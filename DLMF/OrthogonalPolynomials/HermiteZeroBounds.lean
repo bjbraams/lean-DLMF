@@ -7,7 +7,7 @@ module
 
 public import DLMF.OrthogonalPolynomials.HermiteFixedX
 public import DLMF.OrthogonalPolynomials.BoundsZeros
-public import ToMathlib.Analysis.ODE.SturmComparison
+public import DLMFMathlib.Analysis.ODE.SturmComparison
 public import Mathlib.Order.Fin.Basic
 
 /-!

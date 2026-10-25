@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.GeneralizedHypergeometric.Basic
-public import ToMathlib.Analysis.Complex.SeparatingContour
+public import DLMFMathlib.Analysis.Complex.SeparatingContour
 
 /-!
 # Generalized hypergeometric integrals: DLMF §16.5

@@ -7,7 +7,7 @@ module
 
 public import DLMF.ExpIntegrals.Expansions
 public import DLMF.IncompleteGamma.ExpIntegralAsymptotics
-public import ToMathlib.Analysis.Asymptotics.WatsonRotated
+public import DLMFMathlib.Analysis.Asymptotics.WatsonRotated
 
 /-!
 # Sectorial asymptotic expansions and explicit remainders, DLMF §6.12

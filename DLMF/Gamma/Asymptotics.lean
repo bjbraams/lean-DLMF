@@ -12,7 +12,7 @@ public import DLMF.Gamma.Digamma
 public import DLMF.Gamma.IntegralRepresentations
 public import DLMF.Gamma.ComplexBinet
 public import DLMF.Gamma.MellinBarnes
-public import ToMathlib.Analysis.Asymptotics.Watson
+public import DLMFMathlib.Analysis.Asymptotics.Watson
 public import Mathlib.NumberTheory.ZetaValues
 public import DLMF.Hypergeometric.Basic
 public import Mathlib.NumberTheory.Bernoulli

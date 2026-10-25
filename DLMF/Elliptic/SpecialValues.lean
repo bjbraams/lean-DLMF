@@ -82,9 +82,11 @@ theorem Real.compEllIntKm_eq_integral_algebraic {m : ℝ} (hm : m < 1) :
       Real.incEllIntFm_pi_div_two]
 
 /-- Jacobi's inverse function `arcsn(x|m) = F(arcsin x|m)` (Duverney (5.56)). -/
+@[dlmf 22.15.E4]
 def Real.jacobiArcsnm (x m : ℝ) : ℝ := Real.incEllIntFm (arcsin x) m
 
 /-- `sn(arcsn x) = x` for `|x| ≤ 1`. -/
+@[dlmf 22.15.E1]
 theorem Real.jacobiSnm_jacobiArcsnm {m : ℝ} (hm : m < 1) {x : ℝ} (hx : -1 ≤ x) (hx1 : x ≤ 1) :
     Real.jacobiSnm (Real.jacobiArcsnm x m) m = x := by
   rw [Real.jacobiSnm, Real.jacobiArcsnm, Real.jacobiAmm_incEllIntFm hm, sin_arcsin hx hx1]

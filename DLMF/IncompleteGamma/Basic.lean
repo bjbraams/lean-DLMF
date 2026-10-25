@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.ErrorFunctions.Basic
-public import ToMathlib.Analysis.Complex.ParametricHolomorphy
+public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 
 /-!
 # Incomplete Gamma continuation, definitions and differential equations, DLMF §8.2

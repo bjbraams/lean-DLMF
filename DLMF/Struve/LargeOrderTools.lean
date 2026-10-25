@@ -12,7 +12,7 @@ public import Mathlib.Analysis.Calculus.ParametricIntervalIntegral
 public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 public import Mathlib.Analysis.Calculus.MeanValue
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
-public import ToMathlib.Analysis.Asymptotics.WatsonSector
+public import DLMFMathlib.Analysis.Asymptotics.WatsonSector
 
 /-!
 # Large-order tools for the Anger–Weber coefficients

@@ -9,9 +9,9 @@ public import DLMF.IncompleteGamma.SpecialValues
 public import DLMF.IncompleteGamma.ExpIntegralAsymptotics
 public import DLMF.IncompleteGamma.RealIntegrals
 public import ToMathlib.Analysis.Integral.Laplace
-public import ToMathlib.Analysis.Asymptotics.LaplaceSaddle
-public import ToMathlib.Analysis.Calculus.DoubleZeroSqrt
-public import ToMathlib.Analysis.Calculus.InverseSeries
+public import DLMFMathlib.Analysis.Asymptotics.LaplaceSaddle
+public import DLMFMathlib.Analysis.Calculus.DoubleZeroSqrt
+public import DLMFMathlib.Analysis.Calculus.InverseSeries
 
 /-!
 # Large argument and large parameter expansions, DLMF §8.11

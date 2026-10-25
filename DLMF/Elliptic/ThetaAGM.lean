@@ -129,6 +129,7 @@ theorem Real.jacobiThetaThreeNullQ_sq_add_jacobiThetaFourNullQ_sq {q : ℝ} (hq0
   ring
 
 /-- `θ₃(q) θ₄(q) = θ₄(q²)²`. -/
+@[dlmf 20.7.E11 "special case z = 0, real nome 0 < q < 1: θ₃(0,q)θ₄(0,q) = θ₄²(0,q²)"]
 theorem Real.jacobiThetaThreeNullQ_mul_jacobiThetaFourNullQ {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
     Real.jacobiThetaThreeNullQ q * Real.jacobiThetaFourNullQ q =
       Real.jacobiThetaFourNullQ (q ^ 2) ^ 2 := by

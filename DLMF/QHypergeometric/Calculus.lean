@@ -16,6 +16,8 @@ The shifted factorials, Gaussian polynomial, Jackson integral and q-derivative r
 `DLMF.QSeries`. The derivative adapter supplies the removable value at0 required by DLMF,
 while the existing q-derivative remains the operator at every nonzero argument.
 Finite-interval and bilateral integrals are the standard adapters around that Jackson API.
+The finite Gaussian bridges reuse the proved q-Pochhammer reversal and Mathlib integer-power
+laws; phase cancellation is kept valid at every stated natural/integer index.
 Natural partial-sum predicates retain the distinction between conditional convergence and
 Lean's totalized, unordered `tsum`.
 -/
@@ -84,7 +86,25 @@ theorem qBinom_ratio {q : ℂ} (hq : ‖q‖<1) {m n : ℕ} (hm : m≤n) :
 theorem qBinom_terminating_ratio {q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) {m n : ℕ} (hm : m≤n) :
     qBinom q n m=qPochhammer (q^(-(n:ℤ))) q m*(-1:ℂ)^m*
       q^((n:ℤ)*m-(m.choose 2:ℤ))/qPochhammer q q m := by
-  sorry
+  have hB := qBinom_eq hq m (n-m)
+  rw [Nat.add_sub_of_le hm] at hB
+  rw [hB,qPochhammer_reverse (a := q^(-(n:ℤ))) (zpow_ne_zero _ hq0) hq0]
+  have harg : q^(1-(m:ℤ))/q^(-(n:ℤ))=q*q^(n-m) := by
+    rw [← zpow_sub₀ hq0,show (1-(m:ℤ))-(-(n:ℤ))=((n-m+1:ℕ):ℤ) by omega,zpow_natCast,pow_succ]
+    ring
+  rw [harg]
+  have hs : (-1:ℂ)^m*(-1:ℂ)^m=1 := by rw [← mul_pow]; norm_num
+  have hp : (q^(-(n:ℤ)))^m*q^(m.choose 2)*q^((n:ℤ)*m-(m.choose 2:ℤ))=1 := by
+    calc
+      _ = q^((-(n:ℤ))*(m:ℤ)+(m.choose 2:ℤ)+((n:ℤ)*m-(m.choose 2:ℤ))) := by
+        simp only [zpow_add₀ hq0,zpow_mul,zpow_natCast]
+      _ = 1 := by rw [show (-(n:ℤ))*(m:ℤ)+(m.choose 2:ℤ)+((n:ℤ)*m-(m.choose 2:ℤ))=0 by ring,zpow_zero]
+  have hf : (-q^(-(n:ℤ)))^m*q^(m.choose 2)*(-1:ℂ)^m*q^((n:ℤ)*m-(m.choose 2:ℤ))=1 := by
+    rw [neg_pow]
+    calc
+      _ = ((-1:ℂ)^m*(-1:ℂ)^m)*((q^(-(n:ℤ)))^m*q^(m.choose 2)*q^((n:ℤ)*m-(m.choose 2:ℤ))) := by ring
+      _ = 1 := by rw [hs,hp]; norm_num
+  linear_combination (norm := ring_nf) -(qPochhammer (q*q^(n-m)) q m/qPochhammer q q m)*hf
 
 /-- qBinomialInt nat. -/
 theorem qBinomialInt_nat {q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (n m : ℕ) :
@@ -103,7 +123,27 @@ theorem qBinomialInt_nat {q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (n m : ℕ) :
 theorem qBinomialInt_negative {q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) {n : ℕ} (hn : 0<n) (m : ℕ) :
     qBinomialInt q (-(n:ℤ)) m=qBinom q (m+n-1) m*(-1:ℂ)^m*
       q^(-(m:ℤ)*n-(m.choose 2:ℤ)) := by
-  sorry
+  let N := m+n-1
+  have hmN : m≤N := by dsimp [N]; omega
+  have hN : (N:ℤ)=(m:ℤ)+(n:ℤ)-1 := by dsimp [N]; omega
+  unfold qBinomialInt
+  rw [show -(n:ℤ)-(m:ℤ)+1= -(N:ℤ) by omega]
+  rw [qBinom_terminating_ratio hq0 hq hmN]
+  have hs : (-1:ℂ)^m*(-1:ℂ)^m=1 := by rw [← mul_pow]; norm_num
+  have htri : (m.choose 2:ℤ)*2=(m:ℤ)*((m:ℤ)-1) := by
+    have h := DLMF.QSeries.TripleProduct.tri_mul_two (m:ℤ)
+    have ht : DLMF.QSeries.TripleProduct.tri (m:ℤ)=(m.choose 2:ℤ) := by
+      simpa using (DLMF.QSeries.TripleProduct.tri_sub_cast m 0).symm
+    rw [ht] at h
+    exact h
+  have hexp : ((N:ℤ)*m-(m.choose 2:ℤ))+(-(m:ℤ)*n-(m.choose 2:ℤ))=0 := by
+    rw [hN]
+    nlinarith
+  have hf : (-1:ℂ)^m*q^((N:ℤ)*m-(m.choose 2:ℤ))*(-1:ℂ)^m*q^(-(m:ℤ)*n-(m.choose 2:ℤ))=1 := by
+    calc
+      _ = ((-1:ℂ)^m*(-1:ℂ)^m)*(q^((N:ℤ)*m-(m.choose 2:ℤ))*q^(-(m:ℤ)*n-(m.choose 2:ℤ))) := by ring
+      _ = 1 := by rw [hs,← zpow_add₀ hq0,hexp,zpow_zero]; norm_num
+  linear_combination (norm := ring_nf) -(qPochhammer (q^(-(N:ℤ))) q m/qPochhammer q q m)*hf
 
 /-- qBinom pascal second. -/
 @[dlmf 17.2.E32]
@@ -169,17 +209,221 @@ theorem q_binomial_series {q z : ℂ} (hq : ‖q‖<1) (hz : ‖z‖<1) (m : ℕ
   rw [hv] at hs
   simpa [qBinom_eq hq] using hs
 
+/-- The Jackson integral to `q^{-n}` as a tail sum of the bilateral series. -/
+theorem qaR4_jackson_neg_pow {q : ℂ} (hq0 : q≠0) (f : ℂ → ℂ) (n : ℕ) :
+    jacksonIntegral q (q^(-(n:ℤ))) f=(1-q)*∑' k : ℤ,
+      (if -(n:ℤ)≤k then q^k*f (q^k) else 0) := by
+  unfold jacksonIntegral
+  have hinj : Function.Injective (fun j : ℕ => (j:ℤ)-n) := fun i j h => by simpa using h
+  rw [← hinj.tsum_eq]
+  · rw [mul_comm (q^(-(n:ℤ))),mul_assoc,← tsum_mul_left]
+    congr 1
+    apply tsum_congr
+    intro j
+    simp only [show -(n:ℤ)≤(j:ℤ)-n by omega,if_true]
+    have e : q^(-(n:ℤ))*q^j=q^((j:ℤ)-n) := by
+      rw [← zpow_natCast q j,← zpow_add₀ hq0]; congr 1; ring
+    rw [← e]
+    ring
+  · intro k hk
+    simp only [Function.mem_support,ne_eq,ite_eq_right_iff,not_forall] at hk
+    obtain ⟨hk,_⟩ := hk
+    exact ⟨(k+n).toNat,by simp; omega⟩
+
+/-- A finite Jackson sum to `q^{-n}` split into its negative part and a positive partial sum. -/
+theorem qaR4_jackson_partial_split {q : ℂ} (hq0 : q≠0) (f : ℂ → ℂ) (n M : ℕ) :
+    q^(-(n:ℤ))*(1-q)*∑ j∈range (n+M), f (q^(-(n:ℤ))*q^j)*q^j=
+      (1-q)*((∑ i∈range n, q^(-(i:ℤ)-1)*f (q^(-(i:ℤ)-1)))+∑ j∈range M, q^j*f (q^j)) := by
+  have e : ∀ j : ℕ, q^(-(n:ℤ))*q^j=q^((j:ℤ)-n) := fun j => by
+    rw [← zpow_natCast q j,← zpow_add₀ hq0]; congr 1; ring
+  have e2 : ∀ j : ℕ, q^(-(n:ℤ))*(f (q^(-(n:ℤ))*q^j)*q^j)=q^((j:ℤ)-n)*f (q^((j:ℤ)-n)) := by
+    intro j; rw [← e j]; ring
+  rw [mul_comm (q^(-(n:ℤ))),mul_assoc,mul_sum,sum_congr rfl (fun j _ => e2 j)]
+  congr 1
+  rw [sum_range_add]
+  congr 1
+  · rw [← sum_range_reflect]
+    apply sum_congr rfl
+    intro i hi
+    have hin : i<n := mem_range.mp hi
+    have : ((n-1-i:ℕ):ℤ)-n= -(i:ℤ)-1 := by omega
+    rw [this]
+  · apply sum_congr rfl
+    intro j _
+    have : ((n+j:ℕ):ℤ)-n=(j:ℤ) := by push_cast; ring
+    rw [this,zpow_natCast]
+
+/-- The coefficient in the finite-difference form of the iterated q-derivative. -/
+noncomputable def qaR4_fdCoeff (q : ℂ) (n j : ℕ) : ℂ :=
+  q^(-(n:ℤ)*j+((j+1).choose 2:ℤ))*(-1:ℂ)^j*qBinom q n j
+
+/-- The q-Pascal step for the finite-difference coefficients. -/
+theorem qaR4_fdCoeff_succ {q : ℂ} (hq0 : q≠0) (n j : ℕ) :
+    qaR4_fdCoeff q (n+1) (j+1)=-(q^(-(n:ℤ))*qaR4_fdCoeff q n j)+qaR4_fdCoeff q n (j+1) := by
+  simp only [qaR4_fdCoeff,qBinom_succ_succ]
+  have h1 : q^(-((n+1:ℕ):ℤ)*((j+1:ℕ):ℤ)+((j+1+1).choose 2:ℤ))=
+      q^(-(n:ℤ))*q^(-(n:ℤ)*j+((j+1).choose 2:ℤ)) := by
+    rw [← zpow_add₀ hq0]; congr 1
+    rw [Nat.choose_succ_succ' (j+1),Nat.choose_one_right]; push_cast; ring
+  have h2 : q^(-((n+1:ℕ):ℤ)*((j+1:ℕ):ℤ)+((j+1+1).choose 2:ℤ))*q^(j+1)=
+      q^(-(n:ℤ)*((j+1:ℕ):ℤ)+((j+1+1).choose 2:ℤ)) := by
+    rw [← zpow_natCast q (j+1),← zpow_add₀ hq0]; congr 1; push_cast; ring
+  rw [← h2,h1,pow_succ]
+  ring
+
+/-- The coefficient recursion behind 17.2.E42. -/
+theorem qaR4_fdCoeff_sum {q : ℂ} (hq0 : q≠0) (F : ℕ → ℂ) (n : ℕ) :
+    ∑ j∈range (n+1+1), qaR4_fdCoeff q (n+1) j*F j=
+      ∑ j∈range (n+1), qaR4_fdCoeff q n j*F j-
+        q^(-(n:ℤ))*∑ j∈range (n+1), qaR4_fdCoeff q n j*F (j+1) := by
+  have h0 : ∀ m : ℕ, qaR4_fdCoeff q m 0=1 := fun m => by simp [qaR4_fdCoeff]
+  have hl : qaR4_fdCoeff q n (n+1)=0 := by
+    simp [qaR4_fdCoeff,qBinom_eq_zero_of_lt q (Nat.lt_succ_self n)]
+  rw [sum_range_succ',sum_congr rfl (fun j _ => by rw [qaR4_fdCoeff_succ hq0 n j]),h0]
+  have e : ∑ j∈range (n+1), qaR4_fdCoeff q n j*F j=
+      ∑ j∈range (n+1), qaR4_fdCoeff q n (j+1)*F (j+1)+1*F 0 := by
+    rw [← h0 n,← sum_range_succ' (fun j => qaR4_fdCoeff q n j*F j),
+      sum_range_succ (fun k => qaR4_fdCoeff q n k*F k) (n+1),hl]
+    ring
+  rw [e,mul_sum,← sub_add_eq_add_sub,← sum_sub_distrib]
+  congr 1
+  apply sum_congr rfl
+  intro j _
+  ring
+
+/-- Symmetry of the Gaussian polynomial `[n,k]=[n,n-k]`, for every `q`. -/
+theorem qaR4_qBinom_symm (q : ℂ) (k m : ℕ) : qBinom q (k+m) k=qBinom q (k+m) m := by
+  induction h : k+m generalizing k m with
+  | zero => obtain ⟨rfl,rfl⟩ : k=0 ∧ m=0 := by omega
+            rfl
+  | succ n ih =>
+    rcases k with _ | k
+    · simp only [Nat.zero_add] at h; subst h; simp
+    rcases m with _ | m
+    · obtain rfl : k=n := by omega
+      simp
+    have h1 := ih k (m+1) (by omega)
+    have h2 := ih (k+1) m (by omega)
+    rw [qBinom_succ_succ,h1,h2,qBinom_succ_succ',show n-m=k+1 by omega]
+
+/-- Gaussian polynomials are entire functions of the base. -/
+theorem qaR4_qBinom_differentiable (n k : ℕ) : Differentiable ℂ (fun q : ℂ => qBinom q n k) := by
+  induction n generalizing k with
+  | zero => cases k <;> exact differentiable_const _
+  | succ n ih =>
+    cases k with
+    | zero => exact differentiable_const _
+    | succ k =>
+      simp only [qBinom_succ_succ]
+      exact (ih k).add ((differentiable_id.pow _).mul (ih (k+1)))
+
+/-- An identity between entire functions of `q` that holds for `‖q‖<1` holds for all `q`. -/
+theorem qaR4_entire_eq_of_disc {f g : ℂ → ℂ} (hf : Differentiable ℂ f) (hg : Differentiable ℂ g)
+    (h : ∀ q : ℂ, ‖q‖<1 → f q=g q) (q : ℂ) : f q=g q := by
+  have hfg : AnalyticOnNhd ℂ (f-g) univ := fun z _ => (hf.sub hg).analyticAt z
+  have hev : (f-g)=ᶠ[𝓝 0] 0 := by
+    filter_upwards [Metric.ball_mem_nhds (0:ℂ) one_pos] with z hz
+    simp [h z (by simpa using hz)]
+  have := hfg.eqOn_zero_of_preconnected_of_eventuallyEq_zero isPreconnected_univ (mem_univ 0) hev
+    (mem_univ q)
+  simpa [sub_eq_zero] using this
+
+/-- The absorption identity `(1-q^{j+1})[m+1,j+1]=(1-q^{m+1})[m,j]`, for every `q`. -/
+theorem qaR4_qBinom_absorb (q : ℂ) (m j : ℕ) :
+    (1-q^(j+1))*qBinom q (m+1) (j+1)=(1-q^(m+1))*qBinom q m j := by
+  rcases lt_or_ge m j with hjm | hjm
+  · rw [qBinom_eq_zero_of_lt q (by omega : m+1<j+1),qBinom_eq_zero_of_lt q hjm]; ring
+  apply qaR4_entire_eq_of_disc (f := fun q => (1-q^(j+1))*qBinom q (m+1) (j+1))
+    (g := fun q => (1-q^(m+1))*qBinom q m j)
+  · exact (by fun_prop : Differentiable ℂ fun q : ℂ => 1-q^(j+1)).mul (qaR4_qBinom_differentiable _ _)
+  · exact (by fun_prop : Differentiable ℂ fun q : ℂ => 1-q^(m+1)).mul (qaR4_qBinom_differentiable _ _)
+  intro q hq
+  obtain ⟨l,rfl⟩ := Nat.exists_eq_add_of_le hjm
+  have h1 := qBinom_mul_qPochhammer q (j+1) l
+  have h2 := qBinom_mul_qPochhammer q j l
+  have hj := qPochhammer_self_ne_zero hq j
+  have hl := qPochhammer_self_ne_zero hq l
+  rw [show j+1+l=j+l+1 by ring,qPochhammer_succ q q j,qPochhammer_succ q q (j+l)] at h1
+  apply mul_right_cancel₀ (mul_ne_zero hj hl)
+  rw [show j+l+1=j+1+l by ring] at h1 ⊢
+  rw [show j+1+l=j+l+1 by ring] at h1 ⊢
+  rw [← h2] at h1
+  rw [show q^(j+1)=q*q^j by ring,show q^(j+l+1)=q*q^(j+l) by ring]
+  linear_combination h1
+
+/-- The alternating Gaussian sum `T_m=∑(-1)^j[m,j]`. -/
+theorem qaR4_alt_sum_rec (q : ℂ) (m : ℕ) :
+    ∑ j∈range (m+2+1), (-1:ℂ)^j*qBinom q (m+2) j=
+      (1-q^(m+1))*∑ j∈range (m+1), (-1:ℂ)^j*qBinom q m j := by
+  have hc : ∀ j : ℕ, qBinom q (m+2) (j+1)=qBinom q (m+1) (j+1)+qBinom q (m+1) j-
+      (1-q^(m+1))*qBinom q m j := by
+    intro j
+    rw [← qaR4_qBinom_absorb q m j,qBinom_succ_succ]
+    ring
+  rw [sum_range_succ',sum_congr rfl (fun j _ => by rw [hc j])]
+  have e1 : ∑ j∈range (m+2), (-1:ℂ)^(j+1)*qBinom q (m+1) (j+1)=
+      ∑ j∈range (m+1+1), (-1:ℂ)^j*qBinom q (m+1) j-1 := by
+    rw [sum_range_succ' (fun j => (-1:ℂ)^j*qBinom q (m+1) j),sum_range_succ,
+      qBinom_eq_zero_of_lt q (by omega : m+1<m+1+1)]
+    simp
+  have e2 : ∑ j∈range (m+2), (-1:ℂ)^(j+1)*qBinom q (m+1) j=
+      -∑ j∈range (m+1+1), (-1:ℂ)^j*qBinom q (m+1) j := by
+    rw [← sum_neg_distrib]; apply sum_congr rfl; intro j _; ring
+  have e3 : ∑ j∈range (m+2), (-1:ℂ)^(j+1)*((1-q^(m+1))*qBinom q m j)=
+      -((1-q^(m+1))*∑ j∈range (m+1), (-1:ℂ)^j*qBinom q m j) := by
+    rw [sum_range_succ,qBinom_eq_zero_of_lt q (by omega : m<m+1),mul_sum,← sum_neg_distrib]
+    simp only [mul_zero,add_zero]
+    apply sum_congr rfl; intro j _; ring
+  simp only [mul_sub,mul_add,sum_sub_distrib,sum_add_distrib]
+  rw [e1,e2,e3]
+  simp only [qBinom_zero_right,pow_zero,one_mul]
+  ring
+
 /-- q binomial base square. -/
 @[dlmf 17.2.E39]
 theorem q_binomial_base_square (q : ℂ) (n : ℕ) :
     ∑ j∈range (n+1), qBinom (q^2) n j*q^j=qPochhammer (-q) q n := by
-  sorry
+  induction n with
+  | zero => simp
+  | succ n ih =>
+    have hrefl : ∑ j∈range (n+1), qBinom (q^2) n j*q^(n-j)=∑ j∈range (n+1), qBinom (q^2) n j*q^j := by
+      rw [← sum_range_reflect]
+      apply sum_congr rfl
+      intro j hj
+      have hjn : j≤n := Nat.lt_succ_iff.mp (mem_range.mp hj)
+      have hs := qaR4_qBinom_symm (q^2) j (n-j)
+      rw [Nat.add_sub_cancel' hjn] at hs
+      rw [show n+1-1-j=n-j by omega,Nat.sub_sub_self hjn,← hs]
+    rw [sum_range_succ',qPochhammer_succ,← ih]
+    simp only [qBinom_succ_succ',add_mul,sum_add_distrib]
+    have e1 : ∑ j∈range (n+1), qBinom (q^2) n (j+1)*q^(j+1)+qBinom (q^2) (n+1) 0*q^0=
+        ∑ j∈range (n+1), qBinom (q^2) n j*q^j := by
+      rw [qBinom_zero_right,← qBinom_zero_right (q^2) n,← sum_range_succ' (fun j => qBinom (q^2) n j*q^j),
+        sum_range_succ,qBinom_eq_zero_of_lt _ (Nat.lt_succ_self n)]
+      ring
+    have e2 : ∑ j∈range (n+1), (q^2)^(n-j)*qBinom (q^2) n j*q^(j+1)=
+        q^(n+1)*∑ j∈range (n+1), qBinom (q^2) n j*q^(n-j) := by
+      rw [mul_sum]
+      apply sum_congr rfl
+      intro j hj
+      have hjn : j≤n := Nat.lt_succ_iff.mp (mem_range.mp hj)
+      rw [← pow_mul]
+      have : 2*(n-j)+(j+1)=(n+1)+(n-j) := by omega
+      rw [show q^(2*(n-j))*qBinom (q^2) n j*q^(j+1)=qBinom (q^2) n j*(q^(2*(n-j))*q^(j+1)) by ring,
+        ← pow_add,this,pow_add]
+      ring
+    rw [add_right_comm,e1,e2,hrefl]
+    ring
 
 /-- q binomial alternating even. -/
 @[dlmf 17.2.E40]
 theorem q_binomial_alternating_even (q : ℂ) (n : ℕ) :
     ∑ j∈range (2*n+1), (-1:ℂ)^j*qBinom q (2*n) j=qPochhammer q (q^2) n := by
-  sorry
+  induction n with
+  | zero => simp
+  | succ n ih =>
+    rw [show 2*(n+1)=2*n+2 by ring,qaR4_alt_sum_rec,ih,qPochhammer_succ,← pow_mul,pow_succ]
+    ring
 
 /-- qDeriv iterate finite difference. -/
 @[dlmf 17.2.E42]
@@ -187,7 +431,22 @@ theorem qDeriv_iterate_finite_difference {q z : ℂ} (hq0 : q≠0) (hq1 : q≠1)
     (f : ℂ → ℂ) (n : ℕ) :
     qDerivIterate n q f z=z^(-(n:ℤ))*(1-q)^(-(n:ℤ))*
       ∑ j∈range (n+1), q^(-(n:ℤ)*j+((j+1).choose 2:ℤ))*(-1:ℂ)^j*qBinom q n j*f (z*q^j) := by
-  sorry
+  change _=z^(-(n:ℤ))*(1-q)^(-(n:ℤ))*∑ j∈range (n+1), qaR4_fdCoeff q n j*f (z*q^j)
+  have hq1' : (1:ℂ)-q≠0 := sub_ne_zero.mpr (Ne.symm hq1)
+  induction n generalizing z with
+  | zero => simp [qDerivIterate,qaR4_fdCoeff]
+  | succ n ih =>
+    have hqz : q*z≠0 := mul_ne_zero hq0 hz
+    rw [qDerivIterate,Function.iterate_succ_apply',← qDerivIterate,qDerivExtended_of_ne_zero hz,
+      qDeriv,ih hz,ih hqz,qaR4_fdCoeff_sum hq0 (fun j => f (z*q^j)) n]
+    have e : ∀ j : ℕ, q*z*q^j=z*q^(j+1) := fun j => by rw [pow_succ]; ring
+    simp only [e]
+    generalize ∑ j∈range (n+1), qaR4_fdCoeff q n j*f (z*q^j) = A
+    generalize ∑ j∈range (n+1), qaR4_fdCoeff q n j*f (z*q^(j+1)) = B
+    rw [mul_zpow]
+    simp only [zpow_neg,zpow_natCast]
+    rw [pow_succ,pow_succ]
+    field_simp
 
 /-- qDeriv iterate origin. -/
 @[dlmf 17.2.E42]
@@ -271,7 +530,18 @@ theorem jackson_bilateral_limit {q : ℝ} (hq0 : 0<q) (hq1 : q<1) {f : ℂ → �
     (hf : Summable (fun j : ℤ => (q:ℂ)^j*f ((q:ℂ)^j))) :
     Tendsto (fun n : ℕ => jacksonIntegral (q:ℂ) ((q:ℂ)^(-(n:ℤ))) f) atTop
       (𝓝 (jacksonBilateral q f)) := by
-  sorry
+  have hq0' : (q:ℂ)≠0 := by exact_mod_cast hq0.ne'
+  simp only [qaR4_jackson_neg_pow hq0' f]
+  unfold jacksonBilateral
+  apply Tendsto.const_mul
+  apply tendsto_tsum_of_dominated_convergence (bound := fun k : ℤ => ‖(q:ℂ)^k*f ((q:ℂ)^k)‖)
+  · exact summable_norm_iff.mpr hf
+  · intro k
+    apply tendsto_const_nhds.congr'
+    filter_upwards [eventually_ge_atTop k.natAbs] with n hn
+    rw [if_pos (by omega)]
+  · refine Eventually.of_forall fun n k => ?_
+    split_ifs <;> simp; positivity
 
 /-- The same improper-integral identity for two naturally convergent tails, without assuming absolute summability. -/
 @[dlmf 17.2.E48]
@@ -280,7 +550,21 @@ theorem jackson_bilateral_natural_limit {q : ℝ} (hq0 : 0<q) (hq1 : q<1) {f : �
     ∃ J : ℕ → ℂ,
       (∀ n : ℕ, HasNaturalJacksonIntegral q ((q:ℂ)^(-(n:ℤ))) f (J n)) ∧
       Tendsto J atTop (𝓝 v) := by
-  sorry
+  obtain ⟨vp,vm,hp,hm,hv⟩ := hf
+  have hq0' : (q:ℂ)≠0 := by exact_mod_cast hq0.ne'
+  refine ⟨fun n => (1-(q:ℂ))*((∑ i∈range n, (q:ℂ)^(-(i:ℤ)-1)*f ((q:ℂ)^(-(i:ℤ)-1)))+vp),?_,?_⟩
+  · intro n
+    unfold HasNaturalJacksonIntegral
+    have ht : Tendsto (fun N : ℕ => N-n) atTop atTop := tendsto_sub_atTop_nat n
+    have h := ((hp.comp ht).const_add (∑ i∈range n, (q:ℂ)^(-(i:ℤ)-1)*f ((q:ℂ)^(-(i:ℤ)-1)))).const_mul
+      (1-(q:ℂ))
+    refine h.congr' ?_
+    filter_upwards [eventually_ge_atTop n] with N hN
+    obtain ⟨M,rfl⟩ := Nat.exists_eq_add_of_le hN
+    simp only [Function.comp_apply,Nat.add_sub_cancel_left]
+    rw [qaR4_jackson_partial_split hq0' f n M]
+  · rw [hv,add_comm vp vm]
+    exact (hm.add_const vp).const_mul _
 
 /-- The complete two-index Gaussian limit, including the fixed-index boundary s=0. -/
 @[dlmf 17.2.E34]

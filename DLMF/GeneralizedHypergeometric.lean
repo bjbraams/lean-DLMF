@@ -7,6 +7,7 @@ module
 
 public import DLMF.GeneralizedHypergeometric.AnalyticProperties
 public import DLMF.GeneralizedHypergeometric.Appell
+public import DLMF.GeneralizedHypergeometric.GHATools
 public import DLMF.GeneralizedHypergeometric.AppellContinuation
 public import DLMF.GeneralizedHypergeometric.Asymptotics
 public import DLMF.GeneralizedHypergeometric.Basic

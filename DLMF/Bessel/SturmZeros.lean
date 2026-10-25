@@ -10,7 +10,7 @@ public import Mathlib.Analysis.SpecialFunctions.Sqrt
 public import DLMF.Bessel.Elementary
 public import DLMF.Bessel.Theorems
 public import DLMF.Confluent.Asymptotics
-public import ToMathlib.Analysis.ODE.SturmComparison
+public import DLMFMathlib.Analysis.ODE.SturmComparison
 
 /-!
 # Zeros of Bessel functions and the large-argument behaviour of `I_ν`
@@ -24,7 +24,7 @@ public import ToMathlib.Analysis.ODE.SturmComparison
   (DLMF 10.40.1, leading term), from `I_ν(x) = c(x) 𝐌(ν+½, 2ν+1, 2x)` and DLMF 13.7.1.
 * `IsRealBesselSolution`: real solutions of Bessel's equation (real cylinder functions). Through
   the Liouville normal form `u = √x y`, `u'' + (1 - (ν²-¼)/x²) u = 0`, Sturm comparison
-  (`ToMathlib.Analysis.ODE.SturmComparison`) gives Beals–Wong Thm 9.2.1: infinitely many positive
+  (`DLMFMathlib.Analysis.ODE.SturmComparison`) gives Beals–Wong Thm 9.2.1: infinitely many positive
   zeros (`infinite_zeros`), a zero in every `(a, a+π)` for `|ν| < ½` (`exists_zero_Ioo`), and
   gaps larger than `π` for `|ν| > ½` (`pi_lt_sub`); with the corollaries for `J_ν`.
 * `besselJ_succ_ne_zero_of_eq_zero`, `existsUnique_besselJ_succ_zero_between`,

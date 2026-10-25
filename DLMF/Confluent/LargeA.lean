@@ -8,7 +8,7 @@ module
 public import DLMF.Confluent.Regularized
 public import DLMF.Bessel.Asymptotics
 public import Mathlib.Analysis.Normed.Group.Tannery
-public import ToMathlib.Analysis.ODE.Volterra
+public import DLMFMathlib.Analysis.ODE.Volterra
 public import DLMF.OrthogonalPolynomials.Classical
 public import DLMF.Gamma.Asymptotics
 

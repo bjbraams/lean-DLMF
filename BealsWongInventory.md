@@ -75,9 +75,9 @@ more. These chapters are not large new acquisition areas.
 ## Chapter 3 Second order differential equations
 
 The recent
-[SturmComparison](ToMathlib/Analysis/ODE/SturmComparison.lean),
-[SoninePolya](ToMathlib/Analysis/ODE/SoninePolya.lean), and
-[Volterra](ToMathlib/Analysis/ODE/Volterra.lean) modules cover substantial parts
+[SturmComparison](DLMFMathlib/Analysis/ODE/SturmComparison.lean),
+[SoninePolya](DLMFMathlib/Analysis/ODE/SoninePolya.lean), and
+[Volterra](DLMFMathlib/Analysis/ODE/Volterra.lean) modules cover substantial parts
 of §§3.3 and 3.5. Generic existence and uniqueness tools are already upstream.
 The missing pieces concern the structure and classification of equations.
 

@@ -159,6 +159,7 @@ DLMF §22.16(i)); it is set to `u` for `m ≥ 1`. -/
 def Real.jacobiAmm (u m : ℝ) : ℝ := if h : m < 1 then (Real.incEllIntFmOrderIso h).symm u else u
 
 /-- `F(am(u|m)|m) = u`. -/
+@[dlmf 22.16.E11]
 theorem Real.incEllIntFm_jacobiAmm {m : ℝ} (hm : m < 1) (u : ℝ) :
     Real.incEllIntFm (Real.jacobiAmm u m) m = u := by
   simp only [Real.jacobiAmm, hm, ↓reduceDIte]
@@ -176,6 +177,7 @@ lemma Real.continuous_jacobiAmm {m : ℝ} (hm : m < 1) : Continuous fun u => Rea
   exact (Real.incEllIntFmOrderIso hm).symm.continuous
 
 /-- `d am/du = dn(u|m) = (1 - m sin² am)^{1/2}`. -/
+@[dlmf 22.16.i]
 theorem Real.hasDerivAt_jacobiAmm {m : ℝ} (hm : m < 1) (u : ℝ) :
     HasDerivAt (fun u => Real.jacobiAmm u m)
       ((1 - m * sin (Real.jacobiAmm u m) ^ 2) ^ (1 / 2 : ℝ)) u := by
@@ -196,6 +198,7 @@ theorem Real.jacobiAmm_compEllIntKm {m : ℝ} (hm : m < 1) :
   rw [← Real.incEllIntFm_pi_div_two, Real.jacobiAmm_incEllIntFm hm]
 
 /-- `am(u + 2K|m) = am(u|m) + π`. -/
+@[dlmf 22.16.E2]
 theorem Real.jacobiAmm_add_two_compEllIntKm {m : ℝ} (hm : m < 1) (u : ℝ) :
     Real.jacobiAmm (u + 2 * Real.compEllIntKm m) m = Real.jacobiAmm u m + π := by
   conv_lhs => rw [← Real.incEllIntFm_jacobiAmm hm u, ← Real.incEllIntFm_add_pi hm]
@@ -208,6 +211,7 @@ theorem Real.jacobiAmm_neg {m : ℝ} (hm : m < 1) (u : ℝ) :
   exact Real.jacobiAmm_incEllIntFm hm _
 
 /-- `am(u|0) = u`. -/
+@[dlmf 22.16.E4]
 theorem Real.jacobiAmm_zero_param (u : ℝ) : Real.jacobiAmm u 0 = u := by
   simpa [Real.incEllIntFm_zero_param] using Real.jacobiAmm_incEllIntFm (m := 0) (by norm_num) u
 
@@ -239,21 +243,21 @@ theorem Real.mul_jacobiSnm_sq_add_jacobiDnm_sq {m : ℝ} (hm : m < 1) (u : ℝ) 
 theorem Real.jacobiDnm_pos {m : ℝ} (hm : m < 1) (u : ℝ) : 0 < Real.jacobiDnm u m :=
   rpow_pos_of_pos (one_sub_mul_sin_sq_pos hm _) _
 
-/-- `d sn/du = cn dn` (DLMF 22.13.1). -/
-@[dlmf 22.13.E1]
+/-- `d sn/du = cn dn` (DLMF Table 22.13.1). -/
+@[dlmf 22.13.T1]
 theorem Real.hasDerivAt_jacobiSnm {m : ℝ} (hm : m < 1) (u : ℝ) :
     HasDerivAt (fun u => Real.jacobiSnm u m) (Real.jacobiCnm u m * Real.jacobiDnm u m) u :=
   (hasDerivAt_sin _).comp u (Real.hasDerivAt_jacobiAmm hm u)
 
-/-- `d cn/du = -sn dn` (DLMF 22.13.2). -/
-@[dlmf 22.13.E2]
+/-- `d cn/du = -sn dn` (DLMF Table 22.13.1). -/
+@[dlmf 22.13.T1]
 theorem Real.hasDerivAt_jacobiCnm {m : ℝ} (hm : m < 1) (u : ℝ) :
     HasDerivAt (fun u => Real.jacobiCnm u m) (-(Real.jacobiSnm u m * Real.jacobiDnm u m)) u := by
   have h := (hasDerivAt_cos _).comp u (Real.hasDerivAt_jacobiAmm hm u)
   exact h.congr_deriv (by simp [Real.jacobiSnm, Real.jacobiDnm])
 
-/-- `d dn/du = -m sn cn` (DLMF 22.13.3). -/
-@[dlmf 22.13.E3]
+/-- `d dn/du = -m sn cn` (DLMF Table 22.13.1). -/
+@[dlmf 22.13.T1]
 theorem Real.hasDerivAt_jacobiDnm {m : ℝ} (hm : m < 1) (u : ℝ) :
     HasDerivAt (fun u => Real.jacobiDnm u m)
       (-(m * Real.jacobiSnm u m * Real.jacobiCnm u m)) u := by
@@ -271,6 +275,7 @@ theorem Real.hasDerivAt_jacobiDnm {m : ℝ} (hm : m < 1) (u : ℝ) :
   ring
 
 /-- `sn(u + 2K) = -sn u`, `cn(u + 2K) = -cn u`, `dn(u + 2K) = dn u` (DLMF Table 22.4.3). -/
+@[dlmf 22.4.T3 "real parameter m < 1 and real argument: the 2K column for sn, cn, dn"]
 theorem Real.jacobi_add_two_compEllIntKm {m : ℝ} (hm : m < 1) (u : ℝ) :
     Real.jacobiSnm (u + 2 * Real.compEllIntKm m) m = -Real.jacobiSnm u m ∧
       Real.jacobiCnm (u + 2 * Real.compEllIntKm m) m = -Real.jacobiCnm u m ∧
@@ -280,6 +285,7 @@ theorem Real.jacobi_add_two_compEllIntKm {m : ℝ} (hm : m < 1) (u : ℝ) :
     cos_add_pi, neg_sq, and_self]
 
 /-- `sn` and `cn` have period `4K` (DLMF §22.4). -/
+@[dlmf 22.4.T1 "real parameter m < 1 and real argument: the period 4K of sn and cn"]
 theorem Real.jacobiSnm_add_four_compEllIntKm {m : ℝ} (hm : m < 1) (u : ℝ) :
     Real.jacobiSnm (u + 4 * Real.compEllIntKm m) m = Real.jacobiSnm u m ∧
       Real.jacobiCnm (u + 4 * Real.compEllIntKm m) m = Real.jacobiCnm u m := by
@@ -290,23 +296,27 @@ theorem Real.jacobiSnm_add_four_compEllIntKm {m : ℝ} (hm : m < 1) (u : ℝ) :
   exact ⟨by rw [h.1, h'.1, neg_neg], by rw [h.2.1, h'.2.1, neg_neg]⟩
 
 /-- Special values at `u = K` (DLMF Table 22.5.1): `sn K = 1`, `cn K = 0`, `dn K = (1-m)^{1/2}`. -/
+@[dlmf 22.5.T1 "real parameter m < 1: values of sn, cn, dn at K"]
 theorem Real.jacobi_compEllIntKm {m : ℝ} (hm : m < 1) :
     Real.jacobiSnm (Real.compEllIntKm m) m = 1 ∧ Real.jacobiCnm (Real.compEllIntKm m) m = 0 ∧
       Real.jacobiDnm (Real.compEllIntKm m) m = (1 - m) ^ (1 / 2 : ℝ) := by
   simp [Real.jacobiDnm, Real.jacobiSnm, Real.jacobiCnm, Real.jacobiAmm_compEllIntKm hm]
 
 /-- Values at `u = 0`: `sn 0 = 0`, `cn 0 = 1`, `dn 0 = 1`. -/
+@[dlmf 22.5.T1 "real parameter m < 1: values of sn, cn, dn at 0"]
 theorem jacobi_zero {m : ℝ} (hm : m < 1) :
     Real.jacobiSnm 0 m = 0 ∧ Real.jacobiCnm 0 m = 1 ∧ Real.jacobiDnm 0 m = 1 := by
   simp [Real.jacobiDnm, Real.jacobiSnm, Real.jacobiCnm, Real.jacobiAmm_zero hm]
 
 /-- `sn` is odd and `cn`, `dn` are even. -/
+@[dlmf 22.2 "real parameter m < 1: sn odd, cn and dn even"]
 theorem jacobi_neg {m : ℝ} (hm : m < 1) (u : ℝ) :
     Real.jacobiSnm (-u) m = -Real.jacobiSnm u m ∧ Real.jacobiCnm (-u) m = Real.jacobiCnm u m ∧
       Real.jacobiDnm (-u) m = Real.jacobiDnm u m := by
   simp [Real.jacobiDnm, Real.jacobiSnm, Real.jacobiCnm, Real.jacobiAmm_neg hm]
 
 /-- For `m = 0` the Jacobi functions reduce to `sin`, `cos`, `1` (DLMF §22.5(ii)). -/
+@[dlmf 22.5.T3 "exact at m = 0 for real argument"]
 theorem jacobi_zero_param (u : ℝ) :
     Real.jacobiSnm u 0 = sin u ∧ Real.jacobiCnm u 0 = cos u ∧ Real.jacobiDnm u 0 = 1 := by
   simp [Real.jacobiDnm, Real.jacobiSnm, Real.jacobiCnm, Real.jacobiAmm_zero_param]

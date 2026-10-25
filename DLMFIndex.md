@@ -149,8 +149,8 @@ to the DLMF editors as a companion to the Software Index.
   writes the `dlmf_upstream` pointers, with `"source": "pointer"` and the recording module.
 - `scripts/dlmf_ledgers.py` regenerates the declaration links, statuses and module counts of
   the acquisition ledgers (`AiryAcquisition.md`, `DLMF678Acquisition.md`,
-  `DLMF111214Acquisition.md`, `DLMF4Acquisition.md`, `DLMF16Acquisition.md` and
-  `DLMF17Acquisition.md`) from the dump.
+  `DLMF111214Acquisition.md`, `DLMF4Acquisition.md`, `DLMF16Acquisition.md`,
+  `DLMF17Acquisition.md` and `DLMF19Acquisition.md`–`DLMF23Acquisition.md`) from the dump.
 - `scripts/dlmf_index_page.py` renders the dump as a browsable pilot index page (template
   `scripts/dlmf_index_template.html`): `python3 scripts/dlmf_index_page.py dlmf-tags.json
   dlmf-index.html`. It uses the acquisition ledgers and coverage files for the per-section

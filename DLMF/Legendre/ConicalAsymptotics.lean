@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Legendre.UniformCoordinates
-public import ToMathlib.Analysis.Calculus.DoubleZeroSqrt
+public import DLMFMathlib.Analysis.Calculus.DoubleZeroSqrt
 
 /-!
 # Uniform conical asymptotics and coordinate maps

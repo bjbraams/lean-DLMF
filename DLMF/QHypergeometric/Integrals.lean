@@ -63,6 +63,33 @@ def mellinQBetaValue (q : ℝ) (α β : ℂ) : ℂ :=
     Complex.Gamma a * Complex.Gamma (1-a) * DLMF.QSeries.qGamma q β /
       (DLMF.QSeries.qGamma q (1-a) * DLMF.QSeries.qGamma q (a+β)))
 
+/-- The q-Gamma function is continuous and nonzero on the right half-plane. -/
+theorem qaR4_qGamma_cont_ne (q : ℝ) (hq0 : 0<q) (hq1 : q<1) (x : ℂ) (hx : 0<x.re) :
+    ContinuousAt (DLMF.QSeries.qGamma (q:ℂ)) x ∧ DLMF.QSeries.qGamma (q:ℂ) x≠0 := by
+  have hqn : ‖(q:ℂ)‖<1 := by rw [Complex.norm_real,Real.norm_eq_abs,abs_of_pos hq0]; exact hq1
+  have hqc : (q:ℂ)≠0 := by exact_mod_cast hq0.ne'
+  have hq1c : (1:ℂ)-q≠0 := one_sub_ne_zero_of_norm_lt_one hqn
+  have hpow : ∀ y : ℂ, 0<y.re → ∀ n : ℕ, 1-(q:ℂ)^y*(q:ℂ)^n≠0 := by
+    intro y hy n
+    apply one_sub_ne_zero_of_norm_lt_one
+    rw [norm_mul,Complex.norm_cpow_eq_rpow_re_of_pos hq0,norm_pow]
+    have h1 : q^y.re<1 := Real.rpow_lt_one hq0.le hq1 hy
+    have h2 : ‖(q:ℂ)‖^n≤1 := pow_le_one₀ (norm_nonneg _) hqn.le
+    calc q^y.re*‖(q:ℂ)‖^n≤q^y.re*1 := mul_le_mul_of_nonneg_left h2 (by positivity)
+      _ <1 := by simpa using h1
+  have hA : qPochhammerInf (q:ℂ) (q:ℂ)≠0 := qPochhammerInf_ne_zero hqn fun n => by
+    simpa using hpow 1 (by simp) n
+  have hB : qPochhammerInf ((q:ℂ)^x) (q:ℂ)≠0 := qPochhammerInf_ne_zero hqn (hpow x hx)
+  have hcB : ContinuousAt (fun y : ℂ => qPochhammerInf ((q:ℂ)^y) (q:ℂ)) x :=
+    ((qPochhammerInf_analytic hqn ((q:ℂ)^x) (Set.mem_univ _)).continuousAt).comp
+      (continuousAt_const_cpow hqc)
+  refine ⟨?_,?_⟩
+  · unfold DLMF.QSeries.qGamma
+    exact (continuousAt_const.div hcB hB).mul
+      ((continuousAt_const_cpow hq1c).comp (continuousAt_const.sub continuousAt_id))
+  · unfold DLMF.QSeries.qGamma
+    exact mul_ne_zero (div_ne_zero hA hB) fun h => hq1c ((cpow_eq_zero_iff _ _).mp h).1
+
 /-- On its initial regular strip the filled value is the printed Gamma quotient. -/
 @[dlmf 17.13.E3]
 theorem mellinQBetaValue_eq (q : ℝ) (hq0 : 0<q) (hq1 : q<1)
@@ -70,7 +97,20 @@ theorem mellinQBetaValue_eq (q : ℝ) (hq0 : 0<q) (hq1 : q<1)
     mellinQBetaValue q α β =
       Complex.Gamma α * Complex.Gamma (1-α) * DLMF.QSeries.qGamma q β /
         (DLMF.QSeries.qGamma q (1-α) * DLMF.QSeries.qGamma q (α+β)) := by
-  sorry
+  have h1 := qaR4_qGamma_cont_ne q hq0 hq1 (1-α) (by simp; linarith)
+  have h2 := qaR4_qGamma_cont_ne q hq0 hq1 (α+β) (by simp; linarith)
+  have hG1 : ∀ m : ℕ, α≠-m := fun m h => by
+    have := congrArg Complex.re h; simp at this; linarith [(m.cast_nonneg : (0:ℝ)≤m)]
+  have hG2 : ∀ m : ℕ, 1-α≠-m := fun m h => by
+    have := congrArg Complex.re h; simp at this; linarith [(m.cast_nonneg : (0:ℝ)≤m)]
+  have hc : ContinuousAt (fun a : ℂ => Complex.Gamma a * Complex.Gamma (1-a) * DLMF.QSeries.qGamma q β /
+      (DLMF.QSeries.qGamma q (1-a) * DLMF.QSeries.qGamma q (a+β))) α := by
+    refine ((((Complex.differentiableAt_Gamma α hG1).continuousAt).mul
+      (((Complex.differentiableAt_Gamma (1-α) hG2).continuousAt).comp
+        (continuousAt_const.sub continuousAt_id))).mul continuousAt_const).div
+      ((h1.1.comp (continuousAt_const.sub continuousAt_id)).mul
+        (ContinuousAt.comp (x:=α) (f:=fun a : ℂ => a+β) h2.1 (continuousAt_id.add continuousAt_const))) (mul_ne_zero h1.2 h2.2)
+  exact (hc.tendsto.mono_left nhdsWithin_le_nhds).limUnder_eq
 
 /-- The ordinary Mellin q-beta integral, including the removable integer-alpha cases. -/
 @[dlmf 17.13.E3]

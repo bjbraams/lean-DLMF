@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.ParabolicCylinder.Basic
-public import ToMathlib.Analysis.Asymptotics.WatsonRotated
+public import DLMFMathlib.Analysis.Asymptotics.WatsonRotated
 
 /-!
 # Sector asymptotics of `U(a,z)` past `|ph z| = π/2` (DLMF 12.9)

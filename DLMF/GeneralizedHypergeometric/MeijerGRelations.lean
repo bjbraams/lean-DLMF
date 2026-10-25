@@ -286,6 +286,27 @@ theorem meijerG_log_ode {P : MeijerGParameters} {w : ℂ} (h : MeijerGConvergesL
     MeijerLogEquation P (meijerGLog P) w := by
   sorry
 
+/-- Euler-operator product coefficients vanish above the number of factors. -/
+lemma ghbR4_meijerThetaCoeff_eq_zero (A : List ℂ) :
+    ∀ k, A.length < k → meijerThetaCoeff A k = 0 := by
+  induction A with
+  | nil => intro k hk; simp [meijerThetaCoeff]; omega
+  | cons a A ih =>
+    intro k hk
+    simp only [List.length_cons] at hk
+    have h1 := ih k (by omega)
+    have h2 := ih (k-1) (by omega)
+    simp [meijerThetaCoeff, h1, h2]
+
+/-- The top Euler-operator product coefficient is the monomial `X^length`. -/
+lemma ghbR4_meijerThetaCoeff_length (A : List ℂ) :
+    meijerThetaCoeff A A.length = X ^ A.length := by
+  induction A with
+  | nil => simp [meijerThetaCoeff]
+  | cons a A ih =>
+    have h1 := ghbR4_meijerThetaCoeff_eq_zero A (A.length + 1) (by omega)
+    simp [meijerThetaCoeff, h1, ih, pow_succ, mul_comm]
+
 /-- 16.21: meijerG equation order. -/
 @[dlmf 16.21]
 theorem meijerG_equation_order (P : MeijerGParameters) :
@@ -293,7 +314,98 @@ theorem meijerG_equation_order (P : MeijerGParameters) :
     meijerODECoeff P (max P.p P.q)=
       if P.p<P.q then -(X:ℂ[X])^P.q else if P.q<P.p then
         C (meijerParity P)*X^(P.p+1) else (C (meijerParity P)*X-1)*X^P.p := by
-  sorry
+  have hA : ∀ k, P.p < k → meijerThetaCoeff (P.a.map (·-1)) k = 0 := fun k hk =>
+    ghbR4_meijerThetaCoeff_eq_zero _ k (by simpa [MeijerGParameters.p] using hk)
+  have hB : ∀ k, P.q < k → meijerThetaCoeff P.b k = 0 := fun k hk =>
+    ghbR4_meijerThetaCoeff_eq_zero _ k (by simpa [MeijerGParameters.q] using hk)
+  have hA' : meijerThetaCoeff (P.a.map (·-1)) P.p = X ^ P.p := by
+    simpa [MeijerGParameters.p] using ghbR4_meijerThetaCoeff_length (P.a.map (·-1))
+  have hB' : meijerThetaCoeff P.b P.q = X ^ P.q := ghbR4_meijerThetaCoeff_length P.b
+  refine ⟨fun k hk => ?_, ?_⟩
+  · simp [meijerODECoeff, hA k (by omega), hB k (by omega)]
+  · split_ifs with h1 h2
+    · rw [max_eq_right h1.le]; simp [meijerODECoeff, hA _ h1, hB']
+    · rw [max_eq_left h2.le]; simp [meijerODECoeff, hB _ h2, hA', pow_succ]; ring
+    · have : P.p = P.q := by omega
+      rw [this, max_self]; rw [← this]
+      simp [meijerODECoeff, hA', this ▸ hB']; ring
+
+/-- Each Euler-operator product coefficient is a constant multiple of `X^k`. -/
+lemma ghbR4_meijerThetaCoeff_monomial (A : List ℂ) :
+    ∀ k, ∃ c : ℂ, meijerThetaCoeff A k = C c * X ^ k := by
+  induction A with
+  | nil => intro k; refine ⟨if k = 0 then 1 else 0, ?_⟩; by_cases hk : k = 0 <;> simp [meijerThetaCoeff, hk]
+  | cons a A ih =>
+    intro k
+    obtain ⟨c, hc⟩ := ih k
+    rcases k with _ | k
+    · refine ⟨-a * c, ?_⟩
+      simp [meijerThetaCoeff, hc]
+    · obtain ⟨c', hc'⟩ := ih k
+      refine ⟨c * (k + 1) - a * c + c', ?_⟩
+      simp only [meijerThetaCoeff, hc, hc', Nat.add_one_ne_zero, ite_false, Nat.add_sub_cancel]
+      simp only [derivative_mul, derivative_C, zero_mul, zero_add, derivative_X_pow]
+      simp only [map_add, map_sub, map_mul, pow_succ]
+      push_cast
+      simp only [map_add, map_one, map_natCast]
+      ring
+
+/-- The integer parity sign squares to one. -/
+lemma ghbR4_meijerParity_sq (P : MeijerGParameters) : meijerParity P ^ 2 = 1 := by
+  unfold meijerParity
+  rw [← zpow_natCast, ← zpow_mul]
+  rw [mul_comm, zpow_mul]; norm_num
+
+/-- Each Meijer ODE coefficient has the form `ε u c₁ u^k - c₂ u^k`. -/
+lemma ghbR4_meijerODECoeff_form (P : MeijerGParameters) (k : ℕ) :
+    ∃ c₁ c₂ : ℂ, ∀ u : ℂ, (meijerODECoeff P k).eval u =
+      meijerParity P * u * c₁ * u ^ k - c₂ * u ^ k := by
+  obtain ⟨c₁, h₁⟩ := ghbR4_meijerThetaCoeff_monomial (P.a.map (·-1)) k
+  obtain ⟨c₂, h₂⟩ := ghbR4_meijerThetaCoeff_monomial P.b k
+  refine ⟨c₁, c₂, fun u => ?_⟩
+  simp [meijerODECoeff, h₁, h₂]; ring
+
+
+/-- The integer parity sign is nonzero. -/
+lemma ghbR4_meijerParity_ne_zero (P : MeijerGParameters) : meijerParity P ≠ 0 := by
+  intro h; have := ghbR4_meijerParity_sq P; rw [h] at this; norm_num at this
+
+/-- For `p ≤ q` and `q > 0`, zero is a regular singular point of the Meijer equation. -/
+lemma ghbR4_regular_zero (P : MeijerGParameters) (hpq : P.p ≤ P.q) (hq : 0 < P.q) :
+    MeijerRegularSingularAt P 0 := by
+  have hN : max P.p P.q = P.q := max_eq_right hpq
+  obtain ⟨-, hord⟩ := meijerG_equation_order P
+  have hpar := ghbR4_meijerParity_ne_zero P
+  refine ⟨by omega, ?_, ?_⟩
+  · obtain ⟨c₁, c₂, h⟩ := ghbR4_meijerODECoeff_form P (max P.p P.q)
+    rw [h]; rw [hN]; simp [zero_pow hq.ne']
+  · intro k hk
+    rw [hN] at hk ⊢
+    obtain ⟨c₁, c₂, h⟩ := ghbR4_meijerODECoeff_form P k
+    rw [← hN, hord, hN]
+    rcases lt_or_eq_of_le hpq with hlt | heq
+    · refine ⟨fun u => -(meijerParity P * u * c₁ - c₂), by fun_prop, ?_⟩
+      filter_upwards [self_mem_nhdsWithin] with u hu
+      have hu : u ≠ 0 := hu
+      simp only [hlt, ite_true, h, sub_zero, eval_neg, eval_pow, eval_X]
+      have : u ^ (P.q - k) * u ^ k = u ^ P.q := by rw [← pow_add]; congr 1; omega
+      field_simp
+      linear_combination (meijerParity P * u * c₁ - c₂) * this
+    · have h1 : ¬ P.p < P.q := by omega
+      have h2 : ¬ P.q < P.p := by omega
+      refine ⟨fun u => (meijerParity P * u * c₁ - c₂) / (meijerParity P * u - 1),
+        AnalyticAt.div (by fun_prop) (by fun_prop) (by simp), ?_⟩
+      filter_upwards [self_mem_nhdsWithin] with u hu
+      have hu : u ≠ 0 := hu
+      simp only [h1, h2, ite_false, h, sub_zero, eval_mul, eval_sub, eval_C, eval_X, eval_one,
+        eval_pow]
+      rw [heq]
+      have : u ^ (P.q - k) * u ^ k = u ^ P.q := by rw [← pow_add]; congr 1; omega
+      by_cases hd : meijerParity P * u - 1 = 0
+      · simp [hd]
+      · field_simp
+        linear_combination (-(meijerParity P * u * c₁ - c₂)) * this
+
 
 /-- Inversion represents infinity; the two source singularity regimes are retained. -/
 @[dlmf 16.21]
@@ -303,7 +415,87 @@ theorem meijerG_singularities {P : MeijerGParameters} (hP : P.Valid) (hpq : P.p�
     (P.p=P.q→MeijerRegularSingularAt P (meijerParity P) ∧ MeijerRegularSingularAt P.dual 0) ∧
     (∀ z : ℂ,z≠0→(P.p=P.q→z≠meijerParity P)→
       (meijerODECoeff P (max P.p P.q)).eval z≠0) := by
-  sorry
+  have hdp : P.dual.p = P.q := by simp [MeijerGParameters.dual, MeijerGParameters.p, MeijerGParameters.q]
+  have hdq : P.dual.q = P.p := by simp [MeijerGParameters.dual, MeijerGParameters.p, MeijerGParameters.q]
+  have hpar := ghbR4_meijerParity_ne_zero P
+  have hsq := ghbR4_meijerParity_sq P
+  obtain ⟨-, hord⟩ := meijerG_equation_order P
+  refine ⟨ghbR4_regular_zero P hpq hq, fun hlt => ?_, fun heq => ⟨?_, ?_⟩, ?_⟩
+  · -- irregular singularity of the dual at zero
+    have hN : max P.dual.p P.dual.q = P.q := by rw [hdp, hdq]; exact max_eq_left hpq
+    obtain ⟨-, hordd⟩ := meijerG_equation_order P.dual
+    have hpard := ghbR4_meijerParity_ne_zero P.dual
+    refine ⟨?_, ?_⟩
+    · obtain ⟨c₁, c₂, h⟩ := ghbR4_meijerODECoeff_form P.dual (max P.dual.p P.dual.q)
+      rw [h, hN]; simp [zero_pow hq.ne']
+    · rintro ⟨-, -, hk⟩
+      obtain ⟨f, hf, hfeq⟩ := hk P.p (by rw [hN]; exact hlt)
+      obtain ⟨c, hc⟩ := ghbR4_meijerThetaCoeff_monomial (P.dual.a.map (·-1)) P.p
+      have hb : meijerThetaCoeff P.dual.b P.p = X ^ P.p := by
+        have := ghbR4_meijerThetaCoeff_length P.dual.b
+        simpa [MeijerGParameters.dual, MeijerGParameters.p] using this
+      have hcN : meijerODECoeff P.dual (max P.dual.p P.dual.q) =
+          C (meijerParity P.dual) * X ^ (P.q + 1) := by
+        rw [hordd]
+        split_ifs <;> first | omega | rw [hdp]
+      rw [hcN] at hfeq
+      have hev : ∀ᶠ u in 𝓝[≠] (0:ℂ), u⁻¹ = meijerParity P.dual * (c - f u) := by
+        filter_upwards [hfeq, self_mem_nhdsWithin] with u hu hu0
+        have hu0 : u ≠ 0 := hu0
+        rw [hu]
+        simp only [meijerODECoeff, hc, hb, sub_zero, eval_mul, eval_sub, eval_C, eval_X,
+          eval_pow, hN]
+        have hpow : u ^ (P.q - P.p) * u ^ P.p = u ^ P.q := by
+          rw [← pow_add]; congr 1; omega
+        have hd2 : meijerParity P.dual ^ 2 = 1 := ghbR4_meijerParity_sq P.dual
+        field_simp
+        linear_combination (u * c * meijerParity P.dual - 1) * u * hpow
+      have ht : Tendsto (fun u : ℂ => ‖meijerParity P.dual * (c - f u)‖) (𝓝[≠] 0)
+          (𝓝 ‖meijerParity P.dual * (c - f 0)‖) :=
+        ((hf.continuousAt.tendsto.mono_left nhdsWithin_le_nhds).const_sub c
+          |>.const_mul _).norm
+      have hinf := tendsto_norm_inv_nhdsNE_zero_atTop (α := ℂ)
+      have := hinf.congr' (hev.mono fun u hu => by rw [hu])
+      exact not_tendsto_atTop_of_tendsto_nhds ht this
+  · -- regular singularity at the parity point
+    have hN : max P.p P.q = P.q := max_eq_right hpq
+    have hcN : ∀ u, (meijerODECoeff P (max P.p P.q)).eval u =
+        meijerParity P * (u - meijerParity P) * u ^ P.q := by
+      intro u
+      rw [hord]
+      split_ifs <;> try omega
+      rw [heq]
+      simp only [eval_mul, eval_sub, eval_C, eval_X, eval_one, eval_pow]
+      linear_combination u ^ P.q * hsq
+    refine ⟨by omega, by rw [hcN]; ring, ?_⟩
+    intro k hk
+    rw [hN] at hk
+    refine ⟨fun u => (u - meijerParity P) ^ (P.q - k - 1) * (meijerODECoeff P k).eval u /
+      (meijerParity P * u ^ P.q), AnalyticAt.div ((by fun_prop : AnalyticAt ℂ
+        (fun u : ℂ => (u - meijerParity P) ^ (P.q - k - 1)) _).mul
+          ((meijerODECoeff P k).differentiable.analyticAt _)) (by fun_prop)
+        (mul_ne_zero hpar (pow_ne_zero _ hpar)), ?_⟩
+    have hne : ∀ᶠ u in 𝓝[≠] (meijerParity P), u ≠ 0 :=
+      nhdsWithin_le_nhds (isOpen_ne.mem_nhds hpar)
+    filter_upwards [hne, self_mem_nhdsWithin] with u hu0 hu1
+    have hu1 : u - meijerParity P ≠ 0 := sub_ne_zero.mpr hu1
+    rw [hcN, hN]
+    have hpow : (u - meijerParity P) ^ (P.q - k) =
+        (u - meijerParity P) ^ (P.q - k - 1) * (u - meijerParity P) := by
+      rw [← pow_succ]; congr 1; omega
+    rw [hpow]
+    field_simp
+  · exact ghbR4_regular_zero P.dual (by omega) (by omega)
+  · intro z hz hzp
+    rcases lt_or_eq_of_le hpq with hlt | heq
+    · rw [hord]; simp [hlt, hz]
+    · rw [hord]
+      split_ifs <;> try omega
+      simp only [eval_mul, eval_sub, eval_C, eval_X, eval_one, eval_pow]
+      refine mul_ne_zero ?_ (pow_ne_zero _ hz)
+      intro h0
+      apply hzp heq
+      linear_combination meijerParity P * h0 - z * hsq
 
 /-- 16.21.E2: meijerG fundamental frame. -/
 @[dlmf 16.21.E2]

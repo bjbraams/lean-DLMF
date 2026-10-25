@@ -10,7 +10,7 @@ public import Mathlib.Analysis.SpecialFunctions.Arsinh
 public import Mathlib.Analysis.SpecialFunctions.Artanh
 public import DLMF.Legendre.Conical
 public import DLMF.ParabolicCylinder.WeberUniform
-public import ToMathlib.Analysis.Calculus.DoubleZeroSqrt
+public import DLMFMathlib.Analysis.Calculus.DoubleZeroSqrt
 
 /-!
 # Coordinate changes and envelopes for Legendre uniform approximations

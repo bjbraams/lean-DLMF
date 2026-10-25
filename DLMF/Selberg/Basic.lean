@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import ToMathlib.Analysis.Complex.ParametricHolomorphy
+public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import Mathlib.Tactic.CrossRefAttribute
 public import DLMF.Hypergeometric.Basic
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta

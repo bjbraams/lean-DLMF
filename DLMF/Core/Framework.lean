@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
-public import ToMathlib.Analysis.Complex.SegmentPrimitive
+public import DLMFMathlib.Analysis.Complex.SegmentPrimitive
 public import DLMF.Confluent.ExpIntegral
 public import DLMF.Confluent.ErrorFunctions
 public import DLMF.Confluent.FresnelAsymptotics

@@ -17,7 +17,7 @@ public import Mathlib.Analysis.SpecialFunctions.FrullaniIntegral
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Cotangent
 public import Mathlib.Analysis.Complex.IntegerCompl
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
-public import ToMathlib.Analysis.Asymptotics.WatsonSector
+public import DLMFMathlib.Analysis.Asymptotics.WatsonSector
 
 /-!
 # Integral representations (DLMF §5.9)
@@ -55,7 +55,7 @@ local macro "deriv_simp" : tactic => `(tactic| first
   | (field_simp; ring) | (field_simp; done) | ring | (simp; field_simp; ring) | (simp; done))
 
 /-- The Laplace transform of a power: `∫₀^∞ u^(s-1) e^(-z u) du = Γ(s) z^(-s)` for
-`Re s > 0` and `Re z > 0` (proved in `ToMathlib.Analysis.Asymptotics.WatsonSector`). -/
+`Re s > 0` and `Re z > 0` (proved in `DLMFMathlib.Analysis.Asymptotics.WatsonSector`). -/
 lemma integral_cpow_mul_exp_neg_mul_Ioi {s z : ℂ} (hs : 0 < s.re) (hz : 0 < z.re) :
     ∫ u : ℝ in Set.Ioi 0, (u : ℂ) ^ (s - 1) * Complex.exp (-(z * u)) =
       Complex.Gamma s * z ^ (-s) :=

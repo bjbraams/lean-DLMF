@@ -10,7 +10,7 @@ public import DLMF.ParabolicCylinder.IntegralTools
 public import DLMF.ParabolicCylinder.ContourTools
 public import DLMF.ParabolicCylinder.ProductTools
 public import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
-public import ToMathlib.Analysis.ODE.SymmetricSquare
+public import DLMFMathlib.Analysis.ODE.SymmetricSquare
 
 /-!
 # Cylinder real and contour integrals

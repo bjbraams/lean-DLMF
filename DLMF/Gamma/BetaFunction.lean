@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import ToMathlib.Analysis.Complex.ParametricHolomorphy
+public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import DLMF.Gamma.Basic
 public import TauCeti.Analysis.SpecialFunctions.Beta
 public import Mathlib.MeasureTheory.Integral.Bochner.Basic
@@ -18,7 +18,7 @@ public import Mathlib.Analysis.Complex.Liouville
 public import Mathlib.Analysis.Fourier.Inversion
 public import Mathlib.Analysis.SpecialFunctions.JapaneseBracket
 public import Mathlib.MeasureTheory.Measure.Haar.NormedSpace
-public import ToMathlib.Analysis.Asymptotics.WatsonSector
+public import DLMFMathlib.Analysis.Asymptotics.WatsonSector
 
 /-!
 # Beta function (DLMF §5.12)

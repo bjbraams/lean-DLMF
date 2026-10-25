@@ -10,7 +10,7 @@ public import DLMF.Bessel.YIntegralRep
 public import TauCeti.Analysis.Contour.WorkedExamples.HalfDisc.SineIntegral
 public import Mathlib.Analysis.SpecialFunctions.Complex.Arctan
 public import DLMF.Bessel.Asymptotics
-public import ToMathlib.Analysis.Integral.Improper
+public import DLMFMathlib.Analysis.Integral.Improper
 public import DLMF.Gamma.ShiftedLineBounds
 public import DLMF.Struve.BarnesTools
 

@@ -2,13 +2,13 @@
 
 ## Scope and degree of completion
 
-**Current status, 2026-10-24:** 753 explicit source admissions after the second
-parallel proof round for the newly acquired Chapters 4, 16 and 17. The round proves
-134 statements, taking Elementary from 345 to 253, GeneralizedHypergeometric from
-165 to 151, and QHypergeometric from 188 to 160. The older areas retain 189.
-The compiled audit finds 14,169 project theorems, with 766 depending on `sorryAx`
-(753 direct and 13 inherited), and no other nonstandard axiom. `ToMathlib` has no
-source admissions. See [the latest proof round](#parallel-proofs-in-chapters-4-16-and-17-2026-10-24-second-round).
+**Current status, 2026-10-25:** 890 explicit source admissions after the acquisition
+of DLMF Chapters 20–23 (theta, Riemann theta, Jacobian elliptic, Weierstrass and modular
+functions), which adds 418: Theta 70, RiemannTheta 10, JacobiElliptic 215 and
+Weierstrass 123. Chapters 4/16/17 retain 283 and the older areas 189. The compiled
+audit finds 15,623 project theorems, with 1,025 depending on `sorryAx`, and no other
+nonstandard axiom. `ToMathlib` has no admissions.
+See [the Chapters 20–23 acquisition](#chapters-20-23-acquisition-2026-10-25).
 Earlier inventories describe their dated snapshots.
 
 **Historical status, 2026-10-21 (evening):** 590 explicit admissions after the
@@ -769,8 +769,8 @@ New proved results include the Rodrigues formulas `ultrasphPoly_rodrigues` (18.5
 `legendre_rodrigues` in [Integrals.lean](DLMF/OrthogonalPolynomials/Integrals.lean).
 
 Watson's lemma now also holds for complex `z → ∞` in a sector `δ|z| ≤ re z`
-(`ToMathlib.Analysis.Asymptotics.WatsonSector`). A ray-rotation lemma
-(`ToMathlib.Analysis.Complex.RotateRay`, from Mathlib's Cauchy theorem for rectangles in
+(`DLMFMathlib.Analysis.Asymptotics.WatsonSector`). A ray-rotation lemma
+(`DLMFMathlib.Analysis.Complex.RotateRay`, from Mathlib's Cauchy theorem for rectangles in
 logarithmic coordinates) turns Tricomi's Laplace integral into an integral along the ray
 `arg t = α`. Analytic continuation then gives Tricomi's expansion in every rotated sector
 `δ|z| ≤ re(z e^{iα})`, `|α| < π/2` ([TricomiRotated.lean](DLMF/Confluent/TricomiRotated.lean)).
@@ -1301,7 +1301,7 @@ complex sectors, and the zeros. See [DLMF/Airy/DLMFCoverage.md](DLMF/Airy/DLMFCo
 
 ## Volterra lemma and large-parameter asymptotics, first round (2026-10-17)
 
-* New [ToMathlib/Analysis/ODE/Volterra.lean](ToMathlib/Analysis/ODE/Volterra.lean): for a given
+* New [DLMFMathlib/Analysis/ODE/Volterra.lean](DLMFMathlib/Analysis/ODE/Volterra.lean): for a given
   solution of `u'' + ω²u = g·u` (Banach-valued), the Volterra integral equation, the bound
   `‖u − u₀‖ ≤ M (exp(∫|g|/|ω|) − 1)` against the free oscillation, Gronwall's inequality in
   integral form, and on a half-line with `g` integrable the oscillation `cos(ωx)A + sin(ωx)B`
@@ -3720,8 +3720,8 @@ Legendre 306. Airy remains at 363 and the earlier theory at 117. These are expli
 admitted declarations, rather than comment occurrences or equation counts.
 
 The general straight-segment FTC adapters live in
-[SegmentPrimitive.lean](ToMathlib/Analysis/Complex/SegmentPrimitive.lean).
-[FactorialSeries.lean](ToMathlib/Analysis/Complex/FactorialSeries.lean) proves
+[SegmentPrimitive.lean](DLMFMathlib/Analysis/Complex/SegmentPrimitive.lean).
+[FactorialSeries.lean](DLMFMathlib/Analysis/Complex/FactorialSeries.lean) proves
 absolute convergence and entireness for bounded coefficients with injective positive
 exponents and factorial denominators, using Mathlib's exponential-series and
 locally uniform convergence APIs. Both import Mathlib only. The DLMF primitive
@@ -3836,7 +3836,7 @@ outside this proof batch.
 ### Validation
 
 The ordinary root build passes with 9,797 jobs. All 31 direct file checks pass:
-every changed/new Lean file, the six chapter umbrellas, `DLMF.lean`, `ToMathlib.lean`
+every changed/new Lean file, the six chapter umbrellas, `DLMF.lean`, `DLMFMathlib.lean`
 and `Main.lean`. The compiled axiom audit covers 7,020 `AAR.*` theorem declarations;
 its 1,509 admitted names are exactly the previous 1,609 minus these 100, with no
 hidden admission dependencies or unexpected axioms. All 100 completed statements
@@ -3966,7 +3966,7 @@ outside this batch. No new false or suspected-false statement was identified.
 
 The ordinary root build passes with 9,797 jobs. All 19 direct checks pass: the
 12 source files changed in this follow-up, four affected chapter umbrellas,
-`DLMF.lean`, `ToMathlib.lean` and `Main.lean`.
+`DLMF.lean`, `DLMFMathlib.lean` and `Main.lean`.
 
 The compiled audit covers 7,062 AAR theorem declarations. Its 1,440 admitted names
 are exactly the baseline 1,509 minus the 69 statements above, with no unexpected
@@ -4029,7 +4029,7 @@ appealing to its still unproved parameter limit.
 
 The ordinary root build passes with 9,797 jobs. All 10 direct checks pass:
 the four changed Lean files, the three affected chapter umbrellas, `DLMF.lean`,
-`ToMathlib.lean` and `Main.lean`.
+`DLMFMathlib.lean` and `Main.lean`.
 
 The compiled audit covers 7,081 AAR theorem constants. Its 1,425 admitted names
 are exactly the previous 1,440 minus the 15 completed statements. Each completed
@@ -4300,7 +4300,7 @@ make the special-value import order explicit.
 
 - `lake build > /tmp/DLMF-build.log 2>&1` passes all 9,797 jobs.
 - All 15 Lean files changed in this batch pass direct `lake env lean` checks,
-  together with eight affected chapter umbrellas and `DLMF.lean`, `ToMathlib.lean`
+  together with eight affected chapter umbrellas and `DLMF.lean`, `DLMFMathlib.lean`
   and `Main.lean`: 26 direct checks, all successful.
 - The compiled audit covers 7,127 AAR theorem constants. Its 1,367 admitted names
   are exactly the previous admitted set minus the 58 completed statements.
@@ -4433,7 +4433,7 @@ the original bridge retains its regular-parameter hypothesis.
 
 - `lake build > /tmp/DLMF-build.log 2>&1` passes all 9,797 jobs.
 - Six changed Lean files, eight affected chapter umbrellas and `DLMF.lean`,
-  `ToMathlib.lean` and `Main.lean` pass all 17 direct `lake env lean` checks.
+  `DLMFMathlib.lean` and `Main.lean` pass all 17 direct `lake env lean` checks.
 - The compiled audit covers 7,149 AAR theorem constants. Its 1,356 admitted names
   are exactly the previous set minus these 11 completed statements. Every
   completed statement and all 16 new theorem/lemma helpers have no `sorryAx`
@@ -4684,7 +4684,7 @@ prerequisites are available: `ferrers_wronskian_5` and `associated_wronskian_11`
 
 ### New shared infrastructure
 
-- [ParametricHolomorphy.lean](ToMathlib/Analysis/Complex/ParametricHolomorphy.lean)
+- [ParametricHolomorphy.lean](DLMFMathlib/Analysis/Complex/ParametricHolomorphy.lean)
   (Mathlib only):
   - holomorphy of locally dominated series and of interval, `Ioi` and general integrals in
     a finite-dimensional complex parameter;
@@ -4803,7 +4803,7 @@ prerequisites are available: `ferrers_wronskian_5` and `associated_wronskian_11`
   This set is identical to the source admission set, and no other non-standard axiom
   occurs. The 279 removed names are all absent from the admitted set, and no new admission
   appears.
-- Umbrellas `ToMathlib.lean`, `DLMF/Hypergeometric.lean` and `DLMF/Struve.lean` now import
+- Umbrellas `DLMFMathlib.lean`, `DLMF/Hypergeometric.lean` and `DLMF/Struve.lean` now import
   the three new files. `git diff --check` is clean, and no commit was made.
 
 ## Blocker round (2026-10-20, late evening)
@@ -4833,15 +4833,15 @@ left admitted for a decision.
   exponents 2k and k (J and I), holomorphy, Neumann's expansion of (z/2)^l, a fibre
   regrouping lemma, regularized 13.6.9 for all c, and two terminating identities proved by
   WZ certificates.
-- `ToMathlib/Analysis/ODE/PowerSeriesUniqueness.lean` (Mathlib only): Taylor recurrence
+- `DLMFMathlib/Analysis/ODE/PowerSeriesUniqueness.lean` (Mathlib only): Taylor recurrence
   and its converse for second-order linear ODEs, analytic uniqueness (local and on
   preconnected open sets), Gronwall uniqueness on intervals and the line, and existence
   and uniqueness for 2×2 linear systems on compact intervals.
-- `ToMathlib/Analysis/Asymptotics/WatsonRotated.lean` (Mathlib only): rotation of Laplace
+- `DLMFMathlib/Analysis/Asymptotics/WatsonRotated.lean` (Mathlib only): rotation of Laplace
   rays, Watson's lemma along rotated rays, and gluing of expansions on overlapping
   sectors.
 
-All eight files are in the umbrellas (`DLMF/Bessel.lean`, `ToMathlib.lean`).
+All eight files are in the umbrellas (`DLMF/Bessel.lean`, `DLMFMathlib.lean`).
 
 ### Removals by blocker
 
@@ -5045,11 +5045,11 @@ that are false as formalized (below); all four were then corrected with the user
 
 New modules:
 
-- `ToMathlib/Analysis/ODE/LiouvilleGreenFinite.lean`: Liouville–Green solutions controlled from
+- `DLMFMathlib/Analysis/ODE/LiouvilleGreenFinite.lean`: Liouville–Green solutions controlled from
   a finite endpoint with error bounds, dominant (`lg2_exists_solution_expansion_exp_dom`) and
   oscillatory (`lg2_exists_solution_expansion_osc`), with their Wronskian and the
   linear-combination lemma.
-- `ToMathlib/Analysis/Complex/StarPrimitive.lean`: a primitive of a holomorphic function on a
+- `DLMFMathlib/Analysis/Complex/StarPrimitive.lean`: a primitive of a holomorphic function on a
   star-convex open set (`Complex.starPrim`, `starPrim_hasDerivAt`).
 - `DLMF/Confluent/KummerDecay.lean`: 13.7.2 for 𝐌(a, b, −t), 13.2.23, and the decay bound
   ‖𝐌(a, b, −t)‖ ≤ C(1 + t)^{−Re a + ε}, locally uniform in (a, b), which unblocked the integral
@@ -5199,18 +5199,18 @@ incomplete Gamma −9, parabolic cylinder −8, exponential integrals −6, hype
 
 New modules:
 
-- `ToMathlib/Analysis/Complex/ZeroLocalization.lean`: exactly one zero of an analytic function
+- `DLMFMathlib/Analysis/Complex/ZeroLocalization.lean`: exactly one zero of an analytic function
   in a disc around an approximate zero (contraction form of Newton–Kantorovich), with a
   sequence/filter version.
-- `ToMathlib/Topology/Order/ZeroEnumeration.lean`: unique zeros of strictly monotone functions
+- `DLMFMathlib/Topology/Order/ZeroEnumeration.lean`: unique zeros of strictly monotone functions
   and the enumeration of zeros separated by a sequence of points.
-- `ToMathlib/Analysis/ContinuedFraction/Convergence.lean`: generalized continued fractions
+- `DLMFMathlib/Analysis/ContinuedFraction/Convergence.lean`: generalized continued fractions
   through three-term recurrences: determinant and exact error formulas, Pincherle's theorem, a
   ratio criterion (complex and real), bracketing for positive elements, a positive S-fraction
   criterion, and tails (a fraction converges when a far tail is controlled).
-- `ToMathlib/Analysis/Asymptotics/StationaryPhase.lean`: oscillatory integrals with a cubic
+- `DLMFMathlib/Analysis/Asymptotics/StationaryPhase.lean`: oscillatory integrals with a cubic
   stationary point at an endpoint.
-- `ToMathlib/Analysis/Complex/BarnesResidue.lean`: shifting vertical-line integrals across simple
+- `DLMFMathlib/Analysis/Complex/BarnesResidue.lean`: shifting vertical-line integrals across simple
   poles and across pole-free strips, with sine and Gamma bounds for Barnes integrands.
 - DLMF: `ErrorFunctions/ZeroTools.lean` (Rouché against an exponential model, using TauCeti's
   Rouché theorem), `ErrorFunctions/IntegralTools.lean`, `IncompleteGamma/FractionTools.lean`,
@@ -5321,18 +5321,18 @@ polynomials −1.
 
 New modules:
 
-- `ToMathlib/Analysis/Calculus/DoubleZeroSqrt.lean`: the Airy-type turning-point coordinate ζ
+- `DLMFMathlib/Analysis/Calculus/DoubleZeroSqrt.lean`: the Airy-type turning-point coordinate ζ
   ((2/3)ζ^{3/2} = ∫√p on each side of a simple zero of p): closed forms, analyticity,
   continuity, ζ'(x₀) = p'(x₀)^{1/3}, analytic inverse; signed square roots at a double zero.
-- `ToMathlib/Analysis/Complex/MellinBarnesSeries.lean`: closing a vertical contour across
+- `DLMFMathlib/Analysis/Complex/MellinBarnesSeries.lean`: closing a vertical contour across
   infinitely many simple poles (`mbSeries_tendsto`, partial-sum limit; `mbSeries_hasSum`), with the
   Gamma residue factorization.
-- `ToMathlib/Analysis/Integral/PrincipalValue.lean`: symmetric-excision principal values,
+- `DLMFMathlib/Analysis/Integral/PrincipalValue.lean`: symmetric-excision principal values,
   existence for f/(t−c) with f differentiable at c, and the log-term formula.
-- `ToMathlib/Analysis/ODE/SturmCount.lean`: maximum principles (also for inhomogeneous equations),
+- `DLMFMathlib/Analysis/ODE/SturmCount.lean`: maximum principles (also for inhomogeneous equations),
   oscillation at ±∞, Rolle for infinitely many zeros, interlacing from a signed Wronskian, zero
   counts over a partition.
-- `ToMathlib/Analysis/ODE/SturmDeformation.lean`: with simple zeros and nonvanishing endpoints the
+- `DLMFMathlib/Analysis/ODE/SturmDeformation.lean`: with simple zeros and nonvanishing endpoints the
   zero count is locally constant, hence constant on preconnected parameter sets; half-line version
   with a uniform zero-free region.
 - DLMF: `Airy/ErrorBoundTools.lean` (uniform bounds for Ai, Ai′ on the closed plane, well
@@ -5466,11 +5466,11 @@ polynomials −3, spherical harmonics −2, incomplete Gamma −1, parabolic cyl
 
 New modules:
 
-- `ToMathlib/Analysis/Asymptotics/StieltjesRemainder.lean`: Stieltjes transforms
+- `DLMFMathlib/Analysis/Asymptotics/StieltjesRemainder.lean`: Stieltjes transforms
   ∫φ(τ)/(1+τ/S) dτ with nonnegative density: exact remainder, bounds by the first neglected term
   with factor 1 (Re S ≥ 0) and |csc arg S|, signed enclosures on the imaginary axis, and the
   χ-type bounds needed beyond |ph S| = π/2.
-- `ToMathlib/Analysis/Calculus/InverseSeries.lean`: checking a candidate inverse expansion by
+- `DLMFMathlib/Analysis/Calculus/InverseSeries.lean`: checking a candidate inverse expansion by
   substitution (left inverses with a strict derivative), roots of algebraic relations in big-O form.
 - DLMF: `Airy/StieltjesForm.lean` (ray-Laplace model of the Airy remainder, the χ integral
   Γ(m+1)∫(W²+ρ²)^{−(m+1)/2} = Γ(m)χ(m)W^{−m}), `Bessel/KMellin.lean` (10.43.19, new tag),
@@ -5543,7 +5543,7 @@ Removals by area: Legendre −5, Confluent −3, orthogonal polynomials −3, Be
 
 New modules:
 
-- `ToMathlib/Analysis/Complex/LagrangeBurmann.lean`: the Lagrange–Bürmann formula at the
+- `DLMFMathlib/Analysis/Complex/LagrangeBurmann.lean`: the Lagrange–Bürmann formula at the
   coefficient level, Σ zⁿ (FΦⁿ)⁽ⁿ⁾(0)/n! = F(w)/g(w) when t − zΦ(t) = (t − w)g(t) on a circle
   (Cauchy formula, no argument principle), and extension of a power-series identity from a small
   disc to the disc of holomorphy.
@@ -5627,7 +5627,7 @@ Struve −1.
 
 New modules:
 
-- `ToMathlib/Analysis/SpecificLimits/Pincherle.lean`: partial sums with term ratio tending to ρ,
+- `DLMFMathlib/Analysis/SpecificLimits/Pincherle.lean`: partial sums with term ratio tending to ρ,
   |ρ| > 1, diverge; a continued fraction converges to h + a₀w₁/w₀ when a backward solution w has
   −w_k/(a_{k+1}w_{k+2}) → ρ with |ρ| > 1.
 - DLMF: `Core/ZeroCounting.lean` (finitely many zeros in bounded sets, well-definedness of ordered
@@ -5700,7 +5700,7 @@ The round-11 ζ helpers `legFS_root` … `legFS_zeta_mem_slitPlane` were dedupli
 Removals by area (audit): Legendre −8, Airy −7, Hypergeometric −6, incomplete Gamma −6,
 Confluent −3, orthogonal polynomials −2.
 
-New modules: `ToMathlib/Analysis/Asymptotics/LaplaceSaddle.lean` (all-orders Laplace expansion at
+New modules: `DLMFMathlib/Analysis/Asymptotics/LaplaceSaddle.lean` (all-orders Laplace expansion at
 an interior quadratic saddle through an analytic substitution; coefficient identification from
 O-bounds), `DLMF/Hypergeometric/SpecialValueTools.lean` (two cubic transformations of ₂F₁, Abel's
 theorem along a ray), `DLMF/OrthogonalPolynomials/InequalityTools.lean` (Sonine function for
@@ -5828,7 +5828,7 @@ Earlier numerical totals in this document and the README are historical snapshot
 ### Consolidation performed
 
 - **Scalar power series:** move the shared uniqueness and Cauchy-product proofs to
-  `ToMathlib/Analysis/Complex/ScalarSeries.lean`, in namespace `Complex`. Saalschütz now uses
+  `DLMFMathlib/Analysis/Complex/ScalarSeries.lean`, in namespace `Complex`. Saalschütz now uses
   them directly. The old public orthogonal-polynomial and hypergeometric interfaces are small
   adapters. The new module imports Mathlib only.
 - **Pochhammer algebra:** share reflection and binomial convolution in
@@ -5995,7 +5995,7 @@ and reciprocal Gamma reflection handles exceptional reflected Gamma parameters
 without cancellation of a potentially zero factor. The original `Re a < 1/2`
 condition and every complex argument are retained.
 
-`ToMathlib/Analysis/ODE/SymmetricSquare.lean` extracts the product ODE and the
+`DLMFMathlib/Analysis/ODE/SymmetricSquare.lean` extracts the product ODE and the
 third-order Wronskian/Cramer uniqueness argument from the Airy-specific proofs.
 Both Airy and parabolic-cylinder modules now reuse these Mathlib-only helpers.
 The original Airy interfaces remain as short adapters.
@@ -6342,8 +6342,8 @@ nonstandard axiom occurs, and the completed statements retain their hypotheses.
   on an admission.
 
 The generic Chebyshev machinery is in
-`ToMathlib/Analysis/SpecialFunctions/ChebyshevSeries.lean`. The new
-`ToMathlib/Analysis/Complex/TaylorParameter.lean` consolidates differentiation
+`DLMFMathlib/Analysis/SpecialFunctions/ChebyshevSeries.lean`. The new
+`DLMFMathlib/Analysis/Complex/TaylorParameter.lean` consolidates differentiation
 of parameterized Taylor coefficients and uniform Cauchy bounds; the existing
 hypergeometric coefficient theorem is retained as an adapter.
 
@@ -6539,9 +6539,9 @@ and remaining inverse-hyperbolic formulas; and Chapter 16 unit-circle convergenc
 and continuation foundations. The global continuation existence theorem remains
 the central Chapter 16 analytical obligation.
 
-### Nature of the remaining Chapter 4 admissions
+### Nature of the remaining Chapter 4 admissions (second-round snapshot)
 
-There are 253: 166 in trigonometric/hyperbolic modules, 43 for Lambert W,
+At this snapshot there are 253: 166 in trigonometric/hyperbolic modules, 43 for Lambert W,
 nine for generalized exponentials/logarithms, and 35 in logarithm/power analysis
 and integrals. They are a mixture of routine API adaptation and substantial
 complex analysis, rather than a uniform measure of proof difficulty.
@@ -6564,12 +6564,334 @@ The other 35 admissions comprise three absolutely continuous path/log integral
 statements and a power-value uniqueness criterion; eight bounds, two complex
 asymptotic limits, eight log/binomial series and two higher derivative formulas;
 six continued fractions, four definite integrals and one primitive. Some are good
-adapter targets: Mathlib already proves `Complex.iteratedDeriv_succ_log`, for
+adapter targets: Mathlib already proves `iteratedDeriv_succ_log`, for
 example, while the logarithm-sheet statement needs the constant-shift bridge.
 
-One acquired statement is **false and needs correction**:
+At this snapshot one acquired statement was identified as **false and needing correction**:
 `DLMF.Elementary.arcsinh_values_add` (4.38.E15). At u=v=I, both auxiliary square
 roots on its right side may be zero, so the right side contains w=0. On the left,
 a+b=0 and sinh(a)=sinh(b)=I would imply I=-I. The set formulation therefore loses
 branch compatibility. This is a mathematical counterexample from the definitions;
-no Lean counterexample or corrected theorem is claimed in this round.
+no Lean counterexample or corrected theorem was claimed in the second round.
+The third round below corrects it and related acquisitions, with proved counterexamples.
+
+
+## Parallel proofs in Chapters 4, 16 and 17 (2026-10-24, third round)
+
+This round removes **47 direct admissions**, taking the source total from
+**753 to 706**. Immutable stages, source-hash guards, file ownership and shared/
+exclusive locks serialize repository writes and builds while proofs run in parallel.
+Every removed admission is independently proved with only `propext`,
+`Classical.choice` and `Quot.sound`.
+
+### Elementary: 28 removals
+
+Six logarithm series (4.6.E1–E6) now converge on their complete acquired domains,
+including the admissible unit-circle points, the reciprocal half-plane boundary
+and the imaginary axis in the Cayley transform. Their statements remain limits
+of natural partial sums. Odd series use adjacent finite-term grouping before
+passing to an even subsequence. The new Mathlib-only helper
+[LogBoundary.lean](DLMFMathlib/Analysis/SpecialFunctions/Complex/LogBoundary.lean)
+proves convergence through an integral remainder with a compact-path denominator
+bound; its adapted Mathlib argument retains Michael Stoll's attribution.
+
+Seven further analysis proofs establish arbitrary-order derivatives of logarithm
+sheets and full complex powers, the full complex and terminating binomial series,
+the unit-disk logarithm norm bound, the two-sided punctured-unit-disk exponential
+bound, and the complex zero-limit for positive-real-part powers times log.
+The power-value uniqueness criterion now proves that general powers are single-
+valued exactly for integer exponents. Two further proofs give the exponential-
+ratio primitive and the improper Fermi integral with exact value log 2.
+
+Four trig proofs give the complete arcsin/arccos/arctan inverse families and the
+multivalued inverse-cosine addition formula. Eight hyperbolic removals give the
+complete sinh/cosh inverse families and inverse-function sum/difference sets.
+Four former full-set acquisitions were false:
+`arcsinh_values_add/sub` (4.38.E15) and
+`arcsinh_arccosh_values_add/sub` (4.38.E18). They discarded correlations between
+square-root choices and inverse branches. The corrected characterizations retain
+all parameters and shared square-root witnesses, and require both the sinh and
+cosh equations. Three explicit Lean counterexample declarations cover the former
+claims (u=v=i for the pure pair; u=i,v=1 for the mixed pair). These diagnose our
+set-valued transcription, not a false printed DLMF identity. All other existing
+theorem statements and parameter domains are unchanged.
+
+Elementary now has **225 admissions**: Hyperbolic 103, Trigonometric 51,
+Lambert W 43, Generalized 9, LogExpIntegrals 9, LogExpAnalysis 7 and LogExpBasic 3.
+
+### Generalized hypergeometric: six removals
+
+The proofs cover both finite inversion formulas (16.2.E3/E4), odd terminating
+Dixon (16.4.E5), normalized bilateral Dougall (16.4.E17), the general analytic
+raising-operator identity (16.3.E5), and nominal differential-equation order.
+Finite inversions retain only the original retained-product nonvanishing conditions,
+including degree zero. The integer Pochhammer/Gamma bridge handles shifted poles
+explicitly, so bilateral Dougall includes positive integral lower parameters.
+There are **145 remaining admissions**. General continuation existence is still
+admitted and is unused by these proofs.
+
+### q-hypergeometric: 13 removals
+
+Three Basic proofs establish qPhi holomorphy on its full disk/entire domains and
+entireness of the infinite q-Pochhammer product. Scalar power-series helpers now
+provide the coefficient, radius, analytic expansion and all derivatives at zero.
+Six q-exponential/sine/cosine expansions retain their original radii and q=0 cases.
+Two finite Gaussian bridges prove the terminating ratio and negative-integer upper
+parameter identities. The analytic product and germ-continuation pair identifies
+the series with the product on the convergent germ, then continues the analytic
+function. A divergent totalized tsum is never assigned a continuation value.
+The existing proved `zero_phi_zero` declaration moves into Basic to avoid an
+import cycle; its name, statement and DLMF tag remain unchanged.
+There are **147 remaining admissions**.
+
+### Validation and remaining acquisition defects
+
+The ordinary full build passes (10,341 jobs). All 15 changed Lean files and the
+unchanged root DLMF entry point pass strict individual checks with both implicit-
+variable options disabled. The compiled audit confirms all 47 removed admissions
+are independent of `sorryAx`; all newly introduced declarations have only the
+standard axioms. It finds 14,211 project theorems, 719 depending on `sorryAx`,
+including 13 inherited dependencies. The old guarded-continuation equivalence
+remains explicit. The final tag dump, acquisition links and statuses, import graph,
+Mathlib-only layer, identical shared mirrors, unchanged pins and build topology,
+source census, file modes and whitespace checks pass.
+
+Two existing hyperbolic acquisitions need correction next:
+`hasSum_arctanh` (4.38.E5) and `hasSum_arctanh_large` (4.38.E6) assert unordered
+`HasSum` through their unit-circle boundaries. At z=i every term norm is
+1/(2n+1), whose series diverges, so those boundary claims are false. The DLMF
+formulas require natural-order convergence there; unordered convergence remains
+appropriate in the strict interior/exterior. Both statements remain admitted and
+are flagged in the ledger. A compiled audit finds no callers of either statement,
+so no proved local theorem depends on them. Further priorities are the remaining
+inverse-hyperbolic branch calculus and series, q-calculus finite differences and
+Jackson limits, and Chapter 16 unit-circle/continuation foundations.
+
+
+## Parallel proofs in Chapters 4, 16 and 17 (2026-10-24, fourth round)
+
+Seven agents with exclusive file ownership and a shared/exclusive Lake lock remove
+**234 source admissions** (706 → 472). No theorem statement, hypothesis or
+definition changed; the only moves are within files (`arccos_principal_log_half`,
+`genHG_one_converges_iff`, helper blocks), placed after the results their proofs use.
+The full build passes (10,349 jobs) and `git diff --check` is clean.
+
+### Elementary: 155 removals
+
+- Hyperbolic 103 → 26: partial fractions and products of the hyperbolic functions,
+  hasSum forms of tanh/coth/csch/sech (sech via the Euler-number sec series),
+  inverse analyticity and derivatives, branch points, value-set addition relations,
+  cut limits, real, complex and continued primitives, half-argument roots,
+  `exists_hyperbolic_logarithms`, the linear ODE and `sin_cos_lt_tanh_lt`.
+- Trigonometric 51 → 18, and LogExpBasic, LogExpAnalysis and Generalized cleared:
+  cut limits and real/imaginary parts of the inverse functions, general arctan
+  addition, the twelfth-angle table, the linear/energy/Riccati ODE solution sets,
+  `sin_multiple_product`, the Dirichlet and Fresnel integrals, Euler's sec series,
+  path-integral logarithms for absolutely continuous paths, the logarithm/exponential
+  inequality cutoffs and the generalized exponential and logarithm.
+  LogExpIntegrals 9 → 6 (three dilogarithm integrals). New Mathlib-only module
+  `DLMFMathlib/Analysis/Complex/TrigR4SeriesExtension.lean`.
+- Lambert W 43 → 20: uniqueness of the branch family (via a strip-counting
+  argument at z = 1), coefficient recurrences, the inverse equation, all-order
+  derivatives, primitives, real principal-branch facts, the Maclaurin series of W,
+  its powers, reciprocal and square (Lagrange–Bürmann), integrability, and the
+  behaviour of nonprincipal branches at 0. Except for `lambertBranchFamily_unique`,
+  the coefficient lemmas and the integrability lemmas, these still inherit `sorryAx`
+  from `exists_lambertBranchFamily`, which defines `lambertW`.
+
+### Generalized hypergeometric: 33 removals
+
+Appell 43 → 22 (series sums and analyticity of F1–F4, two-variable continuation
+uniqueness, Euler integrals of F1, F2, F4, the Bailey product for F4, Horn G2/G3
+summability; new module `GHATools.lean`); the 0F1 product formula 16.12.E1;
+unit-circle absolute convergence and divergence and the convergence criterion at
+z = 1; confluence 16.8.10 and the entire-case expanded ODE 16.8.4; the
+large-parameter asymptotic 16.11.11 and two Barnes residue theorems; Meijer G
+equation order and singularities. Most remaining balanced-case results wait on the
+global continuation existence admission in `Basic.lean`.
+
+**Definition defect (corrected):** in `genAsymptoticEkm` (16.11.E4),
+`∏ i, a i - genAsymptoticAugment b j` parses as `(∏ i, a i) - …` (big operators bind
+at precedence 67), and likewise the denominator; DLMF means ∏(aᵢ − bⱼ) and
+∏(bᵢ − bⱼ). With p = 1, q = 2, a = (0), b = (2, 1/2) the perturbed raw coefficient
+grows like 1/(3ε), so `genAsymptoticC_limit` and `genAsymptoticC_recurrence` are
+false as defined. **Corrected 2026-10-25 with the user's approval** by parenthesizing
+both products, `∏ i, (a i - …)` and `∏ i ∈ univ.erase j, (… - …)`; this is a
+transcription defect, not a DLMF erratum. Both statements remain admitted.
+
+### q-hypergeometric: 46 removals
+
+Elementary, Appell and BaileyPairs cleared (q-Eulerian/Stirling/Bernoulli closed
+forms, q-Appell and q-Lauricella transformations, 17.12.E4 and E6). Basic 13 → 6
+(negative and subtracted index shifts, qPsi sums and splitting), BasicSummations
+36 → 22 (Heine contiguous relations 17–24, q-Chu–Vandermonde, the Heine
+q-derivative and q-difference equation), Calculus 11 → 6 (bilateral Jackson
+limits, iterated finite differences, base-square and alternating q-binomial sums),
+Integrals 6 → 5, HigherSummations 23 → 18 (q-Pfaff–Saalschütz 17.7.E4, Jackson's
+8φ7 17.7.E14, terminating 6φ5 17.7.E16, bibasic sums 17.7.E20–21). Bilateral
+summations wait on Ramanujan's 1ψ1 (`DLMF/QSeries/Identities.lean`, admitted).
+
+### Remaining obstacles
+
+Nonterminating q-Gauss/Heine and Sears transformations; termwise differentiation
+of double series (Appell PDEs); continued-fraction convergents (Chapter 4);
+binomial and boundary (Abel) series of inverse functions; the global Lambert W
+branch construction and range description; global continuation of pFq.
+
+
+## Chapters 20–23 acquisition (2026-10-25)
+
+Five agents with exclusive directories acquired DLMF Chapters 20–23 (version of
+2026-10-25, section pages downloaded once and read locally). New entry modules:
+`DLMF.Theta`, `DLMF.RiemannTheta`, `DLMF.JacobiElliptic`, `DLMF.Weierstrass`; ledgers
+DLMF20–DLMF23Acquisition.md. Excluded throughout: graphics; all Applications sections
+(20.12–20.13, 21.7–21.9, 22.18–22.19, 23.20–23.21; their purely mathematical results,
+such as Fay's and Frobenius' identities, Euler's addition theorem, the elliptic-curve
+chord–tangent law and modular equations, are listed in the ledgers for a later decision);
+methods of computation, tables and software. All formulas were checked with mpmath before
+acquisition.
+
+- **Chapter 20** (107 numbered IDs, all covered): nome-form θ_j(z,q) wrappers over the
+  existing `jacobiThetaOneTau…FourTau`, products from the project's triple product,
+  identities, Watson's expansion, relations, integrals and generalizations. 70 admissions;
+  all of 20.2, the zero set, 20.5.E1–E4, 20.7.E26–E33 and the modular properties of k² are proved.
+  `th20_carlsonRF` was a local real R_F placeholder; the Chapter 19 acquisition replaced it
+  by `DLMF.EllipticIntegrals.symEllIntRF` the same day.
+- **Chapter 21** (37 IDs): Riemann theta on any `Fintype` index with the Siegel condition,
+  characteristics, absolute and locally uniform convergence and analyticity (proved),
+  quasi-periodicity (all proved), modular transformations, Riemann's identity and the
+  addition and four-product formulas (proved). 10 admissions. No upstream Siegel space exists.
+- **Chapter 22** (235 numbered IDs and 9 exact tables): all twelve Jacobi functions in a
+  lattice form `jacobiPQTau` (theta quotients, identities proved, including all of
+  Table 22.4.3) and a modulus form `jacobiPQk` using the principal complex K(k), K′(k) on
+  `jacobiModulusDomain` (Re k > 0, k ∉ [1,∞)). The modulus form rests on two admitted
+  foundations, `jacobiTauk_im_pos` and the inversion theorem `jacobi_inversion_k` (22.2.2);
+  51 proved results and 67 compiled dependencies inherit them. Real bridges to
+  `Real.jacobiSnm/Cnm/Dnm` are admitted. 215 admissions. Existing real Ch. 22 tags were
+  corrected: `Real.hasDerivAt_jacobiSnm/Cnm/Dnm` are Table 22.13.1 entries, not 22.13.E1–E3.
+- **Chapter 23** (150 IDs, four by Mathlib pointers only): DLMF half periods (ω1, ω3)
+  bridged to Mathlib's `PeriodPair`; Weierstrass ζ and σ, e_j, η_j, invariants, special
+  lattices, relations to theta and Jacobi functions, series, addition theorems, integrals,
+  asymptotics; λ, Klein's J, Dedekind η (Mathlib's `ModularForm.eta`), Dedekind sums.
+  123 admissions. ℘(z; g₂, g₃) chooses a lattice; uniqueness of that lattice is admitted.
+
+### DLMF errata and source corrections
+
+All of the following were found by the acquisition agents and then checked again by an
+independent agent with its own scripts from the DLMF text (16 confirmed, two partly; none refuted).
+Corrected forms are acquired; docstrings and ledgers record each correction.
+
+- 20.7.E34 holds only up to sign for general τ with principal roots (fails at
+  τ = −2.19+1.29i); acquired squared for all τ and as printed for τ = it.
+- 20.9.E2 (K = (π/2)θ₃²) fails with the principal K(k) for some complex τ (58 of 308 samples);
+  acquired for τ = it. 20.9.E3 needs a branch condition (fails at real z = 1.6, τ = 0.8i);
+  acquired for real 0 < |z| ≤ π/2, τ = it, which is correct but narrower than necessary.
+- 20.10.E3 has a removable point at s = 1 (0·ζ(1) in Lean's totalization); stated for s ≠ 1
+  with the value ln 2 separately.
+- 21.5.E4 fails for general symplectic Γ (z-dependent ratio for g = 2) and contradicts 21.5.E7;
+  it needs the theta-group condition. 21.5.E8's principal square root fails for g ≥ 3.
+  21.6.E4: c_j, d_j are g-dimensional, not h-dimensional. (Representatives of 𝒦 in ℤ^{g×h}T
+  are DLMF's own definition, recorded as a formalization note.) 21.2.E6 needs Ω symmetric and
+  21.5.E5 needs A ∈ GL_g(ℤ).
+- Table 22.5.1: the derivative of dc at K+iK′ is −k, not k. 22.8.E23: the printed determinant
+  is nonzero (≈ −0.03+0.04i); a third column sn (or second column sn·dn) makes it vanish.
+  22.9.E23: the last summand should be s_{3,3}d_{3,3}.
+- 23.6.E29: the last sign is +. 23.6.E17 fails for some generator pairs with the principal
+  K(k). 23.8.E1–E2 need |Im(z/ω1)| < 2 Im(ω3/ω1) (absolute value missing). 23.10.E14: the
+  product runs over (j, ℓ) ≠ (0, 0), not ℓ ≠ j. 23.10.E15: π² should be π. 23.11.E2 holds
+  for 2ω1 = 1 and needs |Re z| + |Re τ| < 1 rather than −1 < Re(z+τ) < 1. 23.11.E3 needs a
+  factor 4. 23.18.E4: J has a pole at q = 0, so it is a modular function, not a modular form
+  in DLMF 23.15(i)'s sense.
+- Nonvanishing hypotheses are added wherever DLMF divides by a theta or elliptic function.
+
+### Validation
+
+The full build passes (10,463 jobs). The four new umbrellas, the root module and the edited
+older files (`Elliptic/Theta`, `ThetaAGM`, `Jacobi`, `JacobiIdentities`, `SpecialValues`, only
+attribute and docstring lines) pass strict checks with both implicit-variable options off.
+No definition or helper contains `sorry`; no axiom or `native_decide` is introduced. The tag
+dump (5,074 entries, 395 upstream pointers, no nonstandard axiom) regenerates all ledgers.
+
+### Next steps
+
+The two Chapter 22 foundations (`jacobiTauk_im_pos`, `jacobi_inversion_k`) and Chapter 23's
+`e_distinct` and 23.3.E12 unlock the most downstream results. Theta-quotient identities in
+the lattice form are routine and plentiful. Chapter 19 (Carlson R_F etc.) would replace the
+Chapter 20 placeholder.
+
+## Chapter 19 acquisition, errata corrections and the lean-codes dependency (2026-10-25)
+
+### Chapter 19
+
+Five agents (parts A–E, exclusive files) acquired DLMF Chapter 19 (version 1.2.8) into the
+new area `DLMF/EllipticIntegrals` (26 modules, umbrella `DLMF.EllipticIntegrals`, imported by
+`DLMF.lean`); ledger DLMF19Acquisition.md. Part A: Legendre's integrals for complex φ and k
+along the straight path (`incEllIntFk/Ek/Dk/Pik`, complete and complementary integrals,
+Bulirsch's cel/el1–el3, Cauchy principal values), §§19.2, 19.4–19.8. Part B: §§19.9–19.14
+(inequalities, addition, asymptotics, reduction; 19.9.E10 excluded as numerical). Part C:
+Carlson's symmetric integrals `symEllIntRF/RJ/RG/RD/R` and the integrand `symEllIntS`, defined
+through or bridged to lean-codes' proved `Carlson.carlsonR`, `carlsonRF`, `carlsonRG`,
+`carlsonRC` (the R_G bridge 19.16.E17 is admitted); §§19.16, 19.18–19.22. Part D:
+§§19.23–19.26. Part E: §§19.27–19.29. Excluded: 19.3, 19.17 (graphics), 19.30–19.35
+(applications), 19.36–19.39 (computation). The real `DLMF.Elliptic` integrals, the complex K of
+`DLMF.JacobiElliptic` and the AGM are reused; only tags were added in `Elliptic/AGM.lean`.
+
+Totals: 426 tagged IDs on 528 declarations (66 definitions, 163 proved, 299 depending on
+admissions); 281 direct admissions. The Chapter 20 placeholder `th20_carlsonRF` was replaced by
+`symEllIntRF`, with two new admitted 20.9.E3 forms. Integration fixed one collision: parts A and
+D both declared `hasDerivAt_incEllIntFk/Ek`; part D's R_D forms (19.25.E6, E12) are now
+`hasDerivAt_incEllIntFk_symEllIntRD`, `hasDerivAt_incEllIntEk_symEllIntRD`.
+
+### DLMF errata
+
+An independent verifier re-checked the eleven Chapter 19 claims numerically against the printed
+pages. Confirmed (missing conditions or wrong formulas): 19.7.E2 (b, d) need Re k > 0;
+19.25.E30–E31 need 0 < u ≤ K; 19.25.E32, E34 need x ≥ 0 (E33 is fine); 19.26.E9 needs p > 0;
+19.26.E13 needs α, β > 0; 19.27.E8 error term O(√(z/g)); 19.27.E12 replaced by the
+Carlson–Gustafson bounds (checked numerically, not against the paper); 19.28.E9 needs
+x + y ≤ π/2 (sufficient). Corrected after verification:
+
+- 19.20.E3/E23: the acquisition's description "off by a factor −i for complex arguments" was
+  wrong; the formulas hold for Re x, Re y > 0 and fail elsewhere in the 19.16(i) domain. Added
+  the admitted complex forms `symEllIntRF_lemniscatic_complex`, `symEllIntRD_lemniscatic_complex`.
+- 19.26.E27: the acquired statement (with Re x > 0) was false at x = 1, θ = 2, where the left
+  side is a principal value. The hypothesis x² − θ ∈ ℂ \ (−∞, 0] was added
+  (`symEllIntRC_duplication_theta`; no failure at 3000 random points).
+- §19.25(i): DLMF's range is already the complex strip 0 ≤ Re φ ≤ π/2; the failure is for φ and
+  k² both nonreal. The Lean statements are for real φ, as before.
+
+Earlier the same day the errata found in Chapters 4 and 20–23 were corrected in docstrings and
+statements ("Corrected from the printed DLMF formula: …"), with two new admitted full-domain
+forms (`jacobiTheta_reduction_iq_eta`, 20.7.E34; `compEllIntKk_eq_jacobiThetaThreeNullTau_fundamental`,
+20.9.E2), and the false `hasSum_arctanh`, `hasSum_arctanh_large` (4.38.E5/E6) were corrected to
+the open domains and proved, with natural-order `tendsto_arctanh_series`,
+`tendsto_arctanh_large_series` for the DLMF domains. The project-wide register DLMFErrata.md
+now has 62 genuine DLMF errata, 19 fixed transcription defects and 32 formalization notes.
+
+### lean-codes dependency and `DLMFMathlib`
+
+With the user's approval lean-codes is a Lake path dependency (package renamed `Main` →
+`LeanCodes`; its modules build into `../lean-codes/.lake/build-codes`). The former mirrors of
+`ToMathlib/Analysis/Integral/Laplace.lean` and `ToMathlib/Analysis/Complex/Carlson.lean` were
+deleted and are imported from lean-codes. lean-codes' duplicate of TauCeti's
+`DifferentiableOn.analyticOnNhd_of_finiteDimensional` was removed in favour of TauCeti's, so
+TauCeti's `CauchyIntegralPolydisc` (and the project's Appell module) can be imported together
+with lean-codes. Because Lean resolves a module's build files by its top-level prefix, two
+packages cannot both own `ToMathlib`; this project's 50 general modules moved to
+`DLMFMathlib/` (root module `DLMFMathlib.lean`; namespaces unchanged), and both lakefiles again
+use prefix globs. Scripts (`DumpDLMF.lean`, `dlmf_ledgers.py`) and AGENTS.md follow.
+
+### Validation
+
+The full build passes (11,260 jobs). Strict checks (`-DautoImplicit=false
+-DrelaxedAutoImplicit=false`) pass on all Chapter 19 modules, the umbrella, the edited Theta,
+Elementary and older files, and `DLMFMathlib.lean`; `lake env lean` now resolves lean-codes'
+`ToMathlib` modules. The compiled audit finds 16,253 project theorems, 1,328 depending on
+`sorryAx`, no other nonstandard axiom; source admissions are 1,173. The tag dump (5,649
+entries, 397 upstream pointers) regenerates all ledgers.
+
+### Next steps
+
+Replace the inline Appell F₁ of 19.5.E4 by `DLMF.Hypergeometric.appF1` now that the import
+clash is gone. Prove the domain extensions of the Carlson bridges (one zero argument, limits on
+the cut), on which many §§19.20–19.25 statements rest.

@@ -9,8 +9,8 @@ public import DLMF.IncompleteGamma.SpecialValues
 public import DLMF.IncompleteGamma.SeriesRecurrences
 public import DLMF.Confluent.Integrals
 public import DLMF.Bessel.Elementary
-public import ToMathlib.Analysis.Complex.BarnesResidue
-public import ToMathlib.Analysis.Integral.PrincipalValue
+public import DLMFMathlib.Analysis.Complex.BarnesResidue
+public import DLMFMathlib.Analysis.Integral.PrincipalValue
 
 /-!
 # Real, contour and Mellin–Barnes representations, DLMF §8.6

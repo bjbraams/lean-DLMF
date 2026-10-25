@@ -9,7 +9,7 @@ public import DLMF.Legendre.Conical
 public import DLMF.Legendre.SpecialValues
 public import DLMF.OrthogonalPolynomials.Legendre
 public import DLMF.OrthogonalPolynomials.ClassicalInstances
-public import ToMathlib.Analysis.ODE.SturmCount
+public import DLMFMathlib.Analysis.ODE.SturmCount
 public import DLMF.Legendre.ZeroTools
 public import DLMF.Legendre.ZeroCounts
 

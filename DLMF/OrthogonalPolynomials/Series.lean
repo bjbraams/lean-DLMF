@@ -18,7 +18,7 @@ public import DLMF.OrthogonalPolynomials.LegendreAddition
 public import DLMF.OrthogonalPolynomials.GegenbauerSeries
 public import DLMF.OrthogonalPolynomials.LaguerreSeries
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Chebyshev.RootsExtrema
-public import ToMathlib.Analysis.Complex.LagrangeBurmann
+public import DLMFMathlib.Analysis.Complex.LagrangeBurmann
 public import Mathlib.Analysis.Convex.PathConnected
 public import DLMF.Hypergeometric.AppellF4
 /-!

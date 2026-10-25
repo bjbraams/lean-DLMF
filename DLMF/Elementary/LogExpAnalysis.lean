@@ -7,12 +7,16 @@ module
 
 public import DLMF.Elementary.LogExpBasic
 public import Mathlib.NumberTheory.Harmonic.EulerMascheroni
+public import Mathlib.Analysis.Analytic.Binomial
+public import DLMFMathlib.Analysis.SpecialFunctions.Complex.LogBoundary
 
 /-!
 # Logarithms, exponentials and powers: DLMF §§4.4–4.8
 
 Exact special values, complex-parameter limits, inequalities, boundary-convergent
-series, differential equations, and multivalued identities. Decimal approximations
+series, differential equations, and multivalued identities. Binomial series use Mathlib's
+`Complex.one_add_cpow_hasFPowerSeriesOnBall_zero`; the coefficient adapter uses
+Mathlib's descending Pochhammer polynomial and generalized binomial APIs. Decimal approximations
 are omitted. The strict bounds in 4.5.3 and 4.5.14 require a strict endpoint; their
 exact positive cutoffs are defined below and equality is retained there.
 The additive constant printed in 4.7.13 is corrected to a multiplicative constant.
@@ -21,7 +25,7 @@ logarithm shifts rather than only multiples of the exponent.
 -/
 
 @[expose] public section
-open Complex Filter Set Finset
+open Complex Filter Set Finset Polynomial
 open scoped Topology Real
 noncomputable section
 namespace DLMF.Elementary
@@ -137,16 +141,128 @@ theorem tendsto_cpow_mul_exp_neg (a : ℂ) :
 theorem tendsto_cpow_mul_exp_neg_sector (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ ≤ Real.pi / 2) :
     Tendsto (fun z : ℂ => z ^ a * Complex.exp (-z))
       (DLMF.sector (Real.pi / 2 - δ)) (𝓝 0) := by
-  sorry
+  rw [tendsto_zero_iff_norm_tendsto_zero]
+  have hsd : 0 < Real.sin δ := Real.sin_pos_of_pos_of_lt_pi hδ (by linarith [Real.pi_pos])
+  set K := Real.exp (Real.pi * |a.im|) with hK
+  have hg : Tendsto (fun r : ℝ => K * (r ^ a.re * Real.exp (-Real.sin δ * r))) atTop (𝓝 0) := by
+    simpa using (tendsto_rpow_mul_exp_neg_mul_atTop_nhds_zero a.re (Real.sin δ) hsd).const_mul K
+  have hg' : Tendsto (fun z : ℂ => K * (‖z‖ ^ a.re * Real.exp (-Real.sin δ * ‖z‖)))
+      (DLMF.sector (Real.pi / 2 - δ)) (𝓝 0) :=
+    (hg.comp (tendsto_comap (f := fun z : ℂ => ‖z‖))).mono_left inf_le_left
+  apply squeeze_zero' (Eventually.of_forall fun z => norm_nonneg _) _ hg'
+  have hmem : {z : ℂ | z ≠ 0 ∧ |arg z| ≤ Real.pi / 2 - δ} ∈ DLMF.sector (Real.pi / 2 - δ) :=
+    mem_inf_of_right (mem_principal_self _)
+  filter_upwards [hmem] with z ⟨hz0, harg⟩
+  rw [norm_mul, Complex.norm_cpow_of_ne_zero hz0, Complex.norm_exp, Complex.neg_re]
+  have hn : 0 < ‖z‖ := norm_pos_iff.mpr hz0
+  have h1 : (Real.exp (arg z * a.im))⁻¹ ≤ K := by
+    rw [← Real.exp_neg, hK, Real.exp_le_exp]
+    have : |arg z * a.im| ≤ Real.pi * |a.im| := by
+      rw [abs_mul]; exact mul_le_mul_of_nonneg_right ((Complex.abs_arg_le_pi z)) (abs_nonneg _)
+    linarith [neg_abs_le (arg z * a.im)]
+  have h2 : Real.exp (-z.re) ≤ Real.exp (-Real.sin δ * ‖z‖) := by
+    rw [Real.exp_le_exp]
+    have hc : Real.sin δ ≤ Real.cos (arg z) := by
+      rw [← Real.cos_pi_div_two_sub, ← Real.cos_abs (arg z)]
+      apply Real.cos_le_cos_of_nonneg_of_le_pi (abs_nonneg _) (by linarith [Real.pi_pos]) harg
+    rw [Complex.cos_arg hz0, le_div_iff₀ hn] at hc
+    linarith
+  rw [div_eq_mul_inv]
+  calc ‖z‖ ^ a.re * (Real.exp (arg z * a.im))⁻¹ * Real.exp (-z.re)
+      ≤ ‖z‖ ^ a.re * K * Real.exp (-Real.sin δ * ‖z‖) := by
+        gcongr
+    _ = K * (‖z‖ ^ a.re * Real.exp (-Real.sin δ * ‖z‖)) := by ring
 
 /-- Exact positive cutoff for the logarithm inequality, without a decimal approximation. -/
 def logInequalityCutoff : ℝ := sSup {x : ℝ | 0 < x ∧ x < 1 ∧ -Real.log (1 - x) ≤ 3 * x / 2}
+
+/-- Members of the logarithm cutoff set lie below `9/10`. -/
+theorem logR4_mem_le {x : ℝ} (hx : x ∈ {x : ℝ | 0 < x ∧ x < 1 ∧ -Real.log (1 - x) ≤ 3 * x / 2}) :
+    x ≤ 9/10 := by
+  obtain ⟨h0, h1, h2⟩ := hx
+  by_contra h
+  push Not at h
+  have hl : Real.log (1 - x) < Real.log (1/10) := Real.log_lt_log (by linarith) (by linarith)
+  have h10 : Real.log (1/10) = - Real.log 10 := by rw [one_div, Real.log_inv]
+  have h8 : 3 * Real.log 2 < Real.log 10 := by
+    rw [← Real.log_rpow (by norm_num)]
+    exact Real.log_lt_log (by norm_num) (by norm_num)
+  have := Real.log_two_gt_d9
+  linarith
+
+/-- The logarithm cutoff set is bounded above. -/
+theorem logR4_bdd : BddAbove {x : ℝ | 0 < x ∧ x < 1 ∧ -Real.log (1 - x) ≤ 3 * x / 2} :=
+  ⟨9/10, fun _ hx => logR4_mem_le hx⟩
+
+/-- One half belongs to the logarithm cutoff set. -/
+theorem logR4_half_mem : (1/2:ℝ) ∈ {x : ℝ | 0 < x ∧ x < 1 ∧ -Real.log (1 - x) ≤ 3 * x / 2} := by
+  refine ⟨by norm_num, by norm_num, ?_⟩
+  rw [show (1:ℝ) - 1/2 = (2:ℝ)⁻¹ by norm_num, Real.log_inv, neg_neg]
+  have := Real.log_two_lt_d9
+  linarith
+
+/-- Convexity bound: below a member of the cutoff set the strict inequality holds. -/
+theorem logR4_strict {x y : ℝ} (hx : 0 < x) (hxy : x < y)
+    (hy : y ∈ {x : ℝ | 0 < x ∧ x < 1 ∧ -Real.log (1 - x) ≤ 3 * x / 2}) :
+    -Real.log (1 - x) < 3 * x / 2 := by
+  obtain ⟨hy0, hy1, hy2⟩ := hy
+  set t := x / y with ht
+  have ht0 : 0 < t := div_pos hx hy0
+  have ht1 : t < 1 := (div_lt_one hy0).mpr hxy
+  have hc := strictConcaveOn_log_Ioi.2 (show 1 - y ∈ Ioi (0:ℝ) by simp; linarith)
+    (show (1:ℝ) ∈ Ioi (0:ℝ) by simp) (by linarith) ht0 (show 0 < 1 - t by linarith) (by ring)
+  have he : t • (1 - y) + (1 - t) • (1:ℝ) = 1 - x := by
+    simp only [smul_eq_mul, ht]; field_simp; ring
+  rw [he] at hc
+  simp only [smul_eq_mul, Real.log_one, mul_zero, add_zero] at hc
+  have : t * (3 * y / 2) = 3 * x / 2 := by rw [ht]; field_simp
+  nlinarith
+
+/-- The logarithm cutoff is at least one half. -/
+theorem logR4_cutoff_pos : 1/2 ≤ logInequalityCutoff := le_csSup logR4_bdd logR4_half_mem
 
 /-- The cutoff is the nonzero root of the equality case. -/
 theorem logInequalityCutoff_spec  :
     0 < logInequalityCutoff ∧ logInequalityCutoff < 1 ∧
     -Real.log (1 - logInequalityCutoff) = 3 * logInequalityCutoff / 2 := by
-  sorry
+  have hc0 := logR4_cutoff_pos
+  have hc9 : logInequalityCutoff ≤ 9/10 := csSup_le ⟨_, logR4_half_mem⟩ (fun _ hx => logR4_mem_le hx)
+  set c := logInequalityCutoff with hcdef
+  have hcont : ContinuousOn (fun x : ℝ => -Real.log (1 - x) - 3 * x / 2) (Icc 0 (9/10)) := by
+    apply ContinuousOn.sub _ (by fun_prop)
+    apply ContinuousOn.neg
+    apply ContinuousOn.log (by fun_prop)
+    intro x hx; simp at hx; linarith [hx.2]
+  refine ⟨by linarith, by linarith, ?_⟩
+  apply le_antisymm
+  · -- closure: c is a limit of members
+    have hT : IsClosed {x ∈ Icc (0:ℝ) (9/10) | -Real.log (1 - x) - 3 * x / 2 ≤ 0} :=
+      hcont.preimage_isClosed_of_isClosed isClosed_Icc isClosed_Iic
+    have hsub : {x : ℝ | 0 < x ∧ x < 1 ∧ -Real.log (1 - x) ≤ 3 * x / 2} ⊆
+        {x ∈ Icc (0:ℝ) (9/10) | -Real.log (1 - x) - 3 * x / 2 ≤ 0} := by
+      intro x hx
+      exact ⟨⟨hx.1.le, logR4_mem_le hx⟩, by linarith [hx.2.2]⟩
+    have hcl : c ∈ closure {x : ℝ | 0 < x ∧ x < 1 ∧ -Real.log (1 - x) ≤ 3 * x / 2} :=
+      csSup_mem_closure ⟨_, logR4_half_mem⟩ logR4_bdd
+    have hmem := hT.closure_subset_iff.mpr hsub hcl
+    have := hmem.2
+    linarith
+  · by_contra hlt
+    push Not at hlt
+    -- f(c) < 0, so slightly larger points are members
+    have hca : ContinuousAt (fun x : ℝ => -Real.log (1 - x) - 3 * x / 2) c := by
+      apply ContinuousAt.sub _ (by fun_prop)
+      apply ContinuousAt.neg
+      apply ContinuousAt.log (by fun_prop)
+      linarith
+    have hev : ∀ᶠ x in 𝓝 c, -Real.log (1 - x) - 3 * x / 2 < 0 ∧ x < 1 :=
+      (hca.eventually (gt_mem_nhds (show -Real.log (1 - c) - 3 * c / 2 < 0 by linarith))).and (gt_mem_nhds (show c < 1 by linarith))
+    obtain ⟨x, ⟨hx1, hx2⟩, hcx⟩ :=
+      ((hev.filter_mono (nhdsWithin_le_nhds (s := Ioi c))).and self_mem_nhdsWithin).exists
+    have hxS : x ∈ {x : ℝ | 0 < x ∧ x < 1 ∧ -Real.log (1 - x) ≤ 3 * x / 2} :=
+      ⟨by linarith [hcx], hx2, by linarith⟩
+    have : x ≤ c := le_csSup logR4_bdd hxS
+    linarith [hcx]
 
 /-- Both sharp first-order logarithmic inequalities. -/
 @[dlmf 4.5.E1]
@@ -176,13 +292,28 @@ theorem neg_log_one_sub_bounds {x : ℝ} (hx : x < 1) (hne : x ≠ 0) :
 @[dlmf 4.5.E3]
 theorem abs_log_one_sub_lt {x : ℝ} (hx : 0 < x) (hr : x < logInequalityCutoff) :
     |Real.log (1 - x)| < 3 * x / 2 := by
-  sorry
+  obtain ⟨y, hy, hxy⟩ := exists_lt_of_lt_csSup ⟨_, logR4_half_mem⟩ hr
+  have h := logR4_strict hx hxy hy
+  have hx1 : x < 1 := lt_trans hxy hy.2.1
+  have hl : Real.log (1 - x) < 0 := Real.log_neg (by linarith) (by linarith)
+  rw [abs_of_neg hl]
+  exact h
 
 /-- Weak form through the exact cutoff. -/
 @[dlmf 4.5.E3]
 theorem abs_log_one_sub_le {x : ℝ} (hx : 0 < x) (hr : x ≤ logInequalityCutoff) :
     |Real.log (1 - x)| ≤ 3 * x / 2 := by
-  sorry
+  rcases hr.lt_or_eq with hr | rfl
+  · obtain ⟨y, hy, hxy⟩ := exists_lt_of_lt_csSup ⟨_, logR4_half_mem⟩ hr
+    have h := logR4_strict hx hxy hy
+    have hx1 : x < 1 := lt_trans hxy hy.2.1
+    have hl : Real.log (1 - x) < 0 := Real.log_neg (by linarith) (by linarith)
+    rw [abs_of_neg hl]
+    exact h.le
+  · obtain ⟨h0, h1, h2⟩ := logInequalityCutoff_spec
+    have hl : Real.log (1 - logInequalityCutoff) < 0 := Real.log_neg (by linarith) (by linarith)
+    rw [abs_of_neg hl]
+    linarith
 
 /-- The positive-parameter power bound for the logarithm. -/
 @[dlmf 4.5.E5]
@@ -199,7 +330,18 @@ theorem log_le_rpow_sub_one {a x : ℝ} (ha : 0 < a) (hx : 0 < x) :
 @[dlmf 4.5.E6]
 theorem norm_log_one_add_le {z : ℂ} (hz : ‖z‖ < 1) :
     ‖Complex.log (1 + z)‖ ≤ -Real.log (1 - ‖z‖) := by
-  sorry
+  have hr : ‖(‖z‖:ℂ)‖<1 := by simpa using hz
+  have hs := Complex.hasSum_re (Complex.hasSum_taylorSeries_neg_log hr)
+  have hn : HasSum (fun n : ℕ => ‖(-1:ℂ)^(n+1)*z^n/n‖) (-Real.log (1-‖z‖)) := by
+    convert hs using 1
+    · ext n
+      simp only [norm_div,norm_mul,norm_pow,norm_neg,norm_one,one_pow,one_mul,norm_natCast]
+      rw [← Complex.ofReal_pow,← Complex.ofReal_natCast,← Complex.ofReal_div,Complex.ofReal_re]
+    · simp only [Complex.neg_re,Complex.log_re]
+      rw [show (1:ℂ)-(‖z‖:ℂ)=((1-‖z‖:ℝ):ℂ) by push_cast; rfl,
+        Complex.norm_of_nonneg (sub_pos.mpr hz).le]
+  rw [← (Complex.hasSum_taylorSeries_log hz).tsum_eq]
+  exact (norm_tsum_le_tsum_norm hn.summable).trans_eq hn.tsum_eq
 
 /-- Exponential bounds for `1-x`. -/
 @[dlmf 4.5.E7]
@@ -267,29 +409,118 @@ theorem rpow_one_add_bounds {x y : ℝ} (hx : 0 < x) (hy : 0 < y) :
 /-- Exact nonzero cutoff for the linear exponential upper bound. -/
 def expInequalityCutoff : ℝ := sSup {x : ℝ | 0 < x ∧ Real.exp (-x) ≤ 1 - x / 2}
 
+/-- Members of the exponential cutoff set lie below two. -/
+theorem logR4_exp_mem_lt {x : ℝ} (hx : x ∈ {x : ℝ | 0 < x ∧ Real.exp (-x) ≤ 1 - x / 2}) :
+    x < 2 := by
+  have := Real.exp_pos (-x)
+  linarith [hx.2]
+
+/-- The exponential cutoff set is bounded above. -/
+theorem logR4_exp_bdd : BddAbove {x : ℝ | 0 < x ∧ Real.exp (-x) ≤ 1 - x / 2} :=
+  ⟨2, fun _ hx => (logR4_exp_mem_lt hx).le⟩
+
+/-- One belongs to the exponential cutoff set. -/
+theorem logR4_exp_one_mem : (1:ℝ) ∈ {x : ℝ | 0 < x ∧ Real.exp (-x) ≤ 1 - x / 2} := by
+  refine ⟨by norm_num, ?_⟩
+  rw [Real.exp_neg]
+  have := Real.exp_one_gt_d9
+  rw [inv_le_comm₀ (Real.exp_pos 1) (by norm_num)]
+  linarith
+
+/-- Convexity bound below a member of the exponential cutoff set. -/
+theorem logR4_exp_strict {x y : ℝ} (hx : 0 < x) (hxy : x < y)
+    (hy : y ∈ {x : ℝ | 0 < x ∧ Real.exp (-x) ≤ 1 - x / 2}) :
+    Real.exp (-x) < 1 - x / 2 := by
+  obtain ⟨hy0, hy2⟩ := hy
+  set t := x / y with ht
+  have ht0 : 0 < t := div_pos hx hy0
+  have ht1 : t < 1 := (div_lt_one hy0).mpr hxy
+  have hc := strictConvexOn_exp.2 (mem_univ (-y)) (mem_univ (0:ℝ)) (by linarith) ht0
+    (show 0 < 1 - t by linarith) (by ring)
+  have he : t • (-y) + (1 - t) • (0:ℝ) = -x := by
+    simp only [smul_eq_mul, ht, mul_zero, add_zero]; field_simp
+  rw [he] at hc
+  simp only [smul_eq_mul, Real.exp_zero, mul_one] at hc
+  have : t * (1 - y / 2) + (1 - t) = 1 - x / 2 := by rw [ht]; field_simp; ring
+  nlinarith
+
 /-- The exponential cutoff and its exact equality case. -/
 theorem expInequalityCutoff_spec  :
     0 < expInequalityCutoff ∧ expInequalityCutoff < 2 ∧
     Real.exp (-expInequalityCutoff) = 1 - expInequalityCutoff / 2 := by
-  sorry
+  have hc1 : 1 ≤ expInequalityCutoff := le_csSup logR4_exp_bdd logR4_exp_one_mem
+  have hc2 : expInequalityCutoff ≤ 2 :=
+    csSup_le ⟨_, logR4_exp_one_mem⟩ (fun _ hx => (logR4_exp_mem_lt hx).le)
+  set c := expInequalityCutoff with hcdef
+  have hle : Real.exp (-c) - 1 + c / 2 ≤ 0 := by
+    have hT : IsClosed {x : ℝ | x ∈ Icc (0:ℝ) 2 ∧ Real.exp (-x) - 1 + x / 2 ≤ 0} :=
+      (by fun_prop : Continuous fun x : ℝ => Real.exp (-x) - 1 + x / 2).continuousOn.preimage_isClosed_of_isClosed
+        isClosed_Icc isClosed_Iic
+    have hsub : {x : ℝ | 0 < x ∧ Real.exp (-x) ≤ 1 - x / 2} ⊆
+        {x : ℝ | x ∈ Icc (0:ℝ) 2 ∧ Real.exp (-x) - 1 + x / 2 ≤ 0} := by
+      intro x hx
+      exact ⟨⟨hx.1.le, (logR4_exp_mem_lt hx).le⟩, by linarith [hx.2]⟩
+    have hcl : c ∈ closure {x : ℝ | 0 < x ∧ Real.exp (-x) ≤ 1 - x / 2} :=
+      csSup_mem_closure ⟨_, logR4_exp_one_mem⟩ logR4_exp_bdd
+    exact (hT.closure_subset_iff.mpr hsub hcl).2
+  have hlt2 : c < 2 := by
+    rcases hc2.lt_or_eq with h | h
+    · exact h
+    · rw [h] at hle; have := Real.exp_pos (-2); linarith
+  refine ⟨by linarith, hlt2, ?_⟩
+  apply le_antisymm (by linarith)
+  by_contra hlt
+  push Not at hlt
+  have hca : ContinuousAt (fun x : ℝ => Real.exp (-x) - 1 + x / 2) c := by fun_prop
+  have hev : ∀ᶠ x in 𝓝 c, Real.exp (-x) - 1 + x / 2 < 0 :=
+    hca.eventually (gt_mem_nhds (show Real.exp (-c) - 1 + c / 2 < 0 by linarith))
+  obtain ⟨x, hx1, hcx⟩ :=
+    ((hev.filter_mono (nhdsWithin_le_nhds (s := Ioi c))).and self_mem_nhdsWithin).exists
+  have hxS : x ∈ {x : ℝ | 0 < x ∧ Real.exp (-x) ≤ 1 - x / 2} :=
+    ⟨by linarith [show c < x from hcx], by linarith⟩
+  have : x ≤ c := le_csSup logR4_exp_bdd hxS
+  linarith [show c < x from hcx]
 
 /-- Strict form inside the exact cutoff. -/
 @[dlmf 4.5.E14]
 theorem exp_neg_lt_linear {x : ℝ} (hx : 0 < x) (hr : x < expInequalityCutoff) :
     Real.exp (-x) < 1 - x / 2 := by
-  sorry
+  obtain ⟨y, hy, hxy⟩ := exists_lt_of_lt_csSup ⟨_, logR4_exp_one_mem⟩ hr
+  exact logR4_exp_strict hx hxy hy
 
 /-- Weak form through the exact cutoff. -/
 @[dlmf 4.5.E14]
 theorem exp_neg_le_linear {x : ℝ} (hx : 0 < x) (hr : x ≤ expInequalityCutoff) :
     Real.exp (-x) ≤ 1 - x / 2 := by
-  sorry
+  rcases hr.lt_or_eq with hr | rfl
+  · obtain ⟨y, hy, hxy⟩ := exists_lt_of_lt_csSup ⟨_, logR4_exp_one_mem⟩ hr
+    exact (logR4_exp_strict hx hxy hy).le
+  · exact expInequalityCutoff_spec.2.2.le
 
 /-- Two-sided complex exponential estimate on the punctured unit disk. -/
 @[dlmf 4.5.E15]
 theorem norm_exp_sub_one_bounds {z : ℂ} (hz : 0 < ‖z‖) (hz1 : ‖z‖ < 1) :
     ‖z‖ / 4 < ‖Complex.exp z - 1‖ ∧ ‖Complex.exp z - 1‖ < 7 * ‖z‖ / 4 := by
-  sorry
+  have he := Complex.exp_bound hz1.le (n := 3) (by norm_num)
+  have hsum : (∑ m∈range 3,z^m/(m.factorial:ℂ))=1+z+z^2/2 := by
+    norm_num [Finset.sum_range_succ]
+  rw [hsum] at he
+  have hR : ‖Complex.exp z-1-z-z^2/2‖≤‖z‖^3*(2/9) := by
+    convert he using 1
+    · congr 1; ring
+    · norm_num
+  have h3 : ‖z‖^3<‖z‖ := by nlinarith [sq_nonneg ‖z‖,mul_pos hz (sub_pos.mpr hz1)]
+  have h2 : ‖z‖^2<‖z‖ := by nlinarith
+  have hs := norm_add_le (Complex.exp z-1-z-z^2/2) (z^2/2)
+  rw [show (Complex.exp z-1-z-z^2/2)+(z^2/2)=Complex.exp z-1-z by ring] at hs
+  have hn : ‖z^2/2‖=‖z‖^2/2 := by norm_num [norm_div,norm_pow]
+  rw [hn] at hs
+  have hsmall : ‖Complex.exp z-1-z‖<3*‖z‖/4 := by nlinarith
+  have hu : ‖Complex.exp z-1‖≤‖Complex.exp z-1-z‖+‖z‖ := by
+    simpa using norm_add_le (Complex.exp z-1-z) z
+  have hl := norm_sub_norm_le z (Complex.exp z-1)
+  rw [show ‖z-(Complex.exp z-1)‖=‖Complex.exp z-1-z‖ from norm_sub_rev _ _] at hl
+  constructor <;> nlinarith
 
 /-- Global complex exponential estimate. -/
 @[dlmf 4.5.E16]
@@ -308,57 +539,256 @@ theorem norm_exp_sub_one_le (z : ℂ) :
 theorem log_one_add_hasSum_closed {z : ℂ} (hz : ‖z‖ ≤ 1) (hne : z ≠ -1) :
     Tendsto (fun N : ℕ => ∑ n ∈ range N, (-1 : ℂ) ^ n * z ^ (n + 1) / (n + 1))
       atTop (𝓝 (Complex.log (1 + z))) := by
-  sorry
+  convert Complex.tendsto_logTaylor_closed hz hne using 1
+  funext N
+  unfold Complex.logTaylor
+  rw [Finset.sum_range_succ']
+  simp [pow_add]
+
+/-- Natural-order positive logarithm series on the closed disk, excluding its pole. -/
+lemma logBoundary_one_sub {w : ℂ} (hw : ‖w‖ ≤ 1) (hne : w ≠ 1) :
+    Tendsto (fun N : ℕ => ∑ n ∈ range N, w ^ (n + 1) / (n + 1))
+      atTop (𝓝 (-Complex.log (1 - w))) := by
+  have hn : -w ≠ (-1 : ℂ) := by simpa using hne
+  have h := (log_one_add_hasSum_closed (z := -w) (by simpa using hw) hn).neg
+  convert h using 1
+  · funext N
+    rw [← Finset.sum_neg_distrib]
+    apply Finset.sum_congr rfl
+    intro n hn
+    rw [neg_pow, pow_succ]
+    have hs : ((-1 : ℂ) ^ n) ^ 2 = 1 := by
+      rw [← pow_mul, Nat.mul_comm n 2, pow_mul, neg_one_sq, one_pow]
+    have hd : (n + 1 : ℂ) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero n
+    field_simp
+    linear_combination -(w ^ (n + 1)) * hs
+
+/-- The real part of a translated closed-disk point is positive off its endpoint. -/
+lemma logBoundary_one_add_re_pos {w : ℂ} (hw : ‖w‖ ≤ 1) (hne : w ≠ -1) :
+    0 < (1 + w).re := by
+  have hs := Complex.sq_norm w
+  rw [Complex.normSq_apply] at hs
+  have hr := (abs_le.mp (Complex.abs_re_le_norm w)).1
+  by_contra hbad
+  have he : w.re = -1 := by simp only [Complex.add_re, Complex.one_re] at hbad; linarith
+  have hi : w.im = 0 := by nlinarith [sq_nonneg w.im, norm_nonneg w]
+  apply hne
+  exact Complex.ext (by simpa using he) (by simpa using hi)
+
+/-- The principal logarithm quotient law for two points with positive real part. -/
+lemma logBoundary_log_div {u v : ℂ} (hu : 0 < u.re) (hv : 0 < v.re) :
+    Complex.log (u / v) = Complex.log u - Complex.log v := by
+  have hu0 : u ≠ 0 := by intro h; simp [h] at hu
+  have hv0 : v ≠ 0 := by intro h; simp [h] at hv
+  have hua := abs_lt.mp (Complex.abs_arg_lt_pi_div_two_iff.mpr (Or.inl hu))
+  have hva := abs_lt.mp (Complex.abs_arg_lt_pi_div_two_iff.mpr (Or.inl hv))
+  have he : Complex.exp (Complex.log u - Complex.log v) = u / v := by
+    rw [Complex.exp_sub, Complex.exp_log hu0, Complex.exp_log hv0]
+  rw [← he]
+  apply Complex.log_exp
+  · simp only [Complex.sub_im, Complex.log_im]
+    linarith
+  · simp only [Complex.sub_im, Complex.log_im]
+    linarith
+
+/-- Odd logarithm series on the whole closed disk except the two divergent endpoints.
+The finite identity groups adjacent natural-order terms before taking an even subsequence. -/
+lemma logBoundary_odd {w : ℂ} (hw : ‖w‖ ≤ 1) (hp : w ≠ 1) (hm : w ≠ -1) :
+    Tendsto (fun N : ℕ => ∑ n ∈ range N, 2 * w ^ (2 * n + 1) / (2 * n + 1))
+      atTop (𝓝 (Complex.log ((1 + w) / (1 - w)))) := by
+  have hplus := log_one_add_hasSum_closed hw hm
+  have hminus := logBoundary_one_sub hw hp
+  let F : ℕ → ℂ := fun n => w ^ (n + 1) / (n + 1) +
+    (-1 : ℂ) ^ n * w ^ (n + 1) / (n + 1)
+  have hfinite (N : ℕ) : (∑ n ∈ range N, 2 * w ^ (2 * n + 1) / (2 * n + 1)) =
+      ∑ n ∈ range (2 * N), F n := by
+    induction N with
+    | zero => simp
+    | succ N ih =>
+      have hidx : 2 * (N + 1) = 2 * N + 1 + 1 := by omega
+      rw [Finset.sum_range_succ, ih, hidx, Finset.sum_range_succ, Finset.sum_range_succ]
+      simp [F, pow_add, pow_mul]
+      ring
+  have hsub : Tendsto (fun N : ℕ => 2 * N) atTop atTop :=
+    tendsto_atTop_mono (fun N => by dsimp only [id]; omega) tendsto_id
+  have h := (hminus.add hplus).comp hsub
+  simp only [← Finset.sum_add_distrib] at h
+  have he : -Complex.log (1 - w) + Complex.log (1 + w) =
+      Complex.log ((1 + w) / (1 - w)) := by
+    rw [logBoundary_log_div (logBoundary_one_add_re_pos hw hm)
+      (by simpa only [sub_eq_add_neg] using
+        logBoundary_one_add_re_pos (w := -w) (by simpa using hw) (by simpa using hp))]
+    ring
+  rw [he] at h
+  exact h.congr (fun N => (hfinite N).symm)
 
 /-- The reciprocal-transformed logarithm series, including the boundary line. -/
 @[dlmf 4.6.E2]
 theorem log_hasSum_halfplane {z : ℂ} (hz : 1 / 2 ≤ z.re) :
     Tendsto (fun N : ℕ => ∑ n ∈ range N, ((z - 1) / z) ^ (n + 1) / (n + 1))
       atTop (𝓝 (Complex.log z)) := by
-  sorry
+  have hz0 : z ≠ 0 := by intro h; simp [h] at hz; linarith
+  have hn : ‖(z - 1) / z‖ ≤ 1 := by
+    rw [norm_div, div_le_one₀ (norm_pos_iff.mpr hz0)]
+    have h₁ := Complex.sq_norm (z - 1)
+    have h₂ := Complex.sq_norm z
+    simp only [Complex.normSq_apply, Complex.sub_re, Complex.sub_im, Complex.one_re,
+      Complex.one_im, sub_zero] at h₁ h₂
+    nlinarith [norm_nonneg (z - 1), norm_nonneg z]
+  have hne : (z - 1) / z ≠ 1 := by
+    intro h
+    have h' := (div_eq_iff hz0).mp h
+    apply (one_ne_zero : (1 : ℂ) ≠ 0)
+    linear_combination -h'
+  have h := logBoundary_one_sub hn hne
+  have he : 1 - (z - 1) / z = z⁻¹ := by field_simp; ring
+  have harg : z.arg ≠ Real.pi := Complex.slitPlane_arg_ne_pi (by
+    change 0 < z.re ∨ z.im ≠ 0
+    left
+    linarith)
+  rw [he, Complex.log_inv z harg, neg_neg] at h
+  exact h
 
 /-- The logarithm Taylor series about one with its full boundary. -/
 @[dlmf 4.6.E3]
 theorem log_hasSum_center_one {z : ℂ} (hz : ‖z - 1‖ ≤ 1) (hne : z ≠ 0) :
     Tendsto (fun N : ℕ => ∑ n ∈ range N, (-1 : ℂ) ^ n * (z - 1) ^ (n + 1) / (n + 1))
       atTop (𝓝 (Complex.log z)) := by
-  sorry
+  have hn : z - 1 ≠ (-1 : ℂ) := by
+    intro h
+    apply hne
+    linear_combination h
+  have h := log_one_add_hasSum_closed hz hn
+  rwa [show 1 + (z - 1) = z by ring] at h
 
 /-- The odd Cayley-transform series, including the imaginary-axis boundary. -/
 @[dlmf 4.6.E4]
 theorem log_hasSum_odd {z : ℂ} (hz : 0 ≤ z.re) (hne : z ≠ 0) :
     Tendsto (fun N : ℕ => ∑ n ∈ range N, 2 * ((z - 1) / (z + 1)) ^ (2 * n + 1) / (2 * n + 1))
       atTop (𝓝 (Complex.log z)) := by
-  sorry
+  have hz1 : z + 1 ≠ 0 := by
+    intro h
+    have hr := congrArg Complex.re h
+    simp only [Complex.add_re, Complex.one_re, Complex.zero_re] at hr
+    linarith
+  have hn : ‖(z - 1) / (z + 1)‖ ≤ 1 := by
+    rw [norm_div, div_le_one₀ (norm_pos_iff.mpr hz1)]
+    have h₁ := Complex.sq_norm (z - 1)
+    have h₂ := Complex.sq_norm (z + 1)
+    simp only [Complex.normSq_apply, Complex.sub_re, Complex.sub_im, Complex.add_re,
+      Complex.add_im, Complex.one_re, Complex.one_im, sub_zero, add_zero] at h₁ h₂
+    nlinarith [norm_nonneg (z - 1), norm_nonneg (z + 1)]
+  have hp : (z - 1) / (z + 1) ≠ 1 := by
+    intro h
+    have he := (div_eq_iff hz1).mp h
+    apply (one_ne_zero : (1 : ℂ) ≠ 0)
+    linear_combination -he / 2
+  have hm : (z - 1) / (z + 1) ≠ -1 := by
+    intro h
+    have he := (div_eq_iff hz1).mp h
+    apply hne
+    linear_combination he / 2
+  have h := logBoundary_odd hn hp hm
+  have he : (1 + (z - 1) / (z + 1)) / (1 - (z - 1) / (z + 1)) = z := by
+    field_simp
+    ring
+  rwa [he] at h
 
 /-- The reciprocal odd series, including all admissible unit-circle points. -/
 @[dlmf 4.6.E5]
 theorem log_ratio_hasSum_odd {z : ℂ} (hz : 1 ≤ ‖z‖) (hp : z ≠ 1) (hm : z ≠ -1) :
     Tendsto (fun N : ℕ => ∑ n ∈ range N, 2 / ((2 * n + 1 : ℂ) * z ^ (2 * n + 1)))
       atTop (𝓝 (Complex.log ((z + 1) / (z - 1)))) := by
-  sorry
+  have hz0 : z ≠ 0 := by intro h; simp [h] at hz; linarith
+  have hn : ‖z⁻¹‖ ≤ 1 := by
+    rw [norm_inv]
+    exact (inv_le_one₀ (norm_pos_iff.mpr hz0)).2 hz
+  have hp' : z⁻¹ ≠ 1 := by
+    intro h
+    apply hp
+    simpa using congrArg (fun w : ℂ => w⁻¹) h
+  have hm' : z⁻¹ ≠ -1 := by
+    intro h
+    apply hm
+    simpa using congrArg (fun w : ℂ => w⁻¹) h
+  have h := logBoundary_odd hn hp' hm'
+  have he : (1 + z⁻¹) / (1 - z⁻¹) = (z + 1) / (z - 1) := by
+    field_simp
+  rw [he] at h
+  convert h using 1
+  funext N
+  apply Finset.sum_congr rfl
+  intro n hn
+  simp only [div_eq_mul_inv, mul_inv, inv_pow]
+  ring
 
 /-- The shifted odd logarithm series with a positive real shift. -/
 @[dlmf 4.6.E6]
 theorem log_add_hasSum_odd {a : ℝ} (ha : 0 < a) {z : ℂ} (hz : -a ≤ z.re) (hne : z ≠ -a) :
     Tendsto (fun N : ℕ => ∑ n ∈ range N, 2 * (z / (2 * a + z)) ^ (2 * n + 1) / (2 * n + 1))
       atTop (𝓝 (Complex.log (z + a) - Complex.log a)) := by
-  sorry
+  have ha0 : (a : ℂ) ≠ 0 := by exact_mod_cast ha.ne'
+  have hza : z + a ≠ 0 := by
+    intro h
+    apply hne
+    linear_combination h
+  have hn : 0 ≤ ((z + a) / a).re := by
+    have hsum : 0 ≤ z.re + a := by linarith
+    simp only [Complex.div_re, Complex.add_re, Complex.ofReal_re, Complex.ofReal_im,
+      mul_zero, Complex.normSq_ofReal]
+    positivity
+  have hne' : (z + a) / a ≠ 0 := div_ne_zero hza ha0
+  have h := log_hasSum_odd hn hne'
+  have hratio : (((z + a) / a) - 1) / (((z + a) / a) + 1) = z / (2 * a + z) := by
+    field_simp
+    ring
+  have hlog : Complex.log ((z + a) / a) = Complex.log (z + a) - Complex.log a := by
+    rw [div_eq_mul_inv, ← Complex.ofReal_inv, Complex.log_mul_ofReal a⁻¹ (inv_pos.mpr ha) (z + a) hza,
+      Real.log_inv, ← Complex.ofReal_log ha.le]
+    push_cast
+    ring
+  simpa only [hratio, hlog] using h
 
 /-- The complex falling factorial, including its empty product. -/
 def fallingPower (a : ℂ) (n : ℕ) : ℂ := ∏ j ∈ range n, (a - j)
+
+/-- Falling-factorial coefficients agree with Mathlib's generalized binomial coefficients. -/
+lemma fallingPower_choose (a : ℂ) (n : ℕ) :
+    fallingPower a n/(n.factorial:ℂ)=Ring.choose a n := by
+  have he : fallingPower a n=(descPochhammer ℂ n).eval a := by
+    rw [descPochhammer_eval_eq_prod_range]
+    rfl
+  rw [he,Ring.choose_eq_smul,Polynomial.descPochhammer_smeval_eq_ascPochhammer,
+    Polynomial.ascPochhammer_smeval_cast,Polynomial.ascPochhammer_smeval_eq_eval,
+    descPochhammer_eval_eq_ascPochhammer]
+  simp [smul_eq_mul,div_eq_mul_inv,mul_comm]
 
 /-- The complex binomial series on its full open disk. -/
 @[dlmf 4.6.E7]
 theorem binomial_hasSum (a : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     HasSum (fun n : ℕ => fallingPower a n / n.factorial * z ^ n) ((1 + z) ^ a) := by
-  sorry
+  have hs := Complex.one_add_cpow_hasFPowerSeriesOnBall_zero (a := a) |>.hasSum
+    (show z∈Metric.eball (0:ℂ) 1 by
+      rw [← ENNReal.ofReal_one,Metric.eball_ofReal]
+      simpa using hz)
+  simpa [binomialSeries,FormalMultilinearSeries.ofScalars_apply_eq,fallingPower_choose,
+    mul_comm] using hs
 
 /-- Nonnegative integer exponents terminate and allow unrestricted arguments. -/
 @[dlmf 4.6.E7]
 theorem binomial_nat_hasSum (m : ℕ) (z : ℂ) :
     HasSum (fun n : ℕ => fallingPower (m : ℂ) n / n.factorial * z ^ n) ((1 + z) ^ m) := by
-  sorry
+  have hc (n : ℕ) : fallingPower (m:ℂ) n/(n.factorial:ℂ)=(m.choose n:ℂ) := by
+    simpa only [descPochhammer_eval_eq_prod_range,fallingPower] using
+      (Nat.cast_choose_eq_descPochhammer_div (K := ℂ) m n).symm
+  simp_rw [hc]
+  have hs : (∑ n∈range (m+1),(m.choose n:ℂ)*z^n)=(1+z)^m := by
+    simpa [mul_comm,mul_left_comm,one_pow,add_comm] using (add_pow z (1:ℂ) m).symm
+  rw [← hs]
+  apply hasSum_sum_of_ne_finset_zero
+  intro n hn
+  have hm : m<n := by simpa using hn
+  simp [Nat.choose_eq_zero_of_lt hm]
 
 /-- Every logarithm sheet has the same derivative on the slit plane. -/
 @[dlmf 4.7.E2]
@@ -372,7 +802,10 @@ theorem logSheet_hasDerivAt (k : ℤ) {z : ℂ} (hz : z ∈ Complex.slitPlane) :
 theorem iteratedDeriv_logSheet (k : ℤ) (n : ℕ) {z : ℂ} (hz : z ∈ Complex.slitPlane) :
     iteratedDeriv (n + 1) (logSheet k) z =
       (-1 : ℂ) ^ n * n.factorial * z ^ (-(n : ℤ) - 1) := by
-  sorry
+  have he : logSheet k = fun z => k*(2*Real.pi*I)+Complex.log z := by
+    ext z; simp [logSheet,add_comm]
+  rw [he,iteratedDeriv_const_add (Nat.succ_pos _) _]
+  exact iteratedDeriv_succ_log hz
 
 /-- General logarithmic ODE solution on a connected open domain with a selected analytic logarithm. -/
 @[dlmf 4.7.E5, dlmf 4.7.E6]
@@ -425,7 +858,19 @@ theorem powerSheet_hasDerivAt (a : ℂ) (k : ℤ) (z : ℂ) :
 @[dlmf 4.7.E11]
 theorem iteratedDeriv_cpow (a : ℂ) (n : ℕ) {z : ℂ} (hz : z ∈ Complex.slitPlane) :
     iteratedDeriv n (fun z : ℂ => z ^ a) z = fallingPower a n * z ^ (a - n) := by
-  sorry
+  induction n generalizing z with
+  | zero => simp [fallingPower]
+  | succ n ih =>
+    have hloc : iteratedDeriv n (fun z : ℂ => z^a) =ᶠ[𝓝 z]
+        (fun z => fallingPower a n*z^(a-n)) := by
+      filter_upwards [Complex.isOpen_slitPlane.mem_nhds hz] with w hw using ih hw
+    rw [iteratedDeriv_succ,hloc.deriv_eq]
+    have hd := ((Complex.hasStrictDerivAt_cpow_const (c := a-n) hz).hasDerivAt.const_mul (fallingPower a n)).deriv
+    rw [hd]
+    have hp : fallingPower a (n+1)=fallingPower a n*(a-n) := by
+      simp [fallingPower,Finset.prod_range_succ]
+    rw [hp,show a-(n:ℂ)-1=a-((n+1:ℕ):ℂ) by push_cast; ring]
+    ring
 
 /-- Corrected general linear ODE solution: the arbitrary constant multiplies the exponential. -/
 @[dlmf 4.7.E12, dlmf 4.7.E13]
@@ -662,6 +1107,42 @@ theorem closedPower_mul {a b u v : ℂ} (hu : u ∈ closedLogValues a)
 @[dlmf 4.4.E14]
 theorem tendsto_cpow_mul_log_complex_zero {a : ℂ} (ha : 0 < a.re) :
     Tendsto (fun z : ℂ => z ^ a * Complex.log z) (𝓝[≠] 0) (𝓝 0) := by
-  sorry
+  let C := Real.exp (Real.pi*|a.im|)
+  have hC : 0≤C := (Real.exp_pos _).le
+  have hp : Tendsto (fun r : ℝ => r^a.re) (𝓝[>] 0) (𝓝 0) := by
+    simpa [Real.zero_rpow ha.ne'] using
+      (Real.continuousAt_rpow_const 0 a.re (Or.inr ha.le)).tendsto.mono_left
+        (nhdsWithin_le_nhds (s := Ioi (0:ℝ)))
+  have hl := (tendsto_log_mul_rpow_nhdsGT_zero ha).norm
+  have hg : Tendsto (fun r : ℝ => C*(‖Real.log r*r^a.re‖+Real.pi*r^a.re))
+      (𝓝[>] 0) (𝓝 0) := by
+    simpa using (hl.add (hp.const_mul Real.pi)).const_mul C
+  rw [tendsto_zero_iff_norm_tendsto_zero]
+  apply squeeze_zero' (Eventually.of_forall fun _ => norm_nonneg _) _ (hg.comp tendsto_norm_nhdsNE_zero)
+  filter_upwards [self_mem_nhdsWithin] with z hz
+  have hz0 : z≠0 := hz
+  have harg : -z.arg*a.im≤Real.pi*|a.im| := by
+    calc
+      -z.arg*a.im = -(z.arg*a.im) := by ring
+      _≤|z.arg*a.im| := neg_le_abs _
+      _=|z.arg| * |a.im| := abs_mul _ _
+      _≤Real.pi*|a.im| := mul_le_mul_of_nonneg_right (Complex.abs_arg_le_pi z) (abs_nonneg _)
+  have hpow : ‖z^a‖≤C*‖z‖^a.re := by
+    rw [Complex.norm_cpow_of_ne_zero hz0,div_eq_mul_inv,← Real.exp_neg]
+    have hh : Real.exp (-(z.arg*a.im))≤C := by
+      apply Real.exp_le_exp.mpr
+      simpa only [neg_mul] using harg
+    exact (mul_le_mul_of_nonneg_left hh (Real.rpow_nonneg (norm_nonneg z) a.re)).trans_eq (mul_comm _ _)
+  have hlog : ‖Complex.log z‖≤|Real.log ‖z‖|+Real.pi := by
+    have h := Complex.norm_le_abs_re_add_abs_im (Complex.log z)
+    rw [Complex.log_re,Complex.log_im] at h
+    linarith [Complex.abs_arg_le_pi z]
+  calc
+    ‖z^a*Complex.log z‖ ≤ (C*‖z‖^a.re)*(|Real.log ‖z‖|+Real.pi) := by
+      rw [norm_mul]
+      exact mul_le_mul hpow hlog (norm_nonneg _) (mul_nonneg hC (Real.rpow_nonneg (norm_nonneg z) a.re))
+    _=C*(‖Real.log ‖z‖*‖z‖^a.re‖+Real.pi*‖z‖^a.re) := by
+      rw [norm_mul,Real.norm_eq_abs,Real.norm_eq_abs,abs_of_nonneg (Real.rpow_nonneg (norm_nonneg z) a.re)]
+      ring
 
 end DLMF.Elementary

@@ -7,11 +7,11 @@ module
 
 public import DLMF.Airy.Framework
 public import DLMF.Airy.Equation
-public import ToMathlib.Analysis.Asymptotics.WatsonRotated
+public import DLMFMathlib.Analysis.Asymptotics.WatsonRotated
 public import Mathlib.MeasureTheory.Integral.Gamma
-public import ToMathlib.Analysis.Complex.SegmentPrimitive
+public import DLMFMathlib.Analysis.Complex.SegmentPrimitive
 public import DLMF.Airy.Zeros
-public import ToMathlib.Analysis.ODE.SturmCount
+public import DLMFMathlib.Analysis.ODE.SturmCount
 
 /-!
 # Scorer functions, DLMF §9.12

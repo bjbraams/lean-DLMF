@@ -24,6 +24,9 @@ expressions whose lower parameters may be exceptional after the final retained t
 
 Mathlib supplies convergent-series radii and holomorphy. Existing local generalized
 calculus supplies differentiation and contiguity; no duplicate proof is introduced.
+Finite inversion multiplies the existing local scalar Pochhammer reflection identity
+and uses Mathlib's descending-factorial/binomial normalization. The integer-index
+Gamma bridge uses Mathlib's Gamma recurrence and its explicit pole totalization.
 -/
 
 @[expose] public section
@@ -293,6 +296,54 @@ theorem genHG_eq_finite {a b : Multiset ℂ} (hb : genDenRegular b)
   rw [genCoeff_eq_gamma_mul_regularized hb]
   ring
 
+/-- Nonvanishing of a retained multiset Pochhammer product follows from that
+of its final product, without a global exclusion of nonpositive integer parameters. -/
+lemma genPoch_ne_zero_of_le {a : Multiset ℂ} {m j : ℕ} (hj : j ≤ m)
+    (ha : genPoch a m ≠ 0) : genPoch a j ≠ 0 := by
+  apply Multiset.prod_ne_zero
+  intro hzero
+  obtain ⟨x, hx, hzero⟩ := Multiset.mem_map.mp hzero
+  have hx' : poch x m ≠ 0 := by
+    intro hx0
+    apply ha
+    exact Multiset.prod_eq_zero (Multiset.mem_map.mpr ⟨x, hx, hx0⟩)
+  exact poch_ne_zero_of_le hj hx' hzero
+
+/-- Multiset Pochhammer reflection, obtained from the existing scalar identity
+`poch_one_sub_sub_mul` by multiplying over the parameter multiset. -/
+lemma genPoch_reflect_mul (a : Multiset ℂ) {m j : ℕ} (hj : j ≤ m) :
+    genPoch a j * genPoch (a.map fun x => 1 - m - x) (m - j) =
+      (-1 : ℂ) ^ ((m - j) * a.card) * genPoch a m := by
+  induction a using Multiset.induction_on with
+  | empty => simp [genPoch, Multiset.empty_eq_zero]
+  | @cons x a ih =>
+    simp only [genPoch, Multiset.map_cons, Multiset.prod_cons, Multiset.card_cons, Multiset.map_map, Function.comp_def] at *
+    have hx := poch_one_sub_sub_mul (x := x) hj
+    rw [show 1 - m - x = 1 - x - m by ring]
+    rw [Nat.mul_add, pow_add, pow_mul]
+    linear_combination (a.map (fun x => poch x j)).prod *
+      (a.map (fun x => poch (1 - (m : ℂ) - x) (m - j))).prod * hx +
+      (-1 : ℂ) ^ (m - j) * poch x m * ih
+
+/-- Reflected retained Pochhammer quotient; endpoint nonvanishing gives every
+smaller original and reflected denominator needed in finite inversion. -/
+lemma genPoch_reflect_eq_div (a : Multiset ℂ) {m j : ℕ} (hj : j ≤ m)
+    (ha : genPoch a m ≠ 0) :
+    genPoch (a.map fun x => 1 - m - x) (m - j) =
+      (-1 : ℂ) ^ ((m - j) * a.card) * genPoch a m / genPoch a j := by
+  apply (eq_div_iff (genPoch_ne_zero_of_le hj ha)).2
+  simpa only [mul_comm] using genPoch_reflect_mul a hj
+
+/-- A terminating coefficient uses the ordinary binomial coefficient, valid
+at every finite retained index. -/
+lemma genCoeff_terminating (a b : Multiset ℂ) (m j : ℕ) :
+    genCoeff ((-m : ℂ) ::ₘ a) b j =
+      (-1 : ℂ) ^ j * (m.choose j : ℂ) * genPoch a j / genPoch b j := by
+  have hf : (j.factorial : ℂ) ≠ 0 := by exact_mod_cast j.factorial_ne_zero
+  simp only [genCoeff, genPoch, Multiset.map_cons, Multiset.prod_cons,
+    poch_neg_coe_nat, Nat.descFactorial_eq_factorial_mul_choose, Nat.cast_mul]
+  field_simp
+
 /-- The terminating inversion formula, with all retained denominator factors nonzero. -/
 @[dlmf 16.2.E3]
 theorem genFiniteHG_inversion (a b : Multiset ℂ) (m : ℕ) {z : ℂ} (hz : z ≠ 0)
@@ -301,7 +352,46 @@ theorem genFiniteHG_inversion (a b : Multiset ℂ) (m : ℕ) {z : ℂ} (hz : z �
       genPoch a m * (-z) ^ m / genPoch b m *
         genFiniteHG m ((-m : ℂ) ::ₘ (b.map fun x => 1 - m - x))
           (a.map fun x => 1 - m - x) ((-1 : ℂ) ^ (a.card + b.card) / z) := by
-  sorry
+  unfold genFiniteHG
+  rw [Finset.mul_sum]
+  conv_rhs => rw [← Finset.sum_range_reflect]
+  apply Finset.sum_congr rfl
+  intro j hj
+  have hjm : j ≤ m := Nat.le_of_lt_succ (Finset.mem_range.mp hj)
+  have hsub : m + 1 - 1 - j = m - j := by omega
+  rw [hsub, genCoeff_terminating, genCoeff_terminating, Nat.choose_symm hjm,
+    genPoch_reflect_eq_div a hjm ha, genPoch_reflect_eq_div b hjm hb]
+  have hAj := genPoch_ne_zero_of_le hjm ha
+  have hBj := genPoch_ne_zero_of_le hjm hb
+  have hpm : (-1 : ℂ) ^ m = (-1) ^ j * (-1) ^ (m - j) := by
+    rw [← pow_add, Nat.add_sub_cancel' hjm]
+  have hzm : z ^ m = z ^ j * z ^ (m - j) := by
+    rw [← pow_add, Nat.add_sub_cancel' hjm]
+  have hsq (n : ℕ) : ((-1 : ℂ) ^ n) ^ 2 = 1 := by
+    rw [← pow_mul, Nat.mul_comm n 2, pow_mul, neg_one_sq, one_pow]
+  rw [neg_pow z, hpm, hzm, div_pow, pow_add, mul_pow, ← pow_mul, ← pow_mul,
+    show a.card * (m - j) = (m - j) * a.card by exact Nat.mul_comm _ _,
+    show b.card * (m - j) = (m - j) * b.card by exact Nat.mul_comm _ _]
+  field_simp [hz, ha, hb, hAj, hBj]
+  linear_combination -(m.choose j : ℂ) * hsq (m - j) -
+    (m.choose j : ℂ) * ((-1 : ℂ) ^ (m - j)) ^ 2 * hsq ((m - j) * b.card)
+
+
+/-- The terminating upper/lower pair cancels throughout every retained term,
+even though it would be exceptional beyond the final retained index. -/
+lemma genFiniteHG_cancel_neg_nat (a b : Multiset ℂ) (m : ℕ) (z : ℂ) :
+    genFiniteHG m ((-m : ℂ) ::ₘ a) ((-m : ℂ) ::ₘ b) z = genFiniteHG m a b z := by
+  unfold genFiniteHG
+  apply Finset.sum_congr rfl
+  intro j hj
+  have hjm : j ≤ m := Nat.le_of_lt_succ (Finset.mem_range.mp hj)
+  have hm : poch (-(m : ℂ)) m ≠ 0 := by
+    rw [poch_neg_coe_nat, Nat.descFactorial_self]
+    exact mul_ne_zero (pow_ne_zero _ (by norm_num)) (by exact_mod_cast m.factorial_ne_zero)
+  have hj' := poch_ne_zero_of_le hjm hm
+  congr 1
+  simp only [genCoeff, genPoch, Multiset.map_cons, Multiset.prod_cons]
+  rw [mul_assoc, mul_div_mul_left _ _ hj']
 
 /-- Every partial sum is a terminating inverted hypergeometric polynomial (16.2.4). -/
 @[dlmf 16.2.E4]
@@ -310,12 +400,61 @@ theorem genFiniteHG_partial_sum_inversion (a b : Multiset ℂ) (m : ℕ)
     genFiniteHG m a b z = genPoch a m * z ^ m / (genPoch b m * m.factorial) *
       genFiniteHG m ((-m : ℂ) ::ₘ 1 ::ₘ (b.map fun x => 1 - m - x))
         (a.map fun x => 1 - m - x) ((-1 : ℂ) ^ (a.card + b.card + 1) / z) := by
-  sorry
+  have hm : poch (-(m : ℂ)) m ≠ 0 := by
+    rw [poch_neg_coe_nat, Nat.descFactorial_self]
+    exact mul_ne_zero (pow_ne_zero _ (by norm_num)) (by exact_mod_cast m.factorial_ne_zero)
+  have hb' : genPoch ((-m : ℂ) ::ₘ b) m ≠ 0 := by
+    simpa only [genPoch, Multiset.map_cons, Multiset.prod_cons] using mul_ne_zero hm hb
+  have h := genFiniteHG_inversion a ((-m : ℂ) ::ₘ b) m hz ha hb'
+  rw [genFiniteHG_cancel_neg_nat] at h
+  have hmap : (((-m : ℂ) ::ₘ b).map fun x => 1 - (m : ℂ) - x) =
+      (1 : ℂ) ::ₘ (b.map fun x => 1 - m - x) := by
+    rw [Multiset.map_cons]
+    congr 1
+    ring
+  have hfac : genPoch a m * (-z) ^ m / genPoch ((-m : ℂ) ::ₘ b) m =
+      genPoch a m * z ^ m / (genPoch b m * m.factorial) := by
+    have hden : genPoch ((-m : ℂ) ::ₘ b) m = poch (-m : ℂ) m * genPoch b m := by
+      simp only [genPoch, Multiset.map_cons, Multiset.prod_cons]
+    rw [hden, poch_neg_coe_nat, Nat.descFactorial_self, neg_pow]
+    field_simp
+  rw [hmap, hfac] at h
+  simpa only [Multiset.card_cons, Nat.add_assoc] using h
 
 /-- Rising factorial at an integer index; negative indices use the reciprocal continuation.
 At singular parameters this expression is totalized, so analytic formulas state exclusions. -/
 def genIntPoch (a : ℂ) (n : ℤ) : ℂ :=
   if 0 ≤ n then poch a n.toNat else (poch (a + n) (-n).toNat)⁻¹
+
+/-- Integer-index Pochhammer/Gamma normalization, including positive integral
+base parameters whose negatively shifted Gamma values are totalized to zero.
+This extends Mathlib's `Complex.Gamma_add_nat_div_Gamma_eq` to integer indices. -/
+lemma genIntPoch_eq_Gamma_div {a : ℂ} (ha : ∀ j : ℕ, a ≠ -(j : ℂ)) (n : ℤ) :
+    genIntPoch a n = Gamma (a + n) / Gamma a := by
+  cases n with
+  | ofNat n =>
+    simpa [genIntPoch] using (Complex.Gamma_add_nat_div_Gamma_eq (n := n) a ha).symm
+  | negSucc n =>
+    have hneg : (poch (a - (n + 1 : ℕ)) (n + 1))⁻¹ =
+        Gamma (a - (n + 1 : ℕ)) / Gamma a := by
+      by_cases hshift : ∀ j : ℕ, a - (n + 1 : ℕ) ≠ -(j : ℂ)
+      · have hg := Complex.Gamma_add_nat_div_Gamma_eq (n := n + 1)
+          (a - (n + 1 : ℕ)) hshift
+        rw [sub_add_cancel] at hg
+        change Gamma a / Gamma (a - (n + 1 : ℕ)) = poch (a - (n + 1 : ℕ)) (n + 1) at hg
+        rw [← hg, inv_div]
+      · push Not at hshift
+        obtain ⟨j, hj⟩ := hshift
+        have hjn : j < n + 1 := by
+          by_contra hbad
+          have hjn' : n + 1 ≤ j := by omega
+          apply ha (j - (n + 1))
+          push_cast [Nat.cast_sub hjn'] at hj ⊢
+          linear_combination hj
+        rw [hj, poch_neg_nat_eq_zero hjn, Complex.Gamma_neg_nat_eq_zero, inv_zero, zero_div]
+    unfold genIntPoch
+    rw [ite_eq_right (show ¬(0 : ℤ) ≤ Int.negSucc n by omega)]
+    simpa [Int.negSucc_eq, sub_eq_add_neg, Nat.cast_add, Nat.cast_one] using hneg
 
 /-- Formal bilateral hypergeometric coefficient, with no factorial factor (16.4.16). -/
 @[dlmf 16.4.E16]

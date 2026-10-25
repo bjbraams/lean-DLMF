@@ -8,7 +8,7 @@ module
 public import DLMF.Airy.Scorer
 public import DLMF.Airy.Zeros
 public import DLMF.Airy.ModulusTools
-public import ToMathlib.Analysis.ODE.SymmetricSquare
+public import DLMFMathlib.Analysis.ODE.SymmetricSquare
 public import DLMF.Airy.SquareTools
 
 /-!

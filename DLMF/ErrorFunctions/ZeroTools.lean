@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import ToMathlib.Analysis.Complex.ZeroLocalization
+public import DLMFMathlib.Analysis.Complex.ZeroLocalization
 public import TauCeti.Analysis.Complex.Conformal.Rouche
 
 /-!

@@ -262,6 +262,7 @@ lemma agmIntegral_agmSequences {x y : ℝ≥0} (hx : 0 < x) (hy : 0 < y) (n : �
 open NNReal in
 /-- **Gauss's theorem** (Temme Theorem 12.1, (12.9)):
 `∫₀^{π/2} (a² cos²θ + b² sin²θ)^{-1/2} dθ = π / (2 M(a, b))` for `a, b > 0`. -/
+@[dlmf 19.8.E4]
 theorem agmIntegral_eq_pi_div_two_div_agm {x y : ℝ≥0} (hx : 0 < x) (hy : 0 < y) :
     agmIntegral x y = π / 2 / (NNReal.agm x y : ℝ) := by
   have hM : (0 : ℝ) < NNReal.agm x y := NNReal.agm_pos hx hy
@@ -355,6 +356,7 @@ theorem Real.compEllIntKm_landen_ascending {m : ℝ} (hm0 : 0 ≤ m) (hm : m < 1
 /-- **Descending Landen transformation for `E`** (Temme (12.14)): with `k' = √(1-m)` and
 `k₁ = (1-k')/(1+k')`, `E(m) = (1+k') E(k₁²) - k' K(m)`. Obtained by differentiating the descending
 transformation of `K` and using `dK/dm` on both sides. -/
+@[dlmf 19.8.E12]
 theorem Real.compEllIntEm_landen_descending {m : ℝ} (hm : m < 1) :
     Real.compEllIntEm m =
       (1 + √(1 - m)) * Real.compEllIntEm (((1 - √(1 - m)) / (1 + √(1 - m))) ^ 2) -

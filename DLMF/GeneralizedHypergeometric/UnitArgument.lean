@@ -18,6 +18,9 @@ identities use Pochhammer quotients, which retain the removable cases hidden by
 quotients of poles in the printed Gamma formulas. Lower parameters retain the
 chapter's nonpositive-integer exclusions, except the explicitly canceled finite pair
 in 16.4.2_5. Convergence at unity is always stated before using a nonterminating sum.
+The odd terminating Dixon evaluation follows from finite inversion. The normalized
+bilateral evaluation reuses the proved local `dougall_bilateral` and Mathlib's
+`Complex.Gamma_mul_Gamma_one_sub`, preserving integral lower parameters.
 -/
 
 @[expose] public section
@@ -157,7 +160,37 @@ theorem genHG_dixon_terminating_odd (k : ℕ) (b c : ℂ)
     (hb : genDenRegular {1 - b - (2 * k + 1), 1 - c - (2 * k + 1)}) :
     genFiniteHG (2 * k + 1) {(-(2 * k + 1) : ℂ), b, c}
       {1 - b - (2 * k + 1), 1 - c - (2 * k + 1)} 1 = 0 := by
-  sorry
+  let N := 2 * k + 1
+  have hB : genPoch {1 - b - N, 1 - c - N} N ≠ 0 := by
+    simpa only [N, Nat.cast_add, Nat.cast_mul, Nat.cast_ofNat, Nat.cast_one] using genPoch_ne_zero hb N
+  have hs : (-1 : ℂ) ^ N = -1 := by simp [N, pow_add, pow_mul]
+  have hp : genPoch {1 - b - N, 1 - c - N} N = genPoch {b, c} N := by
+    simp only [genPoch, Multiset.insert_eq_cons, Multiset.map_cons,
+      Multiset.map_singleton, Multiset.prod_cons, Multiset.prod_singleton]
+    rw [poch_reflect b N, poch_reflect c N, hs]
+    ring
+  have hA : genPoch {b, c} N ≠ 0 := by rw [← hp]; exact hB
+  have hRA : ({b, c} : Multiset ℂ).map (fun x => 1 - (N : ℂ) - x) =
+      {1 - b - N, 1 - c - N} := by
+    simp only [Multiset.insert_eq_cons, Multiset.map_cons, Multiset.map_singleton]
+    congr 1
+    · ring
+    · congr 1
+      ring
+  have hRB : ({1 - b - N, 1 - c - N} : Multiset ℂ).map
+      (fun x => 1 - (N : ℂ) - x) = {b, c} := by
+    simp only [Multiset.insert_eq_cons, Multiset.map_cons, Multiset.map_singleton]
+    congr 1
+    · ring
+    · congr 1
+      ring
+  have hi := genFiniteHG_inversion {b, c} {1 - b - N, 1 - c - N} N
+    (z := 1) (by norm_num) hA hB
+  rw [hRA, hRB, hs, hp, mul_neg_one, neg_div, div_self hA] at hi
+  norm_num [Multiset.insert_eq_cons, Multiset.card_cons, Multiset.card_singleton] at hi
+  have hzero : genFiniteHG N ((-(N : ℂ)) ::ₘ {b, c}) {1 - b - N, 1 - c - N} 1 = 0 := by
+    linear_combination hi / 2
+  simpa only [N, Nat.cast_add, Nat.cast_mul, Nat.cast_ofNat, Nat.cast_one, Multiset.insert_eq_cons] using hzero
 
 /-- Watson sum in the full absolute convergence half-space. -/
 @[dlmf 16.4.E6]
@@ -299,7 +332,39 @@ theorem genHG_dougall_bilateral (a b c d : ℂ) (ha : ∀ k : ℤ, a ≠ k) (hb 
     genBilateralHG {a, b} {c, d} 1 =
       Gamma c * Gamma d * Gamma (1 - a) * Gamma (1 - b) * Gamma (c + d - a - b - 1) /
       (Gamma (c - a) * Gamma (d - a) * Gamma (c - b) * Gamma (d - b)) := by
-  sorry
+  have ha' : ∀ j : ℕ, a ≠ -(j : ℂ) := fun j hj => ha (-(j : ℤ)) (by simpa using hj)
+  have hb' : ∀ j : ℕ, b ≠ -(j : ℂ) := fun j hj => hb (-(j : ℤ)) (by simpa using hj)
+  have hc' : ∀ j : ℕ, c ≠ -(j : ℂ) := hcd c (by simp)
+  have hd' : ∀ j : ℕ, d ≠ -(j : ℂ) := hcd d (by simp)
+  have hGa := Complex.Gamma_ne_zero ha'
+  have hGb := Complex.Gamma_ne_zero hb'
+  have hGc := Complex.Gamma_ne_zero hc'
+  have hGd := Complex.Gamma_ne_zero hd'
+  have hterm (n : ℤ) : genBilateralCoeff {a, b} {c, d} n * (1 : ℂ) ^ n =
+      Gamma c * Gamma d / (Gamma a * Gamma b) *
+        (Gamma (a + n) * Gamma (b + n) / (Gamma (c + n) * Gamma (d + n))) := by
+    simp only [genBilateralCoeff, Multiset.insert_eq_cons, Multiset.map_cons,
+      Multiset.map_singleton, Multiset.prod_cons, Multiset.prod_singleton, one_zpow,
+      mul_one, genIntPoch_eq_Gamma_div ha', genIntPoch_eq_Gamma_div hb',
+      genIntPoch_eq_Gamma_div hc', genIntPoch_eq_Gamma_div hd']
+    field_simp
+  have hconv' : 1 + (a + b).re < (c + d).re := by
+    simp only [Complex.sub_re, Complex.add_re] at hconv ⊢
+    linarith
+  unfold genBilateralHG
+  simp_rw [hterm]
+  -- Restore the existing proved Gamma-form sum before changing its normalization.
+  rw [tsum_mul_left, dougall_bilateral ha hb hconv']
+  have hπ : (Real.pi : ℂ) ^ 2 * Gamma (c + d - a - b - 1) /
+      (Complex.sin (Real.pi * a) * Complex.sin (Real.pi * b) *
+        Gamma (c - a) * Gamma (d - a) * Gamma (c - b) * Gamma (d - b)) =
+      (Real.pi / Complex.sin (Real.pi * a)) * (Real.pi / Complex.sin (Real.pi * b)) *
+        Gamma (c + d - a - b - 1) /
+          (Gamma (c - a) * Gamma (d - a) * Gamma (c - b) * Gamma (d - b)) := by
+    simp only [pow_two, div_eq_mul_inv, mul_inv]
+    ring
+  rw [hπ, ← Complex.Gamma_mul_Gamma_one_sub a, ← Complex.Gamma_mul_Gamma_one_sub b]
+  field_simp
 
 /-- Whipple transformation wherever the printed Gamma numerator is defined, including
 all terminating upper choices. Removable Gamma-pole cases with d,e,f terminating

@@ -13,7 +13,7 @@ public import Mathlib.Analysis.Calculus.Deriv.Mul
 # Sonine–Pólya bounds for the classical differential equations
 
 Sonine's function `S = y² + (k/φ) y'²` for the self-adjoint form `(k y')' + φ y = 0` (see
-`ToMathlib.Analysis.ODE.SoninePolya`) applied to the Jacobi, Hermite and Laguerre equations
+`DLMFMathlib.Analysis.ODE.SoninePolya`) applied to the Jacobi, Hermite and Laguerre equations
 (Szegő, §§7.2, 7.31–7.32; Beals–Wong, §3.5). Here `k` vanishes at the ends of the Jacobi and
 Laguerre intervals, so `S` is written directly in terms of the equation in its usual form
 and differentiated by hand. The results are stated for arbitrary solutions `y` with derivatives

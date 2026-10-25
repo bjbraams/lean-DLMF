@@ -7,7 +7,7 @@ module
 
 public import DLMF.Legendre.Continuation
 public import DLMF.Legendre.Toroidal
-public import ToMathlib.Analysis.SpecificLimits.Pincherle
+public import DLMFMathlib.Analysis.SpecificLimits.Pincherle
 
 /-!
 # Tools for the Ferrers Fourier series (DLMF §14.13)

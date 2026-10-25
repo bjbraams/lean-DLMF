@@ -7,6 +7,8 @@ module
 
 public import DLMF.GeneralizedHypergeometric.Basic
 public import DLMF.Hypergeometric.Clausen
+public import DLMF.GeneralizedHypergeometric.AnalyticProperties
+public import DLMF.GeneralizedHypergeometric.GHATools
 
 /-!
 # Transformations, expansions, and products: DLMF §§16.6,16.10,16.12
@@ -21,7 +23,7 @@ convergence region. All terminating auxiliary functions are finite retained sums
 
 @[expose] public section
 open Complex Filter Set Finset
-open scoped Topology Real
+open scoped Topology Real Nat
 noncomputable section
 namespace DLMF.Hypergeometric
 
@@ -108,12 +110,126 @@ theorem genHG_norlund_expansion (a : ℂ) (A B : Multiset ℂ) (hcard : A.card =
       (genHG (a ::ₘ A) B (z * ζ)) := by
   sorry
 
+/-- Duplication for Pochhammer symbols: `(x)₂ₙ = 4ⁿ (x/2)ₙ ((x+1)/2)ₙ`. -/
+lemma ghaR4_poch_dup (x : ℂ) (n : ℕ) :
+    poch x (2 * n) = 4 ^ n * poch (x / 2) n * poch ((x + 1) / 2) n := by
+  induction n with
+  | zero => simp [poch_zero]
+  | succ n ih =>
+    rw [show 2 * (n + 1) = 2 * n + 1 + 1 by ring, poch_succ, poch_succ, ih, poch_succ, poch_succ]
+    push_cast
+    ring
+
+/-- A Chu–Vandermonde rearrangement: `∑ C(n,k) (a+k)ₙ₋ₖ (b+n-k)ₖ = (a+b+n-1)ₙ`. -/
+lemma ghaR4_vandermonde_two (a b : ℂ) (n : ℕ) :
+    ∑ k ∈ range (n + 1), (n.choose k : ℂ) * poch (a + k) (n - k) * poch (b + (n - k : ℕ)) k =
+      poch (a + b + n - 1) n := by
+  have h := chu_vandermonde_sum n (1 - b - n) a
+  rw [show a - (1 - b - n) = a + b + n - 1 by ring] at h
+  rw [← h]
+  refine Finset.sum_congr rfl fun k hk => ?_
+  have hk' : k ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
+  have hr := poch_reflect (b + (n - k : ℕ)) k
+  rw [show 1 - (b + ((n - k : ℕ) : ℂ)) - k = 1 - b - n by push_cast [Nat.cast_sub hk']; ring] at hr
+  rw [hr]
+  have : ((-1 : ℂ) ^ k) * (-1) ^ k = 1 := by rw [← mul_pow]; norm_num
+  linear_combination (n.choose k : ℂ) * poch (a + k) (n - k) * poch (b + (n - k : ℕ)) k * this.symm
+
+/-- Cauchy-product coefficients of two `0F1` series (DLMF 16.12.1). -/
+lemma ghaR4_0F1_coeff (a b : ℂ) (ha : ∀ k : ℕ, a ≠ -k) (hb : ∀ k : ℕ, b ≠ -k)
+    (hab : ∀ k : ℕ, a + b - 1 ≠ -k) (n : ℕ) :
+    ∑ k ∈ range (n + 1), 1 / (poch a k * k !) * (1 / (poch b (n - k) * (n - k)!)) =
+      4 ^ n * poch ((a + b) / 2) n * poch ((a + b - 1) / 2) n /
+        (poch a n * poch b n * poch (a + b - 1) n * n !) := by
+  have hpa := poch_ne_zero_of_not_neg_nat ha
+  have hpb := poch_ne_zero_of_not_neg_nat hb
+  have hpab := poch_ne_zero_of_not_neg_nat hab
+  have hn : (n ! : ℂ) ≠ 0 := by exact_mod_cast n.factorial_ne_zero
+  have hterm : ∀ k ∈ range (n + 1), 1 / (poch a k * k !) * (1 / (poch b (n - k) * (n - k)!)) =
+      (n.choose k : ℂ) * poch (a + k) (n - k) * poch (b + (n - k : ℕ)) k /
+        (poch a n * poch b n * n !) := by
+    intro k hk
+    have hk' : k ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
+    have h1 := poch_add a k (n - k)
+    have h2 := poch_add b (n - k) k
+    rw [Nat.add_sub_of_le hk'] at h1
+    rw [Nat.sub_add_cancel hk'] at h2
+    have h3 : (n ! : ℂ) = n.choose k * k ! * (n - k)! := by
+      exact_mod_cast (Nat.choose_mul_factorial_mul_factorial hk').symm
+    have hk0 : (k ! : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
+    have hnk0 : ((n - k)! : ℂ) ≠ 0 := by exact_mod_cast (n - k).factorial_ne_zero
+    have hA : poch (a + k) (n - k) ≠ 0 := fun h => hpa n (by rw [h1, h, mul_zero])
+    have hB : poch (b + (n - k : ℕ)) k ≠ 0 := fun h => hpb n (by rw [h2, h, mul_zero])
+    have hC : (n.choose k : ℂ) ≠ 0 := by exact_mod_cast (Nat.choose_pos hk').ne'
+    rw [h1, h2, h3]
+    have := hpa k
+    have := hpb (n - k)
+    field_simp
+  rw [Finset.sum_congr rfl hterm, ← Finset.sum_div, ghaR4_vandermonde_two]
+  have hdup := ghaR4_poch_dup (a + b - 1) n
+  rw [show (a + b - 1 + 1) / 2 = (a + b) / 2 by ring] at hdup
+  have hsplit := poch_add (a + b - 1) n n
+  rw [← two_mul] at hsplit
+  rw [div_eq_div_iff (by simp [hpa n, hpb n, hn]) (by simp [hpa n, hpb n, hn, hpab n])]
+  rw [show a + b + n - 1 = a + b - 1 + n by ring]
+  linear_combination (poch a n * poch b n * n !) * (hsplit.symm.trans hdup)
+
+/-- The `0F1` coefficient. -/
+lemma ghaR4_genCoeff_0F1 (a : ℂ) (n : ℕ) : genCoeff ∅ {a} n = 1 / (poch a n * n !) := by
+  simp [genCoeff, genPoch]
+
+/-- Absolute summability of the `0F1` series. -/
+lemma ghaR4_summable_norm_0F1 (a z : ℂ) (ha : ∀ k : ℕ, a ≠ -k) :
+    Summable fun n : ℕ => ‖genCoeff ∅ {a} n * z ^ n‖ := by
+  obtain ⟨C, hC0, hC⟩ := ghaR4_factorial_le_norm_poch a ha (σ := 2) (by norm_num)
+  refine Summable.of_nonneg_of_le (fun _ => norm_nonneg _) (fun n => ?_)
+    ((Real.summable_pow_div_factorial (2 * ‖z‖)).mul_left C)
+  have hp : 0 < ‖poch a n‖ := norm_pos_iff.mpr (poch_ne_zero_of_not_neg_nat ha n)
+  have hf : (0 : ℝ) < n ! := by exact_mod_cast n.factorial_pos
+  have hf1 : (1 : ℝ) ≤ n ! := by exact_mod_cast n.factorial_pos
+  rw [ghaR4_genCoeff_0F1, norm_mul, norm_div, norm_one, norm_mul, norm_pow, Complex.norm_natCast,
+    mul_pow, div_mul_eq_mul_div, one_mul, div_le_iff₀ (by positivity)]
+  have h := hC n
+  calc ‖z‖ ^ n = ‖z‖ ^ n * 1 := by ring
+    _ ≤ ‖z‖ ^ n * (C * 2 ^ n * ‖poch a n‖ / n !) := by
+        gcongr; rw [le_div_iff₀ hf]; linarith
+    _ ≤ ‖z‖ ^ n * (C * 2 ^ n * ‖poch a n‖ / n !) * n ! := by
+        have : 0 ≤ ‖z‖ ^ n * (C * 2 ^ n * ‖poch a n‖ / n !) := by positivity
+        nlinarith
+    _ = C * (2 ^ n * ‖z‖ ^ n / n !) * (‖poch a n‖ * n !) := by field_simp
+
 /-- The product of two 0F1 functions for every complex z. -/
 @[dlmf 16.12.E1]
 theorem genHG_0F1_product (a b z : ℂ) (hb : genDenRegular {a, b, a + b - 1}) :
     genHG ∅ {a} z * genHG ∅ {b} z =
       genHG {(a + b) / 2, (a + b - 1) / 2} {a, b, a + b - 1} (4 * z) := by
-  sorry
+  have ha' : ∀ k : ℕ, a ≠ -k := hb a (by simp)
+  have hb' : ∀ k : ℕ, b ≠ -k := hb b (by simp)
+  have hab' : ∀ k : ℕ, a + b - 1 ≠ -k := hb (a + b - 1) (by simp)
+  have hA := genHG_hasSum_entire (a := ∅) (b := {a}) (by simp)
+    (fun x hx => by rw [Multiset.mem_singleton] at hx; subst hx; exact ha') z
+  have hB := genHG_hasSum_entire (a := ∅) (b := {b}) (by simp)
+    (fun x hx => by rw [Multiset.mem_singleton] at hx; subst hx; exact hb') z
+  have hC := genHG_hasSum_entire (a := {(a + b) / 2, (a + b - 1) / 2}) (b := {a, b, a + b - 1})
+    (by simp) hb (4 * z)
+  rw [← hA.tsum_eq, ← hB.tsum_eq, ← hC.tsum_eq,
+    tsum_mul_tsum_eq_tsum_sum_range_of_summable_norm (ghaR4_summable_norm_0F1 a z ha')
+      (ghaR4_summable_norm_0F1 b z hb')]
+  congr 1
+  funext n
+  have hcoef := ghaR4_0F1_coeff a b ha' hb' hab' n
+  have hsum : ∑ k ∈ range (n + 1), genCoeff ∅ {a} k * z ^ k * (genCoeff ∅ {b} (n - k) * z ^ (n - k)) =
+      (∑ k ∈ range (n + 1), 1 / (poch a k * k !) * (1 / (poch b (n - k) * (n - k)!))) * z ^ n := by
+    rw [Finset.sum_mul]
+    refine Finset.sum_congr rfl fun k hk => ?_
+    have hk' : k ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
+    rw [ghaR4_genCoeff_0F1, ghaR4_genCoeff_0F1, ← Nat.add_sub_of_le hk', pow_add,
+      Nat.add_sub_cancel_left]
+    ring
+  rw [hsum, hcoef]
+  simp only [genCoeff, genPoch, Multiset.insert_eq_cons, Multiset.map_cons, Multiset.map_singleton,
+    Multiset.prod_cons, Multiset.prod_singleton, mul_pow]
+  ring
 
 /-- The existing Clausen germ identity continued to its whole principal slit. -/
 @[dlmf 16.12.E2]

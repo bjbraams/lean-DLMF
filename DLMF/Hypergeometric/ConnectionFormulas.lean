@@ -7,7 +7,7 @@ module
 
 public import DLMF.Hypergeometric.FurtherTransformations
 public import DLMF.Hypergeometric.CubicTools
-public import ToMathlib.Analysis.Complex.SegmentPrimitive
+public import DLMFMathlib.Analysis.Complex.SegmentPrimitive
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Digamma
 
 /-!

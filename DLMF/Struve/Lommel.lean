@@ -9,7 +9,7 @@ public import DLMF.Struve.Basic
 public import DLMF.Bessel.Elementary
 public import DLMF.Bessel.NeumannSeries
 public import DLMF.Gamma.Simplex.GammaPochhammer
-public import ToMathlib.Analysis.Complex.ParametricHolomorphy
+public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import Mathlib.Analysis.Calculus.DSlope
 
 /-!

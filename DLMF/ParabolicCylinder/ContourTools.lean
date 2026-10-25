@@ -6,8 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.ParabolicCylinder.IntegralTools
-public import ToMathlib.Analysis.Asymptotics.WatsonSector
-public import ToMathlib.Analysis.Complex.BarnesResidue
+public import DLMFMathlib.Analysis.Asymptotics.WatsonSector
+public import DLMFMathlib.Analysis.Complex.BarnesResidue
 
 /-!
 # Contour tools for the parabolic cylinder integrals (DLMF 12.5.5–12.5.7)

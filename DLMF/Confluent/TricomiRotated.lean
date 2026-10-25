@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Confluent.Asymptotics
-public import ToMathlib.Analysis.Complex.RotateRay
+public import DLMFMathlib.Analysis.Complex.RotateRay
 
 /-!
 # Tricomi's function along rotated rays (Temme §7.2; DLMF 13.4.4, 13.7.3)

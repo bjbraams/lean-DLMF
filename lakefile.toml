@@ -10,10 +10,8 @@ relaxedAutoImplicit = false
 
 [[lean_lib]]
 name = "Main"
-roots = ["DLMF", "ToMathlib"]
-globs = [
-  "DLMF", "DLMF.+", "ToMathlib", "ToMathlib.+"
-]
+roots = ["DLMF", "DLMFMathlib"]
+globs = ["DLMF", "DLMF.+", "DLMFMathlib", "DLMFMathlib.+"]
 
 [[lean_exe]]
 name = "main"
@@ -34,3 +32,8 @@ rev = "v4.36.0-rc1"
 name = "TauCeti"
 git = "https://github.com/TauCetiProject/TauCeti"
 rev = "5cdecf40e99d5a5ad0833afff31f5b007d68a149"
+
+[[require]]
+# Sibling project lean-codes (Carlson R-functions and elliptic integrals), user-approved 2026-10-25.
+name = "LeanCodes"
+path = "../lean-codes"

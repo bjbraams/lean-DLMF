@@ -7,7 +7,7 @@ module
 
 public import DLMF.ExpIntegrals.Asymptotics
 public import DLMF.ExpIntegrals.Representations
-public import ToMathlib.Topology.Order.ZeroEnumeration
+public import DLMFMathlib.Topology.Order.ZeroEnumeration
 public import DLMF.ExpIntegrals.TransformTools
 
 /-!

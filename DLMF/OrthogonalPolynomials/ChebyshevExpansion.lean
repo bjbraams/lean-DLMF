@@ -8,7 +8,7 @@ module
 public import DLMF.OrthogonalPolynomials.Series
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Chebyshev.Orthogonality
 public import Mathlib.Analysis.Fourier.AddCircle
-public import ToMathlib.Analysis.SpecialFunctions.ChebyshevSeries
+public import DLMFMathlib.Analysis.SpecialFunctions.ChebyshevSeries
 
 /-!
 # Chebyshev expansions (Temme §6.9.2)

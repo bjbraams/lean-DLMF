@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import ToMathlib.Analysis.Complex.ScalarSeries
+public import DLMFMathlib.Analysis.Complex.ScalarSeries
 public import Mathlib.Analysis.Complex.TaylorSeries
 public import Mathlib.Analysis.Analytic.OfScalars
 

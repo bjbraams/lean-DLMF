@@ -8,7 +8,7 @@ module
 public import DLMF.Hypergeometric.Basic
 public import DLMF.Hypergeometric.Continuation
 public import Mathlib.Algebra.ContinuedFractions.Basic
-public import ToMathlib.Analysis.ContinuedFraction.Convergence
+public import DLMFMathlib.Analysis.ContinuedFraction.Convergence
 
 /-!
 # Continued fractions (DLMF §15.7)

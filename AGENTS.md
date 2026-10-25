@@ -33,13 +33,20 @@ has a DLMF counterpart in 16.23.E1 and remains in the DLMF priority scope.
 
 ## Dependencies and import layers
 
-- `ToMathlib/` holds general results that are not specific to special functions
-  (Euler polynomials, Euler–Maclaurin and Boole summation, asymptotic expansions,
-  Watson's lemma, Laplace asymptotics), in the namespaces of the Mathlib APIs they extend.
-  `ToMathlib` imports Mathlib only, never `DLMF`; `DLMF` modules may import `ToMathlib`.
-  A `ToMathlib` file that also exists in `../lean-codes/ToMathlib` (currently
-  `Analysis/Integral/Laplace.lean` and `Analysis/Complex/Carlson.lean`) must keep identical
-  content and path; make changes in lean-codes and copy them here.
+- `DLMFMathlib/` (modules `DLMFMathlib.*`, renamed from `ToMathlib/` on 2026-10-25) holds
+  general results that are not specific to special functions (Euler polynomials,
+  Euler–Maclaurin and Boole summation, asymptotic expansions, Watson's lemma), in the
+  namespaces of the Mathlib APIs they extend. `DLMFMathlib` imports Mathlib and lean-codes'
+  `ToMathlib` only, never `DLMF`; `DLMF` modules may import `DLMFMathlib`.
+- lean-codes is a Lake path dependency (package `LeanCodes`, `../lean-codes`, since
+  2026-10-25). Its modules (`Carlson.*`, `Pochhammer.*`, `Dirichlet.*`, its `ToMathlib.*`, …)
+  are imported directly; never copy them here and never edit lean-codes from this project.
+  The former mirrors `ToMathlib/Analysis/Integral/Laplace.lean` and
+  `ToMathlib/Analysis/Complex/Carlson.lean` now come from lean-codes. Building lean-DLMF also
+  builds lean-codes modules into lean-codes' own build directory (`.lake/build-codes`).
+- The top-level module prefix `ToMathlib` belongs to lean-codes. Lean locates a module's
+  build files by its package, so two packages must never share a top-level prefix; put new
+  general results of this project under `DLMFMathlib/`.
 
 Mathlib and TauCeti are allowed throughout the DLMF library, including when filling
 existing admissions. Preserve complex branches, normalizations, exceptional parameters

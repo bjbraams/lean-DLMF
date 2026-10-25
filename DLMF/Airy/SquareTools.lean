@@ -7,7 +7,7 @@ module
 
 public import DLMF.Airy.Integrals
 public import DLMF.Airy.Zeros
-public import ToMathlib.Analysis.ODE.SymmetricSquare
+public import DLMFMathlib.Analysis.ODE.SymmetricSquare
 
 /-!
 # Ai² as a Gaussian average of Ai

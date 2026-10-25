@@ -32,13 +32,15 @@ noncomputable section
 namespace DLMF.Elliptic
 
 /-- `dn² - m cn² = 1 - m` (DLMF 22.6.1). -/
+@[dlmf 22.6.E1 "consequence dn² - m cn² = 1 - m of 22.6.1, real m < 1"]
 theorem Real.jacobiDnm_sq_sub_mul_jacobiCnm_sq {m : ℝ} (hm : m < 1) (u : ℝ) :
     Real.jacobiDnm u m ^ 2 - m * Real.jacobiCnm u m ^ 2 = 1 - m := by
   have h1 := Real.jacobiSnm_sq_add_jacobiCnm_sq u m
   have h2 := Real.mul_jacobiSnm_sq_add_jacobiDnm_sq hm u
   linear_combination h2 - m * h1
 
-/-- `(sn')² = (1 - sn²)(1 - m sn²)`: the first-order equation of `sn` (DLMF 22.13.13). -/
+/-- `(sn')² = (1 - sn²)(1 - m sn²)`: the first-order equation of `sn` (DLMF 22.13.1). -/
+@[dlmf 22.13.E1]
 theorem Real.jacobiSnm_deriv_sq {m : ℝ} (hm : m < 1) (u : ℝ) :
     deriv (fun u => Real.jacobiSnm u m) u ^ 2 =
       (1 - Real.jacobiSnm u m ^ 2) * (1 - m * Real.jacobiSnm u m ^ 2) := by
@@ -47,7 +49,8 @@ theorem Real.jacobiSnm_deriv_sq {m : ℝ} (hm : m < 1) (u : ℝ) :
   have h2 := Real.mul_jacobiSnm_sq_add_jacobiDnm_sq hm u
   linear_combination (1 - m * Real.jacobiSnm u m ^ 2) * h1 + Real.jacobiCnm u m ^ 2 * h2
 
-/-- `(cn')² = (1 - cn²)(1 - m + m cn²)` (DLMF 22.13.14). -/
+/-- `(cn')² = (1 - cn²)(1 - m + m cn²)` (DLMF 22.13.2). -/
+@[dlmf 22.13.E2]
 theorem Real.jacobiCnm_deriv_sq {m : ℝ} (hm : m < 1) (u : ℝ) :
     deriv (fun u => Real.jacobiCnm u m) u ^ 2 =
       (1 - Real.jacobiCnm u m ^ 2) * (1 - m + m * Real.jacobiCnm u m ^ 2) := by
@@ -57,7 +60,8 @@ theorem Real.jacobiCnm_deriv_sq {m : ℝ} (hm : m < 1) (u : ℝ) :
   linear_combination (1 - m + m * Real.jacobiCnm u m ^ 2 - m * Real.jacobiSnm u m ^ 2) * h1 +
     Real.jacobiSnm u m ^ 2 * h2
 
-/-- `(dn')² = (1 - dn²)(dn² - (1 - m))` (DLMF 22.13.15). -/
+/-- `(dn')² = (1 - dn²)(dn² - (1 - m))` (DLMF 22.13.3). -/
+@[dlmf 22.13.E3]
 theorem Real.jacobiDnm_deriv_sq {m : ℝ} (hm : m < 1) (u : ℝ) :
     deriv (fun u => Real.jacobiDnm u m) u ^ 2 =
       (1 - Real.jacobiDnm u m ^ 2) * (Real.jacobiDnm u m ^ 2 - (1 - m)) := by
@@ -230,6 +234,7 @@ lemma Real.compEllIntKm_pos {m : ℝ} (hm : m < 1) : 0 < Real.compEllIntKm m := 
 
 /-- Shift by a quarter period (DLMF Table 22.4.3, Duverney Ex. 5.15):
 `sn(u+K) = cn u/dn u`, `cn(u+K) = -k' sn u/dn u`, `dn(u+K) = k'/dn u`, `k' = (1-m)^{1/2}`. -/
+@[dlmf 22.4.T3 "real parameter m < 1: the K column for sn, cn, dn"]
 theorem Real.jacobi_add_compEllIntKm {m : ℝ} (hm : m < 1) (u : ℝ) :
     Real.jacobiSnm (u + Real.compEllIntKm m) m = Real.jacobiCnm u m / Real.jacobiDnm u m ∧
       Real.jacobiCnm (u + Real.compEllIntKm m) m =
@@ -248,6 +253,7 @@ theorem Real.jacobi_add_compEllIntKm {m : ℝ} (hm : m < 1) (u : ℝ) :
 
 /-- Values at the half quarter-period (DLMF Table 22.5.2, Duverney Ex. 5.15):
 `dn(K/2) = k'^{1/2}`, `sn(K/2) = (1+k')^{-1/2}`, `cn(K/2) = k'^{1/2}(1+k')^{-1/2}`. -/
+@[dlmf 22.5.T2 "real parameter m < 1: values of sn, cn, dn at K/2"]
 theorem Real.jacobi_half_compEllIntKm {m : ℝ} (hm : m < 1) :
     Real.jacobiDnm (Real.compEllIntKm m / 2) m = Real.sqrt (Real.sqrt (1 - m)) ∧
       Real.jacobiSnm (Real.compEllIntKm m / 2) m = 1 / Real.sqrt (1 + Real.sqrt (1 - m)) ∧
@@ -292,7 +298,8 @@ theorem Real.jacobi_half_compEllIntKm {m : ℝ} (hm : m < 1) :
   refine ⟨hd', hsq, ?_⟩
   rw [hcs, hsq, hd']; ring
 
-/-- `sn'' = -(1+m) sn + 2m sn³` (DLMF 22.13.16, Duverney Ex. 5.12). -/
+/-- `sn'' = -(1+m) sn + 2m sn³` (DLMF 22.13.13, Duverney Ex. 5.12). -/
+@[dlmf 22.13.E13]
 theorem Real.iteratedDeriv_two_jacobiSnm {m : ℝ} (hm : m < 1) (u : ℝ) :
     iteratedDeriv 2 (fun u => Real.jacobiSnm u m) u =
       -(1 + m) * Real.jacobiSnm u m + 2 * m * Real.jacobiSnm u m ^ 3 := by
@@ -306,7 +313,8 @@ theorem Real.iteratedDeriv_two_jacobiSnm {m : ℝ} (hm : m < 1) (u : ℝ) :
   have h2 := Real.mul_jacobiSnm_sq_add_jacobiDnm_sq hm u
   linear_combination (-(m * Real.jacobiSnm u m)) * h1 + (-Real.jacobiSnm u m) * h2
 
-/-- `cn'' = (2m-1) cn - 2m cn³` (DLMF 22.13.17). -/
+/-- `cn'' = (2m-1) cn - 2m cn³` (DLMF 22.13.14). -/
+@[dlmf 22.13.E14]
 theorem Real.iteratedDeriv_two_jacobiCnm {m : ℝ} (hm : m < 1) (u : ℝ) :
     iteratedDeriv 2 (fun u => Real.jacobiCnm u m) u =
       (2 * m - 1) * Real.jacobiCnm u m - 2 * m * Real.jacobiCnm u m ^ 3 := by
@@ -320,7 +328,8 @@ theorem Real.iteratedDeriv_two_jacobiCnm {m : ℝ} (hm : m < 1) (u : ℝ) :
   have h2 := Real.mul_jacobiSnm_sq_add_jacobiDnm_sq hm u
   linear_combination (2 * m * Real.jacobiCnm u m) * h1 + (-Real.jacobiCnm u m) * h2
 
-/-- `dn'' = (2-m) dn - 2 dn³` (DLMF 22.13.18). -/
+/-- `dn'' = (2-m) dn - 2 dn³` (DLMF 22.13.15). -/
+@[dlmf 22.13.E15]
 theorem Real.iteratedDeriv_two_jacobiDnm {m : ℝ} (hm : m < 1) (u : ℝ) :
     iteratedDeriv 2 (fun u => Real.jacobiDnm u m) u =
       (2 - m) * Real.jacobiDnm u m - 2 * Real.jacobiDnm u m ^ 3 := by

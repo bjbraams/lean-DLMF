@@ -14,8 +14,8 @@ public import DLMF.Confluent.Recurrence
 public import DLMF.Confluent.Continuation
 public import Mathlib.Analysis.Asymptotics.Lemmas
 public import Mathlib.Analysis.Analytic.Binomial
-public import ToMathlib.Analysis.Asymptotics.Watson
-public import ToMathlib.Analysis.Asymptotics.WatsonSector
+public import DLMFMathlib.Analysis.Asymptotics.Watson
+public import DLMFMathlib.Analysis.Asymptotics.WatsonSector
 
 /-!
 # Asymptotic expansions (DLMF §§13.7, 13.8, 13.19)
@@ -30,7 +30,7 @@ turning-point expansions of §§13.20–13.21 (Airy/Bessel with `envAi`/`envJ`)
 are deferred.
 
 Following Temme, *Special Functions*, §§7.1–7.2, the positive-axis expansions are derived
-from Watson's lemma (`ToMathlib.Analysis.Asymptotics.Watson`):
+from Watson's lemma (`DLMFMathlib.Analysis.Asymptotics.Watson`):
 
 * `hasAsymptoticExpansion_kummerU`: `U(a,b,x) ~ ∑ (-1)^s (a)_s (a-b+1)_s / s! · x^{-a-s}`
   for all complex `a, b`, from the Laplace integral for `re a > 0` and the contiguous

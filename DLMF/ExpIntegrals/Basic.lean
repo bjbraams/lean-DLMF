@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Core.Framework
-public import ToMathlib.Analysis.Complex.FactorialSeries
+public import DLMFMathlib.Analysis.Complex.FactorialSeries
 public import DLMF.Confluent.Integrals
 
 /-!

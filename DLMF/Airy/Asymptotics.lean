@@ -7,7 +7,7 @@ module
 
 public import DLMF.Airy.Framework
 public import DLMF.Airy.Relations
-public import ToMathlib.Analysis.Asymptotics.WatsonRotated
+public import DLMFMathlib.Analysis.Asymptotics.WatsonRotated
 public import Mathlib.MeasureTheory.Integral.Gamma
 public import DLMF.Airy.StieltjesForm
 public import DLMF.Confluent.Integrals

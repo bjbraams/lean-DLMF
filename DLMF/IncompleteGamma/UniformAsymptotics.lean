@@ -7,7 +7,7 @@ module
 
 public import DLMF.IncompleteGamma.Asymptotics
 public import DLMF.Gamma.Asymptotics
-public import ToMathlib.Analysis.Complex.StarPrimitive
+public import DLMFMathlib.Analysis.Complex.StarPrimitive
 public import Mathlib.Analysis.Calculus.InverseFunctionTheorem.Analytic
 public import Mathlib.Analysis.Complex.TaylorSeries
 public import Mathlib.Topology.Homotopy.Lifting

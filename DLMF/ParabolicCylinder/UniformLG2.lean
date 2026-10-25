@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.ParabolicCylinder.UniformLG
-public import ToMathlib.Analysis.ODE.LiouvilleGreenFinite
+public import DLMFMathlib.Analysis.ODE.LiouvilleGreenFinite
 
 /-!
 # Uniform expansions of parabolic cylinder functions: second stage

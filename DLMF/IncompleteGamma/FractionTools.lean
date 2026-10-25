@@ -7,7 +7,7 @@ module
 
 public import DLMF.Core.Framework
 public import DLMF.Statistical.ContinuedFraction
-public import ToMathlib.Analysis.ContinuedFraction.Convergence
+public import DLMFMathlib.Analysis.ContinuedFraction.Convergence
 public import DLMF.Confluent.ContinuedFractions
 public import DLMF.IncompleteGamma.Basic
 public import TauCeti.Analysis.Complex.Conformal.Vitali

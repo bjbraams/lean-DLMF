@@ -7,8 +7,8 @@ module
 
 public import DLMF.ParabolicCylinder.AsymptoticsZeros
 public import DLMF.Airy.Basic
-public import ToMathlib.Analysis.Calculus.DoubleZeroSqrt
-public import ToMathlib.Analysis.Calculus.InverseSeries
+public import DLMFMathlib.Analysis.Calculus.DoubleZeroSqrt
+public import DLMFMathlib.Analysis.Calculus.InverseSeries
 
 /-!
 # Olver and Temme uniform cylinder expansions and coefficient systems

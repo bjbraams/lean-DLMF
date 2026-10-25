@@ -13,7 +13,7 @@ public import DLMF.Bessel.NeumannSeries
 public import DLMF.Gamma.RecipGammaDeriv
 public import Mathlib.Analysis.Complex.Trigonometric
 public import Mathlib.Analysis.Complex.TaylorSeries
-public import ToMathlib.Analysis.Complex.TaylorParameter
+public import DLMFMathlib.Analysis.Complex.TaylorParameter
 public import Mathlib.Analysis.Complex.RemovableSingularity
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Series

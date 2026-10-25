@@ -8,8 +8,8 @@ module
 public import DLMF.Airy.Framework
 public import DLMF.Airy.Relations
 public import DLMF.Airy.ModulusTools
-public import ToMathlib.Analysis.Asymptotics.Watson
-public import ToMathlib.Analysis.Asymptotics.AsymptoticInversion
+public import DLMFMathlib.Analysis.Asymptotics.Watson
+public import DLMFMathlib.Analysis.Asymptotics.AsymptoticInversion
 
 /-!
 # Airy modulus and continuous phase, DLMF §9.8

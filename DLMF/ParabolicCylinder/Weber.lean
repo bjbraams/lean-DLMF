@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.ParabolicCylinder.Integrals
-public import ToMathlib.Analysis.ODE.PowerSeriesUniqueness
+public import DLMFMathlib.Analysis.ODE.PowerSeriesUniqueness
 public import DLMF.ParabolicCylinder.SectorAsymptotics
 
 /-!

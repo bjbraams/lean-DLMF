@@ -94,7 +94,7 @@ def main():
         for s in suffixes(e['decl']):
             by_suffix[s].append(e)
         by_id[e['dlmf']].append(e)
-    src, admitted, stats = scan_source(['DLMF', 'ToMathlib'])
+    src, admitted, stats = scan_source(['DLMF', 'DLMFMathlib'])
 
     def resolve(name, path):
         """Dump entry or source record for a linked name, preferring the linked file."""

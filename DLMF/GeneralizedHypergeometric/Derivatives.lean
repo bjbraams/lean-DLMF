@@ -16,6 +16,8 @@ all orders and global principal continuation. Every displayed lower parameter is
 subject to the chapter's exclusion of nonpositive integers. Weighted powers use
 the principal slit plane. Contiguous linear dependence is over rational functions,
 expressed after clearing denominators as polynomial coefficients.
+The general raising-operator identity uses Mathlib's `iteratedDeriv_fun_mul` and
+analytic germ congruence; it has no dependence on hypergeometric continuation.
 -/
 
 @[expose] public section
@@ -74,11 +76,58 @@ theorem genHG_lower_weighted_iteratedDeriv (a b : Multiset ℂ) (hb : genDenRegu
       poch (γ - n) n * z ^ (γ - n - 1) * genHG a ((γ - n) ::ₘ b) z := by
   sorry
 
+/-- Leibniz' rule for an analytic function times the identity, keeping just
+the two nonzero derivatives of the identity function. -/
+lemma genIteratedDeriv_id_mul (f : ℂ → ℂ) (n : ℕ) {z : ℂ} (hf : AnalyticAt ℂ f z) :
+    iteratedDeriv (n + 1) (fun w => w * f w) z =
+      z * iteratedDeriv (n + 1) f z + (n + 1) * iteratedDeriv n f z := by
+  rw [iteratedDeriv_fun_mul (by fun_prop) hf.contDiffAt]
+  let F : ℕ → ℂ := fun i => (n + 1).choose i *
+    iteratedDeriv i (fun w : ℂ => w) z * iteratedDeriv (n + 1 - i) f z
+  have hsub : ({0, 1} : Finset ℕ) ⊆ range (n + 1 + 1) := by
+    intro i hi
+    simp only [Finset.mem_insert, Finset.mem_singleton] at hi
+    rcases hi with rfl | rfl <;> simp
+  have hs : (∑ i ∈ ({0, 1} : Finset ℕ), F i) = ∑ i ∈ range (n + 1 + 1), F i := by
+    apply Finset.sum_subset hsub
+    intro i hi hnot
+    simp only [Finset.mem_insert, Finset.mem_singleton, not_or] at hnot
+    simp [F, iteratedDeriv_fun_id, hnot.1, hnot.2]
+  change (∑ i ∈ range (n + 1 + 1), F i) = _
+  rw [← hs]
+  simp [F, iteratedDeriv_fun_id]
+
 /-- The general operator identity for every analytic germ and every natural order. -/
 @[dlmf 16.3.E5]
 theorem genRaiseOp_iterate (f : ℂ → ℂ) (n : ℕ) {z : ℂ} (hf : AnalyticAt ℂ f z) :
     (genRaiseOp^[n]) f z = z ^ n * iteratedDeriv n (fun z => z ^ n * f z) z := by
-  sorry
+  induction n generalizing z with
+  | zero => simp
+  | succ n ih =>
+    have heq : (fun w => w * (genRaiseOp^[n]) f w) =ᶠ[𝓝 z]
+        (fun w => w ^ (n + 1) * iteratedDeriv n (fun w => w ^ n * f w) w) := by
+      filter_upwards [hf.eventually_analyticAt] with w hw
+      rw [ih hw]
+      ring
+    rw [Function.iterate_succ_apply', genRaiseOp, heq.deriv_eq]
+    have hg : AnalyticAt ℂ (fun w => w ^ n * f w) z := by fun_prop
+    have hD : HasDerivAt (iteratedDeriv n (fun w => w ^ n * f w))
+        (iteratedDeriv (n + 1) (fun w => w ^ n * f w) z) z := by
+      simpa only [iteratedDeriv_succ, iteratedDeriv_eq_iterate] using
+        (hg.iterated_deriv n).differentiableAt.hasDerivAt
+    have hder : deriv (fun w => w ^ (n + 1) * iteratedDeriv n (fun w => w ^ n * f w) w) z =
+        (n + 1) * z ^ n * iteratedDeriv n (fun w => w ^ n * f w) z +
+          z ^ (n + 1) * iteratedDeriv (n + 1) (fun w => w ^ n * f w) z := by
+      simpa only [id_eq, Nat.add_sub_cancel, Nat.cast_add, Nat.cast_one, mul_one] using
+        (((hasDerivAt_id z).fun_pow (n + 1)).fun_mul hD).deriv
+    rw [hder]
+    have hid := genIteratedDeriv_id_mul (fun w => w ^ n * f w) n hg
+    have hfun : (fun w => w ^ (n + 1) * f w) = (fun w => w * (w ^ n * f w)) := by
+      funext w
+      ring
+    rw [hfun, hid]
+    simp only [pow_succ]
+    ring
 
 /-- Any q+2 contiguous functions are linearly dependent over rational functions. -/
 theorem genContiguous_linear_relation {p q : ℕ} (hpq : p ≤ q + 1)

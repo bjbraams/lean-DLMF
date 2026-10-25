@@ -25,7 +25,7 @@ public import DLMF.Hypergeometric.ArgumentContinuation
 public import DLMF.Hypergeometric.IntegralRepresentations
 public import DLMF.Gamma.IntegralRepresentations
 public import DLMF.Gamma.BetaFunction
-public import ToMathlib.Analysis.Complex.ParametricHolomorphy
+public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import Mathlib.MeasureTheory.Integral.Prod
 public import Mathlib.MeasureTheory.Integral.Bochner.Basic
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic

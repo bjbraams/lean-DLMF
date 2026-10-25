@@ -7,8 +7,8 @@ module
 
 public import DLMF.Hypergeometric.EulerIntegral
 public import DLMF.Hypergeometric.Derivatives
-public import ToMathlib.Analysis.Complex.ParametricHolomorphy
-public import ToMathlib.Analysis.Asymptotics.StieltjesRemainder
+public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
+public import DLMFMathlib.Analysis.Asymptotics.StieltjesRemainder
 public import TauCeti.Analysis.SpecialFunctions.Beta
 public import Mathlib.MeasureTheory.Integral.Gamma
 

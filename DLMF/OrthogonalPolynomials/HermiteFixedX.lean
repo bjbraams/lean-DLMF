@@ -7,7 +7,7 @@ module
 
 public import DLMF.OrthogonalPolynomials.Integrals
 public import DLMF.Gamma.Inequalities
-public import ToMathlib.Analysis.ODE.Volterra
+public import DLMFMathlib.Analysis.ODE.Volterra
 
 /-!
 # Hermite polynomials of large degree at a fixed point

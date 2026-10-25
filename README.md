@@ -50,6 +50,31 @@ They include mathematical prose and exact tables; graphics, application notes an
 purely numerical data are excluded. Each chapter has checked upstream coverage;
 new proof obligations remain explicit.
 
+Chapter 19 (elliptic integrals: Legendre's and Carlson's symmetric forms), acquired on
+2026-10-25, has the entry point [EllipticIntegrals](DLMF/EllipticIntegrals.lean) and the ledger
+[Chapter 19](DLMF19Acquisition.md). It builds on the existing real `DLMF.Elliptic` integrals,
+the complex K of `DLMF.JacobiElliptic`, and the proved Carlson library of lean-codes.
+
+The theta and elliptic-function chapters, acquired on 2026-10-25, have the entry points
+[Theta](DLMF/Theta.lean) (Chapter 20), [RiemannTheta](DLMF/RiemannTheta.lean)
+(Chapter 21), [JacobiElliptic](DLMF/JacobiElliptic.lean) (Chapter 22) and
+[Weierstrass](DLMF/Weierstrass.lean) (Chapter 23, including modular functions).
+Their ledgers are [Chapter 20](DLMF20Acquisition.md), [Chapter 21](DLMF21Acquisition.md),
+[Chapter 22](DLMF22Acquisition.md) and [Chapter 23](DLMF23Acquisition.md). They build on
+the existing `DLMF.Elliptic` theta and real Jacobi APIs and on Mathlib's `jacobiTheta₂`,
+Weierstrass `PeriodPair`, Dedekind eta and discriminant. Applications, graphics,
+computation, tables and software sections are excluded; the ledgers list the purely
+mathematical results found in excluded Applications sections.
+
+DLMF errata and source corrections found anywhere in the project are collected in
+[DLMFErrata.md](DLMFErrata.md): genuine DLMF errata, fixed transcription defects of our own,
+and formalization notes, each with evidence and the Lean declarations.
+
+Since 2026-10-25 the companion project [lean-codes](../lean-codes) is a Lake dependency
+(package `LeanCodes`); its Carlson library underlies Chapter 19. The project's own general
+library was renamed from `ToMathlib` to `DLMFMathlib` at the same time, since the `ToMathlib`
+prefix belongs to lean-codes (see AGENTS.md).
+
 The [Beals–Wong inventory](BealsWongInventory.md) records further special-function
 gaps and their implementation status. The 18 October 2026 additions prove discrete
 polynomial addition identities, Rodrigues formulas for the four classical discrete
@@ -113,8 +138,8 @@ theory, and the real connection formulas remain open; see the
 | `K`, `E`, `Π`, `D` complete (19.2.8) | `compEllIntKk`/`…Km`, `compEllIntEk`/`…Em`, `compEllIntPik`/`…Pim`, `compEllIntDk`/`…Dm`; now `compEllIntKkSeries`, `Real.compEllIntKm`, `Real.compEllIntEm`, `Real.compEllIntPim` | `compellintKk`, `compellintEk`, `compellintPik`, `compellintDk` |
 | `F(φ,k)`, `E(φ,k)`, `Π(φ,α²,k)` (19.2.4–7) | `incEllIntFk`/`…Fm`, `incEllIntEk`/`…Em`, `incEllIntPik`/`…Pim`; now `Real.incEllIntFm`, `Real.incEllIntEm`, `Real.incEllIntPim` | `incellintFk`, `incellintEk`, `incellintPik` |
 | `K′`, `E′` (19.2.9) | `ccompEllIntKk`, `ccompEllIntEk` (planned) | `ccompellintKk`, `ccompellintEk` |
-| `am`, `sn`, `cn`, `dn`, `arcsn` (22.2, 22.15, 22.16) | `jacobiAmk`, `jacobiSnk`, …; now `Real.jacobiAmm`, `Real.jacobiSnm`, `Real.jacobiCnm`, `Real.jacobiDnm`, `Real.jacobiArcsnm` | `Jacobiamk`, `Jacobiellsnk`, …, `aJacobiellsnk` |
-| `θ_j(z\|τ)`, `θ_j(z,q)`, `θ_j(q)` (20.2) | `jacobiThetaOneTau`, …, `jacobiThetaFourTau`; `jacobiThetaOneQ`, … (planned); `Real.jacobiThetaThreeNullQ`, `Real.jacobiThetaFourNullQ` | `Jacobithetatau`, `Jacobithetaq` |
+| `am`, `sn`, `cn`, `dn`, `arcsn` (22.2, 22.15, 22.16) | complex `DLMF.JacobiElliptic.jacobiSnk`, … (all twelve) and `jacobiSnTau`, …; real `Real.jacobiAmm`, `Real.jacobiSnm`, `Real.jacobiCnm`, `Real.jacobiDnm`, `Real.jacobiArcsnm` | `Jacobiamk`, `Jacobiellsnk`, …, `aJacobiellsnk` |
+| `θ_j(z\|τ)`, `θ_j(z,q)`, `θ_j(q)` (20.2) | `jacobiThetaOneTau`, …, `jacobiThetaFourTau`; `DLMF.Theta.jacobiThetaOneQ`, …; `Real.jacobiThetaThreeNullQ`, `Real.jacobiThetaFourNullQ` | `Jacobithetatau`, `Jacobithetaq` |
 | Carlson `R_F`, `R_D`, `R_C`, `R_J`, `R_G` (19.16) | `carlsonRF`, … (planned) | `CarsonsymellintRF`, … (sic) |
 
 The real digamma function is still `Real.digamma`, defined in Mathlib's `Real` namespace beside
@@ -122,11 +147,12 @@ Mathlib's `Complex.digamma`; moving it into `DLMF.Gamma.Real` is left for a late
 
 ## Status
 
-The second parallel proof round for Chapters 4, 16 and 17 on 2026-10-24 leaves
-**753 explicit source admissions**, including **253 in Elementary**, **151 in
-GeneralizedHypergeometric**, and **160 in QHypergeometric**. The remaining 189
-are in the older areas. The compiled audit finds **14,169 project theorems**, with **766 depending transitively on `sorryAx`** (753 direct and 13 inherited) and
-no other nonstandard axiom.
+After the fourth Chapter 4/16/17 proof round (2026-10-24) and the Chapters 19–23
+acquisitions (2026-10-25) there are **1,173 explicit source admissions**: Elementary 68,
+GeneralizedHypergeometric 112, QHypergeometric 101, EllipticIntegrals 281, Theta 74,
+RiemannTheta 10, JacobiElliptic 215, Weierstrass 123, and 189 in the older areas. The compiled
+audit finds **16,253 project theorems**, with **1,328 depending transitively on `sorryAx`**, and no
+other nonstandard axiom.
 Counts in the dated development history describe their earlier scope.
 
 The [parallel priority round](REVIEW.md#priority-proof-implementation-with-parallel-ownership-2026-10-24)
@@ -141,6 +167,14 @@ proves 134 further statements: 92 Elementary, 14 generalized hypergeometric and 
 q-hypergeometric. It also makes `genHG_entire` independent of the continuation
 existence admission. The guarded function definition preserves the previous values
 under that explicitly retained existence theorem.
+
+The [third parallel proof round](REVIEW.md#parallel-proofs-in-chapters-4-16-and-17-2026-10-24-third-round)
+removes 47 admissions: 28 Elementary, six generalized hypergeometric and 13
+q-hypergeometric. It proves the six boundary logarithm series in natural order,
+q-series holomorphy and product continuation, finite inversions and normalized
+bilateral Dougall. Four false inverse-hyperbolic set acquisitions are corrected
+and proved with compatible branches. Two remaining arctanh boundary acquisitions
+still need natural-order statements; the ledger records the defect.
 
 The [duplication review](REVIEW.md#duplication-and-reuse-review-2026-10-22) consolidates
 repeated hypergeometric algebra, scalar-series arguments, Bessel symmetry, Legendre
@@ -326,29 +360,30 @@ equation retains reciprocal-Gamma zeros at exceptional parameters. The build,
 [next-priorities review](REVIEW.md#next-proof-priorities-after-the-forcing-batch)
 identifies the next transfers and their prerequisites.
 
-## Supporting library `ToMathlib`
+## Supporting library `DLMFMathlib`
 
 General results that the special-function library uses, following Temme's *Special
 Functions* (Wiley, 1996), Chapters 1–2, and written for eventual contribution to Mathlib:
 
-* `ToMathlib.NumberTheory.EulerPolynomials`: Euler polynomials and numbers, the difference
+* `DLMFMathlib.NumberTheory.EulerPolynomials`: Euler polynomials and numbers, the difference
   equation `Eₙ(x+1) + Eₙ(x) = 2xⁿ`, the Appell property, reflection, alternating power sums,
   and the Euler-number recurrence.
-* `ToMathlib.Analysis.EulerMaclaurin`: the Euler–Maclaurin formula with remainder.
-* `ToMathlib.Analysis.BooleSummation`: Boole's alternating summation formula.
-* `ToMathlib.Analysis.Asymptotics.AsymptoticExpansion` and `.Watson`: Poincaré asymptotic
+* `DLMFMathlib.Analysis.EulerMaclaurin`: the Euler–Maclaurin formula with remainder.
+* `DLMFMathlib.Analysis.BooleSummation`: Boole's alternating summation formula.
+* `DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion` and `.Watson`: Poincaré asymptotic
   expansions and Watson's lemma, also with a complex exponent. In `DLMF.Gamma.Asymptotics`
   they give Stirling's series for `log Γ` as an asymptotic expansion
   (`hasAsymptoticExpansion_log_Gamma`); in `DLMF.Confluent` they give the expansions of
   Tricomi's and Kummer's functions and of the functions derived from them.
-* `ToMathlib.Analysis.Asymptotics.WatsonSector`: Watson's lemma for complex `z → ∞` in a
+* `DLMFMathlib.Analysis.Asymptotics.WatsonSector`: Watson's lemma for complex `z → ∞` in a
   sector `δ|z| ≤ re z`, and the Gamma integral `∫₀^∞ u^{s-1} e^{-zu} du = Γ(s) z^{-s}`.
-* `ToMathlib.Analysis.Complex.RotateRay`: rotation of a ray integral `∫₀^∞ f` to the ray
+* `DLMFMathlib.Analysis.Complex.RotateRay`: rotation of a ray integral `∫₀^∞ f` to the ray
   `arg t = α`, from Cauchy's theorem for rectangles.
-* `ToMathlib.Analysis.Integral.Laplace`: quantitative Laplace asymptotics, copied from
-  `lean-codes`.
+* `ToMathlib.Analysis.Integral.Laplace` (from the lean-codes dependency): quantitative
+  Laplace asymptotics, re-exported by `DLMFMathlib.lean`.
 
-`ToMathlib` imports Mathlib only and contains no admissions.
+`DLMFMathlib` (formerly `ToMathlib`, renamed 2026-10-25) imports Mathlib and lean-codes'
+`ToMathlib` only and contains no admissions.
 
 ## Building
 

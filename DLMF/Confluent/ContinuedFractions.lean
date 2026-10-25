@@ -10,7 +10,7 @@ public import DLMF.Confluent.Whittaker
 public import Mathlib.Algebra.ContinuedFractions.Basic
 public import DLMF.Confluent.Recurrence
 public import DLMF.Confluent.Zeros
-public import ToMathlib.Analysis.ContinuedFraction.Convergence
+public import DLMFMathlib.Analysis.ContinuedFraction.Convergence
 
 /-!
 # Continued fractions (DLMF §§13.5, 13.17)

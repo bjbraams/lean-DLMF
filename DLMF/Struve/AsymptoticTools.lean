@@ -7,8 +7,8 @@ module
 
 public import DLMF.Struve.AngerWeber
 public import DLMF.Confluent.TricomiRotated
-public import ToMathlib.Analysis.Asymptotics.WatsonRotated
-public import ToMathlib.Analysis.ODE.PowerSeriesUniqueness
+public import DLMFMathlib.Analysis.Asymptotics.WatsonRotated
+public import DLMFMathlib.Analysis.ODE.PowerSeriesUniqueness
 public import Mathlib.Analysis.SpecialFunctions.Arsinh
 
 /-!

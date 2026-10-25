@@ -8,7 +8,7 @@ module
 public import Mathlib.Tactic.CrossRefAttribute
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
 public import DLMF.Bessel.SecondKind
-public import ToMathlib.Analysis.Complex.ParametricHolomorphy
+public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 
 /-!
 # Integral representations of `K_ν` (DLMF 10.32.9, 10.32.10)

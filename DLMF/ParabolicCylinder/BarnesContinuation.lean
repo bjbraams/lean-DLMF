@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.ParabolicCylinder.Integrals
-public import ToMathlib.Analysis.Complex.BarnesResidue
+public import DLMFMathlib.Analysis.Complex.BarnesResidue
 
 /-!
 # Cylinder Barnes integrals with crossed-pole corrections

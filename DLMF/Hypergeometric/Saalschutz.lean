@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import ToMathlib.Analysis.Complex.ScalarSeries
+public import DLMFMathlib.Analysis.Complex.ScalarSeries
 public import DLMF.Hypergeometric.Continuation
 public import DLMF.Hypergeometric.EulerIntegral
 public import DLMF.Gamma.Pochhammer

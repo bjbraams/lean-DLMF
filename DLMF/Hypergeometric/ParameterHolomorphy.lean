@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Hypergeometric.ArgumentContinuation
-public import ToMathlib.Analysis.Complex.ParametricHolomorphy
+public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 
 /-!
 # Joint holomorphy of the Gauss function in its parameters (DLMF §15.2(ii))

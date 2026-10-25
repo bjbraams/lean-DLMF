@@ -7,7 +7,7 @@ module
 
 public import DLMF.Legendre.Conical
 public import DLMF.Legendre.Hypergeometric
-public import ToMathlib.Analysis.ODE.PowerSeriesUniqueness
+public import DLMFMathlib.Analysis.ODE.PowerSeriesUniqueness
 public import Mathlib.Analysis.ODE.Gronwall
 
 /-!

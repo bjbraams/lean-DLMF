@@ -7,7 +7,7 @@ module
 
 public import DLMF.ParabolicCylinder.Relations
 public import DLMF.Confluent.IntegralRepresentations
-public import ToMathlib.Analysis.Complex.ParametricHolomorphy
+public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import DLMF.Confluent.TricomiLaplace
 public import DLMF.Hypergeometric.Elementary
 

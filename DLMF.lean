@@ -8,6 +8,11 @@ module
 public import DLMF.Elementary
 public import DLMF.GeneralizedHypergeometric
 public import DLMF.QHypergeometric
+public import DLMF.EllipticIntegrals
+public import DLMF.Theta
+public import DLMF.RiemannTheta
+public import DLMF.JacobiElliptic
+public import DLMF.Weierstrass
 public import DLMF.ParabolicCylinder
 public import DLMF.Struve
 

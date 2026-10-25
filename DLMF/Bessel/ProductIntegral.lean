@@ -9,7 +9,7 @@ public import Mathlib.Tactic.CrossRefAttribute
 public import DLMF.Bessel.WeberSeries
 public import DLMF.Bessel.LargeOrder
 public import DLMF.Gamma.BetaFunction
-public import ToMathlib.Analysis.Complex.ParametricHolomorphy
+public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 
 /-!
 # The product integral `J_μ J_ν` (DLMF 10.9.26)

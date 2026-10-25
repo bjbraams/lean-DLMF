@@ -9,8 +9,8 @@ public import DLMF.Confluent.CoulombIrregular
 public import DLMF.Confluent.AsymptoticConsequences
 public import DLMF.Confluent.Relations
 public import DLMF.OrthogonalPolynomials.ClassicalInstances
-public import ToMathlib.Analysis.ODE.SturmCount
-public import ToMathlib.Analysis.ODE.SturmDeformation
+public import DLMFMathlib.Analysis.ODE.SturmCount
+public import DLMFMathlib.Analysis.ODE.SturmDeformation
 
 /-!
 # Zero counts of Tricomi's `U` by Sturm comparison

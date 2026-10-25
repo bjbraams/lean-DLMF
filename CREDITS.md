@@ -4,10 +4,10 @@ The project formalizes material from Andrews, Askey and Roy, *Special Functions*
 (1999), and the NIST Digital Library of Mathematical Functions, using Mathlib.
 Existing module copyright and authorship notices remain authoritative.
 
-## `ToMathlib` layer (2026-10-15)
+## `ToMathlib` layer, now `DLMFMathlib` (2026-10-15)
 
-`ToMathlib/Analysis/Integral/Laplace.lean` is an unmodified copy of the module of the same
-path in the companion project `lean-codes`. The Euler polynomials build on the Mathlib
+`ToMathlib/Analysis/Integral/Laplace.lean` comes from the companion project `lean-codes`
+(an unmodified copy until 2026-10-25; since then imported from the `LeanCodes` dependency). The Euler polynomials build on the Mathlib
 contributors' `Polynomial.bernoulli` API and follow its recursive style; Euler–Maclaurin uses
 `bernoulliFun` and its derivative from `Mathlib.NumberTheory.ZetaValues`, and both summation
 formulas use Mathlib's interval integration by parts. Watson's lemma uses the Gamma integral
@@ -16,8 +16,8 @@ routes follow Temme, *Special Functions*, §§1.1–1.2 and Theorem 2.4.
 
 ## Carlson's theorem from lean-codes (2026-10-16)
 
-`ToMathlib/Analysis/Complex/Carlson.lean` is an unmodified copy of the module of the same path
-in the companion project `lean-codes`. Its proof of Carlson's theorem follows Titchmarsh,
+`ToMathlib/Analysis/Complex/Carlson.lean` comes from the companion project `lean-codes` (an
+unmodified copy until 2026-10-25; since then imported from the `LeanCodes` dependency). Its proof of Carlson's theorem follows Titchmarsh,
 *The Theory of Functions*, §5.81, and rests on Mathlib's Phragmén–Lindelöf principle
 (`PhragmenLindelof.eq_zero_on_right_half_plane_of_superexponential_decay`) and removable
 singularities.
@@ -47,7 +47,7 @@ Laplace–Heine formula uses `integral_gaussian_complex_Ioi` and
 
 ## Orthogonal-polynomial integrals and complex-sector asymptotics (2026-10-15)
 
-The ray rotation in `ToMathlib/Analysis/Complex/RotateRay.lean` applies the Mathlib contributors'
+The ray rotation in `DLMFMathlib/Analysis/Complex/RotateRay.lean` applies the Mathlib contributors'
 `Complex.integral_boundary_rect_eq_zero_of_differentiableOn` in logarithmic coordinates. The sector
 form of Watson's lemma follows Temme, *Special Functions*, §2.4. Its Gamma integral starts from
 Mathlib's `Complex.Gamma_eq_integral` and extends by `AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq`.
@@ -799,7 +799,7 @@ reuse the Selberg module's parametric-integral lemma.
 
 ## Shared-helper round (2026-10-20)
 
-`ToMathlib/Analysis/Complex/ParametricHolomorphy.lean` is new project work built from
+`DLMFMathlib/Analysis/Complex/ParametricHolomorphy.lean` is new project work built from
 Mathlib's one-variable Cauchy integral formula and its dominated-convergence and
 `fderiv` APIs. It includes a continuous form of Osgood's lemma. No code was copied from
 other projects. The joint parameter holomorphy of the continued Gauss function, the
@@ -811,8 +811,8 @@ listed for the tier-A batch.
 
 The new files `DLMF/Bessel/KIntegralRep.lean`, `YIntegralRep.lean`, `YSchlafli.lean`,
 `Schlafli.lean`, `ProductIntegral.lean`, `NeumannSeries.lean`,
-`ToMathlib/Analysis/ODE/PowerSeriesUniqueness.lean` and
-`ToMathlib/Analysis/Asymptotics/WatsonRotated.lean` are new project work built on Mathlib
+`DLMFMathlib/Analysis/ODE/PowerSeriesUniqueness.lean` and
+`DLMFMathlib/Analysis/Asymptotics/WatsonRotated.lean` are new project work built on Mathlib
 and the project's existing cores. No code was copied from other projects. From TauCeti,
 `TauCeti.Contour.tendsto_integral_sinc_atTop` (the Dirichlet integral, from
 `TauCeti.Analysis.Contour.WorkedExamples.HalfDisc.SineIntegral`) is used in the proof of
@@ -838,8 +838,8 @@ Mathlib's `differentiable_one_div_Gamma`, `one_div_Gamma_eq_self_mul_one_div_Gam
 
 ## Infrastructure round (2026-10-21)
 
-The new files `ToMathlib/Analysis/Asymptotics/AsymptoticInversion.lean`,
-`ToMathlib/Analysis/Integral/Improper.lean`, the five `ToMathlib/Analysis/ODE/LiouvilleGreen*.lean`
+The new files `DLMFMathlib/Analysis/Asymptotics/AsymptoticInversion.lean`,
+`DLMFMathlib/Analysis/Integral/Improper.lean`, the five `ToMathlib/Analysis/ODE/LiouvilleGreen*.lean`
 files, `DLMF/ParabolicCylinder/SectorAsymptotics.lean`, `DLMF/ParabolicCylinder/UniformLG.lean`,
 `DLMF/Legendre/IntegralTools.lean` and the scripts `scripts/DumpDLMF.lean` and
 `scripts/dlmf_ledgers.py` are original project work. No code was copied from other projects.
@@ -850,7 +850,7 @@ The mathematical sources are F. W. J. Olver, *Asymptotics and Special Functions*
 improper integrals, and the `@[dlmf]` cross-reference attribute
 (`Mathlib/Tactic/CrossRefAttribute.lean`, by Damiano Testa), whose environment extension the
 dump script reads. The rotated-contour results reuse the project's
-`ToMathlib/Analysis/Asymptotics/WatsonRotated.lean`.
+`DLMFMathlib/Analysis/Asymptotics/WatsonRotated.lean`.
 
 ## Upstream pointers (2026-10-21)
 
@@ -862,8 +862,8 @@ hypergeometric-series, AGM and Jacobi theta developments) and of TauCeti (6 poin
 
 ## Round 6 (2026-10-21)
 
-The new files `ToMathlib/Analysis/ODE/LiouvilleGreenFinite.lean`,
-`ToMathlib/Analysis/Complex/StarPrimitive.lean`, `DLMF/Confluent/KummerDecay.lean`,
+The new files `DLMFMathlib/Analysis/ODE/LiouvilleGreenFinite.lean`,
+`DLMFMathlib/Analysis/Complex/StarPrimitive.lean`, `DLMF/Confluent/KummerDecay.lean`,
 `DLMF/IncompleteGamma/RealIntegrals.lean`, `DLMF/Legendre/BoundaryAsymptotics.lean`,
 `DLMF/ParabolicCylinder/UniformLG2.lean` and `DLMF/Struve/AsymptoticTools.lean`, and the proofs
 added in this round, are original project work. No code was copied from other projects. The
@@ -885,7 +885,7 @@ work:
   (`TauCeti.Analysis.Complex.Conformal`, `TauCeti.Analysis.Complex.ZeroCount`) are used in
   `DLMF/ErrorFunctions/ZeroTools.lean`; the helper `erfZ_count_eq_single` there is adapted from a
   private TauCeti lemma (`count_eq_single`), as credited in the module header.
-- The primitive argument in `ToMathlib/Analysis/Complex/BarnesResidue.lean` follows the approach
+- The primitive argument in `DLMFMathlib/Analysis/Complex/BarnesResidue.lean` follows the approach
   of TauCeti's Perron formula development (`TauCeti/.../Perron/Basic`), as noted in its docstring.
 - The continued-fraction theory builds on Mathlib's generalized continued fractions
   (`Mathlib/Algebra/ContinuedFractions`).
@@ -995,7 +995,7 @@ transformations of the hypergeometric function; and the representation of Ai² a
 
 ## Duplication review (2026-10-22)
 
-The shared scalar-series helpers in `ToMathlib/Analysis/Complex/ScalarSeries.lean` consolidate
+The shared scalar-series helpers in `DLMFMathlib/Analysis/Complex/ScalarSeries.lean` consolidate
 the existing project proofs using the Mathlib contributors'
 `FormalMultilinearSeries.ofScalars_series_injective`,
 `HasFPowerSeriesAt.eq_formalMultilinearSeries`, and
@@ -1036,7 +1036,7 @@ inverse-series convergence uses `Complex.hasSum_taylorSeries_on_ball`; this last
 result and the printed inverse-series coefficients still depend on the admitted
 global inverse specification.
 
-`ToMathlib/Analysis/ODE/SymmetricSquare.lean` generalizes the existing Airy
+`DLMFMathlib/Analysis/ODE/SymmetricSquare.lean` generalizes the existing Airy
 product calculation using Mathlib's derivative rules. It is original project
 work and has no dependency on special-function modules.
 
@@ -1106,8 +1106,8 @@ Series*, Eq 1.9.7, and Gasper's 1995 q-series lectures, Eq 4.1.23; exact rationa
 counterexamples to the printed DLMF versions are proved in Lean. The constant-term
 correction in 17.14.E3 follows by expanding its displayed Jacobi numerator.
 
-`ToMathlib/Analysis/ODE/Singularities.lean` and
-`ToMathlib/Analysis/Complex/SeparatingContour.lean` supply general predicates using
+`DLMFMathlib/Analysis/ODE/Singularities.lean` and
+`DLMFMathlib/Analysis/Complex/SeparatingContour.lean` supply general predicates using
 Mathlib only. They have no admissions and no special-function dependency.
 
 ## Second parallel Chapter 4/16/17 proof round (2026-10-24)
@@ -1132,3 +1132,93 @@ The 28 q-series proofs reuse the project's QSeries shifted-factorial, Gaussian,
 q-binomial and Jackson APIs and Mathlib's product limits and ratio-test series
 convergence. The new generic qPhi summability proof preserves DLMF's integer phase
 and its full convergence domains. No copied TauCeti proof or new axiom is introduced.
+
+## Third parallel Chapter 4/16/17 proof round (2026-10-24)
+
+`DLMFMathlib/Analysis/SpecialFunctions/Complex/LogBoundary.lean` adapts Michael
+Stoll's 2023 Mathlib integral-remainder proof of `Complex.norm_log_sub_logTaylor_le`.
+A compact-path inverse bound replaces its open-disk geometric bound. The source
+retains his copyright and authorship. The six DLMF adapters use natural partial
+sums, finite odd-term grouping and Mathlib's principal exponential-strip identities.
+
+The complex binomial adapter directly reuses Mathlib's
+`Complex.one_add_cpow_hasFPowerSeriesOnBall_zero`, generalized binomial and
+Pochhammer-polynomial APIs. Logarithm-sheet derivatives use
+`iteratedDeriv_succ_log`; full complex-power derivatives use local derivative
+congruence on the slit plane. The elementary limits, inequalities, primitives and
+improper integral reuse Mathlib's power/log asymptotics, exponential remainder,
+derivative rules and improper fundamental theorem. Complete trig/hyperbolic fibers
+use Mathlib's sine/cosine equality and period APIs. Branch-set corrections use
+explicit logarithm lifts and paired sinh/cosh identities, with no parameter loss.
+
+Chapter 16 finite inversions reuse the proved local `poch_one_sub_sub_mul` and
+`poch_ne_zero_of_le`, plus Mathlib's
+`Nat.descFactorial_eq_factorial_mul_choose`. The integer-index Gamma bridge
+extends `Complex.Gamma_add_nat_div_Gamma_eq`, handling shifted poles explicitly.
+Odd Dixon follows from finite inversion; normalized bilateral Dougall reuses the
+proved local `dougall_bilateral` and Mathlib's Gamma reflection formula without
+strengthening lower-parameter exclusions. The raising operator uses Mathlib's
+`iteratedDeriv_fun_mul`, `iteratedDeriv_fun_id` and analytic germ APIs. Nominal
+order uses `Polynomial.natDegree_multiset_prod_of_monic` and `monic_X_add_C`,
+including empty parameter multisets. No external proof body was copied.
+
+The qPhi power-series/Taylor API directly uses Mathlib's
+`FormalMultilinearSeries.ofScalars`, `le_radius_of_tendsto`, scalar-series
+uniqueness and change-of-origin analyticity. Moving the proved `zero_phi_zero`
+adapter from BasicSummations into Basic preserves its declaration and 17.5.E1
+tag while avoiding an import cycle. The q-elementary expansions reuse the proved
+Heine/Euler q-series, `HasSum.even_add_odd` and injective subsequences; explicit
+q=0 cases preserve all original domains.
+
+The Gaussian bridges reuse the proved QSeries finite q-binomial formula, local
+q-Pochhammer reversal, the exact integer triangular identity and Mathlib's integer
+power laws. No nonzero upper Pochhammer factor is canceled. Product continuation
+applies analytic composition/division to the proved entire q-Pochhammer product,
+then uses the pure Tau Ceti contributors' `ContinuesInside` germ adapter. Series
+values are identified with the product on the convergent disk/germ only. No
+TauCeti proof source was copied, and no new axiom or dependency was introduced.
+
+## Fourth parallel Chapter 4/16/17 proof round (2026-10-24)
+
+Hyperbolic real antiderivatives and derivatives use TauCeti's
+`TauCeti.Analysis.SpecialFunctions.Artanh` (`Real.hasDerivAt_artanh`). The scaled
+Dirichlet integral uses TauCeti's `TauCeti.Contour.tendsto_integral_sin_mul_div_atTop`
+(`TauCeti.Analysis.Contour.WorkedExamples.HalfDisc.SineIntegral`). The two Chapter 16
+Barnes residue theorems use `TauCeti.Contour.residue_eq_of_eventuallyEq_zpow_smul`.
+Appell double-series analyticity uses `TauCeti.Analysis.Complex.CauchyIntegralPolydisc`,
+and `appell_continuation_unique` adapts the one-variable TauCeti arguments
+`IsAnalyticContinuationAlong.eventuallyEq` and `eventually_eventuallyEq_iff_of_analyticAt`
+to two variables, with inline attribution.
+
+Within the project, the Lambert W Maclaurin series reuse the Lagrange–Bürmann theorem of
+`DLMFMathlib/Analysis/Complex/LagrangeBurmann.lean` (`lagB_hasSum_iteratedDeriv`,
+`lagB_hasSum_of_differentiableOn`). The new `DLMFMathlib/Analysis/Complex/TrigR4SeriesExtension.lean`
+adapts the coefficient-uniqueness argument of the local `scalarSeries_unique_ball`.
+The 0F1 product formula uses Chu–Vandermonde; the logarithm integrals
+`integral_log_div_one_sub/add` reuse the local `DLMF.Polylog.Real.dilog_one` and
+`dilog_neg_one`. Chapter 17 summations reuse the project's QSeries Heine transformation
+and the Bailey-lemma API (`DLMF.Bailey.bailey_relation`, `watsonR`,
+`bailey_limit_relation`); two private limit helpers in `BaileyPairs.lean` copy private
+helpers of `DLMF/QSeries/Bailey.lean`. No other external proof body was copied.
+
+## Chapters 20–23 acquisition (2026-10-25)
+
+The theta chapter builds on Mathlib's `jacobiTheta₂` and `jacobiTheta` APIs
+(`Mathlib/NumberTheory/ModularForms/JacobiTheta/*`: quasi-periodicity, parity,
+differentiability, the functional equation) and the project's Jacobi triple product
+(`DLMF/QSeries`). The Riemann theta chapter uses Mathlib's `Matrix.PosDef`, `Matrix.J`
+and `Matrix.symplecticGroup`. The Weierstrass chapter is stated on Mathlib's `PeriodPair`
+with its `weierstrassP`, `derivWeierstrassP`, `G`, `g₂`, `g₃` and differential equation
+(`Mathlib/Analysis/SpecialFunctions/Elliptic/Weierstrass.lean`), and the modular-function
+section uses Mathlib's `ModularForm.eta` and `ModularForm.discriminant`. No external proof
+body was copied.
+
+## lean-codes as a Lake dependency (2026-10-25)
+
+With the user's approval, the companion project lean-codes (Bastiaan J Braams; package
+`LeanCodes`, path `../lean-codes`) is a Lake dependency. Its two former mirrors
+(`ToMathlib/Analysis/Integral/Laplace.lean`, `ToMathlib/Analysis/Complex/Carlson.lean`) are
+imported from it, and the Chapter 19 acquisition builds on its Carlson library: the
+R-function, `carlsonRF`, `carlsonRG`, `carlsonRC`, Legendre-form bridges, duplication,
+Landen/AGM, quartic reduction and asymptotics, formalized from B. C. Carlson, *Special
+Functions of Applied Mathematics* (1977). Its proofs are used through imports, not copied.

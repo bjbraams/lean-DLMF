@@ -19,7 +19,7 @@ the interchange of its two infinite sums.
 -/
 
 @[expose] public noncomputable section
-open Complex Finset Filter
+open Complex Finset Filter DLMF.QSeries
 open scoped Topology
 namespace DLMF.QHypergeometric
 
@@ -93,6 +93,36 @@ def IsBaileyChain (a q : ℂ) (α β : ℕ → ℕ → ℂ) : Prop :=
           (a*q/(ρ1 k*ρ2 k))^j * β k j /
             DLMF.QSeries.qPochhammer q q (n-j))
 
+/-- A convergent sequence of complex numbers is bounded in norm. -/
+private lemma qbR4_exists_norm_le_of_tendsto {u : ℕ → ℂ} {L : ℂ} (hu : Tendsto u atTop (𝓝 L)) :
+    ∃ C, ∀ n, ‖u n‖ ≤ C := by
+  obtain ⟨C, hC⟩ := isBounded_iff_forall_norm_le.mp (Metric.isBounded_range_of_tendsto u hu)
+  exact ⟨C, fun n => hC _ ⟨n, rfl⟩⟩
+
+/-- Tannery's theorem for the finite sums of the Bailey relation (as in `DLMF.Bailey`). -/
+private lemma qbR4_tendsto_sum_range_mul {u : ℕ → ℂ} {v : ℕ → ℕ → ℂ} {L : ℂ} {C : ℝ}
+    (hu : Summable fun k => ‖u k‖) (hv : ∀ k, Tendsto (fun N => v N k) atTop (𝓝 L))
+    (hC : ∀ N k, ‖v N k‖ ≤ C) :
+    Tendsto (fun N => ∑ k ∈ range (N + 1), u k * v N k) atTop (𝓝 ((∑' k, u k) * L)) := by
+  have heq : ∀ N, ∑ k ∈ range (N + 1), u k * v N k =
+      ∑' k, (if k ≤ N then u k * v N k else 0) := by
+    intro N
+    rw [tsum_eq_sum (s := range (N + 1))]
+    · exact sum_congr rfl fun k hk => by
+        simp [show k ≤ N by simpa [Nat.lt_succ_iff] using hk]
+    · intro k hk
+      simp [show ¬k ≤ N by simpa [Nat.lt_succ_iff] using hk]
+  simp only [heq]
+  rw [← tsum_mul_right]
+  refine tendsto_tsum_of_dominated_convergence (bound := fun k => ‖u k‖ * C) (hu.mul_right C)
+    (fun k => ?_) (Eventually.of_forall fun N k => ?_)
+  · refine ((hv k).const_mul (u k)).congr' ?_
+    filter_upwards [eventually_ge_atTop k] with N hN
+    simp [hN]
+  · split_ifs
+    · rw [norm_mul]; exact mul_le_mul_of_nonneg_left (hC N k) (norm_nonneg _)
+    · simpa using mul_nonneg (norm_nonneg (u k)) ((norm_nonneg _).trans (hC 0 0))
+
 /-- The infinite limiting form of Bailey's lemma. -/
 @[dlmf 17.12.E4]
 theorem limitingBaileyTransform {a q : ℂ} {α β : ℕ → ℂ}
@@ -103,7 +133,42 @@ theorem limitingBaileyTransform {a q : ℂ} {α β : ℕ → ℂ}
     (∑' n : ℕ, q ^ (n * n) * a ^ n * β n) =
       (∑' n : ℕ, q ^ (n * n) * a ^ n * α n) /
         DLMF.QSeries.qPochhammerInf (a * q) q := by
-  sorry
+  have hqq : ∀ m, qPochhammer q q m ≠ 0 := qPochhammer_self_ne_zero hq
+  have hQ : qPochhammerInf q q ≠ 0 := qPochhammerInf_ne_zero hq fun n => by
+    simpa [pow_succ'] using qPochhammerInf_pow_succ_ne_zero hq n
+  have hA : qPochhammerInf (a * q) q ≠ 0 := by
+    refine qPochhammerInf_ne_zero hq fun n h0 => hden (n + 1) ?_
+    rw [qPochhammer_succ, h0, mul_zero]
+  have rel : ∀ N, ∑ k ∈ range (N + 1), (q ^ (k * k) * a ^ k * β k) * (qPochhammer q q (N - k))⁻¹ =
+      ∑ k ∈ range (N + 1), (q ^ (k * k) * a ^ k * α k) *
+        (qPochhammer q q (N - k) * qPochhammer (a * q) q (N + k))⁻¹ := by
+    intro N
+    have h := DLMF.Bailey.bailey_limit_relation (α := α) (β := β) (n := N)
+      (fun k _ => hpair k) (fun m _ => hqq m) (hden _)
+    simp only [div_eq_mul_inv] at h
+    convert h using 2 <;> ring
+  have tq := tendsto_qPochhammer (w := q) hq
+  have taq := tendsto_qPochhammer (w := a * q) hq
+  obtain ⟨Cq, hCq⟩ := qbR4_exists_norm_le_of_tendsto (tq.inv₀ hQ)
+  obtain ⟨Ca, hCa⟩ := qbR4_exists_norm_le_of_tendsto (taq.inv₀ hA)
+  have hCq0 : 0 ≤ Cq := (norm_nonneg _).trans (hCq 0)
+  have limL := qbR4_tendsto_sum_range_mul (u := fun k => q ^ (k * k) * a ^ k * β k)
+    (v := fun N k => (qPochhammer q q (N - k))⁻¹) (L := (qPochhammerInf q q)⁻¹)
+    (summable_norm_iff.mpr hβ)
+    (fun k => ((tq.comp (tendsto_sub_atTop_nat k)).inv₀ hQ)) (fun N k => hCq _)
+  have limR := qbR4_tendsto_sum_range_mul (u := fun k => q ^ (k * k) * a ^ k * α k)
+    (v := fun N k => (qPochhammer q q (N - k) * qPochhammer (a * q) q (N + k))⁻¹)
+    (L := (qPochhammerInf q q * qPochhammerInf (a * q) q)⁻¹) (summable_norm_iff.mpr hα)
+    (fun k => ((tq.comp (tendsto_sub_atTop_nat k)).mul
+      (taq.comp (tendsto_add_atTop_nat k))).inv₀ (mul_ne_zero hQ hA))
+    (fun N k => by
+      rw [mul_inv, norm_mul]
+      exact mul_le_mul (hCq _) (hCa _) (norm_nonneg _) hCq0)
+  simp only [rel] at limL
+  have heq := tendsto_nhds_unique limL limR
+  rw [mul_inv] at heq
+  field_simp at heq ⊢
+  linear_combination heq
 
 /-- The explicit numerator sequence of the Rogers–Ramanujan Bailey pair. -/
 @[dlmf 17.12.E6]
@@ -124,6 +189,21 @@ theorem rogersBaileyPair {a q : ℂ} (ha : a ≠ 1)
     (hqq : ∀ n : ℕ, DLMF.QSeries.qPochhammer q q n ≠ 0)
     (haq : ∀ n : ℕ, DLMF.QSeries.qPochhammer (a * q) q n ≠ 0) :
     DLMF.Bailey.IsBaileyPair a q (rogersBaileyAlpha a q) (rogersBaileyBeta q) := by
-  sorry
+  intro n
+  have h := DLMF.Bailey.bailey_limit_relation (a := a) (q := q) (n := n)
+    (α := DLMF.Bailey.unitAlpha a q) (β := fun k => if k = 0 then 1 else 0)
+    (fun k _ => DLMF.Bailey.unit_pair a q k (fun m _ => hqq m) (haq _))
+    (fun m _ => hqq m) (haq _)
+  rw [Finset.sum_eq_single 0 (fun k _ hk => by simp [hk]) (by simp)] at h
+  simp only [pow_zero, mul_one, ↓reduceIte, Nat.sub_zero, mul_zero, one_div] at h
+  rw [rogersBaileyBeta, h]
+  refine sum_congr rfl fun k _ => ?_
+  have h1a : (1 - a) ≠ 0 := sub_ne_zero.mpr (Ne.symm ha)
+  have hD := DLMF.Bailey.qPochhammer_mul_one_sub_pow a q k
+  rw [rogersBaileyAlpha, DLMF.Bailey.unitAlpha]
+  have e : qPochhammer a q k * (1 - a * q ^ (2 * k)) / (1 - a) = DLMF.Bailey.unitD a q k := by
+    rw [hD]; field_simp
+  rw [← e, pow_add]
+  field_simp
 
 end DLMF.QHypergeometric

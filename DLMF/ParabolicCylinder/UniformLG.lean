@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.ParabolicCylinder.Uniform
-public import ToMathlib.Analysis.ODE.LiouvilleGreenExpansion
+public import DLMFMathlib.Analysis.ODE.LiouvilleGreenExpansion
 
 /-!
 # Olver's uniform expansion of `U(-½μ², μt√2)` for `t > 1` (DLMF 12.10.3)

@@ -8,7 +8,7 @@ module
 public import DLMF.Airy.Scorer
 public import DLMF.Airy.IntegralTools
 public import DLMF.IncompleteGamma.Basic
-public import ToMathlib.Analysis.Integral.PrincipalValue
+public import DLMFMathlib.Analysis.Integral.PrincipalValue
 public import DLMF.Bessel.KMellin
 
 /-!

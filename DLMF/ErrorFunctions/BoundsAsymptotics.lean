@@ -7,7 +7,7 @@ module
 
 public import DLMF.ErrorFunctions.Relations
 public import DLMF.IncompleteGamma.FractionTools
-public import ToMathlib.Analysis.Asymptotics.WatsonRotated
+public import DLMFMathlib.Analysis.Asymptotics.WatsonRotated
 public import Mathlib.Analysis.SpecialFunctions.Gaussian.FourierTransform
 public import Mathlib.Analysis.SpecialFunctions.Sqrt
 

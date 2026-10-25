@@ -7,7 +7,7 @@ module
 
 public import Mathlib.Tactic.CrossRefAttribute
 public import DLMF.Bessel.Basic
-public import ToMathlib.Analysis.Complex.ParametricHolomorphy
+public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
 
 /-!

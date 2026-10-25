@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Gamma.VerticalBounds
-public import ToMathlib.Analysis.Complex.BarnesResidue
+public import DLMFMathlib.Analysis.Complex.BarnesResidue
 
 /-!
 # Bounds for `Γ` on vertical lines, uniform under shifts of the line

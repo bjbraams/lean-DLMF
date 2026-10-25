@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bastiaan J Braams
 -/
 import Mathlib
-import ToMathlib
+import DLMFMathlib
 import DLMF
 import DLMF.Core.Upstream
 
@@ -47,7 +47,9 @@ def projectOf (mod : Name) : String × String :=
   | "Mathlib" => ("Mathlib", ".lake/packages/mathlib/")
   | "TauCeti" => ("TauCeti", ".lake/packages/TauCeti/")
   | "DLMF" => ("lean-DLMF", "")
-  | "ToMathlib" => ("lean-DLMF", "")
+  | "DLMFMathlib" => ("lean-DLMF", "")
+  | "ToMathlib" => ("lean-codes", "../lean-codes/")
+  | "Carlson" => ("lean-codes", "../lean-codes/")
   | r => (r, "")
 
 /-- Source path of a module relative to its package root. -/

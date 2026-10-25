@@ -7,7 +7,7 @@ module
 
 public import DLMF.IncompleteGamma.ExponentialIntegral
 public import DLMF.Confluent.TricomiRotated
-public import ToMathlib.Analysis.Asymptotics.WatsonRotated
+public import DLMFMathlib.Analysis.Asymptotics.WatsonRotated
 
 /-!
 # Generalized exponential integral asymptotics, DLMF §8.20

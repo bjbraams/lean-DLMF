@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import ToMathlib.Analysis.Complex.TaylorParameter
+public import DLMFMathlib.Analysis.Complex.TaylorParameter
 
 public import DLMF.Hypergeometric.Solutions
 public import DLMF.Bessel.Modified
@@ -13,8 +13,8 @@ public import Mathlib.Analysis.SpecialFunctions.Arcosh
 public import Mathlib.Analysis.Complex.TaylorSeries
 public import DLMF.Gamma.Asymptotics
 public import DLMF.Gamma.RecipGammaDeriv
-public import ToMathlib.Analysis.Asymptotics.Watson
-public import ToMathlib.Analysis.Complex.ParametricHolomorphy
+public import DLMFMathlib.Analysis.Asymptotics.Watson
+public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 
 /-!
 # Large-parameter asymptotics (DLMF §15.12)

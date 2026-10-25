@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Struve.AngerWeber
-public import ToMathlib.Analysis.Asymptotics.StationaryPhase
+public import DLMFMathlib.Analysis.Asymptotics.StationaryPhase
 
 /-!
 # Turning-point tools for the Anger–Weber functions
