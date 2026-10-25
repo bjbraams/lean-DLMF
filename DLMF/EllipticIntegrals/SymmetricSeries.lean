@@ -9,6 +9,9 @@ public import DLMF.EllipticIntegrals.Symmetric
 public import Mathlib.Data.Fin.Tuple.NatAntidiagonal
 public import Mathlib.RingTheory.MvPolynomial.Symmetric.Defs
 public import Mathlib.RingTheory.Polynomial.Pochhammer
+public import Carlson.R.BinomialSeries
+public import Carlson.RPolynomial.Generating
+public import Carlson.R.Homogeneity
 
 /-!
 # Symmetric elliptic integrals: Taylor and related series (DLMF §19.19)
@@ -65,19 +68,166 @@ theorem symEllIntR_hasSum_T {n : ℕ} (a : ℂ) (b z : Fin n → ℂ) (hc : 0 < 
     (hz : ∀ j, ‖1 - z j‖ < 1) :
     HasSum (fun N => (ascPochhammer ℂ N).eval a / (ascPochhammer ℂ N).eval (∑ j, b j) *
       symEllIntT N b (fun j => 1 - z j)) (symEllIntR a b z) := by
-  sorry
+  set c := ∑ j, b j with hc_def
+  have hzre : ∀ j, 0 < (z j).re := fun j => by
+    have hr := (abs_re_le_norm (1 - z j)).trans_lt (hz j)
+    simp only [sub_re, one_re] at hr
+    linarith [le_abs_self (1 - (z j).re)]
+  have hzs : z ∈ Carlson.carlsonRSlitDomain := fun j => mem_slitPlane_iff.mpr (Or.inl (hzre j))
+  rw [symEllIntR_of_mem _ _ hzs]
+  have H := (Carlson.hasSum_regCarlsonR_cpow_neg a b (z := z)
+    (fun i => by rw [norm_sub_rev]; exact hz i)).mul_left (Gamma c)
+  unfold Carlson.carlsonR
+  convert H using 1
+  funext N
+  rw [Carlson.regCarlsonRPolynomial_eq_numerator_mul_one_div_Gamma,
+    Carlson.carlsonRPolynomialNumerator_eq_sum_piAntidiag]
+  have hcN : ∀ k : ℕ, c ≠ -k := fun k h => by
+    have := congrArg Complex.re h
+    simp at this
+    linarith [hc, (Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
+  have hG0 : Gamma c ≠ 0 := Complex.Gamma_ne_zero hcN
+  have hGN : Gamma (c + N) ≠ 0 := Complex.Gamma_ne_zero fun k h => by
+    have := congrArg Complex.re h
+    simp at this
+    linarith [hc, (Nat.cast_nonneg k : (0 : ℝ) ≤ k), (Nat.cast_nonneg N : (0 : ℝ) ≤ N)]
+  have hG : Gamma (c + N) = Gamma c * (ascPochhammer ℂ N).eval c := by
+    rw [← Complex.Gamma_add_nat_div_Gamma_eq c hcN]; field_simp
+  have hP : (ascPochhammer ℂ N).eval c ≠ 0 := by
+    intro h; rw [h, mul_zero] at hG; exact hGN hG
+  have hNum : Carlson.carlsonGeneratingCoeff Finset.univ b (fun i => 1 - z i) N =
+      (N.factorial : ℂ) * symEllIntT N b (fun j => 1 - z j) := by
+    unfold Carlson.carlsonGeneratingCoeff symEllIntT
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr ?_ fun m hm => ?_
+    · ext m; simp [Finset.mem_piAntidiag, Finset.Nat.mem_antidiagonalTuple]
+    have hsum : ∑ i, m i = N := Finset.Nat.mem_antidiagonalTuple.mp hm
+    have hspec := Nat.multinomial_spec Finset.univ m
+    rw [hsum] at hspec
+    have hspec' : (∏ i, ((m i).factorial : ℂ)) * (Nat.multinomial Finset.univ m : ℂ) =
+        (N.factorial : ℂ) := by exact_mod_cast hspec
+    have hF : (∏ i, ((m i).factorial : ℂ)) ≠ 0 :=
+      Finset.prod_ne_zero_iff.mpr fun i _ => by exact_mod_cast (m i).factorial_ne_zero
+    rw [Finset.prod_mul_distrib, Finset.prod_div_distrib, ← hspec']
+    field_simp
+  rw [hNum, hG]
+  have hNf : (N.factorial : ℂ) ≠ 0 := by exact_mod_cast N.factorial_ne_zero
+  field_simp
+
+/-- Complex homogeneity of `R_{-a}(𝐛; 𝐳)` (helper; any complex `a, 𝐛`): for slit-plane nodes and
+a slit-plane scale `μ` with `arg μ + arg zᵢ ∈ (-π, π)`, `R_{-a}(𝐛; μ𝐳) = μ^{-a} R_{-a}(𝐛; 𝐳)`. -/
+theorem p19sR1_symEllIntR_mul {ι : Type*} [Fintype ι] (a : ℂ) (b : ι → ℂ) {μ : ℂ} {z : ι → ℂ}
+    (hz : z ∈ Carlson.carlsonRSlitDomain) (hμ : μ ∈ slitPlane)
+    (harg : ∀ i, arg μ + arg (z i) ∈ Ioo (-Real.pi) Real.pi) :
+    symEllIntR a b (fun i => μ * z i) = μ ^ (-a) * symEllIntR a b z := by
+  have hmz : (fun i => μ * z i) ∈ Carlson.carlsonRSlitDomain := fun i => by
+    have hμ' := hμ
+    have hw := hz i
+    rw [mem_slitPlane_iff_arg] at hμ' hw ⊢
+    rw [arg_mul hμ'.2 hw.2 ⟨(harg i).1, (harg i).2.le⟩]
+    exact ⟨(harg i).2.ne, mul_ne_zero hμ'.2 hw.2⟩
+  rw [symEllIntR_of_mem _ _ hmz, symEllIntR_of_mem _ _ hz]
+  unfold Carlson.carlsonR
+  rw [Carlson.regCarlsonR_mul_of_arg_add (-a) b hz hμ harg]
+  ring
+
+/-- Complex homogeneity on the right half-plane (helper): `R_{-a}(𝐛; μ𝐳) = μ^{-a} R_{-a}(𝐛; 𝐳)`
+for `ℜ μ > 0` and `ℜ zᵢ > 0`. -/
+theorem p19sR1_symEllIntR_mul_of_re_pos {ι : Type*} [Fintype ι] (a : ℂ) (b : ι → ℂ) {μ : ℂ}
+    {z : ι → ℂ} (hz : ∀ i, 0 < (z i).re) (hμ : 0 < μ.re) :
+    symEllIntR a b (fun i => μ * z i) = μ ^ (-a) * symEllIntR a b z := by
+  refine p19sR1_symEllIntR_mul a b (fun i => mem_slitPlane_iff.mpr (Or.inl (hz i)))
+    (mem_slitPlane_iff.mpr (Or.inl hμ)) fun i => ?_
+  have hm := abs_lt.mp (abs_arg_lt_pi_div_two_iff.mpr (Or.inl hμ))
+  have hi := abs_lt.mp (abs_arg_lt_pi_div_two_iff.mpr (Or.inl (hz i)))
+  constructor <;> linarith [Real.pi_pos]
+
+/-- Helper for 19.19.3: `T_N` with vanishing last variable drops that variable. -/
+theorem p19sR1_symEllIntT_last_zero {n : ℕ} (N : ℕ) (b v : Fin (n + 1) → ℂ)
+    (hv : v (Fin.last n) = 0) :
+    symEllIntT N b v = symEllIntT N (fun j : Fin n => b j.castSucc) (fun j => v j.castSucc) := by
+  unfold symEllIntT
+  set F : (Fin (n + 1) → ℕ) → ℂ := fun m =>
+    ∏ j, (ascPochhammer ℂ (m j)).eval (b j) / ((m j).factorial : ℂ) * v j ^ (m j) with hF_def
+  have hF : ∀ m' : Fin n → ℕ, F (Fin.snoc m' 0) = ∏ j : Fin n,
+      (ascPochhammer ℂ (m' j)).eval (b j.castSucc) / ((m' j).factorial : ℂ) *
+        v j.castSucc ^ (m' j) := by
+    intro m'
+    simp only [F]
+    rw [Fin.prod_univ_castSucc]
+    simp [Fin.snoc_castSucc, Fin.snoc_last]
+  let e : (Fin n → ℕ) ↪ (Fin (n + 1) → ℕ) := ⟨fun m' => Fin.snoc m' 0, fun x y h => by
+    funext j
+    have := congrFun h j.castSucc
+    simpa using this⟩
+  symm
+  calc _ = ∑ m' ∈ Finset.Nat.antidiagonalTuple n N, F (e m') :=
+        Finset.sum_congr rfl fun m' _ => (hF m').symm
+    _ = ∑ m ∈ (Finset.Nat.antidiagonalTuple n N).map e, F m := (Finset.sum_map _ _ _).symm
+    _ = ∑ m ∈ Finset.Nat.antidiagonalTuple (n + 1) N, F m := by
+      refine Finset.sum_subset (fun m hm => ?_) (fun m hm hnot => ?_)
+      · obtain ⟨m', hm', rfl⟩ := Finset.mem_map.mp hm
+        rw [Finset.Nat.mem_antidiagonalTuple] at hm' ⊢
+        rw [Fin.sum_univ_castSucc]
+        change ∑ x : Fin n, (Fin.snoc m' 0 : Fin (n + 1) → ℕ) x.castSucc +
+          (Fin.snoc m' 0 : Fin (n + 1) → ℕ) (Fin.last n) = N
+        simpa using hm'
+      · by_cases h0 : m (Fin.last n) = 0
+        · exfalso
+          apply hnot
+          refine Finset.mem_map.mpr ⟨Fin.init m, ?_, ?_⟩
+          · rw [Finset.Nat.mem_antidiagonalTuple] at hm ⊢
+            rw [Fin.sum_univ_castSucc, h0, add_zero] at hm
+            exact hm
+          · simp only [e]
+            rw [← h0]
+            exact Fin.snoc_init_self m
+        · refine Finset.prod_eq_zero (Finset.mem_univ (Fin.last n)) ?_
+          rw [hv, zero_pow h0, mul_zero]
 
 /-- DLMF 19.19.3: `R_{-a}(𝐛; 𝐳) = zₙ^{-a} ∑_N (a)_N/(c)_N T_N(b₁, …, bₙ₋₁; 1 - z₁/zₙ, …)`,
-`c = ∑ bⱼ` (all `n` parameters), `|1 - zⱼ/zₙ| < 1`, with `zₙ ∈ ℂ \ (-∞, 0]`; `0 < re c`. -/
+`c = ∑ bⱼ` (all `n` parameters), `|1 - zⱼ/zₙ| < 1`, with `zₙ ∈ ℂ \ (-∞, 0]`; `0 < re c`.
+**Corrected from the printed DLMF formula**: we also assume `ph zₙ + ph(zⱼ/zₙ) ∈ (-π, π)`, the
+condition of the homogeneity relation 19.16.11 from which DLMF derives (19.19.3). Without it the
+formula fails: `n = 2`, `a = 0.3`, `𝐛 = (0.5, 0.7)`, `z₁ = e^{-0.8πi}`, `z₂ = e^{0.9πi}` gives
+`R = 1.8216 - 0.4034i` (19.16.9) against `0.5763 - 0.8336i` (mpmath, 2026-10-25). -/
 @[dlmf 19.19.E3]
 theorem symEllIntR_hasSum_T_last {n : ℕ} (a : ℂ) (b : Fin (n + 1) → ℂ) (z : Fin (n + 1) → ℂ)
     (hc : 0 < (∑ j, b j).re) (hzn : z (Fin.last n) ∈ slitPlane)
-    (hz : ∀ j : Fin n, ‖1 - z j.castSucc / z (Fin.last n)‖ < 1) :
+    (hz : ∀ j : Fin n, ‖1 - z j.castSucc / z (Fin.last n)‖ < 1)
+    (harg : ∀ j : Fin n,
+      arg (z (Fin.last n)) + arg (z j.castSucc / z (Fin.last n)) ∈ Set.Ioo (-π) π) :
     HasSum (fun N => z (Fin.last n) ^ (-a) * ((ascPochhammer ℂ N).eval a /
       (ascPochhammer ℂ N).eval (∑ j, b j) *
         symEllIntT N (fun j : Fin n => b j.castSucc)
           (fun j => 1 - z j.castSucc / z (Fin.last n)))) (symEllIntR a b z) := by
-  sorry
+  set μ := z (Fin.last n) with hμ_def
+  have hμ0 : μ ≠ 0 := slitPlane_ne_zero hzn
+  set w : Fin (n + 1) → ℂ := fun i => z i / μ with hw_def
+  have hwl : w (Fin.last n) = 1 := by simp only [w, ← hμ_def]; exact div_self hμ0
+  have hw1 : ∀ i, ‖1 - w i‖ < 1 := by
+    intro i
+    induction i using Fin.lastCases with
+    | last => rw [hwl]; simp
+    | cast j => exact hz j
+  have hwre : ∀ i, 0 < (w i).re := fun i => by
+    have hr := (abs_re_le_norm (1 - w i)).trans_lt (hw1 i)
+    simp only [sub_re, one_re] at hr
+    linarith [le_abs_self (1 - (w i).re)]
+  have hws : w ∈ Carlson.carlsonRSlitDomain := fun i => mem_slitPlane_iff.mpr (Or.inl (hwre i))
+  have harg' : ∀ i, arg μ + arg (w i) ∈ Set.Ioo (-π) π := by
+    intro i
+    induction i using Fin.lastCases with
+    | last =>
+      rw [hwl, arg_one, add_zero]
+      exact ⟨neg_pi_lt_arg μ, lt_of_le_of_ne (arg_le_pi μ) (mem_slitPlane_iff_arg.mp hzn).1⟩
+    | cast j => exact harg j
+  have hzw : symEllIntR a b z = symEllIntR a b (fun i => μ * w i) := by
+    congr 1; funext i; simp only [w]; field_simp
+  rw [hzw, p19sR1_symEllIntR_mul a b hws hzn harg']
+  have H := (symEllIntR_hasSum_T a b w hc hw1).mul_left (μ ^ (-a))
+  convert H using 2 with N
+  rw [p19sR1_symEllIntT_last_zero N b (fun j => 1 - w j) (by simp only [hwl]; ring)]
 
 /-- DLMF 19.19.5: `T_N(½, 𝐳) = ∑ (-1)^{M+N} (½)_M E₁^{m₁}⋯Eₙ^{mₙ} / (m₁!⋯mₙ!)`, over
 `m₁, …, mₙ ≥ 0` with `∑ j mⱼ = N`, `M = ∑ mⱼ` (here `mⱼ` is indexed by `j - 1 : Fin n`). -/

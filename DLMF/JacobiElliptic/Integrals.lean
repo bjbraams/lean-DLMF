@@ -14,7 +14,7 @@ public import Mathlib.Analysis.SpecialFunctions.Trigonometric.InverseDeriv
 DLMF 22.14.1–22.14.15 are indefinite integrals for real `x`. Each is stated as the
 derivative of the printed primitive, `HasDerivAt F (pq x) x`, for the existing real functions
 `sn = Real.jacobiSnm x (k²)`, `cn`, `dn` (the bridge to the complex theta quotients is
-`jacobiSnk_ofReal` etc. in `DLMF.JacobiElliptic.Basic`) with the modulus `0 < k < 1` and
+`jacobiSnk_ofReal` etc. in `DLMF.JacobiElliptic.SpecialValues`) with the modulus `0 < k < 1` and
 `k' = √(1 - k²)`; the nine quotient functions are written out as quotients. All fifteen are
 proved.
 

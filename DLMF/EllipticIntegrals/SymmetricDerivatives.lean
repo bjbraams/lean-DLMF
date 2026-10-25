@@ -8,6 +8,7 @@ module
 public import DLMF.EllipticIntegrals.SymmetricSpecialCases
 public import Carlson.R.SlitDeriv
 public import Carlson.R.EulerPoisson
+public import Carlson.R.Homogeneity
 
 /-!
 # Symmetric elliptic integrals: derivatives and differential equations (DLMF §19.18)
@@ -154,6 +155,31 @@ theorem eulerPoisson_symEllIntR (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
   rw [ei19c_eulerPoisson_congr (ei19c_eventuallyEq a b hz)]
   exact Carlson.carlsonEulerPoissonOperator_carlsonR (-a) b hz j l
 
+/-- `R_{-a}(𝐛; ·)` is holomorphic on the slit-plane node domain. -/
+theorem p19sR1_analyticOnNhd_carlsonR (t : ℂ) (b : ι → ℂ) :
+    AnalyticOnNhd ℂ (Carlson.carlsonR t b) Carlson.carlsonRSlitDomain := by
+  have h := Carlson.analyticOnNhd_regCarlsonR_comp (κ := ι) (U := Carlson.carlsonRSlitDomain)
+    (t := fun _ => t) (b := fun _ => b) (z := id) Carlson.isOpen_carlsonRSlitDomain
+    analyticOnNhd_const analyticOnNhd_const analyticOnNhd_id (fun p hp => hp)
+  exact fun p hp => analyticAt_const.mul (h p hp)
+
+open scoped Classical in
+/-- Mixed coordinate derivatives of `R_{-a}(𝐛; 𝐳)` commute (slit-plane nodes). -/
+theorem p19sR1_partialDeriv_comm_symEllIntR (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
+    (hz : z ∈ Carlson.carlsonRSlitDomain) (j l : ι) :
+    Dirichlet.carlsonPartialDeriv j (Dirichlet.carlsonPartialDeriv l (symEllIntR a b)) z =
+      Dirichlet.carlsonPartialDeriv l (Dirichlet.carlsonPartialDeriv j (symEllIntR a b)) z := by
+  have h := ei19c_eventuallyEq a b hz
+  have hl : Dirichlet.carlsonPartialDeriv l (symEllIntR a b) =ᶠ[𝓝 z]
+      Dirichlet.carlsonPartialDeriv l (Carlson.carlsonR (-a) b) :=
+    h.eventually_nhds.mono fun w hw => SeveralComplexVariables.partialDeriv_congr hw l
+  have hj : Dirichlet.carlsonPartialDeriv j (symEllIntR a b) =ᶠ[𝓝 z]
+      Dirichlet.carlsonPartialDeriv j (Carlson.carlsonR (-a) b) :=
+    h.eventually_nhds.mono fun w hw => SeveralComplexVariables.partialDeriv_congr hw j
+  rw [ei19c_partialDeriv_congr hl j, ei19c_partialDeriv_congr hj l]
+  exact SeveralComplexVariables.partialDeriv_partialDeriv_comm
+    (p19sR1_analyticOnNhd_carlsonR (-a) b) Carlson.isOpen_carlsonRSlitDomain hz j l
+
 /-- DLMF 19.18.12: `(zⱼ ∂ⱼ + bⱼ) ∂ₗ v = (zₗ ∂ₗ + bₗ) ∂ⱼ v` for `v = R_{-a}(𝐛; 𝐳)` (slit-plane
 nodes). -/
 @[dlmf 19.18.E12]
@@ -163,7 +189,10 @@ theorem eulerPoisson_symEllIntR' (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
         b j * Dirichlet.carlsonPartialDeriv l (symEllIntR a b) z =
       z l * Dirichlet.carlsonPartialDeriv l (Dirichlet.carlsonPartialDeriv j (symEllIntR a b)) z +
         b l * Dirichlet.carlsonPartialDeriv j (symEllIntR a b) z := by
-  sorry
+  have hEP := eulerPoisson_symEllIntR a b hz j l
+  unfold Dirichlet.carlsonEulerPoissonOperator at hEP
+  have hc := p19sR1_partialDeriv_comm_symEllIntR a b hz j l
+  linear_combination hEP + z l * hc
 
 /-! ### `R_F`, `R_G` as functions of the vector `(x, y, z)` -/
 
@@ -293,6 +322,64 @@ theorem eulerPoisson_symEllIntRF {v : Fin 3 → ℂ} (hv : v ∈ Carlson.carlson
   rw [ei19c_eulerPoisson_congr (ei19c_RFVec_eventuallyEq hv)]
   exact eulerPoisson_symEllIntR _ _ hv j l
 
+/-! ### Real line derivatives of holomorphic functions of several variables (helpers) -/
+
+theorem p19sR1_hasDerivAt_path (c d : ι → ℂ) (r : ℝ) :
+    HasDerivAt (fun t : ℝ => c + (t : ℂ) • d) d r := by
+  have h := ((hasDerivAt_id r).ofReal_comp.smul_const d).const_add c
+  simpa using h
+
+/-- First derivative of `t ↦ H(c + t d)` along a real line. -/
+theorem p19sR1_hasDerivAt_line [DecidableEq ι] {H : (ι → ℂ) → ℂ} {c d : ι → ℂ} {r : ℝ}
+    (hH : DifferentiableAt ℂ H (c + (r : ℂ) • d)) :
+    HasDerivAt (fun t : ℝ => H (c + (t : ℂ) • d))
+      (∑ i, d i * SeveralComplexVariables.partialDeriv i H (c + (r : ℂ) • d)) r := by
+  have h : HasDerivAt (fun t : ℝ => H (c + (t : ℂ) • d)) _ r :=
+    (hH.hasFDerivAt.restrictScalars ℝ).comp_hasDerivAt r (p19sR1_hasDerivAt_path c d r)
+  refine h.congr_deriv ?_
+  rw [ContinuousLinearMap.coe_restrictScalars', SeveralComplexVariables.fderiv_eq_sum_partialDeriv hH d]
+  simp [smul_eq_mul]
+
+/-- Second derivative of `t ↦ H(c + t d)` along a real line, for `H` holomorphic on an open set
+`U` containing `c + r d`; `G` agrees with `H` on `U`. -/
+theorem p19sR1_deriv2_line [DecidableEq ι] {H G : (ι → ℂ) → ℂ} {U : Set (ι → ℂ)} (hH : AnalyticOnNhd ℂ H U)
+    (hU : IsOpen U) (hGH : EqOn G H U) {c d : ι → ℂ} {r : ℝ} (hr : c + (r : ℂ) • d ∈ U) :
+    deriv (fun t : ℝ => G (c + (t : ℂ) • d)) r =
+        ∑ i, d i * SeveralComplexVariables.partialDeriv i H (c + (r : ℂ) • d) ∧
+      deriv (fun s : ℝ => deriv (fun t : ℝ => G (c + (t : ℂ) • d)) s) r =
+        ∑ j, d j * ∑ i, d i * SeveralComplexVariables.partialDeriv j
+          (SeveralComplexVariables.partialDeriv i H) (c + (r : ℂ) • d) := by
+  have hcont : Continuous (fun t : ℝ => c + (t : ℂ) • d) := by fun_prop
+  have hV : IsOpen ((fun t : ℝ => c + (t : ℂ) • d) ⁻¹' U) := hU.preimage hcont
+  -- first derivatives on the open set of parameters
+  have h1 : ∀ s : ℝ, c + (s : ℂ) • d ∈ U → deriv (fun t : ℝ => G (c + (t : ℂ) • d)) s =
+      ∑ i, d i * SeveralComplexVariables.partialDeriv i H (c + (s : ℂ) • d) := by
+    intro s hs
+    have hev : (fun t : ℝ => G (c + (t : ℂ) • d)) =ᶠ[𝓝 s] fun t => H (c + (t : ℂ) • d) := by
+      filter_upwards [hV.mem_nhds hs] with t ht
+      exact hGH ht
+    rw [hev.deriv_eq]
+    exact (p19sR1_hasDerivAt_line (hH _ hs).differentiableAt).deriv
+  refine ⟨h1 r hr, ?_⟩
+  set H1 : (ι → ℂ) → ℂ := fun p => ∑ i, d i * SeveralComplexVariables.partialDeriv i H p
+  have hH1 : AnalyticOnNhd ℂ H1 U := by
+    intro p hp
+    exact Finset.analyticAt_fun_sum _ fun i _ => analyticAt_const.mul (hH.partialDeriv hU i p hp)
+  have hev : (fun s : ℝ => deriv (fun t : ℝ => G (c + (t : ℂ) • d)) s) =ᶠ[𝓝 r]
+      fun s => H1 (c + (s : ℂ) • d) := by
+    filter_upwards [hV.mem_nhds hr] with s hs
+    exact h1 s hs
+  rw [hev.deriv_eq, (p19sR1_hasDerivAt_line (hH1 _ hr).differentiableAt).deriv]
+  refine Finset.sum_congr rfl fun j _ => ?_
+  congr 1
+  simp only [H1]
+  rw [SeveralComplexVariables.partialDeriv_finset_sum
+    (f := fun i p => d i * SeveralComplexVariables.partialDeriv i H p) _ (fun i _ =>
+    (analyticAt_const.mul (hH.partialDeriv hU i _ hr)).differentiableAt)]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  exact SeveralComplexVariables.partialDeriv_const_mul _
+    (hH.partialDeriv hU i _ hr).differentiableAt j
+
 /-! ### Second-order equations of the complete case (19.18.14–19.18.17) -/
 
 /-- DLMF 19.18.14: `w = R_{-a}(½, ½; x + y, x - y)` satisfies the Euler–Poisson–Darboux equation
@@ -302,7 +389,49 @@ theorem eulerPoissonDarboux_symEllIntR (a : ℂ) {x y : ℝ} (hxy : |y| < x) (hy
     let w : ℝ → ℝ → ℂ := fun x y => symEllIntR a ![1 / 2, 1 / 2] ![(x + y : ℝ), (x - y : ℝ)]
     deriv (fun s => deriv (fun r => w r y) s) x =
       deriv (fun s => deriv (fun r => w x r) s) y + (1 / y : ℂ) * deriv (fun r => w x r) y := by
-  sorry
+  intro w
+  have hH := p19sR1_analyticOnNhd_carlsonR (-a) (![1 / 2, 1 / 2] : Fin 2 → ℂ)
+  have hU := Carlson.isOpen_carlsonRSlitDomain (ι := Fin 2)
+  have hGH : EqOn (symEllIntR a ![1 / 2, 1 / 2]) (Carlson.carlsonR (-a) ![1 / 2, 1 / 2])
+      Carlson.carlsonRSlitDomain := fun z hz => symEllIntR_of_mem _ _ hz
+  have e1 : ∀ r : ℝ, (![((r + y : ℝ) : ℂ), ((r - y : ℝ) : ℂ)] : Fin 2 → ℂ) =
+      ![(y : ℂ), -y] + (r : ℂ) • ![1, 1] := by
+    intro r; funext i; fin_cases i <;> simp <;> ring
+  have e2 : ∀ r : ℝ, (![((x + r : ℝ) : ℂ), ((x - r : ℝ) : ℂ)] : Fin 2 → ℂ) =
+      ![(x : ℂ), x] + (r : ℂ) • ![1, -1] := by
+    intro r; funext i; fin_cases i <;> (simp; try ring)
+  set p : Fin 2 → ℂ := ![((x + y : ℝ) : ℂ), ((x - y : ℝ) : ℂ)] with hp_def
+  have hp : p ∈ Carlson.carlsonRSlitDomain := by
+    have h1 : 0 < x + y := by cases abs_lt.mp hxy; linarith
+    have h2 : 0 < x - y := by cases abs_lt.mp hxy; linarith
+    intro i; fin_cases i
+    · exact ofReal_mem_slitPlane.mpr h1
+    · exact ofReal_mem_slitPlane.mpr h2
+  have hx1 : ![(y : ℂ), -y] + (x : ℂ) • ![1, 1] = p := (e1 x).symm
+  have hx2 : ![(x : ℂ), x] + (y : ℂ) • ![1, -1] = p := (e2 y).symm
+  obtain ⟨-, A⟩ := p19sR1_deriv2_line hH hU hGH (c := ![(y : ℂ), -y]) (d := ![1, 1]) (r := x)
+    (by rw [hx1]; exact hp)
+  obtain ⟨B1, B⟩ := p19sR1_deriv2_line hH hU hGH (c := ![(x : ℂ), x]) (d := ![1, -1]) (r := y)
+    (by rw [hx2]; exact hp)
+  simp only [w, e1, e2]
+  rw [A, B, B1, hx1, hx2]
+  have hEP := Carlson.carlsonEulerPoissonOperator_carlsonR (-a) (![1 / 2, 1 / 2] : Fin 2 → ℂ) hp 0 1
+  unfold Dirichlet.carlsonEulerPoissonOperator at hEP
+  simp only [Dirichlet.carlsonPartialDeriv_eq_partialDeriv] at hEP
+  have hc := SeveralComplexVariables.partialDeriv_partialDeriv_comm hH hU hp 0 1
+  have hy' : (y : ℂ) ≠ 0 := ofReal_ne_zero.mpr hy
+  have hyinv : (y : ℂ) * (y : ℂ)⁻¹ = 1 := mul_inv_cancel₀ hy'
+  simp only [Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one] at hEP ⊢
+  have hp01 : p 0 - p 1 = 2 * (y : ℂ) := by simp only [hp_def]; simp; ring
+  rw [hp01] at hEP
+  have hEP' : 2 * (y : ℂ) * SeveralComplexVariables.partialDeriv 0
+        (SeveralComplexVariables.partialDeriv 1 (Carlson.carlsonR (-a) ![1 / 2, 1 / 2])) p +
+      1 / 2 * SeveralComplexVariables.partialDeriv 1 (Carlson.carlsonR (-a) ![1 / 2, 1 / 2]) p -
+      1 / 2 * SeveralComplexVariables.partialDeriv 0 (Carlson.carlsonR (-a) ![1 / 2, 1 / 2]) p = 0 := by
+    convert hEP using 5; congr; exact Subsingleton.elim _ _
+  linear_combination (2 / (y : ℂ)) * hEP' - 2 * hc -
+    4 * SeveralComplexVariables.partialDeriv 0
+      (SeveralComplexVariables.partialDeriv 1 (Carlson.carlsonR (-a) ![1 / 2, 1 / 2])) p * hyinv
 
 /-- DLMF 19.18.15: `W = R_{-a}(½, ½; t + r, t - r)`, `r = √(x² + y²)`, satisfies the wave
 equation `W_tt = W_xx + W_yy`, for real `t > r > 0`. -/
@@ -323,7 +452,48 @@ theorem axialPotential_symEllIntR (a : ℂ) {x y : ℝ} (hy : y ≠ 0) :
     let u : ℝ → ℝ → ℂ := fun x y => symEllIntR a ![1 / 2, 1 / 2] ![x + y * I, x - y * I]
     deriv (fun s => deriv (fun r => u r y) s) x + deriv (fun s => deriv (fun r => u x r) s) y +
       (1 / y : ℂ) * deriv (fun r => u x r) y = 0 := by
-  sorry
+  intro u
+  have hH := p19sR1_analyticOnNhd_carlsonR (-a) (![1 / 2, 1 / 2] : Fin 2 → ℂ)
+  have hU := Carlson.isOpen_carlsonRSlitDomain (ι := Fin 2)
+  have hGH : EqOn (symEllIntR a ![1 / 2, 1 / 2]) (Carlson.carlsonR (-a) ![1 / 2, 1 / 2])
+      Carlson.carlsonRSlitDomain := fun z hz => symEllIntR_of_mem _ _ hz
+  have e1 : ∀ r : ℝ, (![(r : ℂ) + y * I, r - y * I] : Fin 2 → ℂ) =
+      ![(y : ℂ) * I, -(y * I)] + (r : ℂ) • ![1, 1] := by
+    intro r; funext i; fin_cases i <;> simp <;> ring
+  have e2 : ∀ r : ℝ, (![(x : ℂ) + r * I, x - r * I] : Fin 2 → ℂ) =
+      ![(x : ℂ), x] + (r : ℂ) • ![I, -I] := by
+    intro r; funext i; fin_cases i <;> (simp; try ring)
+  set p : Fin 2 → ℂ := ![(x : ℂ) + y * I, x - y * I] with hp_def
+  have hp : p ∈ Carlson.carlsonRSlitDomain := by
+    intro i; fin_cases i <;> refine mem_slitPlane_iff.mpr (Or.inr ?_) <;> simp [p, hy]
+  have hx1 : ![(y : ℂ) * I, -(y * I)] + (x : ℂ) • ![1, 1] = p := (e1 x).symm
+  have hx2 : ![(x : ℂ), x] + (y : ℂ) • ![I, -I] = p := (e2 y).symm
+  obtain ⟨-, A⟩ := p19sR1_deriv2_line hH hU hGH (c := ![(y : ℂ) * I, -(y * I)]) (d := ![1, 1])
+    (r := x) (by rw [hx1]; exact hp)
+  obtain ⟨B1, B⟩ := p19sR1_deriv2_line hH hU hGH (c := ![(x : ℂ), x]) (d := ![I, -I]) (r := y)
+    (by rw [hx2]; exact hp)
+  simp only [u, e1, e2]
+  rw [A, B, B1, hx1, hx2]
+  have hEP := Carlson.carlsonEulerPoissonOperator_carlsonR (-a) (![1 / 2, 1 / 2] : Fin 2 → ℂ) hp 0 1
+  unfold Dirichlet.carlsonEulerPoissonOperator at hEP
+  simp only [Dirichlet.carlsonPartialDeriv_eq_partialDeriv] at hEP
+  have hc := SeveralComplexVariables.partialDeriv_partialDeriv_comm hH hU hp 0 1
+  have hy' : (y : ℂ) ≠ 0 := ofReal_ne_zero.mpr hy
+  have hyinv : (y : ℂ) * (y : ℂ)⁻¹ = 1 := mul_inv_cancel₀ hy'
+  simp only [Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one] at hEP ⊢
+  have hp01 : p 0 - p 1 = 2 * (y : ℂ) * I := by simp only [hp_def]; simp; ring
+  rw [hp01] at hEP
+  set F := Carlson.carlsonR (-a) (![1 / 2, 1 / 2] : Fin 2 → ℂ)
+  set D0 := SeveralComplexVariables.partialDeriv 0 F p
+  set D1 := SeveralComplexVariables.partialDeriv 1 F p
+  set D00 := SeveralComplexVariables.partialDeriv 0 (SeveralComplexVariables.partialDeriv 0 F) p
+  set D01 := SeveralComplexVariables.partialDeriv 0 (SeveralComplexVariables.partialDeriv 1 F) p
+  set D10 := SeveralComplexVariables.partialDeriv 1 (SeveralComplexVariables.partialDeriv 0 F) p
+  set D11 := SeveralComplexVariables.partialDeriv 1 (SeveralComplexVariables.partialDeriv 1 F) p
+  have hEP' : 2 * (y : ℂ) * I * D01 + 1 / 2 * D1 - 1 / 2 * D0 = 0 := by
+    convert hEP using 5; congr; exact Subsingleton.elim _ _
+  linear_combination (-2 * I / (y : ℂ)) * hEP' - 2 * hc +
+    ((D00 - D01 - D10 + D11) + 4 * D01 * (y : ℂ) * (y : ℂ)⁻¹) * I_sq - 4 * D01 * hyinv
 
 /-- DLMF 19.18.17: `U = R_{-a}(½, ½; z + iρ, z - iρ)`, `ρ = √(x² + y²)`, satisfies Laplace's
 equation `U_xx + U_yy + U_zz = 0`, for real `x, y, z` with `ρ > 0`. -/

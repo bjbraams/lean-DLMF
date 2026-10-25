@@ -80,11 +80,66 @@ theorem ramanujanThetaF_eq_jacobiThetaThreeTau (z τ : ℂ) :
   congr 1
   linear_combination (π * I * τ + 2 * I * z) / 2 * hA + (π * I * τ - 2 * I * z) / 2 * hB
 
+/-- `∑ r^{m(m-1)/2} A^m` converges for `0 ≤ r < 1`, `A ≥ 0` (helper). -/
+lemma p20R1_summable_quad {r A : ℝ} (hr0 : 0 ≤ r) (hr : r < 1) (hA : 0 ≤ A) :
+    Summable (fun m : ℕ => r ^ (m * (m - 1) / 2) * A ^ m) := by
+  obtain ⟨M, hM⟩ : ∃ M : ℕ, r ^ M * A ≤ 1 / 2 := by
+    have ht : Tendsto (fun M : ℕ => r ^ M * A) atTop (𝓝 (0 * A)) :=
+      (tendsto_pow_atTop_nhds_zero_of_lt_one hr0 hr).mul_const A
+    rw [zero_mul] at ht
+    exact ((ht.eventually (gt_mem_nhds (by norm_num : (0 : ℝ) < 1 / 2))).exists).imp
+      fun _ h => h.le
+  refine Summable.of_norm_bounded_eventually_nat
+    (summable_geometric_of_lt_one (by norm_num : (0 : ℝ) ≤ 1 / 2) (by norm_num)) ?_
+  filter_upwards [eventually_ge_atTop (2 * M + 1)] with m hm
+  rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+  have hexp : M * m ≤ m * (m - 1) / 2 := by
+    rw [Nat.le_div_iff_mul_le (by norm_num)]
+    have : 2 * M ≤ m - 1 := by omega
+    calc M * m * 2 = (2 * M) * m := by ring
+      _ ≤ (m - 1) * m := Nat.mul_le_mul_right _ this
+      _ = m * (m - 1) := by ring
+  calc r ^ (m * (m - 1) / 2) * A ^ m ≤ r ^ (M * m) * A ^ m := by
+        exact mul_le_mul_of_nonneg_right (pow_le_pow_of_le_one hr0 hr.le hexp) (by positivity)
+    _ = (r ^ M * A) ^ m := by rw [mul_pow, pow_mul]
+    _ ≤ (1 / 2) ^ m := by gcongr
+
+
+/-- `m(m+1)/2 = m(m-1)/2 + m` in `ℕ` (helper). -/
+lemma p20R1_tri_succ (m : ℕ) : m * (m + 1) / 2 = m * (m - 1) / 2 + m := by
+  have h : m * (m + 1) = m * (m - 1) + 2 * m := by
+    rcases m with _ | k
+    · simp
+    · simp only [Nat.add_sub_cancel]; ring
+  rw [h, Nat.add_mul_div_left _ _ two_pos]
+
 /-- DLMF §20.11(ii): `f(a,b)` converges absolutely for `|ab| < 1`. -/
 @[dlmf 20.11.ii]
 theorem summable_ramanujanThetaF {a b : ℂ} (hab : ‖a * b‖ < 1) :
     Summable (fun n : ℤ => ‖a ^ (n * (n + 1) / 2) * b ^ (n * (n - 1) / 2)‖) := by
-  sorry
+  have hr0 : 0 ≤ ‖a * b‖ := norm_nonneg _
+  refine Summable.of_nat_of_neg_add_one ?_ ?_
+  · refine (p20R1_summable_quad hr0 hab (norm_nonneg a)).congr fun m => ?_
+    have e1 : (m : ℤ) * ((m : ℤ) + 1) / 2 = ((m * (m + 1) / 2 : ℕ) : ℤ) := by push_cast; ring_nf
+    have e2 : (m : ℤ) * ((m : ℤ) - 1) / 2 = ((m * (m - 1) / 2 : ℕ) : ℤ) := by
+      rcases m with _ | k
+      · simp
+      · push_cast; ring_nf
+    symm
+    rw [e1, e2, zpow_natCast, zpow_natCast, norm_mul, norm_pow, norm_pow, p20R1_tri_succ, pow_add,
+      norm_mul, mul_pow]
+    ring
+  · have hs := (summable_nat_add_iff 1).mpr (p20R1_summable_quad hr0 hab (norm_nonneg b))
+    refine hs.congr fun m => ?_
+    have e1 : (-((m : ℤ) + 1)) * (-((m : ℤ) + 1) + 1) / 2 = ((m * (m + 1) / 2 : ℕ) : ℤ) := by
+      push_cast; ring_nf
+    have e2 : (-((m : ℤ) + 1)) * (-((m : ℤ) + 1) - 1) / 2 =
+        (((m + 1) * (m + 1 + 1) / 2 : ℕ) : ℤ) := by
+      push_cast; ring_nf
+    symm
+    rw [e1, e2, zpow_natCast, zpow_natCast, norm_mul, norm_pow, norm_pow, p20R1_tri_succ (m + 1),
+      pow_add, norm_mul, mul_pow, Nat.add_sub_cancel, show (m + 1) * m = m * (m + 1) by ring]
+    ring
 
 /-! ### §20.11(iii) Ramanujan's change of base -/
 

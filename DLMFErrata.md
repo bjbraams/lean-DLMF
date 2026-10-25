@@ -28,7 +28,7 @@ integrals)" below). The Chapter 20–23 entries were found by the acquisition ag
 independent numerical check (REVIEW.md, section "Chapters 20–23 acquisition (2026-10-25)",
 subsection "DLMF errata and source corrections"; ledgers DLMF20–DLMF23Acquisition.md).
 
-Counts (2026-10-25): 62 entries in (a), 19 in (b), 32 in (c). Some entries group closely related
+Counts (2026-10-25): 63 entries in (a), 22 in (b), 32 in (c). Some entries group closely related
 equation numbers.
 
 ## (a) Genuine DLMF errata
@@ -249,6 +249,16 @@ Found by the Chapter 19 acquisition agents and checked by an independent mpmath 
     sides are 1.2490 − 0.3256i and its negative.
   - Lean: `compEllInt_imaginary_comodulus` (DLMF/EllipticIntegrals/Connection.lean), admitted.
   - Found: 2026-10-25.
+- [19.19.E3](https://dlmf.nist.gov/19.19.E3)
+  - Printed: R₋ₐ(𝐛; 𝐳) = zₙ^(−a) Σ (a)_N/(c)_N T_N(b₁, …, bₙ₋₁; 1 − z₁/zₙ, …), |1 − zⱼ/zₙ| < 1.
+    DLMF derives it from 19.16.11 and 19.19.2 but omits the condition of 19.16.11. Correct with
+    ph zₙ + ph(zⱼ/zₙ) ∈ (−π, π) for every j.
+  - Evidence: n = 2, a = 0.3, 𝐛 = (0.5, 0.7), z₁ = e^(−0.8πi), z₂ = e^(0.9πi) (|1 − z₁/z₂| ≈ 0.908):
+    R = 1.8216 − 0.4034i by the integral 19.16.9, against 0.5763 − 0.8336i from the formula; the
+    formula with the roles of z₁, z₂ exchanged gives a third value, 0.6147 + 0.8057i.
+  - Lean: `symEllIntR_hasSum_T_last` (DLMF/EllipticIntegrals/SymmetricSeries.lean), with the
+    hypothesis `harg` added on 2026-10-25 (the acquired statement without it was false); proved.
+  - Found: 2026-10-25 (proof round 1).
 - [19.20.E3](https://dlmf.nist.gov/19.20.E3), [19.20.E23](https://dlmf.nist.gov/19.20.E23)
   - Printed: R_F(x, a, y) = R_{−1/4}(3/4, 1/2; a², xy) and R_D(x, y, a) = R_{−3/4}(5/4, 1/2; a², xy),
     a = (x + y)/2, under the 19.16(i) constraints. They fail inside that domain. Correct for
@@ -557,6 +567,28 @@ Found by the Chapter 19 acquisition agents and checked by an independent mpmath 
   ∏(a_i − b_j), and likewise in the denominator. Fixed by parenthesizing. `genAsymptoticC_limit`,
   `genAsymptoticC_recurrence` (DLMF/GeneralizedHypergeometric/Asymptotics.lean), admitted. Found
   2026-10-25 (REVIEW.md, "Parallel proofs in Chapters 4, 16 and 17 (2026-10-24, fourth round)").
+
+- [19.8.E6](https://dlmf.nist.gov/19.8.E6): the summand `agmSeqC 1 g₀ n ^ 2` used the real square root
+  cₙ = √(aₙ² − gₙ²), which is 0 at n = 0 when k² < 0 (then g₀ = k′ > a₀ = 1), whereas DLMF has
+  c₀² = k². The first identity was false for k² < 0 (mpmath at k² = −1: 0.04305 against
+  −0.45695). Fix: the summand is aₙ² − gₙ² (DLMF 19.8.2). `compEllIntEk_eq_agm`
+  (DLMF/EllipticIntegrals/Quadratic.lean), proved for all real k² < 1. Found 2026-10-25 (proof
+  round 1).
+- [19.22.E9](https://dlmf.nist.gov/19.22.E9), [19.22.E10](https://dlmf.nist.gov/19.22.E10), [19.22.E12](https://dlmf.nist.gov/19.22.E12), [19.22.E14](https://dlmf.nist.gov/19.22.E14): the AGM sequences
+  `agmA`, `agmG` (DLMF/EllipticIntegrals/SymmetricQuadratic.lean) took index n + 1 from Mathlib's
+  `NNReal.agmSequences (n + 1)`, which already holds the (n + 2)-th means, so a₁ and g₁ were
+  skipped and all four series were false (a₀ = 2, g₀ = 1: (4/π)R_G = 1.541964 against 1.714838).
+  Fix: index n + 1 uses `agmSequences n`. `symEllIntRG_zero_agm`, `symEllIntRD_zero_agm` proved;
+  19.22.E12, E14 admitted. Found 2026-10-25 (proof round 1).
+
+- [20.2.ii](https://dlmf.nist.gov/20.2.ii): the earlier `jacobiThetaOneTau_div_sin_analytic` asked,
+  for each fixed z, only for some analytic function of τ agreeing with θ₁(z|τ)/sin z where
+  sin z ≠ 0 (and likewise θ₂/cos z). At the zeros of sin z this is vacuous, so the statement was
+  trivially true and missed DLMF's meaning. Restated (user decision): one function F(z, τ), entire
+  in z, analytic in τ on Im τ > 0, equal to the quotient where sin z ≠ 0, so that at the zeros it is
+  the removable-singularity value. Proved (F is the Fourier series 20.2.1 divided termwise by
+  sin z, via the Dirichlet kernel; G(z, τ) = F(π/2 − z, τ)). DLMF/Theta/Basic.lean. Found
+  2026-10-25 (proof round 1), restated and proved the same day.
 
 ## (c) Formalization notes
 

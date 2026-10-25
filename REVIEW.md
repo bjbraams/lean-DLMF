@@ -6895,3 +6895,80 @@ entries, 397 upstream pointers) regenerates all ledgers.
 Replace the inline Appell F₁ of 19.5.E4 by `DLMF.Hypergeometric.appF1` now that the import
 clash is gone. Prove the domain extensions of the Carlson bridges (one zero argument, limits on
 the cut), on which many §§19.20–19.25 statements rest.
+
+## Proof round 1 for Chapters 19–23 (2026-10-25)
+
+Five agents with disjoint files worked from the committed state (commit 81e21fe): p22
+(`DLMF/JacobiElliptic`, `Theta/Relations.lean`), p23 (`DLMF/Weierstrass`), p19s (the
+`Symmetric*` files of `DLMF/EllipticIntegrals`), p19l (the Legendre-side files) and p20 (the other
+`DLMF/Theta` files and `DLMF/RiemannTheta`). Priorities came from a dependency count: four admissions
+blocked most of the others (`jacobiTauk_im_pos` 52 dependents, `jacobi_inversion_k` 42,
+`HalfPeriods.e_distinct` 10, the R_G bridge 6); everything else was a leaf.
+
+Source admissions in the five areas fell from 703 to 334 (EllipticIntegrals 281 → 187, Theta
+74 → 22, RiemannTheta 10 → 10, JacobiElliptic 215 → 62, Weierstrass 123 → 53); project-wide
+1,173 → 804.
+
+### Highlights
+
+- **Chapter 22.** Both foundations are proved: Im(iK′/K) > 0 on the modulus domain and the inversion
+  22.2.2 (k = θ₂²/θ₃², k′ = θ₄²/θ₃², K = (π/2)θ₃² at τ = iK′/K), with 20.9.4–5. Then the twelve
+  addition theorems 22.8.1–18 and 22.8.24–25, Table 22.13.1 and 22.13.1–24, all of 22.9 (cyclic
+  identities; p = 3 by polynomial certificates), Tables 22.5.1–22.5.4 with the real bridges
+  (moved unchanged from `Basic` to `SpecialValues` to avoid an import cycle; proved by ODE
+  uniqueness), Table 22.6.1, 22.6.1 and 22.6.14–21, all of 22.15 and most of 22.16.
+- **Chapter 23.** 23.3.12 from Mathlib's ℘′² equation; `e_distinct` and lattice uniqueness from
+  the invariants via a Liouville lemma for elliptic functions; 23.10.1–10; σ in theta form and
+  Legendre's relation 23.2.14 (moved unchanged with 23.2.17 from `Basic` to `Relations`); most of
+  §23.6; the lemniscatic roots and invariants (K(1/√2) = Γ(1/4)²/(4√π)); rectangular lattices;
+  η³ = θ₁′/2, Euler's pentagonal series, 23.19.2–4 and 23.17.1–2.
+- **Chapter 19.** All of §19.4; 19.5.1–3 and 19.5.10; 19.7.1 for complex k, 19.7.2 and 19.7.4–7 by
+  the identity theorem and substitutions; 19.8.6, 19.8.11–12; the R_G bridge 19.16.17; most of the
+  19.25 Legendre–Carlson bridges for complex k; 19.21 connection formulas; the lemniscate constants
+  19.20.2, 19.20.22; 19.18.12, 14, 16; 19.19.2–3; 19.22.2–3, 9–10; 19.26.11. New fully proved
+  infrastructure: complex homogeneity of `symEllIntR` (`p19sR1_symEllIntR_mul`, in
+  `SymmetricSeries`) and the modules `P19sR1Bounds`, `P19sR1Connection`, `P19sR1Legendre`.
+- **Chapter 20.** 20.7.1–24 and 20.7.34 (all forms), the products 20.5.5–8 and log-derivative
+  series 20.5.10–13, Jacobi's derivative formula and 20.4.8–12, 20.10.1–2, and the §20.6 lattice
+  sums. Chapter 21 was assessed (Siegel transformations, the Riemann identity) and left for later.
+
+### Statements corrected in this round
+
+Recorded in DLMFErrata.md; each was found by an agent and confirmed numerically by the coordinator
+or agent before the change.
+
+- 19.8.6 (project defect): the summand used the real root cₙ, so c₀ = 0 for k² < 0; now
+  aₙ² − gₙ².
+- 19.22.9–14 (project defect): `agmA`/`agmG` skipped a₁, g₁ (Mathlib's `agmSequences n` holds the
+  (n+1)-th means); definitions re-indexed.
+- 19.19.3 (DLMF erratum): needs ph zₙ + ph(zⱼ/zₙ) ∈ (−π, π), inherited from 19.16.11; hypothesis
+  added, then proved.
+
+One weak statement was found: `DLMF.Theta.jacobiThetaOneTau_div_sin_analytic` said nothing at the
+zeros of sin z and was proved trivially. With the user's approval it was restated in
+removable-singularity form (one F(z, τ), entire in z and analytic in τ, equal to θ₁(z|τ)/sin z where
+sin z ≠ 0; likewise θ₂/cos z) and then proved from the Fourier series 20.2.1 with the Dirichlet
+kernel sin((2n+1)z) = sin z · Σ_{|k|≤n} e^{2ikz} and Mathlib's locally uniform tsum lemma.
+
+### Integration
+
+Coordinator changes: the three `P19sR1*` modules added to the `EllipticIntegrals` umbrella; the
+`JacobiElliptic` umbrella docstring updated; three duplicated bridge lemmas in `Quadratic.lean`
+replaced by p19s's originals. `scripts/dlmf_ledgers.py` had two bugs: lines for bare section IDs
+(e.g. `4.14`) were not recognized and were re-inserted on every run, and declarations were appended
+to every one of several hand-written lines sharing an ID. Both are fixed, the duplicate lines were
+removed, and regeneration is now idempotent.
+
+### Validation
+
+The full build passes (11,290 jobs). Strict checks pass on all 46 changed Lean files; no axiom or
+`native_decide`. Compiled audit: 16,980 project theorems, 862 depending on `sorryAx` (was 1,328), no
+other nonstandard axiom. Tag dump: 5,651 entries, 397 upstream pointers.
+
+### Next steps
+
+Cauchy principal-value infrastructure (blocks 19.2.20–22, 19.6.2–6, 19.6.15, 19.7.3, 19.7.8–10,
+19.25.4/16/19/22 and the p.v. parts of 19.20–19.21); R_J quadratic and Landen transformations
+(19.22.4, 7, 12, 14); 19.28.5 by the route in p19s's notes; Chapter 22 Fourier, partial-fraction and
+Maclaurin series and §22.17; Chapter 23 series 23.9.3–7, 23.6.27–29 (Landen-type) and
+uniformization; Chapter 21 (Siegel modular transformations, Riemann's identity).

@@ -33,15 +33,16 @@ Mathlib has no Jacobian elliptic functions. This area defines the twelve functio
   `jacobiPQk p q z k` with the principal complex `K(k)`, `K'(k)`, `τ = iK'/K`, nome
   `q = e^{-πK'/K}`; the twelve named functions `jacobiSnk … jacobiCsk` and `jacobiSnTau …
   jacobiCsTau`; theta-constant nonvanishing (triple product), Glaisher's relations, parity,
-  meromorphy, and the admitted inversion 22.2.2 and real bridges.
+  meromorphy, and the inversion 22.2.2 with `Im τ > 0` (proved 2026-10-25).
 * `PeriodsPolesZeros` (§22.4): the full Table 22.4.3 (proved), periods (Tables 22.4.1–2), and
   the admitted zero/pole structure.
-* `SpecialValues` (§22.5): values of Table 22.5.1 (proved), derivatives/residues, Table 22.5.2,
-  limiting forms (admitted), and the limits of `K`, `K'`.
+* `SpecialValues` (§22.5): Tables 22.5.1–22.5.4 (values, derivatives/residues, quarter-period
+  values, limiting forms), the limits of `K`, `K'`, and the real bridges `jacobiSnk_ofReal` etc.,
+  all proved.
 * `Addition` (§22.8), `ElementaryIdentities` (§22.6), `Landen` (§22.7), `Cyclic` (§22.9).
 * `MathlibCoverage`: upstream pointers.
 
 Results in the modulus form hold on `jacobiModulusDomain` (`Re k > 0`, `k ∉ [1, ∞)`); those
-proved from theta identities use the admitted inversion `jacobi_inversion_k` and
-`jacobiTauk_im_pos`.
+proved from theta identities use the inversion `jacobi_inversion_k` and `jacobiTauk_im_pos`
+(both proved).
 -/

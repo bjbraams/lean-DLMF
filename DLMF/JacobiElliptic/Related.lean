@@ -227,14 +227,58 @@ theorem Real.incEllIntEm_jacobiAmm (hm : k ^ 2 < 1) (x : ℝ) :
   rw [Real.jacobiEpsilonk, intervalIntegral.integral_eq_sub_of_hasDerivAt (fun t _ => hd t)
     (je22b_intervalIntegrable_jacobiDnm_sq hm 0 x), h0, sub_zero]
 
+open MeasureTheory Set in
+/-- Substitution `t = f θ` for a continuous strictly increasing `f` on `[a, b]`. -/
+lemma p22R1_subst_mono {f f' g h : ℝ → ℝ} {a b : ℝ} (hab : a ≤ b)
+    (hc : ContinuousOn f (Icc a b)) (ha : StrictMonoOn f (Icc a b))
+    (hd : ∀ θ ∈ Ioo a b, HasDerivAt f (f' θ) θ)
+    (hg : ∀ θ ∈ Ioo a b, |f' θ| * g (f θ) = h θ) :
+    ∫ t in f a..f b, g t = ∫ θ in a..b, h θ := by
+  have hfab : f a ≤ f b := ha.monotoneOn ⟨le_rfl, hab⟩ ⟨hab, le_rfl⟩ hab
+  have hcv := integral_image_eq_integral_abs_deriv_smul (f := f) (f' := f')
+    (measurableSet_Ioo (a := a) (b := b)) (fun θ hθ => (hd θ hθ).hasDerivWithinAt)
+    (ha.injOn.mono Ioo_subset_Icc_self) g
+  rw [hc.image_Ioo_of_strictMonoOn hab ha] at hcv
+  rw [intervalIntegral.integral_of_le hfab, integral_Ioc_eq_integral_Ioo, hcv,
+    intervalIntegral.integral_of_le hab, integral_Ioc_eq_integral_Ioo]
+  exact setIntegral_congr_fun measurableSet_Ioo fun θ hθ => by simp only [smul_eq_mul]; exact hg θ hθ
+
 /-- DLMF 22.16.14: `ℰ(x, k) = ∫₀^{sn(x,k)} √((1 - k²t²)/(1 - t²)) dt` for `-K < x < K`
-(the corrected form, DLMF erratum of 2010-07-08 reported by C. Karney). Admitted. -/
+(the corrected form, DLMF erratum of 2010-07
+  -08 reported by C. Karney); substitution `t = sin θ` in `E(am x, k)`. -/
 @[dlmf 22.16.E14 "special case: real modulus 0 < k < 1"]
 theorem Real.jacobiEpsilonk_eq_integral_sn (hk0 : 0 < k) (hk1 : k < 1) {x : ℝ}
     (hx0 : -Real.compEllIntKm (k ^ 2) < x) (hx1 : x < Real.compEllIntKm (k ^ 2)) :
     Real.jacobiEpsilonk x k =
       ∫ t in (0 : ℝ)..Real.jacobiSnm x (k ^ 2), √((1 - k ^ 2 * t ^ 2) / (1 - t ^ 2)) := by
-  sorry
+  have hm : k ^ 2 < 1 := by nlinarith
+  have a0 := je22b_jacobiAmm_strictMono hm hx0
+  have a1 := je22b_jacobiAmm_strictMono hm hx1
+  simp only [Real.jacobiAmm_neg hm, Real.jacobiAmm_compEllIntKm hm] at a0 a1
+  set A := Real.jacobiAmm x (k ^ 2) with hA
+  have hpt : ∀ θ ∈ Set.Ioo (-(π / 2)) (π / 2),
+      |cos θ| * √((1 - k ^ 2 * sin θ ^ 2) / (1 - sin θ ^ 2)) =
+        (1 - k ^ 2 * sin θ ^ 2) ^ (1 / 2 : ℝ) := by
+    intro θ hθ
+    have hc := Real.cos_pos_of_mem_Ioo hθ
+    rw [abs_of_pos hc, show 1 - sin θ ^ 2 = cos θ ^ 2 by rw [← Real.sin_sq_add_cos_sq θ]; ring,
+      Real.sqrt_div' _ (sq_nonneg _), Real.sqrt_sq hc.le, ← Real.sqrt_eq_rpow]
+    field_simp
+  have key : ∀ a b : ℝ, -(π / 2) < a → a ≤ b → b < π / 2 →
+      ∫ t in sin a..sin b, √((1 - k ^ 2 * t ^ 2) / (1 - t ^ 2)) =
+        ∫ θ in a..b, (1 - k ^ 2 * sin θ ^ 2) ^ (1 / 2 : ℝ) := by
+    intro a b ha hab hb
+    exact p22R1_subst_mono hab continuous_sin.continuousOn
+      (Real.strictMonoOn_sin.mono (Set.Icc_subset_Icc ha.le hb.le))
+      (fun θ _ => Real.hasDerivAt_sin θ)
+      (fun θ hθ => hpt θ ⟨by linarith [hθ.1], by linarith [hθ.2]⟩)
+  rw [← Real.incEllIntEm_jacobiAmm hm, Real.incEllIntEm, Real.jacobiSnm, ← hA]
+  rcases le_total 0 A with h | h
+  · have := key 0 A (by linarith [Real.pi_pos]) h a1
+    rw [Real.sin_zero] at this; exact this.symm
+  · have := key A 0 a0 h (by linarith [Real.pi_pos])
+    rw [Real.sin_zero] at this
+    rw [intervalIntegral.integral_symm, ← this, intervalIntegral.integral_symm, neg_neg]
 
 /-- DLMF 22.16.15: `ℰ(x, k) = -k² ∫₀ˣ sn²(t, k) dt + x`. -/
 @[dlmf 22.16.E15 "special case: real modulus with k² < 1"]
@@ -275,16 +319,80 @@ theorem Real.jacobiEpsilonk_add_two_compEllIntKm (hm : k ^ 2 < 1) (x : ℝ) :
   rw [← Real.incEllIntEm_jacobiAmm hm, ← Real.incEllIntEm_jacobiAmm hm,
     Real.jacobiAmm_add_two_compEllIntKm hm, Real.incEllIntEm_add_pi hm]
 
-/-- DLMF 22.16.18: `ℰ(x,k) = -k² ∫₀ˣ cd²(t,k) dt + x + k² sn(x,k) cd(x,k)`. Admitted. -/
+lemma p22R1_hasDerivAt_eps {k : ℝ} (hm : k ^ 2 < 1) (x : ℝ) :
+    HasDerivAt (fun x => Real.jacobiEpsilonk x k) (Real.jacobiDnm x (k ^ 2) ^ 2) x :=
+  (((je22b_continuous_jacobiDnm hm).pow 2).integral_hasStrictDerivAt 0 x).hasDerivAt
+
+lemma p22R1_cont_sn {m : ℝ} (hm : m < 1) : Continuous fun u => Real.jacobiSnm u m :=
+  continuous_iff_continuousAt.mpr fun u => (Real.hasDerivAt_jacobiSnm hm u).continuousAt
+
+lemma p22R1_cont_cn {m : ℝ} (hm : m < 1) : Continuous fun u => Real.jacobiCnm u m :=
+  continuous_iff_continuousAt.mpr fun u => (Real.hasDerivAt_jacobiCnm hm u).continuousAt
+
+lemma p22R1_ftc {F f : ℝ → ℝ} (hF : ∀ t, HasDerivAt F (f t) t) (hf : Continuous f) (x : ℝ) :
+    ∫ t in (0 : ℝ)..x, f t = F x - F 0 :=
+  intervalIntegral.integral_eq_sub_of_hasDerivAt (fun t _ => hF t) (hf.intervalIntegrable _ _)
+
+lemma p22R1_sn_zero {m : ℝ} (hm : m < 1) : Real.jacobiSnm 0 m = 0 := by
+  simp [Real.jacobiSnm, Real.jacobiAmm_zero hm]
+
+
+lemma p22R1_cn_pos {m : ℝ} (hm : m < 1) {t : ℝ} (h0 : -Real.compEllIntKm m < t)
+    (h1 : t < Real.compEllIntKm m) : 0 < Real.jacobiCnm t m := by
+  have a0 := je22b_jacobiAmm_strictMono hm h0
+  have a1 := je22b_jacobiAmm_strictMono hm h1
+  simp only [Real.jacobiAmm_neg hm, Real.jacobiAmm_compEllIntKm hm] at a0 a1
+  exact Real.cos_pos_of_mem_Ioo ⟨a0, a1⟩
+
+lemma p22R1_ftc_on {F f : ℝ → ℝ} {x : ℝ} (hF : ∀ t ∈ Set.uIcc 0 x, HasDerivAt F (f t) t)
+    (hf : ContinuousOn f (Set.uIcc 0 x)) :
+    ∫ t in (0 : ℝ)..x, f t = F x - F 0 :=
+  intervalIntegral.integral_eq_sub_of_hasDerivAt hF hf.intervalIntegrable
+
+
+/-- DLMF 22.16.18: `ℰ(x,k) = -k² ∫₀ˣ cd²(t,k) dt + x + k² sn(x,k) cd(x,k)`. -/
 @[dlmf 22.16.E18 "special case: real modulus 0 < k < 1"]
 theorem Real.jacobiEpsilonk_eq_integral_cd_sq (hk0 : 0 < k) (hk1 : k < 1) (x : ℝ) :
     Real.jacobiEpsilonk x k =
       -k ^ 2 * (∫ t in (0 : ℝ)..x, (Real.jacobiCnm t (k ^ 2) / Real.jacobiDnm t (k ^ 2)) ^ 2) +
         x + k ^ 2 * Real.jacobiSnm x (k ^ 2) *
           (Real.jacobiCnm x (k ^ 2) / Real.jacobiDnm x (k ^ 2)) := by
-  sorry
+  have hm : k ^ 2 < 1 := by nlinarith
+  have hdn := fun t => (Real.jacobiDnm_pos hm t).ne'
+  have cdn := je22b_continuous_jacobiDnm hm
+  have csn := p22R1_cont_sn hm
+  have ccn := p22R1_cont_cn hm
+  have cg : Continuous fun t => (Real.jacobiCnm t (k ^ 2) / Real.jacobiDnm t (k ^ 2)) ^ 2 := by
+    first
+    | exact (ccn.div cdn hdn).pow 2
+    | exact (csn.div cdn hdn).pow 2
+    | exact (continuous_const.div cdn hdn).pow 2
+  have hF : ∀ t, HasDerivAt (fun t => 1 * t + k ^ 2 * (Real.jacobiSnm t (k ^ 2) * (Real.jacobiCnm t (k ^ 2) / Real.jacobiDnm t (k ^ 2))))
+      (Real.jacobiDnm t (k ^ 2) ^ 2 - (-k ^ 2) * (Real.jacobiCnm t (k ^ 2) / Real.jacobiDnm t (k ^ 2)) ^ 2) t := by
+    intro t
+    refine (((hasDerivAt_id t).const_mul (1)).add
+      (((Real.hasDerivAt_jacobiSnm hm t).mul ((Real.hasDerivAt_jacobiCnm hm t).div
+        (Real.hasDerivAt_jacobiDnm hm t) (hdn t))).const_mul (k ^ 2))).congr_deriv ?_
+    have h1 := Real.jacobiSnm_sq_add_jacobiCnm_sq t (k ^ 2)
+    have h2 := Real.mul_jacobiSnm_sq_add_jacobiDnm_sq hm t
+    have hd := hdn t
+    simp only [Pi.div_apply]
+    generalize Real.jacobiSnm t (k ^ 2) = s at *
+    generalize Real.jacobiCnm t (k ^ 2) = c at *
+    generalize Real.jacobiDnm t (k ^ 2) = d at *
+    field_simp
+    linear_combination (c^2*k^2-d^2) * h2
+  have cd2 : Continuous fun t => Real.jacobiDnm t (k ^ 2) ^ 2 := cdn.pow 2
+  have cg2 : Continuous fun t => (-k ^ 2) * (Real.jacobiCnm t (k ^ 2) / Real.jacobiDnm t (k ^ 2)) ^ 2 := cg.const_mul _
+  have key := p22R1_ftc hF (cd2.sub cg2) x
+  rw [intervalIntegral.integral_sub (cd2.intervalIntegrable _ _)
+    (cg2.intervalIntegrable _ _), intervalIntegral.integral_const_mul,
+    p22R1_sn_zero hm] at key
+  rw [Real.jacobiEpsilonk]
+  simp only [mul_zero, zero_mul, add_zero, sub_zero] at key
+  linarith
 
-/-- DLMF 22.16.19: `ℰ(x,k) = k²k'² ∫₀ˣ sd²(t,k) dt + k'² x + k² sn(x,k) cd(x,k)`. Admitted. -/
+/-- DLMF 22.16.19: `ℰ(x,k) = k²k'² ∫₀ˣ sd²(t,k) dt + k'² x + k² sn(x,k) cd(x,k)`. -/
 @[dlmf 22.16.E19 "special case: real modulus 0 < k < 1"]
 theorem Real.jacobiEpsilonk_eq_integral_sd_sq (hk0 : 0 < k) (hk1 : k < 1) (x : ℝ) :
     Real.jacobiEpsilonk x k =
@@ -292,39 +400,190 @@ theorem Real.jacobiEpsilonk_eq_integral_sd_sq (hk0 : 0 < k) (hk1 : k < 1) (x : �
           (∫ t in (0 : ℝ)..x, (Real.jacobiSnm t (k ^ 2) / Real.jacobiDnm t (k ^ 2)) ^ 2) +
         (1 - k ^ 2) * x + k ^ 2 * Real.jacobiSnm x (k ^ 2) *
           (Real.jacobiCnm x (k ^ 2) / Real.jacobiDnm x (k ^ 2)) := by
-  sorry
+  have hm : k ^ 2 < 1 := by nlinarith
+  have hdn := fun t => (Real.jacobiDnm_pos hm t).ne'
+  have cdn := je22b_continuous_jacobiDnm hm
+  have csn := p22R1_cont_sn hm
+  have ccn := p22R1_cont_cn hm
+  have cg : Continuous fun t => (Real.jacobiSnm t (k ^ 2) / Real.jacobiDnm t (k ^ 2)) ^ 2 := by
+    first
+    | exact (ccn.div cdn hdn).pow 2
+    | exact (csn.div cdn hdn).pow 2
+    | exact (continuous_const.div cdn hdn).pow 2
+  have hF : ∀ t, HasDerivAt (fun t => (1 - k ^ 2) * t + k ^ 2 * (Real.jacobiSnm t (k ^ 2) * (Real.jacobiCnm t (k ^ 2) / Real.jacobiDnm t (k ^ 2))))
+      (Real.jacobiDnm t (k ^ 2) ^ 2 - (k ^ 2 * (1 - k ^ 2)) * (Real.jacobiSnm t (k ^ 2) / Real.jacobiDnm t (k ^ 2)) ^ 2) t := by
+    intro t
+    refine (((hasDerivAt_id t).const_mul ((1 - k ^ 2))).add
+      (((Real.hasDerivAt_jacobiSnm hm t).mul ((Real.hasDerivAt_jacobiCnm hm t).div
+        (Real.hasDerivAt_jacobiDnm hm t) (hdn t))).const_mul (k ^ 2))).congr_deriv ?_
+    have h1 := Real.jacobiSnm_sq_add_jacobiCnm_sq t (k ^ 2)
+    have h2 := Real.mul_jacobiSnm_sq_add_jacobiDnm_sq hm t
+    have hd := hdn t
+    simp only [Pi.div_apply]
+    generalize Real.jacobiSnm t (k ^ 2) = s at *
+    generalize Real.jacobiCnm t (k ^ 2) = c at *
+    generalize Real.jacobiDnm t (k ^ 2) = d at *
+    field_simp
+    linear_combination (k^2) * h1 +
+        (c^2*k^2-d^2-k^2) * h2
+  have cd2 : Continuous fun t => Real.jacobiDnm t (k ^ 2) ^ 2 := cdn.pow 2
+  have cg2 : Continuous fun t => (k ^ 2 * (1 - k ^ 2)) * (Real.jacobiSnm t (k ^ 2) / Real.jacobiDnm t (k ^ 2)) ^ 2 := cg.const_mul _
+  have key := p22R1_ftc hF (cd2.sub cg2) x
+  rw [intervalIntegral.integral_sub (cd2.intervalIntegrable _ _)
+    (cg2.intervalIntegrable _ _), intervalIntegral.integral_const_mul,
+    p22R1_sn_zero hm] at key
+  rw [Real.jacobiEpsilonk]
+  simp only [mul_zero, zero_mul, add_zero, sub_zero] at key
+  linarith
 
-/-- DLMF 22.16.20: `ℰ(x,k) = k'² ∫₀ˣ nd²(t,k) dt + k² sn(x,k) cd(x,k)`. Admitted. -/
+/-- DLMF 22.16.20: `ℰ(x,k) = k'² ∫₀ˣ nd²(t,k) dt + k² sn(x,k) cd(x,k)`. -/
 @[dlmf 22.16.E20 "special case: real modulus 0 < k < 1"]
 theorem Real.jacobiEpsilonk_eq_integral_nd_sq (hk0 : 0 < k) (hk1 : k < 1) (x : ℝ) :
     Real.jacobiEpsilonk x k =
       (1 - k ^ 2) * (∫ t in (0 : ℝ)..x, (1 / Real.jacobiDnm t (k ^ 2)) ^ 2) +
         k ^ 2 * Real.jacobiSnm x (k ^ 2) * (Real.jacobiCnm x (k ^ 2) / Real.jacobiDnm x (k ^ 2)) :=
             by
-  sorry
+  have hm : k ^ 2 < 1 := by nlinarith
+  have hdn := fun t => (Real.jacobiDnm_pos hm t).ne'
+  have cdn := je22b_continuous_jacobiDnm hm
+  have csn := p22R1_cont_sn hm
+  have ccn := p22R1_cont_cn hm
+  have cg : Continuous fun t => (1 / Real.jacobiDnm t (k ^ 2)) ^ 2 := by
+    first
+    | exact (ccn.div cdn hdn).pow 2
+    | exact (csn.div cdn hdn).pow 2
+    | exact (continuous_const.div cdn hdn).pow 2
+  have hF : ∀ t, HasDerivAt (fun t => 0 * t + k ^ 2 * (Real.jacobiSnm t (k ^ 2) * (Real.jacobiCnm t (k ^ 2) / Real.jacobiDnm t (k ^ 2))))
+      (Real.jacobiDnm t (k ^ 2) ^ 2 - ((1 - k ^ 2)) * (1 / Real.jacobiDnm t (k ^ 2)) ^ 2) t := by
+    intro t
+    refine (((hasDerivAt_id t).const_mul (0)).add
+      (((Real.hasDerivAt_jacobiSnm hm t).mul ((Real.hasDerivAt_jacobiCnm hm t).div
+        (Real.hasDerivAt_jacobiDnm hm t) (hdn t))).const_mul (k ^ 2))).congr_deriv ?_
+    have h1 := Real.jacobiSnm_sq_add_jacobiCnm_sq t (k ^ 2)
+    have h2 := Real.mul_jacobiSnm_sq_add_jacobiDnm_sq hm t
+    have hd := hdn t
+    simp only [Pi.div_apply]
+    generalize Real.jacobiSnm t (k ^ 2) = s at *
+    generalize Real.jacobiCnm t (k ^ 2) = c at *
+    generalize Real.jacobiDnm t (k ^ 2) = d at *
+    field_simp
+    linear_combination (k^2) * h1 +
+        (c^2*k^2-d^2-1) * h2
+  have cd2 : Continuous fun t => Real.jacobiDnm t (k ^ 2) ^ 2 := cdn.pow 2
+  have cg2 : Continuous fun t => ((1 - k ^ 2)) * (1 / Real.jacobiDnm t (k ^ 2)) ^ 2 := cg.const_mul _
+  have key := p22R1_ftc hF (cd2.sub cg2) x
+  rw [intervalIntegral.integral_sub (cd2.intervalIntegrable _ _)
+    (cg2.intervalIntegrable _ _), intervalIntegral.integral_const_mul,
+    p22R1_sn_zero hm] at key
+  rw [Real.jacobiEpsilonk]
+  simp only [mul_zero, zero_mul, add_zero, sub_zero] at key
+  linarith
 
-/-- DLMF 22.16.21: `ℰ(x,k) = -∫₀ˣ dc²(t,k) dt + x + sn(x,k) dc(x,k)` for `-K < x < K`.
-Admitted. -/
+/-- DLMF 22.16.21: `ℰ(x,k) = -∫₀ˣ dc²(t,k) dt + x + sn(x,k) dc(x,k)` for `-K < x < K`. -/
 @[dlmf 22.16.E21 "special case: real modulus 0 < k < 1"]
 theorem Real.jacobiEpsilonk_eq_integral_dc_sq (hk0 : 0 < k) (hk1 : k < 1) {x : ℝ}
     (hx0 : -Real.compEllIntKm (k ^ 2) < x) (hx1 : x < Real.compEllIntKm (k ^ 2)) :
     Real.jacobiEpsilonk x k =
       -(∫ t in (0 : ℝ)..x, (Real.jacobiDnm t (k ^ 2) / Real.jacobiCnm t (k ^ 2)) ^ 2) + x +
         Real.jacobiSnm x (k ^ 2) * (Real.jacobiDnm x (k ^ 2) / Real.jacobiCnm x (k ^ 2)) := by
-  sorry
+  have hm : k ^ 2 < 1 := by nlinarith
+  have hdn := fun t => (Real.jacobiDnm_pos hm t).ne'
+  have hcn : ∀ t ∈ Set.uIcc 0 x, Real.jacobiCnm t (k ^ 2) ≠ 0 := by
+    intro t ht
+    have hK := Real.compEllIntKm_pos hm
+    refine (p22R1_cn_pos hm ?_ ?_).ne'
+    · cases le_total 0 x with
+      | inl h => rw [Set.uIcc_of_le h] at ht; linarith [ht.1]
+      | inr h => rw [Set.uIcc_of_ge h] at ht; linarith [ht.1]
+    · cases le_total 0 x with
+      | inl h => rw [Set.uIcc_of_le h] at ht; linarith [ht.2]
+      | inr h => rw [Set.uIcc_of_ge h] at ht; linarith [ht.2]
+  have cdn := je22b_continuous_jacobiDnm hm
+  have csn := p22R1_cont_sn hm
+  have ccn := p22R1_cont_cn hm
+  have cg : ContinuousOn (fun t => (Real.jacobiDnm t (k ^ 2) / Real.jacobiCnm t (k ^ 2)) ^ 2) (Set.uIcc 0 x) := by
+    first
+    | exact (cdn.continuousOn.div ccn.continuousOn hcn).pow 2
+    | exact (csn.continuousOn.div ccn.continuousOn hcn).pow 2
+    | exact (continuousOn_const.div ccn.continuousOn hcn).pow 2
+  have hF : ∀ t ∈ Set.uIcc 0 x, HasDerivAt (fun t => 1 * t + Real.jacobiSnm t (k ^ 2) * (Real.jacobiDnm t (k ^ 2) / Real.jacobiCnm t (k ^ 2)))
+      (Real.jacobiDnm t (k ^ 2) ^ 2 - (-1) * (Real.jacobiDnm t (k ^ 2) / Real.jacobiCnm t (k ^ 2)) ^ 2) t := by
+    intro t ht
+    refine (((hasDerivAt_id t).const_mul (1)).add
+      ((Real.hasDerivAt_jacobiSnm hm t).mul ((Real.hasDerivAt_jacobiDnm hm t).div
+        (Real.hasDerivAt_jacobiCnm hm t) (hcn t ht)))).congr_deriv ?_
+    have h1 := Real.jacobiSnm_sq_add_jacobiCnm_sq t (k ^ 2)
+    have h2 := Real.mul_jacobiSnm_sq_add_jacobiDnm_sq hm t
+    have hd := hcn t ht
+    simp only [Pi.div_apply]
+    generalize Real.jacobiSnm t (k ^ 2) = s at *
+    generalize Real.jacobiCnm t (k ^ 2) = c at *
+    generalize Real.jacobiDnm t (k ^ 2) = d at *
+    field_simp
+    linear_combination (d^2) * h1 +
+        (-c^2) * h2
+  have cd2 : ContinuousOn (fun t => Real.jacobiDnm t (k ^ 2) ^ 2) (Set.uIcc 0 x) := (cdn.pow 2).continuousOn
+  have cg2 : ContinuousOn (fun t => (-1) * (Real.jacobiDnm t (k ^ 2) / Real.jacobiCnm t (k ^ 2)) ^ 2) (Set.uIcc 0 x) := continuousOn_const.mul cg
+  have key := p22R1_ftc_on hF (cd2.sub cg2)
+  rw [intervalIntegral.integral_sub cd2.intervalIntegrable cg2.intervalIntegrable,
+    intervalIntegral.integral_const_mul, p22R1_sn_zero hm] at key
+  rw [Real.jacobiEpsilonk]
+  simp only [mul_zero, zero_mul, add_zero, sub_zero] at key
+  linarith
 
-/-- DLMF 22.16.22: `ℰ(x,k) = -k'² ∫₀ˣ nc²(t,k) dt + k'² x + sn(x,k) dc(x,k)` for `-K < x < K`.
-Admitted. -/
+/-- DLMF 22.16.22: `ℰ(x,k) = -k'² ∫₀ˣ nc²(t,k) dt + k'² x + sn(x,k) dc(x,k)` for `-K < x < K`. -/
 @[dlmf 22.16.E22 "special case: real modulus 0 < k < 1"]
 theorem Real.jacobiEpsilonk_eq_integral_nc_sq (hk0 : 0 < k) (hk1 : k < 1) {x : ℝ}
     (hx0 : -Real.compEllIntKm (k ^ 2) < x) (hx1 : x < Real.compEllIntKm (k ^ 2)) :
     Real.jacobiEpsilonk x k =
       -(1 - k ^ 2) * (∫ t in (0 : ℝ)..x, (1 / Real.jacobiCnm t (k ^ 2)) ^ 2) + (1 - k ^ 2) * x +
         Real.jacobiSnm x (k ^ 2) * (Real.jacobiDnm x (k ^ 2) / Real.jacobiCnm x (k ^ 2)) := by
-  sorry
+  have hm : k ^ 2 < 1 := by nlinarith
+  have hdn := fun t => (Real.jacobiDnm_pos hm t).ne'
+  have hcn : ∀ t ∈ Set.uIcc 0 x, Real.jacobiCnm t (k ^ 2) ≠ 0 := by
+    intro t ht
+    have hK := Real.compEllIntKm_pos hm
+    refine (p22R1_cn_pos hm ?_ ?_).ne'
+    · cases le_total 0 x with
+      | inl h => rw [Set.uIcc_of_le h] at ht; linarith [ht.1]
+      | inr h => rw [Set.uIcc_of_ge h] at ht; linarith [ht.1]
+    · cases le_total 0 x with
+      | inl h => rw [Set.uIcc_of_le h] at ht; linarith [ht.2]
+      | inr h => rw [Set.uIcc_of_ge h] at ht; linarith [ht.2]
+  have cdn := je22b_continuous_jacobiDnm hm
+  have csn := p22R1_cont_sn hm
+  have ccn := p22R1_cont_cn hm
+  have cg : ContinuousOn (fun t => (1 / Real.jacobiCnm t (k ^ 2)) ^ 2) (Set.uIcc 0 x) := by
+    first
+    | exact (cdn.continuousOn.div ccn.continuousOn hcn).pow 2
+    | exact (csn.continuousOn.div ccn.continuousOn hcn).pow 2
+    | exact (continuousOn_const.div ccn.continuousOn hcn).pow 2
+  have hF : ∀ t ∈ Set.uIcc 0 x, HasDerivAt (fun t => (1 - k ^ 2) * t + Real.jacobiSnm t (k ^ 2) * (Real.jacobiDnm t (k ^ 2) / Real.jacobiCnm t (k ^ 2)))
+      (Real.jacobiDnm t (k ^ 2) ^ 2 - (-(1 - k ^ 2)) * (1 / Real.jacobiCnm t (k ^ 2)) ^ 2) t := by
+    intro t ht
+    refine (((hasDerivAt_id t).const_mul ((1 - k ^ 2))).add
+      ((Real.hasDerivAt_jacobiSnm hm t).mul ((Real.hasDerivAt_jacobiDnm hm t).div
+        (Real.hasDerivAt_jacobiCnm hm t) (hcn t ht)))).congr_deriv ?_
+    have h1 := Real.jacobiSnm_sq_add_jacobiCnm_sq t (k ^ 2)
+    have h2 := Real.mul_jacobiSnm_sq_add_jacobiDnm_sq hm t
+    have hd := hcn t ht
+    simp only [Pi.div_apply]
+    generalize Real.jacobiSnm t (k ^ 2) = s at *
+    generalize Real.jacobiCnm t (k ^ 2) = c at *
+    generalize Real.jacobiDnm t (k ^ 2) = d at *
+    field_simp
+    linear_combination (d^2-k^2) * h1 +
+        (-c^2+1) * h2
+  have cd2 : ContinuousOn (fun t => Real.jacobiDnm t (k ^ 2) ^ 2) (Set.uIcc 0 x) := (cdn.pow 2).continuousOn
+  have cg2 : ContinuousOn (fun t => (-(1 - k ^ 2)) * (1 / Real.jacobiCnm t (k ^ 2)) ^ 2) (Set.uIcc 0 x) := continuousOn_const.mul cg
+  have key := p22R1_ftc_on hF (cd2.sub cg2)
+  rw [intervalIntegral.integral_sub cd2.intervalIntegrable cg2.intervalIntegrable,
+    intervalIntegral.integral_const_mul, p22R1_sn_zero hm] at key
+  rw [Real.jacobiEpsilonk]
+  simp only [mul_zero, zero_mul, add_zero, sub_zero] at key
+  linarith
 
-/-- DLMF 22.16.23: `ℰ(x,k) = -k'² ∫₀ˣ sc²(t,k) dt + sn(x,k) dc(x,k)` for `-K < x < K`.
-Admitted. -/
+/-- DLMF 22.16.23: `ℰ(x,k) = -k'² ∫₀ˣ sc²(t,k) dt + sn(x,k) dc(x,k)` for `-K < x < K`. -/
 @[dlmf 22.16.E23 "special case: real modulus 0 < k < 1"]
 theorem Real.jacobiEpsilonk_eq_integral_sc_sq (hk0 : 0 < k) (hk1 : k < 1) {x : ℝ}
     (hx0 : -Real.compEllIntKm (k ^ 2) < x) (hx1 : x < Real.compEllIntKm (k ^ 2)) :
@@ -332,7 +591,50 @@ theorem Real.jacobiEpsilonk_eq_integral_sc_sq (hk0 : 0 < k) (hk1 : k < 1) {x : �
       -(1 - k ^ 2) * (∫ t in (0 : ℝ)..x,
           (Real.jacobiSnm t (k ^ 2) / Real.jacobiCnm t (k ^ 2)) ^ 2) +
         Real.jacobiSnm x (k ^ 2) * (Real.jacobiDnm x (k ^ 2) / Real.jacobiCnm x (k ^ 2)) := by
-  sorry
+  have hm : k ^ 2 < 1 := by nlinarith
+  have hdn := fun t => (Real.jacobiDnm_pos hm t).ne'
+  have hcn : ∀ t ∈ Set.uIcc 0 x, Real.jacobiCnm t (k ^ 2) ≠ 0 := by
+    intro t ht
+    have hK := Real.compEllIntKm_pos hm
+    refine (p22R1_cn_pos hm ?_ ?_).ne'
+    · cases le_total 0 x with
+      | inl h => rw [Set.uIcc_of_le h] at ht; linarith [ht.1]
+      | inr h => rw [Set.uIcc_of_ge h] at ht; linarith [ht.1]
+    · cases le_total 0 x with
+      | inl h => rw [Set.uIcc_of_le h] at ht; linarith [ht.2]
+      | inr h => rw [Set.uIcc_of_ge h] at ht; linarith [ht.2]
+  have cdn := je22b_continuous_jacobiDnm hm
+  have csn := p22R1_cont_sn hm
+  have ccn := p22R1_cont_cn hm
+  have cg : ContinuousOn (fun t => (Real.jacobiSnm t (k ^ 2) / Real.jacobiCnm t (k ^ 2)) ^ 2) (Set.uIcc 0 x) := by
+    first
+    | exact (cdn.continuousOn.div ccn.continuousOn hcn).pow 2
+    | exact (csn.continuousOn.div ccn.continuousOn hcn).pow 2
+    | exact (continuousOn_const.div ccn.continuousOn hcn).pow 2
+  have hF : ∀ t ∈ Set.uIcc 0 x, HasDerivAt (fun t => 0 * t + Real.jacobiSnm t (k ^ 2) * (Real.jacobiDnm t (k ^ 2) / Real.jacobiCnm t (k ^ 2)))
+      (Real.jacobiDnm t (k ^ 2) ^ 2 - (-(1 - k ^ 2)) * (Real.jacobiSnm t (k ^ 2) / Real.jacobiCnm t (k ^ 2)) ^ 2) t := by
+    intro t ht
+    refine (((hasDerivAt_id t).const_mul (0)).add
+      ((Real.hasDerivAt_jacobiSnm hm t).mul ((Real.hasDerivAt_jacobiDnm hm t).div
+        (Real.hasDerivAt_jacobiCnm hm t) (hcn t ht)))).congr_deriv ?_
+    have h1 := Real.jacobiSnm_sq_add_jacobiCnm_sq t (k ^ 2)
+    have h2 := Real.mul_jacobiSnm_sq_add_jacobiDnm_sq hm t
+    have hd := hcn t ht
+    simp only [Pi.div_apply]
+    generalize Real.jacobiSnm t (k ^ 2) = s at *
+    generalize Real.jacobiCnm t (k ^ 2) = c at *
+    generalize Real.jacobiDnm t (k ^ 2) = d at *
+    field_simp
+    linear_combination (d^2-1) * h1 +
+        (-c^2+1) * h2
+  have cd2 : ContinuousOn (fun t => Real.jacobiDnm t (k ^ 2) ^ 2) (Set.uIcc 0 x) := (cdn.pow 2).continuousOn
+  have cg2 : ContinuousOn (fun t => (-(1 - k ^ 2)) * (Real.jacobiSnm t (k ^ 2) / Real.jacobiCnm t (k ^ 2)) ^ 2) (Set.uIcc 0 x) := continuousOn_const.mul cg
+  have key := p22R1_ftc_on hF (cd2.sub cg2)
+  rw [intervalIntegral.integral_sub cd2.intervalIntegrable cg2.intervalIntegrable,
+    intervalIntegral.integral_const_mul, p22R1_sn_zero hm] at key
+  rw [Real.jacobiEpsilonk]
+  simp only [mul_zero, zero_mul, add_zero, sub_zero] at key
+  linarith
 
 /-- DLMF 22.16.24: `ℰ(x,k) = -∫₀ˣ (ns²(t,k) - t⁻²) dt + x⁻¹ + x - cn(x,k) ds(x,k)` for
 `0 < |x| < 2K` (the integrand has a removable singularity at `t = 0`). Admitted. -/
@@ -368,22 +670,60 @@ theorem Real.jacobiEpsilonk_eq_integral_cs_sq (hk0 : 0 < k) (hk1 : k < 1) {x : �
   sorry
 
 /-- DLMF 22.16.27: the quasi-addition formula
-`ℰ(x₁ + x₂, k) = ℰ(x₁, k) + ℰ(x₂, k) - k² sn(x₁,k) sn(x₂,k) sn(x₁ + x₂,k)`. Admitted. -/
+`ℰ(x₁ + x₂, k) = ℰ(x₁, k) + ℰ(x₂, k) - k² sn(x₁,k) sn(x₂,k) sn(x₁ + x₂,k)`. -/
 @[dlmf 22.16.E27 "special case: real modulus with k² < 1"]
 theorem Real.jacobiEpsilonk_add (hm : k ^ 2 < 1) (x₁ x₂ : ℝ) :
     Real.jacobiEpsilonk (x₁ + x₂) k = Real.jacobiEpsilonk x₁ k + Real.jacobiEpsilonk x₂ k -
       k ^ 2 * Real.jacobiSnm x₁ (k ^ 2) * Real.jacobiSnm x₂ (k ^ 2) *
         Real.jacobiSnm (x₁ + x₂) (k ^ 2) := by
-  sorry
+  set m := k ^ 2 with hmdef
+  set v := x₂
+  let G : ℝ → ℝ := fun u => Real.jacobiEpsilonk (u + v) k - Real.jacobiEpsilonk u k -
+    Real.jacobiEpsilonk v k + m * Real.jacobiSnm u m * Real.jacobiSnm v m * Real.jacobiSnm (u + v) m
+  have hG : ∀ u, HasDerivAt G 0 u := by
+    intro u
+    have e1 := (p22R1_hasDerivAt_eps hm (u + v)).comp u ((hasDerivAt_id u).add_const v)
+    have e2 := p22R1_hasDerivAt_eps hm u
+    have s1 := Real.hasDerivAt_jacobiSnm hm u
+    have s2 := (Real.hasDerivAt_jacobiSnm hm (u + v)).comp u ((hasDerivAt_id u).add_const v)
+    have hd := (((e1.sub e2).sub_const (Real.jacobiEpsilonk v k)).add
+      (((s1.const_mul m).mul_const (Real.jacobiSnm v m)).mul s2))
+    refine HasDerivAt.congr_deriv (f := G) hd ?_
+    simp only [id, Function.comp_def, mul_zero, zero_add, add_zero]
+    rw [Real.jacobiSnm_add hm, Real.jacobiCnm_add hm, Real.jacobiDnm_add hm]
+    have hD := (Real.one_sub_mul_jacobiSnm_sq_mul_sq_pos hm u v).ne'
+    have h1 := Real.jacobiSnm_sq_add_jacobiCnm_sq u m
+    have h2 := Real.mul_jacobiSnm_sq_add_jacobiDnm_sq hm u
+    have h3 := Real.jacobiSnm_sq_add_jacobiCnm_sq v m
+    have h4 := Real.mul_jacobiSnm_sq_add_jacobiDnm_sq hm v
+    generalize Real.jacobiSnm u m = su at *
+    generalize Real.jacobiCnm u m = cu at *
+    generalize Real.jacobiDnm u m = du at *
+    generalize Real.jacobiSnm v m = sv at *
+    generalize Real.jacobiCnm v m = cv at *
+    generalize Real.jacobiDnm v m = dv at *
+    generalize hDdef : 1 - m * su ^ 2 * sv ^ 2 = D at hD ⊢
+    field_simp
+    linear_combination (-du^2*cv^2*m*D+du^2*m*D) * h1 +
+        (su^2*du^2*m*D+cu^2*du^2*m*D-du^2*m*D) * h3 +
+        (du^2*D) * h4 +
+        (-su*cu*du*sv*cv*dv*m+du^2*dv^2+du^2*D) * hDdef
+  have := is_const_of_deriv_eq_zero (fun u => (hG u).differentiableAt) (fun u => (hG u).deriv) x₁ 0
+  simp only [G, zero_add, Real.jacobiEpsilonk, intervalIntegral.integral_same,
+    Real.jacobiSnm, Real.jacobiAmm_zero hm, Real.sin_zero] at this ⊢
+  linarith
 
-/-- DLMF 22.16.28: `ℰ(x + K, k) = ℰ(x, k) + E(k) - k² sn(x,k) cd(x,k)`. Admitted. -/
+/-- DLMF 22.16.28: `ℰ(x + K, k) = ℰ(x, k) + E(k) - k² sn(x,k) cd(x,k)`. -/
 @[dlmf 22.16.E28 "special case: real modulus with k² < 1"]
 theorem Real.jacobiEpsilonk_add_compEllIntKm (hm : k ^ 2 < 1) (x : ℝ) :
     Real.jacobiEpsilonk (x + Real.compEllIntKm (k ^ 2)) k = Real.jacobiEpsilonk x k +
       Real.compEllIntEm (k ^ 2) -
         k ^ 2 * Real.jacobiSnm x (k ^ 2) * (Real.jacobiCnm x (k ^ 2) / Real.jacobiDnm x (k ^ 2)) :=
             by
-  sorry
+  rw [Real.jacobiEpsilonk_add hm, (Real.jacobi_compEllIntKm hm).1, (Real.jacobi_add_compEllIntKm hm x).1,
+    ← Real.incEllIntEm_jacobiAmm hm (Real.compEllIntKm (k ^ 2)), Real.jacobiAmm_compEllIntKm hm,
+    Real.incEllIntEm_pi_div_two]
+  ring
 
 /-- DLMF 22.16.30: `ℰ(x,k) = θ₄'(ξ,q)/(θ₃²(0,q) θ₄(ξ,q)) + (E(k)/K(k)) x` with
 `ξ = x/θ₃²(0,q) = πx/(2K)` and `θ_j(·, q) = θ_j(·|τ)`, `τ = iK'/K`, for real `x` and
@@ -407,8 +747,7 @@ section Zeta
 variable {k : ℝ}
 
 /-- DLMF §22.16(iii), prose: `Z(x|k)` satisfies the quasi-addition formula 22.16.27,
-`Z(x₁ + x₂|k) = Z(x₁|k) + Z(x₂|k) - k² sn(x₁) sn(x₂) sn(x₁ + x₂)` (from the admitted
-22.16.27). -/
+`Z(x₁ + x₂|k) = Z(x₁|k) + Z(x₂|k) - k² sn(x₁) sn(x₂) sn(x₁ + x₂)` (from 22.16.27). -/
 @[dlmf 22.16.iii "special case: real modulus with k² < 1"]
 theorem Real.jacobiZetaFunctionk_add (hm : k ^ 2 < 1) (x₁ x₂ : ℝ) :
     Real.jacobiZetaFunctionk (x₁ + x₂) k =
@@ -418,7 +757,7 @@ theorem Real.jacobiZetaFunctionk_add (hm : k ^ 2 < 1) (x₁ x₂ : ℝ) :
   simp only [Real.jacobiZetaFunctionk, Real.jacobiEpsilonk_add hm]
   ring
 
-/-- DLMF 22.16.33: `Z(x + K|k) = Z(x|k) - k² sn(x,k) cd(x,k)` (from the admitted 22.16.28). -/
+/-- DLMF 22.16.33: `Z(x + K|k) = Z(x|k) - k² sn(x,k) cd(x,k)` (from 22.16.28). -/
 @[dlmf 22.16.E33 "special case: real modulus with k² < 1"]
 theorem Real.jacobiZetaFunctionk_add_compEllIntKm (hm : k ^ 2 < 1) (x : ℝ) :
     Real.jacobiZetaFunctionk (x + Real.compEllIntKm (k ^ 2)) k = Real.jacobiZetaFunctionk x k -

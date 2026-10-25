@@ -13,6 +13,9 @@ public import DLMF.EllipticIntegrals.Expansions
 public import DLMF.EllipticIntegrals.Inequalities
 public import DLMF.EllipticIntegrals.LegendreIdentities
 public import DLMF.EllipticIntegrals.Legendre
+public import DLMF.EllipticIntegrals.P19sR1Bounds
+public import DLMF.EllipticIntegrals.P19sR1Connection
+public import DLMF.EllipticIntegrals.P19sR1Legendre
 public import DLMF.EllipticIntegrals.Quadratic
 public import DLMF.EllipticIntegrals.Reduction
 public import DLMF.EllipticIntegrals.Relations

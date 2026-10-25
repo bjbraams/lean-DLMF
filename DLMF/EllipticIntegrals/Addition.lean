@@ -533,6 +533,24 @@ theorem incEllIntEk_duplication {k θ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ I
   have h := incEllIntEk_add hk hθ hθ hψ hs hc
   linear_combination -h
 
+/-- Half-angle tangent: `tan(ψ/2) = sin ψ/(1 + cos ψ)` when `1 + cos ψ ≠ 0`. -/
+theorem p19lR1_tan_half {ψ : ℝ} (h : 1 + Real.cos ψ ≠ 0) :
+    Real.tan (ψ / 2) = Real.sin ψ / (1 + Real.cos ψ) := by
+  have hc : Real.cos (ψ / 2) ≠ 0 := by
+    intro h0
+    apply h
+    have : Real.cos ψ = 2 * Real.cos (ψ / 2) ^ 2 - 1 := by
+      rw [← Real.cos_two_mul]; ring_nf
+    rw [this, h0]; ring
+  have hs : Real.sin ψ = 2 * Real.sin (ψ / 2) * Real.cos (ψ / 2) := by
+    rw [← Real.sin_two_mul]; ring_nf
+  have hcc : 1 + Real.cos ψ = 2 * Real.cos (ψ / 2) ^ 2 := by
+    have : Real.cos ψ = 2 * Real.cos (ψ / 2) ^ 2 - 1 := by
+      rw [← Real.cos_two_mul]; ring_nf
+    rw [this]; ring
+  rw [Real.tan_eq_sin_div_cos, hs, hcc]
+  field_simp
+
 /-- DLMF 19.11.15 (remaining formulas): for `ψ ∈ [0, π]` with `sin ψ`, `cos ψ` given by
 (19.11.14) and the first formula of (19.11.15), real `k² < 1` and `θ ∈ [0, π/2)`:
 `tan(ψ/2) = (tan θ) Δ(θ)`, `sin θ = (sin ψ)/√((1 + cos ψ)(1 + Δ(ψ)))`,
@@ -545,7 +563,64 @@ theorem duplication_half_angle {k θ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ Ic
       Real.cos θ = Real.sqrt ((Real.cos ψ + ei19b_delta k ψ) / (1 + ei19b_delta k ψ)) ∧
       Real.tan θ =
         Real.tan (ψ / 2) * Real.sqrt ((1 + Real.cos ψ) / (Real.cos ψ + ei19b_delta k ψ)) := by
-  sorry
+  -- `ψ ∈ [0, π]` is not needed: `sin ψ`, `cos ψ` already determine all four identities.
+  have _ := hψ
+  set s := Real.sin θ with hs_def
+  set c := Real.cos θ with hc_def
+  have hsc : s ^ 2 + c ^ 2 = 1 := Real.sin_sq_add_cos_sq θ
+  have hcpos : 0 < c := Real.cos_pos_of_mem_Ioo ⟨by linarith [hθ.1, Real.pi_pos], hθ.2⟩
+  have hs0 : 0 ≤ s := Real.sin_nonneg_of_nonneg_of_le_pi hθ.1 (by linarith [hθ.2, Real.pi_pos])
+  have hx1 : s ^ 2 < 1 := by nlinarith
+  have hk0 : 0 ≤ k ^ 2 := sq_nonneg k
+  have hkx : k ^ 2 * s ^ 2 < 1 := by nlinarith [sq_nonneg s]
+  set D := ei19b_delta k θ with hD_def
+  have hD2 : D ^ 2 = 1 - k ^ 2 * s ^ 2 := by
+    rw [hD_def, ei19b_delta, Real.sq_sqrt (by linarith)]
+  have hDpos : 0 < D := Real.sqrt_pos.2 (by linarith)
+  set Q := 1 - k ^ 2 * s ^ 4 with hQ_def
+  have hQpos : 0 < Q := by nlinarith [sq_nonneg s, mul_nonneg hk0 (sq_nonneg s)]
+  set N := 1 - 2 * k ^ 2 * s ^ 2 + k ^ 2 * s ^ 4 with hN_def
+  have hNpos : 0 < N := by
+    have : s ^ 2 * (2 - s ^ 2) ≤ 1 := by nlinarith [sq_nonneg (1 - s ^ 2)]
+    nlinarith [mul_nonneg hk0 (sq_nonneg s), mul_le_mul_of_nonneg_left this hk0]
+  have hsinψ : Real.sin ψ = 2 * s * c * D / Q := by
+    rw [hs, ei19b_dupSin, Real.sin_two_mul]
+  have hcosψ : Real.cos ψ = (c ^ 2 - s ^ 2 + k ^ 2 * s ^ 4) / Q := by
+    rw [hc, ei19b_dupCos, Real.cos_two_mul]
+    congr 1; nlinarith
+  have h1c : 1 + Real.cos ψ = 2 * c ^ 2 / Q := by
+    rw [hcosψ]; field_simp; nlinarith
+  have hΔψ : ei19b_delta k ψ = N / Q := by
+    rw [ei19b_delta, hsinψ]
+    rw [show 1 - k ^ 2 * (2 * s * c * D / Q) ^ 2 = (N / Q) ^ 2 by
+      field_simp
+      have hc2 : c ^ 2 = 1 - s ^ 2 := by linarith
+      rw [hc2, hD2, hQ_def, hN_def]
+      ring]
+    exact Real.sqrt_sq (div_pos hNpos hQpos).le
+  have h1Δ : 1 + ei19b_delta k ψ = 2 * D ^ 2 / Q := by
+    rw [hΔψ, hD2]; field_simp; ring
+  have hcΔ : Real.cos ψ + ei19b_delta k ψ = 2 * c ^ 2 * D ^ 2 / Q := by
+    rw [hΔψ, hcosψ, hD2]; field_simp
+    have hc2 : c ^ 2 = 1 - s ^ 2 := by linarith
+    rw [hc2, hN_def]; ring
+  have hthalf : Real.tan (ψ / 2) = s * D / c := by
+    rw [p19lR1_tan_half (by rw [h1c]; positivity), hsinψ, h1c]
+    field_simp
+  have htanθ : Real.tan θ = s / c := Real.tan_eq_sin_div_cos θ
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · rw [hthalf, htanθ]; ring
+  · rw [h1c, h1Δ, hsinψ]
+    rw [show 2 * c ^ 2 / Q * (2 * D ^ 2 / Q) = (2 * c * D / Q) ^ 2 by ring,
+      Real.sqrt_sq (by positivity)]
+    field_simp
+  · rw [hcΔ, h1Δ]
+    rw [show 2 * c ^ 2 * D ^ 2 / Q / (2 * D ^ 2 / Q) = c ^ 2 by field_simp,
+      Real.sqrt_sq hcpos.le]
+  · rw [h1c, hcΔ, hthalf, htanθ]
+    rw [show 2 * c ^ 2 / Q / (2 * c ^ 2 * D ^ 2 / Q) = (1 / D) ^ 2 by field_simp,
+      Real.sqrt_sq (by positivity)]
+    field_simp
 
 /-- DLMF 19.11.16–19.11.17: `Π(ψ, α², k) = 2Π(θ, α², k) + α² R_C(γ - δ, γ)`,
 `γ = (csc²θ - α²)²(csc²ψ - α²)`, `δ = α²(1 - α²)(α² - k²)`, for real `k² < 1`,

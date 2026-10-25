@@ -35,7 +35,7 @@ DECL = re.compile(r'^(?:@\[[^\]]*\]\s*)?(?:(?:private|protected|noncomputable|no
                   r'(theorem|lemma|def|abbrev|instance|structure|inductive|class)\s+([^\s(:{\[]+)', re.M)
 LINK = re.compile(r'\[(`?)([^\]`]+)`?\]\(([^)#]*\.lean)(?:#L(\d+))?\) '
                   r'\((admitted|proved|proved from admissions|definition|defined|nonstandard axioms)\)')
-EQLINE = re.compile(r'^- \[(\d+\.\d+\.(?:[ETF]\d+(?:_\d+)*|[ivx]+))\]\(https://dlmf\.nist\.gov/\1\):')
+EQLINE = re.compile(r'^- \[(\d+\.\d+(?:\.(?:[ETF]\d+(?:_\d+)*|[ivx]+))?)\]\(https://dlmf\.nist\.gov/\1\):')
 
 
 def strip_comments(s):
@@ -161,7 +161,17 @@ def main():
 
         out = []
         seen_ids = set()
-        for line in text.split('\n'):
+        # Lines sharing an ID: what any of them mentions counts for all, and missing
+        # declarations are appended to the last of them only.
+        lines_in = text.split('\n')
+        id_text = collections.defaultdict(str)
+        last_line = {}
+        for k, l in enumerate(lines_in):
+            em0 = EQLINE.match(l)
+            if em0:
+                id_text[em0.group(1)] += l + '\n'
+                last_line[em0.group(1)] = k
+        for k, line in enumerate(lines_in):
             em = EQLINE.match(line)
             if not em:
                 out.append(LINK.sub(lambda m: relink(m)[0], line))
@@ -176,16 +186,23 @@ def main():
                     linked.add(decl)
                 return s
             line = LINK.sub(rep, line)
+            if last_line[lid] != k:
+                out.append(line)
+                continue
+            all_text = id_text[lid]
+            for m in LINK.finditer(all_text):
+                linked.add(m.group(2))
             linked_suffix = {s for d in linked for s in suffixes(d)}
             extra = []
             for e in by_id.get(lid, []):
-                if e['decl'] in linked or e['decl'] in linked_suffix or label(e['decl']).strip('`') in line:
+                if (e['decl'] in linked or e['decl'] in linked_suffix
+                        or label(e['decl']).strip('`') in all_text):
                     continue
                 if e['project'] == 'lean-DLMF':
                     extra.append(fmt(e))
                     stat['appended'] += 1
                 elif e['docUrl'] or e['sourceUrl']:
-                    if e['decl'] in line:
+                    if e['decl'] in all_text:
                         continue
                     extra.append(f"{e['project']}: [`{e['decl']}`]({e['docUrl'] or e['sourceUrl']})")
                     stat['upstream pointers'] += 1

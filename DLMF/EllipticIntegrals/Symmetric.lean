@@ -8,6 +8,8 @@ module
 public import Carlson.Elliptic.Standard
 public import Carlson.R.SingleIntegral.PositiveRay
 public import Carlson.R.Homogeneity
+public import Carlson.Elliptic.ReductionTables
+public import DLMF.EllipticIntegrals.P19sR1Bounds
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
 public import Mathlib.Tactic.CrossRefAttribute
 
@@ -528,6 +530,41 @@ theorem symEllIntRJ_one_one_one_one : symEllIntRJ 1 1 1 1 = 1 := by
 
 /-! ### `R_G` and further representations -/
 
+/-- DLMF 19.21.10 at the level of the defining integrals, **stronger than DLMF** in allowing
+`x = 0`: `2R_G(x, y, z) = z R_F(x, y, z) - (1/3)(x - z)(y - z) R_D(x, y, z)
++ x^{1/2} y^{1/2} z^{-1/2}` for admissible `x` and `y, z ∈ ℂ \ (-∞, 0]`. Proved from the exact
+antiderivative of `p19sR1_RG_identity`. -/
+@[dlmf 19.21.E10]
+theorem p19sR1_two_mul_symEllIntRG {x y z : ℂ} (hx : symEllIntArg x) (hy : y ∈ slitPlane)
+    (hz : z ∈ slitPlane) :
+    2 * symEllIntRG x y z = z * symEllIntRF x y z -
+      (1 / 3) * (x - z) * (y - z) * symEllIntRD x y z +
+        x ^ (1 / 2 : ℂ) * y ^ (1 / 2 : ℂ) * z ^ (-1 / 2 : ℂ) := by
+  have key := p19sR1_RG_identity hx hy hz
+  rw [symEllIntRD_eq_integral (ei19c_not_isNegReal_of_mem_slitPlane hz)]
+  simp only [symEllIntRG, symEllIntRF, symEllIntS]
+  linear_combination (1 / 2 : ℂ) * key
+
+/-- Bridge (slit plane): DLMF's `R_G` integral (19.16.2_5) is `Carlson.carlsonRG`. From
+`p19sR1_two_mul_symEllIntRG` and Carlson's Table 9.3-1, row 3 (`lean-codes`). -/
+theorem p19sR1_symEllIntRG_eq_carlsonRG {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
+    (hz : z ∈ slitPlane) : symEllIntRG x y z = Carlson.carlsonRG x y z := by
+  have h1 := p19sR1_two_mul_symEllIntRG (Or.inl hx) hy hz
+  have h2 := Carlson.carlsonR_table_9_3_1_row3 hx hy hz
+  rw [symEllIntRF_eq_carlsonRF hx hy hz, symEllIntRD_eq_symEllIntR hx hy hz,
+    symEllIntR_of_mem _ _ (ei19c_slit3 hx hy hz), show -(3 / 2 : ℂ) = -3 / 2 by ring] at h1
+  have ex : x * x ^ (-1 / 2 : ℂ) = x ^ (1 / 2 : ℂ) := by
+    calc x * x ^ (-1 / 2 : ℂ) = x ^ (1 : ℂ) * x ^ (-1 / 2 : ℂ) := by rw [cpow_one]
+      _ = _ := by rw [← cpow_add _ _ (slitPlane_ne_zero hx)]; norm_num
+  have ey : y * y ^ (-1 / 2 : ℂ) = y ^ (1 / 2 : ℂ) := by
+    calc y * y ^ (-1 / 2 : ℂ) = y ^ (1 : ℂ) * y ^ (-1 / 2 : ℂ) := by rw [cpow_one]
+      _ = _ := by rw [← cpow_add _ _ (slitPlane_ne_zero hy)]; norm_num
+  have e3 : x * y * (x ^ (-1 / 2 : ℂ) * y ^ (-1 / 2 : ℂ) * z ^ (-1 / 2 : ℂ)) =
+      x ^ (1 / 2 : ℂ) * y ^ (1 / 2 : ℂ) * z ^ (-1 / 2 : ℂ) := by
+    rw [← ex, ← ey]; ring
+  rw [e3] at h2
+  linear_combination (1 / 2 : ℂ) * h1 - (1 / 2 : ℂ) * h2
+
 /-- DLMF 19.16.17: `R_G(x, y, z) = R_{1/2}(1/2, 1/2, 1/2; x, y, z)` on the slit plane
 (note `a = -1/2` here, outside the integral (19.16.9); the right side is Carlson's
 continuation, `lean-codes`' `Carlson.carlsonRG`). -/
@@ -535,7 +572,9 @@ continuation, `lean-codes`' `Carlson.carlsonRG`). -/
 theorem symEllIntRG_eq_symEllIntR {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
     (hz : z ∈ slitPlane) :
     symEllIntRG x y z = symEllIntR (-1 / 2) (fun _ : Fin 3 => 1 / 2) ![x, y, z] := by
-  sorry
+  rw [p19sR1_symEllIntRG_eq_carlsonRG hx hy hz, symEllIntR_of_mem _ _ (ei19c_slit3 hx hy hz),
+    Carlson.carlsonRG]
+  congr 1; ring
 
 /-- Bridge: on the slit plane DLMF's `R_G` is `Carlson.carlsonRG` of `lean-codes`. -/
 theorem symEllIntRG_eq_carlsonRG {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
@@ -581,13 +620,39 @@ theorem symEllIntR_cons_zero {n : ℕ} {a b₁ : ℝ} {b : Fin n → ℝ} {z : F
         symEllIntR (a : ℂ) (fun i => (b i : ℂ)) z := by
   sorry
 
+/-- `R_E(y, z) = z R_K(y, z) + (1/2) z (y - z) R_{-3/2}(1/2, 3/2; y, z)` (Carlson's notation,
+`lean-codes`), from the contiguous relation `regR2_raise₁` and Table 9.3-2, row 3. -/
+theorem p19sR1_carlsonRE_eq {y z : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
+    Carlson.carlsonRE y z = z * Carlson.TwoVariable.carlsonRK y z +
+      (1 / 2) * z * (y - z) * Carlson.carlsonR (-3 / 2) ![1 / 2, 3 / 2] ![y, z] := by
+  have h3 := Carlson.carlsonR_table_9_3_2_row3 hy hz
+  have hr := Carlson.regR2_raise₁ hy hz (-1 / 2) (1 / 2) (1 / 2)
+  unfold Carlson.carlsonRE Carlson.TwoVariable.carlsonRK Carlson.carlsonR at *
+  simp only [Carlson.TwoVariable.pair] at *
+  norm_num [Fin.sum_univ_succ] at h3 hr ⊢
+  linear_combination (1 / 2 : ℂ) * h3 + (y - z) * hr
+
 /-- DLMF 19.16.23: `R_G(0, y, z) = (π/4) R_{1/2}(1/2, 1/2; y, z) = (π/4) z R_{-1/2}(-1/2, 3/2; y, z)`,
 `y, z ∈ ℂ \ (-∞, 0]` (the last `R`-function has `a = a' = 1/2`). -/
 @[dlmf 19.16.E23]
 theorem symEllIntRG_zero_left {y z : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
     symEllIntRG 0 y z = (π / 4) * symEllIntR (-1 / 2) ![1 / 2, 1 / 2] ![y, z] ∧
       symEllIntRG 0 y z = (π / 4) * z * symEllIntR (1 / 2) ![-1 / 2, 3 / 2] ![y, z] := by
-  sorry
+  have hRE : symEllIntRG 0 y z = (π / 4) * Carlson.carlsonRE y z := by
+    have h := p19sR1_two_mul_symEllIntRG (Or.inr rfl) hy hz
+    rw [symEllIntRF_zero_left hy hz, symEllIntRD_zero_left hy hz,
+      symEllIntR_of_mem _ _ (ei19c_slit2 hy hz), symEllIntR_of_mem _ _ (ei19c_slit2 hy hz),
+      zero_cpow (by norm_num : (1 / 2 : ℂ) ≠ 0), p19sR1_carlsonRE_eq hy hz] at *
+    unfold Carlson.TwoVariable.carlsonRK Carlson.TwoVariable.pair
+    rw [show (-(1 / 2) : ℂ) = -1 / 2 by ring, show (-(3 / 2) : ℂ) = -3 / 2 by ring] at h
+    linear_combination (1 / 2 : ℂ) * h
+  refine ⟨?_, ?_⟩
+  · rw [hRE, symEllIntR_of_mem _ _ (ei19c_slit2 hy hz)]
+    unfold Carlson.carlsonRE Carlson.TwoVariable.pair
+    congr 2; ring
+  · have h1 := Carlson.carlsonR_table_9_3_2_row1 hy hz
+    rw [hRE, symEllIntR_of_mem _ _ (ei19c_slit2 hy hz), show -(1 / 2 : ℂ) = -1 / 2 by ring]
+    linear_combination (-(π / 4 : ℂ)) * h1
 
 /-- DLMF 19.16.24: the incomplete integral recovered from the complete one,
 `R_{-a}(𝐛; 𝐳) = z₁^{a'-b₁}/B(b₁, a'-b₁) ∫₀^∞ t^{b₁-1} (t + z₁)^{-a'}

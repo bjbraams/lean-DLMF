@@ -338,7 +338,33 @@ theorem symEllIntRC_add_symEllIntRC {x y l m : ℝ} (hx : 0 ≤ x) (hy : 0 < y) 
     symEllIntRC ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) + symEllIntRC ((x + m : ℝ) : ℂ)
         ((y + m : ℝ) : ℂ) =
       symEllIntRC x y := by
-  sorry
+  have hnn : ∀ r : ℝ, 0 ≤ r → ¬ IsNegReal (r : ℂ) := fun r hr ⟨_, h⟩ => by
+    simp at h; linarith
+  have hsx := Real.sq_sqrt hx
+  have hsxl := Real.sq_sqrt (show 0 ≤ x + l by linarith)
+  have hsx0 := Real.sqrt_nonneg x
+  have hsxl0 : 0 < √(x + l) := Real.sqrt_pos.mpr (by linarith)
+  have hm : 0 < m := by
+    have hl2 : 0 < l ^ 2 := by positivity
+    rw [eq_div_iff hl2.ne'] at hμ
+    have : (√(x + l) * y + √x * (y + l)) ^ 2 > x * l ^ 2 := by
+      have hB : (√x * (y + l)) ^ 2 = x * (y + l) ^ 2 := by rw [mul_pow, hsx]
+      have hA : 0 < (√(x + l) * y) ^ 2 := by positivity
+      have hAB : 0 ≤ (√(x + l) * y) * (√x * (y + l)) :=
+        mul_nonneg (by positivity) (mul_nonneg hsx0 (by linarith))
+      have hxl : x * l ^ 2 ≤ x * (y + l) ^ 2 :=
+        mul_le_mul_of_nonneg_left (by nlinarith) hx
+      nlinarith
+    nlinarith
+  have hμ' : x + m = (√((x + l) * y * y) + √(x * (y + l) * (y + l))) ^ 2 / l ^ 2 := by
+    rw [hμ, show (x + l) * y * y = (x + l) * (y * y) by ring, Real.sqrt_mul (by linarith),
+      Real.sqrt_mul_self hy.le, show x * (y + l) * (y + l) = x * ((y + l) * (y + l)) by ring,
+      Real.sqrt_mul hx, Real.sqrt_mul_self (by linarith)]
+  have h := symEllIntRF_add_symEllIntRF (x := x) (y := y) (z := y)
+    ⟨hx, hy.le, hy.le, fun _ => ⟨hy, hy⟩, fun h0 => absurd h0 hy.ne'⟩ hl hm hμ'
+  rw [symEllIntRC_eq_symEllIntRF _ (hnn _ (by linarith)), symEllIntRC_eq_symEllIntRF _ (hnn _ (by linarith)),
+    symEllIntRC_eq_symEllIntRF _ (hnn _ hy.le)]
+  exact h
 
 /-- DLMF 19.26.12 (second equation): `x + μ = λ^{-2} (√(x + λ) y + √x (y + λ))²` implies
 `y + μ = (y (y + λ)/λ²) (√x + √(x + λ))²`. -/

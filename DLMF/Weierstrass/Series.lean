@@ -153,7 +153,38 @@ nonzero lattice point. -/
 theorem weierstrassP_laurent (L : PeriodPair) {z : ℂ} (hz0 : z ≠ 0)
     (hz : ∀ w ∈ L.lattice, w ≠ 0 → ‖z‖ < ‖w‖) :
     HasSum (fun n : ℕ ↦ laurentCoeff L (n + 2) * z ^ (2 * (n + 2) - 2)) (℘[L] z - 1 / z ^ 2) := by
-  sorry
+  clear hz0
+  have h := L.weierstrassPExceptSeries_hasSum 0 z 0 (fun l hl => by simpa using hz l l.2 hl)
+  have hdef := L.weierstrassPExcept_def ⟨0, zero_mem _⟩ z
+  simp only [sub_zero] at hdef h
+  rw [show ℘[L] z - 1 / z ^ 2 = L.weierstrassPExcept 0 z by rw [hdef]; simp; ring]
+  have hcoeff : ∀ i, (L.weierstrassPExceptSeries 0 0).coeff i =
+      if i = 0 then 0 else (i + 1) * L.G (i + 2) := by
+    intro i
+    simp only [weierstrassPExceptSeries, FormalMultilinearSeries.coeff_ofScalars]
+    split_ifs with hi h0
+    · simp
+    · simp [sumInvPow, PeriodPair.G]
+    · exact absurd (zero_mem _) h0
+  have h2 := (Function.Injective.hasSum_iff
+    (f := fun i => (L.weierstrassPExceptSeries 0 0).coeff i * z ^ i)
+    (g := fun n : ℕ => 2 * n + 2) (fun a b hab => by simp only at hab; omega) ?_).mpr h
+  · convert h2 using 1
+    funext n
+    simp only [Function.comp_apply, hcoeff, laurentCoeff]
+    simp only [show ¬ (2 * n + 2 = 0) by omega, ↓reduceIte]
+    rw [show 2 * (n + 2) - 2 = 2 * n + 2 by omega, show 2 * n + 2 + 2 = 2 * (n + 2) by ring]
+    push_cast; ring
+  · intro i hi
+    rw [hcoeff]
+    split_ifs with h0
+    · simp
+    · have hodd : Odd i := by
+        rcases Nat.even_or_odd i with ⟨k, hk⟩ | ho
+        · exact absurd ⟨k - 1, by simp only; omega⟩ hi
+        · exact ho
+      rw [L.G_eq_zero_of_odd _ (by rcases hodd with ⟨k, hk⟩; exact ⟨k + 1, by omega⟩)]
+      simp
 
 /-- DLMF 23.9.3: `ζ(z) = 1/z - ∑_{n≥2} c_n z^{2n-1}/(2n - 1)` for `0 < |z| < |z₀|`. -/
 @[dlmf 23.9.E3]

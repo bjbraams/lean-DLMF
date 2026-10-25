@@ -9,6 +9,8 @@ Of the 38 numbered equations in §§21.2–21.6, 37 are in scope and all 37 are 
 21.4.E1 is excluded as numerical. The application equations 21.7.E1–E17 and 21.9.E1–E4
 (21 in all) are excluded, and their purely mathematical theorems are listed below.
 
+**Status after proof round 1 (2026-10-25).** No Chapter 21 admission was proved in this round. The 65 declarations tagged with Chapter 21 IDs are 15 definitions, 40 proved theorems and 10 theorems that still depend on admissions (10 direct admissions in DLMF/RiemannTheta; the counts below record the acquisition and earlier states). The per-line statuses in this ledger are regenerated from the compiled dump. See REVIEW.md, "Proof round 1 for Chapters 19–23 (2026-10-25)".
+
 The entry point is [DLMF/RiemannTheta.lean](DLMF/RiemannTheta.lean), a new area
 with five modules: [Basic](DLMF/RiemannTheta/Basic.lean) (Siegel space, θ, θ with
 characteristics, convergence and analyticity, reductions to Jacobi theta),
@@ -155,8 +157,7 @@ the addition formula 21.6.E8 and the four-product formulas 21.6.E6 and 21.6.E7.
 ## Analytical prose and exclusions
 
 - [21.1.p1](https://dlmf.nist.gov/21.1#p1)–[21.1.p5](https://dlmf.nist.gov/21.1#p5) and table 21.1.T1: notation. Covered by `siegelUpperHalfSpace`, `symplecticJ`, `riemannThetaBig` and `riemannThetaBig_eq_tsum`; ‖·‖, transpose and the integer lattice use Mathlib notation.
-- [21.1](https://dlmf.nist.gov/21.1): [`DLMF.RiemannTheta.riemannThetaBig`](DLMF/RiemannTheta/Basic.lean#L87) (definition); [`DLMF.RiemannTheta.riemannThetaBig_eq_tsum`](DLMF/RiemannTheta/Basic.lean#L514) (proved); [`DLMF.RiemannTheta.siegelUpperHalfSpace`](DLMF/RiemannTheta/Basic.lean#L51) (definition); [`DLMF.RiemannTheta.symplecticJ`](DLMF/RiemannTheta/Modular.lean#L54) (definition).
-- [21.1](https://dlmf.nist.gov/21.1): [`DLMF.RiemannTheta.riemannThetaBig`](DLMF/RiemannTheta/Basic.lean#L87) (definition); [`DLMF.RiemannTheta.riemannThetaBig_eq_tsum`](DLMF/RiemannTheta/Basic.lean#L514) (proved); [`DLMF.RiemannTheta.siegelUpperHalfSpace`](DLMF/RiemannTheta/Basic.lean#L51) (definition); [`DLMF.RiemannTheta.symplecticJ`](DLMF/RiemannTheta/Modular.lean#L54) (definition).
+- [21.1](https://dlmf.nist.gov/21.1): [`DLMF.RiemannTheta.riemannThetaBig`](DLMF/RiemannTheta/Basic.lean#L87) (definition); [`DLMF.RiemannTheta.riemannThetaBig_eq_tsum`](DLMF/RiemannTheta/Basic.lean#L514) (proved); [`DLMF.RiemannTheta.siegelUpperHalfSpace`](DLMF/RiemannTheta/Basic.lean#L51) (definition); [`DLMF.RiemannTheta.symplecticJ`](DLMF/RiemannTheta/Modular.lean#L54) (definition); Mathlib: [`Matrix.PosDef`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/LinearAlgebra/Matrix/PosDef.html#Matrix.PosDef); Mathlib: [`Matrix.J`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/LinearAlgebra/SymplecticGroup.html#Matrix.J).
 - [21.2.i.p1](https://dlmf.nist.gov/21.2#i.p1): absolute and uniform convergence on compact sets, analyticity in each element of z and Ω. Covered by `summable_norm_riemannThetaTerm`, `tendstoUniformlyOn_riemannTheta`, `tendstoLocallyUniformlyOn_riemannTheta`, `continuousOn_riemannTheta`, `differentiableAt_riemannTheta_update` and `differentiableAt_riemannTheta_entry` (all proved).
 - [21.2.i.p2](https://dlmf.nist.gov/21.2#i.p2): the scaled θ̂ is bounded and nonanalytic in z. `riemannThetaScaled_bounded` (proved), `not_differentiable_riemannThetaScaled` (admitted).
 - [21.2.Px1.p1](https://dlmf.nist.gov/21.2#Px1.p1): the example 21.2.E3/E4. Covered by `riemannMatrixExample_mem`, `riemannTheta_example` and `riemannThetaScaled_example`.

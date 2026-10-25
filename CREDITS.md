@@ -1222,3 +1222,19 @@ imported from it, and the Chapter 19 acquisition builds on its Carlson library: 
 R-function, `carlsonRF`, `carlsonRG`, `carlsonRC`, Legendre-form bridges, duplication,
 Landen/AGM, quartic reduction and asymptotics, formalized from B. C. Carlson, *Special
 Functions of Applied Mathematics* (1977). Its proofs are used through imports, not copied.
+
+## Proof round 1 for Chapters 19–23 (2026-10-25)
+
+Chapter 19 proofs reuse the lean-codes Carlson library (Bastiaan J Braams, after B. C. Carlson)
+through imports: `Carlson.hasSum_agmA_zero`, `Carlson.carlsonRE_eq_agm`,
+`Carlson.TwoVariable.carlsonRK_sq_eq_inv_agm` (AGM forms of E and K), `Carlson.R.Homogeneity`,
+`Carlson.R.BinomialSeries` and `Carlson.RPolynomial.Generating` (19.19.2),
+`Carlson.Elliptic.ReductionTables`, `Carlson.TwoVariable.GaussHypergeometric`,
+`Carlson.TwoVariable.R.ElementaryValues` and the Landen modules. Chapter 23 uses Mathlib's
+`PeriodPair.derivWeierstrassP_sq`, the Dedekind eta API and the level-one graded ring for the
+discriminant; Chapter 20 uses Mathlib's `logDeriv_tprod_eq_tsum`, the Eisenstein-series summability
+lemmas (`EisensteinSeries.summable_one_div_norm_rpow`, `r_mul_max_le`) and
+`hasSum_mellin_pi_mul`; the Chapter 22 real bridges use `Mathlib.Analysis.ODE.ExistUnique`. The
+polynomial certificates in the p = 3 cyclic identities of `DLMF/JacobiElliptic/Cyclic.lean` were
+computed with the Singular computer-algebra system and are checked by Lean's `linear_combination`.
+No external proof body was copied.

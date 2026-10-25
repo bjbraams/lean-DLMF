@@ -7,6 +7,7 @@ module
 
 public import DLMF.EllipticIntegrals.Legendre
 public import DLMF.EllipticIntegrals.Symmetric
+public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 
 /-!
 # Legendre's integrals: the statements of DLMF §19.2
@@ -126,13 +127,54 @@ theorem compEllIntKk_neg (k : ℂ) : compEllIntKk (-k) = compEllIntKk k := by
 theorem compEllIntEk_neg (k : ℂ) : compEllIntEk (-k) = compEllIntEk k := by
   simp [compEllIntEk, incEllIntEk]
 
-/-- **Admitted.** DLMF §19.2(ii): the principal branches of `K(k)` and `E(k)` are holomorphic off
+/-- `∫₀^b (1 - k² sin²θ)^s dθ` is holomorphic in `k` on the principal domain
+`1 - k² ∈ ℂ \ (-∞, 0]`, for every exponent `s` and real `b`. -/
+theorem p19lR1_differentiableOn_integral_cpow (s : ℂ) (b : ℝ) :
+    DifferentiableOn ℂ (fun k : ℂ => ∫ θ in (0 : ℝ)..b, (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ s)
+      {k | 1 - k ^ 2 ∈ slitPlane} := by
+  have hU : IsOpen {k : ℂ | 1 - k ^ 2 ∈ slitPlane} :=
+    isOpen_slitPlane.preimage (by fun_prop)
+  refine Complex.differentiableOn_intervalIntegral_of_locally_dominated hU 0 b ?_ ?_ ?_
+  · intro k hk
+    refine (Continuous.cpow (by fun_prop) continuous_const fun θ =>
+      ei19a_one_sub_sq_mul_sin_sq_mem_slitPlane hk θ).aestronglyMeasurable
+  · refine Eventually.of_forall fun θ k hk => ?_
+    have hd : DifferentiableAt ℂ (fun x : ℂ => 1 - x ^ 2 * (Real.sin θ : ℂ) ^ 2) k := by fun_prop
+    exact (hd.cpow (differentiableAt_const s)
+      (ei19a_one_sub_sq_mul_sin_sq_mem_slitPlane hk θ)).differentiableWithinAt
+  · intro k0 hk0
+    obtain ⟨ε, hε, hεU⟩ := Metric.isOpen_iff.1 hU k0 hk0
+    have hball : Metric.closedBall k0 (ε / 2) ⊆ {k : ℂ | 1 - k ^ 2 ∈ slitPlane} :=
+      (Metric.closedBall_subset_ball (by linarith)).trans hεU
+    have hcomp : IsCompact (Metric.closedBall k0 (ε / 2) ×ˢ Icc (0 : ℝ) 1) :=
+      (isCompact_closedBall _ _).prod isCompact_Icc
+    have hcont : ContinuousOn (fun p : ℂ × ℝ => ‖(1 - p.1 ^ 2 * (p.2 : ℂ)) ^ s‖)
+        (Metric.closedBall k0 (ε / 2) ×ˢ Icc (0 : ℝ) 1) := by
+      refine ContinuousOn.norm (ContinuousOn.cpow (by fun_prop) continuousOn_const ?_)
+      rintro ⟨k, u⟩ ⟨hk, hu⟩
+      have := ei19a_one_sub_mul_mem_slitPlane (hball hk) hu.1 hu.2
+      simpa using this
+    obtain ⟨M, hM⟩ := hcomp.exists_bound_of_continuousOn hcont
+    refine ⟨Metric.closedBall k0 (ε / 2), Metric.closedBall_mem_nhds _ (by linarith),
+      fun _ => M, ?_, Eventually.of_forall fun θ k hk => ?_⟩
+    · have : IsFiniteMeasure (volume.restrict (uIoc (0 : ℝ) b)) :=
+        isFiniteMeasure_restrict.2 (by
+          rw [uIoc_eq_union]; exact (measure_union_le _ _).trans_lt
+            (ENNReal.add_lt_top.2 ⟨measure_Ioc_lt_top, measure_Ioc_lt_top⟩) |>.ne)
+      exact integrable_const M
+    · have := hM (k, Real.sin θ ^ 2) ⟨hk, sq_nonneg _, Real.sin_sq_le_one θ⟩
+      simpa using this
+
+/-- DLMF §19.2(ii): the principal branches of `K(k)` and `E(k)` are holomorphic off
 the cuts `(-∞, -1] ∪ [1, ∞)`, i.e. on `{k | 1 - k² ∈ ℂ \ (-∞, 0]}`. -/
 @[dlmf 19.2.ii]
 theorem differentiableOn_compEllIntKk_compEllIntEk :
     DifferentiableOn ℂ compEllIntKk {k | 1 - k ^ 2 ∈ slitPlane} ∧
       DifferentiableOn ℂ compEllIntEk {k | 1 - k ^ 2 ∈ slitPlane} := by
-  sorry
+  refine ⟨p19lR1_differentiableOn_integral_cpow _ _, ?_⟩
+  have h : compEllIntEk = fun k : ℂ => ∫ θ in (0 : ℝ)..(π / 2),
+      (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (1 / 2 : ℂ) := funext compEllIntEk_eq_integral
+  rw [h]; exact p19lR1_differentiableOn_integral_cpow _ _
 
 /-- **Admitted.** DLMF §19.2(ii) and 19.2.9: `K'` and `E'` (defined by 19.2.9) are holomorphic on
 `ℂ \ (-∞, 0]`: the branch point is `k = 0` and the principal branch is `|ph k| ≤ π`
@@ -142,20 +184,47 @@ theorem differentiableOn_cCompEllIntKk_cCompEllIntEk :
     DifferentiableOn ℂ cCompEllIntKk slitPlane ∧ DifferentiableOn ℂ cCompEllIntEk slitPlane := by
   sorry
 
-/-- **Admitted.** DLMF 19.2.8_1: `K'(k) = ∫₀¹ dt/(√(1-t²) √(1-(1-k²)t²))` for `|ph k| < π/2`
+/-- The substitution `t = sin θ`: `∫₀^{π/2} h(sin²θ) dθ = ∫₀¹ (1-t²)^{-1/2} h(t²) dt`. -/
+theorem p19lR1_integral_sin_subst (h : ℂ → ℂ) :
+    ∫ θ in (0 : ℝ)..(π / 2), h ((Real.sin θ : ℂ) ^ 2) =
+      ∫ t in (0 : ℝ)..1, (1 - (t : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) * h ((t : ℂ) ^ 2) := by
+  have hsub := intervalIntegral.integral_deriv_smul_comp_of_deriv_nonneg
+    (a := (0 : ℝ)) (b := π / 2) (f := Real.sin) (f' := Real.cos)
+    (g := fun t : ℝ => (1 - (t : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) * h ((t : ℂ) ^ 2))
+    Real.continuous_sin.continuousOn (fun θ _ => Real.hasDerivAt_sin θ) (fun θ hθ => by
+      rw [min_eq_left Real.pi_div_two_pos.le, max_eq_right Real.pi_div_two_pos.le] at hθ
+      exact (Real.cos_pos_of_mem_Ioo ⟨by linarith [hθ.1, Real.pi_pos], hθ.2⟩).le)
+  rw [Real.sin_zero, Real.sin_pi_div_two] at hsub
+  rw [← hsub]
+  refine intervalIntegral.integral_congr_Ioo_of_le Real.pi_div_two_pos.le fun θ hθ => ?_
+  have hc := Real.cos_pos_of_mem_Ioo ⟨by linarith [hθ.1, Real.pi_pos], hθ.2⟩
+  have hsq : 1 - (Real.sin θ : ℂ) ^ 2 = (Real.cos θ : ℂ) ^ 2 := by
+    exact_mod_cast (by nlinarith [Real.sin_sq_add_cos_sq θ] :
+      1 - Real.sin θ ^ 2 = Real.cos θ ^ 2)
+  simp only [Function.comp_apply, real_smul]
+  rw [hsq, DLMF.Hypergeometric.cpow_sq_neg_half hc]
+  have : (Real.cos θ : ℂ) ≠ 0 := ofReal_ne_zero.mpr hc.ne'
+  field_simp
+
+/-- DLMF 19.2.8_1: `K'(k) = ∫₀¹ dt/(√(1-t²) √(1-(1-k²)t²))` for `|ph k| < π/2`
 (an improper integral at `t = 1`). -/
 @[dlmf 19.2.E8_1]
 theorem cCompEllIntKk_eq_integral {k : ℂ} (hk : 0 < k.re) :
     cCompEllIntKk k = ∫ t in (0 : ℝ)..1,
       (1 - (t : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) * (1 - (1 - k ^ 2) * (t : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) := by
-  sorry
+  rw [(cCompEllIntKk_of_re_pos (Or.inl hk)).1, compEllIntKk_jacobiComodulusk, compEllIntKpk,
+    p19lR1_integral_sin_subst (fun u => (1 - (1 - k ^ 2) * u) ^ (-(1 / 2 : ℂ)))]
 
-/-- **Admitted.** DLMF 19.2.8_2: `E'(k) = ∫₀¹ √(1-(1-k²)t²)/√(1-t²) dt` for `|ph k| < π/2`. -/
+/-- DLMF 19.2.8_2: `E'(k) = ∫₀¹ √(1-(1-k²)t²)/√(1-t²) dt` for `|ph k| < π/2`. -/
 @[dlmf 19.2.E8_2]
 theorem cCompEllIntEk_eq_integral {k : ℂ} (hk : 0 < k.re) :
     cCompEllIntEk k = ∫ t in (0 : ℝ)..1,
       (1 - (1 - k ^ 2) * (t : ℂ) ^ 2) ^ (1 / 2 : ℂ) * (1 - (t : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) := by
-  sorry
+  have h : jacobiComodulusk k ^ 2 = 1 - k ^ 2 := by
+    rw [jacobiComodulusk, one_div, Complex.cpow_ofNat_inv_pow]
+  rw [(cCompEllIntKk_of_re_pos (Or.inl hk)).2, compEllIntEk_eq_integral, h,
+    p19lR1_integral_sin_subst (fun u => (1 - (1 - k ^ 2) * u) ^ (1 / 2 : ℂ))]
+  simp only [mul_comm]
 
 /-- Real bridge for `K'`: for real `k > 0`, `K'(k) = Real.compEllIntKm (1 - k²)`. -/
 theorem cCompEllIntKk_ofReal {k : ℝ} (hk : 0 < k) :
@@ -418,7 +487,55 @@ theorem symEllIntRC_eq_cauchyPV {x y : ℂ} (hy : IsNegReal y) :
       (1 / 2) * cauchyPVIoi (fun t => (((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) + y))⁻¹) (-y.re) := by
   simp [symEllIntRC, hy]
 
-/-- **Admitted.** DLMF 19.2.18: for `0 ≤ x < y`,
+/-- `R_C(0, y) = (π/2) y^{-1/2}` for `y ∈ ℂ \ (-∞, 0]` (via `R_F(0, y, y)`, DLMF 19.16.20). -/
+theorem p19lR1_symEllIntRC_zero_left {y : ℂ} (hy : y ∈ slitPlane) :
+    symEllIntRC 0 y = π / 2 * y ^ (-(1 / 2 : ℂ)) := by
+  rw [symEllIntRC_eq_symEllIntRF 0 (ei19c_not_isNegReal_of_mem_slitPlane hy),
+    symEllIntRF_zero_left hy hy]
+  have : (![y, y] : Fin 2 → ℂ) = fun _ => y := by funext i; fin_cases i <;> rfl
+  rw [this, symEllIntR_const _ _ hy (by norm_num)]
+
+/-- `R_C(x, x) = x^{-1/2}` for `x ∈ ℂ \ (-∞, 0]` (DLMF 19.16.11 with `R_C = R_{-1/2}(1/2, 1)`). -/
+theorem p19lR1_symEllIntRC_self {x : ℂ} (hx : x ∈ slitPlane) :
+    symEllIntRC x x = x ^ (-(1 / 2 : ℂ)) := by
+  rw [symEllIntRC_eq_symEllIntR hx hx]
+  have : (![x, x] : Fin 2 → ℂ) = fun _ => x := by funext i; fin_cases i <;> rfl
+  rw [this, symEllIntR_const _ _ hx]
+  norm_num
+  rw [show (3/2 : ℂ) = 1/2 + 1 by norm_num, Complex.Gamma_add_one _ (by norm_num)]
+  exact mul_ne_zero (by norm_num) ei19c_Gamma_half_ne
+
+/-- `R_C(0, y) = (π/2)/√y` for real `y > 0`. -/
+theorem p19lR1_symEllIntRC_zero_left_real {y : ℝ} (hy : 0 < y) :
+    symEllIntRC 0 y = ((π / 2 / Real.sqrt y : ℝ) : ℂ) := by
+  rw [p19lR1_symEllIntRC_zero_left (by simpa using hy),
+    show (-(1 / 2 : ℂ)) = ((-(1 / 2) : ℝ) : ℂ) by push_cast; ring,
+    ← ofReal_cpow hy.le, Real.rpow_neg hy.le, ← Real.sqrt_eq_rpow]
+  push_cast; ring
+
+/-- For `0 < y < x`, `artanh √((x-y)/x) = ln((√x + √(x-y))/√y)`. -/
+theorem p19lR1_artanh_eq_log {x y : ℝ} (hy : 0 < y) (hxy : y < x) :
+    Real.artanh (Real.sqrt ((x - y) / x)) =
+      Real.log ((Real.sqrt x + Real.sqrt (x - y)) / Real.sqrt y) := by
+  have hx : 0 < x := hy.trans hxy
+  have ha : 0 < Real.sqrt x := Real.sqrt_pos.2 hx
+  have hb : 0 < Real.sqrt (x - y) := Real.sqrt_pos.2 (by linarith)
+  have hc : 0 < Real.sqrt y := Real.sqrt_pos.2 hy
+  have hbx : Real.sqrt (x - y) < Real.sqrt x := Real.sqrt_lt_sqrt (by linarith) (by linarith)
+  have hs : Real.sqrt ((x - y) / x) = Real.sqrt (x - y) / Real.sqrt x := Real.sqrt_div' _ hx.le
+  have hs1 : Real.sqrt (x - y) / Real.sqrt x < 1 := (div_lt_one ha).2 hbx
+  rw [hs, Real.artanh_eq_half_log ⟨by linarith [div_pos hb ha], hs1.le⟩]
+  have hsq : (1 + Real.sqrt (x - y) / Real.sqrt x) / (1 - Real.sqrt (x - y) / Real.sqrt x) =
+      ((Real.sqrt x + Real.sqrt (x - y)) / Real.sqrt y) ^ 2 := by
+    have h1 : Real.sqrt x ^ 2 = x := Real.sq_sqrt hx.le
+    have h2 : Real.sqrt (x - y) ^ 2 = x - y := Real.sq_sqrt (by linarith)
+    have h3 : Real.sqrt y ^ 2 = y := Real.sq_sqrt hy.le
+    have hne : Real.sqrt x - Real.sqrt (x - y) ≠ 0 := by linarith
+    field_simp
+    rw [h3]; nlinarith [h1, h2]
+  rw [hsq, Real.log_pow]; push_cast; ring
+
+/-- DLMF 19.2.18: for `0 ≤ x < y`,
 `R_C(x, y) = (y-x)^{-1/2} arctan √((y-x)/x) = (y-x)^{-1/2} arccos √(x/y)` (the arctan form for
 `x > 0`). -/
 @[dlmf 19.2.E18]
@@ -426,9 +543,29 @@ theorem symEllIntRC_of_lt {x y : ℝ} (hx : 0 ≤ x) (hxy : x < y) :
     symEllIntRC x y = ((Real.arccos (Real.sqrt (x / y)) / Real.sqrt (y - x) : ℝ) : ℂ) ∧
       (0 < x → symEllIntRC x y =
         ((Real.arctan (Real.sqrt ((y - x) / x)) / Real.sqrt (y - x) : ℝ) : ℂ)) := by
-  sorry
+  have hy : 0 < y := hx.trans_lt hxy
+  rcases hx.lt_or_eq with hx | rfl
+  · have h : symEllIntRC x y =
+        ((Real.arccos (Real.sqrt (x / y)) / Real.sqrt (y - x) : ℝ) : ℂ) := by
+      rw [symEllIntRC_eq_carlsonRC (by simpa using hx) (by simpa using hy),
+        Carlson.TwoVariable.carlsonRC_of_lt hx hxy]
+    refine ⟨h, fun _ => ?_⟩
+    rw [h]
+    congr 3
+    have hz : 0 < Real.sqrt (x / y) := Real.sqrt_pos.mpr (div_pos hx hy)
+    rw [Real.arccos_eq_arctan hz]
+    congr 1
+    have h1 : 1 - Real.sqrt (x / y) ^ 2 = (y - x) / y := by
+      rw [Real.sq_sqrt (div_pos hx hy).le]; field_simp
+    rw [h1, Real.sqrt_div' _ hy.le, Real.sqrt_div' _ hy.le, Real.sqrt_div' _ hx.le]
+    have hsy : 0 < Real.sqrt y := Real.sqrt_pos.mpr hy
+    have hsx : 0 < Real.sqrt x := Real.sqrt_pos.mpr hx
+    field_simp
+  · refine ⟨?_, fun h => absurd h (lt_irrefl _)⟩
+    rw [show ((0 : ℝ) : ℂ) = 0 by simp, p19lR1_symEllIntRC_zero_left_real hy]
+    simp
 
-/-- **Admitted.** DLMF 19.2.19: for `0 < y < x`,
+/-- DLMF 19.2.19: for `0 < y < x`,
 `R_C(x, y) = (x-y)^{-1/2} artanh √((x-y)/x) = (x-y)^{-1/2} ln((√x + √(x-y))/√y)`. -/
 @[dlmf 19.2.E19]
 theorem symEllIntRC_of_gt {x y : ℝ} (hy : 0 < y) (hxy : y < x) :
@@ -437,7 +574,12 @@ theorem symEllIntRC_of_gt {x y : ℝ} (hy : 0 < y) (hxy : y < x) :
       symEllIntRC x y =
         ((Real.log ((Real.sqrt x + Real.sqrt (x - y)) / Real.sqrt y) / Real.sqrt (x - y) : ℝ) :
           ℂ) := by
-  sorry
+  have hx : 0 < x := hy.trans hxy
+  have h : symEllIntRC x y = ((Real.log ((Real.sqrt x + Real.sqrt (x - y)) / Real.sqrt y) /
+      Real.sqrt (x - y) : ℝ) : ℂ) := by
+    rw [symEllIntRC_eq_carlsonRC (by simpa using hx) (by simpa using hy),
+      Carlson.TwoVariable.carlsonRC_of_gt hy hxy]
+  exact ⟨by rw [h, p19lR1_artanh_eq_log hy hxy], h⟩
 
 /-- **Admitted.** DLMF 19.2.20: for `y < 0 ≤ x` the Cauchy principal value is hyperbolic:
 `R_C(x, y) = √(x/(x-y)) R_C(x-y, -y) = (x-y)^{-1/2} artanh √(x/(x-y))
