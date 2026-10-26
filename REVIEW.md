@@ -7271,3 +7271,81 @@ the path counts of §26.6(i); plane-partition symmetry classes 26.12.5–17; q-m
 26.16.2–3; 27.11.9 and 27.11.11 (elementary L(1, χ) estimates); Jacobi's cube identity as a formal series
 (toward the Ramanujan congruences); real characters as Jacobi symbols. The 24.10 congruences need a
 p-integrality toolkit (Adams' theorem) that Mathlib lacks.
+
+## Chapters 28–31 acquisition (2026-10-26)
+
+Six agents with disjoint files acquired DLMF Chapters 28–31 (analytical results only; rules as for
+Chapters 24–27): ACQ28A (§§28.1–28.11, Mathieu functions of integer order), ACQ28B (§§28.12–28.19,
+noninteger order, and §§28.29–28.31, Hill's equation, Whittaker–Hill and Ince) and ACQ28C
+(§§28.20–28.28, modified Mathieu functions) in `DLMF/Mathieu`; ACQ29 (§§29.1–29.17) in `DLMF/Lame`;
+ACQ30 (§§30.1–30.12) in `DLMF/Spheroidal`; ACQ31 (§§31.1–31.15) in `DLMF/Heun`. Excluded:
+graphics (28.3, 28.13, 28.21, 29.4, 29.13, 30.7), Applications (28.32–28.33, 29.18–29.19,
+30.13–30.15, 31.16–31.17; the ledgers list their pure mathematics, such as separation of variables
+and Slepian's integral equation 30.15.3) and computation, tables and software sections. Mathlib and
+TauCeti have none of these functions, so there are no upstream pointers.
+
+Design. These functions are solutions of linear ODEs, often normalized eigenfunctions, and every
+definition is genuine. Explicit constructions are used where they exist: Heun's local solution Hl
+(a power series with its three-term recurrence), the Lamé polynomials (from the Chebyshev series of
+§29.15 and finite tridiagonal eigenproblems), the radial Mathieu functions (Bessel cross-product
+series 28.24.1), the spheroidal coefficients a^m_{n,k} and the Ince polynomials. Elsewhere the
+functions are chosen from flagged existence theorems, admitted where not proved, as for the earlier
+Lerch and polylog continuations: the Mathieu fundamental solutions w_I, w_II (uniqueness from
+initial data proved, so the choice is immaterial), a_n(q) and b_n(q) for real q (ordered elements of
+the periodic spectrum), λ_ν(q) and me_ν (endpoint of a continuous continuation along [0, q]), Hill's
+global existence, the Lamé eigenvalues and Ec/Es (regular Sturm–Liouville theory), λ^m_n(γ²) and
+𝖯s, 𝖰s, 𝑄s, and the Heun function and Stieltjes polynomials. The ledgers flag each choice.
+Domain choices: §§28.12(ii)–(iii) and 28.14 for ν ∉ ℤ; Mathieu eigenvalues for real q; spheroidal
+radial asymptotics for real γ > 0.
+
+Counts (compiled tag dump; declarations "admitted" include those depending on admissions):
+Chapter 28: 369 IDs on 497 declarations (83 definitions, 52 proved, 362 admitted); Chapter 29: 212
+IDs on 198 declarations (32, 21, 145); Chapter 30: 76 IDs on 135 declarations (39, 20, 76);
+Chapter 31: 121 IDs on 139 declarations (42, 24, 73). New source admissions: Mathieu 314, Lamé 128,
+Spheroidal 56, Heun 72 (570 in all). Among the proved results: the equivalence of the N = 3
+Fuchsian equation with Heun's equation and Fuchs's exponent relations (31.14), van Vleck's zeros
+and the accessory relation of §31.15, the eight finite Fourier series of the Lamé polynomials
+(29.15), the Whittaker–Hill to Ince reduction, symmetry relations of λ_ν and me_ν, and the
+Mathieu reduction of the spheroidal equation.
+
+### DLMF errata
+
+The agents reported 13 suspected errata or notes, each with numerical evidence; an independent
+verifier re-derived every one from the DLMF 1.2.8 page text with its own numerics, and checked the
+DLMF errata page (none listed). Confirmed and entered in DLMFErrata.md (a): 28.5.6 (sign),
+28.23.2–5 ("for all z when j = 1" only for integer ν), 28.28.11 (e^{iνπ/2}), 28.28.16 (overall sign,
+and — found by the verifier — the lower sign belongs to −π ≤ y ≤ 0, not π ≤ y ≤ 2π; the acquired
+statement was corrected accordingly), §28.31(iii) (powers swapped), 30.11.6 (e^{|ℑ(γz)|}), 31.10.8,
+31.10.17, 31.10.22–23 (Fuchs's relation violated) and 31.10 Example 2 (accessory parameter not
+updated after DLMF's own 31.3.10 erratum). Notes in (c): 28.6.16 at n = 0, 28.5.5 at n = 0, and the
+29.8 Ferrers/Legendre notation. Not confirmed: 28.6.12–13, where the agent had misread DLMF's digit
+grouping; the statements agree with DLMF and the correction notes were removed.
+
+### Integration
+
+Coordinator: umbrellas `DLMF/Mathieu.lean`, `Lame.lean`, `Spheroidal.lean`, `Heun.lean`, imported
+from `DLMF.lean`. `DLMF.Legendre.ferrersP` was moved unchanged from the theorem file
+`DLMF/Legendre/Ferrers.lean` to the definitions file `DLMF/Legendre/Basic.lean`, so that
+`DLMF/Spheroidal/FerrersDefs.lean` imports only definitions files. The import survey against
+`scripts/import_baseline.json` reports nothing new: no new two-way area pairs and no new
+definitions-file imports of other areas' theorem files; the four new areas lie in no import cycle.
+Theorem files import some theorem files of other areas (`DLMF.Hypergeometric.Riemann`,
+`DLMF.Legendre.Ferrers`, `DLMF.Legendre.Associated`, `DLMF.JacobiElliptic.SpecialValues`,
+`DLMF.Bessel.Modified`, `DLMF.Bessel.SecondKind`, `DLMF.Elementary.Trigonometric`), which the rule
+allows. Ledgers DLMF28–DLMF31Acquisition.md regenerated from the dump (idempotent).
+
+### Validation
+
+The full build passes (12,274 jobs). Every agent ran the strict check on its files (only `sorry`
+warnings) and `#print axioms` on samples. Compiled audit: 20,289 project theorems, 1,704 depending on
+`sorryAx`, no other nonstandard axiom. Tag dump: 7,998 entries, 582 upstream pointers. Explicit
+source admissions project-wide: 1,520 (950 before; the bridge round had proved three τ admissions).
+
+### Next steps
+
+Cheap targets: the existence theorems for linear ODEs with entire coefficients (Mathieu w_I, w_II,
+Hill), from which many Mathieu statements follow; Heun's Hl convergence on |z| < min(1, |a|) from the
+recurrence; the Lamé polynomial links to Ec/Es; the spheroidal parity and Wronskian relations from
+the existence theorem; the Ince polynomial existence. Harder: Sturm–Liouville ordering and zero
+counts for the eigenvalue characterizations (DLMFMathlib's Sturm modules), the small-q expansions,
+and the Bessel-series expansions of the modified Mathieu functions.

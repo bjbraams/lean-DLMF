@@ -775,8 +775,8 @@ No selected numbered equations. Mathematical prose is recorded in the module inv
 
 ### [§14.2 Differential Equations](https://dlmf.nist.gov/14.2)
 
-- [14.2.E1](https://dlmf.nist.gov/14.2.E1): [`ferrersP_ode`](DLMF/Legendre/Ferrers.lean#L140) (proved).
-- [14.2.E2](https://dlmf.nist.gov/14.2.E2): [`legendreP_ode`](DLMF/Legendre/Basic.lean#L116) (proved); [`DLMF.Legendre.legendreQ_ode`](DLMF/Legendre/SecondKind.lean#L113) (proved); [`DLMF.Legendre.associatedP_ode`](DLMF/Legendre/Associated.lean#L819) (proved); [`DLMF.Legendre.olverQ_ode`](DLMF/Legendre/Associated.lean#L936) (proved); [`DLMF.Legendre.ferrersQ_ode`](DLMF/Legendre/Associated.lean#L1091) (proved).
+- [14.2.E1](https://dlmf.nist.gov/14.2.E1): [`ferrersP_ode`](DLMF/Legendre/Ferrers.lean#L134) (proved).
+- [14.2.E2](https://dlmf.nist.gov/14.2.E2): [`legendreP_ode`](DLMF/Legendre/Basic.lean#L122) (proved); [`DLMF.Legendre.legendreQ_ode`](DLMF/Legendre/SecondKind.lean#L113) (proved); [`DLMF.Legendre.associatedP_ode`](DLMF/Legendre/Associated.lean#L819) (proved); [`DLMF.Legendre.olverQ_ode`](DLMF/Legendre/Associated.lean#L936) (proved); [`DLMF.Legendre.ferrersQ_ode`](DLMF/Legendre/Associated.lean#L1091) (proved).
 - [14.2.E3](https://dlmf.nist.gov/14.2.E3): [`DLMF.Legendre.ferrers_wronskian_3`](DLMF/Legendre/Associated.lean#L1408) (proved).
 - [14.2.E4](https://dlmf.nist.gov/14.2.E4): [`DLMF.Legendre.ferrers_wronskian_4`](DLMF/Legendre/Associated.lean#L1426) (proved).
 - [14.2.E5](https://dlmf.nist.gov/14.2.E5): [`DLMF.Legendre.ferrers_wronskian_5`](DLMF/Legendre/AssociatedRecurrences.lean#L561) (proved).
@@ -789,7 +789,7 @@ No selected numbered equations. Mathematical prose is recorded in the module inv
 
 ### [§14.3 Definitions and Hypergeometric Representations](https://dlmf.nist.gov/14.3)
 
-- [14.3.E1](https://dlmf.nist.gov/14.3.E1): [`ferrersP`](DLMF/Legendre/Ferrers.lean#L52) (defined).
+- [14.3.E1](https://dlmf.nist.gov/14.3.E1): [`ferrersP`](DLMF/Legendre/Basic.lean#L53) (defined).
 - [14.3.E2](https://dlmf.nist.gov/14.3.E2): [`DLMF.Legendre.ferrersQ_hypergeometric`](DLMF/Legendre/Associated.lean#L532) (proved); [`DLMF.Legendre.ferrersQ_order_limit`](DLMF/Legendre/Associated.lean#L632) (proved).
 - [14.3.E3](https://dlmf.nist.gov/14.3.E3): [`DLMF.Legendre.legendreGaussF`](DLMF/Legendre/Hypergeometric.lean#L27) (defined); [`DLMF.Legendre.legendreGaussF_normalization`](DLMF/Legendre/Hypergeometric.lean#L33) (proved).
 - [14.3.E4](https://dlmf.nist.gov/14.3.E4): [`DLMF.Legendre.ferrersP_integer_hypergeometric_4`](DLMF/Legendre/Hypergeometric.lean#L41) (proved).
@@ -848,7 +848,7 @@ No selected numbered equations. Mathematical prose is recorded in the module inv
 
 ### [§14.6 Integer Order](https://dlmf.nist.gov/14.6)
 
-- [14.6.E1](https://dlmf.nist.gov/14.6.E1): [`ferrersP_nat`](DLMF/Legendre/Ferrers.lean#L64) (proved).
+- [14.6.E1](https://dlmf.nist.gov/14.6.E1): [`ferrersP_nat`](DLMF/Legendre/Ferrers.lean#L58) (proved).
 - [14.6.E2](https://dlmf.nist.gov/14.6.E2): [`DLMF.Legendre.ferrersQ_nat_order_derivative`](DLMF/Legendre/AssociatedRecurrences.lean#L993) (proved).
 - [14.6.E3](https://dlmf.nist.gov/14.6.E3): [`DLMF.Legendre.associatedP_nat_order_derivative`](DLMF/Legendre/AssociatedRecurrences.lean#L1046) (proved).
 - [14.6.E4](https://dlmf.nist.gov/14.6.E4): [`DLMF.Legendre.associatedQ_nat_order_derivative`](DLMF/Legendre/AssociatedRecurrences.lean#L1152) (proved).
@@ -907,7 +907,7 @@ No selected numbered equations. Mathematical prose is recorded in the module inv
 - [14.9.E2](https://dlmf.nist.gov/14.9.E2): [`DLMF.Legendre.ferrers_connection_2`](DLMF/Legendre/Connections.lean#L57) (proved).
 - [14.9.E3](https://dlmf.nist.gov/14.9.E3): [`DLMF.Legendre.ferrersP_negative_order_parameter_limit`](DLMF/Legendre/ParameterLimits.lean#L177) (proved); [`DLMF.Legendre.ferrersP_negative_integer_order`](DLMF/Legendre/Connections.lean#L255) (proved).
 - [14.9.E4](https://dlmf.nist.gov/14.9.E4): [`DLMF.Legendre.ferrersQ_negative_integer_order`](DLMF/Legendre/Connections.lean#L276) (proved).
-- [14.9.E5](https://dlmf.nist.gov/14.9.E5): [`legendreP_neg_sub_one`](DLMF/Legendre/Basic.lean#L68) (proved); [`DLMF.Legendre.ferrers_connection_5`](DLMF/Legendre/Connections.lean#L89) (proved).
+- [14.9.E5](https://dlmf.nist.gov/14.9.E5): [`legendreP_neg_sub_one`](DLMF/Legendre/Basic.lean#L74) (proved); [`DLMF.Legendre.ferrers_connection_5`](DLMF/Legendre/Connections.lean#L89) (proved).
 - [14.9.E6](https://dlmf.nist.gov/14.9.E6): [`DLMF.Legendre.ferrers_connection_6`](DLMF/Legendre/Connections.lean#L98) (proved).
 - [14.9.E7](https://dlmf.nist.gov/14.9.E7): [`DLMF.Legendre.ferrers_connection_7`](DLMF/Legendre/Connections.lean#L136) (proved).
 - [14.9.E8](https://dlmf.nist.gov/14.9.E8): [`DLMF.Legendre.ferrers_connection_8`](DLMF/Legendre/Connections.lean#L169) (proved).

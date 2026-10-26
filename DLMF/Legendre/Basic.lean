@@ -50,6 +50,12 @@ namespace DLMF.Legendre
 @[dlmf 14.3.E6]
 def legendreP (ν z : ℂ) : ℂ := regularizedGaussHG (-ν) (ν + 1) 1 ((1 - z) / 2)
 
+/-- The Ferrers function of the first kind on `(-1, 1)`,
+`𝖯^μ_ν(x) = ((1+x)/(1-x))^{μ/2} 𝐅(ν+1, -ν; 1-μ; (1-x)/2)` (DLMF 14.3.1). -/
+@[dlmf 14.3.E1]
+def ferrersP (ν μ : ℂ) (x : ℝ) : ℂ :=
+  (((1 + x) / (1 - x) : ℝ) : ℂ) ^ (μ / 2) * regularizedGaussHG (ν + 1) (-ν) (1 - μ) ((1 - x) / 2)
+
 /-- For `z ∉ (-∞, -1]`, the argument `(1-z)/2` lies in the cut plane. -/
 lemma mem_cutPlane_of_one_add {z : ℂ} (hz : 1 + z ∈ slitPlane) : (1 - z) / 2 ∈ cutPlane := by
   rw [mem_cutPlane, show 1 - (1 - z) / 2 = (1 + z) / 2 by ring]

@@ -42,6 +42,10 @@ public import DLMF.BernoulliEuler
 public import DLMF.Zeta
 public import DLMF.Combinatorics
 public import DLMF.NumberTheory
+public import DLMF.Mathieu
+public import DLMF.Lame
+public import DLMF.Spheroidal
+public import DLMF.Heun
 public import DLMF.Core.UpstreamElementary
 public import DLMF.Core.ZeroCounting
 

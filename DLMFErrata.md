@@ -657,6 +657,79 @@ Found by the Chapter 19 acquisition agents and checked by an independent mpmath 
   - Lean: `sigmaC_eq_prod` (DLMF/NumberTheory/Functions.lean), proved.
   - Found: 2026-10-25.
 
+### Chapters 28–31 (Mathieu, Lamé, spheroidal and Heun functions)
+
+All entries below were found by the acquisition agents on 2026-10-26 and re-derived by an
+independent verifier from the DLMF 1.2.8 page text with its own numerics; none is on the DLMF
+errata page.
+
+- [28.5.E6](https://dlmf.nist.gov/28.5.E6), second relation
+  - Under DLMF's own sign rule (28.5.5–28.5.7) it must read C_{2m+1}(−q) = −S_{2m+1}(q).
+  - Evidence: by 28.2.35 and uniqueness, f_{2m+1}(z,−q) = (−1)^{m+1} g_{2m+1}(½π−z,q);
+    numerically C₁(−0.5) = −0.494187, S₁(0.5) = +0.494187 (also n = 3, q = 0.2, 1.0).
+  - Lean: `mathieuFeC_even_neg` and its neighbours (DLMF/Mathieu/SecondSolutions.lean), admitted.
+- [28.23.E2](https://dlmf.nist.gov/28.23.E2)–[28.23.E5](https://dlmf.nist.gov/28.23.E5)
+  - "Valid for all z when j = 1" holds only for integer ν. For ν ∉ ℤ the terms with n → −∞
+    behave like |cosh z|^{−2|n|} (|sinh z|^{−2|n|} in 28.23.4–5), so the series need the
+    condition |cosh z| > 1 (resp. |sinh z| > 1).
+  - Evidence: ν = 0.5, h = 1, z = 0.5i: terms at n = −5, −20, −40 are 0.027, 0.15, 9.8.
+  - Lean: `hasSum_modMathieuM_cosh`, `hasSum_modMathieuM_cosh_deriv`, `hasSum_modMathieuM_sinh`,
+    `hasSum_modMathieuM_sinh_deriv` (DLMF/Mathieu/Modified/BesselSeries.lean), admitted with the
+    condition |cosh z| > 1 (resp. |sinh z| > 1) for every j.
+- [28.28.E11](https://dlmf.nist.gov/28.28.E11)
+  - The factor e^{iνπ} must be e^{iνπ/2}: right side ½πi e^{iνπ/2} ce_ν(0,h²) M_ν^{(3)}(z,h).
+  - Evidence: term-by-term integration with 10.9.10 and 28.23.2 (j = 3); numerically at ν = 0.4,
+    h = 0.8, z = 1 + 0.5i the left side is 0.13373867 − 0.12414858i, the corrected right side
+    0.13373835 − 0.12414756i, the printed one 0.18117 − 0.02183i.
+  - Lean: `integral_exp_cosh_modMathieuCe` (DLMF/Mathieu/Modified/Integrals.lean), admitted.
+- [28.28.E16](https://dlmf.nist.gov/28.28.E16)
+  - The overall sign is wrong, and the lower sign belongs to −π ≤ y ≤ 0, not π ≤ y ≤ 2π:
+    ∫₀^∞ sin(2h cos y cosh t) Ce_{2n}(t,h²) dt = +πA₀^{2n}(h²)/(2ce_{2n}(½π,h²)) ·
+    (ce_{2n}(y,h²) ∓ 2fe_{2n}(y,h²)/(πC_{2n}(h²))), upper sign for 0 ≤ y ≤ π.
+  - Evidence: h = 0.8, y = 2: left side −0.1431816729, printed right side +0.1431816729 (n = 0;
+    same for 2n = 2, 4); the left side is even in y and fe_{2n} is odd; at y = π + 0.3 the
+    printed range gives ±2.05 against −0.4207.
+  - Lean: `integral_sin_cosh_modMathieuCe` (DLMF/Mathieu/Modified/Integrals.lean), admitted.
+- [28.31(iii)](https://dlmf.nist.gov/28.31.iii), Asymptotic Behavior, second paragraph
+  - The powers are swapped: for ξ > 0, hc_p^m(z,−ξ) and hs_p^m(z,−ξ) behave like multiples of
+    exp(¼ξ cos 2z)(sin z)^p as z → ½π ± i∞, and the other periodic solutions like
+    exp(−¼ξ cos 2z)(sin z)^{−p−2}.
+  - Evidence: 28.31.19–20 and the first paragraph; numerically the ratio to the corrected form
+    converges (−0.416, −0.472, −0.480 for hc_2^0 at y = 2, 3, 4), the ratio to the printed form
+    grows like e^{(2p+2)y}.
+  - Lean: `paraboloidal_asymptotic_neg` (DLMF/Mathieu/Hill/Ince.lean), admitted.
+- [30.11.E6](https://dlmf.nist.gov/30.11.E6), j = 1, 2
+  - The error term must be O(z⁻² e^{|ℑ(γz)|}), not O(z⁻² e^{|ℑz|}) (false for γ > 1).
+  - Evidence: m = n = 0, γ = 3, z = x(1 + 0.5i), x = 5, …, 40: |err||z|²e^{−|ℑz|} = 13.8, …,
+    2.3·10¹⁶, while |err||z|²e^{−|ℑ(γz)|} = 0.093, …, 0.099.
+  - Lean: `spheroidalRadial_isBigO_one_two` (DLMF/Spheroidal/Radial.lean), admitted, real γ > 0.
+- [31.10.E8](https://dlmf.nist.gov/31.10.E8)
+  - The coefficient of ∂𝒦/∂φ must be (2δ−1) cot φ − (2ε−1) tan φ.
+  - Evidence: exact symbolic comparison with D_z − D_t on test polynomials (constant ratio only
+    for the corrected coefficient); kernel 31.10.10 residual 10⁻³¹ against 1.18 as printed.
+  - Lean: `heun_kernel_typeI_angles` (DLMF/Heun/Integral.lean), admitted.
+- [31.10.E17](https://dlmf.nist.gov/31.10.E17)
+  - u must be (stz/a)^{1/2}, not (stz)^{1/2}/a; then u² + v² + w² = s + t + z − 1 − a.
+  - Evidence: 31.10.14 against 31.10.18 on test polynomials (sympy): constant ratio only with
+    u² = stz/a.
+  - Lean: `heun_kernel_typeII_uvw` (DLMF/Heun/Integral.lean), admitted.
+- [31.10.E22](https://dlmf.nist.gov/31.10.E22)–[31.10.E23](https://dlmf.nist.gov/31.10.E23)
+  - The printed cos²θ P-symbol violates Fuchs's relation (its exponents sum to γ/2). Correct:
+    exponent 1 − γ at 0 (not ½(3 − γ)); p² + (α+β−γ)p − σ₂/4 = 0; a + b = α + β + 2p;
+    ab = p² + (α+β)p − σ₁/4; c = γ − α − β − 2p. The m-equation and the a′, b′ relations
+    are right.
+  - Evidence: separation of 31.10.21 by hand; the corrected product kernel leaves a residual of
+    2·10⁻³¹ in 31.10.21, the printed one 8.2.
+  - Lean: `heun_kernel_typeII_separable` (DLMF/Heun/Integral.lean), admitted.
+- [31.10](https://dlmf.nist.gov/31.10.i), Example 2 (31.10.11)
+  - z^{−α} Hl(1/a, q_m; α, α−γ+1, α−β+1, δ; 1/z) does not solve Heun's equation; the accessory
+    parameter must be q_m/a − α(β−ε) − (α/a)(β−δ), as in the corrected 31.3.10 (DLMF erratum,
+    Karney 2022), which Example 2 was not brought in line with.
+  - Evidence: a = 0.4, q = 0.37, (α, β, γ, δ) = (0.6, 1.9, 1.3, 0.7), z = 5: residual 2.2·10⁻³
+    as printed, 1.5·10⁻³² corrected.
+  - Lean: only the kernel equation is acquired (`heun_kernel_example₂_pde`,
+    DLMF/Heun/Integral.lean); the representation is not.
+
 ## (b) Project transcription defects that were fixed
 
 - [4.19.E3](https://dlmf.nist.gov/4.19.E3), [4.19.E4](https://dlmf.nist.gov/4.19.E4),
@@ -901,6 +974,24 @@ Found by the Chapter 19 acquisition agents and checked by an independent mpmath 
   [26.8.E33](https://dlmf.nist.gov/26.8.E33): the hypothesis k ≤ n comes from Lean's truncated
   natural subtraction and from the left side's domain; DLMF is right as printed (independent check
   2026-10-25). DLMF/Combinatorics/Stirling.lean.
+
+### Chapters 28–31
+
+- [28.6.E16](https://dlmf.nist.gov/28.6.E16): the continued fraction holds for n ≥ 1; for
+  n = 0 the first numerator is −2q² (a₀ = −2q²/(4 − a − q²/(16 − a − ⋯))). Both forms are
+  acquired. `mathieuA_even_contFrac` (DLMF/Mathieu/SmallQ.lean).
+- [28.5.E5](https://dlmf.nist.gov/28.5.E5), n = 0: the normalization forces C₀(q) → ∞ as q → 0,
+  so fe₀ with this normalization is discontinuous at q = 0, where 28.5.7 sets fe₀(z, 0) = z by
+  convention; the convention is built into `mathieuFe` (DLMF/Mathieu/Basic.lean).
+- [28.6.E12](https://dlmf.nist.gov/28.6.E12)–[28.6.E13](https://dlmf.nist.gov/28.6.E13): no
+  erratum. The q⁶ denominator is 92935987200000 as printed (grouped `9293 59872 00000`); an
+  acquisition agent's first report misread the grouping.
+- [29.8](https://dlmf.nist.gov/29.8): the kernels use the Ferrers function 𝖯_ν at arguments
+  outside [−1, 1]; the analytic continuation F(ν+1, −ν; 1; ½ − ½x), i.e. the Legendre P_ν, is
+  meant, and the Lean statements use `DLMF.Legendre.legendreP`. Notation, not an erratum.
+- Domain choices: 28.12.2, 28.12.8, 28.12.9 and §28.14 are stated for ν ∉ ℤ (they fail for
+  integer ν under DLMF's own completion, e.g. λ₁(−q) = b₁(q)); 28.23.2–5 are stated with the
+  condition |cosh z| > 1 (|sinh z| > 1) for every j.
 
 ### DLMF's own published errata followed
 

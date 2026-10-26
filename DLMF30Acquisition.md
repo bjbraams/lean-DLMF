@@ -1,0 +1,312 @@
+# DLMF Chapter 30 acquisition: Spheroidal Wave Functions
+
+This acquisition covers the definitions, numbered formulas and analytical assertions in prose
+of [DLMF Chapter 30](https://dlmf.nist.gov/30), §§30.1–30.12, version 1.2.8, checked on
+2026-10-26 (agent ACQ30). The graphics §30.7 and §30.11(ii), the applications §§30.13–30.15 and
+the computation sections §§30.16–30.18 are excluded; the pure mathematics of the applications is
+listed below. The Lean code is in `DLMF/Spheroidal/` (namespace `DLMF.Spheroidal`, helper prefix
+`s30_`); the modules, in import order, are
+[Basic](DLMF/Spheroidal/Basic.lean) (definitions: equations, eigenvalues, `𝖯s`, `𝑃s`,
+coefficients),
+[FerrersDefs](DLMF/Spheroidal/FerrersDefs.lean) (definitions built on Ferrers functions:
+`a^m_{n,k}`, `A^{±m}_n`, `𝖰s`, `𝑄s`, `S^{m(j)}_n`, `K^m_n`, Flammer's functions),
+[Equation](DLMF/Spheroidal/Equation.lean) (§§30.2, 30.3(i), 30.12),
+[Eigenvalues](DLMF/Spheroidal/Eigenvalues.lean) (§§30.3, 30.9),
+[Angular](DLMF/Spheroidal/Angular.lean) (§§30.1, 30.4–30.6),
+[FerrersSeries](DLMF/Spheroidal/FerrersSeries.lean) (§30.8) and
+[Radial](DLMF/Spheroidal/Radial.lean) (§30.11).
+`Basic` imports Mathlib, `DLMF.Bessel.Basic` and `DLMF.Core.Framework` (for `sphericalJ`);
+`FerrersDefs` imports `Basic` and the Legendre theorem file `DLMF.Legendre.Ferrers` (for
+`ferrersP`, see the import note below); `Equation` imports `Basic`, `DLMF.Legendre.Ferrers` and
+`DLMF.Core.Framework`; `Eigenvalues` imports `FerrersDefs`, `DLMF.Core.Framework` and
+`DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion`; `Angular` imports `FerrersDefs`,
+`Equation` and `DLMF.Legendre.Associated` (for `ferrersQ`, `associatedP`, `associatedQ`);
+`FerrersSeries` imports `FerrersDefs` and `DLMF.Legendre.Associated`; `Radial` imports
+`FerrersDefs` and `DLMF.Core.Framework`. Nothing is upstream (Mathlib and TauCeti have no
+spheroidal functions), so there is no `MathlibCoverage` module.
+
+**Counts.** §§30.1–30.12 (without the graphics) have 67 numbered equations (30.1: 2, 30.2: 4,
+30.3: 12, 30.4: 9, 30.5: 4, 30.6: 5, 30.8: 11, 30.9: 6, 30.11: 12, 30.12: 2; §30.7 and §30.10
+have none). In scope: all 67. Covered: all 67. In addition 9 prose IDs carry tags (30.2.i,
+30.2.iii, 30.3.i, 30.3.ii, 30.4.i, 30.4.ii, 30.4.iv, 30.8.ii, 30.9.ii). 76 DLMF IDs are tagged on
+135 declarations: 50 definitions, 9 proved theorems, 20 theorems proved from admissions and 56
+direct admissions. Two further definitions are untagged (`spheroidalPsFactor`,
+`spheroidalCutPlane`), as are the proved helper lemmas `spheroidalEigenvalue_spec`,
+`spheroidalPsFactor_spec`, `spheroidalQs_spec`, `spheroidalQsC_spec`,
+`spheroidalCoeffPrime_spec` (from the existence theorems), `spheroidalPs_zero` and
+`hasDerivAt_spheroidalPs_zero`. Excluded numbered equations: 38 (application: 30.13: 16,
+30.14: 9, 30.15: 13) and 9 (computation: 30.16); §30.7 (21 figures), §30.11(ii) (4 figures)
+graphics; §30.17 tables (numerical); §30.18 software.
+
+Module admissions (`grep -cE 'by sorry|:= sorry|^\s*(·\s*)?sorry\s*$|exact sorry'`):
+
+- [Basic](DLMF/Spheroidal/Basic.lean): 2 admissions. The flagged existence theorems for `λ^m_n` and `𝖯s`.
+- [FerrersDefs](DLMF/Spheroidal/FerrersDefs.lean): 3 admissions. The flagged existence theorems for `a'`, `𝖰s`, `𝑄s`.
+- [Equation](DLMF/Spheroidal/Equation.lean): 7 admissions.
+- [Eigenvalues](DLMF/Spheroidal/Eigenvalues.lean): 13 admissions.
+- [Angular](DLMF/Spheroidal/Angular.lean): 15 admissions.
+- [FerrersSeries](DLMF/Spheroidal/FerrersSeries.lean): 7 admissions.
+- [Radial](DLMF/Spheroidal/Radial.lean): 9 admissions.
+
+## Domains, conventions and design notes
+
+- `γ²` is a real parameter `γ2 : ℝ` (DLMF §30.1); `m ≤ n` naturals. Argument order: degree
+  before order, as for the project's `ferrersP ν μ x`, then DLMF's arguments: `λ^m_n(γ²)` is
+  `spheroidalEigenvalue n m γ2`, `𝖯s^m_n(x, γ²)` is `spheroidalPs n m x γ2`, `S^{m(j)}_n(z, γ)` is
+  `spheroidalRadial j n m z γ`. The radial functions take complex `z`, `γ`; the coefficients are
+  evaluated at `(γ^2).re` and the theorems assume `(γ^2).im = 0`.
+- The equation 30.2.1 is a predicate with genuine differentiability in divergence form:
+  `(1-z²) w'` has derivative `-(λ + γ²(1-z²) - μ²/(1-z²)) w` (complex, `IsSpheroidalSolutionOn`
+  on a set `U`; real on `(-1, 1)` for real-valued `f`, `IsSpheroidalSolutionReal`).
+- **Eigenvalues (definition by choice, flagged).** Following DLMF §30.3(i), `𝖯s^m_n` has the form
+  `(1-x²)^{m/2} g(x)` with `g` entire; `w = (1-z²)^{m/2} g` solves 30.2.1 (`μ = m`) iff
+  `(1-z²)g'' - 2(m+1)zg' + (λ - m(m+1) + γ²(1-z²))g = 0` (`IsSpheroidalFactor`; its power-series
+  recurrence is 30.4.5 with 30.3.6). `spheroidalSpectrum m γ2` is the set of real `λ` with a
+  nonzero entire solution, and `λ^m_n(γ²)` is the element of the spectrum with exactly `n - m`
+  smaller elements (encard), junk `0` otherwise. Existence is the admitted
+  `exists_spheroidalEigenvalue` (Sturm–Liouville theory); the ordering 30.3.1 is proved from it;
+  the zero count `n - m` of §30.4(ii) and the value `n(n+1)` at `γ = 0` (30.3.3) are admitted
+  theorems. This duplicates in spirit the Mathieu area's `nthLeast` (ACQ28A, written
+  concurrently); the two could share a helper later.
+- **`𝖯s` (definition by choice, flagged).** `spheroidalPsFactor n m γ2` is the entire `g` with the
+  eigenvalue `λ^m_n(γ²)`, real on `ℝ`, normalized by 30.4.1 and with the sign of `g(0)` (`n - m`
+  even) or `g'(0)` (`n - m` odd) of §30.4(i); existence and uniqueness are admitted
+  (`existsUnique_isSpheroidalPsFactor`, simplicity of the eigenvalues). Then
+  `𝖯s = (1-x²)^{m/2} Re g(x)` and `𝑃s(z) = (-1)^m (z-1)^{m/2} (z+1)^{m/2} g(z)` with principal
+  powers (30.6.1): real on `(1, ∞)` and analytic on `ℂ ∖ (-∞, 1]` (both proved from the
+  existence theorem), with the boundary values 30.6.4 and the Legendre limit `P^m_n(z)` (30.6.2).
+  This form was checked numerically against the Legendre series `∑(-1)^k a_k P^m_{n+2k}(z)`.
+- **`a^m_{n,k}`.** For `k ≥ -R` (`R = ⌊(n-m)/2⌋`) the integral 30.8.2 with the project's
+  `ferrersP`; for `-N ≤ k < -R` (`N = ⌊(n+m)/2⌋`) the forward recursion of §30.8(ii)
+  (`spheroidalFwd`: `f_{-N-1} = 0`, `f_{-N} = 1`), scaled to match `a^m_{n,-R}`; `0` below `-N`.
+  DLMF says `𝖰s` does not exist when `f_{-R} = 0`; the theorems on `𝖰s`, `𝑄s` and 30.11.9 carry
+  the hypothesis `spheroidalFwd … ≠ 0`. The sum `A^m_n = ∑_{2k ≥ -m-n} (-1)^k a^m_{n,k}` of 30.11.4
+  includes the extended coefficients; this reading was confirmed numerically: the Wronskian
+  30.5.4 of `𝖯s` with the series 30.8.9 matches only with them (e.g. `n = 3, m = 1, γ² = 4`:
+  `13.39975` with, `12.99865` without). `a'^m_{n,k}` (30.8.9–30.8.10) is defined by choice as the
+  recessive solution normalized by 30.8.10 (existence admitted).
+- **`𝖰s` (definition by characterization, flagged).** DLMF gives no closed definition in §30.5;
+  `spheroidalQs` is the solution of 30.2.1 on `(-1, 1)` with the parity 30.5.2 and the Wronskian
+  30.5.4 (unique: a second one differs by a multiple of `𝖯s`, which has the opposite parity),
+  extended by `0`. 30.5.2 and 30.5.4 are thus proved from the existence theorem, and the
+  Meixner–Schäfke series 30.8.9 is the substantive (admitted) theorem.
+- **`𝑄s` (definition by characterization, flagged).** The solution on `ℂ ∖ (-∞, 1]` whose
+  boundary values from above on `(-1, 1)` are those of 30.6.5 (upper signs); existence and
+  uniqueness admitted; the lower signs and the reality on `(1, ∞)` are admitted theorems.
+- **`ψ^{(1)}_k` (flagged).** For `j = 1` the entire `j_k` (`DLMF.sphericalJ` of `DLMF.Core`) is
+  used: 30.11.3 allows every `z ≠ 0` for `j = 1`, while the literal principal-branch formula
+  30.11.1 changes sign on `(-∞, 0]`. The formula is the admitted `spheroidalPsi_one_eq` off the
+  cut. For `j = 2, 3, 4` the formula with principal `(π/(2z))^{1/2}` and
+  `𝒞^{(2), (3), (4)} = Y, J + iY, J - iY` (project's `besselY`, Mathlib's `besselJ`). The project
+  had no `y_n`, `h_n`; they are not defined separately.
+- Series are stated with `HasSum` (Ferrers series over `j ∈ ℕ`, `k = j - R`), asymptotics with
+  `IsBigO` and the project's `HasAsymptoticExpansion` (30.9: powers `γ^{-i}` at `+∞`, the six
+  printed coefficients as `spheroidalProlateBeta`, `spheroidalOblateC`, further coefficients
+  existentially quantified); continued fractions (30.3.5) with `DLMF.cfTail` and
+  `DLMF.HasContinuedFraction`, with the nondegeneracy hypotheses that DLMF leaves implicit.
+  `ℓ_{2k}` (30.3.8) is the `k`-th Taylor coefficient of `γ² ↦ λ^m_n(γ²)` at `0`.
+- **Import note (for the coordinator).** `ferrersP` is defined in the Legendre theorem file
+  `DLMF/Legendre/Ferrers.lean`; the definitions file `FerrersDefs` imports it (the rules forbid
+  copying the definition). Moving `ferrersP` (and `ferrersQ`, `associatedP`, `associatedQ` of
+  `DLMF/Legendre/Associated.lean`) down to a Legendre definitions file would remove this
+  exception.
+
+Source corrections and checks (scripts and outputs in the agent's scratch directory, mpmath at
+20–80 digits, SciPy `pro_cv`, `obl_cv`, `pro_rad1`, `pro_rad2` for cross-checks):
+
+- **30.11.6** (erratum, `j = 1, 2`): the error term `O(z⁻² e^{|ℑz|})` is correct only for
+  `γ ≤ 1`; the correct term is `O(z⁻² e^{|ℑ(γz)|})`. For `n = m = 0`, `γ = 2`, `z = iy`:
+  `|S^{0(1)}_0(iy, 2) - ψ^{(1)}_0(2iy)| y² e^{-y} = 3.9·10³, 8.7·10⁷, 4.2·10¹⁶` at
+  `y = 10, 20, 40`, whereas `|S - ψ| y² e^{-2y} = 0.1771, 0.1785, 0.1791` (similarly for `n = 1`).
+  Acquired in the corrected form for real `γ > 0`. The `j = 3, 4` form checked for real `z`.
+- 30.3.5 (stated with added hypotheses): the equivalence needs nondegeneracy (nonzero finite
+  continuant on the left; nonzero expansion coefficient of index `p` for the convergence of the
+  right side); stated as two implications.
+- 30.5.4/30.11.4: the nonvanishing `A^m_n A^{-m}_n ≠ 0` is stated under the existence hypothesis
+  of §30.8(ii).
+- Checked numerically and found correct: 30.3.1, 30.3.2 (`n ≤ 160`), 30.3.4 (grid
+  `|γ²| ≤ 400`, `m ≤ 4`), 30.3.5 with 30.3.6 and with 30.3.7, 30.3.9–30.3.12 (high-precision
+  polynomial fits, nine `(n, m)` including `n = 0, 1`), 30.4.1 with 30.8.5, 30.4.3, the zero count
+  of §30.4(ii), 30.5.2, 30.5.4 (seven cases), 30.8.7, 30.8.8, 30.8.9–30.8.11 (Wronskian, parity,
+  ODE residual `≤ 10⁻²⁷`), 30.9.1–30.9.6 (scaled remainders stable between `γ = 50` and `100` for
+  seven `(n, m)`), 30.11.3 (SciPy), 30.11.6 (`j = 3`), 30.11.7, 30.11.8 with 30.11.10–30.11.11,
+  30.11.9 (four cases), 30.11.12, 30.6.1 and 30.6.4 (form of `𝑃s`), and the project's
+  `ferrersQ` at the degrees `-m ≤ ν < m` occurring in 30.8.9 (against mpmath).
+
+## Numbered formulas and prose items
+
+## [§30.1 Special Notation](https://dlmf.nist.gov/30.1)
+
+- [30.1.E1](https://dlmf.nist.gov/30.1.E1): [`DLMF.Spheroidal.flammerS1`](DLMF/Spheroidal/FerrersDefs.lean#L222) (definition); [`DLMF.Spheroidal.flammerS2`](DLMF/Spheroidal/FerrersDefs.lean#L227) (definition). Flammer's `S^{(1)}_{mn}`, `S^{(2)}_{mn}` as functions of `γ²`.
+- [30.1.E2](https://dlmf.nist.gov/30.1.E2): [`DLMF.Spheroidal.flammerD`](DLMF/Spheroidal/FerrersDefs.lean#L213) (definition); [`DLMF.Spheroidal.flammerS1_zero`](DLMF/Spheroidal/Angular.lean#L361) (proved from admissions); [`DLMF.Spheroidal.flammerS1_deriv_zero`](DLMF/Spheroidal/Angular.lean#L374) (proved from admissions). `d_{mn}` defined by 30.1.2; both normalizations proved from the sign convention of §30.4(i).
+
+## [§30.2 Differential Equations](https://dlmf.nist.gov/30.2)
+
+- [30.2.i](https://dlmf.nist.gov/30.2.i): [`DLMF.Spheroidal.spheroidal_indicial_exponents`](DLMF/Spheroidal/Equation.lean#L36) (proved); [`DLMF.Spheroidal.spheroidal_irregular_infinity`](DLMF/Spheroidal/Equation.lean#L51) (admitted). Exponents `±μ/2` at `z = 1` (indicial polynomial, proved); irregular singularity of rank 1 at `∞` stated as existence of solutions `∼ e^{±iγz}/z` (admitted).
+- [30.2.iii](https://dlmf.nist.gov/30.2.iii): [`DLMF.Spheroidal.isSpheroidalSolutionReal_ferrersP`](DLMF/Spheroidal/Equation.lean#L88) (admitted); [`DLMF.Spheroidal.spheroidalLiouville_coeff_mathieu`](DLMF/Spheroidal/Equation.lean#L96) (proved); [`DLMF.Spheroidal.IsSpheroidalLiouvilleSolution.mathieu`](DLMF/Spheroidal/Equation.lean#L106) (proved); [`DLMF.Spheroidal.isSpheroidalZetaSolution_sphericalJ`](DLMF/Spheroidal/Equation.lean#L119) (admitted). `γ = 0`: `𝖯^m_n` solves 30.2.1 (admitted); `μ² = 1/4`: Mathieu equation with `a = λ + 1/4 + γ²/2`, `q = γ²/4` (proved); `γ = 0` in 30.2.4: `j_n` (`DLMF.sphericalJ`) solves it (admitted).
+- [30.2.E1](https://dlmf.nist.gov/30.2.E1): [`DLMF.Spheroidal.IsSpheroidalSolutionOn`](DLMF/Spheroidal/Basic.lean#L86) (definition); [`DLMF.Spheroidal.IsSpheroidalSolutionReal`](DLMF/Spheroidal/Basic.lean#L98) (definition). Divergence form with genuine differentiability, complex (`IsSpheroidalSolutionOn`, open `U` avoiding `±1`) and real on `(-1, 1)` (`IsSpheroidalSolutionReal`).
+- [30.2.E2](https://dlmf.nist.gov/30.2.E2): [`DLMF.Spheroidal.IsSpheroidalLiouvilleSolution`](DLMF/Spheroidal/Basic.lean#L109) (definition); [`DLMF.Spheroidal.isSpheroidalLiouvilleSolution_of_isSpheroidalSolutionOn`](DLMF/Spheroidal/Equation.lean#L65) (admitted). Predicate for 30.2.2; the transformation under 30.2.3 (`g(t) = (sin t)^{1/2} w(cos t)`) admitted.
+- [30.2.E3](https://dlmf.nist.gov/30.2.E3): [`DLMF.Spheroidal.isSpheroidalLiouvilleSolution_of_isSpheroidalSolutionOn`](DLMF/Spheroidal/Equation.lean#L65) (admitted). With 30.2.2.
+- [30.2.E4](https://dlmf.nist.gov/30.2.E4): [`DLMF.Spheroidal.IsSpheroidalZetaSolution`](DLMF/Spheroidal/Basic.lean#L120) (definition); [`DLMF.Spheroidal.isSpheroidalZetaSolution_of_isSpheroidalSolutionOn`](DLMF/Spheroidal/Equation.lean#L77) (admitted). `ζ = γz`, `γ ≠ 0`, image set `γU`.
+
+## [§30.3 Eigenvalues](https://dlmf.nist.gov/30.3)
+
+- [30.3.i](https://dlmf.nist.gov/30.3.i): [`DLMF.Spheroidal.IsSpheroidalFactor`](DLMF/Spheroidal/Basic.lean#L157) (definition); [`DLMF.Spheroidal.spheroidalSpectrum`](DLMF/Spheroidal/Basic.lean#L169) (definition); [`DLMF.Spheroidal.spheroidalEigenvalue`](DLMF/Spheroidal/Basic.lean#L175) (definition); [`DLMF.Spheroidal.exists_spheroidalEigenvalue`](DLMF/Spheroidal/Basic.lean#L183) (admitted); [`DLMF.Spheroidal.isSpheroidalSolutionReal_iff_isSpheroidalFactor`](DLMF/Spheroidal/Equation.lean#L129) (admitted); [`DLMF.Spheroidal.exists_bounded_iff_mem_spheroidalSpectrum`](DLMF/Spheroidal/Equation.lean#L139) (admitted). Design choice (flagged): spectrum = real `λ` with a nonzero entire solution of the factor equation; `λ^m_n` = element with `n - m` smaller elements; existence admitted; equivalence with bounded solutions admitted.
+- [30.3.ii](https://dlmf.nist.gov/30.3.ii): [`DLMF.Spheroidal.analyticAt_spheroidalEigenvalue`](DLMF/Spheroidal/Eigenvalues.lean#L75) (admitted). Real-analyticity in `γ²`.
+- [30.3.E1](https://dlmf.nist.gov/30.3.E1): [`DLMF.Spheroidal.spheroidalEigenvalue_lt_succ`](DLMF/Spheroidal/Eigenvalues.lean#L53) (proved from admissions); [`DLMF.Spheroidal.spheroidalEigenvalue_lt`](DLMF/Spheroidal/Eigenvalues.lean#L64) (proved from admissions). Proved from the existence theorem.
+- [30.3.E2](https://dlmf.nist.gov/30.3.E2): [`DLMF.Spheroidal.spheroidalEigenvalue_isBigO_atTop`](DLMF/Spheroidal/Eigenvalues.lean#L82) (admitted). `IsBigO atTop` with `n⁻²`; checked numerically (`n ≤ 160`).
+- [30.3.E3](https://dlmf.nist.gov/30.3.E3): [`DLMF.Spheroidal.spheroidalEigenvalue_zero`](DLMF/Spheroidal/Eigenvalues.lean#L89) (admitted).
+- [30.3.E4](https://dlmf.nist.gov/30.3.E4): [`DLMF.Spheroidal.spheroidalEigenvalue_deriv_bounds`](DLMF/Spheroidal/Eigenvalues.lean#L95) (admitted). `HasDerivAt` with `-1 < d < 0`; checked numerically on a grid `|γ²| ≤ 400`, `m ≤ 4`.
+- [30.3.E5](https://dlmf.nist.gov/30.3.E5): [`DLMF.Spheroidal.spheroidal_cf_of_eigenvalue`](DLMF/Spheroidal/Eigenvalues.lean#L103) (admitted); [`DLMF.Spheroidal.spheroidal_eigenvalue_of_cf`](DLMF/Spheroidal/Eigenvalues.lean#L136) (admitted). Continuants `DLMF.cfTail`/`HasContinuedFraction`; two directions with nondegeneracy hypotheses added (nonzero finite continuant; nonzero expansion coefficient of index `p`); `alt` selects 30.3.6 or 30.3.7.
+- [30.3.E6](https://dlmf.nist.gov/30.3.E6): [`DLMF.Spheroidal.spheroidalCFAlpha`](DLMF/Spheroidal/Basic.lean#L265) (definition); [`DLMF.Spheroidal.spheroidalCFBeta`](DLMF/Spheroidal/Basic.lean#L269) (definition); [`DLMF.Spheroidal.spheroidalCFGamma`](DLMF/Spheroidal/Basic.lean#L273) (definition); [`DLMF.Spheroidal.spheroidal_cf_of_eigenvalue`](DLMF/Spheroidal/Eigenvalues.lean#L103) (admitted); [`DLMF.Spheroidal.spheroidal_eigenvalue_of_cf`](DLMF/Spheroidal/Eigenvalues.lean#L136) (admitted). Coefficient definitions; checked numerically (truncated tridiagonal eigenproblems).
+- [30.3.E7](https://dlmf.nist.gov/30.3.E7): [`DLMF.Spheroidal.spheroidalCFAlphaAlt`](DLMF/Spheroidal/Basic.lean#L277) (definition); [`DLMF.Spheroidal.spheroidalCFBetaAlt`](DLMF/Spheroidal/Basic.lean#L283) (definition); [`DLMF.Spheroidal.spheroidalCFGammaAlt`](DLMF/Spheroidal/Basic.lean#L289) (definition); [`DLMF.Spheroidal.spheroidal_cf_of_eigenvalue`](DLMF/Spheroidal/Eigenvalues.lean#L103) (admitted); [`DLMF.Spheroidal.spheroidal_eigenvalue_of_cf`](DLMF/Spheroidal/Eigenvalues.lean#L136) (admitted). Coefficient definitions; checked numerically.
+- [30.3.E8](https://dlmf.nist.gov/30.3.E8): [`DLMF.Spheroidal.spheroidalEll`](DLMF/Spheroidal/Basic.lean#L335) (definition); [`DLMF.Spheroidal.hasSum_spheroidalEll`](DLMF/Spheroidal/Eigenvalues.lean#L158) (admitted). `ℓ_{2k}` = Taylor coefficients of `γ² ↦ λ^m_n(γ²)` at `0`; positive radius asserted.
+- [30.3.E9](https://dlmf.nist.gov/30.3.E9): [`DLMF.Spheroidal.spheroidalEll_zero`](DLMF/Spheroidal/Eigenvalues.lean#L166) (proved from admissions); [`DLMF.Spheroidal.spheroidalEll_one`](DLMF/Spheroidal/Eigenvalues.lean#L171) (admitted); [`DLMF.Spheroidal.spheroidalEll_two`](DLMF/Spheroidal/Eigenvalues.lean#L178) (admitted). `ℓ_0` proved from 30.3.3; `ℓ_2`, `ℓ_4` admitted; all checked by high-precision fits for nine `(n, m)`.
+- [30.3.E10](https://dlmf.nist.gov/30.3.E10): [`DLMF.Spheroidal.spheroidalEll_three`](DLMF/Spheroidal/Eigenvalues.lean#L192) (admitted). Checked numerically.
+- [30.3.E11](https://dlmf.nist.gov/30.3.E11): [`DLMF.Spheroidal.spheroidalEll_four`](DLMF/Spheroidal/Eigenvalues.lean#L204) (admitted). Checked numerically.
+- [30.3.E12](https://dlmf.nist.gov/30.3.E12): [`DLMF.Spheroidal.spheroidalEllA`](DLMF/Spheroidal/Basic.lean#L341) (definition); [`DLMF.Spheroidal.spheroidalEllB`](DLMF/Spheroidal/Basic.lean#L351) (definition); [`DLMF.Spheroidal.spheroidalEllC`](DLMF/Spheroidal/Basic.lean#L363) (definition); [`DLMF.Spheroidal.spheroidalEllD`](DLMF/Spheroidal/Basic.lean#L373) (definition); [`DLMF.Spheroidal.spheroidalEll_four`](DLMF/Spheroidal/Eigenvalues.lean#L204) (admitted). Auxiliary `A, B, C, D` as definitions.
+
+## [§30.4 Functions of the First Kind](https://dlmf.nist.gov/30.4)
+
+- [30.4.i](https://dlmf.nist.gov/30.4.i): [`DLMF.Spheroidal.existsUnique_isSpheroidalPsFactor`](DLMF/Spheroidal/Basic.lean#L222) (admitted); [`DLMF.Spheroidal.spheroidalPs`](DLMF/Spheroidal/Basic.lean#L242) (definition); [`DLMF.Spheroidal.spheroidalPs_zero_sign`](DLMF/Spheroidal/Angular.lean#L65) (proved from admissions); [`DLMF.Spheroidal.spheroidalPs_deriv_zero_sign`](DLMF/Spheroidal/Angular.lean#L72) (proved from admissions); [`DLMF.Spheroidal.isSpheroidalSolutionReal_spheroidalPs`](DLMF/Spheroidal/Angular.lean#L96) (proved from admissions). Normalization and sign of `𝖯s(0)` / `𝖯s'(0)`; design choice (flagged): `𝖯s = (1-x²)^{m/2} g`, `g` chosen entire, real, normalized; existence/uniqueness admitted.
+- [30.4.ii](https://dlmf.nist.gov/30.4.ii): [`DLMF.Spheroidal.ncard_zeros_spheroidalPs`](DLMF/Spheroidal/Angular.lean#L118) (admitted). `ncard` of the zero set in `(-1, 1)` is `n - m`.
+- [30.4.iv](https://dlmf.nist.gov/30.4.iv): [`DLMF.Spheroidal.tendstoUniformlyOn_spheroidalExpansion_sub_ferrers`](DLMF/Spheroidal/Angular.lean#L190) (admitted). Equiconvergence with the Ferrers expansion, uniformly on `[-1, 1]`.
+- [30.4.E1](https://dlmf.nist.gov/30.4.E1): [`DLMF.Spheroidal.IsSpheroidalPsFactor`](DLMF/Spheroidal/Basic.lean#L204) (definition); [`DLMF.Spheroidal.integral_spheroidalPs_sq`](DLMF/Spheroidal/Angular.lean#L80) (proved from admissions). Proved from the existence theorem.
+- [30.4.E2](https://dlmf.nist.gov/30.4.E2): [`DLMF.Spheroidal.spheroidalPs_gamma_zero`](DLMF/Spheroidal/Angular.lean#L106) (admitted).
+- [30.4.E3](https://dlmf.nist.gov/30.4.E3): [`DLMF.Spheroidal.spheroidalPs_neg`](DLMF/Spheroidal/Angular.lean#L112) (admitted).
+- [30.4.E4](https://dlmf.nist.gov/30.4.E4): [`DLMF.Spheroidal.hasSum_spheroidalPs`](DLMF/Spheroidal/Angular.lean#L126) (proved from admissions). Proved (Taylor series of the entire factor), for all real `x` (stronger than DLMF; meaningful on `[-1, 1]`).
+- [30.4.E5](https://dlmf.nist.gov/30.4.E5): [`DLMF.Spheroidal.spheroidalPs_coeff_recurrence`](DLMF/Spheroidal/Angular.lean#L147) (admitted). With the parity vanishing.
+- [30.4.E6](https://dlmf.nist.gov/30.4.E6): [`DLMF.Spheroidal.integral_spheroidalPs_mul`](DLMF/Spheroidal/Angular.lean#L161) (admitted); [`DLMF.Spheroidal.integral_spheroidalPs_mul_eq`](DLMF/Spheroidal/Angular.lean#L168) (proved from admissions). `k ≠ n` admitted; the Kronecker form proved from it and 30.4.1.
+- [30.4.E7](https://dlmf.nist.gov/30.4.E7): [`DLMF.Spheroidal.tendsto_spheroidalExpansion_L2`](DLMF/Spheroidal/Angular.lean#L178) (admitted). `MemLp f 2` on `(-1, 1)`; `L²` convergence of partial sums (30.4.9).
+- [30.4.E8](https://dlmf.nist.gov/30.4.E8): [`DLMF.Spheroidal.spheroidalExpansionCoeff`](DLMF/Spheroidal/Basic.lean#L256) (definition).
+- [30.4.E9](https://dlmf.nist.gov/30.4.E9): [`DLMF.Spheroidal.tendsto_spheroidalExpansion_L2`](DLMF/Spheroidal/Angular.lean#L178) (admitted).
+
+## [§30.5 Functions of the Second Kind](https://dlmf.nist.gov/30.5)
+
+- [30.5.E1](https://dlmf.nist.gov/30.5.E1): [`DLMF.Spheroidal.IsSpheroidalQs`](DLMF/Spheroidal/FerrersDefs.lean#L137) (definition); [`DLMF.Spheroidal.spheroidalQs`](DLMF/Spheroidal/FerrersDefs.lean#L154) (definition); [`DLMF.Spheroidal.exists_isSpheroidalQs`](DLMF/Spheroidal/FerrersDefs.lean#L242) (admitted); [`DLMF.Spheroidal.isSpheroidalSolutionReal_spheroidalQs`](DLMF/Spheroidal/Angular.lean#L206) (proved from admissions). Design choice (flagged): `𝖰s` characterized by 30.2.1, the parity 30.5.2 and the Wronskian 30.5.4 (unique), existence admitted under nonvanishing of the forward recursion (DLMF: otherwise `𝖰s` does not exist).
+- [30.5.E2](https://dlmf.nist.gov/30.5.E2): [`DLMF.Spheroidal.spheroidalQs_neg`](DLMF/Spheroidal/Angular.lean#L215) (proved from admissions). Proved from the characterization.
+- [30.5.E3](https://dlmf.nist.gov/30.5.E3): [`DLMF.Spheroidal.spheroidalQs_gamma_zero`](DLMF/Spheroidal/Angular.lean#L224) (admitted).
+- [30.5.E4](https://dlmf.nist.gov/30.5.E4): [`DLMF.Spheroidal.wronskian_spheroidalPs_spheroidalQs`](DLMF/Spheroidal/Angular.lean#L230) (proved from admissions); [`DLMF.Spheroidal.spheroidalA_mul_spheroidalANeg_ne_zero`](DLMF/Spheroidal/Angular.lean#L242) (admitted). Wronskian proved from the characterization; `A^m_n A^{-m}_n ≠ 0` admitted. Checked numerically against the series 30.8.9 (7 cases, 25 digits); the extended coefficients `-N ≤ k < -R` are needed in `A^m_n`.
+
+## [§30.6 Functions of Complex Argument](https://dlmf.nist.gov/30.6)
+
+- [30.6.E1](https://dlmf.nist.gov/30.6.E1): [`DLMF.Spheroidal.spheroidalPsC`](DLMF/Spheroidal/Basic.lean#L249) (definition); [`DLMF.Spheroidal.IsSpheroidalQsC`](DLMF/Spheroidal/FerrersDefs.lean#L164) (definition); [`DLMF.Spheroidal.spheroidalQsC`](DLMF/Spheroidal/FerrersDefs.lean#L177) (definition); [`DLMF.Spheroidal.existsUnique_isSpheroidalQsC`](DLMF/Spheroidal/FerrersDefs.lean#L251) (admitted); [`DLMF.Spheroidal.differentiableOn_spheroidalPsC`](DLMF/Spheroidal/Angular.lean#L251) (proved from admissions); [`DLMF.Spheroidal.spheroidalPsC_im_eq_zero`](DLMF/Spheroidal/Angular.lean#L269) (proved from admissions); [`DLMF.Spheroidal.isSpheroidalSolutionOn_spheroidalPsC`](DLMF/Spheroidal/Angular.lean#L285) (admitted); [`DLMF.Spheroidal.isSpheroidalSolutionOn_spheroidalQsC`](DLMF/Spheroidal/Angular.lean#L292) (proved from admissions); [`DLMF.Spheroidal.spheroidalQsC_im_eq_zero`](DLMF/Spheroidal/Angular.lean#L301) (admitted). `𝑃s = (-1)^m (z-1)^{m/2}(z+1)^{m/2} g(z)` (definition; analyticity and reality on `(1, ∞)` proved; checked against the Legendre series `∑(-1)^k a_k P^m_{n+2k}(z)`); `𝑄s` by its upper boundary values 30.6.5 (flagged choice).
+- [30.6.E2](https://dlmf.nist.gov/30.6.E2): [`DLMF.Spheroidal.spheroidalPsC_gamma_zero`](DLMF/Spheroidal/Angular.lean#L308) (admitted). `associatedP`, `associatedQ` of DLMF/Legendre/Associated.lean.
+- [30.6.E3](https://dlmf.nist.gov/30.6.E3): [`DLMF.Spheroidal.wronskian_spheroidalPsC_spheroidalQsC`](DLMF/Spheroidal/Angular.lean#L315) (admitted).
+- [30.6.E4](https://dlmf.nist.gov/30.6.E4): [`DLMF.Spheroidal.tendsto_spheroidalPsC_boundary`](DLMF/Spheroidal/Angular.lean#L327) (admitted).
+- [30.6.E5](https://dlmf.nist.gov/30.6.E5): [`DLMF.Spheroidal.tendsto_spheroidalQsC_boundary_upper`](DLMF/Spheroidal/Angular.lean#L338) (proved from admissions); [`DLMF.Spheroidal.tendsto_spheroidalQsC_boundary_lower`](DLMF/Spheroidal/Angular.lean#L349) (admitted). Upper signs proved from the characterization; lower signs admitted.
+
+## [§30.8 Expansions in Series of Ferrers Functions](https://dlmf.nist.gov/30.8)
+
+- [30.8.ii](https://dlmf.nist.gov/30.8.ii): [`DLMF.Spheroidal.spheroidalFwd`](DLMF/Spheroidal/Basic.lean#L314) (definition); [`DLMF.Spheroidal.exists_isSpheroidalCoeffPrime`](DLMF/Spheroidal/FerrersDefs.lean#L234) (admitted); [`DLMF.Spheroidal.spheroidalCoeff_of_lt`](DLMF/Spheroidal/FerrersSeries.lean#L167) (proved). Forward solution and extended coefficients (definitions); unfolding lemma proved; existence of `a'` admitted.
+- [30.8.E1](https://dlmf.nist.gov/30.8.E1): [`DLMF.Spheroidal.hasSum_spheroidalPs_ferrers`](DLMF/Spheroidal/FerrersSeries.lean#L51) (admitted). Sum over `k = j - R`, `j ∈ ℕ`.
+- [30.8.E2](https://dlmf.nist.gov/30.8.E2): [`DLMF.Spheroidal.spheroidalCoeffMain`](DLMF/Spheroidal/FerrersDefs.lean#L64) (definition); [`DLMF.Spheroidal.spheroidalCoeff`](DLMF/Spheroidal/FerrersDefs.lean#L73) (definition); [`DLMF.Spheroidal.spheroidalCoeff_of_le`](DLMF/Spheroidal/FerrersSeries.lean#L39) (proved). Definition via the project's `ferrersP`; unfolding lemma proved.
+- [30.8.E3](https://dlmf.nist.gov/30.8.E3): [`DLMF.Spheroidal.spheroidalRecA`](DLMF/Spheroidal/Basic.lean#L294) (definition); [`DLMF.Spheroidal.spheroidalRecB`](DLMF/Spheroidal/Basic.lean#L300) (definition); [`DLMF.Spheroidal.spheroidalRecC`](DLMF/Spheroidal/Basic.lean#L308) (definition).
+- [30.8.E4](https://dlmf.nist.gov/30.8.E4): [`DLMF.Spheroidal.spheroidalRecA_neg_R`](DLMF/Spheroidal/FerrersSeries.lean#L62) (proved); [`DLMF.Spheroidal.spheroidalCoeff_recurrence`](DLMF/Spheroidal/FerrersSeries.lean#L81) (admitted); [`DLMF.Spheroidal.spheroidalCoeff_recurrence_of_le`](DLMF/Spheroidal/FerrersSeries.lean#L93) (admitted). All `k ∈ ℤ` (with the extension) and `k ≥ -R`; `A_{-R} = 0` proved.
+- [30.8.E5](https://dlmf.nist.gov/30.8.E5): [`DLMF.Spheroidal.hasSum_spheroidalCoeff_normalization`](DLMF/Spheroidal/FerrersSeries.lean#L104) (admitted). Checked against 30.4.1.
+- [30.8.E6](https://dlmf.nist.gov/30.8.E6): [`DLMF.Spheroidal.spheroidalCoeffNeg`](DLMF/Spheroidal/FerrersDefs.lean#L85) (definition); [`DLMF.Spheroidal.spheroidalCoeffNeg_of_le`](DLMF/Spheroidal/FerrersSeries.lean#L114) (proved).
+- [30.8.E7](https://dlmf.nist.gov/30.8.E7): [`DLMF.Spheroidal.spheroidalCoeff_ratio_isBigO`](DLMF/Spheroidal/FerrersSeries.lean#L126) (admitted). `IsBigO` with `k⁻¹`.
+- [30.8.E8](https://dlmf.nist.gov/30.8.E8): [`DLMF.Spheroidal.spheroidalCoeff_ratio_isBigO_four`](DLMF/Spheroidal/FerrersSeries.lean#L134) (admitted). `IsBigO` with `k⁻⁴`; checked numerically.
+- [30.8.E9](https://dlmf.nist.gov/30.8.E9): [`DLMF.Spheroidal.spheroidalCoeffPrime`](DLMF/Spheroidal/FerrersDefs.lean#L130) (definition); [`DLMF.Spheroidal.spheroidalQs_eq_ferrers_series`](DLMF/Spheroidal/FerrersSeries.lean#L146) (admitted). Two `HasSum`s; checked numerically (Wronskian, parity, ODE residual).
+- [30.8.E10](https://dlmf.nist.gov/30.8.E10): [`DLMF.Spheroidal.IsSpheroidalCoeffPrime`](DLMF/Spheroidal/FerrersDefs.lean#L103) (definition); [`DLMF.Spheroidal.spheroidalQs_eq_ferrers_series`](DLMF/Spheroidal/FerrersSeries.lean#L146) (admitted).
+- [30.8.E11](https://dlmf.nist.gov/30.8.E11): [`DLMF.Spheroidal.spheroidalCPrime`](DLMF/Spheroidal/Basic.lean#L327) (definition); [`DLMF.Spheroidal.spheroidalQs_eq_ferrers_series`](DLMF/Spheroidal/FerrersSeries.lean#L146) (admitted).
+
+## [§30.9 Asymptotic Approximations and Expansions](https://dlmf.nist.gov/30.9)
+
+- [30.9.ii](https://dlmf.nist.gov/30.9.ii): [`DLMF.Spheroidal.spheroidalOblateQ`](DLMF/Spheroidal/Basic.lean#L401) (definition). `q = n + 1` or `n`.
+- [30.9.E1](https://dlmf.nist.gov/30.9.E1): [`DLMF.Spheroidal.spheroidalEigenvalue_prolate_asymptotic`](DLMF/Spheroidal/Eigenvalues.lean#L213) (admitted). `HasAsymptoticExpansion atTop` in powers `γ^{-i}` of `λ + γ² - γq`, first six coefficients given; checked numerically (`γ = 50, 100`, seven `(n, m)`).
+- [30.9.E2](https://dlmf.nist.gov/30.9.E2): [`DLMF.Spheroidal.spheroidalProlateBeta`](DLMF/Spheroidal/Basic.lean#L382) (definition); [`DLMF.Spheroidal.spheroidalEigenvalue_prolate_asymptotic`](DLMF/Spheroidal/Eigenvalues.lean#L213) (admitted).
+- [30.9.E3](https://dlmf.nist.gov/30.9.E3): [`DLMF.Spheroidal.spheroidalEigenvalue_prolate_asymptotic`](DLMF/Spheroidal/Eigenvalues.lean#L213) (admitted).
+- [30.9.E4](https://dlmf.nist.gov/30.9.E4): [`DLMF.Spheroidal.spheroidalEigenvalue_oblate_asymptotic`](DLMF/Spheroidal/Eigenvalues.lean#L223) (admitted). In `κ = |γ|`, `γ² = -κ²`; checked numerically.
+- [30.9.E5](https://dlmf.nist.gov/30.9.E5): [`DLMF.Spheroidal.spheroidalOblateC`](DLMF/Spheroidal/Basic.lean#L406) (definition); [`DLMF.Spheroidal.spheroidalEigenvalue_oblate_asymptotic`](DLMF/Spheroidal/Eigenvalues.lean#L223) (admitted).
+- [30.9.E6](https://dlmf.nist.gov/30.9.E6): [`DLMF.Spheroidal.spheroidalEigenvalue_oblate_asymptotic`](DLMF/Spheroidal/Eigenvalues.lean#L223) (admitted).
+
+## [§30.11 Radial Spheroidal Wave Functions](https://dlmf.nist.gov/30.11)
+
+- [30.11.E1](https://dlmf.nist.gov/30.11.E1): [`DLMF.Spheroidal.spheroidalPsi`](DLMF/Spheroidal/Basic.lean#L439) (definition); [`DLMF.Spheroidal.spheroidalPsi_one_eq`](DLMF/Spheroidal/Radial.lean#L47) (admitted). `ψ^{(1)}_k := j_k` (entire, `DLMF.sphericalJ`); principal-branch formula off `(-∞, 0]` admitted (flagged choice: the literal formula changes sign on the negative axis).
+- [30.11.E2](https://dlmf.nist.gov/30.11.E2): [`DLMF.Spheroidal.spheroidalCylinder`](DLMF/Spheroidal/Basic.lean#L427) (definition); [`DLMF.Spheroidal.spheroidalPsi_three_four`](DLMF/Spheroidal/Radial.lean#L54) (proved from admissions). `ψ^{(3),(4)} = ψ^{(1)} ± iψ^{(2)}` proved from 30.11.1.
+- [30.11.E3](https://dlmf.nist.gov/30.11.E3): [`DLMF.Spheroidal.spheroidalRadial`](DLMF/Spheroidal/FerrersDefs.lean#L186) (definition); [`DLMF.Spheroidal.summable_spheroidalRadial_series`](DLMF/Spheroidal/Radial.lean#L65) (admitted); [`DLMF.Spheroidal.isSpheroidalSolutionOn_spheroidalRadial`](DLMF/Spheroidal/Radial.lean#L76) (admitted). Definition (`γ²` evaluated as `(γ^2).re`); convergence and ODE admitted; checked against SciPy `pro_rad1`, `pro_rad2`.
+- [30.11.E4](https://dlmf.nist.gov/30.11.E4): [`DLMF.Spheroidal.spheroidalA`](DLMF/Spheroidal/FerrersDefs.lean#L95) (definition); [`DLMF.Spheroidal.spheroidalANeg`](DLMF/Spheroidal/FerrersDefs.lean#L99) (definition); [`DLMF.Spheroidal.spheroidalA_mul_spheroidalANeg_ne_zero`](DLMF/Spheroidal/Angular.lean#L242) (admitted). Definitions; nonvanishing admitted.
+- [30.11.E5](https://dlmf.nist.gov/30.11.E5): [`DLMF.Spheroidal.spheroidalRadial_three_four`](DLMF/Spheroidal/Radial.lean#L88) (proved from admissions). Proved from the convergence theorem and 30.11.1.
+- [30.11.E6](https://dlmf.nist.gov/30.11.E6): [`DLMF.Spheroidal.spheroidalRadial_isBigO_one_two`](DLMF/Spheroidal/Radial.lean#L124) (admitted); [`DLMF.Spheroidal.spheroidalRadial_isBigO_three_four`](DLMF/Spheroidal/Radial.lean#L134) (admitted). Corrected (`e^{|ℑ(γz)|}` for `j = 1, 2`), real `γ > 0`, sector filter `DLMF.sector (π - δ)`; see corrections.
+- [30.11.E7](https://dlmf.nist.gov/30.11.E7): [`DLMF.Spheroidal.wronskian_spheroidalRadial`](DLMF/Spheroidal/Radial.lean#L145) (admitted). Checked numerically.
+- [30.11.E8](https://dlmf.nist.gov/30.11.E8): [`DLMF.Spheroidal.spheroidalRadial_one_eq`](DLMF/Spheroidal/Radial.lean#L158) (admitted). Checked numerically with `K` from 30.11.10–30.11.11.
+- [30.11.E9](https://dlmf.nist.gov/30.11.E9): [`DLMF.Spheroidal.spheroidalRadial_two_eq`](DLMF/Spheroidal/Radial.lean#L166) (admitted). Checked numerically (`𝑄s` from the Legendre series analogue of 30.8.9 for `z > 1`, four cases, 11 digits).
+- [30.11.E10](https://dlmf.nist.gov/30.11.E10): [`DLMF.Spheroidal.spheroidalK`](DLMF/Spheroidal/FerrersDefs.lean#L196) (definition); [`DLMF.Spheroidal.spheroidalRadial_one_eq`](DLMF/Spheroidal/Radial.lean#L158) (admitted).
+- [30.11.E11](https://dlmf.nist.gov/30.11.E11): [`DLMF.Spheroidal.spheroidalK`](DLMF/Spheroidal/FerrersDefs.lean#L196) (definition); [`DLMF.Spheroidal.spheroidalRadial_one_eq`](DLMF/Spheroidal/Radial.lean#L158) (admitted).
+- [30.11.E12](https://dlmf.nist.gov/30.11.E12): [`DLMF.Spheroidal.spheroidalRadial_one_integral`](DLMF/Spheroidal/Radial.lean#L181) (admitted). Checked numerically.
+
+## [§30.12 Generalized and Coulomb Spheroidal Functions](https://dlmf.nist.gov/30.12)
+
+- [30.12.E1](https://dlmf.nist.gov/30.12.E1): [`DLMF.Spheroidal.IsGenSpheroidalSolutionOn`](DLMF/Spheroidal/Basic.lean#L133) (definition); [`DLMF.Spheroidal.isGenSpheroidalSolutionOn_zero_iff`](DLMF/Spheroidal/Equation.lean#L150) (proved). Predicate; reduction at `α = 0` proved.
+- [30.12.E2](https://dlmf.nist.gov/30.12.E2): [`DLMF.Spheroidal.IsSpheroidalSolutionOn₂`](DLMF/Spheroidal/Basic.lean#L144) (definition); [`DLMF.Spheroidal.isSpheroidalSolutionOn₂_zero_iff`](DLMF/Spheroidal/Equation.lean#L161) (proved). Predicate; reduction at `α = 0` proved.
+
+## Prose, informal and excluded items
+
+- [§30.1](https://dlmf.nist.gov/30.1): notation (`x ∈ (-1, 1)`, real `γ²`, the names of the
+  main functions) recorded above; the notations of Flammer and Abramowitz–Stegun
+  (`λ_{mn}(γ) = λ^m_n(γ²) + γ²`, `R^{(j)}_{mn}(γ, z) = S^{m(j)}_n(z, γ)`) are notation only.
+- §30.2(i): the remark on prolate (`γ² > 0`) and oblate (`γ² < 0`) coordinates and §30.4(i)
+  paragraph 2 (names "prolate/oblate angular spheroidal wave function") are terminology.
+- §30.5 paragraph 2, §30.6 (further properties, complex parameters), §30.9(i) paragraphs 3–4,
+  §30.9(ii) paragraphs 3–4, §30.9(iii) (large `n`, large `m`, `x → ±1`, complex `γ²`),
+  §30.11(iii) paragraph 2, §30.11(vi) paragraph 2 and §30.12 (theory and computation of
+  30.12.1, 30.12.2): bibliographic pointers; not acquired.
+- [§30.7](https://dlmf.nist.gov/30.7) Graphics (Figures 30.7.1–30.7.21) and §30.11(ii)
+  (Figures 30.11.1–30.11.4): excluded: graphics.
+- [§30.10](https://dlmf.nist.gov/30.10) Series and Integrals: references only (integral
+  equations, product formulas, addition theorem, expansions in products of spherical Bessel
+  functions); no formulas, not acquired.
+- [§30.13](https://dlmf.nist.gov/30.13) Wave Equation in Prolate Spheroidal Coordinates
+  (30.13.E1–E16): excluded: application. Mathematical content: prolate spheroidal coordinates
+  30.13.1–30.13.2 and their metric coefficients 30.13.3–30.13.5, the Laplacian 30.13.6;
+  separation of variables of the Helmholtz equation 30.13.7 into 30.13.8–30.13.11 (30.13.9 and
+  30.13.10 are 30.2.1, 30.13.11 is `w₃'' + μ²w₃ = 0`); single-valuedness and boundedness force
+  `μ = m`, `w₃ = a cos mφ + b sin mφ` (30.13.12), `w₂ = a𝖯s^m_n + b𝖰s^m_n` (30.13.13),
+  `w₁ = aS^{m(1)}_n + bS^{m(2)}_n` (30.13.14), and the product is a `C²` solution in all space when
+  `b₁ = b₂ = 0`; the interior Dirichlet problem for a prolate ellipsoid `ξ = ξ₀` has the
+  eigenvalues `c²κ² = γ²` with `S^{m(1)}_n(ξ₀, γ) = 0` (30.13.15), and between two ellipsoids
+  the condition 30.13.16.
+- [§30.14](https://dlmf.nist.gov/30.14) Wave Equation in Oblate Spheroidal Coordinates
+  (30.14.E1–E9): excluded: application. The same programme for oblate coordinates
+  `x = c√((ξ²+1)(1-η²)) cos φ`, … (30.14.1–30.14.6), separated equations with `γ² = -κ²c²`
+  (30.14.7–30.14.8: `ξ ↦ iξ` in 30.2.1), and the Dirichlet condition `S^{m(1)}_n(iξ₀, γ) = 0`
+  (30.14.9).
+- [§30.15](https://dlmf.nist.gov/30.15) Signal Analysis (30.15.E1–E13): excluded:
+  application. Mathematical content (prolate spheroidal wave functions of Slepian–Pollak): for
+  `τ, σ > 0`, `γ = τσ`, the scaled functions `φ_n(t) = √((2n+1)/(2τ)) √Λ_n 𝖯s^0_n(t/τ, γ²)` with
+  `Λ_n = (2γ/π)(K^0_n(γ) A^0_n(γ²))²` (30.15.1–30.15.2) are the eigenfunctions of the
+  sinc-kernel integral equation `∫_{-τ}^{τ} sin σ(t-s)/(π(t-s)) φ_n(s) ds = Λ_n φ_n(t)` (30.15.3);
+  their Fourier transforms 30.15.4–30.15.6 (band-limitedness); the double orthogonality
+  `∫_{-τ}^{τ} φ_kφ_n = Λ_nδ_{kn}`, `∫_ℝ φ_kφ_n = δ_{kn}` (30.15.7–30.15.8), completeness in the
+  `σ`-band-limited functions and in `L²(-τ, τ)`; the energy-concentration extremal problem
+  30.15.9–30.15.13 with `arccos √B + arccos √α = arccos √Λ_0`. These are candidates for a later
+  decision.
+- [§30.16](https://dlmf.nist.gov/30.16) Methods of Computation (30.16.E1–E9): excluded:
+  computation (truncated matrix eigenproblems for `λ^m_n` with error bounds 30.16.1–30.16.6,
+  normalization of truncated coefficient vectors 30.16.7–30.16.9; the underlying recurrences
+  30.3.5 and 30.8.4 are acquired).
+- [§30.17](https://dlmf.nist.gov/30.17) Tables: excluded: numerical.
+  [§30.18](https://dlmf.nist.gov/30.18) Software: excluded: software.
+
+## Validation
+
+- All seven modules build with `lake build DLMF.Spheroidal.<Module>` and each passes
+  `lake env lean -DautoImplicit=false -DrelaxedAutoImplicit=false` with only `sorry` warnings.
+  There are no axioms, no `native_decide`, no `sorry` in definitions or helper lemmas (the
+  helpers are `private` with prefix `s30_`); the five admitted theorems in the definitions files
+  are the flagged existence theorems. Lines are at most 100 characters.
+- `#print axioms` over all 92 theorems: the 10 proved without admissions depend on
+  `[propext, Classical.choice, Quot.sound]` (`spheroidal_indicial_exponents`,
+  `spheroidalLiouville_coeff_mathieu`, `IsSpheroidalLiouvilleSolution.mathieu`,
+  `isGenSpheroidalSolutionOn_zero_iff`, `isSpheroidalSolutionOn₂_zero_iff`,
+  `spheroidalRecA_neg_R`, `spheroidalCoeff_of_le`, `spheroidalCoeffNeg_of_le`,
+  `spheroidalCoeff_of_lt`, `spheroidalPs_zero`); the others also on `sorryAx`.
+- Theorems proved from admissions (20 tagged): the ordering 30.3.1, `ℓ_0` (from 30.3.3), the
+  sign conventions and the normalization 30.4.1, 30.4.4, the orthogonality relation with
+  Kronecker delta, the facts about `𝖯s` and `𝑃s` that follow from the existence theorem
+  (analyticity, reality, ODE), 30.5.1–30.5.2, 30.5.4, 30.6.1 for `𝑄s`, the upper signs of
+  30.6.5, the two normalizations of 30.1.2, `ψ^{(3), (4)} = ψ^{(1)} ± iψ^{(2)}` and the
+  connection formulas 30.11.5.
+- DLMF.lean, the area umbrella `DLMF/Spheroidal.lean`, README, the lakefile and the other
+  ledgers were not touched (the coordinator writes the umbrella).

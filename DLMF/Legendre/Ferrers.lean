@@ -49,12 +49,6 @@ end DLMF.Hypergeometric
 
 namespace DLMF.Legendre
 
-/-- The Ferrers function of the first kind on `(-1, 1)`,
-`𝖯^μ_ν(x) = ((1+x)/(1-x))^{μ/2} 𝐅(ν+1, -ν; 1-μ; (1-x)/2)` (DLMF 14.3.1). -/
-@[dlmf 14.3.E1]
-def ferrersP (ν μ : ℂ) (x : ℝ) : ℂ :=
-  (((1 + x) / (1 - x) : ℝ) : ℂ) ^ (μ / 2) * regularizedGaussHG (ν + 1) (-ν) (1 - μ) ((1 - x) / 2)
-
 /-- At `μ = 0` the Ferrers function is `P_ν` on `(-1, 1)`. -/
 theorem ferrersP_zero (ν : ℂ) {x : ℝ} (hx : -1 < x) : ferrersP ν 0 x = legendreP ν x := by
   have hs : 1 + (x : ℂ) ∈ slitPlane := Or.inl (by simp; linarith)

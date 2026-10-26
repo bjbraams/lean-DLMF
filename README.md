@@ -79,6 +79,17 @@ arithmetic functions, characters and reciprocity, recorded with `dlmf_upstream` 
 The same exclusions apply; open conjectures (Riemann hypothesis, Goldbach, Lehmer) are named
 as propositions, never stated as theorems.
 
+Chapters 28–31, acquired on 2026-10-26, have the entry points
+[Mathieu](DLMF/Mathieu.lean) (Chapter 28, Mathieu functions and Hill's equation),
+[Lame](DLMF/Lame.lean) (Chapter 29, Lamé functions),
+[Spheroidal](DLMF/Spheroidal.lean) (Chapter 30, spheroidal wave functions) and
+[Heun](DLMF/Heun.lean) (Chapter 31, Heun functions), with the ledgers
+[Chapter 28](DLMF28Acquisition.md), [Chapter 29](DLMF29Acquisition.md),
+[Chapter 30](DLMF30Acquisition.md) and [Chapter 31](DLMF31Acquisition.md). Mathlib has none of
+these functions. Explicit constructions are used where they exist (Heun's local solution, Lamé
+and Ince polynomials, Bessel-product series); otherwise the solutions and eigenvalues are chosen
+from flagged existence theorems, which are proof targets. The same exclusions apply.
+
 DLMF errata and source corrections found anywhere in the project are collected in
 [DLMFErrata.md](DLMFErrata.md): genuine DLMF errata, fixed transcription defects of our own,
 and formalization notes, each with evidence and the Lean declarations.
@@ -160,11 +171,12 @@ Mathlib's `Complex.digamma`; moving it into `DLMF.Gamma.Real` is left for a late
 
 ## Status
 
-After proof round 3 for Chapters 24–27 (2026-10-26) there are **953 explicit source
+After the Chapters 28–31 acquisition (2026-10-26) there are **1,520 explicit source
 admissions**: Elementary 68, GeneralizedHypergeometric 112, QHypergeometric 101,
 EllipticIntegrals 187, Theta 22, RiemannTheta 10, JacobiElliptic 62, Weierstrass 53,
-BernoulliEuler 25, Zeta 46, Combinatorics 37, NumberTheory 42, and 188 in the older areas.
-The compiled audit finds **19,228 project theorems**, with **1,016 depending transitively on
+BernoulliEuler 25, Zeta 46, Combinatorics 37, NumberTheory 39, Mathieu 314, Lame 128,
+Spheroidal 56, Heun 72, and 188 in the older areas.
+The compiled audit finds **20,289 project theorems**, with **1,704 depending transitively on
 `sorryAx`**, and no other nonstandard axiom.
 Counts in the dated development history describe their earlier scope.
 
