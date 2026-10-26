@@ -171,12 +171,12 @@ Mathlib's `Complex.digamma`; moving it into `DLMF.Gamma.Real` is left for a late
 
 ## Status
 
-After the Chapters 28–31 acquisition (2026-10-26) there are **1,520 explicit source
-admissions**: Elementary 68, GeneralizedHypergeometric 112, QHypergeometric 101,
-EllipticIntegrals 187, Theta 22, RiemannTheta 10, JacobiElliptic 62, Weierstrass 53,
-BernoulliEuler 25, Zeta 46, Combinatorics 37, NumberTheory 39, Mathieu 314, Lame 128,
-Spheroidal 56, Heun 72, and 188 in the older areas.
-The compiled audit finds **20,289 project theorems**, with **1,704 depending transitively on
+After proof round 1 for Chapters 28–31 (2026-10-26) there are
+**1,338 explicit source admissions**: Elementary 68, GeneralizedHypergeometric 112,
+QHypergeometric 101, EllipticIntegrals 187, Theta 22, RiemannTheta 10, JacobiElliptic 62,
+Weierstrass 53, BernoulliEuler 25, Zeta 46, Combinatorics 37, NumberTheory 36, Mathieu 203,
+Lame 104, Spheroidal 41, Heun 43, and 188 in the older areas.
+The compiled audit finds **20,789 project theorems**, with **1,606 depending transitively on
 `sorryAx`**, and no other nonstandard axiom.
 Counts in the dated development history describe their earlier scope.
 

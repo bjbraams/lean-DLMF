@@ -7349,3 +7349,87 @@ recurrence; the Lamé polynomial links to Ec/Es; the spheroidal parity and Wrons
 the existence theorem; the Ince polynomial existence. Harder: Sturm–Liouville ordering and zero
 counts for the eigenvalue characterizations (DLMFMathlib's Sturm modules), the small-q expansions,
 and the Bessel-series expansions of the modified Mathieu functions.
+
+## Ramanujan's τ and the prime number theorem (2026-10-26)
+
+TauCeti was re-pinned from `5cdecf40` to `a049b4264` (Mathlib unchanged at `911003dd`), jointly
+in lean-DLMF, lean-codes, lean-CA, lean-LCS and lean-SCV, because they share one TauCeti checkout
+in `.lake/packages` (user decision). At the old pin TauCeti's field-theory modules failed against
+our Mathlib (deprecations under `warningAsError`); `a049b4264` was tested against a Mathlib only
+five commits ahead of ours, and a search showed it uses none of the names those commits add. The
+local `ContinuousMap.coe_coe` patch (`TauCeti-4.36.patch`) is no longer needed. All five
+projects build at the new pin.
+
+Two agents then proved, without statement changes:
+- q27b (Partitions.lean, new `DLMF/NumberTheory/T27bHecke.lean`): multiplicativity of τ
+  (§27.14(vi)), the Hecke relation 27.14.19, and τ(n) ≡ σ₁₁(n) (mod 691) (27.14.20) from
+  E₁₂ − E₆² = cΔ (Mathlib's dimension formula) and TauCeti's discriminant eigenform.
+- q27a (new `DLMFMathlib/NumberTheory/T27aPrimeNumberTheorem.lean`, Mathlib and TauCeti only):
+  the bridge from TauCeti's prime ideal theorem for ℚ (height-one primes of 𝓞 ℚ counted by norm)
+  to `Nat.primeCounting`, giving π(x) ~ x/log x (27.2.3), p_n ~ n log n (27.2.4, by inversion),
+  27.12.1, θ(x) ~ x and ψ(x) ~ x, and from TauCeti's natural-density Chebotarev theorem the prime
+  number theorem in arithmetic progressions (`primeCounting_ap_isEquivalent`, §27.11). Every
+  NumberTheory file now imports TauCeti's PNT modules through `Functions.lean`.
+
+Not reachable from these results: 27.11.13–15 (M(x) = o(x) needs a Landau-type argument),
+27.11.9 and 27.11.11 (O(1) error terms), 27.12.4–8 (error terms; TauCeti has no zero-free
+region) and Rosser's inequality 27.12.2. Admissions in DLMF/NumberTheory: 42 → 36. CREDITS lists
+the TauCeti and Mathlib declarations used.
+
+Validation: full build 13,416 jobs (the TauCeti PNT and Chebotarev closure adds about 1,140);
+audit 20,301 theorems, 1,700 depending on `sorryAx`, no other nonstandard axiom; tag dump 7,998
+entries; import survey: nothing new; ledger 27 regenerated. Project source admissions: 1,517.
+
+## Proof round 1 for Chapters 28–31 (2026-10-26)
+
+Eight agents with disjoint files (rules in the coordinator's RULES-P1-2831 notes): P1ODE (general
+linear ODE theory, Mathieu `Basic`, Hill `Defs`/`Floquet`), P1M28A1 (§§28.2, 28.5, 28.7, 28.9),
+P1M28A2 (§§28.4, 28.6, 28.8, 28.10, 28.11), P1M28B (noninteger order, Hill eigenfunctions, Ince),
+P1M28C (modified Mathieu functions), P1L29, P1S30 and P1H31. Source admissions: Mathieu 314 → 203,
+Lamé 128 → 104, Spheroidal 56 → 41, Heun 72 → 43 (570 → 391).
+
+New general files (DLMFMathlib, Mathlib-only imports):
+- `Analysis/ODE/P1oEntireLinear`: w'' = p w' + q w with entire p, q has an entire solution for any
+  data at any point (majorant series and the identity theorem).
+- `Analysis/ODE/P1oLinearGlobal`: global solutions on ℝ of linear systems with continuous
+  coefficients.
+- `Analysis/ODE/P1oParamHolomorphic`: solutions depend holomorphically on a linear parameter.
+- `Analysis/Fourier/P1a2EntirePeriodic`: an entire 2π-periodic function is the sum of its Fourier
+  series on ℂ; cosine/sine series and Parseval.
+
+Highlights: `exists_isMathieuSolution` (so w_I, w_II and everything built on them are now free of
+admissions), `hill_exists_solution` and all of §28.29(ii) (discriminant criterion 28.29.7–9,
+28.29.11–14); the Fourier series, recurrences and normalizations 28.4.1–20 and the integral
+equations 28.10.1–8 (one kernel lemma); Floquet criteria 28.2.14–16, −q relations 28.2.26–28,
+q = 0 values, normalization and orthogonality 28.2.29–32, Table 28.2.1, all of 28.5.3–7 (including
+the corrected 28.5.6); absolute convergence of the me_ν series 28.14.1, 28.12.5, 28.14.6,
+28.31.4–9; modified-function relations 28.20.2, 28.20.21–25, 28.22.11–14, 28.23.1, 28.28.4–5;
+Lamé recurrences 29.6 (all sixteen), Table 29.12.1, 29.2.2–3, 29.10.4; spheroidal 30.2.2, 30.2.4,
+the γ = 0 spectrum, 30.4.2–6, 30.8.4, 30.11.1; Heun: convergence of Hl and that it solves the
+equation, the local solutions of §31.3 (confirming DLMF's corrected 31.3.10–11), 31.3.13, §31.2
+(singularities, exponents, normal and trigonometric forms, homographies), confluent singularities
+and the Jacobi form. Many results remain "proved from admissions", chiefly through the Mathieu
+eigenvalue existence `mathieuSpecA_exists`/`mathieuSpecB_exists`, `mathieu_ince`, the Lamé and
+spheroidal eigen-specs and the radial series 28.24.1.
+
+Statement corrections: 28.2.33 and the second conjunct of §28.4(i) gained `n ≠ 0`, restoring
+DLMF's range (DLMF has no se₀; 28.4.3–4 index se_{2n+1}, se_{2n+2}); the Lean junk se₀ gave a
+proved counterexample to 28.2.33 and a divergent sine series (DLMFErrata.md (b); 28.2.33 is now
+proved). The Fuchsian normal form 31.14.3–5 gained `Function.Injective a` after a proved
+counterexample (DLMFErrata.md (c)). To watch:
+28.12.7 needs that normality excludes coinciding eigenvalues; 28.15.2 may have degenerate cases.
+
+Integration: the four DLMFMathlib files added to `DLMFMathlib.lean`; import survey: nothing new
+(new cross-area imports are from theorem files: JacobiElliptic, Weierstrass, Legendre,
+OrthogonalPolynomials, Hypergeometric and lean-codes' `Carlson.TwoVariable.RPolynomial`); ledgers
+regenerated (idempotent), with status paragraphs.
+
+Validation: full build 13,426 jobs; audit 20,789 theorems, 1,606 depending on `sorryAx`, no other
+nonstandard axiom; project source admissions 1,338 (1,517 before).
+
+Next steps: the Mathieu eigenvalue existence (periodic Sturm–Liouville: real w_I, w_II for real
+parameters, analyticity in a from `P1oParamHolomorphic`, Sturm deformation and comparison) unlocks
+most of what is proved from admissions in Chapter 28; `mathieu_ince`; Hill's §28.29(iii) (growth of
+Δ, Hadamard); the radial series 28.24.1 (coefficient decay, integer-order Y limits);
+`spheroidalCoeff_recurrence_of_le` (route known); Heun 31.7.2 (star-shaped domain), Heun
+polynomials, 31.10 kernels; the Lamé Weierstrass bridge 29.2.9 and the k = 0 cases of 29.5.

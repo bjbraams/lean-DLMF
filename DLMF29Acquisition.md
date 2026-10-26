@@ -27,6 +27,8 @@ the modules, in import order, are
 `DLMFMathlib.Analysis.ODE.*`. Neither Mathlib nor TauCeti has Lamé functions, so there are no
 upstream pointers.
 
+**Status after proof round 1 (2026-10-26).** Direct admissions in DLMF/Lame fell from 128 to 104. Proved: all sixteen Fourier-coefficient recurrences of 29.6, Table 29.12.1, the algebraic and imaginary-period forms (29.2.2–3, 29.10.4) and the classification of singular points. Many results are proved only from the flagged existence theorems; see REVIEW.md, "Proof round 1 for Chapters 28–31 (2026-10-26)".
+
 **Counts.** §§29.2–29.17 have 208 numbered items; §29.1 is notation only and §§29.4, 29.13
 are graphics (no numbered formulas). Excluded: the ten equations 29.18.E1–29.18.E10
 (application). In scope: 198 numbered items (195 equations and the tables 29.3.T1, 29.3.T2,
@@ -99,20 +101,20 @@ IntegralEquations 5, Polynomials/Series 24, Polynomials/Orthogonality 4, OtherSo
 
 ## [§29.2 Differential Equations](https://dlmf.nist.gov/29.2)
 
-- [29.2.i](https://dlmf.nist.gov/29.2.i): [`DLMF.Lame.lame_regularSingularAt`](DLMF/Lame/DifferentialEquations.lean#L40) (admitted); [`DLMF.Lame.lame_ordinaryAt`](DLMF/Lame/DifferentialEquations.lean#L49) (admitted).
-- [29.2.ii](https://dlmf.nist.gov/29.2.ii): [`DLMF.Lame.isLameAlgebraicSolutionOn_iff_isHeunSolOn`](DLMF/Lame/DifferentialEquations.lean#L135) (proved). DLMF identifies 29.2.10 with Heun’s equation; the proved bridge is stated for the equivalent algebraic form 29.2.2 (Heun parameters `a = k⁻²`, `q = -h/4 · k⁻²`, `α = -ν/2`, `β = (ν+1)/2`, `γ = δ = ε = ½`).
+- [29.2.i](https://dlmf.nist.gov/29.2.i): [`DLMF.Lame.lame_regularSingularAt`](DLMF/Lame/DifferentialEquations.lean#L112) (proved); [`DLMF.Lame.lame_ordinaryAt`](DLMF/Lame/DifferentialEquations.lean#L181) (proved).
+- [29.2.ii](https://dlmf.nist.gov/29.2.ii): [`DLMF.Lame.isLameAlgebraicSolutionOn_iff_isHeunSolOn`](DLMF/Lame/DifferentialEquations.lean#L398) (proved). DLMF identifies 29.2.10 with Heun’s equation; the proved bridge is stated for the equivalent algebraic form 29.2.2 (Heun parameters `a = k⁻²`, `q = -h/4 · k⁻²`, `α = -ν/2`, `β = (ν+1)/2`, `γ = δ = ε = ½`).
 - [29.2.E1](https://dlmf.nist.gov/29.2.E1): [`DLMF.Lame.IsLameSolutionOn`](DLMF/Lame/Basic.lean#L70) (definition); [`DLMF.Lame.Real.IsLameSolution`](DLMF/Lame/Basic.lean#L116) (definition). `IsLameSolutionOn` is the complex equation on an open set (all complex parameters); `Real.IsLameSolution` the real form used for the eigenvalue problems.
-- [29.2.E2](https://dlmf.nist.gov/29.2.E2): [`DLMF.Lame.IsLameAlgebraicSolutionOn`](DLMF/Lame/Basic.lean#L80) (definition); [`DLMF.Lame.isLameSolutionOn_comp_sn_sq`](DLMF/Lame/DifferentialEquations.lean#L59) (admitted). Algebraic form as a predicate; the transfer to 29.2.1 via `ξ = sn²` is admitted.
-- [29.2.E3](https://dlmf.nist.gov/29.2.E3): [`DLMF.Lame.isLameSolutionOn_comp_sn_sq`](DLMF/Lame/DifferentialEquations.lean#L59) (admitted).
-- [29.2.E4](https://dlmf.nist.gov/29.2.E4): [`DLMF.Lame.Real.IsLameTrigSolution`](DLMF/Lame/Basic.lean#L125) (definition); [`DLMF.Lame.Real.isLameSolution_comp_lamePhi`](DLMF/Lame/DifferentialEquations.lean#L69) (proved). Trigonometric form; the transfer `W ↦ W ∘ φ` to 29.2.1 is proved.
-- [29.2.E5](https://dlmf.nist.gov/29.2.E5): [`DLMF.Lame.Real.lamePhi`](DLMF/Lame/Basic.lean#L135) (definition); [`DLMF.Lame.Real.isLameSolution_comp_lamePhi`](DLMF/Lame/DifferentialEquations.lean#L69) (proved).
-- [29.2.E6](https://dlmf.nist.gov/29.2.E6): [`DLMF.Lame.isLameWeierstrassSolutionOn_of_isLameSolutionOn`](DLMF/Lame/DifferentialEquations.lean#L101) (admitted).
-- [29.2.E7](https://dlmf.nist.gov/29.2.E7): [`DLMF.Lame.isLameWeierstrassSolutionOn_of_isLameSolutionOn`](DLMF/Lame/DifferentialEquations.lean#L101) (admitted).
-- [29.2.E8](https://dlmf.nist.gov/29.2.E8): [`DLMF.Lame.isLameWeierstrassSolutionOn_of_isLameSolutionOn`](DLMF/Lame/DifferentialEquations.lean#L101) (admitted).
-- [29.2.E9](https://dlmf.nist.gov/29.2.E9): [`DLMF.Lame.IsLameWeierstrassSolutionOn`](DLMF/Lame/Basic.lean#L89) (definition); [`DLMF.Lame.isLameWeierstrassSolutionOn_of_isLameSolutionOn`](DLMF/Lame/DifferentialEquations.lean#L101) (admitted). Weierstrass form with `℘(z; g₂, g₃)` of `DLMF.Weierstrass`; transfer admitted.
-- [29.2.E10](https://dlmf.nist.gov/29.2.E10): [`DLMF.Lame.IsLameWeierstrassAlgebraicSolutionOn`](DLMF/Lame/Basic.lean#L98) (definition); [`DLMF.Lame.isLameWeierstrassSolutionOn_comp_wp`](DLMF/Lame/DifferentialEquations.lean#L117) (admitted).
-- [29.2.E11](https://dlmf.nist.gov/29.2.E11): [`DLMF.Lame.isLameWeierstrassSolutionOn_comp_wp`](DLMF/Lame/DifferentialEquations.lean#L117) (admitted).
-- [29.2.E12](https://dlmf.nist.gov/29.2.E12): [`DLMF.Lame.isLameWeierstrassSolutionOn_of_isLameSolutionOn`](DLMF/Lame/DifferentialEquations.lean#L101) (admitted).
+- [29.2.E2](https://dlmf.nist.gov/29.2.E2): [`DLMF.Lame.IsLameAlgebraicSolutionOn`](DLMF/Lame/Basic.lean#L80) (definition); [`DLMF.Lame.isLameSolutionOn_comp_sn_sq`](DLMF/Lame/DifferentialEquations.lean#L206) (proved). Algebraic form as a predicate; the transfer to 29.2.1 via `ξ = sn²` is admitted.
+- [29.2.E3](https://dlmf.nist.gov/29.2.E3): [`DLMF.Lame.isLameSolutionOn_comp_sn_sq`](DLMF/Lame/DifferentialEquations.lean#L206) (proved).
+- [29.2.E4](https://dlmf.nist.gov/29.2.E4): [`DLMF.Lame.Real.IsLameTrigSolution`](DLMF/Lame/Basic.lean#L125) (definition); [`DLMF.Lame.Real.isLameSolution_comp_lamePhi`](DLMF/Lame/DifferentialEquations.lean#L267) (proved). Trigonometric form; the transfer `W ↦ W ∘ φ` to 29.2.1 is proved.
+- [29.2.E5](https://dlmf.nist.gov/29.2.E5): [`DLMF.Lame.Real.lamePhi`](DLMF/Lame/Basic.lean#L135) (definition); [`DLMF.Lame.Real.isLameSolution_comp_lamePhi`](DLMF/Lame/DifferentialEquations.lean#L267) (proved).
+- [29.2.E6](https://dlmf.nist.gov/29.2.E6): [`DLMF.Lame.isLameWeierstrassSolutionOn_of_isLameSolutionOn`](DLMF/Lame/DifferentialEquations.lean#L299) (admitted).
+- [29.2.E7](https://dlmf.nist.gov/29.2.E7): [`DLMF.Lame.isLameWeierstrassSolutionOn_of_isLameSolutionOn`](DLMF/Lame/DifferentialEquations.lean#L299) (admitted).
+- [29.2.E8](https://dlmf.nist.gov/29.2.E8): [`DLMF.Lame.isLameWeierstrassSolutionOn_of_isLameSolutionOn`](DLMF/Lame/DifferentialEquations.lean#L299) (admitted).
+- [29.2.E9](https://dlmf.nist.gov/29.2.E9): [`DLMF.Lame.IsLameWeierstrassSolutionOn`](DLMF/Lame/Basic.lean#L89) (definition); [`DLMF.Lame.isLameWeierstrassSolutionOn_of_isLameSolutionOn`](DLMF/Lame/DifferentialEquations.lean#L299) (admitted). Weierstrass form with `℘(z; g₂, g₃)` of `DLMF.Weierstrass`; transfer admitted.
+- [29.2.E10](https://dlmf.nist.gov/29.2.E10): [`DLMF.Lame.IsLameWeierstrassAlgebraicSolutionOn`](DLMF/Lame/Basic.lean#L98) (definition); [`DLMF.Lame.isLameWeierstrassSolutionOn_comp_wp`](DLMF/Lame/DifferentialEquations.lean#L316) (proved from admissions).
+- [29.2.E11](https://dlmf.nist.gov/29.2.E11): [`DLMF.Lame.isLameWeierstrassSolutionOn_comp_wp`](DLMF/Lame/DifferentialEquations.lean#L316) (proved from admissions).
+- [29.2.E12](https://dlmf.nist.gov/29.2.E12): [`DLMF.Lame.isLameWeierstrassSolutionOn_of_isLameSolutionOn`](DLMF/Lame/DifferentialEquations.lean#L299) (admitted).
 
 ## [§29.3 Definitions and Basic Properties](https://dlmf.nist.gov/29.3)
 
@@ -154,67 +156,67 @@ IntegralEquations 5, Polynomials/Series 24, Polynomials/Orthogonality 4, OtherSo
 
 ## [§29.6 Fourier Series](https://dlmf.nist.gov/29.6)
 
-- [29.6.i](https://dlmf.nist.gov/29.6.i): [`DLMF.Lame.Real.lameEck_even_fourierA_eq_zero`](DLMF/Lame/FourierSeries.lean#L649) (admitted). For `ν = 2n` the coefficients `A_{2p}`, `p > n`, of `Ec^{2m}_{2n}` vanish (terminating series); admitted.
-- [29.6.E1](https://dlmf.nist.gov/29.6.E1): [`DLMF.Lame.Real.lameEck_even_hasSum_fourierA`](DLMF/Lame/FourierSeries.lean#L49) (admitted).
-- [29.6.E2](https://dlmf.nist.gov/29.6.E2): [`DLMF.Lame.Real.lameEck_even_fourierA_rec_zero`](DLMF/Lame/FourierSeries.lean#L60) (admitted).
-- [29.6.E3](https://dlmf.nist.gov/29.6.E3): [`DLMF.Lame.Real.lameEck_even_fourierA_rec_zero`](DLMF/Lame/FourierSeries.lean#L60) (admitted).
-- [29.6.E4](https://dlmf.nist.gov/29.6.E4): [`DLMF.Lame.Real.lameEck_even_fourierA_rec`](DLMF/Lame/FourierSeries.lean#L72) (admitted).
-- [29.6.E5](https://dlmf.nist.gov/29.6.E5): [`DLMF.Lame.Real.lameEck_even_fourierA_normalization`](DLMF/Lame/FourierSeries.lean#L85) (admitted).
-- [29.6.E6](https://dlmf.nist.gov/29.6.E6): [`DLMF.Lame.Real.lameEck_even_fourierA_pos`](DLMF/Lame/FourierSeries.lean#L94) (proved from admissions).
-- [29.6.E7](https://dlmf.nist.gov/29.6.E7): [`DLMF.Lame.Real.lameEck_even_fourierA_ratio`](DLMF/Lame/FourierSeries.lean#L107) (admitted).
-- [29.6.E8](https://dlmf.nist.gov/29.6.E8): [`DLMF.Lame.Real.lameEck_even_hasSum_fourierC`](DLMF/Lame/FourierSeries.lean#L118) (admitted).
-- [29.6.E9](https://dlmf.nist.gov/29.6.E9): [`DLMF.Lame.Real.lameEck_even_fourierC_rec_zero`](DLMF/Lame/FourierSeries.lean#L128) (admitted).
-- [29.6.E10](https://dlmf.nist.gov/29.6.E10): [`DLMF.Lame.Real.lameEck_even_fourierC_rec`](DLMF/Lame/FourierSeries.lean#L139) (admitted).
+- [29.6.i](https://dlmf.nist.gov/29.6.i): [`DLMF.Lame.Real.lameEck_even_fourierA_eq_zero`](DLMF/Lame/FourierSeries.lean#L1128) (admitted). For `ν = 2n` the coefficients `A_{2p}`, `p > n`, of `Ec^{2m}_{2n}` vanish (terminating series); admitted.
+- [29.6.E1](https://dlmf.nist.gov/29.6.E1): [`DLMF.Lame.Real.lameEck_even_hasSum_fourierA`](DLMF/Lame/FourierSeries.lean#L332) (admitted).
+- [29.6.E2](https://dlmf.nist.gov/29.6.E2): [`DLMF.Lame.Real.lameEck_even_fourierA_rec_zero`](DLMF/Lame/FourierSeries.lean#L343) (proved from admissions).
+- [29.6.E3](https://dlmf.nist.gov/29.6.E3): [`DLMF.Lame.Real.lameEck_even_fourierA_rec_zero`](DLMF/Lame/FourierSeries.lean#L343) (proved from admissions).
+- [29.6.E4](https://dlmf.nist.gov/29.6.E4): [`DLMF.Lame.Real.lameEck_even_fourierA_rec`](DLMF/Lame/FourierSeries.lean#L364) (proved from admissions).
+- [29.6.E5](https://dlmf.nist.gov/29.6.E5): [`DLMF.Lame.Real.lameEck_even_fourierA_normalization`](DLMF/Lame/FourierSeries.lean#L393) (admitted).
+- [29.6.E6](https://dlmf.nist.gov/29.6.E6): [`DLMF.Lame.Real.lameEck_even_fourierA_pos`](DLMF/Lame/FourierSeries.lean#L402) (proved from admissions).
+- [29.6.E7](https://dlmf.nist.gov/29.6.E7): [`DLMF.Lame.Real.lameEck_even_fourierA_ratio`](DLMF/Lame/FourierSeries.lean#L415) (admitted).
+- [29.6.E8](https://dlmf.nist.gov/29.6.E8): [`DLMF.Lame.Real.lameEck_even_hasSum_fourierC`](DLMF/Lame/FourierSeries.lean#L426) (admitted).
+- [29.6.E9](https://dlmf.nist.gov/29.6.E9): [`DLMF.Lame.Real.lameEck_even_fourierC_rec_zero`](DLMF/Lame/FourierSeries.lean#L436) (proved from admissions).
+- [29.6.E10](https://dlmf.nist.gov/29.6.E10): [`DLMF.Lame.Real.lameEck_even_fourierC_rec`](DLMF/Lame/FourierSeries.lean#L456) (proved from admissions).
 - [29.6.E11](https://dlmf.nist.gov/29.6.E11): [`DLMF.Lame.LameRecurrence.alpha`](DLMF/Lame/Basic.lean#L226) (definition); [`DLMF.Lame.LameRecurrence.beta`](DLMF/Lame/Basic.lean#L242) (definition); [`DLMF.Lame.LameRecurrence.gamma`](DLMF/Lame/Basic.lean#L260) (definition).
-- [29.6.E12](https://dlmf.nist.gov/29.6.E12): [`DLMF.Lame.Real.lameEck_even_fourierC_normalization`](DLMF/Lame/FourierSeries.lean#L152) (admitted).
-- [29.6.E13](https://dlmf.nist.gov/29.6.E13): [`DLMF.Lame.Real.lameEck_even_fourierC_pos`](DLMF/Lame/FourierSeries.lean#L164) (proved from admissions).
-- [29.6.E14](https://dlmf.nist.gov/29.6.E14): [`DLMF.Lame.Real.lameEck_even_fourierC_ratio`](DLMF/Lame/FourierSeries.lean#L183) (admitted).
-- [29.6.E15](https://dlmf.nist.gov/29.6.E15): [`DLMF.Lame.Real.lameEck_even_fourier_parseval`](DLMF/Lame/FourierSeries.lean#L194) (admitted).
-- [29.6.E16](https://dlmf.nist.gov/29.6.E16): [`DLMF.Lame.Real.lameEck_odd_hasSum_fourierA`](DLMF/Lame/FourierSeries.lean#L206) (admitted).
-- [29.6.E17](https://dlmf.nist.gov/29.6.E17): [`DLMF.Lame.Real.lameEck_odd_fourierA_rec_zero`](DLMF/Lame/FourierSeries.lean#L217) (admitted).
-- [29.6.E18](https://dlmf.nist.gov/29.6.E18): [`DLMF.Lame.Real.lameEck_odd_fourierA_rec_zero`](DLMF/Lame/FourierSeries.lean#L217) (admitted).
-- [29.6.E19](https://dlmf.nist.gov/29.6.E19): [`DLMF.Lame.Real.lameEck_odd_fourierA_rec`](DLMF/Lame/FourierSeries.lean#L229) (admitted).
-- [29.6.E20](https://dlmf.nist.gov/29.6.E20): [`DLMF.Lame.Real.lameEck_odd_fourierA_normalization`](DLMF/Lame/FourierSeries.lean#L242) (admitted).
-- [29.6.E21](https://dlmf.nist.gov/29.6.E21): [`DLMF.Lame.Real.lameEck_odd_fourierA_pos`](DLMF/Lame/FourierSeries.lean#L251) (proved from admissions).
-- [29.6.E22](https://dlmf.nist.gov/29.6.E22): [`DLMF.Lame.Real.lameEck_odd_fourierA_ratio`](DLMF/Lame/FourierSeries.lean#L264) (admitted).
-- [29.6.E23](https://dlmf.nist.gov/29.6.E23): [`DLMF.Lame.Real.lameEck_odd_hasSum_fourierC`](DLMF/Lame/FourierSeries.lean#L275) (admitted).
-- [29.6.E24](https://dlmf.nist.gov/29.6.E24): [`DLMF.Lame.Real.lameEck_odd_fourierC_rec_zero`](DLMF/Lame/FourierSeries.lean#L285) (admitted).
-- [29.6.E25](https://dlmf.nist.gov/29.6.E25): [`DLMF.Lame.Real.lameEck_odd_fourierC_rec`](DLMF/Lame/FourierSeries.lean#L296) (admitted).
+- [29.6.E12](https://dlmf.nist.gov/29.6.E12): [`DLMF.Lame.Real.lameEck_even_fourierC_normalization`](DLMF/Lame/FourierSeries.lean#L484) (admitted).
+- [29.6.E13](https://dlmf.nist.gov/29.6.E13): [`DLMF.Lame.Real.lameEck_even_fourierC_pos`](DLMF/Lame/FourierSeries.lean#L496) (proved from admissions).
+- [29.6.E14](https://dlmf.nist.gov/29.6.E14): [`DLMF.Lame.Real.lameEck_even_fourierC_ratio`](DLMF/Lame/FourierSeries.lean#L515) (admitted).
+- [29.6.E15](https://dlmf.nist.gov/29.6.E15): [`DLMF.Lame.Real.lameEck_even_fourier_parseval`](DLMF/Lame/FourierSeries.lean#L526) (admitted).
+- [29.6.E16](https://dlmf.nist.gov/29.6.E16): [`DLMF.Lame.Real.lameEck_odd_hasSum_fourierA`](DLMF/Lame/FourierSeries.lean#L538) (admitted).
+- [29.6.E17](https://dlmf.nist.gov/29.6.E17): [`DLMF.Lame.Real.lameEck_odd_fourierA_rec_zero`](DLMF/Lame/FourierSeries.lean#L549) (proved from admissions).
+- [29.6.E18](https://dlmf.nist.gov/29.6.E18): [`DLMF.Lame.Real.lameEck_odd_fourierA_rec_zero`](DLMF/Lame/FourierSeries.lean#L549) (proved from admissions).
+- [29.6.E19](https://dlmf.nist.gov/29.6.E19): [`DLMF.Lame.Real.lameEck_odd_fourierA_rec`](DLMF/Lame/FourierSeries.lean#L570) (proved from admissions).
+- [29.6.E20](https://dlmf.nist.gov/29.6.E20): [`DLMF.Lame.Real.lameEck_odd_fourierA_normalization`](DLMF/Lame/FourierSeries.lean#L599) (admitted).
+- [29.6.E21](https://dlmf.nist.gov/29.6.E21): [`DLMF.Lame.Real.lameEck_odd_fourierA_pos`](DLMF/Lame/FourierSeries.lean#L608) (proved from admissions).
+- [29.6.E22](https://dlmf.nist.gov/29.6.E22): [`DLMF.Lame.Real.lameEck_odd_fourierA_ratio`](DLMF/Lame/FourierSeries.lean#L621) (admitted).
+- [29.6.E23](https://dlmf.nist.gov/29.6.E23): [`DLMF.Lame.Real.lameEck_odd_hasSum_fourierC`](DLMF/Lame/FourierSeries.lean#L632) (admitted).
+- [29.6.E24](https://dlmf.nist.gov/29.6.E24): [`DLMF.Lame.Real.lameEck_odd_fourierC_rec_zero`](DLMF/Lame/FourierSeries.lean#L642) (proved from admissions).
+- [29.6.E25](https://dlmf.nist.gov/29.6.E25): [`DLMF.Lame.Real.lameEck_odd_fourierC_rec`](DLMF/Lame/FourierSeries.lean#L662) (proved from admissions).
 - [29.6.E26](https://dlmf.nist.gov/29.6.E26): [`DLMF.Lame.LameRecurrence.alpha`](DLMF/Lame/Basic.lean#L226) (definition); [`DLMF.Lame.LameRecurrence.beta`](DLMF/Lame/Basic.lean#L242) (definition); [`DLMF.Lame.LameRecurrence.gamma`](DLMF/Lame/Basic.lean#L260) (definition).
-- [29.6.E27](https://dlmf.nist.gov/29.6.E27): [`DLMF.Lame.Real.lameEck_odd_fourierC_normalization`](DLMF/Lame/FourierSeries.lean#L309) (admitted).
-- [29.6.E28](https://dlmf.nist.gov/29.6.E28): [`DLMF.Lame.Real.lameEck_odd_fourierC_pos`](DLMF/Lame/FourierSeries.lean#L321) (proved from admissions).
-- [29.6.E29](https://dlmf.nist.gov/29.6.E29): [`DLMF.Lame.Real.lameEck_odd_fourierC_ratio`](DLMF/Lame/FourierSeries.lean#L340) (admitted).
-- [29.6.E30](https://dlmf.nist.gov/29.6.E30): [`DLMF.Lame.Real.lameEck_odd_fourier_parseval`](DLMF/Lame/FourierSeries.lean#L351) (admitted).
-- [29.6.E31](https://dlmf.nist.gov/29.6.E31): [`DLMF.Lame.Real.lameEsk_odd_hasSum_fourierB`](DLMF/Lame/FourierSeries.lean#L363) (admitted).
-- [29.6.E32](https://dlmf.nist.gov/29.6.E32): [`DLMF.Lame.Real.lameEsk_odd_fourierB_rec_zero`](DLMF/Lame/FourierSeries.lean#L374) (admitted).
-- [29.6.E33](https://dlmf.nist.gov/29.6.E33): [`DLMF.Lame.Real.lameEsk_odd_fourierB_rec_zero`](DLMF/Lame/FourierSeries.lean#L374) (admitted).
-- [29.6.E34](https://dlmf.nist.gov/29.6.E34): [`DLMF.Lame.Real.lameEsk_odd_fourierB_rec`](DLMF/Lame/FourierSeries.lean#L386) (admitted).
-- [29.6.E35](https://dlmf.nist.gov/29.6.E35): [`DLMF.Lame.Real.lameEsk_odd_fourierB_normalization`](DLMF/Lame/FourierSeries.lean#L399) (admitted).
-- [29.6.E36](https://dlmf.nist.gov/29.6.E36): [`DLMF.Lame.Real.lameEsk_odd_fourierB_pos`](DLMF/Lame/FourierSeries.lean#L408) (admitted).
-- [29.6.E37](https://dlmf.nist.gov/29.6.E37): [`DLMF.Lame.Real.lameEsk_odd_fourierB_ratio`](DLMF/Lame/FourierSeries.lean#L417) (admitted).
-- [29.6.E38](https://dlmf.nist.gov/29.6.E38): [`DLMF.Lame.Real.lameEsk_odd_hasSum_fourierD`](DLMF/Lame/FourierSeries.lean#L428) (admitted).
-- [29.6.E39](https://dlmf.nist.gov/29.6.E39): [`DLMF.Lame.Real.lameEsk_odd_fourierD_rec_zero`](DLMF/Lame/FourierSeries.lean#L438) (admitted).
-- [29.6.E40](https://dlmf.nist.gov/29.6.E40): [`DLMF.Lame.Real.lameEsk_odd_fourierD_rec`](DLMF/Lame/FourierSeries.lean#L449) (admitted).
+- [29.6.E27](https://dlmf.nist.gov/29.6.E27): [`DLMF.Lame.Real.lameEck_odd_fourierC_normalization`](DLMF/Lame/FourierSeries.lean#L690) (admitted).
+- [29.6.E28](https://dlmf.nist.gov/29.6.E28): [`DLMF.Lame.Real.lameEck_odd_fourierC_pos`](DLMF/Lame/FourierSeries.lean#L702) (proved from admissions).
+- [29.6.E29](https://dlmf.nist.gov/29.6.E29): [`DLMF.Lame.Real.lameEck_odd_fourierC_ratio`](DLMF/Lame/FourierSeries.lean#L721) (admitted).
+- [29.6.E30](https://dlmf.nist.gov/29.6.E30): [`DLMF.Lame.Real.lameEck_odd_fourier_parseval`](DLMF/Lame/FourierSeries.lean#L732) (admitted).
+- [29.6.E31](https://dlmf.nist.gov/29.6.E31): [`DLMF.Lame.Real.lameEsk_odd_hasSum_fourierB`](DLMF/Lame/FourierSeries.lean#L744) (admitted).
+- [29.6.E32](https://dlmf.nist.gov/29.6.E32): [`DLMF.Lame.Real.lameEsk_odd_fourierB_rec_zero`](DLMF/Lame/FourierSeries.lean#L755) (proved from admissions).
+- [29.6.E33](https://dlmf.nist.gov/29.6.E33): [`DLMF.Lame.Real.lameEsk_odd_fourierB_rec_zero`](DLMF/Lame/FourierSeries.lean#L755) (proved from admissions).
+- [29.6.E34](https://dlmf.nist.gov/29.6.E34): [`DLMF.Lame.Real.lameEsk_odd_fourierB_rec`](DLMF/Lame/FourierSeries.lean#L776) (proved from admissions).
+- [29.6.E35](https://dlmf.nist.gov/29.6.E35): [`DLMF.Lame.Real.lameEsk_odd_fourierB_normalization`](DLMF/Lame/FourierSeries.lean#L805) (admitted).
+- [29.6.E36](https://dlmf.nist.gov/29.6.E36): [`DLMF.Lame.Real.lameEsk_odd_fourierB_pos`](DLMF/Lame/FourierSeries.lean#L814) (admitted).
+- [29.6.E37](https://dlmf.nist.gov/29.6.E37): [`DLMF.Lame.Real.lameEsk_odd_fourierB_ratio`](DLMF/Lame/FourierSeries.lean#L823) (admitted).
+- [29.6.E38](https://dlmf.nist.gov/29.6.E38): [`DLMF.Lame.Real.lameEsk_odd_hasSum_fourierD`](DLMF/Lame/FourierSeries.lean#L834) (admitted).
+- [29.6.E39](https://dlmf.nist.gov/29.6.E39): [`DLMF.Lame.Real.lameEsk_odd_fourierD_rec_zero`](DLMF/Lame/FourierSeries.lean#L844) (proved from admissions).
+- [29.6.E40](https://dlmf.nist.gov/29.6.E40): [`DLMF.Lame.Real.lameEsk_odd_fourierD_rec`](DLMF/Lame/FourierSeries.lean#L864) (proved from admissions).
 - [29.6.E41](https://dlmf.nist.gov/29.6.E41): [`DLMF.Lame.LameRecurrence.alpha`](DLMF/Lame/Basic.lean#L226) (definition); [`DLMF.Lame.LameRecurrence.beta`](DLMF/Lame/Basic.lean#L242) (definition); [`DLMF.Lame.LameRecurrence.gamma`](DLMF/Lame/Basic.lean#L260) (definition).
-- [29.6.E42](https://dlmf.nist.gov/29.6.E42): [`DLMF.Lame.Real.lameEsk_odd_fourierD_normalization`](DLMF/Lame/FourierSeries.lean#L462) (admitted).
-- [29.6.E43](https://dlmf.nist.gov/29.6.E43): [`DLMF.Lame.Real.lameEsk_odd_fourierD_pos`](DLMF/Lame/FourierSeries.lean#L474) (admitted).
-- [29.6.E44](https://dlmf.nist.gov/29.6.E44): [`DLMF.Lame.Real.lameEsk_odd_fourierD_ratio`](DLMF/Lame/FourierSeries.lean#L483) (admitted).
-- [29.6.E45](https://dlmf.nist.gov/29.6.E45): [`DLMF.Lame.Real.lameEsk_odd_fourier_parseval`](DLMF/Lame/FourierSeries.lean#L494) (admitted).
-- [29.6.E46](https://dlmf.nist.gov/29.6.E46): [`DLMF.Lame.Real.lameEsk_even_hasSum_fourierB`](DLMF/Lame/FourierSeries.lean#L506) (admitted).
-- [29.6.E47](https://dlmf.nist.gov/29.6.E47): [`DLMF.Lame.Real.lameEsk_even_fourierB_rec_zero`](DLMF/Lame/FourierSeries.lean#L517) (admitted).
-- [29.6.E48](https://dlmf.nist.gov/29.6.E48): [`DLMF.Lame.Real.lameEsk_even_fourierB_rec_zero`](DLMF/Lame/FourierSeries.lean#L517) (admitted).
-- [29.6.E49](https://dlmf.nist.gov/29.6.E49): [`DLMF.Lame.Real.lameEsk_even_fourierB_rec`](DLMF/Lame/FourierSeries.lean#L529) (admitted).
-- [29.6.E50](https://dlmf.nist.gov/29.6.E50): [`DLMF.Lame.Real.lameEsk_even_fourierB_normalization`](DLMF/Lame/FourierSeries.lean#L542) (admitted).
-- [29.6.E51](https://dlmf.nist.gov/29.6.E51): [`DLMF.Lame.Real.lameEsk_even_fourierB_pos`](DLMF/Lame/FourierSeries.lean#L551) (admitted).
-- [29.6.E52](https://dlmf.nist.gov/29.6.E52): [`DLMF.Lame.Real.lameEsk_even_fourierB_ratio`](DLMF/Lame/FourierSeries.lean#L560) (admitted).
-- [29.6.E53](https://dlmf.nist.gov/29.6.E53): [`DLMF.Lame.Real.lameEsk_even_hasSum_fourierD`](DLMF/Lame/FourierSeries.lean#L571) (admitted).
-- [29.6.E54](https://dlmf.nist.gov/29.6.E54): [`DLMF.Lame.Real.lameEsk_even_fourierD_rec_zero`](DLMF/Lame/FourierSeries.lean#L581) (admitted).
-- [29.6.E55](https://dlmf.nist.gov/29.6.E55): [`DLMF.Lame.Real.lameEsk_even_fourierD_rec`](DLMF/Lame/FourierSeries.lean#L592) (admitted).
+- [29.6.E42](https://dlmf.nist.gov/29.6.E42): [`DLMF.Lame.Real.lameEsk_odd_fourierD_normalization`](DLMF/Lame/FourierSeries.lean#L892) (admitted).
+- [29.6.E43](https://dlmf.nist.gov/29.6.E43): [`DLMF.Lame.Real.lameEsk_odd_fourierD_pos`](DLMF/Lame/FourierSeries.lean#L904) (admitted).
+- [29.6.E44](https://dlmf.nist.gov/29.6.E44): [`DLMF.Lame.Real.lameEsk_odd_fourierD_ratio`](DLMF/Lame/FourierSeries.lean#L913) (admitted).
+- [29.6.E45](https://dlmf.nist.gov/29.6.E45): [`DLMF.Lame.Real.lameEsk_odd_fourier_parseval`](DLMF/Lame/FourierSeries.lean#L924) (admitted).
+- [29.6.E46](https://dlmf.nist.gov/29.6.E46): [`DLMF.Lame.Real.lameEsk_even_hasSum_fourierB`](DLMF/Lame/FourierSeries.lean#L936) (admitted).
+- [29.6.E47](https://dlmf.nist.gov/29.6.E47): [`DLMF.Lame.Real.lameEsk_even_fourierB_rec_zero`](DLMF/Lame/FourierSeries.lean#L947) (proved from admissions).
+- [29.6.E48](https://dlmf.nist.gov/29.6.E48): [`DLMF.Lame.Real.lameEsk_even_fourierB_rec_zero`](DLMF/Lame/FourierSeries.lean#L947) (proved from admissions).
+- [29.6.E49](https://dlmf.nist.gov/29.6.E49): [`DLMF.Lame.Real.lameEsk_even_fourierB_rec`](DLMF/Lame/FourierSeries.lean#L968) (proved from admissions).
+- [29.6.E50](https://dlmf.nist.gov/29.6.E50): [`DLMF.Lame.Real.lameEsk_even_fourierB_normalization`](DLMF/Lame/FourierSeries.lean#L997) (admitted).
+- [29.6.E51](https://dlmf.nist.gov/29.6.E51): [`DLMF.Lame.Real.lameEsk_even_fourierB_pos`](DLMF/Lame/FourierSeries.lean#L1006) (admitted).
+- [29.6.E52](https://dlmf.nist.gov/29.6.E52): [`DLMF.Lame.Real.lameEsk_even_fourierB_ratio`](DLMF/Lame/FourierSeries.lean#L1015) (admitted).
+- [29.6.E53](https://dlmf.nist.gov/29.6.E53): [`DLMF.Lame.Real.lameEsk_even_hasSum_fourierD`](DLMF/Lame/FourierSeries.lean#L1026) (admitted).
+- [29.6.E54](https://dlmf.nist.gov/29.6.E54): [`DLMF.Lame.Real.lameEsk_even_fourierD_rec_zero`](DLMF/Lame/FourierSeries.lean#L1036) (proved from admissions).
+- [29.6.E55](https://dlmf.nist.gov/29.6.E55): [`DLMF.Lame.Real.lameEsk_even_fourierD_rec`](DLMF/Lame/FourierSeries.lean#L1056) (proved from admissions).
 - [29.6.E56](https://dlmf.nist.gov/29.6.E56): [`DLMF.Lame.LameRecurrence.alpha`](DLMF/Lame/Basic.lean#L226) (definition); [`DLMF.Lame.LameRecurrence.beta`](DLMF/Lame/Basic.lean#L242) (definition); [`DLMF.Lame.LameRecurrence.gamma`](DLMF/Lame/Basic.lean#L260) (definition).
-- [29.6.E57](https://dlmf.nist.gov/29.6.E57): [`DLMF.Lame.Real.lameEsk_even_fourierD_normalization`](DLMF/Lame/FourierSeries.lean#L605) (admitted).
-- [29.6.E58](https://dlmf.nist.gov/29.6.E58): [`DLMF.Lame.Real.lameEsk_even_fourierD_pos`](DLMF/Lame/FourierSeries.lean#L617) (admitted).
-- [29.6.E59](https://dlmf.nist.gov/29.6.E59): [`DLMF.Lame.Real.lameEsk_even_fourierD_ratio`](DLMF/Lame/FourierSeries.lean#L626) (admitted).
-- [29.6.E60](https://dlmf.nist.gov/29.6.E60): [`DLMF.Lame.Real.lameEsk_even_fourier_parseval`](DLMF/Lame/FourierSeries.lean#L637) (admitted).
+- [29.6.E57](https://dlmf.nist.gov/29.6.E57): [`DLMF.Lame.Real.lameEsk_even_fourierD_normalization`](DLMF/Lame/FourierSeries.lean#L1084) (admitted).
+- [29.6.E58](https://dlmf.nist.gov/29.6.E58): [`DLMF.Lame.Real.lameEsk_even_fourierD_pos`](DLMF/Lame/FourierSeries.lean#L1096) (admitted).
+- [29.6.E59](https://dlmf.nist.gov/29.6.E59): [`DLMF.Lame.Real.lameEsk_even_fourierD_ratio`](DLMF/Lame/FourierSeries.lean#L1105) (admitted).
+- [29.6.E60](https://dlmf.nist.gov/29.6.E60): [`DLMF.Lame.Real.lameEsk_even_fourier_parseval`](DLMF/Lame/FourierSeries.lean#L1116) (admitted).
 
 ## [§29.7 Asymptotic Expansions](https://dlmf.nist.gov/29.7)
 
@@ -246,35 +248,35 @@ IntegralEquations 5, Polynomials/Series 24, Polynomials/Orthogonality 4, OtherSo
 
 ## [§29.10 Lamé Functions with Imaginary Periods](https://dlmf.nist.gov/29.10)
 
-- [29.10](https://dlmf.nist.gov/29.10): [`DLMF.Lame.Real.lame_imaginary_periods`](DLMF/Lame/DifferentialEquations.lean#L205) (proved from admissions). Imaginary periods of the functions 29.10.4 proved from the admitted transformation 29.10.1–29.10.3 and the real periods of Table 29.3.2.
-- [29.10.E1](https://dlmf.nist.gov/29.10.E1): [`DLMF.Lame.isLameSolutionOn_imaginary`](DLMF/Lame/DifferentialEquations.lean#L159) (admitted).
-- [29.10.E2](https://dlmf.nist.gov/29.10.E2): [`DLMF.Lame.isLameSolutionOn_imaginary`](DLMF/Lame/DifferentialEquations.lean#L159) (admitted).
-- [29.10.E3](https://dlmf.nist.gov/29.10.E3): [`DLMF.Lame.isLameSolutionOn_imaginary`](DLMF/Lame/DifferentialEquations.lean#L159) (admitted).
-- [29.10.E4](https://dlmf.nist.gov/29.10.E4): [`DLMF.Lame.Real.lameEck_imaginary_solution`](DLMF/Lame/DifferentialEquations.lean#L171) (admitted); [`DLMF.Lame.Real.lameEsk_imaginary_solution`](DLMF/Lame/DifferentialEquations.lean#L186) (admitted).
+- [29.10](https://dlmf.nist.gov/29.10): [`DLMF.Lame.Real.lame_imaginary_periods`](DLMF/Lame/DifferentialEquations.lean#L550) (proved from admissions). Imaginary periods of the functions 29.10.4 proved from the admitted transformation 29.10.1–29.10.3 and the real periods of Table 29.3.2.
+- [29.10.E1](https://dlmf.nist.gov/29.10.E1): [`DLMF.Lame.isLameSolutionOn_imaginary`](DLMF/Lame/DifferentialEquations.lean#L422) (admitted).
+- [29.10.E2](https://dlmf.nist.gov/29.10.E2): [`DLMF.Lame.isLameSolutionOn_imaginary`](DLMF/Lame/DifferentialEquations.lean#L422) (admitted).
+- [29.10.E3](https://dlmf.nist.gov/29.10.E3): [`DLMF.Lame.isLameSolutionOn_imaginary`](DLMF/Lame/DifferentialEquations.lean#L422) (admitted).
+- [29.10.E4](https://dlmf.nist.gov/29.10.E4): [`DLMF.Lame.Real.lameEck_imaginary_solution`](DLMF/Lame/DifferentialEquations.lean#L521) (proved from admissions); [`DLMF.Lame.Real.lameEsk_imaginary_solution`](DLMF/Lame/DifferentialEquations.lean#L537) (proved from admissions).
 
 ## [§29.11 Lamé Wave Equation](https://dlmf.nist.gov/29.11)
 
-- [29.11](https://dlmf.nist.gov/29.11): [`DLMF.Lame.isLameWaveSolutionOn_zero_iff`](DLMF/Lame/DifferentialEquations.lean#L231) (proved). For `ω = 0` the wave equation is 29.2.1 (proved).
+- [29.11](https://dlmf.nist.gov/29.11): [`DLMF.Lame.isLameWaveSolutionOn_zero_iff`](DLMF/Lame/DifferentialEquations.lean#L576) (proved). For `ω = 0` the wave equation is 29.2.1 (proved).
 - [29.11.E1](https://dlmf.nist.gov/29.11.E1): [`DLMF.Lame.IsLameWaveSolutionOn`](DLMF/Lame/Basic.lean#L108) (definition).
 
 ## [§29.12 Definitions](https://dlmf.nist.gov/29.12)
 
-- [29.12.i](https://dlmf.nist.gov/29.12.i): [`DLMF.Lame.lamePolyEk_polynomial_form`](DLMF/Lame/Polynomials/Series.lean#L370) (admitted); [`DLMF.Lame.lamePolyEk_zeros`](DLMF/Lame/Polynomials/Series.lean#L413) (admitted).
-- [29.12.iii](https://dlmf.nist.gov/29.12.iii): [`DLMF.Lame.lamePolyEk_zeros_equilibrium`](DLMF/Lame/Polynomials/Series.lean#L465) (admitted).
-- [29.12.E1](https://dlmf.nist.gov/29.12.E1): [`DLMF.Lame.Real.lameUEk_eq`](DLMF/Lame/Polynomials/Series.lean#L82) (admitted). For real `x`; the Lamé polynomial is defined by its Chebyshev series (29.15.43–29.15.50).
-- [29.12.E2](https://dlmf.nist.gov/29.12.E2): [`DLMF.Lame.Real.lameSEk_eq`](DLMF/Lame/Polynomials/Series.lean#L115) (admitted). For real `x`; the Lamé polynomial is defined by its Chebyshev series (29.15.43–29.15.50).
-- [29.12.E3](https://dlmf.nist.gov/29.12.E3): [`DLMF.Lame.Real.lameCEk_eq`](DLMF/Lame/Polynomials/Series.lean#L147) (admitted). For real `x`; the Lamé polynomial is defined by its Chebyshev series (29.15.43–29.15.50).
-- [29.12.E4](https://dlmf.nist.gov/29.12.E4): [`DLMF.Lame.Real.lameDEk_eq`](DLMF/Lame/Polynomials/Series.lean#L182) (admitted). For real `x`; the Lamé polynomial is defined by its Chebyshev series (29.15.43–29.15.50).
-- [29.12.E5](https://dlmf.nist.gov/29.12.E5): [`DLMF.Lame.Real.lameSCEk_eq`](DLMF/Lame/Polynomials/Series.lean#L217) (admitted). For real `x`; the Lamé polynomial is defined by its Chebyshev series (29.15.43–29.15.50).
-- [29.12.E6](https://dlmf.nist.gov/29.12.E6): [`DLMF.Lame.Real.lameSDEk_eq`](DLMF/Lame/Polynomials/Series.lean#L252) (admitted). For real `x`; the Lamé polynomial is defined by its Chebyshev series (29.15.43–29.15.50).
-- [29.12.E7](https://dlmf.nist.gov/29.12.E7): [`DLMF.Lame.Real.lameCDEk_eq`](DLMF/Lame/Polynomials/Series.lean#L286) (admitted). For real `x`; the Lamé polynomial is defined by its Chebyshev series (29.15.43–29.15.50).
-- [29.12.E8](https://dlmf.nist.gov/29.12.E8): [`DLMF.Lame.Real.lameSCDEk_eq`](DLMF/Lame/Polynomials/Series.lean#L321) (admitted). For real `x`; the Lamé polynomial is defined by its Chebyshev series (29.15.43–29.15.50).
-- [29.12.E9](https://dlmf.nist.gov/29.12.E9): [`DLMF.Lame.lamePolyEk_algebraic_form`](DLMF/Lame/Polynomials/Series.lean#L425) (admitted). Algebraic form stated with the polynomial form of Table 29.12.1 (avoiding branches of `(ξ - 1)^σ`), plus the location and simplicity of the zeros of `P`.
-- [29.12.E10](https://dlmf.nist.gov/29.12.E10): [`DLMF.Lame.lamePolyEk_algebraic_form`](DLMF/Lame/Polynomials/Series.lean#L425) (admitted).
-- [29.12.E11](https://dlmf.nist.gov/29.12.E11): [`DLMF.Lame.lamePolyEk_zeros_maximize`](DLMF/Lame/Polynomials/Series.lean#L442) (admitted).
-- [29.12.E12](https://dlmf.nist.gov/29.12.E12): [`DLMF.Lame.lamePolyEk_zeros_maximize`](DLMF/Lame/Polynomials/Series.lean#L442) (admitted).
-- [29.12.E13](https://dlmf.nist.gov/29.12.E13): [`DLMF.Lame.lamePolyEk_zeros_equilibrium`](DLMF/Lame/Polynomials/Series.lean#L465) (admitted).
-- [29.12.T1](https://dlmf.nist.gov/29.12.T1): [`DLMF.Lame.lamePolyEk_polynomial_form`](DLMF/Lame/Polynomials/Series.lean#L370) (admitted); [`DLMF.Lame.lamePolyEk_periods`](DLMF/Lame/Polynomials/Series.lean#L384) (admitted); [`DLMF.Lame.lamePolyEk_parities`](DLMF/Lame/Polynomials/Series.lean#L396) (admitted). Polynomial form, real and imaginary periods and the three parities, all eight types in three theorems; admitted. The eigenvalue column is 29.15.E7 etc.
+- [29.12.i](https://dlmf.nist.gov/29.12.i): [`DLMF.Lame.lamePolyEk_polynomial_form`](DLMF/Lame/Polynomials/Series.lean#L454) (admitted); [`DLMF.Lame.lamePolyEk_zeros`](DLMF/Lame/Polynomials/Series.lean#L534) (admitted).
+- [29.12.iii](https://dlmf.nist.gov/29.12.iii): [`DLMF.Lame.lamePolyEk_zeros_equilibrium`](DLMF/Lame/Polynomials/Series.lean#L586) (admitted).
+- [29.12.E1](https://dlmf.nist.gov/29.12.E1): [`DLMF.Lame.Real.lameUEk_eq`](DLMF/Lame/Polynomials/Series.lean#L84) (admitted). For real `x`; the Lamé polynomial is defined by its Chebyshev series (29.15.43–29.15.50).
+- [29.12.E2](https://dlmf.nist.gov/29.12.E2): [`DLMF.Lame.Real.lameSEk_eq`](DLMF/Lame/Polynomials/Series.lean#L117) (admitted). For real `x`; the Lamé polynomial is defined by its Chebyshev series (29.15.43–29.15.50).
+- [29.12.E3](https://dlmf.nist.gov/29.12.E3): [`DLMF.Lame.Real.lameCEk_eq`](DLMF/Lame/Polynomials/Series.lean#L149) (admitted). For real `x`; the Lamé polynomial is defined by its Chebyshev series (29.15.43–29.15.50).
+- [29.12.E4](https://dlmf.nist.gov/29.12.E4): [`DLMF.Lame.Real.lameDEk_eq`](DLMF/Lame/Polynomials/Series.lean#L184) (admitted). For real `x`; the Lamé polynomial is defined by its Chebyshev series (29.15.43–29.15.50).
+- [29.12.E5](https://dlmf.nist.gov/29.12.E5): [`DLMF.Lame.Real.lameSCEk_eq`](DLMF/Lame/Polynomials/Series.lean#L219) (admitted). For real `x`; the Lamé polynomial is defined by its Chebyshev series (29.15.43–29.15.50).
+- [29.12.E6](https://dlmf.nist.gov/29.12.E6): [`DLMF.Lame.Real.lameSDEk_eq`](DLMF/Lame/Polynomials/Series.lean#L254) (admitted). For real `x`; the Lamé polynomial is defined by its Chebyshev series (29.15.43–29.15.50).
+- [29.12.E7](https://dlmf.nist.gov/29.12.E7): [`DLMF.Lame.Real.lameCDEk_eq`](DLMF/Lame/Polynomials/Series.lean#L288) (admitted). For real `x`; the Lamé polynomial is defined by its Chebyshev series (29.15.43–29.15.50).
+- [29.12.E8](https://dlmf.nist.gov/29.12.E8): [`DLMF.Lame.Real.lameSCDEk_eq`](DLMF/Lame/Polynomials/Series.lean#L323) (admitted). For real `x`; the Lamé polynomial is defined by its Chebyshev series (29.15.43–29.15.50).
+- [29.12.E9](https://dlmf.nist.gov/29.12.E9): [`DLMF.Lame.lamePolyEk_algebraic_form`](DLMF/Lame/Polynomials/Series.lean#L546) (admitted). Algebraic form stated with the polynomial form of Table 29.12.1 (avoiding branches of `(ξ - 1)^σ`), plus the location and simplicity of the zeros of `P`.
+- [29.12.E10](https://dlmf.nist.gov/29.12.E10): [`DLMF.Lame.lamePolyEk_algebraic_form`](DLMF/Lame/Polynomials/Series.lean#L546) (admitted).
+- [29.12.E11](https://dlmf.nist.gov/29.12.E11): [`DLMF.Lame.lamePolyEk_zeros_maximize`](DLMF/Lame/Polynomials/Series.lean#L563) (admitted).
+- [29.12.E12](https://dlmf.nist.gov/29.12.E12): [`DLMF.Lame.lamePolyEk_zeros_maximize`](DLMF/Lame/Polynomials/Series.lean#L563) (admitted).
+- [29.12.E13](https://dlmf.nist.gov/29.12.E13): [`DLMF.Lame.lamePolyEk_zeros_equilibrium`](DLMF/Lame/Polynomials/Series.lean#L586) (admitted).
+- [29.12.T1](https://dlmf.nist.gov/29.12.T1): [`DLMF.Lame.lamePolyEk_polynomial_form`](DLMF/Lame/Polynomials/Series.lean#L454) (admitted); [`DLMF.Lame.lamePolyEk_periods`](DLMF/Lame/Polynomials/Series.lean#L468) (proved); [`DLMF.Lame.lamePolyEk_parities`](DLMF/Lame/Polynomials/Series.lean#L504) (proved). Polynomial form, real and imaginary periods and the three parities, all eight types in three theorems; admitted. The eigenvalue column is 29.15.E7 etc.
 
 ## [§29.14 Orthogonality](https://dlmf.nist.gov/29.14)
 
@@ -292,49 +294,49 @@ IntegralEquations 5, Polynomials/Series 24, Polynomials/Orthogonality 4, OtherSo
 
 ## [§29.15 Fourier Series and Chebyshev Series](https://dlmf.nist.gov/29.15)
 
-- [29.15.ii](https://dlmf.nist.gov/29.15.ii): [`DLMF.Lame.l29_sn_eq_cos`](DLMF/Lame/Polynomials/Series.lean#L51) (proved); [`DLMF.Lame.l29_T_cos`](DLMF/Lame/Polynomials/Series.lean#L62) (proved); [`DLMF.Lame.l29_U_cos`](DLMF/Lame/Polynomials/Series.lean#L70) (proved). `cos(jθ) = T_j(cos θ)`, `sin((j+1)θ) = sin θ U_j(cos θ)` and `sn = cos φ` (proved).
-- [29.15.E1](https://dlmf.nist.gov/29.15.E1): [`DLMF.Lame.Real.lameUEk_fourier`](DLMF/Lame/Polynomials/Series.lean#L89) (proved). Proved from the Chebyshev series 29.15.43–29.15.50 and §29.15(ii).
+- [29.15.ii](https://dlmf.nist.gov/29.15.ii): [`DLMF.Lame.l29_sn_eq_cos`](DLMF/Lame/Polynomials/Series.lean#L53) (proved); [`DLMF.Lame.l29_T_cos`](DLMF/Lame/Polynomials/Series.lean#L64) (proved); [`DLMF.Lame.l29_U_cos`](DLMF/Lame/Polynomials/Series.lean#L72) (proved). `cos(jθ) = T_j(cos θ)`, `sin((j+1)θ) = sin θ U_j(cos θ)` and `sn = cos φ` (proved).
+- [29.15.E1](https://dlmf.nist.gov/29.15.E1): [`DLMF.Lame.Real.lameUEk_fourier`](DLMF/Lame/Polynomials/Series.lean#L91) (proved). Proved from the Chebyshev series 29.15.43–29.15.50 and §29.15(ii).
 - [29.15.E2](https://dlmf.nist.gov/29.15.E2): [`DLMF.Lame.lameMatrix`](DLMF/Lame/Polynomials/Defs.lean#L128) (definition). `lameMatrix r ν k n` for each of the eight recurrences.
-- [29.15.E3](https://dlmf.nist.gov/29.15.E3): [`DLMF.Lame.lamePolyH_strictMono`](DLMF/Lame/Polynomials/Series.lean#L358) (admitted). Stated as `n + 1` simple roots of the characteristic polynomial and strict increase of `lamePolyH`.
+- [29.15.E3](https://dlmf.nist.gov/29.15.E3): [`DLMF.Lame.lamePolyH_strictMono`](DLMF/Lame/Polynomials/Series.lean#L360) (admitted). Stated as `n + 1` simple roots of the characteristic polynomial and strict increase of `lamePolyH`.
 - [29.15.E4](https://dlmf.nist.gov/29.15.E4): [`DLMF.Lame.lamePolyCoeff`](DLMF/Lame/Polynomials/Defs.lean#L161) (definition).
 - [29.15.E5](https://dlmf.nist.gov/29.15.E5): [`DLMF.Lame.LamePolyType.normForm`](DLMF/Lame/Polynomials/Defs.lean#L74) (definition).
 - [29.15.E6](https://dlmf.nist.gov/29.15.E6): [`DLMF.Lame.LamePolyType.signForm`](DLMF/Lame/Polynomials/Defs.lean#L90) (definition).
-- [29.15.E7](https://dlmf.nist.gov/29.15.E7): [`DLMF.Lame.Real.lameAk_eq_lamePolyH_uE`](DLMF/Lame/Polynomials/Series.lean#L105) (admitted). Admitted (identifies the matrix eigenvalue with the eigenvalue of §29.3).
-- [29.15.E8](https://dlmf.nist.gov/29.15.E8): [`DLMF.Lame.Real.lameSEk_fourier`](DLMF/Lame/Polynomials/Series.lean#L122) (proved). Proved from the Chebyshev series 29.15.43–29.15.50 and §29.15(ii).
+- [29.15.E7](https://dlmf.nist.gov/29.15.E7): [`DLMF.Lame.Real.lameAk_eq_lamePolyH_uE`](DLMF/Lame/Polynomials/Series.lean#L107) (admitted). Admitted (identifies the matrix eigenvalue with the eigenvalue of §29.3).
+- [29.15.E8](https://dlmf.nist.gov/29.15.E8): [`DLMF.Lame.Real.lameSEk_fourier`](DLMF/Lame/Polynomials/Series.lean#L124) (proved). Proved from the Chebyshev series 29.15.43–29.15.50 and §29.15(ii).
 - [29.15.E9](https://dlmf.nist.gov/29.15.E9): [`DLMF.Lame.lamePolyCoeff`](DLMF/Lame/Polynomials/Defs.lean#L161) (definition).
 - [29.15.E10](https://dlmf.nist.gov/29.15.E10): [`DLMF.Lame.LamePolyType.normForm`](DLMF/Lame/Polynomials/Defs.lean#L74) (definition).
 - [29.15.E11](https://dlmf.nist.gov/29.15.E11): [`DLMF.Lame.LamePolyType.signForm`](DLMF/Lame/Polynomials/Defs.lean#L90) (definition).
-- [29.15.E12](https://dlmf.nist.gov/29.15.E12): [`DLMF.Lame.Real.lameAk_eq_lamePolyH_sE`](DLMF/Lame/Polynomials/Series.lean#L137) (admitted). Admitted (identifies the matrix eigenvalue with the eigenvalue of §29.3).
-- [29.15.E13](https://dlmf.nist.gov/29.15.E13): [`DLMF.Lame.Real.lameCEk_fourier`](DLMF/Lame/Polynomials/Series.lean#L154) (proved). Proved from the Chebyshev series 29.15.43–29.15.50 and §29.15(ii).
+- [29.15.E12](https://dlmf.nist.gov/29.15.E12): [`DLMF.Lame.Real.lameAk_eq_lamePolyH_sE`](DLMF/Lame/Polynomials/Series.lean#L139) (admitted). Admitted (identifies the matrix eigenvalue with the eigenvalue of §29.3).
+- [29.15.E13](https://dlmf.nist.gov/29.15.E13): [`DLMF.Lame.Real.lameCEk_fourier`](DLMF/Lame/Polynomials/Series.lean#L156) (proved). Proved from the Chebyshev series 29.15.43–29.15.50 and §29.15(ii).
 - [29.15.E14](https://dlmf.nist.gov/29.15.E14): [`DLMF.Lame.lamePolyCoeff`](DLMF/Lame/Polynomials/Defs.lean#L161) (definition).
 - [29.15.E15](https://dlmf.nist.gov/29.15.E15): [`DLMF.Lame.LamePolyType.normForm`](DLMF/Lame/Polynomials/Defs.lean#L74) (definition).
 - [29.15.E16](https://dlmf.nist.gov/29.15.E16): [`DLMF.Lame.LamePolyType.signForm`](DLMF/Lame/Polynomials/Defs.lean#L90) (definition).
-- [29.15.E17](https://dlmf.nist.gov/29.15.E17): [`DLMF.Lame.Real.lameBk_eq_lamePolyH_cE`](DLMF/Lame/Polynomials/Series.lean#L172) (admitted). Admitted (identifies the matrix eigenvalue with the eigenvalue of §29.3).
-- [29.15.E18](https://dlmf.nist.gov/29.15.E18): [`DLMF.Lame.Real.lameDEk_fourier`](DLMF/Lame/Polynomials/Series.lean#L189) (proved). Proved from the Chebyshev series 29.15.43–29.15.50 and §29.15(ii).
+- [29.15.E17](https://dlmf.nist.gov/29.15.E17): [`DLMF.Lame.Real.lameBk_eq_lamePolyH_cE`](DLMF/Lame/Polynomials/Series.lean#L174) (admitted). Admitted (identifies the matrix eigenvalue with the eigenvalue of §29.3).
+- [29.15.E18](https://dlmf.nist.gov/29.15.E18): [`DLMF.Lame.Real.lameDEk_fourier`](DLMF/Lame/Polynomials/Series.lean#L191) (proved). Proved from the Chebyshev series 29.15.43–29.15.50 and §29.15(ii).
 - [29.15.E19](https://dlmf.nist.gov/29.15.E19): [`DLMF.Lame.lamePolyCoeff`](DLMF/Lame/Polynomials/Defs.lean#L161) (definition).
 - [29.15.E20](https://dlmf.nist.gov/29.15.E20): [`DLMF.Lame.LamePolyType.normForm`](DLMF/Lame/Polynomials/Defs.lean#L74) (definition).
 - [29.15.E21](https://dlmf.nist.gov/29.15.E21): [`DLMF.Lame.LamePolyType.signForm`](DLMF/Lame/Polynomials/Defs.lean#L90) (definition).
-- [29.15.E22](https://dlmf.nist.gov/29.15.E22): [`DLMF.Lame.Real.lameAk_eq_lamePolyH_dE`](DLMF/Lame/Polynomials/Series.lean#L207) (admitted). Admitted (identifies the matrix eigenvalue with the eigenvalue of §29.3).
-- [29.15.E23](https://dlmf.nist.gov/29.15.E23): [`DLMF.Lame.Real.lameSCEk_fourier`](DLMF/Lame/Polynomials/Series.lean#L224) (proved). Proved from the Chebyshev series 29.15.43–29.15.50 and §29.15(ii).
+- [29.15.E22](https://dlmf.nist.gov/29.15.E22): [`DLMF.Lame.Real.lameAk_eq_lamePolyH_dE`](DLMF/Lame/Polynomials/Series.lean#L209) (admitted). Admitted (identifies the matrix eigenvalue with the eigenvalue of §29.3).
+- [29.15.E23](https://dlmf.nist.gov/29.15.E23): [`DLMF.Lame.Real.lameSCEk_fourier`](DLMF/Lame/Polynomials/Series.lean#L226) (proved). Proved from the Chebyshev series 29.15.43–29.15.50 and §29.15(ii).
 - [29.15.E24](https://dlmf.nist.gov/29.15.E24): [`DLMF.Lame.lamePolyCoeff`](DLMF/Lame/Polynomials/Defs.lean#L161) (definition).
 - [29.15.E25](https://dlmf.nist.gov/29.15.E25): [`DLMF.Lame.LamePolyType.normForm`](DLMF/Lame/Polynomials/Defs.lean#L74) (definition).
 - [29.15.E26](https://dlmf.nist.gov/29.15.E26): [`DLMF.Lame.LamePolyType.signForm`](DLMF/Lame/Polynomials/Defs.lean#L90) (definition).
-- [29.15.E27](https://dlmf.nist.gov/29.15.E27): [`DLMF.Lame.Real.lameBk_eq_lamePolyH_scE`](DLMF/Lame/Polynomials/Series.lean#L242) (admitted). Admitted (identifies the matrix eigenvalue with the eigenvalue of §29.3).
-- [29.15.E28](https://dlmf.nist.gov/29.15.E28): [`DLMF.Lame.Real.lameSDEk_fourier`](DLMF/Lame/Polynomials/Series.lean#L259) (proved). Proved from the Chebyshev series 29.15.43–29.15.50 and §29.15(ii).
+- [29.15.E27](https://dlmf.nist.gov/29.15.E27): [`DLMF.Lame.Real.lameBk_eq_lamePolyH_scE`](DLMF/Lame/Polynomials/Series.lean#L244) (admitted). Admitted (identifies the matrix eigenvalue with the eigenvalue of §29.3).
+- [29.15.E28](https://dlmf.nist.gov/29.15.E28): [`DLMF.Lame.Real.lameSDEk_fourier`](DLMF/Lame/Polynomials/Series.lean#L261) (proved). Proved from the Chebyshev series 29.15.43–29.15.50 and §29.15(ii).
 - [29.15.E29](https://dlmf.nist.gov/29.15.E29): [`DLMF.Lame.lamePolyCoeff`](DLMF/Lame/Polynomials/Defs.lean#L161) (definition).
 - [29.15.E30](https://dlmf.nist.gov/29.15.E30): [`DLMF.Lame.LamePolyType.normForm`](DLMF/Lame/Polynomials/Defs.lean#L74) (definition).
 - [29.15.E31](https://dlmf.nist.gov/29.15.E31): [`DLMF.Lame.LamePolyType.signForm`](DLMF/Lame/Polynomials/Defs.lean#L90) (definition).
-- [29.15.E32](https://dlmf.nist.gov/29.15.E32): [`DLMF.Lame.Real.lameAk_eq_lamePolyH_sdE`](DLMF/Lame/Polynomials/Series.lean#L276) (admitted). Admitted (identifies the matrix eigenvalue with the eigenvalue of §29.3).
-- [29.15.E33](https://dlmf.nist.gov/29.15.E33): [`DLMF.Lame.Real.lameCDEk_fourier`](DLMF/Lame/Polynomials/Series.lean#L293) (proved). Proved from the Chebyshev series 29.15.43–29.15.50 and §29.15(ii).
+- [29.15.E32](https://dlmf.nist.gov/29.15.E32): [`DLMF.Lame.Real.lameAk_eq_lamePolyH_sdE`](DLMF/Lame/Polynomials/Series.lean#L278) (admitted). Admitted (identifies the matrix eigenvalue with the eigenvalue of §29.3).
+- [29.15.E33](https://dlmf.nist.gov/29.15.E33): [`DLMF.Lame.Real.lameCDEk_fourier`](DLMF/Lame/Polynomials/Series.lean#L295) (proved). Proved from the Chebyshev series 29.15.43–29.15.50 and §29.15(ii).
 - [29.15.E34](https://dlmf.nist.gov/29.15.E34): [`DLMF.Lame.lamePolyCoeff`](DLMF/Lame/Polynomials/Defs.lean#L161) (definition).
 - [29.15.E35](https://dlmf.nist.gov/29.15.E35): [`DLMF.Lame.LamePolyType.normForm`](DLMF/Lame/Polynomials/Defs.lean#L74) (definition).
 - [29.15.E36](https://dlmf.nist.gov/29.15.E36): [`DLMF.Lame.LamePolyType.signForm`](DLMF/Lame/Polynomials/Defs.lean#L90) (definition).
-- [29.15.E37](https://dlmf.nist.gov/29.15.E37): [`DLMF.Lame.Real.lameBk_eq_lamePolyH_cdE`](DLMF/Lame/Polynomials/Series.lean#L311) (admitted). Admitted (identifies the matrix eigenvalue with the eigenvalue of §29.3).
-- [29.15.E38](https://dlmf.nist.gov/29.15.E38): [`DLMF.Lame.Real.lameSCDEk_fourier`](DLMF/Lame/Polynomials/Series.lean#L328) (proved). Proved from the Chebyshev series 29.15.43–29.15.50 and §29.15(ii).
+- [29.15.E37](https://dlmf.nist.gov/29.15.E37): [`DLMF.Lame.Real.lameBk_eq_lamePolyH_cdE`](DLMF/Lame/Polynomials/Series.lean#L313) (admitted). Admitted (identifies the matrix eigenvalue with the eigenvalue of §29.3).
+- [29.15.E38](https://dlmf.nist.gov/29.15.E38): [`DLMF.Lame.Real.lameSCDEk_fourier`](DLMF/Lame/Polynomials/Series.lean#L330) (proved). Proved from the Chebyshev series 29.15.43–29.15.50 and §29.15(ii).
 - [29.15.E39](https://dlmf.nist.gov/29.15.E39): [`DLMF.Lame.lamePolyCoeff`](DLMF/Lame/Polynomials/Defs.lean#L161) (definition).
 - [29.15.E40](https://dlmf.nist.gov/29.15.E40): [`DLMF.Lame.LamePolyType.normForm`](DLMF/Lame/Polynomials/Defs.lean#L74) (definition).
 - [29.15.E41](https://dlmf.nist.gov/29.15.E41): [`DLMF.Lame.LamePolyType.signForm`](DLMF/Lame/Polynomials/Defs.lean#L90) (definition).
-- [29.15.E42](https://dlmf.nist.gov/29.15.E42): [`DLMF.Lame.Real.lameBk_eq_lamePolyH_scdE`](DLMF/Lame/Polynomials/Series.lean#L346) (admitted). Admitted (identifies the matrix eigenvalue with the eigenvalue of §29.3).
+- [29.15.E42](https://dlmf.nist.gov/29.15.E42): [`DLMF.Lame.Real.lameBk_eq_lamePolyH_scdE`](DLMF/Lame/Polynomials/Series.lean#L348) (admitted). Admitted (identifies the matrix eigenvalue with the eigenvalue of §29.3).
 - [29.15.E43](https://dlmf.nist.gov/29.15.E43): [`DLMF.Lame.lameUEk`](DLMF/Lame/Polynomials/Defs.lean#L183) (definition).
 - [29.15.E44](https://dlmf.nist.gov/29.15.E44): [`DLMF.Lame.lameSEk`](DLMF/Lame/Polynomials/Defs.lean#L187) (definition).
 - [29.15.E45](https://dlmf.nist.gov/29.15.E45): [`DLMF.Lame.lameCEk`](DLMF/Lame/Polynomials/Defs.lean#L191) (definition).

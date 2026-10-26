@@ -31,7 +31,7 @@ confirmed by an independent numerical and brute-force check (REVIEW.md, section 
 acquisition (2026-10-25)"; ledgers DLMF24–DLMF27Acquisition.md); three suspected items that
 the check did not confirm are listed under (c) or dropped.
 
-Counts (2026-10-25): 89 entries in (a), 22 in (b), 37 in (c). Some entries group closely related
+Counts (2026-10-26): 97 entries in (a), 23 in (b), 43 in (c). Some entries group closely related
 equation numbers.
 
 ## (a) Genuine DLMF errata
@@ -691,7 +691,8 @@ errata page.
     printed range gives ±2.05 against −0.4207.
   - Lean: `integral_sin_cosh_modMathieuCe` (DLMF/Mathieu/Modified/Integrals.lean), admitted.
 - [28.31(iii)](https://dlmf.nist.gov/28.31.iii), Asymptotic Behavior, second paragraph
-  - The powers are swapped: for ξ > 0, hc_p^m(z,−ξ) and hs_p^m(z,−ξ) behave like multiples of
+  - The powers p and −p−2 are swapped (writing sin z for cos z changes only the constant
+    multiple, since (sin z)/(cos z) → ±i as z → ½π ± i∞): for ξ > 0, hc_p^m(z,−ξ) and hs_p^m(z,−ξ) behave like multiples of
     exp(¼ξ cos 2z)(sin z)^p as z → ½π ± i∞, and the other periodic solutions like
     exp(−¼ξ cos 2z)(sin z)^{−p−2}.
   - Evidence: 28.31.19–20 and the first paragraph; numerically the ratio to the corrected form
@@ -837,6 +838,15 @@ errata page.
   the removable-singularity value. Proved (F is the Fourier series 20.2.1 divided termwise by
   sin z, via the Dirichlet kernel; G(z, τ) = F(π/2 − z, τ)). DLMF/Theta/Basic.lean. Found
   2026-10-25 (proof round 1), restated and proved the same day.
+
+- [28.2.E33](https://dlmf.nist.gov/28.2.E33) and [§28.4(i)](https://dlmf.nist.gov/28.4.i): the
+  acquired statements ranged over all n : ℕ, including n = 0, but DLMF has no se₀ (28.4.3–4 index
+  se_{2n+1}, se_{2n+2}, n ≥ 0). For the Lean junk value se₀ (at q = 0 a positive multiple of x) the
+  orthogonality 28.2.33 fails (counterexample `p1a1_integral_mathieuCe_mul_mathieuSe_zero_ne`,
+  proved) and the sine series of §28.4(i) diverges off the real axis. Fixed 2026-10-26 by the
+  hypothesis n ≠ 0: `integral_mathieuCe_mul_mathieuSe` (DLMF/Mathieu/Properties.lean, now
+  proved) and the second conjunct of `mathieu_fourier_locallyUniform`
+  (DLMF/Mathieu/FourierSeries.lean, admitted).
 
 ## (c) Formalization notes
 
@@ -989,6 +999,11 @@ errata page.
 - [29.8](https://dlmf.nist.gov/29.8): the kernels use the Ferrers function 𝖯_ν at arguments
   outside [−1, 1]; the analytic continuation F(ν+1, −ν; 1; ½ − ½x), i.e. the Legendre P_ν, is
   meant, and the Lean statements use `DLMF.Legendre.legendreP`. Notation, not an erratum.
+- [31.14.E3](https://dlmf.nist.gov/31.14.E3)–[31.14.E5](https://dlmf.nist.gov/31.14.E5): the normal
+  form needs distinct singular points, implicit in DLMF; with coinciding a_j the Lean junk value
+  1/(a_j − a_k) = 0 breaks it. Counterexample `p1h_fuchsian_normalForm_counterexample` (proved);
+  the hypothesis `Function.Injective a` was added on 2026-10-26. `fuchsian_normalForm`
+  (DLMF/Heun/Fuchsian.lean), admitted.
 - Domain choices: 28.12.2, 28.12.8, 28.12.9 and §28.14 are stated for ν ∉ ℤ (they fail for
   integer ν under DLMF's own completion, e.g. λ₁(−q) = b₁(q)); 28.23.2–5 are stated with the
   condition |cosh z| > 1 (|sinh z| > 1) for every j.

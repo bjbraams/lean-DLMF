@@ -71,6 +71,87 @@ theorem integral_exp_mathieuSe {n : ℕ} (hn : n ≠ 0) (h : ℝ) (z α : ℂ) :
       I ^ n * mathieuSe n α (h ^ 2) * radialMathieuMs 1 n z h := by
   sorry
 
+/-- `∂w/∂α` for the kernel `w` of 28.28.1. -/
+theorem p1c_hasDerivAt_mathieuKernelW (z t α : ℂ) :
+    HasDerivAt (fun β => mathieuKernelW z t β)
+      (-(Complex.cosh z * Complex.cos t * Complex.sin α) +
+        Complex.sinh z * Complex.sin t * Complex.cos α) α := by
+  have h1 := ((Complex.hasDerivAt_cos α).const_mul (Complex.cosh z * Complex.cos t)).add
+    ((Complex.hasDerivAt_sin α).const_mul (Complex.sinh z * Complex.sin t))
+  convert h1 using 1
+  · funext β; simp [mathieuKernelW]
+  · ring
+
+/-- Differentiation in `α` under the integral sign for the kernel `e^{2ihw}`. -/
+theorem p1c_hasDerivAt_integral_kernel (h : ℝ) (z : ℂ) {g : ℝ → ℂ} (hg : Continuous g)
+    (α : ℂ) :
+    HasDerivAt (fun β => ∫ t in (0 : ℝ)..2 * π,
+        Complex.exp (2 * I * h * mathieuKernelW z t β) * g t)
+      (∫ t in (0 : ℝ)..2 * π, 2 * I * h * deriv (fun β => mathieuKernelW z t β) α *
+        Complex.exp (2 * I * h * mathieuKernelW z t α) * g t) α := by
+  set W' : ℂ → ℝ → ℂ := fun β t => -(Complex.cosh z * Complex.cos t * Complex.sin β) +
+    Complex.sinh z * Complex.sin t * Complex.cos β
+  set F' : ℂ → ℝ → ℂ := fun β t => 2 * I * h * W' β t *
+    Complex.exp (2 * I * h * mathieuKernelW z t β) * g t
+  have hcontW : Continuous (fun p : ℂ × ℝ => mathieuKernelW z p.2 p.1) := by
+    unfold mathieuKernelW; fun_prop
+  have hcont : Continuous (fun p : ℂ × ℝ => F' p.1 p.2) := by
+    simp only [F', W']
+    have := hg.comp (continuous_snd : Continuous (fun p : ℂ × ℝ => p.2))
+    fun_prop
+  have hFc : ∀ β : ℂ, Continuous (fun t : ℝ =>
+      Complex.exp (2 * I * h * mathieuKernelW z t β) * g t) := fun β => by
+    have : Continuous (fun t : ℝ => mathieuKernelW z t β) := by unfold mathieuKernelW; fun_prop
+    fun_prop
+  obtain ⟨C, hC⟩ := (isCompact_closedBall α 1 |>.prod (isCompact_Icc (a := (0 : ℝ))
+    (b := 2 * π))).exists_bound_of_continuousOn hcont.continuousOn
+  have key := hasDerivAt_integral_of_dominated_loc_of_deriv_le (μ := volume) (a := 0) (b := 2 * π)
+    (F := fun β t => Complex.exp (2 * I * h * mathieuKernelW z t β) * g t) (F' := F')
+    (x₀ := α) (s := Metric.closedBall α 1) (bound := fun _ => C)
+    (Metric.closedBall_mem_nhds α one_pos)
+    (Eventually.of_forall fun β => (hFc β).aestronglyMeasurable)
+    ((hFc α).intervalIntegrable _ _)
+    ((hcont.comp (Continuous.prodMk_right α)).aestronglyMeasurable)
+    (ae_of_all _ fun t ht β hβ => by
+      have ht' : t ∈ Icc 0 (2 * π) := by
+        rw [uIoc_of_le (by positivity)] at ht; exact ⟨ht.1.le, ht.2⟩
+      exact hC (β, t) ⟨hβ, ht'⟩)
+    intervalIntegrable_const
+    (ae_of_all _ fun t _ β _ => by
+      have := (((p1c_hasDerivAt_mathieuKernelW z t β).const_mul (2 * I * h)).cexp).mul_const (g t)
+      convert this using 1
+      simp only [F', W']; ring)
+  convert key.2 using 1
+  apply intervalIntegral.integral_congr
+  intro t _
+  simp only [F', W']
+  rw [(p1c_hasDerivAt_mathieuKernelW z t α).deriv]
+
+
+/-- 28.28.4/28.28.5 from 28.28.2/28.28.3: differentiate in `α`. -/
+theorem p1c_integral_dw_of_integral (h : ℝ) (z : ℂ) {g : ℝ → ℂ} (hg : Continuous g)
+    {f : ℂ → ℂ} (hf : Differentiable ℂ f)
+    (hint : ∀ β : ℂ, (2 * π : ℂ)⁻¹ * ∫ t in (0 : ℝ)..2 * π,
+        Complex.exp (2 * I * h * mathieuKernelW z t β) * g t = f β) (α : ℂ) :
+    I * h / π * ∫ t in (0 : ℝ)..2 * π, deriv (fun β => mathieuKernelW z t β) α *
+        Complex.exp (2 * I * h * mathieuKernelW z t α) * g t = deriv f α := by
+  have hD := p1c_hasDerivAt_integral_kernel h z hg α
+  have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
+  have hfun : (fun β => ∫ t in (0 : ℝ)..2 * π,
+      Complex.exp (2 * I * h * mathieuKernelW z t β) * g t) = fun β => 2 * π * f β := by
+    funext β; rw [← hint β]; field_simp
+  rw [hfun] at hD
+  have hD' := ((hf α).hasDerivAt.const_mul (2 * π : ℂ))
+  have hu := hD.unique hD'
+  have e : (∫ t in (0 : ℝ)..2 * π, 2 * I * h * deriv (fun β => mathieuKernelW z t β) α *
+      Complex.exp (2 * I * h * mathieuKernelW z t α) * g t) =
+      2 * I * h * ∫ t in (0 : ℝ)..2 * π, deriv (fun β => mathieuKernelW z t β) α *
+        Complex.exp (2 * I * h * mathieuKernelW z t α) * g t := by
+    rw [← intervalIntegral.integral_const_mul]; congr 1; funext t; ring
+  rw [e] at hu
+  rw [div_mul_eq_mul_div, div_eq_iff hπ]
+  linear_combination hu / 2
+
 /-- **Integral equation** (DLMF 28.28.4):
 `(ih/π) ∫₀^{2π} (∂w/∂α) e^{2ihw} ce_n(t, h²) dt = i^n ce'_n(α, h²) Mc^{(1)}_n(z, h)`. -/
 @[dlmf 28.28.E4]
@@ -78,7 +159,12 @@ theorem integral_dw_exp_mathieuCe (n : ℕ) (h : ℝ) (z α : ℂ) :
     I * h / π * ∫ t in (0 : ℝ)..2 * π, deriv (fun β => mathieuKernelW z t β) α *
         Complex.exp (2 * I * h * mathieuKernelW z t α) * mathieuCe n t (h ^ 2) =
       I ^ n * deriv (fun x => mathieuCe n x (h ^ 2)) α * radialMathieuMc 1 n z h := by
-  sorry
+  have hd := (isMathieuSolution_mathieuCe n (h ^ 2)).differentiable
+  rw [p1c_integral_dw_of_integral h z (g := fun t : ℝ => mathieuCe n t (h ^ 2))
+    (hd.continuous.comp continuous_ofReal)
+    (f := fun β => I ^ n * mathieuCe n β (h ^ 2) * radialMathieuMc 1 n z h)
+    (by fun_prop) (fun β => integral_exp_mathieuCe n h z β) α]
+  rw [deriv_mul_const (by fun_prop), deriv_const_mul _ (hd α)]
 
 /-- **Integral equation** (DLMF 28.28.5), `n ≥ 1`:
 `(ih/π) ∫₀^{2π} (∂w/∂α) e^{2ihw} se_n(t, h²) dt = i^n se'_n(α, h²) Ms^{(1)}_n(z, h)`. -/
@@ -87,7 +173,12 @@ theorem integral_dw_exp_mathieuSe {n : ℕ} (hn : n ≠ 0) (h : ℝ) (z α : ℂ
     I * h / π * ∫ t in (0 : ℝ)..2 * π, deriv (fun β => mathieuKernelW z t β) α *
         Complex.exp (2 * I * h * mathieuKernelW z t α) * mathieuSe n t (h ^ 2) =
       I ^ n * deriv (fun x => mathieuSe n x (h ^ 2)) α * radialMathieuMs 1 n z h := by
-  sorry
+  have hd := (isMathieuSolution_mathieuSe n (h ^ 2)).differentiable
+  rw [p1c_integral_dw_of_integral h z (g := fun t : ℝ => mathieuSe n t (h ^ 2))
+    (hd.continuous.comp continuous_ofReal)
+    (f := fun β => I ^ n * mathieuSe n β (h ^ 2) * radialMathieuMs 1 n z h)
+    (by fun_prop) (fun β => integral_exp_mathieuSe hn h z β) α]
+  rw [deriv_mul_const (by fun_prop), deriv_const_mul _ (hd α)]
 
 /-- **Integral representation along `𝓛_j`** (DLMF 28.28.7), `j = 3, 4`, `h > 0`, `α` real,
 admissible `(ν, h)`, `η₁`, `η₂` in the valleys (`MathieuPathValley`):

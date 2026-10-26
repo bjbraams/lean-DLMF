@@ -7,6 +7,8 @@ module
 
 public import DLMF.Lame.Basic
 public import DLMFMathlib.Analysis.ODE.PowerSeriesUniqueness
+public import DLMFMathlib.Analysis.ODE.P2lSturmLiouville
+public import DLMF.Elliptic.JacobiIdentities
 
 /-!
 # Lamé functions: eigenvalues, parity, normalization, orthogonality (DLMF §§29.3, 29.9)
@@ -38,13 +40,52 @@ namespace DLMF.Lame
 
 variable {h ν k : ℝ} {w : ℝ → ℝ}
 
-/-! ### Existence theorems (admitted) -/
+/-! ### Existence theorems -/
+
+/-- The Lamé potential `ν(ν+1) k² sn²(x, k)`. -/
+def p2lPot (ν k : ℝ) (x : ℝ) : ℝ := ν * (ν + 1) * k ^ 2 * Real.jacobiSnm x (k ^ 2) ^ 2
+
+lemma p2lPot_continuous (hk : k ^ 2 < 1) : Continuous (p2lPot ν k) :=
+  continuous_const.mul
+    ((continuous_iff_continuousAt.2 fun x => (Real.hasDerivAt_jacobiSnm hk x).continuousAt).pow 2)
+
+lemma p2lPot_abs_le (x : ℝ) : |p2lPot ν k x| ≤ |ν * (ν + 1)| * k ^ 2 := by
+  have h1 : Real.jacobiSnm x (k ^ 2) ^ 2 ≤ 1 := by
+    have := Real.jacobiSnm_sq_add_jacobiCnm_sq x (k ^ 2)
+    nlinarith [sq_nonneg (Real.jacobiCnm x (k ^ 2))]
+  rw [p2lPot, abs_mul, abs_mul, abs_of_nonneg (sq_nonneg (Real.jacobiSnm x (k ^ 2))),
+    abs_of_nonneg (sq_nonneg k)]
+  have := abs_nonneg (ν * (ν + 1))
+  have := sq_nonneg k
+  calc |ν * (ν + 1)| * k ^ 2 * Real.jacobiSnm x (k ^ 2) ^ 2 ≤ |ν * (ν + 1)| * k ^ 2 * 1 := by
+        gcongr
+    _ = _ := mul_one _
+
+lemma p2lPot_neg (hk : k ^ 2 < 1) (x : ℝ) : p2lPot ν k (-x) = p2lPot ν k x := by
+  simp only [p2lPot, (jacobi_neg hk x).1, neg_sq]
+
+lemma p2l_isLameSolution_iff {h : ℝ} {w : ℝ → ℝ} :
+    Real.IsLameSolution h ν k w ↔ ODE.p2lIsSol (p2lPot ν k) h w := by
+  constructor
+  · intro hw
+    exact ⟨hw.differentiable, fun x => (hw.hasDerivAt_deriv x).congr_deriv (by
+      simp only [p2lPot]; ring)⟩
+  · intro hw
+    exact ⟨hw.1, fun x => (hw.2 x).congr_deriv (by simp only [p2lPot]; ring)⟩
+
+lemma p2l_lameSpectrum_eq (odd0 oddK : Bool) :
+    Real.lameSpectrum ν k odd0 oddK =
+      ODE.p2lSpec (p2lPot ν k) (Real.compEllIntKm (k ^ 2)) odd0 oddK := by
+  ext h
+  simp only [Real.lameSpectrum, Real.IsLameEigenfunction, ODE.p2lSpec, mem_ofPred_eq,
+    p2l_isLameSolution_iff]
+  rfl
 
 /-- **Existence and ordering of the Lamé spectra** (DLMF §29.3(i)): for each pair `ν, k` and
 each boundary type of Table 29.3.2, the eigenvalues form an infinite, unbounded, strictly
 increasing sequence `h₀ < h₁ < ⋯` exhausting the spectrum, and the `j`th one is
-characterized by `IsNthLameEigenvalue`. Flagged existence theorem (regular Sturm–Liouville
-theory); admitted. -/
+characterized by `IsNthLameEigenvalue`. Proved by regular Sturm–Liouville theory on `[0, K]`
+(`ODE.p2l_spec_Iio_finite`, `ODE.p2l_spec_not_bddAbove`, `ODE.p2l_enum`). -/
 @[dlmf 29.3.i]
 theorem Real.lameEigenvalue_spec (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1)
     (odd0 oddK : Bool) :
@@ -52,17 +93,146 @@ theorem Real.lameEigenvalue_spec (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 
       StrictMono (Real.lameEigenvalue ν k odd0 oddK) ∧
       Real.lameSpectrum ν k odd0 oddK = Set.range (Real.lameEigenvalue ν k odd0 oddK) ∧
       Tendsto (Real.lameEigenvalue ν k odd0 oddK) atTop atTop := by
-  sorry
+  have hk : k ^ 2 < 1 := by nlinarith
+  have hK := Real.compEllIntKm_pos hk
+  have hS := p2l_lameSpectrum_eq (ν := ν) (k := k) odd0 oddK
+  have hinf : ¬BddAbove (Real.lameSpectrum ν k odd0 oddK) := hS ▸
+    ODE.p2l_spec_not_bddAbove (p2lPot_continuous hk) p2lPot_abs_le (p2lPot_neg hk) hK odd0 oddK
+  have hfin : ∀ c, (Real.lameSpectrum ν k odd0 oddK ∩ Iio c).Finite := fun c => hS ▸
+    ODE.p2l_spec_Iio_finite (p2lPot_continuous hk) p2lPot_abs_le hK odd0 oddK c
+  obtain ⟨h1, h2⟩ := ODE.p2l_enum hinf hfin
+  have hj : ∀ j, ∃! h, Real.IsNthLameEigenvalue ν k odd0 oddK j h := h1
+  have he : ∀ j, Real.IsNthLameEigenvalue ν k odd0 oddK j (Real.lameEigenvalue ν k odd0 oddK j) :=
+    fun j => by
+      rw [Real.lameEigenvalue, dite_eq_left (hj j)]
+      exact (hj j).exists.choose_spec
+  exact ⟨hj, h2 _ fun j => ⟨(he j).1, (he j).2.2⟩⟩
+
+/-- The `j`th eigenvalue is the `j`th element of the spectrum. -/
+theorem Real.isNthLameEigenvalue_lameEigenvalue (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1)
+    (odd0 oddK : Bool) (j : ℕ) :
+    Real.IsNthLameEigenvalue ν k odd0 oddK j (Real.lameEigenvalue ν k odd0 oddK j) := by
+  have hs := (Real.lameEigenvalue_spec hν hk0 hk1 odd0 oddK).1 j
+  rw [Real.lameEigenvalue, dite_eq_left hs]
+  exact hs.exists.choose_spec
+
+/-- Positivity of `∫₀^K dn · w²` for a nonzero solution `w`. -/
+lemma p2l_integral_dn_sq_pos (hk : k ^ 2 < 1) {h : ℝ} {w : ℝ → ℝ}
+    (hw : ODE.p2lIsSol (p2lPot ν k) h w) (hne : w ≠ 0) :
+    0 < ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.jacobiDnm x (k ^ 2) * w x ^ 2 := by
+  have hK := Real.compEllIntKm_pos hk
+  set K := Real.compEllIntKm (k ^ 2)
+  set f : ℝ → ℝ := fun x => Real.jacobiDnm x (k ^ 2) * w x ^ 2
+  have hdn : Continuous fun x => Real.jacobiDnm x (k ^ 2) :=
+    continuous_iff_continuousAt.2 fun x => (Real.hasDerivAt_jacobiDnm hk x).continuousAt
+  have hf : Continuous f := hdn.mul (hw.continuous.pow 2)
+  have hf0 : ∀ x, 0 ≤ f x := fun x => mul_nonneg (Real.jacobiDnm_pos hk x).le (sq_nonneg _)
+  obtain ⟨x₀, hx₀, hwx₀⟩ : ∃ x ∈ Ioo 0 K, w x ≠ 0 := by
+    by_contra hno
+    push Not at hno
+    have hm : K / 2 ∈ Ioo 0 K := ⟨by linarith, by linarith⟩
+    have hev : w =ᶠ[𝓝 (K / 2)] fun _ => 0 := by
+      filter_upwards [Ioo_mem_nhds hm.1 hm.2] with x hx using hno x hx
+    have hd := (hw.hasDerivAt (K / 2)).unique
+      ((hasDerivAt_const (K / 2) (0 : ℝ)).congr_of_eventuallyEq hev)
+    exact hne (ODE.p2l_eq_zero (p2lPot_continuous hk) hw (hno _ hm) hd)
+  rw [intervalIntegral.integral_pos_iff_support_of_nonneg_ae'
+    (Filter.Eventually.of_forall hf0) (hf.intervalIntegrable 0 K)]
+  refine ⟨hK, ?_⟩
+  have hU : IsOpen ({x | f x ≠ 0} ∩ Ioo 0 K) := (isOpen_ne_fun hf continuous_const).inter isOpen_Ioo
+  have hpos := hU.measure_pos MeasureTheory.volume
+    ⟨x₀, mul_ne_zero (Real.jacobiDnm_pos hk x₀).ne' (pow_ne_zero 2 hwx₀), hx₀⟩
+  exact hpos.trans_le (MeasureTheory.measure_mono fun x hx => ⟨hx.1, Ioo_subset_Ioc_self hx.2⟩)
 
 /-- **Existence and uniqueness of the normalized Lamé eigenfunctions** (DLMF §§29.3(iv)–(v)):
 the eigenvalue `lameEigenvalue ν k odd0 oddK j` is simple, so there is exactly one
-eigenfunction with the normalization 29.3.18 and the sign rule of §29.3(v). Flagged existence
-theorem; admitted. -/
+eigenfunction with the normalization 29.3.18 and the sign rule of §29.3(v). Every eigenfunction
+is a multiple of the basic solution `ODE.p2lY` (`ODE.p2l_eq_mul_p2lY`). -/
 @[dlmf 29.3.v]
 theorem Real.lameEigenfunction_spec (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1)
     (odd0 oddK : Bool) (j : ℕ) :
     ∃! w, Real.IsNormalizedLameEigenfunction ν k odd0 oddK j w := by
-  sorry
+  have hk : k ^ 2 < 1 := by nlinarith
+  have hV := p2lPot_continuous (ν := ν) hk
+  set K := Real.compEllIntKm (k ^ 2)
+  set h := Real.lameEigenvalue ν k odd0 oddK j
+  have hmem : h ∈ ODE.p2lSpec (p2lPot ν k) K odd0 oddK :=
+    p2l_lameSpectrum_eq (ν := ν) (k := k) odd0 oddK ▸
+      (Real.isNthLameEigenvalue_lameEigenvalue hν hk0 hk1 odd0 oddK j).1
+  obtain ⟨y0, y1, hy⟩ := ODE.p2lY_spec hV odd0 h
+  set Y := ODE.p2lY (p2lPot ν k) odd0 h
+  have hYne := ODE.p2lY_ne_zero hV odd0 h
+  have hG := (ODE.p2l_mem_spec_iff hV odd0 oddK).1 hmem
+  set I := ∫ x in (0 : ℝ)..K, Real.jacobiDnm x (k ^ 2) * Y x ^ 2
+  have hI : 0 < I := p2l_integral_dn_sq_pos hk hy hYne
+  -- the sign datum `a`: the normalized eigenfunction `c Y` satisfies the sign rule iff `0 < c a`
+  set a := if oddK then -deriv Y K else Y K
+  have ha : a ≠ 0 := by
+    intro ha0
+    simp only [ODE.p2lG, a] at hG ha0
+    cases oddK
+    · simp only [Bool.false_eq_true, ↓reduceIte] at hG ha0
+      exact hYne (ODE.p2l_eq_zero hV hy ha0 hG)
+    · simp only [↓reduceIte, neg_eq_zero] at hG ha0
+      exact hYne (ODE.p2l_eq_zero hV hy hG ha0)
+  have hderiv : ∀ c : ℝ, deriv (fun x => c * Y x) = fun x => c * deriv Y x := fun c =>
+    funext fun x => ((hy.hasDerivAt x).const_mul c).deriv
+  have hint : ∀ c : ℝ, ∫ x in (0 : ℝ)..K, Real.jacobiDnm x (k ^ 2) * (c * Y x) ^ 2 = c ^ 2 * I :=
+    fun c => by
+      rw [← intervalIntegral.integral_const_mul]
+      congr 1; funext x; ring
+  have hsign : ∀ c : ℝ, (if oddK then deriv (fun x => c * Y x) K < 0 else 0 < c * Y K) ↔
+      0 < c * a := fun c => by
+    rw [hderiv]; simp only [a]; cases oddK
+    · simp
+    · simp only [↓reduceIte, mul_neg, neg_pos]
+  -- every normalized eigenfunction is `c Y` with `c² I = π/4` and `0 < c a`
+  have hform : ∀ w, Real.IsNormalizedLameEigenfunction ν k odd0 oddK j w →
+      ∃ c : ℝ, w = (fun x => c * Y x) ∧ c ^ 2 * I = π / 4 ∧ 0 < c * a := by
+    rintro w ⟨⟨hw, hb, -⟩, hn, hs⟩
+    rw [p2l_isLameSolution_iff] at hw
+    have he := ODE.p2l_eq_mul_p2lY hV hw hb.1
+    set c := if odd0 then deriv w 0 else w 0
+    refine ⟨c, he, ?_, ?_⟩
+    · rw [← hint c, ← hn, he]
+    · rw [he] at hs; exact (hsign c).1 hs
+  set c₀ := Real.sqrt (π / (4 * I)) * a / |a|
+  have hsq : Real.sqrt (π / (4 * I)) ^ 2 = π / (4 * I) := Real.sq_sqrt (by positivity)
+  have hsqpos : 0 < Real.sqrt (π / (4 * I)) := Real.sqrt_pos.2 (by positivity)
+  have haa : 0 < |a| := abs_pos.2 ha
+  have hc₀ : c₀ ^ 2 * I = π / 4 := by
+    simp only [c₀, div_pow, mul_pow, sq_abs, hsq]
+    field_simp
+  have hc₀a : 0 < c₀ * a := by
+    simp only [c₀]
+    rw [div_mul_eq_mul_div, mul_assoc, ← sq, ← sq_abs, sq, ← mul_assoc, mul_div_assoc,
+      div_self haa.ne']
+    positivity
+  refine ⟨fun x => c₀ * Y x, ⟨⟨?_, ?_, ?_⟩, ?_, ?_⟩, fun w hw => ?_⟩
+  · rw [p2l_isLameSolution_iff]; exact hy.const_mul c₀
+  · have hb := (ODE.p2l_mem_spec_iff hV odd0 oddK).2 hG
+    refine ⟨?_, ?_⟩
+    · rw [hderiv]; cases odd0 <;> simp_all [ODE.p2lD0, ODE.p2lD1]
+    · rw [hderiv]; simp only [ODE.p2lG] at hG
+      cases oddK
+      · exact mul_eq_zero_of_right c₀ hG
+      · exact mul_eq_zero_of_right c₀ hG
+  · intro h0
+    have hc0 : c₀ ≠ 0 := fun hc => by simp [hc] at hc₀a
+    exact hYne (funext fun x => by
+      have := congrFun h0 x; simp only [Pi.zero_apply, mul_eq_zero] at this
+      exact this.resolve_left hc0)
+  · exact (hint c₀).trans hc₀
+  · exact (hsign c₀).2 hc₀a
+  · obtain ⟨c, rfl, hc, hca⟩ := hform w hw
+    have hcc : c ^ 2 = c₀ ^ 2 := by
+      have := hc.trans hc₀.symm
+      exact mul_right_cancel₀ hI.ne' this
+    have : c = c₀ := by
+      rcases sq_eq_sq_iff_eq_or_eq_neg.1 hcc with h' | h'
+      · exact h'
+      · rw [h', neg_mul] at hca; linarith
+    rw [this]
 
 /-- The normalized eigenfunction satisfies its defining properties. -/
 theorem Real.isNormalizedLameEigenfunction_lameEigenfunction (hν : -1 / 2 ≤ ν) (hk0 : 0 < k)
@@ -73,13 +243,6 @@ theorem Real.isNormalizedLameEigenfunction_lameEigenfunction (hν : -1 / 2 ≤ �
   rw [Real.lameEigenfunction, dite_eq_left hs]
   exact hs.exists.choose_spec
 
-/-- The `j`th eigenvalue is the `j`th element of the spectrum. -/
-theorem Real.isNthLameEigenvalue_lameEigenvalue (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1)
-    (odd0 oddK : Bool) (j : ℕ) :
-    Real.IsNthLameEigenvalue ν k odd0 oddK j (Real.lameEigenvalue ν k odd0 oddK j) := by
-  have hs := (Real.lameEigenvalue_spec hν hk0 hk1 odd0 oddK).1 j
-  rw [Real.lameEigenvalue, dite_eq_left hs]
-  exact hs.exists.choose_spec
 
 /-! ### Helper lemmas: continuity, reflection, Green's identity -/
 

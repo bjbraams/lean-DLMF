@@ -6,6 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Mathieu.Modified.Defs
+public import DLMF.Mathieu.Modified.P2mCrossSeries
+public import DLMF.Mathieu.Modified.P2mRadial
 public import DLMF.Bessel.Modified
 public import DLMF.Bessel.SecondKind
 
@@ -38,7 +40,8 @@ noninteger `ν` carry the hypothesis `|cosh z| > 1` (resp. `|sinh z| > 1`) for a
 
 @[expose] public noncomputable section
 
-open Complex Set Filter
+open Complex hiding besselI
+open Set Filter
 open scoped Topology Real
 
 namespace DLMF.Mathieu
@@ -51,13 +54,109 @@ theorem mathieuCyl_three_four (μ w : ℂ) :
     mathieuCyl 3 μ w = DLMF.Bessel.hankelH1 μ w ∧ mathieuCyl 4 μ w = DLMF.Bessel.hankelH2 μ w :=
   ⟨rfl, rfl⟩
 
+/-- `(r e^z)^μ = r^μ e^{μz}` for `r > 0` and `-π < Im z ≤ π` (principal powers). -/
+theorem p1c_cpow_ofReal_mul_exp (μ : ℂ) {r : ℝ} (hr : 0 < r) {z : ℂ} (hz₁ : -π < z.im)
+    (hz₂ : z.im ≤ π) : ((r : ℂ) * Complex.exp z) ^ μ = (r : ℂ) ^ μ * Complex.exp (μ * z) := by
+  have hr' : (r : ℂ) ≠ 0 := by exact_mod_cast hr.ne'
+  rw [Complex.cpow_def_of_ne_zero (mul_ne_zero hr' (Complex.exp_ne_zero z)),
+    Complex.cpow_def_of_ne_zero hr', Complex.log_ofReal_mul hr (Complex.exp_ne_zero z),
+    Complex.log_exp hz₁ hz₂, ← Complex.exp_add, Complex.ofReal_log hr.le]
+  ring_nf
+
+/-- For `h > 0` and `-π < Im z ≤ π`, `besselJExp μ h z` is the principal-branch `J_μ(h e^z)`. -/
+theorem p1c_besselJExp_eq (μ : ℂ) {h : ℝ} (hh : 0 < h) {z : ℂ} (hz₁ : -π < z.im)
+    (hz₂ : z.im ≤ π) : besselJExp μ h z = besselJ μ (h * Complex.exp z) := by
+  rw [besselJExp, DLMF.Bessel.besselJ_eq_regularized]
+  have := p1c_cpow_ofReal_mul_exp μ (r := h / 2) (by positivity) hz₁ hz₂
+  push_cast at this
+  rw [show (h : ℂ) * Complex.exp z / 2 = (h / 2) * Complex.exp z by ring, this]
+
+/-- `besselJExp k (-h) w = (-1)^k besselJExp k h w` for integer `k`. -/
+theorem p1c_besselJExp_neg_h_intCast (k : ℤ) (h w : ℂ) :
+    besselJExp k (-h) w = (-1 : ℂ) ^ k * besselJExp k h w := by
+  rw [p1c_besselJExp_intCast, p1c_besselJExp_intCast, neg_mul, besselJ_int_neg]
+
+/-- `e^{±πi/2} = ±i`. -/
+theorem p1c_exp_sigma {σ : ℂ} (hσ : σ = 1 ∨ σ = -1) : Complex.exp (σ * π * I / 2) = σ * I := by
+  rcases hσ with rfl | rfl
+  · rw [show (1 : ℂ) * π * I / 2 = (π / 2 : ℂ) * I by ring, Complex.exp_mul_I]
+    simp [← Complex.ofReal_ofNat, ← Complex.ofReal_div, ← Complex.ofReal_cos, ← Complex.ofReal_sin]
+  · rw [show (-1 : ℂ) * π * I / 2 = (-(π / 2) : ℂ) * I by ring, Complex.exp_mul_I]
+    simp [← Complex.ofReal_ofNat, ← Complex.ofReal_div, ← Complex.ofReal_cos, ← Complex.ofReal_sin]
+
+/-- Shifting `z` by `±πi/2` in `J_μ(h e^z)` (continued) is the same as replacing `h` by `±ih`. -/
+theorem p1c_besselJExp_add_pi_div_two (μ : ℂ) {h : ℝ} (hh : 0 < h) {σ : ℂ}
+    (hσ : σ = 1 ∨ σ = -1) (z : ℂ) :
+    besselJExp μ h (z + σ * π * I / 2) = besselJExp μ (σ * I * h) z := by
+  have him : -π < (σ * π * I / 2).im ∧ (σ * π * I / 2).im ≤ π := by
+    rcases hσ with rfl | rfl <;> simp <;> constructor <;> linarith [Real.pi_pos]
+  have hc := p1c_cpow_ofReal_mul_exp μ (r := h / 2) (by positivity) him.1 him.2
+  rw [p1c_exp_sigma hσ] at hc
+  push_cast at hc
+  rw [besselJExp, besselJExp, show σ * I * (h : ℂ) / 2 = h / 2 * (σ * I) by ring, hc,
+    Complex.exp_add, p1c_exp_sigma hσ]
+  have e : Complex.exp (μ * (z + σ * π * I / 2)) = Complex.exp (μ * z) *
+      Complex.exp (μ * (σ * π * I / 2)) := by rw [← Complex.exp_add]; ring_nf
+  rw [e, show (h : ℂ) * (Complex.exp z * (σ * I)) = σ * I * h * Complex.exp z by ring]
+  ring
+
+/-- Shifting `z` by `±πi/2` in `𝒞^{(j)}_μ(h e^z)` amounts to replacing `h` by `±ih`. -/
+theorem p1c_mathieuCylExp_add_pi_div_two (j : ℕ) (μ : ℂ) {h : ℝ} (hh : 0 < h) {σ : ℂ}
+    (hσ : σ = 1 ∨ σ = -1) (z : ℂ) :
+    mathieuCylExp j μ h (z + σ * π * I / 2) = mathieuCylExp j μ (σ * I * h) z := by
+  have hJ := fun μ' => p1c_besselJExp_add_pi_div_two μ' hh hσ z
+  have hY : besselYExp μ h (z + σ * π * I / 2) = besselYExp μ (σ * I * h) z := by
+    simp only [besselYExp, hJ]
+  rcases j with _ | _ | _ | _ | _ | j <;> simp [mathieuCylExp, hJ, hY]
+
+/-- A real noninteger is a complex noninteger. -/
+theorem p1c_not_int_cast {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ) ≠ ν) : ∀ m : ℤ, (m : ℂ) ≠ ν := by
+  intro m hm; exact hν m (by exact_mod_cast hm)
+
+/-- `ν + k` is not an integer when `ν` is not. -/
+theorem p1c_not_int_add {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ) ≠ ν) (k : ℤ) :
+    ¬ ∃ j : ℤ, (ν : ℂ) + k = j := by
+  rintro ⟨j, hj⟩
+  apply hν (j - k)
+  have : (ν : ℂ) = ((j - k : ℤ) : ℂ) := by push_cast; linear_combination hj
+  exact_mod_cast this.symm
+
+/-- `sin((ν + k)π) ≠ 0` for real `ν ∉ ℤ`, `k ∈ ℤ`. -/
+theorem p1c_sin_ne_zero {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ) ≠ ν) (k : ℤ) :
+    Complex.sin ((ν + k) * π) ≠ 0 := by
+  rw [Ne, Complex.sin_eq_zero_iff]
+  rintro ⟨m, hm⟩
+  apply hν (m - k)
+  have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
+  have : ((ν : ℂ) + k) = m := mul_right_cancel₀ hπ hm
+  have : (ν : ℂ) = ((m - k : ℤ) : ℂ) := by push_cast; linear_combination this
+  exact_mod_cast this.symm
+
+/-- `cos((ν + k)π) = (-1)^k cos(νπ)`. -/
+theorem p1c_cos_add_int (ν : ℂ) (k : ℤ) :
+    Complex.cos ((ν + k) * π) = (-1 : ℂ) ^ k * Complex.cos (ν * π) := by
+  rw [add_mul, Complex.cos_antiperiodic.add_int_mul_eq, Int.cast_negOnePow]
+
+/-- `sin((ν + k)π) = (-1)^k sin(νπ)`. -/
+theorem p1c_sin_add_int (ν : ℂ) (k : ℤ) :
+    Complex.sin ((ν + k) * π) = (-1 : ℂ) ^ k * Complex.sin (ν * π) := by
+  rw [add_mul, Complex.sin_antiperiodic.add_int_mul_eq, Int.cast_negOnePow]
+
+/-- `e^{ix} = cos x + i sin x`. -/
+theorem p1c_exp_I_mul (x : ℂ) : Complex.exp (I * x) = Complex.cos x + I * Complex.sin x := by
+  rw [mul_comm, Complex.exp_mul_I]; ring
+
 /-- The continued cylinder functions agree with the principal-branch ones at `h e^z` for
 `h > 0` and `-π < Im z ≤ π` (DLMF 28.23.1). -/
 @[dlmf 28.23.E1]
 theorem mathieuCylExp_eq_mathieuCyl (j : ℕ) (μ : ℂ) {h : ℝ} (hh : 0 < h) {z : ℂ}
     (hz₁ : -π < z.im) (hz₂ : z.im ≤ π) :
     mathieuCylExp j μ h z = mathieuCyl j μ (h * Complex.exp z) := by
-  sorry
+  have hJ : ∀ μ', besselJExp μ' h z = besselJ μ' (h * Complex.exp z) :=
+    fun μ' => p1c_besselJExp_eq μ' hh hz₁ hz₂
+  have hY : besselYExp μ h z = DLMF.Bessel.besselY μ (h * Complex.exp z) := by
+    simp only [besselYExp, DLMF.Bessel.besselY, hJ]
+  rcases j with _ | _ | _ | _ | _ | j <;> simp [mathieuCylExp, mathieuCyl, hJ, hY]
 
 /-- **Expansion in Bessel functions** (DLMF 28.23.2), `ν` real, `ν ∉ ℤ`, `h > 0`,
 `j = 1, 2, 3, 4`, `Re z > 0`, `|cosh z| > 1`:
@@ -219,8 +318,8 @@ convergence and the independence of `n`.) -/
 theorem hasSum_modMathieuTerm (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) {ν h : ℂ}
     (hν : ModMathieuAdmissible ν h) (hh : h ≠ 0) (n : ℤ) (z : ℂ) :
     HasSum (modMathieuTerm j ν z h n)
-      (mathieuMeCoeff ν (h ^ 2) n * modMathieuM j ν z h) := by
-  sorry
+      (mathieuMeCoeff ν (h ^ 2) n * modMathieuM j ν z h) :=
+  p2m_hasSum_modMathieuTerm j hj₁ hj₄ hν hh n z
 
 /-- **Absolute and locally uniform convergence** of the cross-product series (DLMF §28.24,
 "the expansions (28.24.1)–(28.24.13) converge absolutely and uniformly on compact sets of the

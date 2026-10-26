@@ -7,6 +7,7 @@ module
 
 public import DLMF.Heun.Basic
 public import Mathlib.Analysis.SpecialFunctions.Pow.Complex
+public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Cotangent
 
 /-!
@@ -39,7 +40,78 @@ noncomputable section
 
 namespace DLMF.Heun
 
+/-! ### Transformations of second-order equations -/
+
+/-- `IsLinearODE2On` on an open set depends only on the values of `w` there. -/
+theorem p1h_isLinearODE2On_congr {p r w w' : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
+    (h : EqOn w w' U) (hw : IsLinearODE2On p r w U) : IsLinearODE2On p r w' U := by
+  have hev : ∀ z ∈ U, w =ᶠ[𝓝 z] w' := fun z hz =>
+    Filter.eventually_of_mem (hU.mem_nhds hz) fun y hy => h hy
+  have hdev : ∀ z ∈ U, deriv w =ᶠ[𝓝 z] deriv w' := fun z hz =>
+    Filter.eventually_of_mem (hU.mem_nhds hz) fun y hy => (hev y hy).deriv_eq
+  refine ⟨fun z hz => (hw.1 z hz).congr_of_eventuallyEq (hev z hz).symm, fun z hz => ?_⟩
+  rw [← (hev z hz).deriv_eq, ← h hz]
+  exact (hw.2 z hz).congr_of_eventuallyEq (hdev z hz).symm
+
+/-- Gauge transformation: if `g' = L g` and `w₁` solves `w'' + p₁ w' + r₁ w = 0` with
+`p₁ = p + 2L`, `r₁ = r + pL + L² + L'`, then `g w₁` solves `w'' + p w' + r w = 0`. -/
+theorem p1h_isLinearODE2On_mul {p r p₁ r₁ g L L' w₁ : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
+    (hg : ∀ z ∈ U, HasDerivAt g (L z * g z) z) (hL : ∀ z ∈ U, HasDerivAt L (L' z) z)
+    (hp : ∀ z ∈ U, p₁ z = p z + 2 * L z)
+    (hr : ∀ z ∈ U, r₁ z = r z + p z * L z + L z ^ 2 + L' z)
+    (hw : IsLinearODE2On p₁ r₁ w₁ U) : IsLinearODE2On p r (fun z => g z * w₁ z) U := by
+  have hd : ∀ z ∈ U, HasDerivAt (fun z => g z * w₁ z) (g z * (L z * w₁ z + deriv w₁ z)) z :=
+    fun z hz => by
+      convert (hg z hz).mul (hw.1 z hz).hasDerivAt using 1; ring
+  refine ⟨fun z hz => (hd z hz).differentiableAt, fun z hz => ?_⟩
+  have hev : deriv (fun z => g z * w₁ z) =ᶠ[𝓝 z]
+      fun z => g z * (L z * w₁ z + deriv w₁ z) :=
+    Filter.eventually_of_mem (hU.mem_nhds hz) fun y hy => (hd y hy).deriv
+  have h2 := (hg z hz).mul (((hL z hz).mul (hw.1 z hz).hasDerivAt).add (hw.2 z hz))
+  refine (h2.congr_of_eventuallyEq hev).congr_deriv ?_
+  rw [(hd z hz).deriv, hp z hz, hr z hz]
+  simp only [Pi.add_apply, Pi.mul_apply]
+  ring
+
+/-- Change of variable: if `H` solves `H'' + P H' + R H = 0` on `V`, `φ' = φ₁`, `φ₁' = φ₂`,
+`φ₂ + p φ₁ = P(φ) φ₁²` and `r = R(φ) φ₁²`, then `H ∘ φ` solves `w'' + p w' + r w = 0`. -/
+theorem p1h_isLinearODE2On_comp {p r P R φ φ₁ φ₂ H : ℂ → ℂ} {U V : Set ℂ} (hU : IsOpen U)
+    (hφ : ∀ z ∈ U, HasDerivAt φ (φ₁ z) z) (hφ₁ : ∀ z ∈ U, HasDerivAt φ₁ (φ₂ z) z)
+    (hmaps : ∀ z ∈ U, φ z ∈ V)
+    (hp : ∀ z ∈ U, φ₂ z + p z * φ₁ z = P (φ z) * φ₁ z ^ 2)
+    (hr : ∀ z ∈ U, r z = R (φ z) * φ₁ z ^ 2)
+    (hH : IsLinearODE2On P R H V) : IsLinearODE2On p r (fun z => H (φ z)) U := by
+  have hd : ∀ z ∈ U, HasDerivAt (fun z => H (φ z)) (deriv H (φ z) * φ₁ z) z :=
+    fun z hz => (hH.1 _ (hmaps z hz)).hasDerivAt.comp z (hφ z hz)
+  refine ⟨fun z hz => (hd z hz).differentiableAt, fun z hz => ?_⟩
+  have hev : deriv (fun z => H (φ z)) =ᶠ[𝓝 z] fun z => deriv H (φ z) * φ₁ z :=
+    Filter.eventually_of_mem (hU.mem_nhds hz) fun y hy => (hd y hy).deriv
+  have h2 := ((hH.2 _ (hmaps z hz)).comp z (hφ z hz)).mul (hφ₁ z hz)
+  refine (h2.congr_of_eventuallyEq hev).congr_deriv ?_
+  rw [(hd z hz).deriv]
+  have := hp z hz
+  rw [hr z hz]
+  simp only [Function.comp_apply]
+  linear_combination deriv H (φ z) * this
+
+/-- Derivative of a principal power in the form `(b^s)' = (s b'/b) b^s`. -/
+theorem p1h_hasDerivAt_cpow {b : ℂ → ℂ} {b' s z : ℂ} (hb : HasDerivAt b b' z)
+    (hs : b z ∈ slitPlane) :
+    HasDerivAt (fun z => b z ^ s) (s * b' / b z * b z ^ s) z := by
+  have h0 : b z ≠ 0 := slitPlane_ne_zero hs
+  convert hb.cpow_const (c := s) hs using 1
+  rw [cpow_sub _ _ h0, cpow_one]
+  field_simp
+
 variable {a q α β γ δ ε : ℂ}
+
+/-- Derivative of `k/(z - c)`. -/
+theorem p1h_hasDerivAt_const_div_sub (k c z : ℂ) (h : z - c ≠ 0) :
+    HasDerivAt (fun z => k / (z - c)) (-k / (z - c) ^ 2) z := by
+  convert (((hasDerivAt_id z).sub_const c).inv h).const_mul k using 1
+  · ext; simp [div_eq_mul_inv]
+  · simp; ring
+
 
 /-- DLMF 31.10.4 and 31.2.1: away from the singular points, Heun's equation is
 `𝒟_z w = q w` for Heun's operator `𝒟_z`. -/
@@ -72,6 +144,64 @@ theorem isHeunSolOn_iff_heunOperator {w : ℂ → ℂ} {s : Set ℂ}
 
 /-! ### Singularities and exponents (§31.2(i)) -/
 
+/-- At most regular point of a second-order equation from analytic extensions of
+`(z - z₀)² c₀` and `(z - z₀) c₁`. -/
+theorem p1h_atMostRegular_two {c₀ c₁ g₀ g₁ : ℂ → ℂ} {z₀ : ℂ} (hg₀ : AnalyticAt ℂ g₀ z₀)
+    (hg₁ : AnalyticAt ℂ g₁ z₀) (h₀ : ∀ z, z ≠ z₀ → (z - z₀) ^ 2 * c₀ z = g₀ z)
+    (h₁ : ∀ z, z ≠ z₀ → (z - z₀) * c₁ z = g₁ z) :
+    Complex.linearODEAtMostRegularAt ![c₀, c₁] z₀ := by
+  intro j
+  fin_cases j
+  · exact ⟨g₀, hg₀, eventually_nhdsWithin_of_forall fun z hz => by simpa using h₀ z hz⟩
+  · exact ⟨g₁, hg₁, eventually_nhdsWithin_of_forall fun z hz => by simpa using h₁ z hz⟩
+
+/-- Ordinary point of a second-order equation with analytic coefficients. -/
+theorem p1h_ordinary_two {c₀ c₁ : ℂ → ℂ} {z₀ : ℂ} (h₀ : AnalyticAt ℂ c₀ z₀)
+    (h₁ : AnalyticAt ℂ c₁ z₀) : Complex.linearODEOrdinaryAt ![c₀, c₁] z₀ := by
+  intro j
+  fin_cases j
+  · exact ⟨c₀, h₀, by simp⟩
+  · exact ⟨c₁, h₁, by simp⟩
+
+/-- Raw coefficients of a second-order equation after `z = 1/u`. -/
+theorem p1h_recipRaw_two (c₀ c₁ : ℂ → ℂ) {u : ℂ} (hu : u ≠ 0) :
+    Complex.linearODEReciprocalRaw ![c₀, c₁] 0 u = c₀ u⁻¹ ∧
+    Complex.linearODEReciprocalRaw ![c₀, c₁] 1 u = 2 * u ^ 3 - u ^ 2 * c₁ u⁻¹ ∧
+    Complex.linearODEReciprocalRaw ![c₀, c₁] 2 u = u ^ 4 := by
+  have hz : u⁻¹ ≠ 0 := inv_ne_zero hu
+  have d1 : deriv (fun z : ℂ => z⁻¹ - u) = fun z => -(z ^ 2)⁻¹ := by
+    funext z; rw [deriv_sub_const, deriv_inv]
+  have d1' : HasDerivAt (fun z : ℂ => -(z ^ 2)⁻¹) (2 * u ^ 3) u⁻¹ := by
+    have h := ((hasDerivAt_pow 2 u⁻¹).inv (pow_ne_zero 2 hz)).neg
+    convert h using 1
+    simp only [inv_pow, Nat.cast_ofNat]
+    field_simp
+    simp
+  have e2 : deriv (fun z : ℂ => (z⁻¹ - u) ^ 2 / 2) =ᶠ[𝓝 u⁻¹]
+      fun z => -((z⁻¹ - u) * (z ^ 2)⁻¹) := by
+    filter_upwards [isOpen_ne.mem_nhds hz] with z hz'
+    have h := (((hasDerivAt_inv hz').sub_const u).pow 2).div_const 2
+    refine h.deriv.trans ?_
+    norm_num
+    ring
+  have d2 : HasDerivAt (fun z : ℂ => -((z⁻¹ - u) * (z ^ 2)⁻¹)) (u ^ 4) u⁻¹ := by
+    have h := (((hasDerivAt_inv hz).sub_const u).mul
+      ((hasDerivAt_pow 2 u⁻¹).inv (pow_ne_zero 2 hz))).neg
+    convert h using 1
+    simp only [Pi.inv_apply, inv_pow, Nat.cast_ofNat, inv_inv]
+    field_simp
+    ring
+  simp only [Complex.linearODEReciprocalRaw, Complex.linearODEValue, Fin.sum_univ_two]
+  refine ⟨?_, ?_, ?_⟩
+  · simp [iteratedDeriv_succ]
+  · simp only [Nat.factorial_one, Nat.cast_one, div_one, pow_one, iteratedDeriv_succ,
+      iteratedDeriv_zero, d1, d1'.deriv, Fin.val_zero, Fin.val_one]
+    simp [inv_inv]
+    ring
+  · simp only [Nat.factorial_two, Nat.cast_ofNat, iteratedDeriv_succ, iteratedDeriv_zero,
+      Fin.val_zero, Fin.val_one, e2.deriv_eq, d2.deriv, e2.eq_of_nhds]
+    simp [inv_inv]
+
 /-- DLMF §31.2(i): for `a ∉ {0, 1}` Heun's equation has at most regular singular points at
 `0, 1, a` and `∞` and no other singular points (degenerate parameter values can make a
 singular point ordinary or removable, which the predicate `linearODEAtMostRegularAt` allows). -/
@@ -83,7 +213,125 @@ theorem heun_singularities (ha0 : a ≠ 0) (ha1 : a ≠ 1) :
     Complex.linearODEAtMostRegularAtInfinity (heunODECoeff a q α β γ δ ε) ∧
     ∀ z : ℂ, z ≠ 0 → z ≠ 1 → z ≠ a →
       Complex.linearODEOrdinaryAt (heunODECoeff a q α β γ δ ε) z := by
-  sorry
+  have h01 : (0 : ℂ) - 1 ≠ 0 := by norm_num
+  have h0a : (0 : ℂ) - a ≠ 0 := by simpa using ha0
+  have h1a : (1 : ℂ) - a ≠ 0 := sub_ne_zero.2 (Ne.symm ha1)
+  have ha1' : a - 1 ≠ 0 := sub_ne_zero.2 ha1
+  have k0 : ((0 : ℂ) - 1) * (0 - a) ≠ 0 := mul_ne_zero h01 h0a
+  have k1 : (1 : ℂ) * (1 - a) ≠ 0 := mul_ne_zero one_ne_zero h1a
+  have ka : a * (a - 1) ≠ 0 := mul_ne_zero ha0 ha1'
+  have k1' : (1 : ℂ) ≠ 0 := one_ne_zero
+  refine ⟨?_, ?_, ?_, ?_, fun z hz0 hz1 hza => ?_⟩
+  · refine p1h_atMostRegular_two
+      (g₀ := fun z => z * (α * β * z - q) / ((z - 1) * (z - a)))
+      (g₁ := fun z => γ + z * δ / (z - 1) + z * ε / (z - a))
+      (by fun_prop (disch := assumption))
+      (by fun_prop (disch := assumption))
+      (fun z hz => ?_) (fun z hz => ?_)
+    · rw [sub_zero]; unfold heunCoeffR
+      rcases eq_or_ne z 1 with h1 | h1
+      · simp [h1]
+      rcases eq_or_ne z a with h2 | h2
+      · simp [h2]
+      have : z - 1 ≠ 0 := sub_ne_zero.2 h1
+      have : z - a ≠ 0 := sub_ne_zero.2 h2
+      field_simp
+    · rw [sub_zero]; unfold heunCoeffP
+      rcases eq_or_ne z 1 with h1 | h1
+      · simp [h1]
+      rcases eq_or_ne z a with h2 | h2
+      · simp [h2]; field_simp
+      have : z - 1 ≠ 0 := sub_ne_zero.2 h1
+      have : z - a ≠ 0 := sub_ne_zero.2 h2
+      field_simp
+  · refine p1h_atMostRegular_two
+      (g₀ := fun z => (z - 1) * (α * β * z - q) / (z * (z - a)))
+      (g₁ := fun z => (z - 1) * γ / z + δ + (z - 1) * ε / (z - a))
+      (by fun_prop (disch := assumption))
+      (by fun_prop (disch := assumption))
+      (fun z hz => ?_) (fun z hz => ?_)
+    · have : z - 1 ≠ 0 := sub_ne_zero.2 hz
+      unfold heunCoeffR
+      rcases eq_or_ne z 0 with h1 | h1
+      · simp [h1]
+      rcases eq_or_ne z a with h2 | h2
+      · simp [h2]
+      have : z - a ≠ 0 := sub_ne_zero.2 h2
+      field_simp
+    · have : z - 1 ≠ 0 := sub_ne_zero.2 hz
+      unfold heunCoeffP
+      rcases eq_or_ne z 0 with h1 | h1
+      · simp [h1]; field_simp; ring
+      rcases eq_or_ne z a with h2 | h2
+      · simp [h2]; field_simp
+      have : z - a ≠ 0 := sub_ne_zero.2 h2
+      field_simp
+  · refine p1h_atMostRegular_two
+      (g₀ := fun z => (z - a) * (α * β * z - q) / (z * (z - 1)))
+      (g₁ := fun z => (z - a) * γ / z + (z - a) * δ / (z - 1) + ε)
+      (by fun_prop (disch := assumption))
+      (by fun_prop (disch := assumption))
+      (fun z hz => ?_) (fun z hz => ?_)
+    · have : z - a ≠ 0 := sub_ne_zero.2 hz
+      unfold heunCoeffR
+      rcases eq_or_ne z 0 with h1 | h1
+      · simp [h1]
+      rcases eq_or_ne z 1 with h2 | h2
+      · simp [h2]
+      have : z - 1 ≠ 0 := sub_ne_zero.2 h2
+      field_simp
+    · have : z - a ≠ 0 := sub_ne_zero.2 hz
+      unfold heunCoeffP
+      rcases eq_or_ne z 0 with h1 | h1
+      · simp [h1]; field_simp; ring
+      rcases eq_or_ne z 1 with h2 | h2
+      · simp [h2]; field_simp
+      have : z - 1 ≠ 0 := sub_ne_zero.2 h2
+      field_simp
+  · have hev : ∀ᶠ u in 𝓝[≠] (0 : ℂ), u ≠ 0 ∧ u ≠ 1 ∧ u ≠ a⁻¹ := by
+      filter_upwards [self_mem_nhdsWithin,
+        nhdsWithin_le_nhds (isOpen_ne.mem_nhds (zero_ne_one (α := ℂ))),
+        nhdsWithin_le_nhds (isOpen_ne.mem_nhds (inv_ne_zero ha0).symm)] with u h0 h1 h2
+      exact ⟨h0, h1, h2⟩
+    intro j
+    fin_cases j
+    · refine ⟨fun u => (α * β - q * u) / ((1 - u) * (1 - a * u)),
+        by fun_prop (disch := norm_num), ?_⟩
+      filter_upwards [hev] with u ⟨hu0, hu1, hua⟩
+      obtain ⟨r0, -, r2⟩ := p1h_recipRaw_two (heunCoeffR a q α β) (heunCoeffP a γ δ ε) hu0
+      have e1 : 1 - u ≠ 0 := sub_ne_zero.2 (Ne.symm hu1)
+      have e2 : 1 - a * u ≠ 0 := fun h =>
+        hua (eq_inv_of_mul_eq_one_left (by linear_combination -h))
+      have e3 : u⁻¹ - 1 ≠ 0 := by
+        rw [show u⁻¹ - 1 = (1 - u) / u by field_simp]; exact div_ne_zero e1 hu0
+      have e4 : u⁻¹ - a ≠ 0 := by
+        rw [show u⁻¹ - a = (1 - a * u) / u by field_simp]; exact div_ne_zero e2 hu0
+      simp only [Complex.linearODEReciprocalCoeff, heunODECoeff, Nat.sub_zero] at r0 r2 ⊢
+      rw [r0, r2]
+      unfold heunCoeffR
+      simp only [sub_zero]
+      field_simp
+    · refine ⟨fun u => 2 - (γ + δ / (1 - u) + ε / (1 - a * u)),
+        by fun_prop (disch := norm_num), ?_⟩
+      filter_upwards [hev] with u ⟨hu0, hu1, hua⟩
+      obtain ⟨-, r1, r2⟩ := p1h_recipRaw_two (heunCoeffR a q α β) (heunCoeffP a γ δ ε) hu0
+      have e1 : 1 - u ≠ 0 := sub_ne_zero.2 (Ne.symm hu1)
+      have e2 : 1 - a * u ≠ 0 := fun h =>
+        hua (eq_inv_of_mul_eq_one_left (by linear_combination -h))
+      have e3 : u⁻¹ - 1 ≠ 0 := by
+        rw [show u⁻¹ - 1 = (1 - u) / u by field_simp]; exact div_ne_zero e1 hu0
+      have e4 : u⁻¹ - a ≠ 0 := by
+        rw [show u⁻¹ - a = (1 - a * u) / u by field_simp]; exact div_ne_zero e2 hu0
+      simp only [Complex.linearODEReciprocalCoeff, heunODECoeff] at r1 r2 ⊢
+      rw [r1, r2]
+      unfold heunCoeffP
+      simp only [sub_zero]
+      field_simp
+      ring
+  · have h1 : z - 1 ≠ 0 := sub_ne_zero.2 hz1
+    have h2 : z - a ≠ 0 := sub_ne_zero.2 hza
+    exact p1h_ordinary_two (by unfold heunCoeffR; fun_prop (disch := simp [hz0, h1, h2]))
+      (by unfold heunCoeffP; fun_prop (disch := simp [hz0, h1, h2]))
 
 /-- DLMF §31.2(i): the exponents at `z = 0` are `0` and `1 - γ`. The indicial data
 `p₀ = lim z·p(z) = γ` and `q₀ = lim z²·r(z) = 0` give the indicial equation
@@ -93,21 +341,86 @@ theorem heun_singularities (ha0 : a ≠ 0) (ha1 : a ≠ 1) :
 theorem heun_exponents_zero (ha0 : a ≠ 0) :
     Tendsto (fun z => z * heunCoeffP a γ δ ε z) (𝓝[≠] 0) (𝓝 γ) ∧
     Tendsto (fun z => z ^ 2 * heunCoeffR a q α β z) (𝓝[≠] 0) (𝓝 0) := by
-  sorry
+  have h1 : (0 : ℂ) - 1 ≠ 0 := by norm_num
+  have ha : (0 : ℂ) - a ≠ 0 := by simpa using ha0
+  constructor
+  · have h : Tendsto (fun z => γ + z * δ / (z - 1) + z * ε / (z - a)) (𝓝 0)
+        (𝓝 (γ + 0 * δ / (0 - 1) + 0 * ε / (0 - a))) := by
+      apply ContinuousAt.tendsto
+      fun_prop (disch := assumption)
+    simp only [zero_mul, zero_div, add_zero] at h
+    refine (h.mono_left nhdsWithin_le_nhds).congr' ?_
+    filter_upwards [self_mem_nhdsWithin] with z hz
+    simp only [heunCoeffP]
+    rw [mul_add, mul_add, mul_div_cancel₀ _ hz, mul_div_assoc, mul_div_assoc]
+  · have h : Tendsto (fun z => z * (α * β * z - q) / ((z - 1) * (z - a))) (𝓝 0)
+        (𝓝 (0 * (α * β * 0 - q) / ((0 - 1) * (0 - a)))) := by
+      apply ContinuousAt.tendsto
+      fun_prop (disch := exact mul_ne_zero h1 ha)
+    simp only [zero_mul, zero_div] at h
+    refine (h.mono_left nhdsWithin_le_nhds).congr' ?_
+    filter_upwards [self_mem_nhdsWithin] with z hz
+    have hz' : z ≠ 0 := hz
+    simp only [heunCoeffR]
+    rw [mul_div_assoc', show z ^ 2 * (α * β * z - q) = z * (z * (α * β * z - q)) by ring,
+      mul_assoc z, mul_div_mul_left _ _ hz']
 
 /-- DLMF §31.2(i): the exponents at `z = 1` are `0` and `1 - δ`. -/
 @[dlmf 31.2.i]
 theorem heun_exponents_one (ha1 : a ≠ 1) :
     Tendsto (fun z => (z - 1) * heunCoeffP a γ δ ε z) (𝓝[≠] 1) (𝓝 δ) ∧
     Tendsto (fun z => (z - 1) ^ 2 * heunCoeffR a q α β z) (𝓝[≠] 1) (𝓝 0) := by
-  sorry
+  have h0 : (1 : ℂ) ≠ 0 := one_ne_zero
+  have ha : (1 : ℂ) - a ≠ 0 := sub_ne_zero.2 (Ne.symm ha1)
+  constructor
+  · have h : Tendsto (fun z => (z - 1) * γ / z + δ + (z - 1) * ε / (z - a)) (𝓝 1)
+        (𝓝 ((1 - 1) * γ / 1 + δ + (1 - 1) * ε / (1 - a))) := by
+      apply ContinuousAt.tendsto
+      fun_prop (disch := assumption)
+    simp only [sub_self, zero_mul, zero_div, add_zero, zero_add] at h
+    refine (h.mono_left nhdsWithin_le_nhds).congr' ?_
+    filter_upwards [self_mem_nhdsWithin] with z hz
+    have hz' : z - 1 ≠ 0 := sub_ne_zero.2 hz
+    simp only [heunCoeffP]
+    rw [mul_add, mul_add, mul_div_cancel₀ _ hz', mul_div_assoc, mul_div_assoc]
+  · have h : Tendsto (fun z => (z - 1) * (α * β * z - q) / (z * (z - a))) (𝓝 1)
+        (𝓝 ((1 - 1) * (α * β * 1 - q) / (1 * (1 - a)))) := by
+      apply ContinuousAt.tendsto
+      fun_prop (disch := exact mul_ne_zero h0 ha)
+    simp only [sub_self, zero_mul, zero_div] at h
+    refine (h.mono_left nhdsWithin_le_nhds).congr' ?_
+    filter_upwards [self_mem_nhdsWithin] with z hz
+    have hz' : z - 1 ≠ 0 := sub_ne_zero.2 hz
+    simp only [heunCoeffR]
+    field_simp
 
 /-- DLMF §31.2(i): the exponents at `z = a` are `0` and `1 - ε`. -/
 @[dlmf 31.2.i]
 theorem heun_exponents_a (ha0 : a ≠ 0) (ha1 : a ≠ 1) :
     Tendsto (fun z => (z - a) * heunCoeffP a γ δ ε z) (𝓝[≠] a) (𝓝 ε) ∧
     Tendsto (fun z => (z - a) ^ 2 * heunCoeffR a q α β z) (𝓝[≠] a) (𝓝 0) := by
-  sorry
+  have h1 : a - 1 ≠ 0 := sub_ne_zero.2 ha1
+  constructor
+  · have h : Tendsto (fun z => (z - a) * γ / z + (z - a) * δ / (z - 1) + ε) (𝓝 a)
+        (𝓝 ((a - a) * γ / a + (a - a) * δ / (a - 1) + ε)) := by
+      apply ContinuousAt.tendsto
+      fun_prop (disch := assumption)
+    simp only [sub_self, zero_mul, zero_div, add_zero, zero_add] at h
+    refine (h.mono_left nhdsWithin_le_nhds).congr' ?_
+    filter_upwards [self_mem_nhdsWithin] with z hz
+    have hz' : z - a ≠ 0 := sub_ne_zero.2 hz
+    simp only [heunCoeffP]
+    rw [mul_add, mul_add, mul_div_cancel₀ _ hz', mul_div_assoc, mul_div_assoc]
+  · have h : Tendsto (fun z => (z - a) * (α * β * z - q) / (z * (z - 1))) (𝓝 a)
+        (𝓝 ((a - a) * (α * β * a - q) / (a * (a - 1)))) := by
+      apply ContinuousAt.tendsto
+      fun_prop (disch := exact mul_ne_zero ha0 h1)
+    simp only [sub_self, zero_mul, zero_div] at h
+    refine (h.mono_left nhdsWithin_le_nhds).congr' ?_
+    filter_upwards [self_mem_nhdsWithin] with z hz
+    have hz' : z - a ≠ 0 := sub_ne_zero.2 hz
+    simp only [heunCoeffR]
+    field_simp
 
 /-- DLMF §31.2(i): the exponents at `∞` are `α` and `β`. For `w ∼ z^{-ρ}` the indicial
 equation is `ρ(ρ + 1) - (γ + δ + ε)ρ + αβ = 0`, which under Fuchs's relation
@@ -116,7 +429,34 @@ equation is `ρ(ρ + 1) - (γ + δ + ε)ρ + αβ = 0`, which under Fuchs's rela
 theorem heun_exponents_infinity :
     Tendsto (fun z => z * heunCoeffP a γ δ ε z) (Bornology.cobounded ℂ) (𝓝 (γ + δ + ε)) ∧
     Tendsto (fun z => z ^ 2 * heunCoeffR a q α β z) (Bornology.cobounded ℂ) (𝓝 (α * β)) := by
-  sorry
+  have hev : ∀ᶠ z in Bornology.cobounded ℂ, z ≠ 0 ∧ z ≠ 1 ∧ z ≠ a :=
+    (Bornology.eventually_ne_cobounded 0).and
+      ((Bornology.eventually_ne_cobounded 1).and (Bornology.eventually_ne_cobounded a))
+  have h10 : (1 : ℂ) - 0 ≠ 0 := by norm_num
+  have ha0 : (1 : ℂ) - a * 0 ≠ 0 := by norm_num
+  constructor
+  · have h : Tendsto (fun u => γ + δ / (1 - u) + ε / (1 - a * u)) (𝓝 0)
+        (𝓝 (γ + δ / (1 - 0) + ε / (1 - a * 0))) := by
+      apply ContinuousAt.tendsto
+      fun_prop (disch := assumption)
+    simp only [sub_zero, mul_zero, div_one] at h
+    refine (h.comp tendsto_inv₀_cobounded).congr' ?_
+    filter_upwards [hev] with z ⟨hz0, hz1, hza⟩
+    have hz1' : z - 1 ≠ 0 := sub_ne_zero.2 hz1
+    have hza' : z - a ≠ 0 := sub_ne_zero.2 hza
+    simp only [Function.comp_apply, heunCoeffP]
+    field_simp
+  · have h : Tendsto (fun u => (α * β - q * u) / ((1 - u) * (1 - a * u))) (𝓝 0)
+        (𝓝 ((α * β - q * 0) / ((1 - 0) * (1 - a * 0)))) := by
+      apply ContinuousAt.tendsto
+      fun_prop (disch := exact mul_ne_zero h10 ha0)
+    simp only [sub_zero, mul_zero, mul_one, div_one] at h
+    refine (h.comp tendsto_inv₀_cobounded).congr' ?_
+    filter_upwards [hev] with z ⟨hz0, hz1, hza⟩
+    have hz1' : z - 1 ≠ 0 := sub_ne_zero.2 hz1
+    have hza' : z - a ≠ 0 := sub_ne_zero.2 hza
+    simp only [Function.comp_apply, heunCoeffR]
+    field_simp
 
 /-- DLMF §31.2(i): with Fuchs's relation the indicial polynomial at infinity factors as
 `(ρ - α)(ρ - β)`. -/
@@ -147,7 +487,65 @@ theorem heun_normalForm (ha0 : a ≠ 0) (ha1 : a ≠ 1) (hF : α + β + 1 = γ +
     (hwW : ∀ z ∈ U, w z = z ^ (-γ / 2) * (z - 1) ^ (-δ / 2) * (z - a) ^ (-ε / 2) * W z) :
     IsHeunSolOn a q α β γ δ ε w U ↔
       IsLinearODE2On 0 (fun z => -heunNormalCoeff a q α β γ δ ε z) W U := by
-  sorry
+  have hε : ε = α + β + 1 - γ - δ := by linear_combination -hF
+  have ha1' : a - 1 ≠ 0 := sub_ne_zero.2 ha1
+  set g : ℂ → ℂ := fun z => z ^ (-γ / 2) * (z - 1) ^ (-δ / 2) * (z - a) ^ (-ε / 2) with hg
+  set L : ℂ → ℂ := fun z => -γ / 2 / z + -δ / 2 / (z - 1) + -ε / 2 / (z - a) with hL
+  set L' : ℂ → ℂ := fun z => -(-γ / 2) / z ^ 2 + -(-δ / 2) / (z - 1) ^ 2 +
+    -(-ε / 2) / (z - a) ^ 2 with hL'
+  have hne : ∀ z ∈ U, z ≠ 0 ∧ z - 1 ≠ 0 ∧ z - a ≠ 0 := fun z hz =>
+    ⟨slitPlane_ne_zero (hUs z hz).1, slitPlane_ne_zero (hUs z hz).2.1,
+      slitPlane_ne_zero (hUs z hz).2.2⟩
+  have hg0 : ∀ z ∈ U, g z ≠ 0 := fun z hz => by
+    obtain ⟨h0, h1, ha⟩ := hne z hz
+    simp only [hg]
+    exact mul_ne_zero (mul_ne_zero (by simp [cpow_eq_zero_iff, h0])
+      (by simp [cpow_eq_zero_iff, h1])) (by simp [cpow_eq_zero_iff, ha])
+  have hgd : ∀ z ∈ U, HasDerivAt g (L z * g z) z := fun z hz => by
+    obtain ⟨h0, h1, ha⟩ := hne z hz
+    have d1 := p1h_hasDerivAt_cpow (s := -γ / 2) (hasDerivAt_id' z) (hUs z hz).1
+    have d2 := p1h_hasDerivAt_cpow (s := -δ / 2) ((hasDerivAt_id' z).sub_const 1) (hUs z hz).2.1
+    have d3 := p1h_hasDerivAt_cpow (s := -ε / 2) ((hasDerivAt_id' z).sub_const a) (hUs z hz).2.2
+    convert (d1.mul d2).mul d3 using 1
+    simp only [hL, hg, Pi.mul_apply]
+    ring
+  have hLd : ∀ z ∈ U, HasDerivAt L (L' z) z := fun z hz => by
+    obtain ⟨h0, h1, ha⟩ := hne z hz
+    have e1 := p1h_hasDerivAt_const_div_sub (-γ / 2) 0 z (by simpa using h0)
+    have e2 := p1h_hasDerivAt_const_div_sub (-δ / 2) 1 z h1
+    have e3 := p1h_hasDerivAt_const_div_sub (-ε / 2) a z ha
+    simp only [sub_zero] at e1
+    exact (e1.add e2).add e3
+  have key : ∀ z ∈ U, -heunNormalCoeff a q α β γ δ ε z =
+      heunCoeffR a q α β z + heunCoeffP a γ δ ε z * L z + L z ^ 2 + L' z := fun z hz => by
+    obtain ⟨h0, h1, ha⟩ := hne z hz
+    simp only [heunNormalCoeff, heunNormalA, heunNormalB, heunNormalC, heunNormalD,
+      heunCoeffR, heunCoeffP, hL, hL', hε]
+    field_simp
+    ring
+  have hP : ∀ z ∈ U, heunCoeffP a γ δ ε z = 0 + 2 * -L z := fun z hz => by
+    obtain ⟨h0, h1, ha⟩ := hne z hz
+    simp only [heunCoeffP, hL]
+    ring
+  constructor
+  · intro hw
+    have hW : EqOn (fun z => (g z)⁻¹ * w z) W U := fun z hz => by
+      simp only
+      rw [hwW z hz, ← mul_assoc, inv_mul_cancel₀ (hg0 z hz), one_mul]
+    refine p1h_isLinearODE2On_congr hU hW ?_
+    refine p1h_isLinearODE2On_mul (L := fun z => -L z) (L' := fun z => -L' z) hU
+      (fun z hz => ?_) (fun z hz => (hLd z hz).neg) (fun z hz => hP z hz) (fun z hz => ?_) hw
+    · convert (hgd z hz).inv (hg0 z hz) using 1
+      field_simp [hg0 z hz]
+    · rw [Pi.zero_apply, key z hz, hP z hz]
+      ring
+  · intro hW
+    have hw : EqOn (fun z => g z * W z) w U := fun z hz => (hwW z hz).symm
+    refine p1h_isLinearODE2On_congr hU hw ?_
+    refine p1h_isLinearODE2On_mul (L := L) (L' := L') hU hgd hLd (fun z hz => ?_)
+      (fun z hz => ?_) hW
+    · simp only [Pi.zero_apply, hP z hz]; ring
+    · rw [key z hz]
 
 /-! ### Trigonometric form (§31.2(iii)) -/
 
@@ -165,7 +563,29 @@ theorem heun_trigonometricForm (hF : α + β + 1 = γ + δ + ε) {U V : Set ℂ}
         ε * Complex.sin (2 * θ) / (a - Complex.sin θ ^ 2))
       (fun θ => 4 * (α * β * Complex.sin θ ^ 2 - q) / (a - Complex.sin θ ^ 2))
       (fun θ => W (Complex.sin θ ^ 2)) V := by
-  sorry
+  refine p1h_isLinearODE2On_comp (φ₁ := fun θ => 2 * Complex.sin θ * Complex.cos θ)
+    (φ₂ := fun θ => 2 * (Complex.cos θ ^ 2 - Complex.sin θ ^ 2)) hV (fun θ _ => ?_)
+    (fun θ _ => ?_) (fun θ hθ => (hVU θ hθ).1) (fun θ hθ => ?_) (fun θ hθ => ?_) hW
+  · convert (Complex.hasDerivAt_sin θ).pow 2 using 1
+    simp
+  · convert ((Complex.hasDerivAt_sin θ).mul (Complex.hasDerivAt_cos θ)).const_mul 2 using 1
+    · ext; simp only [Pi.mul_apply]; ring
+    · ring
+  · obtain ⟨-, hs, hc, ha⟩ := hVU θ hθ
+    have e1 : Complex.sin θ ^ 2 - 1 = -Complex.cos θ ^ 2 := by
+      linear_combination Complex.sin_sq_add_cos_sq θ
+    have e2 : Complex.sin θ ^ 2 - a = -(a - Complex.sin θ ^ 2) := by ring
+    simp only [heunCoeffP, e1, e2, Complex.cot_eq_cos_div_sin, Complex.tan_eq_sin_div_cos,
+      Complex.sin_two_mul]
+    field_simp
+    ring
+  · obtain ⟨-, hs, hc, ha⟩ := hVU θ hθ
+    have e1 : Complex.sin θ ^ 2 - 1 = -Complex.cos θ ^ 2 := by
+      linear_combination Complex.sin_sq_add_cos_sq θ
+    have e2 : Complex.sin θ ^ 2 - a = -(a - Complex.sin θ ^ 2) := by ring
+    simp only [heunCoeffR, e1, e2]
+    field_simp
+    ring
 
 /-! ### Automorphisms (§31.2(v)) -/
 
@@ -177,7 +597,27 @@ theorem heun_fHomotopic_zero (hF : α + β + 1 = γ + δ + ε) {U : Set ℂ} (hU
     (hUs : ∀ z ∈ U, z ∈ slitPlane ∧ z ≠ 1 ∧ z ≠ a) {w₁ : ℂ → ℂ}
     (hw₁ : IsHeunSolOn a (q + (a * δ + ε) * (1 - γ)) (α + 1 - γ) (β + 1 - γ) (2 - γ) δ ε w₁ U) :
     IsHeunSolOn a q α β γ δ ε (fun z => z ^ (1 - γ) * w₁ z) U := by
-  sorry
+  have hε : ε = α + β + 1 - γ - δ := by linear_combination -hF
+  subst hε
+  refine p1h_isLinearODE2On_mul (L := fun z => (1 - γ) / z) (L' := fun z => -(1 - γ) / z ^ 2)
+    hU (fun z hz => ?_) (fun z hz => ?_) (fun z hz => ?_) (fun z hz => ?_) hw₁
+  · simpa using p1h_hasDerivAt_cpow (s := 1 - γ) (hasDerivAt_id z) (hUs z hz).1
+  · have h0 : z ≠ 0 := slitPlane_ne_zero (hUs z hz).1
+    convert ((hasDerivAt_id z).inv h0).const_mul (1 - γ) using 1
+    · ext; simp [div_eq_mul_inv]
+    · simp; ring
+  · have h0 : z ≠ 0 := slitPlane_ne_zero (hUs z hz).1
+    have h1 : z - 1 ≠ 0 := sub_ne_zero.2 (hUs z hz).2.1
+    have ha : z - a ≠ 0 := sub_ne_zero.2 (hUs z hz).2.2
+    simp only [heunCoeffP]
+    field_simp
+    ring
+  · have h0 : z ≠ 0 := slitPlane_ne_zero (hUs z hz).1
+    have h1 : z - 1 ≠ 0 := sub_ne_zero.2 (hUs z hz).2.1
+    have ha : z - a ≠ 0 := sub_ne_zero.2 (hUs z hz).2.2
+    simp only [heunCoeffP, heunCoeffR]
+    field_simp
+    ring
 
 /-- DLMF §31.2(v), second `F`-homotopic transformation: `(z-1)^{1-δ} w₂(z)` with
 `q₂ = q + aγ(1 - δ)`, `α₂ = α + 1 - δ`, `β₂ = β + 1 - δ`, `δ₂ = 2 - δ`. -/
@@ -186,7 +626,25 @@ theorem heun_fHomotopic_one (hF : α + β + 1 = γ + δ + ε) {U : Set ℂ} (hU 
     (hUs : ∀ z ∈ U, z - 1 ∈ slitPlane ∧ z ≠ 0 ∧ z ≠ a) {w₂ : ℂ → ℂ}
     (hw₂ : IsHeunSolOn a (q + a * γ * (1 - δ)) (α + 1 - δ) (β + 1 - δ) γ (2 - δ) ε w₂ U) :
     IsHeunSolOn a q α β γ δ ε (fun z => (z - 1) ^ (1 - δ) * w₂ z) U := by
-  sorry
+  have hε : ε = α + β + 1 - γ - δ := by linear_combination -hF
+  subst hε
+  refine p1h_isLinearODE2On_mul (L := fun z => (1 - δ) / (z - 1))
+    (L' := fun z => -(1 - δ) / (z - 1) ^ 2)
+    hU (fun z hz => ?_) (fun z hz => ?_) (fun z hz => ?_) (fun z hz => ?_) hw₂
+  · simpa using p1h_hasDerivAt_cpow (s := 1 - δ) ((hasDerivAt_id z).sub_const 1) (hUs z hz).1
+  · exact p1h_hasDerivAt_const_div_sub _ _ _ (slitPlane_ne_zero (hUs z hz).1)
+  · have h0 : z ≠ 0 := (hUs z hz).2.1
+    have h1 : z - 1 ≠ 0 := slitPlane_ne_zero (hUs z hz).1
+    have ha : z - a ≠ 0 := sub_ne_zero.2 (hUs z hz).2.2
+    simp only [heunCoeffP]
+    field_simp
+    ring
+  · have h0 : z ≠ 0 := (hUs z hz).2.1
+    have h1 : z - 1 ≠ 0 := slitPlane_ne_zero (hUs z hz).1
+    have ha : z - a ≠ 0 := sub_ne_zero.2 (hUs z hz).2.2
+    simp only [heunCoeffP, heunCoeffR]
+    field_simp
+    ring
 
 /-- DLMF §31.2(v), third `F`-homotopic transformation: `(z-a)^{1-ε} w₃(z)` with
 `q₃ = q + γ(1 - ε)`, `α₃ = α + 1 - ε`, `β₃ = β + 1 - ε`, `ε₃ = 2 - ε`. -/
@@ -195,7 +653,26 @@ theorem heun_fHomotopic_a (hF : α + β + 1 = γ + δ + ε) {U : Set ℂ} (hU : 
     (hUs : ∀ z ∈ U, z - a ∈ slitPlane ∧ z ≠ 0 ∧ z ≠ 1) {w₃ : ℂ → ℂ}
     (hw₃ : IsHeunSolOn a (q + γ * (1 - ε)) (α + 1 - ε) (β + 1 - ε) γ δ (2 - ε) w₃ U) :
     IsHeunSolOn a q α β γ δ ε (fun z => (z - a) ^ (1 - ε) * w₃ z) U := by
-  sorry
+  have hε : ε = α + β + 1 - γ - δ := by linear_combination -hF
+  subst hε
+  refine p1h_isLinearODE2On_mul (L := fun z => (1 - (α + β + 1 - γ - δ)) / (z - a))
+    (L' := fun z => -(1 - (α + β + 1 - γ - δ)) / (z - a) ^ 2)
+    hU (fun z hz => ?_) (fun z hz => ?_) (fun z hz => ?_) (fun z hz => ?_) hw₃
+  · simpa using p1h_hasDerivAt_cpow (s := 1 - (α + β + 1 - γ - δ))
+      ((hasDerivAt_id z).sub_const a) (hUs z hz).1
+  · exact p1h_hasDerivAt_const_div_sub _ _ _ (slitPlane_ne_zero (hUs z hz).1)
+  · have h0 : z ≠ 0 := (hUs z hz).2.1
+    have h1 : z - 1 ≠ 0 := sub_ne_zero.2 (hUs z hz).2.2
+    have ha : z - a ≠ 0 := slitPlane_ne_zero (hUs z hz).1
+    simp only [heunCoeffP]
+    field_simp
+    ring
+  · have h0 : z ≠ 0 := (hUs z hz).2.1
+    have h1 : z - 1 ≠ 0 := sub_ne_zero.2 (hUs z hz).2.2
+    have ha : z - a ≠ 0 := slitPlane_ne_zero (hUs z hz).1
+    simp only [heunCoeffP, heunCoeffR]
+    field_simp
+    ring
 
 /-- DLMF §31.2(v), homography `z̃ = z/a` (one of the six fixing `∞`): if `w̃` solves Heun's
 equation with `ã = 1/a`, `q̃ = q/a`, `δ̃ = ε`, `ε̃ = δ`, then `w̃(z/a)` solves the original. -/
@@ -205,7 +682,24 @@ theorem heun_homography_div (ha0 : a ≠ 0) (hF : α + β + 1 = γ + δ + ε) {U
     (hw : IsHeunSolOn (1 / a) (q / a) α β γ ε δ w V) (hUV : ∀ z ∈ U, z / a ∈ V)
     (hV : IsOpen V) :
     IsHeunSolOn a q α β γ δ ε (fun z => w (z / a)) U := by
-  sorry
+  refine p1h_isLinearODE2On_comp (φ₁ := fun _ => 1 / a) (φ₂ := fun _ => 0) hU
+    (fun z hz => ?_) (fun z hz => hasDerivAt_const _ _) hUV (fun z hz => ?_) (fun z hz => ?_) hw
+  · simpa [div_eq_mul_inv, mul_comm] using (hasDerivAt_id z).mul_const a⁻¹
+  · obtain ⟨h0, h1, ha⟩ := hUs z hz
+    have h1' : z - 1 ≠ 0 := sub_ne_zero.2 h1
+    have ha' : z - a ≠ 0 := sub_ne_zero.2 ha
+    have e1 : z / a - 1 = (z - a) / a := by field_simp
+    have e2 : z / a - 1 / a = (z - 1) / a := by field_simp
+    simp only [heunCoeffP, e1, e2]
+    field_simp
+    ring
+  · obtain ⟨h0, h1, ha⟩ := hUs z hz
+    have h1' : z - 1 ≠ 0 := sub_ne_zero.2 h1
+    have ha' : z - a ≠ 0 := sub_ne_zero.2 ha
+    have e1 : z / a - 1 = (z - a) / a := by field_simp
+    have e2 : z / a - 1 / a = (z - 1) / a := by field_simp
+    simp only [heunCoeffR, e1, e2]
+    field_simp
 
 /-- DLMF §31.2(v), homography `z̃ = z/(z-1)` (one of the 18 that move `∞`, with prefactor):
 if `w̃` solves Heun's equation with `ã = a/(a-1)`, `q̃ = -(q - aαγ)/(a-1)`,
@@ -218,6 +712,62 @@ theorem heun_homography_mobius (ha1 : a ≠ 1) (hF : α + β + 1 = γ + δ + ε)
     (hw : IsHeunSolOn (a / (a - 1)) (-(q - a * α * γ) / (a - 1)) α (α + 1 - δ) γ
       (α + 1 - β) ε w V) :
     IsHeunSolOn a q α β γ δ ε (fun z => (1 - z) ^ (-α) * w (z / (z - 1))) U := by
-  sorry
+  have hε : ε = α + β + 1 - γ - δ := by linear_combination -hF
+  subst hε
+  have ha1' : a - 1 ≠ 0 := sub_ne_zero.2 ha1
+  set L : ℂ → ℂ := fun z => α / (1 - z)
+  set L' : ℂ → ℂ := fun z => α / (1 - z) ^ 2
+  refine p1h_isLinearODE2On_mul (L := L) (L' := L')
+    (p₁ := fun z => heunCoeffP a γ δ (α + β + 1 - γ - δ) z + 2 * L z)
+    (r₁ := fun z => heunCoeffR a q α β z + heunCoeffP a γ δ (α + β + 1 - γ - δ) z * L z +
+      L z ^ 2 + L' z)
+    hU (fun z hz => ?_) (fun z hz => ?_) (fun z hz => rfl) (fun z hz => rfl) ?_
+  · have h := p1h_hasDerivAt_cpow (s := -α) ((hasDerivAt_id' z).const_sub (1 : ℂ))
+      (hUs z hz).1
+    convert h using 1
+    simp only [L]
+    ring
+  · have h1 : 1 - z ≠ 0 := slitPlane_ne_zero (hUs z hz).1
+    have := ((hasDerivAt_id' z).const_sub (1 : ℂ)).inv h1 |>.const_mul α
+    convert this using 1
+    · ext y; simp [L, div_eq_mul_inv]
+    · simp [L']; field_simp
+  refine p1h_isLinearODE2On_comp (φ₁ := fun z => -1 / (z - 1) ^ 2)
+    (φ₂ := fun z => 2 / (z - 1) ^ 3) hU (fun z hz => ?_) (fun z hz => ?_)
+    (fun z hz => (hUs z hz).2.2.2) (fun z hz => ?_) (fun z hz => ?_) hw
+  · have h1 : z - 1 ≠ 0 := by
+      have := slitPlane_ne_zero (hUs z hz).1; intro h; apply this; linear_combination -h
+    have := (hasDerivAt_id' z).fun_div ((hasDerivAt_id' z).sub_const 1) h1
+    convert this using 1
+    field_simp; ring
+  · have h1 : z - 1 ≠ 0 := by
+      have := slitPlane_ne_zero (hUs z hz).1; intro h; apply this; linear_combination -h
+    have := (((hasDerivAt_id z).sub_const 1).pow 2).inv (pow_ne_zero 2 h1) |>.const_mul (-1 : ℂ)
+    convert this using 1
+    · ext y; simp [div_eq_mul_inv]
+    · simp; field_simp
+  · obtain ⟨h1s, h0, ha, -⟩ := hUs z hz
+    have h1 : z - 1 ≠ 0 := by
+      have := slitPlane_ne_zero h1s; intro h; apply this; linear_combination -h
+    have h1'' : 1 - z ≠ 0 := slitPlane_ne_zero h1s
+    have ha' : z - a ≠ 0 := sub_ne_zero.2 ha
+    have e0 : z / (z - 1) = z / (z - 1) := rfl
+    have e1 : z / (z - 1) - 1 = 1 / (z - 1) := by field_simp; ring
+    have e2 : z / (z - 1) - a / (a - 1) = (a - z) / ((z - 1) * (a - 1)) := by field_simp; ring
+    have ha'' : a - z ≠ 0 := fun h => ha' (by linear_combination -h)
+    simp only [heunCoeffP, L, e1, e2]
+    field_simp
+    ring
+  · obtain ⟨h1s, h0, ha, -⟩ := hUs z hz
+    have h1 : z - 1 ≠ 0 := by
+      have := slitPlane_ne_zero h1s; intro h; apply this; linear_combination -h
+    have h1'' : 1 - z ≠ 0 := slitPlane_ne_zero h1s
+    have ha' : z - a ≠ 0 := sub_ne_zero.2 ha
+    have e1 : z / (z - 1) - 1 = 1 / (z - 1) := by field_simp; ring
+    have e2 : z / (z - 1) - a / (a - 1) = (a - z) / ((z - 1) * (a - 1)) := by field_simp; ring
+    have ha'' : a - z ≠ 0 := fun h => ha' (by linear_combination -h)
+    simp only [heunCoeffP, heunCoeffR, L, L', e1, e2]
+    field_simp
+    ring
 
 end DLMF.Heun

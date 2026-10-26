@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Spheroidal.FerrersDefs
+public import DLMF.Spheroidal.Angular
 public import DLMF.Core.Framework
 public import DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion
 
@@ -89,8 +90,8 @@ theorem spheroidalEigenvalue_isBigO_atTop (m : ℕ) (γ2 : ℝ) :
 /-- **The Legendre case** (DLMF 30.3.3): `λ^m_n(0) = n(n+1)`. -/
 @[dlmf 30.3.E3]
 theorem spheroidalEigenvalue_zero {n m : ℕ} (hmn : m ≤ n) :
-    spheroidalEigenvalue n m 0 = (n : ℝ) * (n + 1) := by
-  sorry
+    spheroidalEigenvalue n m 0 = (n : ℝ) * (n + 1) :=
+  p1s_spheroidalEigenvalue_zero hmn
 
 /-- **Derivative bounds** (DLMF 30.3.4): `-1 < dλ^m_n(γ²)/d(γ²) < 0`. -/
 @[dlmf 30.3.E4]
@@ -156,12 +157,26 @@ theorem spheroidal_eigenvalue_of_cf {m : ℕ} {γ2 : ℝ} (alt : Bool) (p : ℕ)
 /-! ### §30.3(iv) Power-series expansion -/
 
 /-- **The power series in `γ²`** (DLMF 30.3.8): `λ^m_n(γ²) = ∑ ℓ_{2k} γ^{2k}` for
-`|γ²| < r^m_n`, with some radius `r^m_n > 0`. -/
+`|γ²| < r^m_n`, with some radius `r^m_n > 0`. Proved from the analyticity
+(`analyticAt_spheroidalEigenvalue`). -/
 @[dlmf 30.3.E8]
 theorem hasSum_spheroidalEll {n m : ℕ} (hmn : m ≤ n) :
     ∃ r > 0, ∀ t : ℝ, |t| < r →
       HasSum (fun k => spheroidalEll n m k * t ^ k) (spheroidalEigenvalue n m t) := by
-  sorry
+  obtain ⟨r, hr⟩ := (analyticAt_spheroidalEigenvalue hmn 0).hasFPowerSeriesAt
+  obtain ⟨ρ, hρ0, hρr⟩ : ∃ ρ : ℝ, 0 < ρ ∧ ENNReal.ofReal ρ < r := by
+    obtain ⟨ρ, hρ, hρr⟩ := ENNReal.lt_iff_exists_nnreal_btwn.mp hr.r_pos
+    exact ⟨ρ, by exact_mod_cast hρ, by simpa using hρr⟩
+  refine ⟨ρ, hρ0, fun t ht => ?_⟩
+  have hmem : t ∈ Metric.eball (0 : ℝ) r := by
+    rw [Metric.mem_eball, edist_zero_right]
+    refine lt_of_le_of_lt ?_ hρr
+    rw [Real.enorm_eq_ofReal_abs]
+    exact ENNReal.ofReal_le_ofReal ht.le
+  have h := hr.hasSum hmem
+  simp only [zero_add, FormalMultilinearSeries.ofScalars_apply_eq, smul_eq_mul] at h
+  convert h using 2 with k
+  simp only [spheroidalEll]
 
 /-- **`ℓ_0 = n(n+1)`** (DLMF 30.3.9, first equation). Proved from 30.3.3. -/
 @[dlmf 30.3.E9]

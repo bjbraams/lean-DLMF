@@ -13,6 +13,9 @@ public import Mathlib.Data.Set.Card
 public import Mathlib.LinearAlgebra.Matrix.Notation
 public import Mathlib.Tactic
 public import DLMFMathlib.Analysis.ODE.PowerSeriesUniqueness
+public import DLMFMathlib.Analysis.ODE.P1oEntireLinear
+public import DLMFMathlib.Analysis.ODE.P1oParamHolomorphic
+public import DLMFMathlib.Analysis.ODE.P2sSturmSpectrum
 
 /-!
 # Mathieu's equation and the Mathieu functions of integer order (DLMF §28.2)
@@ -23,15 +26,16 @@ This is the definitions file of the Mathieu area (DLMF Chapter 28). It contains
   `w'' + (a - 2q cos 2z) w = 0` (genuine differentiability, complex `z`, `a`, `q`);
 * the basic solutions `mathieuWI a q`, `mathieuWII a q` (`w_I(z; a, q)`, `w_II(z; a, q)`,
   28.2.5), defined by choice from the existence theorem `exists_isMathieuSolution`
-  (admitted: existence of entire solutions of a linear ODE with entire coefficients);
+  (proved: entire solutions of linear ODEs with entire coefficients, majorant series);
   uniqueness is proved (`IsMathieuSolution.eq_of_initial`) from analytic uniqueness;
 * Floquet notions (§28.2(iii)–(iv)): `IsMathieuCharExp a q ν` (`cos πν = w_I(π; a, q)`,
   28.2.16), `IsFloquetSolution a q ν w` (28.2.14) and the monodromy matrix
   `mathieuMonodromy a q` (28.2.15);
 * the eigenvalues `mathieuA n q = a_n(q)` and `mathieuB n q = b_n(q)` for real `q`
   (Table 28.2.1, 28.2.21–28.2.22), the `⌊n/2⌋`-th smallest real root of the boundary condition
-  of Table 28.2.1 (`nthLeast`); the admitted theorems `mathieuSpecA_exists`,
-  `mathieuSpecB_exists` assert that these roots exist (Sturm–Liouville theory);
+  of Table 28.2.1 (`nthLeast`); the theorems `mathieuSpecA_exists`, `mathieuSpecB_exists`
+  (proved by Sturm–Liouville arguments, `DLMFMathlib/Analysis/ODE/P2sSturmSpectrum.lean`)
+  assert that these roots exist;
 * the eigenfunctions `mathieuCe n z q = ce_n(z, q)` and `mathieuSe n z q = se_n(z, q)`
   (Table 28.2.2), normalized by 28.2.30, with the sign `ce_n(0, q) > 0`, `se_n'(0, q) > 0`;
 * the second solutions `mathieuFe n z q = fe_n(z, q)`, `mathieuGe n z q = ge_n(z, q)` with the
@@ -131,13 +135,16 @@ theorem eq_of_initial (h : IsMathieuSolution a q w) (h' : IsMathieuSolution a q 
 end IsMathieuSolution
 
 /-- **Existence of solutions** (DLMF §28.2(ii)): Mathieu's equation has an entire solution with
-arbitrary initial value and derivative at any point `z₀`. Flagged existence theorem
-(admitted): existence of entire solutions of a linear second-order ODE with entire
-coefficients (Picard iteration or majorant series). -/
+arbitrary initial value and derivative at any point `z₀`. Proved from the existence of entire
+solutions of linear second-order ODEs with entire coefficients
+(`ODE.exists_entire_solution_linear_ode'`, majorant series). -/
 @[dlmf 28.2.ii]
 theorem exists_isMathieuSolution (a q z₀ w₀ w₁ : ℂ) :
     ∃ w, IsMathieuSolution a q w ∧ w z₀ = w₀ ∧ deriv w z₀ = w₁ := by
-  sorry
+  obtain ⟨w, hw, hode, h0, h1⟩ := ODE.exists_entire_solution_linear_ode' (p := fun _ => 0)
+    (q := fun z => 2 * q * Complex.cos (2 * z) - a) (differentiable_const _) (by fun_prop)
+    z₀ w₀ w₁
+  exact ⟨w, ⟨hw, fun z => by simpa using hode z⟩, h0, h1⟩
 
 /-! ### Basic solutions -/
 
@@ -286,20 +293,186 @@ def mathieuA (n : ℕ) (q : ℝ) : ℝ :=
 def mathieuB (n : ℕ) (q : ℝ) : ℝ :=
   if n = 0 then 0 else nthLeast (mathieuSpecB n q) ((n - 1) / 2)
 
+/-! #### Existence of the eigenvalues
+
+For real `a`, `q` the basic solutions are real on `ℝ`, their values and derivatives at `π/2` are
+entire functions of `a` (holomorphic parameter dependence), they do not vanish for
+`a < -(2|q| + 1)`, and they change sign for arbitrarily large `a` (energy estimate against
+`cos √a x`, `sin √a x / √a`); see `DLMFMathlib/Analysis/ODE/P2sSturmSpectrum.lean`. -/
+
+/-- A solution of Mathieu's equation, restricted to the real line, with its derivative. -/
+theorem p2s_hasDerivAt_real {a q : ℂ} {w : ℂ → ℂ} (h : IsMathieuSolution a q w) (t : ℝ) :
+    HasDerivAt (fun t : ℝ => w t) (deriv w t) t ∧
+      HasDerivAt (fun t : ℝ => deriv w t) ((2 * q * Complex.cos (2 * t) - a) * w t) t :=
+  ⟨((h.differentiable t).hasDerivAt).comp_ofReal, (h.hasDerivAt_deriv t).comp_ofReal⟩
+
+/-- The real family attached to a family of solutions of Mathieu's equation with real
+parameters and real initial data at `0`: the solutions are real on `ℝ`, their real parts solve
+the real equation, and their values and derivatives are entire in `a`. -/
+theorem p2s_family (q : ℝ) {w : ℂ → ℂ → ℂ} (hw : ∀ a, IsMathieuSolution a q (w a)) {α β : ℝ}
+    (h0 : ∀ a, w a 0 = α) (h1 : ∀ a, deriv (w a) 0 = β) :
+    (∀ a x : ℝ, w a x = ((w a x).re : ℂ) ∧ deriv (w a) x = ((deriv (w a) x).re : ℂ)) ∧
+    (∀ a x : ℝ, HasDerivAt (fun x : ℝ => (w a x).re) (deriv (w a) x).re x) ∧
+    (∀ a x : ℝ, HasDerivAt (fun x : ℝ => (deriv (w a) x).re)
+      ((2 * q * Real.cos (2 * x) - a) * (w a x).re) x) ∧
+    (∀ x : ℝ, Differentiable ℂ (fun a => w a x) ∧ Differentiable ℂ (fun a => deriv (w a) x)) := by
+  have hcoef : ∀ (a x : ℝ), (2 * (q : ℂ) * Complex.cos (2 * (x : ℂ)) - a) =
+      ((2 * q * Real.cos (2 * x) - a : ℝ) : ℂ) := by
+    intro a x; push_cast; rfl
+  refine ⟨fun a x => ?_, fun a x => ?_, fun a x => ?_, fun x => ?_⟩
+  · have hP : Continuous fun t : ℝ => 2 * q * Real.cos (2 * t) - a := by fun_prop
+    have key := ODE.p2s_conj_eq_of_linear_ode hP (f := fun t : ℝ => w a t)
+      (f' := fun t : ℝ => deriv (w a) t) (t₀ := 0) (fun t => by
+        obtain ⟨k1, k2⟩ := p2s_hasDerivAt_real (hw a) t
+        exact ⟨k1, by rw [← hcoef]; exact k2⟩)
+      (by simp [h0]) (by simp [h1]) x
+    exact ⟨(Complex.conj_eq_iff_re.mp key.1).symm, (Complex.conj_eq_iff_re.mp key.2).symm⟩
+  · exact ((hw a).differentiable x).hasDerivAt.real_of_complex
+  · have := ((hw a).hasDerivAt_deriv x).real_of_complex
+    rw [hcoef, Complex.re_ofReal_mul] at this
+    exact this
+  · have := ODE.differentiable_param_of_linear_ode (p₀ := fun _ => 0) (p₁ := fun _ => 0)
+      (q₀ := fun x : ℝ => 2 * (q : ℂ) * Complex.cos (2 * x)) (q₁ := fun _ => -1)
+      continuous_const continuous_const (by fun_prop) continuous_const (t₀ := 0) (y₀ := α)
+      (y₁ := β) (F := fun x μ => w μ x) (F' := fun x μ => deriv (w μ) x)
+      (fun μ t => by
+        obtain ⟨k1, k2⟩ := p2s_hasDerivAt_real (hw μ) t
+        exact ⟨k1, k2.congr_deriv (by ring)⟩)
+      (fun μ => by simpa using h0 μ) (fun μ => by simpa using h1 μ) x
+    exact this
+
+/-- `z = 0 ↔ re z = 0` for a real complex number `z`. -/
+theorem p2s_eq_zero_iff_re {z : ℂ} (hz : z = (z.re : ℂ)) : z = 0 ↔ z.re = 0 := by
+  constructor
+  · intro h; simp [h]
+  · intro h; rw [hz, h, Complex.ofReal_zero]
+
+/-- The bound `|2 q cos 2x| ≤ 2|q| + 1`. -/
+theorem p2s_coef_bound (q : ℝ) :
+    ∀ x ∈ Icc (0 : ℝ) (π / 2), |2 * q * Real.cos (2 * x)| ≤ 2 * |q| + 1 := by
+  intro x _
+  rw [abs_mul, abs_mul, abs_two]
+  have := Real.abs_cos_le_one (2 * x)
+  nlinarith [abs_nonneg q]
+
+/-- From a real family to the enumeration of the zeros of an endpoint function. -/
+theorem p2s_exists_of_endpoint {G : ℂ → ℂ} (hG : Differentiable ℂ G)
+    (hre : ∀ a : ℝ, G a = ((G a).re : ℂ))
+    (hlow : ∃ c, ∀ a : ℝ, a < c → (G a).re ≠ 0)
+    (hs : (∀ N, ∃ a : ℝ, a > N ∧ 0 < (G a).re) ∧ (∀ N, ∃ a : ℝ, a > N ∧ (G a).re < 0))
+    (k : ℕ) : ∃ x ∈ {a : ℝ | G a = 0}, ({a : ℝ | G a = 0} ∩ Iio x).encard = k := by
+  have hset : {a : ℝ | G a = 0} = {a : ℝ | (G a).re = 0} := by
+    ext a; exact p2s_eq_zero_iff_re (hre a)
+  rw [hset]
+  exact ODE.p2s_exists_encard_zeros (g := fun a : ℝ => (G a).re) hG (fun a => (hre a)) hlow
+    hs.1 hs.2 k
+
+/-- The real roots `a` of `w_I(π/2; a, q) = 0` (real `q`) can be enumerated in increasing
+order. -/
+theorem p2s_I_val (q : ℝ) (k : ℕ) : ∃ x ∈ {a : ℝ | mathieuWI a q (π / 2) = 0},
+    ({a : ℝ | mathieuWI a q (π / 2) = 0} ∩ Iio x).encard = k := by
+  obtain ⟨hre, hd, hd', hent⟩ := p2s_family q (w := fun a => mathieuWI a q)
+    (fun a => isMathieuSolution_mathieuWI a q) (α := 1) (β := 0)
+    (fun a => by simp [(mathieuWI_spec a q).2.1]) (fun a => by simp [(mathieuWI_spec a q).2.2])
+  have hpi : ((π / 2 : ℝ) : ℂ) = (π : ℂ) / 2 := by push_cast; ring
+  have hM : (0 : ℝ) < 2 * |q| + 1 := by positivity
+  have h0 : ∀ a : ℝ, (mathieuWI a q ((0 : ℝ) : ℂ)).re = 1 := fun a => by
+    simp [(mathieuWI_spec a q).2.1]
+  have h1 : ∀ a : ℝ, (deriv (mathieuWI a q) ((0 : ℝ) : ℂ)).re = 0 := fun a => by
+    simp [(mathieuWI_spec a q).2.2]
+  rw [← hpi]
+  refine p2s_exists_of_endpoint (G := fun μ => mathieuWI μ q ((π / 2 : ℝ) : ℂ))
+    (hent _).1 (fun a => (hre a _).1) ⟨-(2 * |q| + 1), fun a ha => ?_⟩ ?_ k
+  · exact (ODE.p2s_endpoint_ne_zero (by positivity) (p2s_coef_bound q) ha (hd a) (hd' a)
+      (by rw [h0, h1]; norm_num) (Or.inl (by rw [h0]; norm_num))).1
+  · exact ODE.p2s_signs_I_val (Y := fun a x => (mathieuWI a q x).re) hM (by positivity)
+      (p2s_coef_bound q) hd hd' h0 h1
+
+/-- The real roots `a` of `w_I'(π/2; a, q) = 0` (real `q`) can be enumerated in increasing
+order. -/
+theorem p2s_I_der (q : ℝ) (k : ℕ) : ∃ x ∈ {a : ℝ | deriv (mathieuWI a q) (π / 2) = 0},
+    ({a : ℝ | deriv (mathieuWI a q) (π / 2) = 0} ∩ Iio x).encard = k := by
+  obtain ⟨hre, hd, hd', hent⟩ := p2s_family q (w := fun a => mathieuWI a q)
+    (fun a => isMathieuSolution_mathieuWI a q) (α := 1) (β := 0)
+    (fun a => by simp [(mathieuWI_spec a q).2.1]) (fun a => by simp [(mathieuWI_spec a q).2.2])
+  have hpi : ((π / 2 : ℝ) : ℂ) = (π : ℂ) / 2 := by push_cast; ring
+  have hM : (0 : ℝ) < 2 * |q| + 1 := by positivity
+  have h0 : ∀ a : ℝ, (mathieuWI a q ((0 : ℝ) : ℂ)).re = 1 := fun a => by
+    simp [(mathieuWI_spec a q).2.1]
+  have h1 : ∀ a : ℝ, (deriv (mathieuWI a q) ((0 : ℝ) : ℂ)).re = 0 := fun a => by
+    simp [(mathieuWI_spec a q).2.2]
+  rw [← hpi]
+  refine p2s_exists_of_endpoint (G := fun μ => deriv (mathieuWI μ q) ((π / 2 : ℝ) : ℂ))
+    (hent _).2 (fun a => (hre a _).2) ⟨-(2 * |q| + 1), fun a ha => ?_⟩ ?_ k
+  · exact (ODE.p2s_endpoint_ne_zero (by positivity) (p2s_coef_bound q) ha (hd a) (hd' a)
+      (by rw [h0, h1]; norm_num) (Or.inl (by rw [h0]; norm_num))).2
+  · exact ODE.p2s_signs_I_der (Y := fun a x => (mathieuWI a q x).re) hM (by positivity)
+      (p2s_coef_bound q) hd hd' h0 h1
+
+/-- The real roots `a` of `w_II(π/2; a, q) = 0` (real `q`) can be enumerated in increasing
+order. -/
+theorem p2s_II_val (q : ℝ) (k : ℕ) : ∃ x ∈ {a : ℝ | mathieuWII a q (π / 2) = 0},
+    ({a : ℝ | mathieuWII a q (π / 2) = 0} ∩ Iio x).encard = k := by
+  obtain ⟨hre, hd, hd', hent⟩ := p2s_family q (w := fun a => mathieuWII a q)
+    (fun a => isMathieuSolution_mathieuWII a q) (α := 0) (β := 1)
+    (fun a => by simp [(mathieuWII_spec a q).2.1]) (fun a => by simp [(mathieuWII_spec a q).2.2])
+  have hpi : ((π / 2 : ℝ) : ℂ) = (π : ℂ) / 2 := by push_cast; ring
+  have hM : (0 : ℝ) < 2 * |q| + 1 := by positivity
+  have h0 : ∀ a : ℝ, (mathieuWII a q ((0 : ℝ) : ℂ)).re = 0 := fun a => by
+    simp [(mathieuWII_spec a q).2.1]
+  have h1 : ∀ a : ℝ, (deriv (mathieuWII a q) ((0 : ℝ) : ℂ)).re = 1 := fun a => by
+    simp [(mathieuWII_spec a q).2.2]
+  rw [← hpi]
+  refine p2s_exists_of_endpoint (G := fun μ => mathieuWII μ q ((π / 2 : ℝ) : ℂ))
+    (hent _).1 (fun a => (hre a _).1) ⟨-(2 * |q| + 1), fun a ha => ?_⟩ ?_ k
+  · exact (ODE.p2s_endpoint_ne_zero (by positivity) (p2s_coef_bound q) ha (hd a) (hd' a)
+      (by rw [h0, h1]; norm_num) (Or.inr (by rw [h1]; norm_num))).1
+  · exact ODE.p2s_signs_II_val (Y := fun a x => (mathieuWII a q x).re) hM (by positivity)
+      (p2s_coef_bound q) hd hd' h0 h1
+
+/-- The real roots `a` of `w_II'(π/2; a, q) = 0` (real `q`) can be enumerated in increasing
+order. -/
+theorem p2s_II_der (q : ℝ) (k : ℕ) : ∃ x ∈ {a : ℝ | deriv (mathieuWII a q) (π / 2) = 0},
+    ({a : ℝ | deriv (mathieuWII a q) (π / 2) = 0} ∩ Iio x).encard = k := by
+  obtain ⟨hre, hd, hd', hent⟩ := p2s_family q (w := fun a => mathieuWII a q)
+    (fun a => isMathieuSolution_mathieuWII a q) (α := 0) (β := 1)
+    (fun a => by simp [(mathieuWII_spec a q).2.1]) (fun a => by simp [(mathieuWII_spec a q).2.2])
+  have hpi : ((π / 2 : ℝ) : ℂ) = (π : ℂ) / 2 := by push_cast; ring
+  have hM : (0 : ℝ) < 2 * |q| + 1 := by positivity
+  have h0 : ∀ a : ℝ, (mathieuWII a q ((0 : ℝ) : ℂ)).re = 0 := fun a => by
+    simp [(mathieuWII_spec a q).2.1]
+  have h1 : ∀ a : ℝ, (deriv (mathieuWII a q) ((0 : ℝ) : ℂ)).re = 1 := fun a => by
+    simp [(mathieuWII_spec a q).2.2]
+  rw [← hpi]
+  refine p2s_exists_of_endpoint (G := fun μ => deriv (mathieuWII μ q) ((π / 2 : ℝ) : ℂ))
+    (hent _).2 (fun a => (hre a _).2) ⟨-(2 * |q| + 1), fun a ha => ?_⟩ ?_ k
+  · exact (ODE.p2s_endpoint_ne_zero (by positivity) (p2s_coef_bound q) ha (hd a) (hd' a)
+      (by rw [h0, h1]; norm_num) (Or.inr (by rw [h1]; norm_num))).2
+  · exact ODE.p2s_signs_II_der (Y := fun a x => (mathieuWII a q x).re) hM (by positivity)
+      (p2s_coef_bound q) hd hd' h0 h1
+
 /-- **Existence of the eigenvalues** (DLMF §28.2(v)): for real `q` each spectrum of Table 28.2.1
 is an increasing sequence of reals tending to `+∞`, so its `k`-th smallest element exists.
-Flagged existence theorem (admitted: Sturm–Liouville theory). -/
+Proved from `ODE.p2s_exists_encard_zeros`: the boundary function is the restriction of an
+entire function of `a`, has no zeros for `a < -(2|q| + 1)`, and changes sign for arbitrarily
+large `a`. -/
 @[dlmf 28.2.v]
 theorem mathieuSpecA_exists (n : ℕ) (q : ℝ) (k : ℕ) :
     ∃ x ∈ mathieuSpecA n q, (mathieuSpecA n q ∩ Iio x).encard = k := by
-  sorry
+  unfold mathieuSpecA
+  split_ifs
+  · exact p2s_I_der q k
+  · exact p2s_I_val q k
 
-/-- **Existence of the eigenvalues** `b_n(q)` (DLMF §28.2(v)); flagged existence theorem
-(admitted: Sturm–Liouville theory). -/
+/-- **Existence of the eigenvalues** `b_n(q)` (DLMF §28.2(v)); proved as
+`mathieuSpecA_exists`. -/
 @[dlmf 28.2.v]
 theorem mathieuSpecB_exists (n : ℕ) (q : ℝ) (k : ℕ) :
     ∃ x ∈ mathieuSpecB n q, (mathieuSpecB n q ∩ Iio x).encard = k := by
-  sorry
+  unfold mathieuSpecB
+  split_ifs
+  · exact p2s_II_val q k
+  · exact p2s_II_der q k
 
 /-- `a_n(q)` lies in its spectrum and has `⌊n/2⌋` smaller elements of it (DLMF §28.2(v)). -/
 theorem mathieuA_spec (n : ℕ) (q : ℝ) :

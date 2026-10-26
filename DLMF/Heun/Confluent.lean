@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Heun.Basic
+public import DLMF.Heun.Equation
 
 /-!
 # Confluent forms of Heun's equation (DLMF §31.12)
@@ -33,6 +33,31 @@ noncomputable section
 
 namespace DLMF.Heun
 
+/-- A function with a nonzero limit is not `O(g)` for `g → 0`. -/
+theorem p1h_not_isBigO_of_tendsto {l : Filter ℂ} [l.NeBot] {f g : ℂ → ℂ} {c : ℂ} (hc : c ≠ 0)
+    (hf : Tendsto f l (𝓝 c)) (hg : Tendsto g l (𝓝 0)) : ¬ f =O[l] g := fun h =>
+  hc (tendsto_nhds_unique hf (h.trans_tendsto hg))
+
+/-- `z ^ (-n) → 0` at infinity for `n > 0`. -/
+theorem p1h_tendsto_zpow_neg_cobounded {n : ℕ} (hn : 0 < n) :
+    Tendsto (fun z : ℂ => z ^ (-(n : ℤ))) (Bornology.cobounded ℂ) (𝓝 0) := by
+  have h := (tendsto_inv₀_cobounded (α := ℂ)).pow n
+  simp only [zero_pow hn.ne'] at h
+  refine h.congr fun z => ?_
+  simp [zpow_neg, inv_pow]
+
+/-- If `f / g → c ≠ 0` and `g' / g → 0` then `f` is not `O(g')`. -/
+theorem p1h_not_isBigO_of_div {l : Filter ℂ} [l.NeBot] {f g g' : ℂ → ℂ} {c : ℂ} (hc : c ≠ 0)
+    (hf : Tendsto (fun z => f z / g z) l (𝓝 c)) (hg : Tendsto (fun z => g' z / g z) l (𝓝 0)) :
+    ¬ f =O[l] g' := fun h =>
+  p1h_not_isBigO_of_tendsto hc hf hg
+    (by simpa [div_eq_mul_inv] using h.mul (isBigO_refl (fun z => (g z)⁻¹) l))
+
+/-- `f = O(g)` from a limit of `f / g`, for `g` eventually nonzero. -/
+theorem p1h_isBigO_of_div {l : Filter ℂ} {f g : ℂ → ℂ} {c : ℂ}
+    (hf : Tendsto (fun z => f z / g z) l (𝓝 c)) (hg : ∀ᶠ z in l, g z ≠ 0) : f =O[l] g :=
+  isBigO_of_div_tendsto_nhds (hg.mono fun _ hz h => absurd h hz) c hf
+
 /-- DLMF 31.12.1: the confluent Heun equation has at most regular singular points at `z = 0`
 and `z = 1`, every other finite point is ordinary, and for `ε ≠ 0` it has an irregular
 singularity of rank `1` at `∞`. Coefficients indexed as in `heunODECoeff`. -/
@@ -44,7 +69,60 @@ theorem confluentHeun_singularities (q α γ δ ε : ℂ) (hε : ε ≠ 0) :
     (∀ z : ℂ, z ≠ 0 → z ≠ 1 → Complex.linearODEOrdinaryAt c z) ∧
     HasIrregularRankAtInfinity (fun z => γ / z + δ / (z - 1) + ε)
       (fun z => (α * z - q) / (z * (z - 1))) 1 := by
-  sorry
+  intro c
+  have hm1 : (0 : ℂ) - 1 ≠ 0 := by norm_num
+  have h1 : (1 : ℂ) ≠ 0 := one_ne_zero
+  refine ⟨?_, ?_, fun z hz0 hz1 => ?_, ?_⟩
+  · refine p1h_atMostRegular_two (g₀ := fun z => z * (α * z - q) / (z - 1))
+      (g₁ := fun z => γ + z * δ / (z - 1) + z * ε) (by fun_prop (disch := simpa))
+      (by fun_prop (disch := simpa)) (fun z hz => ?_) (fun z hz => ?_)
+    · rw [sub_zero]; field_simp
+    · rw [sub_zero]; field_simp
+  · refine p1h_atMostRegular_two (g₀ := fun z => (z - 1) * (α * z - q) / z)
+      (g₁ := fun z => (z - 1) * γ / z + δ + (z - 1) * ε) (by fun_prop (disch := simpa))
+      (by fun_prop (disch := simpa)) (fun z hz => ?_) (fun z hz => ?_)
+    · have hz' : z - 1 ≠ 0 := sub_ne_zero.2 hz
+      rcases eq_or_ne z 0 with rfl | hz0
+      · simp
+      · field_simp
+    · have hz' : z - 1 ≠ 0 := sub_ne_zero.2 hz
+      rcases eq_or_ne z 0 with rfl | hz0
+      · simp; ring
+      · field_simp
+  · have hz1' : z - 1 ≠ 0 := sub_ne_zero.2 hz1
+    exact p1h_ordinary_two (by fun_prop (disch := simp [hz0, hz1']))
+      (by fun_prop (disch := simp [hz0, hz1']))
+  · have hev : ∀ᶠ z in Bornology.cobounded ℂ, z ≠ 0 ∧ z ≠ 1 :=
+      (Bornology.eventually_ne_cobounded 0).and (Bornology.eventually_ne_cobounded 1)
+    have hp : Tendsto (fun z => γ / z + δ / (z - 1) + ε) (Bornology.cobounded ℂ) (𝓝 ε) := by
+      have h : Tendsto (fun u => γ * u + δ * u / (1 - u) + ε) (𝓝 0)
+          (𝓝 (γ * 0 + δ * 0 / (1 - 0) + ε)) := by
+        apply ContinuousAt.tendsto
+        fun_prop (disch := norm_num)
+      simp only [mul_zero, zero_div, zero_add] at h
+      refine (h.comp tendsto_inv₀_cobounded).congr' ?_
+      filter_upwards [hev] with z ⟨hz0, hz1⟩
+      have hz1' : z - 1 ≠ 0 := sub_ne_zero.2 hz1
+      simp only [Function.comp_apply]
+      field_simp
+    have hr : Tendsto (fun z => (α * z - q) / (z * (z - 1))) (Bornology.cobounded ℂ) (𝓝 0) := by
+      have h : Tendsto (fun u => (α * u - q * u ^ 2) / (1 - u)) (𝓝 0)
+          (𝓝 ((α * 0 - q * 0 ^ 2) / (1 - 0))) := by
+        apply ContinuousAt.tendsto
+        fun_prop (disch := norm_num)
+      simp only [mul_zero, zero_div, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow,
+        sub_zero] at h
+      refine (h.comp tendsto_inv₀_cobounded).congr' ?_
+      filter_upwards [hev] with z ⟨hz0, hz1⟩
+      have hz1' : z - 1 ≠ 0 := sub_ne_zero.2 hz1
+      simp only [Function.comp_apply]
+      field_simp
+    refine ⟨le_rfl, ?_, ?_, ?_⟩
+    · simpa using hp.isBigO_one ℂ
+    · simpa using hr.isBigO_one ℂ
+    · rintro ⟨h, -⟩
+      exact p1h_not_isBigO_of_tendsto hε hp (p1h_tendsto_zpow_neg_cobounded (n := 1) one_pos)
+        (by simpa using h)
 
 /-- DLMF 31.12.2: the doubly-confluent Heun equation has irregular singularities of rank `1` at
 `z = 0` (for `δ ≠ 0`) and at `∞`, and every other finite point is ordinary. -/
@@ -55,7 +133,71 @@ theorem doublyConfluentHeun_singularities (q α γ δ : ℂ) (hδ : δ ≠ 0) :
     HasIrregularRankAt (fun z => δ / z ^ 2 + γ / z + 1) (fun z => (α * z - q) / z ^ 2) 0 1 ∧
     HasIrregularRankAtInfinity (fun z => δ / z ^ 2 + γ / z + 1)
       (fun z => (α * z - q) / z ^ 2) 1 := by
-  sorry
+  intro c
+  have hev : ∀ᶠ z in 𝓝[≠] (0 : ℂ), z ≠ 0 := self_mem_nhdsWithin
+  have hevi : ∀ᶠ z in Bornology.cobounded ℂ, z ≠ 0 := Bornology.eventually_ne_cobounded 0
+  refine ⟨fun z hz0 => ?_, ?_, ?_⟩
+  · exact p1h_ordinary_two (by fun_prop (disch := simp [hz0]))
+      (by fun_prop (disch := simp [hz0]))
+  · have hp : Tendsto (fun z => (δ / z ^ 2 + γ / z + 1) / (z - 0) ^ (-((1 : ℕ) : ℤ) - 1))
+        (𝓝[≠] 0) (𝓝 δ) := by
+      have h : Tendsto (fun z : ℂ => δ + γ * z + z ^ 2) (𝓝 0) (𝓝 (δ + γ * 0 + 0 ^ 2)) :=
+        (by fun_prop : Continuous fun z : ℂ => δ + γ * z + z ^ 2).tendsto 0
+      simp only [mul_zero, add_zero, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
+        zero_pow] at h
+      refine (tendsto_nhdsWithin_of_tendsto_nhds h).congr' ?_
+      filter_upwards [hev] with z hz
+      rw [sub_zero]
+      norm_num [zpow_neg]
+      field_simp
+    have hr : Tendsto (fun z => (α * z - q) / z ^ 2 / (z - 0) ^ (-2 * ((1 : ℕ) : ℤ) - 2))
+        (𝓝[≠] 0) (𝓝 0) := by
+      have h : Tendsto (fun z : ℂ => (α * z - q) * z ^ 2) (𝓝 0) (𝓝 ((α * 0 - q) * 0 ^ 2)) :=
+        (by fun_prop : Continuous fun z : ℂ => (α * z - q) * z ^ 2).tendsto 0
+      simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, mul_zero] at h
+      refine (tendsto_nhdsWithin_of_tendsto_nhds h).congr' ?_
+      filter_upwards [hev] with z hz
+      rw [sub_zero]
+      norm_num [zpow_neg]
+      field_simp
+    have hz : Tendsto (fun z : ℂ => (z - 0) ^ (-((1 : ℕ) : ℤ)) / (z - 0) ^ (-((1 : ℕ) : ℤ) - 1))
+        (𝓝[≠] 0) (𝓝 0) := by
+      have h : Tendsto (fun z : ℂ => z) (𝓝 0) (𝓝 0) := tendsto_id
+      refine (tendsto_nhdsWithin_of_tendsto_nhds h).congr' ?_
+      filter_upwards [hev] with z hz
+      rw [sub_zero]
+      norm_num [zpow_neg]
+      field_simp
+    refine ⟨le_rfl, p1h_isBigO_of_div hp ?_, p1h_isBigO_of_div hr ?_, ?_⟩
+    · filter_upwards [hev] with z hz; simp [hz]
+    · filter_upwards [hev] with z hz; simp [hz]
+    · rintro ⟨h, -⟩
+      exact p1h_not_isBigO_of_div hδ hp hz h
+  · have hp : Tendsto (fun z => δ / z ^ 2 + γ / z + 1) (Bornology.cobounded ℂ) (𝓝 1) := by
+      have h : Tendsto (fun u : ℂ => δ * u ^ 2 + γ * u + 1) (𝓝 0)
+          (𝓝 (δ * 0 ^ 2 + γ * 0 + 1)) :=
+        (by fun_prop : Continuous fun u : ℂ => δ * u ^ 2 + γ * u + 1).tendsto 0
+      simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, mul_zero,
+        add_zero, zero_add] at h
+      refine (h.comp tendsto_inv₀_cobounded).congr' ?_
+      filter_upwards [hevi] with z hz
+      simp only [Function.comp_apply]
+      field_simp
+    have hr : Tendsto (fun z => (α * z - q) / z ^ 2) (Bornology.cobounded ℂ) (𝓝 0) := by
+      have h : Tendsto (fun u : ℂ => α * u - q * u ^ 2) (𝓝 0) (𝓝 (α * 0 - q * 0 ^ 2)) :=
+        (by fun_prop : Continuous fun u : ℂ => α * u - q * u ^ 2).tendsto 0
+      simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, mul_zero,
+        sub_zero] at h
+      refine (h.comp tendsto_inv₀_cobounded).congr' ?_
+      filter_upwards [hevi] with z hz
+      simp only [Function.comp_apply]
+      field_simp
+    refine ⟨le_rfl, ?_, ?_, ?_⟩
+    · simpa using hp.isBigO_one ℂ
+    · simpa using hr.isBigO_one ℂ
+    · rintro ⟨h, -⟩
+      exact p1h_not_isBigO_of_tendsto one_ne_zero hp
+        (p1h_tendsto_zpow_neg_cobounded (n := 1) one_pos) (by simpa using h)
 
 /-- DLMF 31.12.3: the biconfluent Heun equation (sign as corrected in DLMF 1.0.7) has an at
 most regular singular point at `z = 0`, every other finite point is ordinary, and it has an
@@ -66,7 +208,50 @@ theorem biconfluentHeun_singularities (q α γ δ : ℂ) :
     Complex.linearODEAtMostRegularAt c 0 ∧
     (∀ z : ℂ, z ≠ 0 → Complex.linearODEOrdinaryAt c z) ∧
     HasIrregularRankAtInfinity (fun z => -(γ / z + δ + z)) (fun z => (α * z - q) / z) 2 := by
-  sorry
+  intro c
+  have hevi : ∀ᶠ z in Bornology.cobounded ℂ, z ≠ 0 := Bornology.eventually_ne_cobounded 0
+  refine ⟨?_, fun z hz0 => ?_, ?_⟩
+  · refine p1h_atMostRegular_two (g₀ := fun z => z * (α * z - q))
+      (g₁ := fun z => -(γ + δ * z + z ^ 2)) (by fun_prop) (by fun_prop)
+      (fun z hz => ?_) (fun z hz => ?_)
+    · rw [sub_zero]; field_simp
+    · rw [sub_zero]; field_simp
+  · exact p1h_ordinary_two (by fun_prop (disch := simp [hz0]))
+      (by fun_prop (disch := simp [hz0]))
+  · have hp : Tendsto (fun z => -(γ / z + δ + z) / z ^ ((2 : ℕ) - 1 : ℤ))
+        (Bornology.cobounded ℂ) (𝓝 (-1)) := by
+      have h : Tendsto (fun u : ℂ => -(γ * u ^ 2 + δ * u + 1)) (𝓝 0)
+          (𝓝 (-(γ * 0 ^ 2 + δ * 0 + 1))) :=
+        (by fun_prop : Continuous fun u : ℂ => -(γ * u ^ 2 + δ * u + 1)).tendsto 0
+      simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, mul_zero,
+        add_zero, zero_add] at h
+      refine (h.comp tendsto_inv₀_cobounded).congr' ?_
+      filter_upwards [hevi] with z hz
+      simp only [Function.comp_apply]
+      norm_num
+      field_simp
+    have hr : Tendsto (fun z => (α * z - q) / z / z ^ (2 * ((2 : ℕ) : ℤ) - 2))
+        (Bornology.cobounded ℂ) (𝓝 0) := by
+      have h : Tendsto (fun u : ℂ => α * u ^ 2 - q * u ^ 3) (𝓝 0)
+          (𝓝 (α * 0 ^ 2 - q * 0 ^ 3)) :=
+        (by fun_prop : Continuous fun u : ℂ => α * u ^ 2 - q * u ^ 3).tendsto 0
+      simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, mul_zero,
+        sub_zero] at h
+      refine (h.comp tendsto_inv₀_cobounded).congr' ?_
+      filter_upwards [hevi] with z hz
+      simp only [Function.comp_apply]
+      norm_num
+      field_simp
+    have hz : Tendsto (fun z : ℂ => z ^ ((2 : ℕ) - 2 : ℤ) / z ^ ((2 : ℕ) - 1 : ℤ))
+        (Bornology.cobounded ℂ) (𝓝 0) := by
+      refine (tendsto_inv₀_cobounded (α := ℂ)).congr' ?_
+      filter_upwards [hevi] with z hz
+      norm_num
+    refine ⟨by norm_num, p1h_isBigO_of_div hp ?_, p1h_isBigO_of_div hr ?_, ?_⟩
+    · filter_upwards [hevi] with z hz; simp [hz]
+    · filter_upwards [hevi] with z hz; simp [hz]
+    · rintro ⟨h, -⟩
+      exact p1h_not_isBigO_of_div (by norm_num) hp hz h
 
 /-- DLMF 31.12.4: the triconfluent Heun equation has no finite singular points (every finite
 point is ordinary). -/

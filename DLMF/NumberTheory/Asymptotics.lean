@@ -1861,7 +1861,9 @@ theorem tendsto_sum_moebius_log_div :
 @[dlmf 27.11]
 theorem primeCounting_ap_isEquivalent {h k : ℕ} (hk : 0 < k) (hhk : h.Coprime k) :
     (fun x : ℝ ↦ (((Nat.primesLE ⌊x⌋₊).filter (fun p ↦ p ≡ h [MOD k])).card : ℝ)) ~[atTop]
-      fun x ↦ x / (k.totient * Real.log x) := by
-  sorry
+      fun x ↦ x / (k.totient * Real.log x) :=
+  -- TauCeti's natural-density Chebotarev theorem for `ℚ(ζ_k)`, via
+  -- `DLMFMathlib.NumberTheory.T27aPrimeNumberTheorem`
+  Nat.t27a_primesLE_modEq_isEquivalent hk hhk
 
 end DLMF.NumberTheory

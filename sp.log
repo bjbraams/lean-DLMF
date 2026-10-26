@@ -1,0 +1,2 @@
+DLMF/Painleve/SpecialSolutions.lean:6:0: error: object file '/export/scratch1/braams/lean-codes-lake/packages/mathlib/.lake/build/lib/lean/Mathlib/Analysis/SpecialFunctions/Hypergeometric/Basic.olean' of module Mathlib.Analysis.SpecialFunctions.Hypergeometric.Basic does not exist
+exit 1

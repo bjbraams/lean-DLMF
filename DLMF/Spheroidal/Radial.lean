@@ -49,7 +49,43 @@ namespace DLMF.Spheroidal
 @[dlmf 30.11.E1]
 theorem spheroidalPsi_one_eq (k : ℕ) {z : ℂ} (hz : z ∈ slitPlane) :
     spheroidalPsi 1 k z = ((π : ℂ) / (2 * z)) ^ (1 / 2 : ℂ) * besselJ ((k : ℂ) + 1 / 2) z := by
-  sorry
+  have hz0 : z ≠ 0 := slitPlane_ne_zero hz
+  set w : ℂ := z / 2
+  have hw : w ∈ slitPlane := by
+    have : w = ((1 / 2 : ℝ) : ℂ) * z := by simp [w]; ring
+    rw [this, mem_slitPlane_iff] at *
+    rcases hz with h | h
+    · left; simp; linarith
+    · right; simpa using h
+  have hw0 : w ≠ 0 := slitPlane_ne_zero hw
+  have hwarg : w.arg ≠ π := by
+    intro h; exact (mem_slitPlane_iff_arg.mp hw).1 h
+  have hr : (0 : ℝ) < π / 4 := by positivity
+  have e1 : (π : ℂ) / (2 * z) = ((π / 4 : ℝ) : ℂ) * w⁻¹ := by
+    simp only [w]; push_cast; field_simp; ring
+  have hwi : w⁻¹ ≠ 0 := inv_ne_zero hw0
+  have hp : ((π : ℂ) / (2 * z)) ^ (1 / 2 : ℂ) * w ^ ((1 / 2 : ℂ)) = (Real.sqrt π / 2 : ℝ) := by
+    rw [e1, Complex.cpow_def_of_ne_zero (mul_ne_zero (by exact_mod_cast hr.ne') hwi),
+      Complex.cpow_def_of_ne_zero hw0, ← Complex.exp_add,
+      Complex.log_ofReal_mul hr hwi, Complex.log_inv w hwarg]
+    rw [show ((Real.log (π / 4) : ℂ) + -Complex.log w) * (1 / 2) + Complex.log w * (1 / 2) =
+      ((Real.log (π / 4) / 2 : ℝ) : ℂ) by push_cast; ring, ← Complex.ofReal_exp]
+    congr 1
+    rw [Real.sqrt_eq_rpow, show π / 4 = (π ^ (1 / 2 : ℝ) / 2) ^ (2 : ℝ) by
+      rw [Real.div_rpow (by positivity) (by norm_num), ← Real.rpow_mul (by positivity)]
+      norm_num]
+    rw [Real.log_rpow (by positivity), mul_div_cancel_left₀ _ (by norm_num : (2 : ℝ) ≠ 0),
+      Real.exp_log (by positivity)]
+  simp only [spheroidalPsi, ↓reduceIte, DLMF.sphericalJ]
+  rw [DLMF.Bessel.besselJ_eq_regularized,
+    Complex.cpow_add _ _ (by simpa [w] using hw0), Complex.cpow_natCast]
+  rw [show (k : ℂ) + 1 / 2 + 1 = (k : ℂ) + 3 / 2 by ring]
+  have : z / 2 = w := rfl
+  rw [this]
+  calc _ = (((π : ℂ) / (2 * z)) ^ (1 / 2 : ℂ) * w ^ ((1 / 2 : ℂ))) * w ^ k *
+        regularizedHGFun ∅ {(k : ℂ) + 3 / 2} (-(z ^ 2 / 4)) := by
+          rw [hp]; simp only [w]; push_cast; rw [div_pow]; field_simp; ring_nf
+    _ = _ := by ring
 
 /-- `ψ^{(3)}_k = ψ^{(1)}_k + iψ^{(2)}_k` and `ψ^{(4)}_k = ψ^{(1)}_k - iψ^{(2)}_k` off `(-∞, 0]`
 (DLMF 30.11.1–30.11.2 with `H^{(1),(2)}_ν = J_ν ± iY_ν`). Proved from `spheroidalPsi_one_eq`. -/

@@ -11,6 +11,7 @@ public import DLMFMathlib.Analysis.SpecialFunctions.Complex.LogBoundary
 public import DLMFMathlib.NumberTheory.EulerPolynomials
 public import DLMFMathlib.NumberTheory.EulerNumbers
 public import DLMFMathlib.NumberTheory.BernoulliTaylor
+public import DLMFMathlib.NumberTheory.T27aPrimeNumberTheorem
 public import DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.PartialFractions
 public import DLMFMathlib.Analysis.EulerMaclaurin
 public import DLMFMathlib.Analysis.BooleSummation
@@ -34,6 +35,10 @@ public import DLMFMathlib.Analysis.SpecificLimits.Pincherle
 public import DLMFMathlib.Analysis.ODE.SturmComparison
 public import DLMFMathlib.Analysis.ODE.SymmetricSquare
 public import DLMFMathlib.Analysis.ODE.PowerSeriesUniqueness
+public import DLMFMathlib.Analysis.ODE.P1oEntireLinear
+public import DLMFMathlib.Analysis.ODE.P1oLinearGlobal
+public import DLMFMathlib.Analysis.ODE.P1oParamHolomorphic
+public import DLMFMathlib.Analysis.Fourier.P1a2EntirePeriodic
 public import DLMFMathlib.Analysis.ODE.SoninePolya
 public import DLMFMathlib.Analysis.ODE.Volterra
 public import DLMFMathlib.Analysis.ODE.LiouvilleGreenVolterra
@@ -88,6 +93,14 @@ the namespaces of the Mathlib APIs they extend. These modules import Mathlib onl
 * `DLMFMathlib.Topology.Order.ZeroEnumeration`: unique zeros of strictly monotone functions and the
   enumeration of zeros separated by a sequence of points.
 * `DLMFMathlib.NumberTheory.EulerPolynomials`: Euler polynomials and Euler numbers.
+* `DLMFMathlib.Analysis.ODE.P1oEntireLinear`, `P1oLinearGlobal`, `P1oParamHolomorphic`: entire
+  solutions of linear second-order ODEs with entire coefficients, global solutions on ℝ for
+  continuous coefficients, and holomorphic dependence on a linear parameter.
+* `DLMFMathlib.Analysis.Fourier.P1a2EntirePeriodic`: an entire 2π-periodic function is the sum of
+  its Fourier series on all of ℂ; cosine and sine series and Parseval for even and odd functions.
+* `DLMFMathlib.NumberTheory.T27aPrimeNumberTheorem`: the prime number theorem π(x) ~ x/log x,
+  p_n ~ n log n, θ(x) ~ x, ψ(x) ~ x and primes in progressions, from TauCeti's prime ideal and
+  Chebotarev theorems for ℚ.
 * `DLMFMathlib.Analysis.EulerMaclaurin`: the Euler–Maclaurin summation formula with remainder.
 * `DLMFMathlib.Analysis.BooleSummation`: Boole's alternating summation formula.
 * `DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion`: Poincaré asymptotic expansions.

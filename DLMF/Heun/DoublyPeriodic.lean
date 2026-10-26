@@ -6,6 +6,9 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Heun.Basic
+public import DLMF.Heun.Equation
+public import DLMF.JacobiElliptic.Derivatives
+public import DLMF.JacobiElliptic.ElementaryIdentities
 public import DLMF.JacobiElliptic.Basic
 public import DLMF.Weierstrass.Basic
 public import Mathlib.Analysis.SpecialFunctions.Pow.Complex
@@ -53,6 +56,14 @@ theorem IsLinearODE2On.congr_coeff {p r p' r' w : ℂ → ℂ} {s : Set ℂ}
 
 /-! ### Jacobi's elliptic form -/
 
+/-- `sn(z, k) ≠ 0` forces `z` to be a regular point (`θ₄ ≠ 0`): at a pole the totalized
+quotient is `0`. -/
+theorem p1h_regular_of_jacobiSnk_ne_zero {k z : ℂ} (h : jacobiSnk z k ≠ 0) :
+    jacobiLetterTheta .n (jacobiZetak z k) (jacobiTauk k) ≠ 0 := by
+  intro h0
+  apply h
+  simp [jacobiSnk, jacobiPQk, jacobiGlaisher, h0]
+
 /-- DLMF 31.2.7–31.2.8, Jacobi's elliptic form: with `a = k^{-2}` and `z = sn²(ζ, k)`, a
 solution `W` of Heun's equation gives a solution `w(ζ) = W(sn²(ζ, k))` of
 `w'' + ((2γ-1) cn dn/sn - (2δ-1) sn dn/cn - (2ε-1)k² sn cn/dn) w' + 4k²(αβ sn² - q) w = 0`. -/
@@ -68,7 +79,38 @@ theorem heun_jacobiForm {k : ℂ} (hk : k ∈ jacobiModulusDomain) (hF : α + β
         (2 * ε - 1) * k ^ 2 * (jacobiSnk ζ k * jacobiCnk ζ k / jacobiDnk ζ k))
       (fun ζ => 4 * k ^ 2 * (α * β * jacobiSnk ζ k ^ 2 - q))
       (fun ζ => W (jacobiSnk ζ k ^ 2)) V := by
-  sorry
+  have hk0 : k ≠ 0 := fun h => by rw [h] at hk; exact lt_irrefl _ hk.1
+  refine p1h_isLinearODE2On_comp
+    (φ₁ := fun ζ => 2 * (jacobiSnk ζ k * jacobiCnk ζ k * jacobiDnk ζ k))
+    (φ₂ := fun ζ => 2 * (jacobiCnk ζ k ^ 2 * jacobiDnk ζ k ^ 2 -
+      jacobiSnk ζ k ^ 2 * jacobiDnk ζ k ^ 2 - k ^ 2 * jacobiSnk ζ k ^ 2 * jacobiCnk ζ k ^ 2))
+    hV (fun ζ hζ => ?_) (fun ζ hζ => ?_) (fun ζ hζ => (hVU ζ hζ).1) (fun ζ hζ => ?_)
+    (fun ζ hζ => ?_) hW
+  · have hr := p1h_regular_of_jacobiSnk_ne_zero (hVU ζ hζ).2.1
+    convert (hasDerivAt_jacobiSnk hk hr).pow 2 using 1
+    simp; ring
+  · have hr := p1h_regular_of_jacobiSnk_ne_zero (hVU ζ hζ).2.1
+    convert (((hasDerivAt_jacobiSnk hk hr).mul (hasDerivAt_jacobiCnk hk hr)).mul
+      (hasDerivAt_jacobiDnk hk hr)).const_mul 2 using 1
+    simp only [Pi.mul_apply]; ring
+  · obtain ⟨-, hs, hc, hd⟩ := hVU ζ hζ
+    have hr := p1h_regular_of_jacobiSnk_ne_zero hs
+    obtain ⟨e1, e2⟩ := jacobi_sq_sum hk hr
+    have f1 : jacobiSnk ζ k ^ 2 - 1 = -jacobiCnk ζ k ^ 2 := by linear_combination e1
+    have f2 : jacobiSnk ζ k ^ 2 - (k ^ 2)⁻¹ = -(jacobiDnk ζ k ^ 2 / k ^ 2) := by
+      field_simp; linear_combination e2
+    simp only [heunCoeffP, f1, f2]
+    field_simp
+    ring
+  · obtain ⟨-, hs, hc, hd⟩ := hVU ζ hζ
+    have hr := p1h_regular_of_jacobiSnk_ne_zero hs
+    obtain ⟨e1, e2⟩ := jacobi_sq_sum hk hr
+    have f1 : jacobiSnk ζ k ^ 2 - 1 = -jacobiCnk ζ k ^ 2 := by linear_combination e1
+    have f2 : jacobiSnk ζ k ^ 2 - (k ^ 2)⁻¹ = -(jacobiDnk ζ k ^ 2 / k ^ 2) := by
+      field_simp; linear_combination e2
+    simp only [heunCoeffR, f1, f2]
+    field_simp
+    ring
 
 /-! ### Weierstrass's form -/
 

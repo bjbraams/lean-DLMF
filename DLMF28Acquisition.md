@@ -4,6 +4,8 @@ This acquisition covers the definitions, numbered formulas and analytical assert
 of [DLMF Chapter 28](https://dlmf.nist.gov/28), version 1.2.8, checked on 2026-10-26. It was
 done by three concurrent agents, and this ledger has three parts:
 
+**Status after proof round 1 (2026-10-26).** Direct admissions in DLMF/Mathieu fell from 314 to 203. Proved: the Mathieu existence theorem (entire solutions of linear ODEs with entire coefficients), Hill's global existence and §28.29(ii) Floquet theory, Fourier series and recurrences 28.4.1–20, the integral equations 28.10.1–8, Floquet and q = 0 results of §28.2, all of 28.5.3–7 (including the corrected 28.5.6), absolute convergence of the me_ν series 28.14.1, Ince-equation characterizations and several modified-function relations. 28.2.33 gained the hypothesis n ≠ 0 after a proved counterexample. Many results are proved only from the flagged existence theorems; see REVIEW.md, "Proof round 1 for Chapters 28–31 (2026-10-26)".
+
 - Part A (agent ACQ28A): §§28.1–28.11, Mathieu functions of integer order. Lean code in
   `DLMF/Mathieu/` (namespace `DLMF.Mathieu`, helper prefix `m28a_`).
 - Part B (agent ACQ28B): §§28.12–28.19 and §§28.29–28.31, Mathieu functions of noninteger
@@ -54,14 +56,14 @@ declarations:
 
 - [Basic](DLMF/Mathieu/Basic.lean): 3 admissions (the flagged existence theorems). 25 tagged: 20 definitions, 2 proved, 3 admitted.
 - [ContFracDefs](DLMF/Mathieu/ContFracDefs.lean): 0 admissions. 2 untagged definitions.
-- [Properties](DLMF/Mathieu/Properties.lean): 36 admissions. 71 tagged: 35 proved, 36 admitted.
-- [FourierSeries](DLMF/Mathieu/FourierSeries.lean): 36 admissions. 36 tagged: 36 admitted.
-- [SecondSolutions](DLMF/Mathieu/SecondSolutions.lean): 15 admissions. 20 tagged: 5 proved, 15 admitted.
+- [Properties](DLMF/Mathieu/Properties.lean): 13 admissions. 71 tagged: 35 proved, 36 admitted.
+- [FourierSeries](DLMF/Mathieu/FourierSeries.lean): 10 admissions. 36 tagged: 36 admitted.
+- [SecondSolutions](DLMF/Mathieu/SecondSolutions.lean): 2 admissions. 20 tagged: 5 proved, 15 admitted.
 - [SmallQ](DLMF/Mathieu/SmallQ.lean): 31 admissions. 31 tagged: 31 admitted.
 - [Continuation](DLMF/Mathieu/Continuation.lean): 7 admissions. 7 tagged: 7 admitted.
 - [LargeQ](DLMF/Mathieu/LargeQ.lean): 5 admissions. 5 tagged: 5 admitted.
 - [Zeros](DLMF/Mathieu/Zeros.lean): 9 admissions. 9 tagged: 9 admitted.
-- [IntegralEquations](DLMF/Mathieu/IntegralEquations.lean): 10 admissions. 10 tagged: 10 admitted.
+- [IntegralEquations](DLMF/Mathieu/IntegralEquations.lean): 2 admissions. 10 tagged: 10 admitted.
 - [Expansions](DLMF/Mathieu/Expansions.lean): 6 admissions. 6 tagged: 6 admitted.
 
 ## Design decisions (definitions by choice)
@@ -123,97 +125,97 @@ declarations:
 
 ## [§28.2 Definitions and Basic Properties](https://dlmf.nist.gov/28.2)
 
-- [28.2.i](https://dlmf.nist.gov/28.2.i): [`DLMF.Mathieu.mathieu_algebraic_form_singularities`](DLMF/Mathieu/Properties.lean#L108) (admitted).
-- [28.2.ii](https://dlmf.nist.gov/28.2.ii): [`DLMF.Mathieu.exists_isMathieuSolution`](DLMF/Mathieu/Basic.lean#L133) (admitted); [`DLMF.Mathieu.mathieuWI_neg`](DLMF/Mathieu/Properties.lean#L236) (proved from admissions); [`DLMF.Mathieu.mathieuWII_neg`](DLMF/Mathieu/Properties.lean#L244) (proved from admissions); [`DLMF.Mathieu.differentiable_mathieuWI_mathieuWII`](DLMF/Mathieu/Properties.lean#L423) (admitted).
-- [28.2.iii](https://dlmf.nist.gov/28.2.iii): [`DLMF.Mathieu.exists_entire_mathieuWI_pi`](DLMF/Mathieu/Properties.lean#L457) (admitted); [`DLMF.Mathieu.isMathieuCharExp_iff`](DLMF/Mathieu/Properties.lean#L464) (proved); [`DLMF.Mathieu.re_arccosPrincipal_mathieuWI_div_pi_mem`](DLMF/Mathieu/Properties.lean#L491) (admitted); [`DLMF.Mathieu.isMathieuCharExp_double_iff`](DLMF/Mathieu/Properties.lean#L498) (proved).
-- [28.2.iv](https://dlmf.nist.gov/28.2.iv): [`DLMF.Mathieu.IsMathieuSolution.isFloquet_or`](DLMF/Mathieu/Properties.lean#L524) (proved from admissions); [`DLMF.Mathieu.IsFloquetSolution.unique`](DLMF/Mathieu/Properties.lean#L555) (admitted).
-- [28.2.v](https://dlmf.nist.gov/28.2.v): [`DLMF.Mathieu.mathieuSpecA_exists`](DLMF/Mathieu/Basic.lean#L289) (admitted); [`DLMF.Mathieu.mathieuSpecB_exists`](DLMF/Mathieu/Basic.lean#L297) (admitted); [`DLMF.Mathieu.charExp_set_infinite_discrete`](DLMF/Mathieu/Properties.lean#L586) (admitted); [`DLMF.Mathieu.mathieuA_lt_mathieuA_add_two`](DLMF/Mathieu/Properties.lean#L654) (admitted); [`DLMF.Mathieu.mathieuB_lt_mathieuB_add_two`](DLMF/Mathieu/Properties.lean#L660) (admitted).
-- [28.2.E1](https://dlmf.nist.gov/28.2.E1): [`DLMF.Mathieu.IsMathieuSolution`](DLMF/Mathieu/Basic.lean#L74) (definition).
-- [28.2.E2](https://dlmf.nist.gov/28.2.E2): [`DLMF.Mathieu.algebraic_form_sin_sq`](DLMF/Mathieu/Properties.lean#L42) (proved).
-- [28.2.E3](https://dlmf.nist.gov/28.2.E3): [`DLMF.Mathieu.algebraic_form_cos`](DLMF/Mathieu/Properties.lean#L84) (proved).
-- [28.2.E4](https://dlmf.nist.gov/28.2.E4): [`DLMF.Mathieu.IsMathieuSolution.comp_neg`](DLMF/Mathieu/Properties.lean#L152) (proved); [`DLMF.Mathieu.IsMathieuSolution.comp_add_pi`](DLMF/Mathieu/Properties.lean#L159) (proved); [`DLMF.Mathieu.IsMathieuSolution.comp_sub_pi`](DLMF/Mathieu/Properties.lean#L168) (proved); [`DLMF.Mathieu.IsMathieuSolution.comp_add_half_pi`](DLMF/Mathieu/Properties.lean#L177) (proved); [`DLMF.Mathieu.IsMathieuSolution.comp_sub_half_pi`](DLMF/Mathieu/Properties.lean#L186) (proved).
-- [28.2.E5](https://dlmf.nist.gov/28.2.E5): [`DLMF.Mathieu.mathieuWI`](DLMF/Mathieu/Basic.lean#L144) (definition); [`DLMF.Mathieu.mathieuWII`](DLMF/Mathieu/Basic.lean#L151) (definition); [`DLMF.Mathieu.mathieuWI_spec`](DLMF/Mathieu/Basic.lean#L157) (proved from admissions); [`DLMF.Mathieu.mathieuWII_spec`](DLMF/Mathieu/Basic.lean#L166) (proved from admissions).
-- [28.2.E6](https://dlmf.nist.gov/28.2.E6): [`DLMF.Mathieu.mathieuWI_wronskian`](DLMF/Mathieu/Properties.lean#L269) (proved from admissions).
-- [28.2.E7](https://dlmf.nist.gov/28.2.E7): [`DLMF.Mathieu.mathieuWI_add_pi`](DLMF/Mathieu/Properties.lean#L391) (proved from admissions); [`DLMF.Mathieu.mathieuWI_sub_pi`](DLMF/Mathieu/Properties.lean#L399) (proved from admissions).
-- [28.2.E8](https://dlmf.nist.gov/28.2.E8): [`DLMF.Mathieu.mathieuWII_add_pi`](DLMF/Mathieu/Properties.lean#L407) (proved from admissions); [`DLMF.Mathieu.mathieuWII_sub_pi`](DLMF/Mathieu/Properties.lean#L415) (proved from admissions).
-- [28.2.E9](https://dlmf.nist.gov/28.2.E9): [`DLMF.Mathieu.mathieuWI_pi_eq_deriv_mathieuWII_pi`](DLMF/Mathieu/Properties.lean#L365) (proved from admissions).
-- [28.2.E10](https://dlmf.nist.gov/28.2.E10): [`DLMF.Mathieu.mathieuWI_pi_sub_one`](DLMF/Mathieu/Properties.lean#L370) (proved from admissions).
-- [28.2.E11](https://dlmf.nist.gov/28.2.E11): [`DLMF.Mathieu.mathieuWI_pi_add_one`](DLMF/Mathieu/Properties.lean#L375) (proved from admissions).
-- [28.2.E12](https://dlmf.nist.gov/28.2.E12): [`DLMF.Mathieu.deriv_mathieuWI_pi`](DLMF/Mathieu/Properties.lean#L380) (proved from admissions).
-- [28.2.E13](https://dlmf.nist.gov/28.2.E13): [`DLMF.Mathieu.mathieuWII_pi`](DLMF/Mathieu/Properties.lean#L385) (proved from admissions).
-- [28.2.E14](https://dlmf.nist.gov/28.2.E14): [`DLMF.Mathieu.IsFloquetSolution`](DLMF/Mathieu/Basic.lean#L213) (definition); [`DLMF.Mathieu.exists_isFloquetSolution_iff`](DLMF/Mathieu/Properties.lean#L436) (admitted).
-- [28.2.E15](https://dlmf.nist.gov/28.2.E15): [`DLMF.Mathieu.mathieuMonodromy`](DLMF/Mathieu/Basic.lean#L199) (definition); [`DLMF.Mathieu.exists_isFloquetSolution_iff`](DLMF/Mathieu/Properties.lean#L436) (admitted).
-- [28.2.E16](https://dlmf.nist.gov/28.2.E16): [`DLMF.Mathieu.IsMathieuCharExp`](DLMF/Mathieu/Basic.lean#L205) (definition); [`DLMF.Mathieu.exists_isFloquetSolution_iff_charExp`](DLMF/Mathieu/Properties.lean#L445) (admitted); [`DLMF.Mathieu.mathieuWI_pi_neg_q`](DLMF/Mathieu/Properties.lean#L452) (admitted).
-- [28.2.E17](https://dlmf.nist.gov/28.2.E17): [`DLMF.Mathieu.IsMathieuSolution.add_pi_add_sub_pi`](DLMF/Mathieu/Properties.lean#L511) (proved from admissions).
-- [28.2.E18](https://dlmf.nist.gov/28.2.E18): [`DLMF.Mathieu.IsFloquetSolution.exists_fourier`](DLMF/Mathieu/Properties.lean#L563) (admitted).
-- [28.2.E19](https://dlmf.nist.gov/28.2.E19): [`DLMF.Mathieu.IsFloquetSolution.exists_fourier`](DLMF/Mathieu/Properties.lean#L563) (admitted).
-- [28.2.E20](https://dlmf.nist.gov/28.2.E20): [`DLMF.Mathieu.isFloquetSolution_of_recurrence`](DLMF/Mathieu/Properties.lean#L575) (admitted).
-- [28.2.E21](https://dlmf.nist.gov/28.2.E21): [`DLMF.Mathieu.deriv_mathieuWI_half_pi_mathieuA_even`](DLMF/Mathieu/Properties.lean#L595) (proved from admissions); [`DLMF.Mathieu.mathieuWI_half_pi_mathieuA_odd`](DLMF/Mathieu/Properties.lean#L602) (proved from admissions).
-- [28.2.E22](https://dlmf.nist.gov/28.2.E22): [`DLMF.Mathieu.deriv_mathieuWII_half_pi_mathieuB_odd`](DLMF/Mathieu/Properties.lean#L609) (proved from admissions); [`DLMF.Mathieu.mathieuWII_half_pi_mathieuB_even`](DLMF/Mathieu/Properties.lean#L616) (proved from admissions).
-- [28.2.E23](https://dlmf.nist.gov/28.2.E23): [`DLMF.Mathieu.mathieuA_zero`](DLMF/Mathieu/Properties.lean#L666) (admitted).
-- [28.2.E24](https://dlmf.nist.gov/28.2.E24): [`DLMF.Mathieu.mathieuB_zero`](DLMF/Mathieu/Properties.lean#L671) (admitted).
-- [28.2.E25](https://dlmf.nist.gov/28.2.E25): [`DLMF.Mathieu.mathieu_eigenvalues_interlace_pos`](DLMF/Mathieu/Properties.lean#L676) (admitted); [`DLMF.Mathieu.mathieu_eigenvalues_interlace_neg`](DLMF/Mathieu/Properties.lean#L683) (admitted).
-- [28.2.E26](https://dlmf.nist.gov/28.2.E26): [`DLMF.Mathieu.mathieuA_even_neg`](DLMF/Mathieu/Properties.lean#L693) (admitted).
-- [28.2.E27](https://dlmf.nist.gov/28.2.E27): [`DLMF.Mathieu.mathieuA_odd_neg`](DLMF/Mathieu/Properties.lean#L698) (admitted).
-- [28.2.E28](https://dlmf.nist.gov/28.2.E28): [`DLMF.Mathieu.mathieuB_even_neg`](DLMF/Mathieu/Properties.lean#L704) (admitted).
-- [28.2.E29](https://dlmf.nist.gov/28.2.E29): [`DLMF.Mathieu.mathieuCe_zero_zero`](DLMF/Mathieu/Properties.lean#L851) (admitted); [`DLMF.Mathieu.mathieuCe_q_zero`](DLMF/Mathieu/Properties.lean#L856) (admitted); [`DLMF.Mathieu.mathieuSe_q_zero`](DLMF/Mathieu/Properties.lean#L862) (admitted).
-- [28.2.E30](https://dlmf.nist.gov/28.2.E30): [`DLMF.Mathieu.integral_mathieuCe_sq`](DLMF/Mathieu/Properties.lean#L868) (admitted); [`DLMF.Mathieu.integral_mathieuSe_sq`](DLMF/Mathieu/Properties.lean#L874) (admitted).
-- [28.2.E31](https://dlmf.nist.gov/28.2.E31): [`DLMF.Mathieu.integral_mathieuCe_mul_mathieuCe`](DLMF/Mathieu/Properties.lean#L880) (admitted).
-- [28.2.E32](https://dlmf.nist.gov/28.2.E32): [`DLMF.Mathieu.integral_mathieuSe_mul_mathieuSe`](DLMF/Mathieu/Properties.lean#L886) (admitted).
-- [28.2.E33](https://dlmf.nist.gov/28.2.E33): [`DLMF.Mathieu.integral_mathieuCe_mul_mathieuSe`](DLMF/Mathieu/Properties.lean#L892) (admitted).
-- [28.2.E34](https://dlmf.nist.gov/28.2.E34): [`DLMF.Mathieu.mathieuCe_even_neg_q`](DLMF/Mathieu/Properties.lean#L898) (admitted).
-- [28.2.E35](https://dlmf.nist.gov/28.2.E35): [`DLMF.Mathieu.mathieuCe_odd_neg_q`](DLMF/Mathieu/Properties.lean#L904) (admitted).
-- [28.2.E36](https://dlmf.nist.gov/28.2.E36): [`DLMF.Mathieu.mathieuSe_odd_neg_q`](DLMF/Mathieu/Properties.lean#L911) (admitted).
-- [28.2.E37](https://dlmf.nist.gov/28.2.E37): [`DLMF.Mathieu.mathieuSe_even_neg_q`](DLMF/Mathieu/Properties.lean#L918) (admitted).
-- [28.2.E38](https://dlmf.nist.gov/28.2.E38): [`DLMF.Mathieu.mathieuCe_div_mathieuCe_zero`](DLMF/Mathieu/Properties.lean#L752) (proved from admissions).
-- [28.2.E39](https://dlmf.nist.gov/28.2.E39): [`DLMF.Mathieu.mathieuSe_div_deriv_mathieuSe_zero`](DLMF/Mathieu/Properties.lean#L760) (proved from admissions).
-- [28.2.T1](https://dlmf.nist.gov/28.2.T1): [`DLMF.Mathieu.mathieuSpecA`](DLMF/Mathieu/Basic.lean#L261) (definition); [`DLMF.Mathieu.mathieuSpecB`](DLMF/Mathieu/Basic.lean#L268) (definition); [`DLMF.Mathieu.mathieuA`](DLMF/Mathieu/Basic.lean#L275) (definition); [`DLMF.Mathieu.mathieuB`](DLMF/Mathieu/Basic.lean#L282) (definition); [`DLMF.Mathieu.exists_solution_neumann_iff`](DLMF/Mathieu/Properties.lean#L624) (admitted); [`DLMF.Mathieu.exists_solution_neumann_dirichlet_iff`](DLMF/Mathieu/Properties.lean#L633) (admitted); [`DLMF.Mathieu.exists_solution_dirichlet_neumann_iff`](DLMF/Mathieu/Properties.lean#L640) (admitted); [`DLMF.Mathieu.exists_solution_dirichlet_iff`](DLMF/Mathieu/Properties.lean#L647) (admitted).
-- [28.2.T2](https://dlmf.nist.gov/28.2.T2): [`DLMF.Mathieu.mathieuCe`](DLMF/Mathieu/Basic.lean#L329) (definition); [`DLMF.Mathieu.mathieuSe`](DLMF/Mathieu/Basic.lean#L337) (definition); [`DLMF.Mathieu.mathieuCe_neg`](DLMF/Mathieu/Properties.lean#L813) (proved from admissions); [`DLMF.Mathieu.mathieuSe_neg`](DLMF/Mathieu/Properties.lean#L818) (proved from admissions); [`DLMF.Mathieu.mathieuCe_even_add_pi`](DLMF/Mathieu/Properties.lean#L823) (proved from admissions); [`DLMF.Mathieu.mathieuCe_odd_add_pi`](DLMF/Mathieu/Properties.lean#L830) (proved from admissions); [`DLMF.Mathieu.mathieuSe_odd_add_pi`](DLMF/Mathieu/Properties.lean#L837) (proved from admissions); [`DLMF.Mathieu.mathieuSe_even_add_pi`](DLMF/Mathieu/Properties.lean#L844) (proved from admissions).
+- [28.2.i](https://dlmf.nist.gov/28.2.i): [`DLMF.Mathieu.mathieu_algebraic_form_singularities`](DLMF/Mathieu/Properties.lean#L113) (admitted).
+- [28.2.ii](https://dlmf.nist.gov/28.2.ii): [`DLMF.Mathieu.exists_isMathieuSolution`](DLMF/Mathieu/Basic.lean#L134) (proved); [`DLMF.Mathieu.mathieuWI_neg`](DLMF/Mathieu/Properties.lean#L241) (proved); [`DLMF.Mathieu.mathieuWII_neg`](DLMF/Mathieu/Properties.lean#L249) (proved); [`DLMF.Mathieu.differentiable_mathieuWI_mathieuWII`](DLMF/Mathieu/Properties.lean#L428) (admitted).
+- [28.2.iii](https://dlmf.nist.gov/28.2.iii): [`DLMF.Mathieu.exists_entire_mathieuWI_pi`](DLMF/Mathieu/Properties.lean#L630) (admitted); [`DLMF.Mathieu.isMathieuCharExp_iff`](DLMF/Mathieu/Properties.lean#L637) (proved); [`DLMF.Mathieu.re_arccosPrincipal_mathieuWI_div_pi_mem`](DLMF/Mathieu/Properties.lean#L712) (proved); [`DLMF.Mathieu.isMathieuCharExp_double_iff`](DLMF/Mathieu/Properties.lean#L719) (proved).
+- [28.2.iv](https://dlmf.nist.gov/28.2.iv): [`DLMF.Mathieu.IsMathieuSolution.isFloquet_or`](DLMF/Mathieu/Properties.lean#L745) (proved); [`DLMF.Mathieu.IsFloquetSolution.unique`](DLMF/Mathieu/Properties.lean#L776) (admitted).
+- [28.2.v](https://dlmf.nist.gov/28.2.v): [`DLMF.Mathieu.mathieuSpecA_exists`](DLMF/Mathieu/Basic.lean#L293) (admitted); [`DLMF.Mathieu.mathieuSpecB_exists`](DLMF/Mathieu/Basic.lean#L301) (admitted); [`DLMF.Mathieu.charExp_set_infinite_discrete`](DLMF/Mathieu/Properties.lean#L807) (admitted); [`DLMF.Mathieu.mathieuA_lt_mathieuA_add_two`](DLMF/Mathieu/Properties.lean#L1072) (proved from admissions); [`DLMF.Mathieu.mathieuB_lt_mathieuB_add_two`](DLMF/Mathieu/Properties.lean#L1081) (proved from admissions).
+- [28.2.E1](https://dlmf.nist.gov/28.2.E1): [`DLMF.Mathieu.IsMathieuSolution`](DLMF/Mathieu/Basic.lean#L75) (definition).
+- [28.2.E2](https://dlmf.nist.gov/28.2.E2): [`DLMF.Mathieu.algebraic_form_sin_sq`](DLMF/Mathieu/Properties.lean#L47) (proved).
+- [28.2.E3](https://dlmf.nist.gov/28.2.E3): [`DLMF.Mathieu.algebraic_form_cos`](DLMF/Mathieu/Properties.lean#L89) (proved).
+- [28.2.E4](https://dlmf.nist.gov/28.2.E4): [`DLMF.Mathieu.IsMathieuSolution.comp_neg`](DLMF/Mathieu/Properties.lean#L157) (proved); [`DLMF.Mathieu.IsMathieuSolution.comp_add_pi`](DLMF/Mathieu/Properties.lean#L164) (proved); [`DLMF.Mathieu.IsMathieuSolution.comp_sub_pi`](DLMF/Mathieu/Properties.lean#L173) (proved); [`DLMF.Mathieu.IsMathieuSolution.comp_add_half_pi`](DLMF/Mathieu/Properties.lean#L182) (proved); [`DLMF.Mathieu.IsMathieuSolution.comp_sub_half_pi`](DLMF/Mathieu/Properties.lean#L191) (proved).
+- [28.2.E5](https://dlmf.nist.gov/28.2.E5): [`DLMF.Mathieu.mathieuWI`](DLMF/Mathieu/Basic.lean#L148) (definition); [`DLMF.Mathieu.mathieuWII`](DLMF/Mathieu/Basic.lean#L155) (definition); [`DLMF.Mathieu.mathieuWI_spec`](DLMF/Mathieu/Basic.lean#L161) (proved); [`DLMF.Mathieu.mathieuWII_spec`](DLMF/Mathieu/Basic.lean#L170) (proved).
+- [28.2.E6](https://dlmf.nist.gov/28.2.E6): [`DLMF.Mathieu.mathieuWI_wronskian`](DLMF/Mathieu/Properties.lean#L274) (proved).
+- [28.2.E7](https://dlmf.nist.gov/28.2.E7): [`DLMF.Mathieu.mathieuWI_add_pi`](DLMF/Mathieu/Properties.lean#L396) (proved); [`DLMF.Mathieu.mathieuWI_sub_pi`](DLMF/Mathieu/Properties.lean#L404) (proved).
+- [28.2.E8](https://dlmf.nist.gov/28.2.E8): [`DLMF.Mathieu.mathieuWII_add_pi`](DLMF/Mathieu/Properties.lean#L412) (proved); [`DLMF.Mathieu.mathieuWII_sub_pi`](DLMF/Mathieu/Properties.lean#L420) (proved).
+- [28.2.E9](https://dlmf.nist.gov/28.2.E9): [`DLMF.Mathieu.mathieuWI_pi_eq_deriv_mathieuWII_pi`](DLMF/Mathieu/Properties.lean#L370) (proved).
+- [28.2.E10](https://dlmf.nist.gov/28.2.E10): [`DLMF.Mathieu.mathieuWI_pi_sub_one`](DLMF/Mathieu/Properties.lean#L375) (proved).
+- [28.2.E11](https://dlmf.nist.gov/28.2.E11): [`DLMF.Mathieu.mathieuWI_pi_add_one`](DLMF/Mathieu/Properties.lean#L380) (proved).
+- [28.2.E12](https://dlmf.nist.gov/28.2.E12): [`DLMF.Mathieu.deriv_mathieuWI_pi`](DLMF/Mathieu/Properties.lean#L385) (proved).
+- [28.2.E13](https://dlmf.nist.gov/28.2.E13): [`DLMF.Mathieu.mathieuWII_pi`](DLMF/Mathieu/Properties.lean#L390) (proved).
+- [28.2.E14](https://dlmf.nist.gov/28.2.E14): [`DLMF.Mathieu.IsFloquetSolution`](DLMF/Mathieu/Basic.lean#L217) (definition); [`DLMF.Mathieu.exists_isFloquetSolution_iff`](DLMF/Mathieu/Properties.lean#L534) (proved).
+- [28.2.E15](https://dlmf.nist.gov/28.2.E15): [`DLMF.Mathieu.mathieuMonodromy`](DLMF/Mathieu/Basic.lean#L203) (definition); [`DLMF.Mathieu.exists_isFloquetSolution_iff`](DLMF/Mathieu/Properties.lean#L534) (proved).
+- [28.2.E16](https://dlmf.nist.gov/28.2.E16): [`DLMF.Mathieu.IsMathieuCharExp`](DLMF/Mathieu/Basic.lean#L209) (definition); [`DLMF.Mathieu.exists_isFloquetSolution_iff_charExp`](DLMF/Mathieu/Properties.lean#L590) (proved); [`DLMF.Mathieu.mathieuWI_pi_neg_q`](DLMF/Mathieu/Properties.lean#L622) (proved).
+- [28.2.E17](https://dlmf.nist.gov/28.2.E17): [`DLMF.Mathieu.IsMathieuSolution.add_pi_add_sub_pi`](DLMF/Mathieu/Properties.lean#L732) (proved).
+- [28.2.E18](https://dlmf.nist.gov/28.2.E18): [`DLMF.Mathieu.IsFloquetSolution.exists_fourier`](DLMF/Mathieu/Properties.lean#L784) (admitted).
+- [28.2.E19](https://dlmf.nist.gov/28.2.E19): [`DLMF.Mathieu.IsFloquetSolution.exists_fourier`](DLMF/Mathieu/Properties.lean#L784) (admitted).
+- [28.2.E20](https://dlmf.nist.gov/28.2.E20): [`DLMF.Mathieu.isFloquetSolution_of_recurrence`](DLMF/Mathieu/Properties.lean#L796) (admitted).
+- [28.2.E21](https://dlmf.nist.gov/28.2.E21): [`DLMF.Mathieu.deriv_mathieuWI_half_pi_mathieuA_even`](DLMF/Mathieu/Properties.lean#L816) (proved from admissions); [`DLMF.Mathieu.mathieuWI_half_pi_mathieuA_odd`](DLMF/Mathieu/Properties.lean#L823) (proved from admissions).
+- [28.2.E22](https://dlmf.nist.gov/28.2.E22): [`DLMF.Mathieu.deriv_mathieuWII_half_pi_mathieuB_odd`](DLMF/Mathieu/Properties.lean#L830) (proved from admissions); [`DLMF.Mathieu.mathieuWII_half_pi_mathieuB_even`](DLMF/Mathieu/Properties.lean#L837) (proved from admissions).
+- [28.2.E23](https://dlmf.nist.gov/28.2.E23): [`DLMF.Mathieu.mathieuA_zero`](DLMF/Mathieu/Properties.lean#L1365) (proved).
+- [28.2.E24](https://dlmf.nist.gov/28.2.E24): [`DLMF.Mathieu.mathieuB_zero`](DLMF/Mathieu/Properties.lean#L1374) (proved).
+- [28.2.E25](https://dlmf.nist.gov/28.2.E25): [`DLMF.Mathieu.mathieu_eigenvalues_interlace_pos`](DLMF/Mathieu/Properties.lean#L1387) (admitted); [`DLMF.Mathieu.mathieu_eigenvalues_interlace_neg`](DLMF/Mathieu/Properties.lean#L1394) (admitted).
+- [28.2.E26](https://dlmf.nist.gov/28.2.E26): [`DLMF.Mathieu.mathieuA_even_neg`](DLMF/Mathieu/Properties.lean#L1404) (proved).
+- [28.2.E27](https://dlmf.nist.gov/28.2.E27): [`DLMF.Mathieu.mathieuA_odd_neg`](DLMF/Mathieu/Properties.lean#L1412) (proved).
+- [28.2.E28](https://dlmf.nist.gov/28.2.E28): [`DLMF.Mathieu.mathieuB_even_neg`](DLMF/Mathieu/Properties.lean#L1422) (proved).
+- [28.2.E29](https://dlmf.nist.gov/28.2.E29): [`DLMF.Mathieu.mathieuCe_zero_zero`](DLMF/Mathieu/Properties.lean#L1763) (proved); [`DLMF.Mathieu.mathieuCe_q_zero`](DLMF/Mathieu/Properties.lean#L1775) (proved); [`DLMF.Mathieu.mathieuSe_q_zero`](DLMF/Mathieu/Properties.lean#L1783) (proved).
+- [28.2.E30](https://dlmf.nist.gov/28.2.E30): [`DLMF.Mathieu.integral_mathieuCe_sq`](DLMF/Mathieu/Properties.lean#L1795) (proved); [`DLMF.Mathieu.integral_mathieuSe_sq`](DLMF/Mathieu/Properties.lean#L1803) (proved).
+- [28.2.E31](https://dlmf.nist.gov/28.2.E31): [`DLMF.Mathieu.integral_mathieuCe_mul_mathieuCe`](DLMF/Mathieu/Properties.lean#L1810) (proved from admissions).
+- [28.2.E32](https://dlmf.nist.gov/28.2.E32): [`DLMF.Mathieu.integral_mathieuSe_mul_mathieuSe`](DLMF/Mathieu/Properties.lean#L1818) (proved from admissions).
+- [28.2.E33](https://dlmf.nist.gov/28.2.E33): [`DLMF.Mathieu.integral_mathieuCe_mul_mathieuSe`](DLMF/Mathieu/Properties.lean#L1871) (proved from admissions).
+- [28.2.E34](https://dlmf.nist.gov/28.2.E34): [`DLMF.Mathieu.mathieuCe_even_neg_q`](DLMF/Mathieu/Properties.lean#L1879) (admitted).
+- [28.2.E35](https://dlmf.nist.gov/28.2.E35): [`DLMF.Mathieu.mathieuCe_odd_neg_q`](DLMF/Mathieu/Properties.lean#L1885) (admitted).
+- [28.2.E36](https://dlmf.nist.gov/28.2.E36): [`DLMF.Mathieu.mathieuSe_odd_neg_q`](DLMF/Mathieu/Properties.lean#L1892) (admitted).
+- [28.2.E37](https://dlmf.nist.gov/28.2.E37): [`DLMF.Mathieu.mathieuSe_even_neg_q`](DLMF/Mathieu/Properties.lean#L1899) (admitted).
+- [28.2.E38](https://dlmf.nist.gov/28.2.E38): [`DLMF.Mathieu.mathieuCe_div_mathieuCe_zero`](DLMF/Mathieu/Properties.lean#L1474) (proved).
+- [28.2.E39](https://dlmf.nist.gov/28.2.E39): [`DLMF.Mathieu.mathieuSe_div_deriv_mathieuSe_zero`](DLMF/Mathieu/Properties.lean#L1482) (proved).
+- [28.2.T1](https://dlmf.nist.gov/28.2.T1): [`DLMF.Mathieu.mathieuSpecA`](DLMF/Mathieu/Basic.lean#L265) (definition); [`DLMF.Mathieu.mathieuSpecB`](DLMF/Mathieu/Basic.lean#L272) (definition); [`DLMF.Mathieu.mathieuA`](DLMF/Mathieu/Basic.lean#L279) (definition); [`DLMF.Mathieu.mathieuB`](DLMF/Mathieu/Basic.lean#L286) (definition); [`DLMF.Mathieu.exists_solution_neumann_iff`](DLMF/Mathieu/Properties.lean#L899) (proved from admissions); [`DLMF.Mathieu.exists_solution_neumann_dirichlet_iff`](DLMF/Mathieu/Properties.lean#L945) (proved from admissions); [`DLMF.Mathieu.exists_solution_dirichlet_neumann_iff`](DLMF/Mathieu/Properties.lean#L977) (proved from admissions); [`DLMF.Mathieu.exists_solution_dirichlet_iff`](DLMF/Mathieu/Properties.lean#L1023) (proved from admissions).
+- [28.2.T2](https://dlmf.nist.gov/28.2.T2): [`DLMF.Mathieu.mathieuCe`](DLMF/Mathieu/Basic.lean#L333) (definition); [`DLMF.Mathieu.mathieuSe`](DLMF/Mathieu/Basic.lean#L341) (definition); [`DLMF.Mathieu.mathieuCe_neg`](DLMF/Mathieu/Properties.lean#L1535) (proved); [`DLMF.Mathieu.mathieuSe_neg`](DLMF/Mathieu/Properties.lean#L1540) (proved); [`DLMF.Mathieu.mathieuCe_even_add_pi`](DLMF/Mathieu/Properties.lean#L1545) (proved from admissions); [`DLMF.Mathieu.mathieuCe_odd_add_pi`](DLMF/Mathieu/Properties.lean#L1552) (proved from admissions); [`DLMF.Mathieu.mathieuSe_odd_add_pi`](DLMF/Mathieu/Properties.lean#L1559) (proved from admissions); [`DLMF.Mathieu.mathieuSe_even_add_pi`](DLMF/Mathieu/Properties.lean#L1566) (proved from admissions).
 
 ## [§28.4 Fourier Series](https://dlmf.nist.gov/28.4)
 
-- [28.4.i](https://dlmf.nist.gov/28.4.i): [`DLMF.Mathieu.mathieu_fourier_locallyUniform`](DLMF/Mathieu/FourierSeries.lean#L63) (admitted).
-- [28.4.iii](https://dlmf.nist.gov/28.4.iii): [`DLMF.Mathieu.mathieuFourier_sign`](DLMF/Mathieu/FourierSeries.lean#L176) (admitted).
-- [28.4.E1](https://dlmf.nist.gov/28.4.E1): [`DLMF.Mathieu.mathieuFourierA`](DLMF/Mathieu/Basic.lean#L414) (definition); [`DLMF.Mathieu.hasSum_mathieuCe_even`](DLMF/Mathieu/FourierSeries.lean#L35) (admitted).
-- [28.4.E2](https://dlmf.nist.gov/28.4.E2): [`DLMF.Mathieu.hasSum_mathieuCe_odd`](DLMF/Mathieu/FourierSeries.lean#L42) (admitted).
-- [28.4.E3](https://dlmf.nist.gov/28.4.E3): [`DLMF.Mathieu.mathieuFourierB`](DLMF/Mathieu/Basic.lean#L422) (definition); [`DLMF.Mathieu.hasSum_mathieuSe_odd`](DLMF/Mathieu/FourierSeries.lean#L49) (admitted).
-- [28.4.E4](https://dlmf.nist.gov/28.4.E4): [`DLMF.Mathieu.hasSum_mathieuSe_even`](DLMF/Mathieu/FourierSeries.lean#L56) (admitted).
-- [28.4.E5](https://dlmf.nist.gov/28.4.E5): [`DLMF.Mathieu.mathieuFourierA_even_rec_zero`](DLMF/Mathieu/FourierSeries.lean#L78) (admitted); [`DLMF.Mathieu.mathieuFourierA_even_rec_one`](DLMF/Mathieu/FourierSeries.lean#L86) (admitted); [`DLMF.Mathieu.mathieuFourierA_even_rec`](DLMF/Mathieu/FourierSeries.lean#L93) (admitted).
-- [28.4.E6](https://dlmf.nist.gov/28.4.E6): [`DLMF.Mathieu.mathieuFourierA_odd_rec_zero`](DLMF/Mathieu/FourierSeries.lean#L101) (admitted); [`DLMF.Mathieu.mathieuFourierA_odd_rec`](DLMF/Mathieu/FourierSeries.lean#L108) (admitted).
-- [28.4.E7](https://dlmf.nist.gov/28.4.E7): [`DLMF.Mathieu.mathieuFourierB_odd_rec_zero`](DLMF/Mathieu/FourierSeries.lean#L117) (admitted); [`DLMF.Mathieu.mathieuFourierB_odd_rec`](DLMF/Mathieu/FourierSeries.lean#L124) (admitted).
-- [28.4.E8](https://dlmf.nist.gov/28.4.E8): [`DLMF.Mathieu.mathieuFourierB_even_rec_zero`](DLMF/Mathieu/FourierSeries.lean#L133) (admitted); [`DLMF.Mathieu.mathieuFourierB_even_rec`](DLMF/Mathieu/FourierSeries.lean#L140) (admitted).
-- [28.4.E9](https://dlmf.nist.gov/28.4.E9): [`DLMF.Mathieu.hasSum_mathieuFourierA_even_sq`](DLMF/Mathieu/FourierSeries.lean#L152) (admitted).
-- [28.4.E10](https://dlmf.nist.gov/28.4.E10): [`DLMF.Mathieu.hasSum_mathieuFourierA_odd_sq`](DLMF/Mathieu/FourierSeries.lean#L158) (admitted).
-- [28.4.E11](https://dlmf.nist.gov/28.4.E11): [`DLMF.Mathieu.hasSum_mathieuFourierB_odd_sq`](DLMF/Mathieu/FourierSeries.lean#L164) (admitted).
-- [28.4.E12](https://dlmf.nist.gov/28.4.E12): [`DLMF.Mathieu.hasSum_mathieuFourierB_even_sq`](DLMF/Mathieu/FourierSeries.lean#L170) (admitted).
-- [28.4.E13](https://dlmf.nist.gov/28.4.E13): [`DLMF.Mathieu.mathieuFourierA_even_q_zero`](DLMF/Mathieu/FourierSeries.lean#L190) (admitted).
-- [28.4.E14](https://dlmf.nist.gov/28.4.E14): [`DLMF.Mathieu.mathieuFourierA_odd_q_zero`](DLMF/Mathieu/FourierSeries.lean#L198) (admitted).
-- [28.4.E15](https://dlmf.nist.gov/28.4.E15): [`DLMF.Mathieu.mathieuFourierB_odd_q_zero`](DLMF/Mathieu/FourierSeries.lean#L204) (admitted).
-- [28.4.E16](https://dlmf.nist.gov/28.4.E16): [`DLMF.Mathieu.mathieuFourierB_even_q_zero`](DLMF/Mathieu/FourierSeries.lean#L210) (admitted).
-- [28.4.E17](https://dlmf.nist.gov/28.4.E17): [`DLMF.Mathieu.mathieuFourierA_even_neg_q`](DLMF/Mathieu/FourierSeries.lean#L218) (admitted).
-- [28.4.E18](https://dlmf.nist.gov/28.4.E18): [`DLMF.Mathieu.mathieuFourierB_even_neg_q`](DLMF/Mathieu/FourierSeries.lean#L225) (admitted).
-- [28.4.E19](https://dlmf.nist.gov/28.4.E19): [`DLMF.Mathieu.mathieuFourierA_odd_neg_q`](DLMF/Mathieu/FourierSeries.lean#L232) (admitted).
-- [28.4.E20](https://dlmf.nist.gov/28.4.E20): [`DLMF.Mathieu.mathieuFourierB_odd_neg_q`](DLMF/Mathieu/FourierSeries.lean#L239) (admitted).
-- [28.4.E21](https://dlmf.nist.gov/28.4.E21): [`DLMF.Mathieu.mathieuFourierA_zero_small_q`](DLMF/Mathieu/FourierSeries.lean#L248) (admitted).
-- [28.4.E22](https://dlmf.nist.gov/28.4.E22): [`DLMF.Mathieu.mathieuFourierA_up_small_q`](DLMF/Mathieu/FourierSeries.lean#L257) (admitted); [`DLMF.Mathieu.mathieuFourierB_up_small_q`](DLMF/Mathieu/FourierSeries.lean#L267) (admitted).
-- [28.4.E23](https://dlmf.nist.gov/28.4.E23): [`DLMF.Mathieu.mathieuFourierA_down_small_q`](DLMF/Mathieu/FourierSeries.lean#L277) (admitted); [`DLMF.Mathieu.mathieuFourierB_down_small_q`](DLMF/Mathieu/FourierSeries.lean#L287) (admitted).
-- [28.4.E24](https://dlmf.nist.gov/28.4.E24): [`DLMF.Mathieu.mathieuFourierA_even_large_m`](DLMF/Mathieu/FourierSeries.lean#L299) (admitted).
-- [28.4.E25](https://dlmf.nist.gov/28.4.E25): [`DLMF.Mathieu.mathieuFourierA_odd_large_m`](DLMF/Mathieu/FourierSeries.lean#L309) (admitted).
-- [28.4.E26](https://dlmf.nist.gov/28.4.E26): [`DLMF.Mathieu.mathieuFourierB_odd_large_m`](DLMF/Mathieu/FourierSeries.lean#L320) (admitted).
-- [28.4.E27](https://dlmf.nist.gov/28.4.E27): [`DLMF.Mathieu.mathieuFourierB_even_large_m`](DLMF/Mathieu/FourierSeries.lean#L331) (admitted).
+- [28.4.i](https://dlmf.nist.gov/28.4.i): [`DLMF.Mathieu.mathieu_fourier_locallyUniform`](DLMF/Mathieu/FourierSeries.lean#L523) (admitted).
+- [28.4.iii](https://dlmf.nist.gov/28.4.iii): [`DLMF.Mathieu.mathieuFourier_sign`](DLMF/Mathieu/FourierSeries.lean#L711) (proved from admissions).
+- [28.4.E1](https://dlmf.nist.gov/28.4.E1): [`DLMF.Mathieu.mathieuFourierA`](DLMF/Mathieu/Basic.lean#L418) (definition); [`DLMF.Mathieu.hasSum_mathieuCe_even`](DLMF/Mathieu/FourierSeries.lean#L465) (proved from admissions).
+- [28.4.E2](https://dlmf.nist.gov/28.4.E2): [`DLMF.Mathieu.hasSum_mathieuCe_odd`](DLMF/Mathieu/FourierSeries.lean#L479) (proved from admissions).
+- [28.4.E3](https://dlmf.nist.gov/28.4.E3): [`DLMF.Mathieu.mathieuFourierB`](DLMF/Mathieu/Basic.lean#L426) (definition); [`DLMF.Mathieu.hasSum_mathieuSe_odd`](DLMF/Mathieu/FourierSeries.lean#L493) (proved from admissions).
+- [28.4.E4](https://dlmf.nist.gov/28.4.E4): [`DLMF.Mathieu.hasSum_mathieuSe_even`](DLMF/Mathieu/FourierSeries.lean#L507) (proved from admissions).
+- [28.4.E5](https://dlmf.nist.gov/28.4.E5): [`DLMF.Mathieu.mathieuFourierA_even_rec_zero`](DLMF/Mathieu/FourierSeries.lean#L538) (proved from admissions); [`DLMF.Mathieu.mathieuFourierA_even_rec_one`](DLMF/Mathieu/FourierSeries.lean#L550) (proved from admissions); [`DLMF.Mathieu.mathieuFourierA_even_rec`](DLMF/Mathieu/FourierSeries.lean#L561) (proved from admissions).
+- [28.4.E6](https://dlmf.nist.gov/28.4.E6): [`DLMF.Mathieu.mathieuFourierA_odd_rec_zero`](DLMF/Mathieu/FourierSeries.lean#L576) (proved from admissions); [`DLMF.Mathieu.mathieuFourierA_odd_rec`](DLMF/Mathieu/FourierSeries.lean#L586) (proved from admissions).
+- [28.4.E7](https://dlmf.nist.gov/28.4.E7): [`DLMF.Mathieu.mathieuFourierB_odd_rec_zero`](DLMF/Mathieu/FourierSeries.lean#L603) (proved from admissions); [`DLMF.Mathieu.mathieuFourierB_odd_rec`](DLMF/Mathieu/FourierSeries.lean#L613) (proved from admissions).
+- [28.4.E8](https://dlmf.nist.gov/28.4.E8): [`DLMF.Mathieu.mathieuFourierB_even_rec_zero`](DLMF/Mathieu/FourierSeries.lean#L629) (proved from admissions); [`DLMF.Mathieu.mathieuFourierB_even_rec`](DLMF/Mathieu/FourierSeries.lean#L639) (proved from admissions).
+- [28.4.E9](https://dlmf.nist.gov/28.4.E9): [`DLMF.Mathieu.hasSum_mathieuFourierA_even_sq`](DLMF/Mathieu/FourierSeries.lean#L657) (proved from admissions).
+- [28.4.E10](https://dlmf.nist.gov/28.4.E10): [`DLMF.Mathieu.hasSum_mathieuFourierA_odd_sq`](DLMF/Mathieu/FourierSeries.lean#L670) (proved from admissions).
+- [28.4.E11](https://dlmf.nist.gov/28.4.E11): [`DLMF.Mathieu.hasSum_mathieuFourierB_odd_sq`](DLMF/Mathieu/FourierSeries.lean#L683) (proved from admissions).
+- [28.4.E12](https://dlmf.nist.gov/28.4.E12): [`DLMF.Mathieu.hasSum_mathieuFourierB_even_sq`](DLMF/Mathieu/FourierSeries.lean#L696) (proved from admissions).
+- [28.4.E13](https://dlmf.nist.gov/28.4.E13): [`DLMF.Mathieu.mathieuFourierA_even_q_zero`](DLMF/Mathieu/FourierSeries.lean#L731) (proved).
+- [28.4.E14](https://dlmf.nist.gov/28.4.E14): [`DLMF.Mathieu.mathieuFourierA_odd_q_zero`](DLMF/Mathieu/FourierSeries.lean#L762) (proved).
+- [28.4.E15](https://dlmf.nist.gov/28.4.E15): [`DLMF.Mathieu.mathieuFourierB_odd_q_zero`](DLMF/Mathieu/FourierSeries.lean#L771) (proved).
+- [28.4.E16](https://dlmf.nist.gov/28.4.E16): [`DLMF.Mathieu.mathieuFourierB_even_q_zero`](DLMF/Mathieu/FourierSeries.lean#L780) (proved).
+- [28.4.E17](https://dlmf.nist.gov/28.4.E17): [`DLMF.Mathieu.mathieuFourierA_even_neg_q`](DLMF/Mathieu/FourierSeries.lean#L791) (proved from admissions).
+- [28.4.E18](https://dlmf.nist.gov/28.4.E18): [`DLMF.Mathieu.mathieuFourierB_even_neg_q`](DLMF/Mathieu/FourierSeries.lean#L810) (proved from admissions).
+- [28.4.E19](https://dlmf.nist.gov/28.4.E19): [`DLMF.Mathieu.mathieuFourierA_odd_neg_q`](DLMF/Mathieu/FourierSeries.lean#L830) (proved from admissions).
+- [28.4.E20](https://dlmf.nist.gov/28.4.E20): [`DLMF.Mathieu.mathieuFourierB_odd_neg_q`](DLMF/Mathieu/FourierSeries.lean#L849) (proved from admissions).
+- [28.4.E21](https://dlmf.nist.gov/28.4.E21): [`DLMF.Mathieu.mathieuFourierA_zero_small_q`](DLMF/Mathieu/FourierSeries.lean#L870) (admitted).
+- [28.4.E22](https://dlmf.nist.gov/28.4.E22): [`DLMF.Mathieu.mathieuFourierA_up_small_q`](DLMF/Mathieu/FourierSeries.lean#L879) (admitted); [`DLMF.Mathieu.mathieuFourierB_up_small_q`](DLMF/Mathieu/FourierSeries.lean#L889) (admitted).
+- [28.4.E23](https://dlmf.nist.gov/28.4.E23): [`DLMF.Mathieu.mathieuFourierA_down_small_q`](DLMF/Mathieu/FourierSeries.lean#L899) (admitted); [`DLMF.Mathieu.mathieuFourierB_down_small_q`](DLMF/Mathieu/FourierSeries.lean#L909) (admitted).
+- [28.4.E24](https://dlmf.nist.gov/28.4.E24): [`DLMF.Mathieu.mathieuFourierA_even_large_m`](DLMF/Mathieu/FourierSeries.lean#L921) (admitted).
+- [28.4.E25](https://dlmf.nist.gov/28.4.E25): [`DLMF.Mathieu.mathieuFourierA_odd_large_m`](DLMF/Mathieu/FourierSeries.lean#L931) (admitted).
+- [28.4.E26](https://dlmf.nist.gov/28.4.E26): [`DLMF.Mathieu.mathieuFourierB_odd_large_m`](DLMF/Mathieu/FourierSeries.lean#L942) (admitted).
+- [28.4.E27](https://dlmf.nist.gov/28.4.E27): [`DLMF.Mathieu.mathieuFourierB_even_large_m`](DLMF/Mathieu/FourierSeries.lean#L953) (admitted).
 
 ## [§28.5 Second Solutions fe_n, ge_n](https://dlmf.nist.gov/28.5)
 
-- [28.5.i](https://dlmf.nist.gov/28.5.i): [`DLMF.Mathieu.mathieu_ince`](DLMF/Mathieu/SecondSolutions.lean#L50) (admitted); [`DLMF.Mathieu.mathieuFeC_ne_zero`](DLMF/Mathieu/SecondSolutions.lean#L71) (admitted); [`DLMF.Mathieu.mathieuGeS_ne_zero`](DLMF/Mathieu/SecondSolutions.lean#L76) (admitted); [`DLMF.Mathieu.mathieuFeF_unique`](DLMF/Mathieu/SecondSolutions.lean#L101) (admitted); [`DLMF.Mathieu.mathieuGeG_unique`](DLMF/Mathieu/SecondSolutions.lean#L111) (admitted); [`DLMF.Mathieu.mathieuFeC_mathieuGeS_tendsto`](DLMF/Mathieu/SecondSolutions.lean#L129) (admitted); [`DLMF.Mathieu.mathieu_secular_unbounded`](DLMF/Mathieu/SecondSolutions.lean#L177) (admitted).
-- [28.5.E1](https://dlmf.nist.gov/28.5.E1): [`DLMF.Mathieu.mathieuFe`](DLMF/Mathieu/Basic.lean#L373) (definition); [`DLMF.Mathieu.mathieuFeC`](DLMF/Mathieu/Basic.lean#L387) (definition); [`DLMF.Mathieu.mathieuFe_eq`](DLMF/Mathieu/SecondSolutions.lean#L58) (proved).
-- [28.5.E2](https://dlmf.nist.gov/28.5.E2): [`DLMF.Mathieu.mathieuGe`](DLMF/Mathieu/Basic.lean#L380) (definition); [`DLMF.Mathieu.mathieuGeS`](DLMF/Mathieu/Basic.lean#L394) (definition); [`DLMF.Mathieu.mathieuGe_eq`](DLMF/Mathieu/SecondSolutions.lean#L65) (proved).
-- [28.5.E3](https://dlmf.nist.gov/28.5.E3): [`DLMF.Mathieu.mathieuFeF`](DLMF/Mathieu/Basic.lean#L400) (definition); [`DLMF.Mathieu.mathieuFeF_periodicity`](DLMF/Mathieu/SecondSolutions.lean#L81) (admitted).
-- [28.5.E4](https://dlmf.nist.gov/28.5.E4): [`DLMF.Mathieu.mathieuGeG`](DLMF/Mathieu/Basic.lean#L406) (definition); [`DLMF.Mathieu.mathieuGeG_periodicity`](DLMF/Mathieu/SecondSolutions.lean#L91) (admitted).
-- [28.5.E5](https://dlmf.nist.gov/28.5.E5): [`DLMF.Mathieu.mathieuFe_mathieuGe_normalization`](DLMF/Mathieu/SecondSolutions.lean#L121) (admitted).
-- [28.5.E6](https://dlmf.nist.gov/28.5.E6): [`DLMF.Mathieu.mathieuFeC_even_neg`](DLMF/Mathieu/SecondSolutions.lean#L141) (admitted); [`DLMF.Mathieu.mathieuFeC_odd_neg`](DLMF/Mathieu/SecondSolutions.lean#L146) (admitted); [`DLMF.Mathieu.mathieuGeS_even_neg`](DLMF/Mathieu/SecondSolutions.lean#L154) (admitted). The second relation is acquired corrected as `C_{2m+1}(−q) = −S_{2m+1}(q)` (see source corrections).
-- [28.5.E7](https://dlmf.nist.gov/28.5.E7): [`DLMF.Mathieu.mathieuFe_zero_zero`](DLMF/Mathieu/SecondSolutions.lean#L160) (proved); [`DLMF.Mathieu.mathieuFe_q_zero`](DLMF/Mathieu/SecondSolutions.lean#L165) (admitted); [`DLMF.Mathieu.mathieuGe_q_zero`](DLMF/Mathieu/SecondSolutions.lean#L171) (admitted).
-- [28.5.E8](https://dlmf.nist.gov/28.5.E8): [`DLMF.Mathieu.mathieuCe_mathieuFe_wronskian`](DLMF/Mathieu/SecondSolutions.lean#L188) (proved from admissions).
-- [28.5.E9](https://dlmf.nist.gov/28.5.E9): [`DLMF.Mathieu.mathieuSe_mathieuGe_wronskian`](DLMF/Mathieu/SecondSolutions.lean#L203) (proved from admissions).
+- [28.5.i](https://dlmf.nist.gov/28.5.i): [`DLMF.Mathieu.mathieu_ince`](DLMF/Mathieu/SecondSolutions.lean#L50) (admitted); [`DLMF.Mathieu.mathieuFeC_ne_zero`](DLMF/Mathieu/SecondSolutions.lean#L690) (proved from admissions); [`DLMF.Mathieu.mathieuGeS_ne_zero`](DLMF/Mathieu/SecondSolutions.lean#L763) (proved from admissions); [`DLMF.Mathieu.mathieuFeF_unique`](DLMF/Mathieu/SecondSolutions.lean#L863) (proved from admissions); [`DLMF.Mathieu.mathieuGeG_unique`](DLMF/Mathieu/SecondSolutions.lean#L895) (proved from admissions); [`DLMF.Mathieu.mathieuFeC_mathieuGeS_tendsto`](DLMF/Mathieu/SecondSolutions.lean#L945) (admitted); [`DLMF.Mathieu.mathieu_secular_unbounded`](DLMF/Mathieu/SecondSolutions.lean#L1012) (proved from admissions).
+- [28.5.E1](https://dlmf.nist.gov/28.5.E1): [`DLMF.Mathieu.mathieuFe`](DLMF/Mathieu/Basic.lean#L377) (definition); [`DLMF.Mathieu.mathieuFeC`](DLMF/Mathieu/Basic.lean#L391) (definition); [`DLMF.Mathieu.mathieuFe_eq`](DLMF/Mathieu/SecondSolutions.lean#L58) (proved).
+- [28.5.E2](https://dlmf.nist.gov/28.5.E2): [`DLMF.Mathieu.mathieuGe`](DLMF/Mathieu/Basic.lean#L384) (definition); [`DLMF.Mathieu.mathieuGeS`](DLMF/Mathieu/Basic.lean#L398) (definition); [`DLMF.Mathieu.mathieuGe_eq`](DLMF/Mathieu/SecondSolutions.lean#L65) (proved).
+- [28.5.E3](https://dlmf.nist.gov/28.5.E3): [`DLMF.Mathieu.mathieuFeF`](DLMF/Mathieu/Basic.lean#L404) (definition); [`DLMF.Mathieu.mathieuFeF_periodicity`](DLMF/Mathieu/SecondSolutions.lean#L835) (proved from admissions).
+- [28.5.E4](https://dlmf.nist.gov/28.5.E4): [`DLMF.Mathieu.mathieuGeG`](DLMF/Mathieu/Basic.lean#L410) (definition); [`DLMF.Mathieu.mathieuGeG_periodicity`](DLMF/Mathieu/SecondSolutions.lean#L849) (proved from admissions).
+- [28.5.E5](https://dlmf.nist.gov/28.5.E5): [`DLMF.Mathieu.mathieuFe_mathieuGe_normalization`](DLMF/Mathieu/SecondSolutions.lean#L936) (proved from admissions).
+- [28.5.E6](https://dlmf.nist.gov/28.5.E6): [`DLMF.Mathieu.mathieuFeC_even_neg`](DLMF/Mathieu/SecondSolutions.lean#L957) (proved from admissions); [`DLMF.Mathieu.mathieuFeC_odd_neg`](DLMF/Mathieu/SecondSolutions.lean#L962) (proved from admissions); [`DLMF.Mathieu.mathieuGeS_even_neg`](DLMF/Mathieu/SecondSolutions.lean#L970) (proved from admissions). The second relation is acquired corrected as `C_{2m+1}(−q) = −S_{2m+1}(q)` (see source corrections).
+- [28.5.E7](https://dlmf.nist.gov/28.5.E7): [`DLMF.Mathieu.mathieuFe_zero_zero`](DLMF/Mathieu/SecondSolutions.lean#L976) (proved); [`DLMF.Mathieu.mathieuFe_q_zero`](DLMF/Mathieu/SecondSolutions.lean#L981) (proved); [`DLMF.Mathieu.mathieuGe_q_zero`](DLMF/Mathieu/SecondSolutions.lean#L998) (proved).
+- [28.5.E8](https://dlmf.nist.gov/28.5.E8): [`DLMF.Mathieu.mathieuCe_mathieuFe_wronskian`](DLMF/Mathieu/SecondSolutions.lean#L1105) (proved).
+- [28.5.E9](https://dlmf.nist.gov/28.5.E9): [`DLMF.Mathieu.mathieuSe_mathieuGe_wronskian`](DLMF/Mathieu/SecondSolutions.lean#L1120) (proved).
 
 ## [§28.6 Expansions for Small q](https://dlmf.nist.gov/28.6)
 
@@ -274,16 +276,16 @@ declarations:
 
 ## [§28.10 Integral Equations](https://dlmf.nist.gov/28.10)
 
-- [28.10.E1](https://dlmf.nist.gov/28.10.E1): [`DLMF.Mathieu.integral_cos_mathieuCe_even`](DLMF/Mathieu/IntegralEquations.lean#L28) (admitted).
-- [28.10.E2](https://dlmf.nist.gov/28.10.E2): [`DLMF.Mathieu.integral_cosh_mathieuCe_even`](DLMF/Mathieu/IntegralEquations.lean#L38) (admitted).
-- [28.10.E3](https://dlmf.nist.gov/28.10.E3): [`DLMF.Mathieu.integral_sin_mathieuCe_odd`](DLMF/Mathieu/IntegralEquations.lean#L48) (admitted).
-- [28.10.E4](https://dlmf.nist.gov/28.10.E4): [`DLMF.Mathieu.integral_cos_cosh_mathieuCe_odd`](DLMF/Mathieu/IntegralEquations.lean#L59) (admitted).
-- [28.10.E5](https://dlmf.nist.gov/28.10.E5): [`DLMF.Mathieu.integral_sinh_mathieuSe_odd`](DLMF/Mathieu/IntegralEquations.lean#L69) (admitted).
-- [28.10.E6](https://dlmf.nist.gov/28.10.E6): [`DLMF.Mathieu.integral_sin_cos_mathieuSe_odd`](DLMF/Mathieu/IntegralEquations.lean#L79) (admitted).
-- [28.10.E7](https://dlmf.nist.gov/28.10.E7): [`DLMF.Mathieu.integral_sin_sin_mathieuSe_even`](DLMF/Mathieu/IntegralEquations.lean#L89) (admitted).
-- [28.10.E8](https://dlmf.nist.gov/28.10.E8): [`DLMF.Mathieu.integral_cos_sinh_mathieuSe_even`](DLMF/Mathieu/IntegralEquations.lean#L100) (admitted).
-- [28.10.E9](https://dlmf.nist.gov/28.10.E9): [`DLMF.Mathieu.integral_besselJ_mathieuCe_even`](DLMF/Mathieu/IntegralEquations.lean#L111) (admitted).
-- [28.10.E10](https://dlmf.nist.gov/28.10.E10): [`DLMF.Mathieu.integral_besselJ_mathieuCe`](DLMF/Mathieu/IntegralEquations.lean#L121) (admitted).
+- [28.10.E1](https://dlmf.nist.gov/28.10.E1): [`DLMF.Mathieu.integral_cos_mathieuCe_even`](DLMF/Mathieu/IntegralEquations.lean#L435) (proved from admissions).
+- [28.10.E2](https://dlmf.nist.gov/28.10.E2): [`DLMF.Mathieu.integral_cosh_mathieuCe_even`](DLMF/Mathieu/IntegralEquations.lean#L556) (proved from admissions).
+- [28.10.E3](https://dlmf.nist.gov/28.10.E3): [`DLMF.Mathieu.integral_sin_mathieuCe_odd`](DLMF/Mathieu/IntegralEquations.lean#L637) (proved from admissions).
+- [28.10.E4](https://dlmf.nist.gov/28.10.E4): [`DLMF.Mathieu.integral_cos_cosh_mathieuCe_odd`](DLMF/Mathieu/IntegralEquations.lean#L700) (proved from admissions).
+- [28.10.E5](https://dlmf.nist.gov/28.10.E5): [`DLMF.Mathieu.integral_sinh_mathieuSe_odd`](DLMF/Mathieu/IntegralEquations.lean#L769) (proved from admissions).
+- [28.10.E6](https://dlmf.nist.gov/28.10.E6): [`DLMF.Mathieu.integral_sin_cos_mathieuSe_odd`](DLMF/Mathieu/IntegralEquations.lean#L834) (proved from admissions).
+- [28.10.E7](https://dlmf.nist.gov/28.10.E7): [`DLMF.Mathieu.integral_sin_sin_mathieuSe_even`](DLMF/Mathieu/IntegralEquations.lean#L905) (proved from admissions).
+- [28.10.E8](https://dlmf.nist.gov/28.10.E8): [`DLMF.Mathieu.integral_cos_sinh_mathieuSe_even`](DLMF/Mathieu/IntegralEquations.lean#L980) (proved from admissions).
+- [28.10.E9](https://dlmf.nist.gov/28.10.E9): [`DLMF.Mathieu.integral_besselJ_mathieuCe_even`](DLMF/Mathieu/IntegralEquations.lean#L1054) (admitted).
+- [28.10.E10](https://dlmf.nist.gov/28.10.E10): [`DLMF.Mathieu.integral_besselJ_mathieuCe`](DLMF/Mathieu/IntegralEquations.lean#L1064) (admitted).
 
 ## [§28.11 Expansions in Series of Mathieu Functions](https://dlmf.nist.gov/28.11)
 
@@ -463,24 +465,24 @@ Source corrections and checks (scripts in the agent's scratch directory `acq28b/
 
 ## [§28.12 Definitions and Basic Properties](https://dlmf.nist.gov/28.12)
 
-- [28.12.i](https://dlmf.nist.gov/28.12.i): [`DLMF.Mathieu.mathieuLambda`](DLMF/Mathieu/Noninteger/Defs.lean#L113) (definition); [`DLMF.Mathieu.isMathieuCharExp_mathieuLambda`](DLMF/Mathieu/Noninteger/Properties.lean#L231) (admitted); [`DLMF.Mathieu.isMathieuCharExp_iff_exists_mathieuLambda`](DLMF/Mathieu/Noninteger/Properties.lean#L239) (admitted); [`DLMF.Mathieu.mathieuNormalSegment_real`](DLMF/Mathieu/Noninteger/Properties.lean#L248) (admitted); [`DLMF.Mathieu.not_continuousAt_mathieuLambda`](DLMF/Mathieu/Noninteger/Properties.lean#L255) (admitted). `mathieuLambda` (λ_ν(q)): straight-segment continuation from ν² (design note); characterization by 28.2.16, the set of roots `{λ_{ν+2n}}`, reality/normality for real ν, q, discontinuity at integers.
-- [28.12.ii](https://dlmf.nist.gov/28.12.ii): [`DLMF.Mathieu.mathieuMe`](DLMF/Mathieu/Noninteger/Defs.lean#L124) (definition); [`DLMF.Mathieu.isFloquetSolution_mathieuMe`](DLMF/Mathieu/Noninteger/Properties.lean#L372) (admitted). `mathieuMe` (me_ν): Fourier series with the continued coefficients; Floquet property admitted.
-- [28.12.iii](https://dlmf.nist.gov/28.12.iii): [`DLMF.Mathieu.mathieuCeNu_mathieuSeNu_real`](DLMF/Mathieu/Noninteger/Properties.lean#L477) (proved); [`DLMF.Mathieu.mathieu_periodic_of_rational`](DLMF/Mathieu/Noninteger/Properties.lean#L491) (admitted). Reality of ce_ν, se_ν for real ν, q, x (proved from 28.12.10); periodicity 2mπ for rational ν = s/m ∉ ℤ (admitted).
-- [28.12.E1](https://dlmf.nist.gov/28.12.E1): [`DLMF.Mathieu.mathieuLambda_zero`](DLMF/Mathieu/Noninteger/Properties.lean#L225) (proved). For ν ∉ ℤ; proved from the definition (the continuation at q = 0 is constant).
-- [28.12.E2](https://dlmf.nist.gov/28.12.E2): [`DLMF.Mathieu.mathieuLambda_neg_q_and_neg_nu`](DLMF/Mathieu/Noninteger/Properties.lean#L345) (proved). For ν ∉ ℤ (false for integer ν with 28.12.3: λ₁(-q) = b₁(q)); proved by transporting continuation paths.
-- [28.12.E3](https://dlmf.nist.gov/28.12.E3): [`DLMF.Mathieu.mathieuLambda_intCast_eq`](DLMF/Mathieu/Noninteger/Properties.lean#L353) (proved). Integer order, real q (definition completion via `mathieuLambdaInt`).
-- [28.12.E4](https://dlmf.nist.gov/28.12.E4): [`DLMF.Mathieu.mathieuMe_zero`](DLMF/Mathieu/Noninteger/Properties.lean#L363) (proved). ν ∉ ℤ.
-- [28.12.E5](https://dlmf.nist.gov/28.12.E5): [`DLMF.Mathieu.integral_mathieuMe_mul_neg`](DLMF/Mathieu/Noninteger/Properties.lean#L382) (admitted). ν ∉ ℤ, q normal along the segment.
-- [28.12.E6](https://dlmf.nist.gov/28.12.E6): [`DLMF.Mathieu.mathieuMe_add_pi`](DLMF/Mathieu/Noninteger/Properties.lean#L390) (proved). ν ∉ ℤ, all q.
-- [28.12.E7](https://dlmf.nist.gov/28.12.E7): [`DLMF.Mathieu.integral_mathieuMe_orthogonal`](DLMF/Mathieu/Noninteger/Properties.lean#L403) (admitted). ν ∉ ℤ, q normal for ν + 2m and ν + 2n.
-- [28.12.E8](https://dlmf.nist.gov/28.12.E8): [`DLMF.Mathieu.mathieuMe_neg_nu`](DLMF/Mathieu/Noninteger/Properties.lean#L413) (proved). ν ∉ ℤ; proved (reindexing m ↦ -m).
-- [28.12.E9](https://dlmf.nist.gov/28.12.E9): [`DLMF.Mathieu.mathieuMe_neg_q`](DLMF/Mathieu/Noninteger/Properties.lean#L425) (proved). ν ∉ ℤ; proved from 28.14.8.
-- [28.12.E10](https://dlmf.nist.gov/28.12.E10): [`DLMF.Mathieu.conj_mathieuMe`](DLMF/Mathieu/Noninteger/Properties.lean#L440) (proved). Stronger than DLMF: with the straight-segment continuation valid for every q (DLMF excepts cuts on the real q-axis for special complex ν).
-- [28.12.E11](https://dlmf.nist.gov/28.12.E11): [`DLMF.Mathieu.mathieuMe_natCast`](DLMF/Mathieu/Noninteger/Properties.lean#L455) (proved); [`DLMF.Mathieu.mathieuMe_neg_natCast`](DLMF/Mathieu/Noninteger/Properties.lean#L464) (proved). Integer order, real q (definition completion via `mathieuMeInt`).
+- [28.12.i](https://dlmf.nist.gov/28.12.i): [`DLMF.Mathieu.mathieuLambda`](DLMF/Mathieu/Noninteger/Defs.lean#L113) (definition); [`DLMF.Mathieu.isMathieuCharExp_mathieuLambda`](DLMF/Mathieu/Noninteger/Properties.lean#L864) (proved); [`DLMF.Mathieu.isMathieuCharExp_iff_exists_mathieuLambda`](DLMF/Mathieu/Noninteger/Properties.lean#L242) (admitted); [`DLMF.Mathieu.mathieuNormalSegment_real`](DLMF/Mathieu/Noninteger/Properties.lean#L251) (admitted); [`DLMF.Mathieu.not_continuousAt_mathieuLambda`](DLMF/Mathieu/Noninteger/Properties.lean#L258) (admitted). `mathieuLambda` (λ_ν(q)): straight-segment continuation from ν² (design note); characterization by 28.2.16, the set of roots `{λ_{ν+2n}}`, reality/normality for real ν, q, discontinuity at integers.
+- [28.12.ii](https://dlmf.nist.gov/28.12.ii): [`DLMF.Mathieu.mathieuMe`](DLMF/Mathieu/Noninteger/Defs.lean#L124) (definition); [`DLMF.Mathieu.isFloquetSolution_mathieuMe`](DLMF/Mathieu/Noninteger/Properties.lean#L750) (proved). `mathieuMe` (me_ν): Fourier series with the continued coefficients; Floquet property admitted.
+- [28.12.iii](https://dlmf.nist.gov/28.12.iii): [`DLMF.Mathieu.mathieuCeNu_mathieuSeNu_real`](DLMF/Mathieu/Noninteger/Properties.lean#L925) (proved); [`DLMF.Mathieu.mathieu_periodic_of_rational`](DLMF/Mathieu/Noninteger/Properties.lean#L972) (proved). Reality of ce_ν, se_ν for real ν, q, x (proved from 28.12.10); periodicity 2mπ for rational ν = s/m ∉ ℤ (admitted).
+- [28.12.E1](https://dlmf.nist.gov/28.12.E1): [`DLMF.Mathieu.mathieuLambda_zero`](DLMF/Mathieu/Noninteger/Properties.lean#L236) (proved). For ν ∉ ℤ; proved from the definition (the continuation at q = 0 is constant).
+- [28.12.E2](https://dlmf.nist.gov/28.12.E2): [`DLMF.Mathieu.mathieuLambda_neg_q_and_neg_nu`](DLMF/Mathieu/Noninteger/Properties.lean#L348) (proved). For ν ∉ ℤ (false for integer ν with 28.12.3: λ₁(-q) = b₁(q)); proved by transporting continuation paths.
+- [28.12.E3](https://dlmf.nist.gov/28.12.E3): [`DLMF.Mathieu.mathieuLambda_intCast_eq`](DLMF/Mathieu/Noninteger/Properties.lean#L356) (proved). Integer order, real q (definition completion via `mathieuLambdaInt`).
+- [28.12.E4](https://dlmf.nist.gov/28.12.E4): [`DLMF.Mathieu.mathieuMe_zero`](DLMF/Mathieu/Noninteger/Properties.lean#L691) (proved). ν ∉ ℤ.
+- [28.12.E5](https://dlmf.nist.gov/28.12.E5): [`DLMF.Mathieu.integral_mathieuMe_mul_neg`](DLMF/Mathieu/Noninteger/Properties.lean#L700) (proved). ν ∉ ℤ, q normal along the segment.
+- [28.12.E6](https://dlmf.nist.gov/28.12.E6): [`DLMF.Mathieu.mathieuMe_add_pi`](DLMF/Mathieu/Noninteger/Properties.lean#L715) (proved). ν ∉ ℤ, all q.
+- [28.12.E7](https://dlmf.nist.gov/28.12.E7): [`DLMF.Mathieu.integral_mathieuMe_orthogonal`](DLMF/Mathieu/Noninteger/Properties.lean#L728) (admitted). ν ∉ ℤ, q normal for ν + 2m and ν + 2n.
+- [28.12.E8](https://dlmf.nist.gov/28.12.E8): [`DLMF.Mathieu.mathieuMe_neg_nu`](DLMF/Mathieu/Noninteger/Properties.lean#L738) (proved). ν ∉ ℤ; proved (reindexing m ↦ -m).
+- [28.12.E9](https://dlmf.nist.gov/28.12.E9): [`DLMF.Mathieu.mathieuMe_neg_q`](DLMF/Mathieu/Noninteger/Properties.lean#L873) (proved). ν ∉ ℤ; proved from 28.14.8.
+- [28.12.E10](https://dlmf.nist.gov/28.12.E10): [`DLMF.Mathieu.conj_mathieuMe`](DLMF/Mathieu/Noninteger/Properties.lean#L888) (proved). Stronger than DLMF: with the straight-segment continuation valid for every q (DLMF excepts cuts on the real q-axis for special complex ν).
+- [28.12.E11](https://dlmf.nist.gov/28.12.E11): [`DLMF.Mathieu.mathieuMe_natCast`](DLMF/Mathieu/Noninteger/Properties.lean#L903) (proved); [`DLMF.Mathieu.mathieuMe_neg_natCast`](DLMF/Mathieu/Noninteger/Properties.lean#L912) (proved). Integer order, real q (definition completion via `mathieuMeInt`).
 - [28.12.E12](https://dlmf.nist.gov/28.12.E12): [`DLMF.Mathieu.mathieuCeNu`](DLMF/Mathieu/Noninteger/Defs.lean#L145) (definition). Definition for every ν; used for ν ∉ ℤ.
 - [28.12.E13](https://dlmf.nist.gov/28.12.E13): [`DLMF.Mathieu.mathieuSeNu`](DLMF/Mathieu/Noninteger/Defs.lean#L151) (definition). Definition for every ν; used for ν ∉ ℤ.
-- [28.12.E14](https://dlmf.nist.gov/28.12.E14): [`DLMF.Mathieu.mathieuCeNu_neg`](DLMF/Mathieu/Noninteger/Properties.lean#L500) (proved). ν ∉ ℤ.
-- [28.12.E15](https://dlmf.nist.gov/28.12.E15): [`DLMF.Mathieu.mathieuSeNu_neg`](DLMF/Mathieu/Noninteger/Properties.lean#L508) (proved). ν ∉ ℤ.
+- [28.12.E14](https://dlmf.nist.gov/28.12.E14): [`DLMF.Mathieu.mathieuCeNu_neg`](DLMF/Mathieu/Noninteger/Properties.lean#L1013) (proved). ν ∉ ℤ.
+- [28.12.E15](https://dlmf.nist.gov/28.12.E15): [`DLMF.Mathieu.mathieuSeNu_neg`](DLMF/Mathieu/Noninteger/Properties.lean#L1021) (proved). ν ∉ ℤ.
 
 ## [§28.13 Graphics](https://dlmf.nist.gov/28.13)
 
@@ -488,30 +490,30 @@ Source corrections and checks (scripts in the agent's scratch directory `acq28b/
 
 ## [§28.14 Fourier Series](https://dlmf.nist.gov/28.14)
 
-- [28.14.E1](https://dlmf.nist.gov/28.14.E1): [`DLMF.Mathieu.mathieuMeCoeff`](DLMF/Mathieu/Noninteger/Defs.lean#L134) (definition); [`DLMF.Mathieu.hasSum_mathieuMe`](DLMF/Mathieu/Noninteger/Fourier.lean#L36) (admitted); [`DLMF.Mathieu.hasSum_mathieuMe_ofReal`](DLMF/Mathieu/Noninteger/Fourier.lean#L50) (proved). `mathieuMeCoeff ν q m` = c^ν_{2m}(q); absolute and locally uniform convergence on ℂ admitted; the real-axis case is proved (ℓ¹ coefficients by construction).
-- [28.14.E2](https://dlmf.nist.gov/28.14.E2): [`DLMF.Mathieu.hasSum_mathieuCeNu`](DLMF/Mathieu/Noninteger/Fourier.lean#L87) (proved from admissions). From 28.14.1.
-- [28.14.E3](https://dlmf.nist.gov/28.14.E3): [`DLMF.Mathieu.hasSum_mathieuSeNu`](DLMF/Mathieu/Noninteger/Fourier.lean#L100) (proved from admissions). From 28.14.1.
-- [28.14.E4](https://dlmf.nist.gov/28.14.E4): [`DLMF.Mathieu.mathieuMeCoeff_recurrence`](DLMF/Mathieu/Noninteger/Fourier.lean#L113) (proved). From the definition (q normal along the segment).
-- [28.14.E5](https://dlmf.nist.gov/28.14.E5): [`DLMF.Mathieu.hasSum_mathieuMeCoeff_sq`](DLMF/Mathieu/Noninteger/Fourier.lean#L124) (proved). From the definition.
-- [28.14.E6](https://dlmf.nist.gov/28.14.E6): [`DLMF.Mathieu.mathieuMeCoeff_ratio`](DLMF/Mathieu/Noninteger/Fourier.lean#L132) (admitted). Stated as c_{2m}/c_{2m∓2} + q/(4m²) = O(m⁻³), m → ±∞, q ≠ 0.
-- [28.14.E7](https://dlmf.nist.gov/28.14.E7): [`DLMF.Mathieu.mathieuMeCoeff_neg`](DLMF/Mathieu/Noninteger/Fourier.lean#L144) (proved). ν ∉ ℤ.
-- [28.14.E8](https://dlmf.nist.gov/28.14.E8): [`DLMF.Mathieu.mathieuMeCoeff_neg_q`](DLMF/Mathieu/Noninteger/Fourier.lean#L153) (proved). ν ∉ ℤ.
-- [28.14.E9](https://dlmf.nist.gov/28.14.E9): [`DLMF.Mathieu.mathieuMeCoeff_zero`](DLMF/Mathieu/Noninteger/Fourier.lean#L160) (proved). ν ∉ ℤ.
-- [28.14.E10](https://dlmf.nist.gov/28.14.E10): [`DLMF.Mathieu.mathieuMeCoeff_isBigO_zero`](DLMF/Mathieu/Noninteger/Fourier.lean#L168) (admitted). c_{2m} - (leading term) c_0 = O(q^{m+2}), q → 0 in ℂ, m ≥ 1 (equivalent to DLMF since c_0 → 1). Checked numerically.
+- [28.14.E1](https://dlmf.nist.gov/28.14.E1): [`DLMF.Mathieu.mathieuMeCoeff`](DLMF/Mathieu/Noninteger/Defs.lean#L134) (definition); [`DLMF.Mathieu.hasSum_mathieuMe`](DLMF/Mathieu/Noninteger/Fourier.lean#L37) (proved); [`DLMF.Mathieu.hasSum_mathieuMe_ofReal`](DLMF/Mathieu/Noninteger/Fourier.lean#L68) (proved). `mathieuMeCoeff ν q m` = c^ν_{2m}(q); absolute and locally uniform convergence on ℂ admitted; the real-axis case is proved (ℓ¹ coefficients by construction).
+- [28.14.E2](https://dlmf.nist.gov/28.14.E2): [`DLMF.Mathieu.hasSum_mathieuCeNu`](DLMF/Mathieu/Noninteger/Fourier.lean#L105) (proved). From 28.14.1.
+- [28.14.E3](https://dlmf.nist.gov/28.14.E3): [`DLMF.Mathieu.hasSum_mathieuSeNu`](DLMF/Mathieu/Noninteger/Fourier.lean#L118) (proved). From 28.14.1.
+- [28.14.E4](https://dlmf.nist.gov/28.14.E4): [`DLMF.Mathieu.mathieuMeCoeff_recurrence`](DLMF/Mathieu/Noninteger/Fourier.lean#L131) (proved). From the definition (q normal along the segment).
+- [28.14.E5](https://dlmf.nist.gov/28.14.E5): [`DLMF.Mathieu.hasSum_mathieuMeCoeff_sq`](DLMF/Mathieu/Noninteger/Fourier.lean#L142) (proved). From the definition.
+- [28.14.E6](https://dlmf.nist.gov/28.14.E6): [`DLMF.Mathieu.mathieuMeCoeff_ratio`](DLMF/Mathieu/Noninteger/Fourier.lean#L316) (proved). Stated as c_{2m}/c_{2m∓2} + q/(4m²) = O(m⁻³), m → ±∞, q ≠ 0.
+- [28.14.E7](https://dlmf.nist.gov/28.14.E7): [`DLMF.Mathieu.mathieuMeCoeff_neg`](DLMF/Mathieu/Noninteger/Fourier.lean#L350) (proved). ν ∉ ℤ.
+- [28.14.E8](https://dlmf.nist.gov/28.14.E8): [`DLMF.Mathieu.mathieuMeCoeff_neg_q`](DLMF/Mathieu/Noninteger/Fourier.lean#L359) (proved). ν ∉ ℤ.
+- [28.14.E9](https://dlmf.nist.gov/28.14.E9): [`DLMF.Mathieu.mathieuMeCoeff_zero`](DLMF/Mathieu/Noninteger/Fourier.lean#L366) (proved). ν ∉ ℤ.
+- [28.14.E10](https://dlmf.nist.gov/28.14.E10): [`DLMF.Mathieu.mathieuMeCoeff_isBigO_zero`](DLMF/Mathieu/Noninteger/Fourier.lean#L374) (admitted). c_{2m} - (leading term) c_0 = O(q^{m+2}), q → 0 in ℂ, m ≥ 1 (equivalent to DLMF since c_0 → 1). Checked numerically.
 
 ## [§28.15 Expansions for Small 𝑞](https://dlmf.nist.gov/28.15)
 
-- [28.15.E1](https://dlmf.nist.gov/28.15.E1): [`DLMF.Mathieu.mathieuLambda_isBigO_zero`](DLMF/Mathieu/Noninteger/Expansions.lean#L38) (admitted). Remainder O(q⁸) as q → 0 in ℂ, ν ∉ ℤ. Checked numerically (ν = 0.3, 1.7, 2.5, q = 0.05: error ~ 4·10⁻¹³).
-- [28.15.E2](https://dlmf.nist.gov/28.15.E2): [`DLMF.Mathieu.mathieuLambda_contFrac`](DLMF/Mathieu/Noninteger/Expansions.lean#L50) (admitted). Continued fractions as limits of the approximants `mathieuContFrac`; DLMF's remark "higher coefficients can be found by equating powers" is not a separate statement.
-- [28.15.E3](https://dlmf.nist.gov/28.15.E3): [`DLMF.Mathieu.mathieuMe_isBigO_zero`](DLMF/Mathieu/Noninteger/Expansions.lean#L64) (admitted). Remainder O(q³) for fixed z. Coefficients checked numerically.
+- [28.15.E1](https://dlmf.nist.gov/28.15.E1): [`DLMF.Mathieu.mathieuLambda_isBigO_zero`](DLMF/Mathieu/Noninteger/Expansions.lean#L39) (admitted). Remainder O(q⁸) as q → 0 in ℂ, ν ∉ ℤ. Checked numerically (ν = 0.3, 1.7, 2.5, q = 0.05: error ~ 4·10⁻¹³).
+- [28.15.E2](https://dlmf.nist.gov/28.15.E2): [`DLMF.Mathieu.mathieuLambda_contFrac`](DLMF/Mathieu/Noninteger/Expansions.lean#L51) (admitted). Continued fractions as limits of the approximants `mathieuContFrac`; DLMF's remark "higher coefficients can be found by equating powers" is not a separate statement.
+- [28.15.E3](https://dlmf.nist.gov/28.15.E3): [`DLMF.Mathieu.mathieuMe_isBigO_zero`](DLMF/Mathieu/Noninteger/Expansions.lean#L65) (admitted). Remainder O(q³) for fixed z. Coefficients checked numerically.
 
 ## [§28.16 Asymptotic Expansions for Large 𝑞](https://dlmf.nist.gov/28.16)
 
-- [28.16.E1](https://dlmf.nist.gov/28.16.E1): [`DLMF.Mathieu.mathieuLambda_isBigO_atTop`](DLMF/Mathieu/Noninteger/Expansions.lean#L81) (admitted). Remainder after the printed terms O(h⁻⁶), h → +∞, real ν ∈ (m, m+1). Checked numerically.
+- [28.16.E1](https://dlmf.nist.gov/28.16.E1): [`DLMF.Mathieu.mathieuLambda_isBigO_atTop`](DLMF/Mathieu/Noninteger/Expansions.lean#L82) (admitted). Remainder after the printed terms O(h⁻⁶), h → +∞, real ν ∈ (m, m+1). Checked numerically.
 
 ## [§28.17 Stability as 𝑥 → ±∞](https://dlmf.nist.gov/28.17)
 
-- [28.17](https://dlmf.nist.gov/28.17): [`DLMF.Mathieu.IsMathieuStable`](DLMF/Mathieu/Noninteger/Defs.lean#L199) (definition); [`DLMF.Mathieu.isMathieuStable_q_zero`](DLMF/Mathieu/Noninteger/Expansions.lean#L99) (proved); [`DLMF.Mathieu.isMathieuStable_mathieuLambda`](DLMF/Mathieu/Noninteger/Expansions.lean#L148) (admitted); [`DLMF.Mathieu.not_isMathieuStable_of_im_ne_zero`](DLMF/Mathieu/Noninteger/Expansions.lean#L155) (admitted); [`DLMF.Mathieu.mathieuMe_tendsto_or`](DLMF/Mathieu/Noninteger/Expansions.lean#L165) (admitted); [`DLMF.Mathieu.isOpen_mathieuStable_and_frontier`](DLMF/Mathieu/Noninteger/Expansions.lean#L176) (admitted). `IsMathieuStable` (definition, ¶1); stable pairs for q = 0, a > 0 (proved) and for real ν ∉ ℤ (¶2); instability for ℑν ≠ 0 and unboundedness of all nontrivial solutions, behaviour of me_ν(±x) (¶3); openness of the real stability region and its boundary on the characteristic curves (¶4). Figure 28.17.1 excluded: graphics.
+- [28.17](https://dlmf.nist.gov/28.17): [`DLMF.Mathieu.IsMathieuStable`](DLMF/Mathieu/Noninteger/Defs.lean#L199) (definition); [`DLMF.Mathieu.isMathieuStable_q_zero`](DLMF/Mathieu/Noninteger/Expansions.lean#L100) (proved); [`DLMF.Mathieu.isMathieuStable_mathieuLambda`](DLMF/Mathieu/Noninteger/Expansions.lean#L204) (proved from admissions); [`DLMF.Mathieu.not_isMathieuStable_of_im_ne_zero`](DLMF/Mathieu/Noninteger/Expansions.lean#L330) (proved); [`DLMF.Mathieu.mathieuMe_tendsto_or`](DLMF/Mathieu/Noninteger/Expansions.lean#L260) (proved); [`DLMF.Mathieu.isOpen_mathieuStable_and_frontier`](DLMF/Mathieu/Noninteger/Expansions.lean#L359) (admitted). `IsMathieuStable` (definition, ¶1); stable pairs for q = 0, a > 0 (proved) and for real ν ∉ ℤ (¶2); instability for ℑν ≠ 0 and unboundedness of all nontrivial solutions, behaviour of me_ν(±x) (¶3); openness of the real stability region and its boundary on the characteristic curves (¶4). Figure 28.17.1 excluded: graphics.
 
 ## [§28.18 Integrals and Integral Equations](https://dlmf.nist.gov/28.18)
 
@@ -519,38 +521,38 @@ Source corrections and checks (scripts in the agent's scratch directory `acq28b/
 
 ## [§28.19 Expansions in Series of me_{ν+2n} Functions](https://dlmf.nist.gov/28.19)
 
-- [28.19.E1](https://dlmf.nist.gov/28.19.E1): [`DLMF.Mathieu.hasSum_mathieuMe_expansion`](DLMF/Mathieu/Noninteger/Expansions.lean#L188) (admitted). Hypotheses: ν ∉ ℤ, q normal for every ν + 2n, f analytic on a strip a < ℑz < b.
-- [28.19.E2](https://dlmf.nist.gov/28.19.E2): [`DLMF.Mathieu.hasSum_mathieuMe_expansion`](DLMF/Mathieu/Noninteger/Expansions.lean#L188) (admitted).
-- [28.19.E3](https://dlmf.nist.gov/28.19.E3): [`DLMF.Mathieu.hasSum_mathieuMe_expansion`](DLMF/Mathieu/Noninteger/Expansions.lean#L188) (admitted).
-- [28.19.E4](https://dlmf.nist.gov/28.19.E4): [`DLMF.Mathieu.hasSum_exp_mathieuMe`](DLMF/Mathieu/Noninteger/Expansions.lean#L208) (admitted).
+- [28.19.E1](https://dlmf.nist.gov/28.19.E1): [`DLMF.Mathieu.hasSum_mathieuMe_expansion`](DLMF/Mathieu/Noninteger/Expansions.lean#L371) (admitted). Hypotheses: ν ∉ ℤ, q normal for every ν + 2n, f analytic on a strip a < ℑz < b.
+- [28.19.E2](https://dlmf.nist.gov/28.19.E2): [`DLMF.Mathieu.hasSum_mathieuMe_expansion`](DLMF/Mathieu/Noninteger/Expansions.lean#L371) (admitted).
+- [28.19.E3](https://dlmf.nist.gov/28.19.E3): [`DLMF.Mathieu.hasSum_mathieuMe_expansion`](DLMF/Mathieu/Noninteger/Expansions.lean#L371) (admitted).
+- [28.19.E4](https://dlmf.nist.gov/28.19.E4): [`DLMF.Mathieu.hasSum_exp_mathieuMe`](DLMF/Mathieu/Noninteger/Expansions.lean#L391) (admitted).
 
 ## [§28.29 Definitions and Basic Properties (Hill's Equation)](https://dlmf.nist.gov/28.29)
 
-- [28.29.i](https://dlmf.nist.gov/28.29.i): [`DLMF.Mathieu.IsHillPotential`](DLMF/Mathieu/Hill/Defs.lean#L98) (definition); [`DLMF.Mathieu.isHillPotential_mathieu`](DLMF/Mathieu/Hill/Floquet.lean#L49) (proved). Mathieu's equation as Hill's equation (proved: Q = -2q cos 2x satisfies 28.29.2–28.29.3); hypotheses on Q.
-- [28.29.ii](https://dlmf.nist.gov/28.29.ii): [`DLMF.Mathieu.hill_exists_solution`](DLMF/Mathieu/Hill/Floquet.lean#L70) (admitted); [`DLMF.Mathieu.hillWI_spec`](DLMF/Mathieu/Hill/Floquet.lean#L95) (proved from admissions); [`DLMF.Mathieu.hillWII_spec`](DLMF/Mathieu/Hill/Floquet.lean#L106) (proved from admissions); [`DLMF.Mathieu.differentiable_hillDiscriminant`](DLMF/Mathieu/Hill/Floquet.lean#L214) (admitted); [`DLMF.Mathieu.exists_hillFloquet_fundamental_pair`](DLMF/Mathieu/Hill/Floquet.lean#L233) (admitted); [`DLMF.Mathieu.hill_all_periodic_of_minimal_period`](DLMF/Mathieu/Hill/Floquet.lean#L266) (admitted); [`DLMF.Mathieu.IsHillSolution.floquet_or`](DLMF/Mathieu/Hill/Floquet.lean#L285) (admitted); [`DLMF.Mathieu.hillWI_neg_of_even`](DLMF/Mathieu/Hill/Floquet.lean#L297) (proved from admissions); [`DLMF.Mathieu.hillWII_neg_of_even`](DLMF/Mathieu/Hill/Floquet.lean#L315) (proved from admissions). Existence (flagged, admitted) and uniqueness (proved) of solutions, basic solutions w_I, w_II (definitions by choice), entire discriminant, fundamental pair, period nπ, Floquet-or-shift, symmetric case (w_I even, w_II odd: proved from existence).
-- [28.29.iii](https://dlmf.nist.gov/28.29.iii): [`DLMF.Mathieu.differentiable_hillDiscriminant`](DLMF/Mathieu/Hill/Floquet.lean#L214) (admitted); [`DLMF.Mathieu.hillDiscriminant_order_half`](DLMF/Mathieu/Hill/Floquet.lean#L346) (admitted); [`DLMF.Mathieu.infinite_hillDiscriminant_eq`](DLMF/Mathieu/Hill/Floquet.lean#L358) (admitted); [`DLMF.Mathieu.hillPeriodicEigenvalue_spec`](DLMF/Mathieu/Hill/Floquet.lean#L367) (admitted); [`DLMF.Mathieu.hillAntiperiodicEigenvalue_spec`](DLMF/Mathieu/Hill/Floquet.lean#L380) (admitted). Real Q: Δ entire of order exactly ½; infinitely many roots of Δ = 2cos πν; the eigenvalue sequences.
+- [28.29.i](https://dlmf.nist.gov/28.29.i): [`DLMF.Mathieu.IsHillPotential`](DLMF/Mathieu/Hill/Defs.lean#L98) (definition); [`DLMF.Mathieu.isHillPotential_mathieu`](DLMF/Mathieu/Hill/Floquet.lean#L54) (proved). Mathieu's equation as Hill's equation (proved: Q = -2q cos 2x satisfies 28.29.2–28.29.3); hypotheses on Q.
+- [28.29.ii](https://dlmf.nist.gov/28.29.ii): [`DLMF.Mathieu.hill_exists_solution`](DLMF/Mathieu/Hill/Floquet.lean#L75) (proved); [`DLMF.Mathieu.hillWI_spec`](DLMF/Mathieu/Hill/Floquet.lean#L105) (proved); [`DLMF.Mathieu.hillWII_spec`](DLMF/Mathieu/Hill/Floquet.lean#L116) (proved); [`DLMF.Mathieu.differentiable_hillDiscriminant`](DLMF/Mathieu/Hill/Floquet.lean#L504) (proved); [`DLMF.Mathieu.exists_hillFloquet_fundamental_pair`](DLMF/Mathieu/Hill/Floquet.lean#L539) (proved); [`DLMF.Mathieu.hill_all_periodic_of_minimal_period`](DLMF/Mathieu/Hill/Floquet.lean#L677) (proved); [`DLMF.Mathieu.IsHillSolution.floquet_or`](DLMF/Mathieu/Hill/Floquet.lean#L789) (proved); [`DLMF.Mathieu.hillWI_neg_of_even`](DLMF/Mathieu/Hill/Floquet.lean#L823) (proved); [`DLMF.Mathieu.hillWII_neg_of_even`](DLMF/Mathieu/Hill/Floquet.lean#L841) (proved). Existence (flagged, admitted) and uniqueness (proved) of solutions, basic solutions w_I, w_II (definitions by choice), entire discriminant, fundamental pair, period nπ, Floquet-or-shift, symmetric case (w_I even, w_II odd: proved from existence).
+- [28.29.iii](https://dlmf.nist.gov/28.29.iii): [`DLMF.Mathieu.differentiable_hillDiscriminant`](DLMF/Mathieu/Hill/Floquet.lean#L504) (proved); [`DLMF.Mathieu.hillDiscriminant_order_half`](DLMF/Mathieu/Hill/Floquet.lean#L891) (admitted); [`DLMF.Mathieu.infinite_hillDiscriminant_eq`](DLMF/Mathieu/Hill/Floquet.lean#L903) (admitted); [`DLMF.Mathieu.hillPeriodicEigenvalue_spec`](DLMF/Mathieu/Hill/Floquet.lean#L912) (admitted); [`DLMF.Mathieu.hillAntiperiodicEigenvalue_spec`](DLMF/Mathieu/Hill/Floquet.lean#L925) (admitted). Real Q: Δ entire of order exactly ½; infinitely many roots of Δ = 2cos πν; the eigenvalue sequences.
 - [28.29.E1](https://dlmf.nist.gov/28.29.E1): [`DLMF.Mathieu.IsHillSolution`](DLMF/Mathieu/Hill/Defs.lean#L91) (definition). Real variable, Q : ℝ → ℂ continuous (covers DLMF's two cases on the real axis).
 - [28.29.E2](https://dlmf.nist.gov/28.29.E2): [`DLMF.Mathieu.IsHillPotential`](DLMF/Mathieu/Hill/Defs.lean#L98) (definition). Field of `IsHillPotential`.
 - [28.29.E3](https://dlmf.nist.gov/28.29.E3): [`DLMF.Mathieu.IsHillPotential`](DLMF/Mathieu/Hill/Defs.lean#L98) (definition). Field of `IsHillPotential`; DLMF's "π is the minimum period" is not required.
-- [28.29.E4](https://dlmf.nist.gov/28.29.E4): [`DLMF.Mathieu.hillWI_add_pi`](DLMF/Mathieu/Hill/Floquet.lean#L145) (proved from admissions). Proved from the flagged existence theorem.
-- [28.29.E5](https://dlmf.nist.gov/28.29.E5): [`DLMF.Mathieu.hillWII_add_pi`](DLMF/Mathieu/Hill/Floquet.lean#L159) (proved from admissions). Proved from the flagged existence theorem.
-- [28.29.E6](https://dlmf.nist.gov/28.29.E6): [`DLMF.Mathieu.exists_hillCharExp`](DLMF/Mathieu/Hill/Floquet.lean#L175) (proved). Proved: a characteristic exponent with -1 < ℜν ≤ 1 exists for every λ.
-- [28.29.E7](https://dlmf.nist.gov/28.29.E7): [`DLMF.Mathieu.IsHillFloquetSolution`](DLMF/Mathieu/Hill/Defs.lean#L135) (definition); [`DLMF.Mathieu.exists_hillFloquet_iff_det`](DLMF/Mathieu/Hill/Floquet.lean#L196) (admitted). `IsHillFloquetSolution` (definition); Floquet's theorem admitted. Stated for every ν (DLMF normalizes 28.29.6).
-- [28.29.E8](https://dlmf.nist.gov/28.29.E8): [`DLMF.Mathieu.hillMonodromy`](DLMF/Mathieu/Hill/Defs.lean#L128) (definition); [`DLMF.Mathieu.exists_hillFloquet_iff_det`](DLMF/Mathieu/Hill/Floquet.lean#L196) (admitted). `hillMonodromy` (definition).
-- [28.29.E9](https://dlmf.nist.gov/28.29.E9): [`DLMF.Mathieu.exists_hillFloquet_iff_discriminant`](DLMF/Mathieu/Hill/Floquet.lean#L206) (admitted). Stated for every ν.
-- [28.29.E10](https://dlmf.nist.gov/28.29.E10): [`DLMF.Mathieu.IsHillFloquetSolution.exists_periodic`](DLMF/Mathieu/Hill/Floquet.lean#L221) (proved). Proved.
-- [28.29.E11](https://dlmf.nist.gov/28.29.E11): [`DLMF.Mathieu.exists_hill_periodic_of_discriminant`](DLMF/Mathieu/Hill/Floquet.lean#L244) (admitted). Stated for all solutions (c = 0 for multiples of P), with s = (-1)^ν = ±1.
-- [28.29.E12](https://dlmf.nist.gov/28.29.E12): [`DLMF.Mathieu.hill_coexistence_iff`](DLMF/Mathieu/Hill/Floquet.lean#L256) (admitted). Coexistence ↔ monodromy = ±I.
-- [28.29.E13](https://dlmf.nist.gov/28.29.E13): [`DLMF.Mathieu.IsHillSolution.add_pi_add_sub_pi`](DLMF/Mathieu/Hill/Floquet.lean#L276) (admitted).
-- [28.29.E14](https://dlmf.nist.gov/28.29.E14): [`DLMF.Mathieu.hillDiscriminant_of_even`](DLMF/Mathieu/Hill/Floquet.lean#L337) (admitted). Q even: Δ(λ) = 2 w_I(π, λ).
+- [28.29.E4](https://dlmf.nist.gov/28.29.E4): [`DLMF.Mathieu.hillWI_add_pi`](DLMF/Mathieu/Hill/Floquet.lean#L155) (proved). Proved from the flagged existence theorem.
+- [28.29.E5](https://dlmf.nist.gov/28.29.E5): [`DLMF.Mathieu.hillWII_add_pi`](DLMF/Mathieu/Hill/Floquet.lean#L169) (proved). Proved from the flagged existence theorem.
+- [28.29.E6](https://dlmf.nist.gov/28.29.E6): [`DLMF.Mathieu.exists_hillCharExp`](DLMF/Mathieu/Hill/Floquet.lean#L443) (proved). Proved: a characteristic exponent with -1 < ℜν ≤ 1 exists for every λ.
+- [28.29.E7](https://dlmf.nist.gov/28.29.E7): [`DLMF.Mathieu.IsHillFloquetSolution`](DLMF/Mathieu/Hill/Defs.lean#L135) (definition); [`DLMF.Mathieu.exists_hillFloquet_iff_det`](DLMF/Mathieu/Hill/Floquet.lean#L464) (proved). `IsHillFloquetSolution` (definition); Floquet's theorem admitted. Stated for every ν (DLMF normalizes 28.29.6).
+- [28.29.E8](https://dlmf.nist.gov/28.29.E8): [`DLMF.Mathieu.hillMonodromy`](DLMF/Mathieu/Hill/Defs.lean#L128) (definition); [`DLMF.Mathieu.exists_hillFloquet_iff_det`](DLMF/Mathieu/Hill/Floquet.lean#L464) (proved). `hillMonodromy` (definition).
+- [28.29.E9](https://dlmf.nist.gov/28.29.E9): [`DLMF.Mathieu.exists_hillFloquet_iff_discriminant`](DLMF/Mathieu/Hill/Floquet.lean#L481) (proved). Stated for every ν.
+- [28.29.E10](https://dlmf.nist.gov/28.29.E10): [`DLMF.Mathieu.IsHillFloquetSolution.exists_periodic`](DLMF/Mathieu/Hill/Floquet.lean#L527) (proved). Proved.
+- [28.29.E11](https://dlmf.nist.gov/28.29.E11): [`DLMF.Mathieu.exists_hill_periodic_of_discriminant`](DLMF/Mathieu/Hill/Floquet.lean#L600) (proved). Stated for all solutions (c = 0 for multiples of P), with s = (-1)^ν = ±1.
+- [28.29.E12](https://dlmf.nist.gov/28.29.E12): [`DLMF.Mathieu.hill_coexistence_iff`](DLMF/Mathieu/Hill/Floquet.lean#L649) (proved). Coexistence ↔ monodromy = ±I.
+- [28.29.E13](https://dlmf.nist.gov/28.29.E13): [`DLMF.Mathieu.IsHillSolution.add_pi_add_sub_pi`](DLMF/Mathieu/Hill/Floquet.lean#L778) (proved).
+- [28.29.E14](https://dlmf.nist.gov/28.29.E14): [`DLMF.Mathieu.hillDiscriminant_of_even`](DLMF/Mathieu/Hill/Floquet.lean#L863) (proved). Q even: Δ(λ) = 2 w_I(π, λ).
 - [28.29.E15](https://dlmf.nist.gov/28.29.E15): [`DLMF.Mathieu.hillDiscriminant`](DLMF/Mathieu/Hill/Defs.lean#L121) (definition). `hillDiscriminant` (definition, for all Q).
-- [28.29.E16](https://dlmf.nist.gov/28.29.E16): [`DLMF.Mathieu.hillPeriodicEigenvalue`](DLMF/Mathieu/Hill/Defs.lean#L190) (definition); [`DLMF.Mathieu.hillPeriodicEigenvalue_spec`](DLMF/Mathieu/Hill/Floquet.lean#L367) (admitted). `hillPeriodicEigenvalue` (definition by counting with multiplicity = dim of the periodic solution space); characterization admitted.
-- [28.29.E17](https://dlmf.nist.gov/28.29.E17): [`DLMF.Mathieu.hillAntiperiodicEigenvalue`](DLMF/Mathieu/Hill/Defs.lean#L198) (definition); [`DLMF.Mathieu.hillAntiperiodicEigenvalue_spec`](DLMF/Mathieu/Hill/Floquet.lean#L380) (admitted). `hillAntiperiodicEigenvalue` (μ_n, n ≥ 1); DLMF's "solution of period 2π" means antiperiodic (w(z+π) = -w(z)).
-- [28.29.E18](https://dlmf.nist.gov/28.29.E18): [`DLMF.Mathieu.hill_eigenvalue_interlacing`](DLMF/Mathieu/Hill/Floquet.lean#L395) (admitted).
-- [28.29.E19](https://dlmf.nist.gov/28.29.E19): [`DLMF.Mathieu.hillMeanSquare`](DLMF/Mathieu/Hill/Defs.lean#L225) (definition); [`DLMF.Mathieu.hillAntiperiodicEigenvalue_asymptotic`](DLMF/Mathieu/Hill/Floquet.lean#L406) (admitted). `hillMeanSquare` N.
-- [28.29.E20](https://dlmf.nist.gov/28.29.E20): [`DLMF.Mathieu.hillAntiperiodicEigenvalue_asymptotic`](DLMF/Mathieu/Hill/Floquet.lean#L406) (admitted). Q ∈ C².
-- [28.29.E21](https://dlmf.nist.gov/28.29.E21): [`DLMF.Mathieu.hillPeriodicEigenvalue_asymptotic`](DLMF/Mathieu/Hill/Floquet.lean#L418) (admitted). Q ∈ C².
-- [28.29.E22](https://dlmf.nist.gov/28.29.E22): [`DLMF.Mathieu.hill_gap_asymptotic`](DLMF/Mathieu/Hill/Floquet.lean#L430) (admitted). Q ∈ C^k (Hochstadt).
+- [28.29.E16](https://dlmf.nist.gov/28.29.E16): [`DLMF.Mathieu.hillPeriodicEigenvalue`](DLMF/Mathieu/Hill/Defs.lean#L190) (definition); [`DLMF.Mathieu.hillPeriodicEigenvalue_spec`](DLMF/Mathieu/Hill/Floquet.lean#L912) (admitted). `hillPeriodicEigenvalue` (definition by counting with multiplicity = dim of the periodic solution space); characterization admitted.
+- [28.29.E17](https://dlmf.nist.gov/28.29.E17): [`DLMF.Mathieu.hillAntiperiodicEigenvalue`](DLMF/Mathieu/Hill/Defs.lean#L198) (definition); [`DLMF.Mathieu.hillAntiperiodicEigenvalue_spec`](DLMF/Mathieu/Hill/Floquet.lean#L925) (admitted). `hillAntiperiodicEigenvalue` (μ_n, n ≥ 1); DLMF's "solution of period 2π" means antiperiodic (w(z+π) = -w(z)).
+- [28.29.E18](https://dlmf.nist.gov/28.29.E18): [`DLMF.Mathieu.hill_eigenvalue_interlacing`](DLMF/Mathieu/Hill/Floquet.lean#L940) (admitted).
+- [28.29.E19](https://dlmf.nist.gov/28.29.E19): [`DLMF.Mathieu.hillMeanSquare`](DLMF/Mathieu/Hill/Defs.lean#L225) (definition); [`DLMF.Mathieu.hillAntiperiodicEigenvalue_asymptotic`](DLMF/Mathieu/Hill/Floquet.lean#L951) (admitted). `hillMeanSquare` N.
+- [28.29.E20](https://dlmf.nist.gov/28.29.E20): [`DLMF.Mathieu.hillAntiperiodicEigenvalue_asymptotic`](DLMF/Mathieu/Hill/Floquet.lean#L951) (admitted). Q ∈ C².
+- [28.29.E21](https://dlmf.nist.gov/28.29.E21): [`DLMF.Mathieu.hillPeriodicEigenvalue_asymptotic`](DLMF/Mathieu/Hill/Floquet.lean#L963) (admitted). Q ∈ C².
+- [28.29.E22](https://dlmf.nist.gov/28.29.E22): [`DLMF.Mathieu.hill_gap_asymptotic`](DLMF/Mathieu/Hill/Floquet.lean#L975) (admitted). Q ∈ C^k (Hochstadt).
 
 ## [§28.30 Expansions in Series of Eigenfunctions](https://dlmf.nist.gov/28.30)
 
@@ -562,32 +564,32 @@ Source corrections and checks (scripts in the agent's scratch directory `acq28b/
 
 ## [§28.31 Equations of Whittaker–Hill and Ince](https://dlmf.nist.gov/28.31)
 
-- [28.31.ii](https://dlmf.nist.gov/28.31.ii): [`DLMF.Mathieu.inceC_spec`](DLMF/Mathieu/Hill/Ince.lean#L182) (admitted); [`DLMF.Mathieu.inceS_spec`](DLMF/Mathieu/Hill/Ince.lean#L200) (admitted). Ince polynomials exist for nonnegative integer p, eigenvalues real, distinct, ordered by zeros (`inceC_spec`, `inceS_spec`).
-- [28.31.iii](https://dlmf.nist.gov/28.31.iii): [`DLMF.Mathieu.paraboloidal_asymptotic_pos`](DLMF/Mathieu/Hill/Ince.lean#L346) (admitted); [`DLMF.Mathieu.paraboloidal_asymptotic_neg`](DLMF/Mathieu/Hill/Ince.lean#L378) (admitted). Asymptotic behaviour for ξ > 0 (z = iy → ±i∞) and, **corrected**, for -ξ (z = ½π + iy): factors exp(¼ξ cos 2z)(sin z)^p and exp(-¼ξ cos 2z)(sin z)^{-p-2} instead of DLMF's (cos z)^{-p-2} and (cos z)^p; "other periodic solutions" taken as even or odd periodic solutions not proportional to hc, hs.
+- [28.31.ii](https://dlmf.nist.gov/28.31.ii): [`DLMF.Mathieu.inceC_spec`](DLMF/Mathieu/Hill/Ince.lean#L723) (admitted); [`DLMF.Mathieu.inceS_spec`](DLMF/Mathieu/Hill/Ince.lean#L741) (admitted). Ince polynomials exist for nonnegative integer p, eigenvalues real, distinct, ordered by zeros (`inceC_spec`, `inceS_spec`).
+- [28.31.iii](https://dlmf.nist.gov/28.31.iii): [`DLMF.Mathieu.paraboloidal_asymptotic_pos`](DLMF/Mathieu/Hill/Ince.lean#L985) (admitted); [`DLMF.Mathieu.paraboloidal_asymptotic_neg`](DLMF/Mathieu/Hill/Ince.lean#L1017) (admitted). Asymptotic behaviour for ξ > 0 (z = iy → ±i∞) and, **corrected**, for -ξ (z = ½π + iy): factors exp(¼ξ cos 2z)(sin z)^p and exp(-¼ξ cos 2z)(sin z)^{-p-2} instead of DLMF's (cos z)^{-p-2} and (cos z)^p; "other periodic solutions" taken as even or odd periodic solutions not proportional to hc, hs.
 - [28.31.E1](https://dlmf.nist.gov/28.31.E1): [`DLMF.Mathieu.IsWhittakerHillSolution`](DLMF/Mathieu/Hill/Defs.lean#L232) (definition). `IsWhittakerHillSolution` (definition, entire W, complex parameters).
-- [28.31.E2](https://dlmf.nist.gov/28.31.E2): [`DLMF.Mathieu.isWhittakerHillSolution_iff_isInceSolution`](DLMF/Mathieu/Hill/Ince.lean#L74) (proved). Proved, for all complex parameters with ξ² = -4k²c² (DLMF: k² < 0).
+- [28.31.E2](https://dlmf.nist.gov/28.31.E2): [`DLMF.Mathieu.isWhittakerHillSolution_iff_isInceSolution`](DLMF/Mathieu/Hill/Ince.lean#L75) (proved). Proved, for all complex parameters with ξ² = -4k²c² (DLMF: k² < 0).
 - [28.31.E3](https://dlmf.nist.gov/28.31.E3): [`DLMF.Mathieu.IsInceSolution`](DLMF/Mathieu/Hill/Defs.lean#L240) (definition). `IsInceSolution` (definition).
-- [28.31.E4](https://dlmf.nist.gov/28.31.E4): [`DLMF.Mathieu.isInceSolution_cos_even_iff`](DLMF/Mathieu/Hill/Ince.lean#L131) (admitted); [`DLMF.Mathieu.isInceSolution_cos_odd_iff`](DLMF/Mathieu/Hill/Ince.lean#L144) (admitted). Fourier-series solutions with `IsEntireFourierCoeff` coefficients: solution ↔ recurrences (DLMF: "formal" solutions).
-- [28.31.E5](https://dlmf.nist.gov/28.31.E5): [`DLMF.Mathieu.isInceSolution_sin_odd_iff`](DLMF/Mathieu/Hill/Ince.lean#L156) (admitted); [`DLMF.Mathieu.isInceSolution_sin_even_iff`](DLMF/Mathieu/Hill/Ince.lean#L168) (admitted).
-- [28.31.E6](https://dlmf.nist.gov/28.31.E6): [`DLMF.Mathieu.isInceSolution_cos_even_iff`](DLMF/Mathieu/Hill/Ince.lean#L131) (admitted).
-- [28.31.E7](https://dlmf.nist.gov/28.31.E7): [`DLMF.Mathieu.isInceSolution_cos_odd_iff`](DLMF/Mathieu/Hill/Ince.lean#L144) (admitted).
-- [28.31.E8](https://dlmf.nist.gov/28.31.E8): [`DLMF.Mathieu.isInceSolution_sin_odd_iff`](DLMF/Mathieu/Hill/Ince.lean#L156) (admitted).
-- [28.31.E9](https://dlmf.nist.gov/28.31.E9): [`DLMF.Mathieu.isInceSolution_sin_even_iff`](DLMF/Mathieu/Hill/Ince.lean#L168) (admitted).
-- [28.31.E10](https://dlmf.nist.gov/28.31.E10): [`DLMF.Mathieu.inceC`](DLMF/Mathieu/Hill/Defs.lean#L283) (definition); [`DLMF.Mathieu.inceC_spec`](DLMF/Mathieu/Hill/Ince.lean#L182) (admitted). `inceC` (C_p^m): definition by choice (unique normalized cosine Ince polynomial for η = a_p^m(ξ), `inceA` chosen by zero count, real ξ).
-- [28.31.E11](https://dlmf.nist.gov/28.31.E11): [`DLMF.Mathieu.inceS`](DLMF/Mathieu/Hill/Defs.lean#L293) (definition); [`DLMF.Mathieu.inceS_spec`](DLMF/Mathieu/Hill/Ince.lean#L200) (admitted). `inceS` (S_p^m), `inceB`: as for C.
-- [28.31.E12](https://dlmf.nist.gov/28.31.E12): [`DLMF.Mathieu.inceC_spec`](DLMF/Mathieu/Hill/Ince.lean#L182) (admitted); [`DLMF.Mathieu.inceS_spec`](DLMF/Mathieu/Hill/Ince.lean#L200) (admitted).
-- [28.31.E13](https://dlmf.nist.gov/28.31.E13): [`DLMF.Mathieu.ince_tendsto_xi_zero`](DLMF/Mathieu/Hill/Ince.lean#L219) (admitted).
-- [28.31.E14](https://dlmf.nist.gov/28.31.E14): [`DLMF.Mathieu.ince_tendsto_mathieu`](DLMF/Mathieu/Hill/Ince.lean#L231) (admitted). Along sequences p_j → ∞, ξ_j → 0, p_j ξ_j → 2q (real q), using ce_m, se_m of DLMF.Mathieu.Basic.
-- [28.31.E15](https://dlmf.nist.gov/28.31.E15): [`DLMF.Mathieu.ince_tendsto_mathieu`](DLMF/Mathieu/Hill/Ince.lean#L231) (admitted).
+- [28.31.E4](https://dlmf.nist.gov/28.31.E4): [`DLMF.Mathieu.isInceSolution_cos_even_iff`](DLMF/Mathieu/Hill/Ince.lean#L363) (proved); [`DLMF.Mathieu.isInceSolution_cos_odd_iff`](DLMF/Mathieu/Hill/Ince.lean#L469) (proved). Fourier-series solutions with `IsEntireFourierCoeff` coefficients: solution ↔ recurrences (DLMF: "formal" solutions).
+- [28.31.E5](https://dlmf.nist.gov/28.31.E5): [`DLMF.Mathieu.isInceSolution_sin_odd_iff`](DLMF/Mathieu/Hill/Ince.lean#L544) (proved); [`DLMF.Mathieu.isInceSolution_sin_even_iff`](DLMF/Mathieu/Hill/Ince.lean#L624) (proved).
+- [28.31.E6](https://dlmf.nist.gov/28.31.E6): [`DLMF.Mathieu.isInceSolution_cos_even_iff`](DLMF/Mathieu/Hill/Ince.lean#L363) (proved).
+- [28.31.E7](https://dlmf.nist.gov/28.31.E7): [`DLMF.Mathieu.isInceSolution_cos_odd_iff`](DLMF/Mathieu/Hill/Ince.lean#L469) (proved).
+- [28.31.E8](https://dlmf.nist.gov/28.31.E8): [`DLMF.Mathieu.isInceSolution_sin_odd_iff`](DLMF/Mathieu/Hill/Ince.lean#L544) (proved).
+- [28.31.E9](https://dlmf.nist.gov/28.31.E9): [`DLMF.Mathieu.isInceSolution_sin_even_iff`](DLMF/Mathieu/Hill/Ince.lean#L624) (proved).
+- [28.31.E10](https://dlmf.nist.gov/28.31.E10): [`DLMF.Mathieu.inceC`](DLMF/Mathieu/Hill/Defs.lean#L283) (definition); [`DLMF.Mathieu.inceC_spec`](DLMF/Mathieu/Hill/Ince.lean#L723) (admitted). `inceC` (C_p^m): definition by choice (unique normalized cosine Ince polynomial for η = a_p^m(ξ), `inceA` chosen by zero count, real ξ).
+- [28.31.E11](https://dlmf.nist.gov/28.31.E11): [`DLMF.Mathieu.inceS`](DLMF/Mathieu/Hill/Defs.lean#L293) (definition); [`DLMF.Mathieu.inceS_spec`](DLMF/Mathieu/Hill/Ince.lean#L741) (admitted). `inceS` (S_p^m), `inceB`: as for C.
+- [28.31.E12](https://dlmf.nist.gov/28.31.E12): [`DLMF.Mathieu.inceC_spec`](DLMF/Mathieu/Hill/Ince.lean#L723) (admitted); [`DLMF.Mathieu.inceS_spec`](DLMF/Mathieu/Hill/Ince.lean#L741) (admitted).
+- [28.31.E13](https://dlmf.nist.gov/28.31.E13): [`DLMF.Mathieu.ince_tendsto_xi_zero`](DLMF/Mathieu/Hill/Ince.lean#L760) (admitted).
+- [28.31.E14](https://dlmf.nist.gov/28.31.E14): [`DLMF.Mathieu.ince_tendsto_mathieu`](DLMF/Mathieu/Hill/Ince.lean#L772) (admitted). Along sequences p_j → ∞, ξ_j → 0, p_j ξ_j → 2q (real q), using ce_m, se_m of DLMF.Mathieu.Basic.
+- [28.31.E15](https://dlmf.nist.gov/28.31.E15): [`DLMF.Mathieu.ince_tendsto_mathieu`](DLMF/Mathieu/Hill/Ince.lean#L772) (admitted).
 - [28.31.E16](https://dlmf.nist.gov/28.31.E16): [`DLMF.Mathieu.paraboloidalHc`](DLMF/Mathieu/Hill/Defs.lean#L302) (definition). `paraboloidalHc` (definition).
 - [28.31.E17](https://dlmf.nist.gov/28.31.E17): [`DLMF.Mathieu.paraboloidalHs`](DLMF/Mathieu/Hill/Defs.lean#L308) (definition). `paraboloidalHs` (definition).
-- [28.31.E18](https://dlmf.nist.gov/28.31.E18): [`DLMF.Mathieu.paraboloidal_isWhittakerHillSolution`](DLMF/Mathieu/Hill/Ince.lean#L246) (proved from admissions). As the Whittaker–Hill equation with k = iξ/2, c = 1; proved from 28.31.2 and the admitted Ince-polynomial specifications.
-- [28.31.E19](https://dlmf.nist.gov/28.31.E19): [`DLMF.Mathieu.paraboloidalHc_neg_xi`](DLMF/Mathieu/Hill/Ince.lean#L273) (admitted). Checked numerically (p ≤ 6, ξ = 0.8).
-- [28.31.E20](https://dlmf.nist.gov/28.31.E20): [`DLMF.Mathieu.paraboloidalHs_neg_xi`](DLMF/Mathieu/Hill/Ince.lean#L284) (admitted). Checked numerically.
-- [28.31.E21](https://dlmf.nist.gov/28.31.E21): [`DLMF.Mathieu.integral_paraboloidal_orthogonal`](DLMF/Mathieu/Hill/Ince.lean#L295) (admitted).
-- [28.31.E22](https://dlmf.nist.gov/28.31.E22): [`DLMF.Mathieu.paraboloidalHc_double_orthogonal`](DLMF/Mathieu/Hill/Ince.lean#L305) (admitted). u-integral along u₀ + it, t ≥ 0 (u₀ = 0 for ξ > 0, ½π for ξ < 0, as DLMF); the factor i of du dropped.
-- [28.31.E23](https://dlmf.nist.gov/28.31.E23): [`DLMF.Mathieu.paraboloidalHs_double_orthogonal`](DLMF/Mathieu/Hill/Ince.lean#L321) (admitted).
-- [28.31.E24](https://dlmf.nist.gov/28.31.E24): [`DLMF.Mathieu.paraboloidalHc_Hs_double_orthogonal`](DLMF/Mathieu/Hill/Ince.lean#L334) (admitted).
+- [28.31.E18](https://dlmf.nist.gov/28.31.E18): [`DLMF.Mathieu.paraboloidal_isWhittakerHillSolution`](DLMF/Mathieu/Hill/Ince.lean#L787) (proved from admissions). As the Whittaker–Hill equation with k = iξ/2, c = 1; proved from 28.31.2 and the admitted Ince-polynomial specifications.
+- [28.31.E19](https://dlmf.nist.gov/28.31.E19): [`DLMF.Mathieu.paraboloidalHc_neg_xi`](DLMF/Mathieu/Hill/Ince.lean#L814) (admitted). Checked numerically (p ≤ 6, ξ = 0.8).
+- [28.31.E20](https://dlmf.nist.gov/28.31.E20): [`DLMF.Mathieu.paraboloidalHs_neg_xi`](DLMF/Mathieu/Hill/Ince.lean#L825) (admitted). Checked numerically.
+- [28.31.E21](https://dlmf.nist.gov/28.31.E21): [`DLMF.Mathieu.integral_paraboloidal_orthogonal`](DLMF/Mathieu/Hill/Ince.lean#L902) (proved from admissions).
+- [28.31.E22](https://dlmf.nist.gov/28.31.E22): [`DLMF.Mathieu.paraboloidalHc_double_orthogonal`](DLMF/Mathieu/Hill/Ince.lean#L944) (admitted). u-integral along u₀ + it, t ≥ 0 (u₀ = 0 for ξ > 0, ½π for ξ < 0, as DLMF); the factor i of du dropped.
+- [28.31.E23](https://dlmf.nist.gov/28.31.E23): [`DLMF.Mathieu.paraboloidalHs_double_orthogonal`](DLMF/Mathieu/Hill/Ince.lean#L960) (admitted).
+- [28.31.E24](https://dlmf.nist.gov/28.31.E24): [`DLMF.Mathieu.paraboloidalHc_Hs_double_orthogonal`](DLMF/Mathieu/Hill/Ince.lean#L973) (admitted).
 
 ## Prose, informal and excluded items (part B)
 
@@ -646,11 +648,11 @@ Module admissions (`grep -cE 'by sorry|:= sorry|^\s*(·\s*)?sorry\s*$|exact sorr
 tagged declarations:
 
 - [Defs](DLMF/Mathieu/Modified/Defs.lean): 0 admissions. 45 tagged: 45 definitions.
-- [BesselSeries](DLMF/Mathieu/Modified/BesselSeries.lean): 27 admissions. 28 tagged: 1 proved, 27 admitted.
-- [Properties](DLMF/Mathieu/Modified/Properties.lean): 17 admissions. 28 tagged: 4 proved, 7 proved from admissions, 17 admitted.
-- [Connection](DLMF/Mathieu/Modified/Connection.lean): 8 admissions. 8 tagged: 8 admitted.
+- [BesselSeries](DLMF/Mathieu/Modified/BesselSeries.lean): 26 admissions. 28 tagged: 1 proved, 27 admitted.
+- [Properties](DLMF/Mathieu/Modified/Properties.lean): 9 admissions. 28 tagged: 4 proved, 7 proved from admissions, 17 admitted.
+- [Connection](DLMF/Mathieu/Modified/Connection.lean): 4 admissions. 8 tagged: 8 admitted.
 - [Asymptotics](DLMF/Mathieu/Modified/Asymptotics.lean): 5 admissions. 10 tagged: 3 proved, 2 proved from admissions, 5 admitted.
-- [Integrals](DLMF/Mathieu/Modified/Integrals.lean): 41 admissions. 45 tagged: 4 proved, 41 admitted.
+- [Integrals](DLMF/Mathieu/Modified/Integrals.lean): 39 admissions. 45 tagged: 4 proved, 41 admitted.
 
 ## Part C: design notes
 
@@ -745,32 +747,32 @@ tagged declarations:
 
 ## [§28.20 Definitions and Basic Properties](https://dlmf.nist.gov/28.20)
 
-- [28.20.iii](https://dlmf.nist.gov/28.20.iii): [`DLMF.Mathieu.modMathieuM`](DLMF/Mathieu/Modified/Defs.lean#L186) (definition); [`DLMF.Mathieu.isModMathieuSolution_modMathieuM`](DLMF/Mathieu/Modified/Properties.lean#L145) (admitted); [`DLMF.Mathieu.eq_modMathieuM_three_of_isBigO`](DLMF/Mathieu/Modified/Properties.lean#L189) (admitted); [`DLMF.Mathieu.eq_modMathieuM_four_of_isBigO`](DLMF/Mathieu/Modified/Properties.lean#L200) (admitted); [`DLMF.Mathieu.modMathieuM_one_two_real`](DLMF/Mathieu/Modified/Properties.lean#L209) (admitted). The modified Mathieu functions; `M^{(j)}_ν(·, h)` solves the modified Mathieu equation 28.20.1 with `q = h²`, `a = λ_ν(h²)` ), `j = 1, 2, 3, 4`, `h ≠ 0`, admissible `(ν, h)`.
-- [28.20.E1](https://dlmf.nist.gov/28.20.E1): [`DLMF.Mathieu.IsModMathieuSolution`](DLMF/Mathieu/Modified/Defs.lean#L67) (definition); [`DLMF.Mathieu.IsMathieuSolution.isModMathieuSolution_comp`](DLMF/Mathieu/Modified/Properties.lean#L33) (proved). The modified Mathieu equation; If `w` solves Mathieu's equation 28.2.1 then `z ↦ w(cz)` with `c² = -1` (`c = ±i`) solves the modified Mathieu equation 28.20.1.
-- [28.20.E2](https://dlmf.nist.gov/28.20.E2): [`DLMF.Mathieu.isModMathieuSolution_comp_cosh`](DLMF/Mathieu/Modified/Properties.lean#L61) (admitted). The algebraic form.
-- [28.20.E3](https://dlmf.nist.gov/28.20.E3): [`DLMF.Mathieu.modMathieuCe`](DLMF/Mathieu/Modified/Defs.lean#L78) (definition); [`DLMF.Mathieu.modMathieuCe_natCast`](DLMF/Mathieu/Modified/Properties.lean#L74) (proved); [`DLMF.Mathieu.isModMathieuSolution_modMathieuCe`](DLMF/Mathieu/Modified/Properties.lean#L92) (proved from admissions). The modified Mathieu function; `Ce_n(z, q) = ce_n(iz, q)` for `n ∈ ℕ` and real `q` .
-- [28.20.E4](https://dlmf.nist.gov/28.20.E4): [`DLMF.Mathieu.modMathieuSe`](DLMF/Mathieu/Modified/Defs.lean#L87) (definition); [`DLMF.Mathieu.modMathieuSe_natCast`](DLMF/Mathieu/Modified/Properties.lean#L83) (proved); [`DLMF.Mathieu.isModMathieuSolution_modMathieuSe`](DLMF/Mathieu/Modified/Properties.lean#L99) (proved from admissions). The modified Mathieu function; `Se_n(z, q) = -i se_n(iz, q)` for `n ≥ 1` and real `q` .
-- [28.20.E5](https://dlmf.nist.gov/28.20.E5): [`DLMF.Mathieu.modMathieuMe`](DLMF/Mathieu/Modified/Defs.lean#L96) (definition); [`DLMF.Mathieu.isModMathieuSolution_modMathieuMe`](DLMF/Mathieu/Modified/Properties.lean#L114) (proved from admissions). The modified Mathieu function; `Me_ν(·, q)` solves the modified Mathieu equation with `a = λ_ν(q)` , `ν ∉ ℤ`, `q` normal along `[0, q]`.
-- [28.20.E6](https://dlmf.nist.gov/28.20.E6): [`DLMF.Mathieu.modMathieuFe`](DLMF/Mathieu/Modified/Defs.lean#L101) (definition); [`DLMF.Mathieu.isModMathieuSolution_modMathieuFe`](DLMF/Mathieu/Modified/Properties.lean#L122) (proved from admissions). The modified Mathieu function; `Fe_n(·, q)` solves the modified Mathieu equation with `a = a_n(q)` , `(n, q) ≠ (0, 0)`.
-- [28.20.E7](https://dlmf.nist.gov/28.20.E7): [`DLMF.Mathieu.modMathieuGe`](DLMF/Mathieu/Modified/Defs.lean#L107) (definition); [`DLMF.Mathieu.isModMathieuSolution_modMathieuGe`](DLMF/Mathieu/Modified/Properties.lean#L137) (proved from admissions). The modified Mathieu function; `Ge_n(·, q)` solves the modified Mathieu equation with `a = b_n(q)` .
-- [28.20.E8](https://dlmf.nist.gov/28.20.E8): [`DLMF.Mathieu.modMathieuM_three_isBigO`](DLMF/Mathieu/Modified/Properties.lean#L153) (admitted). Asymptotics of `M^{(3)}_ν`. Notation h = √q > 0, recorded on the first theorem that uses it.
-- [28.20.E9](https://dlmf.nist.gov/28.20.E9): [`DLMF.Mathieu.modMathieuM_three_isBigO`](DLMF/Mathieu/Modified/Properties.lean#L153) (admitted). Asymptotics of `M^{(3)}_ν`.
-- [28.20.E10](https://dlmf.nist.gov/28.20.E10): [`DLMF.Mathieu.modMathieuM_four_isBigO`](DLMF/Mathieu/Modified/Properties.lean#L163) (admitted). Asymptotics of `M^{(4)}_ν`.
-- [28.20.E11](https://dlmf.nist.gov/28.20.E11): [`DLMF.Mathieu.modMathieuM_one_isBigO`](DLMF/Mathieu/Modified/Properties.lean#L171) (admitted). Asymptotics of `M^{(1)}_ν`.
-- [28.20.E12](https://dlmf.nist.gov/28.20.E12): [`DLMF.Mathieu.modMathieuM_two_isBigO`](DLMF/Mathieu/Modified/Properties.lean#L180) (admitted). Asymptotics of `M^{(2)}_ν`.
-- [28.20.E13](https://dlmf.nist.gov/28.20.E13): [`DLMF.Mathieu.modMathieuM_three`](DLMF/Mathieu/Modified/Properties.lean#L228) (proved from admissions). `M^{(3)}_ν = M^{(1)}_ν + i M^{(2)}_ν` , `h ≠ 0`, admissible `(ν, h)`.
-- [28.20.E14](https://dlmf.nist.gov/28.20.E14): [`DLMF.Mathieu.modMathieuM_four`](DLMF/Mathieu/Modified/Properties.lean#L238) (proved from admissions). `M^{(4)}_ν = M^{(1)}_ν - i M^{(2)}_ν` , `h ≠ 0`, admissible `(ν, h)`.
+- [28.20.iii](https://dlmf.nist.gov/28.20.iii): [`DLMF.Mathieu.modMathieuM`](DLMF/Mathieu/Modified/Defs.lean#L186) (definition); [`DLMF.Mathieu.isModMathieuSolution_modMathieuM`](DLMF/Mathieu/Modified/Properties.lean#L165) (admitted); [`DLMF.Mathieu.eq_modMathieuM_three_of_isBigO`](DLMF/Mathieu/Modified/Properties.lean#L209) (admitted); [`DLMF.Mathieu.eq_modMathieuM_four_of_isBigO`](DLMF/Mathieu/Modified/Properties.lean#L220) (admitted); [`DLMF.Mathieu.modMathieuM_one_two_real`](DLMF/Mathieu/Modified/Properties.lean#L229) (admitted). The modified Mathieu functions; `M^{(j)}_ν(·, h)` solves the modified Mathieu equation 28.20.1 with `q = h²`, `a = λ_ν(h²)` ), `j = 1, 2, 3, 4`, `h ≠ 0`, admissible `(ν, h)`.
+- [28.20.E1](https://dlmf.nist.gov/28.20.E1): [`DLMF.Mathieu.IsModMathieuSolution`](DLMF/Mathieu/Modified/Defs.lean#L67) (definition); [`DLMF.Mathieu.IsMathieuSolution.isModMathieuSolution_comp`](DLMF/Mathieu/Modified/Properties.lean#L36) (proved). The modified Mathieu equation; If `w` solves Mathieu's equation 28.2.1 then `z ↦ w(cz)` with `c² = -1` (`c = ±i`) solves the modified Mathieu equation 28.20.1.
+- [28.20.E2](https://dlmf.nist.gov/28.20.E2): [`DLMF.Mathieu.isModMathieuSolution_comp_cosh`](DLMF/Mathieu/Modified/Properties.lean#L64) (proved). The algebraic form.
+- [28.20.E3](https://dlmf.nist.gov/28.20.E3): [`DLMF.Mathieu.modMathieuCe`](DLMF/Mathieu/Modified/Defs.lean#L78) (definition); [`DLMF.Mathieu.modMathieuCe_natCast`](DLMF/Mathieu/Modified/Properties.lean#L94) (proved); [`DLMF.Mathieu.isModMathieuSolution_modMathieuCe`](DLMF/Mathieu/Modified/Properties.lean#L112) (proved). The modified Mathieu function; `Ce_n(z, q) = ce_n(iz, q)` for `n ∈ ℕ` and real `q` .
+- [28.20.E4](https://dlmf.nist.gov/28.20.E4): [`DLMF.Mathieu.modMathieuSe`](DLMF/Mathieu/Modified/Defs.lean#L87) (definition); [`DLMF.Mathieu.modMathieuSe_natCast`](DLMF/Mathieu/Modified/Properties.lean#L103) (proved); [`DLMF.Mathieu.isModMathieuSolution_modMathieuSe`](DLMF/Mathieu/Modified/Properties.lean#L119) (proved). The modified Mathieu function; `Se_n(z, q) = -i se_n(iz, q)` for `n ≥ 1` and real `q` .
+- [28.20.E5](https://dlmf.nist.gov/28.20.E5): [`DLMF.Mathieu.modMathieuMe`](DLMF/Mathieu/Modified/Defs.lean#L96) (definition); [`DLMF.Mathieu.isModMathieuSolution_modMathieuMe`](DLMF/Mathieu/Modified/Properties.lean#L134) (proved). The modified Mathieu function; `Me_ν(·, q)` solves the modified Mathieu equation with `a = λ_ν(q)` , `ν ∉ ℤ`, `q` normal along `[0, q]`.
+- [28.20.E6](https://dlmf.nist.gov/28.20.E6): [`DLMF.Mathieu.modMathieuFe`](DLMF/Mathieu/Modified/Defs.lean#L101) (definition); [`DLMF.Mathieu.isModMathieuSolution_modMathieuFe`](DLMF/Mathieu/Modified/Properties.lean#L142) (proved). The modified Mathieu function; `Fe_n(·, q)` solves the modified Mathieu equation with `a = a_n(q)` , `(n, q) ≠ (0, 0)`.
+- [28.20.E7](https://dlmf.nist.gov/28.20.E7): [`DLMF.Mathieu.modMathieuGe`](DLMF/Mathieu/Modified/Defs.lean#L107) (definition); [`DLMF.Mathieu.isModMathieuSolution_modMathieuGe`](DLMF/Mathieu/Modified/Properties.lean#L157) (proved). The modified Mathieu function; `Ge_n(·, q)` solves the modified Mathieu equation with `a = b_n(q)` .
+- [28.20.E8](https://dlmf.nist.gov/28.20.E8): [`DLMF.Mathieu.modMathieuM_three_isBigO`](DLMF/Mathieu/Modified/Properties.lean#L173) (admitted). Asymptotics of `M^{(3)}_ν`. Notation h = √q > 0, recorded on the first theorem that uses it.
+- [28.20.E9](https://dlmf.nist.gov/28.20.E9): [`DLMF.Mathieu.modMathieuM_three_isBigO`](DLMF/Mathieu/Modified/Properties.lean#L173) (admitted). Asymptotics of `M^{(3)}_ν`.
+- [28.20.E10](https://dlmf.nist.gov/28.20.E10): [`DLMF.Mathieu.modMathieuM_four_isBigO`](DLMF/Mathieu/Modified/Properties.lean#L183) (admitted). Asymptotics of `M^{(4)}_ν`.
+- [28.20.E11](https://dlmf.nist.gov/28.20.E11): [`DLMF.Mathieu.modMathieuM_one_isBigO`](DLMF/Mathieu/Modified/Properties.lean#L191) (admitted). Asymptotics of `M^{(1)}_ν`.
+- [28.20.E12](https://dlmf.nist.gov/28.20.E12): [`DLMF.Mathieu.modMathieuM_two_isBigO`](DLMF/Mathieu/Modified/Properties.lean#L200) (admitted). Asymptotics of `M^{(2)}_ν`.
+- [28.20.E13](https://dlmf.nist.gov/28.20.E13): [`DLMF.Mathieu.modMathieuM_three`](DLMF/Mathieu/Modified/Properties.lean#L248) (proved from admissions). `M^{(3)}_ν = M^{(1)}_ν + i M^{(2)}_ν` , `h ≠ 0`, admissible `(ν, h)`.
+- [28.20.E14](https://dlmf.nist.gov/28.20.E14): [`DLMF.Mathieu.modMathieuM_four`](DLMF/Mathieu/Modified/Properties.lean#L258) (proved from admissions). `M^{(4)}_ν = M^{(1)}_ν - i M^{(2)}_ν` , `h ≠ 0`, admissible `(ν, h)`.
 - [28.20.E15](https://dlmf.nist.gov/28.20.E15): [`DLMF.Mathieu.radialMathieuMc`](DLMF/Mathieu/Modified/Defs.lean#L198) (definition). The radial Mathieu function.
 - [28.20.E16](https://dlmf.nist.gov/28.20.E16): [`DLMF.Mathieu.radialMathieuMs`](DLMF/Mathieu/Modified/Defs.lean#L204) (definition). The radial Mathieu function.
 - [28.20.E17](https://dlmf.nist.gov/28.20.E17): [`DLMF.Mathieu.modMathieuIe`](DLMF/Mathieu/Modified/Defs.lean#L212) (definition). `Ie_n(z, h) = i^{-n} Mc^{(1)}_n(z, ih)` .
 - [28.20.E18](https://dlmf.nist.gov/28.20.E18): [`DLMF.Mathieu.modMathieuIo`](DLMF/Mathieu/Modified/Defs.lean#L217) (definition). `Io_n(z, h) = i^{-n} Ms^{(1)}_n(z, ih)` .
 - [28.20.E19](https://dlmf.nist.gov/28.20.E19): [`DLMF.Mathieu.modMathieuKe`](DLMF/Mathieu/Modified/Defs.lean#L222) (definition). `Ke_n(z, h)`.
 - [28.20.E20](https://dlmf.nist.gov/28.20.E20): [`DLMF.Mathieu.modMathieuKo`](DLMF/Mathieu/Modified/Defs.lean#L229) (definition). `Ko_n(z, h)`.
-- [28.20.E21](https://dlmf.nist.gov/28.20.E21): [`DLMF.Mathieu.modMathieuM_wronskian_two`](DLMF/Mathieu/Modified/Properties.lean#L250) (admitted); [`DLMF.Mathieu.modMathieuM_wronskian_three`](DLMF/Mathieu/Modified/Properties.lean#L261) (admitted). Wronskians.
-- [28.20.E22](https://dlmf.nist.gov/28.20.E22): [`DLMF.Mathieu.modMathieuM_add_pi_div_two`](DLMF/Mathieu/Modified/Properties.lean#L275) (admitted). Shift by `±πi/2`.
-- [28.20.E23](https://dlmf.nist.gov/28.20.E23): [`DLMF.Mathieu.radialMathieu_add_pi_div_two_even`](DLMF/Mathieu/Modified/Properties.lean#L283) (admitted). Shift by `±πi/2`.
-- [28.20.E24](https://dlmf.nist.gov/28.20.E24): [`DLMF.Mathieu.radialMathieu_add_pi_div_two_odd`](DLMF/Mathieu/Modified/Properties.lean#L294) (admitted). Shift by `±πi/2`.
-- [28.20.E25](https://dlmf.nist.gov/28.20.E25): [`DLMF.Mathieu.modMathieuM_one_add_int_mul_pi_I`](DLMF/Mathieu/Modified/Properties.lean#L318) (proved); [`DLMF.Mathieu.modMathieuM_two_add_int_mul_pi_I`](DLMF/Mathieu/Modified/Properties.lean#L342) (admitted); [`DLMF.Mathieu.modMathieuM_three_add_int_mul_pi_I`](DLMF/Mathieu/Modified/Properties.lean#L351) (admitted); [`DLMF.Mathieu.modMathieuM_four_add_int_mul_pi_I`](DLMF/Mathieu/Modified/Properties.lean#L363) (admitted). Shift by `sπi`.
+- [28.20.E21](https://dlmf.nist.gov/28.20.E21): [`DLMF.Mathieu.modMathieuM_wronskian_two`](DLMF/Mathieu/Modified/Properties.lean#L302) (admitted); [`DLMF.Mathieu.modMathieuM_wronskian_three`](DLMF/Mathieu/Modified/Properties.lean#L322) (proved from admissions). Wronskians.
+- [28.20.E22](https://dlmf.nist.gov/28.20.E22): [`DLMF.Mathieu.modMathieuM_add_pi_div_two`](DLMF/Mathieu/Modified/Properties.lean#L383) (proved from admissions). Shift by `±πi/2`.
+- [28.20.E23](https://dlmf.nist.gov/28.20.E23): [`DLMF.Mathieu.radialMathieu_add_pi_div_two_even`](DLMF/Mathieu/Modified/Properties.lean#L698) (proved from admissions). Shift by `±πi/2`.
+- [28.20.E24](https://dlmf.nist.gov/28.20.E24): [`DLMF.Mathieu.radialMathieu_add_pi_div_two_odd`](DLMF/Mathieu/Modified/Properties.lean#L723) (proved from admissions). Shift by `±πi/2`.
+- [28.20.E25](https://dlmf.nist.gov/28.20.E25): [`DLMF.Mathieu.modMathieuM_one_add_int_mul_pi_I`](DLMF/Mathieu/Modified/Properties.lean#L762) (proved); [`DLMF.Mathieu.modMathieuM_two_add_int_mul_pi_I`](DLMF/Mathieu/Modified/Properties.lean#L847) (proved from admissions); [`DLMF.Mathieu.modMathieuM_three_add_int_mul_pi_I`](DLMF/Mathieu/Modified/Properties.lean#L864) (proved from admissions); [`DLMF.Mathieu.modMathieuM_four_add_int_mul_pi_I`](DLMF/Mathieu/Modified/Properties.lean#L891) (proved from admissions). Shift by `sπi`.
 
 ## [§28.21 Graphics](https://dlmf.nist.gov/28.21)
 
@@ -788,44 +790,44 @@ tagged declarations:
 - [28.22.E8](https://dlmf.nist.gov/28.22.E8): [`DLMF.Mathieu.mathieuJoinGo`](DLMF/Mathieu/Modified/Defs.lean#L276) (definition). The joining factor.
 - [28.22.E9](https://dlmf.nist.gov/28.22.E9): [`DLMF.Mathieu.mathieuJoinFe`](DLMF/Mathieu/Modified/Defs.lean#L288) (definition). The joining factor.
 - [28.22.E10](https://dlmf.nist.gov/28.22.E10): [`DLMF.Mathieu.mathieuJoinFo`](DLMF/Mathieu/Modified/Defs.lean#L293) (definition). The joining factor.
-- [28.22.E11](https://dlmf.nist.gov/28.22.E11): [`DLMF.Mathieu.radialMathieu_two_zero`](DLMF/Mathieu/Modified/Connection.lean#L66) (admitted). Values at `z = 0`.
-- [28.22.E12](https://dlmf.nist.gov/28.22.E12): [`DLMF.Mathieu.mathieuFe_ge_zero_eq_joinG`](DLMF/Mathieu/Modified/Connection.lean#L75) (admitted). Initial values of the second solutions.
-- [28.22.E13](https://dlmf.nist.gov/28.22.E13): [`DLMF.Mathieu.modMathieuM_one_eq_modMathieuMe`](DLMF/Mathieu/Modified/Connection.lean#L86) (admitted). Noninteger order.
-- [28.22.E14](https://dlmf.nist.gov/28.22.E14): [`DLMF.Mathieu.modMathieuM_two_eq`](DLMF/Mathieu/Modified/Connection.lean#L97) (admitted). Noninteger order.
+- [28.22.E11](https://dlmf.nist.gov/28.22.E11): [`DLMF.Mathieu.radialMathieu_two_zero`](DLMF/Mathieu/Modified/Connection.lean#L82) (proved from admissions). Values at `z = 0`.
+- [28.22.E12](https://dlmf.nist.gov/28.22.E12): [`DLMF.Mathieu.mathieuFe_ge_zero_eq_joinG`](DLMF/Mathieu/Modified/Connection.lean#L164) (proved from admissions). Initial values of the second solutions.
+- [28.22.E13](https://dlmf.nist.gov/28.22.E13): [`DLMF.Mathieu.modMathieuM_one_eq_modMathieuMe`](DLMF/Mathieu/Modified/Connection.lean#L358) (proved from admissions). Noninteger order.
+- [28.22.E14](https://dlmf.nist.gov/28.22.E14): [`DLMF.Mathieu.modMathieuM_two_eq`](DLMF/Mathieu/Modified/Connection.lean#L427) (proved from admissions). Noninteger order.
 
 ## [§28.23 Expansions in Series of Bessel Functions](https://dlmf.nist.gov/28.23)
 
-- [28.23.E1](https://dlmf.nist.gov/28.23.E1): [`DLMF.Mathieu.mathieuCylExp`](DLMF/Mathieu/Modified/Defs.lean#L130) (definition); [`DLMF.Mathieu.mathieuCyl`](DLMF/Mathieu/Modified/Defs.lean#L142) (definition); [`DLMF.Mathieu.mathieuCyl_three_four`](DLMF/Mathieu/Modified/BesselSeries.lean#L48) (proved); [`DLMF.Mathieu.mathieuCylExp_eq_mathieuCyl`](DLMF/Mathieu/Modified/BesselSeries.lean#L54) (admitted). The cylinder functions; The principal-branch cylinder functions `𝒞^{(j)}_μ(w)` of DLMF 28.23.1 (`J_μ`, `Y_μ`, `H^{(1)}_μ`, `H^{(2)}_μ` at `w`, with `DLMF.Bessel.besselY`); junk `0` for.
-- [28.23.E2](https://dlmf.nist.gov/28.23.E2): [`DLMF.Mathieu.hasSum_modMathieuM_cosh`](DLMF/Mathieu/Modified/BesselSeries.lean#L62) (admitted). Expansion in Bessel functions. **Corrected domain**: DLMF says valid for all z when j = 1; true only for |cosh z| > 1 (see Corrections).
-- [28.23.E3](https://dlmf.nist.gov/28.23.E3): [`DLMF.Mathieu.hasSum_modMathieuM_cosh_deriv`](DLMF/Mathieu/Modified/BesselSeries.lean#L76) (admitted). Expansion in Bessel functions. **Corrected domain** (|cosh z| > 1; see Corrections).
-- [28.23.E4](https://dlmf.nist.gov/28.23.E4): [`DLMF.Mathieu.hasSum_modMathieuM_sinh`](DLMF/Mathieu/Modified/BesselSeries.lean#L88) (admitted). Expansion in Bessel functions. **Corrected domain** (|sinh z| > 1; see Corrections).
-- [28.23.E5](https://dlmf.nist.gov/28.23.E5): [`DLMF.Mathieu.hasSum_modMathieuM_sinh_deriv`](DLMF/Mathieu/Modified/BesselSeries.lean#L100) (admitted). Expansion in Bessel functions. **Corrected domain** (|sinh z| > 1; see Corrections).
-- [28.23.E6](https://dlmf.nist.gov/28.23.E6): [`DLMF.Mathieu.hasSum_radialMathieuMc_even_cosh`](DLMF/Mathieu/Modified/BesselSeries.lean#L112) (admitted). Integer-order expansion.
-- [28.23.E7](https://dlmf.nist.gov/28.23.E7): [`DLMF.Mathieu.hasSum_radialMathieuMc_even_sinh`](DLMF/Mathieu/Modified/BesselSeries.lean#L125) (admitted). Integer-order expansion.
-- [28.23.E8](https://dlmf.nist.gov/28.23.E8): [`DLMF.Mathieu.hasSum_radialMathieuMc_odd_cosh`](DLMF/Mathieu/Modified/BesselSeries.lean#L135) (admitted). Integer-order expansion.
-- [28.23.E9](https://dlmf.nist.gov/28.23.E9): [`DLMF.Mathieu.hasSum_radialMathieuMc_odd_sinh`](DLMF/Mathieu/Modified/BesselSeries.lean#L147) (admitted). Integer-order expansion.
-- [28.23.E10](https://dlmf.nist.gov/28.23.E10): [`DLMF.Mathieu.hasSum_radialMathieuMs_odd_cosh`](DLMF/Mathieu/Modified/BesselSeries.lean#L160) (admitted). Integer-order expansion.
-- [28.23.E11](https://dlmf.nist.gov/28.23.E11): [`DLMF.Mathieu.hasSum_radialMathieuMs_odd_sinh`](DLMF/Mathieu/Modified/BesselSeries.lean#L173) (admitted). Integer-order expansion.
-- [28.23.E12](https://dlmf.nist.gov/28.23.E12): [`DLMF.Mathieu.hasSum_radialMathieuMs_even_cosh`](DLMF/Mathieu/Modified/BesselSeries.lean#L185) (admitted). Integer-order expansion.
-- [28.23.E13](https://dlmf.nist.gov/28.23.E13): [`DLMF.Mathieu.hasSum_radialMathieuMs_even_sinh`](DLMF/Mathieu/Modified/BesselSeries.lean#L198) (admitted). Integer-order expansion.
-- [28.23](https://dlmf.nist.gov/28.23): [`DLMF.Mathieu.hasSum_radialMathieuMc_even_cosh`](DLMF/Mathieu/Modified/BesselSeries.lean#L112) (admitted); [`DLMF.Mathieu.hasSum_radialMathieuMc_even_sinh`](DLMF/Mathieu/Modified/BesselSeries.lean#L125) (admitted); [`DLMF.Mathieu.hasSum_radialMathieuMc_odd_cosh`](DLMF/Mathieu/Modified/BesselSeries.lean#L135) (admitted); [`DLMF.Mathieu.hasSum_radialMathieuMc_odd_sinh`](DLMF/Mathieu/Modified/BesselSeries.lean#L147) (admitted); [`DLMF.Mathieu.hasSum_radialMathieuMs_even_cosh`](DLMF/Mathieu/Modified/BesselSeries.lean#L185) (admitted); [`DLMF.Mathieu.hasSum_radialMathieuMs_even_sinh`](DLMF/Mathieu/Modified/BesselSeries.lean#L198) (admitted); [`DLMF.Mathieu.hasSum_radialMathieuMs_odd_cosh`](DLMF/Mathieu/Modified/BesselSeries.lean#L160) (admitted); [`DLMF.Mathieu.hasSum_radialMathieuMs_odd_sinh`](DLMF/Mathieu/Modified/BesselSeries.lean#L173) (admitted).
+- [28.23.E1](https://dlmf.nist.gov/28.23.E1): [`DLMF.Mathieu.mathieuCylExp`](DLMF/Mathieu/Modified/Defs.lean#L130) (definition); [`DLMF.Mathieu.mathieuCyl`](DLMF/Mathieu/Modified/Defs.lean#L142) (definition); [`DLMF.Mathieu.mathieuCyl_three_four`](DLMF/Mathieu/Modified/BesselSeries.lean#L48) (proved); [`DLMF.Mathieu.mathieuCylExp_eq_mathieuCyl`](DLMF/Mathieu/Modified/BesselSeries.lean#L163) (proved). The cylinder functions; The principal-branch cylinder functions `𝒞^{(j)}_μ(w)` of DLMF 28.23.1 (`J_μ`, `Y_μ`, `H^{(1)}_μ`, `H^{(2)}_μ` at `w`, with `DLMF.Bessel.besselY`); junk `0` for.
+- [28.23.E2](https://dlmf.nist.gov/28.23.E2): [`DLMF.Mathieu.hasSum_modMathieuM_cosh`](DLMF/Mathieu/Modified/BesselSeries.lean#L175) (admitted). Expansion in Bessel functions. **Corrected domain**: DLMF says valid for all z when j = 1; true only for |cosh z| > 1 (see Corrections).
+- [28.23.E3](https://dlmf.nist.gov/28.23.E3): [`DLMF.Mathieu.hasSum_modMathieuM_cosh_deriv`](DLMF/Mathieu/Modified/BesselSeries.lean#L189) (admitted). Expansion in Bessel functions. **Corrected domain** (|cosh z| > 1; see Corrections).
+- [28.23.E4](https://dlmf.nist.gov/28.23.E4): [`DLMF.Mathieu.hasSum_modMathieuM_sinh`](DLMF/Mathieu/Modified/BesselSeries.lean#L201) (admitted). Expansion in Bessel functions. **Corrected domain** (|sinh z| > 1; see Corrections).
+- [28.23.E5](https://dlmf.nist.gov/28.23.E5): [`DLMF.Mathieu.hasSum_modMathieuM_sinh_deriv`](DLMF/Mathieu/Modified/BesselSeries.lean#L213) (admitted). Expansion in Bessel functions. **Corrected domain** (|sinh z| > 1; see Corrections).
+- [28.23.E6](https://dlmf.nist.gov/28.23.E6): [`DLMF.Mathieu.hasSum_radialMathieuMc_even_cosh`](DLMF/Mathieu/Modified/BesselSeries.lean#L225) (admitted). Integer-order expansion.
+- [28.23.E7](https://dlmf.nist.gov/28.23.E7): [`DLMF.Mathieu.hasSum_radialMathieuMc_even_sinh`](DLMF/Mathieu/Modified/BesselSeries.lean#L238) (admitted). Integer-order expansion.
+- [28.23.E8](https://dlmf.nist.gov/28.23.E8): [`DLMF.Mathieu.hasSum_radialMathieuMc_odd_cosh`](DLMF/Mathieu/Modified/BesselSeries.lean#L248) (admitted). Integer-order expansion.
+- [28.23.E9](https://dlmf.nist.gov/28.23.E9): [`DLMF.Mathieu.hasSum_radialMathieuMc_odd_sinh`](DLMF/Mathieu/Modified/BesselSeries.lean#L260) (admitted). Integer-order expansion.
+- [28.23.E10](https://dlmf.nist.gov/28.23.E10): [`DLMF.Mathieu.hasSum_radialMathieuMs_odd_cosh`](DLMF/Mathieu/Modified/BesselSeries.lean#L273) (admitted). Integer-order expansion.
+- [28.23.E11](https://dlmf.nist.gov/28.23.E11): [`DLMF.Mathieu.hasSum_radialMathieuMs_odd_sinh`](DLMF/Mathieu/Modified/BesselSeries.lean#L286) (admitted). Integer-order expansion.
+- [28.23.E12](https://dlmf.nist.gov/28.23.E12): [`DLMF.Mathieu.hasSum_radialMathieuMs_even_cosh`](DLMF/Mathieu/Modified/BesselSeries.lean#L298) (admitted). Integer-order expansion.
+- [28.23.E13](https://dlmf.nist.gov/28.23.E13): [`DLMF.Mathieu.hasSum_radialMathieuMs_even_sinh`](DLMF/Mathieu/Modified/BesselSeries.lean#L311) (admitted). Integer-order expansion.
+- [28.23](https://dlmf.nist.gov/28.23): [`DLMF.Mathieu.hasSum_radialMathieuMc_even_cosh`](DLMF/Mathieu/Modified/BesselSeries.lean#L225) (admitted); [`DLMF.Mathieu.hasSum_radialMathieuMc_even_sinh`](DLMF/Mathieu/Modified/BesselSeries.lean#L238) (admitted); [`DLMF.Mathieu.hasSum_radialMathieuMc_odd_cosh`](DLMF/Mathieu/Modified/BesselSeries.lean#L248) (admitted); [`DLMF.Mathieu.hasSum_radialMathieuMc_odd_sinh`](DLMF/Mathieu/Modified/BesselSeries.lean#L260) (admitted); [`DLMF.Mathieu.hasSum_radialMathieuMs_even_cosh`](DLMF/Mathieu/Modified/BesselSeries.lean#L298) (admitted); [`DLMF.Mathieu.hasSum_radialMathieuMs_even_sinh`](DLMF/Mathieu/Modified/BesselSeries.lean#L311) (admitted); [`DLMF.Mathieu.hasSum_radialMathieuMs_odd_cosh`](DLMF/Mathieu/Modified/BesselSeries.lean#L273) (admitted); [`DLMF.Mathieu.hasSum_radialMathieuMs_odd_sinh`](DLMF/Mathieu/Modified/BesselSeries.lean#L286) (admitted).
 
 ## [§28.24 Expansions in Series of Cross-Products of Bessel Functions or Modified Bessel Functions](https://dlmf.nist.gov/28.24)
 
-- [28.24.E1](https://dlmf.nist.gov/28.24.E1): [`DLMF.Mathieu.hasSum_modMathieuTerm`](DLMF/Mathieu/Modified/BesselSeries.lean#L213) (admitted). Cross-product expansion.
-- [28.24.E2](https://dlmf.nist.gov/28.24.E2): [`DLMF.Mathieu.hasSum_radialMathieuMc_even_cross`](DLMF/Mathieu/Modified/BesselSeries.lean#L240) (admitted). Cross-product expansion.
-- [28.24.E3](https://dlmf.nist.gov/28.24.E3): [`DLMF.Mathieu.hasSum_radialMathieuMc_odd_cross`](DLMF/Mathieu/Modified/BesselSeries.lean#L254) (admitted). Cross-product expansion.
-- [28.24.E4](https://dlmf.nist.gov/28.24.E4): [`DLMF.Mathieu.hasSum_radialMathieuMs_odd_cross`](DLMF/Mathieu/Modified/BesselSeries.lean#L268) (admitted). Cross-product expansion.
-- [28.24.E5](https://dlmf.nist.gov/28.24.E5): [`DLMF.Mathieu.hasSum_radialMathieuMs_even_cross`](DLMF/Mathieu/Modified/BesselSeries.lean#L282) (admitted). Cross-product expansion.
-- [28.24.E6](https://dlmf.nist.gov/28.24.E6): [`DLMF.Mathieu.hasSum_modMathieuIe_even`](DLMF/Mathieu/Modified/BesselSeries.lean#L297) (admitted). Modified-Bessel cross-product expansion.
-- [28.24.E7](https://dlmf.nist.gov/28.24.E7): [`DLMF.Mathieu.hasSum_modMathieuIo_even`](DLMF/Mathieu/Modified/BesselSeries.lean#L314) (admitted). Modified-Bessel cross-product expansion.
-- [28.24.E8](https://dlmf.nist.gov/28.24.E8): [`DLMF.Mathieu.hasSum_modMathieuIe_odd`](DLMF/Mathieu/Modified/BesselSeries.lean#L331) (admitted). Modified-Bessel cross-product expansion.
-- [28.24.E9](https://dlmf.nist.gov/28.24.E9): [`DLMF.Mathieu.hasSum_modMathieuIo_odd`](DLMF/Mathieu/Modified/BesselSeries.lean#L349) (admitted). Modified-Bessel cross-product expansion.
-- [28.24.E10](https://dlmf.nist.gov/28.24.E10): [`DLMF.Mathieu.hasSum_modMathieuKe_even`](DLMF/Mathieu/Modified/BesselSeries.lean#L366) (admitted). Modified-Bessel cross-product expansion. Restricted to |Im z| < π (principal K).
-- [28.24.E11](https://dlmf.nist.gov/28.24.E11): [`DLMF.Mathieu.hasSum_modMathieuKo_even`](DLMF/Mathieu/Modified/BesselSeries.lean#L383) (admitted). Modified-Bessel cross-product expansion. Restricted to |Im z| < π (principal K).
-- [28.24.E12](https://dlmf.nist.gov/28.24.E12): [`DLMF.Mathieu.hasSum_modMathieuKe_odd`](DLMF/Mathieu/Modified/BesselSeries.lean#L401) (admitted). Modified-Bessel cross-product expansion. Restricted to |Im z| < π (principal K).
-- [28.24.E13](https://dlmf.nist.gov/28.24.E13): [`DLMF.Mathieu.hasSum_modMathieuKo_odd`](DLMF/Mathieu/Modified/BesselSeries.lean#L419) (admitted). Modified-Bessel cross-product expansion. Restricted to |Im z| < π (principal K).
-- [28.24](https://dlmf.nist.gov/28.24): [`DLMF.Mathieu.modMathieuTerm_locally_uniform`](DLMF/Mathieu/Modified/BesselSeries.lean#L225) (admitted).
+- [28.24.E1](https://dlmf.nist.gov/28.24.E1): [`DLMF.Mathieu.hasSum_modMathieuTerm`](DLMF/Mathieu/Modified/BesselSeries.lean#L326) (admitted). Cross-product expansion.
+- [28.24.E2](https://dlmf.nist.gov/28.24.E2): [`DLMF.Mathieu.hasSum_radialMathieuMc_even_cross`](DLMF/Mathieu/Modified/BesselSeries.lean#L353) (admitted). Cross-product expansion.
+- [28.24.E3](https://dlmf.nist.gov/28.24.E3): [`DLMF.Mathieu.hasSum_radialMathieuMc_odd_cross`](DLMF/Mathieu/Modified/BesselSeries.lean#L367) (admitted). Cross-product expansion.
+- [28.24.E4](https://dlmf.nist.gov/28.24.E4): [`DLMF.Mathieu.hasSum_radialMathieuMs_odd_cross`](DLMF/Mathieu/Modified/BesselSeries.lean#L381) (admitted). Cross-product expansion.
+- [28.24.E5](https://dlmf.nist.gov/28.24.E5): [`DLMF.Mathieu.hasSum_radialMathieuMs_even_cross`](DLMF/Mathieu/Modified/BesselSeries.lean#L395) (admitted). Cross-product expansion.
+- [28.24.E6](https://dlmf.nist.gov/28.24.E6): [`DLMF.Mathieu.hasSum_modMathieuIe_even`](DLMF/Mathieu/Modified/BesselSeries.lean#L410) (admitted). Modified-Bessel cross-product expansion.
+- [28.24.E7](https://dlmf.nist.gov/28.24.E7): [`DLMF.Mathieu.hasSum_modMathieuIo_even`](DLMF/Mathieu/Modified/BesselSeries.lean#L427) (admitted). Modified-Bessel cross-product expansion.
+- [28.24.E8](https://dlmf.nist.gov/28.24.E8): [`DLMF.Mathieu.hasSum_modMathieuIe_odd`](DLMF/Mathieu/Modified/BesselSeries.lean#L444) (admitted). Modified-Bessel cross-product expansion.
+- [28.24.E9](https://dlmf.nist.gov/28.24.E9): [`DLMF.Mathieu.hasSum_modMathieuIo_odd`](DLMF/Mathieu/Modified/BesselSeries.lean#L462) (admitted). Modified-Bessel cross-product expansion.
+- [28.24.E10](https://dlmf.nist.gov/28.24.E10): [`DLMF.Mathieu.hasSum_modMathieuKe_even`](DLMF/Mathieu/Modified/BesselSeries.lean#L479) (admitted). Modified-Bessel cross-product expansion. Restricted to |Im z| < π (principal K).
+- [28.24.E11](https://dlmf.nist.gov/28.24.E11): [`DLMF.Mathieu.hasSum_modMathieuKo_even`](DLMF/Mathieu/Modified/BesselSeries.lean#L496) (admitted). Modified-Bessel cross-product expansion. Restricted to |Im z| < π (principal K).
+- [28.24.E12](https://dlmf.nist.gov/28.24.E12): [`DLMF.Mathieu.hasSum_modMathieuKe_odd`](DLMF/Mathieu/Modified/BesselSeries.lean#L514) (admitted). Modified-Bessel cross-product expansion. Restricted to |Im z| < π (principal K).
+- [28.24.E13](https://dlmf.nist.gov/28.24.E13): [`DLMF.Mathieu.hasSum_modMathieuKo_odd`](DLMF/Mathieu/Modified/BesselSeries.lean#L532) (admitted). Modified-Bessel cross-product expansion. Restricted to |Im z| < π (principal K).
+- [28.24](https://dlmf.nist.gov/28.24): [`DLMF.Mathieu.modMathieuTerm_locally_uniform`](DLMF/Mathieu/Modified/BesselSeries.lean#L338) (admitted).
 
 ## [§28.25 Asymptotic Expansions for Large ℜz](https://dlmf.nist.gov/28.25)
 
@@ -851,56 +853,56 @@ tagged declarations:
 
 ## [§28.28 Integrals, Integral Representations, and Integral Equations](https://dlmf.nist.gov/28.28)
 
-- [28.28.i](https://dlmf.nist.gov/28.28.i): [`DLMF.Mathieu.integrableOn_exp_cosh_modMathieu`](DLMF/Mathieu/Modified/Integrals.lean#L176) (admitted). Absolute convergence.
+- [28.28.i](https://dlmf.nist.gov/28.28.i): [`DLMF.Mathieu.integrableOn_exp_cosh_modMathieu`](DLMF/Mathieu/Modified/Integrals.lean#L271) (admitted). Absolute convergence.
 - [28.28.E1](https://dlmf.nist.gov/28.28.E1): [`DLMF.Mathieu.mathieuKernelW`](DLMF/Mathieu/Modified/Defs.lean#L391) (definition). `w = cosh z cos t cos α + sinh z sin t sin α` .
-- [28.28.E2](https://dlmf.nist.gov/28.28.E2): [`DLMF.Mathieu.integral_exp_mathieuCe`](DLMF/Mathieu/Modified/Integrals.lean#L51) (admitted). Integral equation.
-- [28.28.E3](https://dlmf.nist.gov/28.28.E3): [`DLMF.Mathieu.integral_exp_mathieuSe`](DLMF/Mathieu/Modified/Integrals.lean#L61) (admitted). Integral equation.
-- [28.28.E4](https://dlmf.nist.gov/28.28.E4): [`DLMF.Mathieu.integral_dw_exp_mathieuCe`](DLMF/Mathieu/Modified/Integrals.lean#L70) (admitted). Integral equation.
-- [28.28.E5](https://dlmf.nist.gov/28.28.E5): [`DLMF.Mathieu.integral_dw_exp_mathieuSe`](DLMF/Mathieu/Modified/Integrals.lean#L79) (admitted). Integral equation.
-- [28.28.E6](https://dlmf.nist.gov/28.28.E6): [`DLMF.Mathieu.mathieuPathIntegral`](DLMF/Mathieu/Modified/Defs.lean#L396) (definition); [`DLMF.Mathieu.pathIntegral_exp_mathieuMe`](DLMF/Mathieu/Modified/Integrals.lean#L88) (admitted). The integral along the path `𝓛_j` of DLMF 28.28.6, realized as a polygonal path with vertical rays; Integral representation along `𝓛_j`.
-- [28.28.E7](https://dlmf.nist.gov/28.28.E7): [`DLMF.Mathieu.pathIntegral_exp_mathieuMe`](DLMF/Mathieu/Modified/Integrals.lean#L88) (admitted). Integral representation along `𝓛_j`.
-- [28.28.E8](https://dlmf.nist.gov/28.28.E8): [`DLMF.Mathieu.pathIntegral_dw_exp_mathieuMe`](DLMF/Mathieu/Modified/Integrals.lean#L100) (admitted). Integral representation along `𝓛_j`.
-- [28.28.E9](https://dlmf.nist.gov/28.28.E9): [`DLMF.Mathieu.pathIntegral_one_exp_mathieuMe`](DLMF/Mathieu/Modified/Integrals.lean#L113) (admitted). Integral representation along `𝓛_1`.
-- [28.28.E10](https://dlmf.nist.gov/28.28.E10): [`DLMF.Mathieu.integral_exp_cosh_modMathieuCe`](DLMF/Mathieu/Modified/Integrals.lean#L125) (admitted); [`DLMF.Mathieu.integral_exp_cosh_modMathieuSe`](DLMF/Mathieu/Modified/Integrals.lean#L139) (admitted); [`DLMF.Mathieu.integral_exp_cosh_modMathieuFe`](DLMF/Mathieu/Modified/Integrals.lean#L152) (admitted); [`DLMF.Mathieu.integral_exp_cosh_modMathieuGe`](DLMF/Mathieu/Modified/Integrals.lean#L165) (admitted). Laplace-type integral.
-- [28.28.E11](https://dlmf.nist.gov/28.28.E11): [`DLMF.Mathieu.integral_exp_cosh_modMathieuCe`](DLMF/Mathieu/Modified/Integrals.lean#L125) (admitted). Laplace-type integral. **Corrected**: factor e^{iνπ/2}, not e^{iνπ} (see Corrections).
-- [28.28.E12](https://dlmf.nist.gov/28.28.E12): [`DLMF.Mathieu.integral_exp_cosh_modMathieuSe`](DLMF/Mathieu/Modified/Integrals.lean#L139) (admitted). Laplace-type integral.
-- [28.28.E13](https://dlmf.nist.gov/28.28.E13): [`DLMF.Mathieu.integral_exp_cosh_modMathieuFe`](DLMF/Mathieu/Modified/Integrals.lean#L152) (admitted). Laplace-type integral.
-- [28.28.E14](https://dlmf.nist.gov/28.28.E14): [`DLMF.Mathieu.integral_exp_cosh_modMathieuGe`](DLMF/Mathieu/Modified/Integrals.lean#L165) (admitted). Laplace-type integral.
-- [28.28.E15](https://dlmf.nist.gov/28.28.E15): [`DLMF.Mathieu.integral_cos_cosh_modMathieuCe`](DLMF/Mathieu/Modified/Integrals.lean#L189) (admitted). Cosine transform.
-- [28.28.E16](https://dlmf.nist.gov/28.28.E16): [`DLMF.Mathieu.integral_sin_cosh_modMathieuCe`](DLMF/Mathieu/Modified/Integrals.lean#L199) (admitted). Sine transform. **Corrected**: overall sign of the right-hand side and the range of the lower sign (see Corrections).
-- [28.28.E17](https://dlmf.nist.gov/28.28.E17): [`DLMF.Mathieu.integral_cyl_mathieuMe`](DLMF/Mathieu/Modified/Integrals.lean#L313) (admitted). Integral of a product with a Bessel function.
-- [28.28.E18](https://dlmf.nist.gov/28.28.E18): [`DLMF.Mathieu.mathieuKernelR`](DLMF/Mathieu/Modified/Defs.lean#L418) (definition); [`DLMF.Mathieu.mathieuKernelR_sq`](DLMF/Mathieu/Modified/Integrals.lean#L226) (proved); [`DLMF.Mathieu.mathieuKernelR_zero`](DLMF/Mathieu/Modified/Integrals.lean#L259) (proved). `R(z, t)` of DLMF 28.28.18; `R(z, t)² = ½(cosh 2z + cos 2t)` , `Re z > 0`, real `t`.
-- [28.28.E19](https://dlmf.nist.gov/28.28.E19): [`DLMF.Mathieu.mathieuKernelPhi`](DLMF/Mathieu/Modified/Defs.lean#L424) (definition); [`DLMF.Mathieu.exp_two_I_mathieuKernelPhi`](DLMF/Mathieu/Modified/Integrals.lean#L273) (proved); [`DLMF.Mathieu.mathieuKernelPhi_zero`](DLMF/Mathieu/Modified/Integrals.lean#L308) (proved). `φ(z, t)` of DLMF 28.28.19; `e^{2iφ} = cosh(z + it) / cosh(z - it)` , `Re z > 0`, real `t`.
-- [28.28.E20](https://dlmf.nist.gov/28.28.E20): [`DLMF.Mathieu.integral_cyl_mathieuCe_even`](DLMF/Mathieu/Modified/Integrals.lean#L325) (admitted). Integer order.
-- [28.28.E21](https://dlmf.nist.gov/28.28.E21): [`DLMF.Mathieu.integral_cyl_mathieuCe_odd`](DLMF/Mathieu/Modified/Integrals.lean#L337) (admitted). Integer order.
-- [28.28.E22](https://dlmf.nist.gov/28.28.E22): [`DLMF.Mathieu.integral_cyl_mathieuSe_odd`](DLMF/Mathieu/Modified/Integrals.lean#L349) (admitted). Integer order.
-- [28.28.E23](https://dlmf.nist.gov/28.28.E23): [`DLMF.Mathieu.integral_cyl_mathieuSe_even`](DLMF/Mathieu/Modified/Integrals.lean#L361) (admitted). Integer order.
+- [28.28.E2](https://dlmf.nist.gov/28.28.E2): [`DLMF.Mathieu.integral_exp_mathieuCe`](DLMF/Mathieu/Modified/Integrals.lean#L55) (admitted). Integral equation.
+- [28.28.E3](https://dlmf.nist.gov/28.28.E3): [`DLMF.Mathieu.integral_exp_mathieuSe`](DLMF/Mathieu/Modified/Integrals.lean#L65) (admitted). Integral equation.
+- [28.28.E4](https://dlmf.nist.gov/28.28.E4): [`DLMF.Mathieu.integral_dw_exp_mathieuCe`](DLMF/Mathieu/Modified/Integrals.lean#L155) (proved from admissions). Integral equation.
+- [28.28.E5](https://dlmf.nist.gov/28.28.E5): [`DLMF.Mathieu.integral_dw_exp_mathieuSe`](DLMF/Mathieu/Modified/Integrals.lean#L169) (proved from admissions). Integral equation.
+- [28.28.E6](https://dlmf.nist.gov/28.28.E6): [`DLMF.Mathieu.mathieuPathIntegral`](DLMF/Mathieu/Modified/Defs.lean#L396) (definition); [`DLMF.Mathieu.pathIntegral_exp_mathieuMe`](DLMF/Mathieu/Modified/Integrals.lean#L183) (admitted). The integral along the path `𝓛_j` of DLMF 28.28.6, realized as a polygonal path with vertical rays; Integral representation along `𝓛_j`.
+- [28.28.E7](https://dlmf.nist.gov/28.28.E7): [`DLMF.Mathieu.pathIntegral_exp_mathieuMe`](DLMF/Mathieu/Modified/Integrals.lean#L183) (admitted). Integral representation along `𝓛_j`.
+- [28.28.E8](https://dlmf.nist.gov/28.28.E8): [`DLMF.Mathieu.pathIntegral_dw_exp_mathieuMe`](DLMF/Mathieu/Modified/Integrals.lean#L195) (admitted). Integral representation along `𝓛_j`.
+- [28.28.E9](https://dlmf.nist.gov/28.28.E9): [`DLMF.Mathieu.pathIntegral_one_exp_mathieuMe`](DLMF/Mathieu/Modified/Integrals.lean#L208) (admitted). Integral representation along `𝓛_1`.
+- [28.28.E10](https://dlmf.nist.gov/28.28.E10): [`DLMF.Mathieu.integral_exp_cosh_modMathieuCe`](DLMF/Mathieu/Modified/Integrals.lean#L220) (admitted); [`DLMF.Mathieu.integral_exp_cosh_modMathieuSe`](DLMF/Mathieu/Modified/Integrals.lean#L234) (admitted); [`DLMF.Mathieu.integral_exp_cosh_modMathieuFe`](DLMF/Mathieu/Modified/Integrals.lean#L247) (admitted); [`DLMF.Mathieu.integral_exp_cosh_modMathieuGe`](DLMF/Mathieu/Modified/Integrals.lean#L260) (admitted). Laplace-type integral.
+- [28.28.E11](https://dlmf.nist.gov/28.28.E11): [`DLMF.Mathieu.integral_exp_cosh_modMathieuCe`](DLMF/Mathieu/Modified/Integrals.lean#L220) (admitted). Laplace-type integral. **Corrected**: factor e^{iνπ/2}, not e^{iνπ} (see Corrections).
+- [28.28.E12](https://dlmf.nist.gov/28.28.E12): [`DLMF.Mathieu.integral_exp_cosh_modMathieuSe`](DLMF/Mathieu/Modified/Integrals.lean#L234) (admitted). Laplace-type integral.
+- [28.28.E13](https://dlmf.nist.gov/28.28.E13): [`DLMF.Mathieu.integral_exp_cosh_modMathieuFe`](DLMF/Mathieu/Modified/Integrals.lean#L247) (admitted). Laplace-type integral.
+- [28.28.E14](https://dlmf.nist.gov/28.28.E14): [`DLMF.Mathieu.integral_exp_cosh_modMathieuGe`](DLMF/Mathieu/Modified/Integrals.lean#L260) (admitted). Laplace-type integral.
+- [28.28.E15](https://dlmf.nist.gov/28.28.E15): [`DLMF.Mathieu.integral_cos_cosh_modMathieuCe`](DLMF/Mathieu/Modified/Integrals.lean#L284) (admitted). Cosine transform.
+- [28.28.E16](https://dlmf.nist.gov/28.28.E16): [`DLMF.Mathieu.integral_sin_cosh_modMathieuCe`](DLMF/Mathieu/Modified/Integrals.lean#L294) (admitted). Sine transform. **Corrected**: overall sign of the right-hand side and the range of the lower sign (see Corrections).
+- [28.28.E17](https://dlmf.nist.gov/28.28.E17): [`DLMF.Mathieu.integral_cyl_mathieuMe`](DLMF/Mathieu/Modified/Integrals.lean#L409) (admitted). Integral of a product with a Bessel function.
+- [28.28.E18](https://dlmf.nist.gov/28.28.E18): [`DLMF.Mathieu.mathieuKernelR`](DLMF/Mathieu/Modified/Defs.lean#L418) (definition); [`DLMF.Mathieu.mathieuKernelR_sq`](DLMF/Mathieu/Modified/Integrals.lean#L322) (proved); [`DLMF.Mathieu.mathieuKernelR_zero`](DLMF/Mathieu/Modified/Integrals.lean#L355) (proved). `R(z, t)` of DLMF 28.28.18; `R(z, t)² = ½(cosh 2z + cos 2t)` , `Re z > 0`, real `t`.
+- [28.28.E19](https://dlmf.nist.gov/28.28.E19): [`DLMF.Mathieu.mathieuKernelPhi`](DLMF/Mathieu/Modified/Defs.lean#L424) (definition); [`DLMF.Mathieu.exp_two_I_mathieuKernelPhi`](DLMF/Mathieu/Modified/Integrals.lean#L369) (proved); [`DLMF.Mathieu.mathieuKernelPhi_zero`](DLMF/Mathieu/Modified/Integrals.lean#L404) (proved). `φ(z, t)` of DLMF 28.28.19; `e^{2iφ} = cosh(z + it) / cosh(z - it)` , `Re z > 0`, real `t`.
+- [28.28.E20](https://dlmf.nist.gov/28.28.E20): [`DLMF.Mathieu.integral_cyl_mathieuCe_even`](DLMF/Mathieu/Modified/Integrals.lean#L421) (admitted). Integer order.
+- [28.28.E21](https://dlmf.nist.gov/28.28.E21): [`DLMF.Mathieu.integral_cyl_mathieuCe_odd`](DLMF/Mathieu/Modified/Integrals.lean#L433) (admitted). Integer order.
+- [28.28.E22](https://dlmf.nist.gov/28.28.E22): [`DLMF.Mathieu.integral_cyl_mathieuSe_odd`](DLMF/Mathieu/Modified/Integrals.lean#L445) (admitted). Integer order.
+- [28.28.E23](https://dlmf.nist.gov/28.28.E23): [`DLMF.Mathieu.integral_cyl_mathieuSe_even`](DLMF/Mathieu/Modified/Integrals.lean#L457) (admitted). Integer order.
 - [28.28.E24](https://dlmf.nist.gov/28.28.E24): [`DLMF.Mathieu.modMathieuD0`](DLMF/Mathieu/Modified/Defs.lean#L439) (definition); [`DLMF.Mathieu.modMathieuD1`](DLMF/Mathieu/Modified/Defs.lean#L444) (definition). `D_0(ν, μ, z) = M^{(3)}_ν(z) M^{(4)}_μ(z) - M^{(4)}_ν(z) M^{(3)}_μ(z)` ; `D_1(ν, μ, z) = M^{(3)'}_ν(z) M^{(4)}_μ(z) - M^{(4)'}_ν(z) M^{(3)}_μ(z)` .
-- [28.28.E25](https://dlmf.nist.gov/28.28.E25): [`DLMF.Mathieu.integral_cos_mathieuMe_mul`](DLMF/Mathieu/Modified/Integrals.lean#L378) (admitted). DLMF 28.28.25.
-- [28.28.E26](https://dlmf.nist.gov/28.28.E26): [`DLMF.Mathieu.integral_sin_mathieuMe_mul`](DLMF/Mathieu/Modified/Integrals.lean#L389) (admitted). DLMF 28.28.26.
-- [28.28.E27](https://dlmf.nist.gov/28.28.E27): [`DLMF.Mathieu.mathieuAlpha0`](DLMF/Mathieu/Modified/Defs.lean#L450) (definition); [`DLMF.Mathieu.mathieuAlpha0_eq`](DLMF/Mathieu/Modified/Integrals.lean#L400) (admitted). `α^{(0)}_{ν,m} = (2π)⁻¹ ∫₀^{2π} cos t me_ν(t, h²) me_{-ν-2m-1}(t, h²) dt` ; DLMF 28.28.27 (second equality), `D_0(ν, ν+2m+1, 0) ≠ 0`.
-- [28.28.E28](https://dlmf.nist.gov/28.28.E28): [`DLMF.Mathieu.mathieuAlpha1`](DLMF/Mathieu/Modified/Defs.lean#L457) (definition); [`DLMF.Mathieu.mathieuAlpha1_eq`](DLMF/Mathieu/Modified/Integrals.lean#L409) (admitted). `α^{(1)}_{ν,m} = (2π)⁻¹ ∫₀^{2π} sin t me_ν(t, h²) me_{-ν-2m-1}(t, h²) dt` ; DLMF 28.28.28 (second equality), `D_1(ν, ν+2m+1, 0) ≠ 0`.
-- [28.28.E29](https://dlmf.nist.gov/28.28.E29): [`DLMF.Mathieu.integral_sin_deriv_mathieuMe_mul`](DLMF/Mathieu/Modified/Integrals.lean#L419) (admitted). DLMF 28.28.29.
-- [28.28.E30](https://dlmf.nist.gov/28.28.E30): [`DLMF.Mathieu.integral_cos_deriv_mathieuMe_mul`](DLMF/Mathieu/Modified/Integrals.lean#L431) (admitted). DLMF 28.28.30.
-- [28.28.E31](https://dlmf.nist.gov/28.28.E31): [`DLMF.Mathieu.integral_cos_sin_mathieuMe_mul`](DLMF/Mathieu/Modified/Integrals.lean#L443) (admitted). DLMF 28.28.31.
-- [28.28.E32](https://dlmf.nist.gov/28.28.E32): [`DLMF.Mathieu.integral_deriv_mathieuMe_mul`](DLMF/Mathieu/Modified/Integrals.lean#L454) (admitted). DLMF 28.28.32.
-- [28.28.E33](https://dlmf.nist.gov/28.28.E33): [`DLMF.Mathieu.mathieuGammaInt`](DLMF/Mathieu/Modified/Defs.lean#L464) (definition); [`DLMF.Mathieu.mathieuGammaInt_eq`](DLMF/Mathieu/Modified/Integrals.lean#L466) (admitted). `γ_{ν,m} = (2π)⁻¹ ∫₀^{2π} me'_ν(t, h²) me_{-ν-2m}(t, h²) dt` ; DLMF 28.28.33 (second equality), `D_1(ν, ν+2m, 0) ≠ 0`.
-- [28.28.E34](https://dlmf.nist.gov/28.28.E34): [`DLMF.Mathieu.pv_integral_deriv_mathieuMe_div_sin`](DLMF/Mathieu/Modified/Integrals.lean#L476) (admitted). DLMF 28.28.34 (Cauchy principal value at the zeros `0, π, 2π` of `sin t`; the integrand is `2π`-periodic, so the excluded set `{|sin t| ≤ ε}` is symmetric about.
+- [28.28.E25](https://dlmf.nist.gov/28.28.E25): [`DLMF.Mathieu.integral_cos_mathieuMe_mul`](DLMF/Mathieu/Modified/Integrals.lean#L474) (admitted). DLMF 28.28.25.
+- [28.28.E26](https://dlmf.nist.gov/28.28.E26): [`DLMF.Mathieu.integral_sin_mathieuMe_mul`](DLMF/Mathieu/Modified/Integrals.lean#L485) (admitted). DLMF 28.28.26.
+- [28.28.E27](https://dlmf.nist.gov/28.28.E27): [`DLMF.Mathieu.mathieuAlpha0`](DLMF/Mathieu/Modified/Defs.lean#L450) (definition); [`DLMF.Mathieu.mathieuAlpha0_eq`](DLMF/Mathieu/Modified/Integrals.lean#L496) (admitted). `α^{(0)}_{ν,m} = (2π)⁻¹ ∫₀^{2π} cos t me_ν(t, h²) me_{-ν-2m-1}(t, h²) dt` ; DLMF 28.28.27 (second equality), `D_0(ν, ν+2m+1, 0) ≠ 0`.
+- [28.28.E28](https://dlmf.nist.gov/28.28.E28): [`DLMF.Mathieu.mathieuAlpha1`](DLMF/Mathieu/Modified/Defs.lean#L457) (definition); [`DLMF.Mathieu.mathieuAlpha1_eq`](DLMF/Mathieu/Modified/Integrals.lean#L505) (admitted). `α^{(1)}_{ν,m} = (2π)⁻¹ ∫₀^{2π} sin t me_ν(t, h²) me_{-ν-2m-1}(t, h²) dt` ; DLMF 28.28.28 (second equality), `D_1(ν, ν+2m+1, 0) ≠ 0`.
+- [28.28.E29](https://dlmf.nist.gov/28.28.E29): [`DLMF.Mathieu.integral_sin_deriv_mathieuMe_mul`](DLMF/Mathieu/Modified/Integrals.lean#L515) (admitted). DLMF 28.28.29.
+- [28.28.E30](https://dlmf.nist.gov/28.28.E30): [`DLMF.Mathieu.integral_cos_deriv_mathieuMe_mul`](DLMF/Mathieu/Modified/Integrals.lean#L527) (admitted). DLMF 28.28.30.
+- [28.28.E31](https://dlmf.nist.gov/28.28.E31): [`DLMF.Mathieu.integral_cos_sin_mathieuMe_mul`](DLMF/Mathieu/Modified/Integrals.lean#L539) (admitted). DLMF 28.28.31.
+- [28.28.E32](https://dlmf.nist.gov/28.28.E32): [`DLMF.Mathieu.integral_deriv_mathieuMe_mul`](DLMF/Mathieu/Modified/Integrals.lean#L550) (admitted). DLMF 28.28.32.
+- [28.28.E33](https://dlmf.nist.gov/28.28.E33): [`DLMF.Mathieu.mathieuGammaInt`](DLMF/Mathieu/Modified/Defs.lean#L464) (definition); [`DLMF.Mathieu.mathieuGammaInt_eq`](DLMF/Mathieu/Modified/Integrals.lean#L562) (admitted). `γ_{ν,m} = (2π)⁻¹ ∫₀^{2π} me'_ν(t, h²) me_{-ν-2m}(t, h²) dt` ; DLMF 28.28.33 (second equality), `D_1(ν, ν+2m, 0) ≠ 0`.
+- [28.28.E34](https://dlmf.nist.gov/28.28.E34): [`DLMF.Mathieu.pv_integral_deriv_mathieuMe_div_sin`](DLMF/Mathieu/Modified/Integrals.lean#L572) (admitted). DLMF 28.28.34 (Cauchy principal value at the zeros `0, π, 2π` of `sin t`; the integrand is `2π`-periodic, so the excluded set `{|sin t| ≤ ε}` is symmetric about.
 - [28.28.E35](https://dlmf.nist.gov/28.28.E35): [`DLMF.Mathieu.radialMathieuDs0`](DLMF/Mathieu/Modified/Defs.lean#L471) (definition); [`DLMF.Mathieu.radialMathieuDs1`](DLMF/Mathieu/Modified/Defs.lean#L477) (definition); [`DLMF.Mathieu.radialMathieuDs2`](DLMF/Mathieu/Modified/Defs.lean#L483) (definition). `Ds_0(n, m, z) = Ms^{(3)}_n Ms^{(4)}_m - Ms^{(4)}_n Ms^{(3)}_m` ; `Ds_1(n, m, z) = Ms^{(3)'}_n Ms^{(4)}_m - Ms^{(4)'}_n Ms^{(3)}_m` .
-- [28.28.E36](https://dlmf.nist.gov/28.28.E36): [`DLMF.Mathieu.integral_cos_mathieuSe_mul`](DLMF/Mathieu/Modified/Integrals.lean#L494) (admitted). DLMF 28.28.36, `m, n ≥ 1`, `m - n = 2p + 1`.
-- [28.28.E37](https://dlmf.nist.gov/28.28.E37): [`DLMF.Mathieu.integral_sin_deriv_mathieuSe_mul`](DLMF/Mathieu/Modified/Integrals.lean#L505) (admitted). DLMF 28.28.37, `m, n ≥ 1`, `m - n = 2p + 1`.
-- [28.28.E38](https://dlmf.nist.gov/28.28.E38): [`DLMF.Mathieu.mathieuAlphaHatS`](DLMF/Mathieu/Modified/Defs.lean#L513) (definition); [`DLMF.Mathieu.mathieuAlphaHatS_eq`](DLMF/Mathieu/Modified/Integrals.lean#L516) (admitted). `α̂^{(s)}_{n,m} = (2π)⁻¹ ∫₀^{2π} cos t se_n(t, h²) se_m(t, h²) dt` , real `h`; DLMF 28.28.38 (second equality), `m, n ≥ 1`, `m - n = 2p + 1`, `Ds_2(n, m, 0) ≠ 0`.
+- [28.28.E36](https://dlmf.nist.gov/28.28.E36): [`DLMF.Mathieu.integral_cos_mathieuSe_mul`](DLMF/Mathieu/Modified/Integrals.lean#L590) (admitted). DLMF 28.28.36, `m, n ≥ 1`, `m - n = 2p + 1`.
+- [28.28.E37](https://dlmf.nist.gov/28.28.E37): [`DLMF.Mathieu.integral_sin_deriv_mathieuSe_mul`](DLMF/Mathieu/Modified/Integrals.lean#L601) (admitted). DLMF 28.28.37, `m, n ≥ 1`, `m - n = 2p + 1`.
+- [28.28.E38](https://dlmf.nist.gov/28.28.E38): [`DLMF.Mathieu.mathieuAlphaHatS`](DLMF/Mathieu/Modified/Defs.lean#L513) (definition); [`DLMF.Mathieu.mathieuAlphaHatS_eq`](DLMF/Mathieu/Modified/Integrals.lean#L612) (admitted). `α̂^{(s)}_{n,m} = (2π)⁻¹ ∫₀^{2π} cos t se_n(t, h²) se_m(t, h²) dt` , real `h`; DLMF 28.28.38 (second equality), `m, n ≥ 1`, `m - n = 2p + 1`, `Ds_2(n, m, 0) ≠ 0`.
 - [28.28.E39](https://dlmf.nist.gov/28.28.E39): [`DLMF.Mathieu.radialMathieuDc0`](DLMF/Mathieu/Modified/Defs.lean#L489) (definition); [`DLMF.Mathieu.radialMathieuDc1`](DLMF/Mathieu/Modified/Defs.lean#L495) (definition). `Dc_0(n, m, z) = Mc^{(3)}_n Mc^{(4)}_m - Mc^{(4)}_n Mc^{(3)}_m` ; `Dc_1(n, m, z) = Mc^{(3)'}_n Mc^{(4)}_m - Mc^{(4)'}_n Mc^{(3)}_m` .
 - [28.28.E40](https://dlmf.nist.gov/28.28.E40): [`DLMF.Mathieu.radialMathieuDsc0`](DLMF/Mathieu/Modified/Defs.lean#L501) (definition); [`DLMF.Mathieu.radialMathieuDsc1`](DLMF/Mathieu/Modified/Defs.lean#L507) (definition). `Dsc_0(n, m, z) = Ms^{(3)}_n Mc^{(4)}_m - Ms^{(4)}_n Mc^{(3)}_m` ; `Dsc_1(n, m, z) = Ms^{(3)'}_n Mc^{(4)}_m - Ms^{(4)'}_n Mc^{(3)}_m` .
-- [28.28.E41](https://dlmf.nist.gov/28.28.E41): [`DLMF.Mathieu.integral_sin_mathieuSe_mul_mathieuCe`](DLMF/Mathieu/Modified/Integrals.lean#L526) (admitted). DLMF 28.28.41, `m ≥ 0`, `n ≥ 1`, `m - n = 2p + 1`.
-- [28.28.E42](https://dlmf.nist.gov/28.28.E42): [`DLMF.Mathieu.integral_cos_deriv_mathieuSe_mul_mathieuCe`](DLMF/Mathieu/Modified/Integrals.lean#L537) (admitted). DLMF 28.28.42, `m ≥ 0`, `n ≥ 1`, `m - n = 2p + 1`.
-- [28.28.E43](https://dlmf.nist.gov/28.28.E43): [`DLMF.Mathieu.mathieuBetaHat`](DLMF/Mathieu/Modified/Defs.lean#L520) (definition); [`DLMF.Mathieu.mathieuBetaHat_eq`](DLMF/Mathieu/Modified/Integrals.lean#L548) (admitted). `β̂_{n,m} = (2π)⁻¹ ∫₀^{2π} sin t se_n(t, h²) ce_m(t, h²) dt` , real `h`; DLMF 28.28.43 (second equality), `m ≥ 0`, `n ≥ 1`, `m - n = 2p + 1`, `Dsc_1(n, m, 0) ≠ 0`.
-- [28.28.E44](https://dlmf.nist.gov/28.28.E44): [`DLMF.Mathieu.integral_sin_two_mathieuSe_mul_mathieuCe`](DLMF/Mathieu/Modified/Integrals.lean#L558) (admitted). DLMF 28.28.44, `m ≥ 0`, `n ≥ 1`, `n - m = 2p`.
-- [28.28.E45](https://dlmf.nist.gov/28.28.E45): [`DLMF.Mathieu.integral_deriv_mathieuSe_mul_mathieuCe`](DLMF/Mathieu/Modified/Integrals.lean#L568) (admitted). DLMF 28.28.45, `m ≥ 0`, `n ≥ 1`, `n - m = 2p`.
-- [28.28.E46](https://dlmf.nist.gov/28.28.E46): [`DLMF.Mathieu.mathieuGammaHat`](DLMF/Mathieu/Modified/Defs.lean#L527) (definition); [`DLMF.Mathieu.mathieuGammaHat_eq`](DLMF/Mathieu/Modified/Integrals.lean#L579) (admitted). `γ̂_{n,m} = (2π)⁻¹ ∫₀^{2π} se'_n(t, h²) ce_m(t, h²) dt` , real `h`; DLMF 28.28.46 (second equality), `m ≥ 0`, `n ≥ 1`, `n - m = 2p`, `Dsc_1(n, m, 0) ≠ 0`.
-- [28.28.E47](https://dlmf.nist.gov/28.28.E47): [`DLMF.Mathieu.integral_cos_mathieuCe_mul`](DLMF/Mathieu/Modified/Integrals.lean#L589) (admitted). DLMF 28.28.47, `m, n ≥ 0`, `m - n = 2p + 1`.
-- [28.28.E48](https://dlmf.nist.gov/28.28.E48): [`DLMF.Mathieu.integral_sin_deriv_mathieuCe_mul`](DLMF/Mathieu/Modified/Integrals.lean#L600) (admitted). DLMF 28.28.48, `m, n ≥ 0`, `m - n = 2p + 1`.
-- [28.28.E49](https://dlmf.nist.gov/28.28.E49): [`DLMF.Mathieu.mathieuAlphaHatC`](DLMF/Mathieu/Modified/Defs.lean#L534) (definition); [`DLMF.Mathieu.mathieuAlphaHatC_eq`](DLMF/Mathieu/Modified/Integrals.lean#L611) (admitted). `α̂^{(c)}_{n,m} = (2π)⁻¹ ∫₀^{2π} cos t ce_n(t, h²) ce_m(t, h²) dt` , real `h`; DLMF 28.28.49 (second equality), `m, n ≥ 0`, `m - n = 2p + 1`, `Dc_0(n, m, 0) ≠ 0`.
+- [28.28.E41](https://dlmf.nist.gov/28.28.E41): [`DLMF.Mathieu.integral_sin_mathieuSe_mul_mathieuCe`](DLMF/Mathieu/Modified/Integrals.lean#L622) (admitted). DLMF 28.28.41, `m ≥ 0`, `n ≥ 1`, `m - n = 2p + 1`.
+- [28.28.E42](https://dlmf.nist.gov/28.28.E42): [`DLMF.Mathieu.integral_cos_deriv_mathieuSe_mul_mathieuCe`](DLMF/Mathieu/Modified/Integrals.lean#L633) (admitted). DLMF 28.28.42, `m ≥ 0`, `n ≥ 1`, `m - n = 2p + 1`.
+- [28.28.E43](https://dlmf.nist.gov/28.28.E43): [`DLMF.Mathieu.mathieuBetaHat`](DLMF/Mathieu/Modified/Defs.lean#L520) (definition); [`DLMF.Mathieu.mathieuBetaHat_eq`](DLMF/Mathieu/Modified/Integrals.lean#L644) (admitted). `β̂_{n,m} = (2π)⁻¹ ∫₀^{2π} sin t se_n(t, h²) ce_m(t, h²) dt` , real `h`; DLMF 28.28.43 (second equality), `m ≥ 0`, `n ≥ 1`, `m - n = 2p + 1`, `Dsc_1(n, m, 0) ≠ 0`.
+- [28.28.E44](https://dlmf.nist.gov/28.28.E44): [`DLMF.Mathieu.integral_sin_two_mathieuSe_mul_mathieuCe`](DLMF/Mathieu/Modified/Integrals.lean#L654) (admitted). DLMF 28.28.44, `m ≥ 0`, `n ≥ 1`, `n - m = 2p`.
+- [28.28.E45](https://dlmf.nist.gov/28.28.E45): [`DLMF.Mathieu.integral_deriv_mathieuSe_mul_mathieuCe`](DLMF/Mathieu/Modified/Integrals.lean#L664) (admitted). DLMF 28.28.45, `m ≥ 0`, `n ≥ 1`, `n - m = 2p`.
+- [28.28.E46](https://dlmf.nist.gov/28.28.E46): [`DLMF.Mathieu.mathieuGammaHat`](DLMF/Mathieu/Modified/Defs.lean#L527) (definition); [`DLMF.Mathieu.mathieuGammaHat_eq`](DLMF/Mathieu/Modified/Integrals.lean#L675) (admitted). `γ̂_{n,m} = (2π)⁻¹ ∫₀^{2π} se'_n(t, h²) ce_m(t, h²) dt` , real `h`; DLMF 28.28.46 (second equality), `m ≥ 0`, `n ≥ 1`, `n - m = 2p`, `Dsc_1(n, m, 0) ≠ 0`.
+- [28.28.E47](https://dlmf.nist.gov/28.28.E47): [`DLMF.Mathieu.integral_cos_mathieuCe_mul`](DLMF/Mathieu/Modified/Integrals.lean#L685) (admitted). DLMF 28.28.47, `m, n ≥ 0`, `m - n = 2p + 1`.
+- [28.28.E48](https://dlmf.nist.gov/28.28.E48): [`DLMF.Mathieu.integral_sin_deriv_mathieuCe_mul`](DLMF/Mathieu/Modified/Integrals.lean#L696) (admitted). DLMF 28.28.48, `m, n ≥ 0`, `m - n = 2p + 1`.
+- [28.28.E49](https://dlmf.nist.gov/28.28.E49): [`DLMF.Mathieu.mathieuAlphaHatC`](DLMF/Mathieu/Modified/Defs.lean#L534) (definition); [`DLMF.Mathieu.mathieuAlphaHatC_eq`](DLMF/Mathieu/Modified/Integrals.lean#L707) (admitted). `α̂^{(c)}_{n,m} = (2π)⁻¹ ∫₀^{2π} cos t ce_n(t, h²) ce_m(t, h²) dt` , real `h`; DLMF 28.28.49 (second equality), `m, n ≥ 0`, `m - n = 2p + 1`, `Dc_0(n, m, 0) ≠ 0`.
 
 ## Part C: validation
 

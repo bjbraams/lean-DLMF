@@ -267,8 +267,9 @@ special-function integral foundations without admitted dependencies.
 
 ## TauCeti
 
-TauCeti is available as a dependency at revision
-`a780c7ad6beb23f60a17351a492d177878020ad5`. The source headers of the modules below
+TauCeti is available as a dependency, pinned since 2026-10-26 at revision
+`a049b4264d2cf4dbf4720796f844a3a3764914a5` (jointly with lean-codes, lean-CA, lean-LCS and
+lean-SCV, which share the package checkout). Older entries cite the revision they used. The source headers of the modules below
 credit **The Tau Ceti contributors**, under the Apache 2.0 license.
 
 The [reuse review and implementation](TauCetiReview.md) records six adopted uses.
@@ -1276,3 +1277,30 @@ sine product `EulerSineProd` (25.8.8), `Complex.hasSum_taylorSeries_on_ball` and
 (25.2.4, 24.16.9), and `DifferentiableOn.isExactOn_ball` (the logarithm in 24.16.9). The
 Rogers–Ramanujan partition identities 26.10.13–14 are derived from the project's own
 `DLMF.Bailey.rogers_ramanujan_first` and `rogers_ramanujan_second`. No external proof body was copied.
+
+## Ramanujan's τ and the prime number theorem (2026-10-26)
+
+Ramanujan's τ (DLMF/NumberTheory/Partitions.lean, with the general Hecke recursion helpers in
+DLMF/NumberTheory/T27bHecke.lean): multiplicativity (§27.14(vi)), 27.14.19 and the congruence
+τ(n) ≡ σ₁₁(n) (mod 691) (27.14.20) use TauCeti's
+`TauCeti.ModularForms.LevelOne.DiscriminantEigenform`
+(`TauCeti.ModularForm.discriminant_qExpansion_coeff_mul`,
+`TauCeti.ModularForm.discriminant_qExpansion_coeff_prime_pow_add_two`) and Mathlib's
+`CuspForm.exists_smul_discriminant_of_weight_eq_twelve` (E₁₂ − E₆² = cΔ, from
+`Mathlib.NumberTheory.ModularForms.LevelOne.DimensionFormula`),
+`ModularFormClass.qExpansion_coeff_unique`, `ModularForm.discriminant_qExpansion_coeff_one`,
+`EisensteinSeries.E_qExpansion_coeff`, `ModularForm.qExpansion_pow`, `qExpansion_smul` and
+`qExpansion_sub`.
+
+The prime number theorem (DLMFMathlib/NumberTheory/T27aPrimeNumberTheorem.lean; 27.2.3, 27.2.4,
+27.12.1 and primes in arithmetic progressions, §27.11) specializes TauCeti's prime ideal theorem
+and natural-density Chebotarev theorem to ℚ:
+`TauCeti.NumberTheory.ArithmeticDirichletSeries.Prime.PrimeIdealTheorem`
+(`TauCeti.primeIdealTheorem`, `TauCeti.primeCount_univ_isEquivalent_div_log`,
+`TauCeti.primeCount_eq_card`, `TauCeti.primeTheta_apply`, `TauCeti.primesLE`,
+`TauCeti.mem_normLE`, `Rat.HeightOneSpectrum.absNorm_asIdeal`,
+`Rat.HeightOneSpectrum.exists_absNorm_eq`) and
+`TauCeti.NumberTheory.Chebotarev.PrimeCounting.PrimesCongruent`
+(`NumberField.Chebotarev.tendsto_primeCount_primesCongruent`), with Mathlib's
+`Rat.HeightOneSpectrum.primesEquiv`, `natGenerator`, `prime_natGenerator` and
+`Chebyshev.isBigO_psi_sub_theta_sqrt` (ψ(x) ~ x from θ(x) ~ x). No external proof body was copied.

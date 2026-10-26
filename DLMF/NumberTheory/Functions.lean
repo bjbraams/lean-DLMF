@@ -19,6 +19,7 @@ public import Mathlib.Analysis.SpecialFunctions.Pow.Complex
 public import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
 public import Mathlib.Analysis.Asymptotics.AsymptoticEquivalent
 public import Mathlib.Data.Finset.NatDivisors
+public import DLMFMathlib.NumberTheory.T27aPrimeNumberTheorem
 
 /-!
 # Functions of multiplicative number theory (DLMF §§27.1–27.3)
@@ -109,14 +110,24 @@ theorem primePi_eq_card (x : ℝ) :
 and Legendre, proved by Hadamard and de la Vallée Poussin). -/
 @[dlmf 27.2.E3]
 theorem primePi_isEquivalent :
-    (fun x : ℝ ↦ (primePi x : ℝ)) ~[atTop] fun x ↦ x / Real.log x := by
-  sorry
+    (fun x : ℝ ↦ (primePi x : ℝ)) ~[atTop] fun x ↦ x / Real.log x :=
+  -- TauCeti's prime ideal theorem for `ℚ`, via `DLMFMathlib.NumberTheory.T27aPrimeNumberTheorem`
+  Nat.t27a_primeCounting_isEquivalent
 
 /-- DLMF 27.2.4: the equivalent form `p_n ∼ n ln n` of the prime number theorem. -/
 @[dlmf 27.2.E4]
 theorem nthPrime_isEquivalent :
     (fun n : ℕ ↦ (nthPrime n : ℝ)) ~[atTop] fun n ↦ n * Real.log n := by
-  sorry
+  have hsub : Tendsto (fun n : ℕ ↦ n - 1) atTop atTop := tendsto_sub_atTop_nat 1
+  have h := Nat.t27a_nth_prime_isEquivalent.comp_tendsto hsub
+  -- `(n - 1 : ℕ) ~ n`
+  have hn : (fun n : ℕ ↦ ((n - 1 : ℕ) : ℝ)) ~[atTop] fun n ↦ (n : ℝ) := by
+    refine (Nat.t27a_natCast_add_one_isEquivalent.comp_tendsto hsub).symm.congr_right ?_
+    filter_upwards [eventually_ge_atTop 1] with n hn
+    simp only [Function.comp_apply]
+    rw [Nat.cast_sub hn, Nat.cast_one, sub_add_cancel]
+  have hlog := hn.log tendsto_natCast_atTop_atTop
+  exact h.trans (hn.mul hlog)
 
 /-- DLMF 27.2.5: `⌊1/n⌋ = 1` for `n = 1` and `0` for `n > 1`. -/
 @[dlmf 27.2.E5]
