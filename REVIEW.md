@@ -6972,3 +6972,302 @@ Cauchy principal-value infrastructure (blocks 19.2.20–22, 19.6.2–6, 19.6.15,
 (19.22.4, 7, 12, 14); 19.28.5 by the route in p19s's notes; Chapter 22 Fourier, partial-fraction and
 Maclaurin series and §22.17; Chapter 23 series 23.9.3–7, 23.6.27–29 (Landen-type) and
 uniformization; Chapter 21 (Siegel modular transformations, Riemann's identity).
+
+## Chapters 24–27 acquisition (2026-10-25)
+
+Seven agents with disjoint files acquired DLMF Chapters 24–27 (analytical results only, as
+for Chapters 19–23; rules in the coordinator's RULES-ACQ2427 notes): ACQ24A (§§24.1–24.10)
+and ACQ24B (§§24.11–24.16) in `DLMF/BernoulliEuler`, ACQ25A (§§25.1–25.10, Riemann zeta) and
+ACQ25B (§§25.11–25.15) in `DLMF/Zeta`, ACQ26A (§§26.1–26.8) and ACQ26B (§§26.9–26.18) in
+`DLMF/Combinatorics`, and ACQ27 (§§27.1–27.14) in `DLMF/NumberTheory`. Applications
+(24.17–18, 25.16–17, 26.19–20, 27.15–17), graphics, computation, tables, approximations and
+software sections are excluded; the ledgers list the pure mathematics found in the excluded
+Applications sections (Euler–Maclaurin and Boole summation, Euler sums, the Chinese remainder
+theorem, Euler–Fermat). Open conjectures (RH, GRH, Goldbach, Hardy–Littlewood's G(k), Lehmer's
+τ(n) ≠ 0) are named as `Prop`s or recorded as "conjecture: not acquired"; results conditional on
+RH appear only as implications.
+
+Reuse: Mathlib's `bernoulli`, `Polynomial.bernoulli`, `riemannZeta`, `completedRiemannZeta`,
+`hardyZ` (proved equal to DLMF's Z), `hurwitzZeta`, `expZeta` (DLMF's F(x, s)),
+`DirichletCharacter.LFunction`, `gaussSum`, `catalan`, `Nat.bell`, `Nat.stirlingFirst/Second`
+(DLMF's signed s(n, k) is a new ℤ-valued `signedStirlingFirst`), `Nat.largeSchroder`,
+`Nat.Partition`, `Equiv.Perm`, `ArithmeticFunction`, Chebyshev ψ/θ, `legendreSym`, `jacobiSym`,
+`ModularForm.eta`; the project's `eulerNumber`, `Polynomial.euler`, `polylogSeries`, Dilog,
+`dirichletEta`, `catalanConstant`, `partitionFunction`, `qPochhammerInf`, `qBinom`,
+`DLMF.Confluent.hurwitzZetaComplex`, `dedekindSum` and `logIntLi`. New definitions include
+complex Bₙ(x), Eₙ(x) wrappers, periodic B̃ₙ, Nörlund polynomials, Bernoulli numbers of the second
+kind, degenerate and character Bernoulli numbers, Genocchi, tangent and Lucas numbers, Stieltjes
+constants, Riemann ξ, Riemann–Siegel θ and Z, N(T), general-order Li_s(z) and Lerch's Φ (their
+continuations to ℂ \ [1, ∞) chosen from admitted existence theorems — flagged in the ledger),
+Delannoy, Motzkin and Narayana numbers, lattice paths, restricted partition counts, plane
+partitions, permutation statistics, rook and hit numbers, the twelvefold-way counts, Jordan's
+function, complex σ_α, Waring's g(k) and G(k), r_k(n), Ramanujan's τ and DLMF's Δ = (2π)¹²η²⁴.
+The existing Ramanujan congruences in `DLMF/Partitions.lean` are DLMF 27.14(v) and now carry that
+tag, so they are no longer AAR-only.
+
+Counts (compiled tag dump): Chapter 24: 192 IDs, 238 tagged declarations (28 definitions, 98
+proved, 112 admitted or depending on admissions), 37 upstream pointers; Chapter 25: 171 IDs, 212
+declarations (22, 45, 145), 43 pointers; Chapter 26: 220 IDs, 295 declarations (49, 84, 162), 82
+pointers; Chapter 27: 149 IDs, 212 declarations (33, 83, 105), 49 pointers. New source
+admissions: BernoulliEuler 111, Zeta 124, Combinatorics 157, NumberTheory 97 (489 in all).
+
+### DLMF errata and source corrections
+
+The acquisition agents reported 29 suspected errata or missing conditions, each with numerical or
+brute-force evidence; an independent verifier re-derived every one from the DLMF page text. 25
+were confirmed (some in part) and entered in DLMFErrata.md (a), Chapters 24–27: among them
+24.4.24 (false for every n; corrected by partial fractions), 25.11.23 (denominator), 25.12.13
+(branch error introduced by DLMF's V1.2.3 modification), 25.14.7 (no conditions printed),
+26.8.31 (insufficient hypothesis; counterexample sin πz proved), 26.9.7, 26.10.9, 26.10.18,
+26.12.24, 26.18.4, the inequality claim in §26.10(iv), the transpose-complement definition in
+26.12, 27.12.3 (Legendre's formula computes π(x) − π(√x)) and the multiplicativity claim in the
+first sentence of §27.3 (false for φ_k, k ≥ 1). The verifier did not confirm 24.14.10 (DLMF
+already requires positive indices), 26.8.5 and 26.8.27/33 (k ≤ n is a Lean artifact; listed under
+(c)); it found 25.14.7 valid on a wider domain (0 < Re a ≤ 1) than the acquired statement uses.
+
+### Integration
+
+Coordinator: umbrellas `DLMF/BernoulliEuler.lean`, `Zeta.lean`, `Combinatorics.lean`,
+`NumberTheory.lean`, imported from `DLMF.lean`. Ledgers DLMF24–DLMF27Acquisition.md regenerated
+from the dump (idempotent; older ledgers unchanged). Also on 2026-10-25: four new
+`dlmf_upstream` pointers in `DLMF/OrthogonalPolynomials/MathlibCoverage.lean` (18.1.E3
+`C_comp_two_mul_X`, `S_comp_two_mul_X`; 18.9.E9 `U_eq_two_mul_T_add_U`; 18.9.E22
+`add_one_mul_T_eq_poly_in_U`), from the preparation of a Mathlib PR adding docstrings and
+`@[dlmf]` tags to `Mathlib/RingTheory/Polynomial/Chebyshev.lean` (draft `Chebyshev-PR.lean` at the
+project root, not part of the library).
+
+### Validation
+
+The full build passes (11,710 jobs). Each agent ran the strict
+`lake env lean -DautoImplicit=false -DrelaxedAutoImplicit=false` check on its files (only
+`sorry` warnings) and `#print axioms` on its proved theorems. Compiled audit: 17,974 project
+theorems, 1,385 depending on `sorryAx`, no other nonstandard axiom. Tag dump: 6,796 entries, 582
+upstream pointers. Explicit source admissions project-wide: 1,293.
+
+### Next steps
+
+Cheap admissions flagged by the agents (26.8.6 by induction, 26.8.37, 26.6.1, the §26.3(i) path
+counts, 26.7.3–4 from 26.7.2, the 24.16.10 generating function from
+`hasSum_bernoulliPolyB_mul_pow_div`, p(5) = 7 once a computable partition count is bridged); the
+continuation existence theorems for Li_s and Φ; Hurwitz-zeta and L-function identities through
+Mathlib's functional equations; the prime number theorem (27.12, 25.16 ψ), which Mathlib lacks
+(TauCeti's prime ideal theorem needs a bridge from K = ℚ); Chapter 24 asymptotics and zeros.
+
+## Proof round 1 for Chapters 24–27 (2026-10-25)
+
+Seven agents with disjoint files worked from the uncommitted acquisition tree: p24a and p24b
+(`DLMF/BernoulliEuler` parts A and B), p25a and p25b (`DLMF/Zeta`), p26a and p26b
+(`DLMF/Combinatorics`) and p27 (`DLMF/NumberTheory`, `DLMF/Partitions.lean`). Direct source
+admissions in the four areas fell from 489 to 311: BernoulliEuler 111 → 64, Zeta 124 → 87,
+Combinatorics 157 → 95, NumberTheory 97 → 65 (the three Ramanujan congruences in
+`DLMF/Partitions.lean` remain). Project-wide 1,293 → 1,115.
+
+### Highlights
+
+- **Chapter 24.** 24.2.7; 24.4.15–17; all of §24.5 (24.5.6–10 by exponential generating
+  functions); 24.6.7–12 (explicit formulas by forward differences); 24.7.1, 24.7.2, 24.7.6 (Mellin
+  forms; ∫ sech); 24.8.4–5; 24.9.1, 24.9.10; 24.10.1 from Mathlib's von Staudt–Clausen; 24.13.6, 24.13.11;
+  24.14.1–10 (the triple and quadruple convolutions by generating-function certificates);
+  24.15.6, 8, 11, 12; 24.16.1, 24.16.2, 24.16.10; several §24.12 zero statements.
+- **Chapter 25.** 25.2.8–10 (Euler–Maclaurin form of ζ by integration by parts against B̃ₚ and the
+  identity theorem); 25.4.5 and with it 25.6.13–14; 25.6.15–19; 25.5.1–4, 25.5.8–9. A new fully proved
+  module `DLMF/Zeta/Q25bLerchContinuation.lean` continues the Lerch series Σ zⁿ/(a+n)^s to
+  ℂ \ [1, ∞) with uniqueness and an integral representation, so `polylog` and `lerchPhi` no longer
+  rest on admitted existence theorems; then 25.12.2–6, 25.12.11, 25.12.16, 25.14.2, 25.14.3 (third
+  part), 25.14.5, 25.11.1, 11–14, 16, 22, 24, 25, and the trivial-zero description of §25.15(ii).
+- **Chapter 26.** `card_perm_numCycles` (permutations by number of cycles, via a cycle-maximum
+  bijection) and hence the combinatorial meaning of s(n, k); 26.8.3, 5, 6, 11–13, 31, 37, 41, 42;
+  26.7.3–5, 26.7.8; 26.5.2 and the Catalan path count; 26.6.1 and Delannoy path counts; 26.4.2,
+  26.4.7; all twelve entries of the twelvefold way (Table 26.17.1); 26.18.2, 26.18.4; 26.11.3, 4, 6;
+  26.16.1; 26.15.2, 4, 5, 7; 26.14.9, 14; 26.13.4; most of §26.9 (26.9.3, 5–8). New Mathlib-only file
+  `DLMFMathlib/Combinatorics/Q26bSurjections.lean` (surjection counts, quotients of maps).
+- **Chapter 27.** All of `DirichletSeries` (27.4), `Inversion` (27.5) and `DivisorSums` (27.6–27.7,
+  Lambert series); multiplicativity of d_k and Jordan's J_k; character orthogonality, primitivity,
+  finite Fourier expansion, Ramanujan sums 27.10.5, Gauss sums; Korselt's criterion. The
+  asymptotic (27.11–27.12, PNT-type), additive (27.13) and partition (27.14) files are untouched.
+
+### Statements corrected in this round
+
+Both were found by agents with a proved counterexample; recorded in DLMFErrata.md (a).
+
+- 25.15(ii) `LFunction_one_sub_conj_eq_zero`: DLMF's "zeros in 0 ≤ ℜs ≤ 1, symmetric about the
+  critical line" fails at the trivial zero s = 0 of an even character; hypothesis ρ ≠ 0 added.
+- 26.6.12 `catalan_eq_sum_narayana`: false at n = 0 (DLMF prints no condition); restated for n ≥ 1
+  and proved.
+
+### Integration
+
+Coordinator: `DLMF.Zeta.Q25bLerchContinuation` added to the Zeta umbrella and
+`DLMFMathlib.Combinatorics.Q26bSurjections` to `DLMFMathlib.lean`; ledger status paragraphs and
+regenerated per-line statuses (idempotent); CREDITS entry. New cross-area imports: `DLMF.Zeta.IntegerArguments`
+imports `DLMF.BernoulliEuler.IntegralsSums`; `DLMF.BernoulliEuler.RelatedNumbers` imports
+`DLMF.Combinatorics.Stirling`.
+
+### Validation
+
+The full build passes (11,724 jobs). Every agent ran the strict check on its changed files (only
+`sorry` warnings) and `#print axioms` on samples. Compiled audit: 18,412 project theorems, 1,183
+depending on `sorryAx` (was 1,385), no other nonstandard axiom.
+
+### Next steps
+
+Chapter 24: 24.4.11, 24.4.24 (roots-of-unity filter), 24.6.1–6, 24.7.3–5, 24.9.2–8 (Stirling bounds),
+24.10.2–9, 24.14.11–12 (Hankel determinants), 24.16.6, 24.16.8 (algebraic). Chapter 25: 25.6.20 (from
+24.14.1 at x = 1/2), 25.8.1 (Fubini), a local Euler–Maclaurin for `hurwitzZetaComplex` (unblocks most
+remaining Hurwitz items), Clausen 25.12.9, ζ(0, x) = 1/2 − x for Mathlib's `hurwitzZeta`. Chapter 26:
+Finpartition counts (26.4.8, 26.7.1-type), the Eulerian insertion recurrence 26.14.8 and its
+dependents, MacMahon's maj bijection, PartitionIdentities (finite approximation plus Tannery for
+products), plane partitions. Chapter 27: 27.11 elementary partial sums, the four-squares Waring
+value, the pentagonal/σ partition recurrences and a computable bridge for p(5) = 7; PNT remains
+out of reach without upstream support.
+
+## Proof round 2 for Chapters 24–27 (2026-10-25)
+
+Seven agents with the file split of round 1 (p24a, p24b, p25a, p25b, p26a, p26b, p27) worked on
+the uncommitted round-1 tree. Direct source admissions in the four areas fell from 311 to 208:
+BernoulliEuler 64 → 35, Zeta 87 → 62, Combinatorics 95 → 62, NumberTheory 65 → 49 (the three
+Ramanujan congruences in `DLMF/Partitions.lean` remain). Project-wide 1,115 → 1,012.
+
+### Highlights
+
+- **Chapter 24.** 24.4.11; 24.6.1, 24.6.4–5; 24.7.3–5; 24.8.2–3; 24.9.2–3, 24.9.5–8 (bounds via
+  Stirling's formula); 24.10.5; all of §24.11 (uniform limits 24.11.5–6 with explicit error bounds),
+  and from them the zero limits 24.12.4, 24.12.5, 24.12.8 and the corrected 24.12.11 by a general
+  zero-counting theorem (`r24b_tendsto_zerosGE`: Rolle plus the mean value theorem under uniform
+  convergence of the polynomials and their derivatives); 24.15.7; 24.16.4–7 (logarithmic series,
+  Bernoulli numbers of the second kind, the Nörlund recurrence, degenerate Bernoulli numbers).
+  `DLMF/BernoulliEuler/Asymptotics.lean` is now free of admissions.
+- **Chapter 25.** 25.2.3 (alternating series, so `riemannZeta_eq_alternating` is fully proved),
+  25.2.5 (Stieltjes sequence); 25.5.5–6, 25.5.17–19 (digamma/polygamma integrals); 25.6.6–8 (25.6.8
+  from the project's central-binomial series), 25.6.20; 25.8.1, 25.8.9. A new fully proved module
+  `DLMF/Zeta/R25bHurwitzContinuation.lean` continues `hurwitzZetaComplex` by a one-interval
+  Euler–Maclaurin argument (holomorphy in s and in a, residue at s = 1) and proves the bridge
+  `r25b_hurwitzZetaComplex_mathlib` to Mathlib's `hurwitzZeta`; with it 25.11.5–7, 25.11.15, 25.11.17, 25.11.41. Dirichlet L: L(χ̄, s̄) = conj L(χ, s) by the
+  identity theorem, giving the corrected 25.15(ii) symmetry and `LFunction_zero_of_ne_one`.
+- **Chapter 26.** The Eulerian insertion recurrence 26.14.8 (from `Perm.decomposeFin'`) and with it
+  Worpitzky 26.14.5, 26.14.6–7, 26.14.11–12, 26.14.15–16; 26.14.3 (inversions and major index); the
+  excedance characterizations of §26.14(i); §26.13 (inversion number = minimal number of adjacent
+  transpositions); §26.9(i) boxed partitions as lattice paths, 26.9.9. Finpartition counts by S(n, k)
+  and Bell numbers, 26.4.8, 26.8.19, 26.8.23; partition identities 26.10.2 (first equality), 26.10.3,
+  26.10.5–7, 26.10.9, 26.10.11. New Mathlib-only file `DLMFMathlib/Combinatorics/R26aFinpartition.lean`.
+- **Chapter 27.** p(5) = 7, 27.14.3, the pentagonal and σ recursions 27.14.6–7, the τ generating
+  series 27.14.18; character Fourier expansions and Gauss sums of primitive characters; Legendre's
+  sieve for π(x); the elementary partial sums 27.11.4, 27.11.6–7; g(2) = 4, 27.13.5 and Mordell's
+  formula for theta powers. New Mathlib-only file `DLMFMathlib/RingTheory/R27PowerSeriesEval.lean`
+  (absolutely convergent evaluation of ℤ⟦X⟧ at a complex point).
+
+### Statements corrected in this round
+
+Both corrections rest on proved counterexamples; recorded in DLMFErrata.md.
+
+- 24.12.11 `tendsto_eulerRealZero_odd` (DLMF erratum, (a)): DLMF prints y_{2m}^{(n)} → m − 1/2 for
+  odd n; the zeros tend to 1/2, 3/2, 5/2, …, so y_{2m} → 2m − 1/2 and the printed form fails for every
+  m ≥ 1. Restated as y_m^{(n)} → m − 1/2 and proved; the counterexample
+  `r24b_tendsto_eulerRealZero_odd_counterexample` is proved. Numerical evidence was recomputed
+  independently by the coordinator (n = 21, 41, 61).
+- 25.11.10 `hasSum_hurwitzZetaComplex_taylor` (formalization note, (c)): at s = 0, −1, −2, … the
+  term with n + s = 1 is DLMF's limit, while Lean's `poch s n · ζ(1)` is 0; hypothesis
+  s ≠ 0, −1, −2, … added (counterexample at s = 0, a = 1/2 proved). Still admitted.
+
+### Integration
+
+Coordinator: `DLMF.Zeta.R25bHurwitzContinuation` added to the Zeta umbrella;
+`DLMFMathlib.Combinatorics.R26aFinpartition` and `DLMFMathlib.RingTheory.R27PowerSeriesEval` added
+to `DLMFMathlib.lean`; the two statement corrections; ledger status paragraphs and regenerated
+per-line statuses (idempotent); CREDITS entry. New cross-area imports: `DLMF.Combinatorics.Permutations`
+imports `DLMF.BernoulliEuler.Explicit`; `DLMF.Zeta.IntegerArguments` imports `DLMF.Polylog.Dilog` and
+`DLMF.Hypergeometric.Clausen`; `DLMF.Zeta.IntegralReps` imports `DLMF.Gamma.IntegralRepresentations`;
+`DLMF.Combinatorics.PartitionIdentities` imports `DLMF.QSeries.QExponential`. Several lines in the
+Chapter 24–27 files exceed 100 characters (from the acquisition and both rounds); they were wrapped
+in proof round 3.
+
+### Validation
+
+The full build passes (11,746 jobs). Every agent ran the strict check on its changed files (only
+`sorry` warnings) and `#print axioms` on samples. Compiled audit: 18,805 project theorems, 1,076
+depending on `sorryAx` (was 1,183), no other nonstandard axiom.
+
+### Next steps
+
+Chapter 24: 24.12.2–3, 24.12.6, 24.12.9–10 (quantitative zero estimates; 24.12.2 checks out
+numerically), 24.14.11–12 (Hankel determinants), 24.16.8–9, separability (§24.12(iv)). Chapter 25:
+use `r25b_hurwitzZetaComplex_mathlib` to close the admitted `DLMF.Confluent.hurwitzZetaComplex_mathlib`
+(`DLMF/IncompleteGamma/ZerosIntegrals.lean`, after moving the lemma upstream); 25.11.19–20, 25.11.27–28
+and 25.11.38 (parametric holomorphy, binomial series); Periodic 25.13.1; Clausen 25.12.9; 25.2.4 and
+25.6.12 (Laurent coefficients). Chapter 26: Motzkin/Catalan 26.6.13–14, lattice-path generating
+functions, 26.10.4/10 (staircase bijection), Rogers–Ramanujan and Schur, plane partitions (23
+admissions untouched). Chapter 27: 27.11.2 (hyperbola method), 27.11.3, 27.11.5, Mertens 27.11.8–11,
+σ multiplicativity 27.3.7, the Waring statements once `waring_hilbert` is available; PNT-equivalent
+results remain out of reach.
+
+## Proof round 3 for Chapters 24–27 (2026-10-26)
+
+Seven agents with the file split of rounds 1–2 (every file of the four areas assigned to one agent)
+first wrapped every line over 100 characters in their files (about 170 lines, layout only; no line
+in the four areas now exceeds 100 characters), then worked through the round-2 Next steps. Direct
+source admissions in the four areas fell from 208 to 150: BernoulliEuler 35 → 25, Zeta 62 → 46,
+Combinatorics 62 → 37, NumberTheory 49 → 42 (the three Ramanujan congruences in
+`DLMF/Partitions.lean` remain). One Chapter 8 admission was also closed. Project-wide 1,012 → 953.
+No statement was changed and no statement was found false.
+
+### Highlights
+
+- **Chapter 24.** The corrected roots-of-unity multiplication formula 24.4.24 (a periodic
+  polynomial is constant), so `Properties.lean` is free of admissions; 24.6.2, 24.6.6; the
+  quantitative zero bounds 24.12.2, 24.12.3, 24.12.9, 24.12.10 (Fourier series with explicit tail
+  bounds; y₂ = (1+√5)/2 is a double zero for n = 5); 24.16.9 in both forms (a holomorphic logarithm
+  of t/(eᵗ − 1) on the disk, then identification with the principal power); 24.16.8 (expansion in
+  log(1+λt)/λ with the Stirling generating function 26.8.8, coefficient uniqueness, and a polynomial
+  identity in λ). `Generalizations.lean` is free of admissions.
+- **Chapter 25.** 25.2.4, the Laurent series with Stieltjes constants (the regular part of ζ is
+  entire; its Taylor coefficients by Tannery's theorem from 25.2.7); 25.5.13 (theta split of Mathlib's
+  completed zeta); 25.8.2–4 and 25.8.8 (25.8.2–3 continued from Re s > 1 by the identity theorem);
+  25.11.8, 25.11.9, Lerch's formula 25.11.18, 25.11.19, 25.11.27, 25.11.31, 25.11.38, 25.11.39;
+  Periodic 25.13.1 (Dirichlet test, new Mathlib-only module `DLMF/Zeta/S25bDirichletTest.lean`);
+  Clausen 25.12.9. The definition `DLMF.Confluent.hurwitzZetaComplex` moved from
+  `DLMF/IncompleteGamma/ZerosIntegrals.lean` into the new `DLMF/Zeta/S25bHurwitzCore.lean` (same
+  name, namespace and body), which lets `ZerosIntegrals` close its admitted bridge
+  `hurwitzZetaComplex_mathlib` from the round-2 continuation results.
+- **Chapter 26.** Lattice paths 26.6.2, 26.6.4–7, 26.6.9, 26.6.13–14 (Motzkin/Catalan, Delannoy
+  and Schröder generating functions; new Mathlib-only modules `S26aQuadraticSeries` and
+  `S26aSeriesTransform`); Touchard 26.5.5; the Stirling generating functions 26.8.8–9; 26.10.4 and
+  26.10.10 (staircase bijection, new `DLMF/Combinatorics/S26aStaircase.lean`) and the
+  Rogers–Ramanujan partition identities 26.10.13–14 (from the project's proved analytic identities
+  in `DLMF/Bailey.lean`); MacMahon's box formula 26.12.4 and 26.12.21 (bounded semistandard
+  tableaux and TauCeti's Jacobi bialternant), the generating function 26.12.20 and recurrence
+  26.12.25; §26.13 minimal transposition factorizations (TauCeti); rook numbers 26.15.9–11, 26.15.13.
+- **Chapter 27.** The hyperbola method 27.11.2, 27.11.3, 27.11.5; Mertens 27.11.8 and 27.11.10
+  (Legendre's formula for ln N! and Mathlib's Chebyshev bound); σ multiplicativity 27.3.7;
+  primitivity from separability (§27.10).
+
+### Integration
+
+Coordinator: `DLMF.Zeta.S25bHurwitzCore` and `DLMF.Zeta.S25bDirichletTest` added to the Zeta umbrella,
+`DLMF.Combinatorics.S26aStaircase` to the Combinatorics umbrella, and
+`DLMFMathlib.Combinatorics.S26aQuadraticSeries` and `S26aSeriesTransform` to `DLMFMathlib.lean`.
+The agent's verbatim copy of the `hurwitzZetaComplex` body was replaced by moving the one definition;
+a duplicated proof of 24.6.9 in `Explicit.lean` was removed by moving `bernoulli_eq_explicit₉`
+before its use in 24.6.2 (statement and tag unchanged). New imports across areas:
+`DLMF.IncompleteGamma.ZerosIntegrals` imports `DLMF.Zeta.S25bHurwitzCore`;
+`DLMF.BernoulliEuler.Generalizations` imports `DLMF.Combinatorics.Stirling`;
+`DLMF.Combinatorics.PartitionIdentities` imports `DLMF.Bailey`; PlanePartitions and Permutations import
+TauCeti modules (CREDITS entry). Ledger status paragraphs and regenerated per-line statuses
+(idempotent).
+
+### Validation
+
+The full build passes (11,816 jobs). Every agent ran the strict check on its changed files (only
+`sorry` warnings) and `#print axioms` on samples. Compiled audit: 19,228 project theorems, 1,016
+depending on `sorryAx` (was 1,076), no other nonstandard axiom.
+
+### Next steps
+
+TauCeti proves the prime ideal theorem (hence PNT over ℚ), PNT in progressions (Chebotarev) and Hecke
+multiplicativity of the discriminant's coefficients; with bridges these would settle 27.2.3–4,
+27.12.1, primes in progressions and τ multiplicativity 27.14.19, at the cost of roughly 160–300
+TauCeti modules in the build (decision pending). Otherwise: 25.6.12 (ζ''(0), now unblocked by
+25.2.4), 25.11.10 (holomorphy of the double series), 25.11.20, 25.11.28, 25.11.42; Narayana 26.6.8 and
+the path counts of §26.6(i); plane-partition symmetry classes 26.12.5–17; q-multinomial counts
+26.16.2–3; 27.11.9 and 27.11.11 (elementary L(1, χ) estimates); Jacobi's cube identity as a formal series
+(toward the Ramanujan congruences); real characters as Jacobi symbols. The 24.10 congruences need a
+p-integrality toolkit (Adams' theorem) that Mathlib lacks.

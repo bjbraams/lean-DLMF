@@ -10,6 +10,7 @@ public import DLMF.Confluent.Integrals
 public import DLMF.IncompleteGamma.SeriesRecurrences
 public import Mathlib.NumberTheory.LSeries.HurwitzZeta
 public import Mathlib.NumberTheory.Bernoulli
+public import DLMF.Zeta.S25bHurwitzCore
 
 /-!
 # Zeros, transforms and sums, DLMF §§8.13–8.15
@@ -914,14 +915,12 @@ theorem lowerIncGamma_multiplication_hasSum {a : ℂ} (ha : ∀ n : ℕ, a ≠ -
         scIncGamma (a+k) (exp u) * (1-exp v)^k / k.factorial := by ring
     _ = _ := by rw [hg, he]; ring
 
-/-- Complex-argument Hurwitz zeta by Euler–Maclaurin continuation; used only for 8.15.2. -/
-def hurwitzZetaComplex (s z : ℂ) : ℂ :=
-  let M := ⌈(1-s.re)/2⌉₊+1; limUnder atTop (fun N : ℕ => (∑ n ∈ Finset.range N, (z+n)^(-s))+(z+N)^(1-s)/(s-1)+(z+N)^(-s)/2+∑ k ∈ Finset.range M, (bernoulli (2*k+2) : ℂ)/(2*k+2).factorial*poch s (2*k+1)*(z+N)^(-s-(2*k+1)))
+-- `hurwitzZetaComplex` (Euler–Maclaurin continuation) is defined in `DLMF.Zeta.S25bHurwitzCore`.
 
 /-- Bridge to Mathlib; its existing Hurwitz zeta is periodic in a real second argument. -/
 theorem hurwitzZetaComplex_mathlib {x : ℝ} (hx : 0 < x) (hx1 : x ≤ 1) {s : ℂ} (hs : s ≠ 1) :
-    hurwitzZetaComplex s x=HurwitzZeta.hurwitzZeta (x : UnitAddCircle) s := by
-  sorry
+    hurwitzZetaComplex s x=HurwitzZeta.hurwitzZeta (x : UnitAddCircle) s :=
+  DLMF.Zeta.s25b_hzc_mathlib hx hx1 hs
 
 /-- Inherited logarithms and a right-half-plane convergence domain are explicit. -/
 @[dlmf 8.15.E2]

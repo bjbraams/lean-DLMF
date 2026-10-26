@@ -97,6 +97,7 @@ lemma summable_odd_terms {s : ℂ} (hs : 1 < s.re) :
   simp only [Function.comp, Nat.cast_mul, Nat.cast_ofNat]
 
 /-- `λ(s) = (1 - 2^{-s}) ζ(s)` for `Re s > 1` (Duverney (2.75)). -/
+@[dlmf 25.2.E2]
 theorem dirichletLambda_eq {s : ℂ} (hs : 1 < s.re) :
     dirichletLambda s = (1 - 2 ^ (-s)) * riemannZeta s := by
   have hz := hasSum_zeta hs
@@ -112,6 +113,7 @@ theorem dirichletLambda_eq {s : ℂ} (hs : 1 < s.re) :
   linear_combination this
 
 /-- The series of `η(s)` converges absolutely to `(1 - 2^{1-s}) ζ(s)` for `Re s > 1`. -/
+@[dlmf 25.2.E3]
 theorem hasSum_dirichletEta {s : ℂ} (hs : 1 < s.re) :
     HasSum (fun n : ℕ => (-1 : ℂ) ^ n / (n + 1 : ℂ) ^ s) ((1 - 2 ^ (1 - s)) * riemannZeta s) := by
   set g : ℕ → ℂ := fun n => (-1 : ℂ) ^ n / (n + 1 : ℂ) ^ s with hg

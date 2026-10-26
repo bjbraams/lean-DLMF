@@ -55,6 +55,7 @@ lemma continuousAt_dilogKernel {t : ℝ} (ht : t < 1) : ContinuousAt dilogKernel
   · exact (continuousAt_dslope_of_ne h0).mpr hd.continuousAt
 
 /-- The real dilogarithm `Li₂(x) = ∫₀ˣ -log(1-t)/t dt`, meaningful for `x ≤ 1` (Duverney (8.13)). -/
+@[dlmf 25.12.E2]
 def Real.dilog (x : ℝ) : ℝ := ∫ t in (0 : ℝ)..x, dilogKernel t
 
 /-- The kernel is continuous on `(-∞, 1)`. -/
@@ -174,6 +175,7 @@ lemma integral_dilogKernel_eq {a b : ℝ} (hab : a ≤ b) (ha : -1 ≤ a) (hb : 
   exact intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le hab hcont hd hint
 
 /-- The series `Li₂` agrees with `Real.dilog` on `[-1, 1]` (Duverney (8.13)). -/
+@[dlmf 25.12.E2]
 theorem polylogSeries_two_ofReal_eq_dilog {x : ℝ} (hx : x ∈ Icc (-1 : ℝ) 1) :
     polylogSeries 2 x = Real.dilog x := by
   have hre : polylogSeries 2 x = ((polylogSeries 2 x).re : ℂ) := by
@@ -285,6 +287,7 @@ theorem Real.dilog_one_half : Real.dilog (1 / 2) = π ^ 2 / 12 - Real.log 2 ^ 2 
 
 /-- **Landen's identity** `Li₂(x) + Li₂(x/(x-1)) = -½ ln²(1-x)` for `x < 1`
 (Duverney (8.20)). -/
+@[dlmf 25.12.E3]
 theorem Real.dilog_add_dilog_div_sub_one {x : ℝ} (hx : x < 1) :
     Real.dilog x + Real.dilog (x / (x - 1)) = -(Real.log (1 - x) ^ 2 / 2) := by
   set L : ℝ → ℝ := fun x => Real.dilog x + Real.dilog (x / (x - 1)) + Real.log (1 - x) ^ 2 / 2
@@ -322,6 +325,7 @@ theorem Real.dilog_add_dilog_div_sub_one {x : ℝ} (hx : x < 1) :
 
 /-- **The inversion formula** `Li₂(x) + Li₂(1/x) = -π²/6 - ½ ln²(-x)` for `x < 0`
 (Duverney, Exercise 8.11). -/
+@[dlmf 25.12.E4]
 theorem Real.dilog_add_dilog_recip {x : ℝ} (hx : x < 0) :
     Real.dilog x + Real.dilog x⁻¹ = -(π ^ 2 / 6) - Real.log (-x) ^ 2 / 2 := by
   set I : ℝ → ℝ := fun x => Real.dilog x + Real.dilog x⁻¹ + Real.log (-x) ^ 2 / 2

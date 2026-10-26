@@ -28,6 +28,7 @@ noncomputable section
 namespace DLMF.Constants
 
 /-- **Catalan's constant** `G = ∑ (-1)^k/(2k+1)² = β(2)` (Duverney Remark 2.9). -/
+@[dlmf 25.11.E40]
 def catalanConstant : ℝ := ∑' k : ℕ, (-1 : ℝ) ^ k / (2 * k + 1) ^ 2
 
 /-- `∑ 1/(2k+1)²` converges. -/

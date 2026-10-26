@@ -31,6 +31,7 @@ namespace DLMF.Partitions
 abbrev partitionFunction (n : ℕ) : ℕ :=
   Fintype.card (Partition n)
 
+@[dlmf 27.14.E3]
 theorem partitionFunction_zero : partitionFunction 0 = 1 := by
   rw [Fintype.card_eq_one_iff]
   refine ⟨⟨(∅ : Multiset ℕ), ?_, ?_⟩, fun p => ?_⟩
@@ -44,14 +45,17 @@ theorem partitionFunction_zero : partitionFunction 0 = 1 := by
     omega
 
 /-- Ramanujan's congruence `p(5n+4) ≡ 0 (mod 5)` (AAR §11.7). -/
+@[dlmf 27.14.v]
 theorem ramanujan_mod_five (n : ℕ) : 5 ∣ partitionFunction (5 * n + 4) := by
   sorry
 
 /-- Ramanujan's congruence `p(7n+5) ≡ 0 (mod 7)`. -/
+@[dlmf 27.14.v]
 theorem ramanujan_mod_seven (n : ℕ) : 7 ∣ partitionFunction (7 * n + 5) := by
   sorry
 
 /-- Ramanujan's congruence `p(11n+6) ≡ 0 (mod 11)`. -/
+@[dlmf 27.14.v]
 theorem ramanujan_mod_eleven (n : ℕ) : 11 ∣ partitionFunction (11 * n + 6) := by
   sorry
 

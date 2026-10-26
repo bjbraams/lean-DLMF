@@ -208,7 +208,7 @@ Additional explicit qualifications are:
 - [SineCosine](DLMF/IncompleteGamma/SineCosine.lean): 0 admissions.
 - [SpecialValues](DLMF/IncompleteGamma/SpecialValues.lean): 0 admissions.
 - [UniformAsymptotics](DLMF/IncompleteGamma/UniformAsymptotics.lean): 10 admissions.
-- [ZerosIntegrals](DLMF/IncompleteGamma/ZerosIntegrals.lean): 7 admissions.
+- [ZerosIntegrals](DLMF/IncompleteGamma/ZerosIntegrals.lean): 6 admissions.
 
 ## Completed first proof batch
 
@@ -724,21 +724,21 @@ is not counted as a proved version of the incorrect universal claim.
 
 #### §8.13
 
-- [8.13.E1](https://dlmf.nist.gov/8.13.E1): [Real.scIncGammaNegativeZero_bounds](DLMF/IncompleteGamma/ZerosIntegrals.lean#L542) (proved).
+- [8.13.E1](https://dlmf.nist.gov/8.13.E1): [Real.scIncGammaNegativeZero_bounds](DLMF/IncompleteGamma/ZerosIntegrals.lean#L543) (proved).
 
 #### §8.14
 
-- [8.14.E1](https://dlmf.nist.gov/8.14.E1): [normIncGammaP_laplace](DLMF/IncompleteGamma/ZerosIntegrals.lean#L696) (proved).
-- [8.14.E2](https://dlmf.nist.gov/8.14.E2): [upperIncGamma_laplace](DLMF/IncompleteGamma/ZerosIntegrals.lean#L715) (proved).
-- [8.14.E3](https://dlmf.nist.gov/8.14.E3): [lowerIncGamma_mellin](DLMF/IncompleteGamma/ZerosIntegrals.lean#L782) (proved).
-- [8.14.E4](https://dlmf.nist.gov/8.14.E4): [upperIncGamma_mellin](DLMF/IncompleteGamma/ZerosIntegrals.lean#L805) (proved).
-- [8.14.E5](https://dlmf.nist.gov/8.14.E5): [lowerIncGamma_mellin_laplace](DLMF/IncompleteGamma/ZerosIntegrals.lean#L827) (proved).
-- [8.14.E6](https://dlmf.nist.gov/8.14.E6): [upperIncGamma_mellin_laplace](DLMF/IncompleteGamma/ZerosIntegrals.lean#L850) (proved).
+- [8.14.E1](https://dlmf.nist.gov/8.14.E1): [normIncGammaP_laplace](DLMF/IncompleteGamma/ZerosIntegrals.lean#L697) (proved).
+- [8.14.E2](https://dlmf.nist.gov/8.14.E2): [upperIncGamma_laplace](DLMF/IncompleteGamma/ZerosIntegrals.lean#L716) (proved).
+- [8.14.E3](https://dlmf.nist.gov/8.14.E3): [lowerIncGamma_mellin](DLMF/IncompleteGamma/ZerosIntegrals.lean#L783) (proved).
+- [8.14.E4](https://dlmf.nist.gov/8.14.E4): [upperIncGamma_mellin](DLMF/IncompleteGamma/ZerosIntegrals.lean#L806) (proved).
+- [8.14.E5](https://dlmf.nist.gov/8.14.E5): [lowerIncGamma_mellin_laplace](DLMF/IncompleteGamma/ZerosIntegrals.lean#L828) (proved).
+- [8.14.E6](https://dlmf.nist.gov/8.14.E6): [upperIncGamma_mellin_laplace](DLMF/IncompleteGamma/ZerosIntegrals.lean#L851) (proved).
 
 #### §8.15
 
-- [8.15.E1](https://dlmf.nist.gov/8.15.E1): [lowerIncGamma_multiplication_hasSum](DLMF/IncompleteGamma/ZerosIntegrals.lean#L882) (proved).
-- [8.15.E2](https://dlmf.nist.gov/8.15.E2): [incompleteGamma_hurwitz_fourier_sum](DLMF/IncompleteGamma/ZerosIntegrals.lean#L926) (admitted).
+- [8.15.E1](https://dlmf.nist.gov/8.15.E1): [lowerIncGamma_multiplication_hasSum](DLMF/IncompleteGamma/ZerosIntegrals.lean#L883) (proved).
+- [8.15.E2](https://dlmf.nist.gov/8.15.E2): [incompleteGamma_hurwitz_fourier_sum](DLMF/IncompleteGamma/ZerosIntegrals.lean#L925) (admitted).
 
 #### §8.17
 
@@ -1022,24 +1022,24 @@ pointers and bibliographic comments are recorded above.
 - [DLMF.Confluent.gammaParisRawCoeff](DLMF/IncompleteGamma/UniformAsymptotics.lean#L951) (definition).
 - [DLMF.Confluent.gammaParisA](DLMF/IncompleteGamma/UniformAsymptotics.lean#L955) (definition).
 - [DLMF.Confluent.gammaParisB](DLMF/IncompleteGamma/UniformAsymptotics.lean#L959) (definition).
-- [DLMF.Confluent.Real.scIncGammaNegativeZero](DLMF/IncompleteGamma/ZerosIntegrals.lean#L30) (definition).
-- [DLMF.Confluent.Real.scIncGammaPositiveZero](DLMF/IncompleteGamma/ZerosIntegrals.lean#L34) (definition).
-- [DLMF.Confluent.scIncGamma_nonnegative_parameter_no_real_zeros](DLMF/IncompleteGamma/ZerosIntegrals.lean#L51) (proved).
-- [DLMF.Confluent.scIncGamma_one_negative_zero](DLMF/IncompleteGamma/ZerosIntegrals.lean#L407) (proved).
-- [DLMF.Confluent.scIncGamma_two_real_zeros](DLMF/IncompleteGamma/ZerosIntegrals.lean#L447) (proved).
-- [DLMF.Confluent.Real.scIncGammaNegativeZero_strictAnti](DLMF/IncompleteGamma/ZerosIntegrals.lean#L489) (proved).
-- [DLMF.Confluent.scIncGammaDoubleZero](DLMF/IncompleteGamma/ZerosIntegrals.lean#L645) (definition).
-- [DLMF.Confluent.scIncGamma_two_parameter_zeros_negative_x](DLMF/IncompleteGamma/ZerosIntegrals.lean#L649) (admitted).
-- [DLMF.Confluent.scIncGamma_two_parameter_zeros_positive_x](DLMF/IncompleteGamma/ZerosIntegrals.lean#L654) (admitted).
-- [DLMF.Confluent.scIncGamma_double_parameter_zero](DLMF/IncompleteGamma/ZerosIntegrals.lean#L659) (admitted).
-- [DLMF.Confluent.scIncGamma_parameter_zeros_at_x_zero](DLMF/IncompleteGamma/ZerosIntegrals.lean#L664) (proved).
-- [DLMF.Confluent.scIncGamma_conjugate_zero_trajectories](DLMF/IncompleteGamma/ZerosIntegrals.lean#L684) (admitted).
-- [DLMF.Confluent.hurwitzZetaComplex](DLMF/IncompleteGamma/ZerosIntegrals.lean#L918) (definition).
-- [DLMF.Confluent.hurwitzZetaComplex_mathlib](DLMF/IncompleteGamma/ZerosIntegrals.lean#L922) (admitted).
-- [DLMF.Confluent.Real.gammaDiDonatoF](DLMF/IncompleteGamma/ZerosIntegrals.lean#L933) (definition).
-- [DLMF.Confluent.Real.gammaDiDonatoH](DLMF/IncompleteGamma/ZerosIntegrals.lean#L937) (definition).
-- [DLMF.Confluent.Real.gammaDiDonato_gamma](DLMF/IncompleteGamma/ZerosIntegrals.lean#L941) (proved).
-- [DLMF.Confluent.Real.gammaDiDonato_approximation](DLMF/IncompleteGamma/ZerosIntegrals.lean#L1000) (admitted).
+- [DLMF.Confluent.Real.scIncGammaNegativeZero](DLMF/IncompleteGamma/ZerosIntegrals.lean#L31) (definition).
+- [DLMF.Confluent.Real.scIncGammaPositiveZero](DLMF/IncompleteGamma/ZerosIntegrals.lean#L35) (definition).
+- [DLMF.Confluent.scIncGamma_nonnegative_parameter_no_real_zeros](DLMF/IncompleteGamma/ZerosIntegrals.lean#L52) (proved).
+- [DLMF.Confluent.scIncGamma_one_negative_zero](DLMF/IncompleteGamma/ZerosIntegrals.lean#L408) (proved).
+- [DLMF.Confluent.scIncGamma_two_real_zeros](DLMF/IncompleteGamma/ZerosIntegrals.lean#L448) (proved).
+- [DLMF.Confluent.Real.scIncGammaNegativeZero_strictAnti](DLMF/IncompleteGamma/ZerosIntegrals.lean#L490) (proved).
+- [DLMF.Confluent.scIncGammaDoubleZero](DLMF/IncompleteGamma/ZerosIntegrals.lean#L646) (definition).
+- [DLMF.Confluent.scIncGamma_two_parameter_zeros_negative_x](DLMF/IncompleteGamma/ZerosIntegrals.lean#L650) (admitted).
+- [DLMF.Confluent.scIncGamma_two_parameter_zeros_positive_x](DLMF/IncompleteGamma/ZerosIntegrals.lean#L655) (admitted).
+- [DLMF.Confluent.scIncGamma_double_parameter_zero](DLMF/IncompleteGamma/ZerosIntegrals.lean#L660) (admitted).
+- [DLMF.Confluent.scIncGamma_parameter_zeros_at_x_zero](DLMF/IncompleteGamma/ZerosIntegrals.lean#L665) (proved).
+- [DLMF.Confluent.scIncGamma_conjugate_zero_trajectories](DLMF/IncompleteGamma/ZerosIntegrals.lean#L685) (admitted).
+- [DLMF.Confluent.hurwitzZetaComplex](DLMF/Zeta/S25bHurwitzCore.lean#L427) (definition).
+- [DLMF.Confluent.hurwitzZetaComplex_mathlib](DLMF/IncompleteGamma/ZerosIntegrals.lean#L921) (proved).
+- [DLMF.Confluent.Real.gammaDiDonatoF](DLMF/IncompleteGamma/ZerosIntegrals.lean#L932) (definition).
+- [DLMF.Confluent.Real.gammaDiDonatoH](DLMF/IncompleteGamma/ZerosIntegrals.lean#L936) (definition).
+- [DLMF.Confluent.Real.gammaDiDonato_gamma](DLMF/IncompleteGamma/ZerosIntegrals.lean#L940) (proved).
+- [DLMF.Confluent.Real.gammaDiDonato_approximation](DLMF/IncompleteGamma/ZerosIntegrals.lean#L999) (admitted).
 
 ## Next proof priorities
 

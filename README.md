@@ -66,6 +66,19 @@ Weierstrass `PeriodPair`, Dedekind eta and discriminant. Applications, graphics,
 computation, tables and software sections are excluded; the ledgers list the purely
 mathematical results found in excluded Applications sections.
 
+Chapters 24–27, acquired on 2026-10-25, have the entry points
+[BernoulliEuler](DLMF/BernoulliEuler.lean) (Chapter 24, Bernoulli and Euler polynomials),
+[Zeta](DLMF/Zeta.lean) (Chapter 25, zeta and related functions),
+[Combinatorics](DLMF/Combinatorics.lean) (Chapter 26, combinatorial analysis) and
+[NumberTheory](DLMF/NumberTheory.lean) (Chapter 27, functions of number theory), with the
+ledgers [Chapter 24](DLMF24Acquisition.md), [Chapter 25](DLMF25Acquisition.md),
+[Chapter 26](DLMF26Acquisition.md) and [Chapter 27](DLMF27Acquisition.md). They reuse
+Mathlib's Bernoulli numbers and polynomials, Riemann and Hurwitz zeta, `expZeta`, Dirichlet
+L-functions, binomial, Catalan, Bell and Stirling numbers, partitions, permutations,
+arithmetic functions, characters and reciprocity, recorded with `dlmf_upstream` pointers.
+The same exclusions apply; open conjectures (Riemann hypothesis, Goldbach, Lehmer) are named
+as propositions, never stated as theorems.
+
 DLMF errata and source corrections found anywhere in the project are collected in
 [DLMFErrata.md](DLMFErrata.md): genuine DLMF errata, fixed transcription defects of our own,
 and formalization notes, each with evidence and the Lean declarations.
@@ -147,12 +160,12 @@ Mathlib's `Complex.digamma`; moving it into `DLMF.Gamma.Real` is left for a late
 
 ## Status
 
-After proof round 1 for Chapters 19–23 (2026-10-25) there are **804 explicit source
+After proof round 3 for Chapters 24–27 (2026-10-26) there are **953 explicit source
 admissions**: Elementary 68, GeneralizedHypergeometric 112, QHypergeometric 101,
-EllipticIntegrals 187, Theta 22, RiemannTheta 10, JacobiElliptic 62, Weierstrass 53, and 189 in
-the older areas. The compiled audit finds **16,980 project theorems**, with **862 depending
-transitively on `sorryAx`**, and no
-other nonstandard axiom.
+EllipticIntegrals 187, Theta 22, RiemannTheta 10, JacobiElliptic 62, Weierstrass 53,
+BernoulliEuler 25, Zeta 46, Combinatorics 37, NumberTheory 42, and 188 in the older areas.
+The compiled audit finds **19,228 project theorems**, with **1,016 depending transitively on
+`sorryAx`**, and no other nonstandard axiom.
 Counts in the dated development history describe their earlier scope.
 
 The [parallel priority round](REVIEW.md#priority-proof-implementation-with-parallel-ownership-2026-10-24)

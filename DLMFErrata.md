@@ -26,9 +26,12 @@ cited section of [REVIEW.md](REVIEW.md) or a chapter ledger and was not re-verif
 register. The Chapter 19 entries were checked the same way (section "Chapter 19 (elliptic
 integrals)" below). The Chapter 20–23 entries were found by the acquisition agents and confirmed by an
 independent numerical check (REVIEW.md, section "Chapters 20–23 acquisition (2026-10-25)",
-subsection "DLMF errata and source corrections"; ledgers DLMF20–DLMF23Acquisition.md).
+subsection "DLMF errata and source corrections"; ledgers DLMF20–DLMF23Acquisition.md). The Chapter 24–27 entries were found by the acquisition agents and
+confirmed by an independent numerical and brute-force check (REVIEW.md, section "Chapters 24–27
+acquisition (2026-10-25)"; ledgers DLMF24–DLMF27Acquisition.md); three suspected items that
+the check did not confirm are listed under (c) or dropped.
 
-Counts (2026-10-25): 63 entries in (a), 22 in (b), 32 in (c). Some entries group closely related
+Counts (2026-10-25): 89 entries in (a), 22 in (b), 37 in (c). Some entries group closely related
 equation numbers.
 
 ## (a) Genuine DLMF errata
@@ -482,6 +485,178 @@ Found by the Chapter 19 acquisition agents and checked by an independent mpmath 
     admitted.
   - Found: 2026-10-25.
 
+### Chapter 24 (Bernoulli and Euler polynomials)
+
+- [24.4.E24](https://dlmf.nist.gov/24.4.E24)
+  - The printed multiplication formula with roots of unity is false for every n ≥ 1 (at n = 1 it
+    is off by −(m − 1)). Correct: B_n(mx) = m^n B_n(x) − n Σ_{k=1}^n Σ_{j=0}^{k−1} (−1)^j C(k−1, j)
+    (Σ_{r=1}^{m−1} ζ^r/(1 − ζ^r)^k) (j + mx)^(n−1), ζ = e^(2πi/m), derived by partial fractions.
+  - Evidence: x = 0.37, m = 2, n = 1: printed −0.76, B_1(0.74) = 0.24; the corrected form agrees
+    to about 1e-24 for n ≤ 8, m ≤ 6 at real and complex x.
+  - Lean: `bernoulliPolyB_mul_eq_roots_of_unity` (DLMF/BernoulliEuler/Properties.lean), admitted.
+  - Found: 2026-10-25.
+- [24.4.E8](https://dlmf.nist.gov/24.4.E8), [24.4.E11](https://dlmf.nist.gov/24.4.E11)
+  (missing conditions)
+  - 24.4.8 fails at n = 0 (as 24.4.7 does, entry above; 24.4.26 received n > 0 in erratum V1.0.5,
+    but these two did not). 24.4.11 fails at m = 1 for n ≥ 1 (left side 1, right side 0).
+  - Lean: `sum_Icc_neg_one_pow_mul_pow_eq_euler` (n ≥ 1), `sum_coprime_pow` (m ≥ 2)
+    (DLMF/BernoulliEuler/Properties.lean), admitted.
+  - Found: 2026-10-25.
+- [24.10.E3](https://dlmf.nist.gov/24.10.E3) (missing condition)
+  - Kummer's congruence fails when m = 1 or n = 1: p = 3, m = 1, n = 3 gives B_1/1 = −1/2 ≢ 0 = B_3/3
+    (mod 3). A scan of p < 30, m, n < 40 finds 92 failures, all with m = 1 or n = 1.
+  - Lean: `kummer_congruence` (m, n ≥ 2) (DLMF/BernoulliEuler/Arithmetic.lean), admitted.
+  - Found: 2026-10-25.
+- [24.12.E11](https://dlmf.nist.gov/24.12.E11)
+  - Printed: for odd n, y_{2m}^{(n)} → m − 1/2. Correct: y_m^{(n)} → m − 1/2 (the zeros of
+    cos πx); y_{2m}^{(n)} tends to 2m − 1/2, so the printed form fails for every m ≥ 1, and
+    already 24.12.9–24.12.10 place y_2^{(n)} near 3/2.
+  - Evidence: the zeros of E_n in [1/2, ∞) for n = 21, 41, 61 are about 0.5, 1.50025, 2.49975,
+    3.50025, 4.49975, 5.50025 (sign changes, mpmath; found by p24b, recomputed independently).
+  - Lean: `r24b_tendsto_eulerRealZero_odd_counterexample` (proved), `tendsto_eulerRealZero_odd`
+    (corrected statement, proved) (DLMF/BernoulliEuler/Zeros.lean).
+  - Found: 2026-10-25 (proof round 2).
+- [24.16.E9](https://dlmf.nist.gov/24.16.E9) (branch, borderline (a)/(c))
+  - For complex t, t/(e^t − 1) is real and negative at t ≈ 2.0085 + 4.4072i (|t| ≈ 4.84 < 2π), so
+    the principal power (t/(e^t − 1))^x is not the analytic branch on all of |t| < 2π.
+  - Evidence: t = 1.9663 + 4.4315i, x = 1/2: principal power 0.0032 + 0.8049i, series −0.0032 − 0.8049i.
+  - Lean: `hasSum_norlundPolynomial` (‖t‖ < π, complex), `hasSum_norlundPolynomial_real`
+    (|t| < 2π, real) (DLMF/BernoulliEuler/Generalizations.lean), both proved (proof round 3,
+    2026-10-26).
+  - Found: 2026-10-25.
+
+### Chapter 25 (zeta and related functions)
+
+- [25.11.E23](https://dlmf.nist.gov/25.11.E23)
+  - The first denominator must be 8n√3·3^(2n−1), not 8n√3(3^(2n−1) − 1).
+  - Evidence: n = 1: ζ′(−1, 1/3) = 0.0937262017607794; printed 0.0433428…; corrected agrees to
+    15 digits (also n = 2, 3, 4) and with 25.11.21 at h = 1, k = 3.
+  - Lean: `deriv_hurwitzZeta_one_sub_two_mul_third` (DLMF/Zeta/Hurwitz.lean), admitted.
+  - Found: 2026-10-25.
+- [25.11.E37](https://dlmf.nist.gov/25.11.E37) (branch)
+  - With principal logarithms the identity holds only modulo 2πi (off by exactly 2πi at n = 2,
+    a = 4 − 9i, and at n = 3, a = 1 + 5i); it holds with the log-gamma function.
+  - Lean: `hasSum_hurwitzZeta_log_gamma` (real a ≥ 1), `exp_tsum_hurwitzZeta_eq_prod_gamma`
+    (exponentiated, Re a ≥ 1) (DLMF/Zeta/HurwitzIntegrals.lean), admitted.
+  - Found: 2026-10-25.
+- [25.12.E13](https://dlmf.nist.gov/25.12.E13)
+  - With the principal ln z the formula fails for Im z < 0 (and contradicts 25.12.4 at s = 2,
+    z = −2 − i); it holds with 0 < ph z < 2π, i.e. parameter 1/2 + ln(−z)/(2πi). The error was
+    introduced by DLMF's own V1.2.3 modification (e^(2πia) replaced by z).
+  - Evidence: s = 2.5 + 0.2i, z = 0.5 − 0.9i: left side −0.19501 − 0.80944i, printed right side
+    4.3896 − 6.2751i.
+  - Lean: `polylog_add_exp_mul_polylog_inv` (DLMF/Zeta/Polylog.lean), admitted.
+  - Found: 2026-10-25.
+- [25.14.E7](https://dlmf.nist.gov/25.14.E7) (missing condition)
+  - DLMF states no conditions; the formula fails for a = 1.6 + 0.2i, a = 1.5, a = 1.2,
+    a = −0.3 + 0.4i, and holds for about 0 < Re a ≤ 1, z ≠ 0, 1 (verified also at |z| = 1 and
+    z = 1.5 + 0.5i).
+  - Lean: `lerchPhi_transformation` (DLMF/Zeta/Lerch.lean), stated on the narrower verified domain
+    0 < Re a < 1, 0 < |z| < 1, admitted.
+  - Found: 2026-10-25.
+
+- [25.15.ii](https://dlmf.nist.gov/25.15.ii) (prose)
+  - "Infinitely many zeros in the critical strip 0 ≤ ℜs ≤ 1, located symmetrically about the
+    critical line": for an even primitive χ the trivial zero s = 0 lies in that strip but
+    L(1, χ) ≠ 0. The symmetry ρ ↦ 1 − ρ̄ holds for zeros ρ ≠ 0.
+  - Lean: `q25b_LFunction_one_sub_conj_counterexample` (proved), `LFunction_one_sub_conj_eq_zero`
+    (hypothesis ρ ≠ 0 added in proof round 1) (DLMF/Zeta/DirichletL.lean), admitted.
+  - Found: 2026-10-25 (proof round 1).
+
+### Chapter 26 (combinatorial analysis)
+
+- [26.6.E12](https://dlmf.nist.gov/26.6.E12) (missing condition)
+  - C(n) = Σ_{k=1}^n N(n, k) is printed without a condition; at n = 0 the sum is empty while
+    C(0) = 1. Holds for n ≥ 1.
+  - Lean: `q26a_not_catalan_eq_sum_narayana` (proved counterexample), `catalan_eq_sum_narayana`
+    (n ≥ 1, restated in proof round 1) (DLMF/Combinatorics/LatticePaths.lean), proved.
+  - Found: 2026-10-25 (proof round 1).
+- [26.8.E31](https://dlmf.nist.gov/26.8.E31)
+  - The hypothesis "f analytic for all x and the series converges" is insufficient:
+    f(z) = sin(πz), x = 0, k = 1 has every Δ^n f(0) = 0 but f′(0) = π. A Newton-series hypothesis is
+    needed; acquired for polynomials.
+  - Lean: `not_forall_stirling_deriv_eq_fwdDiff_series` (proved),
+    `hasSum_signedStirlingFirst_fwdDiff` (polynomials, admitted) (DLMF/Combinatorics/Stirling.lean).
+  - Found: 2026-10-25.
+- [26.9.E7](https://dlmf.nist.gov/26.9.E7)
+  - The sum must run over k, n (printed m, n, with m free on the right), and the condition must be
+    |x| < 1 (printed |xq| < 1, insufficient: q = 0.5, x = 1.5).
+  - Evidence: power-series check for m ≤ 3, k < 6.
+  - Lean: `hasSum_qBinom_mul_pow_x` (DLMF/Combinatorics/RestrictedPartitions.lean), admitted.
+  - Found: 2026-10-25.
+- [26.10.E9](https://dlmf.nist.gov/26.10.E9)
+  - The printed recurrence p_m(D, n) = p_m(D, n − m) + p_(m−1)(D, n) is false (m = n = 2: 1 ≠ 2; 43
+    failures for m ≤ 6, n < 15). Correct: p_m(D, n) = p_(m−1)(D, n) + p_m(D, n − m) − p_(m−2)(D, n − m),
+    equivalently q_m(n) = q_m(n − m) + q_(m−1)(n − m) for exactly m distinct parts.
+  - Lean: `partitionCountAtMostDistinct_recurrence`, `card_distinct_card_eq_recurrence`
+    (DLMF/Combinatorics/PartitionIdentities.lean), admitted.
+  - Found: 2026-10-25.
+- [26.10.iv](https://dlmf.nist.gov/26.10.iv) (prose)
+  - "p(D′3, n) ≤ p(D3, n), with strict inequality for n ≥ 9" is wrong: the inequality is strict at
+    n = 9 and n ≥ 15 (checked to n = 30) but an equality for 10 ≤ n ≤ 14.
+  - Lean: `partitionCountSchur_le`, `partitionCountSchur_lt_iff`
+    (DLMF/Combinatorics/PartitionIdentities.lean).
+  - Found: 2026-10-25.
+- [26.10.E18](https://dlmf.nist.gov/26.10.E18)
+  - The range must be 1 ≤ h ≤ k (printed 1 < h ≤ k gives A_1 = 0). With the correction 26.10.17
+    gives 295.998 at n = 30 (p(D, 30) = 296); with the printed range 0.23 − 0.07i.
+  - Lean: `distinctPartitionKloosterman` (DLMF/Combinatorics/PartitionIdentities.lean), definition.
+  - Found: 2026-10-25.
+- [26.12.E24](https://dlmf.nist.gov/26.12.E24)
+  - The product must run over 1 ≤ h ≤ j ≤ r (printed h < j); at r = 2 the printed form gives
+    (1 + q)(1 + q²)/(1 + q + q²) instead of 1 + q². Brute-force generating functions agree with the
+    corrected form for r = 1..4.
+  - Lean: `sum_descendingPPIn_pow` (DLMF/Combinatorics/PlanePartitions.lean), admitted.
+  - Found: 2026-10-25.
+- [26.12.E12](https://dlmf.nist.gov/26.12.E12) (prose definition)
+  - "Transpose complement" read literally as reflection through the (x, y)-plane gives counts
+    0, 0, 2, 2, …; the formula matches only with reflection in the plane x = y (h and j swapped):
+    1, 1, 2, 3, 5, 14, 14.
+  - Lean: `card_transposeComplement` (DLMF/Combinatorics/PlanePartitions.lean), admitted.
+  - Found: 2026-10-25.
+- [26.13.E4](https://dlmf.nist.gov/26.13.E4), [26.7.E3](https://dlmf.nist.gov/26.7.E3),
+  [26.7.E4](https://dlmf.nist.gov/26.7.E4), [26.4.E10](https://dlmf.nist.gov/26.4.E10),
+  [26.8.E10](https://dlmf.nist.gov/26.8.E10), [26.8.E29](https://dlmf.nist.gov/26.8.E29),
+  [26.5.E1](https://dlmf.nist.gov/26.5.E1) (missing conditions at n = 0 or m = 0)
+  - The floor form of 26.13.4 gives 0 at n = 0 (d(0) = 1); 26.7.3 needs n ≥ 1 (at n = 0, m = 2 it
+    gives 1/2); the first (Dobiński) form of 26.7.4 gives 1 − e⁻¹ at n = 0; 26.4.10 fails at m = 0;
+    26.8.10 (sum from k = 1) and 26.8.29 fail at n = 0; the fourth form of 26.5.1 fails at n = 0.
+  - Lean: `numDerangements_eq_floor` (DLMF/Combinatorics/Permutations.lean), `bell_eq_sum_mul_sum`,
+    `bell_eq_exp_neg_one_mul_tsum` (Bell.lean), `multinomial_eq_sum_update` (Multinomial.lean),
+    `sum_Icc_stirlingSecond_mul_ascPochhammer`, `sum_neg_one_pow_mul_signedStirlingFirst`
+    (Stirling.lean), `catalan_eq_choose_sub` (Catalan.lean); proved or admitted as the ledger says.
+  - Found: 2026-10-25.
+- [26.17.T1](https://dlmf.nist.gov/26.17.T1) (missing conditions)
+  - The entry S(n, 1) + … + S(n, k) fails at n = 0 (count 1, table 0; the sum should start at
+    j = 0); p_k(n) − p_(k−1)(n) is undefined at k = 0. The binomial entries need C(−1, 0) = 1.
+  - Lean: `twelvefoldCount_*` (DLMF/Combinatorics/TwelvefoldWay.lean), with side conditions.
+  - Found: 2026-10-25.
+- [26.18.E4](https://dlmf.nist.gov/26.18.E4)
+  - The upper limit must be k (printed n): n = 1, k = 3 gives −3, n = 2, k = 4 gives 4, and n = 0,
+    k ≥ 1 gives 1 instead of 0. The corrected form holds for all n, k (0⁰ = 1).
+  - Lean: `card_surjective_eq_sum` (DLMF/Combinatorics/CountingTechniques.lean), admitted.
+  - Found: 2026-10-25.
+
+### Chapter 27 (functions of number theory)
+
+- [27.12.E3](https://dlmf.nist.gov/27.12.E3)
+  - Legendre's formula as printed computes π(x) − π(√x). Correct:
+    π(x) = π(√x) − 1 + ⌊x⌋ − Σ⌊x/p_j⌋ + Σ_{r≥2} (−1)^r Σ ⌊x/(p_{j1}⋯p_{jr})⌋.
+  - Evidence: x = 10: printed 2, π(10) = 4, π(√10) = 2; corrected form checked for x up to 1000.
+  - Lean: `primePi_legendre` (DLMF/NumberTheory/Primes.lean), admitted.
+  - Found: 2026-10-25.
+- [27.3](https://dlmf.nist.gov/27.3), first sentence
+  - "Except for ν(n), Λ(n), p_n and π(x), the functions in §27.2 are multiplicative" is false for
+    φ_k, k ≥ 1 (sum of k-th powers of the m ≤ n prime to n): φ₁(2)φ₁(3) = 3 ≠ φ₁(6) = 6,
+    φ₂(2)φ₂(3) = 5 ≠ φ₂(6) = 26. The other §27.2 functions are multiplicative as claimed.
+  - Lean: `totientPowerSum_one_not_multiplicative` (DLMF/NumberTheory/Functions.lean), proved.
+  - Found: 2026-10-25.
+- [27.3.E6](https://dlmf.nist.gov/27.3.E6) (missing condition)
+  - For complex α, α ≠ 0 is insufficient: with α = 2πi/ln 2, 2^α = 1 and the p = 2 factor is 0/0
+    (σ_α(8) = 4). The condition is p_r^α ≠ 1 for every prime p_r dividing n.
+  - Lean: `sigmaC_eq_prod` (DLMF/NumberTheory/Functions.lean), proved.
+  - Found: 2026-10-25.
+
 ## (b) Project transcription defects that were fixed
 
 - [4.19.E3](https://dlmf.nist.gov/4.19.E3), [4.19.E4](https://dlmf.nist.gov/4.19.E4),
@@ -701,6 +876,31 @@ Found by the Chapter 19 acquisition agents and checked by an independent mpmath 
   lifts modulo integer matrices the identity fails (g = 1, T = [[3/5, 4/5], [4/5, −3/5]]).
   `riemann_identity`, `riemann_identity_char` (DLMF/RiemannTheta/Products.lean), admitted.
   Found 2026-10-25.
+
+### Chapters 24–27
+
+- Chapter 25 removable points: 25.4.2 (s ≠ 2, 3, …), 25.4.5 (s ≠ −1, −2, …), 25.5.13 (s ≠ 0),
+  25.8.3 (s ≠ 0, −1, …), 25.8.6 (z ≠ 0) and 25.10.4 (cos √(2πt) ≠ 0) carry hypotheses because
+  Lean's Γ vanishes at its poles, cot 0 = 0 and ζ(1) is a junk value; 25.2.3, 25.5.3, 25.5.4,
+  25.5.10 and 25.5.21 are stated multiplied by 1 − 2^(1−s), which is stronger than DLMF.
+  DLMF/Zeta (DLMF25Acquisition.md, part A).
+- [25.10.E2](https://dlmf.nist.gov/25.10.E2): θ(t) uses the principal arg, as DLMF prescribes; it
+  differs from the continuous Riemann–Siegel θ by multiples of 2π. `riemannSiegelTheta`
+  (DLMF/Zeta/Zeros.lean), definition.
+- Chapter 25 implicit conditions made explicit by the acquisition (not independently
+  re-verified): s ≠ −m in 25.11.16; s ≠ 0 in 25.11.17 and 25.11.41; s ≠ 1 in 25.11.31 and 25.11.35;
+  k ≥ 2 in 25.15.3, 25.15.6 and 25.15.10; z ≠ 0 and z ∉ [1, ∞) in 25.12.12 and 25.14.3_1.
+  DLMF25Acquisition.md, part B.
+- [25.11.E10](https://dlmf.nist.gov/25.11.E10): at s = 0, −1, −2, … the term with n + s = 1
+  is DLMF's limit of (s)_n ζ(n + s), whereas Lean's `poch s n · ζ(1)` is 0; at s = 0, a = 1/2 the
+  Lean series sums to −1/2 while ζ(0, 1/2) = 0. The hypothesis s ≠ 0, −1, −2, … was added.
+  `r25b_hasSum_hurwitzZetaComplex_taylor_counterexample` (proved),
+  `hasSum_hurwitzZetaComplex_taylor` (DLMF/Zeta/Hurwitz.lean), admitted. Found 2026-10-25
+  (proof round 2).
+- [26.8.E5](https://dlmf.nist.gov/26.8.E5), [26.8.E27](https://dlmf.nist.gov/26.8.E27),
+  [26.8.E33](https://dlmf.nist.gov/26.8.E33): the hypothesis k ≤ n comes from Lean's truncated
+  natural subtraction and from the left side's domain; DLMF is right as printed (independent check
+  2026-10-25). DLMF/Combinatorics/Stirling.lean.
 
 ### DLMF's own published errata followed
 

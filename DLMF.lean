@@ -38,6 +38,10 @@ public import DLMF.SphericalHarmonics
 public import DLMF.QSeries
 public import DLMF.Partitions
 public import DLMF.Bailey
+public import DLMF.BernoulliEuler
+public import DLMF.Zeta
+public import DLMF.Combinatorics
+public import DLMF.NumberTheory
 public import DLMF.Core.UpstreamElementary
 public import DLMF.Core.ZeroCounting
 

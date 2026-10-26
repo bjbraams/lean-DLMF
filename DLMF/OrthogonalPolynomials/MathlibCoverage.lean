@@ -25,8 +25,8 @@ Mathlib's Chebyshev polynomials `T R n`, `U R n` are indexed by `n : ℤ` over a
 
 DLMF items that Mathlib already tags with `@[dlmf]` get no pointer here: 18.5.1
 (`T_real_cos`, `T_real_cosh`; also `T_complex_cos`), 18.5.2 (`U_real_cos`, `U_real_cosh`; also
-`U_complex_cos`), 18.9.9 (`two_mul_T_eq_U_sub_U`; also `U_eq_two_mul_T_add_U`), 18.9.21
-(`T_derivative_eq_U`) and 18.18.21 (`T_mul_T`).
+`U_complex_cos`), 18.9.9 (`two_mul_T_eq_U_sub_U`), 18.9.21 (`T_derivative_eq_U`) and 18.18.21
+(`T_mul_T`). The untagged rearrangement `U_eq_two_mul_T_add_U` of 18.9.9 does get a pointer.
 
 `Polynomial.Chebyshev.abs_eval_T_real_eq_one_iff` (`|T_n(x)| = 1` iff `x = cos(kπ/n)`) was
 formerly listed under Table 18.6.1, which does not contain it; it has no DLMF pointer.
@@ -41,6 +41,10 @@ dlmf_upstream 18.1.E3 Polynomial.Chebyshev.C_eq_two_mul_T_comp_half_mul_X
   "partial: first equality C_n(x) = 2T_n(x/2), over a ring with 2 invertible, n ∈ ℤ"
 dlmf_upstream 18.1.E3 Polynomial.Chebyshev.S_eq_U_comp_half_mul_X
   "partial: second equality S_n(x) = U_n(x/2), over a ring with 2 invertible, n ∈ ℤ"
+dlmf_upstream 18.1.E3 Polynomial.Chebyshev.C_comp_two_mul_X
+  "partial: first equality in the form C_n(2x) = 2T_n(x), over any commutative ring, n ∈ ℤ"
+dlmf_upstream 18.1.E3 Polynomial.Chebyshev.S_comp_two_mul_X
+  "partial: second equality in the form S_n(2x) = U_n(x), over any commutative ring, n ∈ ℤ"
 
 /- Table 18.3.1: leading coefficients and the Chebyshev-T orthogonality data. -/
 dlmf_upstream 18.3.T1 Polynomial.Chebyshev.leadingCoeff_T
@@ -111,6 +115,11 @@ dlmf_upstream 18.9.T1 Polynomial.Chebyshev.U_add_two
 dlmf_upstream 18.9.E10 Polynomial.Chebyshev.one_sub_X_sq_mul_U_eq_pol_in_T
   "exact: in the equivalent form (1-x²)U_n = xT_{n+1} - T_{n+2}, which with T_add_two is \
   -(T_{n+2} - T_n)/2; n ∈ ℤ"
+dlmf_upstream 18.9.E9 Polynomial.Chebyshev.U_eq_two_mul_T_add_U
+  "exact: in the equivalent form U_{n+2} = 2T_{n+2} + U_n; n ∈ ℤ"
+dlmf_upstream 18.9.E22 Polynomial.Chebyshev.add_one_mul_T_eq_poly_in_U
+  "equivalent form: (n+1)T_{n+1} = xU_n - (1-x²)U_n' as a polynomial identity, which is \
+  18.9.22 multiplied by (1-x²)^{1/2}; n ∈ ℤ"
 
 /- §18.14(i): the bound `|T_n(x)| ≤ 1` is (18.14.1) for α = β = -1/2, since
 `T_n = P_n^{(-1/2,-1/2)} / P_n^{(-1/2,-1/2)}(1)`. -/

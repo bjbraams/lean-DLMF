@@ -57,6 +57,11 @@ public import DLMFMathlib.Analysis.Calculus.InverseSeries
 public import DLMFMathlib.Analysis.ODE.Singularities
 
 public import DLMFMathlib.Analysis.Complex.SeparatingContour
+public import DLMFMathlib.Combinatorics.Q26bSurjections
+public import DLMFMathlib.Combinatorics.R26aFinpartition
+public import DLMFMathlib.Combinatorics.S26aQuadraticSeries
+public import DLMFMathlib.Combinatorics.S26aSeriesTransform
+public import DLMFMathlib.RingTheory.R27PowerSeriesEval
 
 /-!
 # Supporting results for Mathlib
@@ -102,4 +107,14 @@ the namespaces of the Mathlib APIs they extend. These modules import Mathlib onl
 * `DLMFMathlib.Analysis.ODE.SoninePolya`: the Sonine–Pólya theorem on relative maxima.
 * `DLMFMathlib.Analysis.ODE.Volterra`: the Volterra integral equation and Gronwall-type
   perturbation estimate for `u'' + ω² u = g u`.
+* `DLMFMathlib.Combinatorics.Q26bSurjections`: counting surjections `Fin n → Fin k` (k!·S(n, k)
+  and the alternating sum), and quotients of maps by permutations, for the twelvefold way.
+* `DLMFMathlib.Combinatorics.R26aFinpartition`: finpartitions as fibres of surjections; surjections
+  onto `Fin k` with a fibre-size condition number `k!` times the finpartitions with `k` parts.
+* `DLMFMathlib.Combinatorics.S26aQuadraticSeries`: the Catalan series and the solution of
+  `F = 1 + aXF + X^eF²` with its coefficients (Touchard, large Schröder numbers), binomial inversion.
+* `DLMFMathlib.Combinatorics.S26aSeriesTransform`: summing `Σ c_k x^{ek} (1 - bx)^{-(2k+1)}` by
+  diagonals; the central binomial series `Σ C(2k, k) y^k = 1/√(1 - 4y)`.
+* `DLMFMathlib.RingTheory.R27PowerSeriesEval`: absolutely convergent evaluation of integer power
+  series at a complex point, with its algebra (products, powers, `1 - X^k`, geometric series).
 -/

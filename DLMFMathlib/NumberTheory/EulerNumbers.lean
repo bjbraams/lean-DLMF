@@ -36,6 +36,7 @@ namespace Polynomial
 
 /-- **Euler polynomials through Bernoulli polynomials** (Duverney, Ex. 2.5):
 `(n+1) Eₙ(x) = 2ⁿ⁺¹ (Bₙ₊₁((x+1)/2) - Bₙ₊₁(x/2))`. -/
+@[dlmf 24.4.E23]
 theorem euler_eq_bernoulli (n : ℕ) :
     ((n : ℚ[X]) + 1) * euler n =
       C ((2 : ℚ) ^ (n + 1)) * ((bernoulli (n + 1)).comp (C (1 / 2) * X + C (1 / 2)) -
@@ -66,6 +67,7 @@ theorem euler_eq_bernoulli (n : ℕ) :
 
 /-- Even Euler numbers through Bernoulli polynomials:
 `E₂ₖ = -2^{4k+2} B₂ₖ₊₁(1/4)/(2k+1)`. -/
+@[dlmf 24.4.E31]
 theorem eulerNumber_two_mul (k : ℕ) :
     eulerNumber (2 * k) =
       -(2 ^ (4 * k + 2) / (2 * k + 1)) * (bernoulli (2 * k + 1)).eval (1 / 4) := by

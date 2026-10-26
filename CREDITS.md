@@ -1238,3 +1238,41 @@ lemmas (`EisensteinSeries.summable_one_div_norm_rpow`, `r_mul_max_le`) and
 polynomial certificates in the p = 3 cyclic identities of `DLMF/JacobiElliptic/Cyclic.lean` were
 computed with the Singular computer-algebra system and are checked by Lean's `linear_combination`.
 No external proof body was copied.
+
+## Chapters 24–27 acquisition and proof round 1 (2026-10-25)
+
+The Chapter 24–27 areas build on Mathlib's Bernoulli, zeta, L-series, arithmetic-function,
+character, combinatorics and partition libraries (recorded with `dlmf_upstream` pointers); the
+proofs use, among others, Mathlib's `Bernoulli.vonStaudt_clausen` (24.10.1), `LSeries_iteratedDeriv`,
+`hasSum_mellin`, the Hurwitz-zeta functional equations, `Real.one_add_rpow_hasFPowerSeriesOnBall_zero`
+(the Catalan generating function), `DomMulAct.stabilizer_card` (multiset permutations) and Korselt's
+criterion `Nat.IsCarmichael`. From the companion project lean-codes (Bastiaan J Braams),
+`Pochhammer.PochhammerTransform` (`coeff_ascPochhammer`) is imported in
+`DLMF/BernoulliEuler/RelatedNumbers.lean` (24.15.8) and `DLMF/Combinatorics/MathlibCoverage.lean`.
+From TauCeti, `TauCeti.Combinatorics.Enumerative.Partition.Conjugate` (conjugate partitions) is
+imported in `DLMF/Combinatorics/RestrictedPartitions.lean` (26.9). The coefficients of the
+generating-function certificates for 24.14.8–10 were found with sympy and are checked by Lean's
+`linear_combination`. No external proof body was copied.
+
+## Proof round 2 for Chapters 24–27 (2026-10-25)
+
+The round-2 proofs use, among others, Mathlib's `Equiv.Perm.decomposeFin'` (the Eulerian insertion
+recurrence 26.14.8), `Ring.descPochhammer_smeval_add` (Vandermonde for falling factorials, 26.8.19),
+the pentagonal number theorem in `Mathlib.Combinatorics.Enumerative.Pentagonal.PowerSeries`
+(26.10.7, 27.14.6), the harmonic-number bounds of `Mathlib.NumberTheory.Harmonic.Bounds` and the
+zeta values of `Mathlib.NumberTheory.ZetaValues` (27.11.4, 27.11.6–7), the trigonometric series of
+`Mathlib.Analysis.SpecialFunctions.Trigonometric.Series` (24.11.5–6) and the binomial series of
+`Mathlib.Analysis.Analytic.Binomial` (24.16.5–7). No external proof body was copied.
+
+## Proof round 3 for Chapters 24–27 (2026-10-26)
+
+From TauCeti, `TauCeti.RingTheory.MvPolynomial.Symmetric.Schur.Bialternant`
+(`TauCeti.diagramSchurPoly_mul_alternant`, the Jacobi bialternant formula) is imported in
+`DLMF/Combinatorics/PlanePartitions.lean` for MacMahon's box formula (26.12.4, 26.12.21), and
+`TauCeti.GroupTheory.Perm.SwapFactors` (`Equiv.Perm.isLeast_card_sub_orbitCount`) in
+`DLMF/Combinatorics/Permutations.lean` for the minimal transposition factorization (§26.13). The
+round also uses Mathlib's `Chebyshev.psi_le_const_mul_self` (Mertens 27.11.8, 27.11.10), Euler's
+sine product `EulerSineProd` (25.8.8), `Complex.hasSum_taylorSeries_on_ball` and the Tannery theorem
+(25.2.4, 24.16.9), and `DifferentiableOn.isExactOn_ball` (the logarithm in 24.16.9). The
+Rogers–Ramanujan partition identities 26.10.13–14 are derived from the project's own
+`DLMF.Bailey.rogers_ramanujan_first` and `rogers_ramanujan_second`. No external proof body was copied.

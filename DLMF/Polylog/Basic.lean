@@ -32,6 +32,7 @@ namespace DLMF.Polylog
 on the closed unit disk for `n ≥ 2` and on the open disk for all `n`. The plain name `polylog` is
 reserved for the continuation to `ℂ ∖ [1, ∞)`, which is not yet defined; the real integral forms
 are `Real.dilog` and `Real.trilog`. -/
+@[dlmf 25.12.E10]
 def polylogSeries (n : ℕ) (z : ℂ) : ℂ := ∑' k : ℕ, z ^ (k + 1) / ((k : ℂ) + 1) ^ n
 
 /-- The terms are bounded by `1/(k+1)^n` on the closed disk. -/
@@ -82,6 +83,7 @@ lemma hasSum_polylogSeries_zero_index {n : ℕ} (hn : 1 ≤ n) {z : ℂ}
   simpa only [polylogSeries, Nat.cast_add, Nat.cast_one] using h
 
 /-- `Li_n(1) = ζ(n)` for `n ≥ 2` (DLMF 25.12.12 generalized). -/
+@[dlmf 25.12.ii]
 theorem polylogSeries_one_eq_zeta {n : ℕ} (hn : 2 ≤ n) : polylogSeries n 1 = riemannZeta n := by
   rw [zeta_nat_eq_tsum_of_gt_one (by omega)]
   have h := hasSum_polylogSeries_zero_index (by omega)
@@ -176,6 +178,7 @@ theorem hasDerivAt_polylogSeries_div (n : ℕ) {z : ℂ} (hz : ‖z‖ < 1) (hz0
   exact tsum_congr fun k => by ring
 
 /-- On the unit circle, `Li_n(e^{2πia})` is Mathlib's `expZeta a n` for `n ≥ 2`. -/
+@[dlmf 25.13]
 theorem polylogSeries_exp_eq_expZeta {n : ℕ} (hn : 2 ≤ n) (a : ℝ) :
     polylogSeries n (exp (2 * π * I * a)) = HurwitzZeta.expZeta a n := by
   have h := HurwitzZeta.hasSum_expZeta_of_one_lt_re a (s := n) (by simp; exact_mod_cast hn)

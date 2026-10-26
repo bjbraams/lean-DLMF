@@ -52,6 +52,7 @@ open Finset
 namespace Polynomial
 
 /-- The Euler polynomials, by the recursion `Eₙ = Xⁿ - ½ ∑_{k<n} (n choose k) E_k`. -/
+@[dlmf 24.2.E8]
 def euler (n : ℕ) : ℚ[X] :=
   X ^ n - C (1 / 2) * ∑ k : Fin n, ((n.choose k : ℚ) • euler k)
 decreasing_by exact k.2
@@ -100,12 +101,14 @@ theorem derivative_euler_succ (n : ℕ) :
   simp only [map_add, map_one, map_natCast, Nat.cast_add, Nat.cast_one, Nat.add_sub_cancel]
   ring
 
+@[dlmf 24.4.E35]
 theorem derivative_euler (n : ℕ) : derivative (euler n) = (n : ℚ[X]) * euler (n - 1) := by
   cases n with
   | zero => simp
   | succ n => simpa using derivative_euler_succ n
 
 /-- `Eₙ(1) + Eₙ(0) = 2 · 0ⁿ`. -/
+@[dlmf 24.4.E26]
 theorem euler_eval_one_add_eval_zero (n : ℕ) :
     (euler n).eval 1 + (euler n).eval 0 = 2 * 0 ^ n := by
   induction n using Nat.strong_induction_on with
@@ -166,6 +169,7 @@ theorem eq_of_comp_X_add_one_add_self_eq {P Q : ℚ[X]}
   exact sub_eq_zero.mp this
 
 /-- The defining property `Eₙ(x+1) + Eₙ(x) = 2xⁿ`. -/
+@[dlmf 24.4.E2]
 theorem euler_comp_X_add_one_add (n : ℕ) :
     (euler n).comp (X + 1) + euler n = 2 * X ^ n := by
   induction n with
@@ -200,6 +204,7 @@ theorem euler_eval_add_one_add (n : ℕ) (x : ℚ) :
 /-! ### The binomial property and reflection -/
 
 /-- The Appell property `Eₙ(x+h) = ∑ₖ (n choose k) h^{n-k} E_k(x)`. -/
+@[dlmf 24.4.E13]
 theorem euler_comp_X_add_C (n : ℕ) (h : ℚ) :
     (euler n).comp (X + C h) =
       ∑ k ∈ range (n + 1), C ((n.choose k : ℚ) * h ^ (n - k)) * euler k := by
@@ -233,6 +238,7 @@ theorem euler_eval_add (n : ℕ) (x h : ℚ) :
   simpa [eval_finsetSum] using congrArg (eval x) (euler_comp_X_add_C n h)
 
 /-- The reflection `Eₙ(1-x) = (-1)ⁿ Eₙ(x)`. -/
+@[dlmf 24.4.E4]
 theorem euler_comp_one_sub_X (n : ℕ) :
     (euler n).comp (1 - X) = C ((-1) ^ n) * euler n := by
   have hc : ((-1 : ℚ) ^ n) * (-1) ^ n = 1 := by rw [← mul_pow]; norm_num
@@ -263,6 +269,7 @@ theorem euler_eval_one_sub (n : ℕ) (x : ℚ) :
 /-! ### Alternating power sums -/
 
 /-- `2 ∑_{k<N} (-1)ᵏ kⁿ = Eₙ(0) - (-1)ᴺ Eₙ(N)`. -/
+@[dlmf 24.4.E8]
 theorem sum_range_neg_one_pow_mul_pow (n N : ℕ) :
     2 * ∑ k ∈ range N, (-1 : ℚ) ^ k * (k : ℚ) ^ n =
       (euler n).eval 0 - (-1) ^ N * (euler n).eval (N : ℚ) := by
@@ -282,12 +289,14 @@ end Polynomial
 open Polynomial
 
 /-- The Euler numbers `Eₙ = 2ⁿ Eₙ(1/2)`, the coefficients of `sech t = ∑ Eₙ tⁿ/n!`. -/
+@[dlmf 24.2.E9]
 def eulerNumber (n : ℕ) : ℚ := 2 ^ n * (euler n).eval (1 / 2)
 
 @[simp]
 theorem eulerNumber_zero : eulerNumber 0 = 1 := by simp [eulerNumber]
 
 /-- The odd Euler numbers vanish. -/
+@[dlmf 24.2.E7]
 theorem eulerNumber_eq_zero_of_odd {n : ℕ} (hn : Odd n) : eulerNumber n = 0 := by
   have h := euler_eval_one_sub n (1 / 2)
   rw [show (1 : ℚ) - 1 / 2 = 1 / 2 by norm_num, hn.neg_one_pow] at h
@@ -319,6 +328,7 @@ theorem sum_choose_mul_eulerNumber (n : ℕ) :
 /-! ### Euler polynomials as real functions -/
 
 /-- The function `x ↦ Eₙ(x) : ℝ → ℝ`. -/
+@[dlmf 24.2.ii]
 def eulerFun (n : ℕ) (x : ℝ) : ℝ := ((euler n).map (algebraMap ℚ ℝ)).eval x
 
 theorem eulerFun_add_one_add (n : ℕ) (x : ℝ) :
