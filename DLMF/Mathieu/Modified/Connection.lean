@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Mathieu.Modified.Properties
+public import DLMF.Mathieu.Modified.P2mConnection
 
 /-!
 # Modified Mathieu functions: connection formulas (DLMF §28.22)
@@ -30,8 +30,8 @@ namespace DLMF.Mathieu
 @[dlmf 28.22.E1]
 theorem radialMathieuMc_one_eq (m : ℕ) {h : ℝ} (hh : 0 < h) (z : ℂ) :
     radialMathieuMc 1 m z h = Real.sqrt (2 / π) / (mathieuJoinGe m h * mathieuCe m 0 (h ^ 2)) *
-      modMathieuCe m z ((h ^ 2 : ℝ) : ℂ) := by
-  sorry
+      modMathieuCe m z ((h ^ 2 : ℝ) : ℂ) :=
+  p2m_radialMathieuMc_one_eq m hh z
 
 /-- **Connection formula** (DLMF 28.22.2), `h > 0`, `m = 1, 2, …`:
 `Ms^{(1)}_m(z, h) = √(2/π) (g_{o,m}(h) se'_m(0, h²))⁻¹ Se_m(z, h²)`. -/
@@ -39,8 +39,8 @@ theorem radialMathieuMc_one_eq (m : ℕ) {h : ℝ} (hh : 0 < h) (z : ℂ) :
 theorem radialMathieuMs_one_eq {m : ℕ} (hm : m ≠ 0) {h : ℝ} (hh : 0 < h) (z : ℂ) :
     radialMathieuMs 1 m z h = Real.sqrt (2 / π) /
       (mathieuJoinGo m h * deriv (fun x => mathieuSe m x (h ^ 2)) 0) *
-      modMathieuSe m z ((h ^ 2 : ℝ) : ℂ) := by
-  sorry
+      modMathieuSe m z ((h ^ 2 : ℝ) : ℂ) :=
+  p2m_radialMathieuMs_one_eq hm hh z
 
 /-- **Connection formula** (DLMF 28.22.3), `h > 0`, `m = 0, 1, …`:
 `Mc^{(2)}_m(z, h) = √(2/π) (g_{e,m} ce_m(0, h²))⁻¹
@@ -49,8 +49,8 @@ theorem radialMathieuMs_one_eq {m : ℕ} (hm : m ≠ 0) {h : ℝ} (hh : 0 < h) (
 theorem radialMathieuMc_two_eq (m : ℕ) {h : ℝ} (hh : 0 < h) (z : ℂ) :
     radialMathieuMc 2 m z h = Real.sqrt (2 / π) / (mathieuJoinGe m h * mathieuCe m 0 (h ^ 2)) *
       (-mathieuJoinFe m h * modMathieuCe m z ((h ^ 2 : ℝ) : ℂ) +
-        2 / (π * mathieuFeC m (h ^ 2)) * modMathieuFe m z (h ^ 2)) := by
-  sorry
+        2 / (π * mathieuFeC m (h ^ 2)) * modMathieuFe m z (h ^ 2)) :=
+  p2m_radialMathieuMc_two_eq m hh z
 
 /-- **Connection formula** (DLMF 28.22.4), `h > 0`, `m = 1, 2, …`:
 `Ms^{(2)}_m(z, h) = √(2/π) (g_{o,m} se'_m(0, h²))⁻¹
@@ -60,8 +60,8 @@ theorem radialMathieuMs_two_eq {m : ℕ} (hm : m ≠ 0) {h : ℝ} (hh : 0 < h) (
     radialMathieuMs 2 m z h = Real.sqrt (2 / π) /
       (mathieuJoinGo m h * deriv (fun x => mathieuSe m x (h ^ 2)) 0) *
       (-mathieuJoinFo m h * modMathieuSe m z ((h ^ 2 : ℝ) : ℂ) -
-        2 / (π * mathieuGeS m (h ^ 2)) * modMathieuGe m z (h ^ 2)) := by
-  sorry
+        2 / (π * mathieuGeS m (h ^ 2)) * modMathieuGe m z (h ^ 2)) :=
+  p2m_radialMathieuMs_two_eq hm hh z
 
 /-- An even function differentiable at `0` has derivative `0` there. -/
 theorem p1c_deriv_zero_of_even {f : ℂ → ℂ} (hf : DifferentiableAt ℂ f 0)
@@ -287,32 +287,6 @@ theorem mathieuFe_ge_zero_eq_joinG (m : ℕ) {h : ℝ} (hh : 0 < h) :
     rw [hs] at hW
     field_simp at hW
     linear_combination hW / 2 - mathieuGe m 0 (h ^ 2) * hP
-
-/-- If `w` solves the modified Mathieu equation 28.20.1 then `t ↦ w(ct)`, `c² = -1`, solves
-Mathieu's equation 28.2.1. -/
-theorem p1c_isMathieuSolution_comp {a q : ℂ} {w : ℂ → ℂ} (hw : IsModMathieuSolution a q w)
-    {c : ℂ} (hc : c ^ 2 = -1) : IsMathieuSolution a q (fun t => w (c * t)) := by
-  have hd : ∀ t, HasDerivAt (fun t => w (c * t)) (deriv w (c * t) * c) t := fun t => by
-    have := ((hw.differentiable (c * t)).hasDerivAt).comp t ((hasDerivAt_id t).const_mul c)
-    convert this using 1 <;> first | rfl | simp
-  refine ⟨fun t => (hd t).differentiableAt, fun t => ?_⟩
-  have he : deriv (fun t => w (c * t)) = fun t => deriv w (c * t) * c :=
-    funext fun t => (hd t).deriv
-  rw [he]
-  have h2 := ((hw.hasDerivAt_deriv (c * t)).comp t ((hasDerivAt_id t).const_mul c)).mul_const c
-  have hc' : c = I ∨ c = -I := by
-    have : (c - I) * (c + I) = 0 := by ring_nf; rw [hc, I_sq]; ring
-    rcases mul_eq_zero.mp this with h | h
-    · exact Or.inl (sub_eq_zero.mp h)
-    · exact Or.inr (eq_neg_of_add_eq_zero_left h)
-  have hcos : Complex.cosh (2 * (c * t)) = Complex.cos (2 * t) := by
-    rcases hc' with rfl | rfl
-    · rw [show 2 * (I * t) = (2 * t) * I by ring, Complex.cosh_mul_I]
-    · rw [show 2 * (-I * t) = -((2 * t) * I) by ring, Complex.cosh_neg, Complex.cosh_mul_I]
-  convert h2 using 1
-  · rfl
-  rw [hcos]
-  linear_combination ((2 * q * Complex.cos (2 * t) - a) * w (c * t)) * hc
 
 /-- Mathieu's equation is invariant under `t ↦ -t`. -/
 theorem p1c_isMathieuSolution_neg {a q : ℂ} {w : ℂ → ℂ} (hw : IsMathieuSolution a q w) :

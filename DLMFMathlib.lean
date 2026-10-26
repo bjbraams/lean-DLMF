@@ -67,6 +67,11 @@ public import DLMFMathlib.Combinatorics.R26aFinpartition
 public import DLMFMathlib.Combinatorics.S26aQuadraticSeries
 public import DLMFMathlib.Combinatorics.S26aSeriesTransform
 public import DLMFMathlib.RingTheory.R27PowerSeriesEval
+public import DLMFMathlib.Analysis.ODE.P2lSturmLiouville
+public import DLMFMathlib.Analysis.ODE.P2sSturmSpectrum
+public import DLMFMathlib.Analysis.ODE.P2sOscillation
+public import DLMFMathlib.Analysis.ODE.P2sGrowth
+public import DLMFMathlib.Analysis.ODE.P2sSturmOsc
 
 /-!
 # Supporting results for Mathlib
@@ -98,6 +103,13 @@ the namespaces of the Mathlib APIs they extend. These modules import Mathlib onl
   continuous coefficients, and holomorphic dependence on a linear parameter.
 * `DLMFMathlib.Analysis.Fourier.P1a2EntirePeriodic`: an entire 2π-periodic function is the sum of
   its Fourier series on all of ℂ; cosine and sine series and Parseval for even and odd functions.
+* `DLMFMathlib.Analysis.ODE.P2sSturmSpectrum`, `P2sGrowth`, `P2sOscillation`: spectra of real
+  Sturm–Liouville problems through entire boundary functions, energy estimates, and infinitely
+  many zeros when the coefficient tends to +∞.
+* `DLMFMathlib.Analysis.ODE.P2lSturmLiouville`: separated Sturm–Liouville theory for
+  `w'' = (V - h) w` on `[0, L]` (spectrum, discreteness, parity, comparison, enumeration).
+* `DLMFMathlib.Analysis.ODE.P2sSturmOsc`: the Sturm oscillation theorem, Dirichlet and Neumann
+  eigenvalue counts and their interlacing, and the sign of eigenfunctions at the endpoint.
 * `DLMFMathlib.NumberTheory.T27aPrimeNumberTheorem`: the prime number theorem π(x) ~ x/log x,
   p_n ~ n log n, θ(x) ~ x, ψ(x) ~ x and primes in progressions, from TauCeti's prime ideal and
   Chebotarev theorems for ℚ.

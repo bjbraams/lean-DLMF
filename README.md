@@ -90,9 +90,17 @@ these functions. Explicit constructions are used where they exist (Heun's local 
 and Ince polynomials, Bessel-product series); otherwise the solutions and eigenvalues are chosen
 from flagged existence theorems, which are proof targets. The same exclusions apply.
 
+Chapter 32 (Painlevé transcendents), acquired on 2026-10-26, extends the entry point
+[Painleve](DLMF/Painleve.lean) with the six Painlevé equations in DLMF's normalization,
+Hamiltonian structure, Bäcklund transformations, rational, elementary and special-function
+solutions, real asymptotics and PDE reductions (ledger [Chapter 32](DLMF32Acquisition.md)).
+DLMF's PII with parameter α is the Beals–Wong PII(−α) of the older modules described below.
+
 DLMF errata and source corrections found anywhere in the project are collected in
-[DLMFErrata.md](DLMFErrata.md): genuine DLMF errata, fixed transcription defects of our own,
-and formalization notes, each with evidence and the Lean declarations.
+the [DLMF errata report](https://bjbraams.github.io/lean-DLMF/DLMFErrata.pdf) (LaTeX source
+[reports/DLMFErrata.tex](reports/DLMFErrata.tex), built by CI and published on GitHub Pages):
+genuine DLMF errata, fixed transcription defects of our own, and formalization notes, each with
+evidence and the Lean declarations.
 
 Since 2026-10-25 the companion project [lean-codes](../lean-codes) is a Lake dependency
 (package `LeanCodes`); its Carlson library underlies Chapter 19. The project's own general
@@ -171,12 +179,12 @@ Mathlib's `Complex.digamma`; moving it into `DLMF.Gamma.Real` is left for a late
 
 ## Status
 
-After proof round 1 for Chapters 28–31 (2026-10-26) there are
-**1,338 explicit source admissions**: Elementary 68, GeneralizedHypergeometric 112,
+After proof round 2 for Chapters 28–31 and the Chapter 32 acquisition (2026-10-26) there are
+**1,310 explicit source admissions**: Elementary 68, GeneralizedHypergeometric 112,
 QHypergeometric 101, EllipticIntegrals 187, Theta 22, RiemannTheta 10, JacobiElliptic 62,
-Weierstrass 53, BernoulliEuler 25, Zeta 46, Combinatorics 37, NumberTheory 36, Mathieu 203,
-Lame 104, Spheroidal 41, Heun 43, and 188 in the older areas.
-The compiled audit finds **20,789 project theorems**, with **1,606 depending transitively on
+Weierstrass 53, BernoulliEuler 25, Zeta 46, Combinatorics 37, NumberTheory 36, Mathieu 173,
+Lame 44, Spheroidal 35, Heun 28, Painleve 83, and 188 in the older areas.
+The compiled audit finds **21,765 project theorems**, with **1,453 depending transitively on
 `sorryAx`**, and no other nonstandard axiom.
 Counts in the dated development history describe their earlier scope.
 

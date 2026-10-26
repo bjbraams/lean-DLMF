@@ -39,7 +39,7 @@ pointers for 40 IDs.
 - Every numbered formula of §§26.3–26.8 was checked by brute force (exact integer arithmetic,
   and mpmath for the generating functions and asymptotics) over ranges of the indices. The
   findings below are recorded here and in the docstrings; they are not yet in
-  [DLMFErrata.md](DLMFErrata.md).
+  the [DLMF errata report](https://bjbraams.github.io/lean-DLMF/DLMFErrata.pdf).
 - **26.8.31 is false as printed.** For an entire f with a convergent series, the identity
   `f⁽ᵏ⁾(x)/k! = ∑_{n≥k} s(n, k) Δⁿf(x)/n!` can fail: f(z) = sin(πz), x = 0, k = 1 gives
   f'(0) = π while every Δⁿf(0) vanishes. The counterexample is proved

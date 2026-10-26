@@ -280,10 +280,12 @@ theorem IsPainleveIIIOn.t₅ {β : ℂ} {w : ℂ → ℂ} {U : Set ℂ}
       (hw.const_mul (β + 1))).div (hw.pow 2) (pow_ne_zero 2 h0)
     convert hd using 1
     · funext x
-      try simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply, Pi.div_apply, id,
+      try simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply,
+          Pi.div_apply, id,
           Nat.cast_ofNat, Nat.add_one_sub_one, pow_one]
       try ring
-    · simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply, Pi.div_apply, id,
+    · simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply,
+        Pi.div_apply, id,
         Nat.cast_ofNat, Nat.add_one_sub_one, pow_one]
       simp only [painleveIIIRhs]
       field_simp
@@ -299,10 +301,12 @@ theorem IsPainleveIIIOn.t₅ {β : ℂ} {w : ℂ → ℂ} {U : Set ℂ}
     have hd := P.neg.div (hw.pow 3) (pow_ne_zero 3 h0)
     convert hd using 1
     · funext x
-      try simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply, Pi.div_apply, id,
+      try simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply,
+          Pi.div_apply, id,
           Nat.cast_ofNat, Nat.add_one_sub_one, pow_one]
       try ring
-    · simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply, Pi.div_apply, id,
+    · simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply,
+        Pi.div_apply, id,
         Nat.cast_ofNat, Nat.add_one_sub_one, pow_one]
       simp only [painleveIIIRhs]
       generalize hn : z * deriv w z + z - (β + 1) * w z = n at hu0 ⊢
@@ -331,10 +335,12 @@ theorem IsPainleveIIIOn.t₆ {β : ℂ} {w : ℂ → ℂ} {U : Set ℂ}
       (hw.const_mul (β - 1))).neg.div (hw.pow 2) (pow_ne_zero 2 h0)
     convert hd using 1
     · funext x
-      try simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply, Pi.div_apply, id,
+      try simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply,
+          Pi.div_apply, id,
           Nat.cast_ofNat, Nat.add_one_sub_one, pow_one]
       try ring
-    · simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply, Pi.div_apply, id,
+    · simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply,
+        Pi.div_apply, id,
         Nat.cast_ofNat, Nat.add_one_sub_one, pow_one]
       simp only [painleveIIIRhs]
       field_simp
@@ -350,10 +356,12 @@ theorem IsPainleveIIIOn.t₆ {β : ℂ} {w : ℂ → ℂ} {U : Set ℂ}
     have hd := P.div (hw.pow 3) (pow_ne_zero 3 h0)
     convert hd using 1
     · funext x
-      try simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply, Pi.div_apply, id,
+      try simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply,
+          Pi.div_apply, id,
           Nat.cast_ofNat, Nat.add_one_sub_one, pow_one]
       try ring
-    · simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply, Pi.div_apply, id,
+    · simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply,
+        Pi.div_apply, id,
         Nat.cast_ofNat, Nat.add_one_sub_one, pow_one]
       simp only [painleveIIIRhs]
       generalize hn : z * deriv w z - z + (β - 1) * w z = n at hu0 ⊢
@@ -398,10 +406,12 @@ theorem IsPainleveIVOn.t₁ {α β r : ℂ} (hr : r ^ 2 = -2 * β) {w : ℂ → 
       r).div (hw.const_mul 2) (mul_ne_zero two_ne_zero h0)
     convert hd using 1
     · funext x
-      try simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply, Pi.div_apply, id,
+      try simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply,
+          Pi.div_apply, id,
           Nat.cast_ofNat, Nat.add_one_sub_one, pow_one]
       try ring
-    · simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply, Pi.div_apply, id,
+    · simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply,
+        Pi.div_apply, id,
         Nat.cast_ofNat, Nat.add_one_sub_one, pow_one]
       simp only [painleveIVRhs]
       field_simp
@@ -419,10 +429,12 @@ theorem IsPainleveIVOn.t₁ {α β r : ℂ} (hr : r ^ 2 = -2 * β) {w : ℂ → 
       (mul_ne_zero (by norm_num : (4 : ℂ) ≠ 0) (pow_ne_zero 2 h0))
     convert hd using 1
     · funext x
-      try simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply, Pi.div_apply, id,
+      try simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply,
+          Pi.div_apply, id,
           Nat.cast_ofNat, Nat.add_one_sub_one, pow_one]
       try ring
-    · simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply, Pi.div_apply, id,
+    · simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply,
+        Pi.div_apply, id,
         Nat.cast_ofNat, Nat.add_one_sub_one, pow_one]
       simp only [painleveIVRhs]
       generalize hn : deriv w z - w z ^ 2 - 2 * z * w z - r = n at hu0 ⊢
@@ -454,10 +466,12 @@ theorem IsPainleveIVOn.t₂ {α β r : ℂ} (hr : r ^ 2 = -2 * β) {w : ℂ → 
       r).neg.div (hw.const_mul 2) (mul_ne_zero two_ne_zero h0)
     convert hd using 1
     · funext x
-      try simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply, Pi.div_apply, id,
+      try simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply,
+          Pi.div_apply, id,
           Nat.cast_ofNat, Nat.add_one_sub_one, pow_one]
       try ring
-    · simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply, Pi.div_apply, id,
+    · simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply,
+        Pi.div_apply, id,
         Nat.cast_ofNat, Nat.add_one_sub_one, pow_one]
       simp only [painleveIVRhs]
       field_simp
@@ -475,10 +489,12 @@ theorem IsPainleveIVOn.t₂ {α β r : ℂ} (hr : r ^ 2 = -2 * β) {w : ℂ → 
       (mul_ne_zero (by norm_num : (4 : ℂ) ≠ 0) (pow_ne_zero 2 h0))
     convert hd using 1
     · funext x
-      try simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply, Pi.div_apply, id,
+      try simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply,
+          Pi.div_apply, id,
           Nat.cast_ofNat, Nat.add_one_sub_one, pow_one]
       try ring
-    · simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply, Pi.div_apply, id,
+    · simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply,
+        Pi.div_apply, id,
         Nat.cast_ofNat, Nat.add_one_sub_one, pow_one]
       simp only [painleveIVRhs]
       generalize hn : deriv w z + w z ^ 2 + 2 * z * w z - r = n at hu0 ⊢

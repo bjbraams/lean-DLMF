@@ -1,0 +1,4 @@
+# latexmk settings for the lean-DLMF reports: LuaLaTeX, and the shared preamble
+# lean-codes/reports/leanreport.sty from the sibling checkout (locally and in CI).
+$pdf_mode = 4;
+ensure_path('TEXINPUTS', '../../lean-codes/reports//');

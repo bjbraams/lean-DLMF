@@ -168,8 +168,8 @@ theorem isModMathieuSolution_modMathieuGe (n : ℕ) (q : ℝ) :
 @[dlmf 28.20.iii]
 theorem isModMathieuSolution_modMathieuM (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) {ν h : ℂ}
     (hν : ModMathieuAdmissible ν h) (hh : h ≠ 0) :
-    IsModMathieuSolution (mathieuLambda ν (h ^ 2)) (h ^ 2) (fun z => modMathieuM j ν z h) := by
-  sorry
+    IsModMathieuSolution (mathieuLambda ν (h ^ 2)) (h ^ 2) (fun z => modMathieuM j ν z h) :=
+  p2m_isModMathieuSolution_modMathieuM j hj₁ hj₄ hν hh
 
 /-- **Asymptotics of `M^{(3)}_ν`** (DLMF 28.20.9): for real `ν`, `h > 0` and `δ > 0`,
 `M^{(3)}_ν(z, h) = H^{(1)}_ν(2h cosh z)(1 + O(sech z))` as `Re z → +∞` with

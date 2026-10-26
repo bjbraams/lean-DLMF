@@ -27,7 +27,11 @@ recurrences (29.6.3–29.6.4 and their analogues) are proved from Lamé's equati
 coefficients defined as Fourier integrals: Green's identity against the test functions
 `cos(jφ(x))`, `sin(jφ(x))` (unweighted) and `dn(x) cos(jφ(x))`, `dn(x) sin(jφ(x))` (weighted),
 whose image under the Lamé operator is a combination of three such functions (`p1l_int_unw`,
-`p1l_int_w`). All other statements are admitted.
+`p1l_int_w`). The expansions themselves follow from the convergence of the Fourier series of
+periodic `C²` functions (`DLMF.Lame.P2lFourier`); the normalizations and the Parseval sums by
+termwise integration against `E`, `E dn` and `E dn²` (with `dn² = 1 - k²/2 - (k²/2) cos 2φ`);
+the positivity conditions for `B`, `D` by termwise differentiation of the sine series at
+`φ = 0` and `Es'(K) < 0`. The ratio limits and the terminating case are admitted.
 
 The prose of §29.6(i) (unique recessive solution of the recurrence for `ν ≠ 2n`; for
 `ν = 2n`, `m ≤ n`, the coefficients `A_{2p}` vanish for `p > n`) is acquired as
@@ -290,6 +294,140 @@ lemma p2l_integral_sin_dn_sq (hk : k ^ 2 < 1) {w : ℝ → ℝ} (hw : Continuous
         Real.sin (2 * Real.lamePhi t k) := by rw [← Real.sin_sub]; ring_nf
   rw [e2] at hs; rw [e1]; rw [Real.cos_two_mul] at hs ⊢
   linear_combination (Real.sin (j * Real.lamePhi t k) * w t) * hd + k ^ 2 / 4 * w t * hs
+
+/-- A real solution of Lamé's equation is `C³`. -/
+lemma p2l_contDiff_lame_three {h : ℝ} {w : ℝ → ℝ} (hk : k ^ 2 < 1)
+    (hw : Real.IsLameSolution h ν k w) : ContDiff ℝ 3 w := by
+  have hdd : deriv (deriv w) =
+      fun x => -(h - ν * (ν + 1) * k ^ 2 * Real.jacobiSnm x (k ^ 2) ^ 2) * w x :=
+    funext fun x => (hw.hasDerivAt_deriv x).deriv
+  have hsn : ContDiff ℝ 1 fun x => Real.jacobiSnm x (k ^ 2) := by
+    rw [contDiff_one_iff_deriv]
+    refine ⟨fun x => (Real.hasDerivAt_jacobiSnm hk x).differentiableAt, ?_⟩
+    rw [show deriv (fun x => Real.jacobiSnm x (k ^ 2)) =
+      fun x => Real.jacobiCnm x (k ^ 2) * Real.jacobiDnm x (k ^ 2) from
+      funext fun x => (Real.hasDerivAt_jacobiSnm hk x).deriv]
+    exact (continuous_iff_continuousAt.2 fun x =>
+      (Real.hasDerivAt_jacobiCnm hk x).continuousAt).mul
+      (continuous_iff_continuousAt.2 fun x => (Real.hasDerivAt_jacobiDnm hk x).continuousAt)
+  have hw1 : ContDiff ℝ 1 w := (p2l_contDiff_lame hk hw).of_le (by norm_num)
+  rw [show (3 : WithTop ℕ∞) = 2 + 1 from rfl, contDiff_succ_iff_deriv]
+  refine ⟨hw.differentiable, by simp, ?_⟩
+  rw [show (2 : WithTop ℕ∞) = 1 + 1 from rfl, contDiff_succ_iff_deriv]
+  refine ⟨fun x => (hw.hasDerivAt_deriv x).differentiableAt, by simp, ?_⟩
+  rw [hdd]
+  exact ((contDiff_const.sub (contDiff_const.mul (hsn.pow 2))).neg).mul hw1
+
+lemma p2l_contDiff_incEllIntFm_three (hk : k ^ 2 < 1) :
+    ContDiff ℝ 3 (fun ψ => Real.incEllIntFm ψ (k ^ 2)) := by
+  have hd : deriv (fun ψ => Real.incEllIntFm ψ (k ^ 2)) =
+      fun ψ => (1 - k ^ 2 * Real.sin ψ ^ 2) ^ (-(1 / 2) : ℝ) :=
+    funext fun ψ => (Real.hasDerivAt_incEllIntFm hk ψ).deriv
+  have hpos : ∀ ψ, 0 < 1 - k ^ 2 * Real.sin ψ ^ 2 := fun ψ => by
+    have := Real.sin_sq_le_one ψ
+    nlinarith [sq_nonneg k, sq_nonneg (Real.sin ψ)]
+  rw [show (3 : WithTop ℕ∞) = 2 + 1 from rfl, contDiff_succ_iff_deriv]
+  refine ⟨fun ψ => (Real.hasDerivAt_incEllIntFm hk ψ).differentiableAt, by simp, ?_⟩
+  rw [hd]
+  exact (contDiff_const.sub (contDiff_const.mul (Real.contDiff_sin.pow 2))).rpow_const_of_ne
+    fun ψ => (hpos ψ).ne'
+
+lemma p2l_contDiff_rho_three (hk : k ^ 2 < 1) (weighted : Bool) :
+    ContDiff ℝ 3 (p2lRho k weighted) := by
+  unfold p2lRho; cases weighted
+  · simp only [Bool.false_eq_true, ↓reduceIte]
+    exact (contDiff_const.sub (contDiff_const.mul (Real.contDiff_cos.pow 2))).rpow_const_of_ne
+      fun φ => (p2l_one_sub_pos hk φ).ne'
+  · simpa using contDiff_const
+
+lemma p2lPhiFun_contDiff_three (hk : k ^ 2 < 1) {w : ℝ → ℝ} (hw : ContDiff ℝ 3 w)
+    (weighted : Bool) : ContDiff ℝ 3 (p2lPhiFun w k weighted) :=
+  (hw.comp ((p2l_contDiff_incEllIntFm_three hk).comp (contDiff_const.sub contDiff_id))).div
+    (p2l_contDiff_rho_three hk weighted) fun φ => (p2lRho_pos hk weighted φ).ne'
+
+/-- Termwise differentiation at `φ = 0` of the sine series of a Lamé solution with
+`w(2K - x) = -w(x)`: `∑ j b_j = F'(0)`. -/
+lemma p2l_hasSum_mul_sinCoeff (hk0 : 0 < k) (hk1 : k < 1) {h : ℝ} {w : ℝ → ℝ}
+    (hw : Real.IsLameSolution h ν k w)
+    (h4 : ∀ x, w (x + 4 * Real.compEllIntKm (k ^ 2)) = w x)
+    (hσ : ∀ x, w (2 * Real.compEllIntKm (k ^ 2) - x) = -w x) {δ : ℝ}
+    (hδ : ∀ x, w (-x) = δ * w x) (weighted : Bool) :
+    HasSum (fun j : ℕ => (j : ℝ) * ((1 - δ * (-1) ^ j) / 2 * Real.lameSinCoeff w k weighted j))
+      (deriv (p2lPhiFun w k weighted) 0) := by
+  have hk := l29_sq_lt_one hk0 hk1
+  set F := p2lPhiFun w k weighted with hFdef
+  have hF3 := p2lPhiFun_contDiff_three hk (p2l_contDiff_lame_three hk hw) weighted
+  have hF1 : Differentiable ℝ F := hF3.differentiable (by norm_num)
+  have hG : ContDiff ℝ 2 (deriv F) := by
+    rw [show (3 : WithTop ℕ∞) = 2 + 1 from rfl, contDiff_succ_iff_deriv] at hF3
+    exact hF3.2.2
+  have hσ' : ∀ x, w (2 * Real.compEllIntKm (k ^ 2) - x) = -1 * w x := fun x => by
+    rw [hσ, neg_one_mul]
+  have hodd : ∀ t, F (-t) = -F t := fun t => by
+    rw [hFdef, p2lPhiFun_neg hk hσ', neg_one_mul]
+  have hper : Function.Periodic F (2 * π) := p2lPhiFun_periodic hk h4
+  have hev : ∀ t, deriv F (-t) = deriv F t := fun t => by
+    have h1 : deriv (fun s => F (-s)) t = -deriv F (-t) := deriv_comp_neg F t
+    have h2 : deriv (fun s => -F s) t = -deriv F t := by
+      simp
+    rw [show (fun s => F (-s)) = fun s => -F s from funext hodd, h2] at h1
+    linarith
+  have hperd : Function.Periodic (deriv F) (2 * π) := fun x => by
+    have := deriv_comp_add_const (f := F) (a := 2 * π) (x := x)
+    rwa [show (fun x => F (x + 2 * π)) = F from funext hper, eq_comm] at this
+  have hs := p2l_hasSum_cos hG hperd hev 0
+  have hF0 : F 0 = 0 := by have := hodd 0; rw [neg_zero] at this; linarith
+  have hFπ : F π = 0 := by
+    have h1 := hodd π
+    rw [show -π = π - 2 * π by ring, hper.sub_eq] at h1
+    linarith
+  have hcoef : ∀ n : ℕ, 2 / π * ∫ t in (0 : ℝ)..π, deriv F t * Real.cos (n * t) =
+      n * (2 / π * ∫ t in (0 : ℝ)..π, F t * Real.sin (n * t)) := fun n => by
+    have hibp := intervalIntegral.integral_mul_deriv_eq_deriv_mul (a := 0) (b := π)
+      (u := fun t => Real.cos (n * t)) (v := F) (u' := fun t => -(n * Real.sin (n * t)))
+      (v' := deriv F)
+      (fun t _ => by
+        simpa [mul_comm] using ((hasDerivAt_id t).const_mul (n : ℝ)).cos)
+      (fun t _ => (hF1 t).hasDerivAt)
+      ((by fun_prop : Continuous fun t => -(n * Real.sin (n * t))).intervalIntegrable _ _)
+      ((hG.continuous).intervalIntegrable _ _)
+    rw [hF0, hFπ] at hibp
+    rw [show (∫ t in (0 : ℝ)..π, deriv F t * Real.cos (n * t)) =
+      ∫ t in (0 : ℝ)..π, Real.cos (n * t) * deriv F t by congr 1; funext t; ring, hibp]
+    simp only [mul_zero, sub_zero, zero_sub]
+    rw [← intervalIntegral.integral_neg, ← intervalIntegral.integral_const_mul,
+      ← intervalIntegral.integral_const_mul, ← intervalIntegral.integral_const_mul]
+    congr 1; funext t; ring
+  convert hs using 1
+  funext n
+  rw [hcoef, p2l_lame_coeff_sin hk0 hk1 (p2l_contDiff_lame hk hw) hδ weighted n]
+  split_ifs with hn
+  · simp [hn]
+  · simp [hFdef]
+
+/-- `F'(0) > 0` for `F = w(x(φ))/ρ(φ)` when `w(K) = 0` and `w'(K) < 0`. -/
+lemma p2l_deriv_phiFun_pos (hk : k ^ 2 < 1) {w : ℝ → ℝ} (hw : Differentiable ℝ w)
+    (hK : w (Real.compEllIntKm (k ^ 2)) = 0) (hd : deriv w (Real.compEllIntKm (k ^ 2)) < 0)
+    (weighted : Bool) : 0 < deriv (p2lPhiFun w k weighted) 0 := by
+  set c := (1 - k ^ 2 * Real.sin (π / 2 - 0) ^ 2) ^ (-(1 / 2) : ℝ) with hc
+  have hc0 : 0 < c := Real.rpow_pos_of_pos (by
+    have := Real.sin_sq_le_one (π / 2 - 0)
+    nlinarith [sq_nonneg k, sq_nonneg (Real.sin (π / 2 - 0))]) _
+  have hg : HasDerivAt (fun φ => Real.incEllIntFm (π / 2 - φ) (k ^ 2)) (c * -1) 0 :=
+    (Real.hasDerivAt_incEllIntFm hk (π / 2 - 0)).comp (0 : ℝ)
+      ((hasDerivAt_id (0 : ℝ)).const_sub (π / 2))
+  have hg0 : Real.incEllIntFm (π / 2 - 0) (k ^ 2) = Real.compEllIntKm (k ^ 2) := by
+    rw [sub_zero, Real.incEllIntFm_pi_div_two]
+  have hwg := (hw (Real.incEllIntFm (π / 2 - 0) (k ^ 2))).hasDerivAt.comp (0 : ℝ) hg
+  have hρ := ((p2l_contDiff_rho_three hk weighted).differentiable (by norm_num) 0).hasDerivAt
+  have hρ0 := p2lRho_pos hk weighted 0
+  have hdiv := hwg.div hρ hρ0.ne'
+  have e := hdiv.deriv
+  change deriv (p2lPhiFun w k weighted) 0 = _ at e
+  rw [e]
+  simp only [Function.comp]
+  rw [hg0, hK, zero_mul, sub_zero]
+  exact div_pos (mul_pos (by nlinarith) hρ0) (by positivity)
 
 /-! ### Fourier recurrences from Green's identity (helpers) -/
 
@@ -566,8 +704,7 @@ lemma p1l_sin_rec {h j : ℝ} {w : ℝ → ℝ} (hk : k ^ 2 < 1) (hw : Real.IsLa
     linear_combination (4 / π) * this
 
 /-- DLMF 29.6.1: `Ec^{2m}_ν(x, k²) = ½A₀ + ∑_{p≥1} A_{2p} cos(2pφ)` for real `x`, with `φ = π/2 -
-am(x, k)` and the Fourier coefficients `A_{2p}` of `Real.lameCosCoeff` (weighted by `dn`). Admitted.
--/
+am(x, k)` and the Fourier coefficients `A_{2p}` of `Real.lameCosCoeff` (weighted by `dn`). -/
 @[dlmf 29.6.E1]
 theorem Real.lameEck_even_hasSum_fourierA
     (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
@@ -633,7 +770,7 @@ theorem Real.lameEck_even_fourierA_rec
   push_cast at key ⊢
   linear_combination key
 
-/-- DLMF 29.6.5: the normalization of the coefficients `A_{2p}`. Admitted. -/
+/-- DLMF 29.6.5: the normalization of the coefficients `A_{2p}`. -/
 @[dlmf 29.6.E5]
 theorem Real.lameEck_even_fourierA_normalization
     (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
@@ -685,7 +822,7 @@ theorem Real.lameEck_even_fourierA_ratio
   sorry
 
 /-- DLMF 29.6.8: `Ec^{2m}_ν(x, k²) = dn(x, k) ∑_p C_{2p} (trig)` for real `x`, with the unweighted
-Fourier coefficients `C_{2p}`. Admitted. -/
+Fourier coefficients `C_{2p}`. -/
 @[dlmf 29.6.E8]
 theorem Real.lameEck_even_hasSum_fourierC
     (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
@@ -750,8 +887,7 @@ theorem Real.lameEck_even_fourierC_rec
   push_cast at key ⊢
   linear_combination key
 
-/-- DLMF 29.6.12: the normalization of the coefficients `C_{2p}` (both series converge). Admitted.
--/
+/-- DLMF 29.6.12: the normalization of the coefficients `C_{2p}` (both series converge). -/
 @[dlmf 29.6.E12]
 theorem Real.lameEck_even_fourierC_normalization
     (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
@@ -832,7 +968,7 @@ theorem Real.lameEck_even_fourierC_ratio
         (𝓝 (k ^ 2 / (1 + Real.sqrt (1 - k ^ 2)) ^ 2)) := by
   sorry
 
-/-- DLMF 29.6.15: `∑ AC = (4/π) ∫₀^K (Ec^{2m}_ν)² dx`. Admitted. -/
+/-- DLMF 29.6.15: `∑ AC = (4/π) ∫₀^K (Ec^{2m}_ν)² dx`. -/
 @[dlmf 29.6.E15]
 theorem Real.lameEck_even_fourier_parseval
     (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
@@ -857,8 +993,7 @@ theorem Real.lameEck_even_fourier_parseval
     simp [pow_succ, pow_mul, this]
 
 /-- DLMF 29.6.16: `Ec^{2m+1}_ν(x, k²) = ∑_{p≥0} A_{2p+1} cos((2p+1)φ)` for real `x`, with `φ = π/2 -
-am(x, k)` and the Fourier coefficients `A_{2p+1}` of `Real.lameCosCoeff` (weighted by `dn`).
-Admitted. -/
+am(x, k)` and the Fourier coefficients `A_{2p+1}` of `Real.lameCosCoeff` (weighted by `dn`). -/
 @[dlmf 29.6.E16]
 theorem Real.lameEck_odd_hasSum_fourierA
     (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
@@ -924,7 +1059,7 @@ theorem Real.lameEck_odd_fourierA_rec
   push_cast at key ⊢
   linear_combination key
 
-/-- DLMF 29.6.20: the normalization of the coefficients `A_{2p+1}`. Admitted. -/
+/-- DLMF 29.6.20: the normalization of the coefficients `A_{2p+1}`. -/
 @[dlmf 29.6.E20]
 theorem Real.lameEck_odd_fourierA_normalization
     (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
@@ -976,7 +1111,7 @@ theorem Real.lameEck_odd_fourierA_ratio
   sorry
 
 /-- DLMF 29.6.23: `Ec^{2m+1}_ν(x, k²) = dn(x, k) ∑_p C_{2p+1} (trig)` for real `x`, with the
-unweighted Fourier coefficients `C_{2p+1}`. Admitted. -/
+unweighted Fourier coefficients `C_{2p+1}`. -/
 @[dlmf 29.6.E23]
 theorem Real.lameEck_odd_hasSum_fourierC
     (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
@@ -1042,8 +1177,7 @@ theorem Real.lameEck_odd_fourierC_rec
   push_cast at key ⊢
   linear_combination key
 
-/-- DLMF 29.6.27: the normalization of the coefficients `C_{2p+1}` (both series converge). Admitted.
--/
+/-- DLMF 29.6.27: the normalization of the coefficients `C_{2p+1}` (both series converge). -/
 @[dlmf 29.6.E27]
 theorem Real.lameEck_odd_fourierC_normalization
     (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
@@ -1121,7 +1255,7 @@ theorem Real.lameEck_odd_fourierC_ratio
         (𝓝 (k ^ 2 / (1 + Real.sqrt (1 - k ^ 2)) ^ 2)) := by
   sorry
 
-/-- DLMF 29.6.30: `∑ AC = (4/π) ∫₀^K (Ec^{2m+1}_ν)² dx`. Admitted. -/
+/-- DLMF 29.6.30: `∑ AC = (4/π) ∫₀^K (Ec^{2m+1}_ν)² dx`. -/
 @[dlmf 29.6.E30]
 theorem Real.lameEck_odd_fourier_parseval
     (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
@@ -1146,8 +1280,7 @@ theorem Real.lameEck_odd_fourier_parseval
     simp [pow_succ, pow_mul, this]
 
 /-- DLMF 29.6.31: `Es^{2m+1}_ν(x, k²) = ∑_{p≥0} B_{2p+1} sin((2p+1)φ)` for real `x`, with `φ = π/2 -
-am(x, k)` and the Fourier coefficients `B_{2p+1}` of `Real.lameSinCoeff` (weighted by `dn`).
-Admitted. -/
+am(x, k)` and the Fourier coefficients `B_{2p+1}` of `Real.lameSinCoeff` (weighted by `dn`). -/
 @[dlmf 29.6.E31]
 theorem Real.lameEsk_odd_hasSum_fourierB
     (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
@@ -1213,7 +1346,7 @@ theorem Real.lameEsk_odd_fourierB_rec
   push_cast at key ⊢
   linear_combination key
 
-/-- DLMF 29.6.35: the normalization of the coefficients `B_{2p+1}`. Admitted. -/
+/-- DLMF 29.6.35: the normalization of the coefficients `B_{2p+1}`. -/
 @[dlmf 29.6.E35]
 theorem Real.lameEsk_odd_fourierB_normalization
     (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
@@ -1240,14 +1373,32 @@ theorem Real.lameEsk_odd_fourierB_normalization
   · have := (p2l_neg_one_pow_mod j).1.2 (by omega)
     simp [pow_succ, pow_mul, this]
 
-/-- DLMF 29.6.36: positivity (`-dEs/dz` at `z = K` divided by `dn(K)`). Admitted. -/
+/-- DLMF 29.6.36: positivity (`-dEs/dz` at `z = K` divided by `dn(K)`). -/
 @[dlmf 29.6.E36]
 theorem Real.lameEsk_odd_fourierB_pos
     (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
     let B : ℕ → ℝ := fun p =>
       Real.lameSinCoeff (fun x => Real.lameEsk ν (2 * m + 1) x k) k true (2 * p + 1)
     ∃ S, HasSum (fun p => ((2 * p + 1 : ℕ) : ℝ) * B p) S ∧ 0 < S := by
-  sorry
+  intro B
+  have hk := l29_sq_lt_one hk0 hk1
+  have hpar := Real.lameEsk_parity hν hk0 hk1 (2 * m + 1)
+  have hsol := (Real.lameEsk_isLameEigenfunction hν hk0 hk1 (2 * m + 1)).1
+  have hs := p2l_hasSum_mul_sinCoeff hk0 hk1 hsol (fun x => (hpar x).2.2.2.2)
+    (fun x => (hpar x).2.1) (fun x => (hpar x).1) true
+  have hK : Real.lameEsk ν (2 * m + 1) (Real.compEllIntKm (k ^ 2)) k = 0 := by
+    have := (hpar (Real.compEllIntKm (k ^ 2))).2.1
+    rw [show 2 * Real.compEllIntKm (k ^ 2) - Real.compEllIntKm (k ^ 2) =
+      Real.compEllIntKm (k ^ 2) by ring] at this
+    linarith
+  have hpos := p2l_deriv_phiFun_pos hk hsol.differentiable hK
+    (Real.lameEsk_deriv_K_neg hν hk0 hk1 _) true
+  refine ⟨_, ?_, hpos⟩
+  convert p2l_hasSum_two_mul_add 1 (fun j hj => ?_) hs using 1
+  · funext p
+    simp only [B, pow_succ, pow_mul]; norm_num
+  · have := (p2l_neg_one_pow_mod j).1.2 (by omega)
+    simp [pow_succ, pow_mul, this]
 
 /-- DLMF 29.6.37: `B_{p+1}/B_p → k²/(1 + k')²` unless `ν = 2 * n + 1` with `m ≤ n`. Admitted. -/
 @[dlmf 29.6.E37]
@@ -1261,7 +1412,7 @@ theorem Real.lameEsk_odd_fourierB_ratio
   sorry
 
 /-- DLMF 29.6.38: `Es^{2m+1}_ν(x, k²) = dn(x, k) ∑_p D_{2p+1} (trig)` for real `x`, with the
-unweighted Fourier coefficients `D_{2p+1}`. Admitted. -/
+unweighted Fourier coefficients `D_{2p+1}`. -/
 @[dlmf 29.6.E38]
 theorem Real.lameEsk_odd_hasSum_fourierD
     (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
@@ -1327,8 +1478,7 @@ theorem Real.lameEsk_odd_fourierD_rec
   push_cast at key ⊢
   linear_combination key
 
-/-- DLMF 29.6.42: the normalization of the coefficients `D_{2p+1}` (both series converge). Admitted.
--/
+/-- DLMF 29.6.42: the normalization of the coefficients `D_{2p+1}` (both series converge). -/
 @[dlmf 29.6.E42]
 theorem Real.lameEsk_odd_fourierD_normalization
     (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
@@ -1376,14 +1526,32 @@ theorem Real.lameEsk_odd_fourierD_normalization
   · have := (p2l_neg_one_pow_mod j).1.2 (by omega)
     simp [pow_mul, pow_succ, this]
 
-/-- DLMF 29.6.43: positivity Admitted. -/
+/-- DLMF 29.6.43: positivity (`-d(Es/dn)/dz` at `z = K`). -/
 @[dlmf 29.6.E43]
 theorem Real.lameEsk_odd_fourierD_pos
     (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
     let D : ℕ → ℝ := fun p =>
       Real.lameSinCoeff (fun x => Real.lameEsk ν (2 * m + 1) x k) k false (2 * p + 1)
     ∃ S, HasSum (fun p => ((2 * p + 1 : ℕ) : ℝ) * D p) S ∧ 0 < S := by
-  sorry
+  intro D
+  have hk := l29_sq_lt_one hk0 hk1
+  have hpar := Real.lameEsk_parity hν hk0 hk1 (2 * m + 1)
+  have hsol := (Real.lameEsk_isLameEigenfunction hν hk0 hk1 (2 * m + 1)).1
+  have hs := p2l_hasSum_mul_sinCoeff hk0 hk1 hsol (fun x => (hpar x).2.2.2.2)
+    (fun x => (hpar x).2.1) (fun x => (hpar x).1) false
+  have hK : Real.lameEsk ν (2 * m + 1) (Real.compEllIntKm (k ^ 2)) k = 0 := by
+    have := (hpar (Real.compEllIntKm (k ^ 2))).2.1
+    rw [show 2 * Real.compEllIntKm (k ^ 2) - Real.compEllIntKm (k ^ 2) =
+      Real.compEllIntKm (k ^ 2) by ring] at this
+    linarith
+  have hpos := p2l_deriv_phiFun_pos hk hsol.differentiable hK
+    (Real.lameEsk_deriv_K_neg hν hk0 hk1 _) false
+  refine ⟨_, ?_, hpos⟩
+  convert p2l_hasSum_two_mul_add 1 (fun j hj => ?_) hs using 1
+  · funext p
+    simp only [D, pow_succ, pow_mul]; norm_num
+  · have := (p2l_neg_one_pow_mod j).1.2 (by omega)
+    simp [pow_succ, pow_mul, this]
 
 /-- DLMF 29.6.44: `D_{p+1}/D_p → k²/(1 + k')²` unless `ν = 2 * n + 2` with `m ≤ n`. Admitted. -/
 @[dlmf 29.6.E44]
@@ -1396,7 +1564,7 @@ theorem Real.lameEsk_odd_fourierD_ratio
         (𝓝 (k ^ 2 / (1 + Real.sqrt (1 - k ^ 2)) ^ 2)) := by
   sorry
 
-/-- DLMF 29.6.45: `∑ BD = (4/π) ∫₀^K (Es^{2m+1}_ν)² dx`. Admitted. -/
+/-- DLMF 29.6.45: `∑ BD = (4/π) ∫₀^K (Es^{2m+1}_ν)² dx`. -/
 @[dlmf 29.6.E45]
 theorem Real.lameEsk_odd_fourier_parseval
     (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
@@ -1421,8 +1589,7 @@ theorem Real.lameEsk_odd_fourier_parseval
     simp [pow_succ, pow_mul, this]
 
 /-- DLMF 29.6.46: `Es^{2m+2}_ν(x, k²) = ∑_{p≥0} B_{2p+2} sin((2p+2)φ)` for real `x`, with `φ = π/2 -
-am(x, k)` and the Fourier coefficients `B_{2p+2}` of `Real.lameSinCoeff` (weighted by `dn`).
-Admitted. -/
+am(x, k)` and the Fourier coefficients `B_{2p+2}` of `Real.lameSinCoeff` (weighted by `dn`). -/
 @[dlmf 29.6.E46]
 theorem Real.lameEsk_even_hasSum_fourierB
     (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
@@ -1491,7 +1658,7 @@ theorem Real.lameEsk_even_fourierB_rec
   push_cast at key ⊢
   linear_combination key
 
-/-- DLMF 29.6.50: the normalization of the coefficients `B_{2p+2}`. Admitted. -/
+/-- DLMF 29.6.50: the normalization of the coefficients `B_{2p+2}`. -/
 @[dlmf 29.6.E50]
 theorem Real.lameEsk_even_fourierB_normalization
     (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
@@ -1522,14 +1689,36 @@ theorem Real.lameEsk_even_fourierB_normalization
   · have := (p2l_neg_one_pow_mod j).2.2 (by omega)
     simp [pow_succ, pow_mul, this]
 
-/-- DLMF 29.6.51: positivity (`-dEs/dz` at `z = K` divided by `dn(K)`). Admitted. -/
+/-- DLMF 29.6.51: positivity (`-dEs/dz` at `z = K` divided by `dn(K)`). -/
 @[dlmf 29.6.E51]
 theorem Real.lameEsk_even_fourierB_pos
     (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
     let B : ℕ → ℝ := fun p =>
       Real.lameSinCoeff (fun x => Real.lameEsk ν (2 * m + 2) x k) k true (2 * p + 2)
     ∃ S, HasSum (fun p => ((2 * p + 2 : ℕ) : ℝ) * B p) S ∧ 0 < S := by
-  sorry
+  intro B
+  have hk := l29_sq_lt_one hk0 hk1
+  have hpar := Real.lameEsk_parity hν hk0 hk1 (2 * m + 2)
+  have hsol := (Real.lameEsk_isLameEigenfunction hν hk0 hk1 (2 * m + 2)).1
+  have hs := p2l_hasSum_mul_sinCoeff hk0 hk1 hsol (fun x => (hpar x).2.2.2.2)
+    (fun x => (hpar x).2.1) (fun x => (hpar x).1) true
+  have hK : Real.lameEsk ν (2 * m + 2) (Real.compEllIntKm (k ^ 2)) k = 0 := by
+    have := (hpar (Real.compEllIntKm (k ^ 2))).2.1
+    rw [show 2 * Real.compEllIntKm (k ^ 2) - Real.compEllIntKm (k ^ 2) =
+      Real.compEllIntKm (k ^ 2) by ring] at this
+    linarith
+  have hpos := p2l_deriv_phiFun_pos hk hsol.differentiable hK
+    (Real.lameEsk_deriv_K_neg hν hk0 hk1 _) true
+  refine ⟨_, ?_, hpos⟩
+  have h3 := p2l_hasSum_two_mul_add 0 (fun j hj => ?_) hs
+  · rw [← hasSum_nat_add_iff' 1] at h3
+    convert h3 using 1
+    · funext p
+      simp only [B, pow_succ, pow_mul]; norm_num
+      rw [show 2 * (p + 1) = 2 * p + 2 by ring]; ring
+    · simp
+  · have := (p2l_neg_one_pow_mod j).2.2 (by omega)
+    simp [pow_succ, pow_mul, this]
 
 /-- DLMF 29.6.52: `B_{p+1}/B_p → k²/(1 + k')²` unless `ν = 2 * n + 2` with `m ≤ n`. Admitted. -/
 @[dlmf 29.6.E52]
@@ -1543,7 +1732,7 @@ theorem Real.lameEsk_even_fourierB_ratio
   sorry
 
 /-- DLMF 29.6.53: `Es^{2m+2}_ν(x, k²) = dn(x, k) ∑_p D_{2p+2} (trig)` for real `x`, with the
-unweighted Fourier coefficients `D_{2p+2}`. Admitted. -/
+unweighted Fourier coefficients `D_{2p+2}`. -/
 @[dlmf 29.6.E53]
 theorem Real.lameEsk_even_hasSum_fourierD
     (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
@@ -1612,8 +1801,7 @@ theorem Real.lameEsk_even_fourierD_rec
   push_cast at key ⊢
   linear_combination key
 
-/-- DLMF 29.6.57: the normalization of the coefficients `D_{2p+2}` (both series converge). Admitted.
--/
+/-- DLMF 29.6.57: the normalization of the coefficients `D_{2p+2}` (both series converge). -/
 @[dlmf 29.6.E57]
 theorem Real.lameEsk_even_fourierD_normalization
     (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
@@ -1666,14 +1854,36 @@ theorem Real.lameEsk_even_fourierD_normalization
   · have := (p2l_neg_one_pow_mod j).2.2 (by omega)
     simp [pow_mul, pow_succ, this]
 
-/-- DLMF 29.6.58: positivity Admitted. -/
+/-- DLMF 29.6.58: positivity (`-d(Es/dn)/dz` at `z = K`). -/
 @[dlmf 29.6.E58]
 theorem Real.lameEsk_even_fourierD_pos
     (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
     let D : ℕ → ℝ := fun p =>
       Real.lameSinCoeff (fun x => Real.lameEsk ν (2 * m + 2) x k) k false (2 * p + 2)
     ∃ S, HasSum (fun p => ((2 * p + 2 : ℕ) : ℝ) * D p) S ∧ 0 < S := by
-  sorry
+  intro D
+  have hk := l29_sq_lt_one hk0 hk1
+  have hpar := Real.lameEsk_parity hν hk0 hk1 (2 * m + 2)
+  have hsol := (Real.lameEsk_isLameEigenfunction hν hk0 hk1 (2 * m + 2)).1
+  have hs := p2l_hasSum_mul_sinCoeff hk0 hk1 hsol (fun x => (hpar x).2.2.2.2)
+    (fun x => (hpar x).2.1) (fun x => (hpar x).1) false
+  have hK : Real.lameEsk ν (2 * m + 2) (Real.compEllIntKm (k ^ 2)) k = 0 := by
+    have := (hpar (Real.compEllIntKm (k ^ 2))).2.1
+    rw [show 2 * Real.compEllIntKm (k ^ 2) - Real.compEllIntKm (k ^ 2) =
+      Real.compEllIntKm (k ^ 2) by ring] at this
+    linarith
+  have hpos := p2l_deriv_phiFun_pos hk hsol.differentiable hK
+    (Real.lameEsk_deriv_K_neg hν hk0 hk1 _) false
+  refine ⟨_, ?_, hpos⟩
+  have h3 := p2l_hasSum_two_mul_add 0 (fun j hj => ?_) hs
+  · rw [← hasSum_nat_add_iff' 1] at h3
+    convert h3 using 1
+    · funext p
+      simp only [D, pow_succ, pow_mul]; norm_num
+      rw [show 2 * (p + 1) = 2 * p + 2 by ring]; ring
+    · simp
+  · have := (p2l_neg_one_pow_mod j).2.2 (by omega)
+    simp [pow_succ, pow_mul, this]
 
 /-- DLMF 29.6.59: `D_{p+1}/D_p → k²/(1 + k')²` unless `ν = 2 * n + 3` with `m ≤ n`. Admitted. -/
 @[dlmf 29.6.E59]
@@ -1686,7 +1896,7 @@ theorem Real.lameEsk_even_fourierD_ratio
         (𝓝 (k ^ 2 / (1 + Real.sqrt (1 - k ^ 2)) ^ 2)) := by
   sorry
 
-/-- DLMF 29.6.60: `∑ BD = (4/π) ∫₀^K (Es^{2m+2}_ν)² dx`. Admitted. -/
+/-- DLMF 29.6.60: `∑ BD = (4/π) ∫₀^K (Es^{2m+2}_ν)² dx`. -/
 @[dlmf 29.6.E60]
 theorem Real.lameEsk_even_fourier_parseval
     (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :

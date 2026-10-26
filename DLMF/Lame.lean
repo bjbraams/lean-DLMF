@@ -16,6 +16,11 @@ public import DLMF.Lame.IntegralEquations
 public import DLMF.Lame.Polynomials.Series
 public import DLMF.Lame.Polynomials.Orthogonality
 public import DLMF.Lame.OtherSolutions
+public import DLMF.Lame.P2lFourier
+public import DLMF.Lame.Polynomials.P2pBase
+public import DLMF.Lame.Polynomials.P2pODE
+public import DLMF.Lame.Polynomials.P2pEigen
+public import DLMF.Lame.Polynomials.P2pIdent
 
 /-!
 # Lamé functions (DLMF Chapter 29)

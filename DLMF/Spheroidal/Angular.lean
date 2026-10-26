@@ -13,6 +13,8 @@ public import DLMF.Legendre.SpecialValues
 public import DLMF.Legendre.SeriesTools
 public import DLMF.Legendre.Integer
 public import DLMF.OrthogonalPolynomials.Differential
+public import DLMF.Spheroidal.P2yFerrersTools
+public import DLMFMathlib.Analysis.ODE.PowerSeriesUniqueness
 
 /-!
 # Angular spheroidal wave functions (DLMF §§30.1, 30.4–30.6)
@@ -862,11 +864,312 @@ theorem spheroidalQs_neg {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
     spheroidalQs n m (-x) γ2 = (-1) ^ (n - m + 1) * spheroidalQs n m x γ2 :=
   (spheroidalQs_spec hmn γ2 hf).parity x hx
 
-/-- **The Legendre limit** (DLMF 30.5.3): `𝖰s^m_n(x, 0) = 𝖰^m_n(x)` on `(-1, 1)`. -/
+/-! #### Proof of the Legendre limit 30.5.3 -/
+
+/-- `𝖯^m_N(x)` is real for `-1 < x < 1`. -/
+theorem p2y_ferrersP_im (N m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) : (ferrersP N m x).im = 0 := by
+  have := ferrersP_real (N : ℝ) (m : ℝ) hx
+  simpa using this
+
+/-- `∫ 𝖯^m_n 𝖯^m_ν` over `(-1, 1)` for integer degrees, through `P^{(m)}`. -/
+theorem p2y_integral_ferrers_mul {m n ν : ℕ} (hn : m ≤ n) :
+    ∫ x in (-1 : ℝ)..1, (ferrersP n m x).re * (ferrersP ν m x).re =
+      if n = ν then 2 * ((n + m).factorial : ℝ) / ((2 * n + 1) * (n - m).factorial) else 0 := by
+  rw [← p2y_D_orth hn ν]
+  apply p2y_integral_congr_Ioo
+  intro x hx
+  have h := congrArg Complex.re (legInt_ferrersP_mul n ν m hx)
+  rw [p2y_legInt_D_real n m x, p2y_legInt_D_real ν m x,
+    show ((1 : ℂ) - (x : ℂ) ^ 2) ^ m = (((1 - x ^ 2) ^ m : ℝ) : ℂ) by push_cast; rfl,
+    ← ofReal_mul, ← ofReal_mul, ofReal_re, Complex.mul_re, p2y_ferrersP_im n m hx,
+    p2y_ferrersP_im ν m hx, mul_zero, sub_zero] at h
+  exact h
+
+/-- `𝖯s^m_n(x, 0) = 𝖯^m_n(x)` (real form). -/
+theorem p2y_ps_zero_re {n m : ℕ} (hmn : m ≤ n) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
+    spheroidalPs n m x 0 = (ferrersP n m x).re := by
+  rw [← spheroidalPs_gamma_zero hmn hx, ofReal_re]
+
+/-- **The coefficients at `γ = 0`**: `a^m_{n,k}(0) = δ_{k,0}`. -/
+theorem p2y_coeff_gamma_zero {n m : ℕ} (hmn : m ≤ n) (k : ℤ) :
+    spheroidalCoeff n m 0 k = if k = 0 then 1 else 0 := by
+  unfold spheroidalCoeff
+  by_cases h1 : -(((n - m) / 2 : ℕ) : ℤ) ≤ k
+  · simp only [h1, ↓reduceIte]
+    unfold spheroidalCoeffMain
+    obtain ⟨ν, hν⟩ : ∃ ν : ℕ, (ν : ℤ) = n + 2 * k := ⟨(n + 2 * k).toNat, by omega⟩
+    have hc : ((n : ℂ) + 2 * (k : ℂ)) = (ν : ℂ) := by exact_mod_cast hν.symm
+    have hI : ∫ x in (-1 : ℝ)..1, spheroidalPs n m x 0 * (ferrersP ((n : ℂ) + 2 * (k : ℂ))
+        m x).re = if n = ν then 2 * ((n + m).factorial : ℝ) /
+          ((2 * n + 1) * (n - m).factorial) else 0 := by
+      rw [← p2y_integral_ferrers_mul hmn]
+      apply p2y_integral_congr_Ioo
+      intro x hx
+      rw [hc, p2y_ps_zero_re hmn hx]
+    rw [hI]
+    by_cases hk : k = 0
+    · subst hk
+      have hnν : n = ν := by omega
+      subst hnν
+      have h1' : ((n : ℤ) - m + 2 * (0 : ℤ)).toNat = n - m := by omega
+      have h2' : ((n : ℤ) + m + 2 * (0 : ℤ)).toNat = n + m := by omega
+      rw [h1', h2']
+      have hf1 : ((n - m).factorial : ℝ) ≠ 0 := by positivity
+      have hf2 : ((n + m).factorial : ℝ) ≠ 0 := by positivity
+      have h2n : (2 * (n : ℝ) + 1) ≠ 0 := by positivity
+      simp only [zpow_zero, Int.cast_zero, mul_zero, add_zero, one_mul, ↓reduceIte]
+      field_simp
+    · simp only [show n ≠ ν by omega, hk, ↓reduceIte, mul_zero]
+  · simp only [h1, ↓reduceIte, show k ≠ 0 by omega]
+    by_cases h2 : -(((n + m) / 2 : ℕ) : ℤ) ≤ k
+    · simp only [h2, ↓reduceIte]
+      have hF : spheroidalFwd n m 0 ((n + m) / 2 - (n - m) / 2 + 1) = 0 := by
+        obtain ⟨j, hj⟩ : ∃ j, (n + m) / 2 - (n - m) / 2 + 1 = j + 2 :=
+          ⟨(n + m) / 2 - (n - m) / 2 - 1, by omega⟩
+        rw [hj, spheroidalFwd]
+        simp [spheroidalRecC]
+      rw [hF, div_zero]
+    · simp only [h2, ↓reduceIte]
+
+/-- `A^m_n(0) = 1`. -/
+theorem p2y_A_gamma_zero {n m : ℕ} (hmn : m ≤ n) : spheroidalA n m 0 = 1 := by
+  unfold spheroidalA
+  simp_rw [p2y_coeff_gamma_zero hmn]
+  rw [tsum_eq_single 0 (fun k hk => by simp [hk])]
+  simp
+
+/-- `A^{-m}_n(0) = 1`. -/
+theorem p2y_ANeg_gamma_zero {n m : ℕ} (hmn : m ≤ n) : spheroidalANeg n m 0 = 1 := by
+  unfold spheroidalANeg
+  rw [tsum_eq_single 0 (fun k hk => by
+    unfold spheroidalCoeffNeg
+    split_ifs <;> simp [p2y_coeff_gamma_zero hmn, hk])]
+  unfold spheroidalCoeffNeg
+  simp only [Left.neg_nonpos_iff, Nat.cast_nonneg, ↓reduceIte, p2y_coeff_gamma_zero hmn,
+    zpow_zero, one_mul, mul_one]
+  have h1' : ((n : ℤ) - m + 2 * (0 : ℤ)).toNat = n - m := by omega
+  have h2' : ((n : ℤ) + m + 2 * (0 : ℤ)).toNat = n + m := by omega
+  rw [h1', h2']
+  have hf1 : ((n - m).factorial : ℝ) ≠ 0 := by positivity
+  have hf2 : ((n + m).factorial : ℝ) ≠ 0 := by positivity
+  field_simp
+
+/-- Solutions of 30.2.1 on `(-1, 1)` in second-order form `f'' = p f' + q f`. -/
+theorem p2y_second_order {lam γ2 μ : ℝ} {f : ℝ → ℝ} (hf : IsSpheroidalSolutionReal lam γ2 μ f) :
+    ∀ t ∈ Ioo (-1 : ℝ) 1, HasDerivAt f (deriv f t) t ∧ HasDerivAt (deriv f)
+      ((2 * t / (1 - t ^ 2)) • deriv f t +
+        (-(lam + γ2 * (1 - t ^ 2) - μ ^ 2 / (1 - t ^ 2)) / (1 - t ^ 2)) • f t) t := by
+  intro t ht
+  refine ⟨(hf.differentiableAt t ht).hasDerivAt, ?_⟩
+  have h1 : 0 < 1 - t ^ 2 := by nlinarith [ht.1, ht.2]
+  have hW := hf.hasDerivAt t ht
+  have hs : HasDerivAt (fun s : ℝ => 1 - s ^ 2) (-(2 * t)) t := by
+    simpa using ((hasDerivAt_id t).pow 2).const_sub 1
+  have hq := hW.div hs h1.ne'
+  have hev : (fun s => (1 - s ^ 2) * deriv f s / (1 - s ^ 2)) =ᶠ[𝓝 t] deriv f := by
+    filter_upwards [isOpen_Ioo.mem_nhds ht] with s hs'
+    have : 1 - s ^ 2 ≠ 0 := by nlinarith [hs'.1, hs'.2]
+    field_simp
+  refine (hq.congr_of_eventuallyEq hev.symm).congr_deriv ?_
+  simp only [smul_eq_mul]
+  field_simp
+  ring
+
+/-- **Uniqueness** for 30.2.1 on `(-1, 1)`: two solutions with the same value and derivative at a
+point of `(-1, 1)` coincide there. -/
+theorem p2y_eqOn_of_sol {lam γ2 μ : ℝ} {f g : ℝ → ℝ} (hf : IsSpheroidalSolutionReal lam γ2 μ f)
+    (hg : IsSpheroidalSolutionReal lam γ2 μ g) {x0 : ℝ} (hx0 : x0 ∈ Ioo (-1 : ℝ) 1)
+    (h0 : f x0 = g x0) (h1 : deriv f x0 = deriv g x0) : EqOn f g (Ioo (-1 : ℝ) 1) := by
+  have hp : ContinuousOn (fun t : ℝ => 2 * t / (1 - t ^ 2)) (Ioo (-1 : ℝ) 1) :=
+    ContinuousOn.div (by fun_prop) (by fun_prop) fun t ht => by nlinarith [ht.1, ht.2]
+  have hq : ContinuousOn (fun t : ℝ => -(lam + γ2 * (1 - t ^ 2) - μ ^ 2 / (1 - t ^ 2)) /
+      (1 - t ^ 2)) (Ioo (-1 : ℝ) 1) := by
+    have hne : ∀ t ∈ Ioo (-1 : ℝ) 1, 1 - t ^ 2 ≠ 0 := fun t ht => by nlinarith [ht.1, ht.2]
+    refine ContinuousOn.div ?_ (by fun_prop) hne
+    exact ((continuousOn_const.add (continuousOn_const.mul (by fun_prop))).sub
+      (continuousOn_const.div (by fun_prop) hne)).neg
+  exact (ODE.eqOn_of_linear_ode isOpen_Ioo ordConnected_Ioo hx0 hp hq (p2y_second_order hf)
+    (p2y_second_order hg) h0 h1).1
+
+/-- Solutions of 30.2.1 on `(-1, 1)` form a vector space: `f + c g` is a solution. -/
+theorem p2y_sol_add {lam γ2 μ : ℝ} {f g : ℝ → ℝ} (hf : IsSpheroidalSolutionReal lam γ2 μ f)
+    (hg : IsSpheroidalSolutionReal lam γ2 μ g) (c : ℝ) :
+    IsSpheroidalSolutionReal lam γ2 μ (fun x => f x + c * g x) := by
+  have hd : ∀ t ∈ Ioo (-1 : ℝ) 1, deriv (fun x => f x + c * g x) t = deriv f t + c * deriv g t :=
+    fun t ht => ((hf.differentiableAt t ht).hasDerivAt.add
+      ((hg.differentiableAt t ht).hasDerivAt.const_mul c)).deriv
+  refine ⟨fun t ht => ((hf.differentiableAt t ht).add
+    ((hg.differentiableAt t ht).const_mul c)), fun t ht => ?_⟩
+  have h := (hf.hasDerivAt t ht).add ((hg.hasDerivAt t ht).const_mul c)
+  refine (h.congr_of_eventuallyEq ?_).congr_deriv (by ring)
+  filter_upwards [isOpen_Ioo.mem_nhds ht] with s hs
+  rw [hd s hs, Pi.add_apply]
+  ring
+
+/-- **Uniqueness of `𝖰s`**: two functions with the characterization `IsSpheroidalQs` agree on
+`(-1, 1)` (their difference is a multiple of `𝖯s` of the wrong parity). -/
+theorem p2y_isSpheroidalQs_unique {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} {f g : ℝ → ℝ}
+    (hf : IsSpheroidalQs n m γ2 f) (hg : IsSpheroidalQs n m γ2 g) :
+    EqOn f g (Ioo (-1 : ℝ) 1) := by
+  set P : ℝ → ℝ := fun t => spheroidalPs n m t γ2 with hP
+  have hPs := isSpheroidalSolutionReal_spheroidalPs hmn γ2
+  obtain ⟨x0, hx0, hP0⟩ : ∃ x0 ∈ Ioo (-1 : ℝ) 1, P x0 ≠ 0 := by
+    by_contra hcon
+    push Not at hcon
+    have h := integral_spheroidalPs_sq hmn γ2
+    rw [p2y_integral_congr_Ioo (f₂ := fun _ => (0 : ℝ)) (fun x hx => by
+      rw [show spheroidalPs n m x γ2 = 0 from hcon x hx]; ring)] at h
+    have : (0 : ℝ) < 2 / (2 * n + 1) * (((n + m).factorial : ℝ) / (n - m).factorial) := by
+      positivity
+    rw [intervalIntegral.integral_zero] at h
+    linarith
+  set c := (f x0 - g x0) / P x0 with hc
+  have hcP : c * P x0 = f x0 - g x0 := by simp only [hc]; field_simp
+  clear_value c
+  have hG := p2y_sol_add hg.ode hPs c
+  have hdG : deriv (fun x => g x + c * P x) x0 = deriv g x0 + c * deriv P x0 :=
+    ((hg.ode.differentiableAt x0 hx0).hasDerivAt.add
+      ((hPs.differentiableAt x0 hx0).hasDerivAt.const_mul c)).deriv
+  have hW := (hf.wronskian x0 hx0).trans (hg.wronskian x0 hx0).symm
+  change P x0 * deriv f x0 - deriv P x0 * f x0 = P x0 * deriv g x0 - deriv P x0 * g x0 at hW
+  have hfG : EqOn f (fun x => g x + c * P x) (Ioo (-1 : ℝ) 1) := by
+    refine p2y_eqOn_of_sol hf.ode hG hx0 (by show f x0 = g x0 + c * P x0; linarith) ?_
+    rw [hdG]
+    have : P x0 * (deriv f x0 - deriv g x0 - c * deriv P x0) = 0 := by
+      linear_combination hW - deriv P x0 * hcP
+    have := (mul_eq_zero.mp this).resolve_left hP0
+    linarith
+  have hc0 : c = 0 := by
+    have hm : -x0 ∈ Ioo (-1 : ℝ) 1 := ⟨by linarith [hx0.2], by linarith [hx0.1]⟩
+    have e1 := hfG hx0
+    have e2 := hfG hm
+    have p1 := hf.parity x0 hx0
+    have p2 := hg.parity x0 hx0
+    have p3 : P (-x0) = (-1) ^ (n - m) * P x0 := spheroidalPs_neg hmn x0 γ2
+    simp only at e1 e2
+    rw [p1, p2, p3] at e2
+    have hs : ((-1 : ℝ) ^ (n - m + 1)) = -(-1) ^ (n - m) := by rw [pow_succ]; ring
+    rw [hs] at e2
+    have h2 : (-1 : ℝ) ^ (n - m) * (2 * c * P x0) = 0 := by
+      linear_combination -((-1) ^ (n - m) * e1 + e2)
+    have hne : ((-1 : ℝ) ^ (n - m)) ≠ 0 := pow_ne_zero _ (by norm_num)
+    have := (mul_eq_zero.mp h2).resolve_left hne
+    have := (mul_eq_zero.mp this).resolve_right hP0
+    linarith
+  intro x hx
+  rw [hfG hx, hc0]
+  simp
+
+/-- The real part of a real-valued Ferrers solution solves 30.2.1 with `γ = 0`. -/
+theorem p2y_real_of_ferrers {ν μ : ℝ} {F : ℝ → ℂ} (hF : IsFerrersSolution ν μ F) :
+    IsSpheroidalSolutionReal (ν * (ν + 1)) 0 μ (fun x => (F x).re) := by
+  have hd : ∀ x ∈ Ioo (-1 : ℝ) 1, HasDerivAt (fun t => (F t).re) (deriv F x).re x :=
+    fun x hx => by
+      simpa only [Function.comp_def, Complex.reCLM_apply] using
+        Complex.reCLM.hasFDerivAt.comp_hasDerivAt x (hF x hx).1.hasDerivAt
+  refine ⟨fun x hx => (hd x hx).differentiableAt, fun x hx => ?_⟩
+  obtain ⟨-, f2, hf2, heq⟩ := hF x hx
+  have h2 : HasDerivAt (fun t => (deriv F t).re) f2.re x := by
+    simpa only [Function.comp_def, Complex.reCLM_apply] using
+      Complex.reCLM.hasFDerivAt.comp_hasDerivAt x hf2
+  have hs : HasDerivAt (fun t : ℝ => 1 - t ^ 2) (-(2 * x)) x := by
+    simpa using ((hasDerivAt_id x).pow 2).const_sub 1
+  have hev : (fun t => (1 - t ^ 2) * deriv (fun t => (F t).re) t) =ᶠ[𝓝 x]
+      (fun t => (1 - t ^ 2) * (deriv F t).re) := by
+    filter_upwards [isOpen_Ioo.mem_nhds hx] with t ht
+    rw [(hd t ht).deriv]
+  refine ((hs.mul h2).congr_of_eventuallyEq hev).congr_deriv ?_
+  have e3 : ((ν : ℂ) * ((ν : ℂ) + 1) - (μ : ℂ) ^ 2 / (1 - (x : ℂ) ^ 2)) =
+      ((ν * (ν + 1) - μ ^ 2 / (1 - x ^ 2) : ℝ) : ℂ) := by push_cast; rfl
+  have e1 : (1 - (x : ℂ) ^ 2) = ((1 - x ^ 2 : ℝ) : ℂ) := by push_cast; rfl
+  have e2 : (2 * (x : ℂ)) = ((2 * x : ℝ) : ℂ) := by push_cast; rfl
+  rw [e3, e1, e2] at heq
+  have h := congrArg Complex.re heq
+  simp only [Complex.add_re, Complex.sub_re, Complex.re_ofReal_mul, Complex.zero_re] at h
+  linear_combination h
+
+/-- `𝖰^m_n` solves the Ferrers equation. -/
+theorem p2y_ferrersQ_sol (ν μ : ℂ) : IsFerrersSolution ν μ (ferrersQ ν μ) :=
+  ((ferrersEven_isFerrersSolution ν μ).add_smul (ferrersOdd_isFerrersSolution ν μ) _ _).congr
+    (ferrersQ_eqOn_even_odd ν μ).symm
+
+/-- `𝖯^μ_ν` solves the Ferrers equation (regular case). -/
+theorem p2y_ferrersP_sol {ν μ : ℂ} (h : LegendreQRegular ν μ) :
+    IsFerrersSolution ν μ (ferrersP ν μ) :=
+  ((ferrersEven_isFerrersSolution ν μ).add_smul (ferrersOdd_isFerrersSolution ν μ) _ _).congr
+    (ferrersP_regular_eqOn h).symm
+
+/-- `𝖰^m_n` is regular for integer `n, m ≥ 0`. -/
+theorem p2y_regular (n m : ℕ) : LegendreQRegular (n : ℂ) (m : ℂ) := by
+  intro k h
+  have := congrArg Complex.re h
+  simp at this
+  have h1 : (0 : ℝ) ≤ n + m := by positivity
+  have h2 : (0 : ℝ) ≤ k := Nat.cast_nonneg k
+  linarith
+
+/-- **The Legendre limit** (DLMF 30.5.3): `𝖰s^m_n(x, 0) = 𝖰^m_n(x)` on `(-1, 1)`.
+Proved: at `γ = 0`, `a^m_{n,k} = δ_{k0}` and `A^{±m}_n = 1`, so `𝖰^m_n` satisfies the
+characterization `IsSpheroidalQs`, which determines `𝖰s` on `(-1, 1)`
+(`p2y_isSpheroidalQs_unique`). -/
 @[dlmf 30.5.E3]
 theorem spheroidalQs_gamma_zero {n m : ℕ} (hmn : m ≤ n) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
     (spheroidalQs n m x 0 : ℂ) = ferrersQ n m x := by
-  sorry
+  have hreg := p2y_regular n m
+  have hQim : ∀ y ∈ Ioo (-1 : ℝ) 1, (ferrersQ n m y).im = 0 := fun y hy => by
+    have := ferrersQ_real (n : ℝ) (m : ℝ) hy (by simpa using hreg)
+    simpa using this
+  set f₀ : ℝ → ℝ := fun y => if y ∈ Ioo (-1 : ℝ) 1 then (ferrersQ n m y).re else 0 with hf₀
+  have hf₀I : ∀ y ∈ Ioo (-1 : ℝ) 1, f₀ y = (ferrersQ n m y).re := fun y hy => by
+    simp only [hf₀, hy, ↓reduceIte]
+  have hQsol : IsFerrersSolution ((n : ℝ) : ℂ) ((m : ℝ) : ℂ) (ferrersQ n m) := by
+    simpa using p2y_ferrersQ_sol (n : ℂ) (m : ℂ)
+  have hPsol : IsFerrersSolution (n : ℂ) (m : ℂ) (ferrersP n m) := p2y_ferrersP_sol hreg
+  have hdQ : ∀ y ∈ Ioo (-1 : ℝ) 1, deriv f₀ y = (deriv (ferrersQ n m) y).re := by
+    intro y hy
+    have h := Complex.reCLM.hasFDerivAt.comp_hasDerivAt y (hQsol y hy).1.hasDerivAt
+    refine HasDerivAt.deriv ?_
+    refine (h.congr_of_eventuallyEq ?_)
+    filter_upwards [isOpen_Ioo.mem_nhds hy] with t ht
+    simp [hf₀I t ht]
+  have hdP : ∀ y ∈ Ioo (-1 : ℝ) 1, deriv (fun t => spheroidalPs n m t 0) y =
+      (deriv (ferrersP n m) y).re := by
+    intro y hy
+    have h := Complex.reCLM.hasFDerivAt.comp_hasDerivAt y (hPsol y hy).1.hasDerivAt
+    refine HasDerivAt.deriv ?_
+    refine (h.congr_of_eventuallyEq ?_)
+    filter_upwards [isOpen_Ioo.mem_nhds hy] with t ht
+    simp [p2y_ps_zero_re hmn ht]
+  have hQs : IsSpheroidalQs n m 0 f₀ := by
+    refine ⟨?_, fun y hy => ?_, fun y hy => ?_, fun y hy => by simp only [hf₀, hy, ↓reduceIte]⟩
+    · rw [p1s_spheroidalEigenvalue_zero hmn]
+      exact p1s_isSpheroidalSolutionReal_congr (p2y_real_of_ferrers hQsol)
+        (fun y hy => (hf₀I y hy).symm)
+    · have hy' : -y ∈ Ioo (-1 : ℝ) 1 := ⟨by linarith [hy.2], by linarith [hy.1]⟩
+      rw [hf₀I _ hy', hf₀I _ hy, ferrersQ_neg_of_add_eq_nat (N := n + m) (by push_cast; ring) y,
+        show ((-1 : ℂ) ^ (n + m + 1)) = (((-1 : ℝ) ^ (n - m + 1) : ℝ) : ℂ) by
+          rw [show n + m + 1 = (n - m + 1) + 2 * m by omega, pow_add, pow_mul]; push_cast; ring,
+        re_ofReal_mul]
+    · rw [hdQ y hy, hdP y hy, hf₀I y hy, p2y_ps_zero_re hmn hy, p2y_A_gamma_zero hmn,
+        p2y_ANeg_gamma_zero hmn, mul_one, mul_one]
+      have hW := ferrers_wronskian_4 (n : ℂ) (m : ℂ) hreg hy
+      unfold ferrersWronskian at hW
+      have hG1 : Complex.Gamma ((n : ℂ) + m + 1) = ((n + m).factorial : ℂ) := by
+        rw [← Complex.Gamma_nat_eq_factorial]; push_cast; ring_nf
+      have hG2 : Complex.Gamma ((n : ℂ) - m + 1) = ((n - m).factorial : ℂ) := by
+        rw [← Complex.Gamma_nat_eq_factorial, Nat.cast_sub hmn]
+      rw [hG1, hG2, show (((n + m).factorial : ℂ) / (((n - m).factorial : ℂ) * (1 - (y : ℂ) ^ 2)))
+        = ((((n + m).factorial : ℝ) / ((1 - y ^ 2) * (n - m).factorial) : ℝ) : ℂ) by
+          push_cast; ring] at hW
+      have h := congrArg Complex.re hW
+      rw [ofReal_re, Complex.sub_re, Complex.mul_re, Complex.mul_re,
+        p2y_ferrersP_im n m hy, hQim y hy, zero_mul, zero_mul, sub_zero, sub_zero] at h
+      linarith
+  have hex : ∃ f, IsSpheroidalQs n m 0 f := ⟨f₀, hQs⟩
+  have hu := p2y_isSpheroidalQs_unique hmn hex.choose_spec hQs hx
+  simp only [spheroidalQs, hex, ↓reduceDIte]
+  rw [hu, hf₀I x hx]
+  exact Complex.ext (by simp) (by simp [hQim x hx])
 
 /-- **Wronskian** (DLMF 30.5.4): `𝒲{𝖯s^m_n, 𝖰s^m_n} = (n+m)!/((1-x²)(n-m)!) A^m_n A^{-m}_n`.
 Proved from the characterization (`exists_isSpheroidalQs`). -/

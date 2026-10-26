@@ -8,6 +8,7 @@ module
 public import DLMF.Lame.Basic
 public import DLMFMathlib.Analysis.ODE.PowerSeriesUniqueness
 public import DLMFMathlib.Analysis.ODE.P2lSturmLiouville
+public import DLMFMathlib.Analysis.ODE.P2sSturmOsc
 public import DLMF.Elliptic.JacobiIdentities
 
 /-!
@@ -15,9 +16,10 @@ public import DLMF.Elliptic.JacobiIdentities
 
 The existence and ordering of the four spectra of Table 29.3.2 (`Real.lameEigenvalue_spec`)
 and the existence and uniqueness of the normalized eigenfunctions
-(`Real.lameEigenfunction_spec`) are admitted existence theorems (regular Sturm–Liouville
-theory on `[0, K]`); the definitions of `DLMF.Lame.Basic` are by choice from them. From these
-the following are proved:
+(`Real.lameEigenfunction_spec`) are proved from the separated Sturm–Liouville theory of
+`DLMFMathlib.Analysis.ODE.P2lSturmLiouville` (Lamé's equation as `w'' = (V - h) w` with the
+even potential `V = ν(ν+1)k² sn²`); the definitions of `DLMF.Lame.Basic` are by choice from
+them. From these the following are proved:
 
 * the eigenfunctions solve Lamé's equation with the boundary conditions, normalization
   29.3.18 and the sign rule of §29.3(v);
@@ -25,8 +27,11 @@ the following are proved:
   (`ODE.eq_of_linear_ode`) and the symmetries `sn(-x) = -sn x`, `sn(2K - x) = sn x`;
 * the orthogonality relations 29.3.19, by Green's identity for the Wronskian.
 
-The interlacing 29.3.1–29.3.6, the duality 29.3.7–29.3.8, the continued fractions 29.3.10,
-the zero counts of Table 29.3.2 and the stability theorem of §29.9 are admitted.
+The zero counts of Table 29.3.2 and the interlacing 29.3.1–29.3.4 follow from Sturm's
+oscillation theorem (`DLMFMathlib.Analysis.ODE.P2sSturmOsc`), applied on `[0, K]` and, for
+29.3.1 and 29.3.3, to the problem on `[0, 2K]` with potential shifted by `K`. The coalescence
+and sign 29.3.5–29.3.6, the duality 29.3.7–29.3.8, the continued fractions 29.3.10 and the
+stability theorem of §29.9 are admitted.
 -/
 
 @[expose] public section
@@ -479,66 +484,444 @@ theorem Real.lameEsk_parity (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m
 
 /-! ### Zeros (Table 29.3.2) -/
 
+/-- Sturm oscillation for the Lamé eigenfunctions: the `j`th eigenfunction of each boundary
+type has exactly `j` zeros in `(0, K)`. -/
+lemma p2l_eigenfunction_zeros (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1)
+    (odd0 oddK : Bool) (j : ℕ) :
+    {x | x ∈ Ioo 0 (Real.compEllIntKm (k ^ 2)) ∧
+      Real.lameEigenfunction ν k odd0 oddK j x = 0}.encard = j := by
+  have hk := l29_sq_lt_one hk0 hk1
+  have hK := Real.compEllIntKm_pos hk
+  obtain ⟨⟨hw, hbc, hne⟩, -, -⟩ :=
+    Real.isNormalizedLameEigenfunction_lameEigenfunction hν hk0 hk1 odd0 oddK j
+  have hN := Real.isNthLameEigenvalue_lameEigenvalue hν hk0 hk1 odd0 oddK j
+  rw [p2l_isLameSolution_iff] at hw
+  rw [ODE.p2s_oscillation_of_sol (p2lPot_continuous hk) p2lPot_abs_le hK odd0 oddK hw hbc hne,
+    ← p2l_lameSpectrum_eq, ← hN.2.1.cast_ncard_eq, hN.2.2]
+
+lemma p2l_finite_ncard_of_encard {s : Set ℝ} {n : ℕ} (h : s.encard = n) :
+    s.Finite ∧ s.ncard = n := by
+  have hf : s.Finite := Set.finite_of_encard_eq_coe h
+  refine ⟨hf, ?_⟩
+  have := hf.cast_ncard_eq
+  rw [h] at this
+  exact_mod_cast this
+
+/-- Zeros in `[0, 2K)` of a function symmetric about `K` up to a nonzero factor. -/
+lemma p2l_zeros_Ico {w : ℝ → ℝ} {K : ℝ} (hK : 0 < K) {s : ℝ}
+    (hsym : ∀ x, w (2 * K - x) = s * w x) {n : ℕ}
+    (hA : {x | x ∈ Ioo 0 K ∧ w x = 0}.encard = n) :
+    {x ∈ Ico 0 (2 * K) | w x = 0}.encard =
+      2 * n + ((if w 0 = 0 then 1 else 0) + (if w K = 0 then 1 else 0) : ℕ) := by
+  set ZA := {x | x ∈ Ioo 0 K ∧ w x = 0}
+  have hZ : {x ∈ Ico 0 (2 * K) | w x = 0} = ({x | x = 0 ∧ w x = 0} ∪ ZA) ∪
+      ({x | x = K ∧ w x = 0} ∪ (fun x => 2 * K - x) '' ZA) := by
+    ext x
+    simp only [mem_ofPred_eq, mem_Ico, mem_union, mem_image, ZA, mem_Ioo]
+    constructor
+    · rintro ⟨⟨h0, h1⟩, hx⟩
+      rcases h0.eq_or_lt with h | h
+      · exact Or.inl (Or.inl ⟨h.symm, hx⟩)
+      rcases lt_trichotomy x K with h' | h' | h'
+      · exact Or.inl (Or.inr ⟨⟨h, h'⟩, hx⟩)
+      · exact Or.inr (Or.inl ⟨h', hx⟩)
+      · refine Or.inr (Or.inr ⟨2 * K - x, ⟨⟨by linarith, by linarith⟩, ?_⟩, by ring⟩)
+        rw [hsym, hx, mul_zero]
+    · rintro ((⟨rfl, hx⟩ | ⟨⟨h0, h1⟩, hx⟩) | (⟨rfl, hx⟩ | ⟨y, ⟨⟨h0, h1⟩, hy⟩, rfl⟩))
+      · exact ⟨⟨le_rfl, by linarith⟩, hx⟩
+      · exact ⟨⟨h0.le, by linarith⟩, hx⟩
+      · exact ⟨⟨hK.le, by linarith⟩, hx⟩
+      · exact ⟨⟨by linarith, by linarith⟩, by rw [hsym, hy, mul_zero]⟩
+  have hpt : ∀ a : ℝ, {x | x = a ∧ w x = 0}.encard = ((if w a = 0 then 1 else 0 : ℕ) : ℕ∞) := by
+    intro a
+    split_ifs with ha
+    · rw [show {x | x = a ∧ w x = 0} = {a} from by
+        ext x; simp only [mem_ofPred_eq, mem_singleton_iff]
+        exact ⟨fun h => h.1, fun h => ⟨h, h ▸ ha⟩⟩]
+      simp
+    · rw [show {x | x = a ∧ w x = 0} = ∅ from by
+        ext x; simp only [mem_ofPred_eq, mem_empty_iff_false, iff_false, not_and]
+        rintro rfl; exact ha]
+      simp
+  have himg : ((fun x => 2 * K - x) '' ZA).encard = ZA.encard :=
+    Set.InjOn.encard_image fun a _ b _ hab => by simpa using hab
+  rw [hZ, encard_union_eq, encard_union_eq, encard_union_eq, himg, hpt, hpt, hA]
+  · push_cast; ring
+  · rw [Set.disjoint_left]; rintro x ⟨rfl, -⟩ ⟨y, ⟨⟨h0, h1⟩, -⟩, hy⟩; simp at hy; linarith
+  · rw [Set.disjoint_left]; rintro x ⟨rfl, -⟩ ⟨⟨h0, h1⟩, -⟩; linarith
+  · rw [Set.disjoint_left]
+    rintro x (⟨rfl, -⟩ | ⟨⟨h0, h1⟩, -⟩) (⟨rfl, -⟩ | ⟨y, ⟨⟨h2, h3⟩, -⟩, hy⟩)
+    · linarith
+    · simp at hy; linarith
+    · linarith
+    · simp at hy; linarith
+
+/-- Neumann and Dirichlet eigenvalues at `K` interlace (same condition at `0`):
+`N_j < D_j < N_{j+1}`. -/
+lemma p2l_interlace (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (odd0 : Bool) (j : ℕ) :
+    Real.lameEigenvalue ν k odd0 false j < Real.lameEigenvalue ν k odd0 true j ∧
+      Real.lameEigenvalue ν k odd0 true j < Real.lameEigenvalue ν k odd0 false (j + 1) := by
+  have hk := l29_sq_lt_one hk0 hk1
+  have hK := Real.compEllIntKm_pos hk
+  set K := Real.compEllIntKm (k ^ 2)
+  set V := p2lPot ν k
+  have hV : Continuous V := p2lPot_continuous hk
+  have hB : ∀ x, |V x| ≤ |ν * (ν + 1)| * k ^ 2 := p2lPot_abs_le
+  set Dset := {e | ODE.p2lY V odd0 e K = 0}
+  set Nset := {e | deriv (ODE.p2lY V odd0 e) K = 0}
+  have hD : Real.lameSpectrum ν k odd0 true = Dset := by
+    rw [p2l_lameSpectrum_eq, ODE.p2s_spec_eq_dir hV]
+  have hN : Real.lameSpectrum ν k odd0 false = Nset := by
+    rw [p2l_lameSpectrum_eq, ODE.p2s_spec_eq_neu hV]
+  have hfinD : ∀ c, (Dset ∩ Iio c).Finite := fun c => by
+    rw [← hD, p2l_lameSpectrum_eq]; exact ODE.p2l_spec_Iio_finite hV hB hK odd0 true c
+  have hfinN : ∀ c, (Nset ∩ Iio c).Finite := fun c => by
+    rw [← hN, p2l_lameSpectrum_eq]; exact ODE.p2l_spec_Iio_finite hV hB hK odd0 false c
+  have hfinDc : ∀ c, (Dset ∩ Iic c).Finite := fun c =>
+    (hfinD (c + 1)).subset fun x hx => ⟨hx.1, lt_of_le_of_lt (mem_Iic.1 hx.2) (lt_add_one c)⟩
+  have cnt : ∀ i, (Dset ∩ Iic (Real.lameEigenvalue ν k odd0 false i)).ncard = i := fun i => by
+    have hNi := Real.isNthLameEigenvalue_lameEigenvalue hν hk0 hk1 odd0 false i
+    unfold Real.IsNthLameEigenvalue at hNi
+    rw [hN] at hNi
+    calc (Dset ∩ Iic (Real.lameEigenvalue ν k odd0 false i)).ncard
+        = ODE.p2sN V odd0 (Real.lameEigenvalue ν k odd0 false i) K :=
+          (ODE.p2s_dirichlet_count hV hB hK hfinD _).symm
+      _ = (Nset ∩ Iio (Real.lameEigenvalue ν k odd0 false i)).ncard :=
+          ODE.p2s_neumann_count hV hB hK hfinD hfinN hNi.1
+      _ = i := hNi.2.2
+  have hDj := Real.isNthLameEigenvalue_lameEigenvalue hν hk0 hk1 odd0 true j
+  unfold Real.IsNthLameEigenvalue at hDj
+  rw [hD] at hDj
+  set d := Real.lameEigenvalue ν k odd0 true j
+  have hins : (insert d (Dset ∩ Iio d)).ncard = j + 1 := by
+    rw [Set.ncard_insert_of_notMem (by simp) hDj.2.1, hDj.2.2]
+  constructor
+  · by_contra hle
+    push Not at hle
+    have := Set.ncard_le_ncard (s := insert d (Dset ∩ Iio d))
+      (t := Dset ∩ Iic (Real.lameEigenvalue ν k odd0 false j))
+      (fun x hx => by
+        rcases hx with rfl | ⟨hx1, hx2⟩
+        · exact ⟨hDj.1, hle⟩
+        · exact ⟨hx1, le_trans (le_of_lt hx2) hle⟩) (hfinDc _)
+    rw [hins, cnt] at this
+    omega
+  · by_contra hle
+    push Not at hle
+    set e := Real.lameEigenvalue ν k odd0 false (j + 1)
+    rcases hle.lt_or_eq with hlt | heq
+    · have := Set.ncard_le_ncard (s := Dset ∩ Iic e) (t := Dset ∩ Iio d)
+        (fun x hx => ⟨hx.1, lt_of_le_of_lt hx.2 hlt⟩) hDj.2.1
+      rw [hDj.2.2, cnt] at this
+      omega
+    · have hNe := (Real.isNthLameEigenvalue_lameEigenvalue hν hk0 hk1 odd0 false (j + 1)).1
+      rw [hN] at hNe
+      have hDe : ODE.p2lY V odd0 e K = 0 := heq ▸ hDj.1
+      exact ODE.p2lY_ne_zero hV odd0 e
+        (ODE.p2l_eq_zero hV (ODE.p2lY_spec hV odd0 e).2.2 hDe hNe)
+
+/-- Zeros in `(0, 2K)` of a function symmetric about `K` up to a factor. -/
+lemma p2l_zeros_Ioo_two {w : ℝ → ℝ} {K : ℝ} (hK : 0 < K) {s : ℝ}
+    (hsym : ∀ x, w (2 * K - x) = s * w x) {n : ℕ}
+    (hA : {x | x ∈ Ioo 0 K ∧ w x = 0}.encard = n) :
+    {x | x ∈ Ioo 0 (2 * K) ∧ w x = 0}.encard =
+      2 * n + ((if w K = 0 then 1 else 0 : ℕ)) := by
+  set ZA := {x | x ∈ Ioo 0 K ∧ w x = 0}
+  have hZ : {x | x ∈ Ioo 0 (2 * K) ∧ w x = 0} =
+      ZA ∪ ({x | x = K ∧ w x = 0} ∪ (fun x => 2 * K - x) '' ZA) := by
+    ext x
+    simp only [mem_ofPred_eq, mem_union, mem_image, ZA, mem_Ioo]
+    constructor
+    · rintro ⟨⟨h0, h1⟩, hx⟩
+      rcases lt_trichotomy x K with h' | h' | h'
+      · exact Or.inl ⟨⟨h0, h'⟩, hx⟩
+      · exact Or.inr (Or.inl ⟨h', hx⟩)
+      · refine Or.inr (Or.inr ⟨2 * K - x, ⟨⟨by linarith, by linarith⟩, ?_⟩, by ring⟩)
+        rw [hsym, hx, mul_zero]
+    · rintro (⟨⟨h0, h1⟩, hx⟩ | (⟨rfl, hx⟩ | ⟨y, ⟨⟨h0, h1⟩, hy⟩, rfl⟩))
+      · exact ⟨⟨h0, by linarith⟩, hx⟩
+      · exact ⟨⟨hK, by linarith⟩, hx⟩
+      · exact ⟨⟨by linarith, by linarith⟩, by rw [hsym, hy, mul_zero]⟩
+  have hpt : {x | x = K ∧ w x = 0}.encard = ((if w K = 0 then 1 else 0 : ℕ) : ℕ∞) := by
+    split_ifs with ha
+    · rw [show {x | x = K ∧ w x = 0} = {K} from by
+        ext x; simp only [mem_ofPred_eq, mem_singleton_iff]
+        exact ⟨fun h => h.1, fun h => ⟨h, h ▸ ha⟩⟩]
+      simp
+    · rw [show {x | x = K ∧ w x = 0} = ∅ from by
+        ext x; simp only [mem_ofPred_eq, mem_empty_iff_false, iff_false, not_and]
+        rintro rfl; exact ha]
+      simp
+  have himg : ((fun x => 2 * K - x) '' ZA).encard = ZA.encard :=
+    Set.InjOn.encard_image fun a _ b _ hab => by simpa using hab
+  rw [hZ, encard_union_eq, encard_union_eq, himg, hpt, hA]
+  · push_cast; ring
+  · rw [Set.disjoint_left]; rintro x ⟨rfl, -⟩ ⟨y, ⟨⟨h0, h1⟩, -⟩, hy⟩; simp at hy; linarith
+  · rw [Set.disjoint_left]
+    rintro x ⟨⟨h0, h1⟩, -⟩ (⟨rfl, -⟩ | ⟨y, ⟨⟨h2, h3⟩, -⟩, hy⟩)
+    · linarith
+    · simp at hy; linarith
+
+/-- Zeros of `x ↦ w(x - K)` in `(0, K)` correspond to those of `w` in `(0, K)` when
+`w(-y) = s w(y)`. -/
+lemma p2l_zeros_shift {w : ℝ → ℝ} {K s : ℝ} (hpar : ∀ x, w (-x) = s * w x) :
+    {x | x ∈ Ioo 0 K ∧ w (x - K) = 0}.encard = {x | x ∈ Ioo 0 K ∧ w x = 0}.encard := by
+  have : {x | x ∈ Ioo 0 K ∧ w (x - K) = 0} =
+      (fun x => K - x) '' {x | x ∈ Ioo 0 K ∧ w x = 0} := by
+    ext x
+    simp only [mem_ofPred_eq, mem_image, mem_Ioo]
+    constructor
+    · rintro ⟨⟨h0, h1⟩, hx⟩
+      refine ⟨K - x, ⟨⟨by linarith, by linarith⟩, ?_⟩, by ring⟩
+      have := hpar (x - K)
+      rw [neg_sub, hx, mul_zero] at this
+      exact this
+    · rintro ⟨y, ⟨⟨h0, h1⟩, hy⟩, rfl⟩
+      refine ⟨⟨by linarith, by linarith⟩, ?_⟩
+      rw [show K - y - K = -y by ring, hpar, hy, mul_zero]
+  rw [this]
+  exact Set.InjOn.encard_image fun a _ b _ hab => by simpa using hab
+
+/-- The Lamé equation shifted by `K`. -/
+lemma p2l_isSol_shift {V : ℝ → ℝ} {h K : ℝ} {w : ℝ → ℝ} (hw : ODE.p2lIsSol V h w) :
+    ODE.p2lIsSol (fun x => V (x - K)) h (fun x => w (x - K)) := by
+  have hd : deriv (fun x => w (x - K)) = fun x => deriv w (x - K) :=
+    funext fun x => deriv_comp_sub_const (f := w) (a := K) (x := x)
+  refine ⟨fun x => ((hw.1 (x - K)).hasDerivAt.comp_sub_const x K).differentiableAt,
+    fun x => ?_⟩
+  rw [hd]
+  exact (hw.2 (x - K)).comp_sub_const x K
+
+/-- `w'(-K) = 0` for a function with `w(-x) = s w(x)` and `w'(K) = 0`. -/
+lemma p2l_deriv_neg_eq_zero {w : ℝ → ℝ} {K s : ℝ} (hw : Differentiable ℝ w)
+    (hpar : ∀ x, w (-x) = s * w x) (hK : deriv w K = 0) : deriv w (-K) = 0 := by
+  have h1 : deriv (fun x => w (-x)) K = -deriv w (-K) := deriv_comp_neg w K
+  rw [show (fun x => w (-x)) = fun x => s * w x from funext hpar, deriv_const_mul _ (hw K),
+    hK, mul_zero] at h1
+  linarith
+
+/-- In the problem on `[0, 2K]` with potential `V(x - K)` and Neumann conditions at both ends,
+`a^m_ν` is an eigenvalue with exactly `m` smaller eigenvalues. -/
+lemma p2l_lameAk_shift (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
+    Real.lameAk ν m k ∈ ODE.p2lSpec (fun x => p2lPot ν k (x - Real.compEllIntKm (k ^ 2)))
+      (2 * Real.compEllIntKm (k ^ 2)) false false ∧
+    (ODE.p2lSpec (fun x => p2lPot ν k (x - Real.compEllIntKm (k ^ 2)))
+      (2 * Real.compEllIntKm (k ^ 2)) false false ∩ Iio (Real.lameAk ν m k)).encard = m := by
+  have hk := l29_sq_lt_one hk0 hk1
+  have hK := Real.compEllIntKm_pos hk
+  set K := Real.compEllIntKm (k ^ 2)
+  set E := fun x => Real.lameEck ν m x k with hE
+  obtain ⟨hw, hb, hne⟩ := Real.lameEck_isLameEigenfunction hν hk0 hk1 m
+  rw [p2l_isLameSolution_iff] at hw
+  have hpar := Real.lameEck_parity hν hk0 hk1 m
+  set u := fun x => E (x - K) with hu
+  have hus := p2l_isSol_shift (K := K) hw
+  have hdu : ∀ x, deriv u x = deriv E (x - K) := fun x => deriv_comp_sub_const E K x
+  simp only [Real.LameBoundary, Bool.false_eq_true, ↓reduceIte] at hb
+  have hbc : ODE.p2lBC (2 * K) false false u := by
+    simp only [ODE.p2lBC, Bool.false_eq_true, ↓reduceIte]
+    rw [hdu, hdu, zero_sub, show 2 * K - K = K by ring]
+    exact ⟨p2l_deriv_neg_eq_zero hw.1 (fun x => (hpar x).1) hb.2, hb.2⟩
+  have hune : u ≠ 0 := fun h0 => hne (funext fun y => by
+    have := congrFun h0 (y + K); simpa [u] using this)
+  have hmem : Real.lameAk ν m k ∈ ODE.p2lSpec (fun x => p2lPot ν k (x - K)) (2 * K) false false :=
+    ⟨u, hus, hbc, hune⟩
+  refine ⟨hmem, ?_⟩
+  have hosc := ODE.p2s_oscillation_of_sol (V := fun x => p2lPot ν k (x - K))
+    ((p2lPot_continuous hk).comp (by fun_prop))
+    (fun x => p2lPot_abs_le (x - K)) (by linarith) false false hus hbc hune
+  rw [← hosc]
+  have hZ := p2l_zeros_Ioo_two (w := u) hK (s := (-1) ^ m)
+    (fun x => by
+      simp only [u]
+      rw [show 2 * K - x - K = -(x - K) by ring]; exact (hpar _).1)
+    (n := m / 2) (by
+      refine (p2l_zeros_shift (w := E) (K := K) (fun x => (hpar x).1)).trans ?_
+      exact p2l_eigenfunction_zeros hν hk0 hk1 _ _ _)
+  refine hZ.trans ?_
+  simp only [u, sub_self]
+  have hnz : deriv E 0 = 0 → E 0 ≠ 0 :=
+    fun hd h0 => hne (ODE.p2l_eq_zero (p2lPot_continuous hk) hw h0 hd)
+  have hmod := Nat.mod_two_of_bodd m
+  cases hbo : m.bodd <;> rw [hbo] at hmod <;>
+    simp only [hbo, Bool.false_eq_true, ↓reduceIte] at hb <;> simp at hmod
+  · simp only [hnz hb.1, ↓reduceIte]
+    exact_mod_cast (show 2 * (m / 2) + 0 = m by omega)
+  · simp only [show E 0 = 0 from hb.1, ↓reduceIte]
+    exact_mod_cast (show 2 * (m / 2) + 1 = m by omega)
+
+/-- In the problem on `[0, 2K]` with potential `V(x - K)` and Dirichlet conditions at both ends,
+`b^m_ν` (`m ≥ 1`) is an eigenvalue with exactly `m - 1` smaller eigenvalues. -/
+lemma p2l_lameBk_shift (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) {m : ℕ} (hm : 1 ≤ m) :
+    Real.lameBk ν m k ∈ ODE.p2lSpec (fun x => p2lPot ν k (x - Real.compEllIntKm (k ^ 2)))
+      (2 * Real.compEllIntKm (k ^ 2)) true true ∧
+    (ODE.p2lSpec (fun x => p2lPot ν k (x - Real.compEllIntKm (k ^ 2)))
+      (2 * Real.compEllIntKm (k ^ 2)) true true ∩ Iio (Real.lameBk ν m k)).encard =
+        (m - 1 : ℕ) := by
+  have hk := l29_sq_lt_one hk0 hk1
+  have hK := Real.compEllIntKm_pos hk
+  set K := Real.compEllIntKm (k ^ 2)
+  set E := fun x => Real.lameEsk ν m x k with hE
+  obtain ⟨hw, hb, hne⟩ := Real.lameEsk_isLameEigenfunction hν hk0 hk1 m
+  rw [p2l_isLameSolution_iff] at hw
+  have hpar := Real.lameEsk_parity hν hk0 hk1 m
+  set u := fun x => E (x - K) with hu
+  have hus := p2l_isSol_shift (K := K) hw
+  simp only [Real.LameBoundary, ↓reduceIte] at hb
+  have hbc : ODE.p2lBC (2 * K) true true u := by
+    simp only [ODE.p2lBC, ↓reduceIte, u]
+    rw [zero_sub, show 2 * K - K = K by ring]
+    refine ⟨?_, hb.2⟩
+    show Real.lameEsk ν m (-K) k = 0
+    rw [(hpar K).1, show Real.lameEsk ν m K k = 0 from hb.2, mul_zero]
+  have hune : u ≠ 0 := fun h0 => hne (funext fun y => by
+    have := congrFun h0 (y + K); simpa [u] using this)
+  have hmem : Real.lameBk ν m k ∈ ODE.p2lSpec (fun x => p2lPot ν k (x - K)) (2 * K) true true :=
+    ⟨u, hus, hbc, hune⟩
+  refine ⟨hmem, ?_⟩
+  have hosc := ODE.p2s_oscillation_of_sol (V := fun x => p2lPot ν k (x - K))
+    ((p2lPot_continuous hk).comp (by fun_prop))
+    (fun x => p2lPot_abs_le (x - K)) (by linarith) true true hus hbc hune
+  rw [← hosc]
+  have hZ := p2l_zeros_Ioo_two (w := u) hK (s := (-1) ^ (m + 1))
+    (fun x => by
+      simp only [u]
+      rw [show 2 * K - x - K = -(x - K) by ring]; exact (hpar _).1)
+    (n := (m - 1) / 2) (by
+      refine (p2l_zeros_shift (w := E) (K := K) (fun x => (hpar x).1)).trans ?_
+      exact p2l_eigenfunction_zeros hν hk0 hk1 _ _ _)
+  refine hZ.trans ?_
+  simp only [u, sub_self]
+  have hnz : deriv E 0 = 0 → E 0 ≠ 0 :=
+    fun hd h0 => hne (ODE.p2l_eq_zero (p2lPot_continuous hk) hw h0 hd)
+  have hmod := Nat.mod_two_of_bodd m
+  cases hbo : m.bodd <;> rw [hbo] at hmod <;>
+    simp only [hbo, Bool.not_false, Bool.not_true, Bool.false_eq_true, ↓reduceIte] at hb <;>
+    simp at hmod
+  · simp only [show E 0 = 0 from hb.1, ↓reduceIte]
+    exact_mod_cast (show 2 * ((m - 1) / 2) + 1 = m - 1 by omega)
+  · simp only [hnz hb.1, ↓reduceIte]
+    exact_mod_cast (show 2 * ((m - 1) / 2) + 0 = m - 1 by omega)
+
 /-- Table 29.3.2: `Ec^m_ν(x, k²)` has exactly `⌊m/2⌋` zeros in `(0, K)` (the "nonnegative
-integer `m`" of the table for `Ec^{2m}`, `Ec^{2m+1}`). Admitted (Sturm oscillation). -/
+integer `m`" of the table for `Ec^{2m}`, `Ec^{2m+1}`). -/
 @[dlmf 29.3.iv]
 theorem Real.lameEck_zeros_Ioo (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
     {x ∈ Set.Ioo 0 (Real.compEllIntKm (k ^ 2)) | Real.lameEck ν m x k = 0}.Finite ∧
-      {x ∈ Set.Ioo 0 (Real.compEllIntKm (k ^ 2)) | Real.lameEck ν m x k = 0}.ncard = m / 2 := by
-  sorry
+      {x ∈ Set.Ioo 0 (Real.compEllIntKm (k ^ 2)) | Real.lameEck ν m x k = 0}.ncard = m / 2 :=
+  p2l_finite_ncard_of_encard (p2l_eigenfunction_zeros hν hk0 hk1 _ _ _)
 
-/-- Table 29.3.2: `Es^m_ν(x, k²)` (`m ≥ 1`) has exactly `⌊(m - 1)/2⌋` zeros in `(0, K)`.
-Admitted. -/
+/-- Table 29.3.2: `Es^m_ν(x, k²)` (`m ≥ 1`) has exactly `⌊(m - 1)/2⌋` zeros in `(0, K)`. -/
 @[dlmf 29.3.iv]
 theorem Real.lameEsk_zeros_Ioo (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ)
     (hm : 1 ≤ m) :
     {x ∈ Set.Ioo 0 (Real.compEllIntKm (k ^ 2)) | Real.lameEsk ν m x k = 0}.Finite ∧
       {x ∈ Set.Ioo 0 (Real.compEllIntKm (k ^ 2)) | Real.lameEsk ν m x k = 0}.ncard =
-        (m - 1) / 2 := by
-  sorry
+        (m - 1) / 2 :=
+  p2l_finite_ncard_of_encard (p2l_eigenfunction_zeros hν hk0 hk1 _ _ _)
 
-/-- §29.3(iv): the superscript `m` of `Ec^m_ν` is the number of zeros in `[0, 2K)`.
-Admitted. -/
+/-- §29.3(iv): the superscript `m` of `Ec^m_ν` is the number of zeros in `[0, 2K)`. -/
 @[dlmf 29.3.iv]
 theorem Real.lameEck_zeros_Ico (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
     {x ∈ Set.Ico 0 (2 * Real.compEllIntKm (k ^ 2)) | Real.lameEck ν m x k = 0}.Finite ∧
       {x ∈ Set.Ico 0 (2 * Real.compEllIntKm (k ^ 2)) | Real.lameEck ν m x k = 0}.ncard = m := by
-  sorry
+  have hk := l29_sq_lt_one hk0 hk1
+  have hK := Real.compEllIntKm_pos hk
+  obtain ⟨hw, hb, hne⟩ := Real.lameEck_isLameEigenfunction hν hk0 hk1 m
+  rw [p2l_isLameSolution_iff] at hw
+  have hnz : ∀ x, deriv (fun x => Real.lameEck ν m x k) x = 0 → Real.lameEck ν m x k ≠ 0 :=
+    fun x hd h0 => hne (ODE.p2l_eq_zero (p2lPot_continuous hk) hw h0 hd)
+  refine p2l_finite_ncard_of_encard ?_
+  have hZ := p2l_zeros_Ico (w := fun x => Real.lameEck ν m x k) hK (s := 1)
+    (fun x => by rw [one_mul]; exact (Real.lameEck_parity hν hk0 hk1 m x).2.1)
+    (p2l_eigenfunction_zeros hν hk0 hk1 _ _ _)
+  rw [hZ]
+  simp only [Real.LameBoundary, Bool.false_eq_true, ↓reduceIte] at hb
+  simp only [hnz _ hb.2, ↓reduceIte]
+  have hmod := Nat.mod_two_of_bodd m
+  cases hbo : m.bodd <;> rw [hbo] at hmod <;> simp only [hbo, Bool.false_eq_true, ↓reduceIte] at hb
+    <;> simp at hmod
+  · simp only [hnz _ hb.1, ↓reduceIte]
+    exact_mod_cast (show 2 * (m / 2) + (0 + 0) = m by omega)
+  · simp only [hb.1, ↓reduceIte]
+    exact_mod_cast (show 2 * (m / 2) + (1 + 0) = m by omega)
 
-/-- §29.3(iv): the superscript `m` of `Es^m_ν` (`m ≥ 1`) is the number of zeros in `[0, 2K)`.
-Admitted. -/
+/-- §29.3(iv): the superscript `m` of `Es^m_ν` (`m ≥ 1`) is the number of zeros in `[0, 2K)`. -/
 @[dlmf 29.3.iv]
 theorem Real.lameEsk_zeros_Ico (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ)
     (hm : 1 ≤ m) :
     {x ∈ Set.Ico 0 (2 * Real.compEllIntKm (k ^ 2)) | Real.lameEsk ν m x k = 0}.Finite ∧
       {x ∈ Set.Ico 0 (2 * Real.compEllIntKm (k ^ 2)) | Real.lameEsk ν m x k = 0}.ncard = m := by
-  sorry
+  have hk := l29_sq_lt_one hk0 hk1
+  have hK := Real.compEllIntKm_pos hk
+  obtain ⟨hw, hb, hne⟩ := Real.lameEsk_isLameEigenfunction hν hk0 hk1 m
+  rw [p2l_isLameSolution_iff] at hw
+  have hnz : ∀ x, deriv (fun x => Real.lameEsk ν m x k) x = 0 → Real.lameEsk ν m x k ≠ 0 :=
+    fun x hd h0 => hne (ODE.p2l_eq_zero (p2lPot_continuous hk) hw h0 hd)
+  refine p2l_finite_ncard_of_encard ?_
+  have hZ := p2l_zeros_Ico (w := fun x => Real.lameEsk ν m x k) hK (s := -1)
+    (fun x => by rw [neg_one_mul]; exact (Real.lameEsk_parity hν hk0 hk1 m x).2.1)
+    (p2l_eigenfunction_zeros hν hk0 hk1 _ _ _)
+  rw [hZ]
+  simp only [Real.LameBoundary, ↓reduceIte] at hb
+  simp only [hb.2, ↓reduceIte]
+  have hmod := Nat.mod_two_of_bodd m
+  cases hbo : m.bodd <;> rw [hbo] at hmod <;>
+    simp only [hbo, Bool.not_false, Bool.not_true, Bool.false_eq_true, ↓reduceIte] at hb <;>
+    simp at hmod
+  · simp only [hb.1, ↓reduceIte]
+    exact_mod_cast (show 2 * ((m - 1) / 2) + (1 + 1) = m by omega)
+  · simp only [hnz _ hb.1, ↓reduceIte]
+    exact_mod_cast (show 2 * ((m - 1) / 2) + (0 + 1) = m by omega)
 
 /-! ### Distribution of the eigenvalues (§29.3(ii)) -/
 
-/-- Interlacing 29.3.1: `a^m_ν(k²) < a^{m+1}_ν(k²)`. Admitted. -/
+/-- Interlacing 29.3.1: `a^m_ν(k²) < a^{m+1}_ν(k²)`. -/
 @[dlmf 29.3.E1]
 theorem Real.lameAk_lt_lameAk_succ (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
     Real.lameAk ν m k < Real.lameAk ν (m + 1) k := by
-  sorry
+  obtain ⟨-, h1⟩ := p2l_lameAk_shift hν hk0 hk1 m
+  obtain ⟨hm2, h2⟩ := p2l_lameAk_shift hν hk0 hk1 (m + 1)
+  by_contra hle
+  push Not at hle
+  have := Set.encard_le_encard (Set.inter_subset_inter_right
+    (ODE.p2lSpec (fun x => p2lPot ν k (x - Real.compEllIntKm (k ^ 2)))
+      (2 * Real.compEllIntKm (k ^ 2)) false false) (Set.Iio_subset_Iio hle))
+  rw [h1, h2] at this
+  norm_cast at this
+  omega
 
-/-- Interlacing 29.3.2: `a^m_ν(k²) < b^{m+1}_ν(k²)`. Admitted. -/
+/-- Interlacing 29.3.2: `a^m_ν(k²) < b^{m+1}_ν(k²)`. -/
 @[dlmf 29.3.E2]
 theorem Real.lameAk_lt_lameBk_succ (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
     Real.lameAk ν m k < Real.lameBk ν (m + 1) k := by
-  sorry
+  have h := (p2l_interlace hν hk0 hk1 m.bodd (m / 2)).1
+  rw [Real.lameAk, Real.lameBk, Nat.bodd_succ, Bool.not_not,
+    show (m + 1 - 1) / 2 = m / 2 by omega]
+  exact h
 
-/-- Interlacing 29.3.3: `b^m_ν(k²) < b^{m+1}_ν(k²)`, `m ≥ 1`. Admitted. -/
+/-- Interlacing 29.3.3: `b^m_ν(k²) < b^{m+1}_ν(k²)`, `m ≥ 1`. -/
 @[dlmf 29.3.E3]
 theorem Real.lameBk_lt_lameBk_succ (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) {m : ℕ}
     (hm : 1 ≤ m) : Real.lameBk ν m k < Real.lameBk ν (m + 1) k := by
-  sorry
+  obtain ⟨-, h1⟩ := p2l_lameBk_shift hν hk0 hk1 hm
+  obtain ⟨-, h2⟩ := p2l_lameBk_shift hν hk0 hk1 (by omega : 1 ≤ m + 1)
+  by_contra hle
+  push Not at hle
+  have := Set.encard_le_encard (Set.inter_subset_inter_right
+    (ODE.p2lSpec (fun x => p2lPot ν k (x - Real.compEllIntKm (k ^ 2)))
+      (2 * Real.compEllIntKm (k ^ 2)) true true) (Set.Iio_subset_Iio hle))
+  rw [h1, h2] at this
+  norm_cast at this
+  omega
 
-/-- Interlacing 29.3.4: `b^m_ν(k²) < a^{m+1}_ν(k²)`, `m ≥ 1`. Admitted. -/
+/-- Interlacing 29.3.4: `b^m_ν(k²) < a^{m+1}_ν(k²)`, `m ≥ 1`. -/
 @[dlmf 29.3.E4]
 theorem Real.lameBk_lt_lameAk_succ (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) {m : ℕ}
     (hm : 1 ≤ m) : Real.lameBk ν m k < Real.lameAk ν (m + 1) k := by
-  sorry
+  have h := (p2l_interlace hν hk0 hk1 (!m.bodd) ((m - 1) / 2)).2
+  rw [Real.lameAk, Real.lameBk, Nat.bodd_succ, show (m + 1) / 2 = (m - 1) / 2 + 1 by omega]
+  exact h
 
 /-- Coalescence 29.3.5: `a^m_ν(k²) = b^m_ν(k²)` for `ν = 0, 1, …, m - 1`. Admitted. -/
 @[dlmf 29.3.E5]

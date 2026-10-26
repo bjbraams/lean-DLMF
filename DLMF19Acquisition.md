@@ -16,7 +16,7 @@ direct admissions in the 26 `DLMF/EllipticIntegrals` modules (the rest are prove
 admitted lemmas). Excluded: §19.3 and §19.17 (graphics), §§19.30–19.35 (applications),
 §§19.36–19.39 (computation, tables, approximations, software) and 19.9.E10 (numerical). The
 DLMF errata found here were checked by an independent numerical verifier and are collected in
-[DLMFErrata.md](DLMFErrata.md), section "Chapter 19". lean-codes' proved Carlson library (a
+the [DLMF errata report](https://bjbraams.github.io/lean-DLMF/DLMFErrata.pdf), section "Chapter 19". lean-codes' proved Carlson library (a
 Lake dependency since 2026-10-25) is reused through bridges, not copied.
 
 Part A: §§19.1, 19.2 and 19.4–19.8 have 100 numbered equations and tagged prose items
@@ -404,7 +404,7 @@ Domains and conventions:
 
 - `symEllIntRF`, `symEllIntRJ`, `symEllIntRG`, `symEllIntRD` and `symEllIntRC` take complex arguments and follow DLMF 19.16.1–19.16.5 and 19.2.17. Off the stated domains the Bochner integrals are totalized. R_J and R_C take the Cauchy principal value (`cauchyPVIoi`) when p or y is a negative real.
 - `symEllIntR a b z` is lean-codes `Carlson.carlsonR (-a) b z` on the product slit plane. When a node lies on the cut or is 0 (§19.16(iii)), it is the limit from the slit domain. On the slit plane, the bridges `symEllIntRF_eq_carlsonRF`, `symEllIntRJ_eq_carlsonR`, `symEllIntRC_eq_carlsonRC` and `symEllIntRG_eq_carlsonRG` relate these definitions to the lean-codes ones. The first three are proved; the last is proved modulo 19.16.E17.
-- **Corrected** (domain), 19.20.E3 and 19.20.E23: the printed identities fail for some complex arguments in the 19.16(i) domain. The independent check (2026-10-25) showed that the discrepancy factor is not a constant −i (at x = −1 + i, y = −1 + 2i it is +i for E3 and −i for E23; at x = −2 + 2i, y = 1.5 − 1.5i it is 0.945 + 0.328i and −0.541 + 0.841i), and that both formulas hold for Re x, Re y > 0. They are acquired for real x, y > 0 and, as corrected complex forms, for Re x, Re y > 0 (`symEllIntRF_lemniscatic_complex`, `symEllIntRD_lemniscatic_complex`). See DLMFErrata.md.
+- **Corrected** (domain), 19.20.E3 and 19.20.E23: the printed identities fail for some complex arguments in the 19.16(i) domain. The independent check (2026-10-25) showed that the discrepancy factor is not a constant −i (at x = −1 + i, y = −1 + 2i it is +i for E3 and −i for E23; at x = −2 + 2i, y = 1.5 − 1.5i it is 0.945 + 0.328i and −0.541 + 0.841i), and that both formulas hold for Re x, Re y > 0. They are acquired for real x, y > 0 and, as corrected complex forms, for Re x, Re y > 0 (`symEllIntRF_lemniscatic_complex`, `symEllIntRD_lemniscatic_complex`). See the errata report (reports/DLMFErrata.tex).
 - Branch conditions not printed in DLMF are made explicit. 19.16.E11 requires ph λ + ph zⱼ ∈ (−π, π). 19.21.E4 and 19.21.E5 use `SignType.sign z.im`.
 - The decimal values in 19.20.2 and 19.20.22 are excluded as numerical results; the exact identities are acquired.
 

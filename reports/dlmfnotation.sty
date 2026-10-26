@@ -1,0 +1,97 @@
+% dlmfnotation.sty -- DLMF notation and link macros for the lean-DLMF reports.
+% Load after leanreport.sty (lean-codes/reports), which provides fonts, packages, \lean, \file,
+% \repofile and basic notation.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{dlmfnotation}[2026/10/26 DLMF notation for lean-DLMF reports]
+\RequirePackage{leanreport}
+
+% ---------------------------------------------------------------- links
+% \deq{28.28.16}      -> (28.28.16), linked to https://dlmf.nist.gov/28.28.E16
+% \DLMF{28.28.16}     -> DLMF (28.28.16)
+% \dlink{URL-suffix}{text} -> text linked to https://dlmf.nist.gov/URL-suffix
+\makeatletter
+\def\deq#1{\deq@split#1\relax}
+\def\deq@split#1.#2.#3\relax{\href{https://dlmf.nist.gov/#1.#2.E#3}{(#1.#2.#3)}}
+\makeatother
+\newcommand{\DLMF}[1]{DLMF~\deq{#1}}
+\newcommand{\dlink}[2]{\href{https://dlmf.nist.gov/#1}{#2}}
+
+% ---------------------------------------------------------------- general math
+\DeclareMathOperator{\ph}{ph}           % phase
+\DeclareMathOperator{\sgn}{sgn}
+\DeclareMathOperator{\Ln}{Ln}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\arccosh}{arccosh}
+\DeclareMathOperator{\arcsinh}{arcsinh}
+\DeclareMathOperator{\arctanh}{arctanh}
+\DeclareMathOperator{\arcsech}{arcsech}
+\DeclareMathOperator{\arccsch}{arccsch}
+\DeclareMathOperator{\arccoth}{arccoth}
+\DeclareMathOperator{\sech}{sech}
+\DeclareMathOperator{\csch}{csch}
+\newcommand{\poch}[2]{\left(#1\right)_{#2}}             % Pochhammer (a)_n
+\newcommand{\qpoch}[3]{\left(#1;#2\right)_{#3}}         % q-Pochhammer (a;q)_n
+\newcommand{\NVar}[1]{#1}                               % DLMF placeholder variable
+
+% ---------------------------------------------------------------- special functions
+\newcommand{\GammaF}{\Gamma}
+\DeclareMathOperator{\Ai}{Ai}
+\DeclareMathOperator{\Bi}{Bi}
+\newcommand{\StruveH}{\mathbf{H}}
+\newcommand{\AngerJ}{\mathbf{J}}
+\newcommand{\WeberE}{\mathbf{E}}
+\newcommand{\FerrersP}{\mathsf{P}}
+\newcommand{\FerrersQ}{\mathsf{Q}}
+\newcommand{\LegendreP}{P}
+\newcommand{\LegendreQ}{\boldsymbol{Q}}
+\newcommand{\IncBetaI}{I}
+% Mathieu functions
+\DeclareMathOperator{\ce}{ce}
+\DeclareMathOperator{\se}{se}
+\DeclareMathOperator{\fe}{fe}
+\DeclareMathOperator{\Mge}{ge}     % Mathieu ge (\ge is taken)
+\DeclareMathOperator{\Ce}{Ce}
+\DeclareMathOperator{\Se}{Se}
+\DeclareMathOperator{\hc}{hc}
+\DeclareMathOperator{\hs}{hs}
+\newcommand{\MathieuM}[1]{\mathrm{M}^{(#1)}}
+% Heun
+\DeclareMathOperator{\Hl}{Hl}
+% Jacobian elliptic functions
+\DeclareMathOperator{\am}{am}
+\DeclareMathOperator{\sn}{sn}
+\DeclareMathOperator{\cn}{cn}
+\DeclareMathOperator{\dn}{dn}
+\DeclareMathOperator{\cs}{cs}
+\DeclareMathOperator{\ns}{ns}
+\DeclareMathOperator{\nc}{nc}
+\DeclareMathOperator{\dc}{dc}
+\DeclareMathOperator{\jsc}{sc}    % Jacobi sc (\sc is taken)
+\DeclareMathOperator{\cd}{cd}
+\DeclareMathOperator{\arccs}{arccs}
+\DeclareMathOperator{\arccn}{arccn}
+\DeclareMathOperator{\arccd}{arccd}
+% Carlson symmetric integrals
+\newcommand{\RF}{R_{F}}
+\newcommand{\RG}{R_{G}}
+\newcommand{\RD}{R_{D}}
+\newcommand{\RJ}{R_{J}}
+\newcommand{\RC}{R_{C}}
+% theta, Weierstrass
+\newcommand{\Lattice}{\mathbb{L}}
+\newcommand{\WeierP}{\wp}
+
+% ---------------------------------------------------------------- further notation
+\providecommand{\erfc}{\operatorname{erfc}}
+\providecommand{\MeijerG}[5]{G^{#1,#2}_{#3,#4}\left(#5\right)}
+\providecommand{\qbinom}[3]{\genfrac{[}{]}{0pt}{}{#1}{#2}_{#3}}
+\providecommand{\qhyp}[2]{{}_{#1}\phi_{#2}}
+\providecommand{\qbhyp}[2]{{}_{#1}\psi_{#2}}
+\providecommand{\Kp}{K'}
+\providecommand{\Lthree}{\mathbb{L}_{3}}
+\providecommand{\bOmega}{\boldsymbol{\Omega}}
+\providecommand{\bGamma}{\boldsymbol{\Gamma}}
+\providecommand{\me}{\operatorname{me}}
+\providecommand{\Li}{\operatorname{Li}}
+
+\endinput

@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Painleve.SolutionsDefs
+public import DLMF.Painleve.Equations
 public import DLMF.Painleve.Rational
 
 /-!
@@ -30,21 +31,10 @@ namespace DLMF.Painleve
 
 /-! ## Bridge to Beals–Wong -/
 
-/-- DLMF's `PII` with parameter `α` is Beals–Wong's `PII(-α)`. -/
-lemma b32_isPainleveIIOn_iff {α : ℂ} {w : ℂ → ℂ} {U : Set ℂ} :
-    IsPainleveIIOn α w U ↔ IsPIIOn (-α) w U := by
-  constructor
-  · intro h
-    exact ⟨h.differentiableAt, fun z hz => by
-      simpa [painleveIIRhs, sub_neg_eq_add] using h.hasDerivAt_deriv z hz⟩
-  · intro h
-    exact ⟨h.differentiableAt, fun z hz => by
-      simpa [painleveIIRhs, sub_neg_eq_add] using h.hasDerivAt_deriv z hz⟩
-
 /-- The symmetry `w ↦ -w`, `α ↦ -α` of DLMF's `PII`. -/
 lemma b32_isPainleveIIOn_neg {α : ℂ} {w : ℂ → ℂ} {U : Set ℂ}
     (h : IsPainleveIIOn α w U) : IsPainleveIIOn (-α) (fun z => -w z) U := by
-  rw [b32_isPainleveIIOn_iff] at h ⊢
+  rw [isPainleveIIOn_iff_isPIIOn] at h ⊢
   simpa using h.neg
 
 /-- A polynomial quotient `p/q` solves `PII` with parameter `α` on the regular set of `q`
@@ -81,7 +71,7 @@ construction `exists_rational_solution_int`. -/
 theorem painleveII_exists_rational_int (n : ℤ) :
     ∃ p q : ℂ[X], q ≠ 0 ∧ IsPainleveIIOn (n : ℂ) (rationalFn p q) (polynomialDomain q) := by
   obtain ⟨p, q, hq, h⟩ := exists_rational_solution_int (-n)
-  exact ⟨p, q, hq, b32_isPainleveIIOn_iff.mpr (by simpa using h)⟩
+  exact ⟨p, q, hq, isPainleveIIOn_iff_isPIIOn.mpr (by simpa using h)⟩
 
 /-- DLMF 32.8.1: `w(z; 1) = -1/z` solves `PII` with `α = 1` for `z ≠ 0`. -/
 @[dlmf 32.8.E1]
@@ -89,7 +79,7 @@ theorem painleveII_rational_one :
     IsPainleveIIOn 1 (fun z => -1 / z) {z | z ≠ 0} := by
   have h := isPIIOn_recip (𝕜 := ℂ)
   have h' : IsPainleveIIOn (-1) (fun z : ℂ => z⁻¹) {z | z ≠ 0} :=
-    b32_isPainleveIIOn_iff.mpr (by simpa using h)
+    isPainleveIIOn_iff_isPIIOn.mpr (by simpa using h)
   simpa [neg_div, one_div] using b32_isPainleveIIOn_neg h'
 
 /-! ## The Yablonskii–Vorob'ev polynomials (32.8.5–32.8.7) -/
@@ -197,7 +187,7 @@ theorem yablonskiiVorobievQ_six :
 /-- Equality on an open set transports DLMF's `PII`. -/
 lemma b32_congr {α : ℂ} {w w' : ℂ → ℂ} {U : Set ℂ} (h : IsPainleveIIOn α w U)
     (hU : IsOpen U) (he : EqOn w w' U) : IsPainleveIIOn α w' U :=
-  b32_isPainleveIIOn_iff.mpr ((b32_isPainleveIIOn_iff.mp h).congr hU he)
+  isPainleveIIOn_iff_isPIIOn.mpr ((isPainleveIIOn_iff_isPIIOn.mp h).congr hU he)
 
 /-- A difference of logarithmic derivatives `A₁/A - B₁/B` of polynomials (with `A₁` the
 derivative of `A`, `A₂` that of `A₁`, `A₃` that of `A₂`, similarly for `B`) solves `PII` where

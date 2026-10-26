@@ -6865,7 +6865,7 @@ statements ("Corrected from the printed DLMF formula: …"), with two new admitt
 forms (`jacobiTheta_reduction_iq_eta`, 20.7.E34; `compEllIntKk_eq_jacobiThetaThreeNullTau_fundamental`,
 20.9.E2), and the false `hasSum_arctanh`, `hasSum_arctanh_large` (4.38.E5/E6) were corrected to
 the open domains and proved, with natural-order `tendsto_arctanh_series`,
-`tendsto_arctanh_large_series` for the DLMF domains. The project-wide register DLMFErrata.md
+`tendsto_arctanh_large_series` for the DLMF domains. The project-wide register the errata report (reports/DLMFErrata.tex)
 now has 62 genuine DLMF errata, 19 fixed transcription defects and 32 formalization notes.
 
 ### lean-codes dependency and `DLMFMathlib`
@@ -6934,7 +6934,7 @@ Source admissions in the five areas fell from 703 to 334 (EllipticIntegrals 281 
 
 ### Statements corrected in this round
 
-Recorded in DLMFErrata.md; each was found by an agent and confirmed numerically by the coordinator
+Recorded in the errata report (reports/DLMFErrata.tex); each was found by an agent and confirmed numerically by the coordinator
 or agent before the change.
 
 - 19.8.6 (project defect): the summand used the real root cₙ, so c₀ = 0 for k² < 0; now
@@ -7015,7 +7015,7 @@ admissions: BernoulliEuler 111, Zeta 124, Combinatorics 157, NumberTheory 97 (48
 
 The acquisition agents reported 29 suspected errata or missing conditions, each with numerical or
 brute-force evidence; an independent verifier re-derived every one from the DLMF page text. 25
-were confirmed (some in part) and entered in DLMFErrata.md (a), Chapters 24–27: among them
+were confirmed (some in part) and entered in the errata report (reports/DLMFErrata.tex) (a), Chapters 24–27: among them
 24.4.24 (false for every n; corrected by partial fractions), 25.11.23 (denominator), 25.12.13
 (branch error introduced by DLMF's V1.2.3 modification), 25.14.7 (no conditions printed),
 26.8.31 (insufficient hypothesis; counterexample sin πz proved), 26.9.7, 26.10.9, 26.10.18,
@@ -7088,7 +7088,7 @@ Combinatorics 157 → 95, NumberTheory 97 → 65 (the three Ramanujan congruence
 
 ### Statements corrected in this round
 
-Both were found by agents with a proved counterexample; recorded in DLMFErrata.md (a).
+Both were found by agents with a proved counterexample; recorded in the errata report (reports/DLMFErrata.tex) (a).
 
 - 25.15(ii) `LFunction_one_sub_conj_eq_zero`: DLMF's "zeros in 0 ≤ ℜs ≤ 1, symmetric about the
   critical line" fails at the trivial zero s = 0 of an even character; hypothesis ρ ≠ 0 added.
@@ -7158,7 +7158,7 @@ Ramanujan congruences in `DLMF/Partitions.lean` remain). Project-wide 1,115 → 
 
 ### Statements corrected in this round
 
-Both corrections rest on proved counterexamples; recorded in DLMFErrata.md.
+Both corrections rest on proved counterexamples; recorded in the errata report (reports/DLMFErrata.tex).
 
 - 24.12.11 `tendsto_eulerRealZero_odd` (DLMF erratum, (a)): DLMF prints y_{2m}^{(n)} → m − 1/2 for
   odd n; the zeros tend to 1/2, 3/2, 5/2, …, so y_{2m} → 2m − 1/2 and the printed form fails for every
@@ -7312,7 +7312,7 @@ Mathieu reduction of the spheroidal equation.
 
 The agents reported 13 suspected errata or notes, each with numerical evidence; an independent
 verifier re-derived every one from the DLMF 1.2.8 page text with its own numerics, and checked the
-DLMF errata page (none listed). Confirmed and entered in DLMFErrata.md (a): 28.5.6 (sign),
+DLMF errata page (none listed). Confirmed and entered in the errata report (reports/DLMFErrata.tex) (a): 28.5.6 (sign),
 28.23.2–5 ("for all z when j = 1" only for integer ν), 28.28.11 (e^{iνπ/2}), 28.28.16 (overall sign,
 and — found by the verifier — the lower sign belongs to −π ≤ y ≤ 0, not π ≤ y ≤ 2π; the acquired
 statement was corrected accordingly), §28.31(iii) (powers swapped), 30.11.6 (e^{|ℑ(γz)|}), 31.10.8,
@@ -7414,9 +7414,9 @@ spheroidal eigen-specs and the radial series 28.24.1.
 
 Statement corrections: 28.2.33 and the second conjunct of §28.4(i) gained `n ≠ 0`, restoring
 DLMF's range (DLMF has no se₀; 28.4.3–4 index se_{2n+1}, se_{2n+2}); the Lean junk se₀ gave a
-proved counterexample to 28.2.33 and a divergent sine series (DLMFErrata.md (b); 28.2.33 is now
+proved counterexample to 28.2.33 and a divergent sine series (the errata report (reports/DLMFErrata.tex) (b); 28.2.33 is now
 proved). The Fuchsian normal form 31.14.3–5 gained `Function.Injective a` after a proved
-counterexample (DLMFErrata.md (c)). To watch:
+counterexample (the errata report (reports/DLMFErrata.tex) (c)). To watch:
 28.12.7 needs that normality excludes coinciding eigenvalues; 28.15.2 may have degenerate cases.
 
 Integration: the four DLMFMathlib files added to `DLMFMathlib.lean`; import survey: nothing new
@@ -7433,3 +7433,119 @@ most of what is proved from admissions in Chapter 28; `mathieu_ince`; Hill's §2
 Δ, Hadamard); the radial series 28.24.1 (coefficient decay, integer-order Y limits);
 `spheroidalCoeff_recurrence_of_le` (route known); Heun 31.7.2 (star-shaped domain), Heun
 polynomials, 31.10 kernels; the Lamé Weierstrass bridge 29.2.9 and the k = 0 cases of 29.5.
+
+## Proof round 2 for Chapters 28–31 (2026-10-26)
+
+Eight agents with disjoint files (later resumed on freed files), helper prefixes `p2s_` (Mathieu
+spectral theory, Hill, zeros), `p2f_` (Mathieu properties and Fourier series), `p2m_` (modified
+Mathieu functions), `p2x_` (noninteger order, second solutions), `p2l_` (Lamé eigenvalues and
+Fourier series), `p2p_` (Lamé polynomials), `p2y_` (spheroidal) and `p2h_` (Heun). Source
+admissions: Mathieu 203 → 173, Lamé 104 → 44, Spheroidal 41 → 35, Heun 43 → 28 (391 → 280).
+
+New general files (DLMFMathlib, Mathlib-only imports):
+- `Analysis/ODE/P2sSturmSpectrum`, `P2sGrowth`, `P2sOscillation`: spectra of real Sturm–Liouville
+  problems via entire boundary functions (enumeration of a discrete set bounded below, Grönwall
+  energy estimates, sign changes for large λ, infinitely many zeros when the coefficient tends to
+  +∞).
+- `Analysis/ODE/P2lSturmLiouville`: separated Sturm–Liouville theory for w'' = (V − h)w on [0, L]
+  (spectrum, discreteness, parity, comparison, enumeration).
+- `Analysis/ODE/P2sSturmOsc`: the Sturm oscillation theorem (the k-th eigenfunction has k zeros),
+  Dirichlet/Neumann counts and interlacing, signs at the endpoint.
+
+Highlights:
+- Mathieu: `mathieuSpecA_exists`/`mathieuSpecB_exists` (the definitions of a_n(q), b_n(q) and
+  everything that rested only on them are now fully proved); `mathieu_ince` (§28.5(i)) and
+  `IsFloquetSolution.unique` (§28.2(iv)); joint entireness of w_I, w_II in (z, a, q) through
+  Hartogs's theorem from lean-codes (`SeveralComplexVariables.SeparateAnalytic`, the first use of
+  the SCV modules here); 28.2.18–20; `mathieu_zeros_count`, the imaginary-axis zeros (§28.9) and
+  the −q relations 28.2.34–37 by the oscillation theorem; §28.4(i); the stability chart §28.17;
+  `hillDiscriminant_order_half` (§28.29(iii)); the radial series 28.24.1–5 and their locally
+  uniform convergence, the reality §28.20(iii), the modified Mathieu equation for the series and
+  the connection formulas 28.22.1–4 (with the integer-order monodromy 28.20.25).
+- Lamé: `Real.lameEigenvalue_spec`/`lameEigenfunction_spec`; Table 29.3.2 and 29.3.1–4; the
+  29.6 expansions, normalizations, Parseval sums and positivity; 29.5.1–3; 29.10.1–3; Lamé
+  polynomials: 29.15.3, the polynomial form, the Lamé equation (`p2p_lamePolyEk_isLameSolution`),
+  29.12.1–8, the 29.15.7 family and the orthogonality 29.14.1–11.
+- Spheroidal: 30.8.1, 30.8.4, 30.8.5, 30.8.7, 30.8.8 (corrected), 30.5.3.
+- Heun: 31.5.2 and Heun polynomials, 31.4.1, 31.7.2–3, §31.7(ii), 31.14.3–5, 31.15.2, 31.15.4,
+  31.8.4–5, 31.10.9, 31.10.19, 31.10.22–23 (corrected form), 31.11.2 (corrected).
+
+Statement corrections (the errata report (reports/DLMFErrata.tex) (b)): 30.8.8 gained γ² ≠ 0 after the proved counterexample
+`p2y_not_spheroidalCoeff_ratio_isBigO_four_zero`; 31.11.2 gained the hypotheses that the third Gauss
+parameters are not nonpositive integers after the proved counterexample
+`p2h_not_heunHypP5_P6_riemann_degenerate`. Both are now proved.
+
+Open decisions and concerns:
+- 31.7.4 (`heunLocal_cubic_eq_hypergeometric`) is false on the acquired domain, which has three
+  components; DLMF gives no domain. Numerical evidence only; the proposed restriction
+  |ph(1 − (3/2 − i√3/2)z)| < π/6 is in the errata report (reports/DLMFErrata.tex) (c). The statement is unchanged pending the
+  user's decision.
+- `IsHeunEigenvalue01` admits any preconnected open U containing 0 and 1, including sets that wind
+  around a singularity; it may admit eigenvalues for other path classes (no counterexample yet).
+  Affects `IsHeunEigenvalue01.analyticOn_ball`, `heunEigenvalue01_infinite_discrete` and the
+  orthogonality statements.
+- 28.12.7 is proved under the extra hypothesis λ_{ν+2m}(q) ≠ λ_{ν+2n}(q) (separate theorem);
+  28.15.2 may have degenerate cases (c₀ = 0 for complex q).
+
+Integration: new modules added to the umbrellas (Mathieu `P2sBridge`, `Modified.P2mCrossSeries`,
+`P2mRadial`, `P2mConnection`; Lamé `P2lFourier`, `Polynomials.P2pBase`, `P2pODE`, `P2pEigen`,
+`P2pIdent`; Spheroidal `P2yFerrersTools`) and the five DLMFMathlib files to `DLMFMathlib.lean`.
+Definitions and lemmas moved down unchanged: `p1a2_cos_rec`, `p1a2_sin_rec`, `p1a2_deriv_periodic`
+(FourierSeries → Properties), three `p1c_` Bessel lemmas (BesselSeries → P2mCrossSeries),
+`p1c_isMathieuSolution_comp` (Connection → P2mConnection), `p1l_hasDerivAt_phi`
+(→ P2lFourier). New cross-area imports are from theorem files (Legendre `AdditionTools`,
+`IntegralTools`, Elliptic `JacobiIdentities`, JacobiElliptic `SpecialValues`, Bessel `Asymptotics`,
+Theta `Basic`); import survey: nothing new. Ledgers regenerated (idempotent), with status
+paragraphs.
+
+Validation: full build 13,490 jobs; audit 21,765 theorems, 1,453 depending on `sorryAx`, no other
+nonstandard axiom; project source admissions 1,310 (1,338 before, including the 83 new Chapter 32
+admissions).
+
+Next steps: Mathieu 28.2.25 (needs comparisons between a_n and b_n of opposite parity), the
+analytic branch of a_n(q) at q = 0 (unlocks all 31 SmallQ admissions), §28.7 (simplicity of
+eigenvalues, implicit function theorem), Ince-equation spectra (Sturm theory with a first-order
+term), 28.24.6–13 at imaginary h, 28.20.21 (needs the 28.20.9–12 asymptotics); Lamé zeros on
+K + i[0, K′] (unlocks 29.12.9–13), duality 29.3.7–8, the 29.6 ratio limits (Perron–Kreuser);
+spheroidal eigenvalue existence (singular Sturm–Liouville theory on (−1, 1)); Heun: analytic
+continuation for `heunFunction01`, Pincherle-type continued fractions, Heine–Stieltjes counting,
+the remaining 31.10 kernel PDEs (multivariable chain rule).
+
+## Chapter 32 acquisition (2026-10-26)
+
+Two agents: part A (§§32.1–32.7, prefix `a32_`) and part B (§§32.8–32.17, prefix `b32_`); ledger
+DLMF32Acquisition.md. The existing Beals–Wong Painlevé II development in DLMF/Painleve (`IsPIIOn`,
+Bäcklund, Airy and rational solutions, Lax pair, tau quotients, poles, local real existence) is
+reused: DLMF's PII w″ = 2w³ + zw + α is `IsPIIOn (−α)` (`isPainleveIIOn_iff_isPIIOn`).
+
+Modules (all in DLMF/Painleve): definitions files `Defs` (the six equations in the DLMF
+normalization, structures with nonvanishing fields where DLMF divides, Hamiltonians H_I–H_VI,
+Lax data) and `SolutionsDefs` (Yablonskii–Vorob'ev and Okamoto polynomials, τ-functions,
+rationality and algebraicity predicates, real ODE predicates, PDE predicates for mKdV, KdV,
+sine-Gordon and Boussinesq, Tracy–Widom F, Freud moments and Hankel determinants); theorem files
+`Equations` (§32.2), `BacklundDLMF` (§32.7), `Hamiltonian` (§32.6), `Isomonodromy` (§§32.4–32.5),
+`RationalDLMF` (§32.8), `ElementarySolutions` (§32.9), `SpecialSolutions` (§32.10),
+`RealAsymptotics` (§32.11), `Reductions` (§32.13), `Combinatorics` (§§32.14–32.15).
+
+Coverage: 280 in-scope numbered equations, 277 covered (32.2.E8, the Möbius map of the
+Painlevé–Gambier classification, and the informal 32.10.E1 and 32.10.E24 are not formalized);
+§32.3 graphics, §32.16 applications (no mathematical statements) and §32.17 computation excluded,
+§32.12 references only. 358 tag entries: 192 proved, 166 admitted; 83 source admissions. Proved
+during acquisition: the PII Bäcklund maps and recurrence, the PIV, PV, PVI symmetries and
+coalescences, the Hamiltonian systems and most σ-equations, the PIII Lax compatibility,
+Q₂–Q₆ and the rational-solution identities, all five Riccati reductions of §32.10 with the
+Airy, Hermite and erfc solutions, the elementary solutions of §32.9 and the PDE reductions.
+Design: the Painlevé property (32.2.i) is stated as meromorphic continuation and admitted; the
+classification and transcendence statements are not formalized; real asymptotics use
+`IsEquivalent`/`IsLittleO`/`IsBigO`, with 32.11.6–10 stated globally on ℝ (stronger than DLMF).
+
+DLMF errata (confirmed by an independent exact symbolic check against DLMF's own definitions;
+the errata report (reports/DLMFErrata.tex) (a), Chapter 32): 32.6.26 (θ₁ for θ∞), 32.6.30–31, 32.6.37 (stray θ∞), 32.6.38–39
+(signs), 32.7.42–43 (α = ½θ∞², A = ½Θ∞²), §32.9(ii) (one sign only), 32.10.29 (n = 0, not
+n = 1). Formalization notes in the errata report (reports/DLMFErrata.tex) (c): the hypotheses σ″ ≠ 0 in 32.6.7–8 and
+32.6.14–15, the case m = 1 of 32.10.20, the explicit §32.9(i) companion result, d > 0 in §32.11.
+
+Integration: twelve modules added to DLMF/Painleve.lean; a duplicate PII bridge lemma from part B
+removed in favour of `isPainleveIIOn_iff_isPIIOn`. New cross-area imports are from theorem files
+(Confluent `Whittaker`, `ParabolicCylinder`, ErrorFunctions `Basic`, OrthogonalPolynomials
+`Differential`, Airy `Framework`); import survey: nothing new.

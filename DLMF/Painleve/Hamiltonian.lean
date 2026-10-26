@@ -272,7 +272,8 @@ theorem isHamiltonianSystemOn_painleveHamiltonianIII_iff {κ₀ κinf θ₀ θin
   · simp only [neg_neg]
   · intro z _
     have := (((((hasDerivAt_pow 2 (p z)).const_mul (q z ^ 2)).sub
-      ((hasDerivAt_id (p z)).const_mul (κinf * z * q z ^ 2 + (2 * θ₀ + 1) * q z - κ₀ * z))).add_const
+      ((hasDerivAt_id (p z)).const_mul
+        (κinf * z * q z ^ 2 + (2 * θ₀ + 1) * q z - κ₀ * z))).add_const
       (κinf * (θ₀ + θinf) * z * q z)).div_const z)
     refine this.congr_of_eventuallyEq ?_ |>.congr_deriv ?_
     · exact Filter.Eventually.of_forall fun x => by simp [painleveHamiltonianIII]
@@ -305,10 +306,12 @@ theorem IsHamiltonianSystemOn.isPainleveIIIOn {κ₀ κinf θ₀ θinf : ℂ} {q
     (hq'.const_mul (2 * θ₀ + 1)) |>.add (hid.const_mul κ₀)).div hid hz0
   convert hd using 1
   · funext x
-    try simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply, Pi.div_apply, id,
+    try simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply,
+        Pi.div_apply, id,
           Nat.cast_ofNat, Nat.add_one_sub_one, pow_one]
     try ring
-  · simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply, Pi.div_apply, id,
+  · simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply,
+      Pi.div_apply, id,
         Nat.cast_ofNat, Nat.add_one_sub_one, pow_one]
     simp only [painleveIIIRhs]
     field_simp
@@ -345,15 +348,17 @@ theorem IsHamiltonianSystemOn.sigma_painleveIII {κ₀ κinf θ₀ θinf : ℂ} 
     · funext x
       simp only [σ, painleveHamiltonianIII, Pi.add_apply, Pi.sub_apply, Pi.mul_apply,
         Pi.pow_apply, Pi.div_apply, id]
-      ring
-    · simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply, Pi.div_apply, id,
+      try ring
+    · simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply,
+        Pi.div_apply, id,
         Nat.cast_ofNat, Nat.add_one_sub_one, pow_one]
       field_simp
       ring
   have hσ2 : HasDerivAt (fun y => 2 * κ₀ * p y - κ₀ * κinf * y)
       (2 * κ₀ * ((-2 * q z * p z ^ 2 + 2 * κinf * z * q z * p z + (2 * θ₀ + 1) * p z -
         κinf * (θ₀ + θinf) * z) / z) - κ₀ * κinf) z := by
-    simpa using ((h z hzU).2.const_mul (2 * κ₀)).sub ((hasDerivAt_id z).const_mul (κ₀ * κinf))
+    exact (((h z hzU).2.const_mul (2 * κ₀)).sub ((hasDerivAt_id z).const_mul (κ₀ * κinf))
+      ).congr_deriv (by ring)
   rw [(hσ z hzU).deriv, a32_deriv_deriv hU hσ hzU hσ2]
   have hz0 := hz z hzU
   simp only [σ, painleveHamiltonianIII]
@@ -439,10 +444,12 @@ theorem IsHamiltonianSystemOn.isPainleveIIIPrimeOn {η₀ ηinf θ₀ θinf : �
     (hq'.const_mul θ₀) |>.add (hid.const_mul η₀)).div hid hz0
   convert hd using 1
   · funext x
-    try simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply, Pi.div_apply, id,
+    try simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply,
+        Pi.div_apply, id,
           Nat.cast_ofNat, Nat.add_one_sub_one, pow_one]
     try ring
-  · simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply, Pi.div_apply, id,
+  · simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply,
+      Pi.div_apply, id,
         Nat.cast_ofNat, Nat.add_one_sub_one, pow_one]
     simp only [painleveIIIPrimeRhs]
     field_simp
@@ -477,8 +484,9 @@ theorem IsHamiltonianSystemOn.sigma_painleveIIIPrime {η₀ ηinf θ₀ θinf : 
     · funext x
       simp only [σ, painleveHamiltonianIIIPrime, Pi.add_apply, Pi.sub_apply, Pi.mul_apply,
         Pi.pow_apply, Pi.div_apply, id]
-      ring
-    · simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply, Pi.div_apply, id,
+      try ring
+    · simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply,
+        Pi.div_apply, id,
         Nat.cast_ofNat, Nat.add_one_sub_one, pow_one]
       field_simp
       ring
@@ -561,10 +569,12 @@ theorem IsHamiltonianSystemOn.isPainleveIIIOn_gammaZero {κ₀ κinf θ : ℂ} {
     (hid.const_mul κ₀)).div hid hz0
   convert hd using 1
   · funext x
-    try simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply, Pi.div_apply, id,
+    try simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply,
+        Pi.div_apply, id,
           Nat.cast_ofNat, Nat.add_one_sub_one, pow_one]
     try ring
-  · simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply, Pi.div_apply, id,
+  · simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply,
+      Pi.div_apply, id,
         Nat.cast_ofNat, Nat.add_one_sub_one, pow_one]
     simp only [painleveIIIRhs]
     field_simp
@@ -598,8 +608,9 @@ theorem IsHamiltonianSystemOn.sigma_painleveIII_gammaZero {κ₀ κinf θ : ℂ}
     · funext x
       simp only [σ, painleveHamiltonianIIIGammaZero, Pi.add_apply, Pi.sub_apply, Pi.mul_apply,
         Pi.pow_apply, Pi.div_apply, id]
-      ring
-    · simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply, Pi.div_apply, id,
+      try ring
+    · simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply,
+        Pi.div_apply, id,
         Nat.cast_ofNat, Nat.add_one_sub_one, pow_one]
       field_simp
       ring

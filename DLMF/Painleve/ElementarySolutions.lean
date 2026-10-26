@@ -247,9 +247,8 @@ theorem painleveV_sqrt {κ μ : ℂ} {U : Set ℂ} (hU : IsOpen U) (hUs : U ⊆ 
     have h2 := ht2 z
     simp only [painleveVRhs, id_eq, add_sub_cancel_left]
     field_simp
-    linear_combination (-(64 * κ ^ 3 * μ * z ^ (1 / 2 : ℂ) + 128 * κ ^ 4 * μ
-        * (z ^ (1 / 2 : ℂ)) ^ 2 +
-      64 * κ ^ 5 * μ * (z ^ (1 / 2 : ℂ)) ^ 3)) * h2
+    linear_combination (-(64 * κ ^ 3 * μ * z ^ (1 / 2 : ℂ) + 128 * κ ^ 4 * μ * (z ^ (1 / 2 : ℂ)) ^ 2
+      + 64 * κ ^ 5 * μ * (z ^ (1 / 2 : ℂ)) ^ 3)) * h2
 
 /-- DLMF 32.9.8: `w = κe^{μz}` solves `PV` with parameters `(0, 0, μ, -μ²/2)` on every open set
 avoiding `z = 0` and the points where `w = 1`, for `κ ≠ 0`. -/
@@ -276,8 +275,8 @@ theorem painleveV_exp {κ μ : ℂ} {U : Set ℂ} (hU : IsOpen U) (hκ : κ ≠ 
 (DLMF writes `C exp(±√(-2δ) z)`; the sign must be that of `γ = ±√(-2δ)`, the other sign does
 not give a solution when `γ ≠ 0`). Corollary of 32.9.8. -/
 @[dlmf 32.9.ii]
-theorem painleveV_exp' {C γ δ : ℂ} {U : Set ℂ} (hU : IsOpen U) (hC : C ≠ 0) (hγδ : γ ^ 2 + 2 * δ
-    = 0)
+theorem painleveV_exp' {C γ δ : ℂ} {U : Set ℂ} (hU : IsOpen U) (hC : C ≠ 0)
+    (hγδ : γ ^ 2 + 2 * δ = 0)
     (h0 : ∀ z ∈ U, z ≠ 0) (h1 : ∀ z ∈ U, C * exp (γ * z) ≠ 1) :
     IsPainleveVOn 0 0 γ δ (fun z => C * exp (γ * z)) U := by
   have hδ : δ = -γ ^ 2 / 2 := by linear_combination hγδ / 2
@@ -304,8 +303,8 @@ set. -/
 @[dlmf 32.9.E12]
 theorem painleveV_firstIntegral {α β : ℂ} {w : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
     (hc : IsPreconnected U) (h : IsPainleveVOn α β 0 0 w U) :
-    ∃ C : ℂ, ∀ z ∈ U, z ^ 2 * deriv w z ^ 2 = (w z - 1) ^ 2 * (2 * α * w z ^ 2 + C * w z - 2
-        * β) := by
+    ∃ C : ℂ, ∀ z ∈ U, z ^ 2 * deriv w z ^ 2 = (w z - 1) ^ 2 * (2 * α * w z ^ 2 + C * w z -
+      2 * β) := by
   obtain ⟨C, hC⟩ := b32_const_of_hasDerivAt_zero (I := fun z =>
       (z ^ 2 * deriv w z ^ 2 / (w z - 1) ^ 2 - 2 * α * w z ^ 2 + 2 * β) / w z) hU hc
     fun z hz => by
@@ -366,13 +365,9 @@ theorem painleveVI_sqrt {κ μ : ℂ} {U : Set ℂ} (hU : IsOpen U) (hUs : U ⊆
   simp only [painleveVIRhs, id_eq]
   field_simp
   set T := z ^ (1 / 2 : ℂ) with hT
-  linear_combination (-4 * κ ^ 2 * (z  ^  (1 / 2 : ℂ)) ^ 4 + 8 * κ ^ 2 * (z  ^  (1 / 2 : ℂ)) ^ 3
-      * z + 8 * κ ^ 2 * (z  ^  (1 / 2 : ℂ)) ^ 3 - 4 * κ ^ 2 * (z  ^  (1 / 2 : ℂ)) ^ 2 * z ^ 2 - 16
-          * κ ^ 2 * (z  ^  (1 / 2 : ℂ)) ^ 2 * z - 4 * κ ^ 2 * (z  ^  (1 / 2 : ℂ)) ^ 2 + 8 * κ ^ 2
-              * (z  ^  (1 / 2 : ℂ)) * z ^ 2 + 8 * κ ^ 2 * (z  ^  (1 / 2 : ℂ)) * z - 4 * κ ^ 2
-                  * z ^ 2 + 4 * μ ^ 2 * (z  ^  (1 / 2 : ℂ)) ^ 2 * z ^ 2 - 8 * μ ^ 2
-                      * (z  ^  (1 / 2 : ℂ)) ^ 2 * z + 4 * μ ^ 2 * (z  ^  (1 / 2 : ℂ)) ^ 2
-                          - (z  ^  (1 / 2 : ℂ)) ^ 2 * z ^ 2 + 2 * (z  ^  (1 / 2 : ℂ)) ^ 2 * z
-                              - (z  ^  (1 / 2 : ℂ)) ^ 2) * h2
+  linear_combination (-4 * κ ^ 2 * T ^ 4 + 8 * κ ^ 2 * T ^ 3 * z + 8 * κ ^ 2 * T ^ 3
+    - 4 * κ ^ 2 * T ^ 2 * z ^ 2 - 16 * κ ^ 2 * T ^ 2 * z - 4 * κ ^ 2 * T ^ 2 + 8 * κ ^ 2 * T * z ^ 2
+    + 8 * κ ^ 2 * T * z - 4 * κ ^ 2 * z ^ 2 + 4 * μ ^ 2 * T ^ 2 * z ^ 2 - 8 * μ ^ 2 * T ^ 2 * z
+    + 4 * μ ^ 2 * T ^ 2 - T ^ 2 * z ^ 2 + 2 * T ^ 2 * z - T ^ 2) * h2
 
 end DLMF.Painleve

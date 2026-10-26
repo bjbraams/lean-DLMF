@@ -28,7 +28,7 @@ IntegralReps 20, IntegerArguments 13, Sums 7, Asymptotics 1, Zeros 4), plus 10 n
 
 **Status after proof round 1 (2026-10-25).** The 212 declarations tagged with Chapter 25 IDs are 22 definitions, 96 proved theorems and 94 theorems that still depend on admissions; direct admissions in DLMF/Zeta fell from 124 to 87. The per-line statuses in this ledger are regenerated from the compiled dump; the counts below record the acquisition. See REVIEW.md, "Proof round 1 for Chapters 24–27 (2026-10-25)".
 
-**Status after proof round 2 (2026-10-25).** The 213 declarations tagged with Chapter 25 IDs are 22 definitions, 126 proved theorems and 65 theorems that still depend on admissions; direct admissions in DLMF/Zeta fell from 87 to 62. 25.11.10 received the hypothesis s ≠ 0, −1, −2, … after a proved counterexample (Lean's totalized ζ(1); DLMFErrata.md (c)). See REVIEW.md, "Proof round 2 for Chapters 24–27 (2026-10-25)".
+**Status after proof round 2 (2026-10-25).** The 213 declarations tagged with Chapter 25 IDs are 22 definitions, 126 proved theorems and 65 theorems that still depend on admissions; direct admissions in DLMF/Zeta fell from 87 to 62. 25.11.10 received the hypothesis s ≠ 0, −1, −2, … after a proved counterexample (Lean's totalized ζ(1); the errata report (reports/DLMFErrata.tex) (c)). See REVIEW.md, "Proof round 2 for Chapters 24–27 (2026-10-25)".
 
 **Status after proof round 3 (2026-10-26).** The 213 declarations tagged with Chapter 25 IDs are 22 definitions, 142 proved theorems and 49 theorems that still depend on admissions; direct admissions in DLMF/Zeta fell from 62 to 46. No statement was changed. See REVIEW.md, "Proof round 3 for Chapters 24–27 (2026-10-26)".
 

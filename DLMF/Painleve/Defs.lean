@@ -291,4 +291,17 @@ def painleveIIILaxB (z u₀ u₁ v₀ v₁ l : ℂ) : Matrix (Fin 2) (Fin 2) ℂ
   l • !![1 / 4, 0; 0, -1 / 4] + (1 / z) • !![0, u₀; u₁, 0] -
     (1 / (z * l)) • painleveIIILaxM z v₀ v₁
 
+/-- The `z`-derivative of the residue matrix `M` of 32.4.8–32.4.9 along functions with
+derivatives `v₀' = dv₀`, `v₁' = dv₁`. -/
+def painleveIIILaxMDeriv (z v₀ v₁ dv₀ dv₁ : ℂ) : Matrix (Fin 2) (Fin 2) ℂ :=
+  !![dv₀ - 1 / 4, -(dv₁ * v₀ + v₁ * dv₀);
+    (dv₀ - 1 / 2) / v₁ - (v₀ - z / 2) * dv₁ / v₁ ^ 2, 1 / 4 - dv₀]
+
+/-- The right-hand sides of the system 32.4.10–32.4.13, divided by `z`, in the order
+`u₀', u₁', v₀', v₁'`. -/
+def painleveIIISystemRhs (θinf z u₀ u₁ v₀ v₁ : ℂ) : ℂ × ℂ × ℂ × ℂ :=
+  ((θinf * u₀ - z * v₀ * v₁) / z, (-θinf * u₁ - z * (2 * v₀ - z) / (2 * v₁)) / z,
+    (2 * v₀ * u₁ * v₁ + v₀ + u₀ * (2 * v₀ - z) / v₁) / z,
+    (2 * u₀ - 2 * u₁ * v₁ ^ 2 - θinf * v₁) / z)
+
 end DLMF.Painleve

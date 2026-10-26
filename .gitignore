@@ -1,3 +1,11 @@
 .lake
 *.olean
 References/
+# Report PDFs are built by CI (.github/workflows/reports.yml) and published on GitHub Pages.
+reports/*.pdf
+reports/*.aux
+reports/*.log
+reports/*.fls
+reports/*.fdb_latexmk
+reports/*.out
+reports/*.toc

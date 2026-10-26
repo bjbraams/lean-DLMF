@@ -1,0 +1,65 @@
+# Build the LaTeX reports in reports/ with LuaLaTeX and publish the PDFs on GitHub Pages,
+# at https://bjbraams.github.io/lean-DLMF/<name>.pdf. The shared preamble leanreport.sty comes
+# from the sibling repository lean-codes (reports/), checked out next to this one, as locally.
+# One-time setting: Settings → Pages → Source: "GitHub Actions".
+name: Reports
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "reports/**"
+      - ".github/workflows/reports.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: texlive/texlive:latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: lean-DLMF
+      - uses: actions/checkout@v5
+        with:
+          repository: bjbraams/lean-codes
+          path: lean-codes
+          sparse-checkout: reports
+      - name: Build PDFs
+        working-directory: lean-DLMF/reports
+        run: |
+          set -e
+          for f in *.tex; do latexmk -lualatex -interaction=nonstopmode -halt-on-error "$f"; done
+      - name: Collect site
+        run: |
+          set -e
+          mkdir -p site
+          cp lean-DLMF/reports/*.pdf site/
+          {
+            echo '<!doctype html><meta charset="utf-8"><title>lean-DLMF reports</title>'
+            echo '<h1>lean-DLMF reports</h1><ul>'
+            for f in site/*.pdf; do b=$(basename "$f"); echo "<li><a href=\"$b\">$b</a></li>"; done
+            echo '</ul><p>Built from <a href="https://github.com/bjbraams/lean-DLMF">lean-DLMF</a>.</p>'
+          } > site/index.html
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -99,14 +99,14 @@ theorem painleveII_airy {ε : ℂ} (hε : ε = 1 ∨ ε = -1) (C₁ C₂ : ℂ) 
       airySeedDeriv k C₁ C₂ z := fun z => (hasDerivAt_airySeed k C₁ C₂ z).deriv
   rcases hε with rfl | rfl
   · have h0 : IsPainleveIIOn (-1 / 2) (airyPII k C₁ C₂) {z | airySeed k C₁ C₂ z ≠ 0} :=
-      b32_isPainleveIIOn_iff.mpr (by convert h using 1; norm_num)
+      isPainleveIIOn_iff_isPIIOn.mpr (by convert h using 1; norm_num)
     have h' := b32_isPainleveIIOn_neg h0
     rw [show (1 : ℂ) / 2 = -(-1 / 2) by norm_num]
     refine b32_congr h' hS fun z _ => ?_
     simp only [hd, airyPII, airySeed]
     ring
   · have h0 : IsPainleveIIOn (-1 / 2) (airyPII k C₁ C₂) {z | airySeed k C₁ C₂ z ≠ 0} :=
-      b32_isPainleveIIOn_iff.mpr (by convert h using 1; norm_num)
+      isPainleveIIOn_iff_isPIIOn.mpr (by convert h using 1; norm_num)
     refine b32_congr h0 hS fun z _ => ?_
     simp only [hd, airyPII, airySeed]
     ring
@@ -121,7 +121,7 @@ theorem painleveII_exists_airy (n : ℤ) :
     ∃ (w : ℂ → ℂ) (U : Set ℂ), IsOpen U ∧ U.Nonempty ∧ IsPainleveIIOn ((n : ℂ) + 1 / 2) w U := by
   obtain ⟨s, hs, hne, h⟩ := exists_open_isPIIOn_airyPIIHierarchy b32_airy_scale (-n - 1)
   refine ⟨airyPIIHierarchy (-(2 : ℂ) ^ (-1 / 3 : ℂ)) 1 0 (-n - 1), s, hs, hne,
-      b32_isPainleveIIOn_iff.mpr ?_⟩
+      isPainleveIIOn_iff_isPIIOn.mpr ?_⟩
   convert h using 2
   push_cast
   ring
@@ -176,7 +176,68 @@ theorem painleveII_five_halves {Φ : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
     IsPainleveIIOn (5 / 2)
       (fun z => 1 / (2 * Φ z ^ 2 + z) + (2 * z * Φ z ^ 2 + Φ z + z ^ 2) /
         (4 * Φ z ^ 3 + 2 * z * Φ z - 1)) U := by
-  sorry
+  have hfun : (fun z => 1 / (2 * Φ z ^ 2 + z) + (2 * z * Φ z ^ 2 + Φ z + z ^ 2) /
+      (4 * Φ z ^ 3 + 2 * z * Φ z - 1)) = fun x => 1 / ((1 : ℂ) * x + (2 : ℂ) * Φ x ^ 2) + ((1 : ℂ)
+          * x ^ 2 + (2 : ℂ) * x * Φ x ^ 2 + (1 : ℂ) * Φ x) / ((2 : ℂ) * x * Φ x + (4 : ℂ) * Φ x ^ 3
+          + (-1 : ℂ)) :=
+    funext fun x => by ring
+  rw [hfun]
+  have hD0 : ∀ x ∈ U, ((1 : ℂ) * x + (2 : ℂ) * Φ x ^ 2) ≠ 0 := fun x hx => by
+    convert hD x hx using 1; ring
+  have hE0 : ∀ x ∈ U, ((2 : ℂ) * x * Φ x + (4 : ℂ) * Φ x ^ 3 + (-1 : ℂ)) ≠ 0 := fun x hx => by
+    convert hE x hx using 1; ring
+  have hD : ∀ x ∈ U, HasDerivAt (fun x => ((1 : ℂ) * x + (2 : ℂ) * Φ x ^ 2)) _ x := fun x hx =>
+    (((hasDerivAt_const x (1 : ℂ)).mul (hasDerivAt_id' x)).add ((hasDerivAt_const x (2 : ℂ)).mul
+        ((hΦ x hx).pow 2)))
+  have hE : ∀ x ∈ U, HasDerivAt (fun x => ((2 : ℂ) * x * Φ x + (4 : ℂ) * Φ x ^ 3 +
+      (-1 : ℂ))) _ x := fun x hx =>
+    (((((hasDerivAt_const x (2 : ℂ)).mul (hasDerivAt_id' x)).mul (hΦ x hx)).add
+        ((hasDerivAt_const x (4 : ℂ)).mul ((hΦ x hx).pow 3))).add (hasDerivAt_const x (-1 : ℂ)))
+  have hN : ∀ x ∈ U, HasDerivAt (fun x => ((1 : ℂ) * x ^ 2 + (2 : ℂ) * x * Φ x ^ 2 + (1 : ℂ)
+      * Φ x)) _ x := fun x hx =>
+    ((((hasDerivAt_const x (1 : ℂ)).mul ((hasDerivAt_id' x).pow 2)).add (((hasDerivAt_const x
+        (2 : ℂ)).mul (hasDerivAt_id' x)).mul ((hΦ x hx).pow 2))).add ((hasDerivAt_const x
+        (1 : ℂ)).mul (hΦ x hx)))
+  have hD1 : ∀ x ∈ U, HasDerivAt (fun x => ((-2 : ℂ) * x * Φ x + (-4 : ℂ) * Φ x ^ 3 +
+      (1 : ℂ))) _ x := fun x hx =>
+    (((((hasDerivAt_const x (-2 : ℂ)).mul (hasDerivAt_id' x)).mul (hΦ x hx)).add
+        ((hasDerivAt_const x (-4 : ℂ)).mul ((hΦ x hx).pow 3))).add (hasDerivAt_const x (1 : ℂ)))
+  have hE1 : ∀ x ∈ U, HasDerivAt (fun x => ((-1 : ℂ) * x ^ 2 + (-8 : ℂ) * x * Φ x ^ 2 + (-12 : ℂ)
+      * Φ x ^ 4 + (2 : ℂ) * Φ x)) _ x := fun x hx =>
+    (((((hasDerivAt_const x (-1 : ℂ)).mul ((hasDerivAt_id' x).pow 2)).add (((hasDerivAt_const x
+        (-8 : ℂ)).mul (hasDerivAt_id' x)).mul ((hΦ x hx).pow 2))).add ((hasDerivAt_const x
+        (-12 : ℂ)).mul ((hΦ x hx).pow 4))).add ((hasDerivAt_const x (2 : ℂ)).mul (hΦ x hx)))
+  have hN1 : ∀ x ∈ U, HasDerivAt (fun x => ((-2 : ℂ) * x ^ 2 * Φ x + (-4 : ℂ) * x * Φ x ^ 3 +
+      (3 / 2 : ℂ) * x + (1 : ℂ) * Φ x ^ 2)) _ x := fun x hx =>
+    ((((((hasDerivAt_const x (-2 : ℂ)).mul ((hasDerivAt_id' x).pow 2)).mul (hΦ x hx)).add
+        (((hasDerivAt_const x (-4 : ℂ)).mul (hasDerivAt_id' x)).mul ((hΦ x hx).pow 3))).add
+        ((hasDerivAt_const x (3 / 2 : ℂ)).mul (hasDerivAt_id' x))).add ((hasDerivAt_const x
+        (1 : ℂ)).mul ((hΦ x hx).pow 2)))
+  refine isODE2SolutionOn_of_hasDerivAt hU (v := fun x => -((-2 : ℂ) * x * Φ x + (-4 : ℂ) * Φ x ^ 3
+      + (1 : ℂ)) / ((1 : ℂ) * x + (2 : ℂ) * Φ x ^ 2) ^ 2 + (((-2 : ℂ) * x ^ 2 * Φ x + (-4 : ℂ) * x
+      * Φ x ^ 3 + (3 / 2 : ℂ) * x + (1 : ℂ) * Φ x ^ 2) * ((2 : ℂ) * x * Φ x + (4 : ℂ) * Φ x ^ 3 +
+      (-1 : ℂ)) - ((1 : ℂ) * x ^ 2 + (2 : ℂ) * x * Φ x ^ 2 + (1 : ℂ) * Φ x) * ((-1 : ℂ) * x ^ 2 +
+      (-8 : ℂ) * x * Φ x ^ 2 + (-12 : ℂ) * Φ x ^ 4 + (2 : ℂ) * Φ x)) / ((2 : ℂ) * x * Φ x + (4 : ℂ)
+      * Φ x ^ 3 + (-1 : ℂ)) ^ 2) (fun x hx => ?_) (fun x hx => ?_)
+  · refine (((hasDerivAt_const x (1 : ℂ)).div (hD x hx) (hD0 x hx)).add
+      ((hN x hx).div (hE x hx) (hE0 x hx))).congr_deriv ?_
+    have := hD0 x hx
+    have := hE0 x hx
+    simp only [Pi.mul_apply, Pi.pow_apply]
+    field_simp
+    ring
+  · refine (((hD1 x hx).neg.div ((hD x hx).pow 2) (pow_ne_zero 2 (hD0 x hx))).add
+      ((((hN1 x hx).mul (hE x hx)).sub ((hN x hx).mul (hE1 x hx))).div ((hE x hx).pow 2)
+        (pow_ne_zero 2 (hE0 x hx)))).congr_deriv ?_
+    have hd := hD0 x hx
+    have he := hE0 x hx
+    simp only [painleveIIRhs, Pi.mul_apply, Pi.pow_apply, Pi.sub_apply, Pi.neg_apply]
+    generalize Φ x = p at hd he ⊢
+    generalize hdd : 1 * x + 2 * p ^ 2 = d at hd ⊢
+    generalize hee : 2 * x * p + 4 * p ^ 3 + -1 = e at he ⊢
+    field_simp
+    subst hdd hee
+    ring
 
 /-- DLMF 32.10.6 for the Airy function: with `Φ = φ'/φ`, `φ` as in 32.10.5,
 `w(z; 3/2) = Φ - 1/(2Φ² + z)` solves `PII` with `α = 3/2` where `φ ≠ 0` and `2Φ² + z ≠ 0`. -/

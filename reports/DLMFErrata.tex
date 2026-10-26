@@ -1,49 +1,11 @@
-% DLMFErrata.tex -- LaTeX version of DLMFErrata.md (lean-DLMF), 2026-10-26.
-% Compile with LuaLaTeX (twice): latexmk -lualatex DLMFErrata.tex
-% Preamble for DLMFErrata.tex (LuaLaTeX)
+% DLMFErrata.tex -- errata and source corrections for the DLMF found in the lean-DLMF
+% formalization. This file is the only source (DLMFErrata.md was retired on 2026-10-26).
+% Compile with LuaLaTeX: latexmk -lualatex DLMFErrata.tex (reports/latexmkrc finds the shared
+% preamble lean-codes/reports/leanreport.sty).
 \documentclass[11pt,a4paper]{article}
-\usepackage[margin=25mm]{geometry}
-\usepackage{amsmath,amssymb,mathtools}
-\usepackage{fontspec}
-\usepackage[math-style=TeX,bold-style=TeX]{unicode-math}
-\setmainfont{Latin Modern Roman}
-\setmathfont{Latin Modern Math}
-\AtBeginDocument{\renewcommand{\boldsymbol}[1]{\symbf{#1}}}
-\setmonofont{DejaVu Sans Mono}[Scale=0.82]
-\usepackage[english]{babel}
-\usepackage{microtype}
-\usepackage{booktabs}
-\usepackage{enumitem}
-\usepackage{needspace}
-\usepackage{ragged2e}
-\usepackage{xcolor}
-\usepackage[obeyspaces]{url}
-\usepackage[hidelinks]{hyperref}
-\hypersetup{
-  pdftitle={Errata and source corrections for the NIST Digital Library of Mathematical Functions found in the lean-DLMF formalization},
-  pdfauthor={Bastiaan J. Braams},
-  colorlinks=true, linkcolor={blue!50!black}, urlcolor={blue!50!black}, citecolor={green!40!black}}
-
-% ---------------------------------------------------------------- links
-% \deq{28.28.16}      -> (28.28.16), linked to https://dlmf.nist.gov/28.28.E16
-% \DLMF{28.28.16}     -> DLMF (28.28.16)
-% \dlink{URL-suffix}{text} -> text linked to https://dlmf.nist.gov/URL-suffix
-\makeatletter
-\def\deq#1{\deq@split#1\relax}
-\def\deq@split#1.#2.#3\relax{\href{https://dlmf.nist.gov/#1.#2.E#3}{(#1.#2.#3)}}
-\makeatother
-\newcommand{\DLMF}[1]{DLMF~\deq{#1}}
-\newcommand{\dlink}[2]{\href{https://dlmf.nist.gov/#1}{#2}}
-
-% ---------------------------------------------------------------- Lean names and paths
-% \lean{name_with_underscores} and \file{DLMF/Area/File.lean}; breakable after _ . / -
-\makeatletter
-\def\UrlBreaks{\do\_\do\.\do\/\do\-\do\'}
-\def\UrlBigBreaks{}
-\makeatother
-\DeclareUrlCommand\lean{\urlstyle{tt}}
-\DeclareUrlCommand\file{\urlstyle{tt}}
-\Urlmuskip=0mu
+\usepackage{leanreport}
+\usepackage{dlmfnotation}
+\hypersetup{pdftitle={Errata and source corrections for the NIST Digital Library of Mathematical Functions found in the lean-DLMF formalization}}
 
 % ---------------------------------------------------------------- entries
 \newcounter{entry}
@@ -55,100 +17,10 @@
 \newenvironment{fields}{\begin{description}[font=\normalfont\itshape,
   leftmargin=1.5em, labelindent=0pt, itemsep=0.3ex, topsep=0.3ex, parsep=0.3ex]\setlength{\parindent}{0pt}\RaggedRight}{\end{description}}
 
-% ---------------------------------------------------------------- general math
-\newcommand{\iu}{\mathrm{i}}            % imaginary unit
-\newcommand{\eu}{\mathrm{e}}            % Euler's number
-\newcommand{\dd}{\mathrm{d}}            % differential
-\newcommand{\NN}{\mathbb{N}}
-\newcommand{\ZZ}{\mathbb{Z}}
-\newcommand{\QQ}{\mathbb{Q}}
-\newcommand{\RR}{\mathbb{R}}
-\newcommand{\CC}{\mathbb{C}}
-\DeclareMathOperator{\ph}{ph}           % phase
-\DeclareMathOperator{\sgn}{sgn}
-\DeclareMathOperator{\Ln}{Ln}
-\DeclareMathOperator{\diag}{diag}
-\DeclareMathOperator{\arccosh}{arccosh}
-\DeclareMathOperator{\arcsinh}{arcsinh}
-\DeclareMathOperator{\arctanh}{arctanh}
-\DeclareMathOperator{\arcsech}{arcsech}
-\DeclareMathOperator{\arccsch}{arccsch}
-\DeclareMathOperator{\arccoth}{arccoth}
-\DeclareMathOperator{\sech}{sech}
-\DeclareMathOperator{\csch}{csch}
-\newcommand{\poch}[2]{\left(#1\right)_{#2}}             % Pochhammer (a)_n
-\newcommand{\qpoch}[3]{\left(#1;#2\right)_{#3}}         % q-Pochhammer (a;q)_n
-\newcommand{\NVar}[1]{#1}                               % DLMF placeholder variable
-
-% ---------------------------------------------------------------- special functions
-\newcommand{\GammaF}{\Gamma}
-\DeclareMathOperator{\Ai}{Ai}
-\DeclareMathOperator{\Bi}{Bi}
-\newcommand{\StruveH}{\mathbf{H}}
-\newcommand{\AngerJ}{\mathbf{J}}
-\newcommand{\WeberE}{\mathbf{E}}
-\newcommand{\FerrersP}{\mathsf{P}}
-\newcommand{\FerrersQ}{\mathsf{Q}}
-\newcommand{\LegendreP}{P}
-\newcommand{\LegendreQ}{\boldsymbol{Q}}
-\newcommand{\IncBetaI}{I}
-% Mathieu functions
-\DeclareMathOperator{\ce}{ce}
-\DeclareMathOperator{\se}{se}
-\DeclareMathOperator{\fe}{fe}
-\DeclareMathOperator{\Mge}{ge}     % Mathieu ge (\ge is taken)
-\DeclareMathOperator{\Ce}{Ce}
-\DeclareMathOperator{\Se}{Se}
-\DeclareMathOperator{\hc}{hc}
-\DeclareMathOperator{\hs}{hs}
-\newcommand{\MathieuM}[1]{\mathrm{M}^{(#1)}}
-% Heun
-\DeclareMathOperator{\Hl}{Hl}
-% Jacobian elliptic functions
-\DeclareMathOperator{\am}{am}
-\DeclareMathOperator{\sn}{sn}
-\DeclareMathOperator{\cn}{cn}
-\DeclareMathOperator{\dn}{dn}
-\DeclareMathOperator{\cs}{cs}
-\DeclareMathOperator{\ns}{ns}
-\DeclareMathOperator{\nc}{nc}
-\DeclareMathOperator{\dc}{dc}
-\DeclareMathOperator{\jsc}{sc}    % Jacobi sc (\sc is taken)
-\DeclareMathOperator{\cd}{cd}
-\DeclareMathOperator{\arccs}{arccs}
-\DeclareMathOperator{\arccn}{arccn}
-\DeclareMathOperator{\arccd}{arccd}
-% Carlson symmetric integrals
-\newcommand{\RF}{R_{F}}
-\newcommand{\RG}{R_{G}}
-\newcommand{\RD}{R_{D}}
-\newcommand{\RJ}{R_{J}}
-\newcommand{\RC}{R_{C}}
-% theta, Weierstrass
-\newcommand{\Lattice}{\mathbb{L}}
-\newcommand{\WeierP}{\wp}
-
-% ---------------------------------------------------------------- line breaking
-\setlength{\emergencystretch}{3em}
-\tolerance=800
-
-% ---------------------------------------------------------------- further notation
-\providecommand{\erfc}{\operatorname{erfc}}
-\providecommand{\MeijerG}[5]{G^{#1,#2}_{#3,#4}\left(#5\right)}
-\providecommand{\qbinom}[3]{\genfrac{[}{]}{0pt}{}{#1}{#2}_{#3}}
-\providecommand{\qhyp}[2]{{}_{#1}\phi_{#2}}
-\providecommand{\qbhyp}[2]{{}_{#1}\psi_{#2}}
-\providecommand{\Kp}{K'}
-\providecommand{\Lthree}{\mathbb{L}_{3}}
-\providecommand{\bOmega}{\boldsymbol{\Omega}}
-\providecommand{\bGamma}{\boldsymbol{\Gamma}}
-\providecommand{\me}{\operatorname{me}}
-\providecommand{\Li}{\operatorname{Li}}
-
 % entry counts
-\newcommand{\NumA}{97}
-\newcommand{\NumB}{23}
-\newcommand{\NumC}{43}
+\newcommand{\NumA}{104}
+\newcommand{\NumB}{25}
+\newcommand{\NumC}{50}
 \newcommand{\NumOut}{3}
 
 \begin{document}
@@ -227,7 +99,9 @@ and confirmed by an independent numerical and brute-force check (\file{REVIEW.md
 \file{DLMF27Acquisition.md}); three suspected items that the check did not confirm are listed
 under (c) or dropped. The Chapter~28--31 entries were found by the acquisition agents on
 2026-10-26 and re-derived by an independent verifier from the DLMF~1.2.8 page text with its own
-numerics.
+numerics. The Chapter~32 entries were found by the acquisition agents on 2026-10-26 and
+confirmed by an independent exact symbolic check against DLMF's own definitions (\file{REVIEW.md},
+section ``Chapter 32 acquisition (2026-10-26)''; ledger \file{DLMF32Acquisition.md}).
 
 \subsection{Counts}
 
@@ -811,7 +685,7 @@ $\Re k>0$ (its erratum for V1.2.0) stands above \deq{19.7.3} only.
 \item[Evidence] at $k=-0.6$, $K(-\iu k'/k)=1.19718$ but $kK(k')=-1.19718$; at
 $k=-0.6+0.3\iu$ the two sides are $1.2490-0.3256\iu$ and its negative.
 \item[Lean] \lean{compEllInt_imaginary_comodulus} (\file{DLMF/EllipticIntegrals/Connection.lean}),
-admitted.
+proved.
 \item[Found] 2026-10-25.
 \end{fields}
 
@@ -881,7 +755,7 @@ $k^{2}$.
 branch) or $1.0876-1.1700\iu$ (principal) against $\RF=2.1714+0.0724\iu$.
 \item[Lean] \lean{incEllIntFk_eq_symEllIntRF}, \lean{incEllIntEk_eq_symEllIntRG} and neighbours
 (\file{DLMF/EllipticIntegrals/SymmetricRelations.lean}), stated for real
-$\phi\in(0,\pi/2]$, admitted.
+$\phi\in(0,\pi/2]$, proved.
 \item[Found] 2026-10-25.
 \end{fields}
 
@@ -898,7 +772,7 @@ The right sides are unchanged under $u\mapsto 2K-u$ and even in~$u$.
 \item[Correct] for $0<u\le K$.
 \item[Evidence] $k^{2}=0.5$, $u=2.4>K=1.85407$: $\am=1.96619$ against $\RC=1.17540$, and
 $\RF=1.30815$ against~$u$; at $u=-0.7$ the sign is wrong.
-\item[Lean] \lean{jacobiAmm_eq_symEllIntRC}, \lean{eq_symEllIntRF_jacobi}, admitted.
+\item[Lean] \lean{jacobiAmm_eq_symEllIntRC}, \lean{eq_symEllIntRF_jacobi}, proved.
 \item[Found] 2026-10-25.
 \end{fields}
 
@@ -1063,7 +937,7 @@ $2.03+0.90\iu$, $-2.85+0.88\iu$; the eta form agrees at 200 random $(z,\tau)$ (m
 \item[Lean] \lean{jacobiTheta_reduction_iq_sq} (squared form, all $\tau$),
 \lean{jacobiTheta_reduction_iq_rectangular} (printed form, $\tau=\iu t$),
 \lean{jacobiTheta_reduction_iq_eta} (full-domain form) (\file{DLMF/Theta/Identities.lean}),
-all admitted.
+all proved.
 \item[Found] 2026-10-25.
 \end{fields}
 
@@ -1195,7 +1069,7 @@ genus-$g$ theta function).
 \end{equation*}
 \item[Evidence] numerical differentiation.
 \item[Lean] \lean{jacobiDck_specialDerivs} (\file{DLMF/JacobiElliptic/SpecialValues.lean}),
-admitted.
+proved.
 \item[Found] 2026-10-25.
 \end{fields}
 
@@ -1236,7 +1110,7 @@ s_{1,3}^{(4)}d_{1,3}^{(4)}c_{2,3}^{(4)}c_{3,3}^{(4)}+s_{2,3}^{(4)}d_{2,3}^{(4)}c
 \end{equation*}
 \item[Evidence] $k=0.6$, $z=0.37+0.21\iu$: printed right side $\approx4.208-0.036\iu$, left side
 $\approx0.552+0.183\iu$.
-\item[Lean] \lean{jacobi_cyclic_sdcc_three} (\file{DLMF/JacobiElliptic/Cyclic.lean}), admitted.
+\item[Lean] \lean{jacobi_cyclic_sdcc_three} (\file{DLMF/JacobiElliptic/Cyclic.lean}), proved.
 \item[Found] 2026-10-25.
 \end{fields}
 
@@ -1255,7 +1129,7 @@ principal $K$ when $\tau=\iu K'(k)/K(k)$.
 \item[Evidence] generators $2\omega_{1}+4\omega_{3}$, $2\omega_{3}$:
 $K^{2}-\omega_{1}^{2}(e_{1}-e_{3})\approx11.0-13.7\iu$.
 \item[Lean] \lean{HalfPeriods.quarterK_sq_eq}, \lean{HalfPeriods.compEllIntKk_sq_eq}
-(\file{DLMF/Weierstrass/Relations.lean}), admitted.
+(\file{DLMF/Weierstrass/Relations.lean}), proved.
 \item[Found] 2026-10-25.
 \end{fields}
 
@@ -1418,7 +1292,7 @@ B_{n}(mx)=m^{n}B_{n}(x)-n\sum_{k=1}^{n}\sum_{j=0}^{k-1}(-1)^{j}\binom{k-1}{j}
 \item[Evidence] $x=0.37$, $m=2$, $n=1$: printed $-0.76$, while $B_1(0.74)=0.24$; the corrected
 form agrees to about $10^{-24}$ for $n\le 8$, $m\le 6$ at real and complex $x$.
 \item[Lean] \lean{bernoulliPolyB_mul_eq_roots_of_unity} (\file{DLMF/BernoulliEuler/Properties.lean}),
-admitted.
+proved.
 \item[Found] 2026-10-25.
 \end{fields}
 
@@ -1435,7 +1309,7 @@ admitted.
 $n\ge 1$. \DLMF{24.4.11} fails at $m=1$ for $n\ge 1$ (left side $1$, right side $0$), so it needs
 $m\ge 2$.
 \item[Lean] \lean{sum_Icc_neg_one_pow_mul_pow_eq_euler} ($n\ge 1$), \lean{sum_coprime_pow}
-($m\ge 2$) (\file{DLMF/BernoulliEuler/Properties.lean}), admitted.
+($m\ge 2$) (\file{DLMF/BernoulliEuler/Properties.lean}), proved.
 \item[Found] 2026-10-25.
 \end{fields}
 
@@ -1575,7 +1449,7 @@ located symmetrically about the critical line $\Re s=\frac12$.''
 $L(1,\chi)\ne 0$. The symmetry $\rho\mapsto 1-\bar\rho$ holds for zeros $\rho\ne 0$.
 \item[Lean] \lean{q25b_LFunction_one_sub_conj_counterexample} (proved),
 \lean{LFunction_one_sub_conj_eq_zero} (hypothesis $\rho\ne 0$ added in proof round 1)
-(\file{DLMF/Zeta/DirichletL.lean}), admitted.
+(\file{DLMF/Zeta/DirichletL.lean}), proved.
 \item[Found] 2026-10-25 (proof round 1).
 \end{fields}
 
@@ -1604,7 +1478,7 @@ C(n)=\sum_{k=1}^{n}N(n,k).
 $\Delta^{n}f(0)=0$ but $f'(0)=\pi$. A Newton-series hypothesis is needed; the formula is acquired
 for polynomials.
 \item[Lean] \lean{not_forall_stirling_deriv_eq_fwdDiff_series} (proved),
-\lean{hasSum_signedStirlingFirst_fwdDiff} (polynomials, admitted)
+\lean{hasSum_signedStirlingFirst_fwdDiff} (polynomials, proved)
 (\file{DLMF/Combinatorics/Stirling.lean}).
 \item[Found] 2026-10-25.
 \end{fields}
@@ -1624,7 +1498,7 @@ condition must be $|x|<1$ (the printed $|xq|<1$ is insufficient: $q=0.5$, $x=1.5
 \end{equation*}
 \item[Evidence] power-series check for $m\le 3$, $k<6$.
 \item[Lean] \lean{hasSum_qBinom_mul_pow_x} (\file{DLMF/Combinatorics/RestrictedPartitions.lean}),
-admitted.
+proved.
 \item[Found] 2026-10-25.
 \end{fields}
 
@@ -1641,7 +1515,7 @@ p_{m}(\mathcal{D},n)=p_{m-1}(\mathcal{D},n)+p_{m}(\mathcal{D},n-m)-p_{m-2}(\math
 \end{equation*}
 equivalently $q_m(n)=q_m(n-m)+q_{m-1}(n-m)$ for partitions into exactly $m$ distinct parts.
 \item[Lean] \lean{partitionCountAtMostDistinct_recurrence}, \lean{card_distinct_card_eq_recurrence}
-(\file{DLMF/Combinatorics/PartitionIdentities.lean}), admitted.
+(\file{DLMF/Combinatorics/PartitionIdentities.lean}), proved.
 \item[Found] 2026-10-25.
 \end{fields}
 
@@ -1733,8 +1607,7 @@ $1-\eu^{-1}$ at $n=0$; \deq{26.4.10} fails at $m=0$; \deq{26.8.10} (sum from $k=
 \lean{bell_eq_sum_mul_sum}, \lean{bell_eq_exp_neg_one_mul_tsum} (\file{Bell.lean}),
 \lean{multinomial_eq_sum_update} (\file{Multinomial.lean}),
 \lean{sum_Icc_stirlingSecond_mul_ascPochhammer}, \lean{sum_neg_one_pow_mul_signedStirlingFirst}
-(\file{Stirling.lean}), \lean{catalan_eq_choose_sub} (\file{Catalan.lean}); proved or admitted as
-the ledger says.
+(\file{Stirling.lean}), \lean{catalan_eq_choose_sub} (\file{Catalan.lean}); all proved.
 \item[Found] 2026-10-25.
 \end{fields}
 
@@ -1767,7 +1640,7 @@ k^{n}+\sum_{t=1}^{k}(-1)^{t}\binom{k}{t}(k-t)^{n}.
 The printed form gives $-3$ at $n=1$, $k=3$, gives $4$ at $n=2$, $k=4$, and gives $1$ instead of
 $0$ at $n=0$, $k\ge 1$. The corrected form holds for all $n$, $k$ ($0^0=1$).
 \item[Lean] \lean{card_surjective_eq_sum} (\file{DLMF/Combinatorics/CountingTechniques.lean}),
-admitted.
+proved.
 \item[Found] 2026-10-25.
 \end{fields}
 
@@ -1790,7 +1663,7 @@ As printed it computes $\pi(x)-\pi(\sqrt x)$.
 \end{equation*}
 \item[Evidence] $x=10$: printed $2$, $\pi(10)=4$, $\pi(\sqrt{10})=2$; the corrected form is checked
 for $x$ up to $1000$.
-\item[Lean] \lean{primePi_legendre} (\file{DLMF/NumberTheory/Primes.lean}), admitted.
+\item[Lean] \lean{primePi_legendre} (\file{DLMF/NumberTheory/Primes.lean}), proved.
 \item[Found] 2026-10-25.
 \end{fields}
 
@@ -1840,7 +1713,7 @@ C_{2m+1}(-q)=-S_{2m+1}(q).
 $f_{2m+1}(z,-q)=(-1)^{m+1}g_{2m+1}(\tfrac12\pi-z,q)$; numerically $C_1(-0.5)=-0.494187$,
 $S_1(0.5)=+0.494187$ (also $n=3$, $q=0.2$, $1.0$).
 \item[Lean] \lean{mathieuFeC_even_neg} and its neighbours (\file{DLMF/Mathieu/SecondSolutions.lean}),
-admitted.
+proved.
 \end{fields}
 
 \entry{\deq{28.23.2}--\deq{28.23.5}}
@@ -2022,7 +1895,7 @@ ab=p^{2}+(\alpha+\beta)p-\tfrac{1}{4}\sigma_{1},\qquad c=\gamma-\alpha-\beta-2p.
 The $m$-equation and the $a'$, $b'$ relations are right.
 \item[Evidence] separation of \DLMF{31.10.21} by hand; the corrected product kernel leaves a
 residual of $2\cdot 10^{-31}$ in \deq{31.10.21}, the printed one $8.2$.
-\item[Lean] \lean{heun_kernel_typeII_separable} (\file{DLMF/Heun/Integral.lean}), admitted.
+\item[Lean] \lean{heun_kernel_typeII_separable} (\file{DLMF/Heun/Integral.lean}), proved.
 \end{fields}
 
 \entry{\dlink{31.10.i}{\S31.10, Example~2} (\deq{31.10.11})}
@@ -2043,6 +1916,91 @@ line with.
 residual $2.2\cdot 10^{-3}$ as printed, $1.5\cdot 10^{-32}$ corrected.
 \item[Lean] only the kernel equation is acquired (\lean{heun_kernel_example₂_pde},
 \file{DLMF/Heun/Integral.lean}); the representation is not.
+\end{fields}
+
+\subsection{Chapter 32 (Painlev\'e transcendents)}
+
+Found by the acquisition agents on 2026-10-26 and confirmed by an independent exact symbolic
+check (sympy) against DLMF's own definitions, with the Hamiltonian convention
+$q'=\partial H/\partial p$, $p'=-\partial H/\partial q$ of \DLMF{32.6.1}.
+
+\entry{\deq{32.6.26}}
+\begin{fields}
+\item[Printed] $\zeta p'=-2qp^{2}+2\eta_{\infty}qp+\theta_{0}p-\tfrac{1}{2}\eta_{\infty}(\theta_{0}+\theta_{1})$.
+\item[Correct] the last term is $-\tfrac12\eta_\infty(\theta_0+\theta_\infty)$, i.e.\
+$-\partial(\zeta H)/\partial q$ from \deq{32.6.24}; $\theta_1$ is not a parameter of
+$\mathrm{P}_{\mathrm{III}'}$.
+\item[Evidence] residual $\eta_\infty(\theta_1-\theta_\infty)/2$ as printed, $0$ corrected.
+\item[Lean] \lean{isHamiltonianSystemOn_painleveHamiltonianIIIPrime_iff}
+(\file{DLMF/Painleve/Hamiltonian.lean}), proved.
+\end{fields}
+
+\entry{\deq{32.6.30}--\deq{32.6.31}}
+\begin{fields}
+\item[Printed] $q=\dfrac{\eta_{0}(\zeta\sigma''-2\theta_{0}\sigma'+\eta_{0}\eta_{\infty}\theta_{\infty})}
+{\eta_{0}^{2}\eta_{\infty}^{2}-4(\sigma')^{2}}$ and $p=(2\sigma'+\eta_{0}\eta_{\infty}\zeta)/(2\eta_{0})$.
+\item[Correct] the numerator of \deq{32.6.30} contains $2\zeta\sigma''$, and
+$p=(2\sigma'+\eta_0\eta_\infty)/(2\eta_0)$.
+\item[Evidence] with $\sigma$ from \deq{32.6.28}, $\sigma'=\eta_0(2p-\eta_\infty)/2$; the printed
+\deq{32.6.31} leaves the residual $\eta_\infty(\zeta-1)/2$, the printed \deq{32.6.30} a nonzero
+rational residual; both corrected forms give $0$.
+\item[Lean] \lean{painleveIIIPrime_of_sigma} (\file{DLMF/Painleve/Hamiltonian.lean}), admitted.
+\end{fields}
+
+\entry{\deq{32.6.37}}
+\begin{fields}
+\item[Printed] $(z\sigma''-\sigma')^{2}+2(\sigma')^{2}(z\sigma'-2\sigma)
+-4\kappa_{0}\kappa_{\infty}(\theta+1)\theta_{\infty}z\sigma'=4\kappa_{0}^{2}\kappa_{\infty}^{2}z^{2}$.
+\item[Correct] the third term is $-4\kappa_0\kappa_\infty(\theta+1)z\sigma'$; $\theta_\infty$ is
+not a parameter of this system.
+\item[Evidence] with $\sigma$ from \deq{32.6.36} and $H$ from \deq{32.6.32} the printed form leaves
+the residual $8\kappa_0^2\kappa_\infty pz(\theta+1)(\theta_\infty-1)$; the corrected form gives $0$.
+\item[Lean] \lean{IsHamiltonianSystemOn.sigma_painleveIII_gammaZero}
+(\file{DLMF/Painleve/Hamiltonian.lean}), proved.
+\end{fields}
+
+\entry{\deq{32.6.38}--\deq{32.6.39}}
+\begin{fields}
+\item[Printed] $q=\kappa_0(z\sigma''-\theta\sigma'+2\kappa_0\kappa_\infty z)/(\sigma')^2$ and
+$p=\sigma'/(2\kappa_0)$.
+\item[Correct] by \deq{32.6.36}, $\sigma'=-2\kappa_0p$, so $p=-\sigma'/(2\kappa_0)$ and
+$q=\kappa_0(z\sigma''+\theta\sigma'+2\kappa_0\kappa_\infty z)/(\sigma')^2$.
+\item[Evidence] residuals $-2p$ in \deq{32.6.39} and $\theta/p$ in \deq{32.6.38} as printed, $0$
+corrected.
+\item[Lean] \lean{painleveIIIGammaZero_of_sigma} (\file{DLMF/Painleve/Hamiltonian.lean}), admitted.
+\end{fields}
+
+\entry{\deq{32.7.42}--\deq{32.7.43}}
+\begin{fields}
+\item[Printed] $\alpha=\tfrac12(\theta_\infty-1)^2$ and $A=\tfrac12(\Theta_\infty-1)^2$.
+\item[Correct] $\alpha=\tfrac12\theta_\infty^2$ and $A=\tfrac12\Theta_\infty^2$.
+\item[Evidence] exact rational test point $\Theta=(1/3,2/7,-3/5,5/11)$,
+$(W,W',z)=(3/7,-2/9,13/5)$ with $W''$ from $\mathrm{P}_{\mathrm{VI}}$: with the printed
+parameters the second equality of \deq{32.7.46} and $\mathrm{P}_{\mathrm{VI}}$ for $w$ fail
+(residuals $\approx-4.1\cdot10^{-2}$ and $3.6\cdot10^{-3}$); with the corrected ones both are
+exactly $0$.
+\item[Lean] \lean{IsPainleveVIOn.okamoto} (\file{DLMF/Painleve/BacklundDLMF.lean}), admitted.
+\end{fields}
+
+\entry{\dlink{32.9.ii}{\S32.9(ii)}}
+\begin{fields}
+\item[Printed] $\mathrm{P}_{\mathrm{V}}$ with $\alpha=\beta=0$ and $\gamma^2+2\delta=0$ has
+solutions $w(z)=C\exp(\pm\sqrt{-2\delta}\,z)$.
+\item[Correct] only $w=C\eu^{\gamma z}$ is a solution; equation \deq{32.9.8} is correct.
+\item[Evidence] $w=C\eu^{-\gamma z}$ leaves the residual $-2C\gamma\eu^{-\gamma z}/z$.
+\item[Lean] \lean{painleveV_exp}, \lean{painleveV_exp'}
+(\file{DLMF/Painleve/ElementarySolutions.lean}), proved.
+\end{fields}
+
+\entry{\deq{32.10.29}}
+\begin{fields}
+\item[Printed] ``If $n=1$, then the Riccati equation is''
+$w'=\dfrac{aw^2}{z(z-1)}+\dfrac{(b+c)z-a-c}{z(z-1)}w-\dfrac{b}{z-1}$.
+\item[Correct] ``If $n=0$'': the Riccati equation gives $\mathrm{P}_{\mathrm{VI}}$ exactly when
+$(1-a-b-c)^2=1-2\delta$, i.e.\ $a+b+c+d=1$.
+\item[Evidence] the $\mathrm{P}_{\mathrm{VI}}$ residual factors exactly as a multiple of
+$[(1-a-b-c)^2-d^2]\,w(w-1)(w-z)/(z(z-1))$.
+\item[Lean] \lean{painleveVI_of_riccati} (\file{DLMF/Painleve/SpecialSolutions.lean}), proved.
 \end{fields}
 
 \section{(b) Project transcription defects that were fixed}\label{sec:b}
@@ -2274,8 +2232,32 @@ residual $2.2\cdot 10^{-3}$ as printed, $1.5\cdot 10^{-32}$ corrected.
 \item[Lean] Counterexample \lean{p1a1_integral_mathieuCe_mul_mathieuSe_zero_ne} (proved);
   \lean{integral_mathieuCe_mul_mathieuSe} (\file{DLMF/Mathieu/Properties.lean}), now proved;
   second conjunct of \lean{mathieu_fourier_locallyUniform}
-  (\file{DLMF/Mathieu/FourierSeries.lean}), admitted.
+  (\file{DLMF/Mathieu/FourierSeries.lean}), proved.
 \item[Found] 2026-10-26 (proof round 1 for Chapters 28--31).
+\end{fields}
+
+\entry{\deq{30.8.8}}
+\begin{fields}
+\item[Defect] The acquired \lean{spheroidalCoeff_ratio_isBigO_four} ranged over all $\gamma^2$,
+  including $\gamma^2=0$. There every $A_k$ vanishes, Lean's $(\lambda-B_k)/A_k$ is $0$, and the
+  expression is identically $-1$, not $O(k^{-4})$.
+\item[Fix] The hypothesis $\gamma^2\ne0$ (DLMF divides by $A_k$), 2026-10-26.
+\item[Lean] Counterexample \lean{p2y_not_spheroidalCoeff_ratio_isBigO_four_zero} (proved);
+  \lean{spheroidalCoeff_ratio_isBigO_four} (\file{DLMF/Spheroidal/FerrersSeries.lean}), now
+  proved.
+\item[Found] 2026-10-26 (proof round 2 for Chapters 28--31).
+\end{fields}
+
+\entry{\deq{31.11.2}}
+\begin{fields}
+\item[Defect] The acquired \lean{heunHypP5_P6_riemann} ranged over all parameters, including those
+  where a third Gauss parameter $1+\lambda-\mu+2j$ or $1-\lambda+\mu-2j$ is a nonpositive
+  integer; there Mathlib's ${}_2F_1$ takes a junk value and the Riemann equation fails
+  ($\gamma=1$, $\delta=-1$, $\lambda=-1$, $\mu=0$, $j=0$, $z=2$).
+\item[Fix] The hypotheses that these parameters are not nonpositive integers, 2026-10-26.
+\item[Lean] Counterexample \lean{p2h_not_heunHypP5_P6_riemann_degenerate} (proved);
+  \lean{heunHypP5_P6_riemann} (\file{DLMF/Heun/Hypergeometric.lean}), now proved.
+\item[Found] 2026-10-26 (proof round 2 for Chapters 28--31).
 \end{fields}
 
 \section{(c) Formalization notes}\label{sec:c}
@@ -2620,7 +2602,7 @@ residual $2.2\cdot 10^{-3}$ as printed, $1.5\cdot 10^{-32}$ corrected.
   $a_j$ the Lean junk value $1/(a_j-a_k)=0$ breaks it. The hypothesis
   \lean{Function.Injective a} was added on 2026-10-26.
 \item[Lean] Counterexample \lean{p1h_fuchsian_normalForm_counterexample} (proved);
-  \lean{fuchsian_normalForm} (\file{DLMF/Heun/Fuchsian.lean}), admitted.
+  \lean{fuchsian_normalForm} (\file{DLMF/Heun/Fuchsian.lean}), proved.
 \end{fields}
 
 \entry{Domain choices}
@@ -2631,13 +2613,73 @@ residual $2.2\cdot 10^{-3}$ as printed, $1.5\cdot 10^{-32}$ corrected.
   ($|\sinh z|>1$) for every $j$.
 \end{fields}
 
+
+\entry{\deq{31.7.4}}
+\begin{fields}
+\item[Note] DLMF gives no domain for the cubic transformation. The acquired statement uses
+  $\{|z|<1,\ |1-(1-cz)^3|<1\}$, $c=\tfrac32-\tfrac{\sqrt3}{2}\iu$, which has three components;
+  the identity holds only on the one containing $0$ (numerically: off that component the two
+  sides differ by $0.36$--$0.60$). Proposed restriction, pending a decision: add
+  $|\ph(1-cz)|<\pi/6$, which selects exactly that component (star-shaped about $0$; the identity
+  holds there to $5\cdot10^{-18}$).
+\item[Lean] \lean{heunLocal_cubic_eq_hypergeometric} (\file{DLMF/Heun/Hypergeometric.lean}),
+  admitted, unchanged.
+\end{fields}
+
+\entry{\deq{28.12.7}}
+\begin{fields}
+\item[Note] Proved under the extra hypothesis $\lambda_{\nu+2m}(q)\ne\lambda_{\nu+2n}(q)$ as a
+  separate theorem; the statement as acquired stays admitted.
+\item[Lean] \lean{p2x_integral_mathieuMe_orthogonal_of_ne}
+  (\file{DLMF/Mathieu/Noninteger/Properties.lean}), proved.
+\end{fields}
+
+\subsection{Chapter 32}
+
+\entry{\deq{32.6.7}--\deq{32.6.8} and \deq{32.6.14}--\deq{32.6.15}}
+\begin{fields}
+\item[Note] Recovering the Hamiltonian system from the $\sigma$-equation needs $\sigma''\ne0$
+  (and $\sigma'\ne0$ in \deq{32.6.14}--\deq{32.6.15}): $\sigma=2c^3+cz$ solves \deq{32.6.6} but
+  gives no solution of \deq{32.6.3}--\deq{32.6.4}. The hypotheses are stated, as are
+  nonvanishing hypotheses wherever DLMF divides.
+\item[Lean] \file{DLMF/Painleve/Hamiltonian.lean}.
+\end{fields}
+
+\entry{\deq{32.10.20}, $m=1$}
+\begin{fields}
+\item[Note] The case $m=1$ gives $w\equiv0$, which is not a solution of $\mathrm{P}_{\mathrm{IV}}$
+  ($\mathrm{P}_{\mathrm{IV}}$ divides by $w$); it is excluded.
+\item[Lean] \file{DLMF/Painleve/SpecialSolutions.lean}.
+\end{fields}
+
+\entry{\dlink{32.9.i}{\S32.9(i)}}
+\begin{fields}
+\item[Note] The ``similar result'' for $\alpha=\gamma=0$ is made explicit as
+  $z^2w'^2-2zww'+2\beta zw+\delta z^2=Cw^2$ and proved.
+\item[Lean] \file{DLMF/Painleve/ElementarySolutions.lean}.
+\end{fields}
+
+\entry{\dlink{32.11}{\S32.11}}
+\begin{fields}
+\item[Note] $d>0$ is implicit in \deq{32.11.9}, \deq{32.11.17} and \deq{32.11.21}; for $d<0$
+  the parity rule $(-1)^n$ and the sign $\sigma$ flip. The Lean statements assume $d>0$.
+\item[Lean] \file{DLMF/Painleve/RealAsymptotics.lean}.
+\end{fields}
+
+\entry{\deq{32.2.2}}
+\begin{fields}
+\item[Note] DLMF's $\mathrm{P}_{\mathrm{II}}$ $w''=2w^3+zw+\alpha$ is the Beals--Wong equation
+  $u''=2u^3+xu-c$ of the older Painlev\'e files with $c=-\alpha$. Notation, not an erratum.
+\item[Lean] \lean{isPainleveIIOn_iff_isPIIOn} (\file{DLMF/Painleve/Equations.lean}), proved.
+\end{fields}
+
 \subsection{DLMF's own published errata followed}
 
 \entry{\deq{22.16.14}}
 \begin{fields}
 \item[Note] The corrected form (DLMF erratum of 2010-07-08, Karney) is used.
 \item[Lean] \lean{Real.jacobiEpsilonk_eq_integral_sn} (\file{DLMF/JacobiElliptic/Related.lean}),
-  admitted.
+  proved.
 \end{fields}
 
 \entry{\deq{23.18.7}}

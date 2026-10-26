@@ -32,7 +32,7 @@ the project's `ferrersQ` agrees with mpmath at the low degrees `-m ≤ ν < m` t
 
 @[expose] public noncomputable section
 
-open Complex Set Filter Asymptotics DLMF.Legendre
+open Complex Set Filter Asymptotics DLMF.Legendre MeasureTheory
 open scoped Topology Real
 
 namespace DLMF.Spheroidal
@@ -50,17 +50,6 @@ theorem spheroidalCoeff_of_le {n m : ℕ} (γ2 : ℝ) {k : ℤ} (hk : -(((n - m)
   unfold spheroidalCoeff
   simp only [hk, ↓reduceIte]
   rfl
-
-/-- **The Ferrers expansion** (DLMF 30.8.1):
-`𝖯s^m_n(x, γ²) = ∑_{k ≥ -R} (-1)^k a^m_{n,k}(γ²) 𝖯^m_{n+2k}(x)` on `(-1, 1)`. -/
-@[dlmf 30.8.E1]
-theorem hasSum_spheroidalPs_ferrers {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {x : ℝ}
-    (hx : x ∈ Ioo (-1 : ℝ) 1) :
-    HasSum (fun j : ℕ =>
-        let k : ℤ := (j : ℤ) - ((n - m) / 2 : ℕ)
-        (-1 : ℝ) ^ k * spheroidalCoeff n m γ2 k * (ferrersP ((n : ℂ) + 2 * k) m x).re)
-      (spheroidalPs n m x γ2) := by
-  sorry
 
 /-- `A_{-R} = 0` (DLMF §30.8(i), note after 30.8.4). Proved. -/
 @[dlmf 30.8.E4]
@@ -533,16 +522,6 @@ theorem spheroidalCoeff_recurrence_of_le {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
       (by rw [← hbr0]; positivity) core
 
 
-/-- **The normalization** (DLMF 30.8.5):
-`∑_{k ≥ -R} a^m_{n,k}(γ²) a^{-m}_{n,k}(γ²)/(2n+4k+1) = 1/(2n+1)` (equivalent to 30.4.1). -/
-@[dlmf 30.8.E5]
-theorem hasSum_spheroidalCoeff_normalization {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
-    HasSum (fun j : ℕ =>
-        let k : ℤ := (j : ℤ) - ((n - m) / 2 : ℕ)
-        spheroidalCoeff n m γ2 k * spheroidalCoeffNeg n m γ2 k / (2 * (n : ℝ) + 4 * k + 1))
-      (1 / (2 * (n : ℝ) + 1)) := by
-  sorry
-
 /-- **The coefficients `a^{-m}_{n,k}`** (DLMF 30.8.6): for `k ≥ -R`,
 `a^{-m}_{n,k} = (n-m)!(n+m+2k)!/((n+m)!(n-m+2k)!) a^m_{n,k}`. Proved (definition). -/
 @[dlmf 30.8.E6]
@@ -555,25 +534,992 @@ theorem spheroidalCoeffNeg_of_le {n m : ℕ} (γ2 : ℝ) {k : ℤ}
   unfold spheroidalCoeffNeg
   simp only [hk, ↓reduceIte]
 
+/-! #### Proof of the expansion 30.8.1 and the normalization 30.8.5
+
+With `ν = n - 2R + 2j`, `a^m_{n,j-R} = ±(2ν+1)(ν-m)!/(2(ν+m)!) b_ν`, `b_ν = ∫ (1-x²)^m g P_ν^{(m)}`.
+A crude bound gives `|a| = O(j)`; the recurrence 30.8.4 with `B_k - λ → ∞` improves it to
+geometric decay of any rate, which dominates the exponential growth of `P_ν^{(m)}` on `[-1, 1]`.
+Completeness of the `P_ν^{(m)}` (`p2y_hasSum_expansion`) then gives 30.8.1 and Parseval 30.8.5. -/
+
+/-- The real Ferrers function of integer degree through `P_N^{(m)}`. -/
+theorem p2y_ferrers_re (N m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
+    (ferrersP N m x).re = (-1) ^ m * (1 - x ^ 2) ^ ((m : ℝ) / 2) * (legInt_D N m x).re := by
+  rw [legInt_ferrersP_nat_nat N m hx, p2y_legInt_D_real N m x,
+    show ((-1 : ℂ) ^ m) = (((-1 : ℝ) ^ m : ℝ) : ℂ) by push_cast; rfl, ← ofReal_mul, ← ofReal_mul,
+    ofReal_re, ofReal_re]
+
+/-- The coefficients 30.8.2 through the entire factor: for `k = j - R`, `ν = n - 2R + 2j`,
+`a^m_{n,k} = (-1)^{k+m} (2ν+1)(ν-m)!/(2(ν+m)!) ∫ (1-x²)^m g P_ν^{(m)}`. -/
+theorem p2y_coeff_eq {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) (j : ℕ) :
+    spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ)) =
+      (-1 : ℝ) ^ ((j : ℤ) - ((n - m) / 2 : ℕ)) * (-1) ^ m *
+        ((2 * ((n - 2 * ((n - m) / 2) + 2 * j : ℕ) : ℝ) + 1) *
+          ((n - 2 * ((n - m) / 2) + 2 * j - m).factorial : ℝ) /
+            (2 * ((n - 2 * ((n - m) / 2) + 2 * j + m).factorial : ℝ)) *
+        ∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * (spheroidalPsFactor n m γ2 y).re *
+          (legInt_D (n - 2 * ((n - m) / 2) + 2 * j) m y).re) := by
+  rw [spheroidalCoeff_of_le γ2 (by omega)]
+  obtain ⟨ν, hν⟩ : ∃ ν, ν = n - 2 * ((n - m) / 2) + 2 * j := ⟨_, rfl⟩
+  rw [← hν]
+  have hνi : (ν : ℤ) = n + 2 * ((j : ℤ) - ((n - m) / 2 : ℕ)) := by omega
+  have hc : ((n : ℂ) + 2 * ((((j : ℤ) - ((n - m) / 2 : ℕ)) : ℤ) : ℂ)) = ((ν : ℕ) : ℂ) := by
+    exact_mod_cast hνi.symm
+  have hr : ((n : ℝ) + 2 * ((((j : ℤ) - ((n - m) / 2 : ℕ)) : ℤ) : ℝ)) = ((ν : ℕ) : ℝ) := by
+    exact_mod_cast hνi.symm
+  have h1 : ((n : ℤ) - m + 2 * ((j : ℤ) - ((n - m) / 2 : ℕ))).toNat = ν - m := by omega
+  have h2 : ((n : ℤ) + m + 2 * ((j : ℤ) - ((n - m) / 2 : ℕ))).toNat = ν + m := by omega
+  rw [hc, h1, h2, hr]
+  have hI : ∫ x in (-1 : ℝ)..1, spheroidalPs n m x γ2 * (ferrersP ((ν : ℕ) : ℂ) m x).re =
+      (-1) ^ m * ∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * (spheroidalPsFactor n m γ2 y).re *
+        (legInt_D ν m y).re := by
+    rw [← intervalIntegral.integral_const_mul]
+    apply p2y_integral_congr_Ioo
+    intro x hx
+    simp only [spheroidalPs]
+    rw [p2y_ferrers_prod m ν hx]
+    ring
+  rw [hI]
+  ring
+
+/-- The parity of the entire factor: `g(-x) = (-1)^{n-m} g(x)`. -/
+theorem p2y_factor_neg {n m : ℕ} (hmn : m ≤ n) (γ2 x : ℝ) :
+    (spheroidalPsFactor n m γ2 ((-x : ℝ) : ℂ)).re =
+      (-1) ^ (n - m) * (spheroidalPsFactor n m γ2 x).re := by
+  have hg := spheroidalPsFactor_spec hmn γ2
+  have hu := (existsUnique_isSpheroidalPsFactor hmn γ2).unique
+    (p1s_isSpheroidalPsFactor_reflect hg) hg
+  have hx := congrFun hu (-(x : ℂ))
+  simp only [neg_neg] at hx
+  rw [ofReal_neg, ← hx, show ((-1 : ℂ) ^ (n - m)) = (((-1 : ℝ) ^ (n - m) : ℝ) : ℂ) by
+    push_cast; rfl, re_ofReal_mul]
+
+/-- The coefficients of the wrong parity vanish. -/
+theorem p2y_coeff_parity {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) (μ : ℕ) (hμ : m ≤ μ)
+    (hex : ∀ j : ℕ, μ ≠ n - 2 * ((n - m) / 2) + 2 * j) :
+    ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * (spheroidalPsFactor n m γ2 x).re *
+      (legInt_D μ m x).re = 0 := by
+  have hodd : (n + μ) % 2 = 1 := by
+    by_contra h
+    exact hex ((μ - (n - 2 * ((n - m) / 2))) / 2) (by omega)
+  have hs : ((-1 : ℝ) ^ (n - m) * (-1) ^ (μ + m)) = -1 := by
+    rw [← pow_add, show n - m + (μ + m) = n + μ by omega]
+    exact Odd.neg_one_pow (Nat.odd_iff.mpr hodd)
+  set f : ℝ → ℝ := fun x => (1 - x ^ 2) ^ m * (spheroidalPsFactor n m γ2 x).re *
+    (legInt_D μ m x).re with hf
+  have hneg : ∀ x, f (-x) = -f x := by
+    intro x
+    simp only [hf]
+    rw [p2y_factor_neg hmn, p2y_D_neg, neg_sq]
+    linear_combination ((1 - x ^ 2) ^ m * (spheroidalPsFactor n m γ2 x).re *
+      (legInt_D μ m x).re) * hs
+  have h := intervalIntegral.integral_comp_neg (a := (-1 : ℝ)) (b := 1) f
+  simp only [neg_neg, hneg, intervalIntegral.integral_neg] at h
+  change ∫ x in (-1 : ℝ)..1, f x = 0
+  linarith
+
+/-- A crude bound for the coefficient `∫ (1-x²)^m G P_ν^{(m)}` of a bounded continuous `G`. -/
+theorem p2y_b_bound {G : ℝ → ℝ} (hG : ContinuousOn G (Icc (-1) 1)) {MG : ℝ}
+    (hM : ∀ x ∈ Icc (-1 : ℝ) 1, |G x| ≤ MG) {m ν : ℕ} (hν : m ≤ ν) :
+    |∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * G x * (legInt_D ν m x).re| ≤
+      MG * (2 + 2 * ((ν + m).factorial : ℝ) / ((2 * ν + 1) * (ν - m).factorial)) := by
+  have hD : Continuous fun x : ℝ => (legInt_D ν m x).re :=
+    Complex.continuous_re.comp (legInt_cont_D ν m)
+  have hw : Continuous fun x : ℝ => (1 - x ^ 2) ^ m := by fun_prop
+  have hMG : 0 ≤ MG := (abs_nonneg _).trans (hM 0 (by norm_num))
+  calc _ ≤ ∫ x in (-1 : ℝ)..1, |(1 - x ^ 2) ^ m * G x * (legInt_D ν m x).re| :=
+        intervalIntegral.abs_integral_le_integral_abs (by norm_num)
+    _ ≤ ∫ x in (-1 : ℝ)..1, MG * (1 + (1 - x ^ 2) ^ m * (legInt_D ν m x).re *
+          (legInt_D ν m x).re) := by
+        refine intervalIntegral.integral_mono_on (by norm_num) ?_ ?_ fun x hx => ?_
+        · exact ((hw.continuousOn.mul hG).mul hD.continuousOn).abs.intervalIntegrable_of_Icc
+            (by norm_num)
+        · exact (continuous_const.mul (continuous_const.add
+            ((hw.mul hD).mul hD))).intervalIntegrable _ _
+        · have h1 : 0 ≤ 1 - x ^ 2 := by nlinarith [hx.1, hx.2]
+          have hw0 : 0 ≤ (1 - x ^ 2) ^ m := pow_nonneg h1 m
+          have hw1 : (1 - x ^ 2) ^ m ≤ 1 := pow_le_one₀ h1 (by nlinarith)
+          set d := (legInt_D ν m x).re
+          have hd : |d| ≤ 1 + d * d := by
+            rcases abs_cases d with ⟨h, _⟩ | ⟨h, _⟩ <;> rw [h] <;> nlinarith [sq_nonneg (d - 1),
+              sq_nonneg (d + 1)]
+          rw [abs_mul, abs_mul, abs_of_nonneg hw0]
+          have hG' := hM x hx
+          have : (1 - x ^ 2) ^ m * |d| ≤ 1 + (1 - x ^ 2) ^ m * d * d := by
+            nlinarith [mul_le_mul_of_nonneg_left hd hw0, mul_self_nonneg d]
+          calc (1 - x ^ 2) ^ m * |G x| * |d| = |G x| * ((1 - x ^ 2) ^ m * |d|) := by ring
+            _ ≤ MG * (1 + (1 - x ^ 2) ^ m * d * d) :=
+              mul_le_mul hG' this (by positivity) hMG
+    _ = MG * (2 + 2 * ((ν + m).factorial : ℝ) / ((2 * ν + 1) * (ν - m).factorial)) := by
+        have hi : IntervalIntegrable (fun x : ℝ => (1 - x ^ 2) ^ m * (legInt_D ν m x).re *
+            (legInt_D ν m x).re) volume (-1) 1 := ((hw.mul hD).mul hD).intervalIntegrable _ _
+        rw [intervalIntegral.integral_const_mul, intervalIntegral.integral_add
+          intervalIntegrable_const hi, p2y_D_orth hν ν]
+        simp only [↓reduceIte, intervalIntegral.integral_const, smul_eq_mul]
+        ring
+
+/-- **A linear a-priori bound** for the coefficients: `|a^m_{n,j-R}| ≤ M (j+1)`. -/
+theorem p2y_coeff_linear {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
+    ∃ M : ℝ, 0 ≤ M ∧ ∀ j : ℕ,
+      |spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ))| ≤ M * (j + 1) := by
+  have hg := (spheroidalPsFactor_spec hmn γ2).factor.differentiable
+  have hGc : Continuous fun x : ℝ => (spheroidalPsFactor n m γ2 x).re :=
+    Complex.continuous_re.comp (hg.continuous.comp continuous_ofReal)
+  obtain ⟨MG, hMG⟩ := (isCompact_Icc.image_of_continuousOn
+    (hGc.continuousOn (s := Icc (-1 : ℝ) 1))).isBounded.exists_norm_le
+  have hM : ∀ x ∈ Icc (-1 : ℝ) 1, |(spheroidalPsFactor n m γ2 x).re| ≤ MG :=
+    fun x hx => hMG _ ⟨x, hx, rfl⟩
+  have hMG0 : 0 ≤ MG := (abs_nonneg _).trans (hM 0 (by norm_num))
+  refine ⟨MG * (2 * n + 4), by positivity, fun j => ?_⟩
+  rw [p2y_coeff_eq hmn γ2 j]
+  obtain ⟨ν, hν⟩ : ∃ ν, ν = n - 2 * ((n - m) / 2) + 2 * j := ⟨_, rfl⟩
+  rw [← hν]
+  have hνm : m ≤ ν := by omega
+  have hνn : (ν : ℝ) ≤ n + 2 * j := by
+    have : ν ≤ n + 2 * j := by omega
+    exact_mod_cast this
+  have hb := p2y_b_bound hGc.continuousOn hM hνm
+  have hs : |(-1 : ℝ) ^ ((j : ℤ) - ((n - m) / 2 : ℕ)) * (-1) ^ m| = 1 := by
+    rw [abs_mul, abs_zpow, abs_pow, abs_neg, abs_one, one_zpow, one_pow, mul_one]
+  have hf1 : (0 : ℝ) < ((ν - m).factorial : ℝ) := by positivity
+  have hf2 : (0 : ℝ) < ((ν + m).factorial : ℝ) := by positivity
+  have hfl : ((ν - m).factorial : ℝ) ≤ ((ν + m).factorial : ℝ) := by
+    exact_mod_cast Nat.factorial_le (by omega)
+  have h2 : (0 : ℝ) < 2 * ν + 1 := by positivity
+  rw [abs_mul, hs, one_mul, abs_mul, abs_of_pos (by positivity)]
+  set B := |∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * (spheroidalPsFactor n m γ2 y).re *
+    (legInt_D ν m y).re|
+  have hB0 : 0 ≤ B := abs_nonneg _
+  calc (2 * (ν : ℝ) + 1) * ((ν - m).factorial : ℝ) / (2 * ((ν + m).factorial : ℝ)) * B
+      ≤ (2 * (ν : ℝ) + 1) * ((ν - m).factorial : ℝ) / (2 * ((ν + m).factorial : ℝ)) *
+        (MG * (2 + 2 * ((ν + m).factorial : ℝ) / ((2 * ν + 1) * (ν - m).factorial))) :=
+        mul_le_mul_of_nonneg_left hb (by positivity)
+    _ = MG * (2 * ((2 * (ν : ℝ) + 1) * ((ν - m).factorial : ℝ) / (2 * ((ν + m).factorial : ℝ)))
+        + 1) := by field_simp
+    _ ≤ MG * (2 * (2 * (ν : ℝ) + 1) / 2 + 1) := by
+        gcongr
+        rw [mul_div_assoc, show 2 * (2 * (ν : ℝ) + 1) / 2 = 2 * ((2 * ν + 1) / 2) by ring]
+        gcongr
+        have hq : ((ν - m).factorial : ℝ) / (2 * ((ν + m).factorial : ℝ)) ≤ 1 / 2 := by
+          rw [div_le_iff₀ (by positivity)]; linarith
+        calc (2 * (ν : ℝ) + 1) * (((ν - m).factorial : ℝ) / (2 * ((ν + m).factorial : ℝ)))
+            ≤ (2 * (ν : ℝ) + 1) * (1 / 2) := mul_le_mul_of_nonneg_left hq h2.le
+          _ = (2 * (ν : ℝ) + 1) / 2 := by ring
+    _ ≤ MG * (2 * n + 4) * (j + 1) := by
+        rw [mul_assoc]
+        gcongr
+        have : (0 : ℝ) ≤ j := Nat.cast_nonneg j
+        have : (0 : ℝ) ≤ n := Nat.cast_nonneg n
+        nlinarith
+
+/-- Bounds for the coefficients of 30.8.4 for `k ≥ 1`: `|A_k|, |C_k| ≤ |γ²|` and
+`B_k ≥ (n+2k)(n+2k+1) - 2|γ²|(1+m²)`. -/
+theorem p2y_rec_bounds {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {k : ℤ} (hk : 1 ≤ k) :
+    |spheroidalRecA n m γ2 k| ≤ |γ2| ∧ |spheroidalRecC n m γ2 k| ≤ |γ2| ∧
+      ((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1) - 2 * |γ2| * (1 + m ^ 2) ≤
+        spheroidalRecB n m γ2 k := by
+  have kr : (1 : ℝ) ≤ k := by exact_mod_cast hk
+  have hmr : (m : ℝ) ≤ n := by exact_mod_cast hmn
+  have hm0 : (0 : ℝ) ≤ m := Nat.cast_nonneg m
+  refine ⟨?_, ?_, ?_⟩
+  · unfold spheroidalRecA
+    rw [mul_div_assoc, abs_mul, abs_neg]
+    refine mul_le_of_le_one_right (abs_nonneg _) ?_
+    rw [abs_div, abs_of_nonneg (by nlinarith), abs_of_pos (by nlinarith), div_le_one
+      (by nlinarith)]
+    nlinarith
+  · unfold spheroidalRecC
+    rw [mul_div_assoc, abs_mul, abs_neg]
+    refine mul_le_of_le_one_right (abs_nonneg _) ?_
+    rw [abs_div, abs_of_nonneg (by nlinarith), abs_of_pos (by nlinarith), div_le_one
+      (by nlinarith)]
+    nlinarith
+  · unfold spheroidalRecB
+    set F := (((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1) - 1 + m ^ 2) /
+      ((2 * (n : ℝ) + 4 * k - 1) * (2 * (n : ℝ) + 4 * k + 3)) with hF
+    have hQ : 0 < (2 * (n : ℝ) + 4 * k - 1) * (2 * (n : ℝ) + 4 * k + 3) := by nlinarith
+    have hF0 : 0 ≤ F := div_nonneg (by nlinarith) hQ.le
+    have hF1 : F ≤ 1 + m ^ 2 := by
+      rw [hF, div_le_iff₀ hQ]; nlinarith [mul_nonneg hm0 hm0]
+    rw [show 2 * γ2 * (((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1) - 1 + m ^ 2) /
+      ((2 * (n : ℝ) + 4 * k - 1) * (2 * (n : ℝ) + 4 * k + 3)) = 2 * γ2 * F by rw [hF]; ring]
+    have h1 : γ2 * F ≤ |γ2| * (1 + m ^ 2) :=
+      (le_abs_self _).trans (by rw [abs_mul, abs_of_nonneg hF0]; exact
+        mul_le_mul_of_nonneg_left hF1 (abs_nonneg _))
+    linarith
+
+/-- Eventually `|a_{j+1}| ≤ ε (|a_j| + |a_{j+2}|)` (from 30.8.4, since `B_k - λ → ∞`). -/
+theorem p2y_coeff_eps {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {ε : ℝ} (hε : 0 < ε) :
+    ∃ J : ℕ, ∀ j : ℕ, J ≤ j →
+      |spheroidalCoeff n m γ2 (((j + 1 : ℕ) : ℤ) - ((n - m) / 2 : ℕ))| ≤
+        ε * (|spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ))| +
+          |spheroidalCoeff n m γ2 (((j + 2 : ℕ) : ℤ) - ((n - m) / 2 : ℕ))|) := by
+  set lam := spheroidalEigenvalue n m γ2
+  set T : ℝ := |γ2| / ε + 1 + 2 * |γ2| * (1 + m ^ 2) + |lam| with hT
+  obtain ⟨J0, hJ0⟩ := exists_nat_ge T
+  refine ⟨J0 + (n - m) / 2, fun j hj => ?_⟩
+  set k : ℤ := ((j + 1 : ℕ) : ℤ) - ((n - m) / 2 : ℕ) with hk
+  have hk1 : 1 ≤ k := by omega
+  have hkT : T ≤ (k : ℝ) := by
+    have : ((J0 : ℤ) : ℝ) + 1 ≤ (k : ℝ) := by exact_mod_cast (by omega : (J0 : ℤ) + 1 ≤ k)
+    push_cast at this
+    linarith
+  have hrec := spheroidalCoeff_recurrence_of_le hmn γ2 (k := k) (by omega)
+  simp only [show -(((n - m) / 2 : ℕ) : ℤ) ≤ k - 1 by omega, ↓reduceIte] at hrec
+  rw [show k - 1 = (j : ℤ) - ((n - m) / 2 : ℕ) by rw [hk]; push_cast; ring,
+    show k + 1 = ((j + 2 : ℕ) : ℤ) - ((n - m) / 2 : ℕ) by rw [hk]; push_cast; ring] at hrec
+  obtain ⟨hA, hC, hB⟩ := p2y_rec_bounds hmn γ2 hk1
+  set a0 := spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ))
+  set a1 := spheroidalCoeff n m γ2 k
+  set a2 := spheroidalCoeff n m γ2 (((j + 2 : ℕ) : ℤ) - ((n - m) / 2 : ℕ))
+  have hk0 : (1 : ℝ) ≤ k := by exact_mod_cast hk1
+  have hn0 : (0 : ℝ) ≤ n := Nat.cast_nonneg n
+  have hνbig : T ≤ ((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1) := by nlinarith
+  have hBl : |γ2| / ε + 1 ≤ spheroidalRecB n m γ2 k - lam := by
+    have := le_abs_self lam
+    linarith
+  have hpos : 0 < spheroidalRecB n m γ2 k - lam := by
+    have : 0 ≤ |γ2| / ε := by positivity
+    linarith
+  have hge : |γ2| ≤ ε * (spheroidalRecB n m γ2 k - lam) := by
+    have h1 := mul_le_mul_of_nonneg_left hBl hε.le
+    rw [mul_add, mul_div_cancel₀ _ hε.ne', mul_one] at h1
+    linarith
+  have e : (spheroidalRecB n m γ2 k - lam) * a1 = -(spheroidalRecA n m γ2 k * a0 +
+      spheroidalRecC n m γ2 k * a2) := by linear_combination hrec
+  have h2 : (spheroidalRecB n m γ2 k - lam) * |a1| ≤ |γ2| * (|a0| + |a2|) := by
+    have := congrArg abs e
+    rw [abs_mul, abs_of_pos hpos, abs_neg] at this
+    rw [this]
+    calc _ ≤ |spheroidalRecA n m γ2 k * a0| + |spheroidalRecC n m γ2 k * a2| := abs_add_le _ _
+      _ ≤ |γ2| * |a0| + |γ2| * |a2| := by
+          rw [abs_mul, abs_mul]
+          exact add_le_add (mul_le_mul_of_nonneg_right hA (abs_nonneg _))
+            (mul_le_mul_of_nonneg_right hC (abs_nonneg _))
+      _ = _ := by ring
+  have h3 : (spheroidalRecB n m γ2 k - lam) * |a1| ≤
+      (spheroidalRecB n m γ2 k - lam) * (ε * (|a0| + |a2|)) := by
+    calc _ ≤ |γ2| * (|a0| + |a2|) := h2
+      _ ≤ ε * (spheroidalRecB n m γ2 k - lam) * (|a0| + |a2|) :=
+          mul_le_mul_of_nonneg_right hge (by positivity)
+      _ = _ := by ring
+  exact le_of_mul_le_mul_left h3 hpos
+
+/-- **Geometric decay** of the coefficients: for every `q > 0`, eventually
+`|a_j| ≤ M (j+1) q^{j-J}`. -/
+theorem p2y_coeff_decay {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {q : ℝ} (hq : 0 < q) :
+    ∃ J : ℕ, ∃ M : ℝ, 0 ≤ M ∧ ∀ j : ℕ, J ≤ j →
+      |spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ))| ≤ M * (j + 1) * q ^ (j - J) := by
+  obtain ⟨M, hM0, hM⟩ := p2y_coeff_linear hmn γ2
+  obtain ⟨J, hJ⟩ := p2y_coeff_eps hmn γ2 (by positivity : (0 : ℝ) < q / 2)
+  refine ⟨J, M, hM0, ?_⟩
+  have key : ∀ i : ℕ, ∀ j : ℕ, J + i ≤ j →
+      |spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ))| ≤ M * (j + 1) * q ^ i := by
+    intro i
+    induction i with
+    | zero => intro j _; simpa using hM j
+    | succ i ih =>
+      intro j' hj'
+      obtain ⟨j, rfl⟩ : ∃ j, j' = j + 1 := ⟨j' - 1, by omega⟩
+      have h := hJ j (by omega)
+      have h0 := ih j (by omega)
+      have h2 := ih (j + 2) (by omega)
+      have hqi : 0 ≤ q ^ i := by positivity
+      calc _ ≤ q / 2 * (|spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ))| +
+            |spheroidalCoeff n m γ2 (((j + 2 : ℕ) : ℤ) - ((n - m) / 2 : ℕ))|) := h
+        _ ≤ q / 2 * (M * (j + 1) * q ^ i + M * ((j + 2 : ℕ) + 1) * q ^ i) := by
+            gcongr
+        _ = M * (((j + 1 : ℕ) : ℝ) + 1) * q ^ (i + 1) := by push_cast; ring
+  intro j hj
+  exact key (j - J) j (by omega)
+
+/-- A summable dominating sequence for the expansion of the entire factor on `[-1, 1]`, from the
+geometric decay of the coefficients and the exponential bound of `P_ν^{(m)}`. -/
+theorem p2y_factor_bound {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
+    ∃ u : ℕ → ℝ, Summable u ∧ ∀ j : ℕ, ∀ x ∈ Icc (-1 : ℝ) 1,
+      |(2 * ((n - 2 * ((n - m) / 2) + 2 * j : ℕ) : ℝ) + 1) *
+          ((n - 2 * ((n - m) / 2) + 2 * j - m).factorial : ℝ) /
+          (2 * ((n - 2 * ((n - m) / 2) + 2 * j + m).factorial : ℝ)) *
+        (∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * (spheroidalPsFactor n m γ2 y).re *
+          (legInt_D (n - 2 * ((n - m) / 2) + 2 * j) m y).re) *
+          (legInt_D (n - 2 * ((n - m) / 2) + 2 * j) m x).re| ≤ u j := by
+  have hg := (spheroidalPsFactor_spec hmn γ2).factor.differentiable
+  have hGc : Continuous fun x : ℝ => (spheroidalPsFactor n m γ2 x).re :=
+    Complex.continuous_re.comp (hg.continuous.comp continuous_ofReal)
+  obtain ⟨C, hC0, hCb⟩ := p2y_D_bound m
+  set L : ℝ := 2 * (m : ℝ) + 3 with hL
+  have hL1 : 1 ≤ L := by rw [hL]; have := (Nat.cast_nonneg m : (0 : ℝ) ≤ m); linarith
+  have hL0 : 0 < L := by linarith
+  set q : ℝ := 1 / (2 * L ^ 2) with hq
+  have hq0 : 0 < q := by positivity
+  obtain ⟨J, M, hM0, hdec⟩ := p2y_coeff_decay hmn γ2 hq0
+  set ν₀ := n - 2 * ((n - m) / 2) with hν₀
+  have hν₀m : m ≤ ν₀ := by omega
+  set a : ℕ → ℝ := fun j => spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ)) with ha
+  set u : ℕ → ℝ := fun j => C * L ^ (ν₀ + 2 * j - m) * |a j| with hu
+  have hsumg : Summable fun j : ℕ => (C * L * M / q ^ J) * ((j + 1) * (1 / 2 : ℝ) ^ j) := by
+    refine Summable.mul_left _ ?_
+    have h1 := summable_pow_mul_geometric_of_norm_lt_one 1 (r := (1 / 2 : ℝ))
+      (by norm_num [Real.norm_eq_abs])
+    have h2 := summable_geometric_of_lt_one (r := (1 / 2 : ℝ)) (by norm_num) (by norm_num)
+    convert h1.add h2 using 1
+    funext j; simp; ring
+  have husum : Summable u := by
+    refine Summable.of_norm_bounded_eventually_nat hsumg ?_
+    filter_upwards [eventually_ge_atTop J] with j hj
+    rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
+    have hd := hdec j hj
+    have hpow : L ^ (ν₀ + 2 * j - m) ≤ L ^ (2 * j + 1) := pow_le_pow_right₀ hL1 (by omega)
+    have hqJ : q ^ (j - J) = q ^ j / q ^ J := by
+      rw [eq_div_iff (by positivity), ← pow_add, Nat.sub_add_cancel hj]
+    have hLq : L ^ (2 * j + 1) * q ^ j = L * (1 / 2) ^ j := by
+      rw [hq, pow_succ, pow_mul, mul_comm ((L ^ 2) ^ j) L, mul_assoc, ← mul_pow,
+        show L ^ 2 * (1 / (2 * L ^ 2)) = 1 / 2 by field_simp]
+    calc C * L ^ (ν₀ + 2 * j - m) * |a j| ≤ C * L ^ (2 * j + 1) * (M * (j + 1) * q ^ (j - J)) :=
+          mul_le_mul (mul_le_mul_of_nonneg_left hpow hC0) hd (abs_nonneg _) (by positivity)
+      _ = C * L * M / q ^ J * ((j + 1) * (1 / 2 : ℝ) ^ j) := by
+          rw [hqJ, show C * L ^ (2 * j + 1) * (M * (j + 1) * (q ^ j / q ^ J)) =
+            C * M * (j + 1) * (L ^ (2 * j + 1) * q ^ j) / q ^ J by ring, hLq]
+          ring
+  refine ⟨u, husum, fun j x hx => ?_⟩
+  have hcoef := p2y_coeff_eq hmn γ2 j
+  have hs : |(-1 : ℝ) ^ ((j : ℤ) - ((n - m) / 2 : ℕ)) * (-1) ^ m| = 1 := by
+    rw [abs_mul, abs_zpow, abs_pow, abs_neg, abs_one, one_zpow, one_pow, mul_one]
+  have haj : |a j| = |(2 * ((ν₀ + 2 * j : ℕ) : ℝ) + 1) * ((ν₀ + 2 * j - m).factorial : ℝ) /
+      (2 * ((ν₀ + 2 * j + m).factorial : ℝ)) * (∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m *
+        (spheroidalPsFactor n m γ2 y).re * (legInt_D (ν₀ + 2 * j) m y).re)| := by
+    simp only [ha]
+    rw [hcoef, abs_mul, hs, one_mul]
+  rw [abs_mul, ← haj]
+  calc |a j| * |(legInt_D (ν₀ + 2 * j) m x).re| ≤ |a j| * (C * L ^ (ν₀ + 2 * j - m)) :=
+        mul_le_mul_of_nonneg_left (hCb _ (by omega) x hx) (abs_nonneg _)
+    _ = u j := by simp only [hu]; ring
+
+/-- **The expansion of the entire factor** in the functions `P_ν^{(m)}`, `ν = n - 2R + 2j`, on
+`(-1, 1)` (the content of DLMF 30.8.1). -/
+theorem p2y_factor_expansion {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
+    ∀ x ∈ Ioo (-1 : ℝ) 1, HasSum (fun j : ℕ =>
+      (2 * ((n - 2 * ((n - m) / 2) + 2 * j : ℕ) : ℝ) + 1) *
+          ((n - 2 * ((n - m) / 2) + 2 * j - m).factorial : ℝ) /
+          (2 * ((n - 2 * ((n - m) / 2) + 2 * j + m).factorial : ℝ)) *
+        (∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * (spheroidalPsFactor n m γ2 y).re *
+          (legInt_D (n - 2 * ((n - m) / 2) + 2 * j) m y).re) *
+          (legInt_D (n - 2 * ((n - m) / 2) + 2 * j) m x).re)
+      ((spheroidalPsFactor n m γ2 x).re) := by
+  have hg := (spheroidalPsFactor_spec hmn γ2).factor.differentiable
+  have hGc : Continuous fun x : ℝ => (spheroidalPsFactor n m γ2 x).re :=
+    Complex.continuous_re.comp (hg.continuous.comp continuous_ofReal)
+  obtain ⟨u, hu, hb⟩ := p2y_factor_bound hmn γ2
+  exact p2y_hasSum_expansion hGc.continuousOn (by omega)
+    (fun μ hμ hex => p2y_coeff_parity hmn γ2 μ hμ hex) hu hb
+
+/-- **The Ferrers expansion** (DLMF 30.8.1):
+`𝖯s^m_n(x, γ²) = ∑_{k ≥ -R} (-1)^k a^m_{n,k}(γ²) 𝖯^m_{n+2k}(x)` on `(-1, 1)`. Proved from the
+eigenfunction choice: the coefficients decay geometrically (30.8.4) and the functions
+`P_ν^{(m)}` are complete (Weierstrass). -/
+@[dlmf 30.8.E1]
+theorem hasSum_spheroidalPs_ferrers {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {x : ℝ}
+    (hx : x ∈ Ioo (-1 : ℝ) 1) :
+    HasSum (fun j : ℕ =>
+        let k : ℤ := (j : ℤ) - ((n - m) / 2 : ℕ)
+        (-1 : ℝ) ^ k * spheroidalCoeff n m γ2 k * (ferrersP ((n : ℂ) + 2 * k) m x).re)
+      (spheroidalPs n m x γ2) := by
+  have h := (p2y_factor_expansion hmn γ2 x hx).mul_left ((1 - x ^ 2) ^ ((m : ℝ) / 2))
+  convert h using 1
+  swap
+  · rfl
+  funext j
+  obtain ⟨ν, hν⟩ : ∃ ν, ν = n - 2 * ((n - m) / 2) + 2 * j := ⟨_, rfl⟩
+  have hνi : (ν : ℤ) = n + 2 * ((j : ℤ) - ((n - m) / 2 : ℕ)) := by omega
+  have hc : ((n : ℂ) + 2 * ((((j : ℤ) - ((n - m) / 2 : ℕ)) : ℤ) : ℂ)) = ((ν : ℕ) : ℂ) := by
+    exact_mod_cast hνi.symm
+  simp only []
+  rw [p2y_coeff_eq hmn γ2 j, hc, ← hν, p2y_ferrers_re ν m hx]
+  have h1 : ((-1 : ℝ) ^ ((j : ℤ) - ((n - m) / 2 : ℕ))) * (-1) ^ ((j : ℤ) - ((n - m) / 2 : ℕ)) =
+      1 := by rw [← mul_zpow]; norm_num
+  have h2 : ((-1 : ℝ) ^ m) * (-1) ^ m = 1 := by rw [← mul_pow]; norm_num
+  linear_combination ((2 * (ν : ℝ) + 1) * ((ν - m).factorial : ℝ) / (2 * ((ν + m).factorial : ℝ))
+    * (∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * (spheroidalPsFactor n m γ2 y).re *
+      (legInt_D ν m y).re) * (1 - x ^ 2) ^ ((m : ℝ) / 2) * (legInt_D ν m x).re) *
+    ((-1) ^ m * (-1) ^ m * h1 + h2)
+
+/-- **Parseval's identity** for the expansion of the entire factor:
+`∑_j c_ν b_ν² = ∫ (1-x²)^m g² = 2(n+m)!/((2n+1)(n-m)!)`. -/
+theorem p2y_parseval {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
+    HasSum (fun j : ℕ =>
+      (2 * ((n - 2 * ((n - m) / 2) + 2 * j : ℕ) : ℝ) + 1) *
+          ((n - 2 * ((n - m) / 2) + 2 * j - m).factorial : ℝ) /
+          (2 * ((n - 2 * ((n - m) / 2) + 2 * j + m).factorial : ℝ)) *
+        (∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * (spheroidalPsFactor n m γ2 y).re *
+          (legInt_D (n - 2 * ((n - m) / 2) + 2 * j) m y).re) *
+        (∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * (spheroidalPsFactor n m γ2 y).re *
+          (legInt_D (n - 2 * ((n - m) / 2) + 2 * j) m y).re))
+      (2 / (2 * n + 1) * (((n + m).factorial : ℝ) / (n - m).factorial)) := by
+  have spec := spheroidalPsFactor_spec hmn γ2
+  have hg := spec.factor.differentiable
+  have hGc : Continuous fun x : ℝ => (spheroidalPsFactor n m γ2 x).re :=
+    Complex.continuous_re.comp (hg.continuous.comp continuous_ofReal)
+  obtain ⟨MG, hMG⟩ := (isCompact_Icc.image_of_continuousOn
+    (hGc.continuousOn (s := Icc (-1 : ℝ) 1))).isBounded.exists_norm_le
+  have hM : ∀ x ∈ Icc (-1 : ℝ) 1, |(spheroidalPsFactor n m γ2 x).re| ≤ MG :=
+    fun x hx => hMG _ ⟨x, hx, rfl⟩
+  obtain ⟨u, hu, hb⟩ := p2y_factor_bound hmn γ2
+  have hexp := p2y_factor_expansion hmn γ2
+  rw [← spec.normalized]
+  set ν₀ := n - 2 * ((n - m) / 2)
+  set G : ℝ → ℝ := fun x => (spheroidalPsFactor n m γ2 x).re with hG
+  set α : ℕ → ℝ := fun j => (2 * ((ν₀ + 2 * j : ℕ) : ℝ) + 1) * ((ν₀ + 2 * j - m).factorial : ℝ) /
+      (2 * ((ν₀ + 2 * j + m).factorial : ℝ)) *
+        (∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * G y * (legInt_D (ν₀ + 2 * j) m y).re) with hα
+  have hD : ∀ μ : ℕ, Continuous fun x : ℝ => (legInt_D μ m x).re := fun μ =>
+    Complex.continuous_re.comp (legInt_cont_D μ m)
+  have hw : Continuous fun x : ℝ => (1 - x ^ 2) ^ m := by fun_prop
+  have h := intervalIntegral.hasSum_integral_of_dominated_convergence (μ := volume)
+    (a := (-1 : ℝ)) (b := 1) (F := fun j x => (1 - x ^ 2) ^ m * G x * (α j *
+      (legInt_D (ν₀ + 2 * j) m x).re)) (f := fun x => (1 - x ^ 2) ^ m * G x * G x)
+    (fun j _ => MG * u j)
+    (fun j => ((hw.mul hGc).mul (continuous_const.mul (hD _))).aestronglyMeasurable)
+    (fun j => ?_) ?_ intervalIntegrable_const ?_
+  · convert h using 1
+    · funext j
+      rw [show (fun x : ℝ => (1 - x ^ 2) ^ m * G x * (α j * (legInt_D (ν₀ + 2 * j) m x).re)) =
+        fun x => α j * ((1 - x ^ 2) ^ m * G x * (legInt_D (ν₀ + 2 * j) m x).re) by
+          funext x; ring, intervalIntegral.integral_const_mul]
+    · refine intervalIntegral.integral_congr fun x _ => ?_
+      simp only [hG]; ring
+  · refine Filter.Eventually.of_forall fun x hx => ?_
+    rw [uIoc_of_le (by norm_num)] at hx
+    have hx' : x ∈ Icc (-1 : ℝ) 1 := ⟨hx.1.le, hx.2⟩
+    have h1 : 0 ≤ 1 - x ^ 2 := by nlinarith [hx'.1, hx'.2]
+    have hw0 : 0 ≤ (1 - x ^ 2) ^ m := pow_nonneg h1 m
+    have hw1 : (1 - x ^ 2) ^ m ≤ 1 := pow_le_one₀ h1 (by nlinarith)
+    have hbj := hb j x hx'
+    rw [Real.norm_eq_abs, abs_mul, abs_mul, abs_of_nonneg hw0]
+    calc (1 - x ^ 2) ^ m * |G x| * |α j * (legInt_D (ν₀ + 2 * j) m x).re|
+        ≤ 1 * MG * u j := by
+          refine mul_le_mul (mul_le_mul hw1 (hM x hx') (abs_nonneg _) zero_le_one) ?_
+            (abs_nonneg _) (mul_nonneg zero_le_one ((abs_nonneg _).trans (hM 0 (by norm_num))))
+          simpa only [hα, mul_assoc] using hbj
+      _ = MG * u j := by ring
+  · exact Filter.Eventually.of_forall fun x _ => hu.mul_left MG
+  · filter_upwards [MeasureTheory.Measure.ae_ne volume (1 : ℝ)] with x hx1 hx
+    rw [uIoc_of_le (by norm_num)] at hx
+    have hxo : x ∈ Ioo (-1 : ℝ) 1 := ⟨hx.1, lt_of_le_of_ne hx.2 hx1⟩
+    have := (hexp x hxo).mul_left ((1 - x ^ 2) ^ m * G x)
+    simpa only [hα, mul_assoc] using this
+
+/-- **The normalization** (DLMF 30.8.5):
+`∑_{k ≥ -R} a^m_{n,k}(γ²) a^{-m}_{n,k}(γ²)/(2n+4k+1) = 1/(2n+1)` (equivalent to 30.4.1).
+Proved by Parseval's identity for the expansion 30.8.1. -/
+@[dlmf 30.8.E5]
+theorem hasSum_spheroidalCoeff_normalization {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
+    HasSum (fun j : ℕ =>
+        let k : ℤ := (j : ℤ) - ((n - m) / 2 : ℕ)
+        spheroidalCoeff n m γ2 k * spheroidalCoeffNeg n m γ2 k / (2 * (n : ℝ) + 4 * k + 1))
+      (1 / (2 * (n : ℝ) + 1)) := by
+  have hf1 : (0 : ℝ) < ((n - m).factorial : ℝ) := by positivity
+  have hf2 : (0 : ℝ) < ((n + m).factorial : ℝ) := by positivity
+  have hn : (0 : ℝ) < 2 * n + 1 := by positivity
+  have h := (p2y_parseval hmn γ2).mul_left (((n - m).factorial : ℝ) / (2 * (n + m).factorial))
+  convert h using 1
+  · funext j
+    obtain ⟨ν, hν⟩ : ∃ ν, ν = n - 2 * ((n - m) / 2) + 2 * j := ⟨_, rfl⟩
+    have hνi : (ν : ℤ) = n + 2 * ((j : ℤ) - ((n - m) / 2 : ℕ)) := by omega
+    have hνr : ((ν : ℕ) : ℝ) = n + 2 * ((((j : ℤ) - ((n - m) / 2 : ℕ)) : ℤ) : ℝ) := by
+      exact_mod_cast hνi
+    have hr : 2 * (n : ℝ) + 4 * ((((j : ℤ) - ((n - m) / 2 : ℕ)) : ℤ) : ℝ) + 1 =
+        2 * ((ν : ℕ) : ℝ) + 1 := by linarith
+    have h1 : ((n : ℤ) - m + 2 * ((j : ℤ) - ((n - m) / 2 : ℕ))).toNat = ν - m := by omega
+    have h2 : ((n : ℤ) + m + 2 * ((j : ℤ) - ((n - m) / 2 : ℕ))).toNat = ν + m := by omega
+    simp only []
+    rw [spheroidalCoeffNeg_of_le γ2 (by omega), h1, h2, p2y_coeff_eq hmn γ2 j, ← hν]
+    rw [hr]
+    set B := ∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * (spheroidalPsFactor n m γ2 y).re *
+      (legInt_D ν m y).re
+    have hs : ((-1 : ℝ) ^ ((j : ℤ) - ((n - m) / 2 : ℕ)) * (-1) ^ m) ^ 2 = 1 := by
+      rw [mul_pow, ← zpow_natCast, ← zpow_mul, ← pow_mul]
+      rw [show (((j : ℤ) - ((n - m) / 2 : ℕ)) * ((2 : ℕ) : ℤ)) =
+        2 * ((j : ℤ) - ((n - m) / 2 : ℕ)) by push_cast; ring, zpow_mul]
+      norm_num
+    have hg1 : (0 : ℝ) < ((ν - m).factorial : ℝ) := by positivity
+    have hg2 : (0 : ℝ) < ((ν + m).factorial : ℝ) := by positivity
+    have hν1 : (0 : ℝ) < 2 * ((ν : ℕ) : ℝ) + 1 := by positivity
+    field_simp
+    rw [← mul_pow, hs, one_mul]
+  · field_simp
+
+/-! #### Proof of the ratio asymptotics 30.8.7
+
+For `γ² ≠ 0` the coefficients are not eventually zero (else backward recursion with `A_k ≠ 0`
+and 30.8.1 would give `𝖯s = 0`); with `|a_{j+1}| ≤ (|a_j| + |a_{j+2}|)/8` and the linear bound
+this forces `|a_{j+1}| ≤ |a_j|/4` eventually. -/
+
+/-- `A_k ≠ 0` for `k > -R` when `γ² ≠ 0`. -/
+theorem p2y_recA_ne_zero {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) {k : ℤ}
+    (hk : -(((n - m) / 2 : ℕ) : ℤ) < k) : spheroidalRecA n m γ2 k ≠ 0 := by
+  unfold spheroidalRecA
+  have h1 : ((n : ℤ) - m + 2 * k - 1) ≠ 0 := by omega
+  have h2 : ((n : ℤ) - m + 2 * k) ≠ 0 := by omega
+  have h3 : (2 * (n : ℤ) + 4 * k - 3) ≠ 0 := by omega
+  have h4 : (2 * (n : ℤ) + 4 * k - 1) ≠ 0 := by omega
+  have h1' : ((n : ℝ) - m + 2 * k - 1) ≠ 0 := by exact_mod_cast h1
+  have h2' : ((n : ℝ) - m + 2 * k) ≠ 0 := by exact_mod_cast h2
+  have h3' : (2 * (n : ℝ) + 4 * k - 3) ≠ 0 := by exact_mod_cast h3
+  have h4' : (2 * (n : ℝ) + 4 * k - 1) ≠ 0 := by exact_mod_cast h4
+  exact div_ne_zero (mul_ne_zero (neg_ne_zero.mpr hγ) (mul_ne_zero h1' h2'))
+    (mul_ne_zero h3' h4')
+
+/-- For `γ² ≠ 0` the coefficients `a^m_{n,k}`, `k ≥ -R`, are not eventually zero. -/
+theorem p2y_coeff_not_eventually_zero {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) :
+    ¬ ∃ J : ℕ, ∀ j : ℕ, J ≤ j → spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ)) = 0 := by
+  rintro ⟨J, hJ⟩
+  have hall : ∀ d j : ℕ, J ≤ j + d → spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ)) = 0 := by
+    intro d
+    induction d with
+    | zero => intro j hj; exact hJ j (by omega)
+    | succ d ih =>
+      intro j _
+      have h1 := ih (j + 1) (by omega)
+      have h2 := ih (j + 2) (by omega)
+      have hrec := spheroidalCoeff_recurrence_of_le hmn γ2
+        (k := ((j + 1 : ℕ) : ℤ) - ((n - m) / 2 : ℕ)) (by omega)
+      simp only [show -(((n - m) / 2 : ℕ) : ℤ) ≤ ((j + 1 : ℕ) : ℤ) - ((n - m) / 2 : ℕ) - 1 by
+        omega, ↓reduceIte] at hrec
+      rw [show ((j + 1 : ℕ) : ℤ) - ((n - m) / 2 : ℕ) - 1 = (j : ℤ) - ((n - m) / 2 : ℕ) by
+          push_cast; ring,
+        show ((j + 1 : ℕ) : ℤ) - ((n - m) / 2 : ℕ) + 1 = ((j + 2 : ℕ) : ℤ) - ((n - m) / 2 : ℕ) by
+          push_cast; ring, h1, h2] at hrec
+      simp only [mul_zero, add_zero] at hrec
+      exact (mul_eq_zero.mp hrec).resolve_left (p2y_recA_ne_zero hmn hγ (by omega))
+  have hz : ∀ j : ℕ, spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ)) = 0 :=
+    fun j => hall J j (by omega)
+  have hG : ∀ x ∈ Ioo (-1 : ℝ) 1, (spheroidalPsFactor n m γ2 x).re = 0 := by
+    intro x hx
+    have h := p2y_factor_expansion hmn γ2 x hx
+    have h0 : ∀ j : ℕ, (2 * ((n - 2 * ((n - m) / 2) + 2 * j : ℕ) : ℝ) + 1) *
+          ((n - 2 * ((n - m) / 2) + 2 * j - m).factorial : ℝ) /
+          (2 * ((n - 2 * ((n - m) / 2) + 2 * j + m).factorial : ℝ)) *
+        (∫ y in (-1 : ℝ)..1, (1 - y ^ 2) ^ m * (spheroidalPsFactor n m γ2 y).re *
+          (legInt_D (n - 2 * ((n - m) / 2) + 2 * j) m y).re) = 0 := by
+      intro j
+      have := hz j
+      rw [p2y_coeff_eq hmn γ2 j] at this
+      exact (mul_eq_zero.mp this).resolve_left (mul_ne_zero (zpow_ne_zero _ (by norm_num))
+        (pow_ne_zero _ (by norm_num)))
+    simp only [h0, zero_mul] at h
+    exact h.unique hasSum_zero
+  have hnorm := (spheroidalPsFactor_spec hmn γ2).normalized
+  have h0 : ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * (spheroidalPsFactor n m γ2 x).re ^ 2 = 0 := by
+    rw [p2y_integral_congr_Ioo (f₂ := fun _ => (0 : ℝ)) (fun x hx => by
+      simp only [hG x hx]; ring)]
+    simp
+  rw [h0] at hnorm
+  have : (0 : ℝ) < 2 / (2 * n + 1) * (((n + m).factorial : ℝ) / (n - m).factorial) := by
+    positivity
+  linarith
+
+/-- Eventually `|a_{j+1}| ≤ |a_j|/4`. -/
+theorem p2y_coeff_ratio_le {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
+    ∃ J : ℕ, ∀ j : ℕ, J ≤ j →
+      |spheroidalCoeff n m γ2 (((j + 1 : ℕ) : ℤ) - ((n - m) / 2 : ℕ))| ≤
+        |spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ))| / 4 := by
+  obtain ⟨J, hJ⟩ := p2y_coeff_eps hmn γ2 (by norm_num : (0 : ℝ) < 1 / 8)
+  obtain ⟨M, hM0, hM⟩ := p2y_coeff_linear hmn γ2
+  refine ⟨J, fun j0 hj0 => ?_⟩
+  set a : ℕ → ℝ := fun j => |spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ))| with ha
+  change a (j0 + 1) ≤ a j0 / 4
+  by_contra hcon
+  push Not at hcon
+  have key : ∀ i : ℕ, a (j0 + i) / 4 < a (j0 + i + 1) ∧ 4 ^ i * a (j0 + 1) ≤ a (j0 + i + 1) := by
+    intro i
+    induction i with
+    | zero => exact ⟨by simpa using hcon, by simp⟩
+    | succ i ih =>
+      have h := hJ (j0 + i) (by omega)
+      change a (j0 + i + 1) ≤ 1 / 8 * (a (j0 + i) + a (j0 + i + 2)) at h
+      have hnn : 0 ≤ a (j0 + i + 1) := abs_nonneg _
+      have h2 : 4 * a (j0 + i + 1) < a (j0 + i + 2) := by linarith [ih.1]
+      refine ⟨by rw [show j0 + (i + 1) = j0 + i + 1 by ring]; linarith, ?_⟩
+      rw [show j0 + (i + 1) + 1 = j0 + i + 2 by ring, pow_succ]
+      nlinarith [ih.2]
+  have hδ : 0 < a (j0 + 1) := lt_of_le_of_lt (by positivity) (key 0).1
+  obtain ⟨i, hi⟩ := pow_unbounded_of_one_lt (M * (j0 + 2) / a (j0 + 1)) (by norm_num : (1 : ℝ) < 2)
+  have hlin := hM (j0 + i + 1)
+  have hk := (key i).2
+  have h2i : ((i : ℝ) + 1) ≤ 2 ^ i := by
+    have := Nat.lt_two_pow_self (n := i)
+    exact_mod_cast this
+  have h4 : (4 : ℝ) ^ i = 2 ^ i * 2 ^ i := by rw [← mul_pow]; norm_num
+  rw [div_lt_iff₀ hδ] at hi
+  have hj0 : (0 : ℝ) ≤ j0 := Nat.cast_nonneg j0
+  have : (4 : ℝ) ^ i * a (j0 + 1) ≤ M * (j0 + 2) * 2 ^ i := by
+    calc (4 : ℝ) ^ i * a (j0 + 1) ≤ a (j0 + i + 1) := hk
+      _ ≤ M * (((j0 + i + 1 : ℕ) : ℝ) + 1) := hlin
+      _ ≤ M * ((j0 + 2) * (i + 1)) := by
+          gcongr; push_cast; nlinarith [(Nat.cast_nonneg i : (0 : ℝ) ≤ i)]
+      _ ≤ M * (j0 + 2) * 2 ^ i := by
+          rw [← mul_assoc]; exact mul_le_mul_of_nonneg_left h2i (by positivity)
+  rw [h4] at this
+  have h2pos : (0 : ℝ) < 2 ^ i := by positivity
+  nlinarith
+
+/-- `|B_k - (n+2k)(n+2k+1)| ≤ 2|γ²|(1+m²)` for `k ≥ 1`. -/
+theorem p2y_recB_close {n m : ℕ} (γ2 : ℝ) {k : ℤ} (hk : 1 ≤ k) :
+    |spheroidalRecB n m γ2 k - ((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1)| ≤
+      2 * |γ2| * (1 + m ^ 2) := by
+  have kr : (1 : ℝ) ≤ k := by exact_mod_cast hk
+  have hn0 : (0 : ℝ) ≤ n := Nat.cast_nonneg n
+  have hm0 : (0 : ℝ) ≤ m := Nat.cast_nonneg m
+  unfold spheroidalRecB
+  set F := (((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1) - 1 + m ^ 2) /
+    ((2 * (n : ℝ) + 4 * k - 1) * (2 * (n : ℝ) + 4 * k + 3)) with hF
+  have hQ : 0 < (2 * (n : ℝ) + 4 * k - 1) * (2 * (n : ℝ) + 4 * k + 3) := by nlinarith
+  have hF0 : 0 ≤ F := div_nonneg (by nlinarith) hQ.le
+  have hF1 : F ≤ 1 + m ^ 2 := by
+    have hQ1 : 1 ≤ (2 * (n : ℝ) + 4 * k - 1) * (2 * (n : ℝ) + 4 * k + 3) := by nlinarith
+    rw [hF, div_le_iff₀ hQ]
+    nlinarith [mul_nonneg (sq_nonneg (m : ℝ)) (by linarith : (0 : ℝ) ≤
+      (2 * (n : ℝ) + 4 * k - 1) * (2 * (n : ℝ) + 4 * k + 3) - 1)]
+  rw [show 2 * γ2 * (((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1) - 1 + m ^ 2) /
+    ((2 * (n : ℝ) + 4 * k - 1) * (2 * (n : ℝ) + 4 * k + 3)) = 2 * γ2 * F by rw [hF]; ring,
+    show ((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1) - 2 * γ2 * F -
+      ((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1) = -(2 * γ2 * F) by ring, abs_neg, abs_mul,
+    abs_mul, abs_of_nonneg hF0, abs_two, mul_assoc, mul_assoc]
+  gcongr
+
+/-- `|-4A_k - γ²| ≤ |γ²|(4m²+12m+7)/k` for `k ≥ 2`. -/
+theorem p2y_recA_close {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {k : ℤ} (hk : 2 ≤ k) :
+    |-4 * spheroidalRecA n m γ2 k - γ2| ≤ |γ2| * (4 * m ^ 2 + 12 * m + 7) / k := by
+  have kr : (2 : ℝ) ≤ k := by exact_mod_cast hk
+  have hn0 : (0 : ℝ) ≤ n := Nat.cast_nonneg n
+  have hm0 : (0 : ℝ) ≤ m := Nat.cast_nonneg m
+  have hmr : (m : ℝ) ≤ n := by exact_mod_cast hmn
+  unfold spheroidalRecA
+  set ν : ℝ := (n : ℝ) + 2 * k with hν
+  have hν4 : 4 ≤ ν := by rw [hν]; linarith
+  have hkν : (k : ℝ) ≤ ν := by rw [hν]; linarith
+  have hQ : ν ^ 2 ≤ (2 * (n : ℝ) + 4 * k - 3) * (2 * (n : ℝ) + 4 * k - 1) := by
+    rw [show (2 * (n : ℝ) + 4 * k - 3) * (2 * (n : ℝ) + 4 * k - 1) = (2 * ν - 3) * (2 * ν - 1) by
+      rw [hν]; ring]
+    nlinarith
+  have hQ0 : 0 < (2 * (n : ℝ) + 4 * k - 3) * (2 * (n : ℝ) + 4 * k - 1) := by nlinarith
+  rw [show -4 * (-γ2 * (((n : ℝ) - m + 2 * k - 1) * ((n : ℝ) - m + 2 * k)) /
+      ((2 * (n : ℝ) + 4 * k - 3) * (2 * (n : ℝ) + 4 * k - 1))) - γ2 =
+      γ2 * (((4 - 8 * m) * ν + 4 * m ^ 2 + 4 * m - 3) /
+        ((2 * (n : ℝ) + 4 * k - 3) * (2 * (n : ℝ) + 4 * k - 1))) by
+    rw [div_eq_mul_inv, div_eq_mul_inv]
+    set Qi := ((2 * (n : ℝ) + 4 * k - 3) * (2 * (n : ℝ) + 4 * k - 1))⁻¹ with hQi
+    have hQQ : ((2 * (n : ℝ) + 4 * k - 3) * (2 * (n : ℝ) + 4 * k - 1)) * Qi = 1 :=
+      mul_inv_cancel₀ hQ0.ne'
+    rw [hν]
+    linear_combination γ2 * hQQ]
+  rw [abs_mul, abs_div, abs_of_pos hQ0, le_div_iff₀ (by linarith), mul_assoc]
+  refine mul_le_mul_of_nonneg_left ?_ (abs_nonneg _)
+  rw [div_mul_eq_mul_div, div_le_iff₀ hQ0]
+  have hl : |(4 - 8 * (m : ℝ)) * ν + 4 * m ^ 2 + 4 * m - 3| ≤ (4 * m ^ 2 + 12 * m + 7) * ν := by
+    rw [abs_le]; constructor <;> nlinarith [mul_nonneg hm0 (by linarith : (0 : ℝ) ≤ ν)]
+  calc |(4 - 8 * (m : ℝ)) * ν + 4 * m ^ 2 + 4 * m - 3| * k
+      ≤ (4 * m ^ 2 + 12 * m + 7) * ν * ν :=
+        mul_le_mul hl hkν (by linarith) (by positivity)
+    _ ≤ _ := by rw [mul_assoc]; exact mul_le_mul_of_nonneg_left (by nlinarith [hQ]) (by positivity)
+
+/-- The algebra of 30.8.7: from `16 D E = 4k² X + γ² Y`, `D ≥ k²`, `|X| ≤ c₃/k`, `|Y| ≤ c₂ k`. -/
+theorem p2y_alg_ratio {k D X Y E γ2 c₂ c₃ : ℝ} (hk : 1 ≤ k) (hD : k ^ 2 ≤ D)
+    (h : 16 * D * E = 4 * k ^ 2 * X + γ2 * Y) (hX : |X| ≤ c₃ / k) (hY : |Y| ≤ c₂ * k) :
+    |E| ≤ (4 * c₃ + |γ2| * c₂) / 16 * k⁻¹ := by
+  have hk0 : 0 < k := by linarith
+  have hD0 : 0 < D := by nlinarith
+  have h1 : 16 * D * |E| ≤ k * (4 * c₃ + |γ2| * c₂) := by
+    have := congrArg abs h
+    rw [abs_mul, abs_of_pos (by positivity : (0 : ℝ) < 16 * D)] at this
+    rw [this]
+    have hX' : k * |X| ≤ c₃ := by rw [le_div_iff₀ hk0] at hX; linarith
+    calc |4 * k ^ 2 * X + γ2 * Y| ≤ |4 * k ^ 2 * X| + |γ2 * Y| := abs_add_le _ _
+      _ = 4 * k * (k * |X|) + |γ2| * |Y| := by
+          rw [abs_mul (4 * k ^ 2), abs_mul γ2, abs_of_pos (by positivity : (0 : ℝ) < 4 * k ^ 2)]
+          ring
+      _ ≤ 4 * k * c₃ + |γ2| * (c₂ * k) := by gcongr
+      _ = _ := by ring
+  have hE := abs_nonneg E
+  rw [← div_eq_mul_inv, le_div_iff₀ hk0]
+  nlinarith
+
+/-- For `γ² ≠ 0`, eventually `a_j ≠ 0` and `|a_{j+1}| ≤ |a_j|/4`. -/
+theorem p2y_coeff_ne_zero {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) :
+    ∃ J : ℕ, ∀ j : ℕ, J ≤ j → spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ)) ≠ 0 ∧
+      |spheroidalCoeff n m γ2 (((j + 1 : ℕ) : ℤ) - ((n - m) / 2 : ℕ))| ≤
+        |spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ))| / 4 := by
+  obtain ⟨J, hJ⟩ := p2y_coeff_ratio_le hmn γ2
+  refine ⟨J, fun j hj => ⟨fun h0 => ?_, hJ j hj⟩⟩
+  apply p2y_coeff_not_eventually_zero hmn hγ
+  refine ⟨j, fun i hi => ?_⟩
+  obtain ⟨d, rfl⟩ : ∃ d, i = j + d := ⟨i - j, by omega⟩
+  induction d with
+  | zero => simpa using h0
+  | succ d ih =>
+    have h := hJ (j + d) (by omega)
+    rw [ih (by omega), abs_zero, zero_div] at h
+    exact abs_nonpos_iff.mp h
+
 /-- **Ratio asymptotics** (DLMF 30.8.7): `k² a^m_{n,k}(γ²)/a^m_{n,k-1}(γ²) = γ²/16 + O(1/k)` as
-`k → ∞`. -/
+`k → ∞`. Proved: for `γ² = 0` the coefficients vanish for `k ≥ 1`; otherwise they are eventually
+nonzero with `|a_{k+1}/a_k| ≤ 1/4`, and 30.8.4 gives
+`k² a_k/a_{k-1} = -k² A_k/(B_k - λ + C_k a_{k+1}/a_k)`. -/
 @[dlmf 30.8.E7]
 theorem spheroidalCoeff_ratio_isBigO {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
     (fun k : ℕ => (k : ℝ) ^ 2 * spheroidalCoeff n m γ2 k / spheroidalCoeff n m γ2 ((k : ℤ) - 1) -
         γ2 / 16) =O[atTop] (fun k : ℕ => (k : ℝ)⁻¹) := by
-  sorry
+  by_cases hγ : γ2 = 0
+  · subst hγ
+    refine (isBigO_zero (fun k : ℕ => (k : ℝ)⁻¹) atTop).congr' ?_ EventuallyEq.rfl
+    filter_upwards [eventually_ge_atTop 1] with k hk
+    have hrec := spheroidalCoeff_recurrence_of_le hmn 0 (k := (k : ℤ)) (by omega)
+    have hA : spheroidalRecA n m 0 k = 0 := by simp [spheroidalRecA]
+    have hC : spheroidalRecC n m 0 k = 0 := by simp [spheroidalRecC]
+    have hB : spheroidalRecB n m 0 k = ((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1) := by
+      simp [spheroidalRecB]
+    rw [hA, hC, hB, p1s_spheroidalEigenvalue_zero hmn] at hrec
+    have hk1 : (1 : ℝ) ≤ k := by exact_mod_cast hk
+    have hn0 : (0 : ℝ) ≤ n := Nat.cast_nonneg n
+    have hpos : ((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1) - n * (n + 1) ≠ 0 := by
+      have : (0 : ℝ) < ((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1) - n * (n + 1) := by nlinarith
+      exact this.ne'
+    have h0 : spheroidalCoeff n m 0 k = 0 := by
+      simp only [zero_mul, zero_add, add_zero] at hrec
+      exact (mul_eq_zero.mp hrec).resolve_left hpos
+    simp [h0]
+  -- `γ² ≠ 0`
+  obtain ⟨J1, hJ1⟩ := p2y_coeff_ne_zero hmn hγ
+  set R := (n - m) / 2 with hR
+  set lam := spheroidalEigenvalue n m γ2
+  set c₀ : ℝ := 2 * |γ2| * (1 + m ^ 2) + |lam| + |γ2| / 4 with hc₀
+  set c₂ : ℝ := (n : ℝ) ^ 2 + 5 * n + 2 + c₀ with hc₂
+  set c₃ : ℝ := |γ2| * (4 * m ^ 2 + 12 * m + 7) with hc₃
+  obtain ⟨K0, hK0⟩ := exists_nat_ge c₀
+  refine IsBigO.of_bound ((4 * c₃ + |γ2| * c₂) / 16) ?_
+  filter_upwards [eventually_ge_atTop (J1 + 2 + K0)] with k hk
+  have ha0 : spheroidalCoeff n m γ2 ((k : ℤ) - 1) ≠ 0 := by
+    have := (hJ1 (k - 1 + R) (by omega)).1
+    have h1k : 1 ≤ k := by omega
+    rwa [show ((k - 1 + R : ℕ) : ℤ) - R = (k : ℤ) - 1 by push_cast [Nat.cast_sub h1k]; ring]
+      at this
+  have ha1 : spheroidalCoeff n m γ2 (k : ℤ) ≠ 0 := by
+    have := (hJ1 (k + R) (by omega)).1
+    rwa [show ((k + R : ℕ) : ℤ) - R = (k : ℤ) by push_cast; ring] at this
+  have hs : |spheroidalCoeff n m γ2 ((k : ℤ) + 1)| ≤ |spheroidalCoeff n m γ2 (k : ℤ)| / 4 := by
+    have := (hJ1 (k + R) (by omega)).2
+    rwa [show ((k + R + 1 : ℕ) : ℤ) - R = (k : ℤ) + 1 by push_cast; ring,
+      show ((k + R : ℕ) : ℤ) - R = (k : ℤ) by push_cast; ring] at this
+  have hk2 : (2 : ℤ) ≤ (k : ℤ) := by omega
+  have hk1 : (1 : ℤ) ≤ (k : ℤ) := by omega
+  have hkr : (2 : ℝ) ≤ k := by exact_mod_cast hk2
+  have hkc : c₀ ≤ (k : ℝ) := by
+    have : (K0 : ℝ) ≤ k := by exact_mod_cast (by omega : K0 ≤ k)
+    linarith
+  have hrec := spheroidalCoeff_recurrence_of_le hmn γ2 (k := (k : ℤ)) (by omega)
+  simp only [show -(((n - m) / 2 : ℕ) : ℤ) ≤ (k : ℤ) - 1 by omega, ↓reduceIte] at hrec
+  obtain ⟨hA, hC, -⟩ := p2y_rec_bounds hmn γ2 hk1
+  have hBc := p2y_recB_close (n := n) (m := m) γ2 hk1
+  have hX := p2y_recA_close hmn γ2 hk2
+  set a0 := spheroidalCoeff n m γ2 ((k : ℤ) - 1)
+  set a1 := spheroidalCoeff n m γ2 (k : ℤ)
+  set a2 := spheroidalCoeff n m γ2 ((k : ℤ) + 1)
+  set A := spheroidalRecA n m γ2 k
+  set B := spheroidalRecB n m γ2 k
+  set C := spheroidalRecC n m γ2 k
+  set sr := a2 / a1 with hsr
+  have hsr4 : |sr| ≤ 1 / 4 := by
+    rw [hsr, abs_div, div_le_iff₀ (abs_pos.mpr ha1)]; linarith
+  have hCs : |C * sr| ≤ |γ2| / 4 := by
+    rw [abs_mul]
+    calc |C| * |sr| ≤ |γ2| * (1 / 4) := mul_le_mul hC hsr4 (abs_nonneg _) (abs_nonneg _)
+      _ = _ := by ring
+  set D := B - lam + C * sr with hD
+  set r := a1 / a0 with hr
+  have hrD : r * D = -A := by
+    rw [hr, hD, hsr]
+    field_simp
+    linear_combination hrec
+  set ν : ℝ := (n : ℝ) + 2 * k with hν
+  have hn0 : (0 : ℝ) ≤ n := Nat.cast_nonneg n
+  have hlam := abs_le.mp (le_refl |lam|)
+  have hBc' := abs_le.mp hBc
+  have hCs' := abs_le.mp hCs
+  have hlam' : -|lam| ≤ lam ∧ lam ≤ |lam| := ⟨neg_abs_le lam, le_abs_self lam⟩
+  simp only [Int.cast_natCast] at hBc' hX
+  have hkk : (k : ℝ) ≤ (k : ℝ) ^ 2 := by nlinarith
+  have hk1r : (1 : ℝ) ≤ k := by linarith
+  have hc0 : 0 ≤ c₀ := by positivity
+  set t := B - ((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1) with ht
+  have hid : D = 4 * (k : ℝ) ^ 2 + ((n : ℝ) ^ 2 + n + (4 * n + 2) * k) + t - lam + C * sr := by
+    rw [hD, ht]; ring
+  have hpos : 0 ≤ (n : ℝ) ^ 2 + n + (4 * n + 2) * k := by positivity
+  have hDk : (k : ℝ) ^ 2 ≤ D := by
+    rw [hid]; linarith [hBc'.1, hCs'.1, hlam'.2]
+  have h1 : (n : ℝ) ^ 2 + n + c₀ ≤ ((n : ℝ) ^ 2 + n + c₀) * k :=
+    le_mul_of_one_le_right (by positivity) hk1r
+  have hY : |4 * (k : ℝ) ^ 2 - D| ≤ c₂ * k := by
+    have e1 : 4 * (k : ℝ) ^ 2 - (4 * (k : ℝ) ^ 2 + ((n : ℝ) ^ 2 + n + (4 * n + 2) * k) + t - lam +
+        C * sr) = -((n : ℝ) ^ 2 + n) - (4 * n + 2) * k - t + lam - C * sr := by ring
+    have e2 : c₂ * k = ((n : ℝ) ^ 2 + n + c₀) * k + (4 * n + 2) * k := by rw [hc₂]; ring
+    rw [hid, e1, e2, abs_le]
+    have hn0 : (0 : ℝ) ≤ n := Nat.cast_nonneg n
+    have hnk : 0 ≤ (4 * (n : ℝ) + 2) * k := by positivity
+    constructor <;> linarith [hBc'.1, hBc'.2, hCs'.1, hCs'.2, hlam'.1, hlam'.2]
+  have hE : 16 * D * ((k : ℝ) ^ 2 * a1 / a0 - γ2 / 16) =
+      4 * (k : ℝ) ^ 2 * (-4 * A - γ2) + γ2 * (4 * (k : ℝ) ^ 2 - D) := by
+    rw [mul_div_assoc, ← hr]
+    linear_combination 16 * (k : ℝ) ^ 2 * hrD
+  have hfin := p2y_alg_ratio (c₃ := c₃) (by linarith) hDk hE (by rw [hc₃]; exact hX) hY
+  rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_inv, abs_of_nonneg (Nat.cast_nonneg (α := ℝ) k)]
+  exact hfin
+
+/-- For `γ² ≠ 0`, eventually `a_{k-1} ≠ 0`, `a_k ≠ 0` and `|a_k/a_{k-1}| ≤ |γ²|/k²`. -/
+theorem p2y_ratio_small {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) :
+    ∃ K : ℕ, ∀ k : ℕ, K ≤ k → spheroidalCoeff n m γ2 ((k : ℤ) - 1) ≠ 0 ∧
+      spheroidalCoeff n m γ2 (k : ℤ) ≠ 0 ∧
+      |spheroidalCoeff n m γ2 (k : ℤ) / spheroidalCoeff n m γ2 ((k : ℤ) - 1)| ≤
+        |γ2| / (k : ℝ) ^ 2 := by
+  -- `γ² ≠ 0`
+  obtain ⟨J1, hJ1⟩ := p2y_coeff_ne_zero hmn hγ
+  set R := (n - m) / 2 with hR
+  set lam := spheroidalEigenvalue n m γ2
+  set c₀ : ℝ := 2 * |γ2| * (1 + m ^ 2) + |lam| + |γ2| / 4 with hc₀
+  set c₂ : ℝ := (n : ℝ) ^ 2 + 5 * n + 2 + c₀ with hc₂
+  set c₃ : ℝ := |γ2| * (4 * m ^ 2 + 12 * m + 7) with hc₃
+  obtain ⟨K0, hK0⟩ := exists_nat_ge c₀
+  refine ⟨J1 + 2 + K0, fun k hk => ?_⟩
+  have ha0 : spheroidalCoeff n m γ2 ((k : ℤ) - 1) ≠ 0 := by
+    have := (hJ1 (k - 1 + R) (by omega)).1
+    have h1k : 1 ≤ k := by omega
+    rwa [show ((k - 1 + R : ℕ) : ℤ) - R = (k : ℤ) - 1 by push_cast [Nat.cast_sub h1k]; ring]
+      at this
+  have ha1 : spheroidalCoeff n m γ2 (k : ℤ) ≠ 0 := by
+    have := (hJ1 (k + R) (by omega)).1
+    rwa [show ((k + R : ℕ) : ℤ) - R = (k : ℤ) by push_cast; ring] at this
+  have hs : |spheroidalCoeff n m γ2 ((k : ℤ) + 1)| ≤ |spheroidalCoeff n m γ2 (k : ℤ)| / 4 := by
+    have := (hJ1 (k + R) (by omega)).2
+    rwa [show ((k + R + 1 : ℕ) : ℤ) - R = (k : ℤ) + 1 by push_cast; ring,
+      show ((k + R : ℕ) : ℤ) - R = (k : ℤ) by push_cast; ring] at this
+  have hk2 : (2 : ℤ) ≤ (k : ℤ) := by omega
+  have hk1 : (1 : ℤ) ≤ (k : ℤ) := by omega
+  have hkr : (2 : ℝ) ≤ k := by exact_mod_cast hk2
+  have hkc : c₀ ≤ (k : ℝ) := by
+    have : (K0 : ℝ) ≤ k := by exact_mod_cast (by omega : K0 ≤ k)
+    linarith
+  have hrec := spheroidalCoeff_recurrence_of_le hmn γ2 (k := (k : ℤ)) (by omega)
+  simp only [show -(((n - m) / 2 : ℕ) : ℤ) ≤ (k : ℤ) - 1 by omega, ↓reduceIte] at hrec
+  obtain ⟨hA, hC, -⟩ := p2y_rec_bounds hmn γ2 hk1
+  have hBc := p2y_recB_close (n := n) (m := m) γ2 hk1
+  have hX := p2y_recA_close hmn γ2 hk2
+  set a0 := spheroidalCoeff n m γ2 ((k : ℤ) - 1)
+  set a1 := spheroidalCoeff n m γ2 (k : ℤ)
+  set a2 := spheroidalCoeff n m γ2 ((k : ℤ) + 1)
+  set A := spheroidalRecA n m γ2 k
+  set B := spheroidalRecB n m γ2 k
+  set C := spheroidalRecC n m γ2 k
+  set sr := a2 / a1 with hsr
+  have hsr4 : |sr| ≤ 1 / 4 := by
+    rw [hsr, abs_div, div_le_iff₀ (abs_pos.mpr ha1)]; linarith
+  have hCs : |C * sr| ≤ |γ2| / 4 := by
+    rw [abs_mul]
+    calc |C| * |sr| ≤ |γ2| * (1 / 4) := mul_le_mul hC hsr4 (abs_nonneg _) (abs_nonneg _)
+      _ = _ := by ring
+  set D := B - lam + C * sr with hD
+  set r := a1 / a0 with hr
+  have hrD : r * D = -A := by
+    rw [hr, hD, hsr]
+    field_simp
+    linear_combination hrec
+  set ν : ℝ := (n : ℝ) + 2 * k with hν
+  have hn0 : (0 : ℝ) ≤ n := Nat.cast_nonneg n
+  have hlam := abs_le.mp (le_refl |lam|)
+  have hBc' := abs_le.mp hBc
+  have hCs' := abs_le.mp hCs
+  have hlam' : -|lam| ≤ lam ∧ lam ≤ |lam| := ⟨neg_abs_le lam, le_abs_self lam⟩
+  simp only [Int.cast_natCast] at hBc' hX
+  have hkk : (k : ℝ) ≤ (k : ℝ) ^ 2 := by nlinarith
+  have hk1r : (1 : ℝ) ≤ k := by linarith
+  have hc0 : 0 ≤ c₀ := by positivity
+  set t := B - ((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1) with ht
+  have hid : D = 4 * (k : ℝ) ^ 2 + ((n : ℝ) ^ 2 + n + (4 * n + 2) * k) + t - lam + C * sr := by
+    rw [hD, ht]; ring
+  have hpos : 0 ≤ (n : ℝ) ^ 2 + n + (4 * n + 2) * k := by positivity
+  have hDk : (k : ℝ) ^ 2 ≤ D := by
+    rw [hid]; linarith [hBc'.1, hCs'.1, hlam'.2]
+  have h1 : (n : ℝ) ^ 2 + n + c₀ ≤ ((n : ℝ) ^ 2 + n + c₀) * k :=
+    le_mul_of_one_le_right (by positivity) hk1r
+  refine ⟨ha0, ha1, ?_⟩
+  have hk0 : (0 : ℝ) < (k : ℝ) ^ 2 := by positivity
+  have hD0 : 0 < D := lt_of_lt_of_le hk0 hDk
+  have hrA : |r| * D = |A| := by
+    rw [← abs_neg A, ← hrD, abs_mul, abs_of_pos hD0]
+  change |r| ≤ _
+  rw [le_div_iff₀ hk0]
+  calc |r| * (k : ℝ) ^ 2 ≤ |r| * D := mul_le_mul_of_nonneg_left hDk (abs_nonneg _)
+    _ = |A| := hrA
+    _ ≤ |γ2| := hA
+
+/-- `|A_k| ≥ |γ²|/16` when `n + 2k ≥ 2m + 2`. -/
+theorem p2y_recA_ge {n m : ℕ} (γ2 : ℝ) {k : ℤ} (hk : 2 * (m : ℤ) + 2 ≤ n + 2 * k) :
+    |γ2| / 16 ≤ |spheroidalRecA n m γ2 k| := by
+  have hkr : 2 * (m : ℝ) + 2 ≤ n + 2 * k := by exact_mod_cast hk
+  have hm0 : (0 : ℝ) ≤ m := Nat.cast_nonneg m
+  unfold spheroidalRecA
+  have hQ : 0 < (2 * (n : ℝ) + 4 * k - 3) * (2 * (n : ℝ) + 4 * k - 1) := by nlinarith
+  have hP : (0 : ℝ) ≤ ((n : ℝ) - m + 2 * k - 1) * ((n : ℝ) - m + 2 * k) := by nlinarith
+  rw [mul_div_assoc, abs_mul, abs_neg, abs_div, abs_of_pos hQ, abs_of_nonneg hP,
+    show |γ2| / 16 = |γ2| * (1 / 16) by ring]
+  refine mul_le_mul_of_nonneg_left ?_ (abs_nonneg _)
+  rw [div_le_div_iff₀ (by norm_num) hQ]
+  nlinarith
 
 /-- **Ratio asymptotics** (DLMF 30.8.8):
 `(λ^m_n(γ²) - B_k)/A_k · a^m_{n,k}(γ²)/a^m_{n,k-1}(γ²) = 1 + O(k⁻⁴)` as `k → ∞`.
 Corrected: the hypothesis `γ2 ≠ 0` was added (2026-10-26), since at `γ² = 0` the statement fails
-(`p2y_not_spheroidalCoeff_ratio_isBigO_four_zero`). -/
+(`p2y_not_spheroidalCoeff_ratio_isBigO_four_zero`). Proved: by 30.8.4 the expression equals
+`C_k (a_k/a_{k-1})(a_{k+1}/a_k)/A_k`, and both ratios are `O(k⁻²)` while `|A_k| ≥ |γ²|/16`. -/
 @[dlmf 30.8.E8]
 theorem spheroidalCoeff_ratio_isBigO_four {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) :
     (fun k : ℕ => (spheroidalEigenvalue n m γ2 - spheroidalRecB n m γ2 k) /
         spheroidalRecA n m γ2 k *
           (spheroidalCoeff n m γ2 k / spheroidalCoeff n m γ2 ((k : ℤ) - 1)) - 1)
       =O[atTop] (fun k : ℕ => ((k : ℝ) ^ 4)⁻¹) := by
-  sorry
+  obtain ⟨K, hK⟩ := p2y_ratio_small hmn hγ
+  refine IsBigO.of_bound (16 * |γ2| ^ 2) ?_
+  filter_upwards [eventually_ge_atTop (K + m + 2)] with k hk
+  obtain ⟨ha0, ha1, hr⟩ := hK k (by omega)
+  obtain ⟨-, ha2', hs⟩ := hK (k + 1) (by omega)
+  push_cast at ha2' hs
+  rw [show ((k : ℤ) + 1 - 1) = (k : ℤ) by ring] at hs
+  have hk1 : (1 : ℤ) ≤ (k : ℤ) := by omega
+  have hA0 := p2y_recA_ne_zero hmn hγ (k := (k : ℤ)) (by omega)
+  have hAge := p2y_recA_ge (n := n) (m := m) γ2 (k := (k : ℤ)) (by omega)
+  obtain ⟨-, hC, -⟩ := p2y_rec_bounds hmn γ2 hk1
+  have hrec := spheroidalCoeff_recurrence_of_le hmn γ2 (k := (k : ℤ)) (by omega)
+  simp only [show -(((n - m) / 2 : ℕ) : ℤ) ≤ (k : ℤ) - 1 by omega, ↓reduceIte] at hrec
+  set a0 := spheroidalCoeff n m γ2 ((k : ℤ) - 1)
+  set a1 := spheroidalCoeff n m γ2 (k : ℤ)
+  set a2 := spheroidalCoeff n m γ2 ((k : ℤ) + 1)
+  set A := spheroidalRecA n m γ2 k
+  set B := spheroidalRecB n m γ2 k
+  set C := spheroidalRecC n m γ2 k
+  have e : (spheroidalEigenvalue n m γ2 - B) / A * (a1 / a0) - 1 =
+      C * (a1 / a0) * (a2 / a1) / A := by
+    field_simp
+    linear_combination -hrec
+  rw [e, Real.norm_eq_abs, Real.norm_eq_abs, abs_div, abs_mul, abs_mul]
+  have hk1r : (1 : ℝ) ≤ k := by exact_mod_cast hk1
+  have hkpos : (0 : ℝ) < k := by linarith
+  have hk2 : (k : ℝ) ^ 2 ≤ ((k : ℝ) + 1) ^ 2 := by nlinarith
+  have hs' : |a2 / a1| ≤ |γ2| / (k : ℝ) ^ 2 :=
+    hs.trans (div_le_div_of_nonneg_left (abs_nonneg _) (by positivity) hk2)
+  have hγ0 : 0 < |γ2| := abs_pos.mpr hγ
+  rw [abs_inv, abs_of_pos (by positivity : (0 : ℝ) < (k : ℝ) ^ 4), div_le_iff₀ (lt_of_lt_of_le
+    (by positivity) hAge)]
+  calc |C| * |a1 / a0| * |a2 / a1| ≤ |γ2| * (|γ2| / (k : ℝ) ^ 2) * (|γ2| / (k : ℝ) ^ 2) := by
+        gcongr
+    _ = 16 * |γ2| ^ 2 * ((k : ℝ) ^ 4)⁻¹ * (|γ2| / 16) := by field_simp
+    _ ≤ 16 * |γ2| ^ 2 * ((k : ℝ) ^ 4)⁻¹ * |A| := by gcongr
 
 /-- **30.8.8 fails at `γ² = 0`** as stated: then `A_k = 0`, the Lean quotient
 `(λ - B_k)/A_k` is `0`, and the expression is the constant `-1`, which is not `O(k⁻⁴)`. -/

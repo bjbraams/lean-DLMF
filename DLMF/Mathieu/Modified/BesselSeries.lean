@@ -327,8 +327,8 @@ theorem hasSum_modMathieuTerm (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) {ν 
 @[dlmf 28.24]
 theorem modMathieuTerm_locally_uniform (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) {ν h : ℂ}
     (hν : ModMathieuAdmissible ν h) (hh : h ≠ 0) (n : ℤ) {K : Set ℂ} (hK : IsCompact K) :
-    ∃ u : ℤ → ℝ, Summable u ∧ ∀ ℓ, ∀ z ∈ K, ‖modMathieuTerm j ν z h n ℓ‖ ≤ u ℓ := by
-  sorry
+    ∃ u : ℤ → ℝ, Summable u ∧ ∀ ℓ, ∀ z ∈ K, ‖modMathieuTerm j ν z h n ℓ‖ ≤ u ℓ :=
+  p2m_modMathieuTerm_locally_uniform j hj₁ hj₄ hν hh n hK
 
 /-- The summability of the defining series, a consequence of 28.24.1. -/
 theorem summable_modMathieuTerm (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) {ν h : ℂ}
@@ -347,8 +347,8 @@ theorem hasSum_radialMathieuMc_even_cross (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j
         (mathieuFourierA (2 * m) (2 * ℓ) (h ^ 2) / mathieuFourierA (2 * m) (2 * s) (h ^ 2)) *
         (besselJExp ((ℓ : ℤ) - s : ℤ) h (-z) * mathieuCylExp j ((ℓ + s : ℕ) : ℂ) h z +
           besselJExp ((ℓ + s : ℕ) : ℂ) h (-z) * mathieuCylExp j ((ℓ : ℤ) - s : ℤ) h z)))
-      (mathieuEpsilon s * radialMathieuMc j (2 * m) z h) := by
-  sorry
+      (mathieuEpsilon s * radialMathieuMc j (2 * m) z h) :=
+  p2m_hasSum_radialMathieuMc_even_cross j hj₁ hj₄ m s hh hA z
 
 /-- **Cross-product expansion** (DLMF 28.24.3), as 28.24.2, `A^{2m+1}_{2s+1}(h²) ≠ 0`:
 `Mc^{(j)}_{2m+1} = (-1)^m ∑_ℓ (-1)^ℓ (A^{2m+1}_{2ℓ+1}/A^{2m+1}_{2s+1})
@@ -361,8 +361,8 @@ theorem hasSum_radialMathieuMc_odd_cross (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j 
           mathieuFourierA (2 * m + 1) (2 * s + 1) (h ^ 2)) *
         (besselJExp ((ℓ : ℤ) - s : ℤ) h (-z) * mathieuCylExp j ((ℓ + s + 1 : ℕ) : ℂ) h z +
           besselJExp ((ℓ + s + 1 : ℕ) : ℂ) h (-z) * mathieuCylExp j ((ℓ : ℤ) - s : ℤ) h z)))
-      (radialMathieuMc j (2 * m + 1) z h) := by
-  sorry
+      (radialMathieuMc j (2 * m + 1) z h) :=
+  p2m_hasSum_radialMathieuMc_odd_cross j hj₁ hj₄ m s hh hA z
 
 /-- **Cross-product expansion** (DLMF 28.24.4), `B^{2m+1}_{2s+1}(h²) ≠ 0`:
 `Ms^{(j)}_{2m+1} = (-1)^m ∑_ℓ (-1)^ℓ (B^{2m+1}_{2ℓ+1}/B^{2m+1}_{2s+1})
@@ -375,8 +375,8 @@ theorem hasSum_radialMathieuMs_odd_cross (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j 
           mathieuFourierB (2 * m + 1) (2 * s + 1) (h ^ 2)) *
         (besselJExp ((ℓ : ℤ) - s : ℤ) h (-z) * mathieuCylExp j ((ℓ + s + 1 : ℕ) : ℂ) h z -
           besselJExp ((ℓ + s + 1 : ℕ) : ℂ) h (-z) * mathieuCylExp j ((ℓ : ℤ) - s : ℤ) h z)))
-      (radialMathieuMs j (2 * m + 1) z h) := by
-  sorry
+      (radialMathieuMs j (2 * m + 1) z h) :=
+  p2m_hasSum_radialMathieuMs_odd_cross j hj₁ hj₄ m s hh hB z
 
 /-- **Cross-product expansion** (DLMF 28.24.5), `B^{2m+2}_{2s+2}(h²) ≠ 0`:
 `Ms^{(j)}_{2m+2} = (-1)^m ∑_ℓ (-1)^ℓ (B^{2m+2}_{2ℓ+2}/B^{2m+2}_{2s+2})
@@ -389,8 +389,8 @@ theorem hasSum_radialMathieuMs_even_cross (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j
           mathieuFourierB (2 * m + 2) (2 * s + 2) (h ^ 2)) *
         (besselJExp ((ℓ : ℤ) - s : ℤ) h (-z) * mathieuCylExp j ((ℓ + s + 2 : ℕ) : ℂ) h z -
           besselJExp ((ℓ + s + 2 : ℕ) : ℂ) h (-z) * mathieuCylExp j ((ℓ : ℤ) - s : ℤ) h z)))
-      (radialMathieuMs j (2 * m + 2) z h) := by
-  sorry
+      (radialMathieuMs j (2 * m + 2) z h) :=
+  p2m_hasSum_radialMathieuMs_even_cross j hj₁ hj₄ m s hh hB z
 
 open DLMF.Bessel in
 /-- **Modified-Bessel cross-product expansion** (DLMF 28.24.6), `h > 0`, `s = 0, 1, …`,

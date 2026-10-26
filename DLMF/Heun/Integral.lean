@@ -648,7 +648,8 @@ theorem p2h_bessel_factor {ν k x A : ℂ} {C : ℂ → ℂ} {S : Set ℂ} (hS :
       (A * (ν * y ^ (ν - 1) * C (y * k) + y ^ ν * (deriv C (y * k) * k))) y := fun y hy => by
     have h1 := (hasDerivAt_id' y).cpow_const (c := ν) hy.1
     have h2 := (hC.differentiableAt _ hy.2).hasDerivAt.comp y (hlin y)
-    convert ((h1.mul h2).const_mul A) using 1
+    have h3 : HasDerivAt (fun y => A * (y ^ ν * C (y * k))) _ y := (h1.mul h2).const_mul A
+    convert h3 using 1
     simp only [Function.comp_apply, mul_one]
   have ev : deriv (fun y => A * (y ^ ν * C (y * k))) =ᶠ[𝓝 x]
       fun y => A * (ν * y ^ (ν - 1) * C (y * k) + y ^ ν * (deriv C (y * k) * k)) :=
@@ -757,6 +758,80 @@ theorem heun_kernel_typeII_spherical {Ω : Set (ℂ × ℂ × ℂ)} (hΩ : IsOpe
         deriv (L r θ) φ = 0 := by
   sorry
 
+/-- First and second derivatives of `r ↦ r^m C` on the slit plane. -/
+theorem p2h_deriv_cpow_mul {r : ℂ} (m C : ℂ) (hr : r ∈ slitPlane) :
+    deriv (fun r' => r' ^ m * C) r = m * r ^ (m - 1) * C ∧
+      deriv (deriv fun r' => r' ^ m * C) r = m * (m - 1) * r ^ (m - 1 - 1) * C := by
+  have hD : ∀ y ∈ slitPlane, HasDerivAt (fun r' => r' ^ m * C) (m * y ^ (m - 1) * C) y :=
+    fun y hy => by
+      convert ((hasDerivAt_id' y).cpow_const (c := m) hy).mul_const C using 1
+      ring
+  refine ⟨(hD r hr).deriv, ?_⟩
+  have ev : deriv (fun r' => r' ^ m * C) =ᶠ[𝓝 r] fun y => m * y ^ (m - 1) * C :=
+    eventually_of_mem (isOpen_slitPlane.mem_nhds hr) fun y hy => (hD y hy).deriv
+  rw [ev.deriv_eq]
+  have h := (((hasDerivAt_id' r).cpow_const (c := m - 1) hr).const_mul m).mul_const C
+  refine h.deriv.trans ?_
+  ring
+
+/-- Chain rule for `t ↦ C · sin^q t · u(cos² t)`: first and second derivatives. -/
+theorem p2h_deriv_sin_cpow_cos_sq_comp {u : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
+    (hu : ContDiffOn ℂ 2 u U) (q C : ℂ) {t : ℂ} (ht : Complex.cos t ^ 2 ∈ U)
+    (hs : Complex.sin t ∈ slitPlane) :
+    deriv (fun t' => C * (Complex.sin t' ^ q * u (Complex.cos t' ^ 2))) t =
+        C * (q * Complex.sin t ^ (q - 1) * Complex.cos t * u (Complex.cos t ^ 2) +
+          Complex.sin t ^ q * (deriv u (Complex.cos t ^ 2) *
+            (-2 * Complex.cos t * Complex.sin t))) ∧
+      deriv (deriv fun t' => C * (Complex.sin t' ^ q * u (Complex.cos t' ^ 2))) t =
+        C * ((q * (q - 1) * Complex.sin t ^ (q - 1 - 1) * Complex.cos t ^ 2 -
+              q * Complex.sin t ^ (q - 1) * Complex.sin t) * u (Complex.cos t ^ 2) +
+            2 * q * Complex.sin t ^ (q - 1) * Complex.cos t *
+              (deriv u (Complex.cos t ^ 2) * (-2 * Complex.cos t * Complex.sin t)) +
+            Complex.sin t ^ q * (deriv (deriv u) (Complex.cos t ^ 2) *
+                (-2 * Complex.cos t * Complex.sin t) ^ 2 +
+              deriv u (Complex.cos t ^ 2) *
+                (2 * Complex.sin t ^ 2 - 2 * Complex.cos t ^ 2))) := by
+  have hd : DifferentiableOn ℂ u U := hu.differentiableOn (by norm_num)
+  have hd2 : DifferentiableOn ℂ (deriv u) U :=
+    ((contDiffOn_succ_iff_deriv_of_isOpen (n := 1) hU).1 hu).2.2.differentiableOn
+      (by norm_num)
+  have hh : ∀ s, HasDerivAt (fun t' => Complex.cos t' ^ 2)
+      (-2 * Complex.cos s * Complex.sin s) s := fun s => by
+    convert (Complex.hasDerivAt_cos s).pow 2 using 1
+    simp
+  have hW : IsOpen {s : ℂ | Complex.cos s ^ 2 ∈ U ∧ Complex.sin s ∈ slitPlane} :=
+    (hU.preimage (by fun_prop)).inter (isOpen_slitPlane.preimage (by fun_prop))
+  have hD : ∀ s ∈ {s : ℂ | Complex.cos s ^ 2 ∈ U ∧ Complex.sin s ∈ slitPlane},
+      HasDerivAt (fun t' => C * (Complex.sin t' ^ q * u (Complex.cos t' ^ 2)))
+        (C * (q * Complex.sin s ^ (q - 1) * Complex.cos s * u (Complex.cos s ^ 2) +
+          Complex.sin s ^ q * (deriv u (Complex.cos s ^ 2) *
+            (-2 * Complex.cos s * Complex.sin s)))) s := fun s hs' => by
+    have h1 := (Complex.hasDerivAt_sin s).cpow_const (c := q) hs'.2
+    have h2 := (hd.differentiableAt (hU.mem_nhds hs'.1)).hasDerivAt.comp s (hh s)
+    have h3 : HasDerivAt (fun t' => C * (Complex.sin t' ^ q * u (Complex.cos t' ^ 2))) _ s :=
+      (h1.mul h2).const_mul C
+    exact h3
+  refine ⟨(hD t ⟨ht, hs⟩).deriv, ?_⟩
+  have ev : deriv (fun t' => C * (Complex.sin t' ^ q * u (Complex.cos t' ^ 2))) =ᶠ[𝓝 t]
+      fun s => C * (q * Complex.sin s ^ (q - 1) * Complex.cos s * u (Complex.cos s ^ 2) +
+          Complex.sin s ^ q * (deriv u (Complex.cos s ^ 2) *
+            (-2 * Complex.cos s * Complex.sin s))) :=
+    eventually_of_mem (hW.mem_nhds ⟨ht, hs⟩) fun s hs' => (hD s hs').deriv
+  rw [ev.deriv_eq]
+  have hs1 := (Complex.hasDerivAt_sin t).cpow_const (c := q - 1) hs
+  have hs0 := (Complex.hasDerivAt_sin t).cpow_const (c := q) hs
+  have hu0 := (hd.differentiableAt (hU.mem_nhds ht)).hasDerivAt.comp t (hh t)
+  have hu1 := (hd2.differentiableAt (hU.mem_nhds ht)).hasDerivAt.comp t (hh t)
+  have hc := ((Complex.hasDerivAt_cos t).const_mul (-2)).mul (Complex.hasDerivAt_sin t)
+  have h := (((((hs1.const_mul q).mul (Complex.hasDerivAt_cos t)).mul hu0).add
+    (hs0.mul (hu1.mul hc))).const_mul C)
+  have h' : HasDerivAt (fun s => C * (q * Complex.sin s ^ (q - 1) * Complex.cos s *
+      u (Complex.cos s ^ 2) + Complex.sin s ^ q * (deriv u (Complex.cos s ^ 2) *
+        (-2 * Complex.cos s * Complex.sin s)))) _ t := h
+  refine h'.deriv.trans ?_
+  simp only [Function.comp_apply, Pi.mul_apply]
+  ring
+
 /-- DLMF 31.10.22–31.10.23 (**corrected**): separable solutions of 31.10.21,
 `𝒦 = r^m sin^{2p}θ f(cos²θ) g(cos²φ)` with `f ∈ P{0, 1, ∞; 0, 0, A; 1-γ, c, B; ·}`,
 `g ∈ P{0, 1, ∞; 0, 0, A'; 1-ε, 1-δ, B'; ·}` and `m² + 2(α+β)m - σ₁ = 0`,
@@ -786,6 +861,69 @@ theorem heun_kernel_typeII_separable (hF : α + β + 1 = γ + δ + ε) {σ₁ σ
       deriv (deriv (L r θ)) φ / (r ^ 2 * Complex.sin θ ^ 2) +
       ((2 * δ - 1) * Complex.cot φ - (2 * ε - 1) * Complex.tan φ) / (r ^ 2 * Complex.sin θ ^ 2) *
         deriv (L r θ) φ = 0 := by
-  sorry
+  intro L
+  obtain ⟨hs, hc0, hs', hc'⟩ := hreg
+  have hr0 : r ≠ 0 := slitPlane_ne_zero hr
+  have eR : (fun r' => L r' θ φ) = fun r' => r' ^ m * (Complex.sin θ ^ (2 * p) *
+      f (Complex.cos θ ^ 2) * g (Complex.cos φ ^ 2)) := funext fun _ => by simp only [L]; ring
+  have eΘ : (fun θ' => L r θ' φ) = fun θ' => (r ^ m * g (Complex.cos φ ^ 2)) *
+      (Complex.sin θ' ^ (2 * p) * f (Complex.cos θ' ^ 2)) := funext fun _ => by simp only [L]; ring
+  have eΦ : L r θ = fun φ' => (r ^ m * Complex.sin θ ^ (2 * p) * f (Complex.cos θ ^ 2)) *
+      g (Complex.cos φ' ^ 2) := rfl
+  obtain ⟨d1, d2⟩ := p2h_deriv_cpow_mul m (Complex.sin θ ^ (2 * p) *
+      f (Complex.cos θ ^ 2) * g (Complex.cos φ ^ 2)) hr
+  obtain ⟨t1, t2⟩ := p2h_deriv_sin_cpow_cos_sq_comp hUf hf.1 (2 * p)
+    (r ^ m * g (Complex.cos φ ^ 2)) hθ.1 hθ.2
+  obtain ⟨e1, e2⟩ := p2h_deriv_cos_sq_comp hUg hg.1
+    (r ^ m * Complex.sin θ ^ (2 * p) * f (Complex.cos θ ^ 2)) hφ
+  rw [eR, eΘ, eΦ, d1, d2, t1, t2, e1, e2]
+  have hsc := Complex.sin_sq_add_cos_sq θ
+  have hsc' := Complex.sin_sq_add_cos_sq φ
+  have hx1 : 1 - Complex.cos θ ^ 2 ≠ 0 := by
+    rw [← hsc]; ring_nf; exact pow_ne_zero _ hs
+  have hy1 : 1 - Complex.cos φ ^ 2 ≠ 0 := by
+    rw [← hsc']; ring_nf; exact pow_ne_zero _ hs'
+  have Rf := p2h_riemann_poly₀ (pow_ne_zero 2 hc0) hx1 (hf.2 _ hθ.1)
+  have Rg := p2h_riemann_poly₀ (pow_ne_zero 2 hc') hy1 (hg.2 _ hφ)
+  have er1 : r ^ (m - 1) = r ^ m / r := by rw [Complex.cpow_sub _ _ hr0, Complex.cpow_one]
+  have er2 : r ^ (m - 1 - 1) = r ^ m / r ^ 2 := by
+    rw [Complex.cpow_sub _ _ hr0, er1, Complex.cpow_one]; ring
+  have es1 : Complex.sin θ ^ (2 * p - 1) = Complex.sin θ ^ (2 * p) / Complex.sin θ := by
+    rw [Complex.cpow_sub _ _ hs, Complex.cpow_one]
+  have es2 : Complex.sin θ ^ (2 * p - 1 - 1) = Complex.sin θ ^ (2 * p) / Complex.sin θ ^ 2 := by
+    rw [Complex.cpow_sub _ _ hs, es1, Complex.cpow_one]; ring
+  rw [er1, er2, es1, es2, Complex.tan_eq_sin_div_cos, Complex.cot_eq_cos_div_sin,
+    Complex.tan_eq_sin_div_cos, Complex.cot_eq_cos_div_sin]
+  have hε : ε = α + β + 1 - γ - δ := by linear_combination -hF
+  have hB : B = α + β + 2 * p - A := by linear_combination hAB.1
+  have hB' : B' = δ + ε - 1 - A' := by linear_combination hAB'.1
+  have hσ₁ : σ₁ = m ^ 2 + 2 * (α + β) * m := by linear_combination -hm
+  have hσ₂ : σ₂ = 4 * (p ^ 2 + (α + β - γ) * p) := by linear_combination -4 * hp
+  have hAB2 := hAB.2
+  have hAB2' := hAB'.2
+  subst hc hB hB' hσ₁ hσ₂
+  subst hε
+  set F0 := f (Complex.cos θ ^ 2)
+  set F1 := deriv f (Complex.cos θ ^ 2)
+  set F2 := deriv (deriv f) (Complex.cos θ ^ 2)
+  set G0 := g (Complex.cos φ ^ 2)
+  set G1 := deriv g (Complex.cos φ ^ 2)
+  set G2 := deriv (deriv g) (Complex.cos φ ^ 2)
+  set Rm := r ^ m
+  set Sq := Complex.sin θ ^ (2 * p)
+  set co := Complex.cos θ
+  set si := Complex.sin θ
+  set co' := Complex.cos φ
+  set si' := Complex.sin φ
+  linear_combination (norm := skip)
+    (Rm * Sq / (r ^ 2 * si ^ 2 * co * co' * si')) *
+      ((4 * G0 * co * co' * si ^ 2 * si') * Rf + (4 * F0 * co * co' * si') * Rg +
+        (4 * F0 * G0 * co * co' * si ^ 2 * si') * hAB2 + (4 * F0 * G0 * co * co' * si') * hAB2' +
+        (4 * G0 * co * co' * si' * (F0 * α * p + F0 * β * p - F0 * γ * p + F0 * p ^ 2 +
+          F1 * γ * si ^ 2 + F2 * co ^ 2 * si ^ 2)) * hsc +
+        (4 * F0 * co * co' * si' * (G1 * α + G1 * β - G1 * δ - G1 * γ + G1 + G2 * co' ^ 2)) *
+          hsc')
+  field_simp
+  ring
 
 end DLMF.Heun

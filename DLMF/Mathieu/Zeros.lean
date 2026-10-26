@@ -9,6 +9,8 @@ public import DLMF.Mathieu.Basic
 public import Mathlib.RingTheory.Polynomial.Hermite.Basic
 public import Mathlib.Analysis.SpecialFunctions.Pow.Real
 public import DLMFMathlib.Analysis.ODE.P2sOscillation
+public import DLMF.Mathieu.Properties
+public import DLMF.Mathieu.P2sBridge
 
 /-!
 # Zeros of the Mathieu functions (DLMF §28.9)
@@ -39,7 +41,23 @@ theorem mathieu_zeros_count (n : ℕ) (q : ℝ) :
       {x ∈ Ioo 0 (π / 2) | mathieuSe (2 * n + 1) x q = 0}.encard = n ∧
       {x ∈ Ioo 0 (π / 2) | mathieuCe (2 * n + 1) x q = 0}.encard = n ∧
       {x ∈ Ioo 0 (π / 2) | mathieuSe (2 * n + 2) x q = 0}.encard = n := by
-  sorry
+  have hce : ∀ m (x : ℝ), mathieuCe m x q = 0 ↔ mathieuWI (mathieuA m q) q x = 0 := by
+    intro m x; simp [mathieuCe, (mathieuCeZero_pos m q).ne']
+  have hse : ∀ m (x : ℝ), mathieuSe m x q = 0 ↔ mathieuWII (mathieuB m q) q x = 0 := by
+    intro m x; simp [mathieuSe, (mathieuSeDerivZero_pos m q).ne']
+  have e1 := p2s_zeros_A (2 * n) q
+  have e2 := p2s_zeros_B (n := 2 * n + 1) (by omega) q
+  have e3 := p2s_zeros_A (2 * n + 1) q
+  have e4 := p2s_zeros_B (n := 2 * n + 2) (by omega) q
+  rw [show 2 * n / 2 = n by omega] at e1
+  rw [show (2 * n + 1 - 1) / 2 = n by omega] at e2
+  rw [show (2 * n + 1) / 2 = n by omega] at e3
+  rw [show (2 * n + 2 - 1) / 2 = n by omega] at e4
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · rw [← e1]; congr 1; ext x; exact and_congr_right fun _ => hce _ x
+  · rw [← e2]; congr 1; ext x; exact and_congr_right fun _ => hse _ x
+  · rw [← e3]; congr 1; ext x; exact and_congr_right fun _ => hce _ x
+  · rw [← e4]; congr 1; ext x; exact and_congr_right fun _ => hse _ x
 
 /-- **Continuity of the zeros** (DLMF §28.9): the zeros of `ce_{2n}(·, q)` in `(0, π/2)` are
 `n` continuous functions of real `q`. -/

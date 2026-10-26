@@ -30,6 +30,10 @@ public import DLMF.Mathieu.Hill.Defs
 public import DLMF.Mathieu.Hill.Floquet
 public import DLMF.Mathieu.Hill.Eigenfunctions
 public import DLMF.Mathieu.Hill.Ince
+public import DLMF.Mathieu.P2sBridge
+public import DLMF.Mathieu.Modified.P2mCrossSeries
+public import DLMF.Mathieu.Modified.P2mRadial
+public import DLMF.Mathieu.Modified.P2mConnection
 
 /-!
 # Mathieu functions and Hill's equation (DLMF Chapter 28)

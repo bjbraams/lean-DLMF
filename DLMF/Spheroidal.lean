@@ -12,6 +12,7 @@ public import DLMF.Spheroidal.Eigenvalues
 public import DLMF.Spheroidal.Angular
 public import DLMF.Spheroidal.FerrersSeries
 public import DLMF.Spheroidal.Radial
+public import DLMF.Spheroidal.P2yFerrersTools
 
 /-!
 # Spheroidal wave functions (DLMF Chapter 30)
