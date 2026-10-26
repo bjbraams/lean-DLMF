@@ -7476,10 +7476,10 @@ parameters are not nonpositive integers after the proved counterexample
 `p2h_not_heunHypP5_P6_riemann_degenerate`. Both are now proved.
 
 Open decisions and concerns:
-- 31.7.4 (`heunLocal_cubic_eq_hypergeometric`) is false on the acquired domain, which has three
-  components; DLMF gives no domain. Numerical evidence only; the proposed restriction
-  |ph(1 − (3/2 − i√3/2)z)| < π/6 is in the errata report (reports/DLMFErrata.tex) (c). The statement is unchanged pending the
-  user's decision.
+- 31.7.4 (`heunLocal_cubic_eq_hypergeometric`) was false on the acquired domain, which has three
+  components; DLMF gives no domain (numerical evidence: the sides differ by 0.36–0.60 off the
+  component containing 0). By user decision the hypothesis |ph(1 − (3/2 − i√3/2)z)| < π/6,
+  which selects that component, was added after integration; still admitted. Errata report (b).
 - `IsHeunEigenvalue01` admits any preconnected open U containing 0 and 1, including sets that wind
   around a singularity; it may admit eigenvalues for other path classes (no counterexample yet).
   Affects `IsHeunEigenvalue01.analyticOn_ball`, `heunEigenvalue01_infinite_discrete` and the

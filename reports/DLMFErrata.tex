@@ -19,8 +19,8 @@
 
 % entry counts
 \newcommand{\NumA}{104}
-\newcommand{\NumB}{25}
-\newcommand{\NumC}{50}
+\newcommand{\NumB}{26}
+\newcommand{\NumC}{49}
 \newcommand{\NumOut}{3}
 
 \begin{document}
@@ -2260,6 +2260,20 @@ $[(1-a-b-c)^2-d^2]\,w(w-1)(w-z)/(z(z-1))$.
 \item[Found] 2026-10-26 (proof round 2 for Chapters 28--31).
 \end{fields}
 
+\entry{\deq{31.7.4}}
+\begin{fields}
+\item[Defect] DLMF gives no domain for the cubic transformation. The acquired statement used
+  $\{|z|<1,\ |1-(1-cz)^3|<1\}$, $c=\tfrac32-\tfrac{\sqrt3}{2}\iu$, which has three components;
+  the identity holds only on the one containing $0$ (numerically: off that component the two
+  sides differ by $0.36$--$0.60$).
+\item[Fix] The hypothesis $|\ph(1-cz)|<\pi/6$, which selects exactly that component
+  (star-shaped about $0$; the identity holds there to $5\cdot10^{-18}$). User decision,
+  2026-10-26.
+\item[Lean] \lean{heunLocal_cubic_eq_hypergeometric} (\file{DLMF/Heun/Hypergeometric.lean}),
+  admitted.
+\item[Found] 2026-10-26 (proof round 2 for Chapters 28--31).
+\end{fields}
+
 \section{(c) Formalization notes}\label{sec:c}
 \category{c}
 
@@ -2613,18 +2627,6 @@ $[(1-a-b-c)^2-d^2]\,w(w-1)(w-z)/(z(z-1))$.
   ($|\sinh z|>1$) for every $j$.
 \end{fields}
 
-
-\entry{\deq{31.7.4}}
-\begin{fields}
-\item[Note] DLMF gives no domain for the cubic transformation. The acquired statement uses
-  $\{|z|<1,\ |1-(1-cz)^3|<1\}$, $c=\tfrac32-\tfrac{\sqrt3}{2}\iu$, which has three components;
-  the identity holds only on the one containing $0$ (numerically: off that component the two
-  sides differ by $0.36$--$0.60$). Proposed restriction, pending a decision: add
-  $|\ph(1-cz)|<\pi/6$, which selects exactly that component (star-shaped about $0$; the identity
-  holds there to $5\cdot10^{-18}$).
-\item[Lean] \lean{heunLocal_cubic_eq_hypergeometric} (\file{DLMF/Heun/Hypergeometric.lean}),
-  admitted, unchanged.
-\end{fields}
 
 \entry{\deq{28.12.7}}
 \begin{fields}

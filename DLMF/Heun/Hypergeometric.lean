@@ -443,11 +443,19 @@ theorem heunLocal_four_eq_hypergeometric {z : ℂ} (hz : ‖z‖ < 1)
 /-- DLMF 31.7.4: with `a = 1/2 + i√3/2`,
 `Hl(a, αβ(1/2 + i√3/6); α, β, (α+β+1)/3, (α+β+1)/3; z)
 = ₂F₁(α/3, β/3; (α+β+1)/3; 1 - (1 - (3/2 - i√3/2) z)³)` where both series converge and
-`(α + β + 1)/3 ∉ {0, -1, …}`. -/
+`(α + β + 1)/3 ∉ {0, -1, …}`, on the component containing `0` of the set where both series
+converge, selected by `|ph(1 - (3/2 - i√3/2) z)| < π/6`.
+
+DLMF gives no domain. Corrected 2026-10-26 (user decision): the set
+`{‖z‖ < 1, ‖1 - (1 - (3/2 - i√3/2) z)³‖ < 1}` of the original acquisition has three components
+and the identity fails off the one containing `0` (numerically the two sides differ by
+0.36–0.60 there); the phase condition selects exactly that component, which is star-shaped
+about `0`. -/
 @[dlmf 31.7.E4]
 theorem heunLocal_cubic_eq_hypergeometric
     (hγ : ∀ n : ℕ, (α + β + 1) / 3 ≠ -(n : ℂ)) {z : ℂ} (hz : ‖z‖ < 1)
-    (hz' : ‖1 - (1 - (3 / 2 - I * Real.sqrt 3 / 2) * z) ^ 3‖ < 1) :
+    (hz' : ‖1 - (1 - (3 / 2 - I * Real.sqrt 3 / 2) * z) ^ 3‖ < 1)
+    (hph : |Complex.arg (1 - (3 / 2 - I * Real.sqrt 3 / 2) * z)| < π / 6) :
     heunLocal (1 / 2 + I * Real.sqrt 3 / 2) (α * β * (1 / 2 + I * Real.sqrt 3 / 6)) α β
         ((α + β + 1) / 3) ((α + β + 1) / 3) z =
       ordinaryHypergeometric (α / 3) (β / 3) ((α + β + 1) / 3)
