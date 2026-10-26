@@ -12,6 +12,9 @@ public import DLMF.Weierstrass.ModularFunctions
 public import Mathlib.Combinatorics.Enumerative.Pentagonal.EulerFunction
 public import Mathlib.Algebra.Order.Field.GeomSum
 public import DLMFMathlib.RingTheory.R27PowerSeriesEval
+public import DLMF.NumberTheory.T27bHecke
+public import Mathlib.NumberTheory.ModularForms.LevelOne.DimensionFormula
+public import TauCeti.NumberTheory.ModularForms.LevelOne.DiscriminantEigenform
 
 /-!
 # Unrestricted partitions (DLMF §27.14)
@@ -33,6 +36,14 @@ integer valued by construction; the analytic generating function is `hasSum_rama
 Ramanujan's congruences are `DLMF.Partitions.ramanujan_mod_five` etc. (tagged there). Lehmer's
 conjecture `τ(n) ≠ 0` is open and stated only as a proposition (`LehmerConjecture`); Lehmer's
 numerical verification bound is excluded (numerical).
+
+The multiplicativity of `τ` and 27.14.19 come from Tau Ceti's Hecke eigenform theory of `Δ`
+(`TauCeti.ModularForm.discriminant_qExpansion_coeff_mul`,
+`TauCeti.ModularForm.discriminant_qExpansion_coeff_prime_pow_add_two`), transported to
+`ramanujanTau` by `t27b_ramanujanTau_eq_coeff` (Mathlib's `qExpansion_coeff_unique`). The
+congruence 27.14.20 compares `q`-expansions in `E₁₂ - E₆² = c Δ` (Mathlib's
+`CuspForm.exists_smul_discriminant_of_weight_eq_twelve` and
+`EisensteinSeries.E_qExpansion_coeff`).
 -/
 
 @[expose] public noncomputable section
@@ -579,18 +590,136 @@ theorem hasSum_ramanujanTau {x : ℂ} (hx : ‖x‖ < 1) :
   rw [(hasProd_eulerReciprocal hx).2]
   exact (r27_absEval_mul (r27_absEval_X x) (r27_absEval_pow (r27_absEval_pentagonalSeries hx) 24)).2
 
+/-! #### Bridge to Mathlib's discriminant and Eisenstein series (helpers) -/
+
+/-- Mathlib's `Δ(τ) = η(τ)²⁴` is `∑ τ(m) qᵐ` with `q = e^{2πiτ}`. -/
+theorem t27b_hasSum_discriminant (τ : ℍ) :
+    HasSum (fun m : ℕ ↦ (ramanujanTau m : ℂ) • Function.Periodic.qParam 1 τ ^ m)
+      (ModularForm.discriminant τ) := by
+  have hq : ‖Function.Periodic.qParam 1 τ‖ < 1 :=
+    Function.Periodic.norm_qParam_lt_one one_pos τ.im_pos
+  have h := hasSum_ramanujanTau hq
+  simp only [smul_eq_mul]
+  convert h using 1
+  rw [ModularForm.discriminant, eta_eq_eulerReciprocal, mul_pow, Function.Periodic.qParam,
+    ← Complex.exp_nat_mul]
+  congr 2
+  · push_cast; ring_nf
+  · congr 2; push_cast; ring
+
+/-- `τ(m)` is the `m`th `q`-expansion coefficient of Mathlib's `Δ`. -/
+theorem t27b_ramanujanTau_eq_coeff (m : ℕ) :
+    (ramanujanTau m : ℂ) = (UpperHalfPlane.qExpansion 1 ModularForm.discriminant).coeff m :=
+  ModularFormClass.qExpansion_coeff_unique one_pos one_mem_strictPeriods_SL
+    (f := CuspForm.discriminant) t27b_hasSum_discriminant m
+
+/-- `τ(mn) = τ(m) τ(n)` for coprime `m, n` (Tau Ceti). -/
+theorem t27b_ramanujanTau_mul_coprime {m n : ℕ} (h : m.Coprime n) :
+    ramanujanTau (m * n) = ramanujanTau m * ramanujanTau n := by
+  have := TauCeti.ModularForm.discriminant_qExpansion_coeff_mul h
+  rw [← t27b_ramanujanTau_eq_coeff, ← t27b_ramanujanTau_eq_coeff,
+    ← t27b_ramanujanTau_eq_coeff] at this
+  exact_mod_cast this
+
+/-- `τ(1) = 1`. -/
+theorem t27b_ramanujanTau_one : ramanujanTau 1 = 1 := by
+  have := ModularForm.discriminant_qExpansion_coeff_one
+  rw [← t27b_ramanujanTau_eq_coeff] at this
+  exact_mod_cast this
+
+/-- `τ(p^{r+2}) = τ(p) τ(p^{r+1}) - p¹¹ τ(p^r)` (Tau Ceti). -/
+theorem t27b_ramanujanTau_prime_pow_add_two {p : ℕ} (hp : p.Prime) (r : ℕ) :
+    ramanujanTau (p ^ (r + 2)) =
+      ramanujanTau p * ramanujanTau (p ^ (r + 1)) - (p : ℤ) ^ 11 * ramanujanTau (p ^ r) := by
+  have := TauCeti.ModularForm.discriminant_qExpansion_coeff_prime_pow_add_two hp r
+  simp only [← t27b_ramanujanTau_eq_coeff] at this
+  exact_mod_cast this
+
+section T27b691
+
+open ModularForm EisensteinSeries
+open scoped ArithmeticFunction.sigma
+
+/-- `B₁₂ = -691/2730`. -/
+private theorem t27b_bernoulli_twelve : bernoulli 12 = -691 / 2730 := by decide +kernel
+
+/-- `E₁₂ - E₆²` as a level-one modular form of weight 12. -/
+private def t27b_G : ModularForm 𝒮ℒ 12 :=
+  ModularForm.mcast (by decide) (E (k := 12) (by norm_num)) -
+    ModularForm.mcast (by decide) (E₆.pow 2)
+
+/-- The `q`-expansion of `E₁₂ - E₆²`. -/
+private theorem t27b_G_qExpansion :
+    qExpansion 1 t27b_G = qExpansion 1 (E (k := 12) (by norm_num)) -
+      qExpansion 1 E₆ * qExpansion 1 E₆ := by
+  simp only [t27b_G, FunLike.coe_sub, coe_mcast,
+    ModularForm.qExpansion_sub one_pos one_mem_strictPeriods_SL,
+    ModularForm.qExpansion_pow one_pos one_mem_strictPeriods_SL]
+  ring
+
+/-- The coefficients of `E₁₂`: `1` and `(65520/691) σ₁₁(m)`. -/
+private theorem t27b_E12_coeff (m : ℕ) :
+    (qExpansion 1 (E (k := 12) (by norm_num))).coeff m =
+      if m = 0 then 1 else (65520 / 691 : ℂ) * (σ 11 m : ℂ) := by
+  rw [E_qExpansion_coeff (by norm_num) ⟨6, rfl⟩, t27b_bernoulli_twelve]
+  norm_num
+
+/-- `E₁₂ - E₆²` is a cusp form. -/
+private theorem t27b_G_isCuspForm : IsCuspForm t27b_G := by
+  simp [isCuspForm_iff_coeffZero_eq_zero, t27b_G_qExpansion,
+    PowerSeries.coeff_mul, -PowerSeries.coeff_zero_eq_constantCoeff,
+    E_qExpansion_coeff_zero _ ⟨3, rfl⟩, E_qExpansion_coeff_zero _ ⟨6, rfl⟩]
+
+/-- Integer coefficients of `E₆`. -/
+private def t27b_e6 (m : ℕ) : ℤ := if m = 0 then 1 else -504 * (σ 5 m : ℤ)
+
+/-- The coefficients of `E₆` are the integers `t27b_e6 m`. -/
+private theorem t27b_E6_coeff (m : ℕ) :
+    (qExpansion 1 E₆).coeff m = (t27b_e6 m : ℂ) := by
+  rw [E_qExpansion_coeff (by norm_num) ⟨3, rfl⟩, t27b_e6]
+  have hb : bernoulli 6 = 1 / 42 := by decide +kernel
+  split_ifs <;> norm_num [hb]
+
+/-- The coefficients of `E₁₂ - E₆²` for `n ≥ 1`. -/
+private theorem t27b_G_coeff (n : ℕ) (hn : n ≠ 0) :
+    (qExpansion 1 t27b_G).coeff n = (65520 / 691 : ℂ) * (σ 11 n : ℂ) -
+      ((∑ x ∈ Finset.antidiagonal n, t27b_e6 x.1 * t27b_e6 x.2 : ℤ) : ℂ) := by
+  rw [t27b_G_qExpansion, map_sub, t27b_E12_coeff, PowerSeries.coeff_mul]
+  simp [hn, t27b_E6_coeff]
+
+/-- `E₁₂ - E₆² = c Δ`, coefficientwise. -/
+private theorem t27b_G_eq : ∃ c : ℂ, ∀ n, (qExpansion 1 t27b_G).coeff n =
+    c * (ramanujanTau n : ℂ) := by
+  obtain ⟨g, hg⟩ := t27b_G_isCuspForm
+  obtain ⟨c, hc⟩ := CuspForm.exists_smul_discriminant_of_weight_eq_twelve g
+  have hgE : (g : ℍ → ℂ) = t27b_G := congrArg DFunLike.coe hg
+  have hcΔ : (c • CuspForm.discriminant : ℍ → ℂ) = g := congrArg DFunLike.coe hc
+  have hgΔ := ModularForm.qExpansion_smul one_pos one_mem_strictPeriods_SL c
+    CuspForm.discriminant
+  rw [hcΔ, hgE] at hgΔ
+  refine ⟨c, fun n ↦ ?_⟩
+  rw [hgΔ, PowerSeries.coeff_smul, smul_eq_mul, CuspForm.coe_discriminant,
+    t27b_ramanujanTau_eq_coeff]
+
+end T27b691
+
 /-- §27.14(vi): `τ` is multiplicative. -/
 @[dlmf 27.14.vi]
 theorem isMultiplicativeFn_ramanujanTau :
     IsMultiplicativeFn (fun n ↦ (ramanujanTau n : ℂ)) := by
-  sorry
+  refine ⟨by simp [t27b_ramanujanTau_one], fun m n _ _ h ↦ ?_⟩
+  simp only [t27b_ramanujanTau_mul_coprime h, Int.cast_mul]
 
 /-- DLMF 27.14.19: `τ(m)τ(n) = ∑_{d ∣ (m,n)} d¹¹ τ(mn/d²)`, `m, n ≥ 1`. -/
 @[dlmf 27.14.E19]
 theorem ramanujanTau_mul {m n : ℕ} (hm : 1 ≤ m) (hn : 1 ≤ n) :
     ramanujanTau m * ramanujanTau n =
       ∑ d ∈ (Nat.gcd m n).divisors, (d : ℤ) ^ 11 * ramanujanTau (m * n / d ^ 2) := by
-  sorry
+  have hf : IsMultiplicativeFn ramanujanTau :=
+    ⟨t27b_ramanujanTau_one, fun m n _ _ h ↦ t27b_ramanujanTau_mul_coprime h⟩
+  refine t27b_hecke_mul (w := fun d ↦ (d : ℤ) ^ 11) hf (fun i j ↦ by push_cast; ring)
+    (fun p hp a b ↦ t27b_hecke_prime_pow _ _ hp (fun k ↦ by push_cast; ring)
+      t27b_ramanujanTau_one (t27b_ramanujanTau_prime_pow_add_two hp) a b) hm hn
 
 /-- §27.14(vi): Lehmer's conjecture `τ(n) ≠ 0` for `n ≥ 1` (open; stated as a proposition
 only). -/
@@ -600,6 +729,28 @@ def LehmerConjecture : Prop := ∀ n : ℕ, 1 ≤ n → ramanujanTau n ≠ 0
 /-- DLMF 27.14.20: `τ(n) ≡ σ₁₁(n) (mod 691)`. -/
 @[dlmf 27.14.E20]
 theorem ramanujanTau_modEq (n : ℕ) : ramanujanTau n ≡ (σ 11 n : ℤ) [ZMOD 691] := by
-  sorry
+  rcases eq_or_ne n 0 with rfl | hn
+  · simp [ramanujanTau]
+  obtain ⟨c, hc⟩ := t27b_G_eq
+  have h1 := hc 1
+  have hA1 : (∑ x ∈ Finset.antidiagonal 1, t27b_e6 x.1 * t27b_e6 x.2) = -1008 := by
+    simp [t27b_e6, Finset.Nat.antidiagonal_succ]
+  rw [t27b_G_coeff 1 one_ne_zero, t27b_ramanujanTau_one, hA1] at h1
+  have hc' : c = 65520 / 691 + 1008 := by
+    simp at h1
+    linear_combination -h1
+  have hn' := hc n
+  rw [t27b_G_coeff n hn, hc'] at hn'
+  set A := ∑ x ∈ Finset.antidiagonal n, t27b_e6 x.1 * t27b_e6 x.2
+  have key : 65520 * (σ 11 n : ℤ) - 691 * A = 762048 * ramanujanTau n := by
+    have : ((65520 * (σ 11 n : ℤ) - 691 * A : ℤ) : ℂ) =
+        ((762048 * ramanujanTau n : ℤ) : ℂ) := by
+      push_cast
+      linear_combination 691 * hn'
+    exact_mod_cast this
+  have hdvd : (691 : ℤ) ∣ 566 * ((σ 11 n : ℤ) - ramanujanTau n) :=
+    ⟨A - 94 * σ 11 n + 1102 * ramanujanTau n, by linear_combination key⟩
+  have hcop : IsCoprime (691 : ℤ) 566 := Int.isCoprime_iff_gcd_eq_one.mpr (by norm_num)
+  exact (Int.modEq_iff_dvd).mpr (hcop.dvd_of_dvd_mul_left hdvd)
 
 end DLMF.NumberTheory

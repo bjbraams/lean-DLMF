@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.NumberTheory.Functions
+public import DLMF.NumberTheory.T27bHecke
 public import DLMF.NumberTheory.DirichletSeries
 public import DLMF.NumberTheory.Inversion
 public import DLMF.NumberTheory.DivisorSums
