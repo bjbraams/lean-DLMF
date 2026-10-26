@@ -38,7 +38,15 @@ jobs:
         working-directory: lean-DLMF/reports
         run: |
           set -e
+          test -f ../../lean-codes/reports/leanreport.sty || {
+            echo "::error::lean-codes/reports/leanreport.sty is missing on GitHub (push lean-codes)"
+            exit 1; }
           for f in *.tex; do latexmk -lualatex -interaction=nonstopmode -halt-on-error "$f"; done
+      - name: Show LaTeX errors
+        if: failure()
+        working-directory: lean-DLMF/reports
+        run: |
+          for f in *.log; do [ -f "$f" ] && { echo "== $f"; grep -n -A8 '^!' "$f" | head -60; }; done
       - name: Collect site
         run: |
           set -e
