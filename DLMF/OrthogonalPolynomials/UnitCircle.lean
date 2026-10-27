@@ -5,9 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.OrthogonalPolynomials.Topics
-public import Mathlib.Tactic.CrossRefAttribute
 public import DLMF.QSeries.Pochhammer
+public import DLMF.Hypergeometric.Basic
+public import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.SpecialFunctions.Bernstein
 /-!
 # Orthogonal polynomials on the unit circle
 
@@ -65,7 +66,7 @@ variable {μ : Measure ℂ} {p : ℕ → ℂ[X]}
 /-- The `L²(μ)` inner product of two polynomials. -/
 def ip (μ : Measure ℂ) (f g : ℂ[X]) : ℂ := ∫ z, f.eval z * star (g.eval z) ∂μ
 
-lemma integrable_eval_mul (h : IsUnitCircleOP μ p) (f g : ℂ[X]) :
+theorem integrable_eval_mul (h : IsUnitCircleOP μ p) (f g : ℂ[X]) :
     Integrable (fun z => f.eval z * star (g.eval z)) μ := by
   haveI := h.1
   have hc : Continuous fun z => f.eval z * star (g.eval z) :=
@@ -75,48 +76,48 @@ lemma integrable_eval_mul (h : IsUnitCircleOP μ p) (f g : ℂ[X]) :
   filter_upwards [h.2.1] with z hz
   exact hC z (by simpa using hz)
 
-lemma ip_add_left (h : IsUnitCircleOP μ p) (f g k : ℂ[X]) :
+theorem ip_add_left (h : IsUnitCircleOP μ p) (f g k : ℂ[X]) :
     ip μ (f + g) k = ip μ f k + ip μ g k := by
   unfold ip
   rw [← integral_add (integrable_eval_mul h f k) (integrable_eval_mul h g k)]
   congr 1; funext z; simp [eval_add]; ring
 
-lemma ip_sub_left (h : IsUnitCircleOP μ p) (f g k : ℂ[X]) :
+theorem ip_sub_left (h : IsUnitCircleOP μ p) (f g k : ℂ[X]) :
     ip μ (f - g) k = ip μ f k - ip μ g k := by
   unfold ip
   rw [← integral_sub (integrable_eval_mul h f k) (integrable_eval_mul h g k)]
   congr 1; funext z; simp [eval_sub]; ring
 
-lemma ip_C_mul_left (f k : ℂ[X]) (c : ℂ) : ip μ (C c * f) k = c * ip μ f k := by
+theorem ip_C_mul_left (f k : ℂ[X]) (c : ℂ) : ip μ (C c * f) k = c * ip μ f k := by
   unfold ip
   rw [← integral_const_mul]
   congr 1; funext z; simp; ring
 
-lemma ip_C_mul_right (f k : ℂ[X]) (c : ℂ) : ip μ f (C c * k) = star c * ip μ f k := by
+theorem ip_C_mul_right (f k : ℂ[X]) (c : ℂ) : ip μ f (C c * k) = star c * ip μ f k := by
   unfold ip
   rw [← integral_const_mul]
   congr 1; funext z; simp; ring
 
-lemma ip_add_right (h : IsUnitCircleOP μ p) (f g k : ℂ[X]) :
+theorem ip_add_right (h : IsUnitCircleOP μ p) (f g k : ℂ[X]) :
     ip μ f (g + k) = ip μ f g + ip μ f k := by
   unfold ip
   rw [← integral_add (integrable_eval_mul h f g) (integrable_eval_mul h f k)]
   congr 1; funext z; simp [eval_add]; ring
 
-lemma ip_sum_right (h : IsUnitCircleOP μ p) (f : ℂ[X]) {ι : Type*} (s : Finset ι)
+theorem ip_sum_right (h : IsUnitCircleOP μ p) (f : ℂ[X]) {ι : Type*} (s : Finset ι)
     (g : ι → ℂ[X]) : ip μ f (∑ i ∈ s, g i) = ∑ i ∈ s, ip μ f (g i) := by
   classical
   induction s using Finset.induction_on with
   | empty => simp [ip]
   | insert a s ha ih => rw [Finset.sum_insert ha, Finset.sum_insert ha, ip_add_right h, ih]
 
-lemma ip_swap (f g : ℂ[X]) : ip μ g f = star (ip μ f g) := by
+theorem ip_swap (f g : ℂ[X]) : ip μ g f = star (ip μ f g) := by
   unfold ip
   change _ = (starRingEnd ℂ) _
   rw [← integral_conj]
   congr 1; funext z; simp [mul_comm]
 
-lemma ip_X_mul (h : IsUnitCircleOP μ p) (f g : ℂ[X]) : ip μ (X * f) (X * g) = ip μ f g := by
+theorem ip_X_mul (h : IsUnitCircleOP μ p) (f g : ℂ[X]) : ip μ (X * f) (X * g) = ip μ f g := by
   unfold ip
   refine integral_congr_ae ?_
   filter_upwards [h.2.1] with z hz
@@ -125,12 +126,12 @@ lemma ip_X_mul (h : IsUnitCircleOP μ p) (f g : ℂ[X]) : ip μ (X * f) (X * g) 
     rw [Complex.star_def, Complex.mul_conj, Complex.normSq_eq_norm_sq, hz]; simp
   linear_combination (f.eval z * star (g.eval z)) * this
 
-lemma ip_zero_right (f : ℂ[X]) : ip μ f 0 = 0 := by simp [ip]
+theorem ip_zero_right (f : ℂ[X]) : ip μ f 0 = 0 := by simp [ip]
 
-lemma ip_zero_left (f : ℂ[X]) : ip μ 0 f = 0 := by simp [ip]
+theorem ip_zero_left (f : ℂ[X]) : ip μ 0 f = 0 := by simp [ip]
 
 /-- Peeling off the leading term against the monic `p d`. -/
-lemma exists_decomp (h : IsUnitCircleOP μ p) (q : ℂ[X]) :
+theorem exists_decomp (h : IsUnitCircleOP μ p) (q : ℂ[X]) :
     ∃ t : ℂ[X], q = C q.leadingCoeff * p q.natDegree + t ∧
       (t = 0 ∨ t.natDegree < q.natDegree) := by
   set d := q.natDegree with hd
@@ -157,7 +158,7 @@ lemma exists_decomp (h : IsUnitCircleOP μ p) (q : ℂ[X]) :
     exact natDegree_lt_natDegree ht hlt
 
 /-- `p m` is orthogonal to every polynomial of lower degree. -/
-lemma ip_p_eq_zero (h : IsUnitCircleOP μ p) (m : ℕ) :
+theorem ip_p_eq_zero (h : IsUnitCircleOP μ p) (m : ℕ) :
     ∀ q : ℂ[X], q.natDegree < m → ip μ (p m) q = 0 := by
   intro q
   induction hd : q.natDegree using Nat.strong_induction_on generalizing q with
@@ -172,20 +173,20 @@ lemma ip_p_eq_zero (h : IsUnitCircleOP μ p) (m : ℕ) :
 
 end IsUnitCircleOP
 
-lemma reflectedPolynomial_eval_zero (n : ℕ) (f : ℂ[X]) :
+theorem reflectedPolynomial_eval_zero (n : ℕ) (f : ℂ[X]) :
     (reflectedPolynomial n f).eval 0 = star (f.coeff n) := by
   unfold reflectedPolynomial
   rw [eval_finsetSum, Finset.sum_range_succ']
   simp
 
-lemma natDegree_reflectedPolynomial_le (n : ℕ) (f : ℂ[X]) :
+theorem natDegree_reflectedPolynomial_le (n : ℕ) (f : ℂ[X]) :
     (reflectedPolynomial n f).natDegree ≤ n := by
   unfold reflectedPolynomial
   refine natDegree_sum_le_of_forall_le _ _ fun k hk => ?_
   have hk' := Finset.mem_range.mp hk
   exact (natDegree_C_mul_X_pow_le _ _).trans (by omega)
 
-lemma coeff_reflectedPolynomial (n : ℕ) (f : ℂ[X]) (j : ℕ) :
+theorem coeff_reflectedPolynomial (n : ℕ) (f : ℂ[X]) (j : ℕ) :
     (reflectedPolynomial n f).coeff j = if j ≤ n then star (f.coeff (n - j)) else 0 := by
   unfold reflectedPolynomial
   rw [finsetSum_coeff]
@@ -199,15 +200,15 @@ lemma coeff_reflectedPolynomial (n : ℕ) (f : ℂ[X]) (j : ℕ) :
     have := Finset.mem_range.mp hk
     simp only [ite_eq_right_iff]; intro h; omega
 
-lemma reflectedPolynomial_add (n : ℕ) (f g : ℂ[X]) :
+theorem reflectedPolynomial_add (n : ℕ) (f g : ℂ[X]) :
     reflectedPolynomial n (f + g) = reflectedPolynomial n f + reflectedPolynomial n g := by
   ext j; simp only [coeff_add, coeff_reflectedPolynomial]; split_ifs <;> simp
 
-lemma reflectedPolynomial_C_mul (n : ℕ) (c : ℂ) (f : ℂ[X]) :
+theorem reflectedPolynomial_C_mul (n : ℕ) (c : ℂ) (f : ℂ[X]) :
     reflectedPolynomial n (C c * f) = C (star c) * reflectedPolynomial n f := by
   ext j; simp only [coeff_C_mul, coeff_reflectedPolynomial]; split_ifs <;> simp [mul_comm]
 
-lemma reflectedPolynomial_X_mul {n : ℕ} {f : ℂ[X]} :
+theorem reflectedPolynomial_X_mul {n : ℕ} {f : ℂ[X]} :
     reflectedPolynomial (n + 1) (X * f) = reflectedPolynomial n f := by
   ext j
   simp only [coeff_reflectedPolynomial]
@@ -217,7 +218,7 @@ lemma reflectedPolynomial_X_mul {n : ℕ} {f : ℂ[X]} :
   · omega
   · rfl
 
-lemma reflectedPolynomial_reflectedPolynomial {n : ℕ} {f : ℂ[X]} (hf : f.natDegree ≤ n) :
+theorem reflectedPolynomial_reflectedPolynomial {n : ℕ} {f : ℂ[X]} (hf : f.natDegree ≤ n) :
     reflectedPolynomial (n + 1) (reflectedPolynomial n f) = X * f := by
   ext j
   simp only [coeff_reflectedPolynomial]
@@ -232,7 +233,7 @@ lemma reflectedPolynomial_reflectedPolynomial {n : ℕ} {f : ℂ[X]} (hf : f.nat
     · rw [coeff_eq_zero_of_natDegree_lt (by omega)]
 
 /-- On the unit circle, `f*(z) = zⁿ conj(f(z))`. -/
-lemma reflectedPolynomial_eval_of_norm_eq_one {n : ℕ} {f : ℂ[X]} (hf : f.natDegree ≤ n) {z : ℂ}
+theorem reflectedPolynomial_eval_of_norm_eq_one {n : ℕ} {f : ℂ[X]} (hf : f.natDegree ≤ n) {z : ℂ}
     (hz : ‖z‖ = 1) : (reflectedPolynomial n f).eval z = z ^ n * star (f.eval z) := by
   have hz0 : z ≠ 0 := fun h => by simp [h] at hz
   have hstar : star z = z⁻¹ := by
@@ -253,7 +254,7 @@ namespace IsUnitCircleOP
 
 variable {μ : Measure ℂ} {p : ℕ → ℂ[X]}
 
-lemma ip_self_ne_zero (h : IsUnitCircleOP μ p) (d : ℕ) : ip μ (p d) (p d) ≠ 0 := by
+theorem ip_self_ne_zero (h : IsUnitCircleOP μ p) (d : ℕ) : ip μ (p d) (p d) ≠ 0 := by
   have hpos := h.2.2.2.2.1 d
   have heq : ip μ (p d) (p d) = ((∫ z, ‖(p d).eval z‖ ^ 2 ∂μ : ℝ) : ℂ) := by
     unfold ip
@@ -265,7 +266,7 @@ lemma ip_self_ne_zero (h : IsUnitCircleOP μ p) (d : ℕ) : ip μ (p d) (p d) �
 
 /-- A polynomial orthogonal to all polynomials of degree below `n` and of degree below `n` is
 zero. -/
-lemma eq_zero_of_ip_eq_zero (h : IsUnitCircleOP μ p) {n : ℕ} {s : ℂ[X]} (hs : s.natDegree < n)
+theorem eq_zero_of_ip_eq_zero (h : IsUnitCircleOP μ p) {n : ℕ} {s : ℂ[X]} (hs : s.natDegree < n)
     (horth : ∀ g : ℂ[X], g.natDegree < n → ip μ s g = 0) : s = 0 := by
   by_contra hs0
   set d := s.natDegree
@@ -281,14 +282,14 @@ lemma eq_zero_of_ip_eq_zero (h : IsUnitCircleOP μ p) {n : ℕ} {s : ℂ[X]} (hs
   · exact ip_self_ne_zero h d h3
 
 /-- Orthogonality to the monomials `X^i`, `i < n`, gives orthogonality to all lower degrees. -/
-lemma ip_eq_zero_of_monomials (h : IsUnitCircleOP μ p) {n : ℕ} {s : ℂ[X]}
+theorem ip_eq_zero_of_monomials (h : IsUnitCircleOP μ p) {n : ℕ} {s : ℂ[X]}
     (hmono : ∀ i < n, ip μ s (X ^ i) = 0) (g : ℂ[X]) (hg : g.natDegree < n) : ip μ s g = 0 := by
   rw [as_sum_range' g n hg, ip_sum_right h]
   refine Finset.sum_eq_zero fun i hi => ?_
   rw [← C_mul_X_pow_eq_monomial, ip_C_mul_right, hmono i (Finset.mem_range.mp hi), mul_zero]
 
 /-- `p n^*` is orthogonal to `X^j` for `1 ≤ j ≤ n`. -/
-lemma ip_reflected_X_pow (h : IsUnitCircleOP μ p) {n j : ℕ} (hj1 : 1 ≤ j) (hjn : j ≤ n) :
+theorem ip_reflected_X_pow (h : IsUnitCircleOP μ p) {n j : ℕ} (hj1 : 1 ≤ j) (hjn : j ≤ n) :
     ip μ (reflectedPolynomial n (p n)) (X ^ j) = 0 := by
   have hdeg : (p n).natDegree ≤ n := (h.2.2.1 n).2.le
   have key : ip μ (reflectedPolynomial n (p n)) (X ^ j) = star (ip μ (p n) (X ^ (n - j))) := by
@@ -355,7 +356,7 @@ theorem szego (h : IsUnitCircleOP μ p) (n : ℕ) :
   rw [ht0, mul_zero, hr] at ht
   linear_combination ht
 
-lemma ip_reflected_self (h : IsUnitCircleOP μ p) (n : ℕ) :
+theorem ip_reflected_self (h : IsUnitCircleOP μ p) (n : ℕ) :
     ip μ (reflectedPolynomial n (p n)) (reflectedPolynomial n (p n)) = ip μ (p n) (p n) := by
   have hdeg : (p n).natDegree ≤ n := (h.2.2.1 n).2.le
   unfold ip
@@ -368,14 +369,14 @@ lemma ip_reflected_self (h : IsUnitCircleOP μ p) (n : ℕ) :
   have : z ^ n * star z ^ n = 1 := by rw [← mul_pow, hzz, one_pow]
   linear_combination (star ((p n).eval z) * (p n).eval z) * this
 
-lemma ip_self_eq_ofReal (h : IsUnitCircleOP μ p) (f : ℂ[X]) :
+theorem ip_self_eq_ofReal (h : IsUnitCircleOP μ p) (f : ℂ[X]) :
     ip μ f f = ((∫ z, ‖f.eval z‖ ^ 2 ∂μ : ℝ) : ℂ) := by
   unfold ip
   rw [← integral_complex_ofReal]
   congr 1; funext z
   rw [Complex.star_def, Complex.mul_conj, Complex.normSq_eq_norm_sq]
 
-lemma ip_succ_self (h : IsUnitCircleOP μ p) (n : ℕ) :
+theorem ip_succ_self (h : IsUnitCircleOP μ p) (n : ℕ) :
     ip μ (p (n + 1)) (p (n + 1)) =
       (1 - (p (n + 1)).eval 0 * star ((p (n + 1)).eval 0)) * ip μ (p n) (p n) := by
   set c0 := (p (n + 1)).eval 0
@@ -413,7 +414,7 @@ lemma norm_ratio_aux (h : IsUnitCircleOP μ p) (n : ℕ) :
   rw [hc] at h1
   exact_mod_cast h1
 
-lemma norm_sq_eq_mul_star (a : ℂ) : (((‖a‖ ^ 2 : ℝ)) : ℂ) = a * star a := by
+theorem norm_sq_eq_mul_star (a : ℂ) : (((‖a‖ ^ 2 : ℝ)) : ℂ) = a * star a := by
   rw [Complex.star_def, Complex.mul_conj, Complex.normSq_eq_norm_sq]
 
 end IsUnitCircleOP

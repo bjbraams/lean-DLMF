@@ -8,7 +8,6 @@ module
 public import DLMF.Gamma.ComplexBinet
 public import DLMF.Gamma.ShiftedLineBounds
 public import Mathlib.MeasureTheory.Integral.Asymptotics
-public import Mathlib.Analysis.SpecialFunctions.JapaneseBracket
 
 /-!
 # Estimates for the Mellin–Barnes integrand of the Struve function
@@ -37,7 +36,7 @@ open scoped Real Topology
 namespace DLMF.Struve
 
 /-- `(y + m)^q ≤ 2^|q| y^q` once `y ≥ 2|m|`, `y > 0`. -/
-lemma struveBar_rpow_shift_le {y m q : ℝ} (hy : 0 < y) (hym : 2 * |m| ≤ y) :
+theorem struveBar_rpow_shift_le {y m q : ℝ} (hy : 0 < y) (hym : 2 * |m| ≤ y) :
     (y + m) ^ q ≤ (2 : ℝ) ^ |q| * y ^ q := by
   have h1 : y / 2 ≤ y + m := by linarith [neg_abs_le m]
   have h2 : y + m ≤ 2 * y := by linarith [le_abs_self m, abs_nonneg m]
@@ -52,7 +51,7 @@ lemma struveBar_rpow_shift_le {y m q : ℝ} (hy : 0 < y) (hym : 2 * |m| ≤ y) :
           div_eq_mul_inv, mul_comm]
 
 /-- Stirling on a shifted vertical line: `1/|Γ(a + i(y+m))| = O(y^{1/2-a} e^{πy/2})`. -/
-lemma struveBar_recip_Gamma_isBigO (a m : ℝ) :
+theorem struveBar_recip_Gamma_isBigO (a m : ℝ) :
     (fun y : ℝ => (‖Gamma ((a : ℂ) + ((y : ℂ) + m) * I)‖)⁻¹) =O[atTop]
       (fun y : ℝ => y ^ (1 / 2 - a) * Real.exp (π * y / 2)) := by
   have hE := (Asymptotics.isEquivalent_of_tendsto_one
@@ -84,7 +83,7 @@ lemma struveBar_recip_Gamma_isBigO (a m : ℝ) :
 
 
 /-- `π/|sin(π(t+iy))| ≤ 4π e^{-πy}` for `y ≥ 1`. -/
-lemma struveBar_pi_div_sin_le (t : ℝ) {y : ℝ} (hy : 1 ≤ y) :
+theorem struveBar_pi_div_sin_le (t : ℝ) {y : ℝ} (hy : 1 ≤ y) :
     π / ‖sin (π * ((t : ℂ) + y * I))‖ ≤ 4 * π * Real.exp (-(π * y)) := by
   have hpy : π ≤ π * y := by nlinarith [Real.pi_pos]
   have hs := Complex.barnesRes_abs_sinh_le_norm_sin (π * t) (π * y)
@@ -104,7 +103,7 @@ lemma struveBar_pi_div_sin_le (t : ℝ) {y : ℝ} (hy : 1 ≤ y) :
         rw [Real.exp_neg]; field_simp
 
 /-- `π/|sin(π(t+iy))| = O(e^{-πy})` as `y → +∞`. -/
-lemma struveBar_pi_div_sin_isBigO (t : ℝ) :
+theorem struveBar_pi_div_sin_isBigO (t : ℝ) :
     (fun y : ℝ => π / ‖sin (π * ((t : ℂ) + y * I))‖) =O[atTop]
       (fun y : ℝ => Real.exp (-(π * y))) := by
   refine Asymptotics.IsBigO.of_bound (4 * π) ?_
@@ -115,7 +114,7 @@ lemma struveBar_pi_div_sin_isBigO (t : ℝ) :
 
 /-- **Decay of the Barnes integrand of `H_ν` on horizontal lines** (Stirling, DLMF 5.11.9):
 `π/|sin(π(t+iy))| · 1/|Γ(a+iy)| · 1/|Γ(b+i(y+m))| = O(y^{1-a-b})` as `y → +∞`. -/
-lemma struveBar_isBigO (t a b m : ℝ) :
+theorem struveBar_isBigO (t a b m : ℝ) :
     (fun y : ℝ => π / ‖sin (π * ((t : ℂ) + y * I))‖ * (‖Gamma ((a : ℂ) + y * I)‖)⁻¹ *
       (‖Gamma ((b : ℂ) + ((y : ℂ) + m) * I)‖)⁻¹) =O[atTop] (fun y : ℝ => y ^ (1 - a - b)) := by
   have h1 := struveBar_pi_div_sin_isBigO t
@@ -130,7 +129,7 @@ lemma struveBar_isBigO (t a b m : ℝ) :
   linear_combination (y ^ (1 / 2 - a) * y ^ (1 / 2 - b)) * this
 
 /-- `t ↦ w^t / (Γ(α+t) Γ(β+t))` is continuous on `[c, ∞)` when `α + c, β + c > 0`. -/
-lemma struveBar_continuousOn_rpow_div_Gamma {α β w c : ℝ} (hα : 0 < α + c) (hβ : 0 < β + c)
+theorem struveBar_continuousOn_rpow_div_Gamma {α β w c : ℝ} (hα : 0 < α + c) (hβ : 0 < β + c)
     (hw : 0 < w) :
     ContinuousOn (fun t : ℝ => w ^ t / (Real.Gamma (α + t) * Real.Gamma (β + t))) (Ici c) := by
   intro t ht
@@ -148,7 +147,7 @@ lemma struveBar_continuousOn_rpow_div_Gamma {α β w c : ℝ} (hα : 0 < α + c)
 
 /-- `t ↦ w^t / (Γ(α+t) Γ(β+t))` is integrable on `(c, ∞)` when `α + c, β + c > 0`
 (factorial decay, `DLMF.Gamma.shiftB_Gamma_ge`). -/
-lemma struveBar_integrableOn_rpow_div_Gamma {α β w c : ℝ} (hα : 0 < α + c) (hβ : 0 < β + c)
+theorem struveBar_integrableOn_rpow_div_Gamma {α β w c : ℝ} (hα : 0 < α + c) (hβ : 0 < β + c)
     (hw : 0 < w) :
     IntegrableOn (fun t : ℝ => w ^ t / (Real.Gamma (α + t) * Real.Gamma (β + t))) (Ioi c) := by
   set f := fun t : ℝ => w ^ t / (Real.Gamma (α + t) * Real.Gamma (β + t)) with hf
@@ -199,7 +198,7 @@ lemma struveBar_integrableOn_rpow_div_Gamma {α β w c : ℝ} (hα : 0 < α + c)
   · exact Or.inr (lt_of_not_ge htT)
 
 /-- `y^p = O((1 + |y|)^p)` as `y → +∞`, for `p ≤ 0`. -/
-lemma struveBar_rpow_isBigO_one_add {p : ℝ} (hp : p ≤ 0) :
+theorem struveBar_rpow_isBigO_one_add {p : ℝ} (hp : p ≤ 0) :
     (fun y : ℝ => y ^ p) =O[atTop] (fun y : ℝ => (1 + ‖y‖) ^ p) := by
   refine Asymptotics.IsBigO.of_bound ((2 : ℝ) ^ (-p)) ?_
   filter_upwards [eventually_ge_atTop 1] with y hy
@@ -217,7 +216,7 @@ lemma struveBar_rpow_isBigO_one_add {p : ℝ} (hp : p ≤ 0) :
     _ ≤ (2 : ℝ) ^ (-p) * (1 + y) ^ p := mul_le_mul_of_nonneg_left h h3
 
 /-- A continuous function on `ℝ` with `O(|y|^p)` tails at both ends, `p < -1`, is integrable. -/
-lemma struveBar_integrable_of_isBigO {E : Type*} [NormedAddCommGroup E] {f : ℝ → E}
+theorem struveBar_integrable_of_isBigO {E : Type*} [NormedAddCommGroup E] {f : ℝ → E}
     (hf : Continuous f) {p : ℝ} (hp : p < -1)
     (h1 : f =O[atTop] (fun y : ℝ => y ^ p)) (h2 : (fun y => f (-y)) =O[atTop] (fun y : ℝ => y ^ p)) :
     Integrable f := by

@@ -27,7 +27,7 @@ noncomputable section
 namespace DLMF.QSeries
 
 /-- `|(q^{m+1};q)_k| ≤ exp(1/(1-|q|))`, uniformly in `m` and `k`. -/
-lemma norm_qPochhammer_le {q : ℂ} (hq : ‖q‖ < 1) (m k : ℕ) :
+theorem norm_qPochhammer_le {q : ℂ} (hq : ‖q‖ < 1) (m k : ℕ) :
     ‖qPochhammer (q * q ^ m) q k‖ ≤ Real.exp (1 / (1 - ‖q‖)) := by
   rw [qPochhammer_eq_prod, norm_prod]
   have hb : ∀ j ∈ range k, ‖1 - q * q ^ m * q ^ j‖ ≤ Real.exp (‖q‖ ^ j) := by
@@ -50,7 +50,7 @@ lemma norm_qPochhammer_le {q : ℂ} (hq : ‖q‖ < 1) (m k : ℕ) :
           (fun _ _ => by positivity)
 
 /-- `1/(q;q)_k` is bounded for `|q| < 1`. -/
-lemma exists_norm_recip_qPochhammer_le {q : ℂ} (hq : ‖q‖ < 1) :
+theorem exists_norm_recip_qPochhammer_le {q : ℂ} (hq : ‖q‖ < 1) :
     ∃ D, ∀ k, ‖(qPochhammer q q k)⁻¹‖ ≤ D := by
   have h := ((tendsto_qPochhammer (w := q) hq).inv₀
     (qPochhammerInf_ne_zero_of_norm_lt_one hq hq)).norm
@@ -59,7 +59,7 @@ lemma exists_norm_recip_qPochhammer_le {q : ℂ} (hq : ‖q‖ < 1) :
 
 /-- `[k+m, k]_q = (q^{m+1};q)_k / (q;q)_k`. -/
 @[dlmf 17.2.E29 "exact: |q|<1, after q*q^n=q^(n+1)"]
-lemma qBinom_eq {q : ℂ} (hq : ‖q‖ < 1) (k m : ℕ) :
+theorem qBinom_eq {q : ℂ} (hq : ‖q‖ < 1) (k m : ℕ) :
     qBinom q (k + m) k = qPochhammer (q * q ^ m) q k / qPochhammer q q k := by
   have h := qBinom_mul_qPochhammer q k m
   have hk := qPochhammer_self_ne_zero hq k
@@ -71,7 +71,7 @@ lemma qBinom_eq {q : ℂ} (hq : ‖q‖ < 1) (k m : ℕ) :
   linear_combination h
 
 /-- `(w;q)_k` is continuous in `w`. -/
-lemma continuous_qPochhammer (q : ℂ) (k : ℕ) : Continuous fun w : ℂ => qPochhammer w q k := by
+theorem continuous_qPochhammer (q : ℂ) (k : ℕ) : Continuous fun w : ℂ => qPochhammer w q k := by
   simp_rw [qPochhammer_eq_prod]; fun_prop
 
 /-- **Euler's second identity** `E_q(x) = ∑ q^{n(n-1)/2} xⁿ/(q;q)_n = (-x;q)_∞` for `|q| < 1` and

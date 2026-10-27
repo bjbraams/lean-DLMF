@@ -6,10 +6,9 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Spheroidal.FerrersDefs
-public import DLMF.Legendre.Associated
 public import DLMF.Legendre.IntegralTools
-public import DLMF.Spheroidal.P2yFerrersTools
 public import DLMF.Spheroidal.Angular
+public import Mathlib.Tactic.Monotonicity.Lemmas
 
 /-!
 # Expansions in series of Ferrers functions (DLMF §30.8)
@@ -80,7 +79,7 @@ the recurrence 14.10.3 expresses `(1-x²)𝖯^m_ν` through `𝖯^m_{ν-2}, 𝖯
 /-- Self-adjointness of `L_m u = (1-x²)u'' - 2(m+1)xu'` with weight `(1-x²)^m` on `[-1, 1]`,
 applied to an entire solution `g` of the factor equation and `P_N^{(m)}`: the boundary terms
 vanish because of the factor `(1-x²)^{m+1}`. -/
-theorem p2y_selfAdjoint {g : ℂ → ℂ} (hg : Differentiable ℂ g) (m N : ℕ) (lam γ2 : ℂ)
+lemma p2y_selfAdjoint {g : ℂ → ℂ} (hg : Differentiable ℂ g) (m N : ℕ) (lam γ2 : ℂ)
     (hode : ∀ z : ℂ, (1 - z ^ 2) * deriv (deriv g) z - 2 * ((m : ℂ) + 1) * z * deriv g z +
       (lam - m * ((m : ℂ) + 1) + γ2 * (1 - z ^ 2)) * g z = 0) :
     ((N : ℂ) * (N + 1) - lam) *
@@ -129,7 +128,7 @@ theorem p2y_selfAdjoint {g : ℂ → ℂ} (hg : Differentiable ℂ g) (m N : ℕ
   · exact (continuous_const.mul (hc0 (m + 1))).intervalIntegrable _ _
 
 /-- The integral of `(1-x²)^{m/2} G(x) 𝖯^m_N(x)` through the polynomial factor. -/
-theorem p2y_integral_ferrers {g : ℂ → ℂ} (hreal : ∀ x : ℝ, (g x).im = 0) (m N : ℕ) :
+lemma p2y_integral_ferrers {g : ℂ → ℂ} (hreal : ∀ x : ℝ, (g x).im = 0) (m N : ℕ) :
     ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ ((m : ℝ) / 2) * (g x).re * (ferrersP N m x).re =
       (-1) ^ m * (∫ x : ℝ in (-1 : ℝ)..1, (1 - (x : ℂ) ^ 2) ^ m * g x * legInt_D N m x).re := by
   have hg : ∀ x : ℝ, g x = ((g x).re : ℂ) := fun x => (Complex.ext rfl (by simp [hreal x]))
@@ -156,7 +155,7 @@ theorem p2y_integral_ferrers {g : ℂ → ℂ} (hreal : ∀ x : ℝ, (g x).im = 
 
 /-- `(1-x²)𝖯^m_ν(x)` in terms of `𝖯^m_{ν-2}`, `𝖯^m_ν`, `𝖯^m_{ν+2}` (from DLMF 14.10.3), multiplied
 by `(2ν-1)(2ν+1)(2ν+3)`. -/
-theorem p2y_ferrers_one_sub_sq (ν : ℝ) (m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
+lemma p2y_ferrers_one_sub_sq (ν : ℝ) (m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
     (2 * ν - 1) * (2 * ν + 1) * (2 * ν + 3) * (1 - x ^ 2) * (ferrersP ν m x).re =
       ((2 * ν - 1) * (2 * ν + 1) * (2 * ν + 3) - ((2 * ν - 1) * (ν - m + 1) * (ν + m + 1) +
         (2 * ν + 3) * (ν + m) * (ν - m))) * (ferrersP ν m x).re -
@@ -180,7 +179,7 @@ theorem p2y_ferrers_one_sub_sq (ν : ℝ) (m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-
   linear_combination h
 
 /-- Pointwise form of the product `(1-x²)^{m/2} G 𝖯^m_N` on `(-1, 1)`. -/
-theorem p2y_ferrers_prod {g : ℂ → ℂ} (m N : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
+lemma p2y_ferrers_prod {g : ℂ → ℂ} (m N : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
     (1 - x ^ 2) ^ ((m : ℝ) / 2) * (g x).re * (ferrersP N m x).re =
       (-1) ^ m * (1 - x ^ 2) ^ m * (g x).re * (legInt_D N m x).re := by
   rw [legInt_ferrersP_nat_nat N m hx, p2y_legInt_D_real N m x]
@@ -199,7 +198,7 @@ theorem p2y_ferrers_prod {g : ℂ → ℂ} (m N : ℕ) {x : ℝ} (hx : x ∈ Ioo
   linear_combination (-1) ^ m * (g x).re * (legInt_D N m x).re * hr
 
 /-- Integrability of `(1-x²)^{m/2} G 𝖯^m_μ` when `𝖯^m_μ` agrees with an integer-degree one. -/
-theorem p2y_ferrers_intInt {g : ℂ → ℂ} (hg : Continuous g) (m : ℕ) {μ : ℂ} (N : ℕ)
+lemma p2y_ferrers_intInt {g : ℂ → ℂ} (hg : Continuous g) (m : ℕ) {μ : ℂ} (N : ℕ)
     (hμ : ∀ x ∈ Ioo (-1 : ℝ) 1, ferrersP μ m x = ferrersP N m x) :
     IntervalIntegrable (fun x : ℝ => (1 - x ^ 2) ^ ((m : ℝ) / 2) * (g x).re *
       (ferrersP μ m x).re) MeasureTheory.volume (-1) 1 := by
@@ -215,7 +214,7 @@ theorem p2y_ferrers_intInt {g : ℂ → ℂ} (hg : Continuous g) (m : ℕ) {μ :
   rw [hμ x hx, p2y_ferrers_prod m N hx]
 
 /-- `𝖯^μ_{-N-1} = 𝖯^μ_N` (degree reflection, from the symmetry of `₂F₁`). -/
-theorem p2y_ferrersP_neg_sub_one (N : ℕ) (μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
+lemma p2y_ferrersP_neg_sub_one (N : ℕ) (μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
     ferrersP (-(N : ℂ) - 1) μ x = ferrersP N μ x := by
   have hs : 1 + (x : ℂ) ∈ slitPlane := Or.inl (by simp; linarith [hx.1])
   unfold ferrersP
@@ -223,7 +222,7 @@ theorem p2y_ferrersP_neg_sub_one (N : ℕ) (μ : ℂ) {x : ℝ} (hx : x ∈ Ioo 
     DLMF.Hypergeometric.regularizedGaussHG_symm _ _ _ (mem_cutPlane_of_one_add hs)]
 
 /-- The core identity behind 30.8.4: self-adjointness and the recurrence of `(1-x²)𝖯^m_ν`. -/
-theorem p2y_core {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) (N : ℕ) :
+lemma p2y_core {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) (N : ℕ) :
     ((N : ℝ) * (N + 1) - spheroidalEigenvalue n m γ2) *
         ((2 * (N : ℝ) - 1) * (2 * N + 1) * (2 * N + 3)) *
         ∫ x in (-1 : ℝ)..1, spheroidalPs n m x γ2 * (ferrersP ((N : ℝ) : ℂ) m x).re =
@@ -317,13 +316,13 @@ theorem p2y_core {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) (N : ℕ) :
   linear_combination (-1) ^ m * e * hSA' + γ2 * hrec
 
 /-- `(n+2)! = (n+2)(n+1) n!` in `ℝ`. -/
-theorem p2y_factorial_two (a : ℕ) :
+lemma p2y_factorial_two (a : ℕ) :
     (((a + 2).factorial : ℕ) : ℝ) = ((a : ℝ) + 2) * ((a : ℝ) + 1) * (a.factorial : ℝ) := by
   rw [show a + 2 = (a + 1) + 1 from rfl, Nat.factorial_succ, Nat.factorial_succ]; push_cast; ring
 
 /-- The lowest admissible degree: `(N+m)(N+m-1) 𝖯^m_{N-2} = 0` on `(-1, 1)` when
 `m ≤ N < m + 2`. -/
-theorem p2y_low_vanish {m N : ℕ} (hmN : m ≤ N) (h : N < m + 2) {x : ℝ}
+lemma p2y_low_vanish {m N : ℕ} (hmN : m ≤ N) (h : N < m + 2) {x : ℝ}
     (hx : x ∈ Ioo (-1 : ℝ) 1) :
     ((N : ℝ) + m) * ((N : ℝ) + m - 1) * (ferrersP (((N : ℝ) : ℂ) - 2) m x).re = 0 := by
   rcases Nat.lt_or_ge N 2 with hN | hN
@@ -341,7 +340,7 @@ theorem p2y_low_vanish {m N : ℕ} (hmN : m ≤ N) (h : N < m + 2) {x : ℝ}
     simp
 
 /-- The algebra of 30.8.4 at the lowest index `k = -R`. -/
-theorem p2y_alg_low (n k m γ2 lam s Fa Fb T0 Tp Tm : ℝ) (hbf : Fb ≠ 0)
+lemma p2y_alg_low (n k m γ2 lam s Fa Fb T0 Tp Tm : ℝ) (hbf : Fb ≠ 0)
     (hd1 : 2 * n + 4 * k - 1 ≠ 0) (hdm3 : 2 * n + 4 * k - 3 ≠ 0) (hd3 : 2 * n + 4 * k + 3 ≠ 0)
     (hd5 : 2 * n + 4 * k + 5 ≠ 0) (hd1' : 2 * n + 4 * k + 1 ≠ 0)
     (hb1 : n + m + 2 * k + 1 ≠ 0) (hb2 : n + m + 2 * k + 2 ≠ 0)
@@ -382,7 +381,7 @@ theorem p2y_alg_low (n k m γ2 lam s Fa Fb T0 Tp Tm : ℝ) (hbf : Fb ≠ 0)
   ring
 
 /-- The algebra of 30.8.4 for `k > -R`. -/
-theorem p2y_alg_high (n k m γ2 lam s Fa Fb T0 Tp Tm : ℝ) (hbf : Fb ≠ 0)
+lemma p2y_alg_high (n k m γ2 lam s Fa Fb T0 Tp Tm : ℝ) (hbf : Fb ≠ 0)
     (hd1 : 2 * n + 4 * k - 1 ≠ 0) (hdm3 : 2 * n + 4 * k - 3 ≠ 0) (hd3 : 2 * n + 4 * k + 3 ≠ 0)
     (hd5 : 2 * n + 4 * k + 5 ≠ 0) (hd1' : 2 * n + 4 * k + 1 ≠ 0) (hB : 0 ≤ n + m + 2 * k - 2)
     (core : ((n + 2 * k) * (n + 2 * k + 1) - lam) *
@@ -542,7 +541,7 @@ geometric decay of any rate, which dominates the exponential growth of `P_ν^{(m
 Completeness of the `P_ν^{(m)}` (`p2y_hasSum_expansion`) then gives 30.8.1 and Parseval 30.8.5. -/
 
 /-- The real Ferrers function of integer degree through `P_N^{(m)}`. -/
-theorem p2y_ferrers_re (N m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
+lemma p2y_ferrers_re (N m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
     (ferrersP N m x).re = (-1) ^ m * (1 - x ^ 2) ^ ((m : ℝ) / 2) * (legInt_D N m x).re := by
   rw [legInt_ferrersP_nat_nat N m hx, p2y_legInt_D_real N m x,
     show ((-1 : ℂ) ^ m) = (((-1 : ℝ) ^ m : ℝ) : ℂ) by push_cast; rfl, ← ofReal_mul, ← ofReal_mul,
@@ -550,7 +549,7 @@ theorem p2y_ferrers_re (N m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
 
 /-- The coefficients 30.8.2 through the entire factor: for `k = j - R`, `ν = n - 2R + 2j`,
 `a^m_{n,k} = (-1)^{k+m} (2ν+1)(ν-m)!/(2(ν+m)!) ∫ (1-x²)^m g P_ν^{(m)}`. -/
-theorem p2y_coeff_eq {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) (j : ℕ) :
+lemma p2y_coeff_eq {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) (j : ℕ) :
     spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ)) =
       (-1 : ℝ) ^ ((j : ℤ) - ((n - m) / 2 : ℕ)) * (-1) ^ m *
         ((2 * ((n - 2 * ((n - m) / 2) + 2 * j : ℕ) : ℝ) + 1) *
@@ -582,7 +581,7 @@ theorem p2y_coeff_eq {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) (j : ℕ) :
   ring
 
 /-- The parity of the entire factor: `g(-x) = (-1)^{n-m} g(x)`. -/
-theorem p2y_factor_neg {n m : ℕ} (hmn : m ≤ n) (γ2 x : ℝ) :
+lemma p2y_factor_neg {n m : ℕ} (hmn : m ≤ n) (γ2 x : ℝ) :
     (spheroidalPsFactor n m γ2 ((-x : ℝ) : ℂ)).re =
       (-1) ^ (n - m) * (spheroidalPsFactor n m γ2 x).re := by
   have hg := spheroidalPsFactor_spec hmn γ2
@@ -594,7 +593,7 @@ theorem p2y_factor_neg {n m : ℕ} (hmn : m ≤ n) (γ2 x : ℝ) :
     push_cast; rfl, re_ofReal_mul]
 
 /-- The coefficients of the wrong parity vanish. -/
-theorem p2y_coeff_parity {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) (μ : ℕ) (hμ : m ≤ μ)
+lemma p2y_coeff_parity {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) (μ : ℕ) (hμ : m ≤ μ)
     (hex : ∀ j : ℕ, μ ≠ n - 2 * ((n - m) / 2) + 2 * j) :
     ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * (spheroidalPsFactor n m γ2 x).re *
       (legInt_D μ m x).re = 0 := by
@@ -618,7 +617,7 @@ theorem p2y_coeff_parity {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) (μ : ℕ) (hμ
   linarith
 
 /-- A crude bound for the coefficient `∫ (1-x²)^m G P_ν^{(m)}` of a bounded continuous `G`. -/
-theorem p2y_b_bound {G : ℝ → ℝ} (hG : ContinuousOn G (Icc (-1) 1)) {MG : ℝ}
+lemma p2y_b_bound {G : ℝ → ℝ} (hG : ContinuousOn G (Icc (-1) 1)) {MG : ℝ}
     (hM : ∀ x ∈ Icc (-1 : ℝ) 1, |G x| ≤ MG) {m ν : ℕ} (hν : m ≤ ν) :
     |∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * G x * (legInt_D ν m x).re| ≤
       MG * (2 + 2 * ((ν + m).factorial : ℝ) / ((2 * ν + 1) * (ν - m).factorial)) := by
@@ -658,7 +657,7 @@ theorem p2y_b_bound {G : ℝ → ℝ} (hG : ContinuousOn G (Icc (-1) 1)) {MG : �
         ring
 
 /-- **A linear a-priori bound** for the coefficients: `|a^m_{n,j-R}| ≤ M (j+1)`. -/
-theorem p2y_coeff_linear {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
+lemma p2y_coeff_linear {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
     ∃ M : ℝ, 0 ≤ M ∧ ∀ j : ℕ,
       |spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ))| ≤ M * (j + 1) := by
   have hg := (spheroidalPsFactor_spec hmn γ2).factor.differentiable
@@ -713,7 +712,7 @@ theorem p2y_coeff_linear {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
 
 /-- Bounds for the coefficients of 30.8.4 for `k ≥ 1`: `|A_k|, |C_k| ≤ |γ²|` and
 `B_k ≥ (n+2k)(n+2k+1) - 2|γ²|(1+m²)`. -/
-theorem p2y_rec_bounds {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {k : ℤ} (hk : 1 ≤ k) :
+lemma p2y_rec_bounds {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {k : ℤ} (hk : 1 ≤ k) :
     |spheroidalRecA n m γ2 k| ≤ |γ2| ∧ |spheroidalRecC n m γ2 k| ≤ |γ2| ∧
       ((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1) - 2 * |γ2| * (1 + m ^ 2) ≤
         spheroidalRecB n m γ2 k := by
@@ -748,7 +747,7 @@ theorem p2y_rec_bounds {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {k : ℤ} (hk : 1
     linarith
 
 /-- Eventually `|a_{j+1}| ≤ ε (|a_j| + |a_{j+2}|)` (from 30.8.4, since `B_k - λ → ∞`). -/
-theorem p2y_coeff_eps {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {ε : ℝ} (hε : 0 < ε) :
+lemma p2y_coeff_eps {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {ε : ℝ} (hε : 0 < ε) :
     ∃ J : ℕ, ∀ j : ℕ, J ≤ j →
       |spheroidalCoeff n m γ2 (((j + 1 : ℕ) : ℤ) - ((n - m) / 2 : ℕ))| ≤
         ε * (|spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ))| +
@@ -806,7 +805,7 @@ theorem p2y_coeff_eps {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {ε : ℝ} (hε : 
 
 /-- **Geometric decay** of the coefficients: for every `q > 0`, eventually
 `|a_j| ≤ M (j+1) q^{j-J}`. -/
-theorem p2y_coeff_decay {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {q : ℝ} (hq : 0 < q) :
+lemma p2y_coeff_decay {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {q : ℝ} (hq : 0 < q) :
     ∃ J : ℕ, ∃ M : ℝ, 0 ≤ M ∧ ∀ j : ℕ, J ≤ j →
       |spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ))| ≤ M * (j + 1) * q ^ (j - J) := by
   obtain ⟨M, hM0, hM⟩ := p2y_coeff_linear hmn γ2
@@ -834,7 +833,7 @@ theorem p2y_coeff_decay {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {q : ℝ} (hq : 
 
 /-- A summable dominating sequence for the expansion of the entire factor on `[-1, 1]`, from the
 geometric decay of the coefficients and the exponential bound of `P_ν^{(m)}`. -/
-theorem p2y_factor_bound {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
+lemma p2y_factor_bound {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
     ∃ u : ℕ → ℝ, Summable u ∧ ∀ j : ℕ, ∀ x ∈ Icc (-1 : ℝ) 1,
       |(2 * ((n - 2 * ((n - m) / 2) + 2 * j : ℕ) : ℝ) + 1) *
           ((n - 2 * ((n - m) / 2) + 2 * j - m).factorial : ℝ) /
@@ -896,7 +895,7 @@ theorem p2y_factor_bound {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
 
 /-- **The expansion of the entire factor** in the functions `P_ν^{(m)}`, `ν = n - 2R + 2j`, on
 `(-1, 1)` (the content of DLMF 30.8.1). -/
-theorem p2y_factor_expansion {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
+lemma p2y_factor_expansion {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
     ∀ x ∈ Ioo (-1 : ℝ) 1, HasSum (fun j : ℕ =>
       (2 * ((n - 2 * ((n - m) / 2) + 2 * j : ℕ) : ℝ) + 1) *
           ((n - 2 * ((n - m) / 2) + 2 * j - m).factorial : ℝ) /
@@ -944,7 +943,7 @@ theorem hasSum_spheroidalPs_ferrers {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {x :
 
 /-- **Parseval's identity** for the expansion of the entire factor:
 `∑_j c_ν b_ν² = ∫ (1-x²)^m g² = 2(n+m)!/((2n+1)(n-m)!)`. -/
-theorem p2y_parseval {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
+lemma p2y_parseval {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
     HasSum (fun j : ℕ =>
       (2 * ((n - 2 * ((n - m) / 2) + 2 * j : ℕ) : ℝ) + 1) *
           ((n - 2 * ((n - m) / 2) + 2 * j - m).factorial : ℝ) /
@@ -1054,7 +1053,7 @@ and 30.8.1 would give `𝖯s = 0`); with `|a_{j+1}| ≤ (|a_j| + |a_{j+2}|)/8` a
 this forces `|a_{j+1}| ≤ |a_j|/4` eventually. -/
 
 /-- `A_k ≠ 0` for `k > -R` when `γ² ≠ 0`. -/
-theorem p2y_recA_ne_zero {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) {k : ℤ}
+lemma p2y_recA_ne_zero {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) {k : ℤ}
     (hk : -(((n - m) / 2 : ℕ) : ℤ) < k) : spheroidalRecA n m γ2 k ≠ 0 := by
   unfold spheroidalRecA
   have h1 : ((n : ℤ) - m + 2 * k - 1) ≠ 0 := by omega
@@ -1069,7 +1068,7 @@ theorem p2y_recA_ne_zero {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 
     (mul_ne_zero h3' h4')
 
 /-- For `γ² ≠ 0` the coefficients `a^m_{n,k}`, `k ≥ -R`, are not eventually zero. -/
-theorem p2y_coeff_not_eventually_zero {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) :
+lemma p2y_coeff_not_eventually_zero {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) :
     ¬ ∃ J : ℕ, ∀ j : ℕ, J ≤ j → spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ)) = 0 := by
   rintro ⟨J, hJ⟩
   have hall : ∀ d j : ℕ, J ≤ j + d → spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ)) = 0 := by
@@ -1118,7 +1117,7 @@ theorem p2y_coeff_not_eventually_zero {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (h
   linarith
 
 /-- Eventually `|a_{j+1}| ≤ |a_j|/4`. -/
-theorem p2y_coeff_ratio_le {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
+lemma p2y_coeff_ratio_le {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
     ∃ J : ℕ, ∀ j : ℕ, J ≤ j →
       |spheroidalCoeff n m γ2 (((j + 1 : ℕ) : ℤ) - ((n - m) / 2 : ℕ))| ≤
         |spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ))| / 4 := by
@@ -1163,7 +1162,7 @@ theorem p2y_coeff_ratio_le {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
   nlinarith
 
 /-- `|B_k - (n+2k)(n+2k+1)| ≤ 2|γ²|(1+m²)` for `k ≥ 1`. -/
-theorem p2y_recB_close {n m : ℕ} (γ2 : ℝ) {k : ℤ} (hk : 1 ≤ k) :
+lemma p2y_recB_close {n m : ℕ} (γ2 : ℝ) {k : ℤ} (hk : 1 ≤ k) :
     |spheroidalRecB n m γ2 k - ((n : ℝ) + 2 * k) * ((n : ℝ) + 2 * k + 1)| ≤
       2 * |γ2| * (1 + m ^ 2) := by
   have kr : (1 : ℝ) ≤ k := by exact_mod_cast hk
@@ -1187,7 +1186,7 @@ theorem p2y_recB_close {n m : ℕ} (γ2 : ℝ) {k : ℤ} (hk : 1 ≤ k) :
   gcongr
 
 /-- `|-4A_k - γ²| ≤ |γ²|(4m²+12m+7)/k` for `k ≥ 2`. -/
-theorem p2y_recA_close {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {k : ℤ} (hk : 2 ≤ k) :
+lemma p2y_recA_close {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {k : ℤ} (hk : 2 ≤ k) :
     |-4 * spheroidalRecA n m γ2 k - γ2| ≤ |γ2| * (4 * m ^ 2 + 12 * m + 7) / k := by
   have kr : (2 : ℝ) ≤ k := by exact_mod_cast hk
   have hn0 : (0 : ℝ) ≤ n := Nat.cast_nonneg n
@@ -1223,7 +1222,7 @@ theorem p2y_recA_close {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {k : ℤ} (hk : 2
     _ ≤ _ := by rw [mul_assoc]; exact mul_le_mul_of_nonneg_left (by nlinarith [hQ]) (by positivity)
 
 /-- The algebra of 30.8.7: from `16 D E = 4k² X + γ² Y`, `D ≥ k²`, `|X| ≤ c₃/k`, `|Y| ≤ c₂ k`. -/
-theorem p2y_alg_ratio {k D X Y E γ2 c₂ c₃ : ℝ} (hk : 1 ≤ k) (hD : k ^ 2 ≤ D)
+lemma p2y_alg_ratio {k D X Y E γ2 c₂ c₃ : ℝ} (hk : 1 ≤ k) (hD : k ^ 2 ≤ D)
     (h : 16 * D * E = 4 * k ^ 2 * X + γ2 * Y) (hX : |X| ≤ c₃ / k) (hY : |Y| ≤ c₂ * k) :
     |E| ≤ (4 * c₃ + |γ2| * c₂) / 16 * k⁻¹ := by
   have hk0 : 0 < k := by linarith
@@ -1244,7 +1243,7 @@ theorem p2y_alg_ratio {k D X Y E γ2 c₂ c₃ : ℝ} (hk : 1 ≤ k) (hD : k ^ 2
   nlinarith
 
 /-- For `γ² ≠ 0`, eventually `a_j ≠ 0` and `|a_{j+1}| ≤ |a_j|/4`. -/
-theorem p2y_coeff_ne_zero {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) :
+lemma p2y_coeff_ne_zero {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) :
     ∃ J : ℕ, ∀ j : ℕ, J ≤ j → spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ)) ≠ 0 ∧
       |spheroidalCoeff n m γ2 (((j + 1 : ℕ) : ℤ) - ((n - m) / 2 : ℕ))| ≤
         |spheroidalCoeff n m γ2 ((j : ℤ) - ((n - m) / 2 : ℕ))| / 4 := by
@@ -1374,7 +1373,7 @@ theorem spheroidalCoeff_ratio_isBigO {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
   exact hfin
 
 /-- For `γ² ≠ 0`, eventually `a_{k-1} ≠ 0`, `a_k ≠ 0` and `|a_k/a_{k-1}| ≤ |γ²|/k²`. -/
-theorem p2y_ratio_small {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) :
+lemma p2y_ratio_small {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0) :
     ∃ K : ℕ, ∀ k : ℕ, K ≤ k → spheroidalCoeff n m γ2 ((k : ℤ) - 1) ≠ 0 ∧
       spheroidalCoeff n m γ2 (k : ℤ) ≠ 0 ∧
       |spheroidalCoeff n m γ2 (k : ℤ) / spheroidalCoeff n m γ2 ((k : ℤ) - 1)| ≤
@@ -1460,7 +1459,7 @@ theorem p2y_ratio_small {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} (hγ : γ2 ≠ 0
     _ ≤ |γ2| := hA
 
 /-- `|A_k| ≥ |γ²|/16` when `n + 2k ≥ 2m + 2`. -/
-theorem p2y_recA_ge {n m : ℕ} (γ2 : ℝ) {k : ℤ} (hk : 2 * (m : ℤ) + 2 ≤ n + 2 * k) :
+lemma p2y_recA_ge {n m : ℕ} (γ2 : ℝ) {k : ℤ} (hk : 2 * (m : ℤ) + 2 ≤ n + 2 * k) :
     |γ2| / 16 ≤ |spheroidalRecA n m γ2 k| := by
   have hkr : 2 * (m : ℝ) + 2 ≤ n + 2 * k := by exact_mod_cast hk
   have hm0 : (0 : ℝ) ≤ m := Nat.cast_nonneg m
@@ -1523,7 +1522,7 @@ theorem spheroidalCoeff_ratio_isBigO_four {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ
 
 /-- **30.8.8 fails at `γ² = 0`** as stated: then `A_k = 0`, the Lean quotient
 `(λ - B_k)/A_k` is `0`, and the expression is the constant `-1`, which is not `O(k⁻⁴)`. -/
-theorem p2y_not_spheroidalCoeff_ratio_isBigO_four_zero (n m : ℕ) :
+lemma p2y_not_spheroidalCoeff_ratio_isBigO_four_zero (n m : ℕ) :
     ¬ (fun k : ℕ => (spheroidalEigenvalue n m 0 - spheroidalRecB n m 0 k) /
         spheroidalRecA n m 0 k *
           (spheroidalCoeff n m 0 k / spheroidalCoeff n m 0 ((k : ℤ) - 1)) - 1)

@@ -57,7 +57,7 @@ theorem isOpen_compEllIntDomain : IsOpen compEllIntDomain := by
 /-- Differentiation under the integral sign: for continuous `w`,
 `d/dk ∫₀^b w(θ) (1 - k² sin²θ)^s dθ = ∫₀^b w(θ) s (1 - k² sin²θ)^{s-1} (-2k sin²θ) dθ` on the
 principal domain `1 - k² ∈ ℂ \ (-∞, 0]`. -/
-theorem p19lR1_hasDerivAt_integral_cpow {w : ℝ → ℂ} (hw : Continuous w) (s : ℂ) (b : ℝ) {k0 : ℂ}
+lemma p19lR1_hasDerivAt_integral_cpow {w : ℝ → ℂ} (hw : Continuous w) (s : ℂ) (b : ℝ) {k0 : ℂ}
     (hk0 : 1 - k0 ^ 2 ∈ slitPlane) :
     HasDerivAt (fun k : ℂ => ∫ θ in (0 : ℝ)..b, w θ * (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ s)
       (∫ θ in (0 : ℝ)..b, w θ * (s * (1 - k0 ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (s - 1) *
@@ -119,7 +119,7 @@ theorem p19lR1_hasDerivAt_integral_cpow {w : ℝ → ℂ} (hw : Continuous w) (s
     exact (hb.cpow_const (ei19a_one_sub_sq_mul_sin_sq_mem_slitPlane (hball hk) θ)).const_mul (w θ)
 
 /-- The case `w = 1` of `p19lR1_hasDerivAt_integral_cpow`. -/
-theorem p19lR1_hasDerivAt_integral_cpow_one (s : ℂ) (b : ℝ) {k0 : ℂ}
+lemma p19lR1_hasDerivAt_integral_cpow_one (s : ℂ) (b : ℝ) {k0 : ℂ}
     (hk0 : 1 - k0 ^ 2 ∈ slitPlane) :
     HasDerivAt (fun k : ℂ => ∫ θ in (0 : ℝ)..b, (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ s)
       (∫ θ in (0 : ℝ)..b, s * (1 - k0 ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (s - 1) *
@@ -193,7 +193,7 @@ theorem hasDerivAt_compEllIntEk {k : ℂ} (hk : k ∈ compEllIntDomain) :
   field_simp
   ring
 
-theorem ei19a_one_sub_sq_ne_zero {k : ℂ} (hk : k ∈ compEllIntDomain) : 1 - k ^ 2 ≠ 0 :=
+lemma ei19a_one_sub_sq_ne_zero {k : ℂ} (hk : k ∈ compEllIntDomain) : 1 - k ^ 2 ≠ 0 :=
   slitPlane_ne_zero hk.2
 
 /-- DLMF 19.4.1 (second relation): `d(E - k'²K)/dk = kK`. -/
@@ -296,7 +296,7 @@ theorem hasDerivAt_compEllIntPik {α2 k : ℂ} (hk : k ∈ compEllIntDomain)
   field_simp
 
 /-- The condition `1 - k² g(t) ∈ ℂ \ (-∞, 0]` for all `t ∈ [0, 1]` is open in `k`. -/
-theorem p19lR1_eventually_path {g : ℝ → ℂ} (hg : Continuous g) {k0 : ℂ}
+lemma p19lR1_eventually_path {g : ℝ → ℂ} (hg : Continuous g) {k0 : ℂ}
     (hk0 : ∀ t ∈ Icc (0 : ℝ) 1, 1 - k0 ^ 2 * g t ∈ slitPlane) :
     ∀ᶠ k in 𝓝 k0, ∀ t ∈ Icc (0 : ℝ) 1, 1 - k ^ 2 * g t ∈ slitPlane := by
   refine isCompact_Icc.eventually_forall_of_forall_eventually fun t ht => ?_
@@ -305,7 +305,7 @@ theorem p19lR1_eventually_path {g : ℝ → ℂ} (hg : Continuous g) {k0 : ℂ}
 
 /-- Differentiation under the integral sign along `t ∈ [0, 1]`:
 `d/dk ∫₀¹ w(t) (1 - k² g(t))^s dt = ∫₀¹ w(t) s (1 - k² g(t))^{s-1} (-2k g(t)) dt`. -/
-theorem p19lR1_hasDerivAt_path {g w : ℝ → ℂ} (hg : Continuous g) (hw : ContinuousOn w (Icc 0 1))
+lemma p19lR1_hasDerivAt_path {g w : ℝ → ℂ} (hg : Continuous g) (hw : ContinuousOn w (Icc 0 1))
     (s : ℂ)
     {k0 : ℂ} (hk0 : ∀ t ∈ Icc (0 : ℝ) 1, 1 - k0 ^ 2 * g t ∈ slitPlane) :
     HasDerivAt (fun k : ℂ => ∫ t in (0 : ℝ)..1, w t * (1 - k ^ 2 * g t) ^ s)
@@ -367,7 +367,7 @@ theorem p19lR1_hasDerivAt_path {g w : ℝ → ℂ} (hg : Continuous g) (hw : Con
 noncomputable abbrev p19lR1_Δc (k z : ℂ) : ℂ := (1 - k ^ 2 * Complex.sin z ^ 2) ^ (1 / 2 : ℂ)
 
 /-- `Δ′(z) = -k² sin z cos z/Δ(z)` where `1 - k² sin²z ∈ ℂ \ (-∞, 0]`. -/
-theorem p19lR1_hasDerivAt_Δc {k z : ℂ} (hz : 1 - k ^ 2 * Complex.sin z ^ 2 ∈ slitPlane) :
+lemma p19lR1_hasDerivAt_Δc {k z : ℂ} (hz : 1 - k ^ 2 * Complex.sin z ^ 2 ∈ slitPlane) :
     HasDerivAt (p19lR1_Δc k)
       (-(k ^ 2 * Complex.sin z * Complex.cos z) * (p19lR1_Δc k z)⁻¹) z := by
   have hb : HasDerivAt (fun z : ℂ => 1 - k ^ 2 * Complex.sin z ^ 2)
@@ -379,13 +379,13 @@ theorem p19lR1_hasDerivAt_Δc {k z : ℂ} (hz : 1 - k ^ 2 * Complex.sin z ^ 2 �
   ring
 
 /-- `Δ(z) ≠ 0` where `1 - k² sin²z ∈ ℂ \ (-∞, 0]`. -/
-theorem p19lR1_Δc_ne_zero {k z : ℂ} (hz : 1 - k ^ 2 * Complex.sin z ^ 2 ∈ slitPlane) :
+lemma p19lR1_Δc_ne_zero {k z : ℂ} (hz : 1 - k ^ 2 * Complex.sin z ^ 2 ∈ slitPlane) :
     p19lR1_Δc k z ≠ 0 := by
   rw [p19lR1_Δc, Ne, cpow_eq_zero_iff]; exact fun h' => slitPlane_ne_zero hz h'.1
 
 /-- The complex-path form of `∫ Δ⁻³`: along the segment `[0, φ]`,
 `∫₀¹ φ Δ(tφ)⁻³ dt = (E(φ, k) - k² sin φ cos φ/Δ(φ))/k′²`. -/
-theorem p19lR1_path_integral_cube {φ k : ℂ} (hk1 : k ^ 2 ≠ 1) (hφ : legendrePathOK φ k) :
+lemma p19lR1_path_integral_cube {φ k : ℂ} (hk1 : k ^ 2 ≠ 1) (hφ : legendrePathOK φ k) :
     ∫ t in (0 : ℝ)..1, φ * ((1 - k ^ 2 * Complex.sin (t * φ) ^ 2)⁻¹ *
         (1 - k ^ 2 * Complex.sin (t * φ) ^ 2) ^ (-(1 / 2 : ℂ))) =
       (incEllIntEk φ k - k ^ 2 * Complex.sin φ * Complex.cos φ / p19lR1_Δc k φ) / (1 - k ^ 2) := by
@@ -586,7 +586,7 @@ theorem hasDerivAt_incEllIntPik {φ α2 k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 �
 /-! ### §19.4(ii) Differential equations -/
 
 /-- The hypotheses `k ≠ 0`, `k² ≠ 1` and `legendrePathOK φ k` hold near `k`. -/
-theorem p19lR1_eventually_good {φ k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1)
+lemma p19lR1_eventually_good {φ k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1)
     (hφ : legendrePathOK φ k) :
     ∀ᶠ z in 𝓝 k, z ≠ 0 ∧ z ^ 2 ≠ 1 ∧ legendrePathOK φ z := by
   have hg : Continuous fun t : ℝ => Complex.sin (t * φ) ^ 2 := by fun_prop

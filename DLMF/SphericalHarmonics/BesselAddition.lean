@@ -5,9 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Tactic.CrossRefAttribute
 public import DLMF.OrthogonalPolynomials.Series
-public import DLMF.Gamma.RecipGammaDeriv
 
 /-!
 # Gegenbauer's addition theorem for Bessel functions (DLMF 10.23.8)
@@ -49,7 +47,7 @@ noncomputable section
 namespace DLMF.Bessel
 
 /-- Iterated derivatives of regularized `₀F₁` raise the parameter. -/
-lemma shBes_iteratedDeriv (c : ℂ) (k : ℕ) :
+theorem shBes_iteratedDeriv (c : ℂ) (k : ℕ) :
     iteratedDeriv k (regularizedHGFun (∅ : Multiset ℂ) {c}) =
       regularizedHGFun (∅ : Multiset ℂ) {c + k} := by
   induction k with
@@ -63,7 +61,7 @@ lemma shBes_iteratedDeriv (c : ℂ) (k : ℕ) :
     ring
 
 /-- Taylor shift of regularized `₀F₁`: `F_c(s + z) = ∑ zᵏ/k! F_{c+k}(s)`. -/
-lemma shBes_hasSum_shift (c s z : ℂ) :
+theorem shBes_hasSum_shift (c s z : ℂ) :
     HasSum (fun k : ℕ => z ^ k / k ! * regularizedHGFun (∅ : Multiset ℂ) {c + k} s)
       (regularizedHGFun (∅ : Multiset ℂ) {c} (s + z)) := by
   have hf : Differentiable ℂ (regularizedHGFun (∅ : Multiset ℂ) {c}) :=
@@ -74,7 +72,7 @@ lemma shBes_hasSum_shift (c s z : ℂ) :
   ring
 
 /-- The power series of regularized `₀F₁`. -/
-lemma shBes_hasSum_series (c w : ℂ) :
+theorem shBes_hasSum_series (c w : ℂ) :
     HasSum (fun m : ℕ => w ^ m / (m ! * Gamma (c + m)))
       (regularizedHGFun (∅ : Multiset ℂ) {c} w) := by
   have h := (hasFPowerSeriesOnBall_regularized0F1 c).hasSum_mul_pow (z := w) (by simp)
@@ -83,7 +81,7 @@ lemma shBes_hasSum_series (c w : ℂ) :
   ring
 
 /-- `‖Γ(c + N)⁻¹‖ ≤ ‖Γ(c)⁻¹‖ / N!` for `1 ≤ Re c`. -/
-lemma shBes_norm_recip_Gamma_add_nat {c : ℂ} (hc : 1 ≤ c.re) (N : ℕ) :
+theorem shBes_norm_recip_Gamma_add_nat {c : ℂ} (hc : 1 ≤ c.re) (N : ℕ) :
     ‖(Gamma (c + N))⁻¹‖ ≤ ‖(Gamma c)⁻¹‖ / N ! := by
   induction N with
   | zero => simp
@@ -105,7 +103,7 @@ lemma shBes_norm_recip_Gamma_add_nat {c : ℂ} (hc : 1 ≤ c.re) (N : ℕ) :
       _ = _ := by push_cast; field_simp
 
 /-- `N! ≤ ‖(c)_N‖` for `1 ≤ Re c`. -/
-lemma shBes_factorial_le_norm_poch {c : ℂ} (hc : 1 ≤ c.re) (N : ℕ) :
+theorem shBes_factorial_le_norm_poch {c : ℂ} (hc : 1 ≤ c.re) (N : ℕ) :
     (N ! : ℝ) ≤ ‖poch c N‖ := by
   induction N with
   | zero => simp [poch_zero]
@@ -119,7 +117,7 @@ lemma shBes_factorial_le_norm_poch {c : ℂ} (hc : 1 ≤ c.re) (N : ℕ) :
     gcongr
 
 /-- `‖(ν)_k‖ ≤ k! (1 + ‖ν‖)^k`. -/
-lemma shBes_norm_poch_le (ν : ℂ) (k : ℕ) :
+theorem shBes_norm_poch_le (ν : ℂ) (k : ℕ) :
     ‖poch ν k‖ ≤ k ! * (1 + ‖ν‖) ^ k := by
   induction k with
   | zero => simp [poch_zero]
@@ -135,7 +133,7 @@ lemma shBes_norm_poch_le (ν : ℂ) (k : ℕ) :
       _ = _ := by push_cast; ring
 
 /-- Bound for shifted regularized `₀F₁`: `‖F_{c+k}(s)‖ ≤ ‖Γ(c)⁻¹‖ E(‖s‖) / k!`. -/
-lemma shBes_norm_F_le {c : ℂ} (hc : 1 ≤ c.re) (k : ℕ) (s : ℂ) :
+theorem shBes_norm_F_le {c : ℂ} (hc : 1 ≤ c.re) (k : ℕ) (s : ℂ) :
     ‖regularizedHGFun (∅ : Multiset ℂ) {c + k} s‖ ≤
       ‖(Gamma c)⁻¹‖ * (∑' m : ℕ, ‖s‖ ^ m / m !) / k ! := by
   have hs := shBes_hasSum_series (c + k) s
@@ -163,7 +161,7 @@ lemma shBes_norm_F_le {c : ℂ} (hc : 1 ≤ c.re) (k : ℕ) (s : ℂ) :
     _ = _ := by field_simp
 
 /-- The contiguous relation for the shifted family `m ↦ F_{c+m}(x)`. -/
-lemma shBes_contiguous (c x : ℂ) (m : ℕ) :
+theorem shBes_contiguous (c x : ℂ) (m : ℕ) :
     regularizedHGFun (∅ : Multiset ℂ) {c + m} x =
       (c + m) * regularizedHGFun (∅ : Multiset ℂ) {c + ((m + 1 : ℕ) : ℂ)} x +
         x * regularizedHGFun (∅ : Multiset ℂ) {c + ((m + 2 : ℕ) : ℂ)} x := by
@@ -172,7 +170,7 @@ lemma shBes_contiguous (c x : ℂ) (m : ℕ) :
 
 /-- A finite identity behind the product formula for regularized `₀F₁`:
 `∑ₗ C(j,l) xˡ Γ(c+l)⁻¹ F_{c+l+j}(x) = Γ(c+j)⁻¹ F_c(x)`. -/
-lemma shBes_sum_choose {c : ℂ} (hc : 0 < c.re) (x : ℂ) (j : ℕ) :
+theorem shBes_sum_choose {c : ℂ} (hc : 0 < c.re) (x : ℂ) (j : ℕ) :
     ∑ l ∈ Finset.range (j + 1), (j.choose l : ℂ) * x ^ l * (Gamma (c + l))⁻¹ *
         regularizedHGFun (∅ : Multiset ℂ) {c + ((l + j : ℕ) : ℂ)} x =
       regularizedHGFun (∅ : Multiset ℂ) {c} x * (Gamma (c + j))⁻¹ := by
@@ -247,7 +245,7 @@ lemma shBes_sum_choose {c : ℂ} (hc : 0 < c.re) (x : ℂ) (j : ℕ) :
 
 /-- Product formula for regularized `₀F₁`:
 `F_c(x) F_c(y) = ∑ₗ (xy)ˡ / (l! Γ(c+l)) F_{c+2l}(x+y)`. -/
-lemma shBes_hasSum_product {c : ℂ} (hc : 1 ≤ c.re) (x y : ℂ) :
+theorem shBes_hasSum_product {c : ℂ} (hc : 1 ≤ c.re) (x y : ℂ) :
     HasSum (fun l : ℕ => (x * y) ^ l / l ! * (Gamma (c + l))⁻¹ *
         regularizedHGFun (∅ : Multiset ℂ) {c + ((2 * l : ℕ) : ℂ)} (x + y))
       (regularizedHGFun (∅ : Multiset ℂ) {c} x * regularizedHGFun (∅ : Multiset ℂ) {c} y) := by
@@ -322,7 +320,7 @@ lemma shBes_hasSum_product {c : ℂ} (hc : 1 ≤ c.re) (x y : ℂ) :
 
 /-- A crude bound for Gegenbauer polynomials on `[-1, 1]` with complex parameter:
 `‖(ν + n) C_n^ν(cos φ)‖ ≤ (‖ν‖ + 1) (4 (1 + ‖ν‖))ⁿ`. -/
-lemma shBes_norm_ultrasph_le {ν : ℂ} (hν : 0 < ν.re) (n : ℕ) (θ : ℝ) :
+theorem shBes_norm_ultrasph_le {ν : ℂ} (hν : 0 < ν.re) (n : ℕ) (θ : ℝ) :
     ‖(ν + n) * ultrasphPoly ν n (Real.cos θ)‖ ≤ (‖ν‖ + 1) * (4 * (1 + ‖ν‖)) ^ n := by
   set B : ℝ := 1 + ‖ν‖
   have hB : 0 ≤ B := by positivity

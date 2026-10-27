@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Legendre.Continuation
-public import DLMF.Legendre.Toroidal
 public import DLMFMathlib.Analysis.SpecificLimits.Pincherle
 
 /-!
@@ -55,17 +54,17 @@ helpers of `DLMF.Legendre.IntegralRepresentations` (`legInt_root`, `legInt_zeta`
 abbrev legFS_zeta (z : ℂ) : ℂ := legInt_zeta z
 
 /-- `ζ ≠ 0` on `ℂ ∖ (-∞, 1]`; an alias of `legInt_zeta_ne_zero`. -/
-lemma legFS_zeta_ne_zero {z : ℂ} (hz : z-1 ∈ slitPlane) : legFS_zeta z ≠ 0 :=
+theorem legFS_zeta_ne_zero {z : ℂ} (hz : z-1 ∈ slitPlane) : legFS_zeta z ≠ 0 :=
   legInt_zeta_ne_zero hz
 
 /-- `|ζ| < 1` on `ℂ ∖ (-∞, 1]`; an alias of `legInt_norm_zeta_lt_one`. -/
-lemma legFS_norm_zeta_lt_one {z : ℂ} (hz : z-1 ∈ slitPlane) : ‖legFS_zeta z‖ < 1 :=
+theorem legFS_norm_zeta_lt_one {z : ℂ} (hz : z-1 ∈ slitPlane) : ‖legFS_zeta z‖ < 1 :=
   legInt_norm_zeta_lt_one hz
 
 /-! The `ζ`-form `legFS_olverQ_eq_G` of `𝑸^μ_ν` is in `DLMF.Legendre.Continuation`. -/
 
 /-- One-sided limit of `log(z-1)` at a point of `(-1, 1)` approached from the side `σ`. -/
-lemma legFS_log_sub_one_lim {σ : ℝ} (hσ : σ = 1 ∨ σ = -1) {x : ℝ} (hx : x < 1) :
+theorem legFS_log_sub_one_lim {σ : ℝ} (hσ : σ = 1 ∨ σ = -1) {x : ℝ} (hx : x < 1) :
     Tendsto (fun ε : ℝ => log ((x:ℂ) + (σ:ℂ)*I*ε - 1)) (𝓝[>] (0:ℝ))
       (𝓝 ((Real.log (1-x) : ℂ) + σ*π*I)) := by
   have hpath : Tendsto (fun ε : ℝ => (x:ℂ) + (σ:ℂ)*I*ε - 1) (𝓝[>] (0:ℝ)) (𝓝 ((x - 1 : ℝ) : ℂ)) := by
@@ -101,7 +100,7 @@ lemma legFS_log_sub_one_lim {σ : ℝ} (hσ : σ = 1 ∨ σ = -1) {x : ℝ} (hx 
 
 /-- One-sided boundary values of `ζ = z - √(z²-1)` on `(-1, 1)`: from the side `σ`,
 `ζ(cos θ + σ i 0) = cos θ - σ i sin θ`. -/
-lemma legFS_zeta_lim {σ : ℝ} (hσ : σ = 1 ∨ σ = -1) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
+theorem legFS_zeta_lim {σ : ℝ} (hσ : σ = 1 ∨ σ = -1) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
     Tendsto (fun ε : ℝ => legInt_zeta ((Real.cos θ:ℂ) + (σ:ℂ)*I*ε)) (𝓝[>] (0:ℝ))
       (𝓝 ((Real.cos θ:ℂ) - (σ:ℂ)*I*(Real.sin θ:ℂ))) := by
   set x := Real.cos θ with hxdef
@@ -148,7 +147,7 @@ lemma legFS_zeta_lim {σ : ℝ} (hσ : σ = 1 ∨ σ = -1) {θ : ℝ} (h0 : 0 < 
 
 
 /-- `cos θ + s i sin θ = e^{isθ}` for `s = ±1`. -/
-lemma legFS_side_exp {s : ℝ} (hs : s = 1 ∨ s = -1) (θ : ℝ) :
+theorem legFS_side_exp {s : ℝ} (hs : s = 1 ∨ s = -1) (θ : ℝ) :
     (Real.cos θ:ℂ) - ((-s:ℝ):ℂ)*I*(Real.sin θ:ℂ) = exp ((s:ℂ)*θ*I) := by
   rcases hs with rfl | rfl
   · rw [show ((1:ℝ):ℂ)*θ*I = (θ:ℂ)*I by push_cast; ring, exp_mul_I, ← ofReal_cos, ← ofReal_sin]
@@ -158,7 +157,7 @@ lemma legFS_side_exp {s : ℝ} (hs : s = 1 ∨ s = -1) (θ : ℝ) :
     push_cast; ring
 
 /-- `1 - e^{2isθ} = 2 sin θ · e^{is(θ - π/2)}` for `s = ±1`. -/
-lemma legFS_one_sub_exp_sq {s : ℝ} (hs : s = 1 ∨ s = -1) (θ : ℝ) :
+theorem legFS_one_sub_exp_sq {s : ℝ} (hs : s = 1 ∨ s = -1) (θ : ℝ) :
     1 - exp ((s:ℂ)*θ*I)^2 = ((2*Real.sin θ : ℝ) : ℂ) * exp (((s*(θ - π/2) : ℝ) : ℂ)*I) := by
   have hu : exp ((θ:ℂ)*I) ≠ 0 := exp_ne_zero _
   have hsin : Complex.sin (θ:ℂ) = (exp (-(θ:ℂ)*I) - exp ((θ:ℂ)*I))*I/2 := by
@@ -261,7 +260,7 @@ theorem legFS_PQ_hyp (ν μ : ℂ) (hr : LegendreQRegular ν μ) {θ : ℝ} (h0 
 /-! ### A Tannery limit for `𝐅(a, b+k; c+k; z)` -/
 
 /-- `‖(a)_n‖ ≤ (‖a‖)_n`. -/
-lemma legFS_norm_poch_le (a : ℂ) (n : ℕ) : ‖poch a n‖ ≤ ‖poch (‖a‖:ℂ) n‖ := by
+theorem legFS_norm_poch_le (a : ℂ) (n : ℕ) : ‖poch a n‖ ≤ ‖poch (‖a‖:ℂ) n‖ := by
   induction n with
   | zero => simp [poch]
   | succ n ih =>
@@ -275,7 +274,7 @@ lemma legFS_norm_poch_le (a : ℂ) (n : ℕ) : ‖poch a n‖ ≤ ‖poch (‖a�
 def legFS_q (b c : ℂ) (k n : ℕ) : ℂ := poch (b+k) n * Gamma (c+k) / Gamma (c+k+n)
 
 /-- For `Re (c+k) > 0`, the recursion `q_{n+1} = q_n (b+k+n)/(c+k+n)`. -/
-lemma legFS_q_succ (b c : ℂ) {k : ℕ} (hk : 0 < (c+k).re) (n : ℕ) :
+theorem legFS_q_succ (b c : ℂ) {k : ℕ} (hk : 0 < (c+k).re) (n : ℕ) :
     legFS_q b c k (n+1) = legFS_q b c k n * ((b+k+n)/(c+k+n)) := by
   have hre : 0 < (c+k+n).re := by simp at hk ⊢; positivity
   have h1 : c+k+n ≠ 0 := fun h => by rw [h] at hre; simp at hre
@@ -286,11 +285,11 @@ lemma legFS_q_succ (b c : ℂ) {k : ℕ} (hk : 0 < (c+k).re) (n : ℕ) :
   field_simp
 
 /-- For `Re (c+k) > 0`, `q_0 = 1`. -/
-lemma legFS_q_zero (b c : ℂ) {k : ℕ} (hk : 0 < (c+k).re) : legFS_q b c k 0 = 1 := by
+theorem legFS_q_zero (b c : ℂ) {k : ℕ} (hk : 0 < (c+k).re) : legFS_q b c k 0 = 1 := by
   simp [legFS_q, poch, Gamma_ne_zero_of_re_pos hk]
 
 /-- `(k+β)/(k+γ) → 1`. -/
-lemma legFS_ratio_tendsto (β γ : ℂ) :
+theorem legFS_ratio_tendsto (β γ : ℂ) :
     Tendsto (fun k : ℕ => ((k:ℂ)+β)/((k:ℂ)+γ)) atTop (𝓝 1) := by
   have h0 : Tendsto (fun k : ℕ => ((k:ℂ))⁻¹) atTop (𝓝 0) := 
     tendsto_inv_atTop_nhds_zero_nat (𝕜 := ℂ)
@@ -304,7 +303,7 @@ lemma legFS_ratio_tendsto (β γ : ℂ) :
   field_simp
 
 /-- Per-term limit: `q_k(n) → 1` as `k → ∞`. -/
-lemma legFS_q_tendsto (b c : ℂ) (n : ℕ) : Tendsto (fun k => legFS_q b c k n) atTop (𝓝 1) := by
+theorem legFS_q_tendsto (b c : ℂ) (n : ℕ) : Tendsto (fun k => legFS_q b c k n) atTop (𝓝 1) := by
   have hev : ∀ᶠ k : ℕ in atTop, 0 < (c+k).re := by
     obtain ⟨K, hK⟩ := exists_nat_gt (-c.re)
     filter_upwards [eventually_ge_atTop K] with k hk
@@ -321,7 +320,7 @@ lemma legFS_q_tendsto (b c : ℂ) (n : ℕ) : Tendsto (fun k => legFS_q b c k n)
     exact this.congr' (by filter_upwards [hev] with k hk; rw [legFS_q_succ b c hk])
 
 /-- Uniform bound: `‖q_k(n)‖ ≤ (1+ε)^n` for `k` large. -/
-lemma legFS_q_bound (b c : ℂ) {ε : ℝ} (hε : 0 < ε) :
+theorem legFS_q_bound (b c : ℂ) {ε : ℝ} (hε : 0 < ε) :
     ∀ᶠ k : ℕ in atTop, ∀ n, ‖legFS_q b c k n‖ ≤ (1+ε)^n := by
   obtain ⟨K, hK⟩ := exists_nat_gt (‖b-c‖/ε - c.re + 1)
   filter_upwards [eventually_ge_atTop K] with k hk n
@@ -383,7 +382,7 @@ theorem legFS_tannery (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
 /-! ### Terminating and Pincherle-type continued fractions -/
 
 /-- Up to the first vanishing partial numerator `a_K`, the project's continuants are Mathlib's. -/
-lemma legFS_cfContinuants_eq {a b : ℕ → ℂ} {K : ℕ} (ha : ∀ k, 1 ≤ k → k < K → a k ≠ 0)
+theorem legFS_cfContinuants_eq {a b : ℕ → ℂ} {K : ℕ} (ha : ∀ k, 1 ≤ k → k < K → a k ≠ 0)
     (n : ℕ) (hn : n ≤ K) :
     DLMF.cfContinuants a b 0 n =
       ((GenContFract.cfConv_ofFun 0 a b).nums n, (GenContFract.cfConv_ofFun 0 a b).dens n, false) := by
@@ -400,7 +399,7 @@ lemma legFS_cfContinuants_eq {a b : ℕ → ℂ} {K : ℕ} (ha : ∀ k, 1 ≤ k 
 
 /-- After the first vanishing partial numerator `a_K` (`K ≥ 1`) the project's finite continued
 fraction freezes at the `K`-th Mathlib convergent. -/
-lemma legFS_cfTail_freeze {a b : ℕ → ℂ} {K : ℕ} (hK : 1 ≤ K)
+theorem legFS_cfTail_freeze {a b : ℕ → ℂ} {K : ℕ} (hK : 1 ≤ K)
     (ha : ∀ k, 1 ≤ k → k < K → a k ≠ 0) (haK : a K = 0) {N : ℕ} (hN : K ≤ N) :
     DLMF.cfTail a b 0 N = (GenContFract.cfConv_ofFun 0 a b).convs K := by
   have hfr : ∀ j, DLMF.cfContinuants a b 0 (K + 1 + j) =
@@ -423,7 +422,7 @@ lemma legFS_cfTail_freeze {a b : ℕ → ℂ} {K : ℕ} (hK : 1 ≤ K)
 
 /-- A terminating continued fraction (first vanishing numerator `a_K`, `K ≥ 1`) with a backward
 solution `w`, `w₀ ≠ 0`, has the value `a₀ w₁/w₀`. -/
-lemma legFS_hasCF_of_terminating {a b w : ℕ → ℂ} {K : ℕ} (hK : 1 ≤ K)
+theorem legFS_hasCF_of_terminating {a b w : ℕ → ℂ} {K : ℕ} (hK : 1 ≤ K)
     (ha : ∀ k, 1 ≤ k → k < K → a k ≠ 0) (haK : a K = 0)
     (hw : ∀ k, w k = b k * w (k + 1) + a (k + 1) * w (k + 2)) (hw0 : w 0 ≠ 0) :
     DLMF.HasContinuedFraction a b (a 0 * w 1 / w 0) := by
@@ -445,7 +444,7 @@ lemma legFS_hasCF_of_terminating {a b w : ℕ → ℂ} {K : ℕ} (hK : 1 ≤ K)
 
 /-- With no vanishing partial numerator, Pincherle's criterion with a ratio limit gives the value
 `a₀ w₁/w₀` of the project's continued fraction. -/
-lemma legFS_hasCF_of_ratio {a b w : ℕ → ℂ} (ha : ∀ k, a k ≠ 0)
+theorem legFS_hasCF_of_ratio {a b w : ℕ → ℂ} (ha : ∀ k, a k ≠ 0)
     (hw : ∀ k, w k = b k * w (k + 1) + a (k + 1) * w (k + 2)) (hw0 : w 0 ≠ 0)
     (hwev : ∀ᶠ k in atTop, w k ≠ 0) {ρ : ℂ} (hρ : 1 < ‖ρ‖)
     (hlim : Tendsto (fun k => -(w k / (a (k + 1) * w (k + 2)))) atTop (𝓝 ρ)) :
@@ -458,7 +457,7 @@ lemma legFS_hasCF_of_ratio {a b w : ℕ → ℂ} (ha : ∀ k, a k ≠ 0)
   simp only [DLMF.cfTail, this]; rfl
 
 /-- If `a₀ = 0` every finite continued fraction has numerator `0`. -/
-lemma legFS_cfContinuants_fst_zero {a b : ℕ → ℂ} (h0 : a 0 = 0) (n : ℕ) :
+theorem legFS_cfContinuants_fst_zero {a b : ℕ → ℂ} (h0 : a 0 = 0) (n : ℕ) :
     (DLMF.cfContinuants a b 0 n).1 = 0 := by
   induction n using Nat.strong_induction_on with
   | _ n ih =>
@@ -474,7 +473,7 @@ lemma legFS_cfContinuants_fst_zero {a b : ℕ → ℂ} (h0 : a 0 = 0) (n : ℕ) 
 
 /-- A continued fraction with a vanishing partial numerator and a backward solution `w`,
 `w₀ ≠ 0`, has the value `a₀ w₁/w₀`. -/
-lemma legFS_hasCF_of_exists_zero {a b w : ℕ → ℂ} (hex : ∃ K, a K = 0)
+theorem legFS_hasCF_of_exists_zero {a b w : ℕ → ℂ} (hex : ∃ K, a K = 0)
     (hw : ∀ k, w k = b k * w (k + 1) + a (k + 1) * w (k + 2)) (hw0 : w 0 ≠ 0) :
     DLMF.HasContinuedFraction a b (a 0 * w 1 / w 0) := by
   classical
@@ -495,7 +494,7 @@ section FerrersQIntegral
 open MeasureTheory
 
 /-- The kernel of DLMF 14.25.2 is integrable on `(0, ∞)` (Euler substitution). -/
-lemma legTr_integrableOn_kernel {ν μ : ℂ} (h0 : -1/2 < μ.re) (h1 : μ.re < (ν+1).re) {z : ℂ}
+theorem legTr_integrableOn_kernel {ν μ : ℂ} (h0 : -1/2 < μ.re) (h1 : μ.re < (ν+1).re) {z : ℂ}
     (hz : z-1 ∈ slitPlane) :
     IntegrableOn (fun t : ℝ => (Real.sinh t:ℂ)^(2*μ)/(z+legInt_root z*Real.cosh t)^(ν+μ+1))
       (Ioi 0) := by
@@ -513,7 +512,7 @@ lemma legTr_integrableOn_kernel {ν μ : ℂ} (h0 : -1/2 < μ.re) (h1 : μ.re < 
   exact (legInt_kernel_Q (ν := ν) (μ := μ) hz ht).symm
 
 /-- `√(z²-1)` at `z = 3`. -/
-lemma legTr_root_three : legInt_root 3 = ((Real.sqrt 8 : ℝ) : ℂ) := by
+theorem legTr_root_three : legInt_root 3 = ((Real.sqrt 8 : ℝ) : ℂ) := by
   have h := legInt_zeta_real (t := 3) (by norm_num)
   have : legInt_root ((3:ℝ):ℂ) = ((3:ℝ):ℂ) - legInt_zeta ((3:ℝ):ℂ) := by rw [legInt_zeta]; ring
   rw [h] at this
@@ -522,7 +521,7 @@ lemma legTr_root_three : legInt_root 3 = ((Real.sqrt 8 : ℝ) : ℂ) := by
 
 
 /-- `‖w^{-a}‖ ≤ e^{π|Im a|} ‖w‖^{-Re a}`. -/
-lemma legTr_norm_recip_cpow_le {w a : ℂ} (hw : w ≠ 0) :
+theorem legTr_norm_recip_cpow_le {w a : ℂ} (hw : w ≠ 0) :
     ‖1/w^a‖ ≤ Real.exp (π*|a.im|) * ‖w‖^(-a.re) := by
   rw [norm_div, norm_one, norm_cpow_of_ne_zero hw, one_div_div, Real.rpow_neg (norm_nonneg _),
     div_eq_mul_inv]
@@ -539,7 +538,7 @@ noncomputable def legTr_sideKernel (ν μ : ℂ) (σ θ t : ℝ) : ℂ :=
 
 /-- DLMF 14.25.2 at `cos θ + σ i 0`, `σ = ±1`: the boundary integrand is integrable and its
 integral is the one-sided limit of `𝑸^μ_ν` (dominated convergence). -/
-lemma legTr_side {ν μ : ℂ} (hμ : -1/2 < μ.re) (ha : 0 < (ν+μ+1).re) (h1 : μ.re < (ν+1).re)
+theorem legTr_side {ν μ : ℂ} (hμ : -1/2 < μ.re) (ha : 0 < (ν+μ+1).re) (h1 : μ.re < (ν+1).re)
     {σ : ℝ} (hσ : σ = 1 ∨ σ = -1) {θ : ℝ} (hθ : 0 < θ) (hπ : θ < π) :
     IntegrableOn (legTr_sideKernel ν μ σ θ) (Ioi 0) ∧
     Tendsto (fun ε : ℝ => olverQ ν μ ((Real.cos θ:ℂ)+(σ:ℂ)*I*ε)) (𝓝[>] (0:ℝ))
@@ -688,7 +687,7 @@ lemma legTr_side {ν μ : ℂ} (hμ : -1/2 < μ.re) (ha : 0 < (ν+μ+1).re) (h1 
   exact this.aestronglyMeasurable
 
 /-- `exp(μ/2 (ln(1-cos θ) + σπi + ln(1+cos θ))) = e^{σμπi/2} sin^μ θ`. -/
-lemma legTr_side_exp (μ : ℂ) {σ : ℝ} {θ : ℝ} (hθ : 0 < θ) (hπ : θ < π) :
+theorem legTr_side_exp (μ : ℂ) {σ : ℝ} {θ : ℝ} (hθ : 0 < θ) (hπ : θ < π) :
     exp (μ/2*((Real.log (1-Real.cos θ):ℂ)+σ*π*I+(Real.log (1+Real.cos θ):ℂ))) =
       exp (σ*μ*π*I/2)*(Real.sin θ:ℂ)^μ := by
   have hs : 0 < Real.sin θ := Real.sin_pos_of_pos_of_lt_pi hθ hπ

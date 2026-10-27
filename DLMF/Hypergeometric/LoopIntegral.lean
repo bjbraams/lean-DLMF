@@ -5,9 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Hypergeometric.EulerIntegral
 public import DLMF.Hypergeometric.Continuation
-public import Mathlib.Analysis.Complex.CauchyIntegral
 
 /-!
 # The loop integral for `₂F₁` (DLMF 15.6.2, Temme §5.2.2)
@@ -56,18 +54,18 @@ def hypergeometricLoop (a b c z : ℂ) (ρ : ℝ) : ℂ :=
 def loopLogIntegrand (a b c z : ℂ) (w : ℂ) : ℂ :=
   (1 + exp w) ^ (b - 1) * exp ((c - b - 1) * w) * (1 - z * (1 + exp w)) ^ (-a) * exp w
 
-lemma ofReal_exp_cpow (x : ℝ) (s : ℂ) : ((Real.exp x : ℝ) : ℂ) ^ s = exp (s * x) := by
+theorem ofReal_exp_cpow (x : ℝ) (s : ℂ) : ((Real.exp x : ℝ) : ℂ) ^ s = exp (s * x) := by
   rw [cpow_def_of_ne_zero (by exact_mod_cast (Real.exp_pos x).ne'), ofReal_exp, log_exp]
   · ring
   · simp [Real.pi_pos]
   · simp [Real.pi_pos.le]
 
-lemma ofReal_cpow_eq_exp_mul_log {ρ : ℝ} (hρ : 0 < ρ) (s : ℂ) :
+theorem ofReal_cpow_eq_exp_mul_log {ρ : ℝ} (hρ : 0 < ρ) (s : ℂ) :
     (ρ : ℂ) ^ s = exp (s * Real.log ρ) := by
   rw [← Real.exp_log hρ, ofReal_exp_cpow, Real.log_exp]
 
 /-- The log-coordinate integrand is holomorphic where `|e^w| < 1` and `|z| (1 + |e^w|) < 1`. -/
-lemma differentiableAt_loopLogIntegrand (a b c z : ℂ) {w : ℂ} (hw : w.re < 0)
+theorem differentiableAt_loopLogIntegrand (a b c z : ℂ) {w : ℂ} (hw : w.re < 0)
     (hz : ‖z‖ * (1 + Real.exp w.re) < 1) : DifferentiableAt ℂ (loopLogIntegrand a b c z) w := by
   have he : ‖exp w‖ = Real.exp w.re := norm_exp w
   have he1 : Real.exp w.re < 1 := (Real.exp_lt_exp.mpr hw).trans_eq Real.exp_zero
@@ -94,7 +92,7 @@ lemma differentiableAt_loopLogIntegrand (a b c z : ℂ) {w : ℂ} (hw : w.re < 0
   exact (((hA.cpow (differentiableAt_const _) h1).mul hC).mul
     (hB.cpow (differentiableAt_const _) h2)).mul differentiableAt_exp
 
-lemma one_sub_mul_ofReal_mem_slitPlane {z : ℂ} {t : ℝ} (h : ‖z‖ * |t| < 1) :
+theorem one_sub_mul_ofReal_mem_slitPlane {z : ℂ} {t : ℝ} (h : ‖z‖ * |t| < 1) :
     1 - z * t ∈ slitPlane := by
   rw [mem_slitPlane_iff]; left
   have h1 := abs_re_le_norm (z * t)
@@ -102,7 +100,7 @@ lemma one_sub_mul_ofReal_mem_slitPlane {z : ℂ} {t : ℝ} (h : ‖z‖ * |t| < 
   rw [sub_re, one_re]; linarith [le_abs_self (z * t).re]
 
 /-- The factors of the segment integrand other than `t^{b-1}`. -/
-lemma continuousOn_loopSeg_rest (a b c z s : ℂ) {T : ℝ} (hT : T < 1) (hz : ‖z‖ * |T| < 1)
+theorem continuousOn_loopSeg_rest (a b c z s : ℂ) {T : ℝ} (hT : T < 1) (hz : ‖z‖ * |T| < 1)
     (hz1 : ‖z‖ < 1) :
     ContinuousOn (fun t : ℝ => ((1 - t : ℝ) : ℂ) ^ (c - b - 1) * exp (s * π * I * (c - b - 1)) *
       (1 - z * t) ^ (-a)) (uIcc 0 T) := by
@@ -133,12 +131,12 @@ lemma continuousOn_loopSeg_rest (a b c z s : ℂ) {T : ℝ} (hT : T < 1) (hz : �
   · exact ContinuousAt.cpow (by fun_prop) continuousAt_const (ofReal_mem_slitPlane.mpr h1)
   · exact ContinuousAt.cpow (by fun_prop) continuousAt_const (one_sub_mul_ofReal_mem_slitPlane h2)
 
-lemma loopSegIntegrand_eq (a b c z s : ℂ) (t : ℝ) :
+theorem loopSegIntegrand_eq (a b c z s : ℂ) (t : ℝ) :
     loopSegIntegrand a b c z s t = (t : ℂ) ^ (b - 1) *
       (((1 - t : ℝ) : ℂ) ^ (c - b - 1) * exp (s * π * I * (c - b - 1)) * (1 - z * t) ^ (-a)) := by
   unfold loopSegIntegrand; ring
 
-lemma intervalIntegrable_loopSegIntegrand (a b c z s : ℂ) (hb : 0 < b.re) {T : ℝ}
+theorem intervalIntegrable_loopSegIntegrand (a b c z s : ℂ) (hb : 0 < b.re) {T : ℝ}
     (hT : T < 1) (hz : ‖z‖ * |T| < 1) (hz1 : ‖z‖ < 1) :
     IntervalIntegrable (loopSegIntegrand a b c z s) volume 0 T := by
   have h := (intervalIntegral.intervalIntegrable_cpow' (a := 0) (b := T) (r := b - 1)
@@ -149,7 +147,7 @@ lemma intervalIntegrable_loopSegIntegrand (a b c z s : ℂ) (hb : 0 < b.re) {T :
   rw [he]; exact h
 
 /-- The horizontal sides of the rectangle are the differences of the segment integrals. -/
-lemma integral_loopLogIntegrand_horizontal (a b c z : ℂ) {s : ℂ} (hs : s = 1 ∨ s = -1)
+theorem integral_loopLogIntegrand_horizontal (a b c z : ℂ) {s : ℂ} (hs : s = 1 ∨ s = -1)
     {ρ₁ ρ₂ : ℝ} (hρ₁ : 0 < ρ₁) (hρ₂ : 0 < ρ₂) (hρ₁1 : ρ₁ < 1) (hρ₂1 : ρ₂ < 1)
     (hz1 : ‖z‖ < 1) :
     ∫ x in (Real.log ρ₁)..(Real.log ρ₂), loopLogIntegrand a b c z (x + (s.re * π : ℝ) * I) =
@@ -204,7 +202,7 @@ lemma integral_loopLogIntegrand_horizontal (a b c z : ℂ) {s : ℂ} (hs : s = 1
   ring
 
 /-- The vertical sides of the rectangle are the circle integrals. -/
-lemma I_mul_loopLogIntegrand_vertical (a b c z : ℂ) {ρ : ℝ} (hρ : 0 < ρ) (θ : ℝ) :
+theorem I_mul_loopLogIntegrand_vertical (a b c z : ℂ) {ρ : ℝ} (hρ : 0 < ρ) (θ : ℝ) :
     I * loopLogIntegrand a b c z ((Real.log ρ : ℂ) + θ * I) = loopCircIntegrand a b c z ρ θ := by
   unfold loopLogIntegrand loopCircIntegrand
   have hexp : exp ((Real.log ρ : ℂ) + θ * I) = ρ * exp (θ * I) := by
@@ -277,7 +275,7 @@ theorem hypergeometricLoop_eq (a b c z : ℂ) (hb : 0 < b.re) {ρ₁ ρ₂ : ℝ
   unfold hypergeometricLoop
   linear_combination -h1 + h2 - hrect
 
-lemma norm_cpow_le_rpow_mul_exp {w : ℂ} (hw : w ≠ 0) (s : ℂ) :
+theorem norm_cpow_le_rpow_mul_exp {w : ℂ} (hw : w ≠ 0) (s : ℂ) :
     ‖w ^ s‖ ≤ ‖w‖ ^ s.re * Real.exp (π * |s.im|) := by
   rw [norm_cpow_of_ne_zero hw, div_eq_mul_inv, ← Real.exp_neg]
   gcongr
@@ -285,7 +283,7 @@ lemma norm_cpow_le_rpow_mul_exp {w : ℂ} (hw : w ≠ 0) (s : ℂ) :
   have h2 : |arg w * s.im| ≤ π * |s.im| := by rw [abs_mul]; gcongr
   linarith [neg_abs_le (arg w * s.im)]
 
-lemma rpow_le_add_rpow {m M r : ℝ} (hm : 0 < m) (hr : m ≤ r) (hrM : r ≤ M) (τ : ℝ) :
+theorem rpow_le_add_rpow {m M r : ℝ} (hm : 0 < m) (hr : m ≤ r) (hrM : r ≤ M) (τ : ℝ) :
     r ^ τ ≤ m ^ τ + M ^ τ := by
   have hr0 : 0 < r := by linarith
   rcases le_total 0 τ with hτ | hτ
@@ -295,7 +293,7 @@ lemma rpow_le_add_rpow {m M r : ℝ} (hm : 0 < m) (hr : m ≤ r) (hrM : r ≤ M)
     linarith [Real.rpow_nonneg (show (0 : ℝ) ≤ M by linarith) τ]
 
 /-- The circle integrand is `O(ρ'^{re(c-b)})` uniformly in `θ`. -/
-lemma norm_loopCircIntegrand_le (a b c z : ℂ) {ρ : ℝ} (hρ : 0 < ρ) (hρ1 : ρ < 1)
+theorem norm_loopCircIntegrand_le (a b c z : ℂ) {ρ : ℝ} (hρ : 0 < ρ) (hρ1 : ρ < 1)
     (hz : ‖z‖ * (1 + ρ) < 1) :
     ∃ K : ℝ, ∀ ρ' : ℝ, 0 < ρ' → ρ' ≤ ρ → ∀ θ ∈ Icc (-π) π,
       ‖loopCircIntegrand a b c z ρ' θ‖ ≤ K * ρ' ^ ((c - b - 1).re + 1) := by
@@ -568,7 +566,7 @@ theorem differentiable_hypergeometricLoop (a b z : ℂ) (hb : 0 < b.re) {ρ : �
   unfold hypergeometricLoop
   exact ((hseg (-1)).add hcirc).sub (hseg 1)
 
-lemma exp_neg_sub_exp_loop (x : ℂ) :
+theorem exp_neg_sub_exp_loop (x : ℂ) :
     exp (-1 * π * I * (x - 1)) - exp (1 * π * I * (x - 1)) = 2 * I * sin (π * x) := by
   have h1 : exp (-1 * π * I * (x - 1)) = -exp (-(π * x * I)) := by
     rw [show -1 * (π : ℂ) * I * (x - 1) = -(π * x * I) + π * I by ring, exp_add, exp_pi_mul_I]

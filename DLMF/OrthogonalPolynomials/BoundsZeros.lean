@@ -5,12 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.OrthogonalPolynomials.Topics
-public import Mathlib.Tactic.CrossRefAttribute
-public import DLMF.OrthogonalPolynomials.Differential
-public import DLMF.OrthogonalPolynomials.Integrals
-public import DLMF.OrthogonalPolynomials.JacobiDiscriminant
-public import DLMF.OrthogonalPolynomials.GegenbauerSeries
 public import DLMF.OrthogonalPolynomials.ClassicalInstances
 public import DLMF.OrthogonalPolynomials.SoninePolyaApplications
 public import DLMF.OrthogonalPolynomials.InequalityTools
@@ -38,7 +32,7 @@ namespace DLMF.OrthogonalPolynomials
 /-! ### Sonine–Pólya bounds for Jacobi polynomials -/
 
 /-- The real Jacobi polynomial satisfies the Jacobi differential equation. -/
-lemma jacobiPolyPR_ode {α : ℝ} (hα : -1 < α) (β : ℝ) (n : ℕ) (x : ℝ) :
+theorem jacobiPolyPR_ode {α : ℝ} (hα : -1 < α) (β : ℝ) (n : ℕ) (x : ℝ) :
     (1 - x ^ 2) * (derivative (derivative (jacobiPolyPR α β n))).eval x +
       (β - α - (α + β + 2) * x) * (derivative (jacobiPolyPR α β n)).eval x +
       n * (n + α + β + 1) * (jacobiPolyPR α β n).eval x = 0 := by
@@ -54,7 +48,7 @@ lemma jacobiPolyPR_ode {α : ℝ} (hα : -1 < α) (β : ℝ) (n : ℕ) (x : ℝ)
   exact_mod_cast h
 
 /-- Positivity and monotonicity of real Pochhammer symbols. -/
-lemma poch_ofReal_le {r s : ℝ} (hr : 0 < r) (hrs : r ≤ s) (n : ℕ) :
+theorem poch_ofReal_le {r s : ℝ} (hr : 0 < r) (hrs : r ≤ s) (n : ℕ) :
     ∃ u v : ℝ, 0 < u ∧ u ≤ v ∧ poch (r : ℂ) n = u ∧ poch (s : ℂ) n = v := by
   induction n with
   | zero => exact ⟨1, 1, one_pos, le_rfl, by simp [poch_zero], by simp [poch_zero]⟩
@@ -132,7 +126,7 @@ theorem jacobi_bernstein_bound {α β x : ℝ} (hα : α ∈ Set.Icc (-1 / 2) (1
   sorry
 
 /-- Pochhammer symbols of a positive real are positive reals. -/
-lemma exists_poch_ofReal_eq {r : ℝ} (hr : 0 < r) (k : ℕ) :
+theorem exists_poch_ofReal_eq {r : ℝ} (hr : 0 < r) (k : ℕ) :
     ∃ s : ℝ, 0 < s ∧ poch (r : ℂ) k = s := by
   induction k with
   | zero => exact ⟨1, one_pos, by simp [poch_zero]⟩
@@ -184,7 +178,7 @@ theorem ultrasphPoly_bound_at_one {lam x : ℝ} (hlam : 0 < lam) (hx : |x| ≤ 1
 /-! ### Sonine–Pólya bounds for Gegenbauer polynomials with `-1/2 < λ < 0` -/
 
 /-- Gegenbauer polynomials with `-1/2 < λ` as a real multiple of a real Jacobi polynomial. -/
-lemma ultrasphPoly_eq_mul_jacobiPolyPR {lam : ℝ} (hlam : -1 / 2 < lam) (m : ℕ) :
+theorem ultrasphPoly_eq_mul_jacobiPolyPR {lam : ℝ} (hlam : -1 / 2 < lam) (m : ℕ) :
     ∃ c : ℂ, ∀ z : ℂ, ultrasphPoly lam m z =
       c * (((jacobiPolyPR (lam - 1 / 2) (lam - 1 / 2) m).map (algebraMap ℝ ℂ)).eval z) := by
   obtain ⟨u, -, hu, -, h1, -⟩ := poch_ofReal_le (r := lam + 1 / 2) (s := lam + 1 / 2)
@@ -198,7 +192,7 @@ lemma ultrasphPoly_eq_mul_jacobiPolyPR {lam : ℝ} (hlam : -1 / 2 < lam) (m : �
   ring_nf
 
 /-- An even polynomial has zero derivative at `0`. -/
-lemma derivative_eval_zero_of_even {p : ℝ[X]} (h : ∀ t, p.eval (-t) = p.eval t) :
+theorem derivative_eval_zero_of_even {p : ℝ[X]} (h : ∀ t, p.eval (-t) = p.eval t) :
     (derivative p).eval 0 = 0 := by
   have h1 : HasDerivAt (fun t => p.eval (-t)) ((derivative p).eval (-0) * (-1)) 0 :=
     (p.hasDerivAt (-0)).comp 0 (hasDerivAt_neg 0)
@@ -516,7 +510,7 @@ theorem ultrasphPoly_bernstein_bound {lam x : ℝ} (hlam : 0 < lam) (hlam1 : lam
         field_simp
 
 /-- The parameter-zero Laguerre estimate is the norm bound for a positive cosine transform. -/
-lemma laguerrePolyL_zero_parameter_bound (n : ℕ) {x : ℝ} (hx : 0 ≤ x) :
+theorem laguerrePolyL_zero_parameter_bound (n : ℕ) {x : ℝ} (hx : 0 ≤ x) :
     Real.exp (-x / 2) * ‖laguerrePolyL 0 n x‖ ≤ 1 := by
   let y := Real.sqrt x
   let w : ℝ → ℝ := fun t => Real.exp (-(t ^ 2) / 2) * (aeval t (hermite n) : ℝ) ^ 2
@@ -783,7 +777,7 @@ theorem jacobi_weighted_bound {α β x : ℝ} (hα : 0 ≤ α) (hβ : 0 ≤ β) 
 /-! ### Laguerre's inequality and the Laguerre zero bounds -/
 
 /-- Cauchy–Schwarz for a multiset of reals: `(∑ a)² ≤ #t ∑ a²`. -/
-lemma multiset_sq_sum_le_card_mul_sum_sq (t : Multiset ℝ) :
+theorem multiset_sq_sum_le_card_mul_sum_sq (t : Multiset ℝ) :
     t.sum ^ 2 ≤ t.card * (t.map (· ^ 2)).sum := by
   have hexp : ∀ c S : ℝ, (t.map fun a => (c * a - S) ^ 2).sum =
       c ^ 2 * (t.map (· ^ 2)).sum - 2 * c * S * t.sum + t.card * S ^ 2 := by
@@ -804,7 +798,7 @@ lemma multiset_sq_sum_le_card_mul_sum_sq (t : Multiset ℝ) :
     nlinarith
 
 /-- Derivative of `t ↦ ∑_{z ∈ s} 1/(t - z)` away from `s`. -/
-lemma hasDerivAt_multiset_sum_recip_sub (s : Multiset ℝ) {x : ℝ} (hx : x ∉ s) :
+theorem hasDerivAt_multiset_sum_recip_sub (s : Multiset ℝ) {x : ℝ} (hx : x ∉ s) :
     HasDerivAt (fun t => (s.map fun z => 1 / (t - z)).sum)
       (-(s.map fun z => 1 / (x - z) ^ 2).sum) x := by
   induction s using Multiset.induction_on with
@@ -854,7 +848,7 @@ theorem laguerre_inequality {g : ℝ[X]} (hs : g.Splits) {x : ℝ} (hx : g.eval 
   exact mul_nonneg (sq_nonneg _) (by linarith)
 
 /-- The real Laguerre polynomial satisfies Laguerre's differential equation. -/
-lemma laguerrePolyLR_ode {α : ℝ} (hα : -1 < α) (n : ℕ) (x : ℝ) :
+theorem laguerrePolyLR_ode {α : ℝ} (hα : -1 < α) (n : ℕ) (x : ℝ) :
     x * (derivative (derivative (laguerrePolyLR α n))).eval x +
       (α + 1 - x) * (derivative (laguerrePolyLR α n)).eval x +
       n * (laguerrePolyLR α n).eval x = 0 := by
@@ -939,7 +933,7 @@ theorem laguerrePolyL_zero_quadratic {α : ℝ} (hα : -1 < α) {n : ℕ} {x : �
   nlinarith [mul_pos hc hpos]
 
 /-- Both Laguerre zero bounds as a two-sided inequality. -/
-lemma laguerrePolyL_zero_bounds {α : ℝ} (hα : -1 < α) {n : ℕ} (hn : 0 < n) {x : ℝ}
+theorem laguerrePolyL_zero_bounds {α : ℝ} (hα : -1 < α) {n : ℕ} (hn : 0 < n) {x : ℝ}
     (hx : laguerrePolyL α n x = 0) :
     ((n : ℝ) - 1 - Real.sqrt (n ^ 2 + (n + 2) * (α + 1))) ^ 2 - 1 ≤ (n + 2) * x ∧
       (n + 2) * x ≤ ((n : ℝ) - 1 + Real.sqrt (n ^ 2 + (n + 2) * (α + 1))) ^ 2 - 1 := by
@@ -985,7 +979,7 @@ def rootDiscriminant {n : ℕ} (leading : ℝ) (x : Fin n → ℝ) : ℝ :=
 
 /-! ### Helpers for the discriminant formulas -/
 
-lemma re_poch_ofReal (c : ℝ) (n : ℕ) :
+theorem re_poch_ofReal (c : ℝ) (n : ℕ) :
     (poch (c : ℂ) n).re = ∏ k ∈ Finset.range n, (c + k) := by
   have h := poch_mul_pow (c : ℂ) 1 n
   simp only [one_pow, mul_one] at h
@@ -994,14 +988,14 @@ lemma re_poch_ofReal (c : ℝ) (n : ℕ) :
     push_cast; rfl
   rw [this, Complex.ofReal_re]
 
-lemma prod_Icc_one_eq_prod_range {M : Type*} [CommMonoid M] (f : ℕ → M) (n : ℕ) :
+theorem prod_Icc_one_eq_prod_range {M : Type*} [CommMonoid M] (f : ℕ → M) (n : ℕ) :
     ∏ j ∈ Finset.Icc 1 n, f j = ∏ k ∈ Finset.range n, f (k + 1) := by
   induction n with
   | zero => simp
   | succ n ih =>
     rw [Finset.prod_Icc_succ_top (by omega), ih, Finset.prod_range_succ]
 
-lemma jacobiDisc_factor {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) {m k : ℕ} (hk : k ≤ m) :
+theorem jacobiDisc_factor {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) {m k : ℕ} (hk : k ≤ m) :
     ((k + 1 : ℕ) : ℝ) ^ (((k + 1 : ℕ) : ℤ) - 2 * ((m + 1 : ℕ) : ℤ) + 2) *
         (((k + 1 : ℕ) : ℝ) + α) ^ (k + 1 - 1) * (((k + 1 : ℕ) : ℝ) + β) ^ (k + 1 - 1) *
         (((m + 1 : ℕ) : ℝ) + ((k + 1 : ℕ) : ℝ) + α + β) ^ (m + 1 - (k + 1)) =
@@ -1092,11 +1086,11 @@ def lagPoly (a : ℂ) (n : ℕ) : ℂ[X] := ∑ j ∈ range (n + 1), C (lcoef a 
 /-- The leading coefficient `(-1)^n / n!`. -/
 def KL (n : ℕ) : ℂ := (-1) ^ n / n !
 
-lemma eval_lagPoly (a : ℂ) (n : ℕ) (x : ℂ) : (lagPoly a n).eval x = laguerrePolyL a n x := by
+theorem eval_lagPoly (a : ℂ) (n : ℕ) (x : ℂ) : (lagPoly a n).eval x = laguerrePolyL a n x := by
   rw [laguerrePolyL_eq_sum_coeff]
   simp [lagPoly, eval_finsetSum, lcoef]
 
-lemma coeff_lagPoly (a : ℂ) (n k : ℕ) :
+theorem coeff_lagPoly (a : ℂ) (n k : ℕ) :
     (lagPoly a n).coeff k = if k < n + 1 then lcoef a n k else 0 := by
   simp only [lagPoly, finsetSum_coeff, coeff_C_mul_X_pow]
   rw [Finset.sum_ite_eq]
@@ -1104,20 +1098,20 @@ lemma coeff_lagPoly (a : ℂ) (n k : ℕ) :
 
 variable {α : ℝ}
 
-lemma poch_ne_zero' (hα : -1 < α) (n : ℕ) : poch ((α : ℂ) + 1) n ≠ 0 :=
+theorem poch_ne_zero' (hα : -1 < α) (n : ℕ) : poch ((α : ℂ) + 1) n ≠ 0 :=
   poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) _
 
-lemma lcoef_self (hα : -1 < α) (n : ℕ) : lcoef α n n = KL n := by
+theorem lcoef_self (hα : -1 < α) (n : ℕ) : lcoef α n n = KL n := by
   have hp := poch_ne_zero' hα n
   have hf : (n ! : ℂ) ≠ 0 := by exact_mod_cast n.factorial_ne_zero
   rw [lcoef, kummerMCoeff, poch_neg_coe_nat, Nat.descFactorial_self, KL]
   field_simp
 
-lemma KL_ne_zero (n : ℕ) : KL n ≠ 0 := by
+theorem KL_ne_zero (n : ℕ) : KL n ≠ 0 := by
   unfold KL
   exact div_ne_zero (pow_ne_zero _ (by norm_num)) (by exact_mod_cast n.factorial_ne_zero)
 
-lemma natDegree_lagPoly (hα : -1 < α) (n : ℕ) : (lagPoly α n).natDegree = n := by
+theorem natDegree_lagPoly (hα : -1 < α) (n : ℕ) : (lagPoly α n).natDegree = n := by
   refine natDegree_eq_of_le_of_coeff_ne_zero ?_ ?_
   · rw [natDegree_le_iff_coeff_eq_zero]
     intro N hN
@@ -1130,19 +1124,19 @@ lemma natDegree_lagPoly (hα : -1 < α) (n : ℕ) : (lagPoly α n).natDegree = n
     · rw [lcoef_self hα]; exact KL_ne_zero n
     · omega
 
-lemma leadingCoeff_lagPoly (hα : -1 < α) (n : ℕ) : (lagPoly α n).leadingCoeff = KL n := by
+theorem leadingCoeff_lagPoly (hα : -1 < α) (n : ℕ) : (lagPoly α n).leadingCoeff = KL n := by
   rw [leadingCoeff, natDegree_lagPoly hα, coeff_lagPoly]
   split_ifs with h
   · exact lcoef_self hα n
   · omega
 
-lemma lagPoly_ne_zero (hα : -1 < α) (n : ℕ) : lagPoly α n ≠ 0 := by
+theorem lagPoly_ne_zero (hα : -1 < α) (n : ℕ) : lagPoly α n ≠ 0 := by
   intro h
   have := leadingCoeff_lagPoly hα n
   rw [h, leadingCoeff_zero] at this
   exact KL_ne_zero n this.symm
 
-lemma roots_lagPoly_eq (hα : -1 < α) {n : ℕ} (x : Fin n → ℝ)
+theorem roots_lagPoly_eq (hα : -1 < α) {n : ℕ} (x : Fin n → ℝ)
     (hroot : ∀ i, laguerrePolyL α n (x i) = 0) (hinj : Function.Injective x) :
     (lagPoly α n).roots = (univ.val.map fun i => (x i : ℂ)) := by
   have hne := lagPoly_ne_zero hα n
@@ -1158,7 +1152,7 @@ lemma roots_lagPoly_eq (hα : -1 < α) {n : ℕ} (x : Fin n → ℝ)
   rw [IsAlgClosed.card_roots_eq_natDegree, natDegree_lagPoly hα, Multiset.card_map,
     card_val, card_univ, Fintype.card_fin]
 
-lemma lagPoly_eq_nodal (hα : -1 < α) {n : ℕ} (x : Fin n → ℝ)
+theorem lagPoly_eq_nodal (hα : -1 < α) {n : ℕ} (x : Fin n → ℝ)
     (hroot : ∀ i, laguerrePolyL α n (x i) = 0) (hinj : Function.Injective x) :
     lagPoly α n = C (KL n) * Lagrange.nodal univ fun i => (x i : ℂ) := by
   conv_lhs => rw [← C_leadingCoeff_mul_prod_multiset_X_sub_C
@@ -1168,10 +1162,10 @@ lemma lagPoly_eq_nodal (hα : -1 < α) {n : ℕ} (x : Fin n → ℝ)
 /-- `∏ L_m(y)` over the zeros `y` of `L_{m+1}`. -/
 def SSL (a : ℂ) (m : ℕ) : ℂ := ((lagPoly a (m + 1)).roots.map fun y => (lagPoly a m).eval y).prod
 
-lemma SSL_zero (a : ℂ) : SSL a 0 = 1 := by
+theorem SSL_zero (a : ℂ) : SSL a 0 = 1 := by
   simp [SSL, lagPoly, lcoef, poch_zero, kummerMCoeff]
 
-lemma eval_lagPoly_two_of_root (hα : -1 < α) (m : ℕ) {y : ℂ}
+theorem eval_lagPoly_two_of_root (hα : -1 < α) (m : ℕ) {y : ℂ}
     (hy : (lagPoly α (m + 1)).eval y = 0) :
     (lagPoly α (m + 2)).eval y = -((m : ℂ) + α + 1) / (m + 2) * (lagPoly α m).eval y := by
   have hα' : -1 < (α : ℂ).re := by simpa using hα
@@ -1183,7 +1177,7 @@ lemma eval_lagPoly_two_of_root (hα : -1 < α) (m : ℕ) {y : ℂ}
   field_simp
   linear_combination h
 
-lemma SSL_succ (hα : -1 < α) (m : ℕ) :
+theorem SSL_succ (hα : -1 < α) (m : ℕ) :
     SSL α (m + 1) = (-1) ^ (m + 1) * ((m : ℂ) + 1 + α) ^ (m + 1) / ((m + 1) ! : ℂ) * SSL α m := by
   have key := lc_pow_mul_prod_roots_eval (lagPoly α (m + 2)) (lagPoly α (m + 1))
   rw [natDegree_lagPoly hα, natDegree_lagPoly hα, leadingCoeff_lagPoly hα,
@@ -1218,13 +1212,13 @@ lemma SSL_succ (hα : -1 < α) (m : ℕ) :
   apply mul_right_cancel₀ (pow_ne_zero (m + 1) hf1)
   linear_combination key
 
-lemma SSL_eq (hα : -1 < α) (m : ℕ) :
+theorem SSL_eq (hα : -1 < α) (m : ℕ) :
     SSL α m = ∏ k ∈ range m, (-1) ^ (k + 1) * ((k : ℂ) + 1 + α) ^ (k + 1) / ((k + 1) ! : ℂ) := by
   induction m with
   | zero => simp [SSL_zero]
   | succ m ih => rw [SSL_succ hα, ih, prod_range_succ]; ring
 
-lemma disc_eq (hα : -1 < α) (m : ℕ) (x : Fin (m + 1) → ℝ)
+theorem disc_eq (hα : -1 < α) (m : ℕ) (x : Fin (m + 1) → ℝ)
     (hroot : ∀ i, laguerrePolyL α (m + 1) (x i) = 0) (hinj : Function.Injective x) :
     (∏ i : Fin (m + 1), ∏ j : Fin (m + 1),
       if i.val < j.val then ((x i - x j : ℝ) : ℂ) ^ 2 else 1) *
@@ -1283,14 +1277,14 @@ lemma disc_eq (hα : -1 < α) (m : ℕ) (x : Fin (m + 1) → ℝ)
     ((∏ i, ∏ j, (if i.val < j.val then (xc i - xc j) ^ 2 else (1 : ℂ))) *
       (K ^ (m + 1) * poch ((α : ℂ) + 1) (m + 1))) * hσ
 
-lemma prod_pow_succ_shift (c : ℂ) (m : ℕ) :
+theorem prod_pow_succ_shift (c : ℂ) (m : ℕ) :
     (∏ k ∈ range m, ((k : ℂ) + 1 + c) ^ (k + 1)) * ((m : ℂ) + 1 + c) ^ (m + 1) =
       (∏ k ∈ range (m + 1), ((k : ℂ) + 1 + c) ^ k) * ∏ k ∈ range (m + 1), ((k : ℂ) + 1 + c) := by
   rw [← prod_mul_distrib]
   simp_rw [← pow_succ]
   rw [prod_range_succ]
 
-lemma factorial_pow_eq (m : ℕ) :
+theorem factorial_pow_eq (m : ℕ) :
     (((m + 1)! : ℕ) : ℂ) ^ (m + 1) =
       (∏ k ∈ range m, (((k + 1)! : ℕ) : ℂ)) * ∏ k ∈ range (m + 1), ((k : ℂ) + 1) ^ (k + 1) := by
   induction m with
@@ -1302,19 +1296,19 @@ lemma factorial_pow_eq (m : ℕ) :
     rw [mul_pow, pow_succ (((m + 1)! : ℂ)), ih]
     ring
 
-lemma prod_neg_one_pow_succ (m : ℕ) :
+theorem prod_neg_one_pow_succ (m : ℕ) :
     ∏ k ∈ range m, (-1 : ℂ) ^ (k + 1) = (-1) ^ (m + 1).choose 2 := by
   rw [prod_pow_eq_pow_sum]
   congr 1
   rw [Nat.choose_two_right, ← Finset.sum_range_id (m + 1), Finset.sum_range_succ']
   simp
 
-lemma poch_eq_prod (c : ℂ) (n : ℕ) : poch c n = ∏ k ∈ range n, (c + k) := by
+theorem poch_eq_prod (c : ℂ) (n : ℕ) : poch c n = ∏ k ∈ range n, (c + k) := by
   have h := poch_mul_pow c 1 n
   simp only [one_pow, mul_one] at h
   exact h
 
-lemma disc_closed (hα : -1 < α) (m : ℕ) (x : Fin (m + 1) → ℝ)
+theorem disc_closed (hα : -1 < α) (m : ℕ) (x : Fin (m + 1) → ℝ)
     (hroot : ∀ i, laguerrePolyL α (m + 1) (x i) = 0) (hinj : Function.Injective x) :
     KL (m + 1) ^ (2 * m) * (∏ i : Fin (m + 1), ∏ j : Fin (m + 1),
       if i.val < j.val then ((x i - x j : ℝ) : ℂ) ^ 2 else 1) =
@@ -1437,7 +1431,7 @@ namespace HerDisc
 
 open Polynomial Finset JacobiDisc
 
-lemma coeff_hermitePolyH_self (n : ℕ) :
+theorem coeff_hermitePolyH_self (n : ℕ) :
     (hermitePolyH n).natDegree ≤ n ∧ (hermitePolyH n).coeff n = 2 ^ n := by
   induction n with
   | zero => simp [hermitePolyH_zero]
@@ -1462,23 +1456,23 @@ lemma coeff_hermitePolyH_self (n : ℕ) :
 /-- The Hermite polynomial over `ℂ`. -/
 def hP (n : ℕ) : ℂ[X] := (hermitePolyH n).map (Int.castRingHom ℂ)
 
-lemma natDegree_hP (n : ℕ) : (hP n).natDegree = n := by
+theorem natDegree_hP (n : ℕ) : (hP n).natDegree = n := by
   obtain ⟨hd, hc⟩ := coeff_hermitePolyH_self n
   have hne : (hermitePolyH n).natDegree = n :=
     natDegree_eq_of_le_of_coeff_ne_zero hd (by rw [hc]; positivity)
   rw [hP, natDegree_map_eq_of_injective (RingHom.injective_int _), hne]
 
-lemma leadingCoeff_hP (n : ℕ) : (hP n).leadingCoeff = 2 ^ n := by
+theorem leadingCoeff_hP (n : ℕ) : (hP n).leadingCoeff = 2 ^ n := by
   rw [leadingCoeff, natDegree_hP, hP, coeff_map, (coeff_hermitePolyH_self n).2]
   simp
 
-lemma hP_ne_zero (n : ℕ) : hP n ≠ 0 := by
+theorem hP_ne_zero (n : ℕ) : hP n ≠ 0 := by
   intro h
   have := leadingCoeff_hP n
   rw [h, leadingCoeff_zero] at this
   exact (pow_ne_zero n two_ne_zero) this.symm
 
-lemma eval_hP_ofReal (n : ℕ) (r : ℝ) :
+theorem eval_hP_ofReal (n : ℕ) (r : ℝ) :
     (hP n).eval (r : ℂ) = ((aeval r (hermitePolyH n) : ℝ) : ℂ) := by
   rw [hP, eval_map, aeval_def]
   have h := Polynomial.hom_eval₂ (hermitePolyH n) (algebraMap ℤ ℝ) Complex.ofRealHom r
@@ -1486,17 +1480,17 @@ lemma eval_hP_ofReal (n : ℕ) (r : ℝ) :
     RingHom.ext_int _ _] at h
   exact h.symm
 
-lemma hP_recurrence (n : ℕ) :
+theorem hP_recurrence (n : ℕ) :
     hP (n + 2) = 2 * X * hP (n + 1) - C (2 * (n + 1) : ℂ) * hP n := by
   simp only [hP, hermitePolyH_recurrence, Polynomial.map_sub, Polynomial.map_mul,
     Polynomial.map_ofNat, map_X, map_C]
   simp
 
-lemma derivative_hP (n : ℕ) : derivative (hP (n + 1)) = C (2 * (n + 1) : ℂ) * hP n := by
+theorem derivative_hP (n : ℕ) : derivative (hP (n + 1)) = C (2 * (n + 1) : ℂ) * hP n := by
   simp only [hP, derivative_map, hermitePolyH_derivative, Polynomial.map_mul, map_C]
   simp
 
-lemma roots_hP_eq {n : ℕ} (x : Fin n → ℝ)
+theorem roots_hP_eq {n : ℕ} (x : Fin n → ℝ)
     (hroot : ∀ i, (aeval (x i) (hermitePolyH n) : ℝ) = 0) (hinj : Function.Injective x) :
     (hP n).roots = (univ.val.map fun i => (x i : ℂ)) := by
   have hne := hP_ne_zero n
@@ -1511,7 +1505,7 @@ lemma roots_hP_eq {n : ℕ} (x : Fin n → ℝ)
   rw [IsAlgClosed.card_roots_eq_natDegree, natDegree_hP, Multiset.card_map,
     card_val, card_univ, Fintype.card_fin]
 
-lemma hP_eq_nodal {n : ℕ} (x : Fin n → ℝ)
+theorem hP_eq_nodal {n : ℕ} (x : Fin n → ℝ)
     (hroot : ∀ i, (aeval (x i) (hermitePolyH n) : ℝ) = 0) (hinj : Function.Injective x) :
     hP n = C (2 ^ n) * Lagrange.nodal univ fun i => (x i : ℂ) := by
   conv_lhs => rw [← C_leadingCoeff_mul_prod_multiset_X_sub_C
@@ -1522,10 +1516,10 @@ lemma hP_eq_nodal {n : ℕ} (x : Fin n → ℝ)
 /-- `∏ H_m(y)` over the zeros `y` of `H_{m+1}`. -/
 def SSH (m : ℕ) : ℂ := ((hP (m + 1)).roots.map fun y => (hP m).eval y).prod
 
-lemma SSH_zero : SSH 0 = 1 := by
+theorem SSH_zero : SSH 0 = 1 := by
   simp [SSH, hP, hermitePolyH_zero]
 
-lemma SSH_succ (m : ℕ) : SSH (m + 1) = (-(2 * ((m : ℂ) + 1))) ^ (m + 1) * SSH m := by
+theorem SSH_succ (m : ℕ) : SSH (m + 1) = (-(2 * ((m : ℂ) + 1))) ^ (m + 1) * SSH m := by
   have key := lc_pow_mul_prod_roots_eval (hP (m + 2)) (hP (m + 1))
   rw [natDegree_hP, natDegree_hP, leadingCoeff_hP, leadingCoeff_hP] at key
   have hne := hP_ne_zero (m + 1)
@@ -1543,12 +1537,12 @@ lemma SSH_succ (m : ℕ) : SSH (m + 1) = (-(2 * ((m : ℂ) + 1))) ^ (m + 1) * SS
   rw [he.neg_one_pow, one_mul, ← pow_mul, ← pow_mul, mul_comm (m + 1) (m + 2)] at key
   exact mul_left_cancel₀ (pow_ne_zero _ two_ne_zero) key
 
-lemma SSH_eq (m : ℕ) : SSH m = ∏ k ∈ range m, (-(2 * ((k : ℂ) + 1))) ^ (k + 1) := by
+theorem SSH_eq (m : ℕ) : SSH m = ∏ k ∈ range m, (-(2 * ((k : ℂ) + 1))) ^ (k + 1) := by
   induction m with
   | zero => simp [SSH_zero]
   | succ m ih => rw [SSH_succ, ih, prod_range_succ]; ring
 
-lemma disc_eq (m : ℕ) (x : Fin (m + 1) → ℝ)
+theorem disc_eq (m : ℕ) (x : Fin (m + 1) → ℝ)
     (hroot : ∀ i, (aeval (x i) (hermitePolyH (m + 1)) : ℝ) = 0) (hinj : Function.Injective x) :
     (∏ i : Fin (m + 1), ∏ j : Fin (m + 1),
       if i.val < j.val then ((x i - x j : ℝ) : ℂ) ^ 2 else 1) * (2 ^ (m + 1)) ^ (m + 1) =
@@ -1582,11 +1576,11 @@ lemma disc_eq (m : ℕ) (x : Fin (m + 1) → ℝ)
     ((∏ i, ∏ j, (if i.val < j.val then (xc i - xc j) ^ 2 else (1 : ℂ))) *
       ((2 : ℂ) ^ (m + 1)) ^ (m + 1)) * hσ
 
-lemma sum_range_succ_eq_choose (m : ℕ) : ∑ k ∈ range m, (k + 1) = (m + 1).choose 2 := by
+theorem sum_range_succ_eq_choose (m : ℕ) : ∑ k ∈ range m, (k + 1) = (m + 1).choose 2 := by
   rw [Nat.choose_two_right, ← Finset.sum_range_id (m + 1), Finset.sum_range_succ']
   simp
 
-lemma disc_closed (m : ℕ) (x : Fin (m + 1) → ℝ)
+theorem disc_closed (m : ℕ) (x : Fin (m + 1) → ℝ)
     (hroot : ∀ i, (aeval (x i) (hermitePolyH (m + 1)) : ℝ) = 0) (hinj : Function.Injective x) :
     ((2 : ℂ) ^ (m + 1)) ^ (2 * m) * (∏ i : Fin (m + 1), ∏ j : Fin (m + 1),
       if i.val < j.val then ((x i - x j : ℝ) : ℂ) ^ 2 else 1) =

@@ -7,7 +7,6 @@ module
 
 public import DLMF.Spheroidal.FerrersDefs
 public import DLMF.Spheroidal.Angular
-public import DLMF.Core.Framework
 public import DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion
 
 /-!
@@ -40,7 +39,7 @@ open scoped Topology Real
 namespace DLMF.Spheroidal
 
 /-- If two elements of a set have `a < b` smaller elements in the set, they are ordered. -/
-private theorem s30_lt_of_encard_lt {S : Set ℝ} {x y : ℝ} {a b : ℕ∞}
+private lemma s30_lt_of_encard_lt {S : Set ℝ} {x y : ℝ} {a b : ℕ∞}
     (hx : (S ∩ Iio x).encard = a) (hy : (S ∩ Iio y).encard = b) (hab : a < b) : x < y := by
   by_contra h
   have hsub : S ∩ Iio y ⊆ S ∩ Iio x :=

@@ -6,9 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.EllipticIntegrals.SymmetricSpecialCases
-public import Carlson.R.SlitDeriv
 public import Carlson.R.EulerPoisson
-public import Carlson.R.Homogeneity
 
 /-!
 # Symmetric elliptic integrals: derivatives and differential equations (DLMF §19.18)
@@ -36,14 +34,14 @@ namespace DLMF.EllipticIntegrals
 
 variable {ι : Type*} [Fintype ι]
 
-theorem ei19c_eventuallyEq (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
+lemma ei19c_eventuallyEq (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
     (hz : z ∈ Carlson.carlsonRSlitDomain) :
     symEllIntR a b =ᶠ[𝓝 z] Carlson.carlsonR (-a) b := by
   filter_upwards [Carlson.isOpen_carlsonRSlitDomain.mem_nhds hz] with w hw
   exact symEllIntR_of_mem _ _ hw
 
 open scoped Classical in
-theorem ei19c_hasDerivAt_update (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
+lemma ei19c_hasDerivAt_update (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
     (hz : z ∈ Carlson.carlsonRSlitDomain) (j : ι) :
     HasDerivAt (fun w => symEllIntR a b (Function.update z j w))
       (Gamma (∑ i, b i) * (-a * b j *
@@ -86,7 +84,7 @@ theorem hasDerivAt_symEllIntR_translate (a : ℂ) (b z : ι → ℂ) {x : ℂ}
   rw [show -a - 1 = -(a + 1) by ring]
   ring
 
-theorem ei19c_deriv_update (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
+lemma ei19c_deriv_update (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
     (hz : z ∈ Carlson.carlsonRSlitDomain) (j : ι) :
     Dirichlet.carlsonPartialDeriv j (symEllIntR a b) z =
       Gamma (∑ i, b i) * (-a * b j *
@@ -129,12 +127,12 @@ theorem mul_partialDeriv_add_symEllIntR (a : ℂ) (b : ι → ℂ) {z : ι → �
   linear_combination Gamma (∑ i, b i) * h1
 
 open scoped Classical in
-theorem ei19c_partialDeriv_congr {F G : (ι → ℂ) → ℂ} {z : ι → ℂ} (h : F =ᶠ[𝓝 z] G) (j : ι) :
+lemma ei19c_partialDeriv_congr {F G : (ι → ℂ) → ℂ} {z : ι → ℂ} (h : F =ᶠ[𝓝 z] G) (j : ι) :
     Dirichlet.carlsonPartialDeriv j F z = Dirichlet.carlsonPartialDeriv j G z :=
   SeveralComplexVariables.partialDeriv_congr h j
 
 open scoped Classical in
-theorem ei19c_eulerPoisson_congr {F G : (ι → ℂ) → ℂ} {z : ι → ℂ} (h : F =ᶠ[𝓝 z] G)
+lemma ei19c_eulerPoisson_congr {F G : (ι → ℂ) → ℂ} {z : ι → ℂ} (h : F =ᶠ[𝓝 z] G)
     (i j : ι) (b : ι → ℂ) :
     Dirichlet.carlsonEulerPoissonOperator i j b z F =
       Dirichlet.carlsonEulerPoissonOperator i j b z G := by
@@ -156,7 +154,7 @@ theorem eulerPoisson_symEllIntR (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
   exact Carlson.carlsonEulerPoissonOperator_carlsonR (-a) b hz j l
 
 /-- `R_{-a}(𝐛; ·)` is holomorphic on the slit-plane node domain. -/
-theorem p19sR1_analyticOnNhd_carlsonR (t : ℂ) (b : ι → ℂ) :
+lemma p19sR1_analyticOnNhd_carlsonR (t : ℂ) (b : ι → ℂ) :
     AnalyticOnNhd ℂ (Carlson.carlsonR t b) Carlson.carlsonRSlitDomain := by
   have h := Carlson.analyticOnNhd_regCarlsonR_comp (κ := ι) (U := Carlson.carlsonRSlitDomain)
     (t := fun _ => t) (b := fun _ => b) (z := id) Carlson.isOpen_carlsonRSlitDomain
@@ -165,7 +163,7 @@ theorem p19sR1_analyticOnNhd_carlsonR (t : ℂ) (b : ι → ℂ) :
 
 open scoped Classical in
 /-- Mixed coordinate derivatives of `R_{-a}(𝐛; 𝐳)` commute (slit-plane nodes). -/
-theorem p19sR1_partialDeriv_comm_symEllIntR (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
+lemma p19sR1_partialDeriv_comm_symEllIntR (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
     (hz : z ∈ Carlson.carlsonRSlitDomain) (j l : ι) :
     Dirichlet.carlsonPartialDeriv j (Dirichlet.carlsonPartialDeriv l (symEllIntR a b)) z =
       Dirichlet.carlsonPartialDeriv l (Dirichlet.carlsonPartialDeriv j (symEllIntR a b)) z := by
@@ -202,15 +200,15 @@ def symEllIntRFVec (v : Fin 3 → ℂ) : ℂ := symEllIntRF (v 0) (v 1) (v 2)
 /-- `R_G` as a function on `ℂ³ = Fin 3 → ℂ`. -/
 def symEllIntRGVec (v : Fin 3 → ℂ) : ℂ := symEllIntRG (v 0) (v 1) (v 2)
 
-theorem ei19c_vec3 (v : Fin 3 → ℂ) : (![v 0, v 1, v 2] : Fin 3 → ℂ) = v := by
+lemma ei19c_vec3 (v : Fin 3 → ℂ) : (![v 0, v 1, v 2] : Fin 3 → ℂ) = v := by
   funext i; fin_cases i <;> rfl
 
-theorem ei19c_RFVec_eventuallyEq {v : Fin 3 → ℂ} (hv : v ∈ Carlson.carlsonRSlitDomain) :
+lemma ei19c_RFVec_eventuallyEq {v : Fin 3 → ℂ} (hv : v ∈ Carlson.carlsonRSlitDomain) :
     symEllIntRFVec =ᶠ[𝓝 v] symEllIntR (1 / 2) (fun _ : Fin 3 => 1 / 2) := by
   filter_upwards [Carlson.isOpen_carlsonRSlitDomain.mem_nhds hv] with w hw
   rw [symEllIntRFVec, symEllIntRF_eq_symEllIntR (hw 0) (hw 1) (hw 2), ei19c_vec3]
 
-theorem ei19c_RGVec_eventuallyEq {v : Fin 3 → ℂ} (hv : v ∈ Carlson.carlsonRSlitDomain) :
+lemma ei19c_RGVec_eventuallyEq {v : Fin 3 → ℂ} (hv : v ∈ Carlson.carlsonRSlitDomain) :
     symEllIntRGVec =ᶠ[𝓝 v] symEllIntR (-1 / 2) (fun _ : Fin 3 => 1 / 2) := by
   filter_upwards [Carlson.isOpen_carlsonRSlitDomain.mem_nhds hv] with w hw
   rw [symEllIntRGVec, symEllIntRG_eq_symEllIntR (hw 0) (hw 1) (hw 2), ei19c_vec3]
@@ -324,13 +322,13 @@ theorem eulerPoisson_symEllIntRF {v : Fin 3 → ℂ} (hv : v ∈ Carlson.carlson
 
 /-! ### Real line derivatives of holomorphic functions of several variables (helpers) -/
 
-theorem p19sR1_hasDerivAt_path (c d : ι → ℂ) (r : ℝ) :
+lemma p19sR1_hasDerivAt_path (c d : ι → ℂ) (r : ℝ) :
     HasDerivAt (fun t : ℝ => c + (t : ℂ) • d) d r := by
   have h := ((hasDerivAt_id r).ofReal_comp.smul_const d).const_add c
   simpa using h
 
 /-- First derivative of `t ↦ H(c + t d)` along a real line. -/
-theorem p19sR1_hasDerivAt_line [DecidableEq ι] {H : (ι → ℂ) → ℂ} {c d : ι → ℂ} {r : ℝ}
+lemma p19sR1_hasDerivAt_line [DecidableEq ι] {H : (ι → ℂ) → ℂ} {c d : ι → ℂ} {r : ℝ}
     (hH : DifferentiableAt ℂ H (c + (r : ℂ) • d)) :
     HasDerivAt (fun t : ℝ => H (c + (t : ℂ) • d))
       (∑ i, d i * SeveralComplexVariables.partialDeriv i H (c + (r : ℂ) • d)) r := by
@@ -342,7 +340,7 @@ theorem p19sR1_hasDerivAt_line [DecidableEq ι] {H : (ι → ℂ) → ℂ} {c d 
 
 /-- Second derivative of `t ↦ H(c + t d)` along a real line, for `H` holomorphic on an open set
 `U` containing `c + r d`; `G` agrees with `H` on `U`. -/
-theorem p19sR1_deriv2_line [DecidableEq ι] {H G : (ι → ℂ) → ℂ} {U : Set (ι → ℂ)} (hH : AnalyticOnNhd ℂ H U)
+lemma p19sR1_deriv2_line [DecidableEq ι] {H G : (ι → ℂ) → ℂ} {U : Set (ι → ℂ)} (hH : AnalyticOnNhd ℂ H U)
     (hU : IsOpen U) (hGH : EqOn G H U) {c d : ι → ℂ} {r : ℝ} (hr : c + (r : ℂ) • d ∈ U) :
     deriv (fun t : ℝ => G (c + (t : ℂ) • d)) r =
         ∑ i, d i * SeveralComplexVariables.partialDeriv i H (c + (r : ℂ) • d) ∧

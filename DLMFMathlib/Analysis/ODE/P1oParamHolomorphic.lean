@@ -6,8 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.Analysis.Complex.LocallyUniformLimit
-public import Mathlib.Topology.ContinuousMap.Bounded.Normed
-public import DLMFMathlib.Analysis.ODE.P1oLinearGlobal
+public import DLMFMathlib.Analysis.ODE.PowerSeriesUniqueness
 
 /-!
 # Holomorphic dependence on a parameter for linear second-order ODEs
@@ -45,7 +44,7 @@ def p1oRetract (R : ℝ) (hR : 0 < R) : ℂ →ᵇ ℂ :=
       calc ‖z‖ = R * (‖z‖ / R) := by field_simp
         _ ≤ R * max 1 (‖z‖ / R) := by gcongr)
 
-theorem p1oRetract_apply_of_mem {R : ℝ} (hR : 0 < R) {z : ℂ} (hz : z ∈ closedBall (0 : ℂ) R) :
+lemma p1oRetract_apply_of_mem {R : ℝ} (hR : 0 < R) {z : ℂ} (hz : z ∈ closedBall (0 : ℂ) R) :
     p1oRetract R hR z = z := by
   have : ‖z‖ / R ≤ 1 := by
     rw [div_le_one hR]; simpa using hz
@@ -66,23 +65,23 @@ def p1oHolBall (R : ℝ) : Submodule ℂ (ℂ →ᵇ ℂ) where
     simp only [mem_ofPred_eq, coe_smul] at *
     exact hf.const_smul c
 
-theorem p1oHolBall_mul {R : ℝ} {f g : ℂ →ᵇ ℂ} (hf : f ∈ p1oHolBall R) (hg : g ∈ p1oHolBall R) :
+lemma p1oHolBall_mul {R : ℝ} {f g : ℂ →ᵇ ℂ} (hf : f ∈ p1oHolBall R) (hg : g ∈ p1oHolBall R) :
     f * g ∈ p1oHolBall R := by
   change DifferentiableOn ℂ (⇑(f * g)) _
   rw [coe_mul]
   exact DifferentiableOn.mul hf hg
 
-theorem p1oHolBall_one (R : ℝ) : (1 : ℂ →ᵇ ℂ) ∈ p1oHolBall R := by
+lemma p1oHolBall_one (R : ℝ) : (1 : ℂ →ᵇ ℂ) ∈ p1oHolBall R := by
   change DifferentiableOn ℂ (⇑(1 : ℂ →ᵇ ℂ)) _
   rw [coe_one]
   exact differentiableOn_const 1
 
-theorem p1oRetract_mem {R : ℝ} (hR : 0 < R) : p1oRetract R hR ∈ p1oHolBall R := by
+lemma p1oRetract_mem {R : ℝ} (hR : 0 < R) : p1oRetract R hR ∈ p1oHolBall R := by
   change DifferentiableOn ℂ (⇑(p1oRetract R hR)) _
   exact differentiableOn_id.congr fun z hz =>
     p1oRetract_apply_of_mem hR (ball_subset_closedBall hz)
 
-theorem p1oHolBall_isClosed (R : ℝ) : IsClosed (p1oHolBall R : Set (ℂ →ᵇ ℂ)) := by
+lemma p1oHolBall_isClosed (R : ℝ) : IsClosed (p1oHolBall R : Set (ℂ →ᵇ ℂ)) := by
   refine isClosed_of_closure_subset fun f hf => ?_
   have hne := mem_closure_iff_nhdsWithin_neBot.mp hf
   have ht : Tendsto (fun g : ℂ →ᵇ ℂ => g) (𝓝[(p1oHolBall R : Set (ℂ →ᵇ ℂ))] f) (𝓝 f) :=
@@ -108,7 +107,7 @@ def p1oField (R : ℝ) (hR : 0 < R) (p₀ p₁ q₀ q₁ : ℝ → ℂ) (t : ℝ
     add_mem (p1oHolBall_mul (p1oCoef R hR _ _).2 y.2.2)
       (p1oHolBall_mul (p1oCoef R hR _ _).2 y.1.2)⟩)
 
-theorem p1oField_lipschitz (R : ℝ) (hR : 0 < R) (p₀ p₁ q₀ q₁ : ℝ → ℂ) (t : ℝ) :
+lemma p1oField_lipschitz (R : ℝ) (hR : 0 < R) (p₀ p₁ q₀ q₁ : ℝ → ℂ) (t : ℝ) :
     LipschitzWith ⟨1 + ‖(p1oCoef R hR (p₀ t) (p₁ t) : ℂ →ᵇ ℂ)‖ +
         ‖(p1oCoef R hR (q₀ t) (q₁ t) : ℂ →ᵇ ℂ)‖, by positivity⟩
       (p1oField R hR p₀ p₁ q₀ q₁ t) := by
@@ -137,7 +136,7 @@ theorem p1oField_lipschitz (R : ℝ) (hR : 0 < R) (p₀ p₁ q₀ q₁ : ℝ →
 
 variable {p₀ p₁ q₀ q₁ : ℝ → ℂ}
 
-theorem p1oCoef_continuousOn {R : ℝ} (hR : 0 < R) {s : Set ℝ} {c₀ c₁ : ℝ → ℂ}
+lemma p1oCoef_continuousOn {R : ℝ} (hR : 0 < R) {s : Set ℝ} {c₀ c₁ : ℝ → ℂ}
     (h₀ : ContinuousOn c₀ s) (h₁ : ContinuousOn c₁ s) :
     ContinuousOn (fun t => (p1oCoef R hR (c₀ t) (c₁ t) : ℂ →ᵇ ℂ)) s :=
   (h₀.smul continuousOn_const).add (h₁.smul continuousOn_const)
@@ -146,7 +145,7 @@ theorem p1oCoef_continuousOn {R : ℝ} (hR : 0 < R) {s : Set ℝ} {c₀ c₁ : �
 `f, f' : ℝ → ℂ → ℂ`, holomorphic in `λ` on the disc `‖λ‖ < R` for every `t`, such that for
 every `λ` with `‖λ‖ ≤ R`, `(f(·, λ), f'(·, λ))` solves
 `y' = y'`, `(y')' = (p₀ + λ p₁) y' + (q₀ + λ q₁) y` on `[a, b]` with data `(y₀, y₁)` at `a`. -/
-theorem p1o_exists_param_Icc {a b R : ℝ} (hab : a ≤ b) (hR : 0 < R)
+lemma p1o_exists_param_Icc {a b R : ℝ} (hab : a ≤ b) (hR : 0 < R)
     (hp₀ : ContinuousOn p₀ (Icc a b)) (hp₁ : ContinuousOn p₁ (Icc a b))
     (hq₀ : ContinuousOn q₀ (Icc a b)) (hq₁ : ContinuousOn q₁ (Icc a b)) (y₀ y₁ : ℂ) :
     ∃ f f' : ℝ → ℂ → ℂ,
@@ -195,7 +194,7 @@ theorem p1o_exists_param_Icc {a b R : ℝ} (hab : a ≤ b) (hR : 0 < R)
     ring
 
 /-- The forward case of `ODE.differentiable_param_of_linear_ode`. -/
-theorem p1o_differentiableOn_param_of_le (hp₀ : Continuous p₀) (hp₁ : Continuous p₁)
+lemma p1o_differentiableOn_param_of_le (hp₀ : Continuous p₀) (hp₁ : Continuous p₁)
     (hq₀ : Continuous q₀) (hq₁ : Continuous q₁) {t₀ : ℝ} {y₀ y₁ : ℂ} {F F' : ℝ → ℂ → ℂ}
     (hF : ∀ μ t, HasDerivAt (fun t => F t μ) (F' t μ) t ∧
       HasDerivAt (fun t => F' t μ) ((p₀ t + μ * p₁ t) * F' t μ + (q₀ t + μ * q₁ t) * F t μ) t)

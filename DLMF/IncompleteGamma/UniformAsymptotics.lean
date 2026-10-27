@@ -5,14 +5,11 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.IncompleteGamma.Asymptotics
-public import DLMF.Gamma.Asymptotics
 public import DLMFMathlib.Analysis.Complex.StarPrimitive
-public import Mathlib.Analysis.Calculus.InverseFunctionTheorem.Analytic
-public import Mathlib.Analysis.Complex.TaylorSeries
 public import Mathlib.Topology.Homotopy.Lifting
-public import Mathlib.Analysis.Convex.Contractible
 public import TauCeti.Topology.Covering.Proper
+public import DLMF.ErrorFunctions.Basic
+public import DLMF.IncompleteGamma.Basic
 
 /-!
 # Uniform incomplete-Gamma expansions and inversion, DLMF §8.12
@@ -101,7 +98,7 @@ theorem incG_exp_sub_one_sub_ne_zero {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠
       (by linarith) (by linarith)
 
 /-- `(e^w-1-w)/w² → 1/2` as `w → 0`. -/
-lemma incG_tendsto_etaQuot :
+theorem incG_tendsto_etaQuot :
     Tendsto (fun w : ℂ => (exp w - 1 - w)/w^2) (𝓝[≠] 0) (𝓝 (1/2)) := by
   rw [tendsto_iff_norm_sub_tendsto_zero]
   refine squeeze_zero' (Eventually.of_forall fun _ => norm_nonneg _) ?_
@@ -149,10 +146,10 @@ theorem incG_gammaEtaFactor_differentiable : Differentiable ℂ gammaEtaFactor :
 /-- The strip `|Im w| < 2π`. -/
 def incG_strip : Set ℂ := {w : ℂ | |w.im| < 2*π}
 
-lemma incG_strip_isOpen : IsOpen incG_strip :=
+theorem incG_strip_isOpen : IsOpen incG_strip :=
   isOpen_lt (continuous_abs.comp continuous_im) continuous_const
 
-lemma incG_strip_convex : Convex ℝ incG_strip := by
+theorem incG_strip_convex : Convex ℝ incG_strip := by
   intro u hu v hv a b ha hb hab
   simp only [incG_strip, Set.mem_ofPred_eq] at *
   have : (a • u + b • v).im = a*u.im + b*v.im := by simp
@@ -168,9 +165,9 @@ lemma incG_strip_convex : Convex ℝ incG_strip := by
           have hs : a*(2*π)+b*(2*π) = 2*π := by rw [← add_mul, hab, one_mul]
           linarith
 
-lemma incG_zero_mem_strip : (0:ℂ) ∈ incG_strip := by simp [incG_strip, Real.pi_pos]
+theorem incG_zero_mem_strip : (0:ℂ) ∈ incG_strip := by simp [incG_strip, Real.pi_pos]
 
-lemma incG_gammaEtaFactor_ne_zero {w : ℂ} (hw : w ∈ incG_strip) : gammaEtaFactor w ≠ 0 := by
+theorem incG_gammaEtaFactor_ne_zero {w : ℂ} (hw : w ∈ incG_strip) : gammaEtaFactor w ≠ 0 := by
   by_cases h0 : w = 0
   · simp [gammaEtaFactor, h0]
   · simp only [gammaEtaFactor, h0, ↓reduceIte]
@@ -178,7 +175,7 @@ lemma incG_gammaEtaFactor_ne_zero {w : ℂ} (hw : w ∈ incG_strip) : gammaEtaFa
       (pow_ne_zero 2 h0)
 
 /-- The logarithmic derivative of the factor is holomorphic on the strip. -/
-lemma incG_logDeriv_differentiableOn :
+theorem incG_logDeriv_differentiableOn :
     DifferentiableOn ℂ (fun t => deriv gammaEtaFactor t/gammaEtaFactor t) incG_strip := by
   have hd := incG_gammaEtaFactor_differentiable
   have hdd : Differentiable ℂ (deriv gammaEtaFactor) := fun w =>
@@ -186,7 +183,7 @@ lemma incG_logDeriv_differentiableOn :
   exact (hdd.differentiableOn).div hd.differentiableOn fun w hw => incG_gammaEtaFactor_ne_zero hw
 
 /-- The primitive in the definition of η has the expected derivative on the strip. -/
-lemma incG_hasDerivAt_etaPrimitive {w : ℂ} (hw : w ∈ incG_strip) :
+theorem incG_hasDerivAt_etaPrimitive {w : ℂ} (hw : w ∈ incG_strip) :
     HasDerivAt (primitive (fun t => deriv gammaEtaFactor t/gammaEtaFactor t))
       (deriv gammaEtaFactor w/gammaEtaFactor w) w := by
   have he : primitive (fun t => deriv gammaEtaFactor t/gammaEtaFactor t) =
@@ -197,7 +194,7 @@ lemma incG_hasDerivAt_etaPrimitive {w : ℂ} (hw : w ∈ incG_strip) :
     incG_logDeriv_differentiableOn hw
 
 /-- `exp` of the primitive of the logarithmic derivative recovers the factor on the strip. -/
-lemma incG_exp_etaPrimitive {w : ℂ} (hw : w ∈ incG_strip) :
+theorem incG_exp_etaPrimitive {w : ℂ} (hw : w ∈ incG_strip) :
     exp (primitive (fun t => deriv gammaEtaFactor t/gammaEtaFactor t) w) = gammaEtaFactor w := by
   set P := primitive (fun t => deriv gammaEtaFactor t/gammaEtaFactor t)
   set f := gammaEtaFactor
@@ -309,7 +306,7 @@ theorem gammaUniformP_identity (a w : ℂ) :
   linear_combination -this/2
 
 /-- Points of the slit plane are not poles of `Γ(a+1)`. -/
-lemma slitPlane_add_one_ne_neg_nat {a : ℂ} (ha : a ∈ slitPlane) : ∀ n : ℕ, a+1 ≠ -n := by
+theorem slitPlane_add_one_ne_neg_nat {a : ℂ} (ha : a ∈ slitPlane) : ∀ n : ℕ, a+1 ≠ -n := by
   intro n h
   have : a = ((-((n:ℝ)+1) : ℝ) : ℂ) := by push_cast; linear_combination h
   rw [this, ofReal_mem_slitPlane] at ha
@@ -424,7 +421,7 @@ def gammaUniformC : ℕ → ℂ → ℂ
     else deriv (gammaUniformC k) w/(exp w-1)+(-1 : ℂ)^(k+1)*gammaStirlingCoeff (k+1)/(exp w-1)
 
 /-- On the positive axis the scaled Gamma function is `exp` of Binet's integral. -/
-lemma incG_gammaScaled_ofReal {t : ℝ} (ht : 0 < t) :
+theorem incG_gammaScaled_ofReal {t : ℝ} (ht : 0 < t) :
     gammaScaled t = ((Real.exp (DLMF.Gamma.binetIntegral t) : ℝ) : ℂ) := by
   have hG : Real.Gamma t = (2*π)^(1/2:ℝ) * Real.exp ((t-1/2)*Real.log t - t) *
       Real.exp (DLMF.Gamma.binetIntegral t) := by
@@ -442,7 +439,7 @@ lemma incG_gammaScaled_ofReal {t : ℝ} (ht : 0 < t) :
     exact_mod_cast hpos.ne'
   field_simp
 
-lemma incG_tendsto_binetIntegral :
+theorem incG_tendsto_binetIntegral :
     Tendsto DLMF.Gamma.binetIntegral atTop (𝓝 0) := by
   have hu : Tendsto (fun t : ℝ => 1/(12*t)) atTop (𝓝 0) := by
     exact tendsto_const_nhds.div_atTop (tendsto_id.const_mul_atTop (by norm_num : (0:ℝ) < 12))
@@ -450,7 +447,7 @@ lemma incG_tendsto_binetIntegral :
   · filter_upwards [eventually_gt_atTop 0] with t ht using (DLMF.Gamma.binetIntegral_mem ht).1
   · filter_upwards [eventually_gt_atTop 0] with t ht using (DLMF.Gamma.binetIntegral_mem ht).2
 
-lemma incG_tendsto_mul_binetIntegral :
+theorem incG_tendsto_mul_binetIntegral :
     Tendsto (fun t : ℝ => t * DLMF.Gamma.binetIntegral t) atTop (𝓝 (1/12)) := by
   have h := DLMF.Gamma.hasAsymptoticExpansion_binetIntegral 1
   simp only [Finset.range_one, Finset.sum_singleton, CharP.cast_eq_zero, zero_add, smul_eq_mul,
@@ -474,7 +471,7 @@ lemma incG_tendsto_mul_binetIntegral :
   filter_upwards [eventually_gt_atTop 0] with t ht
   rw [Real.rpow_neg_one]; field_simp; ring
 
-lemma incG_tendsto_mul_exp_binet_sub_one :
+theorem incG_tendsto_mul_exp_binet_sub_one :
     Tendsto (fun t : ℝ => t * (Real.exp (DLMF.Gamma.binetIntegral t) - 1)) atTop (𝓝 (1/12)) := by
   have hr : Tendsto (fun t : ℝ => t * (Real.exp (DLMF.Gamma.binetIntegral t) - 1 -
       DLMF.Gamma.binetIntegral t)) atTop (𝓝 0) := by
@@ -500,7 +497,7 @@ lemma incG_tendsto_mul_exp_binet_sub_one :
   exact this.congr fun t => by ring
 
 /-- `g₀ = 1`. -/
-lemma incG_gammaStirlingCoeff_zero : gammaStirlingCoeff 0 = 1 := by
+theorem incG_gammaStirlingCoeff_zero : gammaStirlingCoeff 0 = 1 := by
   rw [gammaStirlingCoeff, asymptoticCoeff]
   refine Tendsto.limUnder_eq ?_
   have h1 : Tendsto (fun t => Real.exp (DLMF.Gamma.binetIntegral t)) atTop (𝓝 1) := by
@@ -513,7 +510,7 @@ lemma incG_gammaStirlingCoeff_zero : gammaStirlingCoeff 0 = 1 := by
   simp [incG_gammaScaled_ofReal ht]
 
 /-- `g₁ = 1/12`. -/
-lemma incG_gammaStirlingCoeff_one : gammaStirlingCoeff 1 = 1/12 := by
+theorem incG_gammaStirlingCoeff_one : gammaStirlingCoeff 1 = 1/12 := by
   have h0 := incG_gammaStirlingCoeff_zero
   rw [gammaStirlingCoeff] at h0 ⊢
   rw [asymptoticCoeff]
@@ -526,7 +523,7 @@ lemma incG_gammaStirlingCoeff_one : gammaStirlingCoeff 1 = 1/12 := by
   simp [incG_gammaScaled_ofReal ht]
 
 /-- `e^w ≠ 1` on the punctured strip `0 < |Im w| < 2π` or real `w ≠ 0`. -/
-lemma incG_exp_sub_one_ne_zero {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠ 0) : exp w - 1 ≠ 0 := by
+theorem incG_exp_sub_one_ne_zero {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠ 0) : exp w - 1 ≠ 0 := by
   intro h
   obtain ⟨n, hn⟩ := Complex.exp_eq_one_iff.mp (sub_eq_zero.mp h)
   have him : w.im = n*(2*π) := by rw [hn]; simp
@@ -538,7 +535,7 @@ lemma incG_exp_sub_one_ne_zero {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠ 0) : 
   exact hw0 (by rw [hn, hn0]; simp)
 
 /-- η does not vanish on the punctured strip. -/
-lemma incG_gammaUniformEta_ne_zero {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠ 0) :
+theorem incG_gammaUniformEta_ne_zero {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠ 0) :
     gammaUniformEtaOnLog w ≠ 0 := by
   intro h0
   have := gammaUniformEta_equation hw
@@ -644,7 +641,7 @@ def gammaUniformD (k n : ℕ) : ℂ :=
   iteratedDeriv n (fun η => gammaUniformC k (gammaUniformInverseLog η)) 0/(n.factorial : ℂ)
 
 /-- A bounded image of the saddle coordinate in the closed strip has bounded preimage. -/
-lemma gammaInv_norm_bound {w : ℂ} {M : ℝ} (hw : |w.im| ≤ 2*π) (hF : ‖exp w-1-w‖ ≤ M) :
+theorem gammaInv_norm_bound {w : ℂ} {M : ℝ} (hw : |w.im| ≤ 2*π) (hF : ‖exp w-1-w‖ ≤ M) :
     ‖w‖ ≤ M+4*π+2 := by
   have hnorm := norm_le_abs_re_add_abs_im w
   have hexp : Real.exp w.re ≤ M+1+‖w‖ := by
@@ -669,7 +666,7 @@ lemma gammaInv_norm_bound {w : ℂ} {M : ℝ} (hw : |w.im| ≤ 2*π) (hF : ‖ex
     linarith
 
 /-- Points on the strip boundary map outside the Maclaurin disk. -/
-lemma gammaInv_boundary_norm {w : ℂ} (hw : |w.im|=2*π) :
+theorem gammaInv_boundary_norm {w : ℂ} (hw : |w.im|=2*π) :
     2*π ≤ ‖exp w-1-w‖ := by
   have hsin : Real.sin w.im = 0 := by
     rcases abs_eq (by positivity : (0:ℝ) ≤ 2*π) |>.mp hw with h | h
@@ -679,7 +676,7 @@ lemma gammaInv_boundary_norm {w : ℂ} (hw : |w.im|=2*π) :
   simpa [Complex.exp_im, hsin, hw] using hi
 
 /-- A sublevel set below the first critical image stays compactly inside the strip. -/
-lemma gammaInv_compact_sublevel {M : ℝ} (_hM : 0 ≤ M) (hMπ : M < 2*π) :
+theorem gammaInv_compact_sublevel {M : ℝ} (_hM : 0 ≤ M) (hMπ : M < 2*π) :
     IsCompact {w : ℂ | |w.im| ≤ 2*π ∧ ‖exp w-1-w‖ ≤ M} ∧
       {w : ℂ | |w.im| ≤ 2*π ∧ ‖exp w-1-w‖ ≤ M} ⊆ incG_strip := by
   have hc : IsClosed {w : ℂ | |w.im| ≤ 2*π ∧ ‖exp w-1-w‖ ≤ M} :=
@@ -697,7 +694,7 @@ lemma gammaInv_compact_sublevel {M : ℝ} (_hM : 0 ≤ M) (hMπ : M < 2*π) :
     exact lt_of_le_of_ne hw.1 (fun he => not_le.mpr hMπ ((gammaInv_boundary_norm he).trans hw.2))
 
 /-- Compact subsets of the inverse disk have compact preimage in the strip. -/
-lemma gammaInv_compact_preimage {K : Set ℂ}
+theorem gammaInv_compact_preimage {K : Set ℂ}
     (hKsub : K ⊆ Metric.ball (0:ℂ) (2*Real.sqrt π)) (hK : IsCompact K) :
     IsCompact (incG_strip ∩ gammaUniformEtaOnLog ⁻¹' K) := by
   rcases K.eq_empty_or_nonempty with rfl | hne
@@ -736,7 +733,7 @@ lemma gammaInv_compact_preimage {K : Set ℂ}
   exact Metric.isCompact_iff_isClosed_bounded.mpr ⟨hclosed, hCc.isBounded.subset hSC⟩
 
 /-- The saddle coordinate is locally a homeomorphism on its zero-free strip. -/
-lemma gammaInv_isLocalHomeomorphOn : IsLocalHomeomorphOn gammaUniformEtaOnLog incG_strip := by
+theorem gammaInv_isLocalHomeomorphOn : IsLocalHomeomorphOn gammaUniformEtaOnLog incG_strip := by
   refine IsLocalHomeomorphOn.mk _ _ fun w hw => ?_
   have hs := (incG_gammaUniformEta_analyticOnNhd w hw).hasStrictDerivAt
   have hd := incG_gammaUniformEta_deriv_ne_zero hw
@@ -746,7 +743,7 @@ lemma gammaInv_isLocalHomeomorphOn : IsLocalHomeomorphOn gammaUniformEtaOnLog in
 
 /-- The saddle coordinate is a covering over the entire Maclaurin disk, using the
 Tau Ceti contributors' proper local-homeomorphism criterion. -/
-lemma gammaInv_isCoveringMapOn :
+theorem gammaInv_isCoveringMapOn :
     IsCoveringMapOn (fun w : incG_strip => gammaUniformEtaOnLog w)
       (Metric.ball (0:ℂ) (2*Real.sqrt π)) := by
   have hl : IsLocalHomeomorph (fun w : incG_strip => gammaUniformEtaOnLog w) :=
@@ -767,7 +764,7 @@ lemma gammaInv_isCoveringMapOn :
   exact gammaInv_compact_preimage hKs hK
 
 /-- The local inverse continues single-valuedly over its full Maclaurin disk. -/
-lemma gammaInv_exists_global : ∃ f : ℂ → ℂ,
+theorem gammaInv_exists_global : ∃ f : ℂ → ℂ,
     f 0=0 ∧ deriv f 0=1 ∧ ∀ η : ℂ, ‖η‖ < 2*Real.sqrt π →
       DifferentiableAt ℂ f η ∧ |(f η).im| < 2*π ∧ gammaUniformEtaOnLog (f η)=η := by
   classical

@@ -7,8 +7,8 @@ module
 
 public import DLMFMathlib.NumberTheory.EulerPolynomials
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.IntegrationByParts
-public import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
 public import Mathlib.MeasureTheory.Function.Floor
+public import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
 
 /-!
 # Boole's summation formula

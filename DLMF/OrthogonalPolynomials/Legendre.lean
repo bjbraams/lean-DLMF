@@ -48,7 +48,7 @@ noncomputable section
 
 namespace DLMF.OrthogonalPolynomials
 
-lemma norm_laplace_integrand (θ t : ℝ) :
+theorem norm_laplace_integrand (θ t : ℝ) :
     ‖(Real.cos θ : ℂ) + I * Real.sin θ * Real.cos t‖ =
       Real.sqrt (1 - Real.sin θ ^ 2 * Real.sin t ^ 2) := by
   rw [show (Real.cos θ : ℂ) + I * Real.sin θ * Real.cos t =
@@ -80,7 +80,7 @@ theorem norm_legendrePolyP_le_one (n : ℕ) {x : ℝ} (hx : |x| ≤ 1) : ‖lege
   rwa [Real.cos_arccos (abs_le.mp hx).1 (abs_le.mp hx).2] at this
 
 /-- The Gaussian majorant `|cos θ + i sin θ cos t|ⁿ ≤ exp(-(n sin²θ / 2) sin² t)`. -/
-lemma norm_laplace_integrand_pow_le (n : ℕ) (θ t : ℝ) :
+theorem norm_laplace_integrand_pow_le (n : ℕ) (θ t : ℝ) :
     ‖((Real.cos θ : ℂ) + I * Real.sin θ * Real.cos t) ^ n‖ ≤
       Real.exp (-(n * Real.sin θ ^ 2 / 2) * Real.sin t ^ 2) := by
   set s := Real.sin θ with hs
@@ -182,7 +182,7 @@ theorem conj_legendrePolyP (n : ℕ) (x : ℝ) : conj (legendrePolyP n x) = lege
     rw [show n + 1 + 1 = n + 2 by ring]
     linear_combination hc - hr
 
-lemma continuous_legendrePolyP_ofReal (n : ℕ) : Continuous fun x : ℝ => legendrePolyP n x :=
+theorem continuous_legendrePolyP_ofReal (n : ℕ) : Continuous fun x : ℝ => legendrePolyP n x :=
   (continuous_iff_continuousAt.mpr fun z =>
     ((analyticOnNhd_jacobiPolyP 0 0 n) z (Set.mem_univ z)).continuousAt).comp continuous_ofReal
 
@@ -190,7 +190,7 @@ lemma continuous_legendrePolyP_ofReal (n : ℕ) : Continuous fun x : ℝ => lege
 def legendreCoeff (f : ℝ → ℂ) (n : ℕ) : ℂ :=
   (n + 1 / 2) * ∫ x : ℝ in (-1 : ℝ)..1, f x * legendrePolyP n x
 
-lemma integral_mul_legendrePolyP_eq (f : ℝ → ℂ) (n : ℕ) :
+theorem integral_mul_legendrePolyP_eq (f : ℝ → ℂ) (n : ℕ) :
     ∫ x : ℝ in (-1 : ℝ)..1, f x * legendrePolyP n x = 2 / (2 * n + 1) * legendreCoeff f n := by
   rw [legendreCoeff]
   have h : (2 * (n : ℂ) + 1) ≠ 0 := by norm_cast
@@ -342,7 +342,7 @@ theorem sum_legendreCoeff_sq_le {f : ℝ → ℂ} (hf : ContinuousOn f (Icc (-1)
 /-- The rotated Laplace integrand `u(ψ) = 1 - κ sin²(ψ/2)`, `κ = 2i sin θ e^{-iθ}`. -/
 def laplaceKappa (θ : ℝ) : ℂ := 2 * Real.sin θ ^ 2 + 2 * I * Real.sin θ * Real.cos θ
 
-lemma laplace_integrand_eq (θ ψ : ℝ) :
+theorem laplace_integrand_eq (θ ψ : ℝ) :
     (Real.cos θ : ℂ) + I * Real.sin θ * Real.cos ψ =
       Complex.exp (θ * I) * (1 - laplaceKappa θ * Real.sin (ψ / 2) ^ 2) := by
   rw [Complex.exp_mul_I, ← Complex.ofReal_cos, ← Complex.ofReal_sin, laplaceKappa]
@@ -361,7 +361,7 @@ lemma laplace_integrand_eq (θ ψ : ℝ) :
     (2 * Real.sin θ ^ 2 * Real.cos θ * (Real.sin (ψ / 2) : ℂ) ^ 2) * Complex.I_sq
 
 /-- Splitting Laplace's integral at `π/2`: the two halves are complex conjugate. -/
-lemma integral_laplace_eq_add_conj (n : ℕ) (θ : ℝ) :
+theorem integral_laplace_eq_add_conj (n : ℕ) (θ : ℝ) :
     ∫ t : ℝ in (0 : ℝ)..π, ((Real.cos θ : ℂ) + I * Real.sin θ * Real.cos t) ^ n =
       (∫ t : ℝ in (0 : ℝ)..(π / 2), ((Real.cos θ : ℂ) + I * Real.sin θ * Real.cos t) ^ n) +
         conj (∫ t : ℝ in (0 : ℝ)..(π / 2), ((Real.cos θ : ℂ) + I * Real.sin θ * Real.cos t) ^ n) := by
@@ -380,17 +380,17 @@ lemma integral_laplace_eq_add_conj (n : ℕ) (θ : ℝ) :
   push_cast
   ring
 
-lemma laplaceKappa_eq (θ : ℝ) : laplaceKappa θ =
+theorem laplaceKappa_eq (θ : ℝ) : laplaceKappa θ =
     ((2 * Real.sin θ ^ 2 : ℝ) : ℂ) + ((2 * Real.sin θ * Real.cos θ : ℝ) : ℂ) * I := by
   rw [laplaceKappa]; push_cast; ring
 
-lemma laplaceKappa_re (θ : ℝ) : (laplaceKappa θ).re = 2 * Real.sin θ ^ 2 := by
+theorem laplaceKappa_re (θ : ℝ) : (laplaceKappa θ).re = 2 * Real.sin θ ^ 2 := by
   rw [laplaceKappa_eq]
   simp only [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.I_re, Complex.I_im,
     Complex.ofReal_im]
   ring
 
-lemma norm_one_sub_laplaceKappa_pow_le (n : ℕ) (θ ψ : ℝ) :
+theorem norm_one_sub_laplaceKappa_pow_le (n : ℕ) (θ ψ : ℝ) :
     ‖(1 - laplaceKappa θ * Real.sin (ψ / 2) ^ 2) ^ n‖ ≤
       Real.exp (-(n * Real.sin θ ^ 2 / 2) * Real.sin ψ ^ 2) := by
   have h := norm_laplace_integrand_pow_le n θ ψ
@@ -398,7 +398,7 @@ lemma norm_one_sub_laplaceKappa_pow_le (n : ℕ) (θ ψ : ℝ) :
     one_mul] at h
 
 /-- `n sin²(t / (2√n)) → t²/4`. -/
-lemma tendsto_nat_mul_sin_sq (t : ℝ) :
+theorem tendsto_nat_mul_sin_sq (t : ℝ) :
     Tendsto (fun n : ℕ => (n : ℝ) * Real.sin (t / (2 * Real.sqrt n)) ^ 2) atTop (𝓝 (t ^ 2 / 4)) := by
   have hx : Tendsto (fun n : ℕ => t / (2 * Real.sqrt n)) atTop (𝓝 0) := by
     have hs : Tendsto (fun n : ℕ => 2 * Real.sqrt n) atTop atTop :=
@@ -423,7 +423,7 @@ lemma tendsto_nat_mul_sin_sq (t : ℝ) :
     ring
 
 /-- **The local Laplace limit**: `√n ∫₀^{π/2} (1 - κ sin²(ψ/2))ⁿ dψ → ∫₀^∞ e^{-κt²/4} dt`. -/
-lemma tendsto_sqrt_mul_integral_laplace_half {θ : ℝ} (hθ : 0 < θ) (hθπ : θ < π) :
+theorem tendsto_sqrt_mul_integral_laplace_half {θ : ℝ} (hθ : 0 < θ) (hθπ : θ < π) :
     Tendsto (fun n : ℕ => (Real.sqrt n : ℂ) *
       ∫ ψ : ℝ in (0 : ℝ)..(π / 2), (1 - laplaceKappa θ * Real.sin (ψ / 2) ^ 2) ^ n) atTop
       (𝓝 ((π / (laplaceKappa θ / 4)) ^ (1 / 2 : ℂ) / 2)) := by
@@ -513,7 +513,7 @@ lemma tendsto_sqrt_mul_integral_laplace_half {θ : ℝ} (hθ : 0 < θ) (hθπ : 
   exact (hresc n hn).symm
 
 /-- The Gaussian constant `(π/(κ/4))^{1/2}/2 = ½ √(2π / sin θ) e^{i(θ/2 - π/4)}`. -/
-lemma laplace_gaussian_constant {θ : ℝ} (hθ : 0 < θ) (hθπ : θ < π) :
+theorem laplace_gaussian_constant {θ : ℝ} (hθ : 0 < θ) (hθπ : θ < π) :
     (π / (laplaceKappa θ / 4)) ^ (1 / 2 : ℂ) / 2 =
       ((Real.sqrt (2 * π / Real.sin θ) / 2 : ℝ) : ℂ) * Complex.exp (((θ / 2 - π / 4 : ℝ) : ℂ) * I) := by
   set s := Real.sin θ with hs
@@ -624,7 +624,7 @@ theorem tendsto_sqrt_mul_legendrePolyP_cos {θ : ℝ} (hθ : 0 < θ) (hθπ : θ
 /-! ### The exponential generating function (Temme §6.7) -/
 
 /-- Wallis' integrals on `[0, π]`: odd powers of `cos` integrate to zero. -/
-lemma integral_cos_pow_odd_zero_pi (m : ℕ) : ∫ t in (0 : ℝ)..π, Real.cos t ^ (2 * m + 1) = 0 := by
+theorem integral_cos_pow_odd_zero_pi (m : ℕ) : ∫ t in (0 : ℝ)..π, Real.cos t ^ (2 * m + 1) = 0 := by
   induction m with
   | zero => simp
   | succ m ih =>
@@ -632,7 +632,7 @@ lemma integral_cos_pow_odd_zero_pi (m : ℕ) : ∫ t in (0 : ℝ)..π, Real.cos 
     simp
 
 /-- Wallis' integrals on `[0, π]`: `∫₀^π cos^{2m} = π (2m)! / (4^m (m!)²)`. -/
-lemma integral_cos_pow_even_zero_pi (m : ℕ) :
+theorem integral_cos_pow_even_zero_pi (m : ℕ) :
     ∫ t in (0 : ℝ)..π, Real.cos t ^ (2 * m) = π * ((2 * m)! / (4 ^ m * (m ! : ℝ) ^ 2)) := by
   induction m with
   | zero => simp
@@ -648,7 +648,7 @@ lemma integral_cos_pow_even_zero_pi (m : ℕ) :
     ring
 
 /-- Termwise integration over `[0, π]` of a power series in a bounded continuous function. -/
-lemma hasSum_integral_pow_div_factorial {g : ℝ → ℂ} (hg : Continuous g)
+theorem hasSum_integral_pow_div_factorial {g : ℝ → ℂ} (hg : Continuous g)
     (hb : ∀ t, ‖g t‖ ≤ 1) (u : ℂ) :
     HasSum (fun k : ℕ => ∫ t in (0 : ℝ)..π, (u * g t) ^ k / k !)
       (∫ t in (0 : ℝ)..π, Complex.exp (u * g t)) := by
@@ -743,7 +743,7 @@ theorem legendre_exponential_generating_function {x : ℝ} (hx : |x| ≤ 1) (z :
 
 /-- Termwise integration over `[0, π]` of a power series in a bounded continuous function,
 against an integrable weight. -/
-lemma hasSum_integral_pow_div_factorial_mul {g : ℝ → ℂ} (hg : Continuous g)
+theorem hasSum_integral_pow_div_factorial_mul {g : ℝ → ℂ} (hg : Continuous g)
     (hb : ∀ t, ‖g t‖ ≤ 1) {ρ : ℝ → ℂ} (hρ : IntervalIntegrable ρ volume 0 π) (u : ℂ) :
     HasSum (fun k : ℕ => ∫ t in (0 : ℝ)..π, (u * g t) ^ k / k ! * ρ t)
       (∫ t in (0 : ℝ)..π, Complex.exp (u * g t) * ρ t) := by
@@ -772,7 +772,7 @@ lemma hasSum_integral_pow_div_factorial_mul {g : ℝ → ℂ} (hg : Continuous g
 
 /-- Poisson's integral in angular form: with `t = cos ψ`,
 `∫₋₁¹ (1 - t²)^{λ-1} e^{iwt} dt = ∫₀^π e^{iw cos ψ} sin^{2λ-1} ψ dψ`. -/
-lemma integral_one_sub_sq_cpow_mul_exp_eq_integral_cos {lam : ℝ} (w : ℝ) :
+theorem integral_one_sub_sq_cpow_mul_exp_eq_integral_cos {lam : ℝ} (w : ℝ) :
     ∫ t : ℝ in (-1 : ℝ)..1, (1 - (t : ℂ) ^ 2) ^ ((lam : ℂ) - 1) * Complex.exp (I * w * t) =
       ∫ ψ : ℝ in (0 : ℝ)..π, Complex.exp (I * w * Real.cos ψ) *
         (Real.rpow (Real.sin ψ) (2 * lam - 1) : ℂ) := by

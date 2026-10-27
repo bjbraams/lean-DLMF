@@ -5,7 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Tactic.CrossRefAttribute
 public import DLMF.Hypergeometric.Series
 
 /-!
@@ -26,11 +25,11 @@ noncomputable section
 namespace DLMF.Hypergeometric
 
 /-- Helper lemma for contiguous relations: `a (a+1)_n = (a+n) (a)_n`. -/
-lemma poch_succ_left_mul (a : ℂ) (n : ℕ) : a * poch (a + 1) n = (a + n) * poch a n := by
+theorem poch_succ_left_mul (a : ℂ) (n : ℕ) : a * poch (a + 1) n = (a + n) * poch a n := by
   rw [← poch_succ_left, poch_succ, mul_comm]
 
 /-- Helper lemma for `contiguous_shift_b`. -/
-lemma poch_sub_succ (b : ℂ) (n : ℕ) :
+theorem poch_sub_succ (b : ℂ) (n : ℕ) :
     poch b (n + 1) - poch (b + 1) (n + 1) = -(n + 1 : ℂ) * poch (b + 1) n := by
   rw [poch_succ_left, poch_succ]
   ring
@@ -38,7 +37,7 @@ lemma poch_sub_succ (b : ℂ) (n : ℕ) :
 /-- Helper lemma for `contiguous_shift_b`. The identity is false at `c = 0` without this
 regularity hypothesis: both left-hand hypergeometric series collapse to `1` in Lean's
 totalization, while the right-hand side need not vanish. -/
-lemma gaussHGCoeff_contiguous_shift_b {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
+theorem gaussHGCoeff_contiguous_shift_b {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
     c * gaussHGCoeff a b c (n + 1) - c * gaussHGCoeff a (b + 1) c (n + 1) =
       -a * gaussHGCoeff (a + 1) (b + 1) (c + 1) n := by
   have hc0 : c ≠ 0 := by simpa using hc 0
@@ -100,7 +99,7 @@ theorem contiguous_shift_b {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (hz : �
 
 /-- Helper lemma for AAR (2.5.5): the coefficient identity
 `n (a)_n = a ((a+1)_n - (a)_n)`. -/
-lemma gaussHGCoeff_AAR_2_5_5 {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
+theorem gaussHGCoeff_AAR_2_5_5 {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
     (n : ℂ) * gaussHGCoeff a b c n =
       a * (gaussHGCoeff (a + 1) b c n - gaussHGCoeff a b c n) := by
   cases n with
@@ -116,7 +115,7 @@ lemma gaussHGCoeff_AAR_2_5_5 {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ
     ring
 
 /-- AAR (2.5.5): `z · ∂F/∂z = a (F(a+) - F)`. -/
-lemma ordinaryHypergeometric_mul_deriv_eq_shift_a {a b c z : ℂ}
+theorem ordinaryHypergeometric_mul_deriv_eq_shift_a {a b c z : ℂ}
     (hc : ∀ k : ℕ, c ≠ -k) (hz : ‖z‖ < 1) :
     z * deriv (₂F₁ a b c) z = a * (₂F₁ (a + 1) b c z - ₂F₁ a b c z) := by
   have hz' := mem_eball_one_of_norm_lt_one hz
@@ -141,7 +140,7 @@ lemma ordinaryHypergeometric_mul_deriv_eq_shift_a {a b c z : ℂ}
   exact hL'.unique hR'
 
 /-- Helper lemma for AAR (2.5.8). -/
-lemma gaussHGCoeff_AAR_2_5_8 {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
+theorem gaussHGCoeff_AAR_2_5_8 {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
     (n + 1 : ℂ) * gaussHGCoeff a b c (n + 1) - (n : ℂ) * gaussHGCoeff a b c n -
       (c - a) * gaussHGCoeff (a - 1) b c (n + 1) -
       (a - c) * gaussHGCoeff a b c (n + 1) -
@@ -175,7 +174,7 @@ lemma gaussHGCoeff_AAR_2_5_8 {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ
 
 /-- AAR (2.5.8): `z(1-z) F' = (c-a) F(a-) + (a-c+bz) F`. -/
 @[dlmf 15.5.E20]
-lemma ordinaryHypergeometric_mul_one_sub_mul_deriv_eq {a b c z : ℂ}
+theorem ordinaryHypergeometric_mul_one_sub_mul_deriv_eq {a b c z : ℂ}
     (hc : ∀ k : ℕ, c ≠ -k) (hz : ‖z‖ < 1) :
     z * (1 - z) * deriv (₂F₁ a b c) z =
       (c - a) * ₂F₁ (a - 1) b c z + (a - c + b * z) * ₂F₁ a b c z := by
@@ -279,7 +278,7 @@ theorem contiguous_a {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (hz : ‖z‖ 
   ring
 
 /-- Helper lemma for `contiguous_c`. -/
-lemma gaussHGCoeff_contiguous_c {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
+theorem gaussHGCoeff_contiguous_c {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
     c * gaussHGCoeff a b c n - (c - a) * gaussHGCoeff a b (c + 1) n -
       a * gaussHGCoeff (a + 1) b (c + 1) n = 0 := by
   have hcp := poch_ne_zero_of_not_neg_nat hc n

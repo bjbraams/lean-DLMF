@@ -5,10 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.Calculus.Deriv.MeanValue
-public import Mathlib.Data.Set.Card
-public import Mathlib.Order.Interval.Finset.Defs
-public import DLMFMathlib.Analysis.ODE.SturmComparison
 public import DLMFMathlib.Analysis.ODE.P2lSturmLiouville
 
 /-!
@@ -38,13 +34,13 @@ open Set Filter Topology
 namespace ODE
 
 /-- A continuous function positive on `(a, b)` is nonnegative at `a`. -/
-theorem p2s_nonneg_left {f : ℝ → ℝ} {a b : ℝ} (hf : Continuous f) (hab : a < b)
+lemma p2s_nonneg_left {f : ℝ → ℝ} {a b : ℝ} (hf : Continuous f) (hab : a < b)
     (h : ∀ x ∈ Ioo a b, 0 < f x) : 0 ≤ f a :=
   ge_of_tendsto (hf.continuousAt.tendsto.mono_left nhdsWithin_le_nhds)
     (Filter.eventually_of_mem (Ioo_mem_nhdsGT hab) fun x hx => (h x hx).le)
 
 /-- A continuous function positive on `(a, b)` is nonnegative at `b`. -/
-theorem p2s_nonneg_right {f : ℝ → ℝ} {a b : ℝ} (hf : Continuous f) (hab : a < b)
+lemma p2s_nonneg_right {f : ℝ → ℝ} {a b : ℝ} (hf : Continuous f) (hab : a < b)
     (h : ∀ x ∈ Ioo a b, 0 < f x) : 0 ≤ f b :=
   ge_of_tendsto (hf.continuousAt.tendsto.mono_left nhdsWithin_le_nhds)
     (Filter.eventually_of_mem (Ioo_mem_nhdsLT hab) fun x hx => (h x hx).le)
@@ -53,7 +49,7 @@ variable {Q u u' v v' : ℝ → ℝ} {μ₁ μ₂ a b : ℝ}
 
 /-- **Core of the comparison.** With `μ₁ < μ₂`, `u, v > 0` on `(a, b)`, and at each end
 either `u = 0` or `W = u' v - u v' = 0`, we get a contradiction: `W` increases strictly. -/
-theorem p2s_cmp_core (hμ : μ₁ < μ₂) (hab : a < b) (hu : ∀ x, HasDerivAt u (u' x) x)
+lemma p2s_cmp_core (hμ : μ₁ < μ₂) (hab : a < b) (hu : ∀ x, HasDerivAt u (u' x) x)
     (hu' : ∀ x, HasDerivAt u' ((Q x - μ₁) * u x) x) (hv : ∀ x, HasDerivAt v (v' x) x)
     (hv' : ∀ x, HasDerivAt v' ((Q x - μ₂) * v x) x) (hup : ∀ x ∈ Ioo a b, 0 < u x)
     (hvp : ∀ x ∈ Ioo a b, 0 < v x) (ha : u a = 0 ∨ u' a * v a - u a * v' a = 0)
@@ -89,7 +85,7 @@ theorem p2s_cmp_core (hμ : μ₁ < μ₂) (hab : a < b) (hu : ∀ x, HasDerivAt
 /-- **Comparison in the parameter.** Let `μ₁ < μ₂`, `u'' = (Q - μ₁) u`, `v'' = (Q - μ₂) v`,
 `u ≠ 0` on `(a, b)`, and at each end either `u = 0` or `u' v - u v' = 0`. Then `v` vanishes
 somewhere in `(a, b)`. -/
-theorem p2s_cmp_exists_zero (hμ : μ₁ < μ₂) (hab : a < b) (hu : ∀ x, HasDerivAt u (u' x) x)
+lemma p2s_cmp_exists_zero (hμ : μ₁ < μ₂) (hab : a < b) (hu : ∀ x, HasDerivAt u (u' x) x)
     (hu' : ∀ x, HasDerivAt u' ((Q x - μ₁) * u x) x) (hv : ∀ x, HasDerivAt v (v' x) x)
     (hv' : ∀ x, HasDerivAt v' ((Q x - μ₂) * v x) x) (hu0 : ∀ x ∈ Ioo a b, u x ≠ 0)
     (ha : u a = 0 ∨ u' a * v a - u a * v' a = 0)
@@ -121,7 +117,7 @@ theorem p2s_cmp_exists_zero (hμ : μ₁ < μ₂) (hab : a < b) (hu : ∀ x, Has
 `u' v - u v' = 0` at `0`, and `X > 0`. If `u` has finitely many zeros in `(0, X]`, then `v`
 has at least as many zeros in `(0, X)` (one in each gap between consecutive zeros of `u`,
 starting from `0`). -/
-theorem p2s_count_le (hμ : μ₁ < μ₂) {X : ℝ} (hX : 0 < X) (hu : ∀ x, HasDerivAt u (u' x) x)
+lemma p2s_count_le (hμ : μ₁ < μ₂) {X : ℝ} (hX : 0 < X) (hu : ∀ x, HasDerivAt u (u' x) x)
     (hu' : ∀ x, HasDerivAt u' ((Q x - μ₁) * u x) x) (hv : ∀ x, HasDerivAt v (v' x) x)
     (hv' : ∀ x, HasDerivAt v' ((Q x - μ₂) * v x) x) (hW0 : u' 0 * v 0 - u 0 * v' 0 = 0)
     (hfin : {x | x ∈ Ioc 0 X ∧ u x = 0}.Finite) (hfin' : {x | x ∈ Ioo 0 X ∧ v x = 0}.Finite) :
@@ -227,35 +223,35 @@ variable {V : ℝ → ℝ} {B L : ℝ} {odd0 : Bool}
 noncomputable def p2sN (V : ℝ → ℝ) (odd0 : Bool) (h X : ℝ) : ℕ :=
   {x | x ∈ Ioc 0 X ∧ p2lY V odd0 h x = 0}.ncard
 
-theorem p2s_Y_hasDerivAt (hV : Continuous V) (h x : ℝ) :
+lemma p2s_Y_hasDerivAt (hV : Continuous V) (h x : ℝ) :
     HasDerivAt (p2lY V odd0 h) (deriv (p2lY V odd0 h) x) x :=
   (p2lY_spec hV odd0 h).2.2.hasDerivAt x
 
-theorem p2s_Y'_hasDerivAt (hV : Continuous V) (h x : ℝ) :
+lemma p2s_Y'_hasDerivAt (hV : Continuous V) (h x : ℝ) :
     HasDerivAt (deriv (p2lY V odd0 h)) ((V x - h) * p2lY V odd0 h x) x :=
   (p2lY_spec hV odd0 h).2.2.2 x
 
-theorem p2s_simple (hV : Continuous V) {h x : ℝ} (h0 : p2lY V odd0 h x = 0) :
+lemma p2s_simple (hV : Continuous V) {h x : ℝ} (h0 : p2lY V odd0 h x = 0) :
     deriv (p2lY V odd0 h) x ≠ 0 := fun h1 =>
   p2lY_ne_zero hV odd0 h (p2l_eq_zero hV (p2lY_spec hV odd0 h).2.2 h0 h1)
 
-theorem p2s_finite_Ioc (hV : Continuous V) (h a b : ℝ) :
+lemma p2s_finite_Ioc (hV : Continuous V) (h a b : ℝ) :
     {x | x ∈ Ioc a b ∧ p2lY V odd0 h x = 0}.Finite :=
   (p2l_zeros_finite hV (p2lY_spec hV odd0 h).2.2 (p2lY_ne_zero hV odd0 h) a b).subset
     fun _ hx => ⟨Ioc_subset_Icc_self hx.1, hx.2⟩
 
-theorem p2s_finite_Ioo (hV : Continuous V) (h a b : ℝ) :
+lemma p2s_finite_Ioo (hV : Continuous V) (h a b : ℝ) :
     {x | x ∈ Ioo a b ∧ p2lY V odd0 h x = 0}.Finite :=
   (p2s_finite_Ioc hV h a b).subset fun _ hx => ⟨Ioo_subset_Ioc_self hx.1, hx.2⟩
 
-theorem p2s_W0 (hV : Continuous V) (h h' : ℝ) :
+lemma p2s_W0 (hV : Continuous V) (h h' : ℝ) :
     deriv (p2lY V odd0 h) 0 * p2lY V odd0 h' 0 - p2lY V odd0 h 0 * deriv (p2lY V odd0 h') 0
       = 0 := by
   rw [(p2lY_spec hV odd0 h).1, (p2lY_spec hV odd0 h).2.1, (p2lY_spec hV odd0 h').1,
     (p2lY_spec hV odd0 h').2.1]; ring
 
 /-- Uniformly near `h₀`, the basic solution is positive on `(0, δ]`. -/
-theorem p2s_near_zero (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (h₀ : ℝ) :
+lemma p2s_near_zero (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (h₀ : ℝ) :
     ∃ δ > 0, ∀ᶠ h in 𝓝 h₀, ∀ x ∈ Ioc 0 δ, 0 < p2lY V odd0 h x := by
   obtain ⟨c1, c2⟩ := p2lY_continuous hV hB odd0
   cases odd0
@@ -290,7 +286,7 @@ theorem p2s_near_zero (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (h₀ : ℝ)
     simpa [(p2lY_spec hV true h).1, p2lD0] using this
 
 /-- Below the potential, `y y'` is positive on `(0, ∞)`. -/
-theorem p2s_low (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) {h : ℝ} (hh : h < -B) {x : ℝ}
+lemma p2s_low (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) {h : ℝ} (hh : h < -B) {x : ℝ}
     (hx : 0 < x) : 0 < p2lY V odd0 h x * deriv (p2lY V odd0 h) x := by
   set y := p2lY V odd0 h
   have hE : ∀ t, HasDerivAt (fun t => y t * deriv y t)
@@ -316,7 +312,7 @@ theorem p2s_low (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) {h : ℝ} (hh : h 
   linarith
 
 /-- **Local constancy of the zero count** in `(0, X]` while `X` is not a zero. -/
-theorem p2s_local_count (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) {h₀ X : ℝ} (hX : 0 < X)
+lemma p2s_local_count (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) {h₀ X : ℝ} (hX : 0 < X)
     (hY : p2lY V odd0 h₀ X ≠ 0) : ∀ᶠ h in 𝓝 h₀, p2sN V odd0 h X = p2sN V odd0 h₀ X := by
   obtain ⟨δ, hδ, hev⟩ := p2s_near_zero (odd0 := odd0) hV hB h₀
   set δ' := min δ (X / 2)
@@ -348,7 +344,7 @@ theorem p2s_local_count (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) {h₀ X : 
   rw [key h hh, key h₀ hev'.self_of_nhds, hs]
 
 /-- A set meeting every `(-∞, c)` in a finite set is discrete. -/
-theorem p2s_isolated {S : Set ℝ} (hfin : ∀ c, (S ∩ Iio c).Finite) (h₀ : ℝ) :
+lemma p2s_isolated {S : Set ℝ} (hfin : ∀ c, (S ∩ Iio c).Finite) (h₀ : ℝ) :
     ∃ ε > 0, ∀ h ∈ S, |h - h₀| < ε → h = h₀ := by
   set T : Set ℝ := (S ∩ Iio (h₀ + 1)) \ {h₀}
   have hT : IsOpen Tᶜ := ((hfin _).sdiff).isClosed.isOpen_compl
@@ -360,7 +356,7 @@ theorem p2s_isolated {S : Set ℝ} (hfin : ∀ c, (S ∩ Iio c).Finite) (h₀ : 
   exact hball (show dist h h₀ < ε by
     rw [Real.dist_eq]; exact hh.trans_le (min_le_left _ _)) ⟨⟨hS, hlt⟩, hne⟩
 
-theorem p2s_Iic_left {S : Set ℝ} {ε h₀ h : ℝ} (hiso : ∀ t ∈ S, |t - h₀| < ε → t = h₀)
+lemma p2s_Iic_left {S : Set ℝ} {ε h₀ h : ℝ} (hiso : ∀ t ∈ S, |t - h₀| < ε → t = h₀)
     (hh : h ∈ Ioo (h₀ - ε) h₀) : S ∩ Iic h = S ∩ Iio h₀ := by
   ext t
   simp only [mem_inter_iff, mem_Iic, mem_Iio]
@@ -372,7 +368,7 @@ theorem p2s_Iic_left {S : Set ℝ} {ε h₀ h : ℝ} (hiso : ∀ t ∈ S, |t - h
     have := hiso t hS (abs_lt.2 ⟨by linarith [hh.1], by linarith [hh.1, hh.2]⟩)
     linarith
 
-theorem p2s_Iic_right {S : Set ℝ} {ε h₀ h : ℝ} (hiso : ∀ t ∈ S, |t - h₀| < ε → t = h₀)
+lemma p2s_Iic_right {S : Set ℝ} {ε h₀ h : ℝ} (hiso : ∀ t ∈ S, |t - h₀| < ε → t = h₀)
     (hh : h ∈ Ico h₀ (h₀ + ε)) : S ∩ Iic h = S ∩ Iic h₀ := by
   ext t
   simp only [mem_inter_iff, mem_Iic]
@@ -384,7 +380,7 @@ theorem p2s_Iic_right {S : Set ℝ} {ε h₀ h : ℝ} (hiso : ∀ t ∈ S, |t - 
     linarith
   · rintro ⟨hS, ht⟩; exact ⟨hS, ht.trans hh.1⟩
 
-theorem p2s_Iic_eq_insert {S : Set ℝ} {h₀ : ℝ} (hS : h₀ ∈ S) :
+lemma p2s_Iic_eq_insert {S : Set ℝ} {h₀ : ℝ} (hS : h₀ ∈ S) :
     S ∩ Iic h₀ = insert h₀ (S ∩ Iio h₀) := by
   ext t
   simp only [mem_inter_iff, mem_Iic, mem_Iio, mem_insert_iff]
@@ -397,14 +393,14 @@ theorem p2s_Iic_eq_insert {S : Set ℝ} {h₀ : ℝ} (hS : h₀ ∈ S) :
     · exact ⟨hS, le_rfl⟩
     · exact ⟨h1, h2.le⟩
 
-theorem p2s_ncard_Iic {S : Set ℝ} (hfin : ∀ c, (S ∩ Iio c).Finite) {h₀ : ℝ} (hS : h₀ ∈ S) :
+lemma p2s_ncard_Iic {S : Set ℝ} (hfin : ∀ c, (S ∩ Iio c).Finite) {h₀ : ℝ} (hS : h₀ ∈ S) :
     (S ∩ Iic h₀).ncard = (S ∩ Iio h₀).ncard + 1 := by
   rw [p2s_Iic_eq_insert hS, Set.ncard_insert_of_notMem (by simp) (hfin _)]
 
 /-- **The zero count near a zero at the end.** If `y(e, X) = 0`, then for some small `δ` and all
 `h` near `e`, the zeros in `(0, X]` are those in `(0, X - δ]` plus exactly one more when
 `y'(e, X) y(h, X) ≥ 0`, and no more when `y'(e, X) y(h, X) < 0`. -/
-theorem p2s_box (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) {e X : ℝ} (hX : 0 < X)
+lemma p2s_box (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) {e X : ℝ} (hX : 0 < X)
     (he : p2lY V odd0 e X = 0) :
     ∃ δ, 0 < δ ∧ δ < X ∧ p2lY V odd0 e (X - δ) ≠ 0 ∧ ∀ᶠ h in 𝓝 e,
       (0 ≤ deriv (p2lY V odd0 e) X * p2lY V odd0 h X →
@@ -495,12 +491,12 @@ theorem p2s_box (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) {e X : ℝ} (hX : 
     simp only [p2sN]
     rw [heq]
 
-theorem p2sN_mono (hV : Continuous V) (h : ℝ) {X X' : ℝ} (hXX : X ≤ X') :
+lemma p2sN_mono (hV : Continuous V) (h : ℝ) {X X' : ℝ} (hXX : X ≤ X') :
     p2sN V odd0 h X ≤ p2sN V odd0 h X' :=
   Set.ncard_le_ncard (fun _ hx => ⟨⟨hx.1.1, hx.1.2.trans hXX⟩, hx.2⟩) (p2s_finite_Ioc hV h 0 X')
 
 /-- The zeros in `(0, X]` versus `(0, X)` when `X` is a zero. -/
-theorem p2sN_eq_Ioo_add_one (hV : Continuous V) {h X : ℝ} (hX : 0 < X)
+lemma p2sN_eq_Ioo_add_one (hV : Continuous V) {h X : ℝ} (hX : 0 < X)
     (he : p2lY V odd0 h X = 0) :
     p2sN V odd0 h X = {x | x ∈ Ioo 0 X ∧ p2lY V odd0 h x = 0}.ncard + 1 := by
   have heq : {x | x ∈ Ioc 0 X ∧ p2lY V odd0 h x = 0} =
@@ -518,7 +514,7 @@ theorem p2sN_eq_Ioo_add_one (hV : Continuous V) {h X : ℝ} (hX : 0 < X)
   simp only [p2sN]
   rw [heq, Set.ncard_insert_of_notMem (by simp) (p2s_finite_Ioo hV h 0 X)]
 
-theorem p2sN_eq_Ioo {h X : ℝ} (he : p2lY V odd0 h X ≠ 0) :
+lemma p2sN_eq_Ioo {h X : ℝ} (he : p2lY V odd0 h X ≠ 0) :
     p2sN V odd0 h X = {x | x ∈ Ioo 0 X ∧ p2lY V odd0 h x = 0}.ncard := by
   simp only [p2sN]
   congr 1
@@ -531,7 +527,7 @@ theorem p2sN_eq_Ioo {h X : ℝ} (he : p2lY V odd0 h X ≠ 0) :
     exact ⟨⟨h1, h2.le⟩, h3⟩
 
 /-- Monotonicity of the zero count in the parameter (Sturm comparison). -/
-theorem p2s_mono_count (hV : Continuous V) {h₁ h₂ X : ℝ} (hh : h₁ < h₂) (hX : 0 < X) :
+lemma p2s_mono_count (hV : Continuous V) {h₁ h₂ X : ℝ} (hh : h₁ < h₂) (hX : 0 < X) :
     p2sN V odd0 h₁ X + (if deriv (p2lY V odd0 h₁) X = 0 ∧ deriv (p2lY V odd0 h₂) X = 0 ∧
         p2lY V odd0 h₁ X ≠ 0 then 1 else 0) ≤
       {x | x ∈ Ioo 0 X ∧ p2lY V odd0 h₂ x = 0}.ncard :=
@@ -622,7 +618,7 @@ theorem p2s_ne_of_deriv (hV : Continuous V) {h X : ℝ} (h1 : deriv (p2lY V odd0
 
 /-- **A Neumann eigenvalue in each Dirichlet gap.** Below each Dirichlet eigenvalue `d` and
 above all smaller ones there is an `h` with `y'(h, L) = 0`. -/
-theorem p2s_gap (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (hL : 0 < L)
+lemma p2s_gap (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (hL : 0 < L)
     (hfin : ∀ c, ({e | p2lY V odd0 e L = 0} ∩ Iio c).Finite) {d : ℝ}
     (hd : p2lY V odd0 d L = 0) :
     ∃ e, deriv (p2lY V odd0 e) L = 0 ∧ e < d ∧
@@ -769,7 +765,7 @@ theorem p2s_spec_eq_neu (hV : Continuous V) (odd0 : Bool) :
 (`V` continuous and bounded, any of the four combinations of Dirichlet/Neumann conditions at
 `0` and `L`): at an eigenvalue `h` with exactly `k` smaller eigenvalues, the eigenfunction
 `p2lY V odd0 h` has exactly `k` zeros in `(0, L)`. -/
-theorem p2s_oscillation (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (hL : 0 < L)
+lemma p2s_oscillation (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (hL : 0 < L)
     (odd0 oddK : Bool) {h : ℝ} (hh : h ∈ p2lSpec V L odd0 oddK) :
     {x | x ∈ Ioo 0 L ∧ p2lY V odd0 h x = 0}.ncard = (p2lSpec V L odd0 oddK ∩ Iio h).ncard := by
   have hfin := p2l_spec_Iio_finite hV hB hL odd0 oddK
@@ -810,7 +806,7 @@ theorem p2s_oscillation_of_sol (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (hL
   simp [hc]
 
 /-- Around a simple zero `z`, `y'(z) y` is negative to the left and positive to the right. -/
-theorem p2s_sign_around (hV : Continuous V) {h z : ℝ} (hz : p2lY V odd0 h z = 0) :
+lemma p2s_sign_around (hV : Continuous V) {h z : ℝ} (hz : p2lY V odd0 h z = 0) :
     ∃ η > 0, (∀ x ∈ Ico (z - η) z, deriv (p2lY V odd0 h) z * p2lY V odd0 h x < 0) ∧
       ∀ x ∈ Ioc z (z + η), 0 < deriv (p2lY V odd0 h) z * p2lY V odd0 h x := by
   set s := deriv (p2lY V odd0 h) z
@@ -835,7 +831,7 @@ theorem p2s_sign_around (hV : Continuous V) {h z : ℝ} (hz : p2lY V odd0 h z = 
 
 /-- **The sign of the basic solution** at `X > 0` is `(-1)^N`, where `N` is the number of zeros
 in `(0, X]`. -/
-theorem p2s_sign (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (h : ℝ) :
+lemma p2s_sign (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (h : ℝ) :
     ∀ k : ℕ, ∀ X, 0 < X → p2sN V odd0 h X = k → p2lY V odd0 h X ≠ 0 →
       0 < (-1) ^ k * p2lY V odd0 h X := by
   have hcY : Continuous (p2lY V odd0 h) := (p2lY_spec hV odd0 h).2.2.continuous
@@ -931,7 +927,7 @@ theorem p2s_sign_neumann (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (hL : 0 <
   rw [p2sN_eq_Ioo hY, p2s_oscillation hV hB hL odd0 false hh]
 
 /-- Just left of a positive zero `z` there is a point `X'` with no zeros in `(X', z)`. -/
-theorem p2s_left_point (hV : Continuous V) {h z : ℝ} (hz0 : 0 < z) (hz : p2lY V odd0 h z = 0) :
+lemma p2s_left_point (hV : Continuous V) {h z : ℝ} (hz0 : 0 < z) (hz : p2lY V odd0 h z = 0) :
     ∃ X', 0 < X' ∧ X' < z ∧ deriv (p2lY V odd0 h) z * p2lY V odd0 h X' < 0 ∧
       p2sN V odd0 h z = p2sN V odd0 h X' + 1 := by
   set Z := {x | x ∈ Ioc 0 z ∧ p2lY V odd0 h x = 0}
@@ -964,7 +960,7 @@ theorem p2s_left_point (hV : Continuous V) {h z : ℝ} (hz0 : 0 < z) (hz : p2lY 
 
 /-- At a positive zero `X`, the derivative has sign `(-1)^N`, `N` the number of zeros in
 `(0, X]` (including `X`). -/
-theorem p2s_sign_deriv (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) {h X : ℝ} (hX : 0 < X)
+lemma p2s_sign_deriv (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) {h X : ℝ} (hX : 0 < X)
     (hz : p2lY V odd0 h X = 0) : 0 < (-1) ^ p2sN V odd0 h X * deriv (p2lY V odd0 h) X := by
   obtain ⟨X', hX'0, -, hs, hN⟩ := p2s_left_point (odd0 := odd0) hV hX hz
   have hY : p2lY V odd0 h X' ≠ 0 := fun h0 => by rw [h0, mul_zero] at hs; exact lt_irrefl _ hs

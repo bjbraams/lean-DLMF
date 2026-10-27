@@ -43,7 +43,7 @@ namespace DLMF.WaveEquation
 abbrev F01 (c w : ℂ) : ℂ := regularizedHGFun (∅ : Multiset ℂ) {c} w
 
 /-- Chain rule for `t ↦ ₀F̃₁(c; a t² + b)`. -/
-lemma hasDerivAt_F01_quad (c a b : ℂ) (t : ℝ) :
+theorem hasDerivAt_F01_quad (c a b : ℂ) (t : ℝ) :
     HasDerivAt (fun t : ℝ => F01 c (a * (t : ℂ) ^ 2 + b))
       (F01 (c + 1) (a * (t : ℂ) ^ 2 + b) * (2 * a * t)) t := by
   have hq : HasDerivAt (fun t : ℝ => a * (t : ℂ) ^ 2 + b) (2 * a * t) t := by
@@ -54,7 +54,7 @@ lemma hasDerivAt_F01_quad (c a b : ℂ) (t : ℝ) :
   exact (hasDerivAt_regularized0F1 c _).comp t hq
 
 /-- Second derivative of `t ↦ h(t) ₀F₁(c; a t² + b)`. -/
-lemma iteratedDeriv_two_mul_F01 {h h1 h2 : ℝ → ℂ} (hh : ∀ t, HasDerivAt h (h1 t) t)
+theorem iteratedDeriv_two_mul_F01 {h h1 h2 : ℝ → ℂ} (hh : ∀ t, HasDerivAt h (h1 t) t)
     (hh1 : ∀ t, HasDerivAt h1 (h2 t) t) (c a b : ℂ) (t : ℝ) :
     iteratedDeriv 2 (fun t : ℝ => h t * F01 c (a * (t : ℂ) ^ 2 + b)) t =
       h2 t * F01 c (a * (t : ℂ) ^ 2 + b) +
@@ -79,13 +79,13 @@ lemma iteratedDeriv_two_mul_F01 {h h1 h2 : ℝ → ℂ} (hh : ∀ t, HasDerivAt 
 
 
 /-- Derivative of `t ↦ (p + q t)ᵐ`. -/
-lemma hasDerivAt_pow_affine (p q : ℂ) (m : ℕ) (t : ℝ) :
+theorem hasDerivAt_pow_affine (p q : ℂ) (m : ℕ) (t : ℝ) :
     HasDerivAt (fun t : ℝ => (p + q * t) ^ m) (m * (p + q * t) ^ (m - 1) * q) t := by
   have h := (((hasDerivAt_id (t : ℂ)).const_mul q).const_add p).pow m
   exact h.comp_ofReal.congr_deriv (by simp)
 
 /-- Derivative of `t ↦ m (p + q t)^{m-1} q`. -/
-lemma hasDerivAt_pow_affine' (p q : ℂ) (m : ℕ) (t : ℝ) :
+theorem hasDerivAt_pow_affine' (p q : ℂ) (m : ℕ) (t : ℝ) :
     HasDerivAt (fun t : ℝ => (m : ℂ) * (p + q * t) ^ (m - 1) * q)
       ((m : ℂ) * ((m - 1 : ℕ) * (p + q * t) ^ (m - 1 - 1) * q) * q) t :=
   ((hasDerivAt_pow_affine p q (m - 1) t).const_mul (m : ℂ)).mul_const q
@@ -100,7 +100,7 @@ def cylinderWave (n : ℕ) (k : ℂ) (x y : ℝ) : ℂ :=
   ((x : ℂ) + I * y) ^ n * F01 (n + 1) (-(k ^ 2) * ((x : ℂ) ^ 2 + (y : ℂ) ^ 2) / 4)
 
 /-- `n Z^{n-1} Z = n Zⁿ`, including `n = 0`. -/
-lemma natCast_mul_pow_pred_mul (n : ℕ) (Z : ℂ) : (n : ℂ) * (Z ^ (n - 1) * Z) = n * Z ^ n := by
+theorem natCast_mul_pow_pred_mul (n : ℕ) (Z : ℂ) : (n : ℂ) * (Z ^ (n - 1) * Z) = n * Z ^ n := by
   rcases n with _ | n
   · simp
   · simp [pow_succ]

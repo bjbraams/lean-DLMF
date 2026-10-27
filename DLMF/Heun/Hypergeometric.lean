@@ -9,8 +9,6 @@ public import DLMF.Heun.Basic
 public import DLMF.Heun.LocalSolutions
 public import DLMF.Hypergeometric.Riemann
 public import Carlson.TwoVariable.RPolynomial.Hypergeometric
-public import Mathlib.Analysis.SpecialFunctions.Pow.Complex
-public import Mathlib.Topology.Algebra.InfiniteSum.Basic
 
 /-!
 # Heun functions and the Gauss hypergeometric function (DLMF §31.7(i), §31.11)
@@ -65,7 +63,7 @@ variable {a q α β γ δ ε : ℂ}
 /-! ### Reductions to `₂F₁` (§31.7(i)) -/
 
 /-- Helper for 31.7.1: no Pochhammer value `(γ)_n` vanishes when `γ ∉ {0, -1, -2, …}`. -/
-theorem h31_ascPochhammer_ne_zero (hγ : ∀ n : ℕ, γ ≠ -(n : ℂ)) (n : ℕ) :
+lemma h31_ascPochhammer_ne_zero (hγ : ∀ n : ℕ, γ ≠ -(n : ℂ)) (n : ℕ) :
     (ascPochhammer ℂ n).eval γ ≠ 0 := by
   induction n with
   | zero => simp
@@ -75,7 +73,7 @@ theorem h31_ascPochhammer_ne_zero (hγ : ∀ n : ℕ, γ ≠ -(n : ℂ)) (n : �
     linear_combination h
 
 /-- Helper for 31.7.1: `F_{n+1}(n+1)(n+γ) = (n+α)(n+β)F_n` for the hypergeometric coefficients. -/
-theorem h31_hgCoeff_succ (hγ : ∀ n : ℕ, γ ≠ -(n : ℂ)) (n : ℕ) :
+lemma h31_hgCoeff_succ (hγ : ∀ n : ℕ, γ ≠ -(n : ℂ)) (n : ℕ) :
     ordinaryHypergeometricCoefficient α β γ (n + 1) * (((n : ℂ) + 1) * ((n : ℂ) + γ)) =
       ((n : ℂ) + α) * ((n : ℂ) + β) * ordinaryHypergeometricCoefficient α β γ n := by
   have h1 := h31_ascPochhammer_ne_zero hγ n
@@ -89,7 +87,7 @@ theorem h31_hgCoeff_succ (hγ : ∀ n : ℕ, γ ≠ -(n : ℂ)) (n : ℕ) :
 
 /-- Helper for 31.7.1: if `q = aαβ` and `Q_{j+1} + q - (j+1)(j+γ) = a(j+1+α)(j+1+β)` for all
 `j`, the Maclaurin coefficients of `Hl` are the hypergeometric coefficients. -/
-theorem h31_heunLocalCoeff_eq_hg (ha : a ≠ 0) (hγ : ∀ n : ℕ, γ ≠ -(n : ℂ)) (hq : q = a * α * β)
+lemma h31_heunLocalCoeff_eq_hg (ha : a ≠ 0) (hγ : ∀ n : ℕ, γ ≠ -(n : ℂ)) (hq : q = a * α * β)
     (hQ : ∀ j : ℕ, heunRecQ a α β γ δ (j + 1) + q - ((j : ℂ) + 1) * ((j : ℂ) + γ) =
       a * ((j : ℂ) + 1 + α) * ((j : ℂ) + 1 + β)) (j : ℕ) :
     heunLocalCoeff a q α β γ δ j = ordinaryHypergeometricCoefficient α β γ j := by
@@ -182,7 +180,7 @@ theorem hypergeometric_isHeunSolOn_zero (hγ : ∀ n : ℕ, γ ≠ -(n : ℂ)) :
     linear_combination z * hode
 
 /-- `‖t z (2 - t z)‖ ≤ ‖z (2 - z)‖` for `0 ≤ t ≤ 1` and `‖z‖ ≤ 1`. -/
-theorem p2h_norm_quad_le {z : ℂ} {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) (hz : ‖z‖ ≤ 1) :
+lemma p2h_norm_quad_le {z : ℂ} {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) (hz : ‖z‖ ≤ 1) :
     ‖(t : ℂ) * z * (2 - (t : ℂ) * z)‖ ≤ ‖z * (2 - z)‖ := by
   set r := ‖z‖ with hr
   set x := z.re with hxdef
@@ -212,7 +210,7 @@ theorem p2h_norm_quad_le {z : ℂ} {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) (hz
   nlinarith [mul_nonneg (sub_nonneg.2 ht1) hB]
 
 /-- `‖t z (3 - t z)²‖ ≤ ‖z (3 - z)²‖` for `0 ≤ t ≤ 1` and `‖z‖ ≤ 1`. -/
-theorem p2h_norm_cubic_le {z : ℂ} {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) (hz : ‖z‖ ≤ 1) :
+lemma p2h_norm_cubic_le {z : ℂ} {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) (hz : ‖z‖ ≤ 1) :
     ‖(t : ℂ) * z * (3 - (t : ℂ) * z) ^ 2‖ ≤ ‖z * (3 - z) ^ 2‖ := by
   set r := ‖z‖ with hr
   set x := z.re with hxdef
@@ -489,7 +487,7 @@ theorem heunHypM_neg_one_eq_zero (μ : ℂ) :
 
 /-- `₂F₁(a, b; 0; x) = 1` with Mathlib's junk convention: every term past the constant one
 divides by `(0)_n = 0`, which is taken to be `0`. -/
-theorem p2h_ordinaryHypergeometric_c_zero (a b x : ℂ) : ₂F₁ a b (0 : ℂ) x = 1 := by
+lemma p2h_ordinaryHypergeometric_c_zero (a b x : ℂ) : ₂F₁ a b (0 : ℂ) x = 1 := by
   rw [ordinaryHypergeometric_eq_tsum]
   simp only [smul_eq_mul]
   have h : (fun n : ℕ =>
@@ -507,13 +505,13 @@ theorem p2h_ordinaryHypergeometric_c_zero (a b x : ℂ) : ₂F₁ a b (0 : ℂ) 
 
 /-- The normalized Riemann operator depends on the exponents at `∞` only through their
 product. -/
-theorem p2h_riemannNormalOperator_swap (a₁ a₂ b₁ b₂ c₁ c₂ : ℂ) (f : ℂ → ℂ) (z : ℂ) :
+lemma p2h_riemannNormalOperator_swap (a₁ a₂ b₁ b₂ c₁ c₂ : ℂ) (f : ℂ → ℂ) (z : ℂ) :
     DLMF.Hypergeometric.riemannNormalOperator a₁ a₂ b₁ b₂ c₁ c₂ f z =
       DLMF.Hypergeometric.riemannNormalOperator a₁ a₂ b₁ b₂ c₂ c₁ f z := by
   simp only [DLMF.Hypergeometric.riemannNormalOperator, mul_comm c₁ c₂]
 
 /-- The normalized Riemann operator is homogeneous: `R(C f) = C R(f)`. -/
-theorem p2h_riemannNormalOperator_const_mul (a₁ a₂ b₁ b₂ c₁ c₂ C : ℂ) (f : ℂ → ℂ) (z : ℂ) :
+lemma p2h_riemannNormalOperator_const_mul (a₁ a₂ b₁ b₂ c₁ c₂ C : ℂ) (f : ℂ → ℂ) (z : ℂ) :
     DLMF.Hypergeometric.riemannNormalOperator a₁ a₂ b₁ b₂ c₁ c₂ (fun w => C * f w) z =
       C * DLMF.Hypergeometric.riemannNormalOperator a₁ a₂ b₁ b₂ c₁ c₂ f z := by
   simp only [DLMF.Hypergeometric.riemannNormalOperator, iteratedDeriv_const_mul_field,
@@ -522,7 +520,7 @@ theorem p2h_riemannNormalOperator_const_mul (a₁ a₂ b₁ b₂ c₁ c₂ C : �
 
 /-- A Gauss solution `infinityFirst a b c` at `∞` solves the normalized Riemann equation with
 exponents `0, 1 - c; 0, c - a - b; a, b`, when `a - b + 1 ∉ {0, -1, …}`. -/
-theorem p2h_riemann_infinityFirst {a b c z : ℂ} (hc : ∀ k : ℕ, a - b + 1 ≠ -(k : ℂ))
+lemma p2h_riemann_infinityFirst {a b c z : ℂ} (hc : ∀ k : ℕ, a - b + 1 ≠ -(k : ℂ))
     (hz : 1 < ‖z‖) (hs : z ∈ slitPlane) :
     DLMF.Hypergeometric.riemannNormalOperator 0 (1 - c) 0 (c - a - b) a b
       (DLMF.Hypergeometric.infinityFirst a b c) z = 0 := by
@@ -592,7 +590,7 @@ theorem heunHypP5_P6_riemann {lam μ : ℂ} (h : lam + μ = γ + δ - 1) (j : �
 degenerate case `γ = 1, δ = -1, λ = -1, μ = 0, j = 0`: the third Gauss parameter of `P_0^5` is
 `0`, Mathlib's `₂F₁(-1, -1; 0; 1/z)` is the junk value `1`, so `P_0^5(z) = z`, and the Riemann
 operator at `z = 2` is `-1/2 ≠ 0`. -/
-theorem p2h_not_heunHypP5_P6_riemann_degenerate :
+lemma p2h_not_heunHypP5_P6_riemann_degenerate :
     ¬ ∀ (γ δ lam μ : ℂ) (j : ℕ) (z : ℂ), lam + μ = γ + δ - 1 → 1 < ‖z‖ → z ∈ slitPlane →
       DLMF.Hypergeometric.riemannNormalOperator 0 (1 - γ) 0 (1 - δ) (lam + j) (μ - j)
           (heunHypP5 γ lam μ j) z = 0 ∧

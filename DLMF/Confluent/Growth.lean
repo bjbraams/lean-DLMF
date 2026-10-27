@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Confluent.IntegralRepresentations
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
 /-!
 # Growth of the regularized Kummer function on a ray
@@ -28,7 +27,7 @@ namespace DLMF.Confluent
 
 /-- Lowering the denominator parameter of the entire regularized Kummer function.
 The reciprocal Gamma recurrence keeps this identity valid at Gamma poles. -/
-lemma regularizedConfluent_lower_denominator (a c z : ℂ) :
+theorem regularizedConfluent_lower_denominator (a c z : ℂ) :
     regularizedHGFun {a} {c} z = c * regularizedHGFun {a} {c + 1} z +
       a * z * regularizedHGFun {a + 1} {c + 2} z := by
   have hcoeff (n : ℕ) : regularizedHGFunCoeff {a} {c} n =
@@ -60,7 +59,7 @@ lemma regularizedConfluent_lower_denominator (a c z : ℂ) :
   linear_combination he + hzero
 
 /-- Euler's integral gives an exponential bound in the positive-parameter region. -/
-lemma regularizedConfluent_euler_growth {a c k : ℂ}
+theorem regularizedConfluent_euler_growth {a c k : ℂ}
     (ha : 0 < a.re) (hca : 0 < (c - a).re) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ t : ℝ, 0 ≤ t →
       ‖regularizedHGFun {a} {c} (k * t)‖ ≤ C * Real.exp (max 0 k.re * t) := by
@@ -255,7 +254,7 @@ theorem regularizedConfluent_ray_growth (a c k : ℂ) :
   exact hshift M a c (by linarith)
 
 /-- Every polynomial Gamma majorant is integrable on the positive half-line. -/
-lemma integrableOn_rpow_mul_one_add_pow_mul_exp {s δ : ℝ}
+theorem integrableOn_rpow_mul_one_add_pow_mul_exp {s δ : ℝ}
     (hs : -1 < s) (hδ : 0 < δ) (N : ℕ) :
     IntegrableOn (fun t : ℝ => t ^ s * (1 + t) ^ N * Real.exp (-δ * t)) (Set.Ioi 0) := by
   let G (j : ℕ) (t : ℝ) := (N.choose j : ℝ) * (t ^ (s + j) * Real.exp (-δ * t))
@@ -299,7 +298,7 @@ private lemma norm_kummerLaplaceKernel_le {a b c k z : ℂ} {C δ : ℝ} {N : �
 
 /-- Absolute convergence of the regularized Kummer Laplace transform in its full
 half-plane, including all exceptional denominator parameters. -/
-lemma laplace_regularizedHGFun_integrable {a b c k z : ℂ}
+theorem laplace_regularizedHGFun_integrable {a b c k z : ℂ}
     (hb : 0 < b.re) (hz : max 0 k.re < z.re) :
     IntegrableOn (fun t : ℝ => exp (-z * t) * (t : ℂ) ^ (b - 1) *
       regularizedHGFun {a} {c} (k * t)) (Set.Ioi 0) := by
@@ -317,7 +316,7 @@ lemma laplace_regularizedHGFun_integrable {a b c k z : ℂ}
 
 /-- Holomorphic dependence on the Laplace variable in the full convergence half-plane.
 Mathlib's dominated differentiation theorem applies to a polynomial Gamma majorant. -/
-lemma differentiableOn_laplace_regularizedHGFun (a b c k : ℂ) (hb : 0 < b.re) :
+theorem differentiableOn_laplace_regularizedHGFun (a b c k : ℂ) (hb : 0 < b.re) :
     DifferentiableOn ℂ (fun z => ∫ t : ℝ in Set.Ioi 0,
       exp (-z * t) * (t : ℂ) ^ (b - 1) * regularizedHGFun {a} {c} (k * t))
       {z : ℂ | max 0 k.re < z.re} := by

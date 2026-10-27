@@ -5,19 +5,36 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Core.Framework
-public import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
 public import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
-public import Mathlib.Analysis.SpecialFunctions.Complex.LogBounds
-public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
-public import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
-public import Mathlib.Analysis.SpecialFunctions.Log.Base
-public import Mathlib.Analysis.SpecialFunctions.Gaussian.GaussianIntegral
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 public import Mathlib.MeasureTheory.Function.AbsolutelyContinuous
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.AbsolutelyContinuousFun
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.DerivIntegrable
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.LebesgueDifferentiationThm
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.SpecialFunctions.Bernstein
+public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.Tactic.Basify
+public import Mathlib.Tactic.ENatToNat
+public import Mathlib.Tactic.Echelon.Zsqrtd
+public import Mathlib.Tactic.Inclusion.Extension.Core.Core
+public import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+public import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Rational
+public import Mathlib.Tactic.NormNum.Irrational
+public import Mathlib.Tactic.NormNum.IsCoprime
+public import Mathlib.Tactic.NormNum.IsSquare
+public import Mathlib.Tactic.NormNum.LegendreSymbol
+public import Mathlib.Tactic.NormNum.ModEq
+public import Mathlib.Tactic.NormNum.NatFib
+public import Mathlib.Tactic.NormNum.NatLog
+public import Mathlib.Tactic.NormNum.NatSqrt
+public import Mathlib.Tactic.NormNum.Ordinal
+public import Mathlib.Tactic.NormNum.Parity
+public import Mathlib.Tactic.NormNum.Prime
+public import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.Tactic.Polynomial.Basic
+public import Mathlib.Tactic.ReduceModChar
 
 /-!
 # Logarithms, exponentials and powers: DLMF §§4.2–4.3
@@ -98,17 +115,17 @@ theorem closedLogValues_neg {x : ℝ} (hx : x < 0) :
       · simp [Complex.mul_im,abs_of_pos Real.pi_pos]
 
 /-- Real part of an absolutely continuous complex path. -/
-theorem logR4_ac_re {f : ℝ → ℂ} {a b : ℝ} (hf : AbsolutelyContinuousOnInterval f a b) :
+lemma logR4_ac_re {f : ℝ → ℂ} {a b : ℝ} (hf : AbsolutelyContinuousOnInterval f a b) :
     AbsolutelyContinuousOnInterval (fun t => (f t).re) a b :=
   (Complex.reCLM.lipschitzWith).comp_absolutelyContinuousOnInterval hf
 
 /-- Imaginary part of an absolutely continuous complex path. -/
-theorem logR4_ac_im {f : ℝ → ℂ} {a b : ℝ} (hf : AbsolutelyContinuousOnInterval f a b) :
+lemma logR4_ac_im {f : ℝ → ℂ} {a b : ℝ} (hf : AbsolutelyContinuousOnInterval f a b) :
     AbsolutelyContinuousOnInterval (fun t => (f t).im) a b :=
   (Complex.imCLM.lipschitzWith).comp_absolutelyContinuousOnInterval hf
 
 /-- A complex path whose real and imaginary parts have derivatives has the assembled derivative. -/
-theorem logR4_hasDerivAt_of_re_im {f : ℝ → ℂ} {x r s : ℝ}
+lemma logR4_hasDerivAt_of_re_im {f : ℝ → ℂ} {x r s : ℝ}
     (hr : HasDerivAt (fun t => (f t).re) r x) (hs : HasDerivAt (fun t => (f t).im) s x) :
     HasDerivAt f ((r:ℂ) + (s:ℂ)*I) x := by
   have h := hr.ofReal_comp.add (hs.ofReal_comp.mul_const I)
@@ -117,7 +134,7 @@ theorem logR4_hasDerivAt_of_re_im {f : ℝ → ℂ} {x r s : ℝ}
 
 /-- Absolutely continuous complex paths are differentiable almost everywhere, with
 derivative assembled from the real and imaginary parts. -/
-theorem logR4_ae_hasDerivAt {f : ℝ → ℂ} {a b : ℝ} (hf : AbsolutelyContinuousOnInterval f a b) :
+lemma logR4_ae_hasDerivAt {f : ℝ → ℂ} {a b : ℝ} (hf : AbsolutelyContinuousOnInterval f a b) :
     ∀ᵐ x, x ∈ uIcc a b → HasDerivAt f (deriv f x) x ∧
       deriv f x = ((deriv (fun t : ℝ => (f t).re) x : ℝ) : ℂ) +
         ((deriv (fun t : ℝ => (f t).im) x : ℝ) : ℂ)*I := by
@@ -127,11 +144,11 @@ theorem logR4_ae_hasDerivAt {f : ℝ → ℂ} {a b : ℝ} (hf : AbsolutelyContin
   exact ⟨h.differentiableAt.hasDerivAt, h.deriv⟩
 
 /-- Complexification preserves interval integrability. -/
-theorem logR4_ii_ofReal {g : ℝ → ℝ} {a b : ℝ} (h : IntervalIntegrable g MeasureTheory.volume a b) :
+lemma logR4_ii_ofReal {g : ℝ → ℝ} {a b : ℝ} (h : IntervalIntegrable g MeasureTheory.volume a b) :
     IntervalIntegrable (fun x => (g x : ℂ)) MeasureTheory.volume a b := ⟨h.1.ofReal, h.2.ofReal⟩
 
 /-- The derivative of an absolutely continuous complex path is interval integrable. -/
-theorem logR4_intervalIntegrable_deriv {f : ℝ → ℂ} {a b : ℝ}
+lemma logR4_intervalIntegrable_deriv {f : ℝ → ℂ} {a b : ℝ}
     (hf : AbsolutelyContinuousOnInterval f a b) : IntervalIntegrable (deriv f) MeasureTheory.volume a b := by
   have h1 := (logR4_ac_re hf).intervalIntegrable_deriv
   have h2 := (logR4_ac_im hf).intervalIntegrable_deriv
@@ -142,7 +159,7 @@ theorem logR4_intervalIntegrable_deriv {f : ℝ → ℂ} {a b : ℝ}
   exact (hx (Set.uIoc_subset_uIcc hx')).2.symm
 
 /-- Fundamental theorem of calculus for absolutely continuous complex paths. -/
-theorem logR4_integral_deriv_eq_sub {f : ℝ → ℂ} {a b : ℝ}
+lemma logR4_integral_deriv_eq_sub {f : ℝ → ℂ} {a b : ℝ}
     (hf : AbsolutelyContinuousOnInterval f a b) : ∫ x in a..b, deriv f x = f b - f a := by
   have h1 := (logR4_ac_re hf).intervalIntegrable_deriv
   have h2 := (logR4_ac_im hf).intervalIntegrable_deriv
@@ -161,7 +178,7 @@ theorem logR4_integral_deriv_eq_sub {f : ℝ → ℂ} {a b : ℝ}
   push_cast; ring
 
 /-- A function `C¹` near a compact set is Lipschitz on it. -/
-theorem logR4_lipschitzOnWith_of_compact {F : ℂ → ℂ} {K : Set ℂ} (hK : IsCompact K)
+lemma logR4_lipschitzOnWith_of_compact {F : ℂ → ℂ} {K : Set ℂ} (hK : IsCompact K)
     (hF : ∀ w ∈ K, ContDiffAt ℝ 1 F w) : ∃ L, LipschitzOnWith L F K := by
   apply LocallyLipschitzOn.exists_lipschitzOnWith_of_compact hK
   intro w hw
@@ -169,7 +186,7 @@ theorem logR4_lipschitzOnWith_of_compact {F : ℂ → ℂ} {K : Set ℂ} (hK : I
   exact ⟨L, t, mem_nhdsWithin_of_mem_nhds ht, hL⟩
 
 /-- Composition of an absolutely continuous path with a function `C¹` along its image. -/
-theorem logR4_ac_comp {F : ℂ → ℂ} {γ : ℝ → ℂ} {a b : ℝ}
+lemma logR4_ac_comp {F : ℂ → ℂ} {γ : ℝ → ℂ} {a b : ℝ}
     (hγ : AbsolutelyContinuousOnInterval γ a b) (hF : ∀ t ∈ uIcc a b, ContDiffAt ℝ 1 F (γ t)) :
     AbsolutelyContinuousOnInterval (F ∘ γ) a b := by
   have hK : IsCompact (γ '' uIcc a b) := isCompact_uIcc.image_of_continuousOn hγ.continuousOn
@@ -199,7 +216,7 @@ theorem log_eq_path_integral {z : ℂ} (γ : ℝ → ℂ)
   exact ((hx hxi).1.clog_real (hs' x hxi)).deriv
 
 /-- Indefinite integrals of interval integrable complex functions are absolutely continuous. -/
-theorem logR4_ac_integral {q : ℝ → ℂ} {a b c : ℝ} (hq : IntervalIntegrable q MeasureTheory.volume a b)
+lemma logR4_ac_integral {q : ℝ → ℂ} {a b c : ℝ} (hq : IntervalIntegrable q MeasureTheory.volume a b)
     (hc : c ∈ uIcc a b) : AbsolutelyContinuousOnInterval (fun x => ∫ s in c..x, q s) a b := by
   have hre : IntervalIntegrable (fun s => (q s).re) MeasureTheory.volume a b :=
     ⟨hq.1.re, hq.2.re⟩

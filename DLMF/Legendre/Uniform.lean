@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Legendre.UniformCoordinates
+public import DLMF.Legendre.IntegralRepresentations
 
 /-!
 # Legendre uniform large-degree and large-order approximations

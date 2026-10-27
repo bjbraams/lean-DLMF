@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Hypergeometric.ArgumentContinuation
-public import DLMF.Gamma.BetaFunction
 
 /-!
 # Euler's Gauss integral on the positive half-line
@@ -28,7 +27,7 @@ def eulerHalfLineKernel (p a d z : ℂ) (u : ℝ) : ℂ :=
 
 /-- The Euler half-line kernel is absolutely integrable and evaluates to the continued
 Gauss function for every exponent `p`, with positive endpoint exponents `a,d`. -/
-lemma eulerHalfLine_integrable_integral {p a d z : ℂ}
+theorem eulerHalfLine_integrable_integral {p a d z : ℂ}
     (ha : 0 < a.re) (hd : 0 < d.re) (hz : 0 < z.re) :
     IntegrableOn (eulerHalfLineKernel p a d z) (Ioi 0) ∧
       (∫ u : ℝ in Ioi 0, eulerHalfLineKernel p a d z u) =

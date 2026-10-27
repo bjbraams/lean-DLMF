@@ -6,10 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.BernoulliEuler.Basic
-public import Mathlib.MeasureTheory.Integral.Bochner.Basic
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
-public import Mathlib.Analysis.SpecialFunctions.Log.Basic
-public import Mathlib.NumberTheory.LSeries.MellinEqDirichlet
 public import DLMF.BernoulliEuler.GeneratingFunctions
 
 /-!
@@ -38,7 +34,7 @@ namespace DLMF.BernoulliEuler
 
 /-- Mellin transforms of `∑ aᵢ e^{-pᵢ t}` at a positive integer `m + 1`, real form:
 `∫₀^∞ tᵐ F(t) dt = ∑ m! aᵢ/pᵢ^{m+1}`. -/
-theorem q24a_hasSum_integral_pow_mul {a p : ℕ → ℝ} {F : ℝ → ℝ} (m : ℕ)
+lemma q24a_hasSum_integral_pow_mul {a p : ℕ → ℝ} {F : ℝ → ℝ} (m : ℕ)
     (hp : ∀ i, 0 < p i)
     (hF : ∀ t ∈ Ioi (0 : ℝ), HasSum (fun i => a i * rexp (-p i * t)) (F t))
     (h_sum : Summable fun i => |a i| / p i ^ (m + 1)) :
@@ -68,7 +64,7 @@ theorem q24a_hasSum_integral_pow_mul {a p : ℕ → ℝ} {F : ℝ → ℝ} (m : 
 
 
 /-- `ζ(2n) = ∑_{k ≥ 0} 1/(k+1)^{2n}` in Bernoulli form. -/
-theorem q24a_hasSum_zeta_succ {n : ℕ} (hn : n ≠ 0) :
+lemma q24a_hasSum_zeta_succ {n : ℕ} (hn : n ≠ 0) :
     HasSum (fun k : ℕ => 1 / ((k : ℝ) + 1) ^ (2 * n))
       ((-1 : ℝ) ^ (n + 1) * 2 ^ (2 * n - 1) * π ^ (2 * n) * bernoulli (2 * n) / (2 * n)!) := by
   have h := (hasSum_nat_add_iff' 1).mpr (hasSum_zeta_nat hn)
@@ -77,7 +73,7 @@ theorem q24a_hasSum_zeta_succ {n : ℕ} (hn : n ≠ 0) :
   exact h
 
 /-- The Dirichlet eta function from zeta: `∑ (-1)ᵏ/(k+1)ˢ = (1 - 2^{1-s}) ∑ 1/(k+1)ˢ`. -/
-theorem q24a_hasSum_eta {s : ℕ} {Z : ℝ} (hZ : HasSum (fun k : ℕ => 1 / ((k : ℝ) + 1) ^ s) Z) :
+lemma q24a_hasSum_eta {s : ℕ} {Z : ℝ} (hZ : HasSum (fun k : ℕ => 1 / ((k : ℝ) + 1) ^ s) Z) :
     HasSum (fun k : ℕ => (-1) ^ k * (1 / ((k : ℝ) + 1) ^ s)) ((1 - 2 / 2 ^ s) * Z) := by
   set f : ℕ → ℝ := fun k => 1 / ((k : ℝ) + 1) ^ s
   have ho : HasSum (fun k => f (2 * k + 1)) (Z / 2 ^ s) := by
@@ -100,14 +96,14 @@ theorem q24a_hasSum_eta {s : ℕ} {Z : ℝ} (hZ : HasSum (fun k : ℕ => 1 / ((k
   exact this
 
 
-theorem q24a_summable_pow_succ (m : ℕ) {c : ℝ} (hc : 0 < c) :
+lemma q24a_summable_pow_succ (m : ℕ) {c : ℝ} (hc : 0 < c) :
     Summable fun i : ℕ => (1 : ℝ) / (c * ((i : ℝ) + 1)) ^ (m + 2) := by
   have h := (summable_nat_add_iff 1).mpr (Real.summable_one_div_nat_pow.mpr (by omega : 1 < m + 2))
   refine (h.mul_left (1 / c ^ (m + 2))).congr fun i => ?_
   push_cast; rw [mul_pow]; field_simp
 
 /-- `∫₀^∞ tᵐ/(e^{ct} - 1) dt = ∑_{i ≥ 0} m!/(c(i+1))^{m+1}`, `m ≥ 1`, `c > 0`. -/
-theorem q24a_hasSum_integral_exp_sub_one (m : ℕ) {c : ℝ} (hc : 0 < c) :
+lemma q24a_hasSum_integral_exp_sub_one (m : ℕ) {c : ℝ} (hc : 0 < c) :
     HasSum (fun i : ℕ => ((m + 1) ! : ℝ) * 1 / (c * ((i : ℝ) + 1)) ^ (m + 2))
       (∫ t in Ioi (0 : ℝ), t ^ (m + 1) * (1 / (rexp (c * t) - 1))) := by
   refine q24a_hasSum_integral_pow_mul (a := fun _ => 1) (p := fun i => c * ((i : ℝ) + 1)) (m + 1)
@@ -133,7 +129,7 @@ theorem q24a_hasSum_integral_exp_sub_one (m : ℕ) {c : ℝ} (hc : 0 < c) :
     simp
 
 /-- `∫₀^∞ tᵐ/(e^{ct} + 1) dt = ∑_{i ≥ 0} (-1)ⁱ m!/(c(i+1))^{m+1}`, `m ≥ 1`, `c > 0`. -/
-theorem q24a_hasSum_integral_exp_add_one (m : ℕ) {c : ℝ} (hc : 0 < c) :
+lemma q24a_hasSum_integral_exp_add_one (m : ℕ) {c : ℝ} (hc : 0 < c) :
     HasSum (fun i : ℕ => ((m + 1) ! : ℝ) * (-1) ^ i / (c * ((i : ℝ) + 1)) ^ (m + 2))
       (∫ t in Ioi (0 : ℝ), t ^ (m + 1) * (1 / (rexp (c * t) + 1))) := by
   refine q24a_hasSum_integral_pow_mul (a := fun i => (-1) ^ i) (p := fun i => c * ((i : ℝ) + 1))
@@ -160,7 +156,7 @@ theorem q24a_hasSum_integral_exp_add_one (m : ℕ) {c : ℝ} (hc : 0 < c) :
 
 
 /-- The Bose integral `∫₀^∞ t^{2m+1}/(e^{2πt} - 1) dt = (-1)^m B_{2m+2}/(4(m+1))`. -/
-theorem q24a_integral_exp_sub_one_bernoulli (m : ℕ) :
+lemma q24a_integral_exp_sub_one_bernoulli (m : ℕ) :
     ∫ t in Ioi (0 : ℝ), t ^ (2 * m + 1) / (rexp (2 * π * t) - 1) =
       (-1) ^ m * (bernoulli (2 * (m + 1)) : ℝ) / (4 * (m + 1)) := by
   have h := q24a_hasSum_integral_exp_sub_one (2 * m) (c := 2 * π) (by positivity)
@@ -182,7 +178,7 @@ theorem q24a_integral_exp_sub_one_bernoulli (m : ℕ) :
 
 
 /-- `∫₀^∞ t^{2m+1}/(e^{2πt} + 1) dt = (1 - 2^{-(2m+1)}) (-1)^m B_{2m+2}/(4(m+1))`. -/
-theorem q24a_integral_exp_add_one_bernoulli (m : ℕ) :
+lemma q24a_integral_exp_add_one_bernoulli (m : ℕ) :
     ∫ t in Ioi (0 : ℝ), t ^ (2 * m + 1) / (rexp (2 * π * t) + 1) =
       (1 - 2 / 2 ^ (2 * m + 2)) * ((-1) ^ m * (bernoulli (2 * (m + 1)) : ℝ) / (4 * (m + 1))) := by
   have h := q24a_hasSum_integral_exp_add_one (2 * m) (c := 2 * π) (by positivity)
@@ -199,7 +195,7 @@ theorem q24a_integral_exp_add_one_bernoulli (m : ℕ) :
   rw [heq, ← hb, heq']
   ring
 
-theorem q24a_hasDerivAt_arctan_exp (t : ℝ) :
+lemma q24a_hasDerivAt_arctan_exp (t : ℝ) :
     HasDerivAt (fun t => 2 / π * arctan (rexp (π * t))) (1 / cosh (π * t)) t := by
   have h1 : HasDerivAt (fun t => rexp (π * t)) (rexp (π * t) * π) t := by
     have := ((hasDerivAt_id t).const_mul π).exp
@@ -213,7 +209,7 @@ theorem q24a_hasDerivAt_arctan_exp (t : ℝ) :
   field_simp
   ring
 
-theorem q24a_integral_sech : ∫ t in Ioi (0 : ℝ), 1 / cosh (π * t) = 1 / 2 := by
+lemma q24a_integral_sech : ∫ t in Ioi (0 : ℝ), 1 / cosh (π * t) = 1 / 2 := by
   have hlim : Tendsto (fun t => 2 / π * arctan (rexp (π * t))) atTop (𝓝 (2 / π * (π / 2))) := by
     refine Tendsto.const_mul _ ?_
     exact (tendsto_nhds_of_tendsto_nhdsWithin Real.tendsto_arctan_atTop).comp
@@ -311,7 +307,7 @@ theorem bernoulli_two_mul_eq_integral_exp_sub_one {n : ℕ} (hn : 1 ≤ n) :
     ring_nf; rw [hs]; ring
 
 /-- `csch²(πt) = ∑_{i≥0} 4(i+1) e^{-2π(i+1)t}` for `t > 0`. -/
-theorem r24a_hasSum_csch_sq {t : ℝ} (ht : 0 < t) :
+lemma r24a_hasSum_csch_sq {t : ℝ} (ht : 0 < t) :
     HasSum (fun i : ℕ => (4 * ((i : ℝ) + 1)) * rexp (-(2 * π * ((i : ℝ) + 1)) * t))
       (1 / sinh (π * t) ^ 2) := by
   set r := rexp (-(2 * π * t))
@@ -347,7 +343,7 @@ theorem r24a_hasSum_csch_sq {t : ℝ} (ht : 0 < t) :
 
 
 /-- `sech²(πt) = ∑_{i≥0} 4(-1)ⁱ(i+1) e^{-2π(i+1)t}` for `t > 0`. -/
-theorem r24a_hasSum_sech_sq {t : ℝ} (ht : 0 < t) :
+lemma r24a_hasSum_sech_sq {t : ℝ} (ht : 0 < t) :
     HasSum (fun i : ℕ => (4 * (-1) ^ i * ((i : ℝ) + 1)) * rexp (-(2 * π * ((i : ℝ) + 1)) * t))
       (1 / cosh (π * t) ^ 2) := by
   set r := rexp (-(2 * π * t))
@@ -381,7 +377,7 @@ theorem r24a_hasSum_sech_sq {t : ℝ} (ht : 0 < t) :
 
 
 /-- `log(1 - e^{-2πt}) = ∑_{i≥0} (-1/(i+1)) e^{-2π(i+1)t}` for `t > 0`. -/
-theorem r24a_hasSum_log_one_sub_exp {t : ℝ} (ht : 0 < t) :
+lemma r24a_hasSum_log_one_sub_exp {t : ℝ} (ht : 0 < t) :
     HasSum (fun i : ℕ => (-(1 / ((i : ℝ) + 1))) * rexp (-(2 * π * ((i : ℝ) + 1)) * t))
       (log (1 - rexp (-(2 * π * t)))) := by
   set r := rexp (-(2 * π * t))

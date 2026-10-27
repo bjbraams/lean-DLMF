@@ -29,7 +29,7 @@ noncomputable section
 namespace DLMF.Gamma
 
 /-- The digamma series as a `HasSum`: `∑ (1/(n+1) - 1/(z+n)) = ψ(z) + γ`. -/
-lemma hasSum_cDigammaTerm {z : ℂ} (hz : z ∈ notNegNat) :
+theorem hasSum_cDigammaTerm {z : ℂ} (hz : z ∈ notNegNat) :
     HasSum (fun n => cDigammaTerm n z) (Complex.digamma z + Real.eulerMascheroniConstant) := by
   have h := (summable_cDigammaTerm hz).hasSum
   rw [digamma_eq_cDigammaSeries hz, cDigammaSeries]
@@ -86,7 +86,7 @@ theorem hasSum_one_div_two_mul_sq_add : HasSum (fun n : ℕ => 1 / (2 * (n : ℝ
   exact Complex.hasSum_ofReal.mp h
 
 /-- A sequence converges if its even and odd subsequences converge to the same limit. -/
-lemma tendsto_of_tendsto_even_odd {f : ℕ → ℂ} {L : ℂ}
+theorem tendsto_of_tendsto_even_odd {f : ℕ → ℂ} {L : ℂ}
     (h0 : Tendsto (fun m => f (2 * m)) atTop (𝓝 L))
     (h1 : Tendsto (fun m => f (2 * m + 1)) atTop (𝓝 L)) : Tendsto f atTop (𝓝 L) := by
   rw [Metric.tendsto_atTop] at h0 h1 ⊢
@@ -99,7 +99,7 @@ lemma tendsto_of_tendsto_even_odd {f : ℕ → ℂ} {L : ℂ}
   · exact hN1 k (by omega)
 
 /-- Pairing consecutive terms of a finite sum. -/
-lemma sum_range_two_mul (f : ℕ → ℂ) (M : ℕ) :
+theorem sum_range_two_mul (f : ℕ → ℂ) (M : ℕ) :
     ∑ n ∈ Finset.range (2 * M), f n = ∑ m ∈ Finset.range M, (f (2 * m) + f (2 * m + 1)) := by
   induction M with
   | zero => simp

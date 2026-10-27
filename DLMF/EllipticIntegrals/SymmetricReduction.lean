@@ -7,7 +7,6 @@ module
 
 public import DLMF.EllipticIntegrals.Symmetric
 public import Carlson.Elliptic.QuarticIntegral
-public import Mathlib.Tactic.CrossRefAttribute
 
 /-!
 # Reduction of general elliptic integrals (DLMF §19.29)
@@ -134,7 +133,7 @@ def EllRedPerm (α β γ δ : Fin 5) : Prop :=
 
 /-! ### Algebraic identities (19.29.5), (19.29.9) -/
 
-theorem ei19e_root_sq {ι : Type*} (a b : ι → ℂ) (x : ℝ) (α : ι) :
+lemma ei19e_root_sq {ι : Type*} (a b : ι → ℂ) (x : ℝ) (α : ι) :
     ellRedRoot a b x α ^ 2 = a α + b α * x := by
   rw [sq, ellRedRoot, ei19c_cpow_half_sq]
 
@@ -202,7 +201,7 @@ theorem ellRedU5Sq_eq (a b : Fin 5 → ℂ) {x y : ℝ} (hxy : x ≠ y) (α β �
   linear_combination h1 + key
 
 /-- Polynomial identity behind (19.29.9) (coefficients found by Gröbner reduction). -/
-theorem ei19e_S5_aux (Xa Xb Xc Xd X5 Ya Yb Yc Yd Y5 aa ab ac ad a5 ba bb bc bd b5 x y : ℂ)
+lemma ei19e_S5_aux (Xa Xb Xc Xd X5 Ya Yb Yc Yd Y5 aa ab ac ad a5 ba bb bc bd b5 x y : ℂ)
     (hxy : x - y ≠ 0) (hXa0 : Xa ≠ 0) (hYa0 : Ya ≠ 0) (h5 : aa * b5 - a5 * ba ≠ 0)
     (hXa : Xa ^ 2 = aa + ba * x) (hYa : Ya ^ 2 = aa + ba * y) (hXb : Xb ^ 2 = ab + bb * x) (hYb : Yb ^ 2 = ab + bb * y) (hXc : Xc ^ 2 = ac + bc * x) (hYc : Yc ^ 2 = ac + bc * y) (hXd : Xd ^ 2 = ad + bd * x) (hYd : Yd ^ 2 = ad + bd * y) (hX5 : X5 ^ 2 = a5 + b5 * x) (hY5 : Y5 ^ 2 = a5 + b5 * y) :
     ((Xb * Xc * Xd / Xa * Y5 ^ 2 + Yb * Yc * Yd / Ya * X5 ^ 2) / (x - y)) ^ 2 -
@@ -332,7 +331,7 @@ theorem ellRed_example_GR3142 {a b u c : ℝ} (hab : b < a) (hbu : u < b) (huc :
 
 /-! ### Real positive factors: (19.29.4) from `lean-codes` -/
 
-theorem ei19e_cpow_half_ofReal {r : ℝ} (hr : 0 ≤ r) : (r : ℂ) ^ (1 / 2 : ℂ) = ((√r : ℝ) : ℂ) := by
+lemma ei19e_cpow_half_ofReal {r : ℝ} (hr : 0 ≤ r) : (r : ℂ) ^ (1 / 2 : ℂ) = ((√r : ℝ) : ℂ) := by
   rw [Real.sqrt_eq_rpow, Complex.ofReal_cpow hr]
   push_cast; rfl
 
@@ -464,12 +463,12 @@ theorem ellRedI_reduction {h n : ℕ} (hh : h = 3 ∨ h = 4) (hn : h ≤ n) {a b
             (a α + b α * y) ^ (1 / 2 : ℂ)) * P.eval (y : ℂ) / Q.eval (y : ℂ)) := by
   sorry
 
-theorem ei19e_prod_single {n : ℕ} (f : Fin n → ℂ) (j : Fin n) (q : ℤ) :
+lemma ei19e_prod_single {n : ℕ} (f : Fin n → ℂ) (j : Fin n) (q : ℤ) :
     ∏ k, f k ^ ((Pi.single j q : Fin n → ℤ) k) = f j ^ q := by
   rw [Finset.prod_eq_single j (fun k _ hk => by simp [hk]) (by simp)]
   simp
 
-theorem ei19e_prod_sub {n : ℕ} (f : Fin n → ℂ) {l j : Fin n} (hlj : l ≠ j) :
+lemma ei19e_prod_sub {n : ℕ} (f : Fin n → ℂ) {l j : Fin n} (hlj : l ≠ j) :
     ∏ k, f k ^ ((ellRedE l - ellRedE j) k) = f l * (f j)⁻¹ := by
   rw [← Finset.prod_subset (Finset.subset_univ {l, j}) (fun k _ hk => by
     simp only [Finset.mem_insert, Finset.mem_singleton, not_or] at hk
@@ -703,7 +702,7 @@ theorem ellRed_quad_first {a₁ b₁ a₂ b₂ x y : ℝ} (hy : 0 ≤ y) (hxy : 
 /-- The algebra behind the positivity of the arguments in (19.29.19): with
 `(x² - y²) U = x P₁(y) P₂(y) + y P₁(x) P₂(x)` and `(x² - y²) W = x P₁(x) P₂(y) + y P₁(y) P₂(x)`,
 `P_j(t)² = a_j + b_j t²`, one has `W² - U² = a₂ b₁` (`U_{12}² - U_{14}² = d_{13} d_{24}`, 19.29.5). -/
-theorem ei19e_quad_sq_sub_sq {a₁ b₁ a₂ b₂ x y p₁ q₁ p₂ q₂ : ℝ} (hxy : x ^ 2 - y ^ 2 ≠ 0)
+lemma ei19e_quad_sq_sub_sq {a₁ b₁ a₂ b₂ x y p₁ q₁ p₂ q₂ : ℝ} (hxy : x ^ 2 - y ^ 2 ≠ 0)
     (h₁ : p₁ ^ 2 = a₁ + b₁ * x ^ 2) (h₂ : p₂ ^ 2 = a₂ + b₂ * x ^ 2)
     (k₁ : q₁ ^ 2 = a₁ + b₁ * y ^ 2) (k₂ : q₂ ^ 2 = a₂ + b₂ * y ^ 2) :
     ((x * p₁ * q₂ + y * q₁ * p₂) / (x ^ 2 - y ^ 2)) ^ 2 =
@@ -851,7 +850,7 @@ theorem ellRed_two_quadratics {f₁ g₁ h₁ f₂ g₂ h₂ x y : ℝ} (hxy : y
         (ellRedQuadD f₂ g₂ h₂ f₂ g₂ h₂) x y := by
   sorry
 
-theorem ei19e_endpoints_nonneg {c d x y : ℝ} (hxy : y < x) (h : ∀ t ∈ Ioo y x, 0 < c + d * t) :
+lemma ei19e_endpoints_nonneg {c d x y : ℝ} (hxy : y < x) (h : ∀ t ∈ Ioo y x, 0 < c + d * t) :
     0 ≤ c + d * x ∧ 0 ≤ c + d * y := by
   have hc : IsClosed {t : ℝ | 0 ≤ c + d * t} :=
     isClosed_le continuous_const (continuous_const.add (continuous_const.mul continuous_id))

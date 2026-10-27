@@ -70,7 +70,7 @@ theorem airyErr_wellConditioned_of_far {f g : ℂ → ℂ} (hf : Continuous f) (
     linarith
 
 /-- The `Ai` and `Bi'` prefactors of 9.7.5 and 9.7.8 multiply to `1/(2π)`. -/
-lemma airyErr_pref_ai_mul_biDeriv {z : ℂ} (hz : z ≠ 0) :
+theorem airyErr_pref_ai_mul_biDeriv {z : ℂ} (hz : z ≠ 0) :
     airyPrefactor .ai z * airyPrefactor .biDeriv z = 1 / (2 * π) := by
   have hπs : (Real.sqrt π : ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hq : z ^ (1 / 4 : ℂ) ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl hz)
@@ -82,7 +82,7 @@ lemma airyErr_pref_ai_mul_biDeriv {z : ℂ} (hz : z ≠ 0) :
   linear_combination (π : ℂ) * he - hs
 
 /-- The `Ai'` and `Bi` prefactors of 9.7.6 and 9.7.7 multiply to `-1/(2π)`. -/
-lemma airyErr_pref_aiDeriv_mul_bi {z : ℂ} (hz : z ≠ 0) :
+theorem airyErr_pref_aiDeriv_mul_bi {z : ℂ} (hz : z ≠ 0) :
     airyPrefactor .aiDeriv z * airyPrefactor .bi z = -1 / (2 * π) := by
   have hπs : (Real.sqrt π : ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hq : z ^ (1 / 4 : ℂ) ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl hz)
@@ -94,7 +94,7 @@ lemma airyErr_pref_aiDeriv_mul_bi {z : ℂ} (hz : z ≠ 0) :
   linear_combination -(π : ℂ) * he + hs
 
 /-- The oscillatory `Ai` and `Bi'` prefactors multiply to `1/π`. -/
-lemma airyErr_oscPref_ai_mul_biDeriv {z : ℂ} (hz : z ≠ 0) :
+theorem airyErr_oscPref_ai_mul_biDeriv {z : ℂ} (hz : z ≠ 0) :
     airyOscPrefactor .ai z * airyOscPrefactor .biDeriv z = 1 / π := by
   have hπs : (Real.sqrt π : ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hq : z ^ (1 / 4 : ℂ) ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl hz)
@@ -105,7 +105,7 @@ lemma airyErr_oscPref_ai_mul_biDeriv {z : ℂ} (hz : z ≠ 0) :
   linear_combination -hs
 
 /-- The oscillatory `Ai'` and `Bi` prefactors multiply to `1/π`. -/
-lemma airyErr_oscPref_aiDeriv_mul_bi {z : ℂ} (hz : z ≠ 0) :
+theorem airyErr_oscPref_aiDeriv_mul_bi {z : ℂ} (hz : z ≠ 0) :
     airyOscPrefactor .aiDeriv z * airyOscPrefactor .bi z = 1 / π := by
   have hπs : (Real.sqrt π : ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hq : z ^ (1 / 4 : ℂ) ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl hz)
@@ -116,7 +116,7 @@ lemma airyErr_oscPref_aiDeriv_mul_bi {z : ℂ} (hz : z ≠ 0) :
   linear_combination -hs
 
 /-- `ζ(x) ≥ 1` for `x ≥ 2`. -/
-lemma airyErr_one_le_zeta {x : ℝ} (hx : 2 ≤ x) : 1 ≤ airyZeta x := by
+theorem airyErr_one_le_zeta {x : ℝ} (hx : 2 ≤ x) : 1 ≤ airyZeta x := by
   have h1 : x ^ (1 : ℝ) ≤ x ^ (3 / 2 : ℝ) :=
     Real.rpow_le_rpow_of_exponent_le (by linarith) (by norm_num)
   rw [Real.rpow_one] at h1
@@ -124,7 +124,7 @@ lemma airyErr_one_le_zeta {x : ℝ} (hx : 2 ≤ x) : 1 ≤ airyZeta x := by
   linarith
 
 /-- On the positive axis the zeroth oscillatory envelope is at most twice the prefactor. -/
-lemma airyErr_oscError_le (kind : AiryKind) {x : ℝ} (hx : 2 ≤ x) :
+theorem airyErr_oscError_le (kind : AiryKind) {x : ℝ} (hx : 2 ≤ x) :
     ‖airyOscError kind 0 0 x‖ ≤ 2 * ‖airyOscPrefactor kind x‖ := by
   have hx0 : 0 < x := by linarith
   have hz := airyErr_one_le_zeta hx
@@ -143,7 +143,7 @@ lemma airyErr_oscError_le (kind : AiryKind) {x : ℝ} (hx : 2 ≤ x) :
   nlinarith [norm_nonneg (airyOscPrefactor kind x)]
 
 /-- Elementary data of a positive real point. -/
-lemma airyErr_ofReal_data {x : ℝ} (hx : 0 < x) :
+theorem airyErr_ofReal_data {x : ℝ} (hx : 0 < x) :
     (x : ℂ) ≠ 0 ∧ ‖(x : ℂ)‖ = x ∧ arg (x : ℂ) = 0 :=
   ⟨ofReal_ne_zero.mpr hx.ne', by rw [Complex.norm_real, Real.norm_of_nonneg hx.le],
     Complex.arg_ofReal_of_nonneg hx.le⟩
@@ -264,23 +264,23 @@ theorem airyErr_far_real : ∃ R B : ℝ, ∀ z : ℂ, z.im = 0 → R ≤ ‖z�
     exact (h2 _ ((le_max_right _ _).trans hR)).trans (le_max_right _ _)
 
 /-- `|w^{1/4}| = |w|^{1/4}`. -/
-lemma airyErr_norm_quarter (w : ℂ) : ‖w ^ (1 / 4 : ℂ)‖ = ‖w‖ ^ (1 / 4 : ℝ) := by
+theorem airyErr_norm_quarter (w : ℂ) : ‖w ^ (1 / 4 : ℂ)‖ = ‖w‖ ^ (1 / 4 : ℝ) := by
   rw [show (1 / 4 : ℂ) = ((1 / 4 : ℝ) : ℂ) by push_cast; ring, norm_cpow_real]
 
 /-- The norm of the `Ai` prefactor. -/
-lemma airyErr_norm_pref_ai (w : ℂ) :
+theorem airyErr_norm_pref_ai (w : ℂ) :
     ‖airyPrefactor .ai w‖ = ‖exp (-airyZetaComplex w)‖ / (2 * Real.sqrt π * ‖w‖ ^ (1 / 4 : ℝ)) := by
   rw [airyPrefactor, norm_div, norm_mul, norm_mul, airyErr_norm_quarter, Complex.norm_ofNat,
     Complex.norm_real, Real.norm_of_nonneg (Real.sqrt_nonneg _)]
 
 /-- The norm of the `Ai'` prefactor. -/
-lemma airyErr_norm_pref_aiDeriv (w : ℂ) :
+theorem airyErr_norm_pref_aiDeriv (w : ℂ) :
     ‖airyPrefactor .aiDeriv w‖ = ‖w‖ ^ (1 / 4 : ℝ) * ‖exp (-airyZetaComplex w)‖ / (2 * Real.sqrt π) := by
   rw [airyPrefactor, norm_div, norm_mul, norm_neg, norm_mul, airyErr_norm_quarter,
     Complex.norm_ofNat, Complex.norm_real, Real.norm_of_nonneg (Real.sqrt_nonneg _)]
 
 /-- `re ζ ≥ 0` in the closed sector `|arg z| ≤ π/3`. -/
-lemma airyErr_re_zeta_nonneg {z : ℂ} (hz : z ≠ 0) (harg : |arg z| ≤ π / 3) :
+theorem airyErr_re_zeta_nonneg {z : ℂ} (hz : z ≠ 0) (harg : |arg z| ≤ π / 3) :
     0 ≤ (airyZetaComplex z).re := by
   have hπ := Real.pi_pos
   have h := airyRot_re_W z 0
@@ -291,13 +291,13 @@ lemma airyErr_re_zeta_nonneg {z : ℂ} (hz : z ≠ 0) (harg : |arg z| ≤ π / 3
   simpa using this
 
 /-- `|e^{-ζ}| ≤ 1` in the closed sector `|arg z| ≤ π/3`. -/
-lemma airyErr_norm_exp_neg_zeta_le {z : ℂ} (hz : z ≠ 0) (harg : |arg z| ≤ π / 3) :
+theorem airyErr_norm_exp_neg_zeta_le {z : ℂ} (hz : z ≠ 0) (harg : |arg z| ≤ π / 3) :
     ‖exp (-airyZetaComplex z)‖ ≤ 1 := by
   rw [Complex.norm_exp, neg_re, Real.exp_le_one_iff, neg_nonpos]
   exact airyErr_re_zeta_nonneg hz harg
 
 /-- Bounds for `Bi`, `Bi'` from a rotation identity `Ai(zc) = a (Ai z + b Bi z)`. -/
-lemma airyErr_bi_le_of_rot {a b c : ℂ} (ha : ‖a‖ = 1 / 2) (hb : ‖b‖ = 1) (hc : ‖c‖ = 1)
+theorem airyErr_bi_le_of_rot {a b c : ℂ} (ha : ‖a‖ = 1 / 2) (hb : ‖b‖ = 1) (hc : ‖c‖ = 1)
     (h : ∀ z, airyAi (z * c) = a * (airyAi z + b * airyBi z)) (z : ℂ) :
     ‖airyBi z‖ ≤ 2 * ‖airyAi (z * c)‖ + ‖airyAi z‖ ∧
       ‖airyBiDeriv z‖ ≤ 2 * ‖airyAiDeriv (z * c)‖ + ‖airyAiDeriv z‖ := by
@@ -325,10 +325,10 @@ lemma airyErr_bi_le_of_rot {a b c : ℂ} (ha : ‖a‖ = 1 / 2) (hb : ‖b‖ = 
     linarith [show 1 * ‖airyAiDeriv (z * c)‖ / (1 / 2) = 2 * ‖airyAiDeriv (z * c)‖ by ring]
 
 /-- `|e^{iθ}| = 1`. -/
-lemma airyErr_norm_exp_I (θ : ℝ) : ‖exp ((θ : ℂ) * I)‖ = 1 := norm_exp_ofReal_mul_I θ
+theorem airyErr_norm_exp_I (θ : ℝ) : ‖exp ((θ : ℂ) * I)‖ = 1 := norm_exp_ofReal_mul_I θ
 
 /-- The rotation identities 9.2.11 in the form `Ai(z c) = a (Ai z + b Bi z)`. -/
-lemma airyErr_rot_identity {ε : ℝ} (hε : ε = 1 ∨ ε = -1) :
+theorem airyErr_rot_identity {ε : ℝ} (hε : ε = 1 ∨ ε = -1) :
     ∃ a b : ℂ, ‖a‖ = 1 / 2 ∧ ‖b‖ = 1 ∧ ∀ w, airyAi (w * exp (((ε * (2 * π / 3)) : ℝ) * I)) =
       a * (airyAi w + b * airyBi w) := by
   rcases hε with rfl | rfl
@@ -417,18 +417,18 @@ theorem airyErr_far_sector : ∃ R B : ℝ, ∀ z : ℂ, R ≤ ‖z‖ → z ≠
     _ = _ := by ring
 
 /-- The imaginary part of `2ζ`. -/
-lemma airyErr_im_two_zeta {z : ℂ} (hz : z ≠ 0) :
+theorem airyErr_im_two_zeta {z : ℂ} (hz : z ≠ 0) :
     (2 * airyZetaComplex z).im = Real.exp (log 2 + airyLogZeta z).re * Real.sin (3 / 2 * arg z) := by
   rw [← exp_log_two_add_airyLogZeta hz, Complex.exp_im, im_log_two_add_airyLogZeta]
 
 /-- `|ζ(z)| = (2/3)|z|^{3/2}`. -/
-lemma airyErr_norm_zeta (z : ℂ) : ‖airyZetaComplex z‖ = 2 / 3 * ‖z‖ ^ (3 / 2 : ℝ) := by
+theorem airyErr_norm_zeta (z : ℂ) : ‖airyZetaComplex z‖ = 2 / 3 * ‖z‖ ^ (3 / 2 : ℝ) := by
   have h := airyRot_norm_two_zeta z
   rw [norm_mul, Complex.norm_ofNat] at h
   linarith
 
 /-- `|ζ(z)| ≥ 1` for `|z| ≥ 2`. -/
-lemma airyErr_one_le_norm_zeta {z : ℂ} (hz : 2 ≤ ‖z‖) : 1 ≤ ‖airyZetaComplex z‖ := by
+theorem airyErr_one_le_norm_zeta {z : ℂ} (hz : 2 ≤ ‖z‖) : 1 ≤ ‖airyZetaComplex z‖ := by
   have h1 : ‖z‖ ^ (1 : ℝ) ≤ ‖z‖ ^ (3 / 2 : ℝ) :=
     Real.rpow_le_rpow_of_exponent_le (by linarith) (by norm_num)
   rw [Real.rpow_one] at h1
@@ -436,7 +436,7 @@ lemma airyErr_one_le_norm_zeta {z : ℂ} (hz : 2 ≤ ‖z‖) : 1 ≤ ‖airyZet
   linarith
 
 /-- For `|u| ≥ 2` the zeroth oscillatory envelope is at most `2 |prefactor| e^{|im ζ|}`. -/
-lemma airyErr_oscError_le' (kind : AiryKind) {u : ℂ} (hu : 2 ≤ ‖u‖) :
+theorem airyErr_oscError_le' (kind : AiryKind) {u : ℂ} (hu : 2 ≤ ‖u‖) :
     ‖airyOscError kind 0 0 u‖ ≤
       2 * ‖airyOscPrefactor kind u‖ * Real.exp |(airyZetaComplex u).im| := by
   have hz := airyErr_one_le_norm_zeta hu
@@ -456,19 +456,19 @@ lemma airyErr_oscError_le' (kind : AiryKind) {u : ℂ} (hu : 2 ≤ ‖u‖) :
   nlinarith [mul_nonneg h0 h1.le]
 
 /-- The norm of the oscillatory `Ai` prefactor. -/
-lemma airyErr_norm_oscPref_ai (u : ℂ) :
+theorem airyErr_norm_oscPref_ai (u : ℂ) :
     ‖airyOscPrefactor .ai u‖ = 1 / (Real.sqrt π * ‖u‖ ^ (1 / 4 : ℝ)) := by
   rw [airyOscPrefactor, norm_div, norm_one, norm_mul, airyErr_norm_quarter, Complex.norm_real,
     Real.norm_of_nonneg (Real.sqrt_nonneg _)]
 
 /-- The norm of the oscillatory `Ai'` prefactor. -/
-lemma airyErr_norm_oscPref_aiDeriv (u : ℂ) :
+theorem airyErr_norm_oscPref_aiDeriv (u : ℂ) :
     ‖airyOscPrefactor .aiDeriv u‖ = ‖u‖ ^ (1 / 4 : ℝ) / Real.sqrt π := by
   rw [airyOscPrefactor, norm_div, airyErr_norm_quarter, Complex.norm_real,
     Real.norm_of_nonneg (Real.sqrt_nonneg _)]
 
 /-- Near the negative axis, `|e^{-ζ(w)}| = e^{|im ζ(-w)|}`. -/
-lemma airyErr_negative_axis {w : ℂ} (hw : w ≠ 0) (harg : 5 * π / 6 < |arg w|) :
+theorem airyErr_negative_axis {w : ℂ} (hw : w ≠ 0) (harg : 5 * π / 6 < |arg w|) :
     ‖-w‖ = ‖w‖ ∧ -w ≠ 0 ∧ |arg (-w)| ≤ 2 * π / 3 - π / 2 ∧
       ‖exp (-airyZetaComplex w)‖ = Real.exp |(airyZetaComplex (-w)).im| := by
   have hπ := Real.pi_pos
@@ -592,7 +592,7 @@ theorem airyErr_ai_uniform : ∃ C R : ℝ, 0 ≤ C ∧ ∀ w : ℂ, R ≤ ‖w�
 
 /-- Cross products of `Ai` and `Ai'` at two points of equal modulus whose `ζ` have
 nonnegative total real part are bounded. -/
-lemma airyErr_cross_le {C R : ℝ} (hC : 0 ≤ C)
+theorem airyErr_cross_le {C R : ℝ} (hC : 0 ≤ C)
     (hU : ∀ w : ℂ, R ≤ ‖w‖ → w ≠ 0 →
       ‖airyAi w‖ ≤ C * ‖airyPrefactor .ai w‖ ∧ ‖airyAiDeriv w‖ ≤ C * ‖airyPrefactor .aiDeriv w‖)
     {w₁ w₂ : ℂ} (h₁ : w₁ ≠ 0) (h₂ : w₂ ≠ 0) (hn : ‖w₁‖ = ‖w₂‖) (hR : R ≤ ‖w₁‖)
@@ -621,27 +621,27 @@ lemma airyErr_cross_le {C R : ℝ} (hC : 0 ≤ C)
     _ = _ := by ring
 
 /-- `ζ(z e^{iα}) = ζ(z) e^{3iα/2}` when no branch cut is crossed. -/
-lemma airyErr_zeta_rot {z : ℂ} (hz : z ≠ 0) {α : ℝ} (h1 : -π < arg z + α) (h2 : arg z + α ≤ π)
+theorem airyErr_zeta_rot {z : ℂ} (hz : z ≠ 0) {α : ℝ} (h1 : -π < arg z + α) (h2 : arg z + α ≤ π)
     {κ : ℂ} (hκ : exp (α * I * (3 / 2)) = κ) :
     airyZetaComplex (z * exp (α * I)) = airyZetaComplex z * κ := by
   rw [airyRot_zeta_mul_exp hz h1 h2, hκ]
 
 /-- Derivative of `z ↦ Ai(z c)`. -/
-lemma airyErr_hasDerivAt_rot (c z : ℂ) :
+theorem airyErr_hasDerivAt_rot (c z : ℂ) :
     HasDerivAt (fun z => airyAi (z * c)) (airyAiDeriv (z * c) * c) z := by
   exact (hasDerivAt_airyAi (z * c)).comp z (hasDerivAt_mul_const c)
 
 /-- `deriv` of `z ↦ Ai(z c)`. -/
-lemma airyErr_deriv_rot (c : ℂ) :
+theorem airyErr_deriv_rot (c : ℂ) :
     deriv (fun z => airyAi (z * c)) = fun z => airyAiDeriv (z * c) * c :=
   funext fun z => (airyErr_hasDerivAt_rot c z).deriv
 
 /-- Continuity of `z ↦ Ai(z c)`. -/
-lemma airyErr_continuous_rot (c : ℂ) : Continuous fun z => airyAi (z * c) :=
+theorem airyErr_continuous_rot (c : ℂ) : Continuous fun z => airyAi (z * c) :=
   differentiable_airyAi.continuous.comp (by fun_prop : Continuous fun z : ℂ => z * c)
 
 /-- Continuity of `z ↦ Ai'(z c) c`. -/
-lemma airyErr_continuous_deriv_rot (c : ℂ) : Continuous fun z => airyAiDeriv (z * c) * c :=
+theorem airyErr_continuous_deriv_rot (c : ℂ) : Continuous fun z => airyAiDeriv (z * c) * c :=
   ((Differentiable.continuous (𝕜 := ℂ) fun z => (hasDerivAt_airyAiDeriv z).differentiableAt).comp
     (by fun_prop : Continuous fun z : ℂ => z * c)).mul continuous_const
 

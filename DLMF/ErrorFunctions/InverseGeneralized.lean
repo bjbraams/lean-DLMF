@@ -5,12 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.ErrorFunctions.BoundsAsymptotics
-public import Mathlib.Analysis.Calculus.InverseFunctionTheorem.Analytic
-public import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
 public import Mathlib.Analysis.Calculus.Taylor
-public import Mathlib.Analysis.Analytic.OfScalars
-public import Mathlib.Analysis.Calculus.IteratedDeriv.ConvergenceOnBall
+public import DLMF.Confluent.IncompleteGamma
+public import DLMF.ErrorFunctions.Basic
 
 /-!
 # Generalized and inverse error functions, DLMF §§7.16–7.17

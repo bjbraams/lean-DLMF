@@ -25,7 +25,7 @@ namespace DLMF.Confluent
 open DLMF.Airy
 
 /-- Second derivative of a linear rescaling: `(f(c t))'' = c² f''(c t)`. -/
-lemma iteratedDeriv_two_comp_const_mul {f : ℂ → ℂ} (hf : Differentiable ℂ f)
+theorem iteratedDeriv_two_comp_const_mul {f : ℂ → ℂ} (hf : Differentiable ℂ f)
     (hf2 : Differentiable ℂ (deriv f)) (c t : ℂ) :
     iteratedDeriv 2 (fun t => f (c*t)) t = c^2 * iteratedDeriv 2 f (c*t) := by
   have hl : ∀ w : ℂ, HasDerivAt (fun w : ℂ => c*w) c w := fun w =>

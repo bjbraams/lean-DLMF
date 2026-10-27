@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Gamma.Digamma
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
 /-!
 # Integrals of `log Γ` and `ψ` (AAR §1.6)
@@ -26,14 +25,14 @@ noncomputable section
 
 namespace Real
 
-lemma uIcc_subset_Ioi {a b : ℝ} (ha : 0 < a) (hb : 0 < b) : uIcc a b ⊆ Ioi (0 : ℝ) := by
+theorem uIcc_subset_Ioi {a b : ℝ} (ha : 0 < a) (hb : 0 < b) : uIcc a b ⊆ Ioi (0 : ℝ) := by
   intro x hx
   exact (lt_min ha hb).trans_le hx.1
 
-lemma continuousOn_digamma : ContinuousOn digamma (Ioi 0) :=
+theorem continuousOn_digamma : ContinuousOn digamma (Ioi 0) :=
   fun _ hx => (hasDerivAt_digamma hx).continuousAt.continuousWithinAt
 
-lemma intervalIntegrable_digamma {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
+theorem intervalIntegrable_digamma {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
     IntervalIntegrable digamma volume a b :=
   (continuousOn_digamma.mono (uIcc_subset_Ioi ha hb)).intervalIntegrable
 

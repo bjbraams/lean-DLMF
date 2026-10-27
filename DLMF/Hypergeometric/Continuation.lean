@@ -5,14 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Hypergeometric.Series
-public import DLMF.Hypergeometric.Contiguous
 public import DLMF.Hypergeometric.Derivatives
 public import DLMF.Hypergeometric.Transformations
 public import Mathlib.Analysis.Complex.LocallyUniformLimit
-public import Mathlib.Analysis.Analytic.Uniqueness
 public import Mathlib.Analysis.SpecialFunctions.RegularizedHypergeometric
-public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
 public import Mathlib.Analysis.Calculus.Deriv.Polynomial
 public import Mathlib.Analysis.Complex.AbelLimit
 
@@ -79,31 +75,31 @@ theorem analyticOnNhd_tsum_of_eventually_dominated {F : ℕ → ℂ → ℂ}
 /-! ### Bounds -/
 
 /-- Pochhammer symbols with nonnegative real argument are nonnegative. -/
-lemma ascPochhammer_eval_nonneg {x : ℝ} (hx : 0 ≤ x) (n : ℕ) :
+theorem ascPochhammer_eval_nonneg {x : ℝ} (hx : 0 ≤ x) (n : ℕ) :
     0 ≤ (ascPochhammer ℝ n).eval x := by
   exact poch_eval_nonneg hx n
 
 /-- Pochhammer symbols are monotone on the nonnegative reals. -/
-lemma ascPochhammer_eval_mono {x y : ℝ} (hx : 0 ≤ x) (hxy : x ≤ y) (n : ℕ) :
+theorem ascPochhammer_eval_mono {x y : ℝ} (hx : 0 ≤ x) (hxy : x ≤ y) (n : ℕ) :
     (ascPochhammer ℝ n).eval x ≤ (ascPochhammer ℝ n).eval y := by
   exact poch_eval_mono hx hxy n
 
 /-- Evaluating the complex Pochhammer polynomial at a real number. -/
-lemma ascPochhammer_eval_ofReal (x : ℝ) (n : ℕ) :
+theorem ascPochhammer_eval_ofReal (x : ℝ) (n : ℕ) :
     (ascPochhammer ℂ n).eval (x : ℂ) = (((ascPochhammer ℝ n).eval x : ℝ) : ℂ) := by
   have h := ascPochhammer_map (algebraMap ℝ ℂ) n
   rw [← h, Polynomial.eval_map]
   exact Polynomial.eval₂_at_apply _ _
 
 /-- `‖(a)_n‖ ≤ (r)_n` for `‖a‖ ≤ r`. -/
-lemma norm_ascPochhammer_eval_le {a : ℂ} {r : ℝ} (hr : ‖a‖ ≤ r) (n : ℕ) :
+theorem norm_ascPochhammer_eval_le {a : ℂ} {r : ℝ} (hr : ‖a‖ ≤ r) (n : ℕ) :
     ‖(ascPochhammer ℂ n).eval a‖ ≤ ‖(ascPochhammer ℂ n).eval (r : ℂ)‖ := by
   rw [ascPochhammer_eval_ofReal, Complex.norm_real, Real.norm_eq_abs]
   exact (norm_poch_le a n).trans
     ((ascPochhammer_eval_mono (norm_nonneg a) hr n).trans (le_abs_self _))
 
 /-- Lower bound for the Pochhammer symbol when `1 ≤ Re w`. -/
-lemma factorial_le_norm_ascPochhammer_eval {w : ℂ} (hw : 1 ≤ w.re) (k : ℕ) :
+theorem factorial_le_norm_ascPochhammer_eval {w : ℂ} (hw : 1 ≤ w.re) (k : ℕ) :
     (k.factorial : ℝ) ≤ ‖(ascPochhammer ℂ k).eval w‖ := by
   induction k with
   | zero => simp
@@ -118,7 +114,7 @@ lemma factorial_le_norm_ascPochhammer_eval {w : ℂ} (hw : 1 ≤ w.re) (k : ℕ)
       _ = _ := by ring
 
 /-- `‖1/Γ(c+n)‖ ≤ 1/((n-N)! m)` for `n ≥ N`, when `1 ≤ Re (c+N)` and `m ≤ ‖Γ(c+N)‖`. -/
-lemma norm_recip_Gamma_add_nat_le {c : ℂ} {N : ℕ} (hre : 1 ≤ (c + N).re) {m : ℝ} (hm : 0 < m)
+theorem norm_recip_Gamma_add_nat_le {c : ℂ} {N : ℕ} (hre : 1 ≤ (c + N).re) {m : ℝ} (hm : 0 < m)
     (hΓ : m ≤ ‖Gamma (c + N)‖) {n : ℕ} (hn : N ≤ n) :
     ‖(Gamma (c + n))⁻¹‖ ≤ ((n - N).factorial : ℝ)⁻¹ * m⁻¹ := by
   have hpole : ∀ k : ℕ, c + N ≠ -k := fun k h => by
@@ -144,7 +140,7 @@ lemma norm_recip_Gamma_add_nat_le {c : ℂ} {N : ℕ} (hre : 1 ≤ (c + N).re) {
 /-! ### The nonpositive integers -/
 
 /-- The complement of the nonpositive integers is open in `ℂ`. -/
-lemma isOpen_not_neg_nat : IsOpen {s : ℂ | ∀ m : ℕ, s ≠ -(m : ℂ)} := by
+theorem isOpen_not_neg_nat : IsOpen {s : ℂ | ∀ m : ℕ, s ≠ -(m : ℂ)} := by
   have hce : Topology.IsClosedEmbedding (fun m : ℕ => -((m : ℝ) : ℂ)) :=
     (Homeomorph.neg ℂ).isClosedEmbedding.comp
       (Complex.isometry_ofReal.isClosedEmbedding.comp Nat.isClosedEmbedding_coe_real)
@@ -157,7 +153,7 @@ lemma isOpen_not_neg_nat : IsOpen {s : ℂ | ∀ m : ℕ, s ≠ -(m : ℂ)} := b
   exact hce.isClosed_range.isOpen_compl
 
 /-- Near `-n`, but away from it, no nonpositive integer is hit. -/
-lemma eventually_nhdsWithin_ne_neg_nat (n : ℕ) :
+theorem eventually_nhdsWithin_ne_neg_nat (n : ℕ) :
     ∀ᶠ c in 𝓝[≠] (-(n : ℂ)), ∀ k : ℕ, c ≠ -(k : ℂ) := by
   have h1 : ∀ᶠ c in 𝓝[≠] (-(n : ℂ)), c ≠ -(n : ℂ) := self_mem_nhdsWithin
   have h2 : ∀ᶠ c in 𝓝[≠] (-(n : ℂ)), dist c (-(n : ℂ)) < 1 / 2 :=
@@ -175,14 +171,14 @@ lemma eventually_nhdsWithin_ne_neg_nat (n : ℕ) :
     linarith
 
 /-- `(x)_{m+k} = (x)_m (x+m)_k`. -/
-lemma ascPochhammer_eval_add (x : ℂ) (m k : ℕ) :
+theorem ascPochhammer_eval_add (x : ℂ) (m k : ℕ) :
     (ascPochhammer ℂ (m + k)).eval x =
       (ascPochhammer ℂ m).eval x * (ascPochhammer ℂ k).eval (x + m) := by
   rw [← ascPochhammer_mul, Polynomial.eval_mul, Polynomial.eval_comp]
   simp
 
 /-- `1/Γ(y) = (y)_{p+1}/Γ(y+p+1)` for every `y`. -/
-lemma recip_Gamma_eq_poch_mul (p : ℕ) (y : ℂ) :
+theorem recip_Gamma_eq_poch_mul (p : ℕ) (y : ℂ) :
     (Gamma y)⁻¹ = poch y (p + 1) * (Gamma (y + (p + 1 : ℕ)))⁻¹ := by
   by_cases hy : ∀ m : ℕ, y ≠ -(m : ℂ)
   · have h := Gamma_add_nat_div_Gamma_eq (n := p + 1) y hy
@@ -202,7 +198,7 @@ lemma recip_Gamma_eq_poch_mul (p : ℕ) (y : ℂ) :
 /-! ### The regularized Gauss function -/
 
 /-- The regularized Gauss series with the `Γ` factor isolated. -/
-lemma regularizedGaussHGFun_eq_tsum (a b c z : ℂ) :
+theorem regularizedGaussHGFun_eq_tsum (a b c z : ℂ) :
     regularizedGaussHGFun a b c z =
       ∑' n : ℕ, (ascPochhammer ℂ n).eval a * (ascPochhammer ℂ n).eval b * z ^ n / n.factorial *
         (Gamma (c + n))⁻¹ := by
@@ -214,12 +210,12 @@ lemma regularizedGaussHGFun_eq_tsum (a b c z : ℂ) :
   ring
 
 /-- Membership of the disk in the ball of convergence of the regularized series. -/
-lemma mem_eball_radius_regularizedGaussHGFunSeries (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem mem_eball_radius_regularizedGaussHGFunSeries (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     z ∈ Metric.eball (0 : ℂ) (regularizedGaussHGFunSeries a b c).radius :=
   Metric.eball_subset_eball (radius_regularizedGaussHGFunSeries_ge_one a b c)
     (mem_eball_one_of_norm_lt_one hz)
 
-lemma summable_regularizedGaussHGFun_term (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem summable_regularizedGaussHGFun_term (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     Summable fun n : ℕ =>
       (ascPochhammer ℂ n).eval a * (ascPochhammer ℂ n).eval b * z ^ n / n.factorial *
         (Gamma (c + n))⁻¹ := by
@@ -233,7 +229,7 @@ lemma summable_regularizedGaussHGFun_term (a b c : ℂ) {z : ℂ} (hz : ‖z‖ 
   rw [hc, coeff_regularizedGaussHGFunSeries]
   ring
 
-lemma norm_regularizedGaussHGFunSeries_apply_ofReal (α β : ℝ) (N n : ℕ) (hn : N ≤ n) :
+theorem norm_regularizedGaussHGFunSeries_apply_ofReal (α β : ℝ) (N n : ℕ) (hn : N ≤ n) :
     ‖regularizedGaussHGFunSeries (α : ℂ) (β : ℂ) (1 - N) n‖ =
       ‖(ascPochhammer ℂ n).eval (α : ℂ)‖ * ‖(ascPochhammer ℂ n).eval (β : ℂ)‖ /
         (n.factorial * (n - N).factorial) := by
@@ -245,7 +241,7 @@ lemma norm_regularizedGaussHGFunSeries_apply_ofReal (α β : ℝ) (N n : ℕ) (h
 
 /-- The tail-domination step, shared by the three parameters: on `U` the `n`-th term is
 bounded by the `n`-th term of the majorant series. -/
-lemma norm_term_le_majorant {a b c : ℂ} {z : ℂ} {α β : ℝ}
+theorem norm_term_le_majorant {a b c : ℂ} {z : ℂ} {α β : ℝ}
     (ha : ‖a‖ ≤ α) (hb : ‖b‖ ≤ β) {N : ℕ} (hre : 1 ≤ (c + N).re) {m : ℝ} (hm : 0 < m)
     (hΓ : m ≤ ‖Gamma (c + N)‖) {n : ℕ} (hn : N ≤ n) :
     ‖(ascPochhammer ℂ n).eval a * (ascPochhammer ℂ n).eval b * z ^ n / n.factorial *
@@ -265,7 +261,7 @@ lemma norm_term_le_majorant {a b c : ℂ} {z : ℂ} {α β : ℝ}
     _ = _ := by field_simp
 
 /-- The nonvanishing of `Γ` near a point with real part at least two. -/
-lemma exists_open_norm_Gamma_add_nat_gt {c₀ : ℂ} {N : ℕ} (hre : 2 ≤ (c₀ + N).re) :
+theorem exists_open_norm_Gamma_add_nat_gt {c₀ : ℂ} {N : ℕ} (hre : 2 ≤ (c₀ + N).re) :
     ∃ V : Set ℂ, IsOpen V ∧ c₀ ∈ V ∧
       ∀ c ∈ V, ‖Gamma (c₀ + N)‖ / 2 < ‖Gamma (c + N)‖ := by
   have hpole : ∀ k : ℕ, c₀ + N ≠ -k := fun k h => by
@@ -377,7 +373,7 @@ theorem eq_of_eqOn_re_pos {f g : ℂ → ℂ} (hf : AnalyticOnNhd ℂ f univ)
 /-! ### The regularized derivative formula, for all parameters -/
 
 /-- The coefficient recurrence behind 15.5.1, valid for all parameters. -/
-lemma regularizedHGFunCoeff_pair_succ (a b c : ℂ) (n : ℕ) :
+theorem regularizedHGFunCoeff_pair_succ (a b c : ℂ) (n : ℕ) :
     (n + 1 : ℂ) * regularizedHGFunCoeff {a, b} {c} (n + 1) =
       a * b * regularizedHGFunCoeff {a + 1, b + 1} {c + 1} n := by
   have hc1 : regularizedHGFunCoeff {a, b} {c} (n + 1) =
@@ -423,7 +419,7 @@ theorem deriv_regularizedGaussHGFun (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
   rw [← mul_assoc, regularizedHGFunCoeff_pair_succ]
 
 /-- `𝐅(a,b;c;·)` is differentiable on the unit disk. -/
-lemma differentiableAt_regularizedGaussHGFun (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem differentiableAt_regularizedGaussHGFun (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     DifferentiableAt ℂ (regularizedGaussHGFun a b c) z := by
   have hpos : (0 : ENNReal) < (regularizedGaussHGFunSeries a b c).radius :=
     lt_of_lt_of_le (by norm_num) (radius_regularizedGaussHGFunSeries_ge_one a b c)
@@ -451,24 +447,24 @@ theorem iteratedDeriv_regularizedGaussHGFun (a b c : ℂ) (n : ℕ) {z : ℂ} (h
     ring
 
 /-- `𝐅(a,b;c;z)` is entire in `c` after any translation of `c`. -/
-lemma analyticOnNhd_regularizedGaussHGFun_c_add (a b t : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem analyticOnNhd_regularizedGaussHGFun_c_add (a b t : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     AnalyticOnNhd ℂ (fun c => regularizedGaussHGFun a b (c + t) z) univ :=
   (analyticOnNhd_regularizedGaussHGFun_c a b hz).comp
     (analyticOnNhd_id.add analyticOnNhd_const) (mapsTo_univ _ _)
 
 /-- The Gauss function and its regularization agree off the poles. -/
-lemma regularizedGaussHGFun_eq_div_Gamma {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (z : ℂ) :
+theorem regularizedGaussHGFun_eq_div_Gamma {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (z : ℂ) :
     regularizedGaussHGFun a b c z = ₂F₁ a b c z / Gamma c :=
   (ordinaryHypergeometric_div_Gamma_eq hc).symm
 
-lemma not_neg_nat_add_one {c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) :
+theorem not_neg_nat_add_one {c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) :
     ∀ k : ℕ, c + 1 ≠ -(k : ℂ) := by
   simpa using not_neg_nat_add_nat hc 1
 
-lemma ne_zero_of_not_neg_nat {c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) : c ≠ 0 := by
+theorem ne_zero_of_not_neg_nat {c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) : c ≠ 0 := by
   simpa using hc 0
 
-lemma Gamma_succ_of_not_neg_nat {c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) :
+theorem Gamma_succ_of_not_neg_nat {c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) :
     Gamma (c + 1) = c * Gamma c :=
   Gamma_add_one c (ne_zero_of_not_neg_nat hc)
 
@@ -481,7 +477,7 @@ theorem eq_of_eqOn_not_neg_nat_sub_one {f g : ℂ → ℂ} (hf : AnalyticOnNhd �
       have := congrArg Complex.re h
       simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]⟩ h
 
-lemma eqFun_of_eqOn_not_neg_nat (f g : ℂ → ℂ)
+theorem eqFun_of_eqOn_not_neg_nat (f g : ℂ → ℂ)
     (hf : AnalyticOnNhd ℂ f univ) (hg : AnalyticOnNhd ℂ g univ)
     (h : ∀ c : ℂ, (∀ k : ℕ, c ≠ -(k : ℂ)) → f c = g c) (c : ℂ) : f c = g c :=
   congrFun (eq_of_eqOn_not_neg_nat hf hg h) c
@@ -857,7 +853,7 @@ theorem pfaff_transformation_of_ne_neg_nat {a b c : ℂ} (hc : ∀ k : ℕ, c �
 /-! ### Terminating series as functions of the denominator parameter -/
 
 /-- `(c)_k ≠ 0` when `c` avoids `0, -1, …, -(k-1)`. -/
-lemma poch_ne_zero_of_lt (c : ℂ) (k : ℕ) (hc : ∀ j : ℕ, j < k → c ≠ -(j : ℂ)) : poch c k ≠ 0 := by
+theorem poch_ne_zero_of_lt (c : ℂ) (k : ℕ) (hc : ∀ j : ℕ, j < k → c ≠ -(j : ℂ)) : poch c k ≠ 0 := by
   induction k with
   | zero => simp [poch_zero]
   | succ k ih =>
@@ -866,7 +862,7 @@ lemma poch_ne_zero_of_lt (c : ℂ) (k : ℕ) (hc : ∀ j : ℕ, j < k → c ≠ 
     exact hc k (by omega) (by linear_combination h)
 
 /-- The terminating `₂F₁(-n, b; c; z)` is analytic in `c` off `{0, -1, …, -(n-1)}`. -/
-lemma analyticOnNhd_gauss_neg_nat_param (n : ℕ) (b z : ℂ) :
+theorem analyticOnNhd_gauss_neg_nat_param (n : ℕ) (b z : ℂ) :
     AnalyticOnNhd ℂ (fun c : ℂ => ₂F₁ (-(n : ℂ)) b c z) {c : ℂ | ∀ j : ℕ, j < n → c ≠ -(j : ℂ)} := by
   intro c hc
   have heq : (fun c : ℂ => ₂F₁ (-(n : ℂ)) b c z) = fun c => ∑ k ∈ Finset.range (n + 1),
@@ -887,7 +883,7 @@ lemma analyticOnNhd_gauss_neg_nat_param (n : ℕ) (b z : ℂ) :
     analyticAt_const
 
 /-- Gauss's contiguous relation in `a` for a terminating series, valid for every argument. -/
-lemma contiguous_a_neg_nat {b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) (z : ℂ) :
+theorem contiguous_a_neg_nat {b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) (z : ℂ) :
     (c + (n + 1)) * ₂F₁ (-((n + 2 : ℕ) : ℂ)) b c z +
       (-(2 * (n + 1)) - c + (b + (n + 1)) * z) * ₂F₁ (-((n + 1 : ℕ) : ℂ)) b c z -
       (n + 1) * (z - 1) * ₂F₁ (-(n : ℂ)) b c z = 0 := by

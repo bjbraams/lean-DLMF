@@ -6,8 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.OrthogonalPolynomials.LegendreAddition
-public import Mathlib.Analysis.Calculus.DSlope
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
 /-!
 # The singular integral of a Legendre polynomial
@@ -36,7 +34,7 @@ def signKernel (x t : ℝ) : ℂ := (x-t : ℝ) / (|x-t| : ℝ)
 def dq (n : ℕ) (x t : ℝ) : ℂ :=
   (legendrePolyP n x-legendrePolyP n t) / (|x-t| : ℝ)
 /-- The divided difference extends continuously on either side of the diagonal. -/
-lemma continuous_dslope (n : ℕ) (x : ℝ) :
+theorem continuous_dslope (n : ℕ) (x : ℝ) :
     Continuous (dslope (fun t : ℝ => legendrePolyP n t) x) := by
   have hd (t : ℝ) : DifferentiableAt ℝ (fun t : ℝ => legendrePolyP n t) t :=
     ((LegendreAddition.diff_jet n 0 t).hasDerivAt.comp_ofReal).differentiableAt
@@ -46,20 +44,20 @@ lemma continuous_dslope (n : ℕ) (x : ℝ) :
   · subst t; exact continuousAt_dslope_same.2 (hd x)
   · exact (continuousAt_dslope_of_ne h).2 (hd t).continuousAt
 /-- The left-hand divided difference is the continuous divided slope. -/
-lemma dq_eq_dslope {x t : ℝ} (h : t < x) (n : ℕ) :
+theorem dq_eq_dslope {x t : ℝ} (h : t < x) (n : ℕ) :
     dq n x t = dslope (fun t : ℝ => legendrePolyP n t) x t := by
   rw [dq, dslope_of_ne _ h.ne, slope_def_module, real_smul, abs_of_pos (sub_pos.mpr h)]
   push_cast
   rw [show (t : ℂ)-x = -((x : ℂ)-t) by ring, inv_neg]
   ring
 /-- The right-hand divided difference has the opposite sign. -/
-lemma dq_eq_neg_dslope {x t : ℝ} (h : x < t) (n : ℕ) :
+theorem dq_eq_neg_dslope {x t : ℝ} (h : x < t) (n : ℕ) :
     dq n x t = -dslope (fun t : ℝ => legendrePolyP n t) x t := by
   rw [dq, dslope_of_ne _ h.ne', slope_def_module, real_smul, abs_of_neg (sub_neg.mpr h)]
   push_cast
   ring
 /-- Integrability on both sides of the diagonal. -/
-lemma dq_integrable (n : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1) 1) :
+theorem dq_integrable (n : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1) 1) :
     IntervalIntegrable (dq n x) volume (-1) x ∧ IntervalIntegrable (dq n x) volume x 1 := by
   constructor
   · apply ((continuous_dslope n x).intervalIntegrable (-1) x).congr_uIoo
@@ -71,16 +69,16 @@ lemma dq_integrable (n : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1) 1) :
     rw [uIoo_of_lt hx.2] at ht
     exact (dq_eq_neg_dslope ht.1 n).symm
 /-- The signed kernel on the left interval. -/
-lemma signKernel_of_lt {x t : ℝ} (h : t < x) : signKernel x t = 1 := by
+theorem signKernel_of_lt {x t : ℝ} (h : t < x) : signKernel x t = 1 := by
   rw [signKernel, abs_of_pos (sub_pos.mpr h)]
   exact div_self (ofReal_ne_zero.mpr (sub_pos.mpr h).ne')
 /-- The signed kernel on the right interval. -/
-lemma signKernel_of_gt {x t : ℝ} (h : x < t) : signKernel x t = -1 := by
+theorem signKernel_of_gt {x t : ℝ} (h : x < t) : signKernel x t = -1 := by
   rw [signKernel, abs_of_neg (sub_neg.mpr h)]
   have hne : ((x-t : ℝ) : ℂ) ≠ 0 := ofReal_ne_zero.mpr (sub_neg.mpr h).ne
   rw [ofReal_neg, div_neg, div_self hne]
 /-- Integrability of a signed continuous function. -/
-lemma signed_integrable {f : ℝ → ℂ} (hf : Continuous f) {x : ℝ} (hx : x ∈ Ioo (-1) 1) :
+theorem signed_integrable {f : ℝ → ℂ} (hf : Continuous f) {x : ℝ} (hx : x ∈ Ioo (-1) 1) :
     IntervalIntegrable (fun t => signKernel x t*f t) volume (-1) x ∧
     IntervalIntegrable (fun t => signKernel x t*f t) volume x 1 := by
   constructor
@@ -96,7 +94,7 @@ lemma signed_integrable {f : ℝ → ℂ} (hf : Continuous f) {x : ℝ} (hx : x 
     rw [signKernel_of_gt ht.1, neg_one_mul]
     rfl
 /-- Splitting the signed integral at its sign change. -/
-lemma integral_signed {f : ℝ → ℂ} (hf : Continuous f) {x : ℝ} (hx : x ∈ Ioo (-1) 1) :
+theorem integral_signed {f : ℝ → ℂ} (hf : Continuous f) {x : ℝ} (hx : x ∈ Ioo (-1) 1) :
     (∫ t : ℝ in (-1)..1, signKernel x t*f t) =
       (∫ t : ℝ in (-1)..x, f t) - ∫ t : ℝ in x..1, f t := by
   rw [← intervalIntegral.integral_add_adjacent_intervals (signed_integrable hf hx).1 (signed_integrable hf hx).2]
@@ -118,7 +116,7 @@ lemma integral_signed {f : ℝ → ℂ} (hf : Continuous f) {x : ℝ} (hx : x �
 end DLMF.OrthogonalPolynomials.LegendreSingular
 namespace DLMF.OrthogonalPolynomials.LegendreSingular
 /-- Legendre endpoint values. -/
-lemma endpoints (n : ℕ) : legendrePolyP n 1 = 1 ∧ legendrePolyP n (-1) = (-1)^n := by
+theorem endpoints (n : ℕ) : legendrePolyP n 1 = 1 ∧ legendrePolyP n (-1) = (-1)^n := by
   have h1 : legendrePolyP n 1 = 1 := by
     rw [legendrePolyP, jacobi_at_one (by norm_num)]
     simp [Nat.cast_ne_zero.mpr n.factorial_ne_zero]
@@ -130,10 +128,10 @@ lemma endpoints (n : ℕ) : legendrePolyP n 1 = 1 ∧ legendrePolyP n (-1) = (-1
 def primitive (n : ℕ) (t : ℝ) : ℂ :=
   (legendrePolyP (n+2) t-legendrePolyP n t)/(2*n+3)
 /-- Its endpoint values vanish. -/
-lemma primitive_endpoints (n : ℕ) : primitive n (-1) = 0 ∧ primitive n 1 = 0 := by
+theorem primitive_endpoints (n : ℕ) : primitive n (-1) = 0 ∧ primitive n 1 = 0 := by
   simp [primitive, (endpoints _).1, (endpoints _).2, pow_add]
 /-- The derivative of the primitive. -/
-lemma hasDerivAt_primitive (n : ℕ) (t : ℝ) :
+theorem hasDerivAt_primitive (n : ℕ) (t : ℝ) :
     HasDerivAt (primitive n) (legendrePolyP (n+1) t) t := by
   have h1 := (LegendreAddition.hderiv_jet (n+2) 0 t).comp_ofReal
   have h0 := (LegendreAddition.hderiv_jet n 0 t).comp_ofReal
@@ -149,7 +147,7 @@ lemma hasDerivAt_primitive (n : ℕ) (t : ℝ) :
   push_cast at hr hl
   linear_combination hr-hl
 /-- A signed Legendre integral, evaluated by its primitive. -/
-lemma integral_signed_legendre (n : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1) 1) :
+theorem integral_signed_legendre (n : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1) 1) :
     (∫ t : ℝ in (-1)..1, signKernel x t*legendrePolyP (n+1) t) =
       2*(legendrePolyP (n+2) x-legendrePolyP n x)/(2*n+3) := by
   have hc : Continuous (fun t : ℝ => legendrePolyP (n+1) t) :=
@@ -161,7 +159,7 @@ lemma integral_signed_legendre (n : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1) 1) :
   ring
 
 /-- The recurrence for the divided differences. -/
-lemma dq_recurrence (n : ℕ) (x t : ℝ) :
+theorem dq_recurrence (n : ℕ) (x t : ℝ) :
     (n+2)*dq (n+2) x t =
       (2*n+3)*((x : ℂ)*dq (n+1) x t + signKernel x t*legendrePolyP (n+1) t) - (n+1)*dq n x t := by
   have hx := legendrePolyP_recurrence n (x : ℂ)
@@ -173,7 +171,7 @@ lemma dq_recurrence (n : ℕ) (x t : ℝ) :
 /-- Finite harmonic sums in the normalization of the stated singular integral. -/
 def harmonicSum (n : ℕ) : ℂ := ∑ k ∈ Finset.range n, (k+1 : ℂ)⁻¹
 /-- Adding the next reciprocal to the finite harmonic sum. -/
-lemma harmonicSum_succ (n : ℕ) : harmonicSum (n+1) = harmonicSum n+(n+1 : ℂ)⁻¹ := by
+theorem harmonicSum_succ (n : ℕ) : harmonicSum (n+1) = harmonicSum n+(n+1 : ℂ)⁻¹ := by
   exact Finset.sum_range_succ _ _
 /-- The singular integral of a Legendre polynomial. -/
 theorem singular_integral (n : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1) 1) :

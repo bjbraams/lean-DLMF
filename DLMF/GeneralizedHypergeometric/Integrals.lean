@@ -7,6 +7,7 @@ module
 
 public import DLMF.GeneralizedHypergeometric.Basic
 public import DLMFMathlib.Analysis.Complex.SeparatingContour
+public import Mathlib.MeasureTheory.Function.AbsolutelyContinuous
 
 /-!
 # Generalized hypergeometric integrals: DLMF §16.5

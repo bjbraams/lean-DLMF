@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.ParabolicCylinder.IntegralTools
-public import DLMFMathlib.Analysis.Asymptotics.WatsonSector
 public import DLMFMathlib.Analysis.Complex.BarnesResidue
 
 /-!
@@ -46,7 +45,7 @@ namespace DLMF.Confluent
 
 
 /-- Growth of `e^{-zt+t²/2}` on the vertical line `t = c+iy`. -/
-lemma pcfCt_norm_exp_le (z : ℂ) {c : ℝ} (hc : 0 ≤ c) (y : ℝ) :
+theorem pcfCt_norm_exp_le (z : ℂ) {c : ℝ} (hc : 0 ≤ c) (y : ℝ) :
     ‖exp (-z*((c:ℂ)+y*I) + ((c:ℂ)+y*I)^2/2)‖ ≤
       Real.exp (‖z‖*c + c^2/2 + ‖z‖*|y| - y^2/2) := by
   rw [Complex.norm_exp]
@@ -65,7 +64,7 @@ lemma pcfCt_norm_exp_le (z : ℂ) {c : ℝ} (hc : 0 ≤ c) (y : ℝ) :
   linarith
 
 /-- Growth of `t^p` on the vertical line `t = c+iy`, `c > 0`. -/
-lemma pcfCt_norm_cpow_le (p : ℂ) {c : ℝ} (hc : 0 < c) (y : ℝ) :
+theorem pcfCt_norm_cpow_le (p : ℂ) {c : ℝ} (hc : 0 < c) (y : ℝ) :
     ‖((c:ℂ)+y*I)^p‖ ≤ Real.exp (‖p‖*(|Real.log c| + π) + ‖p‖/c*|y|) := by
   set t : ℂ := (c:ℂ)+y*I
   have ht1 : c ≤ ‖t‖ := by
@@ -105,11 +104,11 @@ noncomputable def pcfCt_dom (Z P c y : ℝ) : ℝ :=
   Real.exp (Z*c + c^2/2 + P*(|Real.log c| + π) + (Z + P/c)^2) * Real.exp (-(1/4) * y^2)
 
 /-- The majorant `pcfCt_dom` is integrable. -/
-lemma pcfCt_dom_integrable (Z P c : ℝ) : Integrable (pcfCt_dom Z P c) :=
+theorem pcfCt_dom_integrable (Z P c : ℝ) : Integrable (pcfCt_dom Z P c) :=
   (integrable_exp_neg_mul_sq (by norm_num : (0:ℝ) < 1/4)).const_mul _
 
 /-- The vertical-line integrand is dominated by `pcfCt_dom`, uniformly for `‖z‖ ≤ Z`, `‖p‖ ≤ P`. -/
-lemma pcfCt_vert_le {z p : ℂ} {Z P c : ℝ} (hc : 0 < c) (hZ : ‖z‖ ≤ Z) (hP : ‖p‖ ≤ P) (y : ℝ) :
+theorem pcfCt_vert_le {z p : ℂ} {Z P c : ℝ} (hc : 0 < c) (hZ : ‖z‖ ≤ Z) (hP : ‖p‖ ≤ P) (y : ℝ) :
     ‖exp (-z*((c:ℂ)+y*I) + ((c:ℂ)+y*I)^2/2) * ((c:ℂ)+y*I)^p‖ ≤ pcfCt_dom Z P c y := by
   rw [norm_mul]
   have h1 := pcfCt_norm_exp_le z hc.le y
@@ -129,7 +128,7 @@ lemma pcfCt_vert_le {z p : ℂ} {Z P c : ℝ} (hc : 0 < c) (hZ : ‖z‖ ≤ Z) 
   nlinarith [sq_nonneg (Z + P/c - |y|/2)]
 
 /-- The Gaussian on a vertical line: `∫ e^{-wt+t²/2} dy = √(2π) e^{-w²/2}`, `t = c+iy`. -/
-lemma pcfCt_gauss_vertical (w : ℂ) (c : ℝ) :
+theorem pcfCt_gauss_vertical (w : ℂ) (c : ℝ) :
     ∫ y : ℝ, exp (-w*((c:ℂ)+y*I) + ((c:ℂ)+y*I)^2/2) = (Real.sqrt (2*π) : ℂ) * exp (-w^2/2) := by
   have h : (fun y : ℝ => exp (-w*((c:ℂ)+y*I) + ((c:ℂ)+y*I)^2/2)) =
       fun y : ℝ => exp ((-1/2:ℂ) * y^2 + ((c - w)*I) * y + (c^2/2 - w*c)) := by
@@ -144,7 +143,7 @@ lemma pcfCt_gauss_vertical (w : ℂ) (c : ℝ) :
   ring_nf; rw [I_sq]; ring
 
 /-- Integrability of the Gaussian on a vertical line. -/
-lemma pcfCt_gauss_vertical_integrable (w : ℂ) (c : ℝ) :
+theorem pcfCt_gauss_vertical_integrable (w : ℂ) (c : ℝ) :
     Integrable (fun y : ℝ => exp (-w*((c:ℂ)+y*I) + ((c:ℂ)+y*I)^2/2)) := by
   have h : (fun y : ℝ => exp (-w*((c:ℂ)+y*I) + ((c:ℂ)+y*I)^2/2)) =
       fun y : ℝ => exp ((-1/2:ℂ) * y^2 + ((c - w)*I) * y + (c^2/2 - w*c)) := by
@@ -153,20 +152,20 @@ lemma pcfCt_gauss_vertical_integrable (w : ℂ) (c : ℝ) :
 
 
 /-- Continuity of the vertical-line integrand in `y`. -/
-lemma pcfCt_vert_continuous (z p : ℂ) {c : ℝ} (hc : 0 < c) :
+theorem pcfCt_vert_continuous (z p : ℂ) {c : ℝ} (hc : 0 < c) :
     Continuous (fun y : ℝ => exp (-z*((c:ℂ)+y*I) + ((c:ℂ)+y*I)^2/2) * ((c:ℂ)+y*I)^p) := by
   refine (by fun_prop : Continuous fun y : ℝ => exp (-z*((c:ℂ)+y*I) + ((c:ℂ)+y*I)^2/2)).mul ?_
   exact (by fun_prop : Continuous fun y : ℝ => (c:ℂ)+y*I).cpow continuous_const fun y =>
     mem_slitPlane_iff.mpr (Or.inl (by simp [hc]))
 
 /-- Integrability of the vertical-line integrand. -/
-lemma pcfCt_vert_integrable (z p : ℂ) {c : ℝ} (hc : 0 < c) :
+theorem pcfCt_vert_integrable (z p : ℂ) {c : ℝ} (hc : 0 < c) :
     Integrable (fun y : ℝ => exp (-z*((c:ℂ)+y*I) + ((c:ℂ)+y*I)^2/2) * ((c:ℂ)+y*I)^p) :=
   (pcfCt_dom_integrable ‖z‖ ‖p‖ c).mono' (pcfCt_vert_continuous z p hc).aestronglyMeasurable
     (Eventually.of_forall fun y => pcfCt_vert_le hc le_rfl le_rfl y)
 
 /-- DLMF 12.5.6 in integral form for `re a > -1/2` (Fubini against Euler's integral). -/
-lemma pcfCt_vertical_of_re {a : ℂ} (ha : -1/2 < a.re) (z : ℂ) {c : ℝ} (hc : 0 < c) :
+theorem pcfCt_vertical_of_re {a : ℂ} (ha : -1/2 < a.re) (z : ℂ) {c : ℝ} (hc : 0 < c) :
     ∫ y : ℝ, exp (-z*((c:ℂ)+y*I) + ((c:ℂ)+y*I)^2/2) * ((c:ℂ)+y*I)^(-a-1/2) =
       (Real.sqrt (2*π) : ℂ) * exp (-z^2/4) * pcfU a z := by
   set T : ℝ → ℂ := fun y => (c:ℂ)+y*I with hT
@@ -236,7 +235,7 @@ lemma pcfCt_vertical_of_re {a : ℂ} (ha : -1/2 < a.re) (z : ℂ) {c : ℝ} (hc 
 
 
 /-- The vertical-line integral is entire in the parameter. -/
-lemma pcfCt_vertical_differentiable (z : ℂ) {c : ℝ} (hc : 0 < c) :
+theorem pcfCt_vertical_differentiable (z : ℂ) {c : ℝ} (hc : 0 < c) :
     Differentiable ℂ (fun a : ℂ =>
       ∫ y : ℝ, exp (-z*((c:ℂ)+y*I) + ((c:ℂ)+y*I)^2/2) * ((c:ℂ)+y*I)^(-a-1/2)) := by
   refine differentiableOn_univ.mp (differentiableOn_integral_of_locally_dominated isOpen_univ
@@ -261,7 +260,7 @@ lemma pcfCt_vertical_differentiable (z : ℂ) {c : ℝ} (hc : 0 < c) :
       _ = ‖a0‖+3/2 := by ring
 
 /-- DLMF 12.5.6 in integral form, all parameters. -/
-lemma pcfCt_vertical (a z : ℂ) {c : ℝ} (hc : 0 < c) :
+theorem pcfCt_vertical (a z : ℂ) {c : ℝ} (hc : 0 < c) :
     ∫ y : ℝ, exp (-z*((c:ℂ)+y*I) + ((c:ℂ)+y*I)^2/2) * ((c:ℂ)+y*I)^(-a-1/2) =
       (Real.sqrt (2*π) : ℂ) * exp (-z^2/4) * pcfU a z := by
   have hf := pcfCt_vertical_differentiable z hc
@@ -281,7 +280,7 @@ lemma pcfCt_vertical (a z : ℂ) {c : ℝ} (hc : 0 < c) :
 
 
 /-- `(± i s)^w = s^w e^{± iπw/2}` for `re s > 0`. -/
-lemma pcfCt_I_mul_cpow {s : ℂ} (hs : 0 < s.re) (w : ℂ) :
+theorem pcfCt_I_mul_cpow {s : ℂ} (hs : 0 < s.re) (w : ℂ) :
     (I*s)^w = s^w * exp (π/2*I*w) ∧ (-I*s)^w = s^w * exp (-(π/2)*I*w) := by
   have hs0 : s ≠ 0 := fun h => by rw [h] at hs; simp at hs
   have hz : |arg s| < π/2 := Complex.abs_arg_lt_pi_div_two_iff.mpr (Or.inl hs)
@@ -306,7 +305,7 @@ lemma pcfCt_I_mul_cpow {s : ℂ} (hs : 0 < s.re) (w : ℂ) :
       cpow_def_of_ne_zero hs0, hl2, ← Complex.exp_add]; congr 1; ring
 
 /-- The horizontal line above the axis, for DLMF 12.5.7. -/
-lemma pcfCt_horizontal_upper (a z : ℂ) {c : ℝ} (hc : 0 < c) :
+theorem pcfCt_horizontal_upper (a z : ℂ) {c : ℝ} (hc : 0 < c) :
     Integrable (fun x : ℝ => exp (z*((x:ℂ)+c*I) - ((x:ℂ)+c*I)^2/2) * ((x:ℂ)+c*I)^(a-1/2)) ∧
     ∫ x : ℝ, exp (z*((x:ℂ)+c*I) - ((x:ℂ)+c*I)^2/2) * ((x:ℂ)+c*I)^(a-1/2) =
       exp (I*π*(a/2-1/4)) * ((Real.sqrt (2*π) : ℂ) * exp (z^2/4) * pcfU (-a) (-I*z)) := by
@@ -333,7 +332,7 @@ lemma pcfCt_horizontal_upper (a z : ℂ) {c : ℝ} (hc : 0 < c) :
   simp only [G]; rw [hV]
 
 /-- The horizontal line below the axis, for DLMF 12.5.7. -/
-lemma pcfCt_horizontal_lower (a z : ℂ) {c : ℝ} (hc : 0 < c) :
+theorem pcfCt_horizontal_lower (a z : ℂ) {c : ℝ} (hc : 0 < c) :
     Integrable (fun x : ℝ => exp (z*((x:ℂ)-c*I) - ((x:ℂ)-c*I)^2/2) * ((x:ℂ)-c*I)^(a-1/2)) ∧
     ∫ x : ℝ, exp (z*((x:ℂ)-c*I) - ((x:ℂ)-c*I)^2/2) * ((x:ℂ)-c*I)^(a-1/2) =
       exp (-I*π*(a/2-1/4)) * ((Real.sqrt (2*π) : ℂ) * exp (z^2/4) * pcfU (-a) (I*z)) := by
@@ -374,15 +373,15 @@ noncomputable def pcfCt_C (a z : ℂ) (r : ℝ) : ℂ :=
 noncomputable def pcfCt_kappa (a : ℂ) : ℂ := exp (-(a-1/2)*π*I) - exp ((a-1/2)*π*I)
 
 /-- `F` is entire. -/
-lemma pcfCt_F_differentiable (a z : ℂ) : Differentiable ℂ (pcfCt_F a z) := by
+theorem pcfCt_F_differentiable (a z : ℂ) : Differentiable ℂ (pcfCt_F a z) := by
   unfold pcfCt_F; fun_prop
 
 /-- `(t : ℂ)^w = exp (w log t)` for `t > 0`. -/
-lemma pcfCt_ofReal_cpow {t : ℝ} (ht : 0 < t) (w : ℂ) : (t:ℂ)^w = exp (w * Real.log t) := by
+theorem pcfCt_ofReal_cpow {t : ℝ} (ht : 0 < t) (w : ℂ) : (t:ℂ)^w = exp (w * Real.log t) := by
   rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr ht.ne'), ← ofReal_log ht.le, mul_comm]
 
 /-- `F` on the two edges `x ± iπ` of the logarithmic strip. -/
-lemma pcfCt_F_edge (a z : ℂ) (x : ℝ) (s : ℝ) (hs : s = 1 ∨ s = -1) :
+theorem pcfCt_F_edge (a z : ℂ) (x : ℝ) (s : ℝ) (hs : s = 1 ∨ s = -1) :
     pcfCt_F a z (x + (s*π:ℝ)*I) = -exp (s*(a-1/2)*π*I) * (Real.exp x * pcfCt_g a z (Real.exp x)) := by
   have he : exp (((s*π:ℝ):ℂ)*I) = -1 := by
     rcases hs with rfl | rfl
@@ -404,7 +403,7 @@ lemma pcfCt_F_edge (a z : ℂ) (x : ℝ) (s : ℝ) (hs : s = 1 ∨ s = -1) :
 
 
 /-- `pcfCt_g` is continuous on the open half-line. -/
-lemma pcfCt_g_continuousOn (a z : ℂ) : ContinuousOn (pcfCt_g a z) (Ioi 0) := by
+theorem pcfCt_g_continuousOn (a z : ℂ) : ContinuousOn (pcfCt_g a z) (Ioi 0) := by
   intro t ht
   refine ContinuousAt.continuousWithinAt ?_
   unfold pcfCt_g
@@ -414,7 +413,7 @@ lemma pcfCt_g_continuousOn (a z : ℂ) : ContinuousOn (pcfCt_g a z) (Ioi 0) := b
 
 /-- Cauchy's theorem on the logarithmic rectangle: the circle parts at two radii differ by
 the jump across the cut. -/
-lemma pcfCt_C_sub (a z : ℂ) {r₁ r₂ : ℝ} (h₁ : 0 < r₁) (h₂ : 0 < r₂) :
+theorem pcfCt_C_sub (a z : ℂ) {r₁ r₂ : ℝ} (h₁ : 0 < r₁) (h₂ : 0 < r₂) :
     pcfCt_C a z r₂ - pcfCt_C a z r₁ = pcfCt_kappa a * ∫ t in r₁..r₂, pcfCt_g a z t := by
   have hR := Complex.integral_boundary_rect_eq_zero_of_differentiableOn (pcfCt_F a z)
     ⟨Real.log r₁, -π⟩ ⟨Real.log r₂, π⟩ (pcfCt_F_differentiable a z).differentiableOn
@@ -445,7 +444,7 @@ lemma pcfCt_C_sub (a z : ℂ) {r₁ r₂ : ℝ} (h₁ : 0 < r₁) (h₂ : 0 < r�
 
 /-- The Hankel loop of DLMF 12.5.5 (the body of `pcfNegativeLoop`) in terms of the jump and the
 circle part. -/
-lemma pcfCt_loop_eq (a z : ℂ) {r R : ℝ} (hr : 0 < r) (hR : 0 < R) :
+theorem pcfCt_loop_eq (a z : ℂ) {r R : ℝ} (hr : 0 < r) (hR : 0 < R) :
     (∫ t : ℝ in r..R, exp (-z*t-t^2/2)*exp ((a-1/2)*(Real.log t-π*I))) +
       (∫ θ : ℝ in -π..π, let t := r*exp (I*θ); exp (z*t-t^2/2)*exp ((a-1/2)*(Real.log r+I*θ))*I*t) -
       (∫ t : ℝ in r..R, exp (-z*t-t^2/2)*exp ((a-1/2)*(Real.log t+π*I))) =
@@ -485,7 +484,7 @@ lemma pcfCt_loop_eq (a z : ℂ) {r R : ℝ} (hr : 0 < r) (hR : 0 < R) :
 
 
 /-- Growth of `F`. -/
-lemma pcfCt_norm_F_le (a z w : ℂ) :
+theorem pcfCt_norm_F_le (a z w : ℂ) :
     ‖pcfCt_F a z w‖ ≤ Real.exp (‖z‖*‖exp w‖ + ‖exp w‖^2/2 + ((a+1/2)*w).re) := by
   unfold pcfCt_F
   rw [Complex.norm_exp]
@@ -501,7 +500,7 @@ lemma pcfCt_norm_F_le (a z w : ℂ) :
   linarith
 
 /-- The circle part on the circle of radius `ρ`. -/
-lemma pcfCt_norm_F_circle_le (a z : ℂ) {ρ : ℝ} (hρ : 0 < ρ) {θ : ℝ} (hθ : |θ| ≤ π) :
+theorem pcfCt_norm_F_circle_le (a z : ℂ) {ρ : ℝ} (hρ : 0 < ρ) {θ : ℝ} (hθ : |θ| ≤ π) :
     ‖pcfCt_F a z (Real.log ρ + θ*I)‖ ≤
       Real.exp (‖z‖*ρ + ρ^2/2 + |a.im| * π) * ρ^(a.re + 1/2) := by
   refine (pcfCt_norm_F_le a z _).trans ?_
@@ -519,7 +518,7 @@ lemma pcfCt_norm_F_circle_le (a z : ℂ) {ρ : ℝ} (hρ : 0 < ρ) {θ : ℝ} (h
   nlinarith
 
 /-- The circle part tends to zero as the radius shrinks, for `re a > -1/2`. -/
-lemma pcfCt_C_tendsto_zero {a : ℂ} (ha : -1/2 < a.re) (z : ℂ) :
+theorem pcfCt_C_tendsto_zero {a : ℂ} (ha : -1/2 < a.re) (z : ℂ) :
     Tendsto (pcfCt_C a z) (𝓝[>] 0) (𝓝 0) := by
   set s : ℝ := a.re + 1/2
   have hs : 0 < s := by simp only [s]; linarith
@@ -548,7 +547,7 @@ lemma pcfCt_C_tendsto_zero {a : ℂ} (ha : -1/2 < a.re) (z : ℂ) :
 
 
 /-- For `re a > -1/2` the loop collapses onto the two sides of the cut. -/
-lemma pcfCt_loop_limit_of_re {a : ℂ} (ha : -1/2 < a.re) (z : ℂ) {r : ℝ} (hr : 0 < r) :
+theorem pcfCt_loop_limit_of_re {a : ℂ} (ha : -1/2 < a.re) (z : ℂ) {r : ℝ} (hr : 0 < r) :
     pcfCt_kappa a * (∫ t in Ioi r, pcfCt_g a z t) + pcfCt_C a z r =
       pcfCt_kappa a * ∫ t in Ioi (0:ℝ), pcfCt_g a z t := by
   have hg0 : IntegrableOn (pcfCt_g a z) (Ioi 0) :=
@@ -584,7 +583,7 @@ lemma pcfCt_loop_limit_of_re {a : ℂ} (ha : -1/2 < a.re) (z : ℂ) {r : ℝ} (h
 
 
 /-- Gaussian majorant of `pcfCt_g` on `[r, ∞)`, uniform for `‖a - 1/2‖ ≤ Q`, `‖z‖ ≤ Z`. -/
-lemma pcfCt_g_le {a z : ℂ} {Q Z r : ℝ} (hr : 0 < r) (hQ : ‖a-1/2‖ ≤ Q) (hZ : ‖z‖ ≤ Z) {t : ℝ}
+theorem pcfCt_g_le {a z : ℂ} {Q Z r : ℝ} (hr : 0 < r) (hQ : ‖a-1/2‖ ≤ Q) (hZ : ‖z‖ ≤ Z) {t : ℝ}
     (ht : r ≤ t) :
     ‖pcfCt_g a z t‖ ≤ Real.exp (Q*|Real.log r| + (Q+Z)^2) * Real.exp (-(1/4) * t^2) := by
   have ht0 : 0 < t := lt_of_lt_of_le hr ht
@@ -614,7 +613,7 @@ lemma pcfCt_g_le {a z : ℂ} {Q Z r : ℝ} (hr : 0 < r) (hQ : ‖a-1/2‖ ≤ Q)
   nlinarith [sq_nonneg (Q + Z - t/2)]
 
 /-- `pcfCt_g` is integrable on `(r, ∞)` for every parameter. -/
-lemma pcfCt_g_integrableOn (a z : ℂ) {r : ℝ} (hr : 0 < r) : IntegrableOn (pcfCt_g a z) (Ioi r) := by
+theorem pcfCt_g_integrableOn (a z : ℂ) {r : ℝ} (hr : 0 < r) : IntegrableOn (pcfCt_g a z) (Ioi r) := by
   refine Integrable.mono' (((integrable_exp_neg_mul_sq (by norm_num : (0:ℝ) < 1/4)).const_mul
     (Real.exp (‖a-1/2‖*|Real.log r| + (‖a-1/2‖+‖z‖)^2))).integrableOn)
     (((pcfCt_g_continuousOn a z).mono (Ioi_subset_Ioi hr.le)).aestronglyMeasurable measurableSet_Ioi) ?_
@@ -622,7 +621,7 @@ lemma pcfCt_g_integrableOn (a z : ℂ) {r : ℝ} (hr : 0 < r) : IntegrableOn (pc
   exact pcfCt_g_le hr le_rfl le_rfl (le_of_lt ht)
 
 /-- The tail `∫_r^∞ t^{a-1/2} e^{-t²/2-zt} dt` is entire in `a`. -/
-lemma pcfCt_tail_differentiable (z : ℂ) {r : ℝ} (hr : 0 < r) :
+theorem pcfCt_tail_differentiable (z : ℂ) {r : ℝ} (hr : 0 < r) :
     Differentiable ℂ (fun a => ∫ t in Ioi r, pcfCt_g a z t) := by
   refine differentiableOn_univ.mp (differentiableOn_integral_of_locally_dominated isOpen_univ
     (fun a _ => ((pcfCt_g_continuousOn a z).mono (Ioi_subset_Ioi hr.le)).aestronglyMeasurable
@@ -645,7 +644,7 @@ lemma pcfCt_tail_differentiable (z : ℂ) {r : ℝ} (hr : 0 < r) :
       _ ≤ ‖a0-1/2‖+1 := by linarith
 
 /-- The circle part is entire in `a`. -/
-lemma pcfCt_C_differentiable (z : ℂ) {r : ℝ} (hr : 0 < r) :
+theorem pcfCt_C_differentiable (z : ℂ) {r : ℝ} (hr : 0 < r) :
     Differentiable ℂ (fun a => pcfCt_C a z r) := by
   have hcont : ∀ a : ℂ, Continuous (fun θ : ℝ => I * pcfCt_F a z (Real.log r + θ*I)) := fun a =>
     continuous_const.mul ((pcfCt_F_differentiable a z).continuous.comp (by fun_prop))
@@ -685,7 +684,7 @@ lemma pcfCt_C_differentiable (z : ℂ) {r : ℝ} (hr : 0 < r) :
 
 /-- The jump times the reflection pair: `κ(a) Γ(1/2+a) Γ(1/2-a) = 2πi` when both Gammas are
 finite and nonzero. -/
-lemma pcfCt_kappa_Gamma {a : ℂ} (h1 : Gamma (1/2+a) ≠ 0) (h2 : Gamma (1/2-a) ≠ 0) :
+theorem pcfCt_kappa_Gamma {a : ℂ} (h1 : Gamma (1/2+a) ≠ 0) (h2 : Gamma (1/2-a) ≠ 0) :
     pcfCt_kappa a * Gamma (1/2+a) * Gamma (1/2-a) = 2*π*I := by
   have hr := Complex.Gamma_mul_Gamma_one_sub (1/2+a)
   rw [show (1:ℂ) - (1/2+a) = 1/2-a by ring] at hr
@@ -706,7 +705,7 @@ lemma pcfCt_kappa_Gamma {a : ℂ} (h1 : Gamma (1/2+a) ≠ 0) (h2 : Gamma (1/2-a)
 
 /-- The completed Hankel loop: `κ(a) ∫_r^∞ g + C(r) = 2πi e^{z²/4} U(a,z) / Γ(1/2-a)` for all
 `a`, `z` and `r > 0`. -/
-lemma pcfCt_loop_value (a z : ℂ) {r : ℝ} (hr : 0 < r) :
+theorem pcfCt_loop_value (a z : ℂ) {r : ℝ} (hr : 0 < r) :
     pcfCt_kappa a * (∫ t in Ioi r, pcfCt_g a z t) + pcfCt_C a z r =
       2*π*I * exp (z^2/4) * pcfU a z * (Gamma (1/2-a))⁻¹ := by
   have hf : Differentiable ℂ (fun a => pcfCt_kappa a * (∫ t in Ioi r, pcfCt_g a z t) +
@@ -748,7 +747,7 @@ noncomputable def pcfCt_Phi (μ : ℂ) (x σ : ℝ) (w : ℂ) : ℂ :=
   exp (μ*w) * exp (I*σ*exp w) / ((x:ℂ)^2 + exp w ^ 2)
 
 /-- Growth of `pcfCt_Phi` on the strip `0 ≤ Im w ≤ π`. -/
-lemma pcfCt_norm_Phi_le (μ : ℂ) (x : ℝ) {σ : ℝ} (hσ : 0 ≤ σ) {w : ℂ} (h0 : 0 ≤ w.im)
+theorem pcfCt_norm_Phi_le (μ : ℂ) (x : ℝ) {σ : ℝ} (hσ : 0 ≤ σ) {w : ℂ} (h0 : 0 ≤ w.im)
     (hπ : w.im ≤ π) (hd : x^2 ≠ Real.exp (2*w.re)) :
     ‖pcfCt_Phi μ x σ w‖ ≤ Real.exp (μ.re*w.re + |μ.im| * π) / |x^2 - Real.exp (2*w.re)| := by
   unfold pcfCt_Phi
@@ -788,7 +787,7 @@ noncomputable def pcfCt_gs (μ : ℂ) (x σ : ℝ) (t : ℝ) : ℂ :=
   (t:ℂ)^(μ-1) * exp (I*σ*t) / ((x:ℂ)^2 + (t:ℂ)^2)
 
 /-- `pcfCt_Phi` on the real axis is `e^u g(e^u)` with `g = pcfCt_gs`. -/
-lemma pcfCt_Phi_real (μ : ℂ) (x σ u : ℝ) :
+theorem pcfCt_Phi_real (μ : ℂ) (x σ u : ℝ) :
     pcfCt_Phi μ x σ u = Real.exp u • pcfCt_gs μ x σ (Real.exp u) := by
   unfold pcfCt_Phi pcfCt_gs
   rw [pcfCt_ofReal_cpow (Real.exp_pos u), Real.log_exp, Complex.real_smul, ofReal_exp]
@@ -796,7 +795,7 @@ lemma pcfCt_Phi_real (μ : ℂ) (x σ u : ℝ) :
   ring
 
 /-- `pcfCt_Phi` on the line `Im w = π`. -/
-lemma pcfCt_Phi_shift (μ : ℂ) (x σ u : ℝ) :
+theorem pcfCt_Phi_shift (μ : ℂ) (x σ u : ℝ) :
     pcfCt_Phi μ x σ (u + π*I) = exp (μ*π*I) * pcfCt_Phi μ x (-σ) u := by
   unfold pcfCt_Phi
   have he : exp ((u:ℂ) + π*I) = -exp (u:ℂ) := by rw [Complex.exp_add, exp_pi_mul_I]; ring
@@ -806,7 +805,7 @@ lemma pcfCt_Phi_shift (μ : ℂ) (x σ u : ℝ) :
   ring
 
 /-- The modulus of `pcfCt_Phi` on the real axis. -/
-lemma pcfCt_norm_Phi_real (μ : ℂ) (x σ u : ℝ) :
+theorem pcfCt_norm_Phi_real (μ : ℂ) (x σ u : ℝ) :
     ‖pcfCt_Phi μ x σ u‖ = Real.exp (μ.re*u) / (x^2 + Real.exp u^2) := by
   unfold pcfCt_Phi
   have hd : (x:ℂ)^2 + exp (u:ℂ)^2 = ((x^2 + Real.exp u^2 : ℝ) : ℂ) := by push_cast; rfl
@@ -819,7 +818,7 @@ lemma pcfCt_norm_Phi_real (μ : ℂ) (x σ u : ℝ) :
   rw [h1, h2, Real.exp_zero, mul_one]
 
 /-- Exponential majorant of `e^{mu}/(x² + e^{2u})`. -/
-lemma pcfCt_line_bound (m : ℝ) {x : ℝ} (hx : 0 < x) (u : ℝ) :
+theorem pcfCt_line_bound (m : ℝ) {x : ℝ} (hx : 0 < x) (u : ℝ) :
     Real.exp (m*u) / (x^2 + Real.exp u^2) ≤ (1 + 1/x^2) * Real.exp (-(min m (2-m) * |u|)) := by
   have hx2 : 0 < x^2 := by positivity
   have he := Real.exp_pos u
@@ -846,7 +845,7 @@ lemma pcfCt_line_bound (m : ℝ) {x : ℝ} (hx : 0 < x) (u : ℝ) :
     nlinarith
 
 /-- `pcfCt_Phi` is integrable on the real axis for `0 < re μ < 2`. -/
-lemma pcfCt_Phi_real_integrable {μ : ℂ} (hm0 : 0 < μ.re) (hm2 : μ.re < 2) {x : ℝ} (hx : 0 < x)
+theorem pcfCt_Phi_real_integrable {μ : ℂ} (hm0 : 0 < μ.re) (hm2 : μ.re < 2) {x : ℝ} (hx : 0 < x)
     (σ : ℝ) : Integrable (fun u : ℝ => pcfCt_Phi μ x σ u) := by
   have hc : Continuous (fun u : ℝ => pcfCt_Phi μ x σ u) := by
     unfold pcfCt_Phi
@@ -859,7 +858,7 @@ lemma pcfCt_Phi_real_integrable {μ : ℂ} (hm0 : 0 < μ.re) (hm2 : μ.re < 2) {
 
 
 /-- The real majorant of the kernel on vertical cross-sections tends to zero at both ends. -/
-lemma pcfCt_cross_bound_tendsto {m : ℝ} (hm0 : 0 < m) (hm2 : m < 2) {x : ℝ} (hx : 0 < x) (c : ℝ) :
+theorem pcfCt_cross_bound_tendsto {m : ℝ} (hm0 : 0 < m) (hm2 : m < 2) {x : ℝ} (hx : 0 < x) (c : ℝ) :
     Tendsto (fun u : ℝ => Real.exp (m*u + c) / |x^2 - Real.exp (2*u)|) atBot (𝓝 0) ∧
     Tendsto (fun u : ℝ => Real.exp (m*u + c) / |x^2 - Real.exp (2*u)|) atTop (𝓝 0) := by
   have hx2 : x^2 ≠ 0 := by positivity
@@ -893,7 +892,7 @@ lemma pcfCt_cross_bound_tendsto {m : ℝ} (hm0 : 0 < m) (hm2 : m < 2) {x : ℝ} 
 
 /-- The residue identity behind the kernel of DLMF 12.12.3: shifting the line `Im w = 0` to
 `Im w = π` across the pole `w = log x + iπ/2` of `pcfCt_Phi`. -/
-lemma pcfCt_kernel_shift {μ : ℂ} (hm0 : 0 < μ.re) (hm2 : μ.re < 2) {x : ℝ} (hx : 0 < x)
+theorem pcfCt_kernel_shift {μ : ℂ} (hm0 : 0 < μ.re) (hm2 : μ.re < 2) {x : ℝ} (hx : 0 < x)
     {σ : ℝ} (hσ : 0 ≤ σ) :
     exp (μ*π*I) * (∫ u : ℝ, pcfCt_Phi μ x (-σ) u) - ∫ u : ℝ, pcfCt_Phi μ x σ u =
       2*π * (I * exp (μ*((Real.log x:ℂ) + π/2*I)) * exp (-(x*σ:ℂ)) / (2*(x:ℂ)^2)) := by
@@ -1023,7 +1022,7 @@ lemma pcfCt_kernel_shift {μ : ℂ} (hm0 : 0 < μ.re) (hm2 : μ.re < 2) {x : ℝ
 
 /-- The Stieltjes–Fourier kernel of DLMF 12.12.3: for `0 < re μ < 2`, `x > 0`, `σ ≥ 0`,
 `∫₀^∞ t^{μ-1} cos(tσ + π/2 - πμ/2)/(x² + t²) dt = (π/2) x^{μ-2} e^{-xσ}`. -/
-lemma pcfCt_kernel {μ : ℂ} (hm0 : 0 < μ.re) (hm2 : μ.re < 2) {x : ℝ} (hx : 0 < x)
+theorem pcfCt_kernel {μ : ℂ} (hm0 : 0 < μ.re) (hm2 : μ.re < 2) {x : ℝ} (hx : 0 < x)
     {σ : ℝ} (hσ : 0 ≤ σ) :
     IntegrableOn (fun t : ℝ => (t:ℂ)^(μ-1) * cos (t*σ + (π/2 - π*μ/2)) / ((x:ℂ)^2 + (t:ℂ)^2))
       (Ioi 0) ∧
@@ -1072,7 +1071,7 @@ lemma pcfCt_kernel {μ : ℂ} (hm0 : 0 < μ.re) (hm2 : μ.re < 2) {x : ℝ} (hx 
 
 /-- Exponential decay of `e^{-t²/4} U(a,t)` on the real line, uniform for `‖-a-1/2‖ ≤ P`
 (from the vertical-line representation 12.5.6 at `c = 1`). -/
-lemma pcfCt_U_decay (P : ℝ) : ∃ M : ℝ, ∀ a : ℂ, ‖-a-1/2‖ ≤ P → ∀ t : ℝ,
+theorem pcfCt_U_decay (P : ℝ) : ∃ M : ℝ, ∀ a : ℂ, ‖-a-1/2‖ ≤ P → ∀ t : ℝ,
     ‖exp (-(t:ℂ)^2/4) * pcfU a t‖ ≤ M * Real.exp (-t) := by
   have hs : (0:ℝ) < Real.sqrt (2*π) := Real.sqrt_pos.mpr (by positivity)
   refine ⟨(∫ y, pcfCt_dom 0 P 1 y) / Real.sqrt (2*π), fun a ha t => ?_⟩

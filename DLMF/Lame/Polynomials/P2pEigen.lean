@@ -6,7 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Lame.Polynomials.P2pODE
-public import DLMFMathlib.Analysis.ODE.P2sSturmOsc
+public import DLMF.JacobiElliptic.SpecialValues
+public import DLMF.Lame.Eigenvalues
 
 /-!
 # Lamé polynomials as Lamé eigenfunctions: eigenvalues (DLMF 29.15.7 and analogues)
@@ -52,7 +53,7 @@ def p2p_preR (t : LamePolyType) (x k : ℝ) : ℝ :=
     | _ => 1)
 
 /-- On the real line a Lamé polynomial is real: `E(x) = pre(x) P(sn²x)`. -/
-lemma p2p_E_ofReal {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) {n m : ℕ}
+theorem p2p_E_ofReal {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) {n m : ℕ}
     (hm : m ≤ n) : ∃ P : ℝ[X], P ≠ 0 ∧ P.natDegree = n ∧ ∀ x : ℝ,
       lamePolyEk t n m x k =
         ((p2p_preR t x k * P.eval (Real.jacobiSnm x (k ^ 2) ^ 2) : ℝ) : ℂ) := by
@@ -77,18 +78,18 @@ lemma p2p_am_mem {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {x : ℝ}
   · have := hmono hx.1; simpa [Real.jacobiAmm_zero hm] using this
   · have := hmono hx.2; simpa [Real.jacobiAmm_compEllIntKm hm] using this
 
-lemma p2p_sn_pos {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {x : ℝ}
+theorem p2p_sn_pos {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {x : ℝ}
     (hx : x ∈ Ioo 0 (Real.compEllIntKm (k ^ 2))) : 0 < Real.jacobiSnm x (k ^ 2) := by
   have h := p2p_am_mem hk0 hk1 hx
   exact Real.sin_pos_of_pos_of_lt_pi h.1 (by linarith [h.2, Real.pi_pos])
 
-lemma p2p_cn_pos {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {x : ℝ}
+theorem p2p_cn_pos {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {x : ℝ}
     (hx : x ∈ Ioo 0 (Real.compEllIntKm (k ^ 2))) : 0 < Real.jacobiCnm x (k ^ 2) := by
   have h := p2p_am_mem hk0 hk1 hx
   exact Real.cos_pos_of_mem_Ioo ⟨by linarith [h.1, Real.pi_pos], h.2⟩
 
 /-- `sn²` is injective on `(0, K)`. -/
-lemma p2p_sn_sq_injOn {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) :
+theorem p2p_sn_sq_injOn {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) :
     InjOn (fun x => Real.jacobiSnm x (k ^ 2) ^ 2) (Ioo 0 (Real.compEllIntKm (k ^ 2))) := by
   intro x hx y hy hxy
   have hm : k ^ 2 < 1 := by nlinarith
@@ -115,7 +116,7 @@ lemma p2p_preR_ne {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) {x : 
 
 /-- The zeros of a Lamé polynomial in `(0, K)`: finitely many, at most `n`, and not all of
 `(0, K)`. -/
-lemma p2p_zeros_le {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) {n m : ℕ}
+theorem p2p_zeros_le {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) {n m : ℕ}
     (hm : m ≤ n) :
     {x | x ∈ Ioo 0 (Real.compEllIntKm (k ^ 2)) ∧ (lamePolyEk t n m x k).re = 0}.Finite ∧
     {x | x ∈ Ioo 0 (Real.compEllIntKm (k ^ 2)) ∧ (lamePolyEk t n m x k).re = 0}.ncard ≤ n ∧
@@ -145,7 +146,7 @@ lemma p2p_zeros_le {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) {n m
 
 /-- A function with reflection symmetry `E(p - z) = σ E(p + z)` vanishes at `p` (`σ = -1`) or
 has vanishing derivative there (`σ = 1`). -/
-lemma p2p_sym_vals {E : ℂ → ℂ} {p σ : ℂ} (hd : DifferentiableAt ℂ E p)
+theorem p2p_sym_vals {E : ℂ → ℂ} {p σ : ℂ} (hd : DifferentiableAt ℂ E p)
     (hE : ∀ z, E (p - z) = σ * E (p + z)) : (σ = -1 → E p = 0) ∧ (σ = 1 → deriv E p = 0) := by
   refine ⟨fun hσ => ?_, fun hσ => ?_⟩
   · have := hE 0
@@ -182,7 +183,7 @@ lemma p2p_re_sol {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {h ν : ℝ} {E : ℂ →
 
 /-- On the real line the Lamé polynomial `lamePolyEk t n j` is an eigenfunction of the Lamé
 problem of Table 29.3.2 with the boundary types of `t`, for `½(H_j + ν(ν+1)k²)`. -/
-lemma p2p_isLameEigenfunction {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
+theorem p2p_isLameEigenfunction {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
     {n j : ℕ} (hj : j ≤ n) :
     Real.IsLameEigenfunction ((lamePolyH t n j k + (t.order n : ℝ) * ((t.order n : ℝ) + 1) *
       k ^ 2) / 2) (t.order n : ℝ) k (p2p_odd0 t) (p2p_oddK t)

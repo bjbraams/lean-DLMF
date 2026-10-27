@@ -57,7 +57,7 @@ theorem besselK_eq_integral_tricomi {ν z : ℂ} (hν : -1 / 2 < ν.re) (hz : 0 
   linear_combination (-besselK ν z) * hpow
 
 /-- The affine substitution `u = 1 + 2t` on `(1, ∞)`. -/
-lemma integral_Ioi_one_eq_two_mul (G : ℝ → ℂ) :
+theorem integral_Ioi_one_eq_two_mul (G : ℝ → ℂ) :
     ∫ u : ℝ in Ioi 1, G u = 2 * ∫ t : ℝ in Ioi 0, G (1 + 2 * t) := by
   have hscale := integral_comp_mul_left_Ioi (fun s => G (1 + s)) 0 (b := 2) two_pos
   rw [mul_zero] at hscale

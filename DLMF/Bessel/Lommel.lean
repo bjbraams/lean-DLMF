@@ -30,7 +30,7 @@ noncomputable section
 namespace DLMF.Bessel
 
 /-- Chain rule for `s ↦ J_μ(cs)` in the form `J_μ' = -(μ/z) J_μ + J_{μ-1}`. -/
-lemma hasDerivAt_besselJ_mul (μ : ℂ) {c t : ℝ} (hc : 0 < c) (ht : 0 < t) :
+theorem hasDerivAt_besselJ_mul (μ : ℂ) {c t : ℝ} (hc : 0 < c) (ht : 0 < t) :
     HasDerivAt (fun s : ℝ => besselJ μ (c * s))
       (c * (-(μ / (c * t)) * besselJ μ (c * t) + besselJ (μ - 1) (c * t))) t := by
   have hs : (c : ℂ) * t ∈ slitPlane := by
@@ -40,7 +40,7 @@ lemma hasDerivAt_besselJ_mul (μ : ℂ) {c t : ℝ} (hc : 0 < c) (ht : 0 < t) :
   simpa [mul_comm] using h.comp_ofReal
 
 /-- Chain rule for `s ↦ J_μ(cs)` in the form `J_μ' = (μ/z) J_μ - J_{μ+1}`. -/
-lemma hasDerivAt_besselJ_mul' (μ : ℂ) {c t : ℝ} (hc : 0 < c) (ht : 0 < t) :
+theorem hasDerivAt_besselJ_mul' (μ : ℂ) {c t : ℝ} (hc : 0 < c) (ht : 0 < t) :
     HasDerivAt (fun s : ℝ => besselJ μ (c * s))
       (c * (μ / (c * t) * besselJ μ (c * t) - besselJ (μ + 1) (c * t))) t := by
   have hs : (c : ℂ) * t ∈ slitPlane := by
@@ -51,7 +51,7 @@ lemma hasDerivAt_besselJ_mul' (μ : ℂ) {c t : ℝ} (hc : 0 < c) (ht : 0 < t) :
 
 /-- The Lommel primitive `t (β J_ν(αt) J_{ν-1}(βt) - α J_{ν-1}(αt) J_ν(βt))` has derivative
 `(α² - β²) t J_ν(αt) J_ν(βt)`. -/
-lemma hasDerivAt_lommel (ν : ℂ) {α β t : ℝ} (hα : 0 < α) (hβ : 0 < β) (ht : 0 < t) :
+theorem hasDerivAt_lommel (ν : ℂ) {α β t : ℝ} (hα : 0 < α) (hβ : 0 < β) (ht : 0 < t) :
     HasDerivAt (fun s : ℝ => (s : ℂ) * (β * besselJ ν (α * s) * besselJ (ν - 1) (β * s) -
         α * besselJ (ν - 1) (α * s) * besselJ ν (β * s)))
       (((α : ℂ) ^ 2 - (β : ℂ) ^ 2) * t * besselJ ν (α * t) * besselJ ν (β * t)) t := by
@@ -77,14 +77,14 @@ noncomputable def besselJCore (μ s : ℂ) : ℂ :=
   regularizedHGFun (∅ : Multiset ℂ) {μ + 1} (-(s / 4))
 
 /-- The core is entire. -/
-lemma differentiable_besselJCore (μ : ℂ) : Differentiable ℂ (besselJCore μ) := by
+theorem differentiable_besselJCore (μ : ℂ) : Differentiable ℂ (besselJCore μ) := by
   intro s
   have h := analyticAt_regularizedHGFun_zero (b := {μ + 1}) (-(s / 4))
   rw [← Multiset.empty_eq_zero] at h
   exact h.differentiableAt.comp s (by fun_prop)
 
 /-- `J_μ(ct) = (ct/2)^μ · core(c²t²)` for real `c, t`. -/
-lemma besselJ_ofReal_mul {μ : ℂ} {c t : ℝ} :
+theorem besselJ_ofReal_mul {μ : ℂ} {c t : ℝ} :
     besselJ μ (c * t) =
       (((c * t / 2 : ℝ)) : ℂ) ^ μ * besselJCore μ ((c : ℂ) ^ 2 * (t : ℂ) ^ 2) := by
   rw [besselJ_eq_regularized, besselJCore]
@@ -94,7 +94,7 @@ lemma besselJ_ofReal_mul {μ : ℂ} {c t : ℝ} :
 open Asymptotics in
 /-- The Lommel primitive vanishes at `0⁺` when `re ν > -1`: it is `O(t^{2 re ν + 2})`, since the
 leading terms of its two products cancel. -/
-lemma tendsto_lommel_zero {ν : ℂ} (hν : -1 < ν.re) {α β : ℝ} (hα : 0 < α) (hβ : 0 < β) :
+theorem tendsto_lommel_zero {ν : ℂ} (hν : -1 < ν.re) {α β : ℝ} (hα : 0 < α) (hβ : 0 < β) :
     Tendsto (fun s : ℝ => (s : ℂ) * (β * besselJ ν (α * s) * besselJ (ν - 1) (β * s) -
         α * besselJ (ν - 1) (α * s) * besselJ ν (β * s))) (𝓝[>] 0) (𝓝 0) := by
   set r := ν.re
@@ -169,12 +169,12 @@ lemma tendsto_lommel_zero {ν : ℂ} (hν : -1 < ν.re) {α β : ℝ} (hα : 0 <
   exact h.mono_left nhdsWithin_le_nhds
 
 /-- `s ↦ J_μ(cs)` is continuous at positive points. -/
-lemma continuousAt_besselJ_mul (μ : ℂ) {c t : ℝ} (hc : 0 < c) (ht : 0 < t) :
+theorem continuousAt_besselJ_mul (μ : ℂ) {c t : ℝ} (hc : 0 < c) (ht : 0 < t) :
     ContinuousAt (fun s : ℝ => besselJ μ (c * s)) t :=
   (hasDerivAt_besselJ_mul μ hc ht).continuousAt
 
 /-- `|J_ν(ct)| ≤ M t^{re ν}` on `(0, 1]`. -/
-lemma exists_norm_besselJ_mul_le (ν : ℂ) {c : ℝ} (hc : 0 < c) :
+theorem exists_norm_besselJ_mul_le (ν : ℂ) {c : ℝ} (hc : 0 < c) :
     ∃ M, ∀ t ∈ Ioc (0 : ℝ) 1, ‖besselJ ν (c * t)‖ ≤ M * t ^ ν.re := by
   obtain ⟨M, hM⟩ := isCompact_Icc.exists_bound_of_continuousOn (s := Icc (0 : ℝ) 1)
     (f := fun t : ℝ => besselJCore ν ((c : ℂ) ^ 2 * (t : ℂ) ^ 2))
@@ -191,7 +191,7 @@ lemma exists_norm_besselJ_mul_le (ν : ℂ) {c : ℝ} (hc : 0 < c) :
 
 open MeasureTheory in
 /-- The Lommel integrand is integrable on `[0, 1]` for `re ν > -1`. -/
-lemma intervalIntegrable_lommel {ν : ℂ} (hν : -1 < ν.re) {α β : ℝ} (hα : 0 < α) (hβ : 0 < β) :
+theorem intervalIntegrable_lommel {ν : ℂ} (hν : -1 < ν.re) {α β : ℝ} (hα : 0 < α) (hβ : 0 < β) :
     IntervalIntegrable (fun t : ℝ => (t : ℂ) * besselJ ν (α * t) * besselJ ν (β * t))
       volume 0 1 := by
   obtain ⟨Ma, hMa⟩ := exists_norm_besselJ_mul_le ν hα
@@ -270,7 +270,7 @@ def besselNormPrimitive (ν : ℂ) (α t : ℝ) : ℂ :=
     ν / α * t * besselJ ν (α * t) * besselJ (ν + 1) (α * t)
 
 /-- The primitive has derivative `t J_ν(αt)²`, by the recurrences for `J_ν'` and `J_{ν+1}'`. -/
-lemma hasDerivAt_besselNormPrimitive (ν : ℂ) {α t : ℝ} (hα : 0 < α) (ht : 0 < t) :
+theorem hasDerivAt_besselNormPrimitive (ν : ℂ) {α t : ℝ} (hα : 0 < α) (ht : 0 < t) :
     HasDerivAt (besselNormPrimitive ν α) ((t : ℂ) * besselJ ν (α * t) ^ 2) t := by
   have hJ := hasDerivAt_besselJ_mul' ν hα ht
   have hK := hasDerivAt_besselJ_mul (ν + 1) hα ht
@@ -288,7 +288,7 @@ lemma hasDerivAt_besselNormPrimitive (ν : ℂ) {α t : ℝ} (hα : 0 < α) (ht 
 
 
 /-- The primitive vanishes at `0⁺` for `re ν > -1`: it is `O(t^{2 re ν + 2})`. -/
-lemma tendsto_besselNormPrimitive {ν : ℂ} (hν : -1 < ν.re) {α : ℝ} (hα : 0 < α) :
+theorem tendsto_besselNormPrimitive {ν : ℂ} (hν : -1 < ν.re) {α : ℝ} (hα : 0 < α) :
     Tendsto (besselNormPrimitive ν α) (𝓝[>] 0) (𝓝 0) := by
   obtain ⟨M, hM⟩ := exists_norm_besselJ_mul_le ν hα
   obtain ⟨N, hN⟩ := exists_norm_besselJ_mul_le (ν + 1) hα

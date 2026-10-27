@@ -5,8 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.IncompleteGamma.ZerosIntegrals
-public import DLMF.Gamma.PolygammaHurwitz
 public import DLMF.Zeta.Q25bLerchContinuation
 public import DLMF.Zeta.R25bHurwitzContinuation
 public import DLMF.Zeta.S25bDirichletTest
@@ -14,8 +12,9 @@ public import DLMFMathlib.Analysis.EulerMaclaurin
 public import Mathlib.NumberTheory.LSeries.HurwitzZetaValues
 public import Mathlib.NumberTheory.LSeries.ZMod
 public import Mathlib.NumberTheory.LSeries.Dirichlet
-public import Mathlib.RingTheory.Binomial
-public import Mathlib.Tactic.CrossRefAttribute
+public import DLMF.Gamma.Polygamma
+public import Mathlib.Tactic.Basify
+public import Mathlib.Tactic.ENatToNat
 
 /-!
 # The Hurwitz zeta function: definition, Euler–Maclaurin forms, special values, derivatives
@@ -874,7 +873,7 @@ lemma q25b_LFunction_const_one {k : ℕ} [NeZero k] {s : ℂ} (hs : s ≠ 1) :
 
 /-- **Distribution relation**: `∑_{r=1}^{k-1} ζ(s, r/k) = (k^s - 1) ζ(s)` for `s ≠ 1`, `k ≥ 1`
 (Mathlib's Hurwitz zeta). -/
-theorem q25b_sum_hurwitzZeta_rat {k : ℕ} (hk : 1 ≤ k) {s : ℂ} (hs : s ≠ 1) :
+lemma q25b_sum_hurwitzZeta_rat {k : ℕ} (hk : 1 ≤ k) {s : ℂ} (hs : s ≠ 1) :
     ∑ r ∈ Finset.Ico 1 k, hurwitzZeta ((r / k : ℝ) : UnitAddCircle) s =
       ((k : ℂ) ^ s - 1) * riemannZeta s := by
   have : NeZero k := ⟨by omega⟩
@@ -890,7 +889,7 @@ theorem q25b_sum_hurwitzZeta_rat {k : ℕ} (hk : 1 ≤ k) {s : ℂ} (hs : s ≠ 
   linear_combination h
 
 /-- The `s`-derivative of the distribution relation (DLMF 25.11.24). -/
-theorem q25b_sum_deriv_hurwitzZeta_rat {s : ℂ} (hs : s ≠ 1) {k : ℕ} (hk : 1 ≤ k) :
+lemma q25b_sum_deriv_hurwitzZeta_rat {s : ℂ} (hs : s ≠ 1) {k : ℕ} (hk : 1 ≤ k) :
     ∑ r ∈ Finset.Ico 1 k, deriv (hurwitzZeta ((r / k : ℝ) : UnitAddCircle)) s =
       ((k : ℂ) ^ s - 1) * deriv riemannZeta s + (k : ℂ) ^ s * riemannZeta s * Real.log k := by
   have hk0 : (k : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
@@ -1076,7 +1075,7 @@ theorem r25b_hurwitzZeta_zero {x : ℝ} (hx : 0 < x) (hx1 : x ≤ 1) :
 `s = 0, -1, -2, …`): the terms with `n + s = 1` involve the pole of `ζ`, where DLMF's product
 `(s)_n ζ(n+s)` is a limit but Lean's `poch 0 n · ζ(1)` is `0`. At `s = 0`, `a = 1/2` the series
 sums to `ζ(0) = -1/2`, while `ζ(0, 1/2) = 0`. -/
-theorem r25b_hasSum_hurwitzZetaComplex_taylor_counterexample :
+lemma r25b_hasSum_hurwitzZetaComplex_taylor_counterexample :
     ¬ HasSum (fun n : ℕ => poch 0 n / n ! * riemannZeta (n + 0) * (1 - 1 / 2 : ℂ) ^ n)
       (hurwitzZetaComplex 0 (1 / 2)) := by
   intro h
@@ -1107,7 +1106,7 @@ theorem hurwitzZetaComplex_neg_nat (n : ℕ) {a : ℂ} (ha : 0 < a.re) :
   exact tendsto_const_nhds.limUnder_eq
 
 /-- `(r w)^t = r^t w^t` for real `r > 0` and `w ≠ 0`. -/
-lemma r25b_ofReal_mul_cpow {r : ℝ} (hr : 0 < r) {w : ℂ} (hw : w ≠ 0) (t : ℂ) :
+theorem r25b_ofReal_mul_cpow {r : ℝ} (hr : 0 < r) {w : ℂ} (hw : w ≠ 0) (t : ℂ) :
     ((r : ℂ) * w) ^ t = (r : ℂ) ^ t * w ^ t := by
   have hr' : (r : ℂ) ≠ 0 := by exact_mod_cast hr.ne'
   rw [cpow_def_of_ne_zero (mul_ne_zero hr' hw), cpow_def_of_ne_zero hr', cpow_def_of_ne_zero hw,
@@ -1115,7 +1114,7 @@ lemma r25b_ofReal_mul_cpow {r : ℝ} (hr : 0 < r) {w : ℂ} (hw : w ≠ 0) (t : 
   ring_nf
 
 /-- `a + n ≠ 0` for `Re a > 0`. -/
-lemma r25b_ne_neg_nat_of_re_pos {a : ℂ} (ha : 0 < a.re) : ∀ n : ℕ, a + n ≠ 0 := fun n h => by
+theorem r25b_ne_neg_nat_of_re_pos {a : ℂ} (ha : 0 < a.re) : ∀ n : ℕ, a + n ≠ 0 := fun n h => by
   have := congrArg Complex.re h; simp at this; linarith [(n.cast_nonneg : (0 : ℝ) ≤ n)]
 
 /-- **Multiplication formula** (DLMF 25.11.15): `ζ(s, ka) = k^{-s} ∑_{n=0}^{k-1} ζ(s, a + n/k)`

@@ -31,7 +31,7 @@ variable {K : Type*} [NormedField K]
 
 /-- Tail sums of terms growing at least geometrically with ratio `r > 1` are dominated by the
 last term. -/
-lemma pinch_sum_Ico_le {T : ℕ → K} {r : ℝ} (hr : 1 < r) {M : ℕ}
+theorem pinch_sum_Ico_le {T : ℕ → K} {r : ℝ} (hr : 1 < r) {M : ℕ}
     (hT : ∀ n ≥ M, r * ‖T n‖ ≤ ‖T (n + 1)‖) (n : ℕ) (hn : M ≤ n) :
     ∑ k ∈ Ico M n, ‖T k‖ ≤ ‖T n‖ / (r - 1) := by
   have hr1 : 0 < r - 1 := by linarith

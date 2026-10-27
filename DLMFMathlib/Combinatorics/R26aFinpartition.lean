@@ -7,9 +7,8 @@ module
 
 public import Mathlib.Order.Partition.Finpartition
 public import Mathlib.Data.Fintype.Perm
-public import Mathlib.Logic.Equiv.Fintype
-public import Mathlib.Data.Fintype.BigOperators
-public import Mathlib.Algebra.BigOperators.Ring.Finset
+public import Mathlib.Algebra.Ring.Nat
+public import Mathlib.Data.Fintype.Pi
 
 /-!
 # Finpartitions from surjections

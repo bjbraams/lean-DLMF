@@ -5,9 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.IncompleteGamma.SpecialValues
 public import DLMF.IncompleteGamma.SeriesRecurrences
-public import DLMF.Confluent.Integrals
 public import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
 public import Mathlib.MeasureTheory.Integral.Gamma
 
@@ -80,7 +78,7 @@ theorem genExpIntE_stieltjes {p z : ℂ} (hp : 0 < p.re) (hz : 0 < z.re) :
   ring
 
 /-- `z log z → 0` as `z → 0`, `z ≠ 0`, in `ℂ`. -/
-lemma tendsto_mul_log_nhdsNE_zero :
+theorem tendsto_mul_log_nhdsNE_zero :
     Tendsto (fun z : ℂ => z * log z) (𝓝[≠] 0) (𝓝 0) := by
   rw [tendsto_zero_iff_norm_tendsto_zero]
   have hc : Tendsto (fun z : ℂ => |‖z‖ * Real.log ‖z‖| + π * ‖z‖) (𝓝[≠] 0) (𝓝 0) := by
@@ -201,7 +199,7 @@ theorem genExpIntE_nat_hasSum {n : ℕ} (hn : 1 ≤ n) {z : ℂ} (hz : z ≠ 0) 
     ring
 
 /-- `∑_{j=0}^{n} (-1)^j C(n+1, j+1) = 1`. -/
-lemma incG_alt_choose_succ (n : ℕ) :
+theorem incG_alt_choose_succ (n : ℕ) :
     ∑ j ∈ Finset.range (n+1), ((n+1).choose (j+1) : ℚ) * (-1)^j = 1 := by
   have h := Int.alternating_sum_range_choose (n := n+1)
   simp only [Nat.add_one_ne_zero, ↓reduceIte] at h
@@ -216,7 +214,7 @@ lemma incG_alt_choose_succ (n : ℕ) :
   exact_mod_cast h''
 
 /-- `∑_{j=1}^{n} (-1)^{j-1} C(n,j)/j = H_n`. -/
-lemma incG_sum_choose_harmonic (n : ℕ) :
+theorem incG_sum_choose_harmonic (n : ℕ) :
     ∑ j ∈ Finset.range n, (n.choose (j+1) : ℚ) * (-1)^j / (j+1) = harmonic n := by
   induction n with
   | zero => simp
@@ -241,7 +239,7 @@ lemma incG_sum_choose_harmonic (n : ℕ) :
 
 
 /-- The `E₁` part of DLMF 6.6.2 as a power series in `z`, with constant term `-γ`. -/
-lemma incG_hasSum_E1_add_log {z : ℂ} (hz : z ≠ 0) :
+theorem incG_hasSum_E1_add_log {z : ℂ} (hz : z ≠ 0) :
     HasSum (fun k : ℕ => if k = 0 then -(Real.eulerMascheroniConstant : ℂ)
       else -(-z)^k/((k.factorial : ℂ)*k)) (genExpIntE 1 z + log z) := by
   have h := hasSum_Ein_complex z
@@ -252,7 +250,7 @@ lemma incG_hasSum_E1_add_log {z : ℂ} (hz : z ≠ 0) :
   · funext k; push_cast; rw [neg_pow z, pow_succ (-1:ℂ)]; ring
   · ring
 
-lemma incG_digamma_conv_term {n j : ℕ} (hj : j < n) (z : ℂ) :
+theorem incG_digamma_conv_term {n j : ℕ} (hj : j < n) (z : ℂ) :
     (-(-z)^(j+1)/(((j+1).factorial : ℂ)*((j+1:ℕ):ℂ))) * (z^(n-(j+1))/((n-(j+1)).factorial : ℂ)) =
       z^n/(n.factorial : ℂ) * ((n.choose (j+1) : ℂ) * (-1)^j / ((j:ℂ)+1)) := by
   obtain ⟨m, rfl⟩ : ∃ m, n = (j+1) + m := ⟨n-(j+1), by omega⟩
@@ -312,7 +310,7 @@ theorem incG_expIntE1_digamma_series {z : ℂ} (hz : z ≠ 0) :
   ring
 
 /-- Factorial form of DLMF 8.19.9, by induction through 8.19.12. -/
-lemma incG_genExpIntE_succ_digamma (m : ℕ) {z : ℂ} (hz : z ≠ 0) :
+theorem incG_genExpIntE_succ_digamma (m : ℕ) {z : ℂ} (hz : z ≠ 0) :
     genExpIntE ((m:ℂ)+1) z = (-1:ℂ)^(m+1)*z^m/(m.factorial : ℂ)*log z +
       exp (-z)/(m.factorial : ℂ)*(∑ k ∈ Finset.range m, (-z)^k*((m-(k+1)).factorial : ℂ)) +
       exp (-z)*(-z)^m/(m.factorial : ℂ)*(∑' k : ℕ, z^k/(k.factorial : ℂ)*digamma (k+1)) := by
@@ -367,7 +365,7 @@ theorem genExpIntE_nat_digamma_series {n : ℕ} (hn : 1 ≤ n) {z : ℂ} (hz : z
   incG_genExpIntE_nat_digamma_series hn hz
 
 /-- Excluding positive integral `p` excludes nonpositive integral `1-p`. -/
-lemma one_sub_ne_neg_nat {p : ℂ} (hp : ∀ n : ℕ, p ≠ n+1) : ∀ n : ℕ, 1-p ≠ -n :=
+theorem one_sub_ne_neg_nat {p : ℂ} (hp : ∀ n : ℕ, p ≠ n+1) : ∀ n : ℕ, 1-p ≠ -n :=
   fun n h => hp n (by linear_combination -h)
 
 /-- genExpIntE hasSum noninteger. -/
@@ -438,7 +436,7 @@ theorem genExpIntE_scaled_derivative (p : ℂ) {z : ℂ} (hz : z ∈ slitPlane) 
   linear_combination -exp z * hr + he
 
 /-- `t^s e^{-bt}` is integrable on `(1,∞)` for `b > 0`. -/
-lemma incG_integrableOn_rpow_mul_exp_neg {s b : ℝ} (hb : 0 < b) :
+theorem incG_integrableOn_rpow_mul_exp_neg {s b : ℝ} (hb : 0 < b) :
     IntegrableOn (fun t : ℝ => t^s * Real.exp (-b*t)) (Ioi 1) := by
   refine integrable_of_isBigO_exp_neg (b := b/2) (by positivity) ?_ ?_
   · intro t ht
@@ -452,7 +450,7 @@ lemma incG_integrableOn_rpow_mul_exp_neg {s b : ℝ} (hb : 0 < b) :
     rw [← Real.exp_add]; ring_nf
 
 /-- The integrand of the `j`-th parameter derivative. -/
-lemma incG_norm_paramIntegrand_le (j : ℕ) (q z : ℂ) {t : ℝ} (ht : 1 ≤ t) :
+theorem incG_norm_paramIntegrand_le (j : ℕ) (q z : ℂ) {t : ℝ} (ht : 1 ≤ t) :
     ‖(Real.log t : ℂ)^j*(t : ℂ)^(-q)*exp (-z*t)‖ ≤ t^((j:ℝ) - q.re) * Real.exp (-z.re*t) := by
   have ht0 : 0 < t := by linarith
   have hl0 : 0 ≤ Real.log t := Real.log_nonneg ht
@@ -464,7 +462,7 @@ lemma incG_norm_paramIntegrand_le (j : ℕ) (q z : ℂ) {t : ℝ} (ht : 1 ≤ t)
   have : Real.log t ^ j ≤ t^j := pow_le_pow_left₀ hl0 hlt j
   gcongr
 
-lemma incG_paramIntegrand_continuousOn (j : ℕ) (q z : ℂ) :
+theorem incG_paramIntegrand_continuousOn (j : ℕ) (q z : ℂ) :
     ContinuousOn (fun t : ℝ => (Real.log t : ℂ)^j*(t : ℂ)^(-q)*exp (-z*t)) (Ioi 0) := by
   intro t ht
   have ht0 : (0:ℝ) < t := ht
@@ -473,7 +471,7 @@ lemma incG_paramIntegrand_continuousOn (j : ℕ) (q z : ℂ) :
   · exact (continuousAt_ofReal_cpow_const _ _ (Or.inr ht0.ne'))
   · exact (Complex.continuous_exp.comp (continuous_const.mul continuous_ofReal)).continuousAt
 
-lemma incG_paramIntegrand_integrableOn (j : ℕ) (q : ℂ) {z : ℂ} (hz : 0 < z.re) :
+theorem incG_paramIntegrand_integrableOn (j : ℕ) (q : ℂ) {z : ℂ} (hz : 0 < z.re) :
     IntegrableOn (fun t : ℝ => (Real.log t : ℂ)^j*(t : ℂ)^(-q)*exp (-z*t)) (Ioi 1) := by
   refine Integrable.mono' (incG_integrableOn_rpow_mul_exp_neg (s := (j:ℝ) - q.re) hz) ?_ ?_
   · exact ((incG_paramIntegrand_continuousOn j q z).mono (Ioi_subset_Ioi zero_le_one)).aestronglyMeasurable
@@ -481,7 +479,7 @@ lemma incG_paramIntegrand_integrableOn (j : ℕ) (q : ℂ) {z : ℂ} (hz : 0 < z
   · filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
     exact incG_norm_paramIntegrand_le j q z (le_of_lt ht)
 
-lemma incG_hasDerivAt_paramIntegrand (j : ℕ) (q z : ℂ) {t : ℝ} (ht : 0 < t) :
+theorem incG_hasDerivAt_paramIntegrand (j : ℕ) (q z : ℂ) {t : ℝ} (ht : 0 < t) :
     HasDerivAt (fun q => (Real.log t : ℂ)^j*(t : ℂ)^(-q)*exp (-z*t))
       (-((Real.log t : ℂ)^(j+1)*(t : ℂ)^(-q)*exp (-z*t))) q := by
   have h := ((hasDerivAt_neg q).const_cpow (c := (t:ℂ)) (Or.inl (ofReal_ne_zero.mpr ht.ne')))
@@ -490,7 +488,7 @@ lemma incG_hasDerivAt_paramIntegrand (j : ℕ) (q z : ℂ) {t : ℝ} (ht : 0 < t
   rw [← ofReal_log ht.le]; ring
 
 /-- Differentiation under the integral sign in the order parameter. -/
-lemma incG_hasDerivAt_paramIntegral (j : ℕ) (q : ℂ) {z : ℂ} (hz : 0 < z.re) :
+theorem incG_hasDerivAt_paramIntegral (j : ℕ) (q : ℂ) {z : ℂ} (hz : 0 < z.re) :
     HasDerivAt (fun q => ∫ t : ℝ in Ioi 1, (Real.log t : ℂ)^j*(t : ℂ)^(-q)*exp (-z*t))
       (-(∫ t : ℝ in Ioi 1, (Real.log t : ℂ)^(j+1)*(t : ℂ)^(-q)*exp (-z*t))) q := by
   have hb := incG_integrableOn_rpow_mul_exp_neg (s := ((j+1:ℕ):ℝ) + (1 - q.re)) hz
@@ -951,7 +949,7 @@ theorem genExpIntE_mellin_laplace {a b p : ℂ} (ha : -1 < a.re) (hb : 0 < b.re)
   rw [hG, hc, show b+p-1 = p+b-1 by ring]
   field_simp
 
-lemma incG_one_add_mul_re_pos {a : ℂ} (ha : -1 < a.re) {u : ℝ} (hu : u ∈ Set.uIcc (0:ℝ) 1) :
+theorem incG_one_add_mul_re_pos {a : ℂ} (ha : -1 < a.re) {u : ℝ} (hu : u ∈ Set.uIcc (0:ℝ) 1) :
     0 < (1 + a*u).re := by
   rw [Set.uIcc_of_le zero_le_one] at hu
   simp only [add_re, one_re, mul_re, ofReal_re, ofReal_im, mul_zero, sub_zero]
@@ -959,13 +957,13 @@ lemma incG_one_add_mul_re_pos {a : ℂ} (ha : -1 < a.re) {u : ℝ} (hu : u ∈ S
   · nlinarith [hu.1]
   · nlinarith [hu.1, hu.2]
 
-lemma incG_continuousOn_powDiv {a : ℂ} (ha : -1 < a.re) (m : ℕ) :
+theorem incG_continuousOn_powDiv {a : ℂ} (ha : -1 < a.re) (m : ℕ) :
     ContinuousOn (fun u : ℝ => (u:ℂ)^m/(1+a*u)) (Set.uIcc 0 1) := by
   refine ContinuousOn.div (by fun_prop) (by fun_prop) fun u hu h0 => ?_
   have := incG_one_add_mul_re_pos ha hu; rw [h0] at this; simp at this
 
 /-- The finite integral `J_n(a) = ∫₀¹ u^{n-1}/(1+au) du` in closed form. -/
-lemma incG_laplaceJ_recurrence {a : ℂ} (ha : -1 < a.re) (m : ℕ) :
+theorem incG_laplaceJ_recurrence {a : ℂ} (ha : -1 < a.re) (m : ℕ) :
     a * (∫ u in (0:ℝ)..1, (u:ℂ)^(m+1)/(1+a*u)) =
       1/(m+1) - ∫ u in (0:ℝ)..1, (u:ℂ)^m/(1+a*u) := by
   have hi : IntervalIntegrable (fun u : ℝ => (u:ℂ)^m/(1+a*u)) volume 0 1 :=
@@ -982,7 +980,7 @@ lemma incG_laplaceJ_recurrence {a : ℂ} (ha : -1 < a.re) (m : ℕ) :
   field_simp
   ring
 
-lemma incG_laplaceJ_one {a : ℂ} (ha : -1 < a.re) (ha0 : a ≠ 0) :
+theorem incG_laplaceJ_one {a : ℂ} (ha : -1 < a.re) (ha0 : a ≠ 0) :
     (∫ u in (0:ℝ)..1, (u:ℂ)^0/(1+a*u)) = log (1+a)/a := by
   have hd : ∀ u ∈ Set.uIcc (0:ℝ) 1, HasDerivAt (fun u : ℝ => log (1+a*u)/a) ((u:ℂ)^0/(1+a*u)) u := by
     intro u hu
@@ -994,7 +992,7 @@ lemma incG_laplaceJ_one {a : ℂ} (ha : -1 < a.re) (ha0 : a ≠ 0) :
     ((incG_continuousOn_powDiv ha 0).intervalIntegrable)]
   simp
 
-lemma incG_laplaceJ_closed {a : ℂ} (ha : -1 < a.re) (ha0 : a ≠ 0) (m : ℕ) :
+theorem incG_laplaceJ_closed {a : ℂ} (ha : -1 < a.re) (ha0 : a ≠ 0) (m : ℕ) :
     (∫ u in (0:ℝ)..1, (u:ℂ)^m/(1+a*u)) = (-1 : ℂ)^m/a^(m+1)*(log (1+a)+∑ k ∈ Finset.range m, (-1 : ℂ)^(k+1)*a^(k+1)/(k+1)) := by
   induction m with
   | zero => rw [incG_laplaceJ_one ha ha0]; simp; ring
@@ -1010,7 +1008,7 @@ lemma incG_laplaceJ_closed {a : ℂ} (ha : -1 < a.re) (ha0 : a ≠ 0) (m : ℕ) 
     have hpow2 : (-1:ℂ)^(m*2) = 1 := by rw [mul_comm, pow_mul]; simp
     linear_combination (-(a^3*a^(m*2))) * hpow2
 
-lemma incG_laplaceJ_zero (m : ℕ) :
+theorem incG_laplaceJ_zero (m : ℕ) :
     (∫ u in (0:ℝ)..1, (u:ℂ)^m/(1+0*u)) = 1/(m+1) := by
   have : (∫ u in (0:ℝ)..1, (u:ℂ)^m) = ((∫ u in (0:ℝ)..1, u^m : ℝ) : ℂ) := by
     rw [← intervalIntegral.integral_ofReal]; simp
@@ -1018,7 +1016,7 @@ lemma incG_laplaceJ_zero (m : ℕ) :
   rw [this, integral_pow]; push_cast; simp
 
 /-- The Laplace transform of `E_n` as a finite integral, via 8.19.25. -/
-lemma incG_genExpIntE_laplace_eq {n : ℕ} (hn : 1 ≤ n) {a : ℂ} (ha : -1 < a.re) :
+theorem incG_genExpIntE_laplace_eq {n : ℕ} (hn : 1 ≤ n) {a : ℂ} (ha : -1 < a.re) :
     (∫ t : ℝ in Ioi 0, exp (-a*t)*genExpIntE n t) =
       ∫ u in (0:ℝ)..1, (u:ℂ)^(n-1)/(1+a*u) := by
   have hz : 0 < (1+a).re := by simp; linarith
@@ -1101,7 +1099,7 @@ theorem genExpIntL_hypergeometric {p : ℝ} (hp : 0 < p) :
   field_simp
 
 /-- The shift `u = 1 + v` on `(1, ∞)`. -/
-lemma incGP_integral_Ioi_one_shift (g : ℝ → ℝ) :
+theorem incGP_integral_Ioi_one_shift (g : ℝ → ℝ) :
     ∫ s in Ioi (1 : ℝ), g s = ∫ t in Ioi (0 : ℝ), g (1 + t) := by
   rw [← integral_indicator measurableSet_Ioi, ← integral_indicator measurableSet_Ioi]
   have h : ∀ t : ℝ, (Ioi (0 : ℝ)).indicator (fun t => g (1 + t)) t =
@@ -1116,7 +1114,7 @@ lemma incGP_integral_Ioi_one_shift (g : ℝ → ℝ) :
   exact (integral_add_left_eq_self (fun u => (Ioi (1 : ℝ)).indicator g u) 1).symm
 
 /-- `E_p(x) ≤ Γ(1-s) x^{s-1} e^{-x}` for real `0 ≤ s < 1`, `s ≤ p`, `x > 0`. -/
-lemma incGP_genExpIntE_re_le {p s : ℝ} (hs0 : 0 ≤ s) (hs1 : s < 1) (hsp : s ≤ p) {x : ℝ}
+theorem incGP_genExpIntE_re_le {p s : ℝ} (hs0 : 0 ≤ s) (hs1 : s < 1) (hsp : s ≤ p) {x : ℝ}
     (hx : 0 < x) :
     (genExpIntE p x).re ≤ Real.Gamma (1 - s) * x ^ (s - 1) * Real.exp (-x) := by
   rw [incG_genExpIntE_re_eq p hx, incGP_integral_Ioi_one_shift]
@@ -1151,7 +1149,7 @@ lemma incGP_genExpIntE_re_le {p s : ℝ} (hs0 : 0 ≤ s) (hs1 : s < 1) (hsp : s 
   ring
 
 /-- For real `p` and `x > 0`, `E_p(x)` is real. -/
-lemma incGP_genExpIntE_ofReal (p : ℝ) {x : ℝ} (hx : 0 < x) :
+theorem incGP_genExpIntE_ofReal (p : ℝ) {x : ℝ} (hx : 0 < x) :
     genExpIntE p x = ((genExpIntE p x).re : ℂ) := by
   rw [incG_genExpIntE_re_eq p hx, genExpIntE_eq_integral (p:ℂ) hx]
   rw [show ((∫ t in Ioi 1, Real.exp (-x*t)*t^(-p) : ℝ) : ℂ) =
@@ -1161,7 +1159,7 @@ lemma incGP_genExpIntE_ofReal (p : ℝ) {x : ℝ} (hx : 0 < x) :
   rw [Complex.real_smul, ofReal_mul, ofReal_cpow ht0]; push_cast; ring_nf
 
 /-- Integrability of `t^σ e^{-2t}` on `(0,∞)` for `σ > -1`. -/
-lemma incGP_integrableOn {σ : ℝ} (hσ : -1 < σ) (C : ℝ) :
+theorem incGP_integrableOn {σ : ℝ} (hσ : -1 < σ) (C : ℝ) :
     IntegrableOn (fun t : ℝ => C * (t ^ σ * Real.exp (-2 * t ^ (1 : ℝ)))) (Ioi 0) :=
   (integrableOn_rpow_mul_exp_neg_mul_rpow hσ one_pos two_pos).const_mul C
 

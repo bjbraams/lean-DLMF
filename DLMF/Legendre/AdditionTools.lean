@@ -5,17 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Legendre.IntegralRepresentations
-public import DLMF.Legendre.Laplace
-public import DLMF.Legendre.IntegerTheory
-public import DLMF.OrthogonalPolynomials.LegendreAddition
-public import DLMF.Hypergeometric.ParameterHolomorphy
-public import ToMathlib.Analysis.Complex.Carlson
-public import Mathlib.Analysis.Fourier.AddCircle
-public import Mathlib.Analysis.PSeries
 public import DLMF.Legendre.Series
-public import DLMF.Hypergeometric.Elementary
-public import DLMF.Gamma.RecipGammaDeriv
 public import DLMF.Legendre.Harmonics
 
 /-!
@@ -59,12 +49,12 @@ namespace DLMF.Legendre
 def legAdd_coeff (f : ℝ → ℂ) (n : ℤ) : ℂ :=
   1 / (2 * π) * ∫ t in (-π)..π, exp (-(n * t * I)) * f t
 
-lemma legAdd_exp_pi (n : ℤ) : exp (-(n * (π:ℝ) * I)) = exp (-(n * ((-π : ℝ):ℂ) * I)) := by
+theorem legAdd_exp_pi (n : ℤ) : exp (-(n * (π:ℝ) * I)) = exp (-(n * ((-π : ℝ):ℂ) * I)) := by
   rw [show -((n:ℂ) * ((-π:ℝ):ℂ) * I) = -(n * (π:ℝ) * I) + n * (2 * π * I) by push_cast; ring,
     exp_add, exp_int_mul_two_pi_mul_I, mul_one]
 
 /-- One integration by parts for a periodic function. -/
-lemma legAdd_integral_exp_mul_eq {g g' : ℝ → ℂ} (hg : ∀ t, HasDerivAt g (g' t) t)
+theorem legAdd_integral_exp_mul_eq {g g' : ℝ → ℂ} (hg : ∀ t, HasDerivAt g (g' t) t)
     (hg' : Continuous g') (hper : g π = g (-π)) {n : ℤ} (hn : n ≠ 0) :
     (∫ t in (-π)..π, exp (-(n * t * I)) * g t) =
       1 / (n * I) * ∫ t in (-π)..π, exp (-(n * t * I)) * g' t := by
@@ -94,7 +84,7 @@ lemma legAdd_integral_exp_mul_eq {g g' : ℝ → ℂ} (hg : ∀ t, HasDerivAt g 
 
 
 /-- Periodicity passes to the derivative. -/
-lemma legAdd_deriv_periodic {f : ℝ → ℂ} (hper : Function.Periodic f (2 * π)) :
+theorem legAdd_deriv_periodic {f : ℝ → ℂ} (hper : Function.Periodic f (2 * π)) :
     Function.Periodic (deriv f) (2 * π) := by
   intro t
   have h : f = fun s => f (s + 2 * π) := funext fun s => (hper s).symm
@@ -102,7 +92,7 @@ lemma legAdd_deriv_periodic {f : ℝ → ℂ} (hper : Function.Periodic f (2 * �
   rw [deriv_comp_add_const]
 
 /-- Second-order decay of the Fourier coefficients of a periodic `C²` function. -/
-lemma legAdd_coeff_bound {f : ℝ → ℂ} (hf : ContDiff ℝ 2 f) (hper : Function.Periodic f (2 * π)) :
+theorem legAdd_coeff_bound {f : ℝ → ℂ} (hf : ContDiff ℝ 2 f) (hper : Function.Periodic f (2 * π)) :
     ∃ M : ℝ, 0 ≤ M ∧ ∀ n : ℤ, n ≠ 0 → ‖legAdd_coeff f n‖ ≤ M / (n:ℝ) ^ 2 := by
   have hd1 : Differentiable ℝ f := hf.differentiable (by norm_num)
   have hc1 : ContDiff ℝ 1 (deriv f) :=
@@ -141,7 +131,7 @@ lemma legAdd_coeff_bound {f : ℝ → ℂ} (hf : ContDiff ℝ 2 f) (hper : Funct
 
 
 /-- The coefficients of an even function are even in the index. -/
-lemma legAdd_coeff_neg {f : ℝ → ℂ} (hev : ∀ t, f (-t) = f t) (n : ℤ) :
+theorem legAdd_coeff_neg {f : ℝ → ℂ} (hev : ∀ t, f (-t) = f t) (n : ℤ) :
     legAdd_coeff f (-n) = legAdd_coeff f n := by
   rw [legAdd_coeff, legAdd_coeff]
   congr 1
@@ -238,7 +228,7 @@ theorem legAdd_carlson {f : ℂ → ℂ} (hf : Differentiable ℂ f) {C A B : �
 
 
 /-- A power of a number in `[B⁻¹, B]`, `B ≥ 1`, is at most `B^{|r|}`. -/
-lemma legAdd_rpow_le {b B r : ℝ} (hb : 0 < b) (h1 : B⁻¹ ≤ b) (h2 : b ≤ B) :
+theorem legAdd_rpow_le {b B r : ℝ} (hb : 0 < b) (h1 : B⁻¹ ≤ b) (h2 : b ≤ B) :
     b ^ r ≤ B ^ |r| := by
   have hB : 0 < B := hb.trans_le h2
   rcases le_or_gt 0 r with hr | hr
@@ -249,7 +239,7 @@ lemma legAdd_rpow_le {b B r : ℝ} (hb : 0 < b) (h1 : B⁻¹ ≤ b) (h2 : b ≤ 
       rw [inv_le_comm₀ hb hB]; exact h1) (by linarith)
 
 /-- The Laplace base `x + √(x²-1) cos u` lies in `[(2x)⁻¹, 2x]` for `x ≥ 1`. -/
-lemma legAdd_laplace_base_mem {x : ℝ} (hx : 1 ≤ x) (u : ℝ) :
+theorem legAdd_laplace_base_mem {x : ℝ} (hx : 1 ≤ x) (u : ℝ) :
     0 < x + Real.sqrt (x ^ 2 - 1) * Real.cos u ∧
     (2 * x)⁻¹ ≤ x + Real.sqrt (x ^ 2 - 1) * Real.cos u ∧
     x + Real.sqrt (x ^ 2 - 1) * Real.cos u ≤ 2 * x := by
@@ -268,7 +258,7 @@ lemma legAdd_laplace_base_mem {x : ℝ} (hx : 1 ≤ x) (u : ℝ) :
   nlinarith
 
 /-- `associatedP ν 0 = legendreP ν` on `[1, ∞)`. -/
-lemma legAdd_associatedP_zero {ν : ℂ} {x : ℝ} (hx : 1 ≤ x) :
+theorem legAdd_associatedP_zero {ν : ℂ} {x : ℝ} (hx : 1 ≤ x) :
     associatedP ν 0 x = legendreP ν x := by
   rcases eq_or_lt_of_le hx with h | h
   · subst h
@@ -281,7 +271,7 @@ lemma legAdd_associatedP_zero {ν : ℂ} {x : ℝ} (hx : 1 ≤ x) :
   · exact associatedP_zero_order ν (legInt_one_lt_mem h)
 
 /-- Laplace bound `|P_ν(x)| ≤ (2x)^{|Re ν|}` for real `x ≥ 1`. -/
-lemma legAdd_norm_legendreP_le (ν : ℂ) {x : ℝ} (hx : 1 ≤ x) :
+theorem legAdd_norm_legendreP_le (ν : ℂ) {x : ℝ} (hx : 1 ≤ x) :
     ‖legendreP ν x‖ ≤ (2 * x) ^ |ν.re| := by
   rw [legendreP_laplace ν hx, norm_mul]
   have hI : ‖∫ u in (0:ℝ)..π, (((x + Real.sqrt (x ^ 2 - 1) * Real.cos u : ℝ)) : ℂ) ^ ν‖ ≤
@@ -299,7 +289,7 @@ lemma legAdd_norm_legendreP_le (ν : ℂ) {x : ℝ} (hx : 1 ≤ x) :
     _ = (2 * x) ^ |ν.re| := by field_simp
 
 /-- Bound for nonnegative integer order on `(1, ∞)` from 14.12.7. -/
-lemma legAdd_norm_associatedP_nat_le (ν : ℂ) (m : ℕ) {x : ℝ} (hx : 1 < x) :
+theorem legAdd_norm_associatedP_nat_le (ν : ℂ) (m : ℕ) {x : ℝ} (hx : 1 < x) :
     ‖associatedP ν m x‖ ≤ ‖poch (ν + 1) m‖ * (2 * x) ^ |ν.re| := by
   rw [associatedP_fourier_integral ν m hx, norm_mul, norm_div]
   have hI : ‖∫ θ : ℝ in (0:ℝ)..π, (x + Real.sqrt (x ^ 2 - 1) * Real.cos θ : ℂ) ^ ν *
@@ -325,7 +315,7 @@ lemma legAdd_norm_associatedP_nat_le (ν : ℂ) (m : ℕ) {x : ℝ} (hx : 1 < x)
 
 
 /-- Bound for negative integer order on `(1, ∞)` from the fractional integral 14.12.5. -/
-lemma legAdd_norm_associatedP_neg_le (ν : ℂ) {m : ℕ} (hm : 1 ≤ m) {x : ℝ} (hx : 1 < x) :
+theorem legAdd_norm_associatedP_neg_le (ν : ℂ) {m : ℕ} (hm : 1 ≤ m) {x : ℝ} (hx : 1 < x) :
     ‖associatedP ν (-(m:ℂ)) x‖ ≤ ‖((x:ℂ) ^ 2 - 1) ^ (-(m:ℂ) / 2) / Gamma m‖ *
       ((2 * x) ^ |ν.re| * (x - 1) ^ (m - 1) * (x - 1)) := by
   have hm' : (0:ℝ) < (m:ℂ).re := by simp; exact_mod_cast hm
@@ -346,7 +336,7 @@ lemma legAdd_norm_associatedP_neg_le (ν : ℂ) {m : ℕ} (hm : 1 ≤ m) {x : �
   rwa [abs_of_pos (by linarith : (0:ℝ) < x - 1)] at hI
 
 /-- `|(ν+1)_m| ≤ m! e^m e^{|ν|}`. -/
-lemma legAdd_norm_poch_le (ν : ℂ) (m : ℕ) :
+theorem legAdd_norm_poch_le (ν : ℂ) (m : ℕ) :
     ‖poch (ν + 1) m‖ ≤ m ! * Real.exp m * Real.exp ‖ν‖ := by
   have h1 : ‖poch (ν + 1) m‖ ≤ (‖ν‖ + m) ^ m := by
     have key : ∀ k : ℕ, k ≤ m → ‖poch (ν + 1) k‖ ≤ (‖ν‖ + m) ^ k := by
@@ -374,19 +364,19 @@ lemma legAdd_norm_poch_le (ν : ℂ) (m : ℕ) :
 
 
 /-- The order-zero function in hypergeometric form, for every argument. -/
-lemma legAdd_associatedP_zero_eq (ν z : ℂ) :
+theorem legAdd_associatedP_zero_eq (ν z : ℂ) :
     associatedP ν 0 z = regularizedGaussHG (ν + 1) (-ν) 1 ((1 - z) / 2) := by
   simp [associatedP]
 
 /-- A real number below `1` lies in the cut plane. -/
-lemma legAdd_ofReal_mem_cutPlane {r : ℝ} (hr : r < 1) : (r : ℂ) ∈ cutPlane := by
+theorem legAdd_ofReal_mem_cutPlane {r : ℝ} (hr : r < 1) : (r : ℂ) ∈ cutPlane := by
   rw [mem_cutPlane]; left; simp; linarith
 
 /-- The argument `cosh ξ₁ cosh ξ₂ - sinh ξ₁ sinh ξ₂ cos t` of the hyperbolic addition theorem. -/
 def legAdd_hX (ξ₁ ξ₂ t : ℝ) : ℝ :=
   Real.cosh ξ₁ * Real.cosh ξ₂ - Real.sinh ξ₁ * Real.sinh ξ₂ * Real.cos t
 
-lemma legAdd_hX_mem {ξ₁ ξ₂ : ℝ} (h1 : 0 ≤ ξ₁) (h2 : 0 ≤ ξ₂) (t : ℝ) :
+theorem legAdd_hX_mem {ξ₁ ξ₂ : ℝ} (h1 : 0 ≤ ξ₁) (h2 : 0 ≤ ξ₂) (t : ℝ) :
     1 ≤ legAdd_hX ξ₁ ξ₂ t ∧ legAdd_hX ξ₁ ξ₂ t ≤ Real.cosh (ξ₁ + ξ₂) := by
   have hs : 0 ≤ Real.sinh ξ₁ * Real.sinh ξ₂ :=
     mul_nonneg (Real.sinh_nonneg_iff.2 h1) (Real.sinh_nonneg_iff.2 h2)
@@ -399,7 +389,7 @@ lemma legAdd_hX_mem {ξ₁ ξ₂ : ℝ} (h1 : 0 ≤ ξ₁) (h2 : 0 ≤ ξ₂) (t
   constructor <;> nlinarith
 
 /-- The order-zero Legendre function along `legAdd_hX` is `C²` in the angle. -/
-lemma legAdd_hX_contDiff (ν : ℂ) {ξ₁ ξ₂ : ℝ} (h1 : 0 ≤ ξ₁) (h2 : 0 ≤ ξ₂) :
+theorem legAdd_hX_contDiff (ν : ℂ) {ξ₁ ξ₂ : ℝ} (h1 : 0 ≤ ξ₁) (h2 : 0 ≤ ξ₂) :
     ContDiff ℝ 2 (fun t : ℝ => associatedP ν 0 (legAdd_hX ξ₁ ξ₂ t)) := by
   have hG : DifferentiableOn ℂ (fun z => regularizedGaussHG (ν + 1) (-ν) 1 z) cutPlane :=
     DifferentiableOn.regularizedGaussHG (differentiableOn_const _) (differentiableOn_const _)
@@ -419,7 +409,7 @@ lemma legAdd_hX_contDiff (ν : ℂ) {ξ₁ ξ₂ : ℝ} (h1 : 0 ≤ ξ₁) (h2 :
 
 
 /-- Order-zero values along `legAdd_hX` are bounded by `(2 cosh (ξ₁+ξ₂))^{|Re ν|}`. -/
-lemma legAdd_hX_norm_le (ν : ℂ) {ξ₁ ξ₂ : ℝ} (h1 : 0 ≤ ξ₁) (h2 : 0 ≤ ξ₂) (t : ℝ) :
+theorem legAdd_hX_norm_le (ν : ℂ) {ξ₁ ξ₂ : ℝ} (h1 : 0 ≤ ξ₁) (h2 : 0 ≤ ξ₂) (t : ℝ) :
     ‖associatedP ν 0 (legAdd_hX ξ₁ ξ₂ t)‖ ≤ (2 * Real.cosh (ξ₁ + ξ₂)) ^ |ν.re| := by
   obtain ⟨hX1, hX2⟩ := legAdd_hX_mem h1 h2 t
   rw [legAdd_associatedP_zero hX1]
@@ -427,7 +417,7 @@ lemma legAdd_hX_norm_le (ν : ℂ) {ξ₁ ξ₂ : ℝ} (h1 : 0 ≤ ξ₁) (h2 : 
     (Real.rpow_le_rpow (by linarith) (by linarith) (abs_nonneg _))
 
 /-- Bound on the Fourier coefficients in the hyperbolic case. -/
-lemma legAdd_hyp_coeff_bound (ν : ℂ) {ξ₁ ξ₂ : ℝ} (h1 : 0 ≤ ξ₁) (h2 : 0 ≤ ξ₂) (m : ℤ) :
+theorem legAdd_hyp_coeff_bound (ν : ℂ) {ξ₁ ξ₂ : ℝ} (h1 : 0 ≤ ξ₁) (h2 : 0 ≤ ξ₂) (m : ℤ) :
     ‖legAdd_coeff (fun t => associatedP ν 0 (legAdd_hX ξ₁ ξ₂ t)) m‖ ≤
       (2 * Real.cosh (ξ₁ + ξ₂)) ^ |ν.re| := by
   rw [legAdd_coeff, norm_mul]
@@ -449,14 +439,14 @@ lemma legAdd_hyp_coeff_bound (ν : ℂ) {ξ₁ ξ₂ : ℝ} (h1 : 0 ≤ ξ₁) (
     _ = _ := by field_simp; ring
 
 /-- The order-zero function at a fixed argument in the cut plane is entire in the degree. -/
-lemma legAdd_differentiable_associatedP_zero {z : ℂ} (hz : (1 - z) / 2 ∈ cutPlane) :
+theorem legAdd_differentiable_associatedP_zero {z : ℂ} (hz : (1 - z) / 2 ∈ cutPlane) :
     Differentiable ℂ (fun ν : ℂ => associatedP ν 0 z) := by
   simp only [legAdd_associatedP_zero_eq]
   exact differentiable_regularizedGaussHG_comp (A := fun ν : ℂ => ν + 1) (B := fun ν : ℂ => -ν)
     (C := fun _ => 1) (by fun_prop) (by fun_prop) (by fun_prop) hz
 
 /-- The Fourier coefficients in the hyperbolic case are entire in the degree. -/
-lemma legAdd_hyp_coeff_differentiable {ξ₁ ξ₂ : ℝ} (h1 : 0 ≤ ξ₁) (h2 : 0 ≤ ξ₂) (m : ℤ) :
+theorem legAdd_hyp_coeff_differentiable {ξ₁ ξ₂ : ℝ} (h1 : 0 ≤ ξ₁) (h2 : 0 ≤ ξ₂) (m : ℤ) :
     Differentiable ℂ (fun ν => legAdd_coeff (fun t => associatedP ν 0 (legAdd_hX ξ₁ ξ₂ t)) m) := by
   have hz : ∀ t, (1 - ((legAdd_hX ξ₁ ξ₂ t : ℝ) : ℂ)) / 2 ∈ cutPlane := fun t => by
     rw [show (1 - ((legAdd_hX ξ₁ ξ₂ t : ℝ) : ℂ)) / 2 = (((1 - legAdd_hX ξ₁ ξ₂ t) / 2 : ℝ) : ℂ) by
@@ -490,7 +480,7 @@ lemma legAdd_hyp_coeff_differentiable {ξ₁ ξ₂ : ℝ} (h1 : 0 ≤ ξ₁) (h2
 
 
 /-- `associatedP ν μ z` is entire in the degree for `(1 - z)/2` in the cut plane. -/
-lemma legAdd_differentiable_associatedP (μ : ℂ) {z : ℂ} (hz : (1 - z) / 2 ∈ cutPlane) :
+theorem legAdd_differentiable_associatedP (μ : ℂ) {z : ℂ} (hz : (1 - z) / 2 ∈ cutPlane) :
     Differentiable ℂ (fun ν : ℂ => associatedP ν μ z) := by
   unfold associatedP
   exact (differentiable_const _).mul (differentiable_regularizedGaussHG_comp
@@ -498,12 +488,12 @@ lemma legAdd_differentiable_associatedP (μ : ℂ) {z : ℂ} (hz : (1 - z) / 2 �
     (by fun_prop) (by fun_prop) (by fun_prop) hz)
 
 /-- `(2x)^{|r|} = exp (log (2x) |r|)`. -/
-lemma legAdd_rpow_eq_exp {x : ℝ} (hx : 0 < x) (r : ℝ) :
+theorem legAdd_rpow_eq_exp {x : ℝ} (hx : 0 < x) (r : ℝ) :
     (2 * x) ^ |r| = Real.exp (Real.log (2 * x) * |r|) := by
   rw [Real.rpow_def_of_pos (by linarith)]
 
 /-- The right-hand side coefficients of the hyperbolic addition theorem satisfy a Carlson bound. -/
-lemma legAdd_hyp_rhs_bound {x₁ x₂ : ℝ} (hx₁ : 1 < x₁) (hx₂ : 1 < x₂) (m : ℕ) :
+theorem legAdd_hyp_rhs_bound {x₁ x₂ : ℝ} (hx₁ : 1 < x₁) (hx₂ : 1 < x₂) (m : ℕ) :
     ∃ C : ℝ, ∀ ν : ℂ, ‖(-1:ℂ) ^ m * associatedP ν (-(m:ℂ)) x₁ * associatedP ν m x₂‖ ≤
       C * Real.exp ((Real.log (2 * x₁) + Real.log (2 * x₂) + 1) * |ν.re| + 1 * |ν.im|) := by
   have hl1 : 0 ≤ Real.log (2 * x₁) := Real.log_nonneg (by linarith)
@@ -552,7 +542,7 @@ lemma legAdd_hyp_rhs_bound {x₁ x₂ : ℝ} (hx₁ : 1 < x₁) (hx₂ : 1 < x�
 
 
 /-- `∫_{-π}^{π} e^{ikt} dt = 2π δ_{k0}` for integer `k`. -/
-lemma legAdd_integral_exp_int (k : ℤ) :
+theorem legAdd_integral_exp_int (k : ℤ) :
     (∫ t : ℝ in (-π)..π, exp (k * t * I)) = if k = 0 then 2 * (π:ℂ) else 0 := by
   split_ifs with hk
   · subst hk; simp; ring
@@ -567,7 +557,7 @@ lemma legAdd_integral_exp_int (k : ℤ) :
       funext t; ring_nf, h, he, sub_self, zero_div]
 
 /-- Linearity of the Fourier coefficient: sums. -/
-lemma legAdd_coeff_add {f g : ℝ → ℂ} (hf : Continuous f) (hg : Continuous g) (m : ℤ) :
+theorem legAdd_coeff_add {f g : ℝ → ℂ} (hf : Continuous f) (hg : Continuous g) (m : ℤ) :
     legAdd_coeff (fun t => f t + g t) m = legAdd_coeff f m + legAdd_coeff g m := by
   simp only [legAdd_coeff, mul_add]
   rw [intervalIntegral.integral_add, mul_add]
@@ -577,7 +567,7 @@ lemma legAdd_coeff_add {f g : ℝ → ℂ} (hf : Continuous f) (hg : Continuous 
       hg).intervalIntegrable _ _
 
 /-- Linearity of the Fourier coefficient: scalars. -/
-lemma legAdd_coeff_const_mul (c : ℂ) (f : ℝ → ℂ) (m : ℤ) :
+theorem legAdd_coeff_const_mul (c : ℂ) (f : ℝ → ℂ) (m : ℤ) :
     legAdd_coeff (fun t => c * f t) m = c * legAdd_coeff f m := by
   simp only [legAdd_coeff]
   rw [show (fun t : ℝ => exp (-((m:ℂ) * t * I)) * (c * f t)) =
@@ -586,7 +576,7 @@ lemma legAdd_coeff_const_mul (c : ℂ) (f : ℝ → ℂ) (m : ℤ) :
   ring
 
 /-- Linearity of the Fourier coefficient: finite sums. -/
-lemma legAdd_coeff_sum {ι : Type*} (s : Finset ι) (F : ι → ℝ → ℂ) (hF : ∀ i, Continuous (F i))
+theorem legAdd_coeff_sum {ι : Type*} (s : Finset ι) (F : ι → ℝ → ℂ) (hF : ∀ i, Continuous (F i))
     (m : ℤ) : legAdd_coeff (fun t => ∑ i ∈ s, F i t) m = ∑ i ∈ s, legAdd_coeff (F i) m := by
   simp only [legAdd_coeff, Finset.mul_sum]
   rw [intervalIntegral.integral_finsetSum, Finset.mul_sum]
@@ -595,7 +585,7 @@ lemma legAdd_coeff_sum {ι : Type*} (s : Finset ι) (F : ι → ℝ → ℂ) (hF
     (hF i)).intervalIntegrable _ _
 
 /-- The Fourier coefficients of a constant. -/
-lemma legAdd_coeff_const (a : ℂ) (m : ℕ) :
+theorem legAdd_coeff_const (a : ℂ) (m : ℕ) :
     legAdd_coeff (fun _ => a) m = if m = 0 then a else 0 := by
   have h := legAdd_integral_exp_int (-(m:ℤ))
   rw [legAdd_coeff, show (fun t : ℝ => exp (-(((m:ℤ):ℂ) * t * I)) * a) =
@@ -607,7 +597,7 @@ lemma legAdd_coeff_const (a : ℂ) (m : ℕ) :
   · simp [hm]
 
 /-- The Fourier coefficients of `cos (j t)`, `j ≥ 1`. -/
-lemma legAdd_coeff_cos {j : ℕ} (hj : 1 ≤ j) (m : ℕ) :
+theorem legAdd_coeff_cos {j : ℕ} (hj : 1 ≤ j) (m : ℕ) :
     legAdd_coeff (fun t : ℝ => cos ((j:ℂ) * t)) m = if j = m then 1 / 2 else 0 := by
   have h1 := legAdd_integral_exp_int ((j:ℤ) - m)
   have h2 := legAdd_integral_exp_int (-((j:ℤ) + m))
@@ -640,7 +630,7 @@ lemma legAdd_coeff_cos {j : ℕ} (hj : 1 ≤ j) (m : ℕ) :
 
 open DLMF.OrthogonalPolynomials.LegendreAddition in
 /-- The Fourier coefficients of the finite Legendre angular kernel are its coefficients. -/
-lemma legAdd_coeff_kernel (n : ℕ) (x y s t : ℂ) (m : ℕ) :
+theorem legAdd_coeff_kernel (n : ℕ) (x y s t : ℂ) (m : ℕ) :
     legAdd_coeff (fun u : ℝ => kernel n x y s t u) m = coeff n m x y s t := by
   have hc : ∀ k : ℕ, Continuous fun u : ℝ => coeff n (k+1) x y s t * cos (((k:ℂ)+1) * u) :=
     fun k => by fun_prop
@@ -675,7 +665,7 @@ lemma legAdd_coeff_kernel (n : ℕ) (x y s t : ℂ) (m : ℕ) :
 
 open DLMF.OrthogonalPolynomials.LegendreAddition in
 /-- Integer degree and order on `(1, ∞)`: `P^m_n(x) = (x²-1)^{m/2} P_n^{(m)}(x)`. -/
-lemma legAdd_associatedP_nat_nat (n m : ℕ) {x : ℝ} (hx : 1 < x) :
+theorem legAdd_associatedP_nat_nat (n m : ℕ) {x : ℝ} (hx : 1 < x) :
     associatedP n m x = (Real.sqrt (x ^ 2 - 1) : ℂ) ^ m * jet n m x := by
   have hz := legInt_one_lt_mem hx
   have hev : associatedP (n:ℂ) 0 =ᶠ[𝓝 (x:ℂ)] DLMF.OrthogonalPolynomials.legendrePolyP n := by
@@ -694,12 +684,12 @@ lemma legAdd_associatedP_nat_nat (n m : ℕ) {x : ℝ} (hx : 1 < x) :
   rw [hpow]; rfl
 
 /-- `√(cosh² ξ - 1) = sinh ξ` for `ξ ≥ 0`. -/
-lemma legAdd_sqrt_cosh_sq {ξ : ℝ} (h : 0 ≤ ξ) : Real.sqrt (Real.cosh ξ ^ 2 - 1) = Real.sinh ξ := by
+theorem legAdd_sqrt_cosh_sq {ξ : ℝ} (h : 0 ≤ ξ) : Real.sqrt (Real.cosh ξ ^ 2 - 1) = Real.sinh ξ := by
   rw [Real.cosh_sq, add_sub_cancel_right, Real.sqrt_sq (Real.sinh_nonneg_iff.2 h)]
 
 open DLMF.OrthogonalPolynomials.LegendreAddition in
 /-- The hyperbolic addition theorem at integer degree, coefficientwise. -/
-lemma legAdd_hyp_nat (n : ℕ) {ξ₁ ξ₂ : ℝ} (h1 : 0 < ξ₁) (h2 : 0 < ξ₂) (m : ℕ) :
+theorem legAdd_hyp_nat (n : ℕ) {ξ₁ ξ₂ : ℝ} (h1 : 0 < ξ₁) (h2 : 0 < ξ₂) (m : ℕ) :
     legAdd_coeff (fun t => associatedP (n:ℂ) 0 (legAdd_hX ξ₁ ξ₂ t)) m =
       (-1:ℂ) ^ m * associatedP n (-(m:ℂ)) (Real.cosh ξ₁) * associatedP n m (Real.cosh ξ₂) := by
   have hsq : ∀ ξ : ℝ, (I * (Real.sinh ξ : ℂ)) ^ 2 = 1 - (Real.cosh ξ : ℂ) ^ 2 := by
@@ -816,7 +806,7 @@ theorem legAdd_associatedP_addition (ν : ℂ) {ξ₁ ξ₂ : ℝ} (h1 : 0 < ξ�
 /-! ### The Ferrers case (14.18.1) -/
 
 /-- Wallis' integral in Gamma form: `∫₀^π sin^{2n} t dt = √π Γ(n + 1/2)/n!`. -/
-lemma legAdd_integral_sin_pow_even (n : ℕ) :
+theorem legAdd_integral_sin_pow_even (n : ℕ) :
     (∫ t : ℝ in (0:ℝ)..π, (((Real.sin t) ^ 2 : ℝ) : ℂ) ^ n) =
       (Real.sqrt π : ℂ) * Gamma (1 / 2 + n) / n ! := by
   have hR : ∀ n : ℕ, (∫ t : ℝ in (0:ℝ)..π, (((Real.sin t) ^ 2 : ℝ) : ℂ) ^ n) =
@@ -848,7 +838,7 @@ lemma legAdd_integral_sin_pow_even (n : ℕ) :
 
 /-- `𝐅(ν+1, -ν; 1; s) = π^{-1/2} ∫₀^π 𝐅(ν+1, -ν; 1/2; s sin² t) dt` for `0 ≤ s < 1`
 (the Mehler–Dirichlet integral in disguise). -/
-lemma legAdd_regGHG_one_eq_integral (ν : ℂ) {s : ℝ} (hs0 : 0 ≤ s) (hs1 : s < 1) :
+theorem legAdd_regGHG_one_eq_integral (ν : ℂ) {s : ℝ} (hs0 : 0 ≤ s) (hs1 : s < 1) :
     regularizedGaussHGFun (ν + 1) (-ν) 1 s = 1 / (Real.sqrt π : ℂ) *
       ∫ t : ℝ in (0:ℝ)..π, regularizedGaussHGFun (ν + 1) (-ν) (1 / 2) ((s * Real.sin t ^ 2 : ℝ)) := by
   have hsn : ‖(s:ℂ)‖ < 1 := by rw [norm_real, Real.norm_eq_abs, abs_of_nonneg hs0]; exact hs1
@@ -900,7 +890,7 @@ lemma legAdd_regGHG_one_eq_integral (ν : ℂ) {s : ℝ} (hs0 : 0 ≤ s) (hs1 : 
 
 
 /-- `(1 - cos θ)/2 = sin²(θ/2)`. -/
-lemma legAdd_one_sub_cos_half (θ : ℝ) : (1 - Real.cos θ) / 2 = Real.sin (θ / 2) ^ 2 := by
+theorem legAdd_one_sub_cos_half (θ : ℝ) : (1 - Real.cos θ) / 2 = Real.sin (θ / 2) ^ 2 := by
   have h := Real.cos_two_mul (θ / 2)
   rw [show 2 * (θ / 2) = θ by ring] at h
   have := Real.sin_sq_add_cos_sq (θ / 2)
@@ -908,7 +898,7 @@ lemma legAdd_one_sub_cos_half (θ : ℝ) : (1 - Real.cos θ) / 2 = Real.sin (θ 
 
 /-- **Sharp exponential bound for Ferrers functions of order zero**:
 `|𝖯_ν(cos θ)| ≤ e^{θ |Im ν|} / cos(θ/2)` for `0 ≤ θ < π` and all complex `ν`. -/
-lemma legAdd_norm_ferrersP_zero_le (ν : ℂ) {θ : ℝ} (h0 : 0 ≤ θ) (hπ : θ < π) :
+theorem legAdd_norm_ferrersP_zero_le (ν : ℂ) {θ : ℝ} (h0 : 0 ≤ θ) (hπ : θ < π) :
     ‖ferrersP ν 0 (Real.cos θ)‖ ≤ Real.exp (θ * |ν.im|) / Real.cos (θ / 2) := by
   set c := Real.sin (θ / 2) with hc
   have hc0 : 0 ≤ c := Real.sin_nonneg_of_nonneg_of_le_pi (by linarith) (by linarith)
@@ -981,7 +971,7 @@ lemma legAdd_norm_ferrersP_zero_le (ν : ℂ) {θ : ℝ} (h0 : 0 ≤ θ) (hπ : 
 
 
 /-- The bound `legAdd_norm_ferrersP_zero_le` on `[cos Θ, 1]`. -/
-lemma legAdd_norm_ferrersP_zero_le_of_mem (ν : ℂ) {Θ x : ℝ} (h0 : 0 ≤ Θ) (hπ : Θ < π)
+theorem legAdd_norm_ferrersP_zero_le_of_mem (ν : ℂ) {Θ x : ℝ} (h0 : 0 ≤ Θ) (hπ : Θ < π)
     (hx1 : Real.cos Θ ≤ x) (hx2 : x ≤ 1) :
     ‖ferrersP ν 0 x‖ ≤ Real.exp (Θ * |ν.im|) / Real.cos (Θ / 2) := by
   have hxm : -1 ≤ x := le_trans (Real.neg_one_le_cos Θ) hx1
@@ -1001,7 +991,7 @@ lemma legAdd_norm_ferrersP_zero_le_of_mem (ν : ℂ) {Θ x : ℝ} (h0 : 0 ≤ Θ
 def legAdd_fY (θ₁ θ₂ t : ℝ) : ℝ :=
   Real.cos θ₁ * Real.cos θ₂ + Real.sin θ₁ * Real.sin θ₂ * Real.cos t
 
-lemma legAdd_fY_mem {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2 : 0 ≤ θ₂) (hs : θ₁ + θ₂ < π) (t : ℝ) :
+theorem legAdd_fY_mem {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2 : 0 ≤ θ₂) (hs : θ₁ + θ₂ < π) (t : ℝ) :
     Real.cos (θ₁ + θ₂) ≤ legAdd_fY θ₁ θ₂ t ∧ legAdd_fY θ₁ θ₂ t ≤ 1 := by
   have hs1 : 0 ≤ Real.sin θ₁ := Real.sin_nonneg_of_nonneg_of_le_pi h1 (by linarith)
   have hs2 : 0 ≤ Real.sin θ₂ := Real.sin_nonneg_of_nonneg_of_le_pi h2 (by linarith)
@@ -1015,12 +1005,12 @@ lemma legAdd_fY_mem {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2 : 0 ≤ θ₂) (h
   constructor <;> nlinarith
 
 /-- The Ferrers function in hypergeometric form at order zero. -/
-lemma legAdd_ferrersP_zero_eq (ν : ℂ) (x : ℝ) :
+theorem legAdd_ferrersP_zero_eq (ν : ℂ) (x : ℝ) :
     ferrersP ν 0 x = regularizedGaussHG (ν + 1) (-ν) 1 ((1 - x) / 2) := by
   simp [ferrersP]
 
 /-- The order-zero Ferrers function along `legAdd_fY` is `C²` in the angle. -/
-lemma legAdd_fY_contDiff (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2 : 0 ≤ θ₂) (hs : θ₁ + θ₂ < π) :
+theorem legAdd_fY_contDiff (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2 : 0 ≤ θ₂) (hs : θ₁ + θ₂ < π) :
     ContDiff ℝ 2 (fun t : ℝ => ferrersP ν 0 (legAdd_fY θ₁ θ₂ t)) := by
   have hG : DifferentiableOn ℂ (fun z => regularizedGaussHG (ν + 1) (-ν) 1 z) cutPlane :=
     DifferentiableOn.regularizedGaussHG (differentiableOn_const _) (differentiableOn_const _)
@@ -1041,18 +1031,18 @@ lemma legAdd_fY_contDiff (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2 :
   congr 1; push_cast; ring
 
 /-- `-1 < cos (θ₁ + θ₂)`. -/
-lemma legAdd_neg_one_lt_cos {θ : ℝ} (h0 : 0 ≤ θ) (hs : θ < π) : -1 < Real.cos θ := by
+theorem legAdd_neg_one_lt_cos {θ : ℝ} (h0 : 0 ≤ θ) (hs : θ < π) : -1 < Real.cos θ := by
   rw [← Real.cos_pi]; exact Real.cos_lt_cos_of_nonneg_of_le_pi h0 le_rfl hs
 
 /-- Order-zero Ferrers values along `legAdd_fY` obey the sharp exponential bound. -/
-lemma legAdd_fY_norm_le (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2 : 0 ≤ θ₂) (hs : θ₁ + θ₂ < π)
+theorem legAdd_fY_norm_le (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2 : 0 ≤ θ₂) (hs : θ₁ + θ₂ < π)
     (t : ℝ) : ‖ferrersP ν 0 (legAdd_fY θ₁ θ₂ t)‖ ≤
       Real.exp ((θ₁ + θ₂) * |ν.im|) / Real.cos ((θ₁ + θ₂) / 2) :=
   legAdd_norm_ferrersP_zero_le_of_mem ν (by linarith) hs (legAdd_fY_mem h1 h2 hs t).1
     (legAdd_fY_mem h1 h2 hs t).2
 
 /-- Bound on the Fourier coefficients in the Ferrers case. -/
-lemma legAdd_fer_coeff_bound (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2 : 0 ≤ θ₂) (hs : θ₁ + θ₂ < π)
+theorem legAdd_fer_coeff_bound (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2 : 0 ≤ θ₂) (hs : θ₁ + θ₂ < π)
     (m : ℤ) : ‖legAdd_coeff (fun t => ferrersP ν 0 (legAdd_fY θ₁ θ₂ t)) m‖ ≤
       Real.exp ((θ₁ + θ₂) * |ν.im|) / Real.cos ((θ₁ + θ₂) / 2) := by
   rw [legAdd_coeff, norm_mul]
@@ -1075,7 +1065,7 @@ lemma legAdd_fer_coeff_bound (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (
     _ = _ := by field_simp; ring
 
 /-- `ferrersP ν μ x` is entire in the degree for `x ∈ (-1, 1]`. -/
-lemma legAdd_differentiable_ferrersP (μ : ℂ) {x : ℝ} (hx : -1 < x) :
+theorem legAdd_differentiable_ferrersP (μ : ℂ) {x : ℝ} (hx : -1 < x) :
     Differentiable ℂ (fun ν : ℂ => ferrersP ν μ x) := by
   unfold ferrersP
   refine (differentiable_const _).mul (differentiable_regularizedGaussHG_comp
@@ -1085,7 +1075,7 @@ lemma legAdd_differentiable_ferrersP (μ : ℂ) {x : ℝ} (hx : -1 < x) :
   exact legAdd_ofReal_mem_cutPlane (by linarith)
 
 /-- The Fourier coefficients in the Ferrers case are entire in the degree. -/
-lemma legAdd_fer_coeff_differentiable {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2 : 0 ≤ θ₂) (hs : θ₁ + θ₂ < π)
+theorem legAdd_fer_coeff_differentiable {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2 : 0 ≤ θ₂) (hs : θ₁ + θ₂ < π)
     (m : ℤ) :
     Differentiable ℂ (fun ν => legAdd_coeff (fun t => ferrersP ν 0 (legAdd_fY θ₁ θ₂ t)) m) := by
   have hc := legAdd_neg_one_lt_cos (by linarith) hs
@@ -1119,13 +1109,13 @@ lemma legAdd_fer_coeff_differentiable {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2
 
 /-- Ferrers functions of nonzero real order vanish at `x = 1` (where `(1+x)/(1-x)` is totalized
 to `0`). -/
-lemma legAdd_ferrersP_one {μ : ℂ} (hμ : μ ≠ 0) (ν : ℂ) : ferrersP ν μ 1 = 0 := by
+theorem legAdd_ferrersP_one {μ : ℂ} (hμ : μ ≠ 0) (ν : ℂ) : ferrersP ν μ 1 = 0 := by
   simp only [ferrersP]
   rw [show ((1:ℝ) + 1) / (1 - 1) = 0 by norm_num, ofReal_zero,
     zero_cpow (div_ne_zero hμ two_ne_zero), zero_mul]
 
 /-- Bound for negative integer order on `[0, π)` from the fractional integral 14.12.2. -/
-lemma legAdd_norm_ferrersP_neg_le {m : ℕ} (hm : 1 ≤ m) {θ : ℝ} (h0 : 0 ≤ θ) (hπ : θ < π) :
+theorem legAdd_norm_ferrersP_neg_le {m : ℕ} (hm : 1 ≤ m) {θ : ℝ} (h0 : 0 ≤ θ) (hπ : θ < π) :
     ∃ K : ℝ, 0 ≤ K ∧ ∀ ν : ℂ, ‖ferrersP ν (-(m:ℂ)) (Real.cos θ)‖ ≤ K * Real.exp (θ * |ν.im|) := by
   have hm0 : (m:ℂ) ≠ 0 := by exact_mod_cast (by omega : m ≠ 0)
   rcases eq_or_lt_of_le h0 with h | h
@@ -1160,7 +1150,7 @@ lemma legAdd_norm_ferrersP_neg_le {m : ℕ} (hm : 1 ≤ m) {θ : ℝ} (h0 : 0 �
     _ = _ := by field_simp
 
 /-- `|(a)_k| ≤ k! ε^{-k} e^{ε (|a| + k)}`. -/
-lemma legAdd_norm_poch_le_exp (a : ℂ) (k : ℕ) {ε : ℝ} (hε : 0 < ε) :
+theorem legAdd_norm_poch_le_exp (a : ℂ) (k : ℕ) {ε : ℝ} (hε : 0 < ε) :
     ‖poch a k‖ ≤ k ! / ε ^ k * Real.exp (ε * (‖a‖ + k)) := by
   have h1 : ‖poch a k‖ ≤ (‖a‖ + k) ^ k := by
     have key : ∀ j : ℕ, j ≤ k → ‖poch a j‖ ≤ (‖a‖ + k) ^ j := by
@@ -1188,7 +1178,7 @@ lemma legAdd_norm_poch_le_exp (a : ℂ) (k : ℕ) {ε : ℝ} (hε : 0 < ε) :
 
 /-- `𝖯^m_ν(x) = (-1)^m (ν-m+1)_{2m} 𝖯^{-m}_ν(x)` for every complex `ν` (14.9.3 without the
 exceptional degrees, by continuation in `ν`). -/
-lemma legAdd_ferrersP_nat_eq (ν : ℂ) (m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem legAdd_ferrersP_nat_eq (ν : ℂ) (m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersP ν m x = (-1) ^ m * poch (ν - m + 1) (2 * m) * ferrersP ν (-(m:ℂ)) x := by
   set D : ℂ → ℂ := fun ν => ferrersP ν m x - (-1) ^ m * poch (ν - m + 1) (2 * m) *
     ferrersP ν (-(m:ℂ)) x
@@ -1228,7 +1218,7 @@ lemma legAdd_ferrersP_nat_eq (ν : ℂ) (m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:
 
 /-- The right-hand side coefficients of the Ferrers addition theorem satisfy a Carlson bound of
 type `θ₁ + θ₂ + ε` on the imaginary axis. -/
-lemma legAdd_fer_rhs_bound {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2 : 0 ≤ θ₂) (hs : θ₁ + θ₂ < π) (m : ℕ)
+theorem legAdd_fer_rhs_bound {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2 : 0 ≤ θ₂) (hs : θ₁ + θ₂ < π) (m : ℕ)
     {ε : ℝ} (hε : 0 < ε) :
     ∃ C : ℝ, ∀ ν : ℂ, ‖(-1:ℂ) ^ m * ferrersP ν (-(m:ℂ)) (Real.cos θ₁) *
       ferrersP ν m (Real.cos θ₂)‖ ≤ C * Real.exp (ε * |ν.re| + (θ₁ + θ₂ + ε) * |ν.im|) := by
@@ -1355,7 +1345,7 @@ theorem legAdd_ferrersP_addition_of_nat {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (
 /-! ### The integer case of 14.18.1 -/
 
 /-- Nonnegative integer order Ferrers P agrees with the polynomial form on `(-1, 1]`. -/
-lemma legAdd_ferrersP_nat_eq_ferrersPNat (n k : ℕ) {x : ℝ} (hx : x ∈ Ioc (-1:ℝ) 1) :
+theorem legAdd_ferrersP_nat_eq_ferrersPNat (n k : ℕ) {x : ℝ} (hx : x ∈ Ioc (-1:ℝ) 1) :
     ferrersP n k x = ferrersPNat n k x := by
   rcases eq_or_lt_of_le hx.2 with rfl | hlt
   · rw [ferrersPNat_one]
@@ -1371,7 +1361,7 @@ lemma legAdd_ferrersP_nat_eq_ferrersPNat (n k : ℕ) {x : ℝ} (hx : x ∈ Ioc (
   · exact (ferrersPNat_eq n k ⟨hx.1, hlt⟩).symm
 
 /-- Negative integer order Ferrers P in polynomial form on `(-1, 1]`. -/
-lemma legAdd_ferrersP_neg_nat_eq_ferrersPNat (n k : ℕ) (hk : k ≤ n) {x : ℝ}
+theorem legAdd_ferrersP_neg_nat_eq_ferrersPNat (n k : ℕ) (hk : k ≤ n) {x : ℝ}
     (hx : x ∈ Ioc (-1:ℝ) 1) :
     ferrersP n (-(k:ℂ)) x = (-1)^k * ((n-k).factorial / (n+k).factorial : ℂ) * ferrersPNat n k x := by
   rcases eq_or_lt_of_le hx.2 with rfl | hlt
@@ -1395,7 +1385,7 @@ lemma legAdd_ferrersP_neg_nat_eq_ferrersPNat (n k : ℕ) (hk : k ≤ n) {x : ℝ
 open DLMF.OrthogonalPolynomials.LegendreAddition in
 /-- The Ferrers addition theorem at integer degree, coefficientwise: the Fourier coefficients of
 `φ ↦ P_n(cos θ₁ cos θ₂ + sin θ₁ sin θ₂ cos φ)` are `(-1)^m 𝖯^{-m}_n(cos θ₁) 𝖯^m_n(cos θ₂)`. -/
-lemma legAdd_fer_nat {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2 : 0 ≤ θ₂) (hs : θ₁ + θ₂ < π) (m n : ℕ) :
+theorem legAdd_fer_nat {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2 : 0 ≤ θ₂) (hs : θ₁ + θ₂ < π) (m n : ℕ) :
     legAdd_coeff (fun t => ferrersP n 0 (legAdd_fY θ₁ θ₂ t)) m =
       (-1:ℂ) ^ m * ferrersP n (-(m:ℂ)) (Real.cos θ₁) * ferrersP n m (Real.cos θ₂) := by
   have hθ1 : θ₁ < π := by linarith

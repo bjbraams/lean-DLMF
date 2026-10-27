@@ -7,7 +7,6 @@ module
 
 public import DLMF.Legendre.Integer
 public import DLMF.OrthogonalPolynomials.Integrals
-public import DLMF.OrthogonalPolynomials.Topics
 
 /-!
 # Neumann's integral for `Q_n` (Temme §8.5)
@@ -29,7 +28,7 @@ noncomputable section
 namespace DLMF.Legendre
 
 /-- For `z ∉ (-∞, 1]` and real `t ≤ 1`, `z - t` lies in the slit plane. -/
-lemma sub_ofReal_mem_slitPlane {z : ℂ} (hz : z - 1 ∈ slitPlane) {t : ℝ} (ht : t ≤ 1) :
+theorem sub_ofReal_mem_slitPlane {z : ℂ} (hz : z - 1 ∈ slitPlane) {t : ℝ} (ht : t ≤ 1) :
     z - t ∈ slitPlane := by
   rw [show z - (t : ℂ) = (z - 1) + ((1 - t : ℝ) : ℂ) by push_cast; ring]
   rw [mem_slitPlane_iff] at hz ⊢
@@ -38,7 +37,7 @@ lemma sub_ofReal_mem_slitPlane {z : ℂ} (hz : z - 1 ∈ slitPlane) {t : ℝ} (h
   · right; simpa using h
 
 /-- `log(z+1) - log(z-1) = log((z+1)/(z-1))` off `(-∞, 1]`. -/
-lemma log_add_one_sub_log_sub_one {z : ℂ} (hz : z - 1 ∈ slitPlane) :
+theorem log_add_one_sub_log_sub_one {z : ℂ} (hz : z - 1 ∈ slitPlane) :
     log (z + 1) - log (z - 1) = log ((z + 1) / (z - 1)) := by
   set D : Set ℂ := {w | w - 1 ∈ slitPlane}
   have h1 (w : ℂ) (hw : w ∈ D) : w + 1 ∈ slitPlane := by
@@ -71,7 +70,7 @@ lemma log_add_one_sub_log_sub_one {z : ℂ} (hz : z - 1 ∈ slitPlane) :
   push_cast; ring
 
 /-- `½ ∫₋₁¹ dt/(z - t) = Q₀(z)`. -/
-lemma integral_recip_sub {z : ℂ} (hz : z - 1 ∈ slitPlane) :
+theorem integral_recip_sub {z : ℂ} (hz : z - 1 ∈ slitPlane) :
     1 / 2 * ∫ t in (-1 : ℝ)..1, 1 / (z - t) = legendreQ 0 z := by
   have hd (t : ℝ) (ht : t ∈ uIcc (-1 : ℝ) 1) : HasDerivAt (fun t : ℝ => -log (z - t))
       (1 / (z - t)) t := by
@@ -90,7 +89,7 @@ lemma integral_recip_sub {z : ℂ} (hz : z - 1 ∈ slitPlane) :
   ring_nf
 
 /-- The difference quotient `(P_n(z) - P_n(t))/(z - t)` is continuous in `t ∈ [-1, 1]`. -/
-lemma continuousOn_legendre_dq (n : ℕ) {z : ℂ} (hz : z - 1 ∈ slitPlane) :
+theorem continuousOn_legendre_dq (n : ℕ) {z : ℂ} (hz : z - 1 ∈ slitPlane) :
     ContinuousOn (fun t : ℝ => (legendrePolyP n z - legendrePolyP n t) / (z - t))
         (uIcc (-1 : ℝ) 1) := by
   intro t ht
@@ -100,13 +99,13 @@ lemma continuousOn_legendre_dq (n : ℕ) {z : ℂ} (hz : z - 1 ∈ slitPlane) :
     (slitPlane_ne_zero (sub_ofReal_mem_slitPlane hz ht1))).continuousWithinAt
 
 /-- `∫₋₁¹ P_{n+1} = 0`, by orthogonality to `P₀`. -/
-lemma integral_legendrePolyP_succ (n : ℕ) :
+theorem integral_legendrePolyP_succ (n : ℕ) :
     ∫ t in (-1 : ℝ)..1, legendrePolyP (n + 1) (t : ℂ) = 0 := by
   have h := DLMF.OrthogonalPolynomials.legendre_orthogonality 0 (n + 1)
   simpa [legendrePolyP_zero] using h
 
 /-- `R_n(z) = ½ ∫₋₁¹ (P_n(z) - P_n(t))/(z - t) dt` (Temme, proof of (8.33)). -/
-lemma legendreQPoly_eq_integral (n : ℕ) {z : ℂ} (hz : z - 1 ∈ slitPlane) :
+theorem legendreQPoly_eq_integral (n : ℕ) {z : ℂ} (hz : z - 1 ∈ slitPlane) :
     (legendreQPoly n).eval z =
       1 / 2 * ∫ t in (-1 : ℝ)..1, (legendrePolyP n z - legendrePolyP n t) / (z - t) := by
   have hne (t : ℝ) (ht : t ∈ uIcc (-1 : ℝ) 1) : z - t ≠ 0 := by

@@ -7,10 +7,8 @@ module
 
 public import DLMF.Mathieu.Basic
 public import Mathlib.RingTheory.Polynomial.Hermite.Basic
-public import Mathlib.Analysis.SpecialFunctions.Pow.Real
 public import DLMFMathlib.Analysis.ODE.P2sOscillation
 public import DLMF.Mathieu.Properties
-public import DLMF.Mathieu.P2sBridge
 
 /-!
 # Zeros of the Mathieu functions (DLMF §28.9)
@@ -113,7 +111,7 @@ theorem mathieu_zeros_large_q_odd (n : ℕ) {t : ℝ} (ht : 0 < t)
 
 /-- Along the imaginary axis a solution of Mathieu's equation solves the modified equation:
 `f(y) = c w(iy)` has `f'(y) = i c w'(iy)` and `f'' = -(2q cosh 2y - a) f`. -/
-theorem p2s_hasDerivAt_imag {a q : ℂ} {w : ℂ → ℂ} (h : IsMathieuSolution a q w) (c : ℂ)
+lemma p2s_hasDerivAt_imag {a q : ℂ} {w : ℂ → ℂ} (h : IsMathieuSolution a q w) (c : ℂ)
     (y : ℝ) :
     HasDerivAt (fun y : ℝ => c * w (y * I)) (c * (I * deriv w (y * I))) y ∧
       HasDerivAt (fun y : ℝ => c * (I * deriv w (y * I)))
@@ -131,7 +129,7 @@ theorem p2s_hasDerivAt_imag {a q : ℂ} {w : ℂ → ℂ} (h : IsMathieuSolution
 
 /-- For real `a`, `q`, a solution with `f = c w(i·)` real data at `0` (`f(0)`, `f'(0)` real) is
 real on `ℝ` and has infinitely many positive zeros when `q > 0`. -/
-theorem p2s_infinite_imag_zeros {a q : ℝ} (hq : 0 < q) {w : ℂ → ℂ}
+lemma p2s_infinite_imag_zeros {a q : ℝ} (hq : 0 < q) {w : ℂ → ℂ}
     (h : IsMathieuSolution a q w) (c : ℂ) (h0 : (starRingEnd ℂ) (c * w 0) = c * w 0)
     (h1 : (starRingEnd ℂ) (c * (I * deriv w 0)) = c * (I * deriv w 0)) :
     {y : ℝ | 0 < y ∧ c * w (y * I) = 0}.Infinite := by

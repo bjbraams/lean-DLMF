@@ -8,7 +8,6 @@ module
 public import DLMF.Mathieu.Modified.Defs
 public import DLMF.Mathieu.Noninteger.Fourier
 public import DLMF.Bessel.SecondKind
-public import ToMathlib.Analysis.SpecialFunctions.Bessel
 
 /-!
 # Convergence of the cross-product series of the modified Mathieu functions (DLMF 28.24.1)
@@ -89,7 +88,7 @@ theorem p2m_differentiable_besselDExp {h : ℂ} (hh : h ≠ 0) (z : ℂ) :
   exact ((p2m_differentiable_besselJExp_order hh z).mul (by fun_prop)).sub
     ((p2m_differentiable_besselJExp_order hh z).comp differentiable_neg)
 
-theorem p2m_besselDExp_int (n : ℤ) (h z : ℂ) : p2m_besselDExp n h z = 0 := by
+lemma p2m_besselDExp_int (n : ℤ) (h z : ℂ) : p2m_besselDExp n h z = 0 := by
   have := p1c_besselJExp_neg_intCast n h z
   rw [p2m_besselDExp, DLMF.Bessel.cos_int_mul_pi_complex, ← Int.cast_neg, this]; ring
 
@@ -304,7 +303,7 @@ theorem p2m_growth_int {u : ℤ → ℂ} {ν w : ℂ} (hw : w ≠ 0)
 
 /-- A bounded solution of `q u_{n+1} - D_n u_n + q u_{n-1} = 0` with `‖D_n‖ ≥ 2n² + 3‖q‖`
 for `n ≥ N₀` decays like `K^n / (n!)²`. -/
-theorem p2m_decay_nat {u : ℕ → ℂ} {D : ℕ → ℂ} {q : ℂ} {M : ℝ} (hq : q ≠ 0)
+lemma p2m_decay_nat {u : ℕ → ℂ} {D : ℕ → ℂ} {q : ℂ} {M : ℝ} (hq : q ≠ 0)
     (hM : ∀ n, ‖u n‖ ≤ M) (N₀ : ℕ) (hN₀ : 1 ≤ N₀)
     (hD : ∀ n, N₀ ≤ n → 2 * (n : ℝ) ^ 2 + 3 * ‖q‖ ≤ ‖D n‖)
     (hrec : ∀ n, 1 ≤ n → q * u (n + 1) - D n * u n + q * u (n - 1) = 0) :
@@ -436,7 +435,7 @@ theorem p2m_summable_pow_div_factorial_int (R : ℝ) :
   · simpa using Real.summable_pow_div_factorial R
 
 /-- `(a + b)! ≤ 2^{a+b} a! b!`. -/
-theorem p2m_factorial_add_le (a b : ℕ) : ((a + b) ! : ℝ) ≤ 2 ^ (a + b) * a ! * b ! := by
+lemma p2m_factorial_add_le (a b : ℕ) : ((a + b) ! : ℝ) ≤ 2 ^ (a + b) * a ! * b ! := by
   have h := Nat.add_choose_mul_factorial_mul_factorial a b
   have h2 := Nat.choose_le_two_pow (a + b) b
   have : (a + b) ! ≤ 2 ^ (a + b) * a ! * b ! := by
@@ -482,7 +481,7 @@ theorem p2m_fam_bound {c Jx Cy : ℤ → ℂ} {Cc K EJ B EC A : ℝ} (hCc : 0 �
         rw [mul_pow, mul_pow, mul_pow, mul_pow, pow_add]
         field_simp
 
-theorem p2m_fam_summable {c Jx Cy : ℤ → ℂ} {Cc K EJ B EC A : ℝ} (hCc : 0 ≤ Cc) (hK : 0 ≤ K)
+lemma p2m_fam_summable {c Jx Cy : ℤ → ℂ} {Cc K EJ B EC A : ℝ} (hCc : 0 ≤ Cc) (hK : 0 ≤ K)
     (hEJ : 0 ≤ EJ) (hB : 1 ≤ B) (hEC : 0 ≤ EC) (hA : 1 ≤ A)
     (hc : ∀ m : ℤ, ‖c m‖ * (m.natAbs ! : ℝ) ^ 2 ≤ Cc * K ^ m.natAbs)
     (hJ : ∀ k : ℤ, ‖Jx k‖ ≤ EJ * B ^ k.natAbs)
@@ -506,7 +505,7 @@ theorem p2m_fam_tsum_le {c Jx Cy : ℤ → ℂ} {Cc K EJ B EC A : ℝ} (hCc : 0 
 
 
 /-- The pointwise identity behind the recurrence in `n` of the cross-product series. -/
-theorem p2m_fam_identity {c Jx Cy : ℤ → ℂ} {ν a x y : ℂ} (hx : x ≠ 0) (hy : y ≠ 0)
+lemma p2m_fam_identity {c Jx Cy : ℤ → ℂ} {ν a x y : ℂ} (hx : x ≠ 0) (hy : y ≠ 0)
     (hrec : ∀ m : ℤ, x * y * c (m + 1) - (a - (ν + 2 * m) ^ 2) * c m + x * y * c (m - 1) = 0)
     (hJr : ∀ k : ℤ, Jx (k - 1) + Jx (k + 1) = 2 * k / x * Jx k)
     (hCr : ∀ k : ℤ, Cy (k - 1) + Cy (k + 1) = 2 * (ν + k) / y * Cy k) (n ℓ : ℤ) :
@@ -535,7 +534,7 @@ theorem p2m_fam_identity {c Jx Cy : ℤ → ℂ} {ν a x y : ℂ} (hx : x ≠ 0)
 
 
 /-- Two consecutive zeros of a solution of the three-term recurrence force it to vanish. -/
-theorem p2m_rec_eq_zero {u : ℤ → ℂ} {D : ℤ → ℂ} {q : ℂ} (hq : q ≠ 0)
+lemma p2m_rec_eq_zero {u : ℤ → ℂ} {D : ℤ → ℂ} {q : ℂ} (hq : q ≠ 0)
     (hrec : ∀ m : ℤ, q * u (m + 1) - D m * u m + q * u (m - 1) = 0) {n₀ : ℤ}
     (h0 : u n₀ = 0) (h1 : u (n₀ + 1) = 0) (m : ℤ) : u m = 0 := by
   have key : ∀ k : ℤ, u k = 0 ∧ u (k + 1) = 0 := by

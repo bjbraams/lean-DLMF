@@ -5,9 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.ExpIntegrals.Expansions
 public import DLMF.IncompleteGamma.ExpIntegralAsymptotics
-public import DLMFMathlib.Analysis.Asymptotics.WatsonRotated
+public import DLMF.ExpIntegrals.Continuation
 
 /-!
 # Sectorial asymptotic expansions and explicit remainders, DLMF §6.12
@@ -59,13 +58,13 @@ theorem laplace_nat_pow {z : ℂ} (hz : 0 < z.re) (m : ℕ) :
     linear_combination -h1
 
 /-- `|t²+1| ≥ 1` on the real line. -/
-lemma norm_ofReal_sq_add_one_ge (t : ℝ) : 1 ≤ ‖(t:ℂ)^2+1‖ := by
+theorem norm_ofReal_sq_add_one_ge (t : ℝ) : 1 ≤ ‖(t:ℂ)^2+1‖ := by
   rw [show ((t:ℂ)^2+1) = ((t^2+1:ℝ):ℂ) by push_cast; ring, Complex.norm_real, Real.norm_eq_abs,
     abs_of_pos (by positivity)]
   nlinarith [sq_nonneg t]
 
 /-- `t²+1 ≠ 0` on the real line. -/
-lemma ofReal_sq_add_one_ne (t : ℝ) : (t:ℂ)^2+1 ≠ 0 := fun h => by
+theorem ofReal_sq_add_one_ne (t : ℝ) : (t:ℂ)^2+1 ≠ 0 := fun h => by
   have := norm_ofReal_sq_add_one_ge t; rw [h, norm_zero] at this; linarith
 
 /-- Integrability of the Laplace rational kernels `e^{-zt} t^m/(t²+1)`. -/
@@ -97,7 +96,7 @@ theorem expIntAux_laplace_Ioi {z : ℂ} (hz : 0 < z.re) :
   · rw [← (h2.congr fun t _ => by ring).eq_integral_Ioi (integrableOn_laplace_rational hz 1)]
 
 /-- The auxiliary-function remainders as Laplace integrals, for both `f` and `g`. -/
-theorem expIntAux_remainder_integral_general (aux : Bool) {z : ℂ} (hz : 0 < z.re) (N : ℕ) :
+lemma expIntAux_remainder_integral_general (aux : Bool) {z : ℂ} (hz : 0 < z.re) (N : ℕ) :
     expIntAsymptoticRemainder aux N z = (-1 : ℂ)^N * ∫ t : ℝ in Ioi 0,
       exp (-z*t)*(t : ℂ)^(2*N+if aux then 1 else 0)/((t : ℂ)^2+1) := by
   induction N with
@@ -120,7 +119,7 @@ theorem expIntAux_remainder_integral_general (aux : Bool) {z : ℂ} (hz : 0 < z.
 
 
 /-- A uniform lower bound for `|t² + 1|` on the sector `|arg t| ≤ |θ| < π/2`. -/
-lemma exists_pos_le_norm_ofReal_mul_exp_sq_add_one {θ : ℝ} (hθ : |θ| < π / 2) :
+theorem exists_pos_le_norm_ofReal_mul_exp_sq_add_one {θ : ℝ} (hθ : |θ| < π / 2) :
     ∃ c > 0, ∀ r y : ℝ, |y| ≤ |θ| → c ≤ ‖((r : ℂ) * exp (y * I)) ^ 2 + 1‖ := by
   obtain ⟨c, hc0, hc⟩ := exists_pos_le_norm_one_add_ofReal_mul_exp (Φ := 2 * |θ|) (by linarith)
   refine ⟨c, hc0, fun r y hy => ?_⟩
@@ -128,7 +127,7 @@ lemma exists_pos_le_norm_ofReal_mul_exp_sq_add_one {θ : ℝ} (hθ : |θ| < π /
   exact hc _ (sq_nonneg r) _ (by rw [abs_mul, abs_two]; linarith)
 
 /-- `Ci` is differentiable on the slit plane. -/
-lemma differentiableAt_cosInt {z : ℂ} (hz : z ∈ slitPlane) : DifferentiableAt ℂ cosInt z := by
+theorem differentiableAt_cosInt {z : ℂ} (hz : z ∈ slitPlane) : DifferentiableAt ℂ cosInt z := by
   unfold cosInt
   exact ((cosIntCin_entire z).neg.add (differentiableAt_log hz)).add_const _
 
@@ -249,7 +248,7 @@ lemma norm_expIntAux_kernel_le {θ c : ℝ} (hc0 : 0 < c)
   exact le_mul_of_one_le_right (by positivity) ((one_le_div hc0).mpr hden)
 
 /-- `(r e^{iy})² + 1 ≠ 0` under a uniform lower bound `c ≤ ‖(r e^{iy})² + 1‖`. -/
-lemma ofReal_mul_exp_sq_add_one_ne {θ c : ℝ} (hc0 : 0 < c)
+theorem ofReal_mul_exp_sq_add_one_ne {θ c : ℝ} (hc0 : 0 < c)
     (hc : ∀ r y : ℝ, |y| ≤ |θ| → c ≤ ‖((r : ℂ) * exp (y * I)) ^ 2 + 1‖) (r : ℝ) {y : ℝ}
     (hy : |y| ≤ |θ|) : ((r : ℂ) * exp (y * I)) ^ 2 + 1 ≠ 0 := fun h0 => by
   have := hc r y hy; rw [h0, norm_zero] at this; linarith
@@ -257,7 +256,7 @@ lemma ofReal_mul_exp_sq_add_one_ne {θ c : ℝ} (hc0 : 0 < c)
 /-- **Rotated Laplace representations of `f` and `g`** (DLMF 6.7.13–6.7.14 continued): for
 `|θ| < π/2` and `re (z e^{iθ}) > 0`, with `m = 0` for `f` and `m = 1` for `g`,
 `f(z), g(z) = e^{iθ} ∫₀^∞ e^{-z e^{iθ} r} (r e^{iθ})ᵐ/((r e^{iθ})² + 1) dr`. -/
-theorem expIntAux_eq_integral_rotate (aux : Bool) {θ : ℝ} (hθ : |θ| < π / 2) {z : ℂ}
+lemma expIntAux_eq_integral_rotate (aux : Bool) {θ : ℝ} (hθ : |θ| < π / 2) {z : ℂ}
     (hz : 0 < (z * exp (θ * I)).re) :
     (if aux then expIntAuxG z else expIntAuxF z) = exp (θ * I) * ∫ r in Ioi (0 : ℝ),
       cexp (-(z * exp (θ * I) * r)) * (((r : ℂ) * exp (θ * I)) ^ (if aux then 1 else 0) /
@@ -352,7 +351,7 @@ theorem expIntAux_eq_integral_rotate (aux : Bool) {θ : ℝ} (hθ : |θ| < π / 
 
 
 /-- Watson's expansion of `f` and `g` in a rotated sector. -/
-theorem expIntAux_rotSector_asymptotic (aux : Bool) {θ δ : ℝ} (hθ : |θ| < π / 2) (hδ : 0 < δ) :
+lemma expIntAux_rotSector_asymptotic (aux : Bool) {θ δ : ℝ} (hθ : |θ| < π / 2) (hδ : 0 < δ) :
     HasAsymptoticExpansion (comap (fun z : ℂ => z * exp (θ * I)) (sectorAtTop δ))
       (fun (n : ℕ) (z : ℂ) => z ^ (-((n : ℂ) + 1)))
       (fun n => Gamma ((n : ℂ) + 1) • expIntAuxCoeff (if aux then 1 else 0) n)
@@ -390,7 +389,7 @@ theorem expIntAux_rotSector_asymptotic (aux : Bool) {θ δ : ℝ} (hθ : |θ| < 
   simp only [smul_eq_mul, hm]
 
 /-- The two rotated sectors `|arg (z e^{∓iβ})| ≤ β`, `β = π/2 - d/2`, cover `|arg z| ≤ π - δ`. -/
-lemma sector_pi_sub_le_sup {δ : ℝ} (hδ : 0 < δ) :
+theorem sector_pi_sub_le_sup {δ : ℝ} (hδ : 0 < δ) :
     ∃ β : ℝ, |β| < π / 2 ∧ 0 < Real.cos β ∧ sector (π - δ) ≤
       comap (fun z : ℂ => z * exp (((-β : ℝ) : ℂ) * I)) (sectorAtTop (Real.cos β)) ⊔
         comap (fun z : ℂ => z * exp ((β : ℂ) * I)) (sectorAtTop (Real.cos β)) := by
@@ -419,7 +418,7 @@ theorem expIntE1_logSector_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 3*�
   exact h
 
 /-- At `w = log x + π i`, the E₁ asymptotic scale is `e^x/(-x)^{n+1}`. -/
-lemma exp_neg_exp_sub_mul_log_add_pi_I {x : ℝ} (hx : 0 < x) (n : ℕ) :
+theorem exp_neg_exp_sub_mul_log_add_pi_I {x : ℝ} (hx : 0 < x) (n : ℕ) :
     exp (-exp ((Real.log x : ℂ) + π*I) - (n+1 : ℂ)*((Real.log x : ℂ) + π*I)) =
       (Real.exp x : ℂ) / (-(x:ℂ))^(n+1) := by
   have hw : exp ((Real.log x : ℂ) + π*I) = -(x:ℂ) := by
@@ -534,7 +533,7 @@ theorem expIntAuxG_remainder_integral {z : ℂ} (hz : 0 < z.re) (N : ℕ) :
 
 /-- Rotated Laplace representation of `E₁`: for `z ≠ 0` with `|arg z| < π`,
 `E₁(z) = e^{-z} e^{iθ} ∫₀^∞ e^{-|z| r}/(1 + r e^{iθ}) dr` with `θ = -arg z`. -/
-lemma genExpIntE_one_eq_integral_rotate {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π) :
+theorem genExpIntE_one_eq_integral_rotate {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π) :
     genExpIntE 1 z = cexp (-z) * (exp (((-arg z : ℝ) : ℂ) * I) * ∫ r in Ioi (0 : ℝ),
       cexp (-((‖z‖ : ℂ) * r)) * (1 + (r : ℂ) * exp (((-arg z : ℝ) : ℂ) * I))⁻¹) := by
   have hθ : |-arg z| < π := by rwa [abs_neg]
@@ -554,7 +553,7 @@ lemma genExpIntE_one_eq_integral_rotate {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| 
   simp only [cpow_neg_one]
 
 /-- First omitted term and csc multiplier from DLMF §6.12(i). -/
-theorem expIntE1_remainder_bound {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π) (N : ℕ) :
+lemma expIntE1_remainder_bound {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π) (N : ℕ) :
     ‖genExpIntE 1 z - exp (-z)*∑ n ∈ Finset.range N, (-1 : ℂ)^n*(n.factorial : ℂ)/z^(n+1)‖ ≤ (if |arg z| ≤ π/2 then 1 else 1/Real.sin |arg z|) * ‖exp (-z)*(N.factorial : ℂ)/z^(N+1)‖ := by
   set θ : ℝ := -arg z with hθ
   set e : ℂ := exp (θ * I) with he
@@ -737,7 +736,7 @@ theorem integral_exp_neg_div_pow_succ {x : ℝ} (hx : 0 < x) (k : ℕ) :
   linear_combination h
 
 /-- Signed real remainder in DLMF §6.12(i). -/
-theorem expIntE1_remainder_sign {x : ℝ} (hx : 0 < x) (N : ℕ) :
+lemma expIntE1_remainder_sign {x : ℝ} (hx : 0 < x) (N : ℕ) :
     0 ≤ (-1 : ℝ)^N * ((genExpIntE 1 x).re - Real.exp (-x)*∑ n ∈ Finset.range N, (-1 : ℝ)^n*(n.factorial : ℝ)/x^(n+1)) := by
   have hE : (genExpIntE 1 x).re = ∫ t in Ioi x, Real.exp (-t)/t^(0+1) := by
     rw [genExpIntE_one_eq_integral hx, Complex.ofReal_re]
@@ -764,7 +763,7 @@ theorem expIntEi_remainder_bound {x : ℝ} (hx : 0 < x) (N : ℕ) :
   sorry
 
 /-- First omitted term and csc multiplier in DLMF §6.12(ii). -/
-theorem expIntAux_remainder_bound (aux : Bool) {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) (N : ℕ) :
+lemma expIntAux_remainder_bound (aux : Bool) {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) (N : ℕ) :
     ‖expIntAsymptoticRemainder aux N z‖ ≤ (if |arg z| ≤ π/4 then 1 else 1/Real.sin (2*|arg z|)) * ‖expIntAsymptoticTerm aux N z‖ := by
   set m := 2 * N + if aux then 1 else 0 with hm
   set θ := -arg z with hθ
@@ -888,7 +887,7 @@ theorem expIntAux_remainder_bound (aux : Bool) {z : ℂ} (hz0 : z ≠ 0) (hz : |
 
 
 /-- Signed real auxiliary-function remainder. -/
-theorem expIntAux_remainder_sign (aux : Bool) {x : ℝ} (hx : 0 < x) (N : ℕ) :
+lemma expIntAux_remainder_sign (aux : Bool) {x : ℝ} (hx : 0 < x) (N : ℕ) :
     0 ≤ (expIntAsymptoticRemainder aux N x).re * (expIntAsymptoticTerm aux N x).re := by
   set m := 2*N+if aux then 1 else 0
   have hr := expIntAux_remainder_integral_general aux (z := x) (by simpa using hx) N

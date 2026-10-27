@@ -5,14 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.OrthogonalPolynomials.Topics
-public import DLMF.Hypergeometric.Continuation
-public import DLMF.Hypergeometric.FiniteConvolution
-public import DLMF.OrthogonalPolynomials.HahnMoments
 public import DLMF.OrthogonalPolynomials.PollaczekMoments
 public import DLMF.Confluent.Recurrence
 public import DLMF.OrthogonalPolynomials.BinomialSeries
-public import Mathlib.Tactic.CrossRefAttribute
 
 /-!
 # The Hahn class: definitions, orthogonality, differences, and generating functions
@@ -43,7 +38,7 @@ def terminatingHG (n : ℕ) (a b : List ℂ) (z : ℂ) : ℂ :=
       z ^ k / (k.factorial : ℂ)
 
 /-- A negative integral first upper parameter makes the finite sum a genuine infinite sum. -/
-lemma terminatingHG_hasSum_neg_nat (n : ℕ) (a b : List ℂ) (z : ℂ) :
+theorem terminatingHG_hasSum_neg_nat (n : ℕ) (a b : List ℂ) (z : ℂ) :
     HasSum (fun k : ℕ => (((-(n : ℂ) :: a).map (fun t => poch t k)).prod /
       (b.map (fun t => poch t k)).prod * z ^ k / (k.factorial : ℂ)))
       (terminatingHG n (-(n : ℂ) :: a) b z) := by
@@ -54,17 +49,17 @@ lemma terminatingHG_hasSum_neg_nat (n : ℕ) (a b : List ℂ) (z : ℂ) :
   simp [poch_neg_nat_eq_zero hnk]
 
 /-- Pochhammer symbols at points of positive real part do not vanish. -/
-lemma poch_ne_zero_of_re_pos {z : ℂ} (hz : 0 < z.re) (k : ℕ) : poch z k ≠ 0 :=
+theorem poch_ne_zero_of_re_pos {z : ℂ} (hz : 0 < z.re) (k : ℕ) : poch z k ≠ 0 :=
   poch_ne_zero_of_not_neg_nat (fun j h => by
     have := congrArg re h; simp at this; linarith [(Nat.cast_nonneg j : (0 : ℝ) ≤ j)]) k
 
 /-- The forward difference of a Pochhammer symbol in a shifted argument. -/
-lemma poch_half_sub (w : ℂ) (k : ℕ) :
+theorem poch_half_sub (w : ℂ) (k : ℕ) :
     poch (w - 1 / 2) (k + 1) - poch (w + 1 / 2) (k + 1) = -(k + 1) * poch (w + 1 / 2) k := by
   rw [poch_succ_left (w - 1 / 2), poch_succ (w + 1 / 2), show w - 1 / 2 + 1 = w + 1 / 2 by ring]
   ring
 
-lemma exp_mul_one_sub_exp (phi : ℂ) :
+theorem exp_mul_one_sub_exp (phi : ℂ) :
     exp (I * phi) * (1 - exp (-2 * I * phi)) = 2 * I * sin phi := by
   have h1 : exp (I * phi) * exp (-2 * I * phi) = exp (-phi * I) := by
     rw [← exp_add]; ring_nf
@@ -72,7 +67,7 @@ lemma exp_mul_one_sub_exp (phi : ℂ) :
   linear_combination (exp (phi * I) - exp (-phi * I)) * I_sq
 
 /-- The Meixner–Pollaczek difference operator on the basis `(w)_{k+1}`, `w = λ + i x`. -/
-lemma mp_basis_succ (lam phi w : ℂ) (n k : ℕ) :
+theorem mp_basis_succ (lam phi w : ℂ) (n k : ℕ) :
     exp (I * phi) * (-I * (w - 2 * lam)) * (poch (w - 1) (k + 1) - poch w (k + 1)) +
       exp (-I * phi) * (-I * w) * (poch (w + 1) (k + 1) - poch w (k + 1)) +
       2 * n * sin phi * poch w (k + 1) =
@@ -90,7 +85,7 @@ lemma mp_basis_succ (lam phi w : ℂ) (n k : ℕ) :
     (2 * sin phi * poch w k * ((k : ℂ) + 1) * (w + k)) * I_sq
 
 /-- The continuous Hahn difference operator on the basis `(w)_{k+1}`, `w = a + i x`. -/
-lemma ch_basis_succ (a b c d w : ℂ) (n k : ℕ) :
+theorem ch_basis_succ (a b c d w : ℂ) (n k : ℕ) :
     -((w - a - c) * (w - a - d)) * (poch (w - 1) (k + 1) - poch w (k + 1)) -
       w * (w - a + b) * (poch (w + 1) (k + 1) - poch w (k + 1)) +
       n * (n + a + b + c + d - 1) * poch w (k + 1) =
@@ -102,7 +97,7 @@ lemma ch_basis_succ (a b c d w : ℂ) (n k : ℕ) :
   linear_combination (w - a + b) * (k + w + 1) * hrel
 
 /-- The Hahn difference operator on the basis `(u)_{k+1}`, `u = -x`. -/
-lemma hahn_basis_succ (α β N u : ℂ) (n k : ℕ) :
+theorem hahn_basis_succ (α β N u : ℂ) (n k : ℕ) :
     (u - α - 1) * (u + N) * (poch (u - 1) (k + 1) - poch u (k + 1)) +
       u * (u + β + N + 1) * (poch (u + 1) (k + 1) - poch u (k + 1)) -
       n * (n + α + β + 1) * poch u (k + 1) =
@@ -150,7 +145,7 @@ def meixnerPollaczekWeight (lam phi : ℂ) (x : ℂ) : ℂ :=
   Gamma (lam + I * x) * Gamma (lam - I * x) * exp ((2 * phi - Real.pi) * x)
 
 /-- The continuous Hahn normalization times its finite Pochhammer sum. -/
-lemma continuousHahn_eq_hahnSum (a b c d : ℂ) (n : ℕ) (x : ℝ) :
+theorem continuousHahn_eq_hahnSum (a b c d : ℂ) (n : ℕ) (x : ℝ) :
     continuousHahn a b c d n x =
       (I ^ n * poch (a + c) n * poch (a + d) n / n.factorial) *
         HahnMoments.hahnSum a b c d n x := by
@@ -177,20 +172,20 @@ theorem continuousHahn_orthogonal {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) {m
     HahnMoments.hahnSum_orthogonal ha hb (by simpa using ha) (by simpa using hb) hmn, mul_zero]
 
 /-- The angular parameter gives the transform scale. -/
-lemma pollaczek_scale_angle (phi : ℝ) : PollaczekMoments.scale (2*phi-π) = 2*sin (phi:ℂ) := by
+theorem pollaczek_scale_angle (phi : ℝ) : PollaczekMoments.scale (2*phi-π) = 2*sin (phi:ℂ) := by
   dsimp only [PollaczekMoments.scale]
   rw [show (2*phi-π)/2 = phi-π/2 by ring, Real.cos_sub_pi_div_two]
   push_cast
   rfl
 /-- The angular phase agrees with the usual Pollaczek phase. -/
-lemma pollaczek_phase_angle (phi : ℝ) : exp (I*(phi:ℂ)) = I*PollaczekMoments.phase (2*phi-π) := by
+theorem pollaczek_phase_angle (phi : ℝ) : exp (I*(phi:ℂ)) = I*PollaczekMoments.phase (2*phi-π) := by
   dsimp only [PollaczekMoments.phase]
   have he : I*(phi:ℂ) = π/2*I+I*((2*phi-π:ℝ):ℂ)/2 := by
     push_cast
     ring
   rw [he, Complex.exp_add, exp_pi_div_two_mul_I]
 /-- The hypergeometric argument is the scale divided by the transform phase. -/
-lemma pollaczek_argument_angle (phi : ℝ) :
+theorem pollaczek_argument_angle (phi : ℝ) :
     1-exp (-2*I*(phi:ℂ)) = PollaczekMoments.scale (2*phi-π)/PollaczekMoments.phase (2*phi-π) := by
   let θ := 2*phi-π
   have hscale : PollaczekMoments.scale θ = exp (I*θ/2)+exp (-I*θ/2) := by
@@ -212,7 +207,7 @@ lemma pollaczek_argument_angle (phi : ℝ) :
   rw [sub_mul, one_mul, he]
   ring
 /-- The standard terminating definition equals the transform-adapted finite sum. -/
-lemma meixnerPollaczek_eq_poly (lam phi : ℝ) (n : ℕ) (x : ℝ) :
+theorem meixnerPollaczek_eq_poly (lam phi : ℝ) (n : ℕ) (x : ℝ) :
     meixnerPollaczek lam phi n x =
       (poch (2*(lam:ℂ)) n/n.factorial*(I*PollaczekMoments.phase (2*phi-π))^n)*
         PollaczekMoments.poly lam (2*phi-π) n x := by
@@ -256,7 +251,7 @@ theorem meixnerPollaczek_orthogonality {lam phi : ℝ} (hlam : 0 < lam) (hphi : 
   · rw [ite_eq_right hmn, PollaczekMoments.poly_orthogonal hlam hθ hmn, mul_zero]
 
 /-- A two-numerator terminating sum is a terminating Gauss series. -/
-lemma terminatingHG_eq_ordinaryHypergeometric (n : ℕ) (b c z : ℂ) :
+theorem terminatingHG_eq_ordinaryHypergeometric (n : ℕ) (b c z : ℂ) :
     terminatingHG n [-(n : ℂ), b] [c] z = ₂F₁ (-(n : ℂ)) b c z := by
   rw [ordinaryHypergeometric_eq_sum_neg_nat]
   unfold terminatingHG gaussHGCoeff
@@ -265,7 +260,7 @@ lemma terminatingHG_eq_ordinaryHypergeometric (n : ℕ) (b c z : ℂ) :
   ring
 
 /-- A second terminating upper parameter permits extending the cutoff to the larger index. -/
-lemma terminatingHG_two_neg_nat (n m : ℕ) (b : List ℂ) (z : ℂ) :
+theorem terminatingHG_two_neg_nat (n m : ℕ) (b : List ℂ) (z : ℂ) :
     terminatingHG n [-(n : ℂ), -(m : ℂ)] b z =
       ∑ k ∈ Finset.range (max n m + 1), poch (-(n : ℂ)) k * poch (-(m : ℂ)) k /
         (b.map (fun t => poch t k)).prod * z ^ k / (k.factorial : ℂ) := by
@@ -278,7 +273,7 @@ lemma terminatingHG_two_neg_nat (n m : ℕ) (b : List ℂ) (z : ℂ) :
   simp [poch_neg_nat_eq_zero hnk]
 
 /-- Symmetry remains valid even when a lower parameter is a nonpositive integer. -/
-lemma terminatingHG_two_neg_nat_swap (n m : ℕ) (b : List ℂ) (z : ℂ) :
+theorem terminatingHG_two_neg_nat_swap (n m : ℕ) (b : List ℂ) (z : ℂ) :
     terminatingHG n [-(n : ℂ), -(m : ℂ)] b z =
       terminatingHG m [-(m : ℂ), -(n : ℂ)] b z := by
   rw [terminatingHG_two_neg_nat, terminatingHG_two_neg_nat, Nat.max_comm m n]
@@ -374,7 +369,7 @@ theorem hahn_difference_equation {α β : ℂ} (hα : -1 < α.re) {N n : ℕ} (h
 
 /-- 15.5.11 in `b` for the terminating function `₂F₁(-n, b; c; z)`, valid for every `z`
 (both sides are polynomials in `z`). -/
-lemma contiguous_b_neg_nat (n : ℕ) (b c z : ℂ) (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) :
+theorem contiguous_b_neg_nat (n : ℕ) (b c z : ℂ) (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) :
     (c - b) * ₂F₁ (-(n : ℂ)) (b - 1) c z +
       (2 * b - c + (-(n : ℂ) - b) * z) * ₂F₁ (-(n : ℂ)) b c z +
       b * (z - 1) * ₂F₁ (-(n : ℂ)) (b + 1) c z = 0 := by
@@ -398,7 +393,7 @@ lemma contiguous_b_neg_nat (n : ℕ) (b c z : ℂ) (hc : ∀ k : ℕ, c ≠ -(k 
   exact congrFun key z
 
 /-- The Meixner polynomial as a terminating `₂F₁`. -/
-lemma meixner_eq_hypergeometric (β c : ℂ) (n : ℕ) (x : ℂ) :
+theorem meixner_eq_hypergeometric (β c : ℂ) (n : ℕ) (x : ℂ) :
     meixner β c n x = ₂F₁ (-(n : ℂ)) (-x) β (1 - c⁻¹) := by
   unfold meixner terminatingHG
   rw [ordinaryHypergeometric_eq_sum_neg_nat]
@@ -408,7 +403,7 @@ lemma meixner_eq_hypergeometric (β c : ℂ) (n : ℕ) (x : ℂ) :
 
 /-- `contiguous_b_neg_nat` for every `c` off `{0, -1, …, -(n-1)}`, by analytic continuation
 in `c`; this covers the Krawtchouk case `c = -N` with `n ≤ N`. -/
-lemma contiguous_b_neg_nat' (n : ℕ) (b c z : ℂ) (hc : ∀ j : ℕ, j < n → c ≠ -(j : ℂ)) :
+theorem contiguous_b_neg_nat' (n : ℕ) (b c z : ℂ) (hc : ∀ j : ℕ, j < n → c ≠ -(j : ℂ)) :
     (c - b) * ₂F₁ (-(n : ℂ)) (b - 1) c z +
       (2 * b - c + (-(n : ℂ) - b) * z) * ₂F₁ (-(n : ℂ)) b c z +
       b * (z - 1) * ₂F₁ (-(n : ℂ)) (b + 1) c z = 0 := by
@@ -446,7 +441,7 @@ lemma contiguous_b_neg_nat' (n : ℕ) (b c z : ℂ) (hc : ∀ j : ℕ, j < n →
   exact key hc
 
 /-- The Krawtchouk polynomial as a terminating `₂F₁`. -/
-lemma krawtchouk_eq_hypergeometric (p : ℂ) (N n : ℕ) (x : ℂ) :
+theorem krawtchouk_eq_hypergeometric (p : ℂ) (N n : ℕ) (x : ℂ) :
     krawtchouk p N n x = ₂F₁ (-(n : ℂ)) (-x) (-(N : ℂ)) p⁻¹ := by
   unfold krawtchouk terminatingHG
   rw [ordinaryHypergeometric_eq_sum_neg_nat]
@@ -483,12 +478,12 @@ theorem meixner_difference_equation {β c : ℂ} (hβ : 0 < β.re) (hc : c ≠ 0
 
 
 /-- Forward difference of `(-x)_{k+1}` in `x`. -/
-lemma poch_neg_succ_sub (x : ℂ) (k : ℕ) :
+theorem poch_neg_succ_sub (x : ℂ) (k : ℕ) :
     poch (-(x + 1)) (k + 1) - poch (-x) (k + 1) = -((k : ℂ) + 1) * poch (-x) k := by
   rw [poch_succ_left, poch_succ, show -(x + 1) + 1 = -x by ring]
   ring
 
-lemma prod_map_poch_succ (L : List ℂ) (j : ℕ) :
+theorem prod_map_poch_succ (L : List ℂ) (j : ℕ) :
     (L.map (fun t => poch t (j + 1))).prod =
       L.prod * ((L.map (fun t => t + 1)).map (fun t => poch t j)).prod := by
   induction L with
@@ -500,7 +495,7 @@ lemma prod_map_poch_succ (L : List ℂ) (j : ℕ) :
 
 /-- The forward difference in `x` of a terminating series whose last numerator parameter is
 `-x`: the common step behind 18.22.19–18.22.25. -/
-lemma terminatingHG_forward_difference (n : ℕ) (L B : List ℂ) (x z : ℂ) :
+theorem terminatingHG_forward_difference (n : ℕ) (L B : List ℂ) (x z : ℂ) :
     terminatingHG (n + 1) (-((n + 1 : ℕ) : ℂ) :: (L ++ [-(x + 1)])) B z -
       terminatingHG (n + 1) (-((n + 1 : ℕ) : ℂ) :: (L ++ [-x])) B z =
     ((n + 1 : ℕ) : ℂ) * L.prod / B.prod * z *
@@ -534,13 +529,13 @@ lemma terminatingHG_forward_difference (n : ℕ) (L B : List ℂ) (x z : ℂ) :
       ((j.factorial : ℂ))⁻¹) * ((j : ℂ) + 1)⁻¹) * hd
 
 /-- `(-n)_{n+1} = 0`. -/
-lemma poch_neg_nat_succ (n : ℕ) : poch (-(n : ℂ)) (n + 1) = 0 := by
+theorem poch_neg_nat_succ (n : ℕ) : poch (-(n : ℂ)) (n + 1) = 0 := by
   rw [poch_succ]
   simp
 
 /-- The difference of a terminating series in its truncation parameter: the companion of
 `terminatingHG_forward_difference` for the first numerator parameter. -/
-lemma terminatingHG_first_difference (n : ℕ) (L B : List ℂ) (z : ℂ) :
+theorem terminatingHG_first_difference (n : ℕ) (L B : List ℂ) (z : ℂ) :
     terminatingHG (n + 1) (-((n + 1 : ℕ) : ℂ) :: L) B z - terminatingHG n (-(n : ℂ) :: L) B z =
       -(L.prod / B.prod * z) * terminatingHG n (-(n : ℂ) :: L.map (fun t => t + 1)) (B.map (fun t => t + 1)) z := by
   unfold terminatingHG
@@ -574,7 +569,7 @@ lemma terminatingHG_first_difference (n : ℕ) (L B : List ℂ) (z : ℂ) :
       ((j.factorial : ℂ))⁻¹) * ((j : ℂ) + 1)⁻¹) * hd
 
 /-- `C_{n+1}(x) - C_n(x) = -(x/a) C_n(x - 1)`, the Charlier companion of 18.22.25 in `n`. -/
-lemma charlier_first_difference (a : ℂ) (n : ℕ) (x : ℂ) :
+theorem charlier_first_difference (a : ℂ) (n : ℕ) (x : ℂ) :
     charlier a (n + 1) x - charlier a n x = -(x / a) * charlier a n (x - 1) := by
   unfold charlier
   have h := terminatingHG_first_difference n [-x] [] (-a⁻¹)
@@ -715,7 +710,7 @@ theorem meixnerPollaczek_recurrence {lam : ℂ} (hlam : 0 < lam.re) (phi : ℂ) 
   linear_combination (poch (2 * lam) n * (2 * lam + n) * E) * hcont
 
 /-- The Meixner–Pollaczek polynomial of degree one. -/
-lemma meixnerPollaczek_one {lam : ℂ} (hlam : lam ≠ 0) (phi x : ℂ) :
+theorem meixnerPollaczek_one {lam : ℂ} (hlam : lam ≠ 0) (phi x : ℂ) :
     meixnerPollaczek lam phi 1 x = 2 * (x * sin phi + lam * cos phi) := by
   unfold meixnerPollaczek terminatingHG
   set u := cexp (I * phi) with hu
@@ -770,7 +765,7 @@ theorem meixnerPollaczek_central_difference {lam : ℂ} (hlam : 0 < lam.re) (phi
 
 /-- `∑ₙ C(N,n) (-n)ₖ zⁿ w^{N-n} = (-N)ₖ zᵏ (z+w)^{N-k}` for `k ≤ N`: factorial moments of a
 binomial distribution. -/
-lemma sum_choose_mul_poch_neg_nat_mul_pow {N k : ℕ} (hk : k ≤ N) (z w : ℂ) :
+theorem sum_choose_mul_poch_neg_nat_mul_pow {N k : ℕ} (hk : k ≤ N) (z w : ℂ) :
     ∑ n ∈ Finset.range (N + 1), (N.choose n : ℂ) * poch (-(n : ℂ)) k * z ^ n * w ^ (N - n) =
       poch (-(N : ℂ)) k * z ^ k * (z + w) ^ (N - k) := by
   rw [show N + 1 = k + (N - k + 1) by omega, Finset.sum_range_add]
@@ -789,7 +784,7 @@ lemma sum_choose_mul_poch_neg_nat_mul_pow {N k : ℕ} (hk : k ≤ N) (z w : ℂ)
   linear_combination (-1 : ℂ) ^ k * k ! * z ^ k * z ^ m * w ^ (N - k - m) * hc'
 
 /-- `∑ₙ C(N,n) (-n)ₖ zⁿ = (-N)ₖ zᵏ (1+z)^{N-k}` for `k ≤ N`. -/
-lemma sum_choose_mul_poch_neg_nat {N k : ℕ} (hk : k ≤ N) (z : ℂ) :
+theorem sum_choose_mul_poch_neg_nat {N k : ℕ} (hk : k ≤ N) (z : ℂ) :
     ∑ n ∈ Finset.range (N + 1), (N.choose n : ℂ) * poch (-(n : ℂ)) k * z ^ n =
       poch (-(N : ℂ)) k * z ^ k * (1 + z) ^ (N - k) := by
   simpa [add_comm z] using sum_choose_mul_poch_neg_nat_mul_pow hk z 1
@@ -828,7 +823,7 @@ theorem krawtchouk_generating_function {p : ℂ} (hp : p ≠ 0) {N x : ℕ} (hx 
   ring
 
 /-- `∑ₙ (β)ₙ (-n)ₖ zⁿ / n! = (β)ₖ (-z)ᵏ (1 - z)^{-β-k}`. -/
-lemma hasSum_poch_mul_poch_neg_nat {β z : ℂ} (hz : ‖z‖ < 1) (k : ℕ) :
+theorem hasSum_poch_mul_poch_neg_nat {β z : ℂ} (hz : ‖z‖ < 1) (k : ℕ) :
     HasSum (fun n : ℕ => poch β n / n ! * poch (-(n : ℂ)) k * z ^ n)
       (poch β k * (-z) ^ k * (1 - z) ^ (-(β + k))) := by
   have hb := (hasSum_poch_div_factorial (β := β + k) hz).mul_left (poch β k * (-z) ^ k)
@@ -892,7 +887,7 @@ theorem meixner_generating_function {β c : ℂ} (hβ : 0 < β.re) (hc : c ≠ 0
     field_simp
 
 /-- `∑ₙ (-n)ₖ wⁿ / n! = (-w)ᵏ eʷ`. -/
-lemma hasSum_poch_neg_nat_div_factorial (k : ℕ) (w : ℂ) :
+theorem hasSum_poch_neg_nat_div_factorial (k : ℕ) (w : ℂ) :
     HasSum (fun n : ℕ => poch (-(n : ℂ)) k / n ! * w ^ n) ((-w) ^ k * exp w) := by
   have he : HasSum (fun n : ℕ => w ^ n / n !) (exp w) := by
     simpa only [Complex.exp_eq_exp_ℂ] using NormedSpace.expSeries_div_hasSum_exp w
@@ -931,11 +926,11 @@ theorem charlier_generating_function (a : ℂ) (x : ℕ) (z : ℂ) :
     ring
 
 /-- The Meixner–Pollaczek polynomial of degree zero. -/
-lemma meixnerPollaczek_zero (lam phi x : ℂ) : meixnerPollaczek lam phi 0 x = 1 := by
+theorem meixnerPollaczek_zero (lam phi x : ℂ) : meixnerPollaczek lam phi 0 x = 1 := by
   simp [meixnerPollaczek, terminatingHG, poch_zero]
 
 /-- `e^{iφ} + e^{-iφ} = 2 cos φ` and `e^{-iφ} - e^{iφ} = -2 i sin φ`, in the form used below. -/
-lemma exp_I_mul_add_recip (phi : ℂ) :
+theorem exp_I_mul_add_recip (phi : ℂ) :
     exp (I * phi) + (exp (I * phi))⁻¹ = 2 * cos phi ∧
       exp (I * phi) - (exp (I * phi))⁻¹ = 2 * I * sin phi := by
   rw [← Complex.exp_neg, Complex.cos, Complex.sin]
@@ -970,7 +965,7 @@ theorem meixnerPollaczek_generating_function {lam : ℂ} (hlam : 0 < lam.re) (ph
   simpa only [hcoeff] using h
 
 /-- Limits propagate through a three-term recurrence whose coefficients converge. -/
-lemma tendsto_of_three_term {ι : Type*} {l : Filter ι} {f : ℕ → ι → ℂ} {g : ℕ → ℂ}
+theorem tendsto_of_three_term {ι : Type*} {l : Filter ι} {f : ℕ → ι → ℂ} {g : ℕ → ℂ}
     {A B : ℕ → ι → ℂ} {A' B' : ℕ → ℂ}
     (h0 : Tendsto (f 0) l (𝓝 (g 0))) (h1 : Tendsto (f 1) l (𝓝 (g 1)))
     (hA : ∀ n, Tendsto (A n) l (𝓝 (A' n))) (hB : ∀ n, Tendsto (B n) l (𝓝 (B' n)))
@@ -987,14 +982,14 @@ lemma tendsto_of_three_term {ι : Type*} {l : Filter ι} {f : ℕ → ι → ℂ
       exact ht.symm)
 
 /-- `c / a → 0` for complex `c` as the real `a → ∞`. -/
-lemma tendsto_const_div_ofReal_atTop (c : ℂ) :
+theorem tendsto_const_div_ofReal_atTop (c : ℂ) :
     Tendsto (fun a : ℝ => c / (a : ℂ)) atTop (𝓝 0) := by
   have := (continuous_ofReal.tendsto 0).comp tendsto_inv_atTop_zero
   rw [ofReal_zero] at this
   simpa [div_eq_mul_inv] using this.const_mul c
 
 /-- `(c + s t)_k / t^k → s^k` as the real `t → ∞`. -/
-lemma tendsto_poch_add_mul_div_pow (c s : ℂ) (k : ℕ) :
+theorem tendsto_poch_add_mul_div_pow (c s : ℂ) (k : ℕ) :
     Tendsto (fun t : ℝ => poch (c + s * t) k / (t : ℂ) ^ k) atTop (𝓝 (s ^ k)) := by
   induction k with
   | zero => simp [poch_zero]
@@ -1121,14 +1116,14 @@ def charlierPoly (a : ℂ) (n : ℕ) : ℂ[X] :=
     (ascPochhammer ℂ k).comp (-X)
 
 /-- Evaluation of `charlierPoly` is the Charlier polynomial. -/
-lemma eval_charlierPoly (a : ℂ) (n : ℕ) (x : ℂ) : (charlierPoly a n).eval x = charlier a n x := by
+theorem eval_charlierPoly (a : ℂ) (n : ℕ) (x : ℂ) : (charlierPoly a n).eval x = charlier a n x := by
   simp only [charlierPoly, charlier, terminatingHG, eval_finsetSum, eval_mul, eval_C, eval_comp,
     eval_neg, eval_X, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, div_one]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [poch]; ring
 
 /-- Self-duality of the Charlier polynomials at integer points. -/
-lemma charlier_swap (a : ℂ) (n m : ℕ) : charlier a n m = charlier a m n := by
+theorem charlier_swap (a : ℂ) (n m : ℕ) : charlier a n m = charlier a m n := by
   simp only [charlier]
   exact terminatingHG_two_neg_nat_swap n m [] _
 
@@ -1577,7 +1572,7 @@ theorem continuousHahn_central_difference {a b c d : ℂ} (hac : 0 < (a + c).re)
   ring
 
 /-- Continuous Hahn coefficients are a convolution of two Kummer coefficient sequences. -/
-lemma continuousHahn_coeff_convolution {a b c d : ℂ}
+theorem continuousHahn_coeff_convolution {a b c d : ℂ}
     (hac : 0 < (a + c).re) (had : 0 < (a + d).re) (hbd : 0 < (b + d).re)
     (x : ℂ) (n : ℕ) :
     continuousHahn a b c d n x / (poch (a + c) n * poch (b + d) n) =
@@ -1665,7 +1660,7 @@ def op (B D f : ℂ → ℂ) (x : ℂ) : ℂ :=
   B x * (f (x + 1) - f x) + D x * (f (x - 1) - f x)
 
 /-- Summation by parts on `{0, …, N}`. -/
-lemma sum_range_mul_op (N : ℕ) (w : ℕ → ℂ) (B D f g : ℂ → ℂ)
+theorem sum_range_mul_op (N : ℕ) (w : ℕ → ℂ) (B D f g : ℂ → ℂ)
     (hD0 : D 0 = 0) (hBN : B N = 0)
     (hP : ∀ x < N, w (x + 1) * D ((x : ℂ) + 1) = w x * B x) :
     ∑ x ∈ Finset.range (N + 1), w x * g x * op B D f x =
@@ -1682,7 +1677,7 @@ lemma sum_range_mul_op (N : ℕ) (w : ℕ → ℂ) (B D f g : ℂ → ℂ)
   linear_combination (g ((x : ℂ) + 1) * (f x - f ((x : ℂ) + 1))) * h
 
 /-- Symmetry of the operator on `{0, …, N}`. -/
-lemma sum_range_mul_op_symm (N : ℕ) (w : ℕ → ℂ) (B D f g : ℂ → ℂ)
+theorem sum_range_mul_op_symm (N : ℕ) (w : ℕ → ℂ) (B D f g : ℂ → ℂ)
     (hD0 : D 0 = 0) (hBN : B N = 0)
     (hP : ∀ x < N, w (x + 1) * D ((x : ℂ) + 1) = w x * B x) :
     ∑ x ∈ Finset.range (N + 1), w x * g x * op B D f x =
@@ -1693,7 +1688,7 @@ lemma sum_range_mul_op_symm (N : ℕ) (w : ℕ → ℂ) (B D f g : ℂ → ℂ)
   ring
 
 /-- Finite orthogonality from the eigenvalue equation. -/
-lemma sum_range_orthogonal (N : ℕ) (w : ℕ → ℂ) (B D f g : ℂ → ℂ) {ef eg : ℂ}
+theorem sum_range_orthogonal (N : ℕ) (w : ℕ → ℂ) (B D f g : ℂ → ℂ) {ef eg : ℂ}
     (hD0 : D 0 = 0) (hBN : B N = 0)
     (hP : ∀ x < N, w (x + 1) * D ((x : ℂ) + 1) = w x * B x)
     (hf : ∀ x : ℕ, x ≤ N → op B D f x = ef * f x)
@@ -1719,7 +1714,7 @@ lemma sum_range_orthogonal (N : ℕ) (w : ℕ → ℂ) (B D f g : ℂ → ℂ) {
 
 
 /-- Summation by parts on `ℕ`. -/
-lemma tsum_mul_op (w : ℕ → ℂ) (B D f g : ℂ → ℂ) (hD0 : D 0 = 0)
+theorem tsum_mul_op (w : ℕ → ℂ) (B D f g : ℂ → ℂ) (hD0 : D 0 = 0)
     (hP : ∀ x : ℕ, w (x + 1) * D ((x : ℂ) + 1) = w x * B x)
     (h1 : Summable fun x : ℕ => w x * g x * (B x * (f ((x : ℂ) + 1) - f x)))
     (h2 : Summable fun x : ℕ => w x * g x * (D x * (f ((x : ℂ) - 1) - f x))) :
@@ -1741,7 +1736,7 @@ lemma tsum_mul_op (w : ℕ → ℂ) (B D f g : ℂ → ℂ) (hD0 : D 0 = 0)
   linear_combination (g ((x : ℂ) + 1) * (f x - f ((x : ℂ) + 1))) * h
 
 /-- Infinite orthogonality from the eigenvalue equation. -/
-lemma tsum_orthogonal (w : ℕ → ℂ) (B D f g : ℂ → ℂ) {ef eg : ℂ} (hD0 : D 0 = 0)
+theorem tsum_orthogonal (w : ℕ → ℂ) (B D f g : ℂ → ℂ) {ef eg : ℂ} (hD0 : D 0 = 0)
     (hP : ∀ x : ℕ, w (x + 1) * D ((x : ℂ) + 1) = w x * B x)
     (h1 : Summable fun x : ℕ => w x * g x * (B x * (f ((x : ℂ) + 1) - f x)))
     (h2 : Summable fun x : ℕ => w x * g x * (D x * (f ((x : ℂ) - 1) - f x)))
@@ -1765,7 +1760,7 @@ lemma tsum_orthogonal (w : ℕ → ℂ) (B D f g : ℂ → ℂ) {ef eg : ℂ} (h
   exact (mul_eq_zero.mp this).resolve_left (sub_ne_zero.mpr hne)
 
 /-- Summability against a weight with polynomial moments. -/
-lemma summable_mul_eval {w : ℕ → ℂ}
+theorem summable_mul_eval {w : ℕ → ℂ}
     (hw : ∀ K : ℕ, Summable fun x : ℕ => ‖w x‖ * ((x : ℝ) + 1) ^ K) (P : ℂ[X]) :
     Summable fun x : ℕ => w x * P.eval (x : ℂ) := by
   have e : (fun x : ℕ => w x * P.eval (x : ℂ)) = fun x =>
@@ -1782,12 +1777,12 @@ lemma summable_mul_eval {w : ℕ → ℂ}
     (norm_nonneg _)
 
 /-- Ratio test for positive real sequences. -/
-lemma summable_of_ratio_pos {u : ℕ → ℝ} (hu : ∀ n, 0 < u n) {l : ℝ} (hl : l < 1)
+theorem summable_of_ratio_pos {u : ℕ → ℝ} (hu : ∀ n, 0 < u n) {l : ℝ} (hl : l < 1)
     (h : Tendsto (fun n => u (n + 1) / u n) atTop (𝓝 l)) : Summable u := by
   refine summable_of_ratio_test_tendsto_lt_one hl (Eventually.of_forall fun n => (hu n).ne') ?_
   simpa only [Real.norm_eq_abs, abs_of_pos (hu _)] using h
 
-lemma tendsto_succ_div_pow (K : ℕ) :
+theorem tendsto_succ_div_pow (K : ℕ) :
     Tendsto (fun n : ℕ => (((n : ℝ) + 1 + 1) / ((n : ℝ) + 1)) ^ K) atTop (𝓝 1) := by
   have h : Tendsto (fun n : ℕ => 1 + 1 / ((n : ℝ) + 1)) atTop (𝓝 (1 + 0)) :=
     tendsto_one_div_add_atTop_nhds_zero_nat.const_add 1
@@ -1799,7 +1794,7 @@ lemma tendsto_succ_div_pow (K : ℕ) :
   simpa using this.pow K
 
 /-- Orthogonality on `ℕ` for polynomial eigenfunctions. -/
-lemma hasSum_orthogonal_poly {w : ℕ → ℂ}
+theorem hasSum_orthogonal_poly {w : ℕ → ℂ}
     (hw : ∀ K : ℕ, Summable fun x : ℕ => ‖w x‖ * ((x : ℝ) + 1) ^ K) (Bp Dp F G : ℂ[X])
     {ef eg : ℂ} (hD0 : Dp.eval 0 = 0)
     (hP : ∀ x : ℕ, w (x + 1) * Dp.eval ((x : ℂ) + 1) = w x * Bp.eval (x : ℂ))
@@ -1825,7 +1820,7 @@ lemma hasSum_orthogonal_poly {w : ℕ → ℂ}
   rw [← h0]
   exact hs.hasSum
 
-lemma summable_charlierWeight {a : ℝ} (ha : 0 < a) (K : ℕ) :
+theorem summable_charlierWeight {a : ℝ} (ha : 0 < a) (K : ℕ) :
     Summable fun x : ℕ => ‖(a : ℂ) ^ x / (x ! : ℂ)‖ * ((x : ℝ) + 1) ^ K := by
   have hu : ∀ n : ℕ, 0 < a ^ n / n ! * ((n : ℝ) + 1) ^ K := fun n => by positivity
   have h := summable_of_ratio_pos hu (l := 0) zero_lt_one ?_
@@ -1846,16 +1841,16 @@ lemma summable_charlierWeight {a : ℝ} (ha : 0 < a) (K : ℕ) :
   have := ((tendsto_one_div_add_atTop_nhds_zero_nat.const_mul a).mul (tendsto_succ_div_pow K))
   simpa using this
 
-lemma charlier_zero (a x : ℂ) : charlier a 0 x = 1 := by
+theorem charlier_zero (a x : ℂ) : charlier a 0 x = 1 := by
   simp [charlier, terminatingHG, poch_zero]
 
-lemma charlier_one {a : ℂ} (ha : a ≠ 0) (x : ℂ) : charlier a 1 x = 1 - x / a := by
+theorem charlier_one {a : ℂ} (ha : a ≠ 0) (x : ℂ) : charlier a 1 x = 1 - x / a := by
   simp [charlier, terminatingHG, Finset.sum_range_succ, poch_zero, poch_one]
   field_simp
   ring
 
 /-- The Charlier recurrence in the form `x C_n = …`. -/
-lemma charlier_mul_x {a : ℂ} (ha : a ≠ 0) (n : ℕ) (x : ℂ) :
+theorem charlier_mul_x {a : ℂ} (ha : a ≠ 0) (n : ℕ) (x : ℂ) :
     x * charlier a n x = (n + a) * charlier a n x - a * charlier a (n + 1) x -
       n * charlier a (n - 1) x := by
   cases n with
@@ -1869,7 +1864,7 @@ lemma charlier_mul_x {a : ℂ} (ha : a ≠ 0) (n : ℕ) (x : ℂ) :
     push_cast
     linear_combination h
 
-theorem charlier_orthogonality_aux {a : ℝ} (ha : 0 < a) (m n : ℕ) :
+lemma charlier_orthogonality_aux {a : ℝ} (ha : 0 < a) (m n : ℕ) :
     HasSum (fun x : ℕ => charlier a m x * charlier a n x * (a : ℂ) ^ x / x.factorial)
       (if m = n then (a : ℂ)⁻¹ ^ n * exp a * n.factorial else 0) := by
   have ha' : (a : ℂ) ≠ 0 := by exact_mod_cast ha.ne'
@@ -1953,17 +1948,17 @@ def hgPoly (n : ℕ) (b : List ℂ) (z : ℂ) : ℂ[X] :=
   ∑ k ∈ Finset.range (n + 1), C (poch (-(n : ℂ)) k / (b.map (fun t => poch t k)).prod *
     z ^ k / k.factorial) * (ascPochhammer ℂ k).comp (-X)
 
-lemma eval_hgPoly (n : ℕ) (b : List ℂ) (z x : ℂ) :
+theorem eval_hgPoly (n : ℕ) (b : List ℂ) (z x : ℂ) :
     (hgPoly n b z).eval x = terminatingHG n [-(n : ℂ), -x] b z := by
   simp only [hgPoly, terminatingHG, eval_finsetSum, eval_mul, eval_C, eval_comp, eval_neg, eval_X,
     List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [poch]; ring
 
-lemma eval_hgPoly_meixner (β c : ℂ) (n : ℕ) (x : ℂ) :
+theorem eval_hgPoly_meixner (β c : ℂ) (n : ℕ) (x : ℂ) :
     (hgPoly n [β] (1 - c⁻¹)).eval x = meixner β c n x := eval_hgPoly _ _ _ _
 
-lemma summable_meixnerWeight {β c : ℝ} (hβ : 0 < β) (hc : 0 < c) (hc1 : c < 1) (K : ℕ) :
+theorem summable_meixnerWeight {β c : ℝ} (hβ : 0 < β) (hc : 0 < c) (hc1 : c < 1) (K : ℕ) :
     Summable fun x : ℕ => ‖poch (β : ℂ) x * (c : ℂ) ^ x / (x ! : ℂ)‖ * ((x : ℝ) + 1) ^ K := by
   have hp : ∀ n : ℕ, poch (β : ℂ) n ≠ 0 := poch_ne_zero_of_re_pos (by simpa using hβ)
   have hu : ∀ n : ℕ, 0 < ‖poch (β : ℂ) n‖ * c ^ n / n ! * ((n : ℝ) + 1) ^ K := fun n => by
@@ -1992,7 +1987,7 @@ lemma summable_meixnerWeight {β c : ℝ} (hβ : 0 < β) (hc : 0 < c) (hc1 : c <
     c).mul (tendsto_succ_div_pow K)
   simpa using this
 
-lemma meixner_zero (β c x : ℂ) : meixner β c 0 x = 1 := by
+theorem meixner_zero (β c x : ℂ) : meixner β c 0 x = 1 := by
   simp [meixner, terminatingHG, poch_zero]
 
 end DiscreteOrtho
@@ -2032,7 +2027,7 @@ theorem meixner_recurrence {β c : ℂ} (hβ : 0 < β.re) (hc : c ≠ 0) (n : �
 namespace DiscreteOrtho
 
 /-- The Meixner recurrence written as `(c - 1) x M_n = …` for all `n`. -/
-lemma meixner_mul_x {β c : ℂ} (hβ : 0 < β.re) (hc : c ≠ 0) (n : ℕ) (x : ℂ) :
+theorem meixner_mul_x {β c : ℂ} (hβ : 0 < β.re) (hc : c ≠ 0) (n : ℕ) (x : ℂ) :
     (c - 1) * x * meixner β c n x = c * (n + β) * meixner β c (n + 1) x -
       (n + (n + β) * c) * meixner β c n x + n * meixner β c (n - 1) x := by
   cases n with
@@ -2048,7 +2043,7 @@ lemma meixner_mul_x {β c : ℂ} (hβ : 0 < β.re) (hc : c ≠ 0) (n : ℕ) (x :
     push_cast
     linear_combination h
 
-theorem meixner_orthogonality_aux {β c : ℝ} (hβ : 0 < β) (hc : 0 < c) (hc1 : c < 1) (m n : ℕ) :
+lemma meixner_orthogonality_aux {β c : ℝ} (hβ : 0 < β) (hc : 0 < c) (hc1 : c < 1) (m n : ℕ) :
     HasSum (fun x : ℕ => meixner β c m x * meixner β c n x * poch β x *
       (c : ℂ) ^ x / x.factorial)
       (if m = n then (c : ℂ)⁻¹ ^ n * n.factorial / (poch β n * (1 - c : ℂ) ^ (β : ℂ)) else 0) := by
@@ -2165,11 +2160,11 @@ theorem meixner_orthogonality {β c : ℝ} (hβ : 0 < β) (hc : 0 < c) (hc1 : c 
       (if m = n then (c : ℂ)⁻¹ ^ n * n.factorial / (poch β n * (1 - c : ℂ) ^ (β : ℂ)) else 0) := by
   exact DiscreteOrtho.meixner_orthogonality_aux hβ hc hc1 m n
 
-lemma krawtchouk_zero (p : ℂ) (N : ℕ) (x : ℂ) : krawtchouk p N 0 x = 1 := by
+theorem krawtchouk_zero (p : ℂ) (N : ℕ) (x : ℂ) : krawtchouk p N 0 x = 1 := by
   simp [krawtchouk, terminatingHG, poch_zero]
 
 /-- The Krawtchouk recurrence in the degree at the lattice points (DLMF 18.22.2). -/
-lemma krawtchouk_mul_x_nat {p : ℂ} (hp : p ≠ 0) {N n m : ℕ} (hn : n ≤ N) (hm : m ≤ N) :
+theorem krawtchouk_mul_x_nat {p : ℂ} (hp : p ≠ 0) {N n m : ℕ} (hn : n ≤ N) (hm : m ≤ N) :
     (m : ℂ) * krawtchouk p N n m =
       p * (n - N) * (krawtchouk p N (n + 1) m - krawtchouk p N n m) +
         (p - 1) * n * (krawtchouk p N (n - 1) m - krawtchouk p N n m) := by
@@ -2356,7 +2351,7 @@ theorem hahn_orthogonal {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) {N m n : �
   simp only [hwdef]
   ring
 
-lemma natDegree_hgPoly_le (n : ℕ) (b : List ℂ) (z : ℂ) :
+theorem natDegree_hgPoly_le (n : ℕ) (b : List ℂ) (z : ℂ) :
     (DiscreteOrtho.hgPoly n b z).natDegree ≤ n := by
   unfold DiscreteOrtho.hgPoly
   refine natDegree_sum_le_of_forall_le _ _ fun k hk => ?_
@@ -2364,7 +2359,7 @@ lemma natDegree_hgPoly_le (n : ℕ) (b : List ℂ) (z : ℂ) :
   rw [natDegree_comp, ascPochhammer_natDegree, natDegree_neg, natDegree_X, mul_one]
   exact Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
 
-lemma eval_hgPoly_krawtchouk (p : ℂ) (N n : ℕ) (x : ℂ) :
+theorem eval_hgPoly_krawtchouk (p : ℂ) (N n : ℕ) (x : ℂ) :
     (DiscreteOrtho.hgPoly n [-(N : ℂ)] p⁻¹).eval x = krawtchouk p N n x :=
   DiscreteOrtho.eval_hgPoly _ _ _ _
 
@@ -2430,7 +2425,7 @@ namespace HahnRec
 def phi (s m : ℂ) (k : ℕ) : ℂ := poch (-m) k * poch (m + s) k
 
 /-- The recurrence operator on the dual basis, with denominators cleared. -/
-lemma op_phi_succ (α β N n : ℂ) (j : ℕ) :
+theorem op_phi_succ (α β N n : ℂ) (j : ℕ) :
     (2 * n + (α + β + 1) - 1) * (n + (α + β + 1)) * (n + α + 1) * (N - n) *
         phi (α + β + 1) (n + 1) (j + 1) -
       ((2 * n + (α + β + 1) - 1) * (n + (α + β + 1)) * (n + α + 1) * (N - n) +
@@ -2470,7 +2465,7 @@ lemma op_phi_succ (α β N n : ℂ) (j : ℕ) :
 /-- The coefficient `1 / ((α+1)_k (-N)_k k!)`. -/
 def dcoef (α : ℂ) (N : ℕ) (k : ℕ) : ℂ := (poch (α + 1) k * poch (-(N : ℂ)) k * k.factorial)⁻¹
 
-lemma hahn_eq_sum (α β : ℂ) (N m K : ℕ) (hm : m ≤ K) (x : ℂ) :
+theorem hahn_eq_sum (α β : ℂ) (N m K : ℕ) (hm : m ≤ K) (x : ℂ) :
     hahn α β N m x = ∑ k ∈ Finset.range (K + 1),
       dcoef α N k * poch (-x) k * phi (α + β + 1) m k := by
   unfold hahn terminatingHG
@@ -2486,7 +2481,7 @@ lemma hahn_eq_sum (α β : ℂ) (N m K : ℕ) (hm : m ≤ K) (x : ℂ) :
     have : m < k := by simp at hk; omega
     simp [phi, poch_neg_nat_eq_zero this]
 
-lemma dcoef_succ {α : ℂ} (hα : -1 < α.re) {N j : ℕ} (hj : j + 1 ≤ N) :
+theorem dcoef_succ {α : ℂ} (hα : -1 < α.re) {N j : ℕ} (hj : j + 1 ≤ N) :
     dcoef α N (j + 1) * ((α + j + 1) * (j - N) * (j + 1)) = dcoef α N j := by
   have h1 : poch (α + 1) j ≠ 0 := poch_ne_zero_of_re_pos (by simp; linarith) j
   have h2 : poch (-(N : ℂ)) j ≠ 0 := by
@@ -2594,7 +2589,7 @@ theorem hahn_recurrence {α β : ℂ} (hα : -1 < α.re) {N n : ℕ} (hn : n + 1
 
 
 /-- The inner Chu–Vandermonde sum for the explicit Meixner formula. -/
-lemma meixner_explicit_inner {n j : ℕ} (hj : j ≤ n) (x β : ℂ) :
+theorem meixner_explicit_inner {n j : ℕ} (hj : j ≤ n) (x β : ℂ) :
     ∑ k ∈ Finset.range (n + 1), (-1 : ℂ) ^ k * n.choose k * k.choose j * poch (-x) k *
       poch (β + k) (n - k) = (-1 : ℂ) ^ j * n.choose j * poch (-x) j * poch (x + β) (n - j) := by
   rw [← Finset.sum_range_add_sum_Ico _ (by omega : j ≤ n + 1)]

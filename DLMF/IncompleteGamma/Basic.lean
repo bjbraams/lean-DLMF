@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.ErrorFunctions.Basic
-public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
+public import DLMF.ExpIntegrals.Basic
+public import DLMF.Statistical.IncompleteGamma
 
 /-!
 # Incomplete Gamma continuation, definitions and differential equations, DLMF §8.2
@@ -212,7 +212,7 @@ theorem lowerIncGamma_parameter_analytic {a z : ℂ} (ha : ∀ n : ℕ, a ≠ -n
   exact (lowerIncGamma_eq_regularized hb z).symm
 
 /-- Near a nonpositive integer, all other points avoid the nonpositive integers. -/
-lemma eventually_nhdsNE_neg_nat_ne (n : ℕ) :
+theorem eventually_nhdsNE_neg_nat_ne (n : ℕ) :
     ∀ᶠ a : ℂ in 𝓝[≠] (-(n : ℂ)), ∀ m : ℕ, a ≠ -m := by
   have hb : Metric.ball (-(n : ℂ)) 1 ∈ 𝓝 (-(n : ℂ)) := Metric.ball_mem_nhds _ one_pos
   filter_upwards [nhdsWithin_le_nhds hb, self_mem_nhdsWithin] with a ha hne m hm
@@ -227,7 +227,7 @@ lemma eventually_nhdsNE_neg_nat_ne (n : ℕ) :
     rw [abs_lt] at ha; linarith
 
 /-- The residue of Gamma at a nonpositive integer. -/
-lemma tendsto_add_nat_mul_Gamma (n : ℕ) :
+theorem tendsto_add_nat_mul_Gamma (n : ℕ) :
     Tendsto (fun a : ℂ => (a+n)*Gamma a) (𝓝[≠] (-(n : ℂ))) (𝓝 ((-1 : ℂ)^n/n.factorial)) := by
   induction n with
   | zero => simpa using tendsto_self_mul_Gamma_nhds_zero
@@ -268,12 +268,12 @@ lemma tendsto_add_nat_mul_Gamma (n : ℕ) :
     ring
 
 /-- `𝐌(a,a+1,-z)` is the scaled incomplete Gamma function. -/
-lemma regularizedConfluent_self_succ_neg (a z : ℂ) :
+theorem regularizedConfluent_self_succ_neg (a z : ℂ) :
     regularizedHGFun {a} {a+1} (-z) = scIncGamma a z := by
   rw [regularizedConfluent_kummer_transform a (a+1) (-z), show a+1-a=1 by ring, neg_neg,
     scIncGamma]
 
-lemma continuous_scIncGamma_param (z : ℂ) : Continuous fun a => scIncGamma a z := by
+theorem continuous_scIncGamma_param (z : ℂ) : Continuous fun a => scIncGamma a z := by
   have h : Continuous fun c : ℂ => regularizedHGFun {1} {c+1} z :=
     continuous_regularizedConfluent.comp (f := fun c : ℂ => ((1:ℂ), c + 1, z)) (by fun_prop)
   exact continuous_const.mul h
@@ -334,7 +334,7 @@ theorem lowerIncGamma_parameter_residue (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
   ring
 
 /-- Derivative of `𝐌(p,q,-u)`. -/
-lemma hasDerivAt_regularizedConfluent_neg (p q w : ℂ) :
+theorem hasDerivAt_regularizedConfluent_neg (p q w : ℂ) :
     HasDerivAt (fun u => regularizedHGFun {p} {q} (-u))
       (-(p*regularizedHGFun {p+1} {q+1} (-w))) w := by
   have h := (differentiableAt_regularizedConfluent p q (-w)).hasDerivAt
@@ -429,7 +429,7 @@ theorem upperIncGammaOnLog_parameter_entire (w : ℂ) :
   · exact (hA b h).differentiableWithinAt
 
 /-- The regular parameters are dense. -/
-lemma dense_regular_param : Dense {a : ℂ | ∀ n : ℕ, a ≠ -n} := by
+theorem dense_regular_param : Dense {a : ℂ | ∀ n : ℕ, a ≠ -n} := by
   have hc : (Set.range fun n : ℕ => -(n:ℂ)).Countable := Set.countable_range _
   convert hc.dense_compl ℂ using 1
   ext a; simp [eq_comm]
@@ -458,13 +458,13 @@ theorem upperIncGammaOnLog_add_one (a w : ℂ) :
   ring
 
 /-- Non-integral parameters are dense. -/
-lemma dense_nonint_param : Dense {a : ℂ | ∀ n : ℤ, a ≠ n} := by
+theorem dense_nonint_param : Dense {a : ℂ | ∀ n : ℤ, a ≠ n} := by
   have hc : (Set.range fun n : ℤ => (n:ℂ)).Countable := Set.countable_range _
   convert hc.dense_compl ℂ using 1
   ext a; simp [eq_comm]
 
 /-- `exp (ε π i) = -1` for `ε = ±1`. -/
-lemma exp_eps_pi_I {ε : ℝ} (hε : ε=1 ∨ ε = -1) : exp (ε*π*I) = -1 := by
+theorem exp_eps_pi_I {ε : ℝ} (hε : ε=1 ∨ ε = -1) : exp (ε*π*I) = -1 := by
   rcases hε with rfl | rfl
   · simp
   · simp [neg_mul]

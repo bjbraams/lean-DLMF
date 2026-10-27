@@ -6,12 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.Analysis.Complex.TaylorSeries
-public import DLMF.Gamma.Digamma
-public import DLMF.Gamma.SpecialValues
 public import DLMF.Gamma.Polygamma
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Cotangent
 public import Mathlib.NumberTheory.LSeries.RiemannZeta
-public import Mathlib.NumberTheory.ZetaValues
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Digamma
 public import Mathlib.Analysis.Real.Pi.Bounds
 
@@ -138,7 +134,7 @@ theorem digamma_one_add_zeta {z : ℂ} (hz : ‖z‖ < 1) :
 /-! ### The recurrence for the coefficients of `1/Γ` and the ζ-series of `log Γ(1+z)` -/
 
 /-- Absolute convergence inside the disc of convergence. -/
-lemma summable_norm_mul_pow_of_summable {b : ℕ → ℂ} {r : ℝ} (e : ℕ)
+theorem summable_norm_mul_pow_of_summable {b : ℕ → ℂ} {r : ℝ} (e : ℕ)
     (h : ∀ w : ℂ, ‖w‖ < r → Summable fun n => b n * w ^ (n + e)) {z : ℂ} (hz : ‖z‖ < r) :
     Summable fun n => ‖b n * z ^ (n + e)‖ := by
   set ρ : ℝ := (‖z‖ + r) / 2 with hρ
@@ -163,7 +159,7 @@ lemma summable_norm_mul_pow_of_summable {b : ℕ → ℂ} {r : ℝ} (e : ℕ)
   exact mul_le_mul_of_nonneg_right hn (by positivity)
 
 /-- Uniqueness of power-series coefficients. -/
-lemma eq_zero_of_hasSum_pow {d : ℕ → ℂ} {r : ℝ} (hr : 0 < r) (h0 : d 0 = 0)
+theorem eq_zero_of_hasSum_pow {d : ℕ → ℂ} {r : ℝ} (hr : 0 < r) (h0 : d 0 = 0)
     (h : ∀ z : ℂ, z ≠ 0 → ‖z‖ < r → HasSum (fun n => d n * z ^ n) 0) (n : ℕ) : d n = 0 := by
   have h' : ∀ z : ℂ, ‖z‖ < r → HasSum (fun n => d n * z ^ n) 0 := by
     intro z hz
@@ -198,14 +194,14 @@ lemma eq_zero_of_hasSum_pow {d : ℕ → ℂ} {r : ℝ} (hr : 0 < r) (h0 : d 0 =
   have hd := (FormalMultilinearSeries.ofScalars_series_eq_zero ℂ).mp this
   exact congrFun hd n
 
-lemma differentiable_recip_Gamma' : Differentiable ℂ fun z : ℂ => (Complex.Gamma z)⁻¹ := by
+theorem differentiable_recip_Gamma' : Differentiable ℂ fun z : ℂ => (Complex.Gamma z)⁻¹ := by
   simpa [one_div] using Complex.differentiable_one_div_Gamma
 
-lemma recipGammaCoeff_zero : recipGammaCoeff 0 = 0 := by
+theorem recipGammaCoeff_zero : recipGammaCoeff 0 = 0 := by
   simp [recipGammaCoeff, Complex.Gamma_zero]
 
 /-- Taylor series of the derivative of `1/Γ`. -/
-lemma hasSum_deriv_recipGamma (z : ℂ) :
+theorem hasSum_deriv_recipGamma (z : ℂ) :
     HasSum (fun k : ℕ => ((k : ℂ) + 1) * recipGammaCoeff (k + 1) * z ^ k)
       (deriv (fun w : ℂ => (Complex.Gamma w)⁻¹) z) := by
   have hd : Differentiable ℂ (deriv fun w : ℂ => (Complex.Gamma w)⁻¹) := by
@@ -222,7 +218,7 @@ lemma hasSum_deriv_recipGamma (z : ℂ) :
   field_simp
 
 /-- `z (1/Γ)'(z) = (1/Γ)(z) - z ψ(1+z) (1/Γ)(z)` in the punctured unit disc. -/
-lemma mul_deriv_recipGamma {z : ℂ} (hz0 : z ≠ 0) (hz : ‖z‖ < 1) :
+theorem mul_deriv_recipGamma {z : ℂ} (hz0 : z ≠ 0) (hz : ‖z‖ < 1) :
     z * deriv (fun w : ℂ => (Complex.Gamma w)⁻¹) z =
       (Complex.Gamma z)⁻¹ - z * (Complex.digamma (1 + z) + Real.eulerMascheroniConstant) *
         (Complex.Gamma z)⁻¹ + Real.eulerMascheroniConstant * z * (Complex.Gamma z)⁻¹ := by
@@ -325,7 +321,7 @@ theorem recipGammaCoeff_recurrence {k : ℕ} (hk : 1 < k) :
   linear_combination this
 
 /-- `0 ≤ ζ(k+2) - 1 ≤ 2^{-k}`, in norm. -/
-lemma norm_riemannZeta_add_two_sub_one_le (k : ℕ) :
+theorem norm_riemannZeta_add_two_sub_one_le (k : ℕ) :
     ‖riemannZeta (k + 2) - 1‖ ≤ (1 / 2 : ℝ) ^ k := by
   have hz := riemannZeta_nat_eq_tsum_succ (p := k + 2) (by omega)
   push_cast at hz
@@ -365,7 +361,7 @@ lemma norm_riemannZeta_add_two_sub_one_le (k : ℕ) :
 def logGammaZetaSeries (z : ℂ) : ℂ :=
   ∑' k : ℕ, (-1 : ℂ) ^ (k + 2) * (riemannZeta (k + 2) - 1) * z ^ (k + 2) / (k + 2)
 
-lemma norm_logGammaZetaSeries_le {z : ℂ} (hz : ‖z‖ < 1) : ‖logGammaZetaSeries z‖ ≤ 1 := by
+theorem norm_logGammaZetaSeries_le {z : ℂ} (hz : ‖z‖ < 1) : ‖logGammaZetaSeries z‖ ≤ 1 := by
   have hg : HasSum (fun k : ℕ => (1 / 2 : ℝ) ^ k * (1 / 2)) 1 := by
     convert hasSum_geometric_two.mul_right (1 / 2 : ℝ) using 1; norm_num
   refine tsum_of_norm_bounded hg fun k => ?_
@@ -383,7 +379,7 @@ lemma norm_logGammaZetaSeries_le {z : ℂ} (hz : ‖z‖ < 1) : ‖logGammaZetaS
     _ ≤ (1 / 2 : ℝ) ^ k * (((k : ℝ) + 2) * (1 / 2)) := by gcongr
     _ = _ := by ring
 
-lemma hasDerivAt_logGammaZetaSeries {z : ℂ} (hz : ‖z‖ < 1) :
+theorem hasDerivAt_logGammaZetaSeries {z : ℂ} (hz : ‖z‖ < 1) :
     HasDerivAt logGammaZetaSeries
       (Complex.digamma (1 + z) + Real.eulerMascheroniConstant - z / (1 + z)) z := by
   set e : ℕ → ℂ := fun k => (-1 : ℂ) ^ (k + 2) * (riemannZeta (k + 2) - 1)

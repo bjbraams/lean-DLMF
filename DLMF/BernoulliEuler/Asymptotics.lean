@@ -9,12 +9,9 @@ public import DLMF.BernoulliEuler.Basic
 public import DLMFMathlib.NumberTheory.EulerNumbers
 public import Mathlib.Analysis.SpecialFunctions.Stirling
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Series
-public import Mathlib.NumberTheory.ZetaValues
 public import Mathlib.NumberTheory.LSeries.Dirichlet
 public import Mathlib.NumberTheory.LSeries.Injectivity
 public import Mathlib.NumberTheory.LSeries.HurwitzZetaValues
-public import Mathlib.Topology.UniformSpace.UniformConvergence
-public import Mathlib.Tactic.CrossRefAttribute
 
 /-!
 # Asymptotic approximations of Bernoulli and Euler numbers and polynomials (DLMF §24.11)
@@ -194,7 +191,7 @@ def r24b_d (i : ℕ) : ℝ := if i % 2 = 0 then 2 * (-1) ^ (i / 2 + 1) else 0
 def r24b_a (p j : ℕ) : ℝ := if j % 2 = p then (-1) ^ (j / 2) else 0
 
 /-- `|c₂ₖ - d₂ₖ| = 2 (ζ(2k) - 1) ≤ 32 · 4⁻ᵏ` for `k ≥ 1`. -/
-theorem r24b_zeta_bound {k : ℕ} (hk : 1 ≤ k) :
+lemma r24b_zeta_bound {k : ℕ} (hk : 1 ≤ k) :
     |r24b_c (2 * k) - r24b_d (2 * k)| ≤ 32 / 2 ^ (2 * k) := by
   have hZ := hasSum_zeta_nat (show k ≠ 0 by omega)
   set Z := (-1 : ℝ) ^ (k + 1) * (2 : ℝ) ^ (2 * k - 1) * π ^ (2 * k) *
@@ -252,7 +249,7 @@ theorem r24b_zeta_bound {k : ℕ} (hk : 1 ≤ k) :
       gcongr; nlinarith
 
 /-- `|cᵢ - dᵢ| ≤ 32 · 2⁻ⁱ` for all `i`. -/
-theorem r24b_c_sub_d (i : ℕ) : |r24b_c i - r24b_d i| ≤ 32 / 2 ^ i := by
+lemma r24b_c_sub_d (i : ℕ) : |r24b_c i - r24b_d i| ≤ 32 / 2 ^ i := by
   rcases Nat.even_or_odd' i with ⟨k, rfl | rfl⟩
   · rcases Nat.eq_zero_or_pos k with rfl | hk
     · simp [r24b_c, r24b_d]; norm_num
@@ -267,7 +264,7 @@ theorem r24b_c_sub_d (i : ℕ) : |r24b_c i - r24b_d i| ≤ 32 / 2 ^ i := by
       positivity
 
 /-- For `n = 2m + p` (`p < 2`), `dᵢ = 2 (-1)^{m+1} a_p(n - i)`. -/
-theorem r24b_d_eq {p : ℕ} (hp : p < 2) (m i : ℕ) (hi : i ≤ 2 * m + p) :
+lemma r24b_d_eq {p : ℕ} (hp : p < 2) (m i : ℕ) (hi : i ≤ 2 * m + p) :
     r24b_d i = 2 * (-1) ^ (m + 1) * r24b_a p (2 * m + p - i) := by
   rcases Nat.even_or_odd' i with ⟨k, rfl | rfl⟩ <;> interval_cases p
   · obtain ⟨j, rfl⟩ := Nat.exists_eq_add_of_le (show k ≤ m by omega)
@@ -289,7 +286,7 @@ theorem r24b_d_eq {p : ℕ} (hp : p < 2) (m i : ℕ) (hi : i ≤ 2 * m + p) :
     simp [r24b_d, r24b_a, h2]; omega
 
 /-- `cos y = ∑ⱼ a₀(j) yʲ/j!`. -/
-theorem r24b_hasSum_a_cos (y : ℂ) :
+lemma r24b_hasSum_a_cos (y : ℂ) :
     HasSum (fun j => (r24b_a 0 j : ℂ) * y ^ j / j !) (Complex.cos y) := by
   rw [← (show Function.Injective (fun l : ℕ => 2 * l) from
     fun a b h => by simpa using h).hasSum_iff]
@@ -300,7 +297,7 @@ theorem r24b_hasSum_a_cos (y : ℂ) :
     simp [r24b_a, this]
 
 /-- `sin y = ∑ⱼ a₁(j) yʲ/j!`. -/
-theorem r24b_hasSum_a_sin (y : ℂ) :
+lemma r24b_hasSum_a_sin (y : ℂ) :
     HasSum (fun j => (r24b_a 1 j : ℂ) * y ^ j / j !) (Complex.sin y) := by
   rw [← (show Function.Injective (fun l : ℕ => 2 * l + 1) from
     fun a b h => by simpa using h).hasSum_iff]
@@ -313,7 +310,7 @@ theorem r24b_hasSum_a_sin (y : ℂ) :
     simp [r24b_a, this]
 
 /-- `(2π)ⁿ Bₙ(x)/n! = ∑ᵢ cᵢ (2πx)ⁿ⁻ⁱ/(n-i)!`. -/
-theorem r24b_bernoulli_expand (n : ℕ) (x : ℂ) :
+lemma r24b_bernoulli_expand (n : ℕ) (x : ℂ) :
     (2 * π : ℂ) ^ n / n ! * bernoulliPolyB n x =
       ∑ i ∈ range (n + 1), (r24b_c i : ℂ) * (2 * π * x) ^ (n - i) / (n - i)! := by
   rw [bernoulliPolyB, Polynomial.bernoulli, map_sum, mul_sum]
@@ -332,16 +329,16 @@ theorem r24b_bernoulli_expand (n : ℕ) (x : ℂ) :
   ring
 
 /-- The `cos`/`sin` coefficients are bounded by `1`. -/
-theorem r24b_abs_a_le (p j : ℕ) : |r24b_a p j| ≤ 1 := by
+lemma r24b_abs_a_le (p j : ℕ) : |r24b_a p j| ≤ 1 := by
   unfold r24b_a; split_ifs <;> simp
 
 /-- The exponential series of a real number. -/
-theorem r24b_hasSum_exp_real (R : ℝ) : HasSum (fun j => R ^ j / j !) (Real.exp R) := by
+lemma r24b_hasSum_exp_real (R : ℝ) : HasSum (fun j => R ^ j / j !) (Real.exp R) := by
   rw [Real.exp_eq_exp_ℝ]; exact NormedSpace.expSeries_div_hasSum_exp R
 
 /-- The core estimate for 24.11.5: the normalized `Bₙ(x)`, `n = 2m + p`, differs from `cos`/`sin`
 by at most `16 · 2⁻ⁿ e^{2R} + (e^R - ∑_{j ≤ n} Rʲ/j!)` when `‖2πx‖ ≤ R`. -/
-theorem r24b_core {p : ℕ} (hp : p < 2) (m n : ℕ) (hn : n = 2 * m + p) (x : ℂ) {r : ℝ}
+lemma r24b_core {p : ℕ} (hp : p < 2) (m n : ℕ) (hn : n = 2 * m + p) (x : ℂ) {r : ℝ}
     (hx : ‖x‖ ≤ r) {G : ℂ}
     (hG : HasSum (fun j => (r24b_a p j : ℂ) * (2 * π * x) ^ j / j !) G) :
     ‖(-1 : ℂ) ^ ((m : ℤ) - 1) * (2 * π) ^ n / (2 * n !) * bernoulliPolyB n x - G‖ ≤
@@ -424,7 +421,7 @@ noncomputable def r24b_err (p m : ℕ) (r : ℝ) : ℝ :=
     (Real.exp (2 * π * r) - ∑ j ∈ range (2 * m + p + 1), (2 * π * r) ^ j / j !)
 
 /-- The error bound tends to `0`. -/
-theorem r24b_err_tendsto (p : ℕ) (r : ℝ) : Tendsto (fun m => r24b_err p m r) atTop (𝓝 0) := by
+lemma r24b_err_tendsto (p : ℕ) (r : ℝ) : Tendsto (fun m => r24b_err p m r) atTop (𝓝 0) := by
   have hn : Tendsto (fun m : ℕ => 2 * m + p) atTop atTop :=
     tendsto_atTop_atTop.mpr fun b => ⟨b, fun a ha => by omega⟩
   have h1 : Tendsto (fun m : ℕ => 16 / 2 ^ (2 * m + p) * Real.exp (2 * (2 * π * r))) atTop
@@ -442,7 +439,7 @@ theorem r24b_err_tendsto (p : ℕ) (r : ℝ) : Tendsto (fun m => r24b_err p m r)
   simpa [r24b_err] using h1.add h2
 
 /-- Uniform convergence from a uniform error bound tending to `0`. -/
-theorem r24b_tendstoUniformlyOn_of_le {F : ℕ → ℂ → ℂ} {G : ℂ → ℂ} {K : Set ℂ} (e : ℕ → ℝ)
+lemma r24b_tendstoUniformlyOn_of_le {F : ℕ → ℂ → ℂ} {G : ℂ → ℂ} {K : Set ℂ} (e : ℕ → ℝ)
     (he : Tendsto e atTop (𝓝 0)) (h : ∀ m x, x ∈ K → ‖F m x - G x‖ ≤ e m) :
     TendstoUniformlyOn F G atTop K := by
   refine Metric.tendstoUniformlyOn_iff.mpr fun ε hε => ?_
@@ -451,19 +448,19 @@ theorem r24b_tendstoUniformlyOn_of_le {F : ℕ → ℂ → ℂ} {G : ℂ → ℂ
   exact (h m x hx).trans_lt hm
 
 /-- The error bound for the even Bernoulli limit (24.11.5). -/
-theorem r24b_bernoulli_even_bound (m : ℕ) (x : ℂ) {r : ℝ} (hx : ‖x‖ ≤ r) :
+lemma r24b_bernoulli_even_bound (m : ℕ) (x : ℂ) {r : ℝ} (hx : ‖x‖ ≤ r) :
     ‖(-1 : ℂ) ^ ((m : ℤ) - 1) * (2 * π) ^ (2 * m) / (2 * (2 * m)!) * bernoulliPolyB (2 * m) x -
       Complex.cos (2 * π * x)‖ ≤ r24b_err 0 m r :=
   r24b_core (p := 0) (by norm_num) m (2 * m) (by ring) x hx (r24b_hasSum_a_cos _)
 
 /-- The error bound for the odd Bernoulli limit (24.11.5). -/
-theorem r24b_bernoulli_odd_bound (m : ℕ) (x : ℂ) {r : ℝ} (hx : ‖x‖ ≤ r) :
+lemma r24b_bernoulli_odd_bound (m : ℕ) (x : ℂ) {r : ℝ} (hx : ‖x‖ ≤ r) :
     ‖(-1 : ℂ) ^ ((m : ℤ) - 1) * (2 * π) ^ (2 * m + 1) / (2 * (2 * m + 1)!) *
         bernoulliPolyB (2 * m + 1) x - Complex.sin (2 * π * x)‖ ≤ r24b_err 1 m r :=
   r24b_core (p := 1) (by norm_num) m (2 * m + 1) rfl x hx (r24b_hasSum_a_sin _)
 
 /-- `Eₙ(x) = 2^{n+1} (B_{n+1}(x/2 + 1/2) - B_{n+1}(x/2))/(n+1)` at complex `x`. -/
-theorem r24b_eulerPolyE_eq (n : ℕ) (x : ℂ) :
+lemma r24b_eulerPolyE_eq (n : ℕ) (x : ℂ) :
     eulerPolyE n x = 2 ^ (n + 1) * (bernoulliPolyB (n + 1) (x / 2 + 1 / 2) -
       bernoulliPolyB (n + 1) (x / 2)) / (n + 1) := by
   have he := congrArg (aeval x) (euler_eq_bernoulli n)
@@ -479,7 +476,7 @@ theorem r24b_eulerPolyE_eq (n : ℕ) (x : ℂ) :
   rw [eq_div_iff hn]; push_cast at he; linear_combination he
 
 /-- `‖x/2‖, ‖x/2 + 1/2‖ ≤ r + 1` when `‖x‖ ≤ r`. -/
-theorem r24b_norm_half_le {x : ℂ} {r : ℝ} (hx : ‖x‖ ≤ r) :
+lemma r24b_norm_half_le {x : ℂ} {r : ℝ} (hx : ‖x‖ ≤ r) :
     ‖x / 2‖ ≤ r + 1 ∧ ‖x / 2 + 1 / 2‖ ≤ r + 1 := by
   have h0 : 0 ≤ r := (norm_nonneg _).trans hx
   have h1 : ‖x / 2‖ ≤ r / 2 := by rw [norm_div, Complex.norm_ofNat]; linarith

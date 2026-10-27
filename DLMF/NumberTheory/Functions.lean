@@ -5,19 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.NumberTheory.ArithmeticFunction.Moebius
-public import Mathlib.NumberTheory.ArithmeticFunction.VonMangoldt
 public import Mathlib.NumberTheory.ArithmeticFunction.Liouville
-public import Mathlib.NumberTheory.ArithmeticFunction.Misc
-public import Mathlib.NumberTheory.PrimeCounting
 public import Mathlib.Algebra.Order.Antidiag.Nat
-public import Mathlib.Data.Nat.Totient
-public import Mathlib.Data.Nat.Prime.Nth
-public import Mathlib.Data.Nat.Squarefree
-public import Mathlib.FieldTheory.Finite.Basic
-public import Mathlib.Analysis.SpecialFunctions.Pow.Complex
-public import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
-public import Mathlib.Analysis.Asymptotics.AsymptoticEquivalent
 public import Mathlib.Data.Finset.NatDivisors
 public import DLMFMathlib.NumberTheory.T27aPrimeNumberTheorem
 
@@ -401,7 +390,7 @@ section q27
 open scoped ArithmeticFunction.zeta
 
 /-- Recursion for the ordered factorizations: split off the first factor. -/
-theorem q27_card_finMulAntidiag_succ (k n : ℕ) :
+lemma q27_card_finMulAntidiag_succ (k n : ℕ) :
     (Nat.finMulAntidiag (k + 1) n).card =
       ∑ ab ∈ n.divisorsAntidiagonal, (Nat.finMulAntidiag k ab.2).card := by
   rw [card_eq_sum_card_fiberwise (f := fun g : Fin (k + 1) → ℕ ↦ (g 0, ∏ i, Fin.tail g i))
@@ -536,7 +525,7 @@ theorem q27_sum_divisors_jordanTotient (k : ℕ) {n : ℕ} (hn : 0 < n) :
 
 
 /-- `J_k(0) = 0`. -/
-theorem q27_jordanTotient_zero_right (k : ℕ) : jordanTotient k 0 = 0 := by
+lemma q27_jordanTotient_zero_right (k : ℕ) : jordanTotient k 0 = 0 := by
   rcases k with _ | k
   · decide
   · simp [jordanTotient]
@@ -546,7 +535,7 @@ def q27_jordanAF (k : ℕ) : ArithmeticFunction ℤ :=
   ⟨fun n ↦ jordanTotient k n, by simp [q27_jordanTotient_zero_right]⟩
 
 /-- Möbius inversion of `∑_{d∣n} J_k(d) = n^k`: `J_k = μ * n^k`. -/
-theorem q27_jordanAF_eq (k : ℕ) :
+lemma q27_jordanAF_eq (k : ℕ) :
     q27_jordanAF k = (μ : ArithmeticFunction ℤ) * (pow k : ArithmeticFunction ℤ) := by
   have h : (ζ : ArithmeticFunction ℤ) * q27_jordanAF k = (pow k : ArithmeticFunction ℤ) := by
     ext n
@@ -558,12 +547,12 @@ theorem q27_jordanAF_eq (k : ℕ) :
   rw [← h, ← mul_assoc, moebius_mul_coe_zeta, one_mul]
 
 /-- `J_k` is multiplicative. -/
-theorem q27_isMultiplicative_jordanAF (k : ℕ) : (q27_jordanAF k).IsMultiplicative := by
+lemma q27_isMultiplicative_jordanAF (k : ℕ) : (q27_jordanAF k).IsMultiplicative := by
   rw [q27_jordanAF_eq]
   exact isMultiplicative_moebius.mul isMultiplicative_pow.natCast
 
 /-- `J_k` is multiplicative (all `k`). -/
-theorem q27_isMultiplicativeFn_jordanTotient (k : ℕ) :
+lemma q27_isMultiplicativeFn_jordanTotient (k : ℕ) :
     IsMultiplicativeFn (jordanTotient k) := by
   have h := (isMultiplicative_iff_isMultiplicativeFn _).mp (q27_isMultiplicative_jordanAF k)
   refine ⟨?_, fun m n hm hn hmn ↦ ?_⟩
@@ -574,7 +563,7 @@ theorem q27_isMultiplicativeFn_jordanTotient (k : ℕ) :
     exact_mod_cast h2
 
 /-- `J_k(p^{e+1}) = p^{(e+1)k} - p^{ek}`. -/
-theorem q27_jordanTotient_prime_pow (k : ℕ) {p : ℕ} (hp : p.Prime) (e : ℕ) :
+lemma q27_jordanTotient_prime_pow (k : ℕ) {p : ℕ} (hp : p.Prime) (e : ℕ) :
     (jordanTotient k (p ^ (e + 1)) : ℤ) = (p : ℤ) ^ ((e + 1) * k) - (p : ℤ) ^ (e * k) := by
   have h1 := q27_sum_divisors_jordanTotient k (pow_pos hp.pos (e + 1))
   have h2 := q27_sum_divisors_jordanTotient k (pow_pos hp.pos e)
@@ -696,7 +685,7 @@ theorem sigmaC_eq_prod {α : ℂ} {n : ℕ} (hn : n ≠ 0)
   ring
 
 /-- `G(m + n + 1) = G(m) + x^{m+1} G(n)` for `G(j) = ∑_{i ≤ j} x^i`. -/
-theorem s27_geom_split {R : Type*} [CommRing R] (x : R) (m n : ℕ) :
+lemma s27_geom_split {R : Type*} [CommRing R] (x : R) (m n : ℕ) :
     ∑ i ∈ range (m + n + 2), x ^ i =
       ∑ i ∈ range (m + 1), x ^ i + x ^ (m + 1) * ∑ i ∈ range (n + 1), x ^ i := by
   rw [show m + n + 2 = (m + 1) + (n + 1) by ring, sum_range_add, mul_sum]
@@ -704,7 +693,7 @@ theorem s27_geom_split {R : Type*} [CommRing R] (x : R) (m n : ℕ) :
   exact sum_congr rfl fun i _ ↦ by rw [pow_add]
 
 /-- Prime-power case of 27.3.7: `∑_{k ≤ a} x^k G(2a + t - 2k) = G(a) G(a + t)`. -/
-theorem s27_geom_hecke {R : Type*} [CommRing R] (x : R) (a t : ℕ) :
+lemma s27_geom_hecke {R : Type*} [CommRing R] (x : R) (a t : ℕ) :
     ∑ k ∈ range (a + 1), x ^ k * ∑ i ∈ range (2 * a + t - 2 * k + 1), x ^ i =
       (∑ i ∈ range (a + 1), x ^ i) * ∑ i ∈ range (a + t + 1), x ^ i := by
   induction a with
@@ -734,19 +723,19 @@ theorem s27_geom_hecke {R : Type*} [CommRing R] (x : R) (a t : ℕ) :
 
 
 /-- `(p^i)^α = (p^α)^i`. -/
-theorem s27_natPow_cpow (p i : ℕ) (α : ℂ) : (((p ^ i : ℕ) : ℂ)) ^ α = ((p : ℂ) ^ α) ^ i := by
+lemma s27_natPow_cpow (p i : ℕ) (α : ℂ) : (((p ^ i : ℕ) : ℂ)) ^ α = ((p : ℂ) ^ α) ^ i := by
   induction i with
   | zero => simp
   | succ i ih => rw [pow_succ, Nat.cast_mul, Complex.natCast_mul_natCast_cpow, ih, pow_succ]
 
 /-- `σ_α(p^j) = ∑_{i ≤ j} (p^α)^i`. -/
-theorem s27_sigmaC_prime_pow (α : ℂ) {p : ℕ} (hp : p.Prime) (j : ℕ) :
+lemma s27_sigmaC_prime_pow (α : ℂ) {p : ℕ} (hp : p.Prime) (j : ℕ) :
     sigmaC α (p ^ j) = ∑ i ∈ range (j + 1), ((p : ℂ) ^ α) ^ i := by
   rw [sigmaC_apply, Nat.sum_divisors_prime_pow hp]
   exact sum_congr rfl fun i _ ↦ s27_natPow_cpow p i α
 
 /-- 27.3.7 for prime powers. -/
-theorem s27_sigmaC_hecke_prime_pow (α : ℂ) {p : ℕ} (hp : p.Prime) (a b : ℕ) :
+lemma s27_sigmaC_hecke_prime_pow (α : ℂ) {p : ℕ} (hp : p.Prime) (a b : ℕ) :
     ∑ d ∈ (p ^ min a b).divisors, (d : ℂ) ^ α * sigmaC α (p ^ (a + b) / d ^ 2) =
       sigmaC α (p ^ a) * sigmaC α (p ^ b) := by
   wlog hab : a ≤ b generalizing a b
@@ -776,7 +765,7 @@ theorem s27_gcd_split {p a b m' n' : ℕ} (hm : p.Coprime m') (hn : p.Coprime n'
 
 
 /-- Splitting off the `p`-part of the right side of 27.3.7. -/
-theorem s27_hecke_split (α : ℂ) {p a b m' n' : ℕ} (hm : p.Coprime m')
+lemma s27_hecke_split (α : ℂ) {p a b m' n' : ℕ} (hm : p.Coprime m')
     (hn : p.Coprime n') :
     ∑ d ∈ ((p ^ a * m').gcd (p ^ b * n')).divisors,
         (d : ℂ) ^ α * sigmaC α (p ^ a * m' * (p ^ b * n') / d ^ 2) =
@@ -809,7 +798,7 @@ theorem s27_hecke_split (α : ℂ) {p a b m' n' : ℕ} (hm : p.Coprime m')
 
 
 /-- DLMF 27.3.7 (proof). -/
-theorem s27_sigmaC_mul_sigmaC (α : ℂ) {m n : ℕ} (hm : 0 < m) (hn : 0 < n) :
+lemma s27_sigmaC_mul_sigmaC (α : ℂ) {m n : ℕ} (hm : 0 < m) (hn : 0 < n) :
     sigmaC α m * sigmaC α n =
       ∑ d ∈ (m.gcd n).divisors, (d : ℂ) ^ α * sigmaC α (m * n / d ^ 2) := by
   induction h : m * n using Nat.strong_induction_on generalizing m n with

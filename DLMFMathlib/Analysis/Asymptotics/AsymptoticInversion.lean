@@ -8,7 +8,6 @@ module
 public import DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion
 public import Mathlib.RingTheory.PowerSeries.Substitution
 public import Mathlib.RingTheory.PowerSeries.Inverse
-public import Mathlib.RingTheory.PowerSeries.Trunc
 public import Mathlib.Topology.Algebra.Polynomial
 public import Mathlib.Analysis.Analytic.Basic
 

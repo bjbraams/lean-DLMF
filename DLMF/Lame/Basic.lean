@@ -7,7 +7,7 @@ module
 
 public import DLMF.JacobiElliptic.Basic
 public import DLMF.Weierstrass.Basic
-public import Mathlib.Data.Set.Card
+public import DLMF.Elliptic.Jacobi
 
 /-!
 # Lamé functions: definitions (DLMF §§29.1–29.3, 29.6, 29.9, 29.11)

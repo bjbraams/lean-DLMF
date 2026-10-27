@@ -7,7 +7,6 @@ Authors: Michael Stoll, Bastiaan J Braams
 module
 
 public import Mathlib.Analysis.SpecialFunctions.Complex.LogBounds
-public import Mathlib.Topology.Order.Compact
 
 /-!
 # Natural convergence of the complex logarithm series on its closed disk
@@ -23,7 +22,7 @@ open scoped Topology
 namespace Complex
 
 /-- The logarithm remainder has a uniform path bound, independent of its order. -/
-lemma exists_norm_log_sub_logTaylor_le {z : ℂ} (hz : 1+z∈slitPlane) :
+theorem exists_norm_log_sub_logTaylor_le {z : ℂ} (hz : 1+z∈slitPlane) :
     ∃ C : ℝ, 0≤C ∧ ∀ n : ℕ,
       ‖log (1+z)-logTaylor (n+1) z‖≤‖z‖^(n+1)*C/(n+1) := by
   have hi := continuousOn_one_add_mul_inv hz
@@ -63,7 +62,7 @@ lemma exists_norm_log_sub_logTaylor_le {z : ℂ} (hz : 1+z∈slitPlane) :
       simp [field]
 
 /-- Adding one to a closed-unit-disk point other than minus one gives a slit-plane point. -/
-lemma one_add_mem_slitPlane_of_norm_le_one {z : ℂ} (hz : ‖z‖≤1) (hne : z≠ -1) :
+theorem one_add_mem_slitPlane_of_norm_le_one {z : ℂ} (hz : ‖z‖≤1) (hne : z≠ -1) :
     1+z∈slitPlane := by
   have hs : z.re^2+z.im^2≤1 := by
     have h:=Complex.sq_norm z
@@ -81,7 +80,7 @@ lemma one_add_mem_slitPlane_of_norm_le_one {z : ℂ} (hz : ‖z‖≤1) (hne : z
   simpa using (show 0<1+z.re by linarith)
 
 /-- The complex log Taylor polynomials converge in natural order at every valid closed-disk point. -/
-lemma tendsto_logTaylor_closed {z : ℂ} (hz : ‖z‖≤1) (hne : z≠ -1) :
+theorem tendsto_logTaylor_closed {z : ℂ} (hz : ‖z‖≤1) (hne : z≠ -1) :
     Tendsto (fun n : ℕ => logTaylor (n+1) z) atTop (𝓝 (log (1+z))) := by
   obtain ⟨C,hC,hbound⟩ := exists_norm_log_sub_logTaylor_le
     (one_add_mem_slitPlane_of_norm_le_one hz hne)

@@ -33,7 +33,7 @@ namespace DLMF.BernoulliEuler
 /-- The `N`-th finite difference of a polynomial of degree `< N` vanishes:
 `∑_{k=0}^{N} (-1)ᵏ (N choose k) P(k) = 0`. -/
 
-theorem q24a_alt_sum_poly_eq_zero (c : ℕ → ℂ) (N : ℕ) :
+lemma q24a_alt_sum_poly_eq_zero (c : ℕ → ℂ) (N : ℕ) :
     ∑ k ∈ range (N + 1), (-1 : ℂ) ^ k * (N.choose k : ℂ) *
       ∑ i ∈ range N, c i * (k : ℂ) ^ i = 0 := by
   have h := congrFun (fwdDiff_iter_sum_mul_pow_eq_zero (R := ℂ) (n := N) c) 0
@@ -51,7 +51,7 @@ theorem q24a_alt_sum_poly_eq_zero (c : ℕ → ℂ) (N : ℕ) :
   rw [this, h, mul_zero]
 /-- Variant for a function given by a polynomial of degree `< N` at the integers. -/
 
-theorem q24a_alt_sum_eq_zero_of_poly (f : ℕ → ℂ) (c : ℕ → ℂ) (N : ℕ)
+lemma q24a_alt_sum_eq_zero_of_poly (f : ℕ → ℂ) (c : ℕ → ℂ) (N : ℕ)
     (hf : ∀ k, f k = ∑ i ∈ range N, c i * (k : ℂ) ^ i) :
     ∑ k ∈ range (N + 1), (-1 : ℂ) ^ k * (N.choose k : ℂ) * f k = 0 := by
   simp only [hf]; exact q24a_alt_sum_poly_eq_zero c N
@@ -71,7 +71,7 @@ theorem q24a_alt_sum_pow_eq_zero (x : ℂ) {m k : ℕ} (hmk : m < k) :
   simp only [hi', ↓reduceIte]; ring
 /-- Alternating binomial sums as iterated forward differences. -/
 
-theorem q24a_alt_sum_eq_fwdDiff (f : ℂ → ℂ) (k : ℕ) (x : ℂ) :
+lemma q24a_alt_sum_eq_fwdDiff (f : ℂ → ℂ) (k : ℕ) (x : ℂ) :
     ∑ j ∈ range (k + 1), (-1 : ℂ) ^ j * (k.choose j : ℂ) * f (x + j) =
       (-1) ^ k * (fwdDiff 1)^[k] f x := by
   rw [fwdDiff_iter_eq_sum_shift, mul_sum]
@@ -83,7 +83,7 @@ theorem q24a_alt_sum_eq_fwdDiff (f : ℂ → ℂ) (k : ℕ) (x : ℂ) :
   norm_num
 /-- `Δᵏf(x+1) = Δᵏ⁺¹f(x) + Δᵏf(x)`. -/
 
-theorem q24a_fwdDiff_iter_add_one (f : ℂ → ℂ) (k : ℕ) (x : ℂ) :
+lemma q24a_fwdDiff_iter_add_one (f : ℂ → ℂ) (k : ℕ) (x : ℂ) :
     (fwdDiff 1)^[k] f (x + 1) = (fwdDiff 1)^[k + 1] f x + (fwdDiff 1)^[k] f x := by
   rw [Function.iterate_succ_apply', fwdDiff]; ring
 
@@ -93,20 +93,20 @@ noncomputable def q24a_c (k m : ℕ) : ℂ :=
 
 /-- `c(k, m) = 0` for `m < k`. -/
 
-theorem q24a_c_eq_zero {k m : ℕ} (h : m < k) : q24a_c k m = 0 := by
+lemma q24a_c_eq_zero {k m : ℕ} (h : m < k) : q24a_c k m = 0 := by
   have := q24a_alt_sum_pow_eq_zero 0 h
   simpa [q24a_c] using this
 
 /-- Extending a binomial-weighted sum beyond `k`. -/
 
-theorem q24a_sum_choose_extend (a : ℕ → ℂ) {k M : ℕ} (h : k + 1 ≤ M) :
+lemma q24a_sum_choose_extend (a : ℕ → ℂ) {k M : ℕ} (h : k + 1 ≤ M) :
     ∑ j ∈ range (k + 1), (k.choose j : ℂ) * a j = ∑ j ∈ range M, (k.choose j : ℂ) * a j := by
   refine sum_subset (range_subset_range.mpr h) fun j _ hj => ?_
   rw [Nat.choose_eq_zero_of_lt (by simpa using hj)]; simp
 
 /-- Hockey stick: `∑_{k<N} (k choose j) = (N choose j+1)`. -/
 
-theorem q24a_sum_range_choose (N j : ℕ) :
+lemma q24a_sum_range_choose (N j : ℕ) :
     ∑ k ∈ range N, (k.choose j : ℂ) = (N.choose (j + 1) : ℂ) := by
   induction N with
   | zero => simp
@@ -114,7 +114,7 @@ theorem q24a_sum_range_choose (N j : ℕ) :
 
 /-- Pascal recursion for `c`: `∑_j (-1)ʲ (k choose j)(j+1)ᴺ = c(k, N) - c(k+1, N)`. -/
 
-theorem q24a_c_shift (k N : ℕ) :
+lemma q24a_c_shift (k N : ℕ) :
     ∑ j ∈ range (k + 1), (-1 : ℂ) ^ j * (k.choose j : ℂ) * ((j : ℂ) + 1) ^ N =
       q24a_c k N - q24a_c (k + 1) N := by
   have h1 := q24a_alt_sum_eq_fwdDiff (fun y => y ^ N) k (0 + 1)
@@ -130,7 +130,7 @@ theorem q24a_c_shift (k N : ℕ) :
 
 /-- Newton's `log(1 + Δ) = D` at `0`: `∑_{k=1}^{N} c(k, N)/k = -[N = 1]` for `N ≥ 1`. -/
 
-theorem q24a_sum_c_div (N : ℕ) (hN : 1 ≤ N) :
+lemma q24a_sum_c_div (N : ℕ) (hN : 1 ≤ N) :
     ∑ k ∈ range N, q24a_c (k + 1) N / (k + 1) = if N = 1 then -1 else 0 := by
   have hext : ∀ k ∈ range N, q24a_c (k + 1) N / (k + 1) =
       ∑ j ∈ range (N + 1), (-1 : ℂ) ^ j * (j : ℂ) ^ N * ((k + 1).choose j / (k + 1)) := by
@@ -180,7 +180,7 @@ theorem q24a_sum_c_div (N : ℕ) (hN : 1 ≤ N) :
 
 /-- `∑_{m<N} (N choose m) c(k, m) = -c(k+1, N)`. -/
 
-theorem q24a_sum_choose_c (k N : ℕ) :
+lemma q24a_sum_choose_c (k N : ℕ) :
     ∑ m ∈ range N, (N.choose m : ℂ) * q24a_c k m = -q24a_c (k + 1) N := by
   rw [show -q24a_c (k + 1) N = (q24a_c k N - q24a_c (k + 1) N) - q24a_c k N by ring,
     ← q24a_c_shift]
@@ -198,14 +198,14 @@ noncomputable def q24a_beta (m : ℕ) : ℂ := ∑ k ∈ range (m + 1), q24a_c k
 
 /-- The range of `β_m` may be extended. -/
 
-theorem q24a_beta_extend {m M : ℕ} (h : m + 1 ≤ M) :
+lemma q24a_beta_extend {m M : ℕ} (h : m + 1 ≤ M) :
     q24a_beta m = ∑ k ∈ range M, q24a_c k m / (k + 1) := by
   refine sum_subset (range_subset_range.mpr h) fun k _ hk => ?_
   rw [q24a_c_eq_zero (by simpa using hk), zero_div]
 
 /-- `β` satisfies the Bernoulli recurrence `∑_{m<N} (N choose m) β_m = [N = 1]`. -/
 
-theorem q24a_sum_choose_beta (N : ℕ) (hN : 1 ≤ N) :
+lemma q24a_sum_choose_beta (N : ℕ) (hN : 1 ≤ N) :
     ∑ m ∈ range N, (N.choose m : ℂ) * q24a_beta m = if N = 1 then 1 else 0 := by
   rw [sum_congr rfl fun m hm => by rw [q24a_beta_extend (M := N) (by simpa using hm)]]
   simp only [mul_sum]
@@ -220,7 +220,7 @@ theorem q24a_sum_choose_beta (N : ℕ) (hN : 1 ≤ N) :
 
 /-- `β_n = Bₙ`. -/
 
-theorem q24a_beta_eq (n : ℕ) : q24a_beta n = bernoulli n := by
+lemma q24a_beta_eq (n : ℕ) : q24a_beta n = bernoulli n := by
   induction n using Nat.strong_induction_on with
   | _ n ih =>
     have h1 := q24a_sum_choose_beta (n + 1) (by omega)
@@ -238,7 +238,7 @@ theorem q24a_beta_eq (n : ℕ) : q24a_beta n = bernoulli n := by
     exact mul_left_cancel₀ hn (by linear_combination h1 - h2')
 
 /-- `∑_{k=0}^{n+1} (-1)ᵏ (n+1 choose k) Eₙ(x + k) = 0`. -/
-theorem q24a_alt_sum_eulerPolyE (n : ℕ) (x : ℂ) :
+lemma q24a_alt_sum_eulerPolyE (n : ℕ) (x : ℂ) :
     ∑ k ∈ range (n + 2), (-1 : ℂ) ^ k * ((n + 1).choose k : ℂ) * eulerPolyE n (x + k) = 0 := by
   refine q24a_alt_sum_eq_zero_of_poly _ (fun i => (n.choose (n - i) : ℂ) * eulerPolyE (n - i) x)
     (n + 1) fun j => ?_
@@ -248,7 +248,7 @@ theorem q24a_alt_sum_eulerPolyE (n : ℕ) (x : ℂ) :
   rw [show n + 1 - 1 - i = n - i by omega, Nat.sub_sub_self hi']
 
 /-- `∑_{k=0}^{n+1} (-1)ᵏ (n+1 choose k) Bₙ(x + k) = 0`. -/
-theorem q24a_alt_sum_bernoulliPolyB (n : ℕ) (x : ℂ) :
+lemma q24a_alt_sum_bernoulliPolyB (n : ℕ) (x : ℂ) :
     ∑ k ∈ range (n + 2), (-1 : ℂ) ^ k * ((n + 1).choose k : ℂ) * bernoulliPolyB n (x + k) = 0 := by
   refine q24a_alt_sum_eq_zero_of_poly _
     (fun i => (n.choose (n - i) : ℂ) * bernoulliPolyB (n - i) x) (n + 1) fun j => ?_
@@ -258,7 +258,7 @@ theorem q24a_alt_sum_bernoulliPolyB (n : ℕ) (x : ℂ) :
   rw [show n + 1 - 1 - i = n - i by omega, Nat.sub_sub_self hi']
 
 /-- Reindexing `Icc 1 n` to `range n`. -/
-theorem q24a_sum_Icc_one' {M : Type*} [AddCommMonoid M] (f : ℕ → M) (n : ℕ) :
+lemma q24a_sum_Icc_one' {M : Type*} [AddCommMonoid M] (f : ℕ → M) (n : ℕ) :
     ∑ k ∈ Icc 1 n, f k = ∑ k ∈ range n, f (k + 1) := by
   induction n with
   | zero => simp
@@ -312,7 +312,7 @@ theorem q24a_eulerPolyE_newton (m : ℕ) (x : ℂ) :
 
 /-- Faulhaber: `∑_{j=1}^{k-1} jᴺ = k ∑_{e=0}^{N} cₑ kᵉ`, `cₑ = B_{N-e} (N+1 choose N-e)/(N+1)`,
 `N ≥ 1`. -/
-theorem r24a_sum_pow_eq_mul_poly {N : ℕ} (hN : 1 ≤ N) (k : ℕ) :
+lemma r24a_sum_pow_eq_mul_poly {N : ℕ} (hN : 1 ≤ N) (k : ℕ) :
     ∑ j ∈ Icc 1 (k - 1), (j : ℚ) ^ N = k * ∑ e ∈ range (N + 1),
       bernoulli (N - e) * ((N + 1).choose (N - e) : ℚ) / (N + 1) * (k : ℚ) ^ e := by
   have h1 : ∑ j ∈ Icc 1 (k - 1), (j : ℚ) ^ N = ∑ j ∈ range k, (j : ℚ) ^ N := by
@@ -368,14 +368,14 @@ theorem bernoulli_two_mul_eq_explicit₁ {n : ℕ} (hn : 1 ≤ n) :
 /-! ### Helpers for 24.6.2: Eulerian sums -/
 
 /-- Hockey stick over a range: `∑_{i ≤ N} (i choose a) = (N+1 choose a+1)`. -/
-theorem s24a_sum_range_choose (N a : ℕ) :
+lemma s24a_sum_range_choose (N a : ℕ) :
     ∑ i ∈ range (N + 1), i.choose a = (N + 1).choose (a + 1) := by
   induction N with
   | zero => cases a <;> simp [Nat.choose_eq_zero_of_lt]
   | succ N ih => rw [sum_range_succ, ih, Nat.choose_succ_succ (N + 1) a, add_comm]
 
 /-- Upper Chu–Vandermonde: `∑_{i ≤ n} (i choose a)(n-i choose b) = (n+1 choose a+b+1)`. -/
-theorem s24a_upper_vandermonde (n a b : ℕ) :
+lemma s24a_upper_vandermonde (n a b : ℕ) :
     ∑ i ∈ range (n + 1), i.choose a * (n - i).choose b = (n + 1).choose (a + b + 1) := by
   induction n generalizing b with
   | zero => cases a <;> cases b <;> simp [Nat.choose_eq_zero_of_lt]
@@ -397,7 +397,7 @@ theorem s24a_upper_vandermonde (n a b : ℕ) :
 `∑_{j=1}^{k} (-1)^j jⁿ (n+1 choose k-j) =
 ∑_{i=0}^{k} (n-i choose k-i) ∑_{j=0}^{i} (-1)^j (i choose j) jⁿ`
 for `1 ≤ n`, `k ≤ n`. -/
-theorem s24a_eulerian_expand {n k : ℕ} (hn : 1 ≤ n) (hk : k ≤ n) :
+lemma s24a_eulerian_expand {n k : ℕ} (hn : 1 ≤ n) (hk : k ≤ n) :
     ∑ j ∈ Icc 1 k, (-1 : ℚ) ^ j * (j : ℚ) ^ n * ((n + 1).choose (k - j) : ℚ) =
       ∑ i ∈ range (k + 1), ((n - i).choose (k - i) : ℚ) *
         ∑ j ∈ range (i + 1), (-1 : ℚ) ^ j * (i.choose j : ℚ) * (j : ℚ) ^ n := by
@@ -516,7 +516,7 @@ section
 open Polynomial
 
 /-- A rational polynomial with `H(x+1) + H(x-1) = 0` for all `x` vanishes. -/
-theorem r24a_poly_eq_zero_of_add_shift {H : ℚ[X]}
+lemma r24a_poly_eq_zero_of_add_shift {H : ℚ[X]}
     (h : ∀ x : ℚ, H.eval (x + 1) + H.eval (x - 1) = 0) : H = 0 := by
   have h2 : ∀ x : ℚ, H.eval (x + 2) = -H.eval x := fun x => by
     have := h (x + 1); rw [show x + 1 + 1 = x + 2 by ring, show x + 1 - 1 = x by ring] at this
@@ -541,7 +541,7 @@ theorem r24a_poly_eq_zero_of_add_shift {H : ℚ[X]}
 
 /-- Second difference of iterated forward differences:
 `Δ^{k+2} f(y) = Δᵏ f(y+2) - 2 Δᵏ f(y+1) + Δᵏ f(y)`. -/
-theorem r24a_fwdDiff_iter_add_two (f : ℚ → ℚ) (k : ℕ) (y : ℚ) :
+lemma r24a_fwdDiff_iter_add_two (f : ℚ → ℚ) (k : ℕ) (y : ℚ) :
     (fwdDiff 1)^[k + 2] f y =
       (fwdDiff 1)^[k] f (y + 2) - 2 * (fwdDiff 1)^[k] f (y + 1) + (fwdDiff 1)^[k] f y := by
   rw [add_comm, Function.iterate_add_apply]
@@ -552,7 +552,7 @@ theorem r24a_fwdDiff_iter_add_two (f : ℚ → ℚ) (k : ℕ) (y : ℚ) :
 
 /-- The central-difference series `Q(x) = ∑_{k=0}^{n} (-1/2)ᵏ Δ^{2k} f(x - k)` of `f = x^{2n}`
 solves `Q(x+1) + Q(x-1) = 2x^{2n}`. -/
-theorem r24a_central_series (n : ℕ) (x : ℚ) :
+lemma r24a_central_series (n : ℕ) (x : ℚ) :
     let Q : ℚ → ℚ := fun y => ∑ k ∈ range (n + 1), (-1 / 2 : ℚ) ^ k *
       (fwdDiff 1)^[2 * k] (fun r : ℚ => r ^ (2 * n)) (y - k)
     Q (x + 1) + Q (x - 1) = 2 * x ^ (2 * n) := by
@@ -581,7 +581,7 @@ theorem r24a_central_series (n : ℕ) (x : ℚ) :
   simp [h0, g, f]
 
 /-- `E₂ₙ` from the central-difference series: `E₂ₙ = ∑_{k=0}^{n} (-1/2)ᵏ Δ^{2k}[x^{2n}](-k)`. -/
-theorem r24a_eulerNumber_central (n : ℕ) :
+lemma r24a_eulerNumber_central (n : ℕ) :
     eulerNumber (2 * n) = ∑ k ∈ range (n + 1), (-1 / 2 : ℚ) ^ k *
       (fwdDiff 1)^[2 * k] (fun r : ℚ => r ^ (2 * n)) (0 - k) := by
   set QP : ℚ[X] := ∑ k ∈ range (n + 1), Polynomial.C ((-1 / 2 : ℚ) ^ k) *
@@ -622,7 +622,7 @@ theorem r24a_eulerNumber_central (n : ℕ) :
 /-- Folding the central difference of the even function `x^{2n}`:
 `∑_{i=0}^{2k} (-1)^{2k-i} (2k choose i)(i-k)^{2n} =
 2(-1)ᵏ ∑_{j=1}^{k} (-1)ʲ (2k choose k-j) j^{2n}`. -/
-theorem r24a_central_fold (n k : ℕ) (hn : 1 ≤ n) :
+lemma r24a_central_fold (n k : ℕ) (hn : 1 ≤ n) :
     ∑ i ∈ range (2 * k + 1), (-1 : ℚ) ^ (2 * k - i) * ((2 * k).choose i : ℚ) *
       ((i : ℚ) - k) ^ (2 * n) = 2 * (-1) ^ k * ∑ j ∈ Icc 1 k, (-1 : ℚ) ^ j *
         ((2 * k).choose (k - j) : ℚ) * (j : ℚ) ^ (2 * n) := by
@@ -655,7 +655,7 @@ theorem r24a_central_fold (n k : ℕ) (hn : 1 ≤ n) :
 
 
 /-- Reflected summation over a final segment: `∑_{k=n-m}^{n} G k = ∑_{i=0}^{m} G (n - i)`. -/
-theorem r24a_sum_Icc_sub_reflect {M : Type*} [AddCommMonoid M] (G : ℕ → M) {m n : ℕ} (h : m ≤ n) :
+lemma r24a_sum_Icc_sub_reflect {M : Type*} [AddCommMonoid M] (G : ℕ → M) {m n : ℕ} (h : m ≤ n) :
     ∑ k ∈ Icc (n - m) n, G k = ∑ i ∈ range (m + 1), G (n - i) := by
   induction m with
   | zero => simp
@@ -725,7 +725,7 @@ open Polynomial
 def s24a_S : Module.End ℤ (ℚ → ℚ) := shiftₗ ℚ ℚ (1 : ℚ) + shiftₗ ℚ ℚ (-1 : ℚ)
 
 /-- Binomial expansion of powers of the symmetric shift. -/
-theorem s24a_S_pow_apply (f : ℚ → ℚ) (i : ℕ) (x : ℚ) :
+lemma s24a_S_pow_apply (f : ℚ → ℚ) (i : ℕ) (x : ℚ) :
     (s24a_S ^ i) f x = ∑ j ∈ range (i + 1), (i.choose j : ℚ) * f (x + j - (i - j : ℕ)) := by
   have hc : Commute (shiftₗ ℚ ℚ (1 : ℚ)) (shiftₗ ℚ ℚ (-1 : ℚ)) := by
     ext f y; simp [Module.End.mul_apply, shiftₗ_apply, add_right_comm]
@@ -738,7 +738,7 @@ theorem s24a_S_pow_apply (f : ℚ → ℚ) (i : ℕ) (x : ℚ) :
   ring
 
 /-- `2 - S = -(τ₋₁ Δ²)`. -/
-theorem s24a_two_sub_S :
+lemma s24a_two_sub_S :
     (2 : Module.End ℤ (ℚ → ℚ)) - s24a_S =
       -(shiftₗ ℚ ℚ (-1 : ℚ) * fwdDiffₗ ℚ ℚ (1 : ℚ) ^ 2) := by
   ext f y
@@ -746,7 +746,7 @@ theorem s24a_two_sub_S :
   ring_nf
 
 /-- `(2 - S)^N` kills `x^{2n}` for `N > n`. -/
-theorem s24a_two_sub_S_pow_apply {n N : ℕ} (hN : n < N) (x : ℚ) :
+lemma s24a_two_sub_S_pow_apply {n N : ℕ} (hN : n < N) (x : ℚ) :
     ((2 - s24a_S) ^ N) (fun r : ℚ => r ^ (2 * n)) x = 0 := by
   have hc : Commute (shiftₗ ℚ ℚ (-1 : ℚ)) (fwdDiffₗ ℚ ℚ (1 : ℚ) ^ 2) := by
     refine Commute.pow_right ?_ 2
@@ -761,7 +761,7 @@ theorem s24a_two_sub_S_pow_apply {n N : ℕ} (hN : n < N) (x : ℚ) :
   rfl
 
 /-- Binomial expansion of `(2 - S)^N x^{2n} = 0`. -/
-theorem s24a_binom_S {n N : ℕ} (hN : n < N) (x : ℚ) :
+lemma s24a_binom_S {n N : ℕ} (hN : n < N) (x : ℚ) :
     ∑ i ∈ range (N + 1), (-1 : ℚ) ^ i * 2 ^ (N - i) * (N.choose i : ℚ) *
       (s24a_S ^ i) (fun r : ℚ => r ^ (2 * n)) x = 0 := by
   have h := s24a_two_sub_S_pow_apply hN x
@@ -782,7 +782,7 @@ theorem s24a_binom_S {n N : ℕ} (hN : n < N) (x : ℚ) :
 
 /-- Folding a symmetric sum: `∑_{j=0}^{k} (k choose j)(j - (k-j))^{2n} =
 2 ∑_{j=0}^{⌊(k-1)/2⌋} (k choose j)(k-2j)^{2n}` for `k ≥ 1`, `n ≥ 1`. -/
-theorem s24a_fold (n k : ℕ) (hn : 1 ≤ n) (hk : 1 ≤ k) :
+lemma s24a_fold (n k : ℕ) (hn : 1 ≤ n) (hk : 1 ≤ k) :
     ∑ j ∈ range (k + 1), (k.choose j : ℚ) * ((j : ℚ) - ((k - j : ℕ) : ℚ)) ^ (2 * n) =
       2 * ∑ j ∈ range ((k - 1) / 2 + 1), (k.choose j : ℚ) * ((k - 2 * j : ℕ) : ℚ) ^ (2 * n) := by
   set g : ℕ → ℚ := fun j => (k.choose j : ℚ) * ((j : ℚ) - ((k - j : ℕ) : ℚ)) ^ (2 * n)
@@ -827,7 +827,7 @@ theorem s24a_fold (n k : ℕ) (hn : 1 ≤ n) (hk : 1 ≤ k) :
 
 /-- Proof of DLMF 24.6.6 by the symmetric-shift operator and uniqueness of polynomial solutions
 of `Q(x+1) + Q(x-1) = 2x^{2n}`. -/
-theorem s24a_eulerNumber_two_mul_eq_explicit₆ {n : ℕ} (hn : 1 ≤ n) :
+lemma s24a_eulerNumber_two_mul_eq_explicit₆ {n : ℕ} (hn : 1 ≤ n) :
     eulerNumber (2 * n) = ∑ k ∈ Icc 1 (2 * n), ((-1 : ℚ) ^ k / 2 ^ (k - 1)) *
       ((2 * n + 1).choose (k + 1) : ℚ) *
         ∑ j ∈ range ((k - 1) / 2 + 1), (k.choose j : ℚ) * ((k - 2 * j : ℕ) : ℚ) ^ (2 * n) := by

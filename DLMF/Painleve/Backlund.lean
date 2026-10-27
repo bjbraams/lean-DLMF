@@ -40,7 +40,7 @@ def backlundReflectDeriv (c : 𝕜) (u : 𝕜 → 𝕜) (x : 𝕜) : 𝕜 :=
   deriv u x - 2 * u x * backlundCorrection c u x - backlundCorrection c u x ^ 2
 
 /-- The denominator satisfies a first-order equation with constant inhomogeneous term. -/
-lemma IsPIIOn.hasDerivAt_backlundDenom {c : 𝕜} {u : 𝕜 → 𝕜} {s : Set 𝕜}
+theorem IsPIIOn.hasDerivAt_backlundDenom {c : 𝕜} {u : 𝕜 → 𝕜} {s : Set 𝕜}
     (h : IsPIIOn c u s) {x : 𝕜} (hx : x ∈ s) :
     HasDerivAt (backlundDenom u) (2 * u x * backlundDenom u x + (1 - 2 * c)) x := by
   have hu := h.hasDerivAt hx
@@ -49,7 +49,7 @@ lemma IsPIIOn.hasDerivAt_backlundDenom {c : 𝕜} {u : 𝕜 → 𝕜} {s : Set �
     (hv.const_mul 2)).congr_deriv (by dsimp only [backlundDenom, id_eq, Pi.pow_apply]; ring)
 
 /-- The Bäcklund correction satisfies a Riccati identity wherever its denominator is nonzero. -/
-lemma IsPIIOn.hasDerivAt_backlundCorrection {c : 𝕜} {u : 𝕜 → 𝕜} {s : Set 𝕜}
+theorem IsPIIOn.hasDerivAt_backlundCorrection {c : 𝕜} {u : 𝕜 → 𝕜} {s : Set 𝕜}
     (h : IsPIIOn c u s) {x : 𝕜} (hx : x ∈ s) (hD : backlundDenom u x ≠ 0) :
     HasDerivAt (backlundCorrection c u)
       (-2 * u x * backlundCorrection c u x - backlundCorrection c u x ^ 2) x := by
@@ -59,7 +59,7 @@ lemma IsPIIOn.hasDerivAt_backlundCorrection {c : 𝕜} {u : 𝕜 → 𝕜} {s : 
   ring
 
 /-- The first derivative of the reflected solution. -/
-lemma IsPIIOn.hasDerivAt_backlundReflect {c : 𝕜} {u : 𝕜 → 𝕜} {s : Set 𝕜}
+theorem IsPIIOn.hasDerivAt_backlundReflect {c : 𝕜} {u : 𝕜 → 𝕜} {s : Set 𝕜}
     (h : IsPIIOn c u s) {x : 𝕜} (hx : x ∈ s) (hD : backlundDenom u x ≠ 0) :
     HasDerivAt (backlundReflect c u) (backlundReflectDeriv c u x) x :=
   ((h.hasDerivAt hx).add (h.hasDerivAt_backlundCorrection hx hD)).congr_deriv (by
@@ -108,7 +108,7 @@ theorem IsPIIOn.backlundReflect_involutive {c : 𝕜} {u : 𝕜 → 𝕜} {s : S
 
 /-- Away from `c = 1/2`, the Bäcklund denominator cannot vanish identically on a
 nonempty open set of a Painlevé II solution. -/
-lemma IsPIIOn.exists_backlundDenom_ne_zero {c : 𝕜} {u : 𝕜 → 𝕜} {s : Set 𝕜}
+theorem IsPIIOn.exists_backlundDenom_ne_zero {c : 𝕜} {u : 𝕜 → 𝕜} {s : Set 𝕜}
     (h : IsPIIOn c u s) (hs : IsOpen s) (hne : s.Nonempty) (hc : 1 - 2 * c ≠ 0) :
     ∃ x ∈ s, backlundDenom u x ≠ 0 := by
   by_contra hno
@@ -127,7 +127,7 @@ def backlundDown (c : 𝕜) (u : 𝕜 → 𝕜) (x : 𝕜) : 𝕜 := -backlundRe
 def backlundUp (c : 𝕜) (u : 𝕜 → 𝕜) : 𝕜 → 𝕜 := backlundReflect (-c) (fun x => -u x)
 
 /-- The usual explicit expression for the upward parameter shift. -/
-lemma backlundUp_eq (c : 𝕜) (u : 𝕜 → 𝕜) (x : 𝕜) :
+theorem backlundUp_eq (c : 𝕜) (u : 𝕜 → 𝕜) (x : 𝕜) :
     backlundUp c u x = -u x + (1 + 2 * c) / (x + 2 * u x ^ 2 - 2 * deriv u x) := by
   dsimp only [backlundUp, backlundReflect, backlundCorrection, backlundDenom]
   rw [show deriv (fun x => -u x) x = -deriv u x from deriv.neg]
@@ -169,7 +169,7 @@ def backlundUpJet (c x u v : 𝕜) : 𝕜 × 𝕜 :=
   (-u + h, -v + 2 * u * h - h ^ 2)
 
 /-- The upward transformation differentiates to the second component of its rational jet. -/
-lemma IsPIIOn.hasDerivAt_backlundUp {c : 𝕜} {u : 𝕜 → 𝕜} {s : Set 𝕜}
+theorem IsPIIOn.hasDerivAt_backlundUp {c : 𝕜} {u : 𝕜 → 𝕜} {s : Set 𝕜}
     (h : IsPIIOn c u s) {x : 𝕜} (hx : x ∈ s)
     (hD : backlundDenom (fun x => -u x) x ≠ 0) :
     HasDerivAt (backlundUp c u) (backlundUpJet c x (u x) (deriv u x)).2 x := by

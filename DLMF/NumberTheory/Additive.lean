@@ -5,10 +5,13 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.NumberTheory.Functions
 public import Mathlib.NumberTheory.SumFourSquares
 public import Mathlib.NumberTheory.ModularForms.JacobiTheta.OneVariable
 public import DLMFMathlib.RingTheory.R27PowerSeriesEval
+public import Mathlib.CategoryTheory.Category.Init
+public import Mathlib.Combinatorics.Matroid.Init
+public import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.NumberTheory.Chebyshev
 
 /-!
 # Functions of additive number theory (DLMF §27.13)
@@ -208,7 +211,7 @@ section R27Helpers
 open PowerSeries
 
 /-- Sums over `I^{k+1}` split off the first coordinate. -/
-theorem r27_sum_piFinset_succ {k : ℕ} (I : Finset ℤ) (g : (Fin (k + 1) → ℤ) → ℤ) :
+lemma r27_sum_piFinset_succ {k : ℕ} (I : Finset ℤ) (g : (Fin (k + 1) → ℤ) → ℤ) :
     ∑ v ∈ Fintype.piFinset (fun _ : Fin (k + 1) ↦ I), g v =
       ∑ a ∈ I, ∑ w ∈ Fintype.piFinset (fun _ : Fin k ↦ I), g (Fin.cons a w) := by
   rw [← sum_product' (f := fun a w ↦ g (Fin.cons a w))]
@@ -233,11 +236,11 @@ def r27_cnt (k B : ℕ) (m : ℤ) : ℤ :=
   ∑ v ∈ Fintype.piFinset (fun _ : Fin k ↦ Icc (-(B : ℤ)) B), if ∑ i, v i ^ 2 = m then 1 else 0
 
 /-- `cnt₀(m) = [m = 0]`. -/
-theorem r27_cnt_zero (B : ℕ) (m : ℤ) : r27_cnt 0 B m = if 0 = m then 1 else 0 := by
+lemma r27_cnt_zero (B : ℕ) (m : ℤ) : r27_cnt 0 B m = if 0 = m then 1 else 0 := by
   simp [r27_cnt]
 
 /-- Recursion for the representation counts. -/
-theorem r27_cnt_succ (k B : ℕ) (m : ℤ) :
+lemma r27_cnt_succ (k B : ℕ) (m : ℤ) :
     r27_cnt (k + 1) B m = ∑ a ∈ Icc (-(B : ℤ)) B, r27_cnt k B (m - a ^ 2) := by
   rw [r27_cnt, r27_sum_piFinset_succ]
   refine sum_congr rfl fun a _ ↦ ?_
@@ -249,7 +252,7 @@ theorem r27_cnt_succ (k B : ℕ) (m : ℤ) :
   apply propext; constructor <;> intro h <;> linarith
 
 /-- `r_k(n)` with any box `[-B, B]`, `B ≥ n`. -/
-theorem r27_sumSquaresCount_eq_cnt (k n B : ℕ) (hB : n ≤ B) :
+lemma r27_sumSquaresCount_eq_cnt (k n B : ℕ) (hB : n ≤ B) :
     (sumSquaresCount k n : ℤ) = r27_cnt k B n := by
   rw [r27_cnt, sum_boole, sumSquaresCount]
   congr 1
@@ -270,7 +273,7 @@ theorem r27_sumSquaresCount_eq_cnt (k n B : ℕ) (hB : n ≤ B) :
     constructor <;> [linarith [neg_abs_le (v i)]; linarith [le_abs_self (v i)]]
 
 /-- No representations of negative numbers. -/
-theorem r27_cnt_neg (k B : ℕ) {m : ℤ} (hm : m < 0) : r27_cnt k B m = 0 := by
+lemma r27_cnt_neg (k B : ℕ) {m : ℤ} (hm : m < 0) : r27_cnt k B m = 0 := by
   rw [r27_cnt]
   refine sum_eq_zero fun v _ ↦ ?_
   have : 0 ≤ ∑ i, v i ^ 2 := sum_nonneg fun i _ ↦ sq_nonneg _
@@ -281,7 +284,7 @@ theorem r27_cnt_neg (k B : ℕ) {m : ℤ} (hm : m < 0) : r27_cnt k B m = 0 := by
 def r27_thetaSeries : PowerSeries ℤ := PowerSeries.mk fun n ↦ (sumSquaresCount 1 n : ℤ)
 
 /-- The coefficients of `ϑ^k` are `r_k(n)` (formal identity). -/
-theorem r27_coeff_thetaSeries_pow (k n : ℕ) :
+lemma r27_coeff_thetaSeries_pow (k n : ℕ) :
     coeff n (r27_thetaSeries ^ k) = sumSquaresCount k n := by
   induction k generalizing n with
   | zero =>
@@ -331,7 +334,7 @@ theorem r27_coeff_thetaSeries_pow (k n : ℕ) :
 
 open Classical in
 /-- `r₁(n)`: `1` at `n = 0`, `2` at positive squares, `0` otherwise. -/
-theorem r27_sumSquaresCount_one (n : ℕ) :
+lemma r27_sumSquaresCount_one (n : ℕ) :
     (sumSquaresCount 1 n : ℤ) = if n = 0 then 1 else if ∃ m : ℕ, (m + 1) ^ 2 = n then 2 else 0 := by
   rw [r27_sumSquaresCount_eq_cnt 1 n n le_rfl, r27_cnt_succ]
   simp_rw [r27_cnt_zero]
@@ -371,7 +374,7 @@ theorem r27_sumSquaresCount_one (n : ℕ) :
 
 open Classical in
 /-- `ϑ(x) = ∑ r₁(n) xⁿ` converges absolutely in the unit disc. -/
-theorem r27_absEval_thetaSeries {x : ℂ} (hx : ‖x‖ < 1) :
+lemma r27_absEval_thetaSeries {x : ℂ} (hx : ‖x‖ < 1) :
     r27_absEval r27_thetaSeries x (jacobiThetaSeries x) := by
   have hc : ∀ n, ((coeff n r27_thetaSeries : ℤ) : ℂ) * x ^ n =
       (if n = 0 then 1 else 0) +

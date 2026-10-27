@@ -5,7 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Tactic.CrossRefAttribute
 public import DLMF.Bessel.SturmZeros
 
 /-!
@@ -62,7 +61,7 @@ def airyGDeriv (z : ℂ) : ℂ :=
   regularizedHGFun (∅ : Multiset ℂ) {4 / 3} (z ^ 3 / 9) +
     z ^ 3 / 3 * regularizedHGFun (∅ : Multiset ℂ) {7 / 3} (z ^ 3 / 9)
 
-lemma hasDerivAt_reg0F1_cube {c c' : ℂ} (hc : c + 1 = c') (z : ℂ) :
+theorem hasDerivAt_reg0F1_cube {c c' : ℂ} (hc : c + 1 = c') (z : ℂ) :
     HasDerivAt (fun z : ℂ => regularizedHGFun (∅ : Multiset ℂ) {c} (z ^ 3 / 9))
       (z ^ 2 / 3 * regularizedHGFun (∅ : Multiset ℂ) {c'} (z ^ 3 / 9)) z := by
   subst hc
@@ -71,7 +70,7 @@ lemma hasDerivAt_reg0F1_cube {c c' : ℂ} (hc : c + 1 = c') (z : ℂ) :
   norm_num
   ring
 
-lemma reg0F1_contiguous' {c c₁ c₂ : ℂ} (h₁ : c + 1 = c₁) (h₂ : c + 1 + 1 = c₂) (w : ℂ) :
+theorem reg0F1_contiguous' {c c₁ c₂ : ℂ} (h₁ : c + 1 = c₁) (h₂ : c + 1 + 1 = c₂) (w : ℂ) :
     regularizedHGFun (∅ : Multiset ℂ) {c} w =
       c * regularizedHGFun ∅ {c₁} w + w * regularizedHGFun ∅ {c₂} w := by
   subst h₁ h₂
@@ -108,18 +107,18 @@ theorem hasDerivAt_airyGDeriv (z : ℂ) : HasDerivAt airyGDeriv (z * airyG z) z 
   norm_num
   ring
 
-lemma reg0F1_zero (c : ℂ) : regularizedHGFun (∅ : Multiset ℂ) {c} 0 = (Gamma c)⁻¹ := by
+theorem reg0F1_zero (c : ℂ) : regularizedHGFun (∅ : Multiset ℂ) {c} 0 = (Gamma c)⁻¹ := by
   rw [regularizedHGFun_zero]
   exact (regularizedHGFunCoeff_empty c 0).trans (by simp)
 
-lemma airyF_zero : airyF 0 = (Gamma (2 / 3))⁻¹ := by
+theorem airyF_zero : airyF 0 = (Gamma (2 / 3))⁻¹ := by
   rw [airyF, show (0 : ℂ) ^ 3 / 9 = 0 by norm_num, reg0F1_zero]
 
-lemma airyG_zero : airyG 0 = 0 := by simp [airyG]
+theorem airyG_zero : airyG 0 = 0 := by simp [airyG]
 
-lemma airyFDeriv_zero : airyFDeriv 0 = 0 := by simp [airyFDeriv]
+theorem airyFDeriv_zero : airyFDeriv 0 = 0 := by simp [airyFDeriv]
 
-lemma airyGDeriv_zero : airyGDeriv 0 = 3 * (Gamma (1 / 3))⁻¹ := by
+theorem airyGDeriv_zero : airyGDeriv 0 = 3 * (Gamma (1 / 3))⁻¹ := by
   have h : Gamma (4 / 3) = 1 / 3 * Gamma (1 / 3) := by
     rw [show (4 / 3 : ℂ) = 1 / 3 + 1 by norm_num, Complex.Gamma_add_one _ (by norm_num)]
   rw [airyGDeriv, show (0 : ℂ) ^ 3 / 9 = 0 by norm_num, reg0F1_zero, reg0F1_zero, h]
@@ -191,12 +190,12 @@ theorem airyBi_ode (z : ℂ) : deriv (deriv airyBi) z = z * airyBi z := by
 
 /-! ### Values at the origin -/
 
-lemma three_rpow_add (a b : ℝ) : (3 : ℝ) ^ a * (3 : ℝ) ^ b = (3 : ℝ) ^ (a + b) :=
+theorem three_rpow_add (a b : ℝ) : (3 : ℝ) ^ a * (3 : ℝ) ^ b = (3 : ℝ) ^ (a + b) :=
   (Real.rpow_add (by norm_num) a b).symm
 
-lemma sqrt_three_eq_rpow : Real.sqrt 3 = (3 : ℝ) ^ (1 / 2 : ℝ) := Real.sqrt_eq_rpow 3
+theorem sqrt_three_eq_rpow : Real.sqrt 3 = (3 : ℝ) ^ (1 / 2 : ℝ) := Real.sqrt_eq_rpow 3
 
-lemma three_rpow_neg (a : ℝ) : (3 : ℝ) ^ (-a) = ((3 : ℝ) ^ a)⁻¹ :=
+theorem three_rpow_neg (a : ℝ) : (3 : ℝ) ^ (-a) = ((3 : ℝ) ^ a)⁻¹ :=
   Real.rpow_neg (by norm_num) a
 
 @[dlmf 9.2.E3]
@@ -264,7 +263,7 @@ theorem IsAirySol.wronskian_eq {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') (
   exact is_const_of_deriv_eq_zero (fun w => (hd w).differentiableAt)
     (fun w => (hd w).deriv) z 0
 
-lemma Gamma_one_third_mul_Gamma_two_thirds :
+theorem Gamma_one_third_mul_Gamma_two_thirds :
     Gamma (1 / 3) * Gamma (2 / 3) = 2 * π / Real.sqrt 3 := by
   have h := Complex.Gamma_mul_Gamma_one_sub (1 / 3)
   rw [show (1 : ℂ) - 1 / 3 = 2 / 3 by norm_num] at h
@@ -344,7 +343,7 @@ theorem IsAirySol.eq_of_initial {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') 
 
 /-! ### Rotations by cube roots of unity (DLMF 9.2(iv)) -/
 
-lemma exp_two_pi_I_div_three :
+theorem exp_two_pi_I_div_three :
     exp (2 * π * I / 3) = -1 / 2 + (Real.sqrt 3 / 2 : ℝ) * I := by
   have h : (2 * π * I / 3 : ℂ) = ((2 * π / 3 : ℝ) : ℂ) * I := by push_cast; ring
   rw [h, exp_mul_I, ← ofReal_cos, ← ofReal_sin,
@@ -353,11 +352,11 @@ lemma exp_two_pi_I_div_three :
   push_cast
   ring
 
-lemma omega_cube : exp (2 * π * I / 3) ^ 3 = 1 := by
+theorem omega_cube : exp (2 * π * I / 3) ^ 3 = 1 := by
   rw [← Complex.exp_nat_mul, show ((3 : ℕ) : ℂ) * (2 * π * I / 3) = 2 * π * I by push_cast; ring,
     exp_two_pi_mul_I]
 
-lemma one_add_omega_add_sq : 1 + exp (2 * π * I / 3) + exp (2 * π * I / 3) ^ 2 = 0 := by
+theorem one_add_omega_add_sq : 1 + exp (2 * π * I / 3) + exp (2 * π * I / 3) ^ 2 = 0 := by
   rw [exp_two_pi_I_div_three]
   have h3 : ((Real.sqrt 3 : ℝ) : ℂ) ^ 2 = 3 := by
     rw [← ofReal_pow, Real.sq_sqrt (by norm_num)]; push_cast; ring
@@ -369,16 +368,16 @@ lemma reg0F1_cube_mul {c ω : ℂ} (hω : ω ^ 3 = 1) (z : ℂ) :
       regularizedHGFun (∅ : Multiset ℂ) {c} (z ^ 3 / 9) := by
   rw [mul_pow, hω, one_mul]
 
-lemma airyF_mul {ω : ℂ} (hω : ω ^ 3 = 1) (z : ℂ) : airyF (ω * z) = airyF z :=
+theorem airyF_mul {ω : ℂ} (hω : ω ^ 3 = 1) (z : ℂ) : airyF (ω * z) = airyF z :=
   reg0F1_cube_mul hω z
 
-lemma airyG_mul {ω : ℂ} (hω : ω ^ 3 = 1) (z : ℂ) : airyG (ω * z) = ω * airyG z := by
+theorem airyG_mul {ω : ℂ} (hω : ω ^ 3 = 1) (z : ℂ) : airyG (ω * z) = ω * airyG z := by
   simp only [airyG, reg0F1_cube_mul hω z]; ring
 
-lemma sqrt_three_sq : ((Real.sqrt 3 : ℝ) : ℂ) ^ 2 = 3 := by
+theorem sqrt_three_sq : ((Real.sqrt 3 : ℝ) : ℂ) ^ 2 = 3 := by
   rw [← ofReal_pow, Real.sq_sqrt (by norm_num)]; push_cast; ring
 
-lemma exp_neg_two_pi_I_div_three :
+theorem exp_neg_two_pi_I_div_three :
     exp (-(2 * π * I / 3)) = -1 / 2 - (Real.sqrt 3 / 2 : ℝ) * I := by
   have h : (-(2 * π * I / 3) : ℂ) = ((-(2 * π / 3) : ℝ) : ℂ) * I := by push_cast; ring
   rw [h, exp_mul_I, ← ofReal_cos, ← ofReal_sin, Real.cos_neg, Real.sin_neg,
@@ -387,26 +386,26 @@ lemma exp_neg_two_pi_I_div_three :
   push_cast
   ring
 
-lemma exp_pi_I_div_six : exp (π * I / 6) = (Real.sqrt 3 / 2 : ℝ) + (1 / 2 : ℂ) * I := by
+theorem exp_pi_I_div_six : exp (π * I / 6) = (Real.sqrt 3 / 2 : ℝ) + (1 / 2 : ℂ) * I := by
   have h : (π * I / 6 : ℂ) = ((π / 6 : ℝ) : ℂ) * I := by push_cast; ring
   rw [h, exp_mul_I, ← ofReal_cos, ← ofReal_sin, Real.cos_pi_div_six, Real.sin_pi_div_six]
   push_cast
   ring
 
-lemma exp_neg_pi_I_div_six : exp (-(π * I / 6)) = (Real.sqrt 3 / 2 : ℝ) - (1 / 2 : ℂ) * I := by
+theorem exp_neg_pi_I_div_six : exp (-(π * I / 6)) = (Real.sqrt 3 / 2 : ℝ) - (1 / 2 : ℂ) * I := by
   have h : (-(π * I / 6) : ℂ) = ((-(π / 6) : ℝ) : ℂ) * I := by push_cast; ring
   rw [h, exp_mul_I, ← ofReal_cos, ← ofReal_sin, Real.cos_neg, Real.sin_neg, Real.cos_pi_div_six,
     Real.sin_pi_div_six]
   push_cast
   ring
 
-lemma exp_pi_I_div_three : exp (π * I / 3) = (1 / 2 : ℂ) + (Real.sqrt 3 / 2 : ℝ) * I := by
+theorem exp_pi_I_div_three : exp (π * I / 3) = (1 / 2 : ℂ) + (Real.sqrt 3 / 2 : ℝ) * I := by
   have h : (π * I / 3 : ℂ) = ((π / 3 : ℝ) : ℂ) * I := by push_cast; ring
   rw [h, exp_mul_I, ← ofReal_cos, ← ofReal_sin, Real.cos_pi_div_three, Real.sin_pi_div_three]
   push_cast
   ring
 
-lemma exp_neg_pi_I_div_three :
+theorem exp_neg_pi_I_div_three :
     exp (-(π * I / 3)) = (1 / 2 : ℂ) - (Real.sqrt 3 / 2 : ℝ) * I := by
   have h : (-(π * I / 3) : ℂ) = ((-(π / 3) : ℝ) : ℂ) * I := by push_cast; ring
   rw [h, exp_mul_I, ← ofReal_cos, ← ofReal_sin, Real.cos_neg, Real.sin_neg,
@@ -414,7 +413,7 @@ lemma exp_neg_pi_I_div_three :
   push_cast
   ring
 
-lemma omega_recip_cube : exp (-(2 * π * I / 3)) ^ 3 = 1 := by
+theorem omega_recip_cube : exp (-(2 * π * I / 3)) ^ 3 = 1 := by
   rw [← Complex.exp_nat_mul, show ((3 : ℕ) : ℂ) * (-(2 * π * I / 3)) = -(2 * π * I) by
     push_cast; ring, exp_neg, exp_two_pi_mul_I, inv_one]
 
@@ -491,12 +490,12 @@ lemma reg0F1_conj_rat (c : ℝ) (z : ℂ) :
       conj (regularizedHGFun (∅ : Multiset ℂ) {(c : ℂ)} (z ^ 3 / 9)) := by
   rw [← regularized0F1_conj, map_div₀, map_pow, map_ofNat]
 
-lemma airyF_conj (z : ℂ) : airyF (conj z) = conj (airyF z) := by
+theorem airyF_conj (z : ℂ) : airyF (conj z) = conj (airyF z) := by
   have h := reg0F1_conj_rat (2 / 3) z
   push_cast at h
   exact h
 
-lemma airyG_conj (z : ℂ) : airyG (conj z) = conj (airyG z) := by
+theorem airyG_conj (z : ℂ) : airyG (conj z) = conj (airyG z) := by
   have h := reg0F1_conj_rat (4 / 3) z
   push_cast at h
   simp only [airyG, map_mul, h]

@@ -5,10 +5,11 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.OrthogonalPolynomials.Topics
-public import Mathlib.Tactic.CrossRefAttribute
-public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 public import TauCeti.LinearAlgebra.Matrix.CornerMinor
+public import DLMF.OrthogonalPolynomials.General
+public import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+public import Mathlib.Data.Nat.Factorial.DoubleFactorial
 /-!
 # Kernels, moments, recurrence coefficients, and zeros
 
@@ -109,7 +110,7 @@ theorem sum_recurrenceDiagonal {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOr
     linarith
 
 /-- Integration against the kernel is a finite sum of orthogonal coordinates. -/
-lemma integral_mul_kernel {μ : Measure ℝ} {p : ℕ → ℝ[X]}
+theorem integral_mul_kernel {μ : Measure ℝ} {p : ℕ → ℝ[X]}
     (h : IsOrthogonalPolynomials μ p) {f : ℝ → ℝ} (hf : MemLp f 2 μ) (n : ℕ) (x : ℝ) :
     ∫ y, f y * christoffelDarbouxKernel μ p n x y ∂μ =
       ∑ k ∈ Finset.range (n + 1), (p k).eval x / squaredNorm μ p k *
@@ -527,7 +528,7 @@ theorem kernel_polynomials_orthogonal {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h
       _ = 0 := hs
 
 /-- Integration against a monomial is the corresponding finite sum of moments. -/
-lemma moment_coeff_sum {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOrthogonalPolynomials μ p)
+theorem moment_coeff_sum {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOrthogonalPolynomials μ p)
     (q : ℝ[X]) (n : ℕ) (hq : q.natDegree ≤ n) (i : ℕ) :
     ∑ j : Fin (n + 1), q.coeff j * moment μ (i + j) =
       ∫ t, t ^ i * q.eval t ∂μ := by
@@ -591,7 +592,7 @@ theorem monic_moment_determinant {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : Is
   exact (eq_div_iff (hankelDeterminant_pos h n).ne').mpr hh.symm
 
 /-- The Hankel determinant quotient is the squared norm of the monic polynomial. -/
-lemma hankelDeterminant_succ_eq_squaredNorm_mul {μ : Measure ℝ} {p : ℕ → ℝ[X]}
+theorem hankelDeterminant_succ_eq_squaredNorm_mul {μ : Measure ℝ} {p : ℕ → ℝ[X]}
     (h : IsOrthogonalPolynomials μ p) (hmonic : ∀ n, (p n).Monic) (n : ℕ) :
     hankelDeterminant μ (n + 1) = squaredNorm μ p n * hankelDeterminant μ n := by
   classical
@@ -657,7 +658,7 @@ theorem monic_offdiagonal_moment_determinant {μ : Measure ℝ} {p : ℕ → ℝ
   field_simp
 
 /-- The coefficient immediately below the leading term is a shifted moment determinant. -/
-lemma monic_subleading_coeff_moment_determinant {μ : Measure ℝ} {p : ℕ → ℝ[X]}
+theorem monic_subleading_coeff_moment_determinant {μ : Measure ℝ} {p : ℕ → ℝ[X]}
     (h : IsOrthogonalPolynomials μ p) (hmonic : ∀ n, (p n).Monic) (n : ℕ) :
     (p (n + 1)).coeff n = -shiftedHankelDeterminant μ (n + 1) / hankelDeterminant μ (n + 1) := by
   classical

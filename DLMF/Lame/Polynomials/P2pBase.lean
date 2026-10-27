@@ -6,10 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Lame.Polynomials.Defs
-public import DLMF.Lame.Eigenvalues
-public import DLMF.JacobiElliptic.SpecialValues
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Chebyshev.Basic
 public import Mathlib.Analysis.Matrix.Spectrum
+public import DLMF.JacobiElliptic.PeriodsPolesZeros
 
 /-!
 # Lamé polynomials: the matrix eigenvalues, polynomial form, periods and parities
@@ -127,7 +125,7 @@ lemma p2p_tridiagSym_isHermitian {a b c : ℕ → ℝ} {n : ℕ} (h : ∀ p < n,
 
 /-- An eigenvector of a matrix that vanishes above the superdiagonal and has nonzero
 superdiagonal entries is zero if its first entry is zero. -/
-lemma p2p_eigvec_zero_of_head {n : ℕ} {A : Matrix (Fin (n + 1)) (Fin (n + 1)) ℝ}
+theorem p2p_eigvec_zero_of_head {n : ℕ} {A : Matrix (Fin (n + 1)) (Fin (n + 1)) ℝ}
     (hA0 : ∀ i j : Fin (n + 1), (i : ℕ) + 1 < j → A i j = 0)
     (hA1 : ∀ i j : Fin (n + 1), (j : ℕ) = i + 1 → A i j ≠ 0) {v : Fin (n + 1) → ℝ} {μ : ℝ}
     (hv : A *ᵥ v = μ • v) (h0 : v 0 = 0) : v = 0 := by
@@ -154,7 +152,7 @@ lemma p2p_eigvec_zero_of_head {n : ℕ} {A : Matrix (Fin (n + 1)) (Fin (n + 1)) 
 
 /-- The tridiagonal matrix with `0 < a p * c (p+1)` for `p < n` has `n + 1` distinct real
 eigenvalues. -/
-theorem p2p_tridiag_roots {a b c : ℕ → ℝ} {n : ℕ} (h : ∀ p < n, 0 < a p * c (p + 1)) :
+lemma p2p_tridiag_roots {a b c : ℕ → ℝ} {n : ℕ} (h : ∀ p < n, 0 < a p * c (p + 1)) :
     (p2p_tridiag a b c n).charpoly.roots.card = n + 1 ∧
       (p2p_tridiag a b c n).charpoly.roots.Nodup := by
   have hS := p2p_tridiagSym_isHermitian (b := b) h
@@ -201,7 +199,7 @@ theorem p2p_tridiag_roots {a b c : ℕ → ℝ} {n : ℕ} (h : ∀ p < n, 0 < a 
 end p2pTridiag
 
 /-- The products `α_p γ_{p+1}`, `p < n`, of the matrix 29.15.2 are positive for all eight types. -/
-lemma p2p_alpha_gamma_pos {k : ℝ} (hk0 : 0 < k) (t : LamePolyType) (n : ℕ) :
+theorem p2p_alpha_gamma_pos {k : ℝ} (hk0 : 0 < k) (t : LamePolyType) (n : ℕ) :
     ∀ p < n, 0 < t.recurrence.alpha (t.order n) k p *
       t.recurrence.gamma (t.order n) k (p + 1) := by
   intro p hp
@@ -247,7 +245,7 @@ open Matrix
 def p2p_ext {n : ℕ} (u : Fin (n + 1) → ℝ) (q : ℕ) : ℝ :=
   if h : q < n + 1 then u ⟨q, h⟩ else 0
 
-lemma p2p_row (a b c : ℕ → ℝ) {n : ℕ} (u : Fin (n + 1) → ℝ) {p : ℕ} (hp : p < n + 1) :
+theorem p2p_row (a b c : ℕ → ℝ) {n : ℕ} (u : Fin (n + 1) → ℝ) {p : ℕ} (hp : p < n + 1) :
     (p2p_tridiag a b c n *ᵥ u) ⟨p, hp⟩ =
       a p * p2p_ext u (p + 1) + b p * p2p_ext u p +
         (if p = 0 then 0 else c p * p2p_ext u (p - 1)) := by
@@ -279,14 +277,14 @@ lemma p2p_row (a b c : ℕ → ℝ) {n : ℕ} (u : Fin (n + 1) → ℝ) {p : ℕ
       · simp [h1]
       · simp [h1, p2p_ext]
 
-lemma p2p_lameRecVec_succ (r : LameRecurrence) (ν k H : ℝ) (p : ℕ) :
+theorem p2p_lameRecVec_succ (r : LameRecurrence) (ν k H : ℝ) (p : ℕ) :
     lameRecVec r ν k H (p + 1) = ((H - r.beta ν k p) * lameRecVec r ν k H p -
       r.gamma ν k p * (if p = 0 then 0 else lameRecVec r ν k H (p - 1))) / r.alpha ν k p := by
   rcases p with _ | p
   · simp [lameRecVec, lameRecVecPair]
   · simp [lameRecVec, lameRecVecPair]
 
-lemma p2p_lameRecVec_zero (r : LameRecurrence) (ν k H : ℝ) : lameRecVec r ν k H 0 = 1 := rfl
+theorem p2p_lameRecVec_zero (r : LameRecurrence) (ν k H : ℝ) : lameRecVec r ν k H 0 = 1 := rfl
 
 /-- If `H` is an eigenvalue of the matrix 29.15.2 (with `α_p γ_{p+1} > 0`), the forward
 recursion gives an eigenvector with nonzero last entry `v_n`. -/
@@ -369,7 +367,7 @@ lemma p2p_lameRecVec_last_ne_zero {r : LameRecurrence} {ν k H : ℝ} {n : ℕ}
   exact hU0 (hbw n le_rfl 0 (by omega))
 
 /-- The eigenvalue `H_m` (`m ≤ n`) is a root of the characteristic polynomial of 29.15.2. -/
-lemma p2p_lamePolyH_eval {k : ℝ} (hk0 : 0 < k) (t : LamePolyType) {n m : ℕ} (hm : m ≤ n) :
+theorem p2p_lamePolyH_eval {k : ℝ} (hk0 : 0 < k) (t : LamePolyType) {n m : ℕ} (hm : m ≤ n) :
     (lameMatrix t.recurrence (t.order n) k n).charpoly.eval (lamePolyH t n m k) = 0 := by
   obtain ⟨hc, -⟩ := p2p_tridiag_roots (b := t.recurrence.beta (t.order n) k)
     (p2p_alpha_gamma_pos hk0 t n)
@@ -542,7 +540,7 @@ lemma p1l_basis_neg (t : LamePolyType) (p : ℕ) (s : ℂ) :
 
 /-- How a Lamé polynomial transforms when `sn, cn, dn` are multiplied by constants
 `ε = ±1`, `a`, `b`. -/
-lemma p1l_lamePolyEk_transform (t : LamePolyType) (n m : ℕ) {z z' : ℂ} {ε a b : ℂ}
+theorem p1l_lamePolyEk_transform (t : LamePolyType) (n m : ℕ) {z z' : ℂ} {ε a b : ℂ}
     (hε : ε = 1 ∨ ε = -1) (hs : jacobiSnk z' k = ε * jacobiSnk z k)
     (hc : jacobiCnk z' k = a * jacobiCnk z k) (hd : jacobiDnk z' k = b * jacobiDnk z k) :
     lamePolyEk t n m z' k =
@@ -564,7 +562,7 @@ lemma p1l_lamePolyEk_transform (t : LamePolyType) (n m : ℕ) {z z' : ℂ} {ε a
   cases t <;> simp [LamePolyType.prefactor, hc, hd] <;> ring
 
 /-- The shift identities used for the periods and parities of Lamé polynomials. -/
-lemma p1l_shifts (hk0 : 0 < k) (hk1 : k < 1) (z : ℂ) :
+theorem p1l_shifts (hk0 : 0 < k) (hk1 : k < 1) (z : ℂ) :
     let K : ℂ := Real.compEllIntKm (k ^ 2)
     let K' : ℂ := Real.compEllIntKm (1 - k ^ 2)
     (jacobiSnk (z + 2 * K) k = -jacobiSnk z k ∧ jacobiCnk (z + 2 * K) k = -jacobiCnk z k ∧
@@ -611,7 +609,7 @@ lemma p1l_shifts (hk0 : 0 < k) (hk1 : k < 1) (z : ℂ) :
 
 
 /-- The polynomial form with `deg P = n` (in particular `P ≠ 0`). -/
-lemma p2p_polyForm (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) {n m : ℕ} (hm : m ≤ n) :
+theorem p2p_polyForm (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) {n m : ℕ} (hm : m ≤ n) :
     ∃ P : ℝ[X], P.degree = n ∧ ∀ z : ℂ,
       lamePolyEk t n m z k = t.prefactor z k *
         (if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then jacobiSnk z k else 1) *

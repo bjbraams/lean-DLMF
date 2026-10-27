@@ -5,12 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.OrthogonalPolynomials.Topics
-public import Mathlib.Tactic.CrossRefAttribute
-public import DLMF.Bessel.Basic
 public import DLMF.Confluent.LargeA
 public import DLMF.OrthogonalPolynomials.Differential
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Sinc
 /-!
 # Limits between families and Mehler–Heine formulas
 
@@ -40,7 +36,7 @@ namespace DLMF.OrthogonalPolynomials
 
 /-- As `b → ∞`, the terminating Jacobi series `₂F₁(-n, n+α+b+1; α+1; u)`, divided by `bⁿ`,
 tends to its top-degree term. -/
-lemma tendsto_jacobiSeries_div_pow {α : ℂ} (n : ℕ) (u : ℂ) :
+theorem tendsto_jacobiSeries_div_pow {α : ℂ} (n : ℕ) (u : ℂ) :
     Tendsto (fun b : ℝ => (∑ k ∈ Finset.range (n + 1),
       gaussHGCoeff (-(n : ℂ)) (n + α + b + 1) (α + 1) k * u ^ k) / (b : ℂ) ^ n) atTop
       (𝓝 (poch (-(n : ℂ)) n / (poch (α + 1) n * n !) * u ^ n)) := by
@@ -639,7 +635,7 @@ private lemma jacobi_eq_Gamma_mul_scaled_series {α : ℝ} (hα : -1 < α) (β :
   field_simp [hp, hG, hnC]
 
 /-- Jacobi polynomials at a shrinking endpoint scale have a regularized Bessel limit. -/
-lemma jacobi_mehler_heine_regularized {α : ℝ} (hα : -1 < α) (β : ℂ)
+theorem jacobi_mehler_heine_regularized {α : ℝ} (hα : -1 < α) (β : ℂ)
     {wseq : ℕ → ℂ} {w : ℂ} (hw : Tendsto wseq atTop (𝓝 w)) :
     Tendsto (fun n : ℕ => (Real.rpow (n : ℝ) (-α) : ℂ) *
       jacobiPolyP α β n (1 - 2 * wseq n / (n : ℂ) ^ 2)) atTop
@@ -719,7 +715,7 @@ theorem jacobi_mehler_heine {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) {z : �
   rfl
 
 /-- The complex scaled Laguerre limit, without choosing a square-root branch. -/
-lemma laguerrePolyL_mehler_heine_regularized {α : ℝ} (hα : -1 < α) (z : ℂ) :
+theorem laguerrePolyL_mehler_heine_regularized {α : ℝ} (hα : -1 < α) (z : ℂ) :
     Tendsto (fun n : ℕ => (Real.rpow (n : ℝ) (-α) : ℂ) * laguerrePolyL α n (z / n))
       atTop (𝓝 (regularizedHGFun ∅ {(α : ℂ) + 1} (-z))) := by
   have hc : ∀ k : ℕ, (α : ℂ) + 1 ≠ -(k : ℂ) := by

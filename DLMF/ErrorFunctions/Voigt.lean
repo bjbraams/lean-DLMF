@@ -5,7 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.ErrorFunctions.Relations
 public import DLMF.ErrorFunctions.Integrals
 
 /-!

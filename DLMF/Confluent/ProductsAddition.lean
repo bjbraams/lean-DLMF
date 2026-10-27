@@ -5,11 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Confluent.Basic
 public import DLMF.Confluent.Whittaker
-public import DLMF.Confluent.Recurrence
 public import DLMF.Confluent.MobiusTaylor
-public import Mathlib.Analysis.Complex.TaylorSeries
 
 /-!
 # Products and addition theorems (DLMF §§13.12, 13.13, 13.25, 13.26)
@@ -36,7 +33,7 @@ namespace DLMF.Confluent
 
 /-- A disk centered in the right half-plane, with radius the distance to zero,
 avoids the nonpositive real axis. -/
-lemma ball_norm_subset_slitPlane {x : ℂ} (hx : 0 < x.re) :
+theorem ball_norm_subset_slitPlane {x : ℂ} (hx : 0 < x.re) :
     Metric.ball x ‖x‖ ⊆ slitPlane := by
   intro w hw
   rw [mem_slitPlane_iff]
@@ -49,7 +46,7 @@ lemma ball_norm_subset_slitPlane {x : ℂ} (hx : 0 < x.re) :
 
 /-- Principal powers multiply without a branch correction when both factors
 lie in the right half-plane. -/
-lemma cpow_mul_of_re_pos {u v : ℂ} (hu : 0 < u.re) (hv : 0 < v.re) (s : ℂ) :
+theorem cpow_mul_of_re_pos {u v : ℂ} (hu : 0 < u.re) (hv : 0 < v.re) (s : ℂ) :
     (u * v) ^ s = u ^ s * v ^ s := by
   have hu0 := slitPlane_ne_zero (Or.inl hu : u ∈ slitPlane)
   have hv0 := slitPlane_ne_zero (Or.inl hv : v ∈ slitPlane)
@@ -60,7 +57,7 @@ lemma cpow_mul_of_re_pos {u v : ℂ} (hu : 0 < u.re) (hv : 0 < v.re) (s : ℂ) :
   congr 1; ring
 
 /-- The power factor in the downward-parameter Taylor formulas. -/
-lemma cpow_add_shift_factor {x y : ℂ} (hx : 0 < x.re) (hy : ‖y‖ < ‖x‖)
+theorem cpow_add_shift_factor {x y : ℂ} (hx : 0 < x.re) (hy : ‖y‖ < ‖x‖)
     (b : ℂ) (n : ℕ) :
     (x + y) ^ (1 - b) * x ^ (b - n - 1) = ((x + y) / x) ^ (1 - b) / x ^ n := by
   have hx0 := slitPlane_ne_zero (Or.inl hx : x ∈ slitPlane)
@@ -79,7 +76,7 @@ lemma cpow_add_shift_factor {x y : ℂ} (hx : 0 < x.re) (hy : ‖y‖ < ‖x‖)
   rfl
 
 /-- For `‖y‖ < ‖x‖` the ratio `(x + y)/x` lies in the right half-plane. -/
-lemma re_add_div_pos {x y : ℂ} (hyx : ‖y‖ < ‖x‖) : 0 < ((x + y) / x).re := by
+theorem re_add_div_pos {x y : ℂ} (hyx : ‖y‖ < ‖x‖) : 0 < ((x + y) / x).re := by
   have hx0 : x ≠ 0 := norm_pos_iff.mp (lt_of_le_of_lt (norm_nonneg y) hyx)
   have hdiv : ‖y / x‖ < 1 := by
     rw [norm_div]; exact (div_lt_one (norm_pos_iff.mpr hx0)).mpr hyx
@@ -90,27 +87,27 @@ lemma re_add_div_pos {x y : ℂ} (hyx : ‖y‖ < ‖x‖) : 0 < ((x + y) / x).r
   linarith
 
 /-- Splitting `(x + y)^s` as `((x + y)/x)^s x^s` on the principal branch. -/
-lemma add_cpow_eq_div_cpow_mul {x y : ℂ} (hx : 0 < x.re) (hyx : ‖y‖ < ‖x‖) (s : ℂ) :
+theorem add_cpow_eq_div_cpow_mul {x y : ℂ} (hx : 0 < x.re) (hyx : ‖y‖ < ‖x‖) (s : ℂ) :
     (x + y) ^ s = ((x + y) / x) ^ s * x ^ s := by
   have hx0 := slitPlane_ne_zero (Or.inl hx : x ∈ slitPlane)
   rw [← cpow_mul_of_re_pos (re_add_div_pos hyx) hx, div_mul_cancel₀ _ hx0]
 
 /-- `x^{n/2} = (x^{1/2})^n`. -/
-lemma cpow_nat_div_two (x : ℂ) (n : ℕ) : x ^ ((n : ℂ) / 2) = (x ^ (1 / 2 : ℂ)) ^ n := by
+theorem cpow_nat_div_two (x : ℂ) (n : ℕ) : x ^ ((n : ℂ) / 2) = (x ^ (1 / 2 : ℂ)) ^ n := by
   rw [← cpow_nat_mul]; congr 1; ring
 
 /-- `(x^{1/2})^n (x^{1/2})^n = x^n`. -/
-lemma cpow_half_pow_mul_self (x : ℂ) (n : ℕ) :
+theorem cpow_half_pow_mul_self (x : ℂ) (n : ℕ) :
     (x ^ (1 / 2 : ℂ)) ^ n * (x ^ (1 / 2 : ℂ)) ^ n = x ^ n := by
   rw [← mul_pow, ← sq, ← cpow_nat_mul]; norm_num
 
 /-- The principal square root of a nonzero number is nonzero. -/
-lemma cpow_half_ne_zero {x : ℂ} (hx : x ≠ 0) : x ^ (1 / 2 : ℂ) ≠ 0 :=
+theorem cpow_half_ne_zero {x : ℂ} (hx : x ≠ 0) : x ^ (1 / 2 : ℂ) ≠ 0 :=
   (cpow_ne_zero_iff_of_exponent_ne_zero (by norm_num)).mpr hx
 
 /-- The prefactor of the downward-`μ` Whittaker additions:
 `r^{μ+1/2} r^{-2μ} = (r⁻¹)^{μ-1/2}` for `Re r > 0`. -/
-lemma cpow_shift_down_prefactor {r : ℂ} (hr : 0 < r.re) (μ : ℂ) :
+theorem cpow_shift_down_prefactor {r : ℂ} (hr : 0 < r.re) (μ : ℂ) :
     r ^ (μ + 1 / 2) * r ^ (-2 * μ) = r⁻¹ ^ (μ - 1 / 2) := by
   have hr0 := slitPlane_ne_zero (Or.inl hr : r ∈ slitPlane)
   have harg : r.arg ≠ π := by
@@ -119,7 +116,7 @@ lemma cpow_shift_down_prefactor {r : ℂ} (hr : 0 < r.re) (μ : ℂ) :
   congr 1; ring
 
 /-- Reflection of a Pochhammer symbol: `(b - n)_n = (-1)^n (1 - b)_n`. -/
-lemma poch_sub_nat_self (b : ℂ) (n : ℕ) : poch (b - n) n = (-1 : ℂ) ^ n * poch (1 - b) n := by
+theorem poch_sub_nat_self (b : ℂ) (n : ℕ) : poch (b - n) n = (-1 : ℂ) ^ n * poch (1 - b) n := by
   induction n with
   | zero => simp [poch_zero]
   | succ n ih =>
@@ -128,7 +125,7 @@ lemma poch_sub_nat_self (b : ℂ) (n : ℕ) : poch (b - n) n = (-1 : ℂ) ^ n * 
     ring
 
 /-- Near a point `x` of the slit plane, `w^s = (w/x)^s x^s`. -/
-lemma eventually_cpow_eq_div_cpow_mul {x : ℂ} (hx : x ∈ slitPlane) (s : ℂ) :
+theorem eventually_cpow_eq_div_cpow_mul {x : ℂ} (hx : x ∈ slitPlane) (s : ℂ) :
     ∀ᶠ w in 𝓝 x, w ^ s = (w / x) ^ s * x ^ s := by
   have hx0 := slitPlane_ne_zero hx
   have hπ : |x.arg| < π := by
@@ -150,7 +147,7 @@ lemma eventually_cpow_eq_div_cpow_mul {x : ℂ} (hx : x ∈ slitPlane) (s : ℂ)
 
 /-- Taylor expansion of `(w/x)^s F(w)` about `x` in the slit plane, on the disk of radius `‖x‖`,
 where `w/x` stays in the right half-plane. -/
-lemma div_cpow_mul_eq_taylor {F : ℂ → ℂ} (hF : Differentiable ℂ F) {x y : ℂ}
+theorem div_cpow_mul_eq_taylor {F : ℂ → ℂ} (hF : Differentiable ℂ F) {x y : ℂ}
     (hx : x ∈ slitPlane) (hyx : ‖y‖ < ‖x‖) (s : ℂ) :
     ((x + y) / x) ^ s * F (x + y) =
       ∑' n : ℕ, (n.factorial : ℂ)⁻¹ * ((x ^ s)⁻¹ * iteratedDeriv n (fun w => w ^ s * F w) x) *
@@ -176,7 +173,7 @@ lemma div_cpow_mul_eq_taylor {F : ℂ → ℂ} (hF : Differentiable ℂ F) {x y 
   rw [heq.iteratedDeriv_eq, iteratedDeriv_const_mul_field]
 
 /-- Principal powers in the first-parameter addition prefactor. -/
-lemma cpow_first_parameter_prefactor {x y : ℂ} (hx : 0 < x.re)
+theorem cpow_first_parameter_prefactor {x y : ℂ} (hx : 0 < x.re)
     (hy : -1 / 2 < (y / x).re) (s a : ℂ) :
     (x + y) ^ s * (x / (x + y)) ^ a = ((x + y) / x) ^ (s - a) * x ^ s := by
   have hx0 := slitPlane_ne_zero (Or.inl hx : x ∈ slitPlane)
@@ -192,7 +189,7 @@ lemma cpow_first_parameter_prefactor {x y : ℂ} (hx : 0 < x.re)
     sub_eq_add_neg]
 
 /-- The reverse-ratio form of the same first-parameter prefactor. -/
-lemma cpow_first_parameter_prefactor_recip {x y : ℂ} (hx : 0 < x.re)
+theorem cpow_first_parameter_prefactor_recip {x y : ℂ} (hx : 0 < x.re)
     (hy : -1 / 2 < (y / x).re) (s a : ℂ) :
     (x + y) ^ s * (x / (x + y)) ^ a = (x / (x + y)) ^ (a - s) * x ^ s := by
   have hx0 := slitPlane_ne_zero (Or.inl hx : x ∈ slitPlane)

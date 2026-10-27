@@ -35,7 +35,7 @@ theorem p2s_hB (q : ℝ) (x : ℝ) : |2 * q * Real.cos (2 * x)| ≤ 2 * |q| := b
 
 theorem p2s_hpi : ((π / 2 : ℝ) : ℂ) = (π : ℂ) / 2 := by push_cast; ring
 
-theorem p2s_WI_re (a q : ℝ) : (fun x : ℝ => (mathieuWI a q x).re) =
+lemma p2s_WI_re (a q : ℝ) : (fun x : ℝ => (mathieuWI a q x).re) =
     ODE.p2lY (fun x : ℝ => 2 * q * Real.cos (2 * x)) false a := by
   obtain ⟨-, hd, hd', -⟩ := p2s_family q (w := fun a => mathieuWI a q)
     (fun a => isMathieuSolution_mathieuWI a q) (α := 1) (β := 0)
@@ -50,7 +50,7 @@ theorem p2s_WI_re (a q : ℝ) : (fun x : ℝ => (mathieuWI a q x).re) =
   · rw [y0]; simp [(mathieuWI_spec a q).2.1, ODE.p2lD0]
   · rw [hdw, y1]; simp [(mathieuWI_spec a q).2.2, ODE.p2lD1]
 
-theorem p2s_WII_re (a q : ℝ) : (fun x : ℝ => (mathieuWII a q x).re) =
+lemma p2s_WII_re (a q : ℝ) : (fun x : ℝ => (mathieuWII a q x).re) =
     ODE.p2lY (fun x : ℝ => 2 * q * Real.cos (2 * x)) true a := by
   obtain ⟨-, hd, hd', -⟩ := p2s_family q (w := fun a => mathieuWII a q)
     (fun a => isMathieuSolution_mathieuWII a q) (α := 0) (β := 1)

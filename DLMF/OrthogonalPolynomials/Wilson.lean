@@ -5,8 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.OrthogonalPolynomials.Topics
-public import Mathlib.Tactic.CrossRefAttribute
 public import DLMF.OrthogonalPolynomials.Hahn
 public import DLMF.Confluent.Relations
 /-!
@@ -60,7 +58,7 @@ def dualHahn (γ δ : ℂ) (N n : ℕ) (x : ℂ) : ℂ :=
     (poch (γ + 1) k * poch (-(N : ℂ)) k * k.factorial)
 
 /-- Factoring the quadratic product into two Pochhammer symbols. -/
-lemma poch_mul_eq_prod (u v : ℂ) (k : ℕ) :
+theorem poch_mul_eq_prod (u v : ℂ) (k : ℕ) :
     poch u k * poch v k = ∏ j ∈ Finset.range k, (u + j) * (v + j) := by
   induction k with
   | zero => simp [poch_zero]
@@ -68,7 +66,7 @@ lemma poch_mul_eq_prod (u v : ℂ) (k : ℕ) :
     rw [poch_succ, poch_succ, Finset.prod_range_succ, ← ih]
     ring
 
-lemma poch_conjugate_pair (a y : ℂ) (k : ℕ) :
+theorem poch_conjugate_pair (a y : ℂ) (k : ℕ) :
     ∏ j ∈ Finset.range k, ((a + j) ^ 2 + y ^ 2) = poch (a + I * y) k * poch (a - I * y) k := by
   rw [poch_mul_eq_prod]
   apply Finset.prod_congr rfl
@@ -77,7 +75,7 @@ lemma poch_conjugate_pair (a y : ℂ) (k : ℕ) :
     _ = (a + I * y + j) * (a - I * y + j) + (I ^ 2 + 1) * y ^ 2 := by ring
     _ = _ := by rw [I_sq]; ring
 
-lemma poch_quadratic_pair (v y : ℂ) (k : ℕ) :
+theorem poch_quadratic_pair (v y : ℂ) (k : ℕ) :
     ∏ j ∈ Finset.range k, ((j : ℂ) * (j + v) - y * (y + v)) =
       poch (-y) k * poch (y + v) k := by
   rw [poch_mul_eq_prod]
@@ -179,7 +177,7 @@ theorem continuousDualHahn_orthogonality {a b c : ℝ} (ha : 0 < a) (hb : 0 < b)
   sorry
 
 /-- `(u + d)_k / (v + d)_k → 1` as the real `d → ∞`. -/
-lemma tendsto_poch_ratio_atTop (u v : ℂ) (k : ℕ) :
+theorem tendsto_poch_ratio_atTop (u v : ℂ) (k : ℕ) :
     Tendsto (fun d : ℝ => poch (u + d) k / poch (v + d) k) atTop (𝓝 1) := by
   have h := (tendsto_poch_add_div_pow u k).div (tendsto_poch_add_div_pow v k) one_ne_zero
   rw [div_one] at h
@@ -189,7 +187,7 @@ lemma tendsto_poch_ratio_atTop (u v : ℂ) (k : ℕ) :
   simp only [Pi.div_apply]
   rw [div_div_div_cancel_right₀ hd']
 
-lemma eventually_poch_add_ne_zero (u : ℂ) (k : ℕ) :
+theorem eventually_poch_add_ne_zero (u : ℂ) (k : ℕ) :
     ∀ᶠ d : ℝ in atTop, poch (u + d) k ≠ 0 := by
   filter_upwards [(tendsto_poch_add_div_pow u k).eventually_ne one_ne_zero] with d hd h
   exact hd (by rw [h, zero_div])
@@ -260,7 +258,7 @@ theorem racah_limit_hahn {α β : ℂ} (hα : -1 < α.re) {N n : ℕ} (hn : n �
   · field_simp
 
 /-- Factoring the shifted Wilson product. -/
-lemma prod_sq_add_shift (a y s : ℂ) (k : ℕ) :
+theorem prod_sq_add_shift (a y s : ℂ) (k : ℕ) :
     ∏ j ∈ Finset.range k, ((a + j) ^ 2 + (y + s * I / 2) ^ 2) =
       poch (a + I * y - s / 2) k * poch (a - I * y + s / 2) k := by
   rw [poch_mul_eq_prod]
@@ -268,7 +266,7 @@ lemma prod_sq_add_shift (a y s : ℂ) (k : ℕ) :
   linear_combination (y ^ 2 + s ^ 2 / 4) * I_sq
 
 /-- The forward difference of the Wilson product pair. -/
-lemma poch_pair_sub (u v : ℂ) (k : ℕ) :
+theorem poch_pair_sub (u v : ℂ) (k : ℕ) :
     poch (u - 1 / 2) (k + 1) * poch (v + 1 / 2) (k + 1) -
       poch (u + 1 / 2) (k + 1) * poch (v - 1 / 2) (k + 1) =
       (k + 1) * (u - v) * (poch (u + 1 / 2) k * poch (v + 1 / 2) k) := by
@@ -371,7 +369,7 @@ theorem continuousDualHahn_central_difference {a b c : ℂ}
   ring
 
 /-- Wilson coefficients are a convolution of two Gauss coefficient sequences. -/
-lemma wilson_coeff_convolution {a b c d : ℂ}
+theorem wilson_coeff_convolution {a b c d : ℂ}
     (hab : 0 < (a+b).re) (hac : 0 < (a+c).re) (had : 0 < (a+d).re)
     (hbc : 0 < (b+c).re) (y : ℂ) (n : ℕ) :
     wilson a b c d n (y^2) / (poch (a+d) n * poch (b+c) n * n !) =
@@ -451,7 +449,7 @@ theorem wilson_generating_function {a b c d : ℂ}
 
 
 /-- Continuous dual Hahn coefficients are a binomial–Gauss convolution. -/
-lemma dualHahn_coeff_convolution {a b c : ℂ}
+theorem dualHahn_coeff_convolution {a b c : ℂ}
     (hab : 0 < (a + b).re) (hac : 0 < (a + c).re) (y : ℂ) (n : ℕ) :
     continuousDualHahn a b c n (y ^ 2) / (poch (a + b) n * n.factorial) =
       ∑ k ∈ Finset.range (n + 1),

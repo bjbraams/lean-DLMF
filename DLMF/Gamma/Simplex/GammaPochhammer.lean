@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
-public import DLMF.Gamma.Simplex.PochhammerIdentities
 
 /-!
 # Pochhammer identities for the Gamma function

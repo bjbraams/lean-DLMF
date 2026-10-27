@@ -7,9 +7,6 @@ module
 
 public import DLMF.Mathieu.Basic
 public import DLMF.Mathieu.Properties
-public import DLMFMathlib.Analysis.Fourier.P1a2EntirePeriodic
-public import Mathlib.Analysis.Asymptotics.Defs
-public import Mathlib.Topology.Algebra.InfiniteSum.Basic
 
 /-!
 # Fourier series of the Mathieu functions (DLMF §28.4)
@@ -44,7 +41,7 @@ namespace DLMF.Mathieu
 /-! ### Auxiliary lemmas -/
 
 /-- `ce_n(z, q)` is `2π`-periodic. -/
-theorem p1a2_mathieuCe_two_pi (n : ℕ) (q : ℝ) (z : ℂ) :
+lemma p1a2_mathieuCe_two_pi (n : ℕ) (q : ℝ) (z : ℂ) :
     mathieuCe n (z + 2 * π) q = mathieuCe n z q := by
   rw [show z + 2 * (π : ℂ) = z + π + π by ring]
   obtain ⟨k, rfl | rfl⟩ := Nat.even_or_odd' n
@@ -52,7 +49,7 @@ theorem p1a2_mathieuCe_two_pi (n : ℕ) (q : ℝ) (z : ℂ) :
   · rw [mathieuCe_odd_add_pi, mathieuCe_odd_add_pi, neg_neg]
 
 /-- `se_n(z, q)` is `2π`-periodic for `n ≠ 0`. -/
-theorem p1a2_mathieuSe_two_pi {n : ℕ} (hn : n ≠ 0) (q : ℝ) (z : ℂ) :
+lemma p1a2_mathieuSe_two_pi {n : ℕ} (hn : n ≠ 0) (q : ℝ) (z : ℂ) :
     mathieuSe n (z + 2 * π) q = mathieuSe n z q := by
   rw [show z + 2 * (π : ℂ) = z + π + π by ring]
   obtain ⟨k, rfl | rfl⟩ := Nat.even_or_odd' n
@@ -61,7 +58,7 @@ theorem p1a2_mathieuSe_two_pi {n : ℕ} (hn : n ≠ 0) (q : ℝ) (z : ℂ) :
   · rw [mathieuSe_odd_add_pi, mathieuSe_odd_add_pi, neg_neg]
 
 /-- The recurrence identity for the cosine integrals of `ce_n` with natural indices. -/
-theorem p1a2_ce_rec (n : ℕ) (q : ℝ) (k : ℤ) :
+lemma p1a2_ce_rec (n : ℕ) (q : ℝ) (k : ℤ) :
     ((mathieuA n q : ℂ) - (k : ℂ) ^ 2) *
         ∫ x in (0 : ℝ)..2 * π, mathieuCe n x q * Complex.cos (k * x) =
       q * ((∫ x in (0 : ℝ)..2 * π, mathieuCe n x q * Complex.cos (((k - 2 : ℤ) : ℂ) * x)) +
@@ -69,7 +66,7 @@ theorem p1a2_ce_rec (n : ℕ) (q : ℝ) (k : ℤ) :
   p1a2_cos_rec (isMathieuSolution_mathieuCe n q) (p1a2_mathieuCe_two_pi n q) k
 
 /-- The recurrence identity for the sine integrals of `se_n` with natural indices. -/
-theorem p1a2_se_rec {n : ℕ} (hn : n ≠ 0) (q : ℝ) (k : ℤ) :
+lemma p1a2_se_rec {n : ℕ} (hn : n ≠ 0) (q : ℝ) (k : ℤ) :
     ((mathieuB n q : ℂ) - (k : ℂ) ^ 2) *
         ∫ x in (0 : ℝ)..2 * π, mathieuSe n x q * Complex.sin (k * x) =
       q * ((∫ x in (0 : ℝ)..2 * π, mathieuSe n x q * Complex.sin (((k - 2 : ℤ) : ℂ) * x)) +
@@ -157,7 +154,7 @@ theorem p1a2_hasSum_mathieuSe {n : ℕ} (hn : n ≠ 0) (q : ℝ) (z : ℂ) :
     (p1a2_mathieuSe_two_pi hn q) (fun z => mathieuSe_neg n z q) z
 
 /-- Parseval for `ce_n` over all indices. -/
-theorem p1a2_hasSum_mathieuFourierA_sq (n : ℕ) (q : ℝ) :
+lemma p1a2_hasSum_mathieuFourierA_sq (n : ℕ) (q : ℝ) :
     HasSum (fun m : ℕ => (if m = 0 then 2 else 1) * mathieuFourierA n m q ^ 2) 1 := by
   have h := p1a2_hasSum_cos_sq (F := fun z => mathieuCe n z q)
     (isMathieuSolution_mathieuCe n q).differentiable (p1a2_mathieuCe_two_pi n q)
@@ -168,7 +165,7 @@ theorem p1a2_hasSum_mathieuFourierA_sq (n : ℕ) (q : ℝ) :
   exact h
 
 /-- Parseval for `se_n`, `n ≥ 1`, over all indices. -/
-theorem p1a2_hasSum_mathieuFourierB_sq {n : ℕ} (hn : n ≠ 0) (q : ℝ) :
+lemma p1a2_hasSum_mathieuFourierB_sq {n : ℕ} (hn : n ≠ 0) (q : ℝ) :
     HasSum (fun m : ℕ => mathieuFourierB n m q ^ 2) 1 := by
   have h := p1a2_hasSum_sin_sq (F := fun z => mathieuSe n z q)
     (isMathieuSolution_mathieuSe n q).differentiable (p1a2_mathieuSe_two_pi hn q)
@@ -180,7 +177,7 @@ theorem p1a2_hasSum_mathieuFourierB_sq {n : ℕ} (hn : n ≠ 0) (q : ℝ) :
 
 
 /-- `∫₀^{2π} cos kx dx = 2π [k = 0]` for integer `k`. -/
-theorem p1a2_integral_cos_int (k : ℤ) :
+lemma p1a2_integral_cos_int (k : ℤ) :
     ∫ x in (0 : ℝ)..2 * π, Complex.cos (k * x) = if k = 0 then (2 * π : ℂ) else 0 := by
   split_ifs with hk
   · subst hk; simp
@@ -201,7 +198,7 @@ theorem p1a2_integral_cos_int (k : ℤ) :
     simp
 
 /-- `∫₀^{2π} cos ax cos bx dx` by the product formula. -/
-theorem p1a2_integral_cos_mul_cos (a b : ℕ) :
+lemma p1a2_integral_cos_mul_cos (a b : ℕ) :
     ∫ x in (0 : ℝ)..2 * π, Complex.cos (a * x) * Complex.cos (b * x) =
       ((if (a : ℤ) - b = 0 then (2 * π : ℂ) else 0) +
         if (a : ℤ) + b = 0 then (2 * π : ℂ) else 0) / 2 := by
@@ -221,7 +218,7 @@ theorem p1a2_integral_cos_mul_cos (a b : ℕ) :
     p1a2_integral_cos_int, p1a2_integral_cos_int]
 
 /-- `∫₀^{2π} sin ax sin bx dx` by the product formula. -/
-theorem p1a2_integral_sin_mul_sin (a b : ℕ) :
+lemma p1a2_integral_sin_mul_sin (a b : ℕ) :
     ∫ x in (0 : ℝ)..2 * π, Complex.sin (a * x) * Complex.sin (b * x) =
       ((if (a : ℤ) - b = 0 then (2 * π : ℂ) else 0) -
         if (a : ℤ) + b = 0 then (2 * π : ℂ) else 0) / 2 := by
@@ -241,7 +238,7 @@ theorem p1a2_integral_sin_mul_sin (a b : ℕ) :
     p1a2_integral_cos_int, p1a2_integral_cos_int]
 
 /-- `π⁻¹ ∫₀^{2π} cos ax cos bx dx = [a = b]` for `a, b ≥ 1`. -/
-theorem p1a2_coef_cos_cos {a b : ℕ} (hb : b ≠ 0) :
+lemma p1a2_coef_cos_cos {a b : ℕ} (hb : b ≠ 0) :
     (1 / π : ℂ) * ∫ x in (0 : ℝ)..2 * π, Complex.cos (a * x) * Complex.cos (b * x) =
       if a = b then 1 else 0 := by
   have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
@@ -254,7 +251,7 @@ theorem p1a2_coef_cos_cos {a b : ℕ} (hb : b ≠ 0) :
     simp [h2, hab]
 
 /-- `π⁻¹ ∫₀^{2π} sin ax sin bx dx = [a = b]` for `a, b ≥ 1`. -/
-theorem p1a2_coef_sin_sin {a b : ℕ} (hb : b ≠ 0) :
+lemma p1a2_coef_sin_sin {a b : ℕ} (hb : b ≠ 0) :
     (1 / π : ℂ) * ∫ x in (0 : ℝ)..2 * π, Complex.sin (a * x) * Complex.sin (b * x) =
       if a = b then 1 else 0 := by
   have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
@@ -267,7 +264,7 @@ theorem p1a2_coef_sin_sin {a b : ℕ} (hb : b ≠ 0) :
     simp [h2, hab]
 
 /-- Reflection `x ↦ π/2 - x` preserves integrals over a period. -/
-theorem p1a2_integral_half_pi_sub {g : ℝ → ℂ} (hg : Function.Periodic g (2 * π)) :
+lemma p1a2_integral_half_pi_sub {g : ℝ → ℂ} (hg : Function.Periodic g (2 * π)) :
     ∫ x in (0 : ℝ)..2 * π, g (π / 2 - x) = ∫ x in (0 : ℝ)..2 * π, g x := by
   rw [intervalIntegral.integral_comp_sub_left, sub_zero]
   have h := hg.intervalIntegral_add_eq (π / 2 - 2 * π) 0
@@ -275,26 +272,26 @@ theorem p1a2_integral_half_pi_sub {g : ℝ → ℂ} (hg : Function.Periodic g (2
   exact h
 
 /-- `cos(nπ) = (-1)^n` in `ℂ`. -/
-theorem p1a2_cos_nat_mul_pi (n : ℕ) : Complex.cos (n * π) = (-1) ^ n := by
+lemma p1a2_cos_nat_mul_pi (n : ℕ) : Complex.cos (n * π) = (-1) ^ n := by
   rw [show (n : ℂ) * π = ((n * π : ℝ) : ℂ) by push_cast; ring, ← Complex.ofReal_cos,
     Real.cos_nat_mul_pi]; push_cast; ring
 
 /-- `cos(2m(π/2 - u)) = (-1)^m cos(2mu)`. -/
-theorem p1a2_cos_even_half_pi_sub (m : ℕ) (u : ℂ) :
+lemma p1a2_cos_even_half_pi_sub (m : ℕ) (u : ℂ) :
     Complex.cos (((2 * m : ℕ) : ℂ) * (π / 2 - u)) =
       (-1) ^ m * Complex.cos (((2 * m : ℕ) : ℂ) * u) := by
   rw [show ((2 * m : ℕ) : ℂ) * (π / 2 - u) = m * π - ((2 * m : ℕ) : ℂ) * u by push_cast; ring,
     Complex.cos_sub, p1a2_cos_nat_mul_pi, Complex.sin_nat_mul_pi]; ring
 
 /-- `sin(2m(π/2 - u)) = -(-1)^m sin(2mu)`. -/
-theorem p1a2_sin_even_half_pi_sub (m : ℕ) (u : ℂ) :
+lemma p1a2_sin_even_half_pi_sub (m : ℕ) (u : ℂ) :
     Complex.sin (((2 * m : ℕ) : ℂ) * (π / 2 - u)) =
       -((-1) ^ m * Complex.sin (((2 * m : ℕ) : ℂ) * u)) := by
   rw [show ((2 * m : ℕ) : ℂ) * (π / 2 - u) = m * π - ((2 * m : ℕ) : ℂ) * u by push_cast; ring,
     Complex.sin_sub, p1a2_cos_nat_mul_pi, Complex.sin_nat_mul_pi]; ring
 
 /-- `cos((2m+1)(π/2 - u)) = (-1)^m sin((2m+1)u)`. -/
-theorem p1a2_cos_odd_half_pi_sub (m : ℕ) (u : ℂ) :
+lemma p1a2_cos_odd_half_pi_sub (m : ℕ) (u : ℂ) :
     Complex.cos (((2 * m + 1 : ℕ) : ℂ) * (π / 2 - u)) =
       (-1) ^ m * Complex.sin (((2 * m + 1 : ℕ) : ℂ) * u) := by
   rw [show ((2 * m + 1 : ℕ) : ℂ) * (π / 2 - u) = (m * π + π / 2) - ((2 * m + 1 : ℕ) : ℂ) * u by
@@ -310,7 +307,7 @@ theorem p1a2_sin_odd_half_pi_sub (m : ℕ) (u : ℂ) :
     p1a2_cos_nat_mul_pi, Complex.sin_nat_mul_pi]; ring
 
 /-- `(-1)^(n - m : ℤ) = (-1)^n (-1)^m` in `ℂ`. -/
-theorem p1a2_neg_one_zpow_sub (n m : ℕ) :
+lemma p1a2_neg_one_zpow_sub (n m : ℕ) :
     ((-1 : ℂ) ^ ((n : ℤ) - m)) = (-1) ^ n * (-1) ^ m := by
   rw [zpow_sub₀ (by norm_num), zpow_natCast, zpow_natCast]
   rw [div_eq_mul_inv]
@@ -319,7 +316,7 @@ theorem p1a2_neg_one_zpow_sub (n m : ℕ) :
 
 /-- Reflection of a Fourier-type integral: if `f(x, -q) k(x) = c g(π/2 - x)` with `g`
 `2π`-periodic, the integral over a period is `c ∫ g`. -/
-theorem p1a2_integral_reflect {f g : ℝ → ℂ} (c : ℂ) (hg : Function.Periodic g (2 * π))
+lemma p1a2_integral_reflect {f g : ℝ → ℂ} (c : ℂ) (hg : Function.Periodic g (2 * π))
     (h : ∀ x : ℝ, f x = c * g (π / 2 - x)) :
     ∫ x in (0 : ℝ)..2 * π, f x = c * ∫ x in (0 : ℝ)..2 * π, g x := by
   simp_rw [h]
@@ -386,7 +383,7 @@ theorem hasSum_mathieuSe_even (n : ℕ) (q : ℝ) (z : ℂ) :
     · rw [p1a2_fourierB_even_odd, zero_mul]
 
 /-- `‖e^{iw}‖ ≤ e^{|ℑw|}`. -/
-theorem p2f_norm_exp_mul_I_le (w : ℂ) : ‖Complex.exp (w * I)‖ ≤ Real.exp |w.im| := by
+lemma p2f_norm_exp_mul_I_le (w : ℂ) : ‖Complex.exp (w * I)‖ ≤ Real.exp |w.im| := by
   rw [Complex.norm_exp]
   apply Real.exp_le_exp.mpr
   simp only [mul_re, I_re, mul_zero, I_im, mul_one, zero_sub]
@@ -417,7 +414,7 @@ theorem p2f_norm_sin_le (w : ℂ) : ‖Complex.sin w‖ ≤ Real.exp |w.im| := b
 
 /-- Absolute and locally uniform convergence of a trigonometric series with rapidly decaying
 coefficients. -/
-theorem p2f_trig_series {c : ℕ → ℂ} {g : ℕ → ℂ → ℂ} {F : ℂ → ℂ}
+lemma p2f_trig_series {c : ℕ → ℂ} {g : ℕ → ℂ → ℂ} {F : ℂ → ℂ}
     (hc : ∀ R : ℝ, ∃ C, 0 ≤ C ∧ ∀ m : ℕ, ‖c m‖ ≤ C * Real.exp (-(R * m)))
     (hg : ∀ m z, ‖g m z‖ ≤ Real.exp (m * |z.im|)) (hF : ∀ z, HasSum (fun m => c m * g m z) (F z)) :
     (∀ z, Summable fun m => ‖c m * g m z‖) ∧

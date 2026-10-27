@@ -7,7 +7,7 @@ module
 
 public import DLMF.JacobiElliptic.Basic
 public import DLMF.JacobiElliptic.ElementaryIdentities
-public import DLMF.Elliptic.JacobiIdentities
+public import DLMF.Elliptic.Jacobi
 
 /-!
 # Derivatives and differential equations of the Jacobian elliptic functions (DLMF §22.13)
@@ -54,13 +54,8 @@ local notation "θ₄" => jacobiThetaFourTau
 /-! ### Theta-function Wronskians and the derivative of a theta quotient (helpers) -/
 
 lemma p22R1_deriv_even {f : ℂ → ℂ} (hf : Differentiable ℂ f) (he : ∀ z, f (-z) = f z) :
-    deriv f 0 = 0 := by
-  have h1 : HasDerivAt f (deriv f 0) (-0) := by rw [neg_zero]; exact (hf 0).hasDerivAt
-  have h2 := h1.comp (0 : ℂ) (hasDerivAt_neg (0 : ℂ))
-  have h3 : (f ∘ fun x => -x) = f := funext fun z => he z
-  rw [h3] at h2
-  have := h2.unique (hf 0).hasDerivAt
-  linear_combination -this / 2
+    deriv f 0 = 0 :=
+  DLMF.Theta.p3t_deriv_even hf he
 
 lemma p22R1_wr {f g A B C E : ℂ → ℂ} {f' g' b' e' : ℂ} (κ x : ℂ)
     (hfg : ∀ y, κ * (f (x + y) * g (x - y)) = A x * B y + C x * E y)
@@ -87,7 +82,7 @@ lemma p22R1_hd2 (z : ℂ) : HasDerivAt (fun w => θ₂ w τ) (deriv (fun w => θ
   ((DLMF.Theta.differentiable_jacobiThetaTau 2 hτ) z).hasDerivAt
 lemma p22R1_hd3 (z : ℂ) : HasDerivAt (fun w => θ₃ w τ) (deriv (fun w => θ₃ w τ) z) z :=
   ((DLMF.Theta.differentiable_jacobiThetaTau 3 hτ) z).hasDerivAt
-lemma p22R1_hd4 (z : ℂ) : HasDerivAt (fun w => θ₄ w τ) (deriv (fun w => θ₄ w τ) z) z :=
+theorem p22R1_hd4 (z : ℂ) : HasDerivAt (fun w => θ₄ w τ) (deriv (fun w => θ₄ w τ) z) z :=
   ((DLMF.Theta.differentiable_jacobiThetaTau 4 hτ) z).hasDerivAt
 
 lemma p22R1_d2zero : deriv (fun w => θ₂ w τ) 0 = 0 :=
@@ -238,11 +233,11 @@ noncomputable def p22R1_th : JacobiLetter → ℂ → ℂ → ℂ
   | .d => θ₃
   | .n => θ₄
 
-lemma p22R1_letter_eq (p : JacobiLetter) (ζ τ : ℂ) :
+theorem p22R1_letter_eq (p : JacobiLetter) (ζ τ : ℂ) :
     jacobiLetterTheta p ζ τ = p22R1_N p τ * p22R1_th p ζ τ := by
   cases p <;> simp [jacobiLetterTheta, p22R1_N, p22R1_th] <;> ring
 
-lemma p22R1_differentiable_th (p : JacobiLetter) {τ : ℂ} (hτ : 0 < τ.im) :
+theorem p22R1_differentiable_th (p : JacobiLetter) {τ : ℂ} (hτ : 0 < τ.im) :
     Differentiable ℂ (fun w => p22R1_th p w τ) := by
   cases p
   · exact DLMF.Theta.differentiable_jacobiThetaTau 1 hτ
@@ -250,7 +245,7 @@ lemma p22R1_differentiable_th (p : JacobiLetter) {τ : ℂ} (hτ : 0 < τ.im) :
   · exact DLMF.Theta.differentiable_jacobiThetaTau 3 hτ
   · exact DLMF.Theta.differentiable_jacobiThetaTau 4 hτ
 
-lemma p22R1_hasDerivAt_PQ {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p q : JacobiLetter}
+theorem p22R1_hasDerivAt_PQ {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p q : JacobiLetter}
     (hpq : p ≠ q) {z : ℂ} (hz : jacobiLetterTheta q (jacobiZetak z k) (jacobiTauk k) ≠ 0) :
     HasDerivAt (fun z => jacobiPQk p q z k)
       (p22R1_N p (jacobiTauk k) / p22R1_N q (jacobiTauk k) * (π / (2 * compEllIntKk k)) *
@@ -411,7 +406,7 @@ lemma p22R1_sq_s2 (hk : k ∈ jacobiModulusDomain) {z : ℂ}
   field_simp
   linear_combination e
 
-lemma p22R1_eventually_ne (hk : k ∈ jacobiModulusDomain) {p : JacobiLetter} {z : ℂ}
+theorem p22R1_eventually_ne (hk : k ∈ jacobiModulusDomain) {p : JacobiLetter} {z : ℂ}
     (hz : jacobiLetterTheta p (jacobiZetak z k) (jacobiTauk k) ≠ 0) :
     ∀ᶠ w in 𝓝 z, jacobiLetterTheta p (jacobiZetak w k) (jacobiTauk k) ≠ 0 := by
   have hτ := jacobiTauk_im_pos hk
@@ -1092,7 +1087,7 @@ open Real
 variable {m : ℝ}
 
 /-- `sn² + cn² = 1` and `m sn² + dn² = 1` at one point (helper). -/
-lemma je22b_identities (hm : m < 1) (u : ℝ) :
+theorem je22b_identities (hm : m < 1) (u : ℝ) :
     Real.jacobiSnm u m ^ 2 + Real.jacobiCnm u m ^ 2 = 1 ∧
       m * Real.jacobiSnm u m ^ 2 + Real.jacobiDnm u m ^ 2 = 1 :=
   ⟨Real.jacobiSnm_sq_add_jacobiCnm_sq u m, Real.mul_jacobiSnm_sq_add_jacobiDnm_sq hm u⟩

@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Cotangent
-public import Mathlib.Tactic.CrossRefAttribute
 
 /-!
 # Partial fractions for tan, csc and sec (DLMF 4.22.3–4.22.5)
@@ -30,7 +29,7 @@ noncomputable section
 namespace Complex
 
 /-- The Mittag-Leffler series for the cotangent as a `HasSum`. -/
-lemma hasSum_cotTerm {x : ℂ} (hx : x ∈ integerComplement) :
+theorem hasSum_cotTerm {x : ℂ} (hx : x ∈ integerComplement) :
     HasSum (fun n => cotTerm x n) (π * cot (π * x) - 1 / x) := by
   rw [cot_series_rep' hx]; exact (summable_cotTerm hx).hasSum
 

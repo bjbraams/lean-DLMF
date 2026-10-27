@@ -5,7 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Hypergeometric.EulerIntegral
 public import DLMF.Hypergeometric.Continuation
 public import DLMF.Gamma.MellinBarnes
 
@@ -30,7 +29,7 @@ open DLMF.Gamma
 
 /-- The Mellin–Barnes integral in Barnes's orientation: for `σ < 0 < re a + σ` and `v > 0`,
 `Γ(a)(1+v)^{-a} = 1/(2π) ∫ Γ(-(σ+iy)) Γ(a+σ+iy) v^{σ+iy} dy`. -/
-lemma Gamma_mul_one_add_cpow_neg_barnes {a : ℂ} {σ : ℝ} (hσ : σ < 0) (haσ : 0 < a.re + σ)
+theorem Gamma_mul_one_add_cpow_neg_barnes {a : ℂ} {σ : ℝ} (hσ : σ < 0) (haσ : 0 < a.re + σ)
     {v : ℝ} (hv : 0 < v) :
     Gamma a * ((1 + v : ℝ) : ℂ) ^ (-a) =
       1 / (2 * π) * ∫ y : ℝ, Gamma (-((σ : ℂ) + I * y)) * Gamma (a + σ + I * y) *
@@ -43,7 +42,7 @@ lemma Gamma_mul_one_add_cpow_neg_barnes {a : ℂ} {σ : ℝ} (hσ : σ < 0) (ha�
   rw [show (((-σ : ℝ) : ℂ) + ((-y : ℝ) : ℂ) * I) = -((σ : ℂ) + I * y) by push_cast; ring,
     show a - -((σ : ℂ) + I * y) = a + σ + I * y by ring, neg_neg]
 
-lemma integrable_Gamma_neg_mul_Gamma {a : ℂ} {σ : ℝ} (hσ : σ < 0) (haσ : 0 < a.re + σ) :
+theorem integrable_Gamma_neg_mul_Gamma {a : ℂ} {σ : ℝ} (hσ : σ < 0) (haσ : 0 < a.re + σ) :
     Integrable (fun y : ℝ => Gamma (-((σ : ℂ) + I * y)) * Gamma (a + σ + I * y)) := by
   have h := (integrable_Gamma_mul_Gamma_vertical (a := a) (σ := -σ) (by linarith)
     (by linarith)).comp_neg
@@ -52,7 +51,7 @@ lemma integrable_Gamma_neg_mul_Gamma {a : ℂ} {σ : ℝ} (hσ : σ < 0) (haσ :
   rw [show (((-σ : ℝ) : ℂ) + ((-y : ℝ) : ℂ) * I) = -((σ : ℂ) + I * y) by push_cast; ring,
     show a - -((σ : ℂ) + I * y) = a + σ + I * y by ring]
 
-lemma continuous_Gamma_neg_mul_Gamma {a : ℂ} {σ : ℝ} (hσ : σ < 0) (haσ : 0 < a.re + σ) :
+theorem continuous_Gamma_neg_mul_Gamma {a : ℂ} {σ : ℝ} (hσ : σ < 0) (haσ : 0 < a.re + σ) :
     Continuous (fun y : ℝ => Gamma (-((σ : ℂ) + I * y)) * Gamma (a + σ + I * y)) := by
   refine continuous_iff_continuousAt.mpr fun y => ContinuousAt.mul ?_ ?_
   · exact (continuousAt_Gamma_of_re_pos (by simp; linarith)).comp (by fun_prop)
@@ -192,7 +191,7 @@ theorem barnes_integral_of_re_sub_pos {a b c : ℂ} {x σ : ℝ} (hx : -1 < x) (
 
 /-- The numerator of Barnes's integrand, `Γ(a+s)Γ(b+s)Γ(-s)(-x)^s` on `s = σ + iy`, decays like
 `e^{-3π|y|/2}`. -/
-lemma exists_norm_barnes_numerator_le {a b : ℂ} {x σ : ℝ} (hx0 : x < 0)
+theorem exists_norm_barnes_numerator_le {a b : ℂ} {x σ : ℝ} (hx0 : x < 0)
     (ha : 0 < a.re + σ) (hb : 0 < b.re + σ) (hσ : σ < 0) :
     ∃ C : ℝ, ∃ K : ℕ, ∀ y : ℝ,
       ‖Gamma (a + σ + I * y) * Gamma (b + σ + I * y) * Gamma (-((σ : ℂ) + I * y)) *

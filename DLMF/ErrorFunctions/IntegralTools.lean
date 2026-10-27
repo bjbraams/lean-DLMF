@@ -23,7 +23,7 @@ open scoped Real Topology Nat
 namespace DLMF.Confluent
 
 /-- If `Re w > 0` and `Re w² > 0`, then `|arg w| < π/4`. -/
-lemma erfInt_abs_arg_lt_of_re_sq {w : ℂ} (hw : 0 < w.re) (hw2 : 0 < (w^2).re) :
+theorem erfInt_abs_arg_lt_of_re_sq {w : ℂ} (hw : 0 < w.re) (hw2 : 0 < (w^2).re) :
     |arg w| < π/4 := by
   have h1 : |arg w| < π/2 := Complex.abs_arg_lt_pi_div_two_iff.2 (Or.inl hw)
   have hre : (w^2).re = ‖w‖^2*Real.cos (2*arg w) := by
@@ -42,7 +42,7 @@ lemma erfInt_abs_arg_lt_of_re_sq {w : ℂ} (hw : 0 < w.re) (hw2 : 0 < (w^2).re) 
   linarith
 
 /-- In the closed sector `|arg z| ≤ π/4`, `Re z ≥ 0` and `Re z² ≥ 0`. -/
-lemma erfInt_re_nonneg_of_abs_arg_le {z : ℂ} (hz : |arg z| ≤ π/4) :
+theorem erfInt_re_nonneg_of_abs_arg_le {z : ℂ} (hz : |arg z| ≤ π/4) :
     0 ≤ z.re ∧ 0 ≤ (z^2).re := by
   constructor
   · rw [← Complex.norm_mul_cos_arg z]
@@ -52,7 +52,7 @@ lemma erfInt_re_nonneg_of_abs_arg_le {z : ℂ} (hz : |arg z| ≤ π/4) :
     rwa [show 2*(π/4) = π/2 by ring, Real.cos_pi_div_two, mul_zero] at h
 
 /-- For `|arg z| ≤ π/4` and `ε > 0`, the shifted point `z + ε` lies in the open sector. -/
-lemma erfInt_shift_mem_open {z : ℂ} (hz : |arg z| ≤ π/4) {ε : ℝ} (hε : 0 < ε) :
+theorem erfInt_shift_mem_open {z : ℂ} (hz : |arg z| ≤ π/4) {ε : ℝ} (hε : 0 < ε) :
     z + ε ≠ 0 ∧ |arg (z+ε)| < π/4 := by
   obtain ⟨h1, h2⟩ := erfInt_re_nonneg_of_abs_arg_le hz
   have hr : 0 < (z+ε).re := by simp; linarith
@@ -62,7 +62,7 @@ lemma erfInt_shift_mem_open {z : ℂ} (hz : |arg z| ≤ π/4) {ε : ℝ} (hε : 
   exact ⟨fun h => by rw [h] at hr; simp at hr, erfInt_abs_arg_lt_of_re_sq hr hr2⟩
 
 /-- Integrability of `t^{k-1/2}/(t²+1)` on `(0, ∞)` for `k ∈ {0, 1}`. -/
-lemma erfInt_integrableOn_rpow_div (k : ℕ) (hk : k ≤ 1) :
+theorem erfInt_integrableOn_rpow_div (k : ℕ) (hk : k ≤ 1) :
     IntegrableOn (fun t : ℝ => t ^ ((k:ℝ) - 1/2) / (t^2+1)) (Ioi 0) := by
   have hs : Ioi (0:ℝ) = Ioc 0 1 ∪ Ioi 1 := (Ioc_union_Ioi_eq_Ioi zero_le_one).symm
   rw [hs]

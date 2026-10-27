@@ -5,16 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Confluent.Basic
-public import DLMF.Confluent.Whittaker
-public import DLMF.Confluent.Recurrence
 public import DLMF.Confluent.Continuation
-public import DLMF.Bessel.Basic
-public import DLMF.Bessel.Modified
-public import DLMF.Bessel.SecondKind
-public import DLMF.OrthogonalPolynomials.Classical
 public import DLMF.OrthogonalPolynomials.Hahn
-public import DLMF.Gamma.Pochhammer
 
 /-!
 # Relations to other functions (DLMF §§13.6, 13.18)
@@ -47,7 +39,7 @@ def hermitePolyHEval (n : ℕ) (z : ℂ) : ℂ :=
   eval z ((hermitePolyH n).map (Int.castRingHom ℂ))
 
 /-- `(-n)_{n-s} (-1)^{n-s} / (n-s)! = C(n,s)`. -/
-lemma poch_neg_nat_sub_div (n s : ℕ) (hs : s ≤ n) :
+theorem poch_neg_nat_sub_div (n s : ℕ) (hs : s ≤ n) :
     poch (-(n : ℂ)) (n - s) * (-1) ^ (n - s) / ((n - s).factorial : ℂ) = n.choose s := by
   rw [DLMF.Gamma.poch_neg_nat_eq]
   simp only [Nat.sub_le, ↓reduceIte]
@@ -59,12 +51,12 @@ lemma poch_neg_nat_sub_div (n s : ℕ) (hs : s ≤ n) :
   linear_combination (n.factorial : ℂ) * h1
 
 /-- Sign bookkeeping for reflected terminating sums. -/
-lemma neg_one_pow_add_mul_pow (s t : ℕ) : ((-1 : ℂ) ^ (s + t) * (-1) ^ s) = (-1) ^ t := by
+theorem neg_one_pow_add_mul_pow (s t : ℕ) : ((-1 : ℂ) ^ (s + t) * (-1) ^ s) = (-1) ^ t := by
   rw [pow_add, mul_comm, ← mul_assoc, ← pow_add, ← two_mul, pow_mul]
   simp
 
 /-- On the right half-plane, `(z²)^w = z^{2w}`. -/
-lemma sq_cpow_of_re_pos {z : ℂ} (hre : 0 < z.re) (w : ℂ) : (z ^ 2) ^ w = z ^ (2 * w) := by
+theorem sq_cpow_of_re_pos {z : ℂ} (hre : 0 < z.re) (w : ℂ) : (z ^ 2) ^ w = z ^ (2 * w) := by
   have harg : |z.arg| < π / 2 := Complex.abs_arg_lt_pi_div_two_iff.mpr (Or.inl hre)
   have him : (log z * 2).im = 2 * z.arg := by
     simp [Complex.log_im, mul_comm]
@@ -72,7 +64,7 @@ lemma sq_cpow_of_re_pos {z : ℂ} (hre : 0 < z.re) (w : ℂ) : (z ^ 2) ^ w = z ^
     (by rw [him]; linarith [abs_lt.mp harg])]
 
 /-- Squares of right half-plane points lie in the slit plane. -/
-lemma sq_mem_slitPlane_of_re_pos {z : ℂ} (hre : 0 < z.re) : z ^ 2 ∈ slitPlane := by
+theorem sq_mem_slitPlane_of_re_pos {z : ℂ} (hre : 0 < z.re) : z ^ 2 ∈ slitPlane := by
   rw [mem_slitPlane_iff]
   by_cases him : z.im = 0
   · left
@@ -87,7 +79,7 @@ lemma sq_mem_slitPlane_of_re_pos {z : ℂ} (hre : 0 < z.re) : z ^ 2 ∈ slitPlan
     · exact him h1
 
 /-- `(r x)^w = r^w x^w` for positive real `r`. -/
-lemma ofReal_mul_cpow_of_pos {r : ℝ} (hr : 0 < r) {x : ℂ} (hx : x ≠ 0) (w : ℂ) :
+theorem ofReal_mul_cpow_of_pos {r : ℝ} (hr : 0 < r) {x : ℂ} (hx : x ≠ 0) (w : ℂ) :
     ((r : ℂ) * x) ^ w = (r : ℂ) ^ w * x ^ w := by
   have hr' : (r : ℂ) ≠ 0 := ofReal_ne_zero.mpr hr.ne'
   rw [cpow_def_of_ne_zero (mul_ne_zero hr' hx), log_ofReal_mul hr hx, cpow_def_of_ne_zero hr',
@@ -95,7 +87,7 @@ lemma ofReal_mul_cpow_of_pos {r : ℝ} (hr : 0 < r) {x : ℂ} (hx : x ≠ 0) (w 
   ring_nf
 
 /-- `Γ(1/2) = √π`. -/
-lemma Gamma_one_half_eq_sqrt : Gamma (1 / 2 : ℂ) = (Real.sqrt π : ℂ) := by
+theorem Gamma_one_half_eq_sqrt : Gamma (1 / 2 : ℂ) = (Real.sqrt π : ℂ) := by
   rw [Complex.Gamma_one_half_eq, Real.sqrt_eq_rpow, Complex.ofReal_cpow Real.pi_pos.le]
   norm_num
 
@@ -221,7 +213,7 @@ theorem kummerM_besselI (ν z : ℂ) (hz : z ∈ slitPlane) (hν : ∀ k : ℕ, 
   linear_combination (-(Gamma (ν + 1) * exp z *
     regularizedHGFun (∅ : Multiset ℂ) {ν + 1} (z ^ 2 / 4))) * hp
 
-lemma ofReal_mul_cpow' {r : ℝ} (hr : 0 < r) {w : ℂ} (hw : w ≠ 0) (s : ℂ) :
+theorem ofReal_mul_cpow' {r : ℝ} (hr : 0 < r) {w : ℂ} (hw : w ≠ 0) (s : ℂ) :
     ((r : ℂ) * w) ^ s = (r : ℂ) ^ s * w ^ s := by
   rw [cpow_def_of_ne_zero (mul_ne_zero (by exact_mod_cast hr.ne') hw), log_ofReal_mul hr hw,
     cpow_def_of_ne_zero (by exact_mod_cast hr.ne'), cpow_def_of_ne_zero hw, ← exp_add,
@@ -230,7 +222,7 @@ lemma ofReal_mul_cpow' {r : ℝ} (hr : 0 < r) {w : ℂ} (hw : w ≠ 0) (s : ℂ)
 
 /-- DLMF 13.6.10 when `2ν` is not an integer, from the connection formula, 13.6.9, the
 duplication formula and the reflection formula. -/
-lemma kummerU_besselK_of_not_int (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
+theorem kummerU_besselK_of_not_int (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
     (h2ν : ∀ k : ℤ, 2 * ν ≠ k) :
     kummerU (ν + 1 / 2) (2 * ν + 1) (2 * z) =
       1 / (Real.sqrt π : ℂ) * exp z * (2 * z) ^ (-ν) * besselK ν z := by
@@ -347,7 +339,7 @@ noncomputable def kummerBesselCoeff (ν : ℂ) (n k : ℕ) : ℂ :=
     (1 / Gamma (2 * ν + 1 + n + k))
 
 /-- Pascal's identity combined with the reciprocal-Gamma recurrence. -/
-lemma kummerBesselCoeff_succ (ν : ℂ) (n k : ℕ) :
+theorem kummerBesselCoeff_succ (ν : ℂ) (n k : ℕ) :
     kummerBesselCoeff ν n (k + 1) - 2 * ν * (2 * ν + 1) * kummerBesselCoeff (ν + 1) n k =
       (2 * ν + 1 + n) * kummerBesselCoeff ν (n + 1) (k + 1) := by
   have hG := one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (2 * ν + 1 + n + (k + 1))
@@ -378,7 +370,7 @@ lemma kummerBesselCoeff_succ (ν : ℂ) (n k : ℕ) :
     ((-1 : ℂ) ^ k * (ν + (k + 1)) * (1 / Gamma (2 * (ν + 1) + 1 + n + k)) * poch (2 * ν) (k + 1)) * hcz
 
 /-- The zero coefficient satisfies the same finite-sum recurrence. -/
-lemma kummerBesselCoeff_succ_zero (ν : ℂ) (n : ℕ) :
+theorem kummerBesselCoeff_succ_zero (ν : ℂ) (n : ℕ) :
     kummerBesselCoeff ν n 0 = (2 * ν + 1 + n) * kummerBesselCoeff ν (n + 1) 0 := by
   simp only [kummerBesselCoeff, pow_zero, Nat.choose_zero_right, Nat.cast_one, one_mul,
     poch_zero, mul_one, Nat.cast_zero, add_zero, Nat.cast_add, Nat.cast_one, one_div]
@@ -386,7 +378,7 @@ lemma kummerBesselCoeff_succ_zero (ν : ℂ) (n : ℕ) :
   ring
 
 /-- The normalized finite expansion on a parameter half-plane. -/
-lemma regularizedConfluent_bessel_sum_pos (n : ℕ) {ν : ℂ} (hν : 0 < ν.re) (z : ℂ) :
+theorem regularizedConfluent_bessel_sum_pos (n : ℕ) {ν : ℂ} (hν : 0 < ν.re) (z : ℂ) :
     regularizedHGFun {ν + 1 / 2} {2 * ν + 1 + n} (2 * z) * (1 / Gamma ν) =
       exp z * ∑ k ∈ Finset.range (n + 1), kummerBesselCoeff ν n k * (z / 2) ^ k *
         regularizedHGFun ∅ {ν + k + 1} (z ^ 2 / 4) := by
@@ -465,7 +457,7 @@ lemma regularizedConfluent_bessel_sum_pos (n : ℕ) {ν : ℂ} (hν : 0 < ν.re)
       (2 * ν + 1) * z * regularizedHGFun {ν + 1 + 1 / 2} {2 * (ν + 1) + 1 + n} (2 * z) * hG
 
 /-- The normalized finite expansion is entire in the order parameter. -/
-lemma regularizedConfluent_bessel_sum_all (n : ℕ) (ν z : ℂ) :
+theorem regularizedConfluent_bessel_sum_all (n : ℕ) (ν z : ℂ) :
     regularizedHGFun {ν + 1 / 2} {2 * ν + 1 + n} (2 * z) * (1 / Gamma ν) =
       exp z * ∑ k ∈ Finset.range (n + 1), kummerBesselCoeff ν n k * (z / 2) ^ k *
         regularizedHGFun ∅ {ν + k + 1} (z ^ 2 / 4) := by
@@ -506,14 +498,14 @@ lemma regularizedConfluent_bessel_sum_all (n : ℕ) (ν z : ℂ) :
   exact hL.eqOn_of_preconnected_of_eventuallyEq hR isPreconnected_univ (Set.mem_univ 1) he (Set.mem_univ ν)
 
 /-- Terminating Pochhammer coefficients as binomial coefficients, including zero tails. -/
-lemma poch_neg_nat_div_factorial_eq (n k : ℕ) :
+theorem poch_neg_nat_div_factorial_eq (n k : ℕ) :
     poch (-(n : ℂ)) k / (k.factorial : ℂ) = (-1) ^ k * (n.choose k : ℂ) := by
   rw [poch_neg_coe_nat, Nat.descFactorial_eq_factorial_mul_choose]
   push_cast
   field_simp [Nat.cast_ne_zero.mpr k.factorial_ne_zero]
 
 /-- A finite Kummer expansion in entire `₀F₁` functions of its argument. -/
-lemma kummerM_finite_regularized0F1 (ν : ℂ) (n : ℕ) (z : ℂ)
+theorem kummerM_finite_regularized0F1 (ν : ℂ) (n : ℕ) (z : ℂ)
     (hb : ∀ k : ℕ, 2 * ν + 1 + n ≠ -(k : ℂ)) (hΓ : ∀ k : ℕ, ν ≠ -(k : ℂ)) :
     kummerM (ν + 1 / 2) (2 * ν + 1 + n) (2 * z) =
       Gamma ν * exp z * ∑ k ∈ Finset.range (n + 1),
@@ -548,7 +540,7 @@ lemma kummerM_finite_regularized0F1 (ν : ℂ) (n : ℕ) (z : ℂ)
   ring
 
 /-- Remove the order power from a shifted modified Bessel function. -/
-lemma cpow_neg_mul_besselI_shift (ν : ℂ) (k : ℕ) {z : ℂ} (hz : z ≠ 0) :
+theorem cpow_neg_mul_besselI_shift (ν : ℂ) (k : ℕ) {z : ℂ} (hz : z ≠ 0) :
     (z / 2) ^ (-ν) * besselI (ν + k) z = (z / 2) ^ k *
       regularizedHGFun ∅ {ν + k + 1} (z ^ 2 / 4) := by
   rw [besselI, ← mul_assoc, ← cpow_add _ _ (div_ne_zero hz two_ne_zero),
@@ -615,22 +607,22 @@ theorem kummerM_besselI_sum_neg (ν : ℂ) (n : ℕ) (z : ℂ)
     _ = _ := by ring
 
 /-- `hermitePolyHEval` is the algebra evaluation. -/
-lemma hermitePolyHEval_eq_aeval (n : ℕ) (z : ℂ) :
+theorem hermitePolyHEval_eq_aeval (n : ℕ) (z : ℂ) :
     hermitePolyHEval n z = Polynomial.aeval z (hermitePolyH n) := by
   rw [hermitePolyHEval, Polynomial.eval_map, Polynomial.aeval_def, algebraMap_int_eq]
 
-lemma hermitePolyHEval_zero (z : ℂ) : hermitePolyHEval 0 z = 1 := by
+theorem hermitePolyHEval_zero (z : ℂ) : hermitePolyHEval 0 z = 1 := by
   simp [hermitePolyHEval]
 
-lemma hermitePolyHEval_one (z : ℂ) : hermitePolyHEval 1 z = 2 * z := by
+theorem hermitePolyHEval_one (z : ℂ) : hermitePolyHEval 1 z = 2 * z := by
   simp [hermitePolyHEval, hermitePolyH_one]
 
-lemma hermitePolyHEval_two (z : ℂ) : hermitePolyHEval 2 z = 4 * z ^ 2 - 2 := by
+theorem hermitePolyHEval_two (z : ℂ) : hermitePolyHEval 2 z = 4 * z ^ 2 - 2 := by
   simp [hermitePolyHEval]
   ring
 
 /-- The three-term recurrence `H_{k+2} = 2z H_{k+1} - 2(k+1) H_k`. -/
-lemma hermitePolyHEval_succ_succ (k : ℕ) (z : ℂ) :
+theorem hermitePolyHEval_succ_succ (k : ℕ) (z : ℂ) :
     hermitePolyHEval (k + 2) z =
       2 * z * hermitePolyHEval (k + 1) z - 2 * (k + 1) * hermitePolyHEval k z := by
   show hermitePolyHEval (k + 1 + 1) z = _
@@ -642,14 +634,14 @@ lemma hermitePolyHEval_succ_succ (k : ℕ) (z : ℂ) :
   push_cast
   ring
 
-lemma hermitePolyHEval_three (z : ℂ) : hermitePolyHEval 3 z = 8 * z ^ 3 - 12 * z := by
+theorem hermitePolyHEval_three (z : ℂ) : hermitePolyHEval 3 z = 8 * z ^ 3 - 12 * z := by
   rw [show (3 : ℕ) = 1 + 2 from rfl, hermitePolyHEval_succ_succ, hermitePolyHEval_two,
     hermitePolyHEval_one]
   push_cast
   ring
 
 /-- The two-step recurrence `H_{k+4} = (4z² - 4k - 10) H_{k+2} - 4(k+1)(k+2) H_k`. -/
-lemma hermitePolyHEval_two_step (k : ℕ) (z : ℂ) :
+theorem hermitePolyHEval_two_step (k : ℕ) (z : ℂ) :
     hermitePolyHEval (k + 4) z =
       (4 * z ^ 2 - (4 * k + 10)) * hermitePolyHEval (k + 2) z -
         4 * (k + 1) * (k + 2) * hermitePolyHEval k z := by
@@ -661,12 +653,12 @@ lemma hermitePolyHEval_two_step (k : ℕ) (z : ℂ) :
   push_cast at r1 r2 r3
   linear_combination r1 + 2 * z * r2 + 2 * ((k : ℂ) + 2) * r3
 
-lemma half_ne_neg_nat : ∀ k : ℕ, (1 / 2 : ℂ) ≠ -(k : ℂ) := fun k hk => by
+theorem half_ne_neg_nat : ∀ k : ℕ, (1 / 2 : ℂ) ≠ -(k : ℂ) := fun k hk => by
   have := congrArg Complex.re hk
   simp at this
   linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
 
-lemma three_half_ne_neg_nat : ∀ k : ℕ, (3 / 2 : ℂ) ≠ -(k : ℂ) := fun k hk => by
+theorem three_half_ne_neg_nat : ∀ k : ℕ, (3 / 2 : ℂ) ≠ -(k : ℂ) := fun k hk => by
   have := congrArg Complex.re hk
   simp at this
   linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]

@@ -6,9 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Mathieu.Basic
-public import Mathlib.Analysis.Asymptotics.Defs
 public import Mathlib.RingTheory.Polynomial.Hermite.Basic
-public import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
 /-!
 # Asymptotic expansions for large `q` (DLMF §28.8)

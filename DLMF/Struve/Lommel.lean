@@ -9,8 +9,6 @@ public import DLMF.Struve.Basic
 public import DLMF.Bessel.Elementary
 public import DLMF.Bessel.NeumannSeries
 public import DLMF.Gamma.Simplex.GammaPochhammer
-public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
-public import Mathlib.Analysis.Calculus.DSlope
 
 /-!
 # Lommel functions and parameter continuation
@@ -734,7 +732,7 @@ def lommelNumerator (a b z : ℂ) : ℂ :=
     2^(a+b-2)*(cos (b*π)*besselJ (a-b) z+sin (b*π)*besselY (a-b) z)
 
 /-- When a lower half-parameter is a nonpositive integer, the 1F2 tail is a 0F1. -/
-theorem regularized1F2_one_neg_nat (n : ℕ) (b q : ℂ) :
+lemma regularized1F2_one_neg_nat (n : ℕ) (b q : ℂ) :
     regularizedHGFun {1} {1-(n:ℂ),b+1} q =
       q^n*regularizedHGFun (∅ : Multiset ℂ) {b+n+1} q := by
   have h := (hasSum_regularized1F2 1 (1-(n:ℂ)) (b+1) q).summable

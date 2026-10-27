@@ -8,7 +8,6 @@ module
 public import DLMF.EllipticIntegrals.Symmetric
 public import Carlson.Elliptic.Addition
 public import Carlson.Elliptic.ZeroVariable
-public import Mathlib.Tactic.CrossRefAttribute
 
 /-!
 # Addition theorems for the symmetric elliptic integrals (DLMF §19.26)
@@ -61,11 +60,11 @@ def ei19d_posDomain (x y z : ℝ) : Prop :=
 
 /-! ### §19.26(i) General formulas -/
 
-theorem ei19d_sqrt_mul3 {a b c : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) (_hc : 0 ≤ c) :
+lemma ei19d_sqrt_mul3 {a b c : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) (_hc : 0 ≤ c) :
     √(a * b * c) = √a * √b * √c := by
   rw [Real.sqrt_mul (mul_nonneg ha hb), Real.sqrt_mul ha]
 
-theorem ei19d_perm_alg {a b c A B C l m : ℝ} (hA : A ^ 2 = a ^ 2 + l) (hB : B ^ 2 = b ^ 2 + l)
+lemma ei19d_perm_alg {a b c A B C l m : ℝ} (hA : A ^ 2 = a ^ 2 + l) (hB : B ^ 2 = b ^ 2 + l)
     (hC : C ^ 2 = c ^ 2 + l) (h : (a ^ 2 + m) * l ^ 2 = (A * b * c + a * B * C) ^ 2) :
     (b ^ 2 + m) * l ^ 2 = (B * a * c + b * A * C) ^ 2 ∧
       (c ^ 2 + m) * l ^ 2 = (C * a * b + c * A * B) ^ 2 := by
@@ -146,7 +145,7 @@ theorem symEllIntRF_addition_zero {y z l m : ℝ} (hy : 0 < y) (hz : 0 < z) (hl 
     symEllIntRF_eq_carlsonRF (hs _ (by linarith)) (hs _ (by linarith)) (hs m hm), ← H]
   ring
 
-theorem ei19d_addition_core {x y z l m : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) (hz : 0 ≤ z) (hl : 0 < l)
+lemma ei19d_addition_core {x y z l m : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) (hz : 0 ≤ z) (hl : 0 < l)
     (h5 : m = (√(x * y * z) + √((x + l) * (y + l) * (z + l))) ^ 2 / l ^ 2 - l - x - y - z) :
     l * (l * m - (x * y + x * z + y * z)) =
         2 * √(x * y * z) * (√(x * y * z) + √((x + l) * (y + l) * (z + l))) ∧
@@ -213,7 +212,7 @@ theorem symEllInt_addition_quadratic {x y z l m : ℝ} (h : ei19d_posDomain x y 
       (√(x * y * z) + √((x + l) * (y + l) * (z + l)))) * h1 +
     4 * (√(x * y * z) + √((x + l) * (y + l) * (z + l))) ^ 2 * hP - 4 * (x * y * z) * h2
 
-theorem ei19d_addition_pos {x y z l m : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z) (hl : 0 < l)
+lemma ei19d_addition_pos {x y z l m : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z) (hl : 0 < l)
     (hm : 0 < m)
     (h5 : m = (√(x * y * z) + √((x + l) * (y + l) * (z + l))) ^ 2 / l ^ 2 - l - x - y - z) :
     symEllIntRF ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) +
@@ -235,7 +234,7 @@ theorem ei19d_addition_pos {x y z l m : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 <
     symEllIntRF_eq_carlsonRF (hs x hx) (hs y hy) (hs z hz)]
   exact Carlson.carlsonRF_add_carlsonRF hx hy hz hl hm h13
 
-theorem ei19d_addition_of_first {x y z l m : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (hz : 0 < z)
+lemma ei19d_addition_of_first {x y z l m : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (hz : 0 < z)
     (hl : 0 < l) (hm : 0 < m)
     (h5 : m = (√(x * y * z) + √((x + l) * (y + l) * (z + l))) ^ 2 / l ^ 2 - l - x - y - z) :
     symEllIntRF ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) +
@@ -485,13 +484,13 @@ theorem symEllIntRF_duplication_zero {y z : ℂ} (hy : y ∈ slitPlane) (hz : z 
     ei19d_symEllIntRF_zero_eq_carlsonRK hy hz,
     symEllIntRF_eq_carlsonRF (hadd y z hy hz) hz' hm, Carlson.carlsonRK_duplication hy hz]
 
-theorem ei19d_div_four_mem {a : ℂ} (ha : a ∈ slitPlane) : a / 4 ∈ slitPlane := by
+lemma ei19d_div_four_mem {a : ℂ} (ha : a ∈ slitPlane) : a / 4 ∈ slitPlane := by
   rw [mem_slitPlane_iff] at ha ⊢
   rcases ha with h | h
   · left; simp only [div_re]; norm_num; positivity
   · right; simp only [div_im]; norm_num; exact h
 
-theorem ei19d_quarter_cpow : ((1 / 4 : ℝ) : ℂ) ^ (-1 / 2 : ℂ) = 2 := by
+lemma ei19d_quarter_cpow : ((1 / 4 : ℝ) : ℂ) ^ (-1 / 2 : ℂ) = 2 := by
   rw [show (-1 / 2 : ℂ) = ((-1 / 2 : ℝ) : ℂ) by push_cast; ring,
     ← ofReal_cpow (by norm_num : (0 : ℝ) ≤ 1 / 4)]
   have h : (1 / 4 : ℝ) ^ (-1 / 2 : ℝ) = 2 := by

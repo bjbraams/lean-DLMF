@@ -5,10 +5,24 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Painleve.Basic
-public import Mathlib.LinearAlgebra.Matrix.Notation
-public import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
-public import Mathlib.Tactic.CrossRefAttribute
+public import Mathlib.Analysis.Calculus.Deriv.Basic
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Mathlib.Tactic.Echelon.Zsqrtd
+public import Mathlib.Tactic.Inclusion.Extension.Core.Core
+public import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+public import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Rational
+public import Mathlib.Tactic.NormNum.Irrational
+public import Mathlib.Tactic.NormNum.IsCoprime
+public import Mathlib.Tactic.NormNum.IsSquare
+public import Mathlib.Tactic.NormNum.LegendreSymbol
+public import Mathlib.Tactic.NormNum.ModEq
+public import Mathlib.Tactic.NormNum.NatFib
+public import Mathlib.Tactic.NormNum.NatLog
+public import Mathlib.Tactic.NormNum.NatSqrt
+public import Mathlib.Tactic.NormNum.Ordinal
+public import Mathlib.Tactic.NormNum.Parity
+public import Mathlib.Tactic.NormNum.Prime
+public import Mathlib.Tactic.NormNum.RealSqrt
 
 /-!
 # Painlevé equations in the DLMF normalization: definitions (DLMF Chapter 32)
@@ -53,19 +67,19 @@ namespace IsODE2SolutionOn
 variable {F G : ℂ → ℂ → ℂ → ℂ} {w : ℂ → ℂ} {U V : Set ℂ}
 
 /-- The first derivative of a solution. -/
-lemma hasDerivAt (h : IsODE2SolutionOn F w U) {z : ℂ} (hz : z ∈ U) :
+theorem hasDerivAt (h : IsODE2SolutionOn F w U) {z : ℂ} (hz : z ∈ U) :
     HasDerivAt w (deriv w z) z := (h.differentiableAt z hz).hasDerivAt
 
 /-- The equation itself. -/
-lemma ode (h : IsODE2SolutionOn F w U) {z : ℂ} (hz : z ∈ U) :
+theorem ode (h : IsODE2SolutionOn F w U) {z : ℂ} (hz : z ∈ U) :
     deriv (deriv w) z = F z (w z) (deriv w z) := (h.hasDerivAt_deriv z hz).deriv
 
 /-- Restriction to a smaller set. -/
-lemma mono (h : IsODE2SolutionOn F w U) (hVU : V ⊆ U) : IsODE2SolutionOn F w V :=
+theorem mono (h : IsODE2SolutionOn F w U) (hVU : V ⊆ U) : IsODE2SolutionOn F w V :=
   ⟨fun z hz => h.differentiableAt z (hVU hz), fun z hz => h.hasDerivAt_deriv z (hVU hz)⟩
 
 /-- Change of right-hand side when the two agree along the solution. -/
-lemma congr_rhs (h : IsODE2SolutionOn F w U)
+theorem congr_rhs (h : IsODE2SolutionOn F w U)
     (hFG : ∀ z ∈ U, F z (w z) (deriv w z) = G z (w z) (deriv w z)) :
     IsODE2SolutionOn G w U :=
   ⟨h.differentiableAt, fun z hz => (hFG z hz) ▸ h.hasDerivAt_deriv z hz⟩
@@ -74,7 +88,7 @@ end IsODE2SolutionOn
 
 /-- Build a solution from an explicit first-order pair `w' = v`, `v' = F(z, w, v)` on an open
 set. -/
-lemma isODE2SolutionOn_of_hasDerivAt {F : ℂ → ℂ → ℂ → ℂ} {w v : ℂ → ℂ} {U : Set ℂ}
+theorem isODE2SolutionOn_of_hasDerivAt {F : ℂ → ℂ → ℂ → ℂ} {w v : ℂ → ℂ} {U : Set ℂ}
     (hU : IsOpen U) (hw : ∀ z ∈ U, HasDerivAt w (v z) z)
     (hv : ∀ z ∈ U, HasDerivAt v (F z (w z) (v z)) z) : IsODE2SolutionOn F w U := by
   refine ⟨fun z hz => (hw z hz).differentiableAt, fun z hz => ?_⟩

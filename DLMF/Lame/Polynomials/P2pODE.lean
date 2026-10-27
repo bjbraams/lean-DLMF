@@ -6,7 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Lame.Polynomials.P2pBase
-public import DLMF.Theta.Basic
+public import DLMF.Elliptic.JacobiIdentities
+public import DLMF.JacobiElliptic.Derivatives
 
 /-!
 # Lamé polynomials solve Lamé's equation (DLMF §§29.12, 29.15)
@@ -819,7 +820,7 @@ lemma p2p_regular {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {z : ℂ}
   linear_combination hmn
 
 /-- Real points are regular. -/
-lemma p2p_regular_real {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (x : ℝ) :
+theorem p2p_regular_real {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (x : ℝ) :
     jacobiRegulark .n (x : ℂ) k := by
   refine p2p_regular hk0 hk1 fun p q h => ?_
   have hK' : 0 < Real.compEllIntKm (1 - k ^ 2) := Real.compEllIntKm_pos (by nlinarith)
@@ -834,7 +835,7 @@ lemma p2p_regular_real {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (x : ℝ) :
   · linarith
 
 /-- The points `K + iτ`, `τ` real, are regular. -/
-lemma p2p_regular_vert {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (τ : ℝ) :
+theorem p2p_regular_vert {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (τ : ℝ) :
     jacobiRegulark .n ((Real.compEllIntKm (k ^ 2) : ℂ) + I * τ) k := by
   refine p2p_regular hk0 hk1 fun p q h => ?_
   have hK : 0 < Real.compEllIntKm (k ^ 2) := Real.compEllIntKm_pos (by nlinarith)
@@ -942,7 +943,7 @@ lemma p2p_green_split {k : ℂ} (hk : k ∈ jacobiModulusDomain) {h1 h2 ν1 ν2 
       ((hs.pow 2).mul (c1.mul c2)))).intervalIntegrable _ _
 
 /-- `H_m < H_{m'}` for `m < m' ≤ n` (29.15.3). -/
-lemma p2p_lamePolyH_lt {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) {n m m' : ℕ}
+theorem p2p_lamePolyH_lt {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) {n m m' : ℕ}
     (h : m < m') (hm' : m' ≤ n) : lamePolyH t n m k < lamePolyH t n m' k := by
   have hs := (lamePolyH_strictMono hk0 hk1 t n).2.2
   induction m', h using Nat.le_induction with
@@ -980,7 +981,7 @@ lemma p2p_integral_odd_periodic (f : ℝ → ℂ) (T c : ℝ) (hper : ∀ x, f (
 
 /-- The inner product 29.14.2 of two products `E(s)E(K + iτ)` on `[0, a] × [0, b]` in terms of
 one-dimensional integrals. -/
-lemma p2p_inner_split {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {t t' : LamePolyType}
+theorem p2p_inner_split {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {t t' : LamePolyType}
     {n m n' m' : ℕ} (hm : m ≤ n) (hm' : m' ≤ n') (a b : ℝ) :
     lameInner k a b (lameProduct t n m k) (lameProduct t' n' m' k) =
       (∫ x in (0 : ℝ)..a, lamePolyEk t n m x k * lamePolyEk t' n' m' x k) *
@@ -1025,7 +1026,7 @@ lemma p2p_inner_split {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {t t' : LamePolyType
 
 /-- Orthogonality from Green's identity: if the Wronskians vanish at the ends of `[0, a]` and of
 `K + i[0, b]` and the eigenvalue pairs differ, the inner product vanishes. -/
-lemma p2p_inner_zero_green {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {t t' : LamePolyType}
+theorem p2p_inner_zero_green {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {t t' : LamePolyType}
     {n m n' m' : ℕ} (hm : m ≤ n) (hm' : m' ≤ n') (a b : ℝ)
     (hW : ∀ z ∈ ({0, (a : ℂ), (Real.compEllIntKm (k ^ 2) : ℂ),
         (Real.compEllIntKm (k ^ 2) : ℂ) + I * b} : Set ℂ),
@@ -1076,13 +1077,13 @@ def p2p_sgnC (t : LamePolyType) : ℂ := if t = .cE ∨ t = .scE ∨ t = .cdE �
 def p2p_sgnD (t : LamePolyType) : ℂ := if t = .dE ∨ t = .sdE ∨ t = .cdE ∨ t = .scdE then -1 else 1
 
 /-- The reflection signs are `±1`. -/
-lemma p2p_sgn_cases (t : LamePolyType) :
+theorem p2p_sgn_cases (t : LamePolyType) :
     (p2p_sgnS t = 1 ∨ p2p_sgnS t = -1) ∧ (p2p_sgnC t = 1 ∨ p2p_sgnC t = -1) ∧
       (p2p_sgnD t = 1 ∨ p2p_sgnD t = -1) := by
   cases t <;> simp [p2p_sgnS, p2p_sgnC, p2p_sgnD]
 
 /-- Reflection symmetries and periods of a Lamé polynomial used for the boundary terms. -/
-lemma p2p_lamePolyEk_sym {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) (n m : ℕ) :
+theorem p2p_lamePolyEk_sym {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) (n m : ℕ) :
     let K : ℂ := Real.compEllIntKm (k ^ 2)
     let K' : ℂ := Real.compEllIntKm (1 - k ^ 2)
     let E := fun z => lamePolyEk t n m z k
@@ -1120,7 +1121,7 @@ lemma p2p_lamePolyEk_sym {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType
 
 /-- The Wronskian of two Lamé polynomials vanishes at a regular point of common reflection
 symmetry. -/
-lemma p2p_W_zero {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {t t' : LamePolyType} {n m n' m' : ℕ}
+theorem p2p_W_zero {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {t t' : LamePolyType} {n m n' m' : ℕ}
     (hm : m ≤ n) (hm' : m' ≤ n') {p σ : ℂ} (hreg : jacobiRegulark .n p k)
     (hσ : σ = 1 ∨ σ = -1)
     (h1 : ∀ z, lamePolyEk t n m (p - z) k = σ * lamePolyEk t n m (p + z) k)
@@ -1140,7 +1141,7 @@ lemma p2p_type_eq {t t' : LamePolyType} {n n' : ℕ} (hs : p2p_sgnS t = p2p_sgnS
 
 /-- The eigenvalue pairs of distinct Lamé polynomials of the same reflection type about `0` and
 `K` differ. -/
-lemma p2p_eigen_ne {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {t t' : LamePolyType}
+theorem p2p_eigen_ne {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {t t' : LamePolyType}
     {n m n' m' : ℕ} (hm : m ≤ n) (hm' : m' ≤ n') (hne : (t, n, m) ≠ (t', n', m'))
     (hs : p2p_sgnS t = p2p_sgnS t') (hc : p2p_sgnC t = p2p_sgnC t') :
     (lamePolyH t' n' m' k + t'.order n' * (t'.order n' + 1) * k ^ 2 : ℂ) / 2 -
@@ -1175,13 +1176,13 @@ lemma p2p_eigen_ne {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {t t' : LamePolyType}
   · exact (p2p_lamePolyH_lt hk0 hk1 t' h hm).ne hH'
 
 /-- The product of two distinct signs `±1` is `-1`. -/
-lemma p2p_sgn_mul {σ σ' : ℂ} (h : σ = 1 ∨ σ = -1) (h' : σ' = 1 ∨ σ' = -1) (hne : σ ≠ σ') :
+theorem p2p_sgn_mul {σ σ' : ℂ} (h : σ = 1 ∨ σ = -1) (h' : σ' = 1 ∨ σ' = -1) (hne : σ ≠ σ') :
     σ * σ' = -1 := by
   rcases h with rfl | rfl <;> rcases h' with rfl | rfl <;> first | (exfalso; exact hne rfl) | ring
 
 /-- If the product of two Lamé polynomials is odd about `c ∈ {0, K}` on the real line, its
 integrals over `[0, 4K]` against `1` and `sn²` vanish. -/
-lemma p2p_real_integrals_zero {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {t t' : LamePolyType}
+theorem p2p_real_integrals_zero {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {t t' : LamePolyType}
     {n m n' m' : ℕ} (c : ℝ) (hc : c = 0 ∨ c = Real.compEllIntKm (k ^ 2))
     (hodd : ∀ z : ℂ, lamePolyEk t n m (c - z) k * lamePolyEk t' n' m' (c - z) k =
       -(lamePolyEk t n m (c + z) k * lamePolyEk t' n' m' (c + z) k)) :

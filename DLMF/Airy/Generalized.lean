@@ -86,7 +86,7 @@ theorem generalizedAiryA_entire (n : ℕ) :
   fun_prop
 
 /-- Derivative of `₀F̃₁(;c; s z^{n+2}/(n+2)²)`. -/
-lemma hasDerivAt_reg0F1_pow (n : ℕ) (s : ℂ) {c c' : ℂ} (hc : c + 1 = c') (z : ℂ) :
+theorem hasDerivAt_reg0F1_pow (n : ℕ) (s : ℂ) {c c' : ℂ} (hc : c + 1 = c') (z : ℂ) :
     HasDerivAt (fun z : ℂ => regularizedHGFun (∅ : Multiset ℂ) {c} (s * z ^ (n + 2) / ((n : ℂ) + 2) ^ 2))
       (s * z ^ (n + 1) / ((n : ℂ) + 2) *
         regularizedHGFun (∅ : Multiset ℂ) {c'} (s * z ^ (n + 2) / ((n : ℂ) + 2) ^ 2)) z := by
@@ -103,18 +103,18 @@ def IsGenAirySol (n : ℕ) (s : ℂ) (w w' : ℂ → ℂ) : Prop :=
   ∀ z, HasDerivAt w (w' z) z ∧ HasDerivAt w' (s * z ^ n * w z) z
 
 /-- Sum of two solutions. -/
-lemma IsGenAirySol.add {n : ℕ} {s : ℂ} {f f' g g' : ℂ → ℂ} (hf : IsGenAirySol n s f f')
+theorem IsGenAirySol.add {n : ℕ} {s : ℂ} {f f' g g' : ℂ → ℂ} (hf : IsGenAirySol n s f f')
     (hg : IsGenAirySol n s g g') :
     IsGenAirySol n s (fun z => f z + g z) (fun z => f' z + g' z) := fun z =>
   ⟨(hf z).1.add (hg z).1, ((hf z).2.add (hg z).2).congr_deriv (by ring)⟩
 
 /-- Constant multiple of a solution. -/
-lemma IsGenAirySol.const_mul {n : ℕ} {s : ℂ} (a : ℂ) {f f' : ℂ → ℂ} (hf : IsGenAirySol n s f f') :
+theorem IsGenAirySol.const_mul {n : ℕ} {s : ℂ} (a : ℂ) {f f' : ℂ → ℂ} (hf : IsGenAirySol n s f f') :
     IsGenAirySol n s (fun z => a * f z) (fun z => a * f' z) := fun z =>
   ⟨(hf z).1.const_mul a, ((hf z).2.const_mul a).congr_deriv (by ring)⟩
 
 /-- The even fundamental solution `₀F̃₁(;1-p; s z^{n+2}/(n+2)²)`. -/
-lemma isGenAirySol_F (n : ℕ) (s : ℂ) :
+theorem isGenAirySol_F (n : ℕ) (s : ℂ) :
     IsGenAirySol n s
       (fun z => regularizedHGFun ∅ {1 - (generalizedAiryOrder n : ℂ)} (s * z ^ (n + 2) / ((n : ℂ) + 2) ^ 2))
       (fun z => s * z ^ (n + 1) / ((n : ℂ) + 2) *
@@ -140,7 +140,7 @@ lemma isGenAirySol_F (n : ℕ) (s : ℂ) :
   ring
 
 /-- The odd fundamental solution `z ₀F̃₁(;1+p; s z^{n+2}/(n+2)²)`. -/
-lemma isGenAirySol_G (n : ℕ) (s : ℂ) :
+theorem isGenAirySol_G (n : ℕ) (s : ℂ) :
     IsGenAirySol n s
       (fun z => z * regularizedHGFun ∅ {1 + (generalizedAiryOrder n : ℂ)} (s * z ^ (n + 2) / ((n : ℂ) + 2) ^ 2))
       (fun z => regularizedHGFun ∅ {1 + (generalizedAiryOrder n : ℂ)} (s * z ^ (n + 2) / ((n : ℂ) + 2) ^ 2) +
@@ -169,7 +169,7 @@ lemma isGenAirySol_G (n : ℕ) (s : ℂ) :
   ring
 
 /-- Transport of a solution along pointwise equalities. -/
-lemma IsGenAirySol.congr {n : ℕ} {s : ℂ} {f f' g g' : ℂ → ℂ} (hf : IsGenAirySol n s f f')
+theorem IsGenAirySol.congr {n : ℕ} {s : ℂ} {f f' g g' : ℂ → ℂ} (hf : IsGenAirySol n s f f')
     (h1 : ∀ z, f z = g z) (h2 : ∀ z, f' z = g' z) : IsGenAirySol n s g g' := by
   rw [← funext h1, ← funext h2]; exact hf
 
@@ -185,13 +185,13 @@ def generalizedAiryGDeriv (n : ℕ) (z : ℂ) : ℂ :=
       regularizedHGFun ∅ {2 + (generalizedAiryOrder n : ℂ)} (z ^ (n + 2) / ((n : ℂ) + 2) ^ 2)
 
 /-- `F_n` solves `w = z^n w`. -/
-lemma isGenAirySol_generalizedAiryF (n : ℕ) :
+theorem isGenAirySol_generalizedAiryF (n : ℕ) :
     IsGenAirySol n 1 (generalizedAiryF n) (generalizedAiryFDeriv n) :=
   (isGenAirySol_F n 1).congr (fun z => by simp [generalizedAiryF])
     (fun z => by simp [generalizedAiryFDeriv])
 
 /-- `G_n` solves `w = z^n w`. -/
-lemma isGenAirySol_generalizedAiryG (n : ℕ) :
+theorem isGenAirySol_generalizedAiryG (n : ℕ) :
     IsGenAirySol n 1 (generalizedAiryG n) (generalizedAiryGDeriv n) :=
   (isGenAirySol_G n 1).congr (fun z => by simp [generalizedAiryG])
     (fun z => by simp [generalizedAiryGDeriv])
@@ -208,7 +208,7 @@ def generalizedAiryBDeriv (n : ℕ) (z : ℂ) : ℂ :=
       (generalizedAiryOrder n : ℂ) ^ ((generalizedAiryOrder n : ℂ) + 1) * generalizedAiryGDeriv n z)
 
 /-- `A_n` solves `w = z^n w`. -/
-lemma isGenAirySol_generalizedAiryA (n : ℕ) :
+theorem isGenAirySol_generalizedAiryA (n : ℕ) :
     IsGenAirySol n 1 (generalizedAiryA n) (generalizedAiryADeriv n) := by
   set p : ℂ := (generalizedAiryOrder n : ℂ)
   refine (((isGenAirySol_generalizedAiryF n).const_mul (p ^ (1 - p))).add
@@ -217,7 +217,7 @@ lemma isGenAirySol_generalizedAiryA (n : ℕ) :
   · intro z; simp only [generalizedAiryADeriv, p]; ring
 
 /-- `B_n` solves `w = z^n w`. -/
-lemma isGenAirySol_generalizedAiryB (n : ℕ) :
+theorem isGenAirySol_generalizedAiryB (n : ℕ) :
     IsGenAirySol n 1 (generalizedAiryB n) (generalizedAiryBDeriv n) := by
   set p : ℂ := (generalizedAiryOrder n : ℂ)
   refine ((((isGenAirySol_generalizedAiryF n).const_mul (p ^ (1 - p))).add
@@ -227,11 +227,11 @@ lemma isGenAirySol_generalizedAiryB (n : ℕ) :
   · intro z; simp only [generalizedAiryBDeriv, p]
 
 /-- The derivative of `A_n`. -/
-lemma deriv_generalizedAiryA (n : ℕ) : deriv (generalizedAiryA n) = generalizedAiryADeriv n :=
+theorem deriv_generalizedAiryA (n : ℕ) : deriv (generalizedAiryA n) = generalizedAiryADeriv n :=
   funext fun z => ((isGenAirySol_generalizedAiryA n) z).1.deriv
 
 /-- The derivative of `B_n`. -/
-lemma deriv_generalizedAiryB (n : ℕ) : deriv (generalizedAiryB n) = generalizedAiryBDeriv n :=
+theorem deriv_generalizedAiryB (n : ℕ) : deriv (generalizedAiryB n) = generalizedAiryBDeriv n :=
   funext fun z => ((isGenAirySol_generalizedAiryB n) z).1.deriv
 
 /-- generalizedAiryA ode (DLMF 9.13.1). -/
@@ -263,20 +263,20 @@ theorem generalizedAiryB_ode {n : ℕ} (hn : 1 ≤ n) (z : ℂ) :
 /-! ### Bessel forms on the real axis -/
 
 /-- The order `p = 1/(n+2)` is positive. -/
-lemma generalizedAiryOrder_pos (n : ℕ) : 0 < generalizedAiryOrder n := by
+theorem generalizedAiryOrder_pos (n : ℕ) : 0 < generalizedAiryOrder n := by
   unfold generalizedAiryOrder; positivity
 
 /-- The order `p = 1/(n+2)` is less than one. -/
-lemma generalizedAiryOrder_lt_one (n : ℕ) : generalizedAiryOrder n < 1 := by
+theorem generalizedAiryOrder_lt_one (n : ℕ) : generalizedAiryOrder n < 1 := by
   unfold generalizedAiryOrder; rw [div_lt_one (by positivity)]; linarith [n.cast_nonneg (α := ℝ)]
 
 /-- Complex powers of the positive real order `p` are real. -/
-lemma generalizedAiryOrder_cpow (n : ℕ) (a : ℝ) :
+theorem generalizedAiryOrder_cpow (n : ℕ) (a : ℝ) :
     (generalizedAiryOrder n : ℂ) ^ (a : ℂ) = ((generalizedAiryOrder n ^ a : ℝ) : ℂ) :=
   (ofReal_cpow (generalizedAiryOrder_pos n).le a).symm
 
 /-- On the positive axis, `ζ = 2p x^{1/(2p)}` is real. -/
-lemma generalizedAiryZeta_ofReal (n : ℕ) {x : ℝ} (hx : 0 < x) :
+theorem generalizedAiryZeta_ofReal (n : ℕ) {x : ℝ} (hx : 0 < x) :
     generalizedAiryZeta n x =
       ((2 * generalizedAiryOrder n * x ^ (((n : ℝ) + 2) / 2)) : ℝ) := by
   rw [generalizedAiryZeta, show ((n : ℂ) + 2) / 2 = (((n : ℝ) + 2) / 2 : ℝ) by push_cast; ring,
@@ -284,7 +284,7 @@ lemma generalizedAiryZeta_ofReal (n : ℕ) {x : ℝ} (hx : 0 < x) :
   simp only [generalizedAiryOrder]; push_cast; ring
 
 /-- `ζ²/4 = x^{n+2}/(n+2)²` on the positive axis. -/
-lemma generalizedAiryZeta_sq_div_four (n : ℕ) {x : ℝ} (hx : 0 < x) :
+theorem generalizedAiryZeta_sq_div_four (n : ℕ) {x : ℝ} (hx : 0 < x) :
     generalizedAiryZeta n x ^ 2 / 4 = (x : ℂ) ^ (n + 2) / ((n : ℂ) + 2) ^ 2 := by
   rw [generalizedAiryZeta_ofReal n hx]
   have h : (2 * generalizedAiryOrder n * x ^ (((n : ℝ) + 2) / 2)) ^ 2 / 4 =
@@ -297,7 +297,7 @@ lemma generalizedAiryZeta_sq_div_four (n : ℕ) {x : ℝ} (hx : 0 < x) :
   exact_mod_cast h
 
 /-- `(ζ/2)^{±p} = p^{±p} x^{±1/2}` on the positive axis. -/
-lemma generalizedAiryZeta_half_cpow (n : ℕ) {x : ℝ} (hx : 0 < x) (s : ℝ) :
+theorem generalizedAiryZeta_half_cpow (n : ℕ) {x : ℝ} (hx : 0 < x) (s : ℝ) :
     (generalizedAiryZeta n x / 2) ^ ((s * generalizedAiryOrder n : ℝ) : ℂ) =
       ((generalizedAiryOrder n ^ (s * generalizedAiryOrder n) * x ^ (s / 2) : ℝ) : ℂ) := by
   have hp := generalizedAiryOrder_pos n
@@ -311,7 +311,7 @@ lemma generalizedAiryZeta_half_cpow (n : ℕ) {x : ℝ} (hx : 0 < x) (s : ℝ) :
   field_simp
 
 /-- `I_p(ζ) = p^p x^{1/2} ₀F̃₁(;1+p;x^{n+2}/(n+2)²)` for `x > 0`. -/
-lemma besselI_generalizedAiryZeta (n : ℕ) {x : ℝ} (hx : 0 < x) :
+theorem besselI_generalizedAiryZeta (n : ℕ) {x : ℝ} (hx : 0 < x) :
     DLMF.Bessel.besselI (generalizedAiryOrder n : ℂ) (generalizedAiryZeta n x) =
       ((generalizedAiryOrder n ^ generalizedAiryOrder n * x ^ (1 / 2 : ℝ) : ℝ) : ℂ) *
         regularizedHGFun ∅ {1 + (generalizedAiryOrder n : ℂ)}
@@ -321,7 +321,7 @@ lemma besselI_generalizedAiryZeta (n : ℕ) {x : ℝ} (hx : 0 < x) :
   rw [DLMF.Bessel.besselI, h, generalizedAiryZeta_sq_div_four n hx, add_comm]
 
 /-- `I_{-p}(ζ) = p^{-p} x^{-1/2} ₀F̃₁(;1-p;x^{n+2}/(n+2)²)` for `x > 0`. -/
-lemma besselI_neg_generalizedAiryZeta (n : ℕ) {x : ℝ} (hx : 0 < x) :
+theorem besselI_neg_generalizedAiryZeta (n : ℕ) {x : ℝ} (hx : 0 < x) :
     DLMF.Bessel.besselI (-(generalizedAiryOrder n : ℂ)) (generalizedAiryZeta n x) =
       ((generalizedAiryOrder n ^ (-generalizedAiryOrder n) * x ^ (-1 / 2 : ℝ) : ℝ) : ℂ) *
         regularizedHGFun ∅ {1 - (generalizedAiryOrder n : ℂ)}
@@ -331,7 +331,7 @@ lemma besselI_neg_generalizedAiryZeta (n : ℕ) {x : ℝ} (hx : 0 < x) :
   rw [DLMF.Bessel.besselI, h, generalizedAiryZeta_sq_div_four n hx, neg_add_eq_sub]
 
 /-- `J_p(ζ) = p^p x^{1/2} ₀F̃₁(;1+p;-x^{n+2}/(n+2)²)` for `x > 0`. -/
-lemma besselJ_generalizedAiryZeta (n : ℕ) {x : ℝ} (hx : 0 < x) :
+theorem besselJ_generalizedAiryZeta (n : ℕ) {x : ℝ} (hx : 0 < x) :
     besselJ (generalizedAiryOrder n : ℂ) (generalizedAiryZeta n x) =
       ((generalizedAiryOrder n ^ generalizedAiryOrder n * x ^ (1 / 2 : ℝ) : ℝ) : ℂ) *
         regularizedHGFun ∅ {1 + (generalizedAiryOrder n : ℂ)}
@@ -341,7 +341,7 @@ lemma besselJ_generalizedAiryZeta (n : ℕ) {x : ℝ} (hx : 0 < x) :
   rw [DLMF.Bessel.besselJ_eq_regularized, h, generalizedAiryZeta_sq_div_four n hx, add_comm]
 
 /-- `J_{-p}(ζ) = p^{-p} x^{-1/2} ₀F̃₁(;1-p;-x^{n+2}/(n+2)²)` for `x > 0`. -/
-lemma besselJ_neg_generalizedAiryZeta (n : ℕ) {x : ℝ} (hx : 0 < x) :
+theorem besselJ_neg_generalizedAiryZeta (n : ℕ) {x : ℝ} (hx : 0 < x) :
     besselJ (-(generalizedAiryOrder n : ℂ)) (generalizedAiryZeta n x) =
       ((generalizedAiryOrder n ^ (-generalizedAiryOrder n) * x ^ (-1 / 2 : ℝ) : ℝ) : ℂ) *
         regularizedHGFun ∅ {1 - (generalizedAiryOrder n : ℂ)}
@@ -351,7 +351,7 @@ lemma besselJ_neg_generalizedAiryZeta (n : ℕ) {x : ℝ} (hx : 0 < x) :
   rw [DLMF.Bessel.besselJ_eq_regularized, h, generalizedAiryZeta_sq_div_four n hx, neg_add_eq_sub]
 
 /-- The complex-power constants of `A_n`, `B_n` at real `x > 0`, written as real powers. -/
-lemma generalizedAiry_cpow_consts (n : ℕ) {x : ℝ} (hx : 0 < x) :
+theorem generalizedAiry_cpow_consts (n : ℕ) {x : ℝ} (hx : 0 < x) :
     (generalizedAiryOrder n : ℂ) ^ (1 - (generalizedAiryOrder n : ℂ)) =
         ((generalizedAiryOrder n ^ (1 - generalizedAiryOrder n) : ℝ) : ℂ) ∧
       (generalizedAiryOrder n : ℂ) ^ ((generalizedAiryOrder n : ℂ) + 1) =
@@ -373,14 +373,14 @@ lemma generalizedAiry_cpow_consts (n : ℕ) {x : ℝ} (hx : 0 < x) :
   · rw [← Real.mul_rpow hp hx.le, ofReal_cpow (by positivity)]; push_cast; ring_nf
 
 /-- `sin(pπ) ≠ 0`, since `0 < p < 1`. -/
-lemma generalizedAiryOrder_sin_ne_zero (n : ℕ) :
+theorem generalizedAiryOrder_sin_ne_zero (n : ℕ) :
     sin ((generalizedAiryOrder n : ℂ) * π) ≠ 0 := by
   rw [← ofReal_mul, ← ofReal_sin, ofReal_ne_zero]
   exact (Real.sin_pos_of_pos_of_lt_pi (by have := generalizedAiryOrder_pos n; positivity)
     (by nlinarith [generalizedAiryOrder_lt_one n, Real.pi_pos])).ne'
 
 /-- The order `p = 1/(n+2)` is not an integer. -/
-lemma generalizedAiryOrder_not_int (n : ℕ) : ∀ k : ℤ, (generalizedAiryOrder n : ℂ) ≠ k := by
+theorem generalizedAiryOrder_not_int (n : ℕ) : ∀ k : ℤ, (generalizedAiryOrder n : ℂ) ≠ k := by
   intro k hk
   have h : generalizedAiryOrder n = k := by exact_mod_cast hk
   have h0 := generalizedAiryOrder_pos n
@@ -391,12 +391,12 @@ lemma generalizedAiryOrder_not_int (n : ℕ) : ∀ k : ℤ, (generalizedAiryOrde
   omega
 
 /-- The order `p = 1/(n+2)` is nonzero. -/
-lemma generalizedAiryOrder_ne_zero (n : ℕ) : (generalizedAiryOrder n : ℂ) ≠ 0 := by
+theorem generalizedAiryOrder_ne_zero (n : ℕ) : (generalizedAiryOrder n : ℂ) ≠ 0 := by
   simp only [generalizedAiryOrder]; push_cast
   exact one_div_ne_zero (by norm_cast)
 
 /-- `(ζ/2)^{s p} = p^{s p} z^{s/2}` for `z` in the sector `|arg z| < π/(n+2)`. -/
-lemma generalizedAiryZeta_half_cpow_sector (n : ℕ) {z : ℂ} (hz : z ≠ 0)
+theorem generalizedAiryZeta_half_cpow_sector (n : ℕ) {z : ℂ} (hz : z ≠ 0)
     (harg : |arg z| < π / ((n : ℝ) + 2)) (s : ℂ) :
     (generalizedAiryZeta n z / 2) ^ (s * (generalizedAiryOrder n : ℂ)) =
       (generalizedAiryOrder n : ℂ) ^ (s * (generalizedAiryOrder n : ℂ)) * z ^ (s / 2) := by
@@ -423,7 +423,7 @@ lemma generalizedAiryZeta_half_cpow_sector (n : ℕ) {z : ℂ} (hz : z ≠ 0)
   simp only [L, generalizedAiryOrder]; push_cast; field_simp
 
 /-- `ζ²/4 = z^{n+2}/(n+2)²` for all `z`. -/
-lemma generalizedAiryZeta_sq_div_four' (n : ℕ) (z : ℂ) :
+theorem generalizedAiryZeta_sq_div_four' (n : ℕ) (z : ℂ) :
     generalizedAiryZeta n z ^ 2 / 4 = z ^ (n + 2) / ((n : ℂ) + 2) ^ 2 := by
   have hnc : (n : ℂ) + 2 ≠ 0 := by norm_cast
   rw [generalizedAiryZeta, mul_pow, ← cpow_nat_mul,
@@ -431,7 +431,7 @@ lemma generalizedAiryZeta_sq_div_four' (n : ℕ) (z : ℂ) :
   field_simp; ring
 
 /-- `z^{1/2} I_p(ζ) = p^p G_n(z)` in the sector `|arg z| < π/(n+2)`. -/
-lemma cpow_half_mul_besselI_generalizedAiryZeta (n : ℕ) {z : ℂ} (hz : z ≠ 0)
+theorem cpow_half_mul_besselI_generalizedAiryZeta (n : ℕ) {z : ℂ} (hz : z ≠ 0)
     (harg : |arg z| < π / ((n : ℝ) + 2)) :
     z ^ (1 / 2 : ℂ) * DLMF.Bessel.besselI (generalizedAiryOrder n) (generalizedAiryZeta n z) =
       (generalizedAiryOrder n : ℂ) ^ (generalizedAiryOrder n : ℂ) * generalizedAiryG n z := by
@@ -444,7 +444,7 @@ lemma cpow_half_mul_besselI_generalizedAiryZeta (n : ℕ) {z : ℂ} (hz : z ≠ 
     regularizedHGFun ∅ {1 + (generalizedAiryOrder n : ℂ)} (z ^ (n + 2) / ((n : ℂ) + 2) ^ 2)) * hzz
 
 /-- `z^{1/2} I_{-p}(ζ) = p^{-p} F_n(z)` in the sector `|arg z| < π/(n+2)`. -/
-lemma cpow_half_mul_besselI_neg_generalizedAiryZeta (n : ℕ) {z : ℂ} (hz : z ≠ 0)
+theorem cpow_half_mul_besselI_neg_generalizedAiryZeta (n : ℕ) {z : ℂ} (hz : z ≠ 0)
     (harg : |arg z| < π / ((n : ℝ) + 2)) :
     z ^ (1 / 2 : ℂ) * DLMF.Bessel.besselI (-(generalizedAiryOrder n : ℂ)) (generalizedAiryZeta n z) =
       (generalizedAiryOrder n : ℂ) ^ (-(generalizedAiryOrder n : ℂ)) * generalizedAiryF n z := by
@@ -496,7 +496,7 @@ theorem generalizedAiry_bessel_basis {n : ℕ} (hn : 1 ≤ n) (a b : ℂ) {x : �
   · beta_reduce; rw [mul_assoc ((x : ℂ) ^ n), hval]; ring
 
 /-- For even `n`, `A_n(-z) = p^{1/2} B_n(z)` on all of `ℂ`. -/
-lemma generalizedAiryA_neg_of_even {n : ℕ} (hn : Even n) (z : ℂ) :
+theorem generalizedAiryA_neg_of_even {n : ℕ} (hn : Even n) (z : ℂ) :
     generalizedAiryA n (-z) = (generalizedAiryOrder n : ℂ) ^ (1 / 2 : ℂ) * generalizedAiryB n z := by
   have hpow : (-z) ^ (n + 2) = z ^ (n + 2) := (hn.add even_two).neg_pow z
   have hp := generalizedAiryOrder_ne_zero n
@@ -510,7 +510,7 @@ lemma generalizedAiryA_neg_of_even {n : ℕ} (hn : Even n) (z : ℂ) :
     p ^ (p + 1) * (z * regularizedHGFun ∅ {1 + p} w))) * h1
 
 /-- For even `n`, `B_n(-z) = p^{-1/2} A_n(z)` on all of `ℂ`. -/
-lemma generalizedAiryB_neg_of_even {n : ℕ} (hn : Even n) (z : ℂ) :
+theorem generalizedAiryB_neg_of_even {n : ℕ} (hn : Even n) (z : ℂ) :
     generalizedAiryB n (-z) = (generalizedAiryOrder n : ℂ) ^ (-1 / 2 : ℂ) * generalizedAiryA n z := by
   have hp := generalizedAiryOrder_ne_zero n
   rw [show generalizedAiryA n z = generalizedAiryA n (-(-z)) by rw [neg_neg],
@@ -580,7 +580,7 @@ theorem generalizedAiryB_bessel {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx : 0 < x) 
     regularizedHGFun ∅ {1 + (p : ℂ)} w * r2'
 
 /-- The Wronskian of two solutions of `w'' = s z^n w` is constant. -/
-lemma IsGenAirySol.wronskian_eq {n : ℕ} {s : ℂ} {f f' g g' : ℂ → ℂ} (hf : IsGenAirySol n s f f')
+theorem IsGenAirySol.wronskian_eq {n : ℕ} {s : ℂ} {f f' g g' : ℂ → ℂ} (hf : IsGenAirySol n s f f')
     (hg : IsGenAirySol n s g g') (z : ℂ) :
     f z * g' z - f' z * g z = f 0 * g' 0 - f' 0 * g 0 := by
   have hd : ∀ z, HasDerivAt (fun z => f z * g' z - f' z * g z) 0 z := fun z =>
@@ -588,7 +588,7 @@ lemma IsGenAirySol.wronskian_eq {n : ℕ} {s : ℂ} {f f' g g' : ℂ → ℂ} (h
   exact is_const_of_deriv_eq_zero (fun z => (hd z).differentiableAt) (fun z => (hd z).deriv) z 0
 
 /-- A solution is a combination of two solutions with nonzero Wronskian. -/
-lemma IsGenAirySol.eq_combination {n : ℕ} {s : ℂ} {f f' g g' w w' : ℂ → ℂ}
+theorem IsGenAirySol.eq_combination {n : ℕ} {s : ℂ} {f f' g g' w w' : ℂ → ℂ}
     (hf : IsGenAirySol n s f f') (hg : IsGenAirySol n s g g') (hw : IsGenAirySol n s w w')
     (hW : f 0 * g' 0 - f' 0 * g 0 ≠ 0) :
     ∃ a b : ℂ, ∀ z, w z = a * f z + b * g z := by
@@ -602,20 +602,20 @@ lemma IsGenAirySol.eq_combination {n : ℕ} {s : ℂ} {f f' g g' w w' : ℂ → 
   linear_combination (-g z) * h1 + f z * h2 - w z * h3
 
 /-- `F_n(0) = 1/Γ(1-p)`. -/
-lemma generalizedAiryF_zero (n : ℕ) :
+theorem generalizedAiryF_zero (n : ℕ) :
     generalizedAiryF n 0 = (Gamma (1 - (generalizedAiryOrder n : ℂ)))⁻¹ := by
   rw [generalizedAiryF, show (0 : ℂ) ^ (n + 2) / ((n : ℂ) + 2) ^ 2 = 0 by simp, reg0F1_zero]
 
 /-- `G_n(0) = 0`. -/
-lemma generalizedAiryG_zero (n : ℕ) : generalizedAiryG n 0 = 0 := by
+theorem generalizedAiryG_zero (n : ℕ) : generalizedAiryG n 0 = 0 := by
   simp [generalizedAiryG]
 
 /-- `F_n′(0) = 0`. -/
-lemma generalizedAiryFDeriv_zero (n : ℕ) : generalizedAiryFDeriv n 0 = 0 := by
+theorem generalizedAiryFDeriv_zero (n : ℕ) : generalizedAiryFDeriv n 0 = 0 := by
   simp [generalizedAiryFDeriv]
 
 /-- `G_n′(0) = 1/Γ(1+p)`. -/
-lemma generalizedAiryGDeriv_zero (n : ℕ) :
+theorem generalizedAiryGDeriv_zero (n : ℕ) :
     generalizedAiryGDeriv n 0 = (Gamma (1 + (generalizedAiryOrder n : ℂ)))⁻¹ := by
   rw [generalizedAiryGDeriv, show (0 : ℂ) ^ (n + 2) / ((n : ℂ) + 2) ^ 2 = 0 by simp, reg0F1_zero]
   simp
@@ -739,20 +739,20 @@ theorem generalizedAiry_wronskian {n : ℕ} (hn : 1 ≤ n) (z : ℂ) :
     (2 * p * p ^ (1 / 2 : ℂ)) * hrefl'
 
 /-- `(1/3)^a = 3^{-a}` as complex powers of reals. -/
-lemma third_cpow (a : ℝ) : ((1 / 3 : ℂ)) ^ (a : ℂ) = (((3 : ℝ) ^ (-a) : ℝ) : ℂ) := by
+theorem third_cpow (a : ℝ) : ((1 / 3 : ℂ)) ^ (a : ℂ) = (((3 : ℝ) ^ (-a) : ℝ) : ℂ) := by
   rw [show (1 / 3 : ℂ) = ((1 / 3 : ℝ) : ℂ) by push_cast; ring, ← Complex.ofReal_cpow (by norm_num),
     one_div, Real.inv_rpow (by norm_num), Real.rpow_neg (by norm_num)]
 
 /-- For `n = 1` the order is `1/3`. -/
-lemma generalizedAiryOrder_one : (generalizedAiryOrder 1 : ℂ) = 1 / 3 := by
+theorem generalizedAiryOrder_one : (generalizedAiryOrder 1 : ℂ) = 1 / 3 := by
   simp only [generalizedAiryOrder]; push_cast; norm_num
 
 /-- For `n = 1`, `generalizedAiryF` is `airyF`. -/
-lemma generalizedAiryF_one (z : ℂ) : generalizedAiryF 1 z = airyF z := by
+theorem generalizedAiryF_one (z : ℂ) : generalizedAiryF 1 z = airyF z := by
   simp only [generalizedAiryF, airyF, generalizedAiryOrder_one]; norm_num
 
 /-- For `n = 1`, `generalizedAiryG` is `airyG`. -/
-lemma generalizedAiryG_one (z : ℂ) : generalizedAiryG 1 z = airyG z := by
+theorem generalizedAiryG_one (z : ℂ) : generalizedAiryG 1 z = airyG z := by
   simp only [generalizedAiryG, airyG, generalizedAiryOrder_one]; norm_num
 
 /-- The n=1 specialization, DLMF §9.13(i). -/
@@ -816,19 +816,19 @@ theorem generalizedAiryB_negative_even_asymptotic {n : ℕ} (hn : 1 ≤ n)  (hev
   sorry
 
 /-- Scaling the variable of a solution of `w'' = s z^n w`. -/
-lemma IsGenAirySol.comp_mul {n : ℕ} {s : ℂ} {f f' : ℂ → ℂ} (hf : IsGenAirySol n s f f') (c : ℂ) :
+theorem IsGenAirySol.comp_mul {n : ℕ} {s : ℂ} {f f' : ℂ → ℂ} (hf : IsGenAirySol n s f f') (c : ℂ) :
     IsGenAirySol n (s * c ^ (n + 2)) (fun t => f (c * t)) (fun t => c * f' (c * t)) := fun t =>
   ⟨((hf (c * t)).1.comp t ((hasDerivAt_id t).const_mul c)).congr_deriv (by simp; ring),
     (((hf (c * t)).2.comp t ((hasDerivAt_id t).const_mul c)).const_mul c).congr_deriv
       (by simp; ring)⟩
 
 /-- The second derivative of a solution. -/
-lemma IsGenAirySol.deriv_deriv {n : ℕ} {s : ℂ} {f f' : ℂ → ℂ} (hf : IsGenAirySol n s f f')
+theorem IsGenAirySol.deriv_deriv {n : ℕ} {s : ℂ} {f f' : ℂ → ℂ} (hf : IsGenAirySol n s f f')
     (z : ℂ) : deriv (deriv f) z = s * z ^ n * f z := by
   rw [show deriv f = f' from funext fun z => (hf z).1.deriv, (hf z).2.deriv]
 
 /-- `((m/2)^{2/m})^m = m²/4`. -/
-lemma olver_scale_pow (n : ℕ) :
+theorem olver_scale_pow (n : ℕ) :
     (((((n + 2 : ℕ) : ℂ)) / 2) ^ (2 / (((n + 2 : ℕ) : ℂ)))) ^ (n + 2) =
       ((n + 2 : ℕ) : ℂ) ^ 2 / 4 := by
   have hm : (((n + 2 : ℕ) : ℂ)) ≠ 0 := by norm_cast
@@ -837,7 +837,7 @@ lemma olver_scale_pow (n : ℕ) :
   ring
 
 /-- Olver's `U_m` solves `w'' = (m²/4) t^{m-2} w`. -/
-lemma isGenAirySol_olverAiryU (n : ℕ) :
+theorem isGenAirySol_olverAiryU (n : ℕ) :
     IsGenAirySol n (((n + 2 : ℕ) : ℂ) ^ 2 / 4) (olverAiryU (n + 2))
       (fun t => (2 * π : ℂ) ^ (1 / 2 : ℂ) * ((((n + 2 : ℕ) : ℂ)) / 2) ^
         ((((n + 2 : ℕ) : ℂ) - 1) / ((n + 2 : ℕ) : ℂ)) / sin (π / ((n + 2 : ℕ) : ℂ)) *
@@ -851,7 +851,7 @@ lemma isGenAirySol_olverAiryU (n : ℕ) :
   exact h.congr (fun t => by simp [olverAiryU]) (fun t => rfl)
 
 /-- Olver's `V̄_m` solves `w'' = (m²/4) t^{m-2} w`. -/
-lemma isGenAirySol_olverAiryVBar (n : ℕ) :
+theorem isGenAirySol_olverAiryVBar (n : ℕ) :
     IsGenAirySol n (((n + 2 : ℕ) : ℂ) ^ 2 / 4) (olverAiryVBar (n + 2))
       (fun t => (π : ℂ) ^ (1 / 2 : ℂ) * ((((n + 2 : ℕ) : ℂ)) / 2) ^
         ((((n + 2 : ℕ) : ℂ) - 2) / (2 * ((n + 2 : ℕ) : ℂ))) / sin (π / ((n + 2 : ℕ) : ℂ)) *
@@ -879,7 +879,7 @@ theorem olverAiryVBar_ode {m : ℕ} (hm : 3 ≤ m) (t : ℂ) :
   rw [(isGenAirySol_olverAiryVBar n).deriv_deriv, Nat.add_sub_cancel]
 
 /-- Olver's variable scaling `(m/2)^{2/m} (m/2)^{-2/m} z = z`. -/
-lemma olver_scale_cancel (n : ℕ) (z : ℂ) :
+theorem olver_scale_cancel (n : ℕ) (z : ℂ) :
     (((n : ℂ) + 2) / 2) ^ (2 / ((n : ℂ) + 2)) * ((((n : ℂ) + 2) / 2) ^ (-2 / ((n : ℂ) + 2)) * z)
       = z := by
   have hc : ((n : ℂ) + 2) / 2 ≠ 0 := by
@@ -942,7 +942,7 @@ theorem olverAiry_even_second {m : ℕ} (hm : 3 ≤ m) (heven : Even m) (t : ℂ
     generalizedAiryB n ((((n + 2 : ℝ) / 2 : ℝ) : ℂ) ^ (2 / ((n + 2 : ℕ) : ℂ)) * t))) * key
 
 /-- The order `p` as `1/m` with `m = n+2`. -/
-lemma generalizedAiryOrder_cast (n : ℕ) :
+theorem generalizedAiryOrder_cast (n : ℕ) :
     (generalizedAiryOrder n : ℂ) = (((n + 2 : ℕ) : ℂ))⁻¹ := by
   simp [generalizedAiryOrder]
 
@@ -991,7 +991,7 @@ theorem olverAiry_rotated_solution {m : ℕ} (hm : 3 ≤ m) (j : ℤ) (z : ℂ) 
 def smirnovArg (m t : ℝ) : ℂ := ((-(t ^ m / m ^ 2) : ℝ) : ℂ)
 
 /-- Derivative of `₀F̃₁(;c; -t^m/m²)` on `t > 0`. -/
-lemma hasDerivAt_smirnovF (m : ℝ) (c : ℂ) {t : ℝ} (ht : 0 < t) :
+theorem hasDerivAt_smirnovF (m : ℝ) (c : ℂ) {t : ℝ} (ht : 0 < t) :
     HasDerivAt (fun t : ℝ => regularizedHGFun (∅ : Multiset ℂ) {c} (smirnovArg m t))
       (((-(t ^ (m - 1) / m)) : ℝ) * regularizedHGFun (∅ : Multiset ℂ) {c + 1} (smirnovArg m t)) t := by
   have hw : HasDerivAt (fun t : ℝ => -(t ^ m / m ^ 2)) (-(m * t ^ (m - 1) / m ^ 2)) t :=
@@ -1004,7 +1004,7 @@ lemma hasDerivAt_smirnovF (m : ℝ) (c : ℂ) {t : ℝ} (ht : 0 < t) :
   field_simp
 
 /-- The even Smirnov solution `₀F̃₁(;1-1/m;-t^m/m²)` of `y'' + t^{m-2} y = 0` on `t > 0`. -/
-lemma smirnov_even_ode {m : ℝ} (hm : 0 < m) {t : ℝ} (ht : 0 < t) :
+theorem smirnov_even_ode {m : ℝ} (hm : 0 < m) {t : ℝ} (ht : 0 < t) :
     HasDerivAt (fun t : ℝ => regularizedHGFun (∅ : Multiset ℂ) {1 - 1 / (m : ℂ)} (smirnovArg m t))
         (((-(t ^ (m - 1) / m)) : ℝ) *
           regularizedHGFun (∅ : Multiset ℂ) {2 - 1 / (m : ℂ)} (smirnovArg m t)) t ∧
@@ -1033,7 +1033,7 @@ lemma smirnov_even_ode {m : ℝ} (hm : 0 < m) {t : ℝ} (ht : 0 < t) :
   linear_combination B * e1c
 
 /-- The odd Smirnov solution `t ₀F̃₁(;1+1/m;-t^m/m²)` of `y'' + t^{m-2} y = 0` on `t > 0`. -/
-lemma smirnov_odd_ode {m : ℝ} (hm : 0 < m) {t : ℝ} (ht : 0 < t) :
+theorem smirnov_odd_ode {m : ℝ} (hm : 0 < m) {t : ℝ} (ht : 0 < t) :
     HasDerivAt (fun t : ℝ => (t : ℂ) *
           regularizedHGFun (∅ : Multiset ℂ) {1 + 1 / (m : ℂ)} (smirnovArg m t))
         (regularizedHGFun (∅ : Multiset ℂ) {1 + 1 / (m : ℂ)} (smirnovArg m t) +
@@ -1074,7 +1074,7 @@ lemma smirnov_odd_ode {m : ℝ} (hm : 0 < m) {t : ℝ} (ht : 0 < t) :
     linear_combination (-(-((m : ℂ) * ((m : ℂ) + 1) * A) + ((t ^ m : ℝ) : ℂ) * B)) * e1c
 
 /-- On `t > 0`, `t^{1/2} J_ν((2/m) t^{m/2})` is `m^{-ν} t^{1/2+mν/2} ₀F̃₁(;ν+1;-t^m/m²)`. -/
-lemma cpow_half_mul_besselJ_smirnov {m : ℝ} (hm : 0 < m) (ν : ℝ) {t : ℝ} (ht : 0 < t) :
+theorem cpow_half_mul_besselJ_smirnov {m : ℝ} (hm : 0 < m) (ν : ℝ) {t : ℝ} (ht : 0 < t) :
     (t : ℂ) ^ (1 / 2 : ℂ) * besselJ (ν : ℂ) (2 / (m : ℂ) * (t : ℂ) ^ ((m : ℂ) / 2)) =
       ((m ^ (-ν) * t ^ (1 / 2 + m * ν / 2) : ℝ) : ℂ) *
         regularizedHGFun (∅ : Multiset ℂ) {(ν : ℂ) + 1} (smirnovArg m t) := by
@@ -1099,7 +1099,7 @@ lemma cpow_half_mul_besselJ_smirnov {m : ℝ} (hm : 0 < m) (ν : ℝ) {t : ℝ} 
   field_simp
 
 /-- From a local representation `f = K Y` on `t > 0` with `Y'' = -t^{m-2} Y`, the ODE for `f`. -/
-lemma smirnov_ode_of_eq {f Y Y' : ℝ → ℂ} {m x : ℝ} (hx : 0 < x) (K : ℂ)
+theorem smirnov_ode_of_eq {f Y Y' : ℝ → ℂ} {m x : ℝ} (hx : 0 < x) (K : ℂ)
     (hf : ∀ t, 0 < t → f t = K * Y t)
     (hY : ∀ t, 0 < t → HasDerivAt Y (Y' t) t ∧
       HasDerivAt Y' (-((t ^ (m - 2) : ℝ) : ℂ) * Y t) t) :
@@ -1206,7 +1206,7 @@ lemma smirnovAiryU2_eq {α x : ℝ} (hα : -2 < α) (hx : 0 < x) :
   rfl
 
 /-- For even `m`, `W_m(t) + W_m(-t)` isolates the even fundamental solution. -/
-lemma olverAiryW_add_neg {m : ℕ} (hme : Even m) (t : ℂ) :
+theorem olverAiryW_add_neg {m : ℕ} (hme : Even m) (t : ℂ) :
     olverAiryW m t + olverAiryW m (-t) =
       2 * ((2 : ℂ) ^ (((m : ℂ) + 2) / (2 * m)) / (2 * (π : ℂ) ^ (1 / 2 : ℂ))) *
         (Gamma (m : ℂ)⁻¹ * Gamma (1 - (m : ℂ)⁻¹)) *
@@ -1217,7 +1217,7 @@ lemma olverAiryW_add_neg {m : ℕ} (hme : Even m) (t : ℂ) :
   ring
 
 /-- For even `m`, `W_m(t) - W_m(-t)` isolates the odd fundamental solution. -/
-lemma olverAiryW_sub_neg {m : ℕ} (hme : Even m) (t : ℂ) :
+theorem olverAiryW_sub_neg {m : ℕ} (hme : Even m) (t : ℂ) :
     olverAiryW m t - olverAiryW m (-t) =
       2 * ((2 : ℂ) ^ (((m : ℂ) + 2) / (2 * m)) / (2 * (π : ℂ) ^ (1 / 2 : ℂ))) *
         (Gamma (-(m : ℂ)⁻¹) / (m : ℂ) ^ (2 * (m : ℂ)⁻¹) * Gamma (1 + (m : ℂ)⁻¹)) *
@@ -1228,7 +1228,7 @@ lemma olverAiryW_sub_neg {m : ℕ} (hme : Even m) (t : ℂ) :
   ring
 
 /-- The Olver variable `((m/2)^{2/m} t)` as a complex number, and its Smirnov argument. -/
-lemma smirnovAiryVariable_ofReal (m : ℕ) (hm : 0 < m) (t : ℝ) :
+theorem smirnovAiryVariable_ofReal (m : ℕ) (hm : 0 < m) (t : ℝ) :
     ((((m : ℝ) / 2) ^ (2 / (m : ℝ)) * t : ℝ) : ℂ) = ((m : ℂ) / 2) ^ (2 * (m : ℂ)⁻¹) * t ∧
       smirnovArg (m : ℝ) (((m : ℝ) / 2) ^ (2 / (m : ℝ)) * t) =
         -(((m : ℂ) / 2) ^ (2 * (m : ℂ)⁻¹) * t) ^ m / (m : ℂ) ^ 2 := by

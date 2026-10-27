@@ -6,9 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Spheroidal.Basic
-public import DLMF.Legendre.Ferrers
 public import DLMF.Legendre.ZeroTools
-public import DLMF.Core.Framework
 
 /-!
 # The spheroidal differential equation (DLMF §30.2, §30.3(i), §30.12)
@@ -49,7 +47,7 @@ private lemma p1s_pow_deriv2_aux (n : ℕ) (z : ℂ) :
 
 /-- On an open set avoiding `±1`, a solution of 30.2.1 has a differentiable derivative, with
 `(1-z²) w'' = 2z w' - (λ + γ²(1-z²) - μ²/(1-z²)) w`. -/
-theorem p1s_hasDerivAt_deriv {lam γ2 μ : ℂ} {U : Set ℂ} {w : ℂ → ℂ} (hU : IsOpen U)
+lemma p1s_hasDerivAt_deriv {lam γ2 μ : ℂ} {U : Set ℂ} {w : ℂ → ℂ} (hU : IsOpen U)
     (hU1 : ∀ z ∈ U, 1 - z ^ 2 ≠ 0) (hw : IsSpheroidalSolutionOn lam γ2 μ U w) {z : ℂ}
     (hz : z ∈ U) :
     HasDerivAt (deriv w) ((2 * z * deriv w z -
@@ -86,7 +84,7 @@ theorem p1s_differentiable_deriv {g : ℂ → ℂ} (hg : Differentiable ℂ g) :
     Differentiable ℂ (deriv g) := fun z => ((hg.analyticAt z).deriv).differentiableAt
 
 /-- An entire function real on `ℝ` has real derivative on `ℝ`. -/
-theorem p1s_deriv_im_eq_zero {g : ℂ → ℂ} (hg : Differentiable ℂ g)
+lemma p1s_deriv_im_eq_zero {g : ℂ → ℂ} (hg : Differentiable ℂ g)
     (hreal : ∀ x : ℝ, (g x).im = 0) (x : ℝ) : (deriv g x).im = 0 := by
   have h1 : HasDerivAt (fun t : ℝ => (g t).im) (deriv g x).im x := by
     have := (hg x).hasDerivAt

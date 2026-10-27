@@ -5,9 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.Complex.Basic
-public import Mathlib.MeasureTheory.Function.AbsolutelyContinuous
-public import Mathlib.Topology.Connected.Basic
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Mathlib.Tactic.Positivity.Finset
 
 /-!
 # Geometric predicates for separating infinite contours

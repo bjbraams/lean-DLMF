@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Lame.Eigenvalues
 public import DLMF.Legendre.Basic
+public import DLMF.Lame.Basic
 
 /-!
 # Lamé functions: integral equations (DLMF §29.8)

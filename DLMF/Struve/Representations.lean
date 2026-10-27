@@ -5,13 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Struve.Properties
 public import DLMF.Bessel.YIntegralRep
 public import TauCeti.Analysis.Contour.WorkedExamples.HalfDisc.SineIntegral
-public import Mathlib.Analysis.SpecialFunctions.Complex.Arctan
-public import DLMF.Bessel.Asymptotics
 public import DLMFMathlib.Analysis.Integral.Improper
-public import DLMF.Gamma.ShiftedLineBounds
 public import DLMF.Struve.BarnesTools
 
 /-!
@@ -165,7 +161,7 @@ theorem struveM_zero_integral (z : ℂ) :
 
 /-! ### The sine transform of `(1+t²)^{ν-1/2}` (DLMF 11.5.7) -/
 /-- `(±i x/2)^w = (x/2)^w e^{±iπw/2}` for `x > 0`. -/
-lemma struveFour_cpow_I_mul {x : ℝ} (hx : 0 < x) (w : ℂ) :
+theorem struveFour_cpow_I_mul {x : ℝ} (hx : 0 < x) (w : ℂ) :
     (I * x / 2) ^ w = ((x : ℂ) / 2) ^ w * exp (I * w * π / 2) := by
   have hx2 : ((x : ℂ) / 2) ≠ 0 := by
     exact div_ne_zero (ofReal_ne_zero.mpr hx.ne') two_ne_zero
@@ -180,7 +176,7 @@ lemma struveFour_cpow_I_mul {x : ℝ} (hx : 0 < x) (w : ℂ) :
   push_cast; ring
 
 /-- `(-i x/2)^w = (x/2)^w e^{-iπw/2}` for `x > 0`. -/
-lemma struveFour_cpow_neg_I_mul {x : ℝ} (hx : 0 < x) (w : ℂ) :
+theorem struveFour_cpow_neg_I_mul {x : ℝ} (hx : 0 < x) (w : ℂ) :
     (-I * x / 2) ^ w = ((x : ℂ) / 2) ^ w * exp (-(I * w * π / 2)) := by
   have hx2 : ((x : ℂ) / 2) ≠ 0 := by
     exact div_ne_zero (ofReal_ne_zero.mpr hx.ne') two_ne_zero
@@ -195,7 +191,7 @@ lemma struveFour_cpow_neg_I_mul {x : ℝ} (hx : 0 < x) (w : ℂ) :
   push_cast; ring
 
 /-- `(x/2)^ν (i x/2)^{-ν} = e^{-iπν/2}`. -/
-lemma struveFour_ratio_I {x : ℝ} (hx : 0 < x) (ν : ℂ) :
+theorem struveFour_ratio_I {x : ℝ} (hx : 0 < x) (ν : ℂ) :
     ((x : ℂ) / 2) ^ ν * (I * x / 2) ^ (-ν) = exp (-(I * ν * π / 2)) := by
   have hx2 : ((x : ℂ) / 2) ≠ 0 := div_ne_zero (ofReal_ne_zero.mpr hx.ne') two_ne_zero
   rw [struveFour_cpow_I_mul hx, cpow_neg, ← mul_assoc, mul_inv_cancel₀ (by
@@ -203,7 +199,7 @@ lemma struveFour_ratio_I {x : ℝ} (hx : 0 < x) (ν : ℂ) :
   ring_nf
 
 /-- `(x/2)^ν (-i x/2)^{-ν} = e^{iπν/2}`. -/
-lemma struveFour_ratio_neg_I {x : ℝ} (hx : 0 < x) (ν : ℂ) :
+theorem struveFour_ratio_neg_I {x : ℝ} (hx : 0 < x) (ν : ℂ) :
     ((x : ℂ) / 2) ^ ν * (-I * x / 2) ^ (-ν) = exp (I * ν * π / 2) := by
   have hx2 : ((x : ℂ) / 2) ≠ 0 := div_ne_zero (ofReal_ne_zero.mpr hx.ne') two_ne_zero
   rw [struveFour_cpow_neg_I_mul hx, cpow_neg, ← mul_assoc, mul_inv_cancel₀ (by
@@ -211,7 +207,7 @@ lemma struveFour_ratio_neg_I {x : ℝ} (hx : 0 < x) (ν : ℂ) :
   ring_nf
 
 /-- The Struve `H` series at `i x` is the Struve `L` series at `x`. -/
-lemma struveFour_core_I (ν : ℂ) (x : ℝ) : struveHCore ν (I * x) = struveLCore ν x := by
+theorem struveFour_core_I (ν : ℂ) (x : ℝ) : struveHCore ν (I * x) = struveLCore ν x := by
   rw [struveHCore, struveLCore]
   refine tsum_congr fun n => ?_
   rw [pow_mul, pow_mul, show (I * x / 2) ^ 2 = -(((x : ℂ) / 2) ^ 2) by ring_nf; rw [I_sq]; ring,
@@ -219,7 +215,7 @@ lemma struveFour_core_I (ν : ℂ) (x : ℝ) : struveHCore ν (I * x) = struveLC
   norm_num
 
 /-- The Struve `H` series at `-i x` is the Struve `L` series at `x`. -/
-lemma struveFour_core_neg_I (ν : ℂ) (x : ℝ) : struveHCore ν (-I * x) = struveLCore ν x := by
+theorem struveFour_core_neg_I (ν : ℂ) (x : ℝ) : struveHCore ν (-I * x) = struveLCore ν x := by
   rw [struveHCore, struveLCore]
   refine tsum_congr fun n => ?_
   rw [pow_mul, pow_mul, show (-I * x / 2) ^ 2 = -(((x : ℂ) / 2) ^ 2) by ring_nf; rw [I_sq]; ring,
@@ -227,7 +223,7 @@ lemma struveFour_core_neg_I (ν : ℂ) (x : ℝ) : struveHCore ν (-I * x) = str
   norm_num
 
 /-- `H_ν(i x) = i e^{iπν/2} L_ν(x)` for `x > 0`. -/
-lemma struveFour_H_I {x : ℝ} (hx : 0 < x) (ν : ℂ) :
+theorem struveFour_H_I {x : ℝ} (hx : 0 < x) (ν : ℂ) :
     struveH ν (I * x) = I * exp (I * ν * π / 2) * struveL ν x := by
   rw [struveH, struveL, struveFour_core_I, struveFour_cpow_I_mul hx]
   rw [show I * (ν + 1) * π / 2 = I * ν * π / 2 + π / 2 * I by ring, exp_add,
@@ -235,7 +231,7 @@ lemma struveFour_H_I {x : ℝ} (hx : 0 < x) (ν : ℂ) :
   ring
 
 /-- `H_ν(-i x) = -i e^{-iπν/2} L_ν(x)` for `x > 0`. -/
-lemma struveFour_H_neg_I {x : ℝ} (hx : 0 < x) (ν : ℂ) :
+theorem struveFour_H_neg_I {x : ℝ} (hx : 0 < x) (ν : ℂ) :
     struveH ν (-I * x) = -I * exp (-(I * ν * π / 2)) * struveL ν x := by
   rw [struveH, struveL, struveFour_core_neg_I, struveFour_cpow_neg_I_mul hx]
   rw [show -(I * (ν + 1) * π / 2) = -(I * ν * π / 2) + (-(π / 2) : ℝ) * I by push_cast; ring,
@@ -244,7 +240,7 @@ lemma struveFour_H_neg_I {x : ℝ} (hx : 0 < x) (ν : ℂ) :
 
 
 /-- `J_μ(i x) = e^{iπμ/2} I_μ(x)` for `x > 0`. -/
-lemma struveFour_J_I {x : ℝ} (hx : 0 < x) (μ : ℂ) :
+theorem struveFour_J_I {x : ℝ} (hx : 0 < x) (μ : ℂ) :
     besselJ μ (I * x) = exp (I * μ * π / 2) * besselI μ x := by
   have hz : I * (x : ℂ) ≠ 0 := mul_ne_zero I_ne_zero (ofReal_ne_zero.mpr hx.ne')
   have harg : arg (I * (x : ℂ)) = π / 2 := by rw [mul_comm, arg_real_mul I hx, arg_I]
@@ -254,7 +250,7 @@ lemma struveFour_J_I {x : ℝ} (hx : 0 < x) (μ : ℂ) :
   simp
 
 /-- `J_μ(-i x) = e^{-iπμ/2} I_μ(x)` for `x > 0`. -/
-lemma struveFour_J_neg_I {x : ℝ} (hx : 0 < x) (μ : ℂ) :
+theorem struveFour_J_neg_I {x : ℝ} (hx : 0 < x) (μ : ℂ) :
     besselJ μ (-I * x) = exp (-(I * μ * π / 2)) * besselI μ x := by
   have hz : -I * (x : ℂ) ≠ 0 :=
     mul_ne_zero (neg_ne_zero.mpr I_ne_zero) (ofReal_ne_zero.mpr hx.ne')
@@ -265,15 +261,15 @@ lemma struveFour_J_neg_I {x : ℝ} (hx : 0 < x) (μ : ℂ) :
   simp
 
 /-- `i x` lies in the slit plane for `x > 0`. -/
-lemma struveFour_mem_slitPlane_I {x : ℝ} (hx : 0 < x) : I * (x : ℂ) ∈ slitPlane := by
+theorem struveFour_mem_slitPlane_I {x : ℝ} (hx : 0 < x) : I * (x : ℂ) ∈ slitPlane := by
   right; simp [hx.ne']
 
 /-- `-i x` lies in the slit plane for `x > 0`. -/
-lemma struveFour_mem_slitPlane_neg_I {x : ℝ} (hx : 0 < x) : -I * (x : ℂ) ∈ slitPlane := by
+theorem struveFour_mem_slitPlane_neg_I {x : ℝ} (hx : 0 < x) : -I * (x : ℂ) ∈ slitPlane := by
   right; simp [hx.ne']
 
 /-- `e^{iπν/2} Y_ν(-ix) - e^{-iπν/2} Y_ν(ix) = -2i I_{-ν}(x)` for all orders `ν`. -/
-lemma struveFour_Y {x : ℝ} (hx : 0 < x) (ν : ℂ) :
+theorem struveFour_Y {x : ℝ} (hx : 0 < x) (ν : ℂ) :
     exp (I * ν * π / 2) * besselY ν (-I * x) - exp (-(I * ν * π / 2)) * besselY ν (I * x) =
       -2 * I * besselI (-ν) x := by
   refine DLMF.Confluent.eq_of_continuousAt_of_integerComplement
@@ -317,7 +313,7 @@ lemma struveFour_Y {x : ℝ} (hx : 0 < x) (ν : ℂ) :
     ring_nf
 
 /-- The boundary value of the regularized sine transform, DLMF 11.5.7. -/
-lemma struveFour_value {x : ℝ} (hx : 0 < x) (ν : ℂ) :
+theorem struveFour_value {x : ℝ} (hx : 0 < x) (ν : ℂ) :
     1 / (2 * I) * (((x : ℂ) / 2) ^ ν * (-I * x / 2) ^ (-ν) * struveK ν (-I * x) -
       ((x : ℂ) / 2) ^ ν * (I * x / 2) ^ (-ν) * struveK ν (I * x)) =
       besselI (-ν) x - struveL ν x := by
@@ -331,24 +327,24 @@ lemma struveFour_value {x : ℝ} (hx : 0 < x) (ν : ℂ) :
   linear_combination (-(1:ℂ)) * hY + (-2 * I * struveL ν x) * e3
 
 /-- `1 + t²` as a real cast. -/
-lemma struveFour_one_add_sq (t : ℝ) : (1 + (t : ℂ) ^ 2) = ((1 + t ^ 2 : ℝ) : ℂ) := by
+theorem struveFour_one_add_sq (t : ℝ) : (1 + (t : ℂ) ^ 2) = ((1 + t ^ 2 : ℝ) : ℂ) := by
   push_cast; ring
 
 /-- `1 + t²` lies in the slit plane. -/
-lemma struveFour_mem_slitPlane (t : ℝ) : (1 + (t : ℂ) ^ 2) ∈ slitPlane := by
+theorem struveFour_mem_slitPlane (t : ℝ) : (1 + (t : ℂ) ^ 2) ∈ slitPlane := by
   rw [struveFour_one_add_sq]; exact ofReal_mem_slitPlane.mpr (by positivity)
 
 /-- `t ↦ (1+t²)^w` is continuous. -/
-lemma struveFour_continuous_cpow (w : ℂ) : Continuous fun t : ℝ => (1 + (t : ℂ) ^ 2) ^ w :=
+theorem struveFour_continuous_cpow (w : ℂ) : Continuous fun t : ℝ => (1 + (t : ℂ) ^ 2) ^ w :=
   (by fun_prop : Continuous fun t : ℝ => 1 + (t : ℂ) ^ 2).cpow continuous_const
     struveFour_mem_slitPlane
 
 /-- `‖(1+t²)^w‖ = (1+t²)^{re w}`. -/
-lemma struveFour_norm_cpow (w : ℂ) (t : ℝ) : ‖(1 + (t : ℂ) ^ 2) ^ w‖ = (1 + t ^ 2) ^ w.re := by
+theorem struveFour_norm_cpow (w : ℂ) (t : ℝ) : ‖(1 + (t : ℂ) ^ 2) ^ w‖ = (1 + t ^ 2) ^ w.re := by
   rw [struveFour_one_add_sq, norm_cpow_eq_rpow_re_of_pos (by positivity)]
 
 /-- Derivative of `t ↦ (1+t²)^w`. -/
-lemma struveFour_hasDerivAt_cpow (w : ℂ) (t : ℝ) :
+theorem struveFour_hasDerivAt_cpow (w : ℂ) (t : ℝ) :
     HasDerivAt (fun t : ℝ => (1 + (t : ℂ) ^ 2) ^ w)
       (w * (1 + (t : ℂ) ^ 2) ^ (w - 1) * (2 * t)) t := by
   have h1 : HasDerivAt (fun z : ℂ => 1 + z ^ 2) (2 * (t : ℂ)) (t : ℂ) := by
@@ -357,14 +353,14 @@ lemma struveFour_hasDerivAt_cpow (w : ℂ) (t : ℝ) :
   simpa using h2
 
 /-- `(1+t²)^s → 0` as `t → ∞` for `s < 0`. -/
-lemma struveFour_tendsto_rpow {s : ℝ} (hs : s < 0) :
+theorem struveFour_tendsto_rpow {s : ℝ} (hs : s < 0) :
     Tendsto (fun t : ℝ => (1 + t ^ 2) ^ s) atTop (𝓝 0) := by
   have h := (tendsto_rpow_neg_atTop (y := -s) (by linarith)).comp
     (tendsto_atTop_add_const_left _ 1 (tendsto_pow_atTop (two_ne_zero (α := ℕ))))
   simpa [Function.comp_def] using h
 
 /-- `t (1+t²)^{s-1}` is integrable on `(0, ∞)` for `s < 0`. -/
-lemma struveFour_integrableOn {s : ℝ} (hs : s < 0) :
+theorem struveFour_integrableOn {s : ℝ} (hs : s < 0) :
     IntegrableOn (fun t : ℝ => t * (1 + t ^ 2) ^ (s - 1)) (Ioi 0) := by
   have hG : ∀ t ∈ Ioi (0 : ℝ), HasDerivAt (fun t : ℝ => -(1 + t ^ 2) ^ s)
       (-(2 * s) * (t * (1 + t ^ 2) ^ (s - 1))) t := by
@@ -384,7 +380,7 @@ lemma struveFour_integrableOn {s : ℝ} (hs : s < 0) :
   field_simp
 
 /-- Existence of the improper integral `∫₀^∞ (1+t²)^a sin(xt) dt` for `re a < 0`. -/
-lemma struveFour_exists {a : ℂ} (ha : a.re < 0) {x : ℝ} (hx : 0 < x) :
+theorem struveFour_exists {a : ℂ} (ha : a.re < 0) {x : ℝ} (hx : 0 < x) :
     ∃ L, Tendsto (fun R : ℝ => ∫ t in (0 : ℝ)..R, (1 + (t : ℂ) ^ 2) ^ a * Real.sin (x * t))
       atTop (𝓝 L) := by
   set u' : ℝ → ℂ := fun t => a * (1 + (t : ℂ) ^ 2) ^ (a - 1) * (2 * t)
@@ -441,7 +437,7 @@ lemma struveFour_exists {a : ℂ} (ha : a.re < 0) {x : ℝ} (hx : 0 < x) :
   exact this.congr fun X => (hibp X).symm
 
 /-- The regularized integrand splits into two Laplace kernels. -/
-lemma struveFour_regularized_eq (ν C : ℂ) (x ε t : ℝ) :
+theorem struveFour_regularized_eq (ν C : ℂ) (x ε t : ℝ) :
     Real.exp (-(ε * t)) • (C * (1 + (t : ℂ) ^ 2) ^ (ν - 1 / 2) * Real.sin (x * t)) =
       C / (2 * I) * (yLaplaceKernel ν (ε - I * x) t - yLaplaceKernel ν (ε + I * x) t) := by
   rw [yLaplaceKernel, yLaplaceKernel, Complex.real_smul, ofReal_exp, ofReal_sin, Complex.sin]
@@ -456,7 +452,7 @@ lemma struveFour_regularized_eq (ν C : ℂ) (x ε t : ℝ) :
   ring
 
 /-- `C ∫ e^{-zt}(1+t²)^{ν-1/2} dt = (x/2)^ν (z/2)^{-ν} K_ν(z)` for `re z > 0`. -/
-lemma struveFour_laplace (ν : ℂ) (x : ℝ) {z : ℂ} (hz : 0 < z.re) :
+theorem struveFour_laplace (ν : ℂ) (x : ℝ) {z : ℂ} (hz : 0 < z.re) :
     2 * ((x : ℂ) / 2) ^ ν / (Real.sqrt π * Gamma (ν + 1 / 2)) *
       ∫ t in Ioi (0 : ℝ), yLaplaceKernel ν z t =
       ((x : ℂ) / 2) ^ ν * (z / 2) ^ (-ν) * struveK ν z := by
@@ -466,7 +462,7 @@ lemma struveFour_laplace (ν : ℂ) (x : ℝ) {z : ℂ} (hz : 0 < z.re) :
   field_simp
 
 /-- `ε ↦ (x/2)^ν ((ε + w)/2)^{-ν} K_ν(ε + w)` is continuous at `0` for `w ∈ slitPlane`. -/
-lemma struveFour_continuousAt (ν : ℂ) (x : ℝ) {w : ℂ} (hw : w ∈ slitPlane) :
+theorem struveFour_continuousAt (ν : ℂ) (x : ℝ) {w : ℂ} (hw : w ∈ slitPlane) :
     ContinuousAt (fun ε : ℝ => ((x : ℂ) / 2) ^ ν * ((ε + w) / 2) ^ (-ν) * struveK ν (ε + w)) 0 := by
   have hw2 : w / 2 ∈ slitPlane := by
     rw [div_eq_mul_inv, show (2 : ℂ)⁻¹ = ((2⁻¹ : ℝ) : ℂ) by push_cast; ring]
@@ -557,7 +553,7 @@ def struveLoop_rect (F : ℂ → ℂ) (a b h : ℝ) : ℂ :=
     I • (∫ y : ℝ in (-h)..h, F (b + y * I)) - I • ∫ y : ℝ in (-h)..h, F (a + y * I)
 
 /-- The rectangle boundary integral of `(s - p)⁻¹` around a real point `p` is `2πi`. -/
-lemma struveLoop_rect_recip {a b p h : ℝ} (ha : a < p) (hb : p < b) (hh : 0 < h) :
+theorem struveLoop_rect_recip {a b p h : ℝ} (ha : a < p) (hb : p < b) (hh : 0 < h) :
     struveLoop_rect (fun s => (s - p)⁻¹) a b h = 2 * π * I := by
   unfold struveLoop_rect
   have hv : ∀ d : ℝ, d ≠ p → ∫ y : ℝ in (-h)..h, (((d : ℂ) + y * I) - p)⁻¹ =
@@ -613,7 +609,7 @@ lemma struveLoop_rect_recip {a b p h : ℝ} (ha : a < p) (hb : p < b) (hh : 0 < 
   ring
 
 /-- Linearity of the rectangle boundary integral, for functions continuous on the four sides. -/
-lemma struveLoop_rect_add {f g : ℂ → ℂ} {a b h : ℝ}
+theorem struveLoop_rect_add {f g : ℂ → ℂ} {a b h : ℝ}
     (hf : ContinuousOn f ([[a, b]] ×ℂ [[-h, h]] \ (re ⁻¹' Ioo a b ∩ im ⁻¹' Ioo (-h) h)))
     (hg : ContinuousOn g ([[a, b]] ×ℂ [[-h, h]] \ (re ⁻¹' Ioo a b ∩ im ⁻¹' Ioo (-h) h))) :
     struveLoop_rect (fun s => f s + g s) a b h = struveLoop_rect f a b h + struveLoop_rect g a b h := by
@@ -661,7 +657,7 @@ def struveLoop_bdry (a b h : ℝ) : Set ℂ :=
   [[a, b]] ×ℂ [[-h, h]] \ (re ⁻¹' Ioo a b ∩ im ⁻¹' Ioo (-h) h)
 
 /-- Points of the horizontal sides lie on the rectangle boundary. -/
-lemma struveLoop_mem_bdry_h {a b h t x : ℝ} (ht : t = -h ∨ t = h) (hx : x ∈ [[a, b]]) :
+theorem struveLoop_mem_bdry_h {a b h t x : ℝ} (ht : t = -h ∨ t = h) (hx : x ∈ [[a, b]]) :
     (x : ℂ) + t * I ∈ struveLoop_bdry a b h := by
   refine ⟨⟨by simpa using hx, ?_⟩, ?_⟩
   · show (((x : ℂ) + t * I).im) ∈ [[-h, h]]
@@ -675,7 +671,7 @@ lemma struveLoop_mem_bdry_h {a b h t x : ℝ} (ht : t = -h ∨ t = h) (hx : x �
     rcases ht with ht | ht <;> rw [ht] at h2 <;> linarith [h2.1, h2.2]
 
 /-- Points of the vertical sides lie on the rectangle boundary. -/
-lemma struveLoop_mem_bdry_v {a b h x y : ℝ} (hx : x = a ∨ x = b) (hy : y ∈ [[-h, h]]) :
+theorem struveLoop_mem_bdry_v {a b h x y : ℝ} (hx : x = a ∨ x = b) (hy : y ∈ [[-h, h]]) :
     (x : ℂ) + y * I ∈ struveLoop_bdry a b h := by
   refine ⟨⟨?_, by simpa using hy⟩, ?_⟩
   · show (((x : ℂ) + y * I).re) ∈ [[a, b]]
@@ -689,7 +685,7 @@ lemma struveLoop_mem_bdry_v {a b h x y : ℝ} (hx : x = a ∨ x = b) (hy : y ∈
     rcases hx with hx | hx <;> rw [hx] at h1 <;> linarith [h1.1, h1.2]
 
 /-- The rectangle boundary integral only depends on the values on the boundary. -/
-lemma struveLoop_rect_congr {F G : ℂ → ℂ} {a b h : ℝ} (hFG : EqOn F G (struveLoop_bdry a b h)) :
+theorem struveLoop_rect_congr {F G : ℂ → ℂ} {a b h : ℝ} (hFG : EqOn F G (struveLoop_bdry a b h)) :
     struveLoop_rect F a b h = struveLoop_rect G a b h := by
   unfold struveLoop_rect
   rw [intervalIntegral.integral_congr (g := fun x : ℝ => G (x + (-h : ℝ) * I))
@@ -702,14 +698,14 @@ lemma struveLoop_rect_congr {F G : ℂ → ℂ} {a b h : ℝ} (hFG : EqOn F G (s
       fun y hy => hFG (struveLoop_mem_bdry_v (Or.inl rfl) hy)]
 
 /-- The rectangle boundary integral is homogeneous. -/
-lemma struveLoop_rect_const_mul (F : ℂ → ℂ) (c : ℂ) (a b h : ℝ) :
+theorem struveLoop_rect_const_mul (F : ℂ → ℂ) (c : ℂ) (a b h : ℝ) :
     struveLoop_rect (fun s => c * F s) a b h = c * struveLoop_rect F a b h := by
   unfold struveLoop_rect
   simp only [intervalIntegral.integral_const_mul, smul_eq_mul]
   ring
 
 /-- **Residue theorem for a rectangle with one simple pole on the real axis.** -/
-lemma struveLoop_rect_pole {F Φ : ℂ → ℂ} {a b p h : ℝ} (ha : a < p) (hb : p < b) (hh : 0 < h)
+theorem struveLoop_rect_pole {F Φ : ℂ → ℂ} {a b p h : ℝ} (ha : a < p) (hb : p < b) (hh : 0 < h)
     (hΦ : DifferentiableOn ℂ Φ ([[a, b]] ×ℂ [[-h, h]]))
     (hF : ∀ s ∈ struveLoop_bdry a b h, F s = Φ s / (s - p)) :
     struveLoop_rect F a b h = 2 * π * I * Φ p := by
@@ -740,7 +736,7 @@ lemma struveLoop_rect_pole {F Φ : ℂ → ℂ} {a b p h : ℝ} (ha : a < p) (hb
   rw [this]; ring
 
 /-- The positive Barnes loop as a rectangle boundary integral minus its right side. -/
-lemma struveLoop_loop_eq (F : ℂ → ℂ) (c h R : ℝ) :
+theorem struveLoop_loop_eq (F : ℂ → ℂ) (c h R : ℝ) :
     positiveBarnesLoop F c h R =
       struveLoop_rect F c R h - I * ∫ y : ℝ in (-h)..h, F (R + y * I) := by
   unfold positiveBarnesLoop segmentIntegral struveLoop_rect
@@ -781,7 +777,7 @@ lemma struveLoop_loop_eq (F : ℂ → ℂ) (c h R : ℝ) :
   ring
 
 /-- Additivity of the rectangle boundary integral over adjacent rectangles. -/
-lemma struveLoop_rect_adj {F : ℂ → ℂ} {a b d h : ℝ}
+theorem struveLoop_rect_adj {F : ℂ → ℂ} {a b d h : ℝ}
     (hcont : ∀ t : ℝ, (t = -h ∨ t = h) → Continuous fun x : ℝ => F (x + t * I)) :
     struveLoop_rect F a b h + struveLoop_rect F b d h = struveLoop_rect F a d h := by
   unfold struveLoop_rect
@@ -796,7 +792,7 @@ def struveLoop_cut (c : ℝ) (n : ℕ) : ℝ := if n = 0 then c else (n : ℝ) -
 
 /-- **Residue theorem for the rectangles `[c, N + 1/2] × [-h, h]`** with simple poles at
 `0, 1, …, N`. -/
-lemma struveLoop_rect_sum {F : ℂ → ℂ} {Φ : ℕ → ℂ → ℂ} {c h : ℝ} (hc0 : c < 0) (hh : 0 < h)
+theorem struveLoop_rect_sum {F : ℂ → ℂ} {Φ : ℕ → ℂ → ℂ} {c h : ℝ} (hc0 : c < 0) (hh : 0 < h)
     (hcont : ∀ t : ℝ, (t = -h ∨ t = h) → Continuous fun x : ℝ => F (x + t * I))
     (hΦ : ∀ n : ℕ, DifferentiableOn ℂ (Φ n) ([[struveLoop_cut c n, n + 1 / 2]] ×ℂ [[-h, h]]))
     (hF : ∀ n : ℕ, ∀ s ∈ struveLoop_bdry (struveLoop_cut c n) (n + 1 / 2) h,
@@ -824,7 +820,7 @@ lemma struveLoop_rect_sum {F : ℂ → ℂ} {Φ : ℕ → ℂ → ℂ} {c h : �
     rw [hc, struveLoop_rect_adj hcont]
 
 /-- Exponential decay of `w^s / (Γ(3/2+s) Γ(3/2+ν+s))` in a horizontal strip as `Re s → ∞`. -/
-lemma struveLoop_tail_bound (ν : ℂ) {w : ℂ} (hw : w ≠ 0) (h : ℝ) :
+theorem struveLoop_tail_bound (ν : ℂ) {w : ℂ} (hw : w ≠ 0) (h : ℝ) :
     ∃ X K : ℝ, ∀ x : ℝ, X ≤ x → ∀ y : ℝ, |y| ≤ h →
       ‖(Gamma (3 / 2 + (x + y * I)))⁻¹ * (Gamma (3 / 2 + ν + (x + y * I)))⁻¹ *
         w ^ ((x : ℂ) + y * I)‖ ≤ K * Real.exp (-x) := by
@@ -922,7 +918,7 @@ def struveLoop_num (ν z : ℂ) (n : ℕ) : ℂ → ℂ :=
   fun s : ℂ => π / struveLoop_D n s / (Gamma (3/2+s)*Gamma (3/2+ν+s)) * (-z^2/4)^s
 
 /-- The zeros of `sin(πs)` are the integers. -/
-lemma struveLoop_sin_eq_zero {s : ℂ} (hs : sin (π * s) = 0) : ∃ k : ℤ, s = k := by
+theorem struveLoop_sin_eq_zero {s : ℂ} (hs : sin (π * s) = 0) : ∃ k : ℤ, s = k := by
   obtain ⟨k, hk⟩ := Complex.sin_eq_zero_iff.mp hs
   refine ⟨k, ?_⟩
   have hp : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
@@ -930,19 +926,19 @@ lemma struveLoop_sin_eq_zero {s : ℂ} (hs : sin (π * s) = 0) : ∃ k : ℤ, s 
   linear_combination this
 
 /-- `sin(πs)/(s - n)` is entire. -/
-lemma struveLoop_differentiable_D (n : ℕ) : Differentiable ℂ (struveLoop_D n) := by
+theorem struveLoop_differentiable_D (n : ℕ) : Differentiable ℂ (struveLoop_D n) := by
   have := (differentiableOn_dslope (f := fun u : ℂ => sin (π * u)) (c := (n : ℂ))
     (s := univ) Filter.univ_mem).mpr (by fun_prop)
   exact differentiableOn_univ.mp this
 
 /-- `D_n(s) = sin(πs)/(s - n)` for `s ≠ n`. -/
-lemma struveLoop_D_of_ne {n : ℕ} {s : ℂ} (hs : s ≠ n) :
+theorem struveLoop_D_of_ne {n : ℕ} {s : ℂ} (hs : s ≠ n) :
     struveLoop_D n s = sin (π * s) / (s - n) := by
   rw [struveLoop_D, dslope_of_ne _ hs, slope_def_module, smul_eq_mul,
     show (π : ℂ) * n = n * π by ring, Complex.sin_nat_mul_pi, sub_zero, div_eq_inv_mul]
 
 /-- `D_n(n) = π cos(πn) = π (-1)^n`. -/
-lemma struveLoop_D_self (n : ℕ) : struveLoop_D n n = π * (-1) ^ n := by
+theorem struveLoop_D_self (n : ℕ) : struveLoop_D n n = π * (-1) ^ n := by
   rw [struveLoop_D, dslope_same]
   have hd : HasDerivAt (fun u : ℂ => sin (π * u)) (cos (π * n) * π) n := by
     have := ((hasDerivAt_id (n : ℂ)).const_mul (π : ℂ)).csin
@@ -954,7 +950,7 @@ lemma struveLoop_D_self (n : ℕ) : struveLoop_D n n = π * (-1) ^ n := by
   ring
 
 /-- `D_n` has no zeros on the `n`-th rectangle. -/
-lemma struveLoop_D_ne_zero {c h : ℝ} (hc : -1 < c) (hc0 : c < 0) {n : ℕ} {s : ℂ}
+theorem struveLoop_D_ne_zero {c h : ℝ} (hc : -1 < c) (hc0 : c < 0) {n : ℕ} {s : ℂ}
     (hs : s ∈ [[struveLoop_cut c n, n + 1 / 2]] ×ℂ [[-h, h]]) : struveLoop_D n s ≠ 0 := by
   by_cases hsn : s = n
   · rw [hsn, struveLoop_D_self]
@@ -981,7 +977,7 @@ lemma struveLoop_D_ne_zero {c h : ℝ} (hc : -1 < c) (hc0 : c < 0) {n : ℕ} {s 
   subst this; simp
 
 /-- The numerator `Φ_n` is holomorphic on the closed `n`-th rectangle. -/
-lemma struveLoop_differentiableOn_Φ (ν z : ℂ) {c h : ℝ} (hc : -1 < c) (hc0 : c < 0) (hz : z ≠ 0) (n : ℕ) :
+theorem struveLoop_differentiableOn_Φ (ν z : ℂ) {c h : ℝ} (hc : -1 < c) (hc0 : c < 0) (hz : z ≠ 0) (n : ℕ) :
     DifferentiableOn ℂ (struveLoop_num ν z n) ([[struveLoop_cut c n, n + 1 / 2]] ×ℂ [[-h, h]]) := by
   have hw : -z ^ 2 / 4 ≠ 0 := by
     have := pow_ne_zero 2 hz; intro h0; apply this; linear_combination -4 * h0
@@ -1000,7 +996,7 @@ lemma struveLoop_differentiableOn_Φ (ν z : ℂ) {c h : ℝ} (hc : -1 < c) (hc0
   · exact (differentiable_id.const_cpow (Or.inl hw)).differentiableOn
 
 /-- On the boundary of the `n`-th rectangle, `F(s) = Φ_n(s)/(s - n)`. -/
-lemma struveLoop_F_eq_Φ (ν z : ℂ) {c h : ℝ} (hc0 : c < 0) (hh : 0 < h) (n : ℕ) {s : ℂ}
+theorem struveLoop_F_eq_Φ (ν z : ℂ) {c h : ℝ} (hc0 : c < 0) (hh : 0 < h) (n : ℕ) {s : ℂ}
     (hs : s ∈ struveLoop_bdry (struveLoop_cut c n) (n + 1 / 2) h) :
     struveLoop_F ν z s = struveLoop_num ν z n s / (s - n) := by
   have hsn : s ≠ n := by
@@ -1018,16 +1014,16 @@ lemma struveLoop_F_eq_Φ (ν z : ℂ) {c h : ℝ} (hc0 : c < 0) (hh : 0 < h) (n 
   · field_simp
 
 /-- The integrand as `π/sin(πs)` times an entire function. -/
-lemma struveLoop_F_eq (ν z s : ℂ) : struveLoop_F ν z s = π / sin (π * s) *
+theorem struveLoop_F_eq (ν z s : ℂ) : struveLoop_F ν z s = π / sin (π * s) *
     ((Gamma (3/2+s))⁻¹ * (Gamma (3/2+ν+s))⁻¹ * (-z^2/4)^s) := by
   simp only [struveLoop_F, div_eq_mul_inv _ (Gamma _ * Gamma _), mul_inv]; ring
 
 /-- `-z²/4 ≠ 0` for `z ≠ 0`. -/
-lemma struveLoop_w_ne_zero {z : ℂ} (hz : z ≠ 0) : -z ^ 2 / 4 ≠ 0 := by
+theorem struveLoop_w_ne_zero {z : ℂ} (hz : z ≠ 0) : -z ^ 2 / 4 ≠ 0 := by
   have := pow_ne_zero 2 hz; intro h0; apply this; linear_combination -4 * h0
 
 /-- The entire factor `w^s/(Γ(3/2+s)Γ(3/2+ν+s))` is continuous. -/
-lemma struveLoop_continuous_G (ν : ℂ) {z : ℂ} (hz : z ≠ 0) :
+theorem struveLoop_continuous_G (ν : ℂ) {z : ℂ} (hz : z ≠ 0) :
     Continuous fun s : ℂ => (Gamma (3/2+s))⁻¹ * (Gamma (3/2+ν+s))⁻¹ * (-z^2/4)^s := by
   have hg1 : Differentiable ℂ fun s : ℂ => (Gamma (3/2+s))⁻¹ := fun s =>
     (differentiable_one_div_Gamma (3/2+s)).comp s ((differentiableAt_id).const_add _)
@@ -1036,7 +1032,7 @@ lemma struveLoop_continuous_G (ν : ℂ) {z : ℂ} (hz : z ≠ 0) :
   exact (hg1.continuous.mul hg2.continuous).mul (continuous_const_cpow' (struveLoop_w_ne_zero hz))
 
 /-- The integrand is continuous on every horizontal line off the real axis. -/
-lemma struveLoop_continuous_line (ν : ℂ) {z : ℂ} (hz : z ≠ 0) {t : ℝ} (ht : t ≠ 0) :
+theorem struveLoop_continuous_line (ν : ℂ) {z : ℂ} (hz : z ≠ 0) {t : ℝ} (ht : t ≠ 0) :
     Continuous fun x : ℝ => struveLoop_F ν z (x + t * I) := by
   simp_rw [struveLoop_F_eq]
   refine Continuous.mul (Continuous.div continuous_const (by fun_prop) fun x h0 => ?_)
@@ -1045,7 +1041,7 @@ lemma struveLoop_continuous_line (ν : ℂ) {z : ℂ} (hz : z ≠ 0) {t : ℝ} (
   apply ht; simpa using congrArg Complex.im hk
 
 /-- `|π/sin(π(x+it))| ≤ π/|sinh(πt)|`. -/
-lemma struveLoop_norm_pi_div_sin_le_line {x t : ℝ} (ht : t ≠ 0) :
+theorem struveLoop_norm_pi_div_sin_le_line {x t : ℝ} (ht : t ≠ 0) :
     ‖(π : ℂ) / sin (π * (x + t * I))‖ ≤ π / |Real.sinh (π * t)| := by
   have hs := Complex.barnesRes_abs_sinh_le_norm_sin (π * x) (π * t)
   have hpos : 0 < |Real.sinh (π * t)| := by
@@ -1055,7 +1051,7 @@ lemma struveLoop_norm_pi_div_sin_le_line {x t : ℝ} (ht : t ≠ 0) :
   exact div_le_div_of_nonneg_left Real.pi_pos.le hpos hs
 
 /-- The integrand is integrable on horizontal half-lines `Re s > c`, `Im s = t ≠ 0`. -/
-lemma struveLoop_integrableOn (ν : ℂ) {z : ℂ} (hz : z ≠ 0) (c : ℝ) {t : ℝ} (ht : t ≠ 0) :
+theorem struveLoop_integrableOn (ν : ℂ) {z : ℂ} (hz : z ≠ 0) (c : ℝ) {t : ℝ} (ht : t ≠ 0) :
     IntegrableOn (fun x : ℝ => struveLoop_F ν z (x + t * I)) (Ioi c) := by
   obtain ⟨X, K, hK⟩ := struveLoop_tail_bound ν (struveLoop_w_ne_zero hz) |t|
   set X' := max X c
@@ -1076,7 +1072,7 @@ lemma struveLoop_integrableOn (ν : ℂ) {z : ℂ} (hz : z ≠ 0) (c : ℝ) {t :
   · exact Or.inr (lt_of_not_ge hxX)
 
 /-- The integrals over the right sides `Re s = N + 1/2` tend to `0`. -/
-lemma struveLoop_tendsto_vertical (ν : ℂ) {z : ℂ} (hz : z ≠ 0) {h : ℝ} (hh : 0 < h) :
+theorem struveLoop_tendsto_vertical (ν : ℂ) {z : ℂ} (hz : z ≠ 0) {h : ℝ} (hh : 0 < h) :
     Tendsto (fun N : ℕ => ∫ y : ℝ in (-h)..h, struveLoop_F ν z (((N + 1 / 2 : ℝ) : ℂ) + y * I))
       atTop (𝓝 0) := by
   obtain ⟨X, K, hK⟩ := struveLoop_tail_bound ν (struveLoop_w_ne_zero hz) h
@@ -1111,7 +1107,7 @@ lemma struveLoop_tendsto_vertical (ν : ℂ) {z : ℂ} (hz : z ≠ 0) {h : ℝ} 
   simpa using ((this.const_mul (π * K)).mul_const |h - -h|)
 
 /-- The residue series is the Struve `L` series: `∑ Φ_n(n) = struveLCore ν z`. -/
-lemma struveLoop_hasSum (ν : ℂ) (z : ℂ) :
+theorem struveLoop_hasSum (ν : ℂ) (z : ℂ) :
     HasSum (fun n : ℕ => struveLoop_num ν z n n) (struveLCore ν z) := by
   convert hasSum_struveLCore ν z using 1
   funext n
@@ -1182,11 +1178,11 @@ theorem struveL_barnes_loop (ν : ℂ) {z : ℂ} (hz : z ≠ 0) {c h : ℝ} (hc 
 /-! ### The Barnes integral for `H_ν` (DLMF 11.5.8) -/
 
 /-- `-(ix)²/4 = x²/4`. -/
-lemma struveBar_w (x : ℝ) : -(I * x) ^ 2 / 4 = ((x ^ 2 / 4 : ℝ) : ℂ) := by
+theorem struveBar_w (x : ℝ) : -(I * x) ^ 2 / 4 = ((x ^ 2 / 4 : ℝ) : ℂ) := by
   push_cast; ring_nf; rw [I_sq]; ring
 
 /-- The modulus of the 11.5.8 integrand `F(s)` at `s = t + iy`. -/
-lemma struveBar_norm_F (ν : ℂ) {x : ℝ} (hx : 0 < x) (t y : ℝ) :
+theorem struveBar_norm_F (ν : ℂ) {x : ℝ} (hx : 0 < x) (t y : ℝ) :
     ‖struveLoop_F ν (I * x) (t + y * I)‖ = (x ^ 2 / 4) ^ t * (π / ‖sin (π * ((t : ℂ) + y * I))‖ *
       (‖Gamma (((3 / 2 + t : ℝ) : ℂ) + y * I)‖)⁻¹ *
       (‖Gamma (((3 / 2 + ν.re + t : ℝ) : ℂ) + ((y : ℂ) + ν.im) * I)‖)⁻¹) := by
@@ -1203,7 +1199,7 @@ lemma struveBar_norm_F (ν : ℂ) {x : ℝ} (hx : 0 < x) (t y : ℝ) :
   ring
 
 /-- The modulus of the 11.5.8 integrand at `s = t - iy`, by conjugation. -/
-lemma struveBar_norm_F_neg (ν : ℂ) {x : ℝ} (hx : 0 < x) (t y : ℝ) :
+theorem struveBar_norm_F_neg (ν : ℂ) {x : ℝ} (hx : 0 < x) (t y : ℝ) :
     ‖struveLoop_F ν (I * x) (t + (-y : ℝ) * I)‖ = (x ^ 2 / 4) ^ t *
       (π / ‖sin (π * ((t : ℂ) + y * I))‖ * (‖Gamma (((3 / 2 + t : ℝ) : ℂ) + y * I)‖)⁻¹ *
       (‖Gamma (((3 / 2 + ν.re + t : ℝ) : ℂ) + ((y : ℂ) + ((-ν.im : ℝ) : ℂ)) * I)‖)⁻¹) := by
@@ -1222,7 +1218,7 @@ lemma struveBar_norm_F_neg (ν : ℂ) {x : ℝ} (hx : 0 < x) (t y : ℝ) :
 `t ± ih` (with shift `m = ±Im ν`), then `∫_{(c,∞)} G h → 0` as `h → ∞`: dominated convergence
 with the uniform bounds `DLMF.Gamma.shiftB_norm_recip_Gamma_le` and the pointwise Stirling decay
 `struveBar_isBigO`. -/
-lemma struveBar_tendsto_horizontal (ν : ℂ) {x c : ℝ} (hx : 0 < x) (hc : -1 < c) (hc0 : c < 0)
+theorem struveBar_tendsto_horizontal (ν : ℂ) {x c : ℝ} (hx : 0 < x) (hc : -1 < c) (hc0 : c < 0)
     (hv : -1 < ν.re + 2 * c) (m : ℝ) (G : ℝ → ℝ → ℂ)
     (hG : ∀ h t : ℝ, ‖G h t‖ = (x ^ 2 / 4) ^ t * (π / ‖sin (π * ((t : ℂ) + h * I))‖ *
       (‖Gamma (((3 / 2 + t : ℝ) : ℂ) + h * I)‖)⁻¹ *
@@ -1287,7 +1283,7 @@ lemma struveBar_tendsto_horizontal (ν : ℂ) {x c : ℝ} (hx : 0 < x) (hc : -1 
     exact hO'.trans_tendsto (tendsto_rpow_neg_atTop hq)
 
 /-- `L_ν`'s normalized series at `iz` is `H_ν`'s at `z`. -/
-lemma struveBar_LCore_I (ν z : ℂ) : struveLCore ν (I * z) = struveHCore ν z := by
+theorem struveBar_LCore_I (ν z : ℂ) : struveLCore ν (I * z) = struveHCore ν z := by
   unfold struveLCore struveHCore
   congr 1; funext n
   have e : (I * z / 2) ^ 2 = -1 * (z / 2) ^ 2 := by ring_nf; rw [I_sq]; ring
@@ -1295,7 +1291,7 @@ lemma struveBar_LCore_I (ν z : ℂ) : struveLCore ν (I * z) = struveHCore ν z
   ring
 
 /-- The 11.5.8 integrand is continuous on the vertical line `Re s = c`, `-1 < c < 0`. -/
-lemma struveBar_continuous_vertical (ν : ℂ) {x c : ℝ} (hx : 0 < x) (hc : -1 < c) (hc0 : c < 0) :
+theorem struveBar_continuous_vertical (ν : ℂ) {x c : ℝ} (hx : 0 < x) (hc : -1 < c) (hc0 : c < 0) :
     Continuous fun y : ℝ => struveLoop_F ν (I * x) (c + y * I) := by
   have hz : I * (x : ℂ) ≠ 0 := mul_ne_zero I_ne_zero (ofReal_ne_zero.mpr hx.ne')
   simp_rw [struveLoop_F_eq]
@@ -1310,7 +1306,7 @@ lemma struveBar_continuous_vertical (ν : ℂ) {x c : ℝ} (hx : 0 < x) (hc : -1
   omega
 
 /-- The 11.5.8 integrand is integrable on the vertical line: it is `O(|y|^{-2-Re ν-2c})`. -/
-lemma struveBar_integrable_vertical (ν : ℂ) {x c : ℝ} (hx : 0 < x) (hc : -1 < c) (hc0 : c < 0)
+theorem struveBar_integrable_vertical (ν : ℂ) {x c : ℝ} (hx : 0 < x) (hc : -1 < c) (hc0 : c < 0)
     (hv : -1 < ν.re + 2 * c) :
     Integrable fun y : ℝ => struveLoop_F ν (I * x) (c + y * I) := by
   have hp : -(2 + ν.re + 2 * c) < -1 := by linarith
@@ -1329,7 +1325,7 @@ lemma struveBar_integrable_vertical (ν : ℂ) {x c : ℝ} (hx : 0 < x) (hc : -1
 
 /-- The closed rectangle identity at height `h`, after `R → ∞`: the two horizontal half-line
 integrals and the vertical segment give `2πi` times the residue sum `H`-core. -/
-lemma struveBar_rect_identity (ν : ℂ) {x c h : ℝ} (hx : 0 < x) (hc : -1 < c) (hc0 : c < 0)
+theorem struveBar_rect_identity (ν : ℂ) {x c h : ℝ} (hx : 0 < x) (hc : -1 < c) (hc0 : c < 0)
     (hh : 0 < h) :
     (∫ t in Ioi c, struveLoop_F ν (I * x) (t + (-h : ℝ) * I)) -
       (∫ t in Ioi c, struveLoop_F ν (I * x) (t + h * I)) -
@@ -1426,7 +1422,7 @@ theorem ofReal_mul_mem_slitPlane {s : ℝ} (hs : 0 < s) {z : ℂ} (hz : z ∈ sl
   · right; simp; exact ⟨hs.ne', h⟩
 
 /-- Derivative of the antiderivative used in the primitive recurrence. -/
-theorem hasDerivAt_struveHPrimitive_aux {ν : ℂ} (hν1 : ν + 1 ≠ 0) {w : ℂ} (hw : w ∈ slitPlane) :
+lemma hasDerivAt_struveHPrimitive_aux {ν : ℂ} (hν1 : ν + 1 ≠ 0) {w : ℂ} (hw : w ∈ slitPlane) :
     HasDerivAt (fun w : ℂ => -(w^(ν+1)*struveH ν w) +
         w^(2*ν+2)/(2^(ν+1)*(ν+1)*Real.sqrt π*Gamma (ν+3/2)))
       (w^(ν+1)*struveH (ν+1) w - (2*ν+1)*(w^ν*struveH ν w)) w := by
@@ -1757,7 +1753,7 @@ theorem exists_bound_integral_sinc : ∃ C : ℝ, ∀ x : ℝ, 0 ≤ x → |∫ 
     exact hb.trans (by linarith [le_max_left X (π/2+1)])
 
 /-- `∫₀^R c sinc(tc) dt = ∫₀^{Rc} sinc`. -/
-lemma integral_mul_sinc_mul (c R : ℝ) :
+theorem integral_mul_sinc_mul (c R : ℝ) :
     ∫ t in (0:ℝ)..R, c * Real.sinc (t * c) = ∫ u in (0:ℝ)..R * c, Real.sinc u := by
   rcases eq_or_ne c 0 with rfl | hc
   · simp
@@ -1832,23 +1828,23 @@ theorem tendsto_integral_integral_mul_sinc {a b : ℝ} (hab : a ≤ b) {g : ℝ 
 
 
 /-- `sin(tc)/t = c sinc(tc)` for `t ≠ 0`. -/
-lemma sin_mul_div_eq_mul_sinc (t c : ℝ) (ht : t ≠ 0) :
+theorem sin_mul_div_eq_mul_sinc (t c : ℝ) (ht : t ≠ 0) :
     Real.sin (t * c) / t = c * Real.sinc (t * c) := by
   rcases eq_or_ne c 0 with rfl | hc
   · simp
   · rw [Real.sinc_of_ne_zero (mul_ne_zero ht hc)]; field_simp
 
 /-- `c sinc(tc) t = sin(tc)` for `t ≠ 0`. -/
-lemma mul_sinc_mul_mul (t c : ℝ) (ht : t ≠ 0) :
+theorem mul_sinc_mul_mul (t c : ℝ) (ht : t ≠ 0) :
     c * Real.sinc (t * c) * t = Real.sin (t * c) := by
   rw [← sin_mul_div_eq_mul_sinc t c ht]; field_simp
 
 /-- `√π √π = π` in `ℂ`. -/
-lemma sqrt_pi_mul_sqrt_pi_complex : (Real.sqrt π : ℂ) * (Real.sqrt π : ℂ) = π := by
+theorem sqrt_pi_mul_sqrt_pi_complex : (Real.sqrt π : ℂ) * (Real.sqrt π : ℂ) = π := by
   rw [← ofReal_mul, Real.mul_self_sqrt Real.pi_pos.le]
 
 /-- `∫₀¹ √(1-s²) ds = π/4`. -/
-lemma integral_sqrt_one_sub_sq_unit : ∫ s in (0:ℝ)..1, √(1 - s ^ 2) = π / 4 := by
+theorem integral_sqrt_one_sub_sq_unit : ∫ s in (0:ℝ)..1, √(1 - s ^ 2) = π / 4 := by
   have h := integral_sqrt_one_sub_sq
   have hc : Continuous fun s : ℝ => √(1 - s ^ 2) := by fun_prop
   rw [← intervalIntegral.integral_add_adjacent_intervals (b := 0) (hc.intervalIntegrable _ _)
@@ -1947,14 +1943,14 @@ vanish by `H_ν = Y_ν + K_ν`, Hankel's expansion of `Y_ν` and the Laplace rep
 -/
 
 /-- `u^{μ-1} sin u = u^μ sinc u` for `u ≠ 0`. -/
-lemma struveMel_cpow_mul_sin_eq (μ : ℂ) {u : ℝ} (hu : u ≠ 0) :
+theorem struveMel_cpow_mul_sin_eq (μ : ℂ) {u : ℝ} (hu : u ≠ 0) :
     (u : ℂ) ^ (μ - 1) * (Real.sin u : ℂ) = (u : ℂ) ^ μ * (Real.sinc u : ℂ) := by
   rw [Real.sinc_of_ne_zero hu, cpow_sub _ _ (ofReal_ne_zero.mpr hu), cpow_one]
   push_cast
   field_simp
 
 /-- The Mellin sine integrand is interval integrable for `re μ > -1`. -/
-lemma struveMel_intervalIntegrable {μ : ℂ} (h0 : -1 < μ.re) (a b : ℝ) :
+theorem struveMel_intervalIntegrable {μ : ℂ} (h0 : -1 < μ.re) (a b : ℝ) :
     IntervalIntegrable (fun u : ℝ => (u : ℂ) ^ (μ - 1) * (Real.sin u : ℂ)) volume a b := by
   have h := (intervalIntegral.intervalIntegrable_cpow' h0 (a := a) (b := b)).mul_continuousOn
     (continuous_ofReal.comp Real.continuous_sinc).continuousOn
@@ -1983,7 +1979,7 @@ theorem struveMel_tendsto_sin {μ : ℂ} (h0 : -1 < μ.re) (h1 : μ.re < 1) :
   · exact Complex.tendsto_integral_cpow_mul_sin h0 h1 hμ
 
 /-- The partial Mellin sine integrals are bounded on `[0, ∞)`. -/
-lemma struveMel_exists_bound {μ : ℂ} (h0 : -1 < μ.re) (h1 : μ.re < 1) :
+theorem struveMel_exists_bound {μ : ℂ} (h0 : -1 < μ.re) (h1 : μ.re < 1) :
     ∃ C, ∀ X : ℝ, 0 ≤ X →
       ‖∫ u in (0 : ℝ)..X, (u : ℂ) ^ (μ - 1) * (Real.sin u : ℂ)‖ ≤ C := by
   have hc : Continuous (fun X : ℝ => ∫ u in (0 : ℝ)..X, (u : ℂ) ^ (μ - 1) * (Real.sin u : ℂ)) :=
@@ -1993,7 +1989,7 @@ lemma struveMel_exists_bound {μ : ℂ} (h0 : -1 < μ.re) (h1 : μ.re < 1) :
   exact ⟨C, fun X hX => hC X hX⟩
 
 /-- Scaling: `∫₀^R t^{μ-1} sin(ct) dt = c^{-μ} ∫₀^{Rc} u^{μ-1} sin u du` for `c > 0`. -/
-lemma struveMel_integral_scale (μ : ℂ) {c : ℝ} (hc : 0 < c) {R : ℝ} (hR : 0 ≤ R) :
+theorem struveMel_integral_scale (μ : ℂ) {c : ℝ} (hc : 0 < c) {R : ℝ} (hR : 0 ≤ R) :
     ∫ t in (0 : ℝ)..R, (t : ℂ) ^ (μ - 1) * (Real.sin (t * c) : ℂ) =
       (c : ℂ) ^ (-μ) * ∫ u in (0 : ℝ)..R * c, (u : ℂ) ^ (μ - 1) * (Real.sin u : ℂ) := by
   have h := intervalIntegral.integral_comp_mul_right
@@ -2015,7 +2011,7 @@ lemma struveMel_integral_scale (μ : ℂ) {c : ℝ} (hc : 0 < c) {R : ℝ} (hR :
   field_simp
 
 /-- `sin^{2a-1} θ cos^{2b-1} θ` is integrable on `(0, π/2]` with the Beta value. -/
-lemma struveMel_trigBeta {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) :
+theorem struveMel_trigBeta {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) :
     IntegrableOn (fun θ : ℝ => (Real.sin θ : ℂ) ^ (2 * a - 1) * (Real.cos θ : ℂ) ^ (2 * b - 1))
       (Ioc 0 (π / 2)) ∧
     ∫ θ in Ioc 0 (π / 2), (Real.sin θ : ℂ) ^ (2 * a - 1) * (Real.cos θ : ℂ) ^ (2 * b - 1) =
@@ -2142,12 +2138,12 @@ theorem struveMel_tendsto_direct {μ ν : ℂ} (hμ0 : -1 < μ.re) (hμ1 : μ.re
   exact (hpt t ht.1).symm
 
 /-- `(1/2)^ν = 2^{-ν}`. -/
-lemma struveMel_half_cpow (ν : ℂ) : (1 / 2 : ℂ) ^ ν = (2 : ℂ) ^ (-ν) := by
+theorem struveMel_half_cpow (ν : ℂ) : (1 / 2 : ℂ) ^ ν = (2 : ℂ) ^ (-ν) := by
   have h : (2 : ℂ).arg = 0 := by simp
   rw [one_div, inv_cpow _ _ (by rw [h]; exact Real.pi_ne_zero.symm), cpow_neg]
 
 /-- `z / Γ(z+1) = 1/Γ(z)` for every complex `z` (with Mathlib's conventions at the poles). -/
-lemma struveMel_div_Gamma_add_one (z : ℂ) : z / Gamma (z + 1) = (Gamma z)⁻¹ := by
+theorem struveMel_div_Gamma_add_one (z : ℂ) : z / Gamma (z + 1) = (Gamma z)⁻¹ := by
   rcases eq_or_ne z 0 with rfl | hz
   · simp
   · rw [Complex.Gamma_add_one z hz]
@@ -2156,7 +2152,7 @@ lemma struveMel_div_Gamma_add_one (z : ℂ) : z / Gamma (z + 1) = (Gamma z)⁻¹
     · field_simp
 
 /-- The Struve Mellin value `V(μ, ν)` of DLMF 11.7.10–11.7.11. -/
-lemma struveMel_value_eq {μ ν : ℂ} (hμ0 : -1 < μ.re) (hμ1 : μ.re < 1) (hν : -1 / 2 < ν.re) :
+theorem struveMel_value_eq {μ ν : ℂ} (hμ0 : -1 < μ.re) (hμ1 : μ.re < 1) (hν : -1 / 2 < ν.re) :
     2 * (1 / 2 : ℂ) ^ ν / (Real.sqrt π * Gamma (ν + 1 / 2)) *
         ((if μ = 0 then (π / 2 : ℂ) else Gamma μ * sin (π * μ / 2)) *
           (Gamma (ν + 1 / 2) * Gamma ((1 - μ) / 2) / (2 * Gamma (ν + 1 / 2 + (1 - μ) / 2)))) =
@@ -2223,7 +2219,7 @@ lemma struveMel_value_eq {μ ν : ℂ} (hμ0 : -1 < μ.re) (hμ1 : μ.re < 1) (h
     field_simp
 
 /-- `x^a = O(x^b)` at infinity when `a ≤ b`. -/
-lemma struveMel_rpow_isBigO_rpow {a b : ℝ} (h : a ≤ b) :
+theorem struveMel_rpow_isBigO_rpow {a b : ℝ} (h : a ≤ b) :
     (fun x : ℝ => x ^ a) =O[atTop] (fun x : ℝ => x ^ b) := by
   refine IsBigO.of_bound 1 ?_
   filter_upwards [eventually_ge_atTop 1] with x hx
@@ -2232,7 +2228,7 @@ lemma struveMel_rpow_isBigO_rpow {a b : ℝ} (h : a ≤ b) :
   exact Real.rpow_le_rpow_of_exponent_le hx h
 
 /-- `Y_ν(x) = O(x^{-1/2})` as `x → +∞`, for every complex order. -/
-lemma struveMel_besselY_isBigO (ν : ℂ) :
+theorem struveMel_besselY_isBigO (ν : ℂ) :
     (fun x : ℝ => besselY ν x) =O[atTop] (fun x : ℝ => x ^ (-(1 / 2) : ℝ)) := by
   -- the Hankel function
   have hH : (fun x : ℝ => hankelH1 ν x) =O[atTop] (fun x : ℝ => x ^ (-(1 / 2) : ℝ)) := by
@@ -2308,7 +2304,7 @@ lemma struveMel_besselY_isBigO (ν : ℂ) :
 
 /-- `K_ν(x) = O(x^{re ν - 1})` as `x → +∞` when `re ν ≤ 1/2`, from the Laplace representation
 DLMF 11.5.2. -/
-lemma struveMel_struveK_isBigO {ν : ℂ} (hν : ν.re ≤ 1 / 2) :
+theorem struveMel_struveK_isBigO {ν : ℂ} (hν : ν.re ≤ 1 / 2) :
     (fun x : ℝ => struveK ν x) =O[atTop] (fun x : ℝ => x ^ (ν.re - 1)) := by
   set A : ℝ := ‖2 / ((Real.sqrt π : ℂ) * Gamma (ν + 1 / 2))‖
   refine IsBigO.of_bound (A * 2 ^ (-ν.re)) ?_
@@ -2349,7 +2345,7 @@ lemma struveMel_struveK_isBigO {ν : ℂ} (hν : ν.re ≤ 1 / 2) :
         rw [Real.rpow_sub_one hx.ne']; ring
 
 /-- `H_ν(x) = O(x^{-1/2} + x^{re ν - 1})` as `x → +∞` when `re ν ≤ 1/2`. -/
-lemma struveMel_struveH_isBigO {ν : ℂ} (hν : ν.re ≤ 1 / 2) :
+theorem struveMel_struveH_isBigO {ν : ℂ} (hν : ν.re ≤ 1 / 2) :
     (fun x : ℝ => struveH ν x) =O[atTop] (fun x : ℝ => x ^ (-(1 / 2) : ℝ) + x ^ (ν.re - 1)) := by
   have hY := struveMel_besselY_isBigO ν
   have hK := struveMel_struveK_isBigO hν
@@ -2376,7 +2372,7 @@ lemma struveMel_struveH_isBigO {ν : ℂ} (hν : ν.re ≤ 1 / 2) :
 
 /-- The integration-by-parts boundary term `R^{μ-ν} H_ν(R)` tends to zero when `re ν ≤ 1/2`,
 `re μ < 1` and `re μ < re ν + 1/2`. -/
-lemma struveMel_tendsto_boundary {μ ν : ℂ} (hν : ν.re ≤ 1 / 2) (h1 : μ.re < 1)
+theorem struveMel_tendsto_boundary {μ ν : ℂ} (hν : ν.re ≤ 1 / 2) (h1 : μ.re < 1)
     (h2 : μ.re < ν.re + 1 / 2) :
     Tendsto (fun R : ℝ => (R : ℂ) ^ (μ - ν) * struveH ν R) atTop (𝓝 0) := by
   have hp : (fun R : ℝ => (R : ℂ) ^ (μ - ν)) =O[atTop] (fun R : ℝ => R ^ (μ.re - ν.re)) := by
@@ -2396,7 +2392,7 @@ lemma struveMel_tendsto_boundary {μ ν : ℂ} (hν : ν.re ≤ 1 / 2) (h1 : μ.
   congr 1; ring_nf
 
 /-- For `t > 0`, `t^a H_ν(t) = t^{a+ν+1} (1/2)^{ν+1} H̃_ν(t)` with the entire core `H̃_ν`. -/
-lemma struveMel_cpow_mul_struveH (a ν : ℂ) {t : ℝ} (ht : 0 < t) :
+theorem struveMel_cpow_mul_struveH (a ν : ℂ) {t : ℝ} (ht : 0 < t) :
     (t : ℂ) ^ a * struveH ν t = (t : ℂ) ^ (a + ν + 1) * ((1 / 2 : ℂ) ^ (ν + 1) * struveHCore ν t) := by
   have ht0 : (t : ℂ) ≠ 0 := ofReal_ne_zero.mpr ht.ne'
   rw [struveH, show (t : ℂ) / 2 = ((t : ℝ) : ℂ) * ((1 / 2 : ℝ) : ℂ) by push_cast; ring,
@@ -2406,7 +2402,7 @@ lemma struveMel_cpow_mul_struveH (a ν : ℂ) {t : ℝ} (ht : 0 < t) :
 
 /-- The Struve Mellin integrand `t^{μ-ν-1} H_ν(t)` is interval integrable on `[0, R]`
 when `re μ > -1`. -/
-lemma struveMel_intervalIntegrable_struveH {μ : ℂ} (hμ0 : -1 < μ.re) (ν : ℂ) {R : ℝ} (hR : 0 ≤ R) :
+theorem struveMel_intervalIntegrable_struveH {μ : ℂ} (hμ0 : -1 < μ.re) (ν : ℂ) {R : ℝ} (hR : 0 ≤ R) :
     IntervalIntegrable (fun t : ℝ => (t : ℂ) ^ (μ - ν - 1) * struveH ν t) volume 0 R := by
   have h := (intervalIntegral.intervalIntegrable_cpow' hμ0 (a := 0) (b := R)).mul_continuousOn
     (g := fun t : ℝ => (1 / 2 : ℂ) ^ (ν + 1) * struveHCore ν t)
@@ -2418,7 +2414,7 @@ lemma struveMel_intervalIntegrable_struveH {μ : ℂ} (hμ0 : -1 < μ.re) (ν : 
 
 /-- **Integration by parts** in the Struve Mellin integral, from `d/dt (t^{ν+1} H_{ν+1}) =
 t^{ν+1} H_ν` (DLMF 11.4.27). -/
-lemma struveMel_integral_by_parts {μ : ℂ} (hμ0 : -1 < μ.re) (ν : ℂ) {R : ℝ} (hR : 0 < R) :
+theorem struveMel_integral_by_parts {μ : ℂ} (hμ0 : -1 < μ.re) (ν : ℂ) {R : ℝ} (hR : 0 < R) :
     ∫ t in (0 : ℝ)..R, (t : ℂ) ^ (μ - ν - 1) * struveH ν t =
       (R : ℂ) ^ (μ - (ν + 1)) * struveH (ν + 1) R -
         (μ - 2 * ν - 2) * ∫ t in (0 : ℝ)..R, (t : ℂ) ^ (μ - (ν + 1) - 1) * struveH (ν + 1) t := by
@@ -2481,7 +2477,7 @@ noncomputable def struveMel_value (μ ν : ℂ) : ℂ :=
   else Gamma (μ / 2) * 2 ^ (μ - ν - 1) * sin (π * μ / 2) / (cos (π * μ / 2) * Gamma (ν - μ / 2 + 1))
 
 /-- The recurrence `V(μ, ν) = 2 (ν + 1 - μ/2) V(μ, ν + 1)`, valid for all parameters. -/
-lemma struveMel_value_succ (μ ν : ℂ) :
+theorem struveMel_value_succ (μ ν : ℂ) :
     struveMel_value μ ν = -(μ - 2 * ν - 2) * struveMel_value μ (ν + 1) := by
   have h2 : ∀ w : ℂ, (2 : ℂ) ^ (w + 1) = 2 * 2 ^ w := fun w => by
     rw [cpow_add _ _ two_ne_zero, cpow_one]; ring
@@ -3152,7 +3148,7 @@ theorem exists_bound_struveL_zero :
     exact mul_le_mul_of_nonneg_left this (norm_nonneg _)
 
 /-- Laplace transform of `L₀` in terms of `∫₀¹ du/((a²-1)+u²)`. -/
-theorem struveL_zero_laplace_aux {a : ℂ} (ha : 1 < a.re) :
+lemma struveL_zero_laplace_aux {a : ℂ} (ha : 1 < a.re) :
     HasIntegralAtTop (fun t : ℝ => exp (-a*t)*struveL 0 t) 0
       (2/π * ∫ u : ℝ in 0..1, 1/((a^2-1) + (u:ℂ)^2)) := by
   set w : ℝ → ℂ := fun s => (1-(s:ℂ)^2)^(-1/2:ℂ)

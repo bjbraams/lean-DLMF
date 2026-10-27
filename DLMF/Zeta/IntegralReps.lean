@@ -7,15 +7,8 @@ module
 
 public import DLMF.Gamma.Polygamma
 public import DLMF.Zeta.Riemann
-public import DLMF.Gamma.IntegralRepresentations
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Arctan
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
-public import Mathlib.NumberTheory.LSeries.RiemannZeta
 public import Mathlib.NumberTheory.ModularForms.JacobiTheta.OneVariable
-public import Mathlib.RingTheory.Polynomial.Pochhammer
 public import DLMF.Gamma.PolygammaHurwitz
-public import Mathlib.NumberTheory.LSeries.Dirichlet
-public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 
 /-!
 # Integral representations of the Riemann zeta function (DLMF §25.5)
@@ -1189,7 +1182,7 @@ lemma r25a_Ar_mul_rpow (m : ℕ) (σ : ℝ) {t : ℝ} (ht : 0 < t) :
   field_simp
 
 /-- DLMF 25.5.19 core: `∫₀^∞ ψ^{(m)}(1+x) x^{-s} dx = (-1)^{m+1} Γ(1-s) Γ(m+s) ζ(m+s)`. -/
-theorem r25a_integral_polygamma {s : ℂ} {m : ℕ} (hm : 1 ≤ m) (hs : 0 < s.re) (hs' : s.re < 1) :
+lemma r25a_integral_polygamma {s : ℂ} {m : ℕ} (hm : 1 ≤ m) (hs : 0 < s.re) (hs' : s.re < 1) :
     IntegrableOn (fun x : ℝ => DLMF.Gamma.polygamma m (1 + x) * (x : ℂ) ^ (-s)) (Ioi 0) ∧
       ∫ x in Ioi (0 : ℝ), DLMF.Gamma.polygamma m (1 + x) * (x : ℂ) ^ (-s) =
         (-1) ^ (m + 1) * (Gamma (1 - s) * Gamma (m + s) * riemannZeta (m + s)) := by

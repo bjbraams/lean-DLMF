@@ -5,23 +5,12 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Confluent.Basic
 public import DLMF.Confluent.Confluence
 public import DLMF.Confluent.Whittaker
 public import DLMF.Confluent.Recurrence
-public import DLMF.Bessel.Basic
 public import DLMF.Bessel.Modified
 public import DLMF.Bessel.KIntegralRep
-public import DLMF.Hypergeometric.EulerIntegral
-public import DLMF.Hypergeometric.ArgumentContinuation
 public import DLMF.Hypergeometric.IntegralRepresentations
-public import DLMF.Hypergeometric.Solutions
-public import DLMF.Gamma.IntegralRepresentations
-public import DLMF.Gamma.Asymptotics
-public import TauCeti.Analysis.SpecialFunctions.Beta
-public import Mathlib.Analysis.Convex.SpecificFunctions.Basic
-public import Mathlib.MeasureTheory.Integral.Bochner.Basic
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 
 /-!
 # Integral representations (DLMF §§13.4, 13.16)
@@ -164,7 +153,7 @@ theorem regularized_parameter_integral {a b c z : ℂ}
 
 /-- Gamma-weighted integral of regularized `₀F₁`, a generalization of
 `integral_regularized0F1_gamma`: `∫₀^∞ e^{-t} t^{a-1} ₀F̃₁(;c;wt) dt = Γ(a) M̃(a,c,w)`. -/
-lemma integral_exp_cpow_regularized0F1 {a c w : ℂ} (ha : 0 < a.re) :
+theorem integral_exp_cpow_regularized0F1 {a c w : ℂ} (ha : 0 < a.re) :
     ∫ t : ℝ in Set.Ioi 0, (Real.exp (-t) : ℂ) * (t : ℂ) ^ (a - 1) *
       regularizedHGFun ∅ {c} (w * t) = Gamma a * regularizedHGFun {a} {c} w := by
   let d := regularizedHGFunCoeff (∅ : Multiset ℂ) {c}
@@ -256,7 +245,7 @@ private lemma cpow_half_sq (w : ℂ) : (w ^ (1 / 2 : ℂ)) ^ 2 = w := by
     norm_num
 
 /-- `J_ν(2√(zt)) = z^{ν/2} t^{ν/2} ₀F̃₁(ν+1; -zt)`. -/
-lemma besselJ_two_sqrt {z : ℂ} (hz : z ≠ 0) {t : ℝ} (ht : 0 < t) (ν : ℂ) :
+theorem besselJ_two_sqrt {z : ℂ} (hz : z ≠ 0) {t : ℝ} (ht : 0 < t) (ν : ℂ) :
     besselJ ν (2 * (z * t) ^ (1 / 2 : ℂ)) =
       z ^ (ν / 2) * (t : ℂ) ^ (ν / 2) * regularizedHGFun ∅ {ν + 1} (-z * t) := by
   rw [besselJ_eq_regularized, show 2 * (z * t) ^ (1 / 2 : ℂ) / 2 = (z * t) ^ (1 / 2 : ℂ) by ring,
@@ -265,7 +254,7 @@ lemma besselJ_two_sqrt {z : ℂ} (hz : z ≠ 0) {t : ℝ} (ht : 0 < t) (ν : ℂ
   ring
 
 /-- `I_ν(2√(zt)) = z^{ν/2} t^{ν/2} ₀F̃₁(ν+1; zt)`. -/
-lemma besselI_two_sqrt {z : ℂ} (hz : z ≠ 0) {t : ℝ} (ht : 0 < t) (ν : ℂ) :
+theorem besselI_two_sqrt {z : ℂ} (hz : z ≠ 0) {t : ℝ} (ht : 0 < t) (ν : ℂ) :
     besselI ν (2 * (z * t) ^ (1 / 2 : ℂ)) =
       z ^ (ν / 2) * (t : ℂ) ^ (ν / 2) * regularizedHGFun ∅ {ν + 1} (z * t) := by
   rw [besselI, show 2 * (z * t) ^ (1 / 2 : ℂ) / 2 = (z * t) ^ (1 / 2 : ℂ) by ring,
@@ -302,7 +291,7 @@ theorem regularized_bessel_integral {a b z : ℂ} (ha : 0 < a.re) (hz : 0 < z.re
 
 /-- Absolute convergence of Tricomi's Laplace kernel throughout its stated
 parameter region. A natural power of `1+t` supplies a finite Gamma majorant. -/
-lemma kummerU_laplace_integrable {a b z : ℂ} (ha : 0 < a.re) (hz : 0 < z.re) :
+theorem kummerU_laplace_integrable {a b z : ℂ} (ha : 0 < a.re) (hz : 0 < z.re) :
     IntegrableOn (fun t : ℝ => exp (-z * t) * (t : ℂ) ^ (a - 1) *
       (1 + (t : ℂ)) ^ (b - a - 1)) (Set.Ioi 0) := by
   let N : ℕ := ⌈(b - a - 1).re⌉₊
@@ -339,7 +328,7 @@ lemma kummerU_laplace_integrable {a b z : ℂ} (ha : 0 < a.re) (hz : 0 < z.re) :
 
 /-- Tricomi's normalized Laplace integral is continuous in the second parameter.
 A fixed integer power dominates every kernel in a neighborhood of that parameter. -/
-lemma continuous_kummerU_laplace_integral {a z : ℂ} (ha : 0 < a.re) (hz : 0 < z.re) :
+theorem continuous_kummerU_laplace_integral {a z : ℂ} (ha : 0 < a.re) (hz : 0 < z.re) :
     Continuous (fun b : ℂ => 1 / Gamma a * ∫ t : ℝ in Set.Ioi 0,
       exp (-z * t) * (t : ℂ) ^ (a - 1) * (1 + (t : ℂ)) ^ (b - a - 1)) := by
   apply continuous_iff_continuousAt.mpr
@@ -380,7 +369,7 @@ lemma continuous_kummerU_laplace_integral {a z : ℂ} (ha : 0 < a.re) (hz : 0 < 
 
 /-- Once the Laplace representation is identified off the integer second parameters,
 continuity supplies every integer parameter as well. -/
-lemma kummerU_laplace_of_eqOn_integerComplement {a b z : ℂ}
+theorem kummerU_laplace_of_eqOn_integerComplement {a b z : ℂ}
     (ha : 0 < a.re) (hz : 0 < z.re)
     (h : ∀ c ∈ integerComplement, kummerU a c z =
       1 / Gamma a * ∫ t : ℝ in Set.Ioi 0, exp (-z * t) * (t : ℂ) ^ (a - 1) *
@@ -597,7 +586,7 @@ private lemma kummerU_laplace_of_real_large {a b : ℂ} (ha : 0 < a.re)
     ((le_max_left _ _).trans_lt hT) ((le_max_right _ _).trans_lt hT)).symm
 
 /-- Holomorphic dependence of Tricomi's normalized Laplace integral on the argument. -/
-lemma differentiableOn_kummerU_laplace_integral {a b : ℂ} (ha : 0 < a.re) :
+theorem differentiableOn_kummerU_laplace_integral {a b : ℂ} (ha : 0 < a.re) :
     DifferentiableOn ℂ (fun z : ℂ => 1 / Gamma a * ∫ t : ℝ in Set.Ioi 0,
       exp (-z * t) * (t : ℂ) ^ (a - 1) * (1 + (t : ℂ)) ^ (b - a - 1))
       {z : ℂ | 0 < z.re} := by
@@ -693,13 +682,13 @@ theorem kummerU_laplace {a b z : ℂ} (ha : 0 < a.re) (hz : 0 < z.re) :
     (fun c hc => kummerU_laplace_of_not_int ha (forall_of_mem_integerComplement hc) hz)
 
 /-- The nonnegative integer shifted family specializes the full Tricomi representation. -/
-lemma kummerU_laplace_shift_nat {a z : ℂ} (ha : 0 < a.re) (hz : 0 < z.re) (N : ℕ) :
+theorem kummerU_laplace_shift_nat {a z : ℂ} (ha : 0 < a.re) (hz : 0 < z.re) (N : ℕ) :
     kummerU a (a + N + 1) z = 1 / Gamma a * ∫ t : ℝ in Set.Ioi 0,
       exp (-z * t) * (t : ℂ) ^ (a - 1) * (1 + (t : ℂ)) ^ ((a + N + 1) - a - 1) :=
   kummerU_laplace ha hz
 
 /-- The unit parameter shift specializes the full Tricomi representation. -/
-lemma kummerU_laplace_shift_one {a z : ℂ} (ha : 0 < a.re) (hz : 0 < z.re) :
+theorem kummerU_laplace_shift_one {a z : ℂ} (ha : 0 < a.re) (hz : 0 < z.re) :
     kummerU a (a + 1) z = 1 / Gamma a * ∫ t : ℝ in Set.Ioi 0,
       exp (-z * t) * (t : ℂ) ^ (a - 1) * (1 + (t : ℂ)) ^ ((a + 1) - a - 1) :=
   kummerU_laplace ha hz
@@ -718,7 +707,7 @@ def besselKUKernel (a b : ℂ) (x : ℝ) (t s : ℝ) : ℂ :=
   exp (-(t : ℂ)) * (t : ℂ) ^ (a - b) * (exp (-(s : ℂ) - x * t / s) * (s : ℂ) ^ (b - 2))
 
 /-- Step 1: insert Schläfli's integral for `K_{b-1}(2√(xt))`. -/
-lemma besselK_kernel_eq_integral {a b : ℂ} {x t : ℝ} (hx : 0 < x) (ht : 0 < t) :
+theorem besselK_kernel_eq_integral {a b : ℂ} {x t : ℝ} (hx : 0 < x) (ht : 0 < t) :
     exp (-(t : ℂ)) * (t : ℂ) ^ (a - b / 2 - 1 / 2) * besselK (b - 1) (2 * ((x : ℂ) * t) ^ (1 / 2 : ℂ)) =
       1 / 2 * (x : ℂ) ^ ((1 - b) / 2) * ∫ s : ℝ in Ioi 0, besselKUKernel a b x t s := by
   have hxt : 0 < x * t := mul_pos hx ht
@@ -758,7 +747,7 @@ lemma besselK_kernel_eq_integral {a b : ℂ} {x t : ℝ} (hx : 0 < x) (ht : 0 < 
   linear_combination (1 / 2 * I) * key
 
 /-- Step 2: the inner Gamma integral in `t`. -/
-lemma integral_besselKUKernel_t {a b : ℂ} {x s : ℝ} (hx : 0 < x) (hs : 0 < s)
+theorem integral_besselKUKernel_t {a b : ℂ} {x s : ℝ} (hx : 0 < x) (hs : 0 < s)
     (hab : 0 < (a - b + 1).re) :
     ∫ t : ℝ in Ioi 0, besselKUKernel a b x t s =
       exp (-(s : ℂ)) * (s : ℂ) ^ (b - 2) * (((1 / (1 + x / s) : ℝ) : ℂ) ^ (a - b + 1) *
@@ -776,7 +765,7 @@ lemma integral_besselKUKernel_t {a b : ℂ} {x s : ℝ} (hx : 0 < x) (hs : 0 < s
   linear_combination (t : ℂ) ^ (a - b) * (s : ℂ) ^ (b - 2) * he
 
 /-- Step 3: the outer integral in `s` is a scaled Tricomi Laplace integral. -/
-lemma integral_besselKU_s {a b : ℂ} {x : ℝ} (hx : 0 < x) :
+theorem integral_besselKU_s {a b : ℂ} {x : ℝ} (hx : 0 < x) :
     ∫ s : ℝ in Ioi 0, exp (-(s : ℂ)) * (s : ℂ) ^ (b - 2) * ((1 / (1 + x / s) : ℝ) : ℂ) ^ (a - b + 1) =
       (x : ℂ) ^ (b - 1) * ∫ u : ℝ in Ioi 0,
         exp (-(x : ℂ) * u) * (u : ℂ) ^ (a - 1) * (1 + (u : ℂ)) ^ (b - a - 1) := by
@@ -813,13 +802,13 @@ lemma integral_besselKU_s {a b : ℂ} {x : ℝ} (hx : 0 < x) :
   ring
 
 /-- Measurability of the double integrand. -/
-lemma measurable_besselKUKernel (a b : ℂ) (x : ℝ) :
+theorem measurable_besselKUKernel (a b : ℂ) (x : ℝ) :
     Measurable (Function.uncurry (besselKUKernel a b x)) := by
   unfold besselKUKernel Function.uncurry
   fun_prop
 
 /-- The norm of the double integrand. -/
-lemma norm_besselKUKernel {a b : ℂ} {x t s : ℝ} (ht : 0 < t) (hs : 0 < s) :
+theorem norm_besselKUKernel {a b : ℂ} {x t s : ℝ} (ht : 0 < t) (hs : 0 < s) :
     ‖besselKUKernel a b x t s‖ = Real.exp (-s) * s ^ (b.re - 2) *
       (t ^ (a - b).re * Real.exp (-(1 + x / s) * t)) := by
   unfold besselKUKernel
@@ -836,7 +825,7 @@ lemma norm_besselKUKernel {a b : ℂ} {x t s : ℝ} (ht : 0 < t) (hs : 0 < s) :
   linear_combination t ^ (a - b).re * s ^ (b.re - 2) * this
 
 /-- Absolute integrability of the double integrand on `(0,∞)²`. -/
-lemma integrable_besselKUKernel {a b : ℂ} {x : ℝ} (hx : 0 < x) (hab : 0 < (a - b + 1).re)
+theorem integrable_besselKUKernel {a b : ℂ} {x : ℝ} (hx : 0 < x) (hab : 0 < (a - b + 1).re)
     (ha : 0 < a.re) :
     Integrable (Function.uncurry (besselKUKernel a b x))
       ((volume.restrict (Ioi 0)).prod (volume.restrict (Ioi 0))) := by
@@ -890,7 +879,7 @@ lemma integrable_besselKUKernel {a b : ℂ} {x : ℝ} (hx : 0 < x) (hab : 0 < (a
         _ = _ := by rw [hsA]
 
 /-- DLMF 13.4.7 for real positive argument. -/
-lemma kummerU_eq_integral_besselK_ofReal {a b : ℂ} {x : ℝ} (hx : 0 < x)
+theorem kummerU_eq_integral_besselK_ofReal {a b : ℂ} {x : ℝ} (hx : 0 < x)
     (ha : (b - 1).re < a.re) (ha0 : 0 < a.re) :
     kummerU a b x = 2 * (x : ℂ) ^ ((1 - b) / 2) / (Gamma a * Gamma (a - b + 1)) *
       ∫ t : ℝ in Ioi 0, exp (-(t : ℂ)) * (t : ℂ) ^ (a - b / 2 - 1 / 2) *
@@ -933,7 +922,7 @@ private lemma ofReal_mul_cpow_aux {r : ℝ} (hr : 0 < r) {w : ℂ} (hw : w ≠ 0
   ring_nf
 
 /-- The slit plane is stable under positive real scaling. -/
-lemma mul_ofReal_mem_slitPlane {z : ℂ} (hz : z ∈ slitPlane) {t : ℝ} (ht : 0 < t) :
+theorem mul_ofReal_mem_slitPlane {z : ℂ} (hz : z ∈ slitPlane) {t : ℝ} (ht : 0 < t) :
     z * t ∈ slitPlane := by
   rw [mem_slitPlane_iff] at hz ⊢
   simp only [mul_re, mul_im, ofReal_re, ofReal_im, mul_zero, sub_zero, zero_add]
@@ -942,19 +931,19 @@ lemma mul_ofReal_mem_slitPlane {z : ℂ} (hz : z ∈ slitPlane) {t : ℝ} (ht : 
   · exact Or.inr (mul_ne_zero h ht.ne')
 
 /-- `2 (z t)^{1/2} = 2 √t z^{1/2}` for `t > 0`. -/
-lemma two_mul_cpow_half_mul_ofReal {z : ℂ} (hz : z ≠ 0) {t : ℝ} (ht : 0 < t) :
+theorem two_mul_cpow_half_mul_ofReal {z : ℂ} (hz : z ≠ 0) {t : ℝ} (ht : 0 < t) :
     2 * (z * t) ^ (1 / 2 : ℂ) = 2 * (Real.sqrt t : ℂ) * z ^ (1 / 2 : ℂ) := by
   rw [mul_comm z, ofReal_mul_cpow_aux ht hz, Real.sqrt_eq_rpow, ofReal_cpow ht.le]
   push_cast; ring
 
 /-- The real part of `2 (z t)^{1/2}`. -/
-lemma re_two_mul_cpow_half_mul_ofReal {z : ℂ} (hz : z ≠ 0) {t : ℝ} (ht : 0 < t) :
+theorem re_two_mul_cpow_half_mul_ofReal {z : ℂ} (hz : z ≠ 0) {t : ℝ} (ht : 0 < t) :
     (2 * (z * t) ^ (1 / 2 : ℂ)).re = 2 * Real.sqrt t * (z ^ (1 / 2 : ℂ)).re := by
   rw [two_mul_cpow_half_mul_ofReal hz ht, show (2 : ℂ) * (Real.sqrt t : ℂ) =
     ((2 * Real.sqrt t : ℝ) : ℂ) by push_cast; ring, re_ofReal_mul]
 
 /-- `2 (z t)^{1/2}` lies in the right half-plane. -/
-lemma two_mul_cpow_half_mem_slitPlane {z : ℂ} (hz : z ∈ slitPlane) {t : ℝ} (ht : 0 < t) :
+theorem two_mul_cpow_half_mem_slitPlane {z : ℂ} (hz : z ∈ slitPlane) {t : ℝ} (ht : 0 < t) :
     2 * (z * t) ^ (1 / 2 : ℂ) ∈ slitPlane := by
   refine Or.inl ?_
   rw [re_two_mul_cpow_half_mul_ofReal (slitPlane_ne_zero hz) ht]
@@ -963,7 +952,7 @@ lemma two_mul_cpow_half_mem_slitPlane {z : ℂ} (hz : z ∈ slitPlane) {t : ℝ}
   positivity
 
 /-- Holomorphy in `z` of the Bessel-`K` integral of DLMF 13.4.7 on the slit plane. -/
-lemma differentiableOn_integral_besselK {a b : ℂ} (ha : (b - 1).re < a.re) (ha0 : 0 < a.re) :
+theorem differentiableOn_integral_besselK {a b : ℂ} (ha : (b - 1).re < a.re) (ha0 : 0 < a.re) :
     DifferentiableOn ℂ (fun z : ℂ => ∫ t : ℝ in Ioi 0, exp (-(t : ℂ)) *
       (t : ℂ) ^ (a - b / 2 - 1 / 2) * besselK (b - 1) (2 * (z * t) ^ (1 / 2 : ℂ))) slitPlane := by
   set σ := |(b - 1).re|
@@ -1102,7 +1091,7 @@ theorem kummerU_integral_besselK {a b z : ℂ} (hz : 0 ≤ z.re) (hz0 : z ≠ 0)
 open Set MeasureTheory DLMF.Gamma in
 /-- The Cahen–Mellin integral in Barnes's orientation: `e^{-v} = 1/(2π) ∫ Γ(-(σ+iy)) v^{σ+iy} dy`
 for `σ < 0 < v`. -/
-lemma exp_neg_eq_integral_barnes {σ : ℝ} (hσ : σ < 0) {v : ℝ} (hv : 0 < v) :
+theorem exp_neg_eq_integral_barnes {σ : ℝ} (hσ : σ < 0) {v : ℝ} (hv : 0 < v) :
     exp (-(v : ℂ)) =
       1 / (2 * π) * ∫ y : ℝ, Gamma (-((σ : ℂ) + I * y)) * (v : ℂ) ^ ((σ : ℂ) + I * y) := by
   have h := exp_neg_eq_integral (σ := -σ) (by linarith) hv
@@ -1112,7 +1101,7 @@ lemma exp_neg_eq_integral_barnes {σ : ℝ} (hσ : σ < 0) {v : ℝ} (hv : 0 < v
   rw [show (((-σ : ℝ) : ℂ) + ((-y : ℝ) : ℂ) * I) = -((σ : ℂ) + I * y) by push_cast; ring, neg_neg]
 
 open Set MeasureTheory DLMF.Gamma in
-lemma integrable_Gamma_neg_vertical {σ : ℝ} (hσ : σ < 0) :
+theorem integrable_Gamma_neg_vertical {σ : ℝ} (hσ : σ < 0) :
     Integrable (fun y : ℝ => Gamma (-((σ : ℂ) + I * y))) := by
   refine (integrable_Gamma_vertical (σ := -σ) (by linarith)).comp_neg.congr
     (Eventually.of_forall fun y => ?_)
@@ -1121,7 +1110,7 @@ lemma integrable_Gamma_neg_vertical {σ : ℝ} (hσ : σ < 0) :
 
 open Set MeasureTheory DLMF.Gamma in
 /-- Barnes's integral for `𝐌` (DLMF 13.4.16) when `re (b - a) > 0`, from Kummer's integral. -/
-lemma regularized_barnes_integral_of_re_sub_pos {a b : ℂ} {x σ : ℝ}
+theorem regularized_barnes_integral_of_re_sub_pos {a b : ℂ} {x σ : ℝ}
     (hx : 0 < x) (ha : 0 < a.re + σ) (hσ : σ < 0) (hba : 0 < (b - a).re) :
     regularizedHGFun {a} {b} (-(x : ℂ)) =
       1 / (2 * π * Gamma a) * ∫ y : ℝ, Gamma (a + σ + I * y) * Gamma (-((σ : ℂ) + I * y)) /
@@ -1515,7 +1504,7 @@ theorem kummerU_barnes {a b : ℂ} {x σ : ℝ}
 
 open Set MeasureTheory in
 /-- The exponential Barnes integrand of 13.4.18 is integrable for every first parameter. -/
-lemma integrable_kummerU_barnes_exp_integrand {a b : ℂ} {x σ : ℝ} (hx : 0 < x)
+theorem integrable_kummerU_barnes_exp_integrand {a b : ℂ} {x σ : ℝ} (hx : 0 < x)
     (hb : 0 < (b - 1).re + σ) (hσ : 0 < σ) :
     Integrable (fun t : ℝ => Gamma (b - 1 + σ + I * t) * Gamma (σ + I * t) /
       Gamma (a + σ + I * t) * (x : ℂ) ^ (-(σ + I * t)) * I) := by
@@ -1561,7 +1550,7 @@ lemma integrable_kummerU_barnes_exp_integrand {a b : ℂ} {x σ : ℝ} (hx : 0 <
 open Set MeasureTheory in
 /-- 13.4.18 for `Re a > 0`: the Cahen–Mellin integral for `e^{-x(1+τ)}` inserted into
 Tricomi's Laplace integral, and Euler's second Beta integral in `τ`. -/
-lemma kummerU_barnes_exp_of_re_pos {a b : ℂ} {x σ : ℝ}
+theorem kummerU_barnes_exp_of_re_pos {a b : ℂ} {x σ : ℝ}
     (hx : 0 < x) (ha : 0 < a.re) (hb : 0 < (b - 1).re + σ) (hσ : 0 < σ) :
     kummerU a b x =
       (x : ℂ) ^ (1 - b) * exp x / (2 * π * I) *

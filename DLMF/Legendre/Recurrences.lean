@@ -65,7 +65,7 @@ theorem legendreP_deriv_recurrence (ν : ℂ) {z : ℂ} (hz : 1 + z ∈ slitPlan
   linear_combination (-2 * w) * R1 - 2 * R2 + E2 - 2 * E4
 
 /-- `P_ν⁽ᵐ⁾(z) = (-1/2)ᵐ (-ν)ₘ (ν+1)ₘ 𝐅(m-ν, ν+1+m; 1+m; (1-z)/2)`. -/
-lemma iteratedDeriv_legendreP (ν : ℂ) (m : ℕ) {z : ℂ} (hz : 1 + z ∈ slitPlane) :
+theorem iteratedDeriv_legendreP (ν : ℂ) (m : ℕ) {z : ℂ} (hz : 1 + z ∈ slitPlane) :
     iteratedDeriv m (legendreP ν) z = (-1 / 2) ^ m * poch (-ν) m * poch (ν + 1) m *
       regularizedGaussHG (-ν + m) (ν + 1 + m) (1 + m) ((1 - z) / 2) := by
   induction m generalizing z with

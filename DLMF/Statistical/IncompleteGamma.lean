@@ -54,7 +54,7 @@ theorem normIncGammaP_add_normIncGammaQ {a : ℂ} (ha : ∀ k : ℕ, a ≠ -k) {
   rw [normIncGammaP, normIncGammaQ, ← add_div, lowerIncGamma_add_upperIncGamma ha hz,
     div_self (Gamma_ne_zero ha)]
 
-lemma add_one_ne_neg_nat {a : ℂ} (ha : ∀ k : ℕ, a ≠ -k) : ∀ k : ℕ, a + 1 ≠ -k :=
+theorem add_one_ne_neg_nat {a : ℂ} (ha : ∀ k : ℕ, a ≠ -k) : ∀ k : ℕ, a + 1 ≠ -k :=
   fun k hk => ha (k + 1) (by push_cast; linear_combination hk)
 
 /-- The recurrence `γ(a+1,z) = a γ(a,z) - z^a e^{-z}` (DLMF 8.8.1). -/
@@ -85,7 +85,7 @@ theorem normIncGammaP_add_one {a : ℂ} (ha : ∀ k : ℕ, a ≠ -k) {z : ℂ} (
   rw [normIncGammaP, normIncGammaP, lowerIncGamma_add_one ha hz, Complex.Gamma_add_one a ha0]
   field_simp
 
-lemma natCast_add_one_ne_neg_nat (n : ℕ) : ∀ k : ℕ, ((n : ℂ) + 1) ≠ -k := fun k hk => by
+theorem natCast_add_one_ne_neg_nat (n : ℕ) : ∀ k : ℕ, ((n : ℂ) + 1) ≠ -k := fun k hk => by
   have := congrArg re hk
   simp at this
   linarith [(k.cast_nonneg : (0 : ℝ) ≤ k), (n.cast_nonneg : (0 : ℝ) ≤ n)]

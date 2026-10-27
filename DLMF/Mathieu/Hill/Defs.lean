@@ -5,14 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
-public import Mathlib.Analysis.SpecialFunctions.Complex.Circle
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
-public import Mathlib.LinearAlgebra.Dimension.Finrank
-public import Mathlib.Algebra.BigOperators.Finprod
-public import Mathlib.Order.ConditionallyCompleteLattice.Basic
-public import Mathlib.Data.Set.Card
-public import Mathlib.LinearAlgebra.Matrix.Notation
+public import Mathlib.Analysis.Calculus.Deriv.Add
+public import Mathlib.Analysis.Calculus.Deriv.Mul
 
 /-!
 # Hill's equation and the equations of Whittaker–Hill and Ince: definitions (DLMF §§28.29–28.31)

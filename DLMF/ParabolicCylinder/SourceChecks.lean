@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.ParabolicCylinder.Relations
+public import DLMF.Confluent.ParabolicCylinder
 
 /-!
 # A source discrepancy in DLMF 12.13.6

@@ -6,11 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Hypergeometric.Continuation
-public import DLMF.Hypergeometric.EulerIntegral
-public import Mathlib.Analysis.Calculus.ParametricIntervalIntegral
-public import Mathlib.Analysis.Convex.PathConnected
-public import Mathlib.Analysis.Complex.Convex
-public import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
 
 /-!
 # Continuation of `₂F₁` in the argument to the cut plane (DLMF §15.2(i))
@@ -52,26 +47,26 @@ namespace DLMF.Hypergeometric
 /-- The cut plane `ℂ ∖ [1, ∞)`, the natural domain of `₂F₁` in its argument. -/
 def cutPlane : Set ℂ := {z | 1 - z ∈ slitPlane}
 
-lemma mem_cutPlane {z : ℂ} : z ∈ cutPlane ↔ 1 - z ∈ slitPlane := Iff.rfl
+theorem mem_cutPlane {z : ℂ} : z ∈ cutPlane ↔ 1 - z ∈ slitPlane := Iff.rfl
 
-lemma isOpen_cutPlane : IsOpen cutPlane :=
+theorem isOpen_cutPlane : IsOpen cutPlane :=
   isOpen_slitPlane.preimage (continuous_const.sub continuous_id)
 
-lemma zero_mem_cutPlane : (0 : ℂ) ∈ cutPlane := by
+theorem zero_mem_cutPlane : (0 : ℂ) ∈ cutPlane := by
   show (1 : ℂ) - 0 ∈ slitPlane
   simp
 
-lemma one_sub_ne_zero_of_mem_cutPlane {z : ℂ} (hz : z ∈ cutPlane) : 1 - z ≠ 0 :=
+theorem one_sub_ne_zero_of_mem_cutPlane {z : ℂ} (hz : z ∈ cutPlane) : 1 - z ≠ 0 :=
   slitPlane_ne_zero hz
 
-lemma mem_cutPlane_of_norm_lt_one {z : ℂ} (hz : ‖z‖ < 1) : z ∈ cutPlane := by
+theorem mem_cutPlane_of_norm_lt_one {z : ℂ} (hz : ‖z‖ < 1) : z ∈ cutPlane := by
   show 1 - z ∈ slitPlane
   rw [mem_slitPlane_iff]
   left
   simp only [sub_re, one_re]
   linarith [re_le_norm z]
 
-lemma starConvex_zero_cutPlane : StarConvex ℝ 0 cutPlane := by
+theorem starConvex_zero_cutPlane : StarConvex ℝ 0 cutPlane := by
   intro y hy a b ha hb hab
   have h := starConvex_one_slitPlane (hy : 1 - y ∈ slitPlane) ha hb hab
   show 1 - (a • (0 : ℂ) + b • y) ∈ slitPlane
@@ -80,7 +75,7 @@ lemma starConvex_zero_cutPlane : StarConvex ℝ 0 cutPlane := by
   have : (a : ℂ) + b = 1 := by exact_mod_cast hab
   linear_combination (-1 : ℂ) * this
 
-lemma isPreconnected_cutPlane : IsPreconnected cutPlane :=
+theorem isPreconnected_cutPlane : IsPreconnected cutPlane :=
   (starConvex_zero_cutPlane.isPathConnected zero_mem_cutPlane).isConnected.isPreconnected
 
 /-- The identity principle on the cut plane: analytic functions agreeing near `0` agree on
@@ -106,7 +101,7 @@ theorem eqOn_cutPlane_of_eqOn_disk {f g : ℂ → ℂ} (hf : AnalyticOnNhd ℂ f
   eqOn_cutPlane_of_eqOn_ball hf hg one_pos h
 
 /-- For `z` in the cut plane and `t ∈ [0,1]`, `1 - z t` lies in the slit plane. -/
-lemma one_sub_mul_mem_slitPlane {z : ℂ} (hz : z ∈ cutPlane) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) 1) :
+theorem one_sub_mul_mem_slitPlane {z : ℂ} (hz : z ∈ cutPlane) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) 1) :
     1 - z * t ∈ slitPlane := by
   have hz' : ¬ (1 - z ≤ 0) := mem_slitPlane_iff_not_le_zero.mp hz
   rw [mem_slitPlane_iff_not_le_zero]
@@ -157,18 +152,18 @@ theorem regularizedGaussHGIntegral_eq_regularizedGaussHGFun {a b c : ℂ} (hb : 
     (t : ℂ) ^ (b - 1) * (1 - (t : ℂ)) ^ (c - b - 1) * (1 - z * t) ^ (-a) with hI
   field_simp
 
-lemma continuousOn_one_sub_mul_cpow {z : ℂ} (hz : z ∈ cutPlane) (s : ℂ) :
+theorem continuousOn_one_sub_mul_cpow {z : ℂ} (hz : z ∈ cutPlane) (s : ℂ) :
     ContinuousOn (fun t : ℝ => (1 - z * t) ^ s) (Icc (0 : ℝ) 1) :=
   (continuousOn_const.sub (continuousOn_const.mul continuous_ofReal.continuousOn)).cpow
     continuousOn_const (fun _ ht => one_sub_mul_mem_slitPlane hz ht)
 
-lemma intervalIntegrable_eulerKernel {a b c : ℂ} (hb : 0 < b.re) (hcb : 0 < (c - b).re)
+theorem intervalIntegrable_eulerKernel {a b c : ℂ} (hb : 0 < b.re) (hcb : 0 < (c - b).re)
     {z : ℂ} (hz : z ∈ cutPlane) : IntervalIntegrable (eulerKernel a b c z) volume 0 1 := by
   have h := (betaIntegral_convergent hb hcb).mul_continuousOn
     (by rw [uIcc_of_le zero_le_one]; exact continuousOn_one_sub_mul_cpow hz (-a))
   exact h
 
-lemma hasDerivAt_eulerKernel {a b c z : ℂ} (hz : z ∈ cutPlane) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) 1) :
+theorem hasDerivAt_eulerKernel {a b c z : ℂ} (hz : z ∈ cutPlane) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) 1) :
     HasDerivAt (fun w => eulerKernel a b c w t) (eulerKernelDeriv a b c z t) z := by
   have h1 : HasDerivAt (fun w : ℂ => 1 - w * (t : ℂ)) (-(1 * (t : ℂ))) z :=
     ((hasDerivAt_id' z).mul_const _).const_sub 1
@@ -251,13 +246,13 @@ def shiftC (b c : ℂ) : ℕ := ⌈1 + shiftB b - (c - b).re⌉₊
 /-- The recursion fuel. -/
 def shiftMeasure (b c : ℂ) : ℕ := shiftB b + shiftC b c
 
-lemma ceil_sub_one_lt_ceil {x : ℝ} (hx : 0 < x) : ⌈x - 1⌉₊ < ⌈x⌉₊ := by
+theorem ceil_sub_one_lt_ceil {x : ℝ} (hx : 0 < x) : ⌈x - 1⌉₊ < ⌈x⌉₊ := by
   have h1 : 0 < ⌈x⌉₊ := Nat.ceil_pos.mpr hx
   have : ⌈x - 1⌉₊ ≤ ⌈x⌉₊ - 1 :=
     Nat.ceil_le.mpr (by push_cast [Nat.cast_sub h1]; linarith [Nat.le_ceil x])
   omega
 
-lemma shiftC_add_one_lt {b c : ℂ} (h : 0 < shiftC b c) : shiftC b (c + 1) < shiftC b c := by
+theorem shiftC_add_one_lt {b c : ℂ} (h : 0 < shiftC b c) : shiftC b (c + 1) < shiftC b c := by
   have hx : 0 < 1 + (shiftB b : ℝ) - (c - b).re := Nat.ceil_pos.mp h
   have : 1 + (shiftB b : ℝ) - (c + 1 - b).re = 1 + (shiftB b : ℝ) - (c - b).re - 1 := by
     simp only [sub_re, add_re, one_re]; ring
@@ -265,19 +260,19 @@ lemma shiftC_add_one_lt {b c : ℂ} (h : 0 < shiftC b c) : shiftC b (c + 1) < sh
   rw [this]
   exact ceil_sub_one_lt_ceil hx
 
-lemma shiftB_add_one_lt {b : ℂ} (h : 0 < shiftB b) : shiftB (b + 1) < shiftB b := by
+theorem shiftB_add_one_lt {b : ℂ} (h : 0 < shiftB b) : shiftB (b + 1) < shiftB b := by
   have hx : 0 < 1 - b.re := Nat.ceil_pos.mp h
   have : 1 - (b + 1).re = 1 - b.re - 1 := by simp only [add_re, one_re]; ring
   unfold shiftB
   rw [this]
   exact ceil_sub_one_lt_ceil hx
 
-lemma shiftC_eq_zero_of {b c : ℂ} (h : (c - b).re ≥ 1 + shiftB b) : shiftC b c = 0 := by
+theorem shiftC_eq_zero_of {b c : ℂ} (h : (c - b).re ≥ 1 + shiftB b) : shiftC b c = 0 := by
   unfold shiftC
   rw [Nat.ceil_eq_zero]
   linarith
 
-lemma euler_region_of_shift_eq_zero {b c : ℂ} (hB : shiftB b = 0) (hC : shiftC b c = 0) :
+theorem euler_region_of_shift_eq_zero {b c : ℂ} (hB : shiftB b = 0) (hC : shiftC b c = 0) :
     1 ≤ b.re ∧ 1 ≤ (c - b).re := by
   have hB' : 1 - b.re ≤ 0 := Nat.ceil_eq_zero.mp hB
   have hC' : 1 + (shiftB b : ℝ) - (c - b).re ≤ 0 := Nat.ceil_eq_zero.mp hC
@@ -302,7 +297,7 @@ plane `ℂ ∖ [1, ∞)`, for all parameters (DLMF §15.2(i)). Its domain is `cu
 Mathlib's `regularizedGaussHGFun` and the Euler integral is `regularizedGaussHGIntegral`. -/
 def regularizedGaussHG (a b c z : ℂ) : ℂ := regularizedGaussHGAux (shiftMeasure b c) a b c z
 
-lemma regularizedGaussHGAux_succ_of_pos_c {n : ℕ} {a b c z : ℂ} (h : 0 < shiftC b c) :
+theorem regularizedGaussHGAux_succ_of_pos_c {n : ℕ} {a b c z : ℂ} (h : 0 < shiftC b c) :
     regularizedGaussHGAux (n + 1) a b c z =
       (c - a) * regularizedGaussHGAux n a b (c + 1) z + a
           * regularizedGaussHGAux n (a + 1) b (c + 1) z := by
@@ -315,13 +310,13 @@ lemma regularizedGaussHGAux_succ_of_pos_b {n : ℕ} {a b c z : ℂ} (hc : ¬ 0 <
           * regularizedGaussHGAux n (a + 1) (b + 1) (c + 1) z := by
   simp only [regularizedGaussHGAux, hc, hb, ↓reduceIte]
 
-lemma regularizedGaussHGAux_succ_of_zero {n : ℕ} {a b c z : ℂ} (hc : ¬ 0 < shiftC b c)
+theorem regularizedGaussHGAux_succ_of_zero {n : ℕ} {a b c z : ℂ} (hc : ¬ 0 < shiftC b c)
     (hb : ¬ 0 < shiftB b) : regularizedGaussHGAux (n + 1) a b c z
         = regularizedGaussHGIntegral a b c z := by
   simp only [regularizedGaussHGAux, hc, hb, ↓reduceIte]
 
 /-- The measures of the recursive calls in the `b`-shift branch. -/
-lemma shiftMeasure_b_step {b c : ℂ} (hc : ¬ 0 < shiftC b c) (hb : 0 < shiftB b) :
+theorem shiftMeasure_b_step {b c : ℂ} (hc : ¬ 0 < shiftC b c) (hb : 0 < shiftB b) :
     shiftMeasure (b + 1) c < shiftMeasure b c ∧
       shiftMeasure (b + 1) (c + 1) < shiftMeasure b c := by
   have hC0 : shiftC b c = 0 := Nat.eq_zero_of_not_pos hc
@@ -658,7 +653,7 @@ theorem regularizedGaussHG_euler (a b c : ℂ) {z : ℂ} (hz : z ∈ cutPlane) :
       exact regularizedGaussHGFun_euler a b c hz) hz
 
 /-- The Pfaff map `z ↦ z/(z-1)` preserves the cut plane. -/
-lemma div_sub_one_mem_cutPlane {z : ℂ} (hz : z ∈ cutPlane) : z / (z - 1) ∈ cutPlane := by
+theorem div_sub_one_mem_cutPlane {z : ℂ} (hz : z ∈ cutPlane) : z / (z - 1) ∈ cutPlane := by
   have h0 : 1 - z ≠ 0 := one_sub_ne_zero_of_mem_cutPlane hz
   have h1 : z - 1 ≠ 0 := fun h => h0 (by linear_combination -h)
   show 1 - z / (z - 1) ∈ slitPlane

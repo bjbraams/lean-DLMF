@@ -29,7 +29,7 @@ namespace DLMF.Lame
 open DLMF.Legendre DLMF.Elliptic DLMF.JacobiElliptic
 
 /-- The paired exponential Fourier series of a `2π`-periodic `C²` function. -/
-theorem p2l_hasSum_exp_pair {f : ℝ → ℂ} (hf : ContDiff ℝ 2 f)
+lemma p2l_hasSum_exp_pair {f : ℝ → ℂ} (hf : ContDiff ℝ 2 f)
     (hper : Function.Periodic f (2 * π)) (u : ℝ) :
     HasSum (fun n : ℕ => legAdd_coeff f n * exp (n * u * I) +
       legAdd_coeff f (-(n : ℤ)) * exp (-(n * u * I))) (f u + legAdd_coeff f 0) := by
@@ -145,7 +145,7 @@ theorem p2l_hasSum_cos {F : ℝ → ℝ} (hF : ContDiff ℝ 2 F) (hper : Functio
 
 /-- **Sine series** of an odd, `2π`-periodic `C²` real function, with coefficients
 `(2/π) ∫₀^π F(t) sin(nt) dt`. -/
-theorem p2l_hasSum_sin {F : ℝ → ℝ} (hF : ContDiff ℝ 2 F) (hper : Function.Periodic F (2 * π))
+lemma p2l_hasSum_sin {F : ℝ → ℝ} (hF : ContDiff ℝ 2 F) (hper : Function.Periodic F (2 * π))
     (hodd : ∀ t, F (-t) = -F t) (u : ℝ) :
     HasSum (fun n : ℕ =>
       (2 / π * ∫ t in (0 : ℝ)..π, F t * Real.sin (n * t)) * Real.sin (n * u)) (F u) := by
@@ -176,7 +176,7 @@ section Lame
 variable {k : ℝ}
 
 /-- `dφ/dx = -dn(x, k)` (moved here from `DLMF.Lame.FourierSeries`). -/
-lemma p1l_hasDerivAt_phi (hk : k ^ 2 < 1) (x : ℝ) :
+theorem p1l_hasDerivAt_phi (hk : k ^ 2 < 1) (x : ℝ) :
     HasDerivAt (fun x => Real.lamePhi x k) (-Real.jacobiDnm x (k ^ 2)) x := by
   have := (Real.hasDerivAt_jacobiAmm hk x).const_sub (π / 2)
   simpa [Real.lamePhi, Real.jacobiDnm, Real.jacobiSnm] using this
@@ -190,11 +190,11 @@ def p2lRho (k : ℝ) (weighted : Bool) (φ : ℝ) : ℝ :=
 def p2lPhiFun (w : ℝ → ℝ) (k : ℝ) (weighted : Bool) (φ : ℝ) : ℝ :=
   w (Real.incEllIntFm (π / 2 - φ) (k ^ 2)) / p2lRho k weighted φ
 
-lemma p2l_one_sub_pos (hk : k ^ 2 < 1) (φ : ℝ) : 0 < 1 - k ^ 2 * Real.cos φ ^ 2 := by
+theorem p2l_one_sub_pos (hk : k ^ 2 < 1) (φ : ℝ) : 0 < 1 - k ^ 2 * Real.cos φ ^ 2 := by
   have := Real.cos_sq_le_one φ
   nlinarith [sq_nonneg k, sq_nonneg (Real.cos φ)]
 
-lemma p2lRho_pos (hk : k ^ 2 < 1) (weighted : Bool) (φ : ℝ) : 0 < p2lRho k weighted φ := by
+theorem p2lRho_pos (hk : k ^ 2 < 1) (weighted : Bool) (φ : ℝ) : 0 < p2lRho k weighted φ := by
   unfold p2lRho; split_ifs
   · exact one_pos
   · exact Real.rpow_pos_of_pos (p2l_one_sub_pos hk φ) _
@@ -221,7 +221,7 @@ lemma p2l_contDiff_incEllIntFm (hk : k ^ 2 < 1) :
     fun ψ => (hpos ψ).ne'
 
 /-- A solution of Lamé's equation is `C²`. -/
-lemma p2l_contDiff_lame {h ν : ℝ} {w : ℝ → ℝ} (hk : k ^ 2 < 1) (hw : Real.IsLameSolution h ν k w) :
+theorem p2l_contDiff_lame {h ν : ℝ} {w : ℝ → ℝ} (hk : k ^ 2 < 1) (hw : Real.IsLameSolution h ν k w) :
     ContDiff ℝ 2 w := by
   have hdd : deriv (deriv w) =
       fun x => -(h - ν * (ν + 1) * k ^ 2 * Real.jacobiSnm x (k ^ 2) ^ 2) * w x :=
@@ -258,7 +258,7 @@ lemma p2lRho_pi_sub (φ : ℝ) : p2lRho k weighted (π - φ) = p2lRho k weighted
 lemma p2lRho_add_two_pi (φ : ℝ) : p2lRho k weighted (φ + 2 * π) = p2lRho k weighted φ := by
   simp [p2lRho, Real.cos_add_two_pi]
 
-lemma p2lPhiFun_periodic (hk : k ^ 2 < 1)
+theorem p2lPhiFun_periodic (hk : k ^ 2 < 1)
     (h4 : ∀ x, w (x + 4 * Real.compEllIntKm (k ^ 2)) = w x) :
     Function.Periodic (p2lPhiFun w k weighted) (2 * π) := fun φ => by
   simp only [p2lPhiFun, p2lRho_add_two_pi]
@@ -268,7 +268,7 @@ lemma p2lPhiFun_periodic (hk : k ^ 2 < 1)
   rw [sub_add_cancel] at this
   exact this.symm
 
-lemma p2lPhiFun_neg (hk : k ^ 2 < 1) {σ : ℝ}
+theorem p2lPhiFun_neg (hk : k ^ 2 < 1) {σ : ℝ}
     (hσ : ∀ x, w (2 * Real.compEllIntKm (k ^ 2) - x) = σ * w x) (φ : ℝ) :
     p2lPhiFun w k weighted (-φ) = σ * p2lPhiFun w k weighted φ := by
   simp only [p2lPhiFun, p2lRho_neg]
@@ -284,7 +284,7 @@ lemma p2lPhiFun_pi_sub {δ : ℝ} (hδ : ∀ x, w (-x) = δ * w x) (φ : ℝ) :
   simp only [p2lPhiFun, p2lRho_pi_sub]
   rw [show π / 2 - (π - φ) = -(π / 2 - φ) by ring, Real.incEllIntFm_neg, hδ, mul_div_assoc]
 
-lemma p2l_lamePhi_cos (x : ℝ) : Real.cos (Real.lamePhi x k) = Real.jacobiSnm x (k ^ 2) := by
+theorem p2l_lamePhi_cos (x : ℝ) : Real.cos (Real.lamePhi x k) = Real.jacobiSnm x (k ^ 2) := by
   simp [Real.lamePhi, Real.cos_pi_div_two_sub, Real.jacobiSnm]
 
 lemma p2lRho_lamePhi (x : ℝ) :
@@ -479,7 +479,7 @@ lemma p2l_lame_coeff_cos (hk0 : 0 < k) (hk1 : k < 1) (hw : ContDiff ℝ 2 w) {δ
   ring
 
 /-- The folded coefficient identity behind `p2l_lame_hasSum_sin`. -/
-lemma p2l_lame_coeff_sin (hk0 : 0 < k) (hk1 : k < 1) (hw : ContDiff ℝ 2 w) {δ : ℝ}
+theorem p2l_lame_coeff_sin (hk0 : 0 < k) (hk1 : k < 1) (hw : ContDiff ℝ 2 w) {δ : ℝ}
     (hδ : ∀ x, w (-x) = δ * w x) (weighted : Bool) (j : ℕ) :
     (1 - δ * (-1) ^ j) / 2 * Real.lameSinCoeff w k weighted j =
       2 / π * ∫ t in (0 : ℝ)..π, p2lPhiFun w k weighted t * Real.sin (j * t) := by
@@ -492,7 +492,7 @@ lemma p2l_lame_coeff_sin (hk0 : 0 < k) (hk1 : k < 1) (hw : ContDiff ℝ 2 w) {δ
   ring
 
 /-- Absolute summability of the Lamé cosine coefficients. -/
-lemma p2l_lame_summable_cos (hk0 : 0 < k) (hk1 : k < 1) (hw : ContDiff ℝ 2 w)
+theorem p2l_lame_summable_cos (hk0 : 0 < k) (hk1 : k < 1) (hw : ContDiff ℝ 2 w)
     (h4 : ∀ x, w (x + 4 * Real.compEllIntKm (k ^ 2)) = w x)
     (hσ : ∀ x, w (2 * Real.compEllIntKm (k ^ 2) - x) = w x) {δ : ℝ}
     (hδ : ∀ x, w (-x) = δ * w x) (weighted : Bool) :
@@ -511,7 +511,7 @@ lemma p2l_lame_summable_cos (hk0 : 0 < k) (hk1 : k < 1) (hw : ContDiff ℝ 2 w)
   split_ifs <;> norm_num
 
 /-- Absolute summability of the Lamé sine coefficients. -/
-lemma p2l_lame_summable_sin (hk0 : 0 < k) (hk1 : k < 1) (hw : ContDiff ℝ 2 w)
+theorem p2l_lame_summable_sin (hk0 : 0 < k) (hk1 : k < 1) (hw : ContDiff ℝ 2 w)
     (h4 : ∀ x, w (x + 4 * Real.compEllIntKm (k ^ 2)) = w x)
     (hσ : ∀ x, w (2 * Real.compEllIntKm (k ^ 2) - x) = -w x) {δ : ℝ}
     (hδ : ∀ x, w (-x) = δ * w x) (weighted : Bool) :

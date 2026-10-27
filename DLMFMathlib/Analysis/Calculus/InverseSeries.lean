@@ -5,10 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.Calculus.FDeriv.Analytic
-public import Mathlib.Analysis.SpecialFunctions.Pow.Continuity
-public import Mathlib.Analysis.SpecialFunctions.Sqrt
-public import Mathlib.Algebra.Ring.GeomSum
+public import Mathlib.Analysis.Calculus.Deriv.Basic
+public import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
+public import Mathlib.Tactic.Positivity.Finset
 
 /-!
 # Truncated expansions of inverse and algebraic functions

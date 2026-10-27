@@ -59,12 +59,12 @@ def q27_multOfPrimePow {R : Type*} [CommMonoidWithZero R] (h : ℕ → R) : Arit
   ⟨fun n ↦ if n = 0 then 0 else ∏ p ∈ n.primeFactors, h (p ^ n.factorization p), by simp⟩
 
 /-- Value of `q27_multOfPrimePow` at `n ≠ 0`. -/
-theorem q27_multOfPrimePow_apply {R : Type*} [CommMonoidWithZero R] (h : ℕ → R) {n : ℕ}
+lemma q27_multOfPrimePow_apply {R : Type*} [CommMonoidWithZero R] (h : ℕ → R) {n : ℕ}
     (hn : n ≠ 0) : q27_multOfPrimePow h n = ∏ p ∈ n.primeFactors, h (p ^ n.factorization p) := by
   simp [q27_multOfPrimePow, hn]
 
 /-- `q27_multOfPrimePow h` is multiplicative. -/
-theorem q27_isMultiplicative_multOfPrimePow {R : Type*} [CommMonoidWithZero R] (h : ℕ → R) :
+lemma q27_isMultiplicative_multOfPrimePow {R : Type*} [CommMonoidWithZero R] (h : ℕ → R) :
     (q27_multOfPrimePow h).IsMultiplicative := by
   refine ⟨by simp [q27_multOfPrimePow_apply], fun {m n} hmn ↦ ?_⟩
   rcases eq_or_ne m 0 with rfl | hm
@@ -87,7 +87,7 @@ theorem q27_isMultiplicative_multOfPrimePow {R : Type*} [CommMonoidWithZero R] (
     rw [Finsupp.add_apply, h0, zero_add]
 
 /-- The Dirichlet inverse of a multiplicative function is multiplicative. -/
-theorem q27_isMultiplicative_of_mul_eq_one {f h : ArithmeticFunction ℂ}
+lemma q27_isMultiplicative_of_mul_eq_one {f h : ArithmeticFunction ℂ}
     (hf : f.IsMultiplicative) (hh : f * h = 1) : h.IsMultiplicative := by
   set g := q27_multOfPrimePow (fun n ↦ h n) with hgdef
   have hg : g.IsMultiplicative := q27_isMultiplicative_multOfPrimePow _
@@ -163,7 +163,7 @@ theorem sum_vonMangoldt_and_inverse {n : ℕ} (hn : 0 < n) :
     (fun m _ ↦ vonMangoldt_sum.symm) n hn
 
 /-- `∑_{n≤N} ∑_{m≤N/n} c(n,m) = ∑_{k≤N} ∑_{ab=k} c(a,b)`. -/
-theorem q27_sum_Icc_sum_Icc_div {R : Type*} [AddCommMonoid R] (c : ℕ → ℕ → R) (N : ℕ) :
+lemma q27_sum_Icc_sum_Icc_div {R : Type*} [AddCommMonoid R] (c : ℕ → ℕ → R) (N : ℕ) :
     ∑ n ∈ Icc 1 N, ∑ m ∈ Icc 1 (N / n), c n m =
       ∑ k ∈ Icc 1 N, ∑ x ∈ k.divisorsAntidiagonal, c x.1 x.2 := by
   have hP : ∀ k ∈ Icc 1 N, k.divisorsAntidiagonal =
@@ -213,7 +213,7 @@ theorem q27_sum_divisors_moebius_eq_ite (k : ℕ) :
   rw [this]; split_ifs <;> simp
 
 /-- DLMF 27.5.6 (proof). -/
-theorem q27_moebius_inversion_floor (F G : ℝ → ℂ) :
+lemma q27_moebius_inversion_floor (F G : ℝ → ℂ) :
     (∀ x : ℝ, 1 ≤ x → G x = ∑ n ∈ Finset.Icc 1 ⌊x⌋₊, F (x / n)) ↔
       ∀ x : ℝ, 1 ≤ x → F x = ∑ n ∈ Finset.Icc 1 ⌊x⌋₊, (μ n : ℂ) * G (x / n) := by
   have hdiv : ∀ x : ℝ, 1 ≤ x → ∀ n ∈ Icc 1 ⌊x⌋₊, 1 ≤ x / n ∧ ⌊x / n⌋₊ = ⌊x⌋₊ / n := by
@@ -302,7 +302,7 @@ theorem q27_hasSum_divisorsAntidiagonal {c : ℕ+ × ℕ+ → ℂ} {T : ℂ} (h 
 
 /-- Absolute convergence of `∑_{a,b} w(a,b) H(abx)/(ab)^s` from `∑ d(n)|H(nx)|/n^σ < ∞`,
 `|w| ≤ 1`. -/
-theorem q27_summable_div_cpow (H : ℝ → ℂ) (s : ℂ) (x : ℝ)
+lemma q27_summable_div_cpow (H : ℝ → ℂ) (s : ℂ) (x : ℝ)
     (hH : Summable fun n : ℕ ↦ (σ 0 (n + 1) : ℝ) * ‖H ((n + 1) * x)‖ / (n + 1 : ℝ) ^ s.re)
     (w : ℕ+ × ℕ+ → ℂ) (hw : ∀ c, ‖w c‖ ≤ 1) :
     Summable fun c : ℕ+ × ℕ+ ↦
@@ -341,7 +341,7 @@ theorem q27_summable_div_cpow (H : ℝ → ℂ) (s : ℂ) (x : ℝ)
   ring
 
 /-- Diagonal summation of a Möbius-weighted double series collapses to the `n = 1` term. -/
-theorem q27_hasSum_diag_moebius (H : ℝ → ℂ) (s : ℂ) (x : ℝ) (sel : ℕ × ℕ → ℕ)
+lemma q27_hasSum_diag_moebius (H : ℝ → ℂ) (s : ℂ) (x : ℝ) (sel : ℕ × ℕ → ℕ)
     (hsel : ∀ n : ℕ, ∑ y ∈ n.divisorsAntidiagonal, (μ (sel y) : ℂ) = if n = 1 then 1 else 0)
     {T : ℂ} (h : HasSum (fun c : ℕ+ × ℕ+ ↦ (μ (sel (c.1, c.2)) : ℂ) *
       H (((c.1 * c.2 : ℕ) : ℝ) * x) / ((c.1 * c.2 : ℕ) : ℂ) ^ s) T) : T = H x := by
@@ -366,14 +366,14 @@ theorem q27_hasSum_diag_moebius (H : ℝ → ℂ) (s : ℂ) (x : ℝ) (sel : ℕ
           simp [h1, h1']
 
 /-- `n^s ≠ 0` for `n ≥ 1`. -/
-theorem q27_natCast_cpow_ne_zero {n : ℕ} (hn : 0 < n) (s : ℂ) : (n : ℂ) ^ s ≠ 0 := by
+lemma q27_natCast_cpow_ne_zero {n : ℕ} (hn : 0 < n) (s : ℂ) : (n : ℂ) ^ s ≠ 0 := by
   intro h
   have := Complex.norm_natCast_cpow_of_pos hn s
   rw [h, norm_zero] at this
   exact (Real.rpow_pos_of_pos (Nat.cast_pos.mpr hn) _).ne this
 
 /-- DLMF 27.5.7, forward direction (proof). -/
-theorem q27_moebius_inversion_series (F G : ℝ → ℂ) (s : ℂ)
+lemma q27_moebius_inversion_series (F G : ℝ → ℂ) (s : ℂ)
     (hF : ∀ x : ℝ, 0 < x →
       Summable fun n : ℕ ↦ (σ 0 (n + 1) : ℝ) * ‖F ((n + 1) * x)‖ / (n + 1 : ℝ) ^ s.re)
     (hG : ∀ x : ℝ, 0 < x →
@@ -411,7 +411,7 @@ theorem q27_moebius_inversion_series (F G : ℝ → ℂ) (s : ℂ)
   simp
 
 /-- DLMF 27.5.7, backward direction (proof). -/
-theorem q27_moebius_inversion_series_symm (F G : ℝ → ℂ) (s : ℂ)
+lemma q27_moebius_inversion_series_symm (F G : ℝ → ℂ) (s : ℂ)
     (hG : ∀ x : ℝ, 0 < x →
       Summable fun n : ℕ ↦ (σ 0 (n + 1) : ℝ) * ‖G ((n + 1) * x)‖ / (n + 1 : ℝ) ^ s.re)
     (hF : ∀ x : ℝ, 0 < x →

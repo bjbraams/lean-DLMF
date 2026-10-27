@@ -8,7 +8,6 @@ module
 public import DLMF.Mathieu.Hill.Defs
 public import DLMF.Mathieu.Basic
 public import DLMF.Mathieu.Noninteger.Properties
-public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 
 /-!
 # The equations of Whittaker–Hill and Ince (DLMF §28.31)
@@ -51,13 +50,13 @@ namespace DLMF.Mathieu
 /-! ### §28.31(i)–(ii) Whittaker–Hill and Ince equations -/
 
 /-- `cos 4z = 1 - 2 sin² 2z`. -/
-theorem m28b_cos_four (z : ℂ) : Complex.cos (4 * z) = 1 - 2 * Complex.sin (2 * z) ^ 2 := by
+lemma m28b_cos_four (z : ℂ) : Complex.cos (4 * z) = 1 - 2 * Complex.sin (2 * z) ^ 2 := by
   rw [show (4 : ℂ) * z = 2 * (2 * z) by ring, Complex.cos_two_mul]
   have := Complex.sin_sq_add_cos_sq (2 * z)
   linear_combination (2 : ℂ) * this
 
 /-- The derivative of `-ξ cos(2z)/4`. -/
-theorem m28b_hasDerivAt_g (ξ z : ℂ) :
+lemma m28b_hasDerivAt_g (ξ z : ℂ) :
     HasDerivAt (fun z => -(ξ * Complex.cos (2 * z)) / 4) (ξ * Complex.sin (2 * z) / 2) z := by
   have h2 : HasDerivAt (fun z : ℂ => 2 * z) 2 z := by
     simpa using (hasDerivAt_id z).const_mul (2 : ℂ)
@@ -65,7 +64,7 @@ theorem m28b_hasDerivAt_g (ξ z : ℂ) :
   convert this using 1; ring
 
 /-- The derivative of `ξ sin(2z)/2`. -/
-theorem m28b_hasDerivAt_g' (ξ z : ℂ) :
+lemma m28b_hasDerivAt_g' (ξ z : ℂ) :
     HasDerivAt (fun z => ξ * Complex.sin (2 * z) / 2) (ξ * Complex.cos (2 * z)) z := by
   have h2 : HasDerivAt (fun z : ℂ => 2 * z) 2 z := by
     simpa using (hasDerivAt_id z).const_mul (2 : ℂ)
@@ -133,7 +132,7 @@ theorem isWhittakerHillSolution_iff_isInceSolution {k c ξ η p : ℂ}
 
 /-- Subsequences `A_{2ℓ+b}` of entire Fourier coefficients decay faster than every
 exponential in `ℓ`. -/
-theorem p1b_summable_coeff {A : ℕ → ℂ} (hA : IsEntireFourierCoeff A) (b : ℕ) (K : ℝ) :
+lemma p1b_summable_coeff {A : ℕ → ℂ} (hA : IsEntireFourierCoeff A) (b : ℕ) (K : ℝ) :
     Summable (fun ℓ : ℕ => ‖A (2 * ℓ + b)‖ * Real.exp (K * ℓ)) := by
   have hinj : Function.Injective (fun ℓ : ℕ => 2 * ℓ + b) := fun i j h => by
     simp only at h; omega
@@ -157,7 +156,7 @@ theorem p1b_summable_coeff {A : ℕ → ℂ} (hA : IsEntireFourierCoeff A) (b : 
         _ ≤ _ := by gcongr
 
 /-- Multiplying `∑ g_m e^{i(ν+2m)z}` by `e^{±2iz}` shifts the coefficients. -/
-theorem p1b_hasSum_shift {ν z X : ℂ} {g : ℤ → ℂ}
+lemma p1b_hasSum_shift {ν z X : ℂ} {g : ℤ → ℂ}
     (h : HasSum (fun m : ℤ => g m * Complex.exp (I * (ν + 2 * m) * z)) X) :
     HasSum (fun n : ℤ => g (n - 1) * Complex.exp (I * (ν + 2 * n) * z))
         (Complex.exp (2 * I * z) * X) ∧
@@ -176,7 +175,7 @@ theorem p1b_hasSum_shift {ν z X : ℂ} {g : ℤ → ℂ}
 /-- **Exponential-series solutions of Ince's equation**: for coefficients decaying faster than
 every exponential, `∑ c_n e^{i(ν+2n)z}` solves 28.31.3 iff
 `(η - (ν+2n)²) c_n + ½ξ(ν+2n-2-p) c_{n-1} - ½ξ(ν+2n+2+p) c_{n+1} = 0` for all `n`. -/
-theorem p1b_isInceSolution_series_iff {ξ η p ν : ℂ} {c : ℤ → ℂ}
+lemma p1b_isInceSolution_series_iff {ξ η p ν : ℂ} {c : ℤ → ℂ}
     (hb : ∀ K : ℝ, Summable (fun m : ℤ => ‖c m‖ * Real.exp (K * |(m : ℝ)|))) :
     IsInceSolution ξ η p (fun z => ∑' n : ℤ, c n * Complex.exp (I * (ν + 2 * n) * z)) ↔
       ∀ n : ℤ, (η - (ν + 2 * n) ^ 2) * c n + ξ * (ν + 2 * ((n : ℂ) - 1) - p) / 2 * c (n - 1)
@@ -298,15 +297,15 @@ def p1bTwoSided (a b : ℕ → ℂ) : ℤ → ℂ := fun n => match n with
   | Int.negSucc ℓ => b ℓ
 
 /-- `c_ℓ = a_ℓ` for `ℓ ≥ 0`. -/
-theorem p1bTwoSided_natCast (a b : ℕ → ℂ) (ℓ : ℕ) : p1bTwoSided a b ℓ = a ℓ := rfl
+lemma p1bTwoSided_natCast (a b : ℕ → ℂ) (ℓ : ℕ) : p1bTwoSided a b ℓ = a ℓ := rfl
 
 /-- `c_{-ℓ-1} = b_ℓ`. -/
-theorem p1bTwoSided_neg (a b : ℕ → ℂ) (ℓ : ℕ) : p1bTwoSided a b (-(ℓ : ℤ) - 1) = b ℓ := by
+lemma p1bTwoSided_neg (a b : ℕ → ℂ) (ℓ : ℕ) : p1bTwoSided a b (-(ℓ : ℤ) - 1) = b ℓ := by
   rw [show -(ℓ : ℤ) - 1 = Int.negSucc ℓ by rw [Int.negSucc_eq]; ring]; rfl
 
 /-- Two-sided sequences built from sequences decaying faster than every exponential: decay,
 and the exponential series splits into its two halves. -/
-theorem p1b_twoSided {a b : ℕ → ℂ}
+lemma p1b_twoSided {a b : ℕ → ℂ}
     (ha : ∀ K : ℝ, Summable (fun ℓ : ℕ => ‖a ℓ‖ * Real.exp (K * ℓ)))
     (hb : ∀ K : ℝ, Summable (fun ℓ : ℕ => ‖b ℓ‖ * Real.exp (K * ℓ))) (ν : ℂ) :
     (∀ K : ℝ, Summable (fun m : ℤ => ‖p1bTwoSided a b m‖ * Real.exp (K * |(m : ℝ)|))) ∧
@@ -356,7 +355,7 @@ theorem p1b_twoSided {a b : ℕ → ℂ}
   · rw [show -((ℓ : ℤ) + 1) = -(ℓ : ℤ) - 1 by ring, p1bTwoSided_neg]; push_cast; rfl
 
 /-- Halved subsequences of entire Fourier coefficients. -/
-theorem p1b_summable_coeff_mul {A : ℕ → ℂ} (hA : IsEntireFourierCoeff A) (b : ℕ) (κ : ℂ)
+lemma p1b_summable_coeff_mul {A : ℕ → ℂ} (hA : IsEntireFourierCoeff A) (b : ℕ) (κ : ℂ)
     (K : ℝ) : Summable (fun ℓ : ℕ => ‖κ * A (2 * ℓ + b)‖ * Real.exp (K * ℓ)) :=
   ((p1b_summable_coeff hA b K).mul_left ‖κ‖).congr fun ℓ => by rw [norm_mul]; ring
 
@@ -835,7 +834,7 @@ theorem paraboloidalHs_neg_xi {n m : ℕ} (hm : m ≤ n) (z : ℂ) (ξ : ℝ) :
 
 /-- Orthogonality of `2π`-periodic solutions of the Whittaker–Hill equation 28.31.1 with
 different `A` (the Wronskian identity `(W₁W₂' - W₂W₁')' = (A₁ - A₂) W₁W₂`). -/
-theorem p1b_whittakerHill_orthogonal {A₁ A₂ B k c : ℂ} {W₁ W₂ : ℂ → ℂ}
+lemma p1b_whittakerHill_orthogonal {A₁ A₂ B k c : ℂ} {W₁ W₂ : ℂ → ℂ}
     (h₁ : IsWhittakerHillSolution A₁ B k c W₁) (h₂ : IsWhittakerHillSolution A₂ B k c W₂)
     (hA : A₁ ≠ A₂) (hp₁ : Function.Periodic W₁ (2 * Real.pi))
     (hp₂ : Function.Periodic W₂ (2 * Real.pi)) :
@@ -871,7 +870,7 @@ theorem p1b_whittakerHill_orthogonal {A₁ A₂ B k c : ℂ} {W₁ W₂ : ℂ �
   exact (mul_eq_zero.mp hftc).resolve_left (sub_ne_zero.mpr hA)
 
 /-- Cosine Ince polynomials are `2π`-periodic. -/
-theorem p1b_periodic_cosPoly {p : ℕ} {f : ℂ → ℂ} (hf : IsInceCosPoly p f) :
+lemma p1b_periodic_cosPoly {p : ℕ} {f : ℂ → ℂ} (hf : IsInceCosPoly p f) :
     Function.Periodic f (2 * Real.pi) := by
   obtain ⟨A, hA⟩ := hf
   intro z
@@ -881,7 +880,7 @@ theorem p1b_periodic_cosPoly {p : ℕ} {f : ℂ → ℂ} (hf : IsInceCosPoly p f
     Complex.cos_add_nat_mul_two_pi]
 
 /-- Sine Ince polynomials are `2π`-periodic. -/
-theorem p1b_periodic_sinPoly {p : ℕ} {f : ℂ → ℂ} (hf : IsInceSinPoly p f) :
+lemma p1b_periodic_sinPoly {p : ℕ} {f : ℂ → ℂ} (hf : IsInceSinPoly p f) :
     Function.Periodic f (2 * Real.pi) := by
   obtain ⟨B, hB⟩ := hf
   intro z
@@ -891,7 +890,7 @@ theorem p1b_periodic_sinPoly {p : ℕ} {f : ℂ → ℂ} (hf : IsInceSinPoly p f
     Complex.sin_add_nat_mul_two_pi]
 
 /-- `e^{-ξ cos 2z / 4}` is `2π`-periodic. -/
-theorem p1b_periodic_expCos (ξ : ℂ) :
+lemma p1b_periodic_expCos (ξ : ℂ) :
     Function.Periodic (fun z : ℂ => Complex.exp (-(ξ * Complex.cos (2 * z)) / 4))
       (2 * Real.pi) := by
   intro z

@@ -6,8 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.NumberTheory.LSeries.RiemannZeta
-public import Mathlib.Analysis.Asymptotics.Defs
-public import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
 /-!
 # Asymptotic approximations of the Riemann zeta function (DLMF §25.9)

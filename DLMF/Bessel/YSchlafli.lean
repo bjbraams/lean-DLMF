@@ -27,7 +27,7 @@ open scoped Real Topology
 namespace DLMF.Bessel
 
 /-- The reflection `θ ↦ π - θ` in the angular Schläfli integral. -/
-lemma schlafli_integral_cos_add (z μ : ℂ) :
+theorem schlafli_integral_cos_add (z μ : ℂ) :
     ∫ θ in (0:ℝ)..π, cos (z * Real.sin θ + μ * θ) =
       cos (μ * π) * (∫ θ in (0:ℝ)..π, cos (z * Real.sin θ - μ * θ)) -
         sin (μ * π) * ∫ θ in (0:ℝ)..π, sin (z * Real.sin θ - μ * θ) := by

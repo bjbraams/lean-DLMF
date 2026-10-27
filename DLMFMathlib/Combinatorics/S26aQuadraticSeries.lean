@@ -10,7 +10,6 @@ public import Mathlib.RingTheory.PowerSeries.WellKnown
 public import Mathlib.RingTheory.PowerSeries.NoZeroDivisors
 public import Mathlib.Combinatorics.Enumerative.Catalan.Basic
 public import Mathlib.Combinatorics.Enumerative.Schroder
-public import Mathlib.Data.Nat.Choose.Sum
 public import Mathlib.Tactic.LinearCombination
 
 /-!
@@ -34,7 +33,7 @@ noncomputable section
 /-- The Catalan generating series `∑ C(n) Xⁿ` over `ℚ`. -/
 noncomputable def s26a_catSeries : ℚ⟦X⟧ := mk fun n => (catalan n : ℚ)
 
-theorem s26a_catSeries_eq : s26a_catSeries = 1 + X * s26a_catSeries ^ 2 := by
+lemma s26a_catSeries_eq : s26a_catSeries = 1 + X * s26a_catSeries ^ 2 := by
   ext n
   rcases n with _ | n
   · simp [s26a_catSeries]
@@ -44,21 +43,21 @@ theorem s26a_catSeries_eq : s26a_catSeries = 1 + X * s26a_catSeries ^ 2 := by
 /-- The geometric series `∑ aⁿ Xⁿ = 1/(1 - aX)`. -/
 noncomputable def s26a_geom (a : ℚ) : ℚ⟦X⟧ := rescale a (mk 1)
 
-theorem s26a_geom_mul (a : ℚ) : s26a_geom a * (1 - C a * X) = 1 := by
+lemma s26a_geom_mul (a : ℚ) : s26a_geom a * (1 - C a * X) = 1 := by
   have := congrArg (rescale a) (mk_one_mul_one_sub_eq_one (S := ℚ))
   rwa [map_mul, map_sub, map_one, rescale_X] at this
 
-theorem s26a_coeff_geom_pow (a : ℚ) (d n : ℕ) :
+lemma s26a_coeff_geom_pow (a : ℚ) (d n : ℕ) :
     coeff n (s26a_geom a ^ (d + 1)) = a ^ n * (d + n).choose d := by
   rw [s26a_geom, ← map_pow, mk_one_pow_eq_mk_choose_add, rescale_mk, coeff_mk]
 
-theorem s26a_constantCoeff_geom (a : ℚ) : constantCoeff (s26a_geom a) = 1 := by
+lemma s26a_constantCoeff_geom (a : ℚ) : constantCoeff (s26a_geom a) = 1 := by
   rw [← coeff_zero_eq_constantCoeff_apply, s26a_geom, rescale_mk, coeff_mk]; simp
 
 /-- The substituted argument `q = X^e (1 - aX)^{-2}`. -/
 noncomputable def s26a_arg (a : ℚ) (e : ℕ) : ℚ⟦X⟧ := X ^ e * s26a_geom a ^ 2
 
-theorem s26a_hasSubst_arg (a : ℚ) {e : ℕ} (he : 1 ≤ e) : HasSubst (s26a_arg a e) :=
+lemma s26a_hasSubst_arg (a : ℚ) {e : ℕ} (he : 1 ≤ e) : HasSubst (s26a_arg a e) :=
   HasSubst.of_constantCoeff_zero' (by
     simp [s26a_arg, zero_pow (by omega : e ≠ 0)])
 
@@ -90,7 +89,7 @@ theorem s26a_quad_unique (a : ℚ) {e : ℕ} (he : 1 ≤ e) {F G : ℚ⟦X⟧}
     have := congrArg constantCoeff h
     simp [zero_pow (by omega : e ≠ 0)] at this
 
-theorem s26a_coeff_subst (q : ℚ⟦X⟧) (hq : constantCoeff q = 0) (f : ℚ⟦X⟧) {n N : ℕ}
+lemma s26a_coeff_subst (q : ℚ⟦X⟧) (hq : constantCoeff q = 0) (f : ℚ⟦X⟧) {n N : ℕ}
     (hN : n < N) : coeff n (subst q f) = ∑ k ∈ range N, coeff k f * coeff n (q ^ k) := by
   rw [coeff_subst' (HasSubst.of_constantCoeff_zero' hq)]
   rw [finsum_eq_sum_of_support_subset _ (s := range N)]
@@ -104,7 +103,7 @@ theorem s26a_coeff_subst (q : ℚ⟦X⟧) (hq : constantCoeff q = 0) (f : ℚ⟦
     rw [this n (by omega), smul_zero]
 
 /-- Coefficients of `g · f(q)` for a power series `g` and `q` without constant term. -/
-theorem s26a_coeff_mul_subst (g q : ℚ⟦X⟧) (hq : constantCoeff q = 0) (f : ℚ⟦X⟧) (n : ℕ) :
+lemma s26a_coeff_mul_subst (g q : ℚ⟦X⟧) (hq : constantCoeff q = 0) (f : ℚ⟦X⟧) (n : ℕ) :
     coeff n (g * subst q f) = ∑ k ∈ range (n + 1), coeff k f * coeff n (g * q ^ k) := by
   set P : ℚ⟦X⟧ := ∑ k ∈ range (n + 1), C (coeff k f) * q ^ k
   have hdvd : X ^ (n + 1) ∣ subst q f - P := by
@@ -118,7 +117,7 @@ theorem s26a_coeff_mul_subst (g q : ℚ⟦X⟧) (hq : constantCoeff q = 0) (f : 
   refine sum_congr rfl fun k _ => ?_
   rw [mul_left_comm, coeff_C_mul]
 
-theorem s26a_coeff_quadSeries (a : ℚ) {e : ℕ} (he : 1 ≤ e) (n : ℕ) :
+lemma s26a_coeff_quadSeries (a : ℚ) {e : ℕ} (he : 1 ≤ e) (n : ℕ) :
     coeff n (s26a_quadSeries a e) = ∑ k ∈ range (n + 1), (catalan k : ℚ) *
       if e * k ≤ n then a ^ (n - e * k) * (2 * k + (n - e * k)).choose (2 * k) else 0 := by
   rw [s26a_quadSeries, s26a_coeff_mul_subst _ _ (by
@@ -144,7 +143,7 @@ theorem s26a_coeff_quadSeries_two (a : ℚ) (n : ℕ) :
   · rw [Nat.choose_eq_zero_of_lt (by omega)]; simp
 
 /-- The coefficients for `e = 1`: `∑_k C(k) C(n+k, 2k) a^{n-k}`. -/
-theorem s26a_coeff_quadSeries_one (a : ℚ) (n : ℕ) :
+lemma s26a_coeff_quadSeries_one (a : ℚ) (n : ℕ) :
     coeff n (s26a_quadSeries a 1) =
       ∑ k ∈ range (n + 1), (catalan k : ℚ) * (n + k).choose (2 * k) * a ^ (n - k) := by
   rw [s26a_coeff_quadSeries a le_rfl]
@@ -193,7 +192,7 @@ theorem s26a_largeSchroder_eq_sum (n : ℕ) :
 
 
 /-- Splitting a sum over `range (m + d + 1)` at `m`, the lower part vanishing. -/
-theorem s26a_sum_range_split {M : Type*} [AddCommMonoid M] (f : ℕ → M) (m d : ℕ)
+lemma s26a_sum_range_split {M : Type*} [AddCommMonoid M] (f : ℕ → M) (m d : ℕ)
     (h : ∀ k < m, f k = 0) :
     ∑ k ∈ range (m + d + 1), f k = ∑ j ∈ range (d + 1), f (m + j) := by
   rw [add_assoc, sum_range_add, sum_eq_zero fun k hk => h k (mem_range.mp hk), zero_add]
@@ -212,7 +211,7 @@ theorem s26a_sum_choose_mul_choose (n m : ℕ) :
   rw [Nat.choose_mul (by omega), Nat.add_sub_cancel_left, Nat.add_sub_cancel_left]
 
 /-- `∑_k (-1)^{n-k} C(n, k) C(k, i) = [i = n]` for `i ≤ n`. -/
-theorem s26a_sum_neg_one_pow_choose_mul_choose {n i : ℕ} (hi : i ≤ n) :
+lemma s26a_sum_neg_one_pow_choose_mul_choose {n i : ℕ} (hi : i ≤ n) :
     ∑ k ∈ range (n + 1), (-1 : ℤ) ^ (n - k) * n.choose k * k.choose i =
       if i = n then 1 else 0 := by
   obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le hi

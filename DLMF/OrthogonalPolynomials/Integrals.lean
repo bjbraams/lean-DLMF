@@ -5,29 +5,14 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.OrthogonalPolynomials.Topics
-public import Mathlib.Tactic.CrossRefAttribute
-public import DLMF.OrthogonalPolynomials.Explicit
-public import DLMF.OrthogonalPolynomials.Differential
 public import DLMF.OrthogonalPolynomials.Series
 public import DLMF.OrthogonalPolynomials.LegendreSingular
 public import DLMF.OrthogonalPolynomials.Associated
-public import DLMF.Bessel.Basic
-public import DLMF.Bessel.WeberSeries
-public import DLMF.Hypergeometric.Elementary
-public import DLMF.Gamma.IntegralRepresentations
-public import DLMF.Gamma.BetaFunction
 public import DLMF.Confluent.IntegralRepresentations
-public import DLMF.Confluent.Continuation
-public import DLMF.Hypergeometric.IntegralRepresentations
-public import DLMF.Hypergeometric.Saalschutz
 public import Mathlib.MeasureTheory.Integral.Gamma
-public import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.IntegrationByParts
 public import TauCeti.Analysis.SpecialFunctions.Hermite.Orthogonality
-public import TauCeti.RingTheory.Polynomial.Hermite.Derivative
 public import TauCeti.Analysis.SpecialFunctions.Hermite.Function.Fourier.Basic
-public import TauCeti.Probability.Distributions.Gaussian.PolynomialMemLp
+public import Mathlib.RingTheory.Polynomial.Hermite.Gaussian
 /-!
 # Classical orthogonality, Rodrigues formulas, and integral identities
 
@@ -98,7 +83,7 @@ set_option autoImplicit false
 namespace DLMF.OrthogonalPolynomials
 
 /-- `x^k e^{-x²}` is integrable. -/
-lemma integrable_pow_mul_exp_neg_sq (k : ℕ) :
+theorem integrable_pow_mul_exp_neg_sq (k : ℕ) :
     Integrable fun x : ℝ => x ^ k * Real.exp (-(x ^ 2)) := by
   have h := integrable_rpow_mul_exp_neg_mul_sq (b := 1) one_pos
     (s := (k : ℝ)) (by have := (Nat.cast_nonneg k : (0 : ℝ) ≤ k); linarith)
@@ -106,23 +91,23 @@ lemma integrable_pow_mul_exp_neg_sq (k : ℕ) :
   simp [Real.rpow_natCast]
 
 /-- A polynomial times the Gaussian is integrable. -/
-lemma integrable_eval_mul_exp_neg_sq (q : ℝ[X]) :
+theorem integrable_eval_mul_exp_neg_sq (q : ℝ[X]) :
     Integrable fun x : ℝ => q.eval x * Real.exp (-(x ^ 2)) := by
   exact TauCeti.integrable_eval_mul_exp_neg_sq q
 
 /-- Physicists' Hermite polynomials as real polynomials. -/
 abbrev hermitePolyHR (n : ℕ) : ℝ[X] := (hermitePolyH n).map (Int.castRingHom ℝ)
 
-lemma aeval_hermitePolyH_eq_eval (n : ℕ) (x : ℝ) :
+theorem aeval_hermitePolyH_eq_eval (n : ℕ) (x : ℝ) :
     (aeval x (hermitePolyH n) : ℝ) = (hermitePolyHR n).eval x := by
   rw [aeval_def, hermitePolyHR, eval_map]
   congr 1
 
-lemma hermitePolyHR_succ (n : ℕ) :
+theorem hermitePolyHR_succ (n : ℕ) :
     hermitePolyHR (n + 1) = 2 * X * hermitePolyHR n - derivative (hermitePolyHR n) := by
   simp [hermitePolyHR, Polynomial.map_sub, Polynomial.map_mul, derivative_map]
 
-lemma hasDerivAt_hermite_gauss (n : ℕ) (x : ℝ) :
+theorem hasDerivAt_hermite_gauss (n : ℕ) (x : ℝ) :
     HasDerivAt (fun y => (hermitePolyHR n).eval y * Real.exp (-(y ^ 2)))
       (-((hermitePolyHR (n + 1)).eval x * Real.exp (-(x ^ 2)))) x := by
   have hg : HasDerivAt (fun y : ℝ => Real.exp (-(y ^ 2))) (Real.exp (-(x ^ 2)) * (-(2 * x))) x := by
@@ -135,7 +120,7 @@ lemma hasDerivAt_hermite_gauss (n : ℕ) (x : ℝ) :
   ring
 
 /-- Repeated integration by parts against the Hermite–Gaussian. -/
-lemma integral_eval_mul_hermite_gauss (n : ℕ) :
+theorem integral_eval_mul_hermite_gauss (n : ℕ) :
     ∀ q : ℝ[X], ∫ x : ℝ, q.eval x * ((hermitePolyHR n).eval x * Real.exp (-(x ^ 2))) =
       ∫ x : ℝ, (derivative^[n] q).eval x * Real.exp (-(x ^ 2)) := by
   induction n with
@@ -164,7 +149,7 @@ lemma integral_eval_mul_hermite_gauss (n : ℕ) :
       rw [← integral_neg]; congr 1; funext x; ring
     rw [h1, hibp, neg_neg, ih, Function.iterate_succ_apply]
 
-lemma hermitePolyHR_natDegree_coeff (n : ℕ) :
+theorem hermitePolyHR_natDegree_coeff (n : ℕ) :
     (hermitePolyHR n).natDegree ≤ n ∧ (hermitePolyHR n).coeff n = 2 ^ n := by
   induction n with
   | zero => simp [hermitePolyHR]
@@ -185,7 +170,7 @@ lemma hermitePolyHR_natDegree_coeff (n : ℕ) :
 
 /-- Scaling Mathlib's Beta integral gives the power moments used in Laguerre
 convolutions, including singular but integrable endpoints. -/
-lemma integral_cpow_mul_sub_cpow {a b : ℂ} {x : ℝ}
+theorem integral_cpow_mul_sub_cpow {a b : ℂ} {x : ℝ}
     (ha : -1 < a.re) (hb : -1 < b.re) (hx : 0 < x) :
     (∫ t : ℝ in (0 : ℝ)..x, (t : ℂ) ^ a * ((x : ℂ) - t) ^ b) =
       (x : ℂ) ^ (a + b + 1) * (Gamma (a + 1) * Gamma (b + 1) / Gamma (a + b + 2)) := by
@@ -218,7 +203,7 @@ lemma integral_cpow_mul_sub_cpow {a b : ℂ} {x : ℝ}
   simpa only [show a + 1 + (b + 1) = a + b + 2 by ring] using hi
 
 /-- Integrability of scaled Beta kernels, including integrable endpoint singularities. -/
-lemma intervalIntegrable_cpow_mul_sub_cpow {a b : ℂ} {x : ℝ}
+theorem intervalIntegrable_cpow_mul_sub_cpow {a b : ℂ} {x : ℝ}
     (ha : -1 < a.re) (hb : -1 < b.re) (hx : 0 < x) :
     IntervalIntegrable (fun t : ℝ => (t : ℂ) ^ a * ((x : ℂ) - t) ^ b) volume 0 x := by
   have hi := (betaIntegral_convergent (u := a + 1) (v := b + 1)
@@ -247,7 +232,7 @@ lemma intervalIntegrable_cpow_mul_sub_cpow {a b : ℂ} {x : ℝ}
   ring
 
 /-- Integrability of the Jacobi weight on its orthogonality interval. -/
-lemma intervalIntegrable_jacobi_weight {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) :
+theorem intervalIntegrable_jacobi_weight {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) :
     IntervalIntegrable (fun t : ℝ => (1 - (t : ℂ)) ^ (α : ℂ) *
       (1 + (t : ℂ)) ^ (β : ℂ)) volume (-1) 1 := by
   have hi := (intervalIntegrable_cpow_mul_sub_cpow (a := (β : ℂ)) (b := (α : ℂ))
@@ -261,7 +246,7 @@ lemma intervalIntegrable_jacobi_weight {α β : ℝ} (hα : -1 < α) (hβ : -1 <
     ring
 
 /-- Integrability of Jacobi polynomial products against their weight. -/
-lemma intervalIntegrable_jacobi_product {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (m n : ℕ) :
+theorem intervalIntegrable_jacobi_product {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (m n : ℕ) :
     IntervalIntegrable (fun t : ℝ => jacobiPolyP α β m t * jacobiPolyP α β n t *
       (1 - (t : ℂ)) ^ (α : ℂ) * (1 + (t : ℂ)) ^ (β : ℂ)) volume (-1) 1 := by
   have hP (k : ℕ) : Continuous (fun t : ℝ => jacobiPolyP α β k t) :=
@@ -274,7 +259,7 @@ lemma intervalIntegrable_jacobi_product {α β : ℝ} (hα : -1 < α) (hβ : -1 
   ring
 
 /-- Integration by parts reduces a Jacobi squared norm to a shifted norm. -/
-lemma jacobi_norm_shift {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
+theorem jacobi_norm_shift {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
     4 * (n + 1 : ℂ) * (∫ t : ℝ in (-1 : ℝ)..1, jacobiPolyP α β (n + 1) t ^ 2 *
       (1 - (t : ℂ)) ^ (α : ℂ) * (1 + (t : ℂ)) ^ (β : ℂ)) =
     (n + α + β + 2 : ℂ) * (∫ t : ℝ in (-1 : ℝ)..1, jacobiPolyP (α + 1) (β + 1) n t ^ 2 *
@@ -350,7 +335,7 @@ lemma jacobi_norm_shift {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ) 
   linear_combination -2 * he
 
 /-- The Jacobi weight integral in a form regular throughout the orthogonality range. -/
-lemma integral_jacobi_weight {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) :
+theorem integral_jacobi_weight {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) :
     (∫ t : ℝ in (-1 : ℝ)..1, (1 - (t : ℂ)) ^ (α : ℂ) * (1 + (t : ℂ)) ^ (β : ℂ)) =
       (2 : ℂ) ^ ((α : ℂ) + β + 1) * (Gamma ((α : ℂ) + 1) * Gamma ((β : ℂ) + 1) /
         Gamma ((α : ℂ) + β + 2)) := by
@@ -374,7 +359,7 @@ lemma integral_jacobi_weight {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) :
     _ = _ := by rw [he, add_comm (β : ℂ) α, mul_comm (Gamma ((β : ℂ) + 1))]
 
 /-- Jacobi squared norms at all degrees, with a denominator regular at degree zero. -/
-lemma jacobi_norm_all {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
+theorem jacobi_norm_all {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
     (∫ t : ℝ in (-1 : ℝ)..1, jacobiPolyP α β n t ^ 2 *
       (1 - (t : ℂ)) ^ (α : ℂ) * (1 + (t : ℂ)) ^ (β : ℂ)) =
       (2 : ℂ) ^ ((α : ℂ) + β + 1) * Gamma ((α : ℂ) + n + 1) * Gamma ((β : ℂ) + n + 1) *
@@ -616,7 +601,7 @@ private lemma ultrasphPoly_norm_constant {lam : ℝ} (hlam : 0 < lam) :
   exact hp'
 
 /-- Gegenbauer squared norms, including degree zero. -/
-lemma ultrasphPoly_norm {lam : ℝ} (hlam : 0 < lam) (n : ℕ) :
+theorem ultrasphPoly_norm {lam : ℝ} (hlam : 0 < lam) (n : ℕ) :
     (∫ t : ℝ in (-1 : ℝ)..1, ultrasphPoly lam n t ^ 2 *
       (1 - (t : ℂ) ^ 2) ^ ((lam : ℂ) - 1 / 2)) =
       (2 : ℂ) ^ (1 - 2 * (lam : ℂ)) * Real.pi * Gamma (n + 2 * (lam : ℂ)) /
@@ -723,7 +708,7 @@ theorem ultrasphPoly_orthogonality {lam : ℝ} (hlam : 0 < lam) (m n : ℕ) :
 
 /-- Repeated differentiation of the Jacobi weight, using the proved weighted
 derivative identity on the open interval. -/
-lemma iteratedDeriv_jacobi_weight {α β : ℝ} (hα : -1 < α) (hβ : -1 < β)
+theorem iteratedDeriv_jacobi_weight {α β : ℝ} (hα : -1 < α) (hβ : -1 < β)
     (n : ℕ) {x : ℝ} (hx : x ∈ Set.Ioo (-1) 1) :
     iteratedDeriv n (fun t : ℝ => (1 - (t : ℂ)) ^ (α + n : ℂ) *
       (1 + (t : ℂ)) ^ (β + n : ℂ)) x =
@@ -754,7 +739,7 @@ lemma iteratedDeriv_jacobi_weight {α β : ℝ} (hα : -1 < α) (hβ : -1 < β)
     ring
 
 /-- Repeated differentiation of the Laguerre weight on the positive half-line. -/
-lemma iteratedDeriv_laguerrePolyL_weight {α : ℝ} (hα : -1 < α) (n : ℕ) {x : ℝ} (hx : 0 < x) :
+theorem iteratedDeriv_laguerrePolyL_weight {α : ℝ} (hα : -1 < α) (n : ℕ) {x : ℝ} (hx : 0 < x) :
     iteratedDeriv n (fun t : ℝ => exp (-(t : ℂ)) * (t : ℂ) ^ (α + n : ℂ)) x =
       (n.factorial : ℂ) * exp (-(x : ℂ)) * (x : ℂ) ^ (α : ℂ) * laguerrePolyL α n x := by
   induction n generalizing α x with
@@ -1059,7 +1044,7 @@ private lemma dirM_const_real {θ lam : ℝ} (hθ : 0 < θ) (hθπ : θ < Real.p
 /-- Dirichlet–Mehler integral for Gegenbauer polynomials (DLMF 18.10.1), via the substitution
 `ψ = 2 arcsin(sin(θ/2) √t)`, the quotient formula 15.4.14, the fractional integral 15.6.8 and
 Euler's transformation 15.8.1. -/
-private theorem dirM_main {lam : ℝ} (hlam : 0 < lam) (n : ℕ)
+private lemma dirM_main {lam : ℝ} (hlam : 0 < lam) (n : ℕ)
     {θ : ℝ} (hθ : 0 < θ) (hθπ : θ < Real.pi) :
     ultrasphPoly lam n (Real.cos θ) / ultrasphPoly lam n 1 =
       (2 : ℂ) ^ (lam : ℂ) * Gamma (lam + 1 / 2 : ℂ) /
@@ -1184,7 +1169,7 @@ open Set
 
 /-- `∫₀^π sin^{2λ-1} = √π Γ(λ)/Γ(λ+1/2)` for `λ > 0`, from the trigonometric Beta integral,
 together with the integrability of `sin^{2λ-1}` on `[0, π]`. -/
-lemma integral_sin_rpow_aux {lam : ℝ} (hlam : 0 < lam) :
+theorem integral_sin_rpow_aux {lam : ℝ} (hlam : 0 < lam) :
     IntervalIntegrable (fun t : ℝ => Real.sin t ^ (2 * lam - 1)) volume 0 π ∧
     ∫ t in (0 : ℝ)..π, Real.sin t ^ (2 * lam - 1) =
       Real.sqrt π * Real.Gamma lam / Real.Gamma (lam + 1 / 2) := by
@@ -1220,7 +1205,7 @@ def gegenbauerLaplace (lam θ : ℝ) (n : ℕ) : ℂ :=
     ((Real.sin t ^ (2 * lam - 1) : ℝ) : ℂ)
 
 /-- The weighted Laplace integrals satisfy the normalized Gegenbauer recurrence. -/
-lemma gegenbauerLaplace_recurrence {lam : ℝ} (hlam : 0 < lam) (θ : ℝ) (n : ℕ) :
+theorem gegenbauerLaplace_recurrence {lam : ℝ} (hlam : 0 < lam) (θ : ℝ) (n : ℕ) :
     (n + 1 + 2 * lam : ℂ) * gegenbauerLaplace lam θ (n + 2) =
       2 * (n + 1 + lam) * Real.cos θ * gegenbauerLaplace lam θ (n + 1) -
         (n + 1) * gegenbauerLaplace lam θ n := by
@@ -1379,7 +1364,7 @@ def legendreLaplace (θ : ℝ) (n : ℕ) : ℂ :=
   ∫ t : ℝ in (0 : ℝ)..π, ((Real.cos θ : ℂ) + I * Real.sin θ * Real.cos t) ^ n
 
 /-- The Laplace integrals satisfy the Legendre recurrence. -/
-lemma legendreLaplace_recurrence (θ : ℝ) (n : ℕ) :
+theorem legendreLaplace_recurrence (θ : ℝ) (n : ℕ) :
     (n + 2 : ℂ) * legendreLaplace θ (n + 2) =
       (2 * n + 3) * Real.cos θ * legendreLaplace θ (n + 1) - (n + 1) * legendreLaplace θ n := by
   set c : ℂ := (Real.cos θ : ℂ) with hc
@@ -1461,7 +1446,7 @@ theorem legendre_laplace_integral (n : ℕ) (θ : ℝ) :
     linear_combination (-(π : ℂ)) * hP
 
 /-- `x^k e^{-xz} e^{-x²}` is integrable for every complex `z`. -/
-lemma integrable_pow_mul_cexp_gauss (k : ℕ) (z : ℂ) :
+theorem integrable_pow_mul_cexp_gauss (k : ℕ) (z : ℂ) :
     Integrable fun x : ℝ => (x : ℂ) ^ k * (cexp (-x * z) * cexp (-(x : ℂ) ^ 2)) := by
   have hreal : Integrable fun x : ℝ => x ^ k * Real.exp (-(1 / 2) * x ^ 2) := by
     have h := integrable_rpow_mul_exp_neg_mul_sq (b := 1 / 2) (by norm_num)
@@ -1495,7 +1480,7 @@ lemma integrable_pow_mul_cexp_gauss (k : ℕ) (z : ℂ) :
   linear_combination (x : ℂ) ^ k * e
 
 /-- A polynomial times `e^{-xz} e^{-x²}` is integrable. -/
-lemma integrable_eval_mul_cexp_gauss (q : ℝ[X]) (z : ℂ) :
+theorem integrable_eval_mul_cexp_gauss (q : ℝ[X]) (z : ℂ) :
     Integrable fun x : ℝ => cexp (-x * z) * ((q.eval x * Real.exp (-(x ^ 2)) : ℝ) : ℂ) := by
   have hq : ∀ x : ℝ, cexp (-x * z) * ((q.eval x * Real.exp (-(x ^ 2)) : ℝ) : ℂ) =
       ∑ i ∈ Finset.range (q.natDegree + 1),
@@ -1508,7 +1493,7 @@ lemma integrable_eval_mul_cexp_gauss (q : ℝ[X]) (z : ℂ) :
   exact integrable_finsetSum _ fun i _ => (integrable_pow_mul_cexp_gauss i z).const_mul _
 
 /-- Repeated integration by parts against `e^{-xz}`. -/
-lemma integral_cexp_mul_hermite_gauss (z : ℂ) (n : ℕ) :
+theorem integral_cexp_mul_hermite_gauss (z : ℂ) (n : ℕ) :
     ∫ x : ℝ, cexp (-x * z) * (((hermitePolyHR n).eval x * Real.exp (-(x ^ 2)) : ℝ) : ℂ) =
       (-z) ^ n * ∫ x : ℝ, cexp (-x * z) * ((Real.exp (-(x ^ 2)) : ℝ) : ℂ) := by
   induction n with
@@ -1546,7 +1531,7 @@ lemma integral_cexp_mul_hermite_gauss (z : ℂ) (n : ℕ) :
     ring
 
 /-- `∫ e^{-xz} e^{-x²} dx = √π e^{z²/4}`. -/
-lemma integral_cexp_gauss (z : ℂ) :
+theorem integral_cexp_gauss (z : ℂ) :
     ∫ x : ℝ, cexp (-x * z) * ((Real.exp (-(x ^ 2)) : ℝ) : ℂ) =
       (Real.sqrt Real.pi : ℂ) * cexp (z ^ 2 / 4) := by
   have h := integral_cexp_quadratic (b := -1) (by simp) (-z) 0
@@ -1574,7 +1559,7 @@ lemma hermite_laplace_aux (n : ℕ) (z : ℂ) :
   ring
 
 /-- `(x+it)^n t^j e^{-t²}` is integrable. -/
-lemma integrable_add_I_pow_mul_pow_gauss (x : ℂ) (n j : ℕ) :
+theorem integrable_add_I_pow_mul_pow_gauss (x : ℂ) (n j : ℕ) :
     Integrable fun t : ℝ => (x + I * t) ^ n * ((t : ℂ) ^ j * ((Real.exp (-(t ^ 2)) : ℝ) : ℂ)) := by
   have hq : ∀ t : ℝ, (x + I * t) ^ n * ((t : ℂ) ^ j * ((Real.exp (-(t ^ 2)) : ℝ) : ℂ)) =
       ∑ k ∈ Finset.range (n + 1), ((n.choose k : ℂ) * x ^ (n - k) * I ^ k) *
@@ -1586,12 +1571,12 @@ lemma integrable_add_I_pow_mul_pow_gauss (x : ℂ) (n j : ℕ) :
   exact integrable_finsetSum _ fun k _ => (integrable_pow_mul_cexp_gauss (k + j) 0).const_mul _
 
 /-- `(x+it)^n e^{-t²}` is integrable. -/
-lemma integrable_add_I_pow_gauss (x : ℂ) (n : ℕ) :
+theorem integrable_add_I_pow_gauss (x : ℂ) (n : ℕ) :
     Integrable fun t : ℝ => (x + I * t) ^ n * ((Real.exp (-(t ^ 2)) : ℝ) : ℂ) := by
   simpa using integrable_add_I_pow_mul_pow_gauss x n 0
 
 /-- One integration by parts: `∫ t (x+it)^n e^{-t²} = (i n / 2) ∫ (x+it)^{n-1} e^{-t²}`. -/
-lemma integral_t_mul_add_I_pow (x : ℂ) (n : ℕ) :
+theorem integral_t_mul_add_I_pow (x : ℂ) (n : ℕ) :
     ∫ t : ℝ, (x + I * t) ^ (n + 1) * ((t * Real.exp (-(t ^ 2)) : ℝ) : ℂ) =
       I * (n + 1) / 2 * ∫ t : ℝ, (x + I * t) ^ n * ((Real.exp (-(t ^ 2)) : ℝ) : ℂ) := by
   have hu : ∀ t : ℝ, HasDerivAt (fun s : ℝ => (x + I * s) ^ (n + 1))
@@ -1679,7 +1664,7 @@ theorem hermitePolyH_laplace_integral (n : ℕ) (x : ℂ) :
   linear_combination -hn
 
 /-- `e^{-t²} tⁿ e^{2ixt}` is integrable. -/
-lemma integrable_gauss_pow_cexp (x : ℝ) (n : ℕ) :
+theorem integrable_gauss_pow_cexp (x : ℝ) (n : ℕ) :
     Integrable fun t : ℝ => ((Real.exp (-(t ^ 2)) : ℝ) : ℂ) * (t : ℂ) ^ n * cexp (2 * I * x * t) := by
   refine (integrable_pow_mul_cexp_gauss n (-2 * I * x)).congr (Eventually.of_forall fun t => ?_)
   simp only [ofReal_exp]
@@ -1688,7 +1673,7 @@ lemma integrable_gauss_pow_cexp (x : ℝ) (n : ℕ) :
   ring
 
 /-- The moment recurrence for `∫ e^{-t²} tⁿ e^{2ixt} dt`. -/
-lemma integral_K_succ_succ (x : ℝ) (n : ℕ) :
+theorem integral_K_succ_succ (x : ℝ) (n : ℕ) :
     ∫ t : ℝ, ((Real.exp (-(t ^ 2)) : ℝ) : ℂ) * (t : ℂ) ^ (n + 2) * cexp (2 * I * x * t) =
       I * x * (∫ t : ℝ, ((Real.exp (-(t ^ 2)) : ℝ) : ℂ) * (t : ℂ) ^ (n + 1) * cexp (2 * I * x * t)) +
       (n + 1) / 2 * ∫ t : ℝ, ((Real.exp (-(t ^ 2)) : ℝ) : ℂ) * (t : ℂ) ^ n * cexp (2 * I * x * t) := by
@@ -1730,7 +1715,7 @@ lemma integral_K_succ_succ (x : ℝ) (n : ℕ) :
   ring
 
 /-- The Fourier transform of the Gaussian. -/
-lemma integral_K_zero (x : ℝ) :
+theorem integral_K_zero (x : ℝ) :
     ∫ t : ℝ, ((Real.exp (-(t ^ 2)) : ℝ) : ℂ) * (t : ℂ) ^ 0 * cexp (2 * I * x * t) =
       Real.sqrt Real.pi * cexp (-(x : ℂ) ^ 2) := by
   have h := integral_cexp_gauss (-2 * I * x)
@@ -1741,7 +1726,7 @@ lemma integral_K_zero (x : ℝ) :
   ring
 
 /-- The first moment of the Gaussian Fourier kernel. -/
-lemma integral_K_one (x : ℝ) :
+theorem integral_K_one (x : ℝ) :
     ∫ t : ℝ, ((Real.exp (-(t ^ 2)) : ℝ) : ℂ) * (t : ℂ) ^ 1 * cexp (2 * I * x * t) =
       I * x * ∫ t : ℝ, ((Real.exp (-(t ^ 2)) : ℝ) : ℂ) * (t : ℂ) ^ 0 * cexp (2 * I * x * t) := by
   have hu : ∀ t : ℝ, HasDerivAt (fun s : ℝ => cexp (2 * I * x * s))
@@ -1851,7 +1836,7 @@ theorem hermitePolyH_weighted_integral (n : ℕ) (x : ℝ) :
     neg_sub_neg] using h
 
 /-- Positive integer cosine frequencies integrate to zero on the half-circle. -/
-lemma integral_cos_nat_pi {k : ℕ} (hk : 0 < k) :
+theorem integral_cos_nat_pi {k : ℕ} (hk : 0 < k) :
     (∫ phi : ℝ in (0 : ℝ)..π, (Real.cos (k*phi) : ℂ)) = 0 := by
   have hk0 : (k : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr hk.ne'
   have hh := integral_cos_mul_complex hk0 0 π
@@ -1899,7 +1884,7 @@ theorem legendre_product_integral (n : ℕ) (θ ψ : ℝ) :
 
 /-- Gamma normalization converts Laguerre polynomials into the regularized Kummer
 function. This uses Mathlib's Gamma/Pochhammer relation at regular parameters. -/
-lemma laguerrePolyL_div_Gamma_eq_regularized {α : ℝ} (hα : -1 < α) (n : ℕ) (y : ℂ) :
+theorem laguerrePolyL_div_Gamma_eq_regularized {α : ℝ} (hα : -1 < α) (n : ℕ) (y : ℂ) :
     laguerrePolyL α n y / Gamma ((α : ℂ) + n + 1) =
       regularizedHGFun {(-(n : ℂ))} {(α : ℂ) + 1} y / (n.factorial : ℂ) := by
   have hp : ∀ k : ℕ, (α : ℂ) + 1 ≠ -(k : ℂ) :=
@@ -2061,7 +2046,7 @@ theorem hermitePolyH_fourier_transform (n : ℕ) (y : ℝ) :
   field_simp
 
 /-- TauCeti's Hermite functions with the positive, unit-frequency Fourier convention. -/
-lemma hermiteFunction_integral (n : ℕ) (y : ℝ) :
+theorem hermiteFunction_integral (n : ℕ) (y : ℝ) :
     (∫ x : ℝ, Complex.exp (I * x * y) * (TauCeti.hermiteFunction n x : ℂ)) =
       (Real.sqrt (2 * Real.pi) : ℂ) * I ^ n * (TauCeti.hermiteFunction n y : ℂ) := by
   let s := Real.sqrt (2 * Real.pi)
@@ -2108,7 +2093,7 @@ private lemma ofReal_aeval_int (p : ℤ[X]) (x : ℝ) :
   exact (aeval_algHom_apply (IsScalarTower.toAlgHom ℤ ℝ ℂ) x p).symm
 
 /-- The physicists' Hermite envelope differs from TauCeti's function by a constant. -/
-lemma hermitePolyH_envelope (n : ℕ) (x : ℝ) :
+theorem hermitePolyH_envelope (n : ℕ) (x : ℝ) :
     exp (-(x : ℂ) ^ 2 / 2) * (aeval (x : ℂ) (hermitePolyH n) : ℂ) =
       ((2 : ℝ) ^ (n / 2 : ℝ) * Real.sqrt ((n.factorial : ℝ) * Real.sqrt Real.pi) : ℝ) *
         (TauCeti.hermiteFunction n x : ℂ) := by
@@ -2124,7 +2109,7 @@ lemma hermitePolyH_envelope (n : ℕ) (x : ℝ) :
   rw [mul_div_cancel_right₀ _ (ofReal_ne_zero.mpr hc)]
 
 /-- The probabilists' Hermite envelope is a dilation of TauCeti's Hermite function. -/
-lemma hermite_envelope (n : ℕ) (x : ℝ) :
+theorem hermite_envelope (n : ℕ) (x : ℝ) :
     exp (-(x : ℂ) ^ 2 / 4) * (aeval (x : ℂ) (hermite n) : ℂ) =
       (Real.sqrt ((n.factorial : ℝ) * Real.sqrt Real.pi) : ℂ) *
         (TauCeti.hermiteFunction n (x / Real.sqrt 2) : ℂ) := by
@@ -2157,7 +2142,7 @@ theorem hermitePolyH_fourier_eigenfunction (n : ℕ) (y : ℝ) :
   field_simp
 
 /-- `u^{s-1} e^{-wu}` is integrable on `(0,∞)` for `Re s, Re w > 0`. -/
-lemma integrableOn_cpow_mul_cexp_neg {s w : ℂ} (hs : 0 < s.re) (hw : 0 < w.re) :
+theorem integrableOn_cpow_mul_cexp_neg {s w : ℂ} (hs : 0 < s.re) (hw : 0 < w.re) :
     IntegrableOn (fun u : ℝ => (u : ℂ) ^ (s - 1) * cexp (-(w * u))) (Set.Ioi 0) := by
   have hb := integrableOn_rpow_mul_exp_neg_mul_rpow (p := 1) (s := s.re - 1) (b := w.re)
     (by linarith) one_pos hw
@@ -2168,7 +2153,7 @@ lemma integrableOn_cpow_mul_cexp_neg {s w : ℂ} (hs : 0 < s.re) (hw : 0 < w.re)
   simp
 
 /-- Termwise Mellin–Laplace integration of a finite polynomial sum. -/
-lemma integral_finite_sum_mellin_laplace {a : ℝ} (ha : 0 < a) {z : ℂ}
+theorem integral_finite_sum_mellin_laplace {a : ℝ} (ha : 0 < a) {z : ℂ}
     (hz : 0 < z.re) (s : Finset ℕ) (c : ℕ → ℂ) (d : ℕ → ℕ) :
     (∫ x : ℝ in Set.Ioi 0, exp (-a * x) *
       (∑ k ∈ s, c k * (x : ℂ) ^ d k) * (x : ℂ) ^ (z - 1)) =
@@ -2193,7 +2178,7 @@ lemma integral_finite_sum_mellin_laplace {a : ℝ} (ha : 0 < a) {z : ℂ}
     div_eq_mul_inv, mul_assoc]
 
 /-- `Γ(a + m) = (a)_m Γ(a)` for `Re a > 0`. -/
-lemma Gamma_add_nat_eq_poch_mul {a : ℂ} (ha : 0 < a.re) (m : ℕ) :
+theorem Gamma_add_nat_eq_poch_mul {a : ℂ} (ha : 0 < a.re) (m : ℕ) :
     Gamma (a + m) = poch a m * Gamma a := by
   induction m with
   | zero => simp [poch_zero]
@@ -2279,7 +2264,7 @@ theorem hermitePolyH_laplace_transform (n : ℕ) (z : ℂ) :
   exact hermite_laplace_aux n z
 
 /-- Complex-exponent version of `integral_jacobi_weight`. -/
-lemma integral_jacobi_weight_cpow {a b : ℂ} (ha : -1 < a.re) (hb : -1 < b.re) :
+theorem integral_jacobi_weight_cpow {a b : ℂ} (ha : -1 < a.re) (hb : -1 < b.re) :
     (∫ t : ℝ in (-1 : ℝ)..1, (1 - (t : ℂ)) ^ a * (1 + (t : ℂ)) ^ b) =
       (2 : ℂ) ^ (a + b + 1) * (Gamma (a + 1) * Gamma (b + 1) / Gamma (a + b + 2)) := by
   have he := intervalIntegral.integral_comp_add_right
@@ -2302,7 +2287,7 @@ lemma integral_jacobi_weight_cpow {a b : ℂ} (ha : -1 < a.re) (hb : -1 < b.re) 
     _ = _ := by rw [he, add_comm b a, mul_comm (Gamma (b + 1))]
 
 /-- Complex-exponent version of `intervalIntegrable_jacobi_weight`. -/
-lemma intervalIntegrable_jacobi_weight_cpow {a b : ℂ} (ha : -1 < a.re) (hb : -1 < b.re) :
+theorem intervalIntegrable_jacobi_weight_cpow {a b : ℂ} (ha : -1 < a.re) (hb : -1 < b.re) :
     IntervalIntegrable (fun t : ℝ => (1 - (t : ℂ)) ^ a * (1 + (t : ℂ)) ^ b) volume (-1) 1 := by
   have hi := (intervalIntegrable_cpow_mul_sub_cpow (a := b) (b := a)
     hb ha (show (0 : ℝ) < 2 by norm_num)).comp_add_right 1
@@ -2389,7 +2374,7 @@ theorem jacobi_mellin_transform {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) {z
   field_simp
 
 /-- The substitution `s = 1 - 2x²` on `(0, 1)`, with no regularity assumption on `F`. -/
-lemma integral_mul_comp_one_sub_two_sq (F : ℝ → ℂ) :
+theorem integral_mul_comp_one_sub_two_sq (F : ℝ → ℂ) :
     (∫ x : ℝ in (0 : ℝ)..1, (x : ℂ) * F (1 - 2 * x ^ 2)) =
       (1 / 4 : ℂ) * ∫ s : ℝ in (-1 : ℝ)..1, F s := by
   have himg : (fun x : ℝ => 1 - 2 * x ^ 2) '' Set.Ioo 0 1 = Set.Ioo (-1) 1 := by
@@ -2423,7 +2408,7 @@ lemma integral_mul_comp_one_sub_two_sq (F : ℝ → ℂ) :
 
 
 /-- The substitution `s = 1 - 2x²` turns `(1-x²)^μ x^v` on `(0, 1)` into a Jacobi weight. -/
-lemma integral_one_sub_sq_cpow_mul_cpow (μ v : ℂ) (G : ℝ → ℂ) :
+theorem integral_one_sub_sq_cpow_mul_cpow (μ v : ℂ) (G : ℝ → ℂ) :
     (∫ x : ℝ in (0 : ℝ)..1, (1 - (x : ℂ) ^ 2) ^ μ * (x : ℂ) ^ v * G (1 - 2 * x ^ 2)) =
       (1 / 4 : ℂ) * (2 : ℂ) ^ (-(μ + (v - 1) / 2)) * ∫ s : ℝ in (-1 : ℝ)..1,
         (1 - (s : ℂ)) ^ ((v - 1) / 2) * (1 + (s : ℂ)) ^ μ * G s := by
@@ -2593,7 +2578,7 @@ private lemma binomial_double_sum (m n : ℕ) (f : ℕ → ℂ) :
   simpa only [sum_monomial_index, zero_mul] using h
 
 /-- Finite Gamma-normalized expansion of the Laguerre polynomial divided by its value at zero. -/
-lemma laguerrePolyL_normalized_sum {α : ℂ} (hα : -1 < α.re) (n : ℕ) (x : ℂ) :
+theorem laguerrePolyL_normalized_sum {α : ℂ} (hα : -1 < α.re) (n : ℕ) (x : ℂ) :
     laguerrePolyL α n x / laguerrePolyL α n 0 =
       Gamma (α + 1) * ∑ i ∈ Finset.range (n + 1),
         (n.choose i : ℂ) * (-x) ^ i / Gamma (α + 1 + i) := by
@@ -2618,7 +2603,7 @@ lemma laguerrePolyL_normalized_sum {α : ℂ} (hα : -1 < α.re) (n : ℕ) (x : 
   ring
 
 /-- Power expansion of a normalized Laguerre polynomial with its endpoint weight. -/
-lemma laguerrePolyL_normalized_weight_sum {α : ℂ} (hα : -1 < α.re)
+theorem laguerrePolyL_normalized_weight_sum {α : ℂ} (hα : -1 < α.re)
     (n : ℕ) {t : ℝ} (ht : 0 < t) :
     (t : ℂ) ^ α * laguerrePolyL α n t / laguerrePolyL α n 0 =
       Gamma (α + 1) * ∑ i ∈ Finset.range (n + 1),
@@ -3473,7 +3458,7 @@ theorem jacobi_fractional_integral {α β μ : ℝ} (hα : -1 < α) (hβ : -1 < 
 
 /-- The moments `∫ (1 + x)^m (1 - x)^α (1 + x)^β P_n^{(α,β)}(x) dx`, from the Mellin transform
 and the reflection `x ↦ -x`. -/
-lemma jacobi_moment {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n m : ℕ) :
+theorem jacobi_moment {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n m : ℕ) :
     ∫ x : ℝ in (-1 : ℝ)..1, ((x : ℂ) + 1) ^ m *
         (jacobiPolyP α β n x * (1 - (x : ℂ)) ^ (α : ℂ) * (1 + (x : ℂ)) ^ (β : ℂ)) =
       (-1 : ℂ) ^ n * ((2 : ℂ) ^ ((α : ℂ) + (β + m + 1)) * Gamma (β + m + 1) *
@@ -3501,7 +3486,7 @@ lemma jacobi_moment {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n m : ℕ) :
 
 
 /-- Termwise integration of `e^{-(x+1)z}` against an integrable function on `[-1, 1]`. -/
-lemma hasSum_integral_exp_neg_add_one_mul {w : ℝ → ℂ}
+theorem hasSum_integral_exp_neg_add_one_mul {w : ℝ → ℂ}
     (hw : IntervalIntegrable w volume (-1) 1) (z : ℂ) :
     HasSum (fun m : ℕ => ∫ x : ℝ in (-1 : ℝ)..1, (-z) ^ m / m ! * (((x : ℂ) + 1) ^ m * w x))
       (∫ x : ℝ in (-1 : ℝ)..1, exp (-((x : ℂ) + 1) * z) * w x) := by
@@ -4019,13 +4004,13 @@ theorem hermite_fourier_eigenfunction (n : ℕ) (y : ℝ) :
 def hermiteGauss (n : ℕ) (x : ℝ) : ℝ := aeval x (hermite n) * Real.exp (-(x ^ 2 / 2))
 
 /-- `He_n(x) e^{-x²/2} = (-1)^n dⁿ/dxⁿ e^{-x²/2}`. -/
-lemma hermiteGauss_eq_iterate (n : ℕ) (x : ℝ) :
+theorem hermiteGauss_eq_iterate (n : ℕ) (x : ℝ) :
     hermiteGauss n x = (-1) ^ n * deriv^[n] (fun y => Real.exp (-(y ^ 2 / 2))) x := by
   rw [deriv_gaussian_eq_hermite_mul_gaussian, hermiteGauss, ← mul_assoc, ← mul_assoc,
     ← pow_add, ← two_mul, pow_mul, neg_one_sq, one_pow, one_mul]
 
 /-- `(He_n e^{-x²/2})' = -He_{n+1} e^{-x²/2}`. -/
-lemma hasDerivAt_hermiteGauss (n : ℕ) (x : ℝ) :
+theorem hasDerivAt_hermiteGauss (n : ℕ) (x : ℝ) :
     HasDerivAt (hermiteGauss n) (-hermiteGauss (n + 1) x) x := by
   have hg : ContDiff ℝ ⊤ fun y : ℝ => Real.exp (-(y ^ 2 / 2)) := by fun_prop
   have hd : Differentiable ℝ (deriv^[n] fun y : ℝ => Real.exp (-(y ^ 2 / 2))) := by
@@ -4039,11 +4024,11 @@ lemma hasDerivAt_hermiteGauss (n : ℕ) (x : ℝ) :
   ring
 
 /-- `He_n(x) e^{-x²/2}` is integrable (Tau Ceti `integrable_aeval_mul_gaussian`). -/
-lemma integrable_hermiteGauss (n : ℕ) : Integrable (hermiteGauss n) :=
+theorem integrable_hermiteGauss (n : ℕ) : Integrable (hermiteGauss n) :=
   TauCeti.integrable_aeval_mul_gaussian (hermite n)
 
 /-- The positive-phase Fourier transform of `He_n(x) e^{-x²/2}`. -/
-lemma integral_exp_mul_hermiteGauss (n : ℕ) (y : ℝ) :
+theorem integral_exp_mul_hermiteGauss (n : ℕ) (y : ℝ) :
     ∫ x : ℝ, cexp (I * y * x) * (hermiteGauss n x : ℂ) =
       (I * y) ^ n * (Real.sqrt (2 * π) * Real.exp (-(y ^ 2 / 2)) : ℝ) := by
   induction n with
@@ -4085,7 +4070,7 @@ lemma integral_exp_mul_hermiteGauss (n : ℕ) (y : ℝ) :
 
 
 /-- `e^{iyx} He_n(x) e^{-x²/2}` is integrable. -/
-lemma integrable_exp_mul_hermiteGauss (n : ℕ) (y : ℝ) :
+theorem integrable_exp_mul_hermiteGauss (n : ℕ) (y : ℝ) :
     Integrable fun x : ℝ => cexp (I * y * x) * (hermiteGauss n x : ℂ) := by
   refine (integrable_hermiteGauss n).ofReal.bdd_mul (c := 1) ?_ ?_
   · exact (by fun_prop : Continuous fun x : ℝ => cexp (I * y * x)).aestronglyMeasurable
@@ -4094,11 +4079,11 @@ lemma integrable_exp_mul_hermiteGauss (n : ℕ) (y : ℝ) :
     simp
 
 /-- Rewriting `e^{iyx}` as `e^{(yx) i}`. -/
-lemma exp_I_mul_eq (y x : ℝ) : cexp (I * y * x) = cexp (((y * x : ℝ) : ℂ) * I) := by
+theorem exp_I_mul_eq (y x : ℝ) : cexp (I * y * x) = cexp (((y * x : ℝ) : ℂ) * I) := by
   push_cast; ring_nf
 
 /-- The cosine transform of `He_n(x) e^{-x²/2}` over `ℝ`. -/
-lemma integral_cos_mul_hermiteGauss (n : ℕ) (y : ℝ) :
+theorem integral_cos_mul_hermiteGauss (n : ℕ) (y : ℝ) :
     ∫ x : ℝ, Real.cos (y * x) * hermiteGauss n x =
       ((I * y) ^ n).re * (Real.sqrt (2 * π) * Real.exp (-(y ^ 2 / 2))) := by
   have h := congrArg Complex.re (integral_exp_mul_hermiteGauss n y)
@@ -4110,7 +4095,7 @@ lemma integral_cos_mul_hermiteGauss (n : ℕ) (y : ℝ) :
   rw [exp_I_mul_eq, Complex.re_mul_ofReal, Complex.exp_ofReal_mul_I_re]
 
 /-- The sine transform of `He_n(x) e^{-x²/2}` over `ℝ`. -/
-lemma integral_sin_mul_hermiteGauss (n : ℕ) (y : ℝ) :
+theorem integral_sin_mul_hermiteGauss (n : ℕ) (y : ℝ) :
     ∫ x : ℝ, Real.sin (y * x) * hermiteGauss n x =
       ((I * y) ^ n).im * (Real.sqrt (2 * π) * Real.exp (-(y ^ 2 / 2))) := by
   have h := congrArg Complex.im (integral_exp_mul_hermiteGauss n y)
@@ -4122,7 +4107,7 @@ lemma integral_sin_mul_hermiteGauss (n : ℕ) (y : ℝ) :
   rw [exp_I_mul_eq, Complex.im_mul_ofReal, Complex.exp_ofReal_mul_I_im]
 
 /-- `√(2π)/2 = √(π/2)`. -/
-lemma sqrt_two_pi_div_two : Real.sqrt (2 * π) / 2 = Real.sqrt (π / 2) := by
+theorem sqrt_two_pi_div_two : Real.sqrt (2 * π) / 2 = Real.sqrt (π / 2) := by
   rw [show π / 2 = (2 * π) / 2 ^ 2 by ring, Real.sqrt_div' _ (by positivity),
     Real.sqrt_sq (by norm_num)]
 
@@ -4184,7 +4169,7 @@ theorem hermite_odd_sine_transform (n : ℕ) (y : ℝ) :
   linarith
 
 /-- The product formula for Mathlib's probabilists' Hermite normalization. -/
-lemma hermite_linearization (m n : ℕ) (x : ℝ) :
+theorem hermite_linearization (m n : ℕ) (x : ℝ) :
     (aeval x (hermite m) : ℝ) * aeval x (hermite n) =
       ∑ k ∈ Finset.range (min m n + 1), (m.choose k : ℝ) * n.choose k * k.factorial *
         aeval x (hermite (m + n - 2 * k)) := by
@@ -4227,7 +4212,7 @@ lemma hermite_linearization (m n : ℕ) (x : ℝ) :
         (aeval x (hermite (m + n - 2 * k)) : ℝ) * this
 
 /-- The finite contraction sum in a Hermite transform is a Laguerre polynomial. -/
-lemma hermite_laguerrePolyL_sum (n l : ℕ) (u : ℂ) :
+theorem hermite_laguerrePolyL_sum (n l : ℕ) (u : ℂ) :
     ∑ k ∈ Finset.range (n + 1), (n.choose k : ℂ) * (n + l).choose k * k.factorial *
       (-1 : ℂ) ^ (n - k) * u ^ (2 * (n - k) + l) =
       n.factorial * u ^ l * laguerrePolyL l n (u ^ 2) := by
@@ -4439,7 +4424,7 @@ section LaguerreProductLaplace
 set_option maxHeartbeats 1000000
 
 /-- Complex scaling of a finite Gamma moment. -/
-lemma scaled_monomial_moment {α : ℝ} (hα : -1 < α) {w : ℂ} (hw : 0 < w.re) (n : ℕ) :
+theorem scaled_monomial_moment {α : ℝ} (hα : -1 < α) {w : ℂ} (hw : 0 < w.re) (n : ℕ) :
     IntegrableOn (fun x : ℝ => (w * x) ^ n * (x : ℂ) ^ (α : ℂ) * exp (-(w * x))) (Set.Ioi 0) ∧
     (∫ x : ℝ in Set.Ioi 0, (w * x) ^ n * (x : ℂ) ^ (α : ℂ) * exp (-(w * x))) =
       w ^ (-((α : ℂ) + 1)) * Gamma ((α : ℂ) + n + 1) := by
@@ -4461,7 +4446,7 @@ lemma scaled_monomial_moment {α : ℝ} (hα : -1 < α) {w : ℂ} (hw : 0 < w.re
   linear_combination Gamma ((α : ℂ) + n + 1) * hp
 
 /-- A polynomial's scaled Laplace integral differs from its Gamma integral by one power. -/
-lemma scaled_polynomial_moment {α : ℝ} (hα : -1 < α) {w : ℂ} (hw : 0 < w.re) (p : ℂ[X]) :
+theorem scaled_polynomial_moment {α : ℝ} (hα : -1 < α) {w : ℂ} (hw : 0 < w.re) (p : ℂ[X]) :
     IntegrableOn (fun x : ℝ => p.eval (w * x) * (x : ℂ) ^ (α : ℂ) * exp (-(w * x))) (Set.Ioi 0) ∧
     (∫ x : ℝ in Set.Ioi 0, p.eval (w * x) * (x : ℂ) ^ (α : ℂ) * exp (-(w * x))) =
       w ^ (-((α : ℂ) + 1)) *
@@ -4499,7 +4484,7 @@ lemma scaled_polynomial_moment {α : ℝ} (hα : -1 < α) {w : ℂ} (hw : 0 < w.
     ring
 
 /-- The finite Laguerre expansion is a complex polynomial. -/
-lemma laguerre_exists_poly (α : ℂ) (n : ℕ) :
+theorem laguerre_exists_poly (α : ℂ) (n : ℕ) :
     ∃ p : ℂ[X], ∀ x, p.eval x = laguerrePolyL α n x := by
   refine ⟨∑ j ∈ Finset.range (n + 1), monomial j
     (poch (α + 1) n / n.factorial * kummerMCoeff (-(n : ℂ)) (α + 1) j), ?_⟩
@@ -4507,7 +4492,7 @@ lemma laguerre_exists_poly (α : ℂ) (n : ℕ) :
   simp [eval_finsetSum, laguerrePolyL_eq_sum_coeff]
 
 /-- Scaled Laguerre orthogonality for a complex Laplace rate. -/
-lemma scaled_laguerre_inner {α : ℝ} (hα : -1 < α) {w : ℂ} (hw : 0 < w.re) (m n : ℕ) :
+theorem scaled_laguerre_inner {α : ℝ} (hα : -1 < α) {w : ℂ} (hw : 0 < w.re) (m n : ℕ) :
     IntegrableOn (fun x : ℝ => laguerrePolyL α m (w * x) * laguerrePolyL α n (w * x) *
       (x : ℂ) ^ (α : ℂ) * exp (-(w * x))) (Set.Ioi 0) ∧
     (∫ x : ℝ in Set.Ioi 0, laguerrePolyL α m (w * x) * laguerrePolyL α n (w * x) *
@@ -4536,7 +4521,7 @@ def laguerreScaleCoeff (α w : ℂ) (n k : ℕ) : ℂ :=
     laguerrePolyL α k 0
 
 /-- Expansion in the Laguerre basis evaluated at a scaled argument. -/
-lemma laguerre_scale_sum {α w : ℂ} (hα : -1 < α.re) (hw : w ≠ 0) (n : ℕ) (x : ℂ) :
+theorem laguerre_scale_sum {α w : ℂ} (hα : -1 < α.re) (hw : w ≠ 0) (n : ℕ) (x : ℂ) :
     laguerrePolyL α n x = ∑ k ∈ Finset.range (n + 1),
       laguerreScaleCoeff α w n k * laguerrePolyL α k (w * x) := by
   have he : laguerrePolyL α n 0 ≠ 0 := by
@@ -4553,7 +4538,7 @@ lemma laguerre_scale_sum {α w : ℂ} (hα : -1 < α.re) (hw : w ≠ 0) (n : ℕ
   ring
 
 /-- Orthogonality contracts the two finite change-of-scale expansions. -/
-lemma laguerre_product_contraction {α : ℝ} (hα : -1 < α) {w : ℂ} (hw : 0 < w.re) (m n : ℕ) :
+theorem laguerre_product_contraction {α : ℝ} (hα : -1 < α) {w : ℂ} (hw : 0 < w.re) (m n : ℕ) :
     (∫ x : ℝ in Set.Ioi 0, laguerrePolyL α m x * laguerrePolyL α n x *
       (x : ℂ) ^ (α : ℂ) * exp (-(w * x))) =
       ∑ k ∈ Finset.range (m + 1), laguerreScaleCoeff α w m k * laguerreScaleCoeff α w n k *
@@ -4598,7 +4583,7 @@ lemma laguerre_product_contraction {α : ℝ} (hα : -1 < α) {w : ℂ} (hw : 0 
     rw [ite_eq_right (by intro h; subst j; exact hi hj), mul_zero]
 
 /-- Terminating Gauss coefficients in binomial form. -/
-lemma gauss_neg_nat_choose (m n k : ℕ) (a : ℂ) :
+theorem gauss_neg_nat_choose (m n k : ℕ) (a : ℂ) :
     gaussHGCoeff (-(m : ℂ)) (-(n : ℂ)) a k =
       (m.choose k : ℂ) * (n.choose k : ℂ) * k ! / poch a k := by
   simp only [gaussHGCoeff, poch_neg_coe_nat, Nat.descFactorial_eq_factorial_mul_choose,
@@ -4613,7 +4598,7 @@ lemma gauss_neg_nat_choose (m n k : ℕ) (a : ℂ) :
     ring
 
 /-- The elementary power cancellation in a Laguerre change of scale. -/
-lemma laguerre_scale_power {z : ℂ} (hz : z ≠ 0) (hw : z + 1 ≠ 0) {n k : ℕ} (hk : k ≤ n) :
+theorem laguerre_scale_power {z : ℂ} (hz : z ≠ 0) (hw : z + 1 ≠ 0) {n k : ℕ} (hk : k ≤ n) :
     ((z + 1)⁻¹) ^ k * (1 - (z + 1)⁻¹) ^ (n - k) =
       z ^ n / (z + 1) ^ n / z ^ k := by
   have he : 1 - (z + 1)⁻¹ = z / (z + 1) := by field_simp; ring
@@ -4621,7 +4606,7 @@ lemma laguerre_scale_power {z : ℂ} (hz : z ≠ 0) (hw : z + 1 ≠ 0) {n k : �
   field_simp
 
 /-- The diagonal contraction has exactly the terminating Gauss coefficients. -/
-lemma laguerre_product_contraction_term {α : ℝ} (hα : -1 < α) {z : ℂ}
+theorem laguerre_product_contraction_term {α : ℝ} (hα : -1 < α) {z : ℂ}
     (hz : z ≠ 0) (hw : z + 1 ≠ 0) {m n k : ℕ} (hk : k ≤ m) :
     laguerreScaleCoeff α (z + 1) m k * laguerreScaleCoeff α (z + 1) n k *
       ((z + 1) ^ (-((α : ℂ) + 1)) * Gamma (k + (α : ℂ) + 1) / k !) =
@@ -4728,7 +4713,7 @@ def angularJacobiSum (β : ℂ) (n : ℕ) (x y : ℂ) : ℂ :=
     (poch (β + k + 1) (n - k) / (n - k) !) * (-y ^ 2) ^ (n - k) * (x ^ 2) ^ k
 
 /-- A normalized Gegenbauer polynomial is the corresponding normalized symmetric Jacobi polynomial. -/
-lemma gegenbauer_normalized_jacobi {β : ℝ} (hβ : -1 / 2 < β) (n : ℕ) (z : ℂ) :
+theorem gegenbauer_normalized_jacobi {β : ℝ} (hβ : -1 / 2 < β) (n : ℕ) (z : ℂ) :
     ultrasphPoly (β + 1 / 2) n z / ultrasphPoly (β + 1 / 2) n 1 =
       jacobiPolyP β β n z / jacobiPolyP β β n 1 := by
   have hb : -1 < (β : ℂ).re := by simp; linarith
@@ -4743,7 +4728,7 @@ lemma gegenbauer_normalized_jacobi {β : ℝ} (hβ : -1 / 2 < β) (n : ℕ) (z :
   exact mul_div_mul_left _ _ (div_ne_zero hq hp')
 
 /-- Homogenization of the finite Jacobi binomial sum. -/
-lemma angularJacobiSum_eq {β : ℝ} (hβ : -1 / 2 < β) (n : ℕ) {x y : ℝ}
+theorem angularJacobiSum_eq {β : ℝ} (hβ : -1 / 2 < β) (n : ℕ) {x y : ℝ}
     (hs : 0 < x ^ 2 + y ^ 2) :
     (x ^ 2 + y ^ 2 : ℂ) ^ n * jacobiPolyP β β n ((x ^ 2 - y ^ 2) / (x ^ 2 + y ^ 2) : ℂ) =
       angularJacobiSum β n x y := by
@@ -4767,7 +4752,7 @@ lemma angularJacobiSum_eq {β : ℝ} (hβ : -1 / 2 < β) (n : ℕ) {x y : ℝ}
     ((x ^ 2 + y ^ 2 : ℂ) ^ n * hpow - (2 : ℂ) ^ n * hspow)
 
 /-- The angular weight is integrable, including the allowed singular endpoint exponents. -/
-lemma angular_weight_integrable {β : ℝ} (hβ : -1 / 2 < β) :
+theorem angular_weight_integrable {β : ℝ} (hβ : -1 / 2 < β) :
     IntervalIntegrable (fun phi : ℝ => (Real.sin phi : ℂ) ^ (2 * β : ℂ)) volume 0 Real.pi := by
   have h := (integral_sin_rpow_aux (lam := β + 1 / 2) (by linarith)).1
   have hc : IntervalIntegrable (fun phi : ℝ => ((Real.sin phi ^ (2 * β) : ℝ) : ℂ)) volume 0 Real.pi := by
@@ -4782,7 +4767,7 @@ lemma angular_weight_integrable {β : ℝ} (hβ : -1 / 2 < β) :
     Complex.ofReal_cpow (Real.sin_pos_of_pos_of_lt_pi hphi.1 hphi.2).le]
 
 /-- Homogeneous angular Laplace integral, reduced to a finite symmetric Jacobi sum. -/
-lemma angular_homogeneous {β : ℝ} (hβ : -1 / 2 < β) (n : ℕ) {x y : ℝ}
+theorem angular_homogeneous {β : ℝ} (hβ : -1 / 2 < β) (n : ℕ) {x y : ℝ}
     (hs : 0 < x ^ 2 + y ^ 2) :
     (∫ phi : ℝ in (0 : ℝ)..Real.pi,
       ((x : ℂ) ^ 2 - y ^ 2 + 2 * I * x * y * Real.cos phi) ^ n *
@@ -4863,7 +4848,7 @@ lemma angular_homogeneous {β : ℝ} (hβ : -1 / 2 < β) (n : ℕ) {x y : ℝ}
     ((x ^ 2 + y ^ 2 : ℂ) ^ n) * hLcross
 
 /-- Gaussian radial moments, including integrability at zero. -/
-lemma gaussian_radial_moment {s : ℝ} (hs : 0 < s) :
+theorem gaussian_radial_moment {s : ℝ} (hs : 0 < s) :
     IntegrableOn (fun r : ℝ => exp (-(r : ℂ) ^ 2) * (r : ℂ) ^ (2 * s - 1 : ℂ)) (Ioi 0) ∧
     (∫ r : ℝ in Ioi 0, exp (-(r : ℂ) ^ 2) * (r : ℂ) ^ (2 * s - 1 : ℂ)) =
       (1 / 2) * Gamma (s : ℂ) := by
@@ -4895,7 +4880,7 @@ lemma gaussian_radial_moment {s : ℝ} (hs : 0 < s) :
   ring
 
 /-- The square map takes the open unit interval bijectively to itself. -/
-lemma square_image_Ioo : (fun r : ℝ => r ^ 2) '' Ioo 0 1 = Ioo 0 1 := by
+theorem square_image_Ioo : (fun r : ℝ => r ^ 2) '' Ioo 0 1 = Ioo 0 1 := by
   ext x
   constructor
   · rintro ⟨r, hr, rfl⟩
@@ -4905,7 +4890,7 @@ lemma square_image_Ioo : (fun r : ℝ => r ^ 2) '' Ioo 0 1 = Ioo 0 1 := by
       Real.sq_sqrt hx.1.le⟩
 
 /-- Beta radial moments after the square substitution; endpoint singularities are retained. -/
-lemma beta_radial_moment {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
+theorem beta_radial_moment {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
     IntervalIntegrable (fun r : ℝ => (r : ℂ) ^ (2 * a - 1 : ℂ) * (1 - (r : ℂ) ^ 2) ^ (b - 1 : ℂ)) volume 0 1 ∧
     (∫ r : ℝ in (0 : ℝ)..1, (r : ℂ) ^ (2 * a - 1 : ℂ) * (1 - (r : ℂ) ^ 2) ^ (b - 1 : ℂ)) =
       (1 / 2) * (Gamma (a : ℂ) * Gamma (b : ℂ) / Gamma (a + b : ℂ)) := by
@@ -4956,7 +4941,7 @@ lemma beta_radial_moment {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
 
 
 /-- Gamma-normalized finite Jacobi expansion at a real angle. -/
-lemma jacobi_half_angle_normalized {α β : ℝ} (hα : -1 < α) (n : ℕ) (θ : ℝ) :
+theorem jacobi_half_angle_normalized {α β : ℝ} (hα : -1 < α) (n : ℕ) (θ : ℝ) :
     jacobiPolyP α β n (Real.cos θ) / jacobiPolyP α β n 1 =
       Gamma (α + 1 : ℂ) * n ! * ∑ k ∈ Finset.range (n + 1),
         poch ((β : ℂ) + k + 1) (n - k) /
@@ -5274,7 +5259,7 @@ theorem jacobi_fourier_transform {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (
   exact jacobi_fourier_aux hα hβ n y
 
 /-- For `g` even, the Fourier integral over `[-1, 1]` is twice the cosine integral over `[0, 1]`. -/
-lemma integral_mul_exp_of_even {g : ℝ → ℂ} (hg : IntervalIntegrable g volume (-1) 1)
+theorem integral_mul_exp_of_even {g : ℝ → ℂ} (hg : IntervalIntegrable g volume (-1) 1)
     (hev : ∀ x, g (-x) = g x) (y : ℝ) :
     ∫ x : ℝ in (-1 : ℝ)..1, g x * exp (I * x * y) =
       2 * ∫ x : ℝ in (0 : ℝ)..1, g x * Real.cos (x * y) := by
@@ -5305,7 +5290,7 @@ lemma integral_mul_exp_of_even {g : ℝ → ℂ} (hg : IntervalIntegrable g volu
 
 /-- For `g` odd, the Fourier integral over `[-1, 1]` is `2i` times the sine integral over
 `[0, 1]`. -/
-lemma integral_mul_exp_of_odd {g : ℝ → ℂ} (hg : IntervalIntegrable g volume (-1) 1)
+theorem integral_mul_exp_of_odd {g : ℝ → ℂ} (hg : IntervalIntegrable g volume (-1) 1)
     (hodd : ∀ x, g (-x) = -g x) (y : ℝ) :
     ∫ x : ℝ in (-1 : ℝ)..1, g x * exp (I * x * y) =
       2 * I * ∫ x : ℝ in (0 : ℝ)..1, g x * Real.sin (x * y) := by
@@ -5336,7 +5321,7 @@ lemma integral_mul_exp_of_odd {g : ℝ → ℂ} (hg : IntervalIntegrable g volum
     (-(g x) * (exp (-(x * y) * I) - exp ((x * y) * I))) * I_sq
 
 /-- The Gegenbauer weight times a continuous function is integrable on `[-1, 1]`. -/
-lemma intervalIntegrable_ultrasph_weight_mul {lam : ℝ} (hlam : 0 < lam) (N : ℕ) :
+theorem intervalIntegrable_ultrasph_weight_mul {lam : ℝ} (hlam : 0 < lam) (N : ℕ) :
     IntervalIntegrable (fun x : ℝ => (1 - (x : ℂ) ^ 2) ^ (lam - 1 / 2 : ℂ) *
       ultrasphPoly lam N x) volume (-1) 1 := by
   have hw := intervalIntegrable_jacobi_weight_cpow (a := (lam : ℂ) - 1 / 2)
@@ -5429,13 +5414,13 @@ theorem laguerrePolyL_laplace_transform {α : ℝ} (hα : -1 < α) (n : ℕ) {z 
   exact laguerrePolyL_laplace_aux hα n hz
 
 /-- `1/Γ(y) = (y)_m/Γ(y+m)` for every `y` and every `m`, including poles. -/
-lemma recip_Gamma_eq_poch_mul_recip_Gamma_add (m : ℕ) (y : ℂ) :
+theorem recip_Gamma_eq_poch_mul_recip_Gamma_add (m : ℕ) (y : ℂ) :
     (Gamma y)⁻¹ = poch y m * (Gamma (y + m))⁻¹ := by
   cases m with
   | zero => simp [poch_zero]
   | succ p => exact recip_Gamma_eq_poch_mul p y
 
-lemma ultrasphPoly_mellin_transform_even {lam : ℝ} (hlam : 0 < lam) {z : ℂ} (hz : 0 < z.re)
+theorem ultrasphPoly_mellin_transform_even {lam : ℝ} (hlam : 0 < lam) {z : ℂ} (hz : 0 < z.re)
     (m : ℕ) :
     ∫ x : ℝ in (0 : ℝ)..1, (1 - (x : ℂ) ^ 2) ^ (lam - 1 / 2 : ℂ) *
       ultrasphPoly lam (2 * m) x * (x : ℂ) ^ (z - 1) =
@@ -5546,7 +5531,7 @@ lemma ultrasphPoly_mellin_transform_even {lam : ℝ} (hlam : 0 < lam) {z : ℂ} 
   linear_combination 2 * pl * Gz2 * Gmlh * R * hPQ
 
 
-lemma ultrasphPoly_mellin_transform_odd {lam : ℝ} (hlam : 0 < lam) {z : ℂ} (hz : 0 < z.re)
+theorem ultrasphPoly_mellin_transform_odd {lam : ℝ} (hlam : 0 < lam) {z : ℂ} (hz : 0 < z.re)
     (m : ℕ) :
     ∫ x : ℝ in (0 : ℝ)..1, (1 - (x : ℂ) ^ 2) ^ (lam - 1 / 2 : ℂ) *
       ultrasphPoly lam (2 * m + 1) x * (x : ℂ) ^ (z - 1) =

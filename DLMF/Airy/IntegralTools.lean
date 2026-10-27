@@ -6,8 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Airy.Scorer
-public import DLMF.Airy.Asymptotics
-public import DLMF.Airy.ModulusPhase
 
 /-!
 # Tools for the Airy integrals of DLMF §9.10
@@ -29,7 +27,7 @@ open scoped Real Topology
 namespace DLMF.Airy
 
 /-- For an entire integrand, the primitive at a real point is the interval integral. -/
-lemma airyInt_primitive_ofReal {f : ℂ → ℂ} (hf : Differentiable ℂ f) (x : ℝ) :
+theorem airyInt_primitive_ofReal {f : ℂ → ℂ} (hf : Differentiable ℂ f) (x : ℝ) :
     primitive f x = ∫ t in (0 : ℝ)..x, f t := by
   obtain ⟨g, hg⟩ := hf.isExactOn_univ
   have hg' (w : ℂ) : HasDerivAt g (f w) w := hg w (mem_univ w)
@@ -47,7 +45,7 @@ lemma airyInt_primitive_ofReal {f : ℂ → ℂ} (hf : Differentiable ℂ f) (x 
   simp
 
 /-- `∫₀^∞ t^m e^{-st} dt = m!/s^{m+1}`. -/
-lemma airyInt_integral_pow_mul_exp_neg (m : ℕ) {s : ℝ} (hs : 0 < s) :
+theorem airyInt_integral_pow_mul_exp_neg (m : ℕ) {s : ℝ} (hs : 0 < s) :
     IntegrableOn (fun t : ℝ => t ^ m * Real.exp (-(s * t))) (Ioi 0) ∧
       ∫ t in Ioi (0 : ℝ), t ^ m * Real.exp (-(s * t)) = (Nat.factorial m : ℝ) / s ^ (m + 1) := by
   have he : (fun t : ℝ => t ^ m * Real.exp (-(s * t))) =ᵐ[volume.restrict (Ioi 0)]
@@ -67,7 +65,7 @@ lemma airyInt_integral_pow_mul_exp_neg (m : ℕ) {s : ℝ} (hs : 0 < s) :
 
 
 /-- The Laplace integrand of Hi is dominated by `t^m e^{-st}` when `Re w ≤ -s`. -/
-lemma airyInt_norm_integral_cubic_le (m : ℕ) {w : ℂ} {s : ℝ} (hs : 0 < s) (hw : w.re ≤ -s) :
+theorem airyInt_norm_integral_cubic_le (m : ℕ) {w : ℂ} {s : ℝ} (hs : 0 < s) (hw : w.re ≤ -s) :
     ‖∫ t : ℝ in Ioi 0, (t : ℂ) ^ m * exp (-(t : ℂ) ^ 3 / 3 + w * t)‖ ≤
       (Nat.factorial m : ℝ) / s ^ (m + 1) := by
   obtain ⟨hi, hv⟩ := airyInt_integral_pow_mul_exp_neg m hs
@@ -82,7 +80,7 @@ lemma airyInt_norm_integral_cubic_le (m : ℕ) {w : ℂ} {s : ℝ} (hs : 0 < s) 
   nlinarith [pow_pos ht 3]
 
 /-- `‖Hi(w)‖ ≤ 1/(πs)` when `Re w ≤ -s < 0`. -/
-lemma airyInt_norm_scorerHi_le {w : ℂ} {s : ℝ} (hs : 0 < s) (hw : w.re ≤ -s) :
+theorem airyInt_norm_scorerHi_le {w : ℂ} {s : ℝ} (hs : 0 < s) (hw : w.re ≤ -s) :
     ‖scorerHi w‖ ≤ 1 / (π * s) := by
   rw [(scorerHi_exp_integral w).2, norm_div, norm_real, Real.norm_of_nonneg Real.pi_pos.le]
   have h := airyInt_norm_integral_cubic_le 0 hs hw
@@ -92,7 +90,7 @@ lemma airyInt_norm_scorerHi_le {w : ℂ} {s : ℝ} (hs : 0 < s) (hw : w.re ≤ -
     _ = 1 / (π * s) * π := by field_simp
 
 /-- `‖Hi'(w)‖ ≤ 1/(πs²)` when `Re w ≤ -s < 0`. -/
-lemma airyInt_norm_scorerHiDeriv_le {w : ℂ} {s : ℝ} (hs : 0 < s) (hw : w.re ≤ -s) :
+theorem airyInt_norm_scorerHiDeriv_le {w : ℂ} {s : ℝ} (hs : 0 < s) (hw : w.re ≤ -s) :
     ‖scorerHiDeriv w‖ ≤ 1 / (π * s ^ 2) := by
   rw [scorerHiDeriv_exp_integral w, norm_div, norm_real, Real.norm_of_nonneg Real.pi_pos.le]
   have h := airyInt_norm_integral_cubic_le 1 hs hw
@@ -102,7 +100,7 @@ lemma airyInt_norm_scorerHiDeriv_le {w : ℂ} {s : ℝ} (hs : 0 < s) (hw : w.re 
     _ = 1 / (π * s ^ 2) * π := by field_simp
 
 /-- `Hi(-s) = 1/(πs) + O(s^{-4})`, with the explicit bound `2/(πs⁴)`. -/
-lemma airyInt_norm_scorerHi_neg_sub_le {s : ℝ} (hs : 0 < s) :
+theorem airyInt_norm_scorerHi_neg_sub_le {s : ℝ} (hs : 0 < s) :
     ‖scorerHi (-(s : ℂ)) - 1 / (π * s)‖ ≤ 2 / (π * s ^ 4) := by
   have hpi := Real.pi_pos
   obtain ⟨h0i, h0v⟩ := airyInt_integral_pow_mul_exp_neg 0 hs
@@ -145,7 +143,7 @@ lemma airyInt_norm_scorerHi_neg_sub_le {s : ℝ} (hs : 0 < s) :
 
 
 /-- `Hi(-s) = O(s^{-1})` as `s → ∞`. -/
-lemma airyInt_scorerHi_neg_isBigO :
+theorem airyInt_scorerHi_neg_isBigO :
     (fun s : ℝ => scorerHi (-(s : ℂ))) =O[atTop] (fun s : ℝ => s ^ (-1 : ℝ)) := by
   refine IsBigO.of_bound (1 / π) ?_
   filter_upwards [eventually_gt_atTop 0] with s hs
@@ -154,7 +152,7 @@ lemma airyInt_scorerHi_neg_isBigO :
     _ = _ := by field_simp
 
 /-- `Hi'(-s) = O(s^{-2})` as `s → ∞`. -/
-lemma airyInt_scorerHiDeriv_neg_isBigO :
+theorem airyInt_scorerHiDeriv_neg_isBigO :
     (fun s : ℝ => scorerHiDeriv (-(s : ℂ))) =O[atTop] (fun s : ℝ => s ^ (-2 : ℝ)) := by
   refine IsBigO.of_bound (1 / π) ?_
   filter_upwards [eventually_gt_atTop 0] with s hs
@@ -165,7 +163,7 @@ lemma airyInt_scorerHiDeriv_neg_isBigO :
 
 /-- The Scorer cross combination `f Hi' - f' Hi` tends to zero at `-∞` whenever
 `f(-s) = O(s^{-1/4})` and `f'(-s) = O(s^{1/4})`. -/
-lemma airyInt_tendsto_cross_atBot {f f' : ℂ → ℂ}
+theorem airyInt_tendsto_cross_atBot {f f' : ℂ → ℂ}
     (hf : (fun s : ℝ => f (-(s : ℂ))) =O[atTop] (fun s : ℝ => s ^ (-(1 / 4) : ℝ)))
     (hf' : (fun s : ℝ => f' (-(s : ℂ))) =O[atTop] (fun s : ℝ => s ^ (1 / 4 : ℝ))) :
     Tendsto (fun x : ℝ => f x * scorerHiDeriv x - f' x * scorerHi x) atBot (𝓝 0) := by
@@ -187,7 +185,7 @@ lemma airyInt_tendsto_cross_atBot {f f' : ℂ → ℂ}
 
 /-- An improper integral at `-∞` obtained from a Scorer-type identity
 `c + ∫₀ˣ f = π g(x)` with `g → 0` at `-∞`. -/
-lemma airyInt_hasIntegralAtBot_of_cross {f g : ℂ → ℂ} (hfd : Differentiable ℂ f) {c : ℂ}
+theorem airyInt_hasIntegralAtBot_of_cross {f g : ℂ → ℂ} (hfd : Differentiable ℂ f) {c : ℂ}
     (hid : ∀ x : ℝ, c + primitive f x = π * g x)
     (hg : Tendsto (fun x : ℝ => g x) atBot (𝓝 0)) (x : ℝ) :
     HasIntegralAtBot (fun t => f t) x (c + primitive f x) := by
@@ -204,7 +202,7 @@ lemma airyInt_hasIntegralAtBot_of_cross {f g : ℂ → ℂ} (hfd : Differentiabl
   simpa [add_comm] using this
 
 /-- If `g - c s^{1/4} φ = O(s^{-5/4})` with `|φ| ≤ 1`, then `g = O(s^{1/4})`. -/
-lemma airyInt_isBigO_rpow_of_sub {g : ℝ → ℂ} {φ : ℝ → ℝ} (hg : (fun s : ℝ => g s -
+theorem airyInt_isBigO_rpow_of_sub {g : ℝ → ℂ} {φ : ℝ → ℝ} (hg : (fun s : ℝ => g s -
       ((s ^ (1 / 4 : ℝ) / Real.sqrt π * φ s : ℝ) : ℂ)) =O[atTop] (fun s : ℝ => s ^ (-(5 / 4) : ℝ)))
     (hφ : ∀ s, |φ s| ≤ 1) : g =O[atTop] (fun s : ℝ => s ^ (1 / 4 : ℝ)) := by
   have h1 : (fun s : ℝ => ((s ^ (1 / 4 : ℝ) / Real.sqrt π * φ s : ℝ) : ℂ)) =O[atTop]
@@ -226,7 +224,7 @@ lemma airyInt_isBigO_rpow_of_sub {g : ℝ → ℂ} {φ : ℝ → ℝ} (hg : (fun
   exact ((hg.trans h2).add h1).congr_left fun s => by ring
 
 /-- The Scorer cross combination with its leading oscillatory term removed. -/
-lemma airyInt_cross_expansion {f f' : ℂ → ℂ} {φ : ℝ → ℝ} (hφ : ∀ s, |φ s| ≤ 1)
+theorem airyInt_cross_expansion {f f' : ℂ → ℂ} {φ : ℝ → ℝ} (hφ : ∀ s, |φ s| ≤ 1)
     (hf : (fun s : ℝ => f (-(s : ℂ))) =O[atTop] (fun s : ℝ => s ^ (-(1 / 4) : ℝ)))
     (hf' : (fun s : ℝ => f' (-(s : ℂ)) - ((s ^ (1 / 4 : ℝ) / Real.sqrt π * φ s : ℝ) : ℂ))
       =O[atTop] (fun s : ℝ => s ^ (-(5 / 4) : ℝ))) :
@@ -290,18 +288,18 @@ lemma airyInt_cross_expansion {f f' : ℂ → ℂ} {φ : ℝ → ℝ} (hφ : ∀
 
 
 /-- `‖e^{cπi}‖ = 1` for real `c`. -/
-lemma airyInt_norm_exp_pi_I_mul (c : ℝ) : ‖exp ((c : ℂ) * π * I)‖ = 1 := by
+theorem airyInt_norm_exp_pi_I_mul (c : ℝ) : ‖exp ((c : ℂ) * π * I)‖ = 1 := by
   rw [show (c : ℂ) * π * I = ((c * π : ℝ) : ℂ) * I by push_cast; ring, norm_exp_ofReal_mul_I]
 
 /-- Real parts of `x e^{∓2πi/3}`. -/
-lemma airyInt_re_mul_omega {x : ℝ} :
+theorem airyInt_re_mul_omega {x : ℝ} :
     ((x : ℂ) * exp (-2 * π * I / 3)).re = -(x / 2) ∧
       ((x : ℂ) * exp (2 * π * I / 3)).re = -(x / 2) := by
   rw [exp_neg_two_pi_I_div_three', exp_two_pi_I_div_three]
   constructor <;> simp <;> ring
 
 /-- Norms of the rotation factors in the Scorer connection formulas. -/
-lemma airyInt_norm_rot :
+theorem airyInt_norm_rot :
     ‖exp (π * I / 3) / 2‖ = 1 / 2 ∧ ‖exp (-π * I / 3) / 2‖ = 1 / 2 ∧
       ‖exp (-2 * π * I / 3)‖ = 1 ∧ ‖exp (2 * π * I / 3)‖ = 1 := by
   have e1 : π * I / 3 = ((1 / 3 : ℝ) : ℂ) * π * I := by push_cast; ring
@@ -313,7 +311,7 @@ lemma airyInt_norm_rot :
   norm_num
 
 /-- `|Gi(x)| ≤ 2/(πx)` for `x > 0`. -/
-lemma airyInt_norm_scorerGi_le {x : ℝ} (hx : 0 < x) : ‖scorerGi x‖ ≤ 2 / (π * x) := by
+theorem airyInt_norm_scorerGi_le {x : ℝ} (hx : 0 < x) : ‖scorerGi x‖ ≤ 2 / (π * x) := by
   have hx2 : 0 < x / 2 := by linarith
   obtain ⟨n1, n2, -, -⟩ := airyInt_norm_rot
   obtain ⟨r1, r2⟩ := airyInt_re_mul_omega (x := x)
@@ -327,7 +325,7 @@ lemma airyInt_norm_scorerGi_le {x : ℝ} (hx : 0 < x) : ‖scorerGi x‖ ≤ 2 /
     _ = _ := by field_simp; ring
 
 /-- `|Gi'(x)| ≤ 4/(πx²)` for `x > 0`. -/
-lemma airyInt_norm_scorerGiDeriv_le {x : ℝ} (hx : 0 < x) : ‖scorerGiDeriv x‖ ≤ 4 / (π * x ^ 2) := by
+theorem airyInt_norm_scorerGiDeriv_le {x : ℝ} (hx : 0 < x) : ‖scorerGiDeriv x‖ ≤ 4 / (π * x ^ 2) := by
   have hx2 : 0 < x / 2 := by linarith
   obtain ⟨n1, n2, n3, n4⟩ := airyInt_norm_rot
   obtain ⟨r1, r2⟩ := airyInt_re_mul_omega (x := x)
@@ -342,7 +340,7 @@ lemma airyInt_norm_scorerGiDeriv_le {x : ℝ} (hx : 0 < x) : ‖scorerGiDeriv x�
     _ = _ := by field_simp; ring
 
 /-- `|Ai(x)| ≤ 1` for `x ≥ 1`. -/
-lemma airyInt_norm_airyAi_le {x : ℝ} (hx : 1 ≤ x) : ‖airyAi x‖ ≤ 1 := by
+theorem airyInt_norm_airyAi_le {x : ℝ} (hx : 1 ≤ x) : ‖airyAi x‖ ≤ 1 := by
   have hx0 : 0 < x := by linarith
   have h := (airy_ai_real_error hx0 (N := 0) le_rfl).1
   simp only [airyRemainder, airyExponentialSum, Finset.range_zero, Finset.sum_empty, sub_zero,
@@ -365,7 +363,7 @@ lemma airyInt_norm_airyAi_le {x : ℝ} (hx : 1 ≤ x) : ‖airyAi x‖ ≤ 1 := 
     _ = 1 := by ring
 
 /-- `|Ai'(x)| ≤ 2 x^{1/4}` for `x ≥ 1`. -/
-lemma airyInt_norm_airyAiDeriv_le {x : ℝ} (hx : 1 ≤ x) : ‖airyAiDeriv x‖ ≤ 2 * x ^ (1 / 4 : ℝ) := by
+theorem airyInt_norm_airyAiDeriv_le {x : ℝ} (hx : 1 ≤ x) : ‖airyAiDeriv x‖ ≤ 2 * x ^ (1 / 4 : ℝ) := by
   have hx0 : 0 < x := by linarith
   have h := airy_aiDeriv_bound hx0
   rw [airyAiDeriv_ofReal_eq, norm_real, Real.norm_eq_abs]
@@ -381,7 +379,7 @@ lemma airyInt_norm_airyAiDeriv_le {x : ℝ} (hx : 1 ≤ x) : ‖airyAiDeriv x‖
     _ ≤ 2 * x ^ (1 / 4 : ℝ) := by linarith
 
 /-- `Ai Gi' - Ai' Gi → 0` at `+∞`. -/
-lemma airyInt_tendsto_cross_gi_atTop :
+theorem airyInt_tendsto_cross_gi_atTop :
     Tendsto (fun x : ℝ => airyAi x * scorerGiDeriv x - airyAiDeriv x * scorerGi x) atTop (𝓝 0) := by
   have hπ := Real.pi_pos
   have hA : (fun x : ℝ => airyAi x) =O[atTop] (fun _ : ℝ => (1 : ℝ)) := by
@@ -417,7 +415,7 @@ lemma airyInt_tendsto_cross_gi_atTop :
   simpa using h1.sub h2
 
 /-- `u - v = O(|v| x^{-c})` with `c > 0` gives `u ~ v`. -/
-lemma airyInt_isEquivalent_of_isBigO {u v : ℝ → ℂ} {c : ℝ} (hc : 0 < c)
+theorem airyInt_isEquivalent_of_isBigO {u v : ℝ → ℂ} {c : ℝ} (hc : 0 < c)
     (h : (fun x => u x - v x) =O[atTop] (fun x => ‖v x‖ * x ^ (-c))) : u ~[atTop] v := by
   have h1 : (fun x : ℝ => x ^ (-c)) =o[atTop] (fun _ : ℝ => (1 : ℝ)) :=
     isLittleO_one_iff ℝ |>.2 (tendsto_rpow_neg_atTop hc)
@@ -428,7 +426,7 @@ lemma airyInt_isEquivalent_of_isBigO {u v : ℝ → ℂ} {c : ℝ} (hc : 0 < c)
   exact h.trans_isLittleO h3
 
 /-- On the real axis, `πGi(x) = 1/x + O(x^{-4})`. -/
-lemma airyInt_scorerGi_sub_isBigO :
+theorem airyInt_scorerGi_sub_isBigO :
     (fun x : ℝ => scorerGi x - 1 / (π * x)) =O[atTop] (fun x : ℝ => x ^ (-4 : ℝ)) := by
   have hπ := Real.pi_pos
   have h := (scorerGi_asymptotic (δ := π / 6) (by positivity) (by linarith) 1)
@@ -444,7 +442,7 @@ lemma airyInt_scorerGi_sub_isBigO :
       Real.norm_of_nonneg (by positivity)]
 
 /-- Real-axis Poincaré bounds with one term: `w(x) = pref(x) + O(pref(x)/ζ)`. -/
-lemma airyInt_poincare_real (kind : AiryKind) :
+theorem airyInt_poincare_real (kind : AiryKind) :
     (fun x : ℝ => airyFunction kind x - airyPrefactor kind x) =O[atTop]
       (fun x : ℝ => airyPrefactor kind x / airyZetaComplex x) := by
   have hπ := Real.pi_pos
@@ -466,7 +464,7 @@ lemma airyInt_poincare_real (kind : AiryKind) :
 
 
 /-- `Gi(x) = O(x^{-1})` as `x → +∞`. -/
-lemma airyInt_scorerGi_isBigO :
+theorem airyInt_scorerGi_isBigO :
     (fun x : ℝ => scorerGi x) =O[atTop] (fun x : ℝ => x ^ (-1 : ℝ)) := by
   have hπ := Real.pi_pos
   refine IsBigO.of_bound (2 / π) ?_
@@ -476,7 +474,7 @@ lemma airyInt_scorerGi_isBigO :
     _ = _ := by field_simp
 
 /-- `Gi'(x) = O(x^{-2})` as `x → +∞`. -/
-lemma airyInt_scorerGiDeriv_isBigO :
+theorem airyInt_scorerGiDeriv_isBigO :
     (fun x : ℝ => scorerGiDeriv x) =O[atTop] (fun x : ℝ => x ^ (-2 : ℝ)) := by
   have hπ := Real.pi_pos
   refine IsBigO.of_bound (4 / π) ?_
@@ -488,7 +486,7 @@ lemma airyInt_scorerGiDeriv_isBigO :
 
 /-- The Scorer cross combination `π(A Gi' - A' Gi)` at `+∞`: if `A = O(x^{1/2}|v|)` and
 `A' = -x v + O(x^{-1/2}|v|)`, then it is asymptotic to `v`. -/
-lemma airyInt_cross_equiv_atTop {A A' v : ℝ → ℂ}
+theorem airyInt_cross_equiv_atTop {A A' v : ℝ → ℂ}
     (hA : A =O[atTop] (fun x => x ^ (1 / 2 : ℝ) * ‖v x‖))
     (hA' : (fun x => A' x + x * v x) =O[atTop] (fun x => x ^ (-(1 / 2) : ℝ) * ‖v x‖)) :
     (fun x : ℝ => π * (A x * scorerGiDeriv x - A' x * scorerGi x)) ~[atTop] v := by
@@ -541,7 +539,7 @@ lemma airyInt_cross_equiv_atTop {A A' v : ℝ → ℂ}
 
 
 /-- Real-axis Poincaré bound with no terms: `w(x) = O(pref(x))`. -/
-lemma airyInt_poincare0_real (kind : AiryKind) :
+theorem airyInt_poincare0_real (kind : AiryKind) :
     (fun x : ℝ => airyFunction kind x) =O[atTop] (fun x : ℝ => airyPrefactor kind x) := by
   have hπ := Real.pi_pos
   have hT := airyInt_tendsto_ofReal_sector (α := π / 3 - π / 6) (by linarith)
@@ -558,7 +556,7 @@ lemma airyInt_poincare0_real (kind : AiryKind) :
     simpa [airyExponentialSum, Function.comp_def] using this
 
 /-- `‖pref/ζ‖ = (3/2) x^{-3/2} ‖pref‖` on the positive axis. -/
-lemma airyInt_norm_div_zeta (kind : AiryKind) {x : ℝ} (hx : 0 < x) :
+theorem airyInt_norm_div_zeta (kind : AiryKind) {x : ℝ} (hx : 0 < x) :
     ‖airyPrefactor kind x / airyZetaComplex x‖ =
       3 / 2 * x ^ (-(3 / 2) : ℝ) * ‖airyPrefactor kind x‖ := by
   rw [norm_div, airyReal_zeta_ofReal hx, norm_real, Real.norm_of_nonneg (airyZeta_pos hx).le,
@@ -566,7 +564,7 @@ lemma airyInt_norm_div_zeta (kind : AiryKind) {x : ℝ} (hx : 0 < x) :
   ring
 
 /-- Elementary identities for the powers `x^{1/4}, x^{1/2}, x^{3/4}`. -/
-lemma airyInt_quarter_rpow {x : ℝ} (hx : 0 < x) :
+theorem airyInt_quarter_rpow {x : ℝ} (hx : 0 < x) :
     x ^ (1 / 4 : ℝ) * x ^ (3 / 4 : ℝ) = x ∧ x ^ (1 / 4 : ℝ) * x ^ (1 / 2 : ℝ) = x ^ (3 / 4 : ℝ) ∧
       x ^ (1 / 4 : ℝ) * x ^ (-(3 / 2) : ℝ) * x ^ (3 / 4 : ℝ) = x ^ (-(1 / 2) : ℝ) := by
   refine ⟨?_, ?_, ?_⟩
@@ -576,14 +574,14 @@ lemma airyInt_quarter_rpow {x : ℝ} (hx : 0 < x) :
 
 
 /-- Norm of the prefactor of `Bi(x)` on the positive axis. -/
-lemma airyInt_norm_prefactor_bi {x : ℝ} (hx : 0 < x) :
+theorem airyInt_norm_prefactor_bi {x : ℝ} (hx : 0 < x) :
     ‖airyPrefactor .bi x‖ = Real.exp (airyZeta x) / (Real.sqrt π * x ^ (1 / 4 : ℝ)) := by
   rw [airyPrefactor, norm_div, norm_mul, airyInt_norm_cpow_quarter hx, Complex.norm_exp,
     airyReal_zeta_ofReal hx, ofReal_re, Complex.norm_real,
     Real.norm_of_nonneg (Real.sqrt_nonneg _)]
 
 /-- Norm of the prefactor of `Bi'(x)` on the positive axis. -/
-lemma airyInt_norm_prefactor_biDeriv {x : ℝ} (hx : 0 < x) :
+theorem airyInt_norm_prefactor_biDeriv {x : ℝ} (hx : 0 < x) :
     ‖airyPrefactor .biDeriv x‖ = x ^ (1 / 4 : ℝ) * Real.exp (airyZeta x) / Real.sqrt π := by
   rw [airyPrefactor, norm_div, norm_mul, airyInt_norm_cpow_quarter hx, Complex.norm_exp,
     airyReal_zeta_ofReal hx, ofReal_re, Complex.norm_real,

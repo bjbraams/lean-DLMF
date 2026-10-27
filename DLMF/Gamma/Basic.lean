@@ -5,12 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Tactic.CrossRefAttribute
 public import Mathlib.Analysis.PSeries
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
 public import Mathlib.Analysis.SpecialFunctions.Log.Summable
-public import Mathlib.Data.Complex.BigOperators
-public import Mathlib.Data.Nat.Factorial.BigOperators
 public import Mathlib.NumberTheory.Harmonic.EulerMascheroni
 
 /-!
@@ -61,7 +58,7 @@ so the `n`-th term is `(1 + s/(n+1)) e^{-s/(n+1)}`. -/
 def weierstrassGammaTerm (s : ℂ) (n : ℕ) : ℂ :=
   (1 + s / (n + 1)) * exp (-s / (n + 1))
 
-lemma harmonic_coe_eq_sum (n : ℕ) :
+theorem harmonic_coe_eq_sum (n : ℕ) :
     (harmonic n : ℂ) = ∑ i ∈ range n, (1 : ℂ) / (i + 1) := by
   unfold harmonic
   push_cast
@@ -84,7 +81,7 @@ private lemma norm_one_add_mul_exp_neg_sub_one_le {z : ℂ} (hz : ‖z‖ ≤ 1)
         grw [h1, norm_mul z, h2]
     _ = 3 * ‖z‖ ^ 2 := by ring
 
-lemma summable_weierstrassGammaTerm_sub_one (s : ℂ) :
+theorem summable_weierstrassGammaTerm_sub_one (s : ℂ) :
     Summable fun n : ℕ => weierstrassGammaTerm s n - 1 := by
   have hbase : Summable fun n : ℕ => (1 : ℝ) / (n : ℝ) ^ 2 :=
     (Real.summable_one_div_nat_pow (p := 2)).mpr one_lt_two
@@ -244,7 +241,7 @@ local notation "γ" => eulerMascheroniConstant
 def weierstrassGammaTerm (s : ℝ) (n : ℕ) : ℝ :=
   (1 + s / (n + 1)) * exp (-s / (n + 1))
 
-lemma ofReal_weierstrassGammaTerm (s : ℝ) (n : ℕ) :
+theorem ofReal_weierstrassGammaTerm (s : ℝ) (n : ℕ) :
     (weierstrassGammaTerm s n : ℂ) = Complex.weierstrassGammaTerm s n := by
   simp [weierstrassGammaTerm, Complex.weierstrassGammaTerm, Complex.ofReal_exp]
 

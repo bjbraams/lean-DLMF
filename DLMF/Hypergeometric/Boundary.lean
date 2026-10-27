@@ -5,9 +5,14 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Hypergeometric.Continuation
 public import DLMF.Hypergeometric.FiniteConvolution
-public import DLMF.Hypergeometric.Identities
+public import DLMF.Hypergeometric.ArgumentContinuation
+public import Mathlib.Algebra.Order.Ring.Star
+public import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.SpecialFunctions.Bernstein
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.Combinatorics.Matroid.Init
+public import Mathlib.Data.Nat.Choose.Multinomial
 
 /-!
 # Gauss summation for regularized coefficients on the boundary
@@ -24,7 +29,7 @@ noncomputable section
 namespace DLMF.Hypergeometric
 
 /-- Gauss summation of regularized coefficients at a regular denominator parameter. -/
-lemma hasSum_regularizedGauss_one_of_nonpole {a b c : ℂ}
+theorem hasSum_regularizedGauss_one_of_nonpole {a b c : ℂ}
     (hc : ∀ k : ℕ, c ≠ -k) (h : 0 < (c - a - b).re) :
     HasSum (fun n : ℕ => poch a n * poch b n / (n.factorial * Gamma (c + n)))
       (Gamma (c - a - b) / (Gamma (c - a) * Gamma (c - b))) := by
@@ -41,7 +46,7 @@ lemma hasSum_regularizedGauss_one_of_nonpole {a b c : ℂ}
   · field_simp [Gamma_ne_zero hc]
 
 /-- Regularized Gauss summation retains all denominator parameters, including Gamma poles. -/
-lemma hasSum_regularizedGauss_one {a b c : ℂ} (h : 0 < (c - a - b).re) :
+theorem hasSum_regularizedGauss_one {a b c : ℂ} (h : 0 < (c - a - b).re) :
     HasSum (fun n : ℕ => poch a n * poch b n / (n.factorial * Gamma (c + n)))
       (Gamma (c - a - b) / (Gamma (c - a) * Gamma (c - b))) := by
   by_cases hc : ∀ k : ℕ, c ≠ -k

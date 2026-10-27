@@ -7,17 +7,8 @@ module
 
 public import DLMF.Gamma.SeriesExpansions
 public import DLMFMathlib.NumberTheory.BernoulliTaylor
-public import Mathlib.RingTheory.Polynomial.Pochhammer
-public import Mathlib.Analysis.PSeriesComplex
 public import Mathlib.Analysis.SpecialFunctions.Integrals.Log
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
-public import Mathlib.Analysis.SpecialFunctions.Integrability.Log
-public import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.EulerSineProd
-public import Mathlib.FieldTheory.KummerExtension
-public import Mathlib.RingTheory.RootsOfUnity.Complex
-public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
-public import Mathlib.Analysis.Analytic.Binomial
 public import DLMF.Zeta.Riemann
 
 /-!

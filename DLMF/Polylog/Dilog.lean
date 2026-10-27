@@ -7,9 +7,6 @@ module
 
 public import DLMF.Polylog.Basic
 public import Mathlib.NumberTheory.Real.GoldenRatio
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
-public import Mathlib.Analysis.Calculus.DSlope
-public import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
 
 /-!
 # The real dilogarithm (Duverney §8.1.2; DLMF §25.12(i))
@@ -34,12 +31,12 @@ namespace DLMF.Polylog
 def dilogKernel (t : ℝ) : ℝ := dslope (fun t => -Real.log (1 - t)) 0 t
 
 /-- The kernel away from `0`. -/
-lemma dilogKernel_of_ne {t : ℝ} (ht : t ≠ 0) : dilogKernel t = -Real.log (1 - t) / t := by
+theorem dilogKernel_of_ne {t : ℝ} (ht : t ≠ 0) : dilogKernel t = -Real.log (1 - t) / t := by
   rw [dilogKernel, dslope_of_ne _ ht, slope_def_field]
   simp
 
 /-- The kernel at `0`. -/
-lemma dilogKernel_zero : dilogKernel 0 = 1 := by
+theorem dilogKernel_zero : dilogKernel 0 = 1 := by
   rw [dilogKernel, dslope_same]
   have h : HasDerivAt (fun t : ℝ => -Real.log (1 - t)) 1 0 := by
     have := (((hasDerivAt_id (0 : ℝ)).const_sub 1).log (by norm_num)).fun_neg
@@ -47,7 +44,7 @@ lemma dilogKernel_zero : dilogKernel 0 = 1 := by
   exact h.deriv
 
 /-- The kernel is continuous on `(-∞, 1)`. -/
-lemma continuousAt_dilogKernel {t : ℝ} (ht : t < 1) : ContinuousAt dilogKernel t := by
+theorem continuousAt_dilogKernel {t : ℝ} (ht : t < 1) : ContinuousAt dilogKernel t := by
   have hd : DifferentiableAt ℝ (fun t : ℝ => -Real.log (1 - t)) t :=
     (((differentiableAt_id).const_sub 1).log (by simp; linarith)).fun_neg
   by_cases h0 : t = 0
@@ -59,34 +56,34 @@ lemma continuousAt_dilogKernel {t : ℝ} (ht : t < 1) : ContinuousAt dilogKernel
 def Real.dilog (x : ℝ) : ℝ := ∫ t in (0 : ℝ)..x, dilogKernel t
 
 /-- The kernel is continuous on `(-∞, 1)`. -/
-lemma continuousOn_dilogKernel : ContinuousOn dilogKernel (Iio 1) :=
+theorem continuousOn_dilogKernel : ContinuousOn dilogKernel (Iio 1) :=
   fun _ ht => (continuousAt_dilogKernel ht).continuousWithinAt
 
 /-- The kernel is integrable on compact subintervals of `(-∞, 1)`. -/
-lemma intervalIntegrable_dilogKernel {a b : ℝ} (ha : a < 1) (hb : b < 1) :
+theorem intervalIntegrable_dilogKernel {a b : ℝ} (ha : a < 1) (hb : b < 1) :
     IntervalIntegrable dilogKernel MeasureTheory.volume a b :=
   (continuousOn_dilogKernel.mono fun t ht => by
     rw [mem_uIcc] at ht; rcases ht with ⟨_, h⟩ | ⟨_, h⟩ <;> simp only [mem_Iio] <;>
       linarith).intervalIntegrable
 
 /-- `Li₂' = -log(1-x)/x` on `(-∞, 1)`. -/
-lemma Real.hasDerivAt_dilog {x : ℝ} (hx : x < 1) : HasDerivAt Real.dilog (dilogKernel x) x :=
+theorem Real.hasDerivAt_dilog {x : ℝ} (hx : x < 1) : HasDerivAt Real.dilog (dilogKernel x) x :=
   intervalIntegral.integral_hasDerivAt_right (intervalIntegrable_dilogKernel (by norm_num) hx)
     (continuousOn_dilogKernel.stronglyMeasurableAtFilter isOpen_Iio x hx)
     (continuousAt_dilogKernel hx)
 
 /-- `Li₂(0) = 0`. -/
-lemma Real.dilog_zero : Real.dilog 0 = 0 := by simp [Real.dilog]
+theorem Real.dilog_zero : Real.dilog 0 = 0 := by simp [Real.dilog]
 
 /-- The series of `Li_n` at a real point is real. -/
-lemma polylogSeries_ofReal (n : ℕ) (x : ℝ) :
+theorem polylogSeries_ofReal (n : ℕ) (x : ℝ) :
     polylogSeries n x = ((∑' k : ℕ, x ^ (k + 1) / ((k : ℝ) + 1) ^ n : ℝ) : ℂ) := by
   rw [polylogSeries, ofReal_tsum]
   push_cast
   rfl
 
 /-- The derivative series of `Li₂` at a real point of `(-1, 1)` is the kernel. -/
-lemma tsum_eq_dilogKernel {x : ℝ} (hx : |x| < 1) :
+theorem tsum_eq_dilogKernel {x : ℝ} (hx : |x| < 1) :
     ∑' k : ℕ, (x : ℂ) ^ k / ((k : ℂ) + 1) ^ 1 = (dilogKernel x : ℂ) := by
   have hxn : ‖(x : ℂ)‖ < 1 := by rwa [norm_real, Real.norm_eq_abs]
   by_cases h0 : x = 0
@@ -101,24 +98,24 @@ lemma tsum_eq_dilogKernel {x : ℝ} (hx : |x| < 1) :
     push_cast; ring
 
 /-- Along the real segment `(-1, 1)` the series `Li₂` has derivative the kernel. -/
-lemma hasDerivAt_polylogSeries_two_ofReal {x : ℝ} (hx : |x| < 1) :
+theorem hasDerivAt_polylogSeries_two_ofReal {x : ℝ} (hx : |x| < 1) :
     HasDerivAt (fun t : ℝ => polylogSeries 2 t) (dilogKernel x : ℂ) x := by
   have hxn : ‖(x : ℂ)‖ < 1 := by rwa [norm_real, Real.norm_eq_abs]
   have h := (hasDerivAt_polylogSeries 1 hxn).comp_ofReal
   exact h.congr_deriv (tsum_eq_dilogKernel hx)
 
 /-- `Li_n` is continuous on the closed unit disk for `n ≥ 2`. -/
-lemma continuousOn_polylogSeries {n : ℕ} (hn : 2 ≤ n) :
+theorem continuousOn_polylogSeries {n : ℕ} (hn : 2 ≤ n) :
     ContinuousOn (polylogSeries n) (Metric.closedBall 0 1) :=
   continuousOn_tsum (fun k => (by fun_prop : Continuous fun z : ℂ =>
       z ^ (k + 1) / ((k : ℂ) + 1) ^ n).continuousOn) (summable_one_div_succ_pow hn)
     (fun k z hz => norm_term_le n (by simpa using hz) k)
 
 /-- `Li_n(0) = 0`. -/
-lemma polylogSeries_zero_arg (n : ℕ) : polylogSeries n 0 = 0 := by simp [polylogSeries]
+theorem polylogSeries_zero_arg (n : ℕ) : polylogSeries n 0 = 0 := by simp [polylogSeries]
 
 /-- The series `Li₂` agrees with the integral `Real.dilog` on `(-1, 1)`. -/
-lemma polylogSeries_two_ofReal_eq_dilog_of_abs_lt {x : ℝ} (hx : |x| < 1) :
+theorem polylogSeries_two_ofReal_eq_dilog_of_abs_lt {x : ℝ} (hx : |x| < 1) :
     polylogSeries 2 x = Real.dilog x := by
   set D : ℝ → ℂ := fun t => polylogSeries 2 t - Real.dilog t
   have hD (t : ℝ) (ht : t ∈ Ioo (-1 : ℝ) 1) : HasDerivAt D 0 t := by
@@ -133,7 +130,7 @@ lemma polylogSeries_two_ofReal_eq_dilog_of_abs_lt {x : ℝ} (hx : |x| < 1) :
   exact sub_eq_zero.mp hc
 
 /-- The kernel is nonnegative on `(-1, 1)`. -/
-lemma dilogKernel_nonneg {t : ℝ} (ht : |t| < 1) : 0 ≤ dilogKernel t := by
+theorem dilogKernel_nonneg {t : ℝ} (ht : |t| < 1) : 0 ≤ dilogKernel t := by
   rcases lt_trichotomy t 0 with h | h | h
   · rw [dilogKernel_of_ne h.ne]
     exact div_nonneg_of_nonpos (neg_nonpos.mpr (Real.log_nonneg (by linarith))) h.le
@@ -143,7 +140,7 @@ lemma dilogKernel_nonneg {t : ℝ} (ht : |t| < 1) : 0 ≤ dilogKernel t := by
       (by linarith))) h.le
 
 /-- The real part of the series, continuous on `[-1, 1]`. -/
-lemma continuousOn_re_polylogSeries_two :
+theorem continuousOn_re_polylogSeries_two :
     ContinuousOn (fun t : ℝ => (polylogSeries 2 t).re) (Icc (-1) 1) :=
   continuous_re.comp_continuousOn ((continuousOn_polylogSeries le_rfl).comp
     continuous_ofReal.continuousOn fun t ht => by
@@ -151,14 +148,14 @@ lemma continuousOn_re_polylogSeries_two :
       exact abs_le.mpr ht)
 
 /-- The real part of the series has derivative the kernel on `(-1, 1)`. -/
-lemma hasDerivAt_re_polylogSeries_two {t : ℝ} (ht : |t| < 1) :
+theorem hasDerivAt_re_polylogSeries_two {t : ℝ} (ht : |t| < 1) :
     HasDerivAt (fun t : ℝ => (polylogSeries 2 t).re) (dilogKernel t) t := by
   have h := reCLM.hasFDerivAt.comp_hasDerivAt t (hasDerivAt_polylogSeries_two_ofReal ht)
   simp only [Function.comp_def, reCLM_apply, ofReal_re] at h
   exact h
 
 /-- `∫ₐᵇ` of the kernel through the series, for `-1 ≤ a ≤ b ≤ 1`. -/
-lemma integral_dilogKernel_eq {a b : ℝ} (hab : a ≤ b) (ha : -1 ≤ a) (hb : b ≤ 1) :
+theorem integral_dilogKernel_eq {a b : ℝ} (hab : a ≤ b) (ha : -1 ≤ a) (hb : b ≤ 1) :
     ∫ t in a..b, dilogKernel t = (polylogSeries 2 b).re - (polylogSeries 2 a).re := by
   have hsub : Icc a b ⊆ Icc (-1) 1 := Icc_subset_Icc ha hb
   have hcont := continuousOn_re_polylogSeries_two.mono hsub
@@ -201,12 +198,12 @@ theorem Real.dilog_neg_one : Real.dilog (-1) = -π ^ 2 / 12 := by
   exact_mod_cast h.symm
 
 /-- `Real.dilog` is continuous on `[-1, 1]`. -/
-lemma Real.continuousOn_dilog : ContinuousOn Real.dilog (Icc (-1) 1) := by
+theorem Real.continuousOn_dilog : ContinuousOn Real.dilog (Icc (-1) 1) := by
   refine continuousOn_re_polylogSeries_two.congr fun x hx => ?_
   simp only [polylogSeries_two_ofReal_eq_dilog hx, ofReal_re]
 
 /-- `log(1-y) log y → 0` as `y → 0⁺`. -/
-lemma tendsto_log_mul_log_one_sub :
+theorem tendsto_log_mul_log_one_sub :
     Tendsto (fun y : ℝ => Real.log y * Real.log (1 - y)) (𝓝[>] 0) (𝓝 0) := by
   have h := (tendsto_log_mul_rpow_nhdsGT_zero (r := 1) one_pos).const_mul 2
   rw [mul_zero] at h

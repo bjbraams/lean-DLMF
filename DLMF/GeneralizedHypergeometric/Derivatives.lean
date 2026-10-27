@@ -78,7 +78,7 @@ theorem genHG_lower_weighted_iteratedDeriv (a b : Multiset ℂ) (hb : genDenRegu
 
 /-- Leibniz' rule for an analytic function times the identity, keeping just
 the two nonzero derivatives of the identity function. -/
-lemma genIteratedDeriv_id_mul (f : ℂ → ℂ) (n : ℕ) {z : ℂ} (hf : AnalyticAt ℂ f z) :
+theorem genIteratedDeriv_id_mul (f : ℂ → ℂ) (n : ℕ) {z : ℂ} (hf : AnalyticAt ℂ f z) :
     iteratedDeriv (n + 1) (fun w => w * f w) z =
       z * iteratedDeriv (n + 1) f z + (n + 1) * iteratedDeriv n f z := by
   rw [iteratedDeriv_fun_mul (by fun_prop) hf.contDiffAt]

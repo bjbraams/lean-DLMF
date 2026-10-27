@@ -322,7 +322,7 @@ theorem erf_spherical_series (z : ℂ) :
 open Polynomial.Chebyshev in
 /-- Crude growth bound for Chebyshev polynomials of the first kind:
 `‖Tₘ(b)‖ ≤ (2‖b‖+1)^m`. -/
-lemma erfCheb_norm_T_le (m : ℕ) (b : ℂ) :
+theorem erfCheb_norm_T_le (m : ℕ) (b : ℂ) :
     ‖(T ℂ m).eval b‖ ≤ (2*‖b‖+1)^m := by
   have key : ∀ m : ℕ, ‖(T ℂ m).eval b‖ ≤ (2*‖b‖+1)^m ∧
       ‖(T ℂ (m+1 : ℕ)).eval b‖ ≤ (2*‖b‖+1)^(m+1) := by
@@ -354,7 +354,7 @@ lemma erfCheb_norm_T_le (m : ℕ) (b : ℂ) :
 open Polynomial.Chebyshev in
 /-- Crude growth bound for Chebyshev polynomials of the second kind:
 `‖Uₘ(b)‖ ≤ (2‖b‖+1)^m`. -/
-lemma erfCheb_norm_U_le (m : ℕ) (b : ℂ) :
+theorem erfCheb_norm_U_le (m : ℕ) (b : ℂ) :
     ‖(U ℂ m).eval b‖ ≤ (2*‖b‖+1)^m := by
   have key : ∀ m : ℕ, ‖(U ℂ m).eval b‖ ≤ (2*‖b‖+1)^m ∧
       ‖(U ℂ (m+1 : ℕ)).eval b‖ ≤ (2*‖b‖+1)^(m+1) := by
@@ -384,7 +384,7 @@ lemma erfCheb_norm_U_le (m : ℕ) (b : ℂ) :
   exact (key m).1
 
 /-- `ρᵏ ‖iₖ(w)‖` is summable for every `ρ ≥ 0`. -/
-lemma erfCheb_summable_pow_mul_sphericalI {ρ : ℝ} (hρ : 0 ≤ ρ) (w : ℂ) :
+theorem erfCheb_summable_pow_mul_sphericalI {ρ : ℝ} (hρ : 0 ≤ ρ) (w : ℂ) :
     Summable (fun k : ℕ => ρ^k * ‖sphericalI k w‖) := by
   have hs := (sphSeries_summable_bound (mul_nonneg hρ (norm_nonneg w))).mul_left
     (Real.exp (‖w‖^2/4) / Real.exp ((ρ*‖w‖)^2/4))

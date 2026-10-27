@@ -5,10 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.ParabolicCylinder.Basic
 public import DLMF.ErrorFunctions.Repeated
-public import DLMF.Confluent.Whittaker
-public import DLMF.Bessel.Elementary
 
 /-!
 # Parabolic cylinder special functions and addition formulas
@@ -132,7 +129,7 @@ theorem pcfU_hh (n : ℤ) (hn : -1 ≤ n) (z : ℂ) :
       _ = _ := by rw [hc,he]; ring
 
 /-- On the right half-plane, `log (z² / 2) = 2 log z - log 2`. -/
-lemma log_sq_div_two {z : ℂ} (hz : 0 < z.re) : log (z^2/2) = 2*log z - Real.log 2 := by
+theorem log_sq_div_two {z : ℂ} (hz : 0 < z.re) : log (z^2/2) = 2*log z - Real.log 2 := by
   have hz0 : z ≠ 0 := fun h => by simp [h] at hz
   have ha := abs_lt.mp (abs_arg_lt_pi_div_two_iff.mpr (Or.inl hz))
   have hsq : log (z^2) = 2*log z := by
@@ -144,19 +141,19 @@ lemma log_sq_div_two {z : ℂ} (hz : 0 < z.re) : log (z^2/2) = 2*log z - Real.lo
   push_cast; ring
 
 /-- Powers of `z² / 2` on the right half-plane. -/
-lemma sq_div_two_cpow {z : ℂ} (hz : 0 < z.re) (s : ℂ) :
+theorem sq_div_two_cpow {z : ℂ} (hz : 0 < z.re) (s : ℂ) :
     (z^2/2)^s = exp (s*(2*log z - Real.log 2)) := by
   have hz0 : z ≠ 0 := fun h => by simp [h] at hz
   rw [Complex.cpow_def_of_ne_zero (div_ne_zero (pow_ne_zero 2 hz0) two_ne_zero),
     log_sq_div_two hz, mul_comm]
 
 /-- Powers of two through the real logarithm. -/
-lemma two_cpow_eq_exp (s : ℂ) : (2:ℂ)^s = exp (s * Real.log 2) := by
+theorem two_cpow_eq_exp (s : ℂ) : (2:ℂ)^s = exp (s * Real.log 2) := by
   rw [Complex.cpow_def_of_ne_zero two_ne_zero, mul_comm,
     show (2:ℂ) = ((2:ℝ):ℂ) by norm_num, ← Complex.ofReal_log (by norm_num)]
 
 /-- On the right half-plane, `z²/4` lies in the slit plane. -/
-lemma sq_div_four_mem_slitPlane {z : ℂ} (hz : 0 < z.re) : z^2/4 ∈ slitPlane := by
+theorem sq_div_four_mem_slitPlane {z : ℂ} (hz : 0 < z.re) : z^2/4 ∈ slitPlane := by
   rw [Complex.mem_slitPlane_iff]
   by_cases hy : z.im = 0
   · left; simp [sq, hy]; positivity
@@ -168,7 +165,7 @@ lemma sq_div_four_mem_slitPlane {z : ℂ} (hz : 0 < z.re) : z^2/4 ∈ slitPlane 
     · exact hy h'
 
 /-- `(z/(2π))^{1/2} = z^{1/2}/√(2π)`. -/
-lemma div_two_pi_cpow_half {z : ℂ} (hz : z ≠ 0) :
+theorem div_two_pi_cpow_half {z : ℂ} (hz : z ≠ 0) :
     (z/(2*π))^(1/2:ℂ) = z^(1/2:ℂ) / Real.sqrt (2*π) := by
   have hpos : (0:ℝ) < 2*π := by positivity
   have hsq : (Real.sqrt (2*π):ℂ) = exp (Real.log (2*π) * (1/2:ℂ)) := by
@@ -180,7 +177,7 @@ lemma div_two_pi_cpow_half {z : ℂ} (hz : z ≠ 0) :
   congr 1; push_cast; ring
 
 /-- `U(0,z) = z^{1/2} K_{1/4}(z²/4)/√(2π)` on the right half-plane. -/
-lemma pcfU_zero_eq_besselK {z : ℂ} (hz : 0 < z.re) :
+theorem pcfU_zero_eq_besselK {z : ℂ} (hz : 0 < z.re) :
     pcfU 0 z = z^(1/2:ℂ) / Real.sqrt (2*π) * besselK (1/4) (z^2/4) := by
   have hz0 : z ≠ 0 := fun h => by simp [h] at hz
   have hw := sq_div_four_mem_slitPlane hz
@@ -203,7 +200,7 @@ lemma pcfU_zero_eq_besselK {z : ℂ} (hz : 0 < z.re) :
     _ = _ := by rw [he]; ring
 
 /-- `U'(0,z) = -z^{3/2} K_{3/4}(z²/4)/(2√(2π))` on the right half-plane. -/
-lemma deriv_pcfU_zero_eq_besselK {z : ℂ} (hz : 0 < z.re) :
+theorem deriv_pcfU_zero_eq_besselK {z : ℂ} (hz : 0 < z.re) :
     deriv (pcfU 0) z = -(z * z^(1/2:ℂ)) / (2 * Real.sqrt (2*π)) * besselK (3/4) (z^2/4) := by
   have hz0 : z ≠ 0 := fun h => by simp [h] at hz
   have hw := sq_div_four_mem_slitPlane hz

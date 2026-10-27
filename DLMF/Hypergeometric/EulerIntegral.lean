@@ -5,10 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Tactic.CrossRefAttribute
 public import DLMF.Hypergeometric.Series
-public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
-public import Mathlib.MeasureTheory.Integral.DominatedConvergence
 public import Mathlib.Analysis.Normed.Group.Tannery
 
 /-!
@@ -34,12 +31,12 @@ noncomputable section
 namespace DLMF.Hypergeometric
 
 /-- Helper lemma for `ordinaryHypergeometric_eq_integral`. -/
-lemma re_c_pos_of {b c : ℂ} (hb : 0 < b.re) (hcb : 0 < (c - b).re) : 0 < c.re := by
+theorem re_c_pos_of {b c : ℂ} (hb : 0 < b.re) (hcb : 0 < (c - b).re) : 0 < c.re := by
   have : c.re = b.re + (c - b).re := by simp [sub_re]
   linarith
 
 /-- Helper lemma for `ordinaryHypergeometric_eq_integral`. -/
-lemma not_neg_nat_of_re_pos {w : ℂ} (hw : 0 < w.re) : ∀ k : ℕ, w ≠ -k := by
+theorem not_neg_nat_of_re_pos {w : ℂ} (hw : 0 < w.re) : ∀ k : ℕ, w ≠ -k := by
   intro k hk
   have : w.re = -k := by simpa using congrArg Complex.re hk
   have hk0 : (0 : ℝ) ≤ k := Nat.cast_nonneg k
@@ -47,7 +44,7 @@ lemma not_neg_nat_of_re_pos {w : ℂ} (hw : 0 < w.re) : ∀ k : ℕ, w ≠ -k :=
 
 /-- Helper lemma for `ordinaryHypergeometric_eq_integral`.
 AAR's binomial expansion of `(1-zt)^{-a}` on `t ∈ [0,1]`. -/
-lemma hasSum_one_sub_mul_cpow {a z : ℂ} {t : ℝ} (ht : t ∈ Set.Icc (0 : ℝ) 1)
+theorem hasSum_one_sub_mul_cpow {a z : ℂ} {t : ℝ} (ht : t ∈ Set.Icc (0 : ℝ) 1)
     (hz : ‖z‖ < 1) :
     HasSum (fun n : ℕ => poch a n / n.factorial * (z * t) ^ n) ((1 - z * t) ^ (-a)) := by
   have hzt : ‖z * (t : ℂ)‖ < 1 := by
@@ -59,7 +56,7 @@ lemma hasSum_one_sub_mul_cpow {a z : ℂ} {t : ℝ} (ht : t ∈ Set.Icc (0 : ℝ
   simpa using hasSum_poch_div_factorial (β := a) (z := z * t) hzt
 
 /-- Helper lemma for `ordinaryHypergeometric_eq_integral`. -/
-lemma euler_term_eq_gaussHGCoeff {a b c : ℂ} (n : ℕ)
+theorem euler_term_eq_gaussHGCoeff {a b c : ℂ} (n : ℕ)
     (hb : 0 < b.re) (hcb : 0 < (c - b).re) :
     Gamma c / (Gamma b * Gamma (c - b)) *
         (poch a n / n.factorial * betaIntegral (b + n) (c - b)) =
@@ -157,7 +154,7 @@ open Filter Nat
 open scoped Topology
 
 /-- Helper lemma for `gauss_summation`: the value at `1` as a sum of Gauss coefficients. -/
-lemma ordinaryHypergeometric_one_eq_tsum (a b c : ℂ) :
+theorem ordinaryHypergeometric_one_eq_tsum (a b c : ℂ) :
     ₂F₁ a b c (1 : ℂ) = ∑' n, gaussHGCoeff a b c n := by
   rw [ordinaryHypergeometric_eq_tsum]
   simp only [smul_eq_mul, one_pow, mul_one]
@@ -166,7 +163,7 @@ lemma ordinaryHypergeometric_one_eq_tsum (a b c : ℂ) :
   simp [gaussHGCoeff, poch, div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm]
 
 /-- Helper lemma for `gauss_summation`: `n t_n → 0` for the Gauss coefficients at `z = 1`. -/
-lemma tendsto_natCast_mul_gaussHGCoeff {a b c : ℂ} (h : 0 < (c - a - b).re) :
+theorem tendsto_natCast_mul_gaussHGCoeff {a b c : ℂ} (h : 0 < (c - a - b).re) :
     Tendsto (fun n : ℕ => (n : ℂ) * gaussHGCoeff a b c n) atTop (𝓝 0) := by
   by_cases hpole : ∃ k : ℕ, a = -k ∨ b = -k ∨ c = -k
   · obtain ⟨k, hk⟩ := hpole
@@ -194,7 +191,7 @@ lemma tendsto_natCast_mul_gaussHGCoeff {a b c : ℂ} (h : 0 < (c - a - b).re) :
 
 /-- Helper lemma for `gauss_summation`: the termwise form of the contiguous relation
 `c(c-a-b)F(c) - (c-a)(c-b)F(c+1) = 0` at `z = 1`, which telescopes. -/
-lemma gaussHGCoeff_contiguous_one_telescope {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
+theorem gaussHGCoeff_contiguous_one_telescope {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
     c * (c - a - b) * gaussHGCoeff a b c n - (c - a) * (c - b) * gaussHGCoeff a b (c + 1) n =
       c * ((n : ℂ) * gaussHGCoeff a b c n -
         ((n + 1 : ℕ) : ℂ) * gaussHGCoeff a b c (n + 1)) := by
@@ -212,7 +209,7 @@ lemma gaussHGCoeff_contiguous_one_telescope {a b c : ℂ} (hc : ∀ k : ℕ, c �
 
 /-- Helper lemma for `gauss_summation`: the contiguous relation
 `c(c-a-b)F(a,b;c;1) = (c-a)(c-b)F(a,b;c+1;1)` (AAR (2.2.3)). -/
-lemma tsum_gaussHGCoeff_contiguous_one {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k)
+theorem tsum_gaussHGCoeff_contiguous_one {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k)
     (h : 0 < (c - a - b).re) :
     c * (c - a - b) * ∑' n, gaussHGCoeff a b c n =
       (c - a) * (c - b) * ∑' n, gaussHGCoeff a b (c + 1) n := by
@@ -243,7 +240,7 @@ lemma tsum_gaussHGCoeff_contiguous_one {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k
   linear_combination key
 
 /-- Helper lemma for `gauss_summation`: iterating the contiguous relation. -/
-lemma poch_mul_tsum_gaussHGCoeff_one {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k)
+theorem poch_mul_tsum_gaussHGCoeff_one {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k)
     (h : 0 < (c - a - b).re) (n : ℕ) :
     poch c n * poch (c - a - b) n * ∑' k, gaussHGCoeff a b c k =
       poch (c - a) n * poch (c - b) n * ∑' k, gaussHGCoeff a b (c + n) k := by
@@ -259,7 +256,7 @@ lemma poch_mul_tsum_gaussHGCoeff_one {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k)
     linear_combination (c + n) * (c - a - b + n) * ih + poch (c - a) n * poch (c - b) n * G
 
 /-- Helper lemma for `gauss_summation`: real parts bound Pochhammer norms from below. -/
-lemma poch_eval_re_le_norm_poch {z : ℂ} (hz : 0 ≤ z.re) (k : ℕ) :
+theorem poch_eval_re_le_norm_poch {z : ℂ} (hz : 0 ≤ z.re) (k : ℕ) :
     (ascPochhammer ℝ k).eval z.re ≤ ‖poch z k‖ := by
   induction k with
   | zero => simp [poch_zero]
@@ -270,7 +267,7 @@ lemma poch_eval_re_le_norm_poch {z : ℂ} (hz : 0 ≤ z.re) (k : ℕ) :
     exact mul_le_mul ih hle (by positivity) (norm_nonneg _)
 
 /-- Helper lemma for `gauss_summation`. -/
-lemma pow_le_poch_eval {x : ℝ} (hx : 0 ≤ x) (k : ℕ) :
+theorem pow_le_poch_eval {x : ℝ} (hx : 0 ≤ x) (k : ℕ) :
     x ^ k ≤ (ascPochhammer ℝ k).eval x := by
   induction k with
   | zero => simp
@@ -280,7 +277,7 @@ lemma pow_le_poch_eval {x : ℝ} (hx : 0 ≤ x) (k : ℕ) :
       (poch_eval_nonneg hx k)
 
 /-- Helper lemma for `gauss_summation`: `F(a,b;c+n;1) → 1` as `n → ∞`. -/
-lemma tendsto_tsum_gaussHGCoeff_add_nat (a b c : ℂ) :
+theorem tendsto_tsum_gaussHGCoeff_add_nat (a b c : ℂ) :
     Tendsto (fun n : ℕ => ∑' k, gaussHGCoeff a b (c + n) k) atTop (𝓝 1) := by
   obtain ⟨N₀, hN₀⟩ := exists_nat_gt (‖a‖ + ‖b‖ + 1 - c.re)
   set r : ℝ := c.re + N₀ with hr
@@ -343,7 +340,7 @@ lemma tendsto_tsum_gaussHGCoeff_add_nat (a b c : ℂ) :
   rwa [tsum_ite_eq] at this
 
 /-- Helper lemma for `gauss_summation`: the Pochhammer ratio tends to the Gamma quotient. -/
-lemma tendsto_poch_ratio_gauss {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (h : 0 < (c - a - b).re) :
+theorem tendsto_poch_ratio_gauss {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (h : 0 < (c - a - b).re) :
     Tendsto (fun n : ℕ => poch (c - a) n * poch (c - b) n / (poch c n * poch (c - a - b) n))
       atTop (𝓝 (Gamma c * Gamma (c - a - b) / (Gamma (c - a) * Gamma (c - b)))) := by
   have hab := not_neg_nat_of_re_pos h
@@ -421,7 +418,7 @@ theorem gauss_summation {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (h : 0 < (c -
 end GaussSummation
 
 /-- Helper lemma for `chu_vandermonde`: the Pochhammer form of the Chu–Vandermonde identity. -/
-lemma chu_vandermonde_sum (n : ℕ) (b c : ℂ) :
+theorem chu_vandermonde_sum (n : ℕ) (b c : ℂ) :
     ∑ k ∈ Finset.range (n + 1),
       (-1 : ℂ) ^ k * n.choose k * poch b k * poch (c + k) (n - k) = poch (c - b) n := by
   induction n generalizing b c with
@@ -533,7 +530,7 @@ theorem chu_vandermonde (n : ℕ) {b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) :
   ring
 
 /-- Reflection of a Pochhammer symbol: `(1 - y - m)_m = (-1)^m (y)_m`. -/
-lemma poch_reflect (y : ℂ) (m : ℕ) : poch (1 - y - m) m = (-1 : ℂ) ^ m * poch y m := by
+theorem poch_reflect (y : ℂ) (m : ℕ) : poch (1 - y - m) m = (-1 : ℂ) ^ m * poch y m := by
   induction m with
   | zero => simp [poch_zero]
   | succ m ih =>
@@ -543,7 +540,7 @@ lemma poch_reflect (y : ℂ) (m : ℕ) : poch (1 - y - m) m = (-1 : ℂ) ^ m * p
     ring
 
 /-- The binomial theorem for rising factorials (Chu–Vandermonde). -/
-lemma poch_add_binomial_sum (u v : ℂ) (n : ℕ) :
+theorem poch_add_binomial_sum (u v : ℂ) (n : ℕ) :
     ∑ j ∈ Finset.range (n + 1), (n.choose j : ℂ) * poch u j * poch v (n - j) = poch (u + v) n := by
   have hchu := chu_vandermonde_sum n v (1 - u - n)
   have href := poch_reflect (u + v) n

@@ -6,11 +6,33 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Hypergeometric.AppellF4
-public import DLMF.Hypergeometric.GeneralizedIntegral
-public import DLMF.Core.Framework
 public import DLMF.GeneralizedHypergeometric.GHATools
-public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
-public import TauCeti.Analysis.Complex.Conformal.Continuation.Basic
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.SpecialFunctions.Bernstein
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.Tactic.Basify
+public import Mathlib.Tactic.ENatToNat
+public import Mathlib.Tactic.Echelon.Zsqrtd
+public import Mathlib.Tactic.Inclusion.Extension.Core.Core
+public import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+public import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Rational
+public import Mathlib.Tactic.NormNum.Irrational
+public import Mathlib.Tactic.NormNum.IsCoprime
+public import Mathlib.Tactic.NormNum.IsSquare
+public import Mathlib.Tactic.NormNum.LegendreSymbol
+public import Mathlib.Tactic.NormNum.ModEq
+public import Mathlib.Tactic.NormNum.NatFib
+public import Mathlib.Tactic.NormNum.NatLog
+public import Mathlib.Tactic.NormNum.NatSqrt
+public import Mathlib.Tactic.NormNum.Ordinal
+public import Mathlib.Tactic.NormNum.Parity
+public import Mathlib.Tactic.NormNum.Prime
+public import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.Tactic.Polynomial.Basic
+public import Mathlib.Tactic.ReduceModChar
+public import TauCeti.Topology.LocallyConstant.Preconnected
 
 /-!
 # Appell functions and Horn's double series (DLMF §§16.13–16.16)
@@ -32,7 +54,7 @@ open scoped Real Topology Nat Interval
 namespace DLMF.Hypergeometric
 
 /-- A bivariate power series at zero has only its constant term. -/
-lemma appell_tsum_zero (c : ℕ × ℕ→ℂ) :
+theorem appell_tsum_zero (c : ℕ × ℕ→ℂ) :
     (∑' p : ℕ × ℕ,c p*0^p.1*0^p.2)=c (0,0) := by
   rw [tsum_eq_single (0,0)]
   · simp
@@ -1603,7 +1625,7 @@ lemma ghaR4_appF4Coeff_geom (a b c c' : ℂ) (hc : AppellRegular c) (hc' : Appel
 /-- Bailey's product formula at all regular lower parameters (stronger than `appF4_bailey`,
 which assumes positive real parts). The proof is that of `appF4_bailey` in
 `DLMF.Hypergeometric.AppellF4`, with its coefficient bound replaced by `ghaR4_appF4Coeff_geom`. -/
-theorem ghaR4_appF4_bailey {a b c c' : ℂ} (hcc : c + c' = a + b + 1) (hc : AppellRegular c)
+lemma ghaR4_appF4_bailey {a b c c' : ℂ} (hcc : c + c' = a + b + 1) (hc : AppellRegular c)
     (hc' : AppellRegular c') : ∃ δ > 0, ∀ X Y : ℂ, ‖X‖ < δ → ‖Y‖ < δ →
       HasSum (fun p : ℕ × ℕ => appF4Coeff a b c c' p.1 p.2 * (X * (1 - Y)) ^ p.1 *
         (Y * (1 - X)) ^ p.2) (₂F₁ a b c X * ₂F₁ a b c' Y) := by

@@ -6,10 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Hypergeometric.Basic
-public import DLMF.Hypergeometric.Continuation
-public import DLMF.Hypergeometric.FurtherTransformations
 public import DLMF.Hypergeometric.ConnectionFormulas
-public import DLMF.Hypergeometric.ParameterHolomorphy
 
 /-!
 # Parameter dependence and boundary convergence (DLMF §§15.2, 15.4)
@@ -106,7 +103,7 @@ theorem tendsto_regularized_at_neg_nat (a b : ℂ) (n : ℕ) {z : ℂ} (hz : ‖
   exact regularizedGaussHGFun_eq_div_Gamma hc z
 
 /-- Dirichlet's test with a sequence of bounded variation tending to zero. -/
-lemma exists_tendsto_sum_mul_of_bdd_variation {f g : ℕ → ℂ} {B : ℝ}
+theorem exists_tendsto_sum_mul_of_bdd_variation {f g : ℕ → ℂ} {B : ℝ}
     (hf0 : Tendsto f atTop (𝓝 0)) (hvar : Summable fun k => ‖f (k + 1) - f k‖)
     (hG : ∀ n, ‖∑ i ∈ Finset.range n, g i‖ ≤ B) :
     ∃ s : ℂ, Tendsto (fun n => ∑ i ∈ Finset.range n, f i * g i) atTop (𝓝 s) := by
@@ -309,7 +306,7 @@ theorem divergence_on_circle
   linarith
 
 /-- `₂F₁(p,q;r;1-x) → 1` as `x → 1⁻`. -/
-lemma tendsto_ordinaryHypergeometric_one_sub_left (p q r : ℂ) :
+theorem tendsto_ordinaryHypergeometric_one_sub_left (p q r : ℂ) :
     Tendsto (fun x : ℝ => ₂F₁ p q r (1 - (x : ℂ))) (𝓝[<] 1) (𝓝 1) := by
   have hc : ContinuousAt (₂F₁ p q r : ℂ → ℂ) (0 : ℂ) :=
     ((hasFPowerSeriesOnBall_ordinaryHypergeometric p q r).analyticAt_of_mem
@@ -323,7 +320,7 @@ lemma tendsto_ordinaryHypergeometric_one_sub_left (p q r : ℂ) :
   simpa [Function.comp_def, ordinaryHypergeometric_zero] using this
 
 /-- `(-log(1-x))⁻¹ → 0` as `x → 1⁻`. -/
-lemma tendsto_recip_neg_log_one_sub_left :
+theorem tendsto_recip_neg_log_one_sub_left :
     Tendsto (fun x : ℝ => ((-Real.log (1 - x) : ℝ) : ℂ)⁻¹) (𝓝[<] 1) (𝓝 0) := by
   have h1 : Tendsto (fun x : ℝ => 1 - x) (𝓝[<] 1) (𝓝[>] 0) := by
     have hc : Tendsto (fun x : ℝ => 1 - x) (𝓝[<] 1) (𝓝 0) := by

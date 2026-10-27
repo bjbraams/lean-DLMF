@@ -5,7 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Tactic.CrossRefAttribute
 public import DLMF.Bessel.Basic
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
@@ -57,7 +56,7 @@ namespace DLMF.Bessel
 
 
 /-- Gaussian-type bound for the ray integrand. -/
-lemma norm_exp_schlafliRay_le {δ M : ℝ} (hδ : 0 < δ) {a c : ℂ} (hc : δ ≤ c.re) (ha : -M ≤ a.re)
+theorem norm_exp_schlafliRay_le {δ M : ℝ} (hδ : 0 < δ) {a c : ℂ} (hc : δ ≤ c.re) (ha : -M ≤ a.re)
     {t : ℝ} (ht : 0 ≤ t) :
     ‖exp (-(c * Real.exp t) - a * t)‖ ≤ Real.exp ((M + 1) ^ 2 / (2 * δ)) * Real.exp (-t) := by
   rw [norm_exp, ← Real.exp_add]
@@ -76,13 +75,13 @@ lemma norm_exp_schlafliRay_le {δ M : ℝ} (hδ : 0 < δ) {a c : ℂ} (hc : δ �
   nlinarith
 
 /-- The dominating function is integrable on the half-line. -/
-lemma integrableOn_schlafli_bound (K : ℝ) :
+theorem integrableOn_schlafli_bound (K : ℝ) :
     IntegrableOn (fun t : ℝ => Real.exp K * Real.exp (-t)) (Ioi 0) := by
   have := (exp_neg_integrableOn_Ioi 0 one_pos).const_mul (Real.exp K)
   simp only [neg_mul, one_mul] at this; exact this
 
 /-- The ray integrand `e^{-c eᵗ - a t}` is integrable on `(0, ∞)` for `ℜ c > 0`. -/
-lemma integrableOn_schlafliRay {a c : ℂ} (hc : 0 < c.re) :
+theorem integrableOn_schlafliRay {a c : ℂ} (hc : 0 < c.re) :
     IntegrableOn (fun t : ℝ => exp (-(c * Real.exp t) - a * t)) (Ioi 0) := by
   refine (integrableOn_schlafli_bound ((|a.re| + 1) ^ 2 / (2 * c.re))).mono' ?_ ?_
   · exact (by fun_prop : Continuous fun t : ℝ => exp (-(c * Real.exp t) - a * t))
@@ -99,7 +98,7 @@ def schlafliCircle (a c : ℂ) : ℂ := ∫ θ in (-π)..π, exp (c * exp (θ * 
 def schlafliRay (a c : ℂ) : ℂ := ∫ t in Ioi (0:ℝ), exp (-(c * Real.exp t) - a * t)
 
 /-- `∫_{-π}^{π} e^{ibθ} dθ = 2 sin(πb)/b` for `b ≠ 0`. -/
-lemma integral_exp_mul_I_symm {b : ℂ} (hb : b ≠ 0) :
+theorem integral_exp_mul_I_symm {b : ℂ} (hb : b ≠ 0) :
     ∫ θ in (-π)..π, exp (b * θ * I) = 2 * sin (π * b) / b := by
   have hc : b * I ≠ 0 := mul_ne_zero hb I_ne_zero
   have := integral_exp_mul_complex (a := -π) (b := π) hc
@@ -112,7 +111,7 @@ lemma integral_exp_mul_I_symm {b : ℂ} (hb : b ≠ 0) :
   rw [I_sq]; ring_nf
 
 /-- Termwise expansion of the circle integral in powers of `c`. -/
-lemma hasSum_schlafliCircle (a c : ℂ) :
+theorem hasSum_schlafliCircle (a c : ℂ) :
     HasSum (fun n : ℕ => c ^ n / n ! * ∫ θ in (-π)..π, exp ((n - a) * θ * I))
       (schlafliCircle a c) := by
   have hpt (θ : ℝ) : HasSum (fun n : ℕ => c ^ n / n ! * exp ((n - a) * θ * I))
@@ -151,7 +150,7 @@ lemma hasSum_schlafliCircle (a c : ℂ) :
 
 
 /-- Termwise expansion of the lower incomplete Gamma integral `∫₀¹ u^{-a-1} e^{-cu} du`. -/
-lemma hasSum_schlafli_lowerGamma {a : ℂ} (ha : a.re < 0) (c : ℂ) :
+theorem hasSum_schlafli_lowerGamma {a : ℂ} (ha : a.re < 0) (c : ℂ) :
     HasSum (fun n : ℕ => (-c) ^ n / n ! * (1 / (n - a)))
       (∫ u in (0:ℝ)..1, (u : ℂ) ^ (-a - 1) * exp (-(c * u))) := by
   have hpt (u : ℝ) (hu : 0 < u) : HasSum (fun n : ℕ => (-c) ^ n / n ! * (u : ℂ) ^ ((n : ℂ) - a - 1))
@@ -203,14 +202,14 @@ lemma hasSum_schlafli_lowerGamma {a : ℂ} (ha : a.re < 0) (c : ℂ) :
 
 
 /-- `sin(π(n - a)) = -(-1)ⁿ sin(πa)`. -/
-lemma sin_pi_mul_nat_sub (n : ℕ) (a : ℂ) : sin (π * (n - a)) = -((-1) ^ n * sin (π * a)) := by
+theorem sin_pi_mul_nat_sub (n : ℕ) (a : ℂ) : sin (π * (n - a)) = -((-1) ^ n * sin (π * a)) := by
   have hc : cos ((n : ℂ) * π) = (-1) ^ n := by
     rw [← ofReal_natCast, ← ofReal_mul, ← ofReal_cos, Real.cos_nat_mul_pi]; push_cast; rfl
   rw [mul_sub, sin_sub, mul_comm (π : ℂ) n, sin_nat_mul_pi, hc]
   ring
 
 /-- For `ℜ a < 0` the circle integral is a multiple of the lower incomplete Gamma integral. -/
-lemma schlafliCircle_eq_lower {a : ℂ} (ha : a.re < 0) (c : ℂ) :
+theorem schlafliCircle_eq_lower {a : ℂ} (ha : a.re < 0) (c : ℂ) :
     schlafliCircle a c =
       -2 * sin (π * a) * ∫ u in (0:ℝ)..1, (u : ℂ) ^ (-a - 1) * exp (-(c * u)) := by
   refine (hasSum_schlafliCircle a c).unique ?_
@@ -223,7 +222,7 @@ lemma schlafliCircle_eq_lower {a : ℂ} (ha : a.re < 0) (c : ℂ) :
   ring
 
 /-- The substitution `u = eᵗ` turns the ray integral into an upper incomplete Gamma integral. -/
-lemma schlafliRay_eq_upper (a c : ℂ) :
+theorem schlafliRay_eq_upper (a c : ℂ) :
     schlafliRay a c = ∫ u in Ioi (1:ℝ), (u : ℂ) ^ (-a - 1) * exp (-(c * u)) := by
   have h := integral_comp_exp_Ioi (fun u : ℝ => (u : ℂ) ^ (-a - 1) * exp (-(c * u))) 0
   rw [Real.exp_zero] at h
@@ -235,7 +234,7 @@ lemma schlafliRay_eq_upper (a c : ℂ) :
   ring_nf
 
 /-- `sin(πa) ≠ 0` in the strip `-1 < ℜ a < 0`. -/
-lemma sin_pi_mul_ne_zero_of_strip {a : ℂ} (ha0 : a.re < 0) (ha1 : -1 < a.re) :
+theorem sin_pi_mul_ne_zero_of_strip {a : ℂ} (ha0 : a.re < 0) (ha1 : -1 < a.re) :
     sin (π * a) ≠ 0 := by
   rw [Ne, Complex.sin_eq_zero_iff]
   rintro ⟨k, hk⟩
@@ -301,7 +300,7 @@ theorem schlafli_gamma_strip {a : ℂ} (ha0 : a.re < 0) (ha1 : -1 < a.re) {c : �
 
 
 /-- A uniform bound for the circle integrand on `[-π, π]`. -/
-lemma norm_exp_schlafliCircle_le (a c : ℂ) {θ : ℝ} (hθ : |θ| ≤ π) :
+theorem norm_exp_schlafliCircle_le (a c : ℂ) {θ : ℝ} (hθ : |θ| ≤ π) :
     ‖exp (c * exp (θ * I) - a * θ * I)‖ ≤ Real.exp (‖c‖ + ‖a‖ * π) := by
   rw [norm_exp]
   apply Real.exp_le_exp.mpr
@@ -311,12 +310,12 @@ lemma norm_exp_schlafliCircle_le (a c : ℂ) {θ : ℝ} (hθ : |θ| ≤ π) :
   gcongr
 
 /-- Points of `Ι (-π) π` satisfy `|θ| ≤ π`. -/
-lemma abs_le_pi_of_mem_uIoc {θ : ℝ} (hθ : θ ∈ Ι (-π) π) : |θ| ≤ π := by
+theorem abs_le_pi_of_mem_uIoc {θ : ℝ} (hθ : θ ∈ Ι (-π) π) : |θ| ≤ π := by
   rw [Set.uIoc_of_le (by linarith [Real.pi_pos])] at hθ
   exact abs_le.2 ⟨hθ.1.le, hθ.2⟩
 
 /-- The circle integral is entire in the order. -/
-lemma differentiable_schlafliCircle_left (c : ℂ) :
+theorem differentiable_schlafliCircle_left (c : ℂ) :
     Differentiable ℂ fun a => schlafliCircle a c := by
   have h := Complex.differentiableOn_intervalIntegral_of_locally_dominated (U := univ)
     (Φ := fun a (θ : ℝ) => exp (c * exp (θ * I) - a * θ * I)) isOpen_univ (ν := volume) (-π) π
@@ -336,7 +335,7 @@ lemma differentiable_schlafliCircle_left (c : ℂ) :
   exact fun a => (h a (mem_univ a)).differentiableAt (isOpen_univ.mem_nhds (mem_univ a))
 
 /-- The circle integral is entire in `c`. -/
-lemma differentiable_schlafliCircle_right (a : ℂ) :
+theorem differentiable_schlafliCircle_right (a : ℂ) :
     Differentiable ℂ fun c => schlafliCircle a c := by
   have h := Complex.differentiableOn_intervalIntegral_of_locally_dominated (U := univ)
     (Φ := fun c (θ : ℝ) => exp (c * exp (θ * I) - a * θ * I)) isOpen_univ (ν := volume) (-π) π
@@ -356,7 +355,7 @@ lemma differentiable_schlafliCircle_right (a : ℂ) :
   exact fun c => (h c (mem_univ c)).differentiableAt (isOpen_univ.mem_nhds (mem_univ c))
 
 /-- The ray integral is entire in the order for `ℜ c > 0`. -/
-lemma differentiable_schlafliRay_left {c : ℂ} (hc : 0 < c.re) :
+theorem differentiable_schlafliRay_left {c : ℂ} (hc : 0 < c.re) :
     Differentiable ℂ fun a => schlafliRay a c := by
   have h := Complex.differentiableOn_integral_Ioi_of_locally_dominated (U := univ)
     (Φ := fun a (t : ℝ) => exp (-(c * Real.exp t) - a * t)) isOpen_univ 0
@@ -376,7 +375,7 @@ lemma differentiable_schlafliRay_left {c : ℂ} (hc : 0 < c.re) :
   exact fun a => (h a (mem_univ a)).differentiableAt (isOpen_univ.mem_nhds (mem_univ a))
 
 /-- The ray integral is holomorphic in `c` on the right half-plane. -/
-lemma differentiableOn_schlafliRay_right (a : ℂ) :
+theorem differentiableOn_schlafliRay_right (a : ℂ) :
     DifferentiableOn ℂ (fun c => schlafliRay a c) {c | 0 < c.re} := by
   have hU : IsOpen {c : ℂ | 0 < c.re} := isOpen_lt continuous_const continuous_re
   exact Complex.differentiableOn_integral_Ioi_of_locally_dominated (U := {c | 0 < c.re})
@@ -457,7 +456,7 @@ theorem schlafli_gamma (a : ℂ) {c : ℂ} (hc : 0 < c.re) :
 
 
 /-- A bound for the circle integrand depending only on `ℑ a`. -/
-lemma norm_exp_schlafliCircle_le' (a c : ℂ) {θ : ℝ} (hθ : |θ| ≤ π) :
+theorem norm_exp_schlafliCircle_le' (a c : ℂ) {θ : ℝ} (hθ : |θ| ≤ π) :
     ‖exp (c * exp (θ * I) - a * θ * I)‖ ≤ Real.exp (‖c‖ + |a.im| * π) := by
   rw [norm_exp]
   apply Real.exp_le_exp.mpr
@@ -475,7 +474,7 @@ lemma norm_exp_schlafliCircle_le' (a c : ℂ) {θ : ℝ} (hθ : |θ| ≤ π) :
   linarith
 
 /-- The angular part of Schläfli's integral, expanded in circle integrals. -/
-lemma hasSum_schlafli_angular (ν z : ℂ) :
+theorem hasSum_schlafli_angular (ν z : ℂ) :
     HasSum (fun k : ℕ => (-(z / 2)) ^ k / k ! * schlafliCircle (ν + k) (z / 2))
       (∫ θ in (-π)..π, exp (I * (z * Real.sin θ - ν * θ))) := by
   set c := z / 2 with hc
@@ -514,7 +513,7 @@ lemma hasSum_schlafli_angular (ν z : ℂ) :
   exact hint
 
 /-- The radial part of Schläfli's integral, expanded in ray integrals. -/
-lemma hasSum_schlafli_radial (ν : ℂ) {z : ℂ} (hz : 0 < z.re) :
+theorem hasSum_schlafli_radial (ν : ℂ) {z : ℂ} (hz : 0 < z.re) :
     HasSum (fun k : ℕ => (z / 2) ^ k / k ! * schlafliRay (ν + k) (z / 2))
       (∫ t in Ioi (0:ℝ), exp (-(z * Real.sinh t) - ν * t)) := by
   set c := z / 2 with hc
@@ -559,7 +558,7 @@ lemma hasSum_schlafli_radial (ν : ℂ) {z : ℂ} (hz : 0 < z.re) :
 
 
 /-- Folding the symmetric angular integral. -/
-lemma integral_cos_eq_symm_exp (ν z : ℂ) :
+theorem integral_cos_eq_symm_exp (ν z : ℂ) :
     1 / π * ∫ θ in (0:ℝ)..π, cos (z * Real.sin θ - ν * θ) =
       1 / (2 * π) * ∫ θ in (-π)..π, exp (I * (z * Real.sin θ - ν * θ)) := by
   set h : ℝ → ℂ := fun θ => exp (I * (z * Real.sin θ - ν * θ)) with hh
@@ -626,7 +625,7 @@ theorem besselJ_eq_schlafli (ν : ℂ) {z : ℂ} (hz : 0 < z.re) :
 
 
 /-- `e^{-z sinh t - νt} = e^{-(z/2)eᵗ - νt} e^{(z/2)e^{-t}}`. -/
-lemma exp_schlafli_split (ν z : ℂ) (t : ℝ) :
+theorem exp_schlafli_split (ν z : ℂ) (t : ℝ) :
     exp (-(z * Real.sinh t) - ν * t) =
       exp (-(z / 2 * Real.exp t) - ν * t) * exp (z / 2 * Real.exp (-t)) := by
   rw [← exp_add, ofReal_sinh, Complex.sinh, ofReal_exp, ofReal_exp, ofReal_neg]
@@ -634,7 +633,7 @@ lemma exp_schlafli_split (ν z : ℂ) (t : ℝ) :
   ring
 
 /-- A dominating bound for the radial integrand of Schläfli's integral. -/
-lemma norm_exp_schlafli_le {δ M : ℝ} (hδ : 0 < δ) {ν z : ℂ} (hz : δ ≤ (z / 2).re)
+theorem norm_exp_schlafli_le {δ M : ℝ} (hδ : 0 < δ) {ν z : ℂ} (hz : δ ≤ (z / 2).re)
     (hν : -M ≤ ν.re) {t : ℝ} (ht : 0 ≤ t) :
     ‖exp (-(z * Real.sinh t) - ν * t)‖ ≤
       Real.exp ‖z / 2‖ * (Real.exp ((M + 1) ^ 2 / (2 * δ)) * Real.exp (-t)) := by
@@ -713,17 +712,17 @@ integration by parts. -/
 def schlafliBoundary (μ w : ℂ) : ℂ := (1 + ∫ t in Ioi (0:ℝ), schlafliKernel μ w t) / w
 
 /-- `cosh t ≠ 0` as a complex number. -/
-lemma cosh_ofReal_ne_zero (t : ℝ) : (Real.cosh t : ℂ) ≠ 0 :=
+theorem cosh_ofReal_ne_zero (t : ℝ) : (Real.cosh t : ℂ) ≠ 0 :=
   ofReal_ne_zero.2 (Real.cosh_pos t).ne'
 
 /-- The integration-by-parts kernel is continuous in `t`. -/
-lemma continuous_schlafliKernel (μ w : ℂ) : Continuous (schlafliKernel μ w) := by
+theorem continuous_schlafliKernel (μ w : ℂ) : Continuous (schlafliKernel μ w) := by
   unfold schlafliKernel
   refine (by fun_prop : Continuous fun t : ℝ => exp (-(w * Real.sinh t) - μ * t)).mul ?_
   exact Continuous.div (by fun_prop) (by fun_prop) fun t => pow_ne_zero 2 (cosh_ofReal_ne_zero t)
 
 /-- The derivative of `e^{-w sinh t - μt} / cosh t`. -/
-lemma hasDerivAt_schlafli_ibp (μ w : ℂ) (t : ℝ) :
+theorem hasDerivAt_schlafli_ibp (μ w : ℂ) (t : ℝ) :
     HasDerivAt (fun s : ℝ => exp (-(w * Real.sinh s) - μ * s) / (Real.cosh s : ℂ))
       (-w * exp (-(w * Real.sinh t) - μ * t) + schlafliKernel μ w t) t := by
   have h1 : HasDerivAt (fun s : ℝ => (Real.sinh s : ℂ)) (Real.cosh t : ℂ) t :=
@@ -741,7 +740,7 @@ lemma hasDerivAt_schlafli_ibp (μ w : ℂ) (t : ℝ) :
   ring
 
 /-- For `ℜ w ≥ 0` and `t ≥ 0`, `|e^{-w sinh t - μt}| ≤ e^{-ℜμ t}`. -/
-lemma norm_exp_schlafli_le_of_re_nonneg {μ w : ℂ} (hw : 0 ≤ w.re) {t : ℝ} (ht : 0 ≤ t) :
+theorem norm_exp_schlafli_le_of_re_nonneg {μ w : ℂ} (hw : 0 ≤ w.re) {t : ℝ} (ht : 0 ≤ t) :
     ‖exp (-(w * Real.sinh t) - μ * t)‖ ≤ Real.exp (-μ.re * t) := by
   rw [norm_exp]
   apply Real.exp_le_exp.mpr
@@ -752,7 +751,7 @@ lemma norm_exp_schlafli_le_of_re_nonneg {μ w : ℂ} (hw : 0 ≤ w.re) {t : ℝ}
   nlinarith
 
 /-- A bound for the integration-by-parts kernel. -/
-lemma norm_schlafliKernel_le {μ w : ℂ} (hw : 0 ≤ w.re) {t : ℝ} (ht : 0 ≤ t) :
+theorem norm_schlafliKernel_le {μ w : ℂ} (hw : 0 ≤ w.re) {t : ℝ} (ht : 0 ≤ t) :
     ‖schlafliKernel μ w t‖ ≤ (‖μ‖ + 1) * Real.exp (-μ.re * t) := by
   rw [schlafliKernel, norm_mul, mul_comm]
   gcongr
@@ -773,7 +772,7 @@ lemma norm_schlafliKernel_le {μ w : ℂ} (hw : 0 ≤ w.re) {t : ℝ} (ht : 0 �
       _ ≤ (‖μ‖ + 1) * Real.cosh t ^ 2 := by gcongr; nlinarith
 
 /-- The integration-by-parts kernel is integrable for `ℜ μ > 0`, `ℜ w ≥ 0`. -/
-lemma integrableOn_schlafliKernel {μ w : ℂ} (hμ : 0 < μ.re) (hw : 0 ≤ w.re) :
+theorem integrableOn_schlafliKernel {μ w : ℂ} (hμ : 0 < μ.re) (hw : 0 ≤ w.re) :
     IntegrableOn (schlafliKernel μ w) (Ioi 0) := by
   refine ((exp_neg_integrableOn_Ioi 0 hμ).const_mul (‖μ‖ + 1)).mono' ?_ ?_
   · exact (continuous_schlafliKernel μ w)
@@ -782,7 +781,7 @@ lemma integrableOn_schlafliKernel {μ w : ℂ} (hμ : 0 < μ.re) (hw : 0 ≤ w.r
     exact norm_schlafliKernel_le hw (le_of_lt ht)
 
 /-- Integration by parts in the radial Schläfli integral. -/
-lemma intervalIntegral_schlafli_ibp (μ : ℂ) {w : ℂ} (hw : w ≠ 0) (R : ℝ) :
+theorem intervalIntegral_schlafli_ibp (μ : ℂ) {w : ℂ} (hw : w ≠ 0) (R : ℝ) :
     ∫ t in (0:ℝ)..R, exp (-(w * Real.sinh t) - μ * t) =
       (1 - exp (-(w * Real.sinh R) - μ * R) / (Real.cosh R : ℂ) +
         ∫ t in (0:ℝ)..R, schlafliKernel μ w t) / w := by

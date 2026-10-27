@@ -7,9 +7,6 @@ module
 
 public import DLMF.Hypergeometric.Derivatives
 public import DLMF.Hypergeometric.EulerIntegral
-public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
-public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
-public import Mathlib.Tactic.CrossRefAttribute
 public import TauCeti.Analysis.SpecialFunctions.IncompleteBeta
 public import TauCeti.Probability.Distributions.Binomial.Tail
 
@@ -59,14 +56,14 @@ def Real.incBeta (a b : ℂ) (x : ℝ) : ℂ :=
 def Real.normIncBetaI (a b : ℂ) (x : ℝ) : ℂ := Real.incBeta a b x / betaIntegral a b
 
 /-- The Beta integrand is integrable on every subinterval of `[0, 1]`. -/
-lemma intervalIntegrable_beta {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) {u v : ℝ}
+theorem intervalIntegrable_beta {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) {u v : ℝ}
     (hu : u ∈ Icc (0 : ℝ) 1) (hv : v ∈ Icc (0 : ℝ) 1) :
     IntervalIntegrable (fun t : ℝ => (t : ℂ) ^ (a - 1) * (1 - (t : ℂ)) ^ (b - 1)) volume u v :=
   (betaIntegral_convergent ha hb).mono_set (uIcc_subset_uIcc (by simpa using hu)
     (by simpa using hv))
 
 /-- `B(a,b) ≠ 0` for positive real parts. -/
-lemma betaIntegral_ne_zero {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) : betaIntegral a b ≠ 0 := by
+theorem betaIntegral_ne_zero {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) : betaIntegral a b ≠ 0 := by
   intro h
   have := Gamma_mul_Gamma_eq_betaIntegral ha hb
   rw [h, mul_zero] at this
@@ -130,12 +127,12 @@ theorem Real.normIncBetaI_one_right {a : ℂ} (ha : 0 < a.re) (x : ℝ) :
   field_simp
 
 /-- `t^a = t^{a-1} t` for `a ≠ 0`, including `t = 0`. -/
-lemma cpow_eq_cpow_sub_one_mul {a : ℂ} (ha : a ≠ 0) (t : ℂ) : t ^ a = t ^ (a - 1) * t := by
+theorem cpow_eq_cpow_sub_one_mul {a : ℂ} (ha : a ≠ 0) (t : ℂ) : t ^ a = t ^ (a - 1) * t := by
   by_cases ht : t = 0
   · rw [ht, zero_cpow ha, mul_zero]
   · rw [cpow_sub _ _ ht, cpow_one, div_mul_cancel₀ _ ht]
 
-lemma re_add_one_pos {a : ℂ} (ha : 0 < a.re) : 0 < (a + 1).re := by simp; linarith
+theorem re_add_one_pos {a : ℂ} (ha : 0 < a.re) : 0 < (a + 1).re := by simp; linarith
 
 /-- `B_x(a,b) = B_x(a+1,b) + B_x(a,b+1)`, from `t + (1 - t) = 1`. -/
 theorem Real.incBeta_eq_add {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) {x : ℝ}
@@ -249,7 +246,7 @@ theorem Real.normIncBetaI_add_one_right {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.
   linear_combination (b * V) * hB - (b * Q) * hS + Q * hR - V * hrec
 
 /-- For real positive parameters, `B(a,b)` is the real Beta function. -/
-lemma betaIntegral_ofReal {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
+theorem betaIntegral_ofReal {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
     betaIntegral a b = (ProbabilityTheory.beta a b : ℂ) := by
   have h := Gamma_mul_Gamma_eq_betaIntegral (s := (a : ℂ)) (t := b) (by simpa) (by simpa)
   have hG : Gamma ((a : ℂ) + b) ≠ 0 := Gamma_ne_zero_of_re_pos (by simp; linarith)

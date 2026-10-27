@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Struve.AngerWeber
-public import DLMF.Confluent.TricomiRotated
 public import DLMFMathlib.Analysis.Asymptotics.WatsonRotated
 public import DLMFMathlib.Analysis.ODE.PowerSeriesUniqueness
 public import Mathlib.Analysis.SpecialFunctions.Arsinh
@@ -43,10 +42,10 @@ def struveAs_dom : Set ℂ := {s : ℂ | 1 + s ^ 2 ∈ slitPlane}
 def struveAs_kernel (ν s : ℂ) : ℂ :=
   (s + (1 + s ^ 2) ^ (1 / 2 : ℂ)) ^ (-ν) * (1 + s ^ 2) ^ (-(1 / 2 : ℂ))
 
-lemma struveAs_isOpen_dom : IsOpen struveAs_dom :=
+theorem struveAs_isOpen_dom : IsOpen struveAs_dom :=
   isOpen_slitPlane.preimage (by fun_prop)
 
-lemma struveAs_re_cpow_half_pos {x : ℂ} (hx : x ∈ slitPlane) : 0 < (x ^ (1 / 2 : ℂ)).re := by
+theorem struveAs_re_cpow_half_pos {x : ℂ} (hx : x ∈ slitPlane) : 0 < (x ^ (1 / 2 : ℂ)).re := by
   have hx0 := slitPlane_ne_zero hx
   rw [cpow_def_of_ne_zero hx0, exp_re]
   refine mul_pos (Real.exp_pos _) (Real.cos_pos_of_mem_Ioo ⟨?_, ?_⟩)
@@ -57,10 +56,10 @@ lemma struveAs_re_cpow_half_pos {x : ℂ} (hx : x ∈ slitPlane) : 0 < (x ^ (1 /
     have : (log x * (1 / 2)).im = arg x / 2 := by simp [log_im, div_eq_mul_inv]
     rw [this]; linarith [Real.pi_pos]
 
-lemma struveAs_cpow_half_sq (x : ℂ) : (x ^ (1 / 2 : ℂ)) ^ 2 = x := by
+theorem struveAs_cpow_half_sq (x : ℂ) : (x ^ (1 / 2 : ℂ)) ^ 2 = x := by
   rw [one_div]; exact_mod_cast cpow_ofNat_inv_pow x 2
 
-lemma struveAs_add_sqrt_mem {s : ℂ} (hs : s ∈ struveAs_dom) :
+theorem struveAs_add_sqrt_mem {s : ℂ} (hs : s ∈ struveAs_dom) :
     s + (1 + s ^ 2) ^ (1 / 2 : ℂ) ∈ slitPlane := by
   set w := (1 + s ^ 2) ^ (1 / 2 : ℂ) with hw
   have hre := struveAs_re_cpow_half_pos hs
@@ -85,10 +84,10 @@ lemma struveAs_add_sqrt_mem {s : ℂ} (hs : s ∈ struveAs_dom) :
   nlinarith [sq_nonneg a]
 
 
-lemma struveAs_one_add_sq_ne_zero {s : ℂ} (hs : s ∈ struveAs_dom) : 1 + s ^ 2 ≠ 0 :=
+theorem struveAs_one_add_sq_ne_zero {s : ℂ} (hs : s ∈ struveAs_dom) : 1 + s ^ 2 ≠ 0 :=
   slitPlane_ne_zero hs
 
-lemma struveAs_hasDerivAt_cpow (c : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) :
+theorem struveAs_hasDerivAt_cpow (c : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) :
     HasDerivAt (fun s : ℂ => (1 + s ^ 2) ^ c) (c * (1 + s ^ 2) ^ (c - 1) * (2 * s)) s := by
   have h : HasDerivAt (fun s : ℂ => 1 + s ^ 2) (2 * s) s := by
     simpa using ((hasDerivAt_pow 2 s).const_add 1)
@@ -99,24 +98,24 @@ abbrev struveAs_q (s : ℂ) : ℂ := (1 + s ^ 2) ^ (-(1 / 2 : ℂ))
 /-- The factor `h(s) = (s+√(1+s²))^{-ν}`. -/
 abbrev struveAs_h (ν s : ℂ) : ℂ := (s + (1 + s ^ 2) ^ (1 / 2 : ℂ)) ^ (-ν)
 
-lemma struveAs_sqrt_mul_q {s : ℂ} (hs : s ∈ struveAs_dom) :
+theorem struveAs_sqrt_mul_q {s : ℂ} (hs : s ∈ struveAs_dom) :
     (1 + s ^ 2) ^ (1 / 2 : ℂ) * struveAs_q s = 1 := by
   rw [struveAs_q, ← cpow_add _ _ (struveAs_one_add_sq_ne_zero hs)]; simp
 
-lemma struveAs_q_mul_q {s : ℂ} (hs : s ∈ struveAs_dom) :
+theorem struveAs_q_mul_q {s : ℂ} (hs : s ∈ struveAs_dom) :
     struveAs_q s * struveAs_q s * (1 + s ^ 2) = 1 := by
   have hu := struveAs_one_add_sq_ne_zero hs
   rw [struveAs_q, ← cpow_add _ _ hu, show -(1 / 2 : ℂ) + -(1 / 2) = -1 by norm_num, cpow_neg_one,
     inv_mul_cancel₀ hu]
 
-lemma struveAs_hasDerivAt_q {s : ℂ} (hs : s ∈ struveAs_dom) :
+theorem struveAs_hasDerivAt_q {s : ℂ} (hs : s ∈ struveAs_dom) :
     HasDerivAt struveAs_q (-s * struveAs_q s * (1 + s ^ 2)⁻¹) s := by
   have hu := struveAs_one_add_sq_ne_zero hs
   convert struveAs_hasDerivAt_cpow (-(1 / 2 : ℂ)) hs using 1
   rw [cpow_sub _ _ hu, cpow_one, struveAs_q]
   field_simp
 
-lemma struveAs_hasDerivAt_h (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) :
+theorem struveAs_hasDerivAt_h (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) :
     HasDerivAt (struveAs_h ν) (-ν * struveAs_h ν s * struveAs_q s) s := by
   have hu := struveAs_one_add_sq_ne_zero hs
   have hv := struveAs_add_sqrt_mem hs
@@ -136,10 +135,10 @@ abbrev struveAs_G1 (ν s : ℂ) : ℂ :=
   -ν * struveAs_h ν s * struveAs_q s * struveAs_q s -
     s * struveAs_h ν s * struveAs_q s * (1 + s ^ 2)⁻¹
 
-lemma struveAs_kernel_eq (ν : ℂ) : struveAs_kernel ν = fun s => struveAs_h ν s * struveAs_q s :=
+theorem struveAs_kernel_eq (ν : ℂ) : struveAs_kernel ν = fun s => struveAs_h ν s * struveAs_q s :=
   rfl
 
-lemma struveAs_hasDerivAt_kernel (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) :
+theorem struveAs_hasDerivAt_kernel (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) :
     HasDerivAt (struveAs_kernel ν) (struveAs_G1 ν s) s := by
   rw [struveAs_kernel_eq]
   convert (struveAs_hasDerivAt_h ν hs).mul (struveAs_hasDerivAt_q hs) using 1
@@ -150,7 +149,7 @@ abbrev struveAs_G2 (ν s : ℂ) : ℂ :=
   let h := struveAs_h ν s; let q := struveAs_q s; let i := (1 + s ^ 2)⁻¹
   ν ^ 2 * h * q ^ 3 + 3 * ν * s * h * q ^ 2 * i - h * q * i + 3 * s ^ 2 * h * q * i ^ 2
 
-lemma struveAs_hasDerivAt_G1 (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) :
+theorem struveAs_hasDerivAt_G1 (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) :
     HasDerivAt (struveAs_G1 ν) (struveAs_G2 ν s) s := by
   have hu := struveAs_one_add_sq_ne_zero hs
   have hh := struveAs_hasDerivAt_h ν hs
@@ -165,7 +164,7 @@ lemma struveAs_hasDerivAt_G1 (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) :
   field_simp
   ring
 
-lemma struveAs_ode (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) :
+theorem struveAs_ode (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) :
     (1 + s ^ 2) * struveAs_G2 ν s + 3 * s * struveAs_G1 ν s + (1 - ν ^ 2) * struveAs_kernel ν s
       = 0 := by
   have hu := struveAs_one_add_sq_ne_zero hs
@@ -183,27 +182,27 @@ def struveAs_coeffD (ν : ℂ) : ℕ → ℂ
   | 1 => -ν
   | n + 2 => (ν ^ 2 - ((n : ℂ) + 1) ^ 2) * struveAs_coeffD ν n
 
-lemma struveAs_zero_mem : (0 : ℂ) ∈ struveAs_dom := by simp [struveAs_dom]
+theorem struveAs_zero_mem : (0 : ℂ) ∈ struveAs_dom := by simp [struveAs_dom]
 
-lemma struveAs_differentiableOn_kernel (ν : ℂ) :
+theorem struveAs_differentiableOn_kernel (ν : ℂ) :
     DifferentiableOn ℂ (struveAs_kernel ν) struveAs_dom :=
   fun _ hs => (struveAs_hasDerivAt_kernel ν hs).differentiableAt.differentiableWithinAt
 
-lemma struveAs_analyticAt_kernel (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) :
+theorem struveAs_analyticAt_kernel (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) :
     AnalyticAt ℂ (struveAs_kernel ν) s :=
   (struveAs_differentiableOn_kernel ν).analyticAt (struveAs_isOpen_dom.mem_nhds hs)
 
-lemma struveAs_deriv_kernel_eventually (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) :
+theorem struveAs_deriv_kernel_eventually (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) :
     deriv (struveAs_kernel ν) =ᶠ[𝓝 s] struveAs_G1 ν := by
   filter_upwards [struveAs_isOpen_dom.mem_nhds hs] with x hx
   exact (struveAs_hasDerivAt_kernel ν hx).deriv
 
-lemma struveAs_deriv2_kernel (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) :
+theorem struveAs_deriv2_kernel (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) :
     deriv (deriv (struveAs_kernel ν)) s = struveAs_G2 ν s := by
   rw [(struveAs_deriv_kernel_eventually ν hs).deriv_eq]
   exact (struveAs_hasDerivAt_G1 ν hs).deriv
 
-lemma struveAs_iteratedDeriv_add_two (ν : ℂ) (n : ℕ) :
+theorem struveAs_iteratedDeriv_add_two (ν : ℂ) (n : ℕ) :
     iteratedDeriv (n + 2) (struveAs_kernel ν) 0 =
       (ν ^ 2 - ((n : ℂ) + 1) ^ 2) * iteratedDeriv n (struveAs_kernel ν) 0 := by
   set f := struveAs_kernel ν with hfdef
@@ -241,9 +240,9 @@ lemma struveAs_iteratedDeriv_add_two (ν : ℂ) (n : ℕ) :
     linear_combination h
 
 
-lemma struveAs_kernel_zero (ν : ℂ) : struveAs_kernel ν 0 = 1 := by simp [struveAs_kernel]
+theorem struveAs_kernel_zero (ν : ℂ) : struveAs_kernel ν 0 = 1 := by simp [struveAs_kernel]
 
-lemma struveAs_iteratedDeriv_kernel (ν : ℂ) (n : ℕ) :
+theorem struveAs_iteratedDeriv_kernel (ν : ℂ) (n : ℕ) :
     iteratedDeriv n (struveAs_kernel ν) 0 = struveAs_coeffD ν n := by
   induction n using Nat.strong_induction_on with
   | _ n ih =>
@@ -256,7 +255,7 @@ lemma struveAs_iteratedDeriv_kernel (ν : ℂ) (n : ℕ) :
       rw [struveAs_iteratedDeriv_add_two, ih k (by omega), struveAs_coeffD]
 
 /-- Taylor expansion of the kernel at the origin. -/
-lemma struveAs_kernel_sub_sum_isBigO (ν : ℂ) (N : ℕ) :
+theorem struveAs_kernel_sub_sum_isBigO (ν : ℂ) (N : ℕ) :
     (fun s => struveAs_kernel ν s - ∑ n ∈ Finset.range N, struveAs_coeffD ν n / n ! * s ^ n)
       =O[𝓝 0] fun s => ‖s‖ ^ N := by
   have h := ((struveAs_analyticAt_kernel ν struveAs_zero_mem).hasFPowerSeriesAt
@@ -267,7 +266,7 @@ lemma struveAs_kernel_sub_sum_isBigO (ν : ℂ) (N : ℕ) :
 
 /-- `‖(s+√(1+s²))^{-ν} (1+s²)^{-1/2}‖ ≤ c^{-1/2} (1+2|s|)^{|re ν|} e^{π |im ν|}` when
 `c ≤ |1+s²|`. -/
-lemma struveAs_norm_kernel_le (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) {c : ℝ} (hc : 0 < c)
+theorem struveAs_norm_kernel_le (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) {c : ℝ} (hc : 0 < c)
     (hcs : c ≤ ‖1 + s ^ 2‖) :
     ‖struveAs_kernel ν s‖ ≤ c ^ (-(1 / 2 : ℝ)) * (1 + 2 * ‖s‖) ^ |ν.re| * Real.exp (π * |ν.im|) := by
   set w := (1 + s ^ 2) ^ (1 / 2 : ℂ) with hw
@@ -316,7 +315,7 @@ lemma struveAs_norm_kernel_le (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) {c 
 
 
 /-- Points `r e^{iy}`, `|y| < π/2`, lie in the domain. -/
-lemma struveAs_ray_mem {r y : ℝ} (hy : |y| < π / 2) : (r : ℂ) * exp (y * I) ∈ struveAs_dom := by
+theorem struveAs_ray_mem {r y : ℝ} (hy : |y| < π / 2) : (r : ℂ) * exp (y * I) ∈ struveAs_dom := by
   change 1 + ((r : ℂ) * exp (y * I)) ^ 2 ∈ slitPlane
   rw [Complex.ofReal_mul_exp_ofReal_mul_I_sq, mem_slitPlane_iff, add_re, add_im, re_ofReal_mul,
     im_ofReal_mul, exp_ofReal_mul_I_re, exp_ofReal_mul_I_im]
@@ -335,7 +334,7 @@ lemma struveAs_ray_mem {r y : ℝ} (hy : |y| < π / 2) : (r : ℂ) * exp (y * I)
 
 /-- Uniform bound for the kernel on the rays `r e^{iy}`, `|y| ≤ |α| < π/2`, uniformly for
 `|re μ| ≤ a`, `|im μ| ≤ b`. -/
-lemma struveAs_exists_ray_bound {α : ℝ} (hα : |α| < π / 2) (a b : ℝ) :
+theorem struveAs_exists_ray_bound {α : ℝ} (hα : |α| < π / 2) (a b : ℝ) :
     ∃ C, 0 ≤ C ∧ ∀ μ : ℂ, |μ.re| ≤ a → |μ.im| ≤ b → ∀ r : ℝ, 0 ≤ r → ∀ y : ℝ, |y| ≤ |α| →
       ‖struveAs_kernel μ ((r : ℂ) * exp (y * I))‖ ≤ C * (1 + 2 * r) ^ a := by
   obtain ⟨c, hc, hcb⟩ := Complex.exists_pos_le_norm_one_add_ofReal_mul_exp
@@ -356,7 +355,7 @@ lemma struveAs_exists_ray_bound {α : ℝ} (hα : |α| < π / 2) (a b : ℝ) :
     _ = _ := by ring
 
 /-- `(1 + 2r)^a ≤ 3^a r^a + 3^a` for `r ≥ 0`, `a ≥ 0`. -/
-lemma struveAs_one_add_two_mul_rpow_le {a r : ℝ} (ha : 0 ≤ a) (hr : 0 ≤ r) :
+theorem struveAs_one_add_two_mul_rpow_le {a r : ℝ} (ha : 0 ≤ a) (hr : 0 ≤ r) :
     (1 + 2 * r) ^ a ≤ 3 ^ a * r ^ a + 3 ^ a := by
   rcases le_total r 1 with h | h
   · have : (1 + 2 * r) ^ a ≤ 3 ^ a := Real.rpow_le_rpow (by linarith) (by linarith) ha
@@ -366,7 +365,7 @@ lemma struveAs_one_add_two_mul_rpow_le {a r : ℝ} (ha : 0 ≤ a) (hr : 0 ≤ r)
     nlinarith [Real.rpow_nonneg (by norm_num : (0:ℝ) ≤ 3) a]
 
 /-- On the real axis, `A(sinh t) cosh t = e^{-νt}`. -/
-lemma struveAs_kernel_sinh (ν : ℂ) (t : ℝ) :
+theorem struveAs_kernel_sinh (ν : ℂ) (t : ℝ) :
     struveAs_kernel ν (Real.sinh t) * Real.cosh t = exp (-ν * t) := by
   have hc := Real.cosh_pos t
   have h1 : (1 + (Real.sinh t : ℂ) ^ 2) = ((Real.cosh t ^ 2 : ℝ) : ℂ) := by
@@ -384,7 +383,7 @@ lemma struveAs_kernel_sinh (ν : ℂ) (t : ℝ) :
   field_simp
 
 /-- The substitution `s = sinh t` in the Laplace integral of `A_ν`. -/
-lemma struveAs_integral_sinh (ν z : ℂ) :
+theorem struveAs_integral_sinh (ν z : ℂ) :
     ∫ s in Ioi (0 : ℝ), exp (-(z * s)) * struveAs_kernel ν s =
       ∫ t in Ioi (0 : ℝ), exp (-ν * t - z * Real.sinh t) := by
   have himg : Real.sinh '' Ioi 0 = Ioi 0 := by
@@ -401,7 +400,7 @@ lemma struveAs_integral_sinh (ν z : ℂ) :
 
 
 /-- Exponential damping of a polynomially bounded continuous function is integrable. -/
-lemma struveAs_integrableOn {G : ℝ → ℂ} {c C a : ℝ} (hc : 0 < c) (hC : 0 ≤ C) (ha : 0 ≤ a)
+theorem struveAs_integrableOn {G : ℝ → ℂ} {c C a : ℝ} (hc : 0 < c) (hC : 0 ≤ C) (ha : 0 ≤ a)
     (hG : ContinuousOn G (Ioi 0)) (hb : ∀ r : ℝ, 0 < r → ‖G r‖ ≤ C * (1 + 2 * r) ^ a) :
     IntegrableOn (fun r : ℝ => Real.exp (-c * r) • G r) (Ioi 0) := by
   have hmaj := ((integrableOn_exp_neg_mul_mul_rpow_sub_one (s := a + 1) (by linarith) hc
@@ -417,7 +416,7 @@ lemma struveAs_integrableOn {G : ℝ → ℂ} {c C a : ℝ} (hc : 0 < c) (hC : 0
     _ = _ := by simp only [Pi.add_apply]; ring
 
 /-- Continuity of the kernel along a ray. -/
-lemma struveAs_continuous_ray (ν : ℂ) {θ : ℝ} (hθ : |θ| < π / 2) :
+theorem struveAs_continuous_ray (ν : ℂ) {θ : ℝ} (hθ : |θ| < π / 2) :
     Continuous fun r : ℝ => struveAs_kernel ν ((r : ℂ) * exp (θ * I)) :=
   continuous_iff_continuousAt.2 fun r =>
     ContinuousAt.comp (g := struveAs_kernel ν) (f := fun r : ℝ => (r : ℂ) * exp (θ * I)) (x := r)
@@ -425,14 +424,14 @@ lemma struveAs_continuous_ray (ν : ℂ) {θ : ℝ} (hθ : |θ| < π / 2) :
         (struveAs_ray_mem hθ))).continuousAt
       (by fun_prop : Continuous fun r : ℝ => (r : ℂ) * exp (θ * I)).continuousAt
 
-lemma struveAs_ray_bound' (ν : ℂ) {θ : ℝ} (hθ : |θ| < π / 2) :
+theorem struveAs_ray_bound' (ν : ℂ) {θ : ℝ} (hθ : |θ| < π / 2) :
     ∃ C, 0 ≤ C ∧ ∀ r : ℝ, 0 ≤ r → ∀ y : ℝ, |y| ≤ |θ| →
       ‖struveAs_kernel ν ((r : ℂ) * exp (y * I))‖ ≤ C * (1 + 2 * r) ^ |ν.re| := by
   obtain ⟨C, hC, h⟩ := struveAs_exists_ray_bound hθ |ν.re| |ν.im|
   exact ⟨C, hC, fun r hr y hy => h ν le_rfl le_rfl r hr y hy⟩
 
 /-- Integrability of the damped kernel along a ray. -/
-lemma struveAs_integrableOn_ray (ν : ℂ) {θ c : ℝ} (hθ : |θ| < π / 2) (hc : 0 < c) :
+theorem struveAs_integrableOn_ray (ν : ℂ) {θ c : ℝ} (hθ : |θ| < π / 2) (hc : 0 < c) :
     IntegrableOn (fun r : ℝ => Real.exp (-c * r) • struveAs_kernel ν ((r : ℂ) * exp (θ * I)))
       (Ioi 0) := by
   obtain ⟨C, hC, h⟩ := struveAs_ray_bound' ν hθ
@@ -440,7 +439,7 @@ lemma struveAs_integrableOn_ray (ν : ℂ) {θ c : ℝ} (hθ : |θ| < π / 2) (h
     fun r hr => h r hr.le θ le_rfl
 
 /-- Integrability of the Laplace integrand on the real axis. -/
-lemma struveAs_integrableOn_real (ν : ℂ) {z : ℂ} (hz : 0 < z.re) :
+theorem struveAs_integrableOn_real (ν : ℂ) {z : ℂ} (hz : 0 < z.re) :
     IntegrableOn (fun s : ℝ => exp (-(z * s)) * struveAs_kernel ν s) (Ioi 0) := by
   have h := struveAs_integrableOn_ray ν (θ := 0) (by simp [Real.pi_pos]) hz
   have h2 := integrableOn_cexp_neg_mul_smul_of_le h le_rfl
@@ -474,7 +473,7 @@ def struveAs_rotInt (ν : ℂ) (θ : ℝ) (z : ℂ) : ℂ :=
   ∫ r in Ioi (0 : ℝ), exp (-(z * exp (θ * I) * r)) * struveAs_kernel ν (r * exp (θ * I))
 
 /-- Rotation of the ray of integration. -/
-lemma struveAs_integral_eq_rot (ν : ℂ) {θ : ℝ} (hθ : |θ| < π / 2) {z : ℂ} (hz : 0 < z.re)
+theorem struveAs_integral_eq_rot (ν : ℂ) {θ : ℝ} (hθ : |θ| < π / 2) {z : ℂ} (hz : 0 < z.re)
     (hzθ : 0 < (z * exp (θ * I)).re) :
     ∫ s in Ioi (0 : ℝ), exp (-(z * s)) * struveAs_kernel ν s =
       exp (θ * I) * struveAs_rotInt ν θ z := by
@@ -499,7 +498,7 @@ lemma struveAs_integral_eq_rot (ν : ℂ) {θ : ℝ} (hθ : |θ| < π / 2) {z : 
     exact Real.rpow_le_rpow (by linarith) (by linarith) ha
 
 /-- The rotated integral is holomorphic on the half-plane `re (z e^{iθ}) > 0`. -/
-lemma struveAs_differentiableOn_rotInt (ν : ℂ) {θ : ℝ} (hθ : |θ| < π / 2) :
+theorem struveAs_differentiableOn_rotInt (ν : ℂ) {θ : ℝ} (hθ : |θ| < π / 2) :
     DifferentiableOn ℂ (struveAs_rotInt ν θ) {z : ℂ | 0 < (z * exp (θ * I)).re} := by
   obtain ⟨C, hC, h⟩ := struveAs_ray_bound' ν hθ
   set a := |ν.re|
@@ -517,7 +516,7 @@ lemma struveAs_differentiableOn_rotInt (ν : ℂ) {θ : ℝ} (hθ : |θ| < π / 
   simp only [Function.comp_apply, struveAs_rotInt, smul_eq_mul]
 
 /-- The rotated integral is continuous in the order. -/
-lemma struveAs_continuousAt_rotInt_order {θ : ℝ} (hθ : |θ| < π / 2) {z : ℂ}
+theorem struveAs_continuousAt_rotInt_order {θ : ℝ} (hθ : |θ| < π / 2) {z : ℂ}
     (hz : 0 < (z * exp (θ * I)).re) (ν : ℂ) :
     ContinuousAt (fun μ => struveAs_rotInt μ θ z) ν := by
   set a := |ν.re| + 1
@@ -562,7 +561,7 @@ lemma struveAs_continuousAt_rotInt_order {θ : ℝ} (hθ : |θ| < π / 2) {z : �
     refine ContinuousAt.mul ?_ continuousAt_const
     exact (continuous_neg.const_cpow (Or.inl hv)).continuousAt
 
-lemma struveAs_halfPlane_subset {θ : ℝ} (hθ : |θ| < π / 2) :
+theorem struveAs_halfPlane_subset {θ : ℝ} (hθ : |θ| < π / 2) :
     {z : ℂ | 0 < (z * exp (θ * I)).re} ⊆ slitPlane := by
   intro w hw
   change 0 < (w * exp (θ * I)).re at hw
@@ -577,7 +576,7 @@ lemma struveAs_halfPlane_subset {θ : ℝ} (hθ : |θ| < π / 2) :
 
 
 /-- The rotated representation of `A_ν`, at nonintegral order. -/
-lemma struveAs_angerA_eq_rot_of_not_int {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) {θ : ℝ}
+theorem struveAs_angerA_eq_rot_of_not_int {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) {θ : ℝ}
     (hθ : |θ| < π / 2) {z : ℂ} (hz : 0 < (z * exp (θ * I)).re) :
     angerA ν z = 1 / π * (exp (θ * I) * struveAs_rotInt ν θ z) := by
   set H : Set ℂ := {z : ℂ | 0 < (z * exp (θ * I)).re} with hH
@@ -638,7 +637,7 @@ theorem struveAs_angerA_eq_rot (ν : ℂ) {θ : ℝ} (hθ : |θ| < π / 2) {z : 
 
 
 /-- Taylor remainder of the kernel along a ray, in the form required by Watson's lemma. -/
-lemma struveAs_kernel_ray_isBigO (ν : ℂ) (θ : ℝ) (N : ℕ) :
+theorem struveAs_kernel_ray_isBigO (ν : ℂ) (θ : ℝ) (N : ℕ) :
     (fun r : ℝ => struveAs_kernel ν ((r : ℂ) * exp (θ * I)) -
         ∑ n ∈ Finset.range N, (((r : ℂ) * exp (θ * I)) ^ ((n : ℂ) + 1 - 1)) •
           (struveAs_coeffD ν n / n !))

@@ -82,7 +82,7 @@ lemma p20R1_hasSum_prod {u v τ σ : ℂ} (hτ : 0 < τ.im) (hσ : 0 < σ.im) :
 
 /-- Watson's product formula in Mathlib's normalization:
 `ϑ(u|τ)ϑ(v|τ) = ϑ(u+v|2τ)ϑ(u-v|2τ) + e^{iπτ+2πiu} ϑ(u+v+τ|2τ)ϑ(u-v+τ|2τ)`. -/
-theorem p20R1_jacobiTheta₂_mul (u v τ : ℂ) (hτ : 0 < τ.im) :
+lemma p20R1_jacobiTheta₂_mul (u v τ : ℂ) (hτ : 0 < τ.im) :
     jacobiTheta₂ u τ * jacobiTheta₂ v τ =
       jacobiTheta₂ (u + v) (2 * τ) * jacobiTheta₂ (u - v) (2 * τ) +
         cexp (π * I * τ + 2 * π * I * u) *
@@ -128,7 +128,7 @@ theorem p20R1_W3 (z w τ : ℂ) (hτ : 0 < τ.im) :
   rw [h]; ring
 
 /-- Watson-type formula for `θ₄θ₄` (helper). -/
-theorem p20R1_W4 (z w τ : ℂ) (hτ : 0 < τ.im) :
+lemma p20R1_W4 (z w τ : ℂ) (hτ : 0 < τ.im) :
     jacobiThetaFourTau z τ * jacobiThetaFourTau w τ =
       jacobiThetaThreeTau (z + w) (2 * τ) * jacobiThetaThreeTau (z - w) (2 * τ) -
         jacobiThetaTwoTau (z + w) (2 * τ) * jacobiThetaTwoTau (z - w) (2 * τ) := by
@@ -139,7 +139,7 @@ theorem p20R1_W4 (z w τ : ℂ) (hτ : 0 < τ.im) :
   rw [jacobiThetaFourTau, jacobiThetaFourTau, h]; ring
 
 /-- Watson-type formula for `θ₂θ₂` (helper). -/
-theorem p20R1_W2 (z w τ : ℂ) (hτ : 0 < τ.im) :
+lemma p20R1_W2 (z w τ : ℂ) (hτ : 0 < τ.im) :
     jacobiThetaTwoTau z τ * jacobiThetaTwoTau w τ =
       jacobiThetaThreeTau (z + w) (2 * τ) * jacobiThetaTwoTau (z - w) (2 * τ) +
         jacobiThetaTwoTau (z + w) (2 * τ) * jacobiThetaThreeTau (z - w) (2 * τ) := by
@@ -160,7 +160,7 @@ theorem p20R1_W2 (z w τ : ℂ) (hτ : 0 < τ.im) :
       jacobiThetaTwoTau (z + w) (2 * τ) * jacobiThetaTwoTau (z - w + π * (2 * τ) / 2) (2 * τ)) * hM
 
 /-- Watson's formula 20.7.13 for `θ₁θ₁` (helper). -/
-theorem p20R1_W1 (z w τ : ℂ) (hτ : 0 < τ.im) :
+lemma p20R1_W1 (z w τ : ℂ) (hτ : 0 < τ.im) :
     jacobiThetaOneTau z τ * jacobiThetaOneTau w τ =
       jacobiThetaThreeTau (z + w) (2 * τ) * jacobiThetaTwoTau (z - w) (2 * τ) -
         jacobiThetaTwoTau (z + w) (2 * τ) * jacobiThetaThreeTau (z - w) (2 * τ) := by
@@ -204,7 +204,7 @@ lemma p20R1_three_half_pi (τ : ℂ) : jacobiThetaThreeTau (π / 2) τ = jacobiT
   rw [show (π / 2 : ℂ) = 0 + π / 2 by ring, p20R1_three_add_half]
 
 /-- The quartic identity `θ₃²(z)θ₃²(w) - θ₄²(z)θ₄²(w) = θ₂²(z)θ₂²(w) - θ₁²(z)θ₁²(w)` (helper). -/
-theorem p20R1_quartic (z w τ : ℂ) (hτ : 0 < τ.im) :
+lemma p20R1_quartic (z w τ : ℂ) (hτ : 0 < τ.im) :
     jacobiThetaThreeTau z τ ^ 2 * jacobiThetaThreeTau w τ ^ 2 -
       jacobiThetaFourTau z τ ^ 2 * jacobiThetaFourTau w τ ^ 2 =
     jacobiThetaTwoTau z τ ^ 2 * jacobiThetaTwoTau w τ ^ 2 -
@@ -237,7 +237,7 @@ lemma p20R1_alg {n p₁ p₂ u v r t X Y a b c d : ℂ} (hP : p₁ * p₂ = X) (
     _ = u ^ 2 * v ^ 2 - r ^ 2 * t ^ 2 := by rw [← h1, ← h2, ← h3, ← h4]; ring
 
 /-- Landen-type product `θ₁(z|τ)θ₂(z|τ) = θ₁(2z|2τ)θ₄(0|2τ)` (helper). -/
-lemma p20R1_L1 (z τ : ℂ) (hτ : 0 < τ.im) :
+theorem p20R1_L1 (z τ : ℂ) (hτ : 0 < τ.im) :
     jacobiThetaOneTau z τ * jacobiThetaTwoTau z τ =
       jacobiThetaOneTau (2 * z) (2 * τ) * jacobiThetaFourNullTau (2 * τ) := by
   have h := p20R1_W1 z (z + π / 2) τ hτ
@@ -247,7 +247,7 @@ lemma p20R1_L1 (z τ : ℂ) (hτ : 0 < τ.im) :
   linear_combination h
 
 /-- Landen-type product `θ₃(z|τ)θ₄(z|τ) = θ₄(2z|2τ)θ₄(0|2τ)` (helper). -/
-lemma p20R1_L4 (z τ : ℂ) (hτ : 0 < τ.im) :
+theorem p20R1_L4 (z τ : ℂ) (hτ : 0 < τ.im) :
     jacobiThetaThreeTau z τ * jacobiThetaFourTau z τ =
       jacobiThetaFourTau (2 * z) (2 * τ) * jacobiThetaFourNullTau (2 * τ) := by
   have h := p20R1_W3 z (z + π / 2) τ hτ
@@ -292,7 +292,7 @@ lemma p20R1_D2 (x τ : ℂ) (hτ : 0 < τ.im) :
   linear_combination -h
 
 /-- `θ₃(0|τ)θ₄(0|τ) = θ₄(0|2τ)²` (helper). -/
-lemma p20R1_L40 (τ : ℂ) (hτ : 0 < τ.im) :
+theorem p20R1_L40 (τ : ℂ) (hτ : 0 < τ.im) :
     jacobiThetaThreeNullTau τ * jacobiThetaFourNullTau τ =
       jacobiThetaFourNullTau (2 * τ) * jacobiThetaFourNullTau (2 * τ) := by
   have h := p20R1_L4 0 τ hτ
@@ -331,7 +331,7 @@ def p20R1_parityEquivInt : ℤ ⊕ ℤ ≃ ℤ where
     · simp only [Sum.elim_inr]; omega
 
 /-- Even/odd splitting `ϑ(u|τ) = ϑ(2u|4τ) + e^{iπτ+2πiu} ϑ(2u+2τ|4τ)` (helper). -/
-theorem p20R1_jacobiTheta₂_split (u τ : ℂ) (hτ : 0 < τ.im) :
+lemma p20R1_jacobiTheta₂_split (u τ : ℂ) (hτ : 0 < τ.im) :
     jacobiTheta₂ u τ = jacobiTheta₂ (2 * u) (4 * τ) +
       cexp (π * I * τ + 2 * π * I * u) * jacobiTheta₂ (2 * u + 2 * τ) (4 * τ) := by
   have h4τ : 0 < (4 * τ).im := by simp; linarith
@@ -354,7 +354,7 @@ theorem p20R1_jacobiTheta₂_split (u τ : ℂ) (hτ : 0 < τ.im) :
   exact hP.unique (hA.sum hB)
 
 /-- `θ₃(z|τ) = θ₃(2z|4τ) + θ₂(2z|4τ)` (helper). -/
-theorem p20R1_three_split (z τ : ℂ) (hτ : 0 < τ.im) :
+lemma p20R1_three_split (z τ : ℂ) (hτ : 0 < τ.im) :
     jacobiThetaThreeTau z τ = jacobiThetaThreeTau (2 * z) (4 * τ) +
       jacobiThetaTwoTau (2 * z) (4 * τ) := by
   have h := p20R1_jacobiTheta₂_split (z / π) τ hτ
@@ -751,19 +751,6 @@ theorem jacobiThetaFourTau_landen_four (z τ : ℂ) (hτ : 0 < τ.im) :
   rw [thetaLandenB]
   linear_combination (1 / (jacobiThetaThreeNullTau τ * jacobiThetaFourNullTau τ * jacobiThetaThreeTau (π / 4) τ)) * hK - jacobiThetaFourTau (4 * z) (4 * τ) * hne
 
-/-! ### §20.7(vii) Derivatives of ratios of theta functions -/
-
-/-- DLMF 20.7.25: `d/dz (θ₂(z|τ)/θ₄(z|τ)) = -θ₃²(0|τ) θ₁(z|τ) θ₃(z|τ)/θ₄²(z|τ)` where
-`θ₄(z|τ) ≠ 0`. Corrected from the printed DLMF formula: the hypothesis `θ₄(z|τ) ≠ 0` is added,
-since at a zero of `θ₄` the quotient has a pole (Lean's `x / 0 = 0`). -/
-@[dlmf 20.7.E25]
-theorem hasDerivAt_jacobiThetaTwoTau_div_four {z τ : ℂ} (hτ : 0 < τ.im)
-    (hz : jacobiThetaFourTau z τ ≠ 0) :
-    HasDerivAt (fun w => jacobiThetaTwoTau w τ / jacobiThetaFourTau w τ)
-      (-(jacobiThetaThreeNullTau τ ^ 2 * jacobiThetaOneTau z τ * jacobiThetaThreeTau z τ) /
-        jacobiThetaFourTau z τ ^ 2) z := by
-  sorry
-
 /-! ### §20.7(viii) Transformations of lattice parameter -/
 
 /-- `e^{iπ m(m+1)} = 1` for integer `m`: `m(m+1)` is even. -/
@@ -817,6 +804,155 @@ theorem jacobiThetaOneTau_add_one (z τ : ℂ) :
     jacobiThetaOneTau z (τ + 1) = cexp (π * I / 4) * jacobiThetaOneTau z τ := by
   rw [jacobiThetaOneTau, jacobiThetaTwoTau_add_one, jacobiThetaOneTau]
   ring
+
+/-- `θ₁(x - π/2|τ) = -θ₂(x|τ)` (helper). -/
+lemma p3t_one_sub_half (x τ : ℂ) : jacobiThetaOneTau (x - π / 2) τ = -jacobiThetaTwoTau x τ := by
+  rw [jacobiThetaOneTau, sub_add_cancel]
+
+/-- `θ₂(x - π/2|τ) = θ₁(x|τ)` (helper). -/
+lemma p3t_two_sub_half (x τ : ℂ) : jacobiThetaTwoTau (x - π / 2) τ = jacobiThetaOneTau x τ := by
+  have h := p20R1_one_add_half (x - π / 2) τ
+  rw [sub_add_cancel] at h
+  exact h.symm
+
+/-- `θ₃(x - π/2|τ) = θ₄(x|τ)` (helper). -/
+lemma p3t_three_sub_half (x τ : ℂ) :
+    jacobiThetaThreeTau (x - π / 2) τ = jacobiThetaFourTau x τ := by
+  rw [jacobiThetaFourTau, show x + π / 2 = (x - π / 2) + π by ring, jacobiThetaThreeTau_add_pi]
+
+/-- Mixed product `θ₂(0)θ₃(0) θ₁(u+v)θ₄(u-v) = θ₁θ₄(u) θ₂θ₃(v) + θ₂θ₃(u) θ₁θ₄(v)` (helper). -/
+theorem p3t_mixed14 (u v τ : ℂ) (hτ : 0 < τ.im) :
+    jacobiThetaTwoNullTau τ * jacobiThetaThreeNullTau τ *
+        (jacobiThetaOneTau (u + v) τ * jacobiThetaFourTau (u - v) τ) =
+      jacobiThetaOneTau u τ * jacobiThetaFourTau u τ *
+          (jacobiThetaTwoTau v τ * jacobiThetaThreeTau v τ) +
+        jacobiThetaTwoTau u τ * jacobiThetaThreeTau u τ *
+          (jacobiThetaOneTau v τ * jacobiThetaFourTau v τ) := by
+  have hσ : 0 < (τ / 2).im := by simp; linarith
+  have h2 : 2 * (τ / 2) = τ := by ring
+  have k1 := p20R1_W1 u (v - π / 2) (τ / 2) hσ
+  have k2 := p20R1_W1 v (u - π / 2) (τ / 2) hσ
+  rw [h2, p3t_one_sub_half, show u + (v - π / 2) = (u + v) - π / 2 by ring,
+    show u - (v - π / 2) = (u - v) + π / 2 by ring, p3t_three_sub_half,
+    p20R1_two_add_half, p3t_two_sub_half, p20R1_three_add_half] at k1
+  rw [h2, p3t_one_sub_half, show v + (u - π / 2) = (u + v) - π / 2 by ring,
+    show v - (u - π / 2) = -(u - v) + π / 2 by ring, p3t_three_sub_half,
+    p20R1_two_add_half, p3t_two_sub_half, p20R1_three_add_half,
+    jacobiThetaOneTau_neg, jacobiThetaFourTau_neg] at k2
+  have d1u := p20R1_D1 u (τ / 2) hσ
+  have d1v := p20R1_D1 v (τ / 2) hσ
+  have d2u := p20R1_D2 u (τ / 2) hσ
+  have d2v := p20R1_D2 v (τ / 2) hσ
+  have d20 := p20R1_D2 0 (τ / 2) hσ
+  rw [h2] at d1u d1v d2u d2v d20
+  simp only [jacobiThetaTwoNullTau, jacobiThetaThreeNullTau] at d1u d1v d2u d2v d20 ⊢
+  set g := jacobiThetaTwoTau 0 (τ / 2)
+  linear_combination (1 / 2 * (jacobiThetaOneTau (u + v) τ * jacobiThetaFourTau (u - v) τ)) * d20
+    + g ^ 2 / 4 * k1 + g ^ 2 / 4 * k2
+    - (1 / 2 * (jacobiThetaTwoTau v τ * jacobiThetaThreeTau v τ)) * d1u
+    - (jacobiThetaOneTau u (τ / 2) * g / 4) * d2v
+    - (1 / 2 * (jacobiThetaOneTau v τ * jacobiThetaFourTau v τ)) * d2u
+    - (jacobiThetaTwoTau u (τ / 2) * g / 4) * d1v
+
+/-- Mixed product `θ₂(0)θ₄(0) θ₂(u+v)θ₄(u-v) = θ₂θ₄(u) θ₂θ₄(v) - θ₁θ₃(u) θ₁θ₃(v)` (helper). -/
+theorem p3t_mixed24 (u v τ : ℂ) (hτ : 0 < τ.im) :
+    jacobiThetaTwoNullTau τ * jacobiThetaFourNullTau τ *
+        (jacobiThetaTwoTau (u + v) τ * jacobiThetaFourTau (u - v) τ) =
+      jacobiThetaTwoTau u τ * jacobiThetaFourTau u τ *
+          (jacobiThetaTwoTau v τ * jacobiThetaFourTau v τ) -
+        jacobiThetaOneTau u τ * jacobiThetaThreeTau u τ *
+          (jacobiThetaOneTau v τ * jacobiThetaThreeTau v τ) := by
+  have hτ1 : 0 < (τ + 1).im := by simpa using hτ
+  have h := p3t_mixed14 (u + π / 2) v (τ + 1) hτ1
+  simp only [jacobiThetaTwoNullTau, jacobiThetaThreeNullTau, jacobiThetaFourNullTau,
+    jacobiThetaOneTau_add_one, jacobiThetaTwoTau_add_one, jacobiThetaThreeTau_add_one,
+    jacobiThetaFourTau_add_one] at h ⊢
+  rw [show u + π / 2 + v = (u + v) + π / 2 by ring, show u + π / 2 - v = (u - v) + π / 2 by ring,
+    p20R1_one_add_half, p20R1_two_add_half, p20R1_three_add_half, p20R1_four_add_half,
+    p20R1_one_add_half, p20R1_three_add_half] at h
+  have hε : cexp (π * I / 4) ^ 2 ≠ 0 := pow_ne_zero _ (exp_ne_zero _)
+  apply mul_left_cancel₀ hε
+  linear_combination h
+
+/-- The derivative at  of an even differentiable function vanishes (helper). -/
+theorem p3t_deriv_even {f : ℂ → ℂ} (hf : Differentiable ℂ f) (he : ∀ z, f (-z) = f z) :
+    deriv f 0 = 0 := by
+  have h1 : HasDerivAt f (deriv f 0) (-0) := by rw [neg_zero]; exact (hf 0).hasDerivAt
+  have h2 := h1.comp (0 : ℂ) (hasDerivAt_neg (0 : ℂ))
+  have h3 : (f ∘ fun x => -x) = f := funext fun z => he z
+  rw [h3] at h2
+  have := h2.unique (hf 0).hasDerivAt
+  linear_combination -this / 2
+
+/-! ### §20.7(vii) Derivatives of ratios of theta functions -/
+
+/-- DLMF 20.7.25: `d/dz (θ₂(z|τ)/θ₄(z|τ)) = -θ₃²(0|τ) θ₁(z|τ) θ₃(z|τ)/θ₄²(z|τ)` where
+`θ₄(z|τ) ≠ 0`. Corrected from the printed DLMF formula: the hypothesis `θ₄(z|τ) ≠ 0` is added,
+since at a zero of `θ₄` the quotient has a pole (Lean's `x / 0 = 0`). -/
+@[dlmf 20.7.E25]
+theorem hasDerivAt_jacobiThetaTwoTau_div_four {z τ : ℂ} (hτ : 0 < τ.im)
+    (hz : jacobiThetaFourTau z τ ≠ 0) :
+    HasDerivAt (fun w => jacobiThetaTwoTau w τ / jacobiThetaFourTau w τ)
+      (-(jacobiThetaThreeNullTau τ ^ 2 * jacobiThetaOneTau z τ * jacobiThetaThreeTau z τ) /
+        jacobiThetaFourTau z τ ^ 2) z := by
+  have hd : ∀ j, ∀ x : ℂ, HasDerivAt (fun w => jacobiThetaTau j w τ)
+      (deriv (fun w => jacobiThetaTau j w τ) x) x :=
+    fun j x => ((differentiable_jacobiThetaTau j hτ) x).hasDerivAt
+  have h2 := hd 2 z
+  have h4 := hd 4 z
+  simp only [jacobiThetaTau] at h2 h4
+  set a := deriv (fun w => jacobiThetaTwoTau w τ) z
+  set b := deriv (fun w => jacobiThetaFourTau w τ) z
+  -- differentiate the mixed identity in `v` at `0`
+  have hL : HasDerivAt (fun v => jacobiThetaTwoNullTau τ * jacobiThetaFourNullTau τ *
+      (jacobiThetaTwoTau (z + v) τ * jacobiThetaFourTau (z - v) τ))
+      (jacobiThetaTwoNullTau τ * jacobiThetaFourNullTau τ *
+        (a * jacobiThetaFourTau z τ + jacobiThetaTwoTau z τ * -b)) 0 := by
+    have h2' : HasDerivAt (fun w => jacobiThetaTwoTau w τ) a (z + 0) := by rwa [add_zero]
+    have h4' : HasDerivAt (fun w => jacobiThetaFourTau w τ) b (z - 0) := by rwa [sub_zero]
+    have := ((h2'.comp_const_add z 0).mul (h4'.comp_const_sub z 0)).const_mul
+      (jacobiThetaTwoNullTau τ * jacobiThetaFourNullTau τ)
+    simp only [add_zero, sub_zero] at this
+    exact this
+  have d1 := hd 1 0
+  have d2 := hd 2 0
+  have d3 := hd 3 0
+  have d4 := hd 4 0
+  simp only [jacobiThetaTau] at d1 d2 d3 d4
+  have e2 := p3t_deriv_even (differentiable_jacobiThetaTau 2 hτ)
+    (fun w => jacobiThetaTwoTau_neg w τ)
+  have e3 := p3t_deriv_even (differentiable_jacobiThetaTau 3 hτ)
+    (fun w => jacobiThetaThreeTau_neg w τ)
+  have e4 := p3t_deriv_even (differentiable_jacobiThetaTau 4 hτ)
+    (fun w => jacobiThetaFourTau_neg w τ)
+  simp only [jacobiThetaTau] at e2 e3 e4
+  rw [e2] at d2; rw [e3] at d3; rw [e4] at d4
+  have e1 := jacobiThetaOneDerivNullTau_eq_mul hτ
+  simp only [jacobiThetaOneDerivNullTau] at e1
+  rw [e1] at d1
+  have hR := ((d2.mul d4).const_mul (jacobiThetaTwoTau z τ * jacobiThetaFourTau z τ)).sub
+    ((d1.mul d3).const_mul (jacobiThetaOneTau z τ * jacobiThetaThreeTau z τ))
+  have hLR : HasDerivAt (fun v => jacobiThetaTwoNullTau τ * jacobiThetaFourNullTau τ *
+      (jacobiThetaTwoTau (z + v) τ * jacobiThetaFourTau (z - v) τ))
+      (-(jacobiThetaOneTau z τ * jacobiThetaThreeTau z τ *
+        (jacobiThetaTwoNullTau τ * jacobiThetaThreeNullTau τ * jacobiThetaFourNullTau τ *
+          jacobiThetaThreeTau 0 τ))) 0 := by
+    convert hR using 1
+    swap
+    · simp only [p20R1_one_zero]; ring
+    funext v
+    exact p3t_mixed24 z v τ hτ
+  have heq := hL.unique hLR
+  obtain ⟨n2, n3, n4⟩ := jacobiThetaNullTau_ne_zero hτ
+  have hW : a * jacobiThetaFourTau z τ - jacobiThetaTwoTau z τ * b =
+      -(jacobiThetaThreeNullTau τ ^ 2 * jacobiThetaOneTau z τ * jacobiThetaThreeTau z τ) := by
+    apply mul_left_cancel₀ (mul_ne_zero n2 n4)
+    simp only [jacobiThetaTwoNullTau, jacobiThetaThreeNullTau, jacobiThetaFourNullTau] at heq ⊢
+    linear_combination heq
+  have := h2.div h4 hz
+  rwa [hW] at this
+
+/-! ### §20.7(viii) Transformations of lattice parameter (continued) -/
 
 /-- DLMF 20.7.32: `(-iτ)^{1/2} θ₃(z|τ) = exp(iτ'z²/π) θ₃(zτ'|τ')`, `τ' = -1/τ`, principal
 square root, `Im τ > 0`. -/
@@ -885,7 +1021,7 @@ lemma p20R1_hasProd_one_sub {f : ℕ → ℂ} {ρ : ℝ} (hρ : ρ < 1) (hf : �
   exact (multipliable_one_sub_of_summable hs).hasProd
 
 /-- The product identity `θ₂(0|τ+½) η(2τ) = 2 e^{iπ/8} η(τ) η(4τ)` (helper for 20.7.34). -/
-theorem p20R1_two_null_half_eta {τ : ℂ} (hτ : 0 < τ.im) :
+lemma p20R1_two_null_half_eta {τ : ℂ} (hτ : 0 < τ.im) :
     jacobiThetaTwoNullTau (τ + 1 / 2) * ModularForm.eta (2 * τ) =
       2 * cexp (π * I / 8) * (ModularForm.eta τ * ModularForm.eta (4 * τ)) := by
   have hτ' : 0 < (τ + 1 / 2).im := by simpa using hτ

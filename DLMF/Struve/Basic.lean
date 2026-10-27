@@ -6,10 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Core.Framework
-public import DLMF.Bessel.WeberSeries
-public import Mathlib.Analysis.Convex.PathConnected
-public import Mathlib.Analysis.Complex.Convex
 public import DLMF.Hypergeometric.GeneralizedCalculus
+public import DLMF.Confluent.Relations
 
 /-!
 # Struve functions: definitions, convergence and differential equations

@@ -5,9 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
-public import Mathlib.MeasureTheory.Integral.DominatedConvergence
 
 /-!
 # Cauchy principal values by symmetric excision

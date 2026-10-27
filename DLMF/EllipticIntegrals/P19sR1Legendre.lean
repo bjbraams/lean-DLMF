@@ -7,7 +7,6 @@ module
 
 public import DLMF.EllipticIntegrals.Symmetric
 public import DLMF.EllipticIntegrals.Legendre
-public import Mathlib.MeasureTheory.Function.JacobianOneDim
 
 /-!
 # Legendre's integrals as symmetric integrals: the substitution (DLMF §19.25(i))
@@ -29,7 +28,7 @@ open scoped Real Topology
 namespace DLMF.EllipticIntegrals
 
 /-- `(r w)^s = r^s w^s` for real `r > 0` and any complex `w`, `s`. -/
-theorem p19sR1_ofReal_mul_cpow {r : ℝ} (hr : 0 < r) (w s : ℂ) :
+lemma p19sR1_ofReal_mul_cpow {r : ℝ} (hr : 0 < r) (w s : ℂ) :
     ((r : ℂ) * w) ^ s = (r : ℂ) ^ s * w ^ s := by
   have hr0 : (r : ℂ) ≠ 0 := ofReal_ne_zero.mpr hr.ne'
   by_cases hw : w = 0
@@ -43,7 +42,7 @@ theorem p19sR1_ofReal_mul_cpow {r : ℝ} (hr : 0 < r) (w s : ℂ) :
 
 /-- The substitution `t = csc² θ - csc² φ` on `(0, φ)`, `0 < φ ≤ π/2`:
 `∫₀^∞ G(t) dt = ∫₀^φ (2 cos θ / sin³ θ) G(csc² θ - csc² φ) dθ` (no integrability needed). -/
-theorem p19sR1_integral_Ioi_eq_Ioo {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π / 2) (G : ℝ → ℂ) :
+lemma p19sR1_integral_Ioi_eq_Ioo {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π / 2) (G : ℝ → ℂ) :
     ∫ t in Ioi (0 : ℝ), G t = ∫ θ in Ioo (0 : ℝ) φ,
       ((2 * Real.cos θ / Real.sin θ ^ 3 : ℝ) : ℂ) * G (1 / Real.sin θ ^ 2 - 1 / Real.sin φ ^ 2) := by
   set f : ℝ → ℝ := fun θ => 1 / Real.sin θ ^ 2 - 1 / Real.sin φ ^ 2 with hf
@@ -115,12 +114,12 @@ theorem p19sR1_integral_Ioi_eq_Ioo {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π / 2)
   rw [abs_neg, abs_of_pos (by positivity), real_smul]
 
 /-- `(r²)^{1/2} = r` for real `r ≥ 0`. -/
-theorem p19sR1_cpow_half_ofReal_sq {r : ℝ} (hr : 0 ≤ r) : ((r ^ 2 : ℝ) : ℂ) ^ (1 / 2 : ℂ) = r := by
+lemma p19sR1_cpow_half_ofReal_sq {r : ℝ} (hr : 0 ≤ r) : ((r ^ 2 : ℝ) : ℂ) ^ (1 / 2 : ℂ) = r := by
   rw [show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring, ← ofReal_cpow (sq_nonneg r),
     ← Real.sqrt_eq_rpow, Real.sqrt_sq hr]
 
 /-- Under the substitution: `√(t + c - w) = √(1 - w sin² θ)/sin θ` with `t = csc² θ - c`. -/
-theorem p19sR1_subst_cpow_half {θ : ℝ} (hs : 0 < Real.sin θ) (a : ℝ) (w : ℂ) :
+lemma p19sR1_subst_cpow_half {θ : ℝ} (hs : 0 < Real.sin θ) (a : ℝ) (w : ℂ) :
     (((1 / Real.sin θ ^ 2 - a : ℝ) : ℂ) + ((a : ℂ) - w)) ^ (1 / 2 : ℂ) =
       (1 - w * (Real.sin θ : ℂ) ^ 2) ^ (1 / 2 : ℂ) * ((1 / Real.sin θ : ℝ) : ℂ) := by
   have hs0 : Complex.sin (θ : ℂ) ≠ 0 := by
@@ -132,7 +131,7 @@ theorem p19sR1_subst_cpow_half {θ : ℝ} (hs : 0 < Real.sin θ) (a : ℝ) (w : 
     mul_comm]
 
 /-- `(1 - sin² θ)^{1/2} = cos θ` when `cos θ > 0`. -/
-theorem p19sR1_one_sub_sin_sq_cpow_half {θ : ℝ} (hc : 0 < Real.cos θ) :
+lemma p19sR1_one_sub_sin_sq_cpow_half {θ : ℝ} (hc : 0 < Real.cos θ) :
     (1 - 1 * (Real.sin θ : ℂ) ^ 2) ^ (1 / 2 : ℂ) = Real.cos θ := by
   have : (1 - 1 * (Real.sin θ : ℂ) ^ 2) = ((Real.cos θ ^ 2 : ℝ) : ℂ) := by
     push_cast
@@ -140,7 +139,7 @@ theorem p19sR1_one_sub_sin_sq_cpow_half {θ : ℝ} (hc : 0 < Real.cos θ) :
   rw [this, p19sR1_cpow_half_ofReal_sq hc.le]
 
 /-- The pointwise form of `symEllIntS (c - 1) (c - k²) c` under the substitution. -/
-theorem p19sR1_symEllIntS_subst {φ θ : ℝ} (hs : 0 < Real.sin θ) (hc : 0 < Real.cos θ) (k : ℂ) :
+lemma p19sR1_symEllIntS_subst {φ θ : ℝ} (hs : 0 < Real.sin θ) (hc : 0 < Real.cos θ) (k : ℂ) :
     symEllIntS (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1) (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - k ^ 2)
         ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) (1 / Real.sin θ ^ 2 - 1 / Real.sin φ ^ 2) =
       (Real.cos θ : ℂ) * (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (1 / 2 : ℂ) *
@@ -250,7 +249,7 @@ theorem p19sR1_symEllIntRJ_legendre {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π / 2
 
 /-- For `0 ≤ θ ≤ φ ≤ π/2`, `1 - k² sin² θ` lies on the segment from `1` to `1 - k² sin² φ`, so it
 is in the slit plane when `1 - k² sin² φ` is. -/
-theorem p19sR1_mem_slitPlane_sin {φ θ : ℝ} (h1 : φ ≤ π / 2) {w : ℂ}
+lemma p19sR1_mem_slitPlane_sin {φ θ : ℝ} (h1 : φ ≤ π / 2) {w : ℂ}
     (hk : 1 - w * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane) (hθ0 : 0 ≤ θ) (hθ : θ ≤ φ) :
     1 - w * (Real.sin θ : ℂ) ^ 2 ∈ slitPlane := by
   have hs0 : 0 ≤ Real.sin θ := Real.sin_nonneg_of_nonneg_of_le_pi hθ0 (by linarith [Real.pi_pos])
@@ -273,7 +272,7 @@ theorem p19sR1_mem_slitPlane_sin {φ θ : ℝ} (h1 : φ ≤ π / 2) {w : ℂ}
   field_simp
   ring
 
-theorem p19sR1_continuousOn_A {φ : ℝ} (h0 : 0 ≤ φ) (h1 : φ ≤ π / 2) {w : ℂ}
+lemma p19sR1_continuousOn_A {φ : ℝ} (h0 : 0 ≤ φ) (h1 : φ ≤ π / 2) {w : ℂ}
     (hk : 1 - w * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane) (s : ℂ) :
     ContinuousOn (fun θ : ℝ => (1 - w * (Real.sin θ : ℂ) ^ 2) ^ s) (uIcc 0 φ) := by
   intro θ hθ
@@ -308,7 +307,7 @@ theorem p19sR1_incEllIntEk_eq_sub {φ : ℝ} (h0 : 0 ≤ φ) (h1 : φ ≤ π / 2
 
 /-- For real `0 ≤ φ ≤ π/2` and `1 - α² sin² φ ∈ ℂ \ (-∞, 0]`, the principal value in `Π` is not
 needed: `Π(φ, α², k) = ∫₀^φ (1 - α² sin²θ)⁻¹ (1 - k² sin²θ)^{-1/2} dθ`. -/
-theorem p19sR1_incEllIntPik_eq_integral {φ : ℝ} (h0 : 0 ≤ φ) (h1 : φ ≤ π / 2) {α2 : ℂ}
+lemma p19sR1_incEllIntPik_eq_integral {φ : ℝ} (h0 : 0 ≤ φ) (h1 : φ ≤ π / 2) {α2 : ℂ}
     (hα : 1 - α2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane) (k : ℂ) :
     incEllIntPik φ α2 k = ∫ θ in (0 : ℝ)..φ, ((1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹ *
       (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ))) := by
@@ -327,7 +326,7 @@ theorem p19sR1_incEllIntPik_eq_integral {φ : ℝ} (h0 : 0 ≤ φ) (h1 : φ ≤ 
     simp only [hg] at this
     simpa [← Complex.ofReal_sin, ← Complex.ofReal_mul] using this
 
-theorem p19sR1_continuousOn_inv_A {φ : ℝ} (h0 : 0 ≤ φ) (h1 : φ ≤ π / 2) {α2 : ℂ}
+lemma p19sR1_continuousOn_inv_A {φ : ℝ} (h0 : 0 ≤ φ) (h1 : φ ≤ π / 2) {α2 : ℂ}
     (hα : 1 - α2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane) :
     ContinuousOn (fun θ : ℝ => (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹) (uIcc 0 φ) := by
   intro θ hθ
@@ -357,13 +356,13 @@ theorem p19sR1_incEllIntPik_sub {φ : ℝ} (h0 : 0 ≤ φ) (h1 : φ ≤ π / 2) 
   · exact (p19sR1_continuousOn_A h0 h1 hk _).intervalIntegrable
 
 /-- `c = csc² φ ≥ 1` for `0 < φ ≤ π/2`. -/
-theorem p19sR1_one_le_csc_sq {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π / 2) :
+lemma p19sR1_one_le_csc_sq {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π / 2) :
     1 ≤ 1 / Real.sin φ ^ 2 := by
   have hs : 0 < Real.sin φ := Real.sin_pos_of_pos_of_lt_pi h0 (by linarith [Real.pi_pos])
   rw [le_div_iff₀ (by positivity), one_mul]
   nlinarith [Real.sin_le_one φ]
 
-theorem p19sR1_one_lt_csc_sq {φ : ℝ} (h0 : 0 < φ) (h1 : φ < π / 2) :
+lemma p19sR1_one_lt_csc_sq {φ : ℝ} (h0 : 0 < φ) (h1 : φ < π / 2) :
     1 < 1 / Real.sin φ ^ 2 := by
   have hs : 0 < Real.sin φ := Real.sin_pos_of_pos_of_lt_pi h0 (by linarith [Real.pi_pos])
   have hs1 : Real.sin φ < 1 := by
@@ -577,13 +576,13 @@ theorem p19sR1_compEllIntPik_eq_symEllIntR {k α2 : ℂ} (hk : 1 - k ^ 2 ∈ sli
 
 /-! ### Homogeneity for all arguments (positive real scale) -/
 
-theorem p19sR1_integral_Ioi_scale (g : ℝ → ℂ) {l : ℝ} (hl : 0 < l) :
+lemma p19sR1_integral_Ioi_scale (g : ℝ → ℂ) {l : ℝ} (hl : 0 < l) :
     ∫ t in Ioi (0 : ℝ), g t = (l : ℂ) * ∫ s in Ioi (0 : ℝ), g (l * s) := by
   have h := integral_comp_mul_left_Ioi' g 0 hl
   rw [mul_zero] at h
   rw [← h, Complex.real_smul]
 
-theorem p19sR1_symEllIntS_scale {l : ℝ} (hl : 0 < l) (x y z : ℂ) (s : ℝ) :
+lemma p19sR1_symEllIntS_scale {l : ℝ} (hl : 0 < l) (x y z : ℂ) (s : ℝ) :
     symEllIntS ((l : ℂ) * x) ((l : ℂ) * y) ((l : ℂ) * z) (l * s) =
       ((l : ℂ) ^ (1 / 2 : ℂ)) ^ 3 * symEllIntS x y z s := by
   simp only [symEllIntS]
@@ -679,7 +678,7 @@ theorem p19sR1_symEllIntRG_scale {l : ℝ} (hl : 0 < l) (x y z : ℂ) :
 
 /-! ### §19.25(iii): the parametrization `sin² φ = (z - x)/z`, `k² = (z - y)/(z - x)` -/
 
-theorem p19sR1_arccos_setup {x z : ℝ} (hx : 0 ≤ x) (hxz : x < z) :
+lemma p19sR1_arccos_setup {x z : ℝ} (hx : 0 ≤ x) (hxz : x < z) :
     0 < Real.arccos √(x / z) ∧ Real.arccos √(x / z) ≤ π / 2 ∧
       1 / Real.sin (Real.arccos √(x / z)) ^ 2 = z / (z - x) := by
   have hz : 0 < z := lt_of_le_of_lt hx hxz
@@ -772,7 +771,7 @@ theorem p19sR1_cot_sqrt_eq {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π / 2) {κ : �
 
 /-! ### §19.25(ii): Bulirsch's `el1`, `el2` -/
 
-theorem p19sR1_arctan_setup {x : ℝ} (hx : 0 < x) :
+lemma p19sR1_arctan_setup {x : ℝ} (hx : 0 < x) :
     0 < Real.arctan x ∧ Real.arctan x < π / 2 ∧
       1 / Real.sin (Real.arctan x) ^ 2 = 1 / x ^ 2 + 1 := by
   refine ⟨Real.arctan_pos.mpr hx, Real.arctan_lt_pi_div_two x, ?_⟩
@@ -780,7 +779,7 @@ theorem p19sR1_arctan_setup {x : ℝ} (hx : 0 < x) :
   field_simp
 
 /-- `cos² θ + k_c² sin² θ = 1 - (1 - k_c²) sin² θ`, with `(1 - k_c²) = ((1 - k_c²)^{1/2})²`. -/
-theorem p19sR1_cos_sq_add (θ : ℝ) (kc : ℂ) :
+lemma p19sR1_cos_sq_add (θ : ℝ) (kc : ℂ) :
     Complex.cos (θ : ℂ) ^ 2 + kc ^ 2 * Complex.sin (θ : ℂ) ^ 2 =
       1 - ((1 - kc ^ 2) ^ (1 / 2 : ℂ)) ^ 2 * (Real.sin θ : ℂ) ^ 2 := by
   rw [sq ((1 - kc ^ 2) ^ (1 / 2 : ℂ)), ei19c_cpow_half_sq, Complex.ofReal_sin,
@@ -798,7 +797,7 @@ theorem p19sR1_bulirschEl1_eq {x : ℝ} (hx : 0 < x) (kc : ℂ) :
   push_cast
   ring_nf
 
-theorem p19sR1_bulirsch_mem {φ : ℝ} {kc : ℂ} (hkc : kc ^ 2 ∈ slitPlane) :
+lemma p19sR1_bulirsch_mem {φ : ℝ} {kc : ℂ} (hkc : kc ^ 2 ∈ slitPlane) :
     1 - ((1 - kc ^ 2) ^ (1 / 2 : ℂ)) ^ 2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane := by
   rw [sq ((1 - kc ^ 2) ^ (1 / 2 : ℂ)), ei19c_cpow_half_sq]
   have h := starConvex_one_slitPlane.add_smul_mem (y := kc ^ 2 - 1) (by simpa using hkc)
@@ -806,7 +805,7 @@ theorem p19sR1_bulirsch_mem {φ : ℝ} {kc : ℂ} (hkc : kc ^ 2 ∈ slitPlane) :
   convert h using 1
   rw [Complex.real_smul]; push_cast; ring
 
-theorem p19sR1_bulirschEl2_pointwise {θ : ℝ} (hc : 0 < Real.cos θ) (kc : ℂ) (a b : ℝ) :
+lemma p19sR1_bulirschEl2_pointwise {θ : ℝ} (hc : 0 < Real.cos θ) (kc : ℂ) (a b : ℝ) :
     ((a : ℂ) + (b : ℂ) * Complex.tan (θ : ℂ) ^ 2) *
         ((1 + Complex.tan (θ : ℂ) ^ 2) * (1 + kc ^ 2 * Complex.tan (θ : ℂ) ^ 2)) ^ (-(1 / 2 : ℂ)) =
       (a : ℂ) * (1 - ((1 - kc ^ 2) ^ (1 / 2 : ℂ)) ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) +
@@ -835,7 +834,7 @@ theorem p19sR1_bulirschEl2_pointwise {θ : ℝ} (hc : 0 < Real.cos θ) (kc : ℂ
   field_simp
   linear_combination (a : ℂ) * V * hsc
 
-theorem p19sR1_bulirschEl1_eq_integral {x : ℝ} (kc : ℂ) :
+lemma p19sR1_bulirschEl1_eq_integral {x : ℝ} (kc : ℂ) :
     bulirschEl1 x kc = ∫ θ in (0 : ℝ)..Real.arctan x,
       (1 - ((1 - kc ^ 2) ^ (1 / 2 : ℂ)) ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) := by
   rw [bulirschEl1, ← ofReal_arctan, ei19a_segmentIntegral_ofReal]

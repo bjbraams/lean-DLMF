@@ -7,8 +7,10 @@ module
 
 public import DLMF.RiemannTheta.Symmetry
 public import Mathlib.LinearAlgebra.SymplecticGroup
-public import Mathlib.Data.ZMod.Basic
 public import Mathlib.FieldTheory.Finite.Basic
+public import Mathlib.Analysis.Convex.Contractible
+public import Mathlib.Analysis.Complex.CoveringMap
+public import Mathlib.Topology.Homotopy.Lifting
 
 /-!
 # Modular transformations of Riemann theta functions (DLMF §21.5)
@@ -69,7 +71,7 @@ def IsSymplecticBlocks (A B C D : Matrix ι ι ℤ) : Prop :=
   IsSymplectic (Matrix.fromBlocks A B C D)
 
 omit [Fintype ι] in
-lemma symplecticJ_eq_neg {R : Type*} [CommRing R] : symplecticJ ι R = -Matrix.J ι R := by
+theorem symplecticJ_eq_neg {R : Type*} [CommRing R] : symplecticJ ι R = -Matrix.J ι R := by
   simp [symplecticJ, Matrix.J, Matrix.fromBlocks_neg]
 
 /-- DLMF's symplectic condition agrees with membership in Mathlib's `Matrix.symplecticGroup`
@@ -92,6 +94,75 @@ abbrev rth21_cplx (A : Matrix ι ι ℤ) : Matrix ι ι ℂ := A.map (Int.cast)
 /-- The real matrix of an integer matrix. -/
 abbrev rth21_real (A : Matrix ι ι ℤ) : Matrix ι ι ℝ := A.map (Int.cast)
 
+omit [DecidableEq ι] in
+/-- For a real symmetric `Y`, `u* Y u = x·Yx + y·Yy` with `u = x + iy`. -/
+lemma p3t_star_quad {Y : Matrix ι ι ℝ} (hY : Yᵀ = Y) (u : ι → ℂ) :
+    star u ⬝ᵥ (Y.map ofReal *ᵥ u) =
+      (((fun i => (u i).re) ⬝ᵥ (Y *ᵥ fun i => (u i).re) +
+        (fun i => (u i).im) ⬝ᵥ (Y *ᵥ fun i => (u i).im) : ℝ) : ℂ) := by
+  set x : ι → ℝ := fun i => (u i).re
+  set y : ι → ℝ := fun i => (u i).im
+  have hc : ∀ v w : ι → ℝ, (fun i => (v i : ℂ)) ⬝ᵥ (Y.map ofReal *ᵥ fun i => (w i : ℂ)) =
+      ((v ⬝ᵥ (Y *ᵥ w) : ℝ) : ℂ) := by
+    intro v w
+    simp [dotProduct, mulVec, ofReal_sum, ofReal_mul]
+  have hs : x ⬝ᵥ (Y *ᵥ y) = y ⬝ᵥ (Y *ᵥ x) := by
+    rw [dotProduct_mulVec, ← mulVec_transpose, hY, dotProduct_comm]
+  have hu : u = (fun i => (x i : ℂ)) + I • (fun i => (y i : ℂ)) := by
+    ext i; simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul, x, y]
+    rw [mul_comm, Complex.re_add_im]
+  have hsu : star u = (fun i => (x i : ℂ)) - I • (fun i => (y i : ℂ)) := by
+    ext i; simp [x, y]
+    apply Complex.ext <;> simp
+  rw [hsu, show Y.map ofReal *ᵥ u = Y.map ofReal *ᵥ ((fun i => (x i : ℂ)) +
+    I • (fun i => (y i : ℂ))) by rw [← hu]]
+  rw [mulVec_add, mulVec_smul, sub_dotProduct, dotProduct_add, dotProduct_add, smul_dotProduct,
+    smul_dotProduct, dotProduct_smul, dotProduct_smul, hc, hc, hc, hc, hs]
+  simp only [smul_eq_mul]
+  push_cast
+  ring_nf
+  rw [I_sq]
+  ring
+
+omit [Fintype ι] [DecidableEq ι] in
+/-- `Ω - Ωᴴ = 2i Im Ω` for symmetric `Ω`. -/
+lemma p3t_sub_conjTranspose {Ω : Matrix ι ι ℂ} (hΩ : Ωᵀ = Ω) :
+    Ω - Ωᴴ = (2 * I) • (Ω.map Complex.im).map ofReal := by
+  ext i j
+  have h := congrFun (congrFun hΩ i) j
+  simp only [transpose_apply] at h
+  simp only [Matrix.sub_apply, conjTranspose_apply, h, Matrix.smul_apply, map_apply, smul_eq_mul]
+  apply Complex.ext
+  · simp
+  · simp; ring
+
+
+omit [Fintype ι] [DecidableEq ι] in
+/-- Integer matrices are fixed by `ᴴ` up to transposition. -/
+lemma p3t_cplx_conjTranspose (A : Matrix ι ι ℤ) : (rth21_cplx A)ᴴ = (rth21_cplx A)ᵀ := by
+  ext i j; simp [conjTranspose_apply]
+
+/-- The block relations of an integer symplectic matrix, over `ℂ`. -/
+lemma p3t_blocks {A B C D : Matrix ι ι ℤ} (hΓ : IsSymplecticBlocks A B C D) :
+    (rth21_cplx A)ᵀ * rth21_cplx C = (rth21_cplx C)ᵀ * rth21_cplx A ∧
+      (rth21_cplx B)ᵀ * rth21_cplx D = (rth21_cplx D)ᵀ * rth21_cplx B ∧
+      (rth21_cplx A)ᵀ * rth21_cplx D - (rth21_cplx C)ᵀ * rth21_cplx B = 1 := by
+  obtain ⟨h1, h2, h3⟩ := SymplecticGroup.fromBlocks_mem_iff.mp
+    ((isSymplectic_iff_mem_symplecticGroup _).mp hΓ)
+  have e : ∀ X : Matrix ι ι ℤ, rth21_cplx X = X.map (Int.castRingHom ℂ) := fun X => by
+    ext; simp
+  refine ⟨?_, ?_, ?_⟩
+  · have := congrArg (fun X => X.map (Int.castRingHom ℂ)) h1
+    simp only [Matrix.map_mul, Matrix.transpose_map] at this
+    simpa only [e] using this
+  · have := congrArg (fun X => X.map (Int.castRingHom ℂ)) h2
+    simp only [Matrix.map_mul, Matrix.transpose_map] at this
+    simpa only [e] using this
+  · have := congrArg (Int.castRingHom ℂ).mapMatrix h3
+    rw [map_sub, map_mul, map_mul, map_one] at this
+    simp only [RingHom.mapMatrix_apply, Matrix.transpose_map] at this
+    simpa only [e] using this
+
 /-- A symplectic `Γ` maps the Siegel space to itself, `Ω ↦ (AΩ+B)(CΩ+D)⁻¹`, and `CΩ+D` is
 invertible there (DLMF §21.5(i), implicit in 21.5.4). -/
 @[dlmf 21.5.i "the modular action preserves the Siegel space and CΩ+D is invertible"]
@@ -100,7 +171,123 @@ theorem modular_mem_siegel {A B C D : Matrix ι ι ℤ} (hΓ : IsSymplecticBlock
     IsUnit (rth21_cplx C * Ω + rth21_cplx D).det ∧
       (rth21_cplx A * Ω + rth21_cplx B) * (rth21_cplx C * Ω + rth21_cplx D)⁻¹ ∈
         siegelUpperHalfSpace ι := by
-  sorry
+  obtain ⟨m1, m2, m3⟩ := p3t_blocks hΓ
+  set a := rth21_cplx A
+  set b := rth21_cplx B
+  set c := rth21_cplx C
+  set d := rth21_cplx D
+  set M := c * Ω + d with hM
+  set N := a * Ω + b with hN
+  set Y := Ω.map Complex.im with hYdef
+  have hYs : Yᵀ = Y := by
+    have := hΩ.2.1.eq
+    rwa [conjTranspose_eq_transpose_of_trivial] at this
+  have key : ∀ P : Matrix ι ι ℂ, (P * cᵀ + dᵀ) * N - (P * aᵀ + bᵀ) * M = Ω - P := by
+    intro P
+    have m4 : dᵀ * a - bᵀ * c = 1 := by
+      have := congrArg transpose m3
+      simpa [transpose_sub, transpose_mul] using this
+    calc (P * cᵀ + dᵀ) * N - (P * aᵀ + bᵀ) * M =
+        P * (cᵀ * a - aᵀ * c) * Ω - P * (aᵀ * d - cᵀ * b) + (dᵀ * a - bᵀ * c) * Ω +
+          (dᵀ * b - bᵀ * d) := by rw [hN, hM]; noncomm_ring
+      _ = Ω - P := by rw [m1, m3, m4, m2]; noncomm_ring
+  have hMt : Mᵀ = Ω * cᵀ + dᵀ := by rw [hM, transpose_add, transpose_mul, hΩ.1]
+  have hNt : Nᵀ = Ω * aᵀ + bᵀ := by rw [hN, transpose_add, transpose_mul, hΩ.1]
+  have hMh : Mᴴ = Ωᴴ * cᵀ + dᵀ := by
+    rw [hM, conjTranspose_add, conjTranspose_mul, p3t_cplx_conjTranspose, p3t_cplx_conjTranspose]
+  have hNh : Nᴴ = Ωᴴ * aᵀ + bᵀ := by
+    rw [hN, conjTranspose_add, conjTranspose_mul, p3t_cplx_conjTranspose, p3t_cplx_conjTranspose]
+  have hT : Mᵀ * N = Nᵀ * M := by
+    have := key Ω; rw [sub_self, ← hMt, ← hNt] at this; exact sub_eq_zero.mp this
+  have hH : Mᴴ * N - Nᴴ * M = (2 * I) • Y.map ofReal := by
+    rw [hMh, hNh, key, p3t_sub_conjTranspose hΩ.1]
+  -- the quadratic form
+  have hq : ∀ u : ι → ℂ, star (M *ᵥ u) ⬝ᵥ (N *ᵥ u) - star (N *ᵥ u) ⬝ᵥ (M *ᵥ u) =
+      2 * I * (((fun i => (u i).re) ⬝ᵥ (Y *ᵥ fun i => (u i).re) +
+        (fun i => (u i).im) ⬝ᵥ (Y *ᵥ fun i => (u i).im) : ℝ) : ℂ) := by
+    intro u
+    rw [← p3t_star_quad hYs, ← smul_eq_mul, ← dotProduct_smul, ← smul_mulVec, ← hH,
+      sub_mulVec, dotProduct_sub, star_mulVec, star_mulVec, dotProduct_mulVec, dotProduct_mulVec,
+      vecMul_vecMul, vecMul_vecMul, ← dotProduct_mulVec, ← dotProduct_mulVec]
+  have hpos : ∀ u : ι → ℂ, u ≠ 0 → 0 < (fun i => (u i).re) ⬝ᵥ (Y *ᵥ fun i => (u i).re) +
+      (fun i => (u i).im) ⬝ᵥ (Y *ᵥ fun i => (u i).im) := by
+    intro u hu
+    have h0 := rth21_posIm_of_mem hΩ
+    have hnn : ∀ x : ι → ℝ, 0 ≤ x ⬝ᵥ (Y *ᵥ x) := fun x => by
+      by_cases hx : x = 0
+      · simp [hx]
+      · exact (h0 x hx).le
+    by_cases hre : (fun i => (u i).re) = 0
+    · have him : (fun i => (u i).im) ≠ 0 := by
+        intro him; apply hu; funext i
+        apply Complex.ext
+        · exact congrFun hre i
+        · exact congrFun him i
+      exact add_pos_of_nonneg_of_pos (hnn _) (h0 _ him)
+    · exact add_pos_of_pos_of_nonneg (h0 _ hre) (hnn _)
+  have hdet : IsUnit M.det := by
+    rw [isUnit_iff_ne_zero]
+    intro h0
+    obtain ⟨v, hv, hMv⟩ := (exists_mulVec_eq_zero_iff (M := M)).mpr h0
+    have h1 := hq v
+    rw [hMv, star_zero, zero_dotProduct, dotProduct_zero, sub_zero] at h1
+    have hp := hpos v hv
+    have : (2 * I) * (((fun i => (v i).re) ⬝ᵥ (Y *ᵥ fun i => (v i).re) +
+        (fun i => (v i).im) ⬝ᵥ (Y *ᵥ fun i => (v i).im) : ℝ) : ℂ) ≠ 0 :=
+      mul_ne_zero (mul_ne_zero two_ne_zero I_ne_zero) (ofReal_ne_zero.mpr hp.ne')
+    exact this h1.symm
+  have hsymm : (N * M⁻¹)ᵀ = N * M⁻¹ := by
+    rw [transpose_mul, transpose_nonsing_inv]
+    have hMtu : IsUnit Mᵀ.det := by rwa [det_transpose]
+    calc (Mᵀ)⁻¹ * Nᵀ = (Mᵀ)⁻¹ * (Nᵀ * M) * M⁻¹ := by
+          rw [Matrix.mul_assoc, Matrix.mul_assoc, mul_nonsing_inv _ hdet, Matrix.mul_one]
+      _ = N * M⁻¹ := by
+          rw [← hT, ← Matrix.mul_assoc, nonsing_inv_mul _ hMtu, Matrix.one_mul]
+  refine ⟨hdet, hsymm, PosDef.of_dotProduct_mulVec_pos ?_ fun x hx => ?_⟩
+  · rw [IsHermitian, conjTranspose_eq_transpose_of_trivial, ← Matrix.transpose_map, hsymm]
+  · rw [star_trivial, ← rth21_im_quad_ofReal]
+    set xc : ι → ℂ := fun i => (x i : ℂ) with hxc
+    set u := M⁻¹ *ᵥ xc with hu_def
+    have hMu : M *ᵥ u = xc := by
+      rw [hu_def, mulVec_mulVec, mul_nonsing_inv _ hdet, one_mulVec]
+    have hu : u ≠ 0 := by
+      intro h
+      apply hx
+      funext i
+      have := congrFun hMu i
+      rw [h, mulVec_zero, hxc] at this
+      simpa using this.symm
+    have hsx : star xc = xc := by ext i; simp [hxc]
+    have hw : xc ⬝ᵥ ((N * M⁻¹) *ᵥ xc) = star (M *ᵥ u) ⬝ᵥ (N *ᵥ u) := by
+      rw [hMu, hsx, ← mulVec_mulVec]
+    have hc : starRingEnd ℂ (star (M *ᵥ u) ⬝ᵥ (N *ᵥ u)) = star (N *ᵥ u) ⬝ᵥ (M *ᵥ u) := by
+      simp only [dotProduct, map_sum, map_mul, Pi.star_apply]
+      refine Finset.sum_congr rfl fun i _ => ?_
+      simp [mul_comm]
+    have h2 := hq u
+    rw [← hc] at h2
+    rw [hw]
+    have h3 := congrArg Complex.im h2
+    rw [Complex.sub_conj] at h3
+    simp at h3
+    linarith [hpos u hu]
+
+omit [DecidableEq ι] in
+/-- The Siegel upper half-space is convex. -/
+lemma p3t_siegel_convex : Convex ℝ (siegelUpperHalfSpace ι) := by
+  refine convex_iff_forall_pos.mpr fun Ω₁ h₁ Ω₂ h₂ a b ha hb hab => ⟨?_, ?_⟩
+  · rw [transpose_add, transpose_smul, transpose_smul, h₁.1, h₂.1]
+  · have e : (a • Ω₁ + b • Ω₂).map Complex.im = a • Ω₁.map Complex.im + b • Ω₂.map Complex.im := by
+      ext i j; simp
+    rw [e]
+    exact (h₁.2.smul ha).add (h₂.2.smul hb)
+
+/-- `iI` lies in the Siegel upper half-space. -/
+lemma p3t_siegel_nonempty : (I • (1 : Matrix ι ι ℂ)) ∈ siegelUpperHalfSpace ι := by
+  refine ⟨by simp, ?_⟩
+  have e : (I • (1 : Matrix ι ι ℂ)).map Complex.im = 1 := by
+    ext i j; by_cases h : i = j <;> simp [h, Matrix.one_apply]
+  rw [e]; exact PosDef.one
 
 /-- A continuous square root of `det(CΩ+D)` exists on the Siegel space (DLMF §21.5(i): the
 branch of `√det[CΩ+D]` in 21.5.4 and 21.5.9). -/
@@ -109,7 +296,37 @@ theorem exists_continuous_sqrt_det {C D : Matrix ι ι ℤ}
     (hdet : ∀ Ω ∈ siegelUpperHalfSpace ι, (rth21_cplx C * Ω + rth21_cplx D).det ≠ 0) :
     ∃ s : Matrix ι ι ℂ → ℂ, ContinuousOn s (siegelUpperHalfSpace ι) ∧
       ∀ Ω ∈ siegelUpperHalfSpace ι, s Ω ^ 2 = (rth21_cplx C * Ω + rth21_cplx D).det := by
-  sorry
+  classical
+  set S := siegelUpperHalfSpace ι
+  have : LocallyConvexSpace ℝ (Matrix ι ι ℂ) :=
+    inferInstanceAs (LocallyConvexSpace ℝ (ι → ι → ℂ))
+  have hne : S.Nonempty := ⟨_, p3t_siegel_nonempty⟩
+  have : ContractibleSpace S := p3t_siegel_convex.contractibleSpace hne
+  have : LocallyPathConnectedSpace S := p3t_siegel_convex.locallyPathConnectedSpace
+  let f : C(S, {z : ℂ // z ≠ 0}) := ⟨fun Ω => ⟨(rth21_cplx C * Ω.1 + rth21_cplx D).det,
+    hdet Ω.1 Ω.2⟩, by
+      refine Continuous.subtype_mk ?_ _
+      exact (Continuous.matrix_det ((continuous_const.matrix_mul continuous_subtype_val).add
+        continuous_const))⟩
+  let a₀ : S := ⟨_, p3t_siegel_nonempty⟩
+  set w := ((f a₀ : ℂ)) ^ ((2 : ℕ)⁻¹ : ℂ) with hw
+  have hw0 : w ≠ 0 := by
+    rw [hw, Ne, cpow_eq_zero_iff]; exact fun h => (f a₀).2 h.1
+  have hw2 : w ^ 2 = f a₀ := by
+    rw [hw]; exact cpow_nat_inv_pow _ two_ne_zero
+  obtain ⟨F, ⟨-, hF⟩, -⟩ :=
+    (isCoveringMap_npow (𝕜 := ℂ) 2 (by norm_num)).existsUnique_continuousMap_lifts
+    f a₀ ⟨w, hw0⟩ (Subtype.ext hw2)
+  refine ⟨fun Ω => if h : Ω ∈ S then (F ⟨Ω, h⟩ : ℂ) else 0, ?_, fun Ω hΩ => ?_⟩
+  · rw [continuousOn_iff_continuous_domRestrict]
+    have : S.domRestrict (fun Ω => if h : Ω ∈ S then (F ⟨Ω, h⟩ : ℂ) else 0) =
+        fun Ω : S => (F Ω : ℂ) := by
+      funext Ω; simp [Set.domRestrict, Ω.2]
+    rw [this]
+    exact continuous_subtype_val.comp F.continuous
+  · simp only [hΩ, dite_true]
+    have := congrArg Subtype.val (congrFun hF ⟨Ω, hΩ⟩)
+    exact this
 
 /-- **Corrected 21.5.4.** For an integer symplectic `Γ = [[A,B],[C,D]]` with `diag(CDᵀ)` and
 `diag(ABᵀ)` even (the theta group) and any continuous branch `s` of `√det(CΩ+D)` on the

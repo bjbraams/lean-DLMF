@@ -7,9 +7,6 @@ module
 
 public import DLMF.NumberTheory.Functions
 public import Mathlib.NumberTheory.EulerProduct.DirichletLSeries
-public import Mathlib.NumberTheory.LSeries.Dirichlet
-public import Mathlib.NumberTheory.LSeries.Deriv
-public import Mathlib.NumberTheory.LSeries.Convolution
 
 /-!
 # Euler products and Dirichlet series (DLMF §27.4)
@@ -69,7 +66,7 @@ theorem LSeriesHasSum_moebius {s : ℂ} (hs : 1 < s.re) :
   exact (LSeriesSummable_moebius_iff.mpr hs).LSeriesHasSum
 
 /-- The Dirichlet series of `n ↦ n^α` is `ζ(s - α)`, `ℜs > 1 + ℜα`. -/
-theorem n27_LSeriesHasSum_powC (α : ℂ) {s : ℂ} (hs : 1 + α.re < s.re) :
+lemma n27_LSeriesHasSum_powC (α : ℂ) {s : ℂ} (hs : 1 + α.re < s.re) :
     LSeriesHasSum ↗(powC α) s (riemannZeta (s - α)) := by
   have h := LSeriesHasSum_one (s := s - α) (by simp; linarith)
   unfold LSeriesHasSum at h ⊢
@@ -94,7 +91,7 @@ theorem q27_mul_apply_prime_pow {R : Type*} [Semiring R] (f g : ArithmeticFuncti
   rw [Nat.pow_div (by simpa [Nat.lt_succ_iff] using hi) hp.pos]
 
 /-- The Dirichlet series of the unit `δ` is `1`. -/
-theorem q27_LSeriesHasSum_one {s : ℂ} : LSeriesHasSum ↗(1 : ArithmeticFunction ℂ) s 1 := by
+lemma q27_LSeriesHasSum_one {s : ℂ} : LSeriesHasSum ↗(1 : ArithmeticFunction ℂ) s 1 := by
   rw [one_eq_delta]
   unfold LSeriesHasSum
   simp_rw [funext (LSeries.term_delta s)]
@@ -102,7 +99,7 @@ theorem q27_LSeriesHasSum_one {s : ℂ} : LSeriesHasSum ↗(1 : ArithmeticFuncti
 
 /-- Division of Dirichlet series: if `f * g = h`, `L f = a ≠ 0`, `L h = c` and `L g` converges,
 then `L g = c / a`. -/
-theorem q27_LSeriesHasSum_of_mul_eq {f g h : ArithmeticFunction ℂ} {s a c : ℂ}
+lemma q27_LSeriesHasSum_of_mul_eq {f g h : ArithmeticFunction ℂ} {s a c : ℂ}
     (hfg : f * g = h) (hf : LSeriesHasSum ↗f s a) (ha : a ≠ 0) (hg : LSeriesSummable ↗g s)
     (hh : LSeriesHasSum ↗h s c) : LSeriesHasSum ↗g s (c / a) := by
   have h1 := LSeriesHasSum_mul hf hg.LSeriesHasSum
@@ -115,7 +112,7 @@ theorem q27_LSeriesHasSum_of_mul_eq {f g h : ArithmeticFunction ℂ} {s a c : �
 def q27_sqLift (g : ℕ → ℂ) : ℕ → ℂ := fun n ↦ if IsSquare n then g (Nat.sqrt n) else 0
 
 /-- `∑ g(m) (m²)^{-s} = ∑ g(m) m^{-2s}`. -/
-theorem q27_LSeriesHasSum_sqLift {g : ℕ → ℂ} {s a : ℂ} (h : LSeriesHasSum g (2 * s) a) :
+lemma q27_LSeriesHasSum_sqLift {g : ℕ → ℂ} {s a : ℂ} (h : LSeriesHasSum g (2 * s) a) :
     LSeriesHasSum (q27_sqLift g) s a := by
   unfold LSeriesHasSum at h ⊢
   have hinj : Function.Injective (fun m : ℕ ↦ m ^ 2) := Nat.pow_left_injective two_ne_zero
@@ -142,7 +139,7 @@ theorem q27_LSeriesHasSum_sqLift {g : ℕ → ℂ} {s a : ℂ} (h : LSeriesHasSu
 def q27_totientC : ArithmeticFunction ℂ := ⟨fun n ↦ (n.totient : ℂ), by simp⟩
 
 /-- `∑_{d∣n} φ(d) = n` as a Dirichlet convolution. -/
-theorem q27_zeta_mul_totientC : (ζ : ArithmeticFunction ℂ) * q27_totientC = powC 1 := by
+lemma q27_zeta_mul_totientC : (ζ : ArithmeticFunction ℂ) * q27_totientC = powC 1 := by
   ext n
   rcases eq_or_ne n 0 with rfl | hn
   · simp
@@ -151,7 +148,7 @@ theorem q27_zeta_mul_totientC : (ζ : ArithmeticFunction ℂ) * q27_totientC = p
   exact_mod_cast Nat.sum_totient n
 
 /-- DLMF 27.4.6 (proof). -/
-theorem q27_LSeriesHasSum_totient {s : ℂ} (hs : 2 < s.re) :
+lemma q27_LSeriesHasSum_totient {s : ℂ} (hs : 2 < s.re) :
     LSeriesHasSum (fun n ↦ (n.totient : ℂ)) s (riemannZeta (s - 1) / riemannZeta s) := by
   have h1 : 1 < s.re := by linarith
   have hsum : LSeriesSummable ↗q27_totientC s := by
@@ -221,16 +218,16 @@ theorem q27_sum_sq_dvd_moebius {n : ℕ} (hn : n ≠ 0) :
 def q27_absMoebius : ArithmeticFunction ℤ := ⟨fun n ↦ |μ n|, by simp⟩
 
 /-- Value of `q27_absMoebius`. -/
-theorem q27_absMoebius_apply (n : ℕ) : q27_absMoebius n = |μ n| := rfl
+lemma q27_absMoebius_apply (n : ℕ) : q27_absMoebius n = |μ n| := rfl
 
 /-- `|μ|` is multiplicative. -/
-theorem q27_isMultiplicative_absMoebius : q27_absMoebius.IsMultiplicative := by
+lemma q27_isMultiplicative_absMoebius : q27_absMoebius.IsMultiplicative := by
   refine ⟨by simp [q27_absMoebius_apply], fun {m n} hmn ↦ ?_⟩
   simp only [q27_absMoebius_apply]
   rw [isMultiplicative_moebius.map_mul_of_coprime hmn, abs_mul]
 
 /-- `|μ(p^j)| = 1` for `j ≤ 1` and `0` otherwise. -/
-theorem q27_absMoebius_prime_pow {p : ℕ} (hp : p.Prime) (j : ℕ) :
+lemma q27_absMoebius_prime_pow {p : ℕ} (hp : p.Prime) (j : ℕ) :
     q27_absMoebius (p ^ j) = if j ≤ 1 then 1 else 0 := by
   rw [q27_absMoebius_apply]
   rcases j with _ | j
@@ -239,7 +236,7 @@ theorem q27_absMoebius_prime_pow {p : ℕ} (hp : p.Prime) (j : ℕ) :
   rcases j with _ | j <;> simp
 
 /-- `λ * |μ| = δ`. -/
-theorem q27_liouville_mul_absMoebius :
+lemma q27_liouville_mul_absMoebius :
     (liouville : ArithmeticFunction ℤ) * q27_absMoebius = 1 := by
   refine (IsMultiplicative.eq_iff_eq_on_prime_powers _
     (isMultiplicative_liouville.mul q27_isMultiplicative_absMoebius) _
@@ -256,7 +253,7 @@ theorem q27_liouville_mul_absMoebius :
     rw [q27_absMoebius_prime_pow hp, ite_eq_right (by omega), mul_zero]
 
 /-- `∑_{d∣p^{e+1}} |μ(d)| = 2`. -/
-theorem q27_zeta_mul_absMoebius_prime_pow {p : ℕ} (hp : p.Prime) (e : ℕ) :
+lemma q27_zeta_mul_absMoebius_prime_pow {p : ℕ} (hp : p.Prime) (e : ℕ) :
     ((ζ : ArithmeticFunction ℤ) * q27_absMoebius) (p ^ (e + 1)) = 2 := by
   rw [coe_zeta_mul_apply, Nat.sum_divisors_prime_pow hp, sum_range_succ', sum_range_succ',
     sum_eq_zero]
@@ -268,7 +265,7 @@ theorem q27_zeta_mul_absMoebius_prime_pow {p : ℕ} (hp : p.Prime) (e : ℕ) :
 def q27_twoPowOmega : ArithmeticFunction ℤ := ⟨fun n ↦ if n = 0 then 0 else 2 ^ ω n, by simp⟩
 
 /-- `2^{ω(n)} = ∑_{d∣n} |μ(d)|`. -/
-theorem q27_twoPowOmega_eq : q27_twoPowOmega = (ζ : ArithmeticFunction ℤ) * q27_absMoebius := by
+lemma q27_twoPowOmega_eq : q27_twoPowOmega = (ζ : ArithmeticFunction ℤ) * q27_absMoebius := by
   have hmul : q27_twoPowOmega.IsMultiplicative := by
     refine ⟨by simp [q27_twoPowOmega], fun {m n} hmn ↦ ?_⟩
     change (if m * n = 0 then 0 else 2 ^ ω (m * n) : ℤ) =
@@ -293,7 +290,7 @@ def q27_moebiusSq : ArithmeticFunction ℂ :=
   ⟨q27_sqLift fun m ↦ (μ m : ℂ), by simp [q27_sqLift]⟩
 
 /-- `∑_{d²∣n} μ(d) = |μ(n)|` as a Dirichlet convolution. -/
-theorem q27_zeta_mul_moebiusSq :
+lemma q27_zeta_mul_moebiusSq :
     (ζ : ArithmeticFunction ℂ) * q27_moebiusSq = (q27_absMoebius : ArithmeticFunction ℂ) := by
   ext n
   rcases eq_or_ne n 0 with rfl | hn
@@ -322,7 +319,7 @@ theorem q27_zeta_mul_moebiusSq :
     rfl
 
 /-- DLMF 27.4.8 (proof). -/
-theorem q27_LSeriesHasSum_abs_moebius {s : ℂ} (hs : 1 < s.re) :
+lemma q27_LSeriesHasSum_abs_moebius {s : ℂ} (hs : 1 < s.re) :
     LSeriesHasSum (fun n ↦ ((|μ n| : ℤ) : ℂ)) s (riemannZeta s / riemannZeta (2 * s)) := by
   have h2 : 1 < (2 * s).re := by
     rw [show (2 : ℂ) * s = ((2 : ℝ) : ℂ) * s by norm_num, Complex.re_ofReal_mul]; linarith
@@ -338,7 +335,7 @@ theorem q27_LSeriesHasSum_abs_moebius {s : ℂ} (hs : 1 < s.re) :
   exact h
 
 /-- DLMF 27.4.7 (proof). -/
-theorem q27_LSeriesHasSum_liouville {s : ℂ} (hs : 1 < s.re) :
+lemma q27_LSeriesHasSum_liouville {s : ℂ} (hs : 1 < s.re) :
     LSeriesHasSum (fun n ↦ (liouville n : ℂ)) s (riemannZeta (2 * s) / riemannZeta s) := by
   have h2 : 1 < (2 * s).re := by
     rw [show (2 : ℂ) * s = ((2 : ℝ) : ℂ) * s by norm_num, Complex.re_ofReal_mul]; linarith
@@ -363,7 +360,7 @@ theorem q27_LSeriesHasSum_liouville {s : ℂ} (hs : 1 < s.re) :
   exact h
 
 /-- DLMF 27.4.9 (proof). -/
-theorem q27_LSeriesHasSum_two_pow_cardDistinctFactors {s : ℂ} (hs : 1 < s.re) :
+lemma q27_LSeriesHasSum_two_pow_cardDistinctFactors {s : ℂ} (hs : 1 < s.re) :
     LSeriesHasSum (fun n ↦ if n = 0 then 0 else (2 : ℂ) ^ ω n) s
       (riemannZeta s ^ 2 / riemannZeta (2 * s)) := by
   have habs : LSeriesHasSum ↗(q27_absMoebius : ArithmeticFunction ℂ) s
@@ -383,14 +380,14 @@ theorem q27_LSeriesHasSum_two_pow_cardDistinctFactors {s : ℂ} (hs : 1 < s.re) 
   exact h
 
 /-- Casting commutes with Dirichlet powers. -/
-theorem q27_natCoe_pow (f : ArithmeticFunction ℕ) (k : ℕ) :
+lemma q27_natCoe_pow (f : ArithmeticFunction ℕ) (k : ℕ) :
     ((f ^ k : ArithmeticFunction ℕ) : ArithmeticFunction ℂ) = (f : ArithmeticFunction ℂ) ^ k := by
   induction k with
   | zero => simp
   | succ k ih => rw [pow_succ, natCoe_mul, ih, pow_succ]
 
 /-- DLMF 27.4.10 (proof). -/
-theorem q27_LSeriesHasSum_divisorCountK (k : ℕ) {s : ℂ} (hs : 1 < s.re) :
+lemma q27_LSeriesHasSum_divisorCountK (k : ℕ) {s : ℂ} (hs : 1 < s.re) :
     LSeriesHasSum (fun n ↦ (divisorCountK k n : ℂ)) s (riemannZeta s ^ k) := by
   have hfun : (fun n ↦ (divisorCountK k n : ℂ)) = ↗((ζ : ArithmeticFunction ℂ) ^ k) := by
     funext n

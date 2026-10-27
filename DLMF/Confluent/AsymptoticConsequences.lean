@@ -5,7 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Confluent.ConnectionWronskians
 public import DLMF.Confluent.TricomiRotated
 
 /-!
@@ -32,7 +31,7 @@ noncomputable section
 
 namespace DLMF.Confluent
 
-lemma tendsto_ofReal_recip_atTop : Tendsto (fun x : ℝ => ((x : ℂ))⁻¹) atTop (𝓝 0) := by
+theorem tendsto_ofReal_recip_atTop : Tendsto (fun x : ℝ => ((x : ℂ))⁻¹) atTop (𝓝 0) := by
   have := (tendsto_inv_atTop_zero (𝕜 := ℝ)).ofReal
   simpa using this
 
@@ -132,12 +131,12 @@ theorem tendsto_whittakerW_atTop (κ μ : ℂ) :
 def upperSectorAtTop (δ : ℝ) : Filter ℂ :=
   Filter.comap (fun z : ℂ => ‖z‖) atTop ⊓ Filter.principal {z : ℂ | δ ≤ z.arg ∧ z.arg ≤ π - δ}
 
-lemma sin_le_cos_of_abs_le {δ θ : ℝ} (hδ : 0 < δ) (hδπ : δ < π / 2) (hθ : |θ| ≤ π / 2 - δ / 2) :
+theorem sin_le_cos_of_abs_le {δ θ : ℝ} (hδ : 0 < δ) (hδπ : δ < π / 2) (hθ : |θ| ≤ π / 2 - δ / 2) :
     Real.sin (δ / 2) ≤ Real.cos θ := by
   rw [← Real.cos_abs θ, ← Real.cos_pi_div_two_sub]
   exact Real.cos_le_cos_of_nonneg_of_le_pi (abs_nonneg θ) (by linarith) hθ
 
-lemma tendsto_upperSectorAtTop_rot {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π / 2) (σ : ℝ)
+theorem tendsto_upperSectorAtTop_rot {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π / 2) (σ : ℝ)
     (hσ : σ = 1 ∨ σ = -1) :
     Tendsto (fun z : ℂ => (σ : ℂ) * z) (upperSectorAtTop δ)
       (rotSectorAtTop (Real.sin (δ / 2)) (-σ * (π / 2 - δ / 2))) := by

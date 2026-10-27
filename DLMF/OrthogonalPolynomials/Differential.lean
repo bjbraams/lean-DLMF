@@ -8,10 +8,7 @@ module
 public import Mathlib.Analysis.SpecialFunctions.Sqrt
 
 public import DLMF.OrthogonalPolynomials.Topics
-public import Mathlib.Tactic.CrossRefAttribute
 public import DLMF.OrthogonalPolynomials.Explicit
-public import DLMF.Confluent.Recurrence
-public import DLMF.Hypergeometric.Continuation
 /-!
 # Differential equations and recurrences (DLMF §§18.8–18.9)
 
@@ -49,7 +46,7 @@ theorem hermite_derivative (n : ℕ) :
     ring
 
 /-- The terminating Gauss series has infinite radius, including singular lower parameters. -/
-lemma hasFPowerSeriesOnBall_gauss_neg_nat (n : ℕ) (b c : ℂ) :
+theorem hasFPowerSeriesOnBall_gauss_neg_nat (n : ℕ) (b c : ℂ) :
     HasFPowerSeriesOnBall (₂F₁ (-(n : ℂ)) b c)
       (FormalMultilinearSeries.ofScalars ℂ (gaussHGCoeff (-(n : ℂ)) b c)) 0 ⊤ := by
   have hz (k : ℕ) (hk : n < k) : gaussHGCoeff (-(n : ℂ)) b c k = 0 := by
@@ -67,7 +64,7 @@ lemma hasFPowerSeriesOnBall_gauss_neg_nat (n : ℕ) (b c : ℂ) :
     simp [hz k hnk]
 
 /-- The Gauss equation for a terminating series holds at every complex point. -/
-lemma gauss_neg_nat_ode (n : ℕ) (b : ℂ) {c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (z : ℂ) :
+theorem gauss_neg_nat_ode (n : ℕ) (b : ℂ) {c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (z : ℂ) :
     z * (1 - z) * deriv (deriv (₂F₁ (-(n : ℂ)) b c)) z +
       (c - (-(n : ℂ) + b + 1) * z) * deriv (₂F₁ (-(n : ℂ)) b c) z +
       n * b * ₂F₁ (-(n : ℂ)) b c z = 0 := by
@@ -77,7 +74,7 @@ lemma gauss_neg_nat_ode (n : ℕ) (b : ℂ) {c : ℂ} (hc : ∀ k : ℕ, c ≠ -
   linear_combination h
 
 /-- The affine substitution used in the Jacobi and Gegenbauer definitions. -/
-lemma deriv_half_shift (f : ℂ → ℂ) :
+theorem deriv_half_shift (f : ℂ → ℂ) :
     deriv (fun z => f ((1 - z) / 2)) = fun z => (-1 / 2 : ℂ) * deriv f ((1 - z) / 2) := by
   funext z
   change deriv (fun w => (fun t => f (t / 2)) (1 - w)) z = _
@@ -171,11 +168,11 @@ The Gauss contiguous relations are available for `‖z‖ < 1`. The classical po
 entire in `x`, so an identity between them proved for `‖(1-x)/2‖ < 1` holds everywhere. -/
 
 /-- The set `‖(1-x)/2‖ < 1` is open. -/
-lemma isOpen_half_shift_disk : IsOpen {x : ℂ | ‖(1 - x) / 2‖ < 1} :=
+theorem isOpen_half_shift_disk : IsOpen {x : ℂ | ‖(1 - x) / 2‖ < 1} :=
   isOpen_lt (by fun_prop) continuous_const
 
 /-- Jacobi polynomials are entire in `x`. -/
-lemma analyticOnNhd_jacobiPolyP (α β : ℂ) (n : ℕ) :
+theorem analyticOnNhd_jacobiPolyP (α β : ℂ) (n : ℕ) :
     AnalyticOnNhd ℂ (fun x => jacobiPolyP α β n x) Set.univ := by
   intro x _
   unfold jacobiPolyP
@@ -184,7 +181,7 @@ lemma analyticOnNhd_jacobiPolyP (α β : ℂ) (n : ℕ) :
     (AnalyticAt.comp (f := fun w : ℂ => (1 - w) / 2) (analyticAt_gauss_neg_nat n _ _ _) hf)
 
 /-- Gegenbauer polynomials are entire in `x`. -/
-lemma analyticOnNhd_ultrasphPoly (lam : ℂ) (n : ℕ) :
+theorem analyticOnNhd_ultrasphPoly (lam : ℂ) (n : ℕ) :
     AnalyticOnNhd ℂ (fun x => ultrasphPoly lam n x) Set.univ := by
   intro x _
   unfold ultrasphPoly
@@ -193,7 +190,7 @@ lemma analyticOnNhd_ultrasphPoly (lam : ℂ) (n : ℕ) :
     (AnalyticAt.comp (f := fun w : ℂ => (1 - w) / 2) (analyticAt_gauss_neg_nat n _ _ _) hf)
 
 /-- Gegenbauer polynomials are analytic in the parameter on the half-plane `-1/2 < Re λ`. -/
-lemma analyticOnNhd_ultrasphPoly_param (n : ℕ) (x : ℂ) :
+theorem analyticOnNhd_ultrasphPoly_param (n : ℕ) (x : ℂ) :
     AnalyticOnNhd ℂ (fun lam => ultrasphPoly lam n x) {lam : ℂ | -1 / 2 < lam.re} := by
   intro lam hlam
   have hc : ∀ k : ℕ, lam + 1 / 2 ≠ -(k : ℂ) := not_neg_nat_of_re_pos (by
@@ -223,19 +220,19 @@ lemma analyticOnNhd_ultrasphPoly_param (n : ℕ) (x : ℂ) :
 
 /-- Gegenbauer polynomials are analytic at every point, in `fun_prop` form. -/
 @[fun_prop]
-lemma analyticAt_ultrasphPoly (lam : ℂ) (n : ℕ) (x : ℂ) :
+theorem analyticAt_ultrasphPoly (lam : ℂ) (n : ℕ) (x : ℂ) :
     AnalyticAt ℂ (fun x => ultrasphPoly lam n x) x :=
   analyticOnNhd_ultrasphPoly lam n x (Set.mem_univ x)
 
 /-- Jacobi polynomials are analytic at every point, in `fun_prop` form. -/
 @[fun_prop]
-lemma analyticAt_jacobiPolyP (α β : ℂ) (n : ℕ) (x : ℂ) :
+theorem analyticAt_jacobiPolyP (α β : ℂ) (n : ℕ) (x : ℂ) :
     AnalyticAt ℂ (fun x => jacobiPolyP α β n x) x :=
   analyticOnNhd_jacobiPolyP α β n x (Set.mem_univ x)
 
 /-- An identity between entire functions of `x` holds everywhere once it holds for
 `‖(1-x)/2‖ < 1`. -/
-lemma eq_of_eqOn_half_shift_disk {f g : ℂ → ℂ} (hf : AnalyticOnNhd ℂ f Set.univ)
+theorem eq_of_eqOn_half_shift_disk {f g : ℂ → ℂ} (hf : AnalyticOnNhd ℂ f Set.univ)
     (hg : AnalyticOnNhd ℂ g Set.univ) (h : ∀ x : ℂ, ‖(1 - x) / 2‖ < 1 → f x = g x) : f = g :=
   DLMF.Hypergeometric.eq_of_analyticOnNhd_univ_of_eqOn hf hg isOpen_half_shift_disk
     ⟨1, by simp⟩ h
@@ -669,7 +666,7 @@ theorem ultrasphPoly_raise_parameter_sq {lam : ℂ} (hlam : -1 / 2 < lam.re) (n 
   exact congrFun key x
 
 /-- The Jacobi polynomial of degree one. -/
-lemma jacobiPolyP_one_eq {α : ℂ} (hα : -1 < α.re) (β x : ℂ) :
+theorem jacobiPolyP_one_eq {α : ℂ} (hα : -1 < α.re) (β x : ℂ) :
     jacobiPolyP α β 1 x = (α + 1) - (α + β + 2) * ((1 - x) / 2) := by
   have h : α + 1 ≠ 0 := by
     intro h
@@ -683,7 +680,7 @@ lemma jacobiPolyP_one_eq {α : ℂ} (hα : -1 < α.re) (β x : ℂ) :
   ring
 
 /-- The Gegenbauer polynomial of degree one. -/
-lemma ultrasphPoly_one_eq {lam : ℂ} (hlam : -1 / 2 < lam.re) (x : ℂ) :
+theorem ultrasphPoly_one_eq {lam : ℂ} (hlam : -1 / 2 < lam.re) (x : ℂ) :
     ultrasphPoly lam 1 x = 2 * lam * x := by
   have h : lam + 1 / 2 ≠ 0 := by
     intro h
@@ -744,7 +741,7 @@ theorem ultrasphPoly_reflection {lam : ℂ} (hlam : -1 / 2 < lam.re) (n : ℕ) (
     linear_combination h1 - (-1 : ℂ) ^ n * h2
 
 /-- `(a+1)_{n+1} · a = (a)_n (a+n)(a+n+1)`. -/
-lemma poch_succ_succ_mul (a : ℂ) (n : ℕ) :
+theorem poch_succ_succ_mul (a : ℂ) (n : ℕ) :
     poch (a + 1) (n + 1) * a = poch a n * (a + n) * (a + n + 1) := by
   have h1 := poch_succ_left a (n + 1)
   have h2 := poch_succ a (n + 1)
@@ -810,13 +807,13 @@ theorem jacobi_symmetric_even_at_zero {α : ℂ} (hα : -1 < α.re) (n : ℕ) :
       ((-1 / 4 : ℂ) ^ (n + 1) * 16 * (2 * n + α + 1)) * hpoch
 
 /-- Jacobi polynomials with `α = β = -1/2` in hypergeometric form. -/
-lemma jacobiPolyP_half_half (n : ℕ) (x : ℂ) :
+theorem jacobiPolyP_half_half (n : ℕ) (x : ℂ) :
     jacobiPolyP (-1 / 2) (-1 / 2) n x =
       poch (1 / 2) n / n.factorial * ₂F₁ (-(n : ℂ)) (n : ℂ) (1 / 2) ((1 - x) / 2) := by
   unfold jacobiPolyP
   rw [show (n : ℂ) + -1 / 2 + -1 / 2 + 1 = n by ring, show (-1 / 2 : ℂ) + 1 = 1 / 2 by norm_num]
 
-lemma poch_half_ne_zero (n : ℕ) : poch (1 / 2 : ℂ) n ≠ 0 :=
+theorem poch_half_ne_zero (n : ℕ) : poch (1 / 2 : ℂ) n ≠ 0 :=
   poch_ne_zero_of_not_neg_nat (fun k hk => by
     have := congrArg Complex.re hk
     simp at this
@@ -824,7 +821,7 @@ lemma poch_half_ne_zero (n : ℕ) : poch (1 / 2 : ℂ) n ≠ 0 :=
 
 /-- The three-term recurrence of `₂F₁(-n, n; 1/2; (1-x)/2)` in `n`, from the Jacobi recurrence
 with `α = β = -1/2`. -/
-lemma gauss_chebyshev_recurrence (n : ℕ) (x : ℂ) :
+theorem gauss_chebyshev_recurrence (n : ℕ) (x : ℂ) :
     ₂F₁ (-((n : ℂ) + 2)) ((n : ℂ) + 2) (1 / 2) ((1 - x) / 2) =
       2 * x * ₂F₁ (-((n : ℂ) + 1)) ((n : ℂ) + 1) (1 / 2) ((1 - x) / 2) -
         ₂F₁ (-(n : ℂ)) (n : ℂ) (1 / 2) ((1 - x) / 2) := by
@@ -1041,7 +1038,7 @@ theorem jacobi_raise_alpha {α β : ℂ} (hα : -1 < α.re) (n : ℕ) (x : ℂ) 
       (poch (α + 1 + 1) n) * hrel
   exact congrFun key x
 
-lemma poch_three_half_ne_zero (n : ℕ) : poch (3 / 2 : ℂ) n ≠ 0 :=
+theorem poch_three_half_ne_zero (n : ℕ) : poch (3 / 2 : ℂ) n ≠ 0 :=
   poch_ne_zero_of_not_neg_nat (fun k hk => by
     have := congrArg Complex.re hk
     simp at this
@@ -1113,7 +1110,7 @@ theorem chebyshevT_quadratic (n : ℕ) (x : ℂ) :
   ring
 
 /-- `sin θ ≠ 0` when `cos θ ≠ ±1`. -/
-lemma sin_ne_zero_of_cos_ne {θ : ℂ} (h1 : cos θ ≠ 1) (h2 : cos θ ≠ -1) : sin θ ≠ 0 := by
+theorem sin_ne_zero_of_cos_ne {θ : ℂ} (h1 : cos θ ≠ 1) (h2 : cos θ ≠ -1) : sin θ ≠ 0 := by
   intro h
   have hsc := Complex.sin_sq_add_cos_sq θ
   rw [h] at hsc
@@ -1123,7 +1120,7 @@ lemma sin_ne_zero_of_cos_ne {θ : ℂ} (h1 : cos θ ≠ 1) (h2 : cos θ ≠ -1) 
   · exact h2 (by linear_combination h3)
 
 /-- `sin (θ/2) ≠ 0` when `cos θ ≠ 1`. -/
-lemma sin_half_ne_zero_of_cos_ne_one {θ : ℂ} (h1 : cos θ ≠ 1) : sin (θ / 2) ≠ 0 := by
+theorem sin_half_ne_zero_of_cos_ne_one {θ : ℂ} (h1 : cos θ ≠ 1) : sin (θ / 2) ≠ 0 := by
   intro h
   apply h1
   have hsc := Complex.sin_sq_add_cos_sq (θ / 2)
@@ -1264,7 +1261,7 @@ theorem laguerrePolyL_mul_argument {α : ℂ} (hα : -1 < α.re) (n : ℕ) (x : 
   linear_combination (-(α + 1 + (n : ℂ))) * hM
 
 /-- Differentiating a terminating Gauss series is valid throughout the complex plane. -/
-lemma deriv_gauss_neg_nat_succ (n : ℕ) (b : ℂ) {c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) :
+theorem deriv_gauss_neg_nat_succ (n : ℕ) (b : ℂ) {c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) :
     deriv (₂F₁ (-((n + 1 : ℕ) : ℂ)) b c) = fun z =>
       (-((n + 1 : ℕ) : ℂ) * b / c) * ₂F₁ (-(n : ℂ)) (b + 1) (c + 1) z := by
   funext z
@@ -1297,7 +1294,7 @@ theorem jacobi_derivative {α β : ℂ} (hα : -1 < α.re) (n : ℕ) (x : ℂ) :
 
 /-- The derivative of a Jacobi polynomial on the disk `‖(1-x)/2‖ < 1`, from 15.5.1 and the
 chain rule. -/
-lemma hasDerivAt_jacobiPolyP {α β : ℂ} (hα : -1 < α.re) (n : ℕ) {x : ℂ} (hx : ‖(1 - x) / 2‖ < 1) :
+theorem hasDerivAt_jacobiPolyP {α β : ℂ} (hα : -1 < α.re) (n : ℕ) {x : ℂ} (hx : ‖(1 - x) / 2‖ < 1) :
     HasDerivAt (jacobiPolyP α β n)
       (poch (α + 1) n / n.factorial * (-(n : ℂ) * ((n : ℂ) + α + β + 1) / (α + 1) *
         ₂F₁ (-(n : ℂ) + 1) ((n : ℂ) + α + β + 1 + 1) (α + 1 + 1) ((1 - x) / 2) * (-1 / 2))) x := by
@@ -1465,7 +1462,7 @@ theorem ultrasphPoly_derivative {lam : ℂ} (hlam : -1 / 2 < lam.re) (n : ℕ) (
 
 /-- The derivative formula for Kummer's entire series at regular lower parameters. -/
 @[dlmf 13.3.E15]
-lemma deriv_kummerM_regular {a c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) :
+theorem deriv_kummerM_regular {a c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) :
     deriv (kummerM a c) = fun z => a / c * kummerM (a + 1) (c + 1) z :=
   funext fun z => DLMF.Confluent.deriv_kummerM hc (by simpa using hc 0)
 
@@ -1508,7 +1505,7 @@ theorem hermite_weighted_derivative (n : ℕ) (x : ℝ) :
 
 
 /-- The derivative of a Gegenbauer polynomial on the disk `‖(1-x)/2‖ < 1`. -/
-lemma hasDerivAt_ultrasphPoly {lam : ℂ} (hlam : -1 / 2 < lam.re) (n : ℕ) {x : ℂ}
+theorem hasDerivAt_ultrasphPoly {lam : ℂ} (hlam : -1 / 2 < lam.re) (n : ℕ) {x : ℂ}
     (hx : ‖(1 - x) / 2‖ < 1) :
     HasDerivAt (ultrasphPoly lam n)
       (poch (2 * lam) n / n.factorial * (-(n : ℂ) * ((n : ℂ) + 2 * lam) / (lam + 1 / 2) *
@@ -1523,7 +1520,7 @@ lemma hasDerivAt_ultrasphPoly {lam : ℂ} (hlam : -1 / 2 < lam.re) (n : ℕ) {x 
 
 /-- The polynomial identity behind 18.9.16:
 `(1-x²) P' + (β(1-x) - α(1+x)) P = -2(n+1) P^{(α-1,β-1)}_{n+1}`. -/
-lemma jacobi_weighted_identity {α β : ℂ} (hα : 0 < α.re) (n : ℕ) (x : ℂ) :
+theorem jacobi_weighted_identity {α β : ℂ} (hα : 0 < α.re) (n : ℕ) (x : ℂ) :
     (1 - x ^ 2) * deriv (jacobiPolyP α β n) x + (β * (1 - x) - α * (1 + x)) * jacobiPolyP α β n x +
       2 * (n + 1) * jacobiPolyP (α - 1) (β - 1) (n + 1) x = 0 := by
   have hα' : -1 < α.re := by linarith
@@ -1577,7 +1574,7 @@ lemma jacobi_weighted_identity {α β : ℂ} (hα : 0 < α.re) (n : ℕ) (x : �
 
 /-- The polynomial identity behind 18.9.20, multiplied by `2(λ-1)`:
 `2(λ-1)((1-x²) C' - (2λ-1) x C) + (n+1)(n+2λ-1) C^{λ-1}_{n+1} = 0`. -/
-lemma ultrasphPoly_weighted_identity {lam : ℂ} (hlam : 1 / 2 < lam.re) (n : ℕ) (x : ℂ) :
+theorem ultrasphPoly_weighted_identity {lam : ℂ} (hlam : 1 / 2 < lam.re) (n : ℕ) (x : ℂ) :
     2 * (lam - 1)
         * ((1 - x ^ 2) * deriv (ultrasphPoly lam n) x - (2 * lam - 1) * x * ultrasphPoly lam n x) +
       (n + 1) * (n + 2 * lam - 1) * ultrasphPoly (lam - 1) (n + 1) x = 0 := by
@@ -1763,7 +1760,7 @@ theorem chebyshevU_weighted_derivative (n : ℕ) {x : ℝ} (hx : x ∈ Set.Ioo (
 
 /-- The polynomial identity behind 18.9.24: `x L' + (α - x) L = (n+1) L^{(α-1)}_{n+1}`, from the
 Kummer relation 13.3.13. -/
-lemma laguerrePolyL_weighted_identity {α : ℂ} (hα : 0 < α.re) (n : ℕ) (x : ℂ) :
+theorem laguerrePolyL_weighted_identity {α : ℂ} (hα : 0 < α.re) (n : ℕ) (x : ℂ) :
     x * deriv (laguerrePolyL α n) x + (α - x) * laguerrePolyL α n x = (n + 1)
         * laguerrePolyL (α - 1) (n + 1) x := by
   have hb : ∀ k : ℕ, α + 1 ≠ -(k : ℂ) := not_neg_nat_of_re_pos (by

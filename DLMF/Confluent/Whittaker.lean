@@ -5,12 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Tactic.CrossRefAttribute
-public import DLMF.Confluent.Basic
 public import DLMF.Confluent.BasicProperties
-public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
-public import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
-public import Mathlib.Analysis.Asymptotics.Lemmas
 
 /-!
 # Whittaker functions (AAR §4.3)
@@ -56,13 +51,13 @@ def whittakerW (κ μ z : ℂ) : ℂ :=
   exp (-z / 2) * z ^ (1 / 2 + μ) * kummerU (1 / 2 + μ - κ) (1 + 2 * μ) z
 
 /-- A half-integer Whittaker specialization whose former raw Gamma formula vanished. -/
-lemma whittakerW_half_zero (z : ℂ) :
+theorem whittakerW_half_zero (z : ℂ) :
     whittakerW (1 / 2) 0 z = exp (-z / 2) * z ^ (1 / 2 : ℂ) := by
   norm_num [whittakerW, kummerU_zero]
 
 /-- An elementary Whittaker W specialization, also detecting a missing parameter
 bound in the Bessel-K integral representation. -/
-lemma whittakerW_zero_half {z : ℂ} (hz : z ≠ 0) :
+theorem whittakerW_zero_half {z : ℂ} (hz : z ≠ 0) :
     whittakerW 0 (1 / 2) z = exp (-z / 2) := by
   have hU := DLMF.Confluent.kummerU_kummer_transform_all 1 2 hz
   norm_num [kummerU_zero] at hU
@@ -81,7 +76,7 @@ def whittakerWOnLog (κ μ w : ℂ) : ℂ :=
     Gamma (2 * μ) / Gamma (1 / 2 + μ - κ) * whittakerMOnLog κ (-μ) w
 
 /-- Logarithmic derivative of the prefactor in Whittaker's `M`. -/
-lemma hasDerivAt_whittakerPrefactor (r : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
+theorem hasDerivAt_whittakerPrefactor (r : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (fun w : ℂ => exp (-w / 2) * w ^ r)
       (exp (-z / 2) * z ^ r * (r / z - 1 / 2)) z := by
   have hd := (((hasDerivAt_id z).neg.div_const 2).cexp).mul
@@ -135,7 +130,7 @@ theorem whittakerM_ode {κ μ z : ℂ} (hz : z ∈ slitPlane)
   linear_combination (16 * z * g z) * hode
 
 /-- Whittaker's `M` is analytic away from the principal power's branch cut. -/
-lemma analyticAt_whittakerM {κ μ z : ℂ} (hz : z ∈ slitPlane)
+theorem analyticAt_whittakerM {κ μ z : ℂ} (hz : z ∈ slitPlane)
     (hμ : ∀ k : ℕ, 1 + 2 * μ ≠ -k) : AnalyticAt ℂ (whittakerM κ μ) z := by
   unfold whittakerM
   apply AnalyticAt.mul
@@ -147,7 +142,7 @@ lemma analyticAt_whittakerM {κ μ z : ℂ} (hz : z ∈ slitPlane)
 
 /-- The generic connection formula for W; the integer case uses continuation. -/
 @[dlmf 13.14.E33]
-lemma whittakerW_eq_connection {κ μ z : ℂ} (hz : z ∈ slitPlane)
+theorem whittakerW_eq_connection {κ μ z : ℂ} (hz : z ∈ slitPlane)
     (hμ : ∀ k : ℤ, 2 * μ ≠ k) :
     whittakerW κ μ z =
       Gamma (-2 * μ) / Gamma (1 / 2 - μ - κ) * whittakerM κ μ z +
@@ -440,7 +435,7 @@ theorem isBigO_whittakerM_at_zero {κ μ : ℂ} (hμ : ∀ k : ℕ, 2 * μ ≠ -
       (cpow_add _ _ hz : z ^ ((μ + 1 / 2) + 1) = z ^ (μ + 1 / 2) * z ^ (1 : ℂ)), cpow_one]
 
 /-- `W(g f₁, g f₂) = g² W(f₁, f₂)`. -/
-lemma wronskian_mul_left {g f₁ f₂ : ℂ → ℂ} {z : ℂ} (hg : DifferentiableAt ℂ g z)
+theorem wronskian_mul_left {g f₁ f₂ : ℂ → ℂ} {z : ℂ} (hg : DifferentiableAt ℂ g z)
     (h₁ : DifferentiableAt ℂ f₁ z) (h₂ : DifferentiableAt ℂ f₂ z) :
     wronskian (fun w => g w * f₁ w) (fun w => g w * f₂ w) z =
       g z ^ 2 * wronskian f₁ f₂ z := by
@@ -449,20 +444,20 @@ lemma wronskian_mul_left {g f₁ f₂ : ℂ → ℂ} {z : ℂ} (hg : Differentia
   ring
 
 /-- The Whittaker prefactor `e^{-z/2} z^{μ+1/2}`. -/
-lemma differentiableAt_whittaker_prefactor (μ : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
+theorem differentiableAt_whittaker_prefactor (μ : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     DifferentiableAt ℂ (fun w => exp (-w / 2) * w ^ (μ + 1 / 2)) z :=
   (by fun_prop : DifferentiableAt ℂ (fun w : ℂ => exp (-w / 2)) z).mul
     ((hasDerivAt_id z).cpow_const (c := μ + 1 / 2) hz).differentiableAt
 
 /-- The square of the Whittaker prefactor. -/
-lemma whittaker_prefactor_sq (μ z : ℂ) :
+theorem whittaker_prefactor_sq (μ z : ℂ) :
     (exp (-z / 2) * z ^ (μ + 1 / 2)) ^ 2 = exp (-z) * z ^ (1 + 2 * μ) := by
   rw [mul_pow, ← exp_nat_mul, ← cpow_nat_mul]
   push_cast
   ring_nf
 
 /-- Whittaker W as prefactor times Tricomi U. -/
-lemma whittakerW_eq_prefactor_mul (κ μ : ℂ) :
+theorem whittakerW_eq_prefactor_mul (κ μ : ℂ) :
     whittakerW κ μ = fun w => (exp (-w / 2) * w ^ (μ + 1 / 2)) *
       kummerU (μ + 1 / 2 - κ) (1 + 2 * μ) w := by
   funext w
@@ -470,7 +465,7 @@ lemma whittakerW_eq_prefactor_mul (κ μ : ℂ) :
   rw [show (1 / 2 : ℂ) + μ = μ + 1 / 2 by ring]
 
 /-- `U(a,b,·)` is differentiable at every point of the slit plane. -/
-lemma differentiableAt_kummerU (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
+theorem differentiableAt_kummerU (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     DifferentiableAt ℂ (kummerU a b) z :=
   (differentiableOn_kummerU a b).differentiableAt (isOpen_slitPlane.mem_nhds hz)
 
@@ -653,7 +648,7 @@ theorem whittakerM_jump {κ μ z : ℂ} (hz : z ∈ slitPlane) (hμi : ∀ n : �
     _ = _ := by rw [← hpp, ← hmm]; ring
 
 /-- Whittaker W on the logarithmic plane, expressed through Tricomi U there. -/
-lemma whittakerWOnLog_eq_kummerUOnLog (κ μ w : ℂ) :
+theorem whittakerWOnLog_eq_kummerUOnLog (κ μ w : ℂ) :
     whittakerWOnLog κ μ w = exp (-exp w / 2) * exp ((μ + 1 / 2) * w) *
       kummerUOnLog (1 / 2 + μ - κ) (1 + 2 * μ) w := by
   unfold whittakerWOnLog whittakerMOnLog kummerUOnLog
@@ -669,7 +664,7 @@ lemma whittakerWOnLog_eq_kummerUOnLog (κ μ w : ℂ) :
   ring
 
 /-- The prefactor in Whittaker W after a half-turn, with the turn retained. -/
-lemma whittakerWOnLog_half_turn (κ μ : ℂ) {z : ℂ} (hz : z ≠ 0) (sign : Bool) :
+theorem whittakerWOnLog_half_turn (κ μ : ℂ) {z : ℂ} (hz : z ≠ 0) (sign : Bool) :
     whittakerWOnLog κ μ (log z + (if sign then 1 else -1) * π * I) =
       exp (z / 2) * z ^ (μ + 1 / 2) * exp ((if sign then 1 else -1) * (μ + 1 / 2) * π * I) *
         kummerUOnLog (1 / 2 + μ - κ) (1 + 2 * μ)

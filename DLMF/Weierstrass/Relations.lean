@@ -6,11 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Weierstrass.Basic
-public import DLMF.Theta.Basic
 public import DLMF.JacobiElliptic.Basic
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 public import DLMF.Theta.ZeroValues
-public import DLMF.Theta.Identities
 public import DLMF.Weierstrass.Addition
 
 /-!
@@ -59,7 +56,7 @@ def thetaOneTripleDerivNull (τ : ℂ) : ℂ := iteratedDeriv 3 (fun z ↦ jacob
 
 /-! ### Helpers (p23R1): `σ` in terms of `θ₁`, Legendre's relation, `℘` in theta form -/
 /-- A function periodic in `2ω₁` and `2ω₃` is periodic for the whole lattice. -/
-theorem p23R1_lattice_periodic {F : Type*} {g : ℂ → F} (h1 : ∀ z, g (z + 2 * H.ω₁) = g z)
+lemma p23R1_lattice_periodic {F : Type*} {g : ℂ → F} (h1 : ∀ z, g (z + 2 * H.ω₁) = g z)
     (h3 : ∀ z, g (z + 2 * H.ω₃) = g z) : ∀ z w, w ∈ H.lattice → g (z + w) = g z := by
   intro z w hw
   obtain ⟨m, n, rfl⟩ := H.mem_lattice_iff.mp hw
@@ -70,7 +67,7 @@ theorem p23R1_lattice_periodic {F : Type*} {g : ℂ → F} (h1 : ∀ z, g (z + 2
 
 /-- An entire nonvanishing `Q` with `Q(z + 2ω₁) = Q(z)` and
 `Q(z + 2ω₃) = e^{2c(z + ω₃)} Q(z)` has `c = 0` and is constant. -/
-theorem p23R1_quasi_const {Q : ℂ → ℂ} (hQ : Differentiable ℂ Q) (hne : ∀ z, Q z ≠ 0)
+lemma p23R1_quasi_const {Q : ℂ → ℂ} (hQ : Differentiable ℂ Q) (hne : ∀ z, Q z ≠ 0)
     (h1 : ∀ z, Q (z + 2 * H.ω₁) = Q z) (c : ℂ)
     (h3 : ∀ z, Q (z + 2 * H.ω₃) = cexp (2 * c * (z + H.ω₃)) * Q z) :
     c = 0 ∧ ∀ z, Q z = Q 0 := by
@@ -144,7 +141,7 @@ theorem p23R1_quasi_const {Q : ℂ → ℂ} (hQ : Differentiable ℂ Q) (hne : �
 
 open Classical in
 /-- Order of an entire function with simple zeros exactly on the lattice. -/
-theorem p23R1_order_of_simple {f : ℂ → ℂ} (hf : Differentiable ℂ f)
+lemma p23R1_order_of_simple {f : ℂ → ℂ} (hf : Differentiable ℂ f)
     (hz : ∀ x, f x = 0 ↔ x ∈ H.lattice) (hd : ∀ x ∈ H.lattice, deriv f x ≠ 0) (x : ℂ) :
     meromorphicOrderAt f x = if x ∈ H.lattice then 1 else 0 := by
   have ha : AnalyticAt ℂ f x := hf.analyticAt x
@@ -158,7 +155,7 @@ theorem p23R1_order_of_simple {f : ℂ → ℂ} (hf : Differentiable ℂ f)
 /-- Characterisation of `σ`: an entire `f` with simple zeros exactly on the lattice,
 `f'(0) = 1`, `f(z + 2ω₁) = -e^{2η₁(z+ω₁)} f(z)` and `f(z + 2ω₃) = -e^{2b(z+ω₃)} f(z)` equals `σ`,
 and then `b = η₃`. -/
-theorem p23R1_sigma_eq_of {f : ℂ → ℂ} (hf : Differentiable ℂ f)
+lemma p23R1_sigma_eq_of {f : ℂ → ℂ} (hf : Differentiable ℂ f)
     (hz : ∀ x, f x = 0 ↔ x ∈ H.lattice) (hd : ∀ x ∈ H.lattice, deriv f x ≠ 0)
     (hd0 : deriv f 0 = 1)
     (h1 : ∀ z, f (z + 2 * H.ω₁) = -cexp (2 * H.eta 1 * (z + H.ω₁)) * f z) (b : ℂ)
@@ -266,18 +263,18 @@ noncomputable def p23R1_thetaSigma (z : ℂ) : ℂ :=
     jacobiThetaOneTau (π * z / (2 * H.ω₁)) H.tau / (π * jacobiThetaOneDerivNullTau H.tau)
 
 /-- `θ₁'(0|τ) ≠ 0`. -/
-theorem p23R1_thetaOneDeriv_ne_zero : jacobiThetaOneDerivNullTau H.tau ≠ 0 := by
+lemma p23R1_thetaOneDeriv_ne_zero : jacobiThetaOneDerivNullTau H.tau ≠ 0 := by
   have hτ := H.tau_im_pos
   rw [jacobiThetaOneDerivNullTau_eq_mul hτ]
   obtain ⟨a, b, c⟩ := jacobiThetaNullTau_ne_zero hτ
   exact mul_ne_zero (mul_ne_zero a b) c
 
 /-- `θ₁(·|τ)` is entire. -/
-theorem p23R1_differentiable_thetaOne : Differentiable ℂ (fun w => jacobiThetaOneTau w H.tau) := by
+lemma p23R1_differentiable_thetaOne : Differentiable ℂ (fun w => jacobiThetaOneTau w H.tau) := by
   simpa [jacobiThetaTau] using differentiable_jacobiThetaTau 1 H.tau_im_pos
 
 /-- The theta expression of 23.6.9 is entire. -/
-theorem p23R1_differentiable_thetaSigma : Differentiable ℂ H.p23R1_thetaSigma := by
+lemma p23R1_differentiable_thetaSigma : Differentiable ℂ H.p23R1_thetaSigma := by
   have := H.p23R1_differentiable_thetaOne
   unfold p23R1_thetaSigma
   have h2 : Differentiable ℂ (fun z : ℂ => jacobiThetaOneTau (π * z / (2 * H.ω₁)) H.tau) :=
@@ -285,7 +282,7 @@ theorem p23R1_differentiable_thetaSigma : Differentiable ℂ H.p23R1_thetaSigma 
   fun_prop
 
 /-- Quasi-periodicity of the theta expression over the whole lattice. -/
-theorem p23R1_thetaSigma_add_lattice (m n : ℤ) (z : ℂ) :
+lemma p23R1_thetaSigma_add_lattice (m n : ℤ) (z : ℂ) :
     H.p23R1_thetaSigma (z + (2 * m * H.ω₁ + 2 * n * H.ω₃)) =
       cexp (H.eta 1 * ((z + (2 * m * H.ω₁ + 2 * n * H.ω₃)) ^ 2 - z ^ 2) / (2 * H.ω₁)) *
         ((-1 : ℂ) ^ (m + n) * cexp (-(π * I * H.tau * n ^ 2)) *
@@ -304,7 +301,7 @@ theorem p23R1_thetaSigma_add_lattice (m n : ℤ) (z : ℂ) :
   ring
 
 /-- Zeros of the theta expression: exactly the lattice. -/
-theorem p23R1_thetaSigma_eq_zero_iff (x : ℂ) : H.p23R1_thetaSigma x = 0 ↔ x ∈ H.lattice := by
+lemma p23R1_thetaSigma_eq_zero_iff (x : ℂ) : H.p23R1_thetaSigma x = 0 ↔ x ∈ H.lattice := by
   have hω := H.ω₁_ne_zero
   have hD := H.p23R1_thetaOneDeriv_ne_zero
   have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
@@ -321,7 +318,7 @@ theorem p23R1_thetaSigma_eq_zero_iff (x : ℂ) : H.p23R1_thetaSigma x = 0 ↔ x 
   · intro h; rw [h]; field_simp
 
 /-- The theta expression has derivative `1` at `0`. -/
-theorem p23R1_thetaSigma_hasDerivAt_zero : HasDerivAt H.p23R1_thetaSigma 1 0 := by
+lemma p23R1_thetaSigma_hasDerivAt_zero : HasDerivAt H.p23R1_thetaSigma 1 0 := by
   have hω := H.ω₁_ne_zero
   have hD := H.p23R1_thetaOneDeriv_ne_zero
   have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
@@ -343,7 +340,7 @@ theorem p23R1_thetaSigma_hasDerivAt_zero : HasDerivAt H.p23R1_thetaSigma 1 0 := 
     simp
 
 /-- The zeros of the theta expression are simple. -/
-theorem p23R1_thetaSigma_deriv_ne_zero (x : ℂ) (hx : x ∈ H.lattice) :
+lemma p23R1_thetaSigma_deriv_ne_zero (x : ℂ) (hx : x ∈ H.lattice) :
     deriv H.p23R1_thetaSigma x ≠ 0 := by
   obtain ⟨m, n, rfl⟩ := H.mem_lattice_iff.mp hx
   set l := 2 * m * H.ω₁ + 2 * n * H.ω₃
@@ -409,7 +406,7 @@ theorem legendre_relation :
   refine ⟨?_, ?_, h3⟩ <;> rw [he, ω₂] <;> linear_combination h3
 
 /-- `σ(z + 2mω_j) = (-1)^m e^{2mη_j(z + mω_j)} σ(z)` for `m ∈ ℤ`. -/
-theorem p23R1_sigma_add_int_mul {j : ℕ} (hj : j ∈ ({1, 2, 3} : Finset ℕ)) (m : ℤ) :
+lemma p23R1_sigma_add_int_mul {j : ℕ} (hj : j ∈ ({1, 2, 3} : Finset ℕ)) (m : ℤ) :
     ∀ z, H.weierstrassSigma (z + 2 * m * H.halfPeriod j) =
       (-1 : ℂ) ^ m * cexp (2 * m * H.eta j * (z + m * H.halfPeriod j)) *
         H.weierstrassSigma z := by
@@ -484,7 +481,7 @@ theorem weierstrassSigma_add_lattice (z : ℂ) {j k : ℕ} (hj : j ∈ ({1, 2, 3
 
 /-- For an entire `φ` with `φ(0) = 0`, `φ'(0) ≠ 0`, `φ''(0) = 0`:
 `(φ'/φ)'(w) + 1/w² → φ'''(0)/(3φ'(0))` as `w → 0`. -/
-theorem p23R1_logDeriv_tendsto {φ : ℂ → ℂ} (hφ : Differentiable ℂ φ) (h0 : φ 0 = 0)
+lemma p23R1_logDeriv_tendsto {φ : ℂ → ℂ} (hφ : Differentiable ℂ φ) (h0 : φ 0 = 0)
     (hc : deriv φ 0 ≠ 0) (h2 : iteratedDeriv 2 φ 0 = 0) :
     Tendsto (fun w => deriv (fun z => deriv φ z / φ z) w + 1 / w ^ 2) (𝓝[≠] 0)
       (𝓝 (iteratedDeriv 3 φ 0 / (3 * deriv φ 0))) := by
@@ -554,7 +551,7 @@ theorem p23R1_logDeriv_tendsto {φ : ℂ → ℂ} (hφ : Differentiable ℂ φ) 
   ring
 
 /-- Derivative of the theta expression of 23.6.9. -/
-theorem p23R1_hasDerivAt_thetaSigma (u : ℂ) :
+lemma p23R1_hasDerivAt_thetaSigma (u : ℂ) :
     HasDerivAt H.p23R1_thetaSigma
       (H.p23R1_thetaSigma u * (H.eta 1 / H.ω₁ * u) +
         2 * H.ω₁ * cexp (H.eta 1 * u ^ 2 / (2 * H.ω₁)) *
@@ -579,7 +576,7 @@ theorem p23R1_hasDerivAt_thetaSigma (u : ℂ) :
     ring
 
 /-- DLMF 23.6.13 (helper form). -/
-theorem p23R1_zeta_theta {u : ℂ} (hu : u ∉ H.lattice) :
+lemma p23R1_zeta_theta {u : ℂ} (hu : u ∉ H.lattice) :
     H.weierstrassZeta u = H.eta 1 / H.ω₁ * u + π / (2 * H.ω₁) *
       (deriv (fun z ↦ jacobiThetaOneTau z H.tau) (π * u / (2 * H.ω₁)) /
         jacobiThetaOneTau (π * u / (2 * H.ω₁)) H.tau) := by
@@ -598,7 +595,7 @@ theorem p23R1_zeta_theta {u : ℂ} (hu : u ∉ H.lattice) :
   field_simp
 
 /-- `℘(u) = -η₁/ω₁ - (π/(2ω₁))² (θ₁'/θ₁)'(πu/(2ω₁))` for `u ∉ 𝕃`. -/
-theorem p23R1_wp_theta_aux {u : ℂ} (hu : u ∉ H.lattice) :
+lemma p23R1_wp_theta_aux {u : ℂ} (hu : u ∉ H.lattice) :
     H.weierstrassP u = -(H.eta 1 / H.ω₁) - (π / (2 * H.ω₁)) ^ 2 *
       deriv (fun z ↦ deriv (fun w ↦ jacobiThetaOneTau w H.tau) z / jacobiThetaOneTau z H.tau)
         (π * u / (2 * H.ω₁)) := by
@@ -628,7 +625,7 @@ theorem p23R1_wp_theta_aux {u : ℂ} (hu : u ∉ H.lattice) :
   linear_combination -h
 
 /-- DLMF 23.6.8 (helper form): `η₁ = -(π²/(12ω₁)) θ₁'''(0)/θ₁'(0)`. -/
-theorem p23R1_eta_one_theta :
+lemma p23R1_eta_one_theta :
     H.eta 1 = -(π ^ 2 / (12 * H.ω₁)) *
       (thetaOneTripleDerivNull H.tau / jacobiThetaOneDerivNullTau H.tau) := by
   have hω := H.ω₁_ne_zero
@@ -676,7 +673,7 @@ theorem p23R1_eta_one_theta :
 
 /-- `℘(z) - ℘(a) = -(πθ₁'(0))²/(4ω₁²) · θ₁(w+b)θ₁(w-b)/(θ₁(w)²θ₁(b)²)`, `w = πz/(2ω₁)`,
 `b = πa/(2ω₁)`, for `z, a ∉ 𝕃`. -/
-theorem p23R1_wp_sub_theta {z a : ℂ} (hz : z ∉ H.lattice) (ha : a ∉ H.lattice) :
+lemma p23R1_wp_sub_theta {z a : ℂ} (hz : z ∉ H.lattice) (ha : a ∉ H.lattice) :
     H.weierstrassP z - H.weierstrassP a =
       -((π * jacobiThetaOneDerivNullTau H.tau) ^ 2 / (4 * H.ω₁ ^ 2)) *
         (jacobiThetaOneTau (π * z / (2 * H.ω₁) + π * a / (2 * H.ω₁)) H.tau *
@@ -718,7 +715,7 @@ theorem p23R1_wp_sub_theta {z a : ℂ} (hz : z ∉ H.lattice) (ha : a ∉ H.latt
   linear_combination (-4 * Tp * Tm) * hE
 
 /-- `θ₁(w ± π/2) = ±θ₂(w)`. -/
-theorem p23R1_theta_shift_one (w τ : ℂ) :
+lemma p23R1_theta_shift_one (w τ : ℂ) :
     jacobiThetaOneTau (w + π / 2) τ = jacobiThetaTwoTau w τ ∧
       jacobiThetaOneTau (w - π / 2) τ = -jacobiThetaTwoTau w τ := by
   refine ⟨(jacobiThetaTwoTau_half_periods w τ).1.symm, ?_⟩
@@ -729,7 +726,7 @@ theorem p23R1_theta_shift_one (w τ : ℂ) :
   rw [← h1]; linear_combination h2
 
 /-- `e^{iπτ/2} θ₁(w + πτ/2) θ₁(w - πτ/2) = θ₄(w)²`. -/
-theorem p23R1_theta_shift_three (w τ : ℂ) :
+lemma p23R1_theta_shift_three (w τ : ℂ) :
     cexp (π * I * τ / 2) * (jacobiThetaOneTau (w + π * τ / 2) τ *
       jacobiThetaOneTau (w - π * τ / 2) τ) = jacobiThetaFourTau w τ ^ 2 := by
   have h1 := (jacobiThetaFourTau_half_periods w τ).2.1
@@ -747,7 +744,7 @@ theorem p23R1_theta_shift_three (w τ : ℂ) :
     jacobiThetaOneTau (w - π * τ / 2) τ) * hI
 
 /-- `e^{iπτ/2} θ₁(w + c) θ₁(w - c) = -θ₃(w)²`, `c = π/2 + πτ/2`. -/
-theorem p23R1_theta_shift_two (w τ : ℂ) :
+lemma p23R1_theta_shift_two (w τ : ℂ) :
     cexp (π * I * τ / 2) * (jacobiThetaOneTau (w + (π / 2 + π * τ / 2)) τ *
       jacobiThetaOneTau (w - (π / 2 + π * τ / 2)) τ) = -jacobiThetaThreeTau w τ ^ 2 := by
   have h1 := (jacobiThetaThreeTau_half_periods w τ).2.2
@@ -874,7 +871,7 @@ theorem p23R1_e_diff :
   · rw [e1, p23R1_wp_sub_e_two H ha, hw, t1, t3]; field_simp
 
 /-- 23.6.2 (helper form). -/
-theorem p23R1_e_one_theta :
+lemma p23R1_e_one_theta :
     H.e 1 = π ^ 2 / (12 * H.ω₁ ^ 2) *
       (jacobiThetaTwoTau 0 H.tau ^ 4 + 2 * jacobiThetaFourTau 0 H.tau ^ 4) := by
   obtain ⟨d3, d2⟩ := H.p23R1_e_diff
@@ -1247,7 +1244,7 @@ theorem e_three_eq_jacobi :
   linear_combination (12 : ℂ) * hj
 
 /-- The Jacobi theta argument at `Kz/ω₁` is `πz/(2ω₁)`. -/
-theorem p23R1_zeta_arg (z : ℂ) :
+lemma p23R1_zeta_arg (z : ℂ) :
     jacobiZetaTau (H.quarterK * z / H.ω₁) H.tau = π * z / (2 * H.ω₁) := by
   have hω := H.ω₁_ne_zero
   have n3 := (jacobiThetaNullTau_ne_zero H.tau_im_pos).2.1

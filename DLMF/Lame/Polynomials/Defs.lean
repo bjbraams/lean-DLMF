@@ -7,8 +7,6 @@ module
 
 public import DLMF.Lame.Basic
 public import Mathlib.RingTheory.Polynomial.Chebyshev
-public import Mathlib.LinearAlgebra.Matrix.Charpoly.Basic
-public import Mathlib.Data.Multiset.Sort
 
 /-!
 # Lamé polynomials: explicit construction (DLMF §§29.12, 29.14, 29.15)

@@ -8,10 +8,7 @@ module
 public import DLMF.Combinatorics.Basic
 public import Mathlib.Combinatorics.Enumerative.Catalan.Basic
 public import Mathlib.Combinatorics.Enumerative.Schroder
-public import Mathlib.Analysis.SpecialFunctions.Pow.Real
-public import Mathlib.Data.Nat.GCD.Basic
 public import Mathlib.Data.Nat.Choose.Vandermonde
-public import DLMFMathlib.Combinatorics.S26aQuadraticSeries
 public import DLMFMathlib.Combinatorics.S26aSeriesTransform
 public import DLMF.Combinatorics.Catalan
 
@@ -95,7 +92,7 @@ def narayana : ℕ → ℕ → ℕ
   | n, k + 1 => n.choose (k + 1) * n.choose k / n
 
 /-- The divisibility behind `narayana`: `n ∣ C(n, k+1) C(n, k)`. -/
-theorem c26a_dvd_choose_mul_choose (n k : ℕ) : n ∣ n.choose (k + 1) * n.choose k := by
+lemma c26a_dvd_choose_mul_choose (n k : ℕ) : n ∣ n.choose (k + 1) * n.choose k := by
   rcases n with _ | a
   · simp
   · -- `(a+2) C(a+1,k+1) C(a+1,k) = (a+1) C(a,k) C(a+2,k+1)`
@@ -197,7 +194,7 @@ theorem card_latticePaths_above_eq_largeSchroder (n : ℕ) :
 
 
 /-- A function satisfying the Delannoy boundary values and recurrence is `delannoy`. -/
-theorem q26a_eq_delannoy (f : ℕ → ℕ → ℕ) (h0 : ∀ n, f 0 n = 1) (h1 : ∀ m, f m 0 = 1)
+lemma q26a_eq_delannoy (f : ℕ → ℕ → ℕ) (h0 : ∀ n, f 0 n = 1) (h1 : ∀ m, f m 0 = 1)
     (hs : ∀ m n, f (m + 1) (n + 1) = f (m + 1) n + f m (n + 1) + f m n) (m n : ℕ) :
     f m n = delannoy m n := by
   induction m generalizing n with
@@ -208,7 +205,7 @@ theorem q26a_eq_delannoy (f : ℕ → ℕ → ℕ) (h0 : ∀ n, f 0 n = 1) (h1 :
     | succ n ihn => rw [hs, delannoy_succ_succ, ihn, ih, ih]
 
 /-- DLMF 26.6.1, first form. -/
-theorem q26a_delannoy_eq_sum1 (m n : ℕ) :
+lemma q26a_delannoy_eq_sum1 (m n : ℕ) :
     delannoy m n = ∑ k ∈ range (n + 1), n.choose k * (m + n - k).choose n := by
   symm
   apply q26a_eq_delannoy (fun m n => ∑ k ∈ range (n + 1), n.choose k * (m + n - k).choose n)
@@ -255,7 +252,7 @@ theorem q26a_delannoy_eq_sum1 (m n : ℕ) :
     ring
 
 /-- DLMF 26.6.1, second form. -/
-theorem q26a_delannoy_eq_sum2 (m n : ℕ) :
+lemma q26a_delannoy_eq_sum2 (m n : ℕ) :
     delannoy m n = ∑ k ∈ range (n + 1), 2 ^ k * m.choose k * n.choose k := by
   symm
   apply q26a_eq_delannoy (fun m n => ∑ k ∈ range (n + 1), 2 ^ k * m.choose k * n.choose k)
@@ -303,12 +300,12 @@ theorem q26a_delannoy_eq_sum2 (m n : ℕ) :
     omega
 
 /-- DLMF 26.6.12 as printed fails for `n = 0` (`C(0) = 1`, empty sum). -/
-theorem q26a_not_catalan_eq_sum_narayana :
+lemma q26a_not_catalan_eq_sum_narayana :
     ¬ ∀ n : ℕ, catalan n = ∑ k ∈ Icc 1 n, narayana n k := by
   intro h; simpa using h 0
 
 /-- DLMF 26.6.12 for `n ≥ 1`: `C(n) = ∑_{k=1}^{n} N(n, k)`. -/
-theorem q26a_catalan_eq_sum_narayana {n : ℕ} (hn : 1 ≤ n) :
+lemma q26a_catalan_eq_sum_narayana {n : ℕ} (hn : 1 ≤ n) :
     catalan n = ∑ k ∈ Icc 1 n, narayana n k := by
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
   have hv : ∑ j ∈ range (m + 1), (m + 1).choose (j + 1) * (m + 1).choose j =
@@ -338,7 +335,7 @@ theorem q26a_catalan_eq_sum_narayana {n : ℕ} (hn : 1 ≤ n) :
 /-! ### Motzkin numbers via the Catalan series (agent p26a) -/
 
 /-- The Motzkin series satisfies `M = 1 + XM + X²M²`. -/
-theorem s26a_motzkinSeries_eq :
+lemma s26a_motzkinSeries_eq :
     (PowerSeries.mk fun n => (motzkin n : ℚ)) =
       1 + PowerSeries.C 1 * PowerSeries.X * (PowerSeries.mk fun n => (motzkin n : ℚ)) +
         PowerSeries.X ^ 2 * (PowerSeries.mk fun n => (motzkin n : ℚ)) ^ 2 := by
@@ -359,7 +356,7 @@ theorem s26a_motzkinSeries_eq :
   simp
 
 /-- `M(n) = ∑_k C(n, 2k) C(k)`. -/
-theorem s26a_motzkin_eq_sum (n : ℕ) :
+lemma s26a_motzkin_eq_sum (n : ℕ) :
     (motzkin n : ℚ) = ∑ k ∈ range (n + 1), (catalan k : ℚ) * n.choose (2 * k) := by
   have := s26a_quad_unique 1 (by norm_num) s26a_motzkinSeries_eq
     (s26a_quadSeries_eq 1 (by norm_num))
@@ -368,7 +365,7 @@ theorem s26a_motzkin_eq_sum (n : ℕ) :
   simpa using h
 
 /-- `C(n+1) = ∑_k C(n, k) M(k)`. -/
-theorem s26a_catalan_succ_eq_sum_motzkin (n : ℕ) :
+lemma s26a_catalan_succ_eq_sum_motzkin (n : ℕ) :
     (catalan (n + 1) : ℚ) = ∑ k ∈ range (n + 1), (n.choose k : ℚ) * motzkin k := by
   simp_rw [s26a_motzkin_eq_sum, mul_sum]
   have : ∀ k ∈ range (n + 1), ∑ j ∈ range (k + 1),
@@ -386,7 +383,7 @@ theorem s26a_catalan_succ_eq_sum_motzkin (n : ℕ) :
   exact sum_congr rfl fun k _ => by ring
 
 /-- `∑_{j < 2N} f j = ∑_{k < N} (f (2k) + f (2k+1))`. -/
-theorem s26a_sum_range_two_mul {M : Type*} [AddCommMonoid M] (f : ℕ → M) (N : ℕ) :
+lemma s26a_sum_range_two_mul {M : Type*} [AddCommMonoid M] (f : ℕ → M) (N : ℕ) :
     ∑ j ∈ range (2 * N), f j = ∑ k ∈ range N, (f (2 * k) + f (2 * k + 1)) := by
   induction N with
   | zero => simp
@@ -395,7 +392,7 @@ theorem s26a_sum_range_two_mul {M : Type*} [AddCommMonoid M] (f : ℕ → M) (N 
       sum_range_succ, add_assoc]
 
 /-- `M(m) = ∑_j C(m, j) a_j` with `a_j = C(j/2)` for even `j`, `0` for odd `j`. -/
-theorem s26a_motzkin_eq_sum_even (m : ℕ) :
+lemma s26a_motzkin_eq_sum_even (m : ℕ) :
     (motzkin m : ℤ) = ∑ j ∈ range (m + 1),
       (m.choose j : ℤ) * (if Even j then (catalan (j / 2) : ℤ) else 0) := by
   have h := s26a_motzkin_eq_sum m
@@ -412,7 +409,7 @@ theorem s26a_motzkin_eq_sum_even (m : ℕ) :
 
 
 /-- DLMF 26.6.13 (helper): `M(n) = ∑_k (-1)^k C(n, k) C(n+1-k)`, by binomial inversion. -/
-theorem s26a_motzkin_eq_sum_catalan (n : ℕ) :
+lemma s26a_motzkin_eq_sum_catalan (n : ℕ) :
     (motzkin n : ℤ) = ∑ k ∈ range (n + 1), (-1) ^ k * (n.choose k : ℤ) * catalan (n + 1 - k) := by
   have hb : ∀ m, (catalan (m + 1) : ℤ) =
       ∑ k ∈ range (m + 1), (m.choose k : ℤ) * motzkin k := fun m => by
@@ -425,7 +422,7 @@ theorem s26a_motzkin_eq_sum_catalan (n : ℕ) :
     Nat.choose_symm (by omega), show n - k + 1 = n + 1 - k by omega]
 
 /-- `D(n, n) = ∑_k C(2k, k) C(n+k, 2k)`. -/
-theorem s26a_delannoy_diag_eq_sum (n : ℕ) :
+lemma s26a_delannoy_diag_eq_sum (n : ℕ) :
     (delannoy n n : ℚ) = ∑ k ∈ range (n + 1), ((2 * k).choose k : ℚ) * (n + k).choose (2 * k) := by
   rw [q26a_delannoy_eq_sum1, Nat.cast_sum, ← sum_range_reflect]
   refine sum_congr rfl fun k hk => ?_
@@ -438,12 +435,12 @@ theorem s26a_delannoy_diag_eq_sum (n : ℕ) :
   push_cast; ring
 
 /-- `√(P/(1-x)²) = √P/(1-x)` for `1 - x > 0`. -/
-theorem s26a_sqrt_div_sq {x : ℝ} (P : ℝ) (h : 0 < 1 - x) :
+lemma s26a_sqrt_div_sq {x : ℝ} (P : ℝ) (h : 0 < 1 - x) :
     Real.sqrt (P / (1 - x) ^ 2) = Real.sqrt P / (1 - x) := by
   rw [Real.sqrt_div' P (sq_nonneg _), Real.sqrt_sq h.le]
 
 /-- For `|x| < 3 - 2√2`: `4|x| < (1 - |x|)²`. -/
-theorem s26a_schroder_bound {x : ℝ} (hx : |x| < 3 - 2 * Real.sqrt 2) :
+lemma s26a_schroder_bound {x : ℝ} (hx : |x| < 3 - 2 * Real.sqrt 2) :
     4 * |x| < (1 - |x|) ^ 2 ∧ |x| < 1 := by
   have hs : Real.sqrt 2 ^ 2 = 2 := Real.sq_sqrt (by norm_num)
   have hs1 : 1 < Real.sqrt 2 := by
@@ -456,7 +453,7 @@ theorem s26a_schroder_bound {x : ℝ} (hx : |x| < 3 - 2 * Real.sqrt 2) :
   · linarith
 
 /-- `D(m, n) = D(n, m)`. -/
-theorem s26a_delannoy_comm (m n : ℕ) : delannoy m n = delannoy n m := by
+lemma s26a_delannoy_comm (m n : ℕ) : delannoy m n = delannoy n m := by
   rw [q26a_delannoy_eq_sum2, q26a_delannoy_eq_sum2,
     sum_subset (range_subset_range.mpr (by omega : n + 1 ≤ m + n + 1)),
     sum_subset (range_subset_range.mpr (by omega : m + 1 ≤ m + n + 1))]
@@ -467,7 +464,7 @@ theorem s26a_delannoy_comm (m n : ℕ) : delannoy m n = delannoy n m := by
     rw [Nat.choose_eq_zero_of_lt (n := n) (by simp at hk; omega)]; simp
 
 /-- Shifting a series by `k` places. -/
-theorem s26a_hasSum_shift {f : ℕ → ℝ} {a : ℝ} (hf : HasSum f a) (k : ℕ) :
+lemma s26a_hasSum_shift {f : ℕ → ℝ} {a : ℝ} (hf : HasSum f a) (k : ℕ) :
     HasSum (fun n => if k ≤ n then f (n - k) else 0) a := by
   rw [← hasSum_nat_add_iff' k]
   simp only [Nat.le_add_left, ite_true, Nat.add_sub_cancel]
@@ -475,7 +472,7 @@ theorem s26a_hasSum_shift {f : ℕ → ℝ} {a : ℝ} (hf : HasSum f a) (k : ℕ
   exact hf
 
 /-- The row generating function `∑_n D(m, n) tⁿ = (1+t)^m/(1-t)^{m+1}`. -/
-theorem s26a_hasSum_delannoy_row (m : ℕ) {t : ℝ} (ht : |t| < 1) :
+lemma s26a_hasSum_delannoy_row (m : ℕ) {t : ℝ} (ht : |t| < 1) :
     HasSum (fun n => (delannoy m n : ℝ) * t ^ n) ((1 + t) ^ m / (1 - t) ^ (m + 1)) := by
   have hk : ∀ k ∈ range (m + 1), HasSum (fun n => if k ≤ n then
       (m.choose k : ℝ) * t ^ k * (((n - k + m).choose m : ℝ) * t ^ (n - k)) else 0)

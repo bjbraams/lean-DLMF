@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Legendre.Integrals
-public import DLMF.Legendre.Connections
 public import DLMF.Gamma.RecipGammaDeriv
 
 /-!
@@ -32,7 +31,7 @@ def legendreSinSqTrigamma (ν : ℂ) : ℂ :=
   limUnder (𝓝[≠] ν) (fun v => (sin (π*v))^2*deriv digamma (v+1))
 
 /-- Reflection in the form `Γ(-v)⁻¹ = -sin(πv) Γ(v+1) / π`, valid when `Γ(-v)` is finite. -/
-lemma recip_Gamma_neg_eq_of_sin_ne_zero {v : ℂ} (hv : ∀ m : ℕ, v + 1 ≠ -(m : ℂ)) (hs : sin (π * v) ≠ 0) :
+theorem recip_Gamma_neg_eq_of_sin_ne_zero {v : ℂ} (hv : ∀ m : ℕ, v + 1 ≠ -(m : ℂ)) (hs : sin (π * v) ≠ 0) :
     (Gamma (-v))⁻¹ = -(sin (π * v) * Gamma (v + 1)) / π := by
   have h := Complex.Gamma_mul_Gamma_one_sub (v + 1)
   rw [show 1 - (v + 1) = -v by ring, show (π : ℂ) * (v + 1) = π * v + π by ring, sin_add_pi] at h
@@ -46,7 +45,7 @@ lemma recip_Gamma_neg_eq_of_sin_ne_zero {v : ℂ} (hv : ∀ m : ℕ, v + 1 ≠ -
     _ = 1 := by rw [h']; field_simp
 
 /-- `sin(πv) ψ(v+1) = π (1/Γ)'(v+1) / Γ(-v)` off the negative integers. -/
-lemma sin_mul_digamma_add_one_eq {v : ℂ} (hv : ∀ m : ℕ, v + 1 ≠ -(m : ℂ)) :
+theorem sin_mul_digamma_add_one_eq {v : ℂ} (hv : ∀ m : ℕ, v + 1 ≠ -(m : ℂ)) :
     sin (π * v) * digamma (v + 1) = π * DLMF.Gamma.recipGammaDeriv 1 (v + 1) * (Gamma (-v))⁻¹ := by
   by_cases hs : sin (π * v) = 0
   · obtain ⟨k, hk⟩ := Complex.sin_eq_zero_iff.mp hs
@@ -66,7 +65,7 @@ lemma sin_mul_digamma_add_one_eq {v : ℂ} (hv : ∀ m : ℕ, v + 1 ≠ -(m : �
     field_simp
 
 /-- `sin²(πv) ψ'(v+1) = π² (((1/Γ)')² - (1/Γ)(1/Γ)'')(v+1) / Γ(-v)²` off the negative integers. -/
-lemma sin_sq_mul_deriv_digamma_add_one_eq {v : ℂ} (hv : ∀ m : ℕ, v + 1 ≠ -(m : ℂ)) :
+theorem sin_sq_mul_deriv_digamma_add_one_eq {v : ℂ} (hv : ∀ m : ℕ, v + 1 ≠ -(m : ℂ)) :
     sin (π * v) ^ 2 * deriv digamma (v + 1) =
       π ^ 2 * (DLMF.Gamma.recipGammaDeriv 1 (v + 1) ^ 2 - (Gamma (v + 1))⁻¹ * DLMF.Gamma.recipGammaDeriv 2 (v + 1)) *
         ((Gamma (-v))⁻¹) ^ 2 := by

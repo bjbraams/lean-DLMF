@@ -6,8 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Mathieu.Basic
-public import DLMF.Mathieu.FourierSeries
 public import Mathlib.Analysis.SpecialFunctions.Bessel
+public import DLMF.Mathieu.Properties
 
 /-!
 # Integral equations (DLMF §28.10)
@@ -34,7 +34,7 @@ namespace DLMF.Mathieu
 
 /-- Differentiation under the integral sign for a jointly continuous kernel whose
 `z`-derivative is jointly continuous. -/
-theorem p1a2_hasDerivAt_integral {K K' : ℂ → ℝ → ℂ} {a b : ℝ}
+lemma p1a2_hasDerivAt_integral {K K' : ℂ → ℝ → ℂ} {a b : ℝ}
     (hK : ∀ z t, HasDerivAt (fun z => K z t) (K' z t) z)
     (hcK : Continuous fun p : ℂ × ℝ => K p.1 p.2) (hcK' : Continuous fun p : ℂ × ℝ => K' p.1 p.2)
     (z₀ : ℂ) :
@@ -139,14 +139,14 @@ theorem p1a2_hasDerivAt_deriv_se (n : ℕ) (q : ℝ) (t : ℝ) :
   ((isMathieuSolution_mathieuSe n q).hasDerivAt_deriv t).comp_ofReal
 
 /-- `ce_n'(0) = 0`. -/
-theorem p1a2_deriv_ce_zero (n : ℕ) (q : ℝ) : deriv (fun z => mathieuCe n z q) 0 = 0 := by
+lemma p1a2_deriv_ce_zero (n : ℕ) (q : ℝ) : deriv (fun z => mathieuCe n z q) 0 = 0 := by
   have h := (mathieuWI_spec (mathieuA n q) q)
   rw [show deriv (fun z => mathieuCe n z q) 0 =
       (mathieuCeZero n q : ℂ) * deriv (mathieuWI (mathieuA n q) q) 0 from
     ((h.1.differentiable 0).hasDerivAt.const_mul _).deriv, h.2.2, mul_zero]
 
 /-- `se_n(0) = 0`. -/
-theorem p1a2_se_zero (n : ℕ) (q : ℝ) : mathieuSe n 0 q = 0 := by
+lemma p1a2_se_zero (n : ℕ) (q : ℝ) : mathieuSe n 0 q = 0 := by
   simp [mathieuSe, (mathieuWII_spec (mathieuB n q) q).2.1]
 
 /-- An even solution for `a = a_n(q)` is a multiple of `ce_n`. -/
@@ -209,17 +209,17 @@ theorem p1a2_deriv_ce_even_half_pi (n : ℕ) (q : ℝ) :
   rw [deriv_mathieuWI_half_pi_mathieuA_even, mul_zero]
 
 /-- `t ↦ cos t` as a complex-valued function of real `t`. -/
-theorem p1a2_hasDerivAt_rcos (t : ℝ) :
+lemma p1a2_hasDerivAt_rcos (t : ℝ) :
     HasDerivAt (fun t : ℝ => ((Real.cos t : ℝ) : ℂ)) (-((Real.sin t : ℝ) : ℂ)) t := by
   simpa using (Real.hasDerivAt_cos t).ofReal_comp
 
 /-- `t ↦ sin t` as a complex-valued function of real `t`. -/
-theorem p1a2_hasDerivAt_rsin (t : ℝ) :
+lemma p1a2_hasDerivAt_rsin (t : ℝ) :
     HasDerivAt (fun t : ℝ => ((Real.sin t : ℝ) : ℂ)) ((Real.cos t : ℝ) : ℂ) t :=
   (Real.hasDerivAt_sin t).ofReal_comp
 
 /-- First and second derivatives of `x ↦ P(x) Φ(u(x))`. -/
-theorem p1a2_hasDerivAt_mul_comp {𝕜 : Type*} [NontriviallyNormedField 𝕜] [NormedAlgebra 𝕜 ℂ]
+lemma p1a2_hasDerivAt_mul_comp {𝕜 : Type*} [NontriviallyNormedField 𝕜] [NormedAlgebra 𝕜 ℂ]
     {P P1 P2 u u1 u2 : 𝕜 → ℂ} {Φ Φ1 Φ2 : ℂ → ℂ} {x : 𝕜}
     (hP : HasDerivAt P (P1 x) x) (hP1 : HasDerivAt P1 (P2 x) x)
     (hu : HasDerivAt u (u1 x) x) (hu1 : HasDerivAt u1 (u2 x) x)
@@ -234,7 +234,7 @@ theorem p1a2_hasDerivAt_mul_comp {𝕜 : Type*} [NontriviallyNormedField 𝕜] [
   convert (hP1.mul h0).add (hP.mul (h1.mul hu1)) using 1
 
 /-- **Kernel criterion, product form** `K(z, t) = P(z, t) Φ(u(z, t))`. -/
-theorem p1a2_isMathieuSolution_kernel {a q : ℂ} {α β : ℝ} {f f' : ℝ → ℂ}
+lemma p1a2_isMathieuSolution_kernel {a q : ℂ} {α β : ℝ} {f f' : ℝ → ℂ}
     {P Pz Pzz Pt Ptt u uz uzz ut utt : ℂ → ℝ → ℂ} {Φ Φ1 Φ2 : ℂ → ℂ}
     (hPz : ∀ z t, HasDerivAt (fun z => P z t) (Pz z t) z)
     (hPzz : ∀ z t, HasDerivAt (fun z => Pz z t) (Pzz z t) z)
@@ -303,7 +303,7 @@ theorem p1a2_isMathieuSolution_kernel {a q : ℂ} {α β : ℝ} {f f' : ℝ → 
     hf hf' hpde hbd
 
 /-- A solution vanishing together with its derivative at a point is zero. -/
-theorem p1a2_eq_zero_of_initial {a q : ℂ} {w : ℂ → ℂ} (hw : IsMathieuSolution a q w) {z₀ : ℂ}
+lemma p1a2_eq_zero_of_initial {a q : ℂ} {w : ℂ → ℂ} (hw : IsMathieuSolution a q w) {z₀ : ℂ}
     (h0 : w z₀ = 0) (h1 : deriv w z₀ = 0) : w = fun _ => 0 := by
   have := hw.eq_of_initial (hw.const_mul 0) (z₀ := z₀) (by simp [h0])
     (by rw [show deriv (fun z => (0 : ℂ) * w z) z₀ = 0 by simp, h1])
@@ -326,7 +326,7 @@ theorem p1a2_se_or_deriv_ne_zero (n : ℕ) (q : ℝ) (z₀ : ℂ) (h0 : mathieuS
   exact (mathieuSeDerivZero_pos n q).ne' (by exact_mod_cast h2.symm)
 
 /-- Identification of the constant for an even solution, by a value. -/
-theorem p1a2_finish_val_ce {n : ℕ} {q : ℝ} {G : ℂ → ℂ}
+lemma p1a2_finish_val_ce {n : ℕ} {q : ℝ} {G : ℂ → ℂ}
     (hG : IsMathieuSolution (mathieuA n q) q G) (hev : ∀ z, G (-z) = G z) {z₀ A : ℂ}
     (hne : mathieuCe n z₀ q ≠ 0) (hval : 2 / π * G z₀ = A) (z : ℂ) :
     2 / π * G z = A / mathieuCe n z₀ q * mathieuCe n z q := by
@@ -335,7 +335,7 @@ theorem p1a2_finish_val_ce {n : ℕ} {q : ℝ} {G : ℂ → ℂ}
   field_simp
 
 /-- Identification of the constant for an even solution, by a derivative. -/
-theorem p1a2_finish_der_ce {n : ℕ} {q : ℝ} {G : ℂ → ℂ}
+lemma p1a2_finish_der_ce {n : ℕ} {q : ℝ} {G : ℂ → ℂ}
     (hG : IsMathieuSolution (mathieuA n q) q G) (hev : ∀ z, G (-z) = G z) {z₀ A : ℂ}
     (hne : deriv (fun z => mathieuCe n z q) z₀ ≠ 0) (hval : 2 / π * deriv G z₀ = A) (z : ℂ) :
     2 / π * G z = A / deriv (fun z => mathieuCe n z q) z₀ * mathieuCe n z q := by
@@ -347,7 +347,7 @@ theorem p1a2_finish_der_ce {n : ℕ} {q : ℝ} {G : ℂ → ℂ}
   field_simp
 
 /-- Identification of the constant for an odd solution, by a value. -/
-theorem p1a2_finish_val_se {n : ℕ} {q : ℝ} {G : ℂ → ℂ}
+lemma p1a2_finish_val_se {n : ℕ} {q : ℝ} {G : ℂ → ℂ}
     (hG : IsMathieuSolution (mathieuB n q) q G) (hodd : ∀ z, G (-z) = -G z) {z₀ A : ℂ}
     (hne : mathieuSe n z₀ q ≠ 0) (hval : 2 / π * G z₀ = A) (z : ℂ) :
     2 / π * G z = A / mathieuSe n z₀ q * mathieuSe n z q := by
@@ -359,7 +359,7 @@ theorem p1a2_finish_val_se {n : ℕ} {q : ℝ} {G : ℂ → ℂ}
   field_simp
 
 /-- Identification of the constant for an odd solution, by a derivative. -/
-theorem p1a2_finish_der_se {n : ℕ} {q : ℝ} {G : ℂ → ℂ}
+lemma p1a2_finish_der_se {n : ℕ} {q : ℝ} {G : ℂ → ℂ}
     (hG : IsMathieuSolution (mathieuB n q) q G) (hodd : ∀ z, G (-z) = -G z) {z₀ A : ℂ}
     (hne : deriv (fun z => mathieuSe n z q) z₀ ≠ 0) (hval : 2 / π * deriv G z₀ = A) (z : ℂ) :
     2 / π * G z = A / deriv (fun z => mathieuSe n z q) z₀ * mathieuSe n z q := by
@@ -538,19 +538,19 @@ theorem integral_cos_mathieuCe_even (n : ℕ) (h : ℝ) (z : ℂ) :
   field_simp
 
 /-- Constant factor: derivative facts. -/
-theorem p1a2_hd_one_z : ∀ (z : ℂ) (_t : ℝ), HasDerivAt (fun _ : ℂ => (1 : ℂ)) 0 z :=
+lemma p1a2_hd_one_z : ∀ (z : ℂ) (_t : ℝ), HasDerivAt (fun _ : ℂ => (1 : ℂ)) 0 z :=
   fun _ _ => hasDerivAt_const _ _
 
 /-- Constant factor in `t`. -/
-theorem p1a2_hd_one_t : ∀ (_z : ℂ) (t : ℝ), HasDerivAt (fun _ : ℝ => (1 : ℂ)) 0 t :=
+lemma p1a2_hd_one_t : ∀ (_z : ℂ) (t : ℝ), HasDerivAt (fun _ : ℝ => (1 : ℂ)) 0 t :=
   fun _ _ => hasDerivAt_const _ _
 
 /-- Zero factor in `z`. -/
-theorem p1a2_hd_zero_z : ∀ (z : ℂ) (_t : ℝ), HasDerivAt (fun _ : ℂ => (0 : ℂ)) 0 z :=
+lemma p1a2_hd_zero_z : ∀ (z : ℂ) (_t : ℝ), HasDerivAt (fun _ : ℂ => (0 : ℂ)) 0 z :=
   fun _ _ => hasDerivAt_const _ _
 
 /-- Zero factor in `t`. -/
-theorem p1a2_hd_zero_t : ∀ (_z : ℂ) (t : ℝ), HasDerivAt (fun _ : ℝ => (0 : ℂ)) 0 t :=
+lemma p1a2_hd_zero_t : ∀ (_z : ℂ) (t : ℝ), HasDerivAt (fun _ : ℝ => (0 : ℂ)) 0 t :=
   fun _ _ => hasDerivAt_const _ _
 
 /-- **DLMF 28.10.2**: `(2/π) ∫₀^{π/2} cosh(2h sin z sin t) ce_{2n}(t, h²) dt

@@ -8,8 +8,11 @@ module
 public import Mathlib.Analysis.Convex.Deriv
 
 public import DLMF.QSeries.Pochhammer
-public import DLMF.QSeries.Identities
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.Algebra.Order.Ring.Star
+public import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.SpecialFunctions.Bernstein
+public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
 
 /-!
 # q-gamma and q-beta (DLMF §5.18)
@@ -114,23 +117,23 @@ def qNum (q t : ℝ) : ℝ := (1 - q ^ t) / (1 - q)
 
 variable {q x : ℝ}
 
-lemma one_sub_rpow_pos (hq0 : 0 < q) (hq1 : q < 1) {t : ℝ} (ht : 0 < t) :
+theorem one_sub_rpow_pos (hq0 : 0 < q) (hq1 : q < 1) {t : ℝ} (ht : 0 < t) :
     0 < 1 - q ^ t := by
   have := Real.rpow_lt_one hq0.le hq1 ht
   linarith
 
-lemma g_nonpos (hq0 : 0 < q) (hq1 : q < 1) {t : ℝ} (ht : 0 < t) : g q t ≤ 0 := by
+theorem g_nonpos (hq0 : 0 < q) (hq1 : q < 1) {t : ℝ} (ht : 0 < t) : g q t ≤ 0 := by
   have := Real.rpow_pos_of_pos hq0 t
   exact Real.log_nonpos (one_sub_rpow_pos hq0 hq1 ht).le (by linarith)
 
-lemma g_eq (hq0 : 0 < q) (hq1 : q < 1) {t : ℝ} (ht : 0 < t) :
+theorem g_eq (hq0 : 0 < q) (hq1 : q < 1) {t : ℝ} (ht : 0 < t) :
     g q t = Real.log (qNum q t) + Real.log (1 - q) := by
   unfold g qNum
   rw [Real.log_div (one_sub_rpow_pos hq0 hq1 ht).ne' (by linarith)]
   ring
 
 /-- `t ↦ log (1 - q^t)` is concave on `(0, ∞)`. -/
-lemma concaveOn_g (hq0 : 0 < q) (hq1 : q < 1) : ConcaveOn ℝ (Ioi 0) (g q) := by
+theorem concaveOn_g (hq0 : 0 < q) (hq1 : q < 1) : ConcaveOn ℝ (Ioi 0) (g q) := by
   refine ⟨convex_Ioi 0, fun s hs t ht a b ha hb hab => ?_⟩
   have hs' := one_sub_rpow_pos hq0 hq1 hs
   have ht' := one_sub_rpow_pos hq0 hq1 ht
@@ -149,7 +152,7 @@ lemma concaveOn_g (hq0 : 0 < q) (hq1 : q < 1) : ConcaveOn ℝ (Ioi 0) (g q) := b
         linear_combination hab
       linarith
 
-lemma g_concave_one (hq0 : 0 < q) (hq1 : q < 1) {t : ℝ} (ht : 0 < t) (hx0 : 0 ≤ x)
+theorem g_concave_one (hq0 : 0 < q) (hq1 : q < 1) {t : ℝ} (ht : 0 < t) (hx0 : 0 ≤ x)
     (hx1 : x ≤ 1) : (1 - x) * g q t + x * g q (t + 1) ≤ g q (t + x) := by
   have h := (concaveOn_g hq0 hq1).2 (mem_Ioi.2 ht) (mem_Ioi.2 (by linarith : (0 : ℝ) < t + 1))
     (by linarith : (0 : ℝ) ≤ 1 - x) hx0 (by ring)
@@ -157,7 +160,7 @@ lemma g_concave_one (hq0 : 0 < q) (hq1 : q < 1) {t : ℝ} (ht : 0 < t) (hx0 : 0 
   convert h using 2
   ring
 
-lemma g_concave_two (hq0 : 0 < q) (hq1 : q < 1) {t : ℝ} (ht : 1 < t) (hx0 : 0 ≤ x) :
+theorem g_concave_two (hq0 : 0 < q) (hq1 : q < 1) {t : ℝ} (ht : 1 < t) (hx0 : 0 ≤ x) :
     g q (t + x) - g q t ≤ x * (g q t - g q (t - 1)) := by
   have h1 : (0 : ℝ) < 1 + x := by linarith
   have h1' : 1 + x ≠ 0 := h1.ne'
@@ -183,18 +186,18 @@ def D (q x : ℝ) (N : ℕ) : ℝ :=
 def K (q x : ℝ) (n : ℕ) : ℝ :=
   ∑ k ∈ range n, g q ((k : ℝ) + 1) - ∑ k ∈ range (n + 1), g q (x + k)
 
-lemma D_succ (q x : ℝ) (N : ℕ) :
+theorem D_succ (q x : ℝ) (N : ℕ) :
     D q x (N + 1) = D q x N + g q ((N : ℝ) + 1) - g q (x + N) := by
   unfold D
   rw [sum_range_succ, sum_range_succ]
   ring
 
-lemma D_base (q x : ℝ) (n : ℕ) : D q x (n + 1) = K q x n + g q ((n : ℝ) + 1) := by
+theorem D_base (q x : ℝ) (n : ℕ) : D q x (n + 1) = K q x n + g q ((n : ℝ) + 1) := by
   unfold D K
   rw [sum_range_succ (fun k : ℕ => g q ((k : ℝ) + 1))]
   ring
 
-lemma D_lower (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 ≤ x) {n : ℕ} (hn : 1 ≤ n) :
+theorem D_lower (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 ≤ x) {n : ℕ} (hn : 1 ≤ n) :
     ∀ N, n + 1 ≤ N →
       K q x n + g q N + x * g q n - x * g q ((N : ℝ) - 1) ≤ D q x N := by
   intro N hN
@@ -215,7 +218,7 @@ lemma D_lower (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 ≤ x) {n : ℕ} (hn : 1 ≤ 
     simp only [add_sub_cancel_right]
     linarith
 
-lemma D_upper (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 ≤ x) (hx1 : x ≤ 1) (n : ℕ) :
+theorem D_upper (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 ≤ x) (hx1 : x ≤ 1) (n : ℕ) :
     ∀ N, n + 1 ≤ N →
       D q x N ≤ K q x n + x * g q ((n : ℝ) + 1) + (1 - x) * g q N := by
   intro N hN
@@ -239,7 +242,7 @@ def r (q x : ℝ) (N : ℕ) : ℝ :=
   (∏ k ∈ range N, (1 - q ^ (k + 1))) / (∏ k ∈ range N, (1 - q ^ (x + k))) *
     (1 - q) ^ (1 - x)
 
-lemma log_r (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (N : ℕ) :
+theorem log_r (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (N : ℕ) :
     Real.log (r q x N) = D q x N + (1 - x) * Real.log (1 - q) := by
   have hA : ∀ k ∈ range N, (1 - q ^ (k + 1) : ℝ) ≠ 0 := fun k _ =>
     (sub_pos.2 (pow_lt_one₀ hq0.le hq1 (Nat.succ_ne_zero k))).ne'
@@ -255,14 +258,14 @@ lemma log_r (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (N : ℕ) :
     sum_congr rfl fun k _ => by norm_cast
   rw [e]
 
-lemma r_pos (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (N : ℕ) : 0 < r q x N := by
+theorem r_pos (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (N : ℕ) : 0 < r q x N := by
   unfold r
   refine mul_pos (div_pos (prod_pos fun k _ => ?_) (prod_pos fun k _ => ?_))
     (Real.rpow_pos_of_pos (by linarith) _)
   · exact sub_pos.2 (pow_lt_one₀ hq0.le hq1 (Nat.succ_ne_zero k))
   · exact one_sub_rpow_pos hq0 hq1 (add_pos_of_pos_of_nonneg hx0 k.cast_nonneg)
 
-lemma r_bounds (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (hx1 : x ≤ 1) {n : ℕ}
+theorem r_bounds (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (hx1 : x ≤ 1) {n : ℕ}
     (hn : 1 ≤ n) {N : ℕ} (hN : n + 1 ≤ N) :
     Real.exp (K q x n + x * g q n + (1 - x) * Real.log (1 - q) + g q N) ≤ r q x N ∧
       r q x N ≤ Real.exp (K q x n + x * g q ((n : ℝ) + 1) + (1 - x) * Real.log (1 - q)) := by
@@ -279,7 +282,7 @@ lemma r_bounds (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (hx1 : x ≤ 1) {n : �
     (g_nonpos hq0 hq1 hN0)
   constructor <;> refine Real.exp_le_exp.2 ?_ <;> linarith
 
-lemma tendsto_g_nat (hq0 : 0 < q) (hq1 : q < 1) :
+theorem tendsto_g_nat (hq0 : 0 < q) (hq1 : q < 1) :
     Tendsto (fun N : ℕ => g q N) atTop (𝓝 0) := by
   have h : Tendsto (fun N : ℕ => q ^ (N : ℝ)) atTop (𝓝 0) := by
     simpa [Real.rpow_natCast] using tendsto_pow_atTop_nhds_zero_of_lt_one hq0.le hq1
@@ -287,11 +290,11 @@ lemma tendsto_g_nat (hq0 : 0 < q) (hq1 : q < 1) :
     simpa using (tendsto_const_nhds (x := (1 : ℝ))).sub h
   simpa [g] using h2.log one_ne_zero
 
-lemma norm_ofReal_lt_one (hq0 : 0 < q) (hq1 : q < 1) : ‖(q : ℂ)‖ < 1 := by
+theorem norm_ofReal_lt_one (hq0 : 0 < q) (hq1 : q < 1) : ‖(q : ℂ)‖ < 1 := by
   rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos hq0]
   exact hq1
 
-lemma tendsto_r_complex (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) :
+theorem tendsto_r_complex (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) :
     Tendsto (fun N => (r q x N : ℂ)) atTop (𝓝 (qGamma q x)) := by
   have hq := norm_ofReal_lt_one hq0 hq1
   have hA := tendsto_qPochhammer (w := (q : ℂ)) hq
@@ -329,7 +332,7 @@ def L (q x : ℝ) (n : ℕ) (t : ℝ) : ℝ :=
   ∑ k ∈ range n, Real.log (qNum q ((k : ℝ) + 1)) -
     ∑ k ∈ range (n + 1), Real.log (qNum q (x + k)) + x * Real.log (qNum q t)
 
-lemma K_add_eq (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (n : ℕ) {t : ℝ} (ht : 0 < t) :
+theorem K_add_eq (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (n : ℕ) {t : ℝ} (ht : 0 < t) :
     K q x n + x * g q t + (1 - x) * Real.log (1 - q) = L q x n t := by
   have e1 : ∑ k ∈ range n, g q ((k : ℝ) + 1) =
       ∑ k ∈ range n, (Real.log (qNum q ((k : ℝ) + 1)) + Real.log (1 - q)) :=
@@ -343,7 +346,7 @@ lemma K_add_eq (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (n : ℕ) {t : ℝ} (ht
   push_cast
   ring
 
-lemma tendsto_qNum (t : ℝ) : Tendsto (fun q : ℝ => qNum q t) (𝓝[<] 1) (𝓝 t) := by
+theorem tendsto_qNum (t : ℝ) : Tendsto (fun q : ℝ => qNum q t) (𝓝[<] 1) (𝓝 t) := by
   have hd : HasDerivAt (fun q : ℝ => q ^ t) (t * (1 : ℝ) ^ (t - 1)) 1 :=
     Real.hasDerivAt_rpow_const (Or.inl one_ne_zero)
   rw [Real.one_rpow, mul_one] at hd
@@ -357,7 +360,7 @@ lemma tendsto_qNum (t : ℝ) : Tendsto (fun q : ℝ => qNum q t) (𝓝[<] 1) (�
   field_simp
   ring
 
-lemma tendsto_L (hx0 : 0 < x) (n : ℕ) {t : ℝ} (ht : 0 < t) :
+theorem tendsto_L (hx0 : 0 < x) (n : ℕ) {t : ℝ} (ht : 0 < t) :
     Tendsto (fun q => L q x n t) (𝓝[<] 1)
       (𝓝 (∑ k ∈ range n, Real.log ((k : ℝ) + 1) - ∑ k ∈ range (n + 1), Real.log (x + k) +
         x * Real.log t)) := by
@@ -368,7 +371,7 @@ lemma tendsto_L (hx0 : 0 < x) (n : ℕ) {t : ℝ} (ht : 0 < t) :
   · positivity
   · exact (add_pos_of_pos_of_nonneg hx0 k.cast_nonneg).ne'
 
-lemma exp_lim (hx0 : 0 < x) {n : ℕ} (hn : 1 ≤ n) :
+theorem exp_lim (hx0 : 0 < x) {n : ℕ} (hn : 1 ≤ n) :
     Real.exp (∑ k ∈ range n, Real.log ((k : ℝ) + 1) - ∑ k ∈ range (n + 1), Real.log (x + k) +
       x * Real.log n) = Real.GammaSeq x n := by
   have hn0 : (0 : ℝ) < n := by exact_mod_cast hn
@@ -385,7 +388,7 @@ lemma exp_lim (hx0 : 0 < x) {n : ℕ} (hn : 1 ≤ n) :
     Real.GammaSeq, hfac]
   ring
 
-lemma key (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (hx1 : x ≤ 1) :
+theorem key (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (hx1 : x ≤ 1) :
     qGamma q x = ((qGamma q x).re : ℂ) ∧ ∀ n : ℕ, 1 ≤ n →
       Real.exp (L q x n n) ≤ (qGamma q x).re ∧
         (qGamma q x).re ≤ Real.exp (L q x n ((n : ℝ) + 1)) := by
@@ -507,7 +510,7 @@ namespace QGammaMono
 open Finset QGammaLimit
 
 /-- `y ↦ sinh y / y` is strictly increasing on `(0, ∞)`. -/
-lemma mul_sinh_lt {y Y : ℝ} (hy : 0 < y) (hyY : y < Y) :
+theorem mul_sinh_lt {y Y : ℝ} (hy : 0 < y) (hyY : y < Y) :
     Y * Real.sinh y < y * Real.sinh Y := by
   have hconv : StrictConvexOn ℝ (Ici 0) Real.sinh := by
     refine StrictMonoOn.strictConvexOn_of_deriv (convex_Ici 0)
@@ -524,7 +527,7 @@ lemma mul_sinh_lt {y Y : ℝ} (hy : 0 < y) (hyY : y < Y) :
   have := mul_lt_mul_of_pos_left h hY
   rwa [← mul_assoc, mul_div_cancel₀ _ hY.ne'] at this
 
-lemma exp_div_sq_eq {u : ℝ} (hu : 0 < u) :
+theorem exp_div_sq_eq {u : ℝ} (hu : 0 < u) :
     Real.exp u / (Real.exp u - 1) ^ 2 = 1 / (2 * Real.sinh (u / 2)) ^ 2 := by
   have hE : Real.exp u = Real.exp (u / 2) ^ 2 := by
     rw [← Real.exp_nat_mul]
@@ -536,7 +539,7 @@ lemma exp_div_sq_eq {u : ℝ} (hu : 0 < u) :
   rw [Real.sinh_eq, Real.exp_neg, hE]
   field_simp
 
-lemma sq_mul_exp_div_lt {b a t : ℝ} (hb : 0 < b) (hba : b < a) (ht : 0 < t) :
+theorem sq_mul_exp_div_lt {b a t : ℝ} (hb : 0 < b) (hba : b < a) (ht : 0 < t) :
     a ^ 2 * (Real.exp (a * t) / (Real.exp (a * t) - 1) ^ 2) <
       b ^ 2 * (Real.exp (b * t) / (Real.exp (b * t) - 1) ^ 2) := by
   have ha : 0 < a := hb.trans hba
@@ -558,7 +561,7 @@ lemma sq_mul_exp_div_lt {b a t : ℝ} (hb : 0 < b) (hba : b < a) (ht : 0 < t) :
 /-- `log (1 - e^{-ct})`. -/
 def ell (c t : ℝ) : ℝ := Real.log (1 - Real.exp (-(c * t)))
 
-lemma hasDerivAt_ell {c t : ℝ} (hc : 0 < c) (ht : 0 < t) :
+theorem hasDerivAt_ell {c t : ℝ} (hc : 0 < c) (ht : 0 < t) :
     HasDerivAt (ell c) (c / (Real.exp (c * t) - 1)) t := by
   have hE : 1 < Real.exp (c * t) := Real.one_lt_exp_iff.2 (by positivity)
   have hne : 1 - Real.exp (-(c * t)) ≠ 0 := by
@@ -575,7 +578,7 @@ lemma hasDerivAt_ell {c t : ℝ} (hc : 0 < c) (ht : 0 < t) :
   have h2 : Real.exp (c * t) - 1 ≠ 0 := by linarith
   field_simp
 
-lemma hasDerivAt_phi {c t : ℝ} (hc : 0 < c) (ht : 0 < t) :
+theorem hasDerivAt_phi {c t : ℝ} (hc : 0 < c) (ht : 0 < t) :
     HasDerivAt (fun t => c / (Real.exp (c * t) - 1))
       (-(c ^ 2 * (Real.exp (c * t) / (Real.exp (c * t) - 1) ^ 2))) t := by
   have hE : 1 < Real.exp (c * t) := Real.one_lt_exp_iff.2 (by positivity)
@@ -587,7 +590,7 @@ lemma hasDerivAt_phi {c t : ℝ} (hc : 0 < c) (ht : 0 < t) :
   field_simp
   ring
 
-lemma strictConcaveOn_ell_sub {b a : ℝ} (hb : 0 < b) (hba : b < a) :
+theorem strictConcaveOn_ell_sub {b a : ℝ} (hb : 0 < b) (hba : b < a) :
     StrictConcaveOn ℝ (Ioi 0) (fun t => ell b t - ell a t) := by
   have ha : 0 < a := hb.trans hba
   have hd : ∀ t ∈ Ioi (0 : ℝ), HasDerivAt (fun t => ell b t - ell a t)
@@ -614,19 +617,19 @@ lemma strictConcaveOn_ell_sub {b a : ℝ} (hb : 0 < b) (hba : b < a) :
 
 variable {q p x : ℝ}
 
-lemma g_mono (hq0 : 0 < q) (hq1 : q < 1) {s t : ℝ} (hs : 0 < s) (hst : s ≤ t) :
+theorem g_mono (hq0 : 0 < q) (hq1 : q < 1) {s t : ℝ} (hs : 0 < s) (hst : s ≤ t) :
     g q s ≤ g q t := by
   unfold g
   refine Real.log_le_log (one_sub_rpow_pos hq0 hq1 hs) ?_
   linarith [Real.rpow_le_rpow_of_exponent_ge hq0 hq1.le hst]
 
-lemma g_one (q : ℝ) : g q 1 = Real.log (1 - q) := by
+theorem g_one (q : ℝ) : g q 1 = Real.log (1 - q) := by
   simp [g]
 
 /-- The difference of the logarithmic factors for the bases `p` and `q`. -/
 def G (q p t : ℝ) : ℝ := g p t - g q t
 
-lemma strictConcaveOn_G (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) :
+theorem strictConcaveOn_G (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) :
     StrictConcaveOn ℝ (Ioi 0) (G q p) := by
   have hp0 : 0 < p := hq0.trans hqp
   have hb : 0 < -Real.log p := neg_pos.2 (Real.log_neg hp0 hp1)
@@ -637,7 +640,7 @@ lemma strictConcaveOn_G (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) :
   rw [e]
   exact strictConcaveOn_ell_sub hb hba
 
-lemma G_step_left (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx0 : 0 < x) (hx1 : x < 1)
+theorem G_step_left (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx0 : 0 < x) (hx1 : x < 1)
     {s : ℝ} (hs : 0 ≤ s) :
     G q p (x + s) + (1 - x) * G q p (s + 2) < (2 - x) * G q p (s + 1) := by
   have h2x : 0 < 2 - x := by linarith
@@ -657,7 +660,7 @@ lemma G_step_left (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx0 : 0 < x) (hx1 :
     field_simp
   linarith
 
-lemma G_step_right (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx : 1 < x) (hx2 : x < 2)
+theorem G_step_right (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx : 1 < x) (hx2 : x < 2)
     {s : ℝ} (hs : 0 ≤ s) :
     (2 - x) * G q p (s + 1) + (x - 1) * G q p (s + 2) < G q p (x + s) := by
   have h := (strictConcaveOn_G hq0 hqp hp1).2 (mem_Ioi.2 (by linarith : (0 : ℝ) < s + 1))
@@ -671,17 +674,17 @@ lemma G_step_right (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx : 1 < x) (hx2 :
 def T (q p x : ℝ) (N : ℕ) : ℝ :=
   ∑ k ∈ range N, (G q p ((k : ℝ) + 1) - G q p (x + k)) + (1 - x) * G q p 1
 
-lemma T_succ (q p x : ℝ) (N : ℕ) :
+theorem T_succ (q p x : ℝ) (N : ℕ) :
     T q p x (N + 1) = T q p x N + G q p ((N : ℝ) + 1) - G q p (x + N) := by
   unfold T
   rw [sum_range_succ]
   ring
 
-lemma T_one (q p x : ℝ) : T q p x 1 = (2 - x) * G q p 1 - G q p x := by
+theorem T_one (q p x : ℝ) : T q p x 1 = (2 - x) * G q p 1 - G q p x := by
   simp [T]
   ring
 
-lemma r_eq (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx0 : 0 < x) (N : ℕ) :
+theorem r_eq (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx0 : 0 < x) (N : ℕ) :
     r p x N = r q x N * Real.exp (T q p x N) := by
   have hp0 : 0 < p := hq0.trans hqp
   have hq1 : q < 1 := hqp.trans hp1
@@ -693,7 +696,7 @@ lemma r_eq (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx0 : 0 < x) (N : ℕ) :
     Real.exp_log (r_pos hq0 hq1 hx0 N)]
   field_simp [(r_pos hq0 hq1 hx0 N).ne']
 
-lemma tendsto_G (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) :
+theorem tendsto_G (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) :
     Tendsto (fun N : ℕ => G q p ((N : ℝ) + 1)) atTop (𝓝 0) := by
   have hp0 : 0 < p := hq0.trans hqp
   have hq1 : q < 1 := hqp.trans hp1
@@ -703,12 +706,12 @@ lemma tendsto_G (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) :
   refine h.congr fun N => ?_
   simp [G]
 
-lemma tendsto_r_re (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) :
+theorem tendsto_r_re (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) :
     Tendsto (r q x) atTop (𝓝 (qGamma q x).re) :=
   ((Complex.continuous_re.tendsto _).comp (tendsto_r_complex hq0 hq1 hx0)).congr
     fun N => by simp
 
-lemma D_ge (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (hx2 : x ≤ 2) (N : ℕ) :
+theorem D_ge (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (hx2 : x ≤ 2) (N : ℕ) :
     g q 1 - g q ((N : ℝ) + 1) ≤ D q x N := by
   induction N with
   | zero => simp [D]
@@ -718,7 +721,7 @@ lemma D_ge (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (hx2 : x ≤ 2) (N : ℕ) :
     push_cast
     linarith
 
-lemma qGamma_re_pos (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (hx2 : x ≤ 2) :
+theorem qGamma_re_pos (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (hx2 : x ≤ 2) :
     0 < (qGamma q x).re := by
   have hlow : ∀ N, Real.exp (g q 1 + (1 - x) * Real.log (1 - q)) ≤ r q x N := by
     intro N
@@ -727,7 +730,7 @@ lemma qGamma_re_pos (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (hx2 : x ≤ 2) :
     linarith [D_ge hq0 hq1 hx0 hx2 N, g_nonpos hq0 hq1 (by positivity : (0 : ℝ) < N + 1)]
   exact (Real.exp_pos _).trans_le (ge_of_tendsto' (tendsto_r_re hq0 hq1 hx0) hlow)
 
-lemma T_lower (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx0 : 0 < x) (hx1 : x < 1) :
+theorem T_lower (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx0 : 0 < x) (hx1 : x < 1) :
     ∀ N, 1 ≤ N →
       T q p x 1 - (1 - x) * G q p 2 ≤ T q p x N - (1 - x) * G q p ((N : ℝ) + 1) := by
   intro N hN
@@ -740,7 +743,7 @@ lemma T_lower (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx0 : 0 < x) (hx1 : x <
     rw [show (N : ℝ) + 1 + 1 = N + 2 by ring]
     linarith
 
-lemma T_upper (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx : 1 < x) (hx2 : x < 2) :
+theorem T_upper (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx : 1 < x) (hx2 : x < 2) :
     ∀ N, 1 ≤ N →
       T q p x N + (x - 1) * G q p ((N : ℝ) + 1) ≤ T q p x 1 + (x - 1) * G q p 2 := by
   intro N hN

@@ -7,15 +7,9 @@ module
 
 public import Mathlib.Analysis.SpecialFunctions.Elliptic.Weierstrass
 public import Mathlib.Analysis.Meromorphic.NormalForm
-public import Mathlib.Analysis.Complex.Liouville
-public import Mathlib.Analysis.SpecialFunctions.Complex.LogBounds
-public import Mathlib.Analysis.Normed.Module.MultipliableUniformlyOn
 public import Mathlib.Analysis.Calculus.LogDerivUniformlyOn
-public import Mathlib.Analysis.SpecialFunctions.Exp
-public import Mathlib.Analysis.Complex.LocallyUniformLimit
 public import Mathlib.Analysis.Normed.Module.Connected
-public import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
-public import Mathlib.Tactic.CrossRefAttribute
+public import DLMFMathlib.NumberTheory.ModularForms.P3wJSurjective
 
 /-!
 # Weierstrass lattices, `℘`, `ζ` and `σ` (DLMF §§23.2–23.3(i))
@@ -175,14 +169,14 @@ theorem span_two_ω₂_two_ω₁ :
         (Submodule.subset_span (by simp))
 
 /-- Integer coordinates with respect to `2ω₁, 2ω₃` are unique. -/
-theorem p23R1_int_coord_eq_zero {m n : ℤ} (h : (m : ℂ) * (2 * H.ω₁) + n * (2 * H.ω₃) = 0) :
+lemma p23R1_int_coord_eq_zero {m n : ℤ} (h : (m : ℂ) * (2 * H.ω₁) + n * (2 * H.ω₃) = 0) :
     m = 0 ∧ n = 0 := by
   have := LinearIndependent.pair_iff.mp H.linearIndependent_two_mul (m : ℝ) (n : ℝ)
     (by simpa [Complex.real_smul] using h)
   exact_mod_cast this
 
 /-- `ℑ((cω₁ + dω₃)/(aω₁ + bω₃)) = (ad - bc) ℑτ / |a + bτ|²`. -/
-theorem p23R1_im_div (a b c d : ℤ) :
+lemma p23R1_im_div (a b c d : ℤ) :
     ((c * H.ω₁ + d * H.ω₃) / (a * H.ω₁ + b * H.ω₃)).im =
       ((a * d - b * c : ℤ) : ℝ) * H.tau.im / normSq (a + b * H.tau) := by
   have h1 := H.ω₁_ne_zero
@@ -290,7 +284,7 @@ theorem wp23_zeta_summand (z w : ℂ) (hw : w ≠ 0) (hz : z ≠ w) :
   ring
 
 /-- Locally uniform bound for the zeta summand: `‖z²/(w²(z-w))‖ ≤ 2r²‖w‖⁻³`. -/
-theorem wp23_zeta_bound (r : ℝ) (hr : 0 < r) (s : ℂ) (hs : ‖s‖ < r) (l : ℂ) (h : 2 * r ≤ ‖l‖) :
+lemma wp23_zeta_bound (r : ℝ) (hr : 0 < r) (s : ℂ) (hs : ‖s‖ < r) (l : ℂ) (h : 2 * r ≤ ‖l‖) :
     ‖1 / (s - l) + 1 / l + s / l ^ 2‖ ≤ 2 * r ^ 2 * ‖l‖ ^ (-3 : ℝ) := by
   have hl : 0 < ‖l‖ := by linarith
   have hl0 : l ≠ 0 := norm_pos_iff.mp hl
@@ -353,7 +347,7 @@ open Filter Topology
 
 /-- The Weierstrass elementary factor bound: `‖(1 - u)e^{u + u²/2} - 1‖ ≤ 2‖u‖³` for
 `‖u‖ ≤ 1/2`. -/
-theorem p23R1_norm_elementary_factor_sub_one_le {u : ℂ} (hu : ‖u‖ ≤ 1 / 2) :
+lemma p23R1_norm_elementary_factor_sub_one_le {u : ℂ} (hu : ‖u‖ ≤ 1 / 2) :
     ‖(1 - u) * cexp (u + u ^ 2 / 2) - 1‖ ≤ 2 * ‖u‖ ^ 3 := by
   have hu1 : ‖-u‖ < 1 := by rw [norm_neg]; linarith
   have h1u : (1 : ℂ) - u ≠ 0 := by
@@ -390,7 +384,7 @@ theorem p23R1_norm_elementary_factor_sub_one_le {u : ℂ} (hu : ‖u‖ ≤ 1 / 
 noncomputable def p23R1_sigmaFactor (l z : ℂ) : ℂ := (1 - z / l) * cexp (z / l + z ^ 2 / (2 * l ^ 2))
 
 /-- Bound for the Weierstrass factor of `σ` on `‖z‖ < r` when `‖l‖ ≥ 2r`. -/
-theorem p23R1_norm_sigmaFactor_sub_one_le {r : ℝ} {l z : ℂ} (hz : ‖z‖ < r) (hl : 2 * r ≤ ‖l‖) :
+lemma p23R1_norm_sigmaFactor_sub_one_le {r : ℝ} {l z : ℂ} (hz : ‖z‖ < r) (hl : 2 * r ≤ ‖l‖) :
     ‖p23R1_sigmaFactor l z - 1‖ ≤ 2 * r ^ 3 * ‖l‖ ^ (-3 : ℝ) := by
   have hr : 0 < r := lt_of_le_of_lt (norm_nonneg z) hz
   have hl0 : 0 < ‖l‖ := by linarith
@@ -406,7 +400,7 @@ theorem p23R1_norm_sigmaFactor_sub_one_le {r : ℝ} {l z : ℂ} (hz : ‖z‖ < 
   gcongr
 
 /-- All but finitely many lattice points have norm at least `R`. -/
-theorem p23R1_eventually_le_norm (L : PeriodPair) (R : ℝ) :
+lemma p23R1_eventually_le_norm (L : PeriodPair) (R : ℝ) :
     ∀ᶠ l : L.lattice in cofinite, R ≤ ‖(l : ℂ)‖ := by
   refine (isCompact_iff_finite.mp (isCompact_closedBall (0 : L.lattice) R)).subset ?_
   intro l hl
@@ -415,12 +409,12 @@ theorem p23R1_eventually_le_norm (L : PeriodPair) (R : ℝ) :
   exact (not_le.mp hl').le
 
 /-- The majorant `2r³‖l‖⁻³` is summable over the lattice. -/
-theorem p23R1_summable_bound (L : PeriodPair) (r : ℝ) :
+lemma p23R1_summable_bound (L : PeriodPair) (r : ℝ) :
     Summable fun l : L.lattice => 2 * r ^ 3 * ‖(l : ℂ)‖ ^ (-3 : ℝ) :=
   (ZLattice.summable_norm_rpow _ _ (by simp; norm_num)).mul_left _
 
 /-- The product for `σ` converges locally uniformly on every ball. -/
-theorem p23R1_hasProdLocallyUniformlyOn_sigma (L : PeriodPair) {r : ℝ} :
+lemma p23R1_hasProdLocallyUniformlyOn_sigma (L : PeriodPair) {r : ℝ} :
     HasProdLocallyUniformlyOn (fun (l : L.lattice) z => p23R1_sigmaFactor l z)
       (fun z => ∏' l : L.lattice, p23R1_sigmaFactor l z) (Metric.ball 0 r) := by
   have h := Summable.hasProdLocallyUniformlyOn_one_add (f := fun (l : L.lattice) z =>
@@ -434,7 +428,7 @@ theorem p23R1_hasProdLocallyUniformlyOn_sigma (L : PeriodPair) {r : ℝ} :
       p23R1_sigmaFactor l z - 1).continuousOn
 
 /-- `∑ ‖E_l(z) - 1‖` converges for the Weierstrass factors `E_l` of `σ`. -/
-theorem p23R1_summable_norm_sigmaFactor (L : PeriodPair) (z : ℂ) :
+lemma p23R1_summable_norm_sigmaFactor (L : PeriodPair) (z : ℂ) :
     Summable fun l : L.lattice => ‖p23R1_sigmaFactor l z - 1‖ := by
   refine Summable.of_norm_bounded_eventually (p23R1_summable_bound L (‖z‖ + 1)) ?_
   filter_upwards [p23R1_eventually_le_norm L (2 * (‖z‖ + 1))] with l hl
@@ -442,7 +436,7 @@ theorem p23R1_summable_norm_sigmaFactor (L : PeriodPair) (z : ℂ) :
   exact p23R1_norm_sigmaFactor_sub_one_le (by linarith) hl
 
 /-- The Weierstrass factors of `σ` do not vanish off the lattice. -/
-theorem p23R1_sigmaFactor_ne_zero (L : PeriodPair) {z : ℂ} (hz : z ∉ L.lattice)
+lemma p23R1_sigmaFactor_ne_zero (L : PeriodPair) {z : ℂ} (hz : z ∉ L.lattice)
     (l : L.lattice) : p23R1_sigmaFactor l z ≠ 0 := by
   unfold p23R1_sigmaFactor
   refine mul_ne_zero ?_ (Complex.exp_ne_zero _)
@@ -457,7 +451,7 @@ theorem p23R1_sigmaFactor_ne_zero (L : PeriodPair) {z : ℂ} (hz : z ∉ L.latti
 
 /-- The logarithmic derivative of a Weierstrass factor of `σ` is a summand of `ζ` (the `l = 0`
 summand `1/z` of `ζ` is accounted for separately). -/
-theorem p23R1_logDeriv_sigmaFactor (L : PeriodPair) {x : ℂ} (hx : x ∉ L.lattice)
+lemma p23R1_logDeriv_sigmaFactor (L : PeriodPair) {x : ℂ} (hx : x ∉ L.lattice)
     (l : L.lattice) :
     logDeriv (p23R1_sigmaFactor l) x =
       (1 / (x - l) + 1 / l + x / l ^ 2) - if (l : ℂ) = 0 then 1 / x else 0 := by
@@ -494,7 +488,7 @@ theorem multipliable_weierstrassSigma (L : PeriodPair) (z : ℂ) :
   ((p23R1_hasProdLocallyUniformlyOn_sigma L (r := ‖z‖ + 1)).hasProd
     (by simp)).multipliable
 
-theorem wp23_differentiableOn_zeta_summand (L : PeriodPair) (l : L.lattice) :
+lemma wp23_differentiableOn_zeta_summand (L : PeriodPair) (l : L.lattice) :
     DifferentiableOn ℂ (fun z : ℂ ↦ 1 / (z - l) + 1 / l + z / l ^ 2) L.latticeᶜ := by
   intro z hz
   have : z - l ≠ 0 := sub_ne_zero.mpr fun h => hz (h ▸ l.2)
@@ -695,7 +689,7 @@ theorem wp23_isPreconnected_compl_lattice (L : PeriodPair) :
     hc).isPreconnected
 
 /-- `ζ(z + w) - ζ(z)` is independent of `z ∉ 𝕃` for `w ∈ 𝕃`. -/
-theorem wp23_zeta_add_sub_const (L : PeriodPair) {w : ℂ} (hw : w ∈ L.lattice) {z₁ z₂ : ℂ}
+lemma wp23_zeta_add_sub_const (L : PeriodPair) {w : ℂ} (hw : w ∈ L.lattice) {z₁ z₂ : ℂ}
     (h₁ : z₁ ∉ L.lattice) (h₂ : z₂ ∉ L.lattice) :
     weierstrassZeta L (z₁ + w) - weierstrassZeta L z₁ =
       weierstrassZeta L (z₂ + w) - weierstrassZeta L z₂ := by
@@ -732,7 +726,7 @@ theorem p23R1_hasDerivAt_weierstrassSigma_zero (L : PeriodPair) :
   simp [hP0]
 
 /-- `σ'(z) = ζ(z)σ(z)` off the lattice. -/
-theorem p23R1_deriv_weierstrassSigma_eq (L : PeriodPair) {z : ℂ} (hz : z ∉ L.lattice) :
+lemma p23R1_deriv_weierstrassSigma_eq (L : PeriodPair) {z : ℂ} (hz : z ∉ L.lattice) :
     deriv (weierstrassSigma L) z = weierstrassZeta L z * weierstrassSigma L z := by
   have h := (weierstrassSigma_eq_zero_iff L).not.mpr hz
   rw [weierstrassZeta_eq_deriv_div L hz, div_mul_cancel₀ _ h]
@@ -839,7 +833,7 @@ theorem p23R1_two_le_order {g : ℂ → ℂ} {x : ℂ} (hg : AnalyticAt ℂ g x)
     exact e
 
 /-- `-2 + o ≥ 0` for an order `o ≥ 2`. -/
-theorem p23R1_nonneg_add {o : WithTop ℤ} (h : 2 ≤ o) : 0 ≤ (-2 : WithTop ℤ) + o := by
+lemma p23R1_nonneg_add {o : WithTop ℤ} (h : 2 ≤ o) : 0 ≤ (-2 : WithTop ℤ) + o := by
   cases o with
   | top => simp
   | coe n =>
@@ -949,7 +943,7 @@ theorem p23R1_halfPeriod_product (L : PeriodPair) {a : ℂ} (ha : a ∉ L.lattic
   exact ⟨c, fun z hz hza => hc z ((hA1 z hza).mul (hA2 z hz))⟩
 
 /-- `℘` is not locally constant at any point off the lattice. -/
-theorem p23R1_weierstrassP_not_eventually_const (L : PeriodPair) {z₀ : ℂ}
+lemma p23R1_weierstrassP_not_eventually_const (L : PeriodPair) {z₀ : ℂ}
     (hz₀ : z₀ ∉ L.lattice) (c : ℂ) : ¬ ∀ᶠ z in 𝓝 z₀, ℘[L] z = c := by
   intro h
   have hA : AnalyticOnNhd ℂ (fun z => ℘[L] z - c) L.latticeᶜ :=
@@ -1195,7 +1189,7 @@ theorem e_isRoot (j : ℕ) (hj : j ∈ ({1, 2, 3} : Finset ℕ)) :
   H.e_root_cubic hj
 
 /-- `e_k ≠ e_j` whenever `ω_k + ω_j ∉ 𝕃`. -/
-theorem p23R1_e_ne {j k : ℕ} (hj : j ∈ ({1, 2, 3} : Finset ℕ)) (hk : k ∈ ({1, 2, 3} : Finset ℕ))
+lemma p23R1_e_ne {j k : ℕ} (hj : j ∈ ({1, 2, 3} : Finset ℕ)) (hk : k ∈ ({1, 2, 3} : Finset ℕ))
     (hjk : H.halfPeriod k + H.halfPeriod j ∉ H.lattice) : H.e k ≠ H.e j :=
   p23R1_weierstrassP_ne_of_halfLattice H.periodPair (H.halfPeriod_notMem hj)
     (H.two_mul_halfPeriod_mem hj) (H.halfPeriod_notMem hk) hjk
@@ -1242,7 +1236,7 @@ theorem e_sum : H.e 1 + H.e 2 + H.e 3 = 0 := by
   · linear_combination h / 4
 
 /-- `4(e₁² + e₁e₂ + e₂²) = g₂`. -/
-theorem wp23_g₂_eq : 4 * (H.e 1 ^ 2 + H.e 1 * H.e 2 + H.e 2 ^ 2) = H.g₂ := by
+lemma wp23_g₂_eq : 4 * (H.e 1 ^ 2 + H.e 1 * H.e 2 + H.e 2 ^ 2) = H.g₂ := by
   obtain ⟨h12, -, -⟩ := H.e_distinct
   have r1 := H.e_root_cubic (j := 1) (by simp)
   have r2 := H.e_root_cubic (j := 2) (by simp)
@@ -1353,10 +1347,10 @@ theorem wp23_G_eq_of_lattice_eq (L L' : PeriodPair) (h : L.lattice = L'.lattice)
   rw [← (Equiv.subtypeEquivRight (fun x => by rw [h]) : L.lattice ≃ L'.lattice).tsum_eq]
   rfl
 
-theorem wp23_ω₁_ne_zero (L : PeriodPair) : L.ω₁ ≠ 0 := by
+lemma wp23_ω₁_ne_zero (L : PeriodPair) : L.ω₁ ≠ 0 := by
   simpa using L.indep.ne_zero 0
 
-theorem wp23_im_div_ne_zero (L : PeriodPair) : (L.ω₂ / L.ω₁).im ≠ 0 := by
+lemma wp23_im_div_ne_zero (L : PeriodPair) : (L.ω₂ / L.ω₁).im ≠ 0 := by
   intro him
   have h1 := wp23_ω₁_ne_zero L
   have hq : L.ω₂ / L.ω₁ = ((L.ω₂ / L.ω₁).re : ℂ) := Complex.ext (by simp) (by simp [him])
@@ -1402,11 +1396,149 @@ theorem latticeDiscriminant_ne_zero' (L : PeriodPair) : latticeDiscriminant L �
   simpa [latticeDiscriminant, PeriodPair.g₂, PeriodPair.g₃,
     wp23_G_eq_of_lattice_eq _ _ hl] using h
 
-/-- DLMF §23.3(i): if `g₂³ ≠ 27g₃²` there is a lattice with invariants `g₂, g₃`. -/
+/-! ### Homogeneity of the invariants (§23.10(iv)) -/
+
+/-- The period pair `c𝕃` with periods `cω₁, cω₂` (`c ≠ 0`). -/
+def scalePeriodPair (c : ℂ) (hc : c ≠ 0) (L : PeriodPair) : PeriodPair :=
+  ⟨c * L.ω₁, c * L.ω₂, by
+    refine LinearIndependent.pair_iff.mpr fun s t h => ?_
+    refine LinearIndependent.pair_iff.mp L.indep s t ?_
+    have : c * (s • L.ω₁ + t • L.ω₂) = 0 := by
+      rw [← h]; simp only [Complex.real_smul]; ring
+    simpa [hc] using this⟩
+
+theorem wp23_mem_scale_iff (c : ℂ) (hc : c ≠ 0) (L : PeriodPair) {z : ℂ} :
+    z ∈ (scalePeriodPair c hc L).lattice ↔ z / c ∈ L.lattice := by
+  simp only [PeriodPair.mem_lattice, scalePeriodPair]
+  constructor
+  · rintro ⟨m, n, rfl⟩; exact ⟨m, n, by field_simp⟩
+  · rintro ⟨m, n, h⟩; exact ⟨m, n, by rw [← mul_div_cancel₀ z hc, ← h]; ring⟩
+
+/-- Multiplication by `c` as a bijection `𝕃 ≃ c𝕃`. -/
+def wp23_scaleEquiv (c : ℂ) (hc : c ≠ 0) (L : PeriodPair) :
+    L.lattice ≃ (scalePeriodPair c hc L).lattice where
+  toFun l := ⟨c * l, (wp23_mem_scale_iff c hc L).mpr (by simp [hc])⟩
+  invFun l := ⟨l / c, (wp23_mem_scale_iff c hc L).mp l.2⟩
+  left_inv l := by ext; simp [hc]
+  right_inv l := by ext; simp [mul_div_cancel₀ _ hc]
+
+/-- `G_k(c𝕃) = c^{-k}G_k(𝕃)`. -/
+lemma wp23_G_scale (c : ℂ) (hc : c ≠ 0) (L : PeriodPair) (k : ℕ) :
+    (scalePeriodPair c hc L).G k = c⁻¹ ^ k * L.G k := by
+  simp only [PeriodPair.G]
+  rw [← (wp23_scaleEquiv c hc L).tsum_eq, ← tsum_mul_left]
+  refine tsum_congr fun l => ?_
+  simp only [wp23_scaleEquiv, Equiv.coe_fn_mk]
+  rw [mul_pow, mul_inv, inv_pow]
+
+/-- DLMF §23.10(iv): replacing `𝕃` by `c𝕃` divides `g₂` by `c⁴` and `g₃` by `c⁶`. -/
+@[dlmf 23.10.iv]
+theorem invariants_scale (c : ℂ) (hc : c ≠ 0) (L : PeriodPair) :
+    (scalePeriodPair c hc L).g₂ = L.g₂ / c ^ 4 ∧ (scalePeriodPair c hc L).g₃ = L.g₃ / c ^ 6 := by
+  simp only [PeriodPair.g₂, PeriodPair.g₃, wp23_G_scale]
+  constructor <;> field_simp
+
+section p23R1Disc
+
+open PeriodPair ModularForm EisensteinSeries UpperHalfPlane
+
+/-- The lattice sums of the lattice `ℤ + ℤτ` are the full Eisenstein sums. -/
+theorem p23R1_G_ofTau (τ : ℍ) (k : ℕ) :
+    (HalfPeriods.ofTau (1 / 2) (by norm_num) τ).periodPair.G k =
+      ∑' v : Fin 2 → ℤ, eisSummand k v τ := by
+  set L := (HalfPeriods.ofTau (1 / 2) (by norm_num) τ).periodPair
+  simp only [PeriodPair.G]
+  rw [← ((finTwoArrowEquiv ℤ).trans
+    ((Equiv.prodComm ℤ ℤ).trans L.latticeEquivProd.toEquiv.symm)).tsum_eq]
+  refine tsum_congr fun v => ?_
+  simp only [Equiv.trans_apply, eisSummand]
+  rw [show ((L.latticeEquivProd.toEquiv.symm ((Equiv.prodComm ℤ ℤ) (finTwoArrowEquiv ℤ v)) :
+    L.lattice) : ℂ) = _ from L.latticeEquiv_symm_apply _]
+  simp [L, HalfPeriods.periodPair, _root_.zpow_neg, zpow_natCast]
+  ring_nf
+
+/-- `B₆ = 1/42`. -/
+lemma p23R1_bernoulli_six : bernoulli 6 = 1 / 42 := by decide +kernel
+
+/-- `ζ(6) = π⁶/945`. -/
+theorem p23R1_riemannZeta_six : riemannZeta 6 = π ^ 6 / 945 := by
+  have := riemannZeta_two_mul_nat (k := 3) (by norm_num)
+  norm_num [p23R1_bernoulli_six, Nat.factorial] at this
+  rw [this]; ring
+
+/-- `G_k(ℤ + ℤτ) = 2ζ(k)E_k(τ)` with Mathlib's normalised Eisenstein series. -/
+theorem p23R1_G_eq_E (τ : ℍ) {k : ℕ} (hk : 3 ≤ k) :
+    (HalfPeriods.ofTau (1 / 2) (by norm_num) τ).periodPair.G k =
+      2 * riemannZeta k * E hk τ := by
+  rw [p23R1_G_ofTau, tsum_eisSummand_eq_riemannZeta_mul_eisensteinSeries hk]
+  have : (E hk : ℍ → ℂ) τ = (1 / 2 : ℂ) * eisensteinSeries 0 k τ := rfl
+  rw [this]
+  ring
+
+end p23R1Disc
+
+open ModularForm EisensteinSeries UpperHalfPlane in
+/-- DLMF §23.3(i): if `g₂³ ≠ 27g₃²` there is a lattice with invariants `g₂, g₃`.  Proved from the
+surjectivity of the modular invariant `E₄³/(E₄³ - E₆²)` and the homogeneity of the invariants. -/
 @[dlmf 23.3.i]
 theorem exists_periodPair_invariants (g₂ g₃ : ℂ) (h : g₂ ^ 3 - 27 * g₃ ^ 2 ≠ 0) :
     ∃ L : PeriodPair, L.g₂ = g₂ ∧ L.g₃ = g₃ := by
-  sorry
+  obtain ⟨τ, hτ⟩ := p3w_exists_E₄_cube_div_eq (g₂ ^ 3 / (g₂ ^ 3 - 27 * g₃ ^ 2))
+  set L0 := (HalfPeriods.ofTau (1 / 2) (by norm_num) τ).periodPair with hL0
+  have z4 : riemannZeta ((4 : ℕ) : ℂ) = π ^ 4 / 90 := by exact_mod_cast riemannZeta_four
+  have z6 : riemannZeta ((6 : ℕ) : ℂ) = π ^ 6 / 945 := by exact_mod_cast p23R1_riemannZeta_six
+  have ha : L0.g₂ = 4 * π ^ 4 / 3 * E₄ τ := by
+    rw [PeriodPair.g₂, p23R1_G_eq_E τ (k := 4) (by norm_num), z4]; ring
+  have hb : L0.g₃ = 8 * π ^ 6 / 27 * E₆ τ := by
+    rw [PeriodPair.g₃, p23R1_G_eq_E τ (k := 6) (by norm_num), z6]; ring
+  have hD := p3w_E₄_cube_sub_E₆_sq_ne_zero τ
+  have hΔ0 : L0.g₂ ^ 3 - 27 * L0.g₃ ^ 2 ≠ 0 := latticeDiscriminant_ne_zero' L0
+  have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
+  have key : L0.g₂ ^ 3 * g₃ ^ 2 = g₂ ^ 3 * L0.g₃ ^ 2 := by
+    simp only [p3wJ] at hτ
+    rw [div_eq_div_iff hD h] at hτ
+    rw [ha, hb]
+    linear_combination (-(64 : ℂ) * π ^ 12 / 729) * hτ
+  -- a scaling factor `u = c⁻²`
+  obtain ⟨u, hu0, hu2, hu3⟩ : ∃ u : ℂ, u ≠ 0 ∧ u ^ 2 * L0.g₂ = g₂ ∧ u ^ 3 * L0.g₃ = g₃ := by
+    by_cases h2 : g₂ = 0
+    · have h3 : g₃ ≠ 0 := by rintro rfl; simp [h2] at h
+      have ha0 : L0.g₂ = 0 := by
+        rw [h2] at key; simpa [h3] using key
+      have hb0 : L0.g₃ ≠ 0 := by rintro hb0; simp [ha0, hb0] at hΔ0
+      obtain ⟨u, hu⟩ := IsAlgClosed.exists_pow_nat_eq (g₃ / L0.g₃) (by norm_num : 0 < 3)
+      refine ⟨u, ?_, by simp [ha0, h2], by rw [hu]; field_simp⟩
+      rintro rfl; exact div_ne_zero h3 hb0 (by simpa using hu.symm)
+    by_cases h3 : g₃ = 0
+    · have hb0 : L0.g₃ = 0 := by
+        rw [h3] at key; simpa [h2] using key.symm
+      have ha0 : L0.g₂ ≠ 0 := by rintro ha0; simp [ha0, hb0] at hΔ0
+      obtain ⟨u, hu⟩ := IsAlgClosed.exists_pow_nat_eq (g₂ / L0.g₂) (by norm_num : 0 < 2)
+      refine ⟨u, ?_, by rw [hu]; field_simp, by simp [hb0, h3]⟩
+      rintro rfl; exact div_ne_zero h2 ha0 (by simpa using hu.symm)
+    have ha0 : L0.g₂ ≠ 0 := by
+      rintro ha0
+      have : L0.g₃ = 0 := by simpa [ha0, h2] using key
+      simp [ha0, this] at hΔ0
+    have hb0 : L0.g₃ ≠ 0 := by
+      rintro hb0
+      have : L0.g₂ = 0 := by simpa [hb0, h3] using key
+      simp [hb0, this] at hΔ0
+    refine ⟨g₃ * L0.g₂ / (g₂ * L0.g₃), by simp [h2, h3, ha0, hb0], ?_, ?_⟩
+    · rw [show (g₃ * L0.g₂ / (g₂ * L0.g₃)) ^ 2 * L0.g₂ =
+          g₃ ^ 2 * L0.g₂ ^ 3 / (g₂ ^ 2 * L0.g₃ ^ 2) by ring,
+        div_eq_iff (by simp [h2, hb0])]
+      linear_combination key
+    · rw [show (g₃ * L0.g₂ / (g₂ * L0.g₃)) ^ 3 * L0.g₃ =
+          g₃ ^ 3 * L0.g₂ ^ 3 * L0.g₃ / (g₂ ^ 3 * L0.g₃ ^ 3) by ring,
+        div_eq_iff (by simp [h2, hb0])]
+      linear_combination (g₃ * L0.g₃) * key
+  obtain ⟨c, hc⟩ := IsAlgClosed.exists_pow_nat_eq u⁻¹ (by norm_num : 0 < 2)
+  have hc0 : c ≠ 0 := by rintro rfl; exact hu0 (by simpa using hc.symm)
+  obtain ⟨s2, s3⟩ := invariants_scale c hc0 L0
+  refine ⟨scalePeriodPair c hc0 L0, ?_, ?_⟩
+  · rw [s2, show c ^ 4 = (c ^ 2) ^ 2 by ring, hc, ← hu2]; field_simp
+  · rw [s3, show c ^ 6 = (c ^ 2) ^ 3 by ring, hc, ← hu3]; field_simp
 
 section p23R1Uniq
 
@@ -1414,7 +1546,7 @@ open Filter Topology
 
 /-- The differential equation of `℘` in terms of the regular part `p = ℘ - 1/z²` near `0`:
 `(z³p' - 2)² = 4(1 + z²p)³ - g₂z⁴(1 + z²p) - g₃z⁶`. -/
-theorem p23R1_ode_regularPart (L : PeriodPair) :
+lemma p23R1_ode_regularPart (L : PeriodPair) :
     ∀ᶠ z in 𝓝[≠] (0 : ℂ), (z ^ 3 * deriv (fun w => ℘[L] w - 1 / w ^ 2) z - 2) ^ 2 =
       4 * (1 + z ^ 2 * (℘[L] z - 1 / z ^ 2)) ^ 3 -
         L.g₂ * z ^ 4 * (1 + z ^ 2 * (℘[L] z - 1 / z ^ 2)) - L.g₃ * z ^ 6 := by
@@ -1443,7 +1575,7 @@ theorem p23R1_ode_regularPart (L : PeriodPair) :
   linear_combination z ^ 6 * ode
 
 /-- Two lattices with the same invariants have the same `℘` near `0`. -/
-theorem p23R1_weierstrassP_eventuallyEq_of_invariants (L L' : PeriodPair) (h₂ : L.g₂ = L'.g₂)
+lemma p23R1_weierstrassP_eventuallyEq_of_invariants (L L' : PeriodPair) (h₂ : L.g₂ = L'.g₂)
     (h₃ : L.g₃ = L'.g₃) :
     ∀ᶠ z in 𝓝 (0 : ℂ), ℘[L] z - 1 / z ^ 2 - (℘[L'] z - 1 / z ^ 2) = 0 := by
   set p : ℂ → ℂ := fun w => ℘[L] w - 1 / w ^ 2 with hp
@@ -1522,12 +1654,9 @@ theorem p23R1_weierstrassP_eventuallyEq_of_invariants (L L' : PeriodPair) (h₂ 
     linarith
   · exact hg0 h
 
-/-- A lattice with the same `℘` near `0` as another is contained in it. -/
-theorem p23R1_lattice_le_of_invariants (L L' : PeriodPair) (h₂ : L.g₂ = L'.g₂)
-    (h₃ : L.g₃ = L'.g₃) : L.lattice ≤ L'.lattice := by
-  have hev := p23R1_weierstrassP_eventuallyEq_of_invariants L L' h₂ h₃
-  have hev' : ∀ᶠ z in 𝓝 (0 : ℂ), ℘[L] z = ℘[L'] z := hev.mono fun z hz => by
-    linear_combination hz
+/-- If two lattices have the same `℘` near `0`, the first is contained in the second. -/
+theorem p3w_lattice_le_of_eventuallyEq (L L' : PeriodPair)
+    (hev' : ∀ᶠ z in 𝓝 (0 : ℂ), ℘[L] z = ℘[L'] z) : L.lattice ≤ L'.lattice := by
   set U : Set ℂ := ((L.lattice : Set ℂ) ∪ L'.lattice)ᶜ with hUdef
   have hcount : ∀ M : PeriodPair, (M.lattice : Set ℂ).Countable := fun M => by
     have : Countable M.lattice := M.latticeEquivProd.toEquiv.injective.countable
@@ -1567,6 +1696,12 @@ theorem p23R1_lattice_le_of_invariants (L L' : PeriodPair) (h₂ : L.g₂ = L'.g
   have := (L'.analyticOnNhd_weierstrassP l hl').meromorphicOrderAt_nonneg
   rw [hord] at this
   exact absurd this (by decide)
+
+/-- A lattice with the same `℘` near `0` as another is contained in it. -/
+lemma p23R1_lattice_le_of_invariants (L L' : PeriodPair) (h₂ : L.g₂ = L'.g₂)
+    (h₃ : L.g₃ = L'.g₃) : L.lattice ≤ L'.lattice := by
+  have hev := p23R1_weierstrassP_eventuallyEq_of_invariants L L' h₂ h₃
+  exact p3w_lattice_le_of_eventuallyEq L L' (hev.mono fun z hz => by linear_combination hz)
 
 end p23R1Uniq
 
@@ -1618,7 +1753,7 @@ theorem wp23_weierstrassZeta_eq_of_lattice_eq (L L' : PeriodPair) (h : L.lattice
   rw [← (Equiv.subtypeEquivRight (fun x => by rw [h]) : L.lattice ≃ L'.lattice).tsum_eq]
   rfl
 
-theorem wp23_weierstrassSigma_eq_of_lattice_eq (L L' : PeriodPair) (h : L.lattice = L'.lattice)
+lemma wp23_weierstrassSigma_eq_of_lattice_eq (L L' : PeriodPair) (h : L.lattice = L'.lattice)
     (z : ℂ) : weierstrassSigma L z = weierstrassSigma L' z := by
   simp only [weierstrassSigma]
   rw [← (Equiv.subtypeEquivRight (fun x => by rw [h]) : L.lattice ≃ L'.lattice).tprod_eq]

@@ -5,8 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Gamma.Basic
 public import Mathlib.Algebra.ContinuedFractions.Basic
+public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+public import Mathlib.Data.Nat.Factorial.DoubleFactorial
 
 /-!
 # Continued fractions (DLMF §5.10)

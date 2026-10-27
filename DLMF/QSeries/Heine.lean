@@ -32,18 +32,18 @@ noncomputable section
 namespace DLMF.QSeries
 
 /-- Swapping the numerator parameters of `₂φ₁`. -/
-lemma basicHG_swap (a b c q z : ℂ) : basicHG [a, b] [c] q z = basicHG [b, a] [c] q z := by
+theorem basicHG_swap (a b c q z : ℂ) : basicHG [a, b] [c] q z = basicHG [b, a] [c] q z := by
   simp only [basicHG, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one]
   congr 1; funext n; ring
 
 /-- `₂φ₁(d, w; d; q, z)` collapses to `₁φ₀(w; q, z)`. -/
-lemma basicHG_cancel {d w q z : ℂ} (hd : ∀ n : ℕ, qPochhammer d q n ≠ 0) :
+theorem basicHG_cancel {d w q z : ℂ} (hd : ∀ n : ℕ, qPochhammer d q n ≠ 0) :
     basicHG [d, w] [d] q z = ∑' n : ℕ, qPochhammer w q n / qPochhammer q q n * z ^ n := by
   simp only [basicHG, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one]
   congr 1; funext n; field [hd n]
 
 /-- `(0;q)_∞ = 1`. -/
-@[simp] lemma qPochhammerInf_zero (q : ℂ) : qPochhammerInf 0 q = 1 := by
+@[simp] theorem qPochhammerInf_zero (q : ℂ) : qPochhammerInf 0 q = 1 := by
   simp [qPochhammerInf]
 
 /-- **Euler's identity** `e_q(x) = ∑ xⁿ/(q;q)_n = 1/(x;q)_∞` for `|x| < 1` (Duverney (10.28)). -/
@@ -122,7 +122,7 @@ theorem heine_transformation_three {a b c q z : ℂ} (hq : ‖q‖ < 1) (hz : �
   field
 
 /-- `(q^{-n};q)_k = 0` for `k > n`. -/
-lemma qPochhammer_recip_pow_eq_zero {q : ℂ} (hq0 : q ≠ 0) {n k : ℕ} (hk : n < k) :
+theorem qPochhammer_recip_pow_eq_zero {q : ℂ} (hq0 : q ≠ 0) {n k : ℕ} (hk : n < k) :
     qPochhammer (q ^ n)⁻¹ q k = 0 := by
   rw [qPochhammer_eq_prod]
   exact prod_eq_zero (mem_range.mpr hk) (by field)

@@ -5,7 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.Complex.Basic
+public import Mathlib.Algebra.Order.BigOperators.Expect
+public import Mathlib.Analysis.Complex.Order
+public import Mathlib.Tactic.ContinuousFunctionalCalculus
 
 /-!
 # Truncated continued fractions for the Mathieu eigenvalues (DLMF 28.6.16–28.6.19)

@@ -18,9 +18,9 @@
   leftmargin=1.5em, labelindent=0pt, itemsep=0.3ex, topsep=0.3ex, parsep=0.3ex]\setlength{\parindent}{0pt}\RaggedRight}{\end{description}}
 
 % entry counts
-\newcommand{\NumA}{104}
-\newcommand{\NumB}{26}
-\newcommand{\NumC}{49}
+\newcommand{\NumA}{135}
+\newcommand{\NumB}{27}
+\newcommand{\NumC}{58}
 \newcommand{\NumOut}{3}
 
 \begin{document}
@@ -29,7 +29,7 @@
   NIST Digital Library of Mathematical Functions\\[0.4ex]
   \large found in the Lean~4 formalization \texttt{lean-DLMF}}
 \author{Bastiaan J. Braams}
-\date{2026-10-26}
+\date{2026-10-27}
 \maketitle
 
 \begin{abstract}
@@ -39,7 +39,7 @@
   fixed. It is meant for readers who compare a Lean statement with the printed DLMF formula and
   find that the two differ, and as a list of candidate errata reports for the DLMF editors. The
   entries refer to DLMF Release~1.2.8 of 2026-09-15 and describe the state of the
-  \texttt{lean-DLMF} project on 2026-10-26. The report has \NumA{} entries of genuine DLMF
+  \texttt{lean-DLMF} project on 2026-10-27. The report has \NumA{} entries of genuine DLMF
   errata, \NumB{} project transcription defects that were fixed, and \NumC{} formalization
   notes.
 \end{abstract}
@@ -101,7 +101,10 @@ under (c) or dropped. The Chapter~28--31 entries were found by the acquisition a
 2026-10-26 and re-derived by an independent verifier from the DLMF~1.2.8 page text with its own
 numerics. The Chapter~32 entries were found by the acquisition agents on 2026-10-26 and
 confirmed by an independent exact symbolic check against DLMF's own definitions (\file{REVIEW.md},
-section ``Chapter 32 acquisition (2026-10-26)''; ledger \file{DLMF32Acquisition.md}).
+section ``Chapter 32 acquisition (2026-10-26)''; ledger \file{DLMF32Acquisition.md}). The
+Chapter~1--2 entries were found by the acquisition agents on 2026-10-27 and confirmed by the
+coordinator from the DLMF~1.2.8 page text, analytically or with fresh mpmath scripts (ledgers
+\file{DLMF1Acquisition.md} and \file{DLMF2Acquisition.md}).
 
 \subsection{Counts}
 
@@ -111,6 +114,183 @@ are numbered a.1, a.2, \dots, b.1, \dots, c.1, \dots\ within each category.
 
 \section{(a) Genuine DLMF errata}\label{sec:a}
 \category{a}
+
+\subsection{Chapter 1 (algebraic and analytic methods)}
+
+Found by the acquisition agents on 2026-10-27 and confirmed by the coordinator from the DLMF
+1.2.8 page text, analytically or with fresh mpmath scripts.
+
+\entry{\deq{1.2.51}}
+\begin{fields}
+\item[Printed] equality in the Cauchy--Schwarz inequality holds iff $\mathbf v$ is a scalar
+  multiple of $\mathbf u$.
+\item[Correct] iff $\mathbf u=\mathbf 0$ or $\mathbf v$ is a scalar multiple of $\mathbf u$
+  ($\mathbf u=\mathbf 0\ne\mathbf v$ gives equality $0=0$).
+\item[Lean] \lean{norm_inner_eq_norm_mul_iff} (\file{DLMF/AlgebraicAnalytic/Algebra/Matrices.lean}),
+  proved.
+\end{fields}
+
+\entry{\deq{1.7.1}--\deq{1.7.3} (equality cases)}
+\begin{fields}
+\item[Printed] equality iff $a_j=cb_j$ (respectively $a_j^p=cb_j^q$).
+\item[Correct] iff $Aa_j=Bb_j$ (respectively $Aa_j^p=Bb_j^q$) with $A,B$ not both zero, as DLMF
+  itself states the integral versions \deq{1.7.4}--\deq{1.7.6}; the printed form misses
+  $\mathbf b=\mathbf 0\ne\mathbf a$.
+\item[Lean] \lean{sq_sum_mul_eq_iff}, \lean{inner_eq_Lp_mul_Lq_iff}, \lean{Lp_add_eq_iff}
+  (\file{DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean}), admitted.
+\end{fields}
+
+\entry{\deq{1.7.11}}
+\begin{fields}
+\item[Printed] $\exp\bigl(\int_0^1\ln f\bigr)<\int_0^1 f$.
+\item[Correct] $\le$; the inequality is strict unless $f$ is almost everywhere constant (for
+  constant $f$ both sides are equal).
+\item[Lean] \lean{exp_integral_log_le_integral}, proved; \lean{exp_integral_log_lt_integral}
+  (strict, $f$ not a.e.\ constant), admitted
+  (\file{DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean}).
+\end{fields}
+
+\entry{\deq{1.9.51}}
+\begin{fields}
+\item[Printed] the Cauchy product formula ``when $\sum a_nz^n$ and $\sum b_nz^n$ both converge''.
+\item[Correct] inside the common disc of convergence; at a point of the boundary circle the
+  product series must also converge (Abel's theorem then gives equality).
+\item[Evidence] $a_n=b_n=(-1)^n/\sqrt{n+1}$ at $z=1$: both series converge, while
+  $|c_n|\ge\sum_{k=0}^n((k+1)(n-k+1))^{-1/2}\ge 2(n+1)/(n+2)$, so the product series diverges.
+\item[Lean] \lean{tendsto_cauchyProduct} (\file{DLMF/AlgebraicAnalytic/Complex/Calculus.lean}),
+  admitted.
+\end{fields}
+
+\entry{\deq{1.10.25}}
+\begin{fields}
+\item[Printed] Mittag-Leffler's expansion for distinct $z_n$ with $\sum|a_nz_n^{-2}|<\infty$.
+\item[Correct] also $z_n\ne0$ (the terms contain $1/z_n$) and $|z_n|\to\infty$; otherwise the
+  poles may accumulate and $f$ is not meromorphic in $\CC$.
+\item[Evidence] $z_n=1+1/n$, $a_n=2^{-n}$: the series converges off $\{z_n\}\cup\{1\}$, and $1$ is
+  a non-isolated singularity.
+\item[Lean] \lean{mittagLeffler} (\file{DLMF/AlgebraicAnalytic/Complex/Functions.lean}), admitted.
+\end{fields}
+
+\entry{\dlink{1.13.viii}{\S1.13(viii)} (Liouville normal form, periodic case)}
+\begin{fields}
+\item[Printed] the Liouville transformation carries periodic boundary conditions to periodic
+  ones.
+\item[Correct] only if $(p\rho)^{1/4}$, its derivative and $\rho/p$ take equal values at $a$ and
+  $b$: $w(0)=m(a)u(a)$ while $w(c)=m(b)u(b)$.
+\item[Lean] \lean{liouville_eigenvalues_periodic}
+  (\file{DLMF/AlgebraicAnalytic/ODE/SturmLiouville.lean}), with these hypotheses, admitted.
+\end{fields}
+
+\entry{\deq{1.14.45}}
+\begin{fields}
+\item[Printed] $\int|\mathcal Hf|^p\le A_p\int|f|^p$, with Pichorides' constants
+  $A_p=\tan(\tfrac12\pi/p)$ ($1<p\le2$), $\cot(\tfrac12\pi/p)$ ($p\ge2$), ``sharp''.
+\item[Correct] $\|\mathcal Hf\|_p\le A_p\|f\|_p$, that is, constant $A_p^p$ for the $p$-th powers.
+\item[Evidence] $p=4/3$: the boundary values of $G(z)=(-\iu z)^{-0.745}(1-\iu z)^{-1/2}$ give the
+  ratio $\int|\mathcal Hf|^p/\int|f|^p\approx3.19>A_p=2.414$ (and $<A_p^p=3.2387$).
+\item[Lean] \lean{hilbertTransform_lp_bound}
+  (\file{DLMF/AlgebraicAnalytic/Transforms/MellinHilbertStieltjes.lean}), admitted.
+\end{fields}
+
+\entry{\dlink{1.14.T2}{Table~1.14.2}, row 11}
+\begin{fields}
+\item[Printed] $\ln\bigl((a^2+t^2)/(b^2+t^2)\bigr)\mapsto\sqrt{2\pi}\,(\eu^{-bx}-\eu^{-ax})/x$,
+  $\Re a,\Re b>0$, with the principal logarithm.
+\item[Correct] $\ln(a^2+t^2)-\ln(b^2+t^2)$; the principal logarithm of the quotient jumps by
+  $2\pi\iu$ for complex $a,b$.
+\item[Evidence] $a=1+10\iu$, $b=1-10\iu$, $x=0.7$: the cosine transform of the quotient form is
+  $-2.1815\iu$, of the difference form $2.336535\iu$, the table $2.336535\iu$.
+\item[Lean] \lean{fourierCosTransform_log_sub_log}
+  (\file{DLMF/AlgebraicAnalytic/Transforms/Tables.lean}), admitted.
+\end{fields}
+
+\entry{\dlink{1.14.T4}{Table~1.14.4}, rows 15--17}
+\begin{fields}
+\item[Printed] row 15, $2(1-\cosh at)/t\mapsto\ln(1-a^2/s^2)$ for $\Re(s+a)>0$; rows 16--17,
+  $2(1-\cos at)/t$ and $\sin(at)/t$ for $\Re s>0$.
+\item[Correct] row 15 needs $\Re s>|\Re a|$ (for $a=1$, $s=\tfrac12$ the integral diverges);
+  rows 16--17 need $\Re s>|\Im a|$ for complex $a$, since $\cos at$ grows like
+  $\eu^{|\Im a|t}$.
+\item[Lean] \lean{laplaceTransform_one_sub_cosh_div}, \lean{laplaceTransform_one_sub_cos_div},
+  \lean{laplaceTransform_sin_div} (\file{DLMF/AlgebraicAnalytic/Transforms/Tables.lean}),
+  admitted.
+\end{fields}
+
+\entry{\dlink{1.15.v}{\S1.15(v)}, after \deq{1.15.40}}
+\begin{fields}
+\item[Printed] $\lim_{y\to0+}\Im\Phi(x+\iu y)$ is the Hilbert transform of $f$.
+\item[Correct] it is $-\mathcal Hf(x)$ under DLMF's definition \deq{1.14.41}: by \deq{1.15.40} the
+  limit is $\frac1\pi\,\mathrm{P}\!\int f(t)/(x-t)\,\dd t$.
+\item[Evidence] $f=1/(1+t^2)$, $x=0.6$: $\Im\Phi(x+0.001\iu)=0.4405$, $\mathcal Hf(x)=-0.4412$.
+\item[Lean] \lean{tendsto_im_poissonCauchyIntegral}
+  (\file{DLMF/AlgebraicAnalytic/Summability/Integrals.lean}), admitted.
+\end{fields}
+
+\entry{\deq{1.15.53}}
+\begin{fields}
+\item[Printed] $D^\alpha D^\beta f=D^{\alpha+\beta}f$ without conditions on $f$.
+\item[Correct] needs a hypothesis on $f$: for $f=x^{\beta-1}$, $D^\beta f=0$ while
+  $D^{\alpha+\beta}f=\Gamma(\beta)x^{-\alpha-1}/\Gamma(-\alpha)\ne0$ (e.g.\ $\alpha=\frac12$,
+  $\beta=\frac13$), by the power rule \deq{1.15.50}.
+\item[Lean] \lean{fractionalDerivative_fractionalDerivative_cpow}
+  (\file{DLMF/AlgebraicAnalytic/Summability/Fractional.lean}), for $f=x^\mu$ with
+  $\Re\mu>-1$, $\Re(\mu-\beta)>-1$, admitted.
+\end{fields}
+
+\entry{\deq{1.17.19}--\deq{1.17.20}}
+\begin{fields}
+\item[Printed] $\lim_n\int_{-\pi}^\pi\delta_n(x-a)\phi(x)\,\dd x=\phi(a)$ ``provided that
+  $\phi$ is continuous and of period $2\pi$''.
+\item[Correct] the integral is the $n$-th partial sum of the Fourier series of $\phi$ at $a$,
+  which can diverge for continuous $\phi$ (du Bois-Reymond); a condition such as $\phi\in C^1$
+  (or Dini's condition) is needed.
+\item[Lean] \lean{tendsto_dirichletKernel_integral}
+  (\file{DLMF/AlgebraicAnalytic/Distributions/DiracDelta.lean}), for $C^1$ $\phi$, admitted.
+\end{fields}
+
+\entry{\deq{1.18.54}}
+\begin{fields}
+\item[Printed] the Sokhotski--Plemelj limit ``for $f\in C(X)$''.
+\item[Correct] continuity does not ensure that the principal value exists; a H\"older condition
+  is needed.
+\item[Lean] \lean{tendsto_sokhotski_plemelj} (\file{DLMF/AlgebraicAnalytic/Spectral/Theory.lean}),
+  for $C^1$ $f$ of compact support on $\RR$, admitted.
+\end{fields}
+
+\subsection{Chapter 2 (asymptotic approximations)}
+
+Found by the acquisition agents on 2026-10-27 and confirmed by the coordinator from the DLMF
+1.2.8 page text.
+
+\entry{\deq{2.5.11}, \deq{2.5.15}, \deq{2.5.16}}
+\begin{fields}
+\item[Printed] $\operatorname{res}_{z=n}[x^{-z}\mathscr Mf(1-z)\mathscr Mh(z)]=(a_n\ln x+b_n)x^{-n}$
+  and $I(x)=-\sum_{s=0}^{2n}(a_s\ln x+b_s)x^{-s}+O(x^{-2n-1+\epsilon})$ for the integral
+  $I(x)=\int_0^\infty J_\nu^2(xt)/(1+t)\,\dd t$ of \deq{2.5.8}.
+\item[Correct] the residue is $-(a_n\ln x+b_n)x^{-n}$, so
+  $I(x)=+\sum_{s=1}^{2n}(a_s\ln x+b_s)x^{-s}+O(x^{-2n-1+\epsilon})$, and in \deq{2.5.16}
+  $c_s=a_{2s+1}$, $d_s=b_{2s+1}$. The term $s=0$ lies outside the strip crossed by the contour
+  ($b_0=-1/(2\nu)\ne0$ for $\nu>0$, while DLMF's ``$b_s=0$ for even $s$'' holds only for $s\ge2$).
+\item[Evidence] $I(x)>0$, but the printed leading term is
+  $-(\ln x+3\ln2+\gamma)/(\pi x)<0$ for $\nu=0$ ($a_1=1/\pi$, $b_1=(3\ln2+\gamma)/\pi$); for
+  $\nu>0$ the printed $s=0$ term is the constant $1/(2\nu)$, while $I(x)\to0$. mpmath:
+  $\nu=0$, $x=20$: $I=0.0899450$, corrected leading term $0.0899606$.
+\item[Lean] \lean{residueAt_besselSq}, \lean{besselSq_integral_expansion}, admitted;
+  \lean{besselSq_integral_expansion_odd}, proved from them
+  (\file{DLMF/AsymptoticApproximations/Mellin/BesselExample.lean}).
+\end{fields}
+
+\entry{\dlink{2.10.iv}{\S2.10(iv)}, \deq{2.10.34}--\deq{2.10.36}}
+\begin{fields}
+\item[Printed] ``Let $\alpha$ be a constant in $(0,2\pi)$''.
+\item[Correct] $\alpha\in(0,\pi)$. For $\pi<\alpha<2\pi$, $\sin\alpha<0$, so $(2\sin\alpha)^{-1/2}$
+  and the right side of \deq{2.10.36} are not real while $P_n(\cos\alpha)$ is; with
+  $\alpha=2\pi-\alpha'$ the correct phase is $n\alpha'+\frac12\alpha'-\frac14\pi$, which differs
+  from the printed $n\alpha+\frac12\alpha-\frac14\pi=-(n\alpha'+\frac12\alpha'-\frac34\pi)
+  \bmod 2\pi$.
+\item[Lean] \lean{legendreComparison_hasSum}, \lean{legendrePolyP_cos_asymptotic}
+  (\file{DLMF/AsymptoticApproximations/Sums/Darboux.lean}), admitted.
+\end{fields}
 
 % Fragment a1: section (a), Chapters 4 through "Chapters 16, 17 and 24"
 
@@ -1268,7 +1448,7 @@ of level zero.
 \item[Correct] $J$ has a pole at $q=0$ (\deq{23.17.5}), so it is a modular function, not a
 modular form in the sense of \S23.15(i).
 \item[Lean] \lean{kleinJ_smul}, \lean{isModularFunction_kleinJ}
-(\file{DLMF/Weierstrass/ModularFunctions.lean}), admitted.
+(\file{DLMF/Weierstrass/ModularFunctions.lean}), proved.
 \item[Found] 2026-10-25.
 \end{fields}
 % Section (a), Chapters 24--31 (fragment a3)
@@ -1944,7 +2124,7 @@ $p=(2\sigma'+\eta_0\eta_\infty)/(2\eta_0)$.
 \item[Evidence] with $\sigma$ from \deq{32.6.28}, $\sigma'=\eta_0(2p-\eta_\infty)/2$; the printed
 \deq{32.6.31} leaves the residual $\eta_\infty(\zeta-1)/2$, the printed \deq{32.6.30} a nonzero
 rational residual; both corrected forms give $0$.
-\item[Lean] \lean{painleveIIIPrime_of_sigma} (\file{DLMF/Painleve/Hamiltonian.lean}), admitted.
+\item[Lean] \lean{painleveIIIPrime_of_sigma} (\file{DLMF/Painleve/Hamiltonian.lean}), proved.
 \end{fields}
 
 \entry{\deq{32.6.37}}
@@ -1967,7 +2147,7 @@ $p=\sigma'/(2\kappa_0)$.
 $q=\kappa_0(z\sigma''+\theta\sigma'+2\kappa_0\kappa_\infty z)/(\sigma')^2$.
 \item[Evidence] residuals $-2p$ in \deq{32.6.39} and $\theta/p$ in \deq{32.6.38} as printed, $0$
 corrected.
-\item[Lean] \lean{painleveIIIGammaZero_of_sigma} (\file{DLMF/Painleve/Hamiltonian.lean}), admitted.
+\item[Lean] \lean{painleveIIIGammaZero_of_sigma} (\file{DLMF/Painleve/Hamiltonian.lean}), proved.
 \end{fields}
 
 \entry{\deq{32.7.42}--\deq{32.7.43}}
@@ -1979,7 +2159,7 @@ $(W,W',z)=(3/7,-2/9,13/5)$ with $W''$ from $\mathrm{P}_{\mathrm{VI}}$: with the 
 parameters the second equality of \deq{32.7.46} and $\mathrm{P}_{\mathrm{VI}}$ for $w$ fail
 (residuals $\approx-4.1\cdot10^{-2}$ and $3.6\cdot10^{-3}$); with the corrected ones both are
 exactly $0$.
-\item[Lean] \lean{IsPainleveVIOn.okamoto} (\file{DLMF/Painleve/BacklundDLMF.lean}), admitted.
+\item[Lean] \lean{IsPainleveVIOn.okamoto} (\file{DLMF/Painleve/BacklundDLMF.lean}), proved.
 \end{fields}
 
 \entry{\dlink{32.9.ii}{\S32.9(ii)}}
@@ -2001,6 +2181,194 @@ $(1-a-b-c)^2=1-2\delta$, i.e.\ $a+b+c+d=1$.
 \item[Evidence] the $\mathrm{P}_{\mathrm{VI}}$ residual factors exactly as a multiple of
 $[(1-a-b-c)^2-d^2]\,w(w-1)(w-z)/(z(z-1))$.
 \item[Lean] \lean{painleveVI_of_riccati} (\file{DLMF/Painleve/SpecialSolutions.lean}), proved.
+\end{fields}
+
+\subsection{Chapters 33--36 (Coulomb functions, $3j,6j,9j$ symbols, matrix argument, coalescing saddles)}
+
+Found by the acquisition agents on 2026-10-26 and confirmed by an independent check with fresh
+scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exact arithmetic).
+
+\entry{\deq{33.9.4}}
+\begin{fields}
+\item[Printed] the expansion of $F_\ell(\eta,\rho)$ for $\eta<0$ with the coefficients $b_k$ of
+  \deq{33.9.3}.
+\item[Correct] the $k$-th term carries the extra factor $(-1)^{k+1}$; this is \deq{33.9.3} under
+  $t\mapsto-t$ (the $b_k$ depend only on $\eta^2$).
+\item[Evidence] $(\ell,\eta,\rho)=(0,-1.3,0.8)$: $F=0.4951378867$, printed $0.4423244$, corrected
+  $0.4951378867$; similarly at $(1,-0.7,1.5)$ and $(2,-2.1,0.6)$.
+\item[Lean] \lean{coulombF_eq_besselJ_series} (\file{DLMF/Coulomb/RhoEtaSeries.lean}), admitted.
+\end{fields}
+
+\entry{\deq{33.11.7}}
+\begin{fields}
+\item[Printed] $g\hat f-f\hat g=1$.
+\item[Correct] $f\hat g-g\hat f=1$: with $f,g,\hat f,\hat g$ of \deq{33.11.2}--\deq{33.11.3},
+  $F'G-FG'=f\hat g-g\hat f$, and $\mathscr W\{G,F\}=1$ by \deq{33.2.12}.
+\item[Evidence] $g\hat f-f\hat g=-1.000\ldots$ at $(\ell,\eta,\rho)=(0,0.5,30)$, $(2,-1.2,50)$,
+  $(1,2,10)$; the leading terms give $f_0\hat g_0=1-\eta/\rho$.
+\item[Lean] \lean{largeRho_wronskian} (\file{DLMF/Coulomb/RhoEtaAsymptotics.lean}), proved.
+\end{fields}
+
+\entry{\deq{33.12.3}}
+\begin{fields}
+\item[Printed] the factor of $\mathrm{Ai}'(x)$ (and of $\mathrm{Bi}'(x)$) is
+  $\sum_k(B_k+A_k')/\mu^k$ without a leading term.
+\item[Correct] $1+\sum_k(B_k+A_k')/\mu^k$, as differentiation of \deq{33.12.2} gives
+  ($dx/d\rho=-(2\eta)^{-1/3}$, $\mathrm{Ai}''=x\,\mathrm{Ai}$).
+\item[Evidence] $\eta=25$, $\rho=51$: $F_0'$ true $0.2303425$, printed $0.0049897$, corrected
+  $0.2303423$; $G_0'$ true $-0.4235734$, printed $0.0085326$, corrected $-0.4235737$.
+\item[Lean] \lean{coulomb_zero_deriv_transition} (\file{DLMF/Coulomb/RhoEtaAsymptotics.lean}),
+  admitted.
+\end{fields}
+
+\entry{\deq{33.14.15}}
+\begin{fields}
+\item[Printed] the bound states are listed for $n=\ell,\ell+1,\ldots$ in the line after
+  \deq{33.14.15}.
+\item[Correct] $n=\ell+1,\ell+2,\ldots$, as in the text above \deq{33.14.14}:
+  $A(-1/\ell^2,\ell)=\prod_k(1-k^2/\ell^2)=0$, so $\phi_{\ell,\ell}=0$.
+\item[Lean] \lean{hydrogenRadial_orthonormal} (\file{DLMF/Coulomb/Energy/Properties.lean}),
+  admitted.
+\end{fields}
+
+\entry{\deq{33.16.15}}
+\begin{fields}
+\item[Printed] the expressions of $s(\epsilon,\ell;r)$ and $c(\epsilon,\ell;r)$ for $\epsilon>0$,
+  $r<0$.
+\item[Correct] $s=(-1)^{\ell+1}\eu^{\pi/\tau}(\pi\tau)^{-1/2}F_\ell(1/\tau,-\tau r)$ and
+  $c=(-1)^{\ell}\eu^{-\pi/\tau}(\pi\tau)^{-1/2}G_\ell(1/\tau,-\tau r)$, which follow from
+  \deq{33.16.6}--\deq{33.16.7} and \deq{33.14.9}--\deq{33.14.10}.
+\item[Evidence] $\epsilon=0.7$, $\ell=1$, $r=-1.3$: $s$ true $1.72551393616$, printed $0.0403810$,
+  corrected $1.72551393616$; $c$ true $-0.06407112687$, printed $2.73781$, corrected
+  $-0.06407112687$.
+\item[Lean] \lean{coulombs_coulombc_eq_neg} (\file{DLMF/Coulomb/Energy/Connection.lean}), admitted;
+  the corrected form is also proved from the admitted \deq{33.16.6}--\deq{33.16.7}.
+\end{fields}
+
+\entry{\deq{33.16.17}}
+\begin{fields}
+\item[Printed] the prefactor $(-1)^\ell/(2\nu^{1/2})$.
+\item[Correct] $(-1)^\ell/(2\nu)^{1/2}$.
+\item[Evidence] $\epsilon=-0.3$, $\ell=0$, $r=1.7$: $s$ true $0.1706086610$, printed $0.1206385$
+  (exactly $1/\sqrt2$ times the true value).
+\item[Lean] \lean{coulombs_coulombc_eq_whittaker_pos} (\file{DLMF/Coulomb/Energy/Connection.lean}),
+  admitted.
+\end{fields}
+
+\entry{\deq{33.16.18}}
+\begin{fields}
+\item[Printed] the factors $K(\nu,\ell)$ and $1/K(\nu,\ell)$ in the expressions for $r<0$.
+\item[Correct] $K$ and $1/K$ interchanged in all three places, consistently with
+  \deq{33.16.12}--\deq{33.16.13}.
+\item[Evidence] $\epsilon=-0.3$, $\ell=0$, $r=-1.7$: $s$ true $-10.5753083$, printed $-56.655$,
+  corrected $-10.5753083$; $c$ true $0.01206467$, printed $0.00225090$, corrected $0.01206467$.
+\item[Lean] \lean{coulombs_coulombc_eq_whittaker_neg} (\file{DLMF/Coulomb/Energy/Connection.lean}),
+  proved.
+\end{fields}
+
+\entry{\deq{33.19.3}}
+\begin{fields}
+\item[Printed] the expansion of $2\pi h(\epsilon,\ell;r)$ with the finite sum taken once and the
+  digamma terms at $\kappa$ of \deq{33.14.6}.
+\item[Correct] the finite sum is doubled, and for $\epsilon<0$, $r<0$ the digamma terms use
+  $\kappa=+(-\epsilon)^{-1/2}$. As printed, $h\sim(2\ell)!/(2\pi(2r)^\ell)$ as $r\to0$,
+  contradicting \deq{33.18.1}.
+\item[Evidence] $(\epsilon,\ell,r)=(0.7,0,1.3)$: true $-3.888680$, printed $-4.888680$, corrected
+  $-3.888680$; $(-0.3,0,-1.7)$: true $0.1072038$, printed $-155.04$, doubled sum only $-154.04$,
+  both corrections $0.1072038$.
+\item[Lean] \lean{coulombh_hasSum} (\file{DLMF/Coulomb/Energy/Series.lean}), admitted.
+\end{fields}
+
+\entry{\dlink{34.4}{\S34.4}}
+\begin{fields}
+\item[Printed] the four triangle conditions of a $6j$ symbol are equivalent to the existence of a
+  tetrahedron with edges $j_1,\ldots,l_3$, except in degenerate cases.
+\item[Correct] only the necessity direction holds: a tetrahedron implies the triangle conditions.
+\item[Evidence] $\{3\ 2\ 2;\ 3\ 2\ 2\}=1/14$ satisfies all four triangle conditions with
+  non-degenerate faces, but its Cayley--Menger determinant gives $V^2=-9/8<0$. Among the $13597$
+  nonzero symbols with all $j\le4$, $8440$ have $V^2<0$ (and $2807$ with the Ponzano--Regge
+  lengths $j+\tfrac12$, e.g.\ $\{\tfrac12\ \tfrac12\ 1;\ \tfrac12\ \tfrac12\ 1\}=1/6$).
+\item[Lean] \lean{triangle_conditions_of_tetrahedron} (\file{DLMF/WignerSymbols/SixJ.lean}), proved;
+  the converse is not acquired.
+\end{fields}
+
+\entry{\deq{35.2.2}}
+\begin{fields}
+\item[Printed] the inversion formula of the Laplace transform with the factor
+  $(2\pi\iu)^{-m(m+1)/2}$.
+\item[Correct] an extra factor $2^{m(m-1)/2}$: the pairing $\operatorname{tr}(\mathbf{VX})$ doubles the
+  off-diagonal frequencies with respect to the measure $\mathrm d\mathbf X$ of \S35.1.
+\item[Evidence] exact inversion of a Gaussian on $2\times2$ symmetric matrices needs $1/(4\pi^3)$,
+  the printed factor gives $1/(8\pi^3)$.
+\item[Lean] \lean{laplaceTransform_inversion} (\file{DLMF/MatrixArgument/GammaBeta.lean}), admitted.
+\end{fields}
+
+\entry{\deq{35.7.8}}
+\begin{fields}
+\item[Printed] the formula holds when $a\in\{0,-1,\ldots\}$ or more generally when some
+  $a-\tfrac12(j-1)$ is a nonpositive integer.
+\item[Correct] only for $j=1$, i.e.\ $a\in\{0,-1,\ldots\}$.
+\item[Evidence] $m=2$, $b=0.4$, $c=2.7$, $\mathbf T=\operatorname{diag}(0.3,0.65)$: $a=\tfrac12$
+  gives $1.0896151$ against $-3.7418066$, $a=-\tfrac12$ gives $0.9236366$ against $0.2471093$;
+  $a=-1,-2$ agree.
+\item[Lean] \lean{hyp2F1_reflection} (\file{DLMF/MatrixArgument/Gaussian.lean}), admitted.
+\end{fields}
+
+\entry{\dlink{35.8.i}{\S35.8(i)}}
+\begin{fields}
+\item[Printed] the series terminates if some $a_j$ satisfies
+  $-a_j+\tfrac12(k-1)\in\{0,1,\ldots\}$ for some $k$.
+\item[Correct] only for $k=1$: for $m=2$, $[\tfrac12]_{(n,0)}=(\tfrac12)_n\ne0$, and
+  ${}_1F_0(\tfrac12;\mathbf T)=|\mathbf I-\mathbf T|^{-1/2}$ is not a polynomial.
+\item[Lean] \lean{hypergeometricPFQ_eq_sum_of_neg_nat} (\file{DLMF/MatrixArgument/Generalized.lean}),
+  proved.
+\end{fields}
+
+\entry{\deq{35.8.6}}
+\begin{fields}
+\item[Printed] the Pfaff--Saalsch\"utz value of the balanced ${}_3F_2(\mathbf I)$.
+\item[Correct] the reciprocal of the printed right-hand side.
+\item[Evidence] $m=2$, $(a_1,a_2,a_3,b_1)=(0.3,1.7,-3,5.2)$: series $1.153126854577291$, printed
+  $0.8672072773$, reciprocal $1.153126854577291$; for $m=1$ the corrected form is the classical
+  Pfaff--Saalsch\"utz sum.
+\item[Lean] \lean{hyp3F2_one_saalschutz} (\file{DLMF/MatrixArgument/Generalized.lean}), admitted.
+\end{fields}
+
+\entry{\deq{35.8.7}}
+\begin{fields}
+\item[Printed] Thomae's transformation with $b_2-a_2$ and the classical $\Gamma(c)$,
+  $\Gamma(c+a_3)$.
+\item[Correct] $b_2-a_1$, and $\Gamma_m$ throughout.
+\item[Evidence] $m=2$, $(a_1,a_2,a_3,b_1,b_2)=(3.2,0.4,0.7,4.5,3.9)$: left side $1.1445330$,
+  printed $388.34$, corrected $1.1445295$ (within the truncation error); $m=1$ to $30$ digits.
+\item[Lean] \lean{hyp3F2_one_thomae} (\file{DLMF/MatrixArgument/Generalized.lean}), admitted.
+\end{fields}
+
+\entry{\deq{35.8.13}}
+\begin{fields}
+\item[Printed] the Euler integral with the factor $1/B_m(b_1-a_1,a_1)$.
+\item[Correct] the factor $B_m(b_1-a_1,a_1)$, consistently with \deq{35.7.5}.
+\item[Evidence] exact at $m=2$, $a_1=\tfrac52$, $a_2=-2$, $b_1=6$,
+  $\mathbf T=\operatorname{diag}(\tfrac13,\tfrac12)$: integral $751\pi/2021760$, corrected ratio
+  exactly $1$; the printed form is off by $B_2^2=\pi^2/1587600$.
+\item[Lean] \lean{hasIntegralOn_hypergeometricPFQ_euler} (\file{DLMF/MatrixArgument/Generalized.lean}),
+  admitted.
+\end{fields}
+
+\entry{\deq{36.11.7}--\deq{36.11.8}}
+\begin{fields}
+\item[Printed] the asymptotic forms of $\Psi^{(\mathrm E)}(0,0,z)$ and $\Psi^{(\mathrm H)}(0,0,z)$
+  as $z\to\pm\infty$.
+\item[Correct] the printed forms hold only as $z\to+\infty$. As $z\to-\infty$,
+  $\Psi^{(\mathrm E)}(0,0,z)=(\pi/z)\bigl(\iu-\sqrt3\,\eu^{4\iu z^3/27}+o(1)\bigr)$ and
+  $\Psi^{(\mathrm H)}(0,0,z)=(2\pi/z)\bigl(-1-(\iu/\sqrt3)\,\eu^{\iu z^3/27}+o(1)\bigr)$, both by
+  \deq{36.2.24}.
+\item[Evidence] $\Psi^{(\mathrm E)}(0,0,-15)=-0.3207932-0.0398931\iu$: printed form
+  $0.32063-0.37913\iu$, corrected $-0.3206251-0.0397507\iu$; $\Psi^{(\mathrm H)}(0,0,-18)=
+  0.4894911-0.1449119\iu$: printed $-0.20879-0.14470\iu$, corrected $0.4893448-0.1446979\iu$.
+\item[Lean] \lean{ellipticUmbilicIntegral_z_atBot}, \lean{hyperbolicUmbilicIntegral_z_atBot}
+  (\file{DLMF/CoalescingSaddles/Asymptotics.lean}), admitted; the $z\to+\infty$ forms
+  \lean{ellipticUmbilicIntegral_z_atTop}, \lean{hyperbolicUmbilicIntegral_z_atTop}, admitted.
 \end{fields}
 
 \section{(b) Project transcription defects that were fixed}\label{sec:b}
@@ -2274,8 +2642,81 @@ $[(1-a-b-c)^2-d^2]\,w(w-1)(w-z)/(z(z-1))$.
 \item[Found] 2026-10-26 (proof round 2 for Chapters 28--31).
 \end{fields}
 
+\entry{\deq{32.10.32}--\deq{32.10.34}}
+\begin{fields}
+\item[Defect] The acquired \lean{painleveVI_picard} (Picard's solutions of $\mathrm{P}_{\mathrm{VI}}$)
+  required $\Lambda(\cdot,z)$ to be entire with the periods $2\varphi_1(z)$, $2\varphi_2(z)$, whereas
+  DLMF's $\Lambda$ is elliptic with poles. The hypotheses were contradictory (an entire function
+  with two $\mathbb R$-independent periods is constant, forcing $w=0$;
+  \lean{p3b_painleveVI_picard_hyp_false}), so the statement held vacuously.
+\item[Fix] Restated on 2026-10-27 with
+  $\Lambda(u,z)=4\wp\bigl(u+\omega_0(z);g_2(z),g_3(z)\bigr)+\tfrac13(1+z)$,
+  $g_2=\tfrac1{12}(z^2-z+1)$, $g_3=-\tfrac1{432}(1+z)(2-z)(2z-1)$ and $\wp(\omega_0)=-\tfrac1{12}(1+z)$,
+  with $2\varphi_1(z)$, $2\varphi_2(z)$ a basis of the period lattice and $w$ off the poles. Checked
+  numerically: with $\Lambda=z\,\mathrm{sn}^2(u/2,k)$, $k^2=z$, $\varphi_1=2K$, $\varphi_2=2\iu K'$, the
+  $\mathrm{P}_{\mathrm{VI}}(0,0,0,\tfrac12)$ residual is below $10^{-40}$ at three complex points.
+  The lattice hypotheses are satisfiable at every $z\notin\{0,1\}$
+  (\lean{picard_hypotheses_nonempty}, proved).
+\item[Lean] \lean{painleveVI_picard} (\file{DLMF/Painleve/SpecialSolutions.lean}), admitted.
+\item[Found] 2026-10-26 (proof round 3 for Chapters 20--32).
+\end{fields}
+
 \section{(c) Formalization notes}\label{sec:c}
 \category{c}
+
+\subsection{Chapters 1--2}
+
+\entry{\deq{1.10.24}}
+\begin{fields}
+\item[Note] $F\ne0$ follows from the hypotheses only with DLMF's definition of convergence of a
+  product (\S1.9(vii), nonzero limit); for plain uniform convergence of the partial products it
+  fails ($a_n=\frac12$). The Lean statement takes $F\ne0$ as part of the convergence hypothesis.
+\item[Lean] \lean{tendsto_logDeriv_prod} (\file{DLMF/AlgebraicAnalytic/Complex/Functions.lean}),
+  admitted.
+\end{fields}
+
+\entry{\dlink{1.10.ii}{\S1.10(ii)} (analytic continuation)}
+\begin{fields}
+\item[Note] The identity theorem behind the uniqueness of analytic continuation needs
+  $D_1\cap D_2$ to be connected, which DLMF leaves tacit; the Lean statement assumes it.
+\item[Lean] \file{DLMF/AlgebraicAnalytic/Complex/Functions.lean}.
+\end{fields}
+
+\entry{\dlink{1.14.T5}{Table~1.14.5}, rows 3 and 7}
+\begin{fields}
+\item[Note] Row 3 ($\ln(a/x)$ on $(0,a)$, $a^s/s^2$) holds for $\Re s>0$, weaker than the printed
+  condition, and is acquired in that stronger form. Row 7 ($\ln|(1+x)/(1-x)|$,
+  $\pi\tan(\frac12 s\pi)/s$) needs $s\ne0$ in Lean, where the right side is $0/0=0$ at $s=0$.
+\item[Lean] \file{DLMF/AlgebraicAnalytic/Transforms/Tables.lean}.
+\end{fields}
+
+\entry{\deq{1.18.38}}
+\begin{fields}
+\item[Note] DLMF does not print the eigenvalue of Case~3 (periodic boundary conditions on
+  $[0,\pi]$); it is $(2n)^2$.
+\item[Lean] \lean{expEigenfunction_spec} (\file{DLMF/AlgebraicAnalytic/Spectral/Theory.lean}),
+  proved.
+\end{fields}
+
+\entry{\deq{2.3.26}}
+\begin{fields}
+\item[Note] $a=(2p(\alpha,0)-2p(\alpha,\alpha))^{1/2}$ must carry the sign of $\alpha$, so that
+  $t=0\leftrightarrow w=0$ and $t=\alpha\leftrightarrow w=a$ correspond monotonically as DLMF
+  requires; the principal root would fail for $\alpha<0$.
+\item[Lean] \lean{bleisteinA}, \lean{bleisteinW_zero}
+  (\file{DLMF/AsymptoticApproximations/Integrals/Defs.lean},
+  \file{DLMF/AsymptoticApproximations/Integrals/Coalescing.lean}), definition and proved.
+\end{fields}
+
+\entry{\deq{2.5.10}}
+\begin{fields}
+\item[Note] At $z=0$ the printed form is $\Gamma(z)^{-1}\cdot\pi/\sin(\pi z)$, a removable
+  $0\cdot\infty$ that Lean totalizes to $0$. The statement uses the equivalent
+  $2^{z-1}\Gamma(\nu+\frac12z)\Gamma(1-z)/(\Gamma^2(1-\frac12z)\Gamma(1+\nu-\frac12z))$; the
+  printed form is proved from it where $\sin\pi z\ne0$.
+\item[Lean] \lean{mellin_besselJ_sq}, admitted; \lean{mellin_besselJ_sq_eq_kernel}, proved
+  (\file{DLMF/AsymptoticApproximations/Mellin/BesselExample.lean}).
+\end{fields}
 
 \subsection{Totalization, removable points and nonvanishing hypotheses}
 
@@ -2422,7 +2863,7 @@ $[(1-a-b-c)^2-d^2]\,w(w-1)(w-z)/(z(z-1))$.
 \item[Evidence] mpmath at $s=0.6+0.2\iu$, $1.5$, $3$, $2.5+0.3\iu$ and $s=1$.
 \item[Lean] \lean{mellin_one_sub_jacobiThetaFourNullTau},
   \lean{mellin_one_sub_jacobiThetaFourNullTau_one} (\file{DLMF/Theta/Integrals.lean}),
-  admitted.
+  proved.
 \item[Found] 2026-10-25.
 \end{fields}
 
@@ -2636,6 +3077,20 @@ $[(1-a-b-c)^2-d^2]\,w(w-1)(w-z)/(z(z-1))$.
   (\file{DLMF/Mathieu/Noninteger/Properties.lean}), proved.
 \end{fields}
 
+\entry{\deq{28.4.22}--\deq{28.4.23}}
+\begin{fields}
+\item[Note] The acquired statements assert $A^m_{m\pm2s}(q)=(c\,(q/4)^s+\varepsilon(q)\,q)\,A^m_m(q)$
+  for all real $q$, with $\varepsilon$ only required to be $O(1)$ as $q\to0$; DLMF means an
+  expansion for small $q$. Away from $0$ the identity fails where $A^m_m(q)=0$ and
+  $A^m_{m\pm2s}(q)\ne0$: numerically $A^2_2$ changes sign between $q=21$ and $q=21.32$ while
+  $A^2_4\approx-0.683$, and similar sign changes occur for $m=3,\dots,8$. Suspected false as
+  stated (numerical evidence only). Proposed restriction, pending a decision: make the identity
+  eventual near $q=0$, or assume $A^m_m(q)\ne0$.
+\item[Lean] \lean{mathieuFourierA_up_small_q}, \lean{mathieuFourierB_up_small_q},
+  \lean{mathieuFourierA_down_small_q}, \lean{mathieuFourierB_down_small_q}
+  (\file{DLMF/Mathieu/FourierSeries.lean}), admitted, unchanged.
+\end{fields}
+
 \subsection{Chapter 32}
 
 \entry{\deq{32.6.7}--\deq{32.6.8} and \deq{32.6.14}--\deq{32.6.15}}
@@ -2673,6 +3128,28 @@ $[(1-a-b-c)^2-d^2]\,w(w-1)(w-z)/(z(z-1))$.
 \item[Note] DLMF's $\mathrm{P}_{\mathrm{II}}$ $w''=2w^3+zw+\alpha$ is the Beals--Wong equation
   $u''=2u^3+xu-c$ of the older Painlev\'e files with $c=-\alpha$. Notation, not an erratum.
 \item[Lean] \lean{isPainleveIIOn_iff_isPIIOn} (\file{DLMF/Painleve/Equations.lean}), proved.
+\end{fields}
+
+\subsection{Chapters 33--36}
+
+\entry{\deq{33.5.7}, \deq{33.10.6}, \deq{33.10.10}}
+\begin{fields}
+\item[Note] The phase shift $\sigma_\ell(\eta)$ of \deq{33.2.10} is taken on the principal branch by
+  \lean{coulombSigma}, which suffices for $H^\pm$, $G$ and $\eu^{\iu\sigma}$; these limits need
+  DLMF's continuous branch (with the principal branch \deq{33.10.10} is off by about $38$ at
+  $\eta=-20$). The continuous branch is \lean{phaseShift}, defined by the Weierstrass product;
+  its defining property \lean{phaseShift_spec} is admitted.
+\item[Lean] \file{DLMF/Coulomb/Defs.lean}, \file{DLMF/Coulomb/RhoEtaLimits.lean}.
+\end{fields}
+
+\entry{\deq{36.2.19}, \deq{36.2.28}, \deq{36.4.8}, \deq{36.4.12}}
+\begin{fields}
+\item[Note] Domain restrictions: \deq{36.2.19} is stated for $y\ne0$ and \deq{36.2.28} for $z>0$;
+  \deq{36.4.8} uses $z<0$ where DLMF prints $z\le0$ (the origin is only a limit point of the
+  self-intersection line); \deq{36.4.12} is stated for $z\ne0$, since the slice $z=0$ consists of
+  two half-lines that the parametrization does not produce.
+\item[Lean] \file{DLMF/CoalescingSaddles/CanonicalIntegrals.lean},
+  \file{DLMF/CoalescingSaddles/BifurcationSets.lean}.
 \end{fields}
 
 \subsection{DLMF's own published errata followed}

@@ -7,9 +7,8 @@ module
 
 public import Mathlib.Analysis.Complex.CauchyIntegral
 public import Mathlib.Analysis.SpecialFunctions.Integrability.Basic
-public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
-public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 public import Mathlib.MeasureTheory.Integral.ExpDecay
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Arctan
 
 /-!
 # Rotating the ray of integration
@@ -43,7 +42,7 @@ namespace Complex
 variable {f : ℂ → ℂ} {α σ κ C : ℝ}
 
 /-- Integrability of `r ↦ f(r e^{iy})` on `(0, ∞)` from the bounds at `0` and `∞`. -/
-lemma integrableOn_ray_of_bounds (hσ : 0 < σ) (hκ : 0 < κ) {y : ℝ}
+theorem integrableOn_ray_of_bounds (hσ : 0 < σ) (hκ : 0 < κ) {y : ℝ}
     (hc : ∀ r : ℝ, 0 < r → ContinuousAt (fun r : ℝ => f (r * exp (y * I))) r)
     (h0 : ∀ r : ℝ, 0 < r → r ≤ 1 → ‖f (r * exp (y * I))‖ ≤ C * r ^ (σ - 1))
     (hinf : ∀ r : ℝ, 1 ≤ r → ‖f (r * exp (y * I))‖ ≤ C * Real.exp (-κ * r)) :
@@ -64,11 +63,11 @@ lemma integrableOn_ray_of_bounds (hσ : 0 < σ) (hκ : 0 < κ) {y : ℝ}
     exact (ae_restrict_iff' measurableSet_Ioi).mpr
       (Eventually.of_forall fun r hr => hinf r (le_of_lt hr))
 
-lemma exp_ofReal_add_mul_I (x y : ℝ) : exp ((x : ℂ) + y * I) = (Real.exp x : ℂ) * exp (y * I) := by
+theorem exp_ofReal_add_mul_I (x y : ℝ) : exp ((x : ℂ) + y * I) = (Real.exp x : ℂ) * exp (y * I) := by
   rw [exp_add, ofReal_exp]
 
 /-- The rectangle identity behind the rotation formula, for `0 < ε` and `0 < R`. -/
-lemma integral_sub_exp_mul_integral_rotate {ε R : ℝ} (hε : 0 < ε) (hR : 0 < R)
+theorem integral_sub_exp_mul_integral_rotate {ε R : ℝ} (hε : 0 < ε) (hR : 0 < R)
     (hd : ∀ r : ℝ, 0 < r → ∀ y ∈ [[0, α]], DifferentiableAt ℂ f (r * exp (y * I))) :
     (∫ r in ε..R, f r) - exp (α * I) * ∫ r in ε..R, f (r * exp (α * I)) =
       -(I * ∫ y in (0 : ℝ)..α, f (R * exp (y * I)) * (R * exp (y * I))) +
@@ -123,7 +122,7 @@ lemma integral_sub_exp_mul_integral_rotate {ε R : ℝ} (hε : 0 < ε) (hR : 0 <
   linear_combination hrect
 
 /-- `∫_{1/n}^{n} g → ∫₀^∞ g` for `g` integrable on `(0, ∞)`. -/
-lemma tendsto_integral_recip_nat_nat {g : ℝ → ℂ} (hg : IntegrableOn g (Ioi 0)) :
+theorem tendsto_integral_recip_nat_nat {g : ℝ → ℂ} (hg : IntegrableOn g (Ioi 0)) :
     Tendsto (fun n : ℕ => ∫ r in (1 / (n + 1 : ℝ))..(n + 1), g r) atTop
       (𝓝 (∫ r in Ioi (0 : ℝ), g r)) := by
   have h1 : Tendsto (fun n : ℕ => ∫ r in (0 : ℝ)..(n + 1), g r) atTop

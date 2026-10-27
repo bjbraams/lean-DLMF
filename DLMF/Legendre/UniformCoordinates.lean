@@ -5,12 +5,12 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.SpecialFunctions.Arcosh
 public import Mathlib.Analysis.SpecialFunctions.Arsinh
 public import Mathlib.Analysis.SpecialFunctions.Artanh
-public import DLMF.Legendre.Conical
-public import DLMF.ParabolicCylinder.WeberUniform
 public import DLMFMathlib.Analysis.Calculus.DoubleZeroSqrt
+public import DLMF.Bessel.Elementary
+public import DLMF.ParabolicCylinder.Basic
+public import Mathlib.Analysis.SpecialFunctions.Sqrt
 
 /-!
 # Coordinate changes and envelopes for Legendre uniform approximations
@@ -58,7 +58,7 @@ noncomputable def legO_L (α η : ℝ) : ℝ :=
   α*Real.log (Real.sqrt (α^2+η^2)+α)-α*Real.log η-Real.sqrt (α^2+η^2)
 
 /-- `L'(η) = -√(α²+η²)/η`. -/
-lemma legO_hasDerivAt {α η : ℝ} (hα : 0 ≤ α) (hη : 0 < η) :
+theorem legO_hasDerivAt {α η : ℝ} (hα : 0 ≤ α) (hη : 0 < η) :
     HasDerivAt (legO_L α) (-(Real.sqrt (α^2+η^2)/η)) η := by
   have hp : 0 < α^2+η^2 := by positivity
   set s := Real.sqrt (α^2+η^2) with hs
@@ -78,7 +78,7 @@ lemma legO_hasDerivAt {α η : ℝ} (hα : 0 ≤ α) (hη : 0 < η) :
     linear_combination (-s) * hs2
 
 /-- `L` decreases strictly on `(0, ∞)`. -/
-lemma legO_strictAntiOn {α : ℝ} (hα : 0 ≤ α) : StrictAntiOn (legO_L α) (Ioi 0) := by
+theorem legO_strictAntiOn {α : ℝ} (hα : 0 ≤ α) : StrictAntiOn (legO_L α) (Ioi 0) := by
   refine strictAntiOn_of_deriv_neg (convex_Ioi 0)
     (fun η hη => (legO_hasDerivAt hα hη).continuousAt.continuousWithinAt) fun η hη => ?_
   rw [interior_Ioi] at hη
@@ -88,7 +88,7 @@ lemma legO_strictAntiOn {α : ℝ} (hα : 0 ≤ α) : StrictAntiOn (legO_L α) (
   positivity
 
 /-- `L → ∞` as `η → 0⁺` when `α > 0`. -/
-lemma legO_tendsto_zero {α : ℝ} (hα : 0 < α) : Tendsto (legO_L α) (𝓝[>] 0) atTop := by
+theorem legO_tendsto_zero {α : ℝ} (hα : 0 < α) : Tendsto (legO_L α) (𝓝[>] 0) atTop := by
   have hg : ContinuousAt (fun η : ℝ => α*Real.log (Real.sqrt (α^2+η^2)+α) - Real.sqrt (α^2+η^2)) 0 := by
     have h : Real.sqrt (α^2+0^2)+α ≠ 0 := by positivity
     fun_prop (disch := exact h)
@@ -98,7 +98,7 @@ lemma legO_tendsto_zero {α : ℝ} (hα : 0 < α) : Tendsto (legO_L α) (𝓝[>]
   simp only [legO_L]; ring
 
 /-- `L → -∞` as `η → ∞`. -/
-lemma legO_tendsto_atTop {α : ℝ} (hα : 0 ≤ α) : Tendsto (legO_L α) atTop atBot := by
+theorem legO_tendsto_atTop {α : ℝ} (hα : 0 ≤ α) : Tendsto (legO_L α) atTop atBot := by
   have hb : ∀ᶠ η in atTop, legO_L α η ≤ α*Real.log 3 - η := by
     filter_upwards [eventually_ge_atTop (α+1)] with η hη
     have hη0 : 0 < η := by linarith
@@ -155,7 +155,7 @@ theorem legendreOrderEta_spec {α x : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) (hx 
   exact (legO_strictAntiOn hα).injOn hη hs.1 (((hrel η).1 h).trans ((hrel _).1 hs.2).symm)
 
 /-- The first logarithm argument in DLMF 14.15.10 is positive for `x > 1`. -/
-lemma legO_N_pos {α x : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) (hx : 1 < x) :
+theorem legO_N_pos {α x : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) (hx : 1 < x) :
     0 < (1+α^2)*x^2+1-α^2-2*x*Real.sqrt (α^2*x^2-α^2+1) := by
   have hB : 0 < 1 - α^2 := by nlinarith
   have hW : Real.sqrt (α^2*x^2-α^2+1) ^ 2 = α^2*x^2-α^2+1 :=
@@ -174,7 +174,7 @@ lemma legO_N_pos {α x : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) (hx : 1 < x) :
   nlinarith
 
 /-- `R'(x) = √(α²x²-α²+1)/(x²-1)`. -/
-lemma legO_R_hasDerivAt {α x : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) (hx : 1 < x) :
+theorem legO_R_hasDerivAt {α x : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) (hx : 1 < x) :
     HasDerivAt (legO_R α) (Real.sqrt (α^2*x^2-α^2+1)/(x^2-1)) x := by
   have hB : 0 < 1 - α^2 := by nlinarith
   have hx2 : 0 < x^2 - 1 := by nlinarith
@@ -224,7 +224,7 @@ lemma legO_R_hasDerivAt {α x : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) (hx : 1 < 
       - α^4*x^2 - α^2*x^4 + α^2*x^2) * hW
 
 /-- Rationalized form of the first logarithm argument. -/
-lemma legO_ratio {α x : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) (hx : 1 < x) :
+theorem legO_ratio {α x : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) (hx : 1 < x) :
     ((1+α^2)*x^2+1-α^2-2*x*Real.sqrt (α^2*x^2-α^2+1))/((x^2-1)*(1-α^2))
       = (1-α^2)*(x^2-1)/((1+α^2)*x^2+1-α^2+2*x*Real.sqrt (α^2*x^2-α^2+1)) := by
   have hB : 0 < 1 - α^2 := by nlinarith
@@ -238,7 +238,7 @@ lemma legO_ratio {α x : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) (hx : 1 < x) :
   linear_combination (-4*x^2) * hW
 
 /-- `R → -∞` as `x → 1⁺`. -/
-lemma legO_R_tendsto_one {α : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) :
+theorem legO_R_tendsto_one {α : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) :
     Tendsto (legO_R α) (𝓝[>] (1:ℝ)) atBot := by
   have hB : 0 < 1 - α^2 := by nlinarith
   set T : ℝ → ℝ := fun x => (1+α^2)*x^2+1-α^2+2*x*Real.sqrt (α^2*x^2-α^2+1) with hTdef
@@ -278,7 +278,7 @@ lemma legO_R_tendsto_one {α : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) :
   rw [legO_ratio hα hα1 hx]
 
 /-- `R → ∞` as `x → ∞` when `α > 0`. -/
-lemma legO_R_tendsto_atTop {α : ℝ} (hα : 0 < α) (hα1 : α < 1) :
+theorem legO_R_tendsto_atTop {α : ℝ} (hα : 0 < α) (hα1 : α < 1) :
     Tendsto (legO_R α) atTop atTop := by
   have hB : 0 < 1 - α^2 := by nlinarith
   have hb : ∀ᶠ x in atTop, Real.log ((1-α^2)/8)/2 + α/2*Real.log (α^2*x^2) ≤ legO_R α x := by
@@ -314,11 +314,11 @@ lemma legO_R_tendsto_atTop {α : ℝ} (hα : 0 < α) (hα1 : α < 1) :
   exact (tendsto_pow_atTop (two_ne_zero)).const_mul_atTop (by positivity)
 
 /-- `L` at `α = 0`. -/
-lemma legO_L_zero (b : ℝ) (hb : 0 < b) : legO_L 0 b = -b := by
+theorem legO_L_zero (b : ℝ) (hb : 0 < b) : legO_L 0 b = -b := by
   simp [legO_L, Real.sqrt_sq hb.le]
 
 /-- `R` at `α = 0`. -/
-lemma legO_R_zero {x : ℝ} (hx : 1 < x) : legO_R 0 x = Real.log ((x-1)/(x+1))/2 := by
+theorem legO_R_zero {x : ℝ} (hx : 1 < x) : legO_R 0 x = Real.log ((x-1)/(x+1))/2 := by
   have h2 : 0 < x + 1 := by linarith
   simp only [legO_R, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, zero_mul, sub_zero,
     zero_add, Real.sqrt_one, add_zero, mul_one, zero_div, one_mul]
@@ -326,7 +326,7 @@ lemma legO_R_zero {x : ℝ} (hx : 1 < x) : legO_R 0 x = Real.log ((x-1)/(x+1))/2
     rw [div_eq_div_iff (by nlinarith) h2.ne']; ring]
 
 /-- Eventually `R(x) > L(b)` for every `b > 0`. -/
-lemma legO_R_eventually_gt {α : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) {b : ℝ} (hb : 0 < b) :
+theorem legO_R_eventually_gt {α : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) {b : ℝ} (hb : 0 < b) :
     ∀ᶠ x in atTop, legO_L α b < legO_R α x := by
   rcases hα.lt_or_eq with hα | hα
   · exact (legO_R_tendsto_atTop hα hα1).eventually (eventually_gt_atTop _)
@@ -417,16 +417,16 @@ noncomputable def legY_L1 (a s : ℝ) : ℝ := s - a * Real.arctan (s / a)
 noncomputable def legY_L2 (a s : ℝ) : ℝ := s + a/2 * Real.log (a^2 - s^2) - a * Real.log (s + a)
 
 /-- `L₁` is continuous. -/
-lemma legY_L1_continuous (a : ℝ) : Continuous (legY_L1 a) := by
+theorem legY_L1_continuous (a : ℝ) : Continuous (legY_L1 a) := by
   unfold legY_L1
   exact continuous_id.sub (continuous_const.mul (Real.continuous_arctan.comp
     (continuous_id.div_const a)))
 
 /-- `L₁(0) = 0`. -/
-lemma legY_L1_zero (a : ℝ) : legY_L1 a 0 = 0 := by simp [legY_L1]
+theorem legY_L1_zero (a : ℝ) : legY_L1 a 0 = 0 := by simp [legY_L1]
 
 /-- `L₁` increases strictly on `[0, ∞)`. -/
-lemma legY_L1_strictMonoOn {a : ℝ} (ha : 0 ≤ a) : StrictMonoOn (legY_L1 a) (Ici 0) := by
+theorem legY_L1_strictMonoOn {a : ℝ} (ha : 0 ≤ a) : StrictMonoOn (legY_L1 a) (Ici 0) := by
   rcases ha.eq_or_lt with rfl | ha
   · intro s _ t _ h; simpa [legY_L1] using h
   refine strictMonoOn_of_deriv_pos (convex_Ici 0) (legY_L1_continuous a).continuousOn ?_
@@ -443,12 +443,12 @@ lemma legY_L1_strictMonoOn {a : ℝ} (ha : 0 ≤ a) : StrictMonoOn (legY_L1 a) (
   nlinarith
 
 /-- A linear lower bound for `L₁`. -/
-lemma legY_L1_ge {a : ℝ} (ha : 0 ≤ a) (s : ℝ) : s - a * (π/2) ≤ legY_L1 a s := by
+theorem legY_L1_ge {a : ℝ} (ha : 0 ≤ a) (s : ℝ) : s - a * (π/2) ≤ legY_L1 a s := by
   unfold legY_L1
   nlinarith [Real.arctan_lt_pi_div_two (s/a)]
 
 /-- `L₁` maps `[0, ∞)` onto `[0, ∞)`. -/
-lemma legY_L1_surj {a : ℝ} (ha : 0 ≤ a) {v : ℝ} (hv : 0 ≤ v) :
+theorem legY_L1_surj {a : ℝ} (ha : 0 ≤ a) {v : ℝ} (hv : 0 ≤ v) :
     ∃ s, 0 ≤ s ∧ legY_L1 a s = v := by
   have h0 : (0:ℝ) ≤ v + a * (π/2) := by positivity
   obtain ⟨s, hs, hsv⟩ := intermediate_value_Icc h0 (legY_L1_continuous a).continuousOn
@@ -457,11 +457,11 @@ lemma legY_L1_surj {a : ℝ} (ha : 0 ≤ a) {v : ℝ} (hv : 0 ≤ v) :
   exact ⟨s, hs.1, hsv⟩
 
 /-- `L₂(0) = 0`. -/
-lemma legY_L2_zero (a : ℝ) : legY_L2 a 0 = 0 := by
+theorem legY_L2_zero (a : ℝ) : legY_L2 a 0 = 0 := by
   simp [legY_L2, Real.log_pow]; ring
 
 /-- `L₂` is continuous away from `s = α` and `s = -α`. -/
-lemma legY_L2_continuousOn (a : ℝ) :
+theorem legY_L2_continuousOn (a : ℝ) :
     ContinuousOn (legY_L2 a) {s | 0 ≤ s ∧ s ≠ a ∧ 0 < s + a} := by
   intro s ⟨hs, hsa, hsa'⟩
   have h1 : a^2 - s^2 ≠ 0 := by
@@ -477,7 +477,7 @@ lemma legY_L2_continuousOn (a : ℝ) :
     (continuousAt_const.mul ((continuous_id.add continuous_const).continuousAt.log hsa'.ne'))
 
 /-- `L₂'(s) = -s²/(α² - s²)`. -/
-lemma legY_L2_hasDerivAt {a s : ℝ} (hsa : a^2 - s^2 ≠ 0) (hsa' : s + a ≠ 0) :
+theorem legY_L2_hasDerivAt {a s : ℝ} (hsa : a^2 - s^2 ≠ 0) (hsa' : s + a ≠ 0) :
     HasDerivAt (legY_L2 a) (-s^2/(a^2 - s^2)) s := by
   have h1 : HasDerivAt (fun s : ℝ => a^2 - s^2) (-(2*s)) s := by
     simpa using (hasDerivAt_pow 2 s).const_sub (a^2)
@@ -491,7 +491,7 @@ lemma legY_L2_hasDerivAt {a s : ℝ} (hsa : a^2 - s^2 ≠ 0) (hsa' : s + a ≠ 0
   ring
 
 /-- `L₂` decreases strictly on `[0, α)`. -/
-lemma legY_L2_strictAntiOn {a : ℝ} (ha : 0 < a) : StrictAntiOn (legY_L2 a) (Ico 0 a) := by
+theorem legY_L2_strictAntiOn {a : ℝ} (ha : 0 < a) : StrictAntiOn (legY_L2 a) (Ico 0 a) := by
   refine strictAntiOn_of_deriv_neg (convex_Ico 0 a)
     ((legY_L2_continuousOn a).mono fun s hs => ⟨hs.1, hs.2.ne, by linarith [hs.1]⟩) ?_
   intro s hs
@@ -502,7 +502,7 @@ lemma legY_L2_strictAntiOn {a : ℝ} (ha : 0 < a) : StrictAntiOn (legY_L2 a) (Ic
   exact div_neg_of_neg_of_pos (by linarith) hp
 
 /-- `L₂` increases strictly on `(α, ∞)`. -/
-lemma legY_L2_strictMonoOn {a : ℝ} (ha : 0 ≤ a) : StrictMonoOn (legY_L2 a) (Ioi a) := by
+theorem legY_L2_strictMonoOn {a : ℝ} (ha : 0 ≤ a) : StrictMonoOn (legY_L2 a) (Ioi a) := by
   refine strictMonoOn_of_deriv_pos (convex_Ioi a)
     ((legY_L2_continuousOn a).mono fun s hs => ⟨by have : a < s := hs; linarith, (ne_of_gt hs),
       by have : a < s := hs; linarith⟩) ?_
@@ -515,7 +515,7 @@ lemma legY_L2_strictMonoOn {a : ℝ} (ha : 0 ≤ a) : StrictMonoOn (legY_L2 a) (
   exact div_pos_of_neg_of_neg (by linarith) hp
 
 /-- `L₂ → -∞` at `s = α`. -/
-lemma legY_L2_tendsto_nhdsNE {a : ℝ} (ha : 0 < a) : Tendsto (legY_L2 a) (𝓝[≠] a) atBot := by
+theorem legY_L2_tendsto_nhdsNE {a : ℝ} (ha : 0 < a) : Tendsto (legY_L2 a) (𝓝[≠] a) atBot := by
   have h1 : Tendsto (fun s : ℝ => a^2 - s^2) (𝓝[≠] a) (𝓝[≠] 0) := by
     refine tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within _ ?_ ?_
     · have := ((continuous_const.sub (continuous_pow 2)).tendsto a (f := fun s : ℝ => a^2 - s^2))
@@ -540,7 +540,7 @@ lemma legY_L2_tendsto_nhdsNE {a : ℝ} (ha : 0 < a) : Tendsto (legY_L2 a) (𝓝[
   simp only [Function.comp, legY_L2]; ring
 
 /-- A linear lower bound for `L₂` for large `s`. -/
-lemma legY_L2_ge {a s : ℝ} (ha : 0 ≤ a) (hs : 3*a + 1 ≤ s) :
+theorem legY_L2_ge {a s : ℝ} (ha : 0 ≤ a) (hs : 3*a + 1 ≤ s) :
     s - a/2 * Real.log 2 ≤ legY_L2 a s := by
   have h1 : 0 < s - a := by linarith
   have h2 : 0 < s + a := by linarith
@@ -554,7 +554,7 @@ lemma legY_L2_ge {a s : ℝ} (ha : 0 ≤ a) (hs : 3*a + 1 ≤ s) :
   nlinarith [mul_le_mul_of_nonneg_left h3 ha]
 
 /-- `L₂ → ∞` at `∞`. -/
-lemma legY_L2_tendsto_atTop {a : ℝ} (ha : 0 ≤ a) : Tendsto (legY_L2 a) atTop atTop := by
+theorem legY_L2_tendsto_atTop {a : ℝ} (ha : 0 ≤ a) : Tendsto (legY_L2 a) atTop atTop := by
   refine tendsto_atTop_mono' _ ?_ (tendsto_atTop_add_const_right _ (-(a/2 * Real.log 2)) tendsto_id)
   filter_upwards [eventually_ge_atTop (3*a+1)] with s hs
   have := legY_L2_ge ha hs
@@ -570,15 +570,15 @@ noncomputable def legY_R2 (a x : ℝ) : ℝ :=
   Real.log ((x+Real.sqrt (x^2-1+a^2))/Real.sqrt (1-a^2))+a/2*Real.log ((1-a^2)*|1-x^2|/((1+a^2)*x^2-1+a^2+2*a*x*Real.sqrt (x^2-1+a^2)))
 
 /-- `√(1-α²) > 0`. -/
-lemma legY_x0_pos {a : ℝ} (ha1 : a < 1) (ha : 0 ≤ a) : 0 < Real.sqrt (1 - a^2) :=
+theorem legY_x0_pos {a : ℝ} (ha1 : a < 1) (ha : 0 ≤ a) : 0 < Real.sqrt (1 - a^2) :=
   Real.sqrt_pos.2 (by nlinarith)
 
 /-- `√(1-α²)² = 1-α²`. -/
-lemma legY_x0_sq {a : ℝ} (ha1 : a < 1) (ha : 0 ≤ a) : Real.sqrt (1 - a^2) ^ 2 = 1 - a^2 :=
+theorem legY_x0_sq {a : ℝ} (ha1 : a < 1) (ha : 0 ≤ a) : Real.sqrt (1 - a^2) ^ 2 = 1 - a^2 :=
   Real.sq_sqrt (by nlinarith)
 
 /-- The right side of 14.15.21 vanishes at `x = √(1-α²)`. -/
-lemma legY_R1_x0 {a : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) : legY_R1 a (Real.sqrt (1 - a^2)) = 0 := by
+theorem legY_R1_x0 {a : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) : legY_R1 a (Real.sqrt (1 - a^2)) = 0 := by
   have h0 := legY_x0_pos ha1 ha
   have h2 := legY_x0_sq ha1 ha
   unfold legY_R1
@@ -593,12 +593,12 @@ lemma legY_R1_x0 {a : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) : legY_R1 a (Real.sqrt (
   rw [this, Real.arccos_one]; ring
 
 /-- At `α = 0` the right side of 14.15.21 is `arccos x`. -/
-lemma legY_R1_zero_alpha (x : ℝ) : legY_R1 0 x = Real.arccos x := by
+theorem legY_R1_zero_alpha (x : ℝ) : legY_R1 0 x = Real.arccos x := by
   simp [legY_R1]
 
 
 /-- Derivative of the right side of 14.15.21: `-√(1-α²-x²)/(1-x²)`. -/
-lemma legY_R1_hasDerivAt {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : 0 < x)
+theorem legY_R1_hasDerivAt {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : 0 < x)
     (hx1 : x < Real.sqrt (1 - a^2)) :
     HasDerivAt (legY_R1 a) (-Real.sqrt (1 - a^2 - x^2) / (1 - x^2)) x := by
   set c := Real.sqrt (1 - a^2) with hc
@@ -650,7 +650,7 @@ lemma legY_R1_hasDerivAt {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : 0 < x)
 
 
 /-- The right side of 14.15.21 decreases strictly on `[0, √(1-α²)]`. -/
-lemma legY_R1_strictAntiOn {a : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) :
+theorem legY_R1_strictAntiOn {a : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) :
     StrictAntiOn (legY_R1 a) (Icc 0 (Real.sqrt (1 - a^2))) := by
   rcases ha.eq_or_lt with rfl | ha
   · intro x hx y hy hxy
@@ -679,7 +679,7 @@ lemma legY_R1_strictAntiOn {a : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) :
     exact div_neg_of_neg_of_pos (by linarith) hx2
 
 /-- The right side of 14.15.21 is nonnegative on `[0, √(1-α²)]`. -/
-lemma legY_R1_nonneg {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx : 0 ≤ x)
+theorem legY_R1_nonneg {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx : 0 ≤ x)
     (hx1 : x ≤ Real.sqrt (1 - a^2)) : 0 ≤ legY_R1 a x := by
   rcases hx1.lt_or_eq with h | h
   · rw [← legY_R1_x0 ha ha1]
@@ -688,7 +688,7 @@ lemma legY_R1_nonneg {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx : 0 ≤ x)
 
 
 /-- The right side of 14.15.22 without the absolute value (the logarithm is even). -/
-lemma legY_R2_eq (a x : ℝ) : legY_R2 a x =
+theorem legY_R2_eq (a x : ℝ) : legY_R2 a x =
     Real.log ((x+Real.sqrt (x^2-1+a^2))/Real.sqrt (1-a^2)) + a/2*Real.log ((1-a^2)*(1-x^2)/((1+a^2)*x^2-1+a^2+2*a*x*Real.sqrt (x^2-1+a^2))) := by
   unfold legY_R2
   congr 2
@@ -697,12 +697,12 @@ lemma legY_R2_eq (a x : ℝ) : legY_R2 a x =
   · rw [h, ← Real.log_neg_eq_log]; congr 1; ring
 
 /-- `√(1-α²) ≤ x ↔ x² - 1 + α² ≥ 0` for `x ≥ 0`. -/
-lemma legY_x0_le_iff {a x : ℝ} (hx : 0 ≤ x) :
+theorem legY_x0_le_iff {a x : ℝ} (hx : 0 ≤ x) :
     Real.sqrt (1 - a^2) ≤ x ↔ 0 ≤ x^2 - 1 + a^2 := by
   rw [Real.sqrt_le_left hx]; constructor <;> intro h <;> linarith
 
 /-- `√(1-α²) < x ↔ x² - 1 + α² > 0` for `x ≥ 0`. -/
-lemma legY_x0_lt_iff {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx : 0 ≤ x) :
+theorem legY_x0_lt_iff {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx : 0 ≤ x) :
     Real.sqrt (1 - a^2) < x ↔ 0 < x^2 - 1 + a^2 := by
   have h0 := legY_x0_pos ha1 ha
   have h2 := legY_x0_sq ha1 ha
@@ -715,7 +715,7 @@ lemma legY_x0_lt_iff {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx : 0 ≤ x) :
     rwa [Real.sqrt_sq hx] at this
 
 /-- Derivative of the right side of 14.15.22: `√(x²-1+α²)/(x²-1)`. -/
-lemma legY_R2_hasDerivAt {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx : 0 ≤ x)
+theorem legY_R2_hasDerivAt {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx : 0 ≤ x)
     (hx0 : Real.sqrt (1 - a^2) < x) (hx1 : x ≠ 1) :
     HasDerivAt (legY_R2 a) (Real.sqrt (x^2 - 1 + a^2) / (x^2 - 1)) x := by
   have hW0' := (legY_x0_lt_iff ha ha1 hx).1 hx0
@@ -766,7 +766,7 @@ lemma legY_R2_hasDerivAt {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx : 0 ≤ x)
 
 
 /-- The right side of 14.15.22 vanishes at `x = √(1-α²)`. -/
-lemma legY_R2_x0 {a : ℝ} (ha : 0 < a) (ha1 : a < 1) : legY_R2 a (Real.sqrt (1 - a^2)) = 0 := by
+theorem legY_R2_x0 {a : ℝ} (ha : 0 < a) (ha1 : a < 1) : legY_R2 a (Real.sqrt (1 - a^2)) = 0 := by
   have h0 := legY_x0_pos ha1 ha.le
   have h2 := legY_x0_sq ha1 ha.le
   have hW : Real.sqrt (Real.sqrt (1 - a^2) ^ 2 - 1 + a^2) = 0 := by
@@ -782,7 +782,7 @@ lemma legY_R2_x0 {a : ℝ} (ha : 0 < a) (ha1 : a < 1) : legY_R2 a (Real.sqrt (1 
   rw [this, Real.log_one, mul_zero]
 
 /-- Continuity of the right side of 14.15.22. -/
-lemma legY_R2_continuousAt {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx1 : x ≠ 1) (hx1' : x ≠ -1)
+theorem legY_R2_continuousAt {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx1 : x ≠ 1) (hx1' : x ≠ -1)
     (hpos : 0 < x + Real.sqrt (x^2-1+a^2))
     (hG : (1+a^2)*x^2-1+a^2+2*a*x*Real.sqrt (x^2-1+a^2) ≠ 0) :
     ContinuousAt (legY_R2 a) x := by
@@ -804,13 +804,13 @@ lemma legY_R2_continuousAt {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx1 : x ≠
         (1+a^2)*x^2-1+a^2+2*a*x*Real.sqrt (x^2-1+a^2)).continuousAt) hG
 
 /-- For `x ≥ √(1-α²)` the denominator in 14.15.22 is the square `(W + αx)²`. -/
-lemma legY_G_eq {a x : ℝ} (hW : 0 ≤ x^2 - 1 + a^2) :
+theorem legY_G_eq {a x : ℝ} (hW : 0 ≤ x^2 - 1 + a^2) :
     (1+a^2)*x^2-1+a^2+2*a*x*Real.sqrt (x^2-1+a^2) = (Real.sqrt (x^2-1+a^2) + a*x)^2 := by
   have := Real.sq_sqrt hW
   linear_combination (-1) * this
 
 /-- The right side of 14.15.22 decreases strictly on `[√(1-α²), 1)`. -/
-lemma legY_R2_strictAntiOn {a : ℝ} (ha : 0 < a) (ha1 : a < 1) :
+theorem legY_R2_strictAntiOn {a : ℝ} (ha : 0 < a) (ha1 : a < 1) :
     StrictAntiOn (legY_R2 a) (Ico (Real.sqrt (1 - a^2)) 1) := by
   have h0 := legY_x0_pos ha1 ha.le
   refine strictAntiOn_of_deriv_neg (convex_Ico _ _) ?_ ?_
@@ -831,7 +831,7 @@ lemma legY_R2_strictAntiOn {a : ℝ} (ha : 0 < a) (ha1 : a < 1) :
     exact div_neg_of_pos_of_neg (Real.sqrt_pos.2 hW) (by nlinarith [hx.2])
 
 /-- The right side of 14.15.22 is negative on `(√(1-α²), 1)`. -/
-lemma legY_R2_neg {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx0 : Real.sqrt (1 - a^2) < x)
+theorem legY_R2_neg {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx0 : Real.sqrt (1 - a^2) < x)
     (hx1 : x < 1) : legY_R2 a x < 0 := by
   rw [← legY_R2_x0 ha ha1]
   exact legY_R2_strictAntiOn ha ha1 ⟨le_rfl, by
@@ -839,11 +839,11 @@ lemma legY_R2_neg {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx0 : Real.sqrt (1 - a
     nlinarith [legY_x0_pos ha1 ha.le]⟩ ⟨hx0.le, hx1⟩ hx0
 
 /-- `√(1-α²) ≤ 1`. -/
-lemma legY_x0_le_one (a : ℝ) : Real.sqrt (1 - a^2) ≤ 1 := by
+theorem legY_x0_le_one (a : ℝ) : Real.sqrt (1 - a^2) ≤ 1 := by
   rw [Real.sqrt_le_one]; nlinarith
 
 /-- The right side of 14.15.22 increases strictly on `(1, ∞)`. -/
-lemma legY_R2_strictMonoOn {a : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) :
+theorem legY_R2_strictMonoOn {a : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) :
     StrictMonoOn (legY_R2 a) (Ioi 1) := by
   have hd : ∀ x ∈ Ioi (1:ℝ), HasDerivAt (legY_R2 a)
       (Real.sqrt (x^2 - 1 + a^2) / (x^2 - 1)) x := fun x hx =>
@@ -858,7 +858,7 @@ lemma legY_R2_strictMonoOn {a : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) :
   exact div_pos (Real.sqrt_pos.2 (by nlinarith)) (by nlinarith)
 
 /-- The right side of 14.15.22 tends to `∞`. -/
-lemma legY_R2_tendsto_atTop {a : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) :
+theorem legY_R2_tendsto_atTop {a : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) :
     Tendsto (legY_R2 a) atTop atTop := by
   set c := Real.sqrt (1 - a^2)
   have hc0 : 0 < c := legY_x0_pos ha1 ha
@@ -899,7 +899,7 @@ lemma legY_R2_tendsto_atTop {a : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) :
   linarith
 
 /-- At `α = 0` the right side of 14.15.22 is positive for `x > 1`. -/
-lemma legY_R2_pos_zero {x : ℝ} (hx : 1 < x) : 0 < legY_R2 0 x := by
+theorem legY_R2_pos_zero {x : ℝ} (hx : 1 < x) : 0 < legY_R2 0 x := by
   simp only [legY_R2]
   norm_num
   apply Real.log_pos
@@ -908,23 +908,23 @@ lemma legY_R2_pos_zero {x : ℝ} (hx : 1 < x) : 0 < legY_R2 0 x := by
 
 
 /-- The relation at `x = 1`. -/
-lemma legY_rel_one (a y : ℝ) : LegendreYRelation a 1 y ↔ y = 0 := by
+theorem legY_rel_one (a y : ℝ) : LegendreYRelation a 1 y ↔ y = 0 := by
   simp [LegendreYRelation]
 
 /-- The relation for `x ≤ √(1-α²)`, `x ≠ 1`, through `L₁`. -/
-lemma legY_rel_left {a x y : ℝ} (hx1 : x ≠ 1) (hx0 : x ≤ Real.sqrt (1 - a^2)) :
+theorem legY_rel_left {a x y : ℝ} (hx1 : x ≠ 1) (hx0 : x ≤ Real.sqrt (1 - a^2)) :
     LegendreYRelation a x y ↔ a^2 ≤ y ∧ legY_L1 a (Real.sqrt (y - a^2)) = legY_R1 a x := by
   simp only [LegendreYRelation, hx1, hx0, ↓reduceIte]; rfl
 
 /-- The left side of 14.15.22 through `L₂`. -/
-lemma legY_L2_sqrt {a y : ℝ} (hy : y ≤ a^2) :
+theorem legY_L2_sqrt {a y : ℝ} (hy : y ≤ a^2) :
     Real.sqrt (a^2-y)+a/2*Real.log |y|-a*Real.log (Real.sqrt (a^2-y)+a)
       = legY_L2 a (Real.sqrt (a^2-y)) := by
   unfold legY_L2
   rw [Real.sq_sqrt (by linarith), Real.log_abs, show a^2 - (a^2 - y) = y by ring]
 
 /-- The relation for `x > √(1-α²)`, `x ≠ 1`, through `L₂`. -/
-lemma legY_rel_right {a x y : ℝ} (hx1 : x ≠ 1) (hx0 : ¬ x ≤ Real.sqrt (1 - a^2)) :
+theorem legY_rel_right {a x y : ℝ} (hx1 : x ≠ 1) (hx0 : ¬ x ≤ Real.sqrt (1 - a^2)) :
     LegendreYRelation a x y ↔ y ≤ a^2 ∧ (x < 1 → 0 < y) ∧ (1 < x → y < 0) ∧
       legY_L2 a (Real.sqrt (a^2-y)) = legY_R2 a x := by
   simp only [LegendreYRelation, hx1, hx0, ↓reduceIte]
@@ -935,7 +935,7 @@ lemma legY_rel_right {a x y : ℝ} (hx1 : x ≠ 1) (hx0 : ¬ x ≤ Real.sqrt (1 
     exact ⟨h1, h2, h3, by rw [legY_L2_sqrt h1]; exact h4⟩
 
 /-- Existence and uniqueness of the solution of 14.15.21–22. -/
-lemma legY_existsUnique {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx : 0 ≤ x) :
+theorem legY_existsUnique {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx : 0 ≤ x) :
     (∃ y, LegendreYRelation a x y) ∧
       ∀ y₁ y₂, LegendreYRelation a x y₁ → LegendreYRelation a x y₂ → y₁ = y₂ := by
   have hc0 := legY_x0_pos ha1 ha
@@ -1220,7 +1220,7 @@ noncomputable def legC_P (α ζ : ℝ) : ℝ :=
   ζ*Real.sqrt (ζ^2+α^2)/2+α^2/2*Real.arsinh (ζ/α)
 
 /-- Helper `legC_P_hasDerivAt` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-lemma legC_P_hasDerivAt {α : ℝ} (hα : 0 < α) (ζ : ℝ) :
+theorem legC_P_hasDerivAt {α : ℝ} (hα : 0 < α) (ζ : ℝ) :
     HasDerivAt (legC_P α) (Real.sqrt (ζ^2+α^2)) ζ := by
   have hp : 0 < ζ^2+α^2 := by positivity
   set s := Real.sqrt (ζ^2+α^2) with hs
@@ -1241,23 +1241,23 @@ lemma legC_P_hasDerivAt {α : ℝ} (hα : 0 < α) (ζ : ℝ) :
     linear_combination hs2
 
 /-- Helper `legC_P_strictMono` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-lemma legC_P_strictMono {α : ℝ} (hα : 0 < α) : StrictMono (legC_P α) :=
+theorem legC_P_strictMono {α : ℝ} (hα : 0 < α) : StrictMono (legC_P α) :=
   strictMono_of_deriv_pos fun ζ => by
     rw [(legC_P_hasDerivAt hα ζ).deriv]; exact Real.sqrt_pos.2 (by positivity)
 
 /-- Helper `legC_P_neg` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-lemma legC_P_neg (α ζ : ℝ) : legC_P α (-ζ) = -legC_P α ζ := by
+theorem legC_P_neg (α ζ : ℝ) : legC_P α (-ζ) = -legC_P α ζ := by
   simp only [legC_P, neg_sq, neg_div, Real.arsinh_neg]; ring
 
 /-- Helper `legC_P_ge` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-lemma legC_P_ge {α ζ : ℝ} (hα : 0 < α) (hζ : 0 ≤ ζ) : ζ^2/2 ≤ legC_P α ζ := by
+theorem legC_P_ge {α ζ : ℝ} (hα : 0 < α) (hζ : 0 ≤ ζ) : ζ^2/2 ≤ legC_P α ζ := by
   have h1 : ζ ≤ Real.sqrt (ζ^2+α^2) := Real.le_sqrt_of_sq_le (by nlinarith)
   have h2 : 0 ≤ Real.arsinh (ζ/α) := Real.arsinh_nonneg_iff.2 (by positivity)
   simp only [legC_P]
   nlinarith [mul_nonneg (sq_nonneg α) h2]
 
 /-- Helper `legC_P_surj` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-lemma legC_P_surj {α : ℝ} (hα : 0 < α) (c : ℝ) : ∃ ζ, legC_P α ζ = c := by
+theorem legC_P_surj {α : ℝ} (hα : 0 < α) (c : ℝ) : ∃ ζ, legC_P α ζ = c := by
   have hc : Continuous (legC_P α) := continuous_iff_continuousAt.2 fun ζ =>
     (legC_P_hasDerivAt hα ζ).continuousAt
   set T := |c| + 2
@@ -1276,7 +1276,7 @@ noncomputable def legC_F (α ζ : ℝ) : ℝ :=
   ζ*Real.sqrt (ζ^2-α^2)/2-α^2/2*Real.arcosh (ζ/α)
 
 /-- Helper `legC_F_hasDerivAt` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-lemma legC_F_hasDerivAt {α ζ : ℝ} (hα : 0 < α) (hζ : α < ζ) :
+theorem legC_F_hasDerivAt {α ζ : ℝ} (hα : 0 < α) (hζ : α < ζ) :
     HasDerivAt (legC_F α) (Real.sqrt (ζ^2-α^2)) ζ := by
   have hp : 0 < ζ^2-α^2 := by nlinarith
   set s := Real.sqrt (ζ^2-α^2) with hs
@@ -1298,7 +1298,7 @@ lemma legC_F_hasDerivAt {α ζ : ℝ} (hα : 0 < α) (hζ : α < ζ) :
     linear_combination hs2
 
 /-- Helper `legC_F_continuousOn` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-lemma legC_F_continuousOn {α : ℝ} (hα : 0 < α) : ContinuousOn (legC_F α) (Ici α) := by
+theorem legC_F_continuousOn {α : ℝ} (hα : 0 < α) : ContinuousOn (legC_F α) (Ici α) := by
   have h1 : ContinuousOn (fun ζ : ℝ => Real.arcosh (ζ/α)) (Ici α) :=
     Real.continuousOn_arcosh.comp (continuous_id.div_const α).continuousOn fun ζ hζ => by
       show 1 ≤ ζ/α; rw [le_div_iff₀ hα]; simpa using hζ
@@ -1307,7 +1307,7 @@ lemma legC_F_continuousOn {α : ℝ} (hα : 0 < α) : ContinuousOn (legC_F α) (
     2).continuousOn.sub (h1.const_smul (α^2/2))
 
 /-- Helper `legC_F_strictMonoOn` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-lemma legC_F_strictMonoOn {α : ℝ} (hα : 0 < α) : StrictMonoOn (legC_F α) (Ici α) := by
+theorem legC_F_strictMonoOn {α : ℝ} (hα : 0 < α) : StrictMonoOn (legC_F α) (Ici α) := by
   refine strictMonoOn_of_deriv_pos (convex_Ici α) (legC_F_continuousOn hα) fun ζ hζ => ?_
   rw [interior_Ici] at hζ
   have hζ : α < ζ := hζ
@@ -1315,11 +1315,11 @@ lemma legC_F_strictMonoOn {α : ℝ} (hα : 0 < α) : StrictMonoOn (legC_F α) (
   exact Real.sqrt_pos.2 (by nlinarith)
 
 /-- Helper `legC_F_self` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-lemma legC_F_self {α : ℝ} (hα : 0 < α) : legC_F α α = 0 := by
+theorem legC_F_self {α : ℝ} (hα : 0 < α) : legC_F α α = 0 := by
   simp [legC_F, hα.ne', Real.arcosh_zero]
 
 /-- Helper `legC_F_ge` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-lemma legC_F_ge {α ζ : ℝ} (hα : 0 < α) (hζ : 2*α ≤ ζ) : ζ^2/4 - α*ζ ≤ legC_F α ζ := by
+theorem legC_F_ge {α ζ : ℝ} (hα : 0 < α) (hζ : 2*α ≤ ζ) : ζ^2/4 - α*ζ ≤ legC_F α ζ := by
   have hζ0 : 0 < ζ := by linarith
   have h1 : ζ/2 ≤ Real.sqrt (ζ^2-α^2) := Real.le_sqrt_of_sq_le (by nlinarith)
   have hy : 1 ≤ ζ/α := by rw [le_div_iff₀ hα]; linarith
@@ -1337,7 +1337,7 @@ lemma legC_F_ge {α ζ : ℝ} (hα : 0 < α) (hζ : 2*α ≤ ζ) : ζ^2/4 - α*�
   nlinarith
 
 /-- Helper `legC_F_surj` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-lemma legC_F_surj {α c : ℝ} (hα : 0 < α) (hc : 0 ≤ c) : ∃ ζ, α ≤ ζ ∧ legC_F α ζ = c := by
+theorem legC_F_surj {α c : ℝ} (hα : 0 < α) (hc : 0 ≤ c) : ∃ ζ, α ≤ ζ ∧ legC_F α ζ = c := by
   set T := 2*α + 2*Real.sqrt c + 4*α + 1 with hT
   have hsc := Real.sq_sqrt hc
   have hsc0 := Real.sqrt_nonneg c
@@ -1352,7 +1352,7 @@ lemma legC_F_surj {α c : ℝ} (hα : 0 < α) (hc : 0 ≤ c) : ∃ ζ, α ≤ ζ
   exact ⟨ζ, hζ.1, h⟩
 
 /-- Helper `legC_hasDerivAt_artanh` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-lemma legC_hasDerivAt_artanh {v : ℝ} (hv : v ∈ Ioo (-1:ℝ) 1) :
+theorem legC_hasDerivAt_artanh {v : ℝ} (hv : v ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt Real.artanh (1/(1-v^2)) v := by
   have h1 : 0 < 1 + v := by linarith [hv.1]
   have h2 : 0 < 1 - v := by linarith [hv.2]
@@ -1372,12 +1372,12 @@ noncomputable def legC_G (a x : ℝ) : ℝ :=
   Real.sqrt (1-a^2)*Real.artanh (Real.sqrt ((x^2-a^2)/(1-a^2))/x)-Real.arcosh (x/a)
 
 /-- Helper `legC_G_v` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-lemma legC_G_v {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) :
+theorem legC_G_v {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) :
     Real.sqrt ((x^2-a^2)/(1-a^2))/x = Real.sqrt (x^2-a^2)/(Real.sqrt (1-a^2)*x) := by
   rw [Real.sqrt_div' _ (by nlinarith), div_div]
 
 /-- Helper `legC_G_hasDerivAt` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-lemma legC_G_hasDerivAt {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : x ∈ Ioo a 1) :
+theorem legC_G_hasDerivAt {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : x ∈ Ioo a 1) :
     HasDerivAt (legC_G a) (Real.sqrt (x^2-a^2)/(1-x^2)) x := by
   have hx0 : 0 < x := ha.trans hx.1
   have hw2p : 0 < x^2-a^2 := by nlinarith [hx.1]
@@ -1419,11 +1419,11 @@ lemma legC_G_hasDerivAt {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : x ∈ Ioo a
     rw [hw2, hc2]; ring
 
 /-- Helper `legC_continuousAt_artanh` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-lemma legC_continuousAt_artanh {v : ℝ} (hv : v ∈ Ioo (-1:ℝ) 1) : ContinuousAt Real.artanh v :=
+theorem legC_continuousAt_artanh {v : ℝ} (hv : v ∈ Ioo (-1:ℝ) 1) : ContinuousAt Real.artanh v :=
   (legC_hasDerivAt_artanh hv).continuousAt
 
 /-- Helper `legC_G_nonneg` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-lemma legC_G_nonneg {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : x ∈ Ico a 1) : 0 ≤ legC_G a x := by
+theorem legC_G_nonneg {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : x ∈ Ico a 1) : 0 ≤ legC_G a x := by
   have hc2p : 0 < 1 - a^2 := by nlinarith
   set c := Real.sqrt (1-a^2) with hc
   have hc0 : 0 < c := Real.sqrt_pos.2 hc2p
@@ -1475,7 +1475,7 @@ noncomputable def legC_H (α ζ : ℝ) : ℝ :=
   α^2/2*Real.arcsin (ζ/α)+ζ/2*Real.sqrt (α^2-ζ^2)
 
 /-- Helper `legC_H_hasDerivAt` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-lemma legC_H_hasDerivAt {α ζ : ℝ} (hα : 0 < α) (hζ : ζ ∈ Ioo (-α) α) :
+theorem legC_H_hasDerivAt {α ζ : ℝ} (hα : 0 < α) (hζ : ζ ∈ Ioo (-α) α) :
     HasDerivAt (legC_H α) (Real.sqrt (α^2-ζ^2)) ζ := by
   have hp : 0 < α^2-ζ^2 := by nlinarith [hζ.1, hζ.2]
   set s := Real.sqrt (α^2-ζ^2) with hs
@@ -1498,11 +1498,11 @@ lemma legC_H_hasDerivAt {α ζ : ℝ} (hα : 0 < α) (hζ : ζ ∈ Ioo (-α) α)
     linear_combination hs2
 
 /-- Helper `legC_H_continuous` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-lemma legC_H_continuous (α : ℝ) : Continuous (legC_H α) := by
+theorem legC_H_continuous (α : ℝ) : Continuous (legC_H α) := by
   unfold legC_H; fun_prop
 
 /-- Helper `legC_H_strictMonoOn` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-lemma legC_H_strictMonoOn {α : ℝ} (hα : 0 < α) : StrictMonoOn (legC_H α) (Icc (-α) α) := by
+theorem legC_H_strictMonoOn {α : ℝ} (hα : 0 < α) : StrictMonoOn (legC_H α) (Icc (-α) α) := by
   refine strictMonoOn_of_deriv_pos (convex_Icc _ _) (legC_H_continuous α).continuousOn
     fun ζ hζ => ?_
   rw [interior_Icc] at hζ
@@ -1510,11 +1510,11 @@ lemma legC_H_strictMonoOn {α : ℝ} (hα : 0 < α) : StrictMonoOn (legC_H α) (
   exact Real.sqrt_pos.2 (by nlinarith [hζ.1, hζ.2])
 
 /-- Helper `legC_H_right` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-lemma legC_H_right {α : ℝ} (hα : 0 < α) : legC_H α α = π*α^2/4 := by
+theorem legC_H_right {α : ℝ} (hα : 0 < α) : legC_H α α = π*α^2/4 := by
   simp [legC_H, hα.ne', Real.arcsin_one]; ring
 
 /-- Helper `legC_H_left` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-lemma legC_H_left {α : ℝ} (hα : 0 < α) : legC_H α (-α) = -(π*α^2/4) := by
+theorem legC_H_left {α : ℝ} (hα : 0 < α) : legC_H α (-α) = -(π*α^2/4) := by
   simp [legC_H, hα.ne', Real.arcsin_neg, Real.arcsin_one]; ring
 
 /-- Right side of DLMF 14.15.28 as a function of `x ∈ (-a, a)`. -/
@@ -1522,11 +1522,11 @@ noncomputable def legC_K (a x : ℝ) : ℝ :=
   Real.arcsin (x/a)-Real.sqrt (1-a^2)*Real.arctan (x*Real.sqrt ((1-a^2)/(a^2-x^2)))
 
 /-- Helper `legC_K_neg` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-lemma legC_K_neg (a x : ℝ) : legC_K a (-x) = -legC_K a x := by
+theorem legC_K_neg (a x : ℝ) : legC_K a (-x) = -legC_K a x := by
   simp only [legC_K, neg_div, Real.arcsin_neg, neg_sq, neg_mul, Real.arctan_neg]; ring
 
 /-- Helper `legC_K_hasDerivAt` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-lemma legC_K_hasDerivAt {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : x ∈ Ioo (-a) a) :
+theorem legC_K_hasDerivAt {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : x ∈ Ioo (-a) a) :
     HasDerivAt (legC_K a) (Real.sqrt (a^2-x^2)/(1-x^2)) x := by
   have hm2p : 0 < a^2-x^2 := by nlinarith [hx.1, hx.2]
   have hx2 : 0 < 1 - x^2 := by nlinarith [hx.1, hx.2]
@@ -1565,7 +1565,7 @@ lemma legC_K_hasDerivAt {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : x ∈ Ioo (
     rw [hm2, hc2]; ring
 
 /-- Helper `legC_K_tendsto` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-lemma legC_K_tendsto {a : ℝ} (ha : 0 < a) (ha1 : a < 1) :
+theorem legC_K_tendsto {a : ℝ} (ha : 0 < a) (ha1 : a < 1) :
     Tendsto (legC_K a) (𝓝[<] a) (𝓝 (π/2 - Real.sqrt (1-a^2)*(π/2))) := by
   have hc2p : 0 < 1 - a^2 := by nlinarith
   have h1 : Tendsto (fun x : ℝ => Real.arcsin (x/a)) (𝓝[<] a) (𝓝 (π/2)) := by
@@ -1592,7 +1592,7 @@ lemma legC_K_tendsto {a : ℝ} (ha : 0 < a) (ha1 : a < 1) :
   exact h1.sub (h2.const_mul _)
 
 /-- Helper `legC_K_bound` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-lemma legC_K_bound {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : x ∈ Ioo (-a) a) :
+theorem legC_K_bound {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : x ∈ Ioo (-a) a) :
     legC_K a x < π/2 - Real.sqrt (1-a^2)*(π/2) := by
   have hmono : StrictMonoOn (legC_K a) (Ioo (-a) a) := by
     refine strictMonoOn_of_deriv_pos (convex_Ioo _ _)
@@ -1612,7 +1612,7 @@ lemma legC_K_bound {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : x ∈ Ioo (-a) a
   linarith
 
 /-- Helper `legC_params_lt` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-lemma legC_params_lt {ν μ : ℝ} (hν : -1/2 < ν) (hμ : 0 < μ) (hlt : μ < ν+1/2) :
+theorem legC_params_lt {ν μ : ℝ} (hν : -1/2 < ν) (hμ : 0 < μ) (hlt : μ < ν+1/2) :
     0 < legendreCylinderA ν μ ∧ legendreCylinderA ν μ < 1 ∧ 0 < legendreCylinderAlpha ν μ ∧
       π/2 - Real.sqrt (1-legendreCylinderA ν μ^2)*(π/2) = π*legendreCylinderAlpha ν μ^2/4 := by
   have hp : 0 < ν+1/2 := by linarith
@@ -1641,14 +1641,14 @@ lemma legC_params_lt {ν μ : ℝ} (hν : -1/2 < ν) (hμ : 0 < μ) (hlt : μ < 
     ring
 
 /-- Helper `legC_alpha_pos_of_gt` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-lemma legC_alpha_pos_of_gt {ν μ : ℝ} (hν : -1/2 < ν) (hgt : ν+1/2 < μ) :
+theorem legC_alpha_pos_of_gt {ν μ : ℝ} (hν : -1/2 < ν) (hgt : ν+1/2 < μ) :
     0 < legendreCylinderAlpha ν μ := by
   have hp : 0 < ν+1/2 := by linarith
   have habs : |ν-μ+1/2| = μ-(ν+1/2) := by rw [abs_of_neg (by linarith)]; ring
   exact Real.sqrt_pos.2 (div_pos (by rw [habs]; linarith) hp)
 
 /-- Helper `legC_A_eq_zero` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-lemma legC_A_eq_zero {ν μ : ℝ} (h : μ = ν+1/2) :
+theorem legC_A_eq_zero {ν μ : ℝ} (h : μ = ν+1/2) :
     legendreCylinderA ν μ = 0 := by
   rw [legendreCylinderA, show ν-μ+1/2 = 0 by linarith]; simp
 
@@ -1725,7 +1725,7 @@ def legendreUniformFilter (S : Set (ℝ × ℝ × ℝ)) : Filter (ℝ × ℝ × 
   comap Prod.fst atTop ⊓ 𝓟 S
 
 /-- For real order and positive argument, `Y_ν(x)` is real. -/
-lemma legBes_besselY_im (ν x : ℝ) (hx : 0 < x) : (besselY ν x).im = 0 := by
+theorem legBes_besselY_im (ν x : ℝ) (hx : 0 < x) : (besselY ν x).im = 0 := by
   have hs : (x : ℂ) ∈ slitPlane := Or.inl (by simpa using hx)
   have hnot : ∀ μ : ℝ, (∀ k : ℤ, (μ : ℂ) ≠ k) → (besselY μ x).im = 0 := by
     intro μ hμ
@@ -1759,12 +1759,12 @@ lemma legBes_besselY_im (ν x : ℝ) (hx : 0 < x) : (besselY ν x).im = 0 := by
     (tendsto_const_nhds.congr' (hev.mono fun μ h => h.symm))
 
 /-- For real order and positive argument, `Y_ν(x)` is real. -/
-lemma legBes_besselY_ofReal_eq_re (ν x : ℝ) (hx : 0 < x) :
+theorem legBes_besselY_ofReal_eq_re (ν x : ℝ) (hx : 0 < x) :
     besselY ν x = ((besselY ν x).re : ℂ) :=
   Complex.ext (by simp) (by simp [legBes_besselY_im ν x hx])
 
 /-- `x ↦ J_ν(x) + Y_ν(x)` is real-continuous on `(0, ∞)`. -/
-lemma legBes_continuousOn (ν : ℝ) :
+theorem legBes_continuousOn (ν : ℝ) :
     ContinuousOn (fun x : ℝ => (besselJ ν x + besselY ν x).re) (Ioi 0) := by
   intro x hx
   have hs : (x : ℂ) ∈ slitPlane := Or.inl (by simpa using hx)
@@ -1776,7 +1776,7 @@ lemma legBes_continuousOn (ν : ℝ) :
   exact ((continuousOn_re_besselJ ν) x hx).add hY.continuousWithinAt
 
 /-- On the positive axis `J_ν + Y_ν` vanishes iff its real part does. -/
-lemma legBes_eq_zero_iff {ν x : ℝ} (hx : 0 < x) :
+theorem legBes_eq_zero_iff {ν x : ℝ} (hx : 0 < x) :
     besselJ ν x + besselY ν x = 0 ↔ (besselJ ν x + besselY ν x).re = 0 := by
   rw [besselJ_ofReal_eq_re ν x hx, legBes_besselY_ofReal_eq_re ν x hx, ← ofReal_add, ofReal_re,
     ofReal_eq_zero]
@@ -1784,7 +1784,7 @@ lemma legBes_eq_zero_iff {ν x : ℝ} (hx : 0 < x) :
 
 /-- Large-argument positivity: `J_ν + Y_ν > 0` at points `x ≡ νπ/2 + π/4 (mod 2π)` beyond any
 bound. -/
-lemma legBes_large (ν : ℝ) (X : ℝ) :
+theorem legBes_large (ν : ℝ) (X : ℝ) :
     ∃ x, X ≤ x ∧ 0 < x ∧ 0 < (besselJ ν x + besselY ν x).re := by
   obtain ⟨C, hC⟩ := ((besselJ_sub_cos_isBigO (ν : ℂ)).add (besselY_sub_sin_isBigO (ν : ℂ))).bound
   obtain ⟨X0, hX0⟩ := eventually_atTop.mp hC
@@ -1838,7 +1838,7 @@ lemma legBes_large (ν : ℝ) (X : ℝ) :
 
 
 /-- Near `0`, `J_ν` is positive and bounded (`ν ≥ 0`). -/
-lemma legBes_besselJ_small {ν : ℝ} (hν : 0 ≤ ν) :
+theorem legBes_besselJ_small {ν : ℝ} (hν : 0 ≤ ν) :
     ∃ δ M : ℝ, 0 < δ ∧ 0 < M ∧ ∀ t : ℝ, 0 < t → t ≤ δ →
       0 < (besselJ ν t).re ∧ (besselJ ν t).re ≤ M := by
   set G : ℝ → ℂ := fun x => regularizedHGFun (∅ : Multiset ℂ) {(ν : ℂ) + 1} (-((x : ℂ) ^ 2 / 4))
@@ -1874,7 +1874,7 @@ lemma legBes_besselJ_small {ν : ℝ} (hν : 0 ≤ ν) :
 
 /-- Small-argument behaviour: `J_ν + Y_ν < 0` on some interval `(0, ε)` (`ν ≥ 0`), from
 `(Y_ν/J_ν)' = 2/(π x J_ν²)` (Wronskian, DLMF 10.5.2) and the boundedness of `J_ν`. -/
-lemma legBes_small {ν : ℝ} (hν : 0 ≤ ν) :
+theorem legBes_small {ν : ℝ} (hν : 0 ≤ ν) :
     ∃ ε : ℝ, 0 < ε ∧ ∀ x : ℝ, 0 < x → x < ε → (besselJ ν x + besselY ν x).re < 0 := by
   obtain ⟨δ, M, hδ, hM, hJ⟩ := legBes_besselJ_small hν
   set j : ℝ → ℝ := fun t => (besselJ ν t).re with hj

@@ -8,8 +8,7 @@ module
 public import DLMFMathlib.Analysis.ODE.P1oParamHolomorphic
 public import DLMFMathlib.Analysis.ODE.SturmComparison
 public import DLMFMathlib.Analysis.ODE.SturmDeformation
-public import Mathlib.Analysis.Analytic.IsolatedZeros
-public import Mathlib.Analysis.Complex.CauchyIntegral
+public import DLMFMathlib.Analysis.ODE.P1oLinearGlobal
 
 /-!
 # Spectra of separated Sturm–Liouville problems with an even potential
@@ -75,23 +74,23 @@ def p2lY (V : ℝ → ℝ) (odd0 : Bool) (h : ℝ) : ℝ → ℝ :=
   open Classical in
   if hV : Continuous V then (p2l_exists hV h odd0).choose else 0
 
-lemma p2lY_spec (hV : Continuous V) (odd0 : Bool) (h : ℝ) :
+theorem p2lY_spec (hV : Continuous V) (odd0 : Bool) (h : ℝ) :
     p2lY V odd0 h 0 = p2lD0 odd0 ∧ deriv (p2lY V odd0 h) 0 = p2lD1 odd0 ∧
       p2lIsSol V h (p2lY V odd0 h) := by
   rw [p2lY, dite_eq_left hV]
   exact (p2l_exists hV h odd0).choose_spec
 
-lemma p2lIsSol.hasDerivAt {w : ℝ → ℝ} (hw : p2lIsSol V h w) (x : ℝ) :
+theorem p2lIsSol.hasDerivAt {w : ℝ → ℝ} (hw : p2lIsSol V h w) (x : ℝ) :
     HasDerivAt w (deriv w x) x := (hw.1 x).hasDerivAt
 
-lemma p2lIsSol.continuous {w : ℝ → ℝ} (hw : p2lIsSol V h w) : Continuous w :=
+theorem p2lIsSol.continuous {w : ℝ → ℝ} (hw : p2lIsSol V h w) : Continuous w :=
   hw.1.continuous
 
-lemma p2lIsSol.continuous_deriv {w : ℝ → ℝ} (hw : p2lIsSol V h w) : Continuous (deriv w) :=
+theorem p2lIsSol.continuous_deriv {w : ℝ → ℝ} (hw : p2lIsSol V h w) : Continuous (deriv w) :=
   continuous_iff_continuousAt.2 fun x => (hw.2 x).continuousAt
 
 /-- Uniqueness for the equation. -/
-lemma p2l_sol_eq (hV : Continuous V) {w₁ w₂ : ℝ → ℝ} (h₁ : p2lIsSol V h w₁)
+theorem p2l_sol_eq (hV : Continuous V) {w₁ w₂ : ℝ → ℝ} (h₁ : p2lIsSol V h w₁)
     (h₂ : p2lIsSol V h w₂) {x₀ : ℝ} (e₀ : w₁ x₀ = w₂ x₀) (e₁ : deriv w₁ x₀ = deriv w₂ x₀) :
     w₁ = w₂ := by
   have := eq_of_linear_ode (𝕜 := ℝ) (E := ℝ) (t₀ := x₀) (p := fun _ => 0)
@@ -101,7 +100,7 @@ lemma p2l_sol_eq (hV : Continuous V) {w₁ w₂ : ℝ → ℝ} (h₁ : p2lIsSol 
     (fun t => ⟨h₂.hasDerivAt t, (h₂.2 t).congr_deriv (by simp)⟩) e₀ e₁
   exact this.1
 
-lemma p2lIsSol.const_mul {w : ℝ → ℝ} (hw : p2lIsSol V h w) (c : ℝ) :
+theorem p2lIsSol.const_mul {w : ℝ → ℝ} (hw : p2lIsSol V h w) (c : ℝ) :
     p2lIsSol V h (fun x => c * w x) := by
   have hd : deriv (fun x => c * w x) = fun x => c * deriv w x :=
     funext fun x => ((hw.hasDerivAt x).const_mul c).deriv
@@ -110,14 +109,14 @@ lemma p2lIsSol.const_mul {w : ℝ → ℝ} (hw : p2lIsSol V h w) (c : ℝ) :
   exact ((hw.2 x).const_mul c).congr_deriv (by ring)
 
 /-- A solution vanishing to first order at a point is zero. -/
-lemma p2l_eq_zero (hV : Continuous V) {w : ℝ → ℝ} (hw : p2lIsSol V h w) {x₀ : ℝ}
+theorem p2l_eq_zero (hV : Continuous V) {w : ℝ → ℝ} (hw : p2lIsSol V h w) {x₀ : ℝ}
     (e₀ : w x₀ = 0) (e₁ : deriv w x₀ = 0) : w = 0 := by
   have h0 : p2lIsSol V h (0 : ℝ → ℝ) := ⟨differentiable_const 0, fun x => by
     simp⟩
   exact p2l_sol_eq hV hw h0 (x₀ := x₀) (by simp [e₀]) (by simp [e₁])
 
 /-- Every solution satisfying the condition at `0` is a multiple of the basic solution. -/
-lemma p2l_eq_mul_p2lY (hV : Continuous V) {odd0 : Bool} {w : ℝ → ℝ} (hw : p2lIsSol V h w)
+theorem p2l_eq_mul_p2lY (hV : Continuous V) {odd0 : Bool} {w : ℝ → ℝ} (hw : p2lIsSol V h w)
     (h0 : if odd0 then w 0 = 0 else deriv w 0 = 0) :
     w = fun x => (if odd0 then deriv w 0 else w 0) * p2lY V odd0 h x := by
   obtain ⟨y0, y1, hy⟩ := p2lY_spec hV odd0 h
@@ -129,7 +128,7 @@ lemma p2l_eq_mul_p2lY (hV : Continuous V) {odd0 : Bool} {w : ℝ → ℝ} (hw : 
   · cases odd0 <;> simp_all [p2lD0]
   · rw [hd]; cases odd0 <;> simp_all [p2lD1]
 
-lemma p2lY_ne_zero (hV : Continuous V) (odd0 : Bool) (h : ℝ) : p2lY V odd0 h ≠ 0 := by
+theorem p2lY_ne_zero (hV : Continuous V) (odd0 : Bool) (h : ℝ) : p2lY V odd0 h ≠ 0 := by
   intro h0
   obtain ⟨y0, y1, -⟩ := p2lY_spec hV odd0 h
   rw [h0] at y0 y1
@@ -170,7 +169,7 @@ theorem p2l_mem_spec_iff (hV : Continuous V) (odd0 oddK : Bool) :
 /-! ### Lower bound of the spectrum -/
 
 /-- If `|V| ≤ B`, every eigenvalue is at least `-B` (energy identity for `w w'`). -/
-theorem p2l_spec_lower (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (hL : 0 < L)
+lemma p2l_spec_lower (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (hL : 0 < L)
     {odd0 oddK : Bool} (hh : h ∈ p2lSpec V L odd0 oddK) : -B ≤ h := by
   by_contra hlt
   push Not at hlt
@@ -255,7 +254,7 @@ lemma p2lF_ofReal (hV : Continuous V) (odd0 : Bool) (h t : ℝ) :
     (by rw [F0, y0]) (by rw [F1, y1])
   exact ⟨congrFun this.1 t, congrFun this.2 t⟩
 
-lemma p2lY_continuous_param (hV : Continuous V) (odd0 : Bool) (t : ℝ) :
+theorem p2lY_continuous_param (hV : Continuous V) (odd0 : Bool) (t : ℝ) :
     Continuous (fun h => p2lY V odd0 h t) ∧ Continuous (fun h => deriv (p2lY V odd0 h) t) := by
   have e : ∀ h, p2lY V odd0 h t = (p2lF V odd0 t h).re ∧
       deriv (p2lY V odd0 h) t = (p2lF' V odd0 t h).re := fun h => by
@@ -462,7 +461,7 @@ lemma p2l_continuous_uncurry {f f' : ℝ → ℝ → ℝ} (hc : ∀ x, Continuou
     _ ≤ |f h x - f h x₀| + |f h x₀ - f h₀ x₀| := abs_add_le _ _
     _ < ε := by linarith
 
-lemma p2lY_continuous (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (odd0 : Bool) :
+theorem p2lY_continuous (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (odd0 : Bool) :
     Continuous (Function.uncurry (p2lY V odd0)) ∧
       Continuous (Function.uncurry fun h x => deriv (p2lY V odd0 h) x) := by
   have c1 : Continuous (Function.uncurry (p2lY V odd0)) :=
@@ -542,11 +541,11 @@ lemma p2l_many_zeros (hB : ∀ x, |V x| ≤ B) (hL : 0 < L) (N : ℕ) {w : ℝ �
     linarith [(hz j).2]
 
 /-- Simple zeros of a nonzero solution in a compact interval are finite in number. -/
-lemma p2l_zeros_finite (hV : Continuous V) {w : ℝ → ℝ} (hw : p2lIsSol V h w) (hne : w ≠ 0)
+theorem p2l_zeros_finite (hV : Continuous V) {w : ℝ → ℝ} (hw : p2lIsSol V h w) (hne : w ≠ 0)
     (a b : ℝ) : {x | x ∈ Icc a b ∧ w x = 0}.Finite :=
   sturmDef_finite (fun x _ => hw.hasDerivAt x) fun _ _ h0 h1 => hne (p2l_eq_zero hV hw h0 h1)
 
-lemma p2l_le_ncard_of_strictMono {P : ℝ → Prop} {n : ℕ} {z : Fin n → ℝ} (hz : StrictMono z)
+theorem p2l_le_ncard_of_strictMono {P : ℝ → Prop} {n : ℕ} {z : Fin n → ℝ} (hz : StrictMono z)
     (hP : ∀ j, P (z j)) (hfin : {x | P x}.Finite) : n ≤ {x | P x}.ncard := by
   have := Set.ncard_le_ncard (s := range z) (t := {x | P x}) (by
     rintro _ ⟨j, rfl⟩; exact hP j) hfin

@@ -5,11 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Tactic.CrossRefAttribute
 public import DLMF.Bessel.WeberSeries
 public import DLMF.Bessel.LargeOrder
 public import DLMF.Gamma.BetaFunction
-public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
+public import Mathlib.Algebra.Order.Ring.Star
 
 /-!
 # The product integral `J_μ J_ν` (DLMF 10.9.26)
@@ -41,12 +40,12 @@ def cosBetaValue (a b : ℂ) : ℂ :=
   π * Gamma a * (2 : ℂ) ^ (-a) * (Gamma ((a + b + 1) / 2))⁻¹ * (Gamma ((a - b + 1) / 2))⁻¹
 
 /-- `cos t ≥ 0` on `Ι 0 (π/2)`. -/
-lemma cos_nonneg_of_mem_uIoc {t : ℝ} (ht : t ∈ Ι 0 (π / 2)) : 0 ≤ Real.cos t := by
+theorem cos_nonneg_of_mem_uIoc {t : ℝ} (ht : t ∈ Ι 0 (π / 2)) : 0 ≤ Real.cos t := by
   rw [uIoc_of_le (by positivity)] at ht
   exact Real.cos_nonneg_of_mem_Icc ⟨by linarith [ht.1, Real.pi_pos], ht.2⟩
 
 /-- DLMF 5.12.5 for real parameters, in complex form. -/
-lemma integral_cos_cpow_mul_cos_ofReal {a b : ℝ} (ha : 0 < a) (hb : |b| < a + 1) :
+theorem integral_cos_cpow_mul_cos_ofReal {a b : ℝ} (ha : 0 < a) (hb : |b| < a + 1) :
     ∫ t in (0:ℝ)..(π / 2), ((Real.cos t : ℂ)) ^ ((a : ℂ) - 1) * cos ((b : ℂ) * t) =
       cosBetaValue a b := by
   have hcongr : ∫ t in (0:ℝ)..(π / 2), ((Real.cos t : ℂ)) ^ ((a : ℂ) - 1) * cos ((b : ℂ) * t) =
@@ -68,7 +67,7 @@ lemma integral_cos_cpow_mul_cos_ofReal {a b : ℝ} (ha : 0 < a) (hb : |b| < a + 
   field_simp
 
 /-- `‖cos w‖ ≤ exp ‖w‖`. -/
-lemma norm_cos_le_exp_norm (w : ℂ) : ‖cos w‖ ≤ Real.exp ‖w‖ := by
+theorem norm_cos_le_exp_norm (w : ℂ) : ‖cos w‖ ≤ Real.exp ‖w‖ := by
   rw [Complex.cos]
   have h1 : ‖exp (w * I)‖ ≤ Real.exp ‖w‖ := by
     rw [norm_exp]; exact Real.exp_le_exp.2 ((re_le_norm _).trans (by simp))
@@ -79,7 +78,7 @@ lemma norm_cos_le_exp_norm (w : ℂ) : ‖cos w‖ ≤ Real.exp ‖w‖ := by
   linarith
 
 /-- `‖x^s‖ ≤ x^{ℜ s}` for real `x ≥ 0`. -/
-lemma norm_ofReal_cpow_le {x : ℝ} (hx : 0 ≤ x) (s : ℂ) : ‖(x : ℂ) ^ s‖ ≤ x ^ s.re := by
+theorem norm_ofReal_cpow_le {x : ℝ} (hx : 0 ≤ x) (s : ℂ) : ‖(x : ℂ) ^ s‖ ≤ x ^ s.re := by
   rcases hx.lt_or_eq with hx | rfl
   · rw [norm_cpow_eq_rpow_re_of_pos hx]
   · by_cases hs : s = 0
@@ -88,7 +87,7 @@ lemma norm_ofReal_cpow_le {x : ℝ} (hx : 0 ≤ x) (s : ℂ) : ‖(x : ℂ) ^ s�
       exact Real.rpow_nonneg le_rfl _
 
 /-- Real points `c + 1/(n+1)` accumulate at `c`. -/
-lemma frequently_of_forall_nat_add {c : ℝ} {P : ℂ → Prop}
+theorem frequently_of_forall_nat_add {c : ℝ} {P : ℂ → Prop}
     (hP : ∀ n : ℕ, P ((c + 1 / ((n:ℝ) + 1) : ℝ))) :
     ∃ᶠ z in 𝓝[≠] (c : ℂ), P z := by
   have hu : Tendsto (fun n : ℕ => ((c + 1 / ((n : ℝ) + 1) : ℝ) : ℂ)) atTop (𝓝[≠] (c : ℂ)) := by
@@ -105,12 +104,12 @@ lemma frequently_of_forall_nat_add {c : ℝ} {P : ℂ → Prop}
   exact hu.frequently (Frequently.of_forall hP)
 
 /-- `cos^{ℜ s}` is integrable on `[0, π/2]` for `ℜ s > -1`. -/
-lemma intervalIntegrable_norm_cos_cpow {s : ℂ} (hs : -1 < s.re) :
+theorem intervalIntegrable_norm_cos_cpow {s : ℂ} (hs : -1 < s.re) :
     IntervalIntegrable (fun t : ℝ => Real.cos t ^ s.re) volume 0 (π / 2) :=
   DLMF.Gamma.intervalIntegrable_cos_rpow hs
 
 /-- The cosine Beta integral is entire in `b`. -/
-lemma differentiable_cosBeta_integral_right (a : ℂ) (ha : 0 < a.re) :
+theorem differentiable_cosBeta_integral_right (a : ℂ) (ha : 0 < a.re) :
     Differentiable ℂ fun b : ℂ =>
       ∫ t in (0:ℝ)..(π / 2), ((Real.cos t : ℂ)) ^ (a - 1) * cos (b * t) := by
   have hr : -1 < (a - 1).re := by simp; linarith
@@ -138,13 +137,13 @@ lemma differentiable_cosBeta_integral_right (a : ℂ) (ha : 0 < a.re) :
   exact fun b => (h b (mem_univ b)).differentiableAt (isOpen_univ.mem_nhds (mem_univ b))
 
 /-- The cosine Beta value is entire in `b`. -/
-lemma differentiable_cosBetaValue_right (a : ℂ) : Differentiable ℂ fun b => cosBetaValue a b := by
+theorem differentiable_cosBetaValue_right (a : ℂ) : Differentiable ℂ fun b => cosBetaValue a b := by
   unfold cosBetaValue
   have hG := differentiable_one_div_Gamma
   exact ((differentiable_const _).mul ((hG.comp (by fun_prop)))).mul (hG.comp (by fun_prop))
 
 /-- DLMF 5.12.5 for real `a > 0` and complex `b`. -/
-lemma integral_cos_cpow_mul_cos_ofReal_left {a : ℝ} (ha : 0 < a) (b : ℂ) :
+theorem integral_cos_cpow_mul_cos_ofReal_left {a : ℝ} (ha : 0 < a) (b : ℂ) :
     ∫ t in (0:ℝ)..(π / 2), ((Real.cos t : ℂ)) ^ ((a : ℂ) - 1) * cos (b * t) =
       cosBetaValue a b := by
   have hf := analyticOnNhd_univ_iff_differentiable.2
@@ -160,7 +159,7 @@ lemma integral_cos_cpow_mul_cos_ofReal_left {a : ℝ} (ha : 0 < a) (b : ℂ) :
   linarith
 
 /-- Almost every point of `Ι 0 (π/2)` lies in the open interval. -/
-lemma ae_ne_pi_div_two : ∀ᵐ t ∂(volume.restrict (Ι 0 (π / 2))), t ∈ Ioo 0 (π / 2) := by
+theorem ae_ne_pi_div_two : ∀ᵐ t ∂(volume.restrict (Ι 0 (π / 2))), t ∈ Ioo 0 (π / 2) := by
   have h1 : ∀ᵐ t ∂(volume : Measure ℝ), t ≠ π / 2 :=
     compl_mem_ae_iff.2 (measure_singleton (π / 2))
   filter_upwards [ae_restrict_of_ae h1, ae_restrict_mem measurableSet_uIoc] with t ht ht'
@@ -168,11 +167,11 @@ lemma ae_ne_pi_div_two : ∀ᵐ t ∂(volume.restrict (Ι 0 (π / 2))), t ∈ Io
   exact ⟨ht'.1, lt_of_le_of_ne ht'.2 ht⟩
 
 /-- `cos t > 0` on `(0, π/2)`. -/
-lemma cos_pos_of_mem_Ioo {t : ℝ} (ht : t ∈ Ioo 0 (π / 2)) : 0 < Real.cos t :=
+theorem cos_pos_of_mem_Ioo {t : ℝ} (ht : t ∈ Ioo 0 (π / 2)) : 0 < Real.cos t :=
   Real.cos_pos_of_mem_Ioo ⟨by linarith [ht.1, Real.pi_pos], ht.2⟩
 
 /-- The cosine Beta integral is holomorphic in `a` on `ℜ a > 0`. -/
-lemma differentiableOn_cosBeta_integral_left (b : ℂ) :
+theorem differentiableOn_cosBeta_integral_left (b : ℂ) :
     DifferentiableOn ℂ (fun a : ℂ =>
       ∫ t in (0:ℝ)..(π / 2), ((Real.cos t : ℂ)) ^ (a - 1) * cos (b * t)) {a | 0 < a.re} := by
   have hU : IsOpen {a : ℂ | 0 < a.re} := isOpen_lt continuous_const continuous_re
@@ -206,7 +205,7 @@ lemma differentiableOn_cosBeta_integral_left (b : ℂ) :
       exact mul_le_mul_of_nonneg_left ht.2.le (norm_nonneg _)
 
 /-- The cosine Beta value is holomorphic in `a` on `ℜ a > 0`. -/
-lemma differentiableOn_cosBetaValue_left (b : ℂ) :
+theorem differentiableOn_cosBetaValue_left (b : ℂ) :
     DifferentiableOn ℂ (fun a => cosBetaValue a b) {a | 0 < a.re} := by
   intro a ha
   simp only [mem_ofPred_eq] at ha
@@ -235,7 +234,7 @@ theorem integral_cos_cpow_mul_cos {a : ℂ} (ha : 0 < a.re) (b : ℂ) :
 
 open DLMF.Hypergeometric in
 /-- `(r z)^s = r^s z^s` for real `r > 0`. -/
-lemma ofReal_mul_cpow_of_pos {r : ℝ} (hr : 0 < r) (z s : ℂ) :
+theorem ofReal_mul_cpow_of_pos {r : ℝ} (hr : 0 < r) (z s : ℂ) :
     ((r : ℂ) * z) ^ s = (r : ℂ) ^ s * z ^ s := by
   rcases eq_or_ne z 0 with rfl | hz
   · by_cases hs : s = 0
@@ -247,12 +246,12 @@ lemma ofReal_mul_cpow_of_pos {r : ℝ} (hr : 0 < r) (z s : ℂ) :
     ring_nf
 
 /-- A point of `Ι 0 (π/2)` other than `π/2` lies in `(0, π/2)`. -/
-lemma mem_Ioo_of_mem_uIoc {t : ℝ} (ht : t ∈ Ι 0 (π / 2)) (h : t ≠ π / 2) : t ∈ Ioo 0 (π / 2) := by
+theorem mem_Ioo_of_mem_uIoc {t : ℝ} (ht : t ∈ Ι 0 (π / 2)) (h : t ≠ π / 2) : t ∈ Ioo 0 (π / 2) := by
   rw [uIoc_of_le (by positivity)] at ht
   exact ⟨ht.1, lt_of_le_of_ne ht.2 h⟩
 
 /-- Termwise expansion behind the product integral. -/
-lemma hasSum_besselJ_cos_integrand (s b z : ℂ) {θ : ℝ} (hθ : θ ∈ Ioo 0 (π / 2)) :
+theorem hasSum_besselJ_cos_integrand (s b z : ℂ) {θ : ℝ} (hθ : θ ∈ Ioo 0 (π / 2)) :
     HasSum (fun k : ℕ => z ^ s * ((-z ^ 2) ^ k / k ! * (Gamma (s + 1 + k))⁻¹) *
         (((Real.cos θ : ℂ)) ^ ((s + 2 * k + 1) - 1) * cos (b * θ)))
       (besselJ s (2 * z * Real.cos θ) * cos (b * θ)) := by
@@ -375,7 +374,7 @@ private lemma sin_pi_div_two_complex : sin ((π / 2 : ℝ) : ℂ) = 1 := by
   rw [← ofReal_sin, Real.sin_pi_div_two]; simp
 
 /-- `sin x = 2 ∑ₖ (-1)ᵏ J_{2k+1}(x)` (DLMF 10.12.3 at `θ = π/2`). -/
-lemma hasSum_neg_one_pow_besselJ_odd (x : ℂ) :
+theorem hasSum_neg_one_pow_besselJ_odd (x : ℂ) :
     HasSum (fun k : ℕ => (-1) ^ k * besselJ (2 * k + 1 : ℕ) x) (sin x / 2) := by
   have h := (hasSum_besselJ_sin x (π / 2)).div_const 2
   rw [sin_pi_div_two_complex, mul_one] at h
@@ -385,7 +384,7 @@ lemma hasSum_neg_one_pow_besselJ_odd (x : ℂ) :
   ring
 
 /-- `cos x = J₀(x) + 2 ∑_{k≥1} (-1)ᵏ J_{2k}(x)` (DLMF 10.12.2 at `θ = π/2`). -/
-lemma hasSum_neg_one_pow_besselJ_even (x : ℂ) :
+theorem hasSum_neg_one_pow_besselJ_even (x : ℂ) :
     HasSum (fun k : ℕ => (if k = 0 then 1/2 else 1) * (-1) ^ k * besselJ (2 * k : ℕ) x)
       (cos x / 2) := by
   refine (hasSum_nat_add_iff' 1).mp ?_
@@ -400,7 +399,7 @@ lemma hasSum_neg_one_pow_besselJ_even (x : ℂ) :
     ring
 
 /-- `|J_n(w)| ≤ (|w|/2)ⁿ e^{|w|²/4} / n!`. -/
-lemma norm_besselJ_nat_le (n : ℕ) (w : ℂ) :
+theorem norm_besselJ_nat_le (n : ℕ) (w : ℂ) :
     ‖besselJ n w‖ ≤ (‖w‖ / 2) ^ n * Real.exp (‖w‖ ^ 2 / 4) / n ! := by
   have h := norm_besselJ_le (ν := (n : ℝ)) (Nat.cast_nonneg n) w
   rw [show ((n : ℝ) : ℂ) = (n : ℂ) by norm_cast, cpow_natCast, norm_pow, norm_div,
@@ -408,7 +407,7 @@ lemma norm_besselJ_nat_le (n : ℕ) (w : ℂ) :
   exact h
 
 /-- `θ ↦ J_n(z cos θ)` is continuous. -/
-lemma continuous_besselJ_nat_comp (n : ℕ) (z : ℂ) :
+theorem continuous_besselJ_nat_comp (n : ℕ) (z : ℂ) :
     Continuous fun θ : ℝ => besselJ (n : ℂ) (z * Real.cos θ) := by
   have h : Continuous (besselJ (n : ℂ)) := by
     have := (analyticOnNhd_besselJ_int (n : ℤ)).continuousOn

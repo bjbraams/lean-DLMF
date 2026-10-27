@@ -5,12 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Tactic.CrossRefAttribute
 public import DLMF.Confluent.Basic
-public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
-public import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Series
-public import Mathlib.Analysis.SpecialFunctions.Gaussian.GaussianIntegral
 public import Mathlib.Analysis.SpecialFunctions.Bessel
 
 /-!
@@ -55,12 +51,12 @@ def besselY (ν z : ℂ) : ℂ := by
       (besselJ μ z * cos (μ * π) - besselJ (-μ) z) / sin (μ * π))
   else (besselJ ν z * cos (ν * π) - besselJ (-ν) z) / sin (ν * π)
 
-lemma regularizedHGFunCoeff_empty (c : ℂ) (n : ℕ) :
+theorem regularizedHGFunCoeff_empty (c : ℂ) (n : ℕ) :
     regularizedHGFunCoeff (∅ : Multiset ℂ) {c} n = 1 / (n ! * Gamma (c + n)) := by
   simp [regularizedHGFunCoeff]
 
 /-- The regularized `₀F₁` series is entire, including nonpositive integer parameters. -/
-lemma hasFPowerSeriesOnBall_regularized0F1 (c : ℂ) :
+theorem hasFPowerSeriesOnBall_regularized0F1 (c : ℂ) :
     HasFPowerSeriesOnBall (regularizedHGFun (∅ : Multiset ℂ) {c})
       (FormalMultilinearSeries.ofScalars ℂ (regularizedHGFunCoeff ∅ {c})) 0 ⊤ := by
   have hr : (regularizedHGFunSeries ∅ {c}).radius = ⊤ :=
@@ -70,12 +66,12 @@ lemma hasFPowerSeriesOnBall_regularized0F1 (c : ℂ) :
   simpa only [hr] using (regularizedHGFunSeries ∅ {c}).hasFPowerSeriesOnBall
     (by rw [hr]; simp)
 
-lemma analyticAt_regularized0F1 (c z : ℂ) :
+theorem analyticAt_regularized0F1 (c z : ℂ) :
     AnalyticAt ℂ (regularizedHGFun (∅ : Multiset ℂ) {c}) z :=
   (hasFPowerSeriesOnBall_regularized0F1 c).analyticAt_of_mem (by simp)
 
 /-- The reciprocal Gamma recurrence avoids restrictions on the parameter. -/
-lemma regularized0F1_coeff_recurrence (c : ℂ) (n : ℕ) :
+theorem regularized0F1_coeff_recurrence (c : ℂ) (n : ℕ) :
     (n + 1 : ℂ) * (c + n) * regularizedHGFunCoeff ∅ {c} (n + 1) =
       regularizedHGFunCoeff ∅ {c} n := by
   simp only [regularizedHGFunCoeff_empty, Nat.factorial_succ, Nat.cast_mul,
@@ -85,7 +81,7 @@ lemma regularized0F1_coeff_recurrence (c : ℂ) (n : ℕ) :
   field [Nat.cast_ne_zero.mpr (Nat.succ_ne_zero n)]
 
 /-- The differential equation for regularized `₀F₁`. -/
-lemma regularized0F1_ode (c w : ℂ) :
+theorem regularized0F1_ode (c w : ℂ) :
     w * deriv (deriv (regularizedHGFun (∅ : Multiset ℂ) {c})) w +
       c * deriv (regularizedHGFun ∅ {c}) w - regularizedHGFun ∅ {c} w = 0 := by
   have he := (hasFPowerSeriesOnBall_regularized0F1 c).ode_of_recurrence
@@ -94,7 +90,7 @@ lemma regularized0F1_ode (c w : ℂ) :
   simpa using he
 
 /-- Differentiating regularized `₀F₁` raises its parameter by one. -/
-lemma deriv_regularized0F1 (c w : ℂ) :
+theorem deriv_regularized0F1 (c w : ℂ) :
     deriv (regularizedHGFun (∅ : Multiset ℂ) {c}) w = regularizedHGFun ∅ {c + 1} w := by
   have hd := (hasFPowerSeriesOnBall_regularized0F1 c).deriv_ofScalars.hasSum_mul_pow
     (z := w) (by simp)
@@ -107,13 +103,13 @@ lemma deriv_regularized0F1 (c w : ℂ) :
   simp_rw [he] at hd
   exact hd.unique ((hasFPowerSeriesOnBall_regularized0F1 (c + 1)).hasSum_mul_pow (by simp))
 
-lemma hasDerivAt_regularized0F1 (c w : ℂ) :
+theorem hasDerivAt_regularized0F1 (c w : ℂ) :
     HasDerivAt (regularizedHGFun (∅ : Multiset ℂ) {c}) (regularizedHGFun ∅ {c + 1} w) w := by
   rw [← deriv_regularized0F1]
   exact (analyticAt_regularized0F1 c w).differentiableAt.hasDerivAt
 
 /-- A contiguous relation valid even at the exceptional integer parameters. -/
-lemma regularized0F1_contiguous (c w : ℂ) :
+theorem regularized0F1_contiguous (c w : ℂ) :
     regularizedHGFun (∅ : Multiset ℂ) {c} w =
       c * regularizedHGFun ∅ {c + 1} w + w * regularizedHGFun ∅ {c + 1 + 1} w := by
   have hf := hasFPowerSeriesOnBall_regularized0F1 (c + 1)
@@ -134,11 +130,11 @@ lemma regularized0F1_contiguous (c w : ℂ) :
   rw [deriv_regularized0F1] at ht
   exact ((hasFPowerSeriesOnBall_regularized0F1 c).hasSum_mul_pow (by simp)).unique ht
 
-lemma div_two_mem_slitPlane {z : ℂ} (hz : z ∈ slitPlane) : z / 2 ∈ slitPlane := by
+theorem div_two_mem_slitPlane {z : ℂ} (hz : z ∈ slitPlane) : z / 2 ∈ slitPlane := by
   simpa [mem_slitPlane_iff, div_re, div_im] using hz
 
 /-- Derivative of the principal-power prefactor in the Bessel series. -/
-lemma hasDerivAt_besselPrefactor (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
+theorem hasDerivAt_besselPrefactor (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (fun w : ℂ => (w / 2) ^ ν) ((z / 2) ^ ν * (ν / z)) z := by
   have hd := ((hasDerivAt_id z).div_const 2).cpow_const (c := ν) (div_two_mem_slitPlane hz)
   convert! hd using 1
@@ -147,7 +143,7 @@ lemma hasDerivAt_besselPrefactor (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
   field
 
 /-- Analyticity of the common Bessel series with either sign of its quadratic argument. -/
-lemma analyticAt_besselSeries (ν σ : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
+theorem analyticAt_besselSeries (ν σ : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     AnalyticAt ℂ (fun w : ℂ => (w / 2) ^ ν *
       regularizedHGFun (∅ : Multiset ℂ) {ν + 1} (σ * w ^ 2 / 4)) z := by
   apply AnalyticAt.mul
@@ -155,7 +151,7 @@ lemma analyticAt_besselSeries (ν σ : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
   · exact (analyticAt_regularized0F1 (ν + 1) _).comp (by fun_prop)
 
 /-- AAR (4.5.1)–(4.5.2), with a sign parameter to cover modified Bessel functions too. -/
-lemma besselSeries_ode (ν σ : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
+theorem besselSeries_ode (ν σ : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     let f := fun w : ℂ => (w / 2) ^ ν *
       regularizedHGFun (∅ : Multiset ℂ) {ν + 1} (σ * w ^ 2 / 4)
     z ^ 2 * deriv (deriv f) z + z * deriv f z - (σ * z ^ 2 + ν ^ 2) * f z = 0 := by
@@ -223,7 +219,7 @@ theorem besselJ_ode {ν z : ℂ} (hz : z ∈ slitPlane) :
   linear_combination he
 
 /-- AAR (4.6.2): the derivative of `J_ν` in terms of `J_{ν+1}`. -/
-lemma hasDerivAt_besselJ {ν z : ℂ} (hz : z ∈ slitPlane) :
+theorem hasDerivAt_besselJ {ν z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (besselJ ν) (ν / z * besselJ ν z - besselJ (ν + 1) z) z := by
   have hu : HasDerivAt (fun w : ℂ => -(w ^ 2 / 4)) (-z / 2) z := by
     convert! (((hasDerivAt_id z).pow 2).div_const 4).neg using 1
@@ -262,14 +258,14 @@ theorem besselY_ode {ν z : ℂ} (hz : z ∈ slitPlane) (hν : ∀ k : ℤ, ν �
   linear_combination a * besselJ_ode (ν := ν) hz + b * besselJ_ode (ν := -ν) hz
 
 /-- Half-integer Gamma values needed for the elementary Bessel evaluations. -/
-lemma Gamma_three_halves : Gamma (3 / 2 : ℂ) = Gamma (1 / 2) / 2 := by
+theorem Gamma_three_halves : Gamma (3 / 2 : ℂ) = Gamma (1 / 2) / 2 := by
   have h := Gamma_add_one (1 / 2 : ℂ) (by norm_num)
   have heq : (1 / 2 : ℂ) + 1 = 3 / 2 := by ring
   rw [heq] at h
   rw [h]
   ring
 
-lemma Gamma_nat_add_three_halves (n : ℕ) :
+theorem Gamma_nat_add_three_halves (n : ℕ) :
     Gamma ((3 / 2 : ℂ) + n) =
       ((2 * n + 1).factorial : ℂ) / (4 ^ n * n.factorial * 2) * Gamma (1 / 2) := by
   have hfac : ((2 * n + 1).factorial : ℝ) =
@@ -290,7 +286,7 @@ lemma Gamma_nat_add_three_halves (n : ℕ) :
   push_cast
   ring
 
-lemma Gamma_nat_add_half (n : ℕ) :
+theorem Gamma_nat_add_half (n : ℕ) :
     Gamma ((1 / 2 : ℂ) + n) =
       ((2 * n).factorial : ℂ) / (4 ^ n * n.factorial) * Gamma (1 / 2) := by
   have hfac : ((2 * n).factorial : ℝ) = 2 ^ n * n.factorial * (2 * n - 1).doubleFactorial := by
@@ -312,17 +308,17 @@ lemma Gamma_nat_add_half (n : ℕ) :
   push_cast
   ring
 
-lemma log_two : log (2 : ℂ) = Real.log 2 := by
+theorem log_two : log (2 : ℂ) = Real.log 2 := by
   rw [← ofReal_ofNat 2, ofReal_log (by norm_num)]
 
-lemma log_pi : log (π : ℂ) = Real.log π :=
+theorem log_pi : log (π : ℂ) = Real.log π :=
   (ofReal_log Real.pi_pos.le).symm
 
-lemma arg_pi_ne_pi : (π : ℂ).arg ≠ π := by
+theorem arg_pi_ne_pi : (π : ℂ).arg ≠ π := by
   rw [arg_ofReal_of_nonneg Real.pi_pos.le]
   exact ne_of_lt Real.pi_pos
 
-lemma log_div_ofNat_two {z : ℂ} (hz : z ∈ slitPlane) :
+theorem log_div_ofNat_two {z : ℂ} (hz : z ∈ slitPlane) :
     log (z / 2) = log z - log 2 := by
   have hz0 := slitPlane_ne_zero hz
   have hinv : (2 : ℂ)⁻¹ = ↑((2 : ℝ)⁻¹) := by
@@ -331,18 +327,18 @@ lemma log_div_ofNat_two {z : ℂ} (hz : z ∈ slitPlane) :
     ofReal_neg, log_two]
   ring
 
-lemma cpow_half_div_two {z : ℂ} (hz : z ∈ slitPlane) :
+theorem cpow_half_div_two {z : ℂ} (hz : z ∈ slitPlane) :
     (z / 2) ^ (1 / 2 : ℂ) = z ^ (1 / 2 : ℂ) / (2 : ℂ) ^ (1 / 2 : ℂ) := by
   have hz0 := slitPlane_ne_zero hz
   have h2 : (2 : ℂ) ≠ 0 := by norm_num
   rw [cpow_def_of_ne_zero (div_ne_zero hz0 h2), log_div_ofNat_two hz, sub_mul, exp_sub,
     ← cpow_def_of_ne_zero hz0, ← cpow_def_of_ne_zero h2]
 
-lemma cpow_half_recip_div_two {z : ℂ} (hz : z ∈ slitPlane) :
+theorem cpow_half_recip_div_two {z : ℂ} (hz : z ∈ slitPlane) :
     (z / 2) ^ (-(1 / 2 : ℂ)) = (2 : ℂ) ^ (1 / 2 : ℂ) / z ^ (1 / 2 : ℂ) := by
   rw [cpow_neg, cpow_half_div_two hz, inv_div]
 
-lemma cpow_half_div_pi :
+theorem cpow_half_div_pi :
     ((2 : ℂ) / π) ^ (1 / 2 : ℂ) =
       (2 : ℂ) ^ (1 / 2 : ℂ) / (π : ℂ) ^ (1 / 2 : ℂ) := by
   have h2 : (2 : ℂ) ≠ 0 := by norm_num
@@ -355,7 +351,7 @@ lemma cpow_half_div_pi :
   rw [cpow_def_of_ne_zero (div_ne_zero h2 hπ), hlog, sub_mul, exp_sub,
     ← cpow_def_of_ne_zero h2, ← cpow_def_of_ne_zero hπ]
 
-lemma cpow_half_two_div_pi_z {z : ℂ} (hz : z ∈ slitPlane) :
+theorem cpow_half_two_div_pi_z {z : ℂ} (hz : z ∈ slitPlane) :
     (2 / (π * z)) ^ (1 / 2 : ℂ) =
       ((2 : ℂ) / π) ^ (1 / 2 : ℂ) / z ^ (1 / 2 : ℂ) := by
   have hz0 := slitPlane_ne_zero hz
@@ -373,7 +369,7 @@ lemma cpow_half_two_div_pi_z {z : ℂ} (hz : z ∈ slitPlane) :
   rw [cpow_def_of_ne_zero (div_ne_zero h2 (mul_ne_zero hπ hz0)), hlog, sub_mul, exp_sub,
     ← cpow_def_of_ne_zero (div_ne_zero h2 hπ), ← cpow_def_of_ne_zero hz0]
 
-lemma cpow_half_sq {w : ℂ} (hw : w ≠ 0) :
+theorem cpow_half_sq {w : ℂ} (hw : w ≠ 0) :
     w = w ^ (1 / 2 : ℂ) * w ^ (1 / 2 : ℂ) := by
   have hadd := cpow_add (x := w) (1 / 2 : ℂ) (1 / 2 : ℂ) hw
   have hsum : (1 / 2 : ℂ) + 1 / 2 = 1 := by ring
@@ -381,7 +377,7 @@ lemma cpow_half_sq {w : ℂ} (hw : w ≠ 0) :
   exact hadd
 
 /-- The algebraic identity connecting the half-integer Bessel prefactors. -/
-lemma bessel_half_prefactor {z : ℂ} (hz : z ∈ slitPlane) :
+theorem bessel_half_prefactor {z : ℂ} (hz : z ∈ slitPlane) :
     (z / 2) ^ (1 / 2 : ℂ) * 2 / (z * Gamma (1 / 2 : ℂ)) =
       (2 / (π * z)) ^ (1 / 2 : ℂ) := by
   have hz0 := slitPlane_ne_zero hz
@@ -410,7 +406,7 @@ lemma bessel_half_prefactor {z : ℂ} (hz : z ∈ slitPlane) :
     field [h2h, hzh, hπh]
   rw [hform, hsimp]
 
-lemma regularized0F1_three_halves_eq_sinc {z : ℂ} (hz : z ≠ 0) :
+theorem regularized0F1_three_halves_eq_sinc {z : ℂ} (hz : z ≠ 0) :
     regularizedHGFun (∅ : Multiset ℂ) {3 / 2} (-(z ^ 2 / 4)) =
       2 * sin z / (z * Gamma (1 / 2 : ℂ)) := by
   have hg : Gamma (1 / 2 : ℂ) ≠ 0 := Gamma_ne_zero_of_re_pos (by norm_num)
@@ -447,7 +443,7 @@ lemma regularized0F1_three_halves_eq_sinc {z : ℂ} (hz : z ≠ 0) :
     field [hz, hg]
   exact hs.unique (hval ▸ hsin0.mul_left (2 / Gamma (1 / 2 : ℂ)))
 
-lemma regularized0F1_half_eq_cos {z : ℂ} :
+theorem regularized0F1_half_eq_cos {z : ℂ} :
     regularizedHGFun (∅ : Multiset ℂ) {1 / 2} (-(z ^ 2 / 4)) =
       cos z / Gamma (1 / 2 : ℂ) := by
   have hg : Gamma (1 / 2 : ℂ) ≠ 0 := Gamma_ne_zero_of_re_pos (by norm_num)
@@ -507,7 +503,7 @@ theorem besselJ_neg_half (z : ℂ) (hz : z ∈ slitPlane) :
   field [hz0, hg, h2h, hzh, hπh]
 
 /-- Kummer's second transformation (AAR (4.1.12), p. 191), in regularized `₀F₁` form. -/
-lemma kummerM_eq_exp_mul_regularized0F1 {ν : ℂ}
+theorem kummerM_eq_exp_mul_regularized0F1 {ν : ℂ}
     (hν : ∀ k : ℕ, ν + 1 ≠ -k) (h2ν : ∀ k : ℕ, 2 * ν + 1 ≠ -k) (z : ℂ) :
     kummerM (ν + 1 / 2) (2 * ν + 1) z =
       Gamma (ν + 1) * exp (z / 2) * regularizedHGFun (∅ : Multiset ℂ) {ν + 1} (z ^ 2 / 16) := by

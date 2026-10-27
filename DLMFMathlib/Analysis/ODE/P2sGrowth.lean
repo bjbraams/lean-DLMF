@@ -7,10 +7,7 @@ module
 
 public import Mathlib.Analysis.ODE.Gronwall
 public import Mathlib.Analysis.InnerProductSpace.Calculus
-public import Mathlib.Analysis.Complex.Basic
-public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 public import Mathlib.Analysis.Calculus.Deriv.MeanValue
-public import Mathlib.Topology.Order.IntermediateValue
 
 /-!
 # Growth bounds for solutions of `y'' = P(x) y`
@@ -71,7 +68,7 @@ theorem p2s_energy_complex_le {P y y' : ℝ → ℂ} {M L k : ℝ} (hM : 0 ≤ M
   exact hG
 
 /-- Monotonicity on `[0, L]` from a nonnegative derivative on `(0, L)`. -/
-theorem p2s_le_of_deriv_nonneg {F F' : ℝ → ℝ} {L : ℝ} (hF : ∀ x, HasDerivAt F (F' x) x)
+lemma p2s_le_of_deriv_nonneg {F F' : ℝ → ℝ} {L : ℝ} (hF : ∀ x, HasDerivAt F (F' x) x)
     (h : ∀ x ∈ Ioo 0 L, 0 ≤ F' x) {x : ℝ} (hx : x ∈ Icc 0 L) : F 0 ≤ F x := by
   have hmono : MonotoneOn F (Icc 0 L) :=
     monotoneOn_of_hasDerivWithinAt_nonneg (convex_Icc 0 L)
@@ -80,7 +77,7 @@ theorem p2s_le_of_deriv_nonneg {F F' : ℝ → ℝ} {L : ℝ} (hF : ∀ x, HasDe
   exact hmono ⟨le_rfl, hx.1.trans hx.2⟩ hx hx.1
 
 /-- A continuous function with `f(0) = 1` and `f² ≥ 1` on `[0, L]` satisfies `f ≥ 1` there. -/
-theorem p2s_one_le_of_sq {f : ℝ → ℝ} {L : ℝ} (hf : Continuous f) (h0 : f 0 = 1)
+lemma p2s_one_le_of_sq {f : ℝ → ℝ} {L : ℝ} (hf : Continuous f) (h0 : f 0 = 1)
     (h : ∀ x ∈ Icc 0 L, 1 ≤ f x ^ 2) {x : ℝ} (hx : x ∈ Icc 0 L) : 1 ≤ f x := by
   by_contra hlt
   push Not at hlt
@@ -93,7 +90,7 @@ theorem p2s_one_le_of_sq {f : ℝ → ℝ} {L : ℝ} (hf : Continuous f) (h0 : f
 
 /-- `y y'` is nondecreasing on `[0, L]` when `y'' = p y` with `p ≥ 0` there; with `y y' = 0` at
 `0` it is nonnegative. -/
-theorem p2s_mul_deriv_nonneg {p y y' : ℝ → ℝ} {L : ℝ} (hp : ∀ x ∈ Icc 0 L, 0 ≤ p x)
+lemma p2s_mul_deriv_nonneg {p y y' : ℝ → ℝ} {L : ℝ} (hp : ∀ x ∈ Icc 0 L, 0 ≤ p x)
     (hy : ∀ x, HasDerivAt y (y' x) x) (hy' : ∀ x, HasDerivAt y' (p x * y x) x)
     (h0 : y 0 * y' 0 = 0) {x : ℝ} (hx : x ∈ Icc 0 L) : 0 ≤ y x * y' x := by
   have := p2s_le_of_deriv_nonneg (F := fun x => y x * y' x) (L := L)

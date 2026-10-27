@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.MeasureTheory.Integral.Gamma
-public import Mathlib.Analysis.MellinTransform
 public import DLMF.Bessel.KIntegralRep
 
 /-!
@@ -37,7 +36,7 @@ noncomputable section
 namespace DLMF.Bessel
 
 /-- The Gaussian moment `x^{s-1} e^{-b x²}` is integrable on `(0, ∞)` for `Re s > 0`, `b > 0`. -/
-lemma kMel_integrableOn_gauss {s : ℂ} (hs : 0 < s.re) {b : ℝ} (hb : 0 < b) :
+theorem kMel_integrableOn_gauss {s : ℂ} (hs : 0 < s.re) {b : ℝ} (hb : 0 < b) :
     IntegrableOn (fun x : ℝ => (x : ℂ) ^ (s - 1) * exp (-(b * (x : ℂ) ^ 2))) (Ioi 0) := by
   refine (integrableOn_rpow_mul_exp_neg_mul_rpow (s := s.re - 1) (p := 2) (by linarith)
     two_pos hb).mono' (by fun_prop) ?_
@@ -47,7 +46,7 @@ lemma kMel_integrableOn_gauss {s : ℂ} (hs : 0 < s.re) {b : ℝ} (hb : 0 < b) :
   simp [← ofReal_pow]
 
 /-- The absolute Gaussian moment: `∫₀^∞ x^{Re s-1} e^{-b x²} dx = ½ b^{-Re s/2} Γ(Re s/2)`. -/
-lemma kMel_norm_integral_gauss {s : ℂ} (hs : 0 < s.re) {b : ℝ} (hb : 0 < b) :
+theorem kMel_norm_integral_gauss {s : ℂ} (hs : 0 < s.re) {b : ℝ} (hb : 0 < b) :
     ∫ x : ℝ in Ioi 0, ‖(x : ℂ) ^ (s - 1)‖ * ‖exp (-(b * (x : ℂ) ^ 2))‖ =
       b ^ (-s.re / 2) * (1 / 2) * Real.Gamma (s.re / 2) := by
   have h := integral_rpow_mul_exp_neg_mul_rpow (q := s.re - 1) (p := 2) two_pos
@@ -60,7 +59,7 @@ lemma kMel_norm_integral_gauss {s : ℂ} (hs : 0 < s.re) {b : ℝ} (hb : 0 < b) 
   simp [← ofReal_pow]
 
 /-- `(x²)^w = x^{2w}` for `x > 0`. -/
-lemma kMel_ofReal_sq_cpow {x : ℝ} (hx : 0 < x) (w : ℂ) :
+theorem kMel_ofReal_sq_cpow {x : ℝ} (hx : 0 < x) (w : ℂ) :
     ((x ^ 2 : ℝ) : ℂ) ^ w = (x : ℂ) ^ (2 * w) := by
   have hl : (Complex.log x).im = 0 := by rw [← ofReal_log hx.le]; rfl
   rw [ofReal_pow, ← cpow_natCast, ← cpow_mul]
@@ -70,7 +69,7 @@ lemma kMel_ofReal_sq_cpow {x : ℝ} (hx : 0 < x) (w : ℂ) :
 
 /-- The complex Gaussian moment: `∫₀^∞ x^{s-1} e^{-b x²} dx = ½ b^{-s/2} Γ(s/2)` for
 `Re s > 0`, `b > 0`. -/
-lemma kMel_integral_gauss {s : ℂ} (hs : 0 < s.re) {b : ℝ} (hb : 0 < b) :
+theorem kMel_integral_gauss {s : ℂ} (hs : 0 < s.re) {b : ℝ} (hb : 0 < b) :
     ∫ x : ℝ in Ioi 0, (x : ℂ) ^ (s - 1) * exp (-(b * (x : ℂ) ^ 2)) =
       (1 / (b : ℂ)) ^ (s / 2) * Gamma (s / 2) / 2 := by
   have hs2 : 0 < (s / 2).re := by simp; linarith
@@ -96,11 +95,11 @@ def kMel_kernel (μ ν : ℂ) (p : ℝ × ℝ) : ℂ :=
     ((p.2 : ℂ) ^ (μ + ν - 1) * exp (-(((1 / (4 * p.1) : ℝ) : ℂ) * (p.2 : ℂ) ^ 2)))
 
 /-- The kernel is measurable. -/
-lemma kMel_measurable_kernel (μ ν : ℂ) : Measurable (kMel_kernel μ ν) := by
+theorem kMel_measurable_kernel (μ ν : ℂ) : Measurable (kMel_kernel μ ν) := by
   unfold kMel_kernel; fun_prop
 
 /-- The inner (Gaussian) integral of the kernel in `x`. -/
-lemma kMel_inner {μ ν : ℂ} (h : 0 < (μ + ν).re) {t : ℝ} (ht : 0 < t) :
+theorem kMel_inner {μ ν : ℂ} (h : 0 < (μ + ν).re) {t : ℝ} (ht : 0 < t) :
     ∫ x : ℝ in Ioi 0, kMel_kernel μ ν (t, x) =
       (4 : ℂ) ^ ((μ + ν) / 2) * Gamma ((μ + ν) / 2) / 2 *
         ((t : ℂ) ^ ((μ - ν) / 2 - 1) * exp (-(t : ℂ))) := by
@@ -115,7 +114,7 @@ lemma kMel_inner {μ ν : ℂ} (h : 0 < (μ + ν).re) {t : ℝ} (ht : 0 < t) :
   linear_combination ((4 : ℂ) ^ ((μ + ν) / 2) * Gamma ((μ + ν) / 2) / 2 * exp (-(t : ℂ))) * e2
 
 /-- The inner integral of the absolute kernel in `x`. -/
-lemma kMel_norm_inner {μ ν : ℂ} (h : 0 < (μ + ν).re) {t : ℝ} (ht : 0 < t) :
+theorem kMel_norm_inner {μ ν : ℂ} (h : 0 < (μ + ν).re) {t : ℝ} (ht : 0 < t) :
     ∫ x : ℝ in Ioi 0, ‖kMel_kernel μ ν (t, x)‖ =
       (4 : ℝ) ^ ((μ + ν).re / 2) * (1 / 2) * Real.Gamma ((μ + ν).re / 2) *
         (Real.exp (-t) * t ^ ((μ.re - ν.re) / 2 - 1)) := by
@@ -131,7 +130,7 @@ lemma kMel_norm_inner {μ ν : ℂ} (h : 0 < (μ + ν).re) {t : ℝ} (ht : 0 < t
     Real.exp (-t)) * e
 
 /-- The kernel is integrable on `(0, ∞)²` when `|Re ν| < Re μ`. -/
-lemma kMel_integrable_kernel {μ ν : ℂ} (h : |ν.re| < μ.re) :
+theorem kMel_integrable_kernel {μ ν : ℂ} (h : |ν.re| < μ.re) :
     Integrable (kMel_kernel μ ν) ((volume.restrict (Ioi (0 : ℝ))).prod
       (volume.restrict (Ioi (0 : ℝ)))) := by
   have h1 : 0 < (μ + ν).re := by simp only [add_re]; linarith [neg_abs_le ν.re]
@@ -148,7 +147,7 @@ lemma kMel_integrable_kernel {μ ν : ℂ} (h : |ν.re| < μ.re) :
     exact (kMel_norm_inner h1 ht).symm
 
 /-- Schläfli's form of `x^{μ-1} K_ν(x)` as an integral of the kernel. -/
-lemma kMel_schlafli {μ ν : ℂ} {x : ℝ} (hx : 0 < x) :
+theorem kMel_schlafli {μ ν : ℂ} {x : ℝ} (hx : 0 < x) :
     (x : ℂ) ^ (μ - 1) * besselK ν x =
       1 / 2 * (2 : ℂ) ^ (-ν) * ∫ t : ℝ in Ioi 0, kMel_kernel μ ν (t, x) := by
   have hx0 : (x : ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.ne'
@@ -174,7 +173,7 @@ lemma kMel_schlafli {μ ν : ℂ} {x : ℝ} (hx : 0 < x) :
     ∫ t : ℝ in Ioi 0, exp (-(t : ℂ) - (x : ℂ) ^ 2 / (4 * t)) * (t : ℂ) ^ (-ν - 1)) * e3
 
 /-- `∫₀^∞ t^{a-1} e^{-t} dt = Γ(a)` for `Re a > 0`. -/
-lemma kMel_gamma_integral {a : ℂ} (ha : 0 < a.re) :
+theorem kMel_gamma_integral {a : ℂ} (ha : 0 < a.re) :
     ∫ t : ℝ in Ioi 0, (t : ℂ) ^ (a - 1) * exp (-(t : ℂ)) = Gamma a := by
   have := integral_cpow_mul_exp_neg_mul_Ioi ha one_pos
   simpa using this

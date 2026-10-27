@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.OrthogonalPolynomials.Hahn
-public import Mathlib.RingTheory.PowerSeries.Exp
 
 /-!
 # Addition formulas for discrete classical polynomials
@@ -30,7 +29,7 @@ namespace DiscreteAddition
 open PowerSeries
 
 /-- Multiplication of exponential generating series in binomial-coefficient notation. -/
-lemma coeff_mul_factorial (f g : PowerSeries ℂ) (n : ℕ) :
+theorem coeff_mul_factorial (f g : PowerSeries ℂ) (n : ℕ) :
     coeff n (f * g) * n ! =
       ∑ k ∈ Finset.range (n + 1), (n.choose k : ℂ) *
         (coeff k f * k !) * (coeff (n - k) g * (n - k) !) := by
@@ -46,7 +45,7 @@ def charlierSeries (a x : ℂ) : PowerSeries ℂ :=
   rescale a⁻¹ (binomSeries (-x)) * PowerSeries.exp ℂ
 
 /-- The Charlier coefficients, including the totalized value at `a = 0`. -/
-lemma coeff_charlierSeries (a x : ℂ) (n : ℕ) :
+theorem coeff_charlierSeries (a x : ℂ) (n : ℕ) :
     coeff n (charlierSeries a x) * n ! = charlier a n x := by
   rw [charlierSeries, coeff_mul_factorial]
   unfold charlier terminatingHG
@@ -65,7 +64,7 @@ lemma coeff_charlierSeries (a x : ℂ) (n : ℕ) :
   linear_combination -(n.choose k * poch (-x) k * a⁻¹ ^ k) * hs
 
 /-- Translation of the Charlier generating series. -/
-lemma charlierSeries_add (a x y : ℂ) :
+theorem charlierSeries_add (a x y : ℂ) :
     charlierSeries a (x + y) =
       rescale a⁻¹ (binomSeries (-y)) * charlierSeries a x := by
   simp only [charlierSeries, ← mul_assoc, ← map_mul, binomSeries_mul]
@@ -74,7 +73,7 @@ lemma charlierSeries_add (a x y : ℂ) :
   ring
 
 /-- The fixed-parameter Charlier convolution has the correction factor `exp(-X)`. -/
-lemma charlierSeries_add_fixed (a x y : ℂ) :
+theorem charlierSeries_add_fixed (a x y : ℂ) :
     charlierSeries a (x + y) =
       PowerSeries.evalNegHom (PowerSeries.exp ℂ) *
         (charlierSeries a x * charlierSeries a y) := by
@@ -92,7 +91,7 @@ def meixnerSeries (β c x : ℂ) : PowerSeries ℂ :=
   rescale c⁻¹ (binomSeries (-x)) * binomSeries (x + β)
 
 /-- Meixner coefficients with only the finite denominator restrictions needed at degree `n`. -/
-lemma coeff_meixnerSeries {β c : ℂ} (n : ℕ)
+theorem coeff_meixnerSeries {β c : ℂ} (n : ℕ)
     (hβ : ∀ k ≤ n, poch β k ≠ 0) (x : ℂ) :
     coeff n (meixnerSeries β c x) * n ! = poch β n * meixner β c n x := by
   rw [meixnerSeries, coeff_mul_factorial, poch_mul_meixner_eq_sum_of_ne_zero n hβ]
@@ -103,7 +102,7 @@ lemma coeff_meixnerSeries {β c : ℂ} (n : ℕ)
   field_simp
 
 /-- Addition of both the argument and the Meixner parameter. -/
-lemma meixnerSeries_add (β γ c x y : ℂ) :
+theorem meixnerSeries_add (β γ c x y : ℂ) :
     meixnerSeries (β + γ) c (x + y) = meixnerSeries β c x * meixnerSeries γ c y := by
   unfold meixnerSeries
   conv_rhs => rw [mul_mul_mul_comm, ← map_mul, binomSeries_mul, binomSeries_mul]
@@ -111,7 +110,7 @@ lemma meixnerSeries_add (β γ c x y : ℂ) :
     show x + β + (y + γ) = x + y + (β + γ) by ring]
 
 /-- The correction factor for addition at fixed Meixner parameter. -/
-lemma meixnerSeries_add_fixed (β c x y : ℂ) :
+theorem meixnerSeries_add_fixed (β c x y : ℂ) :
     meixnerSeries β c (x + y) =
       binomSeries (-β) * (meixnerSeries β c x * meixnerSeries β c y) := by
   rw [← meixnerSeries_add]
@@ -124,7 +123,7 @@ def krawtchoukSeries (p : ℂ) (N : ℕ) (x : ℂ) : PowerSeries ℂ :=
   rescale p (meixnerSeries (-(N : ℂ)) (1 - p⁻¹)⁻¹ x)
 
 /-- Krawtchouk coefficients up to degree `N`; the finite denominator factors are nonzero. -/
-lemma coeff_krawtchoukSeries (p : ℂ) (N n : ℕ) (hn : n ≤ N) (x : ℂ) :
+theorem coeff_krawtchoukSeries (p : ℂ) (N n : ℕ) (hn : n ≤ N) (x : ℂ) :
     coeff n (krawtchoukSeries p N x) * n ! =
       poch (-(N : ℂ)) n * p ^ n * krawtchouk p N n x := by
   have hb : ∀ k ≤ n, poch (-(N : ℂ)) k ≠ 0 := by
@@ -137,7 +136,7 @@ lemma coeff_krawtchoukSeries (p : ℂ) (N n : ℕ) (hn : n ≤ N) (x : ℂ) :
   ring
 
 /-- The Krawtchouk convolution correction is `(1-pX)^{-N}`. -/
-lemma krawtchoukSeries_add (p : ℂ) (N : ℕ) (x y : ℂ) :
+theorem krawtchoukSeries_add (p : ℂ) (N : ℕ) (x y : ℂ) :
     krawtchoukSeries p N (x + y) =
       rescale p (binomSeries (N : ℂ)) *
         (krawtchoukSeries p N x * krawtchoukSeries p N y) := by

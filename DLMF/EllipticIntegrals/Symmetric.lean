@@ -6,12 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import Carlson.Elliptic.Standard
-public import Carlson.R.SingleIntegral.PositiveRay
-public import Carlson.R.Homogeneity
 public import Carlson.Elliptic.ReductionTables
 public import DLMF.EllipticIntegrals.P19sR1Bounds
-public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
-public import Mathlib.Tactic.CrossRefAttribute
 
 /-!
 # Symmetric elliptic integrals: definitions (DLMF §§19.15–19.16)
@@ -169,7 +165,7 @@ theorem ei19c_not_isNegReal_of_mem_slitPlane {p : ℂ} (hp : p ∈ slitPlane) : 
   · linarith
   · exact h h1
 
-theorem ei19c_add_mem_slitPlane {t : ℝ} (ht : 0 < t) {z : ℂ} (hz : symEllIntArg z) :
+lemma ei19c_add_mem_slitPlane {t : ℝ} (ht : 0 < t) {z : ℂ} (hz : symEllIntArg z) :
     (t : ℂ) + z ∈ slitPlane := by
   rcases hz with hz | rfl
   · rcases mem_slitPlane_iff.mp hz with h | h
@@ -190,13 +186,13 @@ theorem ei19c_betaIntegral_inv {a a' : ℂ} (ha : 0 < a.re) (ha' : 0 < a'.re) :
 theorem ei19c_Gamma_three_halves : Gamma (3 / 2 : ℂ) = (1 / 2) * Gamma (1 / 2) := by
   rw [show (3 / 2 : ℂ) = 1 / 2 + 1 by norm_num, Complex.Gamma_add_one _ (by norm_num)]
 
-theorem ei19c_Gamma_five_halves : Gamma (5 / 2 : ℂ) = (3 / 2) * Gamma (3 / 2) := by
+lemma ei19c_Gamma_five_halves : Gamma (5 / 2 : ℂ) = (3 / 2) * Gamma (3 / 2) := by
   rw [show (5 / 2 : ℂ) = 3 / 2 + 1 by norm_num, Complex.Gamma_add_one _ (by norm_num)]
 
 theorem ei19c_Gamma_half_ne : Gamma (1 / 2 : ℂ) ≠ 0 :=
   Complex.Gamma_ne_zero_of_re_pos (by norm_num)
 
-theorem ei19c_Gamma_half_sq : Gamma (1 / 2 : ℂ) * Gamma (1 / 2) = π := by
+lemma ei19c_Gamma_half_sq : Gamma (1 / 2 : ℂ) * Gamma (1 / 2) = π := by
   rw [Complex.Gamma_one_half_eq, ei19c_cpow_half_sq]
 
 /-- DLMF 19.16.9 (first form), **stronger than DLMF**: for complex `a, 𝐛` with `Re a > 0`,
@@ -265,7 +261,7 @@ theorem symEllIntRF_eq_carlsonRF {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y �
     Carlson.carlsonRF]
   congr 1; ring
 
-theorem ei19c_Gamma_two : Gamma (2 : ℂ) = 1 := by
+lemma ei19c_Gamma_two : Gamma (2 : ℂ) = 1 := by
   rw [show (2 : ℂ) = 1 + 1 by norm_num, Complex.Gamma_add_one _ one_ne_zero, Complex.Gamma_one]
   ring
 
@@ -547,7 +543,7 @@ theorem p19sR1_two_mul_symEllIntRG {x y z : ℂ} (hx : symEllIntArg x) (hy : y �
 
 /-- Bridge (slit plane): DLMF's `R_G` integral (19.16.2_5) is `Carlson.carlsonRG`. From
 `p19sR1_two_mul_symEllIntRG` and Carlson's Table 9.3-1, row 3 (`lean-codes`). -/
-theorem p19sR1_symEllIntRG_eq_carlsonRG {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
+lemma p19sR1_symEllIntRG_eq_carlsonRG {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
     (hz : z ∈ slitPlane) : symEllIntRG x y z = Carlson.carlsonRG x y z := by
   have h1 := p19sR1_two_mul_symEllIntRG (Or.inl hx) hy hz
   have h2 := Carlson.carlsonR_table_9_3_1_row3 hx hy hz
@@ -622,7 +618,7 @@ theorem symEllIntR_cons_zero {n : ℕ} {a b₁ : ℝ} {b : Fin n → ℝ} {z : F
 
 /-- `R_E(y, z) = z R_K(y, z) + (1/2) z (y - z) R_{-3/2}(1/2, 3/2; y, z)` (Carlson's notation,
 `lean-codes`), from the contiguous relation `regR2_raise₁` and Table 9.3-2, row 3. -/
-theorem p19sR1_carlsonRE_eq {y z : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
+lemma p19sR1_carlsonRE_eq {y z : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
     Carlson.carlsonRE y z = z * Carlson.TwoVariable.carlsonRK y z +
       (1 / 2) * z * (y - z) * Carlson.carlsonR (-3 / 2) ![1 / 2, 3 / 2] ![y, z] := by
   have h3 := Carlson.carlsonR_table_9_3_2_row3 hy hz

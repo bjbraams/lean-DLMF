@@ -6,12 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.NumberTheory.LSeries.RiemannZeta
-public import Mathlib.Analysis.SpecialFunctions.Gamma.Deligne
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
-public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
-public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
-public import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
-public import Mathlib.Analysis.Complex.CauchyIntegral
 
 /-!
 # Reflection formulas for the Riemann zeta function (DLMF §25.4)

@@ -5,12 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Core.Upstream
-public import Mathlib.Algebra.Order.Round
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Arctan
-public import Mathlib.Analysis.SpecialFunctions.Complex.Arctan
-public import Mathlib.Analysis.SpecialFunctions.Pow.Real
-public import Mathlib.Analysis.SpecialFunctions.Pow.Continuity
+public import Mathlib.MeasureTheory.Covering.Besicovitch
+public import Mathlib.Tactic.Positivity.Finset
 
 /-!
 # Elementary argument reductions (DLMF §4.45)
@@ -60,7 +57,7 @@ def trigReductionIndex (x : ℝ) : ℤ := ⌊x / Real.pi + 1 / 2⌋
 def trigReductionAngle (x : ℝ) : ℝ := x - trigReductionIndex x * Real.pi
 
 /-- Scaled form of Mathlib’s `abs_sub_round`: reduction stays within half a period. -/
-lemma abs_sub_nearest_mul_le (x : ℝ) {L : ℝ} (hL : 0 < L) :
+theorem abs_sub_nearest_mul_le (x : ℝ) {L : ℝ} (hL : 0 < L) :
     |x - (⌊x / L + 1 / 2⌋ : ℤ) * L| ≤ L / 2 := by
   have h := mul_le_mul_of_nonneg_right (abs_sub_round (x / L)) hL.le
   calc |x - (⌊x / L + 1 / 2⌋ : ℤ) * L|
@@ -101,7 +98,7 @@ def arctanReductionSequence (x : ℝ) : ℕ → ℝ
   | n + 1 => arctanReductionStep (arctanReductionSequence x n)
 
 /-- Positive arguments stay positive under half-angle reduction. -/
-lemma arctanReductionStep_pos {x : ℝ} (hx : 0 < x) : 0 < arctanReductionStep x := by
+theorem arctanReductionStep_pos {x : ℝ} (hx : 0 < x) : 0 < arctanReductionStep x := by
   exact div_pos hx (by positivity)
 
 /-- The stable half-angle identity in the source. -/
@@ -129,14 +126,14 @@ theorem arctanReductionStep_identity {x : ℝ} (hx : 0 < x) :
   linear_combination -hs2
 
 /-- All iterated arguments remain positive. -/
-lemma arctanReductionSequence_pos {x : ℝ} (hx : 0 < x) (n : ℕ) :
+theorem arctanReductionSequence_pos {x : ℝ} (hx : 0 < x) (n : ℕ) :
     0 < arctanReductionSequence x n := by
   induction n with
   | zero => exact hx
   | succ n ih => exact arctanReductionStep_pos ih
 
 /-- Every positive half-angle step reduces the argument by at least a factor two. -/
-lemma arctanReductionStep_le_half {x : ℝ} (hx : 0 < x) :
+theorem arctanReductionStep_le_half {x : ℝ} (hx : 0 < x) :
     arctanReductionStep x ≤ x / 2 := by
   have hs := Real.sqrt_nonneg (1 + x ^ 2)
   have hs2 := Real.sq_sqrt (show 0 ≤ 1 + x ^ 2 by positivity)

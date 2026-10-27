@@ -6,11 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.EllipticIntegrals.SymmetricSeries
-public import DLMF.EllipticIntegrals.P19sR1Connection
 public import DLMF.EllipticIntegrals.SymmetricRelations
-public import Carlson.R.EulerTransform
-public import Carlson.R.IntegerParameters
-public import Mathlib.Analysis.Asymptotics.AsymptoticEquivalent
 
 /-!
 # Symmetric elliptic integrals: special cases (DLMF §19.20)
@@ -37,18 +33,18 @@ open scoped Real Topology
 
 namespace DLMF.EllipticIntegrals
 
-theorem ei19c_smul_mem_slitPlane {l : ℝ} (hl : 0 < l) {x : ℂ} (hx : x ∈ slitPlane) :
+lemma ei19c_smul_mem_slitPlane {l : ℝ} (hl : 0 < l) {x : ℂ} (hx : x ∈ slitPlane) :
     (l : ℂ) * x ∈ slitPlane := by
   rcases mem_slitPlane_iff.mp hx with h | h
   · exact mem_slitPlane_iff.mpr (Or.inl (by simp; positivity))
   · exact mem_slitPlane_iff.mpr (Or.inr (by simp [hl.ne', h]))
 
-theorem ei19c_arg_ofReal_add {l : ℝ} (hl : 0 < l) {x : ℂ} (hx : x ∈ slitPlane) :
+lemma ei19c_arg_ofReal_add {l : ℝ} (hl : 0 < l) {x : ℂ} (hx : x ∈ slitPlane) :
     arg (l : ℂ) + arg x ∈ Ioo (-π) π := by
   rw [arg_ofReal_of_nonneg hl.le, zero_add]
   exact ⟨neg_pi_lt_arg _, lt_of_le_of_ne (arg_le_pi _) (mem_slitPlane_iff_arg.mp hx).1⟩
 
-theorem ei19c_symEllIntR_smul {ι : Type*} [Fintype ι] (a : ℂ) (b : ι → ℂ) {l : ℝ} (hl : 0 < l)
+lemma ei19c_symEllIntR_smul {ι : Type*} [Fintype ι] (a : ℂ) (b : ι → ℂ) {l : ℝ} (hl : 0 < l)
     {z : ι → ℂ} (hz : z ∈ Carlson.carlsonRSlitDomain) :
     symEllIntR a b (fun i => (l : ℂ) * z i) = (l : ℂ) ^ (-a) * symEllIntR a b z :=
   symEllIntR_mul a b hz (ofReal_mem_slitPlane.mpr hl) fun i => ei19c_arg_ofReal_add hl (hz i)
@@ -144,7 +140,7 @@ theorem symEllIntRG_smul {l : ℝ} (hl : 0 < l) {x y z : ℂ} (hx : x ∈ slitPl
   congr 2; ring
 
 /-- `∫₀^∞ dt / ((t + z)^{1/2} (t + z)) = 2 z^{-1/2}` for `z ∈ ℂ \ (-∞, 0]`. -/
-theorem p19sR1_integral_inv_cpow_half_mul {z : ℂ} (hz : z ∈ slitPlane) :
+lemma p19sR1_integral_inv_cpow_half_mul {z : ℂ} (hz : z ∈ slitPlane) :
     ∫ t in Ioi (0 : ℝ), (((t : ℂ) + z) ^ (1 / 2 : ℂ) * ((t : ℂ) + z))⁻¹ =
       2 * (z ^ (1 / 2 : ℂ))⁻¹ := by
   obtain ⟨c1, hc1, h1⟩ := p19sR1_norm_cpow_half_ge hz

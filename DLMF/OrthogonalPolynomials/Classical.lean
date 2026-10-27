@@ -5,19 +5,14 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Tactic.CrossRefAttribute
 public import DLMF.Confluent.Basic
 public import DLMF.Hypergeometric.DiffEq
-public import Mathlib.Algebra.Polynomial.Taylor
-public import DLMF.OrthogonalPolynomials.General
 public import Mathlib.Analysis.Complex.TaylorSeries
-public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 public import Mathlib.RingTheory.Polynomial.Chebyshev
 public import Mathlib.RingTheory.Polynomial.Hermite.Basic
-public import Mathlib.RingTheory.Polynomial.Hermite.Gaussian
 public import Mathlib.RingTheory.Polynomial.ShiftedLegendre
-public import Mathlib.Topology.Algebra.InfiniteSum.Real
-public import Mathlib.Topology.Algebra.InfiniteSum.Ring
+public import Mathlib.Analysis.Calculus.Deriv.Polynomial
+public import Mathlib.Analysis.SpecialFunctions.Bernstein
 
 /-!
 # Classical orthogonal polynomials (AAR Chapter 6)
@@ -78,7 +73,7 @@ theorem hermitePolyH_derivative (n : ℕ) :
     ring
 
 /-- The Hermite recurrence in evaluated form. -/
-lemma aeval_hermitePolyH_succ_succ (x : ℂ) (n : ℕ) :
+theorem aeval_hermitePolyH_succ_succ (x : ℂ) (n : ℕ) :
     (aeval x (hermitePolyH (n + 2)) : ℂ) =
       2 * x * aeval x (hermitePolyH (n + 1)) - 2 * (n + 1) * aeval x (hermitePolyH n) := by
   rw [hermitePolyH_succ (n + 1), hermitePolyH_derivative]
@@ -139,7 +134,7 @@ theorem deriv_gaussian_eq_hermitePolyH (n : ℕ) (x : ℝ) :
 
 /-- Complex Rodrigues formula for physicists' Hermite polynomials. Helper lemma for
 `hermitePolyH_generating_function`. -/
-lemma iteratedDeriv_cexp_neg_sq (n : ℕ) (x : ℂ) :
+theorem iteratedDeriv_cexp_neg_sq (n : ℕ) (x : ℂ) :
     iteratedDeriv n (fun y : ℂ => exp (-(y ^ 2))) x =
       (-1 : ℂ) ^ n * (aeval x (hermitePolyH n) : ℂ) * exp (-(x ^ 2)) := by
   rw [iteratedDeriv_eq_iterate, mul_assoc]
@@ -212,7 +207,7 @@ theorem laguerrePolyL_zero (α x : ℂ) : laguerrePolyL α 0 x = 1 := by
 
 /-- The terminating expansion, with coefficients separated from the variable. -/
 @[dlmf 18.11.E2]
-lemma laguerrePolyL_eq_sum_coeff (α : ℂ) (n : ℕ) (x : ℂ) :
+theorem laguerrePolyL_eq_sum_coeff (α : ℂ) (n : ℕ) (x : ℂ) :
     laguerrePolyL α n x = ∑ j ∈ Finset.range (n + 1),
       (poch (α + 1) n / n.factorial * kummerMCoeff (-(n : ℂ)) (α + 1) j) * x ^ j := by
   unfold laguerrePolyL
@@ -222,7 +217,7 @@ lemma laguerrePolyL_eq_sum_coeff (α : ℂ) (n : ℕ) (x : ℂ) :
   ring
 
 /-- Moments of the Laguerre weight are Gamma values; integrability is recorded as well. -/
-lemma laguerrePolyL_weight_moment {α : ℝ} (hα : -1 < α) (k : ℕ) :
+theorem laguerrePolyL_weight_moment {α : ℝ} (hα : -1 < α) (k : ℕ) :
     Integrable (fun x : ℝ => (x : ℂ) ^ k * (x : ℂ) ^ (α : ℂ) * exp (-(x : ℂ)))
       (volume.restrict (Set.Ioi 0)) ∧
     (∫ x : ℝ in Set.Ioi 0, (x : ℂ) ^ k * (x : ℂ) ^ (α : ℂ) * exp (-(x : ℂ))) =
@@ -243,7 +238,7 @@ lemma laguerrePolyL_weight_moment {α : ℝ} (hα : -1 < α) (k : ℕ) :
   rw [integral_congr_ae heq, Gamma_eq_integral hs, GammaIntegral]
 
 /-- Expand a weighted Laguerre monomial into finitely many weight moments. -/
-lemma laguerrePolyL_mul_monomial_eq_sum (α : ℂ) (n k : ℕ) (x : ℝ) :
+theorem laguerrePolyL_mul_monomial_eq_sum (α : ℂ) (n k : ℕ) (x : ℝ) :
     laguerrePolyL α n x * (x : ℂ) ^ k * (x : ℂ) ^ α * exp (-(x : ℂ)) =
       ∑ j ∈ Finset.range (n + 1),
         (poch (α + 1) n / n.factorial * kummerMCoeff (-(n : ℂ)) (α + 1) j) *
@@ -255,14 +250,14 @@ lemma laguerrePolyL_mul_monomial_eq_sum (α : ℂ) (n k : ℕ) (x : ℝ) :
   rw [pow_add]
   ring
 
-lemma integrable_laguerrePolyL_mul_monomial {α : ℝ} (hα : -1 < α) (n k : ℕ) :
+theorem integrable_laguerrePolyL_mul_monomial {α : ℝ} (hα : -1 < α) (n k : ℕ) :
     Integrable (fun x : ℝ => laguerrePolyL α n x * (x : ℂ) ^ k *
       (x : ℂ) ^ (α : ℂ) * exp (-(x : ℂ))) (volume.restrict (Set.Ioi 0)) := by
   simp_rw [laguerrePolyL_mul_monomial_eq_sum]
   exact integrable_finsetSum _ fun j _ => (laguerrePolyL_weight_moment hα (k + j)).1.const_mul _
 
 /-- The Laguerre moments vanish below the polynomial's degree. -/
-lemma integral_laguerrePolyL_mul_monomial {α : ℝ} (hα : -1 < α) (n k : ℕ) :
+theorem integral_laguerrePolyL_mul_monomial {α : ℝ} (hα : -1 < α) (n k : ℕ) :
     (∫ x : ℝ in Set.Ioi 0, laguerrePolyL α n x * (x : ℂ) ^ k *
       (x : ℂ) ^ (α : ℂ) * exp (-(x : ℂ))) =
       Gamma ((α : ℂ) + k + 1) * poch (-(k : ℂ)) n / n.factorial := by
@@ -332,7 +327,7 @@ theorem laguerrePolyL_orthogonal {α : ℝ} {m n : ℕ} (hα : -1 < α) (hmn : m
 /-- Helper lemma for `laguerrePolyL_generating_function`: the explicit terminating sum
 `L_n^{(α)}(x) = ∑_{k=0}^n (α+1+k)_{n-k} (-x)^k / ((n-k)! k!)`. -/
 @[dlmf 18.5.E12]
-lemma laguerrePolyL_eq_sum {α : ℂ} (hα : ∀ k : ℕ, α + 1 ≠ -(k : ℂ)) (n : ℕ) (x : ℂ) :
+theorem laguerrePolyL_eq_sum {α : ℂ} (hα : ∀ k : ℕ, α + 1 ≠ -(k : ℂ)) (n : ℕ) (x : ℂ) :
     laguerrePolyL α n x =
       ∑ k ∈ Finset.range (n + 1),
         poch (α + 1 + k) (n - k) / ((n - k).factorial * k.factorial : ℂ) * (-x) ^ k := by
@@ -360,7 +355,7 @@ lemma laguerrePolyL_eq_sum {α : ℂ} (hα : ∀ k : ℕ, α + 1 ≠ -(k : ℂ))
   field [hck, hn, hk0, hnk]
 
 /-- The real binomial series, used as a nonnegative majorant for Laguerre's double sum. -/
-lemma hasSum_poch_real {r : ℝ} (hr0 : 0 ≤ r) (hr1 : r < 1) (a : ℝ) :
+theorem hasSum_poch_real {r : ℝ} (hr0 : 0 ≤ r) (hr1 : r < 1) (a : ℝ) :
     HasSum (fun m : ℕ => (ascPochhammer ℝ m).eval a / m.factorial * r ^ m)
       ((1 - r) ^ (-a)) := by
   have hs := hasSum_poch_div_factorial (β := (a : ℂ)) (z := (r : ℂ))
@@ -373,7 +368,7 @@ lemma hasSum_poch_real {r : ℝ} (hr0 : 0 ≤ r) (hr1 : r < 1) (a : ℝ) :
     Complex.hasSum_re hs
 
 /-- Absolute convergence of the double series obtained from Laguerre's terminating sum. -/
-lemma summable_laguerrePolyL_double (α x : ℂ) {t : ℂ} (ht : ‖t‖ < 1) :
+theorem summable_laguerrePolyL_double (α x : ℂ) {t : ℂ} (ht : ‖t‖ < 1) :
     Summable (fun km : ℕ × ℕ =>
       (poch (α + 1 + km.1) km.2 / km.2.factorial * t ^ km.2) *
         ((-x * t) ^ km.1 / km.1.factorial)) := by
@@ -495,7 +490,7 @@ def legendrePolyP (n : ℕ) (x : ℂ) : ℂ :=
 theorem legendrePolyP_zero (x : ℂ) : legendrePolyP 0 x = 1 := by simp [legendrePolyP]
 
 /-- Helper lemma for `aeval_shiftedLegendre_eq_legendrePolyP`. -/
-lemma poch_nat_succ_eq_choose_mul_factorial (n k : ℕ) :
+theorem poch_nat_succ_eq_choose_mul_factorial (n k : ℕ) :
     poch ((n : ℂ) + 1) k = (n + k).choose n * k ! := by
   have hn : (n ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
   have hpoch : (n ! : ℂ) * poch ((n : ℂ) + 1) k = (n + k)! := by
@@ -542,7 +537,7 @@ theorem aeval_shiftedLegendre_eq_legendrePolyP (n : ℕ) (x : ℂ) :
   simp [Algebra.smul_def, hcoeff, hhg]
 
 /-- A terminating Gauss series is analytic everywhere, including its endpoints. -/
-lemma analyticAt_gauss_neg_nat (n : ℕ) (b c z : ℂ) :
+theorem analyticAt_gauss_neg_nat (n : ℕ) (b c z : ℂ) :
     AnalyticAt ℂ (₂F₁ (-(n : ℂ)) b c) z := by
   have heq : ₂F₁ (-(n : ℂ)) b c = fun w : ℂ =>
       ∑ k ∈ Finset.range (n + 1), gaussHGCoeff (-(n : ℂ)) b c k * w ^ k :=
@@ -551,7 +546,7 @@ lemma analyticAt_gauss_neg_nat (n : ℕ) (b c z : ℂ) :
   fun_prop
 
 /-- Orthogonality of the terminating Gauss polynomials for the shifted Jacobi weight. -/
-lemma jacobi_shifted_orthogonal {α β : ℝ} (hα : -1 < α) (hβ : -1 < β)
+theorem jacobi_shifted_orthogonal {α β : ℝ} (hα : -1 < α) (hβ : -1 < β)
     {m n : ℕ} (hmn : m < n) :
     (∫ t : ℝ in (0 : ℝ)..1,
       (t : ℂ) ^ (α : ℂ) * (1 - (t : ℂ)) ^ (β : ℂ) *
@@ -705,7 +700,7 @@ theorem ultrasphPoly_zero (lam x : ℂ) : ultrasphPoly lam 0 x = 1 := by
 
 /-- Helper lemma for `eval_U_eq_ultrasphPoly`: `(2)_n / n! = n+1`. -/
 @[dlmf 18.5.E11_4]
-lemma ultrasphPoly_param_one_eq (n : ℕ) (x : ℂ) :
+theorem ultrasphPoly_param_one_eq (n : ℕ) (x : ℂ) :
     ultrasphPoly (1 : ℂ) n x =
       (n + 1 : ℂ) * ₂F₁ (-(n : ℂ)) ((n : ℂ) + 2) (3 / 2) ((1 - x) / 2) := by
   have hne : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
@@ -726,7 +721,7 @@ lemma ultrasphPoly_param_one_eq (n : ℕ) (x : ℂ) :
   rw [hF, show (2 * (1 : ℂ)) = (2 : ℂ) by ring, hs]
 
 /-- Helper lemma for `eval_U_eq_ultrasphPoly`. -/
-lemma ultrasphPoly_one_one (x : ℂ) : ultrasphPoly (1 : ℂ) 1 x = 2 * x := by
+theorem ultrasphPoly_one_one (x : ℂ) : ultrasphPoly (1 : ℂ) 1 x = 2 * x := by
   rw [ultrasphPoly_param_one_eq]
   simp only [Nat.cast_one, one_add_one_eq_two]
   have h3 : (1 : ℂ) + 2 = 3 := by norm_num
@@ -742,7 +737,7 @@ lemma ultrasphPoly_one_one (x : ℂ) : ultrasphPoly (1 : ℂ) 1 x = 2 * x := by
   ring
 
 /-- Helper lemma for `eval_U_eq_ultrasphPoly`: `(1/2)_k = (2k)! / (4^k k!)`. -/
-lemma poch_half (k : ℕ) :
+theorem poch_half (k : ℕ) :
     poch (1 / 2 : ℂ) k = (2 * k).factorial / (4 ^ k * k.factorial : ℂ) := by
   induction k with
   | zero => simp [poch_zero]
@@ -771,7 +766,7 @@ lemma poch_half (k : ℕ) :
     exact this.symm
 
 /-- Helper lemma for `eval_U_eq_ultrasphPoly`. -/
-lemma poch_three_halves_factorial (k : ℕ) :
+theorem poch_three_halves_factorial (k : ℕ) :
     poch (3 / 2 : ℂ) k = (2 * k + 1).factorial / (4 ^ k * k.factorial : ℂ) := by
   have hk0 : (k.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero
   have h4 : (4 : ℂ) ^ k ≠ 0 := pow_ne_zero _ (by norm_num)
@@ -787,7 +782,7 @@ lemma poch_three_halves_factorial (k : ℕ) :
   field [hk0, h4, h2k]
 
 /-- Helper lemma for `eval_U_eq_ultrasphPoly`: coefficient of `((1-x)/2)^k` in `C_n^{(1)}(x)`. -/
-lemma ultrasphPoly_one_coeff {n k : ℕ} (hk : k ≤ n) :
+theorem ultrasphPoly_one_coeff {n k : ℕ} (hk : k ≤ n) :
     (n + 1 : ℂ) * gaussHGCoeff (-(n : ℂ)) ((n : ℂ) + 2) (3 / 2) k =
       (-1 : ℂ) ^ k * (4 : ℂ) ^ k * (n + k + 1).factorial /
         ((n - k).factorial * (2 * k + 1).factorial : ℂ) := by
@@ -834,7 +829,7 @@ def gegenbauerB (n k : ℕ) : ℂ :=
   else 0
 
 /-- Helper lemma for `eval_U_eq_ultrasphPoly`. -/
-lemma gegenbauerB_eq (n k : ℕ) :
+theorem gegenbauerB_eq (n k : ℕ) :
     gegenbauerB n k =
       (n + 1 : ℂ) * gaussHGCoeff (-(n : ℂ)) ((n : ℂ) + 2) (3 / 2) k := by
   by_cases h : k ≤ n
@@ -842,7 +837,7 @@ lemma gegenbauerB_eq (n k : ℕ) :
   · simp [gegenbauerB, h, gaussHGCoeff, poch_neg_nat_eq_zero (Nat.lt_of_not_ge h)]
 
 /-- Helper lemma for `eval_U_eq_ultrasphPoly`. -/
-lemma gegenbauerB_zero (n : ℕ) : gegenbauerB n 0 = n + 1 := by
+theorem gegenbauerB_zero (n : ℕ) : gegenbauerB n 0 = n + 1 := by
   simp [gegenbauerB]
   have hfac : ((n + 1).factorial : ℂ) = (n + 1) * n.factorial := by
     rw [Nat.factorial_succ]; push_cast; ring
@@ -851,7 +846,7 @@ lemma gegenbauerB_zero (n : ℕ) : gegenbauerB n 0 = n + 1 := by
   field [hn]
 
 /-- Taylor derivatives of Chebyshev `U` at one match the terminating Gauss coefficients. -/
-lemma iterate_derivative_U_eq_gaussHGCoeff (n k : ℕ) :
+theorem iterate_derivative_U_eq_gaussHGCoeff (n k : ℕ) :
     (derivative^[k] (Polynomial.Chebyshev.U ℂ n)).eval 1 =
       k.factorial * (n + 1 : ℂ) * gaussHGCoeff (-(n : ℂ)) (n + 2) (3 / 2) k *
         (-(1 / 2 : ℂ)) ^ k := by
@@ -924,11 +919,11 @@ def jacobiMeasure (α β : ℝ) : Measure ℝ :=
     (fun x => ENNReal.ofReal ((1 - x) ^ α * (1 + x) ^ β))
 
 /-- Reflection of a Pochhammer symbol: `(1 - y - m)_m = (-1)^m (y)_m`. -/
-lemma poch_one_sub_sub_self (y : ℂ) (m : ℕ) : poch (1 - y - m) m = (-1 : ℂ) ^ m * poch y m := by
+theorem poch_one_sub_sub_self (y : ℂ) (m : ℕ) : poch (1 - y - m) m = (-1 : ℂ) ^ m * poch y m := by
   exact DLMF.Hypergeometric.poch_reflect y m
 
 /-- The binomial theorem for rising factorials (Chu–Vandermonde). -/
-lemma poch_add_binomial (u v : ℂ) (n : ℕ) :
+theorem poch_add_binomial (u v : ℂ) (n : ℕ) :
     ∑ j ∈ Finset.range (n + 1), (n.choose j : ℂ) * poch u j * poch v (n - j) = poch (u + v) n := by
   exact DLMF.Hypergeometric.poch_add_binomial_sum u v n
 

@@ -787,7 +787,7 @@ theorem iteratedErfc_continuedFraction (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
 
 /-- Integrability of the weighted Gaussian kernel `tⁿ e^{-t²/4}` along a ray `|arg t| < π/4`,
 against any real exponential. -/
-lemma erfRecip_integrableOn_pow_gauss_rotate (n : ℕ) (c : ℝ) {θ : ℝ} (hθ : |θ| < π / 4) :
+theorem erfRecip_integrableOn_pow_gauss_rotate (n : ℕ) (c : ℝ) {θ : ℝ} (hθ : |θ| < π / 4) :
     IntegrableOn (fun r : ℝ => Real.exp (-c * r) •
       ((((r : ℂ) * exp (θ * I)) ^ n) * cexp (-(((r : ℂ) * exp (θ * I)) ^ 2 / 4)))) (Ioi 0) := by
   obtain ⟨K, hK0, hK⟩ := exists_rpow_mul_exp_neg_le' (n : ℝ) one_pos
@@ -822,7 +822,7 @@ lemma erfRecip_integrableOn_pow_gauss_rotate (n : ℕ) (c : ℝ) {θ : ℝ} (hθ
         gcongr
 /-- Laplace form of the repeated erfc integral:
 `iⁿerfc z = 2 π^{-1/2} e^{-z²} / (2^{n+1} n!) ∫₀^∞ e^{-zs} sⁿ e^{-s²/4} ds`. -/
-lemma erfRecip_iteratedErfc_eq_laplace (n : ℕ) (z : ℂ) :
+theorem erfRecip_iteratedErfc_eq_laplace (n : ℕ) (z : ℂ) :
     iteratedErfc n z = 2 / Real.sqrt π * cexp (-z ^ 2) / (2 ^ (n + 1) * (n.factorial : ℂ)) *
       ∫ s in Ioi (0 : ℝ), cexp (-(z * s)) * ((s : ℂ) ^ n * cexp (-((s : ℂ) ^ 2 / 4))) := by
   have hn1 : (n : ℤ) ≠ -1 := by omega
@@ -863,7 +863,7 @@ lemma erfRecip_iteratedErfc_eq_laplace (n : ℕ) (z : ℂ) :
 
 /-- Rotated Laplace form of the repeated erfc integral, valid for every complex `z` and
 `|θ| < π/4`. -/
-lemma erfRecip_iteratedErfc_eq_rotate (n : ℕ) {θ : ℝ} (hθ : |θ| < π / 4) (z : ℂ) :
+theorem erfRecip_iteratedErfc_eq_rotate (n : ℕ) {θ : ℝ} (hθ : |θ| < π / 4) (z : ℂ) :
     iteratedErfc n z = 2 / Real.sqrt π * cexp (-z ^ 2) / (2 ^ (n + 1) * (n.factorial : ℂ)) *
       (exp (θ * I) * ∫ r in Ioi (0 : ℝ), cexp (-(z * exp (θ * I) * r)) *
         ((((r : ℂ) * exp (θ * I)) ^ n) * cexp (-(((r : ℂ) * exp (θ * I)) ^ 2 / 4)))) := by
@@ -929,7 +929,7 @@ lemma erfRecip_iteratedErfc_eq_rotate (n : ℕ) {θ : ℝ} (hθ : |θ| < π / 4)
 
 /-- Taylor remainders of `tⁿ e^{-t²/4}` along a ray, in the form required by Watson's lemma
 with `μ = n + 1`. -/
-lemma erfRecip_pow_gauss_sub_sum_isBigO (n : ℕ) (θ : ℝ) (N : ℕ) :
+theorem erfRecip_pow_gauss_sub_sum_isBigO (n : ℕ) (θ : ℝ) (N : ℕ) :
     (fun r : ℝ => ((r : ℂ) * exp (θ * I)) ^ n * cexp (-(((r : ℂ) * exp (θ * I)) ^ 2 / 4)) -
       ∑ k ∈ Finset.range N,
         (((r : ℂ) * exp (θ * I)) ^ ((k : ℂ) + ((n : ℂ) + 1) - 1)) • gaussQuarterCoeff k)
@@ -954,7 +954,7 @@ lemma erfRecip_pow_gauss_sub_sum_isBigO (n : ℕ) (θ : ℝ) (N : ℕ) :
     ring
 
 /-- `iⁿerfc z ~ 2π^{-1/2} e^{-z²} ∑ (-1)ᵐ (2m+n)!/(n! m!) (2z)^{-n-1-2m}` in a rotated sector. -/
-lemma erfRecip_iteratedErfc_rotSector (n : ℕ) {θ δ : ℝ} (hθ : |θ| < π / 4) (hδ : 0 < δ) :
+theorem erfRecip_iteratedErfc_rotSector (n : ℕ) {θ δ : ℝ} (hθ : |θ| < π / 4) (hδ : 0 < δ) :
     HasAsymptoticExpansion (comap (fun z : ℂ => z * exp (θ * I)) (sectorAtTop δ))
       (fun m z => 2 / Real.sqrt π * exp (-z ^ 2) / (2 * z) ^ (n + 1 + 2 * m))
       (fun m => (-1 : ℂ) ^ m * (2 * m + n).factorial / ((n.factorial : ℂ) * m.factorial))

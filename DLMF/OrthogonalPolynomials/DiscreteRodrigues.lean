@@ -32,7 +32,7 @@ def charlierWeightInt (a : ℂ) (x : ℤ) : ℂ :=
   if 0 ≤ x then a ^ x.toNat / x.toNat.factorial else 0
 
 /-- The adjacent Charlier weights, including the boundary at zero. -/
-lemma charlierWeightInt_sub_one {a : ℂ} (ha : a ≠ 0) (x : ℤ) (hx : 0 ≤ x) :
+theorem charlierWeightInt_sub_one {a : ℂ} (ha : a ≠ 0) (x : ℤ) (hx : 0 ≤ x) :
     charlierWeightInt a (x - 1) = (x : ℂ) / a * charlierWeightInt a x := by
   lift x to ℕ using hx
   cases x with
@@ -76,7 +76,7 @@ def meixnerRodriguesWeight (β c : ℂ) (n : ℕ) (x : ℤ) : ℂ :=
 
 /-- The shifted Meixner weight is its original weight times `(β+x)_n`, also at
 negative integer arguments because of the zero extension. -/
-lemma meixnerRodriguesWeight_eq (β c : ℂ) (n : ℕ) (x : ℤ) :
+theorem meixnerRodriguesWeight_eq (β c : ℂ) (n : ℕ) (x : ℤ) :
     meixnerRodriguesWeight β c n x = meixnerRodriguesWeight β c 0 x * poch (β + x) n := by
   by_cases hx : 0 ≤ x
   · lift x to ℕ using hx
@@ -162,7 +162,7 @@ def krawtchoukRodriguesWeight (p : ℂ) (N n : ℕ) (x : ℤ) : ℂ :=
   (1 - p) ^ N * meixnerRodriguesWeight (-(N : ℂ)) (1 - p⁻¹)⁻¹ n x
 
 /-- The shifted Krawtchouk weight is its binomial weight times `(x-N)_n`. -/
-lemma krawtchoukRodriguesWeight_eq (p : ℂ) (N n : ℕ) (x : ℤ) :
+theorem krawtchoukRodriguesWeight_eq (p : ℂ) (N n : ℕ) (x : ℤ) :
     krawtchoukRodriguesWeight p N n x =
       krawtchoukRodriguesWeight p N 0 x * poch ((x : ℂ) - N) n := by
   rw [krawtchoukRodriguesWeight, meixnerRodriguesWeight_eq]
@@ -172,7 +172,7 @@ lemma krawtchoukRodriguesWeight_eq (p : ℂ) (N n : ℕ) (x : ℤ) :
 
 /-- The order-zero Krawtchouk Rodrigues weight is precisely the binomial weight
 on its natural support. -/
-lemma krawtchoukRodriguesWeight_zero {p : ℂ} (hp : p ≠ 0) (hp1 : p ≠ 1)
+theorem krawtchoukRodriguesWeight_zero {p : ℂ} (hp : p ≠ 0) (hp1 : p ≠ 1)
     (N x : ℕ) (hx : x ≤ N) :
     krawtchoukRodriguesWeight p N 0 x =
       (N.choose x : ℂ) * p ^ x * (1 - p) ^ (N - x) := by
@@ -191,7 +191,7 @@ lemma krawtchoukRodriguesWeight_zero {p : ℂ} (hp : p ≠ 0) (hp1 : p ≠ 1)
   linear_combination ((N.choose x : ℂ) * p ^ x) * hsign
 
 /-- A shifted Krawtchouk weight vanishes beyond its finite support. -/
-lemma krawtchoukRodriguesWeight_eq_zero {p : ℂ} {N n : ℕ} {x : ℤ}
+theorem krawtchoukRodriguesWeight_eq_zero {p : ℂ} {N n : ℕ} {x : ℤ}
     (hx : N < x.toNat + n) : krawtchoukRodriguesWeight p N n x = 0 := by
   unfold krawtchoukRodriguesWeight meixnerRodriguesWeight
   split_ifs <;> simp [poch_neg_nat_eq_zero hx]

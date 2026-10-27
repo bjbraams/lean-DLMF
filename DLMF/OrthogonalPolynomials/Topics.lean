@@ -31,7 +31,7 @@ noncomputable section
 namespace DLMF.OrthogonalPolynomials
 
 /-- The pole-free head form of the finite very-well-poised cancellation. -/
-lemma sum_choose_weighted_recip_poch_tail {a : ℂ} (ha : -1 < a.re) (N : ℕ) :
+theorem sum_choose_weighted_recip_poch_tail {a : ℂ} (ha : -1 < a.re) (N : ℕ) :
     1 / poch (a + 1) (N + 1) +
       ∑ k ∈ Finset.range (N + 1), (-1 : ℂ) ^ (k + 1) * ((N + 1).choose (k + 1) : ℂ) *
         (a + 2 * (k + 1)) / poch (a + (k + 1)) (N + 2) = 0 := by
@@ -78,7 +78,7 @@ lemma sum_choose_weighted_recip_poch_tail {a : ℂ} (ha : -1 < a.re) (N : ℕ) :
 
 
 /-- The finite very-well-poised cancellation underlying polynomial basis inversion. -/
-lemma sum_choose_weighted_recip_poch {a : ℂ} (ha : 0 < a.re) (N : ℕ) :
+theorem sum_choose_weighted_recip_poch {a : ℂ} (ha : 0 < a.re) (N : ℕ) :
     ∑ k ∈ Finset.range (N + 2), (-1 : ℂ) ^ k * ((N + 1).choose k : ℂ) * (a + 2 * k) /
       poch (a + k) (N + 2) = 0 := by
   have hh := sum_choose_weighted_recip_poch_tail (by linarith : -1 < a.re) N
@@ -93,7 +93,7 @@ lemma sum_choose_weighted_recip_poch {a : ℂ} (ha : 0 < a.re) (N : ℕ) :
   linear_combination hh
 
 /-- Regroup a finite triangular double sum by total degree. -/
-lemma sum_triangle_by_total_degree (F : ℕ → ℕ → ℂ) (N : ℕ) :
+theorem sum_triangle_by_total_degree (F : ℕ → ℕ → ℂ) (N : ℕ) :
     ∑ k ∈ Finset.range (N + 1), ∑ j ∈ Finset.range (N - k + 1), F k j =
       ∑ r ∈ Finset.range (N + 1), ∑ k ∈ Finset.range (r + 1), F k (r - k) := by
   induction N generalizing F with
@@ -115,7 +115,7 @@ lemma sum_triangle_by_total_degree (F : ℕ → ℕ → ℂ) (N : ℕ) :
     ring
 
 /-- Include the degree-zero value of the finite cancellation. -/
-lemma sum_choose_weighted_recip_poch_eq {a : ℂ} (ha : 0 < a.re) (r : ℕ) :
+theorem sum_choose_weighted_recip_poch_eq {a : ℂ} (ha : 0 < a.re) (r : ℕ) :
     ∑ k ∈ Finset.range (r + 1), (-1 : ℂ) ^ k * (r.choose k : ℂ) * (a + 2 * k) /
       poch (a + k) (r + 1) = if r = 0 then 1 else 0 := by
   cases r with
@@ -125,7 +125,7 @@ lemma sum_choose_weighted_recip_poch_eq {a : ℂ} (ha : 0 < a.re) (r : ℕ) :
   | succ r => simpa using sum_choose_weighted_recip_poch ha r
 
 /-- Finite triangular Pochhammer inversion, including the exceptional zero base. -/
-lemma sum_choose_recip_poch {a : ℂ} (ha : -1 < a.re) (r : ℕ) :
+theorem sum_choose_recip_poch {a : ℂ} (ha : -1 < a.re) (r : ℕ) :
     ∑ k ∈ Finset.range (r + 1), (-1 : ℂ) ^ k * (r.choose k : ℂ) /
       (poch (a + k) k * poch (a + 2 * k + 1) (r - k)) = if r = 0 then 1 else 0 := by
   cases r with
@@ -167,7 +167,7 @@ noncomputable def jacobiInverseCoeff (α β : ℂ) (n k : ℕ) : ℂ :=
     (poch (α + β + k + 1) k * poch (α + β + 2 * k + 2) (n - k))
 
 /-- Regularity of the triangular Jacobi leading factors on the classical parameter range. -/
-lemma jacobi_leading_poch_ne_zero {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) (k : ℕ) :
+theorem jacobi_leading_poch_ne_zero {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) (k : ℕ) :
     poch (α + β + k + 1) k ≠ 0 := by
   cases k with
   | zero => simp [poch_zero]
@@ -178,7 +178,7 @@ lemma jacobi_leading_poch_ne_zero {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < �
 
 set_option maxHeartbeats 800000 in
 /-- Multiplication of the two triangular coefficient matrices reduces to a finite inversion sum. -/
-lemma jacobiInverseCoeff_mul_gaussCoeff {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re)
+theorem jacobiInverseCoeff_mul_gaussCoeff {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re)
     (n j t : ℕ) (ht : j + t ≤ n) :
     jacobiInverseCoeff α β n (j + t) * (poch (α + 1) (j + t) / (j + t).factorial *
       gaussHGCoeff (-((j + t : ℕ) : ℂ)) ((j + t : ℕ) + α + β + 1) (α + 1) j) =
@@ -242,7 +242,7 @@ lemma jacobiInverseCoeff_mul_gaussCoeff {α β : ℂ} (hα : -1 < α.re) (hβ : 
 
 
 /-- Powers of the shifted coordinate in the Jacobi basis, including `α + β = -1`. -/
-lemma jacobi_monomial_inverse {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) (n : ℕ) (x : ℂ) :
+theorem jacobi_monomial_inverse {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) (n : ℕ) (x : ℂ) :
     ((1 - x) / 2) ^ n = ∑ k ∈ Finset.range (n + 1), jacobiInverseCoeff α β n k * jacobiPolyP α β k x := by
   have hexpand : (∑ k ∈ Finset.range (n + 1), jacobiInverseCoeff α β n k * jacobiPolyP α β k x) =
       ∑ j ∈ Finset.range (n + 1), (∑ k ∈ Finset.Ico j (n + 1),
@@ -298,7 +298,7 @@ lemma jacobi_monomial_inverse {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re
 
 
 /-- A finite Jacobi coefficient multiplied by the inverse basis coefficient. -/
-lemma jacobi_connection_coeff_term {α β γ δ : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re)
+theorem jacobi_connection_coeff_term {α β γ δ : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re)
     (hγ : -1 < γ.re) (n k j : ℕ) (hkj : k + j ≤ n) :
     (poch (γ + 1) n / n.factorial *
       gaussHGCoeff (-(n : ℂ)) (n + γ + δ + 1) (γ + 1) (k + j)) *

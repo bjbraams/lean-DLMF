@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Mathieu.Modified.P2mCrossSeries
+public import ToMathlib.Analysis.SpecialFunctions.Bessel
 
 /-!
 # The cross-product series of the modified Mathieu functions (proof of DLMF 28.24.1)
@@ -38,7 +39,7 @@ namespace DLMF.Mathieu
 /-- Integration by parts for the exponential Fourier coefficients over `[0, π]` of a Floquet
 solution of Mathieu's equation: `q I_{k+2} + q I_{k-2} = (a - k²) I_k`,
 `I_k = ∫₀^π f(x) e^{-ikx} dx`, when `f(z + π) = s f(z)` and `s (-1)^k = 1`. -/
-theorem p2m_floquet_coeff_rec {a q s : ℂ} {f : ℂ → ℂ} (hf : IsMathieuSolution a q f)
+lemma p2m_floquet_coeff_rec {a q s : ℂ} {f : ℂ → ℂ} (hf : IsMathieuSolution a q f)
     (hper : ∀ z, f (z + π) = s * f z) (k : ℤ) (hs : s * (-1 : ℂ) ^ k = 1) :
     q * (∫ x in (0 : ℝ)..π, f x * Complex.exp (-(I * ((k + 2 : ℤ) : ℂ) * x))) +
       q * (∫ x in (0 : ℝ)..π, f x * Complex.exp (-(I * ((k - 2 : ℤ) : ℂ) * x))) =
@@ -156,7 +157,7 @@ theorem p2m_mathieuMeInt_floquet (k : ℤ) (q : ℝ) :
 
 /-- The coefficients `c^ν_{2m}(h²)` of an admissible `(ν, h)` solve a recurrence 28.14.4 and are
 bounded. -/
-theorem p2m_coeff_facts {ν h : ℂ} (hν : ModMathieuAdmissible ν h) :
+lemma p2m_coeff_facts {ν h : ℂ} (hν : ModMathieuAdmissible ν h) :
     (∀ m : ℤ, h ^ 2 * mathieuMeCoeff ν (h ^ 2) (m + 1) -
       (mathieuLambda ν (h ^ 2) - (ν + 2 * m) ^ 2) * mathieuMeCoeff ν (h ^ 2) m +
         h ^ 2 * mathieuMeCoeff ν (h ^ 2) (m - 1) = 0) ∧
@@ -296,7 +297,7 @@ theorem p2m_hasDerivAt_besselJExp (μ : ℂ) {h : ℂ} (hh : h ≠ 0) (z : ℂ) 
   ring
 
 /-- Joint continuity of the continued `J_μ(h e^z)` in `(μ, z)`. -/
-theorem p2m_continuous_besselJExp {h : ℂ} (hh : h ≠ 0) :
+lemma p2m_continuous_besselJExp {h : ℂ} (hh : h ≠ 0) :
     Continuous fun p : ℂ × ℂ => besselJExp p.1 h p.2 := by
   have h2 : h / 2 ≠ 0 := div_ne_zero hh two_ne_zero
   have c1 : Continuous fun p : ℂ × ℂ => (h / 2) ^ p.1 :=
@@ -314,7 +315,7 @@ theorem p2m_continuous_besselJExp {h : ℂ} (hh : h ≠ 0) :
   rw [e]
   exact (c1.mul c2).mul c4
 
-theorem p2m_continuous_besselDExp {h : ℂ} (hh : h ≠ 0) :
+lemma p2m_continuous_besselDExp {h : ℂ} (hh : h ≠ 0) :
     Continuous fun p : ℂ × ℂ => p2m_besselDExp p.1 h p.2 := by
   have hJ := p2m_continuous_besselJExp hh
   unfold p2m_besselDExp
@@ -322,7 +323,7 @@ theorem p2m_continuous_besselDExp {h : ℂ} (hh : h ≠ 0) :
     (-p.1, p.2)))
 
 /-- Joint continuity of the continued `Y_μ(h e^z)` in `(μ, z)`, including integer orders. -/
-theorem p2m_continuousAt_besselYExp {h : ℂ} (hh : h ≠ 0) (μ₀ z₀ : ℂ) :
+lemma p2m_continuousAt_besselYExp {h : ℂ} (hh : h ≠ 0) (μ₀ z₀ : ℂ) :
     ContinuousAt (fun p : ℂ × ℂ => besselYExp p.1 h p.2) (μ₀, z₀) := by
   have hD := p2m_continuous_besselDExp hh
   by_cases hν : ∃ k : ℤ, μ₀ = k
@@ -357,7 +358,7 @@ theorem p2m_continuousAt_besselYExp {h : ℂ} (hh : h ≠ 0) (μ₀ z₀ : ℂ) 
       rw [hk]; exact DLMF.Bessel.sin_int_mul_pi_complex k)
     exact (p2m_besselYExp_of_not_int hp' h p.2).symm
 
-theorem p2m_hasDerivAt_besselYExp_of_not_int {μ : ℂ} (hμ : ∀ k : ℤ, μ ≠ k) {h : ℂ}
+lemma p2m_hasDerivAt_besselYExp_of_not_int {μ : ℂ} (hμ : ∀ k : ℤ, μ ≠ k) {h : ℂ}
     (hh : h ≠ 0) (z : ℂ) :
     HasDerivAt (fun z => besselYExp μ h z)
       (μ * besselYExp μ h z - h * Complex.exp z * besselYExp (μ + 1) h z) z := by
@@ -388,7 +389,7 @@ theorem p2m_hasDerivAt_besselYExp_of_not_int {μ : ℂ} (hμ : ∀ k : ℤ, μ �
   linear_combination (-1 : ℂ) * hr'
 
 /-- The `z`-derivative of the continued `Y_μ(h e^z)`, every order: `μ Y_μ - h e^z Y_{μ+1}`. -/
-theorem p2m_hasDerivAt_besselYExp (μ : ℂ) {h : ℂ} (hh : h ≠ 0) (z : ℂ) :
+lemma p2m_hasDerivAt_besselYExp (μ : ℂ) {h : ℂ} (hh : h ≠ 0) (z : ℂ) :
     HasDerivAt (fun z => besselYExp μ h z)
       (μ * besselYExp μ h z - h * Complex.exp z * besselYExp (μ + 1) h z) z := by
   have := DLMF.Confluent.integerComplement_nhdsWithin_neBot μ
@@ -416,7 +417,7 @@ theorem p2m_hasDerivAt_besselYExp (μ : ℂ) {h : ℂ} (hh : h ≠ 0) (z : ℂ) 
     exact ((p2m_continuousAt_besselYExp_order hh y μ).tendsto).mono_left nhdsWithin_le_nhds
 
 /-- The `z`-derivative of the cylinder functions `𝒞^{(j)}_μ(h e^z)`: `μ 𝒞_μ - h e^z 𝒞_{μ+1}`. -/
-theorem p2m_hasDerivAt_mathieuCylExp (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (μ : ℂ) {h : ℂ}
+lemma p2m_hasDerivAt_mathieuCylExp (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (μ : ℂ) {h : ℂ}
     (hh : h ≠ 0) (z : ℂ) :
     HasDerivAt (fun z => mathieuCylExp j μ h z)
       (μ * mathieuCylExp j μ h z - h * Complex.exp z * mathieuCylExp j (μ + 1) h z) z := by
@@ -429,7 +430,7 @@ theorem p2m_hasDerivAt_mathieuCylExp (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 
   · convert hJ.sub (hY.const_mul I) using 1; ring
 
 /-- Symmetric form: `d/dz 𝒞_μ(h e^z) = (h e^z / 2)(𝒞_{μ-1} - 𝒞_{μ+1})`. -/
-theorem p2m_hasDerivAt_mathieuCylExp' (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (μ : ℂ) {h : ℂ}
+lemma p2m_hasDerivAt_mathieuCylExp' (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (μ : ℂ) {h : ℂ}
     (hh : h ≠ 0) (z : ℂ) :
     HasDerivAt (fun z => mathieuCylExp j μ h z)
       (h * Complex.exp z / 2 * (mathieuCylExp j (μ - 1) h z - mathieuCylExp j (μ + 1) h z)) z := by
@@ -442,7 +443,7 @@ theorem p2m_hasDerivAt_mathieuCylExp' (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤
   linear_combination (1 / 2 : ℂ) * hr'
 
 /-- Symmetric form for `J_k(h e^{-z})`: `d/dz = -(h e^{-z} / 2)(J_{k-1} - J_{k+1})`. -/
-theorem p2m_hasDerivAt_besselJExp_neg (μ : ℂ) {h : ℂ} (hh : h ≠ 0) (z : ℂ) :
+lemma p2m_hasDerivAt_besselJExp_neg (μ : ℂ) {h : ℂ} (hh : h ≠ 0) (z : ℂ) :
     HasDerivAt (fun z => besselJExp μ h (-z))
       (-(h * Complex.exp (-z) / 2 *
         (besselJExp (μ - 1) h (-z) - besselJExp (μ + 1) h (-z)))) z := by
@@ -530,13 +531,13 @@ def p2m_Jz (h z : ℂ) : ℤ → ℂ := fun k => besselJExp k h (-z)
 /-- `k ↦ 𝒞^{(j)}_{ν+k}(h e^z)`. -/
 def p2m_Cz (j : ℕ) (ν h z : ℂ) : ℤ → ℂ := fun k => mathieuCylExp j (ν + k) h z
 
-theorem p2m_continuous_mathieuCylExp (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (μ : ℂ) {h : ℂ}
+lemma p2m_continuous_mathieuCylExp (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (μ : ℂ) {h : ℂ}
     (hh : h ≠ 0) : Continuous fun z => mathieuCylExp j μ h z :=
   continuous_iff_continuousAt.mpr fun z =>
     (p2m_hasDerivAt_mathieuCylExp j hj₁ hj₄ μ hh z).continuousAt
 
 /-- Locally uniform bound for the cross-product terms with any shifts `α`, `β`. -/
-theorem p2m_fam_locally_uniform (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (ν : ℂ) {h : ℂ}
+lemma p2m_fam_locally_uniform (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (ν : ℂ) {h : ℂ}
     (hh : h ≠ 0) {c : ℤ → ℂ} {Cc K : ℝ} (hCc : 0 ≤ Cc) (hK : 0 ≤ K)
     (hc : ∀ m : ℤ, ‖c m‖ * (m.natAbs ! : ℝ) ^ 2 ≤ Cc * K ^ m.natAbs) {S : Set ℂ}
     (hS : IsCompact S) (α β : ℤ) :
@@ -610,7 +611,7 @@ theorem p2m_coeff_decay {ν h : ℂ} (hν : ModMathieuAdmissible ν h) (hh : h �
   obtain ⟨hrec, M, hM⟩ := p2m_coeff_facts hν
   exact p2m_decay_int (pow_ne_zero 2 hh) hM hrec
 
-theorem p2m_modMathieuTerm_eq_fam (j : ℕ) (ν z h : ℂ) (n : ℤ) :
+lemma p2m_modMathieuTerm_eq_fam (j : ℕ) (ν z h : ℂ) (n : ℤ) :
     modMathieuTerm j ν z h n =
       p2m_fam (mathieuMeCoeff ν (h ^ 2)) (p2m_Jz h z) (p2m_Cz j ν h z) (-n) n := by
   funext ℓ
@@ -628,7 +629,7 @@ theorem p2m_modMathieuTerm_locally_uniform (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : 
   exact ⟨u, hu, fun ℓ z hz => by rw [p2m_modMathieuTerm_eq_fam]; exact hle ℓ z hz⟩
 
 /-- The `z`-derivative of a cross-product term, in terms of the neighbouring terms. -/
-theorem p2m_hasDerivAt_fam (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (ν : ℂ) {h : ℂ} (hh : h ≠ 0)
+lemma p2m_hasDerivAt_fam (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (ν : ℂ) {h : ℂ} (hh : h ≠ 0)
     (c : ℤ → ℂ) (α β ℓ : ℤ) (z : ℂ) :
     HasDerivAt (fun z => p2m_fam c (p2m_Jz h z) (p2m_Cz j ν h z) α β ℓ)
       (-(h * Complex.exp (-z) / 2) * (p2m_fam c (p2m_Jz h z) (p2m_Cz j ν h z) (α - 1) β ℓ -
@@ -698,7 +699,7 @@ theorem p2m_hasDerivAt_F (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (ν : ℂ
 
 /-- `(x/2)(A_{k-1} - A_{k+1}) + (x²/4)(A_{k-2} - 2A_k + A_{k+2}) = (k² - x²) A_k` for a solution of
 the Bessel order recurrence. -/
-theorem p2m_second_alg {x k km kp Am2 Am1 A0 Ap1 Ap2 : ℂ} (hx : x ≠ 0) (hkm : km = k - 1)
+lemma p2m_second_alg {x k km kp Am2 Am1 A0 Ap1 Ap2 : ℂ} (hx : x ≠ 0) (hkm : km = k - 1)
     (hkp : kp = k + 1) (r1 : Am2 + A0 = 2 * km / x * Am1) (r0 : Am1 + Ap1 = 2 * k / x * A0)
     (r2 : A0 + Ap2 = 2 * kp / x * Ap1) :
     x / 2 * (Am1 - Ap1) + x ^ 2 / 4 * (Am2 - 2 * A0 + Ap2) = (k ^ 2 - x ^ 2) * A0 := by
@@ -710,14 +711,14 @@ theorem p2m_second_alg {x k km kp Am2 Am1 A0 Ap1 Ap2 : ℂ} (hx : x ≠ 0) (hkm 
   field_simp
   ring
 
-theorem p2m_Jz_rec {h : ℂ} (hh : h ≠ 0) (z : ℂ) (k : ℤ) :
+lemma p2m_Jz_rec {h : ℂ} (hh : h ≠ 0) (z : ℂ) (k : ℤ) :
     p2m_Jz h z (k - 1) + p2m_Jz h z (k + 1) = 2 * k / (h * Complex.exp (-z)) * p2m_Jz h z k := by
   have := p2m_besselJExp_rec (k : ℂ) hh (-z)
   simp only [p2m_Jz]
   push_cast
   exact this
 
-theorem p2m_Cz_rec (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (ν : ℂ) {h : ℂ} (hh : h ≠ 0) (z : ℂ)
+lemma p2m_Cz_rec (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (ν : ℂ) {h : ℂ} (hh : h ≠ 0) (z : ℂ)
     (k : ℤ) : p2m_Cz j ν h z (k - 1) + p2m_Cz j ν h z (k + 1) =
       2 * (ν + k) / (h * Complex.exp z) * p2m_Cz j ν h z k := by
   have := p2m_mathieuCylExp_rec j hj₁ hj₄ (ν + k) hh z
@@ -728,7 +729,7 @@ theorem p2m_Cz_rec (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (ν : ℂ) {h :
 
 /-- The cross-product series `F_{-n,n}` solves the modified Mathieu equation 28.20.1 when `c` solves
 the recurrence 28.14.4 with eigenvalue `a`. -/
-theorem p2m_F_ode (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (ν : ℂ) {h : ℂ} (hh : h ≠ 0)
+lemma p2m_F_ode (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (ν : ℂ) {h : ℂ} (hh : h ≠ 0)
     {c : ℤ → ℂ} {Cc K : ℝ} (hCc : 0 ≤ Cc) (hK : 0 ≤ K)
     (hc : ∀ m : ℤ, ‖c m‖ * (m.natAbs ! : ℝ) ^ 2 ≤ Cc * K ^ m.natAbs) {a : ℂ}
     (hrec : ∀ m : ℤ, h ^ 2 * c (m + 1) - (a - (ν + 2 * m) ^ 2) * c m + h ^ 2 * c (m - 1) = 0)
@@ -857,7 +858,7 @@ theorem p2m_isModMathieuSolution_modMathieuM (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ 
 /-! ### Integer-order cross-product expansions (28.24.2–28.24.5) -/
 
 /-- `Y_{-μ} = cos(μπ) Y_μ + sin(μπ) J_μ` for the continued functions, every order. -/
-theorem p2m_besselYExp_neg (μ : ℂ) {h : ℂ} (hh : h ≠ 0) (z : ℂ) :
+lemma p2m_besselYExp_neg (μ : ℂ) {h : ℂ} (hh : h ≠ 0) (z : ℂ) :
     besselYExp (-μ) h z = Complex.cos (μ * π) * besselYExp μ h z +
       Complex.sin (μ * π) * besselJExp μ h z := by
   have hc := p2m_continuousAt_besselYExp_order hh z
@@ -880,12 +881,12 @@ theorem p2m_besselYExp_neg (μ : ℂ) {h : ℂ} (hh : h ≠ 0) (z : ℂ) :
   linear_combination (-besselJExp c h z) * this
 
 /-- `Y_{-k} = (-1)^k Y_k` for integer `k`. -/
-theorem p2m_besselYExp_neg_intCast (k : ℤ) {h : ℂ} (hh : h ≠ 0) (z : ℂ) :
+lemma p2m_besselYExp_neg_intCast (k : ℤ) {h : ℂ} (hh : h ≠ 0) (z : ℂ) :
     besselYExp ((-k : ℤ) : ℂ) h z = (-1 : ℂ) ^ k * besselYExp k h z := by
   rw [Int.cast_neg, p2m_besselYExp_neg _ hh, DLMF.Bessel.cos_int_mul_pi_complex,
     DLMF.Bessel.sin_int_mul_pi_complex, zero_mul, add_zero]
 
-theorem p2m_mathieuCylExp_neg_intCast (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (k : ℤ) {h : ℂ}
+lemma p2m_mathieuCylExp_neg_intCast (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (k : ℤ) {h : ℂ}
     (hh : h ≠ 0) (z : ℂ) :
     mathieuCylExp j ((-k : ℤ) : ℂ) h z = (-1 : ℂ) ^ k * mathieuCylExp j k h z := by
   have hJ := p1c_besselJExp_neg_intCast k h z
@@ -917,7 +918,7 @@ theorem p2m_sin_add_int_mul_pi (K : ℤ) (x : ℂ) :
   rw [mul_add, Complex.sin_add, DLMF.Bessel.cos_int_mul_pi_complex,
     DLMF.Bessel.sin_int_mul_pi_complex]; ring
 
-theorem p2m_negOnePow_mul_eq_one {N : ℕ} {K : ℤ} (hK : ∃ k : ℤ, K = N + 2 * k) :
+lemma p2m_negOnePow_mul_eq_one {N : ℕ} {K : ℤ} (hK : ∃ k : ℤ, K = N + 2 * k) :
     (-1 : ℂ) ^ N * (-1 : ℂ) ^ K = 1 := by
   obtain ⟨k, rfl⟩ := hK
   rw [← zpow_natCast, ← zpow_add₀ (by norm_num), show (N : ℤ) + (N + 2 * k) = 2 * (N + k) by
@@ -926,7 +927,7 @@ theorem p2m_negOnePow_mul_eq_one {N : ℕ} {K : ℤ} (hK : ∃ k : ℤ, K = N + 
 
 /-- An integrand `f` with `f(x + π) = f(x)` and `f(π - x) = -f(x)` integrates to `0` over
 `[0, π]`. -/
-theorem p2m_integral_eq_zero_of_reflect {f : ℝ → ℂ} (hf : ∀ x, f (π - x) = -f x) :
+lemma p2m_integral_eq_zero_of_reflect {f : ℝ → ℂ} (hf : ∀ x, f (π - x) = -f x) :
     ∫ x in (0 : ℝ)..π, f x = 0 := by
   have h1 : ∫ x in (0 : ℝ)..π, f x = ∫ x in (0 : ℝ)..π, f (π - x) := by
     rw [intervalIntegral.integral_comp_sub_left]; simp
@@ -934,7 +935,7 @@ theorem p2m_integral_eq_zero_of_reflect {f : ℝ → ℂ} (hf : ∀ x, f (π - x
   linear_combination h1 / 2
 
 /-- Doubling the interval for a `π`-periodic integrand. -/
-theorem p2m_integral_two_pi {f : ℝ → ℂ} (hc : Continuous f) (hf : ∀ x, f (x + π) = f x) :
+lemma p2m_integral_two_pi {f : ℝ → ℂ} (hc : Continuous f) (hf : ∀ x, f (x + π) = f x) :
     ∫ x in (0 : ℝ)..2 * π, f x = 2 * ∫ x in (0 : ℝ)..π, f x := by
   rw [← intervalIntegral.integral_add_adjacent_intervals (b := π) (hc.intervalIntegrable _ _)
     (hc.intervalIntegrable _ _)]
@@ -1005,38 +1006,39 @@ theorem p2m_negOnePow_sub (a b : ℤ) : (-1 : ℂ) ^ (a - b) = (-1 : ℂ) ^ a * 
   rw [zpow_sub₀ (by norm_num), div_eq_mul_inv,
     inv_eq_of_mul_eq_one_right (m28b_negOnePow_mul_self b)]
 
-theorem p2m_negOnePow_neg (a : ℤ) : (-1 : ℂ) ^ (-a) = (-1 : ℂ) ^ a := by
+lemma p2m_negOnePow_neg (a : ℤ) : (-1 : ℂ) ^ (-a) = (-1 : ℂ) ^ a := by
   rw [zpow_neg, inv_eq_of_mul_eq_one_right (m28b_negOnePow_mul_self a)]
 
-theorem p2m_sqrt_two_sq : ((Real.sqrt 2 : ℝ) : ℂ) ^ 2 = 2 := by
+lemma p2m_sqrt_two_sq : ((Real.sqrt 2 : ℝ) : ℂ) ^ 2 = 2 := by
   rw [← Complex.ofReal_pow, Real.sq_sqrt (by norm_num)]; push_cast; rfl
 
-/-- Proof of `hasSum_radialMathieuMc_even_cross` (DLMF 28.24.2). -/
-theorem p2m_hasSum_radialMathieuMc_even_cross (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (m s : ℕ)
-    {h : ℝ} (hh : 0 < h) (hA : mathieuFourierA (2 * m) (2 * s) (h ^ 2) ≠ 0) (z : ℂ) :
+/-- `hasSum_radialMathieuMc_even_cross` (DLMF 28.24.2) for complex `h` with real `h² = q`. -/
+theorem p3m_hasSum_radialMathieuMc_even_cross_gen (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (m s : ℕ)
+    {h : ℂ} {q : ℝ} (hq : h ^ 2 = (q : ℂ)) (hh : h ≠ 0)
+    (hA : mathieuFourierA (2 * m) (2 * s) q ≠ 0) (z : ℂ) :
     HasSum (fun ℓ : ℕ => (-1 : ℂ) ^ m * ((-1 : ℂ) ^ ℓ *
-        (mathieuFourierA (2 * m) (2 * ℓ) (h ^ 2) / mathieuFourierA (2 * m) (2 * s) (h ^ 2)) *
+        (mathieuFourierA (2 * m) (2 * ℓ) q / mathieuFourierA (2 * m) (2 * s) q) *
         (besselJExp ((ℓ : ℤ) - s : ℤ) h (-z) * mathieuCylExp j ((ℓ + s : ℕ) : ℂ) h z +
           besselJExp ((ℓ + s : ℕ) : ℂ) h (-z) * mathieuCylExp j ((ℓ : ℤ) - s : ℤ) h z)))
       (mathieuEpsilon s * radialMathieuMc j (2 * m) z h) := by
-  have hh' : (h : ℂ) ≠ 0 := by exact_mod_cast hh.ne'
+  have hh' : (h : ℂ) ≠ 0 := hh
   have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
   set N : ℕ := 2 * m with hN
   have hadm : ModMathieuAdmissible ((N : ℕ) : ℂ) (h : ℂ) :=
-    Or.inr ⟨⟨N, by push_cast; rfl⟩, by rw [← Complex.ofReal_pow]; exact Complex.ofReal_im _⟩
+    Or.inr ⟨⟨N, by push_cast; rfl⟩, by rw [hq]; exact Complex.ofReal_im _⟩
   have H := p2m_hasSum_modMathieuTerm j hj₁ hj₄ hadm hh' ((s : ℤ) - m) z
   set c := mathieuMeCoeff ((N : ℕ) : ℂ) ((h : ℂ) ^ 2) with hcdef
   set I0 : ℤ → ℂ := fun K => ∫ x in (0 : ℝ)..2 * π,
-    mathieuCe N x (h ^ 2) * Complex.cos ((K : ℂ) * x) with hI0
+    mathieuCe N x q * Complex.cos ((K : ℂ) * x) with hI0
   have hc : ∀ k : ℤ, c k = (Real.sqrt 2 : ℂ) / (2 * π) * I0 (N + 2 * k) := by
     intro k
-    have := p2m_mathieuMeCoeff_ce N (h ^ 2) k
+    have := p2m_mathieuMeCoeff_ce N q k
     push_cast at this
-    rw [hcdef, this]
+    rw [hcdef, hq, this]
     simp only [hI0, Int.cast_add, Int.cast_natCast, Int.cast_mul, Int.cast_ofNat]
   have hIneg : ∀ K : ℤ, I0 (-K) = I0 K := by
     intro K; simp only [hI0]; push_cast; simp only [neg_mul, Complex.cos_neg]
-  have hAeq : ∀ ℓ : ℕ, mathieuFourierA (2 * m) (2 * ℓ) (h ^ 2) =
+  have hAeq : ∀ ℓ : ℕ, mathieuFourierA (2 * m) (2 * ℓ) q =
       (if ℓ = 0 then 1 / (2 * π) else 1 / π : ℂ) * I0 (2 * ℓ) := by
     intro ℓ
     simp only [mathieuFourierA, hI0, hN]
@@ -1057,7 +1059,7 @@ theorem p2m_hasSum_radialMathieuMc_even_cross (j : ℕ) (hj₁ : 1 ≤ j) (hj₄
       show ((N : ℕ) : ℂ) + (((s : ℤ) - m : ℤ) : ℂ) + ((p - m : ℤ) : ℂ) = ((p + s : ℤ) : ℂ) by
         simp [hN]; ring]
   have H2 := H1.nat_add_neg
-  set A2s := mathieuFourierA (2 * m) (2 * s) (h ^ 2) with hA2s
+  set A2s := mathieuFourierA (2 * m) (2 * s) q with hA2s
   set Kc : ℂ := (Real.sqrt 2 : ℂ) / A2s
   have H3 := (H2.mul_left Kc).sub (hasSum_ite_eq (0 : ℕ) (Kc * f 0))
   have hs2 := p2m_sqrt_two_sq
@@ -1117,33 +1119,45 @@ theorem p2m_hasSum_radialMathieuMc_even_cross (j : ℕ) (hj₁ : 1 ≤ j) (hj₄
     · field_simp at hKc ⊢
       linear_combination (-((Real.sqrt 2 : ℂ) * M)) * hKc - π * M * hs2
 
-/-- Proof of `hasSum_radialMathieuMc_odd_cross` (DLMF 28.24.3). -/
-theorem p2m_hasSum_radialMathieuMc_odd_cross (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (m s : ℕ)
-    {h : ℝ} (hh : 0 < h) (hA : mathieuFourierA (2 * m + 1) (2 * s + 1) (h ^ 2) ≠ 0) (z : ℂ) :
+/-- Proof of `hasSum_radialMathieuMc_even_cross` (DLMF 28.24.2). -/
+theorem p2m_hasSum_radialMathieuMc_even_cross (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (m s : ℕ)
+    {h : ℝ} (hh : 0 < h) (hA : mathieuFourierA (2 * m) (2 * s) (h ^ 2) ≠ 0) (z : ℂ) :
     HasSum (fun ℓ : ℕ => (-1 : ℂ) ^ m * ((-1 : ℂ) ^ ℓ *
-        (mathieuFourierA (2 * m + 1) (2 * ℓ + 1) (h ^ 2) /
-          mathieuFourierA (2 * m + 1) (2 * s + 1) (h ^ 2)) *
+        (mathieuFourierA (2 * m) (2 * ℓ) (h ^ 2) / mathieuFourierA (2 * m) (2 * s) (h ^ 2)) *
+        (besselJExp ((ℓ : ℤ) - s : ℤ) h (-z) * mathieuCylExp j ((ℓ + s : ℕ) : ℂ) h z +
+          besselJExp ((ℓ + s : ℕ) : ℂ) h (-z) * mathieuCylExp j ((ℓ : ℤ) - s : ℤ) h z)))
+      (mathieuEpsilon s * radialMathieuMc j (2 * m) z h) :=
+  p3m_hasSum_radialMathieuMc_even_cross_gen j hj₁ hj₄ m s (q := h ^ 2) (by push_cast; ring)
+    (by exact_mod_cast hh.ne') hA z
+
+/-- `hasSum_radialMathieuMc_odd_cross` (DLMF 28.24.3) for complex `h` with real `h² = q`. -/
+theorem p3m_hasSum_radialMathieuMc_odd_cross_gen (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (m s : ℕ)
+    {h : ℂ} {q : ℝ} (hq : h ^ 2 = (q : ℂ)) (hh : h ≠ 0)
+    (hA : mathieuFourierA (2 * m + 1) (2 * s + 1) q ≠ 0) (z : ℂ) :
+    HasSum (fun ℓ : ℕ => (-1 : ℂ) ^ m * ((-1 : ℂ) ^ ℓ *
+        (mathieuFourierA (2 * m + 1) (2 * ℓ + 1) q /
+          mathieuFourierA (2 * m + 1) (2 * s + 1) q) *
         (besselJExp ((ℓ : ℤ) - s : ℤ) h (-z) * mathieuCylExp j ((ℓ + s + 1 : ℕ) : ℂ) h z +
           besselJExp ((ℓ + s + 1 : ℕ) : ℂ) h (-z) * mathieuCylExp j ((ℓ : ℤ) - s : ℤ) h z)))
       (radialMathieuMc j (2 * m + 1) z h) := by
-  have hh' : (h : ℂ) ≠ 0 := by exact_mod_cast hh.ne'
+  have hh' : (h : ℂ) ≠ 0 := hh
   have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
   set N : ℕ := 2 * m + 1 with hN
   have hadm : ModMathieuAdmissible ((N : ℕ) : ℂ) (h : ℂ) :=
-    Or.inr ⟨⟨N, by push_cast; rfl⟩, by rw [← Complex.ofReal_pow]; exact Complex.ofReal_im _⟩
+    Or.inr ⟨⟨N, by push_cast; rfl⟩, by rw [hq]; exact Complex.ofReal_im _⟩
   have H := p2m_hasSum_modMathieuTerm j hj₁ hj₄ hadm hh' ((s : ℤ) - m) z
   set c := mathieuMeCoeff ((N : ℕ) : ℂ) ((h : ℂ) ^ 2) with hcdef
   set I0 : ℤ → ℂ := fun K => ∫ x in (0 : ℝ)..2 * π,
-    mathieuCe N x (h ^ 2) * Complex.cos ((K : ℂ) * x) with hI0
+    mathieuCe N x q * Complex.cos ((K : ℂ) * x) with hI0
   have hc : ∀ k : ℤ, c k = (Real.sqrt 2 : ℂ) / (2 * π) * I0 (N + 2 * k) := by
     intro k
-    have := p2m_mathieuMeCoeff_ce N (h ^ 2) k
+    have := p2m_mathieuMeCoeff_ce N q k
     push_cast at this
-    rw [hcdef, this]
+    rw [hcdef, hq, this]
     simp only [hI0, Int.cast_add, Int.cast_natCast, Int.cast_mul, Int.cast_ofNat]
   have hIneg : ∀ K : ℤ, I0 (-K) = I0 K := by
     intro K; simp only [hI0]; push_cast; simp only [neg_mul, Complex.cos_neg]
-  have hAeq : ∀ ℓ : ℕ, mathieuFourierA (2 * m + 1) (2 * ℓ + 1) (h ^ 2) =
+  have hAeq : ∀ ℓ : ℕ, mathieuFourierA (2 * m + 1) (2 * ℓ + 1) q =
       (1 / π : ℂ) * I0 (2 * ℓ + 1) := by
     intro ℓ
     simp only [mathieuFourierA, hI0, hN]
@@ -1165,7 +1179,7 @@ theorem p2m_hasSum_radialMathieuMc_odd_cross (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ 
       show ((N : ℕ) : ℂ) + (((s : ℤ) - m : ℤ) : ℂ) + ((p - m : ℤ) : ℂ) = ((p + s + 1 : ℤ) : ℂ) by
         simp [hN]; ring]
   have H2 := H1.nat_add_neg_add_one
-  set A2s := mathieuFourierA (2 * m + 1) (2 * s + 1) (h ^ 2) with hA2s
+  set A2s := mathieuFourierA (2 * m + 1) (2 * s + 1) q with hA2s
   set Kc : ℂ := (Real.sqrt 2 : ℂ) / A2s
   have H3 := H2.mul_left Kc
   have hs2 := p2m_sqrt_two_sq
@@ -1207,6 +1221,18 @@ theorem p2m_hasSum_radialMathieuMc_odd_cross (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ 
     rw [hA2s, hAeq s] at hKc
     field_simp at hKc ⊢
     linear_combination (-((Real.sqrt 2 : ℂ) * M)) * hKc - π * M * hs2
+
+/-- Proof of `hasSum_radialMathieuMc_odd_cross` (DLMF 28.24.3). -/
+theorem p2m_hasSum_radialMathieuMc_odd_cross (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (m s : ℕ)
+    {h : ℝ} (hh : 0 < h) (hA : mathieuFourierA (2 * m + 1) (2 * s + 1) (h ^ 2) ≠ 0) (z : ℂ) :
+    HasSum (fun ℓ : ℕ => (-1 : ℂ) ^ m * ((-1 : ℂ) ^ ℓ *
+        (mathieuFourierA (2 * m + 1) (2 * ℓ + 1) (h ^ 2) /
+          mathieuFourierA (2 * m + 1) (2 * s + 1) (h ^ 2)) *
+        (besselJExp ((ℓ : ℤ) - s : ℤ) h (-z) * mathieuCylExp j ((ℓ + s + 1 : ℕ) : ℂ) h z +
+          besselJExp ((ℓ + s + 1 : ℕ) : ℂ) h (-z) * mathieuCylExp j ((ℓ : ℤ) - s : ℤ) h z)))
+      (radialMathieuMc j (2 * m + 1) z h) :=
+  p3m_hasSum_radialMathieuMc_odd_cross_gen j hj₁ hj₄ m s (q := h ^ 2) (by push_cast; ring)
+    (by exact_mod_cast hh.ne') hA z
 
 /-- The integer-order coefficients `c^{-N}_{2k}` of `me_{-N} = -√2 i se_N` (`N ≥ 1`) as sine
 integrals: `c^{-N}_{2k}(q) = -√2/(2π) ∫₀^{2π} se_N(x) sin((2k-N)x) dx`. -/
@@ -1267,37 +1293,38 @@ theorem p2m_mathieuMeCoeff_se {N : ℕ} (hN0 : N ≠ 0) (q : ℝ) (k : ℤ) :
   field_simp
   ring
 
-/-- Proof of `hasSum_radialMathieuMs_odd_cross` (DLMF 28.24.4). -/
-theorem p2m_hasSum_radialMathieuMs_odd_cross (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (m s : ℕ)
-    {h : ℝ} (hh : 0 < h) (hB : mathieuFourierB (2 * m + 1) (2 * s + 1) (h ^ 2) ≠ 0) (z : ℂ) :
+/-- `hasSum_radialMathieuMs_odd_cross` (DLMF 28.24.4) for complex `h` with real `h² = q`. -/
+theorem p3m_hasSum_radialMathieuMs_odd_cross_gen (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (m s : ℕ)
+    {h : ℂ} {q : ℝ} (hq : h ^ 2 = (q : ℂ)) (hh : h ≠ 0)
+    (hB : mathieuFourierB (2 * m + 1) (2 * s + 1) q ≠ 0) (z : ℂ) :
     HasSum (fun ℓ : ℕ => (-1 : ℂ) ^ m * ((-1 : ℂ) ^ ℓ *
-        (mathieuFourierB (2 * m + 1) (2 * ℓ + 1) (h ^ 2) /
-          mathieuFourierB (2 * m + 1) (2 * s + 1) (h ^ 2)) *
+        (mathieuFourierB (2 * m + 1) (2 * ℓ + 1) q /
+          mathieuFourierB (2 * m + 1) (2 * s + 1) q) *
         (besselJExp ((ℓ : ℤ) - s : ℤ) h (-z) * mathieuCylExp j ((ℓ + s + 1 : ℕ) : ℂ) h z -
           besselJExp ((ℓ + s + 1 : ℕ) : ℂ) h (-z) * mathieuCylExp j ((ℓ : ℤ) - s : ℤ) h z)))
       (radialMathieuMs j (2 * m + 1) z h) := by
-  have hh' : (h : ℂ) ≠ 0 := by exact_mod_cast hh.ne'
+  have hh' : (h : ℂ) ≠ 0 := hh
   have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
   set N : ℕ := 2 * m + 1 with hN
   have hN0 : N ≠ 0 := by omega
   set ν : ℂ := -((N : ℕ) : ℂ) with hν
   have hadm : ModMathieuAdmissible ν (h : ℂ) :=
-    Or.inr ⟨⟨-(N : ℤ), by push_cast; rfl⟩, by rw [← Complex.ofReal_pow]; exact Complex.ofReal_im _⟩
+    Or.inr ⟨⟨-(N : ℤ), by push_cast; rfl⟩, by rw [hq]; exact Complex.ofReal_im _⟩
   set n : ℤ := (s : ℤ) + m + 1 with hn
   have H := p2m_hasSum_modMathieuTerm j hj₁ hj₄ hadm hh' n z
   set c := mathieuMeCoeff ν ((h : ℂ) ^ 2) with hcdef
   set S0 : ℤ → ℂ := fun K => ∫ x in (0 : ℝ)..2 * π,
-    mathieuSe N x (h ^ 2) * Complex.sin ((K : ℂ) * x) with hS0
+    mathieuSe N x q * Complex.sin ((K : ℂ) * x) with hS0
   have hc : ∀ k : ℤ, c k = -((Real.sqrt 2 : ℂ) / (2 * π)) * S0 (-(N : ℤ) + 2 * k) := by
     intro k
-    have := p2m_mathieuMeCoeff_se hN0 (h ^ 2) k
+    have := p2m_mathieuMeCoeff_se hN0 q k
     push_cast at this
-    rw [hcdef, hν, this]
+    rw [hcdef, hν, hq, this]
     simp only [hS0, Int.cast_add, Int.cast_natCast, Int.cast_mul, Int.cast_ofNat, Int.cast_neg]
   have hSneg : ∀ K : ℤ, S0 (-K) = -S0 K := by
     intro K; simp only [hS0]; push_cast
     simp only [neg_mul, Complex.sin_neg, mul_neg, intervalIntegral.integral_neg]
-  have hBeq : ∀ ℓ : ℕ, mathieuFourierB (2 * m + 1) (2 * ℓ + 1) (h ^ 2) =
+  have hBeq : ∀ ℓ : ℕ, mathieuFourierB (2 * m + 1) (2 * ℓ + 1) q =
       (1 / π : ℂ) * S0 (2 * ℓ + 1) := by
     intro ℓ
     simp only [mathieuFourierB, hS0, hN]
@@ -1324,7 +1351,7 @@ theorem p2m_hasSum_radialMathieuMs_odd_cross (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ 
     simp only [zpow_one]
     ring
   have H2 := H1.nat_add_neg_add_one
-  set B2s := mathieuFourierB (2 * m + 1) (2 * s + 1) (h ^ 2) with hB2s
+  set B2s := mathieuFourierB (2 * m + 1) (2 * s + 1) q with hB2s
   set Kc : ℂ := (Real.sqrt 2 : ℂ) / B2s
   have H3 := H2.mul_left Kc
   have hs2 := p2m_sqrt_two_sq
@@ -1370,38 +1397,51 @@ theorem p2m_hasSum_radialMathieuMs_odd_cross (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ 
     field_simp at hKc ⊢
     linear_combination ((Real.sqrt 2 : ℂ) * M) * hKc + π * M * hs2
 
-/-- Proof of `hasSum_radialMathieuMs_even_cross` (DLMF 28.24.5). -/
-theorem p2m_hasSum_radialMathieuMs_even_cross (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (m s : ℕ)
-    {h : ℝ} (hh : 0 < h) (hB : mathieuFourierB (2 * m + 2) (2 * s + 2) (h ^ 2) ≠ 0) (z : ℂ) :
+/-- Proof of `hasSum_radialMathieuMs_odd_cross` (DLMF 28.24.4). -/
+theorem p2m_hasSum_radialMathieuMs_odd_cross (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (m s : ℕ)
+    {h : ℝ} (hh : 0 < h) (hB : mathieuFourierB (2 * m + 1) (2 * s + 1) (h ^ 2) ≠ 0) (z : ℂ) :
     HasSum (fun ℓ : ℕ => (-1 : ℂ) ^ m * ((-1 : ℂ) ^ ℓ *
-        (mathieuFourierB (2 * m + 2) (2 * ℓ + 2) (h ^ 2) /
-          mathieuFourierB (2 * m + 2) (2 * s + 2) (h ^ 2)) *
+        (mathieuFourierB (2 * m + 1) (2 * ℓ + 1) (h ^ 2) /
+          mathieuFourierB (2 * m + 1) (2 * s + 1) (h ^ 2)) *
+        (besselJExp ((ℓ : ℤ) - s : ℤ) h (-z) * mathieuCylExp j ((ℓ + s + 1 : ℕ) : ℂ) h z -
+          besselJExp ((ℓ + s + 1 : ℕ) : ℂ) h (-z) * mathieuCylExp j ((ℓ : ℤ) - s : ℤ) h z)))
+      (radialMathieuMs j (2 * m + 1) z h) :=
+  p3m_hasSum_radialMathieuMs_odd_cross_gen j hj₁ hj₄ m s (q := h ^ 2) (by push_cast; ring)
+    (by exact_mod_cast hh.ne') hB z
+
+/-- `hasSum_radialMathieuMs_even_cross` (DLMF 28.24.5) for complex `h` with real `h² = q`. -/
+theorem p3m_hasSum_radialMathieuMs_even_cross_gen (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (m s : ℕ)
+    {h : ℂ} {q : ℝ} (hq : h ^ 2 = (q : ℂ)) (hh : h ≠ 0)
+    (hB : mathieuFourierB (2 * m + 2) (2 * s + 2) q ≠ 0) (z : ℂ) :
+    HasSum (fun ℓ : ℕ => (-1 : ℂ) ^ m * ((-1 : ℂ) ^ ℓ *
+        (mathieuFourierB (2 * m + 2) (2 * ℓ + 2) q /
+          mathieuFourierB (2 * m + 2) (2 * s + 2) q) *
         (besselJExp ((ℓ : ℤ) - s : ℤ) h (-z) * mathieuCylExp j ((ℓ + s + 2 : ℕ) : ℂ) h z -
           besselJExp ((ℓ + s + 2 : ℕ) : ℂ) h (-z) * mathieuCylExp j ((ℓ : ℤ) - s : ℤ) h z)))
       (radialMathieuMs j (2 * m + 2) z h) := by
-  have hh' : (h : ℂ) ≠ 0 := by exact_mod_cast hh.ne'
+  have hh' : (h : ℂ) ≠ 0 := hh
   have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
   set N : ℕ := 2 * m + 2 with hN
   have hN0 : N ≠ 0 := by omega
   set ν : ℂ := -((N : ℕ) : ℂ) with hν
   have hadm : ModMathieuAdmissible ν (h : ℂ) :=
-    Or.inr ⟨⟨-(N : ℤ), by push_cast; rfl⟩, by rw [← Complex.ofReal_pow]; exact Complex.ofReal_im _⟩
+    Or.inr ⟨⟨-(N : ℤ), by push_cast; rfl⟩, by rw [hq]; exact Complex.ofReal_im _⟩
   set n : ℤ := (s : ℤ) + m + 2 with hn
   have H := p2m_hasSum_modMathieuTerm j hj₁ hj₄ hadm hh' n z
   set c := mathieuMeCoeff ν ((h : ℂ) ^ 2) with hcdef
   set S0 : ℤ → ℂ := fun K => ∫ x in (0 : ℝ)..2 * π,
-    mathieuSe N x (h ^ 2) * Complex.sin ((K : ℂ) * x) with hS0
+    mathieuSe N x q * Complex.sin ((K : ℂ) * x) with hS0
   have hc : ∀ k : ℤ, c k = -((Real.sqrt 2 : ℂ) / (2 * π)) * S0 (-(N : ℤ) + 2 * k) := by
     intro k
-    have := p2m_mathieuMeCoeff_se hN0 (h ^ 2) k
+    have := p2m_mathieuMeCoeff_se hN0 q k
     push_cast at this
-    rw [hcdef, hν, this]
+    rw [hcdef, hν, hq, this]
     simp only [hS0, Int.cast_add, Int.cast_natCast, Int.cast_mul, Int.cast_ofNat, Int.cast_neg]
   have hSneg : ∀ K : ℤ, S0 (-K) = -S0 K := by
     intro K; simp only [hS0]; push_cast
     simp only [neg_mul, Complex.sin_neg, mul_neg, intervalIntegral.integral_neg]
   have hS00 : S0 0 = 0 := by simp [hS0]
-  have hBeq : ∀ ℓ : ℕ, mathieuFourierB (2 * m + 2) (2 * ℓ + 2) (h ^ 2) =
+  have hBeq : ∀ ℓ : ℕ, mathieuFourierB (2 * m + 2) (2 * ℓ + 2) q =
       (1 / π : ℂ) * S0 (2 * ℓ + 2) := by
     intro ℓ
     simp only [mathieuFourierB, hS0, hN]
@@ -1436,7 +1476,7 @@ theorem p2m_hasSum_radialMathieuMs_even_cross (j : ℕ) (hj₁ : 1 ≤ j) (hj₄
   have H2 := (hasSum_nat_add_iff' 1).mpr H1'.nat_add_neg
   simp only [Finset.range_one, Finset.sum_singleton, Nat.cast_zero, neg_zero, zero_sub,
     hfm1, add_zero, sub_zero] at H2
-  set B2s := mathieuFourierB (2 * m + 2) (2 * s + 2) (h ^ 2) with hB2s
+  set B2s := mathieuFourierB (2 * m + 2) (2 * s + 2) q with hB2s
   set Kc : ℂ := (Real.sqrt 2 : ℂ) / B2s
   have H3 := H2.mul_left (-Kc)
   have hs2 := p2m_sqrt_two_sq
@@ -1483,5 +1523,17 @@ theorem p2m_hasSum_radialMathieuMs_even_cross (j : ℕ) (hj₁ : 1 ≤ j) (hj₄
     rw [hB2s, hBeq s] at hKc
     field_simp at hKc ⊢
     linear_combination (-((Real.sqrt 2 : ℂ) * M)) * hKc - π * M * hs2
+
+/-- Proof of `hasSum_radialMathieuMs_even_cross` (DLMF 28.24.5). -/
+theorem p2m_hasSum_radialMathieuMs_even_cross (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (m s : ℕ)
+    {h : ℝ} (hh : 0 < h) (hB : mathieuFourierB (2 * m + 2) (2 * s + 2) (h ^ 2) ≠ 0) (z : ℂ) :
+    HasSum (fun ℓ : ℕ => (-1 : ℂ) ^ m * ((-1 : ℂ) ^ ℓ *
+        (mathieuFourierB (2 * m + 2) (2 * ℓ + 2) (h ^ 2) /
+          mathieuFourierB (2 * m + 2) (2 * s + 2) (h ^ 2)) *
+        (besselJExp ((ℓ : ℤ) - s : ℤ) h (-z) * mathieuCylExp j ((ℓ + s + 2 : ℕ) : ℂ) h z -
+          besselJExp ((ℓ + s + 2 : ℕ) : ℂ) h (-z) * mathieuCylExp j ((ℓ : ℤ) - s : ℤ) h z)))
+      (radialMathieuMs j (2 * m + 2) z h) :=
+  p3m_hasSum_radialMathieuMs_even_cross_gen j hj₁ hj₄ m s (q := h ^ 2) (by push_cast; ring)
+    (by exact_mod_cast hh.ne') hB z
 
 end DLMF.Mathieu

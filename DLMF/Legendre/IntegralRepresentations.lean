@@ -5,12 +5,11 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Legendre.Hypergeometric
-public import DLMF.Legendre.AssociatedRecurrences
 public import DLMF.Legendre.Neumann
 public import DLMF.Legendre.IntegralTools
 public import DLMF.Legendre.Singularities
 public import DLMF.Hypergeometric.EulerHalfLine
+public import Mathlib.Analysis.SpecialFunctions.Arcosh
 
 /-!
 # Integral representations and fractional integration
@@ -29,7 +28,7 @@ namespace DLMF.Legendre
 /-! ### Helpers for DLMF 14.12.6 and 14.25.1–2 (prefix `legInt_`) -/
 
 /-- Splitting a principal power of a product when the imaginary parts have opposite signs. -/
-lemma legInt_cpow_mul_of_im {A B : ℂ} (hA : A ∈ slitPlane) (hB : B ≠ 0)
+theorem legInt_cpow_mul_of_im {A B : ℂ} (hA : A ∈ slitPlane) (hB : B ≠ 0)
     (h : A.im = 0 ∨ A.im * B.im < 0) (p : ℂ) : (A * B) ^ p = A ^ p * B ^ p := by
   have hA0 : A ≠ 0 := slitPlane_ne_zero hA
   have hlog : log (A * B) = log A + log B := by
@@ -62,7 +61,7 @@ noncomputable def legInt_hs (t : ℝ) : ℝ := (Real.cosh t - 1) / (Real.cosh t 
 noncomputable def legInt_hs' (t : ℝ) : ℝ := 2 * Real.sinh t / (Real.cosh t + 1) ^ 2
 
 /-- Derivative of the half-angle substitution. -/
-lemma legInt_hasDerivAt_hs (t : ℝ) : HasDerivAt legInt_hs (legInt_hs' t) t := by
+theorem legInt_hasDerivAt_hs (t : ℝ) : HasDerivAt legInt_hs (legInt_hs' t) t := by
   have hc : 0 < Real.cosh t + 1 := by linarith [Real.cosh_pos t]
   have h := ((Real.hasDerivAt_cosh t).sub_const 1).div ((Real.hasDerivAt_cosh t).add_const 1) hc.ne'
   unfold legInt_hs legInt_hs'
@@ -70,7 +69,7 @@ lemma legInt_hasDerivAt_hs (t : ℝ) : HasDerivAt legInt_hs (legInt_hs' t) t := 
   field_simp; ring
 
 /-- The half-angle substitution maps `(0, ∞)` onto `(0, 1)`. -/
-lemma legInt_image_hs : legInt_hs '' Ioi 0 = Ioo 0 1 := by
+theorem legInt_image_hs : legInt_hs '' Ioi 0 = Ioo 0 1 := by
   ext s; constructor
   · rintro ⟨t, ht, rfl⟩
     have h1 : 1 < Real.cosh t := Real.one_lt_cosh.mpr (ne_of_gt ht)
@@ -83,7 +82,7 @@ lemma legInt_image_hs : legInt_hs '' Ioi 0 = Ioo 0 1 := by
     field_simp; ring
 
 /-- The half-angle substitution is injective on `(0, ∞)`. -/
-lemma legInt_injOn_hs : InjOn legInt_hs (Ioi 0) := by
+theorem legInt_injOn_hs : InjOn legInt_hs (Ioi 0) := by
   intro u hu v hv he
   have hu1 : 0 < Real.cosh u + 1 := by linarith [Real.cosh_pos u]
   have hv1 : 0 < Real.cosh v + 1 := by linarith [Real.cosh_pos v]
@@ -98,7 +97,7 @@ lemma legInt_injOn_hs : InjOn legInt_hs (Ioi 0) := by
   rwa [abs_of_pos (show (0:ℝ) < u from hu), abs_of_pos (show (0:ℝ) < v from hv)] at this
 
 /-- Change of variables `s = tanh²(t/2)` from `(0,1)` to `(0,∞)`. -/
-lemma legInt_hs_cov {g : ℝ → ℂ} (hg : IntegrableOn g (Ioo 0 1)) :
+theorem legInt_hs_cov {g : ℝ → ℂ} (hg : IntegrableOn g (Ioo 0 1)) :
     IntegrableOn (fun t => |legInt_hs' t| • g (legInt_hs t)) (Ioi 0) ∧
       ∫ t in Ioi 0, |legInt_hs' t| • g (legInt_hs t) = ∫ s in Ioo 0 1, g s := by
   have hd : ∀ t ∈ Ioi (0:ℝ), HasDerivWithinAt legInt_hs (legInt_hs' t) (Ioi 0) t :=
@@ -110,7 +109,7 @@ lemma legInt_hs_cov {g : ℝ → ℂ} (hg : IntegrableOn g (Ioo 0 1)) :
   exact ⟨hcovI.mp hg, hcov.symm⟩
 
 /-- `z + c = (z+1) (c+1)/2 (1 - x s)`, `x = (z-1)/(z+1)`, `s = (c-1)/(c+1)`, split into powers. -/
-lemma legInt_cpow_z_add_cosh {z : ℂ} (hz : z+1 ∈ slitPlane) {t : ℝ} (ht : 0 < t) (p : ℂ) :
+theorem legInt_cpow_z_add_cosh {z : ℂ} (hz : z+1 ∈ slitPlane) {t : ℝ} (ht : 0 < t) (p : ℂ) :
     (z + Real.cosh t) ^ p = (z+1)^p * (((Real.cosh t + 1)/2 : ℝ) : ℂ)^p *
       (1 - (z-1)/(z+1) * (legInt_hs t : ℂ))^p := by
   have hc1 : 1 < Real.cosh t := Real.one_lt_cosh.mpr (ne_of_gt ht)
@@ -152,7 +151,7 @@ lemma legInt_cpow_z_add_cosh {z : ℂ} (hz : z+1 ∈ slitPlane) {t : ℝ} (ht : 
   rw [hsplit1, ← hrB, hsplit2, mul_assoc]
 
 /-- Real logarithms along the half-angle substitution. -/
-lemma legInt_hs_logs {t : ℝ} (ht : 0 < t) :
+theorem legInt_hs_logs {t : ℝ} (ht : 0 < t) :
     2 * Real.log (Real.sinh t) = Real.log (Real.cosh t - 1) + Real.log (Real.cosh t + 1) ∧
     Real.log |legInt_hs' t| = Real.log 2 + Real.log (Real.sinh t) - 2 * Real.log (Real.cosh t + 1) ∧
     Real.log (legInt_hs t) = Real.log (Real.cosh t - 1) - Real.log (Real.cosh t + 1) ∧
@@ -173,7 +172,7 @@ lemma legInt_hs_logs {t : ℝ} (ht : 0 < t) :
   · rw [Real.log_div hp.ne' two_ne_zero]
 
 /-- The integrand of DLMF 14.25.1 after the substitution `s = tanh²(t/2)`. -/
-lemma legInt_kernel_P {ν μ z : ℂ} (hz : z+1 ∈ slitPlane) {t : ℝ} (ht : 0 < t) :
+theorem legInt_kernel_P {ν μ z : ℂ} (hz : z+1 ∈ slitPlane) {t : ℝ} (ht : 0 < t) :
     (Real.sinh t:ℂ)^(2*ν+1) / (z+Real.cosh t)^(ν+μ+1) = 2^(2*ν+1) * ((z+1)^(ν+μ+1))⁻¹ *
       (|legInt_hs' t| • eulerKernel (ν+μ+1) (ν+1) (μ+1) ((z-1)/(z+1)) (legInt_hs t)) := by
   have hc1 : 1 < Real.cosh t := Real.one_lt_cosh.mpr (ne_of_gt ht)
@@ -218,7 +217,7 @@ lemma legInt_kernel_P {ν μ z : ℂ} (hz : z+1 ∈ slitPlane) {t : ℝ} (ht : 0
   field_simp
 
 /-- `x = (z-1)/(z+1)` lies in the cut plane. -/
-lemma legInt_ratio_mem_cutPlane {z : ℂ} (hz : z+1 ∈ slitPlane) : (z-1)/(z+1) ∈ cutPlane := by
+theorem legInt_ratio_mem_cutPlane {z : ℂ} (hz : z+1 ∈ slitPlane) : (z-1)/(z+1) ∈ cutPlane := by
   have hA0 : z + 1 ≠ 0 := slitPlane_ne_zero hz
   rw [mem_cutPlane, show 1 - (z-1)/(z+1) = 2 * (z+1)⁻¹ by field_simp; ring]
   have := recip_mem_slitPlane' hz
@@ -227,7 +226,7 @@ lemma legInt_ratio_mem_cutPlane {z : ℂ} (hz : z+1 ∈ slitPlane) : (z-1)/(z+1)
   · exact Or.inr (by simpa using h)
 
 /-- Pfaff's transformation in the form needed for DLMF 14.25.1. -/
-lemma legInt_associatedP_pfaff (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem legInt_associatedP_pfaff (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     associatedP ν (-μ) z = exp (-μ/2*(log (z+1)-log (z-1))) * ((z+1)/2)^(-(ν+1)) *
       regularizedGaussHG (ν+μ+1) (ν+1) (μ+1) ((z-1)/(z+1)) := by
   have hz1 := one_add_mem_slitPlane_of_sub_one hz
@@ -243,7 +242,7 @@ lemma legInt_associatedP_pfaff (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) 
   ring
 
 /-- DLMF 14.25.1, proved by the substitution `s = tanh²(t/2)`, Euler's integral and Pfaff. -/
-lemma legInt_associatedP_complex_integral {ν μ : ℂ} (h0 : -1 < ν.re) (h1 : ν.re < μ.re) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem legInt_associatedP_complex_integral {ν μ : ℂ} (h0 : -1 < ν.re) (h1 : ν.re < μ.re) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     HasIntegralAtTop (fun t : ℝ => legendreBranchPower μ z/(2^ν*Gamma (μ-ν)*Gamma (ν+1))*((Real.sinh t:ℂ)^(2*ν+1)/(z+Real.cosh t)^(ν+μ+1))) 0 (associatedP ν (-μ) z) := by
   have hz1' : z+1 ∈ slitPlane := by simpa [add_comm] using one_add_mem_slitPlane_of_sub_one hz
   have hA0 : z + 1 ≠ 0 := slitPlane_ne_zero hz1'
@@ -304,27 +303,27 @@ noncomputable def legInt_root (z : ℂ) : ℂ := exp ((log (z-1) + log (z+1))/2)
 noncomputable def legInt_zeta (z : ℂ) : ℂ := z - legInt_root z
 
 /-- `z+1 ∈ slitPlane` when `z-1 ∈ slitPlane`. -/
-lemma legInt_add_one {z : ℂ} (hz : z-1 ∈ slitPlane) : z+1 ∈ slitPlane := by
+theorem legInt_add_one {z : ℂ} (hz : z-1 ∈ slitPlane) : z+1 ∈ slitPlane := by
   simpa [add_comm] using one_add_mem_slitPlane_of_sub_one hz
 
 /-- `(√(z²-1))² = z²-1`. -/
-lemma legInt_root_sq {z : ℂ} (hz : z-1 ∈ slitPlane) : legInt_root z ^ 2 = z^2 - 1 := by
+theorem legInt_root_sq {z : ℂ} (hz : z-1 ∈ slitPlane) : legInt_root z ^ 2 = z^2 - 1 := by
   rw [legInt_root, ← exp_nat_mul, show ((2:ℕ):ℂ) * ((log (z-1) + log (z+1))/2) =
     log (z-1) + log (z+1) by push_cast; ring, exp_add, exp_log (slitPlane_ne_zero hz),
     exp_log (slitPlane_ne_zero (legInt_add_one hz))]
   ring
 
 /-- `ζ (z + √(z²-1)) = 1`, written as `ζ (2z - ζ) = 1`. -/
-lemma legInt_zeta_mul {z : ℂ} (hz : z-1 ∈ slitPlane) : legInt_zeta z * (2*z - legInt_zeta z) = 1 := by
+theorem legInt_zeta_mul {z : ℂ} (hz : z-1 ∈ slitPlane) : legInt_zeta z * (2*z - legInt_zeta z) = 1 := by
   have := legInt_root_sq hz
   rw [legInt_zeta]; linear_combination -this
 
 /-- `ζ ≠ 0`. -/
-lemma legInt_zeta_ne_zero {z : ℂ} (hz : z-1 ∈ slitPlane) : legInt_zeta z ≠ 0 := by
+theorem legInt_zeta_ne_zero {z : ℂ} (hz : z-1 ∈ slitPlane) : legInt_zeta z ≠ 0 := by
   intro h; have := legInt_zeta_mul hz; rw [h, zero_mul] at this; exact zero_ne_one this
 
 /-- `2z = ζ + ζ⁻¹`. -/
-lemma legInt_two_mul_eq {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem legInt_two_mul_eq {z : ℂ} (hz : z-1 ∈ slitPlane) :
     2*z = legInt_zeta z + (legInt_zeta z)⁻¹ := by
   have h0 := legInt_zeta_ne_zero hz
   have := legInt_zeta_mul hz
@@ -332,13 +331,13 @@ lemma legInt_two_mul_eq {z : ℂ} (hz : z-1 ∈ slitPlane) :
   linear_combination this
 
 /-- A point of `ℂ ∖ (-∞, 1]` is not a real number `≤ 1`. -/
-lemma legInt_not_real_le_one {z : ℂ} (hz : z-1 ∈ slitPlane) {r : ℝ} (hr : r ≤ 1) : z ≠ r := by
+theorem legInt_not_real_le_one {z : ℂ} (hz : z-1 ∈ slitPlane) {r : ℝ} (hr : r ≤ 1) : z ≠ r := by
   rintro rfl
   rw [mem_slitPlane_iff] at hz
   simp at hz; linarith
 
 /-- `|ζ| ≠ 1` off `(-∞, 1]`: otherwise `z = Re ζ ∈ [-1, 1]`. -/
-lemma legInt_norm_zeta_ne_one {z : ℂ} (hz : z-1 ∈ slitPlane) : ‖legInt_zeta z‖ ≠ 1 := by
+theorem legInt_norm_zeta_ne_one {z : ℂ} (hz : z-1 ∈ slitPlane) : ‖legInt_zeta z‖ ≠ 1 := by
   intro h1
   set w := legInt_zeta z
   have h0 : w ≠ 0 := legInt_zeta_ne_zero hz
@@ -352,7 +351,7 @@ lemma legInt_norm_zeta_ne_one {z : ℂ} (hz : z-1 ∈ slitPlane) : ‖legInt_zet
   have := re_le_norm w; linarith
 
 /-- For real `t > 1`, `ζ(t) = t - √(t²-1)`. -/
-lemma legInt_zeta_real {t : ℝ} (ht : 1 < t) : legInt_zeta t = ((t - Real.sqrt (t^2-1) : ℝ) : ℂ) := by
+theorem legInt_zeta_real {t : ℝ} (ht : 1 < t) : legInt_zeta t = ((t - Real.sqrt (t^2-1) : ℝ) : ℂ) := by
   have hl : log ((t:ℂ)-1) + log ((t:ℂ)+1) = ((Real.log (t^2-1) : ℝ) : ℂ) := by
     rw [show (t:ℂ)-1 = ((t-1:ℝ):ℂ) by push_cast; ring, show (t:ℂ)+1 = ((t+1:ℝ):ℂ) by push_cast; ring,
       ← ofReal_log (by linarith), ← ofReal_log (by linarith), ← ofReal_add,
@@ -363,7 +362,7 @@ lemma legInt_zeta_real {t : ℝ} (ht : 1 < t) : legInt_zeta t = ((t - Real.sqrt 
   push_cast; ring_nf
 
 /-- `ζ` is analytic on `ℂ ∖ (-∞, 1]`. -/
-lemma legInt_zeta_analyticAt {z : ℂ} (hz : z-1 ∈ slitPlane) : AnalyticAt ℂ legInt_zeta z := by
+theorem legInt_zeta_analyticAt {z : ℂ} (hz : z-1 ∈ slitPlane) : AnalyticAt ℂ legInt_zeta z := by
   have h1 : AnalyticAt ℂ (fun w : ℂ => log (w-1)) z :=
     (analyticAt_clog hz).comp_of_eq (f := fun w : ℂ => w - 1) (by fun_prop) rfl
   have h2 : AnalyticAt ℂ (fun w : ℂ => log (w+1)) z :=
@@ -371,7 +370,7 @@ lemma legInt_zeta_analyticAt {z : ℂ} (hz : z-1 ∈ slitPlane) : AnalyticAt ℂ
   exact analyticAt_id.sub ((h1.add h2).div_const.cexp)
 
 /-- `0 < t - √(t²-1) < 1` for `t > 1`. -/
-lemma legInt_real_bounds {t : ℝ} (ht : 1 < t) :
+theorem legInt_real_bounds {t : ℝ} (ht : 1 < t) :
     0 < t - Real.sqrt (t^2-1) ∧ t - Real.sqrt (t^2-1) < 1 := by
   have h0 : 0 ≤ t^2 - 1 := by nlinarith
   have hs := Real.sq_sqrt h0
@@ -382,7 +381,7 @@ lemma legInt_real_bounds {t : ℝ} (ht : 1 < t) :
     nlinarith
 
 /-- `|ζ| < 1` on `ℂ ∖ (-∞, 1]` (connectedness and `|ζ| ≠ 1`). -/
-lemma legInt_norm_zeta_lt_one {z : ℂ} (hz : z-1 ∈ slitPlane) : ‖legInt_zeta z‖ < 1 := by
+theorem legInt_norm_zeta_lt_one {z : ℂ} (hz : z-1 ∈ slitPlane) : ‖legInt_zeta z‖ < 1 := by
   by_contra h
   push Not at h
   set D : Set ℂ := {w : ℂ | w-1 ∈ slitPlane}
@@ -398,7 +397,7 @@ lemma legInt_norm_zeta_lt_one {z : ℂ} (hz : z-1 ∈ slitPlane) : ‖legInt_zet
   exact legInt_norm_zeta_ne_one hw hw1
 
 /-- `ζ ∉ (-∞, 0]` on `ℂ ∖ (-∞, 1]`. -/
-lemma legInt_zeta_mem_slitPlane {z : ℂ} (hz : z-1 ∈ slitPlane) : legInt_zeta z ∈ slitPlane := by
+theorem legInt_zeta_mem_slitPlane {z : ℂ} (hz : z-1 ∈ slitPlane) : legInt_zeta z ∈ slitPlane := by
   rw [mem_slitPlane_iff]
   by_contra h
   push Not at h
@@ -419,7 +418,7 @@ lemma legInt_zeta_mem_slitPlane {z : ℂ} (hz : z-1 ∈ slitPlane) : legInt_zeta
 /-! ### DLMF 14.25.2 -/
 
 /-- Splitting a principal power of a product of two factors in the right half-plane. -/
-lemma legInt_cpow_mul_of_re {A B : ℂ} (hA : 0 < A.re) (hB : 0 < B.re) (p : ℂ) :
+theorem legInt_cpow_mul_of_re {A B : ℂ} (hA : 0 < A.re) (hB : 0 < B.re) (p : ℂ) :
     (A * B) ^ p = A ^ p * B ^ p := by
   have hA0 : A ≠ 0 := fun h => by simp [h] at hA
   have hB0 : B ≠ 0 := fun h => by simp [h] at hB
@@ -433,7 +432,7 @@ lemma legInt_cpow_mul_of_re {A B : ℂ} (hA : 0 < A.re) (hB : 0 < B.re) (p : ℂ
     hlog, add_mul, exp_add]
 
 /-- `z + √(z²-1) cosh t = ζ⁻¹ ((cosh t + 1)/2) (1 - ζ² s)`, split into principal powers. -/
-lemma legInt_cpow_root_cosh {z : ℂ} (hz : z-1 ∈ slitPlane) {t : ℝ} (ht : 0 < t) (p : ℂ) :
+theorem legInt_cpow_root_cosh {z : ℂ} (hz : z-1 ∈ slitPlane) {t : ℝ} (ht : 0 < t) (p : ℂ) :
     (z + legInt_root z * Real.cosh t) ^ p = ((legInt_zeta z) ^ p)⁻¹ *
       (((Real.cosh t + 1)/2 : ℝ) : ℂ)^p * (1 - (legInt_zeta z)^2 * (legInt_hs t : ℂ))^p := by
   set ζ := legInt_zeta z with hζ
@@ -493,7 +492,7 @@ lemma legInt_cpow_root_cosh {z : ℂ} (hz : z-1 ∈ slitPlane) {t : ℝ} (ht : 0
   ring
 
 /-- The integrand of DLMF 14.25.2 after the substitution `s = tanh²(t/2)`. -/
-lemma legInt_kernel_Q {ν μ z : ℂ} (hz : z-1 ∈ slitPlane) {t : ℝ} (ht : 0 < t) :
+theorem legInt_kernel_Q {ν μ z : ℂ} (hz : z-1 ∈ slitPlane) {t : ℝ} (ht : 0 < t) :
     (Real.sinh t:ℂ)^(2*μ) / (z + legInt_root z * Real.cosh t)^(ν+μ+1) =
       2^(2*μ) * (legInt_zeta z)^(ν+μ+1) *
       (|legInt_hs' t| • eulerKernel (ν+μ+1) (μ+1/2) (ν+3/2) ((legInt_zeta z)^2) (legInt_hs t)) := by
@@ -543,7 +542,7 @@ noncomputable def legInt_QForm (ν μ z : ℂ) : ℂ :=
     regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) ((legInt_zeta z)^2)
 
 /-- `legInt_QForm ν μ` is analytic on `ℂ ∖ (-∞, 1]`. -/
-lemma legInt_QForm_analyticAt (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem legInt_QForm_analyticAt (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     AnalyticAt ℂ (legInt_QForm ν μ) z := by
   have hp : z+1 ∈ slitPlane := legInt_add_one hz
   have hζ := legInt_zeta_analyticAt hz
@@ -561,7 +560,7 @@ lemma legInt_QForm_analyticAt (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
   exact (((analyticAt_const.mul hB).mul analyticAt_const).mul hP).mul hF
 
 /-- The `ζ`-form of `𝑸^μ_ν` on `(1, ∞)`, by the quadratic transformation DLMF 15.8.15. -/
-lemma legInt_olverQ_eq_QForm_real (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 3/2 ≠ -(k:ℂ)) {x : ℝ} (hx : 1 < x) :
+theorem legInt_olverQ_eq_QForm_real (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 3/2 ≠ -(k:ℂ)) {x : ℝ} (hx : 1 < x) :
     olverQ ν μ x = legInt_QForm ν μ x := by
   have hz : (x:ℂ) - 1 ∈ slitPlane := legInt_one_lt_mem hx
   obtain ⟨hq0, hq1⟩ := legInt_real_bounds hx
@@ -610,7 +609,7 @@ lemma legInt_olverQ_eq_QForm_real (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 3/2 ≠ 
   field_simp
 
 /-- The `ζ`-form of `𝑸^μ_ν` on `ℂ ∖ (-∞, 1]` (identity theorem from `(1, ∞)`). -/
-lemma legInt_olverQ_eq_QForm (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 3/2 ≠ -(k:ℂ)) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem legInt_olverQ_eq_QForm (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 3/2 ≠ -(k:ℂ)) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     olverQ ν μ z = legInt_QForm ν μ z := by
   set D : Set ℂ := {w : ℂ | w-1 ∈ slitPlane}
   have h2 : ((2 : ℝ) : ℂ) ∈ D := by show ((2 : ℝ) : ℂ) - 1 ∈ slitPlane; norm_num
@@ -627,7 +626,7 @@ lemma legInt_olverQ_eq_QForm (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 3/2 ≠ -(k:�
   exact legInt_olverQ_eq_QForm_real ν μ hc ht
 
 /-- DLMF 14.25.2, proved by the substitution `s = tanh²(t/2)`, Euler's integral and the `ζ`-form. -/
-lemma legInt_olverQ_complex_integral {ν μ : ℂ} (h0 : -1/2 < μ.re) (h1 : μ.re < (ν+1).re) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem legInt_olverQ_complex_integral {ν μ : ℂ} (h0 : -1/2 < μ.re) (h1 : μ.re < (ν+1).re) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     HasIntegralAtTop (fun t : ℝ => Real.sqrt π*legendreBranchPower μ z/(2^μ*Gamma (μ+1/2)*Gamma (ν-μ+1))*((Real.sinh t:ℂ)^(2*μ)/(z+exp ((log (z-1)+log (z+1))/2)*Real.cosh t)^(ν+μ+1))) 0 (olverQ ν μ z) := by
   have hx : (legInt_zeta z)^2 ∈ cutPlane := by
     refine mem_cutPlane_of_norm_lt_one ?_
@@ -685,7 +684,7 @@ lemma legInt_olverQ_complex_integral {ν μ : ℂ} (h0 : -1/2 < μ.re) (h1 : μ.
 /-! ### Helpers for DLMF 14.12.4 (prefix `legInt_`) -/
 
 /-- The half-line Euler kernel of DLMF 14.12.4 at `v = E/q`, with `2qx = 1 + q²`. -/
-lemma legInt_halfLine_point (ν μ : ℂ) {x q E : ℝ} (hq : 0 < q) (hqx : 1 + q^2 = 2*q*x) (hE : 0 < E) :
+theorem legInt_halfLine_point (ν μ : ℂ) {x q E : ℝ} (hq : 0 < q) (hqx : 1 + q^2 = 2*q*x) (hE : 0 < E) :
     ((E/q : ℝ):ℂ) * eulerHalfLineKernel (μ+1/2) (ν+μ+1) (μ-ν) (((q^2)⁻¹ : ℝ) : ℂ) (E/q) =
       (q:ℂ)^(μ-ν) * (2:ℂ)^(-(μ+1/2)) * (E:ℂ)^(ν+1/2) * ((x + (E + E⁻¹)/2 : ℝ):ℂ)^(-(μ+1/2)) := by
   have hv : 0 < E/q := div_pos hE hq
@@ -723,7 +722,7 @@ lemma legInt_halfLine_point (ν μ : ℂ) {x q E : ℝ} (hq : 0 < q) (hqx : 1 + 
   linear_combination (-(μ+1/2)) * hsum'
 
 /-- The substitutions `v = e^{±t}/q` split a half-line integral at `1/q`. -/
-lemma legInt_exp_split {q : ℝ} (hq : 0 < q) {K : ℝ → ℂ} (hK : IntegrableOn K (Ioi 0)) :
+theorem legInt_exp_split {q : ℝ} (hq : 0 < q) {K : ℝ → ℂ} (hK : IntegrableOn K (Ioi 0)) :
     IntegrableOn (fun t => (Real.exp t / q) • K (Real.exp t / q)) (Ioi 0) ∧
     IntegrableOn (fun t => (Real.exp (-t) / q) • K (Real.exp (-t) / q)) (Ioi 0) ∧
     ∫ t in Ioi 0, ((Real.exp t / q) • K (Real.exp t / q) + (Real.exp (-t) / q) • K (Real.exp (-t) / q)) =
@@ -791,7 +790,7 @@ lemma legInt_exp_split {q : ℝ} (hq : 0 < q) {K : ℝ → ℂ} (hK : Integrable
 
 /-- The hypergeometric value behind DLMF 14.12.4:
 `𝐅(μ+1/2, μ-ν; 2μ+1; 1-q⁻²) = q^{2(μ-ν)} (qx)^{ν-μ} Γ(μ+1)/Γ(2μ+1) 𝐅((μ-ν)/2, (μ-ν+1)/2; μ+1; 1-1/x²)`. -/
-lemma legInt_cosh_hyp (ν μ : ℂ) (hμ : -1/2 < μ.re) {x q : ℝ} (hq0 : 0 < q) (hq1 : q < 1)
+theorem legInt_cosh_hyp (ν μ : ℂ) (hμ : -1/2 < μ.re) {x q : ℝ} (hq0 : 0 < q) (hq1 : q < 1)
     (hqx : 1 + q^2 = 2*q*x) :
     regularizedGaussHG (μ+1/2) (μ-ν) (2*μ+1) (1 - (((q^2)⁻¹:ℝ):ℂ)) =
       exp (Real.log q * (2*(μ-ν))) * exp ((Real.log q + Real.log x) * (ν-μ)) *
@@ -846,7 +845,7 @@ lemma legInt_cosh_hyp (ν μ : ℂ) (hμ : -1/2 < μ.re) {x q : ℝ} (hq0 : 0 < 
   ring_nf
 
 /-- The constant in DLMF 14.12.4, by the duplication formula. -/
-lemma legInt_cosh_value (ν μ F P : ℂ) {x q : ℝ} (hq0 : 0 < q) (hx0 : 0 < x)
+theorem legInt_cosh_value (ν μ F P : ℂ) {x q : ℝ} (hq0 : 0 < q) (hx0 : 0 < x)
     (ha : 0 < (ν+μ+1).re) (h : 0 < (μ-ν).re) (hμ : -1/2 < μ.re) :
     Real.sqrt 2*Gamma (μ+1/2)*P/(Real.sqrt π*Gamma (ν+μ+1)*Gamma (μ-ν)) /
       (2 * ((q:ℂ)^(μ-ν) * (2:ℂ)^(-(μ+1/2)))) * (Gamma (ν + μ + 1) * Gamma (μ - ν) *
@@ -891,7 +890,7 @@ lemma legInt_cosh_value (ν μ F P : ℂ) {x q : ℝ} (hq0 : 0 < q) (hx0 : 0 < x
 
 /-- DLMF 14.12.4 by the substitution `v = e^{±t}/q`, Euler's half-line integral, Pfaff, the
 quadratic transformation 15.8.13 and 14.3.18. -/
-lemma legInt_associatedP_cosh_integral {ν μ : ℂ} (h : 0 < (μ-ν).re) (hconv : -1 < (μ+ν).re) {x : ℝ} (hx : 1 < x) :
+theorem legInt_associatedP_cosh_integral {ν μ : ℂ} (h : 0 < (μ-ν).re) (hconv : -1 < (μ+ν).re) {x : ℝ} (hx : 1 < x) :
     HasIntegralAtTop (fun t : ℝ => Real.sqrt 2*Gamma (μ+1/2)*(x^2-1:ℂ)^(μ/2)/(Real.sqrt π*Gamma (ν+μ+1)*Gamma (μ-ν))*cosh ((ν+1/2)*t)/(x+Real.cosh t:ℂ)^(μ+1/2)) 0 (associatedP ν (-μ) x) := by
   set r := Real.sqrt (x^2-1) with hr
   have hr2 : r^2 = x^2-1 := Real.sq_sqrt (by nlinarith)
@@ -964,7 +963,7 @@ lemma legInt_associatedP_cosh_integral {ν μ : ℂ} (h : 0 < (μ-ν).re) (hconv
 noncomputable def legInt_md (θ s : ℝ) : ℝ := (1 - Real.cos s) / (1 - Real.cos θ)
 
 /-- Change of variables `u = (1 - cos s)/(1 - cos θ)` from `(0, 1)` to `(0, θ)`. -/
-lemma legInt_md_cov {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) (g : ℝ → ℂ) :
+theorem legInt_md_cov {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) (g : ℝ → ℂ) :
     ∫ s in Ioo 0 θ, |Real.sin s / (1 - Real.cos θ)| • g (legInt_md θ s) = ∫ u in Ioo 0 1, g u := by
   have hD : 0 < 1 - Real.cos θ := by
     have := Real.cos_lt_cos_of_nonneg_of_le_pi le_rfl hπ.le h0; rw [Real.cos_zero] at this; linarith
@@ -1001,11 +1000,11 @@ lemma legInt_md_cov {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) (g : ℝ → ℂ) :
   exact hcov.symm
 
 /-- `√r = e^{(log r)/2}` for `r > 0`, as complex numbers. -/
-lemma legInt_sqrt_eq_exp {r : ℝ} (hr : 0 < r) : ((Real.sqrt r : ℝ) : ℂ) = exp (Real.log r / 2) := by
+theorem legInt_sqrt_eq_exp {r : ℝ} (hr : 0 < r) : ((Real.sqrt r : ℝ) : ℂ) = exp (Real.log r / 2) := by
   rw [Real.sqrt_eq_rpow, Real.rpow_def_of_pos hr, ofReal_exp]; push_cast; ring_nf
 
 /-- The integrand of 15.6.8 after the substitution `u = (1 - cos s)/(1 - cos θ)`, by DLMF 15.4.14. -/
-lemma legInt_md_point (ν μ : ℂ) {θ s : ℝ} (hs0 : 0 < s) (hsθ : s < θ) (hπ : θ < π) :
+theorem legInt_md_point (ν μ : ℂ) {θ s : ℝ} (hs0 : 0 < s) (hsθ : s < θ) (hπ : θ < π) :
     |Real.sin s / (1 - Real.cos θ)| • (regularizedGaussHGFun (ν+1) (-ν) (1/2)
       ((1 - (Real.cos θ:ℂ))/2 * (legInt_md θ s : ℂ)) * (legInt_md θ s : ℂ)^((1/2:ℂ)-1) *
       (1 - (legInt_md θ s : ℂ))^((1-μ)-1/2-1)) =
@@ -1445,12 +1444,12 @@ theorem olverQ_nat_interval_integral (n m : ℕ) {x : ℝ} (hx : 1 < x) :
 /-! ### Helpers for DLMF 14.12.12 (prefix `legIR_`) -/
 
 /-- For real `t > 1`, `t - 1` lies in the slit plane. -/
-lemma legIR_sub_one_mem {t : ℝ} (ht : 1 < t) : (t:ℂ) - 1 ∈ slitPlane := by
+theorem legIR_sub_one_mem {t : ℝ} (ht : 1 < t) : (t:ℂ) - 1 ∈ slitPlane := by
   rw [show (t:ℂ)-1 = ((t-1:ℝ):ℂ) by push_cast; ring]
   exact ofReal_mem_slitPlane.2 (by linarith)
 
 /-- A terminating `₂F₁(-N,-n;c+1;w)` sum with `w ≥ 0` has real part at least `1`. -/
-lemma legIR_sum_re_ge (N n c : ℕ) {w : ℝ} (hw : 0 ≤ w) :
+theorem legIR_sum_re_ge (N n c : ℕ) {w : ℝ} (hw : 0 ≤ w) :
     1 ≤ (∑ k ∈ Finset.range (N+1), gaussHGCoeff (-(N:ℂ)) (-(n:ℂ)) ((c:ℂ)+1) k * (w:ℂ)^k).re := by
   have hterm : ∀ k, gaussHGCoeff (-(N:ℂ)) (-(n:ℂ)) ((c:ℂ)+1) k * (w:ℂ)^k =
       ((((N.descFactorial k * n.descFactorial k : ℕ):ℝ) / (((c+1).ascFactorial k * k ! : ℕ):ℝ) * w^k : ℝ) : ℂ) := by
@@ -1468,7 +1467,7 @@ lemma legIR_sum_re_ge (N n c : ℕ) {w : ℝ} (hw : 0 ≤ w) :
   simp
 
 /-- Norm of the branch power `(t²-1)^{m/2}` for real `t > 1`. -/
-lemma legIR_norm_bp (m : ℕ) {t : ℝ} (ht : 1 < t) :
+theorem legIR_norm_bp (m : ℕ) {t : ℝ} (ht : 1 < t) :
     ‖legendreBranchPower m t‖ = Real.exp (m/2*(Real.log (t-1) + Real.log (t+1))) := by
   rw [legendreBranchPower, norm_exp, show (t:ℂ)-1 = ((t-1:ℝ):ℂ) by push_cast; ring,
     show (t:ℂ)+1 = ((t+1:ℝ):ℂ) by push_cast; ring, ← ofReal_log (by linarith), ← ofReal_log (by linarith)]
@@ -1476,7 +1475,7 @@ lemma legIR_norm_bp (m : ℕ) {t : ℝ} (ht : 1 < t) :
 
 /-- For integers `0 ≤ m ≤ n`, `|P^m_n(t)| ≥ C (t²-1)^{m/2}` on `t > 1`, via Pfaff to a
 terminating series with nonnegative terms. -/
-lemma legIR_norm_associatedP_ge (n m : ℕ) (hmn : m ≤ n) : ∃ C > 0, ∀ t : ℝ, 1 < t →
+theorem legIR_norm_associatedP_ge (n m : ℕ) (hmn : m ≤ n) : ∃ C > 0, ∀ t : ℝ, 1 < t →
     C * ‖legendreBranchPower m t‖ ≤ ‖associatedP n m t‖ := by
   obtain ⟨N, rfl⟩ := Nat.exists_eq_add_of_le hmn
   set K := poch (((m+N:ℕ):ℂ) - m + 1) (2*m) / 2^m with hKdef
@@ -1523,7 +1522,7 @@ lemma legIR_norm_associatedP_ge (n m : ℕ) (hmn : m ≤ n) : ∃ C > 0, ∀ t :
     _ ≤ _ := by gcongr
 
 /-- `𝑸^m_n(x) → 0` as `x → ∞` (from DLMF 14.8.15). -/
-lemma legIR_olverQ_tendsto_zero (n m : ℕ) :
+theorem legIR_olverQ_tendsto_zero (n m : ℕ) :
     Tendsto (fun x : ℝ => olverQ n m x) atTop (𝓝 0) := by
   have hν : ∀ k : ℕ, (n:ℂ) ≠ -k-3/2 := fun k h => by
     have := congrArg re h; simp at this; linarith

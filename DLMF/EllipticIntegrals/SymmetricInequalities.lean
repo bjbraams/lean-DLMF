@@ -8,8 +8,6 @@ module
 public import DLMF.EllipticIntegrals.Symmetric
 public import DLMF.EllipticIntegrals.Inequalities
 public import Carlson.Elliptic.CapacityBound
-public import Carlson.Mean.Bounds
-public import Mathlib.Tactic.CrossRefAttribute
 
 /-!
 # Inequalities for the symmetric elliptic integrals (DLMF §19.24)
@@ -53,12 +51,12 @@ namespace DLMF.EllipticIntegrals
 
 /-! ### Reality on nonnegative arguments -/
 
-theorem ei19d_ofReal_add_cpow_half {t r : ℝ} (h : 0 ≤ t + r) :
+lemma ei19d_ofReal_add_cpow_half {t r : ℝ} (h : 0 ≤ t + r) :
     ((t : ℂ) + (r : ℂ)) ^ (1 / 2 : ℂ) = ((√(t + r) : ℝ) : ℂ) := by
   rw [← ofReal_add, show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring,
     ← ofReal_cpow h, Real.sqrt_eq_rpow]
 
-theorem ei19d_symEllIntS_ofReal {x y z t : ℝ} (hx : 0 ≤ t + x) (hy : 0 ≤ t + y)
+lemma ei19d_symEllIntS_ofReal {x y z t : ℝ} (hx : 0 ≤ t + x) (hy : 0 ≤ t + y)
     (hz : 0 ≤ t + z) :
     symEllIntS (x : ℂ) (y : ℂ) (z : ℂ) t = ((√(t + x) * √(t + y) * √(t + z) : ℝ) : ℂ) := by
   rw [symEllIntS, ei19d_ofReal_add_cpow_half hx, ei19d_ofReal_add_cpow_half hy,

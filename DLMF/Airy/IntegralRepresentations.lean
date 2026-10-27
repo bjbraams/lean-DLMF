@@ -5,9 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Airy.Framework
 public import DLMF.Airy.GeneralizedContours
-public import DLMF.Airy.Scorer
 
 /-!
 # Airy integral representations, DLMF §9.5
@@ -22,17 +20,17 @@ open scoped Real Topology
 namespace DLMF.Airy
 
 /-- `e^{(θ+π)i} = -e^{θi}`. -/
-lemma exp_add_pi_mul_I (θ : ℝ) : exp (((θ + π : ℝ) : ℂ) * I) = -exp (θ * I) := by
+theorem exp_add_pi_mul_I (θ : ℝ) : exp (((θ + π : ℝ) : ℂ) * I) = -exp (θ * I) := by
   push_cast; rw [add_mul, exp_add, exp_pi_mul_I]; ring
 
 /-- The Airy contour integrand at `u` equals the Reid kernel (p = 0) at `-u`. -/
-lemma reidKernel_zero_eq_airyIntegrand (z w : ℂ) {u : ℂ} (hu : exp w = -u) :
+theorem reidKernel_zero_eq_airyIntegrand (z w : ℂ) {u : ℂ} (hu : exp w = -u) :
     reidKernel z 0 w = exp (u ^ 3 / 3 - z * u) := by
   rw [reidKernel, show exp (3 * w) = exp w ^ 3 by rw [← exp_nat_mul]; push_cast; ring_nf, hu]
   congr 1; ring
 
 /-- Airy rays are Reid rays (p = 0) rotated by `π`. -/
-lemma rayIntegral_airy_eq_reidRay (z : ℂ) (θ : ℝ) {r : ℝ} (hr : 0 ≤ r) :
+theorem rayIntegral_airy_eq_reidRay (z : ℂ) (θ : ℝ) {r : ℝ} (hr : 0 ≤ r) :
     rayIntegral (fun t => exp (t ^ 3 / 3 - z * t)) θ r = -reidRay z 0 (θ + π) r := by
   rw [rayIntegral, reidRay, ← integral_neg]
   refine setIntegral_congr_fun measurableSet_Ioi fun t (ht : r < t) => ?_
@@ -42,7 +40,7 @@ lemma rayIntegral_airy_eq_reidRay (z : ℂ) (θ : ℝ) {r : ℝ} (hr : 0 ≤ r) 
   · rw [exp_add, exp_log (ofReal_ne_zero.mpr ht0.ne'), exp_add_pi_mul_I]; ring
 
 /-- Airy arcs are Reid arcs (p = 0) rotated by `π`. -/
-lemma arcIntegral_airy_eq_reidArc (z : ℂ) (α β : ℝ) :
+theorem arcIntegral_airy_eq_reidArc (z : ℂ) (α β : ℝ) :
     arcIntegral (fun t => exp (t ^ 3 / 3 - z * t)) α β = -reidArc z 0 (α + π) (β + π) := by
   rw [arcIntegral, reidArc, ← intervalIntegral.integral_comp_add_right, ← intervalIntegral.integral_neg]
   refine intervalIntegral.integral_congr fun θ _ => ?_
@@ -51,7 +49,7 @@ lemma arcIntegral_airy_eq_reidArc (z : ℂ) (α β : ℝ) :
   · exact exp_add_pi_mul_I θ
 
 /-- Airy contours are Reid contours (p = 0) rotated by `π`. -/
-lemma contourIntegral_airy_eq_reidContour (z : ℂ) (α β : ℝ) :
+theorem contourIntegral_airy_eq_reidContour (z : ℂ) (α β : ℝ) :
     contourIntegral (fun t => exp (t ^ 3 / 3 - z * t)) α β =
       -reidContour z 0 (α + π) (β + π) := by
   rw [contourIntegral, reidContour, rayIntegral_airy_eq_reidRay z α zero_le_one,
@@ -59,13 +57,13 @@ lemma contourIntegral_airy_eq_reidContour (z : ℂ) (α β : ℝ) :
   ring
 
 /-- Reversing the orientation of a contour. -/
-lemma contourIntegral_swap (f : ℂ → ℂ) (α β : ℝ) :
+theorem contourIntegral_swap (f : ℂ → ℂ) (α β : ℝ) :
     contourIntegral f α β = -contourIntegral f β α := by
   rw [contourIntegral, contourIntegral, arcIntegral, arcIntegral, intervalIntegral.integral_symm]
   ring
 
 /-- Concatenation of Reid contours. -/
-lemma reidContour_add_adjacent (z p : ℂ) (a b c : ℝ) :
+theorem reidContour_add_adjacent (z p : ℂ) (a b c : ℝ) :
     reidContour z p a b + reidContour z p b c = reidContour z p a c := by
   rw [reidContour, reidContour, reidContour, ← reidArc_add_adjacent z p a b c]
   ring
@@ -113,7 +111,7 @@ linear substitution in 9.5.1.
 -/
 
 /-- Derivative of a primitive along the line `r ↦ r c`. -/
-lemma airyInt_hasDerivAt_ray {f g : ℂ → ℂ} (hg : ∀ w, HasDerivAt g (f w) w) (c : ℂ) (r : ℝ) :
+theorem airyInt_hasDerivAt_ray {f g : ℂ → ℂ} (hg : ∀ w, HasDerivAt g (f w) w) (c : ℂ) (r : ℝ) :
     HasDerivAt (fun r : ℝ => g (r * c)) (c * f (r * c)) r := by
   have h := (hg ((r : ℂ) * c)).comp (r : ℂ) ((hasDerivAt_id (r : ℂ)).mul_const c)
   simp only [Function.comp_def, id, one_mul] at h
@@ -121,7 +119,7 @@ lemma airyInt_hasDerivAt_ray {f g : ℂ → ℂ} (hg : ∀ w, HasDerivAt g (f w)
   exact h.comp_ofReal
 
 /-- Derivative of a primitive along the circle `y ↦ R e^{iy}`. -/
-lemma airyInt_hasDerivAt_arc {f g : ℂ → ℂ} (hg : ∀ w, HasDerivAt g (f w) w) (R y : ℝ) :
+theorem airyInt_hasDerivAt_arc {f g : ℂ → ℂ} (hg : ∀ w, HasDerivAt g (f w) w) (R y : ℝ) :
     HasDerivAt (fun y : ℝ => g (R * exp (y * I))) (I * R * exp (y * I) * f (R * exp (y * I))) y := by
   have h1 : HasDerivAt (fun w : ℂ => (R : ℂ) * exp (w * I)) (R * (exp (y * I) * I)) (y : ℂ) :=
     ((hasDerivAt_id (y : ℂ)).mul_const I).cexp.const_mul (R : ℂ) |>.congr_deriv (by simp)
@@ -133,14 +131,14 @@ lemma airyInt_hasDerivAt_arc {f g : ℂ → ℂ} (hg : ∀ w, HasDerivAt g (f w)
   exact h
 
 /-- Integral of an entire function along a segment of the line `r ↦ r c`, via a primitive. -/
-lemma airyInt_integral_segment {f g : ℂ → ℂ} (hg : ∀ w, HasDerivAt g (f w) w)
+theorem airyInt_integral_segment {f g : ℂ → ℂ} (hg : ∀ w, HasDerivAt g (f w) w)
     (hf : Continuous f) (c : ℂ) (a b : ℝ) :
     ∫ r in a..b, c * f (r * c) = g (b * c) - g (a * c) :=
   intervalIntegral.integral_eq_sub_of_hasDerivAt (fun r _ => airyInt_hasDerivAt_ray hg c r)
     ((continuous_const.mul (hf.comp (continuous_ofReal.mul continuous_const))).intervalIntegrable _ _)
 
 /-- Integral of an entire function along an arc of the circle of radius `R`, via a primitive. -/
-lemma airyInt_integral_arc {f g : ℂ → ℂ} (hg : ∀ w, HasDerivAt g (f w) w)
+theorem airyInt_integral_arc {f g : ℂ → ℂ} (hg : ∀ w, HasDerivAt g (f w) w)
     (hf : Continuous f) (R α β : ℝ) :
     ∫ y in α..β, I * R * exp (y * I) * f (R * exp (y * I)) =
       g (R * exp (β * I)) - g (R * exp (α * I)) :=
@@ -150,7 +148,7 @@ lemma airyInt_integral_arc {f g : ℂ → ℂ} (hg : ∀ w, HasDerivAt g (f w) w
 
 
 /-- A ray integral from the origin splits into the segment `[0, e^{iθ}]` and the ray from radius one. -/
-lemma airyInt_rayIntegral_zero {f g : ℂ → ℂ} (hg : ∀ w, HasDerivAt g (f w) w)
+theorem airyInt_rayIntegral_zero {f g : ℂ → ℂ} (hg : ∀ w, HasDerivAt g (f w) w)
     (hf : Continuous f) (θ : ℝ)
     (hint : IntegrableOn (fun t : ℝ => exp (θ * I) * f (t * exp (θ * I))) (Ioi 0)) :
     rayIntegral f θ 0 = (g (exp (θ * I)) - g 0) + rayIntegral f θ 1 := by
@@ -161,7 +159,7 @@ lemma airyInt_rayIntegral_zero {f g : ℂ → ℂ} (hg : ∀ w, HasDerivAt g (f 
   simp
 
 /-- For an entire integrand, a contour integral is the difference of two ray integrals from the origin. -/
-lemma airyInt_contourIntegral_eq_rays {f g : ℂ → ℂ} (hg : ∀ w, HasDerivAt g (f w) w)
+theorem airyInt_contourIntegral_eq_rays {f g : ℂ → ℂ} (hg : ∀ w, HasDerivAt g (f w) w)
     (hf : Continuous f) (α β : ℝ)
     (hα : IntegrableOn (fun t : ℝ => exp (α * I) * f (t * exp (α * I))) (Ioi 0))
     (hβ : IntegrableOn (fun t : ℝ => exp (β * I) * f (t * exp (β * I))) (Ioi 0)) :
@@ -174,7 +172,7 @@ lemma airyInt_contourIntegral_eq_rays {f g : ℂ → ℂ} (hg : ∀ w, HasDerivA
   ring
 
 /-- The Airy integrand `exp(t³/3 - zt)` is integrable along a ray with `e^{3iθ} = -1`. -/
-lemma airyInt_integrableOn_ray (z : ℂ) {θ : ℝ} (hθ : exp (3 * (θ * I)) = -1) :
+theorem airyInt_integrableOn_ray (z : ℂ) {θ : ℝ} (hθ : exp (3 * (θ * I)) = -1) :
     IntegrableOn (fun t : ℝ => exp (θ * I) *
       exp (((t : ℂ) * exp (θ * I)) ^ 3 / 3 - z * ((t : ℂ) * exp (θ * I)))) (Ioi 0) := by
   have hb : (0 : ℝ) < 1 / 3 := by norm_num
@@ -202,18 +200,18 @@ lemma airyInt_integrableOn_ray (z : ℂ) {θ : ℝ} (hθ : exp (3 * (θ * I)) = 
 noncomputable def airyInt_kernel (x : ℝ) (t : ℂ) : ℂ := exp (t ^ 3 / 3 - (x : ℂ) * t)
 
 /-- The Airy integrand has an entire primitive. -/
-lemma airyInt_kernel_primitive (x : ℝ) :
+theorem airyInt_kernel_primitive (x : ℝ) :
     ∃ g : ℂ → ℂ, ∀ w, HasDerivAt g (airyInt_kernel x w) w := by
   have hd : Differentiable ℂ (airyInt_kernel x) := by unfold airyInt_kernel; fun_prop
   obtain ⟨g, hg⟩ := hd.isExactOn_univ
   exact ⟨g, fun w => hg w (mem_univ w)⟩
 
 /-- The Airy integrand is continuous. -/
-lemma airyInt_continuous_kernel (x : ℝ) : Continuous (airyInt_kernel x) := by
+theorem airyInt_continuous_kernel (x : ℝ) : Continuous (airyInt_kernel x) := by
   unfold airyInt_kernel; fun_prop
 
 /-- Complex conjugation reflects the Airy ray integrals for real `x`. -/
-lemma airyInt_conj_rayIntegral (x θ : ℝ) (r : ℝ) :
+theorem airyInt_conj_rayIntegral (x θ : ℝ) (r : ℝ) :
     (starRingEnd ℂ) (rayIntegral (airyInt_kernel x) θ r) = rayIntegral (airyInt_kernel x) (-θ) r := by
   rw [rayIntegral, rayIntegral, ← integral_conj]
   refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
@@ -223,13 +221,13 @@ lemma airyInt_conj_rayIntegral (x θ : ℝ) (r : ℝ) :
     map_ofNat]
 
 /-- `e^{3iθ} = -1` at the odd multiples of `π/3`. -/
-lemma airyInt_exp_three_mul (θ : ℝ) (k : ℤ) (h : θ = (2 * k + 1) * π / 3) :
+theorem airyInt_exp_three_mul (θ : ℝ) (k : ℤ) (h : θ = (2 * k + 1) * π / 3) :
     exp (3 * (θ * I)) = -1 := by
   rw [h, show (3 : ℂ) * ((((2 * k + 1) * π / 3 : ℝ)) * I) = (k : ℂ) * (2 * π * I) + π * I by
     push_cast; ring, exp_add, exp_int_mul_two_pi_mul_I, one_mul, exp_pi_mul_I]
 
 /-- Integrability of the Airy integrand along the rays at odd multiples of `π/3`. -/
-lemma airyInt_int_ray (x θ : ℝ) (k : ℤ) (h : θ = (2 * k + 1) * π / 3) :
+theorem airyInt_int_ray (x θ : ℝ) (k : ℤ) (h : θ = (2 * k + 1) * π / 3) :
     IntegrableOn (fun t : ℝ => exp (θ * I) * airyInt_kernel x (t * exp (θ * I))) (Ioi 0) :=
   airyInt_integrableOn_ray (x : ℂ) (airyInt_exp_three_mul θ k h)
 
@@ -237,7 +235,7 @@ lemma airyInt_int_ray (x θ : ℝ) (k : ℤ) (h : θ = (2 * k + 1) * π / 3) :
 noncomputable def airyInt_w (x : ℝ) : ℂ := rayIntegral (airyInt_kernel x) (-π / 3) 0
 
 /-- The Airy contour integrals as differences of ray integrals from the origin. -/
-lemma airyInt_contour (x α β : ℝ) (kα kβ : ℤ) (hα : α = (2 * kα + 1) * π / 3)
+theorem airyInt_contour (x α β : ℝ) (kα kβ : ℤ) (hα : α = (2 * kα + 1) * π / 3)
     (hβ : β = (2 * kβ + 1) * π / 3) :
     contourIntegral (airyInt_kernel x) α β =
       -rayIntegral (airyInt_kernel x) α 0 + rayIntegral (airyInt_kernel x) β 0 := by
@@ -246,7 +244,7 @@ lemma airyInt_contour (x α β : ℝ) (kα kβ : ℤ) (hα : α = (2 * kα + 1) 
     (airyInt_int_ray x α kα hα) (airyInt_int_ray x β kβ hβ)
 
 /-- `π Ai(x) = -Im w(x)` for real `x`, from 9.5.4. -/
-lemma airyInt_pi_airyAi (x : ℝ) : (π : ℂ) * airyAi x = ((-(airyInt_w x).im : ℝ) : ℂ) := by
+theorem airyInt_pi_airyAi (x : ℝ) : (π : ℂ) * airyAi x = ((-(airyInt_w x).im : ℝ) : ℂ) := by
   have h := airyAi_contour_integral (x : ℂ)
   have hc := airyInt_contour x (-π / 3) (π / 3) (-1) 0 (by push_cast; ring) (by push_cast; ring)
   have hk : (fun t => exp (t ^ 3 / 3 - (x : ℂ) * t)) = airyInt_kernel x := rfl
@@ -265,7 +263,7 @@ lemma airyInt_pi_airyAi (x : ℝ) : (π : ℂ) * airyAi x = ((-(airyInt_w x).im 
   ring
 
 /-- The Airy ray integral along the negative axis. -/
-lemma airyInt_ray_pi (x : ℝ) :
+theorem airyInt_ray_pi (x : ℝ) :
     rayIntegral (airyInt_kernel x) π 0 = -∫ t : ℝ in Ioi 0, exp (-(t : ℂ) ^ 3 / 3 + x * t) := by
   rw [rayIntegral, ← integral_neg]
   refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
@@ -273,7 +271,7 @@ lemma airyInt_ray_pi (x : ℝ) :
   ring_nf
 
 /-- `π Bi(x) - ∫₀^∞ e^{-t³/3+xt} dt = Re w(x)` for real `x`, from 9.5.5. -/
-lemma airyInt_pi_airyBi (x : ℝ) : (π : ℂ) * airyBi x -
+theorem airyInt_pi_airyBi (x : ℝ) : (π : ℂ) * airyBi x -
     (∫ t : ℝ in Ioi 0, exp (-(t : ℂ) ^ 3 / 3 + x * t)) = (((airyInt_w x).re : ℝ) : ℂ) := by
   have h := airyBi_contour_integral (x : ℂ)
   have hk : (fun t => exp (t ^ 3 / 3 - (x : ℂ) * t)) = airyInt_kernel x := rfl
@@ -300,22 +298,22 @@ lemma airyInt_pi_airyBi (x : ℝ) : (π : ℂ) * airyBi x -
 noncomputable def airyInt_osc (x : ℝ) (t : ℂ) : ℂ := exp (I * (t ^ 3 / 3 + (x : ℂ) * t))
 
 /-- The oscillatory integrand is continuous. -/
-lemma airyInt_continuous_osc (x : ℝ) : Continuous (airyInt_osc x) := by
+theorem airyInt_continuous_osc (x : ℝ) : Continuous (airyInt_osc x) := by
   unfold airyInt_osc; fun_prop
 
 /-- `(e^{iπ/6})³ = i`. -/
-lemma airyInt_exp_sixth_cube : exp (((π / 6 : ℝ) : ℂ) * I) ^ 3 = I := by
+theorem airyInt_exp_sixth_cube : exp (((π / 6 : ℝ) : ℂ) * I) ^ 3 = I := by
   rw [← exp_nat_mul, show ((3 : ℕ) : ℂ) * (((π / 6 : ℝ) : ℂ) * I) = π / 2 * I by push_cast; ring,
     exp_pi_div_two_mul_I]
 
 /-- `e^{-iπ/3} = -i e^{iπ/6}`. -/
-lemma airyInt_exp_neg_third : exp (((-π / 3 : ℝ) : ℂ) * I) = -I * exp (((π / 6 : ℝ) : ℂ) * I) := by
+theorem airyInt_exp_neg_third : exp (((-π / 3 : ℝ) : ℂ) * I) = -I * exp (((π / 6 : ℝ) : ℂ) * I) := by
   rw [show (((-π / 3 : ℝ) : ℂ) * I) = ((π / 6 : ℝ) : ℂ) * I - π / 2 * I by push_cast; ring,
     exp_sub, exp_pi_div_two_mul_I, div_I]
   ring
 
 /-- The rotated oscillatory integrand is `i` times the Airy ray integrand at angle `-π/3`. -/
-lemma airyInt_osc_rotate (x r : ℝ) :
+theorem airyInt_osc_rotate (x r : ℝ) :
     exp (((π / 6 : ℝ) : ℂ) * I) * airyInt_osc x (r * exp (((π / 6 : ℝ) : ℂ) * I)) =
       I * (exp (((-π / 3 : ℝ) : ℂ) * I) *
         airyInt_kernel x (r * exp (((-π / 3 : ℝ) : ℂ) * I))) := by
@@ -332,7 +330,7 @@ lemma airyInt_osc_rotate (x r : ℝ) :
   linear_combination (u * exp (-(r : ℂ) ^ 3 / 3 + I * x * r * u)) * I_sq
 
 /-- `∫₀^b e^{-ay} dy ≤ 1/a`. -/
-lemma airyInt_integral_exp_neg_le {a : ℝ} (ha : 0 < a) (b : ℝ) :
+theorem airyInt_integral_exp_neg_le {a : ℝ} (ha : 0 < a) (b : ℝ) :
     ∫ y in (0 : ℝ)..b, Real.exp (-(a * y)) ≤ 1 / a := by
   have hd : ∀ y ∈ uIcc 0 b, HasDerivAt (fun y => -Real.exp (-(a * y)) / a) (Real.exp (-(a * y))) y := by
     intro y _
@@ -348,7 +346,7 @@ lemma airyInt_integral_exp_neg_le {a : ℝ} (ha : 0 < a) (b : ℝ) :
   linarith
 
 /-- The norm of the oscillatory integrand on the arc. -/
-lemma airyInt_norm_osc_arc (x R y : ℝ) :
+theorem airyInt_norm_osc_arc (x R y : ℝ) :
     ‖I * R * exp (y * I) * airyInt_osc x (R * exp (y * I))‖ =
       |R| * Real.exp (-(R ^ 3 * Real.sin (3 * y) / 3 + x * R * Real.sin y)) := by
   rw [norm_mul, norm_mul, norm_mul, norm_I, one_mul, norm_real, Real.norm_eq_abs,
@@ -362,7 +360,7 @@ lemma airyInt_norm_osc_arc (x R y : ℝ) :
   ring
 
 /-- Jordan-type bound for the arc `0 ≤ arg t ≤ π/6`, `|t| = R`. -/
-lemma airyInt_arc_bound (x : ℝ) {R : ℝ} (hR : 1 ≤ R) (hRx : 6 * |x| ≤ R ^ 2) :
+theorem airyInt_arc_bound (x : ℝ) {R : ℝ} (hR : 1 ≤ R) (hRx : 6 * |x| ≤ R ^ 2) :
     ‖∫ y in (0 : ℝ)..(π / 6), I * R * exp (y * I) * airyInt_osc x (R * exp (y * I))‖ ≤
       π / R ^ 2 := by
   have hR0 : 0 < R := by linarith
@@ -405,7 +403,7 @@ lemma airyInt_arc_bound (x : ℝ) {R : ℝ} (hR : 1 ≤ R) (hRx : 6 * |x| ≤ R 
     _ = π / R ^ 2 := by rw [ha]; field_simp
 
 /-- `∫₀^R e^{i(t³/3+xt)} dt → i w(x)`. -/
-lemma airyInt_tendsto_osc (x : ℝ) :
+theorem airyInt_tendsto_osc (x : ℝ) :
     Tendsto (fun R : ℝ => ∫ t in (0 : ℝ)..R, airyInt_osc x t) atTop (𝓝 (I * airyInt_w x)) := by
   obtain ⟨G, hG⟩ : ∃ G : ℂ → ℂ, ∀ w, HasDerivAt G (airyInt_osc x w) w := by
     have hd : Differentiable ℂ (airyInt_osc x) := by unfold airyInt_osc; fun_prop
@@ -441,12 +439,12 @@ lemma airyInt_tendsto_osc (x : ℝ) :
 
 
 /-- The oscillatory integrand on the real axis. -/
-lemma airyInt_osc_ofReal (x t : ℝ) :
+theorem airyInt_osc_ofReal (x t : ℝ) :
     airyInt_osc x t = exp (((t ^ 3 / 3 + x * t : ℝ) : ℂ) * I) := by
   rw [airyInt_osc]; congr 1; push_cast; ring
 
 /-- The cosine integral is the real part of the oscillatory integral. -/
-lemma airyInt_integral_cos (x R : ℝ) :
+theorem airyInt_integral_cos (x R : ℝ) :
     ∫ t in (0 : ℝ)..R, (Real.cos (t ^ 3 / 3 + x * t) : ℂ) =
       (((∫ t in (0 : ℝ)..R, airyInt_osc x t).re : ℝ) : ℂ) := by
   have h := intervalIntegral.intervalIntegral_re (μ := volume) (a := 0) (b := R)
@@ -459,7 +457,7 @@ lemma airyInt_integral_cos (x R : ℝ) :
   simp only [airyInt_osc_ofReal, exp_ofReal_mul_I_re]
 
 /-- The sine integral is the imaginary part of the oscillatory integral. -/
-lemma airyInt_integral_sin (x R : ℝ) :
+theorem airyInt_integral_sin (x R : ℝ) :
     ∫ t in (0 : ℝ)..R, (Real.sin (t ^ 3 / 3 + x * t) : ℂ) =
       (((∫ t in (0 : ℝ)..R, airyInt_osc x t).im : ℝ) : ℂ) := by
   have h := intervalIntegral.intervalIntegral_im (μ := volume) (a := 0) (b := R)
@@ -543,7 +541,7 @@ For `x > 0` the line `Im v = 0` of 9.5.1 is shifted to `Im v = √x` (Cauchy's t
 rectangle, through a primitive); the result extends to the slit plane by the identity theorem.
 -/
 /-- Integral of an entire function along a line `r ↦ p + r c`, via a primitive. -/
-lemma airyInt_integral_line {f g : ℂ → ℂ} (hg : ∀ w, HasDerivAt g (f w) w)
+theorem airyInt_integral_line {f g : ℂ → ℂ} (hg : ∀ w, HasDerivAt g (f w) w)
     (hf : Continuous f) (p c : ℂ) (a b : ℝ) :
     ∫ r in a..b, c * f (p + r * c) = g (p + b * c) - g (p + a * c) := by
   have hd : ∀ r : ℝ, HasDerivAt (fun r : ℝ => g (p + r * c)) (c * f (p + r * c)) r := by
@@ -557,7 +555,7 @@ lemma airyInt_integral_line {f g : ℂ → ℂ} (hg : ∀ w, HasDerivAt g (f w) 
     (Continuous.intervalIntegrable (u := fun r : ℝ => c * f (p + r * c)) (by fun_prop) _ _)
 
 /-- Norm of the oscillatory integrand on a vertical segment. -/
-lemma airyInt_norm_osc_vert (x s b : ℝ) :
+theorem airyInt_norm_osc_vert (x s b : ℝ) :
     ‖I * airyInt_osc x (s + b * I)‖ = Real.exp (-(s ^ 2 * b) + b ^ 3 / 3 - x * b) := by
   rw [norm_mul, norm_I, one_mul, airyInt_osc, norm_exp]
   congr 1
@@ -566,7 +564,7 @@ lemma airyInt_norm_osc_vert (x s b : ℝ) :
   ring
 
 /-- Bound for the vertical sides of the rectangle `[-R, R] × [0, √x]`. -/
-lemma airyInt_vert_bound {x c : ℝ} (hx : 0 ≤ x) (hc : 0 ≤ c) {s : ℝ} (hs : 1 ≤ s ^ 2) :
+theorem airyInt_vert_bound {x c : ℝ} (hx : 0 ≤ x) (hc : 0 ≤ c) {s : ℝ} (hs : 1 ≤ s ^ 2) :
     ‖∫ b in (0 : ℝ)..c, I * airyInt_osc x (s + b * I)‖ ≤ Real.exp (c ^ 3 / 3) / s ^ 2 := by
   have hs0 : 0 < s ^ 2 := by linarith
   calc _ ≤ ∫ b in (0 : ℝ)..c, Real.exp (c ^ 3 / 3) * Real.exp (-(s ^ 2 * b)) := by
@@ -584,13 +582,13 @@ lemma airyInt_vert_bound {x c : ℝ} (hx : 0 ≤ x) (hc : 0 ≤ c) {s : ℝ} (hs
     _ = _ := by ring
 
 /-- `osc(a) + osc(-a) = 2 cos(a³/3 + xa)` on the real axis. -/
-lemma airyInt_osc_add_neg (x a : ℝ) :
+theorem airyInt_osc_add_neg (x a : ℝ) :
     airyInt_osc x a + airyInt_osc x (-a : ℝ) = 2 * (Real.cos (a ^ 3 / 3 + x * a) : ℂ) := by
   rw [airyInt_osc_ofReal, airyInt_osc_ofReal, ofReal_cos, Complex.cos]
   push_cast; ring_nf
 
 /-- The oscillatory integrand on the line `Im v = √x`. -/
-lemma airyInt_osc_shift {x : ℝ} (hx : 0 ≤ x) (a : ℝ) :
+theorem airyInt_osc_shift {x : ℝ} (hx : 0 ≤ x) (a : ℝ) :
     airyInt_osc x (a + Real.sqrt x * I) = exp (-(2 / 3 * (Real.sqrt x : ℂ) ^ 3)) *
       (exp (-(Real.sqrt x : ℂ) * (a : ℂ) ^ 2) * exp ((a : ℂ) ^ 3 / 3 * I)) := by
   have hc : ((Real.sqrt x : ℝ) : ℂ) ^ 2 = x := by rw [← ofReal_pow, Real.sq_sqrt hx]
@@ -605,7 +603,7 @@ lemma airyInt_osc_shift {x : ℝ} (hx : 0 ≤ x) (a : ℝ) :
 
 
 /-- The Gaussian–cosine integrand is dominated by the Gaussian. -/
-lemma airyInt_norm_gauss_cos_le (s : ℂ) (t : ℝ) :
+theorem airyInt_norm_gauss_cos_le (s : ℂ) (t : ℝ) :
     ‖exp (-s * (t : ℂ) ^ 2) * cos ((t : ℂ) ^ 3 / 3)‖ ≤ Real.exp (-s.re * t ^ 2) := by
   rw [norm_mul, norm_exp, show (t : ℂ) ^ 3 / 3 = ((t ^ 3 / 3 : ℝ) : ℂ) by push_cast; ring,
     ← ofReal_cos, norm_real, Real.norm_eq_abs]
@@ -617,13 +615,13 @@ lemma airyInt_norm_gauss_cos_le (s : ℂ) (t : ℝ) :
     _ = _ := mul_one _
 
 /-- Integrability of the Gaussian–cosine integrand for `Re s > 0`. -/
-lemma airyInt_integrable_gauss_cos {s : ℂ} (hs : 0 < s.re) :
+theorem airyInt_integrable_gauss_cos {s : ℂ} (hs : 0 < s.re) :
     Integrable (fun t : ℝ => exp (-s * (t : ℂ) ^ 2) * cos ((t : ℂ) ^ 3 / 3)) :=
   (integrable_exp_neg_mul_sq hs).mono' (Continuous.aestronglyMeasurable (by fun_prop))
     (Eventually.of_forall fun t => airyInt_norm_gauss_cos_le s t)
 
 /-- Symmetrization of an integral over `[-R, R]`. -/
-lemma airyInt_integral_symm (f : ℝ → ℂ) (hf : Continuous f) (R : ℝ) :
+theorem airyInt_integral_symm (f : ℝ → ℂ) (hf : Continuous f) (R : ℝ) :
     ∫ a in (-R)..R, f a = ∫ a in (0 : ℝ)..R, (f a + f (-a)) := by
   rw [intervalIntegral.integral_add (f := f) (g := fun a => f (-a)) (hf.intervalIntegrable _ _)
     ((hf.comp continuous_neg).intervalIntegrable _ _), intervalIntegral.integral_comp_neg, neg_zero,
@@ -631,7 +629,7 @@ lemma airyInt_integral_symm (f : ℝ → ℂ) (hf : Continuous f) (R : ℝ) :
       (hf.intervalIntegrable _ _)]
 
 /-- Real case of 9.5.7: `Ai(x) = e^{-ζ}/π ∫₀^∞ e^{-√x t²} cos(t³/3) dt` for `x > 0`. -/
-lemma airyInt_gauss_real {x : ℝ} (hx : 0 < x) :
+theorem airyInt_gauss_real {x : ℝ} (hx : 0 < x) :
     airyAi x = exp (-(2 / 3 * (Real.sqrt x : ℂ) ^ 3)) / π *
       ∫ t : ℝ in Ioi 0, exp (-(Real.sqrt x : ℂ) * (t : ℂ) ^ 2) * cos ((t : ℂ) ^ 3 / 3) := by
   set c := Real.sqrt x with hcdef
@@ -709,7 +707,7 @@ lemma airyInt_gauss_real {x : ℝ} (hx : 0 < x) :
 
 /-- Identity theorem from the positive reals: two functions holomorphic on an open preconnected
 set containing `1` that agree at its positive real points agree on the whole set. -/
-lemma airyInt_eqOn_of_pos_real {U : Set ℂ} (hU : IsOpen U) (hUc : IsPreconnected U)
+theorem airyInt_eqOn_of_pos_real {U : Set ℂ} (hU : IsOpen U) (hUc : IsPreconnected U)
     (h1 : (1 : ℂ) ∈ U) {f g : ℂ → ℂ} (hf : DifferentiableOn ℂ f U) (hg : DifferentiableOn ℂ g U)
     (heq : ∀ x : ℝ, 0 < x → (x : ℂ) ∈ U → f x = g x) : EqOn f g U := by
   refine (hf.analyticOnNhd hU).eqOn_of_preconnected_of_frequently_eq (hg.analyticOnNhd hU) hUc h1 ?_
@@ -729,7 +727,7 @@ lemma airyInt_eqOn_of_pos_real {U : Set ℂ} (hU : IsOpen U) (hUc : IsPreconnect
   exact heq r hr hrU
 
 /-- `Re z^{1/2} > 0` on the slit plane. -/
-lemma airyInt_re_sqrt_pos {z : ℂ} (hz : z ∈ slitPlane) : 0 < (z ^ (1 / 2 : ℂ)).re := by
+theorem airyInt_re_sqrt_pos {z : ℂ} (hz : z ∈ slitPlane) : 0 < (z ^ (1 / 2 : ℂ)).re := by
   have hz0 := slitPlane_ne_zero hz
   rw [cpow_def_of_ne_zero hz0, exp_re]
   refine mul_pos (Real.exp_pos _) (Real.cos_pos_of_mem_Ioo ⟨?_, ?_⟩)
@@ -741,11 +739,11 @@ lemma airyInt_re_sqrt_pos {z : ℂ} (hz : z ∈ slitPlane) : 0 < (z ^ (1 / 2 : �
 
 
 /-- `x^{1/2}` for positive real `x`. -/
-lemma airyInt_ofReal_cpow_half {x : ℝ} (hx : 0 ≤ x) : (x : ℂ) ^ (1 / 2 : ℂ) = (Real.sqrt x : ℂ) := by
+theorem airyInt_ofReal_cpow_half {x : ℝ} (hx : 0 ≤ x) : (x : ℂ) ^ (1 / 2 : ℂ) = (Real.sqrt x : ℂ) := by
   rw [Real.sqrt_eq_rpow, ofReal_cpow hx]; push_cast; ring_nf
 
 /-- `ζ(x) = (2/3) (√x)³` for positive real `x`. -/
-lemma airyInt_zeta_ofReal {x : ℝ} (hx : 0 ≤ x) :
+theorem airyInt_zeta_ofReal {x : ℝ} (hx : 0 ≤ x) :
     airyZetaComplex x = 2 / 3 * (Real.sqrt x : ℂ) ^ 3 := by
   rw [airyZetaComplex, show (3 / 2 : ℂ) = ((3 / 2 : ℝ) : ℂ) by push_cast; ring, ← ofReal_cpow hx,
     rpow_three_halves_eq hx]
@@ -761,7 +759,7 @@ section CubicForm
 
 open DLMF.Bessel
 /-- Real case of 9.5.6, via Schläfli's integral for `K_{1/3}`. -/
-lemma airyInt_cubic_real {x : ℝ} (hx : 0 < x) :
+theorem airyInt_cubic_real {x : ℝ} (hx : 0 < x) :
     airyAi x = Real.sqrt 3 / (2 * π) *
       ∫ t : ℝ in Ioi 0, exp (-(t : ℂ) ^ 3 / 3 - (x : ℂ) ^ 3 / (3 * (t : ℂ) ^ 3)) := by
   set X := airyZeta x with hXdef
@@ -835,18 +833,18 @@ lemma airyInt_cubic_real {x : ℝ} (hx : 0 < x) :
 noncomputable def airyInt_sector (α : ℝ) : Set ℂ := slitPlane ∩ (fun z : ℂ => |arg z|) ⁻¹' Iio α
 
 /-- The sector is open. -/
-lemma airyInt_isOpen_sector (α : ℝ) : IsOpen (airyInt_sector α) :=
+theorem airyInt_isOpen_sector (α : ℝ) : IsOpen (airyInt_sector α) :=
   ContinuousOn.isOpen_inter_preimage (fun _ hz => (continuousAt_arg hz).abs.continuousWithinAt)
     isOpen_slitPlane isOpen_Iio
 
 /-- Membership in the sector. -/
-lemma airyInt_mem_sector {α : ℝ} (hα : α ≤ π) {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < α) :
+theorem airyInt_mem_sector {α : ℝ} (hα : α ≤ π) {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < α) :
     z ∈ airyInt_sector α := by
   refine ⟨mem_slitPlane_iff_arg.mpr ⟨fun h => ?_, hz0⟩, hz⟩
   rw [h, abs_of_pos Real.pi_pos] at hz; linarith
 
 /-- The sector is preconnected (the image of a strip under `exp`). -/
-lemma airyInt_isPreconnected_sector {α : ℝ} (hα : α ≤ π) :
+theorem airyInt_isPreconnected_sector {α : ℝ} (hα : α ≤ π) :
     IsPreconnected (airyInt_sector α) := by
   have hS : IsPreconnected (im ⁻¹' Ioo (-α) α) :=
     ((convex_Ioo _ _).linear_preimage imLm).isPreconnected
@@ -867,7 +865,7 @@ lemma airyInt_isPreconnected_sector {α : ℝ} (hα : α ≤ π) :
   exact hS.image _ continuous_exp.continuousOn
 
 /-- `Re z³ ≥ 0` for `|arg z| ≤ π/6`. -/
-lemma airyInt_re_cube_nonneg {z : ℂ} (hz : |arg z| ≤ π / 6) : 0 ≤ (z ^ 3).re := by
+theorem airyInt_re_cube_nonneg {z : ℂ} (hz : |arg z| ≤ π / 6) : 0 ≤ (z ^ 3).re := by
   have h : z ^ 3 = ((‖z‖ ^ 3 : ℝ) : ℂ) * exp (((3 * arg z : ℝ) : ℂ) * I) := by
     conv_lhs => rw [← norm_mul_exp_arg_mul_I z]
     rw [mul_pow, ← exp_nat_mul]; push_cast; ring_nf
@@ -876,7 +874,7 @@ lemma airyInt_re_cube_nonneg {z : ℂ} (hz : |arg z| ≤ π / 6) : 0 ≤ (z ^ 3)
     linarith [abs_le.mp hz]
 
 /-- The cubic integrand of 9.5.6 is dominated by `e^{-t³/3}` when `Re w³ ≥ 0`. -/
-lemma airyInt_norm_cubic_le {w : ℂ} (hw : 0 ≤ (w ^ 3).re) {t : ℝ} (ht : 0 < t) :
+theorem airyInt_norm_cubic_le {w : ℂ} (hw : 0 ≤ (w ^ 3).re) {t : ℝ} (ht : 0 < t) :
     ‖exp (-(t : ℂ) ^ 3 / 3 - w ^ 3 / (3 * (t : ℂ) ^ 3))‖ ≤ Real.exp (-(1 / 3) * t ^ 3) := by
   rw [norm_exp]
   apply Real.exp_le_exp.mpr
@@ -890,14 +888,14 @@ lemma airyInt_norm_cubic_le {w : ℂ} (hw : 0 ≤ (w ^ 3).re) {t : ℝ} (ht : 0 
   linarith
 
 /-- The majorant `e^{-t³/3}` is integrable on `(0, ∞)`. -/
-lemma airyInt_integrableOn_exp_neg_cube :
+theorem airyInt_integrableOn_exp_neg_cube :
     IntegrableOn (fun t : ℝ => Real.exp (-(1 / 3) * t ^ 3)) (Ioi 0) := by
   have := scorerAsym_integrableOn_pow_exp 0 0 (b := 1 / 3) (by norm_num)
   refine this.congr_fun (fun t _ => ?_) measurableSet_Ioi
   simp
 
 /-- The case `z = 0` of 9.5.6, by continuity from the positive axis. -/
-lemma airyInt_cubic_zero :
+theorem airyInt_cubic_zero :
     airyAi 0 = Real.sqrt 3 / (2 * π) *
       ∫ t : ℝ in Ioi 0, exp (-(t : ℂ) ^ 3 / 3 - (0 : ℂ) ^ 3 / (3 * (t : ℂ) ^ 3)) := by
   set Φ : ℂ → ℝ → ℂ := fun z t => exp (-(t : ℂ) ^ 3 / 3 - z ^ 3 / (3 * (t : ℂ) ^ 3)) with hΦ
@@ -1004,13 +1002,13 @@ theorem airyAi_gaussian_cos_integral {z : ℂ} (hz : z ∈ slitPlane) :
   exact h
 
 /-- `log (r e^{iθ}) = log r + iθ` for `r > 0`, `|θ| < π`. -/
-lemma airyInt_log_ofReal_mul_exp {r : ℝ} (hr : 0 < r) {θ : ℝ} (hθ : |θ| < π) :
+theorem airyInt_log_ofReal_mul_exp {r : ℝ} (hr : 0 < r) {θ : ℝ} (hθ : |θ| < π) :
     log ((r : ℂ) * exp (θ * I)) = Real.log r + θ * I := by
   rw [log_ofReal_mul hr (exp_ne_zero _), log_exp (by simp; linarith [neg_abs_le θ])
     (by simp; linarith [le_abs_self θ])]
 
 /-- The pointwise substitution behind 9.5.8. -/
-lemma airyInt_laplace_pointwise {z : ℂ} (hz0 : z ≠ 0) {θ : ℝ} (hθ : |θ| < π)
+theorem airyInt_laplace_pointwise {z : ℂ} (hz0 : z ≠ 0) {θ : ℝ} (hθ : |θ| < π)
     (hΛ : log 2 + airyLogZeta z = ((log 2 + airyLogZeta z).re : ℂ) - θ * I) {r : ℝ} (hr : 0 < r) :
     Complex.exp (-(((Real.exp (log 2 + airyLogZeta z).re : ℝ) : ℂ) * r)) •
         airyRot_kernel (5 / 6) (-1 / 6) ((r : ℂ) * exp (θ * I)) =

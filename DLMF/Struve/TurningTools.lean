@@ -29,7 +29,7 @@ open scoped Real Topology Interval
 namespace DLMF.Struve
 
 /-- `|x - sin x - x³/6| ≤ 3 x⁴` for `x ≥ 0`. -/
-lemma struveTP_sub_sin_bound {x : ℝ} (hx : 0 ≤ x) : |x - Real.sin x - x ^ 3 / 6| ≤ 3 * x ^ 4 := by
+theorem struveTP_sub_sin_bound {x : ℝ} (hx : 0 ≤ x) : |x - Real.sin x - x ^ 3 / 6| ≤ 3 * x ^ 4 := by
   rcases le_or_gt x 1 with h1 | h1
   · have h := Real.sin_bound (x := x) (by rw [abs_of_nonneg hx]; exact h1)
     rw [abs_of_nonneg hx] at h
@@ -45,7 +45,7 @@ lemma struveTP_sub_sin_bound {x : ℝ} (hx : 0 ≤ x) : |x - Real.sin x - x ^ 3 
     rw [abs_le]; constructor <;> nlinarith [pow_nonneg hx 3]
 
 /-- `(2/π²) x² ≤ 1 - cos x` on `[0, π]`. -/
-lemma struveTP_one_sub_cos_ge {x : ℝ} (hx : 0 ≤ x) (hxπ : x ≤ π) :
+theorem struveTP_one_sub_cos_ge {x : ℝ} (hx : 0 ≤ x) (hxπ : x ≤ π) :
     2 / π ^ 2 * x ^ 2 ≤ 1 - Real.cos x := by
   have hc : Real.cos x = 1 - 2 * Real.sin (x / 2) ^ 2 := by
     rw [← Real.cos_two_mul_eq_one_sub]; ring_nf
@@ -61,7 +61,7 @@ lemma struveTP_one_sub_cos_ge {x : ℝ} (hx : 0 ≤ x) (hxπ : x ≤ π) :
 
 /-- The Anger–Weber turning-point integral:
 `ν^{1/3} ∫₀^π e^{iν(θ - sin θ)} dθ → 6^{1/3} Γ(4/3) e^{iπ/6}`. -/
-lemma struveTP_tendsto_integral :
+theorem struveTP_tendsto_integral :
     Tendsto (fun ν : ℝ => ((ν ^ (1 / 3 : ℝ) : ℝ) : ℂ) *
         ∫ x in (0 : ℝ)..π, exp (((ν * (x - Real.sin x) : ℝ) : ℂ) * I)) atTop
       (𝓝 ((((1 / 6 : ℝ) ^ (-(1 / 3 : ℝ)) : ℝ) : ℂ) *
@@ -79,7 +79,7 @@ lemma struveTP_tendsto_integral :
     (fun x hx => struveTP_one_sub_cos_ge hx.1 hx.2) hK
 
 /-- `Γ(4/3) Γ(2/3) = 2π/(3√3)`. -/
-lemma struveTP_Gamma_four_thirds_mul :
+theorem struveTP_Gamma_four_thirds_mul :
     Real.Gamma (4 / 3) * Real.Gamma (2 / 3) = 2 * π / (3 * Real.sqrt 3) := by
   have h1 : Real.Gamma (4 / 3) = 1 / 3 * Real.Gamma (1 / 3) := by
     rw [show (4 / 3 : ℝ) = 1 / 3 + 1 by norm_num, Real.Gamma_add_one (by norm_num)]
@@ -91,13 +91,13 @@ lemma struveTP_Gamma_four_thirds_mul :
   field_simp
 
 /-- `(1/6)^{-1/3} = 2^{1/3} 3^{1/3}`. -/
-lemma struveTP_sixth_rpow : (1 / 6 : ℝ) ^ (-(1 / 3 : ℝ)) = 2 ^ (1 / 3 : ℝ) * 3 ^ (1 / 3 : ℝ) := by
+theorem struveTP_sixth_rpow : (1 / 6 : ℝ) ^ (-(1 / 3 : ℝ)) = 2 ^ (1 / 3 : ℝ) * 3 ^ (1 / 3 : ℝ) := by
   rw [Real.rpow_neg (by norm_num), one_div, Real.inv_rpow (by norm_num), inv_inv,
     show (6 : ℝ) = 2 * 3 by norm_num, Real.mul_rpow (by norm_num) (by norm_num)]
 
 /-- DLMF 11.10.1 at `z = ν` for real `ν`: `𝐉_ν(ν)` as the real part of
 `π⁻¹ ∫₀^π e^{iν(θ - sin θ)} dθ`. -/
-lemma struveTP_angerJ_eq (ν : ℝ) :
+theorem struveTP_angerJ_eq (ν : ℝ) :
     angerJ ν ν = (((1 / π) * (∫ x in (0 : ℝ)..π,
       exp (((ν * (x - Real.sin x) : ℝ) : ℂ) * I)).re : ℝ) : ℂ) := by
   have hint : IntervalIntegrable (fun x : ℝ => exp (((ν * (x - Real.sin x) : ℝ) : ℂ) * I))
@@ -113,7 +113,7 @@ lemma struveTP_angerJ_eq (ν : ℝ) :
 
 /-- DLMF 11.10.2 at `z = ν` for real `ν`: `𝐄_ν(ν)` as the imaginary part of
 `π⁻¹ ∫₀^π e^{iν(θ - sin θ)} dθ`. -/
-lemma struveTP_weberE_eq (ν : ℝ) :
+theorem struveTP_weberE_eq (ν : ℝ) :
     weberE ν ν = (((1 / π) * (∫ x in (0 : ℝ)..π,
       exp (((ν * (x - Real.sin x) : ℝ) : ℂ) * I)).im : ℝ) : ℂ) := by
   have hint : IntervalIntegrable (fun x : ℝ => exp (((ν * (x - Real.sin x) : ℝ) : ℂ) * I))
@@ -129,7 +129,7 @@ lemma struveTP_weberE_eq (ν : ℝ) :
 
 /-- Equivalence from a real limit: if `ν^{1/3} f(ν) → K` (real, `K ≠ 0`) then
 `f(ν) ~ K ν^{-1/3}`, stated for the complex casts used in DLMF 11.11.18–19. -/
-lemma struveTP_isEquivalent_of_tendsto {f : ℝ → ℝ} {K : ℝ} (hK : K ≠ 0)
+theorem struveTP_isEquivalent_of_tendsto {f : ℝ → ℝ} {K : ℝ} (hK : K ≠ 0)
     (h : Tendsto (fun ν : ℝ => ν ^ (1 / 3 : ℝ) * f ν) atTop (𝓝 K)) :
     (fun ν : ℝ => (f ν : ℂ)) ~[atTop] (fun ν : ℝ => ((K / ν ^ (1 / 3 : ℝ) : ℝ) : ℂ)) := by
   refine isEquivalent_of_tendsto_one ?_
@@ -145,7 +145,7 @@ lemma struveTP_isEquivalent_of_tendsto {f : ℝ → ℝ} {K : ℝ} (hK : K ≠ 0
   field_simp
 
 /-- `π⁻¹ 6^{1/3} Γ(4/3) cos(π/6) = 2^{1/3}/(3^{2/3} Γ(2/3))`. -/
-lemma struveTP_const_J :
+theorem struveTP_const_J :
     1 / π * ((1 / 6 : ℝ) ^ (-(1 / 3 : ℝ)) * Real.Gamma (4 / 3) * Real.cos (π / 6)) =
       2 ^ (1 / 3 : ℝ) / (3 ^ (2 / 3 : ℝ) * Real.Gamma (2 / 3)) := by
   have hG := struveTP_Gamma_four_thirds_mul
@@ -162,7 +162,7 @@ lemma struveTP_const_J :
   linear_combination h3
 
 /-- `π⁻¹ 6^{1/3} Γ(4/3) sin(π/6) = 2^{1/3}/(3^{7/6} Γ(2/3))`. -/
-lemma struveTP_const_E :
+theorem struveTP_const_E :
     1 / π * ((1 / 6 : ℝ) ^ (-(1 / 3 : ℝ)) * Real.Gamma (4 / 3) * Real.sin (π / 6)) =
       2 ^ (1 / 3 : ℝ) / (3 ^ (7 / 6 : ℝ) * Real.Gamma (2 / 3)) := by
   have hG := struveTP_Gamma_four_thirds_mul
@@ -180,7 +180,7 @@ lemma struveTP_const_E :
   linear_combination h3
 
 /-- The DLMF right-hand side `2^{1/3}/(3^a Γ(2/3) ν^{1/3})` as a real cast for `ν > 0`. -/
-lemma struveTP_rhs_eq (a : ℝ) {ν : ℝ} (hν : 0 < ν) :
+theorem struveTP_rhs_eq (a : ℝ) {ν : ℝ} (hν : 0 < ν) :
     (2 : ℂ) ^ (1 / 3 : ℂ) / ((3 : ℂ) ^ (a : ℂ) * Gamma (2 / 3) * (ν : ℂ) ^ (1 / 3 : ℂ)) =
       (((2 ^ (1 / 3 : ℝ) / (3 ^ a * Real.Gamma (2 / 3))) / ν ^ (1 / 3 : ℝ) : ℝ) : ℂ) := by
   have e2 : (2 : ℂ) ^ (1 / 3 : ℂ) = ((2 ^ (1 / 3 : ℝ) : ℝ) : ℂ) := by

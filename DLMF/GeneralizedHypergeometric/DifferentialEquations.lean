@@ -8,7 +8,6 @@ module
 public import DLMF.GeneralizedHypergeometric.AnalyticProperties
 public import DLMF.GeneralizedHypergeometric.Derivatives
 public import DLMFMathlib.Analysis.ODE.Singularities
-public import Mathlib.Combinatorics.Enumerative.Stirling
 
 /-!
 # Differential equations and confluence: DLMF §16.8

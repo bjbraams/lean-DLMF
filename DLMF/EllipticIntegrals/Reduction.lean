@@ -60,7 +60,7 @@ theorem integral_inv_sqrt_one_sub_cube {x : ℝ} (h1 : 1 - Real.sqrt 3 ≤ x) (h
 
 /-- The substitution `φ = 2 arctan t` of (19.14.3):
 `(1 - ½ sin²(2 arctan t))^{-1/2} · 2/(1 + t²) = 2/√(1 + t⁴)`. -/
-theorem ei19b_quartic_integrand (t : ℝ) :
+lemma ei19b_quartic_integrand (t : ℝ) :
     (1 - 1 / 2 * Real.sin (2 * Real.arctan t) ^ 2) ^ (-(1 / 2) : ℝ) * (2 * (1 / (1 + t ^ 2))) =
       2 * (Real.sqrt (1 + t ^ 4))⁻¹ := by
   have h1 : 0 < 1 + t ^ 2 := by positivity
@@ -79,7 +79,7 @@ theorem ei19b_quartic_integrand (t : ℝ) :
   field_simp
 
 /-- `∫₀^x dt/√(1 + t⁴) = ½ F(2 arctan x | ½)` (real form of 19.14.3, any real `x`). -/
-theorem ei19b_integral_quartic_nonneg (x : ℝ) :
+lemma ei19b_integral_quartic_nonneg (x : ℝ) :
     ∫ t in (0 : ℝ)..x, (Real.sqrt (1 + t ^ 4))⁻¹ =
       DLMF.Elliptic.Real.incEllIntFm (2 * Real.arctan x) (1 / 2) / 2 := by
   have hG : Continuous fun φ : ℝ => (1 - 1 / 2 * Real.sin φ ^ 2) ^ (-(1 / 2) : ℝ) :=
@@ -162,19 +162,19 @@ theorem integral_inv_sqrt_two_quadratics {a₁ b₁ a₂ b₂ x y α β γ : ℝ
   sorry
 
 /-- A function continuous on `[y, x]` and positive on `(y, x)` is nonnegative at `x`. -/
-theorem ei19b_nonneg_right {f : ℝ → ℝ} (hf : Continuous f) {x y : ℝ} (hyx : y < x)
+lemma ei19b_nonneg_right {f : ℝ → ℝ} (hf : Continuous f) {x y : ℝ} (hyx : y < x)
     (hpos : ∀ t ∈ Ioo y x, 0 < f t) : 0 ≤ f x :=
   ge_of_tendsto (hf.continuousAt.tendsto.mono_left nhdsWithin_le_nhds)
     (Filter.eventually_of_mem (Ioo_mem_nhdsLT hyx) fun t ht => (hpos t ht).le)
 
 /-- A function continuous on `[y, x]` and positive on `(y, x)` is nonnegative at `y`. -/
-theorem ei19b_nonneg_left {f : ℝ → ℝ} (hf : Continuous f) {x y : ℝ} (hyx : y < x)
+lemma ei19b_nonneg_left {f : ℝ → ℝ} (hf : Continuous f) {x y : ℝ} (hyx : y < x)
     (hpos : ∀ t ∈ Ioo y x, 0 < f t) : 0 ≤ f y :=
   ge_of_tendsto (hf.continuousAt.tendsto.mono_left nhdsWithin_le_nhds)
     (Filter.eventually_of_mem (Ioo_mem_nhdsGT hyx) fun t ht => (hpos t ht).le)
 
 /-- The product of the quadratics is nonnegative at both endpoints. -/
-theorem ei19b_prod_nonneg {a₁ b₁ a₂ b₂ x y α β γ : ℝ} (h : ei19b_RedHyp a₁ b₁ a₂ b₂ x y α β γ) :
+lemma ei19b_prod_nonneg {a₁ b₁ a₂ b₂ x y α β γ : ℝ} (h : ei19b_RedHyp a₁ b₁ a₂ b₂ x y α β γ) :
     0 ≤ (a₁ + b₁ * x ^ 2) * (a₂ + b₂ * x ^ 2) ∧ 0 ≤ (a₁ + b₁ * y ^ 2) * (a₂ + b₂ * y ^ 2) := by
   have hc : Continuous fun t : ℝ => (a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2) := by fun_prop
   have hp : ∀ t ∈ Ioo y x, 0 < (a₁ + b₁ * t ^ 2) * (a₂ + b₂ * t ^ 2) := fun t ht =>

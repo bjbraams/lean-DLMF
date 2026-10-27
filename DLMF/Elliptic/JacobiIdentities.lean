@@ -72,7 +72,7 @@ theorem Real.jacobiDnm_deriv_sq {m : ℝ} (hm : m < 1) (u : ℝ) :
     (Real.jacobiDnm u m ^ 2 - m * Real.jacobiSnm u m ^ 2 + m - 1) * h2
 
 /-- The denominator of the addition formulas is positive. -/
-lemma Real.one_sub_mul_jacobiSnm_sq_mul_sq_pos {m : ℝ} (hm : m < 1) (u v : ℝ) :
+theorem Real.one_sub_mul_jacobiSnm_sq_mul_sq_pos {m : ℝ} (hm : m < 1) (u v : ℝ) :
     0 < 1 - m * Real.jacobiSnm u m ^ 2 * Real.jacobiSnm v m ^ 2 := by
   have h1 : Real.jacobiSnm u m ^ 2 ≤ 1 := by
     have := Real.jacobiSnm_sq_add_jacobiCnm_sq u m; nlinarith [sq_nonneg (Real.jacobiCnm u m)]
@@ -86,7 +86,7 @@ lemma Real.one_sub_mul_jacobiSnm_sq_mul_sq_pos {m : ℝ} (hm : m < 1) (u v : ℝ
   · nlinarith
 
 /-- Derivatives of `u ↦ sn(w-u)`, `cn(w-u)`, `dn(w-u)`. -/
-lemma hasDerivAt_jacobi_sub {m : ℝ} (hm : m < 1) (w u : ℝ) :
+theorem hasDerivAt_jacobi_sub {m : ℝ} (hm : m < 1) (w u : ℝ) :
     HasDerivAt (fun u => Real.jacobiSnm (w - u) m)
         (-(Real.jacobiCnm (w - u) m * Real.jacobiDnm (w - u) m)) u ∧
     HasDerivAt (fun u => Real.jacobiCnm (w - u) m)
@@ -101,7 +101,7 @@ lemma hasDerivAt_jacobi_sub {m : ℝ} (hm : m < 1) (w u : ℝ) :
   · exact ((Real.hasDerivAt_jacobiDnm hm (w - u)).comp u hl).congr_deriv (by ring)
 
 /-- A function with zero derivative everywhere is constant. -/
-lemma eq_of_hasDerivAt_zero {Ψ : ℝ → ℝ} (h : ∀ u, HasDerivAt Ψ 0 u) (u : ℝ) : Ψ u = Ψ 0 :=
+theorem eq_of_hasDerivAt_zero {Ψ : ℝ → ℝ} (h : ∀ u, HasDerivAt Ψ 0 u) (u : ℝ) : Ψ u = Ψ 0 :=
   is_const_of_deriv_eq_zero (fun x => (h x).differentiableAt) (fun x => (h x).deriv) u 0
 
 /-- **Addition formula for `sn`** (DLMF 22.8.1, Duverney (5.69)). -/
@@ -226,7 +226,7 @@ theorem Real.jacobiDnm_add {m : ℝ} (hm : m < 1) (u v : ℝ) :
   rw [h]; simp
 
 /-- `K(m) > 0` for `m < 1`. -/
-lemma Real.compEllIntKm_pos {m : ℝ} (hm : m < 1) : 0 < Real.compEllIntKm m := by
+theorem Real.compEllIntKm_pos {m : ℝ} (hm : m < 1) : 0 < Real.compEllIntKm m := by
   have h := Real.strictMono_incEllIntFm hm (show (0 : ℝ) < π / 2 by positivity)
   have h0 : Real.incEllIntFm 0 m = 0 := by simp [Real.incEllIntFm]
   simp only at h

@@ -6,9 +6,9 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Legendre.Conical
-public import DLMF.Legendre.Hypergeometric
 public import DLMFMathlib.Analysis.ODE.PowerSeriesUniqueness
 public import Mathlib.Analysis.ODE.Gronwall
+public import Mathlib.Tactic.Monotonicity.Lemmas
 
 /-!
 # Legendre boundary values and continuation by ODE transport
@@ -100,7 +100,7 @@ theorem associatedP_boundary_upper (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:�
   simpa only [ofReal_one] using h
 
 /-- Two functions continuous at a point and agreeing near it off a countable set agree there. -/
-lemma legendre_eq_of_continuousAt_off_countable {f g : ℂ → ℂ} {μ₀ : ℂ} (hf : ContinuousAt f μ₀)
+theorem legendre_eq_of_continuousAt_off_countable {f g : ℂ → ℂ} {μ₀ : ℂ} (hf : ContinuousAt f μ₀)
     (hg : ContinuousAt g μ₀) {S : Set ℂ} (hS : S.Countable) (h : ∀ᶠ μ in 𝓝 μ₀, μ ∉ S → f μ = g μ) :
     f μ₀ = g μ₀ := by
   have : (𝓝[Sᶜ] μ₀).NeBot := mem_closure_iff_nhdsWithin_neBot.mp ((hS.dense_compl ℂ).closure_eq ▸ mem_univ _)
@@ -120,9 +120,9 @@ noncomputable def ferrersQCont (ν μ z : ℂ) : ℂ :=
   π/2*cos ((ν+μ)*π/2)*(2^μ*Gamma ((ν+μ+2)/2)/Gamma ((ν-μ+1)/2)*z*(1-z^2)^(-μ/2)*
     regularizedGaussHG ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) (z^2))
 
-lemma ferrersQCont_ofReal (ν μ : ℂ) (x : ℝ) : ferrersQCont ν μ x = ferrersQ ν μ x := rfl
+theorem ferrersQCont_ofReal (ν μ : ℂ) (x : ℝ) : ferrersQCont ν μ x = ferrersQ ν μ x := rfl
 
-lemma ferrersPCont_ofReal (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem ferrersPCont_ofReal (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersPCont ν μ x = ferrersP ν μ x := by
   have h1 : 0 < 1 + x := by linarith [hx.1]
   have h2 : 0 < 1 - x := by linarith [hx.2]
@@ -131,7 +131,7 @@ lemma ferrersPCont_ofReal (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ← ofReal_log h1.le, ← ofReal_log h2.le]
   push_cast; ring_nf
 
-lemma legendre_disk_facts {z : ℂ} (hz : z ∈ Metric.ball (0:ℂ) 1) :
+theorem legendre_disk_facts {z : ℂ} (hz : z ∈ Metric.ball (0:ℂ) 1) :
     1+z ∈ slitPlane ∧ 1-z ∈ slitPlane ∧ (1-z)/2 ∈ cutPlane ∧ 1-z^2 ∈ slitPlane ∧ z^2 ∈ cutPlane := by
   have hn : ‖z‖ < 1 := by simpa using hz
   have hre := abs_re_le_norm z
@@ -146,7 +146,7 @@ lemma legendre_disk_facts {z : ℂ} (hz : z ∈ Metric.ball (0:ℂ) 1) :
   · have : (1-z^2).re = 1-(z^2).re := by simp
     rw [this]; linarith [(abs_lt.mp hre2).2]
 
-lemma ferrersPCont_analytic (ν μ : ℂ) : AnalyticOnNhd ℂ (ferrersPCont ν μ) (Metric.ball (0:ℂ) 1) := by
+theorem ferrersPCont_analytic (ν μ : ℂ) : AnalyticOnNhd ℂ (ferrersPCont ν μ) (Metric.ball (0:ℂ) 1) := by
   intro z hz
   obtain ⟨hp, hm, hc, -, -⟩ := legendre_disk_facts hz
   have hG : AnalyticAt ℂ (fun w : ℂ => regularizedGaussHG (ν+1) (-ν) (1-μ) ((1-w)/2)) z :=
@@ -155,7 +155,7 @@ lemma ferrersPCont_analytic (ν μ : ℂ) : AnalyticOnNhd ℂ (ferrersPCont ν �
     fun_prop (disch := assumption)
   exact hE.mul hG
 
-lemma ferrersQCont_analytic (ν μ : ℂ) : AnalyticOnNhd ℂ (ferrersQCont ν μ) (Metric.ball (0:ℂ) 1) := by
+theorem ferrersQCont_analytic (ν μ : ℂ) : AnalyticOnNhd ℂ (ferrersQCont ν μ) (Metric.ball (0:ℂ) 1) := by
   intro z hz
   obtain ⟨-, -, -, hs, hc⟩ := legendre_disk_facts hz
   have hW : AnalyticAt ℂ (fun w : ℂ => (1-w^2)^(-μ/2)) z :=
@@ -168,7 +168,7 @@ lemma ferrersQCont_analytic (ν μ : ℂ) : AnalyticOnNhd ℂ (ferrersQCont ν �
   exact (analyticAt_const.mul (analyticAt_const.mul hW |>.mul hG1)).add
     (analyticAt_const.mul (((analyticAt_const.mul analyticAt_id).mul hW).mul hG2))
 
-lemma continuousAt_ferrersQCont_order {ν μ₀ : ℂ} (h : LegendreQRegular ν μ₀) {z : ℂ}
+theorem continuousAt_ferrersQCont_order {ν μ₀ : ℂ} (h : LegendreQRegular ν μ₀) {z : ℂ}
     (hz : z ∈ Metric.ball (0:ℂ) 1) : ContinuousAt (fun μ => ferrersQCont ν μ z) μ₀ := by
   obtain ⟨-, -, -, hsl, hc⟩ := legendre_disk_facts hz
   have h1 : ∀ m : ℕ, (ν+μ₀+1)/2 ≠ -m := fun m hm => h (2*m) (by push_cast; linear_combination 2*hm)
@@ -193,7 +193,7 @@ lemma continuousAt_ferrersQCont_order {ν μ₀ : ℂ} (h : LegendreQRegular ν 
     pw.continuousAt).mul g1.continuousAt)).add ((continuousAt_const.mul hcs.continuousAt).mul
     (((((p2.continuousAt.mul c2).mul r2).mul continuousAt_const).mul pw.continuousAt).mul g2.continuousAt))
 
-lemma continuous_ferrersPCont_order (ν : ℂ) {z : ℂ} (hz : z ∈ Metric.ball (0:ℂ) 1) :
+theorem continuous_ferrersPCont_order (ν : ℂ) {z : ℂ} (hz : z ∈ Metric.ball (0:ℂ) 1) :
     Continuous fun μ => ferrersPCont ν μ z := by
   obtain ⟨-, -, hc, -, -⟩ := legendre_disk_facts hz
   unfold ferrersPCont
@@ -202,7 +202,7 @@ lemma continuous_ferrersPCont_order (ν : ℂ) {z : ℂ} (hz : z ∈ Metric.ball
       (C := fun μ : ℂ => 1-μ) (by fun_prop) (by fun_prop) (by fun_prop) hc).continuous
 
 /-- On the side `s Im z > 0`, `log (z-1) = log (1-z) + sπi`. -/
-lemma legendre_log_sub_one_side {s : ℝ} (hs : s = 1 ∨ s = -1) {z : ℂ} (hz : 0 < s*z.im) :
+theorem legendre_log_sub_one_side {s : ℝ} (hs : s = 1 ∨ s = -1) {z : ℂ} (hz : 0 < s*z.im) :
     log (z-1) = log (1-z)+s*π*I := by
   have harg : arg (z-1) = arg (1-z)+s*π := by
     rw [show z-1 = -(1-z) by ring]
@@ -213,7 +213,7 @@ lemma legendre_log_sub_one_side {s : ℝ} (hs : s = 1 ∨ s = -1) {z : ℂ} (hz 
   · simp [log_re, norm_sub_rev]
   · simp [log_im, harg]
 
-lemma associatedP_eq_ferrersPCont {s : ℝ} (hs : s = 1 ∨ s = -1) (ν μ : ℂ) {z : ℂ} (hz : 0 < s*z.im) :
+theorem associatedP_eq_ferrersPCont {s : ℝ} (hs : s = 1 ∨ s = -1) (ν μ : ℂ) {z : ℂ} (hz : 0 < s*z.im) :
     associatedP ν μ z = exp (-(s:ℂ)*μ*π*I/2)*ferrersPCont ν μ z := by
   unfold associatedP ferrersPCont
   rw [legendre_log_sub_one_side hs hz, ← mul_assoc, ← exp_add, add_comm z 1]
@@ -223,7 +223,7 @@ lemma associatedP_eq_ferrersPCont {s : ℝ} (hs : s = 1 ∨ s = -1) (ν μ : ℂ
 noncomputable def olverQSide (s : ℝ) (ν μ z : ℂ) : ℂ :=
   exp ((s:ℂ)*μ*π*I/2)/Gamma (ν+μ+1)*(ferrersQCont ν μ z-(s:ℂ)*π*I/2*ferrersPCont ν μ z)
 
-lemma legendre_cos_sub_sin_side {s : ℝ} (hs : s = 1 ∨ s = -1) (μ : ℂ) :
+theorem legendre_cos_sub_sin_side {s : ℝ} (hs : s = 1 ∨ s = -1) (μ : ℂ) :
     exp ((s:ℂ)*μ*π*I/2)*(cos (μ*π)-(s:ℂ)*I*sin (μ*π)) = exp (-(s:ℂ)*μ*π*I/2) := by
   have hc : cos (μ*π)-(s:ℂ)*I*sin (μ*π) = exp (-(s:ℂ)*μ*π*I) := by
     rcases hs with rfl | rfl
@@ -233,7 +233,7 @@ lemma legendre_cos_sub_sin_side {s : ℝ} (hs : s = 1 ∨ s = -1) (μ : ℂ) :
       push_cast; ring
   rw [hc, ← exp_add]; congr 1; ring
 
-lemma olverQSide_eq_nonint {s : ℝ} (hs : s = 1 ∨ s = -1) {ν μ : ℂ} (h : LegendreQRegular ν μ)
+theorem olverQSide_eq_nonint {s : ℝ} (hs : s = 1 ∨ s = -1) {ν μ : ℂ} (h : LegendreQRegular ν μ)
     (hμ : ∀ n : ℤ, μ ≠ n) {z : ℂ} (hz : z ∈ Metric.ball (0:ℂ) 1) :
     olverQSide s ν μ z = π/(2*sin (μ*π))*(exp (-(s:ℂ)*μ*π*I/2)*ferrersPCont ν μ z*(Gamma (ν+μ+1))⁻¹-
       exp ((s:ℂ)*μ*π*I/2)*ferrersPCont ν (-μ) z*(Gamma (ν-μ+1))⁻¹) := by
@@ -267,7 +267,7 @@ lemma olverQSide_eq_nonint {s : ℝ} (hs : s = 1 ∨ s = -1) {ν μ : ℂ} (h : 
   field_simp
   ring
 
-lemma olverQ_eq_olverQSide {s : ℝ} (hs : s = 1 ∨ s = -1) {ν μ : ℂ} (h : LegendreQRegular ν μ)
+theorem olverQ_eq_olverQSide {s : ℝ} (hs : s = 1 ∨ s = -1) {ν μ : ℂ} (h : LegendreQRegular ν μ)
     {z : ℂ} (hz : z ∈ Metric.ball (0:ℂ) 1) (him : 0 < s*z.im) :
     olverQ ν μ z = olverQSide s ν μ z := by
   have hz1 : z-1 ∈ slitPlane := Or.inr (by
@@ -297,7 +297,7 @@ lemma olverQ_eq_olverQSide {s : ℝ} (hs : s = 1 ∨ s = -1) {ν μ : ℂ} (h : 
   ring_nf
 
 /-- Boundary values of `𝑸^μ_ν` from either side of the cut (DLMF 14.23.2). -/
-lemma olverQ_boundary_aux (ν μ : ℂ) (hr : LegendreQRegular ν μ) (s : ℝ) (hs : s = 1 ∨ s = -1)
+theorem olverQ_boundary_aux (ν μ : ℂ) (hr : LegendreQRegular ν μ) (s : ℝ) (hs : s = 1 ∨ s = -1)
     {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     Tendsto (fun ε : ℝ => olverQ ν μ (x+(s:ℂ)*I*ε)) (𝓝[>] (0:ℝ))
       (𝓝 (exp ((s:ℂ)*μ*π*I/2)/Gamma (ν+μ+1)*(ferrersQ ν μ x-(s:ℂ)*π*I/2*ferrersP ν μ x))) := by
@@ -325,7 +325,7 @@ lemma olverQ_boundary_aux (ν μ : ℂ) (hr : LegendreQRegular ν μ) (s : ℝ) 
     rcases hs with rfl | rfl <;> simp <;> exact hε
   exact (olverQ_eq_olverQSide hs hr hεD him).symm
 
-lemma legendre_cos_sub_sin_exp {s : ℝ} (hs : s = 1 ∨ s = -1) (θ : ℂ) :
+theorem legendre_cos_sub_sin_exp {s : ℝ} (hs : s = 1 ∨ s = -1) (θ : ℂ) :
     cos θ-(s:ℂ)*I*sin θ = exp (-(s:ℂ)*θ*I) := by
   rcases hs with rfl | rfl
   · rw [show -((1:ℝ):ℂ)*θ*I = (-θ)*I by push_cast; ring, exp_mul_I, cos_neg, sin_neg]
@@ -339,7 +339,7 @@ noncomputable def olverQSideHyp (s : ℝ) (ν μ z : ℂ) : ℂ :=
     (z*regularizedGaussHG ((μ-ν+1)/2) ((ν+μ+2)/2) (3/2) (z^2)*((Gamma ((ν-μ+1)/2))⁻¹*(Gamma ((ν+μ+1)/2))⁻¹)-
       (s:ℂ)*I*regularizedGaussHG ((μ-ν)/2) ((ν+μ+1)/2) (1/2) (z^2)*((Gamma ((ν-μ+2)/2))⁻¹*(Gamma ((ν+μ+2)/2))⁻¹))
 
-lemma olverQSideHyp_analytic (s : ℝ) (ν μ : ℂ) :
+theorem olverQSideHyp_analytic (s : ℝ) (ν μ : ℂ) :
     AnalyticOnNhd ℂ (olverQSideHyp s ν μ) (Metric.ball (0:ℂ) 1) := by
   intro z hz
   obtain ⟨-, -, -, hsl, hc⟩ := legendre_disk_facts hz
@@ -353,7 +353,7 @@ lemma olverQSideHyp_analytic (s : ℝ) (ν μ : ℂ) :
   exact ((analyticAt_const.mul hW).mul analyticAt_const).mul
     (((analyticAt_id.mul hG1).mul analyticAt_const).sub ((analyticAt_const.mul hG2).mul analyticAt_const))
 
-lemma continuous_olverQSideHyp_order (s : ℝ) (ν : ℂ) {z : ℂ} (hz : z ∈ Metric.ball (0:ℂ) 1) :
+theorem continuous_olverQSideHyp_order (s : ℝ) (ν : ℂ) {z : ℂ} (hz : z ∈ Metric.ball (0:ℂ) 1) :
     Continuous fun μ => olverQSideHyp s ν μ z := by
   obtain ⟨-, -, -, hsl, hc⟩ := legendre_disk_facts hz
   have hne := slitPlane_ne_zero hsl
@@ -370,12 +370,12 @@ lemma continuous_olverQSideHyp_order (s : ℝ) (ν : ℂ) {z : ℂ} (hz : z ∈ 
   exact ((continuous_const.mul pw).mul continuous_const).mul
     (((continuous_const.mul g1).mul (i1.mul i2)).sub ((continuous_const.mul g2).mul (i3.mul i4)))
 
-lemma legendre_pi_three_halves : (π:ℂ)^(3/2:ℂ) = π*Real.sqrt π := by
+theorem legendre_pi_three_halves : (π:ℂ)^(3/2:ℂ) = π*Real.sqrt π := by
   have hpi : (π:ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   rw [show (3/2:ℂ) = 1+((1/2:ℝ):ℂ) by push_cast; norm_num, cpow_add _ _ hpi, cpow_one,
     ← ofReal_cpow Real.pi_pos.le, ← Real.sqrt_eq_rpow]
 
-lemma olverQSide_eq_hyp_real {s : ℝ} (hs : s = 1 ∨ s = -1) {ν μ : ℂ} (h : LegendreQRegular ν μ)
+theorem olverQSide_eq_hyp_real {s : ℝ} (hs : s = 1 ∨ s = -1) {ν μ : ℂ} (h : LegendreQRegular ν μ)
     {y : ℝ} (hy : y ∈ Ioo (-1:ℝ) 1) : olverQSide s ν μ y = olverQSideHyp s ν μ y := by
   obtain ⟨ha, hb⟩ := legendre_Gamma_half_ne_zero h
   have hc := ferrers_sq_mem_cutPlane hy
@@ -427,7 +427,7 @@ lemma olverQSide_eq_hyp_real {s : ℝ} (hs : s = 1 ∨ s = -1) {ν μ : ℂ} (h 
   · push_cast
     linear_combination (norm := (field_simp; ring)) (X*π*S/(2*N)*gc*(U*F1)/gb*(-sb))*I_sq
 
-lemma olverQSide_eq_hyp {s : ℝ} (hs : s = 1 ∨ s = -1) {ν μ : ℂ} (h : LegendreQRegular ν μ)
+theorem olverQSide_eq_hyp {s : ℝ} (hs : s = 1 ∨ s = -1) {ν μ : ℂ} (h : LegendreQRegular ν μ)
     {z : ℂ} (hz : z ∈ Metric.ball (0:ℂ) 1) : olverQSide s ν μ z = olverQSideHyp s ν μ z := by
   have hR : AnalyticOnNhd ℂ (olverQSide s ν μ) (Metric.ball (0:ℂ) 1) := fun w hw =>
     analyticAt_const.mul ((ferrersQCont_analytic ν μ w hw).sub
@@ -446,7 +446,7 @@ lemma olverQSide_eq_hyp {s : ℝ} (hs : s = 1 ∨ s = -1) {ν μ : ℂ} (h : Leg
   intro y hy
   exact olverQSide_eq_hyp_real hs h hy
 
-lemma olverQ_eq_olverQSideHyp {s : ℝ} (hs : s = 1 ∨ s = -1) (ν μ : ℂ)
+theorem olverQ_eq_olverQSideHyp {s : ℝ} (hs : s = 1 ∨ s = -1) (ν μ : ℂ)
     {z : ℂ} (hz : z ∈ Metric.ball (0:ℂ) 1) (him : 0 < s*z.im) :
     olverQ ν μ z = olverQSideHyp s ν μ z := by
   have hz1 : z-1 ∈ slitPlane := Or.inr (by
@@ -577,7 +577,7 @@ theorem ferrersQ_boundary_average {ν μ : ℂ} (hr : LegendreQRegular ν μ) {x
 
 /-- The conical Ferrers function `𝖯^{-μ}_{-1/2+iτ}` is unchanged by `τ ↦ -τ`
 (degree reflection `ν ↦ -ν-1`). -/
-lemma ferrersP_conical_neg_tau (τ μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem ferrersP_conical_neg_tau (τ μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersP (-1/2-I*τ) (-μ) x = ferrersP (-1/2+I*τ) (-μ) x := by
   have hz : ‖(1-(x:ℂ))/2‖ < 1 := by
     rw [show (1-(x:ℂ))/2=(((1-x)/2:ℝ):ℂ) by push_cast; ring, norm_real, Real.norm_eq_abs, abs_lt]
@@ -678,7 +678,7 @@ theorem legendreTransport_exists (ν μ a b : ℂ) (γ : ℝ → ℂ) (hγ : Con
 
 
 /-- Uniqueness of Legendre transports with given initial data. -/
-lemma isLegendreTransport_unique {ν μ a b : ℂ} {γ : ℝ → ℂ} (hγ : ContDiff ℝ 1 γ)
+theorem isLegendreTransport_unique {ν μ a b : ℂ} {γ : ℝ → ℂ} (hγ : ContDiff ℝ 1 γ)
     (hreg : ∀ t ∈ Icc (0:ℝ) 1, γ t ≠ 1 ∧ γ t ≠ -1) {u v u₁ v₁ : ℝ → ℂ}
     (h : IsLegendreTransport ν μ γ a b u v) (h₁ : IsLegendreTransport ν μ γ a b u₁ v₁) :
     EqOn u u₁ (Icc 0 1) ∧ EqOn v v₁ (Icc 0 1) := by
@@ -727,7 +727,7 @@ def legFS_G (ν μ w : ℂ) : ℂ :=
   Real.sqrt π * (1 - w^2)^μ * w^(ν+1) * regularizedGaussHG (μ+1/2) (ν+μ+1) (ν+3/2) (w^2)
 
 /-- `legFS_G ν μ` is analytic at `w` when `w ∉ (-∞, 0]` and `1 - w² ∉ (-∞, 0]`. -/
-lemma legFS_G_analyticAt (ν μ : ℂ) {w : ℂ} (hw : w ∈ slitPlane) (hw2 : 1 - w^2 ∈ slitPlane) :
+theorem legFS_G_analyticAt (ν μ : ℂ) {w : ℂ} (hw : w ∈ slitPlane) (hw2 : 1 - w^2 ∈ slitPlane) :
     AnalyticAt ℂ (legFS_G ν μ) w := by
   have hF : AnalyticAt ℂ (fun w : ℂ => regularizedGaussHG (μ+1/2) (ν+μ+1) (ν+3/2) (w^2)) w :=
     (analyticAt_regularizedGaussHG _ _ _ (show w^2 ∈ cutPlane from hw2)).comp_of_eq
@@ -738,7 +738,7 @@ lemma legFS_G_analyticAt (ν μ : ℂ) {w : ℂ} (hw : w ∈ slitPlane) (hw2 : 1
   exact ((analyticAt_const.mul h1).mul h2).mul hF
 
 /-- `1 - w² ∈ slitPlane` for `|w| < 1`. -/
-lemma legFS_one_sub_sq_mem {w : ℂ} (hw : ‖w‖ < 1) : 1 - w^2 ∈ slitPlane := by
+theorem legFS_one_sub_sq_mem {w : ℂ} (hw : ‖w‖ < 1) : 1 - w^2 ∈ slitPlane := by
   rw [mem_slitPlane_iff]; left
   have : (w^2).re ≤ ‖w‖^2 := by rw [← norm_pow]; exact re_le_norm _
   simp only [sub_re, one_re]
@@ -794,7 +794,7 @@ def legendreEllipseContinued (F : ℂ → ℂ) (ν μ z : ℂ) (s : ℤ) : ℂ :
 /-! ### Helpers for DLMF 14.24.2: the explicit transport of `𝑸^μ_ν` along the ellipse -/
 
 /-- The Joukowski map `J(w) = (w + w⁻¹)/2` sends `{|w| < 1} ∖ (-∞, 0]` into `ℂ ∖ (-∞, 1]`. -/
-lemma legInt_joukowski_mem {w : ℂ} (hw1 : ‖w‖ < 1) (hw : w ∈ slitPlane) :
+theorem legInt_joukowski_mem {w : ℂ} (hw1 : ‖w‖ < 1) (hw : w ∈ slitPlane) :
     (w + w⁻¹)/2 - 1 ∈ slitPlane := by
   have hw0 : w ≠ 0 := slitPlane_ne_zero hw
   have hn : 0 < normSq w := normSq_pos.mpr hw0
@@ -827,7 +827,7 @@ lemma legInt_joukowski_mem {w : ℂ} (hw1 : ‖w‖ < 1) (hw : w ∈ slitPlane) 
       rw [div_eq_one_iff_eq hn.ne'] at this; linarith
 
 /-- `ζ(J(w)) = w` for `|w| < 1`, `w ∉ (-∞, 0]`. -/
-lemma legInt_zeta_joukowski {w : ℂ} (hw1 : ‖w‖ < 1) (hw : w ∈ slitPlane) :
+theorem legInt_zeta_joukowski {w : ℂ} (hw1 : ‖w‖ < 1) (hw : w ∈ slitPlane) :
     legInt_zeta ((w + w⁻¹)/2) = w := by
   have hm := legInt_joukowski_mem hw1 hw
   have hw0 : w ≠ 0 := slitPlane_ne_zero hw
@@ -848,7 +848,7 @@ lemma legInt_zeta_joukowski {w : ℂ} (hw1 : ‖w‖ < 1) (hw : w ∈ slitPlane)
 noncomputable def legInt_ew (ζ : ℂ) (s : ℤ) (t : ℝ) : ℂ := ζ * exp (-(s:ℂ)*π*I*t)
 
 /-- The ellipse path is `J(w(t))`. -/
-lemma legInt_path_eq {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) (t : ℝ) :
+theorem legInt_path_eq {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) (t : ℝ) :
     legendreEllipsePath z s t = (legInt_ew (legInt_zeta z) s t + (legInt_ew (legInt_zeta z) s t)⁻¹)/2 := by
   have h0 := legInt_zeta_ne_zero hz
   have hq : z + exp ((log (z-1) + log (z+1))/2) = (legInt_zeta z)⁻¹ := by
@@ -862,12 +862,12 @@ lemma legInt_path_eq {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) (t : ℝ) :
   ring
 
 /-- `|w(t)| = |ζ|`. -/
-lemma legInt_norm_ew (ζ : ℂ) (s : ℤ) (t : ℝ) : ‖legInt_ew ζ s t‖ = ‖ζ‖ := by
+theorem legInt_norm_ew (ζ : ℂ) (s : ℤ) (t : ℝ) : ‖legInt_ew ζ s t‖ = ‖ζ‖ := by
   rw [legInt_ew, norm_mul, norm_exp]
   simp
 
 /-- The derivative of `w(t)`. -/
-lemma legInt_hasDerivAt_ew (ζ : ℂ) (s : ℤ) (t : ℝ) :
+theorem legInt_hasDerivAt_ew (ζ : ℂ) (s : ℤ) (t : ℝ) :
     HasDerivAt (legInt_ew ζ s) (-(s:ℂ)*π*I * legInt_ew ζ s t) t := by
   have h := ((hasDerivAt_id (t:ℂ)).const_mul (-(s:ℂ)*π*I)).cexp.const_mul ζ
   have h2 := h.comp_ofReal
@@ -883,7 +883,7 @@ noncomputable def legInt_eu (ν μ ζ : ℂ) (s : ℤ) (t : ℝ) : ℂ :=
     regularizedGaussHG (μ+1/2) (ν+μ+1) (ν+3/2) (legInt_ew ζ s t ^ 2)
 
 /-- Locally along the path, the transport is a constant multiple of `𝑸^μ_ν(σ z)`, `σ = ±1`. -/
-lemma legInt_eu_local (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) {σ : ℂ}
+theorem legInt_eu_local (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) {σ : ℂ}
     (hσ : σ = 1 ∨ σ = -1) {t₀ : ℝ} (ht₀ : σ * legInt_ew (legInt_zeta z) s t₀ ∈ slitPlane) :
     ∀ᶠ t in 𝓝 t₀, (σ * legInt_ew (legInt_zeta z) s t ∈ slitPlane) ∧
       legInt_eu ν μ (legInt_zeta z) s t =
@@ -949,11 +949,11 @@ noncomputable def legInt_gd (ζ : ℂ) (s : ℤ) (t : ℝ) : ℂ :=
   -(s:ℂ)*π*I * (legInt_ew ζ s t - (legInt_ew ζ s t)⁻¹)/2
 
 /-- `w(t) ≠ 0`. -/
-lemma legInt_ew_ne_zero {ζ : ℂ} (hζ : ζ ≠ 0) (s : ℤ) (t : ℝ) : legInt_ew ζ s t ≠ 0 :=
+theorem legInt_ew_ne_zero {ζ : ℂ} (hζ : ζ ≠ 0) (s : ℤ) (t : ℝ) : legInt_ew ζ s t ≠ 0 :=
   mul_ne_zero hζ (exp_ne_zero _)
 
 /-- The ellipse path has derivative `legInt_gd`. -/
-lemma legInt_hasDerivAt_path {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) (t : ℝ) :
+theorem legInt_hasDerivAt_path {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) (t : ℝ) :
     HasDerivAt (legendreEllipsePath z s) (legInt_gd (legInt_zeta z) s t) t := by
   have h0 := legInt_ew_ne_zero (legInt_zeta_ne_zero hz) s t
   have hw := legInt_hasDerivAt_ew (legInt_zeta z) s t
@@ -968,7 +968,7 @@ lemma legInt_hasDerivAt_path {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) (t : �
   ring
 
 /-- `γ'(t) ≠ 0` for `s ≠ 0`. -/
-lemma legInt_gd_ne_zero {z : ℂ} (hz : z-1 ∈ slitPlane) {s : ℤ} (hs : s ≠ 0) (t : ℝ) :
+theorem legInt_gd_ne_zero {z : ℂ} (hz : z-1 ∈ slitPlane) {s : ℤ} (hs : s ≠ 0) (t : ℝ) :
     legInt_gd (legInt_zeta z) s t ≠ 0 := by
   have h0 := legInt_ew_ne_zero (legInt_zeta_ne_zero hz) s t
   have hn : ‖legInt_ew (legInt_zeta z) s t‖ < 1 := by
@@ -984,7 +984,7 @@ lemma legInt_gd_ne_zero {z : ℂ} (hz : z-1 ∈ slitPlane) {s : ℤ} (hs : s ≠
   nlinarith [norm_nonneg (legInt_ew (legInt_zeta z) s t)]
 
 /-- A nonzero point outside `ℂ ∖ (-∞, 0]` has its negative inside. -/
-lemma legInt_neg_mem_slitPlane {w : ℂ} (hw0 : w ≠ 0) (hw : w ∉ slitPlane) : -w ∈ slitPlane := by
+theorem legInt_neg_mem_slitPlane {w : ℂ} (hw0 : w ≠ 0) (hw : w ∉ slitPlane) : -w ∈ slitPlane := by
   rw [mem_slitPlane_iff] at hw ⊢
   push Not at hw
   left
@@ -993,7 +993,7 @@ lemma legInt_neg_mem_slitPlane {w : ℂ} (hw0 : w ≠ 0) (hw : w ∉ slitPlane) 
   exact neg_pos.mpr (lt_of_le_of_ne hw.1 this)
 
 /-- Local data at each point of the path: `u = c 𝑸(σ γ)` near `t₀`. -/
-lemma legInt_eu_local' (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) (t₀ : ℝ) :
+theorem legInt_eu_local' (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) (t₀ : ℝ) :
     ∃ c σ : ℂ, σ^2 = 1 ∧ ∀ᶠ t in 𝓝 t₀, σ * legendreEllipsePath z s t - 1 ∈ slitPlane ∧
       legInt_eu ν μ (legInt_zeta z) s t = c * olverQ ν μ (σ * legendreEllipsePath z s t) := by
   have h0 := legInt_ew_ne_zero (legInt_zeta_ne_zero hz) s t₀
@@ -1021,7 +1021,7 @@ lemma legInt_eu_local' (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ
 
 /-- The transport `u` satisfies the first-order Legendre system along the ellipse path, with
 `v = u'/γ'`. -/
-lemma legInt_eu_deriv (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) {s : ℤ} (hs : s ≠ 0) (t₀ : ℝ) :
+theorem legInt_eu_deriv (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) {s : ℤ} (hs : s ≠ 0) (t₀ : ℝ) :
     HasDerivAt (legInt_eu ν μ (legInt_zeta z) s)
       (deriv (legendreEllipsePath z s) t₀ * (deriv (legInt_eu ν μ (legInt_zeta z) s) t₀ /
         legInt_gd (legInt_zeta z) s t₀)) t₀ ∧
@@ -1087,7 +1087,7 @@ lemma legInt_eu_deriv (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) {s : ℤ}
       (c * gd t₀) * hode'
 
 /-- The ellipse path avoids `±1`. -/
-lemma legInt_path_ne {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) (t : ℝ) :
+theorem legInt_path_ne {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) (t : ℝ) :
     legendreEllipsePath z s t ≠ 1 ∧ legendreEllipsePath z s t ≠ -1 := by
   have h0 := legInt_ew_ne_zero (legInt_zeta_ne_zero hz) s t
   have hn : ‖legInt_ew (legInt_zeta z) s t‖ < 1 := by
@@ -1106,7 +1106,7 @@ lemma legInt_path_ne {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) (t : ℝ) :
   exact ⟨key 1 (by norm_num), key (-1) (by norm_num)⟩
 
 /-- The initial data of the transport: `u(0) = 𝑸^μ_ν(z)`, `u'(0) = γ'(0) 𝑸'(z)`. -/
-lemma legInt_eu_zero (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) :
+theorem legInt_eu_zero (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) :
     legInt_eu ν μ (legInt_zeta z) s 0 = olverQ ν μ z ∧
     HasDerivAt (legInt_eu ν μ (legInt_zeta z) s)
       (deriv (olverQ ν μ) z * legInt_gd (legInt_zeta z) s 0) 0 := by
@@ -1198,7 +1198,7 @@ def legendreOneContinued (F : ℂ → ℂ) (ν μ z : ℂ) (s : ℤ) : ℂ :=
 
 /-- A pair `(u, v)` is a Legendre transport along `γ` if near each `t₀` it is `(f ∘ γ, f' ∘ γ)`
 for a local solution `f` of the Legendre equation at `γ(t₀)`. -/
-lemma legTr_isTransport_of_local (ν μ : ℂ) {γ : ℝ → ℂ} (hγ : Differentiable ℝ γ) {u v : ℝ → ℂ}
+theorem legTr_isTransport_of_local (ν μ : ℂ) {γ : ℝ → ℂ} (hγ : Differentiable ℝ γ) {u v : ℝ → ℂ}
     (hloc : ∀ t₀ ∈ Icc (0:ℝ) 1, ∃ f f1 : ℂ → ℂ, ∃ f2 : ℂ, HasDerivAt f (f1 (γ t₀)) (γ t₀) ∧
       HasDerivAt f1 f2 (γ t₀) ∧ 1 - γ t₀ ^ 2 ≠ 0 ∧
       (1 - γ t₀ ^ 2) * f2 - 2 * γ t₀ * f1 (γ t₀) + (ν*(ν+1) - μ^2/(1 - γ t₀ ^ 2)) * f (γ t₀) = 0 ∧
@@ -1224,7 +1224,7 @@ lemma legTr_isTransport_of_local (ν μ : ℂ) {γ : ℝ → ℂ} (hγ : Differe
 
 /-- A function continuous within `s` at `t₀` with locally constant exponential is locally
 constant. -/
-lemma legTr_eventually_eq_of_exp {d : ℝ → ℂ} {s : Set ℝ} {t₀ : ℝ}
+theorem legTr_eventually_eq_of_exp {d : ℝ → ℂ} {s : Set ℝ} {t₀ : ℝ}
     (hd : ContinuousWithinAt d s t₀) (he : ∀ᶠ t in 𝓝[s] t₀, exp (d t) = exp (d t₀)) :
     ∀ᶠ t in 𝓝[s] t₀, d t = d t₀ := by
   have hn : ∀ᶠ t in 𝓝[s] t₀, ‖d t - d t₀‖ < 2*π := by
@@ -1250,19 +1250,19 @@ noncomputable def legTr_K (ν μ w : ℂ) : ℂ :=
   exp (-μ/2*log (w+1)) * regularizedGaussHG (ν+1) (-ν) (1+μ) ((1-w)/2)
 
 /-- `P^{-μ}_ν(w) = e^{μ log(w-1)/2} K(w)`. -/
-lemma legTr_associatedP_eq (ν μ w : ℂ) :
+theorem legTr_associatedP_eq (ν μ w : ℂ) :
     associatedP ν (-μ) w = exp (μ/2*log (w-1)) * legTr_K ν μ w := by
   rw [associatedP, legTr_K, show (1:ℂ) - -μ = 1+μ by ring, ← mul_assoc, ← exp_add]
   congr 2; ring
 
 /-- `𝖯^{-μ}_ν(w) = e^{μ log(1-w)/2} K(w)` (continued into the disk). -/
-lemma legTr_ferrersPCont_eq (ν μ w : ℂ) :
+theorem legTr_ferrersPCont_eq (ν μ w : ℂ) :
     ferrersPCont ν (-μ) w = exp (μ/2*log (1-w)) * legTr_K ν μ w := by
   rw [ferrersPCont, legTr_K, show (1:ℂ) - -μ = 1+μ by ring, ← mul_assoc, ← exp_add, add_comm 1 w]
   congr 2; ring
 
 /-- `K` is analytic where `w + 1 ∉ (-∞, 0]` and `(1-w)/2 ∉ [1, ∞)`. -/
-lemma legTr_K_analyticAt (ν μ : ℂ) {w : ℂ} (hp : w+1 ∈ slitPlane) (hc : (1-w)/2 ∈ cutPlane) :
+theorem legTr_K_analyticAt (ν μ : ℂ) {w : ℂ} (hp : w+1 ∈ slitPlane) (hc : (1-w)/2 ∈ cutPlane) :
     AnalyticAt ℂ (legTr_K ν μ) w := by
   have hG : AnalyticAt ℂ (fun w : ℂ => regularizedGaussHG (ν+1) (-ν) (1+μ) ((1-w)/2)) w :=
     (analyticAt_regularizedGaussHG _ _ _ hc).comp_of_eq (by fun_prop) rfl
@@ -1271,7 +1271,7 @@ lemma legTr_K_analyticAt (ν μ : ℂ) {w : ℂ} (hp : w+1 ∈ slitPlane) (hc : 
   exact hE.mul hG
 
 /-- Derivative of `e^{μL/2} K` for a branch `L` of `log(w-1)` (up to constants). -/
-lemma legTr_hasDerivAt_branch (ν μ : ℂ) {L : ℂ → ℂ} {w : ℂ} (hL : HasDerivAt L (1/(w-1)) w)
+theorem legTr_hasDerivAt_branch (ν μ : ℂ) {L : ℂ → ℂ} {w : ℂ} (hL : HasDerivAt L (1/(w-1)) w)
     (hK : DifferentiableAt ℂ (legTr_K ν μ) w) :
     HasDerivAt (fun w => exp (μ/2*L w) * legTr_K ν μ w)
       (exp (μ/2*L w) * (μ/2*legTr_K ν μ w/(w-1) + deriv (legTr_K ν μ) w)) w := by
@@ -1279,12 +1279,12 @@ lemma legTr_hasDerivAt_branch (ν μ : ℂ) {L : ℂ → ℂ} {w : ℂ} (hL : Ha
   convert h using 1; ring
 
 /-- `(log(w-1))' = 1/(w-1)`. -/
-lemma legTr_hasDerivAt_log_sub_one {w : ℂ} (hw : w-1 ∈ slitPlane) :
+theorem legTr_hasDerivAt_log_sub_one {w : ℂ} (hw : w-1 ∈ slitPlane) :
     HasDerivAt (fun w : ℂ => log (w-1)) (1/(w-1)) w := by
   simpa using ((hasDerivAt_id w).sub_const 1).clog hw
 
 /-- `(log(1-w))' = 1/(w-1)`. -/
-lemma legTr_hasDerivAt_log_one_sub {w : ℂ} (hw : 1-w ∈ slitPlane) :
+theorem legTr_hasDerivAt_log_one_sub {w : ℂ} (hw : 1-w ∈ slitPlane) :
     HasDerivAt (fun w : ℂ => log (1-w)) (1/(w-1)) w := by
   have h := ((hasDerivAt_id' w).const_sub 1).clog hw
   have hne : 1 - w ≠ 0 := slitPlane_ne_zero hw
@@ -1294,7 +1294,7 @@ lemma legTr_hasDerivAt_log_one_sub {w : ℂ} (hw : 1-w ∈ slitPlane) :
   ring
 
 /-- The Legendre equation for `𝖯^μ_ν` continued into the unit disk. -/
-lemma legTr_ferrersPCont_ode (ν μ : ℂ) {w : ℂ} (hw : w ∈ Metric.ball (0:ℂ) 1) :
+theorem legTr_ferrersPCont_ode (ν μ : ℂ) {w : ℂ} (hw : w ∈ Metric.ball (0:ℂ) 1) :
     (1-w^2)*iteratedDeriv 2 (ferrersPCont ν μ) w-2*w*deriv (ferrersPCont ν μ) w+
       (ν*(ν+1)-μ^2/(1-w^2))*ferrersPCont ν μ w=0 := by
   set F := ferrersPCont ν μ
@@ -1351,7 +1351,7 @@ noncomputable def legTr_v (ν μ : ℂ) (γ ℓ : ℝ → ℂ) (t : ℝ) : ℂ :
 
 /-- Local data for `legTr_isTransport_of_local` from a local branch `L` of `log(w-1)` (up to a
 constant) and a solution `F = e^{μL/2} K` of the Legendre equation near `γ(t₀)`. -/
-lemma legTr_local_branch (ν μ : ℂ) {γ : ℝ → ℂ} (hγ : Differentiable ℝ γ) {ℓ : ℝ → ℂ}
+theorem legTr_local_branch (ν μ : ℂ) {γ : ℝ → ℂ} (hγ : Differentiable ℝ γ) {ℓ : ℝ → ℂ}
     (hℓ : ContinuousOn ℓ (Icc 0 1)) (hexp : ∀ t ∈ Icc (0:ℝ) 1, exp (ℓ t) = γ t - 1)
     {t₀ : ℝ} (ht₀ : t₀ ∈ Icc (0:ℝ) 1) {L F : ℂ → ℂ} {U : Set ℂ} {κ : ℂ} (hU : IsOpen U)
     (hw₀ : γ t₀ ∈ U) (hLd : ∀ w ∈ U, HasDerivAt L (1/(w-1)) w)
@@ -1400,7 +1400,7 @@ lemma legTr_local_branch (ν μ : ℂ) {γ : ℝ → ℂ} (hγ : Differentiable 
 
 /-- Transport of `P^{-μ}_ν` along a path that stays in `ℂ ∖ (-∞, 1]` or in the unit disk:
 `u = e^{μℓ/2} K(γ)`, `ℓ` a continuous logarithm of `γ - 1`. -/
-lemma legTr_isTransport_branch (ν μ : ℂ) {γ : ℝ → ℂ} (hγ : Differentiable ℝ γ) {ℓ : ℝ → ℂ}
+theorem legTr_isTransport_branch (ν μ : ℂ) {γ : ℝ → ℂ} (hγ : Differentiable ℝ γ) {ℓ : ℝ → ℂ}
     (hℓ : ContinuousOn ℓ (Icc 0 1)) (hexp : ∀ t ∈ Icc (0:ℝ) 1, exp (ℓ t) = γ t - 1)
     (hdom : ∀ t ∈ Icc (0:ℝ) 1, γ t - 1 ∈ slitPlane ∨ γ t ∈ Metric.ball (0:ℂ) 1) :
     IsLegendreTransport ν μ γ (legTr_u ν μ γ ℓ 0) (legTr_v ν μ γ ℓ 0) (legTr_u ν μ γ ℓ)
@@ -1432,7 +1432,7 @@ lemma legTr_isTransport_branch (ν μ : ℂ) {γ : ℝ → ℂ} (hγ : Different
       (fun w hw => slitPlane_ne_zero (legendre_disk_facts hw).2.2.2.1)
 
 /-- Gluing two everywhere-differentiable functions that agree to first order at `a`. -/
-lemma legTr_hasDerivAt_piecewise {f g f' g' : ℝ → ℂ} {a : ℝ} (hf : ∀ t, HasDerivAt f (f' t) t)
+theorem legTr_hasDerivAt_piecewise {f g f' g' : ℝ → ℂ} {a : ℝ} (hf : ∀ t, HasDerivAt f (f' t) t)
     (hg : ∀ t, HasDerivAt g (g' t) t) (ha : f a = g a) (ha' : f' a = g' a) (t : ℝ) :
     HasDerivAt (fun t => if t ≤ a then f t else g t) (if t ≤ a then f' t else g' t) t := by
   rcases lt_trichotomy t a with h | h | h
@@ -1458,7 +1458,7 @@ lemma legTr_hasDerivAt_piecewise {f g f' g' : ℝ → ℂ} {a : ℝ} (hf : ∀ t
     simp [not_le.mpr (show a < x from hx)]
 
 /-- Gluing two functions continuous on adjacent closed intervals. -/
-lemma legTr_continuousOn_piecewise {f g : ℝ → ℂ} {p a q : ℝ} (hf : ContinuousOn f (Icc p a))
+theorem legTr_continuousOn_piecewise {f g : ℝ → ℂ} {p a q : ℝ} (hf : ContinuousOn f (Icc p a))
     (hg : ContinuousOn g (Icc a q)) (ha : f a = g a) :
     ContinuousOn (fun t => if t ≤ a then f t else g t) (Icc p q) := by
   have h1 : ContinuousOn (fun t => if t ≤ a then f t else g t) (Icc p a) :=
@@ -1473,7 +1473,7 @@ lemma legTr_continuousOn_piecewise {f g : ℝ → ℂ} {p a q : ℝ} (hf : Conti
   · exact Or.inr ⟨h, hx.2⟩
 
 /-- `ℂ ∖ (-∞, 0]` is star-shaped about `1/2`. -/
-lemma legTr_star_mem {w : ℂ} (hw : w ∈ slitPlane) {r : ℝ} (hr0 : 0 ≤ r) (hr1 : r ≤ 1) :
+theorem legTr_star_mem {w : ℂ} (hw : w ∈ slitPlane) {r : ℝ} (hr0 : 0 ≤ r) (hr1 : r ≤ 1) :
     (1 - r) * w + r * (1/2) ∈ slitPlane := by
   rw [mem_slitPlane_iff] at hw ⊢
   rcases eq_or_lt_of_le hr1 with h | h
@@ -1485,7 +1485,7 @@ lemma legTr_star_mem {w : ℂ} (hw : w ∈ slitPlane) {r : ℝ} (hr0 : 0 ≤ r) 
     · right; simp [hi]; exact fun h' => by linarith
 
 /-- The smooth step maps `[0, 1]` into `[0, 1]`. -/
-lemma legTr_S_mem {x : ℝ} (h0 : 0 ≤ x) (h1 : x ≤ 1) :
+theorem legTr_S_mem {x : ℝ} (h0 : 0 ≤ x) (h1 : x ≤ 1) :
     0 ≤ legendreSmoothStep x ∧ legendreSmoothStep x ≤ 1 := by
   unfold legendreSmoothStep
   constructor
@@ -1493,7 +1493,7 @@ lemma legTr_S_mem {x : ℝ} (h0 : 0 ≤ x) (h1 : x ≤ 1) :
   · nlinarith [mul_nonneg (sq_nonneg (1-x)) (by linarith : (0:ℝ) ≤ 1+2*x)]
 
 /-- Derivative of `t ↦ S(3t-c)`. -/
-lemma legTr_hasDerivAt_S (c : ℝ) (t : ℝ) :
+theorem legTr_hasDerivAt_S (c : ℝ) (t : ℝ) :
     HasDerivAt (fun t : ℝ => ((legendreSmoothStep (3*t-c) : ℝ) : ℂ))
       (((6*(3*t-c)-6*(3*t-c)^2)*3 : ℝ) : ℂ) t := by
   have h : HasDerivAt (fun t : ℝ => legendreSmoothStep (3*t-c)) ((6*(3*t-c)-6*(3*t-c)^2)*3) t := by
@@ -1513,13 +1513,13 @@ noncomputable def legTr_loopDeriv (z : ℂ) (s : ℤ) (t : ℝ) : ℂ :=
     1/2*exp (2*π*I*s*legendreSmoothStep (3*t-1))*(2*π*I*s*legTr_Sd 1 t) else legTr_Sd 2 t*(z-3/2)
 
 /-- `e^{2πis S(1)} = 1`. -/
-lemma legTr_exp_two_pi_s (s : ℤ) : exp (2*π*I*s*((legendreSmoothStep (3*(2/3:ℝ)-1) : ℝ) : ℂ)) = 1 := by
+theorem legTr_exp_two_pi_s (s : ℤ) : exp (2*π*I*s*((legendreSmoothStep (3*(2/3:ℝ)-1) : ℝ) : ℂ)) = 1 := by
   rw [show legendreSmoothStep (3*(2/3:ℝ)-1) = 1 by unfold legendreSmoothStep; norm_num]
   rw [show 2*π*I*(s:ℂ)*((1:ℝ):ℂ) = (s:ℂ)*(2*π*I) by push_cast; ring]
   exact exp_int_mul_two_pi_mul_I s
 
 /-- `legendreOneLoop` is differentiable, with derivative `legTr_loopDeriv`. -/
-lemma legTr_hasDerivAt_loop (z : ℂ) (s : ℤ) (t : ℝ) :
+theorem legTr_hasDerivAt_loop (z : ℂ) (s : ℤ) (t : ℝ) :
     HasDerivAt (legendreOneLoop z s) (legTr_loopDeriv z s t) t := by
   have hA : ∀ t, HasDerivAt (fun t : ℝ => z+legendreSmoothStep (3*t)*(3/2-z)) (legTr_Sd 0 t*(3/2-z)) t := by
     intro t
@@ -1543,7 +1543,7 @@ lemma legTr_hasDerivAt_loop (z : ℂ) (s : ℤ) (t : ℝ) :
   exact h
 
 /-- The derivative of `legendreOneLoop` is continuous. -/
-lemma legTr_continuous_loopDeriv (z : ℂ) (s : ℤ) : Continuous (legTr_loopDeriv z s) := by
+theorem legTr_continuous_loopDeriv (z : ℂ) (s : ℤ) : Continuous (legTr_loopDeriv z s) := by
   have hS : ∀ c, Continuous (legTr_Sd c) := fun c => by unfold legTr_Sd; fun_prop
   have hS' : Continuous fun t : ℝ => ((legendreSmoothStep (3*t-1) : ℝ) : ℂ) := by
     unfold legendreSmoothStep; fun_prop
@@ -1555,7 +1555,7 @@ lemma legTr_continuous_loopDeriv (z : ℂ) (s : ℤ) : Continuous (legTr_loopDer
   · intro x hx; rw [hx]; unfold legTr_Sd; norm_num
 
 /-- `legendreOneLoop` is `C¹`. -/
-lemma legTr_contDiff_loop (z : ℂ) (s : ℤ) : ContDiff ℝ 1 (legendreOneLoop z s) := by
+theorem legTr_contDiff_loop (z : ℂ) (s : ℤ) : ContDiff ℝ 1 (legendreOneLoop z s) := by
   rw [contDiff_one_iff_deriv]
   refine ⟨fun t => (legTr_hasDerivAt_loop z s t).differentiableAt, ?_⟩
   have : deriv (legendreOneLoop z s) = legTr_loopDeriv z s :=
@@ -1568,21 +1568,21 @@ noncomputable def legTr_ell (z : ℂ) (s : ℤ) (t : ℝ) : ℂ :=
     log (1/2)+2*π*I*s*legendreSmoothStep (3*t-1) else log (3/2+legendreSmoothStep (3*t-2)*(z-3/2)-1)+2*π*I*s
 
 /-- The first leg of `legendreOneLoop` stays in `ℂ ∖ (-∞, 1]`. -/
-lemma legTr_mem_first {z : ℂ} (hz : z-1 ∈ slitPlane) {t : ℝ} (ht : t ∈ Icc (0:ℝ) (1/3)) :
+theorem legTr_mem_first {z : ℂ} (hz : z-1 ∈ slitPlane) {t : ℝ} (ht : t ∈ Icc (0:ℝ) (1/3)) :
     z+legendreSmoothStep (3*t)*(3/2-z)-1 ∈ slitPlane := by
   obtain ⟨h0, h1⟩ := legTr_S_mem (x := 3*t) (by linarith [ht.1]) (by linarith [ht.2])
   have := legTr_star_mem hz h0 h1
   convert this using 1; ring
 
 /-- The last leg of `legendreOneLoop` stays in `ℂ ∖ (-∞, 1]`. -/
-lemma legTr_mem_last {z : ℂ} (hz : z-1 ∈ slitPlane) {t : ℝ} (ht : t ∈ Icc (2/3:ℝ) 1) :
+theorem legTr_mem_last {z : ℂ} (hz : z-1 ∈ slitPlane) {t : ℝ} (ht : t ∈ Icc (2/3:ℝ) 1) :
     3/2+legendreSmoothStep (3*t-2)*(z-3/2)-1 ∈ slitPlane := by
   obtain ⟨h0, h1⟩ := legTr_S_mem (x := 3*t-2) (by linarith [ht.1]) (by linarith [ht.2])
   have := legTr_star_mem hz (r := 1 - legendreSmoothStep (3*t-2)) (by linarith) (by linarith)
   convert this using 1; push_cast; ring
 
 /-- `e^{ℓ(t)} = γ(t) - 1` along `legendreOneLoop`. -/
-lemma legTr_exp_ell {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) {t : ℝ} (ht : t ∈ Icc (0:ℝ) 1) :
+theorem legTr_exp_ell {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) {t : ℝ} (ht : t ∈ Icc (0:ℝ) 1) :
     exp (legTr_ell z s t) = legendreOneLoop z s t - 1 := by
   unfold legTr_ell legendreOneLoop
   split_ifs with h1 h2
@@ -1592,7 +1592,7 @@ lemma legTr_exp_ell {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) {t : ℝ} (ht :
       show 2*π*I*(s:ℂ) = (s:ℂ)*(2*π*I) by ring, exp_int_mul_two_pi_mul_I, mul_one]
 
 /-- `legTr_ell` is continuous on `[0, 1]`. -/
-lemma legTr_continuousOn_ell {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) :
+theorem legTr_continuousOn_ell {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) :
     ContinuousOn (legTr_ell z s) (Icc 0 1) := by
   have hS : ∀ c : ℝ, Continuous fun t : ℝ => ((legendreSmoothStep (3*t-c) : ℝ) : ℂ) := fun c => by
     unfold legendreSmoothStep; fun_prop
@@ -1616,7 +1616,7 @@ lemma legTr_continuousOn_ell {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) :
     unfold legendreSmoothStep; norm_num
 
 /-- Each point of `legendreOneLoop` lies in `ℂ ∖ (-∞, 1]` or in the unit disk. -/
-lemma legTr_loop_dom {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) {t : ℝ} (ht : t ∈ Icc (0:ℝ) 1) :
+theorem legTr_loop_dom {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) {t : ℝ} (ht : t ∈ Icc (0:ℝ) 1) :
     legendreOneLoop z s t - 1 ∈ slitPlane ∨ legendreOneLoop z s t ∈ Metric.ball (0:ℂ) 1 := by
   unfold legendreOneLoop
   split_ifs with h1 h2
@@ -1686,7 +1686,7 @@ theorem associatedP_one_continuation (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitP
 /-! ### Helpers for DLMF 14.24.1 and 14.24.4: continuity and linearity of the transport (prefix `legTr_`) -/
 
 /-- Gronwall step for `legTr_transport_tendsto`: the second component of the difference system. -/
-lemma legTr_diff_bound {g γ q α β α0 β0 ux vx u v : ℂ} {G Γ0 Qi A B U : ℝ}
+theorem legTr_diff_bound {g γ q α β α0 β0 ux vx u v : ℂ} {G Γ0 Qi A B U : ℝ}
     (hg : ‖g‖ ≤ G) (hγ : ‖γ‖ ≤ Γ0) (hq : ‖q⁻¹‖ ≤ Qi) (hα : ‖α‖ ≤ A) (hβ : ‖β‖ ≤ B) (hu : ‖u‖ ≤ U)
     (hG : 0 ≤ G) (hQi : 0 ≤ Qi) (hΓ : 0 ≤ Γ0) (hA : 0 ≤ A) (hB : 0 ≤ B) :
     ‖g*(2*γ*vx-(α-β/q)*ux)/q - g*(2*γ*v-(α0-β0/q)*u)/q‖ ≤
@@ -1721,7 +1721,7 @@ lemma legTr_diff_bound {g γ q α β α0 β0 ux vx u v : ℂ} {G Γ0 Qi A B U : 
 
 /-- Continuous dependence of the Legendre transport on the degree, the order and the initial
 data (Gronwall). -/
-lemma legTr_transport_tendsto {X : Type*} {l : Filter X} {γ : ℝ → ℂ} (hγ : ContDiff ℝ 1 γ)
+theorem legTr_transport_tendsto {X : Type*} {l : Filter X} {γ : ℝ → ℂ} (hγ : ContDiff ℝ 1 γ)
     (hreg : ∀ t ∈ Icc (0:ℝ) 1, γ t ≠ 1 ∧ γ t ≠ -1) {νf μf af bf : X → ℂ} {ν μ a b : ℂ}
     (hν : Tendsto νf l (𝓝 ν)) (hμ : Tendsto μf l (𝓝 μ)) (ha : Tendsto af l (𝓝 a))
     (hb : Tendsto bf l (𝓝 b)) :
@@ -1838,12 +1838,12 @@ lemma legTr_transport_tendsto {X : Type*} {l : Filter X} {γ : ℝ → ℂ} (hγ
   simpa using this
 
 /-- The transport depends on the order only through `μ²`. -/
-lemma legTr_transport_neg_order (ν μ : ℂ) (γ : ℝ → ℂ) (a b : ℂ) :
+theorem legTr_transport_neg_order (ν μ : ℂ) (γ : ℝ → ℂ) (a b : ℂ) :
     legendreTransport ν (-μ) γ a b = legendreTransport ν μ γ a b := by
   simp only [legendreTransport, IsLegendreTransport, neg_sq]
 
 /-- The transport is linear in the initial data. -/
-lemma legTr_transport_linear (ν μ : ℂ) {γ : ℝ → ℂ} (hγ : ContDiff ℝ 1 γ)
+theorem legTr_transport_linear (ν μ : ℂ) {γ : ℝ → ℂ} (hγ : ContDiff ℝ 1 γ)
     (hreg : ∀ t ∈ Icc (0:ℝ) 1, γ t ≠ 1 ∧ γ t ≠ -1) (c₁ c₂ a₁ b₁ a₂ b₂ : ℂ) :
     legendreTransport ν μ γ (c₁*a₁ + c₂*a₂) (c₁*b₁ + c₂*b₂) =
       c₁*legendreTransport ν μ γ a₁ b₁ + c₂*legendreTransport ν μ γ a₂ b₂ := by
@@ -1862,7 +1862,7 @@ lemma legTr_transport_linear (ν μ : ℂ) {γ : ℝ → ℂ} (hγ : ContDiff �
   exact legendreTransport_unique _ _ _ _ γ hγ hreg h
 
 /-- `legendreOneLoop` avoids `±1`. -/
-lemma legTr_loop_reg {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) :
+theorem legTr_loop_reg {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) :
     ∀ t ∈ Icc (0:ℝ) 1, legendreOneLoop z s t ≠ 1 ∧ legendreOneLoop z s t ≠ -1 := by
   intro t ht
   rcases legTr_loop_dom hz s ht with h | h
@@ -1872,7 +1872,7 @@ lemma legTr_loop_reg {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) :
     refine ⟨fun h1 => by rw [h1] at hn; simp at hn, fun h1 => by rw [h1] at hn; simp at hn⟩
 
 /-- DLMF 14.24.4 for non-integer order, from 14.24.3 for `P^{±μ}_ν` and the connection formula. -/
-lemma legTr_one_olverQ_nonint (ν m : ℂ) (hm : ∀ n : ℤ, m ≠ n) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) :
+theorem legTr_one_olverQ_nonint (ν m : ℂ) (hm : ∀ n : ℤ, m ≠ n) {z : ℂ} (hz : z-1 ∈ slitPlane) (s : ℤ) :
     legendreOneContinued (olverQ ν m) ν m z s = exp (-s*m*π*I)*olverQ ν m z-
       π*I*sin (s*m*π)/(sin (m*π)*Gamma (ν-m+1))*associatedP ν (-m) z := by
   have hγ := legTr_contDiff_loop z s
@@ -1909,12 +1909,12 @@ lemma legTr_one_olverQ_nonint (ν m : ℂ) (hm : ∀ n : ℤ, m ≠ n) {z : ℂ}
   ring
 
 /-- The transport depends on the degree only through `ν(ν+1)`. -/
-lemma legTr_transport_degree_eq {ν ν' : ℂ} (h : ν'*(ν'+1) = ν*(ν+1)) (μ : ℂ) (γ : ℝ → ℂ) (a b : ℂ) :
+theorem legTr_transport_degree_eq {ν ν' : ℂ} (h : ν'*(ν'+1) = ν*(ν+1)) (μ : ℂ) (γ : ℝ → ℂ) (a b : ℂ) :
     legendreTransport ν' μ γ a b = legendreTransport ν μ γ a b := by
   simp only [legendreTransport, IsLegendreTransport, h]
 
 /-- The ellipse path is `C¹`. -/
-lemma legTr_contDiff_ellipse (z : ℂ) (s : ℤ) : ContDiff ℝ 1 (legendreEllipsePath z s) := by
+theorem legTr_contDiff_ellipse (z : ℂ) (s : ℤ) : ContDiff ℝ 1 (legendreEllipsePath z s) := by
   have he : legendreEllipsePath z s = fun t : ℝ =>
       ((z + exp ((log (z-1) + log (z+1))/2)) * exp ((s:ℂ)*π*I * ofRealCLM t) +
         (z + exp ((log (z-1) + log (z+1))/2))⁻¹ * exp ((-(s:ℂ))*π*I * ofRealCLM t))/2 := by
@@ -1924,7 +1924,7 @@ lemma legTr_contDiff_ellipse (z : ℂ) (s : ℤ) : ContDiff ℝ 1 (legendreEllip
   fun_prop
 
 /-- `ν ↦ ∂_z P^{-μ}_ν(z)` is continuous. -/
-lemma legTr_continuous_deriv_associatedP_degree (μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem legTr_continuous_deriv_associatedP_degree (μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     Continuous fun ν => deriv (associatedP ν (-μ)) z := by
   have hw := mem_cutPlane_of_one_add (one_add_mem_slitPlane_of_sub_one hz)
   have e := funext fun ν => deriv_associatedP ν (-μ) hz
@@ -1936,7 +1936,7 @@ lemma legTr_continuous_deriv_associatedP_degree (μ : ℂ) {z : ℂ} (hz : z-1 �
     (continuous_const.mul hG))
 
 /-- DLMF 14.24.1 off the zeros of `cos νπ`, from 14.24.2 for `𝑸^μ_ν`, `𝑸^μ_{-ν-1}` and 14.9.12. -/
-lemma legTr_ellipse_associatedP_generic (ν μ : ℂ) (hc : cos (ν*π) ≠ 0) {z : ℂ} (hz : z-1 ∈ slitPlane)
+theorem legTr_ellipse_associatedP_generic (ν μ : ℂ) (hc : cos (ν*π) ≠ 0) {z : ℂ} (hz : z-1 ∈ slitPlane)
     (s : ℤ) :
     legendreEllipseContinued (associatedP ν (-μ)) ν μ z s = exp (s*ν*π*I)*associatedP ν (-μ) z+
       2*I*sin ((ν+1/2)*s*π)*exp (-s*π*I/2)/(cos (ν*π)*Gamma (μ-ν))*olverQ ν μ z := by

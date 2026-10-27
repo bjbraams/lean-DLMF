@@ -6,8 +6,9 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.QHypergeometric.Basic
-public import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
+public import DLMF.QSeries.QCalculus
+public import DLMF.QSeries.Saalschutz
+public import Mathlib.LinearAlgebra.Complex.FiniteDimensional
 
 /-!
 # q-calculus adapters and Gaussian coefficients (DLMF §17.2)
@@ -210,7 +211,7 @@ theorem q_binomial_series {q z : ℂ} (hq : ‖q‖<1) (hz : ‖z‖<1) (m : ℕ
   simpa [qBinom_eq hq] using hs
 
 /-- The Jackson integral to `q^{-n}` as a tail sum of the bilateral series. -/
-theorem qaR4_jackson_neg_pow {q : ℂ} (hq0 : q≠0) (f : ℂ → ℂ) (n : ℕ) :
+lemma qaR4_jackson_neg_pow {q : ℂ} (hq0 : q≠0) (f : ℂ → ℂ) (n : ℕ) :
     jacksonIntegral q (q^(-(n:ℤ))) f=(1-q)*∑' k : ℤ,
       (if -(n:ℤ)≤k then q^k*f (q^k) else 0) := by
   unfold jacksonIntegral
@@ -231,7 +232,7 @@ theorem qaR4_jackson_neg_pow {q : ℂ} (hq0 : q≠0) (f : ℂ → ℂ) (n : ℕ)
     exact ⟨(k+n).toNat,by simp; omega⟩
 
 /-- A finite Jackson sum to `q^{-n}` split into its negative part and a positive partial sum. -/
-theorem qaR4_jackson_partial_split {q : ℂ} (hq0 : q≠0) (f : ℂ → ℂ) (n M : ℕ) :
+lemma qaR4_jackson_partial_split {q : ℂ} (hq0 : q≠0) (f : ℂ → ℂ) (n M : ℕ) :
     q^(-(n:ℤ))*(1-q)*∑ j∈range (n+M), f (q^(-(n:ℤ))*q^j)*q^j=
       (1-q)*((∑ i∈range n, q^(-(i:ℤ)-1)*f (q^(-(i:ℤ)-1)))+∑ j∈range M, q^j*f (q^j)) := by
   have e : ∀ j : ℕ, q^(-(n:ℤ))*q^j=q^((j:ℤ)-n) := fun j => by
@@ -258,7 +259,7 @@ noncomputable def qaR4_fdCoeff (q : ℂ) (n j : ℕ) : ℂ :=
   q^(-(n:ℤ)*j+((j+1).choose 2:ℤ))*(-1:ℂ)^j*qBinom q n j
 
 /-- The q-Pascal step for the finite-difference coefficients. -/
-theorem qaR4_fdCoeff_succ {q : ℂ} (hq0 : q≠0) (n j : ℕ) :
+lemma qaR4_fdCoeff_succ {q : ℂ} (hq0 : q≠0) (n j : ℕ) :
     qaR4_fdCoeff q (n+1) (j+1)=-(q^(-(n:ℤ))*qaR4_fdCoeff q n j)+qaR4_fdCoeff q n (j+1) := by
   simp only [qaR4_fdCoeff,qBinom_succ_succ]
   have h1 : q^(-((n+1:ℕ):ℤ)*((j+1:ℕ):ℤ)+((j+1+1).choose 2:ℤ))=
@@ -272,7 +273,7 @@ theorem qaR4_fdCoeff_succ {q : ℂ} (hq0 : q≠0) (n j : ℕ) :
   ring
 
 /-- The coefficient recursion behind 17.2.E42. -/
-theorem qaR4_fdCoeff_sum {q : ℂ} (hq0 : q≠0) (F : ℕ → ℂ) (n : ℕ) :
+lemma qaR4_fdCoeff_sum {q : ℂ} (hq0 : q≠0) (F : ℕ → ℂ) (n : ℕ) :
     ∑ j∈range (n+1+1), qaR4_fdCoeff q (n+1) j*F j=
       ∑ j∈range (n+1), qaR4_fdCoeff q n j*F j-
         q^(-(n:ℤ))*∑ j∈range (n+1), qaR4_fdCoeff q n j*F (j+1) := by
@@ -307,7 +308,7 @@ theorem qaR4_qBinom_symm (q : ℂ) (k m : ℕ) : qBinom q (k+m) k=qBinom q (k+m)
     rw [qBinom_succ_succ,h1,h2,qBinom_succ_succ',show n-m=k+1 by omega]
 
 /-- Gaussian polynomials are entire functions of the base. -/
-theorem qaR4_qBinom_differentiable (n k : ℕ) : Differentiable ℂ (fun q : ℂ => qBinom q n k) := by
+lemma qaR4_qBinom_differentiable (n k : ℕ) : Differentiable ℂ (fun q : ℂ => qBinom q n k) := by
   induction n generalizing k with
   | zero => cases k <;> exact differentiable_const _
   | succ n ih =>
@@ -318,7 +319,7 @@ theorem qaR4_qBinom_differentiable (n k : ℕ) : Differentiable ℂ (fun q : ℂ
       exact (ih k).add ((differentiable_id.pow _).mul (ih (k+1)))
 
 /-- An identity between entire functions of `q` that holds for `‖q‖<1` holds for all `q`. -/
-theorem qaR4_entire_eq_of_disc {f g : ℂ → ℂ} (hf : Differentiable ℂ f) (hg : Differentiable ℂ g)
+lemma qaR4_entire_eq_of_disc {f g : ℂ → ℂ} (hf : Differentiable ℂ f) (hg : Differentiable ℂ g)
     (h : ∀ q : ℂ, ‖q‖<1 → f q=g q) (q : ℂ) : f q=g q := by
   have hfg : AnalyticOnNhd ℂ (f-g) univ := fun z _ => (hf.sub hg).analyticAt z
   have hev : (f-g)=ᶠ[𝓝 0] 0 := by
@@ -352,7 +353,7 @@ theorem qaR4_qBinom_absorb (q : ℂ) (m j : ℕ) :
   linear_combination h1
 
 /-- The alternating Gaussian sum `T_m=∑(-1)^j[m,j]`. -/
-theorem qaR4_alt_sum_rec (q : ℂ) (m : ℕ) :
+lemma qaR4_alt_sum_rec (q : ℂ) (m : ℕ) :
     ∑ j∈range (m+2+1), (-1:ℂ)^j*qBinom q (m+2) j=
       (1-q^(m+1))*∑ j∈range (m+1), (-1:ℂ)^j*qBinom q m j := by
   have hc : ∀ j : ℕ, qBinom q (m+2) (j+1)=qBinom q (m+1) (j+1)+qBinom q (m+1) j-

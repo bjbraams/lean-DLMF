@@ -39,7 +39,7 @@ theorem derivWeierstrassP_sq_eq_prod {z : ℂ} (hz : z ∉ H.lattice) :
 end HalfPeriods
 
 /-- `℘'` does not vanish identically off the lattice. -/
-theorem p23R1_exists_derivWeierstrassP_ne_zero (L : PeriodPair) :
+lemma p23R1_exists_derivWeierstrassP_ne_zero (L : PeriodPair) :
     ¬ ∀ w ∈ (L.latticeᶜ : Set ℂ), ℘'[L] w = 0 := by
   intro h
   have hU : IsOpen (L.latticeᶜ : Set ℂ) := L.isClosed_lattice.isOpen_compl

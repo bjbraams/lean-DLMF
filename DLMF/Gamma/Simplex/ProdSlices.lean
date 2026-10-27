@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.MeasureTheory.Integral.Prod
-public import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
 
 /-!
 # Product integrals over measurable sets by slices
@@ -75,7 +74,7 @@ open _root_.MeasureTheory
 
 /-- Swapping the coordinates of an indicator function is the indicator of the swapped set applied to
 the swapped function. -/
-private theorem indicator_swap {α β γ : Type*} [Zero γ] (T : Set (α × β)) (f : α × β → γ) :
+private lemma indicator_swap {α β γ : Type*} [Zero γ] (T : Set (α × β)) (f : α × β → γ) :
     (fun q : β × α ↦ T.indicator f q.swap) =
       (Prod.swap ⁻¹' T).indicator (fun q ↦ f q.swap) := by
   classical
@@ -165,7 +164,7 @@ variable {α : Type*} [MeasurableSpace α]
 omit [MeasurableSpace α] in
 /-- The fiber of a region between two graphs is the corresponding closed interval when the base
 point lies in the base set, and is empty otherwise. -/
-private theorem prod_Icc_slice_preimage (s : Set α) (lo hi : α → ℝ) (x : α) :
+private lemma prod_Icc_slice_preimage (s : Set α) (lo hi : α → ℝ) (x : α) :
     Prod.mk x ⁻¹' {p : α × ℝ | p.1 ∈ s ∧ p.2 ∈ Icc (lo p.1) (hi p.1)} =
       {t | x ∈ s ∧ t ∈ Icc (lo x) (hi x)} := by
   ext t

@@ -8,7 +8,6 @@ module
 public import DLMF.Legendre.Associated
 public import DLMF.Legendre.Connections
 public import DLMF.Legendre.AssociatedRecurrences
-public import Mathlib.Analysis.SpecialFunctions.Gamma.Digamma
 
 /-!
 # Hypergeometric representations and parameter derivatives
@@ -246,7 +245,7 @@ noncomputable def legHypT (c w : ℂ) (n : ℕ) (ν : ℂ) : ℂ :=
     (Gamma (c + n))⁻¹
 
 /-- Each term `legHypT c w n` is entire in the degree. -/
-lemma legHyp_differentiable_T (c w : ℂ) (n : ℕ) : Differentiable ℂ (legHypT c w n) := by
+theorem legHyp_differentiable_T (c w : ℂ) (n : ℕ) : Differentiable ℂ (legHypT c w n) := by
   have h1 : Differentiable ℂ fun ν : ℂ => (ascPochhammer ℂ n).eval (ν+1) :=
     (Polynomial.differentiable (ascPochhammer ℂ n)).comp (differentiable_id.add_const (1:ℂ))
   have h2 : Differentiable ℂ fun ν : ℂ => (ascPochhammer ℂ n).eval (-ν) :=
@@ -255,7 +254,7 @@ lemma legHyp_differentiable_T (c w : ℂ) (n : ℕ) : Differentiable ℂ (legHyp
   fun_prop
 
 /-- Locally uniform majorant for the terms `legHypT` near `ν₀`, for `‖w‖ < 1`. -/
-lemma legHyp_majorant (c w : ℂ) (hw : ‖w‖ < 1) (ν₀ : ℂ) :
+theorem legHyp_majorant (c w : ℂ) (hw : ‖w‖ < 1) (ν₀ : ℂ) :
     ∃ N : ℕ, ∃ u : ℕ → ℝ, Summable u ∧
       ∀ n, N ≤ n → ∀ ν ∈ Metric.ball ν₀ 1, ‖legHypT c w n ν‖ ≤ u n := by
   obtain ⟨N, hN⟩ : ∃ N : ℕ, 1 - c.re ≤ N := exists_nat_ge _
@@ -284,7 +283,7 @@ lemma legHyp_majorant (c w : ℂ) (hw : ‖w‖ < 1) (ν₀ : ℂ) :
   simpa only [coe_nnnorm, legHypT] using norm_term_le_majorant ha hb hre hm le_rfl hn
 
 /-- Termwise differentiation in the degree of `𝐅(ν+1, -ν; c; w)` on the unit disk. -/
-lemma legHyp_hasSum_deriv (c w : ℂ) (hw : ‖w‖ < 1) (ν₀ : ℂ) :
+theorem legHyp_hasSum_deriv (c w : ℂ) (hw : ‖w‖ < 1) (ν₀ : ℂ) :
     HasSum (fun n => legHypT c w n ν₀) (regularizedGaussHGFun (ν₀+1) (-ν₀) c w) ∧
     HasSum (fun n => deriv (legHypT c w n) ν₀)
       (deriv (fun ν => regularizedGaussHGFun (ν+1) (-ν) c w) ν₀) := by
@@ -320,7 +319,7 @@ lemma legHyp_hasSum_deriv (c w : ℂ) (hw : ‖w‖ < 1) (ν₀ : ℂ) :
   exact htail
 
 /-- `Γ' = Γ ψ` away from the poles. -/
-lemma legHyp_hasDerivAt_Gamma {s : ℂ} (hs : ∀ m : ℕ, s ≠ -m) :
+theorem legHyp_hasDerivAt_Gamma {s : ℂ} (hs : ∀ m : ℕ, s ≠ -m) :
     HasDerivAt Gamma (Gamma s * digamma s) s := by
   have hd := (differentiableAt_Gamma s hs).hasDerivAt
   convert hd using 1
@@ -328,32 +327,32 @@ lemma legHyp_hasDerivAt_Gamma {s : ℂ} (hs : ∀ m : ℕ, s ≠ -m) :
   field_simp [Gamma_ne_zero hs]
 
 /-- `sin(πν) ≠ 0` off the integers. -/
-lemma legHyp_sin_ne {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) : sin (π*ν) ≠ 0 := by
+theorem legHyp_sin_ne {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) : sin (π*ν) ≠ 0 := by
   intro h
   obtain ⟨k, hk⟩ := Complex.sin_eq_zero_iff.mp h
   have hπ : (π:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
   exact hν k (mul_left_cancel₀ hπ (by rw [hk]; ring))
 
 /-- `sin(πν) ≠ 0` forces `ν` to be non-integral. -/
-lemma legHyp_not_int {ν : ℂ} (h : sin (π*ν) ≠ 0) : ∀ n : ℤ, ν ≠ n := by
+theorem legHyp_not_int {ν : ℂ} (h : sin (π*ν) ≠ 0) : ∀ n : ℤ, ν ≠ n := by
   rintro n rfl
   apply h
   rw [Complex.sin_eq_zero_iff]; exact ⟨n, by ring⟩
 
 /-- Non-integral `ν` keeps `ν+1` off the poles of `Γ`. -/
-lemma legHyp_pole_add {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) : ∀ m : ℕ, ν + 1 ≠ -m := fun m h =>
+theorem legHyp_pole_add {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) : ∀ m : ℕ, ν + 1 ≠ -m := fun m h =>
   hν (-(m:ℤ)-1) (by push_cast; linear_combination h)
 
 /-- Non-integral `ν` keeps `-ν` off the poles of `Γ`. -/
-lemma legHyp_pole_neg {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) : ∀ m : ℕ, -ν ≠ -m := fun m h =>
+theorem legHyp_pole_neg {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) : ∀ m : ℕ, -ν ≠ -m := fun m h =>
   hν m (by push_cast; linear_combination -h)
 
 /-- A non-pole of `Γ` stays a non-pole after adding a natural number. -/
-lemma legHyp_pole_add_nat {s : ℂ} (hs : ∀ m : ℕ, s ≠ -m) (n : ℕ) : ∀ m : ℕ, s + n ≠ -m :=
+theorem legHyp_pole_add_nat {s : ℂ} (hs : ∀ m : ℕ, s ≠ -m) (n : ℕ) : ∀ m : ℕ, s + n ≠ -m :=
   fun m h => hs (m + n) (by push_cast; linear_combination h)
 
 /-- Off the integers, the term is `-(sin πν/π) Γ(ν+1+n) Γ(-ν+n) wⁿ/(n! Γ(c+n))`. -/
-lemma legHyp_T_eq (c w : ℂ) {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (n : ℕ) :
+theorem legHyp_T_eq (c w : ℂ) {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (n : ℕ) :
     legHypT c w n ν = -(sin (π*ν)/π) * (Gamma (ν+1+n) * Gamma (-ν+n) *
       (w^n / n.factorial * (Gamma (c+n))⁻¹)) := by
   have h1 := Gamma_add_nat_div_Gamma_eq (n := n) (ν+1) (legHyp_pole_add hν)
@@ -372,7 +371,7 @@ lemma legHyp_T_eq (c w : ℂ) {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (n : ℕ)
   linear_combination (Gamma (ν+1+n) * Gamma (-ν+n) * w^n * ((n.factorial:ℂ))⁻¹ * (Gamma (c+n))⁻¹) * hr2
 
 /-- Derivative of a term in the degree, off the integers. -/
-lemma legHyp_hasDerivAt_T (c w : ℂ) {ν₀ : ℂ} (hν : ∀ n : ℤ, ν₀ ≠ n) (n : ℕ) :
+theorem legHyp_hasDerivAt_T (c w : ℂ) {ν₀ : ℂ} (hν : ∀ n : ℤ, ν₀ ≠ n) (n : ℕ) :
     HasDerivAt (legHypT c w n) ((-cos (π*ν₀) - sin (π*ν₀)/π *
       (digamma (ν₀+1+n) - digamma (-ν₀+n))) *
       (Gamma (ν₀+1+n) * Gamma (-ν₀+n) * (w^n / n.factorial * (Gamma (c+n))⁻¹))) ν₀ := by
@@ -401,7 +400,7 @@ lemma legHyp_hasDerivAt_T (c w : ℂ) {ν₀ : ℂ} (hν : ∀ n : ℤ, ν₀ �
 
 /-- The series of DLMF 14.11.3 in the degree-derivative form: with `S_n = Γ(ν+1+n)Γ(-ν+n)wⁿ/(n!Γ(c+n))`,
 `∑ S_n (ψ(ν+1+n) - ψ(-ν+n))` converges, to `(π / sin πν) (-cos πν ∑ S_n - F')`. -/
-lemma legHyp_hasSum_R (c w : ℂ) (hw : ‖w‖ < 1) {ν₀ : ℂ} (hν : ∀ n : ℤ, ν₀ ≠ n) :
+theorem legHyp_hasSum_R (c w : ℂ) (hw : ‖w‖ < 1) {ν₀ : ℂ} (hν : ∀ n : ℤ, ν₀ ≠ n) :
     let S : ℕ → ℂ := fun n => Gamma (ν₀+1+n) * Gamma (-ν₀+n) * (w^n / n.factorial * (Gamma (c+n))⁻¹)
     HasSum S (-(π / sin (π*ν₀)) * regularizedGaussHGFun (ν₀+1) (-ν₀) c w) ∧
     HasSum (fun n => S n * (digamma (ν₀+1+n) - digamma (-ν₀+n)))
@@ -426,13 +425,13 @@ lemma legHyp_hasSum_R (c w : ℂ) (hw : ‖w‖ < 1) {ν₀ : ℂ} (hν : ∀ n 
   ring
 
 /-- `|(1-x)/2| < 1` on `(-1,1)`. -/
-lemma legHyp_norm_w {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) : ‖((1-x)/2:ℂ)‖ < 1 := by
+theorem legHyp_norm_w {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) : ‖((1-x)/2:ℂ)‖ < 1 := by
   rw [show ((1-x)/2:ℂ) = (((1-x)/2:ℝ):ℂ) by push_cast; ring, Complex.norm_real, Real.norm_eq_abs,
     abs_lt]
   constructor <;> linarith [hx.1, hx.2]
 
 /-- The degree-derivative series converges throughout its complex argument disk. -/
-lemma legHyp_hasSum_A_complex {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (μ : ℂ) {z : ℂ} (hz : ‖(1-z)/2‖ < 1) :
+theorem legHyp_hasSum_A_complex {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (μ : ℂ) {z : ℂ} (hz : ‖(1-z)/2‖ < 1) :
     HasSum (fun k : ℕ => ((1-z)/2)^k*Gamma (k-ν)*Gamma (k+ν+1)/((k.factorial:ℂ)*Gamma (k-μ+1))*
         (digamma (k+ν+1)-digamma (k-ν)))
       (π / sin (π*ν) * (-cos (π*ν) * (-(π / sin (π*ν)) *
@@ -445,7 +444,7 @@ lemma legHyp_hasSum_A_complex {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (μ : ℂ
 
 /-- The series inside `A^μ_ν(x)` (DLMF 14.11.3) converges, with the value given by the degree
 derivative of `𝐅(ν+1, -ν; 1-μ; (1-x)/2)`. -/
-lemma legHyp_hasSum_A {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem legHyp_hasSum_A {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     HasSum (fun k : ℕ => ((1-x)/2:ℂ)^k*Gamma (k-ν)*Gamma (k+ν+1)/((k.factorial:ℂ)*Gamma (k-μ+1))*
         (digamma (k+ν+1)-digamma (k-ν)))
       (π / sin (π*ν) * (-cos (π*ν) * (-(π / sin (π*ν)) *
@@ -454,7 +453,7 @@ lemma legHyp_hasSum_A {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (μ : ℂ) {x : �
   simpa using legHyp_hasSum_A_complex hν μ (legHyp_norm_w hx)
 
 /-- `(1/Γ)' = -ψ/Γ` away from the poles. -/
-lemma legHyp_hasDerivAt_recipGamma {s : ℂ} (hs : ∀ m : ℕ, s ≠ -m) :
+theorem legHyp_hasDerivAt_recipGamma {s : ℂ} (hs : ∀ m : ℕ, s ≠ -m) :
     HasDerivAt (fun t => (Gamma t)⁻¹) (-digamma s * (Gamma s)⁻¹) s := by
   have h := (legHyp_hasDerivAt_Gamma hs).inv (Gamma_ne_zero hs)
   refine h.congr_deriv ?_
@@ -463,7 +462,7 @@ lemma legHyp_hasDerivAt_recipGamma {s : ℂ} (hs : ∀ m : ℕ, s ≠ -m) :
 
 /-- Order derivative at `μ = 0` from a connection formula
 `Γ(ν+μ+1)⁻¹ p(μ) - a(μ) Γ(ν-μ+1)⁻¹ p(-μ) = (2/π) sin(μπ) b(μ) Q(μ)`. -/
-lemma legHyp_order_deriv {p a b Q : ℂ → ℂ} {ν D : ℂ} (hν : ∀ m : ℕ, ν+1 ≠ -m)
+theorem legHyp_order_deriv {p a b Q : ℂ → ℂ} {ν D : ℂ} (hν : ∀ m : ℕ, ν+1 ≠ -m)
     (hp : HasDerivAt p D 0) (ha : HasDerivAt a 0 0) (ha0 : a 0 = 1)
     (hb : ContinuousAt b 0) (hQ : ContinuousAt Q 0)
     (hg : ∀ᶠ μ in 𝓝[≠] (0:ℂ), (Gamma (ν+μ+1))⁻¹ * p μ - a μ * ((Gamma (ν-μ+1))⁻¹ * p (-μ)) =
@@ -499,7 +498,7 @@ lemma legHyp_order_deriv {p a b Q : ℂ → ℂ} {ν D : ℂ} (hν : ∀ m : ℕ
   linear_combination (-1/2:ℂ) * hu
 
 /-- `𝖰^μ_ν(x)` is holomorphic in the order at a regular parameter. -/
-lemma legHyp_differentiableAt_ferrersQ_order {ν μ₀ : ℂ} (h : LegendreQRegular ν μ₀) {x : ℝ}
+theorem legHyp_differentiableAt_ferrersQ_order {ν μ₀ : ℂ} (h : LegendreQRegular ν μ₀) {x : ℝ}
     (hx : x ∈ Ioo (-1:ℝ) 1) : DifferentiableAt ℂ (fun μ => ferrersQ ν μ x) μ₀ := by
   have h1 : ∀ m : ℕ, (ν+μ₀+1)/2 ≠ -m := fun m hm => h (2*m) (by push_cast; linear_combination 2*hm)
   have h2 : ∀ m : ℕ, (ν+μ₀+2)/2 ≠ -m := fun m hm => h (2*m+1) (by push_cast; linear_combination 2*hm)
@@ -532,7 +531,7 @@ lemma legHyp_differentiableAt_ferrersQ_order {ν μ₀ : ℂ} (h : LegendreQRegu
       pw).mul (g2 μ₀)))
 
 /-- `𝖯^μ_ν(x)` is entire in the order. -/
-lemma legHyp_differentiable_ferrersP_order (ν : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem legHyp_differentiable_ferrersP_order (ν : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     Differentiable ℂ (fun μ => ferrersP ν μ x) := by
   have hw := legHyp_norm_w hx
   have hr : ((((1+x)/(1-x)):ℝ):ℂ) ≠ 0 := by
@@ -550,13 +549,13 @@ lemma legHyp_differentiable_ferrersP_order (ν : ℂ) {x : ℝ} (hx : x ∈ Ioo 
   exact fun μ => ((differentiableAt_id.div_const 2).const_cpow (Or.inl hr)).mul (hF μ)
 
 /-- `1/Γ(ν+μ+1) ≠ 0` gives the regularity of `(ν, μ)` for `Q`. -/
-lemma legHyp_regular_of_recip {ν μ : ℂ} (h : (Gamma (ν+μ+1))⁻¹ ≠ 0) : LegendreQRegular ν μ := by
+theorem legHyp_regular_of_recip {ν μ : ℂ} (h : (Gamma (ν+μ+1))⁻¹ ≠ 0) : LegendreQRegular ν μ := by
   intro n hn
   apply h
   rw [show ν+μ+1 = -(n:ℂ) by linear_combination hn, Complex.Gamma_neg_nat_eq_zero, inv_zero]
 
 /-- Near `μ = 0`, both `(ν, μ)` and `(ν, -μ)` are regular when `ν+1` is not a pole. -/
-lemma legHyp_eventually_regular {ν : ℂ} (hν : ∀ m : ℕ, ν+1 ≠ -m) :
+theorem legHyp_eventually_regular {ν : ℂ} (hν : ∀ m : ℕ, ν+1 ≠ -m) :
     ∀ᶠ μ in 𝓝 (0:ℂ), LegendreQRegular ν μ ∧ LegendreQRegular ν (-μ) := by
   have hinv : Continuous fun s : ℂ => (Gamma s)⁻¹ := continuous_recip_Gamma
   have h0 : (Gamma (ν+1))⁻¹ ≠ 0 := inv_ne_zero (Gamma_ne_zero hν)
@@ -568,7 +567,7 @@ lemma legHyp_eventually_regular {ν : ℂ} (hν : ∀ m : ℕ, ν+1 ≠ -m) :
   exact ⟨legHyp_regular_of_recip h1, legHyp_regular_of_recip h2⟩
 
 /-- Regularity at order zero keeps `ν+1` off the poles of `Γ`. -/
-lemma legHyp_nu {ν : ℂ} (hν : LegendreQRegular ν 0) : ∀ m : ℕ, ν+1 ≠ -m := fun m h =>
+theorem legHyp_nu {ν : ℂ} (hν : LegendreQRegular ν 0) : ∀ m : ℕ, ν+1 ≠ -m := fun m h =>
   hν m (by linear_combination h)
 
 /-- legendreDegreeA. -/

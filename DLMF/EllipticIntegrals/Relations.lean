@@ -47,11 +47,11 @@ namespace DLMF.EllipticIntegrals
 open Carlson.TwoVariable (carlsonRC)
 
 /-- Positive reals lie in the slit plane. -/
-theorem ei19b_ofReal_mem_slitPlane {a : ℝ} (ha : 0 < a) : ((a : ℝ) : ℂ) ∈ slitPlane :=
+lemma ei19b_ofReal_mem_slitPlane {a : ℝ} (ha : 0 < a) : ((a : ℝ) : ℂ) ∈ slitPlane :=
   ofReal_mem_slitPlane.mpr ha
 
 /-- `(y²)^{-1/2} = 1/y` for `y > 0`, as a complex power of a positive real. -/
-theorem ei19b_sq_cpow_neg_half {y : ℝ} (hy : 0 < y) :
+lemma ei19b_sq_cpow_neg_half {y : ℝ} (hy : 0 < y) :
     (((y ^ 2 : ℝ) : ℂ)) ^ (-1 / 2 : ℂ) = (y : ℂ)⁻¹ := by
   rw [show (-1 / 2 : ℂ) = ((-1 / 2 : ℝ) : ℂ) by push_cast; ring,
     ← ofReal_cpow (by positivity), ← Real.rpow_natCast, ← Real.rpow_mul hy.le]
@@ -74,21 +74,21 @@ theorem ei19b_symEllIntRC_scale {y a b : ℝ} (hy : 0 < y) (ha : 0 < a) (hb : 0 
   rfl
 
 /-- `R_C(y², y² b) = y⁻¹ R_C(1, b)`, `y, b > 0`. -/
-theorem ei19b_symEllIntRC_scale_one_left {y b : ℝ} (hy : 0 < y) (hb : 0 < b) :
+lemma ei19b_symEllIntRC_scale_one_left {y b : ℝ} (hy : 0 < y) (hb : 0 < b) :
     symEllIntRC ((y ^ 2 : ℝ) : ℂ) ((y ^ 2 * b : ℝ) : ℂ) = (y : ℂ)⁻¹ * carlsonRC 1 b := by
   have h := ei19b_symEllIntRC_scale hy one_pos hb
   rw [mul_one] at h
   rw [h, ofReal_one]
 
 /-- `R_C(y² a, y²) = y⁻¹ R_C(a, 1)`, `y, a > 0`. -/
-theorem ei19b_symEllIntRC_scale_one_right {y a : ℝ} (hy : 0 < y) (ha : 0 < a) :
+lemma ei19b_symEllIntRC_scale_one_right {y a : ℝ} (hy : 0 < y) (ha : 0 < a) :
     symEllIntRC ((y ^ 2 * a : ℝ) : ℂ) ((y ^ 2 : ℝ) : ℂ) = (y : ℂ)⁻¹ * carlsonRC a 1 := by
   have h := ei19b_symEllIntRC_scale hy ha one_pos
   rw [mul_one] at h
   rw [h, ofReal_one]
 
 /-- Oddness of `artanh` on `(-1, 1)`. -/
-theorem ei19b_artanh_neg {x : ℝ} (hx : |x| < 1) : Real.artanh (-x) = -Real.artanh x := by
+lemma ei19b_artanh_neg {x : ℝ} (hx : |x| < 1) : Real.artanh (-x) = -Real.artanh x := by
   rw [abs_lt] at hx
   rw [Real.artanh_eq_half_log ⟨by linarith, by linarith⟩,
     Real.artanh_eq_half_log ⟨by linarith, by linarith⟩,
@@ -98,7 +98,7 @@ theorem ei19b_artanh_neg {x : ℝ} (hx : |x| < 1) : Real.artanh (-x) = -Real.art
 
 /-- `log u = (u - 1) R_C(((u + 1)/2)², u)` for every `u > 0` (Carlson's `R_C`); Carlson's
 (6.9-16) gives `u > 1`, and `u < 1` follows by homogeneity from `1/u`. -/
-theorem ei19b_log_eq_mul_carlsonRC {u : ℝ} (hu : 0 < u) :
+lemma ei19b_log_eq_mul_carlsonRC {u : ℝ} (hu : 0 < u) :
     (Real.log u : ℂ) = (u - 1) * carlsonRC (((u + 1) / 2) ^ 2 : ℝ) u := by
   rcases lt_trichotomy u 1 with h | rfl | h
   · have hv : 1 < u⁻¹ := (one_lt_inv₀ hu).mpr h
@@ -151,7 +151,7 @@ theorem arctan_div_eq_mul_symEllIntRC (x : ℝ) {y : ℝ} (hy : 0 < y) :
 
 /-- `artanh u = u R_C(1, 1 - u²)` for `|u| < 1` (Carlson's `R_C`; odd extension of Carlson's
 `0 < u < 1`). -/
-theorem ei19b_artanh_eq_mul_carlsonRC {u : ℝ} (hu : |u| < 1) :
+lemma ei19b_artanh_eq_mul_carlsonRC {u : ℝ} (hu : |u| < 1) :
     (Real.artanh u : ℂ) = u * carlsonRC 1 (1 - u ^ 2 : ℝ) := by
   rcases lt_trichotomy u 0 with h | rfl | h
   · have h' := Carlson.TwoVariable.artanh_eq_mul_carlsonRC (x := -u) (by linarith)

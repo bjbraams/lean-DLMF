@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Lame.Basic
-public import DLMFMathlib.Analysis.ODE.PowerSeriesUniqueness
 public import DLMFMathlib.Analysis.ODE.P2lSturmLiouville
 public import DLMFMathlib.Analysis.ODE.P2sSturmOsc
 public import DLMF.Elliptic.JacobiIdentities
@@ -50,11 +49,11 @@ variable {h ν k : ℝ} {w : ℝ → ℝ}
 /-- The Lamé potential `ν(ν+1) k² sn²(x, k)`. -/
 def p2lPot (ν k : ℝ) (x : ℝ) : ℝ := ν * (ν + 1) * k ^ 2 * Real.jacobiSnm x (k ^ 2) ^ 2
 
-lemma p2lPot_continuous (hk : k ^ 2 < 1) : Continuous (p2lPot ν k) :=
+theorem p2lPot_continuous (hk : k ^ 2 < 1) : Continuous (p2lPot ν k) :=
   continuous_const.mul
     ((continuous_iff_continuousAt.2 fun x => (Real.hasDerivAt_jacobiSnm hk x).continuousAt).pow 2)
 
-lemma p2lPot_abs_le (x : ℝ) : |p2lPot ν k x| ≤ |ν * (ν + 1)| * k ^ 2 := by
+theorem p2lPot_abs_le (x : ℝ) : |p2lPot ν k x| ≤ |ν * (ν + 1)| * k ^ 2 := by
   have h1 : Real.jacobiSnm x (k ^ 2) ^ 2 ≤ 1 := by
     have := Real.jacobiSnm_sq_add_jacobiCnm_sq x (k ^ 2)
     nlinarith [sq_nonneg (Real.jacobiCnm x (k ^ 2))]
@@ -69,7 +68,7 @@ lemma p2lPot_abs_le (x : ℝ) : |p2lPot ν k x| ≤ |ν * (ν + 1)| * k ^ 2 := b
 lemma p2lPot_neg (hk : k ^ 2 < 1) (x : ℝ) : p2lPot ν k (-x) = p2lPot ν k x := by
   simp only [p2lPot, (jacobi_neg hk x).1, neg_sq]
 
-lemma p2l_isLameSolution_iff {h : ℝ} {w : ℝ → ℝ} :
+theorem p2l_isLameSolution_iff {h : ℝ} {w : ℝ → ℝ} :
     Real.IsLameSolution h ν k w ↔ ODE.p2lIsSol (p2lPot ν k) h w := by
   constructor
   · intro hw
@@ -78,7 +77,7 @@ lemma p2l_isLameSolution_iff {h : ℝ} {w : ℝ → ℝ} :
   · intro hw
     exact ⟨hw.1, fun x => (hw.2 x).congr_deriv (by simp only [p2lPot]; ring)⟩
 
-lemma p2l_lameSpectrum_eq (odd0 oddK : Bool) :
+theorem p2l_lameSpectrum_eq (odd0 oddK : Bool) :
     Real.lameSpectrum ν k odd0 oddK =
       ODE.p2lSpec (p2lPot ν k) (Real.compEllIntKm (k ^ 2)) odd0 oddK := by
   ext h
@@ -251,9 +250,9 @@ theorem Real.isNormalizedLameEigenfunction_lameEigenfunction (hν : -1 / 2 ≤ �
 
 /-! ### Helper lemmas: continuity, reflection, Green's identity -/
 
-lemma l29_sq_lt_one (hk0 : 0 < k) (hk1 : k < 1) : k ^ 2 < 1 := by nlinarith
+theorem l29_sq_lt_one (hk0 : 0 < k) (hk1 : k < 1) : k ^ 2 < 1 := by nlinarith
 
-lemma l29_continuous_sn (hk : k ^ 2 < 1) : Continuous fun x => Real.jacobiSnm x (k ^ 2) :=
+theorem l29_continuous_sn (hk : k ^ 2 < 1) : Continuous fun x => Real.jacobiSnm x (k ^ 2) :=
   continuous_iff_continuousAt.2 fun x => (Real.hasDerivAt_jacobiSnm hk x).continuousAt
 
 /-- `sn²` is even. -/
@@ -270,7 +269,7 @@ lemma l29_sn_sq_reflect_K (hk : k ^ 2 < 1) (x : ℝ) :
 
 /-- **Reflection principle** for Lamé's equation: if `sn²` is symmetric about `c`, a solution
 with `w'(c) = 0` is even about `c` and one with `w(c) = 0` is odd about `c`. -/
-theorem l29_reflect {c : ℝ} (hk : k ^ 2 < 1) (hw : Real.IsLameSolution h ν k w)
+lemma l29_reflect {c : ℝ} (hk : k ^ 2 < 1) (hw : Real.IsLameSolution h ν k w)
     (hsym : ∀ x, Real.jacobiSnm (2 * c - x) (k ^ 2) ^ 2 = Real.jacobiSnm x (k ^ 2) ^ 2) :
     (deriv w c = 0 → ∀ x, w (2 * c - x) = w x) ∧ (w c = 0 → ∀ x, w (2 * c - x) = -w x) := by
   set q : ℝ → ℝ := fun x => -(h - ν * (ν + 1) * k ^ 2 * Real.jacobiSnm x (k ^ 2) ^ 2) with hq_def
@@ -307,7 +306,7 @@ theorem l29_reflect {c : ℝ} (hk : k ^ 2 < 1) (hw : Real.IsLameSolution h ν k 
 
 /-- **Green's identity** for Lamé's equation: solutions `w₁, w₂` for distinct eigenvalues
 whose Wronskians vanish at `a` and `b` are orthogonal on `[a, b]` with weight `1`. -/
-theorem l29_integral_mul_eq_zero {h₁ h₂ : ℝ} {w₁ w₂ : ℝ → ℝ}
+lemma l29_integral_mul_eq_zero {h₁ h₂ : ℝ} {w₁ w₂ : ℝ → ℝ}
     (hne : h₁ ≠ h₂) (hw₁ : Real.IsLameSolution h₁ ν k w₁) (hw₂ : Real.IsLameSolution h₂ ν k w₂)
     {a b : ℝ} (ha : deriv w₁ a * w₂ a - w₁ a * deriv w₂ a = 0)
     (hb : deriv w₁ b * w₂ b - w₁ b * deriv w₂ b = 0) :

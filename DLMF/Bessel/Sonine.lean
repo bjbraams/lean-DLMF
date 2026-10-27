@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Bessel.Basic
-public import Mathlib.MeasureTheory.Integral.DominatedConvergence
 
 /-! # Sonine’s integral and Gamma-weighted integrals of regularized `₀F₁`
 
@@ -25,7 +24,7 @@ open DLMF.Hypergeometric
 open DLMF.Confluent
 
 /-- Integrating regularized `₀F₁` against its Gamma weight gives an exponential. -/
-lemma integral_regularized0F1_gamma {c w : ℂ} (hc : 0 < c.re) :
+theorem integral_regularized0F1_gamma {c w : ℂ} (hc : 0 < c.re) :
     ∫ t : ℝ in Ioi 0, (Real.exp (-t) : ℂ) * (t : ℂ) ^ (c - 1) *
       regularizedHGFun ∅ {c} (w * t) = exp w := by
   let d := regularizedHGFunCoeff (∅ : Multiset ℂ) {c}
@@ -96,7 +95,7 @@ lemma integral_regularized0F1_gamma {c w : ℂ} (hc : 0 < c.re) :
   exact setIntegral_congr_fun measurableSet_Ioi (fun t ht => (hpoint t ht).symm)
 
 /-- The scaled Gamma-weighted integral of regularized `₀F₁`. -/
-lemma integral_regularized0F1_gamma_scaled {c w : ℂ} {b : ℝ}
+theorem integral_regularized0F1_gamma_scaled {c w : ℂ} {b : ℝ}
     (hc : 0 < c.re) (hb : 0 < b) :
     ∫ t : ℝ in Ioi 0, (Real.exp (-(b * t)) : ℂ) * (t : ℂ) ^ (c - 1) *
       regularizedHGFun ∅ {c} (w * t) = (1 / b : ℂ) ^ c * exp (w / b) := by

@@ -5,7 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.ParabolicCylinder.Integrals
 public import DLMFMathlib.Analysis.ODE.PowerSeriesUniqueness
 public import DLMF.ParabolicCylinder.SectorAsymptotics
 
@@ -74,14 +73,14 @@ theorem pcfW_initial (a : ℝ) :
     simpa only [mul_zero, mul_one, zero_add] using h
 
 /-- `(e^{iπ/4})² = i`. -/
-lemma exp_pi_I_quarter_sq : exp (π*I/4)^2 = I := by
+theorem exp_pi_I_quarter_sq : exp (π*I/4)^2 = I := by
   rw [← Complex.exp_nat_mul, show ((2:ℕ):ℂ)*(π*I/4) = (π/2:ℝ)*I by push_cast; ring,
     Complex.exp_mul_I, ← Complex.ofReal_cos, ← Complex.ofReal_sin, Real.cos_pi_div_two,
     Real.sin_pi_div_two]
   simp
 
 /-- `e^{-iπ/4} e^{iπ/4} = 1`. -/
-lemma exp_neg_pi_I_quarter_mul : exp (-π*I/4) * exp (π*I/4) = 1 := by
+theorem exp_neg_pi_I_quarter_mul : exp (-π*I/4) * exp (π*I/4) = 1 := by
   rw [← Complex.exp_add]; ring_nf; simp
 
 /-- pcfWEven kummer. -/
@@ -113,7 +112,7 @@ def pcfWDeriv (a : ℝ) (z : ℂ) : ℂ :=
     pcfWDerivZero a * pcfOddDeriv (-I*a) (exp (π*I/4)*z)
 
 /-- A rotated solution of Weber's equation. -/
-lemma IsWeberSol.hasDerivAt_rot {b : ℂ} {f f' : ℂ → ℂ} (hf : IsWeberSol b f f') (c z : ℂ) :
+theorem IsWeberSol.hasDerivAt_rot {b : ℂ} {f f' : ℂ → ℂ} (hf : IsWeberSol b f f') (c z : ℂ) :
     HasDerivAt (fun w => f (c*w)) (c * f' (c*z)) z ∧
       HasDerivAt (fun w => c * f' (c*w)) (c^2*((c*z)^2/4+b) * f (c*z)) z := by
   have hl : ∀ w : ℂ, HasDerivAt (fun w : ℂ => c*w) c w := fun w =>
@@ -160,7 +159,7 @@ theorem pcfW_ode (a : ℝ) :
   ring
 
 /-- `W(a, z̄) = conj W(a, z)`. -/
-lemma conj_pcfW_conj (a : ℝ) (z : ℂ) : conj (pcfW a (conj z)) = pcfW a z := by
+theorem conj_pcfW_conj (a : ℝ) (z : ℂ) : conj (pcfW a (conj z)) = pcfW a z := by
   have hE : conj (pcfWEven a (conj z)) = pcfWEven a z := by
     rw [(pcfWEven_kummer _ _).1, (pcfWEven_kummer _ _).2]
     simp [conj_kummerM, ← Complex.exp_conj, map_div₀, map_ofNat]
@@ -178,7 +177,7 @@ theorem pcfW_real (a x : ℝ) :
   simpa using conj_pcfW_conj a x
 
 /-- `W'(a,x)` is real for real `x`. -/
-lemma conj_pcfWDeriv_ofReal (a x : ℝ) : conj (pcfWDeriv a x) = pcfWDeriv a x := by
+theorem conj_pcfWDeriv_ofReal (a x : ℝ) : conj (pcfWDeriv a x) = pcfWDeriv a x := by
   have h := (hasDerivAt_pcfW a (conj (x:ℂ))).conj_conj
   have he : (conj ∘ pcfW a ∘ conj) = pcfW a := funext fun z => conj_pcfW_conj a z
   rw [he, Complex.conj_conj, Complex.conj_ofReal] at h
@@ -202,7 +201,7 @@ lemma pcfW_wronskian_aux (a : ℝ) (z : ℂ) :
   rw [h0, h1]; ring
 
 /-- `W(a,0) W'(a,0) = -1/2`. -/
-lemma pcfWZero_mul_pcfWDerivZero (a : ℝ) : pcfWZero a * pcfWDerivZero a = -1/2 := by
+theorem pcfWZero_mul_pcfWDerivZero (a : ℝ) : pcfWZero a * pcfWDerivZero a = -1/2 := by
   have hpos : 0 < ‖Gamma (1/4+I*a/2)/Gamma (3/4+I*a/2)‖ := by
     refine norm_pos_iff.mpr (div_ne_zero ?_ ?_) <;> apply Complex.Gamma_ne_zero_of_re_pos <;> simp
   have hinv : ‖Gamma (3/4+I*a/2)/Gamma (1/4+I*a/2)‖ = ‖Gamma (1/4+I*a/2)/Gamma (3/4+I*a/2)‖⁻¹ := by
@@ -474,7 +473,7 @@ lemma pcfW_aux_V_sq_pos (a : ℝ) : ∃ r : ℝ, 0 < r ∧
   linear_combination (conj S) * h - V^2 * (2 * ng * n3^2) * hSS
 
 /-- `e^{-iπ/4} = -i e^{iπ/4}`. -/
-lemma exp_neg_pi_I_quarter_eq : exp (-π*I/4) = -I * exp (π*I/4) := by
+theorem exp_neg_pi_I_quarter_eq : exp (-π*I/4) = -I * exp (π*I/4) := by
   have h1 := exp_neg_pi_I_quarter_mul
   have h2 := exp_pi_I_quarter_sq
   linear_combination (exp (-π*I/4) * (exp (π*I/4)^2 + I) - exp (π*I/4)) * h2
@@ -531,7 +530,7 @@ lemma pcfW_aux_continuous_Gamma {s : ℝ} (hs : 0 < s) :
     (by fun_prop : ContinuousAt (fun t : ℝ => (s:ℂ) + I*t/2) t)
 
 /-- `pcfGammaPhase` is continuous. -/
-lemma continuous_pcfGammaPhase : Continuous pcfGammaPhase :=
+theorem continuous_pcfGammaPhase : Continuous pcfGammaPhase :=
   continuous_iff_continuousAt.mpr fun x =>
     ((Complex.continuous_re.comp continuous_digamma_half_line).integral_hasStrictDerivAt 0
       x).hasDerivAt.continuousAt
@@ -809,7 +808,7 @@ lemma pcfW_aux_scalar (a : ℝ) :
     linear_combination (-1:ℝ) * K2
 
 /-- Two entire solutions of `w'' = (a - z²/4) w` with the same data at `0` coincide. -/
-lemma weberOsc_eq_of_initial {a : ℂ} {f f1 g g1 : ℂ → ℂ}
+theorem weberOsc_eq_of_initial {a : ℂ} {f f1 g g1 : ℂ → ℂ}
     (hf : ∀ z, HasDerivAt f (f1 z) z ∧ HasDerivAt f1 ((a - z^2/4) * f z) z)
     (hg : ∀ z, HasDerivAt g (g1 z) z ∧ HasDerivAt g1 ((a - z^2/4) * g z) z)
     (h0 : f 0 = g 0) (h1 : f1 0 = g1 0) : f = g := by
@@ -825,14 +824,14 @@ lemma weberOsc_eq_of_initial {a : ℂ} {f f1 g g1 : ℂ → ℂ}
   exact funext fun z => h (mem_univ z)
 
 /-- `e^{-iπ/4}² = -i`. -/
-lemma exp_neg_pi_I_quarter_sq : exp (-π*I/4)^2 = -I := by
+theorem exp_neg_pi_I_quarter_sq : exp (-π*I/4)^2 = -I := by
   have h1 := exp_neg_pi_I_quarter_mul
   have h2 := exp_pi_I_quarter_sq
   linear_combination I * exp (-π*I/4)^2 * h2 - I * (exp (-π*I/4) * exp (π*I/4) + 1) * h1 +
     exp (-π*I/4)^2 * I_sq
 
 /-- `U(± i a, c z)` for `c = e^{∓iπ/4}` solves `w'' = (a - z²/4) w`. -/
-lemma pcfU_rot_weberOsc (a : ℝ) (z : ℂ) :
+theorem pcfU_rot_weberOsc (a : ℝ) (z : ℂ) :
     (HasDerivAt (fun w => pcfU (I*a) (exp (-π*I/4) * w))
       (exp (-π*I/4) * pcfUDeriv (I*a) (exp (-π*I/4) * z)) z ∧
     HasDerivAt (fun w => exp (-π*I/4) * pcfUDeriv (I*a) (exp (-π*I/4) * w))
@@ -850,11 +849,11 @@ lemma pcfU_rot_weberOsc (a : ℝ) (z : ℂ) :
     linear_combination (z^2/4 - a) * pcfU (-I*a) (exp (π*I/4) * z) * I_sq
 
 /-- `conj (e^{ix}) = e^{-ix}` for real `x`. -/
-lemma conj_exp_I_ofReal (x : ℝ) : conj (exp (I*x)) = exp (-I*x) := by
+theorem conj_exp_I_ofReal (x : ℝ) : conj (exp (I*x)) = exp (-I*x) := by
   rw [← Complex.exp_conj]; congr 1; simp
 
 /-- `conj (e^{-iπ/4}) = e^{iπ/4}`. -/
-lemma conj_exp_neg_pi_I_quarter : conj (exp (-π*I/4)) = exp (π*I/4) := by
+theorem conj_exp_neg_pi_I_quarter : conj (exp (-π*I/4)) = exp (π*I/4) := by
   rw [← Complex.exp_conj]; congr 1; simp [map_div₀, map_ofNat]
 
 /-- pcfW connection. -/
@@ -969,7 +968,7 @@ def pcfWBeta (a : ℂ) : ℕ → ℂ
 
 open scoped ContDiff in
 /-- Taylor recurrence at `0` for solutions of `w'' = (a - z²/4) w`. -/
-lemma weberOsc_iteratedDeriv_add_two {F F1 : ℂ → ℂ} {a : ℂ}
+theorem weberOsc_iteratedDeriv_add_two {F F1 : ℂ → ℂ} {a : ℂ}
     (h : ∀ z, HasDerivAt F (F1 z) z ∧ HasDerivAt F1 ((a - z^2/4) * F z) z) (n : ℕ) :
     iteratedDeriv (n+2) F 0 =
       a * iteratedDeriv n F 0 - 1/4 * ((n.descFactorial 2 : ℕ) * iteratedDeriv (n-2) F 0) := by
@@ -987,7 +986,7 @@ lemma weberOsc_iteratedDeriv_add_two {F F1 : ℂ → ℂ} {a : ℂ}
 
 
 /-- First and second derivatives of `pcfWEven`: Weber's equation `w'' = (a - z²/4) w`. -/
-lemma pcfWEven_hasDerivAt_two (a z : ℂ) :
+theorem pcfWEven_hasDerivAt_two (a z : ℂ) :
     HasDerivAt (pcfWEven a) (exp (π*I/4) * pcfEvenDeriv (-I*a) (exp (π*I/4)*z)) z ∧
       HasDerivAt (fun w => exp (π*I/4) * pcfEvenDeriv (-I*a) (exp (π*I/4)*w))
         ((a - z^2/4) * pcfWEven a z) z := by
@@ -997,7 +996,7 @@ lemma pcfWEven_hasDerivAt_two (a z : ℂ) :
   linear_combination (z^2/4 - a) * pcfEven (-I * a) (exp (↑π * I / 4) * z) * I_sq
 
 /-- First and second derivatives of `pcfWOdd`: Weber's equation `w'' = (a - z²/4) w`. -/
-lemma pcfWOdd_hasDerivAt_two (a z : ℂ) :
+theorem pcfWOdd_hasDerivAt_two (a z : ℂ) :
     HasDerivAt (pcfWOdd a) (exp (-π*I/4) * (exp (π*I/4) * pcfOddDeriv (-I*a) (exp (π*I/4)*z))) z ∧
       HasDerivAt (fun w => exp (-π*I/4) * (exp (π*I/4) * pcfOddDeriv (-I*a) (exp (π*I/4)*w)))
         ((a - z^2/4) * pcfWOdd a z) z := by
@@ -1007,7 +1006,7 @@ lemma pcfWOdd_hasDerivAt_two (a z : ℂ) :
   linear_combination (exp (-π*I/4)) * (z^2/4 - a) * pcfOdd (-I * a) (exp (↑π * I / 4) * z) * I_sq
 
 /-- Derivatives of `pcfWEven` at `0`: the `pcfWAlpha` recurrence and vanishing odd orders. -/
-lemma pcfWEven_iteratedDeriv (a : ℂ) (n : ℕ) :
+theorem pcfWEven_iteratedDeriv (a : ℂ) (n : ℕ) :
     (iteratedDeriv (2*n) (pcfWEven a) 0 = pcfWAlpha a n ∧
       iteratedDeriv (2*n+2) (pcfWEven a) 0 = pcfWAlpha a (n+1)) ∧
     (iteratedDeriv (2*n+1) (pcfWEven a) 0 = 0 ∧ iteratedDeriv (2*n+3) (pcfWEven a) 0 = 0) := by
@@ -1031,7 +1030,7 @@ lemma pcfWEven_iteratedDeriv (a : ℂ) (n : ℕ) :
       simp
 
 /-- Derivatives of `pcfWOdd` at `0`: the `pcfWBeta` recurrence and vanishing even orders. -/
-lemma pcfWOdd_iteratedDeriv (a : ℂ) (n : ℕ) :
+theorem pcfWOdd_iteratedDeriv (a : ℂ) (n : ℕ) :
     (iteratedDeriv (2*n+1) (pcfWOdd a) 0 = pcfWBeta a n ∧
       iteratedDeriv (2*n+3) (pcfWOdd a) 0 = pcfWBeta a (n+1)) ∧
     (iteratedDeriv (2*n) (pcfWOdd a) 0 = 0 ∧ iteratedDeriv (2*n+2) (pcfWOdd a) 0 = 0) := by
@@ -1094,7 +1093,7 @@ theorem pcfWOdd_series (a z : ℂ) :
     simp [← two_mul, (pcfWOdd_iteratedDeriv a k).2.1]
 
 /-- `Γ(1/4) Γ(3/4) = π √2`. -/
-lemma real_Gamma_quarter_mul : Real.Gamma (1/4) * Real.Gamma (3/4) = π * Real.sqrt 2 := by
+theorem real_Gamma_quarter_mul : Real.Gamma (1/4) * Real.Gamma (3/4) = π * Real.sqrt 2 := by
   have h := Real.Gamma_mul_Gamma_one_sub (1/4)
   rw [show (1:ℝ) - 1/4 = 3/4 by norm_num, show π * (1/4) = π/4 by ring, Real.sin_pi_div_four] at h
   rw [h]
@@ -1103,7 +1102,7 @@ lemma real_Gamma_quarter_mul : Real.Gamma (1/4) * Real.Gamma (3/4) = π * Real.s
   rw [Real.sq_sqrt (by norm_num)]
 
 /-- `W(0,0) = 2^{-3/4} √(Γ(1/4)/Γ(3/4))`. -/
-lemma pcfWZero_zero : pcfWZero 0 = 2^(-3/4:ℝ) * Real.sqrt (Real.Gamma (1/4) / Real.Gamma (3/4)) := by
+theorem pcfWZero_zero : pcfWZero 0 = 2^(-3/4:ℝ) * Real.sqrt (Real.Gamma (1/4) / Real.Gamma (3/4)) := by
   rw [pcfWZero]
   congr 2
   simp only [Complex.ofReal_zero, mul_zero, zero_div, add_zero]
@@ -1112,7 +1111,7 @@ lemma pcfWZero_zero : pcfWZero 0 = 2^(-3/4:ℝ) * Real.sqrt (Real.Gamma (1/4) / 
     Real.norm_of_nonneg (div_nonneg (Real.Gamma_pos_of_pos (by norm_num)).le (Real.Gamma_pos_of_pos (by norm_num)).le)]
 
 /-- `W'(0,0) = -2^{-1/4} √(Γ(3/4)/Γ(1/4))`. -/
-lemma pcfWDerivZero_zero : pcfWDerivZero 0 = -2^(-1/4:ℝ) * Real.sqrt (Real.Gamma (3/4) / Real.Gamma (1/4)) := by
+theorem pcfWDerivZero_zero : pcfWDerivZero 0 = -2^(-1/4:ℝ) * Real.sqrt (Real.Gamma (3/4) / Real.Gamma (1/4)) := by
   rw [pcfWDerivZero]
   congr 2
   simp only [Complex.ofReal_zero, mul_zero, zero_div, add_zero]
@@ -1120,15 +1119,15 @@ lemma pcfWDerivZero_zero : pcfWDerivZero 0 = -2^(-1/4:ℝ) * Real.sqrt (Real.Gam
     Complex.Gamma_ofReal, Complex.Gamma_ofReal, ← Complex.ofReal_div, Complex.norm_real,
     Real.norm_of_nonneg (div_nonneg (Real.Gamma_pos_of_pos (by norm_num)).le (Real.Gamma_pos_of_pos (by norm_num)).le)]
 
-lemma rpow_quarter_pow_four {y : ℝ} (hy : 0 ≤ y) (r : ℝ) : (y^(r/4))^4 = y^r := by
+theorem rpow_quarter_pow_four {y : ℝ} (hy : 0 ≤ y) (r : ℝ) : (y^(r/4))^4 = y^r := by
   rw [← Real.rpow_natCast, ← Real.rpow_mul hy]; norm_num
 
 /-- Equality of positive reals from equality of fourth powers. -/
-lemma eq_of_pow_four_eq {u v : ℝ} (hu : 0 ≤ u) (hv : 0 ≤ v) (h : u^4 = v^4) : u = v :=
+theorem eq_of_pow_four_eq {u v : ℝ} (hu : 0 ≤ u) (hv : 0 ≤ v) (h : u^4 = v^4) : u = v :=
   (pow_left_inj₀ hu hv (by norm_num : (4:ℕ) ≠ 0)).mp h
 
 /-- The real coefficient of `J_{-1/4}` in `W(0,x)`. -/
-lemma pcfW_zero_coeffA {x : ℝ} (hx : 0 < x) :
+theorem pcfW_zero_coeffA {x : ℝ} (hx : 0 < x) :
     pcfWZero 0 * Real.Gamma (3/4) * (x^2/8)^(1/4:ℝ) = 2^(-5/4:ℝ) * (π*x)^(1/2:ℝ) := by
   have g1 := Real.Gamma_pos_of_pos (by norm_num : (0:ℝ) < 1/4)
   have g3 := Real.Gamma_pos_of_pos (by norm_num : (0:ℝ) < 3/4)
@@ -1147,7 +1146,7 @@ lemma pcfW_zero_coeffA {x : ℝ} (hx : 0 < x) :
   linear_combination 32*(Real.Gamma (1/4) * Real.Gamma (3/4) + π*Real.sqrt 2) * hq + 32*π^2 * hs
 
 /-- The real coefficient of `J_{1/4}` in `W(0,x)`. -/
-lemma pcfW_zero_coeffB {x : ℝ} (hx : 0 < x) :
+theorem pcfW_zero_coeffB {x : ℝ} (hx : 0 < x) :
     -pcfWDerivZero 0 * x * Real.Gamma (5/4) * (x^2/8)^(-1/4:ℝ) = 2^(-5/4:ℝ) * (π*x)^(1/2:ℝ) := by
   have g1 := Real.Gamma_pos_of_pos (by norm_num : (0:ℝ) < 1/4)
   have g3 := Real.Gamma_pos_of_pos (by norm_num : (0:ℝ) < 3/4)
@@ -1170,11 +1169,11 @@ lemma pcfW_zero_coeffB {x : ℝ} (hx : 0 < x) :
   linear_combination 256*(Real.Gamma (1/4) * Real.Gamma (3/4) + π*Real.sqrt 2) * hq + 256*π^2 * hs
 
 /-- Real `cpow` of a nonnegative real is real. -/
-lemma ofReal_cpow_real {y : ℝ} (hy : 0 ≤ y) (r : ℝ) : (y:ℂ)^(r:ℂ) = ((y^r : ℝ) : ℂ) :=
+theorem ofReal_cpow_real {y : ℝ} (hy : 0 ≤ y) (r : ℝ) : (y:ℂ)^(r:ℂ) = ((y^r : ℝ) : ℂ) :=
   (Complex.ofReal_cpow hy r).symm
 
 /-- `W`'s even solution at `a = 0` through `J_{-1/4}`. -/
-lemma pcfWEven_zero_besselJ {t : ℝ} (ht : 0 < t) :
+theorem pcfWEven_zero_besselJ {t : ℝ} (ht : 0 < t) :
     pcfWEven 0 t = Gamma (3/4) * (((t^2/8)^(1/4:ℝ) : ℝ) : ℂ) * besselJ (-1/4) ((t:ℂ)^2/4) := by
   have hν : ∀ k : ℕ, (-1/4:ℂ) + 1 ≠ -k := fun k h => by
     have := congrArg Complex.re h; simp at this; norm_num at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
@@ -1198,7 +1197,7 @@ lemma pcfWEven_zero_besselJ {t : ℝ} (ht : 0 < t) :
       exp (-I*(t:ℂ)^2/4) * kummerM (1/4) (1/2) (I*(t:ℂ)^2/2)) * hg
 
 /-- `W`'s odd solution at `a = 0` through `J_{1/4}`. -/
-lemma pcfWOdd_zero_besselJ {t : ℝ} (ht : 0 < t) :
+theorem pcfWOdd_zero_besselJ {t : ℝ} (ht : 0 < t) :
     pcfWOdd 0 t = t * Gamma (5/4) * (((t^2/8)^(-1/4:ℝ) : ℝ) : ℂ) * besselJ (1/4) ((t:ℂ)^2/4) := by
   have hν : ∀ k : ℕ, (1/4:ℂ) + 1 ≠ -k := fun k h => by
     have := congrArg Complex.re h; simp at this; norm_num at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
@@ -1222,15 +1221,15 @@ lemma pcfWOdd_zero_besselJ {t : ℝ} (ht : 0 < t) :
       exp (-I*(t:ℂ)^2/4) * kummerM (3/4) (3/2) (I*(t:ℂ)^2/2)) * hg
 
 /-- `pcfWEven` is even. -/
-lemma pcfWEven_neg (a z : ℂ) : pcfWEven a (-z) = pcfWEven a z := by
+theorem pcfWEven_neg (a z : ℂ) : pcfWEven a (-z) = pcfWEven a z := by
   simp [pcfWEven, pcfEven, mul_neg]
 
 /-- `pcfWOdd` is odd. -/
-lemma pcfWOdd_neg (a z : ℂ) : pcfWOdd a (-z) = -pcfWOdd a z := by
+theorem pcfWOdd_neg (a z : ℂ) : pcfWOdd a (-z) = -pcfWOdd a z := by
   simp [pcfWOdd, pcfOdd, mul_neg]
 
 /-- Complex form of the `J_{-1/4}` coefficient. -/
-lemma pcfW_zero_coeffA' {x : ℝ} (hx : 0 < x) :
+theorem pcfW_zero_coeffA' {x : ℝ} (hx : 0 < x) :
     (pcfWZero 0 : ℂ) * Gamma (3/4) * (((x^2/8)^(1/4:ℝ) : ℝ) : ℂ) = 2^(-5/4:ℂ)*(π*x:ℂ)^(1/2:ℂ) := by
   have h := congrArg (fun r : ℝ => (r:ℂ)) (pcfW_zero_coeffA hx)
   simp only [Complex.ofReal_mul] at h
@@ -1239,7 +1238,7 @@ lemma pcfW_zero_coeffA' {x : ℝ} (hx : 0 < x) :
   push_cast; ring_nf
 
 /-- Complex form of the `J_{1/4}` coefficient. -/
-lemma pcfW_zero_coeffB' {x : ℝ} (hx : 0 < x) :
+theorem pcfW_zero_coeffB' {x : ℝ} (hx : 0 < x) :
     -(pcfWDerivZero 0 : ℂ) * x * Gamma (5/4) * (((x^2/8)^(-1/4:ℝ) : ℝ) : ℂ) = 2^(-5/4:ℂ)*(π*x:ℂ)^(1/2:ℂ) := by
   have h := congrArg (fun r : ℝ => (r:ℂ)) (pcfW_zero_coeffB hx)
   simp only [Complex.ofReal_mul, Complex.ofReal_neg] at h
@@ -1314,11 +1313,11 @@ def pcfWOmega (a x : ℝ) : ℝ :=
   x^2/4-a*Real.log x+π/4+pcfGammaPhase a/2
 
 /-- `W(a,x)` is real. -/
-lemma pcfW_ofReal_im (a x : ℝ) : (pcfW a x).im = 0 := by
+theorem pcfW_ofReal_im (a x : ℝ) : (pcfW a x).im = 0 := by
   rw [← Complex.conj_eq_iff_im]; simpa using conj_pcfW_conj a x
 
 /-- `W(a,z)` and `W(a,-z)` do not vanish together. -/
-lemma pcfW_one_ne (a : ℝ) (z : ℂ) (h1 : pcfW a z = 0) (h2 : pcfW a (-z) = 0) : False := by
+theorem pcfW_one_ne (a : ℝ) (z : ℂ) (h1 : pcfW a z = 0) (h2 : pcfW a (-z) = 0) : False := by
   have hw := pcfW_wronskian_aux a z
   have := pcfWZero_mul_pcfWDerivZero a
   have : (pcfWZero a : ℂ) * pcfWDerivZero a = -1/2 := by exact_mod_cast this
@@ -1327,7 +1326,7 @@ lemma pcfW_one_ne (a : ℝ) (z : ℂ) (h1 : pcfW a z = 0) (h2 : pcfW a (-z) = 0)
   exact zero_ne_one this
 
 /-- `W'(a,z)` and `W'(a,-z)` do not vanish together. -/
-lemma pcfWDeriv_one_ne (a : ℝ) (z : ℂ) (h1 : pcfWDeriv a z = 0) (h2 : pcfWDeriv a (-z) = 0) : False := by
+theorem pcfWDeriv_one_ne (a : ℝ) (z : ℂ) (h1 : pcfWDeriv a z = 0) (h2 : pcfWDeriv a (-z) = 0) : False := by
   have hw := pcfW_wronskian_aux a z
   have := pcfWZero_mul_pcfWDerivZero a
   have : (pcfWZero a : ℂ) * pcfWDerivZero a = -1/2 := by exact_mod_cast this
@@ -1387,7 +1386,7 @@ This upstream gamma-ratio identity is not reproved here. -/
 
 /-- `s₁ + i s₂` of DLMF 12.14.17–18 is the normalized `e^{ζ²/4} ζ^{ia+1/2} U(ia, ζ)` at
 `ζ = x e^{-iπ/4}` (from the connection formula DLMF 12.14.4). -/
-lemma pcfSect_pcfWS_eq (a : ℝ) {x : ℝ} (hx : 0 < x) :
+theorem pcfSect_pcfWS_eq (a : ℝ) {x : ℝ} (hx : 0 < x) :
     pcfWS a x = pcfSect_G (I * a) (exp ((Real.log x : ℂ) + ((-(π/4) : ℝ) : ℂ) * I)) := by
   set v : ℂ := (Real.log x : ℂ) + ((-(π/4) : ℝ) : ℂ) * I
   have hv1 : -π < v.im := by simp [v]; linarith [Real.pi_pos]

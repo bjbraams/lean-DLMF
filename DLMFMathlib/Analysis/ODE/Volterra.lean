@@ -7,10 +7,7 @@ module
 
 public import Mathlib.Analysis.Calculus.Deriv.MeanValue
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
-public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
-public import Mathlib.MeasureTheory.Integral.DominatedConvergence
-public import Mathlib.Tactic.Module
 
 /-!
 # Volterra integral equations for perturbed oscillators

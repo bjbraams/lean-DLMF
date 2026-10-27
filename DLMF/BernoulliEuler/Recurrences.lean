@@ -113,14 +113,14 @@ theorem sum_choose_mul_two_pow_mul_eulerNumber (n : ℕ) :
 /-! ### Helpers for §§24.5(ii)–(iii) -/
 
 /-- Splitting off the first two terms of a sum over `range (n+1)`. -/
-theorem q24a_sum_Icc_two {M : Type*} [AddCommMonoid M] (f : ℕ → M) {n : ℕ} (hn : 1 ≤ n) :
+lemma q24a_sum_Icc_two {M : Type*} [AddCommMonoid M] (f : ℕ → M) {n : ℕ} (hn : 1 ≤ n) :
     f 0 + f 1 + ∑ k ∈ Icc 2 n, f k = ∑ k ∈ range (n + 1), f k := by
   induction n, hn using Nat.le_induction with
   | base => simp [sum_range_succ]
   | succ n hn ih => rw [sum_Icc_succ_top (by omega), ← add_assoc, ih, sum_range_succ (n := n + 1)]
 
 /-- `∑_{k ≤ n} (n+2 choose k) Bₖ = -(n+2) Bₙ₊₁`. -/
-theorem q24a_sum_choose_bernoulli_succ_succ (n : ℕ) :
+lemma q24a_sum_choose_bernoulli_succ_succ (n : ℕ) :
     ∑ k ∈ range (n + 1), ((n + 2).choose k : ℚ) * bernoulli k = -(n + 2) * bernoulli (n + 1) := by
   have h := sum_bernoulli (n + 2)
   simp only [show n + 2 ≠ 1 by omega, ↓reduceIte] at h
@@ -132,7 +132,7 @@ theorem q24a_sum_choose_bernoulli_succ_succ (n : ℕ) :
 noncomputable def q24a_egf (x : ℕ → ℂ) : PowerSeries ℂ := PowerSeries.mk fun n => x n / n !
 
 /-- Coefficients of a product of exponential generating functions. -/
-theorem q24a_coeff_egf_mul (x y : ℕ → ℂ) (n : ℕ) :
+lemma q24a_coeff_egf_mul (x y : ℕ → ℂ) (n : ℕ) :
     PowerSeries.coeff n (q24a_egf x * q24a_egf y) =
       (∑ k ∈ range (n + 1), (n.choose k : ℂ) * x k * y (n - k)) / n ! := by
   rw [PowerSeries.coeff_mul, Nat.sum_antidiagonal_eq_sum_range_succ
@@ -149,7 +149,7 @@ theorem q24a_coeff_egf_mul (x y : ℕ → ℂ) (n : ℕ) :
   field_simp
 
 /-- Binomial convolution identities as products of exponential generating functions. -/
-theorem q24a_egf_eq_mul_iff (x y z : ℕ → ℂ) :
+lemma q24a_egf_eq_mul_iff (x y z : ℕ → ℂ) :
     (∀ n, x n = ∑ k ∈ range (n + 1), (n.choose k : ℂ) * y k * z (n - k)) ↔
       q24a_egf x = q24a_egf y * q24a_egf z := by
   rw [PowerSeries.ext_iff]
@@ -162,7 +162,7 @@ theorem q24a_egf_eq_mul_iff (x y z : ℕ → ℂ) :
   · intro h; exact (div_left_inj' this).mp h
 
 /-- `(t/(eᵗ - 1)) · ((eᵗ - 1)/t) = 1` as formal power series. -/
-theorem q24a_egf_bernoulli_mul :
+lemma q24a_egf_bernoulli_mul :
     q24a_egf (fun n => (bernoulli n : ℂ)) * q24a_egf (fun n => 1 / ((n : ℂ) + 1)) = 1 := by
   have h := bernoulliPowerSeries_mul_exp_sub_one ℂ
   have hB : bernoulliPowerSeries ℂ = q24a_egf (fun n => (bernoulli n : ℂ)) := by
@@ -179,7 +179,7 @@ theorem q24a_egf_bernoulli_mul :
   exact mul_left_cancel₀ hX (h.trans (mul_one _).symm)
 
 /-- Sums over even indices `2k ≤ n`. -/
-theorem q24a_sum_half_eq (g : ℕ → ℂ) (n : ℕ) :
+lemma q24a_sum_half_eq (g : ℕ → ℂ) (n : ℕ) :
     ∑ k ∈ range (n / 2 + 1), g (2 * k) = ∑ k ∈ range (n + 1), if Even k then g k else 0 := by
   rw [← sum_filter]
   have : (range (n + 1)).filter Even = (range (n / 2 + 1)).image (2 * ·) := by
@@ -191,7 +191,7 @@ theorem q24a_sum_half_eq (g : ℕ → ℂ) (n : ℕ) :
   rw [this, sum_image (fun a _ b _ h => by simpa using h)]
 
 /-- `sech t · cosh t = 1` as formal power series. -/
-theorem q24a_egf_euler_mul :
+lemma q24a_egf_euler_mul :
     q24a_egf (fun n => (eulerNumber n : ℂ)) * q24a_egf (fun n => if Even n then 1 else 0) = 1 := by
   ext n
   rw [q24a_coeff_egf_mul, PowerSeries.coeff_one]

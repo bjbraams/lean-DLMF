@@ -6,9 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
-public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
-public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
-public import Mathlib.Analysis.SpecialFunctions.Integrability.Basic
 
 /-!
 # Bounds and integrability for the symmetric elliptic integrands
@@ -96,7 +93,7 @@ theorem p19sR1_norm_cpow_half_ge' {w : ℂ} (hw : w ∈ slitPlane ∨ w = 0) :
     rw [add_zero, p19sR1_norm_cpow_half, Complex.norm_real, Real.norm_of_nonneg ht.le, one_mul]
 
 /-- The dominating function `t ↦ (√t (t + 1))⁻¹` is integrable on `(0, ∞)`. -/
-theorem p19sR1_integrableOn_bound :
+lemma p19sR1_integrableOn_bound :
     IntegrableOn (fun t : ℝ => (Real.sqrt t * (t + 1))⁻¹) (Ioi 0) := by
   have hmeas : AEStronglyMeasurable (fun t : ℝ => (Real.sqrt t * (t + 1))⁻¹) := by
     fun_prop
@@ -204,7 +201,7 @@ theorem p19sR1_norm_inv_s_le {a b c : ℂ} (ha : a ∈ slitPlane ∨ a = 0) (hb 
     _ ≤ _ := by gcongr
 
 /-- `‖(t + q)⁻¹‖ ≤ C` for `q` in the slit plane and `t > 0`. -/
-theorem p19sR1_norm_inv_add_le {q : ℂ} (hq : q ∈ slitPlane) :
+lemma p19sR1_norm_inv_add_le {q : ℂ} (hq : q ∈ slitPlane) :
     ∃ C, 0 ≤ C ∧ ∀ t : ℝ, 0 < t → ‖((t : ℂ) + q)⁻¹‖ ≤ C := by
   obtain ⟨c, hc, h⟩ := p19sR1_norm_add_ge hq
   refine ⟨c⁻¹, by positivity, fun t ht => ?_⟩
@@ -215,7 +212,7 @@ theorem p19sR1_norm_inv_add_le {q : ℂ} (hq : q ∈ slitPlane) :
   nlinarith
 
 /-- `t ‖w/(t + w)‖ ≤ K` for admissible `w` and `t > 0`. -/
-theorem p19sR1_mul_norm_div_add_le {w : ℂ} (hw : w ∈ slitPlane ∨ w = 0) :
+lemma p19sR1_mul_norm_div_add_le {w : ℂ} (hw : w ∈ slitPlane ∨ w = 0) :
     ∃ K, ∀ t : ℝ, 0 < t → t * ‖w / ((t : ℂ) + w)‖ ≤ K := by
   rcases hw with hw | rfl
   · obtain ⟨c, hc, h⟩ := p19sR1_norm_add_ge hw
@@ -228,7 +225,7 @@ theorem p19sR1_mul_norm_div_add_le {w : ℂ} (hw : w ∈ slitPlane ∨ w = 0) :
   · exact ⟨0, fun t _ => by simp⟩
 
 /-- Continuity of `s(t)⁻¹` on `(0, ∞)` for admissible variables. -/
-theorem p19sR1_continuousOn_inv_s {a b c : ℂ} (ha : a ∈ slitPlane ∨ a = 0)
+lemma p19sR1_continuousOn_inv_s {a b c : ℂ} (ha : a ∈ slitPlane ∨ a = 0)
     (hb : b ∈ slitPlane ∨ b = 0) (hc : c ∈ slitPlane ∨ c = 0) :
     ContinuousOn (fun t : ℝ => (((t : ℂ) + a) ^ (1 / 2 : ℂ) * ((t : ℂ) + b) ^ (1 / 2 : ℂ) *
         ((t : ℂ) + c) ^ (1 / 2 : ℂ))⁻¹) (Ioi 0) :=
@@ -266,7 +263,7 @@ theorem p19sR1_integrableOn_RJ {a b c p : ℂ} (ha : a ∈ slitPlane ∨ a = 0) 
       _ = _ := by ring
 
 /-- Integrability of `R_G`'s integrand: `a` admissible, `b, c` in the slit plane. -/
-theorem p19sR1_integrableOn_RG {a b c : ℂ} (ha : a ∈ slitPlane ∨ a = 0) (hb : b ∈ slitPlane)
+lemma p19sR1_integrableOn_RG {a b c : ℂ} (ha : a ∈ slitPlane ∨ a = 0) (hb : b ∈ slitPlane)
     (hc : c ∈ slitPlane) :
     IntegrableOn (fun t : ℝ => (((t : ℂ) + a) ^ (1 / 2 : ℂ) * ((t : ℂ) + b) ^ (1 / 2 : ℂ) *
         ((t : ℂ) + c) ^ (1 / 2 : ℂ))⁻¹ *
@@ -296,7 +293,7 @@ theorem p19sR1_integrableOn_RG {a b c : ℂ} (ha : a ∈ slitPlane ∨ a = 0) (h
       _ = _ := by ring
 
 /-- The algebraic identity behind `p19sR1_RG_identity`, with `u² = t + x` etc. -/
-theorem p19sR1_alg_RG (t u v w x y z : ℂ) (hu : u ^ 2 = t + x) (hv : v ^ 2 = t + y)
+lemma p19sR1_alg_RG (t u v w x y z : ℂ) (hu : u ^ 2 = t + x) (hv : v ^ 2 = t + y)
     (hw : w ^ 2 = t + z) (hu0 : u ≠ 0) (hv0 : v ≠ 0) (hw0 : w ≠ 0) :
     (x + y) * (u * v * w)⁻¹ + (t * (x + y) + x * y) *
       (-((u / (2 * (t + x)) * v + u * (v / (2 * (t + y)))) * w + u * v * (w / (2 * (t + z)))) /

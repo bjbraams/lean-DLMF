@@ -5,10 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Tactic.CrossRefAttribute
-public import Mathlib.Algebra.BigOperators.Intervals
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
-public import Mathlib.Data.Complex.BigOperators
 public import Mathlib.RingTheory.RootsOfUnity.Complex
 public import Mathlib.RingTheory.RootsOfUnity.Lemmas
 
@@ -39,7 +36,7 @@ noncomputable section
 namespace Complex
 
 /-- Algebraic identity `1 - exp(I θ) = -2 I exp(I θ / 2) sin(θ / 2)`. -/
-lemma one_sub_exp_mul_I (θ : ℂ) :
+theorem one_sub_exp_mul_I (θ : ℂ) :
     1 - exp (I * θ) = -2 * I * exp (I * θ / 2) * sin (θ / 2) := by
   convert_to 1 - exp (2 * I * (θ / 2)) = -2 * I * exp (I * (θ / 2)) * sin (θ / 2)
   · congr 1; ring
@@ -64,11 +61,11 @@ lemma one_sub_exp_mul_I (θ : ℂ) :
   rw [hR, I_mul_I, h0, h1]
   ring
 
-lemma pred_add_one {m : ℕ} (hm : 0 < m) : m - 1 + 1 = m :=
+theorem pred_add_one {m : ℕ} (hm : 0 < m) : m - 1 + 1 = m :=
   Nat.sub_add_cancel (Nat.one_le_of_lt hm)
 
 /-- The product of `1 - μ^k` over the nontrivial `m`-th roots of unity is `m`. -/
-lemma prod_one_sub_exp_two_pi {m : ℕ} (hm : 0 < m) :
+theorem prod_one_sub_exp_two_pi {m : ℕ} (hm : 0 < m) :
     ∏ k ∈ range (m - 1), (1 - exp (2 * π * I / m) ^ (k + 1)) = m := by
   have hμ : IsPrimitiveRoot (exp (2 * π * I / m)) (m - 1 + 1) := by
     simpa [pred_add_one hm] using isPrimitiveRoot_exp m hm.ne'
@@ -77,14 +74,14 @@ lemma prod_one_sub_exp_two_pi {m : ℕ} (hm : 0 < m) :
     rw [← Nat.cast_succ, Nat.succ_eq_add_one, pred_add_one hm]
   exact h.trans heq
 
-lemma sum_range_id_complex (n : ℕ) :
+theorem sum_range_id_complex (n : ℕ) :
     ∑ k ∈ range n, (k : ℂ) = (↑(n * (n - 1)) : ℂ) / 2 := by
   have h : ((∑ k ∈ range n, k) * 2 : ℂ) = ↑(n * (n - 1)) := by
     exact_mod_cast sum_range_id_mul_two n
   rw [← Nat.cast_sum]
   exact (eq_div_iff_mul_eq (by norm_num : (2 : ℂ) ≠ 0)).2 h
 
-lemma sum_range_succ_coe (n : ℕ) :
+theorem sum_range_succ_coe (n : ℕ) :
     ∑ k ∈ range n, (k + 1 : ℂ) = (↑(n * (n + 1)) : ℂ) / 2 := by
   have hsum := sum_range_id_complex n
   have hconst : ∑ _k ∈ range n, (1 : ℂ) = n := by simp [sum_const, card_range]
@@ -107,7 +104,7 @@ lemma sum_range_succ_coe (n : ℕ) :
         · field
         · field
 
-lemma exp_sum_pi_div {m : ℕ} (hm : 0 < m) :
+theorem exp_sum_pi_div {m : ℕ} (hm : 0 < m) :
     exp (∑ k ∈ range (m - 1), I * π * (k + 1) / m) = I ^ (m - 1) := by
   have hm0 : (m : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr hm.ne'
   have hs := sum_range_succ_coe (m - 1)
@@ -129,7 +126,7 @@ lemma exp_sum_pi_div {m : ℕ} (hm : 0 < m) :
   have : I * π * ↑(m - 1) / 2 = ↑(m - 1) * (π / 2 * I) := by ring
   rw [this, exp_nat_mul, exp_pi_div_two_mul_I]
 
-lemma one_sub_root_eq_sin {m k : ℕ} (hm : 0 < m) :
+theorem one_sub_root_eq_sin {m k : ℕ} (hm : 0 < m) :
     (1 : ℂ) - exp (2 * π * I / m) ^ (k + 1) =
       -2 * I * exp (I * π * (k + 1) / m) * (Real.sin (π * (k + 1 : ℝ) / m) : ℂ) := by
   have hpow : exp (2 * π * I / m) ^ (k + 1) = exp (I * (2 * π * (k + 1) / m)) := by
@@ -147,7 +144,7 @@ lemma one_sub_root_eq_sin {m k : ℕ} (hm : 0 < m) :
   congr 2
   ring
 
-lemma pow_neg_two_I_mul_I (n : ℕ) : (-2 * I : ℂ) ^ n * I ^ n = (2 : ℂ) ^ n := by
+theorem pow_neg_two_I_mul_I (n : ℕ) : (-2 * I : ℂ) ^ n * I ^ n = (2 : ℂ) ^ n := by
   rw [mul_pow, mul_assoc, ← pow_add, ← two_mul, pow_mul, I_sq, ← mul_pow]
   norm_num
 
@@ -195,7 +192,7 @@ theorem prod_sin_pi_div {m : ℕ} (hm : 0 < m) :
     _ = m / (2 : ℝ) ^ (m - 1) :=
         (eq_div_iff_mul_eq hne).2 (by rw [mul_comm]; exact hreal.symm)
 
-lemma sin_pi_div_pos {m k : ℕ} (hm : 0 < m) (hk : k ∈ Ico 1 m) :
+theorem sin_pi_div_pos {m k : ℕ} (hm : 0 < m) (hk : k ∈ Ico 1 m) :
     0 < sin (π * k / m) := by
   have hk1 : 1 ≤ k := (Finset.mem_Ico.mp hk).1
   have hkm : k < m := (Finset.mem_Ico.mp hk).2
@@ -284,7 +281,7 @@ def multiplicationGamma (m : ℕ) (s : ℝ) : ℝ :=
   (∏ k ∈ range m, Gamma ((s + k) / m)) * (m : ℝ) ^ (s - 1 / 2) /
     (2 * π) ^ ((m - 1 : ℝ) / 2)
 
-lemma multiplicationGamma_add_one {m : ℕ} (hm : 0 < m) {s : ℝ} (hs : s ≠ 0) :
+theorem multiplicationGamma_add_one {m : ℕ} (hm : 0 < m) {s : ℝ} (hs : s ≠ 0) :
     multiplicationGamma m (s + 1) = s * multiplicationGamma m s := by
   have hm0 : (0 : ℝ) < m := Nat.cast_pos.mpr hm
   have hmne : (m : ℝ) ≠ 0 := hm0.ne'
@@ -332,7 +329,7 @@ lemma multiplicationGamma_add_one {m : ℕ} (hm : 0 < m) {s : ℝ} (hs : s ≠ 0
   simp_rw [multiplicationGamma, hshift, hrpow]
   field
 
-lemma multiplicationGamma_one {m : ℕ} (hm : 0 < m) : multiplicationGamma m 1 = 1 := by
+theorem multiplicationGamma_one {m : ℕ} (hm : 0 < m) : multiplicationGamma m 1 = 1 := by
   have hm0 : (0 : ℝ) < m := Nat.cast_pos.mpr hm
   have hIco :
       ∏ k ∈ range m, Gamma ((1 + k : ℝ) / m) =
@@ -356,7 +353,7 @@ lemma multiplicationGamma_one {m : ℕ} (hm : 0 < m) : multiplicationGamma m 1 =
   simp_rw [multiplicationGamma, hprod, hrpow, prod_Gamma_div hm]
   field
 
-lemma convexOn_log_Gamma_comp_add_div {m : ℕ} (hm : 0 < m) (k : ℕ) :
+theorem convexOn_log_Gamma_comp_add_div {m : ℕ} (hm : 0 < m) (k : ℕ) :
     ConvexOn ℝ (Set.Ioi 0) (fun x : ℝ => log (Gamma ((x + k) / m))) := by
   refine ⟨convex_Ioi 0, ?_⟩
   intro x hx y hy a b ha hb hab
@@ -376,7 +373,7 @@ lemma convexOn_log_Gamma_comp_add_div {m : ℕ} (hm : 0 < m) (k : ℕ) :
   have h := convexOn_log_Gamma.2 hx' hy' ha hb hab
   simpa [Function.comp_apply, hcombo] using h
 
-lemma convexOn_sum_log_Gamma_div {m : ℕ} (hm : 0 < m) :
+theorem convexOn_sum_log_Gamma_div {m : ℕ} (hm : 0 < m) :
     ConvexOn ℝ (Set.Ioi 0)
       (fun x : ℝ => ∑ k ∈ range m, log (Gamma ((x + k) / m))) := by
   suffices ∀ s : Finset ℕ,
@@ -390,7 +387,7 @@ lemma convexOn_sum_log_Gamma_div {m : ℕ} (hm : 0 < m) :
     simp_rw [sum_insert hk]
     exact (convexOn_log_Gamma_comp_add_div hm k).add ih
 
-lemma log_multiplicationGamma_eq {m : ℕ} (hm : 0 < m) :
+theorem log_multiplicationGamma_eq {m : ℕ} (hm : 0 < m) :
     Set.EqOn (log ∘ multiplicationGamma m)
       (fun s => ∑ k ∈ range m, log (Gamma ((s + k) / m)) +
         (s - 1 / 2) * log m - log ((2 * π) ^ ((m - 1 : ℝ) / 2)))
@@ -409,7 +406,7 @@ lemma log_multiplicationGamma_eq {m : ℕ} (hm : 0 < m) :
     log_div hnum hC.ne', log_mul hprod.ne' hrpow.ne',
     log_prod (fun k hk => (hGpos k hk).ne'), log_rpow hm0]
 
-lemma multiplicationGamma_log_convex_Ioi {m : ℕ} (hm : 0 < m) :
+theorem multiplicationGamma_log_convex_Ioi {m : ℕ} (hm : 0 < m) :
     ConvexOn ℝ (Set.Ioi (0 : ℝ)) (log ∘ multiplicationGamma m) := by
   have hsum := convexOn_sum_log_Gamma_div hm
   have hlin : ConvexOn ℝ (Set.Ioi 0) (fun s : ℝ => s * log m) := by
@@ -423,7 +420,7 @@ lemma multiplicationGamma_log_convex_Ioi {m : ℕ} (hm : 0 < m) :
   rw [heq]
   ring
 
-lemma multiplicationGamma_pos {m : ℕ} (hm : 0 < m) {s : ℝ} (hs : 0 < s) :
+theorem multiplicationGamma_pos {m : ℕ} (hm : 0 < m) {s : ℝ} (hs : 0 < s) :
     0 < multiplicationGamma m s := by
   have hm0 : (0 : ℝ) < m := Nat.cast_pos.mpr hm
   refine div_pos (mul_pos ?_ (rpow_pos_of_pos hm0 _))
@@ -431,7 +428,7 @@ lemma multiplicationGamma_pos {m : ℕ} (hm : 0 < m) {s : ℝ} (hs : 0 < s) :
   exact prod_pos fun k _ =>
     Gamma_pos_of_pos <| div_pos (add_pos_of_pos_of_nonneg hs (Nat.cast_nonneg _)) hm0
 
-lemma multiplicationGamma_eq_Gamma {m : ℕ} (hm : 0 < m) {s : ℝ} (hs : 0 < s) :
+theorem multiplicationGamma_eq_Gamma {m : ℕ} (hm : 0 < m) {s : ℝ} (hs : 0 < s) :
     multiplicationGamma m s = Gamma s :=
   eq_Gamma_of_log_convex (multiplicationGamma_log_convex_Ioi hm)
     (fun {_y} hy => multiplicationGamma_add_one hm hy.ne')
@@ -491,15 +488,15 @@ namespace Complex
 def gaussMulConst (m : ℕ) : ℂ :=
   ↑(Real.rpow (2 * Real.pi) ((m - 1 : ℝ) / 2))
 
-lemma gaussMulConst_ne_zero (m : ℕ) : gaussMulConst m ≠ 0 :=
+theorem gaussMulConst_ne_zero (m : ℕ) : gaussMulConst m ≠ 0 :=
   ofReal_ne_zero.mpr (Real.rpow_pos_of_pos (mul_pos two_pos Real.pi_pos) _).ne'
 
-lemma differentiable_prod_one_div_Gamma_add_div (m : ℕ) :
+theorem differentiable_prod_one_div_Gamma_add_div (m : ℕ) :
     Differentiable ℂ fun z : ℂ => ∏ k ∈ range m, (Gamma (z + k / m))⁻¹ :=
   Differentiable.fun_finsetProd fun _ _ =>
     differentiable_one_div_Gamma.comp (differentiable_id.add (differentiable_const _))
 
-lemma differentiable_mul_cpow_one_div_Gamma (m : ℕ) (hm : 0 < m) :
+theorem differentiable_mul_cpow_one_div_Gamma (m : ℕ) (hm : 0 < m) :
     Differentiable ℂ fun z : ℂ =>
       (Gamma (m * z))⁻¹ * (m : ℂ) ^ (m * z - 1 / 2) / gaussMulConst m := by
   have hm0 : (m : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr hm.ne'
@@ -507,7 +504,7 @@ lemma differentiable_mul_cpow_one_div_Gamma (m : ℕ) (hm : 0 < m) :
   · exact differentiable_one_div_Gamma.comp (differentiable_id.const_mul _)
   · exact ((differentiable_id.const_mul (m : ℂ)).sub_const (1 / 2)).const_cpow (Or.inl hm0)
 
-lemma gaussMulConst_eq_cpow (m : ℕ) :
+theorem gaussMulConst_eq_cpow (m : ℕ) :
     gaussMulConst m = (2 * π : ℂ) ^ ((m - 1 : ℂ) / 2) := by
   simpa [gaussMulConst] using
     ofReal_cpow (mul_nonneg zero_le_two Real.pi_pos.le) ((m - 1 : ℝ) / 2)

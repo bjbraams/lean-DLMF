@@ -1,4 +1,4 @@
-module
+module -- shake: keep-all
 
 public import DLMF.ErrorFunctions.Basic
 public import DLMF.ErrorFunctions.Relations

@@ -5,10 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.OrthogonalPolynomials.Topics
 public import DLMF.Confluent.Relations
-public import DLMF.Hypergeometric.FurtherTransformations
-public import Mathlib.Tactic.CrossRefAttribute
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Chebyshev.Basic
 
 /-!
 # Explicit formulas, symmetry, and transformations (DLMF §§18.5–18.7)
@@ -96,7 +94,7 @@ theorem jacobi_finite_sum {α β : ℂ} (hα : -1 < α.re) (n : ℕ) (x : ℂ) :
   field_simp [hck, hn, hk0, hnk]
 
 /-- `(-n)_k (n-k)! = (-1)^k n!` for `k ≤ n`. -/
-lemma poch_neg_nat_mul_factorial {n k : ℕ} (hk : k ≤ n) :
+theorem poch_neg_nat_mul_factorial {n k : ℕ} (hk : k ≤ n) :
     poch (-(n : ℂ)) k * ((n - k) ! : ℂ) = (-1) ^ k * (n ! : ℂ) := by
   rw [poch, ascPochhammer_eval_neg_eq_descPochhammer, descPochhammer_eval_eq_descFactorial]
   have h := Nat.factorial_mul_descFactorial hk
@@ -170,7 +168,7 @@ theorem jacobi_binomial_sum {α β : ℂ} (hα : -1 < α.re) (n : ℕ) (x : ℂ)
     fun y hy => jacobi_binomial_sum_aux hα n hy) x
 
 /-- The finite sum for `H_n` at even degree `n = 2m`, via the confluent form 13.6.16. -/
-lemma hermitePolyH_even_sum (m : ℕ) (x : ℂ) :
+theorem hermitePolyH_even_sum (m : ℕ) (x : ℂ) :
     aeval x (hermitePolyH (2 * m)) = ((2 * m) ! : ℂ) * ∑ k ∈ Finset.range (m + 1),
       (-1 : ℂ) ^ k * (2 * x) ^ (2 * m - 2 * k) / ((k ! : ℂ) * (2 * m - 2 * k) !) := by
   have h := Confluent.hermitePolyHEval_even_mul m x
@@ -199,7 +197,7 @@ lemma hermitePolyH_even_sum (m : ℕ) (x : ℂ) :
   simp only [pow_mul', neg_one_sq, one_pow, mul_one]
 
 /-- The finite sum for `H_n` at odd degree `n = 2m + 1`, via the confluent form 13.6.17. -/
-lemma hermitePolyH_odd_sum (m : ℕ) (x : ℂ) :
+theorem hermitePolyH_odd_sum (m : ℕ) (x : ℂ) :
     aeval x (hermitePolyH (2 * m + 1)) = ((2 * m + 1) ! : ℂ) * ∑ k ∈ Finset.range (m + 1),
       (-1 : ℂ) ^ k * (2 * x) ^ (2 * m + 1 - 2 * k) / ((k ! : ℂ) * (2 * m + 1 - 2 * k) !) := by
   have h := Confluent.hermitePolyHEval_odd_mul m x
@@ -243,7 +241,7 @@ theorem hermitePolyH_finite_sum (n : ℕ) (x : ℂ) :
     exact hermitePolyH_odd_sum m x
 
 /-- Gamma normalization of the terminating regularized confluent function. -/
-lemma laguerrePolyL_eq_Gamma_mul_regularized {α : ℂ}
+theorem laguerrePolyL_eq_Gamma_mul_regularized {α : ℂ}
     (hα : ∀ k : ℕ, α + 1 ≠ -(k : ℂ)) (n : ℕ) (z : ℂ) :
     laguerrePolyL α n z = Gamma ((n : ℂ) + α + 1) / (n.factorial : ℂ) *
       regularizedHGFun {-(n : ℂ)} {α + 1} z := by
@@ -263,7 +261,7 @@ theorem jacobi_at_one {α β : ℂ} (hα : -1 < α.re) (n : ℕ) :
   simp [jacobiPolyP]
 
 /-- Jacobi polynomials do not vanish at `x = 1` for `Re α > -1`. -/
-lemma jacobiPolyP_one_ne_zero {α β : ℂ} (hα : -1 < α.re) (n : ℕ) : jacobiPolyP α β n 1 ≠ 0 := by
+theorem jacobiPolyP_one_ne_zero {α β : ℂ} (hα : -1 < α.re) (n : ℕ) : jacobiPolyP α β n 1 ≠ 0 := by
   rw [jacobi_at_one hα]
   exact div_ne_zero (poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by
     simp only [Complex.add_re, Complex.one_re]
@@ -332,7 +330,7 @@ theorem legendre_eq_ultrasphPoly (n : ℕ) (x : ℂ) : legendrePolyP n x
   norm_num [legendrePolyP, jacobiPolyP, ultrasphPoly]
 
 /-- `4^n (1/2)_n n! = (2n)!`. -/
-lemma two_pow_mul_poch_half (n : ℕ) :
+theorem two_pow_mul_poch_half (n : ℕ) :
     (2 : ℂ) ^ (2 * n) * poch (1 / 2) n * n.factorial = (2 * n).factorial := by
   induction n with
   | zero => simp [poch_zero]
@@ -343,7 +341,7 @@ lemma two_pow_mul_poch_half (n : ℕ) :
     linear_combination (4 * (1 / 2 + (n : ℂ)) * ((n : ℂ) + 1)) * ih
 
 /-- `4^n (3/2)_n n! = (2n+1)!`. -/
-lemma two_pow_mul_poch_three_half (n : ℕ) :
+theorem two_pow_mul_poch_three_half (n : ℕ) :
     (2 : ℂ) ^ (2 * n) * poch (3 / 2) n * n.factorial = (2 * n + 1).factorial := by
   induction n with
   | zero => simp [poch_zero]
@@ -389,7 +387,7 @@ theorem hermitePolyH_odd_eq_laguerrePolyL (n : ℕ) (x : ℂ) :
 
 
 /-- The cosines of `k` times the Chebyshev–Gauss angles sum to zero unless `2M ∣ k`. -/
-lemma sum_cos_chebyshevGauss_eq_zero {M : ℕ} {k : ℤ} (hk : ¬ (2 * M : ℤ) ∣ k) :
+theorem sum_cos_chebyshevGauss_eq_zero {M : ℕ} {k : ℤ} (hk : ¬ (2 * M : ℤ) ∣ k) :
     ∑ i ∈ Finset.range M, Real.cos (k * ((2 * i + 1) * π / (2 * M))) = 0 := by
   rcases Nat.eq_zero_or_pos M with rfl | hM
   · simp
@@ -458,7 +456,7 @@ theorem chebyshevT_discrete_orthogonality {N m n : ℕ} (hm : m ≤ N) (hn : n �
   simp
 
 /-- `Uₙ(x) = ∑_{i+j=n} (-1)^j C(i,j) (2x)^{i-j}`, a weighted form of the Fibonacci identity. -/
-lemma chebyshevU_eval_eq_sum_antidiagonal (n : ℕ) (x : ℂ) :
+theorem chebyshevU_eval_eq_sum_antidiagonal (n : ℕ) (x : ℂ) :
     (Chebyshev.U ℂ n).eval x = ∑ p ∈ Finset.antidiagonal n,
       (-1 : ℂ) ^ p.2 * (p.1.choose p.2 : ℂ) * (2 * x) ^ (p.1 - p.2) := by
   have hshift : ∀ i j : ℕ, (i.choose (j + 1) : ℂ) * ((2 * x) * (2 * x) ^ (i - (j + 1))) =

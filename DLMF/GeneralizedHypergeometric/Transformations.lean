@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.GeneralizedHypergeometric.Basic
-public import DLMF.Hypergeometric.Clausen
 public import DLMF.GeneralizedHypergeometric.AnalyticProperties
 public import DLMF.GeneralizedHypergeometric.GHATools
 

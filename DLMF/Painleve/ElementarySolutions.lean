@@ -6,9 +6,12 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Painleve.SolutionsDefs
-public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 public import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
-public import Mathlib.Analysis.Calculus.MeanValue
+public import DLMF.Painleve.Defs
+public import Mathlib.Tactic.Basify
+public import Mathlib.Tactic.ENatToNat
+public import Mathlib.Tactic.Polynomial.Basic
+public import Mathlib.Tactic.ReduceModChar
 
 /-!
 # Other elementary solutions of the Painlevé equations (DLMF §32.9)
@@ -107,7 +110,54 @@ theorem painleveIII_power {κ l μ ν : ℂ} {U : Set ℂ} (hU : IsOpen U) (hUs 
     (hD : ∀ z ∈ U, κ * z ^ (2 * ν) + l * z ^ ν + μ ≠ 0) :
     IsPainleveIIIOn (-ν ^ 2 * l) 0 (ν ^ 2 * (l ^ 2 - 4 * κ * μ)) 0
       (fun z => z ^ (ν - 1) / (κ * z ^ (2 * ν) + l * z ^ ν + μ)) U := by
-  sorry
+  have hz0 : ∀ z ∈ U, z ≠ 0 := fun z hz => slitPlane_ne_zero (hUs hz)
+  have hs0 : ∀ z ∈ U, z ^ ν ≠ 0 := fun z hz => by
+    rw [cpow_def_of_ne_zero (hz0 z hz)]; exact exp_ne_zero _
+  have h2 : ∀ z : ℂ, z ^ (2 * ν) = (z ^ ν) ^ 2 := fun z => by
+    rw [← cpow_nat_mul]; norm_num
+  have hfun : ∀ z ∈ U, z ^ (ν - 1) / (κ * z ^ (2 * ν) + l * z ^ ν + μ) =
+      z ^ ν / (z * (κ * (z ^ ν) ^ 2 + l * z ^ ν + μ)) := fun z hz => by
+    rw [cpow_sub _ _ (hz0 z hz), cpow_one, h2, div_div]
+  have hD' : ∀ z ∈ U, κ * (z ^ ν) ^ 2 + l * z ^ ν + μ ≠ 0 := fun z hz => by
+    rw [← h2]; exact hD z hz
+  have hev : ∀ z ∈ U, (fun z => z ^ (ν - 1) / (κ * z ^ (2 * ν) + l * z ^ ν + μ)) =ᶠ[𝓝 z]
+      fun z => z ^ ν / (z * (κ * (z ^ ν) ^ 2 + l * z ^ ν + μ)) := fun z hz => by
+    filter_upwards [hU.mem_nhds hz] with y hy using hfun y hy
+  have hDd : ∀ z ∈ U, HasDerivAt (fun z => κ * (z ^ ν) ^ 2 + l * z ^ ν + μ)
+      ((2 * κ * z ^ ν + l) * (ν * z ^ ν / z)) z := fun z hz => by
+    have hs := b32_hasDerivAt_cpow (a := ν) (hUs hz)
+    have := (((hs.pow 2).const_mul κ).add (hs.const_mul l)).add_const μ
+    exact this.congr_deriv (by push_cast; ring)
+  refine ⟨isODE2SolutionOn_of_hasDerivAt hU
+    (v := fun z => z ^ ν * (-(ν + 1) * κ * (z ^ ν) ^ 2 - l * z ^ ν + (ν - 1) * μ) /
+      (z ^ 2 * (κ * (z ^ ν) ^ 2 + l * z ^ ν + μ) ^ 2)) (fun z hz => ?_) (fun z hz => ?_), hz0,
+    fun z hz => ?_⟩
+  · have hs := b32_hasDerivAt_cpow (a := ν) (hUs hz)
+    have hq := (hasDerivAt_id z).mul (hDd z hz)
+    have h := hs.div hq (mul_ne_zero (hz0 z hz) (hD' z hz))
+    refine (h.congr_deriv ?_).congr_of_eventuallyEq (hev z hz)
+    have := hz0 z hz; have := hD' z hz
+    simp only [id_eq, Pi.mul_apply]
+    field_simp
+    ring
+  · have hs := b32_hasDerivAt_cpow (a := ν) (hUs hz)
+    have hN := hs.mul ((((hs.pow 2).const_mul (-(ν + 1) * κ)).sub (hs.const_mul l)).add_const
+      ((ν - 1) * μ))
+    have hq := ((hasDerivAt_id z).pow 2).mul ((hDd z hz).pow 2)
+    have h := hN.div hq (mul_ne_zero (pow_ne_zero 2 (hz0 z hz)) (pow_ne_zero 2 (hD' z hz)))
+    refine h.congr_deriv ?_
+    have hz' := hz0 z hz; have hDz := hD' z hz; have hsz := hs0 z hz
+    rw [hfun z hz]
+    simp only [painleveIIIRhs, id_eq, Pi.mul_apply, Pi.pow_apply, Pi.sub_apply]
+    push_cast
+    generalize z ^ ν = S at hDz hsz ⊢
+    obtain ⟨Dv, hDv⟩ : ∃ Dv, Dv = κ * S ^ 2 + l * S + μ := ⟨_, rfl⟩
+    rw [← hDv] at hDz ⊢
+    field_simp
+    subst hDv
+    ring
+  · rw [hfun z hz]
+    exact div_ne_zero (hs0 z hz) (mul_ne_zero (hz0 z hz) (hD' z hz))
 
 /-- DLMF §32.9(i), 32.9.4–32.9.5: with `γ = 0`, `α = 1`, `δ = -1` (the normalization of
 §32.2(ii) when `γ = 0`, `αδ ≠ 0`), `PIII` has algebraic solutions iff `β = 2n`, `n ∈ ℤ`; these
@@ -217,7 +267,32 @@ preconnected open subset of the slit plane is `w = Cz^μ` for constants `C`, `μ
 theorem painleveIII_zero_eq_power {w : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnected U)
     (hUs : U ⊆ slitPlane) (h : IsPainleveIIIOn 0 0 0 0 w U) :
     ∃ C μ : ℂ, ∀ z ∈ U, w z = C * z ^ μ := by
-  sorry
+  obtain ⟨μ, hμ⟩ := b32_const_of_hasDerivAt_zero (I := fun z => z * deriv w z / w z) hU hc
+    fun z hz => by
+      have hw := h.ode.hasDerivAt hz
+      have hv := h.ode.hasDerivAt_deriv z hz
+      have hw0 := h.w_ne_zero z hz
+      have hz0 := h.ne_zero z hz
+      refine (((hasDerivAt_id z).mul hv).div hw hw0).congr_deriv ?_
+      simp only [painleveIIIRhs, id_eq, Pi.mul_apply]
+      field_simp
+      ring
+  obtain ⟨C, hC⟩ := b32_const_of_hasDerivAt_zero (I := fun z => w z * z ^ (-μ)) hU hc
+    fun z hz => by
+      have hw := h.ode.hasDerivAt hz
+      have hw0 := h.w_ne_zero z hz
+      have hz0 := h.ne_zero z hz
+      have hm := hμ z hz
+      have ht : z ^ μ ≠ 0 := by rw [Ne, cpow_eq_zero_iff]; exact fun h => hz0 h.1
+      refine (hw.mul (b32_hasDerivAt_cpow (a := -μ) (hUs hz))).congr_deriv ?_
+      rw [cpow_neg]
+      field_simp at hm ⊢
+      linear_combination hm
+  refine ⟨C, μ, fun z hz => ?_⟩
+  have hz0 := h.ne_zero z hz
+  have ht : z ^ μ ≠ 0 := by rw [Ne, cpow_eq_zero_iff]; exact fun h => hz0 h.1
+  rw [← hC z hz, cpow_neg]
+  field_simp
 
 /-! ## `PV` (§32.9(ii)) -/
 

@@ -5,11 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
-public import Mathlib.Tactic.Ring
 public import Mathlib.Analysis.Calculus.MeanValue
-public import Mathlib.Tactic.FieldSimp
-public import Mathlib.Tactic.LinearCombination
+public import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
 
 /-!
 # Products of solutions of a second-order equation

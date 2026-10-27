@@ -5,9 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
 
 import DLMF.Gamma.Simplex.GammaPochhammer
+public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+public import Mathlib.Data.Nat.Factorial.DoubleFactorial
 
 /-!
 # The complex multivariate beta function

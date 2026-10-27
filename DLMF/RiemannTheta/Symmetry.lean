@@ -44,7 +44,7 @@ lemma rth21_intDot (n m : ι → ℤ) :
     (fun i => (n i : ℂ)) ⬝ᵥ (fun i => (m i : ℂ)) = ((n ⬝ᵥ m : ℤ) : ℂ) := by
   simp [dotProduct]
 
-lemma rth21_exp_int (k : ℤ) : cexp (2 * π * I * k) = 1 := by
+theorem rth21_exp_int (k : ℤ) : cexp (2 * π * I * k) = 1 := by
   rw [show 2 * π * I * (k : ℂ) = k * (2 * π * I) by ring]
   exact Complex.exp_int_mul_two_pi_mul_I k
 

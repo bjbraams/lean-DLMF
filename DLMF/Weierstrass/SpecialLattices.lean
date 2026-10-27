@@ -5,11 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Weierstrass.Basic
 public import DLMF.Weierstrass.Relations
 public import DLMF.Elliptic.SpecialValues
-public import DLMF.JacobiElliptic.Basic
-public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
 
 /-!
 # Real-valued Weierstrass functions and special lattices (DLMF §23.5)
@@ -31,6 +28,63 @@ noncomputable section
 
 namespace DLMF.Weierstrass
 
+section p3wConj
+
+open Filter Topology
+open scoped ComplexConjugate
+
+/-- The complex-conjugate period pair `(ω̄₁, ω̄₂)`. -/
+def p3w_conjPair (L : PeriodPair) : PeriodPair :=
+  ⟨conj L.ω₁, conj L.ω₂, by
+    have h := L.indep.map' Complex.conjLIE.toLinearEquiv.toLinearMap
+      (LinearEquiv.ker _)
+    convert h using 1
+    funext i; fin_cases i <;> rfl⟩
+
+/-- Membership in the conjugate lattice. -/
+lemma p3w_mem_conjPair (L : PeriodPair) {z : ℂ} :
+    z ∈ (p3w_conjPair L).lattice ↔ conj z ∈ L.lattice := by
+  simp only [PeriodPair.mem_lattice, p3w_conjPair]
+  constructor
+  · rintro ⟨m, n, rfl⟩; exact ⟨m, n, by simp⟩
+  · rintro ⟨m, n, h⟩
+    refine ⟨m, n, ?_⟩
+    have := congrArg conj h
+    simp only [map_add, map_mul, map_intCast, conj_conj] at this
+    exact this
+
+/-- Conjugation as a bijection `𝕃 ≃ 𝕃̄`. -/
+def p3w_conjEquiv (L : PeriodPair) : L.lattice ≃ (p3w_conjPair L).lattice where
+  toFun l := ⟨conj (l : ℂ), (p3w_mem_conjPair L).mpr (by simp)⟩
+  invFun l := ⟨conj (l : ℂ), (p3w_mem_conjPair L).mp l.2⟩
+  left_inv l := by ext; simp
+  right_inv l := by ext; simp
+
+/-- `℘(z|𝕃̄) = conj ℘(z̄|𝕃)`. -/
+lemma p3w_weierstrassP_conjPair (L : PeriodPair) (z : ℂ) :
+    ℘[p3w_conjPair L] z = conj (℘[L] (conj z)) := by
+  simp only [PeriodPair.weierstrassP]
+  rw [← (p3w_conjEquiv L).tsum_eq, Complex.conj_tsum]
+  refine tsum_congr fun l => ?_
+  simp [p3w_conjEquiv, map_sub]
+
+/-- `G_n(𝕃̄) = conj G_n(𝕃)`. -/
+lemma p3w_G_conjPair (L : PeriodPair) (n : ℕ) :
+    (p3w_conjPair L).G n = conj (L.G n) := by
+  simp only [PeriodPair.G]
+  rw [← (p3w_conjEquiv L).tsum_eq, Complex.conj_tsum]
+  refine tsum_congr fun l => ?_
+  simp [p3w_conjEquiv]
+
+/-- The conjugate lattice is the image of the lattice under conjugation. -/
+lemma p3w_conjPair_lattice (L : PeriodPair) :
+    ((p3w_conjPair L).lattice : Set ℂ) = (starRingEnd ℂ) '' (L.lattice : Set ℂ) := by
+  ext z
+  simp only [SetLike.mem_coe, Set.mem_image, p3w_mem_conjPair]
+  constructor
+  · intro h; exact ⟨conj z, h, by simp⟩
+  · rintro ⟨w, hw, rfl⟩; simpa using hw
+
 /-- DLMF §23.5(i): the Weierstrass functions are real on the real axis iff the lattice is
 invariant under complex conjugation, equivalently iff `g₂, g₃ ∈ ℝ`. Stated for `℘`. -/
 @[dlmf 23.5.i]
@@ -38,7 +92,74 @@ theorem weierstrassP_real_iff (L : PeriodPair) :
     ((∀ x : ℝ, (x : ℂ) ∉ L.lattice → (℘[L] x).im = 0) ↔
         (starRingEnd ℂ) '' (L.lattice : Set ℂ) = L.lattice) ∧
       ((starRingEnd ℂ) '' (L.lattice : Set ℂ) = L.lattice ↔ L.g₂.im = 0 ∧ L.g₃.im = 0) := by
-  sorry
+  set L' := p3w_conjPair L with hL'
+  have hc : (starRingEnd ℂ) '' (L.lattice : Set ℂ) = L.lattice ↔ L'.lattice = L.lattice := by
+    rw [← p3w_conjPair_lattice, SetLike.coe_set_eq]
+  rw [hc]
+  have hreal : ∀ w : ℂ, conj w = w ↔ w.im = 0 := fun w => Complex.conj_eq_iff_im
+  refine ⟨⟨fun h => ?_, fun h x hx => ?_⟩, ⟨fun h => ?_, fun ⟨h2, h3⟩ => ?_⟩⟩
+  · -- `℘` real on the real axis forces `𝕃̄ = 𝕃`
+    have hpa : AnalyticAt ℂ (fun w => ℘[L] w - 1 / w ^ 2) 0 := by
+      have := analyticAt_weierstrassP_sub L (zero_mem _)
+      simp only [sub_zero] at this; exact this
+    have hqa : AnalyticAt ℂ (fun w => ℘[L'] w - 1 / w ^ 2) 0 := by
+      have := analyticAt_weierstrassP_sub L' (zero_mem _)
+      simp only [sub_zero] at this; exact this
+    have hR : Tendsto (fun t : ℝ => (t : ℂ)) (𝓝[≠] 0) (𝓝[≠] 0) := by
+      refine tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within _ ?_ ?_
+      · exact (Complex.continuous_ofReal.tendsto 0).mono_left nhdsWithin_le_nhds |>.congr
+          (fun _ => rfl) |> fun h => by simpa using h
+      · filter_upwards [self_mem_nhdsWithin] with t ht
+        simpa using ht
+    have heqR : ∀ᶠ t : ℝ in 𝓝[≠] (0 : ℝ),
+        (fun w => ℘[L] w - 1 / w ^ 2) (t : ℂ) - (fun w => ℘[L'] w - 1 / w ^ 2) (t : ℂ) = 0 := by
+      filter_upwards [hR.eventually (nhdsWithin_le_nhds
+        (L.compl_lattice_sdiff_singleton_mem_nhds 0)),
+        hR.eventually (self_mem_nhdsWithin (s := {(0 : ℂ)}ᶜ))] with t ht ht0
+      have htL : (t : ℂ) ∉ L.lattice := fun hh => ht ⟨hh, ht0⟩
+      have him := h t htL
+      have : ℘[L'] (t : ℂ) = ℘[L] (t : ℂ) := by
+        rw [hL', p3w_weierstrassP_conjPair, Complex.conj_ofReal, (hreal _).mpr him]
+      simp [this]
+    rcases (hpa.sub hqa).eventually_eq_or_eventually_ne (analyticAt_const (v := (0 : ℂ))) with
+      hev | hne
+    · have hev' : ∀ᶠ z in 𝓝 (0 : ℂ), ℘[L] z = ℘[L'] z := hev.mono fun z hz => by
+        simp only [Pi.sub_apply] at hz; linear_combination hz
+      exact le_antisymm (p3w_lattice_le_of_eventuallyEq L' L
+        (hev'.mono fun z hz => hz.symm)) (p3w_lattice_le_of_eventuallyEq L L' hev')
+    · exfalso
+      have := (hR.eventually hne).and heqR
+      obtain ⟨t, ht1, ht2⟩ := this.exists
+      exact ht1 ht2
+  · have e := wp23_weierstrassP_eq_of_lattice_eq L' L h (x : ℂ)
+    rw [hL', p3w_weierstrassP_conjPair, Complex.conj_ofReal] at e
+    exact (hreal _).mp e
+  · have h4 := wp23_G_eq_of_lattice_eq L' L h 4
+    have h6 := wp23_G_eq_of_lattice_eq L' L h 6
+    rw [hL', p3w_G_conjPair] at h4 h6
+    have r4 := (hreal _).mp h4
+    have r6 := (hreal _).mp h6
+    simp [PeriodPair.g₂, PeriodPair.g₃, r4, r6]
+  · refine lattice_eq_of_invariants_eq L' L ?_ ?_
+    · rw [hL', PeriodPair.g₂, p3w_G_conjPair, ← map_ofNat (starRingEnd ℂ) 60, ← map_mul]
+      exact (hreal _).mpr h2
+    · rw [hL', PeriodPair.g₃, p3w_G_conjPair, ← map_ofNat (starRingEnd ℂ) 140, ← map_mul]
+      exact (hreal _).mpr h3
+
+
+/-- A lattice invariant under conjugation has `℘(z̄) = conj ℘(z)`. -/
+lemma p3w_weierstrassP_conj_of_inv (L : PeriodPair)
+    (hinv : ∀ z, z ∈ L.lattice → conj z ∈ L.lattice) (z : ℂ) :
+    ℘[L] (conj z) = conj (℘[L] z) := by
+  have hl : (p3w_conjPair L).lattice = L.lattice := by
+    ext w
+    rw [p3w_mem_conjPair]
+    exact ⟨fun h => by simpa using hinv _ h, hinv w⟩
+  have := p3w_weierstrassP_conjPair L (conj z)
+  rw [wp23_weierstrassP_eq_of_lattice_eq _ _ hl, conj_conj] at this
+  exact this
+
+end p3wConj
 
 namespace HalfPeriods
 
@@ -160,7 +281,7 @@ theorem rectangular_roots_monotone (a b₁ b₂ : ℝ) (ha : 0 < a) (hb₁ : 0 <
   sorry
 
 /-- `ζ(cz) = c⁻¹ζ(z)` when multiplication by `c` preserves the lattice. -/
-theorem p23R1_zeta_rot (H : HalfPeriods) (c : ℂ) (hc : c ≠ 0)
+lemma p23R1_zeta_rot (H : HalfPeriods) (c : ℂ) (hc : c ≠ 0)
     (hinv : ∀ z, z ∈ H.lattice ↔ z / c ∈ H.lattice) (z : ℂ) :
     H.weierstrassZeta (c * z) = c⁻¹ * H.weierstrassZeta z := by
   have hl : (scalePeriodPair c hc H.periodPair).lattice = H.periodPair.lattice := by
@@ -187,7 +308,7 @@ theorem p23R1_wp_rot (H : HalfPeriods) (c : ℂ) (hc : c ≠ 0)
   exact this
 
 /-- A lemniscatic lattice is invariant under multiplication by `i`. -/
-theorem p23R1_lemn_inv {H : HalfPeriods} (h3 : H.ω₃ = I * H.ω₁) :
+lemma p23R1_lemn_inv {H : HalfPeriods} (h3 : H.ω₃ = I * H.ω₁) :
     ∀ z, z ∈ H.lattice ↔ z / I ∈ H.lattice := by
   intro z
   simp only [H.mem_lattice_iff, h3]
@@ -327,11 +448,63 @@ theorem compEllIntKm_lemniscatic :
       DLMF.Elliptic.Real.compEllIntKm (1 - 1 / 2) = DLMF.Elliptic.Real.compEllIntKm (1 / 2) :=
   ⟨DLMF.Elliptic.Real.compEllIntKm_one_half, by norm_num⟩
 
+open scoped ComplexConjugate in
+/-- Rhombic lattices: `e₁` real and `e₃ = conj e₂ ∉ ℝ`. -/
+lemma p3w_rhombic_roots {H : HalfPeriods} (h : H.IsRhombic) :
+    conj (H.e 1) = H.e 1 ∧ H.e 3 = conj (H.e 2) ∧ (H.e 2).im ≠ 0 := by
+  obtain ⟨h1i, -, h3r⟩ := h
+  have hω1 : conj H.ω₁ = H.ω₁ := Complex.conj_eq_iff_im.mpr h1i
+  have hω3 : conj H.ω₃ = H.ω₁ - H.ω₃ := by
+    apply Complex.ext
+    · simp [h3r]; ring
+    · simp [h1i]
+  have hinv : ∀ z, z ∈ H.lattice → conj z ∈ H.lattice := by
+    intro z hz
+    obtain ⟨m, n, rfl⟩ := H.mem_lattice_iff.mp hz
+    refine H.mem_lattice_iff.mpr ⟨m + n, -n, ?_⟩
+    simp only [map_add, map_mul, map_ofNat, map_intCast, hω1, hω3]
+    push_cast; ring
+  have hwp := p3w_weierstrassP_conj_of_inv H.periodPair hinv
+  have he1 : conj (H.e 1) = H.e 1 := by
+    simp only [HalfPeriods.e, halfPeriod_one]
+    rw [← hwp, hω1]
+  have he3 : H.e 3 = conj (H.e 2) := by
+    simp only [HalfPeriods.e, halfPeriod_three, halfPeriod_two]
+    rw [← hwp]
+    have : conj H.ω₂ = H.ω₃ - 2 * H.ω₁ := by
+      simp only [HalfPeriods.ω₂, map_sub, map_neg, hω1, hω3]; ring
+    rw [this]
+    have := H.weierstrassP_add_two_mul_halfPeriod (H.ω₃ - 2 * H.ω₁) (j := 1) (by simp)
+    simp only [halfPeriod_one, sub_add_cancel] at this
+    exact this
+  refine ⟨he1, he3, fun h0 => ?_⟩
+  have : H.e 3 = H.e 2 := by rw [he3]; exact Complex.conj_eq_iff_im.mpr h0
+  exact H.e_distinct.2.1 this.symm
+
 /-- DLMF §23.5(iv): for a rhombic lattice `Δ < 0`. -/
 @[dlmf 23.5.iv]
 theorem IsRhombic.discriminant_neg {H : HalfPeriods} (h : H.IsRhombic) :
     (latticeDiscriminant H.periodPair).im = 0 ∧ (latticeDiscriminant H.periodPair).re < 0 := by
-  sorry
+  obtain ⟨h1, h3, hy⟩ := p3w_rhombic_roots h
+  set r := (H.e 1).re
+  set x := (H.e 2).re
+  set y := (H.e 2).im
+  have e1 : H.e 1 = r := by
+    apply Complex.ext <;> simp [r, Complex.conj_eq_iff_im.mp h1]
+  have e2 : H.e 2 = x + y * I := (Complex.re_add_im _).symm
+  have e3 : H.e 3 = x - y * I := by
+    rw [h3]; apply Complex.ext <;> simp [x, y]
+  have key : latticeDiscriminant H.periodPair =
+      ((-64 * y ^ 2 * ((r - x) ^ 2 + y ^ 2) ^ 2 : ℝ) : ℂ) := by
+    rw [H.latticeDiscriminant_eq, e1, e2, e3]
+    push_cast
+    linear_combination 64 * (y : ℂ) ^ 2 * ((y : ℂ) ^ 4 * I ^ 4 - (2 * ((r : ℂ) - x) ^ 2 *
+      (y : ℂ) ^ 2 + (y : ℂ) ^ 4) * I ^ 2 + (((r : ℂ) - x) ^ 2 + (y : ℂ) ^ 2) ^ 2) * I_sq
+  rw [key, Complex.ofReal_im, Complex.ofReal_re]
+  refine ⟨rfl, ?_⟩
+  have hy2 : 0 < y ^ 2 := by positivity
+  have : 0 < ((r - x) ^ 2 + y ^ 2) ^ 2 := by positivity
+  nlinarith
 
 /-- DLMF §23.5(iv): for a rhombic lattice `e₁` is real and `e₃ = conj e₂` with `ℑe₂ > 0`; `e₁`
 and `g₃` have the same sign unless `2ω₃ = (1 + i)ω₁` (the pseudo-lemniscatic case), when both

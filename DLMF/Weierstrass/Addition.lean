@@ -7,8 +7,6 @@ module
 
 public import DLMF.Weierstrass.Basic
 public import DLMF.Weierstrass.DifferentialEquations
-public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
-public import Mathlib.LinearAlgebra.Matrix.Notation
 
 /-!
 # Addition, duplication, `n`-tuple formulas and homogeneity (DLMF §23.10)
@@ -41,7 +39,7 @@ section p23R1Add
 
 open Classical in
 /-- The order of `σ` is `1` at lattice points and `0` elsewhere. -/
-theorem p23R1_order_sigma (L : PeriodPair) (x : ℂ) :
+lemma p23R1_order_sigma (L : PeriodPair) (x : ℂ) :
     meromorphicOrderAt (weierstrassSigma L) x = if x ∈ L.lattice then 1 else 0 := by
   have ha : AnalyticAt ℂ (weierstrassSigma L) x :=
     (differentiable_weierstrassSigma L).analyticAt x
@@ -54,7 +52,7 @@ theorem p23R1_order_sigma (L : PeriodPair) (x : ℂ) :
     rfl
 
 /-- `k ≤ o` gives `0 ≤ o - k` in `WithTop ℤ`. -/
-theorem p23R1_nonneg_add_neg {o : WithTop ℤ} {k : ℤ} (h : (k : WithTop ℤ) ≤ o) :
+lemma p23R1_nonneg_add_neg {o : WithTop ℤ} {k : ℤ} (h : (k : WithTop ℤ) ≤ o) :
     0 ≤ o + -(k : WithTop ℤ) := by
   cases o with
   | top => simp
@@ -65,7 +63,7 @@ theorem p23R1_nonneg_add_neg {o : WithTop ℤ} {k : ℤ} (h : (k : WithTop ℤ) 
 
 open Classical in
 /-- Lower bound for the order of `℘ - ℘(v)` at a non-lattice point. -/
-theorem p23R1_order_weierstrassP_sub_ge (L : PeriodPair) {v x : ℂ} (hx : x ∉ L.lattice) :
+lemma p23R1_order_weierstrassP_sub_ge (L : PeriodPair) {v x : ℂ} (hx : x ∉ L.lattice) :
     (((if x + v ∈ L.lattice then 1 else 0) + (if x - v ∈ L.lattice then 1 else 0) : ℤ) :
       WithTop ℤ) ≤ meromorphicOrderAt (fun u => ℘[L] u - ℘[L] v) x := by
   have hA : AnalyticAt ℂ (fun u => ℘[L] u - ℘[L] v) x :=
@@ -117,7 +115,7 @@ theorem p23R1_order_weierstrassP_sub_ge (L : PeriodPair) {v x : ℂ} (hx : x ∉
     exact hA.meromorphicOrderAt_nonneg
 
 /-- `(℘(u) - ℘(v))σ(u)²σ(v)² = -σ(u + v)σ(u - v)` off the singular set (Liouville). -/
-theorem p23R1_sigma_product_eq (L : PeriodPair) {v : ℂ} (hv : v ∉ L.lattice) {u : ℂ}
+lemma p23R1_sigma_product_eq (L : PeriodPair) {v : ℂ} (hv : v ∉ L.lattice) {u : ℂ}
     (hu : u ∉ L.lattice) (h1 : u + v ∉ L.lattice) (h2 : u - v ∉ L.lattice) :
     (℘[L] u - ℘[L] v) * (weierstrassSigma L u * weierstrassSigma L u * weierstrassSigma L v ^ 2) *
       (weierstrassSigma L (u + v) * weierstrassSigma L (u - v))⁻¹ = -1 := by
@@ -263,7 +261,7 @@ theorem p23R1_sigma_product_eq (L : PeriodPair) {v : ℂ} (hv : v ∉ L.lattice)
 
 /-- `σ(u+v)σ(u-v) = (℘(v) - ℘(u)) σ(u)² σ(v)²` for `u, v ∉ 𝕃` (23.10.3 with cleared
 denominators). -/
-theorem p23R1_sigma_mul (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice) (hv : v ∉ L.lattice) :
+lemma p23R1_sigma_mul (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice) (hv : v ∉ L.lattice) :
     weierstrassSigma L (u + v) * weierstrassSigma L (u - v) =
       (℘[L] v - ℘[L] u) * weierstrassSigma L u ^ 2 * weierstrassSigma L v ^ 2 := by
   by_cases h1 : u + v ∈ L.lattice
@@ -284,7 +282,7 @@ theorem p23R1_sigma_mul (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice) (hv 
   linear_combination hp
 
 /-- `σ' = ζ σ` off the lattice. -/
-theorem p23R1_deriv_sigma (L : PeriodPair) {x : ℂ} (hx : x ∉ L.lattice) :
+lemma p23R1_deriv_sigma (L : PeriodPair) {x : ℂ} (hx : x ∉ L.lattice) :
     deriv (weierstrassSigma L) x = weierstrassZeta L x * weierstrassSigma L x := by
   have hσ : weierstrassSigma L x ≠ 0 := (weierstrassSigma_eq_zero_iff L).not.mpr hx
   rw [weierstrassZeta_eq_deriv_div L hx]; field_simp
@@ -304,7 +302,7 @@ theorem p23R1_hasDerivAt_dwp (L : PeriodPair) {x : ℂ} (hx : x ∉ L.lattice) :
   rwa [deriv_derivWeierstrassP L hx] at this
 
 /-- The addition formula for `ζ` in terms of `℘` and `℘'`, together with `℘(u) ≠ ℘(v)`. -/
-theorem p23R1_zeta_add (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice) (hv : v ∉ L.lattice)
+lemma p23R1_zeta_add (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice) (hv : v ∉ L.lattice)
     (huv : u + v ∉ L.lattice) (huv' : u - v ∉ L.lattice) :
     ℘[L] u ≠ ℘[L] v ∧ weierstrassZeta L (u + v) = weierstrassZeta L u + weierstrassZeta L v +
       1 / 2 * ((℘'[L] u - ℘'[L] v) / (℘[L] u - ℘[L] v)) := by
@@ -369,7 +367,7 @@ theorem p23R1_zeta_add (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice) (hv :
   linear_combination (-1 : ℂ) * (E1 + E2)
 
 /-- Near a point `u` with `u, u ± v ∉ 𝕃`, the same holds. -/
-theorem p23R1_eventually_good (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice)
+lemma p23R1_eventually_good (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice)
     (huv : u + v ∉ L.lattice) (huv' : u - v ∉ L.lattice) :
     ∀ᶠ w in 𝓝 u, w ∉ L.lattice ∧ w + v ∉ L.lattice ∧ w - v ∉ L.lattice := by
   have hopen : IsOpen (L.latticeᶜ : Set ℂ) := L.isClosed_lattice.isOpen_compl
@@ -379,7 +377,7 @@ theorem p23R1_eventually_good (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice
   filter_upwards [h1, h2, h3] with w a b c using ⟨a, b, c⟩
 
 /-- Derivative of `(℘'(w) - ℘'(v))/(℘(w) - ℘(v))` at `w = u`. -/
-theorem p23R1_hasDerivAt_X (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice)
+lemma p23R1_hasDerivAt_X (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice)
     (hne : ℘[L] u - ℘[L] v ≠ 0) :
     HasDerivAt (fun w => (℘'[L] w - ℘'[L] v) / (℘[L] w - ℘[L] v))
       (((6 * ℘[L] u ^ 2 - L.g₂ / 2) * (℘[L] u - ℘[L] v) - (℘'[L] u - ℘'[L] v) * ℘'[L] u) /
@@ -387,7 +385,7 @@ theorem p23R1_hasDerivAt_X (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice)
   ((p23R1_hasDerivAt_dwp L hu).sub_const _).div ((p23R1_hasDerivAt_wp L hu).sub_const _) hne
 
 /-- Differentiated `ζ`-addition formula: `℘(u+v) = ℘(u) - ½ X'(u)`. -/
-theorem p23R1_wp_add_aux (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice) (hv : v ∉ L.lattice)
+lemma p23R1_wp_add_aux (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice) (hv : v ∉ L.lattice)
     (huv : u + v ∉ L.lattice) (huv' : u - v ∉ L.lattice) :
     -℘[L] (u + v) = -℘[L] u + 1 / 2 *
       (((6 * ℘[L] u ^ 2 - L.g₂ / 2) * (℘[L] u - ℘[L] v) - (℘'[L] u - ℘'[L] v) * ℘'[L] u) /
@@ -403,7 +401,7 @@ theorem p23R1_wp_add_aux (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice) (hv
   exact (hf.congr_of_eventuallyEq heq.symm).unique hg
 
 /-- The addition formula 23.10.1 (helper form). -/
-theorem p23R1_wp_add (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice) (hv : v ∉ L.lattice)
+lemma p23R1_wp_add (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice) (hv : v ∉ L.lattice)
     (huv : u + v ∉ L.lattice) (huv' : u - v ∉ L.lattice) :
     ℘[L] (u + v) = 1 / 4 * ((℘'[L] u - ℘'[L] v) / (℘[L] u - ℘[L] v)) ^ 2 - ℘[L] u - ℘[L] v := by
   have hne : ℘[L] u - ℘[L] v ≠ 0 := sub_ne_zero.mpr (p23R1_zeta_add L hu hv huv huv').1
@@ -414,23 +412,23 @@ theorem p23R1_wp_add (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice) (hv : v
   linear_combination -h + hp - hq
 
 /-- `ζ' = -℘` off the lattice. -/
-theorem p23R1_deriv_zeta (L : PeriodPair) {x : ℂ} (hx : x ∉ L.lattice) :
+lemma p23R1_deriv_zeta (L : PeriodPair) {x : ℂ} (hx : x ∉ L.lattice) :
     deriv (weierstrassZeta L) x = -℘[L] x := (hasDerivAt_weierstrassZeta L hx).deriv
 
 /-- `ζ'` agrees with `-℘` near points off the lattice. -/
-theorem p23R1_deriv_zeta_eventually (L : PeriodPair) {x : ℂ} (hx : x ∉ L.lattice) :
+lemma p23R1_deriv_zeta_eventually (L : PeriodPair) {x : ℂ} (hx : x ∉ L.lattice) :
     deriv (weierstrassZeta L) =ᶠ[𝓝 x] fun y => -℘[L] y := by
   filter_upwards [L.isClosed_lattice.isOpen_compl.mem_nhds hx] with y hy
   exact p23R1_deriv_zeta L hy
 
 /-- `ζ'' = -℘'` off the lattice. -/
-theorem p23R1_deriv2_zeta (L : PeriodPair) {x : ℂ} (hx : x ∉ L.lattice) :
+lemma p23R1_deriv2_zeta (L : PeriodPair) {x : ℂ} (hx : x ∉ L.lattice) :
     deriv (deriv (weierstrassZeta L)) x = -℘'[L] x := by
   rw [(p23R1_deriv_zeta_eventually L hx).deriv_eq]
   exact ((p23R1_hasDerivAt_wp L hx).neg).deriv
 
 /-- The third derivative of `ζ` is `-(6℘² - g₂/2)` off the lattice. -/
-theorem p23R1_deriv3_zeta (L : PeriodPair) {x : ℂ} (hx : x ∉ L.lattice) :
+lemma p23R1_deriv3_zeta (L : PeriodPair) {x : ℂ} (hx : x ∉ L.lattice) :
     deriv (deriv (deriv (weierstrassZeta L))) x = -(6 * ℘[L] x ^ 2 - L.g₂ / 2) := by
   have : deriv (deriv (weierstrassZeta L)) =ᶠ[𝓝 x] fun y => -℘'[L] y := by
     filter_upwards [L.isClosed_lattice.isOpen_compl.mem_nhds hx] with y hy
@@ -440,7 +438,7 @@ theorem p23R1_deriv3_zeta (L : PeriodPair) {x : ℂ} (hx : x ∉ L.lattice) :
 
 /-- The addition formula for `℘'`: `℘'(u+v) = X (℘(u) - ℘(u+v)) - ℘'(u)` with
 `X = (℘'(u) - ℘'(v))/(℘(u) - ℘(v))`. -/
-theorem p23R1_dwp_add (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice) (hv : v ∉ L.lattice)
+lemma p23R1_dwp_add (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice) (hv : v ∉ L.lattice)
     (huv : u + v ∉ L.lattice) (huv' : u - v ∉ L.lattice) :
     ℘'[L] (u + v) = (℘'[L] u - ℘'[L] v) / (℘[L] u - ℘[L] v) * (℘[L] u - ℘[L] (u + v)) -
       ℘'[L] u := by
@@ -458,7 +456,7 @@ theorem p23R1_dwp_add (L : PeriodPair) {u v : ℂ} (hu : u ∉ L.lattice) (hv : 
   linear_combination h - (℘'[L] u - ℘'[L] v) / (℘[L] u - ℘[L] v) * ha
 
 /-- `℘'(z) ≠ 0` for `z, 2z ∉ 𝕃`. -/
-theorem p23R1_dwp_ne_zero (L : PeriodPair) {z : ℂ} (hz : z ∉ L.lattice)
+lemma p23R1_dwp_ne_zero (L : PeriodPair) {z : ℂ} (hz : z ∉ L.lattice)
     (h2z : 2 * z ∉ L.lattice) : ℘'[L] z ≠ 0 := by
   set H := halfPeriodsOf L
   have hl : H.lattice = L.lattice := halfPeriodsOf_lattice L
@@ -489,7 +487,7 @@ theorem p23R1_dwp_ne_zero (L : PeriodPair) {z : ℂ} (hz : z ∉ L.lattice)
   exact h2z (by convert this using 1; ring)
 
 /-- Generic case of 23.10.6. -/
-theorem p23R1_zeta_sum_sq_generic (L : PeriodPair) {u v w : ℂ} (hu : u ∉ L.lattice)
+lemma p23R1_zeta_sum_sq_generic (L : PeriodPair) {u v w : ℂ} (hu : u ∉ L.lattice)
     (hv : v ∉ L.lattice) (hw : w ∉ L.lattice) (h : u + v + w = 0) (huv' : u - v ∉ L.lattice) :
     (weierstrassZeta L u + weierstrassZeta L v + weierstrassZeta L w) ^ 2 +
       deriv (weierstrassZeta L) u + deriv (weierstrassZeta L) v +
@@ -502,7 +500,7 @@ theorem p23R1_zeta_sum_sq_generic (L : PeriodPair) {u v w : ℂ} (hu : u ∉ L.l
   ring
 
 /-- Points near `z` (`z ∉ 𝕃`) other than `z` satisfy `v ∉ 𝕃`, `z - v ∉ 𝕃`. -/
-theorem p23R1_eventually_near (L : PeriodPair) {z : ℂ} (hz : z ∉ L.lattice) :
+lemma p23R1_eventually_near (L : PeriodPair) {z : ℂ} (hz : z ∉ L.lattice) :
     ∀ᶠ v in 𝓝[≠] z, v ∉ L.lattice ∧ z - v ∉ L.lattice := by
   have hopen : IsOpen (L.latticeᶜ : Set ℂ) := L.isClosed_lattice.isOpen_compl
   have hC := (continuous_const.sub continuous_id : Continuous fun y : ℂ => z - y).continuousAt
@@ -514,7 +512,7 @@ theorem p23R1_eventually_near (L : PeriodPair) {z : ℂ} (hz : z ∉ L.lattice) 
   exact sub_right_injective this
 
 /-- The difference quotient `(℘'(z) - ℘'(v))/(℘(z) - ℘(v))` tends to `℘''(z)/℘'(z)`. -/
-theorem p23R1_tendsto_X (L : PeriodPair) {z : ℂ} (hz : z ∉ L.lattice) (hp : ℘'[L] z ≠ 0) :
+lemma p23R1_tendsto_X (L : PeriodPair) {z : ℂ} (hz : z ∉ L.lattice) (hp : ℘'[L] z ≠ 0) :
     Tendsto (fun v => (℘'[L] z - ℘'[L] v) / (℘[L] z - ℘[L] v)) (𝓝[≠] z)
       (𝓝 (deriv ℘'[L] z / ℘'[L] z)) := by
   have h1 := hasDerivAt_iff_tendsto_slope.mp (p23R1_hasDerivAt_wp L hz)
@@ -529,7 +527,7 @@ theorem p23R1_tendsto_X (L : PeriodPair) {z : ℂ} (hz : z ∉ L.lattice) (hp : 
   rw [Pi.div_apply, slope_def_field, slope_def_field, div_div_div_cancel_right₀ hv', ← neg_sub (℘'[L] v), ← neg_sub (℘[L] v), neg_div_neg_eq]
 
 /-- A continuous function vanishing off the lattice vanishes everywhere. -/
-theorem p23R1_eq_zero_of_compl (L : PeriodPair) {g : ℂ → ℂ} (hg : Continuous g)
+lemma p23R1_eq_zero_of_compl (L : PeriodPair) {g : ℂ → ℂ} (hg : Continuous g)
     (h : ∀ x, x ∉ L.lattice → g x = 0) (x : ℂ) : g x = 0 := by
   have hev : ∀ᶠ y in 𝓝[≠] x, g y = 0 := by
     filter_upwards [nhdsWithin_le_nhds (L.compl_lattice_sdiff_singleton_mem_nhds x),
@@ -882,30 +880,6 @@ end HalfPeriods
 
 /-! ### Homogeneity (§23.10(iv)) -/
 
-/-- The period pair `c𝕃` with periods `cω₁, cω₂` (`c ≠ 0`). -/
-def scalePeriodPair (c : ℂ) (hc : c ≠ 0) (L : PeriodPair) : PeriodPair :=
-  ⟨c * L.ω₁, c * L.ω₂, by
-    refine LinearIndependent.pair_iff.mpr fun s t h => ?_
-    refine LinearIndependent.pair_iff.mp L.indep s t ?_
-    have : c * (s • L.ω₁ + t • L.ω₂) = 0 := by
-      rw [← h]; simp only [Complex.real_smul]; ring
-    simpa [hc] using this⟩
-
-theorem wp23_mem_scale_iff (c : ℂ) (hc : c ≠ 0) (L : PeriodPair) {z : ℂ} :
-    z ∈ (scalePeriodPair c hc L).lattice ↔ z / c ∈ L.lattice := by
-  simp only [PeriodPair.mem_lattice, scalePeriodPair]
-  constructor
-  · rintro ⟨m, n, rfl⟩; exact ⟨m, n, by field_simp⟩
-  · rintro ⟨m, n, h⟩; exact ⟨m, n, by rw [← mul_div_cancel₀ z hc, ← h]; ring⟩
-
-/-- Multiplication by `c` as a bijection `𝕃 ≃ c𝕃`. -/
-def wp23_scaleEquiv (c : ℂ) (hc : c ≠ 0) (L : PeriodPair) :
-    L.lattice ≃ (scalePeriodPair c hc L).lattice where
-  toFun l := ⟨c * l, (wp23_mem_scale_iff c hc L).mpr (by simp [hc])⟩
-  invFun l := ⟨l / c, (wp23_mem_scale_iff c hc L).mp l.2⟩
-  left_inv l := by ext; simp [hc]
-  right_inv l := by ext; simp [mul_div_cancel₀ _ hc]
-
 /-- DLMF 23.10.17: `℘(cz|c𝕃) = c⁻²℘(z|𝕃)`. -/
 @[dlmf 23.10.E17]
 theorem weierstrassP_scale (c : ℂ) (hc : c ≠ 0) (L : PeriodPair) (z : ℂ) :
@@ -942,21 +916,5 @@ theorem weierstrassSigma_scale (c : ℂ) (hc : c ≠ 0) (L : PeriodPair) (z : �
   rw [mul_div_mul_left _ _ hc, mul_pow, mul_pow,
     show c ^ 2 * z ^ 2 / (2 * (c ^ 2 * (l : ℂ) ^ 2)) = z ^ 2 / (2 * (l : ℂ) ^ 2) by
       rw [mul_left_comm 2, mul_div_mul_left _ _ (pow_ne_zero 2 hc)]]
-
-/-- `G_k(c𝕃) = c^{-k}G_k(𝕃)`. -/
-theorem wp23_G_scale (c : ℂ) (hc : c ≠ 0) (L : PeriodPair) (k : ℕ) :
-    (scalePeriodPair c hc L).G k = c⁻¹ ^ k * L.G k := by
-  simp only [PeriodPair.G]
-  rw [← (wp23_scaleEquiv c hc L).tsum_eq, ← tsum_mul_left]
-  refine tsum_congr fun l => ?_
-  simp only [wp23_scaleEquiv, Equiv.coe_fn_mk]
-  rw [mul_pow, mul_inv, inv_pow]
-
-/-- DLMF §23.10(iv): replacing `𝕃` by `c𝕃` divides `g₂` by `c⁴` and `g₃` by `c⁶`. -/
-@[dlmf 23.10.iv]
-theorem invariants_scale (c : ℂ) (hc : c ≠ 0) (L : PeriodPair) :
-    (scalePeriodPair c hc L).g₂ = L.g₂ / c ^ 4 ∧ (scalePeriodPair c hc L).g₃ = L.g₃ / c ^ 6 := by
-  simp only [PeriodPair.g₂, PeriodPair.g₃, wp23_G_scale]
-  constructor <;> field_simp
 
 end DLMF.Weierstrass

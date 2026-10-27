@@ -5,13 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Hypergeometric.EulerIntegral
 public import DLMF.Hypergeometric.BarnesAux
-public import DLMF.Hypergeometric.Continuation
 public import DLMF.Hypergeometric.FurtherTransformations
 public import DLMF.Hypergeometric.Saalschutz
 public import DLMF.Gamma.Integrals
-public import Mathlib.MeasureTheory.Function.JacobianOneDim
 
 /-!
 # Integral representations (DLMF §15.6)
@@ -132,7 +129,7 @@ theorem barnes_integral {a b c : ℂ} {x σ : ℝ} (hx : -1 < x) (hx0 : x < 0)
   barnes_integral_all hx hx0 ha hb hσ
 
 /-- `Γ(x+n) = (x)ₙ Γ(x)` for real `x > 0`. -/
-lemma hypSV_real_Gamma_add_nat {x : ℝ} (hx : 0 < x) (n : ℕ) :
+theorem hypSV_real_Gamma_add_nat {x : ℝ} (hx : 0 < x) (n : ℕ) :
     Real.Gamma (n + x) = (ascPochhammer ℝ n).eval x * Real.Gamma x := by
   induction n with
   | zero => simp
@@ -283,7 +280,7 @@ theorem barnes_integral_one_sub {a b c z : ℂ} {σ : ℝ} (hz : ‖z‖ < 1)
   exact (hasSum_regularizedGaussHGFun_coeff a b c hz).unique hS'
 
 /-- Absolute summability of the regularized series inside the unit disk. -/
-lemma summable_norm_regularizedGaussHGFun_term (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem summable_norm_regularizedGaussHGFun_term (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     Summable fun n : ℕ => ‖(ascPochhammer ℂ n).eval a * (ascPochhammer ℂ n).eval b * z ^ n /
       n.factorial * (Gamma (c + n))⁻¹‖ := by
   have h := (regularizedGaussHGFunSeries a b c).summable_norm_apply
@@ -385,7 +382,7 @@ open Finset
 open scoped Nat
 
 /-- A summable double series is the sum of its antidiagonal sums. -/
-lemma hypSV_hasSum_antidiag {g : ℕ × ℕ → ℂ} (h : Summable g) :
+theorem hypSV_hasSum_antidiag {g : ℕ × ℕ → ℂ} (h : Summable g) :
     HasSum (fun N => ∑ p ∈ antidiagonal N, g p) (∑' p, g p) := by
   set e := Finset.HasAntidiagonal.sigmaAntidiagonalEquivProd (A := ℕ)
   have h' : HasSum (g ∘ e) (∑' p, g p) := by
@@ -396,7 +393,7 @@ lemma hypSV_hasSum_antidiag {g : ℕ × ℕ → ℂ} (h : Summable g) :
   exact this
 
 /-- A nonnegative double series with summable antidiagonal sums is summable. -/
-lemma hypSV_summable_of_antidiag {G : ℕ × ℕ → ℝ} (h0 : ∀ p, 0 ≤ G p)
+theorem hypSV_summable_of_antidiag {G : ℕ × ℕ → ℝ} (h0 : ∀ p, 0 ≤ G p)
     (h : Summable fun N => ∑ p ∈ antidiagonal N, G p) : Summable G := by
   set e := Finset.HasAntidiagonal.sigmaAntidiagonalEquivProd (A := ℕ)
   rw [← e.summable_iff]
@@ -406,7 +403,7 @@ lemma hypSV_summable_of_antidiag {G : ℕ × ℕ → ℝ} (h0 : ∀ p, 0 ≤ G p
   exact (Finset.sum_coe_sort (antidiagonal N) G).symm
 
 /-- Real Chu–Vandermonde in factorial form. -/
-lemma hypSV_real_vandermonde (u v : ℝ) (N : ℕ) :
+theorem hypSV_real_vandermonde (u v : ℝ) (N : ℕ) :
     ∑ p ∈ antidiagonal N, (ascPochhammer ℝ p.1).eval u / p.1 ! *
       ((ascPochhammer ℝ p.2).eval v / p.2 !) = (ascPochhammer ℝ N).eval (u + v) / N ! := by
   have h := poch_add_eq_sum (u : ℂ) v N
@@ -427,7 +424,7 @@ lemma hypSV_real_vandermonde (u v : ℝ) (N : ℕ) :
   field_simp
 
 /-- `Re c` controls the Pochhammer symbol from below. -/
-lemma hypSV_norm_poch_ge {c : ℂ} (hc : 0 < c.re) (n : ℕ) :
+theorem hypSV_norm_poch_ge {c : ℂ} (hc : 0 < c.re) (n : ℕ) :
     (ascPochhammer ℝ n).eval c.re ≤ ‖poch c n‖ := by
   induction n with
   | zero => simp [poch_zero]
@@ -439,7 +436,7 @@ lemma hypSV_norm_poch_ge {c : ℂ} (hc : 0 < c.re) (n : ℕ) :
     exact mul_le_mul ih h1 (by positivity) (norm_nonneg _)
 
 /-- `‖Γ(c+N)‖⁻¹ ≤ (‖Γ(Re c)‖/‖Γ c‖) ‖Γ(Re c + N)‖⁻¹` for `Re c > 0`. -/
-lemma hypSV_norm_recip_Gamma_le {c : ℂ} (hc : 0 < c.re) (N : ℕ) :
+theorem hypSV_norm_recip_Gamma_le {c : ℂ} (hc : 0 < c.re) (N : ℕ) :
     ‖Gamma (c + N)‖⁻¹ ≤ ‖Gamma (c.re : ℂ)‖ / ‖Gamma c‖ * ‖Gamma ((c.re : ℂ) + N)‖⁻¹ := by
   have hcn : ∀ k : ℕ, c ≠ -k := not_neg_nat_of_re_pos hc
   have hCn : ∀ k : ℕ, (c.re : ℂ) ≠ -k := not_neg_nat_of_re_pos (by simpa using hc)
@@ -464,7 +461,7 @@ lemma hypSV_norm_recip_Gamma_le {c : ℂ} (hc : 0 < c.re) (N : ℕ) :
   exact inv_anti₀ (by positivity) (mul_le_mul_of_nonneg_left hle hn1.le)
 
 /-- Rearranging `∑ₘ (p)ₘ(q)ₘ/m! xᵐ 𝐅(s+m, r; c+m; x)` by total degree. -/
-lemma hypSV_hasSum_shift_series (p q r s c A B : ℂ) (hc : 0 < c.re) {x : ℂ} (hx : ‖x‖ < 1)
+theorem hypSV_hasSum_shift_series (p q r s c A B : ℂ) (hc : 0 < c.re) {x : ℂ} (hx : ‖x‖ < 1)
     (hK : ∀ N, ∑ m ∈ range (N + 1), poch p m * poch q m / m ! *
       (poch (s + m) (N - m) * poch r (N - m) / (N - m)!) = poch A N * poch B N / N !) :
     HasSum (fun m : ℕ => poch p m * poch q m / m ! * x ^ m *
@@ -576,7 +573,7 @@ lemma hypSV_hasSum_shift_series (p q r s c A B : ℂ) (hc : 0 < c.re) {x : ℂ} 
   exact h1
 
 /-- The Vandermonde coefficient identity behind the inner sum of 15.6.9. -/
-lemma hypSV_coeff_inner (α u v : ℂ) (N : ℕ) :
+theorem hypSV_coeff_inner (α u v : ℂ) (N : ℕ) :
     ∑ n ∈ range (N + 1), poch α n * poch u n / n ! *
       (poch (α + n) (N - n) * poch v (N - n) / (N - n)!) = poch α N * poch (u + v) N / N ! := by
   rw [poch_add_eq_sum u v N, Finset.mul_sum, Finset.sum_div]
@@ -593,7 +590,7 @@ lemma hypSV_coeff_inner (α u v : ℂ) (N : ℕ) :
   field_simp
 
 /-- The Pfaff–Saalschütz coefficient identity behind the outer sum of 15.6.9, for all `l`. -/
-lemma hypSV_coeff_outer (a b l : ℂ) (N : ℕ) :
+theorem hypSV_coeff_outer (a b l : ℂ) (N : ℕ) :
     ∑ m ∈ range (N + 1), poch (l - a) m * poch (l - b) m / m ! *
       (poch (l + m) (N - m) * poch (a + b - l) (N - m) / (N - m)!) =
       poch a N * poch b N / N ! := by
@@ -639,7 +636,7 @@ lemma hypSV_coeff_outer (a b l : ℂ) (N : ℕ) :
 
 /-- Termwise integration of `w u ∑ cₙ vⁿ` over `[0,1]` for integrable `w`, continuous `u, v`
 and `‖v‖ ≤ ρ` with `∑ ‖cₙ‖ ρⁿ < ∞`. -/
-lemma hypSV_hasSum_integral {w u v S : ℝ → ℂ} {c : ℕ → ℂ} {ρ : ℝ}
+theorem hypSV_hasSum_integral {w u v S : ℝ → ℂ} {c : ℕ → ℂ} {ρ : ℝ}
     (hw : IntervalIntegrable w MeasureTheory.volume 0 1)
     (hu : ContinuousOn u (Set.Icc 0 1)) (hv : ContinuousOn v (Set.Icc 0 1))
     (hvρ : ∀ t ∈ Set.Icc (0 : ℝ) 1, ‖v t‖ ≤ ρ) (hc : Summable fun n => ‖c n‖ * ρ ^ n)
@@ -677,7 +674,7 @@ lemma hypSV_hasSum_integral {w u v S : ℝ → ℂ} {c : ℕ → ℂ} {ρ : ℝ}
     exact ((hS t ⟨ht.1.le, ht.2⟩).mul_left (u t)).mul_left (w t)
 
 /-- The inner Euler integral of 15.6.9 after expanding both series. -/
-lemma hypSV_product_inner_term {α c d K : ℂ} {x : ℝ} (m n : ℕ) (hd : 0 < d.re)
+theorem hypSV_product_inner_term {α c d K : ℂ} {x : ℝ} (m n : ℕ) (hd : 0 < d.re)
     (hcd : 0 < (c - d).re) (hx0 : 0 ≤ x) (hx1 : x < 1) :
     ∫ t in (0 : ℝ)..1, (t : ℂ) ^ (d + m - 1) * (1 - (t : ℂ)) ^ (c - d - 1) *
         (((1 - (x : ℂ) * t) ^ α)⁻¹ * (K * ((1 - (t : ℂ)) * x / (1 - (x : ℂ) * t)) ^ n)) =

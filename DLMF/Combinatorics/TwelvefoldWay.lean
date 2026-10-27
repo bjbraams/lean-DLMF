@@ -6,11 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Combinatorics.RestrictedPartitions
-public import Mathlib.Combinatorics.Enumerative.Stirling
-public import Mathlib.Data.Fintype.CardEmbedding
-public import Mathlib.RingTheory.Polynomial.Pochhammer
 public import Mathlib.Data.Sym.Card
-public import Mathlib.Data.Fintype.Powerset
 public import DLMFMathlib.Combinatorics.Q26bSurjections
 
 /-!

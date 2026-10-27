@@ -5,11 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Gamma.Basic
-public import Mathlib.Tactic.CrossRefAttribute
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
 public import Mathlib.Analysis.SpecialFunctions.Log.Summable
-public import Mathlib.Analysis.SpecialFunctions.Complex.LogBounds
+public import Mathlib.Analysis.PSeries
 
 /-!
 # Infinite products (DLMF §5.8)
@@ -29,7 +27,7 @@ noncomputable section
 namespace DLMF.Gamma
 
 /-- `∑ₖ y²/(x+k)²` converges. -/
-lemma summable_sq_div_add_sq (x y : ℝ) : Summable fun k : ℕ => y ^ 2 / (x + k) ^ 2 := by
+theorem summable_sq_div_add_sq (x y : ℝ) : Summable fun k : ℕ => y ^ 2 / (x + k) ^ 2 := by
   have hg : Summable fun k : ℕ => 4 * y ^ 2 * (1 / (k : ℝ) ^ 2) :=
     (Real.summable_one_div_nat_pow.mpr one_lt_two).mul_left _
   refine Summable.of_norm_bounded_eventually_nat hg ?_
@@ -48,7 +46,7 @@ lemma summable_sq_div_add_sq (x y : ℝ) : Summable fun k : ℕ => y ^ 2 / (x + 
   nlinarith [sq_nonneg y, mul_le_mul_of_nonneg_left this (sq_nonneg y)]
 
 /-- `∏ₖ (1 + y²/(x+k)²)` converges. -/
-lemma multipliable_one_add_sq_div_add_sq (x y : ℝ) :
+theorem multipliable_one_add_sq_div_add_sq (x y : ℝ) :
     Multipliable fun k : ℕ => 1 + y ^ 2 / (x + k) ^ 2 :=
   Real.multipliable_one_add_of_summable (summable_sq_div_add_sq x y)
 
@@ -116,7 +114,7 @@ theorem Gamma_div_Gamma_add_mul_I_sq {x y : ℝ} (hx : ∀ k : ℕ, (x : ℂ) �
 open Finset in
 /-- The multipliability in 5.8.5: the `n`-th factor is `exp Lₙ` with `|Lₙ| = O(1/n²)`,
 because the balance `∑ aₖ = ∑ bₖ` cancels the terms of order `1/n`. -/
-lemma summable_balanced_factor_sub_one {m : ℕ} (a b : Fin m → ℂ)
+theorem summable_balanced_factor_sub_one {m : ℕ} (a b : Fin m → ℂ)
     (hsum : ∑ k : Fin m, a k = ∑ k : Fin m, b k) :
     Summable fun n : ℕ => ‖(∏ k : Fin m, (a k + n)) / (∏ k : Fin m, (b k + n)) - 1‖ := by
   set A : ℝ := ∑ k : Fin m, (‖a k‖ + ‖b k‖) with hA

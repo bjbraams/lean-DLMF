@@ -6,8 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Legendre.AssociatedRecurrences
-public import DLMF.Legendre.Integer
-public import DLMF.OrthogonalPolynomials.Classical
 public import DLMF.OrthogonalPolynomials.Integrals
 
 /-!
@@ -43,7 +41,7 @@ section RodriguesHelpers
 open DLMF.OrthogonalPolynomials
 
 /-- Iterated derivatives of a polynomial function are the iterated polynomial derivatives. -/
-lemma iteratedDeriv_eval_polynomial {𝕜 : Type*} [NontriviallyNormedField 𝕜] (p : Polynomial 𝕜)
+theorem iteratedDeriv_eval_polynomial {𝕜 : Type*} [NontriviallyNormedField 𝕜] (p : Polynomial 𝕜)
     (k : ℕ) : iteratedDeriv k (fun z => p.eval z) = fun z => (Polynomial.derivative^[k] p).eval z := by
   induction k with
   | zero => simp
@@ -53,7 +51,7 @@ lemma iteratedDeriv_eval_polynomial {𝕜 : Type*} [NontriviallyNormedField 𝕜
     rw [Polynomial.deriv, Function.iterate_succ_apply']
 
 /-- Real-variable iterated derivatives of the complexification of a real polynomial. -/
-lemma iteratedDeriv_ofReal_eval_polynomial (p : Polynomial ℝ) (k : ℕ) :
+theorem iteratedDeriv_ofReal_eval_polynomial (p : Polynomial ℝ) (k : ℕ) :
     iteratedDeriv k (fun x : ℝ => ((p.eval x : ℝ) : ℂ)) =
       fun x => (((Polynomial.derivative^[k] p).eval x : ℝ) : ℂ) := by
   induction k with
@@ -69,7 +67,7 @@ noncomputable def legendrePolyR (n : ℕ) : Polynomial ℝ :=
     (Polynomial.C (1/2) * (1 - Polynomial.X))
 
 /-- `P_n(z)` is the evaluation of the complexified real polynomial `legendrePolyR n`. -/
-lemma legendrePolyP_eq_eval (n : ℕ) (z : ℂ) :
+theorem legendrePolyP_eq_eval (n : ℕ) (z : ℂ) :
     legendrePolyP n z = ((legendrePolyR n).map ofRealHom).eval z := by
   have h := aeval_shiftedLegendre_eq_legendrePolyP n ((1-z)/2)
   rw [show 1 - 2*((1-z)/2) = z by ring] at h
@@ -79,7 +77,7 @@ lemma legendrePolyP_eq_eval (n : ℕ) (z : ℂ) :
   congr 1; ring
 
 /-- Evaluating a complexified real polynomial at a real point. -/
-lemma eval_ofReal_map_ofRealHom (p : Polynomial ℝ) (x : ℝ) :
+theorem eval_ofReal_map_ofRealHom (p : Polynomial ℝ) (x : ℝ) :
     (p.map ofRealHom).eval (x:ℂ) = ((p.eval x : ℝ) : ℂ) := by
   rw [Polynomial.eval_map]; exact Polynomial.eval₂_at_apply ofRealHom x
 
@@ -104,7 +102,7 @@ theorem legendrePolyP_rodrigues_complex (n : ℕ) (z : ℂ) :
   simp [B, Polynomial.map_mul]
 
 /-- `dᵐ P_n(z)/dzᵐ = (2ⁿ n!)⁻¹ dᵐ⁺ⁿ/dzᵐ⁺ⁿ (z²-1)ⁿ`. -/
-lemma iteratedDeriv_legendrePolyP_rodrigues (n m : ℕ) (z : ℂ) :
+theorem iteratedDeriv_legendrePolyP_rodrigues (n m : ℕ) (z : ℂ) :
     iteratedDeriv m (legendrePolyP n) z =
       (2^n*(n.factorial:ℂ))⁻¹ * iteratedDeriv (m+n) (fun z : ℂ => (z^2-1)^n) z := by
   set Rc : Polynomial ℂ := (Polynomial.X^2 - 1)^n
@@ -221,7 +219,7 @@ lemma ferrersW2_neg (ν μ : ℂ) (x : ℝ) : ferrersW2 ν μ (-x) = -ferrersW2 
   simp [ferrersW2]
 
 /-- Parity identities for the trigonometric coefficients at integer `ν+μ`. -/
-lemma cos_sin_nat_half_pi (N : ℕ) :
+theorem cos_sin_nat_half_pi (N : ℕ) :
     cos (N*π/2)*(1-(-1)^N) = 0 ∧ sin (N*π/2)*(1+(-1)^N) = 0 := by
   rcases Nat.even_or_odd' N with ⟨k, rfl | rfl⟩
   · have hs : sin (((2*k:ℕ):ℂ)*π/2) = 0 := by
@@ -233,7 +231,7 @@ lemma cos_sin_nat_half_pi (N : ℕ) :
     exact ⟨by rw [hc, zero_mul], by simp [pow_succ, pow_mul]⟩
 
 /-- Reflection of `𝖯^μ_ν` when `ν+μ` is a nonnegative integer. -/
-lemma ferrersP_neg_of_add_eq_nat {ν μ : ℂ} {N : ℕ} (hN : ν+μ = N) {x : ℝ}
+theorem ferrersP_neg_of_add_eq_nat {ν μ : ℂ} {N : ℕ} (hN : ν+μ = N) {x : ℝ}
     (hx : x ∈ Ioo (-1:ℝ) 1) : ferrersP ν μ (-x) = (-1)^N*ferrersP ν μ x := by
   have hreg : LegendreQRegular ν μ := fun k hk => by
     rw [hN] at hk
@@ -244,7 +242,7 @@ lemma ferrersP_neg_of_add_eq_nat {ν μ : ℂ} {N : ℕ} (hN : ν+μ = N) {x : �
   linear_combination ferrersW1 ν μ x * h1 - ferrersW2 ν μ x * h2
 
 /-- Reflection of `𝖰^μ_ν` when `ν+μ` is a nonnegative integer. -/
-lemma ferrersQ_neg_of_add_eq_nat {ν μ : ℂ} {N : ℕ} (hN : ν+μ = N) (x : ℝ) :
+theorem ferrersQ_neg_of_add_eq_nat {ν μ : ℂ} {N : ℕ} (hN : ν+μ = N) (x : ℝ) :
     ferrersQ ν μ (-x) = (-1)^(N+1)*ferrersQ ν μ x := by
   obtain ⟨h1, h2⟩ := cos_sin_nat_half_pi N
   unfold ferrersQ

@@ -6,9 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Hypergeometric.Elementary
-public import DLMF.Hypergeometric.Transformations
 public import DLMF.Confluent.ExpIntegral
-public import DLMF.Bessel.Basic
 
 /-!
 # Special cases from Duverney, Chapters 3–4
@@ -45,7 +43,7 @@ theorem ordinaryHypergeometric_one_one_half {a : ℂ} (ha : 0 < a.re) :
   linear_combination 2 * hD
 
 /-- The regularized function as a `tsum` of its coefficients. -/
-lemma regularizedHGFun_eq_tsum_coeff (a b : Multiset ℂ) (z : ℂ) :
+theorem regularizedHGFun_eq_tsum_coeff (a b : Multiset ℂ) (z : ℂ) :
     regularizedHGFun a b z = ∑' n : ℕ, regularizedHGFunCoeff a b n * z ^ n := by
   simp only [regularizedHGFun, FormalMultilinearSeries.sum, regularizedHGFunSeries,
     FormalMultilinearSeries.ofScalars_apply_eq, smul_eq_mul]

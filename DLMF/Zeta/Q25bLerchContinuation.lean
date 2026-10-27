@@ -8,11 +8,7 @@ module
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import DLMFMathlib.Analysis.Asymptotics.WatsonSector
 public import Mathlib.Analysis.Complex.LocallyUniformLimit
-public import Mathlib.Analysis.Analytic.Uniqueness
-public import Mathlib.Analysis.Calculus.FDeriv.Analytic
-public import Mathlib.Analysis.Convex.PathConnected
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
-public import Mathlib.MeasureTheory.Integral.DominatedConvergence
 public import Mathlib.Analysis.PSeries
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
 
@@ -56,7 +52,7 @@ lemma q25b_ball_subset_slit : ball (0 : ℂ) 1 ⊆ q25b_slit := fun z hz =>
   q25b_mem_slit_of_norm_lt_one (by simpa using hz)
 
 /-- The cut plane is star-shaped about `0`. -/
-lemma q25b_starConvex_slit : StarConvex ℝ 0 q25b_slit := by
+theorem q25b_starConvex_slit : StarConvex ℝ 0 q25b_slit := by
   intro y hy p q hp hq hpq
   simp only [smul_zero, zero_add]
   rcases eq_or_lt_of_le hq with hq0 | hq0
@@ -72,7 +68,7 @@ lemma q25b_starConvex_slit : StarConvex ℝ 0 q25b_slit := by
     · nlinarith
     · nlinarith
 
-lemma q25b_isPreconnected_slit : IsPreconnected q25b_slit :=
+theorem q25b_isPreconnected_slit : IsPreconnected q25b_slit :=
   (q25b_starConvex_slit.isPathConnected (Or.inr (by simp))).isConnected.isPreconnected
 
 /-- **Uniqueness of the continuation**: two analytic functions on the cut plane that agree on the
@@ -128,18 +124,18 @@ def q25b_lerchInt (s a z : ℂ) : ℂ :=
 lemma q25b_cexp_neg_ofReal (x : ℝ) : cexp (-(x : ℂ)) = ((Real.exp (-x) : ℝ) : ℂ) := by
   rw [ofReal_exp, ofReal_neg]
 
-lemma q25b_norm_cpow_mul_cexp {s b : ℂ} {x : ℝ} (hx : 0 < x) :
+theorem q25b_norm_cpow_mul_cexp {s b : ℂ} {x : ℝ} (hx : 0 < x) :
     ‖(x : ℂ) ^ (s - 1) * cexp (-(b * x))‖ = x ^ (s.re - 1) * Real.exp (-(b.re * x)) := by
   rw [norm_mul, norm_cpow_eq_rpow_re_of_pos hx, norm_exp]
   simp
 
-lemma q25b_integrableOn_rpow_mul_exp {σ β : ℝ} (hσ : 0 < σ) (hβ : 0 < β) :
+theorem q25b_integrableOn_rpow_mul_exp {σ β : ℝ} (hσ : 0 < σ) (hβ : 0 < β) :
     IntegrableOn (fun x : ℝ => x ^ (σ - 1) * Real.exp (-(β * x))) (Ioi 0) := by
   refine Integrable.of_integral_ne_zero ?_
   rw [Real.integral_rpow_mul_exp_neg_mul_Ioi hσ hβ]
   exact mul_ne_zero (by positivity) (Real.Gamma_pos_of_pos hσ).ne'
 
-lemma q25b_aestronglyMeasurable_cpow_mul_cexp (s b : ℂ) :
+theorem q25b_aestronglyMeasurable_cpow_mul_cexp (s b : ℂ) :
     AEStronglyMeasurable (fun x : ℝ => (x : ℂ) ^ (s - 1) * cexp (-(b * x)))
       (volume.restrict (Ioi 0)) := by
   refine ContinuousOn.aestronglyMeasurable ?_ measurableSet_Ioi
@@ -148,7 +144,7 @@ lemma q25b_aestronglyMeasurable_cpow_mul_cexp (s b : ℂ) :
   refine ContinuousAt.mul ?_ (by fun_prop)
   exact (continuousAt_ofReal_cpow_const _ _ (Or.inr (ne_of_gt hx)))
 
-lemma q25b_integrableOn_cpow_mul_cexp {s b : ℂ} (hs : 0 < s.re) (hb : 0 < b.re) :
+theorem q25b_integrableOn_cpow_mul_cexp {s b : ℂ} (hs : 0 < s.re) (hb : 0 < b.re) :
     IntegrableOn (fun x : ℝ => (x : ℂ) ^ (s - 1) * cexp (-(b * x))) (Ioi 0) := by
   refine (q25b_integrableOn_rpow_mul_exp hs hb).mono'
     (q25b_aestronglyMeasurable_cpow_mul_cexp s b) ?_
@@ -156,7 +152,7 @@ lemma q25b_integrableOn_cpow_mul_cexp {s b : ℂ} (hs : 0 < s.re) (hb : 0 < b.re
   rw [q25b_norm_cpow_mul_cexp hx]
 
 /-- The integral 25.14.5 is analytic in `z` on the cut plane, for `Re s > 0`, `Re a > 0`. -/
-theorem q25b_analyticOnNhd_lerchInt {s a : ℂ} (hs : 0 < s.re) (ha : 0 < a.re) :
+lemma q25b_analyticOnNhd_lerchInt {s a : ℂ} (hs : 0 < s.re) (ha : 0 < a.re) :
     AnalyticOnNhd ℂ (q25b_lerchInt s a) q25b_slit := by
   refine DifferentiableOn.analyticOnNhd ?_ q25b_isOpen_slit
   have hx01 : ∀ x : ℝ, 0 < x → Real.exp (-x) ∈ Icc (0 : ℝ) 1 := fun x hx =>
@@ -316,7 +312,7 @@ theorem q25b_isLerchCont_sub_one {s a : ℂ} (ha : ∀ n : ℕ, a + n ≠ 0) {F 
     ring
 
 /-- For `Re a > 0` the continuation exists for every order `s`. -/
-theorem q25b_exists_isLerchCont_of_re_pos {a : ℂ} (ha : 0 < a.re) (s : ℂ) :
+lemma q25b_exists_isLerchCont_of_re_pos {a : ℂ} (ha : 0 < a.re) (s : ℂ) :
     ∃ F, q25b_IsLerchCont s a F := by
   have han : ∀ n : ℕ, a + n ≠ 0 := fun n h => by
     have := congrArg Complex.re h; simp at this; linarith [(n.cast_nonneg : (0 : ℝ) ≤ n)]
@@ -340,7 +336,7 @@ theorem q25b_exists_isLerchCont_of_re_pos {a : ℂ} (ha : 0 < a.re) (s : ℂ) :
 
 /-- Shifting the parameter in the series: if `∑ zⁿ/(a+m+n)^s = w` then
 `∑ zⁿ/(a+n)^s = z^m w + ∑_{n<m} zⁿ/(a+n)^s` (DLMF 25.14.4). -/
-lemma q25b_hasSum_shift {s a z w : ℂ} (m : ℕ)
+theorem q25b_hasSum_shift {s a z w : ℂ} (m : ℕ)
     (h : HasSum (fun n : ℕ => z ^ n / (a + m + n) ^ s) w) :
     HasSum (fun n : ℕ => z ^ n / (a + n) ^ s)
       (z ^ m * w + ∑ n ∈ Finset.range m, z ^ n / (a + n) ^ s) := by
@@ -396,7 +392,7 @@ theorem q25b_IsLerchCont.hasSum_of_norm_le_one {s a : ℂ} {F : ℂ → ℂ}
 
 /-- For `Re s > 1` the series `∑ 1/(a+n)^s` converges, for every complex `a` (principal powers,
 Lean's conventions at `a + n = 0`). -/
-lemma q25b_summable_one_div_cpow {s : ℂ} (hs : 1 < s.re) (a : ℂ) :
+theorem q25b_summable_one_div_cpow {s : ℂ} (hs : 1 < s.re) (a : ℂ) :
     Summable fun n : ℕ => 1 / (a + n) ^ s := by
   obtain ⟨m, hm⟩ := exists_nat_gt (-a.re)
   have h := (q25b_hasSum_shift m (q25b_hasSum_lerchInt (z := 1) (a := a + m) (by linarith)

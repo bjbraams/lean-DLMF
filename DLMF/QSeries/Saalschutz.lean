@@ -5,7 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Tactic.CrossRefAttribute
 public import DLMF.QSeries.QBinomial
 
 /-!
@@ -38,7 +37,7 @@ namespace DLMF.QSeries
 /-- The second `q`-Pascal rule `[n+1, k+1]_q = [n, k+1]_q + q^{n-k} [n, k]_q`, valid for all
 `n, k` (both sides vanish when `k > n`). -/
 @[dlmf 17.2.E32 "exact: second polynomial q-Pascal rule; local adapter proved"]
-lemma qBinom_succ_succ' (q : ℂ) (n k : ℕ) :
+theorem qBinom_succ_succ' (q : ℂ) (n k : ℕ) :
     qBinom q (n + 1) (k + 1) = qBinom q n (k + 1) + q ^ (n - k) * qBinom q n k := by
   induction n generalizing k with
   | zero =>
@@ -149,7 +148,7 @@ theorem sum_qBinom_saalschutz (q x r s : ℂ) (n : ℕ) :
       show x * q * r = x * r * q by ring, show x * q * s = x * s * q by ring]
     ring
 
-lemma qPochhammer_ne_zero_of_le {x q : ℂ} {m n : ℕ} (h : qPochhammer x q n ≠ 0) (hm : m ≤ n) :
+theorem qPochhammer_ne_zero_of_le {x q : ℂ} {m n : ℕ} (h : qPochhammer x q n ≠ 0) (hm : m ≤ n) :
     qPochhammer x q m ≠ 0 := by
   obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le hm
   rw [qPochhammer_add] at h

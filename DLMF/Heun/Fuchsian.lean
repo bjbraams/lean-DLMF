@@ -8,8 +8,6 @@ module
 public import DLMF.Heun.Basic
 public import DLMF.Heun.Equation
 public import Mathlib.Algebra.Polynomial.FieldDivision
-public import Mathlib.Analysis.SpecialFunctions.Pow.Complex
-public import Mathlib.Data.Nat.Choose.Basic
 
 /-!
 # The general Fuchsian equation and Stieltjes polynomials (DLMF §§31.14–31.15)
@@ -44,14 +42,14 @@ namespace DLMF.Heun
 /-! ### The general Fuchsian equation (§31.14) -/
 
 /-- Helper for DLMF 31.14.2: `(z - c)⁻¹ → 0` as `z → ∞` (in `ℂ`, any `c`). -/
-theorem h31_tendsto_sub_inv_cobounded (c : ℂ) :
+lemma h31_tendsto_sub_inv_cobounded (c : ℂ) :
     Tendsto (fun z : ℂ => (z - c)⁻¹) (Bornology.cobounded ℂ) (𝓝 0) := by
   have : Tendsto (fun z : ℂ => z - c) (Bornology.cobounded ℂ) (Bornology.cobounded ℂ) := by
     simp [sub_eq_add_neg]
   exact tendsto_inv₀_cobounded.comp this
 
 /-- Helper for DLMF 31.14.2: eventually `z - c ≠ 0` as `z → ∞` (in `ℂ`, any `c`). -/
-theorem h31_eventually_sub_ne_zero_cobounded (c : ℂ) :
+lemma h31_eventually_sub_ne_zero_cobounded (c : ℂ) :
     ∀ᶠ z in Bornology.cobounded ℂ, z - c ≠ 0 := by
   filter_upwards [eventually_cobounded_le_norm (‖c‖ + 1)] with z hz h
   rw [sub_eq_zero] at h; subst h; linarith
@@ -222,7 +220,7 @@ theorem fuchsianNormalQ_sum_eq_zero {N : ℕ} (a γ q : Fin N → ℂ) (hq : ∑
 
 /-- Algebraic identity behind 31.14.4: with `L = ∑ (γ_j/2)/(z - a_j)`,
 `L² + L' - ∑ q_j/(z - a_j)` is the normal-form coefficient. -/
-theorem p2h_fuchsian_normal_identity {N : ℕ} {a γ q : Fin N → ℂ} (ha : Function.Injective a)
+lemma p2h_fuchsian_normal_identity {N : ℕ} {a γ q : Fin N → ℂ} (ha : Function.Injective a)
     {z : ℂ} (hz : ∀ j, z - a j ≠ 0) :
     fuchsianCoeffR a q z = -fuchsianNormalCoeff a γ q z + 0 * (∑ j, γ j / 2 / (z - a j)) +
       (∑ j, γ j / 2 / (z - a j)) ^ 2 + -∑ j, γ j / 2 / (z - a j) ^ 2 := by
@@ -328,7 +326,7 @@ theorem fuchsian_normalForm {N : ℕ} {a γ q : Fin N → ℂ} {w : ℂ → ℂ}
 /-- `fuchsian_normalForm` (DLMF 31.14.3–31.14.5) fails without distinct singular points:
 for `a = (0, 0)`, `γ = (2, 2)`, `q = 0`, `w = 1` on `slitPlane`, `W = z²` but the junk
 `1/(a_j - a_k) = 0` makes the right-hand side `0`. -/
-theorem p1h_fuchsian_normalForm_counterexample :
+lemma p1h_fuchsian_normalForm_counterexample :
     ¬ ∀ (N : ℕ) (a γ q : Fin N → ℂ) (w : ℂ → ℂ) (U : Set ℂ), IsOpen U →
       (∀ z ∈ U, ∀ j, z - a j ∈ slitPlane) → IsFuchsianSolOn a γ q w U →
       IsLinearODE2On 0 (fun z => -fuchsianNormalCoeff a γ q z)
@@ -352,7 +350,7 @@ theorem p1h_fuchsian_normalForm_counterexample :
 
 /-- Helper for DLMF 31.15.7: for `S = c ∏_k (X - z_k)` and `S(x) ≠ 0`,
 `S'(x) = S(x) ∑_k 1/(x - z_k)`. -/
-theorem h31_logDeriv_prod {n : ℕ} (c : ℂ) (z : Fin n → ℂ) (x : ℂ)
+lemma h31_logDeriv_prod {n : ℕ} (c : ℂ) (z : Fin n → ℂ) (x : ℂ)
     (hx : (C c * ∏ k, (X - C (z k))).eval x ≠ 0) :
     (derivative (C c * ∏ k, (X - C (z k)))).eval x =
       (C c * ∏ k, (X - C (z k))).eval x * ∑ k, 1 / (x - z k) := by
@@ -379,7 +377,7 @@ theorem vanVleck_card_le {N : ℕ} (hN : 2 ≤ N) {a : Fin N → ℂ} (ha : Func
 
 /-- A zero of a nonzero polynomial solution of `Π S'' + Γ S' + V S = 0` at which `Π` does not
 vanish is simple. -/
-theorem p2h_derivative_eval_ne_zero {P G V S : ℂ[X]} {x₀ : ℂ}
+lemma p2h_derivative_eval_ne_zero {P G V S : ℂ[X]} {x₀ : ℂ}
     (hE : P * derivative (derivative S) + G * derivative S + V * S = 0) (hS : S ≠ 0)
     (hroot : S.IsRoot x₀) (hP : P.eval x₀ ≠ 0) : (derivative S).eval x₀ ≠ 0 := by
   intro h
@@ -415,7 +413,7 @@ theorem p2h_derivative_eval_ne_zero {P G V S : ℂ[X]} {x₀ : ℂ}
     omega
 
 /-- Logarithmic derivative of `c ∏_{j ∈ s} (X - z_j)`. -/
-theorem p2h_logDeriv_prod_finset {ι : Type*} [DecidableEq ι] (s : Finset ι) (c : ℂ)
+lemma p2h_logDeriv_prod_finset {ι : Type*} [DecidableEq ι] (s : Finset ι) (c : ℂ)
     (z : ι → ℂ) (x : ℂ) (hx : ∀ j ∈ s, x - z j ≠ 0) :
     (derivative (C c * ∏ j ∈ s, (X - C (z j)))).eval x =
       (C c * ∏ j ∈ s, (X - C (z j))).eval x * ∑ j ∈ s, 1 / (x - z j) := by
@@ -514,7 +512,7 @@ theorem vanVleck_zeros {N n : ℕ} {a γ : Fin N → ℂ} {V S : ℂ[X]}
   · exact h
 
 /-- The zeros of a Stieltjes polynomial that avoid the singular points are distinct. -/
-theorem p2h_stieltjes_injective {N n : ℕ} {a γ : Fin N → ℂ} {V S : ℂ[X]}
+lemma p2h_stieltjes_injective {N n : ℕ} {a γ : Fin N → ℂ} {V S : ℂ[X]}
     (hS : IsVanVleckStieltjes a γ n V S) {c : ℂ} {z : Fin n → ℂ}
     (hSz : S = C c * ∏ k, (X - C (z k))) (hk : ∀ k j, z k ≠ a j) : Function.Injective z := by
   classical
@@ -540,14 +538,14 @@ theorem p2h_stieltjes_injective {N n : ℕ} {a γ : Fin N → ℂ} {V S : ℂ[X]
     mul_zero]
 
 /-- Derivative of a coordinate of `Function.update z k x` in `x`. -/
-theorem p2h_hasDerivAt_update_apply {n : ℕ} (z : Fin n → ℂ) (k i : Fin n) (t : ℂ) :
+lemma p2h_hasDerivAt_update_apply {n : ℕ} (z : Fin n → ℂ) (k i : Fin n) (t : ℂ) :
     HasDerivAt (fun x => Function.update z k x i) (if i = k then 1 else 0) t := by
   by_cases h : i = k
   · subst h; simpa using hasDerivAt_id' t
   · simp only [Function.update_of_ne h, h, ite_false]; exact hasDerivAt_const t _
 
 /-- `logDeriv g x = g'/g(x)` from `HasDerivAt`. -/
-theorem p2h_logDeriv_of_hasDerivAt {g : ℂ → ℂ} {g' x : ℂ} (h : HasDerivAt g g' x) :
+lemma p2h_logDeriv_of_hasDerivAt {g : ℂ → ℂ} {g' x : ℂ} (h : HasDerivAt g g' x) :
     logDeriv g x = g' / g x := by
   rw [logDeriv_apply, h.deriv]
 

@@ -8,13 +8,7 @@ module
 public import DLMF.OrthogonalPolynomials.Classical
 public import DLMF.OrthogonalPolynomials.JacobiDiscriminant
 public import DLMF.Selberg.Basic
-public import Mathlib.Analysis.Complex.Polynomial.Basic
-public import Mathlib.Data.Nat.Choose.Multinomial
-public import Mathlib.LinearAlgebra.Lagrange
-public import Mathlib.NumberTheory.GaussSum
-public import Mathlib.RingTheory.Norm.Defs
 public import Mathlib.RingTheory.Polynomial.Resultant.Basic
-public import Mathlib.RingTheory.Trace.Defs
 
 /-!
 # Applications of the Selberg integral (AAR §§8.5–8.11)
@@ -115,7 +109,7 @@ namespace NearlyPoised
 open MeasureTheory Set
 
 /-- The binomial theorem with Pochhammer coefficients. -/
-lemma sub_pow_eq_sum_poch (x y : ℂ) (n : ℕ) :
+theorem sub_pow_eq_sum_poch (x y : ℂ) (n : ℕ) :
     (x - y) ^ n = ∑ r ∈ Finset.range (n + 1), poch (-(n : ℂ)) r / r ! * (x ^ (n - r) * y ^ r) := by
   rw [sub_eq_neg_add, add_pow]
   refine Finset.sum_congr rfl fun r _ => ?_
@@ -124,30 +118,30 @@ lemma sub_pow_eq_sum_poch (x y : ℂ) (n : ℕ) :
   push_cast
   field_simp
 
-lemma weight_mul_pow_eq {a b : ℂ} (p : ℕ) {x : ℝ} (hx : 0 < x) :
+theorem weight_mul_pow_eq {a b : ℂ} (p : ℕ) {x : ℝ} (hx : 0 < x) :
     weight a b x * (x : ℂ) ^ p = weight (a + p) b x := by
   have hx0 : (x : ℂ) ≠ 0 := by exact_mod_cast hx.ne'
   unfold weight
   rw [mul_right_comm, ← cpow_natCast, ← cpow_add _ _ hx0]
   ring_nf
 
-lemma integrableOn_weight_mul_pow {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (p : ℕ) :
+theorem integrableOn_weight_mul_pow {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (p : ℕ) :
     IntegrableOn (fun x : ℝ => weight a b x * (x : ℂ) ^ p) (Icc (0 : ℝ) 1) := by
   rw [integrableOn_Icc_iff_integrableOn_Ioc]
   have h : IntegrableOn (weight (a + p) b) (Ioc (0 : ℝ) 1) :=
     (integrableOn_weight (by simp; positivity) hb).mono_set Ioc_subset_Icc_self
   exact h.congr_fun (fun x hx => (weight_mul_pow_eq p hx.1).symm) measurableSet_Ioc
 
-lemma integral_weight_mul_pow {a b : ℂ} (p : ℕ) :
+theorem integral_weight_mul_pow {a b : ℂ} (p : ℕ) :
     ∫ x in Icc (0 : ℝ) 1, weight a b x * (x : ℂ) ^ p = betaIntegral (a + p) b := by
   rw [integral_Icc_eq_integral_Ioc, betaIntegral, intervalIntegral.integral_of_le zero_le_one]
   exact setIntegral_congr_fun measurableSet_Ioc fun x hx => weight_mul_pow_eq p hx.1
 
-lemma prod_fin_two_eq {f g : ℝ → ℂ} (t : Fin 2 → ℝ) :
+theorem prod_fin_two_eq {f g : ℝ → ℂ} (t : Fin 2 → ℝ) :
     f (t 0) * g (t 1) = ∏ i : Fin 2, (![f, g] i) (t i) := by
   simp [Fin.prod_univ_two]
 
-lemma integrableOn_cube_two {f g : ℝ → ℂ} (hf : IntegrableOn f (Icc (0 : ℝ) 1))
+theorem integrableOn_cube_two {f g : ℝ → ℂ} (hf : IntegrableOn f (Icc (0 : ℝ) 1))
     (hg : IntegrableOn g (Icc (0 : ℝ) 1)) :
     IntegrableOn (fun t : Fin 2 → ℝ => f (t 0) * g (t 1)) (cube 2) := by
   simp_rw [prod_fin_two_eq]
@@ -157,14 +151,14 @@ lemma integrableOn_cube_two {f g : ℝ → ℂ} (hf : IntegrableOn f (Icc (0 : �
   · exact hf
   · exact hg
 
-lemma integral_cube_two {f g : ℝ → ℂ} :
+theorem integral_cube_two {f g : ℝ → ℂ} :
     ∫ t in cube 2, f (t 0) * g (t 1) =
       (∫ x in Icc (0 : ℝ) 1, f x) * ∫ x in Icc (0 : ℝ) 1, g x := by
   simp_rw [prod_fin_two_eq]
   rw [volume_pi, Measure.restrict_pi_pi, integral_fintype_prod_eq_prod]
   simp [Fin.prod_univ_two]
 
-lemma vdm_two (k : ℕ) (t : Fin 2 → ℝ) :
+theorem vdm_two (k : ℕ) (t : Fin 2 → ℝ) :
     vdm 2 (k : ℂ) t = ((t 0 : ℂ) - t 1) ^ (2 * k) := by
   simp only [vdm, Fin.prod_univ_two, Fin.val_zero, Fin.val_one, lt_irrefl, ite_false,
     zero_lt_one, ite_true, not_lt_zero, one_mul, mul_one]
@@ -173,27 +167,27 @@ lemma vdm_two (k : ℕ) (t : Fin 2 → ℝ) :
   push_cast; ring
 
 
-lemma ne_zero_of_re_pos {z : ℂ} (h : 0 < z.re) : z ≠ 0 := fun h0 => by simp [h0] at h
+theorem ne_zero_of_re_pos {z : ℂ} (h : 0 < z.re) : z ≠ 0 := fun h0 => by simp [h0] at h
 
-lemma poch_ne_zero_of_re_pos {z : ℂ} (hz : 0 < z.re) (n : ℕ) : poch z n ≠ 0 :=
+theorem poch_ne_zero_of_re_pos {z : ℂ} (hz : 0 < z.re) (n : ℕ) : poch z n ≠ 0 :=
   poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos hz) n
 
-lemma Gamma_add_nat_eq {z : ℂ} (hz : 0 < z.re) (n : ℕ) :
+theorem Gamma_add_nat_eq {z : ℂ} (hz : 0 < z.re) (n : ℕ) :
     Gamma (z + n) = poch z n * Gamma z := by
   have h := Gamma_add_nat_div_Gamma_eq (n := n) z (not_neg_nat_of_re_pos hz)
   rw [poch, ← h, div_mul_cancel₀ _ (Gamma_ne_zero_of_re_pos hz)]
 
-lemma betaIntegral_eq {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) :
+theorem betaIntegral_eq {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) :
     betaIntegral x y = Gamma x * Gamma y / Gamma (x + y) := by
   rw [Gamma_mul_Gamma_eq_betaIntegral hx hy,
     mul_div_cancel_left₀ _ (Gamma_ne_zero_of_re_pos (by simp; linarith))]
 
 /-- `(x + 1 - r)_r = (-1)^r (-x)_r`. -/
-lemma poch_neg_eq (x : ℂ) (r : ℕ) : poch (-x) r = (-1) ^ r * poch (x - r + 1) r := by
+theorem poch_neg_eq (x : ℂ) (r : ℕ) : poch (-x) r = (-1) ^ r * poch (x - r + 1) r := by
   rw [poch, ascPochhammer_eval_neg_eq_descPochhammer, descPochhammer_eval_eq_ascPochhammer]
 
 /-- One term of the expanded Aomoto integral. -/
-lemma term_eq {α β : ℂ} (hα : 0 < α.re) (hβ : 0 < β.re) (k r : ℕ) (hr : r ≤ 2 * k) :
+theorem term_eq {α β : ℂ} (hα : 0 < α.re) (hβ : 0 < β.re) (k r : ℕ) (hr : r ≤ 2 * k) :
     poch (-((2 * k : ℕ) : ℂ)) r / r ! *
         (betaIntegral (α + ((2 * k - r + 1 : ℕ) : ℂ)) β * betaIntegral (α + r) β) =
       betaIntegral (α + 2 * k + 1) β * betaIntegral α β *
@@ -235,7 +229,7 @@ lemma term_eq {α β : ℂ} (hα : 0 < α.re) (hβ : 0 < β.re) (k r : ℕ) (hr 
 
 /-- The Aomoto integral with `n = 2`, one linear factor and `c = k`, expanded by the binomial
 theorem: a sum of products of two Beta integrals. -/
-lemma aomoto_two_expand {α β : ℂ} (hα : 0 < α.re) (hβ : 0 < β.re) (k : ℕ) :
+theorem aomoto_two_expand {α β : ℂ} (hα : 0 < α.re) (hβ : 0 < β.re) (k : ℕ) :
     ∫ t : Fin 2 → ℝ in Set.pi Set.univ fun _ => Set.Icc (0 : ℝ) 1,
         selbergIntegrand 2 α β k t * ∏ i : Fin 1, (t (Fin.castLE (by norm_num) i) : ℂ) =
       ∑ r ∈ Finset.range (2 * k + 1), poch (-((2 * k : ℕ) : ℂ)) r / r ! *
@@ -265,7 +259,7 @@ lemma aomoto_two_expand {α β : ℂ} (hα : 0 < α.re) (hβ : 0 < β.re) (k : �
 
 
 /-- The Aomoto evaluation divided by the two Beta factors. -/
-lemma final_identity {α β : ℂ} (hα : 0 < α.re) (hβ : 0 < β.re) (k : ℕ) :
+theorem final_identity {α β : ℂ} (hα : 0 < α.re) (hβ : 0 < β.re) (k : ℕ) :
     betaIntegral (α + 2 * k + 1) β * betaIntegral α β *
       (poch (α + 1) k * poch β k * poch 1 (2 * k) /
         (poch (α + β) k * poch 1 k * poch (α + 1) (2 * k))) =

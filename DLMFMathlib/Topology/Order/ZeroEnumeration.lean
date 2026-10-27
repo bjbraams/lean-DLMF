@@ -5,11 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Topology.Order.IntermediateValue
 public import Mathlib.Data.Set.Card
-public import Mathlib.Order.Filter.AtTopBot.Basic
-public import Mathlib.Basic.Real.Basic
-public import Mathlib.Topology.Instances.Real.Lemmas
+public import Mathlib.Data.EReal.Operations
+public import Mathlib.Topology.MetricSpace.Bounded
 
 /-!
 # Enumerating the positive zeros of a real function

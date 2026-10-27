@@ -5,8 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.EllipticIntegrals.LegendreIdentities
-public import DLMF.Hypergeometric.EulerIntegral
 public import DLMF.EllipticIntegrals.Quadratic
 
 /-!
@@ -47,18 +45,18 @@ def ei19a_appF1Term (a b b' c x y : ℂ) (p : ℕ × ℕ) : ℂ :=
     (poch c (p.1 + p.2) * (Nat.factorial p.1 * Nat.factorial p.2 : ℂ)) * x ^ p.1 * y ^ p.2
 
 /-- `Γ(1/2)² = π`. -/
-theorem p19lR1_Gamma_half_sq : Gamma (1 / 2 : ℂ) * Gamma (1 / 2) = (π : ℂ) := by
+lemma p19lR1_Gamma_half_sq : Gamma (1 / 2 : ℂ) * Gamma (1 / 2) = (π : ℂ) := by
   have h := Gamma_mul_Gamma_one_sub (1 / 2)
   rw [show (1 : ℂ) - 1 / 2 = 1 / 2 by ring, show (π : ℂ) * (1 / 2) = π / 2 by ring,
     sin_pi_div_two, div_one] at h
   exact h
 
 /-- `‖k²‖ < 1` for `‖k‖ < 1`. -/
-theorem p19lR1_norm_sq_lt {k : ℂ} (hk : ‖k‖ < 1) : ‖k ^ 2‖ < 1 := by
+lemma p19lR1_norm_sq_lt {k : ℂ} (hk : ‖k‖ < 1) : ‖k ^ 2‖ < 1 := by
   rw [norm_pow]; exact pow_lt_one₀ (norm_nonneg _) hk (by decide)
 
 /-- Euler's integral for `₂F₁(a, 1/2; 1; k²)` in the angular form. -/
-theorem p19lR1_hyp_half_one {a k : ℂ} (hk : ‖k‖ < 1) :
+lemma p19lR1_hyp_half_one {a k : ℂ} (hk : ‖k‖ < 1) :
     (π / 2 : ℂ) * ₂F₁ a (1 / 2) 1 (k ^ 2) =
       ∫ θ in (0 : ℝ)..(π / 2), (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-a) := by
   rw [ordinaryHypergeometric_eq_integral (by norm_num) (by norm_num) (p19lR1_norm_sq_lt hk),
@@ -69,7 +67,7 @@ theorem p19lR1_hyp_half_one {a k : ℂ} (hk : ‖k‖ < 1) :
   field_simp
 
 /-- The Gauss series of `₂F₁(a, b; c; k²)` in powers of `k`, for `‖k‖ < 1`. -/
-theorem p19lR1_hasSum_hyp (a b c : ℂ) {k : ℂ} (hk : ‖k‖ < 1) :
+lemma p19lR1_hasSum_hyp (a b c : ℂ) {k : ℂ} (hk : ‖k‖ < 1) :
     HasSum (fun m : ℕ => gaussHGCoeff a b c m * k ^ (2 * m)) (₂F₁ a b c (k ^ 2)) := by
   have h := (hasFPowerSeriesOnBall_ordinaryHypergeometric a b c).hasSum_mul_pow
     (z := k ^ 2) (by
@@ -79,11 +77,11 @@ theorem p19lR1_hasSum_hyp (a b c : ℂ) {k : ℂ} (hk : ‖k‖ < 1) :
   simpa only [← pow_mul] using h
 
 /-- `(1)ₘ = m!`. -/
-theorem p19lR1_poch_one (m : ℕ) : poch 1 m = (Nat.factorial m : ℂ) := by
+lemma p19lR1_poch_one (m : ℕ) : poch 1 m = (Nat.factorial m : ℂ) := by
   simp [poch, ascPochhammer_eval_one]
 
 /-- `(2)ₘ = (m+1)!`. -/
-theorem p19lR1_poch_two (m : ℕ) : poch 2 m = (Nat.factorial (m + 1) : ℂ) := by
+lemma p19lR1_poch_two (m : ℕ) : poch 2 m = (Nat.factorial (m + 1) : ℂ) := by
   induction m with
   | zero => simp [poch]
   | succ n ih =>
@@ -260,7 +258,7 @@ def landenModulusSeq (k : ℂ) : ℕ → ℂ
       (1 + (1 - landenModulusSeq k m ^ 2) ^ (1 / 2 : ℂ))
 
 /-- `‖(1 - c)/(1 + c)‖ < 1` for `ℜ c > 0`. -/
-theorem p19lR1_landen_norm_lt {c : ℂ} (hc : 0 < c.re) : ‖(1 - c) / (1 + c)‖ < 1 := by
+lemma p19lR1_landen_norm_lt {c : ℂ} (hc : 0 < c.re) : ‖(1 - c) / (1 + c)‖ < 1 := by
   have h1c : 1 + c ≠ 0 := fun h => by have := congrArg re h; simp at this; linarith
   rw [norm_div, div_lt_one (norm_pos_iff.2 h1c)]
   have h : ‖1 - c‖ ^ 2 < ‖1 + c‖ ^ 2 := by
@@ -269,7 +267,7 @@ theorem p19lR1_landen_norm_lt {c : ℂ} (hc : 0 < c.re) : ‖(1 - c) / (1 + c)�
   exact lt_of_pow_lt_pow_left₀ 2 (norm_nonneg _) h
 
 /-- The descending Landen modulus satisfies `‖k₁‖ ≤ ‖k‖²`. -/
-theorem p19lR1_landen_norm_le {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
+lemma p19lR1_landen_norm_le {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
     ‖(1 - jacobiComodulusk k) / (1 + jacobiComodulusk k)‖ ≤ ‖k‖ ^ 2 := by
   set c := jacobiComodulusk k
   have hc : 0 < c.re := p19lR1_cpow_half_re_pos hk

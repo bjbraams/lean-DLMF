@@ -1,4 +1,4 @@
-module
+module -- shake: keep-all
 
 public import DLMF.IncompleteGamma.Basic
 public import DLMF.Core.MathlibCoverage

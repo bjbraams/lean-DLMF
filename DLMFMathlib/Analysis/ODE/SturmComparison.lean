@@ -6,9 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.Analysis.Calculus.Deriv.MeanValue
-public import Mathlib.Analysis.Calculus.Deriv.Slope
 public import Mathlib.Analysis.Calculus.MeanValue
-public import Mathlib.Topology.Order.IntermediateValue
 
 /-!
 # Sturm comparison and separation theorems

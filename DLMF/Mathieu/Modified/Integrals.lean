@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Mathieu.Modified.Connection
+public import DLMF.Mathieu.Modified.P3mIntegrals
 
 /-!
 # Modified Mathieu functions: integrals and integral equations (DLMF §28.28)
@@ -59,8 +59,8 @@ namespace DLMF.Mathieu
 theorem integral_exp_mathieuCe (n : ℕ) (h : ℝ) (z α : ℂ) :
     (2 * π : ℂ)⁻¹ * ∫ t in (0 : ℝ)..2 * π,
         Complex.exp (2 * I * h * mathieuKernelW z t α) * mathieuCe n t (h ^ 2) =
-      I ^ n * mathieuCe n α (h ^ 2) * radialMathieuMc 1 n z h := by
-  sorry
+      I ^ n * mathieuCe n α (h ^ 2) * radialMathieuMc 1 n z h :=
+  p3m_integral_exp_mathieuCe n h z α
 
 /-- **Integral equation** (DLMF 28.28.3), `n = 1, 2, …`:
 `(2π)⁻¹ ∫₀^{2π} e^{2ihw} se_n(t, h²) dt = i^n se_n(α, h²) Ms^{(1)}_n(z, h)`. -/
@@ -68,68 +68,11 @@ theorem integral_exp_mathieuCe (n : ℕ) (h : ℝ) (z α : ℂ) :
 theorem integral_exp_mathieuSe {n : ℕ} (hn : n ≠ 0) (h : ℝ) (z α : ℂ) :
     (2 * π : ℂ)⁻¹ * ∫ t in (0 : ℝ)..2 * π,
         Complex.exp (2 * I * h * mathieuKernelW z t α) * mathieuSe n t (h ^ 2) =
-      I ^ n * mathieuSe n α (h ^ 2) * radialMathieuMs 1 n z h := by
-  sorry
-
-/-- `∂w/∂α` for the kernel `w` of 28.28.1. -/
-theorem p1c_hasDerivAt_mathieuKernelW (z t α : ℂ) :
-    HasDerivAt (fun β => mathieuKernelW z t β)
-      (-(Complex.cosh z * Complex.cos t * Complex.sin α) +
-        Complex.sinh z * Complex.sin t * Complex.cos α) α := by
-  have h1 := ((Complex.hasDerivAt_cos α).const_mul (Complex.cosh z * Complex.cos t)).add
-    ((Complex.hasDerivAt_sin α).const_mul (Complex.sinh z * Complex.sin t))
-  convert h1 using 1
-  · funext β; simp [mathieuKernelW]
-  · ring
-
-/-- Differentiation in `α` under the integral sign for the kernel `e^{2ihw}`. -/
-theorem p1c_hasDerivAt_integral_kernel (h : ℝ) (z : ℂ) {g : ℝ → ℂ} (hg : Continuous g)
-    (α : ℂ) :
-    HasDerivAt (fun β => ∫ t in (0 : ℝ)..2 * π,
-        Complex.exp (2 * I * h * mathieuKernelW z t β) * g t)
-      (∫ t in (0 : ℝ)..2 * π, 2 * I * h * deriv (fun β => mathieuKernelW z t β) α *
-        Complex.exp (2 * I * h * mathieuKernelW z t α) * g t) α := by
-  set W' : ℂ → ℝ → ℂ := fun β t => -(Complex.cosh z * Complex.cos t * Complex.sin β) +
-    Complex.sinh z * Complex.sin t * Complex.cos β
-  set F' : ℂ → ℝ → ℂ := fun β t => 2 * I * h * W' β t *
-    Complex.exp (2 * I * h * mathieuKernelW z t β) * g t
-  have hcontW : Continuous (fun p : ℂ × ℝ => mathieuKernelW z p.2 p.1) := by
-    unfold mathieuKernelW; fun_prop
-  have hcont : Continuous (fun p : ℂ × ℝ => F' p.1 p.2) := by
-    simp only [F', W']
-    have := hg.comp (continuous_snd : Continuous (fun p : ℂ × ℝ => p.2))
-    fun_prop
-  have hFc : ∀ β : ℂ, Continuous (fun t : ℝ =>
-      Complex.exp (2 * I * h * mathieuKernelW z t β) * g t) := fun β => by
-    have : Continuous (fun t : ℝ => mathieuKernelW z t β) := by unfold mathieuKernelW; fun_prop
-    fun_prop
-  obtain ⟨C, hC⟩ := (isCompact_closedBall α 1 |>.prod (isCompact_Icc (a := (0 : ℝ))
-    (b := 2 * π))).exists_bound_of_continuousOn hcont.continuousOn
-  have key := hasDerivAt_integral_of_dominated_loc_of_deriv_le (μ := volume) (a := 0) (b := 2 * π)
-    (F := fun β t => Complex.exp (2 * I * h * mathieuKernelW z t β) * g t) (F' := F')
-    (x₀ := α) (s := Metric.closedBall α 1) (bound := fun _ => C)
-    (Metric.closedBall_mem_nhds α one_pos)
-    (Eventually.of_forall fun β => (hFc β).aestronglyMeasurable)
-    ((hFc α).intervalIntegrable _ _)
-    ((hcont.comp (Continuous.prodMk_right α)).aestronglyMeasurable)
-    (ae_of_all _ fun t ht β hβ => by
-      have ht' : t ∈ Icc 0 (2 * π) := by
-        rw [uIoc_of_le (by positivity)] at ht; exact ⟨ht.1.le, ht.2⟩
-      exact hC (β, t) ⟨hβ, ht'⟩)
-    intervalIntegrable_const
-    (ae_of_all _ fun t _ β _ => by
-      have := (((p1c_hasDerivAt_mathieuKernelW z t β).const_mul (2 * I * h)).cexp).mul_const (g t)
-      convert this using 1
-      simp only [F', W']; ring)
-  convert key.2 using 1
-  apply intervalIntegral.integral_congr
-  intro t _
-  simp only [F', W']
-  rw [(p1c_hasDerivAt_mathieuKernelW z t α).deriv]
-
+      I ^ n * mathieuSe n α (h ^ 2) * radialMathieuMs 1 n z h :=
+  p3m_integral_exp_mathieuSe hn h z α
 
 /-- 28.28.4/28.28.5 from 28.28.2/28.28.3: differentiate in `α`. -/
-theorem p1c_integral_dw_of_integral (h : ℝ) (z : ℂ) {g : ℝ → ℂ} (hg : Continuous g)
+lemma p1c_integral_dw_of_integral (h : ℝ) (z : ℂ) {g : ℝ → ℂ} (hg : Continuous g)
     {f : ℂ → ℂ} (hf : Differentiable ℂ f)
     (hint : ∀ β : ℂ, (2 * π : ℂ)⁻¹ * ∫ t in (0 : ℝ)..2 * π,
         Complex.exp (2 * I * h * mathieuKernelW z t β) * g t = f β) (α : ℂ) :
@@ -310,7 +253,7 @@ theorem integral_sin_cosh_modMathieuCe (n : ℕ) {h : ℝ} (hh : 0 < h) {y : ℝ
 /-! ### §28.28(ii) Integrals of products with Bessel functions -/
 
 /-- `1 + e^{-2w} ≠ 0` for `Re w > 0` (helper for 28.28.18–28.28.19). -/
-theorem m28c_one_add_exp_ne_zero {w : ℂ} (hw : 0 < w.re) : 1 + Complex.exp (-2 * w) ≠ 0 := by
+lemma m28c_one_add_exp_ne_zero {w : ℂ} (hw : 0 < w.re) : 1 + Complex.exp (-2 * w) ≠ 0 := by
   intro h0
   have h1 : Complex.exp (-2 * w) = -1 := by linear_combination h0
   have h2 := congrArg norm h1

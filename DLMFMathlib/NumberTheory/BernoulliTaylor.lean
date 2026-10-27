@@ -7,7 +7,6 @@ module
 
 public import DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.PartialFractions
 public import Mathlib.NumberTheory.LSeries.HurwitzZetaValues
-public import Mathlib.Analysis.SpecialFunctions.Complex.Log
 
 /-!
 # Bernoulli numbers in the Taylor series of `cot`, `tan`, `z/sin z` and `z/(eᶻ-1)`
@@ -34,7 +33,7 @@ noncomputable section
 namespace Complex
 
 /-- `∑ₙ 1/(n+1)^k = ζ(k)` for natural `k > 1`. -/
-lemma hasSum_one_div_nat_succ_pow {k : ℕ} (hk : 1 < k) :
+theorem hasSum_one_div_nat_succ_pow {k : ℕ} (hk : 1 < k) :
     HasSum (fun n : ℕ => 1 / ((n : ℂ) + 1) ^ k) (riemannZeta k) := by
   have hs : Summable fun n : ℕ => 1 / (n : ℂ) ^ k :=
     Summable.of_norm (by simpa using Real.summable_one_div_nat_pow.mpr hk)
@@ -211,7 +210,7 @@ theorem hasSum_bernoulli_mul_pow_div {z : ℂ} (hz : ‖z‖ < 2 * π) (hz0 : z 
   rwa [show z / (exp z - 1) + z / 2 + -(z / 2) = z / (exp z - 1) by ring] at h
 
 /-- A nonzero point of the open unit disc is not an integer. -/
-lemma mem_integerComplement_of_norm_lt_one {z : ℂ} (hz : ‖z‖ < 1) (hz0 : z ≠ 0) :
+theorem mem_integerComplement_of_norm_lt_one {z : ℂ} (hz : ‖z‖ < 1) (hz0 : z ≠ 0) :
     z ∈ integerComplement := by
   rintro ⟨n, hn⟩
   rcases eq_or_ne n 0 with rfl | hn0

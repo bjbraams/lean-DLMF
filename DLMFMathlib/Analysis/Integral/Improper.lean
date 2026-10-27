@@ -5,9 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
-public import Mathlib.MeasureTheory.Integral.Prod
-public import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
 public import DLMFMathlib.Analysis.Asymptotics.WatsonSector
 
 /-!

@@ -98,7 +98,7 @@ theorem ferrersP_nat (ν : ℂ) (m : ℕ) {x : ℝ} (hx : x ∈ Set.Ioo (-1 : �
     regularizedGaussHG (ν + 1 + m + 1) (-ν + m + 1) (m + 2) ((1 - (x : ℂ)) / 2) * hneg
 
 /-- Chain rule for `x ↦ ((1+x)/(1-x))^p 𝐅(a,b;c;(1-x)/2)` on `(-1, 1)`. -/
-lemma hasDerivAt_ferrers_aux (a b c p : ℂ) {x : ℝ} (hx : x ∈ Set.Ioo (-1 : ℝ) 1) :
+theorem hasDerivAt_ferrers_aux (a b c p : ℂ) {x : ℝ} (hx : x ∈ Set.Ioo (-1 : ℝ) 1) :
     HasDerivAt (fun x : ℝ => (((1 + x) / (1 - x) : ℝ) : ℂ) ^ p *
         regularizedGaussHG a b c ((1 - (x : ℂ)) / 2))
       ((((1 + x) / (1 - x) : ℝ) : ℂ) ^ p *

@@ -7,14 +7,12 @@ module
 
 public import DLMF.Spheroidal.FerrersDefs
 public import DLMF.Spheroidal.Equation
+public import DLMF.Spheroidal.Existence
 public import DLMF.Legendre.Associated
 public import DLMF.Legendre.Integrals
 public import DLMF.Legendre.SpecialValues
 public import DLMF.Legendre.SeriesTools
-public import DLMF.Legendre.Integer
-public import DLMF.OrthogonalPolynomials.Differential
 public import DLMF.Spheroidal.P2yFerrersTools
-public import DLMFMathlib.Analysis.ODE.PowerSeriesUniqueness
 
 /-!
 # Angular spheroidal wave functions (DLMF §§30.1, 30.4–30.6)
@@ -48,7 +46,7 @@ namespace DLMF.Spheroidal
 /-! ### Helpers: reflection and Taylor coefficients (proof round P1, agent S30) -/
 
 /-- Iterated derivatives of `z f(z)` for entire `f`. -/
-theorem p1s_iteratedDeriv_id_mul {f : ℂ → ℂ} (hf : Differentiable ℂ f) (k : ℕ) (z : ℂ) :
+lemma p1s_iteratedDeriv_id_mul {f : ℂ → ℂ} (hf : Differentiable ℂ f) (k : ℕ) (z : ℂ) :
     iteratedDeriv k (fun z => z * f z) z =
       k * iteratedDeriv (k - 1) f z + z * iteratedDeriv k f z := by
   induction k generalizing f z with
@@ -72,12 +70,12 @@ theorem p1s_iteratedDeriv_id_mul {f : ℂ → ℂ} (hf : Differentiable ℂ f) (
       push_cast; ring
 
 /-- `iteratedDeriv k (z f) 0 = k f^{(k-1)}(0)`. -/
-theorem p1s_iteratedDeriv_id_mul_zero {f : ℂ → ℂ} (hf : Differentiable ℂ f) (k : ℕ) :
+lemma p1s_iteratedDeriv_id_mul_zero {f : ℂ → ℂ} (hf : Differentiable ℂ f) (k : ℕ) :
     iteratedDeriv k (fun z => z * f z) 0 = k * iteratedDeriv (k - 1) f 0 := by
   simp [p1s_iteratedDeriv_id_mul hf]
 
 /-- `iteratedDeriv k (z² f) 0 = k (k-1) f^{(k-2)}(0)`. -/
-theorem p1s_iteratedDeriv_sq_mul_zero {f : ℂ → ℂ} (hf : Differentiable ℂ f) (k : ℕ) :
+lemma p1s_iteratedDeriv_sq_mul_zero {f : ℂ → ℂ} (hf : Differentiable ℂ f) (k : ℕ) :
     iteratedDeriv k (fun z => z * (z * f z)) 0 =
       k * (k - 1 : ℕ) * iteratedDeriv (k - 2) f 0 := by
   have h1 := p1s_iteratedDeriv_id_mul_zero (f := fun z => z * f z) (by fun_prop) k
@@ -87,7 +85,7 @@ theorem p1s_iteratedDeriv_sq_mul_zero {f : ℂ → ℂ} (hf : Differentiable ℂ
 /-- Taylor recurrence of a solution of the factor equation:
 `a_{k+2} - (k(k-1) + 2(m+1)k - c) a_k - γ² k(k-1) a_{k-2} = 0` with
 `c = λ - m(m+1) + γ²`, `a_k = g^{(k)}(0)`. -/
-theorem p1s_factor_taylor {m : ℕ} {γ2 lam : ℝ} {g : ℂ → ℂ} (hg : IsSpheroidalFactor m γ2 lam g)
+lemma p1s_factor_taylor {m : ℕ} {γ2 lam : ℝ} {g : ℂ → ℂ} (hg : IsSpheroidalFactor m γ2 lam g)
     (k : ℕ) :
     iteratedDeriv (k + 2) g 0 - ((k : ℂ) * (k - 1 : ℕ) + 2 * ((m : ℂ) + 1) * k -
         ((lam : ℂ) - m * ((m : ℂ) + 1) + γ2)) * iteratedDeriv k g 0 -
@@ -181,7 +179,7 @@ theorem p1s_isSpheroidalPsFactor_reflect {n m : ℕ} {γ2 : ℝ} {g : ℂ → �
 
 
 /-- Iterated derivatives of an entire function real on `ℝ` are real on `ℝ`. -/
-theorem p1s_iteratedDeriv_im_eq_zero {g : ℂ → ℂ} (hg : Differentiable ℂ g)
+lemma p1s_iteratedDeriv_im_eq_zero {g : ℂ → ℂ} (hg : Differentiable ℂ g)
     (hreal : ∀ x : ℝ, (g x).im = 0) (j : ℕ) :
     Differentiable ℂ (iteratedDeriv j g) ∧ ∀ x : ℝ, (iteratedDeriv j g x).im = 0 := by
   induction j with
@@ -266,7 +264,7 @@ theorem isSpheroidalSolutionReal_spheroidalPs {n m : ℕ} (hmn : m ≤ n) (γ2 :
 
 /-- At `γ = 0` the Gegenbauer polynomial `C_j^{(m+1/2)}` is a nonzero entire factor with
 `λ = (m+j)(m+j+1)`. -/
-theorem p1s_mem_spheroidalSpectrum_zero (m j : ℕ) :
+lemma p1s_mem_spheroidalSpectrum_zero (m j : ℕ) :
     ((m : ℝ) + j) * ((m : ℝ) + j + 1) ∈ spheroidalSpectrum m 0 := by
   set lamC : ℂ := (m : ℂ) + 1 / 2
   have hl : -1 / 2 < lamC.re := by
@@ -294,7 +292,7 @@ theorem p1s_mem_spheroidalSpectrum_zero (m j : ℕ) :
 
 /-- At `γ = 0` every element of the spectrum is `(m+j)(m+j+1)`: otherwise the Taylor
 coefficients of a nonzero entire factor would grow like those of `(1-z²)^{-1}`. -/
-theorem p1s_spheroidalSpectrum_zero_subset {m : ℕ} {lam : ℝ}
+lemma p1s_spheroidalSpectrum_zero_subset {m : ℕ} {lam : ℝ}
     (h : lam ∈ spheroidalSpectrum m 0) : ∃ j : ℕ, lam = ((m : ℝ) + j) * ((m : ℝ) + j + 1) := by
   obtain ⟨g, hg, hne⟩ := h
   by_contra hcon
@@ -409,7 +407,7 @@ theorem p1s_spheroidalEigenvalue_zero {n m : ℕ} (hmn : m ≤ n) :
   ring
 
 /-- The sign of `Γ(1/2 - s)`: `(-1)^s Γ(1/2 - s) > 0`. -/
-theorem p1s_neg_one_pow_mul_Gamma_half_sub_pos (s : ℕ) :
+lemma p1s_neg_one_pow_mul_Gamma_half_sub_pos (s : ℕ) :
     0 < (-1 : ℝ) ^ s * Real.Gamma (1 / 2 - s) := by
   have h := Real.Gamma_mul_Gamma_one_sub (1 / 2 + s)
   rw [show (1 : ℝ) - (1 / 2 + s) = 1 / 2 - s by ring,
@@ -425,13 +423,13 @@ theorem p1s_neg_one_pow_mul_Gamma_half_sub_pos (s : ℕ) :
   rw [this]; positivity
 
 /-- `dᵐP_n/dzᵐ` is entire. -/
-theorem p1s_differentiable_iteratedDeriv_legendrePolyP (n m : ℕ) :
+lemma p1s_differentiable_iteratedDeriv_legendrePolyP (n m : ℕ) :
     Differentiable ℂ (iteratedDeriv m (DLMF.OrthogonalPolynomials.legendrePolyP n)) :=
   ((DLMF.Legendre.differentiable_legendrePolyP n).contDiff
     (n := ((m + 1 : ℕ) : WithTop ℕ∞))).differentiable_iteratedDeriv' m
 
 /-- `𝖯^m_n(x) = (1-x²)^{m/2} (-1)^m dᵐP_n(x)/dxᵐ` on `(-1, 1)` (DLMF 14.6.1). -/
-theorem p1s_ferrersP_eq_factor (n m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
+lemma p1s_ferrersP_eq_factor (n m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
     ferrersP n m x = (((1 - x ^ 2) ^ ((m : ℝ) / 2) : ℝ) : ℂ) *
       ((-1) ^ m * iteratedDeriv m (DLMF.OrthogonalPolynomials.legendrePolyP n) x) := by
   rw [ferrersP_nat (n : ℂ) m hx]
@@ -441,7 +439,7 @@ theorem p1s_ferrersP_eq_factor (n m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 
   ring
 
 /-- The factor `(-1)^m dᵐP_n/dzᵐ` is real on `ℝ`. -/
-theorem p1s_ferrersFactor_real (n m : ℕ) (x : ℝ) :
+lemma p1s_ferrersFactor_real (n m : ℕ) (x : ℝ) :
     ((-1) ^ m * iteratedDeriv m (DLMF.OrthogonalPolynomials.legendrePolyP n) x).im = 0 := by
   have hG : Differentiable ℂ
       (fun z => (-1) ^ m * iteratedDeriv m (DLMF.OrthogonalPolynomials.legendrePolyP n) z) :=
@@ -472,7 +470,7 @@ theorem p1s_ferrersFactor_real (n m : ℕ) (x : ℝ) :
   exact Complex.conj_eq_iff_im.mp h0.symm
 
 /-- Solutions of 30.2.1 on `(-1, 1)` depend only on the values on `(-1, 1)`. -/
-theorem p1s_isSpheroidalSolutionReal_congr {lam γ2 μ : ℝ} {f g : ℝ → ℝ}
+lemma p1s_isSpheroidalSolutionReal_congr {lam γ2 μ : ℝ} {f g : ℝ → ℝ}
     (h : IsSpheroidalSolutionReal lam γ2 μ f) (hfg : ∀ x ∈ Ioo (-1 : ℝ) 1, f x = g x) :
     IsSpheroidalSolutionReal lam γ2 μ g := by
   have hev : ∀ x ∈ Ioo (-1 : ℝ) 1, f =ᶠ[𝓝 x] g := fun x hx =>
@@ -486,7 +484,7 @@ theorem p1s_isSpheroidalSolutionReal_congr {lam γ2 μ : ℝ} {f g : ℝ → ℝ
 
 /-- At `γ = 0`, `(-1)^m dᵐP_n/dzᵐ` is the normalized factor of `𝖯s^m_n`, given
 `λ^m_n(0) = n(n+1)`. -/
-theorem p1s_isSpheroidalPsFactor_zero {n m : ℕ} (hmn : m ≤ n)
+lemma p1s_isSpheroidalPsFactor_zero {n m : ℕ} (hmn : m ≤ n)
     (hev : spheroidalEigenvalue n m 0 = (n : ℝ) * (n + 1)) :
     IsSpheroidalPsFactor n m 0
       (fun z => (-1) ^ m * iteratedDeriv m (DLMF.OrthogonalPolynomials.legendrePolyP n) z) := by
@@ -713,7 +711,7 @@ theorem spheroidalPs_coeff_recurrence {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
 /-! ### Orthogonality and expansions (§30.4(iv)) -/
 
 /-- The real form along `ℝ` of the factor equation, for a factor real on `ℝ`. -/
-theorem p1s_factor_ode_re {m : ℕ} {γ2 lam : ℝ} {g : ℂ → ℂ} (hF : IsSpheroidalFactor m γ2 lam g)
+lemma p1s_factor_ode_re {m : ℕ} {γ2 lam : ℝ} {g : ℂ → ℂ} (hF : IsSpheroidalFactor m γ2 lam g)
     (hreal : ∀ x : ℝ, (g x).im = 0) (x : ℝ) :
     (1 - x ^ 2) * (deriv (deriv g) x).re - 2 * ((m : ℝ) + 1) * x * (deriv g x).re +
       (lam - m * ((m : ℝ) + 1) + γ2 * (1 - x ^ 2)) * (g x).re = 0 := by
@@ -732,7 +730,7 @@ theorem p1s_factor_ode_re {m : ℕ} {γ2 lam : ℝ} {g : ℂ → ℂ} (hF : IsSp
 
 /-- Green's identity for two factors: the derivative of
 `(1-x²)^{m+1} (G₁ G₂' - G₂ G₁')` is `(1-x²)^m (λ₁ - λ₂) G₁ G₂`. -/
-theorem p1s_hasDerivAt_factor_wronskian {m : ℕ} {γ2 l1 l2 : ℝ} {g1 g2 : ℂ → ℂ}
+lemma p1s_hasDerivAt_factor_wronskian {m : ℕ} {γ2 l1 l2 : ℝ} {g1 g2 : ℂ → ℂ}
     (h1 : IsSpheroidalFactor m γ2 l1 g1) (h2 : IsSpheroidalFactor m γ2 l2 g2)
     (r1 : ∀ x : ℝ, (g1 x).im = 0) (r2 : ∀ x : ℝ, (g2 x).im = 0) (x : ℝ) :
     HasDerivAt (fun x : ℝ => (1 - x ^ 2) ^ (m + 1) *
@@ -867,12 +865,12 @@ theorem spheroidalQs_neg {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ)
 /-! #### Proof of the Legendre limit 30.5.3 -/
 
 /-- `𝖯^m_N(x)` is real for `-1 < x < 1`. -/
-theorem p2y_ferrersP_im (N m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) : (ferrersP N m x).im = 0 := by
+lemma p2y_ferrersP_im (N m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) : (ferrersP N m x).im = 0 := by
   have := ferrersP_real (N : ℝ) (m : ℝ) hx
   simpa using this
 
 /-- `∫ 𝖯^m_n 𝖯^m_ν` over `(-1, 1)` for integer degrees, through `P^{(m)}`. -/
-theorem p2y_integral_ferrers_mul {m n ν : ℕ} (hn : m ≤ n) :
+lemma p2y_integral_ferrers_mul {m n ν : ℕ} (hn : m ≤ n) :
     ∫ x in (-1 : ℝ)..1, (ferrersP n m x).re * (ferrersP ν m x).re =
       if n = ν then 2 * ((n + m).factorial : ℝ) / ((2 * n + 1) * (n - m).factorial) else 0 := by
   rw [← p2y_D_orth hn ν]
@@ -886,12 +884,12 @@ theorem p2y_integral_ferrers_mul {m n ν : ℕ} (hn : m ≤ n) :
   exact h
 
 /-- `𝖯s^m_n(x, 0) = 𝖯^m_n(x)` (real form). -/
-theorem p2y_ps_zero_re {n m : ℕ} (hmn : m ≤ n) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
+lemma p2y_ps_zero_re {n m : ℕ} (hmn : m ≤ n) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
     spheroidalPs n m x 0 = (ferrersP n m x).re := by
   rw [← spheroidalPs_gamma_zero hmn hx, ofReal_re]
 
 /-- **The coefficients at `γ = 0`**: `a^m_{n,k}(0) = δ_{k,0}`. -/
-theorem p2y_coeff_gamma_zero {n m : ℕ} (hmn : m ≤ n) (k : ℤ) :
+lemma p2y_coeff_gamma_zero {n m : ℕ} (hmn : m ≤ n) (k : ℤ) :
     spheroidalCoeff n m 0 k = if k = 0 then 1 else 0 := by
   unfold spheroidalCoeff
   by_cases h1 : -(((n - m) / 2 : ℕ) : ℤ) ≤ k
@@ -932,14 +930,14 @@ theorem p2y_coeff_gamma_zero {n m : ℕ} (hmn : m ≤ n) (k : ℤ) :
     · simp only [h2, ↓reduceIte]
 
 /-- `A^m_n(0) = 1`. -/
-theorem p2y_A_gamma_zero {n m : ℕ} (hmn : m ≤ n) : spheroidalA n m 0 = 1 := by
+lemma p2y_A_gamma_zero {n m : ℕ} (hmn : m ≤ n) : spheroidalA n m 0 = 1 := by
   unfold spheroidalA
   simp_rw [p2y_coeff_gamma_zero hmn]
   rw [tsum_eq_single 0 (fun k hk => by simp [hk])]
   simp
 
 /-- `A^{-m}_n(0) = 1`. -/
-theorem p2y_ANeg_gamma_zero {n m : ℕ} (hmn : m ≤ n) : spheroidalANeg n m 0 = 1 := by
+lemma p2y_ANeg_gamma_zero {n m : ℕ} (hmn : m ≤ n) : spheroidalANeg n m 0 = 1 := by
   unfold spheroidalANeg
   rw [tsum_eq_single 0 (fun k hk => by
     unfold spheroidalCoeffNeg
@@ -955,7 +953,7 @@ theorem p2y_ANeg_gamma_zero {n m : ℕ} (hmn : m ≤ n) : spheroidalANeg n m 0 =
   field_simp
 
 /-- Solutions of 30.2.1 on `(-1, 1)` in second-order form `f'' = p f' + q f`. -/
-theorem p2y_second_order {lam γ2 μ : ℝ} {f : ℝ → ℝ} (hf : IsSpheroidalSolutionReal lam γ2 μ f) :
+lemma p2y_second_order {lam γ2 μ : ℝ} {f : ℝ → ℝ} (hf : IsSpheroidalSolutionReal lam γ2 μ f) :
     ∀ t ∈ Ioo (-1 : ℝ) 1, HasDerivAt f (deriv f t) t ∧ HasDerivAt (deriv f)
       ((2 * t / (1 - t ^ 2)) • deriv f t +
         (-(lam + γ2 * (1 - t ^ 2) - μ ^ 2 / (1 - t ^ 2)) / (1 - t ^ 2)) • f t) t := by
@@ -977,7 +975,7 @@ theorem p2y_second_order {lam γ2 μ : ℝ} {f : ℝ → ℝ} (hf : IsSpheroidal
 
 /-- **Uniqueness** for 30.2.1 on `(-1, 1)`: two solutions with the same value and derivative at a
 point of `(-1, 1)` coincide there. -/
-theorem p2y_eqOn_of_sol {lam γ2 μ : ℝ} {f g : ℝ → ℝ} (hf : IsSpheroidalSolutionReal lam γ2 μ f)
+lemma p2y_eqOn_of_sol {lam γ2 μ : ℝ} {f g : ℝ → ℝ} (hf : IsSpheroidalSolutionReal lam γ2 μ f)
     (hg : IsSpheroidalSolutionReal lam γ2 μ g) {x0 : ℝ} (hx0 : x0 ∈ Ioo (-1 : ℝ) 1)
     (h0 : f x0 = g x0) (h1 : deriv f x0 = deriv g x0) : EqOn f g (Ioo (-1 : ℝ) 1) := by
   have hp : ContinuousOn (fun t : ℝ => 2 * t / (1 - t ^ 2)) (Ioo (-1 : ℝ) 1) :=
@@ -992,7 +990,7 @@ theorem p2y_eqOn_of_sol {lam γ2 μ : ℝ} {f g : ℝ → ℝ} (hf : IsSpheroida
     (p2y_second_order hg) h0 h1).1
 
 /-- Solutions of 30.2.1 on `(-1, 1)` form a vector space: `f + c g` is a solution. -/
-theorem p2y_sol_add {lam γ2 μ : ℝ} {f g : ℝ → ℝ} (hf : IsSpheroidalSolutionReal lam γ2 μ f)
+lemma p2y_sol_add {lam γ2 μ : ℝ} {f g : ℝ → ℝ} (hf : IsSpheroidalSolutionReal lam γ2 μ f)
     (hg : IsSpheroidalSolutionReal lam γ2 μ g) (c : ℝ) :
     IsSpheroidalSolutionReal lam γ2 μ (fun x => f x + c * g x) := by
   have hd : ∀ t ∈ Ioo (-1 : ℝ) 1, deriv (fun x => f x + c * g x) t = deriv f t + c * deriv g t :=
@@ -1008,7 +1006,7 @@ theorem p2y_sol_add {lam γ2 μ : ℝ} {f g : ℝ → ℝ} (hf : IsSpheroidalSol
 
 /-- **Uniqueness of `𝖰s`**: two functions with the characterization `IsSpheroidalQs` agree on
 `(-1, 1)` (their difference is a multiple of `𝖯s` of the wrong parity). -/
-theorem p2y_isSpheroidalQs_unique {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} {f g : ℝ → ℝ}
+lemma p2y_isSpheroidalQs_unique {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} {f g : ℝ → ℝ}
     (hf : IsSpheroidalQs n m γ2 f) (hg : IsSpheroidalQs n m γ2 g) :
     EqOn f g (Ioo (-1 : ℝ) 1) := by
   set P : ℝ → ℝ := fun t => spheroidalPs n m t γ2 with hP
@@ -1061,7 +1059,7 @@ theorem p2y_isSpheroidalQs_unique {n m : ℕ} (hmn : m ≤ n) {γ2 : ℝ} {f g :
   simp
 
 /-- The real part of a real-valued Ferrers solution solves 30.2.1 with `γ = 0`. -/
-theorem p2y_real_of_ferrers {ν μ : ℝ} {F : ℝ → ℂ} (hF : IsFerrersSolution ν μ F) :
+lemma p2y_real_of_ferrers {ν μ : ℝ} {F : ℝ → ℂ} (hF : IsFerrersSolution ν μ F) :
     IsSpheroidalSolutionReal (ν * (ν + 1)) 0 μ (fun x => (F x).re) := by
   have hd : ∀ x ∈ Ioo (-1 : ℝ) 1, HasDerivAt (fun t => (F t).re) (deriv F x).re x :=
     fun x hx => by
@@ -1089,18 +1087,18 @@ theorem p2y_real_of_ferrers {ν μ : ℝ} {F : ℝ → ℂ} (hF : IsFerrersSolut
   linear_combination h
 
 /-- `𝖰^m_n` solves the Ferrers equation. -/
-theorem p2y_ferrersQ_sol (ν μ : ℂ) : IsFerrersSolution ν μ (ferrersQ ν μ) :=
+lemma p2y_ferrersQ_sol (ν μ : ℂ) : IsFerrersSolution ν μ (ferrersQ ν μ) :=
   ((ferrersEven_isFerrersSolution ν μ).add_smul (ferrersOdd_isFerrersSolution ν μ) _ _).congr
     (ferrersQ_eqOn_even_odd ν μ).symm
 
 /-- `𝖯^μ_ν` solves the Ferrers equation (regular case). -/
-theorem p2y_ferrersP_sol {ν μ : ℂ} (h : LegendreQRegular ν μ) :
+lemma p2y_ferrersP_sol {ν μ : ℂ} (h : LegendreQRegular ν μ) :
     IsFerrersSolution ν μ (ferrersP ν μ) :=
   ((ferrersEven_isFerrersSolution ν μ).add_smul (ferrersOdd_isFerrersSolution ν μ) _ _).congr
     (ferrersP_regular_eqOn h).symm
 
 /-- `𝖰^m_n` is regular for integer `n, m ≥ 0`. -/
-theorem p2y_regular (n m : ℕ) : LegendreQRegular (n : ℂ) (m : ℂ) := by
+lemma p2y_regular (n m : ℕ) : LegendreQRegular (n : ℂ) (m : ℂ) := by
   intro k h
   have := congrArg Complex.re h
   simp at this
@@ -1301,7 +1299,7 @@ theorem wronskian_spheroidalPsC_spheroidalQsC {n m : ℕ} (hmn : m ≤ n) (γ2 :
 
 /-- Boundary limits of `𝑃s` along a filter on `ε` approaching `0`, given the limit of
 `log(x + εi - 1)`. -/
-theorem p1s_tendsto_spheroidalPsC_aux {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {x : ℝ}
+lemma p1s_tendsto_spheroidalPsC_aux {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) {x : ℝ}
     (hx : x ∈ Ioo (-1 : ℝ) 1) {L : Filter ℝ} (hL : L ≤ 𝓝 0) {θ : ℂ}
     (hlog : Tendsto (fun ε : ℝ => Complex.log (x + ε * I - 1)) L
       (𝓝 ((Real.log (1 - x) : ℂ) + θ)))

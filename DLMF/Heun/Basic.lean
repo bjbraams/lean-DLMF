@@ -5,16 +5,11 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.Calculus.Deriv.Basic
-public import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
 public import Mathlib.Analysis.SpecialFunctions.OrdinaryHypergeometric
-public import Mathlib.Analysis.Asymptotics.Defs
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
-public import Mathlib.LinearAlgebra.Matrix.Charpoly.Basic
 public import Mathlib.Algebra.Polynomial.Derivative
-public import Mathlib.Tactic.CrossRefAttribute
-public import DLMFMathlib.Analysis.ODE.Singularities
 public import TauCeti.Analysis.Complex.Conformal.Continuation.Basic
+public import Mathlib.Tactic.Positivity.Finset
 
 /-!
 # Heun functions: definitions (DLMF Chapter 31)

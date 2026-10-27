@@ -7549,3 +7549,224 @@ Integration: twelve modules added to DLMF/Painleve.lean; a duplicate PII bridge 
 removed in favour of `isPainleveIIOn_iff_isPIIOn`. New cross-area imports are from theorem files
 (Confluent `Whittaker`, `ParabolicCylinder`, ErrorFunctions `Basic`, OrthogonalPolynomials
 `Differential`, Airy `Framework`); import survey: nothing new.
+
+## Proof round 3 for Chapters 20–32 (2026-10-26)
+
+Eight agents with disjoint files, helper prefixes `p3t_` (theta and Riemann theta), `p3j_`
+(Jacobian elliptic), `p3w_` (Weierstrass, later Heun 31.2.9–12), `p3q_` (Mathieu small q),
+`p3m_` (modified Mathieu, later Graf's theorem), `p3l_` (Lamé and spheroidal), `p3a_` and `p3b_`
+(Painlevé). Source admissions in the round's areas: Theta 22 → 13, RiemannTheta 10 → 7,
+JacobiElliptic 62 → 35, Weierstrass 53 → 40, Mathieu 173 → 140, Lamé 44 → 41, Spheroidal
+35 → 33, Heun 28 → 26, Painlevé 83 → 41 (510 → 376). No statement was changed.
+
+Highlights:
+- Theta: 20.11.5, 20.5.14–17, 20.10.3, 20.7.25, 20.6.10; the 20.4.2–6 product chain moved from
+  ZeroValues to Products. Riemann theta: modular action preserves the Siegel half-space, a
+  continuous square root of the determinant, non-differentiability of the scaled theta.
+- Jacobian elliptic: Maclaurin expansions 22.10.1–3 and the power series; the inversion and
+  imaginary-argument formulas of OutsideModuli (ODE uniqueness and the identity principle,
+  `P3jJacobiODE`); the eight 1/sin-type partial fractions of 22.12 by a Liouville argument on the
+  lattice ⟨2, 2τ⟩ (`P3jEisenstein`) and the matching eight Fourier series of 22.11. The two
+  mixed-theta lemmas of Addition are now adapters over the Theta versions.
+- Weierstrass: existence of a period pair with given invariants via surjectivity of Klein's j
+  (new `DLMFMathlib/NumberTheory/ModularForms/P3wJSurjective`); Klein's j and λ as modular
+  functions, the eta product for λ, the Laurent series of ζ and the recursion 23.9.5, the
+  half-period expansion 23.9.6, reality of ℘, the rhombic discriminant. Heun 31.2.9–12 (sn² as ℘,
+  the Weierstrass form of Heun's equation).
+- Mathieu: the small-q expansions 28.6.1–14 and 28.6.21–26 by a general three-term recurrence
+  perturbation theory (`P3qJacobi` … `P3qCeSeGen`); 28.24.6–13, the Wronskian 28.20.21 (still
+  through `mathieuNormalSegment_real`) and the integral representations 28.28.2–5.
+- Bessel: Graf's addition theorem 10.23.7 for J at integer order (`hasSum_besselJ_graf`, new
+  `DLMF/Bessel/P3mGraf`), stronger than DLMF (no |v e^{±iα}| < |u| restriction).
+- Lamé and spheroidal: existence of the spheroidal eigenvalues and of the normalized eigenfunction
+  with simplicity and parity (§30.3(i), §30.4(i)); the zeros of the Lamé polynomials on both sides
+  of the rectangle (§29.12(i), 29.12.9–10); the Weierstrass form of Lamé's equation 29.2.6–12.
+- Painlevé: all Bäcklund transformations of 32.7 including the (corrected) Okamoto map and the
+  quadratic and quartic transformations; the coalescence limits of 32.2(iii); 32.2.12; the three
+  σ-equation converses of 32.6; the PIII Lax pair; the rational PII solutions and Yablonskii–
+  Vorobiev recurrence; all PDE reductions 32.13; PIII Bessel, PIV parabolic-cylinder, PV
+  Whittaker (through the contiguous Kummer equations 13.3.13–14) and PVI hypergeometric Riccati
+  solutions.
+
+Integration: the existence theorems of `Spheroidal/Basic.lean` moved unchanged into the new theorem
+file `Spheroidal/Existence.lean`, so the definitions file imports only definitions files. The
+import survey reports one new two-way area pair, JacobiElliptic ↔ Weierstrass, through
+`P3jEisenstein → DLMF.Weierstrass.Basic` (a definitions file).
+
+Open issues for review (in the errata report, section (c), pending a decision):
+- `painleveVI_picard` (32.10.32–34) is vacuously true: Λ(·, z) is required to be entire with two
+  independent periods, which forces w = 0 (`p3b_painleveVI_picard_hyp_false`). Proposed
+  restatement: Λ meromorphic with poles on the period lattice, or defined through ℘.
+- `mathieuFourierA/B_up/down_small_q` (28.4.22–23) are stated for all real q and look false where
+  A^m_m(q) vanishes (numerically A²₂ changes sign near q ≈ 21.3); proposed restriction: eventual
+  near q = 0, or A^m_m(q) ≠ 0. 28.4.21 is true but its proof is blocked by an import cycle.
+- Landen 22.7: k₁ = (1 − k′)/(1 + k′) can leave `jacobiModulusDomain` (e.g. |k′| = 1); not checked.
+- `mathieuNormalSegment_real` (Mathieu/Noninteger/Properties) blocks 28.20.21.
+
+Remaining routes: the cot-type Liouville instance for the other four of 22.11/22.12; ζ in terms of
+ns/ds/cs (23.6.27–29); j-injectivity for `IsRhombic.roots`; Graf for Y, H and general order
+(28.28.17, 28.28.20–23, 28.23.2–13); the Stieltjes argument 29.12.11–13; general-n determinant
+identities for 32.8.9 and the PII Airy Wronskians.
+
+Validation: full build 13,528 jobs; audit 22,426 theorems, 1,266 depending on `sorryAx`, no other
+nonstandard axiom; project source admissions 1,310 → 1,176; ledgers regenerated (idempotent).
+
+## Chapters 33–36 acquisition (2026-10-26)
+
+Six agents: `c1` (§§33.1–33.13), `c2` (§§33.14–33.26), `wj` (Chapter 34), `ma` (Chapter 35),
+`cs1` (§§36.1–36.6) and `cs2` (§§36.7–36.15); rules as for Chapter 32 (graphics, applications,
+computation and numerical values excluded). New areas and ledgers:
+- [Coulomb](DLMF/Coulomb.lean), [DLMF33Acquisition.md](DLMF33Acquisition.md): all 133 in-scope
+  numbered equations and 8 prose items; 88 admissions. The existing Coulomb definitions
+  (`coulombWave`, `coulombF`, `coulombC`, `coulombSigma`, `coulombTheta`, `coulombHPlus/Minus`,
+  `coulombAPlus`, `coulombG`, namespace `DLMF.Confluent`) moved down unchanged into
+  `DLMF/Coulomb/Basic.lean`; the r, ε functions f, h, s, c are in `DLMF/Coulomb/Energy`. The
+  continuous branch of the phase shift is the new `phaseShift` (Weierstrass product), since
+  `coulombSigma` is principal.
+- [WignerSymbols](DLMF/WignerSymbols.lean), [DLMF34Acquisition.md](DLMF34Acquisition.md): all 64
+  numbered equations; 45 admissions. Rational quantum numbers with the standing conditions as
+  predicates; `wigner3j` is Racah's formula 34.2.4, `wigner6j` the sum 34.4.2, `wigner9j` the sum
+  34.6.2. Proved: the classical and Regge symmetries of 3j and 6j symbols, special values, the zero
+  statements of §34.10.
+- [MatrixArgument](DLMF/MatrixArgument.lean), [DLMF35Acquisition.md](DLMF35Acquisition.md): 59
+  of 62 numbered equations (35.7.4 and the cited asymptotics 35.7.10–11 not formalized); 47
+  admissions. Tau Ceti's measure on symmetric matrices and multivariate Gamma (four upstream
+  pointers), the Haar probability measure on O(m), zonal polynomials defined by DLMF's own
+  35.4.2–35.4.3, hypergeometric functions of matrix argument as sums over partitions; integral
+  identities with `HasIntegralOn`.
+- [CoalescingSaddles](DLMF/CoalescingSaddles.lean), [DLMF36Acquisition.md](DLMF36Acquisition.md):
+  all 116 in-scope numbered equations and Table 36.6.1; 52 admissions. Canonical integrals as
+  absolutely convergent integrals along rotated contours (agreement with DLMF's improper integrals
+  admitted). Proved: all bifurcation-set descriptions 36.4.5–13, the scaling relations of §36.6,
+  the cuspoid differential equations 36.10.1–10 and the hyperbolic umbilic equations 36.10.15–18.
+
+DLMF errata: 16 entries, all confirmed by an independent check with fresh scripts (mpmath at
+30–40 digits, sympy exact): 33.9.4, 33.11.7, 33.12.3, the line after 33.14.15, 33.16.15,
+33.16.17, 33.16.18, 33.19.3; the tetrahedron sentence of §34.4; 35.2.2, 35.7.8, §35.8(i), 35.8.6,
+35.8.7, 35.8.13; 36.11.7–8 (valid only as z → +∞). Each is acquired in corrected form. The same
+check confirmed 35.4.9, 35.5.8, 35.6.4, 35.7.5 and 35.8.12 as printed. Errata report: section (a)
+"Chapters 33–36", formalization notes in section (c).
+
+Integration: umbrellas `DLMF/Coulomb.lean`, `DLMF/WignerSymbols.lean`, `DLMF/MatrixArgument.lean`,
+`DLMF/CoalescingSaddles.lean` added to `DLMF.lean`. The import survey reports one new two-way area
+pair, Confluent ↔ Coulomb (`Confluent.Coulomb → Coulomb.Basic` after the move-down).
+
+Validation: full build 13,662 jobs; audit 23,152 theorems, 1,513 depending on `sorryAx`, no other
+nonstandard axiom; project source admissions 1,176 → 1,408 (232 new); ledgers regenerated
+(idempotent).
+
+## Restatement of Picard's solution 32.10.32–34 (2026-10-27)
+
+With user approval, `painleveVI_picard` was restated. The first formulation required `Λ(·, z)` to
+be entire with two independent periods, which made its hypotheses contradictory
+(`p3b_painleveVI_picard_hyp_false`, kept as a documented remark). The new statement uses the new
+definitions `picardG₂`, `picardG₃`, `picardLambda` in `Painleve/SolutionsDefs.lean` (which now
+imports `DLMF.Weierstrass.Basic`): `Λ(u, z) = 4℘(u + ω₀(z); g₂(z), g₃(z)) + (1 + z)/3`, with
+`g₂ = (z² - z + 1)/12`, `g₃ = -(1 + z)(2 - z)(2z - 1)/432`, `℘(ω₀) = -(1 + z)/12`, `2φ₁(z)`,
+`2φ₂(z)` a basis of the period lattice, and `w` off the poles and off `{0, 1, z}`. Checked
+numerically beforehand through the Jacobi form `Λ = z sn²(u/2, k)`, `k² = z`, `φ₁ = 2K`,
+`φ₂ = 2iK'` (PVI(0, 0, 0, 1/2) residual below 1e-40). The new `picard_hypotheses_nonempty`
+(proved) shows that the lattice hypotheses can be met at every `z ∉ {0, 1}`. The theorem is now
+admitted (Painlevé 41 → 42, project 1,408 → 1,409); errata entry moved from section (c) to (b).
+
+## Proof round 2 for Chapters 33–36 (2026-10-27)
+
+Seven agents with disjoint files, helper prefixes `q2a_` (Coulomb ρ, η: properties, series,
+representations), `q2b_` (Coulomb limits and asymptotics), `q2e_` (Coulomb r, ε), `q2w_` (Wigner
+symbols), `q2m_` (matrix argument), `q2s_` and `q2t_` (coalescing saddles). Source admissions:
+Coulomb 88 → 49, WignerSymbols 45 → 34, MatrixArgument 47 → 36, CoalescingSaddles 52 → 35
+(232 → 154). No statement was changed; no statement was found false.
+
+Highlights:
+- Coulomb: the continuous-branch phase shift (`phaseShift_spec`, by Euler's Gamma limit), the
+  recurrences 33.4.3–4 (so 33.2.13 and 33.4.2 are fully proved), 33.2.1 for G, 33.2.7, 33.13,
+  the power series 33.6.1–2 and 33.6.4, the integral representations 33.7.1, 33.7.2 and 33.7.4
+  (a full −π/2 rotation of the U integral), the continued fraction 33.8.1, all of §33.5, 33.10.6,
+  33.10.10, 33.11.5–6; for r, ε: the ODE 33.14.1 for f, the Laguerre form of the hydrogen
+  functions, 33.16.3/4, 33.16.6, 33.16.8/10, 33.16.12–13, the corrected 33.16.18, 33.17.1,
+  33.17.3, 33.19.1 (new `Energy/Q2eRegular`).
+- Wigner symbols: 34.3.2–3, the recursion 34.3.13 for all arguments (stronger than DLMF),
+  34.5.2–7, 34.7.1 and the 9j transposition symmetry (new `Q2wHelpers`).
+- Matrix argument: the multivariate Gamma and Beta integrals 35.3.1–3 and 35.3.8 (Cholesky
+  congruence and Fubini, on Tau Ceti's measure), the Laplace convolution 35.2.3, the symmetric
+  polynomial form of the zonal polynomials and their Laplace integral 35.4.8, 35.5.3, 35.5.6,
+  35.6.2, 35.6.8 (new `Q2mMatrixIntegrals`).
+- Coalescing saddles: agreement of the rotated-contour definitions with DLMF's improper integrals
+  for the cuspoids (36.2.4, 36.2.10; so the Pearcey integral 36.2.14 is fully proved), 36.2.9,
+  36.2.17 (moved unchanged to DifferentialEquations to avoid an import cycle), 36.2.20, the
+  critical-point counts 36.4.1–2, the cusp Stokes set 36.5.2, all of §36.10 (including the
+  elliptic umbilic 36.10.13–14, 36.10.17), the series 36.8.1 and 36.8.3, and the limits 36.11.3
+  (y → +∞) and 36.11.6 (z → +∞).
+
+Remaining blockers: analyticity of Kummer functions in their parameters (Coulomb analyticity in
+η); limits in ε defining h at removable points (most r, ε results for h); U asymptotics uniform in
+the parameters and Airy transition-region asymptotics (33.10.3–9, 33.12); terminating ₄F₃ and
+Dixon transformations, orthogonality and Biedenharn–Elliott machinery (Chapter 34); 35.4.6
+(Σ_κ Z_κ = (tr T)^k), on which most of Chapter 35's series results rest; uniform Airy bounds for
+the umbilic improper integrals 36.2.5, 36.2.11; saddle-point asymptotics with oscillatory
+secondary terms (36.11); explicit constant-Re Φ paths for the Stokes sets.
+
+Note: some proof-local auxiliary definitions (`q2m_jac`, `q2m_phi`, `q2m_zonalPoly`, …) sit in
+theorem files of MatrixArgument; they are not DLMF objects.
+
+Validation: full build 13,676 jobs; audit 23,583 theorems, 1,425 depending on `sorryAx`, no other
+nonstandard axiom; project source admissions 1,409 → 1,331; ledgers regenerated (idempotent);
+import survey: nothing new.
+
+## Chapters 1–2 acquisition (2026-10-27)
+
+DLMF Chapters 1 (Algebraic and Analytic Methods) and 2 (Asymptotic Approximations) were acquired
+by eight agents with disjoint subdirectories: g1a §§1.1–1.3 (`Algebra`), g1b §§1.4–1.7
+(`Calculus`), g1c §§1.8–1.10 (`Fourier`, `Complex`), g1d §§1.11–1.13 (`Polynomials`,
+`ContinuedFractions`, `ODE`), g1e §§1.14–1.15 (`Transforms`, `Summability`), g1f §§1.16–1.18
+(`Distributions`, `Spectral`) under `DLMF/AlgebraicAnalytic/` (namespace
+`DLMF.AlgebraicAnalytic`), and g2a §§2.1–2.5 (`Basics`, `Integrals`, `Mellin`), g2b §§2.6–2.11
+(`Distributional`, `ODE`, `Sums`, `Remainders`) under `DLMF/AsymptoticApproximations/` (namespace
+`DLMF.AsymptoticApproximations`). Each subdirectory has its own `Defs` file and, where something
+is upstream, a `MathlibCoverage` file. With Chapter 3 out of scope (user decision), this
+completes the DLMF coverage. Ledgers: `DLMF1Acquisition.md` and `DLMF2Acquisition.md`, assembled
+from the agents' parts.
+
+Coverage: every in-scope numbered equation is covered by a project declaration or a
+`dlmf_upstream` pointer (447 pointers in the new coverage files; much of Chapter 1 is in Mathlib
+or Tau Ceti: binomial and matrix algebra, Cauchy–Schwarz/Hölder/Minkowski, Fourier series on
+`AddCircle`, Cauchy's theorem, residues, Mellin and Fourier transforms, distributions).
+Exclusions: notation, references-only paragraphs, worked numerical examples (1.11.E8), Table
+2.11.1 and the numerical items of §2.11, Figure 1.4.2.
+Admissions at acquisition: AlgebraicAnalytic 304 (Algebra 1, Calculus 37, Fourier 11, Complex 46,
+Polynomials 3, ContinuedFractions 7, ODE 11, Transforms 94, Summability 35, Distributions 34,
+Spectral 25), AsymptoticApproximations 136 (Basics 13, Integrals 22, Mellin 18,
+Distributional 25, ODE 27, Sums 24, Remainders 7).
+
+Notable proofs at acquisition: Krattenthaler's determinant 1.3.16–17 over any commutative ring;
+Cardano and Ferrari branch-free; Euler's continued fraction 1.12.18 and Pringsheim's theorem
+1.12.25 (both stronger than DLMF); fundamental pairs, Abel's identity and variation of parameters
+(§1.13); the Fourier-transform bridge `fourierTransform_eq_fourier` and the power rule 1.15.50
+for fractional integrals; the Gaussian δ-sequence and the eigenfunction specs of §1.18; Watson's
+lemma, Euler–Maclaurin 2.10.1 (for any integer a), Case I of §2.8 with explicit error bounds,
+the Liouville–Green recessive solutions 2.7.20–27, and the terminant identities of §2.11 as
+corollaries of the project's Chapters 6 and 8.
+
+Design: DLMF normalizations throughout, with proved bridges to Mathlib's conventions (Fourier
+kernel `e^{-2πi⟪x,ξ⟫}`, inner products linear in the second argument, `charpoly = det(XI − A)`,
+transposed circulant); contours are Tau Ceti's piecewise-C¹ curves (the Jordan curve theorem is
+admitted); distributions are Mathlib's `Distribution`; Poincaré expansions use
+`HasAsymptoticExpansion` of `DLMFMathlib`; conditionally convergent integrals and series are
+limits of truncations. The bridge `Complex/GeneratingFunctions` and the theorem files of §1.17 and
+Chapter 2 import other areas' theorem files, which the import rule allows.
+
+DLMF errata confirmed by the coordinator (analytically from the page text or with fresh mpmath
+scripts) and added to `reports/DLMFErrata.tex` as the new subsections "Chapter 1" and
+"Chapter 2" of (a), 15 entries: 1.2.51, 1.7.1–3 (equality cases), 1.7.11 (strict inequality),
+1.9.51 (Cauchy product on the boundary), 1.10.25 (zₙ ≠ 0, |zₙ| → ∞), §1.13(viii) (periodic
+conditions under the Liouville transformation), 1.14.45 (constant A_p^p), Table 1.14.2 row 11
+(log of the quotient), Table 1.14.4 rows 15–17 (conditions), §1.15(v) (−ℋf), 1.15.53 (missing
+hypothesis), 1.17.19–20 (continuity insufficient), 1.18.54 (Plemelj needs Hölder),
+2.5.11/15/16 (sign and range of the residue sum), §2.10(iv) (α ∈ (0, π)). Formalization notes
+added to (c), subsection "Chapters 1–2": 1.10.24, §1.10(ii), Table 1.14.5 rows 3 and 7, 1.18.38,
+2.3.26, 2.5.10. Report counts now 135 / 27 / 58; one stale label (33.16.18, proved in round 2)
+fixed.
+
+Validation: full build 14,336 jobs; audit 24,662 theorems, 1,884 depending on `sorryAx`, no other
+nonstandard axiom; project source admissions 1,331 → 1,771; ledgers regenerated (idempotent on
+the third run); import survey: nothing new from Chapters 1–2.

@@ -5,14 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.Calculus.Deriv.MeanValue
-public import Mathlib.Analysis.Calculus.Deriv.Inv
 public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
-public import Mathlib.Analysis.Calculus.LocalExtr.Basic
-public import Mathlib.Topology.Order.IntermediateValue
-public import Mathlib.Topology.Algebra.Order.Field
-public import Mathlib.Data.Set.Card
-public import Mathlib.Data.Finset.Sort
 public import DLMFMathlib.Analysis.ODE.SturmComparison
 
 /-!

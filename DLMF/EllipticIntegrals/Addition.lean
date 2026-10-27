@@ -210,7 +210,7 @@ theorem symEllIntRC_addition_eq_arctan {k θ φ ψ α2 : ℝ} (hk : k ^ 2 < 1)
 /-- The substitution `θ ↦ π/2 - arctan(k' tan θ)` of (19.11.9) maps `dθ/Δ(θ)` to `-dθ/Δ(θ)`:
 `(1 - m sin²(π/2 - arctan(c tan θ)))^{-1/2} · d/dθ(π/2 - arctan(c tan θ)) = -(1 - m sin²θ)^{-1/2}`,
 `c = √(1 - m)`, for `cos θ > 0`. -/
-theorem ei19b_complement_integrand {m θ : ℝ} (hm : m < 1) (hcos : 0 < Real.cos θ) :
+lemma ei19b_complement_integrand {m θ : ℝ} (hm : m < 1) (hcos : 0 < Real.cos θ) :
     (1 - m * Real.sin (π / 2 - Real.arctan (Real.sqrt (1 - m) * Real.tan θ)) ^ 2) ^ (-(1 / 2) : ℝ) *
         (-(Real.sqrt (1 - m) * (1 / Real.cos θ ^ 2)) /
           (1 + (Real.sqrt (1 - m) * Real.tan θ) ^ 2)) =
@@ -243,7 +243,7 @@ theorem ei19b_complement_integrand {m θ : ℝ} (hm : m < 1) (hcos : 0 < Real.co
 
 /-- Real form of (19.11.7): `F(φ | m) = K(m) - F(π/2 - arctan(√(1-m) tan φ) | m)` for `m < 1`
 and `0 ≤ φ < π/2`. -/
-theorem ei19b_incEllIntFm_complement {m φ : ℝ} (hm : m < 1) (hφ0 : 0 ≤ φ) (hφ : φ < π / 2) :
+lemma ei19b_incEllIntFm_complement {m φ : ℝ} (hm : m < 1) (hφ0 : 0 ≤ φ) (hφ : φ < π / 2) :
     DLMF.Elliptic.Real.incEllIntFm φ m = DLMF.Elliptic.Real.compEllIntKm m -
       DLMF.Elliptic.Real.incEllIntFm (π / 2 - Real.arctan (Real.sqrt (1 - m) * Real.tan φ)) m := by
   set c := Real.sqrt (1 - m) with hcdef
@@ -285,7 +285,7 @@ theorem ei19b_incEllIntFm_complement {m φ : ℝ} (hm : m < 1) (hφ0 : 0 ≤ φ)
 /-- The substitution of (19.11.9) in the second-kind integrand:
 `(1 - m sin²(π/2 - arctan(c tan θ)))^{1/2} · d/dθ(π/2 - arctan(c tan θ)) = -(1 - m) D^{-1/2}/D`,
 `D = 1 - m sin²θ`, `c = √(1 - m)`, for `cos θ > 0`. -/
-theorem ei19b_complement_integrand_E {m θ : ℝ} (hm : m < 1) (hcos : 0 < Real.cos θ) :
+lemma ei19b_complement_integrand_E {m θ : ℝ} (hm : m < 1) (hcos : 0 < Real.cos θ) :
     (1 - m * Real.sin (π / 2 - Real.arctan (Real.sqrt (1 - m) * Real.tan θ)) ^ 2) ^ (1 / 2 : ℝ) *
         (-(Real.sqrt (1 - m) * (1 / Real.cos θ ^ 2)) /
           (1 + (Real.sqrt (1 - m) * Real.tan θ) ^ 2)) =
@@ -316,7 +316,7 @@ theorem ei19b_complement_integrand_E {m θ : ℝ} (hm : m < 1) (hcos : 0 < Real.
   field_simp
 
 /-- `d/dθ [m sin θ cos θ / Δ(θ)] = Δ(θ) - (1 - m)/Δ(θ)³`, `Δ = √(1 - m sin²θ)`, `m < 1`. -/
-theorem ei19b_hasDerivAt_E_correction {m : ℝ} (hm : m < 1) (θ : ℝ) :
+lemma ei19b_hasDerivAt_E_correction {m : ℝ} (hm : m < 1) (θ : ℝ) :
     HasDerivAt (fun θ => m * Real.sin θ * Real.cos θ * (Real.sqrt (1 - m * Real.sin θ ^ 2))⁻¹)
       (Real.sqrt (1 - m * Real.sin θ ^ 2) -
         (1 - m) * (Real.sqrt (1 - m * Real.sin θ ^ 2))⁻¹ / (1 - m * Real.sin θ ^ 2)) θ := by
@@ -349,7 +349,7 @@ theorem ei19b_hasDerivAt_E_correction {m : ℝ} (hm : m < 1) (θ : ℝ) :
   ring
 
 /-- `∫₀^φ (1 - m)/Δ³ = E(φ | m) - m sin φ cos φ/Δ(φ)`, `m < 1`. -/
-theorem ei19b_integral_E_correction {m : ℝ} (hm : m < 1) (φ : ℝ) :
+lemma ei19b_integral_E_correction {m : ℝ} (hm : m < 1) (φ : ℝ) :
     ∫ θ in (0 : ℝ)..φ, (1 - m) * (Real.sqrt (1 - m * Real.sin θ ^ 2))⁻¹ / (1 - m * Real.sin θ ^ 2) =
       DLMF.Elliptic.Real.incEllIntEm φ m -
         m * Real.sin φ * Real.cos φ * (Real.sqrt (1 - m * Real.sin φ ^ 2))⁻¹ := by
@@ -372,7 +372,7 @@ theorem ei19b_integral_E_correction {m : ℝ} (hm : m < 1) (φ : ℝ) :
 
 /-- Real form of (19.11.8): `E(φ | m) = E(m) - E(θ | m) + m sin θ sin φ` with
 `θ = π/2 - arctan(√(1-m) tan φ)`, for `m < 1` and `0 ≤ φ < π/2`. -/
-theorem ei19b_incEllIntEm_complement {m φ : ℝ} (hm : m < 1) (hφ0 : 0 ≤ φ) (hφ : φ < π / 2) :
+lemma ei19b_incEllIntEm_complement {m φ : ℝ} (hm : m < 1) (hφ0 : 0 ≤ φ) (hφ : φ < π / 2) :
     DLMF.Elliptic.Real.incEllIntEm φ m = DLMF.Elliptic.Real.compEllIntEm m -
       DLMF.Elliptic.Real.incEllIntEm (π / 2 - Real.arctan (Real.sqrt (1 - m) * Real.tan φ)) m +
       m * Real.sin (π / 2 - Real.arctan (Real.sqrt (1 - m) * Real.tan φ)) * Real.sin φ := by
@@ -494,13 +494,13 @@ def ei19b_dupCos (k θ : ℝ) : ℝ :=
   (Real.cos (2 * θ) + k ^ 2 * Real.sin θ ^ 4) / (1 - k ^ 2 * Real.sin θ ^ 4)
 
 /-- (19.11.14), (19.11.15) are (19.11.3), (19.11.4) with `φ = θ`. -/
-theorem ei19b_dupSin_eq (k θ : ℝ) : ei19b_dupSin k θ = ei19b_addSin k θ θ := by
+lemma ei19b_dupSin_eq (k θ : ℝ) : ei19b_dupSin k θ = ei19b_addSin k θ θ := by
   unfold ei19b_dupSin ei19b_addSin
   rw [Real.sin_two_mul]
   ring
 
 /-- (19.11.15), first formula, is the first formula of (19.11.4) with `φ = θ`. -/
-theorem ei19b_dupCos_eq {k : ℝ} (hk : k ^ 2 < 1) (θ : ℝ) :
+lemma ei19b_dupCos_eq {k : ℝ} (hk : k ^ 2 < 1) (θ : ℝ) :
     ei19b_dupCos k θ = ei19b_addCos k θ θ := by
   unfold ei19b_dupCos ei19b_addCos
   have hP : ei19b_delta k θ ^ 2 = 1 - k ^ 2 * Real.sin θ ^ 2 :=
@@ -534,7 +534,7 @@ theorem incEllIntEk_duplication {k θ ψ : ℝ} (hk : k ^ 2 < 1) (hθ : θ ∈ I
   linear_combination -h
 
 /-- Half-angle tangent: `tan(ψ/2) = sin ψ/(1 + cos ψ)` when `1 + cos ψ ≠ 0`. -/
-theorem p19lR1_tan_half {ψ : ℝ} (h : 1 + Real.cos ψ ≠ 0) :
+lemma p19lR1_tan_half {ψ : ℝ} (h : 1 + Real.cos ψ ≠ 0) :
     Real.tan (ψ / 2) = Real.sin ψ / (1 + Real.cos ψ) := by
   have hc : Real.cos (ψ / 2) ≠ 0 := by
     intro h0

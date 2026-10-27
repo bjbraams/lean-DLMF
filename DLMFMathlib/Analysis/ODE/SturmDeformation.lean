@@ -7,10 +7,6 @@ module
 
 public import Mathlib.Analysis.Calculus.Deriv.MeanValue
 public import Mathlib.Analysis.Calculus.Deriv.Inverse
-public import Mathlib.Topology.Order.IntermediateValue
-public import Mathlib.Topology.Connected.TotallyDisconnected
-public import Mathlib.Topology.Algebra.Order.Field
-public import Mathlib.Data.Set.Card
 public import DLMFMathlib.Topology.Order.ZeroEnumeration
 
 /-!
@@ -61,14 +57,14 @@ theorem sturmDef_finite {f f' : ℝ → ℝ} {a b : ℝ} (hd : ∀ x ∈ Icc a b
   exact hne.ne this
 
 /-- Continuity of `t ↦ y(t, x)` and joint continuity at interior points. -/
-lemma sturmDef_continuousAt (hΛ : IsOpen Λ) (hU : IsOpen U)
+theorem sturmDef_continuousAt (hΛ : IsOpen Λ) (hU : IsOpen U)
     (hc : ContinuousOn (Function.uncurry Y) (Λ ×ˢ U)) {t : T} {x : ℝ} (ht : t ∈ Λ) (hx : x ∈ U) :
     ContinuousAt (Function.uncurry Y) (t, x) :=
   hc.continuousAt ((hΛ.prod hU).mem_nhds ⟨ht, hx⟩)
 
 /-- One zero, positive slope: for every small `δ`, nearby members of the family have exactly one
 zero in `(z - δ, z + δ)`. -/
-lemma sturmDef_local_pos (hΛ : IsOpen Λ) (hU : IsOpen U)
+theorem sturmDef_local_pos (hΛ : IsOpen Λ) (hU : IsOpen U)
     (hcY : ContinuousOn (Function.uncurry Y) (Λ ×ˢ U))
     (hcY' : ContinuousOn (Function.uncurry Y') (Λ ×ˢ U))
     (hd : ∀ t ∈ Λ, ∀ x ∈ U, HasDerivAt (Y t) (Y' t x) x) {t₀ : T} {z : ℝ} (ht₀ : t₀ ∈ Λ)
@@ -116,7 +112,7 @@ lemma sturmDef_local_pos (hΛ : IsOpen Λ) (hU : IsOpen U)
 
 /-- One simple zero: for every small `δ`, nearby members of the family have exactly one zero in
 `(z - δ, z + δ)`. -/
-lemma sturmDef_local (hΛ : IsOpen Λ) (hU : IsOpen U)
+theorem sturmDef_local (hΛ : IsOpen Λ) (hU : IsOpen U)
     (hcY : ContinuousOn (Function.uncurry Y) (Λ ×ˢ U))
     (hcY' : ContinuousOn (Function.uncurry Y') (Λ ×ˢ U))
     (hd : ∀ t ∈ Λ, ∀ x ∈ U, HasDerivAt (Y t) (Y' t x) x) {t₀ : T} {z : ℝ} (ht₀ : t₀ ∈ Λ)

@@ -5,13 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.OrthogonalPolynomials.Topics
-public import Mathlib.Tactic.CrossRefAttribute
-public import DLMF.OrthogonalPolynomials.Hahn
 public import DLMF.OrthogonalPolynomials.Explicit
 public import DLMF.OrthogonalPolynomials.Differential
-public import DLMF.Gamma.IntegralRepresentations
-public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 /-!
 # Associated, Bessel, Pollaczek, Freud, and exceptional polynomials
 
@@ -205,7 +200,7 @@ theorem associatedPollaczek_limit_hermite {c : ℝ} (hc : 0 ≤ c) (n : ℕ) (x 
     ring
 
 /-- `(a+1)_b = (a+b)!/a!` for natural `a`, in factorial form. -/
-lemma poch_nat_succ_mul_factorial (a b : ℕ) :
+theorem poch_nat_succ_mul_factorial (a b : ℕ) :
     (a ! : ℂ) * poch ((a : ℂ) + 1) b = ((a + b) ! : ℂ) := by
   rw [poch_nat_succ_eq_choose_mul_factorial]
   have h := Nat.choose_mul_factorial_mul_factorial (Nat.le_add_right a b)
@@ -214,7 +209,7 @@ lemma poch_nat_succ_mul_factorial (a b : ℕ) :
   linear_combination h'
 
 /-- Reflection of a Pochhammer symbol: `(1 - r - k)_k = (-1)^k (r)_k`. -/
-lemma poch_reflect (r : ℂ) (k : ℕ) : poch (1 - r - k) k = (-1) ^ k * poch r k := by
+theorem poch_reflect (r : ℂ) (k : ℕ) : poch (1 - r - k) k = (-1) ^ k * poch r k := by
   rw [poch, show (1 - r - k : ℂ) = -(r + k - 1) by ring, ascPochhammer_eval_neg_eq_descPochhammer,
     descPochhammer_eval_eq_ascPochhammer]
   congr 2
@@ -265,7 +260,7 @@ def besselCoeff (a : ℂ) (m k : ℕ) : ℂ :=
   poch (-(m : ℂ)) k * poch ((m : ℂ) + a - 1) k / k.factorial
 
 /-- The termwise form of the Bessel polynomial recurrence. -/
-lemma besselCoeff_rec (a : ℂ) (n j : ℕ) :
+theorem besselCoeff_rec (a : ℂ) (n j : ℕ) :
     2 * (n + a) * (2 * n + a) * besselCoeff a (n + 2) (j + 1) =
       -2 * ((2 * n + a + 2) * (2 * n + a + 1) * (2 * n + a)) * besselCoeff a (n + 1) j +
         2 * (a - 2) * (2 * n + a + 1) * besselCoeff a (n + 1) (j + 1) +
@@ -312,7 +307,7 @@ lemma besselCoeff_rec (a : ℂ) (n j : ℕ) :
 
 
 /-- The Bessel polynomial as a sum over any sufficiently long range. -/
-lemma besselPolynomial_eq_sum (a : ℂ) {m M : ℕ} (hM : m + 1 ≤ M) (x : ℂ) :
+theorem besselPolynomial_eq_sum (a : ℂ) {m M : ℕ} (hM : m + 1 ≤ M) (x : ℂ) :
     besselPolynomial a m x = ∑ k ∈ Finset.range M, besselCoeff a m k * (-x / 2) ^ k := by
   unfold besselPolynomial terminatingHG besselCoeff
   simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, div_one]
@@ -324,11 +319,11 @@ lemma besselPolynomial_eq_sum (a : ℂ) {m M : ℕ} (hM : m + 1 ≤ M) (x : ℂ)
   ring
 
 /-- The constant coefficient. -/
-lemma besselCoeff_zero (a : ℂ) (m : ℕ) : besselCoeff a m 0 = 1 := by
+theorem besselCoeff_zero (a : ℂ) (m : ℕ) : besselCoeff a m 0 = 1 := by
   simp [besselCoeff, poch_zero]
 
 /-- Coefficients beyond the degree vanish. -/
-lemma besselCoeff_eq_zero (a : ℂ) {m k : ℕ} (hk : m < k) : besselCoeff a m k = 0 := by
+theorem besselCoeff_eq_zero (a : ℂ) {m k : ℕ} (hk : m < k) : besselCoeff a m k = 0 := by
   simp [besselCoeff, poch_neg_nat_eq_zero hk]
 
 @[dlmf 18.34.E4]
@@ -436,7 +431,7 @@ open Set
 set_option maxHeartbeats 1000000
 
 /-- A reciprocal Gamma moment, with integrability, from the reciprocal substitution. -/
-lemma reciprocal_gamma_moment {s : ℝ} (hs : 0 < s) :
+theorem reciprocal_gamma_moment {s : ℝ} (hs : 0 < s) :
     IntegrableOn (fun x : ℝ => (x : ℂ) ^ (-s - 1 : ℂ) * exp (-2 / x)) (Ioi 0) ∧
     (∫ x : ℝ in Ioi 0, (x : ℂ) ^ (-s - 1 : ℂ) * exp (-2 / x)) =
       (2 : ℂ) ^ (-(s : ℂ)) * Gamma (s : ℂ) := by
@@ -476,7 +471,7 @@ lemma reciprocal_gamma_moment {s : ℝ} (hs : 0 < s) :
   norm_cast
 
 /-- A monomial moment of the finite Bessel weight. -/
-lemma bessel_weight_moment {a : ℝ} (j : ℕ) (ha : a + j < 1) :
+theorem bessel_weight_moment {a : ℝ} (j : ℕ) (ha : a + j < 1) :
     IntegrableOn (fun x : ℝ => (x : ℂ) ^ j *
       (Real.rpow x (a - 2) * Real.exp (-2 / x) : ℝ)) (Ioi 0) ∧
     (∫ x : ℝ in Ioi 0, (x : ℂ) ^ j *
@@ -501,7 +496,7 @@ lemma bessel_weight_moment {a : ℝ} (j : ℕ) (ha : a + j < 1) :
   congr 2 ; ring
 
 /-- Binomial form of the finite Bessel polynomial. -/
-lemma bessel_binomial_sum (a : ℂ) (n : ℕ) (x : ℂ) :
+theorem bessel_binomial_sum (a : ℂ) (n : ℕ) (x : ℂ) :
     besselPolynomial a n x = ∑ k ∈ Finset.range (n + 1),
       (n.choose k : ℂ) * poch (n + a - 1) k * (x / 2) ^ k := by
   unfold besselPolynomial terminatingHG
@@ -521,7 +516,7 @@ lemma bessel_binomial_sum (a : ℂ) (n : ℕ) (x : ℂ) :
     _ = _ := by rw [hs]; ring
 
 /-- Orthogonal moments of a Bessel polynomial; Vandermonde supplies the finite cancellation. -/
-lemma bessel_monomial_moment {a : ℝ} (m j : ℕ) (ha : a + j + m < 1) :
+theorem bessel_monomial_moment {a : ℝ} (m j : ℕ) (ha : a + j + m < 1) :
     IntegrableOn (fun x : ℝ => besselPolynomial a m x * (x : ℂ) ^ j *
       (Real.rpow x (a - 2) * Real.exp (-2 / x) : ℝ)) (Ioi 0) ∧
     (∫ x : ℝ in Ioi 0, besselPolynomial a m x * (x : ℂ) ^ j *
@@ -576,7 +571,7 @@ lemma bessel_monomial_moment {a : ℝ} (m j : ℕ) (ha : a + j + m < 1) :
     rw [show (m : ℂ) + a - 1 + (1 - a - j - m) = -j by ring]
 
 /-- Product moments reduce to the top monomial after finite orthogonality. -/
-lemma bessel_product_integral_of_le {a : ℝ} (m n : ℕ) (hnm : n ≤ m) (ha : a + 2 * m < 1) :
+theorem bessel_product_integral_of_le {a : ℝ} (m n : ℕ) (hnm : n ≤ m) (ha : a + 2 * m < 1) :
     (∫ x : ℝ in Ioi 0, besselPolynomial a m x * besselPolynomial a n x *
       (Real.rpow x (a - 2) * Real.exp (-2 / x) : ℝ)) =
       if m = n then (2 : ℂ) ^ (a - 1 : ℂ) * Gamma (1 - a - 2 * n : ℂ) *
@@ -628,7 +623,7 @@ lemma bessel_product_integral_of_le {a : ℝ} (m n : ℕ) (hnm : n ≤ m) (ha : 
     simp
 
 /-- The Pochhammer cancellation in the finite Bessel squared norm. -/
-lemma bessel_norm_pochhammer (s : ℂ) (n : ℕ) :
+theorem bessel_norm_pochhammer (s : ℂ) (n : ℕ) :
     s * poch (s + 1) n * poch (s + n + 1) n = (s + 2 * n) * poch s (2 * n) := by
   calc
     _ = s * poch (s + 1) (n + n) := by
@@ -640,7 +635,7 @@ lemma bessel_norm_pochhammer (s : ℂ) (n : ℕ) :
       ring
 
 /-- Gamma form of the finite Bessel norm cancellation. -/
-lemma bessel_norm_gamma {s : ℝ} (hs : 0 < s) (n : ℕ) :
+theorem bessel_norm_gamma {s : ℝ} (hs : 0 < s) (n : ℕ) :
     Gamma (s : ℂ) * poch (s + 1 : ℂ) n / Gamma (s + 2 * n : ℂ) =
       (s + 2 * n : ℂ) / ((s : ℂ) * poch (s + n + 1 : ℂ) n) := by
   have hp : 0 < (s : ℂ).re := by simpa using hs
@@ -758,16 +753,16 @@ theorem pollaczek_reflection (lam a b : ℂ) (c : ℝ) (n : ℕ) (x : ℂ) :
     ring
 
 /-- The Pollaczek polynomial of degree zero. -/
-lemma pollaczek_zero (lam a b x : ℂ) : pollaczek lam a b 0 0 x = 1 := by
+theorem pollaczek_zero (lam a b x : ℂ) : pollaczek lam a b 0 0 x = 1 := by
   simp [pollaczek, associated]
 
 /-- The Pollaczek polynomial of degree one. -/
-lemma pollaczek_one (lam a b x : ℂ) :
+theorem pollaczek_one (lam a b x : ℂ) :
     pollaczek lam a b 0 1 x = 2 * (lam + a) * x + 2 * b := by
   simp [pollaczek, associated]
 
 /-- The three-term recurrence of the Pollaczek polynomials, DLMF 18.35.2. -/
-lemma pollaczek_recurrence (lam a b x : ℂ) (n : ℕ) :
+theorem pollaczek_recurrence (lam a b x : ℂ) (n : ℕ) :
     (n + 2 : ℂ) * pollaczek lam a b 0 (n + 2) x =
       (2 * (n + 1 + lam + a) * x + 2 * b) * pollaczek lam a b 0 (n + 1) x -
         (n + 2 * lam) * pollaczek lam a b 0 n x := by
@@ -784,7 +779,7 @@ lemma pollaczek_recurrence (lam a b x : ℂ) (n : ℕ) :
 
 /-- Pollaczek polynomials at `cos θ` are the coefficients of
 `G_{λ - iΦ}(e^{iθ}X) G_{λ + iΦ}(e^{-iθ}X)`, `Φ = (a cos θ + b)/sin θ`. -/
-lemma pollaczek_eq_coeff_binomProductSeries (lam a b : ℂ) {θ : ℂ} (hθ : sin θ ≠ 0) (n : ℕ) :
+theorem pollaczek_eq_coeff_binomProductSeries (lam a b : ℂ) {θ : ℂ} (hθ : sin θ ≠ 0) (n : ℕ) :
     pollaczek lam a b 0 n (cos θ) = PowerSeries.coeff n (binomProductSeries
       (lam - I * ((a * cos θ + b) / sin θ)) (lam + I * ((a * cos θ + b) / sin θ))
       (exp (I * θ))) := by
@@ -937,7 +932,7 @@ theorem laguerrePolyL_negative_integer_parameter {n k : ℕ} (hk : k ≤ n) (x :
   rw [q1, q2, pow_add, show (-x) ^ k = (-1) ^ k * x ^ k by ring]
   field_simp
 
-lemma analyticAt_laguerrePolyL {α : ℂ} (hα : -1 < α.re) (n : ℕ) (x : ℂ) :
+theorem analyticAt_laguerrePolyL {α : ℂ} (hα : -1 < α.re) (n : ℕ) (x : ℂ) :
     AnalyticAt ℂ (laguerrePolyL α n) x := by
   have hc : ∀ k : ℕ, α + 1 ≠ -(k : ℂ) := not_neg_nat_of_re_pos (by
     simp only [Complex.add_re, Complex.one_re]; linarith)
@@ -948,7 +943,7 @@ lemma analyticAt_laguerrePolyL {α : ℂ} (hα : -1 < α.re) (n : ℕ) (x : ℂ)
     (by simp))
 
 /-- `L'_{m+1} - L'_m + L_m = 0`. -/
-lemma laguerrePolyL_deriv_succ_sub {α : ℂ} (hα : -1 < α.re) (m : ℕ) (x : ℂ) :
+theorem laguerrePolyL_deriv_succ_sub {α : ℂ} (hα : -1 < α.re) (m : ℕ) (x : ℂ) :
     deriv (laguerrePolyL α (m + 1)) x - deriv (laguerrePolyL α m) x + laguerrePolyL α m x = 0 := by
   rcases m with _ | j
   · have h0 : laguerrePolyL α 0 = fun _ => 1 := funext fun x => laguerrePolyL_zero α x
@@ -1056,7 +1051,7 @@ def morsePolynomialFunction (lam : ℝ) (n : ℕ) (x : ℝ) : ℂ :=
     besselPolynomial (2 - 2 * lam) n (lam⁻¹ * Real.exp x) / n.factorial
 
 /-- The Bessel polynomial is the evaluation of a polynomial. -/
-lemma exists_besselPolynomial_eq_eval (a : ℂ) (n : ℕ) :
+theorem exists_besselPolynomial_eq_eval (a : ℂ) (n : ℕ) :
     ∃ p : ℂ[X], besselPolynomial a n = fun x => p.eval x := by
   refine ⟨∑ k ∈ Finset.range (n + 1), C (poch (-(n : ℂ)) k * poch (n + a - 1) k *
     (-1 / 2) ^ k / (k.factorial : ℂ)) * X ^ k, ?_⟩
@@ -1164,7 +1159,7 @@ open Set
 set_option maxHeartbeats 1000000
 
 /-- The product of two Morse functions is a pulled-back finite Bessel weight. -/
-lemma morse_product_weight {lam : ℝ} (hlam : 0 < lam) (m n : ℕ) (x : ℝ) :
+theorem morse_product_weight {lam : ℝ} (hlam : 0 < lam) (m n : ℕ) (x : ℝ) :
     morsePolynomialFunction lam m x * morsePolynomialFunction lam n x =
       (2 : ℂ) ^ (2 * lam - 1 : ℂ) / ((m ! : ℂ) * n !) *
       (Real.exp x / lam : ℝ) *
@@ -1222,7 +1217,7 @@ lemma morse_product_weight {lam : ℝ} (hlam : 0 < lam) (m n : ℕ) (x : ℝ) :
     _ = _ := by rw [he, hp]; ring
 
 /-- Exponential substitution in the product of two Morse functions. -/
-lemma morse_product_integral {lam : ℝ} (hlam : 0 < lam) (m n : ℕ) :
+theorem morse_product_integral {lam : ℝ} (hlam : 0 < lam) (m n : ℕ) :
     (∫ x : ℝ, morsePolynomialFunction lam m x * morsePolynomialFunction lam n x) =
       (2 : ℂ) ^ (2 * lam - 1 : ℂ) / ((m ! : ℂ) * n !) *
       ∫ u : ℝ in Ioi 0, besselPolynomial (2 - 2 * lam : ℂ) m u *

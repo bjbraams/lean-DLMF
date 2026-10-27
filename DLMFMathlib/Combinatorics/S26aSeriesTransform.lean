@@ -5,10 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.SpecificLimits.Normed
 public import Mathlib.Analysis.Analytic.Binomial
-public import Mathlib.Topology.Algebra.InfiniteSum.Real
-public import Mathlib.Data.Nat.Choose.Central
 
 /-!
 # Real generating functions of Catalan-type transforms
@@ -95,7 +92,7 @@ theorem s26a_hasSum_transform (c : ℕ → ℝ) {e : ℕ} (he : 1 ≤ e) {b x g 
   rw [ite_eq_right (by nlinarith)]; simp
 
 /-- The generalized binomial coefficient recursion over `ℝ`. -/
-theorem s26a_ringChoose_succ (a : ℝ) (n : ℕ) :
+lemma s26a_ringChoose_succ (a : ℝ) (n : ℕ) :
     Ring.choose a (n + 1) = Ring.choose a n * (a - n) / (n + 1) := by
   rw [Ring.choose_eq_smul, Ring.choose_eq_smul, ← Polynomial.aeval_eq_smeval,
     ← Polynomial.aeval_eq_smeval, Polynomial.aeval_def, Polynomial.aeval_def,
@@ -106,7 +103,7 @@ theorem s26a_ringChoose_succ (a : ℝ) (n : ℕ) :
   field_simp
 
 /-- `binom(-1/2, n) (-4)ⁿ = C(2n, n)`. -/
-theorem s26a_ringChoose_neg_half (n : ℕ) :
+lemma s26a_ringChoose_neg_half (n : ℕ) :
     Ring.choose (-1 / 2 : ℝ) n * (-4) ^ n = (2 * n).choose n := by
   induction n with
   | zero => simp

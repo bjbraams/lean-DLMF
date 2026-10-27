@@ -27,12 +27,12 @@ noncomputable section
 namespace DLMF.Confluent
 
 /-- The denominator of the fractional linear map has positive real part on the unit disk. -/
-lemma re_one_sub_pos_of_norm_lt_one {w : ℂ} (hw : ‖w‖ < 1) : 0 < (1 - w).re := by
+theorem re_one_sub_pos_of_norm_lt_one {w : ℂ} (hw : ‖w‖ < 1) : 0 < (1 - w).re := by
   simp only [sub_re, one_re]
   linarith [re_le_norm w]
 
 /-- A right-half-plane center stays on the principal branch under the disk map. -/
-lemma div_one_sub_mem_slitPlane {x w : ℂ} (hx : 0 < x.re) (hw : ‖w‖ < 1) :
+theorem div_one_sub_mem_slitPlane {x w : ℂ} (hx : 0 < x.re) (hw : ‖w‖ < 1) :
     x / (1 - w) ∈ slitPlane := by
   have hr := re_one_sub_pos_of_norm_lt_one hw
   have hd : 1 - w ≠ 0 := by intro h; simp [h] at hr
@@ -45,7 +45,7 @@ lemma div_one_sub_mem_slitPlane {x w : ℂ} (hx : 0 < x.re) (hw : ‖w‖ < 1) :
 
 /-- A contiguous differential relation yields a convergent Taylor expansion on the unit disk.
 The coefficient recurrence permits zeros, so terminating numerator parameters are retained. -/
-lemma mobius_taylor (F : ℕ → ℂ → ℂ) (C : ℕ → ℂ) (s x : ℂ)
+theorem mobius_taylor (F : ℕ → ℂ → ℂ) (C : ℕ → ℂ) (s x : ℂ)
     (hC0 : C 0 = 1)
     (hF : ∀ n w, ‖w‖ < 1 → DifferentiableAt ℂ (F n) (x / (1 - w)))
     (hstep : ∀ n w, ‖w‖ < 1 →
@@ -97,7 +97,7 @@ lemma mobius_taylor (F : ℕ → ℂ → ℂ) (C : ℕ → ℂ) (s x : ℂ)
   ring
 
 /-- First-parameter Kummer M expansion in the disk coordinate; no cut restriction on `x`. -/
-lemma kummerM_mobius_taylor {a b x v : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (hv : ‖v‖ < 1) :
+theorem kummerM_mobius_taylor {a b x v : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (hv : ‖v‖ < 1) :
     (1 - v) ^ (-a) * kummerM a b (x / (1 - v)) =
       ∑' n : ℕ, poch a n * kummerM (a + n) b x / n.factorial * v ^ n := by
   simpa only [Nat.cast_zero, add_zero] using
@@ -110,7 +110,7 @@ lemma kummerM_mobius_taylor {a b x v : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (hv : �
         linear_combination (poch a n) * h) hv)
 
 /-- First-parameter Tricomi U expansion in the disk coordinate. -/
-lemma kummerU_mobius_taylor (a b : ℂ) {x v : ℂ} (hx : 0 < x.re) (hv : ‖v‖ < 1) :
+theorem kummerU_mobius_taylor (a b : ℂ) {x v : ℂ} (hx : 0 < x.re) (hv : ‖v‖ < 1) :
     (1 - v) ^ (-a) * kummerU a b (x / (1 - v)) =
       ∑' n : ℕ, poch a n * poch (1 + a - b) n * kummerU (a + n) b x /
         n.factorial * v ^ n := by
@@ -127,7 +127,7 @@ lemma kummerU_mobius_taylor (a b : ℂ) {x v : ℂ} (hx : 0 < x.re) (hv : ‖v�
         linear_combination (poch a n * poch (1 + a - b) n * (a + n)) * h1) hv)
 
 /-- The addition hypotheses put `y/(x+y)` strictly inside the unit disk. -/
-lemma norm_div_add_lt_one {x y : ℂ} (hx : x ≠ 0) (hxy : x + y ≠ 0)
+theorem norm_div_add_lt_one {x y : ℂ} (hx : x ≠ 0) (hxy : x + y ≠ 0)
     (hy : -1 / 2 < (y / x).re) : ‖y / (x + y)‖ < 1 := by
   have hu : ‖y / x‖ < ‖1 + y / x‖ := by
     apply (sq_lt_sq₀ (norm_nonneg _) (norm_nonneg _)).mp
@@ -139,7 +139,7 @@ lemma norm_div_add_lt_one {x y : ℂ} (hx : x ≠ 0) (hxy : x + y ≠ 0)
   exact (div_lt_one (lt_of_le_of_lt (norm_nonneg _) hu)).mpr hu
 
 /-- Undo the fractional linear coordinate, including its principal power prefactor. -/
-lemma of_mobius_taylor {F : ℕ → ℂ → ℂ} {C : ℕ → ℂ} {s x y : ℂ}
+theorem of_mobius_taylor {F : ℕ → ℂ → ℂ} {C : ℕ → ℂ} {s x y : ℂ}
     (hx : x ≠ 0) (hxy : x + y ≠ 0)
     (ht : (1 - y / (x + y)) ^ (-s) * F 0 (x / (1 - y / (x + y))) =
       ∑' n : ℕ, C n * F n x / n.factorial * (y / (x + y)) ^ n) :
@@ -159,7 +159,7 @@ lemma of_mobius_taylor {F : ℕ → ℂ → ℂ} {C : ℕ → ℂ} {s x y : ℂ}
   ring
 
 /-- Exponentially weighted first-parameter Tricomi expansion in the disk coordinate. -/
-lemma kummerU_exp_mobius_taylor (a b : ℂ) {x v : ℂ} (hx : 0 < x.re) (hv : ‖v‖ < 1) :
+theorem kummerU_exp_mobius_taylor (a b : ℂ) {x v : ℂ} (hx : 0 < x.re) (hv : ‖v‖ < 1) :
     (1 - v) ^ (-(b - a)) * (exp (-(x / (1 - v))) * kummerU a b (x / (1 - v))) =
       ∑' n : ℕ, (-1 : ℂ) ^ n * (exp (-x) * kummerU (a - n) b x) / n.factorial * v ^ n := by
   simpa only [Nat.cast_zero, sub_zero] using
@@ -182,7 +182,7 @@ lemma kummerU_exp_mobius_taylor (a b : ℂ) {x v : ℂ} (hx : 0 < x.re) (hv : �
           ((-1 : ℂ) ^ n * exp (-(x / (1 - w))) * (x / (1 - w))) * h2) hv)
 
 /-- Exponentially weighted first-parameter Kummer M expansion in the disk coordinate. -/
-lemma kummerM_exp_mobius_taylor {a b x v : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (hv : ‖v‖ < 1) :
+theorem kummerM_exp_mobius_taylor {a b x v : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (hv : ‖v‖ < 1) :
     (1 - v) ^ (-(b - a)) * (exp (-(x / (1 - v))) * kummerM a b (x / (1 - v))) =
       ∑' n : ℕ, poch (b - a) n * (exp (-x) * kummerM (a - n) b x) / n.factorial * v ^ n := by
   simpa only [Nat.cast_zero, sub_zero] using

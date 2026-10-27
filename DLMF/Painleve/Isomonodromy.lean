@@ -7,8 +7,7 @@ module
 
 public import DLMF.Painleve.Defs
 public import DLMF.Airy.Basic
-public import Mathlib.MeasureTheory.Integral.Bochner.Basic
-public import Mathlib.Analysis.Asymptotics.AsymptoticEquivalent
+public import DLMF.Painleve.Basic
 
 /-!
 # Isomonodromy problems and the integral equation: DLMF §§32.4–32.5
@@ -165,7 +164,32 @@ theorem painleveIII_lax_system_of_compatibility (θinf z u₀ u₁ v₀ v₁ du�
         painleveIIILaxA θinf z u₀ u₁ v₀ v₁ l * painleveIIILaxB z u₀ u₁ v₀ v₁ l -
         painleveIIILaxB z u₀ u₁ v₀ v₁ l * painleveIIILaxA θinf z u₀ u₁ v₀ v₁ l = 0) :
     (du₀, du₁, dv₀, dv₁) = painleveIIISystemRhs θinf z u₀ u₁ v₀ v₁ := by
-  sorry
+  have E (l : ℂ) (hl : l ≠ 0) (i j : Fin 2) := congrFun (congrFun (h l hl) i) j
+  have a00 := E 1 one_ne_zero 0 0
+  have a01 := E 1 one_ne_zero 0 1
+  have b01 := E 2 two_ne_zero 0 1
+  have a10 := E 1 one_ne_zero 1 0
+  have b10 := E 2 two_ne_zero 1 0
+  simp [painleveIIILaxMDeriv, painleveIIILaxA, painleveIIILaxB,
+      painleveIIILaxM] at a00 a01 b01 a10 b10
+  field_simp at a00 a01 b01 a10 b10
+  have g0 : du₀ * z - (θinf * u₀ - v₀ * v₁ * z) = 0 := by
+    linear_combination (-1 / 8 : ℂ) * a01 + (1 / 8 : ℂ) * b01
+  have g1 : v₁ * (du₁ * 2 * v₁ * z - (-2 * θinf * u₁ * v₁ - 2 * v₀ * z + z ^ 2)) = 0 := by
+    linear_combination (-1 / 8 : ℂ) * a10 + (1 / 8 : ℂ) * b10
+  have g2 : dv₀ * v₁ * z - (2 * u₀ * v₀ - u₀ * z + 2 * u₁ * v₀ * v₁ ^ 2 + v₀ * v₁) = 0 := by
+    linear_combination (1 / 32 : ℂ) * a00
+  have g3 : z * (dv₁ * z - (-θinf * v₁ + 2 * u₀ - 2 * u₁ * v₁ ^ 2)) = 0 := by
+    linear_combination (-1 / 8 : ℂ) * a00 + (-1 / 2 : ℂ) * a01 + (1 / 4 : ℂ) * b01 +
+      (1 / 4 : ℂ) * a10 + (-1 / 8 : ℂ) * b10
+  have g1' := (mul_eq_zero.mp g1).resolve_left hv
+  have g3' := (mul_eq_zero.mp g3).resolve_left hz
+  simp only [painleveIIISystemRhs, Prod.mk.injEq]
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · field_simp; linear_combination g0
+  · field_simp; linear_combination g1'
+  · field_simp; linear_combination g2
+  · field_simp; linear_combination g3'
 
 /-- DLMF 32.4.14: along a solution of 32.4.10–32.4.13 on an open set (with `z, v₀, v₁ ≠ 0`),
 `w = -u₀/(v₀v₁)` satisfies `zw' = (4v₀ - z)w² + (2θ∞ - 1)w + z`. -/
@@ -229,7 +253,34 @@ theorem painleveIII_lax_isPainleveIIIOn {θinf θ₀ : ℂ} {u₀ u₁ v₀ v₁
     (hθ : ∀ z ∈ U, 4 * v₀ z / z * (θinf * (1 - z / (4 * v₀ z)) +
       (z - 2 * v₀ z) / (2 * v₀ z * v₁ z) * u₀ z + u₁ z * v₁ z) = θ₀) :
     IsPainleveIIIOn (2 * θ₀) (2 * (1 - θinf)) 1 (-1) (fun z => -u₀ z / (v₀ z * v₁ z)) U := by
-  sorry
+  refine ⟨isODE2SolutionOn_of_hasDerivAt hU (v := fun z => ((4 * v₀ z - z) *
+      (-u₀ z / (v₀ z * v₁ z)) ^ 2 + (2 * θinf - 1) * (-u₀ z / (v₀ z * v₁ z)) + z) / z)
+    (fun z hz' => painleveIII_lax_riccati (hz z hz') (hv₀ z hz') (hv₁ z hz') (hu₀' z hz')
+      (hv₀' z hz') (hv₁' z hz')) (fun z hz' => ?_), hz,
+    fun z hz' => div_ne_zero (neg_ne_zero.mpr (hu₀ z hz')) (mul_ne_zero (hv₀ z hz') (hv₁ z hz'))⟩
+  have hid := hasDerivAt_id z
+  have h0 := hz z hz'
+  have a0 := hu₀ z hz'
+  have b0 := hv₀ z hz'
+  have b1 := hv₁ z hz'
+  have hw := (hu₀' z hz').neg.div ((hv₀' z hz').mul (hv₁' z hz')) (mul_ne_zero b0 b1)
+  have hd := (((((hv₀' z hz').const_mul 4).sub hid).mul (hw.pow 2)).add
+    (hw.const_mul (2 * θinf - 1))).add hid |>.div hid h0
+  convert hd using 1
+  · funext x
+    simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply,
+      Pi.div_apply, id]
+  · rw [← hθ z hz']
+    simp only [Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.neg_apply,
+      Pi.div_apply, id, painleveIIIRhs, painleveIIISystemRhs]
+    generalize u₀ z = a at a0 ⊢
+    generalize v₀ z = b at b0 ⊢
+    generalize v₁ z = c at b1 ⊢
+    generalize u₁ z = d
+    field_simp
+    ring_nf
+    field_simp
+    ring
 
 /-! ## The integral equation (§32.5) -/
 

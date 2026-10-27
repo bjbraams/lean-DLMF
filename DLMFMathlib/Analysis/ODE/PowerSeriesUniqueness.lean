@@ -5,12 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
-public import Mathlib.Analysis.Calculus.ContDiff.Deriv
-public import Mathlib.Analysis.Calculus.FDeriv.Analytic
 public import Mathlib.Analysis.Calculus.Deriv.Prod
 public import Mathlib.Analysis.Analytic.Order
-public import Mathlib.Analysis.Analytic.Uniqueness
 public import Mathlib.Analysis.ODE.ExistUnique
 
 /-!

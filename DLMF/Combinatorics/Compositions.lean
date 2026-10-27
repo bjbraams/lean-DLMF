@@ -9,7 +9,6 @@ public import Mathlib.Combinatorics.Enumerative.Composition
 public import Mathlib.Analysis.SpecificLimits.Normed
 public import Mathlib.Analysis.Complex.Basic
 public import Mathlib.Data.Nat.Fib.Basic
-public import Mathlib.Tactic.CrossRefAttribute
 
 /-!
 # Integer partitions: compositions (DLMF §26.11)

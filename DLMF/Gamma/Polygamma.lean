@@ -5,25 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Gamma.Digamma
 public import DLMF.Gamma.Asymptotics
-public import DLMF.Gamma.SpecialValues
-public import Mathlib.Analysis.SpecialFunctions.Gamma.Digamma
 public import Mathlib.NumberTheory.LSeries.RiemannZeta
-public import Mathlib.NumberTheory.ZetaValues
-public import Mathlib.NumberTheory.Bernoulli
-public import Mathlib.Analysis.Asymptotics.Lemmas
-public import Mathlib.Analysis.Complex.CauchyIntegral
-public import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
-public import Mathlib.Analysis.Calculus.Deriv.ZPow
-public import Mathlib.Topology.Instances.Nat
 public import DLMF.Hypergeometric.Continuation
-public import Mathlib.Topology.Instances.Int
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Complex
 public import Mathlib.Analysis.Complex.SummableUniformlyOn
-public import Mathlib.Topology.Algebra.InfiniteSum.TsumUniformlyOn
-public import Mathlib.Analysis.Normed.Module.Connected
-public import Mathlib.Analysis.SumOverResidueClass
 
 /-!
 # Polygamma functions (DLMF §5.15)
@@ -86,18 +71,18 @@ theorem trigamma_nat_sub_half (n : ℕ) (hn : 1 ≤ n) :
     ring
 
 /-- The complement of the nonpositive integers is open in `ℂ`. -/
-lemma isOpen_not_neg_nat : IsOpen {s : ℂ | ∀ m : ℕ, s ≠ -(m : ℂ)} :=
+theorem isOpen_not_neg_nat : IsOpen {s : ℂ | ∀ m : ℕ, s ≠ -(m : ℂ)} :=
   DLMF.Hypergeometric.isOpen_not_neg_nat
 
 /-- `Γ` is analytic away from the nonpositive integers. -/
-lemma analyticAt_Gamma {s : ℂ} (hs : ∀ m : ℕ, s ≠ -(m : ℂ)) :
+theorem analyticAt_Gamma {s : ℂ} (hs : ∀ m : ℕ, s ≠ -(m : ℂ)) :
     AnalyticAt ℂ Complex.Gamma s := by
   rw [Complex.analyticAt_iff_eventually_differentiableAt]
   filter_upwards [isOpen_not_neg_nat.mem_nhds hs] with w hw
   exact Complex.differentiableAt_Gamma w hw
 
 /-- `ψ` is analytic away from the nonpositive integers. -/
-lemma analyticAt_digamma {s : ℂ} (hs : ∀ m : ℕ, s ≠ -(m : ℂ)) :
+theorem analyticAt_digamma {s : ℂ} (hs : ∀ m : ℕ, s ≠ -(m : ℂ)) :
     AnalyticAt ℂ Complex.digamma s := by
   have hG := analyticAt_Gamma hs
   exact hG.deriv.div hG (Complex.Gamma_ne_zero hs)
@@ -108,18 +93,18 @@ lemma analyticAt_digamma {s : ℂ} (hs : ∀ m : ℕ, s ≠ -(m : ℂ)) :
 def cDigammaTerm (n : ℕ) (z : ℂ) : ℂ := 1 / (n + 1) - 1 / (z + n)
 
 /-- `z + n ≠ 0` when `z` is not a nonpositive integer. -/
-lemma add_nat_ne_zero_of_not_neg_nat {z : ℂ} (hz : ∀ m : ℕ, z ≠ -(m : ℂ)) (n : ℕ) :
+theorem add_nat_ne_zero_of_not_neg_nat {z : ℂ} (hz : ∀ m : ℕ, z ≠ -(m : ℂ)) (n : ℕ) :
     z + n ≠ 0 := fun h => hz n (eq_neg_of_add_eq_zero_left h)
 
 /-- `‖z + n‖ ≥ n / 2` once `n ≥ 2 ‖z‖`. -/
-lemma half_le_norm_add_nat {z : ℂ} {R : ℝ} (hz : ‖z‖ ≤ R) {n : ℕ} (hn : 2 * R ≤ n) :
+theorem half_le_norm_add_nat {z : ℂ} {R : ℝ} (hz : ‖z‖ ≤ R) {n : ℕ} (hn : 2 * R ≤ n) :
     (n : ℝ) / 2 ≤ ‖z + n‖ := by
   have h := norm_sub_norm_le (n : ℂ) (-z)
   rw [sub_neg_eq_add, norm_neg, Complex.norm_natCast, add_comm] at h
   linarith
 
 /-- A uniform `O(1/n²)` bound for the digamma series terms on `‖z‖ ≤ R`. -/
-lemma norm_cDigammaTerm_le {z : ℂ} {R : ℝ} (hz : ‖z‖ ≤ R) {n : ℕ} (hn : 2 * R ≤ n)
+theorem norm_cDigammaTerm_le {z : ℂ} {R : ℝ} (hz : ‖z‖ ≤ R) {n : ℕ} (hn : 2 * R ≤ n)
     (hn1 : 1 ≤ n) : ‖cDigammaTerm n z‖ ≤ 2 * (R + 1) * (1 / (n : ℝ) ^ 2) := by
   have hR : 0 ≤ R := (norm_nonneg z).trans hz
   have hnpos : (0 : ℝ) < n := by exact_mod_cast hn1
@@ -146,18 +131,18 @@ lemma norm_cDigammaTerm_le {z : ℂ} {R : ℝ} (hz : ‖z‖ ≤ R) {n : ℕ} (h
 abbrev notNegNat : Set ℂ := {s : ℂ | ∀ m : ℕ, s ≠ -(m : ℂ)}
 
 /-- Compact subsets of `ℂ` are bounded in norm. -/
-lemma exists_norm_le_of_isCompact {K : Set ℂ} (hK : IsCompact K) : ∃ R : ℝ, ∀ z ∈ K, ‖z‖ ≤ R := by
+theorem exists_norm_le_of_isCompact {K : Set ℂ} (hK : IsCompact K) : ∃ R : ℝ, ∀ z ∈ K, ‖z‖ ≤ R := by
   obtain ⟨R, hR⟩ := hK.isBounded.exists_norm_le
   exact ⟨R, hR⟩
 
 /-- Cofinitely many `n` satisfy `2R ≤ n` and `1 ≤ n`. -/
-lemma eventually_two_mul_le_nat (R : ℝ) : ∀ᶠ n : ℕ in cofinite, 2 * R ≤ n ∧ 1 ≤ n := by
+theorem eventually_two_mul_le_nat (R : ℝ) : ∀ᶠ n : ℕ in cofinite, 2 * R ≤ n ∧ 1 ≤ n := by
   rw [Nat.cofinite_eq_atTop]
   filter_upwards [eventually_ge_atTop (⌈2 * R⌉₊ + 1)] with n hn
   refine ⟨(Nat.le_ceil _).trans (by exact_mod_cast (Nat.le_succ _).trans hn), by omega⟩
 
 /-- The digamma series converges locally uniformly off the poles. -/
-lemma summableLocallyUniformlyOn_cDigammaTerm :
+theorem summableLocallyUniformlyOn_cDigammaTerm :
     SummableLocallyUniformlyOn cDigammaTerm notNegNat := by
   apply SummableLocallyUniformlyOn.of_locally_bounded_eventually
     DLMF.Gamma.isOpen_not_neg_nat
@@ -169,11 +154,11 @@ lemma summableLocallyUniformlyOn_cDigammaTerm :
   exact norm_cDigammaTerm_le (hR z hz) hn.1 hn.2
 
 /-- The digamma series converges off the poles. -/
-lemma summable_cDigammaTerm {z : ℂ} (hz : z ∈ notNegNat) : Summable (cDigammaTerm · z) :=
+theorem summable_cDigammaTerm {z : ℂ} (hz : z ∈ notNegNat) : Summable (cDigammaTerm · z) :=
   summableLocallyUniformlyOn_cDigammaTerm.summable hz
 
 /-- Each digamma series term is differentiable off the poles. -/
-lemma differentiableAt_cDigammaTerm (n : ℕ) {z : ℂ} (hz : z ∈ notNegNat) :
+theorem differentiableAt_cDigammaTerm (n : ℕ) {z : ℂ} (hz : z ∈ notNegNat) :
     DifferentiableAt ℂ (cDigammaTerm n) z := by
   unfold cDigammaTerm
   have := add_nat_ne_zero_of_not_neg_nat hz n
@@ -183,12 +168,12 @@ lemma differentiableAt_cDigammaTerm (n : ℕ) {z : ℂ} (hz : z ∈ notNegNat) :
 def cDigammaSeries (z : ℂ) : ℂ := -Real.eulerMascheroniConstant + ∑' n, cDigammaTerm n z
 
 /-- The digamma series is holomorphic off the poles. -/
-lemma differentiableOn_cDigammaSeries : DifferentiableOn ℂ cDigammaSeries notNegNat :=
+theorem differentiableOn_cDigammaSeries : DifferentiableOn ℂ cDigammaSeries notNegNat :=
   (differentiableOn_const _).add (summableLocallyUniformlyOn_cDigammaTerm.differentiableOn
     DLMF.Gamma.isOpen_not_neg_nat fun n _ hr => differentiableAt_cDigammaTerm n hr)
 
 /-- The complement of the nonpositive integers is preconnected. -/
-lemma isPreconnected_notNegNat : IsPreconnected notNegNat := by
+theorem isPreconnected_notNegNat : IsPreconnected notNegNat := by
   have : notNegNat = (Set.range fun m : ℕ => -(m : ℂ))ᶜ := by
     ext s; simp [eq_comm]
   rw [this]
@@ -196,12 +181,12 @@ lemma isPreconnected_notNegNat : IsPreconnected notNegNat := by
     (rank_real_complex ▸ Nat.one_lt_ofNat)).isConnected.isPreconnected
 
 /-- Positive reals are not poles of `Γ`. -/
-lemma ofReal_mem_notNegNat {x : ℝ} (hx : 0 < x) : (x : ℂ) ∈ notNegNat := fun m h => by
+theorem ofReal_mem_notNegNat {x : ℝ} (hx : 0 < x) : (x : ℂ) ∈ notNegNat := fun m h => by
   have : x = -(m : ℝ) := by exact_mod_cast h
   linarith [(Nat.cast_nonneg m : (0 : ℝ) ≤ m)]
 
 /-- The complex digamma function extends the real one. -/
-lemma digamma_ofReal {x : ℝ} (hx : 0 < x) : Complex.digamma x = Real.digamma x := by
+theorem digamma_ofReal {x : ℝ} (hx : 0 < x) : Complex.digamma x = Real.digamma x := by
   have hG : DifferentiableAt ℂ Complex.Gamma x :=
     Complex.differentiableAt_Gamma _ (ofReal_mem_notNegNat hx)
   have hGr : DifferentiableAt ℝ Real.Gamma x :=
@@ -216,7 +201,7 @@ lemma digamma_ofReal {x : ℝ} (hx : 0 < x) : Complex.digamma x = Real.digamma x
   push_cast; rfl
 
 /-- The complex digamma series extends the real one. -/
-lemma cDigammaSeries_ofReal {x : ℝ} (hx : 0 < x) : cDigammaSeries x = Real.digamma x := by
+theorem cDigammaSeries_ofReal {x : ℝ} (hx : 0 < x) : cDigammaSeries x = Real.digamma x := by
   rw [Real.digamma_eq_tsum hx, cDigammaSeries]
   push_cast
   congr 2
@@ -241,7 +226,7 @@ theorem digamma_eq_cDigammaSeries {z : ℂ} (hz : z ∈ notNegNat) :
 
 
 /-- Higher derivatives of a digamma series term. -/
-lemma iteratedDeriv_cDigammaTerm {k : ℕ} (hk : 1 ≤ k) (n : ℕ) :
+theorem iteratedDeriv_cDigammaTerm {k : ℕ} (hk : 1 ≤ k) (n : ℕ) :
     iteratedDeriv k (cDigammaTerm n) =
       fun w => -((-1 : ℂ) ^ k * (k ! : ℂ) * (w + n) ^ (-1 - k : ℤ)) := by
   funext w
@@ -254,7 +239,7 @@ lemma iteratedDeriv_cDigammaTerm {k : ℕ} (hk : 1 ≤ k) (n : ℕ) :
 
 
 /-- Higher derivatives of a digamma series term within the pole complement. -/
-lemma iteratedDerivWithin_cDigammaTerm {k : ℕ} (hk : 1 ≤ k) (n : ℕ) {w : ℂ}
+theorem iteratedDerivWithin_cDigammaTerm {k : ℕ} (hk : 1 ≤ k) (n : ℕ) {w : ℂ}
     (hw : w ∈ notNegNat) :
     iteratedDerivWithin k (cDigammaTerm n) notNegNat w =
       -((-1 : ℂ) ^ k * (k ! : ℂ) * (w + n) ^ (-1 - k : ℤ)) := by
@@ -262,7 +247,7 @@ lemma iteratedDerivWithin_cDigammaTerm {k : ℕ} (hk : 1 ≤ k) (n : ℕ) {w : �
     iteratedDeriv_cDigammaTerm hk]
 
 /-- Differentiability of the derivatives of the digamma series terms. -/
-lemma differentiableAt_iteratedDerivWithin_cDigammaTerm (k n : ℕ) {r : ℂ}
+theorem differentiableAt_iteratedDerivWithin_cDigammaTerm (k n : ℕ) {r : ℂ}
     (hr : r ∈ notNegNat) :
     DifferentiableAt ℂ (iteratedDerivWithin k (cDigammaTerm n) notNegNat) r := by
   have hU := DLMF.Gamma.isOpen_not_neg_nat
@@ -277,7 +262,7 @@ lemma differentiableAt_iteratedDerivWithin_cDigammaTerm (k n : ℕ) {r : ℂ}
     fun_prop (disch := simp [this])
 
 /-- The differentiated digamma series converge locally uniformly off the poles. -/
-lemma summableLocallyUniformlyOn_iteratedDerivWithin_cDigammaTerm {k : ℕ} (hk : 1 ≤ k) :
+theorem summableLocallyUniformlyOn_iteratedDerivWithin_cDigammaTerm {k : ℕ} (hk : 1 ≤ k) :
     SummableLocallyUniformlyOn
       (fun n => iteratedDerivWithin k (cDigammaTerm n) notNegNat) notNegNat := by
   apply SummableLocallyUniformlyOn.of_locally_bounded_eventually
@@ -319,7 +304,7 @@ theorem polygamma_eq_tsum {n : ℕ} (hn : 0 < n) {z : ℂ} (hz : z ∈ notNegNat
 
 
 /-- `∑ (w + k)^{-1-n}` converges for `n ≥ 1` off the poles. -/
-lemma summable_add_nat_zpow {n : ℕ} (hn : 0 < n) {w : ℂ} (hw : w ∈ notNegNat) :
+theorem summable_add_nat_zpow {n : ℕ} (hn : 0 < n) {w : ℂ} (hw : w ∈ notNegNat) :
     Summable fun k : ℕ => (w + k) ^ (-1 - n : ℤ) := by
   have h := (summableLocallyUniformlyOn_iteratedDerivWithin_cDigammaTerm hn).summable hw
   simp_rw [iteratedDerivWithin_cDigammaTerm hn _ hw] at h
@@ -331,19 +316,19 @@ lemma summable_add_nat_zpow {n : ℕ} (hn : 0 < n) {w : ℂ} (hw : w ∈ notNegN
   rw [mul_assoc _ ((-1 : ℂ) ^ n), inv_mul_cancel₀ hc, one_mul]
 
 /-- `a^{-1-n} = 1/a^{n+1}`. -/
-lemma zpow_neg_one_sub_nat_eq (a : ℂ) (n : ℕ) :
+theorem zpow_neg_one_sub_nat_eq (a : ℂ) (n : ℕ) :
     a ^ (-1 - n : ℤ) = 1 / a ^ (n + 1) := by
   rw [show (-1 - n : ℤ) = -((n + 1 : ℕ) : ℤ) by push_cast; ring, zpow_neg, zpow_natCast,
     one_div]
 
 /-- `∑ 1/k^p` converges in `ℂ` for `p > 1`. -/
-lemma summable_one_div_nat_pow_complex {p : ℕ} (hp : 1 < p) :
+theorem summable_one_div_nat_pow_complex {p : ℕ} (hp : 1 < p) :
     Summable fun k : ℕ => 1 / (k : ℂ) ^ p := by
   refine Summable.of_norm ?_
   simpa using Real.summable_one_div_nat_pow.mpr hp
 
 /-- `ζ(p) = ∑ 1/(k+1)^p` for natural `p > 1`. -/
-lemma riemannZeta_nat_eq_tsum_succ {p : ℕ} (hp : 1 < p) :
+theorem riemannZeta_nat_eq_tsum_succ {p : ℕ} (hp : 1 < p) :
     riemannZeta p = ∑' k : ℕ, 1 / ((k : ℂ) + 1) ^ p := by
   rw [zeta_nat_eq_tsum_of_gt_one hp, (summable_one_div_nat_pow_complex hp).tsum_eq_zero_add]
   simp [Nat.cast_add_one, zero_pow (by omega : p ≠ 0)]
@@ -418,7 +403,7 @@ theorem polygamma_add_one (n : ℕ) {z : ℂ} (hz : ∀ k : ℕ, z ≠ -k) :
     show (-(n + 1 : ℕ) : ℂ) = ((-1 - n : ℤ) : ℂ) by push_cast; ring, Complex.cpow_intCast]
 
 /-- The complement of the integers is open in `ℂ`. -/
-lemma isOpen_not_int : IsOpen {s : ℂ | ∀ k : ℤ, s ≠ (k : ℂ)} := by
+theorem isOpen_not_int : IsOpen {s : ℂ | ∀ k : ℤ, s ≠ (k : ℂ)} := by
   have hce : Topology.IsClosedEmbedding (fun k : ℤ => ((k : ℝ) : ℂ)) :=
     Complex.isometry_ofReal.isClosedEmbedding.comp Int.isClosedEmbedding_coe_real
   have hset : {s : ℂ | ∀ k : ℤ, s ≠ (k : ℂ)} = (Set.range fun k : ℤ => ((k : ℝ) : ℂ))ᶜ := by
@@ -430,7 +415,7 @@ lemma isOpen_not_int : IsOpen {s : ℂ | ∀ k : ℤ, s ≠ (k : ℂ)} := by
   exact hce.isClosed_range.isOpen_compl
 
 /-- `cot (π w)` is smooth away from the integers. -/
-lemma contDiffAt_cot_pi_mul {n : ℕ} {z : ℂ} (hz : ∀ k : ℤ, z ≠ (k : ℂ)) :
+theorem contDiffAt_cot_pi_mul {n : ℕ} {z : ℂ} (hz : ∀ k : ℤ, z ≠ (k : ℂ)) :
     ContDiffAt ℂ n (fun w : ℂ => cot (π * w)) z := by
   have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
   have hsin : sin (π * z) ≠ 0 := by
@@ -520,7 +505,7 @@ from `Asymptotics.lean` then gives the series with an explicit remainder. -/
 
 open MeasureTheory Set
 
-lemma summable_recip_add_pow {n : ℕ} (hn : 1 ≤ n) {z : ℝ} (hz : 0 < z) :
+theorem summable_recip_add_pow {n : ℕ} (hn : 1 ≤ n) {z : ℝ} (hz : 0 < z) :
     Summable fun k : ℕ => ((z + k) ^ (n + 1))⁻¹ := by
   refine Summable.of_norm_bounded_eventually_nat (g := fun k : ℕ => 1 / (k : ℝ) ^ 2)
     (Real.summable_one_div_nat_pow.mpr one_lt_two) ?_
@@ -532,7 +517,7 @@ lemma summable_recip_add_pow {n : ℕ} (hn : 1 ≤ n) {z : ℝ} (hz : 0 < z) :
   calc (k : ℝ) ^ 2 ≤ (z + k) ^ 2 := by gcongr
     _ ≤ (z + k) ^ (n + 1) := pow_le_pow_right₀ (by linarith) (by omega)
 
-lemma integrableOn_exp_mul_pow_mul_binetBeta {z : ℝ} (hz : 0 < z) (n : ℕ) :
+theorem integrableOn_exp_mul_pow_mul_binetBeta {z : ℝ} (hz : 0 < z) (n : ℕ) :
     IntegrableOn (fun t => Real.exp (-z * t) * (t ^ n * binetBeta t)) (Ioi 0) := by
   refine Integrable.mono' ((integrableOn_exp_mul_pow hz n).const_mul (1 / 2)) ?_ ?_
   · exact ((by fun_prop : Continuous fun t => Real.exp (-z * t) * t ^ n).continuousOn.mul
@@ -548,7 +533,7 @@ lemma integrableOn_exp_mul_pow_mul_binetBeta {z : ℝ} (hz : 0 < z) (n : ℕ) :
     nlinarith [mul_pos he hp]
 
 /-- `n! ∑ₖ (z+k)^{-(n+1)} = (n-1)!/zⁿ + n!/(2z^{n+1}) + ∫₀^∞ e^{-zt} t^{n+1} β(t)/t dt`. -/
-lemma factorial_mul_tsum_recip_add_pow {n : ℕ} (hn : 1 ≤ n) {z : ℝ} (hz : 0 < z) :
+theorem factorial_mul_tsum_recip_add_pow {n : ℕ} (hn : 1 ≤ n) {z : ℝ} (hz : 0 < z) :
     (n.factorial : ℝ) * ∑' k : ℕ, ((z + k) ^ (n + 1))⁻¹ =
       (n - 1).factorial / z ^ n + n.factorial / (2 * z ^ (n + 1)) +
         ∫ t in Ioi (0 : ℝ), Real.exp (-z * t) * (t ^ (n + 1) * (binetBeta t / t)) := by
@@ -613,7 +598,7 @@ lemma factorial_mul_tsum_recip_add_pow {n : ℕ} (hn : 1 ≤ n) {z : ℝ} (hz : 
   field_simp
 
 /-- The remainder of the polygamma expansion. -/
-lemma abs_factorial_mul_tsum_sub_le {n : ℕ} (hn : 1 ≤ n) (m : ℕ) {z : ℝ} (hz : 0 < z) :
+theorem abs_factorial_mul_tsum_sub_le {n : ℕ} (hn : 1 ≤ n) (m : ℕ) {z : ℝ} (hz : 0 < z) :
     |(n.factorial : ℝ) * ∑' k : ℕ, ((z + k) ^ (n + 1))⁻¹ -
       ((n - 1).factorial / z ^ n + n.factorial / (2 * z ^ (n + 1)) +
         ∑ k ∈ Finset.Icc 1 m, (bernoulli (2 * k) : ℝ) / (2 * k).factorial *
@@ -646,7 +631,7 @@ lemma abs_factorial_mul_tsum_sub_le {n : ℕ} (hn : 1 ≤ n) (m : ℕ) {z : ℝ}
   rw [hsum, show ∀ A B C D : ℝ, A + B + C - (A + B + D) = C - D from fun A B C D => by ring, hI]
   exact abs_integral_exp_mul_pow_mul_rem_le hz m (n + 1)
 
-lemma isBigO_recip_add_pow {x : ℝ} (hx : 0 < x) (N : ℕ) (C : ℝ) :
+theorem isBigO_recip_add_pow {x : ℝ} (hx : 0 < x) (N : ℕ) (C : ℝ) :
     Asymptotics.IsBigO atTop (fun t : ℝ => C / (t + x) ^ N) (fun t : ℝ => t ^ (-(N : ℝ))) := by
   refine Asymptotics.IsBigO.of_bound |C| ?_
   filter_upwards [eventually_gt_atTop 0] with t ht

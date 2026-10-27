@@ -10,10 +10,7 @@ public import Mathlib.NumberTheory.LSeries.PrimesInAP
 public import Mathlib.NumberTheory.Harmonic.EulerMascheroni
 public import Mathlib.NumberTheory.LSeries.RiemannZeta
 public import Mathlib.NumberTheory.Harmonic.Bounds
-public import Mathlib.NumberTheory.ZetaValues
 public import Mathlib.NumberTheory.LSeries.HurwitzZetaValues
-public import Mathlib.Analysis.Real.Pi.Bounds
-public import Mathlib.NumberTheory.Chebyshev
 
 /-!
 # Asymptotic formulas: partial sums (DLMF §27.11)
@@ -48,11 +45,11 @@ section R27Helpers
 open scoped ArithmeticFunction.zeta
 
 /-- `range (N + 1) = {0} ∪ (0, N]`. -/
-theorem r27_range_eq_insert_Ioc (N : ℕ) : range (N + 1) = insert 0 (Ioc 0 N) := by
+lemma r27_range_eq_insert_Ioc (N : ℕ) : range (N + 1) = insert 0 (Ioc 0 N) := by
   ext n; simp only [mem_range, mem_insert, mem_Ioc]; omega
 
 /-- Tail bound: `|A - ∑_{d ≤ N} a(d)/d²| ≤ 2/(N+1)` when `|a| ≤ 1` and `∑ a(d)/d² = A`. -/
-theorem r27_tail_inv_sq {a : ℕ → ℝ} (ha : ∀ d, |a d| ≤ 1) {A : ℝ}
+lemma r27_tail_inv_sq {a : ℕ → ℝ} (ha : ∀ d, |a d| ≤ 1) {A : ℝ}
     (hA : HasSum (fun d : ℕ ↦ a d / (d : ℝ) ^ 2) A) (N : ℕ) :
     |A - ∑ d ∈ Ioc 0 N, a d / (d : ℝ) ^ 2| ≤ 2 / (N + 1) := by
   set f : ℕ → ℝ := fun d ↦ a d / (d : ℝ) ^ 2
@@ -89,7 +86,7 @@ theorem r27_tail_inv_sq {a : ℕ → ℝ} (ha : ∀ d, |a d| ≤ 1) {A : ℝ}
           _ ≤ 2 / (N + 1) := sum_Ioo_inv_sq_le N _
 
 /-- `∑_{d ≤ N} 1/d ≤ 1 + ln N`. -/
-theorem r27_sum_inv_le (N : ℕ) : ∑ d ∈ Ioc 0 N, ((d : ℝ))⁻¹ ≤ 1 + Real.log N := by
+lemma r27_sum_inv_le (N : ℕ) : ∑ d ∈ Ioc 0 N, ((d : ℝ))⁻¹ ≤ 1 + Real.log N := by
   have h := harmonic_le_one_add_log N
   rw [harmonic_eq_sum_Icc] at h
   have hI : Ioc 0 N = Icc 1 N := by ext; simp only [mem_Ioc, mem_Icc]; omega
@@ -98,7 +95,7 @@ theorem r27_sum_inv_le (N : ℕ) : ∑ d ∈ Ioc 0 N, ((d : ℝ))⁻¹ ≤ 1 + R
   exact h
 
 /-- `(N/d) - 1 < ⌊N/d⌋ ≤ N/d`. -/
-theorem r27_div_bounds (N d : ℕ) (hd : 0 < d) :
+lemma r27_div_bounds (N d : ℕ) (hd : 0 < d) :
     ((N / d : ℕ) : ℝ) ≤ (N : ℝ) / d ∧ (N : ℝ) / d < ((N / d : ℕ) : ℝ) + 1 := by
   have hd' : (0 : ℝ) < d := by exact_mod_cast hd
   constructor
@@ -109,7 +106,7 @@ theorem r27_div_bounds (N d : ℕ) (hd : 0 < d) :
     linarith
 
 /-- `∑_{m ≤ M} m = M(M+1)/2` in `ℝ`. -/
-theorem r27_sum_Ioc_id (M : ℕ) : ∑ m ∈ Ioc 0 M, (m : ℝ) = M * (M + 1) / 2 := by
+lemma r27_sum_Ioc_id (M : ℕ) : ∑ m ∈ Ioc 0 M, (m : ℝ) = M * (M + 1) / 2 := by
   induction M with
   | zero => simp
   | succ M ih =>
@@ -117,7 +114,7 @@ theorem r27_sum_Ioc_id (M : ℕ) : ∑ m ∈ Ioc 0 M, (m : ℝ) = M * (M + 1) / 
     push_cast; ring
 
 /-- Core estimate for `∑_{d ≤ N} a(d) T(⌊N/d⌋)`, `T(M) = M(M+1)/2`. -/
-theorem r27_sum_triangle_bound {a : ℕ → ℝ} (ha : ∀ d, |a d| ≤ 1) {A : ℝ}
+lemma r27_sum_triangle_bound {a : ℕ → ℝ} (ha : ∀ d, |a d| ≤ 1) {A : ℝ}
     (hA : HasSum (fun d : ℕ ↦ a d / (d : ℝ) ^ 2) A) {N : ℕ} (hN : 1 ≤ N) :
     |∑ d ∈ Ioc 0 N, a d * (((N / d : ℕ) : ℝ) * (((N / d : ℕ) : ℝ) + 1) / 2) - A * N ^ 2 / 2| ≤
       N * (2 + Real.log N) := by
@@ -167,7 +164,7 @@ theorem r27_sum_triangle_bound {a : ℕ → ℝ} (ha : ∀ d, |a d| ≤ 1) {A : 
     _ ≤ N * (2 + Real.log N) := by nlinarith
 
 /-- Core estimate for `∑_{d ≤ N} (a(d)/d) ⌊N/d⌋`. -/
-theorem r27_sum_floor_bound {a : ℕ → ℝ} (ha : ∀ d, |a d| ≤ 1) {A : ℝ}
+lemma r27_sum_floor_bound {a : ℕ → ℝ} (ha : ∀ d, |a d| ≤ 1) {A : ℝ}
     (hA : HasSum (fun d : ℕ ↦ a d / (d : ℝ) ^ 2) A) {N : ℕ} (hN : 1 ≤ N) :
     |∑ d ∈ Ioc 0 N, a d / d * ((N / d : ℕ) : ℝ) - A * N| ≤ 3 + Real.log N := by
   have hN' : (1 : ℝ) ≤ N := by exact_mod_cast hN
@@ -207,19 +204,19 @@ theorem r27_sum_floor_bound {a : ℕ → ℝ} (ha : ∀ d, |a d| ≤ 1) {A : ℝ
     _ = 3 + Real.log N := by ring
 
 /-- Converting a real bound to a complex `IsBigO`. -/
-theorem r27_isBigO_ofReal {u v : ℝ → ℝ} (c : ℝ) (h : ∀ᶠ x in atTop, |u x| ≤ c * |v x|) :
+lemma r27_isBigO_ofReal {u v : ℝ → ℝ} (c : ℝ) (h : ∀ᶠ x in atTop, |u x| ≤ c * |v x|) :
     (fun x ↦ (u x : ℂ)) =O[atTop] fun x ↦ (v x : ℂ) :=
   IsBigO.of_bound c (by simpa only [Complex.norm_real, Real.norm_eq_abs] using h)
 
 /-- `1 ≤ ln x` for `x ≥ 3`. -/
-theorem r27_one_le_log {x : ℝ} (hx : 3 ≤ x) : 1 ≤ Real.log x := by
+lemma r27_one_le_log {x : ℝ} (hx : 3 ≤ x) : 1 ≤ Real.log x := by
   rw [Real.le_log_iff_exp_le (by linarith)]
   have := Real.exp_one_lt_d9
   norm_num at this
   linarith
 
 /-- `∑_{n ≤ N} σ₁(n) = ∑_{d ≤ N} T(⌊N/d⌋)`. -/
-theorem r27_sum_sigma_one (N : ℕ) :
+lemma r27_sum_sigma_one (N : ℕ) :
     ∑ n ∈ Icc 1 N, (σ 1 n : ℝ) =
       ∑ d ∈ Ioc 0 N, (1 : ℝ) * (((N / d : ℕ) : ℝ) * (((N / d : ℕ) : ℝ) + 1) / 2) := by
   have h := sum_Ioc_mul_eq_sum_sum (ζ : ArithmeticFunction ℕ) (pow 1) N
@@ -237,7 +234,7 @@ theorem r27_sum_sigma_one (N : ℕ) :
     pow_one]
 
 /-- From `|S(N) - c N²| ≤ N(2 + ln N)` to `|S(⌊x⌋) - c x²| ≤ 8 x ln x`, `x ≥ 3`. -/
-theorem r27_quadratic_conversion {S : ℕ → ℝ} {c : ℝ} (hc0 : 0 ≤ c) (hc : c ≤ 2)
+lemma r27_quadratic_conversion {S : ℕ → ℝ} {c : ℝ} (hc0 : 0 ≤ c) (hc : c ≤ 2)
     (h : ∀ N : ℕ, 1 ≤ N → |S N - c * N ^ 2| ≤ N * (2 + Real.log N)) {x : ℝ} (hx : 3 ≤ x) :
     |S ⌊x⌋₊ - c * x ^ 2| ≤ 8 * |x * Real.log x| := by
   have hx0 : 0 ≤ x := by linarith
@@ -270,7 +267,7 @@ theorem r27_quadratic_conversion {S : ℕ → ℝ} {c : ℝ} (hc0 : 0 ≤ c) (hc
   constructor <;> linarith
 
 /-- From `|S(N) - c N| ≤ 3 + ln N` to `|S(⌊x⌋) - c x| ≤ 5 ln x`, `x ≥ 3`. -/
-theorem r27_linear_conversion {S : ℕ → ℝ} {c : ℝ} (hc0 : 0 ≤ c) (hc : c ≤ 1)
+lemma r27_linear_conversion {S : ℕ → ℝ} {c : ℝ} (hc0 : 0 ≤ c) (hc : c ≤ 1)
     (h : ∀ N : ℕ, 1 ≤ N → |S N - c * N| ≤ 3 + Real.log N) {x : ℝ} (hx : 3 ≤ x) :
     |S ⌊x⌋₊ - c * x| ≤ 5 * |Real.log x| := by
   have hx0 : 0 ≤ x := by linarith
@@ -290,7 +287,7 @@ theorem r27_linear_conversion {S : ℕ → ℝ} {c : ℝ} (hc0 : 0 ≤ c) (hc : 
   constructor <;> linarith
 
 /-- DLMF 27.11.4 (proof). -/
-theorem r27_sum_sigma_one_asymptotic :
+lemma r27_sum_sigma_one_asymptotic :
     HasPartialSumAsymptotic (fun n ↦ (σ 1 n : ℂ)) (fun x ↦ (π ^ 2 / 12 * x ^ 2 : ℝ))
       (fun x ↦ (x * Real.log x : ℝ)) := by
   unfold HasPartialSumAsymptotic
@@ -308,14 +305,14 @@ theorem r27_sum_sigma_one_asymptotic :
   convert hcore using 3; ring
 
 /-- `φ(n) = ∑_{ab = n} μ(a) b` in `ℝ`. -/
-theorem r27_totient_eq_sum (n : ℕ) (hn : 0 < n) :
+lemma r27_totient_eq_sum (n : ℕ) (hn : 0 < n) :
     (n.totient : ℝ) = ∑ x ∈ n.divisorsAntidiagonal, (μ x.1 : ℝ) * (x.2 : ℝ) := by
   have h := (sum_eq_iff_sum_mul_moebius_eq (R := ℝ) (f := fun n ↦ (n.totient : ℝ))
     (g := fun n ↦ (n : ℝ))).mp (fun n _ ↦ by exact_mod_cast Nat.sum_totient n) n hn
   exact h.symm
 
 /-- `∑ μ(d)/d² = 6/π²`. -/
-theorem r27_hasSum_moebius_div_sq :
+lemma r27_hasSum_moebius_div_sq :
     HasSum (fun d : ℕ ↦ (μ d : ℝ) / (d : ℝ) ^ 2) (6 / π ^ 2) := by
   have hs : 1 < (2 : ℂ).re := by norm_num
   have h1 := LSeries_one_mul_Lseries_moebius hs
@@ -337,7 +334,7 @@ theorem r27_hasSum_moebius_div_sq :
     field_simp
 
 /-- `∑_{n ≤ N} φ(n) = ∑_{d ≤ N} μ(d) T(⌊N/d⌋)`. -/
-theorem r27_sum_totient (N : ℕ) :
+lemma r27_sum_totient (N : ℕ) :
     ∑ n ∈ Icc 1 N, (n.totient : ℝ) =
       ∑ d ∈ Ioc 0 N, (μ d : ℝ) * (((N / d : ℕ) : ℝ) * (((N / d : ℕ) : ℝ) + 1) / 2) := by
   have h := sum_Ioc_mul_eq_sum_sum ((μ : ArithmeticFunction ℤ) : ArithmeticFunction ℝ)
@@ -362,7 +359,7 @@ theorem r27_sum_totient (N : ℕ) :
   simp [pow_apply, this]
 
 /-- `∑_{n ≤ N} φ(n)/n = ∑_{d ≤ N} (μ(d)/d) ⌊N/d⌋`. -/
-theorem r27_sum_totient_div (N : ℕ) :
+lemma r27_sum_totient_div (N : ℕ) :
     ∑ n ∈ Icc 1 N, (n.totient : ℝ) / n = ∑ d ∈ Ioc 0 N, (μ d : ℝ) / d * ((N / d : ℕ) : ℝ) := by
   let F : ArithmeticFunction ℝ := ⟨fun d ↦ (μ d : ℝ) / d, by simp⟩
   have h := sum_Ioc_mul_zeta_eq_sum F N
@@ -384,7 +381,7 @@ theorem r27_sum_totient_div (N : ℕ) :
   rfl
 
 /-- DLMF 27.11.6 (proof). -/
-theorem r27_sum_totient_asymptotic :
+lemma r27_sum_totient_asymptotic :
     HasPartialSumAsymptotic (fun n ↦ (n.totient : ℂ)) (fun x ↦ (3 / π ^ 2 * x ^ 2 : ℝ))
       (fun x ↦ (x * Real.log x : ℝ)) := by
   unfold HasPartialSumAsymptotic
@@ -404,7 +401,7 @@ theorem r27_sum_totient_asymptotic :
   convert hcore using 3; ring
 
 /-- DLMF 27.11.7 (proof). -/
-theorem r27_sum_totient_div_asymptotic :
+lemma r27_sum_totient_div_asymptotic :
     HasPartialSumAsymptotic (fun n ↦ (n.totient : ℂ) / n) (fun x ↦ (6 / π ^ 2 * x : ℝ))
       (fun x ↦ (Real.log x : ℂ)) := by
   unfold HasPartialSumAsymptotic
@@ -424,7 +421,7 @@ theorem r27_sum_totient_div_asymptotic :
   exact hcore
 
 /-- For `d > √N`, `⌊N/d⌋ = #{b ≤ √N : b d ≤ N}`. -/
-theorem s27_card_filter_mul_le (N m d : ℕ) (hm : N < (m + 1) * (m + 1)) (hd : m < d) :
+lemma s27_card_filter_mul_le (N m d : ℕ) (hm : N < (m + 1) * (m + 1)) (hd : m < d) :
     ((Ioc 0 m).filter (fun b ↦ b * d ≤ N)).card = N / d := by
   have : (Ioc 0 m).filter (fun b ↦ b * d ≤ N) = Ioc 0 (N / d) := by
     ext b
@@ -443,7 +440,7 @@ theorem s27_card_filter_mul_le (N m d : ℕ) (hm : N < (m + 1) * (m + 1)) (hd : 
   rw [this, Nat.card_Ioc, Nat.sub_zero]
 
 /-- For `b ≤ √N`, `#{√N < d ≤ N : b d ≤ N} = ⌊N/b⌋ - √N`. -/
-theorem s27_card_filter_mul_le' (N m b : ℕ) (hb : b ∈ Ioc 0 m) :
+lemma s27_card_filter_mul_le' (N m b : ℕ) (hb : b ∈ Ioc 0 m) :
     ((Ioc m N).filter (fun d ↦ b * d ≤ N)).card = N / b - m := by
   obtain ⟨hb0, hbm⟩ := mem_Ioc.mp hb
   have : (Ioc m N).filter (fun d ↦ b * d ≤ N) = Ioc m (N / b) := by
@@ -456,7 +453,7 @@ theorem s27_card_filter_mul_le' (N m b : ℕ) (hb : b ∈ Ioc 0 m) :
   rw [this, Nat.card_Ioc]
 
 /-- Dirichlet's hyperbola identity: `∑_{d ≤ N} ⌊N/d⌋ + m² = 2 ∑_{d ≤ m} ⌊N/d⌋`, `m = ⌊√N⌋`. -/
-theorem s27_hyperbola (N : ℕ) :
+lemma s27_hyperbola (N : ℕ) :
     ∑ d ∈ Ioc 0 N, N / d + N.sqrt * N.sqrt = 2 * ∑ d ∈ Ioc 0 N.sqrt, N / d := by
   set m := N.sqrt
   have hm1 : m * m ≤ N := Nat.sqrt_le N
@@ -488,7 +485,7 @@ theorem s27_hyperbola (N : ℕ) :
 
 
 /-- `0 ≤ H_n - ln n - γ ≤ 1/n` for `n ≥ 1`. -/
-theorem s27_harmonic_sub_bounds {n : ℕ} (hn : 1 ≤ n) :
+lemma s27_harmonic_sub_bounds {n : ℕ} (hn : 1 ≤ n) :
     0 ≤ ∑ d ∈ Ioc 0 n, ((d : ℝ))⁻¹ - Real.log n - Real.eulerMascheroniConstant ∧
       ∑ d ∈ Ioc 0 n, ((d : ℝ))⁻¹ - Real.log n - Real.eulerMascheroniConstant ≤ 1 / n := by
   have hH : ∑ d ∈ Ioc 0 n, ((d : ℝ))⁻¹ = harmonic n := by
@@ -508,7 +505,7 @@ theorem s27_harmonic_sub_bounds {n : ℕ} (hn : 1 ≤ n) :
   constructor <;> linarith
 
 /-- `0 ≤ ln N - 2 ln ⌊√N⌋ ≤ 3/⌊√N⌋` for `N ≥ 1`. -/
-theorem s27_log_sqrt_gap {N : ℕ} (hN : 1 ≤ N) :
+lemma s27_log_sqrt_gap {N : ℕ} (hN : 1 ≤ N) :
     0 ≤ Real.log N - 2 * Real.log N.sqrt ∧
       Real.log N - 2 * Real.log N.sqrt ≤ 3 / N.sqrt := by
   have hm : 1 ≤ N.sqrt := Nat.le_sqrt.mpr (by omega)
@@ -526,7 +523,7 @@ theorem s27_log_sqrt_gap {N : ℕ} (hN : 1 ≤ N) :
     nlinarith
 
 /-- 27.11.2 for integer `N`: `|D(N) - N ln N - (2γ-1)N| ≤ 25 √N`. -/
-theorem s27_sum_sigma_zero_bound {N : ℕ} (hN : 1 ≤ N) :
+lemma s27_sum_sigma_zero_bound {N : ℕ} (hN : 1 ≤ N) :
     |∑ n ∈ Icc 1 N, (σ 0 n : ℝ) - (N * Real.log N + (2 * Real.eulerMascheroniConstant - 1) * N)|
       ≤ 25 * Real.sqrt N := by
   set m := N.sqrt with hmdef
@@ -577,14 +574,14 @@ theorem s27_sum_sigma_zero_bound {N : ℕ} (hN : 1 ≤ N) :
 
 
 /-- `ln x ≤ 2 √x` for `x > 0`. -/
-theorem s27_log_le_two_sqrt {x : ℝ} (hx : 0 < x) : Real.log x ≤ 2 * Real.sqrt x := by
+lemma s27_log_le_two_sqrt {x : ℝ} (hx : 0 < x) : Real.log x ≤ 2 * Real.sqrt x := by
   have hs : 0 < Real.sqrt x := Real.sqrt_pos.mpr hx
   have h := Real.log_le_sub_one_of_pos hs
   rw [Real.log_sqrt hx.le] at h
   linarith
 
 /-- `0 ≤ x ln x - N ln N ≤ ln x + 1` for `N = ⌊x⌋`, `x ≥ 1`. -/
-theorem s27_xlogx_floor {x : ℝ} (hx : 1 ≤ x) :
+lemma s27_xlogx_floor {x : ℝ} (hx : 1 ≤ x) :
     0 ≤ x * Real.log x - ⌊x⌋₊ * Real.log ⌊x⌋₊ ∧
       x * Real.log x - ⌊x⌋₊ * Real.log ⌊x⌋₊ ≤ Real.log x + 1 := by
   have hx0 : 0 < x := by linarith
@@ -616,7 +613,7 @@ theorem s27_xlogx_floor {x : ℝ} (hx : 1 ≤ x) :
     linarith
 
 /-- DLMF 27.11.2 (proof). -/
-theorem s27_sum_sigma_zero_asymptotic :
+lemma s27_sum_sigma_zero_asymptotic :
     HasPartialSumAsymptotic (fun n ↦ (σ 0 n : ℂ))
       (fun x ↦ (x * Real.log x + (2 * Real.eulerMascheroniConstant - 1) * x : ℝ))
       (fun x ↦ (Real.sqrt x : ℂ)) := by
@@ -652,7 +649,7 @@ theorem s27_sum_sigma_zero_asymptotic :
 /-- The error sequence of the telescoping comparison for `∑ ln a / a`. -/
 noncomputable def s27_errLog (a : ℕ) : ℝ := Real.log a / (a * ((a : ℝ) - 1)) + 1 / ((a : ℝ) - 1) ^ 2
 
-theorem s27_errLog_nonneg (a : ℕ) : 0 ≤ s27_errLog a := by
+lemma s27_errLog_nonneg (a : ℕ) : 0 ≤ s27_errLog a := by
   unfold s27_errLog
   rcases Nat.lt_or_ge a 1 with h | h
   · interval_cases a; simp
@@ -661,7 +658,7 @@ theorem s27_errLog_nonneg (a : ℕ) : 0 ≤ s27_errLog a := by
     have : 0 ≤ (a : ℝ) - 1 := by linarith
     positivity
 
-theorem s27_summable_errLog : Summable s27_errLog := by
+lemma s27_summable_errLog : Summable s27_errLog := by
   have hs : Summable fun n : ℕ ↦ 8 * ((n : ℝ) ^ ((3 : ℝ) / 2))⁻¹ :=
     (Real.summable_nat_rpow_inv.mpr (by norm_num)).mul_left 8
   refine Summable.of_norm_bounded_eventually_nat hs ?_
@@ -694,7 +691,7 @@ theorem s27_summable_errLog : Summable s27_errLog := by
   linarith
 
 /-- One telescoping step: `|ln a/a - (½ ln²a - ½ ln²(a-1))| ≤ e(a)` for `a ≥ 1`. -/
-theorem s27_log_step {a : ℕ} (ha : 1 ≤ a) :
+lemma s27_log_step {a : ℕ} (ha : 1 ≤ a) :
     |Real.log a / a - (Real.log a ^ 2 / 2 - Real.log ((a - 1 : ℕ) : ℝ) ^ 2 / 2)| ≤
       s27_errLog a := by
   rcases Nat.lt_or_ge a 2 with h | h
@@ -739,7 +736,7 @@ theorem s27_log_step {a : ℕ} (ha : 1 ≤ a) :
   rw [abs_le]; constructor <;> nlinarith
 
 /-- `∑_{a ≤ N} ln a / a = ½ ln² N + O(1)`. -/
-theorem s27_sum_log_div_bound :
+lemma s27_sum_log_div_bound :
     ∃ C : ℝ, ∀ N : ℕ, |∑ a ∈ Ioc 0 N, Real.log a / a - Real.log N ^ 2 / 2| ≤ C := by
   refine ⟨∑' a, s27_errLog a, fun N ↦ ?_⟩
   have htel : ∀ N : ℕ, Real.log N ^ 2 / 2 =
@@ -757,7 +754,7 @@ theorem s27_sum_log_div_bound :
 
 
 /-- `∑_{n ≤ N} d(n)/n = ∑_{a ≤ N} (1/a) H_{⌊N/a⌋}`. -/
-theorem s27_sum_sigma_zero_div (N : ℕ) :
+lemma s27_sum_sigma_zero_div (N : ℕ) :
     ∑ n ∈ Icc 1 N, (σ 0 n : ℝ) / n =
       ∑ a ∈ Ioc 0 N, ((a : ℝ))⁻¹ * ∑ b ∈ Ioc 0 (N / a), ((b : ℝ))⁻¹ := by
   let f : ArithmeticFunction ℝ := ⟨fun n ↦ ((n : ℝ))⁻¹, by simp⟩
@@ -779,7 +776,7 @@ theorem s27_sum_sigma_zero_div (N : ℕ) :
   rfl
 
 /-- `|H_{⌊N/a⌋} - (ln N - ln a + γ)| ≤ 4a/N` for `1 ≤ a ≤ N`. -/
-theorem s27_harmonic_floor_div {N a : ℕ} (ha : a ∈ Ioc 0 N) :
+lemma s27_harmonic_floor_div {N a : ℕ} (ha : a ∈ Ioc 0 N) :
     |∑ b ∈ Ioc 0 (N / a), ((b : ℝ))⁻¹ - (Real.log N - Real.log a + Real.eulerMascheroniConstant)|
       ≤ 4 * a / N := by
   obtain ⟨ha0, haN⟩ := mem_Ioc.mp ha
@@ -811,7 +808,7 @@ theorem s27_harmonic_floor_div {N a : ℕ} (ha : a ∈ Ioc 0 N) :
   constructor <;> linarith
 
 /-- 27.11.3 for integer `N`, with an unspecified constant. -/
-theorem s27_sum_sigma_zero_div_bound :
+lemma s27_sum_sigma_zero_div_bound :
     ∃ C : ℝ, ∀ N : ℕ, 1 ≤ N → |∑ n ∈ Icc 1 N, (σ 0 n : ℝ) / n -
       (Real.log N ^ 2 / 2 + 2 * Real.eulerMascheroniConstant * Real.log N)| ≤ C := by
   obtain ⟨C, hC⟩ := s27_sum_log_div_bound
@@ -872,7 +869,7 @@ theorem s27_sum_sigma_zero_div_bound :
 
 
 /-- DLMF 27.11.3 (proof). -/
-theorem s27_sum_sigma_zero_div_asymptotic :
+lemma s27_sum_sigma_zero_div_asymptotic :
     HasPartialSumAsymptotic (fun n ↦ (σ 0 n : ℂ) / n)
       (fun x ↦ (Real.log x ^ 2 / 2 + 2 * Real.eulerMascheroniConstant * Real.log x : ℝ))
       (fun _ ↦ (1 : ℂ)) := by
@@ -927,7 +924,7 @@ theorem s27_sum_sigma_zero_div_asymptotic :
 
 /-- `∑_{n ≤ N} Λ(n)/n` as a double sum over primes and exponents (after Mathlib's
 `Chebyshev.psi_eq_sum_mul_log_prime`). -/
-theorem s27_sum_vonMangoldt_div (n : ℕ) :
+lemma s27_sum_vonMangoldt_div (n : ℕ) :
     ∑ m ∈ Ioc 0 n, Λ m / m =
       ∑ p ∈ Nat.primesLE n, ∑ k ∈ Icc 1 (Nat.log p n), Real.log p / (p : ℝ) ^ k := by
   have hI : Ioc 0 n = Icc 1 n := by ext; simp only [mem_Ioc, mem_Icc]; omega
@@ -962,7 +959,7 @@ theorem s27_sum_vonMangoldt_div (n : ℕ) :
 
 
 /-- `1/p ≤ ∑_{k=1}^K p^{-k} ≤ 1/(p-1)` for `p ≥ 2`, `K ≥ 1`. -/
-theorem s27_geom_bounds {p : ℝ} (hp : 2 ≤ p) {K : ℕ} (hK : 1 ≤ K) :
+lemma s27_geom_bounds {p : ℝ} (hp : 2 ≤ p) {K : ℕ} (hK : 1 ≤ K) :
     1 / p ≤ ∑ k ∈ Icc 1 K, 1 / p ^ k ∧ ∑ k ∈ Icc 1 K, 1 / p ^ k ≤ 1 / (p - 1) := by
   have hp0 : 0 < p := by linarith
   have hr : ∀ K : ℕ, (∑ k ∈ Icc 1 K, 1 / p ^ k) * (p - 1) = 1 - 1 / p ^ K := by
@@ -981,7 +978,7 @@ theorem s27_geom_bounds {p : ℝ} (hp : 2 ≤ p) {K : ℕ} (hK : 1 ≤ K) :
     linarith
 
 /-- `∑_{n ≤ N} ln n = ln N!`. -/
-theorem s27_sum_log_eq_log_factorial (N : ℕ) :
+lemma s27_sum_log_eq_log_factorial (N : ℕ) :
     ∑ n ∈ Ioc 0 N, Real.log n = Real.log N.factorial := by
   induction N with
   | zero => simp
@@ -990,7 +987,7 @@ theorem s27_sum_log_eq_log_factorial (N : ℕ) :
       Real.log_mul (by positivity) (by positivity), add_comm]
 
 /-- `N ln N - N ≤ ln N! ≤ N ln N`. -/
-theorem s27_log_factorial_bounds (N : ℕ) :
+lemma s27_log_factorial_bounds (N : ℕ) :
     N * Real.log N - N ≤ Real.log N.factorial ∧ Real.log N.factorial ≤ N * Real.log N := by
   rw [← s27_sum_log_eq_log_factorial]
   constructor
@@ -1010,7 +1007,7 @@ theorem s27_log_factorial_bounds (N : ℕ) :
       _ = N * Real.log N := by rw [sum_const, Nat.card_Ioc, nsmul_eq_mul, Nat.sub_zero]
 
 /-- `ln N - 1 ≤ ∑_{n ≤ N} Λ(n)/n ≤ ln N + ln 4 + 4` for `N ≥ 1`. -/
-theorem s27_sum_vonMangoldt_div_bounds {N : ℕ} (hN : 1 ≤ N) :
+lemma s27_sum_vonMangoldt_div_bounds {N : ℕ} (hN : 1 ≤ N) :
     Real.log N - 1 ≤ ∑ m ∈ Ioc 0 N, Λ m / m ∧
       ∑ m ∈ Ioc 0 N, Λ m / m ≤ Real.log N + (Real.log 4 + 4) := by
   have hN' : (0 : ℝ) < N := by exact_mod_cast hN
@@ -1043,7 +1040,7 @@ theorem s27_sum_vonMangoldt_div_bounds {N : ℕ} (hN : 1 ≤ N) :
 
 
 /-- `0 ≤ ∑_{n ≤ N} Λ(n)/n - ∑_{p ≤ N} (ln p)/p ≤ ∑' e`. -/
-theorem s27_vonMangoldt_sub_prime_bounds (N : ℕ) :
+lemma s27_vonMangoldt_sub_prime_bounds (N : ℕ) :
     0 ≤ ∑ m ∈ Ioc 0 N, Λ m / m - ∑ p ∈ Nat.primesLE N, Real.log p / p ∧
       ∑ m ∈ Ioc 0 N, Λ m / m - ∑ p ∈ Nat.primesLE N, Real.log p / p ≤
         ∑' a, s27_errLog a := by
@@ -1079,7 +1076,7 @@ theorem s27_vonMangoldt_sub_prime_bounds (N : ℕ) :
       _ ≤ _ := s27_summable_errLog.sum_le_tsum _ fun a _ ↦ s27_errLog_nonneg a
 
 /-- DLMF 27.11.10 (proof). -/
-theorem s27_sum_log_prime_div_asymptotic :
+lemma s27_sum_log_prime_div_asymptotic :
     (fun x : ℝ ↦ ∑ p ∈ Nat.primesLE ⌊x⌋₊, Real.log p / p - Real.log x) =O[atTop]
       fun _ ↦ (1 : ℝ) := by
   refine IsBigO.of_bound (∑' a, s27_errLog a + 10) ?_
@@ -1112,12 +1109,12 @@ theorem s27_sum_log_prime_div_asymptotic :
 /-- The constant bounding `|∑_{p ≤ N} (ln p)/p - ln N|`. -/
 noncomputable def s27_mertensC : ℝ := ∑' a, s27_errLog a + 6
 
-theorem s27_mertensC_nonneg : 0 ≤ s27_mertensC := by
+lemma s27_mertensC_nonneg : 0 ≤ s27_mertensC := by
   have : 0 ≤ ∑' a, s27_errLog a := tsum_nonneg s27_errLog_nonneg
   unfold s27_mertensC; linarith
 
 /-- `|∑_{p ≤ N} (ln p)/p - ln N| ≤ C` for `N ≥ 1`. -/
-theorem s27_prime_log_div_bound {N : ℕ} (hN : 1 ≤ N) :
+lemma s27_prime_log_div_bound {N : ℕ} (hN : 1 ≤ N) :
     |∑ p ∈ Nat.primesLE N, Real.log p / p - Real.log N| ≤ s27_mertensC := by
   obtain ⟨a1, a2⟩ := s27_sum_vonMangoldt_div_bounds hN
   obtain ⟨b1, b2⟩ := s27_vonMangoldt_sub_prime_bounds N
@@ -1133,7 +1130,7 @@ theorem s27_prime_log_div_bound {N : ℕ} (hN : 1 ≤ N) :
   constructor <;> linarith
 
 /-- Sums over `primesLE` as sums over `range` with an indicator. -/
-theorem s27_sum_primesLE (h : ℕ → ℝ) (N : ℕ) :
+lemma s27_sum_primesLE (h : ℕ → ℝ) (N : ℕ) :
     ∑ p ∈ Nat.primesLE N, h p = ∑ m ∈ range (N + 1), if m.Prime then h m else 0 := by
   rw [← sum_filter]; rfl
 
@@ -1144,7 +1141,7 @@ noncomputable def s27_P (n : ℕ) : ℝ := ∑ p ∈ Nat.primesLE n, Real.log p 
 noncomputable def s27_f (n : ℕ) : ℝ := 1 / Real.log n
 
 /-- Abel summation: `∑_{p ≤ N} 1/p = P(N) f(N) + ∑_{n < N} P(n) (f(n) - f(n+1))`. -/
-theorem s27_abel (N : ℕ) :
+lemma s27_abel (N : ℕ) :
     ∑ p ∈ Nat.primesLE N, (1 / p : ℝ) =
       s27_P N * s27_f N + ∑ n ∈ range N, s27_P n * (s27_f n - s27_f (n + 1)) := by
   have hP : ∀ n, s27_P n = ∑ m ∈ range (n + 1), if m.Prime then Real.log m / m else 0 :=
@@ -1171,7 +1168,7 @@ noncomputable def s27_G (n : ℕ) : ℝ :=
   s27_P n * (s27_f n - s27_f (n + 1)) -
     (Real.log (Real.log ((n + 1 : ℕ) : ℝ)) - Real.log (Real.log n))
 
-theorem s27_f_nonneg (n : ℕ) : 0 ≤ s27_f n := by
+lemma s27_f_nonneg (n : ℕ) : 0 ≤ s27_f n := by
   unfold s27_f
   have : 0 ≤ Real.log n := by
     rcases Nat.eq_zero_or_pos n with rfl | h
@@ -1180,7 +1177,7 @@ theorem s27_f_nonneg (n : ℕ) : 0 ≤ s27_f n := by
   positivity
 
 /-- For `n ≥ 2`: `0 ≤ f(n) - f(n+1)` and `|G(n)| ≤ (C + 1)(f(n) - f(n+1))`. -/
-theorem s27_G_bound {n : ℕ} (hn : 2 ≤ n) :
+lemma s27_G_bound {n : ℕ} (hn : 2 ≤ n) :
     0 ≤ s27_f n - s27_f (n + 1) ∧
       |s27_G n| ≤ (s27_mertensC + 1) * (s27_f n - s27_f (n + 1)) := by
   have hn' : (2 : ℝ) ≤ n := by exact_mod_cast hn
@@ -1237,7 +1234,7 @@ theorem s27_G_bound {n : ℕ} (hn : 2 ≤ n) :
   constructor <;> nlinarith
 
 /-- Telescoped tail bound: `∑_{i < M} |G(i + N)| ≤ (C + 1) f(N)` for `N ≥ 2`. -/
-theorem s27_G_tail {N : ℕ} (hN : 2 ≤ N) (M : ℕ) :
+lemma s27_G_tail {N : ℕ} (hN : 2 ≤ N) (M : ℕ) :
     ∑ i ∈ range M, |s27_G (i + N)| ≤ (s27_mertensC + 1) * s27_f N := by
   calc ∑ i ∈ range M, |s27_G (i + N)|
       ≤ ∑ i ∈ range M, (s27_mertensC + 1) * (s27_f (i + N) - s27_f (i + 1 + N)) := by
@@ -1251,13 +1248,13 @@ theorem s27_G_tail {N : ℕ} (hN : 2 ≤ N) (M : ℕ) :
         have := s27_mertensC_nonneg
         nlinarith
 
-theorem s27_summable_G : Summable s27_G := by
+lemma s27_summable_G : Summable s27_G := by
   rw [← summable_nat_add_iff 2]
   refine Summable.of_abs ?_
   exact summable_of_sum_range_le (fun _ ↦ abs_nonneg _) (s27_G_tail le_rfl)
 
 /-- Mertens 27.11.8 for integer `N ≥ 2`. -/
-theorem s27_mertens_nat {N : ℕ} (hN : 2 ≤ N) :
+lemma s27_mertens_nat {N : ℕ} (hN : 2 ≤ N) :
     |∑ p ∈ Nat.primesLE N, (1 / p : ℝ) - (Real.log (Real.log N) + (1 + ∑' n, s27_G n))| ≤
       (2 * s27_mertensC + 1) * s27_f N := by
   have habel := s27_abel N
@@ -1296,7 +1293,7 @@ theorem s27_mertens_nat {N : ℕ} (hN : 2 ≤ N) :
 
 
 /-- DLMF 27.11.8 (proof). -/
-theorem s27_sum_prime_inv_asymptotic :
+lemma s27_sum_prime_inv_asymptotic :
     ∃ A : ℝ, (fun x : ℝ ↦ ∑ p ∈ Nat.primesLE ⌊x⌋₊, (1 / p : ℝ) - (Real.log (Real.log x) + A))
       =O[atTop] fun x ↦ 1 / Real.log x := by
   refine ⟨1 + ∑' n, s27_G n, IsBigO.of_bound (2 * (2 * s27_mertensC + 2)) ?_⟩
@@ -1353,7 +1350,7 @@ theorem s27_sum_prime_inv_asymptotic :
 
 
 /-- Mean-value bounds for `t ↦ t^(α+1)`: `p u^α (v-u) ≤ v^p - u^p ≤ p v^α (v-u)`. -/
-theorem s27_rpow_mvt {α : ℝ} (hα : 0 < α) {u v : ℝ} (hu : 0 ≤ u) (huv : u ≤ v) :
+lemma s27_rpow_mvt {α : ℝ} (hα : 0 < α) {u v : ℝ} (hu : 0 ≤ u) (huv : u ≤ v) :
     (α + 1) * u ^ α * (v - u) ≤ v ^ (α + 1) - u ^ (α + 1) ∧
       v ^ (α + 1) - u ^ (α + 1) ≤ (α + 1) * v ^ α * (v - u) := by
   have hp : 1 ≤ α + 1 := by linarith
@@ -1399,7 +1396,7 @@ theorem s27_rpow_mvt {α : ℝ} (hα : 0 < α) {u v : ℝ} (hu : 0 ≤ u) (huv :
       subst this; subst hv0; simp
 
 /-- `M^p/p ≤ ∑_{m ≤ M} m^α ≤ M^p/p + M^α`, `p = α + 1`. -/
-theorem s27_sum_rpow_bounds {α : ℝ} (hα : 0 < α) (M : ℕ) :
+lemma s27_sum_rpow_bounds {α : ℝ} (hα : 0 < α) (M : ℕ) :
     (M : ℝ) ^ (α + 1) / (α + 1) ≤ ∑ m ∈ Ioc 0 M, (m : ℝ) ^ α ∧
       ∑ m ∈ Ioc 0 M, (m : ℝ) ^ α ≤ (M : ℝ) ^ (α + 1) / (α + 1) + (M : ℝ) ^ α := by
   have hp : 0 < α + 1 := by linarith
@@ -1422,7 +1419,7 @@ theorem s27_sum_rpow_bounds {α : ℝ} (hα : 0 < α) (M : ℕ) :
 
 
 /-- Integral comparison: `∑_{i < M} f(N + i + 1) ≤ N^{-a}/a` for `f(t) = (t^{a+1})⁻¹`, `a > 0`. -/
-theorem s27_tail_rpow {a : ℝ} (ha : 0 < a) {N : ℕ} (hN : 1 ≤ N) (M : ℕ) :
+lemma s27_tail_rpow {a : ℝ} (ha : 0 < a) {N : ℕ} (hN : 1 ≤ N) (M : ℕ) :
     ∑ i ∈ range M, (((N + (i + 1 : ℕ) : ℝ)) ^ (a + 1))⁻¹ ≤ (N : ℝ) ^ (-a) / a := by
   have hN' : (1 : ℝ) ≤ N := by exact_mod_cast hN
   have hanti : AntitoneOn (fun t : ℝ ↦ t ^ (-(a + 1))) (Set.Icc (N : ℝ) (N + M)) := by
@@ -1449,7 +1446,7 @@ theorem s27_tail_rpow {a : ℝ} (ha : 0 < a) {N : ℕ} (hN : 1 ≤ N) (M : ℕ) 
         linarith
 
 /-- `∑_{d ≤ N} d^{-a} ≤ 1 + (N^{1-a} - 1)/(1 - a)` for `a > 0`, `a ≠ 1`, `N ≥ 1`. -/
-theorem s27_sum_rpow_neg_le {a : ℝ} (ha : 0 < a) (ha1 : a ≠ 1) {N : ℕ} (hN : 1 ≤ N) :
+lemma s27_sum_rpow_neg_le {a : ℝ} (ha : 0 < a) (ha1 : a ≠ 1) {N : ℕ} (hN : 1 ≤ N) :
     ∑ d ∈ Ioc 0 N, ((d : ℝ) ^ a)⁻¹ ≤ 1 + ((N : ℝ) ^ (1 - a) - 1) / (1 - a) := by
   obtain ⟨M, rfl⟩ : ∃ M, N = M + 1 := ⟨N - 1, by omega⟩
   have hanti : AntitoneOn (fun t : ℝ ↦ t ^ (-a)) (Set.Icc (1 : ℝ) (1 + M)) := by
@@ -1487,7 +1484,7 @@ theorem s27_sum_rpow_neg_le {a : ℝ} (ha : 0 < a) (ha1 : a ≠ 1) {N : ℕ} (hN
 
 
 /-- `∑_{n ≤ N} σ_α(n) = ∑_{d ≤ N} ∑_{m ≤ N/d} m^α` (real `α > 0`). -/
-theorem s27_sum_sigmaR (α : ℝ) (hα : 0 < α) (N : ℕ) :
+lemma s27_sum_sigmaR (α : ℝ) (hα : 0 < α) (N : ℕ) :
     ∑ n ∈ Icc 1 N, ∑ d ∈ n.divisors, (d : ℝ) ^ α =
       ∑ d ∈ Ioc 0 N, ∑ m ∈ Ioc 0 (N / d), (m : ℝ) ^ α := by
   let g : ArithmeticFunction ℝ := ⟨fun m ↦ (m : ℝ) ^ α, by simp [Real.zero_rpow hα.ne']⟩
@@ -1504,7 +1501,7 @@ theorem s27_sum_sigmaR (α : ℝ) (hα : 0 < α) (N : ℕ) :
   simp [natCoe_apply, zeta_apply, hd0, g]
 
 /-- One term: `|S(⌊N/d⌋) - (N/d)^p/p| ≤ (N/d)^α`. -/
-theorem s27_term_bound {α : ℝ} (hα : 0 < α) {N d : ℕ} (hd : d ∈ Ioc 0 N) :
+lemma s27_term_bound {α : ℝ} (hα : 0 < α) {N d : ℕ} (hd : d ∈ Ioc 0 N) :
     |∑ m ∈ Ioc 0 (N / d), (m : ℝ) ^ α - (N : ℝ) ^ (α + 1) / (α + 1) * ((d : ℝ) ^ (α + 1))⁻¹|
       ≤ (N : ℝ) ^ α * ((d : ℝ) ^ α)⁻¹ := by
   obtain ⟨hd0, hdN⟩ := mem_Ioc.mp hd
@@ -1545,7 +1542,7 @@ theorem s27_term_bound {α : ℝ} (hα : 0 < α) {N d : ℕ} (hd : d ∈ Ioc 0 N
 noncomputable def s27_Z (α : ℝ) : ℝ := ∑' d : ℕ, ((d : ℝ) ^ (α + 1))⁻¹
 
 /-- `0 ≤ Z - ∑_{d ≤ N} d^{-p} ≤ N^{-α}/α`. -/
-theorem s27_Z_tail {α : ℝ} (hα : 0 < α) {N : ℕ} (hN : 1 ≤ N) :
+lemma s27_Z_tail {α : ℝ} (hα : 0 < α) {N : ℕ} (hN : 1 ≤ N) :
     0 ≤ s27_Z α - ∑ d ∈ Ioc 0 N, ((d : ℝ) ^ (α + 1))⁻¹ ∧
       s27_Z α - ∑ d ∈ Ioc 0 N, ((d : ℝ) ^ (α + 1))⁻¹ ≤ (N : ℝ) ^ (-α) / α := by
   have hs : Summable fun d : ℕ ↦ ((d : ℝ) ^ (α + 1))⁻¹ :=
@@ -1567,7 +1564,7 @@ theorem s27_Z_tail {α : ℝ} (hα : 0 < α) {N : ℕ} (hN : 1 ≤ N) :
     push_cast; ring_nf
 
 /-- 27.11.5 for integer `N`: `|∑_{n ≤ N} σ_α(n) - Z N^p/p| ≤ N/(pα) + N^α ∑_{d ≤ N} d^{-α}`. -/
-theorem s27_sigma_nat_bound {α : ℝ} (hα : 0 < α) {N : ℕ} (hN : 1 ≤ N) :
+lemma s27_sigma_nat_bound {α : ℝ} (hα : 0 < α) {N : ℕ} (hN : 1 ≤ N) :
     |∑ n ∈ Icc 1 N, ∑ d ∈ n.divisors, (d : ℝ) ^ α - s27_Z α * (N : ℝ) ^ (α + 1) / (α + 1)| ≤
       N / ((α + 1) * α) + (N : ℝ) ^ α * ∑ d ∈ Ioc 0 N, ((d : ℝ) ^ α)⁻¹ := by
   have hp : 0 < α + 1 := by linarith
@@ -1602,7 +1599,7 @@ theorem s27_sigma_nat_bound {α : ℝ} (hα : 0 < α) {N : ℕ} (hN : 1 ≤ N) :
 
 
 /-- The integer bound of 27.11.5 is `O(N^β)`, `β = max(1, α)`. -/
-theorem s27_sigma_nat_bigO {α : ℝ} (hα : 0 < α) (hα1 : α ≠ 1) :
+lemma s27_sigma_nat_bigO {α : ℝ} (hα : 0 < α) (hα1 : α ≠ 1) :
     ∃ K : ℝ, 0 ≤ K ∧ ∀ N : ℕ, 1 ≤ N →
       |∑ n ∈ Icc 1 N, ∑ d ∈ n.divisors, (d : ℝ) ^ α - s27_Z α * (N : ℝ) ^ (α + 1) / (α + 1)| ≤
         K * (N : ℝ) ^ max 1 α := by
@@ -1652,10 +1649,10 @@ theorem s27_sigma_nat_bigO {α : ℝ} (hα : 0 < α) (hα1 : α ≠ 1) :
       _ = _ := by ring
 
 
-theorem s27_Z_nonneg (α : ℝ) : 0 ≤ s27_Z α := tsum_nonneg fun d ↦ by positivity
+lemma s27_Z_nonneg (α : ℝ) : 0 ≤ s27_Z α := tsum_nonneg fun d ↦ by positivity
 
 /-- `ζ(α + 1) = Z` for real `α > 0`. -/
-theorem s27_riemannZeta_eq_Z {α : ℝ} (hα : 0 < α) :
+lemma s27_riemannZeta_eq_Z {α : ℝ} (hα : 0 < α) :
     riemannZeta ((α : ℂ) + 1) = (s27_Z α : ℂ) := by
   rw [zeta_eq_tsum_one_div_nat_cpow (by simp; linarith), s27_Z, Complex.ofReal_tsum]
   refine tsum_congr fun n ↦ ?_
@@ -1663,7 +1660,7 @@ theorem s27_riemannZeta_eq_Z {α : ℝ} (hα : 0 < α) :
   push_cast; rfl
 
 /-- `σ_α(n)` for real `α` is the real divisor sum. -/
-theorem s27_sigmaC_ofReal (α : ℝ) (n : ℕ) :
+lemma s27_sigmaC_ofReal (α : ℝ) (n : ℕ) :
     sigmaC α n = ((∑ d ∈ n.divisors, (d : ℝ) ^ α : ℝ) : ℂ) := by
   rw [sigmaC_apply, Complex.ofReal_sum]
   refine sum_congr rfl fun d _ ↦ ?_
@@ -1671,7 +1668,7 @@ theorem s27_sigmaC_ofReal (α : ℝ) (n : ℕ) :
   rfl
 
 /-- DLMF 27.11.5 (proof). -/
-theorem s27_sum_sigmaC_asymptotic {α : ℝ} (hα : 0 < α) (hα1 : α ≠ 1) :
+lemma s27_sum_sigmaC_asymptotic {α : ℝ} (hα : 0 < α) (hα1 : α ≠ 1) :
     HasPartialSumAsymptotic (fun n ↦ sigmaC α n)
       (fun x ↦ riemannZeta (α + 1) / (α + 1) * ((x ^ (α + 1) : ℝ) : ℂ))
       (fun x ↦ ((x ^ max 1 α : ℝ) : ℂ)) := by

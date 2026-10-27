@@ -7,7 +7,6 @@ module
 
 public import DLMF.Legendre.Associated
 public import DLMF.Elliptic.Complete
-public import DLMF.OrthogonalPolynomials.Topics
 public import DLMF.Legendre.Neumann
 public import DLMF.Hypergeometric.Clausen
 public import DLMF.Legendre.Connections
@@ -187,7 +186,7 @@ theorem associatedP_degree_2 {z : ℂ} (hz : z-1 ∈ slitPlane) :
   linear_combination h/2
 
 /-- `𝐅(1/2,1;1/2;w) = (1-w)⁻¹/Γ(1/2)` on the cut plane. -/
-lemma regularizedGaussHG_half_one_half {w : ℂ} (hw : w ∈ cutPlane) :
+theorem regularizedGaussHG_half_one_half {w : ℂ} (hw : w ∈ cutPlane) :
     regularizedGaussHG (1/2) 1 (1/2) w = (1-w)⁻¹/Real.sqrt π := by
   rw [regularizedGaussHG_euler _ _ _ hw, show (1/2:ℂ)-1/2-1 = -1 by norm_num,
     show (1/2:ℂ)-1/2 = 0 by norm_num, regularizedGaussHG_zero_left _ _ hw, legendre_Gamma_one_half,
@@ -212,7 +211,7 @@ lemma regularizedGaussHG_ferrersQ_aux {w : ℂ} (hw : w ∈ cutPlane) :
   exact ⟨by linear_combination -h1, by linear_combination (-w)*h3 - 3*h2 - (3/2)*(w-1)*h1 + (3/2)*e⟩
 
 /-- `x 𝐅(1/2,1;3/2;x²) = log((1+x)/(1-x))/√π` on `(-1,1)`. -/
-lemma ofReal_mul_regularizedGaussHG_log_ratio {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem ofReal_mul_regularizedGaussHG_log_ratio {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     (x:ℂ)*regularizedGaussHG (1/2) 1 (3/2) ((x:ℂ)^2) = log ((1+x)/(1-x):ℂ)/Real.sqrt π := by
   have hx1 : ‖(x:ℂ)‖ < 1 := by
     rw [Complex.norm_real, Real.norm_eq_abs, abs_lt]; exact ⟨hx.1, hx.2⟩
@@ -224,7 +223,7 @@ lemma ofReal_mul_regularizedGaussHG_log_ratio {x : ℝ} (hx : x ∈ Ioo (-1:ℝ)
   field_simp
 
 /-- At order zero and natural degree, `𝑸_n = Q_n/n!`. -/
-lemma olverQ_nat_zero_order (n : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem olverQ_nat_zero_order (n : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     olverQ n 0 z = legendreQ n z / n.factorial := by
   have hreg : LegendreQRegular (n:ℂ) 0 := fun k hk => by
     have := congrArg re hk; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
@@ -959,7 +958,7 @@ theorem ferrersP_negative_degree_order (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) (hπ 
 
 /-- The degree-order balanced regularized function `𝐅(ν+1,-ν;ν+1;w) = (1-w)^ν/Γ(ν+1)`
 on the cut plane, including the exceptional parameters. -/
-lemma regularizedGaussHG_legendre_neg_degree (ν : ℂ) {w : ℂ} (hw : w ∈ cutPlane) :
+theorem regularizedGaussHG_legendre_neg_degree (ν : ℂ) {w : ℂ} (hw : w ∈ cutPlane) :
     regularizedGaussHG (ν+1) (-ν) (ν+1) w = (1-w)^ν / Gamma (ν+1) := by
   refine eqOn_cutPlane_of_eqOn_disk (f := regularizedGaussHG (ν+1) (-ν) (ν+1))
     (g := fun w => (1-w)^ν / Gamma (ν+1)) (analyticOnNhd_regularizedGaussHG _ _ _)
@@ -1005,7 +1004,7 @@ theorem associatedP_negative_degree_order (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) :
   rw [← exp_add, ← exp_add]; congr 1; push_cast; ring
 
 /-- The Ferrers order-zero function as a Gauss function of `sin²(θ/2)`. -/
-lemma ferrersP_zero_order_sin_sq (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
+theorem ferrersP_zero_order_sin_sq (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
     ferrersP ν 0 (Real.cos θ) = ₂F₁ (ν+1) (-ν) 1 (((Real.sin (θ/2))^2 : ℝ) : ℂ) ∧
       |(Real.sin (θ/2))^2| < 1 := by
   have ht0 : 0 < θ/2 := by positivity

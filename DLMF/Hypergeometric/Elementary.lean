@@ -5,11 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Hypergeometric.Contiguous
-public import DLMF.Hypergeometric.Continuation
-public import DLMF.Hypergeometric.FurtherTransformations
 public import DLMF.Hypergeometric.SpecialValueTools
-public import Mathlib.Analysis.SpecialFunctions.Gamma.Digamma
 public import DLMF.Gamma.Digamma
 public import DLMF.Gamma.SpecialValues
 
@@ -54,7 +50,7 @@ theorem log_ratio {z : ℂ} (hz : ‖z‖ < 1) :
   convert hh.symm using 1 <;> ring
 
 /-- Principal powers of right-half-plane numbers are multiplicative. -/
-lemma cpow_mul_cpow_of_re_pos {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) (s : ℂ) :
+theorem cpow_mul_cpow_of_re_pos {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) (s : ℂ) :
     x ^ s * y ^ s = (x * y) ^ s := by
   have hx0 : x ≠ 0 := by rintro rfl; simp at hx
   have hy0 : y ≠ 0 := by rintro rfl; simp at hy
@@ -65,7 +61,7 @@ lemma cpow_mul_cpow_of_re_pos {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) (s : �
   ring_nf
 
 /-- The square root `r = √(1+z²)` on the unit disk, with `u = r + z`, `v = r - z`, `uv = 1`. -/
-lemma sqrt_one_add_sq_data {z : ℂ} (hz : ‖z‖ < 1) :
+theorem sqrt_one_add_sq_data {z : ℂ} (hz : ‖z‖ < 1) :
     0 < (1 + z ^ 2).re ∧ 0 < ((1 + z ^ 2) ^ (1 / 2 : ℂ)).re ∧
       ((1 + z ^ 2) ^ (1 / 2 : ℂ)) ^ 2 = 1 + z ^ 2 ∧
       ((1 + z ^ 2) ^ (1 / 2 : ℂ) + z) * ((1 + z ^ 2) ^ (1 / 2 : ℂ) - z) = 1 ∧
@@ -144,7 +140,7 @@ theorem log_add_sqrt {z : ℂ} (hz : ‖z‖ < 1) :
   exact sub_eq_zero.mp h0
 
 /-- Duplication for rising factorials: `(2a)_{2m} = 4^m (a)_m (a + 1/2)_m`. -/
-lemma poch_two_mul_two_mul (a : ℂ) (m : ℕ) :
+theorem poch_two_mul_two_mul (a : ℂ) (m : ℕ) :
     poch (2 * a) (2 * m) = 4 ^ m * poch a m * poch (a + 1 / 2) m := by
   induction m with
   | zero => simp [poch_zero]
@@ -155,7 +151,7 @@ lemma poch_two_mul_two_mul (a : ℂ) (m : ℕ) :
     ring
 
 /-- Even part of a series: if `f` vanishes at odd indices, sum over even indices. -/
-lemma hasSum_even_of_odd_eq_zero {f : ℕ → ℂ} {s : ℂ} (hf : HasSum f s)
+theorem hasSum_even_of_odd_eq_zero {f : ℕ → ℂ} {s : ℂ} (hf : HasSum f s)
     (hodd : ∀ m, f (2 * m + 1) = 0) : HasSum (fun m => f (2 * m)) s := by
   refine ((mul_right_injective₀ (two_ne_zero' ℕ)).hasSum_iff fun n hn => ?_).mpr hf
   obtain ⟨m, h | h⟩ := Nat.even_or_odd' n
@@ -163,7 +159,7 @@ lemma hasSum_even_of_odd_eq_zero {f : ℕ → ℂ} {s : ℂ} (hf : HasSum f s)
   · rw [h]; exact hodd m
 
 /-- Odd part of a series: if `f` vanishes at even indices, sum over odd indices. -/
-lemma hasSum_odd_of_even_eq_zero {f : ℕ → ℂ} {s : ℂ} (hf : HasSum f s)
+theorem hasSum_odd_of_even_eq_zero {f : ℕ → ℂ} {s : ℂ} (hf : HasSum f s)
     (heven : ∀ m, f (2 * m) = 0) : HasSum (fun m => f (2 * m + 1)) s := by
   refine ((show Function.Injective (fun m : ℕ => 2 * m + 1) from fun a b h => by
     simp only at h; omega).hasSum_iff fun n hn => ?_).mpr hf
@@ -203,7 +199,7 @@ theorem even_binomial (a : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     ring
 
 /-- `|tan x| < 1` for `|x| < π/4`. -/
-lemma abs_tan_lt_one {x : ℝ} (hx : |x| < π / 4) : |Real.tan x| < 1 := by
+theorem abs_tan_lt_one {x : ℝ} (hx : |x| < π / 4) : |Real.tan x| < 1 := by
   have hpi := Real.pi_pos
   rw [abs_lt] at hx ⊢
   constructor
@@ -215,7 +211,7 @@ lemma abs_tan_lt_one {x : ℝ} (hx : |x| < π / 4) : |Real.tan x| < 1 := by
     rwa [Real.tan_pi_div_four] at this
 
 /-- For `|x| < π/2`, `(1 ± i tan x)^w = cos^{-w} x · e^{± i w x}`. -/
-lemma one_add_I_tan_cpow {x : ℝ} (hx : |x| < π / 2) (s : ℝ) (hs : s = 1 ∨ s = -1) (w : ℂ) :
+theorem one_add_I_tan_cpow {x : ℝ} (hx : |x| < π / 2) (s : ℝ) (hs : s = 1 ∨ s = -1) (w : ℂ) :
     (1 + s * I * Real.tan x) ^ w = (Real.cos x : ℂ) ^ (-w) * exp (s * I * x * w) := by
   have hpi := Real.pi_pos
   have hc : 0 < Real.cos x := Real.cos_pos_of_mem_Ioo ⟨by linarith [(abs_lt.mp hx).1],
@@ -387,12 +383,12 @@ theorem opposite_parameters_sqrt (a : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     (by simp) hev (by simpa using hz)
 
 /-- Restriction of a complex-analytic function to the real line is real-analytic. -/
-lemma analyticAt_comp_ofReal {f : ℂ → ℂ} {x0 : ℝ} (hf : AnalyticAt ℂ f x0) :
+theorem analyticAt_comp_ofReal {f : ℂ → ℂ} {x0 : ℝ} (hf : AnalyticAt ℂ f x0) :
     AnalyticAt ℝ (fun x : ℝ => f x) x0 :=
   (hf.restrictScalars (𝕜 := ℝ)).comp (Complex.ofRealCLM.analyticAt x0)
 
 /-- `x ↦ ₂F₁(a,b;c;sin² x)` is real-analytic on `(-π/2, π/2)`. -/
-lemma analyticAt_ordinaryHypergeometric_sin_sq (a b c : ℂ) {x0 : ℝ} (hx : |x0| < π / 2) :
+theorem analyticAt_ordinaryHypergeometric_sin_sq (a b c : ℂ) {x0 : ℝ} (hx : |x0| < π / 2) :
     AnalyticAt ℝ (fun x : ℝ => ₂F₁ a b c ((Real.sin x : ℂ) ^ 2)) x0 := by
   have h : ‖((Real.sin x0 : ℂ)) ^ 2‖ < 1 := by
     rw [norm_pow, norm_real, Real.norm_eq_abs, sq_abs, ← Real.cos_sq_add_sin_sq x0]
@@ -407,13 +403,13 @@ lemma analyticAt_ordinaryHypergeometric_sin_sq (a b c : ℂ) {x0 : ℝ} (hx : |x
   simpa [ofReal_sin] using analyticAt_comp_ofReal hG
 
 /-- Positive real bases: `r^w = exp (log r * w)`. -/
-lemma ofReal_cpow_eq_exp {r : ℝ} (hr : 0 < r) (w : ℂ) :
+theorem ofReal_cpow_eq_exp {r : ℝ} (hr : 0 < r) (w : ℂ) :
     (r : ℂ) ^ w = exp ((Real.log r : ℂ) * w) := by
   rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr hr.ne'), ofReal_log hr.le]
 
 /-- Extension from `|x| < π/4` to `|x| < π/2` of an identity between real-analytic
 functions. -/
-lemma eq_of_analytic_of_abs_lt_pi_div_four {f g : ℝ → ℂ}
+theorem eq_of_analytic_of_abs_lt_pi_div_four {f g : ℝ → ℂ}
     (hf : ∀ x, |x| < π / 2 → AnalyticAt ℝ f x) (hg : ∀ x, |x| < π / 2 → AnalyticAt ℝ g x)
     (h : ∀ x, |x| < π / 4 → f x = g x) {x : ℝ} (hx : |x| < π / 2) : f x = g x := by
   have hpi := Real.pi_pos
@@ -430,7 +426,7 @@ lemma eq_of_analytic_of_abs_lt_pi_div_four {f g : ℝ → ℂ}
 
 /-- Pfaff's transformation at `z = -tan² x`: for `|x| < π/4`,
 `₂F₁(a,b;c;-tan² x) = cos^{2a} x · ₂F₁(a,c-b;c;sin² x)`. -/
-lemma ordinaryHypergeometric_neg_tan_sq (a b : ℂ) {c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) {x : ℝ}
+theorem ordinaryHypergeometric_neg_tan_sq (a b : ℂ) {c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) {x : ℝ}
     (hx : |x| < π / 4) :
     ₂F₁ a b c (-((Real.tan x : ℂ) ^ 2)) =
       (Real.cos x : ℂ) ^ (2 * a) * ₂F₁ a (c - b) c ((Real.sin x : ℂ) ^ 2) := by
@@ -1108,7 +1104,7 @@ theorem value_sixth_root
   · field_simp
 
 /-- Coefficient form of `z F'(a,b;c+1;z) = c (F(a,b;c;z) - F(a,b;c+1;z))`. -/
-lemma hypSV_gaussHGCoeff_shift_c {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
+theorem hypSV_gaussHGCoeff_shift_c {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
     (n : ℂ) * gaussHGCoeff a b (c + 1) n =
       c * (gaussHGCoeff a b c n - gaussHGCoeff a b (c + 1) n) := by
   have hc1 : ∀ k : ℕ, c + 1 ≠ -k := fun k h => hc (k + 1) (by push_cast; linear_combination h)
@@ -1121,7 +1117,7 @@ lemma hypSV_gaussHGCoeff_shift_c {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n :
   linear_combination (-(poch a n * poch b n)) * hpoch
 
 /-- `z F'(a,b;c+1;z) = c (F(a,b;c;z) - F(a,b;c+1;z))` (DLMF 15.5.4 with `n = 1`). -/
-lemma hypSV_mul_deriv_shift_c {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (hz : ‖z‖ < 1) :
+theorem hypSV_mul_deriv_shift_c {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (hz : ‖z‖ < 1) :
     z * deriv (₂F₁ a b (c + 1)) z = c * (₂F₁ a b c z - ₂F₁ a b (c + 1) z) := by
   have hz' := mem_eball_one_of_norm_lt_one hz
   have hf := hasFPowerSeriesOnBall_ordinaryHypergeometric a b (c + 1)
@@ -1382,12 +1378,12 @@ theorem value_sixth_root_contiguous
 /-- The paired terms of the alternating series `∑ (-1)^k a/(a+k)`. -/
 def altPair (a : ℂ) (j : ℕ) : ℂ := a / (a + 2 * j) - a / (a + 2 * j + 1)
 
-lemma altPair_eq (a : ℂ) (j : ℕ) (h1 : a + 2 * j ≠ 0) (h2 : a + 2 * j + 1 ≠ 0) :
+theorem altPair_eq (a : ℂ) (j : ℕ) (h1 : a + 2 * j ≠ 0) (h2 : a + 2 * j + 1 ≠ 0) :
     altPair a j = a / ((a + 2 * j) * (a + 2 * j + 1)) := by
   unfold altPair; field_simp; ring
 
 /-- Complex digamma at a positive real is the real digamma. -/
-lemma digamma_ofReal_eq {x : ℝ} (hx : 0 < x) : Complex.digamma x = (Real.digamma x : ℂ) := by
+theorem digamma_ofReal_eq {x : ℝ} (hx : 0 < x) : Complex.digamma x = (Real.digamma x : ℂ) := by
   apply Complex.ext
   · simp [Real.digamma_eq_re_digamma hx]
   · have h := DLMF.Gamma.digamma_conj (x : ℂ)
@@ -1397,7 +1393,7 @@ lemma digamma_ofReal_eq {x : ℝ} (hx : 0 < x) : Complex.digamma x = (Real.digam
     simp; linarith
 
 /-- The real case: `∑ⱼ (x/(x+2j) - x/(x+2j+1)) = (x/2)(ψ((x+1)/2) - ψ(x/2))`. -/
-lemma hasSum_altPair_ofReal {x : ℝ} (hx : 0 < x) :
+theorem hasSum_altPair_ofReal {x : ℝ} (hx : 0 < x) :
     HasSum (altPair x) ((x / 2 : ℂ) * (Complex.digamma ((x + 1) / 2) - Complex.digamma (x / 2))) := by
   have h1 := Real.tendsto_deriv_log_GammaSeq (x := (x + 1) / 2) (by positivity)
   have h2 := Real.tendsto_deriv_log_GammaSeq (x := x / 2) (by positivity)
@@ -1432,7 +1428,7 @@ lemma hasSum_altPair_ofReal {x : ℝ} (hx : 0 < x) :
     push_cast; ring
 
 /-- `ψ` is analytic away from the nonpositive integers. -/
-lemma analyticAt_digamma_of_not_neg_nat {s : ℂ} (hs : ∀ m : ℕ, s ≠ -(m : ℂ)) :
+theorem analyticAt_digamma_of_not_neg_nat {s : ℂ} (hs : ∀ m : ℕ, s ≠ -(m : ℂ)) :
     AnalyticAt ℂ Complex.digamma s := by
   have hG : AnalyticAt ℂ Complex.Gamma s := by
     rw [Complex.analyticAt_iff_eventually_differentiableAt]
@@ -1442,7 +1438,7 @@ lemma analyticAt_digamma_of_not_neg_nat {s : ℂ} (hs : ∀ m : ℕ, s ≠ -(m :
     funext fun s => by rw [Complex.digamma_def, logDeriv_apply]]
   exact hG.deriv.div hG (Complex.Gamma_ne_zero hs)
 
-lemma forall_ne_neg_nat_of_re_pos {s : ℂ} (hs : 0 < s.re) : ∀ m : ℕ, s ≠ -(m : ℂ) := by
+theorem forall_ne_neg_nat_of_re_pos {s : ℂ} (hs : 0 < s.re) : ∀ m : ℕ, s ≠ -(m : ℂ) := by
   intro m h
   have := congrArg re h
   simp at this
@@ -1564,7 +1560,7 @@ theorem hasSum_altPair {a : ℂ} (ha : 0 < a.re) :
   simp only at heq
   rwa [heq] at this
 
-lemma gaussHGCoeff_one_self_add_one {a : ℂ} (ha : 0 < a.re) (k : ℕ) :
+theorem gaussHGCoeff_one_self_add_one {a : ℂ} (ha : 0 < a.re) (k : ℕ) :
     gaussHGCoeff 1 a (a + 1) k = a / (a + k) := by
   have hp : poch (a + 1) k ≠ 0 :=
     poch_ne_zero_of_not_neg_nat (forall_ne_neg_nat_of_re_pos (by simp; linarith)) k

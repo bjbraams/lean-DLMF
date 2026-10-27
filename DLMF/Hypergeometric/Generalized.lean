@@ -46,7 +46,7 @@ def thetaPoly (P : ℂ[X]) (f : ℂ → ℂ) : ℂ → ℂ :=
 
 /-- Multiplying the coefficients by `n` does not decrease the radius, given the derivative
 series. -/
-lemma le_radius_ofScalars_nat_mul {d : ℕ → ℂ} {r : ℝ≥0∞}
+theorem le_radius_ofScalars_nat_mul {d : ℕ → ℂ} {r : ℝ≥0∞}
     (h : r ≤ (ofScalars ℂ (fun n => ((n : ℂ) + 1) * d (n + 1))).radius) :
     r ≤ (ofScalars ℂ (fun n => (n : ℂ) * d n)).radius := by
   refine ENNReal.le_of_forall_nnreal_lt fun r' hr' => ?_
@@ -104,13 +104,13 @@ theorem hasSum_thetaPoly {f : ℂ → ℂ} {c : ℕ → ℂ} {r : ℝ≥0∞}
   ring
 
 /-- `1/Γ(z) = z/Γ(z+1)` for every `z`, with the totalized `Γ`. -/
-lemma recip_Gamma_eq_mul_recip_Gamma_add_one (z : ℂ) : (Gamma z)⁻¹ = z * (Gamma (z + 1))⁻¹ := by
+theorem recip_Gamma_eq_mul_recip_Gamma_add_one (z : ℂ) : (Gamma z)⁻¹ = z * (Gamma (z + 1))⁻¹ := by
   by_cases hz : z = 0
   · subst hz; simp
   · rw [Complex.Gamma_add_one z hz, mul_inv, ← mul_assoc, mul_inv_cancel₀ hz, one_mul]
 
 /-- The coefficient recurrence behind DLMF 16.8.3, for all parameters. -/
-lemma regularizedHGFunCoeff_succ_mul (a b : Multiset ℂ) (n : ℕ) :
+theorem regularizedHGFunCoeff_succ_mul (a b : Multiset ℂ) (n : ℕ) :
     ((n : ℂ) + 1) * (b.map fun j : ℂ => j + n).prod * regularizedHGFunCoeff a b (n + 1) =
       (a.map fun i => (n : ℂ) + i).prod * regularizedHGFunCoeff a b n := by
   unfold regularizedHGFunCoeff

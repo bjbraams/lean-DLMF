@@ -6,9 +6,12 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Heun.Basic
-public import Mathlib.Analysis.SpecialFunctions.Pow.Complex
 public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Cotangent
+public import DLMFMathlib.Analysis.ODE.Singularities
+public import Mathlib.Analysis.Calculus.Deriv.Pow
+public import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Arctan
+public import Mathlib.MeasureTheory.Covering.Besicovitch
 
 /-!
 # Heun's equation and its automorphisms (DLMF §31.2)
@@ -43,7 +46,7 @@ namespace DLMF.Heun
 /-! ### Transformations of second-order equations -/
 
 /-- `IsLinearODE2On` on an open set depends only on the values of `w` there. -/
-theorem p1h_isLinearODE2On_congr {p r w w' : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
+lemma p1h_isLinearODE2On_congr {p r w w' : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
     (h : EqOn w w' U) (hw : IsLinearODE2On p r w U) : IsLinearODE2On p r w' U := by
   have hev : ∀ z ∈ U, w =ᶠ[𝓝 z] w' := fun z hz =>
     Filter.eventually_of_mem (hU.mem_nhds hz) fun y hy => h hy
@@ -164,7 +167,7 @@ theorem p1h_ordinary_two {c₀ c₁ : ℂ → ℂ} {z₀ : ℂ} (h₀ : Analytic
   · exact ⟨c₁, h₁, by simp⟩
 
 /-- Raw coefficients of a second-order equation after `z = 1/u`. -/
-theorem p1h_recipRaw_two (c₀ c₁ : ℂ → ℂ) {u : ℂ} (hu : u ≠ 0) :
+lemma p1h_recipRaw_two (c₀ c₁ : ℂ → ℂ) {u : ℂ} (hu : u ≠ 0) :
     Complex.linearODEReciprocalRaw ![c₀, c₁] 0 u = c₀ u⁻¹ ∧
     Complex.linearODEReciprocalRaw ![c₀, c₁] 1 u = 2 * u ^ 3 - u ^ 2 * c₁ u⁻¹ ∧
     Complex.linearODEReciprocalRaw ![c₀, c₁] 2 u = u ^ 4 := by

@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Hypergeometric.Basic
-public import Mathlib.Analysis.Calculus.FDeriv.Analytic
 
 /-!
 # Scalar power series for hypergeometric differential equations
@@ -25,7 +24,7 @@ noncomputable section
 namespace DLMF.Hypergeometric
 
 /-- Adding a natural number preserves exclusion of the nonpositive integers. -/
-lemma not_neg_nat_add_nat {a : ℂ} (ha : ∀ k : ℕ, a ≠ -k) (m : ℕ) :
+theorem not_neg_nat_add_nat {a : ℂ} (ha : ∀ k : ℕ, a ≠ -k) (m : ℕ) :
     ∀ k : ℕ, a + m ≠ -k := by
   intro k h
   apply ha (k + m)
@@ -33,7 +32,7 @@ lemma not_neg_nat_add_nat {a : ℂ} (ha : ∀ k : ℕ, a ≠ -k) (m : ℕ) :
   linear_combination h
 
 /-- Mathlib's left Pochhammer recurrence in the project's notation. -/
-lemma poch_succ_left (a : ℂ) (n : ℕ) : poch a (n + 1) = a * poch (a + 1) n := by
+theorem poch_succ_left (a : ℂ) (n : ℕ) : poch a (n + 1) = a * poch (a + 1) n := by
   simp [poch, ascPochhammer_succ_left, Polynomial.eval_comp]
 
 /-- Termwise differentiation, as a direct scalar specialization of Mathlib's
@@ -145,7 +144,7 @@ theorem hasFPowerSeriesOnBall_ordinaryHypergeometric (a b c : ℂ) :
   simpa only [ordinaryHypergeometricSeries, heq] using h
 
 /-- Absolute summability of the Gauss series inside the unit disk. -/
-lemma summable_norm_gaussHGCoeff_mul_pow (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem summable_norm_gaussHGCoeff_mul_pow (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     Summable fun n : ℕ => ‖gaussHGCoeff a b c n * z ^ n‖ := by
   have h := hasFPowerSeriesOnBall_ordinaryHypergeometric a b c
   have hr : (‖z‖₊ : ENNReal) < (ofScalars ℂ (gaussHGCoeff a b c)).radius := by
@@ -157,7 +156,7 @@ lemma summable_norm_gaussHGCoeff_mul_pow (a b c : ℂ) {z : ℂ} (hz : ‖z‖ <
   rw [ofScalars_norm, norm_mul, norm_pow, coe_nnnorm]
 
 /-- Helper lemma for binomial expansions of `(1-z)^{-β}`. -/
-lemma gaussHGCoeff_self_right (β : ℂ) (n : ℕ) :
+theorem gaussHGCoeff_self_right (β : ℂ) (n : ℕ) :
     gaussHGCoeff β 1 1 n = poch β n / n.factorial := by
   have h1 : poch (1 : ℂ) n = n.factorial := poch_nat_one n
   have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
@@ -165,14 +164,14 @@ lemma gaussHGCoeff_self_right (β : ℂ) (n : ℕ) :
   field [hf]
 
 /-- Helper lemma for binomial expansions of `(1-z)^{-β}`. -/
-lemma one_not_neg_nat : ∀ k : ℕ, (1 : ℂ) ≠ -k := by
+theorem one_not_neg_nat : ∀ k : ℕ, (1 : ℂ) ≠ -k := by
   intro k h
   have : (1 : ℝ) = -k := by simpa using congrArg Complex.re h
   have : (0 : ℝ) ≤ k := Nat.cast_nonneg k
   linarith
 
 /-- The binomial series `∑ (β)_n / n! z^n = (1-z)^{-β}` for `|z| < 1`. -/
-lemma hasSum_poch_div_factorial {β z : ℂ} (hz : ‖z‖ < 1) :
+theorem hasSum_poch_div_factorial {β z : ℂ} (hz : ‖z‖ < 1) :
     HasSum (fun n : ℕ => poch β n / n.factorial * z ^ n) ((1 - z) ^ (-β)) := by
   have hc : ∀ k : ℕ, (k : ℂ) ≠ -(1 : ℂ) := fun k hk =>
     one_not_neg_nat k (neg_eq_iff_eq_neg.mp hk.symm)
@@ -186,7 +185,7 @@ lemma hasSum_poch_div_factorial {β z : ℂ} (hz : ‖z‖ < 1) :
   rwa [hfun, hval] at hs
 
 /-- Helper lemma for generating-function estimates. -/
-lemma poch_eval_nonneg {x : ℝ} (hx : 0 ≤ x) (n : ℕ) :
+theorem poch_eval_nonneg {x : ℝ} (hx : 0 ≤ x) (n : ℕ) :
     0 ≤ (ascPochhammer ℝ n).eval x := by
   induction n with
   | zero => simp
@@ -195,7 +194,7 @@ lemma poch_eval_nonneg {x : ℝ} (hx : 0 ≤ x) (n : ℕ) :
     exact mul_nonneg ih (add_nonneg hx (Nat.cast_nonneg n))
 
 /-- Helper lemma for generating-function estimates. -/
-lemma norm_poch_le (z : ℂ) (n : ℕ) :
+theorem norm_poch_le (z : ℂ) (n : ℕ) :
     ‖poch z n‖ ≤ (ascPochhammer ℝ n).eval ‖z‖ := by
   induction n with
   | zero => simp [poch_zero]
@@ -209,7 +208,7 @@ lemma norm_poch_le (z : ℂ) (n : ℕ) :
     exact mul_le_mul ih hle (norm_nonneg _) hnn
 
 /-- Helper lemma for generating-function estimates. -/
-lemma poch_eval_mono {x y : ℝ} (hx : 0 ≤ x) (hxy : x ≤ y) (n : ℕ) :
+theorem poch_eval_mono {x y : ℝ} (hx : 0 ≤ x) (hxy : x ≤ y) (n : ℕ) :
     (ascPochhammer ℝ n).eval x ≤ (ascPochhammer ℝ n).eval y := by
   induction n with
   | zero => simp
@@ -219,7 +218,7 @@ lemma poch_eval_mono {x y : ℝ} (hx : 0 ≤ x) (hxy : x ≤ y) (n : ℕ) :
       (add_nonneg hx (Nat.cast_nonneg n)) (poch_eval_nonneg (le_trans hx hxy) n)
 
 /-- Helper lemma for generating-function estimates. -/
-lemma poch_ofReal (x : ℝ) (n : ℕ) :
+theorem poch_ofReal (x : ℝ) (n : ℕ) :
     poch (x : ℂ) n = ↑((ascPochhammer ℝ n).eval x) := by
   induction n with
   | zero => simp [poch_zero]

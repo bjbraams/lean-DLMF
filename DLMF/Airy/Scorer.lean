@@ -5,11 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Airy.Framework
 public import DLMF.Airy.Equation
-public import DLMFMathlib.Analysis.Asymptotics.WatsonRotated
-public import Mathlib.MeasureTheory.Integral.Gamma
-public import DLMFMathlib.Analysis.Complex.SegmentPrimitive
 public import DLMF.Airy.Zeros
 public import DLMFMathlib.Analysis.ODE.SturmCount
 
@@ -58,7 +54,7 @@ open FormalMultilinearSeries
 open scoped NNReal ENNReal
 
 /-- The three-step recurrence `c_{k+3}(k+3)(k+2) = c_k` of the Hi coefficients. -/
-lemma scorerHiCoeff_rec (k : ℕ) :
+theorem scorerHiCoeff_rec (k : ℕ) :
     scorerHiCoeff (k + 3) * (((k : ℂ) + 3) * ((k : ℂ) + 2)) = scorerHiCoeff k := by
   simp only [scorerHiCoeff]
   push_cast
@@ -82,7 +78,7 @@ lemma scorerHiCoeff_rec (k : ℕ) :
   ring
 
 /-- A three-step recurrence `c_{k+3}(k+3)(k+2) = c_k` forces an infinite radius. -/
-lemma radius_ofScalars_eq_top_of_rec3 {c : ℕ → ℂ}
+theorem radius_ofScalars_eq_top_of_rec3 {c : ℕ → ℂ}
     (h : ∀ k : ℕ, c (k + 3) * (((k : ℂ) + 3) * ((k : ℂ) + 2)) = c k) :
     (ofScalars ℂ c).radius = ⊤ := by
   refine ENNReal.eq_top_of_forall_nnreal_le fun r => ?_
@@ -118,11 +114,11 @@ lemma radius_ofScalars_eq_top_of_rec3 {c : ℕ → ℂ}
   rw [ofScalars_norm]
 
 /-- The Maclaurin series of Hi has infinite radius. -/
-lemma radius_scorerHi : (ofScalars ℂ scorerHiCoeff).radius = ⊤ :=
+theorem radius_scorerHi : (ofScalars ℂ scorerHiCoeff).radius = ⊤ :=
   radius_ofScalars_eq_top_of_rec3 scorerHiCoeff_rec
 
 /-- Hi is the sum of its Maclaurin series on all of `ℂ`. -/
-lemma hasFPowerSeriesOnBall_scorerHi :
+theorem hasFPowerSeriesOnBall_scorerHi :
     HasFPowerSeriesOnBall scorerHi (ofScalars ℂ scorerHiCoeff) 0 ⊤ := by
   have h := (ofScalars ℂ scorerHiCoeff).hasFPowerSeriesOnBall (by rw [radius_scorerHi]; simp)
   rw [radius_scorerHi] at h
@@ -131,18 +127,18 @@ lemma hasFPowerSeriesOnBall_scorerHi :
     simp only [scorerHi, FormalMultilinearSeries.sum, ofScalars_apply_eq, smul_eq_mul]
   rwa [he] at h
 
-lemma mem_eball_top (z : ℂ) : z ∈ Metric.eball (0 : ℂ) ⊤ := by simp
+theorem mem_eball_top (z : ℂ) : z ∈ Metric.eball (0 : ℂ) ⊤ := by simp
 /-- Hi is entire. -/
-lemma differentiable_scorerHi : Differentiable ℂ scorerHi := fun z =>
+theorem differentiable_scorerHi : Differentiable ℂ scorerHi := fun z =>
   (hasFPowerSeriesOnBall_scorerHi.analyticAt_of_mem (mem_eball_top z)).differentiableAt
 
-lemma scorerHiCoeff_two : scorerHiCoeff 2 = 1 / (2 * π) := by
+theorem scorerHiCoeff_two : scorerHiCoeff 2 = 1 / (2 * π) := by
   simp only [scorerHiCoeff]
   norm_num
   ring
 
 /-- `Hi'' = z Hi + 1/π`. -/
-lemma hasDerivAt_scorerHiDeriv (z : ℂ) :
+theorem hasDerivAt_scorerHiDeriv (z : ℂ) :
     HasDerivAt scorerHiDeriv (z * scorerHi z + 1 / π) z := by
   have h1 := hasFPowerSeriesOnBall_scorerHi.deriv_ofScalars
   have h2 := h1.deriv_ofScalars
@@ -167,14 +163,14 @@ lemma hasDerivAt_scorerHiDeriv (z : ℂ) :
   rwa [he] at this
 
 /-- `Hi' ` as a derivative. -/
-lemma hasDerivAt_scorerHi (z : ℂ) : HasDerivAt scorerHi (scorerHiDeriv z) z :=
+theorem hasDerivAt_scorerHi (z : ℂ) : HasDerivAt scorerHi (scorerHiDeriv z) z :=
   (differentiable_scorerHi z).hasDerivAt
 
 /-- `Gi' = Bi' - Hi'`. -/
-lemma scorerGiDeriv_eq (z : ℂ) : scorerGiDeriv z = airyBiDeriv z - scorerHiDeriv z :=
+theorem scorerGiDeriv_eq (z : ℂ) : scorerGiDeriv z = airyBiDeriv z - scorerHiDeriv z :=
   ((hasDerivAt_airyBi z).sub (hasDerivAt_scorerHi z)).deriv
 /-- `exp(-ε·2πi/3)` is a cube root of unity for `ε = ±1`. -/
-lemma exp_neg_eps_cube {ε : ℝ} (hε : ε = 1 ∨ ε = -1) : exp (-ε * (2 * π * I / 3)) ^ 3 = 1 := by
+theorem exp_neg_eps_cube {ε : ℝ} (hε : ε = 1 ∨ ε = -1) : exp (-ε * (2 * π * I / 3)) ^ 3 = 1 := by
   rcases hε with rfl | rfl
   · simpa using omega_recip_cube
   · simpa using omega_cube
@@ -297,7 +293,7 @@ theorem scorer_zero  :
   · rw [hGi, hHi', hBi]; push_cast; field_simp; norm_num
 
 /-- `Hi'(0) = 3^{-1/3} Γ(2/3)/π`. -/
-lemma scorerHiDeriv_zero : scorerHiDeriv 0 = scorerHiCoeff 1 := by
+theorem scorerHiDeriv_zero : scorerHiDeriv 0 = scorerHiCoeff 1 := by
   have h := hasFPowerSeriesOnBall_scorerHi.deriv_ofScalars.hasSum_mul_pow (mem_eball_top 0)
   have h' : HasSum (fun n : ℕ => ((n : ℂ) + 1) * scorerHiCoeff (n + 1) * (0 : ℂ) ^ n)
       ((((0 : ℕ) : ℂ) + 1) * scorerHiCoeff (0 + 1) * (0 : ℂ) ^ 0) :=
@@ -354,34 +350,34 @@ theorem scorerDeriv_zero  :
 def IsAiryInhomSol (c : ℂ) (w w' : ℂ → ℂ) : Prop :=
   ∀ z, HasDerivAt w (w' z) z ∧ HasDerivAt w' (z * w z + c) z
 
-lemma IsAiryInhomSol.of_airy {w w' : ℂ → ℂ} (h : IsAirySol w w') : IsAiryInhomSol 0 w w' :=
+theorem IsAiryInhomSol.of_airy {w w' : ℂ → ℂ} (h : IsAirySol w w') : IsAiryInhomSol 0 w w' :=
   fun z => ⟨(h z).1, (h z).2.congr_deriv (by ring)⟩
 
-lemma IsAiryInhomSol.add {c d : ℂ} {f f' g g' : ℂ → ℂ} (hf : IsAiryInhomSol c f f')
+theorem IsAiryInhomSol.add {c d : ℂ} {f f' g g' : ℂ → ℂ} (hf : IsAiryInhomSol c f f')
     (hg : IsAiryInhomSol d g g') :
     IsAiryInhomSol (c + d) (fun z => f z + g z) (fun z => f' z + g' z) := fun z =>
   ⟨(hf z).1.add (hg z).1, ((hf z).2.add (hg z).2).congr_deriv (by ring)⟩
 
-lemma IsAiryInhomSol.const_mul {c : ℂ} (a : ℂ) {f f' : ℂ → ℂ} (hf : IsAiryInhomSol c f f') :
+theorem IsAiryInhomSol.const_mul {c : ℂ} (a : ℂ) {f f' : ℂ → ℂ} (hf : IsAiryInhomSol c f f') :
     IsAiryInhomSol (a * c) (fun z => a * f z) (fun z => a * f' z) := fun z =>
   ⟨(hf z).1.const_mul a, ((hf z).2.const_mul a).congr_deriv (by ring)⟩
 
-lemma IsAiryInhomSol.congr_const {c d : ℂ} {f f' : ℂ → ℂ} (hf : IsAiryInhomSol c f f')
+theorem IsAiryInhomSol.congr_const {c d : ℂ} {f f' : ℂ → ℂ} (hf : IsAiryInhomSol c f f')
     (h : c = d) : IsAiryInhomSol d f f' := h ▸ hf
 
 /-- Inhomogeneous Airy solutions with the same forcing are determined by their initial data. -/
-lemma IsAiryInhomSol.eq_of_initial {c : ℂ} {f f' g g' : ℂ → ℂ} (hf : IsAiryInhomSol c f f')
+theorem IsAiryInhomSol.eq_of_initial {c : ℂ} {f f' g g' : ℂ → ℂ} (hf : IsAiryInhomSol c f f')
     (hg : IsAiryInhomSol c g g') (h0 : f 0 = g 0) (h1 : f' 0 = g' 0) (z : ℂ) : f z = g z := by
   have hd : IsAirySol (fun w => f w - g w) (fun w => f' w - g' w) := fun w =>
     ⟨(hf w).1.sub (hg w).1, ((hf w).2.sub (hg w).2).congr_deriv (by ring)⟩
   exact sub_eq_zero.mp (hd.eq_zero (by simp [h0]) (by simp [h1]) z)
 
 /-- `Hi` solves `w'' = z w + 1/π`. -/
-lemma isAiryInhomSol_scorerHi : IsAiryInhomSol (1 / π) scorerHi scorerHiDeriv := fun z =>
+theorem isAiryInhomSol_scorerHi : IsAiryInhomSol (1 / π) scorerHi scorerHiDeriv := fun z =>
   ⟨hasDerivAt_scorerHi z, hasDerivAt_scorerHiDeriv z⟩
 
 /-- `Gi` solves `w'' = z w - 1/π`. -/
-lemma isAiryInhomSol_scorerGi : IsAiryInhomSol (-(1 / π)) scorerGi scorerGiDeriv := by
+theorem isAiryInhomSol_scorerGi : IsAiryInhomSol (-(1 / π)) scorerGi scorerGiDeriv := by
   intro z
   have hG : scorerGiDeriv = fun z => airyBiDeriv z - scorerHiDeriv z := funext scorerGiDeriv_eq
   refine ⟨((hasDerivAt_airyBi z).sub (hasDerivAt_scorerHi z)).congr_deriv
@@ -391,7 +387,7 @@ lemma isAiryInhomSol_scorerGi : IsAiryInhomSol (-(1 / π)) scorerGi scorerGiDeri
     (by simp only [scorerGi]; ring)
 
 /-- Rotating the argument of an inhomogeneous solution by a cube root of unity. -/
-lemma IsAiryInhomSol.rotate {c ν : ℂ} (hν : ν ^ 3 = 1) {f f' : ℂ → ℂ}
+theorem IsAiryInhomSol.rotate {c ν : ℂ} (hν : ν ^ 3 = 1) {f f' : ℂ → ℂ}
     (hf : IsAiryInhomSol c f f') :
     IsAiryInhomSol (ν ^ 2 * c) (fun z => f (z * ν)) (fun z => ν * f' (z * ν)) := by
   intro z
@@ -414,49 +410,49 @@ lemma airyWronskian3_eq {c : ℂ} {f f' g g' h h' : ℂ → ℂ} (hf : IsAiryInh
   simp only [airyWronskian3, df, dg, dh, (hf z).2.deriv, (hg z).2.deriv, (hh z).2.deriv]
   ring
 
-lemma isAirySol_airyAi_mul {ν : ℂ} (hν : ν ^ 3 = 1) :
+theorem isAirySol_airyAi_mul {ν : ℂ} (hν : ν ^ 3 = 1) :
     IsAirySol (fun t => airyAi (t * ν)) (fun t => ν * airyAiDeriv (t * ν)) := by
   have h := isAirySol_rotated hν
   simp only [mul_comm _ ν]
   exact h
 
 /-- The segment primitive of an entire function differentiates to it. -/
-lemma hasDerivAt_primitive {f : ℂ → ℂ} (hf : Differentiable ℂ f) (z : ℂ) :
+theorem hasDerivAt_primitive {f : ℂ → ℂ} (hf : Differentiable ℂ f) (z : ℂ) :
     HasDerivAt (primitive f) (f z) z := by
   have he : primitive f = fun w : ℂ => w * ∫ t : ℝ in 0..1, f (t * w) := by
     funext w; simp [primitive, lineIntegral]
   rw [he]; exact Complex.hasDerivAt_mul_integral_comp_mul hf z
 
-lemma primitive_zero (f : ℂ → ℂ) : primitive f 0 = 0 := by simp [primitive, lineIntegral]
+theorem primitive_zero (f : ℂ → ℂ) : primitive f 0 = 0 := by simp [primitive, lineIntegral]
 
 /-- `Bi(0) = √3 Ai(0)`. -/
-lemma airyBi_zero_eq : airyBi 0 = (Real.sqrt 3 : ℂ) * airyAi 0 := by
+theorem airyBi_zero_eq : airyBi 0 = (Real.sqrt 3 : ℂ) * airyAi 0 := by
   simp only [airyBi, airyAi, airyG_zero, mul_zero, add_zero, sub_zero]
 
 /-- `Bi'(0) = -√3 Ai'(0)`. -/
-lemma airyBiDeriv_zero_eq : airyBiDeriv 0 = -(Real.sqrt 3 : ℂ) * airyAiDeriv 0 := by
+theorem airyBiDeriv_zero_eq : airyBiDeriv 0 = -(Real.sqrt 3 : ℂ) * airyAiDeriv 0 := by
   simp only [airyBiDeriv, airyAiDeriv, airyFDeriv_zero, mul_zero, zero_add, zero_sub]
   ring
 
-lemma exp_neg_two_pi_I_div_three' : exp (-2 * π * I / 3) = -1 / 2 - (Real.sqrt 3 / 2 : ℝ) * I := by
+theorem exp_neg_two_pi_I_div_three' : exp (-2 * π * I / 3) = -1 / 2 - (Real.sqrt 3 / 2 : ℝ) * I := by
   rw [show (-2 * π * I / 3 : ℂ) = -(2 * π * I / 3) by ring, exp_neg_two_pi_I_div_three]
 
-lemma exp_neg_pi_I_div_three' : exp (-π * I / 3) = (1 / 2 : ℂ) - (Real.sqrt 3 / 2 : ℝ) * I := by
+theorem exp_neg_pi_I_div_three' : exp (-π * I / 3) = (1 / 2 : ℂ) - (Real.sqrt 3 / 2 : ℝ) * I := by
   rw [show (-π * I / 3 : ℂ) = -(π * I / 3) by ring, exp_neg_pi_I_div_three]
 
-lemma sqrt_three_cube : ((Real.sqrt 3 : ℝ) : ℂ) ^ 3 = 3 * (Real.sqrt 3 : ℝ) := by
+theorem sqrt_three_cube : ((Real.sqrt 3 : ℝ) : ℂ) ^ 3 = 3 * (Real.sqrt 3 : ℝ) := by
   rw [pow_succ, sqrt_three_sq]
 
-lemma sqrt_three_four : ((Real.sqrt 3 : ℝ) : ℂ) ^ 4 = 9 := by
+theorem sqrt_three_four : ((Real.sqrt 3 : ℝ) : ℂ) ^ 4 = 9 := by
   rw [show 4 = 2 * 2 by rfl, pow_mul, sqrt_three_sq]; norm_num
 
-lemma scorerHi_zero_eq : scorerHi 0 = 2 * (Real.sqrt 3 : ℂ) / 3 * airyAi 0 := by
+theorem scorerHi_zero_eq : scorerHi 0 = 2 * (Real.sqrt 3 : ℂ) / 3 * airyAi 0 := by
   have h1 := scorer_zero.1
   have h2 := scorer_zero.2.1
   rw [airyBi_zero_eq] at h2
   linear_combination -2 * h1 + 2 * h2
 
-lemma scorerHiDeriv_zero_eq : scorerHiDeriv 0 = -(2 * (Real.sqrt 3 : ℂ) / 3) * airyAiDeriv 0 := by
+theorem scorerHiDeriv_zero_eq : scorerHiDeriv 0 = -(2 * (Real.sqrt 3 : ℂ) / 3) * airyAiDeriv 0 := by
   have h1 := scorerDeriv_zero.1
   have h2 := scorerDeriv_zero.2.1
   rw [airyBiDeriv_zero_eq] at h2
@@ -467,7 +463,7 @@ macro "sqrt3_ring" : tactic =>
   `(tactic| (ring_nf; simp only [sqrt_three_sq, sqrt_three_cube, sqrt_three_four, I_sq,
     I_pow_three]; ring_nf))
 
-lemma exp_eps_values {ε : ℝ} (hε : ε = 1 ∨ ε = -1) :
+theorem exp_eps_values {ε : ℝ} (hε : ε = 1 ∨ ε = -1) :
     exp (ε * (2 * π * I / 3)) = -1 / 2 + ε * (Real.sqrt 3 / 2 : ℝ) * I ∧
     exp (-ε * (2 * π * I / 3)) = -1 / 2 - ε * (Real.sqrt 3 / 2 : ℝ) * I ∧
     exp (-ε * (π * I / 3)) = 1 / 2 - ε * (Real.sqrt 3 / 2 : ℝ) * I ∧
@@ -649,11 +645,11 @@ def scorerGiCoeff (k : ℕ) : ℂ :=
     ((3 : ℂ) ^ (1 / 3 : ℂ)) ^ k / k.factorial
 
 /-- `(3^{1/3})^3 = 3`. -/
-lemma three_cpow_third_cube : ((3 : ℂ) ^ (1 / 3 : ℂ)) ^ 3 = 3 := by
+theorem three_cpow_third_cube : ((3 : ℂ) ^ (1 / 3 : ℂ)) ^ 3 = 3 := by
   rw [one_div]; exact_mod_cast cpow_nat_inv_pow (3 : ℂ) (n := 3) (by norm_num)
 
 /-- The three-step recurrence of the Gi coefficients. -/
-lemma scorerGiCoeff_rec (k : ℕ) :
+theorem scorerGiCoeff_rec (k : ℕ) :
     scorerGiCoeff (k + 3) * (((k : ℂ) + 3) * ((k : ℂ) + 2)) = scorerGiCoeff k := by
   simp only [scorerGiCoeff]
   push_cast
@@ -677,12 +673,12 @@ lemma scorerGiCoeff_rec (k : ℕ) :
   ring
 
 /-- `3^{-2/3} 3^{1/3} = 3^{-1/3}`. -/
-lemma three_cpow_neg_two_thirds_mul_third :
+theorem three_cpow_neg_two_thirds_mul_third :
     (3 : ℂ) ^ (-2 / 3 : ℂ) * (3 : ℂ) ^ (1 / 3 : ℂ) = (3 : ℂ) ^ (-1 / 3 : ℂ) := by
   rw [← cpow_add _ _ (by norm_num)]; norm_num
 
 /-- `c₀(Gi) = c₀(Hi)/2`. -/
-lemma scorerGiCoeff_zero : scorerGiCoeff 0 = scorerHiCoeff 0 / 2 := by
+theorem scorerGiCoeff_zero : scorerGiCoeff 0 = scorerHiCoeff 0 / 2 := by
   simp only [scorerGiCoeff, scorerHiCoeff, Nat.cast_zero, mul_zero, zero_sub, pow_zero,
     Nat.factorial_zero, Nat.cast_one, zero_add]
   rw [show (-1 : ℂ) * π / 3 = ((-(π / 3) : ℝ) : ℂ) by push_cast; ring, ← ofReal_cos,
@@ -691,7 +687,7 @@ lemma scorerGiCoeff_zero : scorerGiCoeff 0 = scorerHiCoeff 0 / 2 := by
   ring_nf
 
 /-- `c₁(Gi) = c₁(Hi)/2`. -/
-lemma scorerGiCoeff_one : scorerGiCoeff 1 = scorerHiCoeff 1 / 2 := by
+theorem scorerGiCoeff_one : scorerGiCoeff 1 = scorerHiCoeff 1 / 2 := by
   simp only [scorerGiCoeff, scorerHiCoeff, Nat.cast_one, pow_one, Nat.factorial_one]
   rw [show (2 * (1 : ℂ) - 1) * π / 3 = ((π / 3 : ℝ) : ℂ) by push_cast; ring, ← ofReal_cos,
     Real.cos_pi_div_three, mul_assoc, show ((1 : ℂ) - 2) / 3 = -1 / 3 by norm_num,
@@ -700,7 +696,7 @@ lemma scorerGiCoeff_one : scorerGiCoeff 1 = scorerHiCoeff 1 / 2 := by
   ring
 
 /-- `c₂(Gi) = -1/(2π)`. -/
-lemma scorerGiCoeff_two : scorerGiCoeff 2 = -(1 / (2 * π)) := by
+theorem scorerGiCoeff_two : scorerGiCoeff 2 = -(1 / (2 * π)) := by
   simp only [scorerGiCoeff]
   rw [show (2 * ((2 : ℕ) : ℂ) - 1) * π / 3 = π + 0 by push_cast; ring, Complex.cos_add,
     Complex.cos_pi, Complex.sin_pi, Complex.cos_zero, Complex.sin_zero,
@@ -712,7 +708,7 @@ lemma scorerGiCoeff_two : scorerGiCoeff 2 = -(1 / (2 * π)) := by
   linear_combination (-1 / (2 * π) : ℂ) * h
 
 /-- The Maclaurin series of Gi sums to an entire function. -/
-lemma hasFPowerSeriesOnBall_scorerGiSeries :
+theorem hasFPowerSeriesOnBall_scorerGiSeries :
     HasFPowerSeriesOnBall (fun z => ∑' k : ℕ, scorerGiCoeff k * z ^ k)
       (FormalMultilinearSeries.ofScalars ℂ scorerGiCoeff) 0 ⊤ := by
   have hr := radius_ofScalars_eq_top_of_rec3 scorerGiCoeff_rec
@@ -724,7 +720,7 @@ lemma hasFPowerSeriesOnBall_scorerGiSeries :
   rwa [he] at h
 
 /-- The Gi Maclaurin series solves `w'' = z w - 1/π`. -/
-lemma isAiryInhomSol_scorerGiSeries :
+theorem isAiryInhomSol_scorerGiSeries :
     IsAiryInhomSol (-(1 / π)) (fun z => ∑' k : ℕ, scorerGiCoeff k * z ^ k)
       (deriv fun z => ∑' k : ℕ, scorerGiCoeff k * z ^ k) := by
   set f := fun z => ∑' k : ℕ, scorerGiCoeff k * z ^ k
@@ -754,7 +750,7 @@ lemma isAiryInhomSol_scorerGiSeries :
   rwa [he] at this
 
 /-- The Gi Maclaurin series equals Gi. -/
-lemma scorerGiSeries_eq : (fun z => ∑' k : ℕ, scorerGiCoeff k * z ^ k) = scorerGi := by
+theorem scorerGiSeries_eq : (fun z => ∑' k : ℕ, scorerGiCoeff k * z ^ k) = scorerGi := by
   have h0 := hasFPowerSeriesOnBall_scorerGiSeries
   funext z
   refine isAiryInhomSol_scorerGiSeries.eq_of_initial isAiryInhomSol_scorerGi ?_ ?_ z
@@ -832,7 +828,7 @@ theorem hasSum_scorerHiDeriv (z : ℂ) :
 -- `scorerGi_sin_integral` (DLMF 9.12.19) is in `DLMF/Airy/IntegralRepresentations.lean`.
 
 /-- `t^k e^{-t³/3}` in `rpow` form. -/
-lemma pow_mul_exp_neg_cube_eq (k : ℕ) :
+theorem pow_mul_exp_neg_cube_eq (k : ℕ) :
     (fun t : ℝ => t ^ k * Real.exp (-(t ^ 3 / 3))) =
       fun t : ℝ => t ^ (k : ℝ) * Real.exp (-(1 / 3) * t ^ (3 : ℝ)) := by
   funext t
@@ -840,14 +836,14 @@ lemma pow_mul_exp_neg_cube_eq (k : ℕ) :
   ring_nf
 
 /-- `t^k e^{-t³/3}` is integrable on `(0,∞)`. -/
-lemma integrableOn_pow_mul_exp_neg_cube (k : ℕ) :
+theorem integrableOn_pow_mul_exp_neg_cube (k : ℕ) :
     IntegrableOn (fun t : ℝ => t ^ k * Real.exp (-(t ^ 3 / 3))) (Ioi 0) := by
   rw [pow_mul_exp_neg_cube_eq]
   exact integrableOn_rpow_mul_exp_neg_mul_rpow (by linarith [k.cast_nonneg (α := ℝ)])
     (by norm_num) (by norm_num)
 
 /-- `∫₀^∞ t^k e^{-t³/3} dt = 3^{(k-2)/3} Γ((k+1)/3)`. -/
-lemma integral_pow_mul_exp_neg_cube (k : ℕ) :
+theorem integral_pow_mul_exp_neg_cube (k : ℕ) :
     ∫ t in Ioi (0 : ℝ), t ^ k * Real.exp (-(t ^ 3 / 3)) =
       (3 : ℝ) ^ (((k : ℝ) - 2) / 3) * Real.Gamma (((k : ℝ) + 1) / 3) := by
   rw [pow_mul_exp_neg_cube_eq, _root_.integral_rpow_mul_exp_neg_mul_rpow (by norm_num)
@@ -858,7 +854,7 @@ lemma integral_pow_mul_exp_neg_cube (k : ℕ) :
   congr 1; ring
 
 /-- The real form of the Hi coefficients. -/
-lemma scorerHiCoeff_eq_ofReal (k : ℕ) :
+theorem scorerHiCoeff_eq_ofReal (k : ℕ) :
     scorerHiCoeff k = (((3 : ℝ) ^ (((k : ℝ) - 2) / 3) * Real.Gamma (((k : ℝ) + 1) / 3) /
       (π * k !) : ℝ) : ℂ) := by
   rw [scorerHiCoeff]
@@ -867,7 +863,7 @@ lemma scorerHiCoeff_eq_ofReal (k : ℕ) :
   push_cast; ring_nf
 
 /-- `t^m e^{-t³/3 + z t}` is integrable on `(0,∞)`. -/
-lemma integrableOn_pow_mul_exp_cubic (m : ℕ) (z : ℂ) :
+theorem integrableOn_pow_mul_exp_cubic (m : ℕ) (z : ℂ) :
     IntegrableOn (fun t : ℝ => (t : ℂ) ^ m * exp (-(t : ℂ) ^ 3 / 3 + z * t)) (Ioi 0) := by
   set b : ℝ := |z.re| + 2
   have hb : 1 ≤ b := by simp only [b]; linarith [abs_nonneg z.re]
@@ -898,7 +894,7 @@ lemma integrableOn_pow_mul_exp_cubic (m : ℕ) (z : ℂ) :
         rw [mul_assoc, ← Real.exp_add, mul_assoc, ← Real.exp_add]; ring_nf
 
 /-- Termwise integration of `t^m e^{-t³/3} e^{zt}` over `(0,∞)`. -/
-lemma hasSum_integral_pow_mul_exp_cubic (m : ℕ) (z : ℂ)
+theorem hasSum_integral_pow_mul_exp_cubic (m : ℕ) (z : ℂ)
     (hs : Summable fun k : ℕ => ‖z‖ ^ k / k ! *
       ∫ t in Ioi (0 : ℝ), t ^ (k + m) * Real.exp (-(t ^ 3 / 3))) :
     HasSum (fun k : ℕ => z ^ k / k ! *
@@ -932,7 +928,7 @@ lemma hasSum_integral_pow_mul_exp_cubic (m : ℕ) (z : ℂ)
     ring
 
 /-- `c_k = I_k/(π k!)` with `I_k = ∫₀^∞ t^k e^{-t³/3}`. -/
-lemma scorerHiCoeff_eq_integral (k : ℕ) :
+theorem scorerHiCoeff_eq_integral (k : ℕ) :
     scorerHiCoeff k = ((∫ t in Ioi (0 : ℝ), t ^ k * Real.exp (-(t ^ 3 / 3)) : ℝ) : ℂ) /
       (π * k !) := by
   rw [scorerHiCoeff_eq_ofReal, integral_pow_mul_exp_neg_cube]; push_cast; ring
@@ -1019,7 +1015,7 @@ theorem scorerHi_mellinBarnes {z : ℂ} (hz0 : z ≠ 0) (hz : |arg (-z)| < 2 * �
   sorry
 
 /-- `I_{k+1}/k!` form of the Hi′ coefficients. -/
-lemma scorerHiDeriv_coeff_eq_integral (k : ℕ) (z : ℂ) :
+theorem scorerHiDeriv_coeff_eq_integral (k : ℕ) (z : ℂ) :
     (3 : ℂ) ^ (-1 / 3 : ℂ) / π * Gamma (((k : ℂ) + 2) / 3) * ((3 : ℂ) ^ (1 / 3 : ℂ) * z) ^ k /
       k ! = z ^ k / k ! *
         ((∫ t in Ioi (0 : ℝ), t ^ (k + 1) * Real.exp (-(t ^ 3 / 3)) : ℝ) : ℂ) / π := by
@@ -1034,7 +1030,7 @@ lemma scorerHiDeriv_coeff_eq_integral (k : ℕ) (z : ℂ) :
   linear_combination (Gamma (((k : ℂ) + 2) / 3) * z ^ k / π / k !) * h3
 
 /-- Laplace integral for Hi′. -/
-lemma scorerHiDeriv_exp_integral (z : ℂ) :
+theorem scorerHiDeriv_exp_integral (z : ℂ) :
     scorerHiDeriv z = (∫ t : ℝ in Ioi 0, (t : ℂ) * exp (-(t : ℂ) ^ 3 / 3 + z * t)) / π := by
   have hpi : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   have hs : Summable fun k : ℕ => ‖z‖ ^ k / k ! *
@@ -1059,7 +1055,7 @@ are rotated to rays `|arg t| < π/6` and expanded by Watson's lemma
 `|arg(-z)| < 2π/3`. The expansions of `Gi`, `Gi'` follow from the rotation formula 9.12.12. -/
 
 /-- The cubic kernel `e^{-t³/3}` along the ray `t = r e^{iy}`. -/
-lemma scorerAsym_norm_kernel (r y : ℝ) :
+theorem scorerAsym_norm_kernel (r y : ℝ) :
     ‖cexp (-(((r : ℂ) * exp (y * I)) ^ 3 / 3))‖ = Real.exp (-(r ^ 3 * Real.cos (3 * y)) / 3) := by
   rw [Complex.norm_exp]
   congr 1
@@ -1069,7 +1065,7 @@ lemma scorerAsym_norm_kernel (r y : ℝ) :
   ring
 
 /-- The cubic kernel is bounded by `1` in the sector `|arg t| ≤ π/6`. -/
-lemma scorerAsym_norm_kernel_le_one {r : ℝ} (hr : 0 ≤ r) {y : ℝ} (hy : |y| ≤ π / 6) :
+theorem scorerAsym_norm_kernel_le_one {r : ℝ} (hr : 0 ≤ r) {y : ℝ} (hy : |y| ≤ π / 6) :
     ‖cexp (-(((r : ℂ) * exp (y * I)) ^ 3 / 3))‖ ≤ 1 := by
   rw [scorerAsym_norm_kernel, Real.exp_le_one_iff]
   have : 0 ≤ Real.cos (3 * y) := by
@@ -1079,7 +1075,7 @@ lemma scorerAsym_norm_kernel_le_one {r : ℝ} (hr : 0 ≤ r) {y : ℝ} (hy : |y|
   linarith
 
 /-- `r^m e^{-cr - br³}` is integrable on `(0, ∞)` for `b > 0`. -/
-lemma scorerAsym_integrableOn_pow_exp (m : ℕ) (c : ℝ) {b : ℝ} (hb : 0 < b) :
+theorem scorerAsym_integrableOn_pow_exp (m : ℕ) (c : ℝ) {b : ℝ} (hb : 0 < b) :
     IntegrableOn (fun r : ℝ => r ^ m * Real.exp (-c * r - b * r ^ 3)) (Ioi 0) := by
   set A : ℝ := |c| + 2
   set R : ℝ := Real.sqrt (A / b)
@@ -1115,7 +1111,7 @@ lemma scorerAsym_integrableOn_pow_exp (m : ℕ) (c : ℝ) {b : ℝ} (hb : 0 < b)
         rw [mul_assoc, ← Real.exp_add, mul_assoc, ← Real.exp_add]; ring_nf
 
 /-- The rotated kernel `(re^{iθ})^m e^{-(re^{iθ})³/3}` is Laplace-integrable for `|θ| < π/6`. -/
-lemma scorerAsym_integrableOn_rotate (m : ℕ) (c : ℝ) {θ : ℝ} (hθ : |θ| < π / 6) :
+theorem scorerAsym_integrableOn_rotate (m : ℕ) (c : ℝ) {θ : ℝ} (hθ : |θ| < π / 6) :
     IntegrableOn (fun r : ℝ => Real.exp (-c * r) •
       (((r : ℂ) * exp (θ * I)) ^ m * cexp (-(((r : ℂ) * exp (θ * I)) ^ 3 / 3)))) (Ioi 0) := by
   have hb : 0 < Real.cos (3 * θ) / 3 := by
@@ -1136,26 +1132,26 @@ lemma scorerAsym_integrableOn_rotate (m : ℕ) (c : ℝ) {θ : ℝ} (hθ : |θ| 
 noncomputable def scorerAsym_laplace (m : ℕ) (w : ℂ) : ℂ :=
   ∫ t in Ioi (0 : ℝ), cexp (-(w * t)) • ((t : ℂ) ^ m * cexp (-((t : ℂ) ^ 3 / 3)))
 
-lemma scorerAsym_integrableOn_zero (m : ℕ) (c : ℝ) :
+theorem scorerAsym_integrableOn_zero (m : ℕ) (c : ℝ) :
     IntegrableOn (fun t : ℝ => Real.exp (-c * t) • ((t : ℂ) ^ m * cexp (-((t : ℂ) ^ 3 / 3))))
       (Ioi 0) := by
   have h := scorerAsym_integrableOn_rotate m c (θ := 0) (by rw [abs_zero]; positivity)
   simpa using h
 
-lemma scorerAsym_differentiable_laplace (m : ℕ) : Differentiable ℂ (scorerAsym_laplace m) :=
+theorem scorerAsym_differentiable_laplace (m : ℕ) : Differentiable ℂ (scorerAsym_laplace m) :=
   fun w => (differentiableOn_integral_cexp_neg_mul_smul
     (scorerAsym_integrableOn_zero m (w.re - 1))).differentiableAt
     ((isOpen_lt continuous_const continuous_re).mem_nhds (by simp))
 
 /-- Hi and Hi' as Laplace integrals: `π Hi(z) = L₀(-z)`, `π Hi'(z) = L₁(-z)`. -/
-lemma scorerAsym_scorerHi_eq (z : ℂ) : π * scorerHi z = scorerAsym_laplace 0 (-z) := by
+theorem scorerAsym_scorerHi_eq (z : ℂ) : π * scorerHi z = scorerAsym_laplace 0 (-z) := by
   rw [(scorerHi_exp_integral z).2, scorerAsym_laplace, mul_div_cancel₀ _
     (ofReal_ne_zero.mpr Real.pi_ne_zero)]
   refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
   simp only [smul_eq_mul, pow_zero, one_mul]
   rw [← Complex.exp_add]; ring_nf
 
-lemma scorerAsym_scorerHiDeriv_eq (z : ℂ) : π * scorerHiDeriv z = scorerAsym_laplace 1 (-z) := by
+theorem scorerAsym_scorerHiDeriv_eq (z : ℂ) : π * scorerHiDeriv z = scorerAsym_laplace 1 (-z) := by
   rw [scorerHiDeriv_exp_integral z, scorerAsym_laplace, mul_div_cancel₀ _
     (ofReal_ne_zero.mpr Real.pi_ne_zero)]
   refine setIntegral_congr_fun measurableSet_Ioi fun t _ => ?_
@@ -1163,7 +1159,7 @@ lemma scorerAsym_scorerHiDeriv_eq (z : ℂ) : π * scorerHiDeriv z = scorerAsym_
   rw [mul_left_comm, ← Complex.exp_add]; ring_nf
 
 /-- **Rotation of the Laplace contour** for `|θ| < π/6`, valid for every complex `w`. -/
-lemma scorerAsym_laplace_rotate (m : ℕ) {θ : ℝ} (hθ : |θ| < π / 6) (w : ℂ) :
+theorem scorerAsym_laplace_rotate (m : ℕ) {θ : ℝ} (hθ : |θ| < π / 6) (w : ℂ) :
     scorerAsym_laplace m w = exp (θ * I) • ∫ r in Ioi (0 : ℝ), cexp (-(w * exp (θ * I) * r)) •
       (((r : ℂ) * exp (θ * I)) ^ m * cexp (-(((r : ℂ) * exp (θ * I)) ^ 3 / 3))) := by
   have hd2 : Differentiable ℂ (fun w : ℂ => exp (θ * I) • ∫ r in Ioi (0 : ℝ),
@@ -1224,7 +1220,7 @@ lemma scorerAsym_laplace_rotate (m : ℕ) {θ : ℝ} (hθ : |θ| < π / 6) (w : 
 noncomputable def scorerAsym_coeff (n : ℕ) : ℂ :=
   if 3 ∣ n then (-1 / 3 : ℂ) ^ (n / 3) / ((n / 3).factorial : ℂ) else 0
 
-lemma scorerAsym_sum_coeff (t : ℂ) (M : ℕ) :
+theorem scorerAsym_sum_coeff (t : ℂ) (M : ℕ) :
     (∑ n ∈ Finset.range (3 * M), t ^ n * scorerAsym_coeff n =
       ∑ k ∈ Finset.range M, (-(t ^ 3 / 3)) ^ k / (k.factorial : ℂ)) ∧
     (∑ n ∈ Finset.range (3 * M + 1), t ^ n * scorerAsym_coeff n =
@@ -1263,7 +1259,7 @@ lemma scorerAsym_sum_coeff (t : ℂ) (M : ℕ) :
   simp [scorerAsym_coeff, h2]
 
 /-- Taylor remainders of `t^m e^{-t³/3}` along a ray, as required by Watson's lemma. -/
-lemma scorerAsym_sub_sum_isBigO (m : ℕ) (θ : ℝ) (N : ℕ) :
+theorem scorerAsym_sub_sum_isBigO (m : ℕ) (θ : ℝ) (N : ℕ) :
     (fun r : ℝ => ((r : ℂ) * exp (θ * I)) ^ m * cexp (-(((r : ℂ) * exp (θ * I)) ^ 3 / 3)) -
       ∑ n ∈ Finset.range N,
         (((r : ℂ) * exp (θ * I)) ^ ((n : ℂ) + ((m : ℂ) + 1) - 1)) • scorerAsym_coeff n)
@@ -1320,7 +1316,7 @@ lemma scorerAsym_sub_sum_isBigO (m : ℕ) (θ : ℝ) (N : ℕ) :
 
 /-- Watson's expansion of `L_m(w) = ∫₀^∞ e^{-wt} t^m e^{-t³/3} dt` in the sector
 `|arg w| ≤ α < 2π/3`, obtained from two rotated rays. -/
-lemma scorerAsym_laplace_expansion (m : ℕ) {α : ℝ} (hα0 : 0 ≤ α) (hα : α < 2 * π / 3) :
+theorem scorerAsym_laplace_expansion (m : ℕ) {α : ℝ} (hα0 : 0 ≤ α) (hα : α < 2 * π / 3) :
     HasAsymptoticExpansion (airySector α) (fun (n : ℕ) (w : ℂ) => w ^ (-((n : ℂ) + ((m : ℂ) + 1))))
       (fun n => Gamma ((n : ℂ) + ((m : ℂ) + 1)) • scorerAsym_coeff n) (scorerAsym_laplace m) := by
   have hπ := Real.pi_pos
@@ -1346,7 +1342,7 @@ lemma scorerAsym_laplace_expansion (m : ℕ) {α : ℝ} (hα0 : 0 ≤ α) (hα :
   exact (h1.sup h2).mono hcov
 
 
-lemma scorerAsym_sum_three {g : ℕ → ℂ} (h1 : ∀ k, g (3 * k + 1) = 0) (h2 : ∀ k, g (3 * k + 2) = 0)
+theorem scorerAsym_sum_three {g : ℕ → ℂ} (h1 : ∀ k, g (3 * k + 1) = 0) (h2 : ∀ k, g (3 * k + 2) = 0)
     (N : ℕ) : ∑ n ∈ Finset.range (3 * N), g n = ∑ k ∈ Finset.range N, g (3 * k) := by
   induction N with
   | zero => simp
@@ -1357,7 +1353,7 @@ lemma scorerAsym_sum_three {g : ℕ → ℂ} (h1 : ∀ k, g (3 * k + 1) = 0) (h2
 
 /-- The expansion of `L_m(-z)` in powers of `1/z`, truncated after `N` nonzero terms, for
 `-z` in the sector `|arg(-z)| ≤ α < 2π/3`. -/
-lemma scorerAsym_laplace_neg_isBigO (m : ℕ) {α : ℝ} (hα0 : 0 ≤ α) (hα : α < 2 * π / 3) (N : ℕ) :
+theorem scorerAsym_laplace_neg_isBigO (m : ℕ) {α : ℝ} (hα0 : 0 ≤ α) (hα : α < 2 * π / 3) (N : ℕ) :
     IsBigO (comap (fun z : ℂ => -z) (airySector α))
       (fun z => scorerAsym_laplace m (-z) - ∑ k ∈ Finset.range N,
         ((3 * k + m).factorial : ℂ) * ((-1 / 3 : ℂ) ^ k / (k.factorial : ℂ)) *
@@ -1393,16 +1389,16 @@ lemma scorerAsym_laplace_neg_isBigO (m : ℕ) {α : ℝ} (hα0 : 0 ≤ α) (hα 
     rw [hpow, one_mul, norm_inv, norm_inv, norm_pow, norm_pow, norm_neg]
 
 
-lemma scorerAsym_eventually_ne_zero (α : ℝ) :
+theorem scorerAsym_eventually_ne_zero (α : ℝ) :
     ∀ᶠ z in comap (fun z : ℂ => -z) (airySector α), z ≠ 0 := by
   have h : ∀ᶠ w in airySector α, w ≠ 0 ∧ |arg w| ≤ α := mem_inf_of_right (mem_principal_self _)
   exact (tendsto_comap.eventually h).mono fun z hz => neg_ne_zero.mp hz.1
 
-lemma scorerAsym_neg_one_pow (k j : ℕ) : (-1 : ℂ) ^ (3 * k + j) = (-1) ^ k * (-1) ^ j := by
+theorem scorerAsym_neg_one_pow (k j : ℕ) : (-1 : ℂ) ^ (3 * k + j) = (-1) ^ k * (-1) ^ j := by
   rw [pow_add, pow_mul]; norm_num
 
 /-- `Hi(z) = -(πz)⁻¹ ∑_{k<N} (3k)!/(k!(3z³)^k) + O(z^{-3N-1})` for `|arg(-z)| ≤ α < 2π/3`. -/
-lemma scorerAsym_scorerHi_isBigO {α : ℝ} (hα0 : 0 ≤ α) (hα : α < 2 * π / 3) (N : ℕ) :
+theorem scorerAsym_scorerHi_isBigO {α : ℝ} (hα0 : 0 ≤ α) (hα : α < 2 * π / 3) (N : ℕ) :
     IsBigO (comap (fun z : ℂ => -z) (airySector α))
       (fun z : ℂ => scorerHi z - -1 / (π * z ^ 1) *
         ∑ k ∈ Finset.range N, (((3 * k + 0).factorial : ℂ) / k.factorial) / (3 * z ^ 3) ^ k)
@@ -1421,7 +1417,7 @@ lemma scorerAsym_scorerHi_isBigO {α : ℝ} (hα0 : 0 ≤ α) (hα : α < 2 * π
     field_simp
 
 /-- `Hi'(z) = (πz²)⁻¹ ∑_{k<N} (3k+1)!/(k!(3z³)^k) + O(z^{-3N-2})` for `|arg(-z)| ≤ α < 2π/3`. -/
-lemma scorerAsym_scorerHiDeriv_isBigO {α : ℝ} (hα0 : 0 ≤ α) (hα : α < 2 * π / 3) (N : ℕ) :
+theorem scorerAsym_scorerHiDeriv_isBigO {α : ℝ} (hα0 : 0 ≤ α) (hα : α < 2 * π / 3) (N : ℕ) :
     IsBigO (comap (fun z : ℂ => -z) (airySector α))
       (fun z : ℂ => scorerHiDeriv z - 1 / (π * z ^ 2) *
         ∑ k ∈ Finset.range N, (((3 * k + 1).factorial : ℂ) / k.factorial) / (3 * z ^ 3) ^ k)
@@ -1439,7 +1435,7 @@ lemma scorerAsym_scorerHiDeriv_isBigO {α : ℝ} (hα0 : 0 ≤ α) (hα : α < 2
     have hf : (k.factorial : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
     field_simp
 
-lemma scorerAsym_arg_mul_exp {z : ℂ} (hz : z ≠ 0) {c : ℝ} (h1 : -π < arg z + c)
+theorem scorerAsym_arg_mul_exp {z : ℂ} (hz : z ≠ 0) {c : ℝ} (h1 : -π < arg z + c)
     (h2 : arg z + c ≤ π) : arg (z * exp (c * I)) = arg z + c := by
   conv_lhs => rw [← norm_mul_exp_arg_mul_I z]
   rw [mul_assoc, ← Complex.exp_add, show (arg z : ℂ) * I + c * I = ((arg z + c : ℝ) : ℂ) * I by
@@ -1447,11 +1443,11 @@ lemma scorerAsym_arg_mul_exp {z : ℂ} (hz : z ≠ 0) {c : ℝ} (h1 : -π < arg 
   exact arg_mul_cos_add_sin_mul_I (norm_pos_iff.mpr hz) ⟨h1, h2⟩
 
 /-- Rotation by `c` maps the sector `|arg z| ≤ α` into `|arg z| ≤ β` when `|c| + α ≤ β < π`. -/
-lemma scorerAsym_tendsto_rotate {α β c : ℝ} (hc : |c| + α ≤ β) (hβ : β < π) :
+theorem scorerAsym_tendsto_rotate {α β c : ℝ} (hc : |c| + α ≤ β) (hβ : β < π) :
     Tendsto (fun z : ℂ => z * exp (c * I)) (airySector α) (airySector β) := by
   exact airyRot_tendsto_rotate hc hβ
 
-lemma scorerAsym_tendsto_omega {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π / 3) :
+theorem scorerAsym_tendsto_omega {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π / 3) :
     Tendsto (fun z : ℂ => z * exp (-2 * π * I / 3)) (airySector (π / 3 - δ))
         (comap (fun z : ℂ => -z) (airySector (2 * π / 3 - δ))) ∧
       Tendsto (fun z : ℂ => z * exp (2 * π * I / 3)) (airySector (π / 3 - δ))
@@ -1474,7 +1470,7 @@ lemma scorerAsym_tendsto_omega {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π / 3) :
     exact this.congr fun z => (e2 z).symm
 
 /-- The derivative of the rotation formula 9.12.12. -/
-lemma scorerAsym_scorerGiDeriv_rotations (z : ℂ) :
+theorem scorerAsym_scorerGiDeriv_rotations (z : ℂ) :
     scorerGiDeriv z = exp (π * I / 3) / 2 * (scorerHiDeriv (z * exp (-2 * π * I / 3)) *
         exp (-2 * π * I / 3)) +
       exp (-π * I / 3) / 2 * (scorerHiDeriv (z * exp (2 * π * I / 3)) * exp (2 * π * I / 3)) := by
@@ -1489,26 +1485,26 @@ lemma scorerAsym_scorerGiDeriv_rotations (z : ℂ) :
   refine h.deriv.trans ?_
   simp
 
-lemma scorerAsym_norm_omega : ‖exp (-2 * π * I / 3)‖ = 1 ∧ ‖exp (2 * π * I / 3)‖ = 1 := by
+theorem scorerAsym_norm_omega : ‖exp (-2 * π * I / 3)‖ = 1 ∧ ‖exp (2 * π * I / 3)‖ = 1 := by
   constructor
   · rw [show (-2 * π * I / 3 : ℂ) = ((-2 * π / 3 : ℝ) : ℂ) * I by push_cast; ring,
       norm_exp_ofReal_mul_I]
   · rw [show (2 * π * I / 3 : ℂ) = ((2 * π / 3 : ℝ) : ℂ) * I by push_cast; ring,
       norm_exp_ofReal_mul_I]
 
-lemma scorerAsym_omega_cube : exp (-2 * π * I / 3) ^ 3 = 1 ∧ exp (2 * π * I / 3) ^ 3 = 1 := by
+theorem scorerAsym_omega_cube : exp (-2 * π * I / 3) ^ 3 = 1 ∧ exp (2 * π * I / 3) ^ 3 = 1 := by
   constructor
   · rw [show (-2 * π * I / 3 : ℂ) = -(2 * π * I / 3) by ring]; exact omega_recip_cube
   · exact omega_cube
 
 /-- Composite bound: `((z c)^n)⁻¹ = O((z^n)⁻¹)` when `‖c‖ = 1`. -/
-lemma scorerAsym_isBigO_recip_pow_mul {l : Filter ℂ} {c : ℂ} (hc : ‖c‖ = 1) (n : ℕ) :
+theorem scorerAsym_isBigO_recip_pow_mul {l : Filter ℂ} {c : ℂ} (hc : ‖c‖ = 1) (n : ℕ) :
     (fun z : ℂ => ((z * c) ^ n)⁻¹) =O[l] (fun z : ℂ => (z ^ n)⁻¹) :=
   IsBigO.of_bound 1 (Eventually.of_forall fun z => by
     rw [one_mul, norm_inv, norm_inv, norm_pow, norm_pow, norm_mul, hc, mul_one])
 
 
-lemma scorerAsym_rot_coeffs :
+theorem scorerAsym_rot_coeffs :
     exp (π * I / 3) / 2 = -exp (-2 * π * I / 3) / 2 ∧ exp (-π * I / 3) / 2 = -exp (2 * π * I / 3) / 2 := by
   constructor
   · rw [show (-2 * π * I / 3 : ℂ) = π * I / 3 - π * I by ring, Complex.exp_sub, exp_pi_mul_I]
@@ -1639,7 +1635,7 @@ theorem scorerHi_simple_zeros {z : ℂ} (hz : scorerHi z = 0) :
   sorry
 
 /-- On the real line the Laplace integral is real. -/
-lemma integral_pow_mul_exp_cubic_ofReal (m : ℕ) (x : ℝ) :
+theorem integral_pow_mul_exp_cubic_ofReal (m : ℕ) (x : ℝ) :
     ∫ t : ℝ in Ioi 0, (t : ℂ) ^ m * exp (-(t : ℂ) ^ 3 / 3 + x * t) =
       ((∫ t : ℝ in Ioi 0, t ^ m * Real.exp (-(t ^ 3 / 3) + x * t) : ℝ) : ℂ) := by
   rw [← integral_complex_ofReal]
@@ -1647,7 +1643,7 @@ lemma integral_pow_mul_exp_cubic_ofReal (m : ℕ) (x : ℝ) :
   push_cast; rw [neg_div]
 
 /-- The real Laplace integral is positive. -/
-lemma integral_pow_mul_exp_cubic_pos (m : ℕ) (x : ℝ) :
+theorem integral_pow_mul_exp_cubic_pos (m : ℕ) (x : ℝ) :
     0 < ∫ t : ℝ in Ioi 0, t ^ m * Real.exp (-(t ^ 3 / 3) + x * t) := by
   have hi : IntegrableOn (fun t : ℝ => t ^ m * Real.exp (-(t ^ 3 / 3) + x * t)) (Ioi 0) := by
     have := (integrableOn_pow_mul_exp_cubic m x).re
@@ -1706,7 +1702,7 @@ def scorerZ_gi' (x : ℝ) : ℝ := (scorerGiDeriv x).re
 /-- `Hi` on the real axis, as a real Laplace integral. -/
 def scorerZ_hi (x : ℝ) : ℝ := (∫ t in Ioi (0 : ℝ), Real.exp (-(t ^ 3 / 3) + x * t)) / π
 
-lemma scorerZ_integrable (m : ℕ) (x : ℝ) :
+theorem scorerZ_integrable (m : ℕ) (x : ℝ) :
     IntegrableOn (fun t : ℝ => t ^ m * Real.exp (-(t ^ 3 / 3) + x * t)) (Ioi 0) := by
   have := (integrableOn_pow_mul_exp_cubic m x).re
   refine this.congr_fun (fun t _ => ?_) measurableSet_Ioi
@@ -1715,28 +1711,28 @@ lemma scorerZ_integrable (m : ℕ) (x : ℝ) :
       ((-(t ^ 3 / 3) + x * t : ℝ) : ℂ) by push_cast; ring,
     ← ofReal_exp, ← ofReal_pow, ← ofReal_mul, ofReal_re]
 
-lemma scorerZ_hi_eq (x : ℝ) : scorerHi x = (scorerZ_hi x : ℂ) := by
+theorem scorerZ_hi_eq (x : ℝ) : scorerHi x = (scorerZ_hi x : ℂ) := by
   rw [(scorerHi_exp_integral x).2]
   have h := integral_pow_mul_exp_cubic_ofReal 0 x
   simp only [pow_zero, one_mul] at h
   rw [h, scorerZ_hi]; push_cast; rfl
 
-lemma scorerZ_hiDeriv_eq (x : ℝ) : scorerHiDeriv x =
+theorem scorerZ_hiDeriv_eq (x : ℝ) : scorerHiDeriv x =
     (((∫ t in Ioi (0 : ℝ), t ^ 1 * Real.exp (-(t ^ 3 / 3) + x * t)) / π : ℝ) : ℂ) := by
   rw [scorerHiDeriv_exp_integral]
   have h := integral_pow_mul_exp_cubic_ofReal 1 x
   simp only [pow_one] at h ⊢
   rw [h]; push_cast; rfl
 
-lemma scorerZ_gi_ofReal (x : ℝ) : scorerGi x = (scorerZ_gi x : ℂ) := by
+theorem scorerZ_gi_ofReal (x : ℝ) : scorerGi x = (scorerZ_gi x : ℂ) := by
   have h : scorerGi x = ((airyBiReal x - scorerZ_hi x : ℝ) : ℂ) := by
     rw [scorerGi, airyBi_ofReal_eq, scorerZ_hi_eq]; push_cast; ring
   rw [scorerZ_gi, h, ofReal_re]
 
-lemma scorerZ_gi_eq (x : ℝ) : scorerZ_gi x = airyBiReal x - scorerZ_hi x := by
+theorem scorerZ_gi_eq (x : ℝ) : scorerZ_gi x = airyBiReal x - scorerZ_hi x := by
   rw [scorerZ_gi, scorerGi, sub_re, scorerZ_hi_eq, ofReal_re]; rfl
 
-lemma scorerZ_gi'_ofReal (x : ℝ) : scorerGiDeriv x = (scorerZ_gi' x : ℂ) := by
+theorem scorerZ_gi'_ofReal (x : ℝ) : scorerGiDeriv x = (scorerZ_gi' x : ℂ) := by
   have h : ∃ r : ℝ, scorerGiDeriv x = (r : ℂ) := by
     rw [scorerGiDeriv_eq, airyBiDeriv_ofReal_eq, scorerZ_hiDeriv_eq]
     exact ⟨airyBiDerivReal x - (∫ t in Ioi (0 : ℝ), t ^ 1 * Real.exp (-(t ^ 3 / 3) + x * t)) / π,
@@ -1744,10 +1740,10 @@ lemma scorerZ_gi'_ofReal (x : ℝ) : scorerGiDeriv x = (scorerZ_gi' x : ℂ) := 
   obtain ⟨r, hr⟩ := h
   rw [scorerZ_gi', hr, ofReal_re]
 
-lemma scorerZ_hasDerivAt_gi (x : ℝ) : HasDerivAt scorerZ_gi (scorerZ_gi' x) x :=
+theorem scorerZ_hasDerivAt_gi (x : ℝ) : HasDerivAt scorerZ_gi (scorerZ_gi' x) x :=
   ((isAiryInhomSol_scorerGi x).1).real_of_complex
 
-lemma scorerZ_hasDerivAt_gi' (x : ℝ) :
+theorem scorerZ_hasDerivAt_gi' (x : ℝ) :
     HasDerivAt scorerZ_gi' (x * scorerZ_gi x - 1 / π) x := by
   have h : HasDerivAt scorerZ_gi' _ x := ((isAiryInhomSol_scorerGi x).2).real_of_complex
   refine h.congr_deriv ?_
@@ -1755,28 +1751,28 @@ lemma scorerZ_hasDerivAt_gi' (x : ℝ) :
   simp only [add_re, re_ofReal_mul, neg_re, div_ofReal_re, one_re]
   rw [ofReal_re]; ring
 
-lemma scorerZ_hasDerivAt_gi'' (x : ℝ) :
+theorem scorerZ_hasDerivAt_gi'' (x : ℝ) :
     HasDerivAt (fun t => t * scorerZ_gi t - 1 / π) (scorerZ_gi x + x * scorerZ_gi' x) x := by
   have := ((hasDerivAt_id x).mul (scorerZ_hasDerivAt_gi x)).sub_const (1 / π)
   convert this using 1 <;> simp
 
-lemma scorerZ_continuous_gi : Continuous scorerZ_gi :=
+theorem scorerZ_continuous_gi : Continuous scorerZ_gi :=
   continuous_iff_continuousAt.mpr fun x => (scorerZ_hasDerivAt_gi x).continuousAt
 
-lemma scorerZ_continuous_gi' : Continuous scorerZ_gi' :=
+theorem scorerZ_continuous_gi' : Continuous scorerZ_gi' :=
   continuous_iff_continuousAt.mpr fun x => (scorerZ_hasDerivAt_gi' x).continuousAt
 
-lemma scorerZ_gi_zero_pos : 0 < scorerZ_gi 0 := by
+theorem scorerZ_gi_zero_pos : 0 < scorerZ_gi 0 := by
   rw [scorerZ_gi, ofReal_zero, scorer_zero.2.1, div_ofNat_re]
   exact div_pos (airyBiReal_pos le_rfl) (by norm_num)
 
-lemma scorerZ_gi'_zero_pos : 0 < scorerZ_gi' 0 := by
+theorem scorerZ_gi'_zero_pos : 0 < scorerZ_gi' 0 := by
   rw [scorerZ_gi', ofReal_zero, scorerDeriv_zero.2.1, div_ofNat_re]
   exact div_pos airyBiDerivReal_zero_pos (by norm_num)
 
 
 /-- Real form of a sector bound: `‖F x‖ ≤ C x^{-p}` eventually along the positive axis. -/
-lemma scorerZ_real_bound {F : ℂ → ℂ} {p : ℂ}
+theorem scorerZ_real_bound {F : ℂ → ℂ} {p : ℂ}
     (h : IsBigO (comap (fun z : ℂ => z) (airySector (π / 3 - π / 6))) F (fun z => z ^ p)) :
     ∃ C, ∀ᶠ x : ℝ in atTop, ‖F x‖ ≤ C * x ^ p.re := by
   rw [comap_id'] at h
@@ -1786,7 +1782,7 @@ lemma scorerZ_real_bound {F : ℂ → ℂ} {p : ℂ}
   filter_upwards [hC, eventually_gt_atTop 0] with x hx hx0
   simpa [Function.comp, Complex.norm_cpow_eq_rpow_re_of_pos hx0] using hx
 
-lemma scorerZ_gi_eventually_pos : ∀ᶠ x in atTop, 0 < scorerZ_gi x := by
+theorem scorerZ_gi_eventually_pos : ∀ᶠ x in atTop, 0 < scorerZ_gi x := by
   have hπ := Real.pi_pos
   obtain ⟨C, hC⟩ := scorerZ_real_bound (scorerGi_asymptotic (δ := π / 6)
     (by positivity) (by linarith) 1)
@@ -1809,7 +1805,7 @@ lemma scorerZ_gi_eventually_pos : ∀ᶠ x in atTop, 0 < scorerZ_gi x := by
     nlinarith
   linarith
 
-lemma scorerZ_gi'_eventually_neg : ∀ᶠ x in atTop, scorerZ_gi' x < 0 := by
+theorem scorerZ_gi'_eventually_neg : ∀ᶠ x in atTop, scorerZ_gi' x < 0 := by
   have hπ := Real.pi_pos
   obtain ⟨C, hC⟩ := scorerZ_real_bound (scorerGiDeriv_asymptotic (δ := π / 6)
     (by positivity) (by linarith) 1)
@@ -1834,7 +1830,7 @@ lemma scorerZ_gi'_eventually_neg : ∀ᶠ x in atTop, scorerZ_gi' x < 0 := by
   linarith
 
 /-- `Gi(x) > 0` for `x ≥ 0`. -/
-lemma scorerZ_gi_pos {x : ℝ} (hx : 0 ≤ x) : 0 < scorerZ_gi x := by
+theorem scorerZ_gi_pos {x : ℝ} (hx : 0 ≤ x) : 0 < scorerZ_gi x := by
   obtain ⟨X, hX, hXx⟩ := (scorerZ_gi_eventually_pos.and (eventually_gt_atTop x)).exists
   have hπ := Real.pi_pos
   have := ODE.sturmCount_neg_of_maxPrinciple (g := fun t => -scorerZ_gi t)
@@ -1848,7 +1844,7 @@ lemma scorerZ_gi_pos {x : ℝ} (hx : 0 ≤ x) : 0 < scorerZ_gi x := by
   linarith
 
 /-- `Gi'` has at most one zero on `[0, ∞)`. -/
-lemma scorerZ_gi'_zero_unique {y₁ y₂ : ℝ} (h₁ : 0 ≤ y₁) (hlt : y₁ < y₂) (e₁ : scorerZ_gi' y₁ = 0)
+theorem scorerZ_gi'_zero_unique {y₁ y₂ : ℝ} (h₁ : 0 ≤ y₁) (hlt : y₁ < y₂) (e₁ : scorerZ_gi' y₁ = 0)
     (e₂ : scorerZ_gi' y₂ = 0) : False := by
   obtain ⟨X, hX, hXx⟩ := (scorerZ_gi'_eventually_neg.and (eventually_gt_atTop y₂)).exists
   have hle := ODE.sturmCount_nonpos_of_maxPrinciple (g := scorerZ_gi')
@@ -1871,7 +1867,7 @@ lemma scorerZ_gi'_zero_unique {y₁ y₂ : ℝ} (h₁ : 0 ≤ y₁) (hlt : y₁ 
 
 
 /-- `0 < Hi(x) ≤ 1/(π|x|)` for `x < 0`. -/
-lemma scorerZ_hi_le {x : ℝ} (hx : x < 0) : scorerZ_hi x ≤ 1 / (π * (-x)) := by
+theorem scorerZ_hi_le {x : ℝ} (hx : x < 0) : scorerZ_hi x ≤ 1 / (π * (-x)) := by
   have hπ := Real.pi_pos
   have hI : ∫ t in Ioi (0 : ℝ), Real.exp (-(t ^ 3 / 3) + x * t) ≤ 1 / (-x) := by
     calc ∫ t in Ioi (0 : ℝ), Real.exp (-(t ^ 3 / 3) + x * t)
@@ -1885,7 +1881,7 @@ lemma scorerZ_hi_le {x : ℝ} (hx : x < 0) : scorerZ_hi x ≤ 1 / (π * (-x)) :=
   exact div_le_div_of_nonneg_right hI hπ.le
 
 /-- The Airy modulus beats the Hi bound: `1/(π|x|) < M(x)` for `x ≤ -1`. -/
-lemma scorerZ_modulus_gt {x : ℝ} (hx : x ≤ -1) : 1 / (π * (-x)) < airyModulus x := by
+theorem scorerZ_modulus_gt {x : ℝ} (hx : x ≤ -1) : 1 / (π * (-x)) < airyModulus x := by
   have hπ := Real.pi_pos
   set s := -x with hs
   have hs1 : 1 ≤ s := by linarith
@@ -1913,7 +1909,7 @@ lemma scorerZ_modulus_gt {x : ℝ} (hx : x ≤ -1) : 1 / (π * (-x)) < airyModul
   nlinarith [sq_nonneg (airyModulus x * (π * s) - 1), mul_pos hM (mul_pos hπ hs0)]
 
 /-- `Gi` takes both signs arbitrarily far to the left. -/
-lemma scorerZ_gi_signs (M : ℝ) (σ : ℝ) (hσ : σ = 0 ∨ σ = π) :
+theorem scorerZ_gi_signs (M : ℝ) (σ : ℝ) (hσ : σ = 0 ∨ σ = π) :
     ∃ x < M, x ≤ -1 ∧ Real.cos (airyPhase x) = Real.cos σ := by
   have hπ := Real.pi_pos
   set A := min M (-1) - 1
@@ -1933,7 +1929,7 @@ lemma scorerZ_gi_signs (M : ℝ) (σ : ℝ) (hσ : σ = 0 ∨ σ = π) :
     linarith [hx.2]
   · rw [hxθ, add_comm, Real.cos_add_nat_mul_two_pi]
 
-lemma scorerZ_gi_frequently (M : ℝ) :
+theorem scorerZ_gi_frequently (M : ℝ) :
     (∃ x < M, 0 < scorerZ_gi x) ∧ ∃ x < M, scorerZ_gi x < 0 := by
   have hπ := Real.pi_pos
   constructor
@@ -1949,7 +1945,7 @@ lemma scorerZ_gi_frequently (M : ℝ) :
       exact div_pos (by simpa using integral_pow_mul_exp_cubic_pos 0 x) hπ
     linarith [airyModulus_pos x]
 
-lemma scorerZ_gi_zeros_infinite : {x : ℝ | x < 0 ∧ scorerZ_gi x = 0}.Infinite :=
+theorem scorerZ_gi_zeros_infinite : {x : ℝ | x < 0 ∧ scorerZ_gi x = 0}.Infinite :=
   ODE.sturmCount_infinite_zeros_atBot scorerZ_continuous_gi.continuousOn
     (fun M => (scorerZ_gi_frequently M).1) (fun M => (scorerZ_gi_frequently M).2)
 

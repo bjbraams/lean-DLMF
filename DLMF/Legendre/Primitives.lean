@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Legendre.Integrals
+public import DLMF.Legendre.AssociatedRecurrences
 
 /-!
 # Indefinite Ferrers integrals as derivative identities
@@ -26,21 +26,21 @@ def ferrersSolution (second : Bool) (ν μ : ℂ) (x : ℝ) : ℂ :=
   if second then ferrersQ ν μ x else ferrersP ν μ x
 
 /-- `𝖯^μ_ν` is differentiable on `(-1,1)`. -/
-lemma differentiableAt_ferrersP (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem differentiableAt_ferrersP (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     DifferentiableAt ℝ (ferrersP ν μ) x :=
   (((hasDerivAt_ferrersEven ν μ hx).const_mul _).add ((hasDerivAt_ferrersOdd ν μ hx).const_mul _)
     ).differentiableAt.congr_of_eventuallyEq
     ((ferrersP_eqOn_even_odd ν μ).eventuallyEq_of_mem (isOpen_Ioo.mem_nhds hx))
 
 /-- Either Ferrers solution is differentiable on `(-1,1)`. -/
-lemma differentiableAt_ferrersSolution (second : Bool) (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem differentiableAt_ferrersSolution (second : Bool) (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     DifferentiableAt ℝ (ferrersSolution second ν μ) x := by
   cases second
   · exact differentiableAt_ferrersP ν μ hx
   · exact differentiableAt_ferrersQ ν μ hx
 
 /-- Order raising for either Ferrers solution. -/
-lemma ferrersSolution_order_raise (second : Bool) (ν μ : ℂ) (h : second = true → LegendreQRegular ν μ)
+theorem ferrersSolution_order_raise (second : Bool) (ν μ : ℂ) (h : second = true → LegendreQRegular ν μ)
     {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     (1-x^2:ℂ)^(1/2:ℂ)*ferrersSolution second ν (μ+1) x =
       -(1-x^2:ℂ)*deriv (ferrersSolution second ν μ) x-μ*x*ferrersSolution second ν μ x := by
@@ -57,7 +57,7 @@ lemma ferrersSolution_order_raise (second : Bool) (ν μ : ℂ) (h : second = tr
     exact ferrersQ_order_raise ν μ (h rfl) hx
 
 /-- Three-term order recurrence for either Ferrers solution. -/
-lemma ferrersSolution_recurrence_1 (second : Bool) (ν μ : ℂ) (h : second = true → LegendreQRegular ν μ)
+theorem ferrersSolution_recurrence_1 (second : Bool) (ν μ : ℂ) (h : second = true → LegendreQRegular ν μ)
     {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersSolution second ν (μ+2) x+2*(μ+1)*x*(1-x^2:ℂ)^(-1/2:ℂ)*ferrersSolution second ν (μ+1) x
       +(ν-μ)*(ν+μ+1)*ferrersSolution second ν μ x=0 := by
@@ -66,7 +66,7 @@ lemma ferrersSolution_recurrence_1 (second : Bool) (ν μ : ℂ) (h : second = t
   · exact ferrersQ_recurrence_1 ν μ (h rfl) hx
 
 /-- Derivative of `(1-x²)^c` on `(-1,1)`. -/
-lemma hasDerivAt_one_sub_sq_cpow (c : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem hasDerivAt_one_sub_sq_cpow (c : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt (fun y : ℝ => (1-(y:ℂ)^2)^c) (c*(1-(x:ℂ)^2)^(c-1)*(-2*x)) x := by
   have hs := ferrers_one_sub_sq_mem_slitPlane hx
   have h := ((hasStrictDerivAt_cpow_const (c := c) hs).hasDerivAt.comp (x:ℂ)
@@ -130,7 +130,7 @@ def ferrersProductPrimitive (singular : Bool) (F G : ℂ → ℂ → ℝ → ℂ
   if singular then ((1-2*μ^2+2*ν*(ν+1))*F ν μ x*G ν μ x+(2*ν+1)*(μ-ν-1)*x*(F ν μ x*G (ν+1) μ x+F (ν+1) μ x*G ν μ x)+2*(μ-ν-1)^2*F (ν+1) μ x*G (ν+1) μ x)/((1-4*μ^2)*(1-x^2:ℂ)^(1/2:ℂ)) else ((μ^2-(ν+1)*(ν+x^2))*F ν μ x*G ν μ x+(ν+1)*(ν-μ+1)*x*(F ν μ x*G (ν+1) μ x+F (ν+1) μ x*G ν μ x)-(ν-μ+1)^2*F (ν+1) μ x*G (ν+1) μ x)/(2*ν*(ν+1))
 
 /-- Degree-raising derivative relation for either Ferrers solution. -/
-lemma ferrersSolution_deriv_degree (second : Bool) (ν μ : ℂ) (h : second = true → LegendreQRegular ν μ)
+theorem ferrersSolution_deriv_degree (second : Bool) (ν μ : ℂ) (h : second = true → LegendreQRegular ν μ)
     {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     (1-x^2:ℂ)*deriv (ferrersSolution second ν μ) x =
       (μ-ν-1)*ferrersSolution second (ν+1) μ x+(ν+1)*x*ferrersSolution second ν μ x := by
@@ -139,7 +139,7 @@ lemma ferrersSolution_deriv_degree (second : Bool) (ν μ : ℂ) (h : second = t
   · exact ferrersQ_recurrence_4 ν μ (h rfl) hx
 
 /-- Degree-lowering derivative relation at degree `ν+1`. -/
-lemma ferrersSolution_deriv_degree_succ (second : Bool) (ν μ : ℂ) (h : second = true → LegendreQRegular ν μ)
+theorem ferrersSolution_deriv_degree_succ (second : Bool) (ν μ : ℂ) (h : second = true → LegendreQRegular ν μ)
     {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     (1-x^2:ℂ)*deriv (ferrersSolution second (ν+1) μ) x =
       (ν+1+μ)*ferrersSolution second ν μ x-(ν+1)*x*ferrersSolution second (ν+1) μ x := by

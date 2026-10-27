@@ -5,17 +5,28 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.Complex.CauchyIntegral
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
-public import Mathlib.Analysis.SpecialFunctions.Sqrt
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
-public import Mathlib.Data.Set.Card
-public import Mathlib.LinearAlgebra.Matrix.Notation
-public import Mathlib.Tactic
-public import DLMFMathlib.Analysis.ODE.PowerSeriesUniqueness
 public import DLMFMathlib.Analysis.ODE.P1oEntireLinear
 public import DLMFMathlib.Analysis.ODE.P1oParamHolomorphic
 public import DLMFMathlib.Analysis.ODE.P2sSturmSpectrum
+public import Mathlib.Tactic.Echelon.Zsqrtd
+public import Mathlib.Tactic.Inclusion.Extension.Core.Core
+public import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+public import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Rational
+public import Mathlib.Tactic.NormNum.Irrational
+public import Mathlib.Tactic.NormNum.IsCoprime
+public import Mathlib.Tactic.NormNum.IsSquare
+public import Mathlib.Tactic.NormNum.LegendreSymbol
+public import Mathlib.Tactic.NormNum.ModEq
+public import Mathlib.Tactic.NormNum.NatFib
+public import Mathlib.Tactic.NormNum.NatLog
+public import Mathlib.Tactic.NormNum.NatSqrt
+public import Mathlib.Tactic.NormNum.Ordinal
+public import Mathlib.Tactic.NormNum.Parity
+public import Mathlib.Tactic.NormNum.Prime
+public import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.Tactic.Polynomial.Basic
+public import Mathlib.Tactic.ReduceModChar
 
 /-!
 # Mathieu's equation and the Mathieu functions of integer order (DLMF §28.2)
@@ -65,7 +76,7 @@ This is the definitions file of the Mathieu area (DLMF Chapter 28). It contains
 @[expose] public noncomputable section
 
 /-- `dif_pos` without the deprecation. -/
-private theorem dif_pos' {c : Prop} [Decidable c] (h : c) {α : Sort*} {t : c → α} {e : ¬c → α} :
+private lemma dif_pos' {c : Prop} [Decidable c] (h : c) {α : Sort*} {t : c → α} {e : ¬c → α} :
     dite c t e = t h := by simp [h]
 
 open Complex Set Filter
@@ -237,7 +248,7 @@ theorem nthLeast_spec {S : Set ℝ} {n : ℕ} (h : ∃ x ∈ S, (S ∩ Iio x).en
   simp only [nthLeast, dif_pos' h]; exact h.choose_spec
 
 /-- The element of `S` with exactly `n` smaller elements is unique. -/
-theorem m28a_eq_of_encard {S : Set ℝ} {n : ℕ} {x y : ℝ} (hx : x ∈ S) (hy : y ∈ S)
+lemma m28a_eq_of_encard {S : Set ℝ} {n : ℕ} {x y : ℝ} (hx : x ∈ S) (hy : y ∈ S)
     (hxn : (S ∩ Iio x).encard = n) (hyn : (S ∩ Iio y).encard = n) : x = y := by
   by_contra hne
   have key : ∀ {x y : ℝ}, x ∈ S → x < y → (S ∩ Iio x).encard = n →
@@ -301,7 +312,7 @@ entire functions of `a` (holomorphic parameter dependence), they do not vanish f
 `cos √a x`, `sin √a x / √a`); see `DLMFMathlib/Analysis/ODE/P2sSturmSpectrum.lean`. -/
 
 /-- A solution of Mathieu's equation, restricted to the real line, with its derivative. -/
-theorem p2s_hasDerivAt_real {a q : ℂ} {w : ℂ → ℂ} (h : IsMathieuSolution a q w) (t : ℝ) :
+lemma p2s_hasDerivAt_real {a q : ℂ} {w : ℂ → ℂ} (h : IsMathieuSolution a q w) (t : ℝ) :
     HasDerivAt (fun t : ℝ => w t) (deriv w t) t ∧
       HasDerivAt (fun t : ℝ => deriv w t) ((2 * q * Complex.cos (2 * t) - a) * w t) t :=
   ⟨((h.differentiable t).hasDerivAt).comp_ofReal, (h.hasDerivAt_deriv t).comp_ofReal⟩
@@ -342,13 +353,13 @@ theorem p2s_family (q : ℝ) {w : ℂ → ℂ → ℂ} (hw : ∀ a, IsMathieuSol
     exact this
 
 /-- `z = 0 ↔ re z = 0` for a real complex number `z`. -/
-theorem p2s_eq_zero_iff_re {z : ℂ} (hz : z = (z.re : ℂ)) : z = 0 ↔ z.re = 0 := by
+lemma p2s_eq_zero_iff_re {z : ℂ} (hz : z = (z.re : ℂ)) : z = 0 ↔ z.re = 0 := by
   constructor
   · intro h; simp [h]
   · intro h; rw [hz, h, Complex.ofReal_zero]
 
 /-- The bound `|2 q cos 2x| ≤ 2|q| + 1`. -/
-theorem p2s_coef_bound (q : ℝ) :
+lemma p2s_coef_bound (q : ℝ) :
     ∀ x ∈ Icc (0 : ℝ) (π / 2), |2 * q * Real.cos (2 * x)| ≤ 2 * |q| + 1 := by
   intro x _
   rw [abs_mul, abs_mul, abs_two]
@@ -356,7 +367,7 @@ theorem p2s_coef_bound (q : ℝ) :
   nlinarith [abs_nonneg q]
 
 /-- From a real family to the enumeration of the zeros of an endpoint function. -/
-theorem p2s_exists_of_endpoint {G : ℂ → ℂ} (hG : Differentiable ℂ G)
+lemma p2s_exists_of_endpoint {G : ℂ → ℂ} (hG : Differentiable ℂ G)
     (hre : ∀ a : ℝ, G a = ((G a).re : ℂ))
     (hlow : ∃ c, ∀ a : ℝ, a < c → (G a).re ≠ 0)
     (hs : (∀ N, ∃ a : ℝ, a > N ∧ 0 < (G a).re) ∧ (∀ N, ∃ a : ℝ, a > N ∧ (G a).re < 0))
@@ -369,7 +380,7 @@ theorem p2s_exists_of_endpoint {G : ℂ → ℂ} (hG : Differentiable ℂ G)
 
 /-- The real roots `a` of `w_I(π/2; a, q) = 0` (real `q`) can be enumerated in increasing
 order. -/
-theorem p2s_I_val (q : ℝ) (k : ℕ) : ∃ x ∈ {a : ℝ | mathieuWI a q (π / 2) = 0},
+lemma p2s_I_val (q : ℝ) (k : ℕ) : ∃ x ∈ {a : ℝ | mathieuWI a q (π / 2) = 0},
     ({a : ℝ | mathieuWI a q (π / 2) = 0} ∩ Iio x).encard = k := by
   obtain ⟨hre, hd, hd', hent⟩ := p2s_family q (w := fun a => mathieuWI a q)
     (fun a => isMathieuSolution_mathieuWI a q) (α := 1) (β := 0)
@@ -390,7 +401,7 @@ theorem p2s_I_val (q : ℝ) (k : ℕ) : ∃ x ∈ {a : ℝ | mathieuWI a q (π /
 
 /-- The real roots `a` of `w_I'(π/2; a, q) = 0` (real `q`) can be enumerated in increasing
 order. -/
-theorem p2s_I_der (q : ℝ) (k : ℕ) : ∃ x ∈ {a : ℝ | deriv (mathieuWI a q) (π / 2) = 0},
+lemma p2s_I_der (q : ℝ) (k : ℕ) : ∃ x ∈ {a : ℝ | deriv (mathieuWI a q) (π / 2) = 0},
     ({a : ℝ | deriv (mathieuWI a q) (π / 2) = 0} ∩ Iio x).encard = k := by
   obtain ⟨hre, hd, hd', hent⟩ := p2s_family q (w := fun a => mathieuWI a q)
     (fun a => isMathieuSolution_mathieuWI a q) (α := 1) (β := 0)
@@ -411,7 +422,7 @@ theorem p2s_I_der (q : ℝ) (k : ℕ) : ∃ x ∈ {a : ℝ | deriv (mathieuWI a 
 
 /-- The real roots `a` of `w_II(π/2; a, q) = 0` (real `q`) can be enumerated in increasing
 order. -/
-theorem p2s_II_val (q : ℝ) (k : ℕ) : ∃ x ∈ {a : ℝ | mathieuWII a q (π / 2) = 0},
+lemma p2s_II_val (q : ℝ) (k : ℕ) : ∃ x ∈ {a : ℝ | mathieuWII a q (π / 2) = 0},
     ({a : ℝ | mathieuWII a q (π / 2) = 0} ∩ Iio x).encard = k := by
   obtain ⟨hre, hd, hd', hent⟩ := p2s_family q (w := fun a => mathieuWII a q)
     (fun a => isMathieuSolution_mathieuWII a q) (α := 0) (β := 1)
@@ -432,7 +443,7 @@ theorem p2s_II_val (q : ℝ) (k : ℕ) : ∃ x ∈ {a : ℝ | mathieuWII a q (π
 
 /-- The real roots `a` of `w_II'(π/2; a, q) = 0` (real `q`) can be enumerated in increasing
 order. -/
-theorem p2s_II_der (q : ℝ) (k : ℕ) : ∃ x ∈ {a : ℝ | deriv (mathieuWII a q) (π / 2) = 0},
+lemma p2s_II_der (q : ℝ) (k : ℕ) : ∃ x ∈ {a : ℝ | deriv (mathieuWII a q) (π / 2) = 0},
     ({a : ℝ | deriv (mathieuWII a q) (π / 2) = 0} ∩ Iio x).encard = k := by
   obtain ⟨hre, hd, hd', hent⟩ := p2s_family q (w := fun a => mathieuWII a q)
     (fun a => isMathieuSolution_mathieuWII a q) (α := 0) (β := 1)

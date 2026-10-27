@@ -5,10 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.ParabolicCylinder.Weber
 public import DLMF.ParabolicCylinder.Hermite
-public import DLMF.OrthogonalPolynomials.ClassicalInstances
-public import DLMFMathlib.Analysis.ODE.SturmDeformation
+public import DLMF.ParabolicCylinder.SectorAsymptotics
 
 /-!
 # Cylinder asymptotic sectors and real and complex zeros
@@ -295,7 +293,7 @@ theorem pcfV_adjacent_asymptotic_neg (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ 
   linear_combination (-(∑ j ∈ Finset.range N, pcfVTerm a (exp w) j)) * hB w
 
 /-- The integral over `(0,∞)` of a positive real function, viewed in `ℂ`, is nonzero. -/
-lemma integral_Ioi_ofReal_ne_zero {g : ℝ → ℝ} (hpos : ∀ t ∈ Ioi (0:ℝ), 0 < g t)
+theorem integral_Ioi_ofReal_ne_zero {g : ℝ → ℝ} (hpos : ∀ t ∈ Ioi (0:ℝ), 0 < g t)
     (hint : IntegrableOn (fun t => (g t : ℂ)) (Ioi 0)) : (∫ t in Ioi (0:ℝ), (g t : ℂ)) ≠ 0 := by
   have hg : IntegrableOn g (Ioi 0) := by simpa using hint.re
   rw [integral_complex_ofReal, Complex.ofReal_ne_zero]
@@ -377,7 +375,7 @@ theorem pcfU_hermite_zero_count (n : ℕ) :
 /-! ### Positive zeros of `U(a,x)` by parameter deformation -/
 
 /-- Joint continuity of Kummer's `M` in the first parameter and the argument. -/
-lemma pcfPZ_kummerM_continuous {c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) :
+theorem pcfPZ_kummerM_continuous {c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) :
     Continuous (fun p : ℂ × ℂ => kummerM p.1 c p.2) := by
   rw [continuous_iff_continuousAt]
   rintro ⟨a₀, z₀⟩
@@ -405,18 +403,18 @@ lemma pcfPZ_kummerM_continuous {c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) :
   exact (hc'.continuousAt (hs.mem_nhds hmem))
 
 /-- Composition form of `pcfPZ_kummerM_continuous`. -/
-lemma pcfPZ_kummerM_comp {c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) {f g : ℂ × ℂ → ℂ}
+theorem pcfPZ_kummerM_comp {c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) {f g : ℂ × ℂ → ℂ}
     (hf : Continuous f) (hg : Continuous g) :
     Continuous (fun p => kummerM (f p) c (g p)) :=
   (pcfPZ_kummerM_continuous hc).comp (hf.prodMk hg)
 
 /-- Continuity of `1/Γ` along a continuous map. -/
-lemma pcfPZ_recipGamma_comp {f : ℂ × ℂ → ℂ} (hf : Continuous f) :
+theorem pcfPZ_recipGamma_comp {f : ℂ × ℂ → ℂ} (hf : Continuous f) :
     Continuous (fun p => (Gamma (f p))⁻¹) :=
   differentiable_one_div_Gamma.continuous.comp hf |>.congr fun p => by simp
 
 /-- `U(a,z)` is jointly continuous in `(a,z)`. -/
-lemma pcfPZ_pcfU_continuous : Continuous (fun p : ℂ × ℂ => pcfU p.1 p.2) := by
+theorem pcfPZ_pcfU_continuous : Continuous (fun p : ℂ × ℂ => pcfU p.1 p.2) := by
   have hb1 : ∀ k : ℕ, (1 / 2 : ℂ) ≠ -k := half_ne_neg_nat
   have hb3 : ∀ k : ℕ, (3 / 2 : ℂ) ≠ -k := three_half_ne_neg_nat
   unfold pcfU pcfEven pcfOdd
@@ -433,7 +431,7 @@ lemma pcfPZ_pcfU_continuous : Continuous (fun p : ℂ × ℂ => pcfU p.1 p.2) :=
   fun_prop
 
 /-- `U'(a,z)` is jointly continuous in `(a,z)`. -/
-lemma pcfPZ_pcfUDeriv_continuous : Continuous (fun p : ℂ × ℂ => pcfUDeriv p.1 p.2) := by
+theorem pcfPZ_pcfUDeriv_continuous : Continuous (fun p : ℂ × ℂ => pcfUDeriv p.1 p.2) := by
   have hb1 : ∀ k : ℕ, (1 / 2 : ℂ) ≠ -k := half_ne_neg_nat
   have hb3 : ∀ k : ℕ, (3 / 2 : ℂ) ≠ -k := three_half_ne_neg_nat
   have hb3' : ∀ k : ℕ, (1 / 2 + 1 : ℂ) ≠ -k := by norm_num; exact three_half_ne_neg_nat
@@ -457,7 +455,7 @@ lemma pcfPZ_pcfUDeriv_continuous : Continuous (fun p : ℂ × ℂ => pcfUDeriv p
 
 /-- A solution of `f'' = q f` with `q ≥ 0` on `[X, ∞)` that decays at infinity and has only
 simple zeros has no zero in `[X, ∞)`. -/
-lemma pcfPZ_no_zero_of_decay {f f' q : ℝ → ℝ} {X : ℝ}
+theorem pcfPZ_no_zero_of_decay {f f' q : ℝ → ℝ} {X : ℝ}
     (hf : ∀ x, X ≤ x → HasDerivAt f (f' x) x)
     (hf' : ∀ x, X ≤ x → HasDerivAt f' (q x * f x) x) (hq : ∀ x, X ≤ x → 0 ≤ q x)
     (hlim : Tendsto f atTop (𝓝 0)) (hs : ∀ x, X ≤ x → f x = 0 → f' x ≠ 0) :
@@ -512,7 +510,7 @@ lemma pcfPZ_no_zero_of_decay {f f' q : ℝ → ℝ} {X : ℝ}
   exact hs x₀ hx₀ h0 (tendsto_nhds_unique hsl hc)
 
 /-- `U(a,x) → 0` as `x → +∞` for real `a`. -/
-lemma pcfPZ_tendsto_pcfU (a : ℝ) : Tendsto (fun x : ℝ => pcfU a x) atTop (𝓝 0) := by
+theorem pcfPZ_tendsto_pcfU (a : ℝ) : Tendsto (fun x : ℝ => pcfU a x) atTop (𝓝 0) := by
   have h0 := hasAsymptoticExpansion_pcfU (a : ℂ) 0
   simp only [Finset.range_zero, Finset.sum_empty, sub_zero, CharP.cast_eq_zero, mul_zero,
     sub_zero] at h0
@@ -534,23 +532,23 @@ lemma pcfPZ_tendsto_pcfU (a : ℝ) : Tendsto (fun x : ℝ => pcfU a x) atTop (�
   ring_nf
 
 /-- The real derivative family of `U` along real arguments. -/
-lemma pcfPZ_hasDerivAt_re (t x : ℝ) :
+theorem pcfPZ_hasDerivAt_re (t x : ℝ) :
     HasDerivAt (fun y : ℝ => (pcfU t y).re) (pcfUDeriv t x).re x :=
   (hasDerivAt_pcfU t x).real_of_complex
 
 /-- Weber's equation for the real parts. -/
-lemma pcfPZ_hasDerivAt_deriv_re (t x : ℝ) :
+theorem pcfPZ_hasDerivAt_deriv_re (t x : ℝ) :
     HasDerivAt (fun y : ℝ => (pcfUDeriv t y).re) ((x ^ 2 / 4 + t) * (pcfU t x).re) x := by
   have h := (hasDerivAt_pcfUDeriv t x).real_of_complex
   rwa [show ((x : ℂ) ^ 2 / 4 + t) = ((x ^ 2 / 4 + t : ℝ) : ℂ) by push_cast; ring,
     Complex.re_ofReal_mul] at h
 
 /-- `U(t,x)` is real for real `t, x`. -/
-lemma pcfPZ_eq_re (t x : ℝ) : pcfU t x = ((pcfU t x).re : ℂ) :=
+theorem pcfPZ_eq_re (t x : ℝ) : pcfU t x = ((pcfU t x).re : ℂ) :=
   Complex.ext (by simp) (by simp [pcfU_real])
 
 /-- `U'(t,x)` is real for real `t, x`. -/
-lemma pcfPZ_deriv_eq_re (t x : ℝ) : pcfUDeriv t x = ((pcfUDeriv t x).re : ℂ) := by
+theorem pcfPZ_deriv_eq_re (t x : ℝ) : pcfUDeriv t x = ((pcfUDeriv t x).re : ℂ) := by
   have h1 : HasDerivAt (fun y : ℝ => pcfU t y) (pcfUDeriv t x) x := (hasDerivAt_pcfU t x).comp_ofReal
   have h2 : HasDerivAt (fun y : ℝ => (((pcfU t y).re : ℝ) : ℂ)) ((pcfUDeriv t x).re : ℂ) x :=
     (pcfPZ_hasDerivAt_re t x).ofReal_comp
@@ -560,7 +558,7 @@ lemma pcfPZ_deriv_eq_re (t x : ℝ) : pcfUDeriv t x = ((pcfUDeriv t x).re : ℂ)
   exact h1.unique h2
 
 /-- Real zeros of `U(t,·)` are simple (Wronskian with `V`). -/
-lemma pcfPZ_simple (t x : ℝ) (h : (pcfU t x).re = 0) : (pcfUDeriv t x).re ≠ 0 := by
+theorem pcfPZ_simple (t x : ℝ) (h : (pcfU t x).re = 0) : (pcfUDeriv t x).re ≠ 0 := by
   intro h'
   have hU : pcfU t x = 0 := by rw [pcfPZ_eq_re, h, Complex.ofReal_zero]
   have hU' : pcfUDeriv t x = 0 := by rw [pcfPZ_deriv_eq_re, h', Complex.ofReal_zero]
@@ -571,14 +569,14 @@ lemma pcfPZ_simple (t x : ℝ) (h : (pcfU t x).re = 0) : (pcfUDeriv t x).re ≠ 
   exact h0 (by rw [← hW]; ring)
 
 /-- `U(t,0) ≠ 0` away from the poles of `Γ(3/4 + t/2)`. -/
-lemma pcfPZ_zero_ne {t : ℝ} (h : ∀ m : ℕ, (3 / 4 + t / 2 : ℂ) ≠ -m) : pcfU t 0 ≠ 0 := by
+theorem pcfPZ_zero_ne {t : ℝ} (h : ∀ m : ℕ, (3 / 4 + t / 2 : ℂ) ≠ -m) : pcfU t 0 ≠ 0 := by
   rw [pcfU_zero]
   refine div_ne_zero ?_ (mul_ne_zero ?_ (Complex.Gamma_ne_zero h))
   · exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   · exact (Complex.cpow_ne_zero_iff.mpr (Or.inl two_ne_zero))
 
 /-- No zeros of `U(t,x)` where `x²/4 + t ≥ 0` beyond `X`. -/
-lemma pcfPZ_far {t : ℝ} {X : ℝ} (hX : ∀ x, X ≤ x → 0 ≤ x ^ 2 / 4 + t) :
+theorem pcfPZ_far {t : ℝ} {X : ℝ} (hX : ∀ x, X ≤ x → 0 ≤ x ^ 2 / 4 + t) :
     ∀ x, X ≤ x → (pcfU t x).re ≠ 0 :=
   pcfPZ_no_zero_of_decay (f := fun y : ℝ => (pcfU t y).re) (f' := fun y : ℝ => (pcfUDeriv t y).re)
     (q := fun y => y ^ 2 / 4 + t) (fun x _ => pcfPZ_hasDerivAt_re t x)
@@ -587,13 +585,13 @@ lemma pcfPZ_far {t : ℝ} {X : ℝ} (hX : ∀ x, X ≤ x → 0 ≤ x ^ 2 / 4 + t
     (fun x _ h => pcfPZ_simple t x h)
 
 /-- Vanishing of `U(t,x)` through its real part. -/
-lemma pcfPZ_re_eq_zero_iff (t x : ℝ) : (pcfU t x).re = 0 ↔ pcfU t x = 0 := by
+theorem pcfPZ_re_eq_zero_iff (t x : ℝ) : (pcfU t x).re = 0 ↔ pcfU t x = 0 := by
   constructor
   · intro h; rw [pcfPZ_eq_re, h, Complex.ofReal_zero]
   · intro h; rw [h, Complex.zero_re]
 
 /-- Base count: `U(-2n-1/2, x)` has exactly `n` positive zeros. -/
-lemma pcfPZ_base (n : ℕ) :
+theorem pcfPZ_base (n : ℕ) :
     {x : ℝ | x ∈ Ici 0 ∧ (pcfU ((-2 * n - 1 / 2 : ℝ) : ℂ) x).re = 0}.ncard = n := by
   obtain ⟨hfin, hcard, -⟩ := pcfU_hermite_zero_count (2 * n)
   have hc : ((-2 * n - 1 / 2 : ℝ) : ℂ) = -((2 * n : ℕ) : ℂ) - 1 / 2 := by push_cast; ring

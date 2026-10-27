@@ -5,9 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Gamma.MellinBarnes
 public import DLMF.Bessel.ProductIntegral
 public import DLMF.OrthogonalPolynomials.HahnMoments
+public import DLMF.Hypergeometric.FiniteConvolution
 /-!
 # Tilted Gamma moments and Meixner--Pollaczek orthogonality
 
@@ -31,14 +31,14 @@ namespace DLMF.OrthogonalPolynomials.PollaczekMoments
 def pairHalf (a b : ℝ) (y : ℝ) : ℂ :=
   Gamma ((a:ℂ)+I*(y/2)) * Gamma ((b:ℂ)-I*(y/2))
 /-- The rescaled Gamma pair is continuous for positive real parameters. -/
-lemma pairHalf_continuous {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
+theorem pairHalf_continuous {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
     Continuous (pairHalf a b) := by
   apply continuous_iff_continuousAt.mpr
   intro y
   exact ((DLMF.Gamma.continuousAt_Gamma_of_re_pos (by simpa using ha)).comp (by fun_prop)).mul
     ((DLMF.Gamma.continuousAt_Gamma_of_re_pos (by simpa using hb)).comp (by fun_prop))
 /-- The existing vertical Gamma estimates give exponential decay of the pair. -/
-lemma pairHalf_bound {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
+theorem pairHalf_bound {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
     ∃ C : ℝ, ∃ K : ℕ, ∀ y : ℝ,
       ‖pairHalf a b y‖ ≤ C*(1+|y|)^K*Real.exp (-(π*|y|)/2) := by
   obtain ⟨A, k, hA⟩ := DLMF.Gamma.exists_norm_Gamma_shift_le ha 0
@@ -64,14 +64,14 @@ lemma pairHalf_bound {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
       gcongr
       linarith [abs_nonneg y]
 /-- The rescaled Mellin--Barnes transform is holomorphic in the right half-plane. -/
-lemma pairHalf_transform_differentiable {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
+theorem pairHalf_transform_differentiable {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
     DifferentiableOn ℂ (fun w : ℂ => ∫ y : ℝ, pairHalf a b y*w^(I*y)) {w | 0 < w.re} := by
   obtain ⟨C,K,h⟩ := pairHalf_bound ha hb
   simpa using DLMF.Gamma.differentiableOn_integral_mul_cpow (pairHalf_continuous ha hb) h 0
 
 
 /-- Evaluation of the rescaled transform on the positive real axis. -/
-lemma pairHalf_transform_real {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {w : ℝ} (hw : 0 < w) :
+theorem pairHalf_transform_real {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {w : ℝ} (hw : 0 < w) :
     (∫ y : ℝ, pairHalf a b y*(w:ℂ)^(I*y)) =
       4*π*Gamma ((a:ℂ)+b)*(w:ℂ)^(2*(b:ℂ))*(1+(w:ℂ)^2)^(-((a:ℂ)+b)) := by
   let u : ℝ := (w⁻¹)^2
@@ -137,7 +137,7 @@ lemma pairHalf_transform_real {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {w : ℝ} (h
 
 
 /-- The rescaled Barnes transform throughout the right half-plane. -/
-lemma pairHalf_transform {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {w : ℂ} (hw : 0 < w.re) :
+theorem pairHalf_transform {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {w : ℂ} (hw : 0 < w.re) :
     (∫ y : ℝ, pairHalf a b y*w^(I*y)) =
       4*π*Gamma ((a:ℂ)+b)*w^(2*(b:ℂ))*(1+w^2)^(-((a:ℂ)+b)) := by
   have hU : IsOpen {w : ℂ | 0 < w.re} := isOpen_lt continuous_const continuous_re
@@ -165,7 +165,7 @@ lemma pairHalf_transform {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {w : ℂ} (hw : 0
   simpa using pairHalf_transform_real ha hb (w := 1+1/((n:ℝ)+1)) (by positivity)
 
 /-- The tilted two-Gamma integral, in the symmetric trigonometric normalization. -/
-lemma tilted_Gamma_integral {a b θ : ℝ} (ha : 0 < a) (hb : 0 < b) (hθ : |θ| < π) :
+theorem tilted_Gamma_integral {a b θ : ℝ} (ha : 0 < a) (hb : 0 < b) (hθ : |θ| < π) :
     (∫ y : ℝ, Gamma ((a:ℂ)+I*y)*Gamma ((b:ℂ)-I*y)*exp (θ*y)) =
       2*π*Gamma ((a:ℂ)+b)*exp (I*θ*((a:ℂ)-b)/2)/
         ((2*Real.cos (θ/2):ℝ):ℂ)^((a:ℂ)+b) := by
@@ -229,7 +229,7 @@ lemma tilted_Gamma_integral {a b θ : ℝ} (ha : 0 < a) (hb : 0 < b) (hθ : |θ|
   linear_combination h/2
 
 /-- The exponentially tilted Gamma pair is absolutely integrable throughout its strip. -/
-lemma integrable_tilted_Gamma {a b θ : ℝ} (ha : 0 < a) (hb : 0 < b) (hθ : |θ| < π) :
+theorem integrable_tilted_Gamma {a b θ : ℝ} (ha : 0 < a) (hb : 0 < b) (hθ : |θ| < π) :
     Integrable (fun y : ℝ => Gamma ((a:ℂ)+I*y)*Gamma ((b:ℂ)-I*y)*exp (θ*y)) := by
   obtain ⟨C,K,h⟩ := pairHalf_bound ha hb
   have hC : 0 ≤ C := (norm_nonneg _).trans (by simpa using h 0)
@@ -270,14 +270,14 @@ def phase (θ : ℝ) : ℂ := exp (I*θ/2)
 def moment (lam θ : ℝ) (j : ℕ) : ℂ :=
   2*π*Gamma (2*(lam:ℂ)+j)*exp (-I*θ*j/2) / scale θ^(2*(lam:ℂ)+j)
 /-- The transform scale does not vanish inside the convergence strip. -/
-lemma scale_ne_zero {θ : ℝ} (hθ : |θ| < π) : scale θ ≠ 0 := by
+theorem scale_ne_zero {θ : ℝ} (hθ : |θ| < π) : scale θ ≠ 0 := by
   apply ofReal_ne_zero.mpr
   have hc : 0 < Real.cos (θ/2) := Real.cos_pos_of_mem_Ioo (by
     rw [abs_lt] at hθ
     constructor <;> linarith)
   exact ne_of_gt (mul_pos (by norm_num) hc)
 /-- Polynomial factors shift the two Gamma parameters. -/
-lemma mixed_moment {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (k j : ℕ) :
+theorem mixed_moment {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (k j : ℕ) :
     Integrable (fun x : ℝ => poch ((lam:ℂ)+I*x) k * poch ((lam:ℂ)-I*x) j * weight lam θ x) ∧
     (∫ x : ℝ, poch ((lam:ℂ)+I*x) k * poch ((lam:ℂ)-I*x) j * weight lam θ x) =
       moment lam θ j * poch (2*(lam:ℂ)+j) k * (phase θ / scale θ)^k := by
@@ -311,7 +311,7 @@ def poly (lam θ : ℝ) (n : ℕ) (x : ℝ) : ℂ :=
   ∑ k ∈ Finset.range (n+1), ((-1:ℂ)^k*n.choose k/poch (2*(lam:ℂ)) k)*
     (scale θ / phase θ)^k * poch ((lam:ℂ)+I*x) k
 /-- Absolute integrability of every polynomial against a reversed rising factorial. -/
-lemma integrable_poly_basis {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n j : ℕ) :
+theorem integrable_poly_basis {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n j : ℕ) :
     Integrable (fun x : ℝ => poly lam θ n x * poch ((lam:ℂ)-I*x) j * weight lam θ x) := by
   simp only [poly, Finset.sum_mul]
   apply integrable_finsetSum
@@ -319,7 +319,7 @@ lemma integrable_poly_basis {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n
   simpa only [mul_assoc] using ((mixed_moment hlam hθ k j).1.const_mul
     (((-1:ℂ)^k*n.choose k/poch (2*(lam:ℂ)) k)*(scale θ/phase θ)^k))
 /-- Chu--Vandermonde evaluates all reversed moments of a Pollaczek polynomial. -/
-lemma integral_poly_basis {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n j : ℕ) :
+theorem integral_poly_basis {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n j : ℕ) :
     (∫ x : ℝ, poly lam θ n x * poch ((lam:ℂ)-I*x) j * weight lam θ x) =
       moment lam θ j * poch (-(j:ℂ)) n / poch (2*(lam:ℂ)) n := by
   have hP (k : ℕ) : poch (2*(lam:ℂ)) k ≠ 0 :=
@@ -345,7 +345,7 @@ lemma integral_poly_basis {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n j
   ring
 
 /-- A same-direction moment reduces to the finite reversed-basis expansion. -/
-lemma poly_same_basis {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n k : ℕ) :
+theorem poly_same_basis {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n k : ℕ) :
     Integrable (fun x : ℝ => poly lam θ n x*poch ((lam:ℂ)+I*x) k*weight lam θ x) ∧
     (∫ x : ℝ, poly lam θ n x*poch ((lam:ℂ)+I*x) k*weight lam θ x) =
       ∑ j ∈ Finset.range (k+1), ((-1:ℂ)^k*k.choose j*poch (-2*(lam:ℂ)-k+1) (k-j))*
@@ -367,7 +367,7 @@ lemma poly_same_basis {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n k : �
   simp_rw [integral_const_mul, integral_poly_basis hlam hθ]
   rfl
 /-- A Pollaczek polynomial annihilates each lower-degree rising factorial. -/
-lemma integral_poly_same_basis_zero {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) {n k : ℕ} (hk : k < n) :
+theorem integral_poly_same_basis_zero {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) {n k : ℕ} (hk : k < n) :
     (∫ x : ℝ, poly lam θ n x*poch ((lam:ℂ)+I*x) k*weight lam θ x) = 0 := by
   rw [(poly_same_basis hlam hθ n k).2]
   apply Finset.sum_eq_zero
@@ -375,7 +375,7 @@ lemma integral_poly_same_basis_zero {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| 
   rw [poch_neg_nat_eq_zero (show j < n by have := Finset.mem_range.mp hj; omega)]
   ring
 /-- Only the leading reversed rising factorial contributes in equal degree. -/
-lemma integral_poly_same_basis_self {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n : ℕ) :
+theorem integral_poly_same_basis_self {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n : ℕ) :
     (∫ x : ℝ, poly lam θ n x*poch ((lam:ℂ)+I*x) n*weight lam θ x) =
       (-1:ℂ)^n*(moment lam θ n*poch (-(n:ℂ)) n/poch (2*(lam:ℂ)) n) := by
   rw [(poly_same_basis hlam hθ n n).2, Finset.sum_eq_single n]
@@ -385,7 +385,7 @@ lemma integral_poly_same_basis_self {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| 
     ring
   · simp
 /-- The finite sum defining a second polynomial can be integrated term by term. -/
-lemma integral_poly_mul_poly {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (m n : ℕ) :
+theorem integral_poly_mul_poly {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (m n : ℕ) :
     (∫ x : ℝ, poly lam θ m x*poly lam θ n x*weight lam θ x) =
       ∑ k ∈ Finset.range (m+1), (((-1:ℂ)^k*m.choose k/poch (2*(lam:ℂ)) k)*(scale θ/phase θ)^k)*
         (∫ x : ℝ, poly lam θ n x*poch ((lam:ℂ)+I*x) k*weight lam θ x) := by
@@ -401,7 +401,7 @@ lemma integral_poly_mul_poly {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (
   rw [he, integral_finsetSum _ (fun k hk => (poly_same_basis hlam hθ n k).1.const_mul _)]
   simp_rw [integral_const_mul]
 /-- Unequal-degree Pollaczek polynomials are orthogonal. -/
-lemma poly_orthogonal {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) {m n : ℕ} (hmn : m ≠ n) :
+theorem poly_orthogonal {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) {m n : ℕ} (hmn : m ≠ n) :
     (∫ x : ℝ, poly lam θ m x*poly lam θ n x*weight lam θ x) = 0 := by
   have hlt (m n : ℕ) (hmn : m < n) :
       (∫ x : ℝ, poly lam θ m x*poly lam θ n x*weight lam θ x) = 0 := by
@@ -415,7 +415,7 @@ lemma poly_orthogonal {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) {m n : �
         fun x : ℝ => poly lam θ n x*poly lam θ m x*weight lam θ x by funext x; ring]
     exact hlt n m h
 /-- The exact square norm of the unnormalized terminating sum. -/
-lemma poly_square {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n : ℕ) :
+theorem poly_square {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n : ℕ) :
     (∫ x : ℝ, poly lam θ n x*poly lam θ n x*weight lam θ x) =
       (scale θ/phase θ)^n*moment lam θ n*poch (-(n:ℂ)) n/poch (2*(lam:ℂ)) n^2 := by
   rw [integral_poly_mul_poly hlam hθ, Finset.sum_eq_single n]
@@ -429,7 +429,7 @@ lemma poly_square {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n : ℕ) :
   · simp
 
 /-- The standard Pollaczek normalization cancels the phase in the square norm. -/
-lemma normalized_square {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n : ℕ) :
+theorem normalized_square {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (n : ℕ) :
     (poch (2*(lam:ℂ)) n/n.factorial*(I*phase θ)^n)^2 *
       (∫ x : ℝ, poly lam θ n x*poly lam θ n x*weight lam θ x) =
       2*π*Gamma (2*(lam:ℂ)+n)/(scale θ^(2*(lam:ℂ))*n.factorial) := by

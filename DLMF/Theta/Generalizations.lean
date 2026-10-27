@@ -6,8 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Theta.Relations
-public import DLMF.Theta.ZeroValues
-public import Mathlib.Analysis.SpecialFunctions.OrdinaryHypergeometric
 
 /-!
 # Theta functions: generalizations and analogs (DLMF §20.11)
@@ -149,7 +147,17 @@ theorem summable_ramanujanThetaF {a b : ℂ} (hab : ‖a * b‖ < 1) :
 theorem ordinaryHypergeometric_half_half_one_thetaModulusK {t : ℝ} (ht : 0 < t) :
     ₂F₁ (1 / 2 : ℂ) (1 / 2) 1 (thetaModulusK (I * t) ^ 2) =
       jacobiThetaThreeNullTau (I * t) ^ 2 := by
-  sorry
+  obtain ⟨h0, h1, -⟩ := DLMF.JacobiElliptic.p22R1_real_at ht
+  obtain ⟨-, hK, -⟩ := compEllIntK_eq_jacobiThetaThreeNullTau ht
+  rw [p22R1_thetaModulusK_I_mul ht] at hK ⊢
+  simp only [ofReal_re] at hK
+  have hm : |DLMF.JacobiElliptic.p22R1_rho t ^ 2| < 1 := by
+    rw [abs_of_nonneg (by positivity)]; nlinarith
+  rw [Real.compEllIntKm_eq_ordinaryHypergeometric hm] at hK
+  have hpi : (π : ℂ) / 2 ≠ 0 := by
+    have := Real.pi_pos; exact_mod_cast (by positivity : π / 2 ≠ 0)
+  push_cast at hK
+  exact mul_left_cancel₀ hpi hK
 
 /-! ### §20.11(v) Permutation symmetry -/
 
@@ -205,7 +213,7 @@ theorem combinedTheta_symmetry {m n : ℕ} {z τ : ℂ}
   refine ⟨?_, ?_, ?_, ?_⟩ <;> field_simp
 
 /-- The normalizing constants of the combined theta functions do not vanish for `Im τ > 0`. -/
-theorem th20_combinedConst_ne_zero {τ : ℂ} (hτ : 0 < τ.im) {j : ℕ} (hj1 : 1 ≤ j) (hj4 : j ≤ 4) :
+lemma th20_combinedConst_ne_zero {τ : ℂ} (hτ : 0 < τ.im) {j : ℕ} (hj1 : 1 ≤ j) (hj4 : j ≤ 4) :
     th20_combinedConst j τ ≠ 0 := by
   obtain ⟨h2, h3, h4⟩ := jacobiThetaNullTau_ne_zero hτ
   interval_cases j

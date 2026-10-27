@@ -56,7 +56,7 @@ open scoped Topology Real Classical
 namespace DLMF.Spheroidal
 
 /-- `dif_pos` without the deprecation. -/
-private theorem s30_dif_pos' {c : Prop} [Decidable c] (h : c) {α : Sort*} {t : c → α}
+private lemma s30_dif_pos' {c : Prop} [Decidable c] (h : c) {α : Sort*} {t : c → α}
     {e : ¬c → α} : dite c t e = t h := by simp [h]
 
 /-! ### Ferrers coefficients (§30.8) -/

@@ -24,7 +24,7 @@ open scoped Real Topology
 namespace DLMF.Airy
 
 /-- `Gi' = Bi'(1/3 - ∫Ai) + Ai' ∫Bi`, the derivative of 9.12.4. -/
-lemma scorerGiDeriv_variation (z : ℂ) :
+theorem scorerGiDeriv_variation (z : ℂ) :
     scorerGiDeriv z = airyBiDeriv z * (1 / 3 - primitive airyAi z) +
       airyAiDeriv z * primitive airyBi z := by
   have hfun : scorerGi = fun z => airyBi z * (1 / 3 - primitive airyAi z) +
@@ -38,7 +38,7 @@ lemma scorerGiDeriv_variation (z : ℂ) :
   simp only [Pi.sub_apply]; ring
 
 /-- `Hi' = Bi'(2/3 + ∫Ai) - Ai' ∫Bi`, the derivative of 9.12.5. -/
-lemma scorerHiDeriv_variation (z : ℂ) :
+theorem scorerHiDeriv_variation (z : ℂ) :
     scorerHiDeriv z = airyBiDeriv z * (2 / 3 + primitive airyAi z) -
       airyAiDeriv z * primitive airyBi z := by
   have h := scorerGiDeriv_eq z
@@ -353,7 +353,7 @@ theorem airyBi_negative_integral  :
 section AiryLaplace
 
 /-- `|Ai(x)| ≤ e^{-ζ}` and `|Ai'(x)| ≤ 2 x^{1/4} e^{-ζ}` for `x ≥ 1`. -/
-lemma airyLap_norm_le_exp {x : ℝ} (hx : 1 ≤ x) :
+theorem airyLap_norm_le_exp {x : ℝ} (hx : 1 ≤ x) :
     ‖airyAi x‖ ≤ Real.exp (-airyZeta x) ∧
       ‖airyAiDeriv x‖ ≤ 2 * x ^ (1 / 4 : ℝ) * Real.exp (-airyZeta x) := by
   have hx0 : 0 < x := by linarith
@@ -388,7 +388,7 @@ lemma airyLap_norm_le_exp {x : ℝ} (hx : 1 ≤ x) :
 
 /-- **Superexponential decay on the positive axis**: for every `b` there is `C` with
 `|Ai(t)|, |Ai'(t)| ≤ C e^{-bt}` for `t ≥ 0`. -/
-lemma airyLap_pos_bound (b : ℝ) : ∃ C, 0 ≤ C ∧ ∀ t : ℝ, 0 ≤ t →
+theorem airyLap_pos_bound (b : ℝ) : ∃ C, 0 ≤ C ∧ ∀ t : ℝ, 0 ≤ t →
     ‖airyAi t‖ ≤ C * Real.exp (-b * t) ∧ ‖airyAiDeriv t‖ ≤ C * Real.exp (-b * t) := by
   set B := max b 0
   set T := max 1 ((3 * (B + 1) / 2) ^ 2)
@@ -454,7 +454,7 @@ lemma airyLap_pos_bound (b : ℝ) : ∃ C, 0 ≤ C ∧ ∀ t : ℝ, 0 ≤ t →
         _ ≤ _ := by nlinarith
 
 /-- **Bounds on the negative axis**: `|Ai(t)| ≤ C` and `|Ai'(t)| ≤ C (1 + |t|)` for `t ≤ 0`. -/
-lemma airyLap_neg_bound : ∃ C, 0 ≤ C ∧ ∀ t : ℝ, t ≤ 0 →
+theorem airyLap_neg_bound : ∃ C, 0 ≤ C ∧ ∀ t : ℝ, t ≤ 0 →
     ‖airyAi t‖ ≤ C ∧ ‖airyAiDeriv t‖ ≤ C * (1 + |t|) := by
   obtain ⟨c1, hc1⟩ := airyInt_ai_neg_isBigO.bound
   obtain ⟨c2, hc2⟩ := airyInt_aiDeriv_neg_isBigO.bound
@@ -511,19 +511,19 @@ lemma airyLap_neg_bound : ∃ C, 0 ≤ C ∧ ∀ t : ℝ, t ≤ 0 →
         _ ≤ _ := by nlinarith [abs_nonneg c1]
 
 /-- `1 + |t| ≤ c⁻¹ e^{c|t|}` for `0 < c ≤ 1`. -/
-lemma airyLap_one_add_abs_le {c : ℝ} (hc : 0 < c) (hc1 : c ≤ 1) (t : ℝ) :
+theorem airyLap_one_add_abs_le {c : ℝ} (hc : 0 < c) (hc1 : c ≤ 1) (t : ℝ) :
     1 + |t| ≤ c⁻¹ * Real.exp (c * |t|) := by
   have h := Real.add_one_le_exp (c * |t|)
   rw [le_inv_mul_iff₀ hc]
   nlinarith [abs_nonneg t]
 
 /-- `|e^{qt}| = e^{(Re q) t}`. -/
-lemma airyLap_norm_exp (q : ℂ) (t : ℝ) : ‖exp (q * t)‖ = Real.exp (q.re * t) := by
+theorem airyLap_norm_exp (q : ℂ) (t : ℝ) : ‖exp (q * t)‖ = Real.exp (q.re * t) := by
   rw [Complex.norm_exp]; simp
 
 /-- **The dominating function**: for `a ≤ Re q ≤ b` with `a > 0`,
 `(1 + |t|) |e^{qt} Ai(t)|` and `|e^{qt} Ai'(t)|` are at most `K e^{-c|t|}`, `c = min a 1 / 2`. -/
-lemma airyLap_dom {a : ℝ} (ha : 0 < a) (b : ℝ) : ∃ K, 0 ≤ K ∧ ∀ q : ℂ, a ≤ q.re → q.re ≤ b →
+theorem airyLap_dom {a : ℝ} (ha : 0 < a) (b : ℝ) : ∃ K, 0 ≤ K ∧ ∀ q : ℂ, a ≤ q.re → q.re ≤ b →
     ∀ t : ℝ, (1 + |t|) * ‖exp (q * t) * airyAi t‖ ≤ K * Real.exp (-(min a 1 / 2) * |t|) ∧
       ‖exp (q * t) * airyAiDeriv t‖ ≤ K * Real.exp (-(min a 1 / 2) * |t|) := by
   set c := min a 1 / 2 with hcdef
@@ -589,7 +589,7 @@ lemma airyLap_dom {a : ℝ} (ha : 0 < a) (b : ℝ) : ∃ K, 0 ≤ K ∧ ∀ q : 
         _ ≤ _ := by gcongr
 
 /-- `e^{-c|t|}` is integrable on `ℝ` for `c > 0`. -/
-lemma airyLap_integrable_exp_abs {c : ℝ} (hc : 0 < c) :
+theorem airyLap_integrable_exp_abs {c : ℝ} (hc : 0 < c) :
     Integrable (fun t : ℝ => Real.exp (-c * |t|)) := by
   have h1 : IntegrableOn (fun t : ℝ => Real.exp (-c * |t|)) (Iic 0) := by
     refine (integrableOn_exp_mul_Iic hc 0).congr_fun (fun t ht => ?_) measurableSet_Iic
@@ -603,14 +603,14 @@ lemma airyLap_integrable_exp_abs {c : ℝ} (hc : 0 < c) :
   rwa [Iic_union_Ioi, integrableOn_univ] at this
 
 /-- Continuity of `t ↦ Ai(t)` and `t ↦ Ai'(t)` on the real line. -/
-lemma airyLap_continuous : Continuous (fun t : ℝ => airyAi t) ∧
+theorem airyLap_continuous : Continuous (fun t : ℝ => airyAi t) ∧
     Continuous (fun t : ℝ => airyAiDeriv t) :=
   ⟨(differentiable_airyAi.continuous).comp continuous_ofReal,
     (continuous_iff_continuousAt.mpr fun z => (hasDerivAt_airyAiDeriv z).continuousAt).comp
       continuous_ofReal⟩
 
 /-- Integrability of `e^{pt} Ai(t)` and `t e^{pt} Ai(t)` on `ℝ` for `Re p > 0`. -/
-lemma airyLap_integrable {p : ℂ} (hp : 0 < p.re) :
+theorem airyLap_integrable {p : ℂ} (hp : 0 < p.re) :
     Integrable (fun t : ℝ => exp (p * t) * airyAi t) ∧
       Integrable (fun t : ℝ => (t : ℂ) * (exp (p * t) * airyAi t)) := by
   obtain ⟨K, hK0, hK⟩ := airyLap_dom hp p.re
@@ -633,7 +633,7 @@ lemma airyLap_integrable {p : ℂ} (hp : 0 < p.re) :
 noncomputable def airyLapF (q : ℂ) : ℂ := ∫ t : ℝ, exp (q * t) * airyAi t
 
 /-- `F` is differentiable on `Re q > 0`, with `F'(q) = ∫ t e^{qt} Ai(t) dt`. -/
-lemma airyLap_hasDerivAt {p : ℂ} (hp : 0 < p.re) :
+theorem airyLap_hasDerivAt {p : ℂ} (hp : 0 < p.re) :
     HasDerivAt airyLapF (∫ t : ℝ, (t : ℂ) * (exp (p * t) * airyAi t)) p := by
   obtain ⟨K, hK0, hK⟩ := airyLap_dom (a := p.re / 2) (by positivity) (3 * p.re / 2)
   have hc : 0 < min (p.re / 2) 1 / 2 := by positivity
@@ -665,7 +665,7 @@ lemma airyLap_hasDerivAt {p : ℂ} (hp : 0 < p.re) :
     ring
 
 /-- The antiderivative `e^{pt}(Ai'(t) - p Ai(t))` of `e^{pt}(t - p²) Ai(t)`. -/
-lemma airyLap_hasDerivAt_g (p : ℂ) (t : ℝ) :
+theorem airyLap_hasDerivAt_g (p : ℂ) (t : ℝ) :
     HasDerivAt (fun t : ℝ => exp (p * t) * (airyAiDeriv t - p * airyAi t))
       (exp (p * t) * (((t : ℂ) - p ^ 2) * airyAi t)) t := by
   have he : HasDerivAt (fun t : ℝ => exp (p * t)) (exp (p * t) * p) t := by
@@ -679,7 +679,7 @@ lemma airyLap_hasDerivAt_g (p : ℂ) (t : ℝ) :
   simp only [Pi.sub_apply]; ring
 
 /-- **The transform equation**: `∫ t e^{pt} Ai(t) dt = p² F(p)` for `Re p > 0`. -/
-lemma airyLap_moment {p : ℂ} (hp : 0 < p.re) :
+theorem airyLap_moment {p : ℂ} (hp : 0 < p.re) :
     (∫ t : ℝ, (t : ℂ) * (exp (p * t) * airyAi t)) = p ^ 2 * airyLapF p := by
   obtain ⟨K, hK0, hK⟩ := airyLap_dom hp p.re
   set c := min p.re 1 / 2
@@ -719,7 +719,7 @@ lemma airyLap_moment {p : ℂ} (hp : 0 < p.re) :
   exact sub_eq_zero.mp hftc
 
 /-- **Constancy**: `F(q) e^{-q³/3}` is constant on `Re q > 0`. -/
-lemma airyLap_const {p q : ℂ} (hp : 0 < p.re) (hq : 0 < q.re) :
+theorem airyLap_const {p q : ℂ} (hp : 0 < p.re) (hq : 0 < q.re) :
     airyLapF p * exp (-p ^ 3 / 3) = airyLapF q * exp (-q ^ 3 / 3) := by
   set U := {c : ℂ | 0 < c.re}
   have hU : IsOpen U := isOpen_lt continuous_const Complex.continuous_re
@@ -736,7 +736,7 @@ lemma airyLap_const {p q : ℂ} (hp : 0 < p.re) (hq : 0 < q.re) :
     (fun z hz => (hD z hz).deriv) hp hq
 
 /-- `∫₀^∞ Ai = 1/3` as a Lebesgue integral, with integrability. -/
-lemma airyLap_integral_Ioi :
+theorem airyLap_integral_Ioi :
     IntegrableOn (fun t : ℝ => airyAi t) (Ioi 0) ∧ (∫ t : ℝ in Ioi 0, airyAi t) = 1 / 3 := by
   obtain ⟨C, hC0, hC⟩ := airyLap_pos_bound 1
   have hi : IntegrableOn (fun t : ℝ => airyAi t) (Ioi 0) := by
@@ -748,7 +748,7 @@ lemma airyLap_integral_Ioi :
   exact airyAi_positive_integral
 
 /-- **Positive half of the Abelian limit**: `∫₀^∞ e^{xt} Ai(t) dt → 1/3` as `x → 0+`. -/
-lemma airyLap_pos_tendsto :
+theorem airyLap_pos_tendsto :
     Tendsto (fun x : ℝ => ∫ t : ℝ in Ioi 0, exp ((x : ℂ) * t) * airyAi t) (𝓝[>] 0)
       (𝓝 (1 / 3)) := by
   obtain ⟨C, hC0, hC⟩ := airyLap_pos_bound 2
@@ -777,7 +777,7 @@ lemma airyLap_pos_tendsto :
 noncomputable def airyLapA (s : ℝ) : ℂ := ∫ u : ℝ in 0..s, airyAi (-(u : ℂ))
 
 /-- `A(s) → 2/3` as `s → ∞` (DLMF 9.10.11), and `A' = Ai(-s)`. -/
-lemma airyLapA_tendsto : Tendsto airyLapA atTop (𝓝 (2 / 3)) := by
+theorem airyLapA_tendsto : Tendsto airyLapA atTop (𝓝 (2 / 3)) := by
   have h := airyAi_negative_integral.comp tendsto_neg_atTop_atBot
   refine h.congr fun s => ?_
   simp only [Function.comp, airyLapA]
@@ -785,14 +785,14 @@ lemma airyLapA_tendsto : Tendsto airyLapA atTop (𝓝 (2 / 3)) := by
   simp only [ofReal_neg, neg_zero] at this
   exact this.symm
 
-lemma airyLapA_hasDerivAt (s : ℝ) : HasDerivAt airyLapA (airyAi (-(s : ℂ))) s := by
+theorem airyLapA_hasDerivAt (s : ℝ) : HasDerivAt airyLapA (airyAi (-(s : ℂ))) s := by
   have hc : Continuous fun u : ℝ => airyAi (-(u : ℂ)) :=
     differentiable_airyAi.continuous.comp (continuous_ofReal.neg)
   exact intervalIntegral.integral_hasDerivAt_right (hc.intervalIntegrable _ _)
     (hc.stronglyMeasurableAtFilter _ _) hc.continuousAt
 
 /-- `A` is bounded on `[0, ∞)`. -/
-lemma airyLapA_bound : ∃ M, 0 ≤ M ∧ ∀ s : ℝ, 0 ≤ s → ‖airyLapA s‖ ≤ M := by
+theorem airyLapA_bound : ∃ M, 0 ≤ M ∧ ∀ s : ℝ, 0 ≤ s → ‖airyLapA s‖ ≤ M := by
   have hcont : Continuous airyLapA :=
     continuous_iff_continuousAt.mpr fun s => (airyLapA_hasDerivAt s).continuousAt
   obtain ⟨S, hS⟩ := eventually_atTop.1 (airyLapA_tendsto.norm.eventually
@@ -809,7 +809,7 @@ lemma airyLapA_bound : ∃ M, 0 ≤ M ∧ ∀ s : ℝ, 0 ≤ s → ‖airyLapA s
     linarith [le_max_right K 0]
 
 /-- **Negative half of the Abelian limit**: `∫₋∞^0 e^{xt} Ai(t) dt → 2/3` as `x → 0+`. -/
-lemma airyLap_neg_tendsto :
+theorem airyLap_neg_tendsto :
     Tendsto (fun x : ℝ => ∫ t : ℝ in Iic 0, exp ((x : ℂ) * t) * airyAi t) (𝓝[>] 0)
       (𝓝 (2 / 3)) := by
   obtain ⟨M, hM0, hM⟩ := airyLapA_bound
@@ -916,7 +916,7 @@ lemma airyLap_neg_tendsto :
   exact (key x hx).symm
 
 /-- **The Abelian limit**: `F(x) → 1` as `x → 0+`. -/
-lemma airyLap_tendsto_zero :
+theorem airyLap_tendsto_zero :
     Tendsto (fun x : ℝ => airyLapF x) (𝓝[>] 0) (𝓝 1) := by
   have h := airyLap_neg_tendsto.add airyLap_pos_tendsto
   rw [show (2 / 3 + 1 / 3 : ℂ) = 1 by norm_num] at h
@@ -929,7 +929,7 @@ lemma airyLap_tendsto_zero :
   rw [airyLapF, e]
 
 /-- **9.10.13 (proof)**: `∫ e^{pt} Ai(t) dt = e^{p³/3}` for `Re p > 0`. -/
-lemma airyLap_bilateral {p : ℂ} (hp : 0 < p.re) : airyLapF p = exp (p ^ 3 / 3) := by
+theorem airyLap_bilateral {p : ℂ} (hp : 0 < p.re) : airyLapF p = exp (p ^ 3 / 3) := by
   have hH : Tendsto (fun x : ℝ => airyLapF x * exp (-(x : ℂ) ^ 3 / 3)) (𝓝[>] 0) (𝓝 1) := by
     have hc : Tendsto (fun x : ℝ => exp (-(x : ℂ) ^ 3 / 3)) (𝓝[>] 0) (𝓝 1) := by
       have : Tendsto (fun x : ℝ => exp (-(x : ℂ) ^ 3 / 3)) (𝓝 0)
@@ -962,24 +962,24 @@ section AiryLaplaceOneSided
 open scoped Nat
 
 /-- `(a)_{n+1} = a (a+1)_n`. -/
-lemma airyLap_poch_succ_left (a : ℂ) (n : ℕ) : poch a (n + 1) = a * poch (a + 1) n := by
+theorem airyLap_poch_succ_left (a : ℂ) (n : ℕ) : poch a (n + 1) = a * poch (a + 1) n := by
   simp [poch, ascPochhammer_succ_left, Polynomial.eval_comp]
 
 /-- For `Re a > 0`, `a + k ≠ 0` for every natural `k`. -/
-lemma airyLap_add_nat_ne_zero {a : ℂ} (ha : 0 < a.re) (k : ℕ) : a + k ≠ 0 := by
+theorem airyLap_add_nat_ne_zero {a : ℂ} (ha : 0 < a.re) (k : ℕ) : a + k ≠ 0 := by
   intro h
   have := congrArg Complex.re h
   simp at this
   linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
 
 /-- No negative integers when `Re b > 0`. -/
-lemma airyLap_not_neg_nat {b : ℂ} (hb : 0 < b.re) : ∀ k : ℕ, b ≠ -k := by
+theorem airyLap_not_neg_nat {b : ℂ} (hb : 0 < b.re) : ∀ k : ℕ, b ≠ -k := by
   intro k h
   have := airyLap_add_nat_ne_zero hb k
   rw [h] at this; simp at this
 
 /-- The coefficients of `M(a, a+1, z)`: `a / ((a + n) n!)`. -/
-lemma airyLap_coeff {a : ℂ} (ha : 0 < a.re) (n : ℕ) :
+theorem airyLap_coeff {a : ℂ} (ha : 0 < a.re) (n : ℕ) :
     kummerMCoeff a (a + 1) n = a / ((a + n) * n !) := by
   have h1 : poch (a + 1) n ≠ 0 := poch_ne_zero_of_not_neg_nat
     (airyLap_not_neg_nat (by simp; linarith)) n
@@ -993,7 +993,7 @@ lemma airyLap_coeff {a : ℂ} (ha : 0 < a.re) (n : ℕ) :
 
 /-- **The Kummer identity behind `∫₀ᶻ t^{a-1} e^t dt`**:
 `a M(a,a+1,z) + z (a/(a+1)) M(a+1,a+2,z) = a e^z` for `Re a > 0`. -/
-lemma airyLap_kummer_identity {a : ℂ} (ha : 0 < a.re) (z : ℂ) :
+theorem airyLap_kummer_identity {a : ℂ} (ha : 0 < a.re) (z : ℂ) :
     a * kummerM a (a + 1) z + z * (a / (a + 1) * kummerM (a + 1) (a + 1 + 1) z) =
       a * exp z := by
   have ha1 : 0 < (a + 1).re := by simp; linarith
@@ -1026,7 +1026,7 @@ lemma airyLap_kummer_identity {a : ℂ} (ha : 0 < a.re) (z : ℂ) :
     ring
 
 /-- `d/dp [p M(1/3, 4/3, p³/3)] = e^{p³/3}`. -/
-lemma airyLap_hasDerivAt_E1 (p : ℂ) :
+theorem airyLap_hasDerivAt_E1 (p : ℂ) :
     HasDerivAt (fun p : ℂ => p * kummerM (1 / 3) (4 / 3) (p ^ 3 / 3)) (exp (p ^ 3 / 3)) p := by
   have ha : (0 : ℝ) < (1 / 3 : ℂ).re := by norm_num
   have hb : ∀ k : ℕ, (4 / 3 : ℂ) ≠ -k := airyLap_not_neg_nat (by norm_num)
@@ -1044,7 +1044,7 @@ lemma airyLap_hasDerivAt_E1 (p : ℂ) :
   linear_combination (3 : ℂ) * hid
 
 /-- `d/dp [p² M(2/3, 5/3, p³/3) / 2] = p e^{p³/3}`. -/
-lemma airyLap_hasDerivAt_E2 (p : ℂ) :
+theorem airyLap_hasDerivAt_E2 (p : ℂ) :
     HasDerivAt (fun p : ℂ => p ^ 2 * kummerM (2 / 3) (5 / 3) (p ^ 3 / 3) / 2)
       (p * exp (p ^ 3 / 3)) p := by
   have ha : (0 : ℝ) < (2 / 3 : ℂ).re := by norm_num
@@ -1064,7 +1064,7 @@ lemma airyLap_hasDerivAt_E2 (p : ℂ) :
 
 /-- Domination on the positive axis: for `‖q‖ ≤ R` and `t ≥ 0`,
 `(1 + t) |e^{-qt} Ai(t)|` and `|e^{-qt} Ai'(t)|` are at most `K e^{-t}`. -/
-lemma airyLap_pos_dom (R : ℝ) : ∃ K, 0 ≤ K ∧ ∀ q : ℂ, ‖q‖ ≤ R → ∀ t : ℝ, 0 ≤ t →
+theorem airyLap_pos_dom (R : ℝ) : ∃ K, 0 ≤ K ∧ ∀ q : ℂ, ‖q‖ ≤ R → ∀ t : ℝ, 0 ≤ t →
     (1 + t) * ‖exp (-q * t) * airyAi t‖ ≤ K * Real.exp (-t) ∧
       ‖exp (-q * t) * airyAiDeriv t‖ ≤ K * Real.exp (-t) := by
   obtain ⟨C, hC0, hC⟩ := airyLap_pos_bound (R + 2)
@@ -1100,7 +1100,7 @@ lemma airyLap_pos_dom (R : ℝ) : ∃ K, 0 ≤ K ∧ ∀ q : ℂ, ‖q‖ ≤ R 
 noncomputable def airyLapL (p : ℂ) : ℂ := ∫ t : ℝ in Ioi 0, exp (-p * t) * airyAi t
 
 /-- Integrability of `e^{-pt} Ai(t)` and `t e^{-pt} Ai(t)` on `(0, ∞)`, for every `p`. -/
-lemma airyLap_integrableOn (p : ℂ) :
+theorem airyLap_integrableOn (p : ℂ) :
     IntegrableOn (fun t : ℝ => exp (-p * t) * airyAi t) (Ioi 0) ∧
       IntegrableOn (fun t : ℝ => (t : ℂ) * (exp (-p * t) * airyAi t)) (Ioi 0) := by
   obtain ⟨K, hK0, hK⟩ := airyLap_pos_dom ‖p‖
@@ -1124,7 +1124,7 @@ lemma airyLap_integrableOn (p : ℂ) :
     nlinarith [norm_nonneg (exp (-(p * t)) * airyAi t)]
 
 /-- `L'(p) = -∫₀^∞ t e^{-pt} Ai(t) dt`. -/
-lemma airyLapL_hasDerivAt (p : ℂ) :
+theorem airyLapL_hasDerivAt (p : ℂ) :
     HasDerivAt airyLapL (-∫ t : ℝ in Ioi 0, (t : ℂ) * (exp (-p * t) * airyAi t)) p := by
   obtain ⟨K, hK0, hK⟩ := airyLap_pos_dom (‖p‖ + 1)
   have hI := (exp_neg_integrableOn_Ioi 0 one_pos).const_mul K
@@ -1157,7 +1157,7 @@ lemma airyLapL_hasDerivAt (p : ℂ) :
     ring
 
 /-- **The transform equation**: `L'(p) = -p² L(p) + Ai'(0) + p Ai(0)`. -/
-lemma airyLapL_ode (p : ℂ) :
+theorem airyLapL_ode (p : ℂ) :
     HasDerivAt airyLapL (-p ^ 2 * airyLapL p + airyAiDeriv 0 + p * airyAi 0) p := by
   obtain ⟨K, hK0, hK⟩ := airyLap_pos_dom ‖p‖
   obtain ⟨i1, i2⟩ := airyLap_integrableOn p
@@ -1203,7 +1203,7 @@ noncomputable def airyLapR (p : ℂ) : ℂ :=
   exp (-p ^ 3 / 3) * (1 / 3 + airyAiDeriv 0 * (p * kummerM (1 / 3) (4 / 3) (p ^ 3 / 3)) +
     airyAi 0 * (p ^ 2 * kummerM (2 / 3) (5 / 3) (p ^ 3 / 3) / 2))
 
-lemma airyLapR_ode (p : ℂ) :
+theorem airyLapR_ode (p : ℂ) :
     HasDerivAt airyLapR (-p ^ 2 * airyLapR p + airyAiDeriv 0 + p * airyAi 0) p := by
   have h2 : HasDerivAt (fun q : ℂ => exp (-q ^ 3 / 3)) (exp (-p ^ 3 / 3) * (-p ^ 2)) p := by
     have := (((hasDerivAt_pow 3 p).neg).div_const 3).cexp
@@ -1217,7 +1217,7 @@ lemma airyLapR_ode (p : ℂ) :
   linear_combination (airyAiDeriv 0 + p * airyAi 0) * this
 
 /-- **9.10.14 (proof)**: `L = R` by uniqueness for the first-order equation. -/
-lemma airyLapL_eq (p : ℂ) : airyLapL p = airyLapR p := by
+theorem airyLapL_eq (p : ℂ) : airyLapL p = airyLapR p := by
   set D : ℂ → ℂ := fun q => (airyLapL q - airyLapR q) * exp (q ^ 3 / 3)
   have hD : ∀ q, HasDerivAt D 0 q := by
     intro q
@@ -1244,7 +1244,7 @@ lemma airyLapL_eq (p : ℂ) : airyLapL p = airyLapR p := by
   · exact absurd h hE
 
 /-- `3^{4/3} Γ(4/3) = 3^{1/3} Γ(1/3)` and `3^{5/3} Γ(5/3) = 2 · 3^{2/3} Γ(2/3)`. -/
-lemma airyLap_const_identities :
+theorem airyLap_const_identities :
     (3 : ℂ) ^ (4 / 3 : ℂ) * Gamma (4 / 3) = (((3 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ) * Gamma (1 / 3) ∧
       (3 : ℂ) ^ (5 / 3 : ℂ) * Gamma (5 / 3) =
         2 * ((((3 : ℝ) ^ (2 / 3 : ℝ) : ℝ) : ℂ) * Gamma (2 / 3)) := by
@@ -1264,7 +1264,7 @@ lemma airyLap_const_identities :
   constructor <;> ring
 
 /-- **9.10.14 (proof)** in the printed form. -/
-lemma airyLap_laplace (p : ℂ) :
+theorem airyLap_laplace (p : ℂ) :
     (∫ t : ℝ in Ioi 0, exp (-p * t) * airyAi t) = exp (-p ^ 3 / 3) *
         (1 / 3 - p * kummerM (1 / 3) (4 / 3) (p ^ 3 / 3) /
           ((3 : ℂ) ^ (4 / 3 : ℂ) * Gamma (4 / 3)) +
@@ -1294,7 +1294,7 @@ section AiryLaplaceNeg
 
 /-- The logarithmic-plane upper incomplete Gamma function through Kummer's function:
 `Γ(a, e^w) = Γ(a) - e^{aw} M(a, a+1, -e^w)/a` on the whole logarithmic plane. -/
-lemma airyLap_upperGamma_eq {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (w : ℂ) :
+theorem airyLap_upperGamma_eq {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (w : ℂ) :
     airyUpperGammaOnLog a w = Gamma a - exp (a * w) * kummerM a (a + 1) (-exp w) / a := by
   have ha0 : a ≠ 0 := by simpa using ha 0
   have h1 : airyUpperGammaOnLog a w = upperIncGammaOnLog a w := rfl
@@ -1311,7 +1311,7 @@ lemma airyLap_upperGamma_eq {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (w : ℂ) :
   linear_combination (-exp (a * w)) * key
 
 /-- `e^{c(3 log p - log 3)} = p^{3c} / 3^c` style evaluations used for 9.10.15. -/
-lemma airyLap_exp_w {p : ℂ} (hp : p ≠ 0) :
+theorem airyLap_exp_w {p : ℂ} (hp : p ≠ 0) :
     exp (3 * log p - log 3) = p ^ 3 / 3 ∧
       exp (1 / 3 * (3 * log p - log 3)) = p / (((3 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ) ∧
       exp (2 / 3 * (3 * log p - log 3)) = p ^ 2 / (((3 : ℝ) ^ (2 / 3 : ℝ) : ℝ) : ℂ) := by
@@ -1331,7 +1331,7 @@ lemma airyLap_exp_w {p : ℂ} (hp : p ≠ 0) :
       push_cast; ring, Complex.exp_sub, Complex.exp_nat_mul, hlp]
 
 /-- `∫₀^∞ e^{-pt} Ai(-t) dt = e^{p³/3} - L(-p)` for `Re p > 0`, with integrability. -/
-lemma airyLap_neg_eq {p : ℂ} (hp : 0 < p.re) :
+theorem airyLap_neg_eq {p : ℂ} (hp : 0 < p.re) :
     IntegrableOn (fun t : ℝ => exp (-p * t) * airyAi (-t)) (Ioi 0) ∧
       (∫ t : ℝ in Ioi 0, exp (-p * t) * airyAi (-t)) = exp (p ^ 3 / 3) - airyLapL (-p) := by
   obtain ⟨Cn, hCn0, hCn⟩ := airyLap_neg_bound
@@ -1362,7 +1362,7 @@ lemma airyLap_neg_eq {p : ℂ} (hp : 0 < p.re) :
     ring
 
 /-- **9.10.15 (proof)**. -/
-lemma airyLap_negative_laplace {p : ℂ} (hp : 0 < p.re) :
+theorem airyLap_negative_laplace {p : ℂ} (hp : 0 < p.re) :
     (∫ t : ℝ in Ioi 0, exp (-p * t) * airyAi (-t)) = exp (p ^ 3 / 3) / 3 *
       (airyUpperGammaOnLog (1 / 3) (3 * log p - log 3) / Gamma (1 / 3) +
         airyUpperGammaOnLog (2 / 3) (3 * log p - log 3) / Gamma (2 / 3)) := by
@@ -1397,7 +1397,7 @@ theorem airyAi_negative_laplace {p : ℂ} (hp : 0 < p.re) :
 section AiryLaplaceNegBi
 
 /-- `|Bi(-s)| ≤ C` and `|Bi'(-s)| ≤ C (1 + s)` for `s ≥ 0`. -/
-lemma airyLapB_bound : ∃ C, 0 ≤ C ∧ ∀ s : ℝ, 0 ≤ s →
+theorem airyLapB_bound : ∃ C, 0 ≤ C ∧ ∀ s : ℝ, 0 ≤ s →
     ‖airyBi (-(s : ℂ))‖ ≤ C ∧ ‖airyBiDeriv (-(s : ℂ))‖ ≤ C * (1 + s) := by
   obtain ⟨c1, hc1⟩ := airyInt_bi_neg_isBigO.bound
   obtain ⟨c2, hc2⟩ := airyInt_biDeriv_neg_isBigO.bound
@@ -1445,7 +1445,7 @@ lemma airyLapB_bound : ∃ C, 0 ≤ C ∧ ∀ s : ℝ, 0 ≤ s →
 noncomputable def airyLapNB (q : ℂ) : ℂ := ∫ t : ℝ in Ioi 0, exp (-q * t) * airyBi (-t)
 
 /-- Domination for `Re q ≥ a > 0`: `(1+t) |e^{-qt} Bi(-t)|, |e^{-qt} Bi'(-t)| ≤ K e^{-(a/2) t}`. -/
-lemma airyLapB_dom {a : ℝ} (ha : 0 < a) : ∃ K, 0 ≤ K ∧ ∀ q : ℂ, a ≤ q.re → ∀ t : ℝ, 0 ≤ t →
+theorem airyLapB_dom {a : ℝ} (ha : 0 < a) : ∃ K, 0 ≤ K ∧ ∀ q : ℂ, a ≤ q.re → ∀ t : ℝ, 0 ≤ t →
     (1 + t) * ‖exp (-q * t) * airyBi (-t)‖ ≤ K * Real.exp (-(a / 2) * t) ∧
       ‖exp (-q * t) * airyBiDeriv (-t)‖ ≤ K * Real.exp (-(a / 2) * t) := by
   obtain ⟨C, hC0, hC⟩ := airyLapB_bound
@@ -1474,7 +1474,7 @@ lemma airyLapB_dom {a : ℝ} (ha : 0 < a) : ∃ K, 0 ≤ K ∧ ∀ q : ℂ, a �
       _ ≤ _ := by gcongr
 
 /-- Integrability of `e^{-pt} Bi(-t)` and `t e^{-pt} Bi(-t)` on `(0, ∞)` for `Re p > 0`. -/
-lemma airyLapB_integrableOn {p : ℂ} (hp : 0 < p.re) :
+theorem airyLapB_integrableOn {p : ℂ} (hp : 0 < p.re) :
     IntegrableOn (fun t : ℝ => exp (-p * t) * airyBi (-t)) (Ioi 0) ∧
       IntegrableOn (fun t : ℝ => (t : ℂ) * (exp (-p * t) * airyBi (-t))) (Ioi 0) := by
   obtain ⟨K, hK0, hK⟩ := airyLapB_dom hp
@@ -1497,7 +1497,7 @@ lemma airyLapB_integrableOn {p : ℂ} (hp : 0 < p.re) :
     nlinarith [norm_nonneg (exp (-p * t) * airyBi (-t))]
 
 /-- `N_B'(p) = -∫₀^∞ t e^{-pt} Bi(-t) dt` on `Re p > 0`. -/
-lemma airyLapNB_hasDerivAt {p : ℂ} (hp : 0 < p.re) :
+theorem airyLapNB_hasDerivAt {p : ℂ} (hp : 0 < p.re) :
     HasDerivAt airyLapNB (-∫ t : ℝ in Ioi 0, (t : ℂ) * (exp (-p * t) * airyBi (-t))) p := by
   obtain ⟨K, hK0, hK⟩ := airyLapB_dom (a := p.re / 2) (by positivity)
   have hI := (exp_neg_integrableOn_Ioi 0 (by positivity : 0 < p.re / 2 / 2)).const_mul K
@@ -1533,7 +1533,7 @@ lemma airyLapNB_hasDerivAt {p : ℂ} (hp : 0 < p.re) :
     ring
 
 /-- **The transform equation for `Bi(-t)`**: `N_B' = p² N_B + Bi'(0) - p Bi(0)`. -/
-lemma airyLapNB_ode {p : ℂ} (hp : 0 < p.re) :
+theorem airyLapNB_ode {p : ℂ} (hp : 0 < p.re) :
     HasDerivAt airyLapNB (p ^ 2 * airyLapNB p + airyBiDeriv 0 - p * airyBi 0) p := by
   obtain ⟨K, hK0, hK⟩ := airyLapB_dom hp
   obtain ⟨i1, i2⟩ := airyLapB_integrableOn hp
@@ -1594,7 +1594,7 @@ noncomputable def airyLapRB (p : ℂ) : ℂ :=
   exp (p ^ 3 / 3) * (airyBiDeriv 0 * (p * kummerM (1 / 3) (4 / 3) (-(p ^ 3 / 3))) -
     airyBi 0 * (p ^ 2 * kummerM (2 / 3) (5 / 3) (-(p ^ 3 / 3)) / 2))
 
-lemma airyLapRB_ode (p : ℂ) :
+theorem airyLapRB_ode (p : ℂ) :
     HasDerivAt airyLapRB (p ^ 2 * airyLapRB p + airyBiDeriv 0 - p * airyBi 0) p := by
   have h2 : HasDerivAt (fun q : ℂ => exp (q ^ 3 / 3)) (exp (p ^ 3 / 3) * p ^ 2) p := by
     have := ((hasDerivAt_pow 3 p).div_const 3).cexp
@@ -1625,7 +1625,7 @@ lemma airyLapRB_ode (p : ℂ) :
   linear_combination (airyBiDeriv 0 - p * airyBi 0) * this
 
 /-- The real-power identities `√3 · 3^{1/3} · 3^{1/6} = 3` and `√3² · 3^{1/3} · 3^{2/3} = 9`. -/
-lemma airyLapB_consts :
+theorem airyLapB_consts :
     (((3 : ℝ) ^ (1 / 6 : ℝ) : ℝ) : ℂ) = 3 / ((Real.sqrt 3 : ℝ) * (((3 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ)) ∧
       (((3 : ℝ) ^ (2 / 3 : ℝ) : ℝ) : ℂ) =
         9 / ((Real.sqrt 3 : ℝ) ^ 2 * (((3 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ)) := by
@@ -1646,7 +1646,7 @@ lemma airyLapB_consts :
   · field_simp; linear_combination h2c
 
 /-- The closed form `R_B` agrees with the printed right-hand side of 9.10.16. -/
-lemma airyLapRB_eq_printed {p : ℂ} (hp0 : p ≠ 0) :
+theorem airyLapRB_eq_printed {p : ℂ} (hp0 : p ≠ 0) :
     airyLapRB p = exp (p ^ 3 / 3) / Real.sqrt 3 *
       (airyUpperGammaOnLog (2 / 3) (3 * log p - log 3) / Gamma (2 / 3) -
         airyUpperGammaOnLog (1 / 3) (3 * log p - log 3) / Gamma (1 / 3)) := by
@@ -1664,7 +1664,7 @@ lemma airyLapRB_eq_printed {p : ℂ} (hp0 : p ≠ 0) :
   ring
 
 /-- On the positive axis the logarithmic-plane upper Gamma is the ordinary one. -/
-lemma airyLap_upperGamma_real (a : ℂ) {x : ℝ} (hx : 0 < x) :
+theorem airyLap_upperGamma_real (a : ℂ) {x : ℝ} (hx : 0 < x) :
     airyUpperGammaOnLog a (3 * log (x : ℂ) - log 3) = upperIncGamma a ((x ^ 3 / 3 : ℝ) : ℂ) := by
   have hw : 3 * log (x : ℂ) - log 3 = ((3 * Real.log x - Real.log 3 : ℝ) : ℂ) := by
     rw [← Complex.ofReal_log hx.le, show (3 : ℂ) = ((3 : ℝ) : ℂ) by norm_num,
@@ -1682,7 +1682,7 @@ lemma airyLap_upperGamma_real (a : ℂ) {x : ℝ} (hx : 0 < x) :
   simp [lineIntegral]
 
 /-- `Γ(a, y) → 0` as `y → +∞` for `Re a > 0`. -/
-lemma airyLap_upperIncGamma_tendsto {a : ℂ} (ha : 0 < a.re) :
+theorem airyLap_upperIncGamma_tendsto {a : ℂ} (ha : 0 < a.re) :
     Tendsto (fun y : ℝ => upperIncGamma a (y : ℂ)) atTop (𝓝 0) := by
   set f : ℝ → ℂ := fun t => (t : ℂ) ^ (a - 1) * Real.exp (-t)
   have hi : IntegrableOn f (Ioi 0) := by
@@ -1701,7 +1701,7 @@ lemma airyLap_upperIncGamma_tendsto {a : ℂ} (ha : 0 < a.re) :
   rw [e]; simp only [f]; ring
 
 /-- **9.10.16 (proof)**: `N_B = R_B` on `Re p > 0`. -/
-lemma airyLapNB_eq {p : ℂ} (hp : 0 < p.re) : airyLapNB p = airyLapRB p := by
+theorem airyLapNB_eq {p : ℂ} (hp : 0 < p.re) : airyLapNB p = airyLapRB p := by
   set U := {c : ℂ | 0 < c.re}
   have hU : IsOpen U := isOpen_lt continuous_const Complex.continuous_re
   set D : ℂ → ℂ := fun q => (airyLapNB q - airyLapRB q) * exp (-q ^ 3 / 3)
@@ -1782,7 +1782,7 @@ theorem airyBi_negative_laplace {p : ℂ} (hp : 0 < p.re) :
   exact ⟨(airyLapB_integrableOn hp).1, (airyLapNB_eq hp).trans (airyLapRB_eq_printed hp0)⟩
 
 /-- On `(0, ∞)`, `t^{α-1} Ai(t) = (π√3)⁻¹ t^{(α+½)-1} K_{1/3}((2/3) t^{3/2})` (DLMF 9.6.2). -/
-lemma airyMel_integrand {α : ℂ} {t : ℝ} (ht : 0 < t) :
+theorem airyMel_integrand {α : ℂ} {t : ℝ} (ht : 0 < t) :
     (t : ℂ) ^ (α - 1) * airyAi t = ((π⁻¹ * (Real.sqrt 3)⁻¹ : ℝ) : ℂ) •
       ((t : ℂ) ^ ((α + 1 / 2) - 1) •
         (fun u : ℝ => DLMF.Bessel.besselK (1 / 3) ((2 / 3 * u : ℝ) : ℂ)) (t ^ (3 / 2 : ℝ))) := by
@@ -1896,7 +1896,7 @@ theorem airyBi_stieltjes_principalValue {x : ℝ} (hx : 0 < x) :
 
 /-- For a solution `w` of Airy's equation on the real line,
 `∫₀ˣ ∫₀ᵛ w = x ∫₀ˣ w - w'(x) + w'(0)`. -/
-lemma airySol_double_integral {w w' : ℂ → ℂ} (hw : IsAirySol w w') (x : ℝ) :
+theorem airySol_double_integral {w w' : ℂ → ℂ} (hw : IsAirySol w w') (x : ℝ) :
     (∫ v : ℝ in 0..x, ∫ t : ℝ in 0..v, w t) =
       (x : ℂ) * (∫ t : ℝ in 0..x, w t) - w' x + w' 0 := by
   have hc : Continuous fun t : ℝ => w t :=
@@ -1946,7 +1946,7 @@ theorem airyAi_repeated_integrals {n : ℕ} (hn : 1 ≤ n) :
 
 /-- Existence of a symmetric principal value on `(0, ∞)` at `c > 0`, in the form of
 `HasPrincipalValueIoi`, from the subtraction hypothesis near `c` and integrable tails. -/
-lemma airyPV_hasPrincipalValueIoi {f : ℝ → ℂ} {b c : ℝ} (A : ℂ) (hc : 0 < c) (hcb : c < b)
+theorem airyPV_hasPrincipalValueIoi {f : ℝ → ℂ} {b c : ℝ} (A : ℂ) (hc : 0 < c) (hcb : c < b)
     (hsub : IntegrableOn (fun t => f t - A / (t - c)) (Icc 0 b))
     (htail : ∀ d : ℝ, c < d → IntegrableOn f (Ioi d)) :
     HasPrincipalValueIoi f c
@@ -1977,12 +1977,12 @@ lemma airyPV_hasPrincipalValueIoi {f : ℝ → ℂ} {b c : ℝ} (A : ℂ) (hc : 
     (EventuallyEq.symm hev)
 
 /-- `(t:ℂ)^(3/2)` is the real power for `t ≥ 0`. -/
-lemma airyPV_cpow_three_halves {t : ℝ} (ht : 0 ≤ t) :
+theorem airyPV_cpow_three_halves {t : ℝ} (ht : 0 ≤ t) :
     (t : ℂ) ^ (3 / 2 : ℂ) = ((t ^ (3 / 2 : ℝ) : ℝ) : ℂ) := by
   rw [Complex.ofReal_cpow ht]; push_cast; ring_nf
 
 /-- `t ↦ t^{3/2}` is injective on `[0, ∞)`. -/
-lemma airyPV_cpow_ne {t x : ℝ} (ht : 0 ≤ t) (hx : 0 ≤ x) (htx : t ≠ x) :
+theorem airyPV_cpow_ne {t x : ℝ} (ht : 0 ≤ t) (hx : 0 ≤ x) (htx : t ≠ x) :
     (t : ℂ) ^ (3 / 2 : ℂ) - (x : ℂ) ^ (3 / 2 : ℂ) ≠ 0 := by
   rw [airyPV_cpow_three_halves ht, airyPV_cpow_three_halves hx, ← Complex.ofReal_sub,
     Complex.ofReal_ne_zero, sub_ne_zero]

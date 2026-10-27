@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Legendre.Associated
+public import DLMF.Legendre.Laplace
 
 /-!
 # Ferrers and associated Legendre connection formulas
@@ -393,7 +394,7 @@ theorem associatedP_neg_euler (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
   linear_combination regularizedGaussHG (μ-ν) (ν+μ+1) (μ+1) ((1-z)/2) * he
 
 /-- The regularized quadratic transformation 15.8.17 near the origin, for all parameters. -/
-lemma regularizedGaussHG_quadratic_half_sum (a b : ℂ) {x : ℂ} (hx : ‖x‖ < 1) (hr : x.re < 1/2)
+theorem regularizedGaussHG_quadratic_half_sum (a b : ℂ) {x : ℂ} (hx : ‖x‖ < 1) (hr : x.re < 1/2)
     (hw : ‖4*x*(x-1)/(1-2*x)^2‖ < 1) :
     regularizedGaussHG a b ((a+b+1)/2) x =
       (1-2*x)^(-a) * regularizedGaussHG (a/2) ((a+1)/2) ((a+b+1)/2) (4*x*(x-1)/(1-2*x)^2) := by
@@ -430,7 +431,7 @@ lemma regularizedGaussHG_quadratic_half_sum (a b : ℂ) {x : ℂ} (hx : ‖x‖ 
   exact hF.eqOn_of_preconnected_of_eventuallyEq hG isPreconnected_univ (mem_univ _) hev (mem_univ b)
 
 /-- The right half of the cut domain of `P^μ_ν` is star-shaped about `2`. -/
-lemma starConvex_re_pos_sub_one_slitPlane :
+theorem starConvex_re_pos_sub_one_slitPlane :
     StarConvex ℝ (2:ℂ) {z : ℂ | 0 < z.re ∧ z-1 ∈ slitPlane} := by
   intro y ⟨hy1, hy2⟩ a b ha hb hab
   rw [mem_slitPlane_iff] at hy2
@@ -523,7 +524,7 @@ theorem associatedP_neg_eq_quadratic (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitP
       ⟨by simp, Or.inl (by simp)⟩).isConnected.isPreconnected h32 hfreq ⟨hre, hz⟩
 
 /-- Off `(-∞,1]`, `1 - 1/z²` lies in the slit plane. -/
-lemma one_sub_recip_sq_mem_slitPlane_of_sub_one {z : ℂ} (hz : z-1 ∈ slitPlane) : 1-1/z^2 ∈ slitPlane := by
+theorem one_sub_recip_sq_mem_slitPlane_of_sub_one {z : ℂ} (hz : z-1 ∈ slitPlane) : 1-1/z^2 ∈ slitPlane := by
   have hz0 : z ≠ 0 := by
     rintro rfl; rw [mem_slitPlane_iff] at hz; norm_num at hz
   rw [mem_slitPlane_iff_not_le_zero]
@@ -557,13 +558,13 @@ lemma one_sub_recip_sq_mem_slitPlane_of_sub_one {z : ℂ} (hz : z-1 ∈ slitPlan
   · simp [hb] at h
 
 /-- The square of the inherited square root `exp((log(z-1)+log(z+1))/2)` is `(z-1)(z+1)`. -/
-lemma whipple_sqrt_sq {z : ℂ} (h1 : z - 1 ≠ 0) (h2 : z + 1 ≠ 0) :
+theorem whipple_sqrt_sq {z : ℂ} (h1 : z - 1 ≠ 0) (h2 : z + 1 ≠ 0) :
     exp ((log (z-1)+log (z+1))/2)^2 = (z-1)*(z+1) := by
   rw [← exp_nat_mul, show ((2:ℕ):ℂ)*((log (z-1)+log (z+1))/2) = log (z-1)+log (z+1) by push_cast; ring,
     exp_add, exp_log h1, exp_log h2]
 
 /-- On the right half of the cut domain, the Whipple point `z/√(z²-1)` avoids `(-∞,1]`. -/
-lemma whipple_point_sub_one_mem {z : ℂ} (hz : z-1 ∈ slitPlane) (hre : 0 < z.re) :
+theorem whipple_point_sub_one_mem {z : ℂ} (hz : z-1 ∈ slitPlane) (hre : 0 < z.re) :
     z/exp ((log (z-1)+log (z+1))/2) - 1 ∈ slitPlane := by
   have h1 : z - 1 ≠ 0 := slitPlane_ne_zero hz
   have h2 : z + 1 ≠ 0 := by
@@ -621,7 +622,7 @@ lemma whipple_point_sub_one_mem {z : ℂ} (hz : z-1 ∈ slitPlane) (hre : 0 < z.
   linarith
 
 /-- The Whipple point of a real `t > 1` is the real number `t/√(t²-1) > 1`, with its logarithms. -/
-lemma whipple_point_real {t : ℝ} (ht : 1 < t) :
+theorem whipple_point_real {t : ℝ} (ht : 1 < t) :
     ∃ ζ : ℝ, 1 < ζ ∧ (t:ℂ)/exp ((log ((t:ℂ)-1)+log ((t:ℂ)+1))/2) = ζ ∧
       Real.log (ζ-1) + Real.log (ζ+1) = -(Real.log (t-1) + Real.log (t+1)) ∧
       Real.log ζ = Real.log t - (Real.log (t-1) + Real.log (t+1))/2 ∧
@@ -749,7 +750,7 @@ theorem associatedP_whipple_real (ν μ : ℂ) (t : ℝ) (ht : 1 < t) :
 
 /-- Identity principle on the right half of the cut domain: functions analytic there that agree
 on the real segment `(1,2)` agree everywhere on it. -/
-lemma eq_of_eqOn_Ioo_re_pos {f g : ℂ → ℂ}
+theorem eq_of_eqOn_Ioo_re_pos {f g : ℂ → ℂ}
     (hf : AnalyticOnNhd ℂ f {z : ℂ | 0 < z.re ∧ z-1 ∈ slitPlane})
     (hg : AnalyticOnNhd ℂ g {z : ℂ | 0 < z.re ∧ z-1 ∈ slitPlane})
     (h : ∀ t : ℝ, t ∈ Ioo (1:ℝ) 2 → f t = g t) {z : ℂ} (hz : z-1 ∈ slitPlane) (hre : 0 < z.re) :
@@ -771,7 +772,7 @@ lemma eq_of_eqOn_Ioo_re_pos {f g : ℂ → ℂ}
       ⟨by simp, Or.inl (by simp)⟩).isConnected.isPreconnected h32 hfreq ⟨hre, hz⟩
 
 /-- Domain facts for the Whipple formulas on the right half of the cut domain. -/
-lemma whipple_domain {w : ℂ} (hw : w ∈ {z : ℂ | 0 < z.re ∧ z-1 ∈ slitPlane}) :
+theorem whipple_domain {w : ℂ} (hw : w ∈ {z : ℂ | 0 < z.re ∧ z-1 ∈ slitPlane}) :
     w + 1 ∈ slitPlane ∧ w - 1 ∈ slitPlane ∧ w ∈ slitPlane ∧ 1/w^2 ∈ cutPlane ∧
     w/exp ((log (w-1)+log (w+1))/2) - 1 ∈ slitPlane ∧
     w/exp ((log (w-1)+log (w+1))/2) + 1 ∈ slitPlane ∧

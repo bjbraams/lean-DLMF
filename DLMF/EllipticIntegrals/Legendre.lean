@@ -8,8 +8,6 @@ module
 public import DLMF.JacobiElliptic.Basic
 public import DLMF.Elliptic.ThirdKind
 public import Carlson.Elliptic.Standard
-public import Mathlib.Analysis.SpecialFunctions.Complex.Arctan
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Periodic
 
 /-!
 # Legendre's elliptic integrals: definitions (DLMF §§19.1–19.2)
@@ -299,11 +297,11 @@ theorem compEllIntDk_eq_integral (k : ℂ) :
     incEllIntDk_ofReal_eq_integral]
 
 /-- For a real exponent and a nonnegative real base the complex power is the real one. -/
-theorem ei19a_ofReal_cpow_ofReal {x : ℝ} (hx : 0 ≤ x) (y : ℝ) :
+lemma ei19a_ofReal_cpow_ofReal {x : ℝ} (hx : 0 ≤ x) (y : ℝ) :
     ((x : ℂ) ^ (y : ℂ)) = ((x ^ y : ℝ) : ℂ) := (ofReal_cpow hx y).symm
 
 /-- If `k² = m` with `m` real and `1 - m sin²θ ≥ 0`, the complex base is the real one. -/
-theorem ei19a_base_ofReal {k : ℂ} {m : ℝ} (hk : k ^ 2 = m) (θ : ℝ) :
+lemma ei19a_base_ofReal {k : ℂ} {m : ℝ} (hk : k ^ 2 = m) (θ : ℝ) :
     1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2 = ((1 - m * Real.sin θ ^ 2 : ℝ) : ℂ) := by
   rw [hk]; push_cast; ring
 

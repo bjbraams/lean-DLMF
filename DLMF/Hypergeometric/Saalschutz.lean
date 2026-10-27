@@ -7,7 +7,6 @@ module
 
 public import DLMFMathlib.Analysis.Complex.ScalarSeries
 public import DLMF.Hypergeometric.Continuation
-public import DLMF.Hypergeometric.EulerIntegral
 public import DLMF.Gamma.Pochhammer
 
 /-!
@@ -30,7 +29,7 @@ noncomputable section
 namespace DLMF.Hypergeometric
 
 /-- The coefficients of `𝐅(a,b;c;z)`: `(a)ₙ (b)ₙ / (n! Γ(c+n))`. -/
-lemma hasSum_regularizedGaussHGFun_coeff (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem hasSum_regularizedGaussHGFun_coeff (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     HasSum (fun n : ℕ => poch a n * poch b n / (n ! * Gamma (c + n)) * z ^ n)
       (regularizedGaussHGFun a b c z) := by
   rw [regularizedGaussHGFun_eq_tsum]
@@ -39,7 +38,7 @@ lemma hasSum_regularizedGaussHGFun_coeff (a b c : ℂ) {z : ℂ} (hz : ‖z‖ <
   field_simp
 
 /-- The binomial series `(1-z)^{-d} = ∑ (d)ₘ zᵐ/m!` on the unit disk. -/
-lemma hasSum_one_sub_cpow_neg (d : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem hasSum_one_sub_cpow_neg (d : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     HasSum (fun n : ℕ => poch d n / n ! * z ^ n) ((1 - z) ^ (-d)) := by
   exact hasSum_poch_div_factorial hz
 
@@ -65,7 +64,7 @@ theorem regularized_saalschutz_convolution (a b c : ℂ) (n : ℕ) :
   exact congrFun h n
 
 /-- `(d)ₙ = (d)ₙ₋ₖ (-1)ᵏ (1-d-n)ₖ` for `k ≤ n`. -/
-lemma poch_eq_poch_sub_mul (d : ℂ) {n k : ℕ} (hk : k ≤ n) :
+theorem poch_eq_poch_sub_mul (d : ℂ) {n k : ℕ} (hk : k ≤ n) :
     poch d n = poch d (n - k) * ((-1) ^ k * poch (1 - d - n) k) := by
   have h := poch_add d (n - k) k
   rw [Nat.sub_add_cancel hk] at h

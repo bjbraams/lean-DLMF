@@ -5,10 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Tactic.CrossRefAttribute
 public import DLMF.Hypergeometric.Contiguous
-public import Mathlib.Analysis.Calculus.MeanValue
-public import Mathlib.Analysis.Complex.RealDeriv
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.InverseDeriv
 
 /-!
@@ -34,7 +31,7 @@ namespace DLMF.Hypergeometric
 
 /-- The coefficient identity underlying termwise differentiation. No nonvanishing
 condition on the numerator parameters is needed. -/
-lemma gaussHGCoeff_shift {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
+theorem gaussHGCoeff_shift {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
     (n + 1 : ℂ) * gaussHGCoeff a b c (n + 1) =
       a * b / c * gaussHGCoeff (a + 1) (b + 1) (c + 1) n := by
   have hc0 : c ≠ 0 := by simpa using hc 0
@@ -46,7 +43,7 @@ lemma gaussHGCoeff_shift {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
   field [hc0, hcp, hn, Nat.cast_ne_zero.mpr n.factorial_ne_zero]
 
 /-- The coefficient recurrence underlying the Gauss differential equation. -/
-lemma gaussHGCoeff_recurrence {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
+theorem gaussHGCoeff_recurrence {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
     (n + 1 : ℂ) * (c + n) * gaussHGCoeff a b c (n + 1) =
       (a + n) * (b + n) * gaussHGCoeff a b c n := by
   have hcp := poch_ne_zero_of_not_neg_nat hc n
@@ -97,14 +94,14 @@ theorem ordinaryHypergeometric_ode {a b c z : ℂ}
     ring
 
 /-- Helper lemma for `arcsin_eq_ordinaryHypergeometric`. -/
-lemma three_halves_not_neg_nat : ∀ k : ℕ, (3 / 2 : ℂ) ≠ -k := by
+theorem three_halves_not_neg_nat : ∀ k : ℕ, (3 / 2 : ℂ) ≠ -k := by
   intro k h
   have hre : (3 : ℝ) / 2 = -k := by simpa using congrArg Complex.re h
   have : (0 : ℝ) ≤ k := Nat.cast_nonneg k
   linarith
 
 /-- Helper lemma for `arcsin_eq_ordinaryHypergeometric`. -/
-lemma one_sub_sq_cpow_neg_half {t : ℝ} (ht : |t| < 1) :
+theorem one_sub_sq_cpow_neg_half {t : ℝ} (ht : |t| < 1) :
     ((1 : ℂ) - (t : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) = (1 / Real.sqrt (1 - t ^ 2) : ℝ) := by
   have hnn : 0 < 1 - t ^ 2 := by nlinarith [abs_lt.mp ht]
   have hx : 0 ≤ (1 - t ^ 2 : ℝ) := hnn.le
@@ -117,15 +114,15 @@ lemma one_sub_sq_cpow_neg_half {t : ℝ} (ht : |t| < 1) :
   rw [hsqrt]
 
 /-- Helper lemma for `arcsin_eq_ordinaryHypergeometric`. -/
-lemma half_add_one_eq_three_halves : (1 / 2 : ℂ) + 1 = 3 / 2 := by ring
+theorem half_add_one_eq_three_halves : (1 / 2 : ℂ) + 1 = 3 / 2 := by ring
 
 /-- Helper lemma for `arcsin_eq_ordinaryHypergeometric`. -/
-lemma three_halves_add_one_eq_five_halves : (3 / 2 : ℂ) + 1 = 5 / 2 := by ring
+theorem three_halves_add_one_eq_five_halves : (3 / 2 : ℂ) + 1 = 5 / 2 := by ring
 
 /-- Helper lemma for `arcsin_eq_ordinaryHypergeometric`: Gauss's contiguous relation
 specialised at `(a,b,c)=(1/2,1/2,3/2)`, together with the binomial series, identifies
 the derivative of `t · ₂F₁(1/2,1/2;3/2;t²)`. -/
-lemma ordinaryHypergeometric_arcsin_ident {z : ℂ} (hz : ‖z‖ < 1) :
+theorem ordinaryHypergeometric_arcsin_ident {z : ℂ} (hz : ‖z‖ < 1) :
     ₂F₁ (1 / 2 : ℂ) (1 / 2) (3 / 2) z +
         z / 3 * ₂F₁ (3 / 2 : ℂ) (3 / 2) (5 / 2) z =
       (1 - z) ^ (-(1 / 2 : ℂ)) := by
@@ -161,7 +158,7 @@ lemma ordinaryHypergeometric_arcsin_ident {z : ℂ} (hz : ‖z‖ < 1) :
 
 /-- Helper lemma for `arcsin_eq_ordinaryHypergeometric`. Powers are written as
 products to avoid an `npowRec`/`mulAux` unfold barrier in `HasDerivAt.scomp`. -/
-lemma hasDerivAt_mul_ordinaryHypergeometric_arcsin {t : ℝ} (ht : |t| < 1) :
+theorem hasDerivAt_mul_ordinaryHypergeometric_arcsin {t : ℝ} (ht : |t| < 1) :
     HasDerivAt (fun u : ℝ =>
         (u : ℂ) * ₂F₁ (1 / 2 : ℂ) (1 / 2) (3 / 2) ((u : ℂ) * (u : ℂ)))
       ((1 / Real.sqrt (1 - t ^ 2) : ℝ) : ℂ) t := by

@@ -66,7 +66,7 @@ theorem zcnt_erfc_conj (z : ℂ) : erfc (conj z) = conj (erfc z) := by
   simp [erfc, zcnt_erf_conj]
 
 /-- Integrability of the Cauchy kernel of the Faddeeva function off the real axis. -/
-lemma zcnt_integrable_cauchy {u : ℂ} (hu : 0 < u.im) :
+theorem zcnt_integrable_cauchy {u : ℂ} (hu : 0 < u.im) :
     Integrable (fun t : ℝ => exp (-(t : ℂ) ^ 2) / ((t : ℂ) - u)) := by
   have hne : ∀ t : ℝ, (t : ℂ) - u ≠ 0 := fun t h => by
     have := congrArg Complex.im h
@@ -184,7 +184,7 @@ theorem zcnt_norm_erfc_le_one {z : ℂ} (hz : 0 ≤ z.re) (hz2 : 0 ≤ (z ^ 2).r
     _ = 1 := by field_simp
 
 /-- `(z²).re = ‖z‖² cos (2 ph z)`. -/
-lemma zcnt_re_sq (z : ℂ) : (z ^ 2).re = ‖z‖ ^ 2 * Real.cos (2 * arg z) := by
+theorem zcnt_re_sq (z : ℂ) : (z ^ 2).re = ‖z‖ ^ 2 * Real.cos (2 * arg z) := by
   rw [Real.cos_two_mul, pow_two, mul_re]
   have hc := norm_mul_cos_arg z
   have hs := norm_mul_sin_arg z
@@ -254,7 +254,7 @@ theorem zcnt_erf_ofReal_ne_zero {x : ℝ} (hx : x ≠ 0) : erf (x : ℂ) ≠ 0 :
   · exact (TauCeti.Real.erf_pos h).ne'
 
 /-- `erf (i y) = (2/√π) i e^{y²} F(y)` with Dawson's integral `F`. -/
-lemma zcnt_erf_I_mul (z : ℂ) :
+theorem zcnt_erf_I_mul (z : ℂ) :
     erf (I * z) = 2 / Real.sqrt π * I * (exp (z ^ 2) * dawsonF z) := by
   have he : erf (I*z)=2/Real.sqrt π*I*primitive (fun t => exp (t^2)) z := by
     rw [erf_complex_segment_integral]
@@ -290,7 +290,7 @@ theorem zcnt_erf_I_mul_ofReal_ne_zero {y : ℝ} (hy : y ≠ 0) : erf (I * (y : �
     (mul_ne_zero (Complex.exp_ne_zero _) (by exact_mod_cast hne))
 
 /-- Two functions with the same derivative everywhere and the same value at `0` agree. -/
-lemma zcnt_eq_of_hasDerivAt {f g f' : ℂ → ℂ} (hf : ∀ z, HasDerivAt f (f' z) z)
+theorem zcnt_eq_of_hasDerivAt {f g f' : ℂ → ℂ} (hf : ∀ z, HasDerivAt f (f' z) z)
     (hg : ∀ z, HasDerivAt g (f' z) z) (h0 : f 0 = g 0) (z : ℂ) : f z = g z := by
   have hd : ∀ w, HasDerivAt (fun w => f w - g w) 0 w := fun w => by
     have h := (hf w).sub (hg w)
@@ -371,7 +371,7 @@ theorem zcnt_fresnelSinInt_I_mul (z : ℂ) : fresnelSinInt (I * z) = -I * fresne
     (by simp [fresnelSinInt, primitive_zero]) z
 
 /-- On the diagonal, `C((1+i)x) = (1+i) x ∫₀¹ cosh(π t² x²) dt`. -/
-lemma zcnt_fresnelCosInt_diag (x : ℝ) :
+theorem zcnt_fresnelCosInt_diag (x : ℝ) :
     fresnelCosInt ((1 + I) * x) =
       (1 + I) * x * ((∫ t in (0 : ℝ)..1, Real.cosh (π * t ^ 2 * x ^ 2) : ℝ) : ℂ) := by
   rw [fresnelCosInt, primitive, segmentIntegral, sub_zero, ← intervalIntegral.integral_ofReal]
@@ -388,7 +388,7 @@ lemma zcnt_fresnelCosInt_diag (x : ℝ) :
   rfl
 
 /-- On the diagonal, `S((1+i)x) = (1+i) x i ∫₀¹ sinh(π t² x²) dt`. -/
-lemma zcnt_fresnelSinInt_diag (x : ℝ) :
+theorem zcnt_fresnelSinInt_diag (x : ℝ) :
     fresnelSinInt ((1 + I) * x) =
       (1 + I) * x * (I * ((∫ t in (0 : ℝ)..1, Real.sinh (π * t ^ 2 * x ^ 2) : ℝ) : ℂ)) := by
   rw [fresnelSinInt, primitive, segmentIntegral, sub_zero, ← intervalIntegral.integral_ofReal,
@@ -430,7 +430,7 @@ theorem zcnt_fresnelSinInt_diag_ne_zero {x : ℝ} (hx : x ≠ 0) :
     (mul_ne_zero I_ne_zero (by exact_mod_cast hpos.ne'))
 
 /-- A Laplace-type integral with a kernel bounded by `t^{s-1} e^{-at}` is at most `a^{-s} Γ(s)`. -/
-lemma zcnt_norm_laplace_le {s a : ℝ} (hs : 0 < s) (ha : 0 < a) {g : ℝ → ℂ}
+theorem zcnt_norm_laplace_le {s a : ℝ} (hs : 0 < s) (ha : 0 < a) {g : ℝ → ℂ}
     (hg : ∀ t : ℝ, 0 < t → ‖g t‖ ≤ t ^ (s - 1) * Real.exp (-(a * t))) :
     ‖∫ t in Ioi (0 : ℝ), g t‖ ≤ (1 / a) ^ s * Real.Gamma s := by
   rw [← Real.integral_rpow_mul_exp_neg_mul_Ioi hs ha]
@@ -612,7 +612,7 @@ theorem zcnt_fresnelSinInt_ofReal_ne_zero {x : ℝ} (hx : x ≠ 0) : fresnelSinI
     linarith
 
 /-- `0 < Im w < Re w` places `w` in the open sector `0 < ph w < π/4`. -/
-lemma zcnt_arg_mem_of_im_lt_re {w : ℂ} (h0 : 0 < w.im) (h1 : w.im < w.re) :
+theorem zcnt_arg_mem_of_im_lt_re {w : ℂ} (h0 : 0 < w.im) (h1 : w.im < w.re) :
     0 < arg w ∧ arg w < π / 4 := by
   have hre : 0 < w.re := h0.trans h1
   have hw : w ≠ 0 := fun h => by simp [h] at hre

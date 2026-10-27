@@ -6,9 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.Analysis.Complex.CauchyIntegral
-public import Mathlib.Analysis.Complex.TaylorSeries
-public import Mathlib.Analysis.Analytic.Uniqueness
-public import Mathlib.Analysis.Analytic.OfScalars
 
 /-!
 # The Lagrange–Bürmann formula at the coefficient level

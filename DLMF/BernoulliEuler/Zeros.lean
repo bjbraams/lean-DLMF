@@ -8,15 +8,7 @@ module
 public import DLMF.BernoulliEuler.Asymptotics
 public import DLMF.BernoulliEuler.Series
 public import DLMFMathlib.NumberTheory.EulerPolynomials
-public import Mathlib.Analysis.Asymptotics.AsymptoticEquivalent
-public import Mathlib.Analysis.SpecialFunctions.Exp
-public import Mathlib.Analysis.Real.Pi.Bounds
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
-public import Mathlib.Data.Multiset.Sort
-public import Mathlib.FieldTheory.Separable
 public import Mathlib.NumberTheory.ZetaValues
-public import Mathlib.Tactic.CrossRefAttribute
 
 /-!
 # Zeros of Bernoulli and Euler polynomials (DLMF §24.12)
@@ -104,19 +96,19 @@ def eulerRealZero (n j : ℕ) : ℝ := (eulerRealZerosGE n).getD (j - 1) 0
 
 /-! ### Basic properties of the zero lists -/
 
-theorem b24b_zerosGE_sorted (p : ℝ[X]) : (b24b_zerosGE p).Pairwise (· ≤ ·) :=
+lemma b24b_zerosGE_sorted (p : ℝ[X]) : (b24b_zerosGE p).Pairwise (· ≤ ·) :=
   Multiset.pairwise_sort _ _
 
-theorem b24b_mem_zerosGE {p : ℝ[X]} (hp : p ≠ 0) {x : ℝ} :
+lemma b24b_mem_zerosGE {p : ℝ[X]} (hp : p ≠ 0) {x : ℝ} :
     x ∈ b24b_zerosGE p ↔ 1 / 2 ≤ x ∧ p.eval x = 0 := by
   rw [b24b_zerosGE, Multiset.mem_sort, Multiset.mem_filter, mem_roots hp, IsRoot.def, and_comm]
 
-theorem b24b_bernoulli_ne_zero (n : ℕ) : Polynomial.bernoulli n ≠ 0 := by
+lemma b24b_bernoulli_ne_zero (n : ℕ) : Polynomial.bernoulli n ≠ 0 := by
   intro h
   have := congrArg (fun p => p.coeff n) h
   simp [coeff_bernoulli] at this
 
-theorem b24b_euler_ne_zero (n : ℕ) : Polynomial.euler n ≠ 0 := by
+lemma b24b_euler_ne_zero (n : ℕ) : Polynomial.euler n ≠ 0 := by
   intro h
   have h1 := euler_comp_X_add_one_add n
   rw [h, zero_comp, add_zero] at h1
@@ -172,7 +164,7 @@ theorem eulerFun_eq_zero_iff_of_le_half {n : ℕ} {x : ℝ} (hx : x ≤ 1 / 2) :
     · exact h
 
 /-- The first entry of a sorted list of reals that are all `≥ a` and contain `a` is `a`. -/
-theorem b24b_getD_zero_eq {l : List ℝ} {a : ℝ} (hs : l.Pairwise (· ≤ ·)) (ha : a ∈ l)
+lemma b24b_getD_zero_eq {l : List ℝ} {a : ℝ} (hs : l.Pairwise (· ≤ ·)) (ha : a ∈ l)
     (hge : ∀ y ∈ l, a ≤ y) : l.getD (1 - 1) 0 = a := by
   cases l with
   | nil => simp at ha
@@ -189,7 +181,7 @@ section ZeroHelpers
 open Finset
 
 /-- Rolle for `Bₖ₊₁`: two zeros give a zero of `Bₖ` between them. -/
-theorem q24b_rolle_bernoulli {k : ℕ} {a b : ℝ} (hab : a < b) (ha : bernoulliFun (k + 1) a = 0)
+lemma q24b_rolle_bernoulli {k : ℕ} {a b : ℝ} (hab : a < b) (ha : bernoulliFun (k + 1) a = 0)
     (hb : bernoulliFun (k + 1) b = 0) : ∃ c ∈ Set.Ioo a b, bernoulliFun k c = 0 := by
   obtain ⟨c, hc, h⟩ := exists_hasDerivAt_eq_zero hab
     (continuous_bernoulliFun (k + 1)).continuousOn (ha.trans hb.symm)
@@ -201,7 +193,7 @@ theorem q24b_rolle_bernoulli {k : ℕ} {a b : ℝ} (hab : a < b) (ha : bernoulli
   · exact h
 
 /-- Rolle for `Eₖ₊₁`. -/
-theorem q24b_rolle_euler {k : ℕ} {a b : ℝ} (hab : a < b) (ha : eulerFun (k + 1) a = 0)
+lemma q24b_rolle_euler {k : ℕ} {a b : ℝ} (hab : a < b) (ha : eulerFun (k + 1) a = 0)
     (hb : eulerFun (k + 1) b = 0) : ∃ c ∈ Set.Ioo a b, eulerFun k c = 0 := by
   obtain ⟨c, hc, h⟩ := exists_hasDerivAt_eq_zero hab
     (continuous_eulerFun (k + 1)).continuousOn (ha.trans hb.symm)
@@ -213,7 +205,7 @@ theorem q24b_rolle_euler {k : ℕ} {a b : ℝ} (hab : a < b) (ha : eulerFun (k +
   · exact h
 
 /-- `B₂ₙ₊₁` has no zero in `(0, 1/2)`. -/
-theorem q24b_bernoulli_odd_ne_zero (n : ℕ) {x : ℝ} (hx : x ∈ Set.Ioo (0 : ℝ) (1 / 2)) :
+lemma q24b_bernoulli_odd_ne_zero (n : ℕ) {x : ℝ} (hx : x ∈ Set.Ioo (0 : ℝ) (1 / 2)) :
     bernoulliFun (2 * n + 1) x ≠ 0 := by
   induction n generalizing x with
   | zero =>
@@ -234,13 +226,13 @@ theorem q24b_bernoulli_odd_ne_zero (n : ℕ) {x : ℝ} (hx : x ∈ Set.Ioo (0 : 
     exact ih ⟨ha.1.trans hd.1, hd.2.trans hb.2⟩ hd0
 
 /-- `Eₖ₊₁(1) = -Eₖ₊₁(0)`. -/
-theorem q24b_eulerFun_one (k : ℕ) : eulerFun (k + 1) 1 = -eulerFun (k + 1) 0 := by
+lemma q24b_eulerFun_one (k : ℕ) : eulerFun (k + 1) 1 = -eulerFun (k + 1) 0 := by
   have h := eulerFun_add_one_add (k + 1) 0
   rw [zero_add, zero_pow (Nat.succ_ne_zero k), mul_zero] at h
   linarith
 
 /-- `E₂ₘ₊₂(0) = 0`. -/
-theorem q24b_eulerFun_two_mul_add_two_zero (m : ℕ) : eulerFun (2 * m + 2) 0 = 0 := by
+lemma q24b_eulerFun_two_mul_add_two_zero (m : ℕ) : eulerFun (2 * m + 2) 0 = 0 := by
   have h1 := q24b_eulerFun_one (2 * m + 1)
   have h2 := eulerFun_one_sub (2 * m + 2) 0
   rw [sub_zero, show 2 * m + 2 = 2 * (m + 1) by ring, pow_mul] at h2
@@ -250,7 +242,7 @@ theorem q24b_eulerFun_two_mul_add_two_zero (m : ℕ) : eulerFun (2 * m + 2) 0 = 
   linarith
 
 /-- `E₂ₘ₊₁(1/2) = 0`. -/
-theorem q24b_eulerFun_odd_half (m : ℕ) : eulerFun (2 * m + 1) (1 / 2) = 0 := by
+lemma q24b_eulerFun_odd_half (m : ℕ) : eulerFun (2 * m + 1) (1 / 2) = 0 := by
   have h := eulerNumber_eq_zero_of_odd (odd_two_mul_add_one m)
   rw [eulerNumber, mul_eq_zero] at h
   have h' : (euler (2 * m + 1)).eval (1 / 2 : ℚ) = 0 := h.resolve_left (pow_ne_zero _ two_ne_zero)
@@ -258,7 +250,7 @@ theorem q24b_eulerFun_odd_half (m : ℕ) : eulerFun (2 * m + 1) (1 / 2) = 0 := b
   rw [eulerFun, this, eval_map, eval₂_at_apply, h', map_zero]
 
 /-- `E₂ₘ₊₁` has no zero in `(0, 1/2)` and `E₂ₘ₊₂` has no zero in `(0, 1)`. -/
-theorem q24b_euler_ne_zero (m : ℕ) :
+lemma q24b_euler_ne_zero (m : ℕ) :
     (∀ x ∈ Set.Ioo (0 : ℝ) (1 / 2), eulerFun (2 * m + 1) x ≠ 0) ∧
       ∀ x ∈ Set.Ioo (0 : ℝ) 1, eulerFun (2 * m + 2) x ≠ 0 := by
   have step : ∀ m : ℕ, (∀ x ∈ Set.Ioo (0 : ℝ) (1 / 2), eulerFun (2 * m + 1) x ≠ 0) →
@@ -299,7 +291,7 @@ theorem q24b_euler_ne_zero (m : ℕ) :
 
 /-- The second entry of a sorted list whose least entry `a` is simple and whose next value is
 `b`. -/
-theorem q24b_getD_one_eq {l : List ℝ} {a b : ℝ} (hs : l.Pairwise (· ≤ ·)) (ha : a ∈ l)
+lemma q24b_getD_one_eq {l : List ℝ} {a b : ℝ} (hs : l.Pairwise (· ≤ ·)) (ha : a ∈ l)
     (hb : b ∈ l) (hab : a < b) (hc : l.count a ≤ 1) (hge : ∀ y ∈ l, a ≤ y)
     (hgeb : ∀ y ∈ l, y ≠ a → b ≤ y) : l.getD (2 - 1) 0 = b := by
   match l, hs, ha, hb, hc, hge, hgeb with
@@ -328,7 +320,7 @@ theorem q24b_getD_one_eq {l : List ℝ} {a b : ℝ} (hs : l.Pairwise (· ≤ ·)
     exact le_antisymm h2 h1
 
 /-- `B₂ₖ ≠ 0` for `k ≥ 1` (from `ζ(2k) > 0`). -/
-theorem q24b_bernoulli_two_mul_ne_zero {k : ℕ} (hk : 1 ≤ k) : _root_.bernoulli (2 * k) ≠ 0 := by
+lemma q24b_bernoulli_two_mul_ne_zero {k : ℕ} (hk : 1 ≤ k) : _root_.bernoulli (2 * k) ≠ 0 := by
   intro h0
   have h := hasSum_zeta_nat (k := k) (by omega)
   rw [h0] at h
@@ -336,7 +328,7 @@ theorem q24b_bernoulli_two_mul_ne_zero {k : ℕ} (hk : 1 ≤ k) : _root_.bernoul
   norm_num at this
 
 /-- `B₂, …, B₅`. -/
-theorem q24b_bernoulli_small :
+lemma q24b_bernoulli_small :
     _root_.bernoulli 2 = 1 / 6 ∧ _root_.bernoulli 3 = 0 ∧ _root_.bernoulli 4 = -1 / 30 ∧
       _root_.bernoulli 5 = 0 := by
   refine ⟨?_, ?_, ?_, ?_⟩ <;> rw [bernoulli_eq_bernoulli'_of_ne_one (by norm_num)]
@@ -346,7 +338,7 @@ theorem q24b_bernoulli_small :
   · exact bernoulli'_eq_zero_of_odd (by decide) (by norm_num)
 
 /-- `Bₙ(x) = ∑ₖ (n choose k) Bₖ x^{n-k}`. -/
-theorem q24b_bernoulliFun_expand (n : ℕ) (x : ℝ) :
+lemma q24b_bernoulliFun_expand (n : ℕ) (x : ℝ) :
     bernoulliFun n x =
       ∑ k ∈ range (n + 1), ((n.choose k : ℝ) * _root_.bernoulli k) * x ^ (n - k) := by
   simp only [bernoulliFun, Polynomial.bernoulli, Polynomial.map_sum, eval_finsetSum,
@@ -355,14 +347,14 @@ theorem q24b_bernoulliFun_expand (n : ℕ) (x : ℝ) :
   simp only [map_mul, map_natCast, eq_ratCast]; ring
 
 /-- Explicit `B₄(x)`. -/
-theorem q24b_B4 (x : ℝ) : bernoulliFun 4 x = x ^ 4 - 2 * x ^ 3 + x ^ 2 - 1 / 30 := by
+lemma q24b_B4 (x : ℝ) : bernoulliFun 4 x = x ^ 4 - 2 * x ^ 3 + x ^ 2 - 1 / 30 := by
   obtain ⟨b2, b3, b4, -⟩ := q24b_bernoulli_small
   rw [q24b_bernoulliFun_expand]
   simp [sum_range_succ, b2, b3, b4, Nat.choose]
   norm_num; ring
 
 /-- Explicit `B₅(x)`. -/
-theorem q24b_B5 (x : ℝ) :
+lemma q24b_B5 (x : ℝ) :
     bernoulliFun 5 x = x ^ 5 - 5 / 2 * x ^ 4 + 5 / 3 * x ^ 3 - 1 / 6 * x := by
   obtain ⟨b2, b3, b4, b5⟩ := q24b_bernoulli_small
   rw [q24b_bernoulliFun_expand]
@@ -370,21 +362,21 @@ theorem q24b_B5 (x : ℝ) :
   norm_num; ring
 
 /-- Explicit `B₂(x)`. -/
-theorem q24b_B2 (x : ℝ) : bernoulliFun 2 x = x ^ 2 - x + 1 / 6 := by
+lemma q24b_B2 (x : ℝ) : bernoulliFun 2 x = x ^ 2 - x + 1 / 6 := by
   obtain ⟨b2, -⟩ := q24b_bernoulli_small
   rw [q24b_bernoulliFun_expand]
   simp [sum_range_succ, b2, Nat.choose]
   norm_num; ring
 
 /-- Explicit `B₃(x)`. -/
-theorem q24b_B3 (x : ℝ) : bernoulliFun 3 x = x ^ 3 - 3 / 2 * x ^ 2 + 1 / 2 * x := by
+lemma q24b_B3 (x : ℝ) : bernoulliFun 3 x = x ^ 3 - 3 / 2 * x ^ 2 + 1 / 2 * x := by
   obtain ⟨b2, b3, -⟩ := q24b_bernoulli_small
   rw [q24b_bernoulliFun_expand]
   simp [sum_range_succ, b2, b3, Nat.choose]
   norm_num; ring
 
 /-- Intermediate value theorem for a sign change. -/
-theorem q24b_exists_root {f : ℝ → ℝ} (hf : Continuous f) {a b : ℝ} (hab : a < b)
+lemma q24b_exists_root {f : ℝ → ℝ} (hf : Continuous f) {a b : ℝ} (hab : a < b)
     (h : f a * f b < 0) : ∃ c ∈ Set.Ioo a b, f c = 0 := by
   rcases lt_or_gt_of_ne (show f a ≠ 0 by intro h0; rw [h0, zero_mul] at h; exact lt_irrefl _ h)
     with ha | ha
@@ -396,7 +388,7 @@ theorem q24b_exists_root {f : ℝ → ℝ} (hf : Continuous f) {a b : ℝ} (hab 
     exact ⟨c, hc, hfc⟩
 
 /-- A real polynomial of degree `≤ n` with `n` distinct real zeros has exactly `n` roots. -/
-theorem q24b_roots_card_eq {p : ℝ[X]} {n : ℕ} (hdeg : p.natDegree ≤ n) (l : List ℝ)
+lemma q24b_roots_card_eq {p : ℝ[X]} {n : ℕ} (hdeg : p.natDegree ≤ n) (l : List ℝ)
     (hl : l.Pairwise (· < ·)) (hlen : l.length = n) (hr : ∀ x ∈ l, p.eval x = 0)
     (hp : p ≠ 0) : p.roots.card = n := by
   refine le_antisymm ((card_roots' p).trans hdeg) ?_
@@ -492,7 +484,7 @@ and `g(A) > 0`; `k = 1, 2` follow from the explicit polynomials. -/
 
 
 /-- If `Bₙ ≠ 0` on `[1/2, lo]` and `Bₙ` changes sign on `[lo, hi]`, then `lo < x₁ < hi`. -/
-theorem s24b_first_zero_bracket {n : ℕ} {lo hi : ℝ} (hlh : lo < hi)
+lemma s24b_first_zero_bracket {n : ℕ} {lo hi : ℝ} (hlh : lo < hi)
     (hne : ∀ x ∈ Set.Icc (1 / 2 : ℝ) lo, bernoulliFun n x ≠ 0)
     (hlo : 1 / 2 ≤ lo) (hsign : bernoulliFun n lo * bernoulliFun n hi < 0) :
     lo < bernoulliRealZero n 1 ∧ bernoulliRealZero n 1 < hi := by
@@ -519,7 +511,7 @@ theorem s24b_first_zero_bracket {n : ℕ} {lo hi : ℝ} (hlh : lo < hi)
 
 
 /-- Tail bound for the Fourier series of `B₂ₖ`, `k ≥ 2`, after the first five terms. -/
-theorem s24b_fourier_tail {k : ℕ} (hk : 2 ≤ k) {x : ℝ} (hx : x ∈ Set.Icc (0 : ℝ) 1) :
+lemma s24b_fourier_tail {k : ℕ} (hk : 2 ≤ k) {x : ℝ} (hx : x ∈ Set.Icc (0 : ℝ) 1) :
     |(-1 : ℝ) ^ (k + 1) * (2 * π) ^ (2 * k) / 2 / (2 * k)! * bernoulliFun (2 * k) x -
       ∑ m ∈ Finset.range 5, 1 / (m : ℝ) ^ (2 * k) * Real.cos (2 * π * m * x)| ≤
       625 * (π ^ 4 / 90 - (1 + 1 / 16 + 1 / 81 + 1 / 256)) * (1 / 5) ^ (2 * k) := by
@@ -551,7 +543,7 @@ theorem s24b_fourier_tail {k : ℕ} (hk : 2 ≤ k) {x : ℝ} (hx : x ∈ Set.Icc
     _ = _ := by ring
 
 /-- The first five Fourier terms of `B_N` at `x = 3/4 + θ/(2π)`. -/
-theorem s24b_main_terms {N : ℕ} (hN : N ≠ 0) (θ : ℝ) :
+lemma s24b_main_terms {N : ℕ} (hN : N ≠ 0) (θ : ℝ) :
     ∑ m ∈ Finset.range 5, 1 / (m : ℝ) ^ N * Real.cos (2 * π * m * (3 / 4 + θ / (2 * π))) =
       Real.sin θ - (1 / 2) ^ N * Real.cos (2 * θ) - (1 / 3) ^ N * Real.sin (3 * θ) +
         (1 / 4) ^ N * Real.cos (4 * θ) := by
@@ -581,7 +573,7 @@ noncomputable def s24b_g (k : ℕ) (θ : ℝ) : ℝ :=
   (-1 : ℝ) ^ (k + 1) * (2 * π) ^ (2 * k) / 2 / (2 * k)! * bernoulliFun (2 * k) (3 / 4 + θ / (2 * π))
 
 /-- Numerical constants for `k ≥ 3`. -/
-theorem s24b_consts {k : ℕ} (hk : 3 ≤ k) :
+lemma s24b_consts {k : ℕ} (hk : 3 ≤ k) :
     0 < (1 / 2 : ℝ) ^ (2 * k) ∧ (1 / 2 : ℝ) ^ (2 * k) ≤ 1 / 64 ∧
       (1 / 3 : ℝ) ^ (2 * k) ≤ 9 / 100 * (1 / 2) ^ (2 * k) ∧
       625 * (π ^ 4 / 90 - (1 + 1 / 16 + 1 / 81 + 1 / 256)) * (1 / 5 : ℝ) ^ (2 * k) ≤
@@ -617,7 +609,7 @@ theorem s24b_consts {k : ℕ} (hk : 3 ≤ k) :
       _ ≤ 6 / 10 := by norm_num
 
 /-- `|g(θ) - main(θ)| ≤ 0.6 A²` on `[-3π/2, π/2]`, `A = 2^{-2k}`, `k ≥ 3`. -/
-theorem s24b_g_approx {k : ℕ} (hk : 3 ≤ k) {θ : ℝ} (h1 : -(3 * π / 2) ≤ θ) (h2 : θ ≤ π / 2) :
+lemma s24b_g_approx {k : ℕ} (hk : 3 ≤ k) {θ : ℝ} (h1 : -(3 * π / 2) ≤ θ) (h2 : θ ≤ π / 2) :
     |s24b_g k θ - (Real.sin θ - (1 / 2) ^ (2 * k) * Real.cos (2 * θ) -
       (1 / 3) ^ (2 * k) * Real.sin (3 * θ) + (1 / 4) ^ (2 * k) * Real.cos (4 * θ))| ≤
       6 / 10 * ((1 / 2) ^ (2 * k)) ^ 2 := by
@@ -633,7 +625,7 @@ theorem s24b_g_approx {k : ℕ} (hk : 3 ≤ k) {θ : ℝ} (h1 : -(3 * π / 2) �
   exact ht.trans (s24b_consts hk).2.2.2
 
 /-- `g(A) > 0` for `A = 2^{-2k}`, `k ≥ 3`. -/
-theorem s24b_g_pos {k : ℕ} (hk : 3 ≤ k) : 0 < s24b_g k ((1 / 2) ^ (2 * k)) := by
+lemma s24b_g_pos {k : ℕ} (hk : 3 ≤ k) : 0 < s24b_g k ((1 / 2) ^ (2 * k)) := by
   obtain ⟨hA0, hA1, hB, -⟩ := s24b_consts hk
   set A : ℝ := (1 / 2) ^ (2 * k) with hAd
   set B : ℝ := (1 / 3) ^ (2 * k) with hBd
@@ -659,7 +651,7 @@ theorem s24b_g_pos {k : ℕ} (hk : 3 ≤ k) : 0 < s24b_g k ((1 / 2) ^ (2 * k)) :
   nlinarith [hap.1]
 
 /-- `g(θ) < 0` for `-π/2 ≤ θ ≤ cA` when `0 ≤ c` and `c + 2A ≤ 1`, `A = 2^{-2k}`, `k ≥ 3`. -/
-theorem s24b_g_neg {k : ℕ} (hk : 3 ≤ k) {c θ : ℝ} (hc0 : 0 ≤ c)
+lemma s24b_g_neg {k : ℕ} (hk : 3 ≤ k) {c θ : ℝ} (hc0 : 0 ≤ c)
     (hc : c + 2 * (1 / 2) ^ (2 * k) ≤ 1) (h1 : -(π / 2) ≤ θ)
     (h2 : θ ≤ c * (1 / 2) ^ (2 * k)) : s24b_g k θ < 0 := by
   obtain ⟨hA0, hA1, hB, -⟩ := s24b_consts hk
@@ -703,7 +695,7 @@ theorem s24b_g_neg {k : ℕ} (hk : 3 ≤ k) {c θ : ℝ} (hc0 : 0 ≤ c)
 
 /-- For `k ≥ 3`, `0 ≤ c < 1` and `c + 2A ≤ 1` (`A = 2^{-2k}`):
 `3/4 + cA/(2π) < x_1^{(2k)} < 3/4 + A/(2π)`. -/
-theorem s24b_bracket {k : ℕ} (hk : 3 ≤ k) {c : ℝ} (hc0 : 0 ≤ c) (hc1 : c < 1)
+lemma s24b_bracket {k : ℕ} (hk : 3 ≤ k) {c : ℝ} (hc0 : 0 ≤ c) (hc1 : c < 1)
     (hc : c + 2 * (1 / 2) ^ (2 * k) ≤ 1) :
     3 / 4 + c * (1 / 2) ^ (2 * k) / (2 * π) < bernoulliRealZero (2 * k) 1 ∧
       bernoulliRealZero (2 * k) 1 < 3 / 4 + (1 / 2) ^ (2 * k) / (2 * π) := by
@@ -748,7 +740,7 @@ theorem s24b_bracket {k : ℕ} (hk : 3 ≤ k) {c : ℝ} (hc0 : 0 ≤ c) (hc1 : c
     push Not at hge
     exact absurd this (not_lt.mpr (mul_nonneg hKK.le hge))
 
-theorem s24b_bounds_two :
+lemma s24b_bounds_two :
     3 / 4 + 1 / (2 ^ (2 + 2) * π) < bernoulliRealZero 2 1 ∧
       bernoulliRealZero 2 1 < 3 / 4 + 1 / (2 ^ (2 + 1) * π) := by
   have hπ1 := Real.pi_gt_three
@@ -768,7 +760,7 @@ theorem s24b_bounds_two :
     norm_num at hu2
     refine mul_neg_of_neg_of_pos (by nlinarith) (by nlinarith)
 
-theorem s24b_bounds_four :
+lemma s24b_bounds_four :
     3 / 4 + 1 / (2 ^ (4 + 2) * π) < bernoulliRealZero 4 1 ∧
       bernoulliRealZero 4 1 < 3 / 4 + 1 / (2 ^ (4 + 1) * π) := by
   have hπ1 := Real.pi_gt_d2
@@ -863,7 +855,7 @@ simple zeros `z_1 < z_2 < ⋯` in `[1/2, ∞)`, then the `j`-th zero of `P_k` in
 to `z_j` (Hurwitz-type argument by counting zeros, Rolle and the mean value theorem). The
 uniform limits are DLMF 24.11.5–24.11.6 (`DLMF.BernoulliEuler.Asymptotics`). -/
 /-- In a sorted list, an index below the number of entries `< c` gives an entry `< c`. -/
-theorem r24b_getD_lt_of_length_filter {l : List ℝ} (hs : l.Pairwise (· ≤ ·)) {c : ℝ} {i : ℕ}
+lemma r24b_getD_lt_of_length_filter {l : List ℝ} (hs : l.Pairwise (· ≤ ·)) {c : ℝ} {i : ℕ}
     (h : i < (l.filter (fun x => decide (x < c))).length) : l.getD i 0 < c := by
   induction l generalizing i with
   | nil => simp at h
@@ -885,7 +877,7 @@ theorem r24b_getD_lt_of_length_filter {l : List ℝ} (hs : l.Pairwise (· ≤ ·
       simp at h
 
 /-- In a sorted list, an entry `< c` at index `i` lies among the entries `< c`. -/
-theorem r24b_length_filter_of_getD_lt {l : List ℝ} (hs : l.Pairwise (· ≤ ·)) {c : ℝ} {i : ℕ}
+lemma r24b_length_filter_of_getD_lt {l : List ℝ} (hs : l.Pairwise (· ≤ ·)) {c : ℝ} {i : ℕ}
     (hi : i < l.length) (h : l.getD i 0 < c) : i < (l.filter (fun x => decide (x < c))).length := by
   induction l generalizing i with
   | nil => simp at hi
@@ -908,7 +900,7 @@ noncomputable def r24b_count (p : ℝ[X]) (c : ℝ) : ℕ :=
   Multiset.card (p.roots.filter (fun x => 1 / 2 ≤ x ∧ x < c))
 
 /-- The number of listed zeros below `c` is `r24b_count p c`. -/
-theorem r24b_length_filter_zerosGE (p : ℝ[X]) (c : ℝ) :
+lemma r24b_length_filter_zerosGE (p : ℝ[X]) (c : ℝ) :
     ((b24b_zerosGE p).filter (fun x => decide (x < c))).length = r24b_count p c := by
   rw [r24b_count, ← Multiset.coe_card, ← Multiset.filter_coe, b24b_zerosGE, Multiset.sort_eq,
     Multiset.filter_filter]
@@ -917,7 +909,7 @@ theorem r24b_length_filter_zerosGE (p : ℝ[X]) (c : ℝ) :
 
 /-- If `r24b_count p (z - r) = j - 1` and `r24b_count p (z + r) = j`, then the `j`-th zero of
 `p` in `[1/2, ∞)` lies in `[z - r, z + r)`. -/
-theorem r24b_getD_mem_of_count {p : ℝ[X]} {j : ℕ} (hj : 1 ≤ j) {a b : ℝ}
+lemma r24b_getD_mem_of_count {p : ℝ[X]} {j : ℕ} (hj : 1 ≤ j) {a b : ℝ}
     (ha : r24b_count p a = j - 1) (hb : r24b_count p b = j) :
     a ≤ (b24b_zerosGE p).getD (j - 1) 0 ∧ (b24b_zerosGE p).getD (j - 1) 0 < b := by
   have hs := b24b_zerosGE_sorted p
@@ -933,7 +925,7 @@ theorem r24b_getD_mem_of_count {p : ℝ[X]} {j : ℕ} (hj : 1 ≤ j) {a b : ℝ}
   omega
 
 /-- Splitting the zero count at `a ≤ b`. -/
-theorem r24b_count_add {p : ℝ[X]} {a b : ℝ} (hab : a ≤ b) :
+lemma r24b_count_add {p : ℝ[X]} {a b : ℝ} (hab : a ≤ b) :
     r24b_count p b = r24b_count p a +
       Multiset.card (p.roots.filter (fun x => 1 / 2 ≤ x ∧ a ≤ x ∧ x < b)) := by
   rw [r24b_count, r24b_count, ← Multiset.card_add,
@@ -948,7 +940,7 @@ theorem r24b_count_add {p : ℝ[X]} {a b : ℝ} (hab : a ≤ b) :
     · rintro ⟨h1, h3, h2⟩; exact ⟨not_lt.mpr h3, h1, h2⟩
 
 /-- No roots satisfy `q` if `p` does not vanish where `q` holds. -/
-theorem r24b_card_filter_eq_zero {p : ℝ[X]} {q : ℝ → Prop} [DecidablePred q]
+lemma r24b_card_filter_eq_zero {p : ℝ[X]} {q : ℝ → Prop} [DecidablePred q]
     (h : ∀ x, q x → p.eval x ≠ 0) : Multiset.card (p.roots.filter q) = 0 := by
   rw [Multiset.card_eq_zero, Multiset.filter_eq_nil]
   intro x hx hq
@@ -956,7 +948,7 @@ theorem r24b_card_filter_eq_zero {p : ℝ[X]} {q : ℝ → Prop} [DecidablePred 
 
 /-- Exactly one root (with multiplicity) satisfies `q` when `ζ` is the unique zero there and
 simple. -/
-theorem r24b_card_filter_eq_one {p : ℝ[X]} (hp : p ≠ 0) {q : ℝ → Prop} [DecidablePred q] {ζ : ℝ}
+lemma r24b_card_filter_eq_one {p : ℝ[X]} (hp : p ≠ 0) {q : ℝ → Prop} [DecidablePred q] {ζ : ℝ}
     (hζ : q ζ) (hζ0 : p.eval ζ = 0) (hd : p.derivative.eval ζ ≠ 0)
     (huniq : ∀ x, q x → p.eval x = 0 → x = ζ) : Multiset.card (p.roots.filter q) = 1 := by
   have hfilt : p.roots.filter q = p.roots.filter (fun x => x = ζ) := by
@@ -970,7 +962,7 @@ theorem r24b_card_filter_eq_one {p : ℝ[X]} (hp : p ≠ 0) {q : ℝ → Prop} [
   omega
 
 /-- Rolle: a function with nonvanishing derivative on `[a, b]` has at most one zero there. -/
-theorem r24b_zero_unique {F F' : ℝ → ℝ} (hF : ∀ x, HasDerivAt F (F' x) x) {a b : ℝ}
+lemma r24b_zero_unique {F F' : ℝ → ℝ} (hF : ∀ x, HasDerivAt F (F' x) x) {a b : ℝ}
     (hF' : ∀ x ∈ Set.Icc a b, F' x ≠ 0) {x y : ℝ} (hx : x ∈ Set.Icc a b) (hy : y ∈ Set.Icc a b)
     (hFx : F x = 0) (hFy : F y = 0) : x = y := by
   by_contra hne
@@ -985,7 +977,7 @@ theorem r24b_zero_unique {F F' : ℝ → ℝ} (hF : ∀ x, HasDerivAt F (F' x) x
 
 /-- Mean value estimate at a simple zero: if `g z = 0` and `|g' - s| < |s|/4` on `[z - r, z + r]`,
 then `s g(z ± r) ≷ ± (3/4) r s²`. -/
-theorem r24b_sign_at_zero {g g' : ℝ → ℝ} (hg : ∀ x, HasDerivAt g (g' x) x) {z r s : ℝ}
+lemma r24b_sign_at_zero {g g' : ℝ → ℝ} (hg : ∀ x, HasDerivAt g (g' x) x) {z r s : ℝ}
     (hr : 0 < r) (hgz : g z = 0) (hd : ∀ x, |x - z| ≤ r → |g' x - s| < |s| / 4) :
     3 / 4 * r * s ^ 2 < s * g (z + r) ∧ s * g (z - r) < -(3 / 4 * r * s ^ 2) := by
   have hcont : Continuous g := continuous_iff_continuousAt.mpr fun t => (hg t).continuousAt
@@ -1025,7 +1017,7 @@ theorem r24b_sign_at_zero {g g' : ℝ → ℝ} (hg : ∀ x, HasDerivAt g (g' x) 
 `c_k P_k' → g'` uniformly on bounded subsets of `[1/2, ∞)`, and the zeros of `g` in `[1/2, ∞)`
 are the simple zeros `z₁ < z₂ < ⋯`, then the `j`-th zero of `P_k` in `[1/2, ∞)` tends to `z_j`.
 (If `z₁ = 1/2` we require `P_k(1/2) = 0`.) -/
-theorem r24b_tendsto_zerosGE (P : ℕ → ℝ[X]) (c : ℕ → ℝ) (hc : ∀ k, c k ≠ 0)
+lemma r24b_tendsto_zerosGE (P : ℕ → ℝ[X]) (c : ℕ → ℝ) (hc : ∀ k, c k ≠ 0)
     (g g' : ℝ → ℝ) (hg : ∀ x, HasDerivAt g (g' x) x) (hg' : Continuous g')
     (z : ℕ → ℝ) (hz : StrictMono z) (hz1 : 1 / 2 ≤ z 1)
     (hzero : ∀ x, 1 / 2 ≤ x → g x = 0 → ∃ i, 1 ≤ i ∧ x = z i)
@@ -1222,7 +1214,7 @@ theorem r24b_tendsto_zerosGE (P : ℕ → ℝ[X]) (c : ℕ → ℝ) (hc : ∀ k,
 
 
 /-- Transfer complex uniform convergence on compacts to real bounds on `[1/2, M]`. -/
-theorem r24b_real_of_unif {F : ℕ → ℂ → ℂ} {G : ℂ → ℂ}
+lemma r24b_real_of_unif {F : ℕ → ℂ → ℂ} {G : ℂ → ℂ}
     (h : ∀ K : Set ℂ, IsCompact K → TendstoUniformlyOn F G atTop K) (a : ℂ)
     (f : ℕ → ℝ → ℝ) (gr : ℝ → ℝ) (hf : ∀ k x, (f k x : ℂ) = a * F k x)
     (hg : ∀ x, (gr x : ℂ) = a * G x) (M ε : ℝ) (hε : 0 < ε) :
@@ -1243,22 +1235,22 @@ theorem r24b_real_of_unif {F : ℕ → ℂ → ℂ} {G : ℂ → ℂ}
       rw [mul_div_assoc', div_lt_iff₀ (by positivity)]; nlinarith [norm_nonneg a]
 
 /-- Shift an eventual statement by one index. -/
-theorem r24b_eventually_shift {Q : ℕ → Prop} (h : ∀ᶠ k in atTop, Q k) :
+lemma r24b_eventually_shift {Q : ℕ → Prop} (h : ∀ᶠ k in atTop, Q k) :
     ∀ᶠ k in atTop, 1 ≤ k ∧ Q (k - 1) :=
   (eventually_ge_atTop 1).and ((tendsto_sub_atTop_nat 1).eventually h)
 
 /-- `(-1)^(m-1) = -(-1)^m`. -/
-theorem r24b_neg_one_zpow (m : ℕ) : (-1 : ℂ) ^ ((m : ℤ) - 1) = -(-1) ^ m := by
+lemma r24b_neg_one_zpow (m : ℕ) : (-1 : ℂ) ^ ((m : ℤ) - 1) = -(-1) ^ m := by
   rw [zpow_sub₀ (by norm_num), zpow_natCast, zpow_one]; ring
 
 /-- Real evaluation of a rational polynomial, cast to `ℂ`, is complex evaluation. -/
-theorem r24b_eval_map_cplx (p : ℚ[X]) (x : ℝ) :
+lemma r24b_eval_map_cplx (p : ℚ[X]) (x : ℝ) :
     (((p.map (algebraMap ℚ ℝ)).eval x : ℝ) : ℂ) = aeval (x : ℂ) p :=
   (b24a_aeval_ofReal p x).symm
 
 
 /-- Zeros of `cos (2πx)` in `[1/2, ∞)`. -/
-theorem r24b_cos_zero {x : ℝ} (hx : 1 / 2 ≤ x) (h : Real.cos (2 * π * x) = 0) :
+lemma r24b_cos_zero {x : ℝ} (hx : 1 / 2 ≤ x) (h : Real.cos (2 * π * x) = 0) :
     ∃ i : ℕ, 1 ≤ i ∧ x = (i : ℝ) / 2 + 1 / 4 := by
   obtain ⟨l, hl⟩ := Real.cos_eq_zero_iff.mp h
   have hx' : x = (2 * l + 1) / 4 := by
@@ -1271,14 +1263,14 @@ theorem r24b_cos_zero {x : ℝ} (hx : 1 / 2 ≤ x) (h : Real.cos (2 * π * x) = 
   exact ⟨l, by exact_mod_cast hl1, by rw [hx']; push_cast; ring⟩
 
 /-- Zeros of `sin (a πx)` (`a > 0`) in `[1/2, ∞)`. -/
-theorem r24b_sin_zero {a x : ℝ} (ha : 0 < a) (h : Real.sin (a * π * x) = 0) :
+lemma r24b_sin_zero {a x : ℝ} (ha : 0 < a) (h : Real.sin (a * π * x) = 0) :
     ∃ n : ℤ, x = n / a := by
   obtain ⟨n, hn⟩ := Real.sin_eq_zero_iff.mp h
   refine ⟨n, ?_⟩
   have := Real.pi_pos; field_simp; nlinarith
 
 /-- `x_j^{(2k)} → j/2 + 1/4` as `k → ∞` (the zeros of `cos 2πx`). -/
-theorem r24b_bernoulli_even_zero {j : ℕ} (hj : 1 ≤ j) :
+lemma r24b_bernoulli_even_zero {j : ℕ} (hj : 1 ≤ j) :
     Tendsto (fun k => bernoulliRealZero (2 * k) j) atTop (𝓝 ((j : ℝ) / 2 + 1 / 4)) := by
   have hcplx : ∀ (k : ℕ) (x : ℝ), (((-(-1) ^ k * (2 * π) ^ (2 * k) / (2 * (2 * k)!) *
       ((Polynomial.bernoulli (2 * k)).map (algebraMap ℚ ℝ)).eval x : ℝ)) : ℂ) =
@@ -1341,11 +1333,11 @@ theorem r24b_bernoulli_even_zero {j : ℕ} (hj : 1 ≤ j) :
 
 
 /-- Zeros of `sin (2πx)`, `sin (πx)` are simple: the derivative `cos` is nonzero there. -/
-theorem r24b_cos_ne_of_sin {θ : ℝ} (h : Real.sin θ = 0) : Real.cos θ ≠ 0 := by
+lemma r24b_cos_ne_of_sin {θ : ℝ} (h : Real.sin θ = 0) : Real.cos θ ≠ 0 := by
   intro h0; have hs := Real.sin_sq_add_cos_sq θ; rw [h, h0] at hs; norm_num at hs
 
 /-- `x_j^{(2k+1)} → j/2` as `k → ∞` (the zeros of `sin 2πx`). -/
-theorem r24b_bernoulli_odd_zero {j : ℕ} (hj : 1 ≤ j) :
+lemma r24b_bernoulli_odd_zero {j : ℕ} (hj : 1 ≤ j) :
     Tendsto (fun k => bernoulliRealZero (2 * k + 1) j) atTop (𝓝 ((j : ℝ) / 2)) := by
   have hcplx : ∀ (k : ℕ) (x : ℝ), (((-(-1) ^ k * (2 * π) ^ (2 * k + 1) / (2 * (2 * k + 1)!) *
       ((Polynomial.bernoulli (2 * k + 1)).map (algebraMap ℚ ℝ)).eval x : ℝ)) : ℂ) =
@@ -1403,7 +1395,7 @@ theorem r24b_bernoulli_odd_zero {j : ℕ} (hj : 1 ≤ j) :
     exact ⟨h1 x hx1 hxM, h2 x hx1 hxM⟩
 
 /-- `y_j^{(2k)} → j` as `k → ∞` (the zeros of `sin πx`). -/
-theorem r24b_euler_even_zero {j : ℕ} (hj : 1 ≤ j) :
+lemma r24b_euler_even_zero {j : ℕ} (hj : 1 ≤ j) :
     Tendsto (fun k => eulerRealZero (2 * k) j) atTop (𝓝 (j : ℝ)) := by
   have hcplx : ∀ (k : ℕ) (x : ℝ), ((((-1) ^ k * π ^ (2 * k + 1) / (4 * (2 * k)!) *
       ((Polynomial.euler (2 * k)).map (algebraMap ℚ ℝ)).eval x : ℝ)) : ℂ) =
@@ -1463,7 +1455,7 @@ theorem r24b_euler_even_zero {j : ℕ} (hj : 1 ≤ j) :
 
 /-- Corrected form of DLMF 24.12.11: `y_j^{(2k+1)} → j - 1/2` as `k → ∞` (the zeros of
 `cos πx`); in particular `y_{2m}^{(n)} → 2m - 1/2` for odd `n`, not `m - 1/2` as printed. -/
-theorem r24b_euler_odd_zero {j : ℕ} (hj : 1 ≤ j) :
+lemma r24b_euler_odd_zero {j : ℕ} (hj : 1 ≤ j) :
     Tendsto (fun k => eulerRealZero (2 * k + 1) j) atTop (𝓝 ((j : ℝ) - 1 / 2)) := by
   have hcplx : ∀ (k : ℕ) (x : ℝ), ((((-1) ^ (k + 1) * π ^ (2 * k + 2) / (4 * (2 * k + 1)!) *
       ((Polynomial.euler (2 * k + 1)).map (algebraMap ℚ ℝ)).eval x : ℝ)) : ℂ) =
@@ -1713,7 +1705,7 @@ From the Fourier series 24.8.5 and `|sin((2k+1)θ)| ≤ (2k+1) sin θ`,
 `E(1 + t) = 2tⁿ - E(t)` and `E(1 - x) = -E(x)` this locates the zero next to `3/2`. -/
 
 /-- `E₅(x) = (x - 1/2)(x² - x - 1)²` (proof of `euler_five`). -/
-theorem s24b_euler_five_eq :
+lemma s24b_euler_five_eq :
     Polynomial.euler 5 = (X - C (1 / 2)) * (X ^ 2 - X - 1) ^ 2 := by
   apply eq_of_comp_X_add_one_add_self_eq
   rw [euler_comp_X_add_one_add]
@@ -1724,7 +1716,7 @@ theorem s24b_euler_five_eq :
 
 
 /-- `|sin (m θ)| ≤ m |sin θ|`. -/
-theorem s24b_abs_sin_nat_mul_le (m : ℕ) (θ : ℝ) :
+lemma s24b_abs_sin_nat_mul_le (m : ℕ) (θ : ℝ) :
     |Real.sin (m * θ)| ≤ m * |Real.sin θ| := by
   induction m with
   | zero => simp
@@ -1741,7 +1733,7 @@ theorem s24b_abs_sin_nat_mul_le (m : ℕ) (θ : ℝ) :
       _ ≤ (m + 1) * |Real.sin θ| := by nlinarith
 
 /-- `cos((2k+1)πt) ≥ -(2k+1) cos(πt)`. -/
-theorem s24b_cos_odd_ge (k : ℕ) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1 / 2) :
+lemma s24b_cos_odd_ge (k : ℕ) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1 / 2) :
     -((2 * k + 1) * Real.cos (π * t)) ≤ Real.cos ((2 * k + 1) * π * t) := by
   set θ := π / 2 - π * t
   have hθ0 : 0 ≤ θ := by simp only [θ]; nlinarith [Real.pi_pos]
@@ -1761,7 +1753,7 @@ theorem s24b_cos_odd_ge (k : ℕ) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1 / 2) 
   linarith [neg_abs_le ((-1 : ℝ) ^ k * Real.sin ((2 * (k : ℝ) + 1) * θ))]
 
 /-- Lower bound for `(-1)ⁿ E₂ₙ₋₁(t)` on `[0, 1/2]`, `n ≥ 2`. -/
-theorem s24b_euler_lower {n : ℕ} (hn : 2 ≤ n) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1 / 2) :
+lemma s24b_euler_lower {n : ℕ} (hn : 2 ≤ n) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1 / 2) :
     4 * (2 * n - 1)! / π ^ (2 * n) * (1 - π ^ 2 / 24) * (1 - 2 * t) ≤
       (-1) ^ n * eulerFun (2 * n - 1) t := by
   set K : ℝ := 4 * (2 * n - 1)! / π ^ (2 * n)
@@ -1810,7 +1802,7 @@ theorem s24b_euler_lower {n : ℕ} (hn : 2 ≤ n) {t : ℝ} (ht0 : 0 ≤ t) (ht1
         _ ≤ _ := by linarith
 
 /-- Bracketing the second entry of a sorted list whose least entry `a` is simple. -/
-theorem s24b_second_bracket {l : List ℝ} {a lo hi z : ℝ} (hs : l.Pairwise (· ≤ ·)) (ha : a ∈ l)
+lemma s24b_second_bracket {l : List ℝ} {a lo hi z : ℝ} (hs : l.Pairwise (· ≤ ·)) (ha : a ∈ l)
     (hc : l.count a ≤ 1) (hge : ∀ y ∈ l, a ≤ y) (hgt : ∀ y ∈ l, y ≠ a → lo < y) (hz : z ∈ l)
     (hza : z ≠ a) (hzh : z < hi) : lo < l.getD (2 - 1) 0 ∧ l.getD (2 - 1) 0 < hi := by
   match l, hs, ha, hc, hge, hgt, hz with
@@ -1837,7 +1829,7 @@ theorem s24b_second_bracket {l : List ℝ} {a lo hi z : ℝ} (hs : l.Pairwise (�
     · exact (List.pairwise_cons.mp (List.pairwise_cons.mp hs).2).1 z h
 
 /-- `1/2` is a simple zero of `E₂ₙ₋₁`, `n ≥ 2`. -/
-theorem s24b_euler_count_half {n : ℕ} (hn : 2 ≤ n) :
+lemma s24b_euler_count_half {n : ℕ} (hn : 2 ≤ n) :
     (eulerRealZerosGE (2 * n - 1)).count (1 / 2) ≤ 1 := by
   set P := (Polynomial.euler (2 * n - 1)).map (algebraMap ℚ ℝ) with hP
   have hP0 : P ≠ 0 :=
@@ -1858,7 +1850,7 @@ theorem s24b_euler_count_half {n : ℕ} (hn : 2 ≤ n) :
   exact hmult
 
 /-- `η (-1)^m E₂ₘ₋₁(t) ≥ 0.77 (1 - 2t)` on `[0, 1/2]`, `η = π^{2m}/(3 (2m-1)!)`, `m ≥ 2`. -/
-theorem s24b_euler_key {m : ℕ} (hm : 2 ≤ m) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1 / 2) :
+lemma s24b_euler_key {m : ℕ} (hm : 2 ≤ m) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1 / 2) :
     77 / 100 * (1 - 2 * t) ≤
       π ^ (2 * m) / (3 * (2 * m - 1)!) * ((-1) ^ m * eulerFun (2 * m - 1) t) := by
   have h := s24b_euler_lower hm ht0 ht1
@@ -1877,7 +1869,7 @@ theorem s24b_euler_key {m : ℕ} (hm : 2 ≤ m) {t : ℝ} (ht0 : 0 ≤ t) (ht1 :
     _ ≤ _ := mul_le_mul_of_nonneg_left h hη.le
 
 /-- `π^{N+1}/N! ≤ 3/4` for `N ≥ 9`. -/
-theorem s24b_pi_pow_div_le {N : ℕ} (hN : 9 ≤ N) : π ^ (N + 1) / N ! ≤ 3 / 4 := by
+lemma s24b_pi_pow_div_le {N : ℕ} (hN : 9 ≤ N) : π ^ (N + 1) / N ! ≤ 3 / 4 := by
   induction N, hN using Nat.le_induction with
   | base =>
     have hp := Real.pi_lt_d2
@@ -1902,7 +1894,7 @@ theorem s24b_pi_pow_div_le {N : ℕ} (hN : 9 ≤ N) : π ^ (N + 1) / N ! ≤ 3 /
       _ = 3 / 4 := by ring
 
 /-- Common facts on `E₂ₘ₋₁` for the zero bounds. -/
-theorem s24b_euler_facts {m : ℕ} (hm : 2 ≤ m) :
+lemma s24b_euler_facts {m : ℕ} (hm : 2 ≤ m) :
     (∀ x, eulerFun (2 * m - 1) (1 - x) = -eulerFun (2 * m - 1) x) ∧
     (∀ t, eulerFun (2 * m - 1) (1 + t) = 2 * t ^ (2 * m - 1) - eulerFun (2 * m - 1) t) ∧
     eulerFun (2 * m - 1) (1 / 2) = 0 ∧
@@ -1917,7 +1909,7 @@ theorem s24b_euler_facts {m : ℕ} (hm : 2 ≤ m) :
   · exact pow_le_pow_of_le_one h0 h1 (by omega)
 
 /-- 24.12.10 for `n = 5`, where `y₂ = y₃ = (1 + √5)/2` is a double zero. -/
-theorem s24b_euler_five_bounds :
+lemma s24b_euler_five_bounds :
     3 / 2 < eulerRealZero 5 2 ∧ eulerRealZero 5 2 < 3 / 2 + π ^ (5 + 1) / (3 * 5 !) := by
   have h5 : ∀ x, eulerFun 5 x = (x - 1 / 2) * (x ^ 2 - x - 1) ^ 2 := by
     intro x; simp [eulerFun, s24b_euler_five_eq]
@@ -2077,7 +2069,7 @@ theorem eulerRealZero_two_bounds_one {n : ℕ} (hn : n % 4 = 1) (h5 : 5 ≤ n) :
 /-- DLMF 24.12.11 as printed, `y_{2m}^{(n)} → m - 1/2` through odd `n`, is false: already for
 `m = 1` the zero `y_2^{(n)}` tends to `3/2` (it lies within `π^{n+1}/(3 n!)` of `3/2` by
 24.12.9–24.12.10). -/
-theorem r24b_tendsto_eulerRealZero_odd_counterexample :
+lemma r24b_tendsto_eulerRealZero_odd_counterexample :
     ¬ Tendsto (fun k : ℕ => eulerRealZero (2 * k + 1) (2 * 1)) atTop (𝓝 ((1 : ℕ) - 1 / 2 : ℝ)) := by
   intro h
   have h2 := r24b_euler_odd_zero (j := 2 * 1) (by norm_num)

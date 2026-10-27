@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Confluent.IncompleteGamma
-public import DLMF.Gamma.IntegralRepresentations
+public import DLMF.Confluent.Asymptotics
+public import DLMF.Confluent.Relations
 
 /-!
 # Fresnel integrals and Dawson's integral (Temme §§7.3.4, 7.3.6; DLMF Chapter 7)
@@ -104,7 +104,7 @@ theorem Real.fresnelCosInt_add_I_mul_fresnelSinInt (x : ℝ) :
   ring
 
 /-- The scaling `∫₀ˣ g(π t²/2) dt = √(2/π) ∫₀^{x√(π/2)} g(u²) du`. -/
-lemma integral_comp_pi_mul_sq_div_two (g : ℝ → ℝ) (x : ℝ) :
+theorem integral_comp_pi_mul_sq_div_two (g : ℝ → ℝ) (x : ℝ) :
     ∫ t in (0 : ℝ)..x, g (π * t ^ 2 / 2) =
       (Real.sqrt (π / 2))⁻¹ * ∫ u in (0 : ℝ)..(Real.sqrt (π / 2) * x), g (u ^ 2) := by
   have hc : Real.sqrt (π / 2) ≠ 0 := (Real.sqrt_pos.mpr (by positivity)).ne'
@@ -156,7 +156,7 @@ theorem Real.tendsto_fresnelSinInt_atTop : Tendsto Real.fresnelSinInt atTop (�
 def Real.dawsonF (x : ℝ) : ℝ := Real.exp (-x ^ 2) * ∫ t in (0 : ℝ)..x, Real.exp (t ^ 2)
 
 /-- `∫₀ˣ e^{t²} dt = x M(1/2, 3/2, x²)`. -/
-lemma integral_exp_sq_eq_kummerM (x : ℝ) :
+theorem integral_exp_sq_eq_kummerM (x : ℝ) :
     ((∫ t in (0 : ℝ)..x, Real.exp (t ^ 2) : ℝ) : ℂ) =
       x * kummerM (1 / 2) (3 / 2) ((x : ℂ) ^ 2) := by
   have hderiv : ∀ t : ℝ,

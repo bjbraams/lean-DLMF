@@ -55,7 +55,7 @@ theorem hasSum_poissonWeight (x : ℝ) : HasSum (poissonWeight x) 1 := by
   simp only [poissonWeight]
   ring
 
-lemma poissonWeight_nonneg {x : ℝ} (hx : 0 ≤ x) (n : ℕ) : 0 ≤ poissonWeight x n := by
+theorem poissonWeight_nonneg {x : ℝ} (hx : 0 ≤ x) (n : ℕ) : 0 ≤ poissonWeight x n := by
   unfold poissonWeight; positivity
 
 /-- The noncentral chi-squared distribution function `P_μ(x,y)` (Temme (11.62)). -/
@@ -66,7 +66,7 @@ def marcumP (μ x y : ℝ) : ℝ :=
 def marcumQ (μ x y : ℝ) : ℝ :=
   ∑' n : ℕ, poissonWeight x n * (1 - TauCeti.regularizedGamma (μ + n) y)
 
-lemma summable_marcumP_term (μ : ℝ) {x : ℝ} (hx : 0 ≤ x) (y : ℝ) :
+theorem summable_marcumP_term (μ : ℝ) {x : ℝ} (hx : 0 ≤ x) (y : ℝ) :
     Summable fun n : ℕ => poissonWeight x n * TauCeti.regularizedGamma (μ + n) y :=
   Summable.of_nonneg_of_le
     (fun n => mul_nonneg (poissonWeight_nonneg hx n) (TauCeti.regularizedGamma_nonneg _ _))
@@ -74,7 +74,7 @@ lemma summable_marcumP_term (μ : ℝ) {x : ℝ} (hx : 0 ≤ x) (y : ℝ) :
       (TauCeti.regularizedGamma_le_one _ _))
     (hasSum_poissonWeight x).summable
 
-lemma summable_marcumQ_term (μ : ℝ) {x : ℝ} (hx : 0 ≤ x) (y : ℝ) :
+theorem summable_marcumQ_term (μ : ℝ) {x : ℝ} (hx : 0 ≤ x) (y : ℝ) :
     Summable fun n : ℕ => poissonWeight x n * (1 - TauCeti.regularizedGamma (μ + n) y) := by
   simp_rw [mul_sub, mul_one]
   exact (hasSum_poissonWeight x).summable.sub (summable_marcumP_term μ hx y)
@@ -104,7 +104,7 @@ theorem marcumP_zero_left (μ y : ℝ) : marcumP μ 0 y = TauCeti.regularizedGam
   simp [poissonWeight]
 
 /-- The Bessel series `(xy)^{-μ/2} I_μ(2√(xy)) = ∑ (xy)ⁿ / (n! Γ(μ+1+n))` for `x, y ≥ 0`. -/
-lemma besselI_two_sqrt_mul (μ : ℝ) {x y : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) :
+theorem besselI_two_sqrt_mul (μ : ℝ) {x y : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) :
     besselI μ ((2 * Real.sqrt (x * y) : ℝ) : ℂ) =
       ((Real.sqrt (x * y) ^ μ * ∑' n : ℕ, (x * y) ^ n / n ! / Real.Gamma (μ + 1 + n) : ℝ) : ℂ) := by
   have hs : 0 ≤ Real.sqrt (x * y) := Real.sqrt_nonneg _
@@ -123,7 +123,7 @@ lemma besselI_two_sqrt_mul (μ : ℝ) {x y : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) 
     ring
 
 /-- `(y/x)^{μ/2} (√(xy))^μ = y^μ` for `x, y > 0`. -/
-lemma div_rpow_mul_sqrt_rpow (μ : ℝ) {x y : ℝ} (hx : 0 < x) (hy : 0 < y) :
+theorem div_rpow_mul_sqrt_rpow (μ : ℝ) {x y : ℝ} (hx : 0 < x) (hy : 0 < y) :
     (y / x) ^ (μ / 2) * Real.sqrt (x * y) ^ μ = y ^ μ := by
   rw [Real.sqrt_eq_rpow, ← Real.rpow_mul (by positivity), show 1 / 2 * μ = μ / 2 by ring,
     ← Real.mul_rpow (by positivity)
@@ -157,7 +157,7 @@ theorem marcumQ_add_one {μ x y : ℝ} (hμ : 0 < μ) (hx : 0 < x) (hy : 0 < y) 
 /-- The coefficient `(y/x)^{ν/2} e^{-x-y}` of the Marcum recurrence. -/
 def marcumCoeff (ν x y : ℝ) : ℝ := (y / x) ^ (ν / 2) * Real.exp (-x - y)
 
-lemma x_mul_marcumCoeff_add_one (μ : ℝ) {x y : ℝ} (hx : 0 < x) (hy : 0 < y) :
+theorem x_mul_marcumCoeff_add_one (μ : ℝ) {x y : ℝ} (hx : 0 < x) (hy : 0 < y) :
     x * marcumCoeff (μ + 1) x y = marcumCoeff μ x y * Real.sqrt (x * y) := by
   have hq : 0 < y / x := div_pos hy hx
   have hs : x * Real.sqrt (y / x) = Real.sqrt (x * y) := by
@@ -167,7 +167,7 @@ lemma x_mul_marcumCoeff_add_one (μ : ℝ) {x y : ℝ} (hx : 0 < x) (hy : 0 < y)
     ← Real.sqrt_eq_rpow, ← hs]
   ring
 
-lemma y_mul_marcumCoeff_sub_one (μ : ℝ) {x y : ℝ} (hx : 0 < x) (hy : 0 < y) :
+theorem y_mul_marcumCoeff_sub_one (μ : ℝ) {x y : ℝ} (hx : 0 < x) (hy : 0 < y) :
     y * marcumCoeff (μ - 1) x y = marcumCoeff μ x y * Real.sqrt (x * y) := by
   have hq : 0 < y / x := div_pos hy hx
   have hs : y = Real.sqrt (y / x) * Real.sqrt (x * y) := by
@@ -216,7 +216,7 @@ theorem marcumQ_recurrence {μ x y : ℝ} (hμ : 1 < μ) (hx : 0 < x) (hy : 0 < 
 
 open MeasureTheory in
 /-- The upper incomplete Gamma integral `∫_y^∞ t^{s-1} e^{-t} dt = Γ(s) (1 - P(s,y))`. -/
-lemma integral_Ioi_rpow_mul_exp {s y : ℝ} (hs : 0 < s) (hy : 0 ≤ y) :
+theorem integral_Ioi_rpow_mul_exp {s y : ℝ} (hs : 0 < s) (hy : 0 ≤ y) :
     ∫ t in Ioi y, Real.exp (-t) * t ^ (s - 1) =
       Real.Gamma s * (1 - TauCeti.regularizedGamma s y) := by
   have hint := Real.GammaIntegral_convergent hs
@@ -235,7 +235,7 @@ lemma integral_Ioi_rpow_mul_exp {s y : ℝ} (hs : 0 < s) (hy : 0 ≤ y) :
 
 open MeasureTheory in
 /-- The real form of the Bessel integral for `Q_μ`. -/
-lemma marcumQ_eq_integral_series {μ x y : ℝ} (hμ : 0 < μ) (hx : 0 ≤ x) (hy : 0 ≤ y) :
+theorem marcumQ_eq_integral_series {μ x y : ℝ} (hμ : 0 < μ) (hx : 0 ≤ x) (hy : 0 ≤ y) :
     marcumQ μ x y = ∫ t in Ioi y, Real.exp (-x - t) * t ^ (μ - 1) *
       ∑' n : ℕ, (x * t) ^ n / n ! / Real.Gamma (μ - 1 + 1 + n) := by
   set F : ℕ → ℝ → ℝ := fun n t =>

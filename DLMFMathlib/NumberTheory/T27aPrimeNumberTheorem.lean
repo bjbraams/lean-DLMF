@@ -5,10 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.NumberTheory.PrimeCounting
 public import Mathlib.NumberTheory.Chebyshev
-public import Mathlib.Analysis.SpecialFunctions.Log.Basic
-public import Mathlib.Analysis.Asymptotics.AsymptoticEquivalent
 public import TauCeti.NumberTheory.ArithmeticDirichletSeries.Prime.PrimeIdealTheorem
 public import TauCeti.NumberTheory.Chebotarev.PrimeCounting.PrimesCongruent
 
@@ -48,7 +45,7 @@ namespace Nat
 
 /-- Counting height-one primes of `𝓞 ℚ` of norm at most `x` with a property of the norm is
 counting rational primes `p ≤ ⌊x⌋₊` with that property. -/
-theorem t27a_card_primesLE_filter (P : ℕ → Prop) [DecidablePred P] (x : ℝ) :
+lemma t27a_card_primesLE_filter (P : ℕ → Prop) [DecidablePred P] (x : ℝ) :
     ((TauCeti.primesLE ℚ x).filter (fun v ↦ P (Ideal.absNorm v.asIdeal))).card =
       ((Nat.primesLE ⌊x⌋₊).filter P).card := by
   classical
@@ -79,7 +76,7 @@ theorem t27a_card_primesLE_filter (P : ℕ → Prop) [DecidablePred P] (x : ℝ)
 
 /-- Summing a function of the norm over the height-one primes of `𝓞 ℚ` of norm at most `x` is
 summing it over the rational primes `p ≤ ⌊x⌋₊`. -/
-theorem t27a_sum_primesLE {M : Type*} [AddCommMonoid M] (g : ℕ → M) (x : ℝ) :
+lemma t27a_sum_primesLE {M : Type*} [AddCommMonoid M] (g : ℕ → M) (x : ℝ) :
     ∑ v ∈ TauCeti.primesLE ℚ x, g (Ideal.absNorm v.asIdeal) =
       ∑ p ∈ Nat.primesLE ⌊x⌋₊, g p := by
   classical
@@ -112,7 +109,7 @@ theorem t27a_sum_primesLE {M : Type*} [AddCommMonoid M] (g : ℕ → M) (x : ℝ
     exact ⟨v, hv⟩
 
 /-- `TauCeti.primeCount ℚ Set.univ x` is the classical prime counting function `π(⌊x⌋₊)`. -/
-theorem t27a_primeCount_rat_univ (x : ℝ) :
+lemma t27a_primeCount_rat_univ (x : ℝ) :
     TauCeti.primeCount ℚ Set.univ x = (Nat.primeCounting ⌊x⌋₊ : ℝ) := by
   classical
   rw [TauCeti.primeCount_eq_card, ← Nat.primesLE_card_eq_primeCounting]
@@ -126,14 +123,14 @@ theorem t27a_primeCounting_isEquivalent :
     (Eventually.of_forall t27a_primeCount_rat_univ)
 
 /-- **The prime number theorem** over `ℕ`: `π(n) ~ n / log n` as `n → ∞`. -/
-theorem t27a_primeCounting_isEquivalent_nat :
+lemma t27a_primeCounting_isEquivalent_nat :
     (fun n : ℕ ↦ (Nat.primeCounting n : ℝ)) ~[atTop] fun n ↦ (n : ℝ) / Real.log n := by
   have h := t27a_primeCounting_isEquivalent.comp_tendsto tendsto_natCast_atTop_atTop
   refine h.congr_left (Eventually.of_forall fun n ↦ ?_)
   simp
 
 /-- `π(p_k) = k + 1` for the `k`th prime `p_k = nth Nat.Prime k` (indexed from `0`). -/
-theorem t27a_primeCounting_nth_prime (k : ℕ) : Nat.primeCounting (nth Nat.Prime k) = k + 1 := by
+lemma t27a_primeCounting_nth_prime (k : ℕ) : Nat.primeCounting (nth Nat.Prime k) = k + 1 := by
   rw [Nat.primeCounting, Nat.primeCounting', Nat.count_succ, ← Nat.primeCounting',
     Nat.primeCounting'_nth_eq]
   simp
@@ -219,17 +216,17 @@ end Nat
 namespace Chebyshev
 
 /-- `TauCeti.primeTheta ℚ Set.univ` is Chebyshev's `θ`. -/
-theorem t27a_primeTheta_rat_univ (x : ℝ) : TauCeti.primeTheta ℚ Set.univ x = θ x := by
+lemma t27a_primeTheta_rat_univ (x : ℝ) : TauCeti.primeTheta ℚ Set.univ x = θ x := by
   rw [TauCeti.primeTheta_apply, theta_eq_sum_primesLE]
   simpa using Nat.t27a_sum_primesLE (fun n ↦ Real.log n) x
 
 /-- **The prime number theorem** for Chebyshev's `θ`: `θ(x) ~ x`. -/
-theorem t27a_theta_isEquivalent : θ ~[atTop] fun x : ℝ ↦ x :=
+lemma t27a_theta_isEquivalent : θ ~[atTop] fun x : ℝ ↦ x :=
   (TauCeti.primeIdealTheorem ℚ).2.1.congr_left
     (Eventually.of_forall t27a_primeTheta_rat_univ)
 
 /-- **The prime number theorem** for Chebyshev's `ψ`: `ψ(x) ~ x`. -/
-theorem t27a_psi_isEquivalent : ψ ~[atTop] fun x : ℝ ↦ x := by
+lemma t27a_psi_isEquivalent : ψ ~[atTop] fun x : ℝ ↦ x := by
   refine IsLittleO.isEquivalent ?_
   have hs : Real.sqrt =o[atTop] fun x : ℝ ↦ x := by
     refine isLittleO_iff.mpr fun c hc ↦ ?_

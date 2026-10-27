@@ -6,8 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Weierstrass.Basic
-public import Mathlib.Analysis.Asymptotics.Defs
-public import Mathlib.NumberTheory.ModularForms.Basic
 
 /-!
 # Asymptotic approximations as `q → 0` (DLMF §23.12)

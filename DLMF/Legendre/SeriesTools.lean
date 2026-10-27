@@ -6,8 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Legendre.Integer
-public import DLMF.OrthogonalPolynomials.Topics
-public import Mathlib.RingTheory.PowerSeries.Derivative
+public import DLMF.Legendre.Laplace
 
 /-!
 # Tools for Legendre generating functions and the polynomials `W_{n-1}`
@@ -33,7 +32,7 @@ namespace DLMF.Legendre
 
 
 /-- The Euler integral with `a = -m` is a polynomial function of `z` on all of `ℂ`. -/
-lemma legSer_integral_poly (m : ℕ) {b c : ℂ} (hb : 0 < b.re) (hcb : 0 < (c-b).re) :
+theorem legSer_integral_poly (m : ℕ) {b c : ℂ} (hb : 0 < b.re) (hcb : 0 < (c-b).re) :
     ∃ p : Polynomial ℂ, ∀ z, regularizedGaussHGIntegral (-(m:ℂ)) b c z = p.eval z := by
   set g : ℝ → ℂ := fun t => (t:ℂ)^(b-1) * (1-(t:ℂ))^(c-b-1) with hg
   have hgI : IntervalIntegrable g volume 0 1 := betaIntegral_convergent hb hcb
@@ -89,7 +88,7 @@ lemma legSer_aux_poly (k : ℕ) : ∀ (m : ℕ) (b c : ℂ), shiftB b = 0 → sh
       exact ⟨p, fun z => by rw [regularizedGaussHGAux_succ_of_zero hc hb]; exact hp z⟩
 
 /-- `P_n` is a polynomial function on all of `ℂ`. -/
-lemma legSer_legendreP_poly (n : ℕ) : ∃ q : Polynomial ℂ, ∀ z, legendreP n z = q.eval z := by
+theorem legSer_legendreP_poly (n : ℕ) : ∃ q : Polynomial ℂ, ∀ z, legendreP n z = q.eval z := by
   have hB : shiftB ((n:ℂ)+1) = 0 := by
     unfold shiftB; rw [Nat.ceil_eq_zero]; simp
   obtain ⟨p, hp⟩ := legSer_aux_poly (shiftMeasure ((n:ℂ)+1) 1) n ((n:ℂ)+1) 1 hB
@@ -101,7 +100,7 @@ lemma legSer_legendreP_poly (n : ℕ) : ∃ q : Polynomial ℂ, ∀ z, legendreP
   congr 1; ring
 
 /-- The set `{z | 1 + z ∈ slitPlane}` is infinite. -/
-lemma legSer_infinite : {z : ℂ | 1 + z ∈ slitPlane}.Infinite := by
+theorem legSer_infinite : {z : ℂ | 1 + z ∈ slitPlane}.Infinite := by
   have hinj : Function.Injective (fun n : ℕ => ((n:ℝ):ℂ)) := fun a b h => by
     simpa using h
   refine Set.infinite_of_injective_forall_mem hinj fun n => ?_
@@ -109,12 +108,12 @@ lemma legSer_infinite : {z : ℂ | 1 + z ∈ slitPlane}.Infinite := by
   exact Or.inl (by simp; positivity)
 
 /-- Two polynomial functions agreeing on `{1 + z ∈ slitPlane}` agree everywhere. -/
-lemma legSer_poly_ext {p q : Polynomial ℂ} (h : ∀ z : ℂ, 1 + z ∈ slitPlane → p.eval z = q.eval z)
+theorem legSer_poly_ext {p q : Polynomial ℂ} (h : ∀ z : ℂ, 1 + z ∈ slitPlane → p.eval z = q.eval z)
     (z : ℂ) : p.eval z = q.eval z := by
   rw [Polynomial.eq_of_infinite_eval_eq p q (legSer_infinite.mono fun w hw => h w hw)]
 
 /-- The three-term recurrence for `P_n(z)` holds for every `z ∈ ℂ`. -/
-lemma legSer_legendreP_rec (n : ℕ) (z : ℂ) :
+theorem legSer_legendreP_rec (n : ℕ) (z : ℂ) :
     ((n:ℂ)+2) * legendreP ((n+2:ℕ):ℂ) z =
       (2*n+3) * z * legendreP ((n+1:ℕ):ℂ) z - ((n:ℂ)+1) * legendreP (n:ℂ) z := by
   obtain ⟨q0, h0⟩ := legSer_legendreP_poly n
@@ -134,14 +133,14 @@ lemma legSer_legendreP_rec (n : ℕ) (z : ℂ) :
   linear_combination key
 
 /-- `P_0(z) = 1` for every `z`. -/
-lemma legSer_legendreP_zero (z : ℂ) : legendreP ((0:ℕ):ℂ) z = 1 := by
+theorem legSer_legendreP_zero (z : ℂ) : legendreP ((0:ℕ):ℂ) z = 1 := by
   obtain ⟨q, h⟩ := legSer_legendreP_poly 0
   have key := legSer_poly_ext (p := q) (q := 1) (fun w hw => by
     rw [← h, legendreP_nat 0 hw]; simp [DLMF.OrthogonalPolynomials.legendrePolyP_zero]) z
   rw [h, key]; simp
 
 /-- `P_1(z) = z` for every `z`. -/
-lemma legSer_legendreP_one (z : ℂ) : legendreP ((1:ℕ):ℂ) z = z := by
+theorem legSer_legendreP_one (z : ℂ) : legendreP ((1:ℕ):ℂ) z = z := by
   obtain ⟨q, h⟩ := legSer_legendreP_poly 1
   have key := legSer_poly_ext (p := q) (q := Polynomial.X) (fun w hw => by
     rw [← h, legendreP_nat 1 hw]; simp [DLMF.OrthogonalPolynomials.legendrePolyP_one]) z
@@ -171,31 +170,31 @@ noncomputable def legSerQ (z : ℂ) : ℂ⟦X⟧ :=
 /-- The linear factor `z - X` as a power series. -/
 noncomputable def legSerL (z : ℂ) : ℂ⟦X⟧ := PowerSeries.C z - PowerSeries.X
 
-lemma legSer_Q_eq (z : ℂ) (S : ℂ⟦X⟧) : legSerQ z * S =
+theorem legSer_Q_eq (z : ℂ) (S : ℂ⟦X⟧) : legSerQ z * S =
     S - PowerSeries.C (2*z) * (PowerSeries.X * S) + PowerSeries.X * (PowerSeries.X * S) := by
   unfold legSerQ; ring
 
-lemma legSer_coeff_Q_zero (z : ℂ) (S : ℂ⟦X⟧) :
+theorem legSer_coeff_Q_zero (z : ℂ) (S : ℂ⟦X⟧) :
     PowerSeries.coeff 0 (legSerQ z * S) = PowerSeries.coeff 0 S := by
   rw [legSer_Q_eq]; simp
 
-lemma legSer_coeff_Q_one (z : ℂ) (S : ℂ⟦X⟧) :
+theorem legSer_coeff_Q_one (z : ℂ) (S : ℂ⟦X⟧) :
     PowerSeries.coeff 1 (legSerQ z * S) = PowerSeries.coeff 1 S - 2*z*PowerSeries.coeff 0 S := by
   rw [legSer_Q_eq, map_add, map_sub, PowerSeries.coeff_C_mul, PowerSeries.coeff_succ_X_mul,
     PowerSeries.coeff_succ_X_mul]
   simp
 
-lemma legSer_coeff_Q_add_two (z : ℂ) (S : ℂ⟦X⟧) (n : ℕ) :
+theorem legSer_coeff_Q_add_two (z : ℂ) (S : ℂ⟦X⟧) (n : ℕ) :
     PowerSeries.coeff (n+2) (legSerQ z * S) = PowerSeries.coeff (n+2) S -
       2*z*PowerSeries.coeff (n+1) S + PowerSeries.coeff n S := by
   rw [legSer_Q_eq, map_add, map_sub, PowerSeries.coeff_C_mul, PowerSeries.coeff_succ_X_mul,
     PowerSeries.coeff_succ_X_mul, PowerSeries.coeff_succ_X_mul]
 
-lemma legSer_coeff_L_zero (z : ℂ) (S : ℂ⟦X⟧) :
+theorem legSer_coeff_L_zero (z : ℂ) (S : ℂ⟦X⟧) :
     PowerSeries.coeff 0 (legSerL z * S) = z * PowerSeries.coeff 0 S := by
   unfold legSerL; rw [sub_mul, map_sub, PowerSeries.coeff_C_mul]; simp
 
-lemma legSer_coeff_L_succ (z : ℂ) (S : ℂ⟦X⟧) (n : ℕ) :
+theorem legSer_coeff_L_succ (z : ℂ) (S : ℂ⟦X⟧) (n : ℕ) :
     PowerSeries.coeff (n+1) (legSerL z * S) = z * PowerSeries.coeff (n+1) S -
       PowerSeries.coeff n S := by
   unfold legSerL; rw [sub_mul, map_sub, PowerSeries.coeff_C_mul, PowerSeries.coeff_succ_X_mul]
@@ -203,9 +202,9 @@ lemma legSer_coeff_L_succ (z : ℂ) (S : ℂ⟦X⟧) (n : ℕ) :
 /-- The sequence `n ↦ P_n(z)`. -/
 noncomputable def legSerP (z : ℂ) (n : ℕ) : ℂ := legendreP (n:ℂ) z
 
-lemma legSerP_zero (z : ℂ) : legSerP z 0 = 1 := legSer_legendreP_zero z
-lemma legSerP_one (z : ℂ) : legSerP z 1 = z := legSer_legendreP_one z
-lemma legSerP_rec (z : ℂ) (n : ℕ) :
+theorem legSerP_zero (z : ℂ) : legSerP z 0 = 1 := legSer_legendreP_zero z
+theorem legSerP_one (z : ℂ) : legSerP z 1 = z := legSer_legendreP_one z
+theorem legSerP_rec (z : ℂ) (n : ℕ) :
     ((n:ℂ)+2) * legSerP z (n+2) = (2*n+3) * z * legSerP z (n+1) - ((n:ℂ)+1) * legSerP z n :=
   legSer_legendreP_rec n z
 
@@ -216,12 +215,12 @@ noncomputable def legSerG (z : ℂ) : ℂ⟦X⟧ := PowerSeries.mk (legSerP z)
 noncomputable def legSerF (z : ℂ) : ℂ⟦X⟧ :=
   PowerSeries.mk fun n => if n = 0 then 0 else legSerP z (n-1) / n
 
-lemma legSer_coeff_dG (z : ℂ) (k : ℕ) :
+theorem legSer_coeff_dG (z : ℂ) (k : ℕ) :
     PowerSeries.coeff k (d⁄dX (legSerG z)) = legSerP z (k+1) * (k+1) := by
   rw [PowerSeries.coeff_derivative, legSerG, PowerSeries.coeff_mk]
 
 /-- `(1 - 2zX + X²) G' = (z - X) G`. -/
-lemma legSer_G_ode (z : ℂ) : legSerQ z * d⁄dX (legSerG z) = legSerL z * legSerG z := by
+theorem legSer_G_ode (z : ℂ) : legSerQ z * d⁄dX (legSerG z) = legSerL z * legSerG z := by
   ext n
   rcases n with _ | _ | n
   · rw [legSer_coeff_Q_zero, legSer_coeff_L_zero, legSer_coeff_dG]
@@ -239,7 +238,7 @@ lemma legSer_G_ode (z : ℂ) : legSerQ z * d⁄dX (legSerG z) = legSerL z * legS
     push_cast at e ⊢
     linear_combination e
 
-lemma legSer_dQ (z : ℂ) : d⁄dX (legSerQ z) = -PowerSeries.C (2*z) + 2 * PowerSeries.X := by
+theorem legSer_dQ (z : ℂ) : d⁄dX (legSerQ z) = -PowerSeries.C (2*z) + 2 * PowerSeries.X := by
   unfold legSerQ
   rw [map_add, map_sub, Derivation.leibniz, PowerSeries.derivative_pow, PowerSeries.derivative_C,
     PowerSeries.derivative_X, PowerSeries.derivative_one]
@@ -247,7 +246,7 @@ lemma legSer_dQ (z : ℂ) : d⁄dX (legSerQ z) = -PowerSeries.C (2*z) + 2 * Powe
   push_cast; ring_nf
 
 /-- `(1 - 2zX + X²) G² = 1`. -/
-lemma legSer_Q_G_sq (z : ℂ) : legSerQ z * legSerG z ^ 2 = 1 := by
+theorem legSer_Q_G_sq (z : ℂ) : legSerQ z * legSerG z ^ 2 = 1 := by
   refine PowerSeries.derivative.ext ?_ ?_
   · rw [Derivation.leibniz, PowerSeries.derivative_pow, PowerSeries.derivative_one, legSer_dQ]
     simp only [smul_eq_mul]
@@ -260,7 +259,7 @@ lemma legSer_Q_G_sq (z : ℂ) : legSerQ z * legSerG z ^ 2 = 1 := by
       legSer_coeff_Q_zero, pow_two, PowerSeries.coeff_mul]
     simp [legSerG, legSerP_zero]
 
-lemma legSer_dF (z : ℂ) : d⁄dX (legSerF z) = legSerG z := by
+theorem legSer_dF (z : ℂ) : d⁄dX (legSerF z) = legSerG z := by
   ext k
   rw [PowerSeries.coeff_derivative, legSerF, PowerSeries.coeff_mk, legSerG, PowerSeries.coeff_mk]
   simp only [Nat.add_one_ne_zero, ↓reduceIte, Nat.add_sub_cancel]
@@ -269,7 +268,7 @@ lemma legSer_dF (z : ℂ) : d⁄dX (legSerF z) = legSerG z := by
   field_simp
 
 /-- `(1 - 2zX + X²) (FG)' = 1 + (z - X) FG`. -/
-lemma legSer_U_ode (z : ℂ) : legSerQ z * d⁄dX (legSerF z * legSerG z) =
+theorem legSer_U_ode (z : ℂ) : legSerQ z * d⁄dX (legSerF z * legSerG z) =
     1 + legSerL z * (legSerF z * legSerG z) := by
   rw [Derivation.leibniz, legSer_dF]
   simp only [smul_eq_mul]
@@ -278,7 +277,7 @@ lemma legSer_U_ode (z : ℂ) : legSerQ z * d⁄dX (legSerF z * legSerG z) =
   ring
 
 /-- The coefficients of `F G` are the convolution sums of DLMF 14.7.4. -/
-lemma legSer_coeff_U (z : ℂ) (n : ℕ) : PowerSeries.coeff n (legSerF z * legSerG z) =
+theorem legSer_coeff_U (z : ℂ) (n : ℕ) : PowerSeries.coeff n (legSerF z * legSerG z) =
     ∑ j ∈ Finset.range n, legSerP z j * legSerP z (n-j-1) / (j+1:ℂ) := by
   rw [PowerSeries.coeff_mul, Finset.Nat.sum_antidiagonal_eq_sum_range_succ_mk,
     Finset.sum_range_succ']
@@ -289,7 +288,7 @@ lemma legSer_coeff_U (z : ℂ) (n : ℕ) : PowerSeries.coeff n (legSerF z * legS
   push_cast; ring
 
 /-- The convolution sums satisfy the recurrence of the polynomials `W_{n-1}`. -/
-lemma legSer_U_rec (z : ℂ) (n : ℕ) :
+theorem legSer_U_rec (z : ℂ) (n : ℕ) :
     ((n:ℂ)+2) * PowerSeries.coeff (n+2) (legSerF z * legSerG z) =
       (2*n+3) * z * PowerSeries.coeff (n+1) (legSerF z * legSerG z) -
         ((n:ℂ)+1) * PowerSeries.coeff n (legSerF z * legSerG z) := by
@@ -307,13 +306,13 @@ lemma legSer_U_rec (z : ℂ) (n : ℕ) :
     push_cast at h ⊢
     linear_combination h
 
-lemma legSer_U_zero (z : ℂ) : PowerSeries.coeff 0 (legSerF z * legSerG z) = 0 := by
+theorem legSer_U_zero (z : ℂ) : PowerSeries.coeff 0 (legSerF z * legSerG z) = 0 := by
   rw [legSer_coeff_U]; simp
 
-lemma legSer_U_one (z : ℂ) : PowerSeries.coeff 1 (legSerF z * legSerG z) = 1 := by
+theorem legSer_U_one (z : ℂ) : PowerSeries.coeff 1 (legSerF z * legSerG z) = 1 := by
   rw [legSer_coeff_U]; simp [legSerP_zero]
 
-lemma legSer_U_eq (z : ℂ) (n : ℕ) :
+theorem legSer_U_eq (z : ℂ) (n : ℕ) :
     PowerSeries.coeff n (legSerF z * legSerG z) = (legendreQPoly n).eval z := by
   induction n using Nat.strong_induction_on with
   | _ n ih =>
@@ -333,7 +332,7 @@ lemma legSer_U_eq (z : ℂ) (n : ℕ) :
 noncomputable def legSerB (ζ : ℂ) : ℂ⟦X⟧ :=
   PowerSeries.mk fun j => poch (1/2) j * ζ^j / (j.factorial : ℂ)
 
-lemma legSer_B_ode (ζ : ℂ) :
+theorem legSer_B_ode (ζ : ℂ) :
     (1 - PowerSeries.C ζ * PowerSeries.X) * d⁄dX (legSerB ζ) = PowerSeries.C (ζ/2) * legSerB ζ := by
   ext n
   rw [sub_mul, one_mul, map_sub, mul_assoc, PowerSeries.coeff_C_mul, PowerSeries.coeff_C_mul,
@@ -355,7 +354,7 @@ lemma legSer_B_ode (ζ : ℂ) :
     ring
 
 /-- `(1 - ζX) B(ζ)² = 1`. -/
-lemma legSer_B_sq (ζ : ℂ) : (1 - PowerSeries.C ζ * PowerSeries.X) * legSerB ζ ^ 2 = 1 := by
+theorem legSer_B_sq (ζ : ℂ) : (1 - PowerSeries.C ζ * PowerSeries.X) * legSerB ζ ^ 2 = 1 := by
   refine PowerSeries.derivative.ext ?_ ?_
   · rw [Derivation.leibniz, PowerSeries.derivative_pow, PowerSeries.derivative_one, map_sub,
       Derivation.leibniz, PowerSeries.derivative_one, PowerSeries.derivative_C, PowerSeries.derivative_X]
@@ -375,7 +374,7 @@ lemma legSer_B_sq (ζ : ℂ) : (1 - PowerSeries.C ζ * PowerSeries.X) * legSerB 
     simp [legSerB, poch_zero]
 
 /-- Square roots of a power series with the same nonzero constant term coincide. -/
-lemma legSer_sq_inj {A B : ℂ⟦X⟧} (h : A^2 = B^2)
+theorem legSer_sq_inj {A B : ℂ⟦X⟧} (h : A^2 = B^2)
     (h0 : PowerSeries.constantCoeff A = PowerSeries.constantCoeff B)
     (h1 : PowerSeries.constantCoeff A ≠ 0) : A = B := by
   have hfac : (A - B) * (A + B) = 0 := by linear_combination h
@@ -387,7 +386,7 @@ lemma legSer_sq_inj {A B : ℂ⟦X⟧} (h : A^2 = B^2)
   exact sub_eq_zero.mp ((mul_eq_zero.mp hfac).resolve_right hne)
 
 /-- `B(ζ₁) B(ζ₂) = ∑ P_n(z) Xⁿ` when `ζ₁ + ζ₂ = 2z` and `ζ₁ ζ₂ = 1`. -/
-lemma legSer_B_mul (z ζ₁ ζ₂ : ℂ) (hs : ζ₁ + ζ₂ = 2*z) (hp : ζ₁ * ζ₂ = 1) :
+theorem legSer_B_mul (z ζ₁ ζ₂ : ℂ) (hs : ζ₁ + ζ₂ = 2*z) (hp : ζ₁ * ζ₂ = 1) :
     legSerB ζ₁ * legSerB ζ₂ = legSerG z := by
   have hQ : legSerQ z = (1 - PowerSeries.C ζ₁ * PowerSeries.X) * (1 - PowerSeries.C ζ₂ * PowerSeries.X) := by
     unfold legSerQ
@@ -411,7 +410,7 @@ lemma legSer_B_mul (z ζ₁ ζ₂ : ℂ) (hs : ζ₁ + ζ₂ = 2*z) (hp : ζ₁ 
     simp [legSerB, poch_zero]
 
 
-lemma legSer_norm_poch_le (n : ℕ) : ‖poch (1/2:ℂ) n‖ ≤ n.factorial := by
+theorem legSer_norm_poch_le (n : ℕ) : ‖poch (1/2:ℂ) n‖ ≤ n.factorial := by
   induction n with
   | zero => simp [poch_zero]
   | succ n ih =>
@@ -423,7 +422,7 @@ lemma legSer_norm_poch_le (n : ℕ) : ‖poch (1/2:ℂ) n‖ ≤ n.factorial := 
           mul_le_mul ih h (norm_nonneg _) (by positivity)
       _ = _ := by push_cast; ring
 
-lemma legSer_norm_coeff_B_le (ζ h : ℂ) (j : ℕ) :
+theorem legSer_norm_coeff_B_le (ζ h : ℂ) (j : ℕ) :
     ‖PowerSeries.coeff j (legSerB ζ) * h^j‖ ≤ ‖h*ζ‖^j := by
   simp only [legSerB, PowerSeries.coeff_mk]
   have hf : (0:ℝ) < j.factorial := by exact_mod_cast j.factorial_pos
@@ -432,12 +431,12 @@ lemma legSer_norm_coeff_B_le (ζ h : ℂ) (j : ℕ) :
         gcongr; exact legSer_norm_poch_le j
     _ = ‖h‖^j * ‖ζ‖^j := by field_simp
 
-lemma legSer_summable_B (ζ h : ℂ) (hl : ‖h*ζ‖ < 1) :
+theorem legSer_summable_B (ζ h : ℂ) (hl : ‖h*ζ‖ < 1) :
     Summable fun j => ‖PowerSeries.coeff j (legSerB ζ) * h^j‖ :=
   (summable_geometric_of_lt_one (norm_nonneg _) hl).of_nonneg_of_le (fun _ => norm_nonneg _)
     (legSer_norm_coeff_B_le ζ h)
 
-lemma legSer_hasSum_B (ζ h : ℂ) (hl : ‖h*ζ‖ < 1) :
+theorem legSer_hasSum_B (ζ h : ℂ) (hl : ‖h*ζ‖ < 1) :
     HasSum (fun j => PowerSeries.coeff j (legSerB ζ) * h^j) ((1 - h*ζ)^(-1/2:ℂ)) := by
   have ht : ‖-(h*ζ)‖ < 1 := by rwa [norm_neg]
   have e := hasSum_one_add_cpow (-1/2:ℂ) ht
@@ -447,7 +446,7 @@ lemma legSer_hasSum_B (ζ h : ℂ) (hl : ‖h*ζ‖ < 1) :
   ring
 
 /-- Product rule for principal powers of numbers with positive real part. -/
-lemma legSer_mul_cpow {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (w : ℂ) :
+theorem legSer_mul_cpow {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (w : ℂ) :
     a^w * b^w = (a*b)^w := by
   have ha0 : a ≠ 0 := fun h => by rw [h] at ha; simp at ha
   have hb0 : b ≠ 0 := fun h => by rw [h] at hb; simp at hb
@@ -487,7 +486,7 @@ theorem legSer_generating (z ζ₁ ζ₂ h : ℂ) (hs : ζ₁ + ζ₂ = 2*z) (hp
 
 
 /-- The two roots `z ± √(z²-1)` of `ζ² - 2zζ + 1`, with the exterior square root. -/
-lemma legSer_roots {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem legSer_roots {z : ℂ} (hz : z-1 ∈ slitPlane) :
     let s := exp ((log (z-1)+log (z+1))/2)
     (z + s) + (z - s) = 2*z ∧ (z + s) * (z - s) = 1 := by
   intro s
@@ -511,14 +510,14 @@ noncomputable def legSerA (n s : ℕ) : ℝ :=
 /-- Coefficients of `W_{n-1}` in powers of `z-1` (DLMF 14.7.3). -/
 noncomputable def legSerE (n s : ℕ) : ℝ := legSerA n s * ((harmonic n : ℝ) - harmonic s)
 
-lemma legSer_fact_ne (m : ℕ) : (m.factorial : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr m.factorial_ne_zero
+theorem legSer_fact_ne (m : ℕ) : (m.factorial : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr m.factorial_ne_zero
 
-lemma legSerA_zero (n : ℕ) : legSerA n 0 = 1 := by
+theorem legSerA_zero (n : ℕ) : legSerA n 0 = 1 := by
   have := legSer_fact_ne n
   simp [legSerA, this]
 
 /-- Factorial identity behind the three-term recurrence of `P_n` in powers of `z-1`. -/
-lemma legSerA_rec (n s : ℕ) :
+theorem legSerA_rec (n s : ℕ) :
     ((n:ℝ)+2) * legSerA (n+2) (s+1) = (2*n+3) * (legSerA (n+1) (s+1) + legSerA (n+1) s) -
       ((n:ℝ)+1) * legSerA n (s+1) := by
   rcases Nat.lt_or_ge n (s+1) with h | h
@@ -558,7 +557,7 @@ lemma legSerA_rec (n s : ℕ) :
     push_cast; field_simp; ring
 
 /-- `A(n+2,s+1) - A(n,s+1) = (2n+3) A(n+1,s)/(s+1)`. -/
-lemma legSerA_diff (n s : ℕ) :
+theorem legSerA_diff (n s : ℕ) :
     legSerA (n+2) (s+1) - legSerA n (s+1) = (2*n+3) * legSerA (n+1) s / ((s:ℝ)+1) := by
   rcases Nat.lt_or_ge n (s+1) with h | h
   · rcases Nat.lt_or_ge (n+1) s with h' | h'
@@ -592,22 +591,22 @@ lemma legSerA_diff (n s : ℕ) :
     push_cast; field_simp; ring
 
 
-lemma legSerE_zero_right (n : ℕ) : legSerE n 0 = harmonic n := by
+theorem legSerE_zero_right (n : ℕ) : legSerE n 0 = harmonic n := by
   simp [legSerE, legSerA_zero]
 
-lemma legSerE_eq_zero {n s : ℕ} (h : n ≤ s) : legSerE n s = 0 := by
+theorem legSerE_eq_zero {n s : ℕ} (h : n ≤ s) : legSerE n s = 0 := by
   rcases h.lt_or_eq with h | rfl
   · simp [legSerE, legSerA, show ¬ s ≤ n by omega]
   · simp [legSerE]
 
-lemma legSerE_rec_zero (n : ℕ) :
+theorem legSerE_rec_zero (n : ℕ) :
     ((n:ℝ)+2) * legSerE (n+2) 0 = (2*n+3) * legSerE (n+1) 0 - ((n:ℝ)+1) * legSerE n 0 := by
   simp only [legSerE_zero_right, harmonic_succ]
   push_cast
   field_simp
   ring
 
-lemma legSerE_rec_succ (n s : ℕ) :
+theorem legSerE_rec_succ (n s : ℕ) :
     ((n:ℝ)+2) * legSerE (n+2) (s+1) = (2*n+3) * (legSerE (n+1) (s+1) + legSerE (n+1) s) -
       ((n:ℝ)+1) * legSerE n (s+1) := by
   have R1 := legSerA_rec n s
@@ -635,14 +634,14 @@ lemma legSerE_rec_succ (n s : ℕ) :
 noncomputable def legSerW (n : ℕ) (z : ℂ) : ℂ :=
   ∑ s ∈ Finset.range n, (legSerE n s : ℂ) * (z-1)^s
 
-lemma legSerW_extend (n k : ℕ) (z : ℂ) :
+theorem legSerW_extend (n k : ℕ) (z : ℂ) :
     legSerW n z = ∑ s ∈ Finset.range (n+k), (legSerE n s : ℂ) * (z-1)^s := by
   induction k with
   | zero => rfl
   | succ k ih =>
     rw [ih, ← add_assoc, Finset.sum_range_succ, legSerE_eq_zero (by omega)]; simp
 
-lemma legSerW_rec (n : ℕ) (z : ℂ) :
+theorem legSerW_rec (n : ℕ) (z : ℂ) :
     ((n:ℂ)+2) * legSerW (n+2) z = (2*n+3) * z * legSerW (n+1) z - ((n:ℂ)+1) * legSerW n z := by
   obtain ⟨t, rfl⟩ : ∃ t, z = 1 + t := ⟨z-1, by ring⟩
   rw [legSerW_extend (n+2) 1, legSerW_extend (n+1) 2, legSerW_extend n 3]
@@ -673,7 +672,7 @@ lemma legSerW_rec (n : ℕ) (z : ℂ) :
   simp only [pow_zero, mul_one]
   linear_combination key0
 
-lemma legSerW_eq (n : ℕ) (z : ℂ) : legSerW n z = (legendreQPoly n).eval z := by
+theorem legSerW_eq (n : ℕ) (z : ℂ) : legSerW n z = (legendreQPoly n).eval z := by
   induction n using Nat.strong_induction_on with
   | _ n ih =>
     match n, ih with
@@ -691,7 +690,7 @@ lemma legSerW_eq (n : ℕ) (z : ℂ) : legSerW n z = (legendreQPoly n).eval z :=
 /-! ### Generating functions of `W_{n-1}` and of `Q_n` (DLMF 14.7.20, 14.7.22) -/
 
 /-- Absolute convergence of `∑ P_n(z) hⁿ` inside the circle of the two roots. -/
-lemma legSer_summable_G (z ζ₁ ζ₂ h : ℂ) (hs : ζ₁ + ζ₂ = 2*z) (hp : ζ₁ * ζ₂ = 1)
+theorem legSer_summable_G (z ζ₁ ζ₂ h : ℂ) (hs : ζ₁ + ζ₂ = 2*z) (hp : ζ₁ * ζ₂ = 1)
     (h1 : ‖h*ζ₁‖ < 1) (h2 : ‖h*ζ₂‖ < 1) :
     Summable fun n => ‖legSerP z n * h^n‖ := by
   have hs1 := legSer_summable_B ζ₁ h h1
@@ -704,7 +703,7 @@ lemma legSer_summable_G (z ζ₁ ζ₂ h : ℂ) (hs : ζ₁ + ζ₂ = 2*z) (hp :
   rw [Finset.mem_antidiagonal] at hkl
   rw [← hkl, pow_add]; ring
 
-lemma legSer_norm_coeff_F_le (z h : ℂ) (n : ℕ) :
+theorem legSer_norm_coeff_F_le (z h : ℂ) (n : ℕ) :
     ‖PowerSeries.coeff n (legSerF z) * h^n‖ ≤ ‖h‖ * ‖legSerP z (n-1) * h^(n-1)‖ := by
   simp only [legSerF, PowerSeries.coeff_mk]
   rcases n with _ | n
@@ -717,7 +716,7 @@ lemma legSer_norm_coeff_F_le (z h : ℂ) (n : ℕ) :
       _ ≤ ‖legSerP z n‖ * (‖h‖^n * ‖h‖) := div_le_self h0 this
       _ = _ := by ring
 
-lemma legSer_summable_F (z ζ₁ ζ₂ h : ℂ) (hs : ζ₁ + ζ₂ = 2*z) (hp : ζ₁ * ζ₂ = 1)
+theorem legSer_summable_F (z ζ₁ ζ₂ h : ℂ) (hs : ζ₁ + ζ₂ = 2*z) (hp : ζ₁ * ζ₂ = 1)
     (h1 : ‖h*ζ₁‖ < 1) (h2 : ‖h*ζ₂‖ < 1) :
     Summable fun n => ‖PowerSeries.coeff n (legSerF z) * h^n‖ := by
   have hG := legSer_summable_G z ζ₁ ζ₂ h hs hp h1 h2
@@ -728,7 +727,7 @@ lemma legSer_summable_F (z ζ₁ ζ₂ h : ℂ) (hs : ζ₁ + ζ₂ = 2*z) (hp :
   exact hG'.of_nonneg_of_le (fun _ => norm_nonneg _) (legSer_norm_coeff_F_le z h)
 
 /-- Cauchy product: `∑ W_{n-1}(z) hⁿ = (∑ F_n hⁿ) (1-2zh+h²)^{-1/2}`. -/
-lemma legSer_hasSum_W (z ζ₁ ζ₂ h : ℂ) (hs : ζ₁ + ζ₂ = 2*z) (hp : ζ₁ * ζ₂ = 1)
+theorem legSer_hasSum_W (z ζ₁ ζ₂ h : ℂ) (hs : ζ₁ + ζ₂ = 2*z) (hp : ζ₁ * ζ₂ = 1)
     (h1 : ‖h*ζ₁‖ < 1) (h2 : ‖h*ζ₂‖ < 1) :
     HasSum (fun n => (legendreQPoly n).eval z * h^n)
       ((∑' n, PowerSeries.coeff n (legSerF z) * h^n) * (1 - 2*z*h + h^2)^(-1/2:ℂ)) := by
@@ -745,7 +744,7 @@ lemma legSer_hasSum_W (z ζ₁ ζ₂ h : ℂ) (hs : ζ₁ + ζ₂ = 2*z) (hp : �
   rw [← hkl, pow_add]; simp [legSerG]; ring
 
 /-- Derivative of the closed form `log(1+x) - log(x - t + √(1-2xt+t²))`. -/
-lemma legSer_hasDerivAt_phi {x t : ℝ} (hq : 0 < 1-2*x*t+t^2) (hl : 0 < x - t + √(1-2*x*t+t^2)) :
+theorem legSer_hasDerivAt_phi {x t : ℝ} (hq : 0 < 1-2*x*t+t^2) (hl : 0 < x - t + √(1-2*x*t+t^2)) :
     HasDerivAt (fun s : ℝ => Real.log (1+x) - Real.log (x - s + √(1-2*x*s+s^2)))
       (1 / √(1-2*x*t+t^2)) t := by
   have hQ : HasDerivAt (fun s : ℝ => 1-2*x*s+s^2) (-2*x + 2*t) t := by
@@ -764,7 +763,7 @@ lemma legSer_hasDerivAt_phi {x t : ℝ} (hq : 0 < 1-2*x*t+t^2) (hl : 0 < x - t +
 
 /-- `∑ P_{n-1}(x) tⁿ / n = log(1+x) - log(x - t + √(1-2xt+t²))` for real `t` in a disc where the
 binomial factors converge and the logarithm is real. -/
-lemma legSer_tsum_F_real {x r : ℝ} (ζ₁ ζ₂ : ℂ) (hs : ζ₁ + ζ₂ = 2*x) (hp : ζ₁ * ζ₂ = 1)
+theorem legSer_tsum_F_real {x r : ℝ} (ζ₁ ζ₂ : ℂ) (hs : ζ₁ + ζ₂ = 2*x) (hp : ζ₁ * ζ₂ = 1)
     (h1 : ‖(r:ℂ)*ζ₁‖ < 1) (h2 : ‖(r:ℂ)*ζ₂‖ < 1)
     (hq : ∀ t : ℝ, |t| < r → 0 < 1-2*x*t+t^2)
     (hl : ∀ t : ℝ, |t| < r → 0 < x - t + √(1-2*x*t+t^2)) {t : ℝ} (ht : |t| < r) :
@@ -846,11 +845,11 @@ lemma legSer_tsum_F_real {x r : ℝ} (ζ₁ ζ₂ : ℂ) (hs : ζ₁ + ζ₂ = 2
   exact heq htS
 
 /-- `a^{1/2} = √a` for `a ≥ 0`, as complex numbers. -/
-lemma legSer_cpow_half {a : ℝ} (ha : 0 ≤ a) : ((a:ℂ))^(1/2:ℂ) = ((√a : ℝ) : ℂ) := by
+theorem legSer_cpow_half {a : ℝ} (ha : 0 ≤ a) : ((a:ℂ))^(1/2:ℂ) = ((√a : ℝ) : ℂ) := by
   rw [Real.sqrt_eq_rpow, Complex.ofReal_cpow ha]; push_cast; ring_nf
 
 /-- Combination of the generating functions of `P_n` and `W_{n-1}` for real `x` and `h`. -/
-lemma legSer_hasSum_Q_real {x h r : ℝ} (ζ₁ ζ₂ : ℂ) (hs : ζ₁ + ζ₂ = 2*x) (hp : ζ₁ * ζ₂ = 1)
+theorem legSer_hasSum_Q_real {x h r : ℝ} (ζ₁ ζ₂ : ℂ) (hs : ζ₁ + ζ₂ = 2*x) (hp : ζ₁ * ζ₂ = 1)
     (h1 : ‖(r:ℂ)*ζ₁‖ < 1) (h2 : ‖(r:ℂ)*ζ₂‖ < 1)
     (hq : ∀ t : ℝ, |t| < r → 0 < 1-2*x*t+t^2)
     (hl : ∀ t : ℝ, |t| < r → 0 < x - t + √(1-2*x*t+t^2)) (hh : |h| < r) (c : ℂ) :

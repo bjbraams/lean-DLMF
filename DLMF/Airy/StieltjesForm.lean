@@ -48,18 +48,18 @@ namespace DLMF.Airy
 /-- The Euler weight `τ^{a-1} (1-τ)^{-a}`. -/
 def airySt_w (a τ : ℝ) : ℝ := τ ^ (a - 1) * (1 - τ) ^ (-a)
 
-lemma airySt_w_nonneg (a : ℝ) {τ : ℝ} (hτ : τ ∈ Ioo (0 : ℝ) 1) : 0 ≤ airySt_w a τ := by
+theorem airySt_w_nonneg (a : ℝ) {τ : ℝ} (hτ : τ ∈ Ioo (0 : ℝ) 1) : 0 ≤ airySt_w a τ := by
   have := hτ.1; have : 0 < 1 - τ := by linarith [hτ.2]
   unfold airySt_w; positivity
 
-lemma airySt_w_pow {a : ℝ} (k : ℕ) {τ : ℝ} (hτ : τ ∈ Ioo (0 : ℝ) 1) :
+theorem airySt_w_pow {a : ℝ} (k : ℕ) {τ : ℝ} (hτ : τ ∈ Ioo (0 : ℝ) 1) :
     τ ^ k * airySt_w a τ = τ ^ ((a + k) - 1) * (1 - τ) ^ ((1 - a) - 1) := by
   unfold airySt_w
   rw [show (a + k) - 1 = (a - 1) + k by ring, Real.rpow_add hτ.1, Real.rpow_natCast,
     show (1 - a) - 1 = -a by ring]
   ring
 
-lemma airySt_integrableOn_w {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) (k : ℕ) :
+theorem airySt_integrableOn_w {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) (k : ℕ) :
     IntegrableOn (fun τ : ℝ => τ ^ k * airySt_w a τ) (Ioo 0 1) := by
   have h := (TauCeti.intervalIntegrable_rpow_mul_one_sub_rpow (a := a + k) (b := 1 - a)
     (by positivity) (by linarith) (u := 0) (v := 1) (by simp) (by simp))
@@ -67,7 +67,7 @@ lemma airySt_integrableOn_w {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) (k : ℕ) :
   exact h.congr_fun (fun τ hτ => (airySt_w_pow k hτ).symm) measurableSet_Ioo
 
 /-- The moments of the Euler weight: `∫₀¹ τ^k w = Γ(a+k)Γ(1-a)/Γ(k+1)`. -/
-lemma airySt_moment {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) (k : ℕ) :
+theorem airySt_moment {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) (k : ℕ) :
     ∫ τ in Ioo (0 : ℝ) 1, τ ^ k * airySt_w a τ =
       Real.Gamma (a + k) * Real.Gamma (1 - a) / Real.Gamma (k + 1) := by
   have h := TauCeti.integral_rpow_mul_one_sub_rpow (a := a + k) (b := 1 - a) (by positivity)
@@ -78,7 +78,7 @@ lemma airySt_moment {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) (k : ℕ) :
   congr 2; ring
 
 /-- `1 + tτ ≠ 0` for `τ ∈ [0,1]` when `1 + t ∈ slitPlane`. -/
-lemma airySt_one_add_mul_mem {t : ℂ} (ht : 1 + t ∈ slitPlane) {τ : ℝ} (hτ : τ ∈ Icc (0 : ℝ) 1) :
+theorem airySt_one_add_mul_mem {t : ℂ} (ht : 1 + t ∈ slitPlane) {τ : ℝ} (hτ : τ ∈ Icc (0 : ℝ) 1) :
     1 + t * τ ∈ slitPlane := by
   have h := (starConvex_ofReal_slitPlane (x := 1) one_pos) ht (a := 1 - τ) (b := τ)
     (by linarith [hτ.2]) hτ.1 (by ring)
@@ -86,7 +86,7 @@ lemma airySt_one_add_mul_mem {t : ℂ} (ht : 1 + t ∈ slitPlane) {τ : ℝ} (h�
   simp only [real_smul]; push_cast; ring
 
 /-- The Euler form of the binomial on the unit disc. -/
-lemma airySt_binom_disc {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) {t : ℂ} (ht : ‖t‖ < 1) :
+theorem airySt_binom_disc {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) {t : ℂ} (ht : ‖t‖ < 1) :
     (1 + t) ^ (-(a : ℂ)) = (1 / (Real.Gamma a * Real.Gamma (1 - a)) : ℝ) *
       ∫ τ in Ioo (0 : ℝ) 1, (airySt_w a τ : ℂ) * (1 + t * τ)⁻¹ := by
   have h1 := ordinaryHypergeometric_eq_one_sub_neg_cpow (a := (a : ℂ)) (c := 1) (z := -t)
@@ -111,7 +111,7 @@ lemma airySt_binom_disc {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) {t : ℂ} (ht : �
 
 /-- **The binomial as a Stieltjes (Euler) integral**: for `0 < a < 1` and `1 + t` in the slit
 plane, `(1+t)^{-a} = (Γ(a)Γ(1-a))⁻¹ ∫₀¹ τ^{a-1}(1-τ)^{-a} (1 + tτ)⁻¹ dτ`. -/
-lemma airySt_binom {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) {t : ℂ} (ht : 1 + t ∈ slitPlane) :
+theorem airySt_binom {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) {t : ℂ} (ht : 1 + t ∈ slitPlane) :
     (1 + t) ^ (-(a : ℂ)) = (1 / (Real.Gamma a * Real.Gamma (1 - a)) : ℝ) *
       ∫ τ in Ioo (0 : ℝ) 1, (airySt_w a τ : ℂ) * (1 + t * τ)⁻¹ := by
   set U : Set ℂ := {t : ℂ | 1 + t ∈ slitPlane} with hU
@@ -183,7 +183,7 @@ def airySt_coef (a : ℝ) (k : ℕ) : ℝ :=
   (-1) ^ k * Real.Gamma (a + k) / (Real.Gamma a * Real.Gamma (k + 1))
 
 /-- **Exact remainder of the binomial expansion** in Stieltjes–Euler form. -/
-lemma airySt_binom_rem {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) {t : ℂ} (ht : 1 + t ∈ slitPlane)
+theorem airySt_binom_rem {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) {t : ℂ} (ht : 1 + t ∈ slitPlane)
     (N : ℕ) :
     (1 + t) ^ (-(a : ℂ)) - ∑ k ∈ range N, (airySt_coef a k : ℂ) * t ^ k =
       (-t) ^ N * (((1 / (Real.Gamma a * Real.Gamma (1 - a)) : ℝ) : ℂ) *
@@ -232,7 +232,7 @@ lemma airySt_binom_rem {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) {t : ℂ} (ht : 1 +
 /-- The ray multiplier: `1` if `cos θ ≥ 0`, else `|csc θ|`. -/
 def airySt_M (θ : ℝ) : ℝ := if 0 ≤ Real.cos θ then 1 else |Real.sin θ|⁻¹
 
-lemma airySt_M_pos {θ : ℝ} (hθ : |θ| < π) : 0 < airySt_M θ := by
+theorem airySt_M_pos {θ : ℝ} (hθ : |θ| < π) : 0 < airySt_M θ := by
   unfold airySt_M
   split_ifs with h
   · exact one_pos
@@ -241,7 +241,7 @@ lemma airySt_M_pos {θ : ℝ} (hθ : |θ| < π) : 0 < airySt_M θ := by
       (by linarith [le_abs_self θ]) |>.mp hs with rfl
     simp
 
-lemma airySt_norm_recip_le {θ : ℝ} (hθ : |θ| < π) {s : ℝ} (hs : 0 ≤ s) :
+theorem airySt_norm_recip_le {θ : ℝ} (hθ : |θ| < π) {s : ℝ} (hs : 0 ≤ s) :
     ‖(1 + (s : ℂ) * exp (θ * I))⁻¹‖ ≤ airySt_M θ := by
   rw [norm_inv]
   unfold airySt_M
@@ -252,7 +252,7 @@ lemma airySt_norm_recip_le {θ : ℝ} (hθ : |θ| < π) {s : ℝ} (hs : 0 ≤ s)
     exact inv_anti₀ (inv_pos.mp hM) (Complex.abs_sin_le_norm_one_add_ofReal_mul_exp s θ)
 
 /-- The Stieltjes factor of the binomial remainder is bounded by `M_θ` times its value at `0`. -/
-lemma airySt_factor_bound {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) {θ : ℝ} (hθ : |θ| < π) {r : ℝ}
+theorem airySt_factor_bound {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) {θ : ℝ} (hθ : |θ| < π) {r : ℝ}
     (hr : 0 ≤ r) (N : ℕ) :
     ‖((1 / (Real.Gamma a * Real.Gamma (1 - a)) : ℝ) : ℂ) *
         ∫ τ in Ioo (0 : ℝ) 1, ((τ ^ N * airySt_w a τ : ℝ) : ℂ) * (1 + (r * exp (θ * I)) * τ)⁻¹‖ ≤
@@ -279,7 +279,7 @@ lemma airySt_factor_bound {a : ℝ} (ha0 : 0 < a) (ha1 : a < 1) {θ : ℝ} (hθ 
     _ = _ := by field_simp
 
 /-- `(r e^{iθ})^s = r^s e^{iθ s}` for `r > 0`, `|θ| < π`. -/
-lemma airySt_ray_cpow {r : ℝ} (hr : 0 < r) {θ : ℝ} (hθ : |θ| < π) (s : ℂ) :
+theorem airySt_ray_cpow {r : ℝ} (hr : 0 < r) {θ : ℝ} (hθ : |θ| < π) (s : ℂ) :
     ((r : ℂ) * exp (θ * I)) ^ s = (r : ℂ) ^ s * exp (θ * I * s) := by
   have hr0 : (r : ℂ) ≠ 0 := ofReal_ne_zero.mpr hr.ne'
   have him : (θ * I : ℂ).im = θ := by simp
@@ -289,7 +289,7 @@ lemma airySt_ray_cpow {r : ℝ} (hr : 0 < r) {θ : ℝ} (hθ : |θ| < π) (s : �
   congr 1; ring
 
 /-- `1 + r e^{iθ}` lies in the slit plane for `r ≥ 0`, `|θ| < π`. -/
-lemma airySt_one_add_mem {r : ℝ} (hr : 0 ≤ r) {θ : ℝ} (hθ : |θ| < π) :
+theorem airySt_one_add_mem {r : ℝ} (hr : 0 ≤ r) {θ : ℝ} (hθ : |θ| < π) :
     1 + (r : ℂ) * exp (θ * I) ∈ slitPlane := by
   rcases eq_or_lt_of_le hr with h | h
   · subst h; simp
@@ -305,7 +305,7 @@ lemma airySt_one_add_mem {r : ℝ} (hr : 0 ≤ r) {θ : ℝ} (hθ : |θ| < π) :
     simp [exp_ofReal_mul_I_im] at *
     exact ⟨h.ne', hs⟩
 
-lemma airySt_norm_ofReal_mul_exp {r : ℝ} (hr : 0 ≤ r) (u : ℝ) :
+theorem airySt_norm_ofReal_mul_exp {r : ℝ} (hr : 0 ≤ r) (u : ℝ) :
     ‖(r : ℂ) * exp (u * I)‖ = r := by
   rw [norm_mul, norm_exp_ofReal_mul_I, mul_one, Complex.norm_real, Real.norm_of_nonneg hr]
 
@@ -314,7 +314,7 @@ def airySt_T (b a θ W : ℝ) (k : ℕ) : ℂ :=
   (airySt_coef a k : ℂ) * exp (θ * I * ((b : ℂ) - 1 + k)) *
     (Gamma ((b : ℂ) + k) * (W : ℂ) ^ (-((b : ℂ) + k)))
 
-lemma airySt_abs_coef {a : ℝ} (ha : 0 < a) (k : ℕ) :
+theorem airySt_abs_coef {a : ℝ} (ha : 0 < a) (k : ℕ) :
     |airySt_coef a k| = Real.Gamma (a + k) / (Real.Gamma a * Real.Gamma (k + 1)) := by
   unfold airySt_coef
   have h1 := Real.Gamma_pos_of_pos (show 0 < a + k by positivity)
@@ -323,7 +323,7 @@ lemma airySt_abs_coef {a : ℝ} (ha : 0 < a) (k : ℕ) :
   rw [mul_div_assoc, abs_mul, abs_pow, abs_neg, abs_one, one_pow, one_mul,
     abs_of_pos (by positivity)]
 
-lemma airySt_norm_T {b a θ W : ℝ} (hb : 0 < b) (ha : 0 < a) (hW : 0 < W) (k : ℕ) :
+theorem airySt_norm_T {b a θ W : ℝ} (hb : 0 < b) (ha : 0 < a) (hW : 0 < W) (k : ℕ) :
     ‖airySt_T b a θ W k‖ =
       Real.Gamma (a + k) / (Real.Gamma a * Real.Gamma (k + 1)) * Real.Gamma (b + k) *
         W ^ (-(b + k)) := by
@@ -340,7 +340,7 @@ lemma airySt_norm_T {b a θ W : ℝ} (hb : 0 < b) (ha : 0 < a) (hW : 0 < W) (k :
   ring
 
 /-- The ray monomial integrand on `(0,∞)`. -/
-lemma airySt_term_eq {b W θ : ℝ} (hθ : |θ| < π) (k : ℕ) {r : ℝ} (hr : 0 < r) :
+theorem airySt_term_eq {b W θ : ℝ} (hθ : |θ| < π) (k : ℕ) {r : ℝ} (hr : 0 < r) :
     Complex.exp (-(W * r)) * (((r : ℂ) * exp (θ * I)) ^ ((b : ℂ) - 1) *
       ((r : ℂ) * exp (θ * I)) ^ k) =
       exp (θ * I * ((b : ℂ) - 1 + k)) * (((r ^ ((b + k) - 1) * Real.exp (-(W * r)) : ℝ) : ℂ)) := by
@@ -351,14 +351,14 @@ lemma airySt_term_eq {b W θ : ℝ} (hθ : |θ| < π) (k : ℕ) {r : ℝ} (hr : 
   push_cast
   ring_nf
 
-lemma airySt_term_integrableOn {b W θ : ℝ} (hb : 0 < b) (hW : 0 < W) (hθ : |θ| < π) (k : ℕ) :
+theorem airySt_term_integrableOn {b W θ : ℝ} (hb : 0 < b) (hW : 0 < W) (hθ : |θ| < π) (k : ℕ) :
     IntegrableOn (fun r : ℝ => Complex.exp (-(W * r)) * (((r : ℂ) * exp (θ * I)) ^ ((b : ℂ) - 1) *
       ((r : ℂ) * exp (θ * I)) ^ k)) (Ioi 0) := by
   have h := ((stRem_integrableOn_rpow_exp (m := (b + k) - 1) (by have := k.cast_nonneg (α := ℝ); linarith) hW).ofReal
     (𝕜 := ℂ)).const_mul (exp (θ * I * ((b : ℂ) - 1 + k)))
   exact IntegrableOn.congr_fun h (fun r hr => (airySt_term_eq hθ k hr).symm) measurableSet_Ioi
 
-lemma airySt_term_integral {b W θ : ℝ} (hb : 0 < b) (hW : 0 < W) (hθ : |θ| < π) (k : ℕ) :
+theorem airySt_term_integral {b W θ : ℝ} (hb : 0 < b) (hW : 0 < W) (hθ : |θ| < π) (k : ℕ) :
     ∫ r in Ioi (0 : ℝ), Complex.exp (-(W * r)) * (((r : ℂ) * exp (θ * I)) ^ ((b : ℂ) - 1) *
       ((r : ℂ) * exp (θ * I)) ^ k) =
       exp (θ * I * ((b : ℂ) - 1 + k)) * (Gamma ((b : ℂ) + k) * (W : ℂ) ^ (-((b : ℂ) + k))) := by
@@ -386,7 +386,7 @@ def airySt_L (b a θ W : ℝ) : ℂ :=
     (1 + (r : ℂ) * exp (θ * I)) ^ (-(a : ℂ)))
 
 /-- **Exact remainder of the ray expansion.** -/
-lemma airySt_rem_repr {a b W θ : ℝ} (ha0 : 0 < a) (ha1 : a < 1) (hb : 0 < b) (hW : 0 < W)
+theorem airySt_rem_repr {a b W θ : ℝ} (ha0 : 0 < a) (ha1 : a < 1) (hb : 0 < b) (hW : 0 < W)
     (hθ : |θ| < π) (N : ℕ)
     (hint : IntegrableOn (fun r : ℝ => Complex.exp (-(W * r)) *
       (((r : ℂ) * exp (θ * I)) ^ ((b : ℂ) - 1) * (1 + (r : ℂ) * exp (θ * I)) ^ (-(a : ℂ))))
@@ -414,14 +414,14 @@ lemma airySt_rem_repr {a b W θ : ℝ} (ha0 : 0 < a) (ha1 : a < 1) (hb : 0 < b) 
   ring
 
 
-lemma airySt_gamma_int {m W : ℝ} (hm : 0 < m) (hW : 0 < W) :
+theorem airySt_gamma_int {m W : ℝ} (hm : 0 < m) (hW : 0 < W) :
     ∫ r in Ioi (0 : ℝ), r ^ (m - 1) * Real.exp (-(W * r)) = Real.Gamma m * W ^ (-m) := by
   have h := integral_rpow_mul_exp_neg_mul_rpow (p := 1) (q := m - 1) one_pos (by linarith) hW
   simp only [Real.rpow_one, div_one, sub_add_cancel, mul_one, neg_mul] at h
   rw [h, mul_comm]
 
 /-- The norm of the ray remainder integrand. -/
-lemma airySt_norm_integrand {a b W θ : ℝ} (hθ : |θ| < π) (N : ℕ) {r : ℝ} (hr : 0 < r) :
+theorem airySt_norm_integrand {a b W θ : ℝ} (hθ : |θ| < π) (N : ℕ) {r : ℝ} (hr : 0 < r) :
     ‖Complex.exp (-(W * r)) * (((r : ℂ) * exp (θ * I)) ^ ((b : ℂ) - 1) *
         ((-((r : ℂ) * exp (θ * I))) ^ N * airySt_Q a N ((r : ℂ) * exp (θ * I))))‖ =
       r ^ ((b + N) - 1) * Real.exp (-(W * r)) * ‖airySt_Q a N ((r : ℂ) * exp (θ * I))‖ := by
@@ -459,7 +459,7 @@ theorem airySt_rem_le_M {a b W θ : ℝ} (ha0 : 0 < a) (ha1 : a < 1) (hb : 0 < b
 def airySt_chi (m : ℝ) : ℝ := Real.sqrt π * Real.Gamma (m / 2 + 1) / Real.Gamma (m / 2 + 1 / 2)
 
 /-- `Γ(m+1) ∫₀^∞ (W²+ρ²)^{-(m+1)/2} dρ = Γ(m) χ(m) W^{-m}`. -/
-lemma airySt_chi_integral {m W : ℝ} (hm : 0 < m) (hW : 0 < W) :
+theorem airySt_chi_integral {m W : ℝ} (hm : 0 < m) (hW : 0 < W) :
     Real.Gamma (m + 1) * ∫ ρ in Ioi (0 : ℝ), (W ^ 2 + ρ ^ 2) ^ (-(m + 1) / 2) =
       Real.Gamma m * airySt_chi m * W ^ (-m) := by
   set s := (m + 1) / 2 with hs
@@ -493,7 +493,7 @@ lemma airySt_chi_integral {m W : ℝ} (hm : 0 < m) (hW : 0 < W) :
   field_simp
 
 /-- The `(N+1)`-st remainder as a Stieltjes mixture, for the χ bound. -/
-lemma airySt_rem_succ_le {a b W θ : ℝ} (ha0 : 0 < a) (ha1 : a < 1) (hb : 0 < b) (hW : 0 < W)
+theorem airySt_rem_succ_le {a b W θ : ℝ} (ha0 : 0 < a) (ha1 : a < 1) (hb : 0 < b) (hW : 0 < W)
     (hθ : |θ| < π) (hsin : Real.sin θ ≠ 0) (N : ℕ) :
     ‖∫ r in Ioi (0 : ℝ), Complex.exp (-(W * r)) * (((r : ℂ) * exp (θ * I)) ^ ((b : ℂ) - 1) *
         ((-((r : ℂ) * exp (θ * I))) ^ (N + 1) * airySt_Q a (N + 1) ((r : ℂ) * exp (θ * I))))‖ ≤
@@ -581,7 +581,7 @@ theorem airySt_rem_le_chi {a b W θ : ℝ} (ha0 : 0 < a) (ha1 : a < 1) (hb : 0 <
 
 
 /-- The chi estimate for a single positive exponential density. -/
-lemma laplaceChi_kernel {m W X θ : ℝ} (hm : 0 < m) (hW : 0 < W)
+theorem laplaceChi_kernel {m W X θ : ℝ} (hm : 0 < m) (hW : 0 < W)
     (hX : 0 < X) (hsin : Real.sin θ ≠ 0) :
     ‖∫ r in Ioi (0 : ℝ), (r : ℂ) ^ (m : ℂ) * Complex.exp (-(W * r)) /
       (X + r * exp (θ * I))‖ ≤
@@ -604,7 +604,7 @@ lemma laplaceChi_kernel {m W X θ : ℝ} (hm : 0 < m) (hW : 0 < W)
 
 
 /-- Positive Laplace mixtures retain the unshifted chi multiplier. -/
-lemma laplaceChi_mixture {m X θ : ℝ} (hm : 0 < m) (hX : 0 < X)
+theorem laplaceChi_mixture {m X θ : ℝ} (hm : 0 < m) (hX : 0 < X)
     (hsin : Real.sin θ ≠ 0) (g : ℝ → ℝ)
     (hg0 : ∀ v ∈ Ioi (0 : ℝ), 0 ≤ g v)
     (hprod : Integrable (fun p : ℝ × ℝ =>
@@ -703,7 +703,7 @@ lemma laplaceChi_mixture {m X θ : ℝ} (hm : 0 < m) (hX : 0 < X)
 
 
 /-- A finite moment of a nonnegative Laplace density supplies product integrability. -/
-lemma laplaceChi_prod_integrable {m : ℝ} (hm : 0 < m) (g : ℝ → ℝ)
+theorem laplaceChi_prod_integrable {m : ℝ} (hm : 0 < m) (g : ℝ → ℝ)
     (hgm : Measurable g) (hg0 : ∀ v ∈ Ioi (0 : ℝ), 0 ≤ g v)
     (hLap : ∀ r ∈ Ioi (0 : ℝ), IntegrableOn
       (fun v : ℝ => Real.exp (-(v * r)) * g v) (Ioi 0))

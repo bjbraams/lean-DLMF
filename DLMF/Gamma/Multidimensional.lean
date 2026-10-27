@@ -7,12 +7,6 @@ module
 
 public import DLMF.Selberg.Basic
 public import DLMF.Gamma.Simplex.MvBetaIntegral
-public import Mathlib.MeasureTheory.Constructions.Pi
-public import Mathlib.Analysis.SpecialFunctions.Pow.Complex
-public import Mathlib.Analysis.SpecialFunctions.Complex.LogBounds
-public import Mathlib.MeasureTheory.Integral.Pi
-public import DLMF.Gamma.Asymptotics
-public import DLMF.Gamma.Multiplication
 public import Mathlib.LinearAlgebra.Lagrange
 
 /-!
@@ -41,7 +35,7 @@ def vandermonde {n : ℕ} (t : Fin n → ℝ) : ℝ :=
   ∏ i : Fin n, ∏ j : Fin n, if i.val < j.val then t i - t j else 1
 
 /-- The open simplex `(0, ∞)ⁿ ∩ {∑ tᵢ ≤ 1}` agrees a.e. with the closed solid simplex. -/
-lemma openSimplex_ae_eq_mvBetaSimplex (n : ℕ) :
+theorem openSimplex_ae_eq_mvBetaSimplex (n : ℕ) :
     ((Set.pi Set.univ fun _ => Set.Ioi (0 : ℝ)) ∩ {t : Fin n → ℝ | ∑ i, t i ≤ 1} :
       Set (Fin n → ℝ)) =ᵐ[volume] Simplex.Complex.mvBetaSimplex n := by
   have hN : ∀ᵐ x : Fin n → ℝ, ∀ i, x i ≠ 0 := by
@@ -102,7 +96,7 @@ open scoped Topology
 
 /-! ### Scaling lemmas -/
 
-lemma integral_pi_Ioc_scale {n : ℕ} (g : (Fin n → ℝ) → ℂ) {L : ℝ} (hL : 0 < L) :
+theorem integral_pi_Ioc_scale {n : ℕ} (g : (Fin n → ℝ) → ℂ) {L : ℝ} (hL : 0 < L) :
     ∫ x in Set.pi Set.univ (fun _ => Ioc (0 : ℝ) L), g x =
       (L : ℂ) ^ n * ∫ t in Set.pi Set.univ (fun _ => Ioc (0 : ℝ) 1), g (L • t) := by
   have hmem : ∀ t : Fin n → ℝ, L • t ∈ Set.pi Set.univ (fun _ => Ioc (0 : ℝ) L) ↔
@@ -132,7 +126,7 @@ lemma integral_pi_Ioc_scale {n : ℕ} (g : (Fin n → ℝ) → ℂ) {L : ℝ} (h
 
 /-! ### Power algebra -/
 
-lemma ofReal_prod_cpow {ι : Type*} (s : Finset ι) (f : ι → ℝ) (hf : ∀ i ∈ s, 0 ≤ f i)
+theorem ofReal_prod_cpow {ι : Type*} (s : Finset ι) (f : ι → ℝ) (hf : ∀ i ∈ s, 0 ≤ f i)
     (w : ℂ) : ((∏ i ∈ s, f i : ℝ) : ℂ) ^ w = ∏ i ∈ s, ((f i : ℝ) : ℂ) ^ w := by
   classical
   induction s using Finset.induction_on with
@@ -143,7 +137,7 @@ lemma ofReal_prod_cpow {ι : Type*} (s : Finset ι) (f : ι → ℝ) (hf : ∀ i
     exact Complex.mul_cpow_ofReal_nonneg (hf j (Finset.mem_insert_self j s))
       (Finset.prod_nonneg fun i hi => hf i (Finset.mem_insert_of_mem hi)) w
 
-lemma ofReal_pow_cpow {x : ℝ} (hx : 0 < x) (k : ℕ) (w : ℂ) :
+theorem ofReal_pow_cpow {x : ℝ} (hx : 0 < x) (k : ℕ) (w : ℂ) :
     ((x ^ k : ℝ) : ℂ) ^ w = (x : ℂ) ^ ((k : ℂ) * w) := by
   rw [Complex.ofReal_pow, ← Complex.cpow_natCast, ← Complex.cpow_mul]
   · rw [← Complex.ofReal_log hx.le, ← Complex.ofReal_natCast, ← Complex.ofReal_mul,
@@ -151,7 +145,7 @@ lemma ofReal_pow_cpow {x : ℝ} (hx : 0 < x) (k : ℕ) (w : ℂ) :
   · rw [← Complex.ofReal_log hx.le, ← Complex.ofReal_natCast, ← Complex.ofReal_mul,
       Complex.ofReal_im]; linarith [Real.pi_pos]
 
-lemma prod_ite_lt_const {n : ℕ} (x : ℝ) :
+theorem prod_ite_lt_const {n : ℕ} (x : ℝ) :
     ∏ i : Fin n, ∏ j : Fin n, (if i.val < j.val then x else 1) = x ^ (n * (n - 1) / 2) := by
   have hrow : ∀ i : Fin n, ∏ j : Fin n, (if i.val < j.val then x else 1) = x ^ (n - 1 - i.val) := by
     intro i
@@ -172,7 +166,7 @@ lemma prod_ite_lt_const {n : ℕ} (x : ℝ) :
   rw [Fin.sum_univ_eq_sum_range (fun i => n - 1 - i) n, Finset.sum_range_reflect (fun i => i) n,
     Finset.sum_range_id]
 
-lemma vandermonde_smul {n : ℕ} (L : ℝ) (t : Fin n → ℝ) :
+theorem vandermonde_smul {n : ℕ} (L : ℝ) (t : Fin n → ℝ) :
     vandermonde (L • t) = L ^ (n * (n - 1) / 2) * vandermonde t := by
   unfold vandermonde
   rw [← prod_ite_lt_const, ← Finset.prod_mul_distrib]
@@ -181,7 +175,7 @@ lemma vandermonde_smul {n : ℕ} (L : ℝ) (t : Fin n → ℝ) :
   refine Finset.prod_congr rfl fun j _ => ?_
   split_ifs <;> simp [Pi.smul_apply, smul_eq_mul, mul_sub]
 
-lemma two_mul_pairs (n : ℕ) : 2 * (n * (n - 1) / 2) = n * (n - 1) := by
+theorem two_mul_pairs (n : ℕ) : 2 * (n * (n - 1) / 2) = n * (n - 1) := by
   rw [← Finset.sum_range_id, mul_comm, Finset.sum_range_id_mul_two]
 
 /-! ### The Laguerre integrand and its approximations -/
@@ -198,7 +192,7 @@ def lagApprox (n m : ℕ) (hm : m ≤ n) (a c : ℂ) (N : ℕ) (x : Fin n → �
     (∏ i : Fin n, (x i : ℂ) ^ (a - 1) * (((1 - x i / N) ^ N : ℝ) : ℂ)) *
     ((|vandermonde x| : ℝ) : ℂ) ^ (2 * c)
 
-lemma prod_ite_abs_cpow_eq {n : ℕ} (c : ℂ) (t : Fin n → ℝ) :
+theorem prod_ite_abs_cpow_eq {n : ℕ} (c : ℂ) (t : Fin n → ℝ) :
     (∏ i : Fin n, ∏ j : Fin n,
       if i.val < j.val then ((|t i - t j| : ℝ) : ℂ) ^ (2 * c) else 1) =
       ((|vandermonde t| : ℝ) : ℂ) ^ (2 * c) := by
@@ -211,7 +205,7 @@ lemma prod_ite_abs_cpow_eq {n : ℕ} (c : ℂ) (t : Fin n → ℝ) :
   refine Finset.prod_congr rfl fun j _ => ?_
   split_ifs <;> simp
 
-lemma lagApprox_smul {n m : ℕ} (hm : m ≤ n) (a c : ℂ) {N : ℕ} (hN : 0 < N)
+theorem lagApprox_smul {n m : ℕ} (hm : m ≤ n) (a c : ℂ) {N : ℕ} (hN : 0 < N)
     {t : Fin n → ℝ} (ht : ∀ i, 0 ≤ t i) :
     lagApprox n m hm a c N ((N : ℝ) • t) =
       (N : ℂ) ^ ((m : ℂ) + n * (a - 1) + ((n * (n - 1) : ℕ) : ℂ) * c) *
@@ -254,7 +248,7 @@ lemma lagApprox_smul {n m : ℕ} (hm : m ≤ n) (a c : ℂ) {N : ℕ} (hN : 0 < 
   rw [← hexp]
   ring
 
-lemma integral_lagApprox_eq {n m : ℕ} (hm : m ≤ n) {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re)
+theorem integral_lagApprox_eq {n m : ℕ} (hm : m ≤ n) {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re)
     {N : ℕ} (hN : 0 < N) :
     ∫ x in Set.pi Set.univ (fun _ => Ioc (0 : ℝ) N), lagApprox n m hm a c N x =
       (N : ℂ) ^ n * (N : ℂ) ^ ((m : ℂ) + n * (a - 1) + ((n * (n - 1) : ℕ) : ℂ) * c) *
@@ -278,7 +272,7 @@ lemma integral_lagApprox_eq {n m : ℕ} (hm : m ≤ n) {a c : ℂ} (ha : 0 < a.r
     exact lagApprox_smul hm a c hN fun i => (ht i (Set.mem_univ _)).1.le
 /-! ### Domination -/
 
-lemma abs_vandermonde_le {n : ℕ} {x : Fin n → ℝ} (hx : ∀ i, 0 ≤ x i) :
+theorem abs_vandermonde_le {n : ℕ} {x : Fin n → ℝ} (hx : ∀ i, 0 ≤ x i) :
     |vandermonde x| ≤ (∏ i, (1 + x i)) ^ (2 * n) := by
   unfold vandermonde
   rw [Finset.abs_prod]
@@ -298,7 +292,7 @@ lemma abs_vandermonde_le {n : ℕ} {x : Fin n → ℝ} (hx : ∀ i, 0 ≤ x i) :
         simp_rw [Finset.prod_mul_distrib, Finset.prod_const, Finset.card_univ, Fintype.card_fin]
         rw [Finset.prod_pow, two_mul, pow_add]
 
-lemma prod_castLE_le {n m : ℕ} (hm : m ≤ n) {x : Fin n → ℝ} (hx : ∀ i, 0 ≤ x i) :
+theorem prod_castLE_le {n m : ℕ} (hm : m ≤ n) {x : Fin n → ℝ} (hx : ∀ i, 0 ≤ x i) :
     ∏ i : Fin m, x (Fin.castLE hm i) ≤ ∏ i, (1 + x i) := by
   calc ∏ i : Fin m, x (Fin.castLE hm i) ≤ ∏ i : Fin m, (1 + x (Fin.castLE hm i)) :=
         Finset.prod_le_prod₀ (fun i _ => hx _) fun i _ => by linarith [hx (Fin.castLE hm i)]
@@ -310,7 +304,7 @@ lemma prod_castLE_le {n m : ℕ} (hm : m ≤ n) {x : Fin n → ℝ} (hx : ∀ i,
 /-- The one-variable majorant `y^{α-1} e^{-y} (1+y)^M`. -/
 def lagMajor (α M : ℝ) (y : ℝ) : ℝ := y ^ (α - 1) * Real.exp (-y) * (1 + y) ^ M
 
-lemma integrableOn_lagMajor {α M : ℝ} (hα : 0 < α) (hM : 0 ≤ M) :
+theorem integrableOn_lagMajor {α M : ℝ} (hα : 0 < α) (hM : 0 ≤ M) :
     IntegrableOn (lagMajor α M) (Ioi 0) := by
   have h1 := Real.GammaIntegral_convergent hα
   have h2 := Real.GammaIntegral_convergent (show 0 < α + M by linarith)
@@ -339,13 +333,13 @@ lemma integrableOn_lagMajor {α M : ℝ} (hα : 0 < α) (hM : 0 ≤ M) :
           rw [show α + M - 1 = (α - 1) + M by ring, Real.rpow_add hy]
           ring
 
-lemma integrableOn_prod_lagMajor {n : ℕ} {α M : ℝ} (hα : 0 < α) (hM : 0 ≤ M) :
+theorem integrableOn_prod_lagMajor {n : ℕ} {α M : ℝ} (hα : 0 < α) (hM : 0 ≤ M) :
     IntegrableOn (fun x : Fin n → ℝ => ∏ i, lagMajor α M (x i))
       (Set.pi Set.univ fun _ => Ioi (0 : ℝ)) := by
   rw [IntegrableOn, volume_pi, Measure.restrict_pi_pi]
   exact Integrable.fintype_prod (fun _ => integrableOn_lagMajor hα hM)
 
-lemma norm_lagApprox_le {n m : ℕ} (hm : m ≤ n) {a c : ℂ} (hc : 0 < c.re) {N : ℕ}
+theorem norm_lagApprox_le {n m : ℕ} (hm : m ≤ n) {a c : ℂ} (hc : 0 < c.re) {N : ℕ}
     {x : Fin n → ℝ} (hx : ∀ i, x i ∈ Ioc (0 : ℝ) N) :
     ‖lagApprox n m hm a c N x‖ ≤ ∏ i, lagMajor a.re (1 + 4 * n * c.re) (x i) := by
   have hx0 : ∀ i, 0 ≤ x i := fun i => (hx i).1.le
@@ -390,12 +384,12 @@ lemma norm_lagApprox_le {n m : ℕ} (hm : m ≤ n) {a c : ℂ} (hc : 0 < c.re) {
           ← Finset.prod_mul_distrib]
         rfl
 
-lemma measurable_lagApprox (n m : ℕ) (hm : m ≤ n) (a c : ℂ) (N : ℕ) :
+theorem measurable_lagApprox (n m : ℕ) (hm : m ≤ n) (a c : ℂ) (N : ℕ) :
     Measurable (lagApprox n m hm a c N) := by
   unfold lagApprox vandermonde
   fun_prop
 
-lemma tendsto_lagApprox {n m : ℕ} (hm : m ≤ n) (a c : ℂ) (x : Fin n → ℝ) :
+theorem tendsto_lagApprox {n m : ℕ} (hm : m ≤ n) (a c : ℂ) (x : Fin n → ℝ) :
     Tendsto (fun N : ℕ => lagApprox n m hm a c N x) atTop (𝓝 (lagIntegrand n m hm a c x)) := by
   unfold lagApprox lagIntegrand
   refine (tendsto_const_nhds.mul (tendsto_finsetProd _ fun i _ => ?_)).mul tendsto_const_nhds
@@ -406,7 +400,7 @@ lemma tendsto_lagApprox {n m : ℕ} (hm : m ≤ n) (a c : ℂ) (x : Fin n → �
   refine h2.congr fun N => ?_
   simp [neg_div, sub_eq_add_neg]
 
-lemma tendsto_integral_lagApprox {n m : ℕ} (hm : m ≤ n) {a c : ℂ} (ha : 0 < a.re)
+theorem tendsto_integral_lagApprox {n m : ℕ} (hm : m ≤ n) {a c : ℂ} (ha : 0 < a.re)
     (hc : 0 < c.re) :
     Tendsto (fun N : ℕ => ∫ x in Set.pi Set.univ (fun _ => Ioc (0 : ℝ) N),
         lagApprox n m hm a c N x) atTop
@@ -451,7 +445,7 @@ lemma tendsto_integral_lagApprox {n m : ℕ} (hm : m ≤ n) {a c : ℂ} (ha : 0 
 
 /-! ### The limit of the right-hand side -/
 
-lemma tendsto_natCast_div_add (β : ℂ) :
+theorem tendsto_natCast_div_add (β : ℂ) :
     Tendsto (fun N : ℕ => (N : ℂ) / (N + β)) atTop (𝓝 1) := by
   have h0 : Tendsto (fun N : ℕ => β / (N : ℂ)) atTop (𝓝 0) := by
     rw [tendsto_zero_iff_norm_tendsto_zero]
@@ -469,7 +463,7 @@ lemma tendsto_natCast_div_add (β : ℂ) :
   refine h1.congr fun N => ?_
   rw [inv_div]
 
-lemma tendsto_Gamma_ratio_nat (p q : ℂ) :
+theorem tendsto_Gamma_ratio_nat (p q : ℂ) :
     Tendsto (fun N : ℕ => Gamma (N + p) / Gamma (N + q) * (N : ℂ) ^ (q - p)) atTop (𝓝 1) := by
   have h := (Gamma_ratio_power (a := p) (b := q)).comp tendsto_natCast_atTop_atTop
   refine h.congr' ?_
@@ -478,7 +472,7 @@ lemma tendsto_Gamma_ratio_nat (p q : ℂ) :
   simp only [Function.comp_apply, Complex.ofReal_natCast]
   rw [div_eq_mul_inv _ ((N : ℂ) ^ (p - q)), ← Complex.cpow_neg, neg_sub]
 
-lemma tendsto_lag_rhs {n m : ℕ} (hn : 0 < n) {a c : ℂ} :
+theorem tendsto_lag_rhs {n m : ℕ} (hn : 0 < n) {a c : ℂ} :
     Tendsto (fun N : ℕ =>
       (N : ℂ) ^ n * (N : ℂ) ^ ((m : ℂ) + n * (a - 1) + ((n * (n - 1) : ℕ) : ℂ) * c) *
         ((∏ j : Fin m, (a + (n - 1 - j : ℕ) * c) / (a + ((N : ℂ) + 1) + (2 * n - 2 - j : ℕ) * c)) *
@@ -539,7 +533,7 @@ lemma tendsto_lag_rhs {n m : ℕ} (hn : 0 < n) {a c : ℂ} :
         N + (a + 1 + ((n + j - 1 : ℕ) : ℂ) * c) by ring]
     ring
 
-theorem selberg_laguerrePolyL_aux {n m : ℕ} {a c : ℂ} (hm : m ≤ n)
+lemma selberg_laguerrePolyL_aux {n m : ℕ} {a c : ℂ} (hm : m ≤ n)
     (ha : 0 < a.re) (hc : 0 < c.re) :
     ∫ t : Fin n → ℝ in Set.pi Set.univ fun _ => Set.Ioi (0 : ℝ),
         (∏ i : Fin m, (t (Fin.castLE hm i) : ℂ)) *
@@ -589,7 +583,7 @@ open scoped Topology
 
 /-! ### Affine change of variables on a cube -/
 
-lemma integral_pi_Icc_affine {n : ℕ} (g : (Fin n → ℝ) → ℂ) {s : ℝ} (hs : 0 < s) :
+theorem integral_pi_Icc_affine {n : ℕ} (g : (Fin n → ℝ) → ℂ) {s : ℝ} (hs : 0 < s) :
     ∫ x in Set.pi Set.univ (fun _ => Icc (-s) s), g x =
       ((2 * s : ℝ) : ℂ) ^ n *
         ∫ t in Set.pi Set.univ (fun _ => Icc (0 : ℝ) 1), g (fun i => 2 * s * t i - s) := by
@@ -639,7 +633,7 @@ def hermIntegrand (n : ℕ) (c : ℂ) (x : Fin n → ℝ) : ℂ :=
 def hermApprox (n : ℕ) (c : ℂ) (N : ℕ) (x : Fin n → ℝ) : ℂ :=
   ((|vandermonde x| : ℝ) : ℂ) ^ (2 * c) * ∏ k : Fin n, (((1 - x k ^ 2 / (2 * N)) ^ N : ℝ) : ℂ)
 
-lemma vandermonde_affine {n : ℕ} (L v : ℝ) (t : Fin n → ℝ) :
+theorem vandermonde_affine {n : ℕ} (L v : ℝ) (t : Fin n → ℝ) :
     vandermonde (fun i => L * t i - v) = L ^ (n * (n - 1) / 2) * vandermonde t := by
   rw [← vandermonde_smul]
   unfold vandermonde
@@ -648,7 +642,7 @@ lemma vandermonde_affine {n : ℕ} (L v : ℝ) (t : Fin n → ℝ) :
   · simp [Pi.smul_apply, smul_eq_mul]
   · rfl
 
-lemma hermApprox_affine {n : ℕ} (c : ℂ) {N : ℕ} (hN : 0 < N) (t : Fin n → ℝ) :
+theorem hermApprox_affine {n : ℕ} (c : ℂ) {N : ℕ} (hN : 0 < N) (t : Fin n → ℝ) :
     hermApprox n c N (fun i => 2 * √(2 * N) * t i - √(2 * N)) =
       (4 : ℂ) ^ (n * N) * ((2 * √(2 * N) : ℝ) : ℂ) ^ (((n * (n - 1) : ℕ) : ℂ) * c) *
         DLMF.Selberg.selbergIntegrand n ((N : ℂ) + 1) ((N : ℂ) + 1) c t := by
@@ -685,7 +679,7 @@ lemma hermApprox_affine {n : ℕ} (c : ℂ) {N : ℕ} (hN : 0 < N) (t : Fin n �
   rw [hexp]
   ring
 
-lemma integral_hermApprox_eq {n : ℕ} {c : ℂ} {N : ℕ}
+theorem integral_hermApprox_eq {n : ℕ} {c : ℂ} {N : ℕ}
     (hc : c ∈ DLMF.Selberg.cDomain n ((N : ℂ) + 1) ((N : ℂ) + 1)) (hN : 0 < N) :
     ∫ x in Set.pi Set.univ (fun _ => Icc (-√(2 * N)) √(2 * N)), hermApprox n c N x =
       ((2 * √(2 * N) : ℝ) : ℂ) ^ n * ((4 : ℂ) ^ (n * N) *
@@ -700,11 +694,11 @@ lemma integral_hermApprox_eq {n : ℕ} {c : ℂ} {N : ℕ}
   congr 1
   exact DLMF.Selberg.selbergInt_eq hb hb hc
 
-lemma measurable_hermApprox (n : ℕ) (c : ℂ) (N : ℕ) : Measurable (hermApprox n c N) := by
+theorem measurable_hermApprox (n : ℕ) (c : ℂ) (N : ℕ) : Measurable (hermApprox n c N) := by
   unfold hermApprox vandermonde
   fun_prop
 
-lemma tendsto_hermApprox {n : ℕ} (c : ℂ) (x : Fin n → ℝ) :
+theorem tendsto_hermApprox {n : ℕ} (c : ℂ) (x : Fin n → ℝ) :
     Tendsto (fun N : ℕ => hermApprox n c N x) atTop (𝓝 (hermIntegrand n c x)) := by
   unfold hermApprox hermIntegrand
   refine tendsto_const_nhds.mul (tendsto_finsetProd _ fun i _ => ?_)
@@ -721,16 +715,16 @@ lemma tendsto_hermApprox {n : ℕ} (c : ℂ) (x : Fin n → ℝ) :
 
 /-! ### The limit of the right-hand side -/
 
-lemma herm_ofReal_cpow_eq_exp {x : ℝ} (hx : 0 < x) (w : ℂ) :
+theorem herm_ofReal_cpow_eq_exp {x : ℝ} (hx : 0 < x) (w : ℂ) :
     ((x : ℝ) : ℂ) ^ w = Complex.exp (w * (Real.log x : ℂ)) := by
   rw [Complex.cpow_def_of_ne_zero (by exact_mod_cast hx.ne'), ← Complex.ofReal_log hx.le,
     mul_comm]
 
-lemma herm_ofReal_eq_exp {x : ℝ} (hx : 0 < x) : ((x : ℝ) : ℂ) = Complex.exp (Real.log x : ℂ) := by
+theorem herm_ofReal_eq_exp {x : ℝ} (hx : 0 < x) : ((x : ℝ) : ℂ) = Complex.exp (Real.log x : ℂ) := by
   rw [← Complex.ofReal_exp, Real.exp_log hx]
 
 /-- One factor of the Hermite right-hand side, rewritten via the duplication formula. -/
-lemma herm_factor_eq {n : ℕ} (hn : 0 < n) (c : ℂ) (j : ℕ) {N : ℕ} (hN : 0 < N) :
+theorem herm_factor_eq {n : ℕ} (hn : 0 < n) (c : ℂ) (j : ℕ) {N : ℕ} (hN : 0 < N) :
     ((2 * √(2 * N) : ℝ) : ℂ) ^ (1 + ((n - 1 : ℕ) : ℂ) * c) * (4 : ℂ) ^ N *
       (Gamma ((N : ℂ) + 1 + (j : ℂ) * c) * Gamma ((N : ℂ) + 1 + (j : ℂ) * c) *
         Gamma (1 + ((j : ℂ) + 1) * c) /
@@ -807,7 +801,7 @@ lemma herm_factor_eq {n : ℕ} (hn : 0 < n) (c : ℂ) (j : ℕ) {N : ℕ} (hN : 
         simp only [div_eq_mul_inv, mul_inv, inv_inv]; ring
     _ = _ := by rw [hpow, hz]; simp only [div_eq_mul_inv, mul_inv]; ring
 
-lemma sum_fin_sub_half (n : ℕ) :
+theorem sum_fin_sub_half (n : ℕ) :
     ∑ j : Fin n, ((j : ℕ) - ((n - 1 : ℕ) : ℂ) / 2) = 0 := by
   rw [Finset.sum_sub_distrib, Finset.sum_const, Finset.card_univ, Fintype.card_fin,
     Fin.sum_univ_eq_sum_range (fun j => ((j : ℕ) : ℂ)) n, ← Nat.cast_sum]
@@ -817,7 +811,7 @@ lemma sum_fin_sub_half (n : ℕ) :
   rw [nsmul_eq_mul]
   linear_combination h' / 2
 
-lemma tendsto_herm_rhs {n : ℕ} (hn : 0 < n) (c : ℂ) :
+theorem tendsto_herm_rhs {n : ℕ} (hn : 0 < n) (c : ℂ) :
     Tendsto (fun N : ℕ => ((2 * √(2 * N) : ℝ) : ℂ) ^ n * ((4 : ℂ) ^ (n * N) *
         ((2 * √(2 * N) : ℝ) : ℂ) ^ (((n * (n - 1) : ℕ) : ℂ) * c) *
           DLMF.Selberg.selbergRHS n ((N : ℂ) + 1) ((N : ℂ) + 1) c)) atTop
@@ -879,13 +873,13 @@ lemma tendsto_herm_rhs {n : ℕ} (hn : 0 < n) (c : ℂ) :
 
 /-! ### Integrability on the full domain -/
 
-lemma neg_one_lt_mul_of_div_lt {n : ℕ} (hn : 0 < n) {σ : ℝ} (hσ : (-1 / n : ℝ) < σ) :
+theorem neg_one_lt_mul_of_div_lt {n : ℕ} (hn : 0 < n) {σ : ℝ} (hσ : (-1 / n : ℝ) < σ) :
     -1 < n * σ := by
   have hn' : (0 : ℝ) < n := by exact_mod_cast hn
   rw [div_lt_iff₀ hn'] at hσ
   linarith
 
-lemma one_add_mul_pos {n : ℕ} (hn : 0 < n) {σ : ℝ} (hσ : (-1 / n : ℝ) < σ) {k : ℕ}
+theorem one_add_mul_pos {n : ℕ} (hn : 0 < n) {σ : ℝ} (hσ : (-1 / n : ℝ) < σ) {k : ℕ}
     (hk : k ≤ n) : 0 < 1 + k * σ := by
   have h := neg_one_lt_mul_of_div_lt hn hσ
   have hk' : (k : ℝ) ≤ n := by exact_mod_cast hk
@@ -893,7 +887,7 @@ lemma one_add_mul_pos {n : ℕ} (hn : 0 < n) {σ : ℝ} (hσ : (-1 / n : ℝ) < 
   · positivity
   · nlinarith
 
-lemma mem_cDomain_herm {n : ℕ} (hn : 0 < n) {c : ℂ} (hc : (-1 / n : ℝ) < c.re) (N : ℕ) :
+theorem mem_cDomain_herm {n : ℕ} (hn : 0 < n) {c : ℂ} (hc : (-1 / n : ℝ) < c.re) (N : ℕ) :
     c ∈ DLMF.Selberg.cDomain n ((N : ℂ) + 1) ((N : ℂ) + 1) := by
   have h1 := neg_one_lt_mul_of_div_lt hn hc
   have h2 := one_add_mul_pos hn hc (Nat.sub_le n 1)
@@ -904,15 +898,15 @@ lemma mem_cDomain_herm {n : ℕ} (hn : 0 < n) {c : ℂ} (hc : (-1 / n : ℝ) < c
 def hermBound (n : ℕ) (σ : ℝ) (x : Fin n → ℝ) : ℝ :=
   |vandermonde x| ^ (2 * σ) * ∏ k : Fin n, Real.exp (-x k ^ 2 / 2)
 
-lemma hermBound_nonneg (n : ℕ) (σ : ℝ) (x : Fin n → ℝ) : 0 ≤ hermBound n σ x := by
+theorem hermBound_nonneg (n : ℕ) (σ : ℝ) (x : Fin n → ℝ) : 0 ≤ hermBound n σ x := by
   unfold hermBound
   positivity
 
-lemma measurable_hermBound (n : ℕ) (σ : ℝ) : Measurable (hermBound n σ) := by
+theorem measurable_hermBound (n : ℕ) (σ : ℝ) : Measurable (hermBound n σ) := by
   unfold hermBound vandermonde
   fun_prop
 
-lemma vandermonde_ne_zero {n : ℕ} {x : Fin n → ℝ} (hx : ∀ i j, i ≠ j → x i ≠ x j) :
+theorem vandermonde_ne_zero {n : ℕ} {x : Fin n → ℝ} (hx : ∀ i j, i ≠ j → x i ≠ x j) :
     vandermonde x ≠ 0 := by
   unfold vandermonde
   refine Finset.prod_ne_zero_iff.mpr fun i _ => Finset.prod_ne_zero_iff.mpr fun j _ => ?_
@@ -920,15 +914,15 @@ lemma vandermonde_ne_zero {n : ℕ} {x : Fin n → ℝ} (hx : ∀ i j, i ≠ j �
   · exact sub_ne_zero.mpr (hx i j (Fin.ne_of_lt h))
   · exact one_ne_zero
 
-lemma ae_vandermonde_ne_zero (n : ℕ) : ∀ᵐ x : Fin n → ℝ, vandermonde x ≠ 0 := by
+theorem ae_vandermonde_ne_zero (n : ℕ) : ∀ᵐ x : Fin n → ℝ, vandermonde x ≠ 0 := by
   filter_upwards [DLMF.Selberg.ae_coords_ne n] with x hx using vandermonde_ne_zero hx
 
-lemma norm_vandermonde_cpow {n : ℕ} {x : Fin n → ℝ} (hx : vandermonde x ≠ 0) (c : ℂ) :
+theorem norm_vandermonde_cpow {n : ℕ} {x : Fin n → ℝ} (hx : vandermonde x ≠ 0) (c : ℂ) :
     ‖((|vandermonde x| : ℝ) : ℂ) ^ (2 * c)‖ = |vandermonde x| ^ (2 * c.re) := by
   rw [Complex.norm_cpow_eq_rpow_re_of_pos (abs_pos.mpr hx)]
   simp
 
-lemma norm_hermIntegrand_eq {n : ℕ} {x : Fin n → ℝ} (hx : vandermonde x ≠ 0) (c : ℂ) :
+theorem norm_hermIntegrand_eq {n : ℕ} {x : Fin n → ℝ} (hx : vandermonde x ≠ 0) (c : ℂ) :
     ‖hermIntegrand n c x‖ = hermBound n c.re x := by
   unfold hermIntegrand hermBound
   rw [norm_mul, norm_vandermonde_cpow hx, norm_prod]
@@ -937,7 +931,7 @@ lemma norm_hermIntegrand_eq {n : ℕ} {x : Fin n → ℝ} (hx : vandermonde x �
   rw [Complex.norm_exp, show (-(x k : ℂ) ^ 2 / 2) = ((-x k ^ 2 / 2 : ℝ) : ℂ) by push_cast; ring,
     Complex.ofReal_re]
 
-lemma one_sub_div_pow_mem {N : ℕ} {y : ℝ} (hy : y ∈ Icc (-√(2 * N)) √(2 * N)) :
+theorem one_sub_div_pow_mem {N : ℕ} {y : ℝ} (hy : y ∈ Icc (-√(2 * N)) √(2 * N)) :
     0 ≤ (1 - y ^ 2 / (2 * N)) ^ N ∧ (1 - y ^ 2 / (2 * N)) ^ N ≤ Real.exp (-y ^ 2 / 2) := by
   have hsq : y ^ 2 ≤ 2 * N := by
     have h := sq_le_sq' hy.1 hy.2
@@ -955,7 +949,7 @@ lemma one_sub_div_pow_mem {N : ℕ} {y : ℝ} (hy : y ∈ Icc (-√(2 * N)) √(
   calc (1 - y ^ 2 / (2 * N)) ^ N ≤ Real.exp (-(y ^ 2 / 2)) := this
     _ = Real.exp (-y ^ 2 / 2) := by ring_nf
 
-lemma norm_hermApprox_le_hermBound {n : ℕ} (c : ℂ) {N : ℕ} {x : Fin n → ℝ}
+theorem norm_hermApprox_le_hermBound {n : ℕ} (c : ℂ) {N : ℕ} {x : Fin n → ℝ}
     (hv : vandermonde x ≠ 0) (hx : ∀ i, x i ∈ Icc (-√(2 * N)) √(2 * N)) :
     ‖hermApprox n c N x‖ ≤ hermBound n c.re x := by
   unfold hermApprox hermBound
@@ -970,7 +964,7 @@ lemma norm_hermApprox_le_hermBound {n : ℕ} (c : ℂ) {N : ℕ} {x : Fin n → 
 def hermApproxR (n : ℕ) (σ : ℝ) (N : ℕ) (x : Fin n → ℝ) : ℝ :=
   |vandermonde x| ^ (2 * σ) * ∏ k : Fin n, (1 - x k ^ 2 / (2 * N)) ^ N
 
-lemma hermApprox_ofReal (n : ℕ) (σ : ℝ) (N : ℕ) (x : Fin n → ℝ) :
+theorem hermApprox_ofReal (n : ℕ) (σ : ℝ) (N : ℕ) (x : Fin n → ℝ) :
     hermApprox n σ N x = (hermApproxR n σ N x : ℂ) := by
   unfold hermApprox hermApproxR
   rw [Complex.ofReal_mul, Complex.ofReal_cpow (abs_nonneg _), Complex.ofReal_prod]
@@ -981,7 +975,7 @@ lemma hermApprox_ofReal (n : ℕ) (σ : ℝ) (N : ℕ) (x : Fin n → ℝ) :
 abbrev hermBox (n N : ℕ) : Set (Fin n → ℝ) :=
   Set.pi Set.univ (fun _ => Icc (-√(2 * (N : ℝ))) √(2 * N))
 
-lemma eventually_mem_hermBox {n : ℕ} (x : Fin n → ℝ) : ∀ᶠ N : ℕ in atTop, x ∈ hermBox n N := by
+theorem eventually_mem_hermBox {n : ℕ} (x : Fin n → ℝ) : ∀ᶠ N : ℕ in atTop, x ∈ hermBox n N := by
   have hs : Tendsto (fun N : ℕ => √(2 * (N : ℝ))) atTop atTop :=
     Real.tendsto_sqrt_atTop.comp (tendsto_natCast_atTop_atTop.const_mul_atTop two_pos)
   have : ∀ i, ∀ᶠ N : ℕ in atTop, |x i| ≤ √(2 * (N : ℝ)) := fun i =>
@@ -989,7 +983,7 @@ lemma eventually_mem_hermBox {n : ℕ} (x : Fin n → ℝ) : ∀ᶠ N : ℕ in a
   filter_upwards [Filter.eventually_all.2 this] with N hN i _
   exact abs_le.mp (hN i)
 
-lemma herm_rhs_ne_zero {n : ℕ} (hn : 0 < n) {σ : ℝ} (hσ : (-1 / n : ℝ) < σ) :
+theorem herm_rhs_ne_zero {n : ℕ} (hn : 0 < n) {σ : ℝ} (hσ : (-1 / n : ℝ) < σ) :
     ∏ j : Fin n, (((√(2 * π) : ℝ) : ℂ) *
       (Gamma (1 + (((j : ℕ) : ℂ) + 1) * σ) / Gamma (1 + σ))) ≠ 0 := by
   refine Finset.prod_ne_zero_iff.mpr fun j _ => mul_ne_zero ?_ (div_ne_zero ?_ ?_)
@@ -1003,7 +997,7 @@ lemma herm_rhs_ne_zero {n : ℕ} (hn : 0 < n) {σ : ℝ} (hσ : (-1 / n : ℝ) <
 
 /-- Integrability of `e^{-|x|²/2} |Δ(x)|^{2σ}` for `σ > -1/n`, by Fatou's lemma applied to the
 Selberg approximations. -/
-lemma integrable_hermBound {n : ℕ} (hn : 0 < n) {σ : ℝ} (hσ : (-1 / n : ℝ) < σ) :
+theorem integrable_hermBound {n : ℕ} (hn : 0 < n) {σ : ℝ} (hσ : (-1 / n : ℝ) < σ) :
     Integrable (hermBound n σ) := by
   have hσc : (-1 / n : ℝ) < (σ : ℂ).re := by simpa using hσ
   have hval := (tendsto_herm_rhs hn (σ : ℂ)).congr' (by
@@ -1077,7 +1071,7 @@ lemma integrable_hermBound {n : ℕ} (hn : 0 < n) {σ : ℝ} (hσ : (-1 / n : �
   exact lt_of_le_of_lt (hfatou.trans hright.le) ENNReal.ofReal_lt_top
 
 /-- Convergence of the box integrals on the full domain `Re c > -1/n`. -/
-lemma tendsto_integral_hermApprox {n : ℕ} (hn : 0 < n) {c : ℂ} (hc : (-1 / n : ℝ) < c.re) :
+theorem tendsto_integral_hermApprox {n : ℕ} (hn : 0 < n) {c : ℂ} (hc : (-1 / n : ℝ) < c.re) :
     Tendsto (fun N : ℕ => ∫ x in hermBox n N, hermApprox n c N x) atTop
       (𝓝 (∫ x, hermIntegrand n c x)) := by
   simp_rw [← integral_indicator (MeasurableSet.univ_pi fun _ => measurableSet_Icc)]
@@ -1096,7 +1090,7 @@ lemma tendsto_integral_hermApprox {n : ℕ} (hn : 0 < n) {c : ℂ} (hc : (-1 / n
     rw [Set.indicator_of_mem hN]
 
 /-- Mehta's integral on the full domain `Re c > -1/n`, as a limit of Selberg's integral. -/
-lemma integral_hermIntegrand {n : ℕ} (hn : 0 < n) {c : ℂ} (hc : (-1 / n : ℝ) < c.re) :
+theorem integral_hermIntegrand {n : ℕ} (hn : 0 < n) {c : ℂ} (hc : (-1 / n : ℝ) < c.re) :
     ∫ x, hermIntegrand n c x =
       ∏ j : Fin n, (((√(2 * π) : ℝ) : ℂ) *
         (Gamma (1 + (((j : ℕ) : ℂ) + 1) * c) / Gamma (1 + c))) := by
@@ -1105,13 +1099,13 @@ lemma integral_hermIntegrand {n : ℕ} (hn : 0 < n) {c : ℂ} (hc : (-1 / n : �
     exact (integral_hermApprox_eq (mem_cDomain_herm hn hc N) hN).symm)
   exact tendsto_nhds_unique (tendsto_integral_hermApprox hn hc) hrhs
 
-lemma sqrt_two_pi_pow (n : ℕ) :
+theorem sqrt_two_pi_pow (n : ℕ) :
     ((√(2 * π) : ℝ) : ℂ) ^ n = (2 * π : ℂ) ^ (n / 2 : ℂ) := by
   rw [show (n / 2 : ℂ) = (n : ℂ) * (1 / 2 : ℝ) by push_cast; ring, Complex.cpow_nat_mul,
     show (2 * π : ℂ) = ((2 * π : ℝ) : ℂ) by push_cast; ring,
     ← Complex.ofReal_cpow (by positivity), Real.sqrt_eq_rpow]
 
-theorem selberg_hermite_aux {n : ℕ} {c : ℂ} (hc : (-1 / n : ℝ) < c.re) :
+lemma selberg_hermite_aux {n : ℕ} {c : ℂ} (hc : (-1 / n : ℝ) < c.re) :
     (1 / (2 * π : ℂ) ^ (n / 2 : ℂ)) *
         ∫ t : Fin n → ℝ,
           ((|vandermonde t| : ℝ) : ℂ) ^ (2 * c) *
@@ -1150,10 +1144,10 @@ open scoped Topology
 /-- The box `[-π, π]ⁿ`. -/
 abbrev circBox (n : ℕ) : Set (Fin n → ℝ) := Set.pi Set.univ fun _ => Icc (-π) π
 
-lemma measurableSet_circBox (n : ℕ) : MeasurableSet (circBox n) :=
+theorem measurableSet_circBox (n : ℕ) : MeasurableSet (circBox n) :=
   MeasurableSet.univ_pi fun _ => measurableSet_Icc
 
-lemma isCompact_circBox (n : ℕ) : IsCompact (circBox n) :=
+theorem isCompact_circBox (n : ℕ) : IsCompact (circBox n) :=
   isCompact_univ_pi fun _ => isCompact_Icc
 
 /-- One row of Dyson's product, `∏_{l ≠ j} (1 - e^{i(θ_j - θ_l)})^m`. -/
@@ -1166,25 +1160,25 @@ def dysonTerm (n : ℕ) (a : Fin n → ℕ) (θ : Fin n → ℝ) : ℂ := ∏ j,
 /-- The torus integral of Dyson's product. -/
 def dysonInt (n : ℕ) (a : Fin n → ℕ) : ℂ := ∫ θ in circBox n, dysonTerm n a θ
 
-lemma continuous_dysonTerm (n : ℕ) (a : Fin n → ℕ) : Continuous (dysonTerm n a) := by
+theorem continuous_dysonTerm (n : ℕ) (a : Fin n → ℕ) : Continuous (dysonTerm n a) := by
   unfold dysonTerm dysonRow
   refine continuous_finsetProd _ fun j _ => continuous_finsetProd _ fun l _ => ?_
   split_ifs
   · exact continuous_const
   · fun_prop
 
-lemma integrableOn_dysonTerm (n : ℕ) (a : Fin n → ℕ) :
+theorem integrableOn_dysonTerm (n : ℕ) (a : Fin n → ℕ) :
     IntegrableOn (dysonTerm n a) (circBox n) :=
   (continuous_dysonTerm n a).continuousOn.integrableOn_compact (isCompact_circBox n)
 
-lemma dysonRow_succ {n : ℕ} (θ : Fin n → ℝ) (j : Fin n) (m : ℕ) :
+theorem dysonRow_succ {n : ℕ} (θ : Fin n → ℝ) (j : Fin n) (m : ℕ) :
     dysonRow θ j (m + 1) = dysonRow θ j m * dysonRow θ j 1 := by
   unfold dysonRow
   rw [← Finset.prod_mul_distrib]
   refine Finset.prod_congr rfl fun l _ => ?_
   split_ifs <;> ring
 
-lemma dysonTerm_update {n : ℕ} (a : Fin n → ℕ) (θ : Fin n → ℝ) {j : Fin n} (h : 1 ≤ a j) :
+theorem dysonTerm_update {n : ℕ} (a : Fin n → ℕ) (θ : Fin n → ℝ) {j : Fin n} (h : 1 ≤ a j) :
     dysonTerm n a θ = dysonTerm n (Function.update a j (a j - 1)) θ * dysonRow θ j 1 := by
   unfold dysonTerm
   rw [← Finset.mul_prod_erase _ _ (Finset.mem_univ j),
@@ -1201,7 +1195,7 @@ lemma dysonTerm_update {n : ℕ} (a : Fin n → ℕ) (θ : Fin n → ℝ) {j : F
 
 /-- Good's identity `∑_j ∏_{l ≠ j} (1 - z_j/z_l)⁻¹ = 1`, from Lagrange interpolation of the
 constant `1` evaluated at `0`. -/
-lemma sum_recip_dysonRow_one {n : ℕ} (hn : 0 < n) {θ : Fin n → ℝ}
+theorem sum_recip_dysonRow_one {n : ℕ} (hn : 0 < n) {θ : Fin n → ℝ}
     (hθ : ∀ j l, j ≠ l → Complex.exp (I * ((θ j - θ l : ℝ) : ℂ)) ≠ 1) :
     ∑ j, (dysonRow θ j 1)⁻¹ = 1 := by
   set v : Fin n → ℂ := fun j => Complex.exp (I * (θ j : ℂ)) with hv
@@ -1231,7 +1225,7 @@ lemma sum_recip_dysonRow_one {n : ℕ} (hn : 0 < n) {θ : Fin n → ℝ}
   field_simp [hv0 l, h1]
   ring
 
-lemma exp_I_mul_ne_one {x : ℝ} (hx0 : x ≠ 0) (hx : |x| < 2 * π) :
+theorem exp_I_mul_ne_one {x : ℝ} (hx0 : x ≠ 0) (hx : |x| < 2 * π) :
     Complex.exp (I * (x : ℂ)) ≠ 1 := by
   intro h
   obtain ⟨m, hm⟩ := Complex.exp_eq_one_iff.mp h
@@ -1247,7 +1241,7 @@ lemma exp_I_mul_ne_one {x : ℝ} (hx0 : x ≠ 0) (hx : |x| < 2 * π) :
   · have : (1 : ℝ) ≤ m := by exact_mod_cast h
     rw [hxr, abs_lt] at hx; nlinarith [Real.pi_pos]
 
-lemma ae_circBox_good (n : ℕ) : ∀ᵐ θ ∂(volume.restrict (circBox n)),
+theorem ae_circBox_good (n : ℕ) : ∀ᵐ θ ∂(volume.restrict (circBox n)),
     ∀ j l, j ≠ l → Complex.exp (I * ((θ j - θ l : ℝ) : ℂ)) ≠ 1 := by
   have h1 : ∀ᵐ θ : Fin n → ℝ, ∀ j, θ j ≠ π ∧ θ j ≠ -π := by
     rw [ae_all_iff]
@@ -1265,7 +1259,7 @@ lemma ae_circBox_good (n : ℕ) : ∀ᵐ θ ∂(volume.restrict (circBox n)),
   refine exp_I_mul_ne_one (sub_ne_zero.mpr (hne j l hjl)) ?_
   rw [abs_lt]; constructor <;> linarith
 
-lemma dysonRow_ne_zero {n : ℕ} {θ : Fin n → ℝ}
+theorem dysonRow_ne_zero {n : ℕ} {θ : Fin n → ℝ}
     (hθ : ∀ j l, j ≠ l → Complex.exp (I * ((θ j - θ l : ℝ) : ℂ)) ≠ 1) (j : Fin n) (m : ℕ) :
     dysonRow θ j m ≠ 0 := by
   unfold dysonRow
@@ -1275,7 +1269,7 @@ lemma dysonRow_ne_zero {n : ℕ} {θ : Fin n → ℝ}
   · exact pow_ne_zero _ (sub_ne_zero.mpr (hθ j l h).symm)
 
 /-- Good's recursion for the torus integrals. -/
-lemma dysonInt_rec {n : ℕ} (hn : 0 < n) (a : Fin n → ℕ) (h : ∀ j, 1 ≤ a j) :
+theorem dysonInt_rec {n : ℕ} (hn : 0 < n) (a : Fin n → ℕ) (h : ∀ j, 1 ≤ a j) :
     dysonInt n a = ∑ j, dysonInt n (Function.update a j (a j - 1)) := by
   unfold dysonInt
   rw [← integral_finsetSum _ fun j _ => integrableOn_dysonTerm n _]
@@ -1289,7 +1283,7 @@ lemma dysonInt_rec {n : ℕ} (hn : 0 < n) (a : Fin n → ℕ) (h : ∀ j, 1 ≤ 
 
 /-! ### Removing a coordinate with zero exponent -/
 
-lemma insertNth_mem_circBox {n : ℕ} (k : Fin (n + 1)) {x : ℝ} {y : Fin n → ℝ} :
+theorem insertNth_mem_circBox {n : ℕ} (k : Fin (n + 1)) {x : ℝ} {y : Fin n → ℝ} :
     (k.insertNth x y : Fin (n + 1) → ℝ) ∈ circBox (n + 1) ↔
       x ∈ Icc (-π) π ∧ y ∈ circBox n := by
   simp only [Set.mem_pi, Set.mem_univ, true_implies]
@@ -1297,7 +1291,7 @@ lemma insertNth_mem_circBox {n : ℕ} (k : Fin (n + 1)) {x : ℝ} {y : Fin n →
   simp only [Fin.insertNth_apply_same, Fin.insertNth_apply_succAbove]
 
 /-- Splitting off the `k`-th coordinate of the box. -/
-lemma integral_circBox_insertNth {n : ℕ} (k : Fin (n + 1)) (g : (Fin (n + 1) → ℝ) → ℂ)
+theorem integral_circBox_insertNth {n : ℕ} (k : Fin (n + 1)) (g : (Fin (n + 1) → ℝ) → ℂ)
     (hg : IntegrableOn g (circBox (n + 1))) :
     ∫ θ in circBox (n + 1), g θ =
       ∫ y in circBox n, ∫ x in Icc (-π) π, g (k.insertNth x y) := by
@@ -1327,7 +1321,7 @@ lemma integral_circBox_insertNth {n : ℕ} (k : Fin (n + 1)) (g : (Fin (n + 1) �
   rw [IntegrableOn, ← Measure.prod_restrict] at hint
   exact hint
 
-lemma integral_exp_neg_I_pow (i : ℕ) :
+theorem integral_exp_neg_I_pow (i : ℕ) :
     ∫ x in Icc (-π) π, Complex.exp (-(I * (x : ℂ))) ^ i = if i = 0 then 2 * π else 0 := by
   rw [integral_Icc_eq_integral_Ioc, ← intervalIntegral.integral_of_le (by linarith [Real.pi_pos])]
   split_ifs with hi
@@ -1346,7 +1340,7 @@ lemma integral_exp_neg_I_pow (i : ℕ) :
     simp
 
 /-- The average over a circle of a polynomial in `e^{-ix}` is its constant term. -/
-lemma integral_prod_one_sub_exp {n : ℕ} (y : Fin n → ℝ) (m : Fin n → ℕ) :
+theorem integral_prod_one_sub_exp {n : ℕ} (y : Fin n → ℝ) (m : Fin n → ℕ) :
     ∫ x in Icc (-π) π, ∏ j, (1 - Complex.exp (I * ((y j - x : ℝ) : ℂ))) ^ m j = 2 * π := by
   set P : Polynomial ℂ := ∏ j, (1 - Polynomial.C (Complex.exp (I * (y j : ℂ))) *
     Polynomial.X) ^ m j with hP
@@ -1368,12 +1362,12 @@ lemma integral_prod_one_sub_exp {n : ℕ} (y : Fin n → ℝ) (m : Fin n → ℕ
     Polynomial.coeff_zero_eq_eval_zero, hP, Polynomial.eval_prod]
   simp
 
-lemma dysonRow_insertNth_self {n : ℕ} (k : Fin (n + 1)) (x : ℝ) (y : Fin n → ℝ) :
+theorem dysonRow_insertNth_self {n : ℕ} (k : Fin (n + 1)) (x : ℝ) (y : Fin n → ℝ) :
     dysonRow (k.insertNth x y : Fin (n + 1) → ℝ) k 0 = 1 := by
   unfold dysonRow
   exact Finset.prod_eq_one fun l _ => by split_ifs <;> simp
 
-lemma dysonRow_insertNth {n : ℕ} (k : Fin (n + 1)) (x : ℝ) (y : Fin n → ℝ) (j : Fin n)
+theorem dysonRow_insertNth {n : ℕ} (k : Fin (n + 1)) (x : ℝ) (y : Fin n → ℝ) (j : Fin n)
     (m : ℕ) :
     dysonRow (k.insertNth x y : Fin (n + 1) → ℝ) (k.succAbove j) m =
       dysonRow y j m * (1 - Complex.exp (I * ((y j - x : ℝ) : ℂ))) ^ m := by
@@ -1382,7 +1376,7 @@ lemma dysonRow_insertNth {n : ℕ} (k : Fin (n + 1)) (x : ℝ) (y : Fin n → �
   simp only [Fin.insertNth_apply_same, Fin.insertNth_apply_succAbove,
     (Fin.succAbove_right_injective (p := k)).eq_iff]
 
-lemma dysonTerm_insertNth {n : ℕ} (a : Fin (n + 1) → ℕ) {k : Fin (n + 1)} (hk : a k = 0)
+theorem dysonTerm_insertNth {n : ℕ} (a : Fin (n + 1) → ℕ) {k : Fin (n + 1)} (hk : a k = 0)
     (x : ℝ) (y : Fin n → ℝ) :
     dysonTerm (n + 1) a (k.insertNth x y) =
       dysonTerm n (a ∘ k.succAbove) y *
@@ -1392,7 +1386,7 @@ lemma dysonTerm_insertNth {n : ℕ} (a : Fin (n + 1) → ℕ) {k : Fin (n + 1)} 
     ← Finset.prod_mul_distrib]
   simp only [dysonRow_insertNth, Function.comp_apply]
 
-lemma dysonInt_succ_of_eq_zero {n : ℕ} (a : Fin (n + 1) → ℕ) {k : Fin (n + 1)} (hk : a k = 0) :
+theorem dysonInt_succ_of_eq_zero {n : ℕ} (a : Fin (n + 1) → ℕ) {k : Fin (n + 1)} (hk : a k = 0) :
     dysonInt (n + 1) a = 2 * π * dysonInt n (a ∘ k.succAbove) := by
   unfold dysonInt
   rw [integral_circBox_insertNth k _ (integrableOn_dysonTerm _ a), ← integral_const_mul]
@@ -1407,23 +1401,23 @@ lemma dysonInt_succ_of_eq_zero {n : ℕ} (a : Fin (n + 1) → ℕ) {k : Fin (n +
 def mnom {n : ℕ} (a : Fin n → ℕ) : ℂ :=
   ((∑ j, a j).factorial : ℂ) / ∏ j, ((a j).factorial : ℂ)
 
-lemma prod_factorial_ne_zero {n : ℕ} (a : Fin n → ℕ) : ∏ j, ((a j).factorial : ℂ) ≠ 0 :=
+theorem prod_factorial_ne_zero {n : ℕ} (a : Fin n → ℕ) : ∏ j, ((a j).factorial : ℂ) ≠ 0 :=
   Finset.prod_ne_zero_iff.mpr fun j _ => by exact_mod_cast (Nat.factorial_pos _).ne'
 
-lemma mnom_succAbove {n : ℕ} (a : Fin (n + 1) → ℕ) {k : Fin (n + 1)} (hk : a k = 0) :
+theorem mnom_succAbove {n : ℕ} (a : Fin (n + 1) → ℕ) {k : Fin (n + 1)} (hk : a k = 0) :
     mnom a = mnom (a ∘ k.succAbove) := by
   unfold mnom
   rw [Fin.sum_univ_succAbove _ k, Fin.prod_univ_succAbove _ k, hk]
   simp
 
-lemma sum_update_pred {n : ℕ} (a : Fin n → ℕ) {j : Fin n} (h : 1 ≤ a j) :
+theorem sum_update_pred {n : ℕ} (a : Fin n → ℕ) {j : Fin n} (h : 1 ≤ a j) :
     (∑ i, Function.update a j (a j - 1) i) + 1 = ∑ i, a i := by
   rw [← Finset.add_sum_erase _ _ (Finset.mem_univ j),
     ← Finset.add_sum_erase _ a (Finset.mem_univ j), Function.update_self]
   rw [Finset.sum_congr rfl fun i hi => Function.update_of_ne (Finset.ne_of_mem_erase hi) _ _]
   omega
 
-lemma mnom_update_mul {n : ℕ} (a : Fin n → ℕ) {j : Fin n} (h : 1 ≤ a j) :
+theorem mnom_update_mul {n : ℕ} (a : Fin n → ℕ) {j : Fin n} (h : 1 ≤ a j) :
     mnom (Function.update a j (a j - 1)) * (∑ i, a i : ℕ) = mnom a * a j := by
   unfold mnom
   have hS := sum_update_pred a h
@@ -1446,7 +1440,7 @@ lemma mnom_update_mul {n : ℕ} (a : Fin n → ℕ) {j : Fin n} (h : 1 ≤ a j) 
   push_cast
   field_simp
 
-lemma mnom_rec {n : ℕ} (hn : 0 < n) (a : Fin n → ℕ) (h : ∀ j, 1 ≤ a j) :
+theorem mnom_rec {n : ℕ} (hn : 0 < n) (a : Fin n → ℕ) (h : ∀ j, 1 ≤ a j) :
     mnom a = ∑ j, mnom (Function.update a j (a j - 1)) := by
   have hS0 : ((∑ i, a i : ℕ) : ℂ) ≠ 0 := by
     have : 1 ≤ ∑ i, a i := (h ⟨0, hn⟩).trans
@@ -1492,7 +1486,7 @@ def circIntegrand (n : ℕ) (b : ℂ) (θ : Fin n → ℝ) : ℂ :=
     (if j.val < k.val then
       (‖Complex.exp (I * θ j) - Complex.exp (I * θ k)‖ : ℂ) ^ (2 * b) else 1)
 
-lemma norm_exp_sub_sq (x y : ℝ) :
+theorem norm_exp_sub_sq (x y : ℝ) :
     ((‖Complex.exp (I * x) - Complex.exp (I * y)‖ ^ 2 : ℝ) : ℂ) =
       (1 - Complex.exp (I * ((x - y : ℝ) : ℂ))) * (1 - Complex.exp (I * ((y - x : ℝ) : ℂ))) := by
   rw [← Complex.normSq_eq_norm_sq, ← Complex.mul_conj]
@@ -1510,7 +1504,7 @@ lemma norm_exp_sub_sq (x y : ℝ) :
   have h2 := Complex.exp_ne_zero (I * y)
   field_simp
 
-lemma prod_lt_mul_eq_prod_ne {n : ℕ} (f : Fin n → Fin n → ℂ) :
+theorem prod_lt_mul_eq_prod_ne {n : ℕ} (f : Fin n → Fin n → ℂ) :
     (∏ j : Fin n, ∏ l : Fin n, if j.val < l.val then f j l * f l j else 1) =
       ∏ j : Fin n, ∏ l : Fin n, if j = l then 1 else f j l := by
   have hsplit : ∀ j l : Fin n, (if j = l then (1 : ℂ) else f j l) =
@@ -1532,7 +1526,7 @@ lemma prod_lt_mul_eq_prod_ne {n : ℕ} (f : Fin n → Fin n → ℂ) :
   refine Finset.prod_congr rfl fun l _ => ?_
   split_ifs <;> simp
 
-lemma circIntegrand_natCast (n k : ℕ) (θ : Fin n → ℝ) :
+theorem circIntegrand_natCast (n k : ℕ) (θ : Fin n → ℝ) :
     circIntegrand n k θ = dysonTerm n (fun _ => k) θ := by
   unfold circIntegrand dysonTerm dysonRow
   have hpow : ∀ j l : Fin n, ((‖Complex.exp (I * θ j) - Complex.exp (I * θ l)‖ : ℝ) : ℂ) ^
@@ -1551,7 +1545,7 @@ def circInt (n : ℕ) (b : ℂ) : ℂ :=
 /-- The right-hand side of 5.14.7. -/
 def circRHS (n : ℕ) (b : ℂ) : ℂ := Complex.Gamma (1 + b * n) / Complex.Gamma (1 + b) ^ n
 
-lemma circInt_natCast (n k : ℕ) : circInt n k = circRHS n k := by
+theorem circInt_natCast (n k : ℕ) : circInt n k = circRHS n k := by
   unfold circInt circRHS
   simp_rw [circIntegrand_natCast]
   rw [show (∫ θ in circBox n, dysonTerm n (fun _ => k) θ) = dysonInt n (fun _ => k) from rfl,
@@ -1571,25 +1565,25 @@ def circV (n : ℕ) (θ : Fin n → ℝ) : ℝ :=
   ∏ j : Fin n, ∏ k : Fin n,
     if j.val < k.val then ‖Complex.exp (I * θ j) - Complex.exp (I * θ k)‖ ^ 2 else 1
 
-lemma measurable_circV (n : ℕ) : Measurable (circV n) := by
+theorem measurable_circV (n : ℕ) : Measurable (circV n) := by
   unfold circV
   fun_prop
 
-lemma measurable_circIntegrand (n : ℕ) (b : ℂ) : Measurable (circIntegrand n b) := by
+theorem measurable_circIntegrand (n : ℕ) (b : ℂ) : Measurable (circIntegrand n b) := by
   unfold circIntegrand
   fun_prop
 
-lemma circV_nonneg (n : ℕ) (θ : Fin n → ℝ) : 0 ≤ circV n θ := by
+theorem circV_nonneg (n : ℕ) (θ : Fin n → ℝ) : 0 ≤ circV n θ := by
   unfold circV
   exact Finset.prod_nonneg fun j _ => Finset.prod_nonneg fun k _ => by
     split_ifs <;> positivity
 
-lemma norm_exp_sub_le (x y : ℝ) : ‖Complex.exp (I * x) - Complex.exp (I * y)‖ ≤ 2 := by
+theorem norm_exp_sub_le (x y : ℝ) : ‖Complex.exp (I * x) - Complex.exp (I * y)‖ ≤ 2 := by
   calc ‖Complex.exp (I * x) - Complex.exp (I * y)‖
       ≤ ‖Complex.exp (I * x)‖ + ‖Complex.exp (I * y)‖ := norm_sub_le _ _
     _ = 2 := by rw [Complex.norm_exp_I_mul_ofReal, Complex.norm_exp_I_mul_ofReal]; norm_num
 
-lemma circV_le (n : ℕ) (θ : Fin n → ℝ) : circV n θ ≤ 4 ^ (n * n) := by
+theorem circV_le (n : ℕ) (θ : Fin n → ℝ) : circV n θ ≤ 4 ^ (n * n) := by
   unfold circV
   calc (∏ j : Fin n, ∏ k : Fin n,
         if j.val < k.val then ‖Complex.exp (I * θ j) - Complex.exp (I * θ k)‖ ^ 2 else 1)
@@ -1606,7 +1600,7 @@ lemma circV_le (n : ℕ) (θ : Fin n → ℝ) : circV n θ ≤ 4 ^ (n * n) := by
         simp only [Finset.prod_const, Finset.card_univ, Fintype.card_fin]
         rw [← pow_mul]
 
-lemma exp_ne_exp_of_good {n : ℕ} {θ : Fin n → ℝ}
+theorem exp_ne_exp_of_good {n : ℕ} {θ : Fin n → ℝ}
     (hθ : ∀ j l, j ≠ l → Complex.exp (I * ((θ j - θ l : ℝ) : ℂ)) ≠ 1) {j l : Fin n}
     (hjl : j ≠ l) : Complex.exp (I * θ j) - Complex.exp (I * θ l) ≠ 0 := by
   intro h
@@ -1614,7 +1608,7 @@ lemma exp_ne_exp_of_good {n : ℕ} {θ : Fin n → ℝ}
   rw [show I * ((θ j - θ l : ℝ) : ℂ) = I * θ j - I * θ l by push_cast; ring, Complex.exp_sub,
     sub_eq_zero.mp h, div_self (Complex.exp_ne_zero _)]
 
-lemma circV_pos {n : ℕ} {θ : Fin n → ℝ}
+theorem circV_pos {n : ℕ} {θ : Fin n → ℝ}
     (hθ : ∀ j l, j ≠ l → Complex.exp (I * ((θ j - θ l : ℝ) : ℂ)) ≠ 1) : 0 < circV n θ := by
   unfold circV
   refine Finset.prod_pos fun j _ => Finset.prod_pos fun k _ => ?_
@@ -1623,7 +1617,7 @@ lemma circV_pos {n : ℕ} {θ : Fin n → ℝ}
     positivity
   · exact one_pos
 
-lemma norm_circIntegrand {n : ℕ} {θ : Fin n → ℝ}
+theorem norm_circIntegrand {n : ℕ} {θ : Fin n → ℝ}
     (hθ : ∀ j l, j ≠ l → Complex.exp (I * ((θ j - θ l : ℝ) : ℂ)) ≠ 1) (b : ℂ) :
     ‖circIntegrand n b θ‖ = circV n θ ^ b.re := by
   unfold circIntegrand circV
@@ -1640,7 +1634,7 @@ lemma norm_circIntegrand {n : ℕ} {θ : Fin n → ℝ}
     simp
   · simp
 
-lemma circIntegrand_ofReal {n : ℕ} (σ : ℝ) (θ : Fin n → ℝ) :
+theorem circIntegrand_ofReal {n : ℕ} (σ : ℝ) (θ : Fin n → ℝ) :
     circIntegrand n σ θ = ((circV n θ ^ σ : ℝ) : ℂ) := by
   unfold circIntegrand circV
   rw [← Real.finsetProd_rpow _ _ fun i _ => Finset.prod_nonneg fun j _ => by
@@ -1654,7 +1648,7 @@ lemma circIntegrand_ofReal {n : ℕ} (σ : ℝ) (θ : Fin n → ℝ) :
     push_cast; ring_nf
   · simp
 
-lemma differentiableAt_circIntegrand {n : ℕ} {θ : Fin n → ℝ}
+theorem differentiableAt_circIntegrand {n : ℕ} {θ : Fin n → ℝ}
     (hθ : ∀ j l, j ≠ l → Complex.exp (I * ((θ j - θ l : ℝ) : ℂ)) ≠ 1) (b : ℂ) :
     DifferentiableAt ℂ (fun b => circIntegrand n b θ) b := by
   unfold circIntegrand
@@ -1665,7 +1659,7 @@ lemma differentiableAt_circIntegrand {n : ℕ} {θ : Fin n → ℝ}
     exact (differentiableAt_id.const_mul 2).const_cpow (Or.inl hne)
   · exact differentiableAt_const _
 
-lemma integrableOn_circV_rpow_of_nonneg (n : ℕ) {σ : ℝ} (hσ : 0 ≤ σ) :
+theorem integrableOn_circV_rpow_of_nonneg (n : ℕ) {σ : ℝ} (hσ : 0 ≤ σ) :
     IntegrableOn (fun θ => circV n θ ^ σ) (circBox n) := by
   refine Measure.integrableOn_of_bounded (M := ((4 : ℝ) ^ (n * n)) ^ σ)
     (isCompact_circBox n).measure_lt_top.ne
@@ -1675,7 +1669,7 @@ lemma integrableOn_circV_rpow_of_nonneg (n : ℕ) {σ : ℝ} (hσ : 0 ≤ σ) :
   exact Real.rpow_le_rpow (circV_nonneg n θ) (circV_le n θ) hσ
 
 /-- Holomorphy of the circular integral wherever the moduli are integrable. -/
-lemma differentiableOn_circInt {n : ℕ} {s0 : ℝ}
+theorem differentiableOn_circInt {n : ℕ} {s0 : ℝ}
     (hint : ∀ σ : ℝ, s0 < σ → IntegrableOn (fun θ => circV n θ ^ σ) (circBox n)) :
     DifferentiableOn ℂ (circInt n) {b | s0 < b.re} := by
   have h : DifferentiableOn ℂ (fun b => ∫ θ in circBox n, circIntegrand n b θ)
@@ -1712,7 +1706,7 @@ lemma differentiableOn_circInt {n : ℕ} {s0 : ℝ}
           linarith [Real.rpow_nonneg hV.le (b₀.re - ε)]
   exact h.const_mul _
 
-lemma exists_norm_circInt_le (n : ℕ) :
+theorem exists_norm_circInt_le (n : ℕ) :
     ∃ A : ℝ, 0 ≤ A ∧ ∀ w : ℂ, 0 ≤ w.re → ‖circInt n w‖ ≤ A * ((4 : ℝ) ^ (n * n)) ^ w.re := by
   have : IsFiniteMeasure (volume.restrict (circBox n)) :=
     isFiniteMeasure_restrict.2 (isCompact_circBox n).measure_lt_top.ne
@@ -1729,7 +1723,7 @@ lemma exists_norm_circInt_le (n : ℕ) :
 
 /-! ### The right-hand side -/
 
-lemma differentiableOn_circRHS {n : ℕ} (hn : 0 < n) :
+theorem differentiableOn_circRHS {n : ℕ} (hn : 0 < n) :
     DifferentiableOn ℂ (circRHS n) {b | (-1 / n : ℝ) < b.re} := by
   intro b hb
   have hb' : (-1 / n : ℝ) < b.re := hb
@@ -1752,7 +1746,7 @@ lemma differentiableOn_circRHS {n : ℕ} (hn : 0 < n) :
 
 /-- `Γ(w+a)/Γ(w+1)` is bounded on the closed right half-plane for `0 < a ≤ 1`, by the Beta
 integral. -/
-lemma exists_norm_Gamma_add_div_le {a : ℝ} (ha0 : 0 < a) (ha1 : a ≤ 1) :
+theorem exists_norm_Gamma_add_div_le {a : ℝ} (ha0 : 0 < a) (ha1 : a ≤ 1) :
     ∃ K : ℝ, ∀ w : ℂ, 0 ≤ w.re → ‖Complex.Gamma (w + a) / Complex.Gamma (w + 1)‖ ≤ K := by
   rcases eq_or_lt_of_le ha1 with rfl | ha1
   · refine ⟨1, fun w hw => ?_⟩
@@ -1787,7 +1781,7 @@ lemma exists_norm_Gamma_add_div_le {a : ℝ} (ha0 : 0 < a) (ha1 : a ≤ 1) :
   simp
   linarith
 
-lemma exists_norm_circRHS_le {n : ℕ} (hn : 0 < n) :
+theorem exists_norm_circRHS_le {n : ℕ} (hn : 0 < n) :
     ∃ B : ℝ, 0 ≤ B ∧ ∀ w : ℂ, 0 ≤ w.re → ‖circRHS n w‖ ≤ B * ((n : ℝ) ^ n) ^ w.re := by
   have hn' : (0 : ℝ) < n := by exact_mod_cast hn
   have hex : ∀ k : Fin n, ∃ K : ℝ, 0 ≤ K ∧ ∀ w : ℂ, 0 ≤ w.re →
@@ -1982,7 +1976,7 @@ theorem circInt_eq_circRHS {n : ℕ} (hn : 0 < n) {b : ℂ} (hb : (-1 / n : ℝ)
   filter_upwards [hV.mem_nhds (by simp : (1 : ℂ) ∈ {c : ℂ | 0 < c.re})] with c hc
   exact hpos c hc
 
-theorem selberg_circular_aux {n : ℕ} {b : ℂ} (hb : (-1 / n : ℝ) < b.re) :
+lemma selberg_circular_aux {n : ℕ} {b : ℂ} (hb : (-1 / n : ℝ) < b.re) :
     (1 / (2 * π : ℂ) ^ (n : ℂ)) *
         ∫ θ : Fin n → ℝ in Set.pi Set.univ fun _ => Set.Icc (-π) π,
           ∏ j : Fin n, ∏ k : Fin n,

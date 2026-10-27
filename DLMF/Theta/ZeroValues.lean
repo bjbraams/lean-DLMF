@@ -7,8 +7,6 @@ module
 
 public import DLMF.Theta.Products
 public import DLMF.Theta.Identities
-public import DLMF.QSeries.Pochhammer
-public import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
 
 /-!
 # Theta functions: values at `z = 0` (DLMF §20.4)
@@ -47,48 +45,6 @@ lemma th20_iteratedDeriv_odd_zero {f : ℂ → ℂ} (hf : ∀ z, f (-z) = -f z) 
   rw [show (fun x => -f x) = -f from rfl, iteratedDeriv_neg] at h
   exact CharZero.eq_neg_self_iff.mp h.symm
 
-/-- Euler's identity `∏_{n≥1} (1 + Q^n)(1 - Q^{2n-1}) = 1` for `‖Q‖ < 1` (helper). -/
-theorem p20R1_euler_hasProd {Q : ℂ} (hQ : ‖Q‖ < 1) :
-    HasProd (fun k : ℕ => (1 + Q ^ (k + 1)) * (1 - Q ^ (2 * k + 1))) 1 := by
-  have hgeo := summable_geometric_of_lt_one (norm_nonneg Q) hQ
-  have hs1 : Summable (fun k : ℕ => ‖Q ^ (k + 1)‖) := by
-    simpa [norm_pow] using (summable_nat_add_iff 1).mpr hgeo
-  have hs2 : Summable (fun k : ℕ => ‖Q ^ (2 * k + 1)‖) := by
-    refine Summable.of_nonneg_of_le (fun _ => norm_nonneg _) (fun k => ?_) hs1
-    rw [norm_pow, norm_pow]
-    exact pow_le_pow_of_le_one (norm_nonneg _) hQ.le (by omega)
-  have hs3 : Summable (fun k : ℕ => ‖Q ^ (2 * (k + 1))‖) := by
-    refine Summable.of_nonneg_of_le (fun _ => norm_nonneg _) (fun k => ?_) hs1
-    rw [norm_pow, norm_pow]
-    exact pow_le_pow_of_le_one (norm_nonneg _) hQ.le (by omega)
-  have hA := (multipliable_one_sub_of_summable hs1).hasProd
-  have hB := (multipliable_one_add_of_summable hs1).hasProd
-  have hC := (multipliable_one_sub_of_summable hs2).hasProd
-  have hD := (multipliable_one_sub_of_summable hs3).hasProd
-  have hAB : HasProd (fun k : ℕ => 1 - Q ^ (2 * (k + 1)))
-      ((∏' k : ℕ, (1 - Q ^ (k + 1))) * ∏' k : ℕ, (1 + Q ^ (k + 1))) := by
-    convert hA.mul hB using 1
-    funext k; ring
-  have hsplit : HasProd (fun m : ℕ => 1 - Q ^ (m + 1))
-      ((∏' k : ℕ, (1 - Q ^ (2 * k + 1))) * ∏' k : ℕ, (1 - Q ^ (2 * (k + 1)))) := by
-    refine HasProd.even_mul_odd ?_ ?_
-    · convert hC using 2
-    · convert hD using 3
-  have hA0 : (∏' k : ℕ, (1 - Q ^ (k + 1))) ≠ 0 := by
-    simpa only [sub_eq_add_neg] using tprod_one_add_ne_zero_of_summable
-      (f := fun k : ℕ => -(Q ^ (k + 1))) (fun k h => by
-        have h1 : Q ^ (k + 1) = 1 := by linear_combination -h
-        have := congrArg norm h1
-        rw [norm_pow, norm_one] at this
-        exact absurd this (pow_lt_one₀ (norm_nonneg _) hQ (by omega)).ne) (by simpa using hs1)
-  have heq := hA.unique hsplit
-  rw [hD.unique hAB] at heq
-  have h1 : (∏' k : ℕ, (1 + Q ^ (k + 1))) * ∏' k : ℕ, (1 - Q ^ (2 * k + 1)) = 1 := by
-    apply mul_left_cancel₀ hA0
-    linear_combination -heq
-  convert hB.mul hC using 1
-  exact h1.symm
-
 /-- DLMF 20.4.1: `θ₁(0,q) = θ₂'(0,q) = θ₃'(0,q) = θ₄'(0,q) = 0` (for every `τ`). -/
 @[dlmf 20.4.E1]
 theorem jacobiTheta_zero_values (τ : ℂ) :
@@ -103,98 +59,6 @@ theorem jacobiTheta_zero_values (τ : ℂ) :
       (fun z => jacobiThetaThreeTau_neg z τ) (n := 1) odd_one
   · simpa using th20_iteratedDeriv_even_zero (f := fun z => jacobiThetaFourTau z τ)
       (fun z => jacobiThetaFourTau_neg z τ) (n := 1) odd_one
-
-/-- DLMF 20.4.2: `θ₁'(0,q) = 2q^{1/4} ∏_{n≥1} (1 - q^{2n})³ = 2q^{1/4} (q²;q²)_∞³`, `Im τ > 0`. -/
-@[dlmf 20.4.E2]
-theorem jacobiThetaOneDerivNullTau_prod {τ : ℂ} (hτ : 0 < τ.im) :
-    Multipliable (fun k : ℕ => (1 - cexp (π * I * τ) ^ (2 * (k + 1))) ^ 3) ∧
-      jacobiThetaOneDerivNullTau τ = 2 * cexp (π * I * τ / 4) *
-        ∏' k : ℕ, ((1 - cexp (π * I * τ) ^ (2 * (k + 1))) ^ 3) ∧
-      jacobiThetaOneDerivNullTau τ = 2 * cexp (π * I * τ / 4) *
-        qPochhammerInf (cexp (π * I * τ) ^ 2) (cexp (π * I * τ) ^ 2) ^ 3 := by
-  obtain ⟨hm', hP, hd⟩ := p20R1_oneDeriv_tprod hτ
-  exact ⟨hm'.pow 3, hd, p20R1_oneDeriv_qPochhammer hτ⟩
-
-/-- DLMF 20.4.3: `θ₂(0,q) = 2q^{1/4} ∏_{n≥1} (1 - q^{2n})(1 + q^{2n})²`, `Im τ > 0`. -/
-@[dlmf 20.4.E3]
-theorem jacobiThetaTwoNullTau_prod {τ : ℂ} (hτ : 0 < τ.im) :
-    Multipliable (fun k : ℕ => (1 - cexp (π * I * τ) ^ (2 * (k + 1))) *
-        (1 + cexp (π * I * τ) ^ (2 * (k + 1))) ^ 2) ∧
-      jacobiThetaTwoNullTau τ = 2 * cexp (π * I * τ / 4) *
-        ∏' k : ℕ, ((1 - cexp (π * I * τ) ^ (2 * (k + 1))) *
-        (1 + cexp (π * I * τ) ^ (2 * (k + 1))) ^ 2) := by
-  obtain ⟨hm, he⟩ := jacobiThetaTwoTau_hasProd 0 hτ
-  have key : ∀ k : ℕ, (1 - cexp (π * I * τ) ^ (2 * (k + 1))) *
-      (1 + 2 * cexp (π * I * τ) ^ (2 * (k + 1)) * cos (2 * 0) +
-        cexp (π * I * τ) ^ (4 * (k + 1))) =
-      (1 - cexp (π * I * τ) ^ (2 * (k + 1))) * (1 + cexp (π * I * τ) ^ (2 * (k + 1))) ^ 2 :=
-    fun k => by rw [mul_zero, cos_zero]; ring
-  refine ⟨hm.congr key, ?_⟩
-  rw [jacobiThetaTwoNullTau, he, cos_zero, tprod_congr key, mul_one]
-
-/-- DLMF 20.4.4: `θ₃(0,q) = ∏_{n≥1} (1 - q^{2n})(1 + q^{2n-1})²`, `Im τ > 0`. -/
-@[dlmf 20.4.E4]
-theorem jacobiThetaThreeNullTau_prod {τ : ℂ} (hτ : 0 < τ.im) :
-    Multipliable (fun k : ℕ => (1 - cexp (π * I * τ) ^ (2 * (k + 1))) *
-        (1 + cexp (π * I * τ) ^ (2 * k + 1)) ^ 2) ∧
-      jacobiThetaThreeNullTau τ =
-        ∏' k : ℕ, ((1 - cexp (π * I * τ) ^ (2 * (k + 1))) *
-        (1 + cexp (π * I * τ) ^ (2 * k + 1)) ^ 2) := by
-  obtain ⟨hm, he⟩ := jacobiThetaThreeTau_hasProd 0 hτ
-  have key : ∀ k : ℕ, (1 - cexp (π * I * τ) ^ (2 * (k + 1))) *
-      (1 + 2 * cexp (π * I * τ) ^ (2 * k + 1) * cos (2 * 0) +
-        cexp (π * I * τ) ^ (4 * k + 2)) =
-      (1 - cexp (π * I * τ) ^ (2 * (k + 1))) * (1 + cexp (π * I * τ) ^ (2 * k + 1)) ^ 2 :=
-    fun k => by rw [mul_zero, cos_zero]; ring
-  exact ⟨hm.congr key, by rw [jacobiThetaThreeNullTau, he]; exact tprod_congr key⟩
-
-/-- DLMF 20.4.5: `θ₄(0,q) = ∏_{n≥1} (1 - q^{2n})(1 - q^{2n-1})²`, `Im τ > 0`. -/
-@[dlmf 20.4.E5]
-theorem jacobiThetaFourNullTau_prod {τ : ℂ} (hτ : 0 < τ.im) :
-    Multipliable (fun k : ℕ => (1 - cexp (π * I * τ) ^ (2 * (k + 1))) *
-        (1 - cexp (π * I * τ) ^ (2 * k + 1)) ^ 2) ∧
-      jacobiThetaFourNullTau τ =
-        ∏' k : ℕ, ((1 - cexp (π * I * τ) ^ (2 * (k + 1))) *
-        (1 - cexp (π * I * τ) ^ (2 * k + 1)) ^ 2) := by
-  obtain ⟨hm, he⟩ := jacobiThetaFourTau_hasProd 0 hτ
-  have key : ∀ k : ℕ, (1 - cexp (π * I * τ) ^ (2 * (k + 1))) *
-      (1 - 2 * cexp (π * I * τ) ^ (2 * k + 1) * cos (2 * 0) +
-        cexp (π * I * τ) ^ (4 * k + 2)) =
-      (1 - cexp (π * I * τ) ^ (2 * (k + 1))) * (1 - cexp (π * I * τ) ^ (2 * k + 1)) ^ 2 :=
-    fun k => by rw [mul_zero, cos_zero]; ring
-  exact ⟨hm.congr key, by rw [jacobiThetaFourNullTau, he]; exact tprod_congr key⟩
-
-/-- DLMF 20.4.6: Jacobi's derivative formula `θ₁'(0,q) = θ₂(0,q) θ₃(0,q) θ₄(0,q)`, `Im τ > 0`. -/
-@[dlmf 20.4.E6]
-theorem jacobiThetaOneDerivNullTau_eq_mul {τ : ℂ} (hτ : 0 < τ.im) :
-    jacobiThetaOneDerivNullTau τ =
-      jacobiThetaTwoNullTau τ * jacobiThetaThreeNullTau τ * jacobiThetaFourNullTau τ := by
-  obtain ⟨m2, e2⟩ := jacobiThetaTwoNullTau_prod hτ
-  obtain ⟨m3, e3⟩ := jacobiThetaThreeNullTau_prod hτ
-  obtain ⟨m4, e4⟩ := jacobiThetaFourNullTau_prod hτ
-  obtain ⟨m1, e1, -⟩ := jacobiThetaOneDerivNullTau_prod hτ
-  have hQn := th20_norm_nome_sq_lt_one hτ
-  set E := cexp (π * I * τ) with hE
-  have hEu := p20R1_euler_hasProd hQn
-  have hP := (m2.hasProd.mul m3.hasProd).mul m4.hasProd
-  have hR := m1.hasProd.mul (hEu.mul hEu)
-  have key : ∀ k : ℕ, (1 - E ^ (2 * (k + 1))) ^ 3 *
-      (((1 + (E ^ 2) ^ (k + 1)) * (1 - (E ^ 2) ^ (2 * k + 1))) *
-        ((1 + (E ^ 2) ^ (k + 1)) * (1 - (E ^ 2) ^ (2 * k + 1)))) =
-      (1 - E ^ (2 * (k + 1))) * (1 + E ^ (2 * (k + 1))) ^ 2 *
-        ((1 - E ^ (2 * (k + 1))) * (1 + E ^ (2 * k + 1)) ^ 2) *
-        ((1 - E ^ (2 * (k + 1))) * (1 - E ^ (2 * k + 1)) ^ 2) := fun k => by ring
-  have hR' : HasProd (fun k : ℕ => (1 - E ^ (2 * (k + 1))) * (1 + E ^ (2 * (k + 1))) ^ 2 *
-        ((1 - E ^ (2 * (k + 1))) * (1 + E ^ (2 * k + 1)) ^ 2) *
-        ((1 - E ^ (2 * (k + 1))) * (1 - E ^ (2 * k + 1)) ^ 2))
-      ((∏' k : ℕ, (1 - E ^ (2 * (k + 1))) ^ 3) * (1 * 1)) := by
-    convert hR using 1
-    funext k
-    exact (key k).symm
-  have heq := hP.unique hR'
-  rw [mul_one, mul_one] at heq
-  rw [e1, e2, e3, e4, mul_assoc (2 * cexp (π * I * τ / 4)), mul_assoc (2 * cexp (π * I * τ / 4)),
-    heq]
 
 /-- DLMF 20.4.7: `θ₁''(0,q) = θ₂'''(0,q) = θ₃'''(0,q) = θ₄'''(0,q) = 0` (for every `τ`). -/
 @[dlmf 20.4.E7]

@@ -7,21 +7,8 @@ module
 
 public import TauCeti.Analysis.SpecialFunctions.Erf
 public import Mathlib.Analysis.Complex.IntegerCompl
-public import Mathlib.Topology.Algebra.Module.Cardinality
-public import Mathlib.Tactic.CrossRefAttribute
-public import DLMF.Hypergeometric.Series
 public import DLMF.Hypergeometric.EulerIntegral
-public import Mathlib.Analysis.Normed.Ring.InfiniteSum
-public import Mathlib.Analysis.Normed.Group.Tannery
-public import Mathlib.Analysis.Analytic.Uniqueness
-public import Mathlib.Analysis.SpecialFunctions.Exponential
-public import Mathlib.Analysis.Normed.Algebra.Exponential
-public import Mathlib.Analysis.Complex.RealDeriv
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 public import Mathlib.Analysis.SpecialFunctions.RegularizedHypergeometric
-public import Mathlib.MeasureTheory.Integral.Bochner.Basic
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
-public import Mathlib.RingTheory.Polynomial.Pochhammer
 public import Mathlib.Analysis.Complex.AbsMax
 
 /-!
@@ -82,7 +69,7 @@ theorem kummerM_self {a z : ℂ} (ha : ∀ k : ℕ, a ≠ -k) :
   simpa [exp_eq_exp_ℂ] using (congrFun (NormedSpace.exp_eq_tsum_div (𝔸 := ℂ)) z).symm
 
 /-- A terminating `₁F₁(-n;c;z)` is a polynomial of degree at most `n`. -/
-lemma kummerM_eq_sum_neg_nat (n : ℕ) (c z : ℂ) :
+theorem kummerM_eq_sum_neg_nat (n : ℕ) (c z : ℂ) :
     kummerM (-(n : ℂ)) c z =
       ∑ k ∈ Finset.range (n + 1), poch (-(n : ℂ)) k / (poch c k * k.factorial) * z ^ k := by
   unfold kummerM
@@ -107,17 +94,17 @@ theorem kummerM_of_zero_param (c z : ℂ) : kummerM 0 c z = 1 := by
   · intro n hn
     simp [hn]
 
-lemma regularizedHGFunCoeff_singleton (a c : ℂ) (n : ℕ) :
+theorem regularizedHGFunCoeff_singleton (a c : ℂ) (n : ℕ) :
     regularizedHGFunCoeff {a} {c} n = poch a n / (n ! * Gamma (c + n)) := by
   simp [regularizedHGFunCoeff, poch]
 
-lemma regularizedHGFun_eq_tsum (a b : Multiset ℂ) (z : ℂ) :
+theorem regularizedHGFun_eq_tsum (a b : Multiset ℂ) (z : ℂ) :
     regularizedHGFun a b z = ∑' n : ℕ, regularizedHGFunCoeff a b n * z ^ n := by
   unfold regularizedHGFun regularizedHGFunSeries
   rw [FormalMultilinearSeries.sum]
   simp_rw [FormalMultilinearSeries.ofScalars_apply_eq, smul_eq_mul]
 
-lemma regularizedHGFun_zero (a b : Multiset ℂ) :
+theorem regularizedHGFun_zero (a b : Multiset ℂ) :
     regularizedHGFun a b 0 = regularizedHGFunCoeff a b 0 := by
   rw [regularizedHGFun_eq_tsum]
   have h : (fun n : ℕ => regularizedHGFunCoeff a b n * (0 : ℂ) ^ n) =
@@ -132,7 +119,7 @@ lemma regularizedHGFun_zero (a b : Multiset ℂ) :
     simp [hn]
 
 /-- The coefficient comparison with Mathlib's regularized confluent series. -/
-lemma kummerMCoeff_eq_mul_regularizedHGFunCoeff {a c : ℂ}
+theorem kummerMCoeff_eq_mul_regularizedHGFunCoeff {a c : ℂ}
     (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
     kummerMCoeff a c n = Gamma c * regularizedHGFunCoeff {a} {c} n := by
   have hp : poch c n = Gamma (c + n) / Gamma c :=
@@ -179,7 +166,7 @@ theorem hasFPowerSeriesOnBall_kummerM {a c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) :
   rwa [hp, hf] at ht
 
 /-- The coefficient recurrence for the confluent hypergeometric equation. -/
-lemma kummerMCoeff_recurrence {a c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
+theorem kummerMCoeff_recurrence {a c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
     (n + 1 : ℂ) * (c + n) * kummerMCoeff a c (n + 1) =
       (a + n) * kummerMCoeff a c n := by
   have hcp := poch_ne_zero_of_not_neg_nat hc n
@@ -191,7 +178,7 @@ lemma kummerMCoeff_recurrence {a c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ)
   field [hcp, hcn, hn, Nat.cast_ne_zero.mpr n.factorial_ne_zero]
 
 /-- Chu–Vandermonde evaluates the coefficient convolution in Kummer's transformation. -/
-lemma kummerMCoeff_kummer_convolution {a c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
+theorem kummerMCoeff_kummer_convolution {a c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
     (∑ k ∈ Finset.range (n + 1),
       kummerMCoeff (c - a) c k * (-1 : ℂ) ^ k / (n - k).factorial) =
       kummerMCoeff a c n := by
@@ -261,7 +248,7 @@ theorem kummerM_ode {a c z : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (hz : z ≠ 0) :
     ring
 
 /-- Differentiating the confluent equation repeatedly gives the shifted equations. -/
-lemma confluent_ode_iteratedDeriv {a c : ℂ} {f : ℂ → ℂ}
+theorem confluent_ode_iteratedDeriv {a c : ℂ} {f : ℂ → ℂ}
     (hf : ∀ w, AnalyticAt ℂ f w)
     (hode : ∀ w, w * deriv (deriv f) w + (c - w) * deriv f w - a * f w = 0)
     (n : ℕ) (w : ℂ) :
@@ -290,7 +277,7 @@ lemma confluent_ode_iteratedDeriv {a c : ℂ} {f : ℂ → ℂ}
 
 /-- Entire solutions of the confluent equation are determined by their value at zero
 when the denominator parameter is not a nonpositive integer. -/
-lemma confluent_ode_unique {a c : ℂ} {f g : ℂ → ℂ}
+theorem confluent_ode_unique {a c : ℂ} {f g : ℂ → ℂ}
     (hc : ∀ k : ℕ, c ≠ -k) (hf : ∀ w, AnalyticAt ℂ f w) (hg : ∀ w, AnalyticAt ℂ g w)
     (hfeq : ∀ w, w * deriv (deriv f) w + (c - w) * deriv f w - a * f w = 0)
     (hgeq : ∀ w, w * deriv (deriv g) w + (c - w) * deriv g w - a * g w = 0)
@@ -314,13 +301,13 @@ lemma confluent_ode_unique {a c : ℂ} {f g : ℂ → ℂ}
   exact hw₁.unique hw₂
 
 /-- The normalized Pochhammer factors have a recurrence with limit multiplier one. -/
-lemma poch_div_pow_succ {b : ℂ} (hb : b ≠ 0) (n : ℕ) :
+theorem poch_div_pow_succ {b : ℂ} (hb : b ≠ 0) (n : ℕ) :
     poch b (n + 1) / b ^ (n + 1) = (poch b n / b ^ n) * (1 + (n : ℂ) / b) := by
   rw [poch_succ, pow_succ]
   field_simp
 
 /-- Each normalized Pochhammer symbol tends to one as its parameter tends to infinity. -/
-lemma tendsto_poch_div_pow (n : ℕ) :
+theorem tendsto_poch_div_pow (n : ℕ) :
     Tendsto (fun b : ℕ => poch (b : ℂ) n / (b : ℂ) ^ n) atTop (𝓝 1) := by
   induction n with
   | zero => simp [poch_zero]
@@ -332,7 +319,7 @@ lemma tendsto_poch_div_pow (n : ℕ) :
     exact (poch_div_pow_succ (Nat.cast_ne_zero.mpr hb) n).symm
 
 /-- `(c + t)_k / t^k → 1` as the real variable `t → ∞`. -/
-lemma tendsto_poch_add_div_pow (c : ℂ) (k : ℕ) :
+theorem tendsto_poch_add_div_pow (c : ℂ) (k : ℕ) :
     Tendsto (fun t : ℝ => poch (c + t) k / (t : ℂ) ^ k) atTop (𝓝 1) := by
   induction k with
   | zero => simp [poch_zero]
@@ -354,7 +341,7 @@ lemma tendsto_poch_add_div_pow (c : ℂ) (k : ℕ) :
     ring
 
 /-- `(-N)_k / (-N)^k → 1` as the natural number `N → ∞`. -/
-lemma tendsto_poch_neg_div_pow (k : ℕ) :
+theorem tendsto_poch_neg_div_pow (k : ℕ) :
     Tendsto (fun N : ℕ => poch (-(N : ℂ)) k / (-(N : ℂ)) ^ k) atTop (𝓝 1) := by
   induction k with
   | zero => simp [poch_zero]
@@ -371,7 +358,7 @@ lemma tendsto_poch_neg_div_pow (k : ℕ) :
     ring
 
 /-- Normalized positive Pochhammer symbols decrease as the parameter increases. -/
-lemma norm_poch_div_pow_le {x y : ℝ} (hx : 0 < x) (hxy : x ≤ y) (n : ℕ) :
+theorem norm_poch_div_pow_le {x y : ℝ} (hx : 0 < x) (hxy : x ≤ y) (n : ℕ) :
     ‖poch (y : ℂ) n / (y : ℂ) ^ n‖ ≤ ‖poch (x : ℂ) n / (x : ℂ) ^ n‖ := by
   have hy : 0 < y := hx.trans_le hxy
   have hnorm (t : ℝ) (ht : 0 < t) (k : ℕ) :
@@ -387,7 +374,7 @@ lemma norm_poch_div_pow_le {x y : ℝ} (hx : 0 < x) (hxy : x ≤ y) (n : ℕ) :
       (by positivity) (norm_nonneg _)
 
 /-- Rescaled Gauss coefficients separate into confluent coefficients and a normalized Pochhammer. -/
-lemma gaussHGCoeff_mul_div_pow (a b c z : ℂ) (n : ℕ) :
+theorem gaussHGCoeff_mul_div_pow (a b c z : ℂ) (n : ℕ) :
     gaussHGCoeff a b c n * (z / b) ^ n =
       (kummerMCoeff a c n * z ^ n) * (poch b n / b ^ n) := by
   simp only [gaussHGCoeff, kummerMCoeff, div_eq_mul_inv, mul_inv_rev]
@@ -442,12 +429,12 @@ def kummerU (a b z : ℂ) : ℂ := by
     Filter.limUnder (𝓝[integerComplement] b) (fun c => kummerUConnection a c z)
 
 /-- Tricomi's function agrees with its connection formula at noninteger parameters. -/
-lemma kummerU_eq_connection (a b z : ℂ) (hb : ∀ k : ℤ, b ≠ k) :
+theorem kummerU_eq_connection (a b z : ℂ) (hb : ∀ k : ℤ, b ≠ k) :
     kummerU a b z = kummerUConnection a b z := by
   simp [kummerU, hb]
 
 /-- The connection formula at zero first parameter is identically one away from integers. -/
-lemma kummerUConnection_zero (b z : ℂ) (hb : ∀ k : ℤ, b ≠ k) :
+theorem kummerUConnection_zero (b z : ℂ) (hb : ∀ k : ℤ, b ≠ k) :
     kummerUConnection 0 b z = 1 := by
   have hp : ∀ k : ℕ, 1 - b ≠ -(k : ℂ) := by
     intro k hk
@@ -459,7 +446,7 @@ lemma kummerUConnection_zero (b z : ℂ) (hb : ∀ k : ℤ, b ≠ k) :
   rw [show (0 : ℂ) - b + 1 = 1 - b by ring, div_self (Gamma_ne_zero hp)]
 
 /-- The connection formula at zero first parameter converges to one at every second parameter. -/
-lemma tendsto_kummerUConnection_zero (b z : ℂ) :
+theorem tendsto_kummerUConnection_zero (b z : ℂ) :
     Tendsto (fun c => kummerUConnection 0 c z) (𝓝[integerComplement] b) (𝓝 1) := by
   apply tendsto_const_nhds.congr'
   filter_upwards [self_mem_nhdsWithin] with c hc
@@ -469,7 +456,7 @@ lemma tendsto_kummerUConnection_zero (b z : ℂ) :
   exact hc ⟨k, hk.symm⟩
 
 /-- Tricomi's value at zero first parameter, including integer second parameters. -/
-lemma kummerU_zero (b z : ℂ) : kummerU 0 b z = 1 := by
+theorem kummerU_zero (b z : ℂ) : kummerU 0 b z = 1 := by
   classical
   unfold kummerU
   split_ifs with hb
@@ -490,7 +477,7 @@ def kummerUOnLog (a b w : ℂ) : ℂ :=
 /-- Euler's integral for Kummer's function, obtained by integrating the exponential
 series against the beta weight (AAR §4.2). This is the `M` form of DLMF 13.4.1. -/
 @[dlmf 13.4.E1]
-lemma kummerM_eq_euler_integral {a c z : ℂ}
+theorem kummerM_eq_euler_integral {a c z : ℂ}
     (ha : 0 < a.re) (hca : 0 < (c - a).re) :
     kummerM a c z = Gamma c / (Gamma a * Gamma (c - a)) *
       ∫ t : ℝ in (0 : ℝ)..1,
@@ -565,7 +552,7 @@ def erfc (z : ℂ) : ℂ := 1 - erf z
 theorem erf_zero : erf 0 = 0 := by simp [erf]
 
 /-- The coefficient identity for the Gaussian antiderivative. -/
-lemma kummerMCoeff_half (n : ℕ) :
+theorem kummerMCoeff_half (n : ℕ) :
     (2 * n + 1 : ℂ) * kummerMCoeff (1 / 2) (3 / 2) n = 1 / n.factorial := by
   have hp : poch (1 / 2 : ℂ) n ≠ 0 :=
     poch_ne_zero_of_not_neg_nat (fun k hk => by
@@ -583,7 +570,7 @@ lemma kummerMCoeff_half (n : ℕ) :
   field [hp, hn, Nat.cast_ne_zero.mpr n.factorial_ne_zero]
 
 /-- A first-order relation between the confluent series and the exponential. -/
-lemma kummerM_half_add_two_mul_deriv (w : ℂ) :
+theorem kummerM_half_add_two_mul_deriv (w : ℂ) :
     kummerM (1 / 2) (3 / 2) w +
       2 * w * deriv (kummerM (1 / 2) (3 / 2)) w = exp w := by
   have hc : ∀ k : ℕ, (3 / 2 : ℂ) ≠ -k := by
@@ -607,7 +594,7 @@ lemma kummerM_half_add_two_mul_deriv (w : ℂ) :
     simpa only [Complex.exp_eq_exp_ℂ] using NormedSpace.expSeries_div_hasSum_exp w)
 
 /-- Differentiating the confluent representation gives the Gaussian. -/
-lemma hasDerivAt_gaussianPrimitive (z : ℂ) :
+theorem hasDerivAt_gaussianPrimitive (z : ℂ) :
     HasDerivAt (fun z : ℂ => z * kummerM (1 / 2) (3 / 2) (-(z ^ 2)))
       (exp (-(z ^ 2))) z := by
   have hc : ∀ k : ℕ, (3 / 2 : ℂ) ≠ -k := by
@@ -666,7 +653,7 @@ open scoped NNReal
 
 /-- The basic step of Saff–Varga: if `z` lies in the parabolic region `P_α` and `Re β ≥ α > 0`,
 then `z + β ≠ 0` and `Re (z / (z + β)) < 1`. -/
-lemma parab_step {α : ℝ} (hα : 0 < α) {z β : ℂ} (hz : z.im ^ 2 < 4 * α * (z.re + α))
+theorem parab_step {α : ℝ} (hα : 0 < α) {z β : ℂ} (hz : z.im ^ 2 < 4 * α * (z.re + α))
     (hβ : α ≤ β.re) : z + β ≠ 0 ∧ (z / (z + β)).re < 1 := by
   have key : 0 < z.re * β.re + z.im * β.im + (β.re ^ 2 + β.im ^ 2) := by
     have h1 : 0 < z.re + β.re + α := by nlinarith [sq_nonneg z.im]
@@ -687,7 +674,7 @@ lemma parab_step {α : ℝ} (hα : 0 < α) {z β : ℂ} (hz : z.im ^ 2 < 4 * α 
 /-- **Saff–Varga for partial sums** (AAR Theorem 4.16.1 and Corollary 4.16.3). Let `A k > 0`
 and `b (k+1) = A k / A (k+1)`. If `0 < α ≤ b 1` and `α ≤ b (k+2) - b (k+1)` for all `k`, then
 no partial sum `∑_{k ≤ n} A k z^k` vanishes in the parabolic region `y² < 4α(x+α)`. -/
-lemma parab_partialSums {A b : ℕ → ℝ} (hA : ∀ k, 0 < A k) (hb : ∀ k, 0 < b (k + 1))
+theorem parab_partialSums {A b : ℕ → ℝ} (hA : ∀ k, 0 < A k) (hb : ∀ k, 0 < b (k + 1))
     (hbA : ∀ k, b (k + 1) * A (k + 1) = A k) {α : ℝ} (hα : 0 < α) (h1 : α ≤ b 1)
     (h2 : ∀ k, α ≤ b (k + 2) - b (k + 1)) {z : ℂ} (hz : z.im ^ 2 < 4 * α * (z.re + α)) (n : ℕ) :
     (∑ k ∈ Finset.range (n + 1), (A k : ℂ) * z ^ k) ≠ 0 := by
@@ -743,7 +730,7 @@ lemma parab_partialSums {A b : ℕ → ℝ} (hA : ∀ k, 0 < A k) (hb : ∀ k, 0
 converge to `f` uniformly on every ball about `0`, and let `f` be analytic and not locally zero
 at `z₀ ∈ U`. Then `f z₀ ≠ 0`. The proof applies the maximum modulus principle to `1 / s n` on a
 small disk about `z₀`. -/
-lemma parab_hurwitz {f : ℂ → ℂ} {s : ℕ → ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U) {z₀ : ℂ}
+theorem parab_hurwitz {f : ℂ → ℂ} {s : ℕ → ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U) {z₀ : ℂ}
     (hz₀ : z₀ ∈ U) (hf : AnalyticAt ℂ f z₀) (hfne : ¬∀ᶠ z in 𝓝 z₀, f z = 0)
     (hs : ∀ n, Differentiable ℂ (s n)) (hsU : ∀ᶠ n in atTop, ∀ z ∈ U, s n z ≠ 0)
     (hconv : ∀ R : ℝ≥0, TendstoUniformlyOn s f atTop (ball 0 R)) : f z₀ ≠ 0 := by
@@ -817,7 +804,7 @@ noncomputable def parab_A (a c : ℝ) (k : ℕ) : ℝ :=
   (ascPochhammer ℝ k).eval a / ((ascPochhammer ℝ k).eval c * k !)
 
 /-- The three parameter cases of AAR Corollary 4.16.4 give the Saff–Varga conditions. -/
-lemma parab_params {a c α : ℝ}
+theorem parab_params {a c α : ℝ}
     (hparams : (0 < c ∧ c ≤ a ∧ α = c / a) ∨
       (1 ≤ a ∧ a ≤ c ∧ α = 1) ∨
       (0 < a ∧ a < 1 ∧ a ≤ c ∧ c < 2 * a / (1 - a) ∧

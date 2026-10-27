@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
-public import Mathlib.Analysis.Complex.Liouville
 
 /-!
 # Parameter derivatives and bounds of Taylor coefficients
@@ -24,7 +23,7 @@ namespace Complex
 
 /-- Holomorphy in a parameter of Taylor coefficients, through Cauchy's integral formula on the
 circle of radius `r`. -/
-lemma differentiable_iteratedDeriv_param {G : ℂ → ℂ → ℂ} {r : ℝ} (hr : 0 < r)
+theorem differentiable_iteratedDeriv_param {G : ℂ → ℂ → ℂ} {r : ℝ} (hr : 0 < r)
     (hcont : ∀ a : ℂ, ∀ t : ℂ, ‖t‖ = r → ContinuousAt (fun p : ℂ × ℂ => G p.1 p.2) (a, t))
     (hdt : ∀ a : ℂ, DifferentiableOn ℂ (G a) (Metric.closedBall 0 r))
     (hda : ∀ t : ℂ, ‖t‖ = r → Differentiable ℂ (fun a => G a t)) (N : ℕ) :

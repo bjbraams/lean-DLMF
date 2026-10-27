@@ -6,8 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.Analysis.Complex.CauchyIntegral
-public import Mathlib.Analysis.Analytic.OfScalars
-public import Mathlib.Analysis.SpecificLimits.Basic
 public import DLMFMathlib.Analysis.ODE.PowerSeriesUniqueness
 
 /-!
@@ -41,7 +39,7 @@ def p1oTaylorSeq (P Q : ℕ → ℂ) (a b : ℂ) : ℕ → ℂ
   | n + 2 => ∑ i : Fin (n + 1), (n.choose i : ℂ) *
       (P i * p1oTaylorSeq P Q a b (n - i + 1) + Q i * p1oTaylorSeq P Q a b (n - i))
 
-theorem p1oTaylorSeq_add_two (P Q : ℕ → ℂ) (a b : ℂ) (n : ℕ) :
+lemma p1oTaylorSeq_add_two (P Q : ℕ → ℂ) (a b : ℂ) (n : ℕ) :
     p1oTaylorSeq P Q a b (n + 2) = ∑ i ∈ Finset.range (n + 1), (n.choose i : ℂ) *
       (P i * p1oTaylorSeq P Q a b (n - i + 1) + Q i * p1oTaylorSeq P Q a b (n - i)) := by
   rw [p1oTaylorSeq]
@@ -49,7 +47,7 @@ theorem p1oTaylorSeq_add_two (P Q : ℕ → ℂ) (a b : ℂ) (n : ℕ) :
       (P i * p1oTaylorSeq P Q a b (n - i + 1) + Q i * p1oTaylorSeq P Q a b (n - i))) (n + 1)
 
 /-- The majorant estimate: if `‖P i‖, ‖Q i‖ ≤ A i! (s/2)ⁱ`, then `‖d n‖ ≤ K n! sⁿ`. -/
-theorem p1oTaylorSeq_bound {P Q : ℕ → ℂ} (a b : ℂ) {s A : ℝ} (hs : 0 < s) (hA : 0 ≤ A)
+lemma p1oTaylorSeq_bound {P Q : ℕ → ℂ} (a b : ℂ) {s A : ℝ} (hs : 0 < s) (hA : 0 ≤ A)
     (hP : ∀ i, ‖P i‖ ≤ A * i ! * (s / 2) ^ i) (hQ : ∀ i, ‖Q i‖ ≤ A * i ! * (s / 2) ^ i) :
     ∃ K, ∀ n, ‖p1oTaylorSeq P Q a b n‖ ≤ K * n ! * s ^ n := by
   set d := p1oTaylorSeq P Q a b
@@ -131,7 +129,7 @@ theorem p1oTaylorSeq_bound {P Q : ℕ → ℂ} (a b : ℂ) {s A : ℝ} (hs : 0 <
 
 /-- Cauchy estimates for an entire function: for every `s > 0` there is `A ≥ 0` with
 `‖f⁽ⁱ⁾(z₀)‖ ≤ A i! (s/2)ⁱ` for all `i`. -/
-theorem p1o_norm_iteratedDeriv_le {f : ℂ → ℂ} (hf : Differentiable ℂ f) (z₀ : ℂ) {s : ℝ}
+lemma p1o_norm_iteratedDeriv_le {f : ℂ → ℂ} (hf : Differentiable ℂ f) (z₀ : ℂ) {s : ℝ}
     (hs : 0 < s) : ∃ A, 0 ≤ A ∧ ∀ i, ‖iteratedDeriv i f z₀‖ ≤ A * i ! * (s / 2) ^ i := by
   have h1 := (hf.analyticAt z₀).hasFPowerSeriesAt
   have h2 := hf.hasFPowerSeriesOnBall z₀ one_pos

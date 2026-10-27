@@ -78,7 +78,7 @@ theorem hasIntegralAtTop_exp_neg_div_sub (c : ℂ) (x : ℝ)
 
 
 /-- Real points avoid `±ia` for `a > 0`. -/
-lemma ofReal_sub_I_mul_ne_zero {a : ℝ} (ha : 0 < a) (t : ℝ) :
+theorem ofReal_sub_I_mul_ne_zero {a : ℝ} (ha : 0 < a) (t : ℝ) :
     (t:ℂ)-I*a ≠ 0 ∧ (t:ℂ)-(-I*a) ≠ 0 := by
   constructor <;> intro h <;> have := congrArg Complex.im h <;> simp at this <;> linarith
 
@@ -376,7 +376,7 @@ theorem expIntEin_real_integral_11 (a b : ℝ) :
 section AngularTools
 
 /-- `cos t + i s sin t ≠ 0` for `s = ±1`. -/
-lemma eiIn_arc_ne_zero {s : ℂ} (hs : s = 1 ∨ s = -1) (t : ℝ) :
+theorem eiIn_arc_ne_zero {s : ℂ} (hs : s = 1 ∨ s = -1) (t : ℝ) :
     (Real.cos t : ℂ) + I*s*Real.sin t ≠ 0 := by
   intro h
   have h1 := congrArg Complex.re h
@@ -388,7 +388,7 @@ lemma eiIn_arc_ne_zero {s : ℂ} (hs : s = 1 ∨ s = -1) (t : ℝ) :
 
 /-- The quarter-circle integral of `1 - e^{-w}` along `w = z(cos t + i s sin t)`, `s = ±1`:
 `∫₀^{π/2} (1 - e^{-w(t)}) dt = (Ein(isz) - Ein z)/(is)`. -/
-lemma eiIn_arc_integral {s : ℂ} (hs : s = 1 ∨ s = -1) (z : ℂ) :
+theorem eiIn_arc_integral {s : ℂ} (hs : s = 1 ∨ s = -1) (z : ℂ) :
     ∫ t : ℝ in 0..(π/2), (1 - exp (-(z*((Real.cos t : ℂ) + I*s*Real.sin t)))) =
       (expIntEin (I*s*z) - expIntEin z)/(I*s) := by
   have hs0 : I*s ≠ 0 := by rcases hs with rfl | rfl <;> simp
@@ -418,7 +418,7 @@ lemma eiIn_arc_integral {s : ℂ} (hs : s = 1 ∨ s = -1) (z : ℂ) :
   rw [← sub_div]; congr 2 <;> ring_nf
 
 /-- The quarter-circle integral of `e^{-w}`. -/
-lemma eiIn_arc_integral_exp {s : ℂ} (hs : s = 1 ∨ s = -1) (z : ℂ) :
+theorem eiIn_arc_integral_exp {s : ℂ} (hs : s = 1 ∨ s = -1) (z : ℂ) :
     ∫ t : ℝ in 0..(π/2), exp (-(z*((Real.cos t : ℂ) + I*s*Real.sin t))) =
       π/2 - (expIntEin (I*s*z) - expIntEin z)/(I*s) := by
   rw [← eiIn_arc_integral hs, intervalIntegral.integral_sub (by simp)
@@ -426,7 +426,7 @@ lemma eiIn_arc_integral_exp {s : ℂ} (hs : s = 1 ∨ s = -1) (z : ℂ) :
   simp
 
 /-- `Ein(-iz) = Cin z - i Si z`. -/
-lemma eiIn_Ein_neg_I (z : ℂ) : expIntEin (I*(-1)*z) = cosIntCin z - I*sinInt z := by
+theorem eiIn_Ein_neg_I (z : ℂ) : expIntEin (I*(-1)*z) = cosIntCin z - I*sinInt z := by
   rw [show I*(-1)*z = I*(-z) by ring, expIntEin_mul_I, cosIntCin_even, sinInt_odd]; ring
 
 end AngularTools
@@ -554,7 +554,7 @@ section BesselKZeroIntegrals
 open DLMF.Bessel
 
 /-- `∫₀^∞ e^{-ct} e^{±it} dt = 1/(c ∓ i)`. -/
-lemma integral_exp_neg_mul_exp_I {c : ℝ} (hc : 0 < c) (ε : ℂ) (hε : ε.re = 0) :
+theorem integral_exp_neg_mul_exp_I {c : ℝ} (hc : 0 < c) (ε : ℂ) (hε : ε.re = 0) :
     ∫ t : ℝ in Ioi 0, exp ((-(c : ℂ) + ε) * t) = 1 / (c - ε) := by
   have ha : (-(c : ℂ) + ε).re < 0 := by simp [hε, hc]
   rw [integral_exp_mul_complex_Ioi ha 0]
@@ -567,7 +567,7 @@ lemma integral_exp_neg_mul_exp_I {c : ℝ} (hc : 0 < c) (ε : ℂ) (hε : ε.re 
   field_simp
 
 /-- `∫₀^∞ e^{-ct} cos t dt = c/(c²+1)`. -/
-lemma integral_exp_neg_mul_cos {c : ℝ} (hc : 0 < c) :
+theorem integral_exp_neg_mul_cos {c : ℝ} (hc : 0 < c) :
     ∫ t : ℝ in Ioi 0, exp (-(c : ℂ) * t) * cos t = c / (c ^ 2 + 1) := by
   have h1 := integral_exp_neg_mul_exp_I hc I (by simp)
   have h2 := integral_exp_neg_mul_exp_I hc (-I) (by simp)
@@ -593,7 +593,7 @@ lemma integral_exp_neg_mul_cos {c : ℝ} (hc : 0 < c) :
   ring
 
 /-- `∫₀^∞ e^{-ct} sin t dt = 1/(c²+1)`. -/
-lemma integral_exp_neg_mul_sin {c : ℝ} (hc : 0 < c) :
+theorem integral_exp_neg_mul_sin {c : ℝ} (hc : 0 < c) :
     ∫ t : ℝ in Ioi 0, exp (-(c : ℂ) * t) * sin t = 1 / (c ^ 2 + 1) := by
   have h1 := integral_exp_neg_mul_exp_I hc I (by simp)
   have h2 := integral_exp_neg_mul_exp_I hc (-I) (by simp)
@@ -620,7 +620,7 @@ lemma integral_exp_neg_mul_sin {c : ℝ} (hc : 0 < c) :
 
 
 /-- Schläfli's integral for `2 K₀(2√(xt))` with the `t`-dependence isolated. -/
-lemma two_mul_besselK_zero_eq_integral {x t : ℝ} (hx : 0 < x) (ht : 0 < t) :
+theorem two_mul_besselK_zero_eq_integral {x t : ℝ} (hx : 0 < x) (ht : 0 < t) :
     2 * besselK 0 (2 * ((x : ℂ) * t) ^ (1 / 2 : ℂ)) =
       ∫ s : ℝ in Ioi 0, exp (-(s : ℂ)) * (s : ℂ)⁻¹ * exp (-((x / s : ℝ) : ℂ) * t) := by
   have hxt : 0 < x * t := mul_pos hx ht
@@ -644,7 +644,7 @@ lemma two_mul_besselK_zero_eq_integral {x t : ℝ} (hx : 0 < x) (ht : 0 < t) :
   ring
 
 /-- Fubini for the Schläfli kernel of `K₀(2√(xt))` against a bounded weight. -/
-lemma integral_besselK_zero_swap {x : ℝ} (hx : 0 < x) {wt : ℝ → ℂ} (hwm : Measurable wt)
+theorem integral_besselK_zero_swap {x : ℝ} (hx : 0 < x) {wt : ℝ → ℂ} (hwm : Measurable wt)
     (hw1 : ∀ t, ‖wt t‖ ≤ 1) :
     ∫ t : ℝ in Ioi 0, (∫ s : ℝ in Ioi 0,
         exp (-(s : ℂ)) * (s : ℂ)⁻¹ * exp (-((x / s : ℝ) : ℂ) * t)) * wt t =
@@ -698,15 +698,15 @@ lemma integral_besselK_zero_swap {x : ℝ} (hx : 0 < x) {wt : ℝ → ℂ} (hwm 
       exact integral_congr_ae (Eventually.of_forall fun t => by simp only; ring)
 
 /-- `‖cos t‖ ≤ 1` for real `t`. -/
-lemma norm_cos_ofReal_le_one (t : ℝ) : ‖cos (t : ℂ)‖ ≤ 1 := by
+theorem norm_cos_ofReal_le_one (t : ℝ) : ‖cos (t : ℂ)‖ ≤ 1 := by
   rw [← ofReal_cos, Complex.norm_real, Real.norm_eq_abs]; exact Real.abs_cos_le_one t
 
 /-- `‖sin t‖ ≤ 1` for real `t`. -/
-lemma norm_sin_ofReal_le_one (t : ℝ) : ‖sin (t : ℂ)‖ ≤ 1 := by
+theorem norm_sin_ofReal_le_one (t : ℝ) : ‖sin (t : ℂ)‖ ≤ 1 := by
   rw [← ofReal_sin, Complex.norm_real, Real.norm_eq_abs]; exact Real.abs_sin_le_one t
 
 /-- Reduction of `2∫₀^∞ K₀(2√(xt)) wt(t) dt` to a single `s`-integral. -/
-lemma two_mul_integral_besselK_zero_mul {x : ℝ} (hx : 0 < x) {wt : ℝ → ℂ} (hwm : Measurable wt)
+theorem two_mul_integral_besselK_zero_mul {x : ℝ} (hx : 0 < x) {wt : ℝ → ℂ} (hwm : Measurable wt)
     (hw1 : ∀ t, ‖wt t‖ ≤ 1) :
     2 * ∫ t : ℝ in Ioi 0, besselK 0 (2 * ((x : ℂ) * t) ^ (1 / 2 : ℂ)) * wt t =
       ∫ s : ℝ in Ioi 0, exp (-(s : ℂ)) * (s : ℂ)⁻¹ *
@@ -717,7 +717,7 @@ lemma two_mul_integral_besselK_zero_mul {x : ℝ} (hx : 0 < x) {wt : ℝ → ℂ
   ring
 
 /-- The Laplace representations of `f(x)` and `g(x)` as Lebesgue integrals, for `x > 0`. -/
-lemma expIntAux_ofReal_laplace_Ioi {x : ℝ} (hx : 0 < x) :
+theorem expIntAux_ofReal_laplace_Ioi {x : ℝ} (hx : 0 < x) :
     expIntAuxF x = ∫ u : ℝ in Ioi 0, exp (-(x : ℂ) * u) / ((u : ℂ) ^ 2 + 1) ∧
     expIntAuxG x = ∫ u : ℝ in Ioi 0, (u : ℂ) * exp (-(x : ℂ) * u) / ((u : ℂ) ^ 2 + 1) := by
   have hx0 : (x : ℂ) ≠ 0 := by exact_mod_cast hx.ne'
@@ -827,7 +827,7 @@ lemma expIntAuxG_ofReal_eq_integral_besselK {x : ℝ} (hx : 0 < x) :
   exact (expIntAux_ofReal_laplace_Ioi hx).2
 
 /-- Holomorphy on the slit plane of `z ↦ ∫₀^∞ K₀(2√(zt)) wt(t) dt` for a bounded continuous `wt`. -/
-lemma differentiableOn_integral_besselK_zero_mul {wt : ℝ → ℂ} (hwc : Continuous wt)
+theorem differentiableOn_integral_besselK_zero_mul {wt : ℝ → ℂ} (hwc : Continuous wt)
     (hw1 : ∀ t, ‖wt t‖ ≤ 1) :
     DifferentiableOn ℂ (fun z : ℂ => ∫ t : ℝ in Ioi 0,
       besselK 0 (2 * (z * t) ^ (1 / 2 : ℂ)) * wt t) slitPlane := by
@@ -902,7 +902,7 @@ lemma differentiableOn_integral_besselK_zero_mul {wt : ℝ → ℂ} (hwc : Conti
       _ = _ := by ring
 
 /-- Identity-theorem extension from the positive axis for the Bessel-`K₀` integrals. -/
-lemma eqOn_slitPlane_of_ofReal_besselK_zero {f : ℂ → ℂ} (hf : DifferentiableOn ℂ f slitPlane)
+theorem eqOn_slitPlane_of_ofReal_besselK_zero {f : ℂ → ℂ} (hf : DifferentiableOn ℂ f slitPlane)
     {wt : ℝ → ℂ} (hwc : Continuous wt) (hw1 : ∀ t, ‖wt t‖ ≤ 1)
     (hx : ∀ x : ℝ, 0 < x → f x =
       2 * ∫ t : ℝ in Ioi 0, besselK 0 (2 * ((x : ℂ) * t) ^ (1 / 2 : ℂ)) * wt t)
@@ -982,7 +982,7 @@ theorem expIntAuxG_besselK_integral {z : ℂ} (hz : z ∈ slitPlane) :
 section InequalityTools
 
 /-- The real part of `E₁` on the positive axis has derivative `-e^{-t}/t`. -/
-lemma eiIn_hasDerivAt_re {t : ℝ} (ht : 0 < t) :
+theorem eiIn_hasDerivAt_re {t : ℝ} (ht : 0 < t) :
     HasDerivAt (fun s : ℝ => (genExpIntE 1 s).re) (-(Real.exp (-t)/t)) t := by
   have hs : (t:ℂ) ∈ slitPlane := ofReal_mem_slitPlane.2 ht
   have h := (hasDerivAt_genExpIntE 1 hs).real_of_complex
@@ -991,13 +991,13 @@ lemma eiIn_hasDerivAt_re {t : ℝ} (ht : 0 < t) :
     ← ofReal_div, neg_re, ofReal_re]
 
 /-- `E₁(t) → 0` along the positive axis (real part). -/
-lemma eiIn_tendsto_re :
+theorem eiIn_tendsto_re :
     Tendsto (fun s : ℝ => (genExpIntE 1 s).re) atTop (𝓝 0) := by
   have h := (Complex.continuous_re.tendsto 0).comp (tendsto_expIntE1_add_ofReal 0)
   simpa [Function.comp_def] using h
 
 /-- A function with negative derivative on `(0,∞)` and limit `0` at `+∞` is positive. -/
-lemma eiIn_pos_of_deriv_neg {g g' : ℝ → ℝ} {x : ℝ} (hx : 0 < x)
+theorem eiIn_pos_of_deriv_neg {g g' : ℝ → ℝ} {x : ℝ} (hx : 0 < x)
     (hd : ∀ t, 0 < t → HasDerivAt g (g' t) t) (hneg : ∀ t, 0 < t → g' t < 0)
     (hlim : Tendsto g atTop (𝓝 0)) : 0 < g x := by
   have hanti : StrictAntiOn g (Ici x) := by
@@ -1016,7 +1016,7 @@ lemma eiIn_pos_of_deriv_neg {g g' : ℝ → ℝ} {x : ℝ} (hx : 0 < x)
 
 /-- Comparison principle for `f(x) = eˣE₁(x)`, which solves `f' = f - 1/x`: if `R - R' - 1/t < 0`
 on `(0,∞)` and `R → 0`, then `R < f`. -/
-lemma eiIn_lt_of_sub_neg {R R' : ℝ → ℝ} {x : ℝ} (hx : 0 < x)
+theorem eiIn_lt_of_sub_neg {R R' : ℝ → ℝ} {x : ℝ} (hx : 0 < x)
     (hd : ∀ t, 0 < t → HasDerivAt R (R' t) t) (hs : ∀ t, 0 < t → R t - R' t - 1/t < 0)
     (hlim : Tendsto R atTop (𝓝 0)) : R x < Real.exp x*(genExpIntE 1 x).re := by
   have key : 0 < (genExpIntE 1 x).re - Real.exp (-x)*R x := by
@@ -1037,7 +1037,7 @@ lemma eiIn_lt_of_sub_neg {R R' : ℝ → ℝ} {x : ℝ} (hx : 0 < x)
 
 /-- Comparison principle, upper form: if `R - R' - 1/t > 0` on `(0,∞)` and `R → 0`, then
 `eˣE₁(x) < R(x)`. -/
-lemma eiIn_gt_of_sub_pos {R R' : ℝ → ℝ} {x : ℝ} (hx : 0 < x)
+theorem eiIn_gt_of_sub_pos {R R' : ℝ → ℝ} {x : ℝ} (hx : 0 < x)
     (hd : ∀ t, 0 < t → HasDerivAt R (R' t) t) (hs : ∀ t, 0 < t → 0 < R t - R' t - 1/t)
     (hlim : Tendsto R atTop (𝓝 0)) : Real.exp x*(genExpIntE 1 x).re < R x := by
   have key : 0 < Real.exp (-x)*R x - (genExpIntE 1 x).re := by
@@ -1058,7 +1058,7 @@ lemma eiIn_gt_of_sub_pos {R R' : ℝ → ℝ} {x : ℝ} (hx : 0 < x)
 
 
 /-- `ln y < (y - 1/y)/2` for `y > 1`. -/
-lemma eiIn_log_lt_half_sub_recip {y : ℝ} (hy : 1 < y) : Real.log y < (y - 1/y)/2 := by
+theorem eiIn_log_lt_half_sub_recip {y : ℝ} (hy : 1 < y) : Real.log y < (y - 1/y)/2 := by
   let h : ℝ → ℝ := fun s => (s - 1/s)/2 - Real.log s
   have hmono : StrictMonoOn h (Ici 1) := by
     refine strictMonoOn_of_deriv_pos (convex_Ici 1) ?_ ?_
@@ -1082,7 +1082,7 @@ lemma eiIn_log_lt_half_sub_recip {y : ℝ} (hy : 1 < y) : Real.log y < (y - 1/y)
   linarith
 
 /-- `t⁻¹ → 0` packaged for rational limits. -/
-lemma eiIn_tendsto_rat {F : ℝ → ℝ} {R : ℝ → ℝ} (hF : ContinuousAt F 0) (hF0 : F 0 = 0)
+theorem eiIn_tendsto_rat {F : ℝ → ℝ} {R : ℝ → ℝ} (hF : ContinuousAt F 0) (hF0 : F 0 = 0)
     (hR : ∀ t : ℝ, 0 < t → R t = F t⁻¹) : Tendsto R atTop (𝓝 0) := by
   have h := hF.tendsto.comp (tendsto_inv_atTop_zero : Tendsto (fun t : ℝ => t⁻¹) atTop (𝓝 0))
   rw [hF0] at h

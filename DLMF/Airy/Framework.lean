@@ -5,10 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Airy.Bessel
-public import DLMF.Gamma.Asymptotics
-public import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
+public import DLMF.Airy.Basic
 
 /-!
 # Conventions for the DLMF Airy acquisition

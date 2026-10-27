@@ -5,18 +5,12 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Confluent.Basic
 public import DLMF.Confluent.Whittaker
-public import DLMF.Bessel.Basic
 public import DLMF.Bessel.Modified
 public import DLMF.Bessel.NeumannSeries
-public import DLMF.Gamma.RecipGammaDeriv
-public import Mathlib.Analysis.Complex.Trigonometric
 public import Mathlib.Analysis.Complex.TaylorSeries
 public import DLMFMathlib.Analysis.Complex.TaylorParameter
-public import Mathlib.Analysis.Complex.RemovableSingularity
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Series
 public import Mathlib.RingTheory.PowerSeries.Derivative
 public import Mathlib.RingTheory.PowerSeries.Exp
 
@@ -936,7 +930,7 @@ private lemma whittakerBesselGenerating_eq_core (μ z t : ℂ) :
   · simp [whittakerBesselGenerating,whittakerBesselBase,ht]
 
 /-- whittakerBesselGenerating differentiableOn; support for the Buchholz coefficient transformation. -/
-lemma whittakerBesselGenerating_differentiableOn (μ z : ℂ) :
+theorem whittakerBesselGenerating_differentiableOn (μ z : ℂ) :
     DifferentiableOn ℂ (whittakerBesselGenerating μ z) (Metric.ball 0 1) := by
   have h := whittakerBessel_core_analytic
   have hf : DifferentiableOn ℂ (fun t : ℂ =>
@@ -949,7 +943,7 @@ lemma whittakerBesselGenerating_differentiableOn (μ z : ℂ) :
   exact hf.congr fun t _ => whittakerBesselGenerating_eq_core μ z t
 
 /-- whittakerBesselGenerating joint continuousAt; support for the Buchholz coefficient transformation. -/
-lemma whittakerBesselGenerating_joint_continuousAt (μ : ℂ) {z t : ℂ} (ht : ‖t‖ < 1) :
+theorem whittakerBesselGenerating_joint_continuousAt (μ : ℂ) {z t : ℂ} (ht : ‖t‖ < 1) :
     ContinuousAt (fun p : ℂ × ℂ => whittakerBesselGenerating μ p.1 p.2) (z,t) := by
   have ht' : t ∈ Metric.ball (0:ℂ) 1 := by simpa using ht
   have h := whittakerBessel_core_analytic
@@ -981,7 +975,7 @@ private lemma whittakerBessel_base_mem_slit {t : ℂ} (ht : t ≠ 0) (hsmall : �
   exact Or.inl (div_pos hS (normSq_pos.mpr hSn))
 
 /-- whittakerBessel hasDerivAt z; support for the Buchholz coefficient transformation. -/
-lemma whittakerBesselGenerating_hasDerivAt_z (μ z t : ℂ) :
+theorem whittakerBesselGenerating_hasDerivAt_z (μ z t : ℂ) :
     HasDerivAt (fun w => whittakerBesselGenerating μ w t)
       (-(cosh t/sinh t-t⁻¹)/2*whittakerBesselGenerating μ z t) z := by
   by_cases ht : t=0
@@ -999,13 +993,13 @@ lemma whittakerBesselGenerating_hasDerivAt_z (μ z t : ℂ) :
       ring
 
 /-- whittakerBessel deriv z; support for the Buchholz coefficient transformation. -/
-lemma whittakerBesselGenerating_deriv_z (μ z t : ℂ) :
+theorem whittakerBesselGenerating_deriv_z (μ z t : ℂ) :
     deriv (fun w => whittakerBesselGenerating μ w t) z =
       -(cosh t/sinh t-t⁻¹)/2*whittakerBesselGenerating μ z t :=
   (whittakerBesselGenerating_hasDerivAt_z μ z t).deriv
 
 /-- whittakerBessel iteratedDeriv two z; support for the Buchholz coefficient transformation. -/
-lemma whittakerBesselGenerating_iteratedDeriv_two_z (μ z t : ℂ) :
+theorem whittakerBesselGenerating_iteratedDeriv_two_z (μ z t : ℂ) :
     iteratedDeriv 2 (fun w => whittakerBesselGenerating μ w t) z =
       (cosh t/sinh t-t⁻¹)^2/4*whittakerBesselGenerating μ z t := by
   have he : deriv (fun w => whittakerBesselGenerating μ w t) =
@@ -1017,7 +1011,7 @@ lemma whittakerBesselGenerating_iteratedDeriv_two_z (μ z t : ℂ) :
   ring
 
 /-- whittakerBessel hasDerivAt t; support for the Buchholz coefficient transformation. -/
-lemma whittakerBesselGenerating_hasDerivAt_t {μ z t : ℂ} (ht : t ≠ 0) (hsmall : ‖t‖ < 1) :
+theorem whittakerBesselGenerating_hasDerivAt_t {μ z t : ℂ} (ht : t ≠ 0) (hsmall : ‖t‖ < 1) :
     HasDerivAt (whittakerBesselGenerating μ z)
       (2*z*iteratedDeriv 2 (fun w => whittakerBesselGenerating μ w t) z -
         2*z/t*deriv (fun w => whittakerBesselGenerating μ w t) z -

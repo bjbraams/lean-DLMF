@@ -6,9 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
-public import Mathlib.MeasureTheory.Integral.DominatedConvergence
-public import Mathlib.Analysis.SpecialFunctions.Exponential
-public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 public import Mathlib.Analysis.Calculus.Deriv.Pow
 
 /-!

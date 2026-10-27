@@ -5,10 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.Calculus.UniformLimitsDeriv
 
 public import DLMF.Bessel.Theorems
 public import DLMF.Confluent.BasicProperties
+public import DLMF.Bessel.Modified
 
 /-!
 # Bessel functions of the second kind and Hankel functions (Temme §§9.1–9.4, DLMF 10.2–10.6)
@@ -32,13 +32,13 @@ namespace DLMF.Bessel
 
 /-! ### The `₀F₁` series in the parameter -/
 
-lemma regularized0F1_eq_tsum (c w : ℂ) :
+theorem regularized0F1_eq_tsum (c w : ℂ) :
     regularizedHGFun (∅ : Multiset ℂ) {c} w = ∑' n : ℕ, w ^ n / n ! * (Gamma (c + n))⁻¹ := by
   rw [regularizedHGFun_eq_tsum]
   congr 1; funext n
   rw [regularizedHGFunCoeff_empty]; field_simp
 
-lemma summable_regularized0F1_term (c w : ℂ) :
+theorem summable_regularized0F1_term (c w : ℂ) :
     Summable fun n : ℕ => w ^ n / n ! * (Gamma (c + n))⁻¹ := by
   have h := (hasFPowerSeriesOnBall_regularized0F1 c).hasSum_mul_pow
     (by simp : w ∈ Metric.eball (0 : ℂ) ⊤)
@@ -46,7 +46,7 @@ lemma summable_regularized0F1_term (c w : ℂ) :
   rw [regularizedHGFunCoeff_empty]; field_simp
 
 /-- Local domination of the `₀F₁` terms, uniformly for `c` near `c₀` and `|w| < R`. -/
-lemma exists_regularized0F1_dominated (c₀ : ℂ) (R : ℝ) :
+theorem exists_regularized0F1_dominated (c₀ : ℂ) (R : ℝ) :
     ∃ V : Set ℂ, IsOpen V ∧ c₀ ∈ V ∧ ∃ N : ℕ, ∃ u : ℕ → ℝ, Summable u ∧
       ∀ n, N ≤ n → ∀ c ∈ V, ∀ w : ℂ, ‖w‖ ≤ R → ‖w ^ n / n ! * (Gamma (c + n))⁻¹‖ ≤ u n := by
   obtain ⟨N, hN⟩ : ∃ N : ℕ, 3 - c₀.re ≤ N := exists_nat_ge _
@@ -131,35 +131,35 @@ theorem differentiable_besselJ_order {z : ℂ} (hz : z ≠ 0) :
 /-- The numerator `D_ν(z) = J_ν(z) cos νπ - J_{-ν}(z)` of `Y_ν`. -/
 def besselD (ν z : ℂ) : ℂ := besselJ ν z * cos (ν * π) - besselJ (-ν) z
 
-lemma cos_int_mul_pi_complex (n : ℤ) : cos ((n : ℂ) * π) = (-1) ^ n := by
+theorem cos_int_mul_pi_complex (n : ℤ) : cos ((n : ℂ) * π) = (-1) ^ n := by
   rw [show ((n : ℂ) * π) = ((n * π : ℝ) : ℂ) by push_cast; ring, ← ofReal_cos,
     Real.cos_int_mul_pi]; push_cast; rfl
 
-lemma sin_int_mul_pi_complex (n : ℤ) : sin ((n : ℂ) * π) = 0 := by
+theorem sin_int_mul_pi_complex (n : ℤ) : sin ((n : ℂ) * π) = 0 := by
   rw [show ((n : ℂ) * π) = ((n * π : ℝ) : ℂ) by push_cast; ring, ← ofReal_sin,
     Real.sin_int_mul_pi]; simp
 
-lemma besselD_int (n : ℤ) (z : ℂ) : besselD n z = 0 := by
+theorem besselD_int (n : ℤ) (z : ℂ) : besselD n z = 0 := by
   rw [besselD, besselJ_neg_int, cos_int_mul_pi_complex]; ring
 
-lemma sin_mul_pi_ne_zero {ν : ℂ} (hν : ∀ k : ℤ, ν ≠ k) : sin (ν * π) ≠ 0 := by
+theorem sin_mul_pi_ne_zero {ν : ℂ} (hν : ∀ k : ℤ, ν ≠ k) : sin (ν * π) ≠ 0 := by
   rw [Complex.sin_ne_zero_iff]
   intro k hk
   have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
   exact hν k (mul_right_cancel₀ hπ hk)
 
-lemma besselY_eq_of_not_int {ν : ℂ} (hν : ∀ k : ℤ, ν ≠ k) (z : ℂ) :
+theorem besselY_eq_of_not_int {ν : ℂ} (hν : ∀ k : ℤ, ν ≠ k) (z : ℂ) :
     besselY ν z = besselD ν z / sin (ν * π) := by
   have : ¬ ∃ k : ℤ, ν = k := fun ⟨k, hk⟩ => hν k hk
   simp [besselY, this, besselD]
 
-lemma differentiable_besselD {z : ℂ} (hz : z ≠ 0) :
+theorem differentiable_besselD {z : ℂ} (hz : z ≠ 0) :
     Differentiable ℂ fun ν : ℂ => besselD ν z := by
   unfold besselD
   exact ((differentiable_besselJ_order hz).mul (by fun_prop)).sub
     ((differentiable_besselJ_order hz).comp differentiable_neg)
 
-lemma continuousOn_besselD :
+theorem continuousOn_besselD :
     ContinuousOn (fun p : ℂ × ℂ => besselD p.2 p.1) (slitPlane ×ˢ univ) := by
   rintro ⟨z, ν⟩ ⟨hz, -⟩
   have hJ : ∀ f : ℂ × ℂ → ℂ, Continuous f →
@@ -171,7 +171,7 @@ lemma continuousOn_besselD :
   unfold besselD
   exact ((hJ _ continuous_snd).mul (by fun_prop)).sub (hJ _ continuous_snd.neg)
 
-lemma not_int_of_mem_ball {n : ℤ} {μ : ℂ} (hμ : μ ∈ Metric.ball (n : ℂ) (1 / 2)) (hne : μ ≠ n) :
+theorem not_int_of_mem_ball {n : ℤ} {μ : ℂ} (hμ : μ ∈ Metric.ball (n : ℂ) (1 / 2)) (hne : μ ≠ n) :
     ∀ k : ℤ, μ ≠ k := by
   intro k hk
   subst hk
@@ -183,7 +183,7 @@ lemma not_int_of_mem_ball {n : ℤ} {μ : ℂ} (hμ : μ ∈ Metric.ball (n : �
     push_cast at this hμ; linarith
   exact hne (by rw [show k = n by omega])
 
-lemma dslope_sin_ne_zero (n : ℤ) {μ : ℂ} (hμ : μ ∈ Metric.ball (n : ℂ) (1 / 2)) :
+theorem dslope_sin_ne_zero (n : ℤ) {μ : ℂ} (hμ : μ ∈ Metric.ball (n : ℂ) (1 / 2)) :
     dslope (fun ν : ℂ => sin (ν * π)) n μ ≠ 0 := by
   by_cases hne : μ = n
   · subst hne
@@ -262,7 +262,7 @@ theorem continuousAt_besselY (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
 /-! ### Recurrences, derivative and the Bessel equation for `Y_ν` -/
 
 /-- `J_ν'(z) = -(ν/z) J_ν(z) + J_{ν-1}(z)` (DLMF 10.6.2). -/
-lemma hasDerivAt_besselJ' {ν z : ℂ} (hz : z ∈ slitPlane) :
+theorem hasDerivAt_besselJ' {ν z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (besselJ ν) (-(ν / z) * besselJ ν z + besselJ (ν - 1) z) z := by
   have h := hasDerivAt_besselJ (ν := ν) hz
   convert h using 1
@@ -271,21 +271,21 @@ lemma hasDerivAt_besselJ' {ν z : ℂ} (hz : z ∈ slitPlane) :
   field_simp at hr ⊢
   linear_combination -hr
 
-lemma cos_add_one_mul_pi (ν : ℂ) : cos ((ν + 1) * π) = -cos (ν * π) := by
+theorem cos_add_one_mul_pi (ν : ℂ) : cos ((ν + 1) * π) = -cos (ν * π) := by
   rw [add_mul, one_mul, cos_add_pi]
-lemma sin_add_one_mul_pi (ν : ℂ) : sin ((ν + 1) * π) = -sin (ν * π) := by
+theorem sin_add_one_mul_pi (ν : ℂ) : sin ((ν + 1) * π) = -sin (ν * π) := by
   rw [add_mul, one_mul, sin_add_pi]
-lemma cos_sub_one_mul_pi (ν : ℂ) : cos ((ν - 1) * π) = -cos (ν * π) := by
+theorem cos_sub_one_mul_pi (ν : ℂ) : cos ((ν - 1) * π) = -cos (ν * π) := by
   rw [sub_mul, one_mul, cos_sub_pi]
-lemma sin_sub_one_mul_pi (ν : ℂ) : sin ((ν - 1) * π) = -sin (ν * π) := by
+theorem sin_sub_one_mul_pi (ν : ℂ) : sin ((ν - 1) * π) = -sin (ν * π) := by
   rw [sub_mul, one_mul, sin_sub_pi]
 
-lemma not_int_add_one {ν : ℂ} (hν : ∀ k : ℤ, ν ≠ k) : ∀ k : ℤ, ν + 1 ≠ k := fun k h =>
+theorem not_int_add_one {ν : ℂ} (hν : ∀ k : ℤ, ν ≠ k) : ∀ k : ℤ, ν + 1 ≠ k := fun k h =>
   hν (k - 1) (by push_cast; linear_combination h)
-lemma not_int_sub_one {ν : ℂ} (hν : ∀ k : ℤ, ν ≠ k) : ∀ k : ℤ, ν - 1 ≠ k := fun k h =>
+theorem not_int_sub_one {ν : ℂ} (hν : ∀ k : ℤ, ν ≠ k) : ∀ k : ℤ, ν - 1 ≠ k := fun k h =>
   hν (k + 1) (by push_cast; linear_combination h)
 
-lemma continuousAt_besselY_order (f : ℂ → ℂ) (hf : Continuous f) (ν : ℂ) {z : ℂ}
+theorem continuousAt_besselY_order (f : ℂ → ℂ) (hf : Continuous f) (ν : ℂ) {z : ℂ}
     (hz : z ∈ slitPlane) : ContinuousAt (fun μ => besselY (f μ) z) ν :=
   ContinuousAt.comp (g := fun p : ℂ × ℂ => besselY p.1 p.2) (f := fun μ => (f μ, z))
     (continuousAt_besselY (f ν) hz) (by fun_prop)
@@ -312,7 +312,7 @@ theorem besselY_add_sub (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
   rw [div_neg, div_neg]
   linear_combination (cos (c * π) / sin (c * π)) * h1 + (1 / sin (c * π)) * h2
 
-lemma hasDerivAt_besselY_of_not_int {ν : ℂ} (hν : ∀ k : ℤ, ν ≠ k) {z : ℂ} (hz : z ∈ slitPlane) :
+theorem hasDerivAt_besselY_of_not_int {ν : ℂ} (hν : ∀ k : ℤ, ν ≠ k) {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (besselY ν) ((ν / z) * besselY ν z - besselY (ν + 1) z) z := by
   have hs := sin_mul_pi_ne_zero hν
   have hY : besselY ν = fun w => besselD ν w / sin (ν * π) :=
@@ -390,7 +390,7 @@ def besselWronskianSeries (ν w : ℂ) : ℂ :=
   regularizedHGFun (∅ : Multiset ℂ) {ν + 1} w * regularizedHGFun ∅ {-ν} w -
     w * (regularizedHGFun ∅ {ν + 2} w * regularizedHGFun ∅ {1 - ν} w)
 
-lemma besselWronskianSeries_eq (ν w : ℂ) :
+theorem besselWronskianSeries_eq (ν w : ℂ) :
     besselWronskianSeries ν w = -(sin (π * ν) / π) := by
   have hd : ∀ c w : ℂ, HasDerivAt (regularizedHGFun (∅ : Multiset ℂ) {c})
       (regularizedHGFun ∅ {c + 1} w) w := fun c w => hasDerivAt_regularized0F1 c w
@@ -446,14 +446,14 @@ theorem wronskian_besselJ_neg (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     (regularizedHGFun (∅ : Multiset ℂ) {ν + 2} (-(z ^ 2 / 4)) *
       regularizedHGFun ∅ {1 - ν} (-(z ^ 2 / 4))) * hz'
 
-lemma continuousAt_besselJ_order (f : ℂ → ℂ) (hf : Continuous f) (ν : ℂ) {z : ℂ}
+theorem continuousAt_besselJ_order (f : ℂ → ℂ) (hf : Continuous f) (ν : ℂ) {z : ℂ}
     (hz : z ∈ slitPlane) : ContinuousAt (fun μ => besselJ (f μ) z) ν :=
   ContinuousAt.comp (g := fun p : ℂ × ℂ => besselJ p.1 p.2) (f := fun μ => (f μ, z))
     (continuousOn_besselJ.continuousAt (prod_mem_nhds univ_mem (isOpen_slitPlane.mem_nhds hz)))
     (by fun_prop)
 
 /-- The cross product `J_{ν+1} Y_ν - J_ν Y_{ν+1} = 2/(πz)`, for every order. -/
-lemma besselJ_succ_mul_besselY_sub (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
+theorem besselJ_succ_mul_besselY_sub (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     besselJ (ν + 1) z * besselY ν z - besselJ ν z * besselY (ν + 1) z = 2 / (π * z) := by
   have hz0 := slitPlane_ne_zero hz
   refine DLMF.Confluent.eq_of_continuousAt_of_integerComplement
@@ -489,14 +489,14 @@ def hankelH1 (ν z : ℂ) : ℂ := besselJ ν z + I * besselY ν z
 @[dlmf 10.4.E3]
 def hankelH2 (ν z : ℂ) : ℂ := besselJ ν z - I * besselY ν z
 
-lemma hasDerivAt_hankelH1 (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
+theorem hasDerivAt_hankelH1 (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (hankelH1 ν) ((ν / z) * hankelH1 ν z - hankelH1 (ν + 1) z) z := by
   have h := (hasDerivAt_besselJ (ν := ν) hz).add ((hasDerivAt_besselY ν hz).const_mul I)
   convert h using 1
   · funext w; simp [hankelH1]
   · simp only [hankelH1]; ring
 
-lemma hasDerivAt_hankelH2 (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
+theorem hasDerivAt_hankelH2 (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (hankelH2 ν) ((ν / z) * hankelH2 ν z - hankelH2 (ν + 1) z) z := by
   have h := (hasDerivAt_besselJ (ν := ν) hz).sub ((hasDerivAt_besselY ν hz).const_mul I)
   convert h using 1
@@ -517,7 +517,7 @@ theorem wronskian_hankelH1_hankelH2 (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) 
 /-! ### The modified functions `I_ν` and `K_ν` -/
 
 /-- `I_ν' = (ν/z) I_ν + I_{ν+1}` (DLMF 10.29.2). -/
-lemma hasDerivAt_besselI {ν z : ℂ} (hz : z ∈ slitPlane) :
+theorem hasDerivAt_besselI {ν z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (besselI ν) (ν / z * besselI ν z + besselI (ν + 1) z) z := by
   have hu : HasDerivAt (fun w : ℂ => w ^ 2 / 4) (z / 2) z := by
     convert! ((hasDerivAt_id z).pow 2).div_const 4 using 1
@@ -542,7 +542,7 @@ theorem besselI_sub_add {ν z : ℂ} (hz : z ≠ 0) :
   linear_combination (norm := (field_simp [hz]; ring)) (-2 * (z / 2) ^ ν / z) * he
 
 /-- `I_ν' = I_{ν-1} - (ν/z) I_ν` (DLMF 10.29.2). -/
-lemma hasDerivAt_besselI' {ν z : ℂ} (hz : z ∈ slitPlane) :
+theorem hasDerivAt_besselI' {ν z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (besselI ν) (besselI (ν - 1) z - ν / z * besselI ν z) z := by
   have h := hasDerivAt_besselI (ν := ν) hz
   convert h using 1
@@ -553,7 +553,7 @@ lemma hasDerivAt_besselI' {ν z : ℂ} (hz : z ∈ slitPlane) :
 
 /-- `I_{-n} = I_n` for integer `n` (DLMF 10.27.1). -/
 @[dlmf 10.27.E1]
-lemma besselI_neg_int (n : ℤ) (z : ℂ) : besselI (-n) z = besselI n z := by
+theorem besselI_neg_int (n : ℤ) (z : ℂ) : besselI (-n) z = besselI n z := by
   wlog hn : 0 ≤ n
   · have he := this (-n) z (by omega)
     simp only [Int.cast_neg, neg_neg] at he
@@ -594,21 +594,21 @@ theorem differentiable_besselI_order {z : ℂ} (hz : z ≠ 0) :
 /-- The numerator `E_ν(z) = I_{-ν}(z) - I_ν(z)` of `K_ν`. -/
 def besselE (ν z : ℂ) : ℂ := besselI (-ν) z - besselI ν z
 
-lemma besselE_int (n : ℤ) (z : ℂ) : besselE n z = 0 := by
+theorem besselE_int (n : ℤ) (z : ℂ) : besselE n z = 0 := by
   rw [besselE, besselI_neg_int, sub_self]
 
-lemma besselK_eq_of_not_int {ν : ℂ} (hν : ∀ k : ℤ, ν ≠ k) (z : ℂ) :
+theorem besselK_eq_of_not_int {ν : ℂ} (hν : ∀ k : ℤ, ν ≠ k) (z : ℂ) :
     besselK ν z = π / 2 * besselE ν z / sin (ν * π) := by
   have : ¬ ∃ k : ℤ, ν = k := fun ⟨k, hk⟩ => hν k hk
   simp [besselK, this, besselE]
 
-lemma differentiable_besselE {z : ℂ} (hz : z ≠ 0) :
+theorem differentiable_besselE {z : ℂ} (hz : z ≠ 0) :
     Differentiable ℂ fun ν : ℂ => besselE ν z := by
   unfold besselE
   exact ((differentiable_besselI_order hz).comp differentiable_neg).sub
     (differentiable_besselI_order hz)
 
-lemma continuousOn_besselE :
+theorem continuousOn_besselE :
     ContinuousOn (fun p : ℂ × ℂ => besselE p.2 p.1) (slitPlane ×ˢ univ) := by
   rintro ⟨z, ν⟩ ⟨hz, -⟩
   have hI : ∀ f : ℂ × ℂ → ℂ, Continuous f →
@@ -686,12 +686,12 @@ theorem continuousAt_besselK (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     have hp' : ∀ k : ℤ, p.1 ≠ k := fun k hk => hp.1 (by rw [hk]; exact sin_int_mul_pi_complex k)
     exact (besselK_eq_of_not_int hp' p.2).symm
 
-lemma continuousAt_besselK_order (f : ℂ → ℂ) (hf : Continuous f) (ν : ℂ) {z : ℂ}
+theorem continuousAt_besselK_order (f : ℂ → ℂ) (hf : Continuous f) (ν : ℂ) {z : ℂ}
     (hz : z ∈ slitPlane) : ContinuousAt (fun μ => besselK (f μ) z) ν :=
   ContinuousAt.comp (g := fun p : ℂ × ℂ => besselK p.1 p.2) (f := fun μ => (f μ, z))
     (continuousAt_besselK (f ν) hz) (by fun_prop)
 
-lemma continuousAt_besselI_order (f : ℂ → ℂ) (hf : Continuous f) (ν : ℂ) {z : ℂ}
+theorem continuousAt_besselI_order (f : ℂ → ℂ) (hf : Continuous f) (ν : ℂ) {z : ℂ}
     (hz : z ∈ slitPlane) : ContinuousAt (fun μ => besselI (f μ) z) ν :=
   ContinuousAt.comp (g := fun p : ℂ × ℂ => besselI p.1 p.2) (f := fun μ => (f μ, z))
     (continuousOn_besselI.continuousAt (prod_mem_nhds univ_mem (isOpen_slitPlane.mem_nhds hz)))
@@ -721,7 +721,7 @@ theorem besselK_add_sub (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
   rw [div_neg, div_neg]
   linear_combination (-(π / 2 / sin (c * π))) * h1 - (π / 2 / sin (c * π)) * h2
 
-lemma hasDerivAt_besselK_of_not_int {ν : ℂ} (hν : ∀ k : ℤ, ν ≠ k) {z : ℂ} (hz : z ∈ slitPlane) :
+theorem hasDerivAt_besselK_of_not_int {ν : ℂ} (hν : ∀ k : ℤ, ν ≠ k) {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (besselK ν) ((ν / z) * besselK ν z - besselK (ν + 1) z) z := by
   have hs := sin_mul_pi_ne_zero hν
   have hK : besselK ν = fun w => π / 2 * besselE ν w / sin (ν * π) :=
@@ -821,7 +821,7 @@ theorem wronskian_besselI_neg (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     (regularizedHGFun (∅ : Multiset ℂ) {ν + 2} (z ^ 2 / 4) *
       regularizedHGFun ∅ {1 - ν} (z ^ 2 / 4)) * hz'
 
-lemma besselK_mul_besselI_succ_add (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
+theorem besselK_mul_besselI_succ_add (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     besselK ν z * besselI (ν + 1) z + besselK (ν + 1) z * besselI ν z = 1 / z := by
   have hz0 := slitPlane_ne_zero hz
   refine DLMF.Confluent.eq_of_continuousAt_of_integerComplement

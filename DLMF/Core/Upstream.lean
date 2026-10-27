@@ -5,7 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public meta import Lean.Elab.Command
 public import Mathlib.Tactic.CrossRefAttribute
 
 /-!

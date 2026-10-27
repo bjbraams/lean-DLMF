@@ -5,10 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.IncompleteGamma.SpecialValues
 public import DLMF.IncompleteGamma.SeriesRecurrences
-public import DLMF.Confluent.Integrals
-public import DLMF.Bessel.Elementary
 public import DLMFMathlib.Analysis.Complex.BarnesResidue
 public import DLMFMathlib.Analysis.Integral.PrincipalValue
 
@@ -28,7 +25,7 @@ namespace DLMF.Confluent
 open DLMF.Statistical
 
 /-- Termwise evaluation of `∫_{-π}^{π} e^{iaθ + z e^{iθ}} dθ`. -/
-lemma hasSum_integral_exp_circle {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (z : ℂ) :
+theorem hasSum_integral_exp_circle {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (z : ℂ) :
     HasSum (fun n : ℕ => 2*sin (π*a)*((-z)^n/((n.factorial : ℂ)*(a+n))))
       (∫ θ : ℝ in (-π)..π, exp (a*I*θ+z*exp (I*θ))) := by
   set F : ℕ → ℝ → ℂ := fun n θ => exp (a*I*θ)*((z*exp (I*θ))^n/(n.factorial : ℂ))
@@ -126,7 +123,7 @@ theorem lowerIncGamma_trigonometric_integral {a : ℂ} (ha : ∀ n : ℤ, a ≠ 
   field_simp
 
 /-- `(t z)^w = t^w z^w` for real `t > 0` and `z ≠ 0`. -/
-lemma lgJ_ofReal_mul_cpow {t : ℝ} (ht : 0 < t) {z : ℂ} (hz : z ≠ 0) (w : ℂ) :
+theorem lgJ_ofReal_mul_cpow {t : ℝ} (ht : 0 < t) {z : ℂ} (hz : z ≠ 0) (w : ℂ) :
     ((t : ℂ) * z) ^ w = (t : ℂ) ^ w * z ^ w := by
   have htz : (t : ℂ) * z ≠ 0 := mul_ne_zero (by exact_mod_cast ht.ne') hz
   rw [cpow_def_of_ne_zero htz, cpow_def_of_ne_zero (by exact_mod_cast ht.ne'),
@@ -134,7 +131,7 @@ lemma lgJ_ofReal_mul_cpow {t : ℝ} (ht : 0 < t) {z : ℂ} (hz : z ≠ 0) (w : �
   ring_nf
 
 /-- `‖Γ(a+1)‖ Γ(σ+1+k) ≤ ‖Γ(a+1+k)‖ Γ(σ+1)` for `σ = Re a > 0`. -/
-lemma lgJ_norm_Gamma_ge {a : ℂ} (ha : 0 < a.re) (k : ℕ) :
+theorem lgJ_norm_Gamma_ge {a : ℂ} (ha : 0 < a.re) (k : ℕ) :
     ‖Gamma (a + 1)‖ * Real.Gamma (a.re + 1 + k) ≤ ‖Gamma (a + 1 + k)‖ * Real.Gamma (a.re + 1) := by
   induction k with
   | zero => simp
@@ -275,7 +272,7 @@ theorem lowerIncGamma_besselJ_integral {a : ℂ} (ha : 0 < a.re) {z : ℂ} (hz :
   field_simp
 
 /-- `(e^x)^w = e^{xw}` for real `x`. -/
-lemma ofReal_exp_cpow_eq_exp_mul (x : ℝ) (w : ℂ) : ((Real.exp x : ℝ) : ℂ)^w = exp (x*w) := by
+theorem ofReal_exp_cpow_eq_exp_mul (x : ℝ) (w : ℂ) : ((Real.exp x : ℝ) : ℂ)^w = exp (x*w) := by
   rw [ofReal_exp, cpow_def_of_ne_zero (Complex.exp_ne_zero _), log_exp (by simp [Real.pi_pos])
     (by simp [Real.pi_pos.le])]
 
@@ -413,7 +410,7 @@ def upperGammaIndentPV (a z : ℂ) : ℂ :=
 
 /-- A symmetric principal value on `[a, ∞)` at `c` exists when `f t - A/(t - c)` is integrable
 near `c` and `f` is integrable on every half-line `(d, ∞)`, `d > c`. -/
-lemma ugPV_hasPrincipalValueIoi {f : ℝ → ℂ} {a b c : ℝ} (A : ℂ) (hac : a < c) (hcb : c < b)
+theorem ugPV_hasPrincipalValueIoi {f : ℝ → ℂ} {a b c : ℝ} (A : ℂ) (hac : a < c) (hcb : c < b)
     (hsub : IntegrableOn (fun t => f t - A / (t - c)) (Icc a b))
     (htail : ∀ d : ℝ, c < d → IntegrableOn f (Ioi d)) :
     HasPrincipalValueIoi f a c
@@ -504,7 +501,7 @@ noncomputable def upperIncGammaMBIntegrand (a z : ℂ) (c y : ℝ) : ℂ :=
   Gamma ((c+y*I)+a)*z^(-((c:ℂ)+y*I))/((c:ℂ)+y*I)
 
 /-- The Mellin–Barnes integrand is continuous in `y`. -/
-lemma continuous_upperIncGammaMBIntegrand (a : ℂ) {z : ℂ} (hz : z ≠ 0) {c : ℝ} (hc : 0 < c)
+theorem continuous_upperIncGammaMBIntegrand (a : ℂ) {z : ℂ} (hz : z ≠ 0) {c : ℝ} (hc : 0 < c)
     (hca : 0 < c+a.re) : Continuous (upperIncGammaMBIntegrand a z c) := by
   refine continuous_iff_continuousAt.mpr fun y => ?_
   unfold upperIncGammaMBIntegrand
@@ -514,7 +511,7 @@ lemma continuous_upperIncGammaMBIntegrand (a : ℂ) {z : ℂ} (hz : z ≠ 0) {c 
   · intro h; have := congrArg re h; simp at this; linarith
 
 /-- Uniform bound for the Mellin–Barnes integrand on `‖z‖ ≥ ρ`, `|arg z| ≤ θ`. -/
-lemma norm_upperIncGammaMBIntegrand_le (a : ℂ) {c : ℝ} (hc : 0 < c) (hca : 0 < c+a.re) :
+theorem norm_upperIncGammaMBIntegrand_le (a : ℂ) {c : ℝ} (hc : 0 < c) (hca : 0 < c+a.re) :
     ∃ C : ℝ, ∃ K : ℕ, ∀ {ρ θ : ℝ}, 0 < ρ → ∀ z : ℂ, ρ ≤ ‖z‖ → |arg z| ≤ θ → ∀ y : ℝ,
       ‖upperIncGammaMBIntegrand a z c y‖ ≤
         C * ρ ^ (-c) / c * ((1 + |y|) ^ K * Real.exp (-((π/2-θ) * |y|))) := by
@@ -552,7 +549,7 @@ lemma norm_upperIncGammaMBIntegrand_le (a : ℂ) {c : ℝ} (hc : 0 < c) (hca : 0
       rw [← this]; ring
 
 /-- The Mellin–Barnes integrand is integrable for `Re z > 0`. -/
-lemma integrable_upperIncGammaMBIntegrand (a : ℂ) {z : ℂ} (hz : 0 < z.re) {c : ℝ} (hc : 0 < c)
+theorem integrable_upperIncGammaMBIntegrand (a : ℂ) {z : ℂ} (hz : 0 < z.re) {c : ℝ} (hc : 0 < c)
     (hca : 0 < c+a.re) : Integrable (upperIncGammaMBIntegrand a z c) := by
   obtain ⟨C, K, hCK⟩ := norm_upperIncGammaMBIntegrand_le a hc hca
   have hz0 : z ≠ 0 := fun h => by rw [h] at hz; simp at hz
@@ -563,7 +560,7 @@ lemma integrable_upperIncGammaMBIntegrand (a : ℂ) {z : ℂ} (hz : 0 < z.re) {c
     (Eventually.of_forall fun y => hCK (norm_pos_iff.mpr hz0) z le_rfl le_rfl y)
 
 /-- The Mellin–Barnes integral is holomorphic in `z` on the right half-plane. -/
-lemma differentiableOn_integral_upperIncGammaMBIntegrand (a : ℂ) {c : ℝ} (hc : 0 < c)
+theorem differentiableOn_integral_upperIncGammaMBIntegrand (a : ℂ) {c : ℝ} (hc : 0 < c)
     (hca : 0 < c+a.re) :
     DifferentiableOn ℂ (fun z => ∫ y, upperIncGammaMBIntegrand a z c y) {z : ℂ | 0 < z.re} := by
   obtain ⟨C, K, hCK⟩ := norm_upperIncGammaMBIntegrand_le a hc hca
@@ -592,7 +589,7 @@ lemma differentiableOn_integral_upperIncGammaMBIntegrand (a : ℂ) {c : ℝ} (hc
       K).const_mul _
 
 /-- DLMF 8.6.11 for real `x > 0`, from the Barnes integral for `U` (DLMF 13.4.18). -/
-lemma integral_upperIncGammaMBIntegrand_ofReal (a : ℂ) {x : ℝ} (hx : 0 < x) {c : ℝ} (hc : 0 < c)
+theorem integral_upperIncGammaMBIntegrand_ofReal (a : ℂ) {x : ℝ} (hx : 0 < x) {c : ℝ} (hc : 0 < c)
     (hca : 0 < c+a.re) :
     ∫ y, upperIncGammaMBIntegrand a x c y = 2*π*upperIncGamma a x := by
   have hx0 : (x : ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.ne'
@@ -669,7 +666,7 @@ noncomputable def incRep_L (a z : ℂ) (c y : ℝ) : ℂ :=
   Gamma (c+y*I)/(a-(c+y*I))*z^(a-(c+y*I))
 
 /-- A whole-line improper integral of an integrable function is its Lebesgue integral. -/
-lemma incRep_integral_eq {f : ℝ → ℂ} {v : ℂ} (hf : Integrable f) (h : HasIntegralWholeLine f v) :
+theorem incRep_integral_eq {f : ℝ → ℂ} {v : ℂ} (hf : Integrable f) (h : HasIntegralWholeLine f v) :
     ∫ y, f y = v := by
   obtain ⟨u, w, hu, hw, huw⟩ := h
   have hu' := tendsto_nhds_unique hu
@@ -679,14 +676,14 @@ lemma incRep_integral_eq {f : ℝ → ℂ} {v : ℂ} (hf : Integrable f) (h : Ha
   rw [← huw, hu', hw', intervalIntegral.integral_Iic_add_Ioi hf.integrableOn hf.integrableOn]
 
 /-- An integrable function has its Lebesgue integral as whole-line improper integral. -/
-lemma incRep_hasIntegralWholeLine {f : ℝ → ℂ} (hf : Integrable f) :
+theorem incRep_hasIntegralWholeLine {f : ℝ → ℂ} (hf : Integrable f) :
     HasIntegralWholeLine f (∫ y, f y) :=
   ⟨_, _, intervalIntegral_tendsto_integral_Iic 0 hf.integrableOn tendsto_id,
     intervalIntegral_tendsto_integral_Ioi 0 hf.integrableOn tendsto_id,
     intervalIntegral.integral_Iic_add_Ioi hf.integrableOn hf.integrableOn⟩
 
 /-- The 8.6.10 integrand is the negative of a shifted 8.6.11 integrand. -/
-lemma incRep_L_eq_upper (a z : ℂ) (c y : ℝ) :
+theorem incRep_L_eq_upper (a z : ℂ) (c y : ℝ) :
     incRep_L a z c y = -upperIncGammaMBIntegrand a z (c - a.re) (y - a.im) := by
   unfold incRep_L upperIncGammaMBIntegrand
   rw [show ((c - a.re : ℝ) : ℂ) + ((y - a.im : ℝ) : ℂ) * I = (c + y*I) - a by
@@ -694,7 +691,7 @@ lemma incRep_L_eq_upper (a z : ℂ) (c y : ℝ) :
   ring
 
 /-- DLMF 8.6.10 to the right of the pole: the line integral is `-2π Γ(a,z)`. -/
-lemma incRep_integral_right {a z : ℂ} (hz : 0 < z.re) {c : ℝ} (hc : 0 < c) (hca : a.re < c) :
+theorem incRep_integral_right {a z : ℂ} (hz : 0 < z.re) {c : ℝ} (hc : 0 < c) (hca : a.re < c) :
     Integrable (incRep_L a z c) ∧ ∫ y, incRep_L a z c y = -(2*π*upperIncGamma a z) := by
   have hc0 : 0 < c - a.re := by linarith
   have hca' : 0 < (c - a.re) + a.re := by linarith
@@ -708,7 +705,7 @@ lemma incRep_integral_right {a z : ℂ} (hz : 0 < z.re) {c : ℝ} (hc : 0 < c) (
   rw [hfun, integral_neg, integral_sub_right_eq_self (fun y => upperIncGammaMBIntegrand a z (c - a.re) y) a.im, hv']
 
 /-- Pointwise bound for the 8.6.10 integrand. -/
-lemma incRep_norm_L_le (a : ℂ) {z : ℂ} (hz : z ≠ 0) (c y : ℝ) :
+theorem incRep_norm_L_le (a : ℂ) {z : ℂ} (hz : z ≠ 0) (c y : ℝ) :
     ‖incRep_L a z c y‖ ≤ ‖Gamma (c+y*I)‖ * (‖z‖^(a.re - c) * Real.exp (|arg z| * |a.im|) *
       Real.exp (|arg z| * |y|)) / ‖a - (c+y*I)‖ := by
   unfold incRep_L
@@ -729,7 +726,7 @@ lemma incRep_norm_L_le (a : ℂ) {z : ℂ} (hz : z ≠ 0) (c y : ℝ) :
     _ = _ := by ring
 
 /-- `|Γ(x+iy)| ≤ Γ(x)/Γ(x') |Γ(x'+iy)|` for `0 < x ≤ x'`. -/
-lemma incRep_norm_Gamma_le {x x' : ℝ} (hx : 0 < x) (hxx : x ≤ x') (y : ℝ) :
+theorem incRep_norm_Gamma_le {x x' : ℝ} (hx : 0 < x) (hxx : x ≤ x') (y : ℝ) :
     ‖Gamma (x + I*y)‖ ≤ Real.Gamma x / Real.Gamma x' * ‖Gamma (x' + I*y)‖ := by
   have hx' : 0 < x' := hx.trans_le hxx
   have h1 := DLMF.Gamma.norm_Gamma_sq_eq hx y
@@ -745,7 +742,7 @@ lemma incRep_norm_Gamma_le {x x' : ℝ} (hx : 0 < x) (hxx : x ≤ x') (y : ℝ) 
     _ = _ := by field_simp
 
 /-- `(1+u)^K e^{-bu} → 0`. -/
-lemma incRep_tendsto_poly_exp {b : ℝ} (hb : 0 < b) (K : ℕ) :
+theorem incRep_tendsto_poly_exp {b : ℝ} (hb : 0 < b) (K : ℕ) :
     Tendsto (fun u : ℝ => (1 + u) ^ K * Real.exp (-(b * u))) atTop (𝓝 0) := by
   have h := ((Real.tendsto_pow_mul_exp_neg_atTop_nhds_zero K).comp
     ((tendsto_id.const_mul_atTop hb).comp (tendsto_atTop_add_const_left _ 1 tendsto_id))).const_mul
@@ -758,7 +755,7 @@ lemma incRep_tendsto_poly_exp {b : ℝ} (hb : 0 < b) (K : ℕ) :
   field_simp
 
 /-- The 8.6.10 integrand is integrable on every line `Re s = c > 0` missing the pole. -/
-lemma incRep_integrable {a z : ℂ} (hz : 0 < z.re) {c : ℝ} (hc : 0 < c) (hca : c ≠ a.re) :
+theorem incRep_integrable {a z : ℂ} (hz : 0 < z.re) {c : ℝ} (hc : 0 < c) (hca : c ≠ a.re) :
     Integrable (incRep_L a z c) := by
   have hz0 : z ≠ 0 := fun h => by rw [h] at hz; simp at hz
   have hθ : |arg z| < π/2 := abs_arg_lt_pi_div_two_iff.mpr (Or.inl hz)
@@ -795,13 +792,13 @@ lemma incRep_integrable {a z : ℂ} (hz : 0 < z.re) {c : ℝ} (hc : 0 < c) (hca 
         simp only [M]; rw [← this]; field_simp
 
 /-- The 8.6.10 integrand in the residue-shift form `φ(s)/(s-a)`. -/
-lemma incRep_L_eq_div (a z : ℂ) (x T : ℝ) :
+theorem incRep_L_eq_div (a z : ℂ) (x T : ℝ) :
     (-(Gamma ((x:ℂ)+T*I) * z^(a-((x:ℂ)+T*I)))) / ((x:ℂ)+T*I - a) = incRep_L a z x T := by
   unfold incRep_L; rw [neg_div, ← div_neg, neg_sub]; ring
 
 open scoped Interval in
 /-- Horizontal cross-sections of the 8.6.10 integrand vanish at `±i∞`. -/
-lemma incRep_horizontal {a z : ℂ} (hz : 0 < z.re) {c c' : ℝ} (hc : 0 < c) (hcc : c ≤ c') :
+theorem incRep_horizontal {a z : ℂ} (hz : 0 < z.re) {c c' : ℝ} (hc : 0 < c) (hcc : c ≤ c') :
     Tendsto (fun T : ℝ => ∫ x in c..c', (-(Gamma ((x:ℂ)+T*I) * z^(a-((x:ℂ)+T*I)))) /
       ((x:ℂ)+T*I - a)) atTop (𝓝 0) ∧
     Tendsto (fun T : ℝ => ∫ x in c..c', (-(Gamma ((x:ℂ)+T*I) * z^(a-((x:ℂ)+T*I)))) /
@@ -876,7 +873,7 @@ lemma incRep_horizontal {a z : ℂ} (hz : 0 < z.re) {c c' : ℝ} (hc : 0 < c) (h
     exact key T (by rw [abs_of_nonneg (by linarith)]; linarith)
 
 /-- The value of the 8.6.10 line integral. -/
-lemma incRep_integral_value {a z : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (hz : 0 < z.re) {c : ℝ} (hc : 0 < c)
+theorem incRep_integral_value {a z : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (hz : 0 < z.re) {c : ℝ} (hc : 0 < c)
     (hca : c ≠ a.re) :
     ∫ y, incRep_L a z c y = 2*π*(lowerIncGamma a z-(if a.re < c then Gamma a else 0)) := by
   have hz0 : z ≠ 0 := fun h => by rw [h] at hz; simp at hz
@@ -921,7 +918,7 @@ theorem lowerIncGamma_mellinBarnes {a z : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (hz 
 
 /-- Uniform vertical bounds for `Γ` on a strip `|Re w| ≤ X`: with the factor `|sin(π Re w)|`
 for all heights, and without it for `|Im w| ≥ 1`. -/
-lemma incRep_Gamma_bound (X : ℝ) :
+theorem incRep_Gamma_bound (X : ℝ) :
     ∃ C : ℝ, ∃ K : ℕ, 0 ≤ C ∧ ∀ x ∈ Icc (-X) X, ∀ y : ℝ,
       ‖Gamma (x + I*y)‖ * |Real.sin (π*x)| ≤ C * (1+|y|)^K * Real.exp (-(π*|y|)/2) ∧
       (1 ≤ |y| → ‖Gamma (x + I*y)‖ ≤ C * (1+|y|)^K * Real.exp (-(π*|y|)/2)) := by
@@ -977,7 +974,7 @@ lemma incRep_Gamma_bound (X : ℝ) :
     field_simp
 
 /-- Vertical bound for `Γ` on a line `Re w = x` missing the poles. -/
-lemma incRep_Gamma_bound_pt {x : ℝ} (hx : ∀ n : ℕ, x ≠ -n) :
+theorem incRep_Gamma_bound_pt {x : ℝ} (hx : ∀ n : ℕ, x ≠ -n) :
     ∃ C : ℝ, ∃ K : ℕ, 0 ≤ C ∧ ∀ y : ℝ,
       ‖Gamma (x + I*y)‖ ≤ C * (1+|y|)^K * Real.exp (-(π*|y|)/2) := by
   by_cases hx0 : 0 < x
@@ -997,7 +994,7 @@ lemma incRep_Gamma_bound_pt {x : ℝ} (hx : ∀ n : ℕ, x ≠ -n) :
 def incRep_f (a w s : ℂ) : ℂ := Gamma (s+1-a)*π/Complex.sin (π*s)*exp (-s*w)
 
 /-- Pointwise bound for the 8.6.12 integrand. -/
-lemma incRep_norm_f_le {a w : ℂ} (x y : ℝ) {C S : ℝ} {K : ℕ} (hC : 0 ≤ C) (hS : 0 < S)
+theorem incRep_norm_f_le {a w : ℂ} (x y : ℝ) {C S : ℝ} {K : ℕ} (hC : 0 ≤ C) (hS : 0 < S)
     (g : ‖Gamma ((x+1-a.re : ℝ) + I*(y - a.im : ℝ))‖ ≤
       C * (1+|y - a.im|)^K * Real.exp (-(π*|y - a.im|)/2))
     (gs : S * Real.exp (π*|y|) ≤ ‖Complex.sin (π*((x:ℂ) + y*I))‖) :
@@ -1042,25 +1039,25 @@ lemma incRep_norm_f_le {a w : ℂ} (x y : ℝ) {C S : ℝ} {K : ℕ} (hC : 0 ≤
         ring
     _ = _ := by rw [← Real.exp_add, ← Real.exp_add]; ring_nf
 
-lemma incRep_f_differentiableAt {a w s : ℂ} (hs : Complex.sin (π*s) ≠ 0)
+theorem incRep_f_differentiableAt {a w s : ℂ} (hs : Complex.sin (π*s) ≠ 0)
     (hA : ∀ m : ℕ, s+1-a ≠ -m) : DifferentiableAt ℂ (incRep_f a w) s := by
   unfold incRep_f
   exact ((((differentiableAt_Gamma _ hA).comp s (by fun_prop)).mul_const _).div
     ((Complex.differentiable_sin _).comp s (by fun_prop)) hs).mul (by fun_prop)
 
-lemma incRep_f_differentiableAt_param {a w s : ℂ} (hA : ∀ m : ℕ, s+1-a ≠ -m) :
+theorem incRep_f_differentiableAt_param {a w s : ℂ} (hA : ∀ m : ℕ, s+1-a ≠ -m) :
     DifferentiableAt ℂ (fun a => incRep_f a w s) a := by
   unfold incRep_f
   exact ((((differentiableAt_Gamma _ hA).comp a (by fun_prop)).mul_const _).div_const _).mul_const _
 
-lemma incRep_f_differentiableAt_w {a w s : ℂ} : DifferentiableAt ℂ (fun w => incRep_f a w s) w := by
+theorem incRep_f_differentiableAt_w {a w s : ℂ} : DifferentiableAt ℂ (fun w => incRep_f a w s) w := by
   unfold incRep_f; fun_prop
 
-lemma incRep_ne_pole {a : ℂ} {x : ℝ} (hav : ∀ n : ℕ, a.re - 1 - n ≠ x) (y : ℝ) :
+theorem incRep_ne_pole {a : ℂ} {x : ℝ} (hav : ∀ n : ℕ, a.re - 1 - n ≠ x) (y : ℝ) :
     ∀ m : ℕ, (x:ℂ) + y*I + 1 - a ≠ -m := fun m h => by
   have := congrArg re h; simp at this; exact hav m (by linarith)
 
-lemma incRep_f_continuous {a w : ℂ} {c : ℝ} (hs : Real.sin (π*c) ≠ 0)
+theorem incRep_f_continuous {a w : ℂ} {c : ℝ} (hs : Real.sin (π*c) ≠ 0)
     (hav : ∀ n : ℕ, a.re - 1 - n ≠ c) : Continuous fun y : ℝ => incRep_f a w (c + y*I) :=
   continuous_iff_continuousAt.mpr fun y => by
     have h := (incRep_f_differentiableAt (w := w) (Complex.barnesRes_sin_ne_zero_of_re (by simpa using hs))
@@ -1068,7 +1065,7 @@ lemma incRep_f_continuous {a w : ℂ} {c : ℝ} (hs : Real.sin (π*c) ≠ 0)
     exact h.comp (f := fun y : ℝ => (c:ℂ) + y*I) (by fun_prop)
 
 /-- The 8.6.12 integrand is integrable on admissible lines. -/
-lemma incRep_f_integrable {a w : ℂ} (hw : |w.im| < 3*π/2) {c : ℝ} (hs : Real.sin (π*c) ≠ 0)
+theorem incRep_f_integrable {a w : ℂ} (hw : |w.im| < 3*π/2) {c : ℝ} (hs : Real.sin (π*c) ≠ 0)
     (hav : ∀ n : ℕ, a.re - 1 - n ≠ c) : Integrable fun y : ℝ => incRep_f a w (c + y*I) := by
   obtain ⟨C, K, hC, h⟩ := incRep_Gamma_bound_pt (x := c+1-a.re) (fun n h => hav n (by linarith))
   have hS : 0 < |Real.sin (π*c)|/2 := by positivity
@@ -1078,7 +1075,7 @@ lemma incRep_f_integrable {a w : ℂ} (hw : |w.im| < 3*π/2) {c : ℝ} (hs : Rea
 
 open scoped Interval in
 /-- Horizontal cross-sections of the 8.6.12 integrand vanish at `±i∞`. -/
-lemma incRep_f_horizontal {a w : ℂ} (hw : |w.im| < 3*π/2) {c₁ c₂ : ℝ} (h12 : c₁ ≤ c₂) :
+theorem incRep_f_horizontal {a w : ℂ} (hw : |w.im| < 3*π/2) {c₁ c₂ : ℝ} (h12 : c₁ ≤ c₂) :
     Tendsto (fun T : ℝ => ∫ x in c₁..c₂, incRep_f a w (x + T*I)) atTop (𝓝 0) ∧
     Tendsto (fun T : ℝ => ∫ x in c₁..c₂, incRep_f a w (x + T*I)) atBot (𝓝 0) := by
   obtain ⟨C, K, hC, h⟩ := incRep_Gamma_bound (|c₁| + |c₂| + 1 + |a.re|)
@@ -1128,7 +1125,7 @@ lemma incRep_f_horizontal {a w : ℂ} (hw : |w.im| < 3*π/2) {c₁ c₂ : ℝ} (
       rw [abs_of_nonpos (by linarith [neg_abs_le a.im])]; linarith [neg_abs_le a.im])
 
 /-- Shifting the 8.6.12 line when no pole lies in the closed strip. -/
-lemma incRep_shift_none {a w : ℂ} (hw : |w.im| < 3*π/2) {c₁ c₂ : ℝ} (h12 : c₁ < c₂)
+theorem incRep_shift_none {a w : ℂ} (hw : |w.im| < 3*π/2) {c₁ c₂ : ℝ} (h12 : c₁ < c₂)
     (hsin : ∀ x ∈ Icc c₁ c₂, Real.sin (π*x) ≠ 0) (hno : ∀ n : ℕ, a.re - 1 - n ∉ Icc c₁ c₂) :
     (∫ y : ℝ, incRep_f a w (c₂ + y*I)) = ∫ y : ℝ, incRep_f a w (c₁ + y*I) := by
   have hav : ∀ c ∈ Icc c₁ c₂, ∀ n : ℕ, a.re - 1 - n ≠ c := fun c hcI n h => hno n (h ▸ hcI)
@@ -1152,7 +1149,7 @@ def incRep_res (a w : ℂ) (n : ℕ) : ℂ :=
 def incRep_phi (a w : ℂ) (n : ℕ) (s : ℂ) : ℂ :=
   Gamma (s+1-a+n+1) / (∏ j ∈ Finset.range n, (s+1-a+j)) * (π/Complex.sin (π*s)) * exp (-s*w)
 
-lemma incRep_phi_pole (a w : ℂ) (n : ℕ) : incRep_phi a w n (a-1-n) = incRep_res a w n := by
+theorem incRep_phi_pole (a w : ℂ) (n : ℕ) : incRep_phi a w n (a-1-n) = incRep_res a w n := by
   unfold incRep_phi incRep_res
   have h1 : a-1-n+1-a+n+1 = (1:ℂ) := by ring
   have h2 : ∏ j ∈ Finset.range n, (a-1-n+1-a+(j:ℂ)) = (-1)^n * n.factorial := by
@@ -1163,7 +1160,7 @@ lemma incRep_phi_pole (a w : ℂ) (n : ℕ) : incRep_phi a w n (a-1-n) = incRep_
   ring
 
 /-- `φ(s)/(s - p) = f(s)` away from the pole `p = a-1-n` and from the poles of index `< n`. -/
-lemma incRep_phi_div {a w s : ℂ} {n : ℕ} (hs : s ≠ a-1-n)
+theorem incRep_phi_div {a w s : ℂ} {n : ℕ} (hs : s ≠ a-1-n)
     (hj : ∀ j : ℕ, j < n → s+1-a+j ≠ 0) :
     incRep_phi a w n s / (s - (a-1-n)) = incRep_f a w s := by
   have hn : s+1-a+n ≠ 0 := fun h => hs (by linear_combination h)
@@ -1180,7 +1177,7 @@ lemma incRep_phi_div {a w s : ℂ} {n : ℕ} (hs : s ≠ a-1-n)
   rw [hG, show s+1-a+(n:ℂ) = s - (a-1-n) by ring]
   field_simp
 
-lemma incRep_phi_differentiableAt {a w s : ℂ} {n : ℕ} (hs : Complex.sin (π*s) ≠ 0)
+theorem incRep_phi_differentiableAt {a w s : ℂ} {n : ℕ} (hs : Complex.sin (π*s) ≠ 0)
     (hA : ∀ m : ℕ, s+1-a+n+1 ≠ -m) (hj : ∀ j : ℕ, j < n → s+1-a+j ≠ 0) :
     DifferentiableAt ℂ (incRep_phi a w n) s := by
   have hP : ∏ j ∈ Finset.range n, (s+1-a+j) ≠ 0 :=
@@ -1191,7 +1188,7 @@ lemma incRep_phi_differentiableAt {a w s : ℂ} {n : ℕ} (hs : Complex.sin (π*
     (by fun_prop)
 
 /-- Shifting the 8.6.12 line across exactly one pole `s = a-1-n`. -/
-lemma incRep_shift_one {a w : ℂ} (hw : |w.im| < 3*π/2) {c₁ c₂ : ℝ}
+theorem incRep_shift_one {a w : ℂ} (hw : |w.im| < 3*π/2) {c₁ c₂ : ℝ}
     (hsin : ∀ x ∈ Icc c₁ c₂, Real.sin (π*x) ≠ 0) {n : ℕ} (hn₁ : c₁ < a.re - 1 - n)
     (hn₂ : a.re - 1 - n < c₂) (hno : ∀ m : ℕ, m ≠ n → a.re - 1 - m ∉ Icc c₁ c₂) :
     (∫ y : ℝ, incRep_f a w (c₂ + y*I)) - (∫ y : ℝ, incRep_f a w (c₁ + y*I)) =
@@ -1252,7 +1249,7 @@ lemma incRep_shift_one {a w : ℂ} (hw : |w.im| < 3*π/2) {c₁ c₂ : ℝ}
   exact key
 
 /-- The `limUnder` residue of `gammaBarnesResidueSum` is the explicit residue. -/
-lemma incRep_limUnder_res {a w : ℂ} {n : ℕ} (hs : Complex.sin (π*(a-1-n)) ≠ 0) :
+theorem incRep_limUnder_res {a w : ℂ} {n : ℕ} (hs : Complex.sin (π*(a-1-n)) ≠ 0) :
     limUnder (𝓝[≠] (a-1-n)) (fun s : ℂ => (s-(a-1-n))*Gamma (s+1-a)*π/Complex.sin (π*s)*
       exp (-s*w)) = incRep_res a w n := by
   set p : ℂ := a-1-n with hp
@@ -1280,7 +1277,7 @@ lemma incRep_limUnder_res {a w : ℂ} {n : ℕ} (hs : Complex.sin (π*(a-1-n)) �
 
 
 /-- `sin(πc) ≠ 0` for `-1 < c < 0`. -/
-lemma incRep_sin_ne_zero_strip {c : ℝ} (h0 : -1 < c) (h1 : c < 0) : Real.sin (π*c) ≠ 0 := by
+theorem incRep_sin_ne_zero_strip {c : ℝ} (h0 : -1 < c) (h1 : c < 0) : Real.sin (π*c) ≠ 0 := by
   have : 0 < Real.sin (-(π*c)) := Real.sin_pos_of_pos_of_lt_pi (by nlinarith [Real.pi_pos])
     (by nlinarith [Real.pi_pos])
   rw [Real.sin_neg] at this; linarith
@@ -1289,7 +1286,7 @@ lemma incRep_sin_ne_zero_strip {c : ℝ} (h0 : -1 < c) (h1 : c < 0) : Real.sin (
 def incRep_W (a w : ℂ) : ℂ := -Gamma (1-a)*exp ((1-a)*w+exp w)*upperIncGammaOnLog a w
 
 /-- DLMF 8.6.12 for real `w` and `Re a < 1 + c`, from the Barnes integral for `U` (13.4.17). -/
-lemma incRep_base_real {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1) {c : ℝ} (hc0 : -1 < c) (hc1 : c < 0)
+theorem incRep_base_real {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1) {c : ℝ} (hc0 : -1 < c) (hc1 : c < 0)
     (hac : a.re < 1 + c) (w : ℝ) :
     ∫ y : ℝ, incRep_f a w (c + y*I) = 2*π*incRep_W a w := by
   set x : ℝ := Real.exp w with hx
@@ -1335,7 +1332,7 @@ lemma incRep_base_real {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1) {c : ℝ} (hc0 : 
   linear_combination (-J) * he3 - (J * exp ((1-a)*(w:ℂ)) * exp (-((1-a)*(w:ℂ)))) * he2
 
 /-- The 8.6.12 line integral is holomorphic in `w` on the strip `|Im w| < 3π/2`. -/
-lemma incRep_integral_differentiableOn_w (a : ℂ) {c : ℝ} (hs : Real.sin (π*c) ≠ 0)
+theorem incRep_integral_differentiableOn_w (a : ℂ) {c : ℝ} (hs : Real.sin (π*c) ≠ 0)
     (hav : ∀ n : ℕ, a.re - 1 - n ≠ c) :
     DifferentiableOn ℂ (fun w => ∫ y : ℝ, incRep_f a w (c + y*I))
       {w : ℂ | |w.im| < 3*π/2} := by
@@ -1374,7 +1371,7 @@ lemma incRep_integral_differentiableOn_w (a : ℂ) {c : ℝ} (hs : Real.sin (π*
   gcongr
 
 /-- DLMF 8.6.12 in the base regime `Re a < 1 + c` (no crossed poles). -/
-lemma incRep_base {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1) {c : ℝ} (hc0 : -1 < c) (hc1 : c < 0)
+theorem incRep_base {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1) {c : ℝ} (hc0 : -1 < c) (hc1 : c < 0)
     (hac : a.re < 1 + c) {w : ℂ} (hw : |w.im| < 3*π/2) :
     ∫ y : ℝ, incRep_f a w (c + y*I) = 2*π*incRep_W a w := by
   have hs := incRep_sin_ne_zero_strip hc0 hc1
@@ -1404,7 +1401,7 @@ lemma incRep_base {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1) {c : ℝ} (hc0 : -1 < 
   exact hF.eqOn_of_preconnected_of_frequently_eq hG hconv.isPreconnected h0 hfreq hw
 
 /-- A natural-number ceiling is determined by the naturals below it. -/
-lemma incRep_ceil_eq_of_iff {x : ℝ} {k : ℕ} (h : ∀ n : ℕ, (n:ℝ) < x ↔ n < k) : ⌈x⌉₊ = k := by
+theorem incRep_ceil_eq_of_iff {x : ℝ} {k : ℕ} (h : ∀ n : ℕ, (n:ℝ) < x ↔ n < k) : ⌈x⌉₊ = k := by
   apply le_antisymm
   · by_contra h'
     push Not at h'
@@ -1418,11 +1415,11 @@ lemma incRep_ceil_eq_of_iff {x : ℝ} {k : ℕ} (h : ∀ n : ℕ, (n:ℝ) < x �
 def incRep_J (a w : ℂ) (c : ℝ) : ℂ :=
   (∫ y : ℝ, incRep_f a w (c + y*I)) + 2*π*∑ n ∈ Finset.range ⌈a.re-1-c⌉₊, incRep_res a w n
 
-lemma incRep_sin_strip_Icc {c₁ c₂ : ℝ} (h1 : -1 < c₁) (h2 : c₂ < 0) :
+theorem incRep_sin_strip_Icc {c₁ c₂ : ℝ} (h1 : -1 < c₁) (h2 : c₂ < 0) :
     ∀ x ∈ Icc c₁ c₂, Real.sin (π*x) ≠ 0 := fun x hx =>
   incRep_sin_ne_zero_strip (by linarith [hx.1]) (by linarith [hx.2])
 
-lemma incRep_J_eq_of_le {a w : ℂ} (hw : |w.im| < 3*π/2) {c₁ c₂ : ℝ} (h1 : -1 < c₁)
+theorem incRep_J_eq_of_le {a w : ℂ} (hw : |w.im| < 3*π/2) {c₁ c₂ : ℝ} (h1 : -1 < c₁)
     (h12 : c₁ ≤ c₂) (h2 : c₂ < 0) (hav₁ : ∀ n : ℕ, a.re - 1 - n ≠ c₁)
     (hav₂ : ∀ n : ℕ, a.re - 1 - n ≠ c₂) : incRep_J a w c₁ = incRep_J a w c₂ := by
   rcases eq_or_lt_of_le h12 with h | h12'
@@ -1472,7 +1469,7 @@ lemma incRep_J_eq_of_le {a w : ℂ} (hw : |w.im| < 3*π/2) {c₁ c₂ : ℝ} (h1
     unfold incRep_J
     rw [hN, incRep_shift_none hw h12' hsin hex]
 
-lemma incRep_J_eq {a w : ℂ} (hw : |w.im| < 3*π/2) {c₁ c₂ : ℝ} (h1 : -1 < c₁) (h1' : c₁ < 0)
+theorem incRep_J_eq {a w : ℂ} (hw : |w.im| < 3*π/2) {c₁ c₂ : ℝ} (h1 : -1 < c₁) (h1' : c₁ < 0)
     (h2 : -1 < c₂) (h2' : c₂ < 0) (hav₁ : ∀ n : ℕ, a.re - 1 - n ≠ c₁)
     (hav₂ : ∀ n : ℕ, a.re - 1 - n ≠ c₂) : incRep_J a w c₁ = incRep_J a w c₂ := by
   rcases le_total c₁ c₂ with h | h
@@ -1483,7 +1480,7 @@ lemma incRep_J_eq {a w : ℂ} (hw : |w.im| < 3*π/2) {c₁ c₂ : ℝ} (h1 : -1 
 def incRep_cg (a : ℂ) : ℝ :=
   if Int.fract a.re < 1/2 then (Int.fract a.re - 1)/2 else (Int.fract a.re - 2)/2
 
-lemma incRep_cg_spec (a : ℂ) : ∃ m : ℤ, -1 < incRep_cg a ∧ incRep_cg a < 0 ∧
+theorem incRep_cg_spec (a : ℂ) : ∃ m : ℤ, -1 < incRep_cg a ∧ incRep_cg a < 0 ∧
     (m:ℝ) + 1/4 ≤ a.re - 1 - incRep_cg a ∧ a.re - 1 - incRep_cg a ≤ m + 3/4 := by
   have h0 := Int.fract_nonneg a.re
   have h1 := Int.fract_lt_one a.re
@@ -1494,14 +1491,14 @@ lemma incRep_cg_spec (a : ℂ) : ∃ m : ℤ, -1 < incRep_cg a ∧ incRep_cg a <
   · push Not at h
     exact ⟨⌊a.re⌋, by linarith, by linarith, by linarith, by linarith⟩
 
-lemma incRep_no_nat {m : ℤ} {x : ℝ} (h1 : (m:ℝ) < x) (h2 : x < m + 1) (n : ℕ) : (n:ℝ) ≠ x := by
+theorem incRep_no_nat {m : ℤ} {x : ℝ} (h1 : (m:ℝ) < x) (h2 : x < m + 1) (n : ℕ) : (n:ℝ) ≠ x := by
   intro h
   rw [← h] at h1 h2
   have : (m:ℤ) < n := by exact_mod_cast h1
   have : (n:ℤ) < m + 1 := by exact_mod_cast h2
   omega
 
-lemma incRep_ceil_near {m : ℤ} {x y : ℝ} (hx1 : (m:ℝ) < x) (hx2 : x < m + 1) (hy1 : (m:ℝ) < y)
+theorem incRep_ceil_near {m : ℤ} {x y : ℝ} (hx1 : (m:ℝ) < x) (hx2 : x < m + 1) (hy1 : (m:ℝ) < y)
     (hy2 : y < m + 1) : ⌈x⌉₊ = ⌈y⌉₊ :=
   incRep_ceil_eq_of_iff fun n => by
     rw [Nat.lt_ceil]
@@ -1516,7 +1513,7 @@ lemma incRep_ceil_near {m : ℤ} {x y : ℝ} (hx1 : (m:ℝ) < x) (hx2 : x < m + 
         push_cast at this; linarith
     rw [key x hx1 hx2, key y hy1 hy2]
 
-lemma incRep_sin_lower (m : ℤ) : ∃ δ : ℝ, 0 < δ ∧
+theorem incRep_sin_lower (m : ℤ) : ∃ δ : ℝ, 0 < δ ∧
     ∀ x ∈ Icc ((m:ℝ) + 1/8) (m + 7/8), δ ≤ |Real.sin (π*x)| := by
   obtain ⟨x₁, hx₁, hmin⟩ := (isCompact_Icc (a := (m:ℝ) + 1/8) (b := m + 7/8)).exists_isMinOn
     (nonempty_Icc.mpr (by linarith)) ((Real.continuous_sin.comp (continuous_const.mul
@@ -1534,14 +1531,14 @@ lemma incRep_sin_lower (m : ℤ) : ∃ δ : ℝ, 0 < δ ∧
   have : k < m + 1 := by exact_mod_cast h2
   omega
 
-lemma incRep_cg_near {a₀ a : ℂ} (h : |a.re - a₀.re| < 1/8) : ∃ m : ℤ,
+theorem incRep_cg_near {a₀ a : ℂ} (h : |a.re - a₀.re| < 1/8) : ∃ m : ℤ,
     (m:ℝ) + 1/8 < a.re - 1 - incRep_cg a₀ ∧ a.re - 1 - incRep_cg a₀ < m + 7/8 ∧
     (m:ℝ) + 1/8 < a₀.re - 1 - incRep_cg a₀ ∧ a₀.re - 1 - incRep_cg a₀ < m + 7/8 := by
   obtain ⟨m, -, -, h1, h2⟩ := incRep_cg_spec a₀
   have := abs_lt.mp h
   exact ⟨m, by linarith, by linarith, by linarith, by linarith⟩
 
-lemma incRep_cg_avoid {a₀ a : ℂ} (h : |a.re - a₀.re| < 1/8) (n : ℕ) :
+theorem incRep_cg_avoid {a₀ a : ℂ} (h : |a.re - a₀.re| < 1/8) (n : ℕ) :
     a.re - 1 - n ≠ incRep_cg a₀ := by
   obtain ⟨m, h1, h2, -, -⟩ := incRep_cg_near h
   intro he
@@ -1549,7 +1546,7 @@ lemma incRep_cg_avoid {a₀ a : ℂ} (h : |a.re - a₀.re| < 1/8) (n : ℕ) :
     (by linarith)
 
 /-- On the canonical line of `a₀` the 8.6.12 integral is holomorphic in `a` near `a₀`. -/
-lemma incRep_integral_differentiableOn_a {w : ℂ} (hw : |w.im| < 3*π/2) (a₀ : ℂ) :
+theorem incRep_integral_differentiableOn_a {w : ℂ} (hw : |w.im| < 3*π/2) (a₀ : ℂ) :
     DifferentiableOn ℂ (fun a => ∫ y : ℝ, incRep_f a w (incRep_cg a₀ + y*I))
       (Metric.ball a₀ (1/8)) := by
   set c₀ := incRep_cg a₀ with hc₀
@@ -1615,7 +1612,7 @@ lemma incRep_integral_differentiableOn_a {w : ℂ} (hw : |w.im| < 3*π/2) (a₀ 
       (DLMF.Gamma.integrable_one_add_abs_pow_mul_exp_neg hb _).const_mul _,
       Eventually.of_forall fun y a' ha' => hbound a' ha' y⟩)
 
-lemma incRep_sin_res_ne {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1) {c : ℝ} (hc : -1 < c) {n : ℕ}
+theorem incRep_sin_res_ne {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1) {c : ℝ} (hc : -1 < c) {n : ℕ}
     (hn : c < a.re - 1 - n) : Complex.sin (π*(a-1-n)) ≠ 0 := by
   intro h
   obtain ⟨k, hk⟩ := Complex.sin_eq_zero_iff.mp h
@@ -1635,7 +1632,7 @@ lemma incRep_sin_res_ne {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1) {c : ℝ} (hc : 
   rw [this]
   linear_combination hk'
 
-lemma incRep_res_differentiableAt (w : ℂ) {a₀ : ℂ} {n : ℕ}
+theorem incRep_res_differentiableAt (w : ℂ) {a₀ : ℂ} {n : ℕ}
     (hs : Complex.sin (π*(a₀-1-n)) ≠ 0) :
     DifferentiableAt ℂ (fun a => incRep_res a w n) a₀ := by
   have h1 : DifferentiableAt ℂ (fun a : ℂ => Complex.sin (π*(a-1-n))) a₀ :=
@@ -1649,12 +1646,12 @@ lemma incRep_res_differentiableAt (w : ℂ) {a₀ : ℂ} {n : ℕ}
 /-- The canonical-line value of the residue-corrected 8.6.12 integral. -/
 def incRep_G (w a : ℂ) : ℂ := incRep_J a w (incRep_cg a)
 
-lemma incRep_G_eq_J {w : ℂ} (hw : |w.im| < 3*π/2) (a : ℂ) {c : ℝ} (hc0 : -1 < c) (hc1 : c < 0)
+theorem incRep_G_eq_J {w : ℂ} (hw : |w.im| < 3*π/2) (a : ℂ) {c : ℝ} (hc0 : -1 < c) (hc1 : c < 0)
     (hav : ∀ n : ℕ, a.re - 1 - n ≠ c) : incRep_J a w c = incRep_G w a := by
   obtain ⟨m, h1, h2, -, -⟩ := incRep_cg_spec a
   exact incRep_J_eq hw hc0 hc1 h1 h2 hav (incRep_cg_avoid (by simp))
 
-lemma incRep_G_differentiableAt {w : ℂ} (hw : |w.im| < 3*π/2) {a₀ : ℂ}
+theorem incRep_G_differentiableAt {w : ℂ} (hw : |w.im| < 3*π/2) {a₀ : ℂ}
     (ha : ∀ n : ℕ, a₀ ≠ n+1) : DifferentiableAt ℂ (incRep_G w) a₀ := by
   obtain ⟨m₀, hc1, hc2, -, -⟩ := incRep_cg_spec a₀
   set H : ℂ → ℂ := fun a => (∫ y : ℝ, incRep_f a w (incRep_cg a₀ + y*I)) +
@@ -1682,7 +1679,7 @@ lemma incRep_G_differentiableAt {w : ℂ} (hw : |w.im| < 3*π/2) {a₀ : ℂ}
 def gammaBarnesResidueSum (a w : ℂ) (c : ℝ) : ℂ :=
   ∑ n ∈ Finset.range ⌈a.re-1-c⌉₊, limUnder (𝓝[≠] (a-1-n)) (fun s : ℂ => (s-(a-1-n))*Gamma (s+1-a)*π/sin (π*s)*exp (-s*w))
 
-lemma incRep_residueSum_eq {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1) (w : ℂ) {c : ℝ} (hc0 : -1 < c) :
+theorem incRep_residueSum_eq {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1) (w : ℂ) {c : ℝ} (hc0 : -1 < c) :
     gammaBarnesResidueSum a w c = ∑ n ∈ Finset.range ⌈a.re-1-c⌉₊, incRep_res a w n := by
   unfold gammaBarnesResidueSum
   refine Finset.sum_congr rfl fun n hn => incRep_limUnder_res (incRep_sin_res_ne ha hc0 ?_)

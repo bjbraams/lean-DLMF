@@ -7,7 +7,6 @@ module
 
 public import DLMF.Hypergeometric.Basic
 public import DLMF.Hypergeometric.Series
-public import Mathlib.Tactic.CrossRefAttribute
 
 /-!
 # Pochhammer identities (DLMF §5.2)
@@ -26,7 +25,7 @@ noncomputable section
 
 namespace DLMF.Gamma
 
-lemma poch_succ_left (a : ℂ) (n : ℕ) : poch a (n + 1) = a * poch (a + 1) n :=
+theorem poch_succ_left (a : ℂ) (n : ℕ) : poch a (n + 1) = a * poch (a + 1) n :=
   DLMF.Hypergeometric.poch_succ_left a n
 @[dlmf 5.2.E6]
 theorem poch_neg_eq (a : ℂ) (n : ℕ) :

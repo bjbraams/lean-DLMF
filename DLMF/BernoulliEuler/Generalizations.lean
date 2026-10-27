@@ -8,23 +8,8 @@ module
 public import DLMF.BernoulliEuler.Basic
 public import DLMF.BernoulliEuler.GeneratingFunctions
 public import DLMF.Combinatorics.Stirling
-public import DLMFMathlib.NumberTheory.EulerNumbers
-public import Mathlib.Analysis.Analytic.Binomial
-public import Mathlib.Analysis.Calculus.FDeriv.Analytic
-public import Mathlib.Analysis.Complex.HasPrimitives
-public import Mathlib.Analysis.Complex.RemovableSingularity
-public import Mathlib.Analysis.Complex.TaylorSeries
-public import Mathlib.Analysis.SpecialFunctions.Complex.Log
-public import Mathlib.Analysis.SpecialFunctions.Complex.LogBounds
-public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
-public import Mathlib.Analysis.SpecialFunctions.Pow.Real
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Series
-public import Mathlib.Combinatorics.Enumerative.Stirling
 public import Mathlib.NumberTheory.DirichletCharacter.Basic
-public import Mathlib.NumberTheory.LegendreSymbol.ZModChar
-public import Mathlib.RingTheory.PowerSeries.Inverse
-public import Mathlib.RingTheory.Polynomial.Pochhammer
-public import Mathlib.Tactic.CrossRefAttribute
+public import Mathlib.Tactic.Monotonicity.Lemmas
 
 /-!
 # Generalizations of Bernoulli and Euler polynomials (DLMF §24.16)
@@ -149,7 +134,7 @@ def eulerOrder (ℓ n : ℕ) : ℚ[X] :=
 /-! ### Powers of power series (helpers for §24.16(i)) -/
 
 /-- If `g` has zero constant term, `[tⁿ] gⁿ = ([t] g)ⁿ`. -/
-theorem q24b_coeff_pow_self (g : PowerSeries ℚ) (hg : PowerSeries.constantCoeff g = 0) (n : ℕ) :
+lemma q24b_coeff_pow_self (g : PowerSeries ℚ) (hg : PowerSeries.constantCoeff g = 0) (n : ℕ) :
     PowerSeries.coeff n (g ^ n) = (PowerSeries.coeff 1 g) ^ n := by
   obtain ⟨h, rfl⟩ := PowerSeries.X_dvd_iff.mpr hg
   rw [mul_pow, PowerSeries.coeff_X_pow_mul']
@@ -159,7 +144,7 @@ theorem q24b_coeff_pow_self (g : PowerSeries ℚ) (hg : PowerSeries.constantCoef
     PowerSeries.coeff_zero_eq_constantCoeff_apply]
 
 /-- If `g` has zero constant term, `[tⁿ] gʲ = 0` for `j > n`. -/
-theorem q24b_coeff_pow_of_lt (g : PowerSeries ℚ) (hg : PowerSeries.constantCoeff g = 0) {n j : ℕ}
+lemma q24b_coeff_pow_of_lt (g : PowerSeries ℚ) (hg : PowerSeries.constantCoeff g = 0) {n j : ℕ}
     (hj : n < j) : PowerSeries.coeff n (g ^ j) = 0 := by
   obtain ⟨h, rfl⟩ := PowerSeries.X_dvd_iff.mpr hg
   rw [mul_pow, PowerSeries.coeff_X_pow_mul']
@@ -167,7 +152,7 @@ theorem q24b_coeff_pow_of_lt (g : PowerSeries ℚ) (hg : PowerSeries.constantCoe
 
 /-- The coefficient polynomial `b24b_powCoeff` at a natural number `ℓ` is the coefficient of
 the `ℓ`-th power. -/
-theorem q24b_powCoeff_eval_natCast (G : PowerSeries ℚ) (hG : PowerSeries.constantCoeff G = 1)
+lemma q24b_powCoeff_eval_natCast (G : PowerSeries ℚ) (hG : PowerSeries.constantCoeff G = 1)
     (ℓ n : ℕ) : (b24b_powCoeff (G - 1) n).eval (ℓ : ℚ) = PowerSeries.coeff n (G ^ ℓ) := by
   set g := G - 1
   have hg : PowerSeries.constantCoeff g = 0 := by simp [g, hG]
@@ -196,7 +181,7 @@ theorem q24b_powCoeff_eval_natCast (G : PowerSeries ℚ) (hG : PowerSeries.const
     rw [q24b_coeff_pow_of_lt g hg (by simp at hj; omega)]; simp
 
 /-- Termwise product of the series of `F` and `G` at `t` is the series of `F * G`. -/
-theorem q24b_coeff_mul_pow (F G : PowerSeries ℚ) (t : ℂ) (n : ℕ) :
+lemma q24b_coeff_mul_pow (F G : PowerSeries ℚ) (t : ℂ) (n : ℕ) :
     ((PowerSeries.coeff n (F * G) : ℚ) : ℂ) * t ^ n =
       ∑ k ∈ range (n + 1), ((PowerSeries.coeff k F : ℚ) * t ^ k) *
         ((PowerSeries.coeff (n - k) G : ℚ) * t ^ (n - k)) := by
@@ -209,7 +194,7 @@ theorem q24b_coeff_mul_pow (F G : PowerSeries ℚ) (t : ℂ) (n : ℕ) :
   ring
 
 /-- Absolute convergence of a power series with rational coefficients passes to powers. -/
-theorem q24b_hasSum_pow (G : PowerSeries ℚ) {t v : ℂ}
+lemma q24b_hasSum_pow (G : PowerSeries ℚ) {t v : ℂ}
     (hs : Summable fun n => ‖((PowerSeries.coeff n G : ℚ) : ℂ) * t ^ n‖)
     (h : HasSum (fun n => ((PowerSeries.coeff n G : ℚ) : ℂ) * t ^ n) v) (ℓ : ℕ) :
     Summable (fun n => ‖((PowerSeries.coeff n (G ^ ℓ) : ℚ) : ℂ) * t ^ n‖) ∧
@@ -230,18 +215,18 @@ theorem q24b_hasSum_pow (G : PowerSeries ℚ) {t v : ℂ}
     exact ⟨hsum, hprod⟩
 
 /-- `B_n^{(ℓ)} = n! [tⁿ] (t/(eᵗ-1))^ℓ`. -/
-theorem q24b_bernoulliNumberOrder_eq (ℓ n : ℕ) :
+lemma q24b_bernoulliNumberOrder_eq (ℓ n : ℕ) :
     bernoulliNumberOrder ℓ n = n ! * PowerSeries.coeff n (bernoulliPowerSeries ℚ ^ ℓ) := by
   rw [bernoulliNumberOrder, norlundPolynomial, eval_smul, smul_eq_mul,
     q24b_powCoeff_eval_natCast _ (by simp [bernoulliPowerSeries])]
 
 /-- `E_n^{(ℓ)} = n! [tⁿ] (2/(eᵗ+1))^ℓ`. -/
-theorem q24b_eulerNumberOrder_eq (ℓ n : ℕ) :
+lemma q24b_eulerNumberOrder_eq (ℓ n : ℕ) :
     eulerNumberOrder ℓ n = n ! * PowerSeries.coeff n (b24b_eulerZeroSeries ^ ℓ) := by
   rw [eulerNumberOrder, q24b_powCoeff_eval_natCast _ (by simp [b24b_eulerZeroSeries])]
 
 /-- Evaluation of `∑ₖ (n choose k) cₖ X^{n-k}`. -/
-theorem q24b_aeval_order (c : ℕ → ℚ) (n : ℕ) (x : ℂ) :
+lemma q24b_aeval_order (c : ℕ → ℚ) (n : ℕ) (x : ℂ) :
     aeval x (∑ k ∈ range (n + 1), C ((n.choose k : ℚ) * c k) * X ^ (n - k)) =
       ∑ k ∈ range (n + 1), (n.choose k : ℂ) * (c k : ℂ) * x ^ (n - k) := by
   simp [map_sum]
@@ -340,7 +325,7 @@ local notation "D" => @PowerSeries.derivative ℚ _
 local notation "β" => bernoulliPowerSeries ℚ
 
 /-- `T β' = β - T β - β²` for `β = t/(eᵗ-1)`. -/
-theorem r24b_X_mul_derivative_bernoulliPowerSeries :
+lemma r24b_X_mul_derivative_bernoulliPowerSeries :
     T * D β = β - T * β - β ^ 2 := by
   set e := PowerSeries.exp ℚ
   have h := bernoulliPowerSeries_mul_exp_sub_one ℚ
@@ -358,7 +343,7 @@ theorem r24b_X_mul_derivative_bernoulliPowerSeries :
 def r24b_expSeries (x : ℚ) : PowerSeries ℚ := PowerSeries.mk fun n => x ^ n / n !
 
 /-- `d/dt e^{xt} = x e^{xt}`. -/
-theorem r24b_derivative_expSeries (x : ℚ) :
+lemma r24b_derivative_expSeries (x : ℚ) :
     D (r24b_expSeries x) = PowerSeries.C x * r24b_expSeries x := by
   ext n
   rw [PowerSeries.coeff_derivative, PowerSeries.coeff_C_mul, r24b_expSeries,
@@ -369,7 +354,7 @@ theorem r24b_derivative_expSeries (x : ℚ) :
   ring
 
 /-- `t (βᵃ)' = a βᵃ - a t βᵃ - a βᵃ⁺¹`. -/
-theorem r24b_X_mul_derivative_pow (a : ℕ) :
+lemma r24b_X_mul_derivative_pow (a : ℕ) :
     T * D (β ^ a) = (a : PowerSeries ℚ) * β ^ a - a * T * β ^ a - a * β ^ (a + 1) := by
   rcases a with _ | a
   · simp
@@ -378,7 +363,7 @@ theorem r24b_X_mul_derivative_pow (a : ℕ) :
     r24b_X_mul_derivative_bernoulliPowerSeries
 
 /-- `[tⁿ] βᵃ e^{xt} = B_n^{(a)}(x)/n!`. -/
-theorem r24b_coeff_pow_mul_exp (a n : ℕ) (x : ℚ) :
+lemma r24b_coeff_pow_mul_exp (a n : ℕ) (x : ℚ) :
     PowerSeries.coeff n (β ^ a * r24b_expSeries x) = (bernoulliOrder a n).eval x / n ! := by
   rw [PowerSeries.coeff_mul, Finset.Nat.sum_antidiagonal_eq_sum_range_succ_mk, bernoulliOrder,
     eval_finsetSum, sum_div]
@@ -393,7 +378,7 @@ theorem r24b_coeff_pow_mul_exp (a n : ℕ) (x : ℚ) :
 
 /-- The Nörlund recurrence
 `a B_{n+1}^{(a+1)}(x) = (a - n - 1) B_{n+1}^{(a)}(x) + (n+1)(x - a) B_n^{(a)}(x)`. -/
-theorem r24b_bernoulliOrder_rec_eval (a n : ℕ) (x : ℚ) :
+lemma r24b_bernoulliOrder_rec_eval (a n : ℕ) (x : ℚ) :
     (a : ℚ) * (bernoulliOrder (a + 1) (n + 1)).eval x =
       ((a : ℚ) - (n + 1)) * (bernoulliOrder a (n + 1)).eval x +
         (n + 1) * (x - a) * (bernoulliOrder a n).eval x := by
@@ -415,7 +400,7 @@ theorem r24b_bernoulliOrder_rec_eval (a n : ℕ) (x : ℚ) :
   linear_combination hc
 
 /-- `B_n^{(n+1)}(x) = (x-1)(x-2)⋯(x-n)`. -/
-theorem r24b_bernoulliOrder_succ_self (n : ℕ) :
+lemma r24b_bernoulliOrder_succ_self (n : ℕ) :
     bernoulliOrder (n + 1) n = (descPochhammer ℚ n).comp (X - 1) := by
   induction n with
   | zero =>
@@ -434,20 +419,20 @@ theorem r24b_bernoulliOrder_succ_self (n : ℕ) :
 def r24b_I : ℚ[X] →ₗ[ℚ] ℚ := lsum fun k => (1 / ((k : ℚ) + 1)) • LinearMap.id
 
 /-- `I(c Xᵐ) = c/(m+1)`. -/
-theorem r24b_I_C_mul_X_pow (c : ℚ) (m : ℕ) : r24b_I (C c * X ^ m) = c / (m + 1) := by
+lemma r24b_I_C_mul_X_pow (c : ℚ) (m : ℕ) : r24b_I (C c * X ^ m) = c / (m + 1) := by
   rw [C_mul_X_pow_eq_monomial, r24b_I, lsum_apply, sum_monomial_index]
   · simp; ring
   · simp
 
 /-- `I(p) = ∑ₖ pₖ/(k+1)`. -/
-theorem r24b_I_eq_sum (p : ℚ[X]) {N : ℕ} (hN : p.natDegree < N) :
+lemma r24b_I_eq_sum (p : ℚ[X]) {N : ℕ} (hN : p.natDegree < N) :
     r24b_I p = ∑ k ∈ range N, p.coeff k / (k + 1) := by
   rw [r24b_I, lsum_apply, sum_over_range' _ (fun _ => by simp) N hN]
   refine sum_congr rfl fun k _ => ?_
   simp; ring
 
 /-- `∫₀¹ B_n^{(a+1)}(x) dx = B_n^{(a)}`. -/
-theorem r24b_I_bernoulliOrder (a n : ℕ) :
+lemma r24b_I_bernoulliOrder (a n : ℕ) :
     r24b_I (bernoulliOrder (a + 1) n) = bernoulliNumberOrder a n := by
   rw [bernoulliOrder, map_sum]
   simp only [r24b_I_C_mul_X_pow]
@@ -484,7 +469,7 @@ local notation "D" => @PowerSeries.derivative ℚ _
 def r24b_logSeries : PowerSeries ℚ := PowerSeries.mk fun m => (-1) ^ m / (m + 1)
 
 /-- `(1 + t) (ln(1+t))' = 1`. -/
-theorem r24b_one_add_X_mul_derivative_log : (1 + T) * D (T * r24b_logSeries) = 1 := by
+lemma r24b_one_add_X_mul_derivative_log : (1 + T) * D (T * r24b_logSeries) = 1 := by
   ext n
   rw [add_mul, one_mul, map_add]
   rcases n with _ | n
@@ -500,7 +485,7 @@ theorem r24b_one_add_X_mul_derivative_log : (1 + T) * D (T * r24b_logSeries) = 1
     ring
 
 /-- The differential equation of `(ln(1+t)/t)^{k+1}`. -/
-theorem r24b_log_rec (k : ℕ) :
+lemma r24b_log_rec (k : ℕ) :
     (1 + T) * T * D (r24b_logSeries ^ (k + 1)) =
       ((k + 1 : ℕ) : PowerSeries ℚ) * r24b_logSeries ^ k -
         ((k + 1 : ℕ) : PowerSeries ℚ) * (1 + T) * r24b_logSeries ^ (k + 1) := by
@@ -510,7 +495,7 @@ theorem r24b_log_rec (k : ℕ) :
   linear_combination ((k + 1 : ℕ) : PowerSeries ℚ) * r24b_logSeries ^ k * h
 
 /-- `n! [tⁿ] (ln(1+t)/t)^ℓ = ℓ B_n^{(ℓ+n)}/(ℓ+n)` for `ℓ ≥ 1`. -/
-theorem r24b_coeff_logSeries_pow (n k : ℕ) :
+lemma r24b_coeff_logSeries_pow (n k : ℕ) :
     (n ! : ℚ) * PowerSeries.coeff n (r24b_logSeries ^ (k + 1)) =
       (k + 1) * bernoulliNumberOrder (k + 1 + n) n / (k + 1 + n) := by
   have hrec : ∀ k n : ℕ, ((n : ℚ) + k + 2) * PowerSeries.coeff (n + 1) (r24b_logSeries ^ (k + 1)) +
@@ -624,14 +609,14 @@ def bernoulliSecondKind (n : ℕ) : ℚ :=
 /-! ### Helpers for 24.16.5: `bₙ = ∫₀¹ (x choose n) dx` and the binomial series -/
 
 /-- `(x choose n) = x(x-1)⋯(x-n+1)/n!`. -/
-theorem r24b_choose_eq (x : ℂ) (n : ℕ) :
+lemma r24b_choose_eq (x : ℂ) (n : ℕ) :
     Ring.choose x n = aeval x (descPochhammer ℚ n) / n ! := by
   rw [Ring.choose_eq_smul, ← aeval_eq_smeval, smul_eq_mul, ← descPochhammer_map (algebraMap ℤ ℚ),
     aeval_map_algebraMap]
   ring
 
 /-- `|x(x-1)⋯(x-n+1)| ≤ n!` for `0 ≤ x ≤ 1`. -/
-theorem r24b_norm_descPochhammer_le (x : ℝ) (hx0 : 0 ≤ x) (hx1 : x ≤ 1) (n : ℕ) :
+lemma r24b_norm_descPochhammer_le (x : ℝ) (hx0 : 0 ≤ x) (hx1 : x ≤ 1) (n : ℕ) :
     ‖aeval (x : ℂ) (descPochhammer ℚ n)‖ ≤ n ! := by
   induction n with
   | zero => simp
@@ -646,7 +631,7 @@ theorem r24b_norm_descPochhammer_le (x : ℝ) (hx0 : 0 ≤ x) (hx1 : x ≤ 1) (n
     exact mul_le_mul ih h (norm_nonneg _) (by positivity)
 
 /-- `∫₀¹ (x choose n) dx = bₙ`. -/
-theorem r24b_integral_descPochhammer (n : ℕ) :
+lemma r24b_integral_descPochhammer (n : ℕ) :
     ∫ x in (0 : ℝ)..1, aeval (x : ℂ) (descPochhammer ℚ n) / n ! = (bernoulliSecondKind n : ℂ) := by
   have hdeg : (descPochhammer ℚ n).natDegree < n + 1 := by
     rw [descPochhammer_natDegree]; omega
@@ -762,13 +747,13 @@ def degenerateBernoulli (n : ℕ) : ℚ[X] :=
 /-! ### Helpers for 24.16.7: the binomial series of `(1 + λt)^{1/λ}` and its inverse -/
 
 /-- The degenerate series has constant term `1`. -/
-theorem r24b_constantCoeff_degenerateSeries :
+lemma r24b_constantCoeff_degenerateSeries :
     PowerSeries.constantCoeff b24b_degenerateSeries = 1 := by
   rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply, b24b_degenerateSeries, PowerSeries.coeff_mk]
   simp
 
 /-- `aeval (1/λ) (x(x-1)⋯(x-k)) · λ^{k+1} = (1-λ)(1-2λ)⋯(1-kλ)`. -/
-theorem r24b_descPochhammer_inv_mul_pow {lam : ℂ} (hlam : lam ≠ 0) (k : ℕ) :
+lemma r24b_descPochhammer_inv_mul_pow {lam : ℂ} (hlam : lam ≠ 0) (k : ℕ) :
     aeval (1 / lam) (descPochhammer ℚ (k + 1)) * lam ^ (k + 1) =
       ∏ i ∈ range k, (1 - ((i + 1 : ℕ) : ℂ) * lam) := by
   induction k with
@@ -780,7 +765,7 @@ theorem r24b_descPochhammer_inv_mul_pow {lam : ℂ} (hlam : lam ≠ 0) (k : ℕ)
     field_simp
 
 /-- The coefficients of the degenerate series at `λ` are `(1/λ choose k+1) λ^{k+1}`. -/
-theorem r24b_coeff_degenerate_aeval {lam : ℂ} (hlam : lam ≠ 0) (k : ℕ) :
+lemma r24b_coeff_degenerate_aeval {lam : ℂ} (hlam : lam ≠ 0) (k : ℕ) :
     aeval lam (PowerSeries.coeff k b24b_degenerateSeries) =
       Ring.choose (1 / lam) (k + 1) * lam ^ (k + 1) := by
   rw [Ring.choose_eq_smul, ← aeval_eq_smeval,
@@ -790,7 +775,7 @@ theorem r24b_coeff_degenerate_aeval {lam : ℂ} (hlam : lam ≠ 0) (k : ℕ) :
   simp
 
 /-- The coefficients of the degenerate series at `λ` are bounded by `(1 + |λ|)ᵏ`. -/
-theorem r24b_norm_coeff_degenerate_le (lam : ℂ) (k : ℕ) :
+lemma r24b_norm_coeff_degenerate_le (lam : ℂ) (k : ℕ) :
     ‖aeval lam (PowerSeries.coeff k b24b_degenerateSeries)‖ ≤ (1 + ‖lam‖) ^ k := by
   rw [b24b_degenerateSeries, PowerSeries.coeff_mk, map_mul, aeval_C, map_prod, norm_mul,
     norm_prod]
@@ -823,7 +808,7 @@ theorem r24b_norm_coeff_degenerate_le (lam : ℂ) (k : ℕ) :
       exact div_le_self (by positivity) (by linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)])
 
 /-- The coefficients `hₙ = βₙ(λ)/n!` of the inverse series are bounded by `(2(1 + |λ|))ⁿ`. -/
-theorem r24b_norm_coeff_inv_le (lam : ℂ) (n : ℕ) :
+lemma r24b_norm_coeff_inv_le (lam : ℂ) (n : ℕ) :
     ‖aeval lam (PowerSeries.coeff n (PowerSeries.invOfUnit b24b_degenerateSeries 1))‖ ≤
       (2 * (1 + ‖lam‖)) ^ n := by
   set A := 1 + ‖lam‖
@@ -990,7 +975,7 @@ open DLMF.Combinatorics
 
 /-- Coefficients of two real power series with the same sum on a punctured neighbourhood of `0`
 are equal. -/
-theorem s24b_coeff_unique {a b : ℕ → ℝ} {f : ℝ → ℝ}
+lemma s24b_coeff_unique {a b : ℕ → ℝ} {f : ℝ → ℝ}
     (ha : ∀ᶠ t in 𝓝[≠] (0 : ℝ), HasSum (fun n => a n * t ^ n) (f t))
     (hb : ∀ᶠ t in 𝓝[≠] (0 : ℝ), HasSum (fun n => b n * t ^ n) (f t)) : a = b := by
   have hser : ∀ c : ℕ → ℝ, (∀ᶠ t in 𝓝[≠] (0 : ℝ), HasSum (fun n => c n * t ^ n) (f t)) →
@@ -1025,7 +1010,7 @@ theorem s24b_coeff_unique {a b : ℕ → ℝ} {f : ℝ → ℝ}
     (h1.eq_formalMultilinearSeries_of_eventually h2 hev)
 
 /-- `u/(eᵘ - 1) = ∑ Bₙ uⁿ/n!` for real `0 < |u| < 2π`. -/
-theorem s24b_hasSum_bernoulli_real {u : ℝ} (hu : |u| < 2 * π) (hu0 : u ≠ 0) :
+lemma s24b_hasSum_bernoulli_real {u : ℝ} (hu : |u| < 2 * π) (hu0 : u ≠ 0) :
     HasSum (fun n : ℕ => (bernoulli n : ℝ) * u ^ n / n !) (u / (Real.exp u - 1)) := by
   have h := Complex.hasSum_bernoulli_mul_pow_div (z := (u : ℂ))
     (by rwa [Complex.norm_real, Real.norm_eq_abs]) (by exact_mod_cast hu0)
@@ -1035,7 +1020,7 @@ theorem s24b_hasSum_bernoulli_real {u : ℝ} (hu : |u| < 2 * π) (hu0 : u ≠ 0)
   · push_cast; rfl
 
 /-- `∑ |Bₙ| vⁿ/n!` converges for `0 ≤ v < 2π`. -/
-theorem s24b_summable_abs_bernoulli {v : ℝ} (hv0 : 0 ≤ v) (hv : v < 2 * π) :
+lemma s24b_summable_abs_bernoulli {v : ℝ} (hv0 : 0 ≤ v) (hv : v < 2 * π) :
     Summable (fun n : ℕ => |(bernoulli n : ℝ)| * v ^ n / n !) := by
   have hsum : ∀ z : ℂ, ‖z‖ < 2 * π →
       Summable (fun n => ((bernoulli n : ℂ) / n !) * z ^ n) := by
@@ -1053,7 +1038,7 @@ theorem s24b_summable_abs_bernoulli {v : ℝ} (hv0 : 0 ≤ v) (hv : v < 2 * π) 
   ring
 
 /-- `∑ⱼ |s(j, m)| xʲ/j! = (-ln(1-x))^m/m!` for `|x| < 1`. -/
-theorem s24b_hasSum_stirlingFirst (m : ℕ) {x : ℝ} (hx : |x| < 1) :
+lemma s24b_hasSum_stirlingFirst (m : ℕ) {x : ℝ} (hx : |x| < 1) :
     HasSum (fun j : ℕ => (Nat.stirlingFirst j m : ℝ) * x ^ j / j !)
       ((-Real.log (1 - x)) ^ m / m !) := by
   have h := hasSum_signedStirlingFirst_div_factorial m (x := -x) (by rwa [abs_neg])
@@ -1074,7 +1059,7 @@ theorem s24b_hasSum_stirlingFirst (m : ℕ) {x : ℝ} (hx : |x| < 1) :
   · rw [neg_pow]; ring
 
 /-- `|ln(1+y)| ≤ |y|/(1-|y|)` for `|y| < 1`. -/
-theorem s24b_abs_log_le {y : ℝ} (hy : |y| < 1) : |Real.log (1 + y)| ≤ |y| / (1 - |y|) := by
+lemma s24b_abs_log_le {y : ℝ} (hy : |y| < 1) : |Real.log (1 + y)| ≤ |y| / (1 - |y|) := by
   have h1 : 0 < 1 + y := by linarith [neg_abs_le y]
   have h2 : 0 < 1 - |y| := by linarith
   have hup := Real.log_le_sub_one_of_pos h1
@@ -1094,7 +1079,7 @@ theorem s24b_abs_log_le {y : ℝ} (hy : |y| < 1) : |Real.log (1 + y)| ≤ |y| / 
     nlinarith [le_abs_self y, abs_nonneg y]
 
 /-- `0 ≤ -ln(1-x) ≤ x/(1-x)` for `0 ≤ x < 1`. -/
-theorem s24b_neg_log_one_sub_le {x : ℝ} (hx0 : 0 ≤ x) (hx : x < 1) :
+lemma s24b_neg_log_one_sub_le {x : ℝ} (hx0 : 0 ≤ x) (hx : x < 1) :
     0 ≤ -Real.log (1 - x) ∧ -Real.log (1 - x) ≤ x / (1 - x) := by
   have h1 : 0 < 1 - x := by linarith
   refine ⟨neg_nonneg.mpr (Real.log_nonpos h1.le (by linarith)), ?_⟩
@@ -1111,7 +1096,7 @@ noncomputable def s24b_e (l : ℝ) : ℕ → ℝ
 
 /-- For `0 < λ < 1/4` and `0 < |t| < 1`, with `u = ln(1+λt)/λ`,
 `t/(eᵘ - 1) = ∑ₙ (bₙ λⁿ + eₙ) tⁿ`. -/
-theorem s24b_hasSum_main {l : ℝ} (hl0 : 0 < l) (hl : l < 1 / 4) {t : ℝ} (ht : |t| < 1)
+lemma s24b_hasSum_main {l : ℝ} (hl0 : 0 < l) (hl : l < 1 / 4) {t : ℝ} (ht : |t| < 1)
     (ht0 : t ≠ 0) :
     HasSum (fun n : ℕ => ((bernoulliSecondKind n : ℝ) * l ^ n + s24b_e l n) * t ^ n)
       (t / (Real.exp (Real.log (1 + l * t) / l) - 1)) := by
@@ -1240,7 +1225,7 @@ theorem s24b_hasSum_main {l : ℝ} (hl0 : 0 < l) (hl : l < 1 / 4) {t : ℝ} (ht 
     rw [mul_sub, e]; ring
 
 /-- 24.16.7 restricted to real `0 < λ` and real `t`. -/
-theorem s24b_hasSum_degenerate_real {l : ℝ} (hl0 : 0 < l) (hl : l < 1 / 4) :
+lemma s24b_hasSum_degenerate_real {l : ℝ} (hl0 : 0 < l) (hl : l < 1 / 4) :
     ∀ᶠ t in 𝓝[≠] (0 : ℝ), HasSum (fun n : ℕ => aeval l (degenerateBernoulli n) / n ! * t ^ n)
       (t / (Real.exp (Real.log (1 + l * t) / l) - 1)) := by
   have h := hasSum_degenerateBernoulli (lam := (l : ℂ)) (by exact_mod_cast hl0.ne')
@@ -1272,7 +1257,7 @@ theorem s24b_hasSum_degenerate_real {l : ℝ} (hl0 : 0 < l) (hl : l < 1 / 4) :
     ring_nf
 
 /-- The reindexing of the Bernoulli–Stirling sum in 24.16.8. -/
-theorem s24b_sum_reindex {j : ℕ} (hj : 1 ≤ j) (l : ℝ) :
+lemma s24b_sum_reindex {j : ℕ} (hj : 1 ≤ j) (l : ℝ) :
     ∑ k ∈ Icc 1 ((j + 1) / 2), ((j : ℝ) + 1) / (2 * k) * (bernoulli (2 * k) : ℝ) *
         ((-1) ^ (j + 1 - 2 * k) * (Nat.stirlingFirst j (2 * k - 1) : ℝ)) * l ^ (j + 1 - 2 * k) =
       ((j : ℝ) + 1) * ∑ m ∈ range (j + 1), (bernoulli (m + 1) : ℝ) / (m + 1) *
@@ -1311,7 +1296,7 @@ theorem s24b_sum_reindex {j : ℕ} (hj : 1 ≤ j) (l : ℝ) :
       simp [bernoulli_eq_zero_of_odd hodd (by omega)]
 
 /-- The coefficient identity behind 24.16.8, for real `0 < λ < 1/4`. -/
-theorem s24b_aeval_degenerate {l : ℝ} (hl0 : 0 < l) (hl : l < 1 / 4) (n : ℕ) :
+lemma s24b_aeval_degenerate {l : ℝ} (hl0 : 0 < l) (hl : l < 1 / 4) (n : ℕ) :
     aeval l (degenerateBernoulli n) / n ! =
       (bernoulliSecondKind n : ℝ) * l ^ n + s24b_e l n := by
   have hm : ∀ᶠ t in 𝓝[≠] (0 : ℝ), HasSum
@@ -1370,7 +1355,7 @@ open Metric
 /-- `t/(eᵗ - 1)`, with its limit `1` at `t = 0`. -/
 noncomputable def s24b_H : ℂ → ℂ := Function.update (fun t => t / (Complex.exp t - 1)) 0 1
 
-theorem s24b_exp_sub_one_ne {t : ℂ} (ht : ‖t‖ < 2 * π) (ht0 : t ≠ 0) :
+lemma s24b_exp_sub_one_ne {t : ℂ} (ht : ‖t‖ < 2 * π) (ht0 : t ≠ 0) :
     Complex.exp t - 1 ≠ 0 := by
   intro h
   obtain ⟨n, hn⟩ := Complex.exp_eq_one_iff.mp (sub_eq_zero.mp h)
@@ -1381,12 +1366,12 @@ theorem s24b_exp_sub_one_ne {t : ℂ} (ht : ‖t‖ < 2 * π) (ht0 : t ≠ 0) :
     rw [← Int.cast_abs]; exact_mod_cast Int.one_le_abs hn0
   nlinarith [Real.pi_pos]
 
-theorem s24b_H_of_ne {t : ℂ} (ht0 : t ≠ 0) : s24b_H t = t / (Complex.exp t - 1) :=
+lemma s24b_H_of_ne {t : ℂ} (ht0 : t ≠ 0) : s24b_H t = t / (Complex.exp t - 1) :=
   Function.update_of_ne ht0 _ _
 
-theorem s24b_H_zero : s24b_H 0 = 1 := Function.update_self _ _ _
+lemma s24b_H_zero : s24b_H 0 = 1 := Function.update_self _ _ _
 
-theorem s24b_tendsto_H : Tendsto (fun t : ℂ => t / (Complex.exp t - 1)) (𝓝[≠] 0) (𝓝 1) := by
+lemma s24b_tendsto_H : Tendsto (fun t : ℂ => t / (Complex.exp t - 1)) (𝓝[≠] 0) (𝓝 1) := by
   have h := (Complex.hasDerivAt_exp 0).tendsto_slope_zero
   simp only [zero_add, Complex.exp_zero, smul_eq_mul] at h
   have h2 := h.inv₀ one_ne_zero
@@ -1394,7 +1379,7 @@ theorem s24b_tendsto_H : Tendsto (fun t : ℂ => t / (Complex.exp t - 1)) (𝓝[
   refine h2.congr' (eventually_nhdsWithin_of_forall fun t ht => ?_)
   simp [div_eq_mul_inv, mul_comm]
 
-theorem s24b_differentiableOn_H : DifferentiableOn ℂ s24b_H (ball 0 (2 * π)) := by
+lemma s24b_differentiableOn_H : DifferentiableOn ℂ s24b_H (ball 0 (2 * π)) := by
   rw [← Complex.differentiableOn_compl_singleton_and_continuousAt_iff
     (ball_mem_nhds _ (by positivity))]
   refine ⟨fun t ht => ?_, ?_⟩
@@ -1407,13 +1392,13 @@ theorem s24b_differentiableOn_H : DifferentiableOn ℂ s24b_H (ball 0 (2 * π)) 
     filter_upwards [isOpen_ne.mem_nhds ht0] with z hz using s24b_H_of_ne hz
   · rw [s24b_H, continuousAt_update_same]; exact s24b_tendsto_H
 
-theorem s24b_H_ne_zero {t : ℂ} (ht : ‖t‖ < 2 * π) : s24b_H t ≠ 0 := by
+lemma s24b_H_ne_zero {t : ℂ} (ht : ‖t‖ < 2 * π) : s24b_H t ≠ 0 := by
   by_cases ht0 : t = 0
   · rw [ht0, s24b_H_zero]; exact one_ne_zero
   · rw [s24b_H_of_ne ht0]; exact div_ne_zero ht0 (s24b_exp_sub_one_ne ht ht0)
 
 /-- A product of two numbers in the open right half-plane lies in the slit plane. -/
-theorem s24b_mul_mem_slitPlane {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) :
+lemma s24b_mul_mem_slitPlane {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) :
     a * b ∈ Complex.slitPlane := by
   rw [Complex.mem_slitPlane_iff]
   by_contra h
@@ -1425,7 +1410,7 @@ theorem s24b_mul_mem_slitPlane {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) :
   nlinarith [mul_pos (mul_pos ha ha) hb, mul_nonneg (sq_nonneg a.im) hb.le]
 
 
-theorem s24b_six_pow_le (n : ℕ) : 6 ^ (n + 1) ≤ (2 * n + 3)! := by
+lemma s24b_six_pow_le (n : ℕ) : 6 ^ (n + 1) ≤ (2 * n + 3)! := by
   induction n with
   | zero => decide
   | succ n ih =>
@@ -1436,7 +1421,7 @@ theorem s24b_six_pow_le (n : ℕ) : 6 ^ (n + 1) ≤ (2 * n + 3)! := by
       _ = _ := by ring
 
 /-- `‖sinh w - w‖ < ‖w‖` for `0 < ‖w‖ < π/2`. -/
-theorem s24b_norm_sinh_sub_lt {w : ℂ} (hw0 : w ≠ 0) (hw : ‖w‖ < π / 2) :
+lemma s24b_norm_sinh_sub_lt {w : ℂ} (hw0 : w ≠ 0) (hw : ‖w‖ < π / 2) :
     ‖Complex.sinh w - w‖ < ‖w‖ := by
   set r := ‖w‖ with hr
   have hr0 : 0 < r := norm_pos_iff.mpr hw0
@@ -1466,7 +1451,7 @@ theorem s24b_norm_sinh_sub_lt {w : ℂ} (hw0 : w ≠ 0) (hw : ‖w‖ < π / 2) 
       refine mul_lt_of_lt_one_right hr0 ?_
       rw [← div_eq_mul_inv, div_lt_one (by linarith)]; linarith
 
-theorem s24b_H_mem_slitPlane {t : ℂ} (ht : ‖t‖ < π) : s24b_H t ∈ Complex.slitPlane := by
+lemma s24b_H_mem_slitPlane {t : ℂ} (ht : ‖t‖ < π) : s24b_H t ∈ Complex.slitPlane := by
   by_cases ht0 : t = 0
   · rw [ht0, s24b_H_zero]; exact Complex.one_mem_slitPlane
   rw [s24b_H_of_ne ht0]
@@ -1509,24 +1494,24 @@ theorem s24b_H_mem_slitPlane {t : ℂ} (ht : ‖t‖ < π) : s24b_H t ∈ Comple
 /-- The logarithmic derivative `H'/H`. -/
 noncomputable def s24b_l (t : ℂ) : ℂ := deriv s24b_H t / s24b_H t
 
-theorem s24b_differentiableOn_l : DifferentiableOn ℂ s24b_l (ball 0 (2 * π)) :=
+lemma s24b_differentiableOn_l : DifferentiableOn ℂ s24b_l (ball 0 (2 * π)) :=
   (s24b_differentiableOn_H.deriv isOpen_ball).div s24b_differentiableOn_H
     fun t ht => s24b_H_ne_zero (by simpa using ht)
 
-theorem s24b_exists_L : ∃ L : ℂ → ℂ, L 0 = 0 ∧
+lemma s24b_exists_L : ∃ L : ℂ → ℂ, L 0 = 0 ∧
     ∀ t ∈ ball (0 : ℂ) (2 * π), HasDerivAt L (s24b_l t) t :=
   s24b_differentiableOn_l.isExactOn_ball.with_val_at 0 0
 
 /-- A holomorphic logarithm of `t/(eᵗ - 1)` on `|t| < 2π`, vanishing at `0`. -/
 noncomputable def s24b_L : ℂ → ℂ := s24b_exists_L.choose
 
-theorem s24b_L_zero : s24b_L 0 = 0 := s24b_exists_L.choose_spec.1
+lemma s24b_L_zero : s24b_L 0 = 0 := s24b_exists_L.choose_spec.1
 
-theorem s24b_hasDerivAt_L {t : ℂ} (ht : t ∈ ball (0 : ℂ) (2 * π)) :
+lemma s24b_hasDerivAt_L {t : ℂ} (ht : t ∈ ball (0 : ℂ) (2 * π)) :
     HasDerivAt s24b_L (s24b_l t) t :=
   s24b_exists_L.choose_spec.2 t ht
 
-theorem s24b_exp_L {t : ℂ} (ht : t ∈ ball (0 : ℂ) (2 * π)) :
+lemma s24b_exp_L {t : ℂ} (ht : t ∈ ball (0 : ℂ) (2 * π)) :
     Complex.exp (s24b_L t) = s24b_H t := by
   set g := fun z => s24b_H z * Complex.exp (-s24b_L z)
   have hd : ∀ z ∈ ball (0 : ℂ) (2 * π), HasDerivAt g 0 z := by
@@ -1543,11 +1528,11 @@ theorem s24b_exp_L {t : ℂ} (ht : t ∈ ball (0 : ℂ) (2 * π)) :
     Complex.exp_neg, inv_one, mul_one] at hc
   exact ((mul_inv_eq_one₀ (Complex.exp_ne_zero _)).mp hc).symm
 
-theorem s24b_differentiableOn_F (x : ℂ) :
+lemma s24b_differentiableOn_F (x : ℂ) :
     DifferentiableOn ℂ (fun z => Complex.exp (x * s24b_L z)) (ball 0 (2 * π)) :=
   fun _ hz => (((s24b_hasDerivAt_L hz).differentiableAt.const_mul x).cexp).differentiableWithinAt
 
-theorem s24b_iteratedDeriv_F (n : ℕ) : ∃ c : ℕ → ℂ → ℂ,
+lemma s24b_iteratedDeriv_F (n : ℕ) : ∃ c : ℕ → ℂ → ℂ,
     (∀ k, DifferentiableOn ℂ (c k) (ball 0 (2 * π))) ∧
     ∀ x : ℂ, ∀ t ∈ ball (0 : ℂ) (2 * π),
       iteratedDeriv n (fun z => Complex.exp (x * s24b_L z)) t =
@@ -1592,7 +1577,7 @@ theorem s24b_iteratedDeriv_F (n : ℕ) : ∃ c : ℕ → ℂ → ℂ,
           exact sum_congr rfl fun k _ => by ring
       rw [key]; ring
 
-theorem s24b_iteratedDeriv_F_natCast (ℓ n : ℕ) :
+lemma s24b_iteratedDeriv_F_natCast (ℓ n : ℕ) :
     iteratedDeriv n (fun z => Complex.exp ((ℓ : ℂ) * s24b_L z)) 0 =
       (((norlundPolynomial n).eval (ℓ : ℚ) : ℚ) : ℂ) := by
   have hev : (fun z => Complex.exp ((ℓ : ℂ) * s24b_L z)) =ᶠ[𝓝 0] fun z => s24b_H z ^ ℓ := by
@@ -1646,7 +1631,7 @@ theorem s24b_iteratedDeriv_F_natCast (ℓ n : ℕ) :
   field_simp
   rfl
 
-theorem s24b_iteratedDeriv_F_eq (x : ℂ) (n : ℕ) :
+lemma s24b_iteratedDeriv_F_eq (x : ℂ) (n : ℕ) :
     iteratedDeriv n (fun z => Complex.exp (x * s24b_L z)) 0 = aeval x (norlundPolynomial n) := by
   obtain ⟨c, -, hF⟩ := s24b_iteratedDeriv_F n
   have h0 : ∀ y : ℂ, iteratedDeriv n (fun z => Complex.exp (y * s24b_L z)) 0 =
@@ -1668,7 +1653,7 @@ theorem s24b_iteratedDeriv_F_eq (x : ℂ) (n : ℕ) :
     rfl
   rw [h0, ← hP, hQ, eval_map_algebraMap]
 
-theorem s24b_L_eq_log {t : ℂ} (ht : ‖t‖ < 2 * π)
+lemma s24b_L_eq_log {t : ℂ} (ht : ‖t‖ < 2 * π)
     (hs : ∀ s : ℝ, s ∈ Set.Icc (0 : ℝ) 1 → s24b_H (s * t) ∈ Complex.slitPlane) :
     s24b_L t = Complex.log (s24b_H t) := by
   set ψ : ℝ → ℂ := fun s => s24b_L (s * t) - Complex.log (s24b_H (s * t))

@@ -5,10 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Elementary.LogExpBasic
-public import DLMF.ExpIntegrals.Basic
 public import DLMF.Polylog.Dilog
-public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
+public import DLMF.Core.Framework
+public import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
 
 /-!
 # Continued fractions and integrals: DLMF §§4.9–4.11
@@ -122,7 +121,7 @@ theorem log_log_primitive {z : ℂ} (hz : z ∈ Complex.slitPlane) (hl : Complex
     (Complex.hasDerivAt_log hl).comp z (Complex.hasDerivAt_log hz)
 
 /-- The dilogarithm kernel is interval integrable on `[0,1]`, up to its logarithmic endpoint. -/
-theorem logR4_dilogKernel_intervalIntegrable :
+lemma logR4_dilogKernel_intervalIntegrable :
     IntervalIntegrable DLMF.Polylog.dilogKernel volume 0 1 := by
   have hcont := DLMF.Polylog.continuousOn_re_polylogSeries_two.mono
     (Icc_subset_Icc (by norm_num : (-1:ℝ) ≤ 0) le_rfl)
@@ -137,7 +136,7 @@ theorem logR4_dilogKernel_intervalIntegrable :
     exact DLMF.Polylog.dilogKernel_nonneg (abs_lt.mpr ⟨by linarith [ht.1], ht.2⟩)
 
 /-- Reflection of the logarithmic integrand into the dilogarithm kernel. -/
-theorem logR4_log_div_one_sub_eq (x : ℝ) (hx : x ≠ 0) :
+lemma logR4_log_div_one_sub_eq (x : ℝ) (hx : x ≠ 0) :
     Real.log (1-x)/(1-(1-x)) = -DLMF.Polylog.dilogKernel x := by
   rw [DLMF.Polylog.dilogKernel_of_ne hx]; ring
 

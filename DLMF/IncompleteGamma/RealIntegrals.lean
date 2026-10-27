@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.IncompleteGamma.SpecialValues
+public import DLMF.Statistical.IncompleteGamma
 
 /-!
 # Real integral forms of the incomplete Gamma functions

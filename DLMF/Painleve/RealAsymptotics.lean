@@ -8,9 +8,6 @@ module
 public import DLMF.Painleve.SolutionsDefs
 public import DLMF.Airy.Framework
 public import DLMF.Confluent.ParabolicCylinder
-public import Mathlib.Analysis.Asymptotics.AsymptoticEquivalent
-public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Inverse
 public import Mathlib.Basic.Real.Sign
 
 /-!

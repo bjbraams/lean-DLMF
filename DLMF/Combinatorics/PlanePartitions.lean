@@ -5,14 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.Asymptotics.AsymptoticEquivalent
-public import Mathlib.Analysis.SpecialFunctions.Pow.Real
 public import Mathlib.NumberTheory.ArithmeticFunction.Misc
 public import Mathlib.NumberTheory.LSeries.RiemannZeta
-public import Mathlib.Order.Interval.Finset.Nat
-public import Mathlib.Tactic.CrossRefAttribute
 public import TauCeti.RingTheory.MvPolynomial.Symmetric.Schur.Bialternant
-import Mathlib.Tactic.LinearCombination
 
 /-!
 # Plane partitions (DLMF §26.12)
@@ -100,22 +95,22 @@ def s26b_rect (r t : ℕ) : YoungDiagram where
     exact ⟨lt_of_le_of_lt hba.1 ha.1, lt_of_le_of_lt hba.2 ha.2⟩
 
 /-- Membership in the rectangle. -/
-theorem s26b_mem_rect {r t i c : ℕ} : (i, c) ∈ s26b_rect r t ↔ i < r ∧ c < t := by
+lemma s26b_mem_rect {r t i c : ℕ} : (i, c) ∈ s26b_rect r t ↔ i < r ∧ c < t := by
   change (i, c) ∈ range r ×ˢ range t ↔ _
   simp
 
 /-- Membership in `planePartitionsIn`. -/
-theorem s26b_mem_planePartitionsIn {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} :
+lemma s26b_mem_planePartitionsIn {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} :
     π ∈ planePartitionsIn r s t ↔ π ⊆ planeBox r s t ∧ IsPlanePartition π := by
   simp [planePartitionsIn]
 
 /-- Membership in `planeBox`. -/
-theorem s26b_mem_planeBox {r s t h j k : ℕ} :
+lemma s26b_mem_planeBox {r s t h j k : ℕ} :
     (h, j, k) ∈ planeBox r s t ↔ 1 ≤ h ∧ h ≤ r ∧ 1 ≤ j ∧ j ≤ s ∧ 1 ≤ k ∧ k ≤ t := by
   simp [planeBox, and_assoc]
 
 /-- Down-closure of a plane partition. -/
-theorem s26b_down {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlanePartition π) {h j k h' j' k' : ℕ}
+lemma s26b_down {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlanePartition π) {h j k h' j' k' : ℕ}
     (hx : (h, j, k) ∈ π) (h1 : 1 ≤ h') (h2 : h' ≤ h) (j1 : 1 ≤ j') (j2 : j' ≤ j) (k1 : 1 ≤ k')
     (k2 : k' ≤ k) : (h', j', k') ∈ π :=
   (hπ _ hx).2.2.2 (s26b_mem_planeBox.mpr ⟨h1, h2, j1, j2, k1, k2⟩)
@@ -125,7 +120,7 @@ def s26b_fiber (π : Finset (ℕ × ℕ × ℕ)) (s h k : ℕ) : Finset ℕ :=
   (Icc 1 s).filter fun j => (h, j, k) ∈ π
 
 /-- The column over `(h, k)` of a plane partition is an initial segment `[1, m]`. -/
-theorem s26b_mem_iff_le_card {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlanePartition π) {s h j k : ℕ}
+lemma s26b_mem_iff_le_card {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlanePartition π) {s h j k : ℕ}
     (hj1 : 1 ≤ j) (hjs : j ≤ s) : (h, j, k) ∈ π ↔ j ≤ #(s26b_fiber π s h k) := by
   constructor
   · intro hx
@@ -150,12 +145,12 @@ theorem s26b_mem_iff_le_card {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlanePar
     simp at this; omega
 
 /-- A column of a plane partition in `B(r, s, t)` has height at most `s`. -/
-theorem s26b_card_fiber_le (π : Finset (ℕ × ℕ × ℕ)) (s h k : ℕ) :
+lemma s26b_card_fiber_le (π : Finset (ℕ × ℕ × ℕ)) (s h k : ℕ) :
     #(s26b_fiber π s h k) ≤ s := by
   simpa [s26b_fiber] using card_le_card (filter_subset (fun j => (h, j, k) ∈ π) (Icc 1 s))
 
 /-- Column heights of a plane partition are antitone. -/
-theorem s26b_fiber_mono {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlanePartition π) {s h k h' k' : ℕ}
+lemma s26b_fiber_mono {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlanePartition π) {s h k h' k' : ℕ}
     (h1 : 1 ≤ h') (h2 : h' ≤ h) (k1 : 1 ≤ k') (k2 : k' ≤ k) :
     #(s26b_fiber π s h k) ≤ #(s26b_fiber π s h' k') := by
   refine card_le_card fun j hj => ?_
@@ -163,7 +158,7 @@ theorem s26b_fiber_mono {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlanePartitio
   exact ⟨hj.1, s26b_down hπ hj.2 h1 h2 (mem_Icc.mp hj.1).1 le_rfl k1 k2⟩
 
 /-- Entries of a semistandard tableau grow by at least one per row down a column. -/
-theorem s26b_col_add {μ : YoungDiagram} (T : SemistandardYoungTableau μ) {i i' c : ℕ}
+lemma s26b_col_add {μ : YoungDiagram} (T : SemistandardYoungTableau μ) {i i' c : ℕ}
     (hii : i ≤ i') (hc : (i', c) ∈ μ) : T i c + (i' - i) ≤ T i' c := by
   induction i', hii using Nat.le_induction with
   | base => simp
@@ -199,7 +194,7 @@ def s26b_toT (r s t : ℕ) (π : Finset (ℕ × ℕ × ℕ)) (hπ : IsPlaneParti
     simp only [hc, ↓reduceIte]
 
 /-- The entries of `s26b_toT`. -/
-theorem s26b_toT_apply (r s t : ℕ) (π : Finset (ℕ × ℕ × ℕ)) (hπ : IsPlanePartition π) (i c : ℕ) :
+lemma s26b_toT_apply (r s t : ℕ) (π : Finset (ℕ × ℕ × ℕ)) (hπ : IsPlanePartition π) (i c : ℕ) :
     s26b_toT r s t π hπ i c = if i < r ∧ c < t then #(s26b_fiber π s (r - i) (t - c)) + i else 0 :=
   rfl
 
@@ -208,7 +203,7 @@ def s26b_ofT (r s t : ℕ) (T : SemistandardYoungTableau (s26b_rect r t)) : Fins
   (planeBox r s t).filter fun x => x.2.1 + (r - x.1) ≤ T (r - x.1) (t - x.2.2)
 
 /-- `s26b_ofT` produces a plane partition in the box. -/
-theorem s26b_ofT_mem (r s t : ℕ) (T : SemistandardYoungTableau (s26b_rect r t)) :
+lemma s26b_ofT_mem (r s t : ℕ) (T : SemistandardYoungTableau (s26b_rect r t)) :
     s26b_ofT r s t T ∈ planePartitionsIn r s t := by
   rw [s26b_mem_planePartitionsIn]
   refine ⟨filter_subset _ _, ?_⟩
@@ -232,7 +227,7 @@ theorem s26b_ofT_mem (r s t : ℕ) (T : SemistandardYoungTableau (s26b_rect r t)
 
 
 /-- `s26b_ofT` inverts `s26b_toT`. -/
-theorem s26b_ofT_toT {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} (hπ' : π ∈ planePartitionsIn r s t) :
+lemma s26b_ofT_toT {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} (hπ' : π ∈ planePartitionsIn r s t) :
     s26b_ofT r s t (s26b_toT r s t π (s26b_mem_planePartitionsIn.mp hπ').2) = π := by
   obtain ⟨hsub, hπ⟩ := s26b_mem_planePartitionsIn.mp hπ'
   ext ⟨h, j, k⟩
@@ -256,7 +251,7 @@ theorem s26b_ofT_toT {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} (hπ' : π 
     omega
 
 /-- Entry bounds `i ≤ T i c ≤ i + s` for a tableau with entries below `r + s`. -/
-theorem s26b_entry_le {r s t : ℕ} (T : SemistandardYoungTableau (s26b_rect r t))
+lemma s26b_entry_le {r s t : ℕ} (T : SemistandardYoungTableau (s26b_rect r t))
     (hT : ∀ i c, (i, c) ∈ s26b_rect r t → T i c < r + s) {i c : ℕ}
     (hc : (i, c) ∈ s26b_rect r t) : i ≤ T i c ∧ T i c ≤ i + s := by
   have hc' := s26b_mem_rect.mp hc
@@ -267,7 +262,7 @@ theorem s26b_entry_le {r s t : ℕ} (T : SemistandardYoungTableau (s26b_rect r t
   omega
 
 /-- `s26b_toT` inverts `s26b_ofT` on bounded tableaux. -/
-theorem s26b_toT_ofT {r s t : ℕ} (T : SemistandardYoungTableau (s26b_rect r t))
+lemma s26b_toT_ofT {r s t : ℕ} (T : SemistandardYoungTableau (s26b_rect r t))
     (hT : ∀ i c, (i, c) ∈ s26b_rect r t → T i c < r + s) :
     s26b_toT r s t (s26b_ofT r s t T)
       (s26b_mem_planePartitionsIn.mp (s26b_ofT_mem r s t T)).2 = T := by
@@ -289,7 +284,7 @@ theorem s26b_toT_ofT {r s t : ℕ} (T : SemistandardYoungTableau (s26b_rect r t)
   · exact (T.zeros (fun h => hc (s26b_mem_rect.mp h))).symm
 
 /-- The tableau of a plane partition in `B(r, s, t)` has entries below `r + s`. -/
-theorem s26b_toT_lt {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlanePartition π) :
+lemma s26b_toT_lt {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlanePartition π) :
     ∀ i c, (i, c) ∈ s26b_rect r t → s26b_toT r s t π hπ i c < r + s := by
   intro i c hc
   rw [s26b_mem_rect] at hc
@@ -299,7 +294,7 @@ theorem s26b_toT_lt {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPla
   omega
 
 /-- The entry sum of the tableau of a plane partition. -/
-theorem s26b_sum_toT {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} (hπ' : π ∈ planePartitionsIn r s t) :
+lemma s26b_sum_toT {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} (hπ' : π ∈ planePartitionsIn r s t) :
     ∑ x ∈ (s26b_rect r t).cells,
         s26b_toT r s t π (s26b_mem_planePartitionsIn.mp hπ').2 x.1 x.2 =
       #π + t * ∑ i ∈ range r, i := by
@@ -358,7 +353,7 @@ theorem s26b_sum_toT {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} (hπ' : π 
 
 
 /-- A product over pairs `i < j` in `Fin N` as a double product over `range N`. -/
-theorem s26b_prod_Ioi_fin {M : Type*} [CommMonoid M] (N : ℕ) (f : ℕ → ℕ → M) :
+lemma s26b_prod_Ioi_fin {M : Type*} [CommMonoid M] (N : ℕ) (f : ℕ → ℕ → M) :
     ∏ i : Fin N, ∏ j ∈ Ioi i, f i j =
       ∏ i ∈ range N, ∏ j ∈ range N, if i < j then f i j else 1 := by
   rw [← Fin.prod_univ_eq_prod_range (fun i => ∏ j ∈ range N, if i < j then f i j else 1)]
@@ -368,7 +363,7 @@ theorem s26b_prod_Ioi_fin {M : Type*} [CommMonoid M] (N : ℕ) (f : ℕ → ℕ 
   ext j; simp
 
 /-- A sum over pairs `i < j` in `Fin N` as a double sum over `range N`. -/
-theorem s26b_sum_Ioi_fin (N : ℕ) (f : ℕ → ℕ → ℕ) :
+lemma s26b_sum_Ioi_fin (N : ℕ) (f : ℕ → ℕ → ℕ) :
     ∑ i : Fin N, ∑ j ∈ Ioi i, f i j =
       ∑ i ∈ range N, ∑ j ∈ range N, if i < j then f i j else 0 := by
   rw [← Fin.sum_univ_eq_sum_range (fun i => ∑ j ∈ range N, if i < j then f i j else 0)]
@@ -378,13 +373,13 @@ theorem s26b_sum_Ioi_fin (N : ℕ) (f : ℕ → ℕ → ℕ) :
   ext j; simp
 
 /-- `1 - X ^ m ≠ 0` in `ℤ[X]` for `m > 0`. -/
-theorem s26b_one_sub_X_pow_ne_zero {m : ℕ} (hm : 0 < m) : (1 - X ^ m : ℤ[X]) ≠ 0 := by
+lemma s26b_one_sub_X_pow_ne_zero {m : ℕ} (hm : 0 < m) : (1 - X ^ m : ℤ[X]) ≠ 0 := by
   have := X_pow_sub_C_ne_zero (R := ℤ) hm 1
   rw [map_one] at this
   intro h; apply this; rw [← neg_sub, h, neg_zero]
 
 /-- Vandermonde product for a strictly decreasing exponent sequence. -/
-theorem s26b_vand_decr (N : ℕ) (α : ℕ → ℕ) (hα : ∀ i j, i < j → j < N → α j < α i) :
+lemma s26b_vand_decr (N : ℕ) (α : ℕ → ℕ) (hα : ∀ i j, i < j → j < N → α j < α i) :
     ∏ i : Fin N, ∏ j ∈ Ioi i, ((X : ℤ[X]) ^ α j - X ^ α i) =
       X ^ (∑ i : Fin N, ∑ j ∈ Ioi i, α j) *
         ∏ i ∈ range N, ∏ j ∈ range N, if i < j then (1 - X ^ (α i - α j)) else 1 := by
@@ -399,7 +394,7 @@ theorem s26b_vand_decr (N : ℕ) (α : ℕ → ℕ) (hα : ∀ i j, i < j → j 
 
 
 /-- Splitting the pairs `i < j` into the cross pairs `i < r ≤ j` and the rest. -/
-theorem s26b_prod_split_cross {M : Type*} [CommMonoid M] (N r : ℕ) (hr : r ≤ N) (F : ℕ → ℕ → M) :
+lemma s26b_prod_split_cross {M : Type*} [CommMonoid M] (N r : ℕ) (hr : r ≤ N) (F : ℕ → ℕ → M) :
     ∏ i ∈ range N, ∏ j ∈ range N, (if i < j then F i j else 1) =
       (∏ i ∈ range N, ∏ j ∈ range N, if i < j ∧ ¬(i < r ∧ r ≤ j) then F i j else 1) *
         ∏ i ∈ range r, ∏ j ∈ Ico r N, F i j := by
@@ -428,7 +423,7 @@ theorem s26b_prod_split_cross {M : Type*} [CommMonoid M] (N r : ℕ) (hr : r ≤
 
 /-- The Vandermonde algebra behind MacMahon's formula: the bialternant identity for the
 rectangle `r × t` in `r + s` variables at `xₖ = Xᵏ`, reduced to the cross pairs. -/
-theorem s26b_alg_main (r s t : ℕ) (G : ℤ[X])
+lemma s26b_alg_main (r s t : ℕ) (G : ℤ[X])
     (h : X ^ (∑ i : Fin (r + s), ∑ j ∈ Ioi i, (if (j : ℕ) < r then t else 0)) * G *
         ∏ i : Fin (r + s), ∏ j ∈ Ioi i,
           ((X : ℤ[X]) ^ (r + s - 1 - (j : ℕ)) - X ^ (r + s - 1 - (i : ℕ))) =
@@ -494,7 +489,7 @@ theorem s26b_alg_main (r s t : ℕ) (G : ℤ[X])
 
 
 /-- An alternant evaluated at the geometric progression `xₖ = Xᵏ` is a Vandermonde product. -/
-theorem s26b_eval_alternant {N : ℕ} (α : Fin N → ℕ) :
+lemma s26b_eval_alternant {N : ℕ} (α : Fin N → ℕ) :
     MvPolynomial.eval (fun k : Fin N => (X : ℤ[X]) ^ (k : ℕ))
         (TauCeti.alternant (Fin N) ℤ[X] α) =
       ∏ i : Fin N, ∏ j ∈ Ioi i, ((X : ℤ[X]) ^ α j - X ^ α i) := by
@@ -505,7 +500,7 @@ theorem s26b_eval_alternant {N : ℕ} (α : Fin N → ℕ) :
 
 
 /-- The monomial of a tableau at a geometric progression. -/
-theorem s26b_prod_weight {N : ℕ} {μ : YoungDiagram} (T : TauCeti.BoundedSSYT N μ) :
+lemma s26b_prod_weight {N : ℕ} {μ : YoungDiagram} (T : TauCeti.BoundedSSYT N μ) :
     ∏ k : Fin N, ((X : ℤ[X]) ^ (k : ℕ)) ^ TauCeti.BoundedSSYT.weight T k =
       X ^ (∑ x ∈ μ.cells, T.1 x.1 x.2) := by
   simp only [← pow_mul]
@@ -521,7 +516,7 @@ theorem s26b_prod_weight {N : ℕ} {μ : YoungDiagram} (T : TauCeti.BoundedSSYT 
     mul_comm]
 
 /-- The exponent `∑_{i<j} λ_j` for the rectangle `r × t`. -/
-theorem s26b_sum_g (r s t : ℕ) :
+lemma s26b_sum_g (r s t : ℕ) :
     ∑ i : Fin (r + s), ∑ j ∈ Ioi i, (if (j : ℕ) < r then t else 0) = t * ∑ i ∈ range r, i := by
   rw [s26b_sum_Ioi_fin (r + s) (fun _ j => if j < r then t else 0), sum_comm]
   have : ∀ j ∈ range (r + s), (∑ i ∈ range (r + s), if i < j then (if j < r then t else 0) else 0) =
@@ -539,7 +534,7 @@ theorem s26b_sum_g (r s t : ℕ) :
   ext i; simp only [mem_filter, mem_range]; omega
 
 /-- MacMahon's box formula as a polynomial identity (proof via Jacobi's bialternant formula). -/
-theorem s26b_box_poly (r s t : ℕ) :
+lemma s26b_box_poly (r s t : ℕ) :
     (∑ π ∈ planePartitionsIn r s t, (X : ℤ[X]) ^ #π) *
         ∏ h ∈ Icc 1 r, ∏ k ∈ Icc 1 s, (1 - (X : ℤ[X]) ^ (h + k - 1)) =
       ∏ h ∈ Icc 1 r, ∏ k ∈ Icc 1 s, (1 - (X : ℤ[X]) ^ (h + k + t - 1)) := by
@@ -617,7 +612,7 @@ theorem s26b_box_poly (r s t : ℕ) :
         congr 2; omega
 
 /-- Telescoping product in a field. -/
-theorem s26b_prod_Icc_div {K : Type*} [Field K] (f : ℕ → K) (t : ℕ) (hf : ∀ k ≤ t, f k ≠ 0) :
+lemma s26b_prod_Icc_div {K : Type*} [Field K] (f : ℕ → K) (t : ℕ) (hf : ∀ k ≤ t, f k ≠ 0) :
     ∏ k ∈ Icc 1 t, f k / f (k - 1) = f t / f 0 := by
   induction t with
   | zero => simp [div_self (hf 0 le_rfl)]
@@ -628,7 +623,7 @@ theorem s26b_prod_Icc_div {K : Type*} [Field K] (f : ℕ → K) (t : ℕ) (hf : 
     field_simp
 
 /-- The counting form: `#PP(r,s,t) ∏ (h+k-1) = ∏ (h+k+t-1)`. -/
-theorem s26b_box_count (r s t : ℕ) :
+lemma s26b_box_count (r s t : ℕ) :
     ((planePartitionsIn r s t).card : ℚ) * ∏ h ∈ Icc 1 r, ∏ k ∈ Icc 1 s, ((h + k - 1 : ℕ) : ℚ) =
       ∏ h ∈ Icc 1 r, ∏ k ∈ Icc 1 s, ((h + k + t - 1 : ℕ) : ℚ) := by
   have hp := s26b_box_poly r s t
@@ -645,7 +640,7 @@ theorem s26b_box_count (r s t : ℕ) :
   simpa [map_prod, map_sum] using this
 
 /-- Box product equals the double product (rational form). -/
-theorem s26b_box_prod_rat (r s t : ℕ) :
+lemma s26b_box_prod_rat (r s t : ℕ) :
     ∏ x ∈ planeBox r s t, ((x.1 + x.2.1 + x.2.2 - 1 : ℚ) / (x.1 + x.2.1 + x.2.2 - 2)) =
       ∏ h ∈ Icc 1 r, ∏ j ∈ Icc 1 s, ((h + j + t - 1 : ℚ) / (h + j - 1)) := by
   rw [planeBox, prod_product]
@@ -674,7 +669,7 @@ def s26b_IsPPArray (n : ℕ) (a : ℕ → ℕ → ℕ) : Prop :=
     ∑ᶠ ij : ℕ × ℕ, Function.uncurry a ij = n
 
 /-- Arrays are antitone in both indices. -/
-theorem s26b_array_anti {a : ℕ → ℕ → ℕ} (h1 : ∀ i j, a (i + 1) j ≤ a i j)
+lemma s26b_array_anti {a : ℕ → ℕ → ℕ} (h1 : ∀ i j, a (i + 1) j ≤ a i j)
     (h2 : ∀ i j, a i (j + 1) ≤ a i j) {i i' j j' : ℕ} (hi : i ≤ i') (hj : j ≤ j') :
     a i' j' ≤ a i j := by
   have hA : ∀ j, Antitone fun i => a i j := fun j => antitone_nat_of_succ_le fun i => h1 i j
@@ -682,7 +677,7 @@ theorem s26b_array_anti {a : ℕ → ℕ → ℕ} (h1 : ∀ i j, a (i + 1) j ≤
   exact (hB i' hj).trans (hA j hi)
 
 /-- Bounds for an array of sum `n`: nonzero entries lie in `[0, n)²` and are at most `n`. -/
-theorem s26b_array_bound {n : ℕ} {a : ℕ → ℕ → ℕ} (ha : s26b_IsPPArray n a) {i j : ℕ}
+lemma s26b_array_bound {n : ℕ} {a : ℕ → ℕ → ℕ} (ha : s26b_IsPPArray n a) {i j : ℕ}
     (hij : a i j ≠ 0) : i < n ∧ j < n ∧ a i j ≤ n := by
   obtain ⟨h1, h2, hfin, hsum⟩ := ha
   rw [finsum_eq_sum_of_support_subset _ hfin.coe_toFinset.symm.subset] at hsum
@@ -722,7 +717,7 @@ def s26b_ofArr (n : ℕ) (a : ℕ → ℕ → ℕ) : Finset (ℕ × ℕ × ℕ) 
   (planeBox n n n).filter fun x => x.2.1 ≤ a (x.1 - 1) (x.2.2 - 1)
 
 /-- `|π|` as the sum of its column heights. -/
-theorem s26b_card_eq_sum_fiber {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} (hsub : π ⊆ planeBox r s t) :
+lemma s26b_card_eq_sum_fiber {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} (hsub : π ⊆ planeBox r s t) :
     #π = ∑ h ∈ Icc 1 r, ∑ k ∈ Icc 1 t, #(s26b_fiber π s h k) := by
   rw [card_eq_sum_card_fiberwise (f := fun x : ℕ × ℕ × ℕ => (x.1, x.2.2))
     (t := Icc 1 r ×ˢ Icc 1 t), sum_product]
@@ -748,7 +743,7 @@ theorem s26b_card_eq_sum_fiber {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} (
     omega
 
 /-- The columns of `s26b_ofArr`. -/
-theorem s26b_fiber_ofArr {n : ℕ} {a : ℕ → ℕ → ℕ} (ha : s26b_IsPPArray n a) {h k : ℕ}
+lemma s26b_fiber_ofArr {n : ℕ} {a : ℕ → ℕ → ℕ} (ha : s26b_IsPPArray n a) {h k : ℕ}
     (hh : 1 ≤ h ∧ h ≤ n) (hk : 1 ≤ k ∧ k ≤ n) :
     s26b_fiber (s26b_ofArr n a) n h k = Icc 1 (a (h - 1) (k - 1)) := by
   have hle : a (h - 1) (k - 1) ≤ n := by
@@ -762,7 +757,7 @@ theorem s26b_fiber_ofArr {n : ℕ} {a : ℕ → ℕ → ℕ} (ha : s26b_IsPPArra
   · rintro ⟨hj1, hj2⟩; exact ⟨⟨hj1, by omega⟩, ⟨hh.1, hh.2, hj1, by omega, hk.1, hk.2⟩, hj2⟩
 
 /-- `s26b_ofArr` of an array is a plane partition of `n` in `B(n, n, n)`. -/
-theorem s26b_ofArr_mem {n : ℕ} {a : ℕ → ℕ → ℕ} (ha : s26b_IsPPArray n a) :
+lemma s26b_ofArr_mem {n : ℕ} {a : ℕ → ℕ → ℕ} (ha : s26b_IsPPArray n a) :
     s26b_ofArr n a ∈ {π ∈ (planeBox n n n).powerset | IsPlanePartition π ∧ π.card = n} := by
   simp only [mem_filter, mem_powerset]
   refine ⟨filter_subset _ _, ?_, ?_⟩
@@ -805,7 +800,7 @@ theorem s26b_ofArr_mem {n : ℕ} {a : ℕ → ℕ → ℕ} (ha : s26b_IsPPArray 
         rfl
 
 /-- The second form of (26.12.21) (helper used before its statement). -/
-theorem s26b_sum_box_pow {q : ℂ} (hq : ∀ m : ℕ, 0 < m → q ^ m ≠ 1) (r s t : ℕ) :
+lemma s26b_sum_box_pow {q : ℂ} (hq : ∀ m : ℕ, 0 < m → q ^ m ≠ 1) (r s t : ℕ) :
     ∑ π ∈ planePartitionsIn r s t, q ^ π.card =
       ∏ h ∈ Icc 1 r, ∏ j ∈ Icc 1 s, (1 - q ^ (h + j + t - 1)) / (1 - q ^ (h + j - 1)) := by
   have hne : ∀ m : ℕ, 0 < m → (1 - q ^ m) ≠ 0 := fun m hm h => hq m hm (sub_eq_zero.mp h).symm
@@ -1191,12 +1186,12 @@ abbrev s26b_I (N : ℕ) : Ideal ℤ[X] := Ideal.span {(X : ℤ[X]) ^ (N + 1)}
 abbrev s26b_mk (N : ℕ) : ℤ[X] →+* ℤ[X] ⧸ s26b_I N := Ideal.Quotient.mk (s26b_I N)
 
 /-- `X^e` vanishes modulo `X^(N+1)` for `e ≥ N + 1`. -/
-theorem s26b_mk_X_pow {N e : ℕ} (he : N + 1 ≤ e) : s26b_mk N ((X : ℤ[X]) ^ e) = 0 := by
+lemma s26b_mk_X_pow {N e : ℕ} (he : N + 1 ≤ e) : s26b_mk N ((X : ℤ[X]) ^ e) = 0 := by
   rw [Ideal.Quotient.eq_zero_iff_mem, Ideal.mem_span_singleton]
   exact pow_dvd_pow _ he
 
 /-- Congruent polynomials modulo `X^(N+1)` share their coefficients up to `N`. -/
-theorem s26b_coeff_eq_of_mk_eq {N : ℕ} {A B : ℤ[X]} (h : s26b_mk N A = s26b_mk N B) {n : ℕ}
+lemma s26b_coeff_eq_of_mk_eq {N : ℕ} {A B : ℤ[X]} (h : s26b_mk N A = s26b_mk N B) {n : ℕ}
     (hn : n ≤ N) : A.coeff n = B.coeff n := by
   rw [Ideal.Quotient.eq, Ideal.mem_span_singleton] at h
   obtain ⟨C, hC⟩ := h
@@ -1210,11 +1205,11 @@ theorem s26b_coeff_eq_of_mk_eq {N : ℕ} {A B : ℤ[X]} (h : s26b_mk N A = s26b_
 def s26b_θ (A : ℤ[X]) : ℤ[X] := X * derivative A
 
 /-- `θ` is a derivation. -/
-theorem s26b_θ_mul (A B : ℤ[X]) : s26b_θ (A * B) = s26b_θ A * B + A * s26b_θ B := by
+lemma s26b_θ_mul (A B : ℤ[X]) : s26b_θ (A * B) = s26b_θ A * B + A * s26b_θ B := by
   simp only [s26b_θ, derivative_mul]; ring
 
 /-- `θ` preserves congruence modulo `X^(N+1)`. -/
-theorem s26b_mk_θ {N : ℕ} {A B : ℤ[X]} (h : s26b_mk N A = s26b_mk N B) :
+lemma s26b_mk_θ {N : ℕ} {A B : ℤ[X]} (h : s26b_mk N A = s26b_mk N B) :
     s26b_mk N (s26b_θ A) = s26b_mk N (s26b_θ B) := by
   rw [Ideal.Quotient.eq, Ideal.mem_span_singleton] at h ⊢
   obtain ⟨C, hC⟩ := h
@@ -1224,7 +1219,7 @@ theorem s26b_mk_θ {N : ℕ} {A B : ℤ[X]} (h : s26b_mk N A = s26b_mk N B) :
   ring
 
 /-- Logarithmic derivative of a product modulo `X^(N+1)`. -/
-theorem s26b_mk_θ_prod {N : ℕ} {ι : Type*} (s : Finset ι) (g c : ι → ℤ[X])
+lemma s26b_mk_θ_prod {N : ℕ} {ι : Type*} (s : Finset ι) (g c : ι → ℤ[X])
     (h : ∀ i ∈ s, s26b_mk N (s26b_θ (g i)) = s26b_mk N (g i * c i)) :
     s26b_mk N (s26b_θ (∏ i ∈ s, g i)) = s26b_mk N ((∏ i ∈ s, g i) * ∑ i ∈ s, c i) := by
   classical
@@ -1237,7 +1232,7 @@ theorem s26b_mk_θ_prod {N : ℕ} {ι : Type*} (s : Finset ι) (g c : ι → ℤ
     ring
 
 /-- A plane partition lies in the cube of side `|π|`. -/
-theorem s26b_subset_planeBox_card {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlanePartition π) :
+lemma s26b_subset_planeBox_card {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPlanePartition π) :
     π ⊆ planeBox #π #π #π := by
   rintro ⟨h, j, k⟩ hx
   obtain ⟨h1, j1, k1, -⟩ := hπ _ hx
@@ -1266,7 +1261,7 @@ theorem s26b_subset_planeBox_card {π : Finset (ℕ × ℕ × ℕ)} (hπ : IsPla
   exact s26b_mem_planeBox.mpr ⟨h1, e1, j1, e2, k1, e3⟩
 
 /-- The box generating polynomial has `pp(n)` as its coefficients up to the side length. -/
-theorem s26b_coeff_boxPoly {N n : ℕ} (hn : n ≤ N) :
+lemma s26b_coeff_boxPoly {N n : ℕ} (hn : n ≤ N) :
     (∑ π ∈ planePartitionsIn N N N, (X : ℤ[X]) ^ #π).coeff n = planePartitionCount n := by
   simp only [finsetSum_coeff, coeff_X_pow]
   rw [sum_boole, planePartitionCount]
@@ -1282,7 +1277,7 @@ theorem s26b_coeff_boxPoly {N n : ℕ} (hn : n ≤ N) :
     omega
 
 /-- Regrouping the box denominator modulo `X^(N+1)`. -/
-theorem s26b_mk_denom (N : ℕ) :
+lemma s26b_mk_denom (N : ℕ) :
     s26b_mk N (∏ h ∈ Icc 1 N, ∏ k ∈ Icc 1 N, (1 - (X : ℤ[X]) ^ (h + k - 1))) =
       s26b_mk N (∏ m ∈ Icc 1 N, (1 - (X : ℤ[X]) ^ m) ^ m) := by
   set f : ℕ → ℤ[X] ⧸ s26b_I N := fun m => s26b_mk N (1 - X ^ m) with hf
@@ -1315,7 +1310,7 @@ theorem s26b_mk_denom (N : ℕ) :
 def s26b_T (N m : ℕ) : ℤ[X] := ∑ l ∈ range N, X ^ (m * (l + 1))
 
 /-- `θ (1 - X^m)^m ≡ -(1 - X^m)^m m² T_m` modulo `X^(N+1)`. -/
-theorem s26b_mk_θ_factor {N m : ℕ} (hm : 1 ≤ m) :
+lemma s26b_mk_θ_factor {N m : ℕ} (hm : 1 ≤ m) :
     s26b_mk N (s26b_θ ((1 - (X : ℤ[X]) ^ m) ^ m)) =
       s26b_mk N ((1 - (X : ℤ[X]) ^ m) ^ m * (-(C ((m : ℤ) ^ 2)) * s26b_T N m)) := by
   have htel : (1 - (X : ℤ[X]) ^ m) * s26b_T N m = X ^ m - X ^ (m * (N + 1)) := by
@@ -1342,7 +1337,7 @@ theorem s26b_mk_θ_factor {N m : ℕ} (hm : 1 ≤ m) :
   simp only [Nat.add_sub_cancel, map_mul, map_sub, hz, sub_zero]
 
 /-- Coefficients of `∑_{m ≤ N} m² T_m` are `σ₂`. -/
-theorem s26b_coeff_S {N j : ℕ} (hj : 1 ≤ j) (hjN : j ≤ N) :
+lemma s26b_coeff_S {N j : ℕ} (hj : 1 ≤ j) (hjN : j ≤ N) :
     (∑ m ∈ Icc 1 N, C ((m : ℤ) ^ 2) * s26b_T N m).coeff j = ArithmeticFunction.sigma 2 j := by
   simp only [finsetSum_coeff, coeff_C_mul, s26b_T, coeff_X_pow]
   rw [ArithmeticFunction.sigma_apply, Nat.cast_sum]
@@ -1385,7 +1380,7 @@ theorem s26b_coeff_S {N j : ℕ} (hj : 1 ≤ j) (hjN : j ≤ N) :
     omega
 
 /-- The recurrence (26.12.25) (helper used before its statement). -/
-theorem s26b_pp_recurrence (n : ℕ) :
+lemma s26b_pp_recurrence (n : ℕ) :
     n * planePartitionCount n =
       ∑ j ∈ Icc 1 n, planePartitionCount (n - j) * ArithmeticFunction.sigma 2 j := by
   set G : ℤ[X] := ∑ π ∈ planePartitionsIn n n n, (X : ℤ[X]) ^ #π with hG
@@ -1458,7 +1453,7 @@ section GenFun
 open Filter Topology
 
 /-- `σ₂(j) ≤ j³`. -/
-theorem s26b_sigma_two_le (j : ℕ) : ArithmeticFunction.sigma 2 j ≤ j ^ 3 := by
+lemma s26b_sigma_two_le (j : ℕ) : ArithmeticFunction.sigma 2 j ≤ j ^ 3 := by
   rw [ArithmeticFunction.sigma_apply]
   calc ∑ d ∈ j.divisors, d ^ 2 ≤ ∑ _d ∈ j.divisors, j ^ 2 :=
         sum_le_sum fun d hd => Nat.pow_le_pow_left (Nat.divisor_le hd) 2
@@ -1467,7 +1462,7 @@ theorem s26b_sigma_two_le (j : ℕ) : ArithmeticFunction.sigma 2 j ≤ j ^ 3 := 
     _ = j ^ 3 := by ring
 
 /-- `pp(n) ρⁿ` is bounded for `0 < ρ < 1` (from the recurrence (26.12.25)). -/
-theorem s26b_pp_bound {ρ : ℝ} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) :
+lemma s26b_pp_bound {ρ : ℝ} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) :
     ∃ B : ℝ, 0 ≤ B ∧ ∀ n, (planePartitionCount n : ℝ) * ρ ^ n ≤ B := by
   have hsum : Summable fun j : ℕ => ((j : ℝ) ^ 3 * ρ ^ j) :=
     summable_pow_mul_geometric_of_norm_lt_one 3
@@ -1523,7 +1518,7 @@ theorem s26b_pp_bound {ρ : ℝ} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) :
       nlinarith
 
 /-- Summability of `pp(n) qⁿ` for `|q| < 1`. -/
-theorem s26b_summable_pp {q : ℂ} (hq : ‖q‖ < 1) :
+lemma s26b_summable_pp {q : ℂ} (hq : ‖q‖ < 1) :
     Summable fun n => ‖(planePartitionCount n : ℂ) * q ^ n‖ := by
   obtain ⟨ρ, hqρ, hρ1⟩ := exists_between hq
   have hρ0 : 0 < ρ := lt_of_le_of_lt (norm_nonneg q) hqρ
@@ -1540,7 +1535,7 @@ theorem s26b_summable_pp {q : ℂ} (hq : ‖q‖ < 1) :
     _ ≤ B * ‖q‖ ^ n := mul_le_mul_of_nonneg_right this (by positivity)
 
 /-- `1 - qᵐ ≠ 0` for `|q| < 1`, `m > 0`. -/
-theorem s26b_one_sub_pow_ne_zero {q : ℂ} (hq : ‖q‖ < 1) {m : ℕ} (hm : 0 < m) : 1 - q ^ m ≠ 0 := by
+lemma s26b_one_sub_pow_ne_zero {q : ℂ} (hq : ‖q‖ < 1) {m : ℕ} (hm : 0 < m) : 1 - q ^ m ≠ 0 := by
   intro h
   have : ‖q ^ m‖ = 1 := by rw [← sub_eq_zero.mp h, norm_one]
   rw [norm_pow] at this
@@ -1548,7 +1543,7 @@ theorem s26b_one_sub_pow_ne_zero {q : ℂ} (hq : ‖q‖ < 1) {m : ℕ} (hm : 0 
   linarith
 
 /-- MacMahon's product `∏ (1 - q^{k+1})^{-(k+1)}` converges, as an exponential of a sum. -/
-theorem s26b_hasProd_macMahon {q : ℂ} (hq : ‖q‖ < 1) :
+lemma s26b_hasProd_macMahon {q : ℂ} (hq : ‖q‖ < 1) :
     ∃ A : ℂ, HasProd (fun k : ℕ => ((1 - q ^ (k + 1)) ^ (k + 1))⁻¹) (Complex.exp A) := by
   set a : ℕ → ℂ := fun k => -(((k + 1 : ℕ) : ℂ) * Complex.log (1 - q ^ (k + 1))) with ha
   have h0 : Summable fun n : ℕ => (n : ℝ) ^ 1 * ‖q‖ ^ n :=
@@ -1577,7 +1572,7 @@ theorem s26b_hasProd_macMahon {q : ℂ} (hq : ‖q‖ < 1) :
     Complex.exp_log (s26b_one_sub_pow_ne_zero hq (Nat.succ_pos k))]
 
 /-- Products `∏ (1 - wᵢ)` over finite families with `∑ ‖wᵢ‖ → 0` tend to `1`. -/
-theorem s26b_tendsto_prod_one_sub {ι : Type*} (s : ℕ → Finset ι) (w : ℕ → ι → ℂ)
+lemma s26b_tendsto_prod_one_sub {ι : Type*} (s : ℕ → Finset ι) (w : ℕ → ι → ℂ)
     (hw : ∀ᶠ N in atTop, ∀ x ∈ s N, ‖w N x‖ ≤ 1 / 2)
     (hsum : Tendsto (fun N => ∑ x ∈ s N, ‖w N x‖) atTop (𝓝 0)) :
     Tendsto (fun N => ∏ x ∈ s N, (1 - w N x)) atTop (𝓝 1) := by
@@ -1605,7 +1600,7 @@ theorem s26b_tendsto_prod_one_sub {ι : Type*} (s : ℕ → Finset ι) (w : ℕ 
   linarith
 
 /-- Regrouping `∏_{h,k ≤ N} f(h+k-1) = ∏_{m ≤ N} f(m)^m` when `f = 1` beyond `N`. -/
-theorem s26b_prod_regroup {M : Type*} [CommMonoid M] (N : ℕ) (f : ℕ → M)
+lemma s26b_prod_regroup {M : Type*} [CommMonoid M] (N : ℕ) (f : ℕ → M)
     (hf1 : ∀ m, N + 1 ≤ m → f m = 1) :
     ∏ h ∈ Icc 1 N, ∏ k ∈ Icc 1 N, f (h + k - 1) = ∏ m ∈ Icc 1 N, f m ^ m := by
   have hin : ∀ h ∈ Icc 1 N, ∏ k ∈ Icc 1 N, f (h + k - 1) = ∏ m ∈ Icc h N, f m := by
@@ -1633,14 +1628,14 @@ theorem s26b_prod_regroup {M : Type*} [CommMonoid M] (N : ℕ) (f : ℕ → M)
 def s26b_c (N n : ℕ) : ℕ := #{π ∈ planePartitionsIn N N N | π.card = n}
 
 /-- `c_N(n) ≤ pp(n)`. -/
-theorem s26b_c_le (N n : ℕ) : s26b_c N n ≤ planePartitionCount n := by
+lemma s26b_c_le (N n : ℕ) : s26b_c N n ≤ planePartitionCount n := by
   refine card_le_card fun π hπ => ?_
   simp only [mem_filter, s26b_mem_planePartitionsIn, mem_powerset] at hπ ⊢
   obtain ⟨⟨_, hπ⟩, rfl⟩ := hπ
   exact ⟨s26b_subset_planeBox_card hπ, hπ, rfl⟩
 
 /-- `c_N(n) = pp(n)` for `n ≤ N`. -/
-theorem s26b_c_eq {N n : ℕ} (hn : n ≤ N) : s26b_c N n = planePartitionCount n := by
+lemma s26b_c_eq {N n : ℕ} (hn : n ≤ N) : s26b_c N n = planePartitionCount n := by
   have := s26b_coeff_boxPoly (N := N) hn
   simp only [Polynomial.finsetSum_coeff, Polynomial.coeff_X_pow, sum_boole] at this
   rw [s26b_c]
@@ -1648,7 +1643,7 @@ theorem s26b_c_eq {N n : ℕ} (hn : n ≤ N) : s26b_c N n = planePartitionCount 
     (by exact_mod_cast this)
 
 /-- `∑_{π ⊆ B(N,N,N)} q^{|π|} = ∑ₙ c_N(n) qⁿ`. -/
-theorem s26b_hasSum_c {q : ℂ} (N : ℕ) :
+lemma s26b_hasSum_c {q : ℂ} (N : ℕ) :
     HasSum (fun n => (s26b_c N n : ℂ) * q ^ n) (∑ π ∈ planePartitionsIn N N N, q ^ π.card) := by
   have hmaps : ∀ π ∈ planePartitionsIn N N N, π.card ∈ range (N ^ 3 + 1) := by
     intro π hπ
@@ -1667,7 +1662,7 @@ theorem s26b_hasSum_c {q : ℂ} (N : ℕ) :
   rw [← hc]; exact hmaps π hπ
 
 /-- Double products `∏_{h,j ≤ N} (1 - w)` with `‖w‖ ≤ ‖q‖^{N+1}` tend to `1`. -/
-theorem s26b_tendsto_box_prod {q : ℂ} (hq : ‖q‖ < 1) (w : ℕ → ℕ × ℕ → ℂ)
+lemma s26b_tendsto_box_prod {q : ℂ} (hq : ‖q‖ < 1) (w : ℕ → ℕ × ℕ → ℂ)
     (hw : ∀ N, ∀ x ∈ Icc 1 N ×ˢ Icc 1 N, ‖w N x‖ ≤ ‖q‖ ^ (N + 1)) :
     Tendsto (fun N => ∏ h ∈ Icc 1 N, ∏ j ∈ Icc 1 N, (1 - w N (h, j))) atTop (𝓝 1) := by
   simp only [← prod_product']

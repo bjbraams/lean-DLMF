@@ -57,7 +57,7 @@ theorem airy_general_solution {w w' : ℂ → ℂ} (hw : IsAirySol w w') :
   exact hw.eq_of_initial hs h0 h1
 
 /-- The initial-value product, normalized using the already proved Airy Wronskian. -/
-lemma airyAi_zero_mul_airyAiDeriv_zero :
+theorem airyAi_zero_mul_airyAiDeriv_zero :
     airyAi 0 * airyAiDeriv 0 = -1 / (2 * π * Real.sqrt 3) := by
   have hB : airyBi 0 = (Real.sqrt 3 : ℂ) * airyAi 0 := by
     simp only [airyBi, airyAi, airyG_zero, mul_zero, add_zero, sub_zero]
@@ -151,7 +151,7 @@ theorem airy_log_derivative_riccati {w w' : ℂ → ℂ} (hw : IsAirySol w w') {
   exact h.congr_deriv (by field_simp)
 
 /-- The regularized `₀F₁` series as a `HasSum`. -/
-lemma hasSum_reg0F1 (c w : ℂ) :
+theorem hasSum_reg0F1 (c w : ℂ) :
     HasSum (fun k : ℕ => w ^ k / (k ! * Gamma (c + k))) (regularizedHGFun ∅ {c} w) := by
   have hr : (regularizedHGFunSeries (∅ : Multiset ℂ) {c}).radius = ⊤ :=
     radius_regularizedHGFunSeries_eq_top (by simp)
@@ -164,7 +164,7 @@ lemma hasSum_reg0F1 (c w : ℂ) :
   ring
 
 /-- Triplication: `(3k)! = 27^k k! (1/3)_k (2/3)_k`. -/
-lemma factorial_three_mul (k : ℕ) :
+theorem factorial_three_mul (k : ℕ) :
     (((3 * k) ! : ℕ) : ℂ) = 27 ^ k * k ! * poch (1 / 3) k * poch (2 / 3) k := by
   induction k with
   | zero => simp [poch]
@@ -178,7 +178,7 @@ lemma factorial_three_mul (k : ℕ) :
     ring
 
 /-- `(3k+1)! = 27^k k! (2/3)_k (4/3)_k`. -/
-lemma factorial_three_mul_add_one (k : ℕ) :
+theorem factorial_three_mul_add_one (k : ℕ) :
     (((3 * k + 1) ! : ℕ) : ℂ) = 27 ^ k * k ! * poch (2 / 3) k * poch (4 / 3) k := by
   induction k with
   | zero => simp [poch]
@@ -192,7 +192,7 @@ lemma factorial_three_mul_add_one (k : ℕ) :
     ring
 
 /-- `(3k+2)! = 2 · 27^k k! (4/3)_k (5/3)_k`. -/
-lemma factorial_three_mul_add_two (k : ℕ) :
+theorem factorial_three_mul_add_two (k : ℕ) :
     (((3 * k + 2) ! : ℕ) : ℂ) = 2 * 27 ^ k * k ! * poch (4 / 3) k * poch (5 / 3) k := by
   induction k with
   | zero => simp [poch]
@@ -206,22 +206,22 @@ lemma factorial_three_mul_add_two (k : ℕ) :
     ring
 
 /-- `(c)_k ≠ 0` for `0 < re c`. -/
-lemma poch_ne_zero_of_re_pos {c : ℂ} (hc : 0 < c.re) (k : ℕ) : poch c k ≠ 0 := by
+theorem poch_ne_zero_of_re_pos {c : ℂ} (hc : 0 < c.re) (k : ℕ) : poch c k ≠ 0 := by
   intro h
   have h2 := DLMF.Gamma.Gamma_add_nat_eq_poch_mul_Gamma hc k
   rw [h, zero_mul] at h2
   exact Gamma_ne_zero_of_re_pos (by simp; linarith [k.cast_nonneg (α := ℝ)]) h2
 
 /-- `Γ(4/3) = Γ(1/3)/3`. -/
-lemma Gamma_four_thirds : Gamma (4 / 3) = 1 / 3 * Gamma (1 / 3) := by
+theorem Gamma_four_thirds : Gamma (4 / 3) = 1 / 3 * Gamma (1 / 3) := by
   rw [show (4 / 3 : ℂ) = 1 / 3 + 1 by norm_num, Complex.Gamma_add_one _ (by norm_num)]
 
 /-- `Γ(5/3) = (2/3) Γ(2/3)`. -/
-lemma Gamma_five_thirds : Gamma (5 / 3) = 2 / 3 * Gamma (2 / 3) := by
+theorem Gamma_five_thirds : Gamma (5 / 3) = 2 / 3 * Gamma (2 / 3) := by
   rw [show (5 / 3 : ℂ) = 2 / 3 + 1 by norm_num, Complex.Gamma_add_one _ (by norm_num)]
 
 /-- Maclaurin series of `airyF`. -/
-lemma hasSum_airyF_maclaurin (z : ℂ) :
+theorem hasSum_airyF_maclaurin (z : ℂ) :
     HasSum (fun k : ℕ => (Gamma (2 / 3))⁻¹ * (3 : ℂ) ^ k * poch (1 / 3) k / (3 * k)! *
       z ^ (3 * k)) (airyF z) := by
   refine (hasSum_reg0F1 (2 / 3) (z ^ 3 / 9)).congr_fun fun k => ?_
@@ -234,7 +234,7 @@ lemma hasSum_airyF_maclaurin (z : ℂ) :
   field_simp
 
 /-- Maclaurin series of `airyG`. -/
-lemma hasSum_airyG_maclaurin (z : ℂ) :
+theorem hasSum_airyG_maclaurin (z : ℂ) :
     HasSum (fun k : ℕ => (Gamma (4 / 3))⁻¹ * (3 : ℂ) ^ k * poch (2 / 3) k / (3 * k + 1)! *
       z ^ (3 * k + 1)) (airyG z) := by
   refine ((hasSum_reg0F1 (4 / 3) (z ^ 3 / 9)).mul_left z).congr_fun fun k => ?_
@@ -247,7 +247,7 @@ lemma hasSum_airyG_maclaurin (z : ℂ) :
   field_simp
 
 /-- Maclaurin series of `airyFDeriv`. -/
-lemma hasSum_airyFDeriv_maclaurin (z : ℂ) :
+theorem hasSum_airyFDeriv_maclaurin (z : ℂ) :
     HasSum (fun k : ℕ => (Gamma (2 / 3))⁻¹ * (3 : ℂ) ^ k * poch (4 / 3) k / (3 * k + 2)! *
       z ^ (3 * k + 2)) (airyFDeriv z) := by
   refine ((hasSum_reg0F1 (5 / 3) (z ^ 3 / 9)).mul_left (z ^ 2 / 3)).congr_fun fun k => ?_
@@ -260,14 +260,14 @@ lemma hasSum_airyFDeriv_maclaurin (z : ℂ) :
   field_simp
 
 /-- `G′(z) = 3 ₀F̃₁(;1/3;z³/9)`. -/
-lemma airyGDeriv_eq (z : ℂ) :
+theorem airyGDeriv_eq (z : ℂ) :
     airyGDeriv z = 3 * regularizedHGFun (∅ : Multiset ℂ) {1 / 3} (z ^ 3 / 9) := by
   rw [airyGDeriv, reg0F1_contiguous' (c := 1 / 3) (c₁ := 4 / 3) (c₂ := 7 / 3) (by norm_num)
     (by norm_num)]
   ring
 
 /-- Maclaurin series of `airyGDeriv`. -/
-lemma hasSum_airyGDeriv_maclaurin (z : ℂ) :
+theorem hasSum_airyGDeriv_maclaurin (z : ℂ) :
     HasSum (fun k : ℕ => (Gamma (4 / 3))⁻¹ * (3 : ℂ) ^ k * poch (2 / 3) k / (3 * k)! *
       z ^ (3 * k)) (airyGDeriv z) := by
   rw [airyGDeriv_eq]
@@ -281,7 +281,7 @@ lemma hasSum_airyGDeriv_maclaurin (z : ℂ) :
   field_simp
 
 /-- `G′(0) = 1/Γ(4/3)`. -/
-lemma airyGDeriv_zero' : airyGDeriv 0 = (Gamma (4 / 3))⁻¹ := by
+theorem airyGDeriv_zero' : airyGDeriv 0 = (Gamma (4 / 3))⁻¹ := by
   rw [airyGDeriv_zero, Gamma_four_thirds]
   have h3 : Gamma (1 / 3) ≠ 0 := Gamma_ne_zero_of_re_pos (by norm_num)
   field_simp

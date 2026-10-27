@@ -133,7 +133,7 @@ theorem lowerIncGamma_large_parameter_hasSum {a : ℂ} (ha : ∀ n : ℕ, a ≠ 
 
 /-- In the sector `|arg a| ≤ π - δ`, every shift `a + m` with `m ≥ 0` keeps a fixed fraction
 of the modulus: `sin δ · ‖a‖ ≤ ‖a + m‖`. -/
-lemma sin_mul_norm_le_norm_add_of_abs_arg_le {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) {a : ℂ}
+theorem sin_mul_norm_le_norm_add_of_abs_arg_le {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) {a : ℂ}
     (harg : |arg a| ≤ π - δ) {m : ℝ} (hm : 0 ≤ m) :
     Real.sin δ * ‖a‖ ≤ ‖a + m‖ := by
   have hs : 0 ≤ Real.sin δ := Real.sin_nonneg_of_nonneg_of_le_pi hδ.le hδ1.le
@@ -152,7 +152,7 @@ lemma sin_mul_norm_le_norm_add_of_abs_arg_le {δ : ℝ} (hδ : 0 < δ) (hδ1 : �
   nlinarith [sq_nonneg (‖a‖ * Real.cos δ - m), mul_nonneg hm (by linarith : 0 ≤ a.re + ‖a‖ * Real.cos δ)]
 
 /-- Pochhammer lower bound in the sector: `(sin δ · ‖a‖)^k ≤ ‖(a + m)_k‖` for `m ≥ 0`. -/
-lemma pow_le_norm_poch_of_abs_arg_le {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) {a : ℂ}
+theorem pow_le_norm_poch_of_abs_arg_le {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) {a : ℂ}
     (harg : |arg a| ≤ π - δ) {m : ℝ} (hm : 0 ≤ m) (k : ℕ) :
     (Real.sin δ * ‖a‖)^k ≤ ‖poch (a + m) k‖ := by
   have hs : 0 ≤ Real.sin δ := Real.sin_nonneg_of_nonneg_of_le_pi hδ.le hδ1.le
@@ -224,7 +224,7 @@ theorem lowerIncGamma_large_parameter_asymptotic {z : ℂ} (hz : z ≠ 0) {δ : 
   linarith
 
 /-- On the logarithmic sector, `exp` maps into the principal sector. -/
-lemma igAsy_tendsto_exp_logSector {α : ℝ} (hα : α < π) :
+theorem igAsy_tendsto_exp_logSector {α : ℝ} (hα : α < π) :
     Tendsto exp (logSector α) (sector α) := by
   refine tendsto_inf.mpr ⟨?_, ?_⟩
   · rw [tendsto_comap_iff]
@@ -242,7 +242,7 @@ lemma igAsy_tendsto_exp_logSector {α : ℝ} (hα : α < π) :
     exact hw'
 
 /-- Points of a sector of half-angle `π - δ` are not nonpositive integers. -/
-lemma igAsy_ne_neg_nat {δ : ℝ} (hδ : 0 < δ) {a : ℂ} (ha0 : a ≠ 0) (harg : |arg a| ≤ π-δ) (n : ℕ) :
+theorem igAsy_ne_neg_nat {δ : ℝ} (hδ : 0 < δ) {a : ℂ} (ha0 : a ≠ 0) (harg : |arg a| ≤ π-δ) (n : ℕ) :
     a ≠ -n := by
   intro hn
   rcases Nat.eq_zero_or_pos n with h | h
@@ -255,7 +255,7 @@ lemma igAsy_ne_neg_nat {δ : ℝ} (hδ : 0 < δ) {a : ℂ} (ha0 : a ≠ 0) (harg
     linarith
 
 /-- First half of 8.11.5 on the principal sector. -/
-lemma igAsy_normIncGammaP_equiv_sector {z : ℂ} (hz : z ≠ 0) {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) :
+theorem igAsy_normIncGammaP_equiv_sector {z : ℂ} (hz : z ≠ 0) {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) :
     IsEquivalent (sector (π-δ)) (fun a => normIncGammaPContinued a z)
       (fun a => z^a*exp (-z)/Gamma (1+a)) := by
   have H := lowerIncGamma_large_parameter_asymptotic hz hδ hδ1 1
@@ -299,7 +299,7 @@ lemma igAsy_normIncGammaP_equiv_sector {z : ℂ} (hz : z ≠ 0) {δ : ℝ} (hδ 
 
 
 /-- Stirling's formula in the form used for 8.11.5. -/
-lemma igAsy_stirling_logSector {z : ℂ} (hz : z ≠ 0) {w : ℂ} (hw1 : -π < w.im) (hw2 : w.im < π) :
+theorem igAsy_stirling_logSector {z : ℂ} (hz : z ≠ 0) {w : ℂ} (hw1 : -π < w.im) (hw2 : w.im < π) :
     z^(exp w)*exp (-z)/Gamma (1+exp w) =
       exp (exp w-z+exp w*(log z-w)-w/2)/Real.sqrt (2*π) * exp (-DLMF.Gamma.binetMu (exp w)) := by
   set a := exp w with ha
@@ -322,7 +322,7 @@ lemma igAsy_stirling_logSector {z : ℂ} (hz : z ≠ 0) {w : ℂ} (hw1 : -π < w
   ring
 
 /-- The Binet remainder tends to zero on the logarithmic sector. -/
-lemma igAsy_tendsto_binetMu_logSector {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) :
+theorem igAsy_tendsto_binetMu_logSector {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) :
     Tendsto (fun w => DLMF.Gamma.binetMu (exp w)) (logSector (π-δ)) (𝓝 0) := by
   have hc : 0 < 1 - Real.cos δ := by
     have := Real.cos_lt_cos_of_nonneg_of_le_pi (le_refl 0) hδ1.le hδ
@@ -389,7 +389,7 @@ theorem incGammaLambdaPolynomial_initial  :
   ring
 
 /-- `1 - x s > 0` for `x < 1` and `s ∈ [0,1]`. -/
-lemma igAsy_one_sub_mul_pos {x s : ℝ} (hx : x < 1) (hs : s ∈ Icc (0:ℝ) 1) : 0 < 1 - x*s := by
+theorem igAsy_one_sub_mul_pos {x s : ℝ} (hx : x < 1) (hs : s ∈ Icc (0:ℝ) 1) : 0 < 1 - x*s := by
   rcases le_or_gt x 0 with h | h
   · nlinarith [mul_nonpos_of_nonpos_of_nonneg h hs.1]
   · nlinarith [mul_le_mul_of_nonneg_left hs.2 h.le]
@@ -401,7 +401,7 @@ noncomputable def igAsy_b : ℕ → Polynomial ℝ
       Polynomial.C (2*(k:ℝ)+1)*Polynomial.X*igAsy_b k
 
 /-- `igAsy_b` complexifies to `incGammaLambdaPolynomial`. -/
-lemma igAsy_b_map (k : ℕ) : (igAsy_b k).map (algebraMap ℝ ℂ) = incGammaLambdaPolynomial k := by
+theorem igAsy_b_map (k : ℕ) : (igAsy_b k).map (algebraMap ℝ ℂ) = incGammaLambdaPolynomial k := by
   induction k with
   | zero => simp [igAsy_b, incGammaLambdaPolynomial]
   | succ k ih =>
@@ -411,7 +411,7 @@ lemma igAsy_b_map (k : ℕ) : (igAsy_b k).map (algebraMap ℝ ℂ) = incGammaLam
     simp
 
 /-- `b_k(x)` at a real point. -/
-lemma igAsy_b_eval (k : ℕ) (x : ℝ) :
+theorem igAsy_b_eval (k : ℕ) (x : ℝ) :
     (incGammaLambdaPolynomial k).eval (x : ℂ) = (((igAsy_b k).eval x : ℝ) : ℂ) := by
   rw [← igAsy_b_map, Polynomial.eval_map, show (x:ℂ) = algebraMap ℝ ℂ x from rfl,
     Polynomial.eval₂_at_apply]
@@ -421,7 +421,7 @@ lemma igAsy_b_eval (k : ℕ) (x : ℝ) :
 noncomputable def igAsy_v (k : ℕ) (y : ℝ) : ℝ := (igAsy_b k).eval y / (1-y)^(2*k)
 
 /-- `v_0 = 1`. -/
-lemma igAsy_v_zero (y : ℝ) : igAsy_v 0 y = 1 := by simp [igAsy_v, igAsy_b]
+theorem igAsy_v_zero (y : ℝ) : igAsy_v 0 y = 1 := by simp [igAsy_v, igAsy_b]
 
 /-- The primitive `W_k(t) = b_k(λt)/(1-λt)^{2k+1}`. -/
 noncomputable def igAsy_W (k : ℕ) (l t : ℝ) : ℝ := (igAsy_b k).eval (l*t) / (1-l*t)^(2*k+1)
@@ -431,7 +431,7 @@ noncomputable def igAsy_W' (k : ℕ) (l t : ℝ) : ℝ :=
   l*((igAsy_b k).derivative.eval (l*t)*(1-l*t) + (2*k+1)*(igAsy_b k).eval (l*t))/(1-l*t)^(2*k+2)
 
 /-- `W_k` has derivative `W_k'` where `1 - λt ≠ 0`. -/
-lemma igAsy_hasDerivAt_W (k : ℕ) {l t : ℝ} (h : 1 - l*t ≠ 0) :
+theorem igAsy_hasDerivAt_W (k : ℕ) {l t : ℝ} (h : 1 - l*t ≠ 0) :
     HasDerivAt (igAsy_W k l) (igAsy_W' k l t) t := by
   have hP := ((igAsy_b k).hasDerivAt (l*t)).comp t ((hasDerivAt_id t).const_mul l)
   have hD := (((hasDerivAt_id t).const_mul l).const_sub 1).pow (2*k+1)
@@ -447,7 +447,7 @@ lemma igAsy_hasDerivAt_W (k : ℕ) {l t : ℝ} (h : 1 - l*t ≠ 0) :
   ring
 
 /-- `t W_k'(t) = v_{k+1}(λt)`. -/
-lemma igAsy_mul_W' (k : ℕ) (l t : ℝ) :
+theorem igAsy_mul_W' (k : ℕ) (l t : ℝ) :
     t * igAsy_W' k l t = igAsy_v (k+1) (l*t) := by
   unfold igAsy_W' igAsy_v
   simp only [igAsy_b, Polynomial.eval_add, Polynomial.eval_mul, Polynomial.eval_X,
@@ -463,7 +463,7 @@ noncomputable def igAsy_g (l : ℝ) (a : ℂ) (t : ℝ) : ℂ := (t:ℂ)^(a-1) *
 noncomputable def igAsy_H (l : ℝ) (a : ℂ) (t : ℝ) : ℂ := (t:ℂ)^a * exp (l*a*(1-t))
 
 /-- `H' = a(1-λt) g` for `t > 0`. -/
-lemma igAsy_hasDerivAt_H (l : ℝ) (a : ℂ) {t : ℝ} (ht : 0 < t) :
+theorem igAsy_hasDerivAt_H (l : ℝ) (a : ℂ) {t : ℝ} (ht : 0 < t) :
     HasDerivAt (igAsy_H l a) (a*(1-l*t)*igAsy_g l a t) t := by
   have hslit : (t:ℂ) ∈ slitPlane := by simpa using ofReal_mem_slitPlane.mpr ht
   have h1 := (Complex.hasStrictDerivAt_cpow_const (c := a) hslit).hasDerivAt.comp_ofReal
@@ -480,7 +480,7 @@ lemma igAsy_hasDerivAt_H (l : ℝ) (a : ℂ) {t : ℝ} (ht : 0 < t) :
   ring
 
 /-- `W_k` is continuous on `[0,1]` for `λ < 1`. -/
-lemma igAsy_continuousOn_W (k : ℕ) {l : ℝ} (hl : l < 1) :
+theorem igAsy_continuousOn_W (k : ℕ) {l : ℝ} (hl : l < 1) :
     ContinuousOn (igAsy_W k l) (uIcc 0 1) := by
   unfold igAsy_W
   refine ContinuousOn.div (by fun_prop) (by fun_prop) fun s hs => ?_
@@ -488,7 +488,7 @@ lemma igAsy_continuousOn_W (k : ℕ) {l : ℝ} (hl : l < 1) :
   exact pow_ne_zero _ (igAsy_one_sub_mul_pos hl hs).ne'
 
 /-- `t ↦ v_k(λt)` is continuous on `[0,1]` for `λ < 1`. -/
-lemma igAsy_continuousOn_v (k : ℕ) {l : ℝ} (hl : l < 1) :
+theorem igAsy_continuousOn_v (k : ℕ) {l : ℝ} (hl : l < 1) :
     ContinuousOn (fun s => igAsy_v k (l*s)) (uIcc 0 1) := by
   unfold igAsy_v
   refine ContinuousOn.div (by fun_prop) (by fun_prop) fun s hs => ?_
@@ -496,7 +496,7 @@ lemma igAsy_continuousOn_v (k : ℕ) {l : ℝ} (hl : l < 1) :
   exact pow_ne_zero _ (igAsy_one_sub_mul_pos hl hs).ne'
 
 /-- `W_k'` is continuous on `[0,1]` for `λ < 1`. -/
-lemma igAsy_continuousOn_W' (k : ℕ) {l : ℝ} (hl : l < 1) :
+theorem igAsy_continuousOn_W' (k : ℕ) {l : ℝ} (hl : l < 1) :
     ContinuousOn (igAsy_W' k l) (uIcc 0 1) := by
   unfold igAsy_W'
   refine ContinuousOn.div (by fun_prop) (by fun_prop) fun s hs => ?_
@@ -504,14 +504,14 @@ lemma igAsy_continuousOn_W' (k : ℕ) {l : ℝ} (hl : l < 1) :
   exact pow_ne_zero _ (igAsy_one_sub_mul_pos hl hs).ne'
 
 /-- `g` is continuous for `Re a > 1`. -/
-lemma igAsy_continuous_g (l : ℝ) {a : ℂ} (ha : 1 < a.re) : Continuous (igAsy_g l a) := by
+theorem igAsy_continuous_g (l : ℝ) {a : ℂ} (ha : 1 < a.re) : Continuous (igAsy_g l a) := by
   unfold igAsy_g
   refine Continuous.mul ?_ (by fun_prop)
   exact continuous_iff_continuousAt.mpr fun t =>
     (Complex.continuousAt_ofReal_cpow_const t (a-1) (Or.inl (by simp; linarith)))
 
 /-- One complex integration by parts. -/
-lemma igAsy_ibpC (k : ℕ) {l : ℝ} (hl : l < 1) {a : ℂ} (ha : 1 < a.re) :
+theorem igAsy_ibpC (k : ℕ) {l : ℝ} (hl : l < 1) {a : ℂ} (ha : 1 < a.re) :
     ∫ t in (0:ℝ)..1, igAsy_g l a t * igAsy_v k (l*t) =
       igAsy_W k l 1/a - 1/a * ∫ t in (0:ℝ)..1, igAsy_g l a t * igAsy_v (k+1) (l*t) := by
   have ha0 : a ≠ 0 := fun h => by simp [h] at ha; linarith
@@ -566,7 +566,7 @@ lemma igAsy_ibpC (k : ℕ) {l : ℝ} (hl : l < 1) {a : ℂ} (ha : 1 < a.re) :
 
 
 /-- Iterated complex integration by parts. -/
-lemma igAsy_iterC {l : ℝ} (hl : l < 1) {a : ℂ} (ha : 1 < a.re) (N : ℕ) :
+theorem igAsy_iterC {l : ℝ} (hl : l < 1) {a : ℂ} (ha : 1 < a.re) (N : ℕ) :
     ∫ t in (0:ℝ)..1, igAsy_g l a t =
       ∑ k ∈ Finset.range N, (-1)^k/a^(k+1) * (igAsy_W k l 1 : ℂ) +
         (-1)^N/a^N * ∫ t in (0:ℝ)..1, igAsy_g l a t * igAsy_v N (l*t) := by
@@ -578,7 +578,7 @@ lemma igAsy_iterC {l : ℝ} (hl : l < 1) {a : ℂ} (ha : 1 < a.re) (N : ℕ) :
     ring
 
 /-- `∫₀¹ e^{-c(1-t)} dt ≤ 1/c`. -/
-lemma igAsy_integral_exp_le {c : ℝ} (hc0 : 0 < c) :
+theorem igAsy_integral_exp_le {c : ℝ} (hc0 : 0 < c) :
     ∫ t in (0:ℝ)..1, Real.exp (-c*(1-t)) ≤ 1/c := by
   have hd : ∀ s ∈ uIcc (0:ℝ) 1, HasDerivAt (fun s : ℝ => Real.exp (-c*(1-s))/c)
       (Real.exp (-c*(1-s))) s := by
@@ -595,7 +595,7 @@ lemma igAsy_integral_exp_le {c : ℝ} (hc0 : 0 < c) :
   linarith [Real.exp_pos (-c*(1-0))]
 
 /-- Pointwise bound `‖t^{a-1} e^{λa(1-t)}‖ ≤ e^{-(Re a(1-λ)-1)(1-t)}`. -/
-lemma igAsy_norm_g_le {l : ℝ} {a : ℂ} (ha : 1 < a.re) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) :
+theorem igAsy_norm_g_le {l : ℝ} {a : ℂ} (ha : 1 < a.re) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) :
     ‖igAsy_g l a t‖ ≤ Real.exp (-(a.re*(1-l)-1)*(1-t)) := by
   unfold igAsy_g
   rcases ht0.eq_or_lt with h | h
@@ -614,7 +614,7 @@ lemma igAsy_norm_g_le {l : ℝ} {a : ℂ} (ha : 1 < a.re) {t : ℝ} (ht0 : 0 ≤
     _ = Real.exp (-(a.re*(1-l)-1)*(1-t)) := by rw [← Real.exp_add]; ring_nf
 
 /-- Remainder bound for the complex integral. -/
-lemma igAsy_norm_integral_le {l : ℝ} (hl : l < 1) {a : ℂ} (ha : 1 < a.re) (ha2 : 2 ≤ a.re*(1-l))
+theorem igAsy_norm_integral_le {l : ℝ} (hl : l < 1) {a : ℂ} (ha : 1 < a.re) (ha2 : 2 ≤ a.re*(1-l))
     {N : ℕ} {K : ℝ} (hK : ∀ t ∈ Icc (0:ℝ) 1, |igAsy_v N (l*t)| ≤ K) :
     ‖∫ t in (0:ℝ)..1, igAsy_g l a t * igAsy_v N (l*t)‖ ≤ K * (2/(a.re*(1-l))) := by
   have hK0 : 0 ≤ K := le_trans (abs_nonneg _) (hK 0 ⟨le_rfl, zero_le_one⟩)
@@ -756,13 +756,13 @@ noncomputable def igAsy_poly : ℕ → Polynomial ℝ
 noncomputable def igAsy_h (k : ℕ) (y : ℝ) : ℝ := (igAsy_poly k).eval y / (1-y)^(2*k)
 
 /-- The recursion of `igAsy_poly`, evaluated. -/
-lemma igAsy_poly_eval_succ (k : ℕ) (y : ℝ) :
+theorem igAsy_poly_eval_succ (k : ℕ) (y : ℝ) :
     (igAsy_poly (k+1)).eval y = (1-y)*((igAsy_poly k).eval y + y*(igAsy_poly k).derivative.eval y) +
       (2*k+1)*y*(igAsy_poly k).eval y := by
   simp [igAsy_poly]
 
 /-- The derivative step of the integration by parts. -/
-lemma igAsy_hasDerivAt_V (k : ℕ) {x s : ℝ} (hs : 1 - x*s ≠ 0) :
+theorem igAsy_hasDerivAt_V (k : ℕ) {x s : ℝ} (hs : 1 - x*s ≠ 0) :
     HasDerivAt (fun t : ℝ => t*(igAsy_poly k).eval (x*t)/(1-x*t)^(2*k+1)) (igAsy_h (k+1) (x*s)) s := by
   have hP := ((igAsy_poly k).hasDerivAt (x*s)).comp s ((hasDerivAt_id s).const_mul x)
   have hD := (((hasDerivAt_id s).const_mul x).const_sub 1).pow (2*k+1)
@@ -778,13 +778,13 @@ lemma igAsy_hasDerivAt_V (k : ℕ) {x s : ℝ} (hs : 1 - x*s ≠ 0) :
 
 
 /-- `h_0 = 1`. -/
-lemma igAsy_h_zero (y : ℝ) : igAsy_h 0 y = 1 := by simp [igAsy_h, igAsy_poly]
+theorem igAsy_h_zero (y : ℝ) : igAsy_h 0 y = 1 := by simp [igAsy_h, igAsy_poly]
 
 /-- The Laplace-type integrand `s^n e^{n x (1-s)}` with `n = m+1`. -/
 noncomputable def igAsy_F (m : ℕ) (x s : ℝ) : ℝ := s^(m+1) * Real.exp ((m+1)*x*(1-s))
 
 /-- Derivative of the integrand `igAsy_F`. -/
-lemma igAsy_hasDerivAt_F (m : ℕ) (x s : ℝ) :
+theorem igAsy_hasDerivAt_F (m : ℕ) (x s : ℝ) :
     HasDerivAt (igAsy_F m x) ((m+1)*(1-x*s)*s^m*Real.exp ((m+1)*x*(1-s))) s := by
   have h1 := hasDerivAt_pow (m+1) s
   have h2 := (Real.hasDerivAt_exp ((m+1)*x*(1-s))).comp s
@@ -798,7 +798,7 @@ lemma igAsy_hasDerivAt_F (m : ℕ) (x s : ℝ) :
   ring
 
 /-- `s ↦ h_k(x s)` is continuous on `[0,1]` for `x < 1`. -/
-lemma igAsy_continuousOn_h (k : ℕ) {x : ℝ} (hx : x < 1) :
+theorem igAsy_continuousOn_h (k : ℕ) {x : ℝ} (hx : x < 1) :
     ContinuousOn (fun s : ℝ => igAsy_h k (x*s)) (uIcc 0 1) := by
   unfold igAsy_h
   refine ContinuousOn.div (by fun_prop) (by fun_prop) fun s hs => ?_
@@ -806,7 +806,7 @@ lemma igAsy_continuousOn_h (k : ℕ) {x : ℝ} (hx : x < 1) :
   exact pow_ne_zero _ (igAsy_one_sub_mul_pos hx hs).ne'
 
 /-- One integration by parts. -/
-lemma igAsy_ibp (m k : ℕ) {x : ℝ} (hx : x < 1) :
+theorem igAsy_ibp (m k : ℕ) {x : ℝ} (hx : x < 1) :
     ∫ s in (0:ℝ)..1, igAsy_F m x s * igAsy_h k (x*s) =
       igAsy_h k x/((m+1)*(1-x)) - 1/(m+1) * ∫ s in (0:ℝ)..1, igAsy_F m x s * igAsy_h (k+1) (x*s) := by
   have hm : (m:ℝ)+1 ≠ 0 := by positivity
@@ -846,7 +846,7 @@ lemma igAsy_ibp (m k : ℕ) {x : ℝ} (hx : x < 1) :
   linear_combination H
 
 /-- Iterated integration by parts. -/
-lemma igAsy_iter (m : ℕ) {x : ℝ} (hx : x < 1) (N : ℕ) :
+theorem igAsy_iter (m : ℕ) {x : ℝ} (hx : x < 1) (N : ℕ) :
     ∫ s in (0:ℝ)..1, igAsy_F m x s =
       ∑ k ∈ Finset.range N, (-1)^k/((m:ℝ)+1)^(k+1) * (igAsy_h k x/(1-x)) +
         (-1)^N/((m:ℝ)+1)^N * ∫ s in (0:ℝ)..1, igAsy_F m x s * igAsy_h N (x*s) := by
@@ -861,11 +861,11 @@ lemma igAsy_iter (m : ℕ) {x : ℝ} (hx : x < 1) (N : ℕ) :
 
 
 /-- The integrand is nonnegative on `[0, ∞)`. -/
-lemma igAsy_F_nonneg (m : ℕ) (x : ℝ) {s : ℝ} (hs : 0 ≤ s) : 0 ≤ igAsy_F m x s := by
+theorem igAsy_F_nonneg (m : ℕ) (x : ℝ) {s : ℝ} (hs : 0 ≤ s) : 0 ≤ igAsy_F m x s := by
   unfold igAsy_F; positivity
 
 /-- Exponential majorant `s^n e^{n x(1-s)} ≤ e^{-n(1-x)(1-s)}`. -/
-lemma igAsy_F_le (m : ℕ) (x : ℝ) {s : ℝ} (hs : 0 ≤ s) :
+theorem igAsy_F_le (m : ℕ) (x : ℝ) {s : ℝ} (hs : 0 ≤ s) :
     igAsy_F m x s ≤ Real.exp (-((m+1)*(1-x))*(1-s)) := by
   unfold igAsy_F
   have h1 : s ≤ Real.exp (s-1) := by linarith [Real.add_one_le_exp (s-1)]
@@ -877,7 +877,7 @@ lemma igAsy_F_le (m : ℕ) (x : ℝ) {s : ℝ} (hs : 0 ≤ s) :
     _ = Real.exp (-((m+1)*(1-x))*(1-s)) := by rw [← Real.exp_add]; ring_nf
 
 /-- `∫₀¹ s^n e^{n x (1-s)} ds ≤ 1/(n(1-x))` for `x < 1`. -/
-lemma igAsy_integral_F_le (m : ℕ) {x : ℝ} (hx : x < 1) :
+theorem igAsy_integral_F_le (m : ℕ) {x : ℝ} (hx : x < 1) :
     ∫ s in (0:ℝ)..1, igAsy_F m x s ≤ 1/((m+1)*(1-x)) := by
   set c : ℝ := (m+1)*(1-x) with hc
   have hc0 : 0 < c := by rw [hc]; have : 0 < 1-x := by linarith
@@ -907,7 +907,7 @@ lemma igAsy_integral_F_le (m : ℕ) {x : ℝ} (hx : x < 1) :
   linarith [Real.exp_pos (-c)]
 
 /-- The absolute value of a real polynomial is bounded by `A (1+|y|)^{deg}`. -/
-lemma igAsy_abs_eval_le (p : Polynomial ℝ) (y : ℝ) :
+theorem igAsy_abs_eval_le (p : Polynomial ℝ) (y : ℝ) :
     |p.eval y| ≤ (∑ i ∈ Finset.range (p.natDegree+1), |p.coeff i|) * (1+|y|)^p.natDegree := by
   rw [Polynomial.eval_eq_sum_range, Finset.sum_mul]
   refine (Finset.abs_sum_le_sum_abs _ _).trans (Finset.sum_le_sum fun i hi => ?_)
@@ -918,7 +918,7 @@ lemma igAsy_abs_eval_le (p : Polynomial ℝ) (y : ℝ) :
     _ ≤ (1+|y|)^p.natDegree := pow_le_pow_right₀ (by linarith [abs_nonneg y]) hi'
 
 /-- `deg p_k ≤ 2k`. -/
-lemma igAsy_poly_natDegree_le (k : ℕ) : (igAsy_poly k).natDegree ≤ 2*k := by
+theorem igAsy_poly_natDegree_le (k : ℕ) : (igAsy_poly k).natDegree ≤ 2*k := by
   induction k with
   | zero => simp [igAsy_poly]
   | succ k ih =>
@@ -941,7 +941,7 @@ lemma igAsy_poly_natDegree_le (k : ℕ) : (igAsy_poly k).natDegree ≤ 2*k := by
       omega
 
 /-- A uniform bound on `h_N` on `(-∞, max 0 (1-δ)]`. -/
-lemma igAsy_h_bound (N : ℕ) {δ : ℝ} (hδ : 0 < δ) :
+theorem igAsy_h_bound (N : ℕ) {δ : ℝ} (hδ : 0 < δ) :
     ∃ K, 0 ≤ K ∧ ∀ y : ℝ, y ≤ max 0 (1-δ) → |igAsy_h N y| ≤ K := by
   set c : ℝ := min 1 δ / 2 with hc
   have hc0 : 0 < c := by rw [hc]; positivity
@@ -976,7 +976,7 @@ lemma igAsy_h_bound (N : ℕ) {δ : ℝ} (hδ : 0 < δ) :
 
 
 /-- `γ(n+1, nx)/((nx)^n e^{-nx}) = n x ∫₀¹ s^n e^{n x (1-s)} ds` with `n = m+1`. -/
-lemma igAsy_lowerIncGamma_ratio_eq (m : ℕ) (x : ℝ) :
+theorem igAsy_lowerIncGamma_ratio_eq (m : ℕ) (x : ℝ) :
     lowerIncGamma (((m+1:ℕ):ℂ)+1) (((m+1:ℕ):ℂ)*x)/((((m+1:ℕ):ℂ)*x)^(m+1)*exp (-((m+1:ℕ):ℂ)*x)) =
       (((m+1)*x * ∫ s in (0:ℝ)..1, igAsy_F m x s : ℝ) : ℂ) := by
   push_cast
@@ -1013,7 +1013,7 @@ lemma igAsy_lowerIncGamma_ratio_eq (m : ℕ) (x : ℝ) :
 
 
 /-- The identity 8.11.14 with `S_n` unfolded. -/
-lemma igAsy_exp_identity (n : ℕ) (x : ℝ) :
+theorem igAsy_exp_identity (n : ℕ) (x : ℝ) :
     exp (n*x : ℂ)=expPartialSum n (n*x)+(n*x : ℂ)^n/n.factorial*
       (lowerIncGamma (n+1) (n*x)/((n*x : ℂ)^n*exp (-n*x : ℂ))) := by
   rw [show (-n*x : ℂ) = -(n*x : ℂ) by ring]
@@ -1038,7 +1038,7 @@ lemma igAsy_exp_identity (n : ℕ) (x : ℝ) :
 noncomputable def igAsy_q (u : ℝ) : ℝ := if u = 0 then 1/2 else -(Real.log (1-u) + u)/u^2
 
 /-- `|q(u) - 1/2| ≤ 2u` on `[0, 1/8]`. -/
-lemma igAsy_q_sub_half {u : ℝ} (hu0 : 0 ≤ u) (hu : u ≤ 1/8) : |igAsy_q u - 1/2| ≤ 2*u := by
+theorem igAsy_q_sub_half {u : ℝ} (hu0 : 0 ≤ u) (hu : u ≤ 1/8) : |igAsy_q u - 1/2| ≤ 2*u := by
   unfold igAsy_q
   split_ifs with h
   · simp [h]
@@ -1058,7 +1058,7 @@ lemma igAsy_q_sub_half {u : ℝ} (hu0 : 0 ≤ u) (hu : u ≤ 1/8) : |igAsy_q u -
 noncomputable def igAsy_E (k : ℕ) (t : ℝ) : ℝ := (1-|t|)^k * Real.exp (k*|t|)
 
 /-- The Gaussian form `e^{-k t² q(|t|)} = (1-|t|)^k e^{k|t|}`. -/
-lemma igAsy_exp_q_eq (k : ℕ) {t : ℝ} (ht : |t| < 1) :
+theorem igAsy_exp_q_eq (k : ℕ) {t : ℝ} (ht : |t| < 1) :
     exp (-((k:ℝ):ℂ) * (t:ℂ)^2 * ((igAsy_q |t| : ℝ) : ℂ)) = (igAsy_E k t : ℂ) := by
   unfold igAsy_E igAsy_q
   split_ifs with h
@@ -1077,7 +1077,7 @@ lemma igAsy_exp_q_eq (k : ℕ) {t : ℝ} (ht : |t| < 1) :
     rw [Real.exp_add, Real.exp_nat_mul, Real.exp_log hpos]
 
 /-- Laplace's method at the endpoint maximum: `√k ∫_{-1/8}^{1/8} E_k → √(2π)`. -/
-lemma igAsy_tendsto_sqrt_mul_integral_E :
+theorem igAsy_tendsto_sqrt_mul_integral_E :
     Tendsto (fun k : ℕ => Real.sqrt k * ∫ t in Icc (-(1/8:ℝ)) (1/8), igAsy_E k t) atTop
       (𝓝 (Real.sqrt (2*π))) := by
   have hqm : Measurable igAsy_q := by
@@ -1124,7 +1124,7 @@ lemma igAsy_tendsto_sqrt_mul_integral_E :
 
 
 /-- Folding the even integrand: `∫_{-1/8}^{1/8} E_{m+1} = 2 ∫_{7/8}^1 s^{m+1} e^{(m+1)(1-s)} ds`. -/
-lemma igAsy_integral_E_eq (m : ℕ) :
+theorem igAsy_integral_E_eq (m : ℕ) :
     ∫ t in Icc (-(1/8:ℝ)) (1/8), igAsy_E (m+1) t = 2 * ∫ s in (7/8:ℝ)..1, igAsy_F m 1 s := by
   have hc : Continuous (igAsy_E (m+1)) := by unfold igAsy_E; fun_prop
   rw [integral_Icc_eq_integral_Ioc, ← intervalIntegral.integral_of_le (by norm_num),
@@ -1147,7 +1147,7 @@ lemma igAsy_integral_E_eq (m : ℕ) :
   rw [h1, h2]; ring
 
 /-- `s^n e^{n(1-s)} ≤ e^{-n(1-s)²/2}` on `[0,1]`. -/
-lemma igAsy_F_one_le (m : ℕ) {s : ℝ} (hs0 : 0 ≤ s) (hs1 : s ≤ 1) :
+theorem igAsy_F_one_le (m : ℕ) {s : ℝ} (hs0 : 0 ≤ s) (hs1 : s ≤ 1) :
     igAsy_F m 1 s ≤ Real.exp (-((m+1)*(1-s)^2/2)) := by
   rcases hs0.eq_or_lt with h | h
   · subst h; simp [igAsy_F]; positivity
@@ -1164,7 +1164,7 @@ lemma igAsy_F_one_le (m : ℕ) {s : ℝ} (hs0 : 0 ≤ s) (hs1 : s ≤ 1) :
   nlinarith [show (0:ℝ) ≤ (m:ℝ)+1 by positivity]
 
 /-- The tail `√n ∫₀^{7/8} s^n e^{n(1-s)} ds → 0`. -/
-lemma igAsy_tendsto_tail :
+theorem igAsy_tendsto_tail :
     Tendsto (fun m : ℕ => Real.sqrt ((m:ℝ)+1) * ∫ s in (0:ℝ)..(7/8), igAsy_F m 1 s) atTop (𝓝 0) := by
   have hb : ∀ m : ℕ, ∫ s in (0:ℝ)..(7/8), igAsy_F m 1 s ≤ 7/8 * Real.exp (-(((m:ℝ)+1)/128)) := by
     intro m
@@ -1195,7 +1195,7 @@ lemma igAsy_tendsto_tail :
     _ = 7/8 * 128 * ((((m:ℝ)+1)/128)^1 * Real.exp (-(((m:ℝ)+1)/128))) := by ring
 
 /-- `√n ∫₀¹ s^n e^{n(1-s)} ds → √(π/2)`, written as `√(2π)/2`. -/
-lemma igAsy_tendsto_sqrt_J :
+theorem igAsy_tendsto_sqrt_J :
     Tendsto (fun m : ℕ => Real.sqrt ((m:ℝ)+1) * ∫ s in (0:ℝ)..1, igAsy_F m 1 s) atTop
       (𝓝 (Real.sqrt (2*π)/2)) := by
   have hE := (igAsy_tendsto_sqrt_mul_integral_E.comp (tendsto_add_atTop_nat 1)).div_const 2
@@ -1215,7 +1215,7 @@ lemma igAsy_tendsto_sqrt_J :
 
 
 /-- `e_n(nx)/e^{nx} = 1 - (nx)^n/n! · S_n(x)/e^{nx}` with the integral form of `S_n`. -/
-lemma igAsy_ratio_eq (m : ℕ) (x : ℝ) :
+theorem igAsy_ratio_eq (m : ℕ) (x : ℝ) :
     expPartialSum (m+1) (((m+1:ℕ):ℂ)*x)/exp (((m+1:ℕ):ℂ)*x) =
       ((1 - ((m+1)*x)^(m+1)/((m+1).factorial) * ((m+1)*x*∫ s in (0:ℝ)..1, igAsy_F m x s) /
         Real.exp ((m+1)*x) : ℝ) : ℂ) := by
@@ -1229,14 +1229,14 @@ lemma igAsy_ratio_eq (m : ℕ) (x : ℝ) :
   linear_combination -hI
 
 /-- `x e^{1-x} < 1` for `x ≠ 1`. -/
-lemma igAsy_mul_exp_lt_one {x : ℝ} (hx1 : x ≠ 1) : x * Real.exp (1-x) < 1 := by
+theorem igAsy_mul_exp_lt_one {x : ℝ} (hx1 : x ≠ 1) : x * Real.exp (1-x) < 1 := by
   have h := Real.add_one_lt_exp (sub_ne_zero.mpr hx1)
   have he : Real.exp (x-1) * Real.exp (1-x) = 1 := by rw [← Real.exp_add]; simp
   have hp := Real.exp_pos (1-x)
   nlinarith
 
 /-- `(nx)^n/(n! e^{nx}) ≤ (x e^{1-x})^n` for `x ≥ 0`. -/
-lemma igAsy_pow_div_factorial_le (n : ℕ) {x : ℝ} (hx0 : 0 ≤ x) :
+theorem igAsy_pow_div_factorial_le (n : ℕ) {x : ℝ} (hx0 : 0 ≤ x) :
     ((n:ℝ)*x)^n/n.factorial/Real.exp (n*x) ≤ (x*Real.exp (1-x))^n := by
   have h := Real.pow_div_factorial_le_exp (n:ℝ) (n.cast_nonneg) n
   rw [div_le_iff₀ (Real.exp_pos _), mul_pow, mul_pow, ← Real.exp_nat_mul]
@@ -1246,7 +1246,7 @@ lemma igAsy_pow_div_factorial_le (n : ℕ) {x : ℝ} (hx0 : 0 ≤ x) :
     _ = x^n * Real.exp (n*(1-x)) * Real.exp (n*x) := by rw [mul_assoc, he]
 
 /-- 8.11.13 for `0 ≤ x < 1`. -/
-lemma igAsy_poisson_lt {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x < 1) :
+theorem igAsy_poisson_lt {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x < 1) :
     Tendsto (fun m : ℕ => ((m+1)*x)^(m+1)/((m+1).factorial) * ((m+1)*x*∫ s in (0:ℝ)..1, igAsy_F m x s) /
         Real.exp ((m+1)*x)) atTop (𝓝 0) := by
   set r := x*Real.exp (1-x)
@@ -1272,7 +1272,7 @@ lemma igAsy_poisson_lt {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x < 1) :
     exact mul_le_mul hP h1 (by positivity) (by positivity)
 
 /-- 8.11.13 at `x = 1`. -/
-lemma igAsy_poisson_one :
+theorem igAsy_poisson_one :
     Tendsto (fun m : ℕ => ((m+1)*1)^(m+1)/((m+1).factorial) * ((m+1)*1*∫ s in (0:ℝ)..1, igAsy_F m 1 s) /
         Real.exp ((m+1)*1)) atTop (𝓝 (1/2)) := by
   have hst := (Stirling.tendsto_stirlingSeq_sqrt_pi.comp (tendsto_add_atTop_nat 1)).inv₀
@@ -1299,7 +1299,7 @@ lemma igAsy_poisson_one :
 
 
 /-- Exponential-series terms increase up to index `n` when `n ≤ y`. -/
-lemma igAsy_term_le {k : ℕ} {y : ℝ} : ∀ n, k ≤ n → (n:ℝ) ≤ y →
+theorem igAsy_term_le {k : ℕ} {y : ℝ} : ∀ n, k ≤ n → (n:ℝ) ≤ y →
     y^k/k.factorial ≤ y^n/n.factorial := by
   intro n hkn
   induction n, hkn using Nat.le_induction with
@@ -1318,7 +1318,7 @@ lemma igAsy_term_le {k : ℕ} {y : ℝ} : ∀ n, k ≤ n → (n:ℝ) ≤ y →
     nlinarith
 
 /-- 8.11.13 for `x > 1`. -/
-lemma igAsy_poisson_gt {x : ℝ} (hx : 1 < x) :
+theorem igAsy_poisson_gt {x : ℝ} (hx : 1 < x) :
     Tendsto (fun m : ℕ => expPartialSum (m+1) (((m+1:ℕ):ℂ)*x)/exp (((m+1:ℕ):ℂ)*x)) atTop (𝓝 0) := by
   set r := x*Real.exp (1-x)
   have hr0 : 0 ≤ r := by have : 0 ≤ x := by linarith
@@ -1384,7 +1384,7 @@ theorem expPartialSumRemainderS_identity (n : ℕ) (x : ℝ) :
   exact igAsy_exp_identity n x
 
 /-- `S_n(x) = n x ∫₀¹ s^n e^{n x (1-s)} ds`. -/
-lemma igAsy_S_eq (m : ℕ) (x : ℝ) :
+theorem igAsy_S_eq (m : ℕ) (x : ℝ) :
     expPartialSumRemainderS (m+1) x = (((m+1)*x * ∫ s in (0:ℝ)..1, igAsy_F m x s : ℝ) : ℂ) := by
   unfold expPartialSumRemainderS
   exact igAsy_lowerIncGamma_ratio_eq m x
@@ -1393,7 +1393,7 @@ lemma igAsy_S_eq (m : ℕ) (x : ℝ) :
 noncomputable def igAsy_d (k : ℕ) (x : ℝ) : ℝ := (-1)^k * (x * igAsy_h k x/(1-x))
 
 /-- The exact remainder of 8.11.18. -/
-lemma igAsy_S_remainder (m N : ℕ) {x : ℝ} (hx : x < 1) :
+theorem igAsy_S_remainder (m N : ℕ) {x : ℝ} (hx : x < 1) :
     expPartialSumRemainderS (m+1) x - ∑ k ∈ Finset.range N, (igAsy_d k x : ℂ)/((m:ℂ)+1)^k =
       (((m+1)*x*((-1)^N/((m:ℝ)+1)^N * ∫ s in (0:ℝ)..1, igAsy_F m x s * igAsy_h N (x*s)) : ℝ) : ℂ) := by
   rw [igAsy_S_eq, igAsy_iter m hx N]
@@ -1409,7 +1409,7 @@ lemma igAsy_S_remainder (m N : ℕ) {x : ℝ} (hx : x < 1) :
   ring
 
 /-- The remainder bound behind 8.11.18. -/
-lemma igAsy_S_remainder_bound (N : ℕ) {δ : ℝ} (hδ : 0 < δ) :
+theorem igAsy_S_remainder_bound (N : ℕ) {δ : ℝ} (hδ : 0 < δ) :
     ∃ C, ∀ m : ℕ, ∀ x : ℝ, x ≤ 1-δ →
       ‖expPartialSumRemainderS (m+1) x - ∑ k ∈ Finset.range N, (igAsy_d k x : ℂ)/((m:ℂ)+1)^k‖
         ≤ C * (1/((m:ℝ)+1)^N) := by
@@ -1458,16 +1458,16 @@ noncomputable def igAsy_phi (u : ℝ) : ℝ := u - Real.log (1+u)
 noncomputable def igAsy_Q : ℝ → ℝ := dslope (dslope igAsy_phi 0) 0
 
 /-- `φ` is analytic at `0`. -/
-lemma igAsy_analyticAt_phi : AnalyticAt ℝ igAsy_phi 0 := by
+theorem igAsy_analyticAt_phi : AnalyticAt ℝ igAsy_phi 0 := by
   unfold igAsy_phi
   exact analyticAt_id.sub ((analyticAt_const.add analyticAt_id).log (by norm_num))
 
 /-- `Q` is analytic at `0`. -/
-lemma igAsy_analyticAt_Q : AnalyticAt ℝ igAsy_Q 0 :=
+theorem igAsy_analyticAt_Q : AnalyticAt ℝ igAsy_Q 0 :=
   (igAsy_analyticAt_phi.dslope 0).dslope 0
 
 /-- `φ(u) = u² Q(u)`. -/
-lemma igAsy_phi_eq (u : ℝ) : igAsy_phi u = u^2 * igAsy_Q u := by
+theorem igAsy_phi_eq (u : ℝ) : igAsy_phi u = u^2 * igAsy_Q u := by
   have h := dblZero_eq_sq_mul_dslope (g := igAsy_phi) (x₀ := 0) (by simp [igAsy_phi]) ?_ u
   · simpa [igAsy_Q] using h
   · have : HasDerivAt igAsy_phi (1 - 1/(1+0)) 0 :=
@@ -1475,7 +1475,7 @@ lemma igAsy_phi_eq (u : ℝ) : igAsy_phi u = u^2 * igAsy_Q u := by
     rw [this.deriv]; norm_num
 
 /-- `|φ(u) - u²/2| ≤ 2|u|³` for `|u| ≤ 1/2`. -/
-lemma igAsy_phi_sub_le {u : ℝ} (hu : |u| ≤ 1/2) : |igAsy_phi u - u^2/2| ≤ 2*|u|^3 := by
+theorem igAsy_phi_sub_le {u : ℝ} (hu : |u| ≤ 1/2) : |igAsy_phi u - u^2/2| ≤ 2*|u|^3 := by
   have h := Real.abs_log_sub_add_sum_range_le (x := -u) (by rw [abs_neg]; linarith) 2
   simp only [Finset.sum_range_succ, Finset.sum_range_zero, abs_neg, sub_neg_eq_add] at h
   have h1 : |igAsy_phi u - u^2/2| = |(0 + (-u)^(0+1)/((0:ℕ)+1) + (-u)^(1+1)/((1:ℕ)+1))
@@ -1489,7 +1489,7 @@ lemma igAsy_phi_sub_le {u : ℝ} (hu : |u| ≤ 1/2) : |igAsy_phi u - u^2/2| ≤ 
   nlinarith [abs_nonneg u]
 
 /-- `Q(0) = 1/2`. -/
-lemma igAsy_Q_zero : igAsy_Q 0 = 1/2 := by
+theorem igAsy_Q_zero : igAsy_Q 0 = 1/2 := by
   have hc : Tendsto (fun u => |igAsy_Q u - 1/2|) (𝓝[≠] 0) (𝓝 |igAsy_Q 0 - 1/2|) :=
     ((igAsy_analyticAt_Q.continuousAt.sub continuousAt_const).abs).tendsto.mono_left
       nhdsWithin_le_nhds
@@ -1514,10 +1514,10 @@ lemma igAsy_Q_zero : igAsy_Q 0 = 1/2 := by
 noncomputable def igAsy_sqrtPhi (u : ℝ) : ℝ := (u - 0) * Real.sqrt (2 * igAsy_Q u)
 
 /-- The signed square root vanishes at `0`. -/
-lemma igAsy_sqrtPhi_zero : igAsy_sqrtPhi 0 = 0 := by simp [igAsy_sqrtPhi]
+theorem igAsy_sqrtPhi_zero : igAsy_sqrtPhi 0 = 0 := by simp [igAsy_sqrtPhi]
 
 /-- The signed square root is analytic at `0` with derivative `1`, and `φ = V²/2` near `0`. -/
-lemma igAsy_sqrtPhi_props : AnalyticAt ℝ igAsy_sqrtPhi 0 ∧ HasDerivAt igAsy_sqrtPhi 1 0 ∧
+theorem igAsy_sqrtPhi_props : AnalyticAt ℝ igAsy_sqrtPhi 0 ∧ HasDerivAt igAsy_sqrtPhi 1 0 ∧
     ∀ᶠ x in 𝓝 0, igAsy_phi x = igAsy_sqrtPhi x ^ 2 / 2 := by
   obtain ⟨h1, h2, h3⟩ := dblZero_signedSqrt (g := igAsy_phi) igAsy_analyticAt_Q
     (by rw [igAsy_Q_zero]; norm_num) (Eventually.of_forall fun x => by rw [igAsy_phi_eq]; ring)
@@ -1535,7 +1535,7 @@ noncomputable def igAsy_Pc : ℕ → ℝ
 noncomputable def igAsy_P1 (v : ℝ) : ℝ :=
   1 + v/3 + v^2/36 - v^3/270 + v^4/4320 + v^5/17010 - 139*v^6/5443200 + v^7/204120
 
-lemma igAsy_sum_Pc (v : ℝ) : ∑ k ∈ Finset.range 9, igAsy_Pc k * v^k = v * igAsy_P1 v := by
+theorem igAsy_sum_Pc (v : ℝ) : ∑ k ∈ Finset.range 9, igAsy_Pc k * v^k = v * igAsy_P1 v := by
   simp only [Finset.sum_range_succ, Finset.sum_range_zero, igAsy_Pc, igAsy_P1]
   ring
 
@@ -1543,7 +1543,7 @@ lemma igAsy_sum_Pc (v : ℝ) : ∑ k ∈ Finset.range 9, igAsy_Pc k * v^k = v * 
 noncomputable def igAsy_R (v : ℝ) : ℝ := -v^62/2768104942150133660519356040269823606784000000000 + 139*v^61/8201792421185581216353647526725403279360000000000 - 64363*v^60/164035848423711624327072950534508065587200000000000 + 8414711*v^59/1458096430432992216240648449195627249664000000000000 - 39398720783*v^58/699886286607836263795511255613901079838720000000000000 + 800844031091*v^57/2666233472791757195411471449957718399385600000000000000 + 203207581524653*v^56/319948016735010863449376573994926207926272000000000000000 - 589903790773392367*v^55/19907876596845120392405653493017630715412480000000000000000 + 1812135294676417436239*v^54/6370520510990438525569809117765641828931993600000000000000000 - 61536180983488037268223*v^53/56626848986581675782842747713472371812728832000000000000000000 - 3200028968192764058201*v^52/530876709249203210464150759813803485744332800000000000000000 + 311443135429997527330939*v^51/2831342449329083789142137385673618590636441600000000000000000 - 44454799605418997643991*v^50/75839529892743315780592965687686212249190400000000000000000 - 559676526517695375461*v^49/674129154602162806938604139446099664437248000000000000000 + 198376372993988324996513*v^48/5898630102768924560712786220153372063825920000000000000000 - 128833516499331115639963*v^47/655403344752102728968087357794819118202880000000000000000 - 3667317918596362552760177*v^46/15729680274050465495234096587075658836869120000000000000000 + 324230753132416786833013*v^45/32770167237605136448404367889740955910144000000000000000 - 14952974654565356951124521*v^44/294931505138446228035639311007668603191296000000000000000 - 13252544188014095919239*v^43/130040346180972763684144317022781571072000000000000000 + 27771663040102917607741*v^42/10403227694477821094731545361822525685760000000000000 - 11954991339734226940007*v^41/1083669551508106364034535975189846425600000000000000 - 36449936144571194043961*v^40/722446367672070909356357316793230950400000000000000 + 75166882097473144608997*v^39/120407727945345151559392886132205158400000000000000 - 22315566379032504120787*v^38/16054363726046020207919051484294021120000000000000 - 120052626821536535467*v^37/7963474070459335420594767601336320000000000000 + 6103713633575949013303*v^36/47780844422756012523568605608017920000000000000 - 29626459559588237*v^35/530898271363955694706317840089088000000000 - 517463897990836994347*v^34/106179654272791138941263568017817600000000000 + 121286984931364029473*v^33/8848304522732594911771964001484800000000000 + 17223711251174594586739*v^32/309690658295640821912018740051968000000000000 - 25997842511592509407*v^31/35112319534653154411793507942400000000000 + 252464389076981274511*v^30/140449278138612617647174031769600000000000 + 58750710510092643809*v^29/2926026627887762867649458995200000000000 - 11171106973961039807*v^28/65022813953061397058876866560000000000 - 522621430896224857*v^27/602063092157975898693304320000000000 + 6291240544991059709*v^26/6095888808099505974269706240000000000 - 181301900023966397*v^25/20158362460646514465177600000000000 - 17454651767210771*v^24/368610056423250550220390400000000 + 696576869128085983*v^23/1075112664567814104809472000000000 - 200522812574221273*v^22/179185444094635684134912000000000 - 35470128327336733*v^21/597284813648785613783040000000 - 132577309851169703*v^20/398189875765857075855360000000 - 510374274227141*v^19/493787048320755302400000000 - 2858145000327557*v^18/967419523240663449600000000 + 517628494375877*v^17/131676546218868080640000000 + 2490219288582629*v^16/65838273109434040320000000 - 14261288811003299*v^15/10973045518239006720000000 - 7688700092268269*v^14/438921820729560268800000 - 469646448720269*v^13/4354383142158336000000 - 1797913715932633*v^12/4354383142158336000000 - 713769681139453*v^11/725730523693056000000 - 7696763934359*v^10/7679688081408000000 - 16218691291337*v^9/1343945414246400000 - 408540701317127*v^8/1511938591027200000 - 8497883956229*v^7/3199870033920000 - 1823729366989*v^6/114281072640000 - 17479190864627*v^5/266655836160000 - 16977567694037*v^4/88885278720000 - 58412710933*v^3/148142131200 - 15240966109*v^2/27433728000 - 158347621*v/326592000 - 235145669/1175731200
 
 /-- The polynomial identity behind the inverse-series verification. -/
-lemma igAsy_residual_identity (v : ℝ) :
+theorem igAsy_residual_identity (v : ℝ) :
     2*(v * igAsy_P1 v - (-∑ i ∈ Finset.range 9, (-(v * igAsy_P1 v))^(i+1)/((i:ℝ)+1))) - v^2 =
       v^10 * igAsy_R v := by
   simp only [Finset.sum_range_succ, Finset.sum_range_zero, igAsy_P1, igAsy_R]
@@ -1551,13 +1551,13 @@ lemma igAsy_residual_identity (v : ℝ) :
   ring
 
 /-- `P₁` is continuous. -/
-lemma igAsy_continuous_P1 : Continuous igAsy_P1 := by unfold igAsy_P1; fun_prop
+theorem igAsy_continuous_P1 : Continuous igAsy_P1 := by unfold igAsy_P1; fun_prop
 
 /-- The residual polynomial is continuous. -/
-lemma igAsy_continuous_R : Continuous igAsy_R := by unfold igAsy_R; fun_prop
+theorem igAsy_continuous_R : Continuous igAsy_R := by unfold igAsy_R; fun_prop
 
 /-- `2φ(P(v)) - v² = O(v^{10})`. -/
-lemma igAsy_isBigO_residual :
+theorem igAsy_isBigO_residual :
     (fun v => 2 * igAsy_phi (v * igAsy_P1 v) - v^2) =O[𝓝 0] fun v => v^10 := by
   set Pn : ℝ → ℝ := fun v => v * igAsy_P1 v with hPn
   have hPc : Continuous Pn := continuous_id.mul igAsy_continuous_P1
@@ -1601,7 +1601,7 @@ lemma igAsy_isBigO_residual :
   ring
 
 /-- `V(P(v)) - v = O(v⁹)` as `v → 0`, `v ≠ 0`. -/
-lemma igAsy_isBigO_sqrtPhi_P :
+theorem igAsy_isBigO_sqrtPhi_P :
     (fun v => igAsy_sqrtPhi (v * igAsy_P1 v) - v) =O[𝓝[≠] 0] fun v => v^9 := by
   set Pn : ℝ → ℝ := fun v => v * igAsy_P1 v with hPn
   set A : ℝ → ℝ := fun v => igAsy_P1 v * Real.sqrt (2 * igAsy_Q (Pn v)) with hA
@@ -1637,7 +1637,7 @@ lemma igAsy_isBigO_sqrtPhi_P :
   ring
 
 /-- The Taylor coefficients of a local inverse of `u ↦ u √(2Q(u))` up to degree `8`. -/
-lemma igAsy_coeff_of_inverse {U : ℝ → ℝ} {p : FormalMultilinearSeries ℝ ℝ ℝ}
+theorem igAsy_coeff_of_inverse {U : ℝ → ℝ} {p : FormalMultilinearSeries ℝ ℝ ℝ}
     (hp : HasFPowerSeriesAt U p 0) (hl : ∀ᶠ x in 𝓝 0, U (igAsy_sqrtPhi x) = x) :
     ∀ k < 9, p.coeff k = igAsy_Pc k := by
   have hs : HasStrictDerivAt U (deriv U 0) (igAsy_sqrtPhi 0) := by
@@ -1669,7 +1669,7 @@ lemma igAsy_coeff_of_inverse {U : ℝ → ℝ} {p : FormalMultilinearSeries ℝ 
 
 /-- **The saddle substitution for `φ(u) = u - log(1+u)`.** There is an analytic `U` with
 `φ(U(v)) = v²/2` near `0`, `sign U(v) = sign v`, and Taylor coefficients `igAsy_Pc`. -/
-lemma igAsy_saddle : ∃ (U : ℝ → ℝ) (p : FormalMultilinearSeries ℝ ℝ ℝ) (v₀ : ℝ), 0 < v₀ ∧
+theorem igAsy_saddle : ∃ (U : ℝ → ℝ) (p : FormalMultilinearSeries ℝ ℝ ℝ) (v₀ : ℝ), 0 < v₀ ∧
     HasFPowerSeriesAt U p 0 ∧ (∀ k < 9, p.coeff k = igAsy_Pc k) ∧
     (∀ v ∈ Icc (-v₀) v₀, HasDerivAt U (deriv U v) v ∧ ContinuousAt (deriv U) v ∧
       -1/2 < U v ∧ igAsy_phi (U v) = v^2/2) ∧ U (-v₀) < 0 ∧ 0 < U v₀ := by
@@ -1706,7 +1706,7 @@ lemma igAsy_saddle : ∃ (U : ℝ → ℝ) (p : FormalMultilinearSeries ℝ ℝ 
     linarith
 
 /-- `s^n e^{n(1-s)} = e^{-n φ(s-1)}` at `s = 1 + u > 0`. -/
-lemma igAsy_F_one_add (m : ℕ) {u : ℝ} (hu : -1 < u) :
+theorem igAsy_F_one_add (m : ℕ) {u : ℝ} (hu : -1 < u) :
     igAsy_F m 1 (1+u) = Real.exp (-((m:ℝ)+1) * igAsy_phi u) := by
   have h : 0 < 1+u := by linarith
   unfold igAsy_F igAsy_phi
@@ -1714,7 +1714,7 @@ lemma igAsy_F_one_add (m : ℕ) {u : ℝ} (hu : -1 < u) :
   congr 1; push_cast; ring
 
 /-- `∫₀^∞ s^n e^{n(1-s)} ds = eⁿ n!/n^{n+1}`. -/
-lemma igAsy_integral_F_Ioi (m : ℕ) :
+theorem igAsy_integral_F_Ioi (m : ℕ) :
     IntegrableOn (igAsy_F m 1) (Ioi 0) ∧ ∫ s in Ioi (0:ℝ), igAsy_F m 1 s =
       Real.exp ((m:ℝ)+1) * ((m+1).factorial * (((m:ℝ)+1)^(m+2))⁻¹) := by
   have hs : (0:ℝ) < (m:ℝ)+2 := by positivity
@@ -1737,7 +1737,7 @@ lemma igAsy_integral_F_Ioi (m : ℕ) :
     Real.rpow_neg hz.le, show ((m+1:ℕ):ℝ)+1 = ((m+2:ℕ):ℝ) by push_cast; ring, Real.rpow_natCast]
 
 /-- `φ` decreases on `(-1, 0]`: `φ(t-1) ≤ φ(s-1)` for `0 < s ≤ t ≤ 1`. -/
-lemma igAsy_phi_anti {s t : ℝ} (hs : 0 < s) (hst : s ≤ t) (ht : t ≤ 1) :
+theorem igAsy_phi_anti {s t : ℝ} (hs : 0 < s) (hst : s ≤ t) (ht : t ≤ 1) :
     igAsy_phi (t-1) ≤ igAsy_phi (s-1) := by
   have ht0 : 0 < t := hs.trans_le hst
   have h := Real.one_sub_inv_le_log_of_pos (div_pos ht0 hs)
@@ -1751,7 +1751,7 @@ lemma igAsy_phi_anti {s t : ℝ} (hs : 0 < s) (hst : s ≤ t) (ht : t ≤ 1) :
   nlinarith
 
 /-- Left tail: `∫₀ᵗ F ≤ t e^{-n φ(t-1)}` for `0 < t ≤ 1`. -/
-lemma igAsy_left_tail (m : ℕ) {t : ℝ} (ht0 : 0 < t) (ht1 : t ≤ 1) :
+theorem igAsy_left_tail (m : ℕ) {t : ℝ} (ht0 : 0 < t) (ht1 : t ≤ 1) :
     0 ≤ ∫ s in (0:ℝ)..t, igAsy_F m 1 s ∧
       ∫ s in (0:ℝ)..t, igAsy_F m 1 s ≤ t * Real.exp (-((m:ℝ)+1) * igAsy_phi (t-1)) := by
   have hc : Continuous (igAsy_F m 1) := by unfold igAsy_F; fun_prop
@@ -1769,7 +1769,7 @@ lemma igAsy_left_tail (m : ℕ) {t : ℝ} (ht0 : 0 < t) (ht1 : t ≤ 1) :
   simpa using this
 
 /-- Right tail: `∫_{1+a}^∞ F ≤ e^{-n φ(a)} (1+a)/(n a)` for `a > 0`. -/
-lemma igAsy_right_tail (m : ℕ) {a : ℝ} (ha : 0 < a) :
+theorem igAsy_right_tail (m : ℕ) {a : ℝ} (ha : 0 < a) :
     0 ≤ ∫ s in Ioi (1+a), igAsy_F m 1 s ∧ ∫ s in Ioi (1+a), igAsy_F m 1 s ≤
       Real.exp (-((m:ℝ)+1) * igAsy_phi a) * ((1+a)/(((m:ℝ)+1)*a)) := by
   set n : ℝ := (m:ℝ)+1 with hn
@@ -1806,7 +1806,7 @@ lemma igAsy_right_tail (m : ℕ) {a : ℝ} (ha : 0 < a) :
 
 /-- The exact decomposition behind 8.11.16: the Gaussian integral after the saddle substitution
 plus exponentially small boundary terms. -/
-lemma igAsy_one_decomp {U : ℝ → ℝ} {v₀ : ℝ} (hv₀ : 0 < v₀) (hU0 : U 0 = 0)
+theorem igAsy_one_decomp {U : ℝ → ℝ} {v₀ : ℝ} (hv₀ : 0 < v₀) (hU0 : U 0 = 0)
     (hd : ∀ v ∈ Icc (-v₀) v₀, HasDerivAt U (deriv U v) v ∧ ContinuousAt (deriv U) v ∧
       -1/2 < U v ∧ igAsy_phi (U v) = v^2/2) (ha : 0 < U v₀) (m : ℕ) :
     ((m:ℝ)+1)*1 * (∫ s in (0:ℝ)..1, igAsy_F m 1 s) -
@@ -1912,11 +1912,11 @@ lemma igAsy_one_decomp {U : ℝ → ℝ} {v₀ : ℝ} (hv₀ : 0 < v₀) (hU0 : 
   linear_combination (n/2) * (h2 - h1 - hI)
 
 /-- `x^{-(j+1)} = (x^{j+1})⁻¹` for `x > 0`. -/
-lemma igAsy_rpow_neg_succ {x : ℝ} (hx : 0 < x) (j : ℕ) : x ^ (-((j:ℝ)+1)) = (x^(j+1))⁻¹ := by
+theorem igAsy_rpow_neg_succ {x : ℝ} (hx : 0 < x) (j : ℕ) : x ^ (-((j:ℝ)+1)) = (x^(j+1))⁻¹ := by
   rw [Real.rpow_neg hx.le, show (j:ℝ)+1 = ((j+1:ℕ):ℝ) by push_cast; ring, Real.rpow_natCast]
 
 /-- `n e^{-n κ} = O(n^{-N})`. -/
-lemma igAsy_exp_small {κ : ℝ} (hκ : 0 < κ) (N : ℕ) :
+theorem igAsy_exp_small {κ : ℝ} (hκ : 0 < κ) (N : ℕ) :
     ∀ᶠ m : ℕ in atTop, ((m:ℝ)+1) * Real.exp (-((m:ℝ)+1) * κ) ≤
       κ⁻¹^(N+1) * (((m:ℝ)+1)^N)⁻¹ := by
   have h1 : Tendsto (fun m : ℕ => ((m:ℝ)+1) * κ) atTop atTop :=
@@ -2071,7 +2071,7 @@ def expPartialSumRemainderCoeff (k : ℕ) (x : ℝ) : ℂ :=
   if k=0 then x/(1-x) else (-1 : ℂ)^k*(incGammaLambdaPolynomial k).eval (x : ℂ)/(1-x : ℂ)^(2*k+1)
 
 /-- `b_k = X p_k` for `k ≥ 1`. -/
-lemma igAsy_lambdaPoly_eq {k : ℕ} (hk : 1 ≤ k) :
+theorem igAsy_lambdaPoly_eq {k : ℕ} (hk : 1 ≤ k) :
     incGammaLambdaPolynomial k = Polynomial.X * (igAsy_poly k).map (algebraMap ℝ ℂ) := by
   induction k, hk using Nat.le_induction with
   | base =>
@@ -2085,14 +2085,14 @@ lemma igAsy_lambdaPoly_eq {k : ℕ} (hk : 1 ≤ k) :
     ring
 
 /-- `b_k(x) = x p_k(x)` for `k ≥ 1`, evaluated at a real point. -/
-lemma igAsy_lambdaPoly_eval {k : ℕ} (hk : 1 ≤ k) (x : ℝ) :
+theorem igAsy_lambdaPoly_eval {k : ℕ} (hk : 1 ≤ k) (x : ℝ) :
     (incGammaLambdaPolynomial k).eval (x : ℂ) = x * (((igAsy_poly k).eval x : ℝ) : ℂ) := by
   rw [igAsy_lambdaPoly_eq hk, Polynomial.eval_mul, Polynomial.eval_X, Polynomial.eval_map,
     show (x:ℂ) = algebraMap ℝ ℂ x from rfl, Polynomial.eval₂_at_apply]
   rfl
 
 /-- The coefficients `d_k(x)` of 8.11.19 in terms of `h_k`. -/
-lemma igAsy_coeff_eq (k : ℕ) {x : ℝ} (hx : x ≠ 1) :
+theorem igAsy_coeff_eq (k : ℕ) {x : ℝ} (hx : x ≠ 1) :
     expPartialSumRemainderCoeff k x = (igAsy_d k x : ℂ) := by
   unfold igAsy_d
   have hx1 : (1:ℂ) - x ≠ 0 := by
@@ -2127,13 +2127,13 @@ substitution `igAsy_saddle` that their proofs use. -/
 
 
 /-- `d/dt (-t²) = -2t`. -/
-lemma igCen_hasDerivAt_neg_sq (x : ℝ) : HasDerivAt (fun t : ℝ => -t^2) (-(2*x)) x := by
+theorem igCen_hasDerivAt_neg_sq (x : ℝ) : HasDerivAt (fun t : ℝ => -t^2) (-(2*x)) x := by
   convert (hasDerivAt_pow 2 x).const_mul (-1:ℝ) using 1
   · funext t; ring
   · push_cast; ring
 
 /-- `|e^{-s²} - e^{-y²}| ≤ |s - y|`. -/
-lemma igCen_exp_neg_sq_lip (s y : ℝ) : |Real.exp (-s^2) - Real.exp (-y^2)| ≤ |s - y| := by
+theorem igCen_exp_neg_sq_lip (s y : ℝ) : |Real.exp (-s^2) - Real.exp (-y^2)| ≤ |s - y| := by
   have hd : ∀ x : ℝ, HasDerivAt (fun t : ℝ => Real.exp (-t^2)) (-(2*x) * Real.exp (-x^2)) x :=
     fun x => by
       have h := igCen_hasDerivAt_neg_sq x
@@ -2150,7 +2150,7 @@ lemma igCen_exp_neg_sq_lip (s y : ℝ) : |Real.exp (-s^2) - Real.exp (-y^2)| ≤
   simpa [Real.norm_eq_abs] using this
 
 /-- Linearisation of `erf`: `|erf T - erf y - (2/√π)(T-y)e^{-y²}| ≤ (2/√π)(T-y)²`. -/
-lemma igCen_erf_sub (T y : ℝ) :
+theorem igCen_erf_sub (T y : ℝ) :
     |TauCeti.Real.erf T - TauCeti.Real.erf y - 2/Real.sqrt π * (T - y) * Real.exp (-y^2)| ≤
       2/Real.sqrt π * (T - y)^2 := by
   have hc : Continuous fun t : ℝ => Real.exp (-t^2) := by fun_prop
@@ -2181,7 +2181,7 @@ lemma igCen_erf_sub (T y : ℝ) :
   nlinarith [h3]
 
 /-- Gaussian tail: `1 - erf M ≤ e^{-M²}/M` for `M > 0`. -/
-lemma igCen_one_sub_erf_le {M : ℝ} (hM : 0 < M) :
+theorem igCen_one_sub_erf_le {M : ℝ} (hM : 0 < M) :
     1 - TauCeti.Real.erf M ≤ Real.exp (-M^2) / M := by
   have hc : Continuous fun t : ℝ => Real.exp (-t^2) := by fun_prop
   have hsp : 1 ≤ Real.sqrt π := by
@@ -2219,14 +2219,14 @@ lemma igCen_one_sub_erf_le {M : ℝ} (hM : 0 < M) :
   linarith
 
 /-- `e^{-x} ≤ 2/x²` for `x > 0`. -/
-lemma igCen_exp_neg_le {x : ℝ} (hx : 0 < x) : Real.exp (-x) ≤ 2 / x^2 := by
+theorem igCen_exp_neg_le {x : ℝ} (hx : 0 < x) : Real.exp (-x) ≤ 2 / x^2 := by
   have h := Real.pow_div_factorial_le_exp x hx.le 2
   rw [Real.exp_neg, inv_eq_one_div, div_le_div_iff₀ (Real.exp_pos x) (by positivity)]
   norm_num [Nat.factorial] at h
   linarith
 
 /-- Cubic Taylor bound for `φ(u) = u - log(1+u)`. -/
-lemma igCen_phi_cubic {u : ℝ} (hu : |u| ≤ 1/2) :
+theorem igCen_phi_cubic {u : ℝ} (hu : |u| ≤ 1/2) :
     |igAsy_phi u - u^2/2 + u^3/3| ≤ 2*|u|^4 := by
   have h := Real.abs_log_sub_add_sum_range_le (x := -u) (by rw [abs_neg]; linarith) 3
   simp only [Finset.sum_range_succ, Finset.sum_range_zero, abs_neg, sub_neg_eq_add] at h
@@ -2240,7 +2240,7 @@ lemma igCen_phi_cubic {u : ℝ} (hu : |u| ≤ 1/2) :
   exact h.trans h2
 
 /-- If `v² = 2φ(u)` and `uv ≥ 0`, then `v = u - u²/3 + O(u³)`. -/
-lemma igCen_v_approx {u v : ℝ} (hu : |u| ≤ 1/2) (hv : v^2 = 2*igAsy_phi u) (huv : 0 ≤ u*v) :
+theorem igCen_v_approx {u v : ℝ} (hu : |u| ≤ 1/2) (hv : v^2 = 2*igAsy_phi u) (huv : 0 ≤ u*v) :
     |v - (u - u^2/3)| ≤ 6*|u|^3 := by
   set w := u - u^2/3 with hw
   have hφ := igCen_phi_cubic hu
@@ -2298,7 +2298,7 @@ lemma igCen_v_approx {u v : ℝ} (hu : |u| ≤ 1/2) (hv : v^2 = 2*igAsy_phi u) (
 
 
 /-- `φ'(u) = 1 - 1/(1+u)` for `u > -1`. -/
-lemma igCen_hasDerivAt_phi {u : ℝ} (hu : -1 < u) :
+theorem igCen_hasDerivAt_phi {u : ℝ} (hu : -1 < u) :
     HasDerivAt igAsy_phi (1 - 1/(1+u)) u := by
   have h1 : HasDerivAt (fun w : ℝ => 1 + w) 1 u := (hasDerivAt_id u).const_add 1
   have h2 := (Real.hasDerivAt_log (by linarith : (1+u) ≠ 0)).comp u h1
@@ -2309,7 +2309,7 @@ lemma igCen_hasDerivAt_phi {u : ℝ} (hu : -1 < u) :
 
 /-- The saddle substitution `U` of `igAsy_saddle` restricted to a small interval `[-w₀, w₀]`,
 with `U'(v) = 1 + 2v/3 + O(v²)` and `vU(v) ≥ 0`. -/
-lemma igCen_U : ∃ (U : ℝ → ℝ) (w₀ C₂ : ℝ), 0 < w₀ ∧ w₀ ≤ 1/2 ∧ 0 ≤ C₂ ∧
+theorem igCen_U : ∃ (U : ℝ → ℝ) (w₀ C₂ : ℝ), 0 < w₀ ∧ w₀ ≤ 1/2 ∧ 0 ≤ C₂ ∧
     (∀ v ∈ Icc (-w₀) w₀, HasDerivAt U (deriv U v) v ∧ ContinuousAt (deriv U) v ∧
       -1/2 < U v ∧ igAsy_phi (U v) = v^2/2 ∧ 0 ≤ v * U v ∧
       |deriv U v - 1 - 2/3*v| ≤ C₂ * v^2) ∧ U (-w₀) < 0 ∧ 0 < U w₀ := by
@@ -2426,7 +2426,7 @@ lemma igCen_U : ∃ (U : ℝ → ℝ) (w₀ C₂ : ℝ), 0 < w₀ ∧ w₀ ≤ 1
 
 
 /-- `(1+u)^a e^{-au} = e^{-aφ(u)}` for `u > -1`. -/
-lemma igCen_kernel (a : ℝ) {u : ℝ} (hu : -1 < u) :
+theorem igCen_kernel (a : ℝ) {u : ℝ} (hu : -1 < u) :
     (1+u)^a * Real.exp (-a*u) = Real.exp (-a * igAsy_phi u) := by
   rw [Real.rpow_def_of_pos (by linarith), ← Real.exp_add]
   unfold igAsy_phi
@@ -2434,7 +2434,7 @@ lemma igCen_kernel (a : ℝ) {u : ℝ} (hu : -1 < u) :
 
 
 /-- The substitution `t = a(1+u)` in `∫₀ˣ t^a e^{-t} dt`. -/
-lemma igCen_integral_subst {a u₁ : ℝ} (ha : 0 < a) (hu : -1 ≤ u₁) :
+theorem igCen_integral_subst {a u₁ : ℝ} (ha : 0 < a) (hu : -1 ≤ u₁) :
     ∫ t in (0:ℝ)..a*(1+u₁), t^a * Real.exp (-t) =
       a^(a+1) * Real.exp (-a) * ∫ u in (-1:ℝ)..u₁, (1+u)^a * Real.exp (-a*u) := by
   have h := intervalIntegral.integral_comp_mul_add (a := -1) (b := u₁)
@@ -2461,7 +2461,7 @@ lemma igCen_integral_subst {a u₁ : ℝ} (ha : 0 < a) (hu : -1 ≤ u₁) :
 
 
 /-- Stirling's formula with Binet's remainder: `a^{a+1} e^{-a}/Γ(a+1) = √a/√(2π) e^{-Φ(a)}`. -/
-lemma igCen_stirling {a : ℝ} (ha : 0 < a) :
+theorem igCen_stirling {a : ℝ} (ha : 0 < a) :
     a^(a+1) * Real.exp (-a) / Real.Gamma (a+1) =
       Real.sqrt a / Real.sqrt (2*π) * Real.exp (-DLMF.Gamma.binetIntegral a) := by
   have hG : Real.Gamma (a+1) = Real.exp (Real.log a + ((a - 1/2) * Real.log a - a +
@@ -2480,7 +2480,7 @@ lemma igCen_stirling {a : ℝ} (ha : 0 < a) :
 
 /-- For real `a, x > 0`, the continued `P(a+1, x)` is the real integral
 `(1/Γ(a+1)) ∫₀ˣ t^a e^{-t} dt`. -/
-lemma igCen_normIncGammaP_eq {a x : ℝ} (ha : 0 < a) (hx : 0 < x) :
+theorem igCen_normIncGammaP_eq {a x : ℝ} (ha : 0 < a) (hx : 0 < x) :
     normIncGammaPContinued ((a:ℂ)+1) (x:ℂ) =
       (((∫ t in (0:ℝ)..x, t^a * Real.exp (-t)) / Real.Gamma (a+1) : ℝ) : ℂ) := by
   have hre : 0 < ((a:ℂ)+1).re := by simp; linarith
@@ -2502,12 +2502,12 @@ lemma igCen_normIncGammaP_eq {a x : ℝ} (ha : 0 < a) (hx : 0 < x) :
   rw [ofReal_cpow ht0]
 
 /-- Continuity of `u ↦ (1+u)^a e^{-au}` for `a ≥ 0`. -/
-lemma igCen_continuous_g {a : ℝ} (ha : 0 ≤ a) :
+theorem igCen_continuous_g {a : ℝ} (ha : 0 ≤ a) :
     Continuous fun u : ℝ => (1+u)^a * Real.exp (-a*u) :=
   ((Real.continuous_rpow_const ha).comp (continuous_const.add continuous_id)).mul (by fun_prop)
 
 /-- `∫_α^β e^{-t²} dt = (√π/2)(erf β - erf α)`. -/
-lemma igCen_integral_exp_neg_sq (α β : ℝ) :
+theorem igCen_integral_exp_neg_sq (α β : ℝ) :
     ∫ t in α..β, Real.exp (-t^2) =
       Real.sqrt π / 2 * (TauCeti.Real.erf β - TauCeti.Real.erf α) := by
   have hc : Continuous fun t : ℝ => Real.exp (-t^2) := by fun_prop
@@ -2518,7 +2518,7 @@ lemma igCen_integral_exp_neg_sq (α β : ℝ) :
   field_simp
 
 /-- Gaussian integral over an interval through `erf`. -/
-lemma igCen_integral_gauss {s : ℝ} (hs : 0 < s) (α β : ℝ) :
+theorem igCen_integral_gauss {s : ℝ} (hs : 0 < s) (α β : ℝ) :
     ∫ v in α..β, Real.exp (-v^2/s^2) =
       s * (Real.sqrt π / 2) * (TauCeti.Real.erf (β/s) - TauCeti.Real.erf (α/s)) := by
   have h := intervalIntegral.integral_comp_mul_left (a := α) (b := β)
@@ -2531,7 +2531,7 @@ lemma igCen_integral_gauss {s : ℝ} (hs : 0 < s) (α β : ℝ) :
         ring
 
 /-- `∫_α^β v e^{-v²/s²} dv = (s²/2)(e^{-α²/s²} - e^{-β²/s²})`. -/
-lemma igCen_integral_mul_gauss {s : ℝ} (hs : 0 < s) (α β : ℝ) :
+theorem igCen_integral_mul_gauss {s : ℝ} (hs : 0 < s) (α β : ℝ) :
     ∫ v in α..β, v * Real.exp (-v^2/s^2) =
       s^2/2 * (Real.exp (-α^2/s^2) - Real.exp (-β^2/s^2)) := by
   rw [intervalIntegral.integral_eq_sub_of_hasDerivAt
@@ -2545,7 +2545,7 @@ lemma igCen_integral_mul_gauss {s : ℝ} (hs : 0 < s) (α β : ℝ) :
   ring
 
 /-- `v² e^{-v²/s²} ≤ 2s² e^{-v²/(2s²)}`. -/
-lemma igCen_sq_mul_gauss_le {s : ℝ} (hs : 0 < s) (v : ℝ) :
+theorem igCen_sq_mul_gauss_le {s : ℝ} (hs : 0 < s) (v : ℝ) :
     v^2 * Real.exp (-v^2/s^2) ≤ 2*s^2 * Real.exp (-(1/(2*s^2)) * v^2) := by
   set z := v^2/(2*s^2) with hz
   have h1 : v^2 = 2*s^2*z := by rw [hz]; field_simp
@@ -2563,7 +2563,7 @@ lemma igCen_sq_mul_gauss_le {s : ℝ} (hs : 0 < s) (v : ℝ) :
 
 /-- The remainder integral: if `|h(v)| ≤ C v²` on `[α, β]`, then
 `|∫_α^β e^{-v²/s²} h(v) dv| ≤ 6 C s³`. -/
-lemma igCen_err_bound {s C α β : ℝ} (hs : 0 < s) (hC : 0 ≤ C) (hαβ : α ≤ β) {h : ℝ → ℝ}
+theorem igCen_err_bound {s C α β : ℝ} (hs : 0 < s) (hC : 0 ≤ C) (hαβ : α ≤ β) {h : ℝ → ℝ}
     (hb : ∀ v ∈ Icc α β, |h v| ≤ C * v^2) :
     |∫ v in α..β, Real.exp (-v^2/s^2) * h v| ≤ 6 * C * s^3 := by
   have hb2 : 0 < 1/(2*s^2) := by positivity
@@ -2597,7 +2597,7 @@ lemma igCen_err_bound {s C α β : ℝ} (hs : 0 < s) (hC : 0 ≤ C) (hαβ : α 
     _ = 6 * C * s^3 := by ring
 
 /-- The left piece `∫_{-1}^b (1+u)^a e^{-au} du ∈ [0, e^{-aφ(b)}]` for `-1 < b ≤ 0`. -/
-lemma igCen_J1 {a b : ℝ} (ha : 0 < a) (hb1 : -1 < b) (hb0 : b ≤ 0) :
+theorem igCen_J1 {a b : ℝ} (ha : 0 < a) (hb1 : -1 < b) (hb0 : b ≤ 0) :
     0 ≤ ∫ u in (-1:ℝ)..b, (1+u)^a * Real.exp (-a*u) ∧
       ∫ u in (-1:ℝ)..b, (1+u)^a * Real.exp (-a*u) ≤ Real.exp (-a * igAsy_phi b) := by
   have hc := igCen_continuous_g ha.le
@@ -2621,7 +2621,7 @@ lemma igCen_J1 {a b : ℝ} (ha : 0 < a) (hb1 : -1 < b) (hb0 : b ≤ 0) :
 
 
 /-- The comparison of the Gaussian main term with the DLMF form (algebraic part of 8.11.10). -/
-lemma igCen_stepB {s y B π' rT ry eT ey v₁ : ℝ} (hs : 0 < s) (hs1 : s ≤ 1) (hB : 0 < B)
+theorem igCen_stepB {s y B π' rT ry eT ey v₁ : ℝ} (hs : 0 < s) (hs1 : s ≤ 1) (hB : 0 < B)
     (hy : |y| ≤ B) (hπ'1 : 1 ≤ π') (hey0 : 0 ≤ ey) (hey1 : ey ≤ 1)
     (herf : |rT - ry - 2/π' * (v₁/s - y) * ey| ≤ 2/π' * (v₁/s - y)^2)
     (hlip : |ey - eT| ≤ |v₁/s - y|)

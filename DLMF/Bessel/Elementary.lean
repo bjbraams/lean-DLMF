@@ -5,8 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Bessel.WeberSeries
-public import DLMF.Bessel.Generating
 public import DLMF.Bessel.KIntegrals
 public import DLMF.Bessel.Asymptotics
 
@@ -42,7 +40,7 @@ namespace DLMF.Bessel
 /-! ### Half-integer orders -/
 
 /-- `Y_{1/2} = -J_{-1/2}`. -/
-lemma besselY_half_eq (z : ℂ) : besselY (1 / 2) z = -besselJ (-(1 / 2)) z := by
+theorem besselY_half_eq (z : ℂ) : besselY (1 / 2) z = -besselJ (-(1 / 2)) z := by
   have hn : ∀ k : ℤ, (1 / 2 : ℂ) ≠ k := fun k hk => by
     have h := congrArg Complex.re hk
     simp at h
@@ -60,7 +58,7 @@ lemma besselY_half_eq (z : ℂ) : besselY (1 / 2) z = -besselJ (-(1 / 2)) z := b
   ring
 
 /-- `Y_{-1/2} = J_{1/2}`. -/
-lemma besselY_neg_half_eq (z : ℂ) : besselY (-(1 / 2)) z = besselJ (1 / 2) z := by
+theorem besselY_neg_half_eq (z : ℂ) : besselY (-(1 / 2)) z = besselJ (1 / 2) z := by
   have hn : ∀ k : ℤ, (-(1 / 2) : ℂ) ≠ k := fun k hk => by
     have h := congrArg Complex.re hk
     simp at h
@@ -276,13 +274,13 @@ theorem hasSum_besselJ_add (n : ℤ) (x y : ℂ) :
 /-! ### Integer-order modified functions: generating function and cosine series -/
 
 /-- `I_n(z) = (-i)ⁿ J_n(iz)` for natural `n` and every `z`. -/
-lemma besselI_nat_eq (n : ℕ) (z : ℂ) : besselI n z = (-I) ^ n * besselJ n (I * z) := by
+theorem besselI_nat_eq (n : ℕ) (z : ℂ) : besselI n z = (-I) ^ n * besselJ n (I * z) := by
   rw [besselI, besselJ_eq_regularized, cpow_natCast, cpow_natCast,
     show -((I * z) ^ 2 / 4) = z ^ 2 / 4 by ring_nf; rw [I_sq]; ring, ← mul_assoc, ← mul_pow,
     show -I * (I * z / 2) = z / 2 by ring_nf; rw [I_sq]; ring]
 
 /-- `I_n(z) = (-i)ⁿ J_n(iz)` for integer `n` and every `z` (DLMF 10.27.6 at integer order). -/
-lemma besselI_int_eq (n : ℤ) (z : ℂ) : besselI n z = (-I) ^ n * besselJ n (I * z) := by
+theorem besselI_int_eq (n : ℤ) (z : ℂ) : besselI n z = (-I) ^ n * besselJ n (I * z) := by
   obtain ⟨n, rfl | rfl⟩ := Int.eq_nat_or_neg n
   · rw [Int.cast_natCast, zpow_natCast, besselI_nat_eq]
   · have hI := besselI_neg_int (n : ℤ) z
@@ -312,7 +310,7 @@ theorem hasSum_besselI_generating_function (z t : ℂ) (ht : t ≠ 0) :
     ring
 
 /-- The bilateral series `e^{z cos θ} = ∑_{n∈ℤ} I_n(z) e^{inθ}`. -/
-lemma hasSum_besselI_exp_cos (z : ℂ) (θ : ℝ) :
+theorem hasSum_besselI_exp_cos (z : ℂ) (θ : ℝ) :
     HasSum (fun n : ℤ => besselI n z * exp (I * n * θ)) (exp (z * cos θ)) := by
   have h := hasSum_besselI_generating_function z (exp (I * θ)) (exp_ne_zero _)
   have hcos : z / 2 * (exp (I * θ) + (exp (I * θ))⁻¹) = z * cos θ := by
@@ -347,14 +345,14 @@ theorem hasSum_besselI_cos (z : ℂ) (θ : ℝ) :
 
 /-! ### Positivity of `I_ν` and `K_ν` on the positive axis -/
 
-lemma Gamma_ofReal_add_one_add (ν : ℝ) (n : ℕ) :
+theorem Gamma_ofReal_add_one_add (ν : ℝ) (n : ℕ) :
     Complex.Gamma ((ν : ℂ) + 1 + n) = ((Real.Gamma (ν + 1 + n) : ℝ) : ℂ) := by
   rw [← Complex.Gamma_ofReal]
   push_cast
   rfl
 
 /-- `I_ν(x)` for real `ν` and `x > 0` as a real series. -/
-lemma besselI_ofReal_eq {ν x : ℝ} (hx : 0 < x) :
+theorem besselI_ofReal_eq {ν x : ℝ} (hx : 0 < x) :
     besselI ν x = (((x / 2) ^ ν * ∑' n : ℕ,
       (x ^ 2 / 4) ^ n / n ! * (Real.Gamma (ν + 1 + n))⁻¹ : ℝ) : ℂ) := by
   rw [besselI, regularized0F1_eq_tsum, ofReal_mul, ofReal_cpow (by positivity), ofReal_tsum]
@@ -384,7 +382,7 @@ theorem besselI_ofReal_pos {ν x : ℝ} (hν : -1 < ν) (hx : 0 < x) :
   exact mul_pos (Real.rpow_pos_of_pos (by positivity) _) (hsum.tsum_pos (fun n => (hpos n).le) 0
     (hpos 0))
 
-lemma besselK_ofReal_pos_of_gt {ν x : ℝ} (hν : -1 / 2 < ν) (hx : 0 < x) :
+theorem besselK_ofReal_pos_of_gt {ν x : ℝ} (hν : -1 / 2 < ν) (hx : 0 < x) :
     ∃ r : ℝ, 0 < r ∧ besselK ν x = r := by
   have hνc : -1 / 2 < (ν : ℂ).re := by simpa using hν
   have hxc : 0 < (x : ℂ).re := by simpa using hx
@@ -516,7 +514,7 @@ theorem besselY_sub_sin_isBigO (ν : ℂ) :
 /-! ### Iterated derivative formulas -/
 
 /-- `(z^ν J_ν(z))' = z^ν J_{ν-1}(z)` on the slit plane (DLMF 10.6.6). -/
-lemma hasDerivAt_cpow_mul_besselJ' (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
+theorem hasDerivAt_cpow_mul_besselJ' (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (fun w : ℂ => w ^ ν * besselJ ν w) (z ^ ν * besselJ (ν - 1) z) z := by
   have hz0 := slitPlane_ne_zero hz
   have h := ((hasDerivAt_id z).cpow_const (c := ν) hz).mul (hasDerivAt_besselJ' (ν := ν) hz)
@@ -528,7 +526,7 @@ lemma hasDerivAt_cpow_mul_besselJ' (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
   ring
 
 /-- `(z^{-ν} J_ν(z))' = -z^{-ν} J_{ν+1}(z)` on the slit plane (DLMF 10.6.6). -/
-lemma hasDerivAt_cpow_neg_mul_besselJ' (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
+theorem hasDerivAt_cpow_neg_mul_besselJ' (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (fun w : ℂ => w ^ (-ν) * besselJ ν w) (-(z ^ (-ν) * besselJ (ν + 1) z)) z := by
   have hz0 := slitPlane_ne_zero hz
   have h := ((hasDerivAt_id z).cpow_const (c := -ν) hz).mul (hasDerivAt_besselJ (ν := ν) hz)

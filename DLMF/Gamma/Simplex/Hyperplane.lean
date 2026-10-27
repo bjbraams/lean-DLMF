@@ -65,7 +65,7 @@ open _root_.MeasureTheory _root_.MeasureTheory.Measure
 
 /-- The fibre of a weighted coordinate sum, after splitting off the `i`-th coordinate, is a
 singleton. -/
-private theorem weightedHyperplane_insertNth_section {n : ℕ}
+private lemma weightedHyperplane_insertNth_section {n : ℕ}
     (a : Fin (n + 1) → ℝ) (i : Fin (n + 1)) (hi : a i ≠ 0) (c : ℝ) (y : Fin n → ℝ) :
     {t | ∑ j, a j * Fin.insertNth i t y j = c} =
       {(c - ∑ j, a (i.succAbove j) * y j) / a i} := by
@@ -82,7 +82,7 @@ private theorem weightedHyperplane_insertNth_section {n : ℕ}
 
 /-- A level set of a weighted coordinate sum on `Fin n → ℝ` is a null set for a finite product
 of sigma-finite measures, provided the sliced coordinate has no atoms. -/
-private theorem pi_weighted_hyperplane_fin {n : ℕ} (μ : Fin n → Measure ℝ)
+private lemma pi_weighted_hyperplane_fin {n : ℕ} (μ : Fin n → Measure ℝ)
     [∀ j, SigmaFinite (μ j)] (a : Fin n → ℝ) (i : Fin n)
     [NullSingletonClass (μ i)] (hi : a i ≠ 0) (c : ℝ) :
     Measure.pi μ {x | ∑ j, a j * x j = c} = 0 := by

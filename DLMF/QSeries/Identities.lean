@@ -5,13 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Tactic.CrossRefAttribute
-public import DLMF.QSeries.Pochhammer
 public import DLMF.QSeries.QBinomial
-public import Mathlib.Analysis.Normed.Ring.InfiniteSum
 public import Mathlib.NumberTheory.ModularForms.JacobiTheta.OneVariable
-public import Mathlib.NumberTheory.SumFourSquares
-public import Mathlib.NumberTheory.SumTwoSquares
 
 /-!
 # Triple product, Ramanujan `₁ψ₁`, basic hypergeometric series, `q`-beta (AAR §§10.4–10.12)
@@ -44,16 +39,16 @@ open scoped Topology
 /-- The exponent `n(n-1)/2` as an integer. -/
 def tri (n : ℤ) : ℤ := n * (n - 1) / 2
 
-lemma tri_mul_two (n : ℤ) : tri n * 2 = n * (n - 1) :=
+theorem tri_mul_two (n : ℤ) : tri n * 2 = n * (n - 1) :=
   Int.ediv_mul_cancel (even_iff_two_dvd.mp (Int.even_mul_pred_self n))
 
-lemma cpow_tri (q : ℂ) (n : ℤ) :
+theorem cpow_tri (q : ℂ) (n : ℤ) :
     q ^ ((n : ℂ) * ((n : ℂ) - 1) / 2) = q ^ tri n := by
   have h : ((tri n : ℤ) : ℂ) = (n : ℂ) * ((n : ℂ) - 1) / 2 := by
     rw [eq_div_iff two_ne_zero]; exact_mod_cast tri_mul_two n
   rw [← h, cpow_intCast]
 
-lemma qPochhammer_shift_down {q z : ℂ} (hq : q ≠ 0) (hz : z ≠ 0) (m : ℕ) :
+theorem qPochhammer_shift_down {q z : ℂ} (hq : q ≠ 0) (hz : z ≠ 0) (m : ℕ) :
     qPochhammer (z / q ^ m) q m * q ^ (m + 1).choose 2 = (-z) ^ m * qPochhammer (q / z) q m := by
   induction m with
   | zero => simp
@@ -68,7 +63,7 @@ lemma qPochhammer_shift_down {q z : ℂ} (hq : q ≠ 0) (hz : z ≠ 0) (m : ℕ)
 /-- The summand `(-1)^n q^{n(n-1)/2} z^n` of the triple product. -/
 def term (q z : ℂ) (n : ℤ) : ℂ := (-1 : ℂ) ^ n * q ^ tri n * z ^ n
 
-lemma tri_sub_cast (k m : ℕ) :
+theorem tri_sub_cast (k m : ℕ) :
     ((k.choose 2 : ℕ) : ℤ) + ((m + 1).choose 2 : ℕ) - (m : ℤ) * k = tri ((k : ℤ) - m) := by
   apply Int.cast_injective (α := ℚ)
   have h := tri_mul_two ((k : ℤ) - m)
@@ -79,7 +74,7 @@ lemma tri_sub_cast (k m : ℕ) :
   push_cast
   ring
 
-lemma term_shift {q z : ℂ} (hq : q ≠ 0) (hz : z ≠ 0) (k m : ℕ) :
+theorem term_shift {q z : ℂ} (hq : q ≠ 0) (hz : z ≠ 0) (k m : ℕ) :
     (-1 : ℂ) ^ k * q ^ k.choose 2 * (z / q ^ m) ^ k * q ^ (m + 1).choose 2 =
       (-z) ^ m * term q z ((k : ℤ) - m) := by
   have hQ : q ^ k.choose 2 * q ^ (m + 1).choose 2 / q ^ (m * k) = q ^ tri ((k : ℤ) - m) := by
@@ -95,7 +90,7 @@ lemma term_shift {q z : ℂ} (hq : q ≠ 0) (hz : z ≠ 0) (k m : ℕ) :
         rw [div_pow, pow_mul]; field_simp
     _ = _ := by rw [← h1, ← h2]; ring
 
-lemma finite_jtp {q z : ℂ} (hq : q ≠ 0) (hz : z ≠ 0) (m : ℕ) :
+theorem finite_jtp {q z : ℂ} (hq : q ≠ 0) (hz : z ≠ 0) (m : ℕ) :
     qPochhammer (q / z) q m * qPochhammer z q m =
       ∑ n ∈ Icc (-(m : ℤ)) m, qBinom q (2 * m) ((m : ℤ) + n).toNat * term q z n := by
   have hsplit : qPochhammer (z / q ^ m) q (2 * m) =
@@ -127,13 +122,13 @@ lemma finite_jtp {q z : ℂ} (hq : q ≠ 0) (hz : z ≠ 0) (m : ℕ) :
 /-- `∏_{j<k} (1 - r^{j+1})⁻¹`, a bound for `‖[n k]_q‖` with `r = ‖q‖`. -/
 def dprod (r : ℝ) (k : ℕ) : ℝ := ∏ j ∈ range k, (1 - r ^ (j + 1))⁻¹
 
-lemma one_sub_pow_succ_pos {r : ℝ} (h0 : 0 ≤ r) (h1 : r < 1) (j : ℕ) : 0 < 1 - r ^ (j + 1) :=
+theorem one_sub_pow_succ_pos {r : ℝ} (h0 : 0 ≤ r) (h1 : r < 1) (j : ℕ) : 0 < 1 - r ^ (j + 1) :=
   sub_pos.mpr (pow_lt_one₀ h0 h1 (Nat.succ_ne_zero j))
 
-lemma dprod_nonneg {r : ℝ} (h0 : 0 ≤ r) (h1 : r < 1) (k : ℕ) : 0 ≤ dprod r k :=
+theorem dprod_nonneg {r : ℝ} (h0 : 0 ≤ r) (h1 : r < 1) (k : ℕ) : 0 ≤ dprod r k :=
   prod_nonneg fun j _ => (inv_pos.mpr (one_sub_pow_succ_pos h0 h1 j)).le
 
-lemma norm_qBinom_le {q : ℂ} (hq : ‖q‖ < 1) (n k : ℕ) : ‖qBinom q n k‖ ≤ dprod ‖q‖ k := by
+theorem norm_qBinom_le {q : ℂ} (hq : ‖q‖ < 1) (n k : ℕ) : ‖qBinom q n k‖ ≤ dprod ‖q‖ k := by
   have h0 := norm_nonneg q
   induction n generalizing k with
   | zero =>
@@ -154,7 +149,7 @@ lemma norm_qBinom_le {q : ℂ} (hq : ‖q‖ < 1) (n k : ℕ) : ‖qBinom q n k�
             add_le_add (ih k) (mul_le_mul_of_nonneg_left (ih (k + 1)) (by positivity))
         _ = dprod ‖q‖ (k + 1) := by rw [hd]; field_simp; ring
 
-lemma dprod_le {r : ℝ} (h0 : 0 ≤ r) (h1 : r < 1) (k : ℕ) :
+theorem dprod_le {r : ℝ} (h0 : 0 ≤ r) (h1 : r < 1) (k : ℕ) :
     dprod r k ≤ Real.exp (r / (1 - r) ^ 2) := by
   have hr1 : 0 < 1 - r := sub_pos.mpr h1
   have hfac (j : ℕ) : (1 - r ^ (j + 1))⁻¹ ≤ Real.exp (r ^ (j + 1) / (1 - r)) := by
@@ -179,7 +174,7 @@ lemma dprod_le {r : ℝ} (h0 : 0 ≤ r) (h1 : r < 1) (k : ℕ) :
         _ ≤ r / (1 - r) * (1 - r)⁻¹ := by gcongr
         _ = r / (1 - r) ^ 2 := by field_simp
 
-lemma tendsto_qBinom_center {q : ℂ} (hq : ‖q‖ < 1) (n : ℤ) :
+theorem tendsto_qBinom_center {q : ℂ} (hq : ‖q‖ < 1) (n : ℤ) :
     Tendsto (fun m : ℕ => qBinom q (2 * m) ((m : ℤ) + n).toNat) atTop
       (𝓝 (qPochhammerInf q q)⁻¹) := by
   have hP := qPochhammerInf_ne_zero_of_norm_lt_one hq hq
@@ -202,7 +197,7 @@ lemma tendsto_qBinom_center {q : ℂ} (hq : ‖q‖ < 1) (n : ℤ) :
   rw [← h]
   field_simp [qPochhammer_self_ne_zero hq]
 
-lemma norm_term_eq {q z : ℂ} (hq : q ≠ 0) (hz : z ≠ 0) (n : ℤ) :
+theorem norm_term_eq {q z : ℂ} (hq : q ≠ 0) (hz : z ≠ 0) (n : ℤ) :
     ‖term q z n‖ = ‖jacobiTheta₂_term n
       (((-(Real.log ‖z‖ - Real.log ‖q‖ / 2) / (2 * π) : ℝ) : ℂ) * I)
       (((-Real.log ‖q‖ / (2 * π) : ℝ) : ℂ) * I)‖ := by
@@ -218,7 +213,7 @@ lemma norm_term_eq {q z : ℂ} (hq : q ≠ 0) (hz : z ≠ 0) (n : ℤ) :
   field_simp
   ring
 
-lemma summable_norm_term {q z : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0) (hz : z ≠ 0) :
+theorem summable_norm_term {q z : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0) (hz : z ≠ 0) :
     Summable fun n : ℤ => ‖term q z n‖ := by
   have hr : 0 < ‖q‖ := norm_pos_iff.mpr hq0
   have hL : Real.log ‖q‖ < 0 := Real.log_neg hr hq
@@ -228,7 +223,7 @@ lemma summable_norm_term {q z : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0) (hz : z 
   have : 0 < 2 * π := by positivity
   exact div_pos (neg_pos.mpr hL) this
 
-lemma jtp_ne_zero {q z : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0) (hz : z ≠ 0) :
+theorem jtp_ne_zero {q z : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0) (hz : z ≠ 0) :
     qPochhammerInf (q / z) q * qPochhammerInf z q =
       (qPochhammerInf q q)⁻¹ * ∑' n : ℤ, term q z n := by
   classical
@@ -258,11 +253,11 @@ lemma jtp_ne_zero {q z : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0) (hz : z ≠ 0) 
         ((norm_qBinom_le hq _ _).trans (dprod_le (norm_nonneg q) hq _)) (norm_nonneg _)
     · simp only [norm_zero]; positivity
 
-lemma qPochhammerInf_zero_right (a : ℂ) : qPochhammerInf a 0 = 1 - a := by
+theorem qPochhammerInf_zero_right (a : ℂ) : qPochhammerInf a 0 = 1 - a := by
   rw [qPochhammerInf, tprod_eq_mulSingle 0 fun k hk => by simp [zero_pow hk]]
   simp
 
-lemma tri_ne_zero {n : ℤ} (h0 : n ≠ 0) (h1 : n ≠ 1) : tri n ≠ 0 := by
+theorem tri_ne_zero {n : ℤ} (h0 : n ≠ 0) (h1 : n ≠ 1) : tri n ≠ 0 := by
   intro h
   have := tri_mul_two n
   rw [h, zero_mul] at this
@@ -270,7 +265,7 @@ lemma tri_ne_zero {n : ℤ} (h0 : n ≠ 0) (h1 : n ≠ 1) : tri n ≠ 0 := by
   · exact h0 h
   · exact h1 (by linarith)
 
-lemma jtp_zero {z : ℂ} : ∑' n : ℤ, term 0 z n = 1 - z := by
+theorem jtp_zero {z : ℂ} : ∑' n : ℤ, term 0 z n = 1 - z := by
   rw [tsum_eq_sum (s := {0, 1})]
   · rw [sum_pair (by norm_num)]
     simp [term, show tri 0 = 0 by decide, show tri 1 = 0 by decide]

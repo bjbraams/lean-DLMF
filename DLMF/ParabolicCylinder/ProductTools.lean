@@ -5,9 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Gamma.BetaFunction
-public import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
 
 /-!
 # Initial integral for the parabolic-cylinder product formula

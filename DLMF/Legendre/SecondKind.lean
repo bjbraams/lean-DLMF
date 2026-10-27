@@ -27,7 +27,7 @@ noncomputable section
 namespace DLMF.Legendre
 
 /-- For `z ∉ (-∞, 1]`, `1/z²` lies in the cut plane. -/
-lemma recip_sq_mem_cutPlane {z : ℂ} (hz : z - 1 ∈ slitPlane) : 1 / z ^ 2 ∈ cutPlane := by
+theorem recip_sq_mem_cutPlane {z : ℂ} (hz : z - 1 ∈ slitPlane) : 1 / z ^ 2 ∈ cutPlane := by
   rw [mem_cutPlane, mem_slitPlane_iff]
   rw [mem_slitPlane_iff] at hz
   by_contra h
@@ -64,18 +64,18 @@ lemma recip_sq_mem_cutPlane {z : ℂ} (hz : z - 1 ∈ slitPlane) : 1 / z ^ 2 ∈
   · simp [hyz] at h
 
 /-- `z ∉ (-∞, 1]` implies `z ∉ (-∞, 0]`. -/
-lemma mem_slitPlane_of_sub_one {z : ℂ} (hz : z - 1 ∈ slitPlane) : z ∈ slitPlane := by
+theorem mem_slitPlane_of_sub_one {z : ℂ} (hz : z - 1 ∈ slitPlane) : z ∈ slitPlane := by
   rw [mem_slitPlane_iff] at hz ⊢
   rcases hz with h | h
   · left; simp at h; linarith
   · right; simpa using h
 
 /-- The domain `ℂ ∖ (-∞, 1]` of `Q_ν` is open. -/
-lemma isOpen_sub_one_mem_slitPlane : IsOpen {z : ℂ | z - 1 ∈ slitPlane} :=
+theorem isOpen_sub_one_mem_slitPlane : IsOpen {z : ℂ | z - 1 ∈ slitPlane} :=
   isOpen_slitPlane.preimage (by fun_prop)
 
 /-- Chain rule for `z ↦ z^p 𝐅(a,b;c;1/z²)`. -/
-lemma hasDerivAt_cpow_mul_regularizedGaussHG_recip_sq (a b c p : ℂ) {z : ℂ} (hz : z - 1 ∈ slitPlane) :
+theorem hasDerivAt_cpow_mul_regularizedGaussHG_recip_sq (a b c p : ℂ) {z : ℂ} (hz : z - 1 ∈ slitPlane) :
     HasDerivAt (fun z => z ^ p * regularizedGaussHG a b c (1 / z ^ 2))
       (p * z ^ (p - 1) * regularizedGaussHG a b c (1 / z ^ 2) -
         2 * z ^ (p - 3) * (a * b * regularizedGaussHG (a + 1) (b + 1) (c + 1) (1 / z ^ 2))) z := by
@@ -162,7 +162,7 @@ theorem legendreQ_ode (ν : ℂ) {z : ℂ}
   linear_combination (-4 * K * Zp) * hode
 
 /-- `w ∈ slitPlane → w⁻¹ ∈ slitPlane`. -/
-lemma recip_mem_slitPlane' {w : ℂ} (hw : w ∈ slitPlane) : w⁻¹ ∈ slitPlane := by
+theorem recip_mem_slitPlane' {w : ℂ} (hw : w ∈ slitPlane) : w⁻¹ ∈ slitPlane := by
   have hn : 0 < normSq w := normSq_pos.mpr (slitPlane_ne_zero hw)
   rw [mem_slitPlane_iff] at hw ⊢
   rcases hw with h | h
@@ -170,7 +170,7 @@ lemma recip_mem_slitPlane' {w : ℂ} (hw : w ∈ slitPlane) : w⁻¹ ∈ slitPla
   · right; rw [inv_im]; exact div_ne_zero (neg_ne_zero.mpr h) hn.ne'
 
 /-- For `z ∉ (-∞, 1]`, `(z+1)/(z-1)` lies in the slit plane. -/
-lemma div_mem_slitPlane {z : ℂ} (hz : z - 1 ∈ slitPlane) : (z + 1) / (z - 1) ∈ slitPlane := by
+theorem div_mem_slitPlane {z : ℂ} (hz : z - 1 ∈ slitPlane) : (z + 1) / (z - 1) ∈ slitPlane := by
   have hz1 : z - 1 ≠ 0 := slitPlane_ne_zero hz
   have hi := recip_mem_slitPlane' hz
   rw [show (z + 1) / (z - 1) = 1 + 2 * (z - 1)⁻¹ by field_simp; ring]
@@ -180,7 +180,7 @@ lemma div_mem_slitPlane {z : ℂ} (hz : z - 1 ∈ slitPlane) : (z + 1) / (z - 1)
   · right; simpa using h
 
 /-- The domain `ℂ ∖ (-∞, 1]` is connected. -/
-lemma isPreconnected_sub_one_mem_slitPlane : IsPreconnected {z : ℂ | z - 1 ∈ slitPlane} := by
+theorem isPreconnected_sub_one_mem_slitPlane : IsPreconnected {z : ℂ | z - 1 ∈ slitPlane} := by
   have h := ((StarConvex.isPathConnected starConvex_one_slitPlane
     (by simp)).isConnected.isPreconnected).image (fun w : ℂ => w + 1)
     (by fun_prop : Continuous fun w : ℂ => w + 1).continuousOn
@@ -190,7 +190,7 @@ lemma isPreconnected_sub_one_mem_slitPlane : IsPreconnected {z : ℂ | z - 1 ∈
   exact ⟨fun h => ⟨z - 1, h, by ring⟩, fun ⟨w, hw, hwz⟩ => by rw [← hwz]; simpa using hw⟩
 
 /-- `Q_ν` is analytic on `ℂ ∖ (-∞, 1]`. -/
-lemma analyticAt_legendreQ (ν : ℂ) {z : ℂ} (hz : z - 1 ∈ slitPlane) :
+theorem analyticAt_legendreQ (ν : ℂ) {z : ℂ} (hz : z - 1 ∈ slitPlane) :
     AnalyticAt ℂ (legendreQ ν) z := by
   have hs := mem_slitPlane_of_sub_one hz
   have hz0 := slitPlane_ne_zero hs

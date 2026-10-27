@@ -50,24 +50,24 @@ variable {E : Type*} [NormedAddCommGroup E]
 variable {S : Set ℝ} {a₁ : ℝ}
 
 /-- In an order-connected set containing `a₁`, the interval `[a₁, x]` lies in the set. -/
-theorem lg2_Icc_subset (hSc : S.OrdConnected) (ha : a₁ ∈ S) {x : ℝ} (hx : x ∈ S) :
+lemma lg2_Icc_subset (hSc : S.OrdConnected) (ha : a₁ ∈ S) {x : ℝ} (hx : x ∈ S) :
     Icc a₁ x ⊆ S :=
   hSc.out ha hx
 
 /-- `uIcc a₁ x ⊆ S` in an order-connected set. -/
-theorem lg2_uIcc_subset (hSc : S.OrdConnected) (ha : a₁ ∈ S) {x : ℝ} (hx : x ∈ S) :
+lemma lg2_uIcc_subset (hSc : S.OrdConnected) (ha : a₁ ∈ S) {x : ℝ} (hx : x ∈ S) :
     uIcc a₁ x ⊆ S :=
   hSc.uIcc_subset ha hx
 
 /-- A function continuous on an order-connected `S ∋ a₁` is integrable on `(a₁, x]`. -/
-theorem lg2_integrableOn_Ioc {f : ℝ → E} (hSc : S.OrdConnected) (ha : a₁ ∈ S)
+lemma lg2_integrableOn_Ioc {f : ℝ → E} (hSc : S.OrdConnected) (ha : a₁ ∈ S)
     (hf : ContinuousOn f S) {x : ℝ} (hx : x ∈ S) : IntegrableOn f (Ioc a₁ x) :=
   ((hf.mono (lg2_Icc_subset hSc ha hx)).integrableOn_compact isCompact_Icc).mono_set
     Ioc_subset_Icc_self
 
 /-- The derivative of a primitive `y ↦ ∫_{a₁}^y f` at a point of an open order-connected set on
 which `f` is continuous. -/
-theorem lg2_hasDerivAt_primitive [NormedSpace ℝ E] [CompleteSpace E] {f : ℝ → E} (hS : IsOpen S)
+lemma lg2_hasDerivAt_primitive [NormedSpace ℝ E] [CompleteSpace E] {f : ℝ → E} (hS : IsOpen S)
     (hSc : S.OrdConnected) (ha : a₁ ∈ S) (hf : ContinuousOn f S) {x : ℝ} (hx : x ∈ S) :
     HasDerivAt (fun y => ∫ t in a₁..y, f t) (f x) x :=
   intervalIntegral.integral_hasDerivAt_right
@@ -76,7 +76,7 @@ theorem lg2_hasDerivAt_primitive [NormedSpace ℝ E] [CompleteSpace E] {f : ℝ 
 
 /-- A primitive `y ↦ ∫_{(a₁, y]} f` of a function integrable on every `(a₁, x]`, `x ∈ S`, is
 continuous on `S ∩ [a₁, ∞)` when `S` is open and order-connected. -/
-theorem lg2_continuousOn_primitive [NormedSpace ℝ E] {f : ℝ → E} (hS : IsOpen S)
+lemma lg2_continuousOn_primitive [NormedSpace ℝ E] {f : ℝ → E} (hS : IsOpen S)
     (hf : ∀ x ∈ S, IntegrableOn f (Ioc a₁ x)) :
     ContinuousOn (fun y => ∫ t in Ioc a₁ y, f t) (S ∩ Ici a₁) := by
   intro y ⟨hyS, hy⟩
@@ -106,7 +106,7 @@ section Head
 variable {ρ : ℝ → ℝ} {S : Set ℝ} {a₁ : ℝ}
 
 /-- The head integral `∫_{a₁}^x ρ` of a nonnegative function is nonnegative. -/
-theorem lg2_head_nonneg (hρ0 : ∀ t ∈ S, a₁ < t → 0 ≤ ρ t) (hSc : S.OrdConnected) (ha : a₁ ∈ S)
+lemma lg2_head_nonneg (hρ0 : ∀ t ∈ S, a₁ < t → 0 ≤ ρ t) (hSc : S.OrdConnected) (ha : a₁ ∈ S)
     {x : ℝ} (hx : x ∈ S) (hax : a₁ ≤ x) : 0 ≤ ∫ t in a₁..x, ρ t :=
   by
   rw [intervalIntegral.integral_of_le hax]
@@ -114,7 +114,7 @@ theorem lg2_head_nonneg (hρ0 : ∀ t ∈ S, a₁ < t → 0 ≤ ρ t) (hSc : S.O
     hρ0 t (lg2_Icc_subset hSc ha hx (Ioc_subset_Icc_self ht)) ht.1
 
 /-- The head integral `∫_{a₁}^x ρ` of a nonnegative function is monotone in `x`. -/
-theorem lg2_head_mono (hρ0 : ∀ t ∈ S, a₁ < t → 0 ≤ ρ t) (hSc : S.OrdConnected) (ha : a₁ ∈ S)
+lemma lg2_head_mono (hρ0 : ∀ t ∈ S, a₁ < t → 0 ≤ ρ t) (hSc : S.OrdConnected) (ha : a₁ ∈ S)
     (hρc : ContinuousOn ρ S) {x y : ℝ} (hy : y ∈ S) (hax : a₁ ≤ x) (hxy : x ≤ y) :
     ∫ t in a₁..x, ρ t ≤ ∫ t in a₁..y, ρ t := by
   have hxS : x ∈ S := lg2_Icc_subset hSc ha hy ⟨hax, hxy⟩
@@ -129,7 +129,7 @@ theorem lg2_head_mono (hρ0 : ∀ t ∈ S, a₁ < t → 0 ≤ ρ t) (hSc : S.Ord
 
 /-- Integration against the head: if `Φ' = φ` and `R x = ∫_{a₁}^x ρ`, then
 `∫_{(a₁,x]} ρ φ(R) = Φ(R x) - Φ 0`. -/
-theorem lg2_integral_mul_comp_head (hS : IsOpen S) (hSc : S.OrdConnected) (ha : a₁ ∈ S)
+lemma lg2_integral_mul_comp_head (hS : IsOpen S) (hSc : S.OrdConnected) (ha : a₁ ∈ S)
     (hρc : ContinuousOn ρ S) {Φ φ : ℝ → ℝ} (hΦ : ∀ s, HasDerivAt Φ (φ s) s)
     (hφ : Continuous φ) {x : ℝ} (hx : x ∈ S) (hax : a₁ ≤ x) :
     IntegrableOn (fun t => ρ t * φ (∫ s in a₁..t, ρ s)) (Ioc a₁ x) ∧
@@ -149,7 +149,7 @@ theorem lg2_integral_mul_comp_head (hS : IsOpen S) (hSc : S.OrdConnected) (ha : 
   simp [hR]
 
 /-- `∫_{(a₁,x]} ρ R^n / n! = R(x)^{n+1} / (n+1)!` for the head `R` of `ρ`. -/
-theorem lg2_integral_mul_head_pow (hS : IsOpen S) (hSc : S.OrdConnected) (ha : a₁ ∈ S)
+lemma lg2_integral_mul_head_pow (hS : IsOpen S) (hSc : S.OrdConnected) (ha : a₁ ∈ S)
     (hρc : ContinuousOn ρ S) (n : ℕ) {x : ℝ} (hx : x ∈ S) (hax : a₁ ≤ x) :
     IntegrableOn (fun t => ρ t * ((∫ s in a₁..t, ρ s) ^ n / n.factorial)) (Ioc a₁ x) ∧
       ∫ t in Ioc a₁ x, ρ t * ((∫ s in a₁..t, ρ s) ^ n / n.factorial) =
@@ -165,7 +165,7 @@ theorem lg2_integral_mul_head_pow (hS : IsOpen S) (hSc : S.OrdConnected) (ha : a
   simpa using h
 
 /-- `∫_{(a₁,x]} ρ exp(R) = exp(R x) - 1` for the head `R` of `ρ`. -/
-theorem lg2_integral_mul_exp_head (hS : IsOpen S) (hSc : S.OrdConnected) (ha : a₁ ∈ S)
+lemma lg2_integral_mul_exp_head (hS : IsOpen S) (hSc : S.OrdConnected) (ha : a₁ ∈ S)
     (hρc : ContinuousOn ρ S) {x : ℝ} (hx : x ∈ S) (hax : a₁ ≤ x) :
     IntegrableOn (fun t => ρ t * Real.exp (∫ s in a₁..t, ρ s)) (Ioc a₁ x) ∧
       ∫ t in Ioc a₁ x, ρ t * Real.exp (∫ s in a₁..t, ρ s) =
@@ -190,7 +190,7 @@ noncomputable def lg2_volterraOp (a₁ : ℝ) (p₁ p₂ q₁ q₂ ψ : ℝ → 
 variable {p₁ p₂ q₁ q₂ ψ : ℝ → 𝕜} {ρ : ℝ → ℝ} {S : Set ℝ} {a₁ : ℝ}
 
 /-- `(a₁, x] ⊆ S ∩ (a₁, ∞)` for `x ∈ S`. -/
-theorem lg2_Ioc_subset (hSc : S.OrdConnected) (ha : a₁ ∈ S) {x : ℝ} (hx : x ∈ S) :
+lemma lg2_Ioc_subset (hSc : S.OrdConnected) (ha : a₁ ∈ S) {x : ℝ} (hx : x ∈ S) :
     Ioc a₁ x ⊆ S ∩ Ioi a₁ := by
   intro t ht
   exact ⟨lg2_Icc_subset hSc ha hx ⟨ht.1.le, ht.2⟩, ht.1⟩
@@ -198,7 +198,7 @@ theorem lg2_Ioc_subset (hSc : S.OrdConnected) (ha : a₁ ∈ S) {x : ℝ} (hx : 
 /-- One Picard step for the Volterra operator controlled from `a₁`: if
 `‖φ t‖ ≤ B t R(t)ⁿ / n!` with `R t = ∫_{a₁}^t ρ` and `B ≥ 0` nondecreasing, then
 `‖(L φ) x‖ ≤ B x R(x)ⁿ⁺¹ / (n + 1)!`. -/
-theorem lg2_volterraOp_step (hS : IsOpen S) (hSc : S.OrdConnected) (ha : a₁ ∈ S)
+lemma lg2_volterraOp_step (hS : IsOpen S) (hSc : S.OrdConnected) (ha : a₁ ∈ S)
     (hp₁ : ContinuousOn p₁ S) (hp₂ : ContinuousOn p₂ S)
     (hq₁ : ContinuousOn (fun t => q₁ t * ψ t) S) (hq₂ : ContinuousOn (fun t => q₂ t * ψ t) S)
     (hρc : ContinuousOn ρ S)
@@ -267,7 +267,7 @@ Ch. 6, §2 for solutions characterized at a finite point `a₁`). Let `S` be ope
 order-connected with `a₁ ∈ S`. If `‖K x t ψ t‖ ≤ ρ t` for `a₁ < t ≤ x`, `ρ` is continuous on
 `S` and `‖σ t‖ ≤ B t` with `B` nondecreasing, then `h x = σ x + ∫_{(a₁,x]} K x t ψ t h t dt` has a
 solution on `S ∩ (a₁, ∞)` with `‖h x - σ x‖ ≤ B x (exp (∫_{a₁}^x ρ) - 1)`. -/
-theorem lg2_exists_volterra_solution_add (hS : IsOpen S) (hSc : S.OrdConnected) (ha : a₁ ∈ S)
+lemma lg2_exists_volterra_solution_add (hS : IsOpen S) (hSc : S.OrdConnected) (ha : a₁ ∈ S)
     (hp₁ : ContinuousOn p₁ S) (hp₂ : ContinuousOn p₂ S)
     (hq₁ : ContinuousOn (fun t => q₁ t * ψ t) S) (hq₂ : ContinuousOn (fun t => q₂ t * ψ t) S)
     {σ : ℝ → 𝕜} {B : ℝ → ℝ} (hσm : AEStronglyMeasurable σ (volume.restrict (S ∩ Ioi a₁)))
@@ -384,7 +384,7 @@ solution `w = A E (P + ε)` on `S ∩ (a₁, ∞)` with
 where `W x = ∫_{a₁}^x ‖r‖` and `V x = ∫_{a₁}^x ‖A A'' - g A²‖`. For `k = -u < 0`
 (`E = exp (u ξ)`) this is the solution dominant at the right; for `k = ± i u` it is an
 oscillatory solution with prescribed behaviour at `a₁`. -/
-theorem lg2_exists_solution_of_approx {S : Set ℝ} {a₁ κ : ℝ} {k : 𝕜}
+lemma lg2_exists_solution_of_approx {S : Set ℝ} {a₁ κ : ℝ} {k : 𝕜}
     {A A' A'' E g P P' P'' : ℝ → 𝕜}
     (hS : IsOpen S) (hSc : S.OrdConnected) (ha : a₁ ∈ S) (hk : k ≠ 0) (hκ : 0 < κ)
     (hA : ∀ x ∈ S, A x ≠ 0)
@@ -623,7 +623,7 @@ recursion `A² A_s'' + 2 A A' A_s' + (A A'' - g A²) A_s = -2 A_{s+1}'` for `s <
 `w'' = (k² A⁻⁴ + g) w` has a solution `w = A E (∑_{s<n} (-1)^s A_s / k^s + ε)` on `S ∩ (a₁, ∞)` with
 `‖ε x‖ ≤ 2 κ ‖k‖^{1-n} (∫_{a₁}^x ‖A_n'‖) exp (κ V x)`, `V x = ∫_{a₁}^x ‖A A'' - g A²‖`, and the
 same bound for `‖A² ε'‖` without the factor `κ`. -/
-theorem lg2_exists_solution_expansion {S : Set ℝ} {a₁ κ : ℝ} {k : 𝕜} {A A' A'' E g : ℝ → 𝕜}
+lemma lg2_exists_solution_expansion {S : Set ℝ} {a₁ κ : ℝ} {k : 𝕜} {A A' A'' E g : ℝ → 𝕜}
     (hS : IsOpen S) (hSc : S.OrdConnected) (ha : a₁ ∈ S) (hk : k ≠ 0) (hκ : 0 < κ)
     (hA : ∀ x ∈ S, A x ≠ 0)
     (hA' : ∀ x ∈ S, HasDerivAt A (A' x) x)
@@ -684,7 +684,7 @@ end Approx
 section Real
 
 /-- A function with nonnegative derivative on an order-connected open set is monotone there. -/
-theorem lg2_monotoneOn_of_hasDerivAt_nonneg {S : Set ℝ} (hSc : S.OrdConnected)
+lemma lg2_monotoneOn_of_hasDerivAt_nonneg {S : Set ℝ} (hSc : S.OrdConnected)
     {ξ d : ℝ → ℝ} (hξ : ∀ x ∈ S, HasDerivAt ξ (d x) x) (hd : ∀ x ∈ S, 0 ≤ d x) :
     MonotoneOn ξ S := by
   have hconv : Convex ℝ S := hSc.convex
@@ -698,7 +698,7 @@ theorem lg2_monotoneOn_of_hasDerivAt_nonneg {S : Set ℝ} (hSc : S.OrdConnected)
 /-- The dominant exponential Liouville–Green kernel: for `ξ' = A⁻²` and `u > 0`,
 `E = exp (u ξ)` solves `E' = u A⁻² E`, `|E|` is nondecreasing and
 `|(1 - E(t)²/E(x)²)/(-2u)| ≤ 1/(2u)` for `t ≤ x`. -/
-theorem lg2_exp_dom_kernel {S : Set ℝ} (hSc : S.OrdConnected) {u : ℝ}
+lemma lg2_exp_dom_kernel {S : Set ℝ} (hSc : S.OrdConnected) {u : ℝ}
     (hu : 0 < u) {A ξ : ℝ → ℝ} (hξ : ∀ x ∈ S, HasDerivAt ξ ((A x ^ 2)⁻¹) x) :
     (∀ x ∈ S, Real.exp (u * ξ x) ≠ 0) ∧
     (∀ x ∈ S, HasDerivAt (fun y => Real.exp (u * ξ y))
@@ -796,7 +796,7 @@ differentiable on `S`, `ξ' = A⁻²`, and let the complex coefficients `A_0, �
 `‖A² ε'‖ ≤ 2 |u|^{1-n} V_{a₁,x}(A_n) exp (V x / |u|)`,
 
 where `V_{a₁,x}(A_n) = ∫_{a₁}^x ‖A_n'‖` and `V x = ∫_{a₁}^x |A A'' - g A²|`. -/
-theorem lg2_exists_solution_expansion_osc {S : Set ℝ} {a₁ u : ℝ} (hS : IsOpen S)
+lemma lg2_exists_solution_expansion_osc {S : Set ℝ} {a₁ u : ℝ} (hS : IsOpen S)
     (hSc : S.OrdConnected) (ha : a₁ ∈ S) (hu : u ≠ 0) {A A' A'' ξ g : ℝ → ℝ}
     (hA : ∀ x ∈ S, A x ≠ 0)
     (hA' : ∀ x ∈ S, HasDerivAt A (A' x) x)
@@ -890,7 +890,7 @@ variable {𝕜 : Type*} [RCLike 𝕜]
 
 /-- The **Wronskian** `w₁ w₂' - w₁' w₂` of two solutions of `w'' = q w` is constant on an open
 preconnected set. -/
-theorem lg2_wronskian_eq {S : Set ℝ} (hS : IsOpen S) (hSc : IsPreconnected S)
+lemma lg2_wronskian_eq {S : Set ℝ} (hS : IsOpen S) (hSc : IsPreconnected S)
     {q w₁ w₁' w₂ w₂' : ℝ → 𝕜}
     (h₁ : ∀ x ∈ S, HasDerivAt w₁ (w₁' x) x) (h₁' : ∀ x ∈ S, HasDerivAt w₁' (q x * w₁ x) x)
     (h₂ : ∀ x ∈ S, HasDerivAt w₂ (w₂' x) x) (h₂' : ∀ x ∈ S, HasDerivAt w₂' (q x * w₂ x) x)
@@ -906,7 +906,7 @@ theorem lg2_wronskian_eq {S : Set ℝ} (hS : IsOpen S) (hSc : IsPreconnected S)
 preconnected set `S` and their Wronskian does not vanish at one point of `S`, then every solution
 `y` of the same equation is a linear combination `c₁ w₁ + c₂ w₂` on `S` (together with its
 derivative). -/
-theorem lg2_eq_lincomb {S : Set ℝ} (hS : IsOpen S) (hSc : IsPreconnected S)
+lemma lg2_eq_lincomb {S : Set ℝ} (hS : IsOpen S) (hSc : IsPreconnected S)
     {q y y' w₁ w₁' w₂ w₂' : ℝ → 𝕜}
     (hy : ∀ x ∈ S, HasDerivAt y (y' x) x) (hy' : ∀ x ∈ S, HasDerivAt y' (q x * y x) x)
     (h₁ : ∀ x ∈ S, HasDerivAt w₁ (w₁' x) x) (h₁' : ∀ x ∈ S, HasDerivAt w₁' (q x * w₁ x) x)

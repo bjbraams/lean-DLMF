@@ -7,7 +7,6 @@ module
 
 public import Mathlib.Analysis.Fourier.AddCircle
 public import Mathlib.Analysis.Complex.CauchyIntegral
-public import Mathlib.Analysis.SpecialFunctions.Exp
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
 
 /-!
@@ -46,7 +45,7 @@ namespace Complex
 variable {F : ℂ → ℂ}
 
 /-- Contour shift for an entire `2π`-periodic function. -/
-theorem p1a2_integral_add_mul_I (hF : Differentiable ℂ F) (hper : ∀ z, F (z + 2 * π) = F z)
+lemma p1a2_integral_add_mul_I (hF : Differentiable ℂ F) (hper : ∀ z, F (z + 2 * π) = F z)
     (y : ℝ) : ∫ x in (0 : ℝ)..2 * π, F (x + y * I) = ∫ x in (0 : ℝ)..2 * π, F x := by
   have h := integral_boundary_rect_eq_zero_of_differentiableOn F 0 (2 * π + y * I)
     hF.differentiableOn
@@ -60,7 +59,7 @@ theorem p1a2_integral_add_mul_I (hF : Differentiable ℂ F) (hper : ∀ z, F (z 
   linear_combination -h
 
 /-- `exp(-ikz)` is `2π`-periodic for integer `k`. -/
-theorem p1a2_exp_int_periodic (k : ℤ) (z : ℂ) :
+lemma p1a2_exp_int_periodic (k : ℤ) (z : ℂ) :
     Complex.exp (-(k * (z + 2 * π) * I)) = Complex.exp (-(k * z * I)) := by
   rw [show -((k : ℂ) * (z + 2 * π) * I) = -(k * z * I) + -(k * (2 * π * I)) by ring,
     Complex.exp_add,
@@ -68,7 +67,7 @@ theorem p1a2_exp_int_periodic (k : ℤ) (z : ℂ) :
     Complex.exp_int_mul_two_pi_mul_I, mul_one]
 
 /-- Shift of the Fourier integral of an entire `2π`-periodic function. -/
-theorem p1a2_fourierInt_shift (hF : Differentiable ℂ F) (hper : ∀ z, F (z + 2 * π) = F z)
+lemma p1a2_fourierInt_shift (hF : Differentiable ℂ F) (hper : ∀ z, F (z + 2 * π) = F z)
     (k : ℤ) (y : ℝ) :
     ∫ x in (0 : ℝ)..2 * π, F x * Complex.exp (-(k * x * I)) =
       Real.exp (k * y) * ∫ x in (0 : ℝ)..2 * π, F (x + y * I) * Complex.exp (-(k * x * I)) := by
@@ -81,7 +80,7 @@ theorem p1a2_fourierInt_shift (hF : Differentiable ℂ F) (hper : ∀ z, F (z + 
   push_cast; ring
 
 /-- Bound of the Fourier integral along a horizontal line. -/
-theorem p1a2_exists_bound_line (hF : Differentiable ℂ F) (y : ℝ) :
+lemma p1a2_exists_bound_line (hF : Differentiable ℂ F) (y : ℝ) :
     ∃ M, 0 ≤ M ∧ ∀ k : ℤ,
       ‖∫ x in (0 : ℝ)..2 * π, F (x + y * I) * Complex.exp (-(k * x * I))‖ ≤ M := by
   have hc : Continuous fun x : ℝ => F (x + y * I) := by
@@ -318,7 +317,7 @@ theorem p1a2_integral_antiperiodic {g : ℝ → ℂ} (hg : Continuous g) (hanti 
   ring
 
 /-- Integration by parts over a period: `∫₀^{2π} F'(x) cos kx dx = k ∫₀^{2π} F(x) sin kx dx`. -/
-theorem p1a2_integral_deriv_mul_cos (hF : Differentiable ℂ F) (hper : ∀ z, F (z + 2 * π) = F z)
+lemma p1a2_integral_deriv_mul_cos (hF : Differentiable ℂ F) (hper : ∀ z, F (z + 2 * π) = F z)
     (k : ℤ) :
     ∫ x in (0 : ℝ)..2 * π, deriv F x * Complex.cos (k * x) =
       k * ∫ x in (0 : ℝ)..2 * π, F x * Complex.sin (k * x) := by

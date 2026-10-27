@@ -52,7 +52,7 @@ def fresnelAuxG (x : ℝ) : ℝ :=
 /-- The Fresnel variable `ζ = √π (1 - i) x / 2` of DLMF 7.5.7. -/
 def fresnelZeta (x : ℝ) : ℂ := (Real.sqrt π : ℂ) * (1 - I) / 2 * x
 
-lemma fresnelZeta_sq (x : ℝ) : fresnelZeta x ^ 2 = -(I * (π * x ^ 2 / 2)) := by
+theorem fresnelZeta_sq (x : ℝ) : fresnelZeta x ^ 2 = -(I * (π * x ^ 2 / 2)) := by
   have hπ : (Real.sqrt π : ℂ) ^ 2 = π := by
     rw [← Complex.ofReal_pow, Real.sq_sqrt Real.pi_pos.le]
   rw [fresnelZeta, mul_pow, div_pow, mul_pow, hπ]
@@ -78,10 +78,10 @@ theorem fresnelAuxG_add_I_mul_fresnelAuxF (x : ℝ) :
   generalize (Real.sin (π * x ^ 2 / 2) : ℂ) = sn at *
   linear_combination (-(c - I * sn)) * hCS + (sn / 2 - sn * Real.fresnelSinInt x) * Complex.I_sq
 
-lemma re_fresnelZeta (x : ℝ) : (fresnelZeta x).re = Real.sqrt π / 2 * x := by
+theorem re_fresnelZeta (x : ℝ) : (fresnelZeta x).re = Real.sqrt π / 2 * x := by
   simp [fresnelZeta]
 
-lemma tendsto_fresnelZeta_sq :
+theorem tendsto_fresnelZeta_sq :
     Tendsto (fun x : ℝ => fresnelZeta x ^ 2) atTop (rotSectorAtTop (1 / 2) (π / 4)) := by
   refine tendsto_comap_iff.mpr ?_
   have hval : ∀ x : ℝ, fresnelZeta x ^ 2 * exp ((π / 4 : ℝ) * I) =

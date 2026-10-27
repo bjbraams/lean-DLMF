@@ -7,9 +7,6 @@ module
 
 public import DLMF.Painleve.SolutionsDefs
 public import DLMF.Airy.Framework
-public import Mathlib.Analysis.Asymptotics.AsymptoticEquivalent
-public import Mathlib.Analysis.SpecialFunctions.Pow.Real
-public import Mathlib.GroupTheory.Perm.Fin
 
 /-!
 # Combinatorics and orthogonal polynomials (DLMF §32.14, §32.15)

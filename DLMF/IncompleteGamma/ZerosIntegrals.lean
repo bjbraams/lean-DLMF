@@ -5,11 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.IncompleteGamma.SpecialValues
-public import DLMF.Confluent.Integrals
 public import DLMF.IncompleteGamma.SeriesRecurrences
-public import Mathlib.NumberTheory.LSeries.HurwitzZeta
-public import Mathlib.NumberTheory.Bernoulli
 public import DLMF.Zeta.S25bHurwitzCore
 
 /-!
@@ -36,7 +32,7 @@ def Real.scIncGammaPositiveZero (a : ℝ) : ℝ :=
   Classical.epsilon (fun x : ℝ => 0 < x ∧ scIncGamma a x=0)
 
 /-- A complex sum of nonnegative real terms with positive leading term is nonzero. -/
-lemma ne_zero_of_hasSum_ofReal_nonneg {f : ℕ → ℝ} {S : ℂ} (h : HasSum (fun k => (f k : ℂ)) S)
+theorem ne_zero_of_hasSum_ofReal_nonneg {f : ℕ → ℝ} {S : ℂ} (h : HasSum (fun k => (f k : ℂ)) S)
     (hf : ∀ k, 0 ≤ f k) (h0 : 0 < f 0) : S ≠ 0 := by
   have hr : HasSum f S.re := by
     have := (Complex.reCLM.hasSum h)
@@ -88,7 +84,7 @@ theorem scIncGamma_nonnegative_parameter_no_real_zeros {a : ℝ} (ha : 0 ≤ a) 
 monotone on each half-line. The signs at `0` and at `±∞` come from the two power series. -/
 
 /-- `e^z γ*(a,z) = ∑ zᵏ / Γ(a+k+1)`. -/
-lemma gzero_hasSum_U (a z : ℂ) :
+theorem gzero_hasSum_U (a z : ℂ) :
     HasSum (fun k : ℕ => z ^ k / Gamma (a + k + 1)) (regularizedHGFun {1} {a + 1} z) := by
   have h := (scIncGamma_hasSum_exponential a z).mul_left (exp z)
   have he : exp z * exp (-z) = 1 := by rw [← Complex.exp_add]; simp
@@ -96,7 +92,7 @@ lemma gzero_hasSum_U (a z : ℂ) :
   refine h.congr_fun fun k => ?_
   rw [← mul_div_assoc, ← mul_assoc, he, one_mul]
 
-lemma gzero_hasSum_U' (a z : ℂ) :
+theorem gzero_hasSum_U' (a z : ℂ) :
     HasSum (fun k : ℕ => (k + 1) * z ^ k / Gamma (a + k + 2)) (regularizedHGFun {2} {a + 2} z) := by
   have hs := (hasFPowerSeriesOnBall_regularizedConfluent 2 (a + 2)).hasSum_mul_pow
     (by simp : z ∈ Metric.eball (0 : ℂ) ⊤)
@@ -113,7 +109,7 @@ lemma gzero_hasSum_U' (a z : ℂ) :
   field_simp
 
 /-- The first-order ODE `z U' = (z - a) U + 1/Γ(a)` of `U(z) = e^z γ*(a,z)`. -/
-lemma gzero_ode {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (z : ℂ) :
+theorem gzero_ode {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (z : ℂ) :
     z * deriv (regularizedHGFun {1} {a + 1}) z =
       (z - a) * regularizedHGFun {1} {a + 1} z + (Gamma a)⁻¹ := by
   rw [deriv_regularizedConfluent, one_mul, show (1 : ℂ) + 1 = 2 by norm_num,
@@ -146,7 +142,7 @@ lemma gzero_ode {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (z : ℂ) :
 /-- The real function `U(x) = e^x γ*(a,x)`. -/
 noncomputable def gzero_U (a x : ℝ) : ℝ := (regularizedHGFun {1} {(a : ℂ) + 1} x).re
 
-lemma gzero_hasSum_real (a x : ℝ) :
+theorem gzero_hasSum_real (a x : ℝ) :
     HasSum (fun k : ℕ => x ^ k / Real.Gamma (a + k + 1)) (gzero_U a x) ∧
       regularizedHGFun {1} {(a : ℂ) + 1} x = (gzero_U a x : ℂ) := by
   have h := gzero_hasSum_U (a : ℂ) (x : ℂ)
@@ -162,7 +158,7 @@ lemma gzero_hasSum_real (a x : ℝ) :
   refine ⟨hre, ?_⟩
   exact hr.unique (Complex.hasSum_ofReal.mpr hre)
 
-lemma gzero_U_zero (a : ℝ) : gzero_U a 0 = (Real.Gamma (a + 1))⁻¹ := by
+theorem gzero_U_zero (a : ℝ) : gzero_U a 0 = (Real.Gamma (a + 1))⁻¹ := by
   have h := (gzero_hasSum_real a 0).1
   rw [← hasSum_nat_add_iff' 1] at h
   simp only [Finset.sum_range_one, pow_zero, Nat.cast_zero, add_zero, one_div] at h
@@ -170,13 +166,13 @@ lemma gzero_U_zero (a : ℝ) : gzero_U a 0 = (Real.Gamma (a + 1))⁻¹ := by
     simp
   linarith [h0.unique h]
 
-lemma gzero_scIncGamma (a x : ℝ) : scIncGamma a x = exp (-(x : ℂ)) * (gzero_U a x : ℂ) := by
+theorem gzero_scIncGamma (a x : ℝ) : scIncGamma a x = exp (-(x : ℂ)) * (gzero_U a x : ℂ) := by
   rw [scIncGamma, (gzero_hasSum_real a x).2]
 
-lemma gzero_scIncGamma_eq_zero (a x : ℝ) : scIncGamma a x = 0 ↔ gzero_U a x = 0 := by
+theorem gzero_scIncGamma_eq_zero (a x : ℝ) : scIncGamma a x = 0 ↔ gzero_U a x = 0 := by
   rw [gzero_scIncGamma, mul_eq_zero, ofReal_eq_zero]; simp [exp_ne_zero]
 
-lemma gzero_deriv {a : ℝ} (ha : ∀ n : ℕ, (a : ℂ) ≠ -n) (x : ℝ) :
+theorem gzero_deriv {a : ℝ} (ha : ∀ n : ℕ, (a : ℂ) ≠ -n) (x : ℝ) :
     ∃ d : ℝ, HasDerivAt (gzero_U a) d x ∧ x * d = (x - a) * gzero_U a x + (Real.Gamma a)⁻¹ := by
   refine ⟨(deriv (regularizedHGFun {1} {(a : ℂ) + 1}) x).re,
     (differentiableAt_regularizedConfluent _ _ _).hasDerivAt.real_of_complex, ?_⟩
@@ -185,11 +181,11 @@ lemma gzero_deriv {a : ℝ} (ha : ∀ n : ℕ, (a : ℂ) ≠ -n) (x : ℝ) :
     Complex.Gamma_ofReal, ← ofReal_inv] at h
   simpa only [re_ofReal_mul, add_re, ofReal_re] using h
 
-lemma gzero_continuous {a : ℝ} (ha : ∀ n : ℕ, (a : ℂ) ≠ -n) : Continuous (gzero_U a) :=
+theorem gzero_continuous {a : ℝ} (ha : ∀ n : ℕ, (a : ℂ) ≠ -n) : Continuous (gzero_U a) :=
   continuous_iff_continuousAt.mpr fun x => (gzero_deriv ha x).choose_spec.1.continuousAt
 
 /-- The sign of `Γ` on `(-k-1, -k)`. -/
-lemma gzero_Gamma_sign (k : ℕ) {x : ℝ} (h1 : -(k : ℝ) - 1 < x) (h2 : x < -k) :
+theorem gzero_Gamma_sign (k : ℕ) {x : ℝ} (h1 : -(k : ℝ) - 1 < x) (h2 : x < -k) :
     0 < (-1) ^ (k + 1) * Real.Gamma x := by
   induction k generalizing x with
   | zero =>
@@ -212,7 +208,7 @@ lemma gzero_Gamma_sign (k : ℕ) {x : ℝ} (h1 : -(k : ℝ) - 1 < x) (h2 : x < -
 
 /-- A power series with eventually nonnegative coefficients and a positive one is eventually
 positive at `+∞`. -/
-lemma gzero_eventually_pos {c : ℕ → ℝ} {S : ℝ → ℝ} (m : ℕ) (hc : ∀ k, m ≤ k → 0 ≤ c k)
+theorem gzero_eventually_pos {c : ℕ → ℝ} {S : ℝ → ℝ} (m : ℕ) (hc : ∀ k, m ≤ k → 0 ≤ c k)
     (hm : 0 < c m) (hS : ∀ y, 0 ≤ y → HasSum (fun k => c k * y ^ k) (S y)) :
     ∀ᶠ y in atTop, 0 < S y := by
   set C := ∑ k ∈ Finset.range m, |c k|
@@ -243,11 +239,11 @@ lemma gzero_eventually_pos {c : ℕ → ℝ} {S : ℝ → ℝ} (m : ℕ) (hc : �
   have := neg_abs_le (∑ k ∈ Finset.range m, c k * y ^ k)
   linarith
 
-lemma gzero_nonint {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) : ∀ n : ℕ, (a : ℂ) ≠ -n := by
+theorem gzero_nonint {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) : ∀ n : ℕ, (a : ℂ) ≠ -n := by
   intro n h
   exact ha (-n) (by exact_mod_cast congrArg re h |>.trans (by simp))
 
-lemma gzero_U_atTop (a : ℝ) : ∀ᶠ y in atTop, 0 < gzero_U a y := by
+theorem gzero_U_atTop (a : ℝ) : ∀ᶠ y in atTop, 0 < gzero_U a y := by
   refine gzero_eventually_pos (c := fun k => (Real.Gamma (a + k + 1))⁻¹) (⌈|a|⌉₊)
     (fun k hk => inv_nonneg.mpr (Real.Gamma_nonneg_of_nonneg ?_)) ?_ fun y _ =>
       (gzero_hasSum_real a y).1.congr_fun fun k => by ring
@@ -258,7 +254,7 @@ lemma gzero_U_atTop (a : ℝ) : ∀ᶠ y in atTop, 0 < gzero_U a y := by
     have := Nat.le_ceil |a|
     linarith [neg_abs_le a]
 
-lemma gzero_hasSum_alt {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) (y : ℝ) :
+theorem gzero_hasSum_alt {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) (y : ℝ) :
     HasSum (fun k : ℕ => ((k ! : ℝ) * (a + k))⁻¹ * y ^ k)
       (Real.Gamma a * Real.exp y * gzero_U a (-y)) := by
   have ha' := gzero_nonint ha
@@ -277,7 +273,7 @@ lemma gzero_hasSum_alt {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) (y : ℝ) :
   · funext k; field_simp
   · simp only [neg_neg]; ring
 
-lemma gzero_U_atBot {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) :
+theorem gzero_U_atBot {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) :
     ∀ᶠ x in atBot, 0 < Real.Gamma a * gzero_U a x := by
   have ha' := gzero_nonint ha
   have hG : Real.Gamma a ≠ 0 := Real.Gamma_ne_zero fun m h => ha (-m) (by rw [h]; simp)
@@ -300,7 +296,7 @@ lemma gzero_U_atBot {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) :
   nlinarith
 
 /-- On each half-line `γ*(a, ·)` has at most one zero: `|x|^a e^{-x} U(x)` is strictly monotone. -/
-lemma gzero_mono_pos {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) :
+theorem gzero_mono_pos {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) :
     StrictMonoOn (fun t : ℝ => Real.Gamma a * (t ^ a * Real.exp (-t) * gzero_U a t)) (Ioi 0) := by
   have ha' := gzero_nonint ha
   have hG : Real.Gamma a ≠ 0 := Real.Gamma_ne_zero fun m h => ha (-m) (by rw [h]; simp)
@@ -328,7 +324,7 @@ lemma gzero_mono_pos {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) :
     exact mul_pos (Real.rpow_pos_of_pos ht _) (Real.exp_pos _)
   exact hm
 
-lemma gzero_mono_neg {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) :
+theorem gzero_mono_neg {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) :
     StrictAntiOn (fun t : ℝ => Real.Gamma a * ((-t) ^ a * Real.exp (-t) * gzero_U a t)) (Iio 0) := by
   have ha' := gzero_nonint ha
   have hG : Real.Gamma a ≠ 0 := Real.Gamma_ne_zero fun m h => ha (-m) (by rw [h]; simp)
@@ -358,15 +354,15 @@ lemma gzero_mono_neg {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) :
     exact mul_pos (Real.rpow_pos_of_pos (by simpa using ht) _) (Real.exp_pos _)
   exact hm
 
-lemma gzero_unique_pos {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) {x y : ℝ} (hx : 0 < x) (hy : 0 < y)
+theorem gzero_unique_pos {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) {x y : ℝ} (hx : 0 < x) (hy : 0 < y)
     (hUx : gzero_U a x = 0) (hUy : gzero_U a y = 0) : x = y :=
   (gzero_mono_pos ha).injOn hx hy (by simp only [hUx, hUy, mul_zero])
 
-lemma gzero_unique_neg {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) {x y : ℝ} (hx : x < 0) (hy : y < 0)
+theorem gzero_unique_neg {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) {x y : ℝ} (hx : x < 0) (hy : y < 0)
     (hUx : gzero_U a x = 0) (hUy : gzero_U a y = 0) : x = y :=
   (gzero_mono_neg ha).injOn hx hy (by simp only [hUx, hUy, mul_zero])
 
-lemma gzero_nonint_of_Ioo {a : ℝ} {m : ℤ} (h1 : (m : ℝ) < a) (h2 : a < m + 1) :
+theorem gzero_nonint_of_Ioo {a : ℝ} {m : ℤ} (h1 : (m : ℝ) < a) (h2 : a < m + 1) :
     ∀ n : ℤ, a ≠ n := by
   intro n hn
   rw [hn] at h1 h2
@@ -375,7 +371,7 @@ lemma gzero_nonint_of_Ioo {a : ℝ} {m : ℤ} (h1 : (m : ℝ) < a) (h2 : a < m +
   omega
 
 /-- The negative zero, when it exists and is unique, is the `ε`-chosen one. -/
-lemma gzero_neg_exists {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) (hs : 0 < Real.Gamma a * gzero_U a 0 → False)
+theorem gzero_neg_exists {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) (hs : 0 < Real.Gamma a * gzero_U a 0 → False)
     (h0 : gzero_U a 0 ≠ 0) :
     ∃ x, x < 0 ∧ gzero_U a x = 0 := by
   have ha' := gzero_nonint ha
@@ -401,7 +397,7 @@ lemma gzero_neg_exists {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) (hs : 0 < Real.Gamm
 
 
 
-lemma gzero_exp_series (y : ℝ) : HasSum (fun k : ℕ => y ^ k / (k ! : ℝ)) (Real.exp y) := by
+theorem gzero_exp_series (y : ℝ) : HasSum (fun k : ℕ => y ^ k / (k ! : ℝ)) (Real.exp y) := by
   rw [Real.exp_eq_exp_ℝ]; exact NormedSpace.expSeries_div_hasSum_exp y
 
 /-- scIncGamma one negative zero. -/

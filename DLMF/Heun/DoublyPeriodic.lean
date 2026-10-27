@@ -6,15 +6,11 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Heun.Basic
-public import DLMF.Heun.Equation
 public import DLMF.Heun.LocalSolutions
 public import DLMF.JacobiElliptic.SpecialValues
-public import Mathlib.Analysis.Complex.CauchyIntegral
-public import DLMF.JacobiElliptic.Derivatives
-public import DLMF.JacobiElliptic.ElementaryIdentities
 public import DLMF.JacobiElliptic.Basic
 public import DLMF.Weierstrass.Basic
-public import Mathlib.Analysis.SpecialFunctions.Pow.Complex
+public import DLMF.Weierstrass.Relations
 
 /-!
 # Doubly-periodic forms of Heun's equation and Lamé's equation (DLMF §31.2(iv), §31.7(ii))
@@ -61,7 +57,7 @@ theorem IsLinearODE2On.congr_coeff {p r p' r' w : ℂ → ℂ} {s : Set ℂ}
 
 /-- `sn(z, k) ≠ 0` forces `z` to be a regular point (`θ₄ ≠ 0`): at a pole the totalized
 quotient is `0`. -/
-theorem p1h_regular_of_jacobiSnk_ne_zero {k z : ℂ} (h : jacobiSnk z k ≠ 0) :
+lemma p1h_regular_of_jacobiSnk_ne_zero {k z : ℂ} (h : jacobiSnk z k ≠ 0) :
     jacobiLetterTheta .n (jacobiZetak z k) (jacobiTauk k) ≠ 0 := by
   intro h0
   apply h
@@ -117,6 +113,77 @@ theorem heun_jacobiForm {k : ℂ} (hk : k ∈ jacobiModulusDomain) (hF : α + β
 
 /-! ### Weierstrass's form -/
 
+/-- DLMF 23.6.26 in the modulus form: if `e₁ - e₃ = c²` and `k² = (e₂ - e₃)/(e₁ - e₃)`, then
+`sn²(iK' + cξ, k) = (℘(ξ) - e₃)/(e₂ - e₃)`. -/
+lemma p3w_jacobiSnk_sq_eq (H : HalfPeriods) {k : ℂ} (hk : k ∈ jacobiModulusDomain)
+    (hk2 : k ^ 2 = (H.e 2 - H.e 3) / (H.e 1 - H.e 3)) {c : ℂ} (hc : c ≠ 0)
+    (hc2 : c ^ 2 = H.e 1 - H.e 3) {ξ : ℂ} (hξ : ξ ∉ H.lattice) :
+    jacobiSnk (I * compEllIntKpk k + ξ * c) k ^ 2 =
+      (H.weierstrassP ξ - H.e 3) / (H.e 2 - H.e 3) := by
+  obtain ⟨hmod, -, hKK⟩ := jacobi_inversion_k hk
+  have hK : compEllIntKk k ≠ 0 := by
+    rw [← hKK, compEllIntKTau]
+    exact mul_ne_zero (by simp [Real.pi_ne_zero])
+      (pow_ne_zero _ (je22a_thetaThree_zero_ne_zero (jacobiTauk_im_pos hk)))
+  set H' : HalfPeriods := ⟨compEllIntKk k / c, I * compEllIntKpk k / c, div_ne_zero hK hc, by
+    rw [div_div_div_cancel_right₀ hc]; exact jacobiTauk_im_pos hk⟩
+  obtain ⟨d12, d23, d13⟩ := H.e_distinct
+  have htau : H'.tau = jacobiTauk k := by
+    simp only [H', HalfPeriods.tau, jacobiTauk]
+    rw [div_div_div_cancel_right₀ hc]
+  have hqK : H'.quarterK = compEllIntKk k := by
+    rw [HalfPeriods.quarterK, htau, hKK]
+  have hω1 : H'.ω₁ = compEllIntKk k / c := rfl
+  have hω3 : H'.ω₃ = I * compEllIntKpk k / c := rfl
+  -- the roots of `H'` agree with those of `H`
+  have hm := H'.modulus_sq_eq.1
+  have hq := H'.quarterK_sq_eq.1
+  rw [HalfPeriods.modulus, htau, hmod, hk2] at hm
+  rw [hqK, hω1] at hq
+  have a13 : H'.e 1 - H'.e 3 = H.e 1 - H.e 3 := by
+    rw [← hc2]; field_simp at hq; linear_combination -hq
+  have a23 : H'.e 2 - H'.e 3 = H.e 2 - H.e 3 := by
+    have h13' : H'.e 1 - H'.e 3 ≠ 0 := by rw [a13]; exact sub_ne_zero.mpr d13
+    rw [a13] at hm
+    field_simp at hm
+    exact hm.symm
+  have s' := H'.e_sum
+  have s := H.e_sum
+  have b3 : H'.e 3 = H.e 3 := by linear_combination (-(a13 + a23) + s' - s) / 3
+  have b1 : H'.e 1 = H.e 1 := by linear_combination a13 + b3
+  have b2 : H'.e 2 = H.e 2 := by linear_combination a23 + b3
+  have hlat : H'.lattice = H.lattice := by
+    refine lattice_eq_of_invariants_eq _ _ ?_ ?_
+    · change H'.g₂ = H.g₂
+      rw [H'.g₂_eq_e.1, H.g₂_eq_e.1, b1, b2, b3]
+    · change H'.g₃ = H.g₃
+      rw [H'.g₃_eq_e.1, H.g₃_eq_e.1, b1, b2, b3]
+  have hwp : ∀ z, H'.weierstrassP z = H.weierstrassP z := fun z =>
+    wp23_weierstrassP_eq_of_lattice_eq _ _ hlat z
+  have hz : ξ + H'.ω₃ + H'.ω₃ ∉ H'.lattice := by
+    rw [hlat, add_assoc, ← two_mul]
+    intro h; apply hξ
+    have := sub_mem h (hlat ▸ H'.two_mul_ω₃_mem)
+    simpa using this
+  have key := H'.weierstrassP_add_ω₃_sub_e_three_eq_sn hz
+  have hper := H'.weierstrassP_add_two_mul_halfPeriod ξ (j := 3) (by simp)
+  simp only [HalfPeriods.halfPeriod_three] at hper
+  rw [add_assoc, ← two_mul, hper, hwp, b3, hqK, HalfPeriods.modulus, htau, hmod, hω1] at key
+  have harg : compEllIntKk k * (ξ + H'.ω₃) / (compEllIntKk k / c) =
+      I * compEllIntKpk k + ξ * c := by
+    rw [hω3]; field_simp; ring
+  rw [harg] at key
+  have hsn : jacobiSnTau (I * compEllIntKpk k + ξ * c) (jacobiTauk k) =
+      jacobiSnk (I * compEllIntKpk k + ξ * c) k := by
+    simp only [jacobiSnTau, jacobiSnk, jacobiPQTau, jacobiPQk, jacobiZetaTau, jacobiZetak, hKK]
+  rw [hsn] at key
+  have h23 : H.e 2 - H.e 3 ≠ 0 := sub_ne_zero.mpr d23
+  have h13 : H.e 1 - H.e 3 ≠ 0 := sub_ne_zero.mpr d13
+  rw [key]
+  field_simp
+  rw [hk2, hc2]
+  field_simp
+
 /-- DLMF 31.2.9: with `k² = (e₂ - e₃)/(e₁ - e₃)` and `ζ = iK' + ξ(e₁ - e₃)^{1/2}`, the Jacobi
 variable `z = sn²(ζ, k)` of 31.2.7 is `(℘(ξ) - e₃)/(e₂ - e₃)`; `e_j = ℘(ω_j)`,
 `e₁ + e₂ + e₃ = 0`. Stated for `k` in `jacobiModulusDomain` and `ξ` off the lattice. -/
@@ -125,7 +192,93 @@ theorem jacobiSnk_sq_eq_weierstrassP (H : HalfPeriods) {k : ℂ} (hk : k ∈ jac
     (hk2 : k ^ 2 = (H.e 2 - H.e 3) / (H.e 1 - H.e 3)) {ξ : ℂ} (hξ : ξ ∉ H.lattice) :
     jacobiSnk (I * compEllIntKpk k + ξ * (H.e 1 - H.e 3) ^ (1 / 2 : ℂ)) k ^ 2 =
       (H.weierstrassP ξ - H.e 3) / (H.e 2 - H.e 3) := by
-  sorry
+  have h13 : H.e 1 - H.e 3 ≠ 0 := sub_ne_zero.mpr H.e_distinct.2.2
+  refine p3w_jacobiSnk_sq_eq H hk hk2 ?_ ?_ hξ
+  · exact (cpow_ne_zero_iff_of_exponent_ne_zero (by norm_num)).mpr h13
+  · rw [one_div]; exact cpow_ofNat_inv_pow _ 2
+
+/-- Algebra of 31.2.9–31.2.11, first-derivative coefficient. -/
+lemma p3w_wf_algA {x y e₁ e₂ e₃ γ δ ε : ℂ} (hs : e₁ + e₂ + e₃ = 0)
+    (h1 : x - e₁ ≠ 0) (h2 : x - e₂ ≠ 0) (h3 : x - e₃ ≠ 0) (hE : e₂ - e₃ ≠ 0)
+    (hsq : y ^ 2 = 4 * (x - e₁) * (x - e₂) * (x - e₃)) :
+    (6 * x ^ 2 - 2 * (e₁ ^ 2 + e₂ ^ 2 + e₃ ^ 2) / 2) / (e₂ - e₃) +
+      2 * -(y * ((1 - 2 * γ) / 4 / (x - e₃) + (1 - 2 * δ) / 4 / (x - e₂) +
+        (1 - 2 * ε) / 4 / (x - e₁))) * (y / (e₂ - e₃)) =
+      heunCoeffP ((e₁ - e₃) / (e₂ - e₃)) γ δ ε ((x - e₃) / (e₂ - e₃)) * (y / (e₂ - e₃)) ^ 2 := by
+  have hz1 : (x - e₃) / (e₂ - e₃) - 1 = (x - e₂) / (e₂ - e₃) := by field_simp; ring
+  have hza : (x - e₃) / (e₂ - e₃) - (e₁ - e₃) / (e₂ - e₃) = (x - e₁) / (e₂ - e₃) := by ring
+  simp only [heunCoeffP, hz1, hza]
+  have he₃ : e₃ = -e₁ - e₂ := by linear_combination hs
+  linear_combination (norm := skip) (-2 * ((1 - 2 * γ) / 4 / (x - e₃) + (1 - 2 * δ) / 4 /
+    (x - e₂) + (1 - 2 * ε) / 4 / (x - e₁)) / (e₂ - e₃) - (γ / ((x - e₃) / (e₂ - e₃)) +
+    δ / ((x - e₂) / (e₂ - e₃)) + ε / ((x - e₁) / (e₂ - e₃))) / (e₂ - e₃) ^ 2) * hsq
+  field_simp
+  subst he₃
+  ring
+
+/-- Algebra of 31.2.9–31.2.12, zeroth-order coefficient. -/
+lemma p3w_wf_algB {x y e₁ e₂ e₃ q α β γ δ ε : ℂ} (hs : e₁ + e₂ + e₃ = 0)
+    (hF : α + β + 1 = γ + δ + ε)
+    (h1 : x - e₁ ≠ 0) (h2 : x - e₂ ≠ 0) (h3 : x - e₃ ≠ 0) (hE : e₂ - e₃ ≠ 0)
+    (hsq : y ^ 2 = 4 * (x - e₁) * (x - e₂) * (x - e₃)) :
+    (e₁ * (γ + δ - 1) ^ 2 + e₂ * (γ + ε - 1) ^ 2 + e₃ * (δ + ε - 1) ^ 2 -
+          4 * α * β * e₃ - 4 * q * (e₂ - e₃)) +
+        (4 * α * β - (γ + δ + ε - 1 / 2) * (γ + δ + ε - 3 / 2)) * x -
+        (ε - 1 / 2) * (ε - 3 / 2) * (y ^ 2 / (4 * (x - e₁) ^ 2) - x - e₁) -
+        (δ - 1 / 2) * (δ - 3 / 2) * (y ^ 2 / (4 * (x - e₂) ^ 2) - x - e₂) -
+        (γ - 1 / 2) * (γ - 3 / 2) * (y ^ 2 / (4 * (x - e₃) ^ 2) - x - e₃) +
+      (-(y * ((1 - 2 * γ) / 4 / (x - e₃) + (1 - 2 * δ) / 4 / (x - e₂) +
+        (1 - 2 * ε) / 4 / (x - e₁)))) ^ 2 +
+      -((1 - 2 * γ) / 4 * ((6 * x ^ 2 - 2 * (e₁ ^ 2 + e₂ ^ 2 + e₃ ^ 2) / 2) * (x - e₃) - y ^ 2) /
+          (x - e₃) ^ 2 +
+        (1 - 2 * δ) / 4 * ((6 * x ^ 2 - 2 * (e₁ ^ 2 + e₂ ^ 2 + e₃ ^ 2) / 2) * (x - e₂) - y ^ 2) /
+          (x - e₂) ^ 2 +
+        (1 - 2 * ε) / 4 * ((6 * x ^ 2 - 2 * (e₁ ^ 2 + e₂ ^ 2 + e₃ ^ 2) / 2) * (x - e₁) - y ^ 2) /
+          (x - e₁) ^ 2) =
+      heunCoeffR ((e₁ - e₃) / (e₂ - e₃)) q α β ((x - e₃) / (e₂ - e₃)) * (y / (e₂ - e₃)) ^ 2 := by
+  have hz1 : (x - e₃) / (e₂ - e₃) - 1 = (x - e₂) / (e₂ - e₃) := by field_simp; ring
+  have hza : (x - e₃) / (e₂ - e₃) - (e₁ - e₃) / (e₂ - e₃) = (x - e₁) / (e₂ - e₃) := by ring
+  simp only [heunCoeffR, hz1, hza]
+  have he₃ : e₃ = -e₁ - e₂ := by linear_combination hs
+  have hα : α = γ + δ + ε - 1 - β := by linear_combination hF
+  linear_combination (norm := skip) (-(ε - 1 / 2) * (ε - 3 / 2) / (4 * (x - e₁) ^ 2) -
+    (δ - 1 / 2) * (δ - 3 / 2) / (4 * (x - e₂) ^ 2) -
+    (γ - 1 / 2) * (γ - 3 / 2) / (4 * (x - e₃) ^ 2) +
+    ((1 - 2 * γ) / 4 / (x - e₃) + (1 - 2 * δ) / 4 / (x - e₂) + (1 - 2 * ε) / 4 / (x - e₁)) ^ 2 +
+    ((1 - 2 * γ) / 4 / (x - e₃) ^ 2 + (1 - 2 * δ) / 4 / (x - e₂) ^ 2 +
+      (1 - 2 * ε) / 4 / (x - e₁) ^ 2) -
+    (α * β * ((x - e₃) / (e₂ - e₃)) - q) / ((x - e₃) / (e₂ - e₃) * ((x - e₂) / (e₂ - e₃)) *
+      ((x - e₁) / (e₂ - e₃))) / (e₂ - e₃) ^ 2) * hsq
+  field_simp
+  subst he₃ hα
+  ring
+
+/-- Shift by a half period: `℘(z + ω_j) = ℘'(z)²/(4(℘(z) - e_j)²) - ℘(z) - e_j` (from 23.10.1). -/
+lemma p3w_weierstrassP_add_halfPeriod (H : HalfPeriods) {j : ℕ}
+    (hj : j ∈ ({1, 2, 3} : Finset ℕ)) {z : ℂ} (hz : z ∉ H.lattice)
+    (hne : H.weierstrassP z ≠ H.e j) :
+    H.weierstrassP (z + H.halfPeriod j) =
+      H.derivWeierstrassP z ^ 2 / (4 * (H.weierstrassP z - H.e j) ^ 2) -
+        H.weierstrassP z - H.e j := by
+  have hv := H.halfPeriod_notMem hj
+  have h1 : z + H.halfPeriod j ∉ H.lattice := by
+    intro h; apply hne
+    have e := H.periodPair.weierstrassP_sub_coe (H.halfPeriod j) ⟨_, h⟩
+    simp only [show H.halfPeriod j - (z + H.halfPeriod j) = -z by ring,
+      PeriodPair.weierstrassP_neg] at e
+    exact e
+  have h2 : z - H.halfPeriod j ∉ H.lattice := by
+    intro h; apply hne
+    have e := H.periodPair.weierstrassP_add_coe (H.halfPeriod j) ⟨_, h⟩
+    simp only [show H.halfPeriod j + (z - H.halfPeriod j) = z by ring] at e
+    exact e
+  have h0 := H.derivWeierstrassP_halfPeriod hj
+  have hne' : H.weierstrassP z - H.e j ≠ 0 := sub_ne_zero.mpr hne
+  rw [HalfPeriods.weierstrassP, weierstrassP_add H.periodPair hz hv h1 h2]
+  simp only [HalfPeriods.derivWeierstrassP] at h0
+  simp only [HalfPeriods.e, HalfPeriods.weierstrassP, HalfPeriods.derivWeierstrassP, h0] at hne' ⊢
+  field_simp
+  ring
 
 /-- DLMF 31.2.9–31.2.12, Weierstrass's form: let `u` solve Heun's equation with
 `a = (e₁ - e₃)/(e₂ - e₃)` and put `z(ξ) = (℘(ξ) - e₃)/(e₂ - e₃)` (31.2.9). Then
@@ -153,7 +306,89 @@ theorem heun_weierstrassForm (L : HalfPeriods) (hF : α + β + 1 = γ + δ + ε)
         ((L.weierstrassP ξ - L.e 3) ^ ((1 - 2 * γ) / 4) *
           (L.weierstrassP ξ - L.e 2) ^ ((1 - 2 * δ) / 4) *
           (L.weierstrassP ξ - L.e 1) ^ ((1 - 2 * ε) / 4))) V := by
-  sorry
+  obtain ⟨-, d23, -⟩ := L.e_distinct
+  have hE : L.e 2 - L.e 3 ≠ 0 := sub_ne_zero.mpr d23
+  have hs := L.e_sum
+  have hg2 := L.g₂_eq_e.1
+  have hn : ∀ ξ ∈ V, L.weierstrassP ξ - L.e 1 ≠ 0 ∧ L.weierstrassP ξ - L.e 2 ≠ 0 ∧
+      L.weierstrassP ξ - L.e 3 ≠ 0 := fun ξ h => by
+    obtain ⟨-, -, h1, h2, h3⟩ := hVU ξ h
+    exact ⟨slitPlane_ne_zero h1, slitPlane_ne_zero h2, slitPlane_ne_zero h3⟩
+  have hP : ∀ ξ ∈ V, HasDerivAt L.weierstrassP (L.derivWeierstrassP ξ) ξ := fun ξ h =>
+    p23R1_hasDerivAt_wp L.periodPair (hVU ξ h).1
+  have hD : ∀ ξ ∈ V, HasDerivAt L.derivWeierstrassP
+      (6 * L.weierstrassP ξ ^ 2 - 2 * (L.e 1 ^ 2 + L.e 2 ^ 2 + L.e 3 ^ 2) / 2) ξ := fun ξ h => by
+    rw [← hg2]; exact p23R1_hasDerivAt_dwp L.periodPair (hVU ξ h).1
+  have hsq : ∀ ξ ∈ V, L.derivWeierstrassP ξ ^ 2 = 4 * (L.weierstrassP ξ - L.e 1) *
+      (L.weierstrassP ξ - L.e 2) * (L.weierstrassP ξ - L.e 3) := fun ξ h =>
+    L.derivWeierstrassP_sq_eq_prod (hVU ξ h).1
+  set Sf : ℂ → ℂ := fun ξ => (1 - 2 * γ) / 4 / (L.weierstrassP ξ - L.e 3) +
+    (1 - 2 * δ) / 4 / (L.weierstrassP ξ - L.e 2) +
+    (1 - 2 * ε) / 4 / (L.weierstrassP ξ - L.e 1) with hSf
+  set Lf : ℂ → ℂ := fun ξ => -(L.derivWeierstrassP ξ * Sf ξ) with hLf
+  set Pdd : ℂ → ℂ := fun ξ => 6 * L.weierstrassP ξ ^ 2 -
+    2 * (L.e 1 ^ 2 + L.e 2 ^ 2 + L.e 3 ^ 2) / 2 with hPdd
+  set L'f : ℂ → ℂ := fun ξ =>
+    -((1 - 2 * γ) / 4 * (Pdd ξ * (L.weierstrassP ξ - L.e 3) - L.derivWeierstrassP ξ ^ 2) /
+          (L.weierstrassP ξ - L.e 3) ^ 2 +
+        (1 - 2 * δ) / 4 * (Pdd ξ * (L.weierstrassP ξ - L.e 2) - L.derivWeierstrassP ξ ^ 2) /
+          (L.weierstrassP ξ - L.e 2) ^ 2 +
+        (1 - 2 * ε) / 4 * (Pdd ξ * (L.weierstrassP ξ - L.e 1) - L.derivWeierstrassP ξ ^ 2) /
+          (L.weierstrassP ξ - L.e 1) ^ 2) with hL'f
+  set Df : ℂ → ℂ := fun ξ => (L.weierstrassP ξ - L.e 3) ^ ((1 - 2 * γ) / 4) *
+    (L.weierstrassP ξ - L.e 2) ^ ((1 - 2 * δ) / 4) *
+    (L.weierstrassP ξ - L.e 1) ^ ((1 - 2 * ε) / 4) with hDf
+  have hg : ∀ ξ ∈ V, HasDerivAt (fun ξ => (Df ξ)⁻¹) (Lf ξ * (Df ξ)⁻¹) ξ := fun ξ h => by
+    obtain ⟨-, -, s1, s2, s3⟩ := hVU ξ h
+    obtain ⟨n1, n2, n3⟩ := hn ξ h
+    have hA := p1h_hasDerivAt_cpow (s := (1 - 2 * γ) / 4) ((hP ξ h).sub_const (L.e 3)) s3
+    have hB := p1h_hasDerivAt_cpow (s := (1 - 2 * δ) / 4) ((hP ξ h).sub_const (L.e 2)) s2
+    have hC := p1h_hasDerivAt_cpow (s := (1 - 2 * ε) / 4) ((hP ξ h).sub_const (L.e 1)) s1
+    have c1 : (L.weierstrassP ξ - L.e 1) ^ ((1 - 2 * ε) / 4) ≠ 0 :=
+      fun h0 => n1 ((cpow_eq_zero_iff _ _).mp h0).1
+    have c2 : (L.weierstrassP ξ - L.e 2) ^ ((1 - 2 * δ) / 4) ≠ 0 :=
+      fun h0 => n2 ((cpow_eq_zero_iff _ _).mp h0).1
+    have c3 : (L.weierstrassP ξ - L.e 3) ^ ((1 - 2 * γ) / 4) ≠ 0 :=
+      fun h0 => n3 ((cpow_eq_zero_iff _ _).mp h0).1
+    have hD0 : Df ξ ≠ 0 := mul_ne_zero (mul_ne_zero c3 c2) c1
+    convert ((hA.mul hB).mul hC).inv hD0 using 1
+    simp only [hLf, hSf, hDf, Pi.mul_apply]
+    field_simp
+  have hL : ∀ ξ ∈ V, HasDerivAt Lf (L'f ξ) ξ := fun ξ h => by
+    obtain ⟨n1, n2, n3⟩ := hn ξ h
+    have hS : HasDerivAt Sf (-((1 - 2 * γ) / 4 * L.derivWeierstrassP ξ /
+          (L.weierstrassP ξ - L.e 3) ^ 2 +
+        (1 - 2 * δ) / 4 * L.derivWeierstrassP ξ / (L.weierstrassP ξ - L.e 2) ^ 2 +
+        (1 - 2 * ε) / 4 * L.derivWeierstrassP ξ / (L.weierstrassP ξ - L.e 1) ^ 2)) ξ := by
+      have a3 := (hasDerivAt_const ξ ((1 - 2 * γ) / 4)).div ((hP ξ h).sub_const (L.e 3)) n3
+      have a2 := (hasDerivAt_const ξ ((1 - 2 * δ) / 4)).div ((hP ξ h).sub_const (L.e 2)) n2
+      have a1 := (hasDerivAt_const ξ ((1 - 2 * ε) / 4)).div ((hP ξ h).sub_const (L.e 1)) n1
+      convert (a3.add a2).add a1 using 1
+      ring
+    convert ((hD ξ h).mul hS).neg using 1
+    simp only [hL'f, hPdd, hSf]
+    field_simp
+    ring
+  rw [show (fun ξ => u ((L.weierstrassP ξ - L.e 3) / (L.e 2 - L.e 3)) / Df ξ) =
+    fun ξ => (Df ξ)⁻¹ * u ((L.weierstrassP ξ - L.e 3) / (L.e 2 - L.e 3)) from
+    funext fun ξ => div_eq_inv_mul _ _]
+  refine p1h_isLinearODE2On_mul (p₁ := fun ξ => 2 * Lf ξ) (r₁ := _) hV hg hL
+    (fun ξ _ => by simp) (fun _ _ => rfl) ?_
+  refine p1h_isLinearODE2On_comp (φ₁ := fun ξ => L.derivWeierstrassP ξ / (L.e 2 - L.e 3))
+    (φ₂ := fun ξ => Pdd ξ / (L.e 2 - L.e 3)) hV
+    (fun ξ h => ((hP ξ h).sub_const _).div_const _) (fun ξ h => (hD ξ h).div_const _)
+    (fun ξ h => (hVU ξ h).2.1) (fun ξ h => ?_) (fun ξ h => ?_) hu
+  · obtain ⟨n1, n2, n3⟩ := hn ξ h
+    exact p3w_wf_algA hs n1 n2 n3 hE (hsq ξ h)
+  · obtain ⟨n1, n2, n3⟩ := hn ξ h
+    have hx := (hVU ξ h).1
+    have w1 := p3w_weierstrassP_add_halfPeriod L (j := 1) (by simp) hx (sub_ne_zero.mp n1)
+    have w2 := p3w_weierstrassP_add_halfPeriod L (j := 2) (by simp) hx (sub_ne_zero.mp n2)
+    have w3 := p3w_weierstrassP_add_halfPeriod L (j := 3) (by simp) hx (sub_ne_zero.mp n3)
+    simp only [HalfPeriods.halfPeriod_one, HalfPeriods.halfPeriod_two,
+      HalfPeriods.halfPeriod_three] at w1 w2 w3
+    simp only [Pi.zero_apply, zero_mul, add_zero, w1, w2, w3]
+    exact p3w_wf_algB hs hF n1 n2 n3 hE (hsq ξ h)
 
 /-! ### Lamé's equation (§31.7(ii)) -/
 
@@ -177,7 +412,7 @@ theorem heun_lame {k h ν : ℂ} (hk : k ∈ jacobiModulusDomain) (hk0 : k ≠ 0
 
 /-- Removable point for a second-order ODE: if `w` is analytic on the open set `V`, the
 coefficients are continuous at `ζ₀`, and the equation holds on `V \ {ζ₀}`, it holds on `V`. -/
-theorem p2h_isLinearODE2On_of_punctured {p r w : ℂ → ℂ} {V : Set ℂ} {ζ₀ : ℂ} (hV : IsOpen V)
+lemma p2h_isLinearODE2On_of_punctured {p r w : ℂ → ℂ} {V : Set ℂ} {ζ₀ : ℂ} (hV : IsOpen V)
     (hw : AnalyticOnNhd ℂ w V) (hp : ContinuousAt p ζ₀) (hr : ContinuousAt r ζ₀)
     (h : IsLinearODE2On p r w (V \ {ζ₀})) : IsLinearODE2On p r w V := by
   refine ⟨fun z hz => (hw z hz).differentiableAt, fun z hz => ?_⟩
@@ -198,7 +433,7 @@ theorem p2h_isLinearODE2On_of_punctured {p r w : ℂ → ℂ} {V : Set ℂ} {ζ�
   · exact h.2 z ⟨hz, hz0⟩
 
 /-- A parameter with positive real part is not in `{0, -1, -2, …}`. -/
-theorem p2h_ne_neg_nat_of_re_pos {c : ℂ} (hc : 0 < c.re) : ∀ n : ℕ, c ≠ -(n : ℂ) := by
+lemma p2h_ne_neg_nat_of_re_pos {c : ℂ} (hc : 0 < c.re) : ∀ n : ℕ, c ≠ -(n : ℂ) := by
   intro n h
   have := congrArg Complex.re h
   simp at this

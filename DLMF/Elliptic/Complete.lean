@@ -37,21 +37,21 @@ noncomputable section
 namespace DLMF.Elliptic
 
 /-- For `m < 1` the base `1 - m sin²θ` is positive. -/
-lemma one_sub_mul_sin_sq_pos {m : ℝ} (hm : m < 1) (θ : ℝ) : 0 < 1 - m * sin θ ^ 2 := by
+theorem one_sub_mul_sin_sq_pos {m : ℝ} (hm : m < 1) (θ : ℝ) : 0 < 1 - m * sin θ ^ 2 := by
   rcases le_or_gt m 0 with h | h <;> nlinarith [sin_sq_le_one θ, sq_nonneg (sin θ)]
 
 /-- Upper bound for the base `1 - m sin²θ`. -/
-lemma one_sub_mul_sin_sq_le {m : ℝ} (θ : ℝ) : 1 - m * sin θ ^ 2 ≤ 1 + |m| := by
+theorem one_sub_mul_sin_sq_le {m : ℝ} (θ : ℝ) : 1 - m * sin θ ^ 2 ≤ 1 + |m| := by
   nlinarith [sin_sq_le_one θ, sq_nonneg (sin θ), abs_nonneg m, neg_abs_le m, le_abs_self m]
 
 /-- For `m < 1`, `θ ↦ (1 - m sin²θ)^p` is continuous. -/
-lemma continuous_one_sub_mul_sin_sq_rpow {m : ℝ} (hm : m < 1) (p : ℝ) :
+theorem continuous_one_sub_mul_sin_sq_rpow {m : ℝ} (hm : m < 1) (p : ℝ) :
     Continuous fun θ : ℝ => (1 - m * sin θ ^ 2) ^ p :=
   (by fun_prop : Continuous fun θ : ℝ => 1 - m * sin θ ^ 2).rpow_const
     fun θ => Or.inl (one_sub_mul_sin_sq_pos hm θ).ne'
 
 /-- Differentiation in the parameter of `∫₀^{π/2} (1 - m sin²θ)^p dθ`. -/
-lemma hasDerivAt_integral_one_sub_mul_sin_sq_rpow (p : ℝ) {m₀ : ℝ} (hm : m₀ < 1) :
+theorem hasDerivAt_integral_one_sub_mul_sin_sq_rpow (p : ℝ) {m₀ : ℝ} (hm : m₀ < 1) :
     HasDerivAt (fun m => ∫ θ in (0 : ℝ)..(π / 2), (1 - m * sin θ ^ 2) ^ p)
       (∫ θ in (0 : ℝ)..(π / 2), -p * sin θ ^ 2 * (1 - m₀ * sin θ ^ 2) ^ (p - 1)) m₀ := by
   set ε := (1 - m₀) / 2 with hε
@@ -123,20 +123,20 @@ def Real.compEllIntKm (m : ℝ) : ℝ := ∫ θ in (0 : ℝ)..(π / 2), (1 - m *
 def Real.compEllIntEm (m : ℝ) : ℝ := ∫ θ in (0 : ℝ)..(π / 2), (1 - m * sin θ ^ 2) ^ (1 / 2 : ℝ)
 
 /-- `x^{1/2} = x · x^{-1/2}` for `x > 0`. -/
-lemma rpow_half_eq_mul {x : ℝ} (hx : 0 < x) : x ^ (1 / 2 : ℝ) = x * x ^ (-(1 / 2) : ℝ) := by
+theorem rpow_half_eq_mul {x : ℝ} (hx : 0 < x) : x ^ (1 / 2 : ℝ) = x * x ^ (-(1 / 2) : ℝ) := by
   rw [← rpow_one_add' hx.le (by norm_num)]; norm_num
 
 /-- `x^{-3/2} = (x^{-1/2})³` for `x > 0`. -/
-lemma rpow_neg_three_halves_eq {x : ℝ} (hx : 0 < x) :
+theorem rpow_neg_three_halves_eq {x : ℝ} (hx : 0 < x) :
     x ^ (-(3 / 2) : ℝ) = (x ^ (-(1 / 2) : ℝ)) ^ 3 := by
   rw [← rpow_natCast, ← rpow_mul hx.le]; norm_num
 
 /-- `(x^{-1/2})² x = 1` for `x > 0`. -/
-lemma rpow_neg_half_sq_mul {x : ℝ} (hx : 0 < x) : (x ^ (-(1 / 2) : ℝ)) ^ 2 * x = 1 := by
+theorem rpow_neg_half_sq_mul {x : ℝ} (hx : 0 < x) : (x ^ (-(1 / 2) : ℝ)) ^ 2 * x = 1 := by
   rw [← rpow_natCast, ← rpow_mul hx.le]; norm_num; rw [rpow_neg_one]; field_simp
 
 /-- Integration by parts: `(1 - m) ∫₀^{π/2} (1 - m sin²θ)^{-3/2} dθ = E(m)`. -/
-lemma one_sub_mul_integral_rpow_neg_three_halves {m : ℝ} (hm : m < 1) :
+theorem one_sub_mul_integral_rpow_neg_three_halves {m : ℝ} (hm : m < 1) :
     (1 - m) * ∫ θ in (0 : ℝ)..(π / 2), (1 - m * sin θ ^ 2) ^ (-(3 / 2) : ℝ) =
       Real.compEllIntEm m := by
   set G : ℝ → ℝ := fun θ => sin θ * cos θ * (1 - m * sin θ ^ 2) ^ (-(1 / 2) : ℝ)
@@ -258,18 +258,18 @@ theorem Real.compEllIntEm_one : Real.compEllIntEm 1 = 1 := by
   simp
 
 /-- `K` is continuous on `(-∞, 1)`. -/
-lemma Real.continuousAt_compEllIntKm {m : ℝ} (hm : m < 1) : ContinuousAt Real.compEllIntKm m :=
+theorem Real.continuousAt_compEllIntKm {m : ℝ} (hm : m < 1) : ContinuousAt Real.compEllIntKm m :=
   (hasDerivAt_integral_one_sub_mul_sin_sq_rpow (-(1 / 2)) hm).continuousAt
 
 /-- `E` is continuous. -/
-lemma Real.continuous_compEllIntEm : Continuous Real.compEllIntEm := by
+theorem Real.continuous_compEllIntEm : Continuous Real.compEllIntEm := by
   unfold Real.compEllIntEm
   have h : Continuous fun p : ℝ × ℝ => (1 - p.1 * sin p.2 ^ 2) ^ (1 / 2 : ℝ) :=
     (continuous_rpow_const (by norm_num : (0 : ℝ) ≤ 1 / 2)).comp (by fun_prop)
   exact intervalIntegral.continuous_parametric_intervalIntegral_of_continuous' h _ _
 
 /-- `K(1-m) ≤ (π/2) m^{-1/2}` for `0 < m ≤ 1`. -/
-lemma Real.compEllIntKm_one_sub_le {m : ℝ} (hm : 0 < m) (hm1 : m ≤ 1) :
+theorem Real.compEllIntKm_one_sub_le {m : ℝ} (hm : 0 < m) (hm1 : m ≤ 1) :
     Real.compEllIntKm (1 - m) ≤ π / 2 * m ^ (-(1 / 2) : ℝ) := by
   have h := intervalIntegral.norm_integral_le_of_norm_le_const (a := 0) (b := π / 2)
     (C := m ^ (-(1 / 2) : ℝ))
@@ -283,7 +283,7 @@ lemma Real.compEllIntKm_one_sub_le {m : ℝ} (hm : 0 < m) (hm1 : m ≤ 1) :
   linarith [le_abs_self (∫ θ in (0 : ℝ)..(π / 2), (1 - (1 - m) * sin θ ^ 2) ^ (-(1 / 2) : ℝ))]
 
 /-- `|E(m) - K(m)| ≤ π m` for `0 ≤ m ≤ 1/2`. -/
-lemma Real.abs_compEllIntEm_sub_compEllIntKm_le {m : ℝ} (hm : 0 ≤ m) (hm2 : m ≤ 1 / 2) :
+theorem Real.abs_compEllIntEm_sub_compEllIntKm_le {m : ℝ} (hm : 0 ≤ m) (hm2 : m ≤ 1 / 2) :
     |Real.compEllIntEm m - Real.compEllIntKm m| ≤ π * m := by
   have hm1 : m < 1 := by linarith
   rw [Real.compEllIntEm, Real.compEllIntKm, ← intervalIntegral.integral_sub
@@ -399,7 +399,7 @@ theorem legendre_relation {m : ℝ} (hm0 : 0 < m) (hm1 : m < 1) :
 
 open Complex in
 /-- `∫₀^{π/2} (1 - m sin²θ)^{-a} dθ = (π/2) ₂F₁(a, 1/2; 1; m)` for `|m| < 1`. -/
-lemma ofReal_integral_eq_ordinaryHypergeometric (a : ℝ) {m : ℝ} (hm : |m| < 1) :
+theorem ofReal_integral_eq_ordinaryHypergeometric (a : ℝ) {m : ℝ} (hm : |m| < 1) :
     ((∫ θ in (0 : ℝ)..(π / 2), (1 - m * Real.sin θ ^ 2) ^ (-a) : ℝ) : ℂ) =
       (π / 2) * ₂F₁ (a : ℂ) (1 / 2) 1 (m : ℂ) := by
   have hm1 : m < 1 := lt_of_le_of_lt (le_abs_self m) hm

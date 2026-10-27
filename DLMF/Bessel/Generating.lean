@@ -23,7 +23,7 @@ open scoped Nat
 /-- Reflection in an integer order, including the value at zero (Mathlib's
 `Complex.besselJ_neg_int`, restated to carry the DLMF tag). -/
 @[dlmf 10.4.E1]
-lemma besselJ_neg_int (n : ℤ) (z : ℂ) : besselJ (-n) z = (-1) ^ n * besselJ n z :=
+theorem besselJ_neg_int (n : ℤ) (z : ℂ) : besselJ (-n) z = (-1) ^ n * besselJ n z :=
   Complex.besselJ_neg_int n z
 
 private def besselDiagonalEquiv (n : ℤ) :
@@ -53,7 +53,7 @@ private lemma bessel_diagonal_sum (x y : ℂ) (n : ℕ) :
 
 set_option maxHeartbeats 800000 in
 /-- The bilateral generating series converges absolutely and has its classical sum. -/
-lemma hasSum_besselJ_generating_function (z t : ℂ) (ht : t ≠ 0) :
+theorem hasSum_besselJ_generating_function (z t : ℂ) (ht : t ≠ 0) :
     HasSum (fun n : ℤ => besselJ n z * t ^ n) (exp (z / 2 * (t - t⁻¹))) := by
   let x := z / 2 * t
   let y := -(z / 2) * t⁻¹

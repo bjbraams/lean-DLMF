@@ -5,7 +5,12 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Confluent.ParabolicCylinder
+public import DLMF.Coulomb.Basic
+public import DLMF.Confluent.Recurrence
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.SpecialFunctions.Bernstein
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.Data.Nat.Choose.Multinomial
 
 /-!
 # Coulomb wave functions (Temme §7.3.2; DLMF §33.2)
@@ -39,7 +44,7 @@ noncomputable section
 
 namespace DLMF.Confluent
 
-lemma conj_poch (a : ℂ) (n : ℕ) : conj (poch a n) = poch (conj a) n := by
+theorem conj_poch (a : ℂ) (n : ℕ) : conj (poch a n) = poch (conj a) n := by
   induction n with
   | zero => simp [poch_zero]
   | succ n ih => rw [poch_succ, poch_succ, map_mul, ih, map_add, map_natCast]
@@ -52,25 +57,12 @@ theorem conj_kummerM (a c z : ℂ) :
   funext n
   simp [conj_poch, map_div₀, map_mul, map_pow]
 
-/-- The unnormalized regular Coulomb wave function
-`ρ^{ℓ+1} e^{-iρ} M(ℓ + 1 - iη, 2ℓ + 2, 2iρ)` (DLMF 33.2.4 without `C_ℓ(η)`), entire in `ρ`. -/
-def coulombWave (ℓ : ℕ) (η z : ℂ) : ℂ :=
-  z ^ (ℓ + 1) * exp (-I * z) * kummerM (ℓ + 1 - I * η) (2 * ℓ + 2) (2 * I * z)
-
-lemma two_mul_nat_add_two_ne_neg_nat (ℓ : ℕ) : ∀ k : ℕ, (2 * (ℓ : ℂ) + 2) ≠ -k := fun k h => by
+theorem two_mul_nat_add_two_ne_neg_nat (ℓ : ℕ) : ∀ k : ℕ, (2 * (ℓ : ℂ) + 2) ≠ -k := fun k h => by
   have := congrArg Complex.re h
   simp at this
   linarith [(Nat.cast_nonneg ℓ : (0 : ℝ) ≤ ℓ), (Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
 
-/-- The derivative of `coulombWave`. -/
-def coulombWaveDeriv (ℓ : ℕ) (η z : ℂ) : ℂ :=
-  exp (-I * z) * (((ℓ + 1 : ℕ) : ℂ) * z ^ ℓ *
-      kummerM (ℓ + 1 - I * η) (2 * ℓ + 2) (2 * I * z) -
-    I * z ^ (ℓ + 1) * kummerM (ℓ + 1 - I * η) (2 * ℓ + 2) (2 * I * z) +
-    2 * I * ((ℓ + 1 - I * η) / (2 * ℓ + 2)) * z ^ (ℓ + 1) *
-      kummerM (ℓ + 1 - I * η + 1) (2 * ℓ + 2 + 1) (2 * I * z))
-
-lemma hasDerivAt_kummerM_two_I_mul {α b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) :
+theorem hasDerivAt_kummerM_two_I_mul {α b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) :
     HasDerivAt (fun z : ℂ => kummerM α b (2 * I * z))
       (2 * I * (α / b * kummerM (α + 1) (b + 1) (2 * I * z))) z := by
   have h := (hasDerivAt_kummerM_shift (a := α) hb (2 * I * z)).comp z
@@ -172,18 +164,6 @@ theorem conj_coulombWave (ℓ : ℕ) (η ρ : ℝ) :
   simp only [map_mul, map_neg, map_add, map_sub, map_one, map_ofNat, map_natCast,
     Complex.conj_I, Complex.conj_ofReal]
   ring_nf
-
-/-- The Coulomb normalizing constant `C_ℓ(η) = 2^ℓ e^{-πη/2} |Γ(ℓ+1+iη)| / (2ℓ+1)!`
-(DLMF 33.2.5). -/
-@[dlmf 33.2.E5]
-def coulombC (ℓ : ℕ) (η : ℝ) : ℝ :=
-  2 ^ ℓ * Real.exp (-π * η / 2) * ‖Gamma (ℓ + 1 + I * η)‖ / (2 * ℓ + 1)!
-
-/-- **The regular Coulomb wave function** `F_ℓ(η,ρ) = C_ℓ(η) ρ^{ℓ+1} e^{-iρ}
-M(ℓ+1-iη, 2ℓ+2, 2iρ)` (DLMF 33.2.4, Temme §7.3.2), for real `η` and `ρ`. -/
-@[dlmf 33.2.E4]
-def coulombF (ℓ : ℕ) (η ρ : ℝ) : ℝ :=
-  (coulombC ℓ η * coulombWave ℓ η ρ).re
 
 theorem ofReal_coulombF (ℓ : ℕ) (η ρ : ℝ) :
     (coulombF ℓ η ρ : ℂ) = coulombC ℓ η * coulombWave ℓ η ρ := by

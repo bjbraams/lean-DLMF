@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Lame.Eigenvalues
+public import DLMF.Lame.Basic
 
 /-!
 # Lamé functions: asymptotic expansions of the eigenvalues (DLMF §29.7(i))

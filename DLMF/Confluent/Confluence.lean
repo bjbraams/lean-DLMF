@@ -33,7 +33,7 @@ private lemma gaussHGCoeff_mul_scaled_pow (a b c z t : ℂ) (n : ℕ) :
   ring
 
 /-- A fixed positive shifted Pochhammer majorizes every sufficiently large parameter. -/
-lemma norm_poch_add_div_pow_le (d : ℂ) {T t : ℝ} (hT : 0 < T) (ht : T ≤ t) (n : ℕ) :
+theorem norm_poch_add_div_pow_le (d : ℂ) {T t : ℝ} (hT : 0 < T) (ht : T ≤ t) (n : ℕ) :
     ‖poch (d + t) n / (t : ℂ) ^ n‖ ≤
       ‖poch ((T + ‖d‖ : ℝ) : ℂ) n / (T : ℂ) ^ n‖ := by
   have ht0 : 0 < t := hT.trans_le ht

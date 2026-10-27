@@ -8,8 +8,6 @@ module
 public import DLMF.ErrorFunctions.Relations
 public import DLMF.IncompleteGamma.FractionTools
 public import DLMFMathlib.Analysis.Asymptotics.WatsonRotated
-public import Mathlib.Analysis.SpecialFunctions.Gaussian.FourierTransform
-public import Mathlib.Analysis.SpecialFunctions.Sqrt
 
 /-!
 # Inequalities, continued fractions and asymptotic remainders, DLMF §§7.8–7.9 and 7.12
@@ -46,7 +44,7 @@ theorem Real.millsRatio_integral (x : ℝ) :
   rw [Real.millsRatio, hre, hi]
   ring
 
-lemma bndAsy_tail_nonneg {E E' : ℝ → ℝ} {x : ℝ} (hE : ∀ y, x ≤ y → HasDerivAt E (E' y) y)
+theorem bndAsy_tail_nonneg {E E' : ℝ → ℝ} {x : ℝ} (hE : ∀ y, x ≤ y → HasDerivAt E (E' y) y)
     (hlim : Tendsto E atTop (𝓝 0)) (hneg : ∀ y, x < y → E' y ≤ 0) : 0 ≤ E x := by
   have hanti : AntitoneOn E (Ici x) :=
     antitoneOn_of_deriv_nonpos (convex_Ici x)
@@ -57,7 +55,7 @@ lemma bndAsy_tail_nonneg {E E' : ℝ → ℝ} {x : ℝ} (hE : ∀ y, x ≤ y →
   filter_upwards [eventually_ge_atTop x] with t ht
   exact hanti (mem_Ici.mpr le_rfl) (mem_Ici.mpr ht) ht
 
-lemma bndAsy_tail_pos {E E' : ℝ → ℝ} {x : ℝ} (hE : ∀ y, x ≤ y → HasDerivAt E (E' y) y)
+theorem bndAsy_tail_pos {E E' : ℝ → ℝ} {x : ℝ} (hE : ∀ y, x ≤ y → HasDerivAt E (E' y) y)
     (hlim : Tendsto E atTop (𝓝 0)) (hneg : ∀ y, x < y → E' y < 0) : 0 < E x := by
   have hanti : StrictAntiOn E (Ici x) :=
     strictAntiOn_of_deriv_neg (convex_Ici x)
@@ -68,7 +66,7 @@ lemma bndAsy_tail_pos {E E' : ℝ → ℝ} {x : ℝ} (hE : ∀ y, x ≤ y → Ha
   have := hanti (mem_Ici.mpr le_rfl) (mem_Ici.mpr (by linarith : x ≤ x+1)) (by linarith)
   linarith
 
-lemma bndAsy_head_le {E E' : ℝ → ℝ} {x : ℝ} (hx : 0 ≤ x) (hE : ∀ y, 0 ≤ y → y ≤ x → HasDerivAt E (E' y) y)
+theorem bndAsy_head_le {E E' : ℝ → ℝ} {x : ℝ} (hx : 0 ≤ x) (hE : ∀ y, 0 ≤ y → y ≤ x → HasDerivAt E (E' y) y)
     (hpos : ∀ y, 0 < y → y < x → 0 ≤ E' y) : E 0 ≤ E x := by
   have hmono : MonotoneOn E (Icc 0 x) :=
     monotoneOn_of_deriv_nonneg (convex_Icc 0 x)
@@ -79,7 +77,7 @@ lemma bndAsy_head_le {E E' : ℝ → ℝ} {x : ℝ} (hx : 0 ≤ x) (hE : ∀ y, 
 
 /-- The tail integral `∫ₓ^∞ e^{-t²}` in terms of `erfc`. -/
 
-lemma bndAsy_millsRatio_eq (x : ℝ) :
+theorem bndAsy_millsRatio_eq (x : ℝ) :
     Real.millsRatio x = Real.exp (x^2) * (Real.sqrt π/2 * TauCeti.Real.erfc x) := by
   have hre : (erfc x).re = TauCeti.Real.erfc x := by
     rw [erfc, erf_ofReal, TauCeti.Real.erfc_def]; simp
@@ -87,7 +85,7 @@ lemma bndAsy_millsRatio_eq (x : ℝ) :
 
 /-- The comparison function `E = e^{-y²} g − ∫_y^∞ e^{-t²}` of a candidate bound `g`. -/
 
-lemma bndAsy_hasDerivAt_E {g : ℝ → ℝ} {g' y : ℝ} (hg : HasDerivAt g g' y) :
+theorem bndAsy_hasDerivAt_E {g : ℝ → ℝ} {g' y : ℝ} (hg : HasDerivAt g g' y) :
     HasDerivAt (fun y => Real.exp (-y^2) * g y - Real.sqrt π/2 * TauCeti.Real.erfc y)
       (Real.exp (-y^2) * (g' - 2*y*g y + 1)) y := by
   have he : HasDerivAt (fun y => Real.exp (-y^2)) (Real.exp (-y^2) * (-(2*y))) y := by
@@ -99,7 +97,7 @@ lemma bndAsy_hasDerivAt_E {g : ℝ → ℝ} {g' y : ℝ} (hg : HasDerivAt g g' y
   field_simp
   ring
 
-lemma bndAsy_tendsto_E {g : ℝ → ℝ} (hg : Tendsto g atTop (𝓝 0)) :
+theorem bndAsy_tendsto_E {g : ℝ → ℝ} (hg : Tendsto g atTop (𝓝 0)) :
     Tendsto (fun y => Real.exp (-y^2) * g y - Real.sqrt π/2 * TauCeti.Real.erfc y) atTop (𝓝 0) := by
   have he : Tendsto (fun y : ℝ => Real.exp (-y^2)) atTop (𝓝 0) :=
     Real.tendsto_exp_atBot.comp (tendsto_neg_atTop_atBot.comp (tendsto_pow_atTop two_ne_zero))
@@ -108,7 +106,7 @@ lemma bndAsy_tendsto_E {g : ℝ → ℝ} (hg : Tendsto g atTop (𝓝 0)) :
 
 /-- Upper bound principle: if `g' − 2yg + 1 < 0` beyond `x` and `g → 0`, then `M(x) < g(x)`. -/
 
-lemma bndAsy_millsRatio_lt {g g' : ℝ → ℝ} {x : ℝ} (hg : ∀ y, x ≤ y → HasDerivAt g (g' y) y)
+theorem bndAsy_millsRatio_lt {g g' : ℝ → ℝ} {x : ℝ} (hg : ∀ y, x ≤ y → HasDerivAt g (g' y) y)
     (hlim : Tendsto g atTop (𝓝 0)) (hP : ∀ y, x < y → g' y - 2*y*g y + 1 < 0) :
     Real.millsRatio x < g x := by
   have h := bndAsy_tail_pos (fun y hy => bndAsy_hasDerivAt_E (hg y hy)) (bndAsy_tendsto_E hlim)
@@ -121,7 +119,7 @@ lemma bndAsy_millsRatio_lt {g g' : ℝ → ℝ} {x : ℝ} (hg : ∀ y, x ≤ y �
     linear_combination (g x) * h1
   nlinarith [mul_pos he h]
 
-lemma bndAsy_lt_millsRatio {g g' : ℝ → ℝ} {x : ℝ} (hg : ∀ y, x ≤ y → HasDerivAt g (g' y) y)
+theorem bndAsy_lt_millsRatio {g g' : ℝ → ℝ} {x : ℝ} (hg : ∀ y, x ≤ y → HasDerivAt g (g' y) y)
     (hlim : Tendsto g atTop (𝓝 0)) (hP : ∀ y, x < y → 0 < g' y - 2*y*g y + 1) :
     g x < Real.millsRatio x := by
   have h := bndAsy_tail_pos (E := fun y => -(Real.exp (-y^2) * g y - Real.sqrt π/2 * TauCeti.Real.erfc y))
@@ -135,7 +133,7 @@ lemma bndAsy_lt_millsRatio {g g' : ℝ → ℝ} {x : ℝ} (hg : ∀ y, x ≤ y �
     linear_combination (g x) * h1
   nlinarith [mul_pos he h]
 
-lemma bndAsy_millsRatio_le_of {g : ℝ → ℝ} {x : ℝ}
+theorem bndAsy_millsRatio_le_of {g : ℝ → ℝ} {x : ℝ}
     (h : 0 ≤ Real.exp (-x^2) * g x - Real.sqrt π/2 * TauCeti.Real.erfc x) :
     Real.millsRatio x ≤ g x := by
   rw [bndAsy_millsRatio_eq]
@@ -146,7 +144,7 @@ lemma bndAsy_millsRatio_le_of {g : ℝ → ℝ} {x : ℝ}
     linear_combination (g x) * h1
   nlinarith [mul_nonneg he.le h]
 
-lemma bndAsy_le_millsRatio_of {g : ℝ → ℝ} {x : ℝ}
+theorem bndAsy_le_millsRatio_of {g : ℝ → ℝ} {x : ℝ}
     (h : Real.exp (-x^2) * g x - Real.sqrt π/2 * TauCeti.Real.erfc x ≤ 0) :
     g x ≤ Real.millsRatio x := by
   rw [bndAsy_millsRatio_eq]
@@ -159,7 +157,7 @@ lemma bndAsy_le_millsRatio_of {g : ℝ → ℝ} {x : ℝ}
 
 /-- Derivative of the candidate bound `α/(βy + √(y²+c))`. -/
 
-lemma bndAsy_hasDerivAt_sqrtFrac (α β c : ℝ) (hc : 0 < c) {y : ℝ}
+theorem bndAsy_hasDerivAt_sqrtFrac (α β c : ℝ) (hc : 0 < c) {y : ℝ}
     (hy : β*y + Real.sqrt (y^2+c) ≠ 0) :
     HasDerivAt (fun y => α/(β*y + Real.sqrt (y^2+c)))
       (-α*(β + y/Real.sqrt (y^2+c))/(β*y + Real.sqrt (y^2+c))^2) y := by
@@ -177,7 +175,7 @@ lemma bndAsy_hasDerivAt_sqrtFrac (α β c : ℝ) (hc : 0 < c) {y : ℝ}
   refine this.congr_deriv ?_
   ring
 
-lemma bndAsy_tendsto_sqrtFrac (α β c : ℝ) (hβ : 0 ≤ β) (hc : 0 ≤ c) :
+theorem bndAsy_tendsto_sqrtFrac (α β c : ℝ) (hβ : 0 ≤ β) (hc : 0 ≤ c) :
     Tendsto (fun y => α/(β*y + Real.sqrt (y^2+c))) atTop (𝓝 0) := by
   refine tendsto_const_nhds.div_atTop ?_
   refine tendsto_atTop_mono' atTop ?_ tendsto_id
@@ -188,7 +186,7 @@ lemma bndAsy_tendsto_sqrtFrac (α β c : ℝ) (hβ : 0 ≤ β) (hc : 0 ≤ c) :
   show y ≤ β*y + Real.sqrt (y^2+c)
   nlinarith [mul_nonneg hβ hy]
 
-lemma bndAsy_sqrt_gap_mono {c y₁ y₂ : ℝ} (hc : 0 < c) (h0 : 0 ≤ y₁) (h12 : y₁ ≤ y₂) :
+theorem bndAsy_sqrt_gap_mono {c y₁ y₂ : ℝ} (hc : 0 < c) (h0 : 0 ≤ y₁) (h12 : y₁ ≤ y₂) :
     y₁*(Real.sqrt (y₁^2+c) - y₁) ≤ y₂*(Real.sqrt (y₂^2+c) - y₂) := by
   have hs : ∀ y : ℝ, Real.sqrt (y^2+c)^2 = y^2+c := fun y => Real.sq_sqrt (by positivity)
   have hp : ∀ y : ℝ, 0 < Real.sqrt (y^2+c) := fun y => Real.sqrt_pos.mpr (by positivity)
@@ -207,7 +205,7 @@ lemma bndAsy_sqrt_gap_mono {c y₁ y₂ : ℝ} (hc : 0 < c) (h0 : 0 ≤ y₁) (h
     nlinarith [hs y₁, hs y₂, mul_le_mul h12 h12 h0 h2]
   nlinarith
 
-lemma bndAsy_pos_of_hasDerivAt {f f' : ℝ → ℝ} (hf : ∀ x, HasDerivAt f (f' x) x)
+theorem bndAsy_pos_of_hasDerivAt {f f' : ℝ → ℝ} (hf : ∀ x, HasDerivAt f (f' x) x)
     (h0 : f 0 = 0) (hpos : ∀ x, 0 < x → 0 < f' x) {x : ℝ} (hx : 0 < x) : 0 < f x := by
   have hmono : StrictMonoOn f (Ici 0) :=
     strictMonoOn_of_deriv_pos (convex_Ici 0)
@@ -215,7 +213,7 @@ lemma bndAsy_pos_of_hasDerivAt {f f' : ℝ → ℝ} (hf : ∀ x, HasDerivAt f (f
       (fun y hy => by rw [interior_Ici] at hy; rw [(hf y).deriv]; exact hpos y hy)
   simpa [h0] using hmono (mem_Ici.mpr le_rfl) (mem_Ici.mpr hx.le) hx
 
-lemma bndAsy_hasDerivAt_integral_exp (a x : ℝ) :
+theorem bndAsy_hasDerivAt_integral_exp (a x : ℝ) :
     HasDerivAt (fun x => ∫ t in (0:ℝ)..x, Real.exp (a*t^2)) (Real.exp (a*x^2)) x :=
   ((by fun_prop : Continuous fun t : ℝ => Real.exp (a*t^2)).integral_hasStrictDerivAt 0 x).hasDerivAt
 
@@ -566,7 +564,7 @@ theorem Real.dawsonF_integral_bounds {x : ℝ} (hx : 0 < x) :
     linarith [mul_comm x (I x)]
 
 /-- Secant bound for `ph(u) = e^{-ku} - 1 + mu`: `ph(t) < (t/s) ph(s)` for `0 < t < s`. -/
-lemma bndAsy_phi_lt {k m t s : ℝ} (hk : 0 < k) (ht : 0 < t) (hts : t < s) :
+theorem bndAsy_phi_lt {k m t s : ℝ} (hk : 0 < k) (ht : 0 < t) (hts : t < s) :
     Real.exp (-(k*t)) - 1 + m*t < t/s * (Real.exp (-(k*s)) - 1 + m*s) := by
   have hs : 0 < s := ht.trans hts
   set θ := t/s with hθ
@@ -949,7 +947,7 @@ theorem faddeevaW_continuedFraction {z : ℂ} (hz : 0 < z.im) :
   ring_nf
 
 /-- The Gaussian kernel along a ray. -/
-lemma norm_cexp_neg_ofReal_mul_exp_ofReal_mul_I_sq (r y : ℝ) :
+theorem norm_cexp_neg_ofReal_mul_exp_ofReal_mul_I_sq (r y : ℝ) :
     ‖cexp (-(((r : ℂ) * exp (y * I)) ^ 2 / 4))‖ = Real.exp (-(r ^ 2 * Real.cos (2 * y)) / 4) := by
   rw [Complex.norm_exp, ofReal_mul_exp_ofReal_mul_I_sq]
   congr 1
@@ -957,7 +955,7 @@ lemma norm_cexp_neg_ofReal_mul_exp_ofReal_mul_I_sq (r y : ℝ) :
   ring
 
 /-- The Gaussian kernel is bounded by `1` in the sector `|arg t| ≤ π/4`. -/
-lemma norm_cexp_neg_ofReal_mul_exp_ofReal_mul_I_sq_le_one (r : ℝ) {y : ℝ} (hy : |y| ≤ π / 4) :
+theorem norm_cexp_neg_ofReal_mul_exp_ofReal_mul_I_sq_le_one (r : ℝ) {y : ℝ} (hy : |y| ≤ π / 4) :
     ‖cexp (-(((r : ℂ) * exp (y * I)) ^ 2 / 4))‖ ≤ 1 := by
   rw [norm_cexp_neg_ofReal_mul_exp_ofReal_mul_I_sq, Real.exp_le_one_iff]
   have : 0 ≤ Real.cos (2 * y) := by
@@ -967,7 +965,7 @@ lemma norm_cexp_neg_ofReal_mul_exp_ofReal_mul_I_sq_le_one (r : ℝ) {y : ℝ} (h
   linarith
 
 /-- Integrability of the Gaussian kernel along a ray `|arg t| < π/4`. -/
-lemma integrableOn_gauss_rotate (c : ℝ) {θ : ℝ} (hθ : |θ| < π / 4) :
+theorem integrableOn_gauss_rotate (c : ℝ) {θ : ℝ} (hθ : |θ| < π / 4) :
     IntegrableOn (fun r : ℝ => Real.exp (-c * r) • cexp (-(((r : ℂ) * exp (θ * I)) ^ 2 / 4)))
       (Ioi 0) := by
   have hb : 0 < (exp (((2 * θ : ℝ) : ℂ) * I) / 4).re := by
@@ -983,14 +981,14 @@ lemma integrableOn_gauss_rotate (c : ℝ) {θ : ℝ} (hθ : |θ| < π / 4) :
   ring_nf
 
 /-- The Laplace transform of the Gaussian kernel along a ray `|arg t| < π/4` is entire. -/
-lemma differentiable_laplace_gauss_rotate {θ : ℝ} (hθ : |θ| < π / 4) :
+theorem differentiable_laplace_gauss_rotate {θ : ℝ} (hθ : |θ| < π / 4) :
     Differentiable ℂ (fun w : ℂ => ∫ r in Ioi (0 : ℝ), cexp (-(w * r)) •
       cexp (-(((r : ℂ) * exp (θ * I)) ^ 2 / 4))) := fun w =>
   (differentiableOn_integral_cexp_neg_mul_smul (integrableOn_gauss_rotate (w.re - 1) hθ)).differentiableAt
     ((isOpen_lt continuous_const continuous_re).mem_nhds (by simp))
 
 /-- The real Laplace representation `erfc x = π^{-1/2} e^{-x²} ∫₀^∞ e^{-xt} e^{-t²/4} dt`. -/
-lemma erfc_ofReal_eq_laplace_gauss (x : ℝ) :
+theorem erfc_ofReal_eq_laplace_gauss (x : ℝ) :
     erfc x = 1 / Real.sqrt π * cexp (-(x : ℂ) ^ 2) *
       ∫ t in Ioi (0 : ℝ), cexp (-((x : ℂ) * t)) * cexp (-((t : ℂ) ^ 2 / 4)) := by
   have hre : (erfc x).re = TauCeti.Real.erfc x := by
@@ -1090,7 +1088,7 @@ noncomputable def gaussQuarterCoeff (n : ℕ) : ℂ :=
   if Even n then (-1 / 4 : ℂ) ^ (n / 2) / ((n / 2).factorial : ℂ) else 0
 
 /-- Partial sums of `∑ aₙ tⁿ` are partial sums of the exponential series of `-t²/4`. -/
-lemma sum_gaussQuarterCoeff (t : ℂ) (M : ℕ) :
+theorem sum_gaussQuarterCoeff (t : ℂ) (M : ℕ) :
     (∑ n ∈ Finset.range (2 * M), t ^ n * gaussQuarterCoeff n =
       ∑ k ∈ Finset.range M, (-(t ^ 2 / 4)) ^ k / (k.factorial : ℂ)) ∧
     (∑ n ∈ Finset.range (2 * M + 1), t ^ n * gaussQuarterCoeff n =
@@ -1113,7 +1111,7 @@ lemma sum_gaussQuarterCoeff (t : ℂ) (M : ℕ) :
     ring
 
 /-- Taylor remainders of `e^{-t²/4}` along a ray, in the form required by Watson's lemma. -/
-lemma gauss_sub_sum_isBigO (θ : ℝ) (N : ℕ) :
+theorem gauss_sub_sum_isBigO (θ : ℝ) (N : ℕ) :
     (fun r : ℝ => cexp (-(((r : ℂ) * exp (θ * I)) ^ 2 / 4)) - ∑ n ∈ Finset.range N,
       (((r : ℂ) * exp (θ * I)) ^ ((n : ℂ) + 1 - 1)) • gaussQuarterCoeff n)
       =O[𝓝[>] 0] fun r => r ^ ((N : ℝ) + (1 : ℂ).re - 1) := by
@@ -1156,7 +1154,7 @@ lemma gauss_sub_sum_isBigO (θ : ℝ) (N : ℕ) :
 
 
 /-- `(1/2)ₙ 4ⁿ n! = (2n)!`. -/
-lemma poch_half_mul_four_pow_mul_factorial (n : ℕ) :
+theorem poch_half_mul_four_pow_mul_factorial (n : ℕ) :
     poch (1 / 2) n * (4 ^ n * (n.factorial : ℂ)) = ((2 * n).factorial : ℂ) := by
   induction n with
   | zero => simp [poch]
@@ -1249,7 +1247,7 @@ theorem poch_half_eq_Gamma (n : ℕ) :
     push_cast; ring
 
 /-- `r e^{iy}` lies in the slit plane for `r > 0` and `|y| < π`. -/
-lemma ofReal_mul_exp_mem_slitPlane {r y : ℝ} (hr : 0 < r) (hy : |y| < π) :
+theorem ofReal_mul_exp_mem_slitPlane {r y : ℝ} (hr : 0 < r) (hy : |y| < π) :
     (r : ℂ) * exp (y * I) ∈ slitPlane := by
   rw [mem_slitPlane_iff]
   by_cases hs : Real.sin y = 0
@@ -1262,7 +1260,7 @@ lemma ofReal_mul_exp_mem_slitPlane {r y : ℝ} (hr : 0 < r) (hy : |y| < π) :
     exact mul_ne_zero hr.ne' hs
 
 /-- Bound for the kernel `t^{-1/2}/(1+t)` of the Laplace form of `erfc` along rays. -/
-lemma norm_erfcKernel_le {θ c : ℝ} (hc0 : 0 < c)
+theorem norm_erfcKernel_le {θ c : ℝ} (hc0 : 0 < c)
     (hc : ∀ s : ℝ, 0 ≤ s → ∀ u : ℝ, |u| ≤ |θ| → c ≤ ‖1 + (s : ℂ) * exp (u * I)‖)
     (hθ : |θ| < π) {r y : ℝ} (hr : 0 < r) (hy : |y| ≤ |θ|) :
     ‖((r : ℂ) * exp (y * I)) ^ (-1/2 : ℂ) * (1 + (r : ℂ) * exp (y * I))⁻¹‖ ≤
@@ -1283,7 +1281,7 @@ lemma norm_erfcKernel_le {θ c : ℝ} (hc0 : 0 < c)
 
 /-- If `re z > 0` and `re (z e^{iθ}) > 0` with `|θ| < π`, then `re (z e^{iy}) > 0` for every
 `y` between `0` and `θ`. -/
-lemma re_mul_exp_pos_of_mem_uIcc_of_lt_pi {z : ℂ} {θ y : ℝ} (hθ : |θ| < π) (hz : 0 < z.re)
+theorem re_mul_exp_pos_of_mem_uIcc_of_lt_pi {z : ℂ} {θ y : ℝ} (hθ : |θ| < π) (hz : 0 < z.re)
     (hzθ : 0 < (z * exp (θ * I)).re) (hy : y ∈ [[0, θ]]) : 0 < (z * exp (y * I)).re := by
   have hz0 : z ≠ 0 := fun h => by simp [h] at hz
   have h0 : |arg z| < π / 2 := Complex.abs_arg_lt_pi_div_two_iff.mpr (Or.inl hz)
@@ -1732,7 +1730,7 @@ def fresnelAsymptoticRemainder (aux : Bool) (N : ℕ) (z : ℂ) : ℂ :=
   (if aux then fresnelAuxGComplex z else fresnelAuxFComplex z)-∑ n ∈ Finset.range N, fresnelAsymptoticTerm aux n z
 
 /-- `e^{ζ²} erfc ζ ~ π^{-1/2} ∑ (-1)^m (1/2)_m ζ^{-2m-1}` in the sector `|arg ζ| ≤ 3π/4 - δ`. -/
-lemma exp_sq_mul_erfc_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 3*π/4) :
+theorem exp_sq_mul_erfc_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 3*π/4) :
     HasAsymptoticExpansion (sector (3*π/4-δ)) (fun (n : ℕ) (z : ℂ) => z^(-(2*(n : ℂ)+1)))
       (fun n => (-1 : ℂ)^n*poch (1/2) n/Real.sqrt π) (fun z => exp (z^2) * erfc z) := by
   have h := (erfc_sector_asymptotic hδ hδ1).1.mul_left (fun z => exp (z^2))
@@ -1744,7 +1742,7 @@ lemma exp_sq_mul_erfc_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 3
   exact h
 
 /-- `arg (z e^{iθ}) = arg z + θ` when `arg z + θ ∈ (-π, π]`. -/
-lemma arg_mul_exp_ofReal_mul_I {z : ℂ} (hz : z ≠ 0) {θ : ℝ} (h1 : -π < arg z + θ)
+theorem arg_mul_exp_ofReal_mul_I {z : ℂ} (hz : z ≠ 0) {θ : ℝ} (h1 : -π < arg z + θ)
     (h2 : arg z + θ ≤ π) : arg (z * exp (θ * I)) = arg z + θ := by
   have hlog : log (z * exp (θ * I)) = log z + θ * I := by
     have : z * exp (θ * I) = exp (log z + θ * I) := by rw [exp_add, exp_log hz]
@@ -1752,7 +1750,7 @@ lemma arg_mul_exp_ofReal_mul_I {z : ℂ} (hz : z ≠ 0) {θ : ℝ} (h1 : -π < a
   rw [← log_im, hlog]; simp [log_im]
 
 /-- `1 - εi = √2 e^{-iεπ/4}` for `ε = ±1`. -/
-lemma one_sub_mul_I_eq {ε : ℝ} (hε : ε = 1 ∨ ε = -1) :
+theorem one_sub_mul_I_eq {ε : ℝ} (hε : ε = 1 ∨ ε = -1) :
     (1 - ε * I : ℂ) = ((Real.sqrt 2 : ℝ) : ℂ) * exp (((-ε * π / 4 : ℝ) : ℂ) * I) := by
   have h2 : Real.sqrt 2 * Real.sqrt 2 = 2 := Real.mul_self_sqrt (by norm_num)
   apply Complex.ext
@@ -1775,7 +1773,7 @@ lemma one_sub_mul_I_eq {ε : ℝ} (hε : ε = 1 ∨ ε = -1) :
 
 /-- `ζ_ε(z) = (√π/2)(1 - εi) z` maps the sector `|arg z| ≤ π/2 - δ` into `|arg ζ| ≤ 3π/4 - δ`,
 uniformly towards infinity. -/
-lemma tendsto_fresnelZetaComplex_sector {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {δ : ℝ} (hδ : 0 < δ)
+theorem tendsto_fresnelZetaComplex_sector {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {δ : ℝ} (hδ : 0 < δ)
     (hδ1 : δ < π/2) :
     Tendsto (fresnelZetaComplex ε) (sector (π/2-δ)) (sector (3*π/4-δ)) := by
   set ρ : ℝ := Real.sqrt π / 2 * Real.sqrt 2 with hρ
@@ -1812,7 +1810,7 @@ lemma tendsto_fresnelZetaComplex_sector {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {�
 
 /-- Coefficient algebra for the Fresnel expansions: with `w² = -1` and `c = (√π/2)(1-w)`,
 `(1+w)/2 · c^{-2m-1} · (-1)^m (1/2)_m/√π = (-1)^m (1/2)_m w^{m+1} (2/π)^m/π`. -/
-lemma fresnel_coeff_algebra {w : ℂ} (hw : w ^ 2 = -1) (p : ℂ) (m : ℕ) :
+theorem fresnel_coeff_algebra {w : ℂ} (hw : w ^ 2 = -1) (p : ℂ) (m : ℕ) :
     (1 + w) / 2 * ((((Real.sqrt π : ℂ) / 2 * (1 - w)) ^ (2 * m + 1))⁻¹ *
       ((-1 : ℂ) ^ m * p / Real.sqrt π)) =
       (-1 : ℂ) ^ m * p * w ^ (m + 1) * (2 / π) ^ m / π := by
@@ -1907,7 +1905,7 @@ theorem fresnelAuxFComplex_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ1 : �
     ring
 
 /-- In the open sector `|arg z| < π/4`, `|im z| < re z`. -/
-lemma abs_im_lt_re_of_abs_arg_lt {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) :
+theorem abs_im_lt_re_of_abs_arg_lt {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) :
     |z.im| < z.re := by
   have hu := abs_lt.mp hz
   have h0 : 0 < ‖z‖ := norm_pos_iff.mpr hz0
@@ -1923,7 +1921,7 @@ lemma abs_im_lt_re_of_abs_arg_lt {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4)
     exact Real.cos_lt_cos_of_nonneg_of_le_pi_div_two (by linarith) (by linarith) (by linarith)
 
 /-- `exp(ε π i/2) = ε i` for `ε = ±1`. -/
-lemma exp_sign_mul_pi_div_two_mul_I' {ε : ℝ} (hε : ε = 1 ∨ ε = -1) :
+theorem exp_sign_mul_pi_div_two_mul_I' {ε : ℝ} (hε : ε = 1 ∨ ε = -1) :
     exp (((ε * π / 2 : ℝ) : ℂ) * I) = ε * I := by
   rcases hε with rfl | rfl
   · push_cast; rw [show (1:ℂ) * π / 2 * I = π / 2 * I by ring, exp_pi_div_two_mul_I]; ring
@@ -1932,7 +1930,7 @@ lemma exp_sign_mul_pi_div_two_mul_I' {ε : ℝ} (hε : ε = 1 ∨ ε = -1) :
 /-- **Laplace forms of `g ± i f`** (from DLMF 7.7.2 rotated by `±π/2`): for `z ≠ 0` with
 `|arg z| < π/4` and `ε = ±1`,
 `g(z) + εi f(z) = εi √2/(2π) ∫₀^∞ e^{-πz²r/2} r^{-1/2}/(1 + εir) dr`. -/
-theorem fresnelAux_signed_laplace {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {z : ℂ} (hz0 : z ≠ 0)
+lemma fresnelAux_signed_laplace {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {z : ℂ} (hz0 : z ≠ 0)
     (hz : |arg z| < π/4) :
     fresnelAuxGComplex z + ε*I*fresnelAuxFComplex z = ε*I*(Real.sqrt 2/(2*π)) *
       ∫ r in Ioi (0:ℝ), cexp (-(π*z^2/2*r)) * ((r:ℂ)^(-1/2:ℂ) * (1 + ε*I*r)⁻¹) := by
@@ -2003,7 +2001,7 @@ theorem fresnelAux_signed_laplace {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {z : ℂ
         rw [hsq]; field_simp; linear_combination (-(ε:ℂ) * J) * h2
 
 /-- Laplace moments `∫₀^∞ e^{-πz²t/2} t^{M-1/2} dt`, integrability, for `|arg z| < π/4`. -/
-lemma fresnel_moment_integrable {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) (M : ℕ) :
+theorem fresnel_moment_integrable {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) (M : ℕ) :
     IntegrableOn (fun t : ℝ => exp (-π*z^2*t/2) * (t:ℂ)^((M:ℂ) - 1/2)) (Ioi 0) := by
   have hre : 0 < (π*z^2/2 : ℂ).re := by
     have h := abs_im_lt_re_of_abs_arg_lt hz0 hz
@@ -2023,7 +2021,7 @@ lemma fresnel_moment_integrable {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) 
 
 /-- Laplace moments for the Fresnel auxiliary functions:
 `1/(π√2) ∫₀^∞ e^{-πz²t/2} t^{M-1/2} dt = (1/2)_M/(π z (πz²/2)^M)` for `|arg z| < π/4`. -/
-lemma fresnel_moment {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) (M : ℕ) :
+theorem fresnel_moment {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) (M : ℕ) :
     1/(π*Real.sqrt 2) * ∫ t in Ioi (0:ℝ), exp (-π*z^2*t/2) * (t:ℂ)^((M:ℂ) - 1/2) =
       poch (1/2) M / (π*z*(π*z^2/2)^M) := by
   have hre : 0 < (π*z^2/2 : ℂ).re := by
@@ -2089,7 +2087,7 @@ lemma fresnel_moment {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) (M : ℕ) :
   field_simp
 
 /-- `1 + s i r ≠ 0` for real `s, r`, with `‖(1 + s i r)⁻¹‖ ≤ 1`. -/
-lemma norm_one_add_sign_I_mul_recip_le (s r : ℝ) :
+theorem norm_one_add_sign_I_mul_recip_le (s r : ℝ) :
     1 + (s:ℂ)*I*r ≠ 0 ∧ ‖(1 + (s:ℂ)*I*r)⁻¹‖ ≤ 1 := by
   have hre : (1 + (s:ℂ)*I*r).re = 1 := by simp
   have h1 : 1 ≤ ‖1 + (s:ℂ)*I*r‖ := hre ▸ re_le_norm _
@@ -2097,7 +2095,7 @@ lemma norm_one_add_sign_I_mul_recip_le (s r : ℝ) :
   exact ⟨hne, by rw [norm_inv]; exact inv_le_one_of_one_le₀ h1⟩
 
 /-- Partial fractions: `(1+ir)⁻¹ ± (1-ir)⁻¹`. -/
-lemma one_add_I_mul_recip_add_sub (r : ℝ) :
+theorem one_add_I_mul_recip_add_sub (r : ℝ) :
     (1 + I*r)⁻¹ + (1 - I*r)⁻¹ = 2/((r:ℂ)^2+1) ∧
       (1 + I*r)⁻¹ - (1 - I*r)⁻¹ = -2*I*r/((r:ℂ)^2+1) := by
   have hu : (1 + I*r) ≠ 0 := by
@@ -2115,7 +2113,7 @@ lemma one_add_I_mul_recip_add_sub (r : ℝ) :
     linear_combination (-2*I*(r:ℂ)^3) * I_sq
 
 /-- Integrability of the signed Fresnel Laplace integrands. -/
-lemma integrableOn_fresnel_signed (s : ℝ) {z : ℂ} (hz0 : z ≠ 0)
+theorem integrableOn_fresnel_signed (s : ℝ) {z : ℂ} (hz0 : z ≠ 0)
     (hz : |arg z| < π/4) :
     IntegrableOn (fun r : ℝ => cexp (-(π*z^2/2*r)) * ((r:ℂ)^(-1/2:ℂ) * (1 + s*I*r)⁻¹))
       (Ioi 0) := by
@@ -2199,7 +2197,7 @@ theorem fresnelAux_laplace_open (aux : Bool) {z : ℂ} (hz0 : z ≠ 0) (hz : |ar
     rw [I_sq]; ring
 
 /-- Integrability of the Fresnel remainder integrands `e^{-πz²t/2} t^{M-1/2}/(t²+1)`. -/
-lemma fresnel_kernel_integrable {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) (M : ℕ) :
+theorem fresnel_kernel_integrable {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) (M : ℕ) :
     IntegrableOn (fun t : ℝ => exp (-π*z^2*t/2) * (t:ℂ)^((M:ℂ) - 1/2) / ((t:ℂ)^2+1))
       (Ioi 0) := by
   have h0 := fresnel_moment_integrable hz0 hz M
@@ -2220,7 +2218,7 @@ lemma fresnel_kernel_integrable {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) 
 
 /-- **Remainder integrals for the Fresnel auxiliary expansions**, with
 `M = 2N + (0 or 1)`: `R_N(z) = (-1)^N/(π√2) ∫₀^∞ e^{-πz²t/2} t^{M-1/2}/(t²+1) dt`. -/
-lemma fresnel_remainder_eq (aux : Bool) {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) (N : ℕ) :
+theorem fresnel_remainder_eq (aux : Bool) {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) (N : ℕ) :
     fresnelAsymptoticRemainder aux N z = (-1 : ℂ)^N/(π*Real.sqrt 2) *
       ∫ t in Ioi (0:ℝ), exp (-π*z^2*t/2) *
         (t:ℂ)^(((2*N + if aux then 1 else 0 : ℕ) : ℂ) - 1/2) / ((t:ℂ)^2+1) := by
@@ -2302,7 +2300,7 @@ theorem fresnelAuxGComplex_remainder_integral {z : ℂ} (hz0 : z ≠ 0) (hz : |a
   simp
 
 /-- Sector-dependent Fresnel next-term bounds. -/
-theorem fresnelAux_remainder_bound (aux : Bool) {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) (N : ℕ) :
+lemma fresnelAux_remainder_bound (aux : Bool) {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/4) (N : ℕ) :
     ‖fresnelAsymptoticRemainder aux N z‖ ≤ (if |arg z| ≤ π/8 then 1 else |1/Real.sin (4*arg z)|)*‖fresnelAsymptoticTerm aux N z‖ := by
   set M : ℕ := 2*N + if aux then 1 else 0 with hM
   set α := arg z with hα
@@ -2471,7 +2469,7 @@ theorem fresnelAux_remainder_bound (aux : Bool) {z : ℂ} (hz0 : z ≠ 0) (hz : 
         field_simp
 
 /-- Signed real Fresnel remainder. -/
-theorem fresnelAux_remainder_sign (aux : Bool) {x : ℝ} (hx : 0 < x) (N : ℕ) :
+lemma fresnelAux_remainder_sign (aux : Bool) {x : ℝ} (hx : 0 < x) (N : ℕ) :
     0 ≤ (-1 : ℝ)^N*(fresnelAsymptoticRemainder aux N x).re := by
   have hx0 : (x:ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.ne'
   have harg : |arg (x:ℂ)| < π/4 := by

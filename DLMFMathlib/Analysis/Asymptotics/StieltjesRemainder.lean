@@ -5,14 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.MeasureTheory.Integral.Bochner.Basic
-public import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
-public import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
-public import Mathlib.Analysis.SpecialFunctions.Complex.Arg
 public import DLMFMathlib.Analysis.Asymptotics.WatsonRotated
-public import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
-public import Mathlib.Analysis.SpecialFunctions.JapaneseBracket
-public import Mathlib.MeasureTheory.Integral.Prod
 
 /-!
 # Remainders of Stieltjes transforms
@@ -61,7 +54,7 @@ def stRem_moment (φ : ℝ → ℝ) (k : ℕ) : ℝ :=
 def stRem_c (S : ℂ) : ℝ := if 0 ≤ S.re then 1 else |Real.sin (arg S)|
 
 /-- The finite geometric expansion `1/(1+x) = Σ_{k<N} (-x)^k + (-x)^N/(1+x)`. -/
-lemma stRem_geom {𝕜 : Type*} [Field 𝕜] (x : 𝕜) (hx : 1 + x ≠ 0) (N : ℕ) :
+theorem stRem_geom {𝕜 : Type*} [Field 𝕜] (x : 𝕜) (hx : 1 + x ≠ 0) (N : ℕ) :
     1 / (1 + x) = ∑ k ∈ range N, (-x) ^ k + (-x) ^ N / (1 + x) := by
   have h := geom_sum_mul_neg (-x) N
   rw [sub_neg_eq_add] at h
@@ -69,11 +62,11 @@ lemma stRem_geom {𝕜 : Type*} [Field 𝕜] (x : 𝕜) (hx : 1 + x ≠ 0) (N : 
   linear_combination -h
 
 /-- `‖1 + τ/S‖ = ‖S + τ‖ / ‖S‖`. -/
-lemma stRem_norm_one_add_div {S : ℂ} (hS : S ≠ 0) (τ : ℝ) :
+theorem stRem_norm_one_add_div {S : ℂ} (hS : S ≠ 0) (τ : ℝ) :
     ‖1 + (τ : ℂ) / S‖ = ‖S + τ‖ / ‖S‖ := by
   rw [show 1 + (τ : ℂ) / S = (S + τ) / S by field_simp, norm_div]
 
-lemma stRem_c_pos {S : ℂ} (hS : S ∈ slitPlane) : 0 < stRem_c S := by
+theorem stRem_c_pos {S : ℂ} (hS : S ∈ slitPlane) : 0 < stRem_c S := by
   unfold stRem_c
   split_ifs with h
   · exact one_pos
@@ -85,14 +78,14 @@ lemma stRem_c_pos {S : ℂ} (hS : S ∈ slitPlane) : 0 < stRem_c S := by
     have : 0 < ‖S‖ := norm_pos_iff.mpr (slitPlane_ne_zero hS)
     exact abs_pos.mpr (div_ne_zero him this.ne')
 
-lemma stRem_c_le_one (S : ℂ) : stRem_c S ≤ 1 := by
+theorem stRem_c_le_one (S : ℂ) : stRem_c S ≤ 1 := by
   unfold stRem_c
   split_ifs
   · exact le_rfl
   · exact Real.abs_sin_le_one _
 
 /-- The basic lower bound `stRem_c S ≤ ‖1 + τ/S‖` for `τ ≥ 0`. -/
-lemma stRem_c_le_norm {S : ℂ} (hS : S ∈ slitPlane) {τ : ℝ} (hτ : 0 ≤ τ) :
+theorem stRem_c_le_norm {S : ℂ} (hS : S ∈ slitPlane) {τ : ℝ} (hτ : 0 ≤ τ) :
     stRem_c S ≤ ‖1 + (τ : ℂ) / S‖ := by
   have hS0 := slitPlane_ne_zero hS
   have hn : 0 < ‖S‖ := norm_pos_iff.mpr hS0
@@ -109,7 +102,7 @@ lemma stRem_c_le_norm {S : ℂ} (hS : S ∈ slitPlane) {τ : ℝ} (hτ : 0 ≤ �
     calc |S.im| = |(S + τ).im| := by simp
       _ ≤ ‖S + τ‖ := Complex.abs_im_le_norm _
 
-lemma stRem_one_add_ne_zero {S : ℂ} (hS : S ∈ slitPlane) {τ : ℝ} (hτ : 0 ≤ τ) :
+theorem stRem_one_add_ne_zero {S : ℂ} (hS : S ∈ slitPlane) {τ : ℝ} (hτ : 0 ≤ τ) :
     1 + (τ : ℂ) / S ≠ 0 := by
   intro h
   have := stRem_c_le_norm hS hτ
@@ -117,13 +110,13 @@ lemma stRem_one_add_ne_zero {S : ℂ} (hS : S ∈ slitPlane) {τ : ℝ} (hτ : 0
   exact (stRem_c_pos hS).not_ge this
 
 /-- `‖1/(1+τ/S)‖ ≤ 1/stRem_c S`. -/
-lemma stRem_norm_recip_le {S : ℂ} (hS : S ∈ slitPlane) {τ : ℝ} (hτ : 0 ≤ τ) :
+theorem stRem_norm_recip_le {S : ℂ} (hS : S ∈ slitPlane) {τ : ℝ} (hτ : 0 ≤ τ) :
     ‖1 / (1 + (τ : ℂ) / S)‖ ≤ 1 / stRem_c S := by
   rw [norm_div, norm_one]
   exact one_div_le_one_div_of_le (stRem_c_pos hS) (stRem_c_le_norm hS hτ)
 
 /-- Integrability of `ψ(τ)/(1+τ/S)` for integrable `ψ`. -/
-lemma stRem_integrableOn {ψ : ℝ → ℂ} (hψ : IntegrableOn ψ (Ioi 0)) {S : ℂ} (hS : S ∈ slitPlane) :
+theorem stRem_integrableOn {ψ : ℝ → ℂ} (hψ : IntegrableOn ψ (Ioi 0)) {S : ℂ} (hS : S ∈ slitPlane) :
     IntegrableOn (fun τ : ℝ => ψ τ / (1 + τ / S)) (Ioi 0) := by
   have hm : Measurable fun τ : ℝ => (1 + (τ : ℂ) / S)⁻¹ := by fun_prop
   refine Integrable.mono' (hψ.norm.const_mul (1 / stRem_c S))
@@ -248,7 +241,7 @@ def stRem_odd (φ : ℝ → ℝ) (X : ℝ) : ℝ :=
   ∫ τ in Ioi (0 : ℝ), φ τ * (τ / X) / (1 + (τ / X) ^ 2)
 
 /-- Integrability of `ψ(τ)/(1+(τ/X)²)` for integrable `ψ`. -/
-lemma stRem_integrableOn_real {ψ : ℝ → ℝ} (hψ : IntegrableOn ψ (Ioi 0)) (X : ℝ) :
+theorem stRem_integrableOn_real {ψ : ℝ → ℝ} (hψ : IntegrableOn ψ (Ioi 0)) (X : ℝ) :
     IntegrableOn (fun τ : ℝ => ψ τ / (1 + (τ / X) ^ 2)) (Ioi 0) := by
   have hm : AEStronglyMeasurable (fun τ : ℝ => ψ τ / (1 + (τ / X) ^ 2))
       (volume.restrict (Ioi 0)) := by
@@ -313,7 +306,7 @@ theorem stRem_even_core {ψ : ℝ → ℝ} {N : ℕ} (hψ0 : ∀ τ ∈ Ioi (0 :
 
 /-- From the exact signed form: the remainder is bounded by the first neglected term and has
 its sign. -/
-lemma stRem_signed_of_core {R m : ℝ} {N : ℕ} {Y : ℝ} (hY : 0 < Y) {J : ℝ} (hJ0 : 0 ≤ J)
+theorem stRem_signed_of_core {R m : ℝ} {N : ℕ} {Y : ℝ} (hY : 0 < Y) {J : ℝ} (hJ0 : 0 ≤ J)
     (hJm : J ≤ m) (hR : R = (-1 : ℝ) ^ N / Y * J) :
     |R| ≤ m / Y ∧ 0 ≤ R * ((-1 : ℝ) ^ N * m) := by
   have hs : ((-1 : ℝ) ^ N) ^ 2 = 1 := by rw [← pow_mul, mul_comm, pow_mul]; simp
@@ -409,7 +402,7 @@ is bounded by `Γ(m+1) ∫₀^∞ (W² + ρ²)^{-(m+1)/2} dρ = Γ(m) χ(m) W^{-
 `θ + β = ±π/2` with `|β| < π/2`, i.e. for `π/2 ≤ |θ| < π`.
 -/
 
-lemma stRem_recip_eq_integral {c : ℂ} (hc : 0 < c.re) :
+theorem stRem_recip_eq_integral {c : ℂ} (hc : 0 < c.re) :
     1 / c = ∫ ρ in Ioi (0 : ℝ), Complex.exp (-(c * ρ)) := by
   have h := integral_exp_mul_complex_Ioi (a := -c) (by simp; linarith) 0
   simp only [ofReal_zero, mul_zero, Complex.exp_zero] at h
@@ -417,7 +410,7 @@ lemma stRem_recip_eq_integral {c : ℂ} (hc : 0 < c.re) :
     funext x; ring_nf, h]
   rw [neg_div, div_neg, neg_neg]
 
-lemma stRem_norm_add_exp {W ρ σ : ℝ} (hσ : Real.cos σ = 0) :
+theorem stRem_norm_add_exp {W ρ σ : ℝ} (hσ : Real.cos σ = 0) :
     ‖(W : ℂ) + ρ * exp (σ * I)‖ = Real.sqrt (W ^ 2 + ρ ^ 2) := by
   rw [norm_eq_sqrt_sq_add_sq]
   congr 1
@@ -431,7 +424,7 @@ lemma stRem_norm_add_exp {W ρ σ : ℝ} (hσ : Real.cos σ = 0) :
   nlinarith [this]
 
 /-- The Laplace kernel `r^m e^{-Wr}` is integrable on `(0, ∞)`. -/
-lemma stRem_integrableOn_rpow_exp {m W : ℝ} (hm : -1 < m) (hW : 0 < W) :
+theorem stRem_integrableOn_rpow_exp {m W : ℝ} (hm : -1 < m) (hW : 0 < W) :
     IntegrableOn (fun r : ℝ => r ^ m * Real.exp (-(W * r))) (Ioi 0) := by
   have := integrableOn_rpow_mul_exp_neg_mul_rpow (s := m) (p := 1) hm one_pos hW
   refine this.congr_fun (fun r hr => ?_) measurableSet_Ioi

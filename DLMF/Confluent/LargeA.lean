@@ -5,12 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Confluent.Regularized
 public import DLMF.Bessel.Asymptotics
-public import Mathlib.Analysis.Normed.Group.Tannery
 public import DLMFMathlib.Analysis.ODE.Volterra
 public import DLMF.OrthogonalPolynomials.Classical
-public import DLMF.Gamma.Asymptotics
 
 /-!
 # Kummer's and Tricomi's functions for large negative `a`
@@ -49,7 +46,7 @@ namespace DLMF.Confluent
 /-! ### A Tannery limit -/
 
 /-- `(d - κ)_n / κⁿ → (-1)ⁿ` as `κ → +∞`. -/
-lemma tendsto_poch_sub_div_pow (d : ℝ) (n : ℕ) :
+theorem tendsto_poch_sub_div_pow (d : ℝ) (n : ℕ) :
     Tendsto (fun κ : ℝ => poch ((d - κ : ℝ) : ℂ) n / (κ : ℂ) ^ n) atTop
       (𝓝 ((-1 : ℂ) ^ n)) := by
   induction n with
@@ -76,7 +73,7 @@ lemma tendsto_poch_sub_div_pow (d : ℝ) (n : ℕ) :
     field_simp
 
 /-- The bound `‖(d - κ)_n / κⁿ‖ ≤ (1 + |d|)_n` for `κ ≥ 1`. -/
-lemma norm_poch_sub_div_pow_le (d : ℝ) {κ : ℝ} (hκ : 1 ≤ κ) (n : ℕ) :
+theorem norm_poch_sub_div_pow_le (d : ℝ) {κ : ℝ} (hκ : 1 ≤ κ) (n : ℕ) :
     ‖poch ((d - κ : ℝ) : ℂ) n / (κ : ℂ) ^ n‖ ≤ (ascPochhammer ℝ n).eval (1 + |d|) := by
   induction n with
   | zero => simp [poch_zero]
@@ -144,21 +141,21 @@ theorem tendsto_regularizedConfluent_sub_div (d : ℝ) (b w : ℂ) :
 /-! ### The Liouville normal form -/
 
 /-- Chain rule for a complex function of a real-valued real function. -/
-lemma hasDerivAt_comp_ofReal_real {F : ℂ → ℂ} {F' : ℂ} {m : ℝ → ℝ} {m' s : ℝ}
+theorem hasDerivAt_comp_ofReal_real {F : ℂ → ℂ} {F' : ℂ} {m : ℝ → ℝ} {m' s : ℝ}
     (hF : HasDerivAt F F' (m s : ℂ)) (hm : HasDerivAt m m' s) :
     HasDerivAt (fun t : ℝ => F (m t : ℂ)) (F' * m') s := by
   have := hF.comp_ofReal.scomp s hm
   rw [real_smul, mul_comm] at this
   exact this
 
-lemma hasDerivAt_sq_div (κ s : ℝ) :
+theorem hasDerivAt_sq_div (κ s : ℝ) :
     HasDerivAt (fun t : ℝ => t ^ 2 / (4 * κ)) (s / (2 * κ)) s := by
   convert (hasDerivAt_pow 2 s).div_const (4 * κ) using 1
   norm_num
   ring
 
 /-- `d/ds 𝐌(p, q, s²/(4κ)) = p 𝐌(p+1, q+1, s²/(4κ)) · s/(2κ)`. -/
-lemma hasDerivAt_regularizedConfluent_sq_div (p q : ℂ) (κ s : ℝ) :
+theorem hasDerivAt_regularizedConfluent_sq_div (p q : ℂ) (κ s : ℝ) :
     HasDerivAt (fun t : ℝ => regularizedHGFun {p} {q} ((t ^ 2 / (4 * κ) : ℝ) : ℂ))
       (p * regularizedHGFun {p + 1} {q + 1} ((s ^ 2 / (4 * κ) : ℝ) : ℂ) *
         ((s / (2 * κ) : ℝ) : ℂ)) s := by
@@ -198,10 +195,10 @@ def largeAU' (c κ s : ℝ) : ℂ :=
 /-- The potential: `u'' + u = g u` with `g = ((c-1)² - 1/4)/s² + s²/(16κ²)`. -/
 def largeAG (c κ s : ℝ) : ℝ := ((c - 1) ^ 2 - 1 / 4) / s ^ 2 + s ^ 2 / (16 * κ ^ 2)
 
-lemma hasDerivAt_largeAW (c κ s : ℝ) : HasDerivAt (largeAW c κ) (largeAW1 c κ s) s :=
+theorem hasDerivAt_largeAW (c κ s : ℝ) : HasDerivAt (largeAW c κ) (largeAW1 c κ s) s :=
   hasDerivAt_regularizedConfluent_sq_div _ _ κ s
 
-lemma hasDerivAt_largeAW1 (c κ s : ℝ) :
+theorem hasDerivAt_largeAW1 (c κ s : ℝ) :
     HasDerivAt (largeAW1 c κ)
       (largeAParam c κ * ((largeAParam c κ + 1) *
         regularizedHGFun {largeAParam c κ + 2} {(c : ℂ) + 2} ((s ^ 2 / (4 * κ) : ℝ) : ℂ) *
@@ -220,7 +217,7 @@ lemma hasDerivAt_largeAW1 (c κ s : ℝ) :
     simp only [largeAW1, Pi.mul_apply]
     ring
 
-lemma hasDerivAt_largeAP (c κ : ℝ) {s : ℝ} (hs : 0 < s) :
+theorem hasDerivAt_largeAP (c κ : ℝ) {s : ℝ} (hs : 0 < s) :
     HasDerivAt (largeAP c κ) (largeAP c κ s * largeAH c κ s) s := by
   have h1 := Real.hasDerivAt_rpow_const (x := s) (p := c - 1 / 2) (Or.inl hs.ne')
   have h2 : HasDerivAt (fun t : ℝ => Real.exp (-(t ^ 2 / (8 * κ))))
@@ -234,7 +231,7 @@ lemma hasDerivAt_largeAP (c κ : ℝ) {s : ℝ} (hs : 0 < s) :
   field_simp
   ring
 
-lemma hasDerivAt_largeAU (c κ : ℝ) {s : ℝ} (hs : 0 < s) :
+theorem hasDerivAt_largeAU (c κ : ℝ) {s : ℝ} (hs : 0 < s) :
     HasDerivAt (largeAU c κ) (largeAU' c κ s) s := by
   have hP := (hasDerivAt_largeAP c κ hs).ofReal_comp
   refine (hP.mul (hasDerivAt_largeAW c κ s)).congr_deriv ?_
@@ -242,7 +239,7 @@ lemma hasDerivAt_largeAU (c κ : ℝ) {s : ℝ} (hs : 0 < s) :
   push_cast
   ring
 
-lemma hasDerivAt_largeAH (c κ : ℝ) {s : ℝ} (hs : 0 < s) :
+theorem hasDerivAt_largeAH (c κ : ℝ) {s : ℝ} (hs : 0 < s) :
     HasDerivAt (largeAH c κ) (-(c - 1 / 2) / s ^ 2 - 1 / (4 * κ)) s := by
   have h1 : HasDerivAt (fun t : ℝ => (c - 1 / 2) / t) ((c - 1 / 2) * -(s ^ 2)⁻¹) s := by
     simpa [div_eq_mul_inv] using (hasDerivAt_inv hs.ne').const_mul (c - 1 / 2)
@@ -252,7 +249,7 @@ lemma hasDerivAt_largeAH (c κ : ℝ) {s : ℝ} (hs : 0 < s) :
   ring
 
 /-- The Liouville normal form of Kummer's equation: `u'' = (g - 1) u`. -/
-lemma hasDerivAt_largeAU' (c : ℝ) {κ : ℝ} (hκ : 0 < κ) {s : ℝ} (hs : 0 < s) :
+theorem hasDerivAt_largeAU' (c : ℝ) {κ : ℝ} (hκ : 0 < κ) {s : ℝ} (hs : 0 < s) :
     HasDerivAt (largeAU' c κ) ((largeAG c κ s - 1) • largeAU c κ s) s := by
   have hP := (hasDerivAt_largeAP c κ hs).ofReal_comp
   have hH := (hasDerivAt_largeAH c κ hs).ofReal_comp
@@ -318,17 +315,17 @@ def largeAU0' (c s : ℝ) : ℂ :=
 /-- The limit potential `((c-1)² - 1/4)/s²`. -/
 def largeAG0 (c s : ℝ) : ℝ := ((c - 1) ^ 2 - 1 / 4) / s ^ 2
 
-lemma hasDerivAt_neg_sq_div_four (s : ℝ) :
+theorem hasDerivAt_neg_sq_div_four (s : ℝ) :
     HasDerivAt (fun t : ℝ => -(t ^ 2 / 4)) (-(s / 2)) s := by
   convert ((hasDerivAt_pow 2 s).div_const 4).neg using 1
   norm_num
   ring
 
-lemma hasDerivAt_largeAV (c s : ℝ) : HasDerivAt (largeAV c) (largeAV1 c s) s :=
+theorem hasDerivAt_largeAV (c s : ℝ) : HasDerivAt (largeAV c) (largeAV1 c s) s :=
   hasDerivAt_comp_ofReal_real (m := fun t : ℝ => -(t ^ 2 / 4))
     (DLMF.Bessel.hasDerivAt_regularized0F1 _ _) (hasDerivAt_neg_sq_div_four s)
 
-lemma hasDerivAt_largeAV1 (c s : ℝ) :
+theorem hasDerivAt_largeAV1 (c s : ℝ) :
     HasDerivAt (largeAV1 c)
       (regularizedHGFun (∅ : Multiset ℂ) {(c : ℂ) + 1 + 1} ((-(s ^ 2 / 4) : ℝ) : ℂ) *
           ((-(s / 2) : ℝ) : ℂ) * ((-(s / 2) : ℝ) : ℂ) +
@@ -341,14 +338,14 @@ lemma hasDerivAt_largeAV1 (c s : ℝ) :
     simpa using this
   exact h1.mul h2
 
-lemma hasDerivAt_largeAQ (c : ℝ) {s : ℝ} (hs : 0 < s) :
+theorem hasDerivAt_largeAQ (c : ℝ) {s : ℝ} (hs : 0 < s) :
     HasDerivAt (largeAQ c) (largeAQ c s * largeAH0 c s) s := by
   refine (Real.hasDerivAt_rpow_const (x := s) (p := c - 1 / 2) (Or.inl hs.ne')).congr_deriv ?_
   simp only [largeAQ, largeAH0]
   rw [Real.rpow_sub_one hs.ne']
   field_simp
 
-lemma hasDerivAt_largeAU0 (c : ℝ) {s : ℝ} (hs : 0 < s) :
+theorem hasDerivAt_largeAU0 (c : ℝ) {s : ℝ} (hs : 0 < s) :
     HasDerivAt (largeAU0 c) (largeAU0' c s) s := by
   have hP := (hasDerivAt_largeAQ c hs).ofReal_comp
   refine (hP.mul (hasDerivAt_largeAV c s)).congr_deriv ?_
@@ -356,7 +353,7 @@ lemma hasDerivAt_largeAU0 (c : ℝ) {s : ℝ} (hs : 0 < s) :
   push_cast
   ring
 
-lemma hasDerivAt_largeAH0 (c : ℝ) {s : ℝ} (hs : 0 < s) :
+theorem hasDerivAt_largeAH0 (c : ℝ) {s : ℝ} (hs : 0 < s) :
     HasDerivAt (largeAH0 c) (-(c - 1 / 2) / s ^ 2) s := by
   have h1 : HasDerivAt (fun t : ℝ => (c - 1 / 2) / t) ((c - 1 / 2) * -(s ^ 2)⁻¹) s := by
     simpa [div_eq_mul_inv] using (hasDerivAt_inv hs.ne').const_mul (c - 1 / 2)
@@ -364,7 +361,7 @@ lemma hasDerivAt_largeAH0 (c : ℝ) {s : ℝ} (hs : 0 < s) :
   ring
 
 /-- The Liouville form of Bessel's equation: `u₀'' = (g₀ - 1) u₀`. -/
-lemma hasDerivAt_largeAU0' (c : ℝ) {s : ℝ} (hs : 0 < s) :
+theorem hasDerivAt_largeAU0' (c : ℝ) {s : ℝ} (hs : 0 < s) :
     HasDerivAt (largeAU0' c) ((largeAG0 c s - 1) • largeAU0 c s) s := by
   have hP := (hasDerivAt_largeAQ c hs).ofReal_comp
   have hH := (hasDerivAt_largeAH0 c hs).ofReal_comp
@@ -401,10 +398,10 @@ lemma hasDerivAt_largeAU0' (c : ℝ) {s : ℝ} (hs : 0 < s) :
 
 /-! ### Convergence of the data at a fixed point -/
 
-lemma tendsto_div_atTop_zero (b : ℝ) : Tendsto (fun κ : ℝ => b / κ) atTop (𝓝 0) :=
+theorem tendsto_div_atTop_zero (b : ℝ) : Tendsto (fun κ : ℝ => b / κ) atTop (𝓝 0) :=
   tendsto_const_nhds.div_atTop tendsto_id
 
-lemma tendsto_largeAW (c s : ℝ) :
+theorem tendsto_largeAW (c s : ℝ) :
     Tendsto (fun κ : ℝ => largeAW c κ s) atTop (𝓝 (largeAV c s)) := by
   have h := tendsto_regularizedConfluent_sub_div (c / 2) (c : ℂ) ((s ^ 2 / 4 : ℝ) : ℂ)
   have hV : largeAV c s = regularizedHGFun (∅ : Multiset ℂ) {(c : ℂ)} (-((s ^ 2 / 4 : ℝ) : ℂ)) := by
@@ -420,7 +417,7 @@ lemma tendsto_largeAW (c s : ℝ) :
   push_cast
   field_simp
 
-lemma tendsto_largeAW1 (c s : ℝ) :
+theorem tendsto_largeAW1 (c s : ℝ) :
     Tendsto (fun κ : ℝ => largeAW1 c κ s) atTop (𝓝 (largeAV1 c s)) := by
   have h := tendsto_regularizedConfluent_sub_div (c / 2 + 1) ((c : ℂ) + 1) ((s ^ 2 / 4 : ℝ) : ℂ)
   have ha : Tendsto (fun κ : ℝ => (((c / 2) / κ - 1 : ℝ) : ℂ)) atTop (𝓝 ((0 - 1 : ℝ) : ℂ)) :=
@@ -445,7 +442,7 @@ lemma tendsto_largeAW1 (c s : ℝ) :
   push_cast
   field_simp
 
-lemma tendsto_largeAP (c s : ℝ) :
+theorem tendsto_largeAP (c s : ℝ) :
     Tendsto (fun κ : ℝ => largeAP c κ s) atTop (𝓝 (largeAQ c s)) := by
   have h : Tendsto (fun κ : ℝ => Real.exp (-(s ^ 2 / 8 / κ))) atTop (𝓝 (Real.exp (-0))) :=
     (Real.continuous_exp.tendsto _).comp (tendsto_div_atTop_zero _).neg
@@ -458,7 +455,7 @@ lemma tendsto_largeAP (c s : ℝ) :
   congr 3
   ring
 
-lemma tendsto_largeAH (c s : ℝ) :
+theorem tendsto_largeAH (c s : ℝ) :
     Tendsto (fun κ : ℝ => largeAH c κ s) atTop (𝓝 (largeAH0 c s)) := by
   have := (tendsto_div_atTop_zero (s / 4)).const_sub ((c - 1 / 2) / s)
   rw [sub_zero] at this
@@ -480,21 +477,21 @@ theorem tendsto_largeAU' (c s : ℝ) :
 /-! ### The limit in terms of Bessel functions -/
 
 /-- `J_μ(s) = (s/2)^μ ₀F̃₁(;μ+1;-s²/4)` for real `s > 0` and real `μ`. -/
-lemma besselJ_ofReal_eq (μ : ℝ) {s : ℝ} (hs : 0 < s) :
+theorem besselJ_ofReal_eq (μ : ℝ) {s : ℝ} (hs : 0 < s) :
     besselJ (μ : ℂ) (s : ℂ) = (((s / 2) ^ μ : ℝ) : ℂ) *
       regularizedHGFun (∅ : Multiset ℂ) {(μ : ℂ) + 1} ((-(s ^ 2 / 4) : ℝ) : ℂ) := by
   rw [DLMF.Bessel.besselJ_eq_regularized, ofReal_cpow (by positivity)]
   push_cast
   ring_nf
 
-lemma rpow_identity {c s : ℝ} (hs : 0 < s) :
+theorem rpow_identity {c s : ℝ} (hs : 0 < s) :
     (2 : ℝ) ^ (c - 1) * Real.sqrt s * (s / 2) ^ (c - 1) = s ^ (c - 1 / 2) := by
   have h2 : (0 : ℝ) < 2 ^ (c - 1) := by positivity
   rw [Real.div_rpow hs.le (by norm_num), Real.sqrt_eq_rpow,
     show c - 1 / 2 = 1 / 2 + (c - 1) by ring, Real.rpow_add hs]
   field_simp
 
-lemma rpow_identity' {c s : ℝ} (hs : 0 < s) :
+theorem rpow_identity' {c s : ℝ} (hs : 0 < s) :
     (2 : ℝ) ^ (c - 1) * Real.sqrt s * (s / 2) ^ c = s ^ (c - 1 / 2) * (s / 2) := by
   have h := rpow_identity (c := c) hs
   have e : (s / 2) ^ c = (s / 2) ^ (c - 1) * (s / 2) := by
@@ -512,7 +509,7 @@ theorem largeAU0_eq (c : ℝ) {s : ℝ} (hs : 0 < s) :
   ring_nf
 
 /-- `u₀'(s) = 2^{c-1} ((c - 1/2)/s · √s J_{c-1}(s) - √s J_c(s))`. -/
-theorem largeAU0'_eq (c : ℝ) {s : ℝ} (hs : 0 < s) :
+lemma largeAU0'_eq (c : ℝ) {s : ℝ} (hs : 0 < s) :
     largeAU0' c s = (((2 : ℝ) ^ (c - 1) : ℝ) : ℂ) *
       ((((c - 1 / 2) / s : ℝ) : ℂ) * ((Real.sqrt s : ℝ) * besselJ ((c - 1 : ℝ) : ℂ) (s : ℂ)) -
         (Real.sqrt s : ℝ) * besselJ (c : ℂ) (s : ℂ)) := by
@@ -570,7 +567,7 @@ theorem sqrt_mul_besselJ_isBigO (μ : ℝ) :
 
 /-! ### Matching on `[s₀, S]` -/
 
-lemma integral_recip_sq_eq (A : ℝ) {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) :
+theorem integral_recip_sq_eq (A : ℝ) {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) :
     ∫ t in a..b, A / t ^ 2 = A / a - A / b := by
   have hderiv : ∀ t ∈ uIcc a b, HasDerivAt (fun t : ℝ => -(A / t)) (A / t ^ 2) t := by
     intro t ht
@@ -588,18 +585,18 @@ lemma integral_recip_sq_eq (A : ℝ) {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) :
   rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv (hcont.intervalIntegrable)]
   ring
 
-lemma continuousOn_largeAG (c κ : ℝ) {a b : ℝ} (ha : 0 < a) :
+theorem continuousOn_largeAG (c κ : ℝ) {a b : ℝ} (ha : 0 < a) :
     ContinuousOn (largeAG c κ) (Icc a b) := by
   refine ContinuousOn.add (continuousOn_const.div (continuousOn_pow 2) fun t ht => ?_)
     (by fun_prop)
   exact pow_ne_zero 2 (lt_of_lt_of_le ha ht.1).ne'
 
-lemma continuousOn_largeAG0 (c : ℝ) {a b : ℝ} (ha : 0 < a) :
+theorem continuousOn_largeAG0 (c : ℝ) {a b : ℝ} (ha : 0 < a) :
     ContinuousOn (largeAG0 c) (Icc a b) :=
   continuousOn_const.div (continuousOn_pow 2) fun _t ht =>
     pow_ne_zero 2 (lt_of_lt_of_le ha ht.1).ne'
 
-lemma integral_abs_largeAG_le (c : ℝ) {κ a b : ℝ} (hκ : 0 < κ) (ha : 0 < a) (hab : a ≤ b) :
+theorem integral_abs_largeAG_le (c : ℝ) {κ a b : ℝ} (hκ : 0 < κ) (ha : 0 < a) (hab : a ≤ b) :
     ∫ t in a..b, |largeAG c κ t| ≤ |(c - 1) ^ 2 - 1 / 4| / a + b ^ 3 / (16 * κ ^ 2) := by
   set A := |(c - 1) ^ 2 - 1 / 4|
   have hle : ∫ t in a..b, |largeAG c κ t| ≤
@@ -633,7 +630,7 @@ lemma integral_abs_largeAG_le (c : ℝ) {κ a b : ℝ} (hκ : 0 < κ) (ha : 0 < 
     exact mul_le_mul_of_nonneg_right (by linarith) (by positivity)
   linarith
 
-lemma integral_abs_largeAG0_le (c : ℝ) {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) :
+theorem integral_abs_largeAG0_le (c : ℝ) {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) :
     ∫ t in a..b, |largeAG0 c t| ≤ |(c - 1) ^ 2 - 1 / 4| / a := by
   have heq : ∀ t ∈ Icc a b, |largeAG0 c t| = |(c - 1) ^ 2 - 1 / 4| / t ^ 2 := by
     intro t ht
@@ -645,7 +642,7 @@ lemma integral_abs_largeAG0_le (c : ℝ) {a b : ℝ} (ha : 0 < a) (hab : a ≤ b
   have : 0 ≤ |(c - 1) ^ 2 - 1 / 4| / b := by positivity
   linarith
 
-lemma oscFree_sub (ω a : ℝ) (c d c' d' : ℂ) (x : ℝ) :
+theorem oscFree_sub (ω a : ℝ) (c d c' d' : ℂ) (x : ℝ) :
     ODE.oscFree ω a c d x - ODE.oscFree ω a c' d' x = ODE.oscFree ω a (c - c') (d - d') x := by
   simp only [ODE.oscFree, smul_sub]
   abel
@@ -718,7 +715,7 @@ lemma largeAU0'_isBigO (c : ℝ) : largeAU0' c =O[atTop] (fun _ => (1 : ℝ)) :=
   filter_upwards [eventually_gt_atTop (0 : ℝ)] with s hs
   exact (largeAU0'_eq c hs).symm
 
-lemma exists_bound_largeAU0 (c : ℝ) :
+theorem exists_bound_largeAU0 (c : ℝ) :
     ∃ B : ℝ, 0 ≤ B ∧ ∀ᶠ s in atTop, ‖largeAU0 c s‖ + ‖largeAU0' c s‖ ≤ B := by
   obtain ⟨C0, hC0⟩ := (largeAU0_isBigO c).bound
   obtain ⟨C1, hC1⟩ := (largeAU0'_isBigO c).bound
@@ -727,11 +724,11 @@ lemma exists_bound_largeAU0 (c : ℝ) :
   simp only [norm_one, mul_one] at h0 h1
   linarith [le_abs_self C0, le_abs_self C1]
 
-lemma tendsto_two_sqrt_mul (x : ℝ) (hx : 0 < x) :
+theorem tendsto_two_sqrt_mul (x : ℝ) (hx : 0 < x) :
     Tendsto (fun κ : ℝ => 2 * Real.sqrt (κ * x)) atTop atTop :=
   (Real.tendsto_sqrt_atTop.comp (tendsto_id.atTop_mul_const hx)).const_mul_atTop two_pos
 
-lemma tendsto_cube_div (x : ℝ) (hx : 0 < x) :
+theorem tendsto_cube_div (x : ℝ) (hx : 0 < x) :
     Tendsto (fun κ : ℝ => (2 * Real.sqrt (κ * x)) ^ 3 / (16 * κ ^ 2)) atTop (𝓝 0) := by
   have h : Tendsto (fun κ : ℝ => x * Real.sqrt x / (2 * Real.sqrt κ)) atTop (𝓝 0) :=
     tendsto_const_nhds.div_atTop (Real.tendsto_sqrt_atTop.const_mul_atTop two_pos)
@@ -871,7 +868,7 @@ theorem tendsto_largeAU_sub_cos (c : ℝ) {x : ℝ} (hx : 0 < x) :
   simp only [Function.comp_apply]
   ring
 
-lemma two_rpow_mul_two_sqrt_rpow {y : ℝ} (hy : 0 ≤ y) (c : ℝ) :
+theorem two_rpow_mul_two_sqrt_rpow {y : ℝ} (hy : 0 ≤ y) (c : ℝ) :
     (2 : ℝ) ^ (1 / 2 - c) * (2 * Real.sqrt y) ^ (c - 1 / 2) = y ^ (c / 2 - 1 / 4) := by
   rw [Real.mul_rpow (by norm_num) (Real.sqrt_nonneg _), Real.sqrt_eq_rpow, ← Real.rpow_mul hy,
     ← mul_assoc, ← Real.rpow_add two_pos, show 1 / 2 - c + (c - 1 / 2) = 0 by ring,
@@ -879,7 +876,7 @@ lemma two_rpow_mul_two_sqrt_rpow {y : ℝ} (hy : 0 ≤ y) (c : ℝ) :
   congr 1
   ring
 
-lemma two_rpow_sqrt_pi_mul (c : ℝ) :
+theorem two_rpow_sqrt_pi_mul (c : ℝ) :
     (2 : ℝ) ^ (1 / 2 - c) * Real.sqrt π * ((2 : ℝ) ^ (c - 1) * Real.sqrt (2 / π)) = 1 := by
   have h1 : Real.sqrt π * Real.sqrt (2 / π) = Real.sqrt 2 := by
     rw [← Real.sqrt_mul Real.pi_pos.le]
@@ -1017,17 +1014,17 @@ theorem tendsto_regularizedConfluent_atBot_besselJ (c : ℝ) {x : ℝ} (hx : 0 <
 /-! ### Tricomi's function for large negative `a` -/
 
 /-- A trigonometric identity behind (8.2.10). -/
-lemma sin_mul_cos_sub_sin_mul_cos (A C t : ℝ) :
+theorem sin_mul_cos_sub_sin_mul_cos (A C t : ℝ) :
     Real.sin (C - A) * Real.cos t + Real.sin A * Real.cos (t + C) =
       Real.sin C * Real.cos (t + A) := by
   simp only [Real.sin_sub, Real.cos_add]
   ring
 
-lemma ofReal_cpow_eq {x : ℝ} (hx : 0 < x) (y : ℝ) : (x : ℂ) ^ (y : ℂ) = ((x ^ y : ℝ) : ℂ) :=
+theorem ofReal_cpow_eq {x : ℝ} (hx : 0 < x) (y : ℝ) : (x : ℂ) ^ (y : ℂ) = ((x ^ y : ℝ) : ℂ) :=
   (ofReal_cpow hx.le y).symm
 
 /-- The algebraic identity expressing `U` through the two regularized Kummer functions. -/
-lemma kummerU_large_a_eq (c : ℝ) (hc : ∀ k : ℤ, c ≠ k) {a x : ℝ} (hx : 0 < x)
+theorem kummerU_large_a_eq (c : ℝ) (hc : ∀ k : ℤ, c ≠ k) {a x : ℝ} (hx : 0 < x)
     (hκ : 0 < c / 2 - a) (hca : 0 < c - a) (h1a : 0 < 1 - a) :
     ((Real.sqrt π * x ^ (c / 2 - 1 / 4) * Real.exp (-(x / 2)) : ℝ) : ℂ) /
         Complex.Gamma (((c / 2 - a : ℝ) : ℂ) + 1 / 4) * kummerU (a : ℂ) (c : ℂ) (x : ℂ) =
@@ -1126,7 +1123,7 @@ lemma kummerU_large_a_eq (c : ℝ) (hc : ∀ k : ℤ, c ≠ k) {a x : ℝ} (hx :
   field_simp
   ring
 
-lemma large_a_algebra {s S1 S2 G1 G2 A1 A2 C1 C2 C0 : ℂ} (hs : s ≠ 0)
+theorem large_a_algebra {s S1 S2 G1 G2 A1 A2 C1 C2 C0 : ℂ} (hs : s ≠ 0)
     (htc : S1 * C1 - S2 * C2 = s * C0) :
     (G1 * S1 * A1 - G2 * S2 * A2) / s - C0 =
       ((G1 - 1) * (S1 * C1) + (G1 - 1) * S1 * (A1 - C1) + (A1 - C1) * S1 -
@@ -1135,7 +1132,7 @@ lemma large_a_algebra {s S1 S2 G1 G2 A1 A2 C1 C2 C0 : ℂ} (hs : s ≠ 0)
   linear_combination htc
 
 /-- `Γ(κ + p)/(Γ(κ + 1/4) κ^{p-1/4}) → 1` as `κ → +∞`. -/
-lemma tendsto_Gamma_ratio_rpow (p : ℝ) :
+theorem tendsto_Gamma_ratio_rpow (p : ℝ) :
     Tendsto (fun κ : ℝ => Complex.Gamma (((κ + p : ℝ) : ℂ)) /
       (Complex.Gamma (((κ : ℝ) : ℂ) + 1 / 4) * ((κ ^ (p - 1 / 4) : ℝ) : ℂ))) atTop (𝓝 1) := by
   refine (DLMF.Gamma.Gamma_ratio_power (a := (p : ℂ)) (b := 1 / 4)).congr' ?_
@@ -1257,7 +1254,7 @@ theorem tendsto_kummerU_atBot (c : ℝ) (hc : ∀ k : ℤ, c ≠ k) {x : ℝ} (h
 
 /-! ### Fejér's formula for Laguerre polynomials -/
 
-lemma tendsto_sqrt_add_sub_sqrt {d : ℝ} (hd : 0 ≤ d) :
+theorem tendsto_sqrt_add_sub_sqrt {d : ℝ} (hd : 0 ≤ d) :
     Tendsto (fun t : ℝ => Real.sqrt (t + d) - Real.sqrt t) atTop (𝓝 0) := by
   have hup : Tendsto (fun t : ℝ => d / Real.sqrt t) atTop (𝓝 0) :=
     tendsto_const_nhds.div_atTop Real.tendsto_sqrt_atTop

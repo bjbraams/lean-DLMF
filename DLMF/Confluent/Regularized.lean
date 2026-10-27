@@ -30,7 +30,7 @@ namespace DLMF.Confluent
 /-! ### Series and majorants -/
 
 /-- The regularized Kummer function as a series with explicit terms. -/
-lemma regularizedConfluent_eq_tsum (a b z : ℂ) :
+theorem regularizedConfluent_eq_tsum (a b z : ℂ) :
     regularizedHGFun {a} {b} z =
       ∑' n : ℕ, poch a n * z ^ n / n.factorial * (Gamma (b + n))⁻¹ := by
   rw [regularizedHGFun_eq_tsum]
@@ -39,12 +39,12 @@ lemma regularizedConfluent_eq_tsum (a b z : ℂ) :
   rw [regularizedHGFunCoeff_singleton]
   ring
 
-lemma radius_regularizedConfluentSeries (a b : ℂ) :
+theorem radius_regularizedConfluentSeries (a b : ℂ) :
     (regularizedHGFunSeries {a} {b}).radius = ⊤ :=
   radius_regularizedHGFunSeries_eq_top (by simp)
 
 /-- The regularized Kummer series converges on all of `ℂ`. -/
-lemma hasFPowerSeriesOnBall_regularizedConfluent (a b : ℂ) :
+theorem hasFPowerSeriesOnBall_regularizedConfluent (a b : ℂ) :
     HasFPowerSeriesOnBall (regularizedHGFun {a} {b})
       (ofScalars ℂ (regularizedHGFunCoeff {a} {b})) 0 ⊤ := by
   have hr := radius_regularizedConfluentSeries a b
@@ -52,7 +52,7 @@ lemma hasFPowerSeriesOnBall_regularizedConfluent (a b : ℂ) :
     (regularizedHGFunSeries {a} {b}) 0 ⊤
   simpa only [hr] using (regularizedHGFunSeries {a} {b}).hasFPowerSeriesOnBall (by rw [hr]; simp)
 
-lemma summable_regularizedConfluent_term (a b z : ℂ) :
+theorem summable_regularizedConfluent_term (a b z : ℂ) :
     Summable fun n : ℕ => poch a n * z ^ n / n.factorial * (Gamma (b + n))⁻¹ := by
   have h := (hasFPowerSeriesOnBall_regularizedConfluent a b).hasSum_mul_pow
     (by simp : z ∈ Metric.eball (0 : ℂ) ⊤)
@@ -60,7 +60,7 @@ lemma summable_regularizedConfluent_term (a b z : ℂ) :
   rw [regularizedHGFunCoeff_singleton]
   ring
 
-lemma norm_regularizedConfluentSeries_apply_ofReal (α : ℝ) (N n : ℕ) (hn : N ≤ n) :
+theorem norm_regularizedConfluentSeries_apply_ofReal (α : ℝ) (N n : ℕ) (hn : N ≤ n) :
     ‖regularizedHGFunSeries {(α : ℂ)} {1 - (N : ℂ)} n‖ =
       ‖poch (α : ℂ) n‖ / (n.factorial * (n - N).factorial) := by
   have hΓ : Gamma ((1 : ℂ) - N + n) = ((n - N).factorial : ℂ) := by
@@ -71,7 +71,7 @@ lemma norm_regularizedConfluentSeries_apply_ofReal (α : ℝ) (N n : ℕ) (hn : 
 
 /-- The tail-domination step: the `n`-th term is bounded by the `n`-th term of the majorant
 series `𝐌(α, 1 - N, ‖z‖)`. -/
-lemma norm_confluent_term_le_majorant {a b z : ℂ} {α : ℝ} (ha : ‖a‖ ≤ α) {N : ℕ}
+theorem norm_confluent_term_le_majorant {a b z : ℂ} {α : ℝ} (ha : ‖a‖ ≤ α) {N : ℕ}
     (hre : 1 ≤ (b + N).re) {m : ℝ} (hm : 0 < m) (hΓ : m ≤ ‖Gamma (b + N)‖) {n : ℕ}
     (hn : N ≤ n) :
     ‖poch a n * z ^ n / n.factorial * (Gamma (b + n))⁻¹‖ ≤
@@ -160,7 +160,7 @@ theorem differentiable_regularizedConfluent_comp {A B : ℂ → ℂ} (hA : Diffe
 
 /-! ### Derivative -/
 
-lemma regularizedHGFunCoeff_singleton_succ (a b : ℂ) (n : ℕ) :
+theorem regularizedHGFunCoeff_singleton_succ (a b : ℂ) (n : ℕ) :
     (n + 1 : ℂ) * regularizedHGFunCoeff {a} {b} (n + 1) =
       a * regularizedHGFunCoeff {a + 1} {b + 1} n := by
   rw [regularizedHGFunCoeff_singleton, regularizedHGFunCoeff_singleton, poch_succ_left,
@@ -183,7 +183,7 @@ theorem deriv_regularizedConfluent (a b z : ℂ) :
   funext n
   rw [← mul_assoc, regularizedHGFunCoeff_singleton_succ]
 
-lemma differentiableAt_regularizedConfluent (a b z : ℂ) :
+theorem differentiableAt_regularizedConfluent (a b z : ℂ) :
     DifferentiableAt ℂ (regularizedHGFun {a} {b}) z :=
   ((hasFPowerSeriesOnBall_regularizedConfluent a b).analyticAt_of_mem
     (by simp : z ∈ Metric.eball (0 : ℂ) ⊤)).differentiableAt
@@ -255,7 +255,7 @@ theorem continuous_regularizedConfluent :
   gcongr
 
 /-- Off the poles of `Γ(b)`, `𝐌(a,b,z) = M(a,b,z)/Γ(b)`. -/
-lemma regularizedConfluent_eq_div_Gamma {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -(k : ℂ)) (z : ℂ) :
+theorem regularizedConfluent_eq_div_Gamma {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -(k : ℂ)) (z : ℂ) :
     regularizedHGFun {a} {b} z = kummerM a b z / Gamma b := by
   rw [kummerM_eq_mul_regularizedHGFun hb, mul_div_cancel_left₀ _ (Gamma_ne_zero hb)]
 

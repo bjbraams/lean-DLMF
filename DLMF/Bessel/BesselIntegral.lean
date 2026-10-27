@@ -5,7 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Bessel.Theorems
+public import DLMF.Bessel.Generating
+public import Mathlib.Analysis.SpecialFunctions.Bernstein
 
 /-!
 # Bessel's integral (DLMF 10.9.1–10.9.2)
@@ -44,13 +45,13 @@ theorem hasSum_besselJ_jacobiAnger (z : ℂ) (θ : ℝ) :
   ring_nf
 
 /-- The integer-order coefficients are absolutely summable. -/
-lemma summable_norm_besselJ_int (z : ℂ) : Summable fun m : ℤ => ‖besselJ m z‖ := by
+theorem summable_norm_besselJ_int (z : ℂ) : Summable fun m : ℤ => ‖besselJ m z‖ := by
   have h := (hasSum_besselJ_generating_function z 1 one_ne_zero).summable
   simp only [one_zpow, mul_one] at h
   exact summable_norm_iff.mpr h
 
 /-- `∫₀^{2π} e^{ikθ} dθ = 2π δ_{k0}` for integer `k`. -/
-lemma integral_exp_int_mul_I (k : ℤ) :
+theorem integral_exp_int_mul_I (k : ℤ) :
     ∫ θ in (0 : ℝ)..2 * π, exp (I * k * θ) = if k = 0 then 2 * π else 0 := by
   split_ifs with hk
   · simp [hk]

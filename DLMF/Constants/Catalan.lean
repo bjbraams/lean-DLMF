@@ -32,7 +32,7 @@ namespace DLMF.Constants
 def catalanConstant : ℝ := ∑' k : ℕ, (-1 : ℝ) ^ k / (2 * k + 1) ^ 2
 
 /-- `∑ 1/(2k+1)²` converges. -/
-lemma summable_one_div_odd_sq : Summable fun k : ℕ => 1 / (2 * (k : ℝ) + 1) ^ 2 := by
+theorem summable_one_div_odd_sq : Summable fun k : ℕ => 1 / (2 * (k : ℝ) + 1) ^ 2 := by
   have h := (Real.summable_one_div_nat_pow (p := 2)).mpr (by norm_num)
   refine Summable.of_nonneg_of_le (fun k => by positivity) (fun k => ?_)
     (h.comp_injective (add_left_injective 1))
@@ -42,14 +42,14 @@ lemma summable_one_div_odd_sq : Summable fun k : ℕ => 1 / (2 * (k : ℝ) + 1) 
   linarith [(k.cast_nonneg : (0 : ℝ) ≤ k)]
 
 /-- The series of Catalan's constant converges absolutely. -/
-lemma hasSum_catalanConstant :
+theorem hasSum_catalanConstant :
     HasSum (fun k : ℕ => (-1 : ℝ) ^ k / (2 * k + 1) ^ 2) catalanConstant := by
   refine (Summable.of_norm ?_).hasSum
   refine summable_one_div_odd_sq.congr fun k => ?_
   rw [norm_div, norm_pow, norm_neg, norm_one, one_pow, Real.norm_of_nonneg (by positivity)]
 
 /-- `∑ 1/(2k+1)² = π²/8`, from `λ(2) = (3/4) ζ(2)`. -/
-lemma hasSum_one_div_odd_sq_complex :
+theorem hasSum_one_div_odd_sq_complex :
     HasSum (fun k : ℕ => 1 / (2 * (k : ℂ) + 1) ^ 2) ((π : ℂ) ^ 2 / 8) := by
   have hs : (1 : ℝ) < (2 : ℂ).re := by norm_num
   have h := (summable_odd_terms hs).hasSum
@@ -62,7 +62,7 @@ lemma hasSum_one_div_odd_sq_complex :
   · ring
 
 /-- `∑ 1/(4k+1)² = (π²/8 + G)/2` and `∑ 1/(4k+3)² = (π²/8 - G)/2`. -/
-lemma hasSum_quarter_sq :
+theorem hasSum_quarter_sq :
     HasSum (fun k : ℕ => 1 / (4 * (k : ℂ) + 1) ^ 2) (((π : ℂ) ^ 2 / 8 + catalanConstant) / 2) ∧
       HasSum (fun k : ℕ => 1 / (4 * (k : ℂ) + 3) ^ 2)
         (((π : ℂ) ^ 2 / 8 - catalanConstant) / 2) := by
@@ -92,7 +92,7 @@ lemma hasSum_quarter_sq :
   · convert hB' using 1; linear_combination -(hsum - hdiff) / 2
 
 /-- Points with positive real part are not poles of `Γ`. -/
-lemma mem_notNegNat_of_re_pos {z : ℂ} (hz : 0 < z.re) : z ∈ DLMF.Gamma.notNegNat := fun m h => by
+theorem mem_notNegNat_of_re_pos {z : ℂ} (hz : 0 < z.re) : z ∈ DLMF.Gamma.notNegNat := fun m h => by
   have := congrArg re h
   simp at this
   linarith [(m.cast_nonneg : (0 : ℝ) ≤ m)]

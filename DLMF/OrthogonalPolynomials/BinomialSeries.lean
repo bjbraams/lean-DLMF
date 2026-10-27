@@ -36,13 +36,13 @@ def binomSeries (lam : ℂ) : PowerSeries ℂ := PowerSeries.mk fun n => poch la
 
 open PowerSeries in
 /-- Coefficients of the binomial series. -/
-lemma coeff_binomSeries (lam : ℂ) (n : ℕ) :
+theorem coeff_binomSeries (lam : ℂ) (n : ℕ) :
     coeff n (binomSeries lam) = poch lam n / (n.factorial : ℂ) := by
   simp [binomSeries]
 
 open PowerSeries in
 /-- The binomial series satisfies `(1 - X) G' = λ G`. -/
-lemma one_sub_X_mul_derivative_binomSeries (lam : ℂ) :
+theorem one_sub_X_mul_derivative_binomSeries (lam : ℂ) :
     (1 - X) * d⁄dX (binomSeries lam) = C lam * binomSeries lam := by
   ext n
   rw [sub_mul, one_mul, map_sub, coeff_C_mul, coeff_derivative, coeff_binomSeries,
@@ -63,7 +63,7 @@ lemma one_sub_X_mul_derivative_binomSeries (lam : ℂ) :
 
 open PowerSeries in
 /-- Derivative of a rescaled power series. -/
-lemma derivative_rescale (a : ℂ) (f : PowerSeries ℂ) :
+theorem derivative_rescale (a : ℂ) (f : PowerSeries ℂ) :
     d⁄dX (rescale a f) = C a * rescale a (d⁄dX f) := by
   ext n
   simp only [coeff_derivative, coeff_rescale, coeff_C_mul, pow_succ]
@@ -71,7 +71,7 @@ lemma derivative_rescale (a : ℂ) (f : PowerSeries ℂ) :
 
 open PowerSeries in
 /-- The rescaled binomial series satisfies `(1 - aX) G' = a λ G`. -/
-lemma one_sub_mul_derivative_rescale_binomSeries (lam a : ℂ) :
+theorem one_sub_mul_derivative_rescale_binomSeries (lam a : ℂ) :
     (1 - C a * X) * d⁄dX (rescale a (binomSeries lam)) =
       C (a * lam) * rescale a (binomSeries lam) := by
   have h := congrArg (rescale a) (one_sub_X_mul_derivative_binomSeries lam)
@@ -84,7 +84,7 @@ lemma one_sub_mul_derivative_rescale_binomSeries (lam a : ℂ) :
 
 open PowerSeries in
 /-- `G_λ G_μ = G_{λ+μ}` (Chu–Vandermonde). -/
-lemma binomSeries_mul (lam μ : ℂ) :
+theorem binomSeries_mul (lam μ : ℂ) :
     binomSeries lam * binomSeries μ = binomSeries (lam + μ) := by
   ext n
   rw [coeff_mul, Finset.Nat.sum_antidiagonal_eq_sum_range_succ_mk, coeff_binomSeries,
@@ -100,7 +100,7 @@ lemma binomSeries_mul (lam μ : ℂ) :
 
 open PowerSeries in
 /-- `(1 - aX) G_1(aX) = 1`: the geometric series. -/
-lemma one_sub_mul_rescale_binomSeries_one (a : ℂ) :
+theorem one_sub_mul_rescale_binomSeries_one (a : ℂ) :
     (1 - C a * X) * rescale a (binomSeries 1) = 1 := by
   have hG : binomSeries 1 = mk fun _ => (1 : ℂ) := by
     ext n
@@ -115,7 +115,7 @@ lemma one_sub_mul_rescale_binomSeries_one (a : ℂ) :
     ring
 
 /-- `‖(λ)_j‖ ≤ (‖λ‖)_j`. -/
-lemma norm_poch_le_norm_poch_norm (lam : ℂ) (j : ℕ) : ‖poch lam j‖ ≤ ‖poch (‖lam‖ : ℂ) j‖ := by
+theorem norm_poch_le_norm_poch_norm (lam : ℂ) (j : ℕ) : ‖poch lam j‖ ≤ ‖poch (‖lam‖ : ℂ) j‖ := by
   induction j with
   | zero => simp [poch_zero]
   | succ j ih =>
@@ -128,7 +128,7 @@ lemma norm_poch_le_norm_poch_norm (lam : ℂ) (j : ℕ) : ‖poch lam j‖ ≤ �
             Complex.norm_real, Real.norm_of_nonneg (by positivity)]
 
 /-- The binomial series converges absolutely in the open unit disk. -/
-lemma summable_norm_poch_div_factorial_mul_pow (lam : ℂ) {u : ℂ} (hu : ‖u‖ < 1) :
+theorem summable_norm_poch_div_factorial_mul_pow (lam : ℂ) {u : ℂ} (hu : ‖u‖ < 1) :
     Summable fun j : ℕ => ‖poch lam j / (j.factorial : ℂ) * u ^ j‖ := by
   have hr : ‖((‖u‖ : ℝ) : ℂ)‖ < 1 := by simpa using hu
   have hs := (hasSum_poch_div_factorial (β := (‖lam‖ : ℂ)) hr).summable.norm
@@ -146,7 +146,7 @@ def binomProductSeries (a b u : ℂ) : PowerSeries ℂ :=
 
 open PowerSeries in
 /-- The differential equation of `G_a(uX) G_b(X/u)`. -/
-lemma binomProductSeries_ode (a b : ℂ) {u : ℂ} (hu : u ≠ 0) :
+theorem binomProductSeries_ode (a b : ℂ) {u : ℂ} (hu : u ≠ 0) :
     (1 - C (u + u⁻¹) * X + X ^ 2) * d⁄dX (binomProductSeries a b u) =
       (C (a * u + b * u⁻¹) - C (a + b) * X) * binomProductSeries a b u := by
   have hA := one_sub_mul_derivative_rescale_binomSeries a u
@@ -162,7 +162,7 @@ lemma binomProductSeries_ode (a b : ℂ) {u : ℂ} (hu : u ≠ 0) :
 
 open PowerSeries in
 /-- The three-term recurrence for the coefficients of `G_a(uX) G_b(X/u)`. -/
-lemma coeff_binomProductSeries_recurrence (a b : ℂ) {u : ℂ} (hu : u ≠ 0) (n : ℕ) :
+theorem coeff_binomProductSeries_recurrence (a b : ℂ) {u : ℂ} (hu : u ≠ 0) (n : ℕ) :
     (n + 2 : ℂ) * coeff (n + 2) (binomProductSeries a b u) =
       ((n + 1) * (u + u⁻¹) + a * u + b * u⁻¹) * coeff (n + 1) (binomProductSeries a b u) -
         (n + a + b) * coeff n (binomProductSeries a b u) := by
@@ -186,12 +186,12 @@ lemma coeff_binomProductSeries_recurrence (a b : ℂ) {u : ℂ} (hu : u ≠ 0) (
 
 open PowerSeries in
 /-- The constant coefficient of `G_a(uX) G_b(X/u)`. -/
-lemma coeff_zero_binomProductSeries (a b u : ℂ) : coeff 0 (binomProductSeries a b u) = 1 := by
+theorem coeff_zero_binomProductSeries (a b u : ℂ) : coeff 0 (binomProductSeries a b u) = 1 := by
   simp [binomProductSeries, coeff_mul, coeff_rescale, coeff_binomSeries, poch_zero]
 
 open PowerSeries in
 /-- The linear coefficient of `G_a(uX) G_b(X/u)`. -/
-lemma coeff_one_binomProductSeries (a b u : ℂ) :
+theorem coeff_one_binomProductSeries (a b u : ℂ) :
     coeff 1 (binomProductSeries a b u) = a * u + b * u⁻¹ := by
   simp [binomProductSeries, coeff_mul, coeff_rescale, coeff_binomSeries,
     Finset.Nat.antidiagonal_succ, poch_succ, poch_zero]
@@ -200,7 +200,7 @@ lemma coeff_one_binomProductSeries (a b u : ℂ) :
 open PowerSeries in
 /-- A sequence with the initial values and the three-term recurrence of
 `G_a(uX) G_b(X/u)` is its coefficient sequence. -/
-lemma eq_coeff_binomProductSeries {a b u : ℂ} (hu : u ≠ 0) {f : ℕ → ℂ} (h0 : f 0 = 1)
+theorem eq_coeff_binomProductSeries {a b u : ℂ} (hu : u ≠ 0) {f : ℕ → ℂ} (h0 : f 0 = 1)
     (h1 : f 1 = a * u + b * u⁻¹)
     (hrec : ∀ n : ℕ, (n + 2 : ℂ) * f (n + 2) =
       ((n + 1) * (u + u⁻¹) + a * u + b * u⁻¹) * f (n + 1) - (n + a + b) * f n) (n : ℕ) :
@@ -218,7 +218,7 @@ lemma eq_coeff_binomProductSeries {a b u : ℂ} (hu : u ≠ 0) {f : ℕ → ℂ}
 
 open PowerSeries in
 /-- Explicit coefficients of `G_a(uX) G_b(X/u)`. -/
-lemma coeff_binomProductSeries (a b u : ℂ) (n : ℕ) :
+theorem coeff_binomProductSeries (a b u : ℂ) (n : ℕ) :
     coeff n (binomProductSeries a b u) = ∑ k ∈ Finset.range (n + 1),
       poch a k * poch b (n - k) / ((k.factorial : ℂ) * (n - k).factorial) *
         (u ^ k * u⁻¹ ^ (n - k)) := by

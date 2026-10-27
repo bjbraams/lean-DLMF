@@ -8,7 +8,6 @@ module
 public import DLMF.EllipticIntegrals.Legendre
 public import DLMF.EllipticIntegrals.Symmetric
 public import DLMF.EllipticIntegrals.Relations
-public import Mathlib.Analysis.SpecialFunctions.Gamma.Digamma
 
 /-!
 # Asymptotic approximations (DLMF §19.12)
@@ -138,7 +137,7 @@ def ei19b_largeRatioFilter : Filter (ℝ × ℝ) :=
 
 /-- `R_C(x, y) = y^{-1/2} arccos(√(x/y))/√(1 - x/y)` for `0 ≤ x < y` (Carlson's (6.9-15) and
 homogeneity; `x = 0` from 19.6.15). -/
-theorem ei19b_symEllIntRC_eq_arccos {x y : ℝ} (hx : 0 ≤ x) (hxy : x < y) :
+lemma ei19b_symEllIntRC_eq_arccos {x y : ℝ} (hx : 0 ≤ x) (hxy : x < y) :
     symEllIntRC (x : ℂ) (y : ℂ) =
       (((Real.sqrt y)⁻¹ * (Real.arccos (Real.sqrt (x / y)) / Real.sqrt (1 - x / y)) : ℝ) : ℂ) := by
   have hy : 0 < y := lt_of_le_of_lt hx hxy
@@ -164,7 +163,7 @@ theorem ei19b_symEllIntRC_eq_arccos {x y : ℝ} (hx : 0 ≤ x) (hxy : x < y) :
 
 /-- The elementary estimate behind 19.12.6:
 `|arccos s/√(1 - s²) - π/2 + s| ≤ 3s²` for `0 ≤ s ≤ 1/2`. -/
-theorem ei19b_arccos_estimate {s : ℝ} (h0 : 0 ≤ s) (h1 : s ≤ 1 / 2) :
+lemma ei19b_arccos_estimate {s : ℝ} (h0 : 0 ≤ s) (h1 : s ≤ 1 / 2) :
     |Real.arccos s / Real.sqrt (1 - s ^ 2) - π / 2 + s| ≤ 3 * s ^ 2 := by
   set r := Real.sqrt (1 - s ^ 2) with hr
   have hs2 : s ^ 2 ≤ 1 / 4 := by nlinarith

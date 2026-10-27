@@ -5,11 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Core.Framework
 public import DLMF.Confluent.ParabolicCylinder
-public import DLMF.Gamma.Digamma
 public import DLMF.Confluent.Coulomb
-public import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
 
 /-!
 # Additional parabolic cylinder definitions and entire dependence
@@ -113,24 +110,24 @@ theorem pcfU_entire_order (z : ℂ) :
   fun_prop
 
 /-- Powers of two commute with complex conjugation of the exponent. -/
-lemma conj_two_cpow (w : ℂ) : conj ((2:ℂ) ^ w) = (2:ℂ) ^ (conj w) := by
+theorem conj_two_cpow (w : ℂ) : conj ((2:ℂ) ^ w) = (2:ℂ) ^ (conj w) := by
   rw [Complex.cpow_conj _ _ (by rw [show (2:ℂ) = ((2:ℝ):ℂ) by norm_num, Complex.arg_ofReal_of_nonneg (by norm_num)]; exact Real.pi_ne_zero.symm),
     map_ofNat]
 
 /-- The even Kummer basis commutes with complex conjugation. -/
-lemma conj_pcfEven (a z : ℂ) : conj (pcfEven a z) = pcfEven (conj a) (conj z) := by
+theorem conj_pcfEven (a z : ℂ) : conj (pcfEven a z) = pcfEven (conj a) (conj z) := by
   simp [pcfEven, conj_kummerM, ← Complex.exp_conj, map_div₀, map_ofNat]
 
 /-- The odd Kummer basis commutes with complex conjugation. -/
-lemma conj_pcfOdd (a z : ℂ) : conj (pcfOdd a z) = pcfOdd (conj a) (conj z) := by
+theorem conj_pcfOdd (a z : ℂ) : conj (pcfOdd a z) = pcfOdd (conj a) (conj z) := by
   simp [pcfOdd, conj_kummerM, ← Complex.exp_conj, map_div₀, map_ofNat]
 
 /-- `U(a,z)` commutes with complex conjugation. -/
-lemma conj_pcfU (a z : ℂ) : conj (pcfU a z) = pcfU (conj a) (conj z) := by
+theorem conj_pcfU (a z : ℂ) : conj (pcfU a z) = pcfU (conj a) (conj z) := by
   simp [pcfU, conj_pcfEven, conj_pcfOdd, conj_two_cpow, ← Complex.Gamma_conj, map_div₀, map_ofNat]
 
 /-- `V(a,z)` commutes with complex conjugation. -/
-lemma conj_pcfV (a z : ℂ) : conj (pcfV a z) = pcfV (conj a) (conj z) := by
+theorem conj_pcfV (a z : ℂ) : conj (pcfV a z) = pcfV (conj a) (conj z) := by
   simp [pcfV, pcfVZero, pcfVDerivZero, conj_pcfEven, conj_pcfOdd, conj_two_cpow,
     ← Complex.Gamma_conj, map_div₀, map_ofNat]
 
@@ -186,25 +183,25 @@ def pcfTheta (a x : ℝ) : ℝ :=
   arg ((pcfU a x+I*pcfUBar a x))
 
 /-- The derivative of the even Kummer basis commuteswith complex conjugation. -/
-lemma conj_pcfEvenDeriv (a z : ℂ) : conj (pcfEvenDeriv a z) = pcfEvenDeriv (conj a) (conj z) := by
+theorem conj_pcfEvenDeriv (a z : ℂ) : conj (pcfEvenDeriv a z) = pcfEvenDeriv (conj a) (conj z) := by
   simp [pcfEvenDeriv, conj_kummerM, ← Complex.exp_conj, map_div₀, map_ofNat]
 
 /-- The derivative of the odd Kummer basis commutes with complex conjugation. -/
-lemma conj_pcfOddDeriv (a z : ℂ) : conj (pcfOddDeriv a z) = pcfOddDeriv (conj a) (conj z) := by
+theorem conj_pcfOddDeriv (a z : ℂ) : conj (pcfOddDeriv a z) = pcfOddDeriv (conj a) (conj z) := by
   simp [pcfOddDeriv, conj_kummerM, ← Complex.exp_conj, map_div₀, map_ofNat]
 
 /-- `U'(a,z)` commutes with complex conjugation. -/
-lemma conj_pcfUDeriv (a z : ℂ) : conj (pcfUDeriv a z) = pcfUDeriv (conj a) (conj z) := by
+theorem conj_pcfUDeriv (a z : ℂ) : conj (pcfUDeriv a z) = pcfUDeriv (conj a) (conj z) := by
   simp [pcfUDeriv, conj_pcfEvenDeriv, conj_pcfOddDeriv, conj_two_cpow, ← Complex.Gamma_conj,
     map_div₀, map_ofNat]
 
 /-- `V'(a,z)` commutes with complex conjugation. -/
-lemma conj_pcfVDeriv (a z : ℂ) : conj (pcfVDeriv a z) = pcfVDeriv (conj a) (conj z) := by
+theorem conj_pcfVDeriv (a z : ℂ) : conj (pcfVDeriv a z) = pcfVDeriv (conj a) (conj z) := by
   simp [pcfVDeriv, pcfVZero, pcfVDerivZero, conj_pcfEvenDeriv, conj_pcfOddDeriv, conj_two_cpow,
     ← Complex.Gamma_conj, map_div₀, map_ofNat]
 
 /-- `u + i v` with real `u`, `v` vanishes only if `u = v = 0`. -/
-lemma add_I_mul_ne_zero_of_real {u v : ℂ} (hu : conj u = u) (hv : conj v = v)
+theorem add_I_mul_ne_zero_of_real {u v : ℂ} (hu : conj u = u) (hv : conj v = v)
     (h : ¬ (u = 0 ∧ v = 0)) : u + I * v ≠ 0 := by
   rw [Complex.conj_eq_iff_im] at hu hv
   intro h0
@@ -215,7 +212,7 @@ lemma add_I_mul_ne_zero_of_real {u v : ℂ} (hu : conj u = u) (hv : conj v = v)
   exact ⟨Complex.ext hr hu, Complex.ext hi hv⟩
 
 /-- `Γ(1/2 - a)` is real for real `a`. -/
-lemma conj_Gamma_half_sub_ofReal (a : ℝ) : conj (Gamma (1/2 - a)) = Gamma (1/2 - a) := by
+theorem conj_Gamma_half_sub_ofReal (a : ℝ) : conj (Gamma (1/2 - a)) = Gamma (1/2 - a) := by
   rw [← Complex.Gamma_conj]; simp [map_ofNat]
 
 /-- pcfF phase. -/
@@ -382,14 +379,14 @@ theorem pcfOdd_kummer_alternative (a z : ℂ) :
   congr 2 <;> ring
 
 /-- A product of scaled shifted factors is a scaled Pochhammer symbol. -/
-lemma prod_range_mul_add_eq_poch (c α : ℂ) (k : ℕ) :
+theorem prod_range_mul_add_eq_poch (c α : ℂ) (k : ℕ) :
     ∏ r ∈ Finset.range k, (c * (α + r)) = c ^ k * poch α k := by
   induction k with
   | zero => simp [poch_zero]
   | succ k ih => rw [Finset.prod_range_succ, ih, poch_succ, pow_succ]; ring
 
 /-- `(2k)! = 4^k k! (1/2)_k`. -/
-lemma factorial_two_mul_eq_poch (k : ℕ) :
+theorem factorial_two_mul_eq_poch (k : ℕ) :
     (((2 * k)! : ℕ) : ℂ) = 4 ^ k * (k ! : ℂ) * poch (1 / 2) k := by
   have h := poch_two_mul (1 / 2) k
   rw [show (2:ℂ) * (1/2) = 1 by norm_num, show (1/2:ℂ) + 1/2 = 1 by norm_num,
@@ -397,7 +394,7 @@ lemma factorial_two_mul_eq_poch (k : ℕ) :
   rw [h]; ring
 
 /-- `(2k+1)! = 4^k k! (3/2)_k`. -/
-lemma factorial_two_mul_add_one_eq_poch (k : ℕ) :
+theorem factorial_two_mul_add_one_eq_poch (k : ℕ) :
     (((2 * k + 1)! : ℕ) : ℂ) = 4 ^ k * (k ! : ℂ) * poch (3 / 2) k := by
   have h := poch_two_mul 1 k
   rw [show (2:ℂ) * 1 = 2 by norm_num, show (1:ℂ) + 1/2 = 3/2 by norm_num,

@@ -7,9 +7,7 @@ module
 
 public import DLMF.Combinatorics.Permutations
 public import DLMF.QSeries.QBinomial
-public import Mathlib.Data.Nat.Choose.Multinomial
 public import Mathlib.GroupTheory.Perm.DomMulAct
-public import DLMFMathlib.Combinatorics.Q26bSurjections
 
 /-!
 # Multiset permutations (DLMF §26.16)

@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.Analysis.Complex.TaylorSeries
-public import Mathlib.Analysis.Analytic.OfScalars
 
 /-!
 # Extending the disk of convergence of a scalar power series
@@ -25,7 +24,7 @@ open scoped Nat Topology
 namespace Complex
 
 /-- Coefficients of a scalar power series are determined by its sums on a small disk. -/
-theorem trigR4_coeff_unique_ball {c d : ℕ → ℂ} {g : ℂ → ℂ} {ρ : ℝ} (hρ : 0 < ρ)
+lemma trigR4_coeff_unique_ball {c d : ℕ → ℂ} {g : ℂ → ℂ} {ρ : ℝ} (hρ : 0 < ρ)
     (hc : ∀ z : ℂ, ‖z‖ < ρ → HasSum (fun n => c n * z ^ n) (g z))
     (hd : ∀ z : ℂ, ‖z‖ < ρ → HasSum (fun n => d n * z ^ n) (g z)) : c = d := by
   set ρ' : NNReal := ⟨ρ / 2, by positivity⟩
@@ -87,7 +86,7 @@ theorem trigR4_hasSum_even_iff {a : ℕ → ℂ} {s : ℂ} :
     simp [this]
 
 /-- A series supported on odd indices is a reindexed series. -/
-theorem trigR4_hasSum_odd_iff {a : ℕ → ℂ} {s : ℂ} :
+lemma trigR4_hasSum_odd_iff {a : ℕ → ℂ} {s : ℂ} :
     HasSum (fun m : ℕ => if Even m then 0 else a (m / 2)) s ↔ HasSum a s := by
   have hinj : Function.Injective (fun n : ℕ => 2 * n + 1) := fun x y h => by simpa using h
   rw [← hinj.hasSum_iff]

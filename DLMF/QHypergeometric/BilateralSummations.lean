@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.QHypergeometric.Basic
-public import TauCeti.Analysis.Complex.Conformal.Continuation.Basic
 
 /-!
 # Bilateral basic summations and continuation (DLMF §17.8)

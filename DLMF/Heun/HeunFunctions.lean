@@ -5,12 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Heun.Basic
-public import Mathlib.Analysis.SpecialFunctions.Pow.Complex
-public import Mathlib.Topology.Algebra.InfiniteSum.Basic
 public import Mathlib.LinearAlgebra.Matrix.Charpoly.Coeff
-public import Mathlib.LinearAlgebra.Matrix.ToLinearEquiv
-public import Mathlib.Analysis.Complex.CauchyIntegral
 public import Mathlib.Analysis.Calculus.Deriv.Polynomial
 public import DLMF.Heun.LocalSolutions
 
@@ -108,7 +103,7 @@ theorem tendsto_heunCFApprox (ha : 1 < ‖a‖) (hα : ∀ n : ℕ, α ≠ -(n :
 /-! ### Heun polynomials (§31.5) -/
 
 /-- Row `i` of `heunPolyMatrix` applied to a vector extended by zero. -/
-theorem p2h_row (a β γ δ : ℂ) (n : ℕ) (w : ℕ → ℂ) (hw : w (n + 1) = 0) (i : Fin (n + 1)) :
+lemma p2h_row (a β γ δ : ℂ) (n : ℕ) (w : ℕ → ℂ) (hw : w (n + 1) = 0) (i : Fin (n + 1)) :
     ∑ k : Fin (n + 1), heunPolyMatrix a β γ δ n i k * w k =
       if (i : ℕ) = 0 then a * γ * w 1 else
         heunRecP (-(n : ℂ)) β i * w (i - 1) - heunRecQ a (-(n : ℂ)) β γ δ i * w i +
@@ -155,7 +150,7 @@ theorem p2h_row (a β γ δ : ℂ) (n : ℕ) (w : ℕ → ℂ) (hw : w (n + 1) =
 /-- For an eigenvalue `q` of `heunPolyMatrix`, the last row of the eigen-equation holds for the
 coefficients of `Hl(a, q; -n, …)`: `q = 0` if `n = 0`, and
 `(Q_n + q)c_n - P_n c_{n-1} = 0` if `n ≥ 1`. -/
-theorem p2h_eigen {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
+lemma p2h_eigen {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
     (hγ : ∀ k : ℕ, k < n → γ ≠ -(k : ℂ))
     (hq : (heunPolyMatrix a β γ δ n).charpoly.IsRoot q) :
     (n = 0 → q = 0) ∧ ∀ m : ℕ, n = m + 1 →
@@ -243,7 +238,7 @@ theorem p2h_eigen {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
 
 /-- For an eigenvalue `q` of `heunPolyMatrix`, the coefficient `c_{n+1}` of `Hl(a, q; -n, …)`
 vanishes. -/
-theorem p2h_coeff_succ_eq_zero {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
+lemma p2h_coeff_succ_eq_zero {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
     (hγ : ∀ k : ℕ, k < n → γ ≠ -(k : ℂ))
     (hq : (heunPolyMatrix a β γ δ n).charpoly.IsRoot q) :
     heunLocalCoeff a q (-(n : ℂ)) β γ δ (n + 1) = 0 := by
@@ -256,7 +251,7 @@ theorem p2h_coeff_succ_eq_zero {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
 
 /-- For an eigenvalue `q` of `heunPolyMatrix`, the coefficients `c_j` of `Hl(a, q; -n, …)`
 vanish for `j > n`. -/
-theorem p2h_coeff_eq_zero {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
+lemma p2h_coeff_eq_zero {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
     (hγ : ∀ k : ℕ, k < n → γ ≠ -(k : ℂ))
     (hq : (heunPolyMatrix a β γ δ n).charpoly.IsRoot q) {j : ℕ} (hj : n < j) :
     heunLocalCoeff a q (-(n : ℂ)) β γ δ j = 0 := by
@@ -283,7 +278,7 @@ theorem p2h_coeff_eq_zero {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
   rwa [add_right_comm] at this
 
 /-- The leading coefficient `c_n` of the Heun polynomial is nonzero. -/
-theorem p2h_coeff_n_ne_zero {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
+lemma p2h_coeff_n_ne_zero {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
     (hγ : ∀ k : ℕ, k < n → γ ≠ -(k : ℂ)) (hβ : ∀ k : ℕ, k < n → β ≠ -(k : ℂ))
     (hq : (heunPolyMatrix a β γ δ n).charpoly.IsRoot q) :
     heunLocalCoeff a q (-(n : ℂ)) β γ δ n ≠ 0 := by
@@ -346,7 +341,7 @@ theorem p2h_coeff_n_ne_zero {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
   simp [c] at this
 
 /-- The coefficients of the Heun polynomial satisfy every equation of the recurrence. -/
-theorem p2h_p1hE_eq_zero {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
+lemma p2h_p1hE_eq_zero {a q β γ δ : ℂ} (ha : a ≠ 0) {n : ℕ}
     (hγ : ∀ k : ℕ, k < n → γ ≠ -(k : ℂ))
     (hq : (heunPolyMatrix a β γ δ n).charpoly.IsRoot q) (k : ℕ) :
     p1hE a q (-(n : ℂ)) β γ δ (heunLocalCoeff a q (-(n : ℂ)) β γ δ) k = 0 := by

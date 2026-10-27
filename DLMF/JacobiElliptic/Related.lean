@@ -7,6 +7,7 @@ module
 
 public import DLMF.JacobiElliptic.Integrals
 public import DLMF.Elementary.Trigonometric
+public import DLMF.Elliptic.JacobiIdentities
 
 /-!
 # Related functions: amplitude, Jacobi's Epsilon and Zeta functions (DLMF §22.16)
@@ -229,7 +230,7 @@ theorem Real.incEllIntEm_jacobiAmm (hm : k ^ 2 < 1) (x : ℝ) :
 
 open MeasureTheory Set in
 /-- Substitution `t = f θ` for a continuous strictly increasing `f` on `[a, b]`. -/
-lemma p22R1_subst_mono {f f' g h : ℝ → ℝ} {a b : ℝ} (hab : a ≤ b)
+theorem p22R1_subst_mono {f f' g h : ℝ → ℝ} {a b : ℝ} (hab : a ≤ b)
     (hc : ContinuousOn f (Icc a b)) (ha : StrictMonoOn f (Icc a b))
     (hd : ∀ θ ∈ Ioo a b, HasDerivAt f (f' θ) θ)
     (hg : ∀ θ ∈ Ioo a b, |f' θ| * g (f θ) = h θ) :

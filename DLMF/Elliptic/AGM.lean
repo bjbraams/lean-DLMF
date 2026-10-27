@@ -32,7 +32,7 @@ noncomputable section
 namespace DLMF.Elliptic
 
 /-- `x^{-1/2} = (√x)⁻¹` for `x ≥ 0`. -/
-lemma rpow_neg_half_eq_recip_sqrt {x : ℝ} (hx : 0 ≤ x) : x ^ (-(1 / 2) : ℝ) = (√x)⁻¹ := by
+theorem rpow_neg_half_eq_recip_sqrt {x : ℝ} (hx : 0 ≤ x) : x ^ (-(1 / 2) : ℝ) = (√x)⁻¹ := by
   rw [rpow_neg hx, sqrt_eq_rpow]
 
 /-- The integral `∫₀^∞ ((t²+a²)(t²+b²))^{-1/2} dt`. -/
@@ -43,7 +43,7 @@ def gaussLineIntegral (a b : ℝ) : ℝ :=
 def gaussSubst (a b t : ℝ) : ℝ := (t - a * b / t) / 2
 
 /-- `t ↦ (t - ab/t)/2` maps `(0, ∞)` onto `ℝ`. -/
-lemma gaussSubst_image {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
+theorem gaussSubst_image {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
     gaussSubst a b '' Ioi 0 = univ := by
   refine eq_univ_of_forall fun y => ?_
   have hab : 0 < a * b := mul_pos ha hb
@@ -57,7 +57,7 @@ lemma gaussSubst_image {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
   nlinarith [hsq]
 
 /-- `t ↦ (t - ab/t)/2` is injective on `(0, ∞)`. -/
-lemma gaussSubst_injOn {a b : ℝ} (ha : 0 < a) (hb : 0 < b) : InjOn (gaussSubst a b) (Ioi 0) := by
+theorem gaussSubst_injOn {a b : ℝ} (ha : 0 < a) (hb : 0 < b) : InjOn (gaussSubst a b) (Ioi 0) := by
   refine StrictMonoOn.injOn fun s hs t ht hst => ?_
   have hs : (0 : ℝ) < s := hs
   have ht : (0 : ℝ) < t := ht
@@ -66,7 +66,7 @@ lemma gaussSubst_injOn {a b : ℝ} (ha : 0 < a) (hb : 0 < b) : InjOn (gaussSubst
   linarith
 
 /-- The derivative of `t ↦ (t - ab/t)/2`. -/
-lemma hasDerivAt_gaussSubst (a b : ℝ) {t : ℝ} (ht : t ≠ 0) :
+theorem hasDerivAt_gaussSubst (a b : ℝ) {t : ℝ} (ht : t ≠ 0) :
     HasDerivAt (gaussSubst a b) ((1 + a * b / t ^ 2) / 2) t := by
   have h := ((hasDerivAt_id t).sub ((hasDerivAt_inv ht).const_mul (a * b))).div_const 2
   refine (h.congr_deriv ?_).congr_of_eventuallyEq (Eventually.of_forall fun s => ?_)
@@ -74,7 +74,7 @@ lemma hasDerivAt_gaussSubst (a b : ℝ) {t : ℝ} (ht : t ≠ 0) :
   · simp only [gaussSubst, Pi.sub_apply, id]; ring
 
 /-- The integrand identity behind Gauss's invariance. -/
-lemma gaussSubst_pointwise {a b t : ℝ} (ha : 0 < a) (hb : 0 < b) (ht : 0 < t) :
+theorem gaussSubst_pointwise {a b t : ℝ} (ha : 0 < a) (hb : 0 < b) (ht : 0 < t) :
     |(1 + a * b / t ^ 2) / 2| * ((gaussSubst a b t ^ 2 + ((a + b) / 2) ^ 2) *
       (gaussSubst a b t ^ 2 + √(a * b) ^ 2)) ^ (-(1 / 2) : ℝ) =
       2 * ((t ^ 2 + a ^ 2) * (t ^ 2 + b ^ 2)) ^ (-(1 / 2) : ℝ) := by
@@ -124,7 +124,7 @@ def agmIntegral (a b : ℝ) : ℝ :=
   ∫ θ in (0 : ℝ)..(π / 2), (a ^ 2 * cos θ ^ 2 + b ^ 2 * sin θ ^ 2) ^ (-(1 / 2) : ℝ)
 
 /-- `t ↦ arctan(t/b)` maps `(0, ∞)` onto `(0, π/2)`. -/
-lemma arctan_div_image {b : ℝ} (hb : 0 < b) :
+theorem arctan_div_image {b : ℝ} (hb : 0 < b) :
     (fun t => arctan (t / b)) '' Ioi 0 = Ioo 0 (π / 2) := by
   ext θ
   constructor
@@ -136,7 +136,7 @@ lemma arctan_div_image {b : ℝ} (hb : 0 < b) :
     rw [mul_div_cancel_left₀ _ hb.ne', arctan_tan (by linarith [pi_pos]) h1]
 
 /-- The integrand identity for the substitution `t = b tan θ`. -/
-lemma agmIntegral_pointwise {a b t : ℝ} (ha : 0 < a) (hb : 0 < b) (ht : 0 < t) :
+theorem agmIntegral_pointwise {a b t : ℝ} (ha : 0 < a) (hb : 0 < b) (ht : 0 < t) :
     |b / (b ^ 2 + t ^ 2)| * (a ^ 2 * cos (arctan (t / b)) ^ 2 +
       b ^ 2 * sin (arctan (t / b)) ^ 2) ^ (-(1 / 2) : ℝ) =
       ((t ^ 2 + a ^ 2) * (t ^ 2 + b ^ 2)) ^ (-(1 / 2) : ℝ) := by
@@ -182,7 +182,7 @@ theorem agmIntegral_eq_gaussLineIntegral {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
     rw [smul_eq_mul]; exact agmIntegral_pointwise ha hb ht
 
 /-- `agmIntegral` is symmetric. -/
-lemma agmIntegral_comm {a b : ℝ} (ha : 0 < a) (hb : 0 < b) : agmIntegral a b = agmIntegral b a := by
+theorem agmIntegral_comm {a b : ℝ} (ha : 0 < a) (hb : 0 < b) : agmIntegral a b = agmIntegral b a := by
   rw [agmIntegral_eq_gaussLineIntegral ha hb, agmIntegral_eq_gaussLineIntegral hb ha,
     gaussLineIntegral, gaussLineIntegral]
   simp_rw [mul_comm (_ ^ 2 + a ^ 2)]
@@ -194,7 +194,7 @@ theorem agmIntegral_am_gm {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
     agmIntegral_eq_gaussLineIntegral ha hb, gaussLineIntegral_am_gm ha hb]
 
 /-- Homogeneity: `agmIntegral (λa) (λb) = λ⁻¹ agmIntegral a b` for `λ > 0`. -/
-lemma agmIntegral_mul {l a b : ℝ} (hl : 0 < l) :
+theorem agmIntegral_mul {l a b : ℝ} (hl : 0 < l) :
     agmIntegral (l * a) (l * b) = l⁻¹ * agmIntegral a b := by
   rw [agmIntegral, agmIntegral, ← intervalIntegral.integral_const_mul]
   refine intervalIntegral.integral_congr fun θ _ => ?_
@@ -204,7 +204,7 @@ lemma agmIntegral_mul {l a b : ℝ} (hl : 0 < l) :
     show ((2 : ℕ) : ℝ) * (-(1 / 2)) = -1 by norm_num, rpow_neg_one]
 
 /-- Bounds: `(π/2)/max(a,b) ≤ agmIntegral a b ≤ (π/2)/min(a,b)` for `0 < b ≤ a`. -/
-lemma agmIntegral_mem_Icc {a b : ℝ} (hb : 0 < b) (hab : b ≤ a) :
+theorem agmIntegral_mem_Icc {a b : ℝ} (hb : 0 < b) (hab : b ≤ a) :
     π / 2 / a ≤ agmIntegral a b ∧ agmIntegral a b ≤ π / 2 / b := by
   have hbase : ∀ θ, b ^ 2 ≤ a ^ 2 * cos θ ^ 2 + b ^ 2 * sin θ ^ 2 ∧
       a ^ 2 * cos θ ^ 2 + b ^ 2 * sin θ ^ 2 ≤ a ^ 2 := by
@@ -239,7 +239,7 @@ lemma agmIntegral_mem_Icc {a b : ℝ} (hb : 0 < b) (hab : b ≤ a) :
 
 open NNReal in
 /-- `agmIntegral` is constant along the AGM iteration. -/
-lemma agmIntegral_agmSequences {x y : ℝ≥0} (hx : 0 < x) (hy : 0 < y) (n : ℕ) :
+theorem agmIntegral_agmSequences {x y : ℝ≥0} (hx : 0 < x) (hy : 0 < y) (n : ℕ) :
     agmIntegral (NNReal.agmSequences x y n).1 (NNReal.agmSequences x y n).2 = agmIntegral x y := by
   induction n generalizing x y with
   | zero =>
@@ -284,7 +284,7 @@ theorem agmIntegral_eq_pi_div_two_div_agm {x y : ℝ≥0} (hx : 0 < x) (hy : 0 <
   exact le_antisymm (ge_of_tendsto' h1 fun n => (hb n).2) (le_of_tendsto' h2 fun n => (hb n).1)
 
 /-- `K(m) = ∫₀^{π/2} (cos²θ + (1-m) sin²θ)^{-1/2} dθ`. -/
-lemma Real.compEllIntKm_eq_agmIntegral {m : ℝ} (hm : m < 1) :
+theorem Real.compEllIntKm_eq_agmIntegral {m : ℝ} (hm : m < 1) :
     Real.compEllIntKm m = agmIntegral 1 √(1 - m) := by
   rw [Real.compEllIntKm, agmIntegral]
   refine intervalIntegral.integral_congr fun θ _ => ?_

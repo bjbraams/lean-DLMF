@@ -5,8 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Bessel.IntegralTransforms
-public import DLMF.Hypergeometric.FurtherTransformations
+public import DLMF.Confluent.Integrals
 
 /-!
 # The regularized Laplace–Bessel transform
@@ -26,7 +25,7 @@ open DLMF.Confluent DLMF.Hypergeometric
 namespace DLMF.Bessel
 
 /-- The quadratic Laplace argument stays on the continued Gauss cut plane. -/
-lemma besselLaplace_argument_mem_cutPlane {s : ℂ} (hs : 0 < s.re) {w : ℝ} (hw : 0 < w) :
+theorem besselLaplace_argument_mem_cutPlane {s : ℂ} (hs : 0 < s.re) {w : ℝ} (hw : 0 < w) :
     -(w : ℂ) ^ 2 / s ^ 2 ∈ cutPlane := by
   have hs0 : s ≠ 0 := by intro h; simp [h] at hs
   let r : ℂ := w / s

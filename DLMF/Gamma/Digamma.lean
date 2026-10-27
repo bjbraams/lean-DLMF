@@ -5,17 +5,11 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Tactic.CrossRefAttribute
-public import Mathlib.Analysis.Calculus.Deriv.Slope
 public import Mathlib.Analysis.Calculus.SmoothSeries
 public import Mathlib.Analysis.Convex.Deriv
 public import Mathlib.Analysis.PSeries
-public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Digamma
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
-public import Mathlib.NumberTheory.Harmonic.GammaDeriv
 public import Mathlib.Analysis.Calculus.Deriv.Star
-public import Mathlib.Analysis.Complex.RealDeriv
 
 /-!
 # The digamma series (AAR Theorem 1.2.5)
@@ -46,7 +40,7 @@ local notation "γ" => eulerMascheroniConstant
 def digamma (x : ℝ) : ℝ :=
   deriv Gamma x / Gamma x
 
-lemma digamma_eq_deriv_log {x : ℝ} (hx : 0 < x) :
+theorem digamma_eq_deriv_log {x : ℝ} (hx : 0 < x) :
     digamma x = deriv (log ∘ Gamma) x := by
   have hG : DifferentiableAt ℝ Gamma x :=
     differentiableAt_Gamma fun m => ((neg_nonpos.mpr m.cast_nonneg).trans_lt hx).ne'
@@ -54,7 +48,7 @@ lemma digamma_eq_deriv_log {x : ℝ} (hx : 0 < x) :
 
 open ComplexConjugate in
 /-- The real digamma function is the real part of Mathlib's complex digamma function. -/
-lemma digamma_eq_re_digamma {x : ℝ} (hx : 0 < x) :
+theorem digamma_eq_re_digamma {x : ℝ} (hx : 0 < x) :
     digamma x = (Complex.digamma x).re := by
   have hx' : ∀ m : ℕ, (x : ℂ) ≠ -m := fun m h => by
     have : x = -(m : ℝ) := by exact_mod_cast h
@@ -76,14 +70,14 @@ lemma digamma_eq_re_digamma {x : ℝ} (hx : 0 < x) :
   rw [Complex.div_ofReal_re, Complex.ofReal_re]
 
 @[dlmf 5.4.E12]
-lemma digamma_one : digamma 1 = -γ := by
+theorem digamma_one : digamma 1 = -γ := by
   simp [digamma, hasDerivAt_Gamma_one.deriv]
 
 /-- The general term of the digamma series. -/
 def digammaSeriesTerm (x : ℝ) (n : ℕ) : ℝ :=
   (n + 1 : ℝ)⁻¹ - (x + n)⁻¹
 
-lemma log_GammaSeq {x : ℝ} (hx : 0 < x) {n : ℕ} (hn : n ≠ 0) :
+theorem log_GammaSeq {x : ℝ} (hx : 0 < x) {n : ℕ} (hn : n ≠ 0) :
     log (GammaSeq x n) =
       x * log n + log n.factorial - ∑ k ∈ range (n + 1), log (x + k) := by
   unfold GammaSeq
@@ -94,7 +88,7 @@ lemma log_GammaSeq {x : ℝ} (hx : 0 < x) {n : ℕ} (hn : n ≠ 0) :
   congr 1
   exact log_prod fun k _ => (add_pos_of_pos_of_nonneg hx (Nat.cast_nonneg k)).ne'
 
-lemma hasDerivAt_log_GammaSeq {x : ℝ} (hx : 0 < x) {n : ℕ} (hn : n ≠ 0) :
+theorem hasDerivAt_log_GammaSeq {x : ℝ} (hx : 0 < x) {n : ℕ} (hn : n ≠ 0) :
     HasDerivAt (fun y : ℝ => log (GammaSeq y n))
       (log n - ∑ k ∈ range (n + 1), (x + k)⁻¹) x := by
   have hsum :
@@ -109,7 +103,7 @@ lemma hasDerivAt_log_GammaSeq {x : ℝ} (hx : 0 < x) {n : ℕ} (hn : n ≠ 0) :
   refine (hlin.sub hsum).congr_of_eventuallyEq ?_
   filter_upwards [Ioi_mem_nhds hx] with y hy using log_GammaSeq hy hn
 
-lemma convexOn_log_GammaSeq {n : ℕ} (hn : n ≠ 0) :
+theorem convexOn_log_GammaSeq {n : ℕ} (hn : n ≠ 0) :
     ConvexOn ℝ (Ioi 0) (fun y : ℝ => log (GammaSeq y n)) := by
   have hlin : ConvexOn ℝ (Ioi 0) (fun y : ℝ => y * log n) := by
     simpa [mul_comm] using (convexOn_id (convex_Ioi (0 : ℝ))).smul (log_natCast_nonneg n)
@@ -137,12 +131,12 @@ lemma convexOn_log_GammaSeq {n : ℕ} (hn : n ≠ 0) :
   refine (((hlin.add hconst).add hsum).congr fun y hy => ?_)
   simp [log_GammaSeq hy hn, sub_eq_add_neg, sum_neg_distrib, Pi.add_apply]
 
-lemma tendsto_log_GammaSeq {x : ℝ} (hx : 0 < x) :
+theorem tendsto_log_GammaSeq {x : ℝ} (hx : 0 < x) :
     Tendsto (fun n : ℕ => log (GammaSeq x n)) atTop (𝓝 (log (Gamma x))) := by
   have hpos : 0 < Gamma x := Gamma_pos_of_pos hx
   exact (GammaSeq_tendsto_Gamma x).log hpos.ne'
 
-lemma tendsto_log_sub_harmonic_succ :
+theorem tendsto_log_sub_harmonic_succ :
     Tendsto (fun n : ℕ => log n - (harmonic (n + 1) : ℝ)) atTop (𝓝 (-γ)) := by
   have hγ : Tendsto (fun n : ℕ => (harmonic (n + 1) : ℝ) - log (n + 1)) atTop (𝓝 γ) := by
     simpa [Function.comp_def] using
@@ -162,7 +156,7 @@ lemma tendsto_log_sub_harmonic_succ :
   · ext n; ring
   · simp
 
-lemma summable_digammaSeriesTerm {x : ℝ} (hx : 0 < x) :
+theorem summable_digammaSeriesTerm {x : ℝ} (hx : 0 < x) :
     Summable (digammaSeriesTerm x) := by
   refine Summable.of_norm_bounded_eventually_nat
     (((summable_one_div_nat_pow (p := 2)).mpr one_lt_two).mul_left |x - 1|) ?_
@@ -179,23 +173,23 @@ lemma summable_digammaSeriesTerm {x : ℝ} (hx : 0 < x) :
       gcongr <;> linarith
     _ = |x - 1| * (1 / (n : ℝ) ^ 2) := by ring
 
-lemma tendsto_partial_digammaSeries {x : ℝ} (hx : 0 < x) :
+theorem tendsto_partial_digammaSeries {x : ℝ} (hx : 0 < x) :
     Tendsto (fun n : ℕ => ∑ k ∈ range (n + 1), digammaSeriesTerm x k) atTop
       (𝓝 (∑' n, digammaSeriesTerm x n)) :=
   (summable_digammaSeriesTerm hx).hasSum.tendsto_sum_nat.comp (tendsto_add_atTop_nat 1)
 
-lemma eq_partial_digammaSeries (x : ℝ) (n : ℕ) :
+theorem eq_partial_digammaSeries (x : ℝ) (n : ℕ) :
     log n - ∑ k ∈ range (n + 1), (x + k)⁻¹ =
       log n - (harmonic (n + 1) : ℝ) + ∑ k ∈ range (n + 1), digammaSeriesTerm x k := by
   simp [digammaSeriesTerm, harmonic, sum_sub_distrib]
 
-lemma tendsto_log_sub_sum_recip {x : ℝ} (hx : 0 < x) :
+theorem tendsto_log_sub_sum_recip {x : ℝ} (hx : 0 < x) :
     Tendsto (fun n : ℕ => log n - ∑ k ∈ range (n + 1), (x + k)⁻¹) atTop
       (𝓝 (-γ + ∑' n, digammaSeriesTerm x n)) := by
   simp_rw [eq_partial_digammaSeries]
   exact tendsto_log_sub_harmonic_succ.add (tendsto_partial_digammaSeries hx)
 
-lemma tendsto_deriv_log_GammaSeq {x : ℝ} (hx : 0 < x) :
+theorem tendsto_deriv_log_GammaSeq {x : ℝ} (hx : 0 < x) :
     Tendsto (fun n : ℕ => log n - ∑ k ∈ range (n + 1), (x + k)⁻¹) atTop
       (𝓝 (digamma x)) := by
   rw [digamma_eq_deriv_log hx]
@@ -276,7 +270,7 @@ theorem digamma_eq_tsum {x : ℝ} (hx : 0 < x) :
     digamma x = -γ + ∑' n, digammaSeriesTerm x n :=
   tendsto_nhds_unique (tendsto_deriv_log_GammaSeq hx) (tendsto_log_sub_sum_recip hx)
 
-lemma hasDerivAt_digammaSeriesTerm {x : ℝ} (hx : 0 < x) (n : ℕ) :
+theorem hasDerivAt_digammaSeriesTerm {x : ℝ} (hx : 0 < x) (n : ℕ) :
     HasDerivAt (fun y : ℝ => digammaSeriesTerm y n) ((x + (n : ℝ))⁻¹ ^ 2) x := by
   have hne : x + n ≠ 0 := (add_pos_of_pos_of_nonneg hx (Nat.cast_nonneg n)).ne'
   have hd : HasDerivAt (fun y : ℝ => y + n) 1 x := (hasDerivAt_id x).add_const _
@@ -291,7 +285,7 @@ lemma hasDerivAt_digammaSeriesTerm {x : ℝ} (hx : 0 < x) (n : ℕ) :
   have hder : 0 - -((x + n) ^ 2)⁻¹ * 1 = (x + (n : ℝ))⁻¹ ^ 2 := by simp [pow_two]
   simpa [hder] using hsub'
 
-lemma summable_trigamma {x : ℝ} (hx : 0 < x) :
+theorem summable_trigamma {x : ℝ} (hx : 0 < x) :
     Summable fun n : ℕ => (x + n)⁻¹ ^ 2 := by
   have h := (Real.summable_one_div_nat_add_rpow x 2).mpr one_lt_two
   refine h.congr fun n => ?_
@@ -350,7 +344,7 @@ theorem trigamma_eq_tsum {x : ℝ} (hx : 0 < x) :
     trigamma x = ∑' n : ℕ, (x + n)⁻¹ ^ 2 := by
   rw [trigamma, (hasDerivAt_digamma hx).deriv]
 
-lemma sum_recip_sub_recip_range (x : ℝ) (N : ℕ) :
+theorem sum_recip_sub_recip_range (x : ℝ) (N : ℕ) :
     ∑ n ∈ range N, ((x + n)⁻¹ - (x + n + 1)⁻¹) = x⁻¹ - (x + N)⁻¹ := by
   induction N with
   | zero => simp
@@ -384,7 +378,7 @@ theorem digamma_nat_add_one (n : ℕ) :
   have := digamma_add_nat (by positivity : (0 : ℝ) < 1) n
   simpa [digamma_one, harmonic, add_comm, add_left_comm] using this
 
-lemma hasDerivAt_log_Gamma {x : ℝ} (hx : 0 < x) :
+theorem hasDerivAt_log_Gamma {x : ℝ} (hx : 0 < x) :
     HasDerivAt (fun y : ℝ => log (Gamma y)) (digamma x) x := by
   have hG : DifferentiableAt ℝ Gamma x :=
     differentiableAt_Gamma fun m =>
@@ -392,7 +386,7 @@ lemma hasDerivAt_log_Gamma {x : ℝ} (hx : 0 < x) :
   have hlog := hG.hasDerivAt.log (Gamma_pos_of_pos hx).ne'
   simpa [digamma, Function.comp_def] using hlog
 
-lemma hasDerivAt_log_sin_pi {x : ℝ} (hx : x ∈ Ioo (0 : ℝ) 1) :
+theorem hasDerivAt_log_sin_pi {x : ℝ} (hx : x ∈ Ioo (0 : ℝ) 1) :
     HasDerivAt (fun y : ℝ => log (sin (π * y))) (π * cot (π * x)) x := by
   have hsin : sin (π * x) ≠ 0 :=
     (sin_pos_of_pos_of_lt_pi (mul_pos pi_pos hx.1)

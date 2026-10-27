@@ -6,10 +6,9 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Painleve.Basic
-public import Mathlib.LinearAlgebra.Matrix.Notation
-public import Mathlib.LinearAlgebra.Matrix.Trace
 public import Mathlib.Analysis.Calculus.Deriv.Prod
 public import Mathlib.Analysis.Matrix.Normed
+public import Mathlib.Tactic.Polynomial.Basic
 
 /-!
 # The compatible linear system for Painlevé II
@@ -85,7 +84,7 @@ theorem lax_compatibility_iff (c x u v w : 𝕜) {l : 𝕜} (hl : l ≠ 0) :
       _ = 0 := hr
 
 /-- Differentiation of the Lax polynomial along a twice differentiable scalar function. -/
-lemma hasDerivAt_laxA {u v : 𝕜 → 𝕜} {x w : 𝕜}
+theorem hasDerivAt_laxA {u v : 𝕜 → 𝕜} {x w : 𝕜}
     (hu : HasDerivAt u (v x) x) (hv : HasDerivAt v w x) (c l : 𝕜) :
     HasDerivAt (fun x => laxA c x (u x) (v x) l) (laxAx (u x) (v x) w l) x := by
   apply hasDerivAt_pi.mpr

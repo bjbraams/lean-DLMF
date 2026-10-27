@@ -5,16 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
-public import Mathlib.Tactic.CrossRefAttribute
-public import DLMF.Hypergeometric.Basic
-public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
-public import Mathlib.MeasureTheory.Constructions.Pi
-public import Mathlib.MeasureTheory.Integral.Bochner.Basic
-public import Mathlib.MeasureTheory.Integral.DivergenceTheorem
 public import Mathlib.MeasureTheory.Integral.Pi
 public import Mathlib.Analysis.Complex.TaylorSeries
-public import Mathlib.Analysis.Complex.Liouville
 public import DLMF.Hypergeometric.Identities
 
 /-!
@@ -64,16 +56,16 @@ def selbergIntegrand (n : ℕ) (a b c : ℂ) (t : Fin n → ℝ) : ℂ :=
 /-- The closed unit cube `[0,1]ⁿ`. -/
 abbrev cube (n : ℕ) : Set (Fin n → ℝ) := Set.pi Set.univ fun _ => Set.Icc (0 : ℝ) 1
 
-lemma measurableSet_cube (n : ℕ) : MeasurableSet (cube n) :=
+theorem measurableSet_cube (n : ℕ) : MeasurableSet (cube n) :=
   MeasurableSet.univ_pi fun _ => measurableSet_Icc
 
-lemma cons_mem_cube {n : ℕ} {x : ℝ} {y : Fin n → ℝ} :
+theorem cons_mem_cube {n : ℕ} {x : ℝ} {y : Fin n → ℝ} :
     (Fin.cons x y : Fin (n + 1) → ℝ) ∈ cube (n + 1) ↔ x ∈ Icc (0 : ℝ) 1 ∧ y ∈ cube n := by
   simp only [Set.mem_pi, Set.mem_univ, true_implies, Fin.forall_fin_succ, Fin.cons_zero,
     Fin.cons_succ]
 
 /-- Splitting off the zeroth coordinate. -/
-lemma integral_cube_succ {n : ℕ} (g : (Fin (n + 1) → ℝ) → ℂ)
+theorem integral_cube_succ {n : ℕ} (g : (Fin (n + 1) → ℝ) → ℂ)
     (hg : IntegrableOn g (cube (n + 1))) :
     ∫ t in cube (n + 1), g t = ∫ y in cube n, ∫ x in Icc (0 : ℝ) 1, g (Fin.cons x y) := by
   have e := (volume_preserving_piFinSuccAbove (fun _ : Fin (n + 1) => ℝ) 0).symm
@@ -109,16 +101,16 @@ def weight (a b : ℂ) (x : ℝ) : ℂ := (x : ℂ) ^ (a - 1) * (1 - (x : ℂ)) 
 def vdm (n : ℕ) (c : ℂ) (t : Fin n → ℝ) : ℂ :=
   ∏ i : Fin n, ∏ j : Fin n, if i.val < j.val then ((|t i - t j| : ℝ) : ℂ) ^ (2 * c) else 1
 
-lemma selbergIntegrand_eq (n : ℕ) (a b c : ℂ) (t : Fin n → ℝ) :
+theorem selbergIntegrand_eq (n : ℕ) (a b c : ℂ) (t : Fin n → ℝ) :
     selbergIntegrand n a b c t = (∏ i, weight a b (t i)) * vdm n c t := rfl
 
-lemma vdm_cons {n : ℕ} (c : ℂ) (x : ℝ) (y : Fin n → ℝ) :
+theorem vdm_cons {n : ℕ} (c : ℂ) (x : ℝ) (y : Fin n → ℝ) :
     vdm (n + 1) c (Fin.cons x y) =
       (∏ j : Fin n, ((|x - y j| : ℝ) : ℂ) ^ (2 * c)) * vdm n c y := by
   simp only [vdm, Fin.prod_univ_succ, Fin.cons_zero, Fin.cons_succ, Fin.val_zero, Fin.val_succ]
   simp
 
-lemma selbergIntegrand_cons {n : ℕ} (a b c : ℂ) (x : ℝ) (y : Fin n → ℝ) :
+theorem selbergIntegrand_cons {n : ℕ} (a b c : ℂ) (x : ℝ) (y : Fin n → ℝ) :
     selbergIntegrand (n + 1) a b c (Fin.cons x y) =
       weight a b x * (∏ j : Fin n, ((|x - y j| : ℝ) : ℂ) ^ (2 * c)) *
         selbergIntegrand n a b c y := by
@@ -126,7 +118,7 @@ lemma selbergIntegrand_cons {n : ℕ} (a b c : ℂ) (x : ℝ) (y : Fin n → ℝ
   simp only [Fin.cons_zero, Fin.cons_succ]
   ring
 
-lemma ofReal_cpow_two_mul {x : ℝ} (hx : 0 ≤ x) (c : ℂ) :
+theorem ofReal_cpow_two_mul {x : ℝ} (hx : 0 ≤ x) (c : ℂ) :
     (x : ℂ) ^ (2 * c) = (x : ℂ) ^ c * (x : ℂ) ^ c := by
   rcases eq_or_ne x 0 with rfl | hx0
   · rcases eq_or_ne c 0 with rfl | hc
@@ -135,7 +127,7 @@ lemma ofReal_cpow_two_mul {x : ℝ} (hx : 0 ≤ x) (c : ℂ) :
   · rw [two_mul, Complex.cpow_add _ _ (by exact_mod_cast hx0)]
 
 /-- Symmetric form of the Vandermonde factor, `∏_{i ≠ j} |tᵢ - tⱼ|^c`. -/
-lemma vdm_eq_sym (n : ℕ) (c : ℂ) (t : Fin n → ℝ) :
+theorem vdm_eq_sym (n : ℕ) (c : ℂ) (t : Fin n → ℝ) :
     vdm n c t = ∏ i : Fin n, ∏ j : Fin n,
       if i ≠ j then ((|t i - t j| : ℝ) : ℂ) ^ c else 1 := by
   have hsplit : ∀ i j : Fin n, (if i ≠ j then ((|t i - t j| : ℝ) : ℂ) ^ c else 1) =
@@ -162,7 +154,7 @@ lemma vdm_eq_sym (n : ℕ) (c : ℂ) (t : Fin n → ℝ) :
     exact ofReal_cpow_two_mul (abs_nonneg _) c
   · simp [h]
 
-lemma vdm_comp_perm (n : ℕ) (c : ℂ) (t : Fin n → ℝ) (σ : Equiv.Perm (Fin n)) :
+theorem vdm_comp_perm (n : ℕ) (c : ℂ) (t : Fin n → ℝ) (σ : Equiv.Perm (Fin n)) :
     vdm n c (t ∘ σ) = vdm n c t := by
   rw [vdm_eq_sym, vdm_eq_sym]
   simp only [Function.comp_apply]
@@ -173,20 +165,20 @@ lemma vdm_comp_perm (n : ℕ) (c : ℂ) (t : Fin n → ℝ) (σ : Equiv.Perm (Fi
   refine Finset.prod_congr rfl fun j _ => ?_
   simp only [ne_eq, σ.injective.eq_iff]
 
-lemma selbergIntegrand_comp_perm (n : ℕ) (a b c : ℂ) (t : Fin n → ℝ)
+theorem selbergIntegrand_comp_perm (n : ℕ) (a b c : ℂ) (t : Fin n → ℝ)
     (σ : Equiv.Perm (Fin n)) :
     selbergIntegrand n a b c (t ∘ σ) = selbergIntegrand n a b c t := by
   rw [selbergIntegrand_eq, selbergIntegrand_eq, vdm_comp_perm]
   congr 1
   exact Equiv.prod_comp σ (fun i => weight a b (t i))
 
-lemma comp_perm_mem_cube {n : ℕ} (t : Fin n → ℝ) (σ : Equiv.Perm (Fin n)) :
+theorem comp_perm_mem_cube {n : ℕ} (t : Fin n → ℝ) (σ : Equiv.Perm (Fin n)) :
     t ∘ σ ∈ cube n ↔ t ∈ cube n := by
   simp only [Set.mem_pi, Set.mem_univ, true_implies, Function.comp_apply]
   exact ⟨fun h i => by simpa using h (σ.symm i), fun h i => h (σ i)⟩
 
 /-- Integrals over the cube are invariant under permutations of the coordinates. -/
-lemma integral_cube_comp_perm {n : ℕ} (σ : Equiv.Perm (Fin n)) (g : (Fin n → ℝ) → ℂ) :
+theorem integral_cube_comp_perm {n : ℕ} (σ : Equiv.Perm (Fin n)) (g : (Fin n → ℝ) → ℂ) :
     ∫ t in cube n, g (t ∘ σ) = ∫ t in cube n, g t := by
   have e := volume_preserving_arrowCongr' (α₁ := Fin n) (α₂ := Fin n) σ.symm
     (MeasurableEquiv.refl ℝ) (MeasurePreserving.id volume)
@@ -202,7 +194,7 @@ lemma integral_cube_comp_perm {n : ℕ} (σ : Equiv.Perm (Fin n)) (g : (Fin n �
         rw [hpre]; simp only [hT]
     _ = ∫ t in cube n, g t := e.setIntegral_preimage_emb (MeasurableEquiv.measurableEmbedding _) _ _
 
-lemma integrableOn_cube_comp_perm {n : ℕ} (σ : Equiv.Perm (Fin n)) {g : (Fin n → ℝ) → ℂ}
+theorem integrableOn_cube_comp_perm {n : ℕ} (σ : Equiv.Perm (Fin n)) {g : (Fin n → ℝ) → ℂ}
     (hg : IntegrableOn g (cube n)) : IntegrableOn (fun t => g (t ∘ σ)) (cube n) := by
   have e := volume_preserving_arrowCongr' (α₁ := Fin n) (α₂ := Fin n) σ.symm
     (MeasurableEquiv.refl ℝ) (MeasurePreserving.id volume)
@@ -222,12 +214,12 @@ lemma integrableOn_cube_comp_perm {n : ℕ} (σ : Equiv.Perm (Fin n)) {g : (Fin 
 def vprod {n : ℕ} (y : Fin n → ℝ) (c : ℂ) (x : ℝ) : ℂ :=
   ∏ j : Fin n, ((|x - y j| : ℝ) : ℂ) ^ (2 * c)
 
-lemma ofReal_abs_cpow_eq_exp {u : ℝ} (hu : u ≠ 0) (w : ℂ) :
+theorem ofReal_abs_cpow_eq_exp {u : ℝ} (hu : u ≠ 0) (w : ℂ) :
     ((|u| : ℝ) : ℂ) ^ w = Complex.exp ((Real.log u : ℂ) * w) := by
   rw [Complex.cpow_def_of_ne_zero (by exact_mod_cast abs_ne_zero.mpr hu),
     ← Complex.ofReal_log (abs_nonneg u), Real.log_abs]
 
-lemma hasDerivAt_abs_sub_cpow {x y : ℝ} (hxy : x ≠ y) (w : ℂ) :
+theorem hasDerivAt_abs_sub_cpow {x y : ℝ} (hxy : x ≠ y) (w : ℂ) :
     HasDerivAt (fun x : ℝ => ((|x - y| : ℝ) : ℂ) ^ w)
       (w / ((x : ℂ) - y) * ((|x - y| : ℝ) : ℂ) ^ w) x := by
   have hne : x - y ≠ 0 := sub_ne_zero.mpr hxy
@@ -243,7 +235,7 @@ lemma hasDerivAt_abs_sub_cpow {x y : ℝ} (hxy : x ≠ y) (w : ℂ) :
   push_cast
   field_simp
 
-lemma hasDerivAt_vprod {n : ℕ} (y : Fin n → ℝ) (c : ℂ) {x : ℝ} (hx : ∀ j, x ≠ y j) :
+theorem hasDerivAt_vprod {n : ℕ} (y : Fin n → ℝ) (c : ℂ) {x : ℝ} (hx : ∀ j, x ≠ y j) :
     HasDerivAt (vprod y c) ((∑ j : Fin n, 2 * c / ((x : ℂ) - y j)) * vprod y c x) x := by
   classical
   have h := HasDerivAt.fun_finsetProd (u := Finset.univ)
@@ -265,7 +257,7 @@ def ibpD {n : ℕ} (y : Fin n → ℝ) (α β c : ℂ) (x : ℝ) : ℂ :=
       vprod y c x +
     (x : ℂ) ^ α * (1 - (x : ℂ)) ^ β * ((∑ j : Fin n, 2 * c / ((x : ℂ) - y j)) * vprod y c x)
 
-lemma hasDerivAt_ibpF {n : ℕ} (y : Fin n → ℝ) (α β c : ℂ) {x : ℝ} (hx : x ∈ Ioo (0 : ℝ) 1)
+theorem hasDerivAt_ibpF {n : ℕ} (y : Fin n → ℝ) (α β c : ℂ) {x : ℝ} (hx : x ∈ Ioo (0 : ℝ) 1)
     (hxy : ∀ j, x ≠ y j) : HasDerivAt (ibpF y α β c) (ibpD y α β c x) x := by
   have h1 : HasDerivAt (fun x : ℝ => (x : ℂ) ^ α) (α * (x : ℂ) ^ (α - 1)) x := by
     have := ((hasDerivAt_id (x : ℂ)).cpow_const (c := α)
@@ -284,7 +276,7 @@ lemma hasDerivAt_ibpF {n : ℕ} (y : Fin n → ℝ) (α β c : ℂ) {x : ℝ} (h
   simp only [Pi.mul_apply]
   ring
 
-lemma norm_vprod_le {n : ℕ} {y : Fin n → ℝ} (hy : y ∈ cube n) {c : ℂ} (hc : 0 ≤ c.re)
+theorem norm_vprod_le {n : ℕ} {y : Fin n → ℝ} (hy : y ∈ cube n) {c : ℂ} (hc : 0 ≤ c.re)
     {x : ℝ} (hx : x ∈ Icc (0 : ℝ) 1) : ‖vprod y c x‖ ≤ 1 := by
   unfold vprod
   rw [norm_prod]
@@ -301,7 +293,7 @@ lemma norm_vprod_le {n : ℕ} {y : Fin n → ℝ} (hy : y ∈ cube n) {c : ℂ} 
     exact Real.rpow_le_one (abs_nonneg _) hle (by simp; linarith)
 
 /-- `‖2c/(x-yⱼ) · ∏ₖ |x-yₖ|^{2c}‖ ≤ 2‖c‖` when `Re c ≥ 1/2`. -/
-lemma norm_div_mul_vprod_le {n : ℕ} {y : Fin n → ℝ} (hy : y ∈ cube n) {c : ℂ}
+theorem norm_div_mul_vprod_le {n : ℕ} {y : Fin n → ℝ} (hy : y ∈ cube n) {c : ℂ}
     (hc : 1 / 2 ≤ c.re) {x : ℝ} (hx : x ∈ Icc (0 : ℝ) 1) (j : Fin n) :
     ‖2 * c / ((x : ℂ) - y j) * vprod y c x‖ ≤ 2 * ‖c‖ := by
   classical
@@ -334,18 +326,18 @@ lemma norm_div_mul_vprod_le {n : ℕ} {y : Fin n → ℝ} (hy : y ∈ cube n) {c
       ≤ 2 * ‖c‖ / |x - y j| * (|x - y j| * 1) := by gcongr
     _ = 2 * ‖c‖ := by field_simp
 
-lemma one_sub_ofReal (x : ℝ) : (1 - (x : ℂ)) = ((1 - x : ℝ) : ℂ) := by push_cast; ring
+theorem one_sub_ofReal (x : ℝ) : (1 - (x : ℂ)) = ((1 - x : ℝ) : ℂ) := by push_cast; ring
 
-lemma measurable_vprod {n : ℕ} (y : Fin n → ℝ) (c : ℂ) : Measurable (vprod y c) := by
+theorem measurable_vprod {n : ℕ} (y : Fin n → ℝ) (c : ℂ) : Measurable (vprod y c) := by
   unfold vprod
   fun_prop
 
-lemma measurable_ibpD {n : ℕ} (y : Fin n → ℝ) (α β c : ℂ) : Measurable (ibpD y α β c) := by
+theorem measurable_ibpD {n : ℕ} (y : Fin n → ℝ) (α β c : ℂ) : Measurable (ibpD y α β c) := by
   unfold ibpD
   have := measurable_vprod y c
   fun_prop
 
-lemma continuousOn_ibpF {n : ℕ} (y : Fin n → ℝ) {α β c : ℂ} (hα : 0 < α.re)
+theorem continuousOn_ibpF {n : ℕ} (y : Fin n → ℝ) {α β c : ℂ} (hα : 0 < α.re)
     (hβ : 0 < β.re ∨ β = 0) (hc : 0 < c.re) : ContinuousOn (ibpF y α β c) (Icc 0 1) := by
   refine continuousOn_of_forall_continuousAt fun x _ => ?_
   unfold ibpF vprod
@@ -367,7 +359,7 @@ lemma continuousOn_ibpF {n : ℕ} (y : Fin n → ℝ) {α β c : ℂ} (hα : 0 <
 def ibpBound (n : ℕ) (α β c : ℂ) (x : ℝ) : ℝ :=
   ‖α‖ * x ^ (α.re - 1) + (if β = 0 then 0 else ‖β‖ * (1 - x) ^ (β.re - 1)) + n * (2 * ‖c‖)
 
-lemma intervalIntegrable_ibpBound (n : ℕ) {α β c : ℂ} (hα : 0 < α.re)
+theorem intervalIntegrable_ibpBound (n : ℕ) {α β c : ℂ} (hα : 0 < α.re)
     (hβ : 0 < β.re ∨ β = 0) : IntervalIntegrable (ibpBound n α β c) volume 0 1 := by
   refine ((IntervalIntegrable.const_mul ?_ _).add ?_).add intervalIntegrable_const
   · exact intervalIntegral.intervalIntegrable_rpow' (by linarith)
@@ -380,7 +372,7 @@ lemma intervalIntegrable_ibpBound (n : ℕ) {α β c : ℂ} (hα : 0 < α.re)
       simpa using h.symm
     · simp
 
-lemma norm_ibpD_le {n : ℕ} {y : Fin n → ℝ} (hy : y ∈ cube n) {α β c : ℂ}
+theorem norm_ibpD_le {n : ℕ} {y : Fin n → ℝ} (hy : y ∈ cube n) {α β c : ℂ}
     (hα : 0 < α.re) (hβ : 0 < β.re ∨ β = 0) (hc : 1 / 2 ≤ c.re) {x : ℝ}
     (hx : x ∈ Ioo (0 : ℝ) 1) : ‖ibpD y α β c x‖ ≤ ibpBound n α β c x := by
   have hx0 : 0 < x := hx.1
@@ -435,13 +427,13 @@ lemma norm_ibpD_le {n : ℕ} {y : Fin n → ℝ} (hy : y ∈ cube n) {α β c : 
         (norm_add_le _ _).trans (add_le_add_left (norm_sub_le _ _) _)
     _ ≤ _ := by linarith
 
-lemma ae_mem_Ioo_of_mem_uIoc : ∀ᵐ x : ℝ, x ∈ Set.uIoc (0 : ℝ) 1 → x ∈ Ioo (0 : ℝ) 1 := by
+theorem ae_mem_Ioo_of_mem_uIoc : ∀ᵐ x : ℝ, x ∈ Set.uIoc (0 : ℝ) 1 → x ∈ Ioo (0 : ℝ) 1 := by
   have hnull : ∀ᵐ x : ℝ, x ≠ 1 := (ae_iff).2 (by simp)
   filter_upwards [hnull] with x hx1 hx
   rw [Set.uIoc_of_le zero_le_one] at hx
   exact ⟨hx.1, lt_of_le_of_ne hx.2 hx1⟩
 
-lemma intervalIntegrable_ibpD {n : ℕ} {y : Fin n → ℝ} (hy : y ∈ cube n) {α β c : ℂ}
+theorem intervalIntegrable_ibpD {n : ℕ} {y : Fin n → ℝ} (hy : y ∈ cube n) {α β c : ℂ}
     (hα : 0 < α.re) (hβ : 0 < β.re ∨ β = 0) (hc : 1 / 2 ≤ c.re) :
     IntervalIntegrable (ibpD y α β c) volume 0 1 := by
   refine (intervalIntegrable_ibpBound n (c := c) hα hβ).mono_fun'
@@ -451,7 +443,7 @@ lemma intervalIntegrable_ibpD {n : ℕ} {y : Fin n → ℝ} (hy : y ∈ cube n) 
   exact norm_ibpD_le hy hα hβ hc (hx hx')
 
 /-- **One-variable integration by parts.** -/
-lemma integral_ibpD {n : ℕ} {y : Fin n → ℝ} (hy : y ∈ cube n) {α β c : ℂ}
+theorem integral_ibpD {n : ℕ} {y : Fin n → ℝ} (hy : y ∈ cube n) {α β c : ℂ}
     (hα : 0 < α.re) (hβ : 0 < β.re ∨ β = 0) (hc : 1 / 2 ≤ c.re) :
     ∫ x in (0 : ℝ)..1, ibpD y α β c x = if β = 0 then vprod y c 1 else 0 := by
   rw [integral_eq_of_hasDerivAt_off_countable_of_le (ibpF y α β c) (ibpD y α β c) zero_le_one
@@ -467,7 +459,7 @@ lemma integral_ibpD {n : ℕ} {y : Fin n → ℝ} (hy : y ∈ cube n) {α β c :
 
 /-! ### Integration by parts in the zeroth coordinate of the cube -/
 
-lemma integrableOn_cube_succ {n : ℕ} (g : (Fin (n + 1) → ℝ) → ℂ)
+theorem integrableOn_cube_succ {n : ℕ} (g : (Fin (n + 1) → ℝ) → ℂ)
     (hg : IntegrableOn (fun p : ℝ × (Fin n → ℝ) => g (Fin.cons p.1 p.2))
       (Icc (0 : ℝ) 1 ×ˢ cube n) (volume.prod volume)) : IntegrableOn g (cube (n + 1)) := by
   have e := (volume_preserving_piFinSuccAbove (fun _ : Fin (n + 1) => ℝ) 0).symm
@@ -486,12 +478,12 @@ lemma integrableOn_cube_succ {n : ℕ} (g : (Fin (n + 1) → ℝ) → ℂ)
   refine (e.integrableOn_comp_preimage (MeasurableEquiv.measurableEmbedding _)).mp ?_
   simpa only [Function.comp_def, hsymm] using hg
 
-lemma measurable_ibpD_uncurry {n : ℕ} (α β c : ℂ) :
+theorem measurable_ibpD_uncurry {n : ℕ} (α β c : ℂ) :
     Measurable (fun p : ℝ × (Fin n → ℝ) => ibpD p.2 α β c p.1) := by
   unfold ibpD vprod
   fun_prop
 
-lemma ae_prod_Ioo_cube {n : ℕ} :
+theorem ae_prod_Ioo_cube {n : ℕ} :
     ∀ᵐ p ∂((volume.restrict (Icc (0 : ℝ) 1)).prod (volume.restrict (cube n))),
       p.1 ∈ Ioo (0 : ℝ) 1 ∧ p.2 ∈ cube n := by
   have h1 : ∀ᵐ x ∂(volume.restrict (Icc (0 : ℝ) 1)), x ∈ Ioo (0 : ℝ) 1 := by
@@ -506,7 +498,7 @@ lemma ae_prod_Ioo_cube {n : ℕ} :
     Measure.quasiMeasurePreserving_snd.ae h2] with p hp1 hp2
   exact ⟨hp1, hp2⟩
 
-lemma integrableOn_ibp {n : ℕ} {α β c : ℂ} (hα : 0 < α.re) (hβ : 0 < β.re ∨ β = 0)
+theorem integrableOn_ibp {n : ℕ} {α β c : ℂ} (hα : 0 < α.re) (hβ : 0 < β.re ∨ β = 0)
     (hc : 1 / 2 ≤ c.re) {K : (Fin n → ℝ) → ℂ} (hK : IntegrableOn K (cube n)) :
     IntegrableOn (fun t : Fin (n + 1) → ℝ => K (Fin.tail t) * ibpD (Fin.tail t) α β c (t 0))
       (cube (n + 1)) := by
@@ -526,7 +518,7 @@ lemma integrableOn_ibp {n : ℕ} {α β c : ℂ} (hα : 0 < α.re) (hβ : 0 < β
   exact mul_le_mul_of_nonneg_right (norm_ibpD_le hp.2 hα hβ hc hp.1) (norm_nonneg _)
 
 /-- **Integration by parts in the zeroth coordinate.** -/
-lemma integral_cube_ibp {n : ℕ} {α β c : ℂ} (hα : 0 < α.re) (hβ : 0 < β.re ∨ β = 0)
+theorem integral_cube_ibp {n : ℕ} {α β c : ℂ} (hα : 0 < α.re) (hβ : 0 < β.re ∨ β = 0)
     (hc : 1 / 2 ≤ c.re) {K : (Fin n → ℝ) → ℂ} (hK : IntegrableOn K (cube n)) :
     ∫ t in cube (n + 1), K (Fin.tail t) * ibpD (Fin.tail t) α β c (t 0) =
       if β = 0 then ∫ y in cube n, K y * vprod y c 1 else 0 := by
@@ -542,27 +534,27 @@ lemma integral_cube_ibp {n : ℕ} {α β c : ℂ} (hα : 0 < α.re) (hβ : 0 < �
 
 /-! ### Integrability on the cube -/
 
-lemma integrableOn_weight {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) :
+theorem integrableOn_weight {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) :
     IntegrableOn (weight a b) (Icc (0 : ℝ) 1) := by
   have h := Complex.betaIntegral_convergent ha hb
   rw [intervalIntegrable_iff_integrableOn_Icc_of_le zero_le_one] at h
   exact h
 
-lemma integrableOn_prod_cube {n : ℕ} {f : ℝ → ℂ} (hf : IntegrableOn f (Icc (0 : ℝ) 1)) :
+theorem integrableOn_prod_cube {n : ℕ} {f : ℝ → ℂ} (hf : IntegrableOn f (Icc (0 : ℝ) 1)) :
     IntegrableOn (fun t : Fin n → ℝ => ∏ i, f (t i)) (cube n) := by
   rw [IntegrableOn, volume_pi, Measure.restrict_pi_pi]
   exact Integrable.fintype_prod (fun _ => hf)
 
-lemma measurable_selbergIntegrand (n : ℕ) (a b c : ℂ) :
+theorem measurable_selbergIntegrand (n : ℕ) (a b c : ℂ) :
     Measurable (selbergIntegrand n a b c) := by
   unfold selbergIntegrand
   fun_prop
 
-lemma measurable_weight (a b : ℂ) : Measurable (weight a b) := by
+theorem measurable_weight (a b : ℂ) : Measurable (weight a b) := by
   unfold weight
   fun_prop
 
-lemma norm_vdm_le_one {n : ℕ} {c : ℂ} (hc : 0 ≤ c.re) {t : Fin n → ℝ} (ht : t ∈ cube n) :
+theorem norm_vdm_le_one {n : ℕ} {c : ℂ} (hc : 0 ≤ c.re) {t : Fin n → ℝ} (ht : t ∈ cube n) :
     ‖vdm n c t‖ ≤ 1 := by
   unfold vdm
   rw [norm_prod]
@@ -575,7 +567,7 @@ lemma norm_vdm_le_one {n : ℕ} {c : ℂ} (hc : 0 ≤ c.re) {t : Fin n → ℝ} 
     simpa [vprod] using this
   · simp
 
-lemma norm_selbergIntegrand_le {n : ℕ} {a b c : ℂ} (hc : 0 ≤ c.re) {t : Fin n → ℝ}
+theorem norm_selbergIntegrand_le {n : ℕ} {a b c : ℂ} (hc : 0 ≤ c.re) {t : Fin n → ℝ}
     (ht : t ∈ cube n) : ‖selbergIntegrand n a b c t‖ ≤ ‖∏ i, weight a b (t i)‖ := by
   rw [selbergIntegrand_eq, norm_mul]
   calc ‖∏ i, weight a b (t i)‖ * ‖vdm n c t‖ ≤ ‖∏ i, weight a b (t i)‖ * 1 := by
@@ -583,7 +575,7 @@ lemma norm_selbergIntegrand_le {n : ℕ} {a b c : ℂ} (hc : 0 ≤ c.re) {t : Fi
     _ = _ := mul_one _
 
 /-- A bounded measurable function times the Selberg integrand is integrable (`Re c ≥ 0`). -/
-lemma integrableOn_mul_selbergIntegrand {n : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
+theorem integrableOn_mul_selbergIntegrand {n : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
     (hc : 0 ≤ c.re) {h : (Fin n → ℝ) → ℂ} (hh : Measurable h) {M : ℝ}
     (hM : ∀ t ∈ cube n, ‖h t‖ ≤ M) :
     IntegrableOn (fun t => h t * selbergIntegrand n a b c t) (cube n) := by
@@ -594,24 +586,24 @@ lemma integrableOn_mul_selbergIntegrand {n : ℕ} {a b c : ℂ} (ha : 0 < a.re) 
   exact mul_le_mul (hM t ht) (norm_selbergIntegrand_le hc ht) (norm_nonneg _)
     ((norm_nonneg _).trans (hM t ht))
 
-lemma selbergIntegrand_eq_cons_tail {n : ℕ} (a b c : ℂ) (t : Fin (n + 1) → ℝ) :
+theorem selbergIntegrand_eq_cons_tail {n : ℕ} (a b c : ℂ) (t : Fin (n + 1) → ℝ) :
     selbergIntegrand (n + 1) a b c t =
       weight a b (t 0) * vprod (Fin.tail t) c (t 0) * selbergIntegrand n a b c (Fin.tail t) := by
   conv_lhs => rw [← Fin.cons_self_tail t]
   rw [selbergIntegrand_cons]
   rfl
 
-lemma tail_mem_cube {n : ℕ} {t : Fin (n + 1) → ℝ} (ht : t ∈ cube (n + 1)) :
+theorem tail_mem_cube {n : ℕ} {t : Fin (n + 1) → ℝ} (ht : t ∈ cube (n + 1)) :
     Fin.tail t ∈ cube n := by
   rw [← Fin.cons_self_tail t, cons_mem_cube] at ht
   exact ht.2
 
-lemma zero_mem_Icc_of_mem_cube {n : ℕ} {t : Fin (n + 1) → ℝ} (ht : t ∈ cube (n + 1)) :
+theorem zero_mem_Icc_of_mem_cube {n : ℕ} {t : Fin (n + 1) → ℝ} (ht : t ∈ cube (n + 1)) :
     t 0 ∈ Icc (0 : ℝ) 1 := ht 0 (Set.mem_univ _)
 
 /-- The singular factor `2c/(t₀ - t_{j+1})` is absorbed by `|t₀ - t_{j+1}|^{2c}` when
 `Re c ≥ 1/2`. -/
-lemma norm_div_mul_selbergIntegrand_le {n : ℕ} {a b c : ℂ} (hc : 1 / 2 ≤ c.re)
+theorem norm_div_mul_selbergIntegrand_le {n : ℕ} {a b c : ℂ} (hc : 1 / 2 ≤ c.re)
     {t : Fin (n + 1) → ℝ} (ht : t ∈ cube (n + 1)) (j : Fin n) :
     ‖2 * c / ((t 0 : ℂ) - t j.succ) * selbergIntegrand (n + 1) a b c t‖ ≤
       2 * ‖c‖ * ‖∏ i, weight a b (t i)‖ := by
@@ -629,7 +621,7 @@ lemma norm_div_mul_selbergIntegrand_le {n : ℕ} {a b c : ℂ} (hc : 1 / 2 ≤ c
     _ ≤ ‖weight a b (t 0)‖ * (2 * ‖c‖) * ‖∏ i, weight a b (Fin.tail t i)‖ := by gcongr
     _ = _ := by rw [norm_mul]; simp only [Fin.tail]; ring
 
-lemma integrableOn_mul_div_selbergIntegrand {n : ℕ} {a b c : ℂ} (ha : 0 < a.re)
+theorem integrableOn_mul_div_selbergIntegrand {n : ℕ} {a b c : ℂ} (ha : 0 < a.re)
     (hb : 0 < b.re) (hc : 1 / 2 ≤ c.re) (j : Fin n) {h : (Fin (n + 1) → ℝ) → ℂ}
     (hh : Measurable h) {M : ℝ} (hM : ∀ t ∈ cube (n + 1), ‖h t‖ ≤ M) :
     IntegrableOn (fun t => h t * (2 * c / ((t 0 : ℂ) - t j.succ) *
@@ -648,12 +640,12 @@ lemma integrableOn_mul_div_selbergIntegrand {n : ℕ} {a b c : ℂ} (ha : 0 < a.
 
 /-! ### Aomoto's recurrence -/
 
-lemma cpow_eq_mul_cpow_sub_one {z : ℂ} (hz : z ≠ 0) (w : ℂ) : z ^ w = z * z ^ (w - 1) := by
+theorem cpow_eq_mul_cpow_sub_one {z : ℂ} (hz : z ≠ 0) (w : ℂ) : z ^ w = z * z ^ (w - 1) := by
   conv_lhs => rw [show w = 1 + (w - 1) by ring]
   rw [Complex.cpow_add _ _ hz, Complex.cpow_one]
 
 /-- `ibpD` in terms of the weight. -/
-lemma ibpD_eq {n : ℕ} (y : Fin n → ℝ) (α β c : ℂ) {x : ℝ} (hx : x ∈ Ioo (0 : ℝ) 1) :
+theorem ibpD_eq {n : ℕ} (y : Fin n → ℝ) (α β c : ℂ) {x : ℝ} (hx : x ∈ Ioo (0 : ℝ) 1) :
     ibpD y α β c x = weight α β x * vprod y c x *
       (α * (1 - x) - β * x + x * (1 - x) * ∑ j : Fin n, 2 * c / ((x : ℂ) - y j)) := by
   have hx0 : (x : ℂ) ≠ 0 := by exact_mod_cast hx.1.ne'
@@ -663,7 +655,7 @@ lemma ibpD_eq {n : ℕ} (y : Fin n → ℝ) (α β c : ℂ) {x : ℝ} (hx : x �
   rw [cpow_eq_mul_cpow_sub_one hx0 α, cpow_eq_mul_cpow_sub_one hx1 β]
   ring
 
-lemma ibpD_zero_eq {n : ℕ} (y : Fin n → ℝ) (α c : ℂ) {x : ℝ} (hx : x ∈ Ioo (0 : ℝ) 1) :
+theorem ibpD_zero_eq {n : ℕ} (y : Fin n → ℝ) (α c : ℂ) {x : ℝ} (hx : x ∈ Ioo (0 : ℝ) 1) :
     ibpD y α 0 c x = weight α 1 x * vprod y c x *
       (α + x * ∑ j : Fin n, 2 * c / ((x : ℂ) - y j)) := by
   have hx0 : (x : ℂ) ≠ 0 := by exact_mod_cast hx.1.ne'
@@ -673,7 +665,7 @@ lemma ibpD_zero_eq {n : ℕ} (y : Fin n → ℝ) (α c : ℂ) {x : ℝ} (hx : x 
   ring
 
 /-- The diagonal `tᵢ = tⱼ` is a null set. -/
-lemma ae_ne_coord {N : ℕ} {i j : Fin N} (hij : i ≠ j) :
+theorem ae_ne_coord {N : ℕ} {i j : Fin N} (hij : i ≠ j) :
     ∀ᵐ t : Fin N → ℝ, t i ≠ t j := by
   classical
   set L : (Fin N → ℝ) →ₗ[ℝ] ℝ :=
@@ -695,10 +687,10 @@ def mono {N : ℕ} (S : Finset (Fin N)) (t : Fin N → ℝ) : ℂ := ∏ i ∈ S
 def aomotoInt (N : ℕ) (a b c : ℂ) (S : Finset (Fin N)) : ℂ :=
   ∫ t in cube N, mono S t * selbergIntegrand N a b c t
 
-lemma measurable_mono {N : ℕ} (S : Finset (Fin N)) : Measurable (mono S) := by
+theorem measurable_mono {N : ℕ} (S : Finset (Fin N)) : Measurable (mono S) := by
   unfold mono; fun_prop
 
-lemma norm_mono_le {N : ℕ} (S : Finset (Fin N)) {t : Fin N → ℝ} (ht : t ∈ cube N) :
+theorem norm_mono_le {N : ℕ} (S : Finset (Fin N)) {t : Fin N → ℝ} (ht : t ∈ cube N) :
     ‖mono S t‖ ≤ 1 := by
   unfold mono
   rw [norm_prod]
@@ -707,12 +699,12 @@ lemma norm_mono_le {N : ℕ} (S : Finset (Fin N)) {t : Fin N → ℝ} (ht : t �
   rw [Complex.norm_real, Real.norm_eq_abs, abs_le]
   constructor <;> linarith [this.1, this.2]
 
-lemma mono_comp_perm {N : ℕ} (S : Finset (Fin N)) (σ : Equiv.Perm (Fin N))
+theorem mono_comp_perm {N : ℕ} (S : Finset (Fin N)) (σ : Equiv.Perm (Fin N))
     (t : Fin N → ℝ) : mono S (t ∘ σ) = mono (S.map σ.toEmbedding) t := by
   unfold mono
   simp [Finset.prod_map]
 
-lemma aomotoInt_map_perm {N : ℕ} (a b c : ℂ) (S : Finset (Fin N)) (σ : Equiv.Perm (Fin N)) :
+theorem aomotoInt_map_perm {N : ℕ} (a b c : ℂ) (S : Finset (Fin N)) (σ : Equiv.Perm (Fin N)) :
     aomotoInt N a b c (S.map σ.toEmbedding) = aomotoInt N a b c S := by
   unfold aomotoInt
   rw [← integral_cube_comp_perm σ (fun t => mono S t * selbergIntegrand N a b c t)]
@@ -722,7 +714,7 @@ lemma aomotoInt_map_perm {N : ℕ} (a b c : ℂ) (S : Finset (Fin N)) (σ : Equi
 def succPre {n : ℕ} (S : Finset (Fin (n + 1))) : Finset (Fin n) :=
   Finset.univ.filter fun j => j.succ ∈ S
 
-lemma mono_eq_tail {n : ℕ} {S : Finset (Fin (n + 1))} (hS : (0 : Fin (n + 1)) ∉ S)
+theorem mono_eq_tail {n : ℕ} {S : Finset (Fin (n + 1))} (hS : (0 : Fin (n + 1)) ∉ S)
     (t : Fin (n + 1) → ℝ) : mono S t = mono (succPre S) (Fin.tail t) := by
   classical
   unfold mono succPre
@@ -733,18 +725,18 @@ lemma mono_eq_tail {n : ℕ} {S : Finset (Fin (n + 1))} (hS : (0 : Fin (n + 1)) 
   rw [Finset.prod_filter]
   rfl
 
-lemma ae_coord_ne {N : ℕ} (i : Fin N) (x : ℝ) : ∀ᵐ t : Fin N → ℝ, t i ≠ x := by
+theorem ae_coord_ne {N : ℕ} (i : Fin N) (x : ℝ) : ∀ᵐ t : Fin N → ℝ, t i ≠ x := by
   rw [volume_pi]
   exact Measure.ae_eval_ne (μ := fun _ : Fin N => (volume : Measure ℝ)) i x
 
-lemma ae_coord_mem_Ioo {n : ℕ} :
+theorem ae_coord_mem_Ioo {n : ℕ} :
     ∀ᵐ t : Fin (n + 1) → ℝ, t ∈ cube (n + 1) → t 0 ∈ Ioo (0 : ℝ) 1 := by
   filter_upwards [ae_coord_ne 0 0, ae_coord_ne 0 1] with t h0 h1 ht
   have := zero_mem_Icc_of_mem_cube ht
   exact ⟨lt_of_le_of_ne this.1 (Ne.symm h0), lt_of_le_of_ne this.2 h1⟩
 
 /-- The integration-by-parts identity behind Aomoto's recurrence. -/
-lemma aomoto_ibp {n : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 1 / 2 ≤ c.re)
+theorem aomoto_ibp {n : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 1 / 2 ≤ c.re)
     {S : Finset (Fin (n + 1))} (hS : (0 : Fin (n + 1)) ∉ S) :
     ∫ t in cube (n + 1), mono S t * selbergIntegrand (n + 1) a b c t *
       (a * (1 - t 0) - b * t 0 + t 0 * (1 - t 0) *
@@ -763,7 +755,7 @@ lemma aomoto_ibp {n : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 1
   ring
 
 /-- Expansion of the Aomoto identity. -/
-lemma aomoto_expand {n : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 1 / 2 ≤ c.re)
+theorem aomoto_expand {n : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 1 / 2 ≤ c.re)
     {S : Finset (Fin (n + 1))} (hS : (0 : Fin (n + 1)) ∉ S) :
     a * aomotoInt (n + 1) a b c S - (a + b) * aomotoInt (n + 1) a b c (insert 0 S) +
       ∑ j : Fin n, ∫ t in cube (n + 1), mono S t * ((t 0 : ℂ) * (1 - t 0)) *
@@ -819,7 +811,7 @@ lemma aomoto_expand {n : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc 
     integral_const_mul, integral_const_mul, integral_finsetSum _ fun j _ => hI3 j] at h
   exact h
 
-lemma two_mul_integral_eq_of_swap {N : ℕ} (σ : Equiv.Perm (Fin N)) {f g : (Fin N → ℝ) → ℂ}
+theorem two_mul_integral_eq_of_swap {N : ℕ} (σ : Equiv.Perm (Fin N)) {f g : (Fin N → ℝ) → ℂ}
     (hf : IntegrableOn f (cube N)) (hg : ∀ᵐ t, t ∈ cube N → f t + f (t ∘ σ) = g t) :
     2 * ∫ t in cube N, f t = ∫ t in cube N, g t := by
   have h1 := integral_cube_comp_perm σ f
@@ -827,25 +819,25 @@ lemma two_mul_integral_eq_of_swap {N : ℕ} (σ : Equiv.Perm (Fin N)) {f g : (Fi
     integral_add hf (integrableOn_cube_comp_perm σ hf), h1]
   ring
 
-lemma mono_comp_of_fix {N : ℕ} {S : Finset (Fin N)} {σ : Equiv.Perm (Fin N)}
+theorem mono_comp_of_fix {N : ℕ} {S : Finset (Fin N)} {σ : Equiv.Perm (Fin N)}
     (hσ : ∀ i ∈ S, σ i = i) (t : Fin N → ℝ) : mono S (t ∘ σ) = mono S t := by
   unfold mono
   exact Finset.prod_congr rfl fun i hi => by simp [hσ i hi]
 
-lemma swap_fix_of_not_mem {n : ℕ} {S : Finset (Fin (n + 1))} (hS : (0 : Fin (n + 1)) ∉ S)
+theorem swap_fix_of_not_mem {n : ℕ} {S : Finset (Fin (n + 1))} (hS : (0 : Fin (n + 1)) ∉ S)
     {k : Fin (n + 1)} (hk : k ∉ S) : ∀ i ∈ S, Equiv.swap (0 : Fin (n + 1)) k i = i := by
   intro i hi
   refine Equiv.swap_apply_of_ne_of_ne ?_ ?_
   · rintro rfl; exact hS hi
   · rintro rfl; exact hk hi
 
-lemma integrableOn_mono_selberg {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
+theorem integrableOn_mono_selberg {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
     (hc : 0 ≤ c.re) (S : Finset (Fin N)) :
     IntegrableOn (fun t => mono S t * selbergIntegrand N a b c t) (cube N) :=
   integrableOn_mul_selbergIntegrand ha hb hc (measurable_mono _) (fun _ ht => norm_mono_le _ ht)
 
 /-- The cross term when `j+1 ∉ S`. -/
-lemma aomoto_cross_not_mem {n : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
+theorem aomoto_cross_not_mem {n : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
     (hc : 1 / 2 ≤ c.re) {S : Finset (Fin (n + 1))} (hS : (0 : Fin (n + 1)) ∉ S) (j : Fin n)
     (hj : j.succ ∉ S) :
     ∫ t in cube (n + 1), mono S t * ((t 0 : ℂ) * (1 - t 0)) *
@@ -919,7 +911,7 @@ lemma aomoto_cross_not_mem {n : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.r
   linear_combination h2 / 2
 
 /-- The cross term when `j+1 ∈ S`. -/
-lemma aomoto_cross_mem {n : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
+theorem aomoto_cross_mem {n : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
     (hc : 1 / 2 ≤ c.re) {S : Finset (Fin (n + 1))} (hS : (0 : Fin (n + 1)) ∉ S) (j : Fin n)
     (hj : j.succ ∈ S) :
     ∫ t in cube (n + 1), mono S t * ((t 0 : ℂ) * (1 - t 0)) *
@@ -966,7 +958,7 @@ lemma aomoto_cross_mem {n : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
   rw [integral_const_mul, ← hins] at h2
   linear_combination h2 / 2
 
-lemma card_succPre {n : ℕ} {S : Finset (Fin (n + 1))} (hS : (0 : Fin (n + 1)) ∉ S) :
+theorem card_succPre {n : ℕ} {S : Finset (Fin (n + 1))} (hS : (0 : Fin (n + 1)) ∉ S) :
     (succPre S).card = S.card := by
   have : S = (succPre S).map (Fin.succEmb n) := by
     ext i
@@ -979,7 +971,7 @@ lemma card_succPre {n : ℕ} {S : Finset (Fin (n + 1))} (hS : (0 : Fin (n + 1)) 
 
 /-- **Aomoto's recurrence** (AAR (8.1.5)): for `0 ∉ S`, with `k = |S|`,
 `(a + (n-k)c) A(S) = (a + b + (2n-k)c) A(S ∪ {0})`. -/
-lemma aomoto_step {n : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 1 / 2 ≤ c.re)
+theorem aomoto_step {n : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 1 / 2 ≤ c.re)
     {S : Finset (Fin (n + 1))} (hS : (0 : Fin (n + 1)) ∉ S) :
     (a + ((n : ℂ) - S.card) * c) * aomotoInt (n + 1) a b c S =
       (a + b + (2 * (n : ℂ) - S.card) * c) * aomotoInt (n + 1) a b c (insert 0 S) := by
@@ -1013,12 +1005,12 @@ lemma aomoto_step {n : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 
 /-- The initial segment `{i | i < m}`. -/
 def iseg (N m : ℕ) : Finset (Fin N) := Finset.univ.filter fun i => i.val < m
 
-lemma card_iseg {N m : ℕ} (hm : m ≤ N) : (iseg N m).card = m := by
+theorem card_iseg {N m : ℕ} (hm : m ≤ N) : (iseg N m).card = m := by
   unfold iseg
   rw [Fin.card_filter_val_lt]
   omega
 
-lemma iseg_map_cycleRange {n m : ℕ} (hm : m ≤ n) :
+theorem iseg_map_cycleRange {n m : ℕ} (hm : m ≤ n) :
     (iseg (n + 1) m).map (Fin.cycleRange (⟨m, by omega⟩ : Fin (n + 1))).toEmbedding =
       Finset.univ.filter fun i : Fin (n + 1) => 1 ≤ i.val ∧ i.val < m + 1 := by
   ext k
@@ -1036,7 +1028,7 @@ lemma iseg_map_cycleRange {n m : ℕ} (hm : m ≤ n) :
     simp; omega
 
 /-- Aomoto's recurrence along initial segments. -/
-lemma aomoto_iseg_step {n : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 1 / 2 ≤ c.re)
+theorem aomoto_iseg_step {n : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 1 / 2 ≤ c.re)
     {m : ℕ} (hm : m ≤ n) :
     (a + ((n : ℂ) - m) * c) * aomotoInt (n + 1) a b c (iseg (n + 1) m) =
       (a + b + (2 * (n : ℂ) - m) * c) * aomotoInt (n + 1) a b c (iseg (n + 1) (m + 1)) := by
@@ -1068,10 +1060,10 @@ def aomotoFactor (N : ℕ) (a b c : ℂ) (j : ℕ) : ℂ :=
 /-- The Selberg integral as a function of its parameters. -/
 def selbergInt (N : ℕ) (a b c : ℂ) : ℂ := ∫ t in cube N, selbergIntegrand N a b c t
 
-lemma aomotoInt_empty (N : ℕ) (a b c : ℂ) : aomotoInt N a b c ∅ = selbergInt N a b c := by
+theorem aomotoInt_empty (N : ℕ) (a b c : ℂ) : aomotoInt N a b c ∅ = selbergInt N a b c := by
   simp [aomotoInt, selbergInt, mono]
 
-lemma aomoto_prod {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 1 / 2 ≤ c.re)
+theorem aomoto_prod {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 1 / 2 ≤ c.re)
     {m : ℕ} (hm : m ≤ N) :
     aomotoInt N a b c (iseg N m) =
       (∏ j ∈ Finset.range m, aomotoFactor N a b c j) * selbergInt N a b c := by
@@ -1099,7 +1091,7 @@ lemma aomoto_prod {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 
     rw [e1, e2, div_mul_eq_mul_div, eq_div_iff hden]
     linear_combination -hstep
 
-lemma mono_univ_mul_selbergIntegrand {N : ℕ} {a b c : ℂ} (ha : a ≠ 0) (t : Fin N → ℝ) :
+theorem mono_univ_mul_selbergIntegrand {N : ℕ} {a b c : ℂ} (ha : a ≠ 0) (t : Fin N → ℝ) :
     mono Finset.univ t * selbergIntegrand N a b c t = selbergIntegrand N (a + 1) b c t := by
   rw [selbergIntegrand_eq, selbergIntegrand_eq, mono, ← mul_assoc, ← Finset.prod_mul_distrib]
   congr 1
@@ -1113,7 +1105,7 @@ lemma mono_univ_mul_selbergIntegrand {N : ℕ} {a b c : ℂ} (ha : a ≠ 0) (t :
     ring
 
 /-- **The `a`-shift of the Selberg integral.** -/
-lemma selbergInt_add_one {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
+theorem selbergInt_add_one {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
     (hc : 1 / 2 ≤ c.re) :
     selbergInt N (a + 1) b c =
       (∏ j ∈ Finset.range N, aomotoFactor N a b c j) * selbergInt N a b c := by
@@ -1129,16 +1121,16 @@ lemma selbergInt_add_one {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
 /-- The reflection `t ↦ 1 - t` of the cube. -/
 def reflect {N : ℕ} (t : Fin N → ℝ) : Fin N → ℝ := fun i => 1 - t i
 
-lemma reflect_reflect {N : ℕ} (t : Fin N → ℝ) : reflect (reflect t) = t := by
+theorem reflect_reflect {N : ℕ} (t : Fin N → ℝ) : reflect (reflect t) = t := by
   ext i; simp [reflect]
 
-lemma measurable_reflect (N : ℕ) : Measurable (reflect (N := N)) := by
+theorem measurable_reflect (N : ℕ) : Measurable (reflect (N := N)) := by
   unfold reflect; fun_prop
 
-lemma measurePreserving_reflect (N : ℕ) : MeasurePreserving (reflect (N := N)) :=
+theorem measurePreserving_reflect (N : ℕ) : MeasurePreserving (reflect (N := N)) :=
   volume_preserving_pi fun _ => Measure.measurePreserving_sub_left volume (1 : ℝ)
 
-lemma measurableEmbedding_reflect (N : ℕ) : MeasurableEmbedding (reflect (N := N)) :=
+theorem measurableEmbedding_reflect (N : ℕ) : MeasurableEmbedding (reflect (N := N)) :=
   MeasurableEmbedding.of_measurable_inverse (measurable_reflect N)
     (by
       have : Set.range (reflect (N := N)) = Set.univ :=
@@ -1146,19 +1138,19 @@ lemma measurableEmbedding_reflect (N : ℕ) : MeasurableEmbedding (reflect (N :=
       rw [this]; exact MeasurableSet.univ)
     (measurable_reflect N) reflect_reflect
 
-lemma reflect_preimage_cube (N : ℕ) : reflect ⁻¹' cube N = cube N := by
+theorem reflect_preimage_cube (N : ℕ) : reflect ⁻¹' cube N = cube N := by
   ext t
   simp only [Set.mem_preimage, Set.mem_pi, Set.mem_univ, true_implies, reflect, Set.mem_Icc]
   exact ⟨fun h i => ⟨by linarith [(h i).2], by linarith [(h i).1]⟩,
     fun h i => ⟨by linarith [(h i).2], by linarith [(h i).1]⟩⟩
 
-lemma integral_cube_reflect {N : ℕ} (g : (Fin N → ℝ) → ℂ) :
+theorem integral_cube_reflect {N : ℕ} (g : (Fin N → ℝ) → ℂ) :
     ∫ t in cube N, g (reflect t) = ∫ t in cube N, g t := by
   conv_lhs => rw [← reflect_preimage_cube N]
   exact (measurePreserving_reflect N).setIntegral_preimage_emb
     (measurableEmbedding_reflect N) _ _
 
-lemma selbergIntegrand_reflect (N : ℕ) (a b c : ℂ) (t : Fin N → ℝ) :
+theorem selbergIntegrand_reflect (N : ℕ) (a b c : ℂ) (t : Fin N → ℝ) :
     selbergIntegrand N a b c (reflect t) = selbergIntegrand N b a c t := by
   rw [selbergIntegrand_eq, selbergIntegrand_eq]
   congr 1
@@ -1172,14 +1164,14 @@ lemma selbergIntegrand_reflect (N : ℕ) (a b c : ℂ) (t : Fin N → ℝ) :
     simp only [reflect, show 1 - t i - (1 - t j) = -(t i - t j) by ring, abs_neg]
 
 /-- **Symmetry** of the Selberg integral in `a` and `b`. -/
-lemma selbergInt_comm (N : ℕ) (a b c : ℂ) : selbergInt N a b c = selbergInt N b a c := by
+theorem selbergInt_comm (N : ℕ) (a b c : ℂ) : selbergInt N a b c = selbergInt N b a c := by
   unfold selbergInt
   rw [← integral_cube_reflect]
   simp only [selbergIntegrand_reflect]
 
 /-! ### The recursion in the dimension -/
 
-lemma scaling_cross {n : ℕ} {a c : ℂ} (ha : 0 < a.re) (hc : 1 / 2 ≤ c.re) (j : Fin n) :
+theorem scaling_cross {n : ℕ} {a c : ℂ} (ha : 0 < a.re) (hc : 1 / 2 ≤ c.re) (j : Fin n) :
     ∫ t in cube (n + 1), (t 0 : ℂ) * (2 * c / ((t 0 : ℂ) - t j.succ) *
         selbergIntegrand (n + 1) a 1 c t) = c * selbergInt (n + 1) a 1 c := by
   obtain ⟨σ, hσ⟩ : ∃ σ : Equiv.Perm (Fin (n + 1)), σ = Equiv.swap 0 j.succ := ⟨_, rfl⟩
@@ -1205,7 +1197,7 @@ lemma scaling_cross {n : ℕ} {a c : ℂ} (ha : 0 < a.re) (hc : 1 / 2 ≤ c.re) 
   linear_combination h2 / 2
 
 /-- **The recursion in the dimension**: `(a + n c) S_{n+1}(a, 1, c) = S_n(a, 1 + 2c, c)`. -/
-lemma selbergInt_succ_one {n : ℕ} {a c : ℂ} (ha : 0 < a.re) (hc : 1 / 2 ≤ c.re) :
+theorem selbergInt_succ_one {n : ℕ} {a c : ℂ} (ha : 0 < a.re) (hc : 1 / 2 ≤ c.re) :
     (a + n * c) * selbergInt (n + 1) a 1 c = selbergInt n a (1 + 2 * c) c := by
   have h1 : (0 : ℝ) < (1 : ℂ).re := by simp
   have hc0 : (0 : ℝ) ≤ c.re := by linarith
@@ -1282,29 +1274,29 @@ def selbergRHS (n : ℕ) (a b c : ℂ) : ℂ :=
     Gamma (a + (j : ℕ) * c) * Gamma (b + (j : ℕ) * c) * Gamma (1 + ((j : ℕ) + 1) * c) /
       (Gamma (a + b + (n + j - 1 : ℕ) * c) * Gamma (1 + c))
 
-lemma selbergRHS_eq_range (n : ℕ) (a b c : ℂ) : selbergRHS n a b c =
+theorem selbergRHS_eq_range (n : ℕ) (a b c : ℂ) : selbergRHS n a b c =
     ∏ j ∈ Finset.range n, Gamma (a + j * c) * Gamma (b + j * c) * Gamma (1 + (j + 1) * c) /
       (Gamma (a + b + (n + j - 1 : ℕ) * c) * Gamma (1 + c)) :=
   Fin.prod_univ_eq_prod_range (fun j : ℕ => Gamma (a + j * c) * Gamma (b + j * c) *
     Gamma (1 + (j + 1) * c) / (Gamma (a + b + (n + j - 1 : ℕ) * c) * Gamma (1 + c))) n
 
-lemma selbergRHS_comm (n : ℕ) (a b c : ℂ) : selbergRHS n a b c = selbergRHS n b a c := by
+theorem selbergRHS_comm (n : ℕ) (a b c : ℂ) : selbergRHS n a b c = selbergRHS n b a c := by
   unfold selbergRHS
   refine Finset.prod_congr rfl fun j _ => ?_
   rw [add_comm a b]
   ring
 
-lemma re_add_nat_mul_pos {a c : ℂ} (ha : 0 < a.re) (hc : 0 ≤ c.re) (x : ℝ) (hx : 0 ≤ x) :
+theorem re_add_nat_mul_pos {a c : ℂ} (ha : 0 < a.re) (hc : 0 ≤ c.re) (x : ℝ) (hx : 0 ≤ x) :
     0 < (a + x * c).re := by
   simp only [Complex.add_re, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im, zero_mul,
     sub_zero]
   nlinarith
 
-lemma Gamma_ne_zero_of_re_pos' {z : ℂ} (hz : 0 < z.re) : Gamma z ≠ 0 :=
+theorem Gamma_ne_zero_of_re_pos' {z : ℂ} (hz : 0 < z.re) : Gamma z ≠ 0 :=
   Complex.Gamma_ne_zero_of_re_pos hz
 
 /-- The `a`-shift of the right-hand side. -/
-lemma selbergRHS_add_one {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
+theorem selbergRHS_add_one {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
     (hc : 0 ≤ c.re) :
     selbergRHS N (a + 1) b c =
       (∏ j ∈ Finset.range N, aomotoFactor N a b c j) * selbergRHS N a b c := by
@@ -1342,7 +1334,7 @@ lemma selbergRHS_add_one {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
   rw [show N + (N - 1 - j) - 1 = 2 * N - 2 - j by omega]
 
 /-- The dimension recursion of the right-hand side. -/
-lemma selbergRHS_succ_one {n : ℕ} {a c : ℂ} (ha : 0 < a.re) (hc : 0 ≤ c.re) :
+theorem selbergRHS_succ_one {n : ℕ} {a c : ℂ} (ha : 0 < a.re) (hc : 0 ≤ c.re) :
     (a + n * c) * selbergRHS (n + 1) a 1 c = selbergRHS n a (1 + 2 * c) c := by
   rw [selbergRHS_eq_range, selbergRHS_eq_range]
   set u : ℕ → ℂ := fun j => Gamma (a + j * c) with hu
@@ -1409,7 +1401,7 @@ lemma selbergRHS_succ_one {n : ℕ} {a c : ℂ} (ha : 0 < a.re) (hc : 0 ≤ c.re
 
 /-! ### Holomorphy in the parameters -/
 
-lemma ae_cube_coords_Ioo (N : ℕ) :
+theorem ae_cube_coords_Ioo (N : ℕ) :
     ∀ᵐ t : Fin N → ℝ, t ∈ cube N → ∀ i, t i ∈ Ioo (0 : ℝ) 1 := by
   have h0 : ∀ᵐ t : Fin N → ℝ, ∀ i, t i ≠ 0 := ae_all_iff.2 fun i => ae_coord_ne i 0
   have h1 : ∀ᵐ t : Fin N → ℝ, ∀ i, t i ≠ 1 := ae_all_iff.2 fun i => ae_coord_ne i 1
@@ -1417,7 +1409,7 @@ lemma ae_cube_coords_Ioo (N : ℕ) :
   have := ht i (Set.mem_univ _)
   exact ⟨lt_of_le_of_ne this.1 (Ne.symm (ht0 i)), lt_of_le_of_ne this.2 (ht1 i)⟩
 
-lemma norm_weight_le_of_re_le {a a' b : ℂ} (h : a'.re ≤ a.re) {x : ℝ}
+theorem norm_weight_le_of_re_le {a a' b : ℂ} (h : a'.re ≤ a.re) {x : ℝ}
     (hx : x ∈ Ioo (0 : ℝ) 1) : ‖weight a b x‖ ≤ ‖weight a' b x‖ := by
   unfold weight
   rw [norm_mul, norm_mul, Complex.norm_cpow_eq_rpow_re_of_pos hx.1,
@@ -1427,16 +1419,16 @@ lemma norm_weight_le_of_re_le {a a' b : ℂ} (h : a'.re ≤ a.re) {x : ℝ}
   simp only [Complex.sub_re, Complex.one_re]
   linarith
 
-lemma norm_weight_le_one_left {a b : ℂ} (h : 1 ≤ a.re) {x : ℝ} (hx : x ∈ Ioo (0 : ℝ) 1) :
+theorem norm_weight_le_one_left {a b : ℂ} (h : 1 ≤ a.re) {x : ℝ} (hx : x ∈ Ioo (0 : ℝ) 1) :
     ‖weight a b x‖ ≤ ‖weight 1 b x‖ := by
   exact norm_weight_le_of_re_le (a := a) (a' := 1) (b := b) (by rw [Complex.one_re]; exact h) hx
 
-lemma differentiableAt_ofReal_cpow_sub_one {x : ℝ} (hx : 0 < x) (a : ℂ) :
+theorem differentiableAt_ofReal_cpow_sub_one {x : ℝ} (hx : 0 < x) (a : ℂ) :
     DifferentiableAt ℂ (fun a : ℂ => (x : ℂ) ^ (a - 1)) a :=
   ((differentiableAt_id.sub_const 1).const_cpow (Or.inl (by exact_mod_cast hx.ne')))
 
 /-- The Selberg integral is holomorphic in `a` on the right half-plane. -/
-lemma differentiableOn_selbergInt_a (N : ℕ) {b c : ℂ} (hb : 0 < b.re) (hc : 0 ≤ c.re) :
+theorem differentiableOn_selbergInt_a (N : ℕ) {b c : ℂ} (hb : 0 < b.re) (hc : 0 ≤ c.re) :
     DifferentiableOn ℂ (fun a => selbergInt N a b c) {a | 0 < a.re} := by
   unfold selbergInt
   refine differentiableOn_integral_of_dominated (isOpen_lt continuous_const Complex.continuous_re)
@@ -1476,11 +1468,11 @@ lemma differentiableOn_selbergInt_a (N : ℕ) {b c : ℂ} (hb : 0 < b.re) (hc : 
 
 /-! ### Carlson's theorem in `a` -/
 
-lemma re_pos_add_nat_mul {a c : ℂ} (ha : 0 < a.re) (hc : 0 ≤ c.re) (k : ℕ) :
+theorem re_pos_add_nat_mul {a c : ℂ} (ha : 0 < a.re) (hc : 0 ≤ c.re) (k : ℕ) :
     0 < (a + (k : ℂ) * c).re := by
   have := re_add_nat_mul_pos ha hc k (Nat.cast_nonneg k); simpa using this
 
-lemma selbergRHS_ne_zero {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 ≤ c.re) :
+theorem selbergRHS_ne_zero {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 ≤ c.re) :
     selbergRHS N a b c ≠ 0 := by
   have hab : 0 < (a + b).re := by simp; linarith
   have hc1 : 0 < (1 : ℂ).re := by simp
@@ -1493,7 +1485,7 @@ lemma selbergRHS_ne_zero {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
   · exact Gamma_ne_zero_of_re_pos' (re_pos_add_nat_mul hab hc _)
   · exact Gamma_ne_zero_of_re_pos' (by simp; linarith)
 
-lemma aomotoFactor_ne_zero {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 ≤ c.re)
+theorem aomotoFactor_ne_zero {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 ≤ c.re)
     (j : ℕ) : aomotoFactor N a b c j ≠ 0 := by
   have hab : 0 < (a + b).re := by simp; linarith
   unfold aomotoFactor
@@ -1501,10 +1493,10 @@ lemma aomotoFactor_ne_zero {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.r
   · have := re_pos_add_nat_mul ha hc (N - 1 - j); rw [h] at this; simp at this
   · have := re_pos_add_nat_mul hab hc (2 * N - 2 - j); rw [h] at this; simp at this
 
-lemma ne_neg_nat_of_re_pos {s : ℂ} (hs : 0 < s.re) : ∀ m : ℕ, s ≠ -m := fun m h => by
+theorem ne_neg_nat_of_re_pos {s : ℂ} (hs : 0 < s.re) : ∀ m : ℕ, s ≠ -m := fun m h => by
   rw [h] at hs; simp at hs; linarith [(Nat.cast_nonneg m : (0 : ℝ) ≤ m)]
 
-lemma differentiableOn_selbergRHS_a (N : ℕ) {b c : ℂ} (hb : 0 < b.re) (hc : 0 ≤ c.re) :
+theorem differentiableOn_selbergRHS_a (N : ℕ) {b c : ℂ} (hb : 0 < b.re) (hc : 0 ≤ c.re) :
     DifferentiableOn ℂ (fun a => selbergRHS N a b c) {a | 0 < a.re} := by
   intro a ha
   have ha' : 0 < a.re := ha
@@ -1527,7 +1519,7 @@ lemma differentiableOn_selbergRHS_a (N : ℕ) {b c : ℂ} (hb : 0 < b.re) (hc : 
       (Gamma_ne_zero_of_re_pos' (by simp; linarith))
 
 /-- Polynomial growth of `1/R` on the strip `1 ≤ Re a ≤ 2`. -/
-lemma exists_norm_recip_selbergRHS_le (N : ℕ) {b c : ℂ} (hb : 0 < b.re) (hc : 0 ≤ c.re) :
+theorem exists_norm_recip_selbergRHS_le (N : ℕ) {b c : ℂ} (hb : 0 < b.re) (hc : 0 ≤ c.re) :
     ∃ C : ℝ, ∃ K : ℕ, ∀ a : ℂ, 1 ≤ a.re → a.re ≤ 2 →
       ‖(selbergRHS N a b c)⁻¹‖ ≤ C * (1 + |a.im|) ^ K := by
   have hp : ∀ j : Fin N, 0 < (b + ((N + j - 1 : ℕ) : ℂ) * c).re :=
@@ -1581,7 +1573,7 @@ lemma exists_norm_recip_selbergRHS_le (N : ℕ) {b c : ℂ} (hb : 0 < b.re) (hc 
     _ = D j * (1 + |a.im|) ^ (K1 j + K2 j) := by rw [hexp, mul_one]
 
 /-- The Selberg integral is bounded on `Re a ≥ 1`. -/
-lemma norm_selbergInt_le {N : ℕ} {a b c : ℂ} (ha : 1 ≤ a.re) (hb : 0 < b.re) (hc : 0 ≤ c.re) :
+theorem norm_selbergInt_le {N : ℕ} {a b c : ℂ} (ha : 1 ≤ a.re) (hb : 0 < b.re) (hc : 0 ≤ c.re) :
     ‖selbergInt N a b c‖ ≤ ∫ t in cube N, ‖∏ i, weight 1 b (t i)‖ := by
   unfold selbergInt
   refine norm_integral_le_of_norm_le
@@ -1594,7 +1586,7 @@ lemma norm_selbergInt_le {N : ℕ} {a b c : ℂ} (ha : 1 ≤ a.re) (hb : 0 < b.r
     norm_weight_le_one_left ha (ht' i)
 
 /-- `S/R` is `1`-periodic in `a`. -/
-lemma selbergRatio_add_one {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
+theorem selbergRatio_add_one {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
     (hc : 1 / 2 ≤ c.re) :
     selbergInt N (a + 1) b c / selbergRHS N (a + 1) b c =
       selbergInt N a b c / selbergRHS N a b c := by
@@ -1605,7 +1597,7 @@ lemma selbergRatio_add_one {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.r
   rw [mul_div_mul_left _ _ hP]
 
 /-- **Carlson's theorem in `a`**: `S/R` does not depend on `a`. -/
-lemma selbergRatio_eq_one_left {N : ℕ} {b c : ℂ} (hb : 0 < b.re) (hc : 1 / 2 ≤ c.re)
+theorem selbergRatio_eq_one_left {N : ℕ} {b c : ℂ} (hb : 0 < b.re) (hc : 1 / 2 ≤ c.re)
     {a : ℂ} (ha : 0 < a.re) :
     selbergInt N a b c / selbergRHS N a b c = selbergInt N 1 b c / selbergRHS N 1 b c := by
   have hc0 : (0 : ℝ) ≤ c.re := by linarith
@@ -1662,14 +1654,14 @@ lemma selbergRatio_eq_one_left {N : ℕ} {b c : ℂ} (hb : 0 < b.re) (hc : 1 / 2
     rw [← this]
     exact (selbergRatio_add_one ha hb hc).symm
 
-lemma selbergRatio_eq_one_one {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
+theorem selbergRatio_eq_one_one {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
     (hc : 1 / 2 ≤ c.re) :
     selbergInt N a b c / selbergRHS N a b c = selbergInt N 1 1 c / selbergRHS N 1 1 c := by
   have h1 : (0 : ℝ) < (1 : ℂ).re := by simp
   rw [selbergRatio_eq_one_left hb hc ha, selbergInt_comm, selbergRHS_comm,
     selbergRatio_eq_one_left h1 hc hb]
 
-lemma selbergInt_zero (a b c : ℂ) : selbergInt 0 a b c = 1 := by
+theorem selbergInt_zero (a b c : ℂ) : selbergInt 0 a b c = 1 := by
   have hcube : cube 0 = Set.univ := Set.eq_univ_of_forall fun t => fun i => i.elim0
   rw [selbergInt, hcube, Measure.restrict_univ]
   simp only [selbergIntegrand, Finset.univ_eq_empty, Finset.prod_empty, mul_one,
@@ -1677,10 +1669,10 @@ lemma selbergInt_zero (a b c : ℂ) : selbergInt 0 a b c = 1 := by
   rw [Measure.real, volume_pi, Measure.pi_univ]
   simp
 
-lemma selbergRHS_zero (a b c : ℂ) : selbergRHS 0 a b c = 1 := by
+theorem selbergRHS_zero (a b c : ℂ) : selbergRHS 0 a b c = 1 := by
   simp [selbergRHS]
 
-lemma selbergRatio_one_one_eq_one {c : ℂ} (hc : 1 / 2 ≤ c.re) :
+theorem selbergRatio_one_one_eq_one {c : ℂ} (hc : 1 / 2 ≤ c.re) :
     ∀ N : ℕ, selbergInt N 1 1 c / selbergRHS N 1 1 c = 1 := by
   have h1 : (0 : ℝ) < (1 : ℂ).re := by simp
   have hc0 : (0 : ℝ) ≤ c.re := by linarith
@@ -1712,13 +1704,13 @@ theorem selbergInt_eq_of_half_le {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0
 
 /-! ### Extension to `Re c > 0` -/
 
-lemma ae_coords_ne (N : ℕ) : ∀ᵐ t : Fin N → ℝ, ∀ i j, i ≠ j → t i ≠ t j := by
+theorem ae_coords_ne (N : ℕ) : ∀ᵐ t : Fin N → ℝ, ∀ i j, i ≠ j → t i ≠ t j := by
   refine ae_all_iff.2 fun i => ae_all_iff.2 fun j => ?_
   by_cases hij : i = j
   · exact Eventually.of_forall fun _ h => absurd hij h
   · filter_upwards [ae_ne_coord hij] with t ht _ using ht
 
-lemma differentiableAt_selbergIntegrand_c {N : ℕ} (a b : ℂ) {t : Fin N → ℝ}
+theorem differentiableAt_selbergIntegrand_c {N : ℕ} (a b : ℂ) {t : Fin N → ℝ}
     (ht : ∀ i j, i ≠ j → t i ≠ t j) (c : ℂ) :
     DifferentiableAt ℂ (fun c => selbergIntegrand N a b c t) c := by
   unfold selbergIntegrand
@@ -1731,7 +1723,7 @@ lemma differentiableAt_selbergIntegrand_c {N : ℕ} (a b : ℂ) {t : Fin N → �
     exact (differentiableAt_id.const_mul 2).const_cpow (Or.inl hne)
   · exact differentiableAt_const _
 
-lemma differentiableOn_selbergInt_c (N : ℕ) {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) :
+theorem differentiableOn_selbergInt_c (N : ℕ) {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) :
     DifferentiableOn ℂ (fun c => selbergInt N a b c) {c | 0 < c.re} := by
   unfold selbergInt
   refine differentiableOn_integral_of_dominated (isOpen_lt continuous_const Complex.continuous_re)
@@ -1762,7 +1754,7 @@ def cDomain (N : ℕ) (a b : ℂ) : Set ℂ :=
   {c | 0 < 1 + N * c.re ∧ 0 < a.re + ((N - 1 : ℕ) : ℝ) * c.re ∧
     0 < b.re + ((N - 1 : ℕ) : ℝ) * c.re}
 
-lemma isOpen_cDomain (N : ℕ) (a b : ℂ) : IsOpen (cDomain N a b) := by
+theorem isOpen_cDomain (N : ℕ) (a b : ℂ) : IsOpen (cDomain N a b) := by
   have h1 : Continuous fun c : ℂ => 1 + (N : ℝ) * c.re := by fun_prop
   have h2 : Continuous fun c : ℂ => a.re + ((N - 1 : ℕ) : ℝ) * c.re := by fun_prop
   have h3 : Continuous fun c : ℂ => b.re + ((N - 1 : ℕ) : ℝ) * c.re := by fun_prop
@@ -1773,7 +1765,7 @@ lemma isOpen_cDomain (N : ℕ) (a b : ℂ) : IsOpen (cDomain N a b) := by
   ext c
   simp [cDomain, and_assoc]
 
-lemma convex_cDomain (N : ℕ) (a b : ℂ) : Convex ℝ (cDomain N a b) := by
+theorem convex_cDomain (N : ℕ) (a b : ℂ) : Convex ℝ (cDomain N a b) := by
   unfold cDomain
   intro x hx y hy s t hs ht hst
   simp only [Set.mem_ofPred_eq, Complex.add_re, Complex.smul_re, smul_eq_mul] at hx hy ⊢
@@ -1795,7 +1787,7 @@ lemma convex_cDomain (N : ℕ) (a b : ℂ) : Convex ℝ (cDomain N a b) := by
       linear_combination (-b.re) * hst
     rw [e]; exact key hx.2.2 hy.2.2
 
-lemma re_pos_of_mem_cDomain {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hc : c ∈ cDomain N a b)
+theorem re_pos_of_mem_cDomain {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hc : c ∈ cDomain N a b)
     {j : ℕ} (hj : j ≤ N - 1) : 0 < (a + (j : ℂ) * c).re := by
   obtain ⟨_, h2, _⟩ := hc
   simp only [Complex.add_re, Complex.mul_re, Complex.natCast_re, Complex.natCast_im, zero_mul,
@@ -1805,7 +1797,7 @@ lemma re_pos_of_mem_cDomain {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hc : c ∈ 
   · nlinarith [(Nat.cast_nonneg j : (0 : ℝ) ≤ j)]
   · nlinarith
 
-lemma re_one_add_pos_of_mem_cDomain {N : ℕ} {a b c : ℂ} (hc : c ∈ cDomain N a b)
+theorem re_one_add_pos_of_mem_cDomain {N : ℕ} {a b c : ℂ} (hc : c ∈ cDomain N a b)
     {j : ℕ} (hj : j ≤ N) : 0 < (1 + (j : ℂ) * c).re := by
   obtain ⟨h1, _, _⟩ := hc
   simp only [Complex.add_re, Complex.one_re, Complex.mul_re, Complex.natCast_re,
@@ -1815,11 +1807,11 @@ lemma re_one_add_pos_of_mem_cDomain {N : ℕ} {a b c : ℂ} (hc : c ∈ cDomain 
   · nlinarith [(Nat.cast_nonneg j : (0 : ℝ) ≤ j)]
   · nlinarith
 
-lemma pos_mem_cDomain (N : ℕ) {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 < c.re) :
+theorem pos_mem_cDomain (N : ℕ) {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 < c.re) :
     c ∈ cDomain N a b := by
   refine ⟨by positivity, by positivity, by positivity⟩
 
-lemma differentiableOn_selbergRHS_c {N : ℕ} {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
+theorem differentiableOn_selbergRHS_c {N : ℕ} {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
     (hN : 0 < N) : DifferentiableOn ℂ (fun c => selbergRHS N a b c) (cDomain N a b) := by
   intro c hc
   refine DifferentiableAt.differentiableWithinAt ?_
@@ -1873,7 +1865,7 @@ theorem selbergInt_eq_of_re_pos {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 
 /-! ### A Landau-type continuation theorem -/
 
 /-- Uniqueness of real power-series coefficients from one-sided vanishing. -/
-lemma eq_zero_of_hasSum_pow_eq_zero {e : ℕ → ℝ} {ε r : ℝ} (hr : 0 < r) (hrε : r < ε)
+theorem eq_zero_of_hasSum_pow_eq_zero {e : ℕ → ℝ} {ε r : ℝ} (hr : 0 < r) (hrε : r < ε)
     (hs : Summable fun k => |e k| * r ^ k)
     (h : ∀ w : ℝ, 0 < w → w < ε → HasSum (fun k => e k * w ^ k) 0) : ∀ k, e k = 0 := by
   intro k
@@ -1918,7 +1910,7 @@ lemma eq_zero_of_hasSum_pow_eq_zero {e : ℕ → ℝ} {ε r : ℝ} (hr : 0 < r) 
   exact tendsto_nhds_unique (hlim.congr' hzero) tendsto_const_nhds
 
 /-- Absolute convergence of a Taylor series strictly inside the disc of holomorphy. -/
-lemma summable_norm_taylor {R : ℂ → ℂ} {z₀ : ℂ} {ρ : ℝ}
+theorem summable_norm_taylor {R : ℂ → ℂ} {z₀ : ℂ} {ρ : ℝ}
     (hR : DifferentiableOn ℂ R (Metric.ball z₀ ρ)) {r : ℝ} (hr0 : 0 ≤ r) (hr : r < ρ) :
     Summable fun k : ℕ => ‖(k.factorial : ℂ)⁻¹ * iteratedDeriv k R z₀‖ * r ^ k := by
   set r' := (r + ρ) / 2 with hr'
@@ -1950,7 +1942,7 @@ lemma summable_norm_taylor {R : ℂ → ℂ} {z₀ : ℂ} {ρ : ℝ}
         field_simp
     _ ≤ B * (r / r') ^ k := by gcongr; exact hterm k
 
-lemma hasSum_mul_rpow_sub {y : ℝ} (hy : 0 < y) (W σ₁ v : ℝ) :
+theorem hasSum_mul_rpow_sub {y : ℝ} (hy : 0 < y) (W σ₁ v : ℝ) :
     HasSum (fun k : ℕ => v ^ k / k.factorial * (W * (-Real.log y) ^ k * y ^ σ₁))
       (W * y ^ (σ₁ - v)) := by
   have h := NormedSpace.expSeries_div_hasSum_exp (𝔸 := ℝ) (v * -Real.log y)
@@ -2136,20 +2128,20 @@ def vdmSq (N : ℕ) (t : Fin N → ℝ) : ℝ :=
 def weightR (N : ℕ) (α β : ℝ) (t : Fin N → ℝ) : ℝ :=
   ∏ i : Fin N, t i ^ (α - 1) * (1 - t i) ^ (β - 1)
 
-lemma measurable_vdmSq (N : ℕ) : Measurable (vdmSq N) := by
+theorem measurable_vdmSq (N : ℕ) : Measurable (vdmSq N) := by
   unfold vdmSq; fun_prop
 
-lemma measurable_weightR (N : ℕ) (α β : ℝ) : Measurable (weightR N α β) := by
+theorem measurable_weightR (N : ℕ) (α β : ℝ) : Measurable (weightR N α β) := by
   unfold weightR; fun_prop
 
-lemma vdmSq_pos {N : ℕ} {t : Fin N → ℝ} (ht : ∀ i j, i ≠ j → t i ≠ t j) : 0 < vdmSq N t := by
+theorem vdmSq_pos {N : ℕ} {t : Fin N → ℝ} (ht : ∀ i j, i ≠ j → t i ≠ t j) : 0 < vdmSq N t := by
   unfold vdmSq
   refine Finset.prod_pos fun i _ => Finset.prod_pos fun j _ => ?_
   split_ifs with hij
   · have := sub_ne_zero.mpr (ht i j (Fin.ne_of_lt hij)); positivity
   · exact one_pos
 
-lemma vdmSq_le_one {N : ℕ} {t : Fin N → ℝ} (ht : t ∈ cube N) : vdmSq N t ≤ 1 := by
+theorem vdmSq_le_one {N : ℕ} {t : Fin N → ℝ} (ht : t ∈ cube N) : vdmSq N t ≤ 1 := by
   unfold vdmSq
   refine Finset.prod_le_one₀ (fun i _ => Finset.prod_nonneg fun j _ => by split_ifs <;> positivity)
     fun i _ => Finset.prod_le_one₀ (fun j _ => by split_ifs <;> positivity) fun j _ => ?_
@@ -2161,7 +2153,7 @@ lemma vdmSq_le_one {N : ℕ} {t : Fin N → ℝ} (ht : t ∈ cube N) : vdmSq N t
       _ ≤ 1 := pow_le_one₀ (abs_nonneg _) this
   · exact le_rfl
 
-lemma norm_vdm_eq {N : ℕ} (c : ℂ) {t : Fin N → ℝ} (ht : ∀ i j, i ≠ j → t i ≠ t j) :
+theorem norm_vdm_eq {N : ℕ} (c : ℂ) {t : Fin N → ℝ} (ht : ∀ i j, i ≠ j → t i ≠ t j) :
     ‖vdm N c t‖ = vdmSq N t ^ c.re := by
   unfold vdm vdmSq
   rw [norm_prod, ← Real.finsetProd_rpow _ _ fun i _ => Finset.prod_nonneg fun j _ => by
@@ -2176,7 +2168,7 @@ lemma norm_vdm_eq {N : ℕ} (c : ℂ) {t : Fin N → ℝ} (ht : ∀ i j, i ≠ j
     simp
   · simp
 
-lemma norm_prod_weight_eq {N : ℕ} (a b : ℂ) {t : Fin N → ℝ} (ht : ∀ i, t i ∈ Ioo (0 : ℝ) 1) :
+theorem norm_prod_weight_eq {N : ℕ} (a b : ℂ) {t : Fin N → ℝ} (ht : ∀ i, t i ∈ Ioo (0 : ℝ) 1) :
     ‖∏ i, weight a b (t i)‖ = weightR N a.re b.re t := by
   unfold weightR
   rw [norm_prod]
@@ -2187,18 +2179,18 @@ lemma norm_prod_weight_eq {N : ℕ} (a b : ℂ) {t : Fin N → ℝ} (ht : ∀ i,
     Complex.norm_cpow_eq_rpow_re_of_pos h1]
   simp
 
-lemma norm_selbergIntegrand_eq {N : ℕ} (a b c : ℂ) {t : Fin N → ℝ}
+theorem norm_selbergIntegrand_eq {N : ℕ} (a b c : ℂ) {t : Fin N → ℝ}
     (ht : ∀ i, t i ∈ Ioo (0 : ℝ) 1) (ht' : ∀ i j, i ≠ j → t i ≠ t j) :
     ‖selbergIntegrand N a b c t‖ = weightR N a.re b.re t * vdmSq N t ^ c.re := by
   rw [selbergIntegrand_eq, norm_mul, norm_prod_weight_eq a b ht, norm_vdm_eq c ht']
 
-lemma weightR_nonneg {N : ℕ} (α β : ℝ) {t : Fin N → ℝ} (ht : ∀ i, t i ∈ Ioo (0 : ℝ) 1) :
+theorem weightR_nonneg {N : ℕ} (α β : ℝ) {t : Fin N → ℝ} (ht : ∀ i, t i ∈ Ioo (0 : ℝ) 1) :
     0 ≤ weightR N α β t :=
   Finset.prod_nonneg fun i _ => mul_nonneg (Real.rpow_nonneg (ht i).1.le _)
     (Real.rpow_nonneg (by linarith [(ht i).2]) _)
 
 /-- For real parameters the integrand is the real nonnegative integrand. -/
-lemma selbergIntegrand_ofReal {N : ℕ} (α β σ : ℝ) {t : Fin N → ℝ}
+theorem selbergIntegrand_ofReal {N : ℕ} (α β σ : ℝ) {t : Fin N → ℝ}
     (ht : ∀ i, t i ∈ Ioo (0 : ℝ) 1) (ht' : ∀ i j, i ≠ j → t i ≠ t j) :
     selbergIntegrand N α β σ t = ((weightR N α β t * vdmSq N t ^ σ : ℝ) : ℂ) := by
   have h := norm_selbergIntegrand_eq (α : ℂ) β σ ht ht'
@@ -2224,7 +2216,7 @@ lemma selbergIntegrand_ofReal {N : ℕ} (α β σ : ℝ) {t : Fin N → ℝ}
     (Real.rpow_nonneg (by linarith [(ht i).2]) _)) (Finset.prod_nonneg fun i _ =>
     Finset.prod_nonneg fun j _ => by split_ifs <;> positivity)
 
-lemma integrableOn_weightR {N : ℕ} {α β : ℝ} (hα : 0 < α) (hβ : 0 < β) :
+theorem integrableOn_weightR {N : ℕ} {α β : ℝ} (hα : 0 < α) (hβ : 0 < β) :
     IntegrableOn (weightR N α β) (cube N) := by
   have h := (integrableOn_prod_cube (n := N) (integrableOn_weight (a := (α : ℂ)) (b := (β : ℂ))
     (by simpa using hα) (by simpa using hβ))).norm
@@ -2233,13 +2225,13 @@ lemma integrableOn_weightR {N : ℕ} {α β : ℝ} (hα : 0 < α) (hβ : 0 < β)
   rw [norm_prod_weight_eq _ _ ht]
   simp
 
-lemma ae_cube_good (N : ℕ) : ∀ᵐ t ∂(volume.restrict (cube N)),
+theorem ae_cube_good (N : ℕ) : ∀ᵐ t ∂(volume.restrict (cube N)),
     (∀ i, t i ∈ Ioo (0 : ℝ) 1) ∧ (∀ i j, i ≠ j → t i ≠ t j) ∧ t ∈ cube N := by
   filter_upwards [(ae_restrict_iff' (measurableSet_cube N)).2 (ae_cube_coords_Ioo N),
     ae_restrict_of_ae (ae_coords_ne N), ae_restrict_mem (measurableSet_cube N)] with t h1 h2 h3
   exact ⟨h1, h2, h3⟩
 
-lemma selbergInt_ofReal {N : ℕ} (α β σ : ℝ) :
+theorem selbergInt_ofReal {N : ℕ} (α β σ : ℝ) :
     selbergInt N α β σ = ((∫ t in cube N, weightR N α β t * vdmSq N t ^ σ : ℝ) : ℂ) := by
   rw [selbergInt, ← integral_complex_ofReal]
   refine integral_congr_ae ?_
@@ -2248,7 +2240,7 @@ lemma selbergInt_ofReal {N : ℕ} (α β σ : ℝ) :
 
 /-- **Integrability of the Selberg integrand** on its full domain of convergence, by Landau's
 theorem. -/
-lemma integrableOn_weightR_mul_vdmSq_rpow {N : ℕ} {α β σ : ℝ} (hα : 0 < α) (hβ : 0 < β)
+theorem integrableOn_weightR_mul_vdmSq_rpow {N : ℕ} {α β σ : ℝ} (hα : 0 < α) (hβ : 0 < β)
     (hσ : (σ : ℂ) ∈ cDomain N α β) :
     IntegrableOn (fun t => weightR N α β t * vdmSq N t ^ σ) (cube N) := by
   have hW := integrableOn_weightR (N := N) hα hβ
@@ -2327,12 +2319,12 @@ lemma integrableOn_weightR_mul_vdmSq_rpow {N : ℕ} {α β σ : ℝ} (hα : 0 < 
     rw [← selbergInt_ofReal, selbergInt_eq_of_re_pos (by simpa using hα) (by simpa using hβ)
       (by simpa using hσ')]
 
-lemma mem_cDomain_re {N : ℕ} {a b c : ℂ} (hc : c ∈ cDomain N a b) :
+theorem mem_cDomain_re {N : ℕ} {a b c : ℂ} (hc : c ∈ cDomain N a b) :
     (c.re : ℂ) ∈ cDomain N (a.re : ℂ) (b.re : ℂ) := by
   obtain ⟨h1, h2, h3⟩ := hc
   exact ⟨by simpa using h1, by simpa using h2, by simpa using h3⟩
 
-lemma differentiableOn_selbergInt_cDomain (N : ℕ) {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) :
+theorem differentiableOn_selbergInt_cDomain (N : ℕ) {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) :
     DifferentiableOn ℂ (fun c => selbergInt N a b c) (cDomain N a b) := by
   unfold selbergInt
   refine differentiableOn_integral_of_dominated (isOpen_cDomain N a b)
@@ -2379,7 +2371,7 @@ theorem selbergInt_eq {N : ℕ} {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
 
 /-! ### Aomoto's integral -/
 
-lemma differentiableOn_integral_mul_selbergIntegrand_c (N : ℕ) {a b : ℂ} (ha : 0 < a.re)
+theorem differentiableOn_integral_mul_selbergIntegrand_c (N : ℕ) {a b : ℂ} (ha : 0 < a.re)
     (hb : 0 < b.re) {h : (Fin N → ℝ) → ℂ} (hh : Measurable h)
     (hh1 : ∀ t ∈ cube N, ‖h t‖ ≤ 1) :
     DifferentiableOn ℂ (fun c => ∫ t in cube N, h t * selbergIntegrand N a b c t)
@@ -2412,7 +2404,7 @@ lemma differentiableOn_integral_mul_selbergIntegrand_c (N : ℕ) {a b : ℂ} (ha
           mul_le_mul (hh1 t ht) (norm_selbergIntegrand_le hz' ht) (norm_nonneg _) zero_le_one
       _ = _ := one_mul _
 
-lemma differentiableAt_aomotoFactor {N : ℕ} {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (j : ℕ)
+theorem differentiableAt_aomotoFactor {N : ℕ} {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (j : ℕ)
     {c : ℂ} (hc : 0 ≤ c.re) : DifferentiableAt ℂ (fun c => aomotoFactor N a b c j) c := by
   unfold aomotoFactor
   have hab : 0 < (a + b).re := by simp; linarith

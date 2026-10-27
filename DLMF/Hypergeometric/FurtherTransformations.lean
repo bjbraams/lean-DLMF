@@ -5,8 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Hypergeometric.Transformations
-public import DLMF.Hypergeometric.Continuation
 public import DLMF.Hypergeometric.Solutions
 public import DLMF.Hypergeometric.ArgumentContinuation
 
@@ -137,7 +135,7 @@ theorem regularized_connection_one_sub_recip
   ring
 
 /-- Reflection of Pochhammer symbols: `(1-y-n)_n = (-1)^n (y)_n`. -/
-lemma poch_one_sub_sub (y : ℂ) (n : ℕ) : poch (1 - y - n) n = (-1 : ℂ) ^ n * poch y n := by
+theorem poch_one_sub_sub (y : ℂ) (n : ℕ) : poch (1 - y - n) n = (-1 : ℂ) ^ n * poch y n := by
   induction n with
   | zero => simp [poch_zero]
   | succ n ih =>
@@ -147,7 +145,7 @@ lemma poch_one_sub_sub (y : ℂ) (n : ℕ) : poch (1 - y - n) n = (-1 : ℂ) ^ n
     ring
 
 /-- `(1-x-m)_{m-j} = (-1)^{m-j} (x)_m / (x)_j` in multiplied-out form. -/
-lemma poch_one_sub_sub_mul {x : ℂ} {m j : ℕ} (hj : j ≤ m) :
+theorem poch_one_sub_sub_mul {x : ℂ} {m j : ℕ} (hj : j ≤ m) :
     poch x j * poch (1 - x - m) (m - j) = (-1 : ℂ) ^ (m - j) * poch x m := by
   have h := poch_one_sub_sub (x + j) (m - j)
   rw [show 1 - (x + j) - ((m - j : ℕ) : ℂ) = 1 - x - m by push_cast [hj]; ring] at h
@@ -188,7 +186,7 @@ theorem terminating_reciprocal
     (m.choose k : ℂ) * (-1 : ℂ) ^ k * poch b m * poch c m * hsq
 
 /-- Pfaff's transformation for a terminating series, for every `w ≠ 1`. -/
-lemma terminating_pfaff (m : ℕ) {b c w : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hw : w ≠ 1) :
+theorem terminating_pfaff (m : ℕ) {b c w : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hw : w ≠ 1) :
     ₂F₁ (-m : ℂ) b c w = (1 - w) ^ m * ₂F₁ (-m : ℂ) (c - b) c (w / (w - 1)) := by
   set Q : ℂ → ℂ := fun v => ∑ k ∈ Finset.range (m + 1),
     gaussHGCoeff (-m : ℂ) (c - b) c k * (-1 : ℂ) ^ k * v ^ k * (1 - v) ^ (m - k) with hQ
@@ -324,7 +322,7 @@ theorem terminating_one_sub
 /-! ### Uniqueness at the origin and Gauss's quadratic transformation -/
 
 /-- The Gauss operator annihilates `₂F₁` on the whole unit disk, including the origin. -/
-lemma gaussOperator_ordinaryHypergeometric {a b c w : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
+theorem gaussOperator_ordinaryHypergeometric {a b c w : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
     (hw : ‖w‖ < 1) : gaussOperator a b c (₂F₁ a b c) w = 0 := by
   by_cases h0 : w = 0
   · subst h0
@@ -339,7 +337,7 @@ lemma gaussOperator_ordinaryHypergeometric {a b c w : ℂ} (hc : ∀ k : ℕ, c 
 
 /-- An analytic solution of the Gauss equation near the origin with value `1` there is
 `₂F₁(a,b;c;·)`, when `c` is not a nonpositive integer. -/
-lemma eq_ordinaryHypergeometric_of_gaussOperator {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
+theorem eq_ordinaryHypergeometric_of_gaussOperator {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
     {r : ℝ} (hr : 0 < r) (hr1 : r ≤ 1) {g : ℂ → ℂ} (hg : AnalyticOnNhd ℂ g (Metric.ball 0 r))
     (hode : ∀ w ∈ Metric.ball (0 : ℂ) r, gaussOperator a b c g w = 0) (h0 : g 0 = 1) :
     ∀ w ∈ Metric.ball (0 : ℂ) r, g w = ₂F₁ a b c w := by
@@ -372,7 +370,7 @@ lemma eq_ordinaryHypergeometric_of_gaussOperator {a b c : ℂ} (hc : ∀ k : ℕ
   exact hg.eqOn_of_preconnected_of_eventuallyEq hF (convex_ball 0 r).isPreconnected h0U hev
 
 /-- Principal square root of a square in the right half-plane. -/
-lemma sq_cpow_half {x : ℂ} (hx : 0 < x.re) : (x ^ 2) ^ (1 / 2 : ℂ) = x := by
+theorem sq_cpow_half {x : ℂ} (hx : 0 < x.re) : (x ^ 2) ^ (1 / 2 : ℂ) = x := by
   have hx0 : x ≠ 0 := by rintro rfl; simp at hx
   have harg : |x.arg| < Real.pi / 2 := abs_arg_lt_pi_div_two_iff.mpr (Or.inl hx)
   have hsq : x ^ 2 = exp (2 * log x) := by
@@ -389,7 +387,7 @@ lemma sq_cpow_half {x : ℂ} (hx : 0 < x.re) : (x ^ 2) ^ (1 / 2 : ℂ) = x := by
     show 2 * log x * (1 / 2) = log x by ring, exp_log hx0]
 
 /-- The principal square root of a point of the right half-plane lies in the right half-plane. -/
-lemma re_cpow_half_pos {y : ℂ} (hy : 0 < y.re) : 0 < (y ^ (1 / 2 : ℂ)).re := by
+theorem re_cpow_half_pos {y : ℂ} (hy : 0 < y.re) : 0 < (y ^ (1 / 2 : ℂ)).re := by
   have hy0 : y ≠ 0 := by rintro rfl; simp at hy
   have harg : |y.arg| < Real.pi / 2 := abs_arg_lt_pi_div_two_iff.mpr (Or.inl hy)
   rw [cpow_def_of_ne_zero hy0, exp_re]
@@ -400,12 +398,12 @@ lemma re_cpow_half_pos {y : ℂ} (hy : 0 < y.re) : 0 < (y ^ (1 / 2 : ℂ)).re :=
   have h2 := (abs_lt.mp harg).2
   constructor <;> norm_num <;> nlinarith [Real.pi_pos]
 
-lemma cpow_half_sq {y : ℂ} (hy : y ≠ 0) : (y ^ (1 / 2 : ℂ)) ^ 2 = y := by
+theorem cpow_half_sq {y : ℂ} (hy : y ≠ 0) : (y ^ (1 / 2 : ℂ)) ^ 2 = y := by
   rw [sq, ← cpow_add _ _ hy]
   norm_num
 
 /-- The quadratic lobe `Re z < 1/2`, `‖4z(1-z)‖ < 1` lies in the unit disk. -/
-lemma norm_lt_one_of_quadratic_lobe {z : ℂ} (hre : z.re < 1 / 2)
+theorem norm_lt_one_of_quadratic_lobe {z : ℂ} (hre : z.re < 1 / 2)
     (hzt : ‖4 * z * (1 - z)‖ < 1) : ‖z‖ < 1 := by
   by_contra h
   push Not at h
@@ -419,7 +417,7 @@ lemma norm_lt_one_of_quadratic_lobe {z : ℂ} (hre : z.re < 1 / 2)
   nlinarith [norm_nonneg z, norm_nonneg (1 - z)]
 
 /-- The inverse of the quadratic map `z ↦ 4z(1-z)` on the unit disk. -/
-lemma quadratic_lobe_of_mem_ball {w : ℂ} (hw : ‖w‖ < 1) :
+theorem quadratic_lobe_of_mem_ball {w : ℂ} (hw : ‖w‖ < 1) :
     let z := (1 - (1 - w) ^ (1 / 2 : ℂ)) / 2
     ‖z‖ < 1 ∧ ‖4 * z * (1 - z)‖ < 1 ∧ z.re < 1 / 2 ∧ 4 * z * (1 - z) = w := by
   intro z
@@ -530,7 +528,7 @@ theorem gauss_quadratic {a b z : ℂ}
   exact hLan.eqOn_of_preconnected_of_eventuallyEq hRan hDc h0D hev ⟨hz, hzt, hre⟩
 
 /-- First derivative of `p · (F ∘ φ)` near a point, for analytic data. -/
-lemma deriv_mul_comp_eventuallyEq {p φ F : ℂ → ℂ} {z : ℂ} (hp : AnalyticAt ℂ p z)
+theorem deriv_mul_comp_eventuallyEq {p φ F : ℂ → ℂ} {z : ℂ} (hp : AnalyticAt ℂ p z)
     (hφ : AnalyticAt ℂ φ z) (hF : AnalyticAt ℂ F (φ z)) :
     deriv (fun w => p w * F (φ w)) =ᶠ[𝓝 z]
       fun w => deriv p w * F (φ w) + p w * (deriv F (φ w) * deriv φ w) := by
@@ -540,7 +538,7 @@ lemma deriv_mul_comp_eventuallyEq {p φ F : ℂ → ℂ} {z : ℂ} (hp : Analyti
     (h3.differentiableAt.hasDerivAt.comp w h2.differentiableAt.hasDerivAt)).deriv
 
 /-- Second derivative of `p · (F ∘ φ)`, for analytic data. -/
-lemma deriv_deriv_mul_comp {p φ F : ℂ → ℂ} {z : ℂ} (hp : AnalyticAt ℂ p z)
+theorem deriv_deriv_mul_comp {p φ F : ℂ → ℂ} {z : ℂ} (hp : AnalyticAt ℂ p z)
     (hφ : AnalyticAt ℂ φ z) (hF : AnalyticAt ℂ F (φ z)) :
     deriv (deriv (fun w => p w * F (φ w))) z =
       deriv (deriv p) z * F (φ z) + 2 * deriv p z * (deriv F (φ z) * deriv φ z) +
@@ -556,7 +554,7 @@ lemma deriv_deriv_mul_comp {p φ F : ℂ → ℂ} {z : ℂ} (hp : AnalyticAt ℂ
   ring
 
 /-- Gauss operator of `p · (F ∘ φ)` in terms of the derivatives of `p`, `φ`, `F`. -/
-lemma gaussOperator_mul_comp {a b c : ℂ} {p φ F : ℂ → ℂ} {z : ℂ} (hp : AnalyticAt ℂ p z)
+theorem gaussOperator_mul_comp {a b c : ℂ} {p φ F : ℂ → ℂ} {z : ℂ} (hp : AnalyticAt ℂ p z)
     (hφ : AnalyticAt ℂ φ z) (hF : AnalyticAt ℂ F (φ z)) :
     gaussOperator a b c (fun w => p w * F (φ w)) z =
       z * (1 - z) * (deriv (deriv p) z * F (φ z) + 2 * deriv p z * (deriv F (φ z) * deriv φ z) +
@@ -569,7 +567,7 @@ lemma gaussOperator_mul_comp {a b c : ℂ} {p φ F : ℂ → ℂ} {z : ℂ} (hp 
     (deriv_mul_comp_eventuallyEq hp hφ hF).eq_of_nhds]
 
 /-- Derivatives of an affine power `w ↦ (α + β w)^s`, written through the power itself. -/
-lemma deriv_affine_cpow {α β s z : ℂ} (h : α + β * z ∈ slitPlane) :
+theorem deriv_affine_cpow {α β s z : ℂ} (h : α + β * z ∈ slitPlane) :
     deriv (fun w => (α + β * w) ^ s) z = s * β * (α + β * z) ^ s / (α + β * z) := by
   have h0 : α + β * z ≠ 0 := slitPlane_ne_zero h
   have hd := ((hasDerivAt_id z).const_mul β |>.const_add α).cpow_const (c := s) (by simpa using h)
@@ -579,7 +577,7 @@ lemma deriv_affine_cpow {α β s z : ℂ} (h : α + β * z ∈ slitPlane) :
   rw [cpow_sub _ _ h0, cpow_one]
   ring
 
-lemma deriv_deriv_affine_cpow {α β s z : ℂ} (h : α + β * z ∈ slitPlane) :
+theorem deriv_deriv_affine_cpow {α β s z : ℂ} (h : α + β * z ∈ slitPlane) :
     deriv (deriv (fun w => (α + β * w) ^ s)) z =
       s * (s - 1) * β ^ 2 * (α + β * z) ^ s / (α + β * z) ^ 2 := by
   have h0 : α + β * z ≠ 0 := slitPlane_ne_zero h
@@ -717,19 +715,19 @@ theorem quadratic_double_denominator
   rw [← this, show (1 : ℂ) - z / 2 = 1 + -1 / 2 * z by ring]
 
 /-- A principal power computed from any logarithm in the principal strip. -/
-lemma cpow_eq_exp_of_exp_eq' {x L : ℂ} (hx : exp L = x) (h1 : -Real.pi < L.im)
+theorem cpow_eq_exp_of_exp_eq' {x L : ℂ} (hx : exp L = x) (h1 : -Real.pi < L.im)
     (h2 : L.im ≤ Real.pi) (y : ℂ) : x ^ y = exp (L * y) := by
   have hx0 : x ≠ 0 := by rw [← hx]; exact exp_ne_zero L
   rw [cpow_def_of_ne_zero hx0, ← hx, log_exp h1 h2]
 
 /-- Sign bookkeeping for `arg`: if `0 < re w` then `|arg w| < π/2`, and the sign of `arg`
 follows the sign of the imaginary part. -/
-lemma arg_le_zero_of_im_nonpos {w : ℂ} (hre : 0 < w.re) (him : w.im ≤ 0) : w.arg ≤ 0 := by
+theorem arg_le_zero_of_im_nonpos {w : ℂ} (hre : 0 < w.re) (him : w.im ≤ 0) : w.arg ≤ 0 := by
   rcases him.lt_or_eq with h | h
   · exact (arg_neg_iff.mpr h).le
   · exact (arg_eq_zero_iff.mpr ⟨hre.le, h⟩).le
 
-lemma phase_double_denominator {a z : ℂ} (hz : ‖z‖ < 1) :
+theorem phase_double_denominator {a z : ℂ} (hz : ‖z‖ < 1) :
     (1 - z / 2) ^ (-a) * (1 - (z / (2 - z)) ^ 2) ^ (-(a / 2)) = (1 - z) ^ (-a / 2) := by
   have hre1 : 0 < (1 - z).re := by
     have := (re_le_norm z).trans_lt hz
@@ -805,7 +803,7 @@ theorem quadratic_double_denominator_one_sub
     phase_double_denominator hz]
 
 /-- `0 < Re((1-z)/(1+z))` on the unit disk. -/
-lemma re_one_sub_div_one_add_pos {z : ℂ} (hz : ‖z‖ < 1) : 0 < ((1 - z) / (1 + z)).re := by
+theorem re_one_sub_div_one_add_pos {z : ℂ} (hz : ‖z‖ < 1) : 0 < ((1 - z) / (1 + z)).re := by
   have h1z : 1 + z ≠ 0 := by
     intro h; have : z = -1 := by linear_combination h
     rw [this] at hz; simp at hz
@@ -819,7 +817,7 @@ lemma re_one_sub_div_one_add_pos {z : ℂ} (hz : ‖z‖ < 1) : 0 < ((1 - z) / (
   exact div_pos (by linarith) hpos
 
 /-- The well-poised quadratic domain is the image of the unit disk under an inverse map. -/
-lemma isPreconnected_wellPoised :
+theorem isPreconnected_wellPoised :
     IsPreconnected {z : ℂ | ‖z‖ < 1 ∧ ‖4 * z / (1 + z) ^ 2‖ < 1} := by
   have himg : {z : ℂ | ‖z‖ < 1 ∧ ‖4 * z / (1 + z) ^ 2‖ < 1} =
       (fun w : ℂ => (1 - (1 - w) ^ (1 / 2 : ℂ)) / (1 + (1 - w) ^ (1 / 2 : ℂ))) ''
@@ -1119,7 +1117,7 @@ theorem quadratic_well_poised_minus
   simp only [hP, hχdef, hH, neg_one_mul, ← sub_eq_add_neg]
 
 /-- Principal powers of a square in the right half-plane. -/
-lemma sq_cpow {x : ℂ} (hx : 0 < x.re) (y : ℂ) : (x ^ 2) ^ y = x ^ (2 * y) := by
+theorem sq_cpow {x : ℂ} (hx : 0 < x.re) (y : ℂ) : (x ^ 2) ^ y = x ^ (2 * y) := by
   have hx0 : x ≠ 0 := by rintro rfl; simp at hx
   have harg : |x.arg| < Real.pi / 2 := abs_arg_lt_pi_div_two_iff.mpr (Or.inl hx)
   have hsq : x ^ 2 = exp (2 * log x) := by
@@ -1134,7 +1132,7 @@ lemma sq_cpow {x : ℂ} (hx : 0 < x.re) (y : ℂ) : (x ^ 2) ^ y = x ^ (2 * y) :=
   ring_nf
 
 /-- `‖1 - 1/s‖ < 1` exactly when `Re s > 1/2`. -/
-lemma norm_one_sub_recip_lt_one_iff {s : ℂ} (hs : s ≠ 0) : ‖1 - 1 / s‖ < 1 ↔ 1 / 2 < s.re := by
+theorem norm_one_sub_recip_lt_one_iff {s : ℂ} (hs : s ≠ 0) : ‖1 - 1 / s‖ < 1 ↔ 1 / 2 < s.re := by
   rw [show 1 - 1 / s = (s - 1) / s by field_simp, norm_div, div_lt_one (norm_pos_iff.mpr hs),
     ← sq_lt_sq₀ (norm_nonneg _) (norm_nonneg _), ← normSq_eq_norm_sq, ← normSq_eq_norm_sq,
     normSq_apply, normSq_apply]
@@ -1142,7 +1140,7 @@ lemma norm_one_sub_recip_lt_one_iff {s : ℂ} (hs : s ≠ 0) : ‖1 - 1 / s‖ <
   constructor <;> intro h <;> nlinarith
 
 /-- The half-sum quadratic domain is star-shaped about the origin. -/
-lemma isPreconnected_halfSum :
+theorem isPreconnected_halfSum :
     IsPreconnected {z : ℂ | ‖z‖ < 1 ∧ z.re < 1 / 2 ∧ ‖4 * z * (z - 1) / (1 - 2 * z) ^ 2‖ < 1} := by
   have hv : ∀ z : ℂ, 1 - 2 * z ≠ 0 →
       4 * z * (z - 1) / (1 - 2 * z) ^ 2 = 1 - 1 / (1 - 2 * z) ^ 2 := by
@@ -1312,7 +1310,7 @@ theorem quadratic_complementary_four_mul
   rw [euler_transformation_of_ne_neg_nat hc hz, show c - a - (1 - a) = c - 1 by ring, hq]
 
 /-- The principal square root of a point of the slit plane lies in the right half-plane. -/
-lemma re_cpow_half_pos_of_mem_slitPlane {z : ℂ} (hz : z ∈ slitPlane) :
+theorem re_cpow_half_pos_of_mem_slitPlane {z : ℂ} (hz : z ∈ slitPlane) :
     0 < (z ^ (1 / 2 : ℂ)).re := by
   have hz0 : z ≠ 0 := slitPlane_ne_zero hz
   have h1 : -Real.pi < z.arg := neg_pi_lt_arg z
@@ -1327,7 +1325,7 @@ lemma re_cpow_half_pos_of_mem_slitPlane {z : ℂ} (hz : z ∈ slitPlane) :
   constructor <;> norm_num <;> nlinarith [Real.pi_pos]
 
 /-- Branch bookkeeping for the square-root quadratic transformation. -/
-lemma phase_quadratic_sqrt {a z : ℂ} (hz : ‖z‖ < 1) (hs : z ∈ slitPlane) :
+theorem phase_quadratic_sqrt {a z : ℂ} (hz : ‖z‖ < 1) (hs : z ∈ slitPlane) :
     (1 + z ^ (1 / 2 : ℂ)) ^ (-2 * a) *
       ((1 + z) / (1 + z ^ (1 / 2 : ℂ)) ^ 2) ^ (-a) = (1 + z) ^ (-a) := by
   set t := z ^ (1 / 2 : ℂ) with ht
@@ -1416,12 +1414,12 @@ theorem quadratic_sqrt
     phase_quadratic_sqrt hz hs]
 
 /-- Complex powers of a positive real through the real logarithm. -/
-lemma ofReal_cpow_eq_exp_log {u : ℝ} (hu : 0 < u) (s : ℂ) :
+theorem ofReal_cpow_eq_exp_log {u : ℝ} (hu : 0 < u) (s : ℂ) :
     (u : ℂ) ^ s = exp (Real.log u * s) := by
   rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr hu.ne'), ofReal_log hu.le]
 
 /-- Data for the real quadratic transformations on `(-1, 0)`. -/
-lemma reciprocal_sqrt_data {x : ℝ} (hx : -1 < x) (hx0 : x < 0) :
+theorem reciprocal_sqrt_data {x : ℝ} (hx : -1 < x) (hx0 : x < 0) :
     2 < 1 - 1 / x ∧ 1 < Real.sqrt (1 - 1 / x) ∧
       Real.sqrt (1 - 1 / x) ^ 2 = 1 - 1 / x ∧ x / (x - 1) = 1 / (1 - 1 / x) := by
   have hq : 2 < 1 - 1 / x := by
@@ -1548,7 +1546,7 @@ theorem quadratic_reciprocal_sqrt_complementary
   ring
 
 /-- `exp L` lies in the slit plane when `|Im L| < π`. -/
-lemma exp_mem_slitPlane_of_im_mem {L : ℂ} (h1 : -Real.pi < L.im) (h2 : L.im < Real.pi) : exp L ∈ slitPlane := by
+theorem exp_mem_slitPlane_of_im_mem {L : ℂ} (h1 : -Real.pi < L.im) (h2 : L.im < Real.pi) : exp L ∈ slitPlane := by
   rw [mem_slitPlane_iff]
   by_cases hs : Real.sin L.im = 0
   · left
@@ -1562,7 +1560,7 @@ lemma exp_mem_slitPlane_of_im_mem {L : ℂ} (h1 : -Real.pi < L.im) (h2 : L.im < 
     exact mul_ne_zero (Real.exp_pos _).ne' hs
 
 /-- Arguments of two points with the same imaginary part, the second further right. -/
-lemma arg_le_arg_of_im_eq {p q : ℂ} (hq : 0 < q.re) (hpq : q.re ≤ p.re) (him : p.im = q.im)
+theorem arg_le_arg_of_im_eq {p q : ℂ} (hq : 0 < q.re) (hpq : q.re ≤ p.re) (him : p.im = q.im)
     (hy : 0 ≤ p.im) : 0 ≤ p.arg ∧ p.arg ≤ q.arg := by
   have hp : 0 < p.re := lt_of_lt_of_le hq hpq
   rw [arg_of_re_nonneg hp.le, arg_of_re_nonneg hq.le]
@@ -1579,7 +1577,7 @@ lemma arg_le_arg_of_im_eq {p q : ℂ} (hq : 0 < q.re) (hpq : q.re ≤ p.re) (him
     exact div_le_div_of_nonneg_left (by rw [← him]; exact hy) hnq hle
 
 /-- The cubic map sends the half-plane `Re z < 8/9` into the cut plane. -/
-lemma cubic_map_mem_cutPlane {z : ℂ} (hr : z.re < 8 / 9) :
+theorem cubic_map_mem_cutPlane {z : ℂ} (hr : z.re < 8 / 9) :
     27 * z ^ 2 * (z - 1) / (9 * z - 8) ^ 2 ∈ cutPlane := by
   rw [mem_cutPlane]
   set p : ℂ := 4 / 3 - z with hp
@@ -1785,7 +1783,7 @@ theorem cubic_transformation
   rw [show (1 : ℂ) - 9 * z / 8 = 1 + -9 / 8 * z by ring]
 
 /-- Second derivative of a composition, for analytic data. -/
-lemma deriv_deriv_comp {φ F : ℂ → ℂ} {z : ℂ} (hφ : AnalyticAt ℂ φ z)
+theorem deriv_deriv_comp {φ F : ℂ → ℂ} {z : ℂ} (hφ : AnalyticAt ℂ φ z)
     (hF : AnalyticAt ℂ F (φ z)) :
     deriv (deriv (fun w => F (φ w))) z =
       iteratedDeriv 2 F (φ z) * deriv φ z ^ 2 + deriv F (φ z) * deriv (deriv φ) z := by
@@ -1802,7 +1800,7 @@ lemma deriv_deriv_comp {φ F : ℂ → ℂ} {z : ℂ} (hφ : AnalyticAt ℂ φ z
   ring
 
 /-- The principal cube root has positive real part. -/
-lemma re_cpow_third_pos {x : ℂ} (hx : x ≠ 0) : 0 < (x ^ (1 / 3 : ℂ)).re := by
+theorem re_cpow_third_pos {x : ℂ} (hx : x ≠ 0) : 0 < (x ^ (1 / 3 : ℂ)).re := by
   rw [cpow_def_of_ne_zero hx, exp_re]
   refine mul_pos (Real.exp_pos _) (Real.cos_pos_of_mem_Ioo ⟨?_, ?_⟩)
   · have := neg_pi_lt_arg x
@@ -1812,11 +1810,11 @@ lemma re_cpow_third_pos {x : ℂ} (hx : x ≠ 0) : 0 < (x ^ (1 / 3 : ℂ)).re :=
     simp [log_im]
     nlinarith [Real.pi_pos]
 
-lemma cpow_third_cube (x : ℂ) : (x ^ (1 / 3 : ℂ)) ^ 3 = x := by
+theorem cpow_third_cube (x : ℂ) : (x ^ (1 / 3 : ℂ)) ^ 3 = x := by
   rw [← cpow_nat_mul]; norm_num
 
 /-- `‖1 - t‖ < ‖1 + 2t‖` when `Re t > 0`. -/
-lemma norm_one_sub_lt_norm_one_add_two_mul {t : ℂ} (ht : 0 < t.re) : ‖1 - t‖ < ‖1 + 2 * t‖ := by
+theorem norm_one_sub_lt_norm_one_add_two_mul {t : ℂ} (ht : 0 < t.re) : ‖1 - t‖ < ‖1 + 2 * t‖ := by
   rw [← sq_lt_sq₀ (norm_nonneg _) (norm_nonneg _), ← normSq_eq_norm_sq, ← normSq_eq_norm_sq,
     normSq_apply, normSq_apply]
   simp only [sub_re, one_re, sub_im, one_im, add_re, add_im, mul_re, mul_im, re_ofNat, im_ofNat]

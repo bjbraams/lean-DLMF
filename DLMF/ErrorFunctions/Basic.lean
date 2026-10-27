@@ -5,7 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.ExpIntegrals.Basic
+public import DLMF.Confluent.FresnelAsymptotics
+public import DLMF.Core.Framework
 
 /-!
 # Entire error, Dawson, Fresnel and Goodwin–Staton functions, DLMF §7.2

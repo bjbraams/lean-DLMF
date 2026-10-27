@@ -8,16 +8,8 @@ module
 public import DLMF.Combinatorics.Stirling
 public import DLMF.BernoulliEuler.Explicit
 public import Mathlib.Combinatorics.Derangements.Finite
-public import Mathlib.Combinatorics.Enumerative.Stirling
 public import Mathlib.GroupTheory.Perm.Cycle.Concrete
-public import Mathlib.GroupTheory.Perm.Cycle.Type
 public import Mathlib.LinearAlgebra.Matrix.Permutation
-public import Mathlib.NumberTheory.Bernoulli
-public import Mathlib.Analysis.SpecialFunctions.Exponential
-public import Mathlib.Analysis.Complex.ExponentialBounds
-public import Mathlib.RingTheory.Polynomial.Pochhammer
-public import Mathlib.Tactic.CrossRefAttribute
-public import DLMFMathlib.Combinatorics.Q26bSurjections
 public import TauCeti.GroupTheory.Perm.SwapFactors
 
 /-!
@@ -2020,10 +2012,10 @@ open Fin.NatCast
 /-- `k`-subsets of `range M` without two consecutive elements. -/
 def s26b_P (M k : ℕ) : ℕ := #{S ∈ (range M).powersetCard k | ∀ i ∈ S, i + 1 ∉ S}
 
-theorem s26b_P_zero_right (M : ℕ) : s26b_P M 0 = 1 := by
+lemma s26b_P_zero_right (M : ℕ) : s26b_P M 0 = 1 := by
   rw [s26b_P, powersetCard_zero, filter_true_of_mem (by simp), card_singleton]
 
-theorem s26b_P_succ_succ (M k : ℕ) :
+lemma s26b_P_succ_succ (M k : ℕ) :
     s26b_P (M + 2) (k + 1) = s26b_P (M + 1) (k + 1) + s26b_P M k := by
   rw [s26b_P, ← card_filter_add_card_filter_not (p := fun S => M + 1 ∉ S)]
   congr 1
@@ -2075,16 +2067,16 @@ theorem s26b_P_succ_succ (M k : ℕ) :
       have hM : M + 1 ∉ S := fun h => by have := mem_range.mp (hS.1.1 h); omega
       exact erase_insert hM
 
-theorem s26b_P_zero_succ (k : ℕ) : s26b_P 0 (k + 1) = 0 := by
+lemma s26b_P_zero_succ (k : ℕ) : s26b_P 0 (k + 1) = 0 := by
   simp [s26b_P]
 
-theorem s26b_P_one_succ_succ (k : ℕ) : s26b_P 1 (k + 2) = 0 := by
+lemma s26b_P_one_succ_succ (k : ℕ) : s26b_P 1 (k + 2) = 0 := by
   rw [s26b_P, powersetCard_eq_empty.mpr (by simp)]
   rfl
 
-theorem s26b_P_one_one : s26b_P 1 1 = 1 := by decide
+lemma s26b_P_one_one : s26b_P 1 1 = 1 := by decide
 
-theorem s26b_P_eq (M k : ℕ) : s26b_P M k = (M + 1 - k).choose k := by
+lemma s26b_P_eq (M k : ℕ) : s26b_P M k = (M + 1 - k).choose k := by
   induction M using Nat.strong_induction_on generalizing k with
   | _ M ih =>
     rcases k with _ | k
@@ -2102,7 +2094,7 @@ theorem s26b_P_eq (M k : ℕ) : s26b_P M k = (M + 1 - k).choose k := by
       · rw [show M + 1 + 1 - (k + 1) = M + 1 - k by omega,
           show M + 2 + 1 - (k + 1) = (M + 1 - k) + 1 by omega, Nat.choose_succ_succ', add_comm]
 
-theorem s26b_P_shift (a M k : ℕ) :
+lemma s26b_P_shift (a M k : ℕ) :
     #{S ∈ (Ico a (a + M)).powersetCard k | ∀ i ∈ S, i + 1 ∉ S} = s26b_P M k := by
   rw [s26b_P]
   symm
@@ -2144,10 +2136,10 @@ theorem s26b_P_shift (a M k : ℕ) :
 /-- `k`-subsets of `range N` without two cyclically consecutive elements. -/
 def s26b_Q (N k : ℕ) : ℕ := #{S ∈ (range N).powersetCard k | ∀ i ∈ S, (i + 1) % N ∉ S}
 
-theorem s26b_Q_zero (N : ℕ) : s26b_Q N 0 = 1 := by
+lemma s26b_Q_zero (N : ℕ) : s26b_Q N 0 = 1 := by
   rw [s26b_Q, powersetCard_zero, filter_true_of_mem (by simp), card_singleton]
 
-theorem s26b_Q_succ {N : ℕ} (hN : 3 ≤ N) (k : ℕ) :
+lemma s26b_Q_succ {N : ℕ} (hN : 3 ≤ N) (k : ℕ) :
     s26b_Q N (k + 1) = s26b_P (N - 1) (k + 1) + s26b_P (N - 3) k := by
   rw [s26b_Q, ← card_filter_add_card_filter_not (p := fun S => 0 ∉ S), filter_filter,
     filter_filter, ← s26b_P_shift 1, ← s26b_P_shift 2]
@@ -2215,7 +2207,7 @@ theorem s26b_Q_succ {N : ℕ} (hN : 3 ≤ N) (k : ℕ) :
       have h0 : 0 ∉ S := fun h => by have := mem_Ico.mp (hS.1.1 h); omega
       exact erase_insert h0
 
-theorem s26b_Q_formula {n : ℕ} (hn : 2 ≤ n) {k : ℕ} (hk : k ≤ n) :
+lemma s26b_Q_formula {n : ℕ} (hn : 2 ≤ n) {k : ℕ} (hk : k ≤ n) :
     (s26b_Q (2 * n) k : ℚ) = 2 * n / (2 * n - k) * (2 * n - k).choose k := by
   rcases k with _ | k
   · rw [s26b_Q_zero]; have : (2 * n : ℚ) ≠ 0 := by positivity
@@ -2240,7 +2232,7 @@ theorem s26b_Q_formula {n : ℕ} (hn : 2 ≤ n) {k : ℕ} (hk : k ≤ n) :
 def s26b_ψ (n : ℕ) [NeZero n] (m : ℕ) : Fin n × Fin n :=
   (((m / 2 : ℕ) : Fin n), (((m + 1) / 2 : ℕ) : Fin n))
 
-theorem s26b_cast_eq_iff {n : ℕ} [NeZero n] {x y : ℕ} (hx : x ≤ n) (hy : y ≤ n) :
+lemma s26b_cast_eq_iff {n : ℕ} [NeZero n] {x y : ℕ} (hx : x ≤ n) (hy : y ≤ n) :
     ((x : Fin n) = (y : Fin n)) ↔ x = y ∨ (x = 0 ∧ y = n) ∨ (x = n ∧ y = 0) := by
   have hn : 0 < n := Nat.pos_of_ne_zero (NeZero.ne n)
   rw [Fin.ext_iff, Fin.val_natCast, Fin.val_natCast]
@@ -2250,7 +2242,7 @@ theorem s26b_cast_eq_iff {n : ℕ} [NeZero n] {x y : ℕ} (hx : x ≤ n) (hy : y
   · rw [Nat.mod_eq_of_lt hy, Nat.mod_self]; omega
   · simp
 
-theorem s26b_image_ψ {n : ℕ} [NeZero n] : (range (2 * n)).image (s26b_ψ n) = menageBoard n := by
+lemma s26b_image_ψ {n : ℕ} [NeZero n] : (range (2 * n)).image (s26b_ψ n) = menageBoard n := by
   ext ⟨i, j⟩
   simp only [mem_image, mem_range, menageBoard, mem_union, mem_univ, true_and, Prod.mk.injEq]
   constructor
@@ -2277,7 +2269,7 @@ theorem s26b_image_ψ {n : ℕ} [NeZero n] : (range (2 * n)).image (s26b_ψ n) =
         show (2 * a.val + 1 + 1) / 2 = a.val + 1 by omega, Nat.cast_succ, Fin.cast_val_eq_self]
       exact ⟨ha, hb⟩
 
-theorem s26b_injOn_ψ {n : ℕ} [NeZero n] (hn : 2 ≤ n) :
+lemma s26b_injOn_ψ {n : ℕ} [NeZero n] (hn : 2 ≤ n) :
     Set.InjOn (s26b_ψ n) (range (2 * n) : Set ℕ) := by
   intro a ha b hb h
   have ha := mem_range.mp ha; have hb := mem_range.mp hb
@@ -2285,7 +2277,7 @@ theorem s26b_injOn_ψ {n : ℕ} [NeZero n] (hn : 2 ≤ n) :
   rw [s26b_cast_eq_iff (by omega) (by omega), s26b_cast_eq_iff (by omega) (by omega)] at h
   omega
 
-theorem s26b_adj {n : ℕ} [NeZero n] (hn : 2 ≤ n) {a b : ℕ} (ha : a < 2 * n) (hb : b < 2 * n) :
+lemma s26b_adj {n : ℕ} [NeZero n] (hn : 2 ≤ n) {a b : ℕ} (ha : a < 2 * n) (hb : b < 2 * n) :
     ((s26b_ψ n a).1 = (s26b_ψ n b).1 ∨ (s26b_ψ n a).2 = (s26b_ψ n b).2) ↔
       a = b ∨ (a + 1) % (2 * n) = b ∨ (b + 1) % (2 * n) = a := by
   simp only [s26b_ψ]
@@ -2297,7 +2289,7 @@ theorem s26b_adj {n : ℕ} [NeZero n] (hn : 2 ≤ n) {a b : ℕ} (ha : a < 2 * n
   · rw [Nat.mod_eq_of_lt h2, show a + 1 = 2 * n by omega, Nat.mod_self]; omega
   · omega
 
-theorem s26b_nonattacking_iff {n : ℕ} [NeZero n] (hn : 2 ≤ n) {S : Finset ℕ}
+lemma s26b_nonattacking_iff {n : ℕ} [NeZero n] (hn : 2 ≤ n) {S : Finset ℕ}
     (hS : S ⊆ range (2 * n)) :
     IsNonattacking (S.image (s26b_ψ n)) ↔ ∀ i ∈ S, (i + 1) % (2 * n) ∉ S := by
   have hinj := (s26b_injOn_ψ hn).mono (coe_subset.mpr hS)
@@ -2324,7 +2316,7 @@ theorem s26b_nonattacking_iff {n : ℕ} [NeZero n] (hn : 2 ≤ n) {S : Finset �
     · exact h a ha (e ▸ hb)
     · exact h b hb (e ▸ ha)
 
-theorem s26b_filter_image_ψ {n : ℕ} [NeZero n] (hn : 2 ≤ n) {S : Finset ℕ}
+lemma s26b_filter_image_ψ {n : ℕ} [NeZero n] (hn : 2 ≤ n) {S : Finset ℕ}
     (hS : S ⊆ range (2 * n)) :
     (range (2 * n)).filter (fun m => s26b_ψ n m ∈ S.image (s26b_ψ n)) = S := by
   ext m
@@ -2334,7 +2326,7 @@ theorem s26b_filter_image_ψ {n : ℕ} [NeZero n] (hn : 2 ≤ n) {S : Finset ℕ
     rwa [← s26b_injOn_ψ hn (coe_subset.mpr hS ha) hm e]
   · intro hm; exact ⟨hS hm, m, hm, rfl⟩
 
-theorem s26b_image_filter_ψ {n : ℕ} [NeZero n] {C : Finset (Fin n × Fin n)}
+lemma s26b_image_filter_ψ {n : ℕ} [NeZero n] {C : Finset (Fin n × Fin n)}
     (hC : C ⊆ menageBoard n) :
     ((range (2 * n)).filter (fun m => s26b_ψ n m ∈ C)).image (s26b_ψ n) = C := by
   ext x
@@ -2346,7 +2338,7 @@ theorem s26b_image_filter_ψ {n : ℕ} [NeZero n] {C : Finset (Fin n × Fin n)}
     obtain ⟨m, hm, e⟩ := mem_image.mp hx'
     exact ⟨m, ⟨hm, e ▸ hx⟩, e⟩
 
-theorem s26b_rook_menage {n : ℕ} [NeZero n] (hn : 2 ≤ n) (k : ℕ) :
+lemma s26b_rook_menage {n : ℕ} [NeZero n] (hn : 2 ≤ n) (k : ℕ) :
     rookNumber (menageBoard n) k = s26b_Q (2 * n) k := by
   rw [rookNumber, s26b_Q]
   symm
@@ -2422,7 +2414,7 @@ def s26b_NA {n : ℕ} (b : Fin n → ℕ) (m k : ℕ) : Finset (Finset (Fin n ×
   (s26b_fb b m).powerset.filter fun C => C.card = k ∧ IsNonattacking C
 
 /-- Membership in `s26b_NA`. -/
-theorem s26b_mem_NA {n : ℕ} {b : Fin n → ℕ} {m k : ℕ} {C : Finset (Fin n × Fin n)} :
+lemma s26b_mem_NA {n : ℕ} {b : Fin n → ℕ} {m k : ℕ} {C : Finset (Fin n × Fin n)} :
     C ∈ s26b_NA b m k ↔ (∀ x ∈ C, (x.2 : ℕ) < b x.1 ∧ (x.1 : ℕ) < m) ∧ C.card = k ∧
       IsNonattacking C := by
   simp only [s26b_NA, mem_filter, mem_powerset]
@@ -2431,7 +2423,7 @@ theorem s26b_mem_NA {n : ℕ} {b : Fin n → ℕ} {m k : ℕ} {C : Finset (Fin n
   · rintro ⟨h1, h2⟩; exact ⟨fun x hx => by simpa [s26b_fb, ferrersBoard] using h1 x hx, h2⟩
 
 /-- Distinct columns: a placement on `m` columns has at most `m` rooks. -/
-theorem s26b_card_le {n : ℕ} {b : Fin n → ℕ} {m k : ℕ} {C : Finset (Fin n × Fin n)}
+lemma s26b_card_le {n : ℕ} {b : Fin n → ℕ} {m k : ℕ} {C : Finset (Fin n × Fin n)}
     (hC : C ∈ s26b_NA b m k) : k ≤ m := by
   obtain ⟨h1, rfl, h3⟩ := s26b_mem_NA.mp hC
   have hinj : Set.InjOn (fun x : Fin n × Fin n => (x.1 : ℕ)) C := fun x hx y hy h => by
@@ -2443,7 +2435,7 @@ theorem s26b_card_le {n : ℕ} {b : Fin n → ℕ} {m k : ℕ} {C : Finset (Fin 
   simpa using card_le_card this
 
 /-- The recurrence for the column-by-column rook numbers of a Ferrers board. -/
-theorem s26b_NA_succ {n : ℕ} {b : Fin n → ℕ} (hb : Monotone b) (hbn : ∀ j, b j ≤ n) {m : ℕ}
+lemma s26b_NA_succ {n : ℕ} {b : Fin n → ℕ} (hb : Monotone b) (hbn : ∀ j, b j ≤ n) {m : ℕ}
     (hm : m < n) (k : ℕ) :
     ((s26b_NA b (m + 1) (k + 1)).card : ℤ) =
       (s26b_NA b m (k + 1)).card + ((b ⟨m, hm⟩ : ℤ) - k) * (s26b_NA b m k).card := by
@@ -2570,7 +2562,7 @@ theorem s26b_NA_succ {n : ℕ} {b : Fin n → ℕ} (hb : Monotone b) (hbn : ∀ 
   rw [← hsplit, h0, Nat.cast_add, hA1]
 
 /-- One empty placement. -/
-theorem s26b_NA_zero {n : ℕ} (b : Fin n → ℕ) (m : ℕ) : #(s26b_NA b m 0) = 1 := by
+lemma s26b_NA_zero {n : ℕ} (b : Fin n → ℕ) (m : ℕ) : #(s26b_NA b m 0) = 1 := by
   rw [card_eq_one]
   refine ⟨∅, ?_⟩
   ext C
@@ -2580,21 +2572,21 @@ theorem s26b_NA_zero {n : ℕ} (b : Fin n → ℕ) (m : ℕ) : #(s26b_NA b m 0) 
   · rintro rfl; exact ⟨by simp, rfl, by simp [IsNonattacking]⟩
 
 /-- No placement of more rooks than columns. -/
-theorem s26b_NA_gt {n : ℕ} (b : Fin n → ℕ) {m k : ℕ} (h : m < k) : #(s26b_NA b m k) = 0 := by
+lemma s26b_NA_gt {n : ℕ} (b : Fin n → ℕ) {m k : ℕ} (h : m < k) : #(s26b_NA b m k) = 0 := by
   rw [card_eq_zero, eq_empty_iff_forall_notMem]
   intro C hC
   have := s26b_card_le hC
   omega
 
 /-- All `n` columns give the rook numbers of the board. -/
-theorem s26b_NA_full {n : ℕ} (b : Fin n → ℕ) (k : ℕ) :
+lemma s26b_NA_full {n : ℕ} (b : Fin n → ℕ) (k : ℕ) :
     #(s26b_NA b n k) = rookNumber (ferrersBoard b) k := by
   have : s26b_fb b n = ferrersBoard b :=
     filter_true_of_mem fun (x : Fin n × Fin n) _ => x.1.isLt
   rw [s26b_NA, this, rookNumber]
 
 /-- `(X + c) (x)_k = (x)_{k+1} + (c + k) (x)_k`. -/
-theorem s26b_X_add_mul_desc (c : ℤ) (k : ℕ) :
+lemma s26b_X_add_mul_desc (c : ℤ) (k : ℕ) :
     (X + C c) * descPochhammer ℤ k = descPochhammer ℤ (k + 1) + C (c + k) * descPochhammer ℤ k := by
   rw [descPochhammer_succ_right, map_add, map_natCast]; ring
 
@@ -2602,7 +2594,7 @@ theorem s26b_X_add_mul_desc (c : ℤ) (k : ℕ) :
 def s26b_bb {n : ℕ} (b : Fin n → ℕ) (j : ℕ) : ℕ := if h : j < n then b ⟨j, h⟩ else 0
 
 /-- The column-by-column form of the Ferrers board identity. -/
-theorem s26b_ferrers_poly {n : ℕ} {b : Fin n → ℕ} (hb : Monotone b) (hbn : ∀ j, b j ≤ n) :
+lemma s26b_ferrers_poly {n : ℕ} {b : Fin n → ℕ} (hb : Monotone b) (hbn : ∀ j, b j ≤ n) :
     ∀ m, m ≤ n → ∑ k ∈ range (m + 1), C (#(s26b_NA b m (m - k)) : ℤ) * descPochhammer ℤ k =
       ∏ j ∈ range m, (X + C ((s26b_bb b j : ℤ) - j)) := by
   intro m
@@ -2643,7 +2635,7 @@ theorem s26b_ferrers_poly {n : ℕ} {b : Fin n → ℕ} (hb : Monotone b) (hbn :
     ring
 
 /-- Coefficients in the falling-factorial basis are unique. -/
-theorem s26b_descPochhammer_coeff_unique (N : ℕ) (d : ℕ → ℤ)
+lemma s26b_descPochhammer_coeff_unique (N : ℕ) (d : ℕ → ℤ)
     (h : ∑ k ∈ range (N + 1), C (d k) * descPochhammer ℤ k = 0) : ∀ k ≤ N, d k = 0 := by
   induction N with
   | zero =>

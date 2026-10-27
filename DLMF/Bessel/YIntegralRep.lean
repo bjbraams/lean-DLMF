@@ -60,7 +60,7 @@ private lemma norm_one_add_sq_cpow_le (w : ℂ) {t : ℝ} (ht : 0 ≤ t) {N : �
       _ ≤ (1 + t) ^ N := one_le_pow₀ (by linarith)
 
 /-- Exponential bound for the Laplace kernel. -/
-lemma norm_yLaplaceKernel_le (ν z : ℂ) {t : ℝ} (ht : 0 ≤ t) {N : ℕ}
+theorem norm_yLaplaceKernel_le (ν z : ℂ) {t : ℝ} (ht : 0 ≤ t) {N : ℕ}
     (hN : 2 * |(ν - 1 / 2).re| ≤ N) :
     ‖yLaplaceKernel ν z t‖ ≤ Real.exp (-z.re * t) * (1 + t) ^ N := by
   rw [yLaplaceKernel, norm_mul, Complex.norm_exp]
@@ -68,7 +68,7 @@ lemma norm_yLaplaceKernel_le (ν z : ℂ) {t : ℝ} (ht : 0 ≤ t) {N : ℕ}
     (Real.exp_pos _).le
 
 /-- Continuity of the Laplace kernel in `t`. -/
-lemma continuous_yLaplaceKernel (ν z : ℂ) : Continuous (yLaplaceKernel ν z) := by
+theorem continuous_yLaplaceKernel (ν z : ℂ) : Continuous (yLaplaceKernel ν z) := by
   unfold yLaplaceKernel
   refine (by fun_prop : Continuous fun t : ℝ => exp (-z * t)).mul ?_
   refine Continuous.cpow (by fun_prop) continuous_const fun t => ?_
@@ -78,7 +78,7 @@ lemma continuous_yLaplaceKernel (ν z : ℂ) : Continuous (yLaplaceKernel ν z) 
 private lemma exists_nat_ge_two_abs (w : ℂ) : ∃ N : ℕ, 2 * |w.re| ≤ N := exists_nat_ge _
 
 /-- Integrability of `t^k` times the kernel. -/
-lemma integrableOn_pow_mul_yLaplaceKernel (ν : ℂ) {z : ℂ} (hz : 0 < z.re) (k : ℕ) :
+theorem integrableOn_pow_mul_yLaplaceKernel (ν : ℂ) {z : ℂ} (hz : 0 < z.re) (k : ℕ) :
     IntegrableOn (fun t : ℝ => (t : ℂ) ^ k * yLaplaceKernel ν z t) (Ioi 0) := by
   obtain ⟨N, hN⟩ := exists_nat_ge_two_abs (ν - 1 / 2)
   have hb := DLMF.Confluent.integrableOn_exp_mul_rpow_mul_one_add_pow (s := 0) (δ := z.re)
@@ -95,12 +95,12 @@ lemma integrableOn_pow_mul_yLaplaceKernel (ν : ℂ) {z : ℂ} (hz : 0 < z.re) (
     _ = _ := by ring
 
 /-- Integrability of the Laplace kernel for `re z > 0`. -/
-lemma integrableOn_yLaplaceKernel (ν : ℂ) {z : ℂ} (hz : 0 < z.re) :
+theorem integrableOn_yLaplaceKernel (ν : ℂ) {z : ℂ} (hz : 0 < z.re) :
     IntegrableOn (yLaplaceKernel ν z) (Ioi 0) := by
   simpa using integrableOn_pow_mul_yLaplaceKernel ν hz 0
 
 /-- Differentiation under the Laplace integral. -/
-lemma hasDerivAt_integral_yLaplaceKernel (ν : ℂ) {z : ℂ} (hz : 0 < z.re) :
+theorem hasDerivAt_integral_yLaplaceKernel (ν : ℂ) {z : ℂ} (hz : 0 < z.re) :
     HasDerivAt (fun w => ∫ t in Ioi (0 : ℝ), yLaplaceKernel ν w t)
       (∫ t in Ioi (0 : ℝ), -((t : ℂ) * yLaplaceKernel ν z t)) z := by
   obtain ⟨N, hN⟩ := exists_nat_ge_two_abs (ν - 1 / 2)
@@ -176,7 +176,7 @@ private lemma one_add_sq_cpow_sub_one (a : ℂ) (t : ℝ) :
   rw [this]; ring
 
 /-- Integration by parts: `z ∫ t k_ν = 2ν Λ_ν - (2ν-1) Λ_{ν-1}`. -/
-lemma mul_integral_mul_yLaplaceKernel (ν : ℂ) {z : ℂ} (hz : 0 < z.re) :
+theorem mul_integral_mul_yLaplaceKernel (ν : ℂ) {z : ℂ} (hz : 0 < z.re) :
     z * ∫ t in Ioi (0 : ℝ), (t : ℂ) * yLaplaceKernel ν z t =
       2 * ν * (∫ t in Ioi (0 : ℝ), yLaplaceKernel ν z t) -
         (2 * ν - 1) * ∫ t in Ioi (0 : ℝ), yLaplaceKernel (ν - 1) z t := by
@@ -255,7 +255,7 @@ def besselYLaplace (ν z : ℂ) : ℂ :=
   2 * (z / 2) ^ ν / (Real.sqrt π * Gamma (ν + 1 / 2)) * ∫ t in Ioi (0 : ℝ), yLaplaceKernel ν z t
 
 /-- Weighted lowering relation `L_ν' = L_{ν-1} - (ν/z) L_ν` for the Laplace integral. -/
-lemma hasDerivAt_besselYLaplace (ν : ℂ) {z : ℂ} (hz : 0 < z.re) :
+theorem hasDerivAt_besselYLaplace (ν : ℂ) {z : ℂ} (hz : 0 < z.re) :
     HasDerivAt (besselYLaplace ν) (besselYLaplace (ν - 1) z - ν / z * besselYLaplace ν z) z := by
   have hzs : z ∈ slitPlane := Or.inl hz
   have hz0 : z ≠ 0 := slitPlane_ne_zero hzs
@@ -294,7 +294,7 @@ private lemma neg_I_cpow' (a : ℂ) : (-I) ^ a = exp (-(π / 2 * a * I)) := by
   rw [cpow_def_of_ne_zero (neg_ne_zero.mpr I_ne_zero), log_neg_I]; ring_nf
 
 /-- The contour integrand on the segment `[0,1]`. -/
-lemma contour_branch_unit (a : ℂ) (ha : a ≠ 0) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) :
+theorem contour_branch_unit (a : ℂ) (ha : a ≠ 0) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) :
     (-I * ((t : ℂ) - 1)) ^ a * ((t : ℂ) + 1) ^ a = exp (π / 2 * a * I) * (1 - (t : ℂ) ^ 2) ^ a := by
   rcases ht1.lt_or_eq with ht1 | rfl
   · have h1 : -I * ((t : ℂ) - 1) = ((1 - t : ℝ) : ℂ) * I := by push_cast; ring
@@ -306,7 +306,7 @@ lemma contour_branch_unit (a : ℂ) (ha : a ≠ 0) {t : ℝ} (ht0 : 0 ≤ t) (ht
   · simp [zero_cpow ha]
 
 /-- The contour integrand on the ray `[1,∞)`. -/
-lemma contour_branch_ray (a : ℂ) (ha : a ≠ 0) {t : ℝ} (ht1 : 1 ≤ t) :
+theorem contour_branch_ray (a : ℂ) (ha : a ≠ 0) {t : ℝ} (ht1 : 1 ≤ t) :
     (-I * ((t : ℂ) - 1)) ^ a * ((t : ℂ) + 1) ^ a =
       exp (-(π / 2 * a * I)) * ((t : ℂ) ^ 2 - 1) ^ a := by
   rcases ht1.lt_or_eq with ht1 | rfl
@@ -338,7 +338,7 @@ private lemma conj_cpow_mul_cpow {w : ℂ} (hw : 0 < w.re) (a : ℂ) :
   · simp [log_im]
 
 /-- The contour integrand on the imaginary axis. -/
-lemma contour_branch_imag (a : ℂ) (y : ℝ) :
+theorem contour_branch_imag (a : ℂ) (y : ℝ) :
     (-I * ((y : ℂ) * I - 1)) ^ a * ((y : ℂ) * I + 1) ^ a =
       exp (π / 2 * a * I) * (1 + (y : ℂ) ^ 2) ^ a := by
   set w : ℂ := 1 + y * I
@@ -379,7 +379,7 @@ private lemma add_one_mem_slitPlane' {s : ℂ} (h0 : 0 ≤ s.re) : s + 1 ∈ sli
   Or.inl (by simp; linarith)
 
 /-- Continuity of the contour integrand on the closed quadrant. -/
-lemma continuousAt_contourG {a : ℂ} (ha : 0 < a.re) (z : ℂ) {s : ℂ} (h0 : 0 ≤ s.re)
+theorem continuousAt_contourG {a : ℂ} (ha : 0 < a.re) (z : ℂ) {s : ℂ} (h0 : 0 ≤ s.re)
     (h1 : 0 ≤ s.im) : ContinuousAt (contourG a z) s := by
   unfold contourG
   have hB : ContinuousAt (fun s : ℂ => (s + 1) ^ a) s :=
@@ -395,7 +395,7 @@ lemma continuousAt_contourG {a : ℂ} (ha : 0 < a.re) (z : ℂ) {s : ℂ} (h0 : 
   exact (hA.mul hB).mul (by fun_prop)
 
 /-- Holomorphy of the contour integrand in the open upper quadrant. -/
-lemma differentiableAt_contourG (a z : ℂ) {s : ℂ} (h0 : 0 ≤ s.re) (h1 : 0 < s.im) :
+theorem differentiableAt_contourG (a z : ℂ) {s : ℂ} (h0 : 0 ≤ s.re) (h1 : 0 < s.im) :
     DifferentiableAt ℂ (contourG a z) s := by
   unfold contourG
   have hs : s ≠ 1 := fun h => by simp [h] at h1
@@ -407,7 +407,7 @@ lemma differentiableAt_contourG (a z : ℂ) {s : ℂ} (h0 : 0 ≤ s.re) (h1 : 0 
   exact (hA.mul hB).mul (by fun_prop)
 
 /-- Bound for the contour integrand on `[0,R]²`. -/
-lemma norm_contourG_le {a : ℂ} (ha : 0 < a.re) (z : ℂ) {R : ℝ} (hR : 1 ≤ R) {s : ℂ}
+theorem norm_contourG_le {a : ℂ} (ha : 0 < a.re) (z : ℂ) {R : ℝ} (hR : 1 ≤ R) {s : ℂ}
     (h0 : 0 ≤ s.re) (h0' : s.re ≤ R) (h1 : 0 ≤ s.im) (h1' : s.im ≤ R) :
     ‖contourG a z s‖ ≤ (3 * R) ^ (2 * a.re) * Real.exp (2 * (π * |a.im|)) *
       Real.exp (-(z.re * s.im + z.im * s.re)) := by
@@ -440,7 +440,7 @@ lemma norm_contourG_le {a : ℂ} (ha : 0 < a.re) (z : ℂ) {R : ℝ} (hR : 1 ≤
         ring
 
 /-- The edge bound tends to zero. -/
-lemma tendsto_contour_edge_bound {a : ℂ} (m : ℝ) (hm : 0 < m) :
+theorem tendsto_contour_edge_bound {a : ℂ} (m : ℝ) (hm : 0 < m) :
     Tendsto (fun R : ℝ => (3 * R) ^ (2 * a.re) * Real.exp (2 * (π * |a.im|)) *
       Real.exp (-m * R) * R) atTop (𝓝 0) := by
   have h := (tendsto_rpow_mul_exp_neg_mul_atTop_nhds_zero (2 * a.re + 1) m hm).const_mul
@@ -453,7 +453,7 @@ lemma tendsto_contour_edge_bound {a : ℂ} (m : ℝ) (hm : 0 < m) :
 
 
 /-- Integrability of `e^{izu} (u²-1)^a` on `(1,∞)` for `im z > 0`. -/
-lemma integrableOn_exp_mul_sq_sub_one_cpow {a z : ℂ} (ha : 0 ≤ a.re) (hz : 0 < z.im) :
+theorem integrableOn_exp_mul_sq_sub_one_cpow {a z : ℂ} (ha : 0 ≤ a.re) (hz : 0 < z.im) :
     IntegrableOn (fun u : ℝ => exp (I * z * u) * ((u : ℂ) ^ 2 - 1) ^ a) (Ioi 1) := by
   obtain ⟨N, hN⟩ := exists_nat_ge (2 * a.re)
   have hb := (DLMF.Confluent.integrableOn_exp_mul_rpow_mul_one_add_pow (s := 0) (δ := z.im)
@@ -482,7 +482,7 @@ lemma integrableOn_exp_mul_sq_sub_one_cpow {a z : ℂ} (ha : 0 ≤ a.re) (hz : 0
 /-- **Quarter-plane contour rotation.** For `re ν > 1/2`, `a = ν - 1/2`, and `z` in the open first
 quadrant, `e^{iπa/2} ∫₀¹ (1-t²)^a e^{izt} dt + e^{-iπa/2} ∫₁^∞ e^{izu} (u²-1)^a du
 = i e^{iπa/2} ∫₀^∞ e^{-zt} (1+t²)^a dt`. -/
-lemma contour_identity {ν z : ℂ} (hν : 1 / 2 < ν.re) (hz : 0 < z.re) (hzi : 0 < z.im) :
+theorem contour_identity {ν z : ℂ} (hν : 1 / 2 < ν.re) (hz : 0 < z.re) (hzi : 0 < z.im) :
     exp (π / 2 * (ν - 1 / 2) * I) * (∫ t in (0 : ℝ)..1, (1 - (t : ℂ) ^ 2) ^ (ν - 1 / 2) *
         exp (I * z * t)) +
       exp (-(π / 2 * (ν - 1 / 2) * I)) * ∫ u in Ioi (1 : ℝ), exp (I * z * u) *
@@ -666,7 +666,7 @@ lemma hankelH1_eq_integral_Ioi_one {ν z : ℂ} (hν : -1 / 2 < ν.re) (hz : 0 <
 
 /-- **Base case.** For `re ν > 1/2` and `z` in the open first quadrant, `K_ν(z)` equals the
 Laplace integral. -/
-lemma struveK_eq_besselYLaplace_of_quadrant {ν z : ℂ} (hν : 1 / 2 < ν.re) (hz : 0 < z.re)
+theorem struveK_eq_besselYLaplace_of_quadrant {ν z : ℂ} (hν : 1 / 2 < ν.re) (hz : 0 < z.re)
     (hzi : 0 < z.im) : DLMF.Struve.struveK ν z = besselYLaplace ν z := by
   have hν' : -1 / 2 < ν.re := by linarith
   have hz0 : z ≠ 0 := fun h => by simp [h] at hz
@@ -716,17 +716,17 @@ lemma struveK_eq_besselYLaplace_of_quadrant {ν z : ℂ} (hν : 1 / 2 < ν.re) (
 private lemma isOpen_re_pos : IsOpen {z : ℂ | 0 < z.re} := isOpen_lt continuous_const continuous_re
 
 /-- The Laplace integral is analytic on the right half-plane. -/
-lemma analyticOnNhd_besselYLaplace (ν : ℂ) : AnalyticOnNhd ℂ (besselYLaplace ν) {z | 0 < z.re} :=
+theorem analyticOnNhd_besselYLaplace (ν : ℂ) : AnalyticOnNhd ℂ (besselYLaplace ν) {z | 0 < z.re} :=
   DifferentiableOn.analyticOnNhd (fun _ hz =>
     (hasDerivAt_besselYLaplace ν hz).differentiableAt.differentiableWithinAt) isOpen_re_pos
 
 /-- `K_ν = H_ν - Y_ν` is analytic on the slit plane. -/
-lemma analyticOnNhd_struveK (ν : ℂ) : AnalyticOnNhd ℂ (DLMF.Struve.struveK ν) slitPlane := by
+theorem analyticOnNhd_struveK (ν : ℂ) : AnalyticOnNhd ℂ (DLMF.Struve.struveK ν) slitPlane := by
   have h := (DLMF.Struve.struve_analytic ν).1.sub (DLMF.Struve.besselY_analytic ν)
   exact h
 
 /-- The base case on the whole right half-plane. -/
-lemma struveK_eq_besselYLaplace_of_re_gt {ν : ℂ} (hν : 1 / 2 < ν.re) {z : ℂ} (hz : 0 < z.re) :
+theorem struveK_eq_besselYLaplace_of_re_gt {ν : ℂ} (hν : 1 / 2 < ν.re) {z : ℂ} (hz : 0 < z.re) :
     DLMF.Struve.struveK ν z = besselYLaplace ν z := by
   have hU : IsPreconnected {z : ℂ | 0 < z.re} := (convex_halfSpace_re_gt 0).isPreconnected
   have hK := (analyticOnNhd_struveK ν).mono
@@ -740,7 +740,7 @@ lemma struveK_eq_besselYLaplace_of_re_gt {ν : ℂ} (hν : 1 / 2 < ν.re) {z : �
 
 /-- Lowering relation `K_ν' = K_{ν-1} - (ν/z) K_ν` for `K_ν = H_ν - Y_ν` (DLMF 11.4.23–24 with
 10.6.1–2). -/
-lemma hasDerivAt_struveK_lower (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
+theorem hasDerivAt_struveK_lower (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (DLMF.Struve.struveK ν)
       (DLMF.Struve.struveK (ν - 1) z - ν / z * DLMF.Struve.struveK ν z) z := by
   have hH := DLMF.Struve.struveH_derivative ν hz

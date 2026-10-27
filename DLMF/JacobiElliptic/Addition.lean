@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.JacobiElliptic.PeriodsPolesZeros
-public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 
 /-!
 # Jacobian elliptic functions: addition theorems (DLMF §22.8)
@@ -52,52 +51,16 @@ lemma p22R1_two_sub_half (x τ : ℂ) :
 
 /-- Mixed addition identity (pairs `{1,4}`, `{2,3}`):
 `θ₂(0)θ₃(0) θ₁(u+v)θ₄(u-v) = θ₁θ₄(u) θ₂θ₃(v) + θ₂θ₃(u) θ₁θ₄(v)`. -/
-lemma p22R1_mixed14 (u v τ : ℂ) (hτ : 0 < τ.im) :
+theorem p22R1_mixed14 (u v τ : ℂ) (hτ : 0 < τ.im) :
     jacobiThetaTwoTau 0 τ * jacobiThetaThreeTau 0 τ *
         (jacobiThetaOneTau (u + v) τ * jacobiThetaFourTau (u - v) τ) =
       jacobiThetaOneTau u τ * jacobiThetaFourTau u τ *
           (jacobiThetaTwoTau v τ * jacobiThetaThreeTau v τ) +
         jacobiThetaTwoTau u τ * jacobiThetaThreeTau u τ *
           (jacobiThetaOneTau v τ * jacobiThetaFourTau v τ) := by
-  set σ := τ / 2 with hσdef
-  have hσ : 0 < σ.im := by simp [σ]; linarith
-  have h2 : 2 * σ = τ := by simp [σ]; ring
-  have k1 := DLMF.Theta.jacobiThetaOneTau_mul_watson u (v - π / 2) σ hσ
-  have k2 := DLMF.Theta.jacobiThetaOneTau_mul_watson v (u - π / 2) σ hσ
-  rw [h2, p22R1_one_sub_half, show u + (v - π / 2) = (u + v) - π / 2 by ring,
-    show u - (v - π / 2) = (u - v) + π / 2 by ring, p22R1_three_sub_half,
-    je22a_thetaTwo_add_half_pi, p22R1_two_sub_half, je22a_thetaThree_add_half_pi] at k1
-  rw [h2, p22R1_one_sub_half, show v + (u - π / 2) = (u + v) - π / 2 by ring,
-    show v - (u - π / 2) = -(u - v) + π / 2 by ring, p22R1_three_sub_half,
-    je22a_thetaTwo_add_half_pi, p22R1_two_sub_half, je22a_thetaThree_add_half_pi,
-    jacobiThetaOneTau_neg, jacobiThetaFourTau_neg] at k2
-  have d1u := DLMF.Theta.p20R1_D1 u σ hσ
-  have d1v := DLMF.Theta.p20R1_D1 v σ hσ
-  have d2u := DLMF.Theta.p20R1_D2 u σ hσ
-  have d2v := DLMF.Theta.p20R1_D2 v σ hσ
-  have d20 := DLMF.Theta.p20R1_D2 0 σ hσ
-  rw [h2] at d1u d1v d2u d2v d20
-  simp only [DLMF.Theta.jacobiThetaTwoNullTau] at d1u d1v d2u d2v d20
-  set g := jacobiThetaTwoTau 0 σ
-  -- 4·LHS = g² (θ₁(u|σ)θ₂(v|σ) + θ₂(u|σ)θ₁(v|σ)) = 4·RHS
-  have hL : 4 * (jacobiThetaTwoTau 0 τ * jacobiThetaThreeTau 0 τ *
-      (jacobiThetaOneTau (u + v) τ * jacobiThetaFourTau (u - v) τ)) =
-      g ^ 2 * (jacobiThetaOneTau u σ * jacobiThetaTwoTau v σ +
-        jacobiThetaTwoTau u σ * jacobiThetaOneTau v σ) := by
-    linear_combination (2 * (jacobiThetaOneTau (u + v) τ * jacobiThetaFourTau (u - v) τ)) * d20
-      + g ^ 2 * k1 + g ^ 2 * k2
-  have hR : 4 * (jacobiThetaOneTau u τ * jacobiThetaFourTau u τ *
-          (jacobiThetaTwoTau v τ * jacobiThetaThreeTau v τ) +
-        jacobiThetaTwoTau u τ * jacobiThetaThreeTau u τ *
-          (jacobiThetaOneTau v τ * jacobiThetaFourTau v τ)) =
-      g ^ 2 * (jacobiThetaOneTau u σ * jacobiThetaTwoTau v σ +
-        jacobiThetaTwoTau u σ * jacobiThetaOneTau v σ) := by
-    linear_combination (2 * (jacobiThetaTwoTau v τ * jacobiThetaThreeTau v τ)) * d1u +
-      (jacobiThetaOneTau u σ * g) * d2v +
-      (2 * (jacobiThetaOneTau v τ * jacobiThetaFourTau v τ)) * d2u +
-      (jacobiThetaTwoTau u σ * g) * d1v
-  have := hL.trans hR.symm
-  linear_combination this / 4
+  have h := DLMF.Theta.p3t_mixed14 u v τ hτ
+  simp only [DLMF.Theta.jacobiThetaTwoNullTau, DLMF.Theta.jacobiThetaThreeNullTau] at h
+  exact h
 
 lemma p22R1_three_mul_four (z w τ : ℂ) (hτ : 0 < τ.im) :
     jacobiThetaThreeTau z τ * jacobiThetaFourTau w τ =
@@ -110,7 +73,7 @@ lemma p22R1_three_mul_four (z w τ : ℂ) (hτ : 0 < τ.im) :
   linear_combination h
 
 /-- Mixed addition identity (pairs `{3,4}`, `{1,2}`). -/
-lemma p22R1_mixed34 (u v τ : ℂ) (hτ : 0 < τ.im) :
+theorem p22R1_mixed34 (u v τ : ℂ) (hτ : 0 < τ.im) :
     jacobiThetaThreeTau 0 τ * jacobiThetaFourTau 0 τ *
         (jacobiThetaThreeTau (u + v) τ * jacobiThetaFourTau (u - v) τ) =
       jacobiThetaThreeTau u τ * jacobiThetaFourTau u τ *
@@ -129,26 +92,19 @@ lemma p22R1_mixed34 (u v τ : ℂ) (hτ : 0 < τ.im) :
   rw [l0, l4u, l4v, l1u, l1v, F]; ring
 
 /-- Mixed addition identity (pairs `{2,4}`, `{1,3}`). -/
-lemma p22R1_mixed24 (u v τ : ℂ) (hτ : 0 < τ.im) :
+theorem p22R1_mixed24 (u v τ : ℂ) (hτ : 0 < τ.im) :
     jacobiThetaTwoTau 0 τ * jacobiThetaFourTau 0 τ *
         (jacobiThetaTwoTau (u + v) τ * jacobiThetaFourTau (u - v) τ) =
       jacobiThetaTwoTau u τ * jacobiThetaFourTau u τ *
           (jacobiThetaTwoTau v τ * jacobiThetaFourTau v τ) -
         jacobiThetaOneTau u τ * jacobiThetaThreeTau u τ *
           (jacobiThetaOneTau v τ * jacobiThetaThreeTau v τ) := by
-  have hτ1 : 0 < (τ + 1).im := by simpa using hτ
-  have h := p22R1_mixed14 (u + π / 2) v (τ + 1) hτ1
-  simp only [DLMF.Theta.jacobiThetaOneTau_add_one, DLMF.Theta.jacobiThetaTwoTau_add_one,
-    DLMF.Theta.jacobiThetaThreeTau_add_one, DLMF.Theta.jacobiThetaFourTau_add_one] at h
-  rw [show u + π / 2 + v = (u + v) + π / 2 by ring, show u + π / 2 - v = (u - v) + π / 2 by ring,
-    je22a_thetaOne_add_half_pi, je22a_thetaTwo_add_half_pi, je22a_thetaThree_add_half_pi,
-    je22a_thetaFour_add_half_pi, je22a_thetaOne_add_half_pi, je22a_thetaThree_add_half_pi] at h
-  have hε : cexp (π * I / 4) ^ 2 ≠ 0 := pow_ne_zero _ (exp_ne_zero _)
-  apply mul_left_cancel₀ hε
-  linear_combination h
+  have h := DLMF.Theta.p3t_mixed24 u v τ hτ
+  simp only [DLMF.Theta.jacobiThetaTwoNullTau, DLMF.Theta.jacobiThetaFourNullTau] at h
+  exact h
 
 /-- `θ₄(0)² θ₄(u+v) θ₄(u-v) = θ₄(u)² θ₄(v)² - θ₁(u)² θ₁(v)²` (alternative form of 20.7.9). -/
-lemma p22R1_four_add_mul_sub (u v τ : ℂ) (hτ : 0 < τ.im) :
+theorem p22R1_four_add_mul_sub (u v τ : ℂ) (hτ : 0 < τ.im) :
     jacobiThetaFourTau 0 τ ^ 2 * (jacobiThetaFourTau (u + v) τ * jacobiThetaFourTau (u - v) τ) =
       jacobiThetaFourTau u τ ^ 2 * jacobiThetaFourTau v τ ^ 2 -
         jacobiThetaOneTau u τ ^ 2 * jacobiThetaOneTau v τ ^ 2 := by
@@ -189,7 +145,7 @@ local notation "θ₄" => jacobiThetaFourTau
 lemma p22R1_four_sub_half (x τ : ℂ) : θ₄ (x - π / 2) τ = θ₃ x τ := by
   rw [jacobiThetaFourTau, sub_add_cancel]
 
-lemma p22R1_P23 (x y τ : ℂ) (hτ : 0 < τ.im) :
+theorem p22R1_P23 (x y τ : ℂ) (hτ : 0 < τ.im) :
     θ₂ 0 τ * θ₃ 0 τ * (θ₂ (x + y) τ * θ₃ (x - y) τ) =
       θ₂ x τ * θ₃ x τ * (θ₂ y τ * θ₃ y τ) - θ₁ x τ * θ₄ x τ * (θ₁ y τ * θ₄ y τ) := by
   have h := p22R1_mixed14 x (y + π / 2) τ hτ
@@ -223,7 +179,7 @@ lemma p22R1_P42 (x y τ : ℂ) (hτ : 0 < τ.im) :
     jacobiThetaThreeTau_neg, jacobiThetaFourTau_neg] at h
   linear_combination h
 
-lemma p22R1_P13 (x y τ : ℂ) (hτ : 0 < τ.im) :
+theorem p22R1_P13 (x y τ : ℂ) (hτ : 0 < τ.im) :
     θ₂ 0 τ * θ₄ 0 τ * (θ₁ (x + y) τ * θ₃ (x - y) τ) =
       θ₂ x τ * θ₄ x τ * (θ₁ y τ * θ₃ y τ) + θ₁ x τ * θ₃ x τ * (θ₂ y τ * θ₄ y τ) := by
   have h := p22R1_mixed24 x (y + π / 2) τ hτ
@@ -267,7 +223,7 @@ lemma p22R1_P21 (x y τ : ℂ) (hτ : 0 < τ.im) :
   apply mul_left_cancel₀ hS
   linear_combination h - I * θ₃ 0 τ * θ₄ 0 τ * (θ₂ (x + y) τ * θ₁ (x - y) τ) * hm
 
-lemma p22R1_P12 (x y τ : ℂ) (hτ : 0 < τ.im) :
+theorem p22R1_P12 (x y τ : ℂ) (hτ : 0 < τ.im) :
     θ₃ 0 τ * θ₄ 0 τ * (θ₁ (x + y) τ * θ₂ (x - y) τ) =
       θ₁ x τ * θ₂ x τ * (θ₃ y τ * θ₄ y τ) + θ₃ x τ * θ₄ x τ * (θ₁ y τ * θ₂ y τ) := by
   have h := p22R1_P21 x (-y) τ hτ
@@ -279,7 +235,7 @@ section
 variable (x y τ : ℂ) (hτ : 0 < τ.im)
 include hτ
 
-lemma p22R1_nulls :
+theorem p22R1_nulls :
     θ₂ 0 τ ≠ 0 ∧ θ₃ 0 τ ≠ 0 ∧ θ₄ 0 τ ≠ 0 ∧ θ₃ 0 τ ^ 4 = θ₂ 0 τ ^ 4 + θ₄ 0 τ ^ 4 := by
   have j := DLMF.Theta.jacobiThetaNull_fourth_power τ hτ
   simp only [DLMF.Theta.jacobiThetaTwoNullTau, DLMF.Theta.jacobiThetaThreeNullTau,
@@ -287,7 +243,7 @@ lemma p22R1_nulls :
   exact ⟨je22a_thetaTwo_zero_ne_zero hτ, je22a_thetaThree_zero_ne_zero hτ,
     je22a_thetaFour_zero_ne_zero hτ, j⟩
 
-lemma p22R1_S3 : θ₃ 0 τ ^ 2 * (θ₃ (x + y) τ * θ₃ (x - y) τ) =
+theorem p22R1_S3 : θ₃ 0 τ ^ 2 * (θ₃ (x + y) τ * θ₃ (x - y) τ) =
     θ₃ x τ ^ 2 * θ₃ y τ ^ 2 + θ₁ x τ ^ 2 * θ₁ y τ ^ 2 := by
   have h := DLMF.Theta.jacobiThetaThreeTau_add_mul_sub x y τ hτ
   have ex := DLMF.Theta.jacobiTheta_sq_three_four x τ hτ
@@ -298,7 +254,7 @@ lemma p22R1_S3 : θ₃ 0 τ ^ 2 * (θ₃ (x + y) τ * θ₃ (x - y) τ) =
   apply mul_left_cancel₀ (pow_ne_zero 2 h4)
   linear_combination θ₃ 0 τ ^ 2 * h + θ₃ y τ ^ 2 * ex + θ₁ x τ ^ 2 * ey
 
-lemma p22R1_S2 : θ₂ 0 τ ^ 2 * (θ₂ (x + y) τ * θ₂ (x - y) τ) =
+theorem p22R1_S2 : θ₂ 0 τ ^ 2 * (θ₂ (x + y) τ * θ₂ (x - y) τ) =
     θ₂ x τ ^ 2 * θ₂ y τ ^ 2 - θ₁ x τ ^ 2 * θ₁ y τ ^ 2 := by
   have h := DLMF.Theta.jacobiThetaTwoTau_add_mul_sub x y τ hτ
   have ex := DLMF.Theta.jacobiTheta_sq_two_four x τ hτ
@@ -1026,7 +982,7 @@ lemma p22R1_reg_neg {k : ℂ} {v : ℂ} (hv : jacobiRegulark .n v k) : jacobiReg
   rw [jacobiZetak_neg, jacobiLetterTheta_neg]; simpa using hv
 
 /-- Addition formulas at `u + v` and `u - v` with the common denominator. -/
-lemma p22R1_add_sub_vals {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
+theorem p22R1_add_sub_vals {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
     (hu : jacobiRegulark .n u k) (hv : jacobiRegulark .n v k)
     (hp : jacobiRegulark .n (u + v) k) (hm : jacobiRegulark .n (u - v) k) :
     let su := jacobiSnk u k; let cu := jacobiCnk u k; let du := jacobiDnk u k
@@ -1064,7 +1020,7 @@ lemma p22R1_pq_ne {p q : JacobiLetter} (hpq : p ≠ q) {z k : ℂ}
   simp only [hpq, ↓reduceIte]
   exact div_ne_zero hp hq
 
-lemma p22R1_reg_add_K {k : ℂ} (hk : k ∈ jacobiModulusDomain) (r : JacobiLetter) (z : ℂ) :
+theorem p22R1_reg_add_K {k : ℂ} (hk : k ∈ jacobiModulusDomain) (r : JacobiLetter) (z : ℂ) :
     jacobiRegulark r (z + compEllIntKk k) k ↔ jacobiRegulark r.swapK z k := by
   have hK := compEllIntKk_ne_zero hk
   have hτ := jacobiTauk_im_pos hk
@@ -1075,14 +1031,14 @@ lemma p22R1_reg_add_K {k : ℂ} (hk : k ∈ jacobiModulusDomain) (r : JacobiLett
   exact ⟨fun h => right_ne_zero_of_mul h,
     fun h => mul_ne_zero (je22a_betaK_ne_zero hτ r) h⟩
 
-lemma p22R1_reg_add_two_K {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ) :
+theorem p22R1_reg_add_two_K {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ) :
     jacobiRegulark .n (z + 2 * compEllIntKk k) k ↔ jacobiRegulark .n z k := by
   rw [show z + 2 * compEllIntKk k = z + compEllIntKk k + compEllIntKk k by ring,
     p22R1_reg_add_K hk, p22R1_reg_add_K hk]
   rfl
 
 /-- Theta functions at real multiples of `π`. -/
-lemma p22R1_theta_real_ne {τ : ℂ} (hτ : 0 < τ.im) (r : ℝ) :
+theorem p22R1_theta_real_ne {τ : ℂ} (hτ : 0 < τ.im) (r : ℝ) :
     jacobiThetaFourTau (r * π) τ ≠ 0 ∧ jacobiThetaThreeTau (r * π) τ ≠ 0 ∧
       ((∀ m : ℤ, r ≠ m) → jacobiThetaOneTau (r * π) τ ≠ 0) := by
   obtain ⟨h1, -, h3, h4⟩ := DLMF.Theta.jacobiThetaTau_eq_zero_iff hτ (r * π)
@@ -1123,7 +1079,7 @@ lemma p22R1_reg_mul_K {k : ℂ} (hk : k ∈ jacobiModulusDomain) (c : ℝ) :
     fun h => mul_ne_zero (div_ne_zero n3 (mul_ne_zero n2 n4)) (h1 h)⟩
 
 /-- Values at `2K/3` and `4K/3`. -/
-lemma p22R1_third_vals {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+theorem p22R1_third_vals {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
     let a := 2 * compEllIntKk k / 3
     let b := 4 * compEllIntKk k / 3
     jacobiRegulark .n a k ∧ jacobiRegulark .n b k ∧ jacobiSnk a k ≠ 0 ∧
@@ -1169,10 +1125,10 @@ lemma p22R1_third_vals {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   refine ⟨hna, hnb, hsa', vs, vc, vd, hD, E1, ?_⟩
   linear_combination -d2 - jacobiCnk a k * E1
 
-lemma p22R1_k_ne {k : ℂ} (hk : k ∈ jacobiModulusDomain) : k ≠ 0 := by
+theorem p22R1_k_ne {k : ℂ} (hk : k ∈ jacobiModulusDomain) : k ≠ 0 := by
   rintro rfl; simp [jacobiModulusDomain] at hk
 
-lemma p22R1_kappa_ne {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+theorem p22R1_kappa_ne {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
     jacobiDnk (2 * compEllIntKk k / 3) k ≠ 0 := by
   obtain ⟨hn, hd, -⟩ := p22R1_reg_mul_K hk (2 / 3)
   have ea : 2 * compEllIntKk k / 3 = ((2 / 3 : ℝ) : ℂ) * compEllIntKk k := by push_cast; ring

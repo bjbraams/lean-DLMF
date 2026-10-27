@@ -7,7 +7,6 @@ module
 
 public import DLMF.Confluent.CoulombIrregular
 public import DLMF.Confluent.AsymptoticConsequences
-public import DLMF.Confluent.Relations
 public import DLMF.OrthogonalPolynomials.ClassicalInstances
 public import DLMFMathlib.Analysis.ODE.SturmCount
 public import DLMFMathlib.Analysis.ODE.SturmDeformation
@@ -55,7 +54,7 @@ def kzt_IsSol (p q y y' : ℝ → ℝ) : Prop :=
     HasDerivAt (fun t => p t * y' t) (-(q x * y x)) x
 
 /-- The negative of a solution is a solution. -/
-lemma kzt_IsSol.neg {p q y y' : ℝ → ℝ} (h : kzt_IsSol p q y y') :
+theorem kzt_IsSol.neg {p q y y' : ℝ → ℝ} (h : kzt_IsSol p q y y') :
     kzt_IsSol p q (fun x => -y x) (fun x => -y' x) := fun x hx => by
   refine ⟨(h x hx).1.neg, ?_⟩
   have := (h x hx).2.neg
@@ -64,7 +63,7 @@ lemma kzt_IsSol.neg {p q y y' : ℝ → ℝ} (h : kzt_IsSol p q y y') :
   · ring
 
 /-- Solutions are continuous on subsets of `(0, ∞)`. -/
-lemma kzt_IsSol.continuousOn {p q y y' : ℝ → ℝ} (h : kzt_IsSol p q y y') {s : Set ℝ}
+theorem kzt_IsSol.continuousOn {p q y y' : ℝ → ℝ} (h : kzt_IsSol p q y y') {s : Set ℝ}
     (hs : s ⊆ Ioi (0:ℝ)) : ContinuousOn y s := fun _x hx =>
   (h _ (hs hx)).1.continuousAt.continuousWithinAt
 
@@ -72,7 +71,7 @@ lemma kzt_IsSol.continuousOn {p q y y' : ℝ → ℝ} (h : kzt_IsSol p q y y') {
 def kzt_W (p u u' y y' : ℝ → ℝ) (x : ℝ) : ℝ := p x * (u' x * y x - u x * y' x)
 
 /-- The weighted Wronskian is odd in `y`. -/
-lemma kzt_W_neg (p u u' y y' : ℝ → ℝ) (x : ℝ) :
+theorem kzt_W_neg (p u u' y y' : ℝ → ℝ) (x : ℝ) :
     kzt_W p u u' (fun x => -y x) (fun x => -y' x) x = -kzt_W p u u' y y' x := by
   simp only [kzt_W]; ring
 
@@ -81,7 +80,7 @@ section Comparison
 variable {p qy qu qw y y' u u' w w' : ℝ → ℝ}
 
 /-- Derivative of the weighted Wronskian: `W' = (qy - qu) u y`. -/
-lemma kzt_hasDerivAt_W (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
+theorem kzt_hasDerivAt_W (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
     {x : ℝ} (hx : x ∈ Ioi (0:ℝ)) :
     HasDerivAt (kzt_W p u u' y y') ((qy x - qu x) * u x * y x) x := by
   have h1 := (hu x hx).2.mul (hy x hx).1
@@ -92,12 +91,12 @@ lemma kzt_hasDerivAt_W (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
   · ring
 
 /-- The weighted Wronskian is continuous on subsets of `(0, ∞)`. -/
-lemma kzt_W_continuousOn (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u') {s : Set ℝ}
+theorem kzt_W_continuousOn (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u') {s : Set ℝ}
     (hs : s ⊆ Ioi (0:ℝ)) : ContinuousOn (kzt_W p u u' y y') s := fun _x hx =>
   (kzt_hasDerivAt_W hy hu (hs hx)).continuousAt.continuousWithinAt
 
 /-- At a zero `a` followed by positive values, the derivative is nonnegative. -/
-lemma kzt_deriv_nonneg_right {f : ℝ → ℝ} {d a b : ℝ} (hd : HasDerivAt f d a) (h0 : f a = 0)
+theorem kzt_deriv_nonneg_right {f : ℝ → ℝ} {d a b : ℝ} (hd : HasDerivAt f d a) (h0 : f a = 0)
     (hab : a < b) (hpos : ∀ x ∈ Ioo a b, 0 < f x) : 0 ≤ d := by
   have hs := (hasDerivAt_iff_tendsto_slope.mp hd).mono_left (nhdsGT_le_nhdsNE a)
   refine ge_of_tendsto hs ?_
@@ -106,7 +105,7 @@ lemma kzt_deriv_nonneg_right {f : ℝ → ℝ} {d a b : ℝ} (hd : HasDerivAt f 
   exact (div_pos (hpos x hx) (sub_pos.mpr hx.1)).le
 
 /-- At a zero `b` preceded by positive values, the derivative is nonpositive. -/
-lemma kzt_deriv_nonpos_left {f : ℝ → ℝ} {d a b : ℝ} (hd : HasDerivAt f d b) (h0 : f b = 0)
+theorem kzt_deriv_nonpos_left {f : ℝ → ℝ} {d a b : ℝ} (hd : HasDerivAt f d b) (h0 : f b = 0)
     (hab : a < b) (hpos : ∀ x ∈ Ioo a b, 0 < f x) : d ≤ 0 := by
   have hs := (hasDerivAt_iff_tendsto_slope.mp hd).mono_left (nhdsLT_le_nhdsNE b)
   refine le_of_tendsto hs ?_
@@ -115,19 +114,19 @@ lemma kzt_deriv_nonpos_left {f : ℝ → ℝ} {d a b : ℝ} (hd : HasDerivAt f d
   exact (div_neg_of_pos_of_neg (hpos x hx) (sub_neg.mpr hx.2)).le
 
 /-- Nonnegativity at the left end by continuity. -/
-lemma kzt_nonneg_left {f : ℝ → ℝ} {a b : ℝ} (hc : ContinuousAt f a) (hab : a < b)
+theorem kzt_nonneg_left {f : ℝ → ℝ} {a b : ℝ} (hc : ContinuousAt f a) (hab : a < b)
     (hpos : ∀ x ∈ Ioo a b, 0 < f x) : 0 ≤ f a := by
   refine ge_of_tendsto (hc.tendsto.mono_left (nhdsWithin_le_nhds (s := Ioi a))) ?_
   filter_upwards [Ioo_mem_nhdsGT hab] with x hx using (hpos x hx).le
 
 /-- Nonnegativity at the right end by continuity. -/
-lemma kzt_nonneg_right {f : ℝ → ℝ} {a b : ℝ} (hc : ContinuousAt f b) (hab : a < b)
+theorem kzt_nonneg_right {f : ℝ → ℝ} {a b : ℝ} (hc : ContinuousAt f b) (hab : a < b)
     (hpos : ∀ x ∈ Ioo a b, 0 < f x) : 0 ≤ f b := by
   refine ge_of_tendsto (hc.tendsto.mono_left (nhdsWithin_le_nhds (s := Iio b))) ?_
   filter_upwards [Ioo_mem_nhdsLT hab] with x hx using (hpos x hx).le
 
 /-- A continuous function without zeros on an order-connected set has constant sign there. -/
-lemma kzt_sign {f : ℝ → ℝ} {s : Set ℝ} (hs : s.OrdConnected) (hc : ContinuousOn f s)
+theorem kzt_sign {f : ℝ → ℝ} {s : Set ℝ} (hs : s.OrdConnected) (hc : ContinuousOn f s)
     (hne : ∀ x ∈ s, f x ≠ 0) : (∀ x ∈ s, 0 < f x) ∨ (∀ x ∈ s, f x < 0) := by
   by_contra h
   push Not at h
@@ -144,7 +143,7 @@ lemma kzt_sign {f : ℝ → ℝ} {s : Set ℝ} (hs : s.OrdConnected) (hc : Conti
 
 /-- **Divergence of a ratio at `∞`.** If `u > 0`, `p u² ≤ K` and the weighted Wronskian
 satisfies `W ≤ -c₀ < 0` on `[s, ∞)`, then `y/u` is unbounded above there. -/
-lemma kzt_ratio_top {s K c₀ : ℝ} (hK : 0 < K) (hc₀ : 0 < c₀)
+theorem kzt_ratio_top {s K c₀ : ℝ} (hK : 0 < K) (hc₀ : 0 < c₀)
     (hyd : ∀ x ∈ Ici s, HasDerivAt y (y' x) x) (hud : ∀ x ∈ Ici s, HasDerivAt u (u' x) x)
     (hup : ∀ x ∈ Ici s, 0 < u x) (hp : ∀ x ∈ Ici s, 0 < p x)
     (hb : ∀ x ∈ Ici s, p x * u x ^ 2 ≤ K)
@@ -188,7 +187,7 @@ lemma kzt_ratio_top {s K c₀ : ℝ} (hK : 0 < K) (hc₀ : 0 < c₀)
 
 /-- **Divergence of a ratio at `0`.** If `u > 0`, `p u² ≤ K x` and `W ≤ -c₀ < 0` on `(0, s]`,
 then `y/u` takes negative values there. -/
-lemma kzt_ratio_zero {s K c₀ : ℝ} (hs : 0 < s) (hK : 0 < K) (hc₀ : 0 < c₀)
+theorem kzt_ratio_zero {s K c₀ : ℝ} (hs : 0 < s) (hK : 0 < K) (hc₀ : 0 < c₀)
     (hyd : ∀ x ∈ Ioc 0 s, HasDerivAt y (y' x) x) (hud : ∀ x ∈ Ioc 0 s, HasDerivAt u (u' x) x)
     (hup : ∀ x ∈ Ioc 0 s, 0 < u x) (hp : ∀ x ∈ Ioc 0 s, 0 < p x)
     (hb : ∀ x ∈ Ioc 0 s, p x * u x ^ 2 ≤ K * x)
@@ -214,7 +213,7 @@ include hp
 
 omit hp in
 /-- `W = p (u'y - uy')` is strictly decreasing where `u, y > 0` and `qy < qu`. -/
-lemma kzt_W_strictAntiOn (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
+theorem kzt_W_strictAntiOn (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
     (hq : ∀ x ∈ Ioi (0:ℝ), qy x < qu x) {s : Set ℝ} (hs : s ⊆ Ioi (0:ℝ)) (hcv : Convex ℝ s)
     (hpos : ∀ x ∈ interior s, 0 < u x ∧ 0 < y x) : StrictAntiOn (kzt_W p u u' y y') s := by
   refine strictAntiOn_of_deriv_neg hcv (kzt_W_continuousOn hy hu hs) fun x hx => ?_
@@ -226,7 +225,7 @@ lemma kzt_W_strictAntiOn (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
 
 omit hp in
 /-- `W = p (u'y - uy')` is strictly increasing where `u, y > 0` and `qu < qy`. -/
-lemma kzt_W_strictMonoOn (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
+theorem kzt_W_strictMonoOn (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
     (hq : ∀ x ∈ Ioi (0:ℝ), qu x < qy x) {s : Set ℝ} (hs : s ⊆ Ioi (0:ℝ)) (hcv : Convex ℝ s)
     (hpos : ∀ x ∈ interior s, 0 < u x ∧ 0 < y x) : StrictMonoOn (kzt_W p u u' y y') s := by
   refine strictMonoOn_of_deriv_pos hcv (kzt_W_continuousOn hy hu hs) fun x hx => ?_
@@ -237,7 +236,7 @@ lemma kzt_W_strictMonoOn (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
   nlinarith
 
 /-- Sign-normalized core of `kzt_between`. -/
-lemma kzt_between_core (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
+theorem kzt_between_core (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
     (hq : ∀ x ∈ Ioi (0:ℝ), qy x < qu x) {a b : ℝ} (ha : 0 < a) (hab : a < b)
     (ya : y a = 0) (yb : y b = 0) (ypos : ∀ x ∈ Ioo a b, 0 < y x)
     (upos : ∀ x ∈ Ioo a b, 0 < u x) : False := by
@@ -278,7 +277,7 @@ theorem kzt_between (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
       (fun x hx => neg_pos.mpr (hy1 x hx)) fun x hx => neg_pos.mpr (hu1 x hx)
 
 /-- Sign-normalized core of `kzt_upper_right`. -/
-lemma kzt_upper_right_core (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
+theorem kzt_upper_right_core (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
     (hq : ∀ x ∈ Ioi (0:ℝ), qy x < qu x) {z s₀ C K : ℝ} (hz : 0 < z)
     (hK : 0 < K) (yz : y z = 0) (ypos : ∀ x ∈ Ioi z, 0 < y x) (upos : ∀ x ∈ Ioi z, 0 < u x)
     (hC : ∀ x ∈ Ioi s₀, y x ≤ C * u x)
@@ -352,7 +351,7 @@ theorem kzt_upper_right (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
       (fun x hx => neg_pos.mpr (hu1 x hx)) hCn3 hb'
 
 /-- Sign-normalized core of `kzt_lower_right`. -/
-lemma kzt_lower_right_core (hy : kzt_IsSol p qy y y') (hw : kzt_IsSol p qw w w')
+theorem kzt_lower_right_core (hy : kzt_IsSol p qy y y') (hw : kzt_IsSol p qw w w')
     (hq : ∀ x ∈ Ioi (0:ℝ), qw x < qy x) {z s₀ K : ℝ} (hz : 0 < z)
     (hK : 0 < K) (wz : w z = 0) (ypos : ∀ x ∈ Ioi z, 0 < y x) (wpos : ∀ x ∈ Ioi z, 0 < w x)
     (hb : ∀ x ∈ Ioi s₀, p x * w x ^ 2 ≤ K) : False := by
@@ -387,7 +386,7 @@ lemma kzt_lower_right_core (hy : kzt_IsSol p qy y y') (hw : kzt_IsSol p qw w w')
   exact absurd hxC (not_lt.mpr (div_pos (ypos x hx') (wpos x hx')).le)
 
 /-- Sign-normalized core of `kzt_lower_left`. -/
-lemma kzt_lower_left_core (hy : kzt_IsSol p qy y y') (hw : kzt_IsSol p qw w w')
+theorem kzt_lower_left_core (hy : kzt_IsSol p qy y y') (hw : kzt_IsSol p qw w w')
     (hq : ∀ x ∈ Ioi (0:ℝ), qw x < qy x) {z s₀ K : ℝ} (hz : 0 < z) (hs₀ : 0 < s₀)
     (hK : 0 < K) (wz : w z = 0) (ypos : ∀ x ∈ Ioo 0 z, 0 < y x)
     (wpos : ∀ x ∈ Ioo 0 z, 0 < w x)
@@ -421,7 +420,7 @@ lemma kzt_lower_left_core (hy : kzt_IsSol p qy y y') (hw : kzt_IsSol p qw w w')
   exact absurd hxC (not_lt.mpr (div_pos (ypos x hx') (wpos x hx')).le)
 
 /-- Sign-normalized core of `kzt_lower_whole`. -/
-lemma kzt_lower_whole_core (hy : kzt_IsSol p qy y y') (hw : kzt_IsSol p qw w w')
+theorem kzt_lower_whole_core (hy : kzt_IsSol p qy y y') (hw : kzt_IsSol p qw w w')
     (hq : ∀ x ∈ Ioi (0:ℝ), qw x < qy x) {s₀ s₀' K : ℝ} (hs₀' : 0 < s₀')
     (hK : 0 < K) (ypos : ∀ x ∈ Ioi 0, 0 < y x) (wpos : ∀ x ∈ Ioi 0, 0 < w x)
     (hb : ∀ x ∈ Ioi s₀, p x * w x ^ 2 ≤ K)
@@ -469,7 +468,7 @@ lemma kzt_lower_whole_core (hy : kzt_IsSol p qy y y') (hw : kzt_IsSol p qw w w')
 
 omit hp in
 /-- Bounds on `p w²` are unchanged by `w ↦ -w`. -/
-lemma kzt_neg_sq_bound {S : Set ℝ} {g : ℝ → ℝ}
+theorem kzt_neg_sq_bound {S : Set ℝ} {g : ℝ → ℝ}
     (hb : ∀ x ∈ S, p x * w x ^ 2 ≤ g x) : ∀ x ∈ S, p x * (-w x) ^ 2 ≤ g x :=
   fun x hx => by rw [neg_sq]; exact hb x hx
 
@@ -696,22 +695,22 @@ def kzt_p (b : ℝ) (x : ℝ) : ℝ := x ^ b * Real.exp (-x)
 def kzt_q (a b : ℝ) (x : ℝ) : ℝ := -a * (x ^ (b - 1) * Real.exp (-x))
 
 /-- The weight `x^b e^{-x}` is positive on `(0, ∞)`. -/
-lemma kzt_p_pos (b : ℝ) : ∀ x ∈ Ioi (0:ℝ), 0 < kzt_p b x := fun _ hx =>
+theorem kzt_p_pos (b : ℝ) : ∀ x ∈ Ioi (0:ℝ), 0 < kzt_p b x := fun _ hx =>
   mul_pos (Real.rpow_pos_of_pos hx b) (Real.exp_pos _)
 
 /-- `U(a,b,x)` is real for real `a`, `b` and `x > 0`. -/
-lemma kzt_U_im (a b : ℝ) {x : ℝ} (hx : 0 < x) : (kummerU (a : ℂ) (b : ℂ) (x : ℂ)).im = 0 := by
+theorem kzt_U_im (a b : ℝ) {x : ℝ} (hx : 0 < x) : (kummerU (a : ℂ) (b : ℂ) (x : ℂ)).im = 0 := by
   have h := conj_kummerU (a : ℂ) (b : ℂ) (z := (x : ℂ)) (ofReal_mem_slitPlane.2 hx)
   simp only [conj_ofReal] at h
   exact conj_eq_iff_im.mp h
 
 /-- `U(a,b,x)` equals the real number `kzt_U a b x` for `x > 0`. -/
-lemma kzt_U_eq (a b : ℝ) {x : ℝ} (hx : 0 < x) :
+theorem kzt_U_eq (a b : ℝ) {x : ℝ} (hx : 0 < x) :
     kummerU (a : ℂ) (b : ℂ) (x : ℂ) = (kzt_U a b x : ℂ) :=
   Complex.ext (by simp [kzt_U]) (by simp [kzt_U_im a b hx])
 
 /-- The shifted values `U(a+k, b+k, x)` are real. -/
-lemma kzt_U_eq_add (a b : ℝ) (k : ℕ) {x : ℝ} (hx : 0 < x) :
+theorem kzt_U_eq_add (a b : ℝ) (k : ℕ) {x : ℝ} (hx : 0 < x) :
     kummerU ((a : ℂ) + k) ((b : ℂ) + k) (x : ℂ) =
       ((kummerU ((a : ℂ) + k) ((b : ℂ) + k) (x : ℂ)).re : ℂ) := by
   have h := kzt_U_eq (a + k) (b + k) hx
@@ -831,7 +830,7 @@ theorem kzt_base_zeros {b : ℝ} (hb : 0 < b) (n : ℕ) :
   simp only [ofReal_inj]
 
 /-- `U(-n,b,x)` is a real polynomial in `x`, times `(-1)ⁿ n!`. -/
-lemma kzt_base_poly {b : ℝ} (hb : 0 < b) (n : ℕ) {x : ℝ} (hx : 0 < x) :
+theorem kzt_base_poly {b : ℝ} (hb : 0 < b) (n : ℕ) {x : ℝ} (hx : 0 < x) :
     kzt_U (-(n : ℝ)) b x = (-1) ^ n * n.factorial * (laguerrePolyLR (b - 1) n).eval x := by
   have hα : ∀ k : ℕ, (((b - 1 : ℝ) : ℂ)) + 1 ≠ -(k : ℂ) := fun k h => by
     have : ((b : ℝ) : ℂ) = -(k : ℂ) := by push_cast at h ⊢; linear_combination h
@@ -904,7 +903,7 @@ theorem kzt_base_bounds {b : ℝ} (hb : 1 ≤ b) (n : ℕ) :
       _ ≤ K := by rw [hK]; nlinarith [sq_nonneg ((n.factorial : ℝ) * Mp)]
 
 /-- The coefficients `q` are ordered by the first parameter. -/
-lemma kzt_q_lt {a a' : ℝ} (b : ℝ) (h : a' < a) : ∀ x ∈ Ioi (0:ℝ), kzt_q a b x < kzt_q a' b x :=
+theorem kzt_q_lt {a a' : ℝ} (b : ℝ) (h : a' < a) : ∀ x ∈ Ioi (0:ℝ), kzt_q a b x < kzt_q a' b x :=
   fun x hx => by
     have : 0 < x ^ (b - 1) * Real.exp (-x) :=
       mul_pos (Real.rpow_pos_of_pos hx _) (Real.exp_pos _)
@@ -1031,7 +1030,7 @@ theorem kzt_connection_neg (a b : ℂ) {x : ℝ} (hx : x < 0) :
     congr 3 <;> ring_nf
 
 /-- `𝐌(a,b,x)` is real for real `a`, `b`, `x`. -/
-lemma kzt_regM_im (a b x : ℝ) : (regularizedHGFun {(a : ℂ)} {(b : ℂ)} (x : ℂ)).im = 0 := by
+theorem kzt_regM_im (a b x : ℝ) : (regularizedHGFun {(a : ℂ)} {(b : ℂ)} (x : ℂ)).im = 0 := by
   rw [regularizedConfluent_eq_tsum]
   have : ∀ n : ℕ, poch (a : ℂ) n * (x : ℂ) ^ n / n.factorial * (Gamma ((b : ℂ) + n))⁻¹ =
       (((ascPochhammer ℝ n).eval a * x ^ n / n.factorial * (Real.Gamma (b + n))⁻¹ : ℝ) : ℂ) := by
@@ -1041,7 +1040,7 @@ lemma kzt_regM_im (a b x : ℝ) : (regularizedHGFun {(a : ℂ)} {(b : ℂ)} (x :
   simp_rw [this, ← ofReal_tsum, ofReal_im]
 
 /-- Continuity of `z ↦ z^s` at a negative real point within the closed upper half-plane. -/
-lemma kzt_cpow_continuousWithinAt (s : ℂ) {x : ℝ} (hx : x < 0) :
+theorem kzt_cpow_continuousWithinAt (s : ℂ) {x : ℝ} (hx : x < 0) :
     ContinuousWithinAt (fun z : ℂ => z ^ s) {z : ℂ | 0 ≤ z.im} (x : ℂ) := by
   have hl := continuousWithinAt_log_of_re_neg_of_im_zero (z := (x : ℂ)) (by simpa using hx)
     (by simp)
@@ -1054,7 +1053,7 @@ lemma kzt_cpow_continuousWithinAt (s : ℂ) {x : ℝ} (hx : x < 0) :
 
 /-- For noninteger `b`, `U(a,b,·)` is continuous at a negative real point within the closed upper
 half-plane (its connection formula is). -/
-lemma kzt_U_continuousWithinAt (a : ℂ) {b : ℂ} (hb : ∀ n : ℤ, b ≠ n) {x : ℝ} (hx : x < 0) :
+theorem kzt_U_continuousWithinAt (a : ℂ) {b : ℂ} (hb : ∀ n : ℤ, b ≠ n) {x : ℝ} (hx : x < 0) :
     ContinuousWithinAt (kummerU a b) {z : ℂ | 0 ≤ z.im} (x : ℂ) := by
   have hbk : ∀ k : ℕ, b ≠ -k := fun k h => hb (-k) (by simp [h])
   have h2b : ∀ k : ℕ, 2 - b ≠ -k := fun k h => hb (k + 2) (by push_cast; linear_combination -h)
@@ -1136,7 +1135,7 @@ theorem kzt_wronskian_neg (a b : ℂ) {x : ℝ} (hx : x < 0) :
 
 /-- `U(a,b,·)` and `𝐌(a,b,·)` have no common zero on the negative axis when `a ∉ -ℕ`, by
 `kzt_wronskian_neg`. -/
-lemma kzt_neg_no_common_zero {a b : ℂ} (ha : ∀ m : ℕ, a ≠ -m) {x : ℝ} (hx : x < 0)
+theorem kzt_neg_no_common_zero {a b : ℂ} (ha : ∀ m : ℕ, a ≠ -m) {x : ℝ} (hx : x < 0)
     (hU : kummerU a b x = 0) (hM : regularizedHGFun {a} {b} (x : ℂ) = 0) : False := by
   have hW := kzt_wronskian_neg a b hx
   rw [hU, hM] at hW
@@ -1149,7 +1148,7 @@ lemma kzt_neg_no_common_zero {a b : ℂ} (ha : ∀ m : ℕ, a ≠ -m) {x : ℝ} 
 
 /-- The term `e^{-πi s} e^x U(b-a,b,-x)/Γ(a)` of `kzt_connection_neg` is `e^{-πi s}` times a real
 number. -/
-lemma kzt_neg_second_term (a b : ℝ) {x : ℝ} (hx : x < 0) (θ : ℂ) :
+theorem kzt_neg_second_term (a b : ℝ) {x : ℝ} (hx : x < 0) (θ : ℂ) :
     θ / Gamma (a : ℂ) * exp (x : ℂ) * kummerU ((b : ℂ) - a) b (-(x : ℂ)) =
       θ * ((Real.exp x * kzt_U (b - a) b (-x) / Real.Gamma a : ℝ) : ℂ) := by
   have ht : (0:ℝ) < -x := by linarith

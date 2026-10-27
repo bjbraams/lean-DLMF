@@ -6,10 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.NumberTheory.LSeries.HurwitzZetaValues
-public import Mathlib.Analysis.SpecialFunctions.Complex.LogBounds
 public import Mathlib.Analysis.Calculus.SmoothSeries
 public import Mathlib.NumberTheory.LSeries.RiemannZeta
-public import Mathlib.Tactic.CrossRefAttribute
 
 /-!
 # The polylogarithm (Duverney Chapter 8; DLMF §25.12)
@@ -36,7 +34,7 @@ are `Real.dilog` and `Real.trilog`. -/
 def polylogSeries (n : ℕ) (z : ℂ) : ℂ := ∑' k : ℕ, z ^ (k + 1) / ((k : ℂ) + 1) ^ n
 
 /-- The terms are bounded by `1/(k+1)^n` on the closed disk. -/
-lemma norm_term_le (n : ℕ) {z : ℂ} (hz : ‖z‖ ≤ 1) (k : ℕ) :
+theorem norm_term_le (n : ℕ) {z : ℂ} (hz : ‖z‖ ≤ 1) (k : ℕ) :
     ‖z ^ (k + 1) / ((k : ℂ) + 1) ^ n‖ ≤ 1 / ((k : ℝ) + 1) ^ n := by
   rw [norm_div, norm_pow, norm_pow, show ((k : ℂ) + 1) = ((k + 1 : ℝ) : ℂ) by push_cast; ring,
     norm_real, Real.norm_of_nonneg (by positivity)]
@@ -44,18 +42,18 @@ lemma norm_term_le (n : ℕ) {z : ℂ} (hz : ‖z‖ ≤ 1) (k : ℕ) :
   exact pow_le_one₀ (norm_nonneg _) hz
 
 /-- `∑ 1/(k+1)^n` converges for `n ≥ 2`. -/
-lemma summable_one_div_succ_pow {n : ℕ} (hn : 2 ≤ n) :
+theorem summable_one_div_succ_pow {n : ℕ} (hn : 2 ≤ n) :
     Summable fun k : ℕ => 1 / ((k : ℝ) + 1) ^ n := by
   have h := (Real.summable_one_div_nat_pow (p := n)).mpr (by omega)
   exact (summable_nat_add_iff 1).mpr h |>.congr fun k => by push_cast; ring_nf
 
 /-- For `n ≥ 2` the series converges absolutely on the closed unit disk. -/
-lemma summable_polylogSeries {n : ℕ} (hn : 2 ≤ n) {z : ℂ} (hz : ‖z‖ ≤ 1) :
+theorem summable_polylogSeries {n : ℕ} (hn : 2 ≤ n) {z : ℂ} (hz : ‖z‖ ≤ 1) :
     Summable fun k : ℕ => z ^ (k + 1) / ((k : ℂ) + 1) ^ n :=
   Summable.of_norm_bounded (summable_one_div_succ_pow hn) (norm_term_le n hz)
 
 /-- On the open unit disk the series converges absolutely for every `n`. -/
-lemma summable_polylogSeries_of_norm_lt_one (n : ℕ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem summable_polylogSeries_of_norm_lt_one (n : ℕ) {z : ℂ} (hz : ‖z‖ < 1) :
     Summable fun k : ℕ => z ^ (k + 1) / ((k : ℂ) + 1) ^ n := by
   refine Summable.of_norm_bounded ((summable_geometric_of_lt_one (norm_nonneg z) hz).mul_left
     ‖z‖) fun k => ?_
@@ -73,7 +71,7 @@ theorem polylogSeries_one {z : ℂ} (hz : ‖z‖ < 1) : polylogSeries 1 z = -lo
   simp
 
 /-- `HasSum` form of the series, indexed from `0` (the `k = 0` term vanishes for `n ≥ 1`). -/
-lemma hasSum_polylogSeries_zero_index {n : ℕ} (hn : 1 ≤ n) {z : ℂ}
+theorem hasSum_polylogSeries_zero_index {n : ℕ} (hn : 1 ≤ n) {z : ℂ}
     (hs : Summable fun k : ℕ => z ^ (k + 1) / ((k : ℂ) + 1) ^ n) :
     HasSum (fun k : ℕ => z ^ k / (k : ℂ) ^ n) (polylogSeries n z) := by
   have h := hs.hasSum

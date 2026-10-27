@@ -39,7 +39,7 @@ def Real.incEllIntEm (φ m : ℝ) : ℝ := ∫ θ in (0 : ℝ)..φ, (1 - m * sin
 
 /-- The integrand `(1 - m sin²θ)^p` is `π`-periodic and even, so its integral over a period is
 twice the integral over `[0, π/2]`. -/
-lemma integral_period {m : ℝ} (hm : m < 1) (p : ℝ) :
+theorem integral_period {m : ℝ} (hm : m < 1) (p : ℝ) :
     ∫ θ in (0 : ℝ)..π, (1 - m * sin θ ^ 2) ^ p =
       2 * ∫ θ in (0 : ℝ)..(π / 2), (1 - m * sin θ ^ 2) ^ p := by
   have hc := continuous_one_sub_mul_sin_sq_rpow hm p
@@ -51,7 +51,7 @@ lemma integral_period {m : ℝ} (hm : m < 1) (p : ℝ) :
   rw [← h]; ring
 
 /-- Quasi-periodicity of the incomplete integrals in the amplitude. -/
-lemma integral_add_pi {m : ℝ} (hm : m < 1) (p φ : ℝ) :
+theorem integral_add_pi {m : ℝ} (hm : m < 1) (p φ : ℝ) :
     ∫ θ in (0 : ℝ)..(φ + π), (1 - m * sin θ ^ 2) ^ p =
       (∫ θ in (0 : ℝ)..φ, (1 - m * sin θ ^ 2) ^ p) +
         2 * ∫ θ in (0 : ℝ)..(π / 2), (1 - m * sin θ ^ 2) ^ p := by
@@ -111,13 +111,13 @@ theorem Real.hasDerivAt_incEllIntEm {m : ℝ} (hm : m < 1) (φ : ℝ) :
     (continuous_one_sub_mul_sin_sq_rpow hm _).continuousAt
 
 /-- `φ ↦ F(φ|m)` is strictly increasing for `m < 1`. -/
-lemma Real.strictMono_incEllIntFm {m : ℝ} (hm : m < 1) : StrictMono fun φ => Real.incEllIntFm φ m :=
+theorem Real.strictMono_incEllIntFm {m : ℝ} (hm : m < 1) : StrictMono fun φ => Real.incEllIntFm φ m :=
   strictMono_of_deriv_pos fun φ => by
     rw [(Real.hasDerivAt_incEllIntFm hm φ).deriv]
     exact rpow_pos_of_pos (one_sub_mul_sin_sq_pos hm φ) _
 
 /-- `φ ↦ F(φ|m)` maps `ℝ` onto `ℝ` for `m < 1`. -/
-lemma Real.surjective_incEllIntFm {m : ℝ} (hm : m < 1) :
+theorem Real.surjective_incEllIntFm {m : ℝ} (hm : m < 1) :
     Function.Surjective fun φ => Real.incEllIntFm φ m := by
   have hcont : Continuous fun φ => Real.incEllIntFm φ m :=
     continuous_iff_continuousAt.mpr fun φ => (Real.hasDerivAt_incEllIntFm hm φ).continuousAt
@@ -172,7 +172,7 @@ theorem Real.jacobiAmm_incEllIntFm {m : ℝ} (hm : m < 1) (φ : ℝ) :
   exact (Real.incEllIntFmOrderIso hm).symm_apply_apply φ
 
 /-- The amplitude is continuous. -/
-lemma Real.continuous_jacobiAmm {m : ℝ} (hm : m < 1) : Continuous fun u => Real.jacobiAmm u m := by
+theorem Real.continuous_jacobiAmm {m : ℝ} (hm : m < 1) : Continuous fun u => Real.jacobiAmm u m := by
   simp only [Real.jacobiAmm, hm, ↓reduceDIte]
   exact (Real.incEllIntFmOrderIso hm).symm.continuous
 

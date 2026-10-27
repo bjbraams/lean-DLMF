@@ -6,9 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.OrthogonalPolynomials.HermiteFixedX
-public import DLMF.OrthogonalPolynomials.BoundsZeros
 public import DLMFMathlib.Analysis.ODE.SturmComparison
-public import Mathlib.Order.Fin.Basic
+public import DLMF.OrthogonalPolynomials.ClassicalInstances
 
 /-!
 # Individual positive Hermite zeros
@@ -31,18 +30,18 @@ open HermiteFixedX
 namespace HermiteZeroBounds
 
 /-- The real polynomial evaluation agrees with the existing complex Hermite evaluation. -/
-lemma ofReal_eval (n : ℕ) (t : ℝ) :
+theorem ofReal_eval (n : ℕ) (t : ℝ) :
     (((hermitePolyHR n).eval t : ℝ) : ℂ) = (aeval (t : ℂ) (hermitePolyH n) : ℂ) := by
   rw [aeval_hermitePolyH_complex, eval_map_ofReal]
 
 /-- The Gaussian factor introduces no additional zeros. -/
-lemma zero_iff (n : ℕ) (t : ℝ) :
+theorem zero_iff (n : ℕ) (t : ℝ) :
     HermiteFixedX.u n t = 0 ↔ (aeval (t : ℂ) (hermitePolyH n) : ℂ) = 0 := by
   rw [HermiteFixedX.u, mul_eq_zero, or_iff_right (exp_ne_zero _), ← ofReal_eval,
     Complex.ofReal_eq_zero]
 
 /-- Even Hermite functions are even. -/
-lemma u_even (m : ℕ) (t : ℝ) : HermiteFixedX.u (2 * m) (-t) = HermiteFixedX.u (2 * m) t := by
+theorem u_even (m : ℕ) (t : ℝ) : HermiteFixedX.u (2 * m) (-t) = HermiteFixedX.u (2 * m) t := by
   have hp : (hermitePolyHR (2 * m)).eval (-t) = (hermitePolyHR (2 * m)).eval t := by
     apply Complex.ofReal_injective
     rw [ofReal_eval, ofReal_eval, Complex.ofReal_neg,
@@ -50,7 +49,7 @@ lemma u_even (m : ℕ) (t : ℝ) : HermiteFixedX.u (2 * m) (-t) = HermiteFixedX.
   simp only [HermiteFixedX.u, neg_sq, hp]
 
 /-- Even Hermite functions do not vanish at zero. -/
-lemma u_even_zero_ne (m : ℕ) : HermiteFixedX.u (2 * m) 0 ≠ 0 := by
+theorem u_even_zero_ne (m : ℕ) : HermiteFixedX.u (2 * m) 0 ≠ 0 := by
   rw [HermiteFixedX.u_zero, HermiteFixedX.hermitePolyHR_even_eval_zero]
   exact mul_ne_zero (pow_ne_zero _ (by norm_num))
     (div_ne_zero (Nat.cast_ne_zero.mpr (2 * m).factorial_ne_zero)
@@ -77,7 +76,7 @@ private lemma positive_roots_of_laguerre {n m : ℕ} {α : ℝ} (hα : -1 < α)
     exact ⟨i, by exact_mod_cast Real.sq_sqrt (hrpos i).le⟩
 
 /-- The positive zeros of an even Hermite polynomial, in increasing order. -/
-lemma positive_roots_even (m : ℕ) :
+theorem positive_roots_even (m : ℕ) :
     ∃ x : Fin m → ℝ, StrictMono x ∧ (∀ i, 0 < x i) ∧
       ∀ t : ℝ, 0 < t → (HermiteFixedX.u (2 * m) t = 0 ↔ ∃ i, t = x i) := by
   apply positive_roots_of_laguerre (α := -(1 / 2)) (by norm_num)
@@ -90,7 +89,7 @@ lemma positive_roots_even (m : ℕ) :
   norm_num
 
 /-- The positive zeros of an odd Hermite polynomial, in increasing order. -/
-lemma positive_roots_odd (m : ℕ) :
+theorem positive_roots_odd (m : ℕ) :
     ∃ x : Fin m → ℝ, StrictMono x ∧ (∀ i, 0 < x i) ∧
       ∀ t : ℝ, 0 < t → (HermiteFixedX.u (2 * m + 1) t = 0 ↔ ∃ i, t = x i) := by
   apply positive_roots_of_laguerre (α := 1 / 2) (by norm_num)
@@ -104,7 +103,7 @@ lemma positive_roots_odd (m : ℕ) :
   norm_num
 
 /-- Consecutive nonnegative Hermite zeros are farther apart than a free half-period. -/
-lemma pi_div_freq_lt_gap (n : ℕ) {a b : ℝ} (ha : 0 ≤ a) (hab : a < b)
+theorem pi_div_freq_lt_gap (n : ℕ) {a b : ℝ} (ha : 0 ≤ a) (hab : a < b)
     (hza : HermiteFixedX.u n a = 0) (hzb : HermiteFixedX.u n b = 0)
     (hno : ∀ t ∈ Ioo a b, HermiteFixedX.u n t ≠ 0) :
     π / freq n < b - a := by
@@ -137,7 +136,7 @@ lemma pi_div_freq_lt_gap (n : ℕ) {a b : ℝ} (ha : 0 ≤ a) (hab : a < b)
 
 /-- Translating the Hermite equation shows that successive positive gaps increase.
 The earlier left endpoint may be zero without being a root. -/
-lemma increasing_gap (n : ℕ) {l a b : ℝ} (hl : 0 ≤ l) (hla : l < a) (hab : a < b)
+theorem increasing_gap (n : ℕ) {l a b : ℝ} (hl : 0 ≤ l) (hla : l < a) (hab : a < b)
     (hza : HermiteFixedX.u n a = 0) (hzb : HermiteFixedX.u n b = 0)
     (hno : ∀ t ∈ Ioo l a, HermiteFixedX.u n t ≠ 0)
     (hno' : ∀ t ∈ Ioo a b, HermiteFixedX.u n t ≠ 0) :
@@ -162,7 +161,7 @@ lemma increasing_gap (n : ℕ) {l a b : ℝ} (hl : 0 ≤ l) (hla : l < a) (hab :
   exact hno (t - d) ⟨by dsimp [d]; linarith [ht.1], by dsimp [d]; linarith [ht.2]⟩ hz
 
 /-- The first positive even Hermite zero is beyond the first free cosine zero. -/
-lemma first_even_lower (m : ℕ) {a : ℝ} (ha : 0 < a)
+theorem first_even_lower (m : ℕ) {a : ℝ} (ha : 0 < a)
     (hza : HermiteFixedX.u (2 * m) a = 0)
     (hno : ∀ t ∈ Ioo 0 a, HermiteFixedX.u (2 * m) t ≠ 0) :
     π / (2 * freq (2 * m)) < a := by
@@ -258,7 +257,7 @@ private lemma previous_intervals {n m : ℕ} (x : Fin (m + 1) → ℝ) (hx : Str
 
 /-- The indexed positive Hermite zero is below its index times the mean radius.
 The proof uses increasing gaps and the already proved outermost-zero bound. -/
-lemma upper_bound {n m : ℕ} (x : Fin m → ℝ) (hx : StrictMono x)
+theorem upper_bound {n m : ℕ} (x : Fin m → ℝ) (hx : StrictMono x)
     (hxpos : ∀ i, 0 < x i)
     (hcomplete : ∀ t : ℝ, 0 < t → (HermiteFixedX.u n t = 0 ↔ ∃ i, t = x i)) :
     ∀ i : Fin m, x i < ((i : ℝ) + 1) * freq n / m := by
@@ -313,7 +312,7 @@ lemma upper_bound {n m : ℕ} (x : Fin m → ℝ) (hx : StrictMono x)
     nlinarith
 
 /-- A first-zero lower bound propagates through all positive Hermite zeros. -/
-lemma lower_bound {n m : ℕ} (x : Fin m → ℝ) (hx : StrictMono x)
+theorem lower_bound {n m : ℕ} (x : Fin m → ℝ) (hx : StrictMono x)
     (hxpos : ∀ i, 0 < x i)
     (hcomplete : ∀ t : ℝ, 0 < t → (HermiteFixedX.u n t = 0 ↔ ∃ i, t = x i))
     (A : ℝ) (hfirst : ∀ i : Fin m, i.val = 0 → A < x i) :

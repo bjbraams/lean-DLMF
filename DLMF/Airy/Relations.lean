@@ -38,7 +38,7 @@ theorem airyInverseZeta_logZeta {z : ℂ} (hz : z ≠ 0) :
       2 / 3 * (log (3 / 2 : ℂ) + log (2 / 3)) + log z by ring, h, mul_zero, zero_add, exp_log hz]
 
 /-- `log (2/3) = log 2 - log 3`. -/
-lemma log_two_thirds : log (2 / 3 : ℂ) = log 2 - log 3 := by
+theorem log_two_thirds : log (2 / 3 : ℂ) = log 2 - log 3 := by
   rw [show (2 / 3 : ℂ) = ((2 / 3 : ℝ) : ℂ) by push_cast; ring, ← ofReal_log (by norm_num),
     Real.log_div (by norm_num) (by norm_num)]
   push_cast
@@ -46,14 +46,14 @@ lemma log_two_thirds : log (2 / 3 : ℂ) = log 2 - log 3 := by
   push_cast; ring
 
 /-- `exp (2ζ)/4 = z³/9` for the logarithmic Airy variable `ζ`. -/
-lemma exp_two_mul_airyLogZeta {z : ℂ} (hz : z ≠ 0) : exp (2 * airyLogZeta z) / 4 = z ^ 3 / 9 := by
+theorem exp_two_mul_airyLogZeta {z : ℂ} (hz : z ≠ 0) : exp (2 * airyLogZeta z) / 4 = z ^ 3 / 9 := by
   rw [airyLogZeta, show 2 * (log (2 / 3 : ℂ) + 3 / 2 * log z) =
     ((2 : ℕ) : ℂ) * log (2 / 3 : ℂ) + ((3 : ℕ) : ℂ) * log z by push_cast; ring, exp_add,
     exp_nat_mul, exp_nat_mul, exp_log (by norm_num), exp_log hz]
   ring
 
 /-- The `I`-Bessel function on the logarithmic plane at the Airy argument `ζ = (2/3) z^{3/2}`. -/
-lemma airyBesselIOnLog_airyLogZeta (ν : ℂ) {z : ℂ} (hz : z ≠ 0) :
+theorem airyBesselIOnLog_airyLogZeta (ν : ℂ) {z : ℂ} (hz : z ≠ 0) :
     airyBesselIOnLog ν (airyLogZeta z) =
       exp (-ν * log 3) * exp (3 / 2 * ν * log z) *
         regularizedHGFun ∅ {ν + 1} (z ^ 3 / 9) := by
@@ -63,7 +63,7 @@ lemma airyBesselIOnLog_airyLogZeta (ν : ℂ) {z : ℂ} (hz : z ≠ 0) :
   ring
 
 /-- The `J`-Bessel function on the logarithmic plane at the Airy argument. -/
-lemma airyBesselJOnLog_airyLogZeta (ν : ℂ) {z : ℂ} (hz : z ≠ 0) :
+theorem airyBesselJOnLog_airyLogZeta (ν : ℂ) {z : ℂ} (hz : z ≠ 0) :
     airyBesselJOnLog ν (airyLogZeta z) =
       exp (-ν * log 3) * exp (3 / 2 * ν * log z) *
         regularizedHGFun ∅ {ν + 1} (-(z ^ 3 / 9)) := by
@@ -73,7 +73,7 @@ lemma airyBesselJOnLog_airyLogZeta (ν : ℂ) {z : ℂ} (hz : z ≠ 0) :
   ring
 
 /-- Real powers of `3` as complex exponentials. -/
-lemma three_rpow_eq_exp (a : ℝ) : (((3 : ℝ) ^ a : ℝ) : ℂ) = exp (a * log 3) := by
+theorem three_rpow_eq_exp (a : ℝ) : (((3 : ℝ) ^ a : ℝ) : ℂ) = exp (a * log 3) := by
   rw [ofReal_cpow (by norm_num : (0 : ℝ) ≤ 3), cpow_def_of_ne_zero (by norm_num)]
   push_cast; ring_nf
 
@@ -104,21 +104,21 @@ lemma airyAi_eq_besselI_complex_aux {z : ℂ} (hz : z ≠ 0) :
     G * (exp (-(1 / 3) * log 3) / 3) * e2 + G * z * e4
 
 /-- `√3 = exp (log 3 / 2)` in `ℂ`. -/
-lemma sqrt_three_eq_exp : ((Real.sqrt 3 : ℝ) : ℂ) = exp (1 / 2 * log 3) := by
+theorem sqrt_three_eq_exp : ((Real.sqrt 3 : ℝ) : ℂ) = exp (1 / 2 * log 3) := by
   rw [Real.sqrt_eq_rpow, three_rpow_eq_exp]; push_cast; ring_nf
 
 /-- `3⁻¹ = exp (-log 3)` in `ℂ`. -/
-lemma recip_three_eq_exp : (3 : ℂ)⁻¹ = exp (-log 3) := by
+theorem recip_three_eq_exp : (3 : ℂ)⁻¹ = exp (-log 3) := by
   rw [exp_neg, exp_log (by norm_num)]
 
 /-- `log (z/3) = log z - log 3` for `z ≠ 0`. -/
-lemma log_div_three {z : ℂ} (hz : z ≠ 0) : log (z / 3) = log z - log 3 := by
+theorem log_div_three {z : ℂ} (hz : z ≠ 0) : log (z / 3) = log z - log 3 := by
   rw [show z / 3 = z * ((1 / 3 : ℝ) : ℂ) by push_cast; ring, log_mul_ofReal _ (by norm_num) _ hz,
     one_div, Real.log_inv, ofReal_neg, ofReal_log (by norm_num)]
   push_cast; ring
 
 /-- `(z/3)^{1/2}` as a complex exponential. -/
-lemma half_cpow_div_three {z : ℂ} (hz : z ≠ 0) :
+theorem half_cpow_div_three {z : ℂ} (hz : z ≠ 0) :
     (z / 3) ^ (1 / 2 : ℂ) = exp ((log z - log 3) * (1 / 2)) := by
   rw [cpow_def_of_ne_zero (div_ne_zero hz (by norm_num)), log_div_three hz]
 
@@ -153,7 +153,7 @@ lemma reg0F1_one_third (w : ℂ) :
 
 /-- Exponent relations for the derivative forms: `z · 3^{-2/3} z = 3^{-2/3} z²`
 and `z · 3^{2/3} z^{-1} = 9 · 3^{-4/3}`. -/
-lemma airy_deriv_exp_relations {z : ℂ} (hz : z ≠ 0) :
+theorem airy_deriv_exp_relations {z : ℂ} (hz : z ≠ 0) :
     z * exp (-(2 / 3) * log 3) * exp (3 / 2 * (2 / 3) * log z) =
         (((3 : ℝ) ^ (-(2 / 3) : ℝ) : ℝ) : ℂ) * (z * z) ∧
       z * exp (-(-(2 / 3)) * log 3) * exp (3 / 2 * -(2 / 3) * log z) =
@@ -208,22 +208,22 @@ lemma airyBiDeriv_eq_besselI_complex_aux {z : ℂ} (hz : z ≠ 0) :
     3 * r * (((3 : ℝ) ^ (-(4 / 3) : ℝ) : ℝ) : ℂ) * hC
 
 /-- The logarithmic `K`-Bessel function is even in its order. -/
-lemma airyBesselKOnLog_neg (ν w : ℂ) : airyBesselKOnLog (-ν) w = airyBesselKOnLog ν w := by
+theorem airyBesselKOnLog_neg (ν w : ℂ) : airyBesselKOnLog (-ν) w = airyBesselKOnLog ν w := by
   simp only [airyBesselKOnLog, neg_neg, mul_neg, Complex.sin_neg]
   rw [div_neg]; ring
 
 /-- `sin (π/3) = √3/2` in `ℂ`. -/
-lemma sin_pi_mul_one_third : sin (π * (1 / 3)) = ((Real.sqrt 3 / 2 : ℝ) : ℂ) := by
+theorem sin_pi_mul_one_third : sin (π * (1 / 3)) = ((Real.sqrt 3 / 2 : ℝ) : ℂ) := by
   rw [show (π * (1 / 3) : ℂ) = ((π / 3 : ℝ) : ℂ) by push_cast; ring, ← ofReal_sin,
     Real.sin_pi_div_three]
 
 /-- `sin (2π/3) = √3/2` in `ℂ`. -/
-lemma sin_pi_mul_two_thirds : sin (π * (2 / 3)) = ((Real.sqrt 3 / 2 : ℝ) : ℂ) := by
+theorem sin_pi_mul_two_thirds : sin (π * (2 / 3)) = ((Real.sqrt 3 / 2 : ℝ) : ℂ) := by
   rw [show (π * (2 / 3) : ℂ) = ((π - π / 3 : ℝ) : ℂ) by push_cast; ring, ← ofReal_sin,
     Real.sin_pi_sub, Real.sin_pi_div_three]
 
 /-- `(z/3)^{1/2}` in terms of `z^{1/2}` and `√3`. -/
-lemma half_cpow_div_three_mul_sqrt {z : ℂ} (hz : z ≠ 0) :
+theorem half_cpow_div_three_mul_sqrt {z : ℂ} (hz : z ≠ 0) :
     (z / 3) ^ (1 / 2 : ℂ) * ((Real.sqrt 3 : ℝ) : ℂ) = z ^ (1 / 2 : ℂ) := by
   rw [half_cpow_div_three hz, cpow_def_of_ne_zero hz, sqrt_three_eq_exp, ← exp_add]
   congr 1; ring
@@ -319,7 +319,7 @@ lemma airyBi_neg_eq_besselJ_complex_aux {z : ℂ} (hz : z ≠ 0) :
   linear_combination (-F) * f1 + G * f2
 
 /-- Helper form of `airyAiDeriv_neg_eq_besselJ_complex`, proved before its use in the `K` forms. -/
-lemma airyAiDeriv_neg_eq_besselJ_complex_aux {z : ℂ} (hz : z ≠ 0) :
+theorem airyAiDeriv_neg_eq_besselJ_complex_aux {z : ℂ} (hz : z ≠ 0) :
     airyAiDeriv (-z) =
       z / 3 *
         (airyBesselJOnLog (2 / 3) (airyLogZeta z) - airyBesselJOnLog (-2 / 3) (airyLogZeta z)) := by
@@ -336,7 +336,7 @@ lemma airyAiDeriv_neg_eq_besselJ_complex_aux {z : ℂ} (hz : z ≠ 0) :
     3 * (((3 : ℝ) ^ (-(4 / 3) : ℝ) : ℝ) : ℂ) * hC
 
 /-- Helper form of `airyBiDeriv_neg_eq_besselJ_complex`, proved before its use in the `K` forms. -/
-lemma airyBiDeriv_neg_eq_besselJ_complex_aux {z : ℂ} (hz : z ≠ 0) :
+theorem airyBiDeriv_neg_eq_besselJ_complex_aux {z : ℂ} (hz : z ≠ 0) :
     airyBiDeriv (-z) =
       (z / Real.sqrt 3) *
         (airyBesselJOnLog (-(2 / 3)) (airyLogZeta z) + airyBesselJOnLog (2 / 3) (airyLogZeta z)) := by
@@ -359,20 +359,20 @@ lemma airyBiDeriv_neg_eq_besselJ_complex_aux {z : ℂ} (hz : z ≠ 0) :
     3 * r * (((3 : ℝ) ^ (-(4 / 3) : ℝ) : ℝ) : ℂ) * hC
 
 /-- `z^{1/2} · z^{-1/2} = 1` for `z ≠ 0`. -/
-lemma half_cpow_mul_neg_half {z : ℂ} (hz : z ≠ 0) :
+theorem half_cpow_mul_neg_half {z : ℂ} (hz : z ≠ 0) :
     z ^ (1 / 2 : ℂ) * z ^ (-(1 / 2) : ℂ) = 1 := by
   rw [← cpow_add _ _ hz]; norm_num
 
 /-- `√3 · √3 = 3` in `ℂ`. -/
-lemma sqrt_three_mul_self_complex : ((Real.sqrt 3 : ℝ) : ℂ) * ((Real.sqrt 3 : ℝ) : ℂ) = 3 := by
+theorem sqrt_three_mul_self_complex : ((Real.sqrt 3 : ℝ) : ℂ) * ((Real.sqrt 3 : ℝ) : ℂ) = 3 := by
   exact_mod_cast Real.mul_self_sqrt (by norm_num : (0 : ℝ) ≤ 3)
 
 /-- `√3 ≠ 0` in `ℂ`. -/
-lemma sqrt_three_ne_zero_complex : ((Real.sqrt 3 : ℝ) : ℂ) ≠ 0 := by
+theorem sqrt_three_ne_zero_complex : ((Real.sqrt 3 : ℝ) : ℂ) ≠ 0 := by
   exact_mod_cast (Real.sqrt_pos.mpr (by norm_num : (0 : ℝ) < 3)).ne'
 
 /-- `J_ν(w + iπ/2) = e^{iπν/2} I_ν(w)` on the logarithmic plane. -/
-lemma airyBesselJOnLog_add_half_pi_I (ν w : ℂ) :
+theorem airyBesselJOnLog_add_half_pi_I (ν w : ℂ) :
     airyBesselJOnLog ν (w + π * I / 2) = exp (ν * (π * I / 2)) * airyBesselIOnLog ν w := by
   simp only [airyBesselJOnLog, airyBesselIOnLog]
   rw [show 2 * (w + π * I / 2) = 2 * w + π * I by ring, exp_add, exp_pi_mul_I,
@@ -380,7 +380,7 @@ lemma airyBesselJOnLog_add_half_pi_I (ν w : ℂ) :
     show -(exp (2 * w) * -1) / 4 = exp (2 * w) / 4 by ring, mul_assoc]
 
 /-- `J_ν(w - iπ/2) = e^{-iπν/2} I_ν(w)` on the logarithmic plane. -/
-lemma airyBesselJOnLog_sub_half_pi_I (ν w : ℂ) :
+theorem airyBesselJOnLog_sub_half_pi_I (ν w : ℂ) :
     airyBesselJOnLog ν (w - π * I / 2) = exp (-ν * (π * I / 2)) * airyBesselIOnLog ν w := by
   simp only [airyBesselJOnLog, airyBesselIOnLog]
   rw [show 2 * (w - π * I / 2) = 2 * w - π * I by ring, exp_sub, exp_pi_mul_I,
@@ -388,111 +388,111 @@ lemma airyBesselJOnLog_sub_half_pi_I (ν w : ℂ) :
     show -(exp (2 * w) / -1) / 4 = exp (2 * w) / 4 by ring, mul_assoc]
 
 /-- `exp (c π i) = cos (c π) + i sin (c π)` for real `c`. -/
-lemma exp_real_mul_pi_I (c : ℝ) {x : ℂ} (hx : x = (c : ℂ) * (π * I)) :
+theorem exp_real_mul_pi_I (c : ℝ) {x : ℂ} (hx : x = (c : ℂ) * (π * I)) :
     exp x = (Real.cos (c * π) : ℂ) + (Real.sin (c * π) : ℂ) * I := by
   rw [hx, show (c : ℂ) * (π * I) = ((c * π : ℝ) : ℂ) * I by push_cast; ring, exp_mul_I,
     ← ofReal_cos, ← ofReal_sin]
 
 /-- `exp (iπ/6) = √3/2 + i/2`. -/
-lemma exp_pi_I_sixth {x : ℂ} (hx : x = (1 / 6 : ℝ) * (π * I)) :
+theorem exp_pi_I_sixth {x : ℂ} (hx : x = (1 / 6 : ℝ) * (π * I)) :
     exp x = ((Real.sqrt 3 : ℝ) : ℂ) / 2 + 1 / 2 * I := by
   rw [exp_real_mul_pi_I _ hx, show (1 / 6 : ℝ) * π = π / 6 by ring, Real.cos_pi_div_six,
     Real.sin_pi_div_six]; push_cast; ring
 
 /-- `exp (-iπ/6) = √3/2 - i/2`. -/
-lemma exp_neg_pi_I_sixth {x : ℂ} (hx : x = (-(1 / 6) : ℝ) * (π * I)) :
+theorem exp_neg_pi_I_sixth {x : ℂ} (hx : x = (-(1 / 6) : ℝ) * (π * I)) :
     exp x = ((Real.sqrt 3 : ℝ) : ℂ) / 2 - 1 / 2 * I := by
   rw [exp_real_mul_pi_I _ hx, show (-(1 / 6) : ℝ) * π = -(π / 6) by ring, Real.cos_neg,
     Real.sin_neg, Real.cos_pi_div_six, Real.sin_pi_div_six]; push_cast; ring
 
 /-- `exp (iπ/3) = 1/2 + i√3/2`. -/
-lemma exp_pi_I_third {x : ℂ} (hx : x = (1 / 3 : ℝ) * (π * I)) :
+theorem exp_pi_I_third {x : ℂ} (hx : x = (1 / 3 : ℝ) * (π * I)) :
     exp x = 1 / 2 + ((Real.sqrt 3 : ℝ) : ℂ) / 2 * I := by
   rw [exp_real_mul_pi_I _ hx, show (1 / 3 : ℝ) * π = π / 3 by ring, Real.cos_pi_div_three,
     Real.sin_pi_div_three]; push_cast; ring
 
 /-- `exp (-iπ/3) = 1/2 - i√3/2`. -/
-lemma exp_neg_pi_I_third {x : ℂ} (hx : x = (-(1 / 3) : ℝ) * (π * I)) :
+theorem exp_neg_pi_I_third {x : ℂ} (hx : x = (-(1 / 3) : ℝ) * (π * I)) :
     exp x = 1 / 2 - ((Real.sqrt 3 : ℝ) : ℂ) / 2 * I := by
   rw [exp_real_mul_pi_I _ hx, show (-(1 / 3) : ℝ) * π = -(π / 3) by ring, Real.cos_neg,
     Real.sin_neg, Real.cos_pi_div_three, Real.sin_pi_div_three]; push_cast; ring
 
 /-- `exp (2iπ/3) = -1/2 + i√3/2`. -/
-lemma exp_two_pi_I_third {x : ℂ} (hx : x = (2 / 3 : ℝ) * (π * I)) :
+theorem exp_two_pi_I_third {x : ℂ} (hx : x = (2 / 3 : ℝ) * (π * I)) :
     exp x = -1 / 2 + ((Real.sqrt 3 : ℝ) : ℂ) / 2 * I := by
   rw [exp_real_mul_pi_I _ hx, show (2 / 3 : ℝ) * π = π - π / 3 by ring, Real.cos_pi_sub,
     Real.sin_pi_sub, Real.cos_pi_div_three, Real.sin_pi_div_three]; push_cast; ring
 
 /-- `exp (-2iπ/3) = -1/2 - i√3/2`. -/
-lemma exp_neg_two_pi_I_third {x : ℂ} (hx : x = (-(2 / 3) : ℝ) * (π * I)) :
+theorem exp_neg_two_pi_I_third {x : ℂ} (hx : x = (-(2 / 3) : ℝ) * (π * I)) :
     exp x = -1 / 2 - ((Real.sqrt 3 : ℝ) : ℂ) / 2 * I := by
   rw [exp_real_mul_pi_I _ hx, show (-(2 / 3) : ℝ) * π = -(π - π / 3) by ring, Real.cos_neg,
     Real.sin_neg, Real.cos_pi_sub, Real.sin_pi_sub, Real.cos_pi_div_three,
     Real.sin_pi_div_three]; push_cast; ring
 
 /-- `exp (5iπ/6) = -√3/2 + i/2`. -/
-lemma exp_five_pi_I_sixth {x : ℂ} (hx : x = (5 / 6 : ℝ) * (π * I)) :
+theorem exp_five_pi_I_sixth {x : ℂ} (hx : x = (5 / 6 : ℝ) * (π * I)) :
     exp x = -((Real.sqrt 3 : ℝ) : ℂ) / 2 + 1 / 2 * I := by
   rw [exp_real_mul_pi_I _ hx, show (5 / 6 : ℝ) * π = π - π / 6 by ring, Real.cos_pi_sub,
     Real.sin_pi_sub, Real.cos_pi_div_six, Real.sin_pi_div_six]; push_cast; ring
 
 /-- `exp (-5iπ/6) = -√3/2 - i/2`. -/
-lemma exp_neg_five_pi_I_sixth {x : ℂ} (hx : x = (-(5 / 6) : ℝ) * (π * I)) :
+theorem exp_neg_five_pi_I_sixth {x : ℂ} (hx : x = (-(5 / 6) : ℝ) * (π * I)) :
     exp x = -((Real.sqrt 3 : ℝ) : ℂ) / 2 - 1 / 2 * I := by
   rw [exp_real_mul_pi_I _ hx, show (-(5 / 6) : ℝ) * π = -(π - π / 6) by ring, Real.cos_neg,
     Real.sin_neg, Real.cos_pi_sub, Real.sin_pi_sub, Real.cos_pi_div_six,
     Real.sin_pi_div_six]; push_cast; ring
 
 /-- `cos (π/3) = 1/2` in `ℂ`. -/
-lemma cos_pi_mul_one_third : cos (π * (1 / 3)) = 1 / 2 := by
+theorem cos_pi_mul_one_third : cos (π * (1 / 3)) = 1 / 2 := by
   rw [show (π * (1 / 3) : ℂ) = ((π / 3 : ℝ) : ℂ) by push_cast; ring, ← ofReal_cos,
     Real.cos_pi_div_three]; push_cast; ring
 
 /-- `cos (2π/3) = -1/2` in `ℂ`. -/
-lemma cos_pi_mul_two_thirds : cos (π * (2 / 3)) = -1 / 2 := by
+theorem cos_pi_mul_two_thirds : cos (π * (2 / 3)) = -1 / 2 := by
   rw [show (π * (2 / 3) : ℂ) = ((π - π / 3 : ℝ) : ℂ) by push_cast; ring, ← ofReal_cos,
     Real.cos_pi_sub, Real.cos_pi_div_three]; push_cast; ring
 
 /-- `cos (π/3) = 1/2` in `ℂ`, in the form used by `airyBesselYOnLog`. -/
-lemma cos_pi_mul_third_eq : cos (π * (1 / 3)) = 1 / 2 := cos_pi_mul_one_third
+theorem cos_pi_mul_third_eq : cos (π * (1 / 3)) = 1 / 2 := cos_pi_mul_one_third
 
 /-- `sin (π/3) = √3/2` in `ℂ`. -/
-lemma sin_pi_mul_third_eq : sin (π * (1 / 3)) = ((Real.sqrt 3 : ℝ) : ℂ) / 2 := by
+theorem sin_pi_mul_third_eq : sin (π * (1 / 3)) = ((Real.sqrt 3 : ℝ) : ℂ) / 2 := by
   rw [sin_pi_mul_one_third]; push_cast; ring
 
 /-- `cos (-π/3) = 1/2` in `ℂ`. -/
-lemma cos_pi_mul_neg_third_eq : cos (π * -(1 / 3)) = 1 / 2 := by
+theorem cos_pi_mul_neg_third_eq : cos (π * -(1 / 3)) = 1 / 2 := by
   rw [mul_neg, cos_neg, cos_pi_mul_one_third]
 
 /-- `sin (-π/3) = -√3/2` in `ℂ`. -/
-lemma sin_pi_mul_neg_third_eq : sin (π * -(1 / 3)) = -(((Real.sqrt 3 : ℝ) : ℂ) / 2) := by
+theorem sin_pi_mul_neg_third_eq : sin (π * -(1 / 3)) = -(((Real.sqrt 3 : ℝ) : ℂ) / 2) := by
   rw [mul_neg, sin_neg, sin_pi_mul_third_eq]
 
 /-- `cos (2π/3) = -1/2` in `ℂ`, in the form used by `airyBesselYOnLog`. -/
-lemma cos_pi_mul_two_thirds_eq : cos (π * (2 / 3)) = -1 / 2 := cos_pi_mul_two_thirds
+theorem cos_pi_mul_two_thirds_eq : cos (π * (2 / 3)) = -1 / 2 := cos_pi_mul_two_thirds
 
 /-- `sin (2π/3) = √3/2` in `ℂ`. -/
-lemma sin_pi_mul_two_thirds_eq : sin (π * (2 / 3)) = ((Real.sqrt 3 : ℝ) : ℂ) / 2 := by
+theorem sin_pi_mul_two_thirds_eq : sin (π * (2 / 3)) = ((Real.sqrt 3 : ℝ) : ℂ) / 2 := by
   rw [sin_pi_mul_two_thirds]; push_cast; ring
 
 /-- `cos (-2π/3) = -1/2` in `ℂ`. -/
-lemma cos_pi_mul_neg_two_thirds_eq : cos (π * -(2 / 3)) = -1 / 2 := by
+theorem cos_pi_mul_neg_two_thirds_eq : cos (π * -(2 / 3)) = -1 / 2 := by
   rw [mul_neg, cos_neg, cos_pi_mul_two_thirds]
 
 /-- `sin (-2π/3) = -√3/2` in `ℂ`. -/
-lemma sin_pi_mul_neg_two_thirds_eq : sin (π * -(2 / 3)) = -(((Real.sqrt 3 : ℝ) : ℂ) / 2) := by
+theorem sin_pi_mul_neg_two_thirds_eq : sin (π * -(2 / 3)) = -(((Real.sqrt 3 : ℝ) : ℂ) / 2) := by
   rw [mul_neg, sin_neg, sin_pi_mul_two_thirds_eq]
 
 /-- `√3 ^ 2 = 3` in `ℂ`. -/
-lemma sqrt_three_sq_complex : ((Real.sqrt 3 : ℝ) : ℂ) ^ 2 = 3 := by
+theorem sqrt_three_sq_complex : ((Real.sqrt 3 : ℝ) : ℂ) ^ 2 = 3 := by
   rw [sq, sqrt_three_mul_self_complex]
 
 /-- `√3 ^ 3 = 3√3` in `ℂ`. -/
-lemma sqrt_three_pow_three_complex : ((Real.sqrt 3 : ℝ) : ℂ) ^ 3 = 3 * ((Real.sqrt 3 : ℝ) : ℂ) := by
+theorem sqrt_three_pow_three_complex : ((Real.sqrt 3 : ℝ) : ℂ) ^ 3 = 3 * ((Real.sqrt 3 : ℝ) : ℂ) := by
   rw [pow_succ, sqrt_three_sq_complex]
 
 /-- `√3 ^ 4 = 9` in `ℂ`. -/
-lemma sqrt_three_pow_four_complex : ((Real.sqrt 3 : ℝ) : ℂ) ^ 4 = 9 := by
+theorem sqrt_three_pow_four_complex : ((Real.sqrt 3 : ℝ) : ℂ) ^ 4 = 9 := by
   rw [show 4 = 2 * 2 by rfl, pow_mul, sqrt_three_sq_complex]; norm_num
 
 /-- airyAi eq besselK complex (DLMF 9.6.2). -/
@@ -1229,13 +1229,13 @@ lemma airyHankel2OnLog_neg_order {ν : ℂ} (hs : sin (π * ν) ≠ 0) (w : ℂ)
     (sin (π * ν) * (cos (π * ν) * airyBesselJOnLog (-ν) w - airyBesselJOnLog ν w)) * I_sq
 
 /-- `sin(π/3) ≠ 0`. -/
-lemma sin_pi_mul_third_ne_zero : sin (π * (1 / 3)) ≠ 0 := by
+theorem sin_pi_mul_third_ne_zero : sin (π * (1 / 3)) ≠ 0 := by
   rw [show (π * (1 / 3) : ℂ) = ((π / 3 : ℝ) : ℂ) by push_cast; ring, ← ofReal_sin,
     Real.sin_pi_div_three, ofReal_ne_zero]
   positivity
 
 /-- `sin(2π/3) ≠ 0`. -/
-lemma sin_pi_mul_two_thirds_ne_zero : sin (π * (2 / 3)) ≠ 0 := by
+theorem sin_pi_mul_two_thirds_ne_zero : sin (π * (2 / 3)) ≠ 0 := by
   rw [show (π * (2 / 3) : ℂ) = ((π - π / 3 : ℝ) : ℂ) by push_cast; ring, ← ofReal_sin,
     Real.sin_pi_sub, Real.sin_pi_div_three, ofReal_ne_zero]
   positivity
@@ -1331,61 +1331,61 @@ theorem hankel2_two_thirds_neg_order (w : ℂ) :
   exact airyHankel2OnLog_neg_order sin_pi_mul_two_thirds_ne_zero w
 
 /-- `(2ζ)²/16 = z³/9`. -/
-lemma two_airyZetaComplex_sq_div (z : ℂ) : (2 * airyZetaComplex z) ^ 2 / 16 = z ^ 3 / 9 := by
+theorem two_airyZetaComplex_sq_div (z : ℂ) : (2 * airyZetaComplex z) ^ 2 / 16 = z ^ 3 / 9 := by
   rw [airyZetaComplex, mul_pow, mul_pow, ← cpow_nat_mul,
     show ((2 : ℕ) : ℂ) * (3 / 2) = ((3 : ℕ) : ℂ) by norm_num, cpow_natCast]
   ring
 
 /-- `exp (c L) = exp (c log(2/3) + (3c/2) log z)`. -/
-lemma exp_mul_airyLogZeta (c z : ℂ) :
+theorem exp_mul_airyLogZeta (c z : ℂ) :
     exp (c * airyLogZeta z) = exp (c * (log 2 - log 3)) * exp (3 / 2 * c * log z) := by
   rw [airyLogZeta, log_two_thirds, ← exp_add]; congr 1; ring
 
 /-- A parameter with positive real part is not a nonpositive integer. -/
-lemma ne_neg_nat_of_re_pos {c : ℂ} (hc : 0 < c.re) : ∀ k : ℕ, c ≠ -k := by
+theorem ne_neg_nat_of_re_pos {c : ℂ} (hc : 0 < c.re) : ∀ k : ℕ, c ≠ -k := by
   intro k h
   have := congrArg re h
   simp at this
   linarith [k.cast_nonneg (α := ℝ)]
 
 /-- Kummer's second transformation at `M(a, 2a, w)` with `a = ν + 1/2`. -/
-lemma kummerM_two_mul_eq {ν a b c : ℂ} (ha : ν + 1 / 2 = a) (hb : 2 * ν + 1 = b) (hc : ν + 1 = c)
+theorem kummerM_two_mul_eq {ν a b c : ℂ} (ha : ν + 1 / 2 = a) (hb : 2 * ν + 1 = b) (hc : ν + 1 = c)
     (hν : ∀ k : ℕ, ν + 1 ≠ -k) (h2ν : ∀ k : ℕ, 2 * ν + 1 ≠ -k) (w : ℂ) :
     kummerM a b w = Gamma c * exp (w / 2) * regularizedHGFun (∅ : Multiset ℂ) {c} (w ^ 2 / 16) := by
   subst ha hb hc
   exact DLMF.Bessel.kummerM_eq_exp_mul_regularized0F1 hν h2ν w
 
 /-- `Γ(4/3) = Γ(1/3)/3`. -/
-lemma Gamma_four_thirds' : Gamma (4 / 3) = 1 / 3 * Gamma (1 / 3) := by
+theorem Gamma_four_thirds' : Gamma (4 / 3) = 1 / 3 * Gamma (1 / 3) := by
   rw [show (4 / 3 : ℂ) = 1 / 3 + 1 by norm_num, Complex.Gamma_add_one _ (by norm_num)]
 
 /-- `Γ(5/3) = (2/3)Γ(2/3)`. -/
-lemma Gamma_five_thirds' : Gamma (5 / 3) = 2 / 3 * Gamma (2 / 3) := by
+theorem Gamma_five_thirds' : Gamma (5 / 3) = 2 / 3 * Gamma (2 / 3) := by
   rw [show (5 / 3 : ℂ) = 2 / 3 + 1 by norm_num, Complex.Gamma_add_one _ (by norm_num)]
 
 /-- Complex powers of `2` and `3` as exponentials. -/
-lemma cpow_two_three (a : ℂ) : (2 : ℂ) ^ a = exp (a * log 2) ∧ (3 : ℂ) ^ a = exp (a * log 3) := by
+theorem cpow_two_three (a : ℂ) : (2 : ℂ) ^ a = exp (a * log 2) ∧ (3 : ℂ) ^ a = exp (a * log 3) := by
   rw [cpow_def_of_ne_zero (by norm_num), cpow_def_of_ne_zero (by norm_num)]
   exact ⟨by ring_nf, by ring_nf⟩
 
 /-- `Γ(4/3) = e^{-log 3} Γ(1/3)`. -/
-lemma Gamma_four_thirds_exp : Gamma (4 / 3) = exp (-log 3) * Gamma (1 / 3) := by
+theorem Gamma_four_thirds_exp : Gamma (4 / 3) = exp (-log 3) * Gamma (1 / 3) := by
   rw [Gamma_four_thirds', exp_neg, exp_log (by norm_num)]; ring
 
 /-- `Γ(5/3) = 2 e^{-log 3} Γ(2/3)`. -/
-lemma Gamma_five_thirds_exp : Gamma (5 / 3) = 2 * exp (-log 3) * Gamma (2 / 3) := by
+theorem Gamma_five_thirds_exp : Gamma (5 / 3) = 2 * exp (-log 3) * Gamma (2 / 3) := by
   rw [Gamma_five_thirds', exp_neg, exp_log (by norm_num)]; ring
 
 /-- `e^{-ζ} e^{2ζ/2} = 1`. -/
-lemma exp_neg_mul_exp_two_div (ζ : ℂ) : exp (-ζ) * exp (2 * ζ / 2) = 1 := by
+theorem exp_neg_mul_exp_two_div (ζ : ℂ) : exp (-ζ) * exp (2 * ζ / 2) = 1 := by
   rw [← exp_add, show -ζ + 2 * ζ / 2 = 0 by ring, exp_zero]
 
 /-- `Γ(5/3) = e^{log 2 - log 3} Γ(2/3)`. -/
-lemma Gamma_five_thirds_exp' : Gamma (5 / 3) = exp (log 2 - log 3) * Gamma (2 / 3) := by
+theorem Gamma_five_thirds_exp' : Gamma (5 / 3) = exp (log 2 - log 3) * Gamma (2 / 3) := by
   rw [Gamma_five_thirds', exp_sub, exp_log (by norm_num), exp_log (by norm_num)]
 
 /-- `-1/3` is not a nonpositive integer. -/
-lemma neg_one_third_ne_neg_nat : ∀ k : ℕ, (-1 / 3 : ℂ) ≠ -k := by
+theorem neg_one_third_ne_neg_nat : ∀ k : ℕ, (-1 / 3 : ℂ) ≠ -k := by
   intro k h
   have := congrArg re h
   simp at this
@@ -1484,14 +1484,14 @@ def airyWhittakerWOnLog (κ μ w : ℂ) : ℂ :=
   exp (-exp w / 2 + (μ + 1 / 2) * w) * kummerUOnLog (μ - κ + 1 / 2) (1 + 2 * μ) w
 
 /-- `e^{log 2 + L} = 2ζ`. -/
-lemma exp_log_two_add_airyLogZeta {z : ℂ} (hz : z ≠ 0) :
+theorem exp_log_two_add_airyLogZeta {z : ℂ} (hz : z ≠ 0) :
     exp (log 2 + airyLogZeta z) = 2 * airyZetaComplex z := by
   rw [airyLogZeta, airyZetaComplex, cpow_def_of_ne_zero hz, exp_add, exp_add,
     exp_log (by norm_num), exp_log (by norm_num)]
   ring_nf
 
 /-- The imaginary part of `log 2 + L` is `(3/2) arg z`. -/
-lemma im_log_two_add_airyLogZeta (z : ℂ) : (log 2 + airyLogZeta z).im = 3 / 2 * arg z := by
+theorem im_log_two_add_airyLogZeta (z : ℂ) : (log 2 + airyLogZeta z).im = 3 / 2 * arg z := by
   rw [airyLogZeta, log_two_thirds]
   simp only [add_im, sub_im, mul_im, log_im]
   rw [show (2 : ℂ) = ((2 : ℝ) : ℂ) by norm_num, show (3 : ℂ) = ((3 : ℝ) : ℂ) by norm_num,
@@ -1499,21 +1499,21 @@ lemma im_log_two_add_airyLogZeta (z : ℂ) : (log 2 + airyLogZeta z).im = 3 / 2 
   norm_num
 
 /-- In the sector `|arg z| < 2π/3`, `log (2ζ) = log 2 + L`. -/
-lemma log_two_airyZeta_bounds {z : ℂ} (hz : |arg z| < 2 * π / 3) :
+theorem log_two_airyZeta_bounds {z : ℂ} (hz : |arg z| < 2 * π / 3) :
     -π < (log 2 + airyLogZeta z).im ∧ (log 2 + airyLogZeta z).im ≤ π := by
   rw [im_log_two_add_airyLogZeta]
   have := abs_lt.mp hz
   constructor <;> linarith
 
 /-- Whittaker `M` at `e^w` with `w` in the principal strip is its logarithmic-plane form. -/
-lemma whittakerM_exp_eq_onLog (κ μ : ℂ) {w : ℂ} (h1 : -π < w.im) (h2 : w.im ≤ π) :
+theorem whittakerM_exp_eq_onLog (κ μ : ℂ) {w : ℂ} (h1 : -π < w.im) (h2 : w.im ≤ π) :
     whittakerM κ μ (exp w) = airyWhittakerMOnLog κ μ w := by
   rw [whittakerM, airyWhittakerMOnLog, cpow_def_of_ne_zero (exp_ne_zero w), log_exp h1 h2,
     neg_div, ← exp_add]
   ring_nf
 
 /-- `Γ(1/3) Γ(2/3) √3 = 2π`. -/
-lemma Gamma_one_third_mul_two_thirds :
+theorem Gamma_one_third_mul_two_thirds :
     Gamma (1 / 3) * Gamma (2 / 3) * (Real.sqrt 3 : ℂ) = 2 * π := by
   have h := Gamma_mul_Gamma_one_sub (1 / 3 : ℂ)
   rw [show (1 : ℂ) - 1 / 3 = 2 / 3 by norm_num, show (π : ℂ) * (1 / 3) = ((π / 3 : ℝ) : ℂ) by
@@ -1524,7 +1524,7 @@ lemma Gamma_one_third_mul_two_thirds :
   field_simp
 
 /-- Legendre duplication at `1/3`: `Γ(1/3) Γ(5/6) = Γ(2/3) 2^{1/3} √π`. -/
-lemma Gamma_one_third_mul_five_sixths :
+theorem Gamma_one_third_mul_five_sixths :
     Gamma (1 / 3) * Gamma (5 / 6) = Gamma (2 / 3) * (2 : ℂ) ^ (1 / 3 : ℂ) * (Real.sqrt π : ℂ) := by
   have h := Complex.Gamma_mul_Gamma_add_half (1 / 3)
   rw [show (1 / 3 : ℂ) + 1 / 2 = 5 / 6 by norm_num, show (2 : ℂ) * (1 / 3) = 2 / 3 by norm_num,
@@ -1532,7 +1532,7 @@ lemma Gamma_one_third_mul_five_sixths :
   exact h
 
 /-- Legendre duplication at `1/6`: `Γ(1/6) Γ(2/3) = Γ(1/3) 2^{2/3} √π`. -/
-lemma Gamma_one_sixth_mul_two_thirds :
+theorem Gamma_one_sixth_mul_two_thirds :
     Gamma (1 / 6) * Gamma (2 / 3) = Gamma (1 / 3) * (2 : ℂ) ^ (2 / 3 : ℂ) * (Real.sqrt π : ℂ) := by
   have h := Complex.Gamma_mul_Gamma_add_half (1 / 6)
   rw [show (1 / 6 : ℂ) + 1 / 2 = 2 / 3 by norm_num, show (2 : ℂ) * (1 / 6) = 1 / 3 by norm_num,
@@ -1540,15 +1540,15 @@ lemma Gamma_one_sixth_mul_two_thirds :
   exact h
 
 /-- `2^{1/3} 2^{2/3} = 2`. -/
-lemma two_cpow_third_mul : (2 : ℂ) ^ (1 / 3 : ℂ) * (2 : ℂ) ^ (2 / 3 : ℂ) = 2 := by
+theorem two_cpow_third_mul : (2 : ℂ) ^ (1 / 3 : ℂ) * (2 : ℂ) ^ (2 / 3 : ℂ) = 2 := by
   rw [← cpow_add _ _ (by norm_num)]; norm_num
 
 /-- `√π² = π` in `ℂ`. -/
-lemma sqrt_pi_sq_complex : (Real.sqrt π : ℂ) * (Real.sqrt π : ℂ) = π := by
+theorem sqrt_pi_sq_complex : (Real.sqrt π : ℂ) * (Real.sqrt π : ℂ) = π := by
   exact_mod_cast Real.mul_self_sqrt Real.pi_pos.le
 
 /-- `Γ(2/3)² √3 = 2^{2/3} √π Γ(5/6)`. -/
-lemma Gamma_two_thirds_sq :
+theorem Gamma_two_thirds_sq :
     Gamma (2 / 3) * Gamma (2 / 3) * (Real.sqrt 3 : ℂ) =
       (2 : ℂ) ^ (2 / 3 : ℂ) * (Real.sqrt π : ℂ) * Gamma (5 / 6) := by
   have G1 := Gamma_one_third_mul_two_thirds
@@ -1564,7 +1564,7 @@ lemma Gamma_two_thirds_sq :
     (π * Gamma (1 / 3) * Gamma (5 / 6)) * h2 - 2 * π * G2
 
 /-- `Γ(1/3)² √3 = 2^{1/3} √π Γ(1/6)`. -/
-lemma Gamma_one_third_sq :
+theorem Gamma_one_third_sq :
     Gamma (1 / 3) * Gamma (1 / 3) * (Real.sqrt 3 : ℂ) =
       (2 : ℂ) ^ (1 / 3 : ℂ) * (Real.sqrt π : ℂ) * Gamma (1 / 6) := by
   have G1 := Gamma_one_third_mul_two_thirds
@@ -1580,19 +1580,19 @@ lemma Gamma_one_third_sq :
     (π * Gamma (1 / 6) * Gamma (2 / 3)) * h2 - 2 * π * G3
 
 /-- `Γ(-2/3) = -(3/2) Γ(1/3)`. -/
-lemma Gamma_neg_two_thirds : Gamma (-2 / 3) = -(3 / 2) * Gamma (1 / 3) := by
+theorem Gamma_neg_two_thirds : Gamma (-2 / 3) = -(3 / 2) * Gamma (1 / 3) := by
   have h := Complex.Gamma_add_one (-2 / 3 : ℂ) (by norm_num)
   rw [show (-2 / 3 : ℂ) + 1 = 1 / 3 by norm_num] at h
   rw [h]; ring
 
 /-- Tricomi's `U` on the logarithmic plane, unfolded at `(5/6, 5/3)`. -/
-lemma kummerUOnLog_five_sixths (w : ℂ) :
+theorem kummerUOnLog_five_sixths (w : ℂ) :
     kummerUOnLog (5 / 6) (5 / 3) w = Gamma (-2 / 3) / Gamma (1 / 6) * kummerM (5 / 6) (5 / 3) (exp w) +
       Gamma (2 / 3) / Gamma (5 / 6) * exp (-2 / 3 * w) * kummerM (1 / 6) (1 / 3) (exp w) := by
   rw [kummerUOnLog]; norm_num
 
 /-- Helper form of `airyAi_eq_kummerU_onLog`, proved before its use in the Whittaker form. -/
-lemma airyAi_eq_kummerU_onLog' {z : ℂ} (hz : z ≠ 0) :
+theorem airyAi_eq_kummerU_onLog' {z : ℂ} (hz : z ≠ 0) :
     airyAi z = ((3 : ℂ) ^ (-1 / 6 : ℂ) / Real.sqrt π) *
       exp ((2 / 3) * airyLogZeta z - airyZetaComplex z) *
         kummerUOnLog (5 / 6) (5 / 3) (log 2 + airyLogZeta z) := by
@@ -1649,7 +1649,7 @@ lemma airyAi_eq_kummerU_onLog' {z : ℂ} (hz : z ≠ 0) :
     R23 * hA - K * c2 * Gamma (2 / 3) * R23 * hw - z * R43 * hB
 
 /-- `Γ(-4/3) = (9/4) Γ(2/3)`. -/
-lemma Gamma_neg_four_thirds : Gamma (-4 / 3) = 9 / 4 * Gamma (2 / 3) := by
+theorem Gamma_neg_four_thirds : Gamma (-4 / 3) = 9 / 4 * Gamma (2 / 3) := by
   have h1 := Complex.Gamma_add_one (-4 / 3 : ℂ) (by norm_num)
   have h2 := Complex.Gamma_add_one (-1 / 3 : ℂ) (by norm_num)
   rw [show (-4 / 3 : ℂ) + 1 = -1 / 3 by norm_num] at h1
@@ -1657,23 +1657,23 @@ lemma Gamma_neg_four_thirds : Gamma (-4 / 3) = 9 / 4 * Gamma (2 / 3) := by
   rw [h2]; ring
 
 /-- `Γ(-1/6) = -6 Γ(5/6)`. -/
-lemma Gamma_neg_one_sixth : Gamma (-1 / 6) = -6 * Gamma (5 / 6) := by
+theorem Gamma_neg_one_sixth : Gamma (-1 / 6) = -6 * Gamma (5 / 6) := by
   have h := Complex.Gamma_add_one (-1 / 6 : ℂ) (by norm_num)
   rw [show (-1 / 6 : ℂ) + 1 = 5 / 6 by norm_num] at h
   rw [h]; ring
 
 /-- `Γ(7/6) = Γ(1/6)/6`. -/
-lemma Gamma_seven_sixths : Gamma (7 / 6) = 1 / 6 * Gamma (1 / 6) := by
+theorem Gamma_seven_sixths : Gamma (7 / 6) = 1 / 6 * Gamma (1 / 6) := by
   rw [show (7 / 6 : ℂ) = 1 / 6 + 1 by norm_num, Complex.Gamma_add_one _ (by norm_num)]
 
 /-- Tricomi's `U` on the logarithmic plane, unfolded at `(7/6, 7/3)`. -/
-lemma kummerUOnLog_seven_sixths (w : ℂ) :
+theorem kummerUOnLog_seven_sixths (w : ℂ) :
     kummerUOnLog (7 / 6) (7 / 3) w = Gamma (-4 / 3) / Gamma (-1 / 6) * kummerM (7 / 6) (7 / 3) (exp w) +
       Gamma (4 / 3) / Gamma (7 / 6) * exp (-4 / 3 * w) * kummerM (-1 / 6) (-1 / 3) (exp w) := by
   rw [kummerUOnLog]; norm_num
 
 /-- Helper form of `airyAiDeriv_eq_kummerU_onLog`, proved before its use in the Whittaker form. -/
-lemma airyAiDeriv_eq_kummerU_onLog' {z : ℂ} (hz : z ≠ 0) :
+theorem airyAiDeriv_eq_kummerU_onLog' {z : ℂ} (hz : z ≠ 0) :
     airyAiDeriv z = -((3 : ℂ) ^ (1 / 6 : ℂ) / Real.sqrt π) *
       exp ((4 / 3) * airyLogZeta z - airyZetaComplex z) *
         kummerUOnLog (7 / 6) (7 / 3) (log 2 + airyLogZeta z) := by
@@ -1741,20 +1741,20 @@ lemma airyAiDeriv_eq_kummerU_onLog' {z : ℂ} (hz : z ≠ 0) :
     3 * (((3 : ℝ) ^ (-(4 / 3 : ℝ)) : ℝ) : ℂ) * hC
 
 /-- A rational `p/3` with `3 ∤ p` is not an integer. -/
-lemma div_three_ne_int {p : ℤ} (hp : p % 3 ≠ 0) : ∀ k : ℤ, ((p : ℂ) / 3) ≠ k := by
+theorem div_three_ne_int {p : ℤ} (hp : p % 3 ≠ 0) : ∀ k : ℤ, ((p : ℂ) / 3) ≠ k := by
   intro k h
   have h' : (p : ℂ) = 3 * k := by rw [← h]; ring
   have : p = 3 * k := by exact_mod_cast h'
   omega
 
 /-- Tricomi's `U` at `e^w`, with `w` in the principal strip, is its logarithmic-plane form. -/
-lemma kummerU_exp_eq_onLog (a : ℂ) {b : ℂ} (hb : ∀ k : ℤ, b ≠ k) {w : ℂ} (h1 : -π < w.im)
+theorem kummerU_exp_eq_onLog (a : ℂ) {b : ℂ} (hb : ∀ k : ℤ, b ≠ k) {w : ℂ} (h1 : -π < w.im)
     (h2 : w.im ≤ π) : kummerU a b (exp w) = kummerUOnLog a b w := by
   rw [kummerU_eq_connection a b _ hb, kummerUConnection, kummerUOnLog,
     cpow_def_of_ne_zero (exp_ne_zero w), log_exp h1 h2, mul_comm w]
 
 /-- Whittaker `W` at `e^w`, with `w` in the principal strip, is its logarithmic-plane form. -/
-lemma whittakerW_exp_eq_onLog (κ μ : ℂ) (hb : ∀ k : ℤ, 1 + 2 * μ ≠ k) {w : ℂ}
+theorem whittakerW_exp_eq_onLog (κ μ : ℂ) (hb : ∀ k : ℤ, 1 + 2 * μ ≠ k) {w : ℂ}
     (h1 : -π < w.im) (h2 : w.im ≤ π) :
     whittakerW κ μ (exp w) = airyWhittakerWOnLog κ μ w := by
   rw [whittakerW, airyWhittakerWOnLog, kummerU_exp_eq_onLog _ hb h1 h2,

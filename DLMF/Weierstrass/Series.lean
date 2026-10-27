@@ -6,8 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Weierstrass.Basic
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
-public import Mathlib.Analysis.Asymptotics.Defs
+public import DLMF.Weierstrass.DifferentialEquations
 
 /-!
 # Fourier series, series of cosecants, products and Laurent series (DLMF §§23.8–23.9)
@@ -192,18 +191,289 @@ theorem weierstrassZeta_laurent (L : PeriodPair) {z : ℂ} (hz0 : z ≠ 0)
     (hz : ∀ w ∈ L.lattice, w ≠ 0 → ‖z‖ < ‖w‖) :
     HasSum (fun n : ℕ ↦ -(laurentCoeff L (n + 2) / (2 * (n + 2) - 1) * z ^ (2 * (n + 2) - 1)))
       (weierstrassZeta L z - 1 / z) := by
-  sorry
+  clear hz0
+  set T : ℕ → L.lattice → ℂ := fun k l => -z ^ (k + 2) * ((l : ℂ) ^ (k + 3))⁻¹ with hTdef
+  -- summability of the double series, from Mathlib's bound for `℘`
+  have hW := L.summable_weierstrassPExceptSummand 0 z 0 (fun l hl => by simpa using hz l l.2 hl)
+  have hinj : Function.Injective (fun p : ℕ × L.lattice => (p.1 + 1, p.2)) := by
+    intro p q h; simp only [Prod.mk.injEq, add_left_inj] at h; exact Prod.ext h.1 h.2
+  have hW' := (summable_norm_iff.mpr (hW.comp_injective hinj)).mul_left ‖z‖
+  have hT : Summable (Function.uncurry T) := by
+    refine Summable.of_norm_bounded hW' fun p => ?_
+    obtain ⟨k, l⟩ := p
+    simp only [Function.uncurry_apply_pair, Function.comp_apply, hTdef,
+      weierstrassPExceptSummand]
+    by_cases hl : (l : ℂ) = 0
+    · simp [hl]
+    · simp only [hl, ite_false, sub_zero, norm_mul, norm_neg, norm_pow, norm_inv]
+      simp only [Pi.zero_apply, sub_zero, norm_mul, norm_zpow]
+      rw [zpow_neg, zpow_natCast, show k + 1 + 2 = k + 3 by ring]
+      have h1 : (1 : ℝ) ≤ ‖((k + 1 : ℕ) : ℂ) + 1‖ := by
+        rw [show ((k + 1 : ℕ) : ℂ) + 1 = ((k + 2 : ℕ) : ℂ) by push_cast; ring, Complex.norm_natCast]
+        norm_cast; omega
+      have h2 : 0 ≤ ‖z‖ ^ (k + 2) * (‖(l : ℂ)‖ ^ (k + 3))⁻¹ := by positivity
+      calc ‖z‖ ^ (k + 2) * (‖(l : ℂ)‖ ^ (k + 3))⁻¹
+          ≤ ‖((k + 1 : ℕ) : ℂ) + 1‖ * (‖z‖ ^ (k + 2) * (‖(l : ℂ)‖ ^ (k + 3))⁻¹) :=
+            le_mul_of_one_le_left h2 h1
+        _ = _ := by ring
+  -- the fibres over `l`: geometric series
+  have hfib : ∀ l : L.lattice, HasSum (fun k => T k l)
+      ((1 / (z - l) + 1 / l + z / l ^ 2) - if (l : ℂ) = 0 then 1 / z else 0) := by
+    intro l
+    by_cases hl : (l : ℂ) = 0
+    · simp [hTdef, hl]
+    · have hzl : ‖z‖ < ‖(l : ℂ)‖ := hz l l.2 hl
+      have hlz : z ≠ l := fun h => by rw [h] at hzl; exact lt_irrefl _ hzl
+      have hq : ‖z / l‖ < 1 := by
+        rw [norm_div, div_lt_one (norm_pos_iff.mpr hl)]; exact hzl
+      have hg := (hasSum_geometric_of_norm_lt_one hq).mul_left (-z ^ 2 / (l : ℂ) ^ 3)
+      simp only [hl, ite_false, sub_zero]
+      rw [wp23_zeta_summand z l hl hlz]
+      convert hg using 1
+      · funext k
+        simp only [hTdef, div_pow]
+        field_simp
+        ring
+      · have h1 : (1 : ℂ) - z / l ≠ 0 := by
+          intro h; apply hlz
+          have : z / l = 1 := by linear_combination -h
+          field_simp at this; exact this
+        have h2 : (z : ℂ) - l ≠ 0 := sub_ne_zero.mpr hlz
+        field_simp
+        ring
+  have hS : HasSum (fun l : L.lattice => 1 / (z - l) + 1 / l + z / l ^ 2) (weierstrassZeta L z) :=
+    (hasSumLocallyUniformly_weierstrassZeta L).hasSum
+  have hite : HasSum (fun l : L.lattice => if (l : ℂ) = 0 then 1 / z else 0) (1 / z) := by
+    convert hasSum_ite_eq (⟨0, zero_mem _⟩ : L.lattice) (1 / z) using 1
+    funext l
+    simp only [Subtype.ext_iff]
+  have htot := hS.sub hite
+  have hswap : ∑' p : ℕ × L.lattice, Function.uncurry T p =
+      weierstrassZeta L z - 1 / z := by
+    rw [← (Equiv.prodComm L.lattice ℕ).tsum_eq]
+    have hsw : Summable (fun q : L.lattice × ℕ =>
+        Function.uncurry T ((Equiv.prodComm L.lattice ℕ) q)) :=
+      (Equiv.prodComm L.lattice ℕ).summable_iff.mpr hT
+    rw [hsw.tsum_prod' (fun l => (hfib l).summable)]
+    simp only [Equiv.prodComm_apply, Prod.swap_prod_mk, Function.uncurry_apply_pair]
+    rw [tsum_congr fun l => (hfib l).tsum_eq]
+    exact htot.tsum_eq
+  have hk := hT.hasSum.prod_fiberwise (fun k => (hT.prod_factor k).hasSum)
+  rw [hswap] at hk
+  have hk' : HasSum (fun k : ℕ => -z ^ (k + 2) * L.G (k + 3)) (weierstrassZeta L z - 1 / z) := by
+    convert hk using 1
+    funext k
+    simp only [Function.uncurry_apply_pair, hTdef, PeriodPair.G]
+    rw [tsum_mul_left]
+  have hinj2 : Function.Injective (fun n : ℕ => 2 * n + 1) := fun a b h => by
+    simp only at h; omega
+  refine ((hinj2.hasSum_iff ?_).mpr hk').congr_fun ?_
+  · intro k hk
+    have heven : Even k := by
+      rcases Nat.even_or_odd k with he | ⟨m, hm⟩
+      · exact he
+      · exact absurd ⟨m, by simp only; omega⟩ hk
+    rw [L.G_eq_zero_of_odd _ (by rcases heven with ⟨m, hm⟩; exact ⟨m + 1, by omega⟩)]
+    simp
+  · intro n
+    simp only [Function.comp_apply, laurentCoeff]
+    have hne : (2 * ((n + 2 : ℕ) : ℂ) - 1) ≠ 0 := by
+      have : (2 * ((n + 2 : ℕ) : ℂ) - 1) = ((2 * n + 3 : ℕ) : ℂ) := by push_cast; ring
+      rw [this]; exact_mod_cast (by omega : 2 * n + 3 ≠ 0)
+    rw [show 2 * (n + 2) - 1 = 2 * n + 1 + 2 by omega, show 2 * (n + 2) = 2 * n + 1 + 3 by omega]
+    push_cast at hne ⊢
+    field_simp
 
+
+section p3wRecursion
+
+open Topology Filter
+open scoped Nat
+
+/-- The ODE `z² g'' = 12 g + 6 z² g² - (g₂/2) z²` for `g = ℘ - 1/z²`, near `0`. -/
+lemma p3w_regular_ode (L : PeriodPair) :
+    (fun z => z ^ 2 * deriv (deriv ℘[L - (0 : ℂ)]) z) =ᶠ[𝓝 0]
+      fun z => 12 * ℘[L - (0 : ℂ)] z + 6 * z ^ 2 * ℘[L - (0 : ℂ)] z ^ 2 - L.g₂ / 2 * z ^ 2 := by
+  set U : Set ℂ := (L.lattice \ {(0 : ℂ)})ᶜ
+  have hU : IsOpen U := L.isOpen_compl_lattice_sdiff
+  have h0U : (0 : ℂ) ∈ U := by simp [U]
+  filter_upwards [hU.mem_nhds h0U] with z hz
+  by_cases hz0 : z = 0
+  · subst hz0; simp
+  have hzL : z ∉ L.lattice := fun h => hz ⟨h, hz0⟩
+  -- `deriv g = ℘'[L - 0]` near `z`
+  have hd : deriv ℘[L - (0 : ℂ)] =ᶠ[𝓝 z] ℘'[L - (0 : ℂ)] :=
+    eventually_of_mem (hU.mem_nhds hz) fun w hw =>
+      L.eqOn_deriv_weierstrassPExcept_derivWeierstrassPExcept 0 hw
+  have h0 : (0 : ℂ) = ((0 : L.lattice) : ℂ) := rfl
+  have hdp : ℘'[L - (0 : ℂ)] = fun w => ℘'[L] w + 2 / w ^ 3 := by
+    funext w; rw [h0, L.derivWeierstrassPExcept_def]; simp
+  have hp : ℘[L - (0 : ℂ)] z = ℘[L] z - 1 / z ^ 2 := by
+    rw [h0, L.weierstrassPExcept_def]; simp [sub_eq_add_neg]
+  have hD : HasDerivAt (fun w => ℘'[L] w + 2 / w ^ 3)
+      (6 * ℘[L] z ^ 2 - L.g₂ / 2 + (-(6 / z ^ 4))) z := by
+    have a := (L.analyticOnNhd_derivWeierstrassP z hzL).differentiableAt.hasDerivAt
+    rw [deriv_derivWeierstrassP L hzL] at a
+    have b : HasDerivAt (fun w : ℂ => 2 / w ^ 3) (-(6 / z ^ 4)) z := by
+      have := ((hasDerivAt_pow 3 z).inv (pow_ne_zero 3 hz0)).const_mul 2
+      convert this using 1
+      · funext w; simp [div_eq_mul_inv]
+      · field_simp; ring
+    exact a.add b
+  rw [hd.deriv_eq, hdp, hD.deriv, hp]
+  field_simp
+  ring
+
+/-- `(z² f)^{(N+2)}(0) = (N+2)(N+1) f^{(N)}(0)`. -/
+lemma p3w_iteratedDeriv_sq_mul {f : ℂ → ℂ} {N : ℕ} (hf : ContDiffAt ℂ (N + 2) f 0) :
+    iteratedDeriv (N + 2) (fun z => z ^ 2 * f z) 0 = (N + 2) * (N + 1) * iteratedDeriv N f 0 := by
+  have hp : ContDiffAt ℂ (N + 2) (fun z : ℂ => z ^ 2) 0 := by fun_prop
+  rw [show (fun z => z ^ 2 * f z) = (fun z : ℂ => z ^ 2) * f from rfl,
+    iteratedDeriv_mul hp hf]
+  simp only [iteratedDeriv_fun_pow_zero]
+  rw [Finset.sum_eq_single 2]
+  · simp only [ite_true, Nat.cast_choose_two, show N + 2 - 2 = N by omega]
+    push_cast; ring
+  · intro b _ hb; simp [hb]
+  · intro h; simp at h
+
+/-- Splitting a sum over `range (2K+1)` into even and odd indices. -/
+lemma p3w_sum_range_even_odd (f : ℕ → ℂ) (K : ℕ) :
+    ∑ i ∈ Finset.range (2 * K + 1), f i =
+      ∑ j ∈ Finset.range (K + 1), f (2 * j) + ∑ j ∈ Finset.range K, f (2 * j + 1) := by
+  induction K with
+  | zero => simp
+  | succ K ih =>
+    rw [show 2 * (K + 1) + 1 = 2 * K + 1 + 1 + 1 by ring, Finset.sum_range_succ,
+      Finset.sum_range_succ, ih, Finset.sum_range_succ (fun j => f (2 * j)) (K + 1),
+      Finset.sum_range_succ (fun j => f (2 * j + 1)) K,
+      show 2 * (K + 1) = 2 * K + 1 + 1 by ring]
+    ring
+
+attribute [local fun_prop] AnalyticAt.contDiffAt in
 /-- DLMF 23.9.5: `c_n = 3/((2n + 1)(n - 3)) ∑_{m=2}^{n-2} c_m c_{n-m}`, `n ≥ 4`. -/
 @[dlmf 23.9.E5]
 theorem laurentCoeff_recursion (L : PeriodPair) {n : ℕ} (hn : 4 ≤ n) :
     laurentCoeff L n = 3 / ((2 * n + 1) * (n - 3)) *
       ∑ m ∈ Finset.Icc 2 (n - 2), laurentCoeff L m * laurentCoeff L (n - m) := by
-  sorry
+  obtain ⟨K, rfl⟩ : ∃ K, n = K + 2 := ⟨n - 2, by omega⟩
+  set g := ℘[L - (0 : ℂ)] with hg
+  have hga : AnalyticAt ℂ g 0 := L.analyticAt_weierstrassPExcept 0
+  have hg2 : AnalyticAt ℂ (deriv (deriv g)) 0 := by
+    have hU := L.analyticOnNhd_weierstrassPExcept 0
+    exact (hU.deriv.deriv) 0 (by simp)
+  have ha : ∀ i, iteratedDeriv i g 0 =
+      if i = 0 then 0 else ((i + 1)! : ℂ) * L.G (i + 2) := by
+    intro i; rw [hg, L.iteratedDeriv_weierstrassPExcept_self, L.sumInvPow_zero]; simp
+  have key := (p3w_regular_ode L).iteratedDeriv_eq (2 * K + 2)
+  rw [p3w_iteratedDeriv_sq_mul (hg2.contDiffAt)] at key
+  rw [show iteratedDeriv (2 * K) (deriv (deriv g)) 0 = iteratedDeriv (2 * K + 2) g 0 by
+    rw [iteratedDeriv_succ', iteratedDeriv_succ']] at key
+  have e2 : iteratedDeriv (2 * K + 2) (fun z => 6 * z ^ 2 * g z ^ 2) 0 =
+      6 * ((2 * K + 2) * (2 * K + 1) * ∑ i ∈ Finset.range (2 * K + 1),
+        ((2 * K).choose i : ℂ) * iteratedDeriv i g 0 * iteratedDeriv (2 * K - i) g 0) := by
+    rw [show (fun z => 6 * z ^ 2 * g z ^ 2) = fun z => 6 * (z ^ 2 * (g * g) z) by
+      funext z; simp; ring]
+    rw [iteratedDeriv_const_mul _ (by fun_prop), p3w_iteratedDeriv_sq_mul (by fun_prop),
+      iteratedDeriv_mul (by fun_prop) (by fun_prop)]
+    push_cast; ring
+  have e1 : iteratedDeriv (2 * K + 2)
+      (fun z => 12 * g z + 6 * z ^ 2 * g z ^ 2 - L.g₂ / 2 * z ^ 2) 0 =
+      12 * iteratedDeriv (2 * K + 2) g 0 +
+        iteratedDeriv (2 * K + 2) (fun z => 6 * z ^ 2 * g z ^ 2) 0 -
+        L.g₂ / 2 * iteratedDeriv (2 * K + 2) (fun z : ℂ => z ^ 2) 0 := by
+    rw [iteratedDeriv_fun_sub (by fun_prop) (by fun_prop),
+      iteratedDeriv_fun_add (by fun_prop) (by fun_prop), iteratedDeriv_const_mul _ (by fun_prop),
+      iteratedDeriv_const_mul _ (by fun_prop)]
+  rw [e1, e2, iteratedDeriv_fun_pow_zero, ite_eq_right (by omega)] at key
+  -- the convolution sum
+  have hT : ∑ i ∈ Finset.range (2 * K + 1),
+      ((2 * K).choose i : ℂ) * iteratedDeriv i g 0 * iteratedDeriv (2 * K - i) g 0 =
+      ((2 * K)! : ℂ) * ∑ m ∈ Finset.Icc 2 (K + 2 - 2),
+        laurentCoeff L m * laurentCoeff L (K + 2 - m) := by
+    rw [p3w_sum_range_even_odd]
+    have hodd : ∑ j ∈ Finset.range K, ((2 * K).choose (2 * j + 1) : ℂ) *
+        iteratedDeriv (2 * j + 1) g 0 * iteratedDeriv (2 * K - (2 * j + 1)) g 0 = 0 := by
+      refine Finset.sum_eq_zero fun j _ => ?_
+      rw [ha, ite_eq_right (by omega), L.G_eq_zero_of_odd _ ⟨j + 1, by ring⟩]
+      simp
+    rw [hodd, add_zero, show K + 2 - 2 = K by omega, ← Finset.Ico_add_one_right_eq_Icc,
+      Finset.sum_Ico_eq_sum_range, Finset.sum_range_succ', Finset.mul_sum]
+    obtain ⟨K', rfl⟩ : ∃ K', K = K' + 1 := ⟨K - 1, by omega⟩
+    rw [Finset.sum_range_succ, show K' + 1 + 1 - 2 = K' by omega]
+    simp only [mul_zero, ha, ite_true, zero_mul, mul_zero, add_zero]
+    have hlast : (2 * (K' + 1)) - 2 * (K' + 1) = 0 := by omega
+    rw [hlast]
+    simp only [ite_true, mul_zero, add_zero]
+    refine Finset.sum_congr rfl fun j hj => ?_
+    have hj' := Finset.mem_range.mp hj
+    obtain ⟨r, rfl⟩ : ∃ r, K' = j + 1 + r := ⟨K' - (j + 1), by omega⟩
+    rw [ite_eq_right (by omega), ite_eq_right (by omega),
+      show 2 * (j + 1 + r + 1) - 2 * (j + 1) = 2 * r + 2 by omega,
+      show j + 1 + r + 1 + 2 - (2 + j) = r + 2 by omega]
+    have hc := Nat.add_choose_mul_factorial_mul_factorial (2 * r + 2) (2 * (j + 1))
+    rw [show 2 * r + 2 + 2 * (j + 1) = 2 * (j + 1 + r + 1) by ring] at hc
+    have hc' : ((2 * (j + 1 + r + 1)).choose (2 * (j + 1)) : ℂ) * ((2 * (j + 1))! : ℂ) *
+        ((2 * r + 2)! : ℂ) = ((2 * (j + 1 + r + 1))! : ℂ) := by
+      rw [← hc]; push_cast; ring
+    rw [Nat.factorial_succ (2 * (j + 1)), Nat.factorial_succ (2 * r + 2), ← hc']
+    simp only [laurentCoeff]
+    push_cast
+    ring_nf
+  rw [hT, ha, ite_eq_right (by omega), show 2 * K + 2 + 2 = 2 * (K + 2) by ring,
+    Nat.factorial_succ (2 * K + 2), Nat.factorial_succ (2 * K + 1),
+    Nat.factorial_succ (2 * K)] at key
+  rw [show laurentCoeff L (K + 2) = (2 * ((K + 2 : ℕ) : ℂ) - 1) * L.G (2 * (K + 2)) from rfl]
+  generalize ∑ m ∈ Finset.Icc 2 (K + 2 - 2), laurentCoeff L m * laurentCoeff L (K + 2 - m) = T
+    at key ⊢
+  generalize L.G (2 * (K + 2)) = G at key ⊢
+  have hF : ((2 * K)! : ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero _
+  have hK : (K : ℂ) - 1 ≠ 0 := by
+    have : (2 : ℝ) ≤ K := by exact_mod_cast (show 2 ≤ K by omega)
+    intro h; have := congrArg Complex.re h; simp at this; linarith
+  push_cast at key ⊢
+  have h5 : (2 * (K : ℂ) + 5) ≠ 0 := by
+    intro h; have := congrArg Complex.re h; simp at this; linarith [(K.cast_nonneg : (0:ℝ) ≤ K)]
+  have h2 : (2 * (K : ℂ) + 2) * (2 * K + 1) ≠ 0 := by
+    refine mul_ne_zero ?_ ?_ <;> intro h <;> have := congrArg Complex.re h <;> simp at this <;>
+      linarith [(K.cast_nonneg : (0:ℝ) ≤ K)]
+  have hcore : (2 * ((2 * (K : ℂ) + 2) * (2 * K + 1)) * ((2 * K)! : ℂ)) *
+      ((2 * K + 3) * G * (2 * K + 5) * (K - 1)) =
+      (2 * ((2 * (K : ℂ) + 2) * (2 * K + 1)) * ((2 * K)! : ℂ)) * (3 * T) := by
+    linear_combination key
+  have hc := mul_left_cancel₀ (mul_ne_zero (mul_ne_zero two_ne_zero h2) hF) hcore
+  rw [show (K : ℂ) + 2 - 3 = K - 1 by ring, show 2 * ((K : ℂ) + 2) + 1 = 2 * K + 5 by ring]
+  field_simp
+  linear_combination hc
+
+end p3wRecursion
 
 namespace HalfPeriods
 
 variable (H : HalfPeriods)
+
+section p3wHalfPeriod
+
+open Topology Filter
+
+attribute [local fun_prop] AnalyticAt.contDiffAt in
+/-- The ODE recursion for the derivatives of `℘` at a point off the lattice. -/
+lemma p3w_iteratedDeriv_wp_succ_succ {x : ℂ} (hx : x ∉ H.lattice) (k : ℕ) :
+    iteratedDeriv (k + 2) H.weierstrassP x =
+      6 * ∑ i ∈ Finset.range (k + 1), (k.choose i : ℂ) * iteratedDeriv i H.weierstrassP x *
+        iteratedDeriv (k - i) H.weierstrassP x - if k = 0 then H.g₂ / 2 else 0 := by
+  have hU : IsOpen (H.lattice : Set ℂ)ᶜ := H.periodPair.isClosed_lattice.isOpen_compl
+  have hode : deriv (deriv H.weierstrassP) =ᶠ[𝓝 x]
+      fun z => 6 * (H.weierstrassP * H.weierstrassP) z - H.g₂ / 2 := by
+    filter_upwards [hU.mem_nhds hx] with z hz
+    simp only [HalfPeriods.weierstrassP, PeriodPair.deriv_weierstrassP, Pi.mul_apply]
+    rw [deriv_derivWeierstrassP _ hz]; ring
+  have hPa : AnalyticOnNhd ℂ H.weierstrassP (H.lattice : Set ℂ)ᶜ :=
+    H.periodPair.analyticOnNhd_weierstrassP
+  have ha : AnalyticAt ℂ H.weierstrassP x := hPa x hx
+  rw [iteratedDeriv_succ', iteratedDeriv_succ', hode.iteratedDeriv_eq,
+    iteratedDeriv_fun_sub (by fun_prop) (by fun_prop), iteratedDeriv_const_mul _ (by fun_prop),
+    iteratedDeriv_mul (by fun_prop) (by fun_prop), iteratedDeriv_const]
 
 /-- DLMF 23.9.6: as `t → 0`, for `j = 1, 2, 3`,
 `℘(ω_j + t) = e_j + (3e_j² - 5c₂)t² + (10c₂e_j + 21c₃)t⁴ + (7c₂e_j² + 21c₃e_j + 5c₂²)t⁶ + O(t⁸)`. -/
@@ -215,7 +485,45 @@ theorem weierstrassP_halfPeriod_expansion {j : ℕ} (hj : j ∈ ({1, 2, 3} : Fin
         (7 * laurentCoeff H.periodPair 2 * H.e j ^ 2 +
           21 * laurentCoeff H.periodPair 3 * H.e j +
           5 * laurentCoeff H.periodPair 2 ^ 2) * t ^ 6)) =O[nhds 0] fun t ↦ t ^ 8 := by
-  sorry
+  have hω := H.halfPeriod_notMem hj
+  have ha : AnalyticAt ℂ H.weierstrassP (H.halfPeriod j) :=
+    H.periodPair.analyticOnNhd_weierstrassP _ hω
+  have hrec := H.p3w_iteratedDeriv_wp_succ_succ hω
+  have p0 : iteratedDeriv 0 H.weierstrassP (H.halfPeriod j) = H.e j := by
+    simp [HalfPeriods.e]
+  have p1 : iteratedDeriv 1 H.weierstrassP (H.halfPeriod j) = 0 := by
+    simp only [iteratedDeriv_one, PeriodPair.deriv_weierstrassP]
+    exact H.derivWeierstrassP_halfPeriod hj
+  have p2 : iteratedDeriv 2 H.weierstrassP (H.halfPeriod j) = 6 * H.e j ^ 2 - H.g₂ / 2 := by
+    have := hrec 0; norm_num [Finset.sum_range_succ, p0] at this; rw [this]; ring
+  have p3 : iteratedDeriv 3 H.weierstrassP (H.halfPeriod j) = 0 := by
+    have := hrec 1; norm_num [Finset.sum_range_succ, p0, p1] at this; exact this
+  have p4 : iteratedDeriv 4 H.weierstrassP (H.halfPeriod j) =
+      12 * H.e j * (6 * H.e j ^ 2 - H.g₂ / 2) := by
+    have := hrec 2; norm_num [Finset.sum_range_succ, p0, p1, p2] at this; rw [this]; ring
+  have p5 : iteratedDeriv 5 H.weierstrassP (H.halfPeriod j) = 0 := by
+    have := hrec 3; norm_num [Finset.sum_range_succ, p0, p1, p2, p3] at this; exact this
+  have p6 : iteratedDeriv 6 H.weierstrassP (H.halfPeriod j) =
+      144 * H.e j ^ 2 * (6 * H.e j ^ 2 - H.g₂ / 2) + 36 * (6 * H.e j ^ 2 - H.g₂ / 2) ^ 2 := by
+    have := hrec 4
+    norm_num [Finset.sum_range_succ, p0, p1, p2, p3, p4, Nat.choose] at this; rw [this]; ring
+  have p7 : iteratedDeriv 7 H.weierstrassP (H.halfPeriod j) = 0 := by
+    have := hrec 5; norm_num [Finset.sum_range_succ, p0, p1, p2, p3, p4, p5, p6] at this
+    exact this
+  have hbig := ha.hasFPowerSeriesAt.isBigO_sub_partialSum_pow 8
+  have hcub := H.e_root_cubic hj
+  have c2 := laurentCoeff_two H.periodPair
+  have c3 := laurentCoeff_three H.periodPair
+  have hn : (fun y : ℂ => ‖y‖ ^ 8) =O[𝓝 0] fun t : ℂ => t ^ 8 :=
+    IsBigO.of_bound 1 (Eventually.of_forall fun y => by simp [norm_pow])
+  refine (hbig.trans hn).congr_left fun t => ?_
+  simp only [FormalMultilinearSeries.partialSum, Finset.sum_range_succ, Finset.sum_range_zero,
+    FormalMultilinearSeries.ofScalars_apply_eq, smul_eq_mul, p0, p1, p2, p3, p4, p5, p6, p7]
+  rw [c2, c3]
+  norm_num [Nat.factorial]
+  linear_combination (3 / 4 * t ^ 4 * (H.e j * t ^ 2 + 1)) * hcub
+
+end p3wHalfPeriod
 
 end HalfPeriods
 

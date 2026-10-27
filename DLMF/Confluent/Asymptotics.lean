@@ -5,17 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Confluent.Basic
 public import DLMF.Confluent.Whittaker
 public import DLMF.Hypergeometric.Asymptotics
-public import DLMF.Gamma.Asymptotics
 public import DLMF.Confluent.IntegralRepresentations
-public import DLMF.Confluent.Recurrence
 public import DLMF.Confluent.Continuation
-public import Mathlib.Analysis.Asymptotics.Lemmas
-public import Mathlib.Analysis.Analytic.Binomial
-public import DLMFMathlib.Analysis.Asymptotics.Watson
-public import DLMFMathlib.Analysis.Asymptotics.WatsonSector
 
 /-!
 # Asymptotic expansions (DLMF §§13.7, 13.8, 13.19)
@@ -61,7 +54,7 @@ def tricomiCoeff (a b : ℂ) (s : ℕ) : ℂ :=
   (-1) ^ s * poch a s * poch (a - b + 1) s / s.factorial
 
 /-- Binomial coefficients with negated upper index as Pochhammer symbols. -/
-lemma ring_choose_neg_eq_poch (r : ℂ) (n : ℕ) :
+theorem ring_choose_neg_eq_poch (r : ℂ) (n : ℕ) :
     Ring.choose (-r) n = (-1) ^ n * poch r n / n.factorial := by
   rw [Ring.choose_neg', Int.negOnePow_def, zpow_natCast, Units.smul_def, Units.val_pow_eq_pow_val,
     Units.val_neg, Units.val_one, zsmul_eq_mul]
@@ -73,7 +66,7 @@ lemma ring_choose_neg_eq_poch (r : ℂ) (n : ℕ) :
   ring
 
 /-- The binomial expansion of `(1+t)^β` at `t = 0⁺`, with an `O(t^N)` remainder. -/
-lemma one_add_cpow_sub_sum_isBigO (β : ℂ) (N : ℕ) :
+theorem one_add_cpow_sub_sum_isBigO (β : ℂ) (N : ℕ) :
     (fun t : ℝ => (1 + (t : ℂ)) ^ β - ∑ n ∈ Finset.range N, Ring.choose β n * (t : ℂ) ^ n)
       =O[𝓝[>] 0] fun t => t ^ N := by
   have h := (Complex.one_add_cpow_hasFPowerSeriesAt_zero (a := β)).isBigO_sub_partialSum_pow N
@@ -87,7 +80,7 @@ lemma one_add_cpow_sub_sum_isBigO (β : ℂ) (N : ℕ) :
 
 /-- **Tricomi's expansion for `re a > 0`**, by Watson's lemma applied to the Laplace
 representation 13.4.4. -/
-lemma hasAsymptoticExpansion_kummerU_of_re_pos {a b : ℂ} (ha : 0 < a.re) :
+theorem hasAsymptoticExpansion_kummerU_of_re_pos {a b : ℂ} (ha : 0 < a.re) :
     HasAsymptoticExpansion atTop (fun (n : ℕ) (x : ℝ) => (x : ℂ) ^ (-((n : ℂ) + a)))
       (tricomiCoeff a b) (fun x : ℝ => kummerU a b x) := by
   set F : ℝ → ℂ := fun t => (t : ℂ) ^ (a - 1) * (1 + (t : ℂ)) ^ (b - a - 1) with hFdef
@@ -145,7 +138,7 @@ lemma hasAsymptoticExpansion_kummerU_of_re_pos {a b : ℂ} (ha : 0 < a.re) :
     field_simp
 
 /-- The coefficient recurrence behind 13.3.10. -/
-lemma tricomiCoeff_sub_one_succ (a b : ℂ) (n : ℕ) :
+theorem tricomiCoeff_sub_one_succ (a b : ℂ) (n : ℕ) :
     tricomiCoeff (a - 1) b (n + 1) =
       tricomiCoeff a (b + 1) (n + 1) - (b - a) * tricomiCoeff a b n := by
   simp only [tricomiCoeff]
@@ -162,18 +155,18 @@ lemma tricomiCoeff_sub_one_succ (a b : ℂ) (n : ℕ) :
   field_simp
   ring
 
-lemma tricomiCoeff_zero (a b : ℂ) : tricomiCoeff a b 0 = 1 := by
+theorem tricomiCoeff_zero (a b : ℂ) : tricomiCoeff a b 0 = 1 := by
   simp [tricomiCoeff, poch_zero]
 
 /-- The norm of the Tricomi scale on the positive axis. -/
-lemma norm_ofReal_cpow_neg_add {x : ℝ} (hx : 0 < x) (n : ℕ) (a : ℂ) :
+theorem norm_ofReal_cpow_neg_add {x : ℝ} (hx : 0 < x) (n : ℕ) (a : ℂ) :
     ‖(x : ℂ) ^ (-((n : ℂ) + a))‖ = x ^ (-((n : ℝ) + a.re)) := by
   rw [Complex.norm_cpow_eq_rpow_re_of_pos hx]
   simp
 
 /-- The downward step in the first parameter, from DLMF 13.3.10:
 `U(a-1,b,x) = x U(a,b+1,x) - (b-a) U(a,b,x)`. -/
-lemma hasAsymptoticExpansion_kummerU_sub_one {a b : ℂ}
+theorem hasAsymptoticExpansion_kummerU_sub_one {a b : ℂ}
     (h1 : HasAsymptoticExpansion atTop (fun (n : ℕ) (x : ℝ) => (x : ℂ) ^ (-((n : ℂ) + a)))
       (tricomiCoeff a (b + 1)) (fun x : ℝ => kummerU a (b + 1) x))
     (h2 : HasAsymptoticExpansion atTop (fun (n : ℕ) (x : ℝ) => (x : ℂ) ^ (-((n : ℂ) + a)))
@@ -260,7 +253,7 @@ theorem hasAsymptoticExpansion_kummerU (a b : ℂ) :
 
 
 /-- The downward step in `a` along any filter on which `|z| ≥ 1` eventually. -/
-lemma hasAsymptoticExpansion_kummerU_sub_one_of_filter {l : Filter ℂ}
+theorem hasAsymptoticExpansion_kummerU_sub_one_of_filter {l : Filter ℂ}
     (hl : ∀ᶠ z in l, 1 ≤ ‖z‖) {a b : ℂ}
     (h1 : HasAsymptoticExpansion l (fun (n : ℕ) (z : ℂ) => z ^ (-((n : ℂ) + a)))
       (tricomiCoeff a (b + 1)) (fun z => kummerU a (b + 1) z))
@@ -319,12 +312,12 @@ lemma hasAsymptoticExpansion_kummerU_sub_one_of_filter {l : Filter ℂ}
     rw [hsum]
     linear_combination -hU
 
-lemma one_le_norm_sectorAtTop (δ : ℝ) : ∀ᶠ z in sectorAtTop δ, 1 ≤ ‖z‖ :=
+theorem one_le_norm_sectorAtTop (δ : ℝ) : ∀ᶠ z in sectorAtTop δ, 1 ≤ ‖z‖ :=
   eventually_sectorAtTop (R := 1) fun _ hz _ => hz
 
 /-- **Tricomi's expansion in a sector**, for `re a > 0`: as `z → ∞` with `δ |z| ≤ re z`,
 `U(a,b,z) ~ ∑ (-1)^s (a)_s (a-b+1)_s / s! · z^{-a-s}` (DLMF 13.7.3). -/
-lemma hasAsymptoticExpansion_kummerU_sector_of_re_pos {a b : ℂ} (ha : 0 < a.re) {δ : ℝ}
+theorem hasAsymptoticExpansion_kummerU_sector_of_re_pos {a b : ℂ} (ha : 0 < a.re) {δ : ℝ}
     (hδ : 0 < δ) :
     HasAsymptoticExpansion (sectorAtTop δ) (fun (n : ℕ) (z : ℂ) => z ^ (-((n : ℂ) + a)))
       (tricomiCoeff a b) (fun z => kummerU a b z) := by
@@ -405,7 +398,7 @@ theorem hasAsymptoticExpansion_kummerU_sector (a b : ℂ) {δ : ℝ} (hδ : 0 < 
     simpa using h
 
 /-- The partial sums of Tricomi's expansion in the form of DLMF 13.7.3. -/
-lemma kummerU_sum_eq {x : ℝ} (hx : 0 < x) (a b : ℂ) (n : ℕ) :
+theorem kummerU_sum_eq {x : ℝ} (hx : 0 < x) (a b : ℂ) (n : ℕ) :
     ∑ s ∈ Finset.range n, (x : ℂ) ^ (-((s : ℂ) + a)) • tricomiCoeff a b s =
       (x : ℂ) ^ (-a) * ∑ s ∈ Finset.range n,
         poch a s * poch (a - b + 1) s / s.factorial * (-(x : ℂ)) ^ (-(s : ℂ)) := by
@@ -420,7 +413,7 @@ lemma kummerU_sum_eq {x : ℝ} (hx : 0 < x) (a b : ℂ) (n : ℕ) :
   ring
 
 /-- The binomial expansion of `(1-t)^β` at `t = 0⁺`, with an `O(t^N)` remainder. -/
-lemma one_sub_cpow_sub_sum_isBigO (β : ℂ) (N : ℕ) :
+theorem one_sub_cpow_sub_sum_isBigO (β : ℂ) (N : ℕ) :
     (fun t : ℝ => (1 - (t : ℂ)) ^ β -
       ∑ n ∈ Finset.range N, Ring.choose β n * (-(t : ℂ)) ^ n) =O[𝓝[>] 0] fun t => t ^ N := by
   have h := (Complex.one_add_cpow_hasFPowerSeriesAt_zero (a := β)).isBigO_sub_partialSum_pow N
@@ -439,7 +432,7 @@ def kummerCoeff (a b : ℂ) (s : ℕ) : ℂ :=
 
 /-- **The expansion of `𝐌(a,b,x)` for `re b > re a > 0`**, by Watson's lemma applied to the
 Euler integral 13.4.1 after the substitution `t ↦ 1 - t`. -/
-lemma hasAsymptoticExpansion_regularizedConfluent_of_re_pos {a b : ℂ} (ha : 0 < a.re)
+theorem hasAsymptoticExpansion_regularizedConfluent_of_re_pos {a b : ℂ} (ha : 0 < a.re)
     (hba : 0 < (b - a).re) :
     HasAsymptoticExpansion atTop (fun (n : ℕ) (x : ℝ) => exp (x : ℂ) * (x : ℂ) ^ (a - b - n))
       (kummerCoeff a b) (fun x : ℝ => regularizedHGFun {a} {b} (x : ℂ)) := by
@@ -536,11 +529,11 @@ lemma hasAsymptoticExpansion_regularizedConfluent_of_re_pos {a b : ℂ} (ha : 0 
     have h1 : ((-1 : ℂ) ^ n) ^ 2 = 1 := by rw [← pow_mul, mul_comm, pow_mul]; simp
     rw [h1, mul_one]
 
-lemma kummerCoeff_zero (a b : ℂ) : kummerCoeff a b 0 = (Gamma a)⁻¹ := by
+theorem kummerCoeff_zero (a b : ℂ) : kummerCoeff a b 0 = (Gamma a)⁻¹ := by
   simp [kummerCoeff, poch_zero]
 
 /-- The coefficient recurrence behind the regularized 13.3.4. -/
-lemma kummerCoeff_sub_one (a b : ℂ) (m : ℕ) :
+theorem kummerCoeff_sub_one (a b : ℂ) (m : ℕ) :
     kummerCoeff (a - 1) b m = kummerCoeff a b (m + 1) - kummerCoeff a (b + 1) (m + 1) := by
   simp only [kummerCoeff]
   rw [recip_Gamma_eq_mul_recip_Gamma_add_one (a - 1), sub_add_cancel,
@@ -555,7 +548,7 @@ lemma kummerCoeff_sub_one (a b : ℂ) (m : ℕ) :
   ring
 
 /-- The coefficient recurrence behind the regularized 13.3.2. -/
-lemma kummerCoeff_b_sub_one (a b : ℂ) (m : ℕ) :
+theorem kummerCoeff_b_sub_one (a b : ℂ) (m : ℕ) :
     kummerCoeff a (b - 1) (m + 1) =
       kummerCoeff a b (m + 1) + (b - 1) * kummerCoeff a b m -
         (b - a) * kummerCoeff a (b + 1) m := by
@@ -572,7 +565,7 @@ lemma kummerCoeff_b_sub_one (a b : ℂ) (m : ℕ) :
   linear_combination (poch (1 - a) m * (m + 1) / Gamma a) * key
 
 /-- Comparison of the scales `eˣ x^c` at `+∞`. -/
-lemma isBigO_exp_mul_cpow {c d : ℂ} (h : c.re ≤ d.re) :
+theorem isBigO_exp_mul_cpow {c d : ℂ} (h : c.re ≤ d.re) :
     (fun x : ℝ => exp (x : ℂ) * (x : ℂ) ^ c) =O[atTop]
       fun x : ℝ => exp (x : ℂ) * (x : ℂ) ^ d := by
   refine IsBigO.of_bound 1 ?_
@@ -582,21 +575,21 @@ lemma isBigO_exp_mul_cpow {c d : ℂ} (h : c.re ≤ d.re) :
     Complex.norm_cpow_eq_rpow_re_of_pos hx0]
   exact mul_le_mul_of_nonneg_left (Real.rpow_le_rpow_of_exponent_le hx h) (norm_nonneg _)
 
-lemma ofReal_mul_exp_mul_cpow {x : ℝ} (hx : 0 < x) (c : ℂ) :
+theorem ofReal_mul_exp_mul_cpow {x : ℝ} (hx : 0 < x) (c : ℂ) :
     (x : ℂ) * (exp (x : ℂ) * (x : ℂ) ^ c) = exp (x : ℂ) * (x : ℂ) ^ (c + 1) := by
   have hx0 : (x : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hx.ne'
   rw [Complex.cpow_add _ _ hx0, Complex.cpow_one]
   ring
 
 /-- `x • O(eˣ x^c) = O(eˣ x^{c+1})`. -/
-lemma isBigO_ofReal_mul_of_isBigO_exp_mul_cpow {f : ℝ → ℂ} {c : ℂ}
+theorem isBigO_ofReal_mul_of_isBigO_exp_mul_cpow {f : ℝ → ℂ} {c : ℂ}
     (h : f =O[atTop] fun x : ℝ => exp (x : ℂ) * (x : ℂ) ^ c) :
     (fun x : ℝ => (x : ℂ) * f x) =O[atTop] fun x : ℝ => exp (x : ℂ) * (x : ℂ) ^ (c + 1) :=
   ((isBigO_refl (fun x : ℝ => (x : ℂ)) atTop).mul h).congr' EventuallyEq.rfl
     (by filter_upwards [eventually_gt_atTop 0] with x hx using ofReal_mul_exp_mul_cpow hx c)
 
 /-- The downward step in `a`, from the regularized 13.3.4. -/
-lemma hasAsymptoticExpansion_regularizedConfluent_sub_one {a b : ℂ}
+theorem hasAsymptoticExpansion_regularizedConfluent_sub_one {a b : ℂ}
     (h1 : HasAsymptoticExpansion atTop
       (fun (n : ℕ) (x : ℝ) => exp (x : ℂ) * (x : ℂ) ^ (a - b - n))
       (kummerCoeff a b) (fun x : ℝ => regularizedHGFun {a} {b} (x : ℂ)))
@@ -633,7 +626,7 @@ lemma hasAsymptoticExpansion_regularizedConfluent_sub_one {a b : ℂ}
   linear_combination hrel
 
 /-- The downward step in `b`, from the regularized 13.3.2. -/
-lemma hasAsymptoticExpansion_regularizedConfluent_b_sub_one {a b : ℂ}
+theorem hasAsymptoticExpansion_regularizedConfluent_b_sub_one {a b : ℂ}
     (h1 : HasAsymptoticExpansion atTop
       (fun (n : ℕ) (x : ℝ) => exp (x : ℂ) * (x : ℂ) ^ (a - b - n))
       (kummerCoeff a b) (fun x : ℝ => regularizedHGFun {a} {b} (x : ℂ)))
@@ -753,7 +746,7 @@ theorem hasAsymptoticExpansion_regularizedConfluent (a b : ℂ) :
   exact hR k b (by simp only [Complex.sub_re] at hk; simp; linarith)
 
 /-- The partial sums of the Kummer expansion in the form of DLMF 13.7.1. -/
-lemma regularizedConfluent_sum_eq {x : ℝ} (hx : 0 < x) (a b : ℂ) (n : ℕ) :
+theorem regularizedConfluent_sum_eq {x : ℝ} (hx : 0 < x) (a b : ℂ) (n : ℕ) :
     ∑ s ∈ Finset.range n, (exp (x : ℂ) * (x : ℂ) ^ (a - b - s)) • kummerCoeff a b s =
       exp (x : ℂ) * (x : ℂ) ^ (a - b) / Gamma a * ∑ s ∈ Finset.range n,
         poch (1 - a) s * poch (b - a) s / s.factorial * (x : ℂ) ^ (-(s : ℂ)) := by
@@ -769,12 +762,12 @@ lemma regularizedConfluent_sum_eq {x : ℝ} (hx : 0 < x) (a b : ℂ) (n : ℕ) :
 def binomRem (r : ℝ) (n : ℕ) (t : ℝ) : ℝ :=
   (1 + t) ^ (-r) - ∑ k ∈ Finset.range n, (-1) ^ k * (ascPochhammer ℝ k).eval r / k ! * t ^ k
 
-lemma ascPochhammer_eval_succ_left' (r : ℝ) (n : ℕ) :
+theorem ascPochhammer_eval_succ_left' (r : ℝ) (n : ℕ) :
     (ascPochhammer ℝ (n + 1)).eval r = r * (ascPochhammer ℝ n).eval (r + 1) := by
   rw [ascPochhammer_succ_left]
   simp [Polynomial.eval_comp]
 
-lemma hasDerivAt_binomRem (r : ℝ) (n : ℕ) {t : ℝ} (ht : -1 < t) :
+theorem hasDerivAt_binomRem (r : ℝ) (n : ℕ) {t : ℝ} (ht : -1 < t) :
     HasDerivAt (binomRem r (n + 1)) (-r * binomRem (r + 1) n t) t := by
   have h1 : HasDerivAt (fun t : ℝ => (1 + t) ^ (-r)) (-r * (1 + t) ^ (-(r + 1))) t := by
     have := ((hasDerivAt_id t).const_add 1).rpow_const (p := -r) (Or.inl (by
@@ -803,7 +796,7 @@ lemma hasDerivAt_binomRem (r : ℝ) (n : ℕ) {t : ℝ} (ht : -1 < t) :
     simp
 
 /-- The binomial remainder is bounded by the first omitted term, for `r ≥ 0` and `t ≥ 0`. -/
-lemma abs_binomRem_le {r : ℝ} (hr : 0 ≤ r) (n : ℕ) {t : ℝ} (ht : 0 ≤ t) :
+theorem abs_binomRem_le {r : ℝ} (hr : 0 ≤ r) (n : ℕ) {t : ℝ} (ht : 0 ≤ t) :
     |binomRem r n t| ≤ (ascPochhammer ℝ n).eval r / n ! * t ^ n := by
   induction n generalizing r t with
   | zero =>
@@ -832,14 +825,14 @@ lemma abs_binomRem_le {r : ℝ} (hr : 0 ≤ r) (n : ℕ) {t : ℝ} (ht : 0 ≤ t
             mul_le_mul_of_nonneg_left this hr
         _ = _ := by push_cast; field_simp
 
-lemma ofReal_ascPochhammer_eval (r : ℝ) (k : ℕ) :
+theorem ofReal_ascPochhammer_eval (r : ℝ) (k : ℕ) :
     (((ascPochhammer ℝ k).eval r : ℝ) : ℂ) = (ascPochhammer ℂ k).eval (r : ℂ) := by
   induction k with
   | zero => simp
   | succ k ih => rw [ascPochhammer_succ_eval, ascPochhammer_succ_eval]; push_cast; rw [ih]
 
 /-- Real Pochhammer symbols at a nonnegative argument are nonnegative. -/
-lemma ascPochhammer_eval_nonneg {r : ℝ} (hr : 0 ≤ r) (k : ℕ) : 0 ≤ (ascPochhammer ℝ k).eval r := by
+theorem ascPochhammer_eval_nonneg {r : ℝ} (hr : 0 ≤ r) (k : ℕ) : 0 ≤ (ascPochhammer ℝ k).eval r := by
   induction k with
   | zero => simp
   | succ k ih => rw [ascPochhammer_succ_eval]; positivity
@@ -1136,13 +1129,13 @@ section LargeBPoincare
 
 open Set
 
-lemma hcub_analyticAt_largeBGenerating (a z : ℂ) : AnalyticAt ℂ (largeBGenerating a z) 0 := by
+theorem hcub_analyticAt_largeBGenerating (a z : ℂ) : AnalyticAt ℂ (largeBGenerating a z) 0 := by
   have h1 : expSubOneDiv 0 ∈ slitPlane := by simp [expSubOneDiv]
   have h2 : AnalyticAt ℂ (fun t : ℂ => exp (t + z * (1 - exp (-t)))) 0 :=
     (analyticAt_id.add (analyticAt_const.mul (analyticAt_const.sub analyticAt_id.neg.cexp))).cexp
   exact ((analyticAt_expSubOneDiv 0).cpow analyticAt_const h1).mul h2
 
-lemma hcub_largeB_taylor (a z : ℂ) (N : ℕ) :
+theorem hcub_largeB_taylor (a z : ℂ) (N : ℕ) :
     (fun t => largeBGenerating a z t - ∑ n ∈ Finset.range N, largeBCoeff a z n * t ^ n)
       =O[𝓝 0] fun t => ‖t‖ ^ N := by
   have h := (hcub_analyticAt_largeBGenerating a z).hasFPowerSeriesAt.isBigO_sub_partialSum_pow N
@@ -1150,7 +1143,7 @@ lemma hcub_largeB_taylor (a z : ℂ) (N : ℕ) :
   simp only [zero_add, FormalMultilinearSeries.partialSum,
     FormalMultilinearSeries.ofScalars_apply_eq, smul_eq_mul, largeBCoeff]
 
-lemma hcub_subst (a z : ℂ) (b : ℝ) {t : ℝ} (ht : 0 < t) :
+theorem hcub_subst (a z : ℂ) (b : ℝ) {t : ℝ} (ht : 0 < t) :
     |Real.exp (-t)| • (((1 - Real.exp (-t) : ℝ) : ℂ) ^ (a - 1) *
       (1 - ((1 - Real.exp (-t) : ℝ) : ℂ)) ^ ((b : ℂ) - a - 1) *
         exp (z * ((1 - Real.exp (-t) : ℝ) : ℂ))) =
@@ -1186,7 +1179,7 @@ lemma hcub_subst (a z : ℂ) (b : ℝ) {t : ℝ} (ht : 0 < t) :
   congr 2
   ring
 
-lemma hcub_euler_eq_laplace (a z : ℂ) (b : ℝ) :
+theorem hcub_euler_eq_laplace (a z : ℂ) (b : ℝ) :
     ∫ s : ℝ in (0 : ℝ)..1, (s : ℂ) ^ (a - 1) * (1 - (s : ℂ)) ^ ((b : ℂ) - a - 1) * exp (z * s) =
       ∫ t in Ioi (0 : ℝ), Real.exp (-b * t) • ((t : ℂ) ^ (a - 1) * largeBGenerating a z t) := by
   rw [intervalIntegral.integral_of_le zero_le_one, integral_Ioc_eq_integral_Ioo, ← hcub_image,
@@ -1195,7 +1188,7 @@ lemma hcub_euler_eq_laplace (a z : ℂ) (b : ℝ) :
   refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
   exact hcub_subst a z b ht
 
-lemma hcub_integrableOn (a z : ℂ) (ha : 0 < a.re) {b : ℝ} (hb : a.re < b) :
+theorem hcub_integrableOn (a z : ℂ) (ha : 0 < a.re) {b : ℝ} (hb : a.re < b) :
     IntegrableOn (fun t : ℝ => Real.exp (-b * t) • ((t : ℂ) ^ (a - 1) * largeBGenerating a z t))
       (Ioi 0) := by
   have hβ := betaIntegral_convergent (u := a) (v := (b : ℂ) - a) ha (by simp; linarith)
@@ -1274,7 +1267,7 @@ theorem hcub_largeB_base (a z : ℂ) (ha : 0 < a.re) (n : ℕ) :
 
 /-- `b^a Γ(b-a)/Γ(b+s) = ∑_{k<n-s} G_k b^{-s-k} + O(b^{-n})`, from the Gamma-ratio expansion
 5.11.13. -/
-lemma hcub_ratio_shift_kummer (a : ℂ) {s n : ℕ} (hs : s ≤ n) :
+theorem hcub_ratio_shift_kummer (a : ℂ) {s n : ℕ} (hs : s ≤ n) :
     (fun b : ℝ => (b : ℂ) ^ a * Gamma ((b : ℂ) - a) / Gamma ((b : ℂ) + s) -
       ∑ k ∈ Finset.range (n - s), DLMF.Gamma.stirlingRatioG (-a) s k * ((b : ℂ)⁻¹) ^ (s + k))
       =O[atTop] fun b => ((b : ℂ)⁻¹) ^ n := by
@@ -1295,7 +1288,7 @@ lemma hcub_ratio_shift_kummer (a : ℂ) {s n : ℕ} (hs : s ≤ n) :
       hcub_cpow_mul_cpow_neg hb]
 
 /-- `b^a Γ(b-a)/Γ(b)` is bounded as `b → +∞`. -/
-lemma hcub_ratio_isBigO_one (a : ℂ) :
+theorem hcub_ratio_isBigO_one (a : ℂ) :
     (fun b : ℝ => (b : ℂ) ^ a * Gamma ((b : ℂ) - a) / Gamma (b : ℂ)) =O[atTop]
       fun _ => (1 : ℂ) := by
   have h := hcub_ratio_shift_kummer a (s := 0) (n := 0) le_rfl
@@ -1364,21 +1357,21 @@ theorem hcub_largeBMix_eq_of_re_pos (a z : ℂ) (ha : 0 < a.re) (N : ℕ) :
       simp only [smul_eq_mul]; congr 1; exact Finset.sum_congr rfl fun _ _ => mul_comm _ _)
   exact congrFun h N
 
-lemma hcub_differentiable_largeBMix (z : ℂ) (N : ℕ) :
+theorem hcub_differentiable_largeBMix (z : ℂ) (N : ℕ) :
     Differentiable ℂ (fun a => hcub_largeBMix a z N) := by
   unfold hcub_largeBMix
   refine Differentiable.fun_sum fun s _ => ?_
   exact (((Polynomial.differentiable _).mul (differentiable_const _)).div_const _).mul
     ((hcub_differentiable_stirlingRatioG _ _).comp differentiable_neg)
 
-lemma hcub_differentiableAt_largeBGenerating (a z : ℂ) {t : ℂ} (ht : ‖t‖ ≤ 1 / 2) :
+theorem hcub_differentiableAt_largeBGenerating (a z : ℂ) {t : ℂ} (ht : ‖t‖ ≤ 1 / 2) :
     DifferentiableAt ℂ (largeBGenerating a z) t := by
   have hE : DifferentiableAt ℂ expSubOneDiv t := (analyticAt_expSubOneDiv t).differentiableAt
   show DifferentiableAt ℂ (fun t => expSubOneDiv t ^ (a - 1) * exp (t + z * (1 - exp (-t)))) t
   exact (hE.cpow (differentiableAt_const _) (hcub_expSubOneDiv_mem_slitPlane ht)).mul
     (by fun_prop)
 
-lemma hcub_differentiable_largeBCoeff (z : ℂ) (N : ℕ) :
+theorem hcub_differentiable_largeBCoeff (z : ℂ) (N : ℕ) :
     Differentiable ℂ (fun a => largeBCoeff a z N) := by
   have hE : ∀ t : ℂ, DifferentiableAt ℂ expSubOneDiv t := fun t =>
     (analyticAt_expSubOneDiv t).differentiableAt
@@ -1425,7 +1418,7 @@ theorem hcub_largeBMix_eq (a z : ℂ) (N : ℕ) :
   simpa [hfdef, sub_eq_zero] using this
 
 /-- `Γ(b)/Γ(b-a) b^{-a}` is bounded as `b → +∞`. -/
-lemma hcub_ratio_isBigO_one' (a : ℂ) :
+theorem hcub_ratio_isBigO_one' (a : ℂ) :
     (fun b : ℝ => Gamma (b : ℂ) / Gamma ((b : ℂ) - a) * (b : ℂ) ^ (-a)) =O[atTop]
       fun _ => (1 : ℂ) := by
   have h := DLMF.Gamma.Gamma_ratio_expansion 0 (-a) 0

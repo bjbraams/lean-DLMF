@@ -7,6 +7,7 @@ module
 
 public import DLMF.ParabolicCylinder.Uniform
 public import DLMFMathlib.Analysis.ODE.LiouvilleGreenExpansion
+public import DLMF.ParabolicCylinder.AsymptoticsZeros
 
 /-!
 # Olver's uniform expansion of `U(-½μ², μt√2)` for `t > 1` (DLMF 12.10.3)
@@ -40,7 +41,7 @@ namespace DLMF.Confluent
 open Polynomial
 
 /-- A function with vanishing derivative on `(b, ∞)` is constant there. -/
-lemma pcfLG_const_of_hasDerivAt_zero {b : ℝ} {f : ℝ → ℂ} (h : ∀ t, b < t → HasDerivAt f 0 t) :
+theorem pcfLG_const_of_hasDerivAt_zero {b : ℝ} {f : ℝ → ℂ} (h : ∀ t, b < t → HasDerivAt f 0 t) :
     ∃ a, ∀ t, b < t → f t = a := by
   obtain ⟨a, ha⟩ := (isOpen_Ioi (a := b)).exists_is_const_of_deriv_eq_zero isPreconnected_Ioi
     (fun t ht => (h t ht).differentiableAt.differentiableWithinAt)
@@ -50,7 +51,7 @@ lemma pcfLG_const_of_hasDerivAt_zero {b : ℝ} {f : ℝ → ℂ} (h : ∀ t, b <
 /-- **Uniqueness of the recessive solution.** Let `U` (complex) and `W` (real, nonvanishing,
 tending to `0`) solve `w'' = q w` on `(b, ∞)`. If `U / W` has a limit at `+∞`, then `U` is a
 constant multiple of `W` on `(b, ∞)`. -/
-lemma pcfLG_eq_mul_of_tendsto {b : ℝ} {q : ℝ → ℝ} {U U' : ℝ → ℂ} {W W' : ℝ → ℝ}
+theorem pcfLG_eq_mul_of_tendsto {b : ℝ} {q : ℝ → ℝ} {U U' : ℝ → ℂ} {W W' : ℝ → ℝ}
     (hU : ∀ t, b < t → HasDerivAt U (U' t) t) (hU' : ∀ t, b < t → HasDerivAt U' (q t * U t) t)
     (hW : ∀ t, b < t → HasDerivAt W (W' t) t) (hW' : ∀ t, b < t → HasDerivAt W' (q t * W t) t)
     (hW0 : ∀ t, b < t → W t ≠ 0) (hWl : Tendsto W atTop (𝓝 0)) {L : ℂ}
@@ -129,7 +130,7 @@ lemma pcfLG_eq_mul_of_tendsto {b : ℝ} {q : ℝ → ℝ} {U U' : ℝ → ℂ} {
 /-- **Borel's lemma at infinity** (real coefficients): every formal series `∑ c_s u^{-s}` is
 the asymptotic expansion of some function, here a truncation `∑_{s<n(u)} c_s u^{-s}` with
 `n(u)` the largest `n ≤ ⌊u⌋` for which `∑_{s<n} |c_s| ≤ u`. -/
-lemma pcfLG_exists_asymptotic (c : ℕ → ℝ) : ∃ F : ℝ → ℝ, ∀ N : ℕ,
+theorem pcfLG_exists_asymptotic (c : ℕ → ℝ) : ∃ F : ℝ → ℝ, ∀ N : ℕ,
     (fun u : ℝ => F u - ∑ s ∈ Finset.range N, c s / u^s) =O[atTop] (fun u : ℝ => (u^N)⁻¹) := by
   classical
   let n : ℝ → ℕ := fun u => Nat.findGreatest (fun m => ∑ s ∈ Finset.range m, |c s| ≤ u) ⌊u⌋₊
@@ -169,12 +170,12 @@ lemma pcfLG_exists_asymptotic (c : ℕ → ℝ) : ∃ F : ℝ → ℝ, ∀ N : �
   · rw [Finset.Ico_eq_empty (by omega), Finset.sum_empty, abs_zero]; positivity
 
 /-- Combining real powers of a positive base. -/
-lemma pcfLG_rpow_mul {y : ℝ} (hy : 0 < y) {a b c : ℝ} (h : a + b = c) :
+theorem pcfLG_rpow_mul {y : ℝ} (hy : 0 < y) {a b c : ℝ} (h : a + b = c) :
     y ^ a * y ^ b = y ^ c := by
   rw [← Real.rpow_add hy, h]
 
 /-- Derivative of `P(t) (t²-1)^c` on `t > 1`. -/
-lemma pcfLG_hasDerivAt_poly_rpow (P : Polynomial ℝ) (c : ℝ) {t : ℝ} (ht : 1 < t) :
+theorem pcfLG_hasDerivAt_poly_rpow (P : Polynomial ℝ) (c : ℝ) {t : ℝ} (ht : 1 < t) :
     HasDerivAt (fun t => P.eval t * (t^2-1) ^ c)
       (((derivative P).eval t * (t^2-1) + 2*c*t*P.eval t) * (t^2-1) ^ (c-1)) t := by
   have hy : 0 < t^2-1 := by nlinarith
@@ -206,7 +207,7 @@ def pcfLG_hatAd2 (s : ℕ) (t : ℝ) : ℝ :=
     (t^2-1) ^ (-((3*s+4)/2):ℝ)
 
 /-- `A' = -(t/2)(t²-1)^{-5/4}`. -/
-lemma pcfLG_hasDerivAt_A {t : ℝ} (ht : 1 < t) : HasDerivAt pcfLG_A (pcfLG_A1 t) t := by
+theorem pcfLG_hasDerivAt_A {t : ℝ} (ht : 1 < t) : HasDerivAt pcfLG_A (pcfLG_A1 t) t := by
   have := pcfLG_hasDerivAt_poly_rpow 1 (-1/4) ht
   simp only [eval_one, one_mul, derivative_one, eval_zero, zero_mul, zero_add, mul_one] at this
   unfold pcfLG_A pcfLG_A1
@@ -214,7 +215,7 @@ lemma pcfLG_hasDerivAt_A {t : ℝ} (ht : 1 < t) : HasDerivAt pcfLG_A (pcfLG_A1 t
   rw [show (-1/4:ℝ) - 1 = -5/4 by norm_num]; ring
 
 /-- `A'' = (3t²+2)/4 · (t²-1)^{-9/4}`. -/
-lemma pcfLG_hasDerivAt_A1 {t : ℝ} (ht : 1 < t) : HasDerivAt pcfLG_A1 (pcfLG_A2 t) t := by
+theorem pcfLG_hasDerivAt_A1 {t : ℝ} (ht : 1 < t) : HasDerivAt pcfLG_A1 (pcfLG_A2 t) t := by
   have hy : 0 < t^2-1 := by nlinarith
   have := pcfLG_hasDerivAt_poly_rpow (C (-1/2:ℝ) * X) (-5/4) ht
   unfold pcfLG_A1 pcfLG_A2
@@ -226,7 +227,7 @@ lemma pcfLG_hasDerivAt_A1 {t : ℝ} (ht : 1 < t) : HasDerivAt pcfLG_A1 (pcfLG_A2
     ring
 
 /-- `A_s' ` from the Olver recursion (DLMF 12.10.11). -/
-lemma pcfLG_olverU_eq (s : ℕ) :
+theorem pcfLG_olverU_eq (s : ℕ) :
     (X^2-1)*derivative (pcfOlverU s)-C (3*(s:ℝ))*X*pcfOlverU s = (pcfOlverPair s).2 := by
   rcases s with _ | s
   · simp [pcfOlverU, pcfOlverPair]
@@ -235,7 +236,7 @@ lemma pcfLG_olverU_eq (s : ℕ) :
     push_cast; exact this
 
 /-- `A_s' = r_{s-1}(t)/(t²-1)^{(3s+2)/2}`, from DLMF 12.10.11. -/
-lemma pcfLG_hasDerivAt_hatA (s : ℕ) {t : ℝ} (ht : 1 < t) :
+theorem pcfLG_hasDerivAt_hatA (s : ℕ) {t : ℝ} (ht : 1 < t) :
     HasDerivAt (pcfLG_hatA s) (pcfLG_hatAd s t) t := by
   have := pcfLG_hasDerivAt_poly_rpow (pcfOlverU s) (-(3*s/2)) ht
   have he := congrArg (Polynomial.eval t) (pcfLG_olverU_eq s)
@@ -245,7 +246,7 @@ lemma pcfLG_hasDerivAt_hatA (s : ℕ) {t : ℝ} (ht : 1 < t) :
   rw [← he, show -(3*(s:ℝ)/2) - 1 = -((3*s+2)/2) by ring]; ring
 
 /-- The derivative of `A_s'`. -/
-lemma pcfLG_hasDerivAt_hatAd (s : ℕ) {t : ℝ} (ht : 1 < t) :
+theorem pcfLG_hasDerivAt_hatAd (s : ℕ) {t : ℝ} (ht : 1 < t) :
     HasDerivAt (pcfLG_hatAd s) (pcfLG_hatAd2 s t) t := by
   have := pcfLG_hasDerivAt_poly_rpow (pcfOlverPair s).2 (-((3*s+2)/2)) ht
   unfold pcfLG_hatAd pcfLG_hatAd2
@@ -253,14 +254,14 @@ lemma pcfLG_hasDerivAt_hatAd (s : ℕ) {t : ℝ} (ht : 1 < t) :
   rw [show -((3*(s:ℝ)+2)/2) - 1 = -((3*s+4)/2) by ring]; ring
 
 /-- The second Olver polynomial of the pair is `r_s` (DLMF 12.10.12). -/
-lemma pcfLG_olverPair_snd_succ (s : ℕ) : (pcfOlverPair (s+1)).2 =
+theorem pcfLG_olverPair_snd_succ (s : ℕ) : (pcfOlverPair (s+1)).2 =
     C (1/8:ℝ)*(C 3*X^2+C 2)*(pcfOlverPair s).1 - C (3/2*(s+1:ℝ))*X*(pcfOlverPair s).2 +
       C (1/2:ℝ)*(X^2-1)*derivative (pcfOlverPair s).2 := by
   rw [pcfOlverPair]
 
 /-- **The Liouville–Green recursion for Olver's coefficients**: with `A = (t²-1)^{-1/4}`,
 `A² A_s'' + 2 A A' A_s' + A A'' A_s = 2 A_{s+1}'`. -/
-lemma pcfLG_recursion (s : ℕ) {t : ℝ} (ht : 1 < t) :
+theorem pcfLG_recursion (s : ℕ) {t : ℝ} (ht : 1 < t) :
     pcfLG_A t ^ 2 * pcfLG_hatAd2 s t + 2 * pcfLG_A t * pcfLG_A1 t * pcfLG_hatAd s t +
       pcfLG_A t * pcfLG_A2 t * pcfLG_hatA s t = 2 * pcfLG_hatAd (s+1) t := by
   have hy : 0 < t^2-1 := by nlinarith
@@ -287,7 +288,7 @@ lemma pcfLG_recursion (s : ℕ) {t : ℝ} (ht : 1 < t) :
     (-t * (pcfOlverPair s).2.eval t) * e2 + ((3*t^2+2)/4 * (pcfOlverPair s).1.eval t) * e3
 
 /-- `ξ' = √(t²-1)` (DLMF 12.10.7). -/
-lemma pcfLG_hasDerivAt_xi {t : ℝ} (ht : 1 < t) :
+theorem pcfLG_hasDerivAt_xi {t : ℝ} (ht : 1 < t) :
     HasDerivAt pcfXi (Real.sqrt (t^2-1)) t := by
   have hy : 0 < t^2-1 := by nlinarith
   set r := Real.sqrt (t^2-1) with hr
@@ -311,25 +312,25 @@ lemma pcfLG_hasDerivAt_xi {t : ℝ} (ht : 1 < t) :
   nlinarith [hr2]
 
 /-- `A⁻² = √(t²-1)`. -/
-lemma pcfLG_A_sq_recip {t : ℝ} (ht : 1 < t) : (pcfLG_A t ^ 2)⁻¹ = Real.sqrt (t^2-1) := by
+theorem pcfLG_A_sq_recip {t : ℝ} (ht : 1 < t) : (pcfLG_A t ^ 2)⁻¹ = Real.sqrt (t^2-1) := by
   have hy : 0 < t^2-1 := by nlinarith
   rw [pcfLG_A, ← Real.rpow_natCast, ← Real.rpow_mul hy.le, ← Real.rpow_neg hy.le,
     Real.sqrt_eq_rpow]
   norm_num
 
 /-- `A⁻⁴ = t²-1`. -/
-lemma pcfLG_A_pow_four_recip {t : ℝ} (ht : 1 < t) : (pcfLG_A t ^ 4)⁻¹ = t^2-1 := by
+theorem pcfLG_A_pow_four_recip {t : ℝ} (ht : 1 < t) : (pcfLG_A t ^ 4)⁻¹ = t^2-1 := by
   have hy : 0 < t^2-1 := by nlinarith
   rw [pcfLG_A, ← Real.rpow_natCast, ← Real.rpow_mul hy.le, ← Real.rpow_neg hy.le]
   norm_num
 
 /-- `A(t) > 0` for `t > 1`. -/
-lemma pcfLG_A_pos {t : ℝ} (ht : 1 < t) : 0 < pcfLG_A t := by
+theorem pcfLG_A_pos {t : ℝ} (ht : 1 < t) : 0 < pcfLG_A t := by
   have hy : 0 < t^2-1 := by nlinarith
   exact Real.rpow_pos_of_pos hy _
 
 /-- A polynomial bound for `t ≥ 1`. -/
-lemma pcfLG_abs_eval_le (P : Polynomial ℝ) {d : ℕ} (hd : P.natDegree ≤ d) {t : ℝ} (ht : 1 ≤ t) :
+theorem pcfLG_abs_eval_le (P : Polynomial ℝ) {d : ℕ} (hd : P.natDegree ≤ d) {t : ℝ} (ht : 1 ≤ t) :
     |P.eval t| ≤ (∑ i ∈ Finset.range (d+1), |P.coeff i|) * t^d := by
   rw [eval_eq_sum_range' (Nat.lt_succ_of_le hd), Finset.sum_mul]
   refine (Finset.abs_sum_le_sum_abs _ _).trans (Finset.sum_le_sum fun i hi => ?_)
@@ -338,7 +339,7 @@ lemma pcfLG_abs_eval_le (P : Polynomial ℝ) {d : ℕ} (hd : P.natDegree ≤ d) 
     (Finset.mem_range.1 hi))) (abs_nonneg _)
 
 /-- `|P(t)| (t²-1)^{-e} ≤ K t^{d-2e}` for `t ≥ c > 1`. -/
-lemma pcfLG_poly_rpow_bound (P : Polynomial ℝ) {d : ℕ} (hd : P.natDegree ≤ d) {e c : ℝ}
+theorem pcfLG_poly_rpow_bound (P : Polynomial ℝ) {d : ℕ} (hd : P.natDegree ≤ d) {e c : ℝ}
     (he : 0 ≤ e) (hc : 1 < c) : ∃ K, 0 ≤ K ∧ ∀ t, c ≤ t →
       |P.eval t * (t^2-1) ^ (-e)| ≤ K * t ^ ((d:ℝ) - 2*e) := by
   set S := ∑ i ∈ Finset.range (d+1), |P.coeff i|
@@ -369,7 +370,7 @@ lemma pcfLG_poly_rpow_bound (P : Polynomial ℝ) {d : ℕ} (hd : P.natDegree ≤
     _ = S * (1 - 1/c^2) ^ (-e) * t ^ ((d:ℝ) - 2*e) := by rw [h3, ← h4]; ring
 
 /-- Integrability of `|P(t)|(t²-1)^{-e}` on `(c,∞)`, `c > 1`, when `d - 2e < -1`. -/
-lemma pcfLG_integrableOn_poly_rpow (P : Polynomial ℝ) {d : ℕ} (hd : P.natDegree ≤ d) {e c : ℝ}
+theorem pcfLG_integrableOn_poly_rpow (P : Polynomial ℝ) {d : ℕ} (hd : P.natDegree ≤ d) {e c : ℝ}
     (he : 0 ≤ e) (hde : (d:ℝ) - 2*e < -1) (hc : 1 < c) :
     IntegrableOn (fun t => |P.eval t * (t^2-1) ^ (-e)|) (Ioi c) := by
   obtain ⟨K, hK, hb⟩ := pcfLG_poly_rpow_bound P hd he hc
@@ -382,7 +383,7 @@ lemma pcfLG_integrableOn_poly_rpow (P : Polynomial ℝ) {d : ℕ} (hd : P.natDeg
   · rw [Real.norm_eq_abs, abs_abs]; exact hb t (le_of_lt ht)
 
 /-- Tail bound for `|P(t)|(t²-1)^{-e}`: `∫_x^∞ ≤ K x^{d-2e+1}/(-(d-2e+1))` for `x ≥ c > 1`. -/
-lemma pcfLG_tail_poly_rpow (P : Polynomial ℝ) {d : ℕ} (hd : P.natDegree ≤ d) {e c : ℝ}
+theorem pcfLG_tail_poly_rpow (P : Polynomial ℝ) {d : ℕ} (hd : P.natDegree ≤ d) {e c : ℝ}
     (he : 0 ≤ e) (hde : (d:ℝ) - 2*e < -1) (hc : 1 < c) : ∃ K, 0 ≤ K ∧ ∀ x, c ≤ x →
       ∫ t in Ioi x, |P.eval t * (t^2-1) ^ (-e)| ≤ K * x ^ ((d:ℝ) - 2*e + 1) := by
   obtain ⟨K, hK, hb⟩ := pcfLG_poly_rpow_bound P hd he hc
@@ -396,22 +397,22 @@ lemma pcfLG_tail_poly_rpow (P : Polynomial ℝ) {d : ℕ} (hd : P.natDegree ≤ 
         rw [integral_const_mul, integral_Ioi_rpow_of_lt hde hx0]; field_simp
 
 /-- The parity–degree class bounds the degree. -/
-lemma pcfLG_good_natDegree {e D : ℕ} {f : Polynomial ℝ} (hf : pcfLG_good e D f) :
+theorem pcfLG_good_natDegree {e D : ℕ} {f : Polynomial ℝ} (hf : pcfLG_good e D f) :
     f.natDegree ≤ D :=
   natDegree_le_iff_coeff_eq_zero.2 fun n hn => by
     by_contra h; have := (hf n h).2; exact absurd hn (not_lt.2 (by exact_mod_cast this))
 
 /-- `deg u_s ≤ 3s`. -/
-lemma pcfLG_natDegree_olverU (s : ℕ) : (pcfOlverU s).natDegree ≤ 3*s :=
+theorem pcfLG_natDegree_olverU (s : ℕ) : (pcfOlverU s).natDegree ≤ 3*s :=
   pcfLG_good_natDegree (pcfLG_olverPair_inv s).1
 
 /-- `deg r_{s} ≤ 3s+2`, i.e. `deg (pcfOlverPair (s+1)).2 ≤ 3s+2`. -/
-lemma pcfLG_natDegree_olverPair_snd (s : ℕ) : (pcfOlverPair (s+1)).2.natDegree ≤ 3*s+2 := by
+theorem pcfLG_natDegree_olverPair_snd (s : ℕ) : (pcfOlverPair (s+1)).2.natDegree ≤ 3*s+2 := by
   rw [pcfLG_olverPair_snd_succ]
   exact pcfLG_good_natDegree (pcfLG_r_good (pcfLG_olverPair_inv s).1 (pcfLG_olverPair_inv s).2)
 
 /-- `P(t)/t^d → coeff_d P` when `deg P ≤ d`. -/
-lemma pcfLG_tendsto_eval_div_pow (P : Polynomial ℝ) {d : ℕ} (hd : P.natDegree ≤ d) :
+theorem pcfLG_tendsto_eval_div_pow (P : Polynomial ℝ) {d : ℕ} (hd : P.natDegree ≤ d) :
     Tendsto (fun t => P.eval t / t^d) atTop (𝓝 (P.coeff d)) := by
   have e : ∀ᶠ t in atTop, P.eval t / t^d =
       ∑ i ∈ Finset.range (d+1), P.coeff i * (if i = d then 1 else (t^(d-i))⁻¹) := by
@@ -440,7 +441,7 @@ lemma pcfLG_tendsto_eval_div_pow (P : Polynomial ℝ) {d : ℕ} (hd : P.natDegre
 def pcfLG_c (s : ℕ) : ℝ := (pcfOlverU s).coeff (3*s)
 
 /-- `t²/(t²-1) → 1`. -/
-lemma pcfLG_tendsto_sq_div : Tendsto (fun t : ℝ => t^2/(t^2-1)) atTop (𝓝 1) := by
+theorem pcfLG_tendsto_sq_div : Tendsto (fun t : ℝ => t^2/(t^2-1)) atTop (𝓝 1) := by
   have h : Tendsto (fun t : ℝ => 1/(1 - (t^2)⁻¹)) atTop (𝓝 (1/(1-0))) :=
     tendsto_const_nhds.div (tendsto_const_nhds.sub
       ((tendsto_pow_atTop two_ne_zero).inv_tendsto_atTop)) (by norm_num)
@@ -452,7 +453,7 @@ lemma pcfLG_tendsto_sq_div : Tendsto (fun t : ℝ => t^2/(t^2-1)) atTop (𝓝 1)
   field_simp
 
 /-- `A_s(t) → c_s` as `t → ∞`. -/
-lemma pcfLG_tendsto_hatA (s : ℕ) : Tendsto (pcfLG_hatA s) atTop (𝓝 (pcfLG_c s)) := by
+theorem pcfLG_tendsto_hatA (s : ℕ) : Tendsto (pcfLG_hatA s) atTop (𝓝 (pcfLG_c s)) := by
   have h1 := pcfLG_tendsto_eval_div_pow (pcfOlverU s) (pcfLG_natDegree_olverU s)
   have h2 : Tendsto (fun t : ℝ => (t^2/(t^2-1)) ^ (3*s/2:ℝ)) atTop (𝓝 1) := by
     have := pcfLG_tendsto_sq_div.rpow_const (p := 3*s/2) (Or.inl one_ne_zero)
@@ -470,7 +471,7 @@ lemma pcfLG_tendsto_hatA (s : ℕ) : Tendsto (pcfLG_hatA s) atTop (𝓝 (pcfLG_c
   field_simp
 
 /-- `A(t) → 0` as `t → ∞`. -/
-lemma pcfLG_tendsto_A : Tendsto pcfLG_A atTop (𝓝 0) := by
+theorem pcfLG_tendsto_A : Tendsto pcfLG_A atTop (𝓝 0) := by
   have h : Tendsto (fun t : ℝ => t^2-1) atTop atTop :=
     tendsto_atTop_add_const_right _ _ (tendsto_pow_atTop two_ne_zero)
   have := (tendsto_rpow_neg_atTop (y := 1/4) (by norm_num)).comp h
@@ -478,7 +479,7 @@ lemma pcfLG_tendsto_A : Tendsto pcfLG_A atTop (𝓝 0) := by
   simp [pcfLG_A, Function.comp]; ring_nf
 
 /-- `√(t²-1)/t → 1`. -/
-lemma pcfLG_tendsto_sqrt_div : Tendsto (fun t : ℝ => Real.sqrt (t^2-1) / t) atTop (𝓝 1) := by
+theorem pcfLG_tendsto_sqrt_div : Tendsto (fun t : ℝ => Real.sqrt (t^2-1) / t) atTop (𝓝 1) := by
   have h : Tendsto (fun t : ℝ => Real.sqrt (1 - (t^2)⁻¹)) atTop (𝓝 (Real.sqrt (1 - 0))) :=
     (tendsto_const_nhds.sub ((tendsto_pow_atTop two_ne_zero).inv_tendsto_atTop)).sqrt
   rw [sub_zero, Real.sqrt_one] at h
@@ -492,10 +493,10 @@ lemma pcfLG_tendsto_sqrt_div : Tendsto (fun t : ℝ => Real.sqrt (t^2-1) / t) at
 def pcfLG_h (μ : ℝ) : ℝ := 2 ^ (-μ^2/4-1/4) * Real.exp (-μ^2/4) * μ ^ (μ^2/2-1/2)
 
 /-- `h(μ) > 0`. -/
-lemma pcfLG_h_pos {μ : ℝ} (hμ : 0 < μ) : 0 < pcfLG_h μ := by unfold pcfLG_h; positivity
+theorem pcfLG_h_pos {μ : ℝ} (hμ : 0 < μ) : 0 < pcfLG_h μ := by unfold pcfLG_h; positivity
 
 /-- `pcfH μ` is the real number `h(μ)` for `μ > 0`. -/
-lemma pcfLG_pcfH_eq {μ : ℝ} (hμ : 0 < μ) : pcfH μ = (pcfLG_h μ : ℂ) := by
+theorem pcfLG_pcfH_eq {μ : ℝ} (hμ : 0 < μ) : pcfH μ = (pcfLG_h μ : ℂ) := by
   unfold pcfH pcfLG_h
   push_cast
   rw [Complex.ofReal_cpow (by norm_num), Complex.ofReal_cpow hμ.le]
@@ -503,7 +504,7 @@ lemma pcfLG_pcfH_eq {μ : ℝ} (hμ : 0 < μ) : pcfH μ = (pcfLG_h μ : ℂ) := 
 
 /-- **The normalization at infinity**: `e^{z²/4} z^{a+1/2} A(t) e^{-μ²ξ(t)} → 1/h(μ)` as
 `t → ∞`, where `z = μ t √2`, `a = -μ²/2`. -/
-lemma pcfLG_tendsto_R {μ : ℝ} (hμ : 0 < μ) :
+theorem pcfLG_tendsto_R {μ : ℝ} (hμ : 0 < μ) :
     Tendsto (fun t : ℝ => Real.exp ((μ*t*Real.sqrt 2)^2/4) * (μ*t*Real.sqrt 2) ^ (1/2-μ^2/2) *
       pcfLG_A t * Real.exp (-(μ^2 * pcfXi t))) atTop (𝓝 (pcfLG_h μ)⁻¹) := by
   set p : ℝ := 1/2-μ^2/2
@@ -558,7 +559,7 @@ lemma pcfLG_tendsto_R {μ : ℝ} (hμ : 0 < μ) :
   ring
 
 /-- The positive real axis tends to infinity inside every sector. -/
-lemma pcfLG_tendsto_sector {α : ℝ} (hα : 0 ≤ α) {μ : ℝ} (hμ : 0 < μ) :
+theorem pcfLG_tendsto_sector {α : ℝ} (hα : 0 ≤ α) {μ : ℝ} (hμ : 0 < μ) :
     Tendsto (fun t : ℝ => ((μ*t*Real.sqrt 2 : ℝ) : ℂ)) atTop (sector α) := by
   have hm : 0 < μ * Real.sqrt 2 := by positivity
   refine tendsto_inf.2 ⟨tendsto_comap_iff.2 ?_, tendsto_principal.2 ?_⟩
@@ -575,7 +576,7 @@ lemma pcfLG_tendsto_sector {α : ℝ} (hα : 0 ≤ α) {μ : ℝ} (hμ : 0 < μ)
 
 /-- **The normalization of `U` at infinity** (from DLMF 12.9.1): for fixed `μ > 0`,
 `U(-μ²/2, μ t √2) / (A(t) e^{-μ² ξ(t)}) → h(μ)` as `t → ∞`. -/
-lemma pcfLG_tendsto_U_div {μ : ℝ} (hμ : 0 < μ) :
+theorem pcfLG_tendsto_U_div {μ : ℝ} (hμ : 0 < μ) :
     Tendsto (fun t : ℝ => pcfU (-μ^2/2) (μ*t*Real.sqrt 2) /
       ((pcfLG_A t * Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ)) atTop (𝓝 (pcfH μ)) := by
   set a : ℂ := -(μ:ℂ)^2/2
@@ -620,18 +621,18 @@ lemma pcfLG_tendsto_U_div {μ : ℝ} (hμ : 0 < μ) :
   push_cast; ring
 
 /-- Continuity of `P(t) (t²-1)^c` on `(1, ∞)`. -/
-lemma pcfLG_continuousOn_poly_rpow (P : Polynomial ℝ) (c : ℝ) :
+theorem pcfLG_continuousOn_poly_rpow (P : Polynomial ℝ) (c : ℝ) :
     ContinuousOn (fun t => P.eval t * (t^2-1) ^ c) (Ioi 1) := fun _t ht =>
   ((pcfLG_hasDerivAt_poly_rpow P c ht).continuousAt).continuousWithinAt
 
 /-- Continuity of `A''` on `(1, ∞)`. -/
-lemma pcfLG_continuousOn_A2 : ContinuousOn pcfLG_A2 (Ioi 1) := by
+theorem pcfLG_continuousOn_A2 : ContinuousOn pcfLG_A2 (Ioi 1) := by
   have := pcfLG_continuousOn_poly_rpow (C (3/4:ℝ) * X^2 + C (1/2:ℝ)) (-9/4)
   refine this.congr fun t _ => ?_
   simp only [pcfLG_A2, eval_add, eval_mul, eval_C, eval_pow, eval_X]; ring
 
 /-- Continuity of `A_s''` on `(1, ∞)`. -/
-lemma pcfLG_continuousOn_hatAd2 (s : ℕ) : ContinuousOn (pcfLG_hatAd2 s) (Ioi 1) := by
+theorem pcfLG_continuousOn_hatAd2 (s : ℕ) : ContinuousOn (pcfLG_hatAd2 s) (Ioi 1) := by
   have := pcfLG_continuousOn_poly_rpow
     (derivative (pcfOlverPair s).2 * (X^2 - 1) - C (3*(s:ℝ)+2) * X * (pcfOlverPair s).2)
     (-((3*s+4)/2))
@@ -639,7 +640,7 @@ lemma pcfLG_continuousOn_hatAd2 (s : ℕ) : ContinuousOn (pcfLG_hatAd2 s) (Ioi 1
   simp [pcfLG_hatAd2]
 
 /-- `A A'' = (3t²+2)/4 · (t²-1)^{-5/2}`. -/
-lemma pcfLG_A_mul_A2 {t : ℝ} (ht : 1 < t) :
+theorem pcfLG_A_mul_A2 {t : ℝ} (ht : 1 < t) :
     pcfLG_A t * pcfLG_A2 t = (C (3/4:ℝ) * X^2 + C (1/2:ℝ)).eval t * (t^2-1) ^ (-(5/2):ℝ) := by
   have hy : 0 < t^2-1 := by nlinarith
   unfold pcfLG_A pcfLG_A2
@@ -649,7 +650,7 @@ lemma pcfLG_A_mul_A2 {t : ℝ} (ht : 1 < t) :
   simp only [eval_add, eval_mul, eval_C, eval_pow, eval_X]; ring
 
 /-- The error-control integrand `|A A''|` is integrable at infinity. -/
-lemma pcfLG_integrableOn_V {c : ℝ} (hc : 1 < c) :
+theorem pcfLG_integrableOn_V {c : ℝ} (hc : 1 < c) :
     IntegrableOn (fun t => |pcfLG_A t * pcfLG_A2 t - (fun _ => (0:ℝ)) t * pcfLG_A t ^ 2|) (Ioi c) := by
   have := pcfLG_integrableOn_poly_rpow (C (3/4:ℝ) * X^2 + C (1/2:ℝ)) (d := 2) (by compute_degree)
     (e := 5/2) (by norm_num) (by norm_num) hc
@@ -658,7 +659,7 @@ lemma pcfLG_integrableOn_V {c : ℝ} (hc : 1 < c) :
   simp only [zero_mul, sub_zero, pcfLG_A_mul_A2 this]
 
 /-- Tail bound for the error-control integral. -/
-lemma pcfLG_tail_V {c : ℝ} (hc : 1 < c) : ∃ K, 0 ≤ K ∧ ∀ x, c ≤ x →
+theorem pcfLG_tail_V {c : ℝ} (hc : 1 < c) : ∃ K, 0 ≤ K ∧ ∀ x, c ≤ x →
     ∫ t in Ioi x, |pcfLG_A t * pcfLG_A2 t - (fun _ => (0:ℝ)) t * pcfLG_A t ^ 2| ≤ K := by
   obtain ⟨K, hK, hb⟩ := pcfLG_tail_poly_rpow (C (3/4:ℝ) * X^2 + C (1/2:ℝ)) (d := 2)
     (by compute_degree) (e := 5/2) (by norm_num) (by norm_num) hc
@@ -674,7 +675,7 @@ lemma pcfLG_tail_V {c : ℝ} (hc : 1 < c) : ∃ K, 0 ≤ K ∧ ∀ x, c ≤ x �
   nlinarith
 
 /-- Integrability of `|A_n'|` at infinity. -/
-lemma pcfLG_integrableOn_hatAd (n : ℕ) {c : ℝ} (hc : 1 < c) :
+theorem pcfLG_integrableOn_hatAd (n : ℕ) {c : ℝ} (hc : 1 < c) :
     IntegrableOn (fun t => |pcfLG_hatAd n t|) (Ioi c) := by
   rcases n with _ | m
   · simp [pcfLG_hatAd, pcfOlverPair]
@@ -684,7 +685,7 @@ lemma pcfLG_integrableOn_hatAd (n : ℕ) {c : ℝ} (hc : 1 < c) :
     simpa [pcfLG_hatAd] using this
 
 /-- Tail bound for `∫_x^∞ |A_n'|`: `≤ K x^{-2}` for `x ≥ c > 1`. -/
-lemma pcfLG_tail_hatAd (n : ℕ) {c : ℝ} (hc : 1 < c) : ∃ K, 0 ≤ K ∧ ∀ x, c ≤ x →
+theorem pcfLG_tail_hatAd (n : ℕ) {c : ℝ} (hc : 1 < c) : ∃ K, 0 ≤ K ∧ ∀ x, c ≤ x →
     ∫ t in Ioi x, |pcfLG_hatAd n t| ≤ K * x ^ (-2:ℝ) := by
   rcases n with _ | m
   · exact ⟨0, le_rfl, fun x _ => by simp [pcfLG_hatAd, pcfOlverPair]⟩
@@ -697,7 +698,7 @@ lemma pcfLG_tail_hatAd (n : ℕ) {c : ℝ} (hc : 1 < c) : ∃ K, 0 ≤ K ∧ ∀
     simpa [pcfLG_hatAd] using this
 
 /-- `A_s` is bounded on `[c, ∞)`, `c > 1`. -/
-lemma pcfLG_bound_hatA (s : ℕ) {c : ℝ} (hc : 1 < c) : ∃ K, 0 ≤ K ∧ ∀ t, c ≤ t →
+theorem pcfLG_bound_hatA (s : ℕ) {c : ℝ} (hc : 1 < c) : ∃ K, 0 ≤ K ∧ ∀ t, c ≤ t →
     |pcfLG_hatA s t| ≤ K := by
   obtain ⟨K, hK, hb⟩ := pcfLG_poly_rpow_bound (pcfOlverU s) (pcfLG_natDegree_olverU s)
     (e := 3*s/2) (by positivity) hc
@@ -707,20 +708,20 @@ lemma pcfLG_bound_hatA (s : ℕ) {c : ℝ} (hc : 1 < c) : ∃ K, 0 ≤ K ∧ ∀
   exact this
 
 /-- `A_0 = 1`. -/
-lemma pcfLG_hatA_zero (t : ℝ) : pcfLG_hatA 0 t = 1 := by
+theorem pcfLG_hatA_zero (t : ℝ) : pcfLG_hatA 0 t = 1 := by
   simp [pcfLG_hatA, pcfOlverU, pcfOlverPair]
 
 /-- `c_0 = 1`. -/
-lemma pcfLG_c_zero : pcfLG_c 0 = 1 := by
+theorem pcfLG_c_zero : pcfLG_c 0 = 1 := by
   simp [pcfLG_c, pcfOlverU, pcfOlverPair]
 
 /-- `|c_s| ≤ K` whenever `|A_s| ≤ K` near infinity. -/
-lemma pcfLG_abs_c_le {s : ℕ} {c K : ℝ} (hb : ∀ t, c ≤ t → |pcfLG_hatA s t| ≤ K) :
+theorem pcfLG_abs_c_le {s : ℕ} {c K : ℝ} (hb : ∀ t, c ≤ t → |pcfLG_hatA s t| ≤ K) :
     |pcfLG_c s| ≤ K :=
   le_of_tendsto (pcfLG_tendsto_hatA s).abs (eventually_atTop.2 ⟨c, hb⟩)
 
 /-- `ξ` is monotone on `(1, ∞)`. -/
-lemma pcfLG_xi_mono {x t : ℝ} (hx : 1 < x) (hxt : x ≤ t) : pcfXi x ≤ pcfXi t := by
+theorem pcfLG_xi_mono {x t : ℝ} (hx : 1 < x) (hxt : x ≤ t) : pcfXi x ≤ pcfXi t := by
   have hm : MonotoneOn pcfXi (Ioi 1) := by
     refine monotoneOn_of_hasDerivWithinAt_nonneg (f' := fun t => Real.sqrt (t^2-1))
       (convex_Ioi 1) (fun t ht => (pcfLG_hasDerivAt_xi ht).continuousAt.continuousWithinAt)
@@ -730,7 +731,7 @@ lemma pcfLG_xi_mono {x t : ℝ} (hx : 1 < x) (hxt : x ≤ t) : pcfXi x ≤ pcfXi
   exact hm hx (lt_of_lt_of_le hx hxt) hxt
 
 /-- `U(-μ²/2, μt√2)` as a function of `t`: first derivative. -/
-lemma pcfLG_hasDerivAt_U (μ t : ℝ) :
+theorem pcfLG_hasDerivAt_U (μ t : ℝ) :
     HasDerivAt (fun t : ℝ => pcfU (-μ^2/2) (μ*t*Real.sqrt 2))
       ((μ:ℂ) * Real.sqrt 2 * pcfUDeriv (-μ^2/2) (μ*t*Real.sqrt 2)) t := by
   have h1 : HasDerivAt (fun w : ℂ => (μ:ℂ) * w * Real.sqrt 2) ((μ:ℂ) * Real.sqrt 2) (t:ℂ) := by
@@ -739,7 +740,7 @@ lemma pcfLG_hasDerivAt_U (μ t : ℝ) :
   exact this.congr_deriv (by ring)
 
 /-- `U(-μ²/2, μt√2)` as a function of `t`: Weber's equation `w'' = μ⁴(t²-1) w`. -/
-lemma pcfLG_hasDerivAt_U' (μ t : ℝ) :
+theorem pcfLG_hasDerivAt_U' (μ t : ℝ) :
     HasDerivAt (fun t : ℝ => (μ:ℂ) * Real.sqrt 2 * pcfUDeriv (-μ^2/2) (μ*t*Real.sqrt 2))
       (((μ^4*(t^2-1) : ℝ) : ℂ) * pcfU (-μ^2/2) (μ*t*Real.sqrt 2)) t := by
   have h1 : HasDerivAt (fun w : ℂ => (μ:ℂ) * w * Real.sqrt 2) ((μ:ℂ) * Real.sqrt 2) (t:ℂ) := by
@@ -759,7 +760,7 @@ def pcfLG_ser (N : ℕ) (u t : ℝ) : ℝ := ∑ s ∈ Finset.range N, pcfLG_hat
 def pcfLG_S (N : ℕ) (u : ℝ) : ℝ := ∑ s ∈ Finset.range N, pcfLG_c s / u^s
 
 /-- The Liouville–Green series with coefficients `(-1)^s A_s` is the Olver series. -/
-lemma pcfLG_lgSeries_eq (N : ℕ) (u t : ℝ) :
+theorem pcfLG_lgSeries_eq (N : ℕ) (u t : ℝ) :
     LiouvilleGreen.lgSeries u (fun s t => (-1)^s * pcfLG_hatA s t) N t = pcfLG_ser N u t := by
   unfold LiouvilleGreen.lgSeries pcfLG_ser
   refine Finset.sum_congr rfl fun s _ => ?_
@@ -767,7 +768,7 @@ lemma pcfLG_lgSeries_eq (N : ℕ) (u t : ℝ) :
 
 /-- A truncated series with leading term `1` and bounded higher coefficients is within
 `K/u` of `1`. -/
-lemma pcfLG_abs_sum_sub_one_le {N : ℕ} (hN : 1 ≤ N) {f : ℕ → ℝ} (hf0 : f 0 = 1) {K : ℕ → ℝ}
+theorem pcfLG_abs_sum_sub_one_le {N : ℕ} (hN : 1 ≤ N) {f : ℕ → ℝ} (hf0 : f 0 = 1) {K : ℕ → ℝ}
     (hK : ∀ s, |f s| ≤ K s) {u : ℝ} (hu : 1 ≤ u) :
     |∑ s ∈ Finset.range N, f s / u^s - 1| ≤ (∑ s ∈ Finset.range N, K s) / u := by
   obtain ⟨M, rfl⟩ : ∃ M, N = M + 1 := ⟨N - 1, by omega⟩
@@ -791,7 +792,7 @@ lemma pcfLG_abs_sum_sub_one_le {N : ℕ} (hN : 1 ≤ N) {f : ℕ → ℝ} (hf0 :
 
 /-- **Core estimate for DLMF 12.10.3.** For `t ≥ 1+δ` and `μ` large,
 `U(-μ²/2, μt√2) S_N(μ²)/(h(μ) A(t) e^{-μ²ξ(t)}) = ∑_{s<N} A_s(t) μ^{-2s} + O(μ^{-2N})`. -/
-lemma pcfLG_core {δ : ℝ} (hδ : 0 < δ) {N : ℕ} (hN : 1 ≤ N) : ∃ C μ₀ : ℝ, 1 ≤ μ₀ ∧ 0 ≤ C ∧
+theorem pcfLG_core {δ : ℝ} (hδ : 0 < δ) {N : ℕ} (hN : 1 ≤ N) : ∃ C μ₀ : ℝ, 1 ≤ μ₀ ∧ 0 ≤ C ∧
     ∀ μ, μ₀ ≤ μ → |pcfLG_S N (μ^2) - 1| ≤ 1/2 ∧ ∀ t, 1 + δ ≤ t →
       ‖pcfU (-μ^2/2) (μ*t*Real.sqrt 2) * (pcfLG_S N (μ^2) : ℂ) /
         (pcfH μ * ((pcfLG_A t * Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ)) -
@@ -986,7 +987,7 @@ lemma pcfLG_core {δ : ℝ} (hδ : 0 < δ) {N : ℕ} (hN : 1 ≤ N) : ∃ C μ�
     rw [abs_le]; constructor <;> linarith [this.1, this.2]
 
 /-- Eventual statements for the uniform filter. -/
-lemma pcfLG_eventually_uniform {S : Set ℝ} {P : ℝ × ℝ → Prop} (μ₀ : ℝ)
+theorem pcfLG_eventually_uniform {S : Set ℝ} {P : ℝ × ℝ → Prop} (μ₀ : ℝ)
     (h : ∀ μ, μ₀ ≤ μ → ∀ t ∈ S, P (μ, t)) : ∀ᶠ p in pcfUniformFilter S, P p := by
   unfold pcfUniformFilter
   rw [eventually_inf_principal]
@@ -994,7 +995,7 @@ lemma pcfLG_eventually_uniform {S : Set ℝ} {P : ℝ × ℝ → Prop} (μ₀ : 
   exact h p.1 hp p.2 hpS
 
 /-- The complex denominator of DLMF 12.10.3 is real. -/
-lemma pcfLG_denom_eq {μ t : ℝ} (ht : 1 < t) (G : ℂ) :
+theorem pcfLG_denom_eq {μ t : ℝ} (ht : 1 < t) (G : ℂ) :
     G * cexp (-(μ:ℂ)^2 * (pcfXi t : ℂ)) / ((t:ℂ)^2-1)^(1/4:ℂ) =
       G * ((pcfLG_A t * Real.exp (-(μ^2 * pcfXi t)) : ℝ) : ℂ) := by
   have hy : 0 < t^2-1 := by nlinarith
@@ -1007,7 +1008,7 @@ lemma pcfLG_denom_eq {μ t : ℝ} (ht : 1 < t) (G : ℂ) :
   field_simp
 
 /-- `pcfOlverA` is the real coefficient `A_s` for `t > 1`. -/
-lemma pcfLG_olverA_eq (s : ℕ) {t : ℝ} (ht : 1 < t) : pcfOlverA s t = (pcfLG_hatA s t : ℂ) := by
+theorem pcfLG_olverA_eq (s : ℕ) {t : ℝ} (ht : 1 < t) : pcfOlverA s t = (pcfLG_hatA s t : ℂ) := by
   have hy : 0 < t^2-1 := by nlinarith
   have e1 : ((t:ℂ)^2-1)^(3*(s:ℂ)/2) = (((t^2-1) ^ (3*(s:ℝ)/2) : ℝ) : ℂ) := by
     rw [Complex.ofReal_cpow hy.le]; push_cast; rfl
@@ -1016,27 +1017,27 @@ lemma pcfLG_olverA_eq (s : ℕ) {t : ℝ} (ht : 1 < t) : pcfOlverA s t = (pcfLG_
   rw [div_eq_mul_inv]
 
 /-- The series of `pcfOlverA` is the real series `pcfLG_ser`. -/
-lemma pcfLG_sum_olverA_eq (N : ℕ) (μ : ℝ) {t : ℝ} (ht : 1 < t) :
+theorem pcfLG_sum_olverA_eq (N : ℕ) (μ : ℝ) {t : ℝ} (ht : 1 < t) :
     ∑ s ∈ Finset.range N, pcfOlverA s t / (μ:ℂ)^(2*s) = (pcfLG_ser N (μ^2) t : ℂ) := by
   rw [pcfLG_ser]; push_cast
   refine Finset.sum_congr rfl fun s _ => ?_
   rw [pcfLG_olverA_eq s ht, pow_mul]
 
 /-- The complex series `∑ c_s μ^{-2s}` is real. -/
-lemma pcfLG_sum_c_eq (N : ℕ) (μ : ℝ) :
+theorem pcfLG_sum_c_eq (N : ℕ) (μ : ℝ) :
     ∑ s ∈ Finset.range N, (pcfLG_c s : ℂ) / (μ:ℂ)^(2*s) = (pcfLG_S N (μ^2) : ℂ) := by
   rw [pcfLG_S]; push_cast
   refine Finset.sum_congr rfl fun s _ => ?_
   rw [pow_mul]
 
 /-- `‖μ^{-2N}‖ = (μ²)^{-N}` for `μ > 0`. -/
-lemma pcfLG_norm_zpow {μ : ℝ} (hμ : 0 < μ) (N : ℕ) :
+theorem pcfLG_norm_zpow {μ : ℝ} (hμ : 0 < μ) (N : ℕ) :
     ‖(μ:ℂ)^(-(2*N:ℤ))‖ = ((μ^2)^N)⁻¹ := by
   rw [norm_zpow, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hμ, zpow_neg,
     show (2*N:ℤ) = ((2*N:ℕ):ℤ) by push_cast; ring, zpow_natCast, pow_mul]
 
 /-- The Borel sum of the coefficients `c_s`, composed with `u = μ²`. -/
-lemma pcfLG_borel_bound {Φ : ℝ → ℝ} (hΦ : ∀ N : ℕ,
+theorem pcfLG_borel_bound {Φ : ℝ → ℝ} (hΦ : ∀ N : ℕ,
     (fun u : ℝ => Φ u - ∑ s ∈ Finset.range N, pcfLG_c s / u^s) =O[atTop] (fun u : ℝ => (u^N)⁻¹))
     (N : ℕ) : ∃ B μ₁ : ℝ, 0 ≤ B ∧ 1 ≤ μ₁ ∧ ∀ μ, μ₁ ≤ μ →
       |Φ (μ^2) - pcfLG_S N (μ^2)| ≤ B / (μ^2)^N := by

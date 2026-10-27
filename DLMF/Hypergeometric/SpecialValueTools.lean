@@ -36,7 +36,7 @@ namespace DLMF.Hypergeometric
 
 /-- Tangent bound for a product: if `|Im wᵢ| ≤ tᵢ Re wᵢ` with `Re wᵢ > 0` and `t₁t₂ < 1`, then
 `w₁w₂` has positive real part and `|Im(w₁w₂)| ≤ T Re(w₁w₂)` whenever `t₁ + t₂ ≤ T(1 - t₁t₂)`. -/
-lemma hypSV_tan_mul {w₁ w₂ : ℂ} {t₁ t₂ T : ℝ} (h₁ : 0 < w₁.re) (h₂ : 0 < w₂.re)
+theorem hypSV_tan_mul {w₁ w₂ : ℂ} {t₁ t₂ T : ℝ} (h₁ : 0 < w₁.re) (h₂ : 0 < w₂.re)
     (ht₁ : |w₁.im| ≤ t₁ * w₁.re) (ht₂ : |w₂.im| ≤ t₂ * w₂.re) (hlt : t₁ * t₂ < 1)
     (hT : t₁ + t₂ ≤ T * (1 - t₁ * t₂)) :
     0 < (w₁ * w₂).re ∧ |(w₁ * w₂).im| ≤ T * (w₁ * w₂).re := by
@@ -69,7 +69,7 @@ lemma hypSV_tan_mul {w₁ w₂ : ℂ} {t₁ t₂ T : ℝ} (h₁ : 0 < w₁.re) (
     _ ≤ _ := mul_le_mul_of_nonneg_left hre hT0
 
 /-- Tangent bound for a reciprocal. -/
-lemma hypSV_tan_recip {w : ℂ} {t : ℝ} (h : 0 < w.re) (ht : |w.im| ≤ t * w.re) :
+theorem hypSV_tan_recip {w : ℂ} {t : ℝ} (h : 0 < w.re) (ht : |w.im| ≤ t * w.re) :
     0 < (w⁻¹).re ∧ |(w⁻¹).im| ≤ t * (w⁻¹).re := by
   have hn : 0 < normSq w := normSq_pos.mpr (by rintro rfl; simp at h)
   rw [inv_re, inv_im]
@@ -79,7 +79,7 @@ lemma hypSV_tan_recip {w : ℂ} {t : ℝ} (h : 0 < w.re) (ht : |w.im| ≤ t * w.
 
 /-- On the cone domain of the cubic map `ψ(z) = -27z(1-z)²/(1-9z)²`, `1 - ψ z` has positive
 real part. -/
-lemma hypSV_psi_one_sub_re_pos {w : ℂ} (h₁ : 30 * |w.im| < 1 + 3 * w.re)
+theorem hypSV_psi_one_sub_re_pos {w : ℂ} (h₁ : 30 * |w.im| < 1 + 3 * w.re)
     (h₂ : 30 * |w.im| < 1 - 9 * w.re) :
     0 < (1 - (-27 * w * (1 - w) ^ 2 / (1 - 9 * w) ^ 2)).re := by
   have hq0 : 1 - 9 * w ≠ 0 := by
@@ -282,7 +282,7 @@ theorem hypSV_cubic_psi {a z : ℂ} (hc : ∀ k : ℕ, 2 * a + 5 / 6 ≠ -(k : �
   rw [show (1 : ℂ) - 9 * z = 1 + -9 * z by ring]
 
 /-- On the cone domain of the cubic map `s(u) = 27u/(4u-1)³`, `1 - s u` has positive real part. -/
-lemma hypSV_cubicTwo_one_sub_re_pos {w : ℂ} (h₁ : 80 * |w.im| < 1 + 8 * w.re)
+theorem hypSV_cubicTwo_one_sub_re_pos {w : ℂ} (h₁ : 80 * |w.im| < 1 + 8 * w.re)
     (h₂ : 80 * |w.im| < 1 - 16 * w.re) :
     0 < (1 - 27 * w / (4 * w - 1) ^ 3).re := by
   have hq0 : 4 * w - 1 ≠ 0 := by
@@ -543,7 +543,7 @@ theorem hypSV_cubic_psi_neg_one_third {A : ℂ} (hcA : ∀ k : ℕ, 2 * A + 5 / 
   exact hlim
 
 /-- `₂F₁` as the tsum of its Gauss coefficients, at every argument (the tsum is totalized). -/
-lemma hypSV_ordinaryHypergeometric_eq_tsum (a b c z : ℂ) :
+theorem hypSV_ordinaryHypergeometric_eq_tsum (a b c z : ℂ) :
     ₂F₁ a b c z = ∑' n, gaussHGCoeff a b c n * z ^ n := by
   rw [ordinaryHypergeometric_eq_tsum]
   simp only [smul_eq_mul]
@@ -553,7 +553,7 @@ lemma hypSV_ordinaryHypergeometric_eq_tsum (a b c z : ℂ) :
 
 /-- Abel's theorem for `₂F₁` along a radius to a point `ω` of the unit circle, when
 `Re(c - a - b) > 0`. -/
-lemma hypSV_tendsto_ray {a b c ω : ℂ} (hω : ‖ω‖ = 1) (h : 0 < (c - a - b).re) :
+theorem hypSV_tendsto_ray {a b c ω : ℂ} (hω : ‖ω‖ = 1) (h : 0 < (c - a - b).re) :
     Tendsto (fun r : ℝ => ₂F₁ a b c ((r : ℂ) * ω)) (𝓝[<] 1) (𝓝 (₂F₁ a b c ω)) := by
   have hs := ordinaryHypergeometric_summable_of_mem_sphere (a := a) (b := b) (c := c) hω h
   have habel := Complex.tendsto_tsum_powerSeries_nhdsWithin_lt hs.hasSum.tendsto_sum_nat
@@ -566,7 +566,7 @@ lemma hypSV_tendsto_ray {a b c ω : ℂ} (hω : ‖ω‖ = 1) (h : 0 < (c - a - 
   rw [mul_pow]; ring
 
 /-- `(p³/q²)^{1/3} = p q^{-2/3}` for positive reals. -/
-lemma hypSV_rpow_third {p q : ℝ} (hp : 0 < p) (hq : 0 < q) :
+theorem hypSV_rpow_third {p q : ℝ} (hp : 0 < p) (hq : 0 < q) :
     (p ^ 3 / q ^ 2) ^ (1 / 3 : ℝ) = p * q ^ (-(2 / 3) : ℝ) := by
   rw [Real.div_rpow (by positivity) (by positivity), ← Real.rpow_natCast, ← Real.rpow_natCast,
     ← Real.rpow_mul hp.le, ← Real.rpow_mul hq.le, Real.rpow_neg hq.le]

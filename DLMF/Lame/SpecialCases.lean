@@ -5,9 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Lame.Eigenvalues
 public import DLMF.Mathieu.Basic
-public import Mathlib.Analysis.SpecialFunctions.OrdinaryHypergeometric
+public import DLMF.Lame.Basic
+public import Mathlib.Tactic.Basify
+public import Mathlib.Tactic.ENatToNat
 
 /-!
 # Lamé functions: special cases and limiting forms (DLMF §29.5)

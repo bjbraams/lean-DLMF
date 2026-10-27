@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Mathieu.Noninteger.Fourier
-public import DLMF.Mathieu.Properties
 public import DLMF.Mathieu.SecondSolutions
 
 /-!
@@ -148,7 +147,7 @@ theorem isMathieuStable_q_zero {a : ℝ} (ha : 0 < a) : IsMathieuStable a 0 := b
     _ = ‖w₀‖ + ‖w₁ / k‖ := by ring
 
 /-- `‖me_ν(±x, q)‖ ≤ (∑ |c_m|) e^{∓ℑν x}` for real `x`. -/
-theorem p1b_norm_mathieuMe_le {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {q : ℂ}
+lemma p1b_norm_mathieuMe_le {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {q : ℂ}
     (hq : MathieuNormalSegment ν q) (x : ℝ) :
     ‖mathieuMe ν x q‖ ≤ (∑' m : ℤ, ‖mathieuMeCoeff ν q m‖) * Real.exp (-(ν.im * x)) := by
   have h := hasSum_mathieuMe_ofReal hν hq x
@@ -159,7 +158,7 @@ theorem p1b_norm_mathieuMe_le {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {
   rw [norm_mul, p1b_norm_exp_real]
 
 /-- `me_ν(x, q)` does not vanish identically on the real axis. -/
-theorem p1b_exists_mathieuMe_ne_zero {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {q : ℂ}
+lemma p1b_exists_mathieuMe_ne_zero {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {q : ℂ}
     (hq : MathieuNormalSegment ν q) : ∃ x : ℝ, mathieuMe ν x q ≠ 0 := by
   by_contra h
   push Not at h
@@ -168,7 +167,7 @@ theorem p1b_exists_mathieuMe_ne_zero {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) �
   exact Real.pi_ne_zero (by exact_mod_cast this.symm)
 
 /-- A pseudoperiodic `w` with `|μ| < 1` and `w(x₀) ≠ 0` is unbounded on the negative axis. -/
-theorem p1b_unbounded_neg {w : ℂ → ℂ} {μ : ℂ} (h : ∀ z, w (z + π) = μ * w z) (hμ : ‖μ‖ < 1)
+lemma p1b_unbounded_neg {w : ℂ → ℂ} {μ : ℂ} (h : ∀ z, w (z + π) = μ * w z) (hμ : ‖μ‖ < 1)
     {x₀ : ℝ} (hx₀ : w x₀ ≠ 0) : ¬ ∃ C : ℝ, ∀ x : ℝ, 0 ≤ x → ‖w (-x)‖ ≤ C := by
   rintro ⟨C, hC⟩
   obtain ⟨N, hN⟩ := exists_nat_ge (x₀ / π)
@@ -190,7 +189,7 @@ theorem p1b_unbounded_neg {w : ℂ → ℂ} {μ : ℂ} (h : ∀ z, w (z + π) = 
   exact hx₀ (norm_le_zero_iff.mp this)
 
 /-- A pseudoperiodic `w` with `|μ| > 1` and `w(x₀) ≠ 0` is unbounded on the positive axis. -/
-theorem p1b_unbounded_pos {w : ℂ → ℂ} {μ : ℂ} (h : ∀ z, w (z + π) = μ * w z) (hμ : 1 < ‖μ‖)
+lemma p1b_unbounded_pos {w : ℂ → ℂ} {μ : ℂ} (h : ∀ z, w (z + π) = μ * w z) (hμ : 1 < ‖μ‖)
     {x₀ : ℝ} (hx₀ : w x₀ ≠ 0) : ¬ ∃ C : ℝ, ∀ x : ℝ, 0 ≤ x → ‖w x‖ ≤ C := by
   have hμ0 : μ ≠ 0 := by rintro rfl; norm_num at hμ
   have hv : ∀ z, w (-(z + π)) = μ⁻¹ * w (-z) := by
@@ -296,7 +295,7 @@ theorem mathieuMe_tendsto_or {q : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) (h�
     simpa using (Real.tendsto_exp_atBot.comp this).const_mul B
 
 /-- A nontrivial solution of Mathieu's equation does not vanish identically on `ℝ`. -/
-theorem p1b_exists_real_ne_zero {a q : ℂ} {w : ℂ → ℂ} (hw : IsMathieuSolution a q w)
+lemma p1b_exists_real_ne_zero {a q : ℂ} {w : ℂ → ℂ} (hw : IsMathieuSolution a q w)
     (hw0 : w ≠ 0) : ∃ x : ℝ, w x ≠ 0 := by
   by_contra h
   push Not at h
@@ -313,7 +312,7 @@ theorem p1b_exists_real_ne_zero {a q : ℂ} {w : ℂ → ℂ} (hw : IsMathieuSol
   exact hw0 (by rw [this]; funext z; simp)
 
 /-- A Floquet solution with respect to `ν` with `ℑν ≠ 0` is unbounded on `ℝ`. -/
-theorem p1b_floquet_unbounded {a q ν : ℂ} {w : ℂ → ℂ} (hw : IsFloquetSolution a q ν w)
+lemma p1b_floquet_unbounded {a q ν : ℂ} {w : ℂ → ℂ} (hw : IsFloquetSolution a q ν w)
     (hν : ν.im ≠ 0) : ¬ ∃ C : ℝ, ∀ x : ℝ, ‖w x‖ ≤ C := by
   rintro ⟨C, hC⟩
   obtain ⟨hs, hw0, hper⟩ := hw
@@ -358,7 +357,7 @@ theorem not_isMathieuStable_of_im_ne_zero {a q ν : ℂ} (hc : IsMathieuCharExp 
   simp at this
 
 /-- A continuous `π`-pseudoperiodic function with multiplier of modulus `1` is bounded on `ℝ`. -/
-theorem p2x_bounded_of_pseudo {w : ℂ → ℂ} (hw : Continuous w) {μ : ℂ} (hμ : ‖μ‖ = 1)
+lemma p2x_bounded_of_pseudo {w : ℂ → ℂ} (hw : Continuous w) {μ : ℂ} (hμ : ‖μ‖ = 1)
     (h : ∀ z, w (z + π) = μ * w z) : ∃ C : ℝ, ∀ x : ℝ, ‖w x‖ ≤ C := by
   set g : ℝ → ℝ := fun x => ‖w x‖
   have hg : Continuous g := continuous_norm.comp (hw.comp Complex.continuous_ofReal)
@@ -375,7 +374,7 @@ theorem p2x_bounded_of_pseudo {w : ℂ → ℂ} (hw : Continuous w) {μ : ℂ} (
 
 /-- Linear growth: if `p(z + π) = s p(z)`, `u(z + π) = s u(z) + B p(z)` with `s² = 1`, `B ≠ 0`
 and `p(x₀) ≠ 0`, then `u` is unbounded on `ℝ`. -/
-theorem p2x_unbounded_jordan {u p : ℂ → ℂ} {s B : ℂ} (hs : s ^ 2 = 1)
+lemma p2x_unbounded_jordan {u p : ℂ → ℂ} {s B : ℂ} (hs : s ^ 2 = 1)
     (hp : ∀ z, p (z + π) = s * p z) (hu : ∀ z, u (z + π) = s * u z + B * p z) (hB : B ≠ 0)
     {x₀ : ℝ} (hx₀ : p x₀ ≠ 0) : ¬ ∃ C : ℝ, ∀ x : ℝ, ‖u x‖ ≤ C := by
   have hpn : ∀ n : ℕ, ∀ z, p (z + n * π) = s ^ n * p z := by
@@ -417,7 +416,7 @@ theorem p2x_unbounded_jordan {u p : ℂ → ℂ} {s B : ℂ} (hs : s ^ 2 = 1)
 
 /-- For real `q ≠ 0` and real `a`, the pair `(a, q)` is stable iff `|w_I(π; a, q)| < 1`
 (DLMF §28.17; the boundary cases `w_I(π) = ±1` are unstable by Ince's theorem). -/
-theorem p2x_stable_iff {a q : ℝ} (hq : q ≠ 0) :
+lemma p2x_stable_iff {a q : ℝ} (hq : q ≠ 0) :
     IsMathieuStable a q ↔ ‖mathieuWI a q π‖ < 1 := by
   have hq' : (q : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hq
   set c := mathieuWI (a : ℂ) (q : ℂ) π with hc

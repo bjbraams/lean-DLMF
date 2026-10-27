@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Bailey
-public import Mathlib.Topology.Algebra.InfiniteSum.Constructions
 
 /-!
 # Bailey transforms and pairs (DLMF §17.12)

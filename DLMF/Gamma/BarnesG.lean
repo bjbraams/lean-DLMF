@@ -11,12 +11,7 @@ public import Mathlib.Analysis.Complex.LocallyUniformLimit
 
 public import DLMF.Gamma.Basic
 public import Mathlib.NumberTheory.LSeries.RiemannZeta
-public import Mathlib.NumberTheory.ZetaValues
-public import Mathlib.NumberTheory.Harmonic.GammaDeriv
 public import Mathlib.NumberTheory.LSeries.HurwitzZetaValues
-public import Mathlib.Analysis.Asymptotics.Lemmas
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
-public import Mathlib.Analysis.SpecialFunctions.Pow.Complex
 public import Mathlib.Analysis.SpecialFunctions.Stirling
 public import DLMF.Gamma.IntegralRepresentations
 
@@ -63,7 +58,7 @@ theorem barnesG_one : barnesG 1 = 1 := by
 
 /-! ### The Weierstrass product: convergence and the shift identity -/
 
-lemma barnesGTerm_eq (z : ℂ) (k : ℕ) :
+theorem barnesGTerm_eq (z : ℂ) (k : ℕ) :
     barnesGTerm z k = (1 + z / (k + 1)) ^ (k + 1) *
       Complex.exp (-z + z ^ 2 / (2 * (k + 1))) := by
   unfold barnesGTerm
@@ -71,7 +66,7 @@ lemma barnesGTerm_eq (z : ℂ) (k : ℕ) :
   congr 1
   rw [show ((k : ℂ) + 1) = ((k + 1 : ℕ) : ℂ) by push_cast; ring, cpow_natCast]
 
-lemma barnesGTerm_eq_exp {z : ℂ} {k : ℕ} (hk : 2 * ‖z‖ ≤ k + 1) :
+theorem barnesGTerm_eq_exp {z : ℂ} {k : ℕ} (hk : 2 * ‖z‖ ≤ k + 1) :
     barnesGTerm z k = Complex.exp ((k + 1) *
       (Complex.log (1 + z / (k + 1)) - logTaylor 3 (z / (k + 1)))) := by
   have hn : ((k : ℂ) + 1) ≠ 0 := by exact_mod_cast (Nat.succ_ne_zero k)
@@ -93,7 +88,7 @@ lemma barnesGTerm_eq_exp {z : ℂ} {k : ℕ} (hk : 2 * ‖z‖ ≤ k + 1) :
     push_cast; field_simp; ring, Complex.exp_add (((k + 1 : ℕ) : ℂ) * _), Complex.exp_nat_mul,
     Complex.exp_log h1]
 
-lemma norm_barnesGTerm_sub_one_le {z : ℂ} {k : ℕ} (hk : 2 * ‖z‖ ≤ k + 1)
+theorem norm_barnesGTerm_sub_one_le {z : ℂ} {k : ℕ} (hk : 2 * ‖z‖ ≤ k + 1)
     (hk' : ‖z‖ ^ 3 ≤ ((k : ℝ) + 1) ^ 2) :
     ‖barnesGTerm z k - 1‖ ≤ 2 * ‖z‖ ^ 3 / ((k : ℝ) + 1) ^ 2 := by
   have hn : (0 : ℝ) < k + 1 := by positivity
@@ -131,7 +126,7 @@ lemma norm_barnesGTerm_sub_one_le {z : ℂ} {k : ℕ} (hk : 2 * ‖z‖ ≤ k + 
       rw [mul_div_assoc, mul_div_assoc]
       nlinarith
 
-lemma summable_norm_barnesGTerm_sub_one (z : ℂ) :
+theorem summable_norm_barnesGTerm_sub_one (z : ℂ) :
     Summable fun k : ℕ => ‖barnesGTerm z k - 1‖ := by
   have hs : Summable fun k : ℕ => 2 * ‖z‖ ^ 3 / ((k : ℝ) + 1) ^ 2 := by
     have := (summable_nat_add_iff 1).mpr (Real.summable_one_div_nat_pow.mpr one_lt_two)
@@ -147,12 +142,12 @@ lemma summable_norm_barnesGTerm_sub_one (z : ℂ) :
   rw [norm_norm]
   exact norm_barnesGTerm_sub_one_le hk hk'
 
-lemma multipliable_barnesGTerm (z : ℂ) : Multipliable (barnesGTerm z) := by
+theorem multipliable_barnesGTerm (z : ℂ) : Multipliable (barnesGTerm z) := by
   have h := Complex.multipliable_one_add_of_summable
     (Summable.of_norm (summable_norm_barnesGTerm_sub_one z))
   simpa using h
 
-lemma barnesGTerm_shift (z : ℂ) (k : ℕ) :
+theorem barnesGTerm_shift (z : ℂ) (k : ℕ) :
     ((k : ℂ) + z) ^ (k + 1) * barnesGTerm z k =
       ((k : ℂ) + 1 + z) ^ (k + 1) * barnesGTerm (z - 1) k *
         Complex.exp (-1 + (z - 1 / 2) / (k + 1)) := by
@@ -166,7 +161,7 @@ lemma barnesGTerm_shift (z : ℂ) (k : ℕ) :
   field_simp
 
 open Finset in
-lemma barnesG_partial (z : ℂ) (N : ℕ) :
+theorem barnesG_partial (z : ℂ) (N : ℕ) :
     (∏ m ∈ range N, (z + m)) * ∏ k ∈ range N, barnesGTerm z k =
       (z + N) ^ N * (∏ k ∈ range N, Complex.exp (-1 + (z - 1 / 2) / (k + 1))) *
         ∏ k ∈ range N, barnesGTerm (z - 1) k := by
@@ -187,7 +182,7 @@ def barnesShiftSeq (z : ℂ) (N : ℕ) : ℂ :=
     ((N : ℂ) ^ z * N.factorial)
 
 open Finset in
-lemma barnesShiftSeq_eq (z : ℂ) {N : ℕ} (hN : 1 ≤ N) :
+theorem barnesShiftSeq_eq (z : ℂ) {N : ℕ} (hN : 1 ≤ N) :
     barnesShiftSeq z N = (1 + z / N) ^ (N + 1) *
       Complex.exp ((z - 1 / 2) * (((harmonic N : ℝ) - Real.log N : ℝ) : ℂ)) /
         ((Stirling.stirlingSeq N * √2 : ℝ) : ℂ) := by
@@ -244,7 +239,7 @@ lemma barnesShiftSeq_eq (z : ℂ) {N : ℕ} (hN : 1 ≤ N) :
     ring
   linear_combination (((N : ℂ) + z) / N) ^ (N + 1) * e1
 
-lemma tendsto_barnesShiftSeq (z : ℂ) :
+theorem tendsto_barnesShiftSeq (z : ℂ) :
     Tendsto (barnesShiftSeq z) atTop
       (𝓝 (Complex.exp z * Complex.exp ((z - 1 / 2) * Real.eulerMascheroniConstant) /
         ((√π * √2 : ℝ) : ℂ))) := by
@@ -273,7 +268,7 @@ lemma tendsto_barnesShiftSeq (z : ℂ) :
   rfl
 
 open Finset in
-lemma prod_barnesGTerm_eq (z : ℂ) (hz : ∀ m : ℕ, z ≠ -m) {N : ℕ} (hN : 1 ≤ N) :
+theorem prod_barnesGTerm_eq (z : ℂ) (hz : ∀ m : ℕ, z ≠ -m) {N : ℕ} (hN : 1 ≤ N) :
     ∏ k ∈ range N, barnesGTerm z k =
       GammaSeq z N * barnesShiftSeq z N * ∏ k ∈ range N, barnesGTerm (z - 1) k := by
   have hQ : ∀ n : ℕ, ∏ m ∈ range n, (z + m) ≠ 0 := fun n =>
@@ -293,7 +288,7 @@ lemma prod_barnesGTerm_eq (z : ℂ) (hz : ∀ m : ℕ, z ≠ -m) {N : ℕ} (hN :
   field_simp
   linear_combination (z + N) * hpart
 
-lemma barnesGSucc_eq_Gamma_mul {z : ℂ} (hz : z ≠ 0) :
+theorem barnesGSucc_eq_Gamma_mul {z : ℂ} (hz : z ≠ 0) :
     barnesGSucc z = Complex.Gamma z * barnesGSucc (z - 1) := by
   by_cases hneg : ∃ m : ℕ, z = -m
   · obtain ⟨m, rfl⟩ := hneg
@@ -338,7 +333,7 @@ lemma barnesGSucc_eq_Gamma_mul {z : ℂ} (hz : z ≠ 0) :
 
 /-! ### The real logarithm of the Weierstrass product -/
 
-lemma sub_sq_div_two_le_log_one_add {u : ℝ} (hu : 0 ≤ u) : u - u ^ 2 / 2 ≤ Real.log (1 + u) := by
+theorem sub_sq_div_two_le_log_one_add {u : ℝ} (hu : 0 ≤ u) : u - u ^ 2 / 2 ≤ Real.log (1 + u) := by
   let F : ℝ → ℝ := fun y => Real.log (1 + y) - y + y ^ 2 / 2
   have A : ∀ y ∈ Set.Icc 0 u, HasDerivAt F (1 / (1 + y) - 1 + y) y := by
     intro y hy
@@ -365,11 +360,11 @@ lemma sub_sq_div_two_le_log_one_add {u : ℝ} (hu : 0 ≤ u) : u - u ^ 2 / 2 ≤
 /-- The terms of the Weierstrass series for `log Γ(t+1)`. -/
 def logGammaTerm (t : ℝ) (n : ℕ) : ℝ := t / (n + 1) - Real.log (1 + t / (n + 1))
 
-lemma logGammaTerm_nonneg {t : ℝ} (ht : 0 ≤ t) (n : ℕ) : 0 ≤ logGammaTerm t n := by
+theorem logGammaTerm_nonneg {t : ℝ} (ht : 0 ≤ t) (n : ℕ) : 0 ≤ logGammaTerm t n := by
   have := Real.log_le_sub_one_of_pos (by positivity : 0 < 1 + t / (n + 1))
   unfold logGammaTerm; linarith
 
-lemma logGammaTerm_le {t : ℝ} (ht : 0 ≤ t) (n : ℕ) :
+theorem logGammaTerm_le {t : ℝ} (ht : 0 ≤ t) (n : ℕ) :
     logGammaTerm t n ≤ t ^ 2 / (2 * ((n : ℝ) + 1) ^ 2) := by
   have := sub_sq_div_two_le_log_one_add (by positivity : 0 ≤ t / (n + 1))
   unfold logGammaTerm
@@ -378,14 +373,14 @@ lemma logGammaTerm_le {t : ℝ} (ht : 0 ≤ t) (n : ℕ) :
     rw [div_div, mul_comm]
   linarith
 
-lemma summable_logGammaTerm {t : ℝ} (ht : 0 ≤ t) : Summable (logGammaTerm t) := by
+theorem summable_logGammaTerm {t : ℝ} (ht : 0 ≤ t) : Summable (logGammaTerm t) := by
   have hs : Summable fun n : ℕ => t ^ 2 / (2 * ((n : ℝ) + 1) ^ 2) := by
     have := (summable_nat_add_iff 1).mpr (Real.summable_one_div_nat_pow.mpr one_lt_two)
     refine (this.mul_left (t ^ 2 / 2)).congr fun k => ?_
     push_cast; field_simp
   exact Summable.of_nonneg_of_le (logGammaTerm_nonneg ht) (logGammaTerm_le ht) hs
 
-lemma hasSum_logGammaTerm {t : ℝ} (ht : 0 ≤ t) :
+theorem hasSum_logGammaTerm {t : ℝ} (ht : 0 ≤ t) :
     HasSum (logGammaTerm t)
       (Real.log (Real.Gamma (t + 1)) + Real.eulerMascheroniConstant * t) := by
   rcases ht.eq_or_lt with rfl | ht
@@ -417,7 +412,7 @@ lemma hasSum_logGammaTerm {t : ℝ} (ht : 0 ≤ t) :
   rw [hG1, Real.log_exp, sub_add_cancel]
   exact (summable_logGammaTerm ht.le).hasSum
 
-lemma continuousOn_logGammaTerm (n : ℕ) : ContinuousOn (fun t => logGammaTerm t n) (Set.Ici 0) := by
+theorem continuousOn_logGammaTerm (n : ℕ) : ContinuousOn (fun t => logGammaTerm t n) (Set.Ici 0) := by
   intro t ht
   have h1 : (1 + t / (n + 1)) ≠ 0 := by
     have : (0 : ℝ) ≤ t := ht
@@ -426,7 +421,7 @@ lemma continuousOn_logGammaTerm (n : ℕ) : ContinuousOn (fun t => logGammaTerm 
   exact (((continuous_id.div_const _).continuousAt).sub
     ((continuous_const.add (continuous_id.div_const _)).continuousAt.log h1)).continuousWithinAt
 
-lemma integral_logGammaTerm {x : ℝ} (hx : 0 ≤ x) (n : ℕ) :
+theorem integral_logGammaTerm {x : ℝ} (hx : 0 ≤ x) (n : ℕ) :
     ∫ t in (0 : ℝ)..x, logGammaTerm t n =
       x ^ 2 / (2 * (n + 1)) - (((n : ℝ) + 1 + x) * Real.log (1 + x / (n + 1)) - x) := by
   have hm : (0 : ℝ) < n + 1 := by positivity
@@ -457,14 +452,14 @@ lemma integral_logGammaTerm {x : ℝ} (hx : 0 ≤ x) (n : ℕ) :
 def barnesLogTerm (x : ℝ) (n : ℕ) : ℝ :=
   (n + 1) * Real.log (1 + x / (n + 1)) - x + x ^ 2 / (2 * (n + 1))
 
-lemma barnesLogTerm_eq {x : ℝ} (hx : 0 ≤ x) (n : ℕ) :
+theorem barnesLogTerm_eq {x : ℝ} (hx : 0 ≤ x) (n : ℕ) :
     barnesLogTerm x n = x * logGammaTerm x n - ∫ t in (0 : ℝ)..x, logGammaTerm t n := by
   have hm : ((n : ℝ) + 1) ≠ 0 := by positivity
   rw [integral_logGammaTerm hx, barnesLogTerm, logGammaTerm]
   field_simp
   ring
 
-lemma hasSum_integral_logGammaTerm {x : ℝ} (hx : 0 ≤ x) :
+theorem hasSum_integral_logGammaTerm {x : ℝ} (hx : 0 ≤ x) :
     HasSum (fun n => ∫ t in (0 : ℝ)..x, logGammaTerm t n)
       (∫ t in (0 : ℝ)..x, ∑' n, logGammaTerm t n) := by
   have hsub : Set.uIoc 0 x ⊆ Set.Ici 0 := by
@@ -487,7 +482,7 @@ lemma hasSum_integral_logGammaTerm {x : ℝ} (hx : 0 ≤ x) :
   · refine Filter.Eventually.of_forall fun t ht => ?_
     exact (summable_logGammaTerm (hsub ht)).hasSum
 
-lemma continuousOn_log_Gamma_add_one :
+theorem continuousOn_log_Gamma_add_one :
     ContinuousOn (fun t : ℝ => Real.log (Real.Gamma (t + 1))) (Set.Ici 0) := by
   intro t ht
   have ht0 : (0 : ℝ) < t + 1 := by have : (0 : ℝ) ≤ t := ht; linarith
@@ -499,7 +494,7 @@ lemma continuousOn_log_Gamma_add_one :
     ContinuousAt.comp (g := Real.Gamma) (f := fun s : ℝ => s + 1) hG (by fun_prop)
   exact (hc.log (Real.Gamma_pos_of_pos ht0).ne').continuousWithinAt
 
-lemma hasSum_barnesLogTerm {x : ℝ} (hx : 0 ≤ x) :
+theorem hasSum_barnesLogTerm {x : ℝ} (hx : 0 ≤ x) :
     HasSum (barnesLogTerm x)
       (x * Real.log (Real.Gamma (x + 1)) - (∫ t in (0 : ℝ)..x, Real.log (Real.Gamma (t + 1))) +
         Real.eulerMascheroniConstant * x ^ 2 / 2) := by
@@ -521,7 +516,7 @@ lemma hasSum_barnesLogTerm {x : ℝ} (hx : 0 ≤ x) :
   · funext n; exact barnesLogTerm_eq hx n
   · ring
 
-lemma barnesGTerm_ofReal {x : ℝ} (hx : 0 ≤ x) (k : ℕ) :
+theorem barnesGTerm_ofReal {x : ℝ} (hx : 0 ≤ x) (k : ℕ) :
     barnesGTerm x k = Complex.exp (barnesLogTerm x k) := by
   have hpos : (0 : ℝ) < 1 + x / (k + 1) := by positivity
   have hreal : (1 + x / (k + 1)) ^ (k + 1) * Real.exp (-x + x ^ 2 / (2 * (k + 1))) =
@@ -534,7 +529,7 @@ lemma barnesGTerm_ofReal {x : ℝ} (hx : 0 ≤ x) (k : ℕ) :
   push_cast
   rfl
 
-lemma barnesGSucc_ofReal {x : ℝ} (hx : 0 ≤ x) :
+theorem barnesGSucc_ofReal {x : ℝ} (hx : 0 ≤ x) :
     barnesGSucc x = Real.exp (x / 2 * Real.log (2 * π) - x * (x + 1) / 2 -
       Real.eulerMascheroniConstant * x ^ 2 / 2 + ∑' n, barnesLogTerm x n) := by
   have hb := (hasSum_barnesLogTerm hx).summable.hasSum
@@ -693,7 +688,7 @@ def zetaTerm (s : ℂ) (n : ℕ) : ℂ :=
     (((n : ℂ) + 1) ^ (1 - s) - (n : ℂ) ^ (1 - s)) / (1 - s) +
     s / 12 * (((n : ℂ) + 1) ^ (-s - 1) - (n : ℂ) ^ (-s - 1))
 
-lemma hasDerivAt_pw {N : ℝ} (a : ℂ) {v : ℝ} (hv : 0 < N + v) :
+theorem hasDerivAt_pw {N : ℝ} (a : ℂ) {v : ℝ} (hv : 0 < N + v) :
     HasDerivAt (fun v : ℝ => ((N + v : ℝ) : ℂ) ^ a) (a * ((N + v : ℝ) : ℂ) ^ (a - 1)) v := by
   have h1 : HasDerivAt (fun v : ℝ => ((N + v : ℝ) : ℂ)) 1 v := by
     simpa using ((hasDerivAt_id v).const_add N).ofReal_comp
@@ -822,7 +817,7 @@ theorem norm_zetaTerm_le {s : ℂ} (hs : s ≠ 1) (hre : -3 ≤ s.re) {n : ℕ} 
   rw [← hEq]
   exact hE1
 
-lemma sum_zetaTerm (s : ℂ) (N : ℕ) :
+theorem sum_zetaTerm (s : ℂ) (N : ℕ) :
     ∑ i ∈ Finset.range N, zetaTerm s (i + 1) =
       ∑ k ∈ Finset.range (N + 1), ((k : ℂ) + 1) ^ (-s) - (1 + ((N : ℂ) + 1) ^ (-s)) / 2 -
         (((N : ℂ) + 1) ^ (1 - s) - 1) / (1 - s) + s / 12 * (((N : ℂ) + 1) ^ (-s - 1) - 1) := by
@@ -834,7 +829,7 @@ lemma sum_zetaTerm (s : ℂ) (N : ℕ) :
     push_cast
     ring
 
-lemma summable_rpow_succ {p : ℝ} (hp : p < -1) :
+theorem summable_rpow_succ {p : ℝ} (hp : p < -1) :
     Summable (fun i : ℕ => ((i : ℝ) + 1) ^ p) := by
   have := (summable_nat_add_iff 1).mpr (Real.summable_nat_rpow.mpr hp)
   refine this.congr fun i => ?_
@@ -842,7 +837,7 @@ lemma summable_rpow_succ {p : ℝ} (hp : p < -1) :
   rfl
 
 /-- A locally uniform bound for the terms near `s₀` with `-2 < re s₀`. -/
-lemma norm_zetaTerm_le_near {s₀ s : ℂ} (h₀ : -2 < s₀.re)
+theorem norm_zetaTerm_le_near {s₀ s : ℂ} (h₀ : -2 < s₀.re)
     (hs : s ∈ Metric.ball s₀ ((s₀.re + 2) / 2)) (hs1 : s ≠ 1) (i : ℕ) :
     ‖zetaTerm s (i + 1)‖ ≤
       (‖s₀‖ + (s₀.re + 2) / 2 + 2) ^ 3 * ((i : ℝ) + 1) ^ (-1 - (s₀.re + 2) / 2) := by
@@ -879,7 +874,7 @@ lemma norm_zetaTerm_le_near {s₀ s : ℂ} (h₀ : -2 < s₀.re)
       (by linarith)
   exact mul_le_mul hA hB (by positivity) (by positivity)
 
-lemma differentiableAt_zetaTerm {s : ℂ} (hs : s ≠ 1) (n : ℕ) (hn : 1 ≤ n) :
+theorem differentiableAt_zetaTerm {s : ℂ} (hs : s ≠ 1) (n : ℕ) (hn : 1 ≤ n) :
     DifferentiableAt ℂ (fun s => zetaTerm s n) s := by
   have hn0 : (n : ℂ) ≠ 0 := by exact_mod_cast (by omega : n ≠ 0)
   have hn1 : (n : ℂ) + 1 ≠ 0 := by exact_mod_cast (by omega : n + 1 ≠ 0)
@@ -899,16 +894,16 @@ lemma differentiableAt_zetaTerm {s : ℂ} (hs : s ≠ 1) (n : ℕ) (hn : 1 ≤ n
 /-- The domain: the half-plane `re s > -2` slit along `[1, ∞)`. -/
 def zetaDom : Set ℂ := {s | -2 < s.re} \ {s | s.im = 0 ∧ 1 ≤ s.re}
 
-lemma isOpen_zetaDom : IsOpen zetaDom :=
+theorem isOpen_zetaDom : IsOpen zetaDom :=
   (isOpen_lt continuous_const Complex.continuous_re).sdiff
     ((isClosed_eq Complex.continuous_im continuous_const).inter
       (isClosed_le continuous_const Complex.continuous_re))
 
-lemma ne_one_of_mem_zetaDom {s : ℂ} (hs : s ∈ zetaDom) : s ≠ 1 := by
+theorem ne_one_of_mem_zetaDom {s : ℂ} (hs : s ∈ zetaDom) : s ≠ 1 := by
   rintro rfl
   exact hs.2 ⟨by simp, by simp⟩
 
-lemma isPreconnected_zetaDom : IsPreconnected zetaDom := by
+theorem isPreconnected_zetaDom : IsPreconnected zetaDom := by
   have h0 : (0 : ℂ) ∈ zetaDom := ⟨by simp, fun h => by norm_num at h⟩
   have hstar : StarConvex ℝ 0 zetaDom := by
     intro y hy a b ha hb hab
@@ -945,7 +940,7 @@ def zetaSeries (s : ℂ) : ℂ := ∑' i : ℕ, zetaTerm s (i + 1)
 /-- The Euler–Maclaurin continuation of `ζ` to `re s > -2`. -/
 def zetaEM (s : ℂ) : ℂ := 1 / (s - 1) + 1 / 2 + s / 12 + zetaSeries s
 
-lemma differentiableAt_zetaSeries {s₀ : ℂ} (h : s₀ ∈ zetaDom) :
+theorem differentiableAt_zetaSeries {s₀ : ℂ} (h : s₀ ∈ zetaDom) :
     DifferentiableAt ℂ zetaSeries s₀ := by
   have h₀ : -2 < s₀.re := h.1
   set W := zetaDom ∩ Metric.ball s₀ ((s₀.re + 2) / 2) with hW
@@ -960,14 +955,14 @@ lemma differentiableAt_zetaSeries {s₀ : ℂ} (h : s₀ ∈ zetaDom) :
     · exact norm_zetaTerm_le_near h₀ hw.2 (ne_one_of_mem_zetaDom hw.1) i
   exact hd.differentiableAt (hWo.mem_nhds hs₀W)
 
-lemma differentiableAt_zetaEM {s : ℂ} (h : s ∈ zetaDom) : DifferentiableAt ℂ zetaEM s := by
+theorem differentiableAt_zetaEM {s : ℂ} (h : s ∈ zetaDom) : DifferentiableAt ℂ zetaEM s := by
   have hs1 : s - 1 ≠ 0 := sub_ne_zero.mpr (ne_one_of_mem_zetaDom h)
   have hA : DifferentiableAt ℂ (fun s : ℂ => 1 / (s - 1)) s :=
     (differentiableAt_const (1 : ℂ)).div (differentiableAt_id.sub_const 1) hs1
   have hB : DifferentiableAt ℂ (fun s : ℂ => s / 12) s := differentiableAt_id.div_const 12
   exact ((hA.add_const (1 / 2 : ℂ)).add hB).add (differentiableAt_zetaSeries h)
 
-lemma tendsto_cpow_neg {w : ℂ} (hw : 0 < w.re) :
+theorem tendsto_cpow_neg {w : ℂ} (hw : 0 < w.re) :
     Tendsto (fun N : ℕ => ((N : ℂ) + 1) ^ (-w)) atTop (𝓝 0) := by
   rw [tendsto_zero_iff_norm_tendsto_zero]
   have h : ∀ N : ℕ, ‖((N : ℂ) + 1) ^ (-w)‖ = ((N : ℝ) + 1) ^ (-w.re) := by
@@ -978,7 +973,7 @@ lemma tendsto_cpow_neg {w : ℂ} (hw : 0 < w.re) :
   exact (tendsto_rpow_neg_atTop hw).comp
     (tendsto_atTop_add_const_right _ 1 tendsto_natCast_atTop_atTop)
 
-lemma zeta_eq_zetaEM {s : ℂ} (hs : 1 < s.re) : riemannZeta s = zetaEM s := by
+theorem zeta_eq_zetaEM {s : ℂ} (hs : 1 < s.re) : riemannZeta s = zetaEM s := by
   have hs1 : s ≠ 1 := by rintro rfl; simp at hs
   have hs1' : (1 : ℂ) - s ≠ 0 := sub_ne_zero.mpr (Ne.symm hs1)
   have hsum : Summable (fun i : ℕ => zetaTerm s (i + 1)) := by
@@ -1023,7 +1018,7 @@ lemma zeta_eq_zetaEM {s : ℂ} (hs : 1 < s.re) : riemannZeta s = zetaEM s := by
   field_simp
   ring
 
-lemma eqOn_zeta_zetaEM : Set.EqOn riemannZeta zetaEM zetaDom := by
+theorem eqOn_zeta_zetaEM : Set.EqOn riemannZeta zetaEM zetaDom := by
   have hζ : AnalyticOnNhd ℂ riemannZeta zetaDom :=
     DifferentiableOn.analyticOnNhd (fun s hs =>
       (differentiableAt_riemannZeta (ne_one_of_mem_zetaDom hs)).differentiableWithinAt)
@@ -1043,7 +1038,7 @@ def dz (n : ℕ) : ℝ :=
     (((n : ℝ) + 1) ^ 2 * Real.log ((n : ℝ) + 1) - (n : ℝ) ^ 2 * Real.log n) / 2 -
     (2 * (n : ℝ) + 1) / 4 + (Real.log ((n : ℝ) + 1) - Real.log n) / 12
 
-lemma hasDerivAt_zetaTerm (n : ℕ) (hn : 1 ≤ n) :
+theorem hasDerivAt_zetaTerm (n : ℕ) (hn : 1 ≤ n) :
     HasDerivAt (fun s => zetaTerm s n) (dz n : ℂ) (-1) := by
   have hn0 : (n : ℂ) ≠ 0 := by exact_mod_cast (by omega : n ≠ 0)
   have hn1 : (n : ℂ) + 1 ≠ 0 := by exact_mod_cast (by omega : n + 1 ≠ 0)
@@ -1071,7 +1066,7 @@ lemma hasDerivAt_zetaTerm (n : ℕ) (hn : 1 ≤ n) :
 def hseq (N : ℕ) : ℝ := ∑ k ∈ Finset.range (N + 1), (k : ℝ) * Real.log k -
     ((N : ℝ) ^ 2 / 2 + N / 2 + 1 / 12) * Real.log N + (N : ℝ) ^ 2 / 4
 
-lemma sum_dz (M : ℕ) : ∑ i ∈ Finset.range M, dz (i + 1) = 1 / 4 - hseq (M + 1) := by
+theorem sum_dz (M : ℕ) : ∑ i ∈ Finset.range M, dz (i + 1) = 1 / 4 - hseq (M + 1) := by
   induction M with
   | zero => simp [hseq, Finset.sum_range_succ]
   | succ M ih =>
@@ -1132,7 +1127,7 @@ theorem tendsto_hseq : Tendsto hseq atTop (𝓝 (Real.log glaisherKinkelin)) := 
 
 /-! ### The real form of 5.17.4 and the integer values -/
 
-lemma log_barnesGSucc_re {x : ℝ} (hx : 0 < x) :
+theorem log_barnesGSucc_re {x : ℝ} (hx : 0 < x) :
     Real.log (barnesGSucc x).re =
       x / 2 * Real.log (2 * π) - x * (x + 1) / 2 + x * Real.log (Real.Gamma (x + 1)) -
         ∫ t in (0 : ℝ)..x, Real.log (Real.Gamma (t + 1)) := by
@@ -1158,7 +1153,7 @@ lemma log_barnesGSucc_re {x : ℝ} (hx : 0 < x) :
   push_cast
   ring
 
-lemma sum_log_factorial (n : ℕ) :
+theorem sum_log_factorial (n : ℕ) :
     ∑ k ∈ Finset.range n, Real.log (k.factorial : ℝ) =
       n * Real.log (n.factorial : ℝ) - ∑ k ∈ Finset.range (n + 1), (k : ℝ) * Real.log k := by
   induction n with
@@ -1170,7 +1165,7 @@ lemma sum_log_factorial (n : ℕ) :
     ring
 
 /-- The statement's function at a positive integer. -/
-lemma barnes_nat_eq (n : ℕ) (hn : 1 ≤ n) :
+theorem barnes_nat_eq (n : ℕ) (hn : 1 ≤ n) :
     Real.log (barnesGSucc ((n : ℝ) : ℂ)).re -
         ((1 / 4) * (n : ℝ) ^ 2 + n * Real.log (Real.Gamma (n + 1)) -
           ((1 / 2) * n * (n + 1) + 1 / 12) * Real.log n - Real.log glaisherKinkelin) =
@@ -1198,7 +1193,7 @@ lemma barnes_nat_eq (n : ℕ) (hn : 1 ≤ n) :
 
 /-! ### The averaged Binet remainder -/
 
-lemma continuousOn_logGamma : ContinuousOn (fun t => Real.log (Real.Gamma t)) (Set.Ioi 0) := by
+theorem continuousOn_logGamma : ContinuousOn (fun t => Real.log (Real.Gamma t)) (Set.Ioi 0) := by
   intro t ht
   have ht' : (0 : ℝ) < t := ht
   have hc : ContinuousAt Real.Gamma t :=
@@ -1214,7 +1209,7 @@ def barnesPsi (t : ℝ) : ℝ := ∫ x in (0 : ℝ)..1, x * Real.log (Real.Gamma
 def barnesB (t : ℝ) : ℝ :=
   (t / 2 + 1 / 12) * Real.log t - t / 2 + Real.log (2 * π) / 4 - barnesPsi t
 
-lemma log_one_add_bounds {x t : ℝ} (hx0 : 0 ≤ x) (hx1 : x ≤ 1) (ht : 1 ≤ t) :
+theorem log_one_add_bounds {x t : ℝ} (hx0 : 0 ≤ x) (hx1 : x ≤ 1) (ht : 1 ≤ t) :
     |(x + t - 1 / 2) * (Real.log (x + t) - Real.log t) - x| ≤ 1 / t := by
   have ht0 : 0 < t := by linarith
   have hu : 0 ≤ x / t := div_nonneg hx0 ht0.le
@@ -1262,7 +1257,7 @@ lemma log_one_add_bounds {x t : ℝ} (hx0 : 0 ≤ x) (hx1 : x ≤ 1) (ht : 1 ≤
     linarith
   · linarith
 
-lemma abs_barnesB_le {t : ℝ} (ht : 1 ≤ t) : |barnesB t| ≤ 2 / t := by
+theorem abs_barnesB_le {t : ℝ} (ht : 1 ≤ t) : |barnesB t| ≤ 2 / t := by
   have ht0 : 0 < t := by linarith
   set g : ℝ → ℝ := fun x => x * (x + t - 1 / 2) * Real.log t - t * x + x / 2 * Real.log (2 * π)
     with hg
@@ -1329,7 +1324,7 @@ lemma abs_barnesB_le {t : ℝ} (ht : 1 ≤ t) : |barnesB t| ≤ 2 / t := by
 
 /-! ### `D - B` is constant -/
 
-lemma hasDerivAt_integral_one {f : ℝ → ℝ} (hf : ContinuousOn f (Set.Ioi 0)) {y : ℝ}
+theorem hasDerivAt_integral_one {f : ℝ → ℝ} (hf : ContinuousOn f (Set.Ioi 0)) {y : ℝ}
     (hy : 0 < y) : HasDerivAt (fun y => ∫ u in (1 : ℝ)..y, f u) (f y) y := by
   have hsub : Set.uIcc 1 y ⊆ Set.Ioi 0 := by
     intro u hu
@@ -1345,18 +1340,18 @@ def barnesLam (y : ℝ) : ℝ := ∫ u in (1 : ℝ)..y, Real.log (Real.Gamma u)
 /-- `P(y) = ∫₁^y u log Γ(u) du`. -/
 def barnesP (y : ℝ) : ℝ := ∫ u in (1 : ℝ)..y, u * Real.log (Real.Gamma u)
 
-lemma continuousOn_mul_logGamma :
+theorem continuousOn_mul_logGamma :
     ContinuousOn (fun u : ℝ => u * Real.log (Real.Gamma u)) (Set.Ioi 0) :=
   continuousOn_id.mul continuousOn_logGamma
 
-lemma intervalIntegrable_of_pos {f : ℝ → ℝ} (hf : ContinuousOn f (Set.Ioi 0)) {a b : ℝ}
+theorem intervalIntegrable_of_pos {f : ℝ → ℝ} (hf : ContinuousOn f (Set.Ioi 0)) {a b : ℝ}
     (ha : 0 < a) (hb : 0 < b) : IntervalIntegrable f volume a b := by
   refine (hf.mono fun u hu => ?_).intervalIntegrable
   rcases Set.mem_uIcc.mp hu with h | h
   · show (0 : ℝ) < u; linarith [h.1]
   · show (0 : ℝ) < u; linarith [h.1]
 
-lemma barnesPsi_eq {t : ℝ} (ht : 0 < t) :
+theorem barnesPsi_eq {t : ℝ} (ht : 0 < t) :
     barnesPsi t = (barnesP (t + 1) - barnesP t) - t * (barnesLam (t + 1) - barnesLam t) := by
   have h1 : barnesPsi t = ∫ u in t..t + 1, (u - t) * Real.log (Real.Gamma u) := by
     have := intervalIntegral.integral_comp_add_right
@@ -1394,7 +1389,7 @@ def barnesV (t : ℝ) : ℝ :=
     ((barnesP (t + 1) - barnesP t) - t * (barnesLam (t + 1) - barnesLam t)) +
     Real.log glaisherKinkelin - Real.log (2 * π) / 4
 
-lemma barnesD_sub_barnesB {t : ℝ} (ht : 0 < t) : barnesD t - barnesB t = barnesV t := by
+theorem barnesD_sub_barnesB {t : ℝ} (ht : 0 < t) : barnesD t - barnesB t = barnesV t := by
   have hΛ : ∫ s in (0 : ℝ)..t, Real.log (Real.Gamma (s + 1)) = barnesLam (t + 1) := by
     have := intervalIntegral.integral_comp_add_right
       (fun u => Real.log (Real.Gamma u)) 1 (a := 0) (b := t)
@@ -1407,7 +1402,7 @@ lemma barnesD_sub_barnesB {t : ℝ} (ht : 0 < t) : barnesD t - barnesB t = barne
 def barnesW (t : ℝ) : ℝ :=
   Real.log (2 * π) / 2 - t + t * Real.log t - (barnesLam (t + 1) - barnesLam t)
 
-lemma hasDerivAt_barnesV {t : ℝ} (ht : 0 < t) : HasDerivAt barnesV (barnesW t) t := by
+theorem hasDerivAt_barnesV {t : ℝ} (ht : 0 < t) : HasDerivAt barnesV (barnesW t) t := by
   have ht1 : 0 < t + 1 := by linarith
   have hL := hasDerivAt_integral_one continuousOn_logGamma ht
   have hL1 := (hasDerivAt_integral_one continuousOn_logGamma ht1).comp_add_const t 1
@@ -1424,7 +1419,7 @@ lemma hasDerivAt_barnesV {t : ℝ} (ht : 0 < t) : HasDerivAt barnesV (barnesW t)
   field_simp
   ring
 
-lemma hasDerivAt_barnesW {t : ℝ} (ht : 0 < t) : HasDerivAt barnesW 0 t := by
+theorem hasDerivAt_barnesW {t : ℝ} (ht : 0 < t) : HasDerivAt barnesW 0 t := by
   have ht1 : 0 < t + 1 := by linarith
   have hL := hasDerivAt_integral_one continuousOn_logGamma ht
   have hL1 := (hasDerivAt_integral_one continuousOn_logGamma ht1).comp_add_const t 1
@@ -1438,7 +1433,7 @@ lemma hasDerivAt_barnesW {t : ℝ} (ht : 0 < t) : HasDerivAt barnesW 0 t := by
   field_simp
   ring
 
-lemma barnesV_eq {t : ℝ} (ht : 0 < t) :
+theorem barnesV_eq {t : ℝ} (ht : 0 < t) :
     barnesV t = barnesV 1 + barnesW 1 * (t - 1) := by
   have hWc : ∀ t ∈ Set.Ioi (0 : ℝ), barnesW t = barnesW 1 := fun t ht =>
     isOpen_Ioi.is_const_of_deriv_eq_zero isPreconnected_Ioi

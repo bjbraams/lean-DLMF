@@ -5,7 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Chebyshev.Orthogonality
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Chebyshev.Basic
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
 public import Mathlib.Analysis.Fourier.AddCircle
@@ -40,13 +39,13 @@ def complexCircleFun {f : ℝ → ℂ} (hf : ContinuousOn f (Icc (-1) 1)) :
         ⟨Real.neg_one_le_cos θ, Real.cos_le_one θ⟩
     exact hc
 
-lemma complexCircleFun_coe {f : ℝ → ℂ} (hf : ContinuousOn f (Icc (-1) 1)) (θ : ℝ) :
+theorem complexCircleFun_coe {f : ℝ → ℂ} (hf : ContinuousOn f (Icc (-1) 1)) (θ : ℝ) :
     complexCircleFun hf (θ : AddCircle (2 * π)) = f (Real.cos θ) := rfl
 
 local instance instTwoPiPos : Fact (0 < 2 * π) := ⟨Real.two_pi_pos⟩
 
 /-- The full-period integral `∫₀^{2π} e^{-inθ} f(cos θ) dθ = π c_{|n|}`. -/
-lemma integral_exp_mul_comp_cos_complex {f : ℝ → ℂ} (hcf : Continuous fun x : ℝ => f (Real.cos x))
+theorem integral_exp_mul_comp_cos_complex {f : ℝ → ℂ} (hcf : Continuous fun x : ℝ => f (Real.cos x))
     (n : ℤ) :
     ∫ x in (0 : ℝ)..(2 * π), Complex.exp (-(I * n * x)) * f (Real.cos x) =
       π * complexCoeff f n.natAbs := by
@@ -91,7 +90,7 @@ lemma integral_exp_mul_comp_cos_complex {f : ℝ → ℂ} (hcf : Continuous fun 
   field_simp
 
 /-- The Fourier coefficients of `θ ↦ f(cos θ)` are half the Chebyshev coefficients. -/
-lemma fourierCoeff_complexCircleFun {f : ℝ → ℂ} (hf : ContinuousOn f (Icc (-1) 1)) (n : ℤ) :
+theorem fourierCoeff_complexCircleFun {f : ℝ → ℂ} (hf : ContinuousOn f (Icc (-1) 1)) (n : ℤ) :
     fourierCoeff (complexCircleFun hf) n = complexCoeff f n.natAbs / 2 := by
   rw [fourierCoeff_eq_intervalIntegral _ n 0, zero_add]
   have hcf : Continuous fun x : ℝ => f (Real.cos x) :=
@@ -227,7 +226,7 @@ theorem norm_complexCoeff_le {f : ℝ → ℂ} {F : ℂ → ℂ} {s M : ℝ} (hs
   nlinarith [norm_nonneg (complexCoeff f n), Real.exp_pos (-(n * s))]
 
 /-- The cosine of a point in a fixed horizontal strip lies in a fixed disk. -/
-lemma norm_cos_le_exp_one {w : ℂ} (hw : |w.im| ≤ 1) : ‖Complex.cos w‖ ≤ Real.exp 1 := by
+theorem norm_cos_le_exp_one {w : ℂ} (hw : |w.im| ≤ 1) : ‖Complex.cos w‖ ≤ Real.exp 1 := by
   have hp : ‖Complex.exp (w * I)‖ ≤ Real.exp 1 := by
     rw [Complex.norm_exp]
     apply Real.exp_le_exp.mpr

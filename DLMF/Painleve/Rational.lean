@@ -7,7 +7,7 @@ module
 
 public import DLMF.Painleve.Backlund
 public import Mathlib.Analysis.Complex.Polynomial.Basic
-public import Mathlib.Algebra.Polynomial.Roots
+public import Mathlib.Tactic.Polynomial.Basic
 
 /-!
 # Rational solutions of Painlevé II
@@ -33,11 +33,11 @@ def rationalFn (p q : ℂ[X]) (x : ℂ) : ℂ := p.eval x / q.eval x
 def polynomialDomain (q : ℂ[X]) : Set ℂ := {x | q.eval x ≠ 0}
 
 /-- A polynomial quotient is regular on an open set. -/
-lemma isOpen_polynomialDomain (q : ℂ[X]) : IsOpen (polynomialDomain q) :=
+theorem isOpen_polynomialDomain (q : ℂ[X]) : IsOpen (polynomialDomain q) :=
   isOpen_ne_fun q.continuous continuous_const
 
 /-- A nonzero polynomial leaves a nonempty regular set. -/
-lemma polynomialDomain_nonempty {q : ℂ[X]} (hq : q ≠ 0) : (polynomialDomain q).Nonempty := by
+theorem polynomialDomain_nonempty {q : ℂ[X]} (hq : q ≠ 0) : (polynomialDomain q).Nonempty := by
   by_contra h
   apply hq
   apply Polynomial.funext
@@ -46,7 +46,7 @@ lemma polynomialDomain_nonempty {q : ℂ[X]} (hq : q ≠ 0) : (polynomialDomain 
   simpa using not_not.mp hx
 
 /-- The explicit derivative of a polynomial quotient on its regular set. -/
-lemma hasDerivAt_rationalFn (p q : ℂ[X]) {x : ℂ} (hx : q.eval x ≠ 0) :
+theorem hasDerivAt_rationalFn (p q : ℂ[X]) {x : ℂ} (hx : q.eval x ≠ 0) :
     HasDerivAt (rationalFn p q)
       ((p.derivative.eval x * q.eval x - p.eval x * q.derivative.eval x) / q.eval x ^ 2) x :=
   (p.hasDerivAt x).div (q.hasDerivAt x) hx
@@ -56,7 +56,7 @@ def rationalStepDenom (p q : ℂ[X]) : ℂ[X] :=
   X * q ^ 2 + C 2 * p ^ 2 - C 2 * p.derivative * q + C 2 * p * q.derivative
 
 /-- Clearing the denominator in the upward Bäcklund transformation. -/
-lemma backlundDenom_neg_rationalFn (p q : ℂ[X]) {x : ℂ} (hx : q.eval x ≠ 0) :
+theorem backlundDenom_neg_rationalFn (p q : ℂ[X]) {x : ℂ} (hx : q.eval x ≠ 0) :
     backlundDenom (fun x => -rationalFn p q x) x =
       (rationalStepDenom p q).eval x / q.eval x ^ 2 := by
   rw [backlundDenom, show deriv (fun x => -rationalFn p q x) x = -deriv (rationalFn p q) x from deriv.neg,
@@ -67,7 +67,7 @@ lemma backlundDenom_neg_rationalFn (p q : ℂ[X]) {x : ℂ} (hx : q.eval x ≠ 0
 
 /-- A rational solution at a nonnegative integral parameter has a nonzero upward-shift
 polynomial, so the next rational function is defined on a nonempty regular set. -/
-lemma rationalStepDenom_ne_zero {p q : ℂ[X]} (hq : q ≠ 0) (n : ℕ)
+theorem rationalStepDenom_ne_zero {p q : ℂ[X]} (hq : q ≠ 0) (n : ℕ)
     (h : IsPIIOn (n : ℂ) (rationalFn p q) (polynomialDomain q)) :
     rationalStepDenom p q ≠ 0 := by
   intro hr
@@ -78,7 +78,7 @@ lemma rationalStepDenom_ne_zero {p q : ℂ[X]} (hq : q ≠ 0) (n : ℕ)
   exact hD rfl
 
 /-- An explicit polynomial pair for one upward Bäcklund shift. -/
-lemma backlundUp_rationalFn (p q : ℂ[X]) (c : ℂ) {x : ℂ}
+theorem backlundUp_rationalFn (p q : ℂ[X]) (c : ℂ) {x : ℂ}
     (hq : q.eval x ≠ 0) (hr : (rationalStepDenom p q).eval x ≠ 0) :
     backlundUp c (rationalFn p q) x =
       rationalFn (-p * rationalStepDenom p q + C (1 + 2 * c) * q ^ 3)
@@ -154,12 +154,12 @@ theorem exists_rational_solution_nat (n : ℕ) :
   ⟨(rationalPIIPair n).1, (rationalPIIPair n).2, rationalPIIPair_spec n⟩
 
 /-- The first nonzero rational solution is represented by `1/X`, as on page 407. -/
-lemma rationalPIIPair_one : rationalPIIPair 1 = (1, X) := by
+theorem rationalPIIPair_one : rationalPIIPair 1 = (1, X) := by
   simp [rationalPIIPair, rationalStepDenom]
 
 /-- The second rational solution is `(2X³-4)/(X(X³+4))`, equivalent to the book's
 `-1/x + 3x²/(x³+4)`. -/
-lemma rationalPIIPair_two : rationalPIIPair 2 = (C 2 * X ^ 3 - C 4, X * (X ^ 3 + C 4)) := by
+theorem rationalPIIPair_two : rationalPIIPair 2 = (C 2 * X ^ 3 - C 4, X * (X ^ 3 + C 4)) := by
   rw [rationalPIIPair, rationalPIIPair_one]
   simp only [rationalStepDenom, derivative_one, derivative_X, one_pow, mul_one, mul_zero,
     sub_zero, zero_mul, Nat.cast_one]

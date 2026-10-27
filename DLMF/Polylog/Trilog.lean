@@ -31,25 +31,25 @@ namespace DLMF.Polylog
 def trilogKernel (t : ℝ) : ℝ := dslope Real.dilog 0 t
 
 /-- The kernel away from `0`. -/
-lemma trilogKernel_of_ne {t : ℝ} (ht : t ≠ 0) : trilogKernel t = Real.dilog t / t := by
+theorem trilogKernel_of_ne {t : ℝ} (ht : t ≠ 0) : trilogKernel t = Real.dilog t / t := by
   rw [trilogKernel, dslope_of_ne _ ht, slope_def_field, Real.dilog_zero]
   simp
 
 /-- The kernel at `0`. -/
-lemma trilogKernel_zero : trilogKernel 0 = 1 := by
+theorem trilogKernel_zero : trilogKernel 0 = 1 := by
   rw [trilogKernel, dslope_same, (Real.hasDerivAt_dilog (by norm_num)).deriv, dilogKernel_zero]
 
 /-- `Real.dilog` is continuous on `(-∞, 1)`. -/
-lemma Real.continuousOn_dilog_Iio : ContinuousOn Real.dilog (Iio 1) :=
+theorem Real.continuousOn_dilog_Iio : ContinuousOn Real.dilog (Iio 1) :=
   fun _ ht => (Real.hasDerivAt_dilog ht).continuousAt.continuousWithinAt
 
 /-- The kernel is continuous on `(-∞, 1)`. -/
-lemma continuousOn_trilogKernel_Iio : ContinuousOn trilogKernel (Iio 1) :=
+theorem continuousOn_trilogKernel_Iio : ContinuousOn trilogKernel (Iio 1) :=
   (continuousOn_dslope (Iio_mem_nhds one_pos)).mpr
     ⟨Real.continuousOn_dilog_Iio, (Real.hasDerivAt_dilog (by norm_num)).differentiableAt⟩
 
 /-- The kernel is continuous on `[-1, 1]`. -/
-lemma continuousOn_trilogKernel_Icc : ContinuousOn trilogKernel (Icc (-1) 1) :=
+theorem continuousOn_trilogKernel_Icc : ContinuousOn trilogKernel (Icc (-1) 1) :=
   (continuousOn_dslope (Icc_mem_nhds (by norm_num) one_pos)).mpr
     ⟨Real.continuousOn_dilog, (Real.hasDerivAt_dilog (by norm_num)).differentiableAt⟩
 
@@ -57,7 +57,7 @@ lemma continuousOn_trilogKernel_Icc : ContinuousOn trilogKernel (Icc (-1) 1) :=
 def Real.trilog (x : ℝ) : ℝ := ∫ t in (0 : ℝ)..x, trilogKernel t
 
 /-- `Li₃' = Li₂(x)/x` on `(-∞, 1)`. -/
-lemma Real.hasDerivAt_trilog {x : ℝ} (hx : x < 1) : HasDerivAt Real.trilog (trilogKernel x) x := by
+theorem Real.hasDerivAt_trilog {x : ℝ} (hx : x < 1) : HasDerivAt Real.trilog (trilogKernel x) x := by
   have hint : IntervalIntegrable trilogKernel MeasureTheory.volume 0 x :=
     (continuousOn_trilogKernel_Iio.mono fun t ht => by
       rw [mem_uIcc] at ht; rcases ht with ⟨_, h⟩ | ⟨_, h⟩ <;> simp only [mem_Iio] <;>
@@ -67,10 +67,10 @@ lemma Real.hasDerivAt_trilog {x : ℝ} (hx : x < 1) : HasDerivAt Real.trilog (tr
     (continuousOn_trilogKernel_Iio.continuousAt (Iio_mem_nhds hx))
 
 /-- `Li₃(0) = 0`. -/
-lemma Real.trilog_zero : Real.trilog 0 = 0 := by simp [Real.trilog]
+theorem Real.trilog_zero : Real.trilog 0 = 0 := by simp [Real.trilog]
 
 /-- `Real.trilog` is continuous on `[-1, 1]`. -/
-lemma Real.continuousOn_trilog : ContinuousOn Real.trilog (Icc (-1) 1) := by
+theorem Real.continuousOn_trilog : ContinuousOn Real.trilog (Icc (-1) 1) := by
   have hk : ContinuousOn trilogKernel (uIcc (-1) 1) := by
     rw [uIcc_of_le (by norm_num)]; exact continuousOn_trilogKernel_Icc
   have h := intervalIntegral.continuousOn_primitive_interval'

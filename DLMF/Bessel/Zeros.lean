@@ -36,14 +36,14 @@ namespace DLMF.Bessel
 def besselB (ν z : ℂ) : ℂ := ν * besselJ ν z - z * besselJ (ν + 1) z
 
 /-- `J_ν' = B_ν / z`. -/
-lemma hasDerivAt_besselJ_B (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
+theorem hasDerivAt_besselJ_B (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (besselJ ν) (besselB ν z / z) z := by
   have hz0 := slitPlane_ne_zero hz
   refine (hasDerivAt_besselJ hz).congr_deriv ?_
   simp only [besselB]; field_simp
 
 /-- `B_ν' = (ν²/z - z) J_ν`: Bessel's equation in Sturm–Liouville form. -/
-lemma hasDerivAt_besselB (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
+theorem hasDerivAt_besselB (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (besselB ν) ((ν ^ 2 / z - z) * besselJ ν z) z := by
   have hz0 := slitPlane_ne_zero hz
   have h1 := hasDerivAt_besselJ (ν := ν) hz
@@ -59,7 +59,7 @@ lemma hasDerivAt_besselB (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
 def besselW (ν μ z : ℂ) : ℂ := besselJ ν z * besselB μ z - besselB ν z * besselJ μ z
 
 /-- `(J_ν B_μ - B_ν J_μ)' = (μ² - ν²)/z · J_ν J_μ`. -/
-lemma hasDerivAt_besselW (ν μ : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
+theorem hasDerivAt_besselW (ν μ : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (besselW ν μ) ((μ ^ 2 - ν ^ 2) / z * besselJ ν z * besselJ μ z) z := by
   have hz0 := slitPlane_ne_zero hz
   have h := ((hasDerivAt_besselJ_B ν hz).mul (hasDerivAt_besselB μ hz)).sub
@@ -70,7 +70,7 @@ lemma hasDerivAt_besselW (ν μ : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
 
 
 /-- For real `ν > -1`, `J_ν(x) > 0` for small `x > 0`. -/
-lemma eventually_re_besselJ_pos {ν : ℝ} (hν : -1 < ν) :
+theorem eventually_re_besselJ_pos {ν : ℝ} (hν : -1 < ν) :
     ∀ᶠ x : ℝ in 𝓝[>] (0 : ℝ), 0 < (besselJ ν x).re := by
   set G : ℝ → ℂ := fun x => regularizedHGFun (∅ : Multiset ℂ) {(ν : ℂ) + 1} (-((x : ℂ) ^ 2 / 4))
   have hG : ContinuousAt G 0 :=
@@ -96,7 +96,7 @@ lemma eventually_re_besselJ_pos {ν : ℝ} (hν : -1 < ν) :
 
 
 /-- The first positive zero of `J_ν` (`ν > -1` real) is attained, and `J_ν > 0` before it. -/
-lemma sInf_besselJ_zeros_spec {ν : ℝ} (hν : -1 < ν) :
+theorem sInf_besselJ_zeros_spec {ν : ℝ} (hν : -1 < ν) :
     sInf {x : ℝ | 0 < x ∧ besselJ ν x = 0} ∈ {x : ℝ | 0 < x ∧ besselJ ν x = 0} ∧
       ∀ x ∈ Ioo 0 (sInf {x : ℝ | 0 < x ∧ besselJ ν x = 0}), 0 < (besselJ ν x).re := by
   set S := {x : ℝ | 0 < x ∧ besselJ ν x = 0}
@@ -146,7 +146,7 @@ lemma sInf_besselJ_zeros_spec {ν : ℝ} (hν : -1 < ν) :
 
 
 /-- `|J_ν(t)|, |B_ν(t)| ≤ C t^ν` on `(0, 1]` for real `ν`. -/
-lemma exists_bound_besselJ_besselB (ν : ℝ) :
+theorem exists_bound_besselJ_besselB (ν : ℝ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ t ∈ Ioc (0 : ℝ) 1,
       ‖besselJ ν t‖ ≤ C * t ^ ν ∧ ‖besselB ν t‖ ≤ C * t ^ ν := by
   obtain ⟨M, hM⟩ := exists_norm_besselJ_mul_le (ν : ℂ) (c := 1) one_pos
@@ -184,7 +184,7 @@ lemma exists_bound_besselJ_besselB (ν : ℝ) :
           nlinarith [mul_nonneg hM0 hp]
 
 /-- `J_ν B_μ - B_ν J_μ → 0` at `0⁺` for real `ν + μ > 0`. -/
-lemma tendsto_besselW_zero {ν μ : ℝ} (h : 0 < ν + μ) :
+theorem tendsto_besselW_zero {ν μ : ℝ} (h : 0 < ν + μ) :
     Tendsto (fun x : ℝ => besselW ν μ x) (𝓝[>] 0) (𝓝 0) := by
   obtain ⟨C, hC0, hC⟩ := exists_bound_besselJ_besselB ν
   obtain ⟨D, hD0, hD⟩ := exists_bound_besselJ_besselB μ

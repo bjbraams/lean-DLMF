@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Legendre.UniformCoordinates
-public import DLMFMathlib.Analysis.Calculus.DoubleZeroSqrt
+public import DLMF.Legendre.Conical
 
 /-!
 # Uniform conical asymptotics and coordinate maps
@@ -61,7 +61,7 @@ noncomputable def conE_L (α η : ℝ) : ℝ :=
   Real.sqrt (α^2+η)+α/2*Real.log η-α*Real.log (Real.sqrt (α^2+η)+α)
 
 /-- `L'(η) = √(α²+η)/(2η)`. -/
-lemma conE_hasDerivAt {α η : ℝ} (hα : 0 ≤ α) (hη : 0 < η) :
+theorem conE_hasDerivAt {α η : ℝ} (hα : 0 ≤ α) (hη : 0 < η) :
     HasDerivAt (conE_L α) (Real.sqrt (α^2+η)/(2*η)) η := by
   have hp : 0 < α^2+η := by positivity
   set s := Real.sqrt (α^2+η) with hs
@@ -80,7 +80,7 @@ lemma conE_hasDerivAt {α η : ℝ} (hα : 0 ≤ α) (hη : 0 < η) :
     linear_combination s * hs2
 
 /-- `L` increases strictly on `(0, ∞)`. -/
-lemma conE_strictMonoOn {α : ℝ} (hα : 0 ≤ α) : StrictMonoOn (conE_L α) (Ioi 0) := by
+theorem conE_strictMonoOn {α : ℝ} (hα : 0 ≤ α) : StrictMonoOn (conE_L α) (Ioi 0) := by
   refine strictMonoOn_of_deriv_pos (convex_Ioi 0)
     (fun η hη => (conE_hasDerivAt hα hη).continuousAt.continuousWithinAt) fun η hη => ?_
   rw [interior_Ioi] at hη
@@ -90,7 +90,7 @@ lemma conE_strictMonoOn {α : ℝ} (hα : 0 ≤ α) : StrictMonoOn (conE_L α) (
   positivity
 
 /-- `L → -∞` as `η → 0⁺` when `α > 0`. -/
-lemma conE_tendsto_zero {α : ℝ} (hα : 0 < α) : Tendsto (conE_L α) (𝓝[>] 0) atBot := by
+theorem conE_tendsto_zero {α : ℝ} (hα : 0 < α) : Tendsto (conE_L α) (𝓝[>] 0) atBot := by
   have hg : ContinuousAt (fun η : ℝ => Real.sqrt (α^2+η) - α*Real.log (Real.sqrt (α^2+η)+α)) 0 := by
     have h : Real.sqrt (α^2+0)+α ≠ 0 := by positivity
     fun_prop (disch := exact h)
@@ -100,7 +100,7 @@ lemma conE_tendsto_zero {α : ℝ} (hα : 0 < α) : Tendsto (conE_L α) (𝓝[>]
   simp only [conE_L]; ring
 
 /-- `L → ∞` as `η → ∞`. -/
-lemma conE_tendsto_atTop {α : ℝ} (hα : 0 ≤ α) : Tendsto (conE_L α) atTop atTop := by
+theorem conE_tendsto_atTop {α : ℝ} (hα : 0 ≤ α) : Tendsto (conE_L α) atTop atTop := by
   have hb : ∀ᶠ η in atTop, Real.sqrt η - α/2*Real.log 3 ≤ conE_L α η := by
     filter_upwards [eventually_ge_atTop (3*α^2+1)] with η hη
     have hη0 : 0 < η := by nlinarith [sq_nonneg α]
@@ -150,7 +150,7 @@ noncomputable def conE_R (α x : ℝ) : ℝ :=
   Real.arccos (x/Real.sqrt (1+α^2))+α/2*Real.log ((1+α^2+(α^2-1)*x^2-2*α*x*Real.sqrt (1+α^2-x^2))/((1+α^2)*(1-x^2)))
 
 /-- The argument of the logarithm in DLMF 14.20.21 is positive. -/
-lemma conE_Q_pos {α x : ℝ} (hα : 0 < α) (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem conE_Q_pos {α x : ℝ} (hα : 0 < α) (hx : x ∈ Ioo (-1:ℝ) 1) :
     0 < 1+α^2+(α^2-1)*x^2-2*α*x*Real.sqrt (1+α^2-x^2) := by
   have hx2 : 0 < 1 - x^2 := by nlinarith [hx.1, hx.2]
   have hS : Real.sqrt (1+α^2-x^2) ^ 2 = 1+α^2-x^2 := Real.sq_sqrt (by nlinarith [sq_nonneg α])
@@ -167,7 +167,7 @@ lemma conE_Q_pos {α x : ℝ} (hα : 0 < α) (hx : x ∈ Ioo (-1:ℝ) 1) :
   nlinarith
 
 /-- `R'(x) = -√(1+α²-x²)/(1-x²)`. -/
-lemma conE_R_hasDerivAt {α x : ℝ} (hα : 0 < α) (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem conE_R_hasDerivAt {α x : ℝ} (hα : 0 < α) (hx : x ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt (conE_R α) (-(Real.sqrt (1+α^2-x^2)/(1-x^2))) x := by
   have hx2 : 0 < 1 - x^2 := by nlinarith [hx.1, hx.2]
   have hA : 0 < 1 + α^2 := by positivity
@@ -215,7 +215,7 @@ lemma conE_R_hasDerivAt {α x : ℝ} (hα : 0 < α) (hx : x ∈ Ioo (-1:ℝ) 1) 
     linear_combination (2*S*α*x + x^2 - 1) * hS
 
 /-- `R(-x) = π - R(x)`. -/
-lemma conE_R_symm {α x : ℝ} (hα : 0 < α) (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem conE_R_symm {α x : ℝ} (hα : 0 < α) (hx : x ∈ Ioo (-1:ℝ) 1) :
     conE_R α (-x) = π - conE_R α x := by
   have hx2 : 0 < 1 - x^2 := by nlinarith [hx.1, hx.2]
   have hS : Real.sqrt (1+α^2-x^2) ^ 2 = 1+α^2-x^2 := Real.sq_sqrt (by nlinarith [sq_nonneg α])
@@ -234,7 +234,7 @@ lemma conE_R_symm {α x : ℝ} (hα : 0 < α) (hx : x ∈ Ioo (-1:ℝ) 1) :
   ring
 
 /-- `R → ∞` as `x → -1⁺`. -/
-lemma conE_R_tendsto_neg_one {α : ℝ} (hα : 0 < α) :
+theorem conE_R_tendsto_neg_one {α : ℝ} (hα : 0 < α) :
     Tendsto (conE_R α) (𝓝[>] (-1:ℝ)) atTop := by
   have hQc : Tendsto (fun x : ℝ => 1+α^2+(α^2-1)*x^2-2*α*x*Real.sqrt (1+α^2-x^2))
       (𝓝[>] (-1:ℝ)) (𝓝 (4*α^2)) := by
@@ -268,7 +268,7 @@ lemma conE_R_tendsto_neg_one {α : ℝ} (hα : 0 < α) :
   ring
 
 /-- `R → -∞` as `x → 1⁻`. -/
-lemma conE_R_tendsto_one {α : ℝ} (hα : 0 < α) :
+theorem conE_R_tendsto_one {α : ℝ} (hα : 0 < α) :
     Tendsto (conE_R α) (𝓝[<] (1:ℝ)) atBot := by
   have hneg : Tendsto (fun x : ℝ => -x) (𝓝[<] (1:ℝ)) (𝓝[>] (-1:ℝ)) := by
     rw [tendsto_nhdsWithin_iff]
@@ -361,7 +361,7 @@ def conicalRho (β x : ℝ) : ℝ :=
   Real.log (((1-β^2)*x^2+1+β^2+2*x*Real.sqrt (1+β^2-β^2*x^2))/(1-x^2))/2+β*Real.arctan (β*x/Real.sqrt (1+β^2-β^2*x^2))-Real.log (1+β^2)/2
 
 /-- `ρ'(x) = √(1+β²-β²x²)/(1-x²)` on `(-1, 1)`. -/
-lemma conR_hasDerivAt (β : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem conR_hasDerivAt (β : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt (conicalRho β) (Real.sqrt (1+β^2-β^2*x^2)/(1-x^2)) x := by
   have hx2 : 0 < 1 - x^2 := by nlinarith [hx.1, hx.2]
   have hR : 1 ≤ 1+β^2-β^2*x^2 := by nlinarith [sq_nonneg β]
@@ -410,7 +410,7 @@ lemma conR_hasDerivAt (β : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     linear_combination (-x*(-2*S*β^2*x^2 - 2*S + β^4*x^3 - β^4*x - β^2*x^3 + β^2*x)) * hS
 
 /-- The argument of the logarithm in `ρ` is positive on `(-1, 1)`. -/
-lemma conR_N_pos (β : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem conR_N_pos (β : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     0 < (1-β^2)*x^2+1+β^2+2*x*Real.sqrt (1+β^2-β^2*x^2) := by
   have hx2 : 0 < 1 - x^2 := by nlinarith [hx.1, hx.2]
   have hS : Real.sqrt (1+β^2-β^2*x^2) ^ 2 = 1+β^2-β^2*x^2 :=
@@ -427,7 +427,7 @@ lemma conR_N_pos (β : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
   nlinarith
 
 /-- `ρ` is odd. -/
-lemma conR_odd (β : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) : conicalRho β (-x) = -conicalRho β x := by
+theorem conR_odd (β : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) : conicalRho β (-x) = -conicalRho β x := by
   have hx2 : 0 < 1 - x^2 := by nlinarith [hx.1, hx.2]
   have hS : Real.sqrt (1+β^2-β^2*x^2) ^ 2 = 1+β^2-β^2*x^2 :=
     Real.sq_sqrt (by nlinarith [sq_nonneg β, mul_nonneg (sq_nonneg β) hx2.le])
@@ -448,7 +448,7 @@ lemma conR_odd (β : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) : conicalRho β 
   ring
 
 /-- `ρ → ∞` as `x → 1⁻`. -/
-lemma conR_tendsto_one (β : ℝ) : Tendsto (conicalRho β) (𝓝[<] (1:ℝ)) atTop := by
+theorem conR_tendsto_one (β : ℝ) : Tendsto (conicalRho β) (𝓝[<] (1:ℝ)) atTop := by
   have hcN : Tendsto (fun x : ℝ => (1-β^2)*x^2+1+β^2+2*x*Real.sqrt (1+β^2-β^2*x^2))
       (𝓝[<] (1:ℝ)) (𝓝 4) := by
     have : Continuous fun x : ℝ => (1-β^2)*x^2+1+β^2+2*x*Real.sqrt (1+β^2-β^2*x^2) := by
@@ -483,7 +483,7 @@ lemma conR_tendsto_one (β : ℝ) : Tendsto (conicalRho β) (𝓝[<] (1:ℝ)) at
   ring
 
 /-- `ρ → -∞` as `x → -1⁺`. -/
-lemma conR_tendsto_neg_one (β : ℝ) : Tendsto (conicalRho β) (𝓝[>] (-1:ℝ)) atBot := by
+theorem conR_tendsto_neg_one (β : ℝ) : Tendsto (conicalRho β) (𝓝[>] (-1:ℝ)) atBot := by
   have hneg : Tendsto (fun x : ℝ => -x) (𝓝[>] (-1:ℝ)) (𝓝[<] (1:ℝ)) := by
     rw [tendsto_nhdsWithin_iff]
     refine ⟨?_, ?_⟩

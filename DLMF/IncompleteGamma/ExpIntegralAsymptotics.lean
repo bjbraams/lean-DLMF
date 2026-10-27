@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.IncompleteGamma.ExponentialIntegral
-public import DLMF.Confluent.TricomiRotated
 public import DLMFMathlib.Analysis.Asymptotics.WatsonRotated
 
 /-!
@@ -38,7 +37,7 @@ theorem genExpIntE_exact_remainder (p : ℂ) {z : ℂ} (hz : z ≠ 0) (N : ℕ) 
     linear_combination (-1:ℂ)^N*poch p N*h
 
 /-- Polynomial bound for `(1+t)^{-p}` on the sector `|arg t| ≤ |θ| < π`. -/
-lemma exists_norm_one_add_cpow_neg_le (p : ℂ) {θ : ℝ} (hθ : |θ| < π) :
+theorem exists_norm_one_add_cpow_neg_le (p : ℂ) {θ : ℝ} (hθ : |θ| < π) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ r : ℝ, 0 ≤ r → ∀ y : ℝ, |y| ≤ |θ| →
       ‖(1 + (r : ℂ) * exp (y * I)) ^ (-p)‖ ≤ C * (1 + r) ^ |p.re| := by
   obtain ⟨c, hc0, hc⟩ := exists_pos_le_norm_one_add_ofReal_mul_exp (Φ := |θ|) hθ
@@ -80,7 +79,7 @@ lemma exists_norm_one_add_cpow_neg_le (p : ℂ) {θ : ℝ} (hθ : |θ| < π) :
     _ = _ := by ring
 
 /-- `E_p(z) = e^{-z} ∫₀^∞ e^{-zt} (1+t)^{-p} dt` for `re z > 0`. -/
-lemma genExpIntE_eq_exp_mul_integral {p z : ℂ} (hz : 0 < z.re) :
+theorem genExpIntE_eq_exp_mul_integral {p z : ℂ} (hz : 0 < z.re) :
     genExpIntE p z = cexp (-z) * ∫ t : ℝ in Ioi 0, cexp (-(z * t)) * (1 + (t : ℂ)) ^ (-p) := by
   have hz0 : z ≠ 0 := fun h => by simp [h] at hz
   rw [genExpIntE_eq_exp_mul_kummerU p hz0, kummerU_laplace (by norm_num) hz]
@@ -88,13 +87,13 @@ lemma genExpIntE_eq_exp_mul_integral {p z : ℂ} (hz : 0 < z.re) :
     show (2 - p : ℂ) - 1 - 1 = -p by ring, neg_mul]
 
 /-- On the principal strip the logarithmic-plane `E_p` is the principal one. -/
-lemma genExpIntEOnLog_eq_genExpIntE (p : ℂ) {w : ℂ} (h1 : -π < w.im) (h2 : w.im ≤ π) :
+theorem genExpIntEOnLog_eq_genExpIntE (p : ℂ) {w : ℂ} (h1 : -π < w.im) (h2 : w.im ≤ π) :
     genExpIntEOnLog p w = genExpIntE p (cexp w) := by
   rw [genExpIntEOnLog, genExpIntE, upperIncGammaOnLog_eq_upperIncGamma _ h1 h2,
     cpow_def_of_ne_zero (Complex.exp_ne_zero w), Complex.log_exp h1 h2, mul_comm w]
 
 /-- `1 + r e^{iy}` lies in the slit plane for `r ≥ 0` and `|y| < π`. -/
-lemma one_add_ofReal_mul_exp_mem_slitPlane {r y : ℝ} (hr : 0 ≤ r) (hy : |y| < π) :
+theorem one_add_ofReal_mul_exp_mem_slitPlane {r y : ℝ} (hr : 0 ≤ r) (hy : |y| < π) :
     1 + (r : ℂ) * exp (y * I) ∈ slitPlane := by
   rw [mem_slitPlane_iff]
   simp only [add_re, one_re, re_ofReal_mul, exp_ofReal_mul_I_re, add_im, one_im, im_ofReal_mul,
@@ -109,13 +108,13 @@ lemma one_add_ofReal_mul_exp_mem_slitPlane {r y : ℝ} (hr : 0 ≤ r) (hy : |y| 
     · left; rw [← hr]; simp
 
 /-- `re (e^w e^{iy}) = e^{re w} cos (im w + y)`. -/
-lemma re_cexp_mul_exp (w : ℂ) (y : ℝ) :
+theorem re_cexp_mul_exp (w : ℂ) (y : ℝ) :
     (cexp w * exp (y * I)).re = Real.exp w.re * Real.cos (w.im + y) := by
   rw [← Complex.exp_add, Complex.exp_re]
   simp
 
 /-- `(1 + r)^k ≤ 2^k (r^k + 1)` for `r, k ≥ 0`. -/
-lemma one_add_rpow_le {r k : ℝ} (hr : 0 ≤ r) (hk : 0 ≤ k) :
+theorem one_add_rpow_le {r k : ℝ} (hr : 0 ≤ r) (hk : 0 ≤ k) :
     (1 + r) ^ k ≤ 2 ^ k * r ^ k + 2 ^ k := by
   rcases le_total r 1 with h | h
   · have : (1 + r) ^ k ≤ 2 ^ k := Real.rpow_le_rpow (by linarith) (by linarith) hk
@@ -247,7 +246,7 @@ noncomputable def logStripAtTop (θ δ : ℝ) : Filter ℂ :=
 
 /-- Along the strip filter, `e^w e^{iθ}` tends to infinity within
 `sectorAtTop (sin (min δ (π/2)))`. -/
-lemma tendsto_cexp_mul_logStripAtTop (θ : ℝ) {δ : ℝ} (hδ : 0 < δ) :
+theorem tendsto_cexp_mul_logStripAtTop (θ : ℝ) {δ : ℝ} (hδ : 0 < δ) :
     Tendsto (fun w : ℂ => cexp w * exp (θ * I)) (logStripAtTop θ δ)
       (sectorAtTop (Real.sin (min δ (π / 2)))) := by
   have hnorm : ∀ w : ℂ, ‖cexp w * exp (θ * I)‖ = Real.exp w.re := fun w => by
@@ -338,7 +337,7 @@ theorem genExpIntEOnLog_strip_asymptotic (p : ℂ) {θ δ : ℝ} (hθ : |θ| < �
 
 /-- Three strips `|im w + θ| ≤ π/2 - d/4`, `θ ∈ {π - d/2, 0, -(π - d/2)}`, cover the closed
 logarithmic sector `|im w| ≤ 3π/2 - δ`, where `d = min δ 1`. -/
-lemma logSector_le_sup_logStripAtTop {δ : ℝ} (hδ : 0 < δ) :
+theorem logSector_le_sup_logStripAtTop {δ : ℝ} (hδ : 0 < δ) :
     logSector (3 * π / 2 - δ) ≤
       logStripAtTop (π - min δ 1 / 2) (min δ 1 / 4) ⊔ logStripAtTop 0 (min δ 1 / 4) ⊔
         logStripAtTop (-(π - min δ 1 / 2)) (min δ 1 / 4) := by
@@ -389,7 +388,7 @@ theorem genExpIntE_log_sector_asymptotic (p : ℂ) {δ : ℝ} (hδ : 0 < δ) (h�
 /-- Crossing one sheet of the logarithmic covering: subtracting the connection term
 `m·2πi/Γ(p)·exp(-m p π i + (p-1) w)` from `E_p` on the log-cover at `w` gives `E_p` at
 `w - 2 m π i`, for `m = ±1`. -/
-lemma genExpIntEOnLog_sub_connection (p w : ℂ) {m : ℤ} (hm : m = 1 ∨ m = -1) :
+theorem genExpIntEOnLog_sub_connection (p w : ℂ) {m : ℤ} (hm : m = 1 ∨ m = -1) :
     genExpIntEOnLog p w - m*2*π*I/Gamma p*exp (-m*p*π*I+(p-1)*w) =
       genExpIntEOnLog p (w - 2*m*π*I) := by
   set w' := w - 2*m*π*I with hw'
@@ -507,7 +506,7 @@ theorem expIntLargeOrderPolynomial_initial  :
 
 open Polynomial in
 /-- Degree bound and leading coefficient of `A_{m+1}`. -/
-lemma expIntLargeOrderPolynomial_succ_degree_coeff (m : ℕ) :
+theorem expIntLargeOrderPolynomial_succ_degree_coeff (m : ℕ) :
     (expIntLargeOrderPolynomial (m+1)).natDegree ≤ m ∧
       (expIntLargeOrderPolynomial (m+1)).coeff m = (-1 : ℂ)^m*(m+1).factorial := by
   induction m with

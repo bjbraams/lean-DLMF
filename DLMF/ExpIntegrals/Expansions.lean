@@ -5,9 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.ExpIntegrals.Continuation
 public import DLMF.IncompleteGamma.ExponentialIntegral
-public import DLMF.Bessel.SphericalSeriesTools
 public import DLMF.Bessel.SphericalProductTools
 
 /-!
@@ -91,20 +89,20 @@ theorem expIntReciprocalFactorialCoeff_initial  :
 /-- The normalised falling polynomial `(-t)_k / k!`. -/
 noncomputable def recipFac_g (k : ℕ) (t : ℝ) : ℝ := ∏ i ∈ Finset.range k, ((i:ℝ) - t) / ((i:ℝ) + 1)
 
-lemma recipFac_g_zero (t : ℝ) : recipFac_g 0 t = 1 := by simp [recipFac_g]
+theorem recipFac_g_zero (t : ℝ) : recipFac_g 0 t = 1 := by simp [recipFac_g]
 
-lemma recipFac_g_succ (k : ℕ) (t : ℝ) :
+theorem recipFac_g_succ (k : ℕ) (t : ℝ) :
     recipFac_g (k+1) t = recipFac_g k t * (((k:ℝ) - t) / ((k:ℝ) + 1)) := by
   simp only [recipFac_g, Finset.prod_range_succ]
 
-lemma recipFac_g_at_zero (k : ℕ) : recipFac_g (k+1) 0 = 0 := by
+theorem recipFac_g_at_zero (k : ℕ) : recipFac_g (k+1) 0 = 0 := by
   rw [recipFac_g, Finset.prod_eq_zero (i := 0) (by simp) (by simp)]
 
-lemma recipFac_g_continuous (k : ℕ) : Continuous (recipFac_g k) := by
+theorem recipFac_g_continuous (k : ℕ) : Continuous (recipFac_g k) := by
   unfold recipFac_g
   fun_prop
 
-lemma recipFac_hasDerivAt_g (k : ℕ) (t : ℝ) :
+theorem recipFac_hasDerivAt_g (k : ℕ) (t : ℝ) :
     HasDerivAt (recipFac_g k) (-∑ i ∈ Finset.range k, recipFac_g i t / ((k:ℝ) - i)) t := by
   induction k with
   | zero =>
@@ -158,7 +156,7 @@ lemma recipFac_hasDerivAt_g (k : ℕ) (t : ℝ) :
     field_simp
     linear_combination -E
 
-lemma recipFac_abs_g_le_choose {t : ℝ} :
+theorem recipFac_abs_g_le_choose {t : ℝ} :
     ∀ k ≤ ⌈t⌉₊, |recipFac_g k t| ≤ (⌈t⌉₊.choose k : ℝ) := by
   intro k
   induction k with
@@ -181,7 +179,7 @@ lemma recipFac_abs_g_le_choose {t : ℝ} :
     exact mul_le_mul (ih hk'.le) (div_le_div_of_nonneg_right (by linarith) hpos.le)
       (div_nonneg (by linarith) hpos.le) (Nat.cast_nonneg _)
 
-lemma recipFac_mul_abs_g_succ_le {t : ℝ} (ht : 0 ≤ t) {k : ℕ} (hk : t ≤ k) :
+theorem recipFac_mul_abs_g_succ_le {t : ℝ} (ht : 0 ≤ t) {k : ℕ} (hk : t ≤ k) :
     ((k:ℝ)+1) * |recipFac_g (k+1) t| ≤ k * |recipFac_g k t| := by
   rw [recipFac_g_succ, abs_mul, abs_div, abs_of_nonneg (by linarith : (0:ℝ) ≤ k - t),
     abs_of_pos (by positivity : (0:ℝ) < k + 1)]
@@ -190,7 +188,7 @@ lemma recipFac_mul_abs_g_succ_le {t : ℝ} (ht : 0 ≤ t) {k : ℕ} (hk : t ≤ 
   have := abs_nonneg (recipFac_g k t)
   nlinarith
 
-lemma recipFac_mul_abs_g_le_of_ceil_le {t : ℝ} (ht : 0 ≤ t) :
+theorem recipFac_mul_abs_g_le_of_ceil_le {t : ℝ} (ht : 0 ≤ t) :
     ∀ k, ⌈t⌉₊ ≤ k → (k:ℝ) * |recipFac_g k t| ≤ ⌈t⌉₊ := by
   intro k hk
   induction k, hk using Nat.le_induction with
@@ -208,7 +206,7 @@ lemma recipFac_mul_abs_g_le_of_ceil_le {t : ℝ} (ht : 0 ≤ t) :
 /-- The bound `(t+1) 2^(t+1)` controlling `k |(−t)_k/k!|`. -/
 noncomputable def recipFac_B (t : ℝ) : ℝ := (t + 1) * Real.exp ((t + 1) * Real.log 2)
 
-lemma recipFac_mul_abs_g_le {t : ℝ} (ht : 0 ≤ t) (k : ℕ) :
+theorem recipFac_mul_abs_g_le {t : ℝ} (ht : 0 ≤ t) (k : ℕ) :
     (k:ℝ) * |recipFac_g k t| ≤ recipFac_B t := by
   have hm : (⌈t⌉₊ : ℝ) ≤ t + 1 := (Nat.ceil_lt_add_one ht).le
   have h2 : ((2:ℝ) ^ ⌈t⌉₊) ≤ Real.exp ((t + 1) * Real.log 2) := by
@@ -229,7 +227,7 @@ lemma recipFac_mul_abs_g_le {t : ℝ} (ht : 0 ≤ t) (k : ℕ) :
   · have h := recipFac_mul_abs_g_le_of_ceil_le ht k hk.le
     nlinarith
 
-lemma recipFac_abs_g_le {t : ℝ} (ht : 0 ≤ t) (k : ℕ) : |recipFac_g k t| ≤ recipFac_B t := by
+theorem recipFac_abs_g_le {t : ℝ} (ht : 0 ≤ t) (k : ℕ) : |recipFac_g k t| ≤ recipFac_B t := by
   rcases k with _ | k
   · rw [recipFac_g_zero, abs_one]
     unfold recipFac_B
@@ -241,10 +239,10 @@ lemma recipFac_abs_g_le {t : ℝ} (ht : 0 ≤ t) (k : ℕ) : |recipFac_g k t| �
     have := abs_nonneg (recipFac_g (k+1) t)
     nlinarith
 
-lemma recipFac_b_pos : 0 < 1 - Real.log 2 := by
+theorem recipFac_b_pos : 0 < 1 - Real.log 2 := by
   have := Real.log_two_lt_d9; linarith
 
-lemma recipFac_exp_mul_B (t : ℝ) :
+theorem recipFac_exp_mul_B (t : ℝ) :
     Real.exp (-t) * recipFac_B t =
       2 * (t * Real.exp (-(1 - Real.log 2) * t) + Real.exp (-(1 - Real.log 2) * t)) := by
   unfold recipFac_B
@@ -254,7 +252,7 @@ lemma recipFac_exp_mul_B (t : ℝ) :
       ring, Real.exp_add, Real.exp_log (by norm_num)]
   linear_combination (t + 1) * this
 
-lemma recipFac_integrable_B : IntegrableOn (fun t => Real.exp (-t) * recipFac_B t) (Ioi 0) := by
+theorem recipFac_integrable_B : IntegrableOn (fun t => Real.exp (-t) * recipFac_B t) (Ioi 0) := by
   have hb := recipFac_b_pos
   have h1 : IntegrableOn (fun t : ℝ => t * Real.exp (-(1 - Real.log 2) * t)) (Ioi 0) := by
     refine (integrableOn_rpow_mul_exp_neg_mul_rpow (s := 1) (p := 1) (by norm_num) one_pos hb).congr_fun
@@ -266,7 +264,7 @@ lemma recipFac_integrable_B : IntegrableOn (fun t => Real.exp (-t) * recipFac_B 
   refine h3.congr_fun (fun t _ => ?_) measurableSet_Ioi
   simp only [recipFac_exp_mul_B]
 
-lemma recipFac_tendsto_B : Tendsto (fun t => Real.exp (-t) * recipFac_B t) atTop (𝓝 0) := by
+theorem recipFac_tendsto_B : Tendsto (fun t => Real.exp (-t) * recipFac_B t) atTop (𝓝 0) := by
   have hb := recipFac_b_pos
   have h1 := tendsto_rpow_mul_exp_neg_mul_atTop_nhds_zero 1 _ hb
   have h0 := tendsto_rpow_mul_exp_neg_mul_atTop_nhds_zero 0 _ hb
@@ -275,7 +273,7 @@ lemma recipFac_tendsto_B : Tendsto (fun t => Real.exp (-t) * recipFac_B t) atTop
   refine this.congr fun t => ?_
   rw [recipFac_exp_mul_B]
 
-lemma recipFac_integrable_g (k : ℕ) :
+theorem recipFac_integrable_g (k : ℕ) :
     IntegrableOn (fun t => Real.exp (-t) * recipFac_g k t) (Ioi 0) := by
   refine recipFac_integrable_B.mono' ?_ ?_
   · exact ((Real.continuous_exp.comp continuous_neg).mul
@@ -288,7 +286,7 @@ lemma recipFac_integrable_g (k : ℕ) :
 /-- The moments `∫₀^∞ e^{-t} (−t)_k/k! dt`. -/
 noncomputable def recipFac_d (k : ℕ) : ℝ := ∫ t in Ioi 0, Real.exp (-t) * recipFac_g k t
 
-lemma recipFac_d_succ (k : ℕ) :
+theorem recipFac_d_succ (k : ℕ) :
     recipFac_d (k+1) = -∑ i ∈ Finset.range (k+1), recipFac_d i / ((k:ℝ) + 1 - i) := by
   set f : ℝ → ℝ := fun t => -(Real.exp (-t) * recipFac_g (k+1) t)
   set f' : ℝ → ℝ := fun t => Real.exp (-t) * recipFac_g (k+1) t +
@@ -326,7 +324,7 @@ lemma recipFac_d_succ (k : ℕ) :
   unfold recipFac_d
   linarith
 
-lemma recipFac_coeff_eq_d (k : ℕ) : expIntReciprocalFactorialCoeff k = (recipFac_d k : ℂ) := by
+theorem recipFac_coeff_eq_d (k : ℕ) : expIntReciprocalFactorialCoeff k = (recipFac_d k : ℂ) := by
   induction k using Nat.strong_induction_on with
   | _ k ih =>
     rcases k with _ | k
@@ -342,7 +340,7 @@ lemma recipFac_coeff_eq_d (k : ℕ) : expIntReciprocalFactorialCoeff k = (recipF
         Nat.cast_sub hj']
       ring
 
-lemma recipFac_norm_poch_ge {z : ℂ} (hz : 0 < z.re) (n : ℕ) :
+theorem recipFac_norm_poch_ge {z : ℂ} (hz : 0 < z.re) (n : ℕ) :
     ∏ j ∈ Finset.range n, (z.re + j) ≤ ‖poch z n‖ := by
   induction n with
   | zero => simp [poch_zero]
@@ -352,13 +350,13 @@ lemma recipFac_norm_poch_ge {z : ℂ} (hz : 0 < z.re) (n : ℕ) :
       have := Complex.re_le_norm (z + n); simpa using this
     exact mul_le_mul ih h1 (by positivity) (norm_nonneg _)
 
-lemma recipFac_poch_ne_zero {z : ℂ} (hz : 0 < z.re) (n : ℕ) : poch z n ≠ 0 := by
+theorem recipFac_poch_ne_zero {z : ℂ} (hz : 0 < z.re) (n : ℕ) : poch z n ≠ 0 := by
   have h := recipFac_norm_poch_ge hz n
   have : 0 < ∏ j ∈ Finset.range n, (z.re + j) :=
     Finset.prod_pos fun j _ => by positivity
   exact norm_pos_iff.1 (this.trans_le h)
 
-lemma recipFac_poch_bound {z : ℂ} (hz : 0 < z.re) :
+theorem recipFac_poch_bound {z : ℂ} (hz : 0 < z.re) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ k : ℕ,
       ‖(((k+1).factorial : ℕ) : ℂ) / poch z (k+2)‖ ≤ C * ((k:ℝ)+1) ^ (-z.re) := by
   obtain ⟨C, hC⟩ := (Real.GammaSeq_tendsto_Gamma z.re).bddAbove_range
@@ -383,7 +381,7 @@ lemma recipFac_poch_bound {z : ℂ} (hz : 0 < z.re) :
 noncomputable def recipFac_F (z : ℂ) (k : ℕ) (t : ℝ) : ℂ :=
   ((Real.exp (-t) * recipFac_g k t : ℝ) : ℂ) * ((k.factorial : ℂ) / poch z (k+1))
 
-lemma recipFac_norm_F_succ_le {z : ℂ} {C : ℝ}
+theorem recipFac_norm_F_succ_le {z : ℂ} {C : ℝ}
     (hC : ∀ k : ℕ, ‖(((k+1).factorial : ℕ) : ℂ) / poch z (k+2)‖ ≤ C * ((k:ℝ)+1) ^ (-z.re))
     {t : ℝ} (ht : 0 ≤ t) (k : ℕ) :
     ‖recipFac_F z (k+1) t‖ ≤ Real.exp (-t) * recipFac_B t * (C * ((k:ℝ)+1) ^ (-z.re - 1)) := by
@@ -400,12 +398,12 @@ lemma recipFac_norm_F_succ_le {z : ℂ} {C : ℝ}
           (by positivity)
     _ = _ := by ring
 
-lemma recipFac_summable_u {z : ℂ} (hz : 0 < z.re) (C : ℝ) :
+theorem recipFac_summable_u {z : ℂ} (hz : 0 < z.re) (C : ℝ) :
     Summable (fun k : ℕ => C * ((k:ℝ)+1) ^ (-z.re - 1)) := by
   have h := (summable_nat_add_iff 1).2 (Real.summable_nat_rpow.2 (by linarith : -z.re - 1 < -1))
   exact (h.mul_left C).congr fun k => by push_cast; rfl
 
-lemma recipFac_hasSum_F {z : ℂ} (hz : 0 < z.re) {t : ℝ} (ht : 0 ≤ t) :
+theorem recipFac_hasSum_F {z : ℂ} (hz : 0 < z.re) {t : ℝ} (ht : 0 ≤ t) :
     HasSum (fun k => recipFac_F z k t) (Complex.exp (-(t:ℂ)) / ((t:ℂ) + z)) := by
   obtain ⟨C, hC0, hC⟩ := recipFac_poch_bound hz
   have hsum : Summable (fun k => recipFac_F z k t) := by
@@ -537,7 +535,7 @@ theorem sinInt_spherical_series (z : ℂ) :
     (by simp [sinInt]) z
 
 /-- Summation by parts for a sequence `q` with `q 0 = 0`. -/
-lemma cinSph_hasSum_by_parts {c q : ℕ → ℂ} {L : ℂ} (hq0 : q 0 = 0)
+theorem cinSph_hasSum_by_parts {c q : ℕ → ℂ} {L : ℂ} (hq0 : q 0 = 0)
     (hs : Summable (fun n => c n * q n)) (hs' : Summable (fun n => c n * q (n+1)))
     (h : HasSum (fun n => c n * (q n - q (n+1))) L) :
     HasSum (fun n => (c (n+1) - c n) * q (n+1)) L := by
@@ -553,29 +551,29 @@ lemma cinSph_hasSum_by_parts {c q : ℕ → ℂ} {L : ℂ} (hq0 : q 0 = 0)
 /-- The harmonic-number form of the coefficients of DLMF 6.10.5. -/
 def cinSphB (n : ℕ) : ℂ := 1 - (-1:ℂ)^n + (harmonic n : ℂ)
 
-lemma cinSph_coeff (n : ℕ) : expIntSphericalCoeff n = (2*n+1) * cinSphB n := by
+theorem cinSph_coeff (n : ℕ) : expIntSphericalCoeff n = (2*n+1) * cinSphB n := by
   rw [expIntSphericalCoeff, cinSphB, digamma_nat_add_one, digamma_one]
   ring
 
-lemma cinSph_b_succ (n : ℕ) : cinSphB (n+1) - cinSphB n = 2*(-1:ℂ)^n + 1/((n:ℂ)+1) := by
+theorem cinSph_b_succ (n : ℕ) : cinSphB (n+1) - cinSphB n = 2*(-1:ℂ)^n + 1/((n:ℂ)+1) := by
   simp only [cinSphB, harmonic_succ]
   push_cast
   ring
 
-lemma cinSph_norm_natCast_le (n : ℕ) : ‖((n:ℂ)+1)‖ ≤ 2^n := by
+theorem cinSph_norm_natCast_le (n : ℕ) : ‖((n:ℂ)+1)‖ ≤ 2^n := by
   rw [show ((n:ℂ)+1) = ((n+1:ℕ):ℂ) by push_cast; ring, Complex.norm_natCast]
   exact_mod_cast Nat.lt_two_pow_self (n := n)
 
-lemma cinSph_norm_natCast_le' (n : ℕ) : ‖(n:ℂ)‖ ≤ 2^n := by
+theorem cinSph_norm_natCast_le' (n : ℕ) : ‖(n:ℂ)‖ ≤ 2^n := by
   rw [Complex.norm_natCast]
   exact_mod_cast (Nat.lt_two_pow_self (n := n)).le
 
-lemma cinSph_norm_two_mul_add_one_le (n : ℕ) : ‖(2*(n:ℂ)+1)‖ ≤ 2*2^n := by
+theorem cinSph_norm_two_mul_add_one_le (n : ℕ) : ‖(2*(n:ℂ)+1)‖ ≤ 2*2^n := by
   rw [show (2*(n:ℂ)+1) = ((2*n+1 : ℝ) : ℂ) by push_cast; ring, Complex.norm_real,
     Real.norm_of_nonneg (by positivity)]
   exact sphProd_two_mul_add_one_le n
 
-lemma cinSph_norm_harmonic_le (n : ℕ) : ‖(harmonic n : ℂ)‖ ≤ n := by
+theorem cinSph_norm_harmonic_le (n : ℕ) : ‖(harmonic n : ℂ)‖ ≤ n := by
   induction n with
   | zero => simp
   | succ n ih =>
@@ -587,7 +585,7 @@ lemma cinSph_norm_harmonic_le (n : ℕ) : ‖(harmonic n : ℂ)‖ ≤ n := by
       exact inv_le_one_of_one_le₀ (by exact_mod_cast Nat.succ_pos n)
     linarith
 
-lemma cinSph_norm_b_le (n : ℕ) : ‖cinSphB n‖ ≤ 3*2^n := by
+theorem cinSph_norm_b_le (n : ℕ) : ‖cinSphB n‖ ≤ 3*2^n := by
   rw [cinSphB]
   have h1 := cinSph_norm_harmonic_le n
   have h2 : (n:ℝ) ≤ 2^n := by exact_mod_cast (Nat.lt_two_pow_self (n := n)).le
@@ -597,7 +595,7 @@ lemma cinSph_norm_b_le (n : ℕ) : ‖cinSphB n‖ ≤ 3*2^n := by
     _ ≤ 1 + 1 + n := by rw [norm_one, norm_pow, norm_neg, norm_one, one_pow]; linarith
     _ ≤ 3*2^n := by linarith
 
-lemma cinSph_norm_coeff_le (n : ℕ) : ‖expIntSphericalCoeff n‖ ≤ 6*4^n := by
+theorem cinSph_norm_coeff_le (n : ℕ) : ‖expIntSphericalCoeff n‖ ≤ 6*4^n := by
   rw [cinSph_coeff, norm_mul]
   calc ‖(2*(n:ℂ)+1)‖ * ‖cinSphB n‖ ≤ (2*2^n) * (3*2^n) :=
         mul_le_mul (cinSph_norm_two_mul_add_one_le n) (cinSph_norm_b_le n) (norm_nonneg _)
@@ -605,20 +603,20 @@ lemma cinSph_norm_coeff_le (n : ℕ) : ‖expIntSphericalCoeff n‖ ≤ 6*4^n :=
     _ = 6*4^n := by rw [show (4:ℝ)^n = 2^n*2^n by rw [← mul_pow]; norm_num]; ring
 
 /-- Ball bounds for `cₙ jₙ(w)²`. -/
-lemma cinSph_bound_sq (c : ℕ → ℂ) {C ρ : ℝ} (hρ : 0 ≤ ρ) (hc : ∀ n, ‖c n‖ ≤ C * ρ^n) (R : ℝ) :
+theorem cinSph_bound_sq (c : ℕ → ℂ) {C ρ : ℝ} (hρ : 0 ≤ ρ) (hc : ∀ n, ‖c n‖ ≤ C * ρ^n) (R : ℝ) :
     ∃ u : ℕ → ℝ, Summable u ∧ ∀ n w, ‖w‖ < R → ‖c n * sphericalJ n w ^ 2‖ ≤ u n := by
   obtain ⟨u, hu, h⟩ := sphProd_bound_coeff_mul c hρ hc id R
   exact ⟨u, hu, fun n w hw => by simpa [sq, mul_assoc] using h n w hw.le⟩
 
 /-- The derivative of the square `jₙ²` as a difference. -/
-lemma cinSph_hasDerivAt_sq (n : ℕ) (w : ℂ) :
+theorem cinSph_hasDerivAt_sq (n : ℕ) (w : ℂ) :
     HasDerivAt (fun w => sphericalJ n w ^ 2)
       (2 * ((n:ℂ) * sphericalJ (n-1) w * sphericalJ n w -
         ((n+1:ℕ):ℂ) * sphericalJ (n+1-1) w * sphericalJ (n+1) w) / (2*n+1)) w := by
   simpa using sphProd_hasDerivAt_sphericalJ_sq n w
 
 /-- Summability of `cₙ qₙ` and `cₙ qₙ₊₁`, `qₙ = n jₙ₋₁ jₙ`, for geometric `cₙ`. -/
-lemma cinSph_summable_q (c : ℕ → ℂ) {C ρ : ℝ} (hρ : 0 ≤ ρ) (hc : ∀ n, ‖c n‖ ≤ C * ρ^n) (w : ℂ) :
+theorem cinSph_summable_q (c : ℕ → ℂ) {C ρ : ℝ} (hρ : 0 ≤ ρ) (hc : ∀ n, ‖c n‖ ≤ C * ρ^n) (w : ℂ) :
     Summable (fun n => c n * ((n:ℂ) * sphericalJ (n-1) w * sphericalJ n w)) ∧
     Summable (fun n => c n * (((n+1:ℕ):ℂ) * sphericalJ (n+1-1) w * sphericalJ (n+1) w)) := by
   have hC : 0 ≤ C := le_trans (norm_nonneg _) ((hc 0).trans (by simp))
@@ -642,7 +640,7 @@ lemma cinSph_summable_q (c : ℕ → ℂ) {C ρ : ℝ} (hρ : 0 ≤ ρ) (hc : �
 
 /-- Termwise Euler derivative of `∑ (-1)ⁿ (2n+1) jₙ(z)² = j₀(2z)`:
 `∑ 4z (-1)ⁿ (n+1) jₙ(z) jₙ₊₁(z) = 2z j₁(2z)`. -/
-lemma cinSph_hasSum_alt_prod (x : ℂ) :
+theorem cinSph_hasSum_alt_prod (x : ℂ) :
     HasSum (fun n : ℕ => 4*x*(-1:ℂ)^n*((n:ℂ)+1)*(sphericalJ n x*sphericalJ (n+1) x))
       (2*x*sphericalJ 1 (2*x)) := by
   set f : ℕ → ℂ → ℂ := fun n w => (-1:ℂ)^n*(2*n+1)*sphericalJ n w^2 with hf
@@ -685,7 +683,7 @@ lemma cinSph_hasSum_alt_prod (x : ℂ) :
 
 /-- Termwise Euler derivative of `Si(2z) = ∑ 2z jₙ(z)²` (DLMF 6.10.4):
 `∑ 4z² jₙ(z) jₙ₊₁(z) = 2z - sin 2z`. -/
-lemma cinSph_hasSum_prod {x : ℂ} (hx : x ≠ 0) :
+theorem cinSph_hasSum_prod {x : ℂ} (hx : x ≠ 0) :
     HasSum (fun n : ℕ => 4*x^2*(sphericalJ n x*sphericalJ (n+1) x)) (2*x - sin (2*x)) := by
   set f : ℕ → ℂ → ℂ := fun n w => 2*w*sphericalJ n w^2 with hf
   set D : ℕ → ℂ → ℂ := fun n w =>
@@ -732,7 +730,7 @@ lemma cinSph_hasSum_prod {x : ℂ} (hx : x ≠ 0) :
     ring
 
 /-- Euler derivative of the series of DLMF 6.10.5: `z S'(z) = 1 - cos 2z`. -/
-lemma cinSph_euler {x : ℂ} (hx : x ≠ 0) :
+theorem cinSph_euler {x : ℂ} (hx : x ≠ 0) :
     Differentiable ℂ (fun w => ∑' n, expIntSphericalCoeff n * sphericalJ n w^2) ∧
     x * deriv (fun w => ∑' n, expIntSphericalCoeff n * sphericalJ n w^2) x = 1 - cos (2*x) := by
   set f : ℕ → ℂ → ℂ := fun n w => expIntSphericalCoeff n * sphericalJ n w^2 with hf
@@ -775,7 +773,7 @@ lemma cinSph_euler {x : ℂ} (hx : x ≠ 0) :
   linear_combination e - x*h1 + h0/2
 
 /-- DLMF 6.10.5 in the form `∑ₙ aₙ jₙ(x)² = Cin(2x)`, including the vanishing term `n = 0`. -/
-lemma cinSph_hasSum (x : ℂ) :
+theorem cinSph_hasSum (x : ℂ) :
     HasSum (fun n => expIntSphericalCoeff n * sphericalJ n x^2) (cosIntCin (2*x)) := by
   set S : ℂ → ℂ := fun w => ∑' n, expIntSphericalCoeff n * sphericalJ n w^2 with hS
   have hDS : Differentiable ℂ S := (cinSph_euler one_ne_zero).1

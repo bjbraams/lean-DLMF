@@ -5,17 +5,16 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 public import DLMFMathlib.Analysis.Complex.SegmentPrimitive
-public import DLMF.Confluent.ExpIntegral
-public import DLMF.Confluent.ErrorFunctions
-public import DLMF.Confluent.FresnelAsymptotics
-public import DLMF.Statistical.IncompleteGamma
-public import DLMF.Statistical.IncompleteBeta
-public import DLMF.Bessel.SecondKind
-public import DLMF.OrthogonalPolynomials.Classical
-public import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
 public import Mathlib.Algebra.ContinuedFractions.Basic
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.SpecialFunctions.Bernstein
+public import Mathlib.Analysis.SpecialFunctions.RegularizedHypergeometric
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.Tactic.Basify
+public import Mathlib.Tactic.ENatToNat
 
 /-!
 # Convergence and branch conventions for the DLMF Chapters 6–8 acquisition

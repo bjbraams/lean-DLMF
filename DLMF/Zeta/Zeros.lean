@@ -5,12 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Zeta.Asymptotics
 public import Mathlib.Analysis.Analytic.Order
 public import Mathlib.NumberTheory.LSeries.HardyZ
-public import Mathlib.NumberTheory.LSeries.Nonvanishing
 public import Mathlib.NumberTheory.LSeries.ZetaZeros
-public import Mathlib.Topology.Algebra.InfiniteSum.Basic
 
 /-!
 # Zeros of the Riemann zeta function (DLMF §25.10)

@@ -5,8 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.OrthogonalPolynomials.Topics
-public import Mathlib.Tactic.CrossRefAttribute
 public import Mathlib.Algebra.ContinuedFractions.ContinuantsRecurrence
 public import DLMF.OrthogonalPolynomials.Differential
 /-!
@@ -37,12 +35,12 @@ def polynomialFraction (a b : ℕ → ℂ) : GenContFract ℂ where
   s := Stream'.Seq.ofStream (fun k => ⟨a k, b k⟩)
 
 /-- The initial denominator does not depend on the first partial numerator. -/
-lemma polynomialFraction_dens_one (a b : ℕ → ℂ) :
+theorem polynomialFraction_dens_one (a b : ℕ → ℂ) :
     (polynomialFraction a b).dens 1 = b 0 :=
   GenContFract.first_den_eq (g := polynomialFraction a b) (gp := ⟨a 0, b 0⟩) (by rfl)
 
 /-- Mathlib's denominator recurrence specialized to the prescribed stream. -/
-lemma polynomialFraction_dens_step (a b : ℕ → ℂ) (n : ℕ) :
+theorem polynomialFraction_dens_step (a b : ℕ → ℂ) (n : ℕ) :
     (polynomialFraction a b).dens (n + 2) =
       b (n + 1) * (polynomialFraction a b).dens (n + 1) +
         a (n + 1) * (polynomialFraction a b).dens n :=

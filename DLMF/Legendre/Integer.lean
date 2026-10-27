@@ -5,8 +5,29 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Legendre.Laplace
 public import DLMF.Legendre.Recurrences
+public import DLMF.Legendre.SecondKind
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Tactic.Basify
+public import Mathlib.Tactic.ENatToNat
+public import Mathlib.Tactic.Echelon.Zsqrtd
+public import Mathlib.Tactic.Inclusion.Extension.Core.Core
+public import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+public import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Rational
+public import Mathlib.Tactic.NormNum.Irrational
+public import Mathlib.Tactic.NormNum.IsCoprime
+public import Mathlib.Tactic.NormNum.IsSquare
+public import Mathlib.Tactic.NormNum.LegendreSymbol
+public import Mathlib.Tactic.NormNum.ModEq
+public import Mathlib.Tactic.NormNum.NatFib
+public import Mathlib.Tactic.NormNum.NatLog
+public import Mathlib.Tactic.NormNum.NatSqrt
+public import Mathlib.Tactic.NormNum.Ordinal
+public import Mathlib.Tactic.NormNum.Parity
+public import Mathlib.Tactic.NormNum.Prime
+public import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.Tactic.Polynomial.Basic
+public import Mathlib.Tactic.ReduceModChar
 
 /-!
 # Recurrence of `Q_ν` and Legendre functions of integer degree (Temme §8.5)
@@ -29,18 +50,18 @@ noncomputable section
 namespace DLMF.Legendre
 
 /-- `1/Γ(z) = z/Γ(z+1)` for every `z`. -/
-lemma recip_Gamma_succ' (z : ℂ) : (Gamma z)⁻¹ = z * (Gamma (z + 1))⁻¹ := by
+theorem recip_Gamma_succ' (z : ℂ) : (Gamma z)⁻¹ = z * (Gamma (z + 1))⁻¹ := by
   have h := one_div_Gamma_eq_self_mul_one_div_Gamma_add_one z
   simpa [one_div] using h
 
 /-- `(x)ₙ₊₁ = x (x+1)ₙ`. -/
-lemma poch_succ_left (x : ℂ) (n : ℕ) :
+theorem poch_succ_left (x : ℂ) (n : ℕ) :
     (ascPochhammer ℂ (n + 1)).eval x = x * (ascPochhammer ℂ n).eval (x + 1) := by
   rw [ascPochhammer_succ_left]; simp [Polynomial.eval_comp]
 
 /-- The regularized series identity behind the recurrence of `Q_ν`: for `c = a + b`,
 `𝐅(a-1,b;c-1;u) - (c-1)𝐅(a,b;c;u) + b² u 𝐅(a,b+1;c+1;u) = 0` on the unit disk. -/
-lemma regularizedGaussHGFun_legendreQ (a b : ℂ) {u : ℂ} (hu : ‖u‖ < 1) :
+theorem regularizedGaussHGFun_legendreQ (a b : ℂ) {u : ℂ} (hu : ‖u‖ < 1) :
     regularizedGaussHGFun (a - 1) b (a + b - 1) u -
         (a + b - 1) * regularizedGaussHGFun a b (a + b) u +
       b ^ 2 * u * regularizedGaussHGFun a (b + 1) (a + b + 1) u = 0 := by
@@ -88,7 +109,7 @@ lemma regularizedGaussHGFun_legendreQ (a b : ℂ) {u : ℂ} (hu : ‖u‖ < 1) :
 
 
 /-- The identity `regularizedGaussHGFun_legendreQ` on the cut plane. -/
-lemma regularizedGaussHG_legendreQ (a b : ℂ) {u : ℂ} (hu : u ∈ cutPlane) :
+theorem regularizedGaussHG_legendreQ (a b : ℂ) {u : ℂ} (hu : u ∈ cutPlane) :
     regularizedGaussHG (a - 1) b (a + b - 1) u - (a + b - 1) * regularizedGaussHG a b (a + b) u +
       b ^ 2 * u * regularizedGaussHG a (b + 1) (a + b + 1) u = 0 :=
   eqOn_cutPlane_of_eqOn_disk
@@ -151,7 +172,7 @@ theorem legendreQ_recurrence {ν : ℂ} (hν : ν ≠ 0) {z : ℂ} (hz : z - 1 �
     (-(ν + 1) ^ 2 / 2 * (Real.sqrt π * A * Z * Gp * Gamma (ν + 1)) * z⁻¹) * hzz
 
 /-- `𝐅(0,b;c;u) = 1/Γ(c)` on the cut plane. -/
-lemma regularizedGaussHG_zero_left (b c : ℂ) {u : ℂ} (hu : u ∈ cutPlane) :
+theorem regularizedGaussHG_zero_left (b c : ℂ) {u : ℂ} (hu : u ∈ cutPlane) :
     regularizedGaussHG 0 b c u = (Gamma c)⁻¹ :=
   eqOn_cutPlane_of_eqOn_disk (f := regularizedGaussHG 0 b c) (g := fun _ => (Gamma c)⁻¹)
     (analyticOnNhd_regularizedGaussHG _ _ _) analyticOnNhd_const (fun u hu => by
@@ -201,7 +222,7 @@ noncomputable def legendreQPoly : ℕ → Polynomial ℂ
         Polynomial.C (n + 1 : ℂ) * legendreQPoly n)
 
 /-- `z ∉ (-∞, 1]` implies `z ∉ (-∞, -1]`. -/
-lemma one_add_mem_slitPlane_of_sub_one {z : ℂ} (hz : z - 1 ∈ slitPlane) : 1 + z ∈ slitPlane := by
+theorem one_add_mem_slitPlane_of_sub_one {z : ℂ} (hz : z - 1 ∈ slitPlane) : 1 + z ∈ slitPlane := by
   rw [mem_slitPlane_iff] at hz ⊢
   rcases hz with h | h
   · left; simp at h ⊢; linarith
@@ -245,7 +266,7 @@ theorem legendreQ_nat (n : ℕ) {z : ℂ} (hz : z - 1 ∈ slitPlane) :
         ((n : ℂ) + 1) * h0
 
 /-- Legendre polynomials are entire. -/
-lemma differentiable_legendrePolyP (n : ℕ) : Differentiable ℂ (legendrePolyP n) := by
+theorem differentiable_legendrePolyP (n : ℕ) : Differentiable ℂ (legendrePolyP n) := by
   have h : legendrePolyP n = fun x => poch (0 + 1) n / n.factorial *
       ∑ k ∈ Finset.range (n + 1), gaussHGCoeff (-(n : ℂ)) ((n : ℂ) + 0 + 0 + 1) (0 + 1) k *
         ((1 - x) / 2) ^ k := by
@@ -253,13 +274,13 @@ lemma differentiable_legendrePolyP (n : ℕ) : Differentiable ℂ (legendrePolyP
   rw [h]; fun_prop
 
 /-- `P_n(1) = 1`. -/
-lemma legendrePolyP_one_eq (n : ℕ) : legendrePolyP n 1 = 1 := by
+theorem legendrePolyP_one_eq (n : ℕ) : legendrePolyP n 1 = 1 := by
   have h := legendreP_nat n (z := 1) (by norm_num)
   rw [legendreP_one] at h
   exact h.symm
 
 /-- `d/dz ½ log((z+1)/(z-1)) = 1/(1-z²)`. -/
-lemma hasDerivAt_legendreQ_zero {z : ℂ} (hz : z - 1 ∈ slitPlane) :
+theorem hasDerivAt_legendreQ_zero {z : ℂ} (hz : z - 1 ∈ slitPlane) :
     HasDerivAt (fun w : ℂ => 1 / 2 * log ((w + 1) / (w - 1))) (1 / (1 - z ^ 2)) z := by
   have hz1 : z - 1 ≠ 0 := slitPlane_ne_zero hz
   have hz2 : z + 1 ≠ 0 := slitPlane_ne_zero (by
@@ -275,7 +296,7 @@ lemma hasDerivAt_legendreQ_zero {z : ℂ} (hz : z - 1 ∈ slitPlane) :
   ring
 
 /-- `P_ν` is analytic off `(-∞, -1]`. -/
-lemma analyticAt_legendreP (ν : ℂ) {z : ℂ} (hz : 1 + z ∈ slitPlane) :
+theorem analyticAt_legendreP (ν : ℂ) {z : ℂ} (hz : 1 + z ∈ slitPlane) :
     AnalyticAt ℂ (legendreP ν) z :=
   (analyticAt_regularizedGaussHG _ _ _ (mem_cutPlane_of_one_add hz)).comp_of_eq (by fun_prop) rfl
 

@@ -7,11 +7,8 @@ module
 
 public import Mathlib.Combinatorics.Enumerative.Stirling
 public import Mathlib.Combinatorics.Enumerative.InclusionExclusion
-public import Mathlib.Data.Fintype.BigOperators
 public import Mathlib.Data.Nat.Choose.Sum
-public import Mathlib.Algebra.BigOperators.Ring.Finset
 public import Mathlib.Logic.Equiv.Fintype
-public import Mathlib.Data.Fintype.Perm
 public import Mathlib.SetTheory.Cardinal.Finite
 
 /-!
@@ -61,7 +58,7 @@ theorem q26b_card_surjective_congr {ι α β : Type*} [Fintype ι] [DecidableEq 
     · funext i; simp
 
 /-- The maps `ι → β` with image exactly `T` are the surjections onto `T`. -/
-theorem q26b_card_image_eq {ι β : Type*} [Fintype ι] [DecidableEq ι] [Fintype β] [DecidableEq β]
+lemma q26b_card_image_eq {ι β : Type*} [Fintype ι] [DecidableEq ι] [Fintype β] [DecidableEq β]
     (T : Finset β) :
     #{f : ι → β | univ.image f = T} = #{g : ι → T | Function.Surjective g} := by
   symm
@@ -89,7 +86,7 @@ theorem q26b_card_image_eq {ι β : Type*} [Fintype ι] [DecidableEq ι] [Fintyp
     exact ⟨i, Subtype.ext hi⟩
 
 /-- `kⁿ = ∑_{j=0}^k C(k, j) · #{surjections Fin n → Fin j}`. -/
-theorem q26b_pow_eq_sum_choose_card_surjective (n k : ℕ) :
+lemma q26b_pow_eq_sum_choose_card_surjective (n k : ℕ) :
     k ^ n = ∑ j ∈ range (k + 1), k.choose j * #{f : Fin n → Fin j | Function.Surjective f} := by
   have h1 : k ^ n = #(univ : Finset (Fin n → Fin k)) := by simp [card_univ]
   rw [h1, Finset.card_eq_sum_card_fiberwise (f := fun f : Fin n → Fin k => univ.image f)
@@ -158,7 +155,7 @@ theorem q26b_card_surjective_eq_alternating_sum (n k : ℕ) :
   push_cast; ring
 
 /-- Counting the classes of a relation through a complete invariant. -/
-lemma q26b_natCard_quot {α M : Type*} (r : α → α → Prop) (F : α → M)
+theorem q26b_natCard_quot {α M : Type*} (r : α → α → Prop) (F : α → M)
     (hF : ∀ a b, r a b ↔ F a = F b) (hs : Function.Surjective F) :
     Nat.card (Quot r) = Nat.card M := by
   refine Nat.card_congr (Equiv.ofBijective (Quot.lift F fun a b h => (hF a b).1 h) ⟨?_, ?_⟩)
@@ -179,7 +176,7 @@ lemma q26b_exists_perm_of_card_fiber {α β : Type*} [Fintype α] [DecidableEq �
   exact ⟨Equiv.ofFiberEquiv e, Equiv.ofFiberEquiv_map e⟩
 
 /-- The multiset of values of `f`. -/
-lemma q26b_count_map {α β : Type*} [Fintype α] [DecidableEq β] (f : α → β) (c : β) :
+theorem q26b_count_map {α β : Type*} [Fintype α] [DecidableEq β] (f : α → β) (c : β) :
     Multiset.count c (univ.val.map f) = #{a | f a = c} := by
   rw [Multiset.count_map]
   simp only [Finset.card, Finset.filter_val]
@@ -187,7 +184,7 @@ lemma q26b_count_map {α β : Type*} [Fintype α] [DecidableEq β] (f : α → �
   exact Multiset.filter_congr fun a _ => eq_comm
 
 /-- Two maps have the same multiset of values iff they differ by a permutation of the domain. -/
-lemma q26b_map_eq_iff {α β : Type*} [Fintype α] [DecidableEq β] (f g : α → β) :
+theorem q26b_map_eq_iff {α β : Type*} [Fintype α] [DecidableEq β] (f g : α → β) :
     univ.val.map f = univ.val.map g ↔ ∃ σ : Perm α, g = f ∘ σ := by
   constructor
   · intro h
@@ -201,7 +198,7 @@ lemma q26b_map_eq_iff {α β : Type*} [Fintype α] [DecidableEq β] (f g : α �
     exact (Multiset.map_univ_val_equiv σ).symm
 
 /-- Every multiset of cardinality `n` is the multiset of values of a map on `Fin n`. -/
-lemma q26b_exists_map_eq {β : Type*} {n : ℕ} (s : Multiset β) (h : Multiset.card s = n) :
+theorem q26b_exists_map_eq {β : Type*} {n : ℕ} (s : Multiset β) (h : Multiset.card s = n) :
     ∃ f : Fin n → β, univ.val.map f = s := by
   obtain ⟨l, rfl⟩ := Quot.exists_rep s
   change Multiset.card (l : Multiset β) = n at h
@@ -210,7 +207,7 @@ lemma q26b_exists_map_eq {β : Type*} {n : ℕ} (s : Multiset β) (h : Multiset.
   exact ⟨l.get, by rw [Fin.univ_val_map, List.ofFn_get]; rfl⟩
 
 /-- Two injections into a finite type differ by a permutation of the target. -/
-lemma q26b_exists_perm_comp_of_injective {α β : Type*} [Fintype β] [DecidableEq β] {a b : α → β}
+theorem q26b_exists_perm_comp_of_injective {α β : Type*} [Fintype β] [DecidableEq β] {a b : α → β}
     (ha : Function.Injective a) (hb : Function.Injective b) : ∃ τ : Perm β, b = τ ∘ a := by
   classical
   let e : {x // x ∈ Set.range a} ≃ {x // x ∈ Set.range b} :=

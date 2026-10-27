@@ -7,8 +7,6 @@ module
 
 public import Mathlib.Data.Nat.Choose.Cast
 
-public import DLMF.Hypergeometric.Series
-public import DLMF.Hypergeometric.DiffEq
 public import DLMF.Hypergeometric.Continuation
 public import DLMF.Bessel.Basic
 public import Mathlib.RingTheory.PowerSeries.Basic
@@ -42,23 +40,23 @@ namespace DLMF.Hypergeometric
 def thetaPS (g : PowerSeries ℂ) : PowerSeries ℂ := PowerSeries.mk fun n => (n : ℂ) * coeff n g
 
 /-- Coefficients of `θ g`. -/
-@[simp] lemma coeff_thetaPS (g : PowerSeries ℂ) (n : ℕ) : coeff n (thetaPS g) = n * coeff n g := by
+@[simp] theorem coeff_thetaPS (g : PowerSeries ℂ) (n : ℕ) : coeff n (thetaPS g) = n * coeff n g := by
   simp [thetaPS]
 
 /-- `θ` is additive. -/
-lemma thetaPS_add (g h : PowerSeries ℂ) : thetaPS (g + h) = thetaPS g + thetaPS h := by
+theorem thetaPS_add (g h : PowerSeries ℂ) : thetaPS (g + h) = thetaPS g + thetaPS h := by
   ext n; simp [mul_add]
 
 /-- `θ` commutes with subtraction. -/
-lemma thetaPS_sub (g h : PowerSeries ℂ) : thetaPS (g - h) = thetaPS g - thetaPS h := by
+theorem thetaPS_sub (g h : PowerSeries ℂ) : thetaPS (g - h) = thetaPS g - thetaPS h := by
   ext n; simp [mul_sub]
 
 /-- `θ` is `ℂ`-linear. -/
-lemma thetaPS_C_mul (c : ℂ) (g : PowerSeries ℂ) : thetaPS (C c * g) = C c * thetaPS g := by
+theorem thetaPS_C_mul (c : ℂ) (g : PowerSeries ℂ) : thetaPS (C c * g) = C c * thetaPS g := by
   ext n; simp [coeff_C_mul]; ring
 
 /-- `θ` is a derivation. -/
-lemma thetaPS_mul (g h : PowerSeries ℂ) :
+theorem thetaPS_mul (g h : PowerSeries ℂ) :
     thetaPS (g * h) = thetaPS g * h + g * thetaPS h := by
   ext n
   simp only [coeff_thetaPS, map_add, coeff_mul, Finset.mul_sum]
@@ -68,7 +66,7 @@ lemma thetaPS_mul (g h : PowerSeries ℂ) :
   rw [← hp]; push_cast; ring
 
 /-- `θ(X g) = X g + X θ g`. -/
-lemma thetaPS_X_mul (g : PowerSeries ℂ) : thetaPS (X * g) = X * g + X * thetaPS g := by
+theorem thetaPS_X_mul (g : PowerSeries ℂ) : thetaPS (X * g) = X * g + X * thetaPS g := by
   ext n
   rcases n with _ | n
   · simp
@@ -79,7 +77,7 @@ def gaussPS (a b c : ℂ) : PowerSeries ℂ := PowerSeries.mk (gaussHGCoeff a b 
 
 /-- The hypergeometric equation in `θ`-form for the formal Gauss series:
 `θ(θ+c-1) F = X (θ+a)(θ+b) F`. -/
-lemma gaussPS_ode {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) :
+theorem gaussPS_ode {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) :
     thetaPS (thetaPS (gaussPS a b c)) + C (c - 1) * thetaPS (gaussPS a b c) -
       X * (thetaPS (thetaPS (gaussPS a b c)) + C (a + b) * thetaPS (gaussPS a b c) +
         C (a * b) * gaussPS a b c) = 0 := by
@@ -96,7 +94,7 @@ lemma gaussPS_ode {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) :
 
 /-- Clausen's coefficient recurrence: with `D = coeff (F²)`, `c = a + b + 1/2`,
 `(n+1)(n+c)(n+2a+2b) D_{n+1} = (n+2a)(n+2b)(n+a+b) D_n`. -/
-lemma clausen_recurrence {a b : ℂ} (hc : ∀ k : ℕ, a + b + 1 / 2 ≠ -k) (n : ℕ) :
+theorem clausen_recurrence {a b : ℂ} (hc : ∀ k : ℕ, a + b + 1 / 2 ≠ -k) (n : ℕ) :
     ((n : ℂ) + 1) * (n + (a + b + 1 / 2)) * (n + (2 * a + 2 * b)) *
         coeff (n + 1) (gaussPS a b (a + b + 1 / 2) * gaussPS a b (a + b + 1 / 2)) =
       (n + 2 * a) * (n + 2 * b) * (n + (a + b)) *
@@ -142,7 +140,7 @@ def clausenCoeff (a b : ℂ) (n : ℕ) : ℂ :=
     (poch (a + b + 1 / 2) n * poch (2 * a + 2 * b) n * n.factorial)
 
 /-- The coefficients of `F(a,b;a+b+1/2;·)²` are those of the Clausen `₃F₂`. -/
-lemma coeff_gaussPS_sq_eq_clausenCoeff {a b : ℂ} (hc : ∀ k : ℕ, a + b + 1 / 2 ≠ -k)
+theorem coeff_gaussPS_sq_eq_clausenCoeff {a b : ℂ} (hc : ∀ k : ℕ, a + b + 1 / 2 ≠ -k)
     (hd : ∀ k : ℕ, 2 * a + 2 * b ≠ -k) (n : ℕ) :
     coeff n (gaussPS a b (a + b + 1 / 2) * gaussPS a b (a + b + 1 / 2)) = clausenCoeff a b n := by
   induction n with
@@ -196,7 +194,7 @@ theorem clausen_formula {a b : ℂ} (hc : ∀ k : ℕ, a + b + 1 / 2 ≠ -k)
   ring
 
 /-- `(3/2)ₙ = (2n+1)!/(4ⁿ n!)`. -/
-lemma poch_three_halves' (n : ℕ) :
+theorem poch_three_halves' (n : ℕ) :
     poch (3 / 2 : ℂ) n = ((2 * n + 1)! : ℂ) / (4 ^ n * n !) := by
   have hG : ∀ k : ℕ, (3 / 2 : ℂ) ≠ -(k : ℂ) := fun k hk => by
     have := congrArg re hk; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
@@ -218,7 +216,7 @@ lemma poch_three_halves' (n : ℕ) :
   ring
 
 /-- The Clausen coefficients at `a = b = 1/2`. -/
-lemma clausenCoeff_half (n : ℕ) :
+theorem clausenCoeff_half (n : ℕ) :
     clausenCoeff (1 / 2) (1 / 2) n = 4 ^ n * (n ! : ℂ) ^ 2 / (((n : ℂ) + 1) * (2 * n + 1)!) := by
   rw [clausenCoeff, show 2 * (1 / 2 : ℂ) = 1 by norm_num, show (1 / 2 : ℂ) + 1 / 2 = 1 by norm_num,
     show (1 : ℂ) + 1 / 2 = 3 / 2 by norm_num, show (1 : ℂ) + 1 = 2 by norm_num,
@@ -230,7 +228,7 @@ lemma clausenCoeff_half (n : ℕ) :
   field_simp
 
 /-- `F(1/2,1/2;3/2;x²)` is real for real `|x| < 1`. -/
-lemma ordinaryHypergeometric_half_im {x : ℝ} (hx : |x| < 1) :
+theorem ordinaryHypergeometric_half_im {x : ℝ} (hx : |x| < 1) :
     (₂F₁ (1 / 2 : ℂ) (1 / 2) (3 / 2) ((x : ℂ) ^ 2)).im = 0 := by
   have hz : ‖(x : ℂ) ^ 2‖ < 1 := by
     rw [norm_pow, norm_real, Real.norm_eq_abs]; nlinarith [abs_nonneg x]

@@ -7,7 +7,6 @@ module
 
 public import DLMF.Hypergeometric.Basic
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Digamma
-public import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
 public import Mathlib.Analysis.Calculus.Deriv.Polynomial
 
 /-!
@@ -38,7 +37,7 @@ namespace DLMF.Gamma
 open DLMF.Hypergeometric
 
 /-- `1/Γ` is entire (Mathlib's `differentiable_one_div_Gamma`, in the `⁻¹` form). -/
-lemma differentiable_recip_Gamma : Differentiable ℂ fun z : ℂ => (Gamma z)⁻¹ := by
+theorem differentiable_recip_Gamma : Differentiable ℂ fun z : ℂ => (Gamma z)⁻¹ := by
   simpa [one_div] using differentiable_one_div_Gamma
 
 /-- The `n`-th derivative of the reciprocal Gamma function, an entire function. -/
@@ -46,33 +45,33 @@ def recipGammaDeriv (n : ℕ) (z : ℂ) : ℂ :=
   iteratedDeriv n (fun w : ℂ => (Gamma w)⁻¹) z
 
 @[simp]
-lemma recipGammaDeriv_zero (z : ℂ) : recipGammaDeriv 0 z = (Gamma z)⁻¹ := by
+theorem recipGammaDeriv_zero (z : ℂ) : recipGammaDeriv 0 z = (Gamma z)⁻¹ := by
   simp [recipGammaDeriv]
 
-lemma recipGammaDeriv_succ (n : ℕ) : recipGammaDeriv (n + 1) = deriv (recipGammaDeriv n) := by
+theorem recipGammaDeriv_succ (n : ℕ) : recipGammaDeriv (n + 1) = deriv (recipGammaDeriv n) := by
   funext z
   simp only [recipGammaDeriv, iteratedDeriv_succ]
   rfl
 
-lemma recipGammaDeriv_one_eq_deriv (z : ℂ) :
+theorem recipGammaDeriv_one_eq_deriv (z : ℂ) :
     recipGammaDeriv 1 z = deriv (fun w : ℂ => (Gamma w)⁻¹) z := by
   simp [recipGammaDeriv]
 
 /-- Each `recipGammaDeriv n` is entire. -/
-lemma differentiable_recipGammaDeriv (n : ℕ) : Differentiable ℂ (recipGammaDeriv n) := by
+theorem differentiable_recipGammaDeriv (n : ℕ) : Differentiable ℂ (recipGammaDeriv n) := by
   have h := (differentiable_recip_Gamma.contDiff (n := ⊤)).differentiable_iteratedDeriv n
     (by exact_mod_cast WithTop.coe_lt_top _)
   exact h
 
-lemma hasDerivAt_recipGammaDeriv (n : ℕ) (z : ℂ) :
+theorem hasDerivAt_recipGammaDeriv (n : ℕ) (z : ℂ) :
     HasDerivAt (recipGammaDeriv n) (recipGammaDeriv (n + 1) z) z := by
   rw [recipGammaDeriv_succ]
   exact (differentiable_recipGammaDeriv n z).hasDerivAt
 
-lemma continuous_recipGammaDeriv (n : ℕ) : Continuous (recipGammaDeriv n) :=
+theorem continuous_recipGammaDeriv (n : ℕ) : Continuous (recipGammaDeriv n) :=
   (differentiable_recipGammaDeriv n).continuous
 
-lemma hasDerivAt_recip_Gamma' (z : ℂ) :
+theorem hasDerivAt_recip_Gamma' (z : ℂ) :
     HasDerivAt (fun w : ℂ => (Gamma w)⁻¹) (recipGammaDeriv 1 z) z := by
   have h := hasDerivAt_recipGammaDeriv 0 z
   have e : recipGammaDeriv 0 = fun w : ℂ => (Gamma w)⁻¹ := funext recipGammaDeriv_zero
@@ -88,19 +87,19 @@ theorem poch_mul_recip_Gamma_add_nat (x : ℂ) (r : ℕ) :
     rw [poch_succ, Nat.cast_succ, ← add_assoc, mul_assoc, ← h, ih]
 
 /-- The non-poles of `Γ` form an open set. -/
-lemma isOpen_setOf_Gamma_ne_zero : IsOpen {z : ℂ | Gamma z ≠ 0} := by
+theorem isOpen_setOf_Gamma_ne_zero : IsOpen {z : ℂ | Gamma z ≠ 0} := by
   have : {z : ℂ | Gamma z ≠ 0} = (fun z : ℂ => (Gamma z)⁻¹) ⁻¹' {0}ᶜ := by
     ext z; simp
   rw [this]
   exact isOpen_compl_singleton.preimage differentiable_recip_Gamma.continuous
 
-lemma Gamma_ne_zero_iff {z : ℂ} : Gamma z ≠ 0 ↔ ∀ m : ℕ, z ≠ -(m : ℂ) := by
+theorem Gamma_ne_zero_iff {z : ℂ} : Gamma z ≠ 0 ↔ ∀ m : ℕ, z ≠ -(m : ℂ) := by
   rw [Ne, Gamma_eq_zero_iff]
   push Not
   rfl
 
 /-- `ψ` is differentiable away from the poles. -/
-lemma differentiableAt_digamma {x : ℂ} (hx : ∀ m : ℕ, x ≠ -(m : ℂ)) :
+theorem differentiableAt_digamma {x : ℂ} (hx : ∀ m : ℕ, x ≠ -(m : ℂ)) :
     DifferentiableAt ℂ digamma x := by
   have hU : {z : ℂ | Gamma z ≠ 0} ∈ 𝓝 x :=
     isOpen_setOf_Gamma_ne_zero.mem_nhds (Gamma_ne_zero_iff.mpr hx)

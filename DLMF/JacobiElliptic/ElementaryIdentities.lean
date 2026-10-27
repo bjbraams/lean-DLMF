@@ -532,7 +532,7 @@ theorem jacobiPQk_half_sq {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p q r : Ja
 /-! ### Jacobi's imaginary transformation (§22.6(iv), Table 22.6.1) -/
 
 /-- The principal square root of a slit-plane number has positive real part. -/
-lemma p22R1_re_sqrt_pos {w : ℂ} (hw : w ∈ slitPlane) : 0 < (w ^ (1 / 2 : ℂ)).re := by
+theorem p22R1_re_sqrt_pos {w : ℂ} (hw : w ∈ slitPlane) : 0 < (w ^ (1 / 2 : ℂ)).re := by
   rcases (p22R1_sqrt_parts w).1.eq_or_lt with h | h
   · exfalso
     have hsq := p22R1_sqrt_sq w
@@ -550,7 +550,7 @@ lemma p22R1_re_sqrt_pos {w : ℂ} (hw : w ∈ slitPlane) : 0 < (w ^ (1 / 2 : ℂ
   · exact h
 
 /-- The complementary modulus of a modulus in `jacobiModulusDomain` is again in the domain. -/
-lemma p22R1_comodulus_mem {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+theorem p22R1_comodulus_mem {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
     jacobiComodulusk k ∈ jacobiModulusDomain := by
   have hsl : 1 - k ^ 2 ∈ slitPlane := by
     have := hk; rw [p22R1_domain_eq] at this; exact this.2
@@ -568,7 +568,7 @@ lemma p22R1_comodulus_mem {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   · exact absurd rfl hm
   · nlinarith
 
-lemma p22R1_K_comodulus (k : ℂ) : compEllIntKk (jacobiComodulusk k) = compEllIntKpk k := by
+theorem p22R1_K_comodulus (k : ℂ) : compEllIntKk (jacobiComodulusk k) = compEllIntKpk k := by
   rw [compEllIntKk, compEllIntKpk, jacobiComodulusk_sq]
 
 lemma p22R1_Kp_comodulus (k : ℂ) : compEllIntKpk (jacobiComodulusk k) = compEllIntKk k := by
@@ -630,7 +630,7 @@ lemma p22R1_letter_neg_inv {τ : ℂ} (hτ : 0 < τ.im) (p : JacobiLetter) (ζ :
     rw [this]; field_simp
 
 /-- General form of Jacobi's imaginary transformation. -/
-lemma p22R1_imag_PQ {k : ℂ} (hk : k ∈ jacobiModulusDomain) (p q : JacobiLetter) (hpq : p ≠ q)
+theorem p22R1_imag_PQ {k : ℂ} (hk : k ∈ jacobiModulusDomain) (p q : JacobiLetter) (hpq : p ≠ q)
     (z : ℂ) : jacobiPQk p q (I * z) k =
       (if p = .s then -I else 1) / (if q = .s then -I else 1) *
         ((if p = .s then -1 else 1) * (if q = .s then -1 else 1)) *

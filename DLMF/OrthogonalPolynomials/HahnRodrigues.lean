@@ -5,7 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.OrthogonalPolynomials.DiscreteRodrigues
+public import DLMF.OrthogonalPolynomials.Hahn
+public import Mathlib.Algebra.Group.ForwardDiff
 
 /-!
 # The finite Hahn Rodrigues formula
@@ -31,13 +32,13 @@ def hahnWeightInt (α β : ℂ) (N : ℕ) (x : ℤ) : ℂ :=
   else 0
 
 /-- The Hahn weight at a point of its natural support. -/
-lemma hahnWeightInt_nat (α β : ℂ) {N x : ℕ} (hx : x ≤ N) :
+theorem hahnWeightInt_nat (α β : ℂ) {N x : ℕ} (hx : x ≤ N) :
     hahnWeightInt α β N x = poch (α + 1) x * poch (β + 1) (N - x) /
       ((x.factorial : ℂ) * (N - x).factorial) := by
   simp [hahnWeightInt, hx]
 
 /-- The Hahn weight vanishes off its support. -/
-lemma hahnWeightInt_eq_zero (α β : ℂ) (N : ℕ) {x : ℤ}
+theorem hahnWeightInt_eq_zero (α β : ℂ) (N : ℕ) {x : ℤ}
     (hx : ¬(0 ≤ x ∧ x ≤ N)) : hahnWeightInt α β N x = 0 := by
   rw [hahnWeightInt, ite_eq_right hx]
 

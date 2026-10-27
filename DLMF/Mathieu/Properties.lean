@@ -9,9 +9,9 @@ public import DLMF.Mathieu.Basic
 public import DLMF.Mathieu.P2sBridge
 public import DLMF.Elementary.Trigonometric
 public import DLMFMathlib.Analysis.ODE.Singularities
-public import DLMFMathlib.Analysis.ODE.P1oParamHolomorphic
 public import SeveralComplexVariables.SeparateAnalytic
 public import DLMFMathlib.Analysis.Fourier.P1a2EntirePeriodic
+public import Mathlib.Analysis.Convex.Contractible
 
 /-!
 # Basic properties of Mathieu's equation and its solutions (DLMF §28.2)
@@ -121,7 +121,7 @@ theorem algebraic_form_cos (a q : ℂ) {W W' W'' : ℂ → ℂ}
   linear_combination W'' (Complex.cos z) * hp
 
 /-- A function with `(z - z₀) f(z) → L ≠ 0` has no analytic extension at `z₀`. -/
-theorem p2f_not_eventuallyEq_analytic {f : ℂ → ℂ} {z₀ L : ℂ} (hL : L ≠ 0)
+lemma p2f_not_eventuallyEq_analytic {f : ℂ → ℂ} {z₀ L : ℂ} (hL : L ≠ 0)
     (h : Tendsto (fun z => (z - z₀) * f z) (𝓝[≠] z₀) (𝓝 L)) :
     ¬ ∃ g : ℂ → ℂ, AnalyticAt ℂ g z₀ ∧ f =ᶠ[𝓝[≠] z₀] g := by
   rintro ⟨g, hg, hfg⟩
@@ -134,13 +134,13 @@ theorem p2f_not_eventuallyEq_analytic {f : ℂ → ℂ} {z₀ L : ℂ} (hL : L �
   exact hL (tendsto_nhds_unique h h3)
 
 /-- Punctured limit from agreement with a continuous function. -/
-theorem p2f_tendsto_of_eq {f g : ℂ → ℂ} {z₀ : ℂ} (hg : ContinuousAt g z₀)
+lemma p2f_tendsto_of_eq {f g : ℂ → ℂ} {z₀ : ℂ} (hg : ContinuousAt g z₀)
     (h : ∀ z, z ≠ z₀ → f z = g z) : Tendsto f (𝓝[≠] z₀) (𝓝 (g z₀)) :=
   (hg.tendsto.mono_left nhdsWithin_le_nhds).congr'
     (eventually_nhdsWithin_of_forall fun z hz => (h z hz).symm)
 
 /-- Two raw coefficients of a second-order equation after `z = 1/u`. -/
-theorem p2f_recipRaw_zero_two (c₀ c₁ : ℂ → ℂ) {u : ℂ} (hu : u ≠ 0) :
+lemma p2f_recipRaw_zero_two (c₀ c₁ : ℂ → ℂ) {u : ℂ} (hu : u ≠ 0) :
     Complex.linearODEReciprocalRaw ![c₀, c₁] 0 u = c₀ u⁻¹ ∧
     Complex.linearODEReciprocalRaw ![c₀, c₁] 2 u = u ^ 4 := by
   have hz : u⁻¹ ≠ 0 := inv_ne_zero hu
@@ -366,7 +366,7 @@ theorem comp_pi_sub (h : IsMathieuSolution a q w) :
   simpa [neg_mul, one_mul, neg_add_eq_sub] using this
 
 /-- Derivative of `z ↦ w(σz + c)`. -/
-theorem m28a_deriv_comp_affine (h : IsMathieuSolution a q w) (σ c z : ℂ) :
+lemma m28a_deriv_comp_affine (h : IsMathieuSolution a q w) (σ c z : ℂ) :
     deriv (fun z => w (σ * z + c)) z = σ * deriv w (σ * z + c) := by
   have hl : HasDerivAt (fun z => σ * z + c) σ z := by
     simpa using ((hasDerivAt_id z).const_mul σ).add_const c
@@ -377,13 +377,13 @@ theorem m28a_deriv_comp_affine (h : IsMathieuSolution a q w) (σ c z : ℂ) :
 end IsMathieuSolution
 
 /-- Derivative of a linear combination `c f + d g`. -/
-theorem m28a_deriv_lincomb {f g : ℂ → ℂ} {z : ℂ} (hf : DifferentiableAt ℂ f z)
+lemma m28a_deriv_lincomb {f g : ℂ → ℂ} {z : ℂ} (hf : DifferentiableAt ℂ f z)
     (hg : DifferentiableAt ℂ g z) (c d : ℂ) :
     deriv (fun x => c * f x + d * g x) z = c * deriv f z + d * deriv g z :=
   ((hf.hasDerivAt.const_mul c).add (hg.hasDerivAt.const_mul d)).deriv
 
 /-- Derivative of a linear combination `c f - d g`. -/
-theorem m28a_deriv_lincomb_sub {f g : ℂ → ℂ} {z : ℂ} (hf : DifferentiableAt ℂ f z)
+lemma m28a_deriv_lincomb_sub {f g : ℂ → ℂ} {z : ℂ} (hf : DifferentiableAt ℂ f z)
     (hg : DifferentiableAt ℂ g z) (c d : ℂ) :
     deriv (fun x => c * f x - d * g x) z = c * deriv f z - d * deriv g z :=
   ((hf.hasDerivAt.const_mul c).sub (hg.hasDerivAt.const_mul d)).deriv
@@ -446,7 +446,7 @@ theorem mathieuWI_wronskian (z : ℂ) : wI z * deriv wII z - deriv wI z * wII z 
 
 /-- Half-period reflection identity for `w_I` about `π/2`:
 `w_I(π - z) = (AB' + A'B) w_I(z) - 2AA' w_II(z)` with `A = w_I(π/2)`, `B = w_II(π/2)`. -/
-theorem m28a_mathieuWI_pi_sub (z : ℂ) :
+lemma m28a_mathieuWI_pi_sub (z : ℂ) :
     wI (π - z) = (wI (π / 2) * deriv wII (π / 2) + deriv wI (π / 2) * wII (π / 2)) * wI z -
       2 * wI (π / 2) * deriv wI (π / 2) * wII z := by
   obtain ⟨h1, -, -⟩ := mathieuWI_spec a q
@@ -472,7 +472,7 @@ theorem m28a_mathieuWI_pi_sub (z : ℂ) :
 
 /-- Half-period reflection identity for `w_II` about `π/2`:
 `w_II(π - z) = 2BB' w_I(z) - (AB' + A'B) w_II(z)`. -/
-theorem m28a_mathieuWII_pi_sub (z : ℂ) :
+lemma m28a_mathieuWII_pi_sub (z : ℂ) :
     wII (π - z) = 2 * wII (π / 2) * deriv wII (π / 2) * wI z -
       (wI (π / 2) * deriv wII (π / 2) + deriv wI (π / 2) * wII (π / 2)) * wII z := by
   obtain ⟨h1, -, -⟩ := mathieuWI_spec a q
@@ -498,7 +498,7 @@ theorem m28a_mathieuWII_pi_sub (z : ℂ) :
   linear_combination this
 
 /-- Derivative of the reflection identity for `w_I` at `z = 0`. -/
-theorem m28a_deriv_mathieuWI_pi :
+lemma m28a_deriv_mathieuWI_pi :
     deriv wI π = 2 * wI (π / 2) * deriv wI (π / 2) := by
   obtain ⟨h1, -, h11⟩ := mathieuWI_spec a q
   obtain ⟨h2, -, h21⟩ := mathieuWII_spec a q
@@ -585,7 +585,7 @@ theorem mathieuWII_sub_pi (z : ℂ) : wII (z - π) = -wII π * wI z + deriv wII 
   rw [this, deriv_comp_sub_const, zero_sub, mathieuWII_neg, deriv_mathieuWII_neg]
 
 /-- Restriction of a Mathieu solution to the ray `t ↦ t z`: derivatives in `t`. -/
-theorem p2f_ray_hasDerivAt {a q : ℂ} {w : ℂ → ℂ} (hw : IsMathieuSolution a q w) (z : ℂ)
+lemma p2f_ray_hasDerivAt {a q : ℂ} {w : ℂ → ℂ} (hw : IsMathieuSolution a q w) (z : ℂ)
     (t : ℝ) :
     HasDerivAt (fun t : ℝ => w (t * z)) (z * deriv w (t * z)) t ∧
       HasDerivAt (fun t : ℝ => z * deriv w (t * z))
@@ -639,7 +639,7 @@ theorem p2f_differentiable_param_q {W : ℂ → ℂ → ℂ → ℂ}
     simpa [← mul_assoc, inv_mul_cancel₀ hz] using this
 
 /-- Hartogs for three variables on `ℂ × ℂ × ℂ`. -/
-theorem p2f_differentiable_of_separately {f : ℂ × ℂ × ℂ → ℂ}
+lemma p2f_differentiable_of_separately {f : ℂ × ℂ × ℂ → ℂ}
     (h1 : ∀ b c, Differentiable ℂ (fun x => f (x, b, c)))
     (h2 : ∀ x c, Differentiable ℂ (fun b => f (x, b, c)))
     (h3 : ∀ x b, Differentiable ℂ (fun c => f (x, b, c))) : Differentiable ℂ f := by
@@ -685,7 +685,7 @@ end Basic
 /-! ### Change of sign of `q` for the basic solutions (from 28.2.4) -/
 
 /-- Derivative of `z ↦ c f(z + s) - d g(z + s)`. -/
-theorem p1a1_deriv_shift_lincomb {f g : ℂ → ℂ} (hf : Differentiable ℂ f)
+lemma p1a1_deriv_shift_lincomb {f g : ℂ → ℂ} (hf : Differentiable ℂ f)
     (hg : Differentiable ℂ g) (c d s z : ℂ) :
     deriv (fun x => c * f (x + s) - d * g (x + s)) z =
       c * deriv f (z + s) - d * deriv g (z + s) := by
@@ -769,7 +769,7 @@ theorem p1a1_deriv_mathieuWII_half_pi_neg_q (a q : ℂ) :
 
 
 /-- The derivative of a solution at `π`, in terms of the basic solutions. -/
-theorem IsMathieuSolution.p1a1_deriv_eq {a q : ℂ} {w : ℂ → ℂ} (h : IsMathieuSolution a q w)
+lemma IsMathieuSolution.p1a1_deriv_eq {a q : ℂ} {w : ℂ → ℂ} (h : IsMathieuSolution a q w)
     (z : ℂ) : deriv w z = w 0 * deriv (mathieuWI a q) z + deriv w 0 * deriv (mathieuWII a q) z := by
   conv_lhs => rw [h.eq_combination]
   exact m28a_deriv_lincomb ((isMathieuSolution_mathieuWI a q).differentiable z)
@@ -874,7 +874,7 @@ theorem mathieuWI_pi_neg_q (a q : ℂ) : mathieuWI a q π = mathieuWI a (-q) π 
   ring
 
 /-- If `g` is entire and even, `s ↦ g(√s)` is entire. -/
-theorem p2f_differentiable_comp_sqrt {g : ℂ → ℂ} (hg : Differentiable ℂ g)
+lemma p2f_differentiable_comp_sqrt {g : ℂ → ℂ} (hg : Differentiable ℂ g)
     (hev : ∀ w, g (-w) = g w) : Differentiable ℂ (fun s => g (s ^ (2⁻¹ : ℂ))) := by
   have key : ∀ s w : ℂ, w ^ 2 = s → g (s ^ (2⁻¹ : ℂ)) = g w := by
     intro s w hw
@@ -911,7 +911,7 @@ theorem p2f_differentiable_comp_sqrt {g : ℂ → ℂ} (hg : Differentiable ℂ 
   · exact hne s₀ hs₀
 
 /-- Hartogs for two variables on `ℂ × ℂ`. -/
-theorem p2f_differentiable_of_separately₂ {f : ℂ × ℂ → ℂ}
+lemma p2f_differentiable_of_separately₂ {f : ℂ × ℂ → ℂ}
     (h1 : ∀ b, Differentiable ℂ (fun x => f (x, b)))
     (h2 : ∀ x, Differentiable ℂ (fun b => f (x, b))) : Differentiable ℂ f := by
   let g : (Fin 2 → ℂ) → ℂ := fun v => f (v 0, v 1)
@@ -977,7 +977,7 @@ theorem isMathieuCharExp_iff (a q ν : ℂ) :
       rw [hk]; field_simp; ring
 
 /-- `ℜ √z ≥ 0` for the principal square root. -/
-theorem p1a1_re_sqrt_nonneg (z : ℂ) : 0 ≤ (Complex.sqrt z).re := by
+lemma p1a1_re_sqrt_nonneg (z : ℂ) : 0 ≤ (Complex.sqrt z).re := by
   rcases eq_or_ne z 0 with rfl | hz
   · simp [Complex.sqrt, Complex.zero_cpow (by norm_num : (2⁻¹ : ℂ) ≠ 0)]
   · rw [Complex.sqrt, Complex.cpow_def_of_ne_zero hz, Complex.exp_re]
@@ -992,7 +992,7 @@ theorem p1a1_re_sqrt_nonneg (z : ℂ) : 0 ≤ (Complex.sqrt z).re := by
       rw [e]; linarith
 
 /-- `0 ≤ ℜ(arccos c / π) ≤ 1` for the principal arccosine. -/
-theorem p1a1_re_arccosPrincipal_div_pi_mem (c : ℂ) :
+lemma p1a1_re_arccosPrincipal_div_pi_mem (c : ℂ) :
     0 ≤ (DLMF.Elementary.arccosPrincipal c / π).re ∧
       (DLMF.Elementary.arccosPrincipal c / π).re ≤ 1 := by
   set s := Complex.sqrt (1 - c ^ 2)
@@ -1089,7 +1089,7 @@ theorem IsMathieuSolution.isFloquet_or {a q ν : ℂ} {w : ℂ → ℂ}
       linear_combination h2 + w z * he
 
 /-- Derivative periodicity from periodicity. -/
-theorem p1a2_deriv_periodic {f : ℂ → ℂ} {T : ℂ} (hf : ∀ z, f (z + T) = f z) (z : ℂ) :
+lemma p1a2_deriv_periodic {f : ℂ → ℂ} {T : ℂ} (hf : ∀ z, f (z + T) = f z) (z : ℂ) :
     deriv f (z + T) = deriv f z := by
   have : (fun z => f (z + T)) = f := funext hf
   have h := deriv_comp_add_const (f := f) (a := T) (x := z)
@@ -1264,7 +1264,7 @@ theorem p2f_sin_coeff_decay {F : ℂ → ℂ} (hF : Differentiable ℂ F)
 
 /-- A sequence satisfying a three-term recurrence with `q ≠ 0` and two vanishing initial
 values vanishes. -/
-theorem p2f_chain_zero {q : ℂ} (hq : q ≠ 0) {b x : ℕ → ℂ}
+lemma p2f_chain_zero {q : ℂ} (hq : q ≠ 0) {b x : ℕ → ℂ}
     (hrec : ∀ j, b j * x (j + 1) = q * (x j + x (j + 2))) (h0 : x 0 = 0) (h1 : x 1 = 0) :
     ∀ j, x j = 0 := by
   have : ∀ j, x j = 0 ∧ x (j + 1) = 0 := by
@@ -1279,7 +1279,7 @@ theorem p2f_chain_zero {q : ℂ} (hq : q ≠ 0) {b x : ℕ → ℂ}
   exact fun j => (this j).1
 
 /-- The Casoratian of two solutions of the same three-term recurrence is constant. -/
-theorem p2f_chain_const {q : ℂ} (hq : q ≠ 0) {b x y : ℕ → ℂ}
+lemma p2f_chain_const {q : ℂ} (hq : q ≠ 0) {b x y : ℕ → ℂ}
     (hx : ∀ j, b j * x (j + 1) = q * (x j + x (j + 2)))
     (hy : ∀ j, b j * y (j + 1) = q * (y j + y (j + 2))) (j : ℕ) :
     x j * y (j + 1) - x (j + 1) * y j = x 0 * y 1 - x 1 * y 0 := by
@@ -1294,7 +1294,7 @@ theorem p2f_chain_const {q : ℂ} (hq : q ≠ 0) {b x y : ℕ → ℂ}
 
 /-- **Coexistence is impossible** (Ince): for `q ≠ 0` an even and an odd solution of Mathieu's
 equation cannot both be `π`-periodic, or both `π`-antiperiodic. -/
-theorem p2f_ince_core {a q μ : ℂ} (hq : q ≠ 0) (hμ : μ = 1 ∨ μ = -1) {F G : ℂ → ℂ}
+lemma p2f_ince_core {a q μ : ℂ} (hq : q ≠ 0) (hμ : μ = 1 ∨ μ = -1) {F G : ℂ → ℂ}
     (hF : IsMathieuSolution a q F) (hG : IsMathieuSolution a q G) (hFe : ∀ z, F (-z) = F z)
     (hGo : ∀ z, G (-z) = -G z) (hFp : ∀ z, F (z + π) = μ * F z)
     (hGp : ∀ z, G (z + π) = μ * G z) : F = 0 ∨ G = 0 := by
@@ -1539,7 +1539,7 @@ theorem IsFloquetSolution.unique {a q ν : ℂ} (hq : q ≠ 0) {w v : ℂ → �
       simp at this
 
 /-- Integration by parts behind the Floquet recurrence 28.2.19. -/
-theorem p2f_floquet_int_rec {a q ν : ℂ} {w : ℂ → ℂ} (hf : IsMathieuSolution a q w)
+lemma p2f_floquet_int_rec {a q ν : ℂ} {w : ℂ → ℂ} (hf : IsMathieuSolution a q w)
     (hfl : ∀ z, w (z + π) = Complex.exp (π * I * ν) * w z) (n : ℤ) :
     q * (∫ x in (0 : ℝ)..π, w x * Complex.exp (-(I * (ν + 2 * ((n + 1 : ℤ) : ℂ)) * x))) -
       (a - (ν + 2 * n) ^ 2) * (∫ x in (0 : ℝ)..π, w x * Complex.exp (-(I * (ν + 2 * n) * x))) +
@@ -1699,7 +1699,7 @@ theorem IsFloquetSolution.exists_fourier {a q ν : ℂ} {w : ℂ → ℂ}
     linear_combination (1 / π : ℂ) * this
 
 /-- A function on `ℤ` that is eventually (cofinitely) at most `1` is bounded above. -/
-theorem p2f_bound_cofinite {f : ℤ → ℝ} (h : ∀ᶠ n in cofinite, f n ≤ 1) :
+lemma p2f_bound_cofinite {f : ℤ → ℝ} (h : ∀ᶠ n in cofinite, f n ≤ 1) :
     ∃ C, 0 ≤ C ∧ ∀ n, f n ≤ C := by
   have hfin : {n | ¬ f n ≤ 1}.Finite := Filter.eventually_cofinite.1 h
   obtain ⟨M, hM⟩ := (hfin.image f).bddAbove
@@ -1709,7 +1709,7 @@ theorem p2f_bound_cofinite {f : ℤ → ℝ} (h : ∀ᶠ n in cofinite, f n ≤ 
   · exact (hM ⟨n, hn, rfl⟩).trans (le_max_right _ _)
 
 /-- Exponential decay of a sequence with `|c_n|^{1/|n|} → 0`. -/
-theorem p2f_coeff_decay {c : ℤ → ℂ}
+lemma p2f_coeff_decay {c : ℤ → ℂ}
     (hlim : Tendsto (fun n : ℤ => ‖c n‖ ^ (1 / (|n| : ℝ))) cofinite (𝓝 0)) (R : ℝ) :
     ∃ C, 0 ≤ C ∧ ∀ n, ‖c n‖ ≤ C * Real.exp (-(R * |(n : ℝ)|)) := by
   have h1 : ∀ᶠ n : ℤ in cofinite, ‖c n‖ ^ (1 / (|n| : ℝ)) < Real.exp (-R) :=
@@ -1737,7 +1737,7 @@ theorem p2f_coeff_decay {c : ℤ → ℂ}
     _ ≤ C * Real.exp (-(R * |(n : ℝ)|)) := by gcongr
 
 /-- `‖x‖^k ≤ e^{2‖x‖}` for `k ≤ 2`. -/
-theorem p2f_norm_pow_le {x : ℂ} {k : ℕ} (hk : k ≤ 2) : ‖x ^ k‖ ≤ Real.exp (2 * ‖x‖) := by
+lemma p2f_norm_pow_le {x : ℂ} {k : ℕ} (hk : k ≤ 2) : ‖x ^ k‖ ≤ Real.exp (2 * ‖x‖) := by
   rw [norm_pow]
   have h1 : max 1 ‖x‖ ≤ Real.exp ‖x‖ := max_le (Real.one_le_exp (norm_nonneg _))
     ((le_add_of_nonneg_right zero_le_one).trans (Real.add_one_le_exp _) |>.trans_eq' rfl)
@@ -1747,7 +1747,7 @@ theorem p2f_norm_pow_le {x : ℂ} {k : ℕ} (hk : k ≤ 2) : ‖x ^ k‖ ≤ Rea
     _ = Real.exp (2 * ‖x‖) := by rw [← Real.exp_nat_mul]; norm_num
 
 /-- Uniform bound for the terms `c_n (i(ν+2n))^k e^{i(ν+2n)z}`, `k ≤ 2`, `‖z‖ ≤ ρ`. -/
-theorem p2f_floquet_term_bound {c : ℤ → ℂ}
+lemma p2f_floquet_term_bound {c : ℤ → ℂ}
     (hlim : Tendsto (fun n : ℤ => ‖c n‖ ^ (1 / (|n| : ℝ))) cofinite (𝓝 0)) (ν : ℂ) (ρ : ℝ) :
     ∃ u : ℤ → ℝ, Summable u ∧ ∀ (k : ℕ), k ≤ 2 → ∀ n (z : ℂ), ‖z‖ ≤ ρ →
       ‖c n * (I * (ν + 2 * n)) ^ k * Complex.exp (I * (ν + 2 * n) * z)‖ ≤ u n := by
@@ -1952,7 +1952,7 @@ theorem mathieuWII_half_pi_mathieuB_even (n : ℕ) (q : ℝ) :
 
 /-- An entire function that does not vanish at some real point has finitely many real zeros in
 every compact interval. -/
-theorem p1a1_finite_real_zeros {g : ℂ → ℂ} (hg : Differentiable ℂ g) {y : ℝ} (hy : g y ≠ 0)
+lemma p1a1_finite_real_zeros {g : ℂ → ℂ} (hg : Differentiable ℂ g) {y : ℝ} (hy : g y ≠ 0)
     (s t : ℝ) : {x : ℝ | x ∈ Icc s t ∧ g x = 0}.Finite := by
   by_contra hinf
   obtain ⟨x, -, hx⟩ := Set.Infinite.exists_accPt_of_subset_isCompact hinf isCompact_Icc
@@ -1970,7 +1970,7 @@ theorem p1a1_finite_real_zeros {g : ℂ → ℂ} (hg : Differentiable ℂ g) {y 
   exact hy this
 
 /-- A set of zeros of such a function, bounded below, has finitely many elements below any `a`. -/
-theorem p1a1_spec_finite {S : Set ℝ} {g : ℂ → ℂ} (hg : Differentiable ℂ g)
+lemma p1a1_spec_finite {S : Set ℝ} {g : ℂ → ℂ} (hg : Differentiable ℂ g)
     (hSg : ∀ x ∈ S, g x = 0) {x₀ : ℝ} (hx₀ : ∀ y ∈ S, x₀ ≤ y) {y : ℝ} (hy : g y ≠ 0) (a : ℝ) :
     (S ∩ Iio a).Finite :=
   (p1a1_finite_real_zeros hg hy x₀ a).subset fun x hx =>
@@ -1982,7 +1982,7 @@ theorem p1a1_exists_eq_nthLeast {S : Set ℝ} {a : ℝ} (ha : a ∈ S) (hfin : (
   ⟨(S ∩ Iio a).ncard, (nthLeast_eq_of ha hfin.cast_ncard_eq.symm).symm⟩
 
 /-- The least element of a spectrum. -/
-theorem p1a1_le_of_encard_zero {S : Set ℝ} {x₀ : ℝ} (h : (S ∩ Iio x₀).encard = (0 : ℕ)) :
+lemma p1a1_le_of_encard_zero {S : Set ℝ} {x₀ : ℝ} (h : (S ∩ Iio x₀).encard = (0 : ℕ)) :
     ∀ y ∈ S, x₀ ≤ y := by
   intro y hy
   by_contra hlt
@@ -1991,14 +1991,14 @@ theorem p1a1_le_of_encard_zero {S : Set ℝ} {x₀ : ℝ} (h : (S ∩ Iio x₀).
   exact (Set.eq_empty_iff_forall_notMem.mp this) y ⟨hy, hlt⟩
 
 /-- `a ↦ w_I(z; a, q)` and `a ↦ w_II(z; a, q)` are entire (from 28.2(ii)). -/
-theorem p1a1_differentiable_param (z q : ℂ) :
+lemma p1a1_differentiable_param (z q : ℂ) :
     Differentiable ℂ (fun a => mathieuWI a q z) ∧ Differentiable ℂ (fun a => mathieuWII a q z) := by
   have hl : Differentiable ℂ (fun a : ℂ => (z, a, q)) := by fun_prop
   exact ⟨differentiable_mathieuWI_mathieuWII.1.comp hl,
     differentiable_mathieuWI_mathieuWII.2.comp hl⟩
 
 /-- A spectrum with an element having no smaller elements is bounded below. -/
-theorem p1a1_least (S : Set ℝ) (h : ∃ x ∈ S, (S ∩ Iio x).encard = (0 : ℕ)) :
+lemma p1a1_least (S : Set ℝ) (h : ∃ x ∈ S, (S ∩ Iio x).encard = (0 : ℕ)) :
     ∃ x₀, ∀ y ∈ S, x₀ ≤ y := by
   obtain ⟨x, -, hx⟩ := h; exact ⟨x, p1a1_le_of_encard_zero hx⟩
 
@@ -2163,7 +2163,7 @@ theorem exists_solution_dirichlet_iff (a q : ℝ) :
       mathieuWII_half_pi_mathieuB_even n q⟩
 
 /-- The `(k+1)`-st smallest element exceeds the `k`-th. -/
-theorem p1a1_nthLeast_lt {S : Set ℝ} {k : ℕ} (hk : ∃ x ∈ S, (S ∩ Iio x).encard = k)
+lemma p1a1_nthLeast_lt {S : Set ℝ} {k : ℕ} (hk : ∃ x ∈ S, (S ∩ Iio x).encard = k)
     (hk1 : ∃ x ∈ S, (S ∩ Iio x).encard = (k + 1 : ℕ)) : nthLeast S k < nthLeast S (k + 1) := by
   obtain ⟨-, hx⟩ := nthLeast_spec hk
   obtain ⟨-, hy⟩ := nthLeast_spec hk1
@@ -2195,7 +2195,7 @@ theorem mathieuB_lt_mathieuB_add_two {n : ℕ} (hn : n ≠ 0) (q : ℝ) :
   exact p1a1_nthLeast_lt (mathieuSpecB_exists n q _) (mathieuSpecB_exists n q _)
 
 /-- The eigenvalues `a_n(q)` are pairwise distinct. -/
-theorem p1a1_mathieuA_injective (q : ℝ) : Function.Injective fun n => mathieuA n q := by
+lemma p1a1_mathieuA_injective (q : ℝ) : Function.Injective fun n => mathieuA n q := by
   intro m n hmn
   simp only at hmn
   have hW := mathieuWI_wronskian (mathieuA m q) q (π / 2)
@@ -2221,7 +2221,7 @@ theorem p1a1_mathieuA_injective (q : ℝ) : Function.Injective fun n => mathieuA
     obtain ⟨i, rfl⟩ := hm; obtain ⟨j, rfl⟩ := hn; omega
 
 /-- The eigenvalues `b_n(q)`, `n ≥ 1`, are pairwise distinct. -/
-theorem p1a1_mathieuB_injective {m n : ℕ} (hm0 : m ≠ 0) (hn0 : n ≠ 0) (q : ℝ)
+lemma p1a1_mathieuB_injective {m n : ℕ} (hm0 : m ≠ 0) (hn0 : n ≠ 0) (q : ℝ)
     (hmn : mathieuB m q = mathieuB n q) : m = n := by
   have hW := mathieuWI_wronskian (mathieuB m q) q (π / 2)
   obtain ⟨hm1, hm2⟩ := mathieuB_spec hm0 q
@@ -2254,7 +2254,7 @@ theorem p1a1_hasDerivAt_cos_mul (s z : ℂ) :
   convert this using 1; ring
 
 /-- Derivative of `sin(sz)/s`. -/
-theorem p1a1_hasDerivAt_sin_mul_div {s : ℂ} (hs0 : s ≠ 0) (z : ℂ) :
+lemma p1a1_hasDerivAt_sin_mul_div {s : ℂ} (hs0 : s ≠ 0) (z : ℂ) :
     HasDerivAt (fun z => Complex.sin (s * z) / s) (Complex.cos (s * z)) z := by
   have := (((hasDerivAt_id' z).const_mul s).csin).div_const s
   convert this using 1; field_simp
@@ -2313,7 +2313,7 @@ theorem p1a1_deriv_mathieuWII_q_zero {a s : ℂ} (hs : s ^ 2 = a) (hs0 : s ≠ 0
   exact (p1a1_hasDerivAt_sin_mul_div hs0 z).deriv
 
 /-- The `n`-th smallest element of the range of a strictly increasing sequence. -/
-theorem p1a1_nthLeast_range {f : ℕ → ℝ} (hf : StrictMono f) (n : ℕ) :
+lemma p1a1_nthLeast_range {f : ℕ → ℝ} (hf : StrictMono f) (n : ℕ) :
     nthLeast (range f) n = f n := by
   apply nthLeast_eq_of (Set.mem_range_self n)
   have e : range f ∩ Iio (f n) = f '' (Iio n) := by
@@ -2324,7 +2324,7 @@ theorem p1a1_nthLeast_range {f : ℕ → ℝ} (hf : StrictMono f) (n : ℕ) :
   simp [Set.encard_eq_coe_toFinset_card]
 
 /-- `s` with `s ⋅ π/2 = m π` is `2m`. -/
-theorem p1a1_eq_two_mul_of_sin {s : ℂ} (h : Complex.sin (s * (π / 2)) = 0) :
+lemma p1a1_eq_two_mul_of_sin {s : ℂ} (h : Complex.sin (s * (π / 2)) = 0) :
     ∃ m : ℤ, s = 2 * m := by
   obtain ⟨m, hm⟩ := Complex.sin_eq_zero_iff.mp h
   refine ⟨m, ?_⟩
@@ -2332,7 +2332,7 @@ theorem p1a1_eq_two_mul_of_sin {s : ℂ} (h : Complex.sin (s * (π / 2)) = 0) :
   apply mul_right_cancel₀ hπ; linear_combination 2 * hm
 
 /-- `s` with `cos(s ⋅ π/2) = 0` is `2m + 1`. -/
-theorem p1a1_eq_two_mul_add_one_of_cos {s : ℂ} (h : Complex.cos (s * (π / 2)) = 0) :
+lemma p1a1_eq_two_mul_add_one_of_cos {s : ℂ} (h : Complex.cos (s * (π / 2)) = 0) :
     ∃ m : ℤ, s = 2 * m + 1 := by
   obtain ⟨m, hm⟩ := Complex.cos_eq_zero_iff.mp h
   refine ⟨m, ?_⟩
@@ -2340,12 +2340,12 @@ theorem p1a1_eq_two_mul_add_one_of_cos {s : ℂ} (h : Complex.cos (s * (π / 2))
   apply mul_right_cancel₀ hπ; linear_combination 2 * hm
 
 /-- `|m|² = m²` in `ℂ`. -/
-theorem p1a1_natAbs_sq (m : ℤ) : ((m.natAbs : ℕ) : ℂ) ^ 2 = (m : ℂ) ^ 2 := by
+lemma p1a1_natAbs_sq (m : ℤ) : ((m.natAbs : ℕ) : ℂ) ^ 2 = (m : ℂ) ^ 2 := by
   have := congrArg (fun t : ℤ => (t : ℂ)) (Int.natAbs_sq m)
   simpa only [Int.cast_pow, Int.cast_natCast] using this
 
 /-- An odd integer squared is `(2j+1)²` for a natural `j`. -/
-theorem p1a1_odd_sq (m : ℤ) : ∃ j : ℕ, ((2 * m + 1 : ℂ)) ^ 2 = ((2 * j + 1 : ℕ) : ℂ) ^ 2 := by
+lemma p1a1_odd_sq (m : ℤ) : ∃ j : ℕ, ((2 * m + 1 : ℂ)) ^ 2 = ((2 * j + 1 : ℕ) : ℂ) ^ 2 := by
   rcases le_or_gt 0 m with hm | hm
   · refine ⟨m.toNat, ?_⟩
     have : ((m.toNat : ℕ) : ℤ) = m := Int.toNat_of_nonneg hm
@@ -2357,7 +2357,7 @@ theorem p1a1_odd_sq (m : ℤ) : ∃ j : ℕ, ((2 * m + 1 : ℂ)) ^ 2 = ((2 * j +
     push_cast; rw [h2]; push_cast; ring
 
 /-- The spectrum of the `a_{2k}` at `q = 0` is `{(2j)²}`. -/
-theorem p1a1_specA_even_zero (k : ℕ) :
+lemma p1a1_specA_even_zero (k : ℕ) :
     mathieuSpecA (2 * k) 0 = range fun j : ℕ => ((2 * j : ℕ) : ℝ) ^ 2 := by
   ext a
   simp only [mathieuSpecA, show Even (2 * k) from even_two_mul k, ↓reduceIte,
@@ -2383,7 +2383,7 @@ theorem p1a1_specA_even_zero (k : ℕ) :
     rw [this]; simp
 
 /-- The spectrum of the `a_{2k+1}` at `q = 0` is `{(2j+1)²}`. -/
-theorem p1a1_specA_odd_zero (k : ℕ) :
+lemma p1a1_specA_odd_zero (k : ℕ) :
     mathieuSpecA (2 * k + 1) 0 = range fun j : ℕ => ((2 * j + 1 : ℕ) : ℝ) ^ 2 := by
   ext a
   simp only [mathieuSpecA, Nat.not_even_bit1, ↓reduceIte,
@@ -2406,7 +2406,7 @@ theorem p1a1_specA_odd_zero (k : ℕ) :
     exact ⟨j, by push_cast; ring⟩
 
 /-- The spectrum of the `b_{2k+1}` at `q = 0` is `{(2j+1)²}`. -/
-theorem p1a1_specB_odd_zero (k : ℕ) :
+lemma p1a1_specB_odd_zero (k : ℕ) :
     mathieuSpecB (2 * k + 1) 0 = range fun j : ℕ => ((2 * j + 1 : ℕ) : ℝ) ^ 2 := by
   ext a
   simp only [mathieuSpecB, Nat.not_even_bit1, ↓reduceIte,
@@ -2435,7 +2435,7 @@ theorem p1a1_specB_odd_zero (k : ℕ) :
     exact ⟨j, by push_cast; ring⟩
 
 /-- The spectrum of the `b_{2k+2}` at `q = 0` is `{(2j+2)²}`. -/
-theorem p1a1_specB_even_zero (k : ℕ) :
+lemma p1a1_specB_even_zero (k : ℕ) :
     mathieuSpecB (2 * k + 2) 0 = range fun j : ℕ => ((2 * j + 2 : ℕ) : ℝ) ^ 2 := by
   ext a
   have he : Even (2 * k + 2) := ⟨k + 1, by ring⟩
@@ -2679,7 +2679,7 @@ theorem mathieuSe_even_add_pi (n : ℕ) (z : ℂ) (q : ℝ) :
 /-! ### Normalization and orthogonality helpers -/
 
 /-- Complex conjugation: `conj ∘ w ∘ conj` solves Mathieu's equation for `(conj a, conj q)`. -/
-theorem IsMathieuSolution.p1a1_conj {a q : ℂ} {w : ℂ → ℂ} (h : IsMathieuSolution a q w) :
+lemma IsMathieuSolution.p1a1_conj {a q : ℂ} {w : ℂ → ℂ} (h : IsMathieuSolution a q w) :
     IsMathieuSolution (conj a) (conj q) (conj ∘ w ∘ conj) := by
   refine ⟨fun z => ?_, fun z => ?_⟩
   · simpa using (h.differentiable (conj z)).conj_conj
@@ -2690,7 +2690,7 @@ theorem IsMathieuSolution.p1a1_conj {a q : ℂ} {w : ℂ → ℂ} (h : IsMathieu
     simp only [Function.comp, map_mul, map_sub, map_ofNat, ← Complex.cos_conj, Complex.conj_conj]
 
 /-- `w_I(z; conj a, conj q) = conj (w_I(conj z; a, q))`. -/
-theorem p1a1_mathieuWI_conj (a q z : ℂ) :
+lemma p1a1_mathieuWI_conj (a q z : ℂ) :
     mathieuWI (conj a) (conj q) z = conj (mathieuWI a q (conj z)) := by
   obtain ⟨h, h0, h1⟩ := mathieuWI_spec a q
   obtain ⟨g, g0, g1⟩ := mathieuWI_spec (conj a) (conj q)
@@ -2699,7 +2699,7 @@ theorem p1a1_mathieuWI_conj (a q z : ℂ) :
   exact congrFun key z
 
 /-- `w_II(z; conj a, conj q) = conj (w_II(conj z; a, q))`. -/
-theorem p1a1_mathieuWII_conj (a q z : ℂ) :
+lemma p1a1_mathieuWII_conj (a q z : ℂ) :
     mathieuWII (conj a) (conj q) z = conj (mathieuWII a q (conj z)) := by
   obtain ⟨h, h0, h1⟩ := mathieuWII_spec a q
   obtain ⟨g, g0, g1⟩ := mathieuWII_spec (conj a) (conj q)
@@ -2736,12 +2736,12 @@ theorem p1a1_deriv_mathieuWII_real (a q x : ℝ) :
   simp
 
 /-- A real complex number squared is its squared norm. -/
-theorem p1a1_sq_eq_norm_sq {z : ℂ} (h : conj z = z) : z ^ 2 = ((‖z‖ ^ 2 : ℝ) : ℂ) := by
+lemma p1a1_sq_eq_norm_sq {z : ℂ} (h : conj z = z) : z ^ 2 = ((‖z‖ ^ 2 : ℝ) : ℂ) := by
   obtain ⟨r, rfl⟩ := Complex.conj_eq_iff_real.mp h
   simp [Complex.norm_real, sq_abs]
 
 /-- `∫₀^{2π} ‖w_I(x; a, q)‖² > 0`. -/
-theorem p1a1_integral_normSq_mathieuWI_pos (a q : ℂ) :
+lemma p1a1_integral_normSq_mathieuWI_pos (a q : ℂ) :
     0 < ∫ x in (0 : ℝ)..2 * π, ‖mathieuWI a q x‖ ^ 2 := by
   obtain ⟨h, h0, -⟩ := mathieuWI_spec a q
   have hev : ∀ᶠ x : ℝ in 𝓝 0, mathieuWI a q x ≠ 0 :=
@@ -2750,7 +2750,7 @@ theorem p1a1_integral_normSq_mathieuWI_pos (a q : ℂ) :
   exact m28a_integral_normSq_pos h.differentiable.continuous (nhdsWithin_le_nhds hev)
 
 /-- `∫₀^{2π} ‖w_II(x; a, q)‖² > 0`. -/
-theorem p1a1_integral_normSq_mathieuWII_pos (a q : ℂ) :
+lemma p1a1_integral_normSq_mathieuWII_pos (a q : ℂ) :
     0 < ∫ x in (0 : ℝ)..2 * π, ‖mathieuWII a q x‖ ^ 2 := by
   obtain ⟨h, h0, h1⟩ := mathieuWII_spec a q
   have hd : HasDerivAt (fun x : ℝ => mathieuWII a q x) 1 0 := by
@@ -2819,7 +2819,7 @@ theorem p1a1_mathieuWII_sq_q_zero {n : ℕ} (hn : n ≠ 0) :
 
 /-- **Orthogonality** (Sturm–Liouville): `2π`-periodic solutions of Mathieu's equation for
 distinct `a₁ ≠ a₂` (same `q`) are orthogonal on `[0, 2π]`. -/
-theorem p1a1_integral_mul_eq_zero {a₁ a₂ q : ℂ} {u v : ℂ → ℂ} (hu : IsMathieuSolution a₁ q u)
+lemma p1a1_integral_mul_eq_zero {a₁ a₂ q : ℂ} {u v : ℂ → ℂ} (hu : IsMathieuSolution a₁ q u)
     (hv : IsMathieuSolution a₂ q v) (hup : ∀ z, u (z + 2 * π) = u z)
     (hvp : ∀ z, v (z + 2 * π) = v z) (hne : a₁ ≠ a₂) :
     ∫ x in (0 : ℝ)..2 * π, u x * v x = 0 := by
@@ -2850,7 +2850,7 @@ theorem p1a1_integral_mul_eq_zero {a₁ a₂ q : ℂ} {u v : ℂ → ℂ} (hu : 
   · exact h
 
 /-- `ce_n(z, q)` has period `2π`. -/
-theorem p1a1_mathieuCe_add_two_pi (n : ℕ) (z : ℂ) (q : ℝ) :
+lemma p1a1_mathieuCe_add_two_pi (n : ℕ) (z : ℂ) (q : ℝ) :
     mathieuCe n (z + 2 * π) q = mathieuCe n z q := by
   rw [show z + 2 * π = z + π + π by ring]
   rcases Nat.even_or_odd' n with ⟨k, rfl | rfl⟩
@@ -2858,7 +2858,7 @@ theorem p1a1_mathieuCe_add_two_pi (n : ℕ) (z : ℂ) (q : ℝ) :
   · rw [mathieuCe_odd_add_pi, mathieuCe_odd_add_pi, neg_neg]
 
 /-- `se_n(z, q)`, `n ≥ 1`, has period `2π`. -/
-theorem p1a1_mathieuSe_add_two_pi {n : ℕ} (hn : n ≠ 0) (z : ℂ) (q : ℝ) :
+lemma p1a1_mathieuSe_add_two_pi {n : ℕ} (hn : n ≠ 0) (z : ℂ) (q : ℝ) :
     mathieuSe n (z + 2 * π) q = mathieuSe n z q := by
   rw [show z + 2 * π = z + π + π by ring]
   rcases Nat.even_or_odd' n with ⟨k, rfl | rfl⟩
@@ -2932,7 +2932,7 @@ theorem integral_mathieuSe_mul_mathieuSe {m n : ℕ} (hm : m ≠ 0) (hn : n ≠ 
 
 /-- **Counterexample** to DLMF 28.2.33 as stated for `n = 0` (where `se_0` is a junk value):
 at `q = 0`, `∫₀^{2π} ce_0 se_0 ≠ 0`, since `se_0(x, 0)` is a positive multiple of `x`. -/
-theorem p1a1_integral_mathieuCe_mul_mathieuSe_zero_ne :
+lemma p1a1_integral_mathieuCe_mul_mathieuSe_zero_ne :
     ∫ x in (0 : ℝ)..2 * π, mathieuCe 0 x 0 * mathieuSe 0 x 0 ≠ 0 := by
   have hB : mathieuB 0 0 = 0 := by simp [mathieuB]
   have hse : ∀ x : ℂ, mathieuSe 0 x 0 = mathieuSeDerivZero 0 0 * x := by
@@ -2953,7 +2953,7 @@ theorem p1a1_integral_mathieuCe_mul_mathieuSe_zero_ne :
   exact this.ne'
 
 /-- DLMF 28.2.33 for `n ≥ 1`: `∫₀^{2π} ce_m se_n = 0`, by parity and periodicity. -/
-theorem p1a1_integral_mathieuCe_mul_mathieuSe {m n : ℕ} (hn : n ≠ 0) (q : ℝ) :
+lemma p1a1_integral_mathieuCe_mul_mathieuSe {m n : ℕ} (hn : n ≠ 0) (q : ℝ) :
     ∫ x in (0 : ℝ)..2 * π, mathieuCe m x q * mathieuSe n x q = 0 := by
   set f : ℝ → ℂ := fun x => mathieuCe m x q * mathieuSe n x q
   have hp : Function.Periodic f (2 * π) := fun x => by
@@ -2985,7 +2985,7 @@ theorem integral_mathieuCe_mul_mathieuSe (m n : ℕ) (hn : n ≠ 0) (q : ℝ) :
 /-- The normalization step of 28.2.34–28.2.37: if `G(z) = c F(π/2 - z)` with `F` continuous and
 `2π`-periodic and `(-1)ⁿ c > 0`, then the normalized `G` is `(-1)ⁿ` times the normalized
 `F(π/2 - ·)`. -/
-theorem p2s_neg_q_aux {F G : ℂ → ℂ} {c : ℝ} {n : ℕ} (hper : ∀ z, F (z + 2 * π) = F z)
+lemma p2s_neg_q_aux {F G : ℂ → ℂ} {c : ℝ} {n : ℕ} (hper : ∀ z, F (z + 2 * π) = F z)
     (hFG : ∀ z, G z = c * F (π / 2 - z)) (hs : 0 < (-1) ^ n * c) (z : ℂ) :
     (Real.sqrt (π / ∫ x in (0 : ℝ)..2 * π, ‖G x‖ ^ 2) : ℂ) * G z =
       (-1) ^ n * ((Real.sqrt (π / ∫ x in (0 : ℝ)..2 * π, ‖F x‖ ^ 2) : ℂ) * F (π / 2 - z)) := by

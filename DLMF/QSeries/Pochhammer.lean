@@ -5,13 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Tactic.CrossRefAttribute
-public import DLMF.Hypergeometric.Basic
 public import Mathlib.Analysis.Normed.Group.Tannery
-public import Mathlib.Analysis.SpecificLimits.Normed
 public import Mathlib.Analysis.SpecialFunctions.Log.Summable
-public import Mathlib.Topology.Algebra.InfiniteSum.Basic
-public import Mathlib.Topology.Algebra.InfiniteSum.NatInt
+public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+public import Mathlib.Data.Nat.Factorial.DoubleFactorial
 
 /-!
 # The `q`-Pochhammer symbol, `q`-binomial theorem, and `q`-gamma (AAR §§10.1–10.3)
@@ -114,7 +111,7 @@ theorem jacksonIntegral_one {q : ℂ} (hq : ‖q‖ < 1) :
   field [hne]
 
 /-- Splitting `(a;q)_∞ = (a;q)_n (aq^n;q)_∞`. Helper lemma for the `q`-binomial theorem. -/
-lemma qPochhammerInf_mul_qPochhammer {a q : ℂ} (hq : ‖q‖ < 1) (n : ℕ) :
+theorem qPochhammerInf_mul_qPochhammer {a q : ℂ} (hq : ‖q‖ < 1) (n : ℕ) :
     qPochhammerInf a q = qPochhammer a q n * qPochhammerInf (a * q ^ n) q := by
   induction n with
   | zero => simp [qPochhammer_zero]
@@ -123,7 +120,7 @@ lemma qPochhammerInf_mul_qPochhammer {a q : ℂ} (hq : ‖q‖ < 1) (n : ℕ) :
     congr 1
     ring_nf
 
-lemma qPochhammer_self_ne_zero {q : ℂ} (hq : ‖q‖ < 1) (n : ℕ) :
+theorem qPochhammer_self_ne_zero {q : ℂ} (hq : ‖q‖ < 1) (n : ℕ) :
     qPochhammer q q n ≠ 0 := by
   have ha : ∀ k : ℕ, 1 - q * q ^ k ≠ 0 := by
     intro k h
@@ -138,7 +135,7 @@ lemma qPochhammer_self_ne_zero {q : ℂ} (hq : ‖q‖ < 1) (n : ℕ) :
   rw [qPochhammerInf_mul_qPochhammer hq n] at hinf
   exact left_ne_zero_of_mul hinf
 
-lemma qPochhammerInf_pow_succ_ne_zero {q : ℂ} (hq : ‖q‖ < 1) (n : ℕ) :
+theorem qPochhammerInf_pow_succ_ne_zero {q : ℂ} (hq : ‖q‖ < 1) (n : ℕ) :
     1 - q ^ (n + 1) ≠ 0 := by
   intro h
   have hn : ‖q ^ (n + 1)‖ < 1 := by
@@ -149,7 +146,7 @@ lemma qPochhammerInf_pow_succ_ne_zero {q : ℂ} (hq : ‖q‖ < 1) (n : ℕ) :
   exact (lt_irrefl (1 : ℝ)) (this ▸ hn)
 
 /-- Helper lemma for the `q`-binomial theorem. -/
-lemma q_binomial_coeff_succ (a q : ℂ) (n : ℕ)
+theorem q_binomial_coeff_succ (a q : ℂ) (n : ℕ)
     (hqn : qPochhammer q q n ≠ 0) (hq1 : 1 - q ^ (n + 1) ≠ 0) :
     qPochhammer a q (n + 1) / qPochhammer q q (n + 1) =
       (1 - a * q ^ n) / (1 - q ^ (n + 1)) *
@@ -159,25 +156,25 @@ lemma q_binomial_coeff_succ (a q : ℂ) (n : ℕ)
   rw [qPochhammer_succ, hqq]
   field [hqn, hq1]
 
-lemma norm_mul_pow_lt_one {w q : ℂ} (hw : ‖w‖ < 1) (hq : ‖q‖ < 1) (n : ℕ) :
+theorem norm_mul_pow_lt_one {w q : ℂ} (hw : ‖w‖ < 1) (hq : ‖q‖ < 1) (n : ℕ) :
     ‖w * q ^ n‖ < 1 := by
   rw [norm_mul, norm_pow]
   exact mul_lt_one_of_nonneg_of_lt_one_left (norm_nonneg w) hw
     (pow_le_one₀ (norm_nonneg q) hq.le)
 
-lemma one_sub_ne_zero_of_norm_lt_one {w : ℂ} (hw : ‖w‖ < 1) : 1 - w ≠ 0 := by
+theorem one_sub_ne_zero_of_norm_lt_one {w : ℂ} (hw : ‖w‖ < 1) : 1 - w ≠ 0 := by
   intro h
   have : ‖w‖ = 1 := by rw [← sub_eq_zero.mp h, norm_one]
   linarith
 
-lemma qPochhammerInf_ne_zero_of_norm_lt_one {w q : ℂ} (hw : ‖w‖ < 1) (hq : ‖q‖ < 1) :
+theorem qPochhammerInf_ne_zero_of_norm_lt_one {w q : ℂ} (hw : ‖w‖ < 1) (hq : ‖q‖ < 1) :
     qPochhammerInf w q ≠ 0 :=
   qPochhammerInf_ne_zero hq fun n h =>
     (lt_irrefl (1 : ℝ)) <|
       (show ‖w * q ^ n‖ = 1 by rw [← sub_eq_zero.mp h, norm_one]) ▸
         norm_mul_pow_lt_one hw hq n
 
-lemma multipliable_one_sub_mul_pow {w q : ℂ} (hq : ‖q‖ < 1) :
+theorem multipliable_one_sub_mul_pow {w q : ℂ} (hq : ‖q‖ < 1) :
     Multipliable fun n : ℕ => (1 - w * q ^ n) := by
   simpa only [sub_eq_add_neg] using
     multipliable_one_add_of_summable (f := fun n : ℕ => -(w * q ^ n))
@@ -185,31 +182,31 @@ lemma multipliable_one_sub_mul_pow {w q : ℂ} (hq : ‖q‖ < 1) :
         (summable_geometric_of_lt_one (norm_nonneg q) hq).mul_left ‖w‖)
 
 @[dlmf 17.2.iii "exact: finite shifted factorials tend to the infinite product, |q|<1"]
-lemma tendsto_qPochhammer {w q : ℂ} (hq : ‖q‖ < 1) :
+theorem tendsto_qPochhammer {w q : ℂ} (hq : ‖q‖ < 1) :
     Tendsto (fun n : ℕ => qPochhammer w q n) atTop (𝓝 (qPochhammerInf w q)) := by
   simpa only [qPochhammer_eq_prod, qPochhammerInf] using
     (multipliable_one_sub_mul_pow (w := w) hq).tendsto_prod_tprod_nat
 
-lemma one_sub_mul_pow_ne_zero_of_norm {w q : ℂ} (hw : ‖w‖ < 1) (hq : ‖q‖ < 1)
+theorem one_sub_mul_pow_ne_zero_of_norm {w q : ℂ} (hw : ‖w‖ < 1) (hq : ‖q‖ < 1)
     (n : ℕ) : 1 - w * q ^ n ≠ 0 := by
   intro h
   exact (lt_irrefl (1 : ℝ)) <|
     (show ‖w * q ^ n‖ = 1 by rw [← sub_eq_zero.mp h, norm_one]) ▸
       norm_mul_pow_lt_one hw hq n
 
-lemma qPochhammer_ne_zero_of_factors {w q : ℂ} (hq : ‖q‖ < 1)
+theorem qPochhammer_ne_zero_of_factors {w q : ℂ} (hq : ‖q‖ < 1)
     (hw : ∀ n : ℕ, 1 - w * q ^ n ≠ 0) (n : ℕ) : qPochhammer w q n ≠ 0 := by
   have hinf := qPochhammerInf_ne_zero hq hw
   rw [qPochhammerInf_mul_qPochhammer hq n] at hinf
   exact left_ne_zero_of_mul hinf
 
-lemma qPochhammerInf_shift_ne_zero {w q : ℂ} (hq : ‖q‖ < 1)
+theorem qPochhammerInf_shift_ne_zero {w q : ℂ} (hq : ‖q‖ < 1)
     (hw : ∀ n : ℕ, 1 - w * q ^ n ≠ 0) (n : ℕ) :
     qPochhammerInf (w * q ^ n) q ≠ 0 :=
   qPochhammerInf_ne_zero hq fun k h => hw (n + k) <| by
     simpa [mul_assoc, pow_add] using h
 
-lemma qPochhammer_eq_div_inf {w q : ℂ} (hq : ‖q‖ < 1)
+theorem qPochhammer_eq_div_inf {w q : ℂ} (hq : ‖q‖ < 1)
     (hw : ∀ n : ℕ, 1 - w * q ^ n ≠ 0) (n : ℕ) :
     qPochhammer w q n =
       qPochhammerInf w q / qPochhammerInf (w * q ^ n) q :=
@@ -217,7 +214,7 @@ lemma qPochhammer_eq_div_inf {w q : ℂ} (hq : ‖q‖ < 1)
     (qPochhammerInf_mul_qPochhammer hq n).symm
 
 /-- Coefficient identity for the Heine generating function. -/
-lemma q_binomial_coeff_sub {a q : ℂ} (hq : ‖q‖ < 1) (n : ℕ) :
+theorem q_binomial_coeff_sub {a q : ℂ} (hq : ‖q‖ < 1) (n : ℕ) :
     let c := fun k : ℕ => qPochhammer a q k / qPochhammer q q k
     c (n + 1) - c n = c (n + 1) * q ^ (n + 1) - a * c n * q ^ n := by
   intro c
@@ -233,7 +230,7 @@ lemma q_binomial_coeff_sub {a q : ℂ} (hq : ‖q‖ < 1) (n : ℕ) :
     ring
   rw [← sub_eq_zero, hdiff, hmul, sub_self]
 
-lemma summable_q_binomial_series {a q z : ℂ} (hq : ‖q‖ < 1) (hz : ‖z‖ < 1) :
+theorem summable_q_binomial_series {a q z : ℂ} (hq : ‖q‖ < 1) (hz : ‖z‖ < 1) :
     Summable fun n : ℕ =>
       qPochhammer a q n / qPochhammer q q n * z ^ n := by
   obtain ⟨r, hr_lt, hr_one⟩ := exists_between hz

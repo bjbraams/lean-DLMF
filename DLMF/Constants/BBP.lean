@@ -6,10 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.ArctanDeriv
-public import Mathlib.MeasureTheory.Integral.DominatedConvergence
-public import Mathlib.Analysis.SpecificLimits.Basic
-public import Mathlib.Tactic.CrossRefAttribute
 
 /-!
 # BBP-type formulas and Gauss's Machin formula (Duverney §8.4)
@@ -68,7 +64,7 @@ theorem hasSum_pow_div_mul_add (a : ℝ) (ha0 : 0 ≤ a) (ha : a < 1) (m j : ℕ
     ring
 
 /-- The BBP integrands are integrable on `[0, 1]`. -/
-lemma intervalIntegrable_bbp (a : ℝ) (ha0 : 0 ≤ a) (ha : a < 1) (m n : ℕ) :
+theorem intervalIntegrable_bbp (a : ℝ) (ha0 : 0 ≤ a) (ha : a < 1) (m n : ℕ) :
     IntervalIntegrable (fun y : ℝ => y ^ n / (1 - a * y ^ m)) volume 0 1 := by
   refine ContinuousOn.intervalIntegrable fun y hy => ?_
   rw [uIcc_of_le zero_le_one] at hy

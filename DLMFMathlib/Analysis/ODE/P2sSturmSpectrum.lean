@@ -6,14 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.Analysis.ODE.Gronwall
-public import Mathlib.Analysis.Analytic.IsolatedZeros
 public import Mathlib.Analysis.Complex.CauchyIntegral
-public import Mathlib.Analysis.Analytic.Constructions
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
-public import Mathlib.Analysis.Calculus.Deriv.MeanValue
 public import Mathlib.Analysis.Calculus.Deriv.Star
-public import Mathlib.Analysis.Complex.RealDeriv
-public import Mathlib.Data.Set.Card
 public import DLMFMathlib.Analysis.ODE.PowerSeriesUniqueness
 public import DLMFMathlib.Analysis.ODE.SturmCount
 
@@ -50,7 +44,7 @@ namespace ODE
 
 /-- A set of reals all of whose initial segments `S ∩ (-∞, x)` are finite has a least element
 in each of its nonempty subsets. -/
-theorem p2s_exists_least {S T : Set ℝ} (hfin : ∀ x, (S ∩ Iio x).Finite) (hTS : T ⊆ S)
+lemma p2s_exists_least {S T : Set ℝ} (hfin : ∀ x, (S ∩ Iio x).Finite) (hTS : T ⊆ S)
     (hT : T.Nonempty) : ∃ m ∈ T, ∀ t ∈ T, m ≤ t := by
   obtain ⟨z, hz⟩ := hT
   have hF : (T ∩ Iic z).Finite := by
@@ -155,7 +149,7 @@ theorem p2s_exists_encard_zeros {g : ℝ → ℝ} {G : ℂ → ℂ} (hG : Differ
 `c'' = -k² c` with the same data. The energy `E = (y' - c')² + k² (y - c)²` satisfies
 `E' = 2 (y' - c') Q y ≤ 3 M E + 2 M A²` with `A = |α| + |β| / k`, so by Grönwall
 `E(x) ≤ (2 A² / 3) (e^{3 M x} - 1)` on `[0, L]`. -/
-theorem p2s_energy_le {Q y y' : ℝ → ℝ} {M L k α β : ℝ} (hM : 0 < M) (hk : 1 ≤ k)
+lemma p2s_energy_le {Q y y' : ℝ → ℝ} {M L k α β : ℝ} (hM : 0 < M) (hk : 1 ≤ k)
     (hQ : ∀ x ∈ Icc 0 L, |Q x| ≤ M) (hy : ∀ x, HasDerivAt y (y' x) x)
     (hy' : ∀ x, HasDerivAt y' ((Q x - k ^ 2) * y x) x) (h0 : y 0 = α) (h1 : y' 0 = β)
     {x : ℝ} (hx : x ∈ Icc 0 L) :
@@ -291,7 +285,7 @@ theorem p2s_endpoint_ne_zero {Q y y' : ℝ → ℝ} {M L μ : ℝ} (hL : 0 < L)
 
 /-- If `(-1)^j g(t_j) > 0` for all large `j` and `t_j → ∞`, then `g` takes positive and negative
 values for arbitrarily large arguments. -/
-theorem p2s_pos_neg_of_alternating {g : ℝ → ℝ} {t : ℕ → ℝ} (ht : Tendsto t atTop atTop) {J : ℕ}
+lemma p2s_pos_neg_of_alternating {g : ℝ → ℝ} {t : ℕ → ℝ} (ht : Tendsto t atTop atTop) {J : ℕ}
     (h : ∀ j ≥ J, 0 < (-1) ^ j * g (t j)) :
     (∀ N, ∃ x > N, 0 < g x) ∧ (∀ N, ∃ x > N, g x < 0) := by
   have key : ∀ N, ∃ j, J ≤ j ∧ Even j ∧ N < t j ∧ N < t (j + 1) := by
@@ -309,12 +303,12 @@ theorem p2s_pos_neg_of_alternating {g : ℝ → ℝ} {t : ℕ → ℝ} (ht : Ten
     exact ⟨t (j + 1), hN, by linarith⟩
 
 /-- `u v > 0` when `(u - v)² < v²`. -/
-theorem p2s_mul_pos_of_sq_lt {u v : ℝ} (h : (u - v) ^ 2 < v ^ 2) : 0 < v * u := by
+lemma p2s_mul_pos_of_sq_lt {u v : ℝ} (h : (u - v) ^ 2 < v ^ 2) : 0 < v * u := by
   nlinarith [sq_nonneg u]
 
 /-- The frequencies `k_j = (j π + φ) / L` tend to `+∞`, and so do `k_j²`; eventually
 `k_j ≥ 1` and `k_j² > B`. -/
-theorem p2s_freq_eventually {L φ : ℝ} (hL : 0 < L) (B : ℝ) :
+lemma p2s_freq_eventually {L φ : ℝ} (hL : 0 < L) (B : ℝ) :
     Tendsto (fun j : ℕ => ((j * π + φ) / L) ^ 2) atTop atTop ∧
       ∃ J : ℕ, ∀ j ≥ J, 1 ≤ (j * π + φ) / L ∧ B < ((j * π + φ) / L) ^ 2 := by
   have h1 : Tendsto (fun j : ℕ => (j * π + φ) / L) atTop atTop := by
@@ -333,7 +327,7 @@ theorem p2s_freq_eventually {L φ : ℝ} (hL : 0 < L) (B : ℝ) :
   exact ⟨ha.trans h, by nlinarith⟩
 
 /-- `k_j L = j π + φ` for `k_j = (j π + φ) / L`. -/
-theorem p2s_freq_mul {L φ : ℝ} (hL : 0 < L) (j : ℕ) : (j * π + φ) / L * L = j * π + φ := by
+lemma p2s_freq_mul {L φ : ℝ} (hL : 0 < L) (j : ℕ) : (j * π + φ) / L * L = j * π + φ := by
   field_simp
 
 variable {Q : ℝ → ℝ} {Y Y' : ℝ → ℝ → ℝ} {M L : ℝ}

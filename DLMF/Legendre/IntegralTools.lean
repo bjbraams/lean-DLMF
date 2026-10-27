@@ -5,10 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Legendre.IntegerTheory
-public import DLMF.OrthogonalPolynomials.Differential
-public import DLMF.Hypergeometric.IntegralRepresentations
-public import DLMF.OrthogonalPolynomials.LegendreSingular
+public import DLMF.Core.Framework
+public import DLMF.Legendre.AssociatedRecurrences
+public import DLMF.Legendre.Laplace
 
 /-!
 # Tools for Legendre integrals
@@ -49,24 +48,24 @@ open DLMF.OrthogonalPolynomials
 abbrev legInt_D (n m : ℕ) : ℂ → ℂ := iteratedDeriv m (legendrePolyP n)
 
 /-- `P_n^{(m)}` is entire. -/
-lemma legInt_analytic_D (n m : ℕ) : AnalyticOnNhd ℂ (legInt_D n m) univ := by
+theorem legInt_analytic_D (n m : ℕ) : AnalyticOnNhd ℂ (legInt_D n m) univ := by
   rw [legInt_D, iteratedDeriv_eq_iterate]
   exact (show AnalyticOnNhd ℂ (legendrePolyP n) univ from analyticOnNhd_jacobiPolyP 0 0 n).iterated_deriv m
 
 /-- Complex derivative of `P_n^{(m)}`. -/
-lemma legInt_hasDerivAt_D (n m : ℕ) (z : ℂ) :
+theorem legInt_hasDerivAt_D (n m : ℕ) (z : ℂ) :
     HasDerivAt (legInt_D n m) (legInt_D n (m+1) z) z := by
   show HasDerivAt (iteratedDeriv m _) (iteratedDeriv (m+1) _ z) z
   rw [iteratedDeriv_succ]
   exact ((legInt_analytic_D n m z (mem_univ _)).differentiableAt).hasDerivAt
 
 /-- Real-variable derivative of `P_n^{(m)}`. -/
-lemma legInt_hasDerivAt_D_real (n m : ℕ) (x : ℝ) :
+theorem legInt_hasDerivAt_D_real (n m : ℕ) (x : ℝ) :
     HasDerivAt (fun x : ℝ => legInt_D n m x) (legInt_D n (m+1) x) x :=
   (legInt_hasDerivAt_D n m x).comp_ofReal
 
 /-- The Legendre equation differentiated `m` times. -/
-lemma legInt_ode (n m : ℕ) (z : ℂ) :
+theorem legInt_ode (n m : ℕ) (z : ℂ) :
     (1 - z^2) * legInt_D n (m+2) z - 2*(m+1)*z*legInt_D n (m+1) z
       + ((n:ℂ)*(n+1) - m*(m+1)) * legInt_D n m z = 0 := by
   induction m generalizing z with
@@ -93,11 +92,11 @@ abbrev legInt_I (m l n : ℕ) : ℂ :=
   ∫ x : ℝ in (-1:ℝ)..1, (1-(x:ℂ)^2)^m * legInt_D l m x * legInt_D n m x
 
 /-- `x ↦ P_n^{(m)}(x)` is continuous on `ℝ`. -/
-lemma legInt_cont_D (n m : ℕ) : Continuous fun x : ℝ => legInt_D n m x :=
+theorem legInt_cont_D (n m : ℕ) : Continuous fun x : ℝ => legInt_D n m x :=
   continuous_iff_continuousAt.mpr fun x => (legInt_hasDerivAt_D_real n m x).continuousAt
 
 /-- Moment recursion by integration by parts and the differentiated Legendre equation. -/
-lemma legInt_I_succ (m l n : ℕ) :
+theorem legInt_I_succ (m l n : ℕ) :
     legInt_I (m+1) l n = ((n:ℂ)-m)*(n+m+1) * legInt_I m l n := by
   have hv : ∀ x ∈ uIcc (-1:ℝ) 1, HasDerivAt (fun x : ℝ => (1-(x:ℂ)^2)^(m+1) * legInt_D n (m+1) x)
       (-(((n:ℂ)-m)*(n+m+1)) * ((1-(x:ℂ)^2)^m * legInt_D n m x)) x := by
@@ -128,7 +127,7 @@ lemma legInt_I_succ (m l n : ℕ) :
   linear_combination hibp
 
 /-- Closed form of the weighted moments from Legendre orthogonality. -/
-lemma legInt_I_eq (m l n : ℕ) :
+theorem legInt_I_eq (m l n : ℕ) :
     legInt_I m l n = (∏ k ∈ Finset.range m, (((n:ℂ)-k)*(n+k+1))) *
       (if l = n then 2/(2*(n:ℂ)+1) else 0) := by
   induction m with
@@ -139,7 +138,7 @@ lemma legInt_I_eq (m l n : ℕ) :
   | succ m ih => rw [legInt_I_succ, ih, Finset.prod_range_succ]; ring
 
 /-- `∏_{k<m} (n-k)(n+k+1) · (n-m)! = (n+m)!` for `m ≤ n`. -/
-lemma legInt_prod_factorial {m n : ℕ} (h : m ≤ n) :
+theorem legInt_prod_factorial {m n : ℕ} (h : m ≤ n) :
     (∏ k ∈ Finset.range m, (((n:ℂ)-k)*(n+k+1))) * ((n-m).factorial : ℂ) = ((n+m).factorial : ℂ) := by
   induction m with
   | zero => simp
@@ -157,7 +156,7 @@ lemma legInt_prod_factorial {m n : ℕ} (h : m ≤ n) :
     ring
 
 /-- Ferrers functions of integer degree and order via derivatives of the Legendre polynomial. -/
-lemma legInt_ferrersP_nat_nat (n m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem legInt_ferrersP_nat_nat (n m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersP n m x = (-1)^m * (((1-x^2)^((m:ℝ)/2) : ℝ) : ℂ) * legInt_D n m x := by
   have hs : 1+(x:ℂ) ∈ slitPlane := Or.inl (by simp; linarith [hx.1])
   have hev : legendreP (n:ℂ) =ᶠ[𝓝 (x:ℂ)] legendrePolyP n := by
@@ -166,7 +165,7 @@ lemma legInt_ferrersP_nat_nat (n m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) 
   rw [ferrersP_nat n m hx, hev.iteratedDeriv_eq]
 
 /-- Product of two Ferrers functions of integer degree and equal integer order. -/
-lemma legInt_ferrersP_mul (l n m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem legInt_ferrersP_mul (l n m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersP l m x * ferrersP n m x = (1-(x:ℂ)^2)^m * legInt_D l m x * legInt_D n m x := by
   rw [legInt_ferrersP_nat_nat l m hx, legInt_ferrersP_nat_nat n m hx]
   have h0 : (0:ℝ) ≤ 1 - x^2 := by nlinarith [hx.1, hx.2]
@@ -181,7 +180,7 @@ lemma legInt_ferrersP_mul (l n m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     (((1-x^2)^((m:ℝ)/2) : ℝ) : ℂ)^2 * legInt_D l m x * legInt_D n m x * hsq
 
 /-- `𝐅(a,b;c;z) = c 𝐅(a,b;c+1;z) + a b z 𝐅(a+1,b+1;c+2;z)` on the cut plane. -/
-lemma legInt_contiguous (a b c : ℂ) {z : ℂ} (hz : z ∈ cutPlane) :
+theorem legInt_contiguous (a b c : ℂ) {z : ℂ} (hz : z ∈ cutPlane) :
     regularizedGaussHG a b c z = c * regularizedGaussHG a b (c+1) z +
       a * b * z * regularizedGaussHG (a+1) (b+1) (c+2) z := by
   have h1 := regularizedGaussHG_contiguous_c a b c hz
@@ -191,7 +190,7 @@ lemma legInt_contiguous (a b c : ℂ) {z : ℂ} (hz : z ∈ cutPlane) :
   linear_combination h1 - a * h2
 
 /-- `d/dw [w^{k+1} 𝐅(a,b;k+2;w)] = w^k 𝐅(a,b;k+1;w)` on the cut plane. -/
-lemma legInt_hasDerivAt_G (a b : ℂ) (k : ℕ) {w : ℂ} (hw : w ∈ cutPlane) :
+theorem legInt_hasDerivAt_G (a b : ℂ) (k : ℕ) {w : ℂ} (hw : w ∈ cutPlane) :
     HasDerivAt (fun w => w^(k+1) * regularizedGaussHG a b ((k:ℂ)+2) w)
       (w^k * regularizedGaussHG a b ((k:ℂ)+1) w) w := by
   have hF := (differentiableAt_regularizedGaussHG a b ((k:ℂ)+2) hw).hasDerivAt
@@ -206,11 +205,11 @@ def legInt_H (a b : ℂ) (k : ℕ) (x : ℝ) : ℂ :=
   (1-(x:ℂ))^k * regularizedGaussHG a b ((k:ℂ)+1) ((1-x)/2)
 
 /-- `(1-x)/2` lies in the cut plane for `x > -1`. -/
-lemma legInt_half_mem_cutPlane {x : ℝ} (hx : -1 < x) : (1-(x:ℂ))/2 ∈ cutPlane := by
+theorem legInt_half_mem_cutPlane {x : ℝ} (hx : -1 < x) : (1-(x:ℂ))/2 ∈ cutPlane := by
   rw [mem_cutPlane]; left; simp; linarith
 
 /-- `H_{k+1}' = -H_k` on `(-1,∞)`. -/
-lemma legInt_hasDerivAt_H (a b : ℂ) (k : ℕ) {x : ℝ} (hx : -1 < x) :
+theorem legInt_hasDerivAt_H (a b : ℂ) (k : ℕ) {x : ℝ} (hx : -1 < x) :
     HasDerivAt (legInt_H a b (k+1)) (-legInt_H a b k x) x := by
   have hw := legInt_half_mem_cutPlane hx
   have hψ : HasDerivAt (fun z : ℂ => (1-z)/2) (-1/2) (x:ℂ) := by
@@ -229,7 +228,7 @@ lemma legInt_hasDerivAt_H (a b : ℂ) (k : ℕ) {x : ℝ} (hx : -1 < x) :
   field_simp
 
 /-- `H_k` is continuous on `(-1,∞)`. -/
-lemma legInt_continuousAt_H (a b : ℂ) (k : ℕ) {x : ℝ} (hx : -1 < x) :
+theorem legInt_continuousAt_H (a b : ℂ) (k : ℕ) {x : ℝ} (hx : -1 < x) :
     ContinuousAt (legInt_H a b k) x := by
   have hw := legInt_half_mem_cutPlane hx
   unfold legInt_H
@@ -238,11 +237,11 @@ lemma legInt_continuousAt_H (a b : ℂ) (k : ℕ) {x : ℝ} (hx : -1 < x) :
     (differentiableAt_regularizedGaussHG a b _ hw).continuousAt (by fun_prop)
 
 /-- `H_{k+1}(1) = 0`. -/
-lemma legInt_H_one (a b : ℂ) (k : ℕ) : legInt_H a b (k+1) 1 = 0 := by
+theorem legInt_H_one (a b : ℂ) (k : ℕ) : legInt_H a b (k+1) 1 = 0 := by
   simp [legInt_H]
 
 /-- `∫_x^1 H_k = H_{k+1}(x)` for `x > -1`. -/
-lemma legInt_integral_H (a b : ℂ) (k : ℕ) {x : ℝ} (hx : -1 < x) :
+theorem legInt_integral_H (a b : ℂ) (k : ℕ) {x : ℝ} (hx : -1 < x) :
     ∫ t in x..1, legInt_H a b k t = legInt_H a b (k+1) x := by
   have hsub : ∀ t ∈ uIcc x 1, -1 < t := fun t ht => by
     rcases le_total x 1 with h | h
@@ -257,7 +256,7 @@ lemma legInt_integral_H (a b : ℂ) (k : ℕ) {x : ℝ} (hx : -1 < x) :
   linear_combination -h
 
 /-- Iterated integrals of `𝖯_ν` from the endpoint `1`. -/
-lemma legInt_iterate_ferrers (ν : ℂ) (k : ℕ) {x : ℝ} (hx : x ∈ Ioc (-1:ℝ) 1) :
+theorem legInt_iterate_ferrers (ν : ℂ) (k : ℕ) {x : ℝ} (hx : x ∈ Ioc (-1:ℝ) 1) :
     ((fun f : ℝ → ℂ => fun x => ∫ t : ℝ in x..1, f t)^[k]) (ferrersP ν 0) x =
       legInt_H (ν+1) (-ν) k x := by
   induction k generalizing x with
@@ -274,7 +273,7 @@ def legInt_K (a b : ℂ) (k : ℕ) (w : ℂ) : ℂ :=
   (w-1)^k * regularizedGaussHG a b ((k:ℂ)+1) ((1-w)/2)
 
 /-- `(1-w)/2` lies in the cut plane when `1+w` lies in the slit plane. -/
-lemma legInt_half_mem_cutPlane' {w : ℂ} (hw : 1+w ∈ slitPlane) : (1-w)/2 ∈ cutPlane := by
+theorem legInt_half_mem_cutPlane' {w : ℂ} (hw : 1+w ∈ slitPlane) : (1-w)/2 ∈ cutPlane := by
   rw [mem_cutPlane, show 1-(1-w)/2 = (1+w)/2 by ring]
   rw [mem_slitPlane_iff] at hw ⊢
   simp only [div_ofNat_re, div_ofNat_im]
@@ -283,7 +282,7 @@ lemma legInt_half_mem_cutPlane' {w : ℂ} (hw : 1+w ∈ slitPlane) : (1-w)/2 ∈
   · right; intro h'; apply h; linarith
 
 /-- `K_{k+1}' = K_k` where `1+w` lies in the slit plane. -/
-lemma legInt_hasDerivAt_K (a b : ℂ) (k : ℕ) {w : ℂ} (hw : 1+w ∈ slitPlane) :
+theorem legInt_hasDerivAt_K (a b : ℂ) (k : ℕ) {w : ℂ} (hw : 1+w ∈ slitPlane) :
     HasDerivAt (legInt_K a b (k+1)) (legInt_K a b k w) w := by
   have hc := legInt_half_mem_cutPlane' hw
   have hψ : HasDerivAt (fun z : ℂ => (1-z)/2) (-1/2) w := by
@@ -303,7 +302,7 @@ lemma legInt_hasDerivAt_K (a b : ℂ) (k : ℕ) {w : ℂ} (hw : 1+w ∈ slitPlan
   ring
 
 /-- `K_k` is continuous where `1+w` lies in the slit plane. -/
-lemma legInt_continuousAt_K (a b : ℂ) (k : ℕ) {w : ℂ} (hw : 1+w ∈ slitPlane) :
+theorem legInt_continuousAt_K (a b : ℂ) (k : ℕ) {w : ℂ} (hw : 1+w ∈ slitPlane) :
     ContinuousAt (legInt_K a b k) w := by
   have hc := legInt_half_mem_cutPlane' hw
   unfold legInt_K
@@ -312,11 +311,11 @@ lemma legInt_continuousAt_K (a b : ℂ) (k : ℕ) {w : ℂ} (hw : 1+w ∈ slitPl
     (differentiableAt_regularizedGaussHG a b _ hc).continuousAt (by fun_prop)
 
 /-- `1+t` lies in the slit plane for real `t ≥ 1`. -/
-lemma legInt_one_add_ofReal_mem {t : ℝ} (ht : 1 ≤ t) : 1 + (t:ℂ) ∈ slitPlane :=
+theorem legInt_one_add_ofReal_mem {t : ℝ} (ht : 1 ≤ t) : 1 + (t:ℂ) ∈ slitPlane :=
   Or.inl (by simp; linarith)
 
 /-- `∫_1^x K_k = K_{k+1}(x)` for `x ≥ 1`. -/
-lemma legInt_integral_K (a b : ℂ) (k : ℕ) {x : ℝ} (hx : 1 ≤ x) :
+theorem legInt_integral_K (a b : ℂ) (k : ℕ) {x : ℝ} (hx : 1 ≤ x) :
     ∫ t in (1:ℝ)..x, legInt_K a b k t = legInt_K a b (k+1) x := by
   have hsub : ∀ t ∈ uIcc 1 x, 1 ≤ t := fun t ht => by rw [uIcc_of_le hx] at ht; exact ht.1
   have hco : ContinuousOn (fun t : ℝ => legInt_K a b k t) (uIcc 1 x) := fun t ht =>
@@ -329,7 +328,7 @@ lemma legInt_integral_K (a b : ℂ) (k : ℕ) {x : ℝ} (hx : 1 ≤ x) :
   rw [h]; simp [legInt_K]
 
 /-- Iterated integrals of `P_ν` from `1` on the real half-line. -/
-lemma legInt_iterate_associated (ν : ℂ) (k : ℕ) {x : ℝ} (hx : 1 ≤ x) :
+theorem legInt_iterate_associated (ν : ℂ) (k : ℕ) {x : ℝ} (hx : 1 ≤ x) :
     ((fun f : ℝ → ℂ => fun x => ∫ t : ℝ in (1:ℝ)..x, f t)^[k]) (fun x : ℝ => associatedP ν 0 x) x =
       legInt_K (ν+1) (-ν) k x := by
   induction k generalizing x with
@@ -341,7 +340,7 @@ lemma legInt_iterate_associated (ν : ℂ) (k : ℕ) {x : ℝ} (hx : 1 ≤ x) :
     exact ih ht.1
 
 /-- `𝐏^{-m}_ν(z) = (z²-1)^{-m/2} K_m(z)` on the principal sheet. -/
-lemma legInt_associatedP_neg_nat (ν : ℂ) (m : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem legInt_associatedP_neg_nat (ν : ℂ) (m : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     associatedP ν (-m) z = legendreBranchPower (-m) z * legInt_K (ν+1) (-ν) m z := by
   have hne : z - 1 ≠ 0 := slitPlane_ne_zero hz
   unfold associatedP legendreBranchPower legInt_K
@@ -350,7 +349,7 @@ lemma legInt_associatedP_neg_nat (ν : ℂ) (m : ℕ) {z : ℂ} (hz : z-1 ∈ sl
   congr 2; ring
 
 /-- On `(1,∞)` the principal branch power is `(x²-1)^{μ/2}`. -/
-lemma legInt_legendreBranchPower_real (μ : ℂ) {x : ℝ} (hx : 1 < x) :
+theorem legInt_legendreBranchPower_real (μ : ℂ) {x : ℝ} (hx : 1 < x) :
     legendreBranchPower μ x = ((x:ℂ)^2-1)^(μ/2) := by
   have h1 : (0:ℝ) < x-1 := by linarith
   have h2 : (0:ℝ) < x+1 := by linarith
@@ -369,7 +368,7 @@ lemma legInt_legendreBranchPower_real (μ : ℂ) {x : ℝ} (hx : 1 < x) :
   congr 1; ring
 
 /-- The slit plane is invariant under multiplication by positive reals. -/
-lemma legInt_ofReal_mul_mem {t : ℝ} (ht : 0 < t) {z : ℂ} (hz : z ∈ slitPlane) :
+theorem legInt_ofReal_mul_mem {t : ℝ} (ht : 0 < t) {z : ℂ} (hz : z ∈ slitPlane) :
     (t:ℂ)*z ∈ slitPlane := by
   rw [mem_slitPlane_iff] at hz ⊢
   rw [re_ofReal_mul, im_ofReal_mul]
@@ -378,7 +377,7 @@ lemma legInt_ofReal_mul_mem {t : ℝ} (ht : 0 < t) {z : ℂ} (hz : z ∈ slitPla
   · exact Or.inr (mul_ne_zero ht.ne' h)
 
 /-- Adding a positive real keeps `0` or a slit-plane point in the slit plane. -/
-lemma legInt_ofReal_add_mem {r : ℝ} (hr : 0 < r) {z : ℂ} (hz : z = 0 ∨ z ∈ slitPlane) :
+theorem legInt_ofReal_add_mem {r : ℝ} (hr : 0 < r) {z : ℂ} (hz : z = 0 ∨ z ∈ slitPlane) :
     (r:ℂ)+z ∈ slitPlane := by
   rcases hz with rfl | hz
   · simpa using hr
@@ -391,7 +390,7 @@ lemma legInt_ofReal_add_mem {r : ℝ} (hr : 0 < r) {z : ℂ} (hz : z = 0 ∨ z �
   · exact Or.inr h
 
 /-- Points of the segment `[1,w]` are `1` or lie in `1 + slitPlane`. -/
-lemma legInt_seg_mem {w : ℂ} (hw : w = 1 ∨ w-1 ∈ slitPlane) {t : ℝ} (ht : t ∈ Icc (0:ℝ) 1) :
+theorem legInt_seg_mem {w : ℂ} (hw : w = 1 ∨ w-1 ∈ slitPlane) {t : ℝ} (ht : t ∈ Icc (0:ℝ) 1) :
     (1 + (t:ℂ)*(w-1)) = 1 ∨ (1 + (t:ℂ)*(w-1)) - 1 ∈ slitPlane := by
   rcases hw with rfl | hw
   · left; simp
@@ -402,7 +401,7 @@ lemma legInt_seg_mem {w : ℂ} (hw : w = 1 ∨ w-1 ∈ slitPlane) {t : ℝ} (ht 
   exact legInt_ofReal_mul_mem h0 hw
 
 /-- For `p` on the segment `[1,w]`, `1+p` lies in the slit plane. -/
-lemma legInt_two_add_mem {w : ℂ} (hw : w = 1 ∨ w-1 ∈ slitPlane) {t : ℝ} (ht : t ∈ Icc (0:ℝ) 1) :
+theorem legInt_two_add_mem {w : ℂ} (hw : w = 1 ∨ w-1 ∈ slitPlane) {t : ℝ} (ht : t ∈ Icc (0:ℝ) 1) :
     1 + (1 + (t:ℂ)*(w-1)) ∈ slitPlane := by
   rw [show 1 + (1 + (t:ℂ)*(w-1)) = ((2:ℝ):ℂ) + (1 + (t:ℂ)*(w-1) - 1) by push_cast; ring]
   refine legInt_ofReal_add_mem two_pos ?_
@@ -411,7 +410,7 @@ lemma legInt_two_add_mem {w : ℂ} (hw : w = 1 ∨ w-1 ∈ slitPlane) {t : ℝ} 
   · exact Or.inr h
 
 /-- Iterated segment integrals of `P_ν` from `1`. -/
-lemma legInt_iterate_segment (ν : ℂ) (k : ℕ) {w : ℂ} (hw : w = 1 ∨ w-1 ∈ slitPlane) :
+theorem legInt_iterate_segment (ν : ℂ) (k : ℕ) {w : ℂ} (hw : w = 1 ∨ w-1 ∈ slitPlane) :
     ((fun f : ℂ → ℂ => fun z => segmentIntegral f 1 z)^[k]) (associatedP ν 0) w =
       legInt_K (ν+1) (-ν) k w := by
   induction k generalizing w with
@@ -451,13 +450,13 @@ abbrev legInt_J (k n : ℕ) : ℂ :=
   ∫ x : ℝ in (-1:ℝ)..1, (1-(x:ℂ)^2)^k * (legInt_D n (k+1) x)^2
 
 /-- Derivative of `1-x²` as a complex-valued function of a real variable. -/
-lemma legInt_hasDerivAt_one_sub_sq (x : ℝ) :
+theorem legInt_hasDerivAt_one_sub_sq (x : ℝ) :
     HasDerivAt (fun x : ℝ => 1-(x:ℂ)^2) (-(2*(x:ℂ))) x := by
   have := ((hasDerivAt_id (x:ℂ)).pow 2).const_sub 1 |>.comp_ofReal
   simpa using this
 
 /-- `∫ (P_n')² = n(n+1)`. -/
-lemma legInt_J_zero (n : ℕ) : legInt_J 0 n = n*(n+1) := by
+theorem legInt_J_zero (n : ℕ) : legInt_J 0 n = n*(n+1) := by
   set c : ℂ := (n:ℂ)*(n+1)
   have hd : ∀ x ∈ uIcc (-1:ℝ) 1, HasDerivAt (fun x : ℝ => (x:ℂ)*(1-(x:ℂ)^2)*(legInt_D n 1 x)^2
       + c*x*(legInt_D n 0 x)^2 + (1-(x:ℂ)^2)*legInt_D n 1 x*legInt_D n 0 x)
@@ -488,7 +487,7 @@ lemma legInt_J_zero (n : ℕ) : legInt_J 0 n = n*(n+1) := by
   linear_combination h/2
 
 /-- Recursion `(j+2) J_{j+1} = (j+1)(n-j-1)(n+j+2) J_j`. -/
-lemma legInt_J_succ (j n : ℕ) :
+theorem legInt_J_succ (j n : ℕ) :
     ((j:ℂ)+2) * legInt_J (j+1) n = ((j:ℂ)+1)*(((n:ℂ)-(j+1))*(n+(j+1)+1)) * legInt_J j n := by
   set c : ℂ := ((n:ℂ)-(j+1))*(n+(j+1)+1)
   have hd : ∀ x ∈ uIcc (-1:ℝ) 1, HasDerivAt (fun x : ℝ =>
@@ -532,7 +531,7 @@ lemma legInt_J_succ (j n : ℕ) :
   linear_combination h/2
 
 /-- Closed form `(k+1) J_k (n-k-1)! = (n+k+1)!` for `k+1 ≤ n`. -/
-lemma legInt_J_eq {k n : ℕ} (h : k+1 ≤ n) :
+theorem legInt_J_eq {k n : ℕ} (h : k+1 ≤ n) :
     ((k:ℂ)+1) * legInt_J k n * ((n-(k+1)).factorial : ℂ) = ((n+(k+1)).factorial : ℂ) := by
   induction k with
   | zero =>
@@ -556,7 +555,7 @@ lemma legInt_J_eq {k n : ℕ} (h : k+1 ≤ n) :
     ring
 
 /-- `(1-x²)^r` is integrable on `[-1,1]` for `r = -1/2` or `r ≥ 0`. -/
-lemma legInt_intervalIntegrable_rpow {r : ℝ} (hr : r = -1/2 ∨ 0 ≤ r) :
+theorem legInt_intervalIntegrable_rpow {r : ℝ} (hr : r = -1/2 ∨ 0 ≤ r) :
     IntervalIntegrable (fun x : ℝ => (1-x^2)^r) volume (-1) 1 := by
   rcases hr with rfl | hr
   · have hd : ∀ x ∈ Ioo (min (-1:ℝ) 1) (max (-1) 1), HasDerivAt Real.arcsin ((1-x^2)^(-1/2:ℝ)) x := by
@@ -574,7 +573,7 @@ lemma legInt_intervalIntegrable_rpow {r : ℝ} (hr : r = -1/2 ∨ 0 ≤ r) :
       ).intervalIntegrable _ _
 
 /-- Green's identity in the order: `∫ (1-x²)^{(l+m)/2-1} P_n^{(l)} P_n^{(m)} = 0` for `l ≠ m`. -/
-lemma legInt_offdiag (n l m : ℕ) (hlm : l ≠ m) (hpos : 0 < l+m) :
+theorem legInt_offdiag (n l m : ℕ) (hlm : l ≠ m) (hpos : 0 < l+m) :
     ∫ x : ℝ in (-1:ℝ)..1, (((1-x^2)^(((l+m:ℕ):ℝ)/2-1) : ℝ) : ℂ) *
       (legInt_D n l x * legInt_D n m x) = 0 := by
   set a : ℝ := ((l+m:ℕ):ℝ)/2 with ha_def
@@ -645,7 +644,7 @@ lemma legInt_offdiag (n l m : ℕ) (hlm : l ≠ m) (hpos : 0 < l+m) :
   exact (mul_eq_zero.mp h).resolve_left hne
 
 /-- `𝖯^l_n 𝖯^m_n/(1-x²) = (-1)^{l+m} (1-x²)^{(l+m)/2-1} P_n^{(l)} P_n^{(m)}` on `(-1,1)`. -/
-lemma legInt_ferrers_div_mul (n l m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem legInt_ferrers_div_mul (n l m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     1/(1-x^2:ℂ)*ferrersP n l x*ferrersP n m x = (-1)^(l+m) *
       ((((1-x^2)^(((l+m:ℕ):ℝ)/2-1)) : ℝ) : ℂ) * (legInt_D n l x * legInt_D n m x) := by
   have hpos : (0:ℝ) < 1 - x^2 := by nlinarith [hx.1, hx.2]
@@ -667,7 +666,7 @@ lemma legInt_ferrers_div_mul (n l m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1)
   linear_combination ((-1:ℂ)^l*(-1)^m*legInt_D n l x * legInt_D n m x) * hr'
 
 /-- Off-diagonal orthogonality of `𝖯^l_n` and `𝖯^m_n` with weight `1/(1-x²)`. -/
-lemma legInt_ferrers_offdiag (n l m : ℕ) (hlm : l ≠ m) (hpos : 0 < l+m) :
+theorem legInt_ferrers_offdiag (n l m : ℕ) (hlm : l ≠ m) (hpos : 0 < l+m) :
     ∫ x : ℝ in -1..1, 1/(1-x^2:ℂ)*ferrersP n l x*ferrersP n m x = 0 := by
   have hI : (∫ x : ℝ in -1..1, 1/(1-x^2:ℂ)*ferrersP n l x*ferrersP n m x) =
       (-1)^(l+m) * ∫ x : ℝ in (-1:ℝ)..1, (((1-x^2)^(((l+m:ℕ):ℝ)/2-1) : ℝ) : ℂ) *
@@ -681,7 +680,7 @@ lemma legInt_ferrers_offdiag (n l m : ℕ) (hlm : l ≠ m) (hpos : 0 < l+m) :
   rw [hI, legInt_offdiag n l m hlm hpos, mul_zero]
 
 /-- The diagonal: `∫ (𝖯^{k+1}_n)²/(1-x²) = ∫ (1-x²)^k (P_n^{(k+1)})²`. -/
-lemma legInt_ferrers_diag (n k : ℕ) :
+theorem legInt_ferrers_diag (n k : ℕ) :
     ∫ x : ℝ in -1..1, 1/(1-x^2:ℂ)*ferrersP n (k+1:ℕ) x*ferrersP n (k+1:ℕ) x = legInt_J k n := by
   refine intervalIntegral.integral_congr_ae ?_
   have : ∀ᵐ t : ℝ ∂volume, t ≠ 1 := by simp [ae_iff]
@@ -697,13 +696,13 @@ lemma legInt_ferrers_diag (n k : ℕ) :
 /-! ### A fractional integral on the cut plane -/
 
 /-- `z s` lies in the cut plane for `z` in the cut plane and `s ∈ [0,1]`. -/
-lemma legInt_mul_mem_cutPlane {z : ℂ} (hz : z ∈ cutPlane) {s : ℝ} (hs : s ∈ Icc (0:ℝ) 1) :
+theorem legInt_mul_mem_cutPlane {z : ℂ} (hz : z ∈ cutPlane) {s : ℝ} (hs : s ∈ Icc (0:ℝ) 1) :
     z * s ∈ cutPlane := by
   have h := starConvex_zero_cutPlane hz (by linarith [hs.2] : (0:ℝ) ≤ 1 - s) hs.1 (by ring)
   simpa [Complex.real_smul, mul_comm] using h
 
 /-- `z ↦ ∫_0^1 w(s) F(z s) ds` is analytic on the cut plane when `F` is and `w` is integrable. -/
-lemma legInt_analyticOnNhd_integral {F : ℂ → ℂ} (hF : AnalyticOnNhd ℂ F cutPlane) {w : ℝ → ℂ}
+theorem legInt_analyticOnNhd_integral {F : ℂ → ℂ} (hF : AnalyticOnNhd ℂ F cutPlane) {w : ℝ → ℂ}
     (hw : IntervalIntegrable w volume 0 1) :
     AnalyticOnNhd ℂ (fun z => ∫ s : ℝ in (0:ℝ)..1, w s * F (z * s)) cutPlane := by
   refine DifferentiableOn.analyticOnNhd (fun z0 hz0 => ?_) isOpen_cutPlane
@@ -762,7 +761,7 @@ lemma legInt_analyticOnNhd_integral {F : ℂ → ℂ} (hF : AnalyticOnNhd ℂ F 
 
 /-- DLMF 15.6.8 with `d = 1` on the cut plane:
 `Γ(μ) 𝐅(a,b;1+μ;z) = ∫_0^1 (1-s)^{μ-1} 𝐅(a,b;1;zs) ds`. -/
-lemma legInt_fractional_cutPlane (a b : ℂ) {μ : ℂ} (hμ : 0 < μ.re) {z : ℂ} (hz : z ∈ cutPlane) :
+theorem legInt_fractional_cutPlane (a b : ℂ) {μ : ℂ} (hμ : 0 < μ.re) {z : ℂ} (hz : z ∈ cutPlane) :
     Gamma μ * regularizedGaussHG a b (1+μ) z =
       ∫ s : ℝ in (0:ℝ)..1, (1-(s:ℂ))^(μ-1) * regularizedGaussHG a b 1 (z * s) := by
   have hw : IntervalIntegrable (fun s : ℝ => (1-(s:ℂ))^(μ-1)) volume 0 1 := by
@@ -784,12 +783,12 @@ lemma legInt_fractional_cutPlane (a b : ℂ) {μ : ℂ} (hμ : 0 < μ.re) {z : �
   rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hzs, sub_self, cpow_zero, mul_one, mul_comm]
 
 /-- Complex powers of a positive real as exponentials of the real logarithm. -/
-lemma legInt_cpow_ofReal {r : ℝ} (hr : 0 < r) (c : ℂ) :
+theorem legInt_cpow_ofReal {r : ℝ} (hr : 0 < r) (c : ℂ) :
     ((r:ℝ):ℂ)^c = exp (Real.log r * c) := by
   rw [cpow_def_of_ne_zero (ofReal_ne_zero.2 hr.ne'), ofReal_log hr.le]
 
 /-- Order-derivative relation `(1-z²) 𝑸' + μ z 𝑸^μ_ν = (ν+μ+1) (z²-1)^{1/2} 𝑸^{μ+1}_ν`. -/
-lemma legInt_olverQ_order_deriv (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem legInt_olverQ_order_deriv (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     (1-z^2)*deriv (olverQ ν μ) z + μ*z*olverQ ν μ z =
       (ν+μ+1)*legendreBranchPower 1 z*olverQ ν (μ+1) z := by
   have h7 := olverQ_recurrence_7 ν μ hz
@@ -801,11 +800,11 @@ noncomputable def legInt_g (ν : ℂ) (k : ℕ) (z : ℂ) : ℂ :=
   legendreBranchPower k z * associatedQ ν (-k) z
 
 /-- `g_0 = Q_ν`. -/
-lemma legInt_g_zero (ν z : ℂ) : legInt_g ν 0 z = associatedQ ν 0 z := by
+theorem legInt_g_zero (ν z : ℂ) : legInt_g ν 0 z = associatedQ ν 0 z := by
   simp [legInt_g, legendreBranchPower]
 
 /-- `g_{k+1}' = g_k` on the principal sheet, for `ν ≠ k`. -/
-lemma legInt_hasDerivAt_g (ν : ℂ) (k : ℕ) (hk : ν ≠ k) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem legInt_hasDerivAt_g (ν : ℂ) (k : ℕ) (hk : ν ≠ k) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     HasDerivAt (legInt_g ν (k+1)) (legInt_g ν k z) z := by
   set C : ℂ := exp (-((k+1:ℕ):ℂ)*π*I)*Gamma (ν+-((k+1:ℕ):ℂ)+1)
   have hQ := ((olverQ_analytic ν (-((k+1:ℕ):ℂ)) z hz).differentiableAt.hasDerivAt).const_mul C
@@ -839,7 +838,7 @@ lemma legInt_hasDerivAt_g (ν : ℂ) (k : ℕ) (hk : ν ≠ k) {z : ℂ} (hz : z
   linear_combination (legendreBranchPower k z * (ν-k) * olverQ ν (-k) z * Gamma (ν-(k+1)+1)) * hb2
 
 /-- Continuity of `g_k` on the principal sheet. -/
-lemma legInt_continuousAt_g (ν : ℂ) (k : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem legInt_continuousAt_g (ν : ℂ) (k : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     ContinuousAt (legInt_g ν k) z := by
   have h1 := (hasDerivAt_legendreBranchPower (k:ℂ) hz).continuousAt
   have h2 := ((olverQ_analytic ν (-(k:ℂ)) z hz).continuousAt).const_mul
@@ -850,7 +849,7 @@ lemma legInt_continuousAt_g (ν : ℂ) (k : ℕ) {z : ℂ} (hz : z-1 ∈ slitPla
   rw [e]; exact h1.mul h2
 
 /-- `g_{k+1}(R) → 0` as `R → ∞` when `k < Re ν`. -/
-lemma legInt_tendsto_g (ν : ℂ) (k : ℕ) (hk : (k:ℝ) < ν.re) :
+theorem legInt_tendsto_g (ν : ℂ) (k : ℕ) (hk : (k:ℝ) < ν.re) :
     Tendsto (fun R : ℝ => legInt_g ν (k+1) R) atTop (𝓝 0) := by
   set w : ℂ := ν + -((k+1:ℕ):ℂ) + 1 with hw
   have hwre : 0 < w.re := by rw [hw]; simp; linarith
@@ -887,11 +886,11 @@ lemma legInt_tendsto_g (ν : ℂ) (k : ℕ) (hk : (k:ℝ) < ν.re) :
   simpa using (tendsto_const_nhds (x := K)).mul h1 |>.mul h2
 
 /-- Real points `t > 1` give `t - 1` in the slit plane. -/
-lemma legInt_one_lt_mem {t : ℝ} (ht : 1 < t) : (t:ℂ)-1 ∈ slitPlane :=
+theorem legInt_one_lt_mem {t : ℝ} (ht : 1 < t) : (t:ℂ)-1 ∈ slitPlane :=
   Or.inl (by simp; linarith)
 
 /-- `∫_x^∞ g_j = -g_{j+1}(x)` for `x > 1` and `j < Re ν`. -/
-lemma legInt_hasIntegralAtTop_g (ν : ℂ) (j : ℕ) (hj : (j:ℝ) < ν.re) {x : ℝ} (hx : 1 < x) :
+theorem legInt_hasIntegralAtTop_g (ν : ℂ) (j : ℕ) (hj : (j:ℝ) < ν.re) {x : ℝ} (hx : 1 < x) :
     HasIntegralAtTop (fun t : ℝ => legInt_g ν j t) x (-legInt_g ν (j+1) x) := by
   have hne : ν ≠ j := fun h => by rw [h] at hj; simp at hj
   have hFTC : ∀ R, x ≤ R → ∫ t in x..R, legInt_g ν j t = legInt_g ν (j+1) R - legInt_g ν (j+1) x := by
@@ -912,7 +911,7 @@ lemma legInt_hasIntegralAtTop_g (ν : ℂ) (j : ℕ) (hj : (j:ℝ) < ν.re) {x :
   exact (hFTC R hR).symm
 
 /-- Iterated tails of `Q_ν`. -/
-lemma legInt_iterate_Q (ν : ℂ) (k : ℕ) (hk : (k:ℝ)-1 < ν.re) {x : ℝ} (hx : 1 < x) :
+theorem legInt_iterate_Q (ν : ℂ) (k : ℕ) (hk : (k:ℝ)-1 < ν.re) {x : ℝ} (hx : 1 < x) :
     ((fun f : ℝ → ℂ => fun x => improperAtTop f x)^[k]) (fun x : ℝ => associatedQ ν 0 x) x =
       (-1)^k * legInt_g ν k x := by
   induction k generalizing x with
@@ -935,7 +934,7 @@ lemma legInt_iterate_Q (ν : ℂ) (k : ℕ) (hk : (k:ℝ)-1 < ν.re) {x : ℝ} (
 
 
 /-- Points of the segment from `z` to `2` stay on the principal sheet. -/
-lemma legInt_seg_two_mem {z : ℂ} (hz : z-1 ∈ slitPlane) {t : ℝ} (ht : t ∈ Icc (0:ℝ) 1) :
+theorem legInt_seg_two_mem {z : ℂ} (hz : z-1 ∈ slitPlane) {t : ℝ} (ht : t ∈ Icc (0:ℝ) 1) :
     (z + t*(2-z)) - 1 ∈ slitPlane := by
   have h := starConvex_one_slitPlane hz ht.1 (by linarith [ht.2] : (0:ℝ) ≤ 1 - t) (by ring)
   convert h using 1
@@ -943,7 +942,7 @@ lemma legInt_seg_two_mem {z : ℂ} (hz : z-1 ∈ slitPlane) {t : ℝ} (ht : t �
   ring
 
 /-- Iterated segment-plus-tail integrals of `Q_ν`. -/
-lemma legInt_iterate_Qc (ν : ℂ) (k : ℕ) (hk : (k:ℝ)-1 < ν.re) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem legInt_iterate_Qc (ν : ℂ) (k : ℕ) (hk : (k:ℝ)-1 < ν.re) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     ((fun f : ℂ → ℂ => fun z => segmentIntegral f z 2+improperAtTop (fun t : ℝ => f t) 2)^[k])
       (associatedQ ν 0) z = (-1)^k * legInt_g ν k z := by
   induction k generalizing z with
@@ -1001,7 +1000,7 @@ lemma legInt_iterate_Qc (ν : ℂ) (k : ℕ) (hk : (k:ℝ)-1 < ν.re) {z : ℂ} 
 
 
 /-- The Laplace kernel `w(θ) = x + √(x²-1) cos θ`, positive for `x > 1`. -/
-lemma legInt_laplace_pos {x : ℝ} (hx : 1 < x) (θ : ℝ) :
+theorem legInt_laplace_pos {x : ℝ} (hx : 1 < x) (θ : ℝ) :
     0 < x + Real.sqrt (x^2-1) * Real.cos θ := by
   have hs : Real.sqrt (x^2-1) < x := by
     rw [Real.sqrt_lt' (by linarith)]; linarith
@@ -1013,7 +1012,7 @@ noncomputable def legInt_L (ν : ℂ) (x : ℝ) (m : ℕ) : ℂ :=
   ∫ θ : ℝ in (0:ℝ)..π, (((x + Real.sqrt (x^2-1) * Real.cos θ : ℝ)) : ℂ)^ν * Real.cos (m*θ)
 
 /-- Continuity of the integrand of `legInt_L`. -/
-lemma legInt_cont_L (ν : ℂ) {x : ℝ} (hx : 1 < x) (c : ℝ) :
+theorem legInt_cont_L (ν : ℂ) {x : ℝ} (hx : 1 < x) (c : ℝ) :
     Continuous fun θ : ℝ => (((x + Real.sqrt (x^2-1) * Real.cos θ : ℝ)) : ℂ)^ν * Real.cos (c*θ) := by
   refine Continuous.mul ?_ (by fun_prop)
   refine continuous_iff_continuousAt.2 fun θ => ?_
@@ -1022,7 +1021,7 @@ lemma legInt_cont_L (ν : ℂ) {x : ℝ} (hx : 1 < x) (c : ℝ) :
 
 /-- The integration-by-parts recurrence
 `(ν+m+2) s L_{m+2} + 2(m+1) x L_{m+1} + (m-ν) s L_m = 0`, `s = √(x²-1)`. -/
-lemma legInt_L_rec (ν : ℂ) {x : ℝ} (hx : 1 < x) (m : ℕ) :
+theorem legInt_L_rec (ν : ℂ) {x : ℝ} (hx : 1 < x) (m : ℕ) :
     (ν+m+2) * Real.sqrt (x^2-1) * legInt_L ν x (m+2) + 2*(m+1)*x*legInt_L ν x (m+1) +
       (m-ν) * Real.sqrt (x^2-1) * legInt_L ν x m = 0 := by
   set s := Real.sqrt (x^2-1)
@@ -1085,20 +1084,20 @@ lemma legInt_L_rec (ν : ℂ) {x : ℝ} (hx : 1 < x) (m : ℕ) :
 noncomputable def legInt_W (x t : ℝ) : ℝ := x + Real.sqrt (x^2-1) * Real.cosh t
 
 /-- Positivity of the Heine kernel. -/
-lemma legInt_W_pos {x : ℝ} (hx : 1 < x) (t : ℝ) : 0 < legInt_W x t := by
+theorem legInt_W_pos {x : ℝ} (hx : 1 < x) (t : ℝ) : 0 < legInt_W x t := by
   unfold legInt_W
   have := Real.sqrt_nonneg (x^2-1); have := Real.one_le_cosh t
   nlinarith
 
 /-- Continuity of `1/W^n`. -/
-lemma legInt_cont_W_pow {x : ℝ} (hx : 1 < x) (n : ℕ) :
+theorem legInt_cont_W_pow {x : ℝ} (hx : 1 < x) (n : ℕ) :
     Continuous fun t => 1 / legInt_W x t ^ n := by
   unfold legInt_W
   exact Continuous.div continuous_const (by fun_prop)
     (fun t => pow_ne_zero _ (legInt_W_pos hx t).ne')
 
 /-- `W(t) → ∞` as `t → ∞`. -/
-lemma legInt_W_tendsto {x : ℝ} (hx : 1 < x) : Tendsto (legInt_W x) atTop atTop := by
+theorem legInt_W_tendsto {x : ℝ} (hx : 1 < x) : Tendsto (legInt_W x) atTop atTop := by
   have hs : 0 < Real.sqrt (x^2-1) := Real.sqrt_pos.2 (by nlinarith)
   refine tendsto_atTop_mono (fun t => ?_)
     ((Real.tendsto_exp_atTop.const_mul_atTop (by positivity : 0 < Real.sqrt (x^2-1)/2)))
@@ -1108,7 +1107,7 @@ lemma legInt_W_tendsto {x : ℝ} (hx : 1 < x) : Tendsto (legInt_W x) atTop atTop
   nlinarith
 
 /-- The `n = 0` Heine integral: `∫_0^∞ dt/W = ½ log((x+1)/(x-1))`. -/
-lemma legInt_heine_zero {x : ℝ} (hx : 1 < x) :
+theorem legInt_heine_zero {x : ℝ} (hx : 1 < x) :
     Tendsto (fun R => ∫ t in (0:ℝ)..R, 1 / legInt_W x t ^ 1) atTop
       (𝓝 (Real.log ((x+1)/(x-1)) / 2)) := by
   set s := Real.sqrt (x^2-1) with hs_def
@@ -1163,7 +1162,7 @@ lemma legInt_heine_zero {x : ℝ} (hx : 1 < x) :
 
 /-- Integration by parts for the Heine integrals:
 `∫_0^R (-n/W^n + (2n+1)x/W^{n+1} - (n+1)/W^{n+2}) = s sinh R / W(R)^{n+1}`. -/
-lemma legInt_heine_ibp {x : ℝ} (hx : 1 < x) (n : ℕ) (R : ℝ) :
+theorem legInt_heine_ibp {x : ℝ} (hx : 1 < x) (n : ℕ) (R : ℝ) :
     ∫ t in (0:ℝ)..R, (-(n:ℝ) * (1 / legInt_W x t ^ n) + (2*n+1)*x * (1 / legInt_W x t ^ (n+1)) -
       (n+1) * (1 / legInt_W x t ^ (n+2))) =
       Real.sqrt (x^2-1) * Real.sinh R / legInt_W x R ^ (n+1) := by
@@ -1201,7 +1200,7 @@ lemma legInt_heine_ibp {x : ℝ} (hx : 1 < x) (n : ℕ) (R : ℝ) :
       (continuous_const.mul (legInt_cont_W_pow hx (n+2)))
 
 /-- The Heine recurrence for truncated integrals. -/
-lemma legInt_heine_rec {x : ℝ} (hx : 1 < x) (n : ℕ) (R : ℝ) :
+theorem legInt_heine_rec {x : ℝ} (hx : 1 < x) (n : ℕ) (R : ℝ) :
     (n+1) * (∫ t in (0:ℝ)..R, 1 / legInt_W x t ^ (n+2)) =
       -(n:ℝ) * (∫ t in (0:ℝ)..R, 1 / legInt_W x t ^ n) +
         (2*n+1)*x * (∫ t in (0:ℝ)..R, 1 / legInt_W x t ^ (n+1)) -
@@ -1215,7 +1214,7 @@ lemma legInt_heine_rec {x : ℝ} (hx : 1 < x) (n : ℕ) (R : ℝ) :
   ring
 
 /-- `s sinh R / W(R) → 1`. -/
-lemma legInt_heine_bdry_one {x : ℝ} (hx : 1 < x) :
+theorem legInt_heine_bdry_one {x : ℝ} (hx : 1 < x) :
     Tendsto (fun R => Real.sqrt (x^2-1) * Real.sinh R / legInt_W x R ^ (0+1)) atTop (𝓝 1) := by
   set s := Real.sqrt (x^2-1)
   have h1 : Tendsto (fun R => x + s * Real.exp (-R)) atTop (𝓝 (x + s*0)) :=
@@ -1231,7 +1230,7 @@ lemma legInt_heine_bdry_one {x : ℝ} (hx : 1 < x) :
   rw [Real.cosh_eq, Real.sinh_eq]; ring
 
 /-- `s sinh R / W(R)^{n+2} → 0`. -/
-lemma legInt_heine_bdry {x : ℝ} (hx : 1 < x) (n : ℕ) :
+theorem legInt_heine_bdry {x : ℝ} (hx : 1 < x) (n : ℕ) :
     Tendsto (fun R => Real.sqrt (x^2-1) * Real.sinh R / legInt_W x R ^ (n+2)) atTop (𝓝 0) := by
   have h1 := legInt_heine_bdry_one hx
   have h2 : Tendsto (fun R => (legInt_W x R)⁻¹ ^ (n+1)) atTop (𝓝 0) := by
@@ -1242,7 +1241,7 @@ lemma legInt_heine_bdry {x : ℝ} (hx : 1 < x) (n : ℕ) :
   rw [inv_pow, zero_add, pow_one, ← div_eq_mul_inv, div_div, ← pow_succ']
 
 /-- At order zero and natural degree, `𝑸_n = Q_n/n!`. -/
-lemma legInt_olverQ_nat_zero_order (n : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem legInt_olverQ_nat_zero_order (n : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     olverQ n 0 z = legendreQ n z / n.factorial := by
   have hreg : LegendreQRegular (n:ℂ) 0 := fun k hk => by
     have := congrArg re hk; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
@@ -1250,7 +1249,7 @@ lemma legInt_olverQ_nat_zero_order (n : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) 
   simp
 
 /-- Heine's integral for `Q_n` on `(1,∞)`, unnormalized. -/
-lemma legInt_heine (x : ℝ) (hx : 1 < x) (n : ℕ) :
+theorem legInt_heine (x : ℝ) (hx : 1 < x) (n : ℕ) :
     Tendsto (fun R => ((∫ t in (0:ℝ)..R, 1 / legInt_W x t ^ (n+1) : ℝ) : ℂ)) atTop
       (𝓝 (legendreQ n x)) := by
   have hx1 : (x:ℂ)-1 ∈ slitPlane := legInt_one_lt_mem hx
@@ -1327,7 +1326,7 @@ lemma legInt_heine (x : ℝ) (hx : 1 < x) (n : ℕ) :
 noncomputable def legInt_u (x : ℝ) : ℝ := 1/2*Real.log ((x+1)/(x-1))
 
 /-- `√(x²-1) e^u = x+1` at `u = arcoth x`. -/
-lemma legInt_s_exp_u {x : ℝ} (hx : 1 < x) :
+theorem legInt_s_exp_u {x : ℝ} (hx : 1 < x) :
     Real.sqrt (x^2-1) * Real.exp (legInt_u x) = x+1 := by
   have hq : 0 < (x+1)/(x-1) := div_pos (by linarith) (by linarith)
   have hs := Real.sqrt_nonneg (x^2-1)
@@ -1341,7 +1340,7 @@ lemma legInt_s_exp_u {x : ℝ} (hx : 1 < x) :
   exact (sq_eq_sq₀ (by positivity) (by linarith)).1 h2
 
 /-- `√(x²-1) cosh u = x` and `√(x²-1) sinh u = 1` at `u = arcoth x`. -/
-lemma legInt_s_cosh_sinh_u {x : ℝ} (hx : 1 < x) :
+theorem legInt_s_cosh_sinh_u {x : ℝ} (hx : 1 < x) :
     Real.sqrt (x^2-1) * Real.cosh (legInt_u x) = x ∧
       Real.sqrt (x^2-1) * Real.sinh (legInt_u x) = 1 := by
   have h1 := legInt_s_exp_u hx
@@ -1369,15 +1368,15 @@ noncomputable def legInt_f (x : ℝ) (n m : ℕ) (t : ℝ) : ℝ := legInt_V x t
 noncomputable def legInt_M (x : ℝ) (n m : ℕ) : ℝ := ∫ t in (0:ℝ)..legInt_u x, legInt_f x n m t
 
 /-- Continuity of `V^n cosh(m t)`. -/
-lemma legInt_cont_f (x : ℝ) (n m : ℕ) : Continuous (legInt_f x n m) := by
+theorem legInt_cont_f (x : ℝ) (n m : ℕ) : Continuous (legInt_f x n m) := by
   unfold legInt_f legInt_V; fun_prop
 
 /-- `V(u) = 0`. -/
-lemma legInt_V_u {x : ℝ} (hx : 1 < x) : legInt_V x (legInt_u x) = 0 := by
+theorem legInt_V_u {x : ℝ} (hx : 1 < x) : legInt_V x (legInt_u x) = 0 := by
   rw [legInt_V, (legInt_s_cosh_sinh_u hx).1, sub_self]
 
 /-- The degree recurrence `(n+2) M(n+2,0) = (2n+3) x M(n+1,0) - (n+1) M(n,0)`. -/
-lemma legInt_M_deg {x : ℝ} (hx : 1 < x) (n : ℕ) :
+theorem legInt_M_deg {x : ℝ} (hx : 1 < x) (n : ℕ) :
     (n+2) * legInt_M x (n+2) 0 = (2*n+3)*x*legInt_M x (n+1) 0 - (n+1) * legInt_M x n 0 := by
   set s := Real.sqrt (x^2-1) with hs_def
   have hss : s^2 = x^2-1 := Real.sq_sqrt (by nlinarith)
@@ -1417,7 +1416,7 @@ lemma legInt_M_deg {x : ℝ} (hx : 1 < x) (n : ℕ) :
 
 /-- The order recurrence
 `(n+m+2) s M(n,m+2) = 2(m+1) x M(n,m+1) + (n-m) s M(n,m)`. -/
-lemma legInt_M_ord {x : ℝ} (hx : 1 < x) (n m : ℕ) :
+theorem legInt_M_ord {x : ℝ} (hx : 1 < x) (n m : ℕ) :
     (n+m+2) * Real.sqrt (x^2-1) * legInt_M x n (m+2) =
       2*(m+1)*x*legInt_M x n (m+1) + ((n:ℝ)-m) * Real.sqrt (x^2-1) * legInt_M x n m := by
   set s := Real.sqrt (x^2-1) with hs_def
@@ -1462,7 +1461,7 @@ lemma legInt_M_ord {x : ℝ} (hx : 1 < x) (n m : ℕ) :
   linarith
 
 /-- `M(0,0) = u` and `M(1,0) = x u - 1`. -/
-lemma legInt_M_base {x : ℝ} (hx : 1 < x) :
+theorem legInt_M_base {x : ℝ} (hx : 1 < x) :
     legInt_M x 0 0 = legInt_u x ∧ legInt_M x 1 0 = x * legInt_u x - 1 := by
   constructor
   · simp [legInt_M, legInt_f]
@@ -1476,7 +1475,7 @@ lemma legInt_M_base {x : ℝ} (hx : 1 < x) :
     simp
 
 /-- `s M(n,1) = x M(n,0) - M(n+1,0)`. -/
-lemma legInt_M_one (x : ℝ) (n : ℕ) :
+theorem legInt_M_one (x : ℝ) (n : ℕ) :
     Real.sqrt (x^2-1) * legInt_M x n 1 = x * legInt_M x n 0 - legInt_M x (n+1) 0 := by
   have hc := fun k : ℕ => (legInt_cont_f x k 0).intervalIntegrable (μ := volume) 0 (legInt_u x)
   simp only [legInt_M]
@@ -1487,7 +1486,7 @@ lemma legInt_M_one (x : ℝ) (n : ℕ) :
   ring
 
 /-- The Legendre recurrence `(k+2) Q_{k+2} = (2k+3) x Q_{k+1} - (k+1) Q_k` on the principal sheet. -/
-lemma legInt_legendreQ_rec (k : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem legInt_legendreQ_rec (k : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     ((k:ℂ)+2) * legendreQ ((k+2:ℕ):ℂ) z =
       (2*k+3)*z*legendreQ ((k+1:ℕ):ℂ) z - ((k:ℂ)+1) * legendreQ k z := by
   have hrec := olverQ_recurrence_3 (k:ℂ) 0 hz
@@ -1506,7 +1505,7 @@ lemma legInt_legendreQ_rec (k : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
   linear_combination hrec - e
 
 /-- `Q_n(x) = M(n,0)` for `x > 1`. -/
-lemma legInt_legendreQ_M {x : ℝ} (hx : 1 < x) (n : ℕ) : legendreQ n x = legInt_M x n 0 := by
+theorem legInt_legendreQ_M {x : ℝ} (hx : 1 < x) (n : ℕ) : legendreQ n x = legInt_M x n 0 := by
   have hx1 : (x:ℂ)-1 ∈ slitPlane := legInt_one_lt_mem hx
   have key : ∀ n : ℕ, legendreQ n x = legInt_M x n 0 ∧ legendreQ (n+1:ℕ) x = legInt_M x (n+1) 0 := by
     intro n
@@ -1541,19 +1540,19 @@ lemma legInt_legendreQ_M {x : ℝ} (hx : 1 < x) (n : ℕ) : legendreQ n x = legI
 noncomputable def legInt_A (x : ℝ) (n p : ℕ) : ℝ := ∫ t in (-1:ℝ)..1, (1-t^2)^n / (x-t)^p
 
 /-- Continuity of the integrand of `legInt_A` on `[-1,1]`. -/
-lemma legInt_contOn_A {x : ℝ} (hx : 1 < x) (n p : ℕ) :
+theorem legInt_contOn_A {x : ℝ} (hx : 1 < x) (n p : ℕ) :
     ContinuousOn (fun t : ℝ => (1-t^2)^n / (x-t)^p) (uIcc (-1) 1) := by
   refine ContinuousOn.div (by fun_prop) (by fun_prop) fun t ht => ?_
   rw [uIcc_of_le (by norm_num)] at ht
   exact pow_ne_zero _ (by linarith [ht.2])
 
 /-- Interval integrability of the integrand of `legInt_A`. -/
-lemma legInt_intInt_A {x : ℝ} (hx : 1 < x) (n p : ℕ) :
+theorem legInt_intInt_A {x : ℝ} (hx : 1 < x) (n p : ℕ) :
     IntervalIntegrable (fun t : ℝ => (1-t^2)^n / (x-t)^p) volume (-1) 1 :=
   (legInt_contOn_A hx n p).intervalIntegrable
 
 /-- The algebraic relation `A(n+1,p+2) = (1-x²) A(n,p+2) + 2x A(n,p+1) - A(n,p)`. -/
-lemma legInt_A_R1 {x : ℝ} (hx : 1 < x) (n p : ℕ) :
+theorem legInt_A_R1 {x : ℝ} (hx : 1 < x) (n p : ℕ) :
     legInt_A x (n+1) (p+2) = (1-x^2) * legInt_A x n (p+2) + 2*x * legInt_A x n (p+1) -
       legInt_A x n p := by
   have hi := legInt_intInt_A hx
@@ -1568,7 +1567,7 @@ lemma legInt_A_R1 {x : ℝ} (hx : 1 < x) (n p : ℕ) :
   ring
 
 /-- Integration by parts: `2(n+1)(x A(n,p+1) - A(n,p)) = (p+1) A(n+1,p+2)`. -/
-lemma legInt_A_R2 {x : ℝ} (hx : 1 < x) (n p : ℕ) :
+theorem legInt_A_R2 {x : ℝ} (hx : 1 < x) (n p : ℕ) :
     2*(n+1)*(x * legInt_A x n (p+1) - legInt_A x n p) = (p+1) * legInt_A x (n+1) (p+2) := by
   have hi := legInt_intInt_A hx
   have hd : ∀ t ∈ uIcc (-1:ℝ) 1, HasDerivAt (fun t : ℝ => (1-t^2)^(n+1) / (x-t)^(p+1))
@@ -1599,13 +1598,13 @@ lemma legInt_A_R2 {x : ℝ} (hx : 1 < x) (n p : ℕ) :
 
 /-- The order relation
 `(p+1)(1-x²) A(n,p+2) + 2(p-n) x A(n,p+1) + (2n+1-p) A(n,p) = 0`. -/
-lemma legInt_A_ord {x : ℝ} (hx : 1 < x) (n p : ℕ) :
+theorem legInt_A_ord {x : ℝ} (hx : 1 < x) (n p : ℕ) :
     (p+1)*(1-x^2)*legInt_A x n (p+2) + 2*((p:ℝ)-n)*x*legInt_A x n (p+1) +
       (2*n+1-(p:ℝ))*legInt_A x n p = 0 := by
   linear_combination (-((p:ℝ)+1))*legInt_A_R1 hx n p - legInt_A_R2 hx n p
 
 /-- `A(n+1,n+2) = 2x A(n,n+1) - 2(x²-1) A(n,n+2)`. -/
-lemma legInt_A_b {x : ℝ} (hx : 1 < x) (n : ℕ) :
+theorem legInt_A_b {x : ℝ} (hx : 1 < x) (n : ℕ) :
     legInt_A x (n+1) (n+2) = 2*x*legInt_A x n (n+1) - 2*(x^2-1)*legInt_A x n (n+2) := by
   have h1 := legInt_A_R1 hx n n
   have hn : (n:ℝ)+1 ≠ 0 := by positivity
@@ -1614,7 +1613,7 @@ lemma legInt_A_b {x : ℝ} (hx : 1 < x) (n : ℕ) :
   linear_combination 2*h1 + h2
 
 /-- The degree recurrence `(n+2) A(n+2,n+3) = 2(2n+3) x A(n+1,n+2) - 4(n+1) A(n,n+1)`. -/
-lemma legInt_A_deg {x : ℝ} (hx : 1 < x) (n : ℕ) :
+theorem legInt_A_deg {x : ℝ} (hx : 1 < x) (n : ℕ) :
     (n+2)*legInt_A x (n+2) (n+3) = 2*(2*n+3)*x*legInt_A x (n+1) (n+2) -
       4*(n+1)*legInt_A x n (n+1) := by
   have B0 := legInt_A_b hx n
@@ -1626,7 +1625,7 @@ lemma legInt_A_deg {x : ℝ} (hx : 1 < x) (n : ℕ) :
   linear_combination ((n:ℝ)+2)*B1 - 2*(x^2-1)*((n:ℝ)+2)*R - 2*(x^2-1)*O - 2*((n:ℝ)+1)*x*B0
 
 /-- `A(0,1) = log((x+1)/(x-1))` and `A(0,2) = 2/(x²-1)`. -/
-lemma legInt_A_base {x : ℝ} (hx : 1 < x) :
+theorem legInt_A_base {x : ℝ} (hx : 1 < x) :
     legInt_A x 0 1 = Real.log ((x+1)/(x-1)) ∧ legInt_A x 0 2 = 2/(x^2-1) := by
   have hi := legInt_intInt_A hx
   constructor
@@ -1656,7 +1655,7 @@ lemma legInt_A_base {x : ℝ} (hx : 1 < x) :
     ring
 
 /-- `Q_n(x) = A(n,n+1)/2^{n+1}` for `x > 1`. -/
-lemma legInt_legendreQ_A {x : ℝ} (hx : 1 < x) (n : ℕ) :
+theorem legInt_legendreQ_A {x : ℝ} (hx : 1 < x) (n : ℕ) :
     legendreQ n x = legInt_A x n (n+1) / 2^(n+1) := by
   have hx1 : (x:ℂ)-1 ∈ slitPlane := legInt_one_lt_mem hx
   have key : ∀ n : ℕ, legendreQ n x = legInt_A x n (n+1) / 2^(n+1) ∧
@@ -1699,19 +1698,19 @@ noncomputable def legInt_Ks (x : ℝ) (p q : ℕ) : ℝ :=
   ∫ θ in (0:ℝ)..π, legInt_w x θ ^ p * Real.sin θ ^ (2*q)
 
 /-- Continuity of the integrand of `legInt_Ks`. -/
-lemma legInt_cont_Ks (x : ℝ) (p q : ℕ) :
+theorem legInt_cont_Ks (x : ℝ) (p q : ℕ) :
     Continuous fun θ => legInt_w x θ ^ p * Real.sin θ ^ (2*q) := by
   unfold legInt_w; fun_prop
 
 /-- Derivative of the real Laplace kernel. -/
-lemma legInt_hasDerivAt_w (x θ : ℝ) :
+theorem legInt_hasDerivAt_w (x θ : ℝ) :
     HasDerivAt (legInt_w x) (-(Real.sqrt (x^2-1) * Real.sin θ)) θ := by
   unfold legInt_w
   simpa using ((Real.hasDerivAt_cos θ).const_mul (Real.sqrt (x^2-1))).const_add x
 
 /-- Integration by parts:
 `(r+2q+3) K(r+1,q+1) = (r+1) x K(r,q+1) + (2q+1) K(r+1,q)`. -/
-lemma legInt_Ks_star (x : ℝ) (r q : ℕ) :
+theorem legInt_Ks_star (x : ℝ) (r q : ℕ) :
     (r+2*q+3) * legInt_Ks x (r+1) (q+1) = (r+1)*x*legInt_Ks x r (q+1) +
       (2*q+1) * legInt_Ks x (r+1) q := by
   have hd : ∀ θ, HasDerivAt (fun θ => legInt_w x θ ^ (r+1) * (Real.sin θ ^ (2*q+1) * Real.cos θ))
@@ -1747,7 +1746,7 @@ lemma legInt_Ks_star (x : ℝ) (r q : ℕ) :
 
 /-- Integration by parts:
 `(p+1) s² K(p,q+1) = (2q+1) (K(p+2,q) - x K(p+1,q))`, `s = √(x²-1)`. -/
-lemma legInt_Ks_ibp (x : ℝ) (p q : ℕ) :
+theorem legInt_Ks_ibp (x : ℝ) (p q : ℕ) :
     ((p:ℝ)+1) * Real.sqrt (x^2-1)^2 * legInt_Ks x p (q+1) =
       (2*q+1) * (legInt_Ks x (p+2) q - x * legInt_Ks x (p+1) q) := by
   have hd : ∀ θ, HasDerivAt (fun θ => Real.sqrt (x^2-1) * (legInt_w x θ ^ (p+1) * Real.sin θ ^ (2*q+1)))
@@ -1780,7 +1779,7 @@ lemma legInt_Ks_ibp (x : ℝ) (p q : ℕ) :
   linarith
 
 /-- `K(r+2,0) - x K(r+1,0) = (r+1) s² K(r,1)`. -/
-lemma legInt_Ks_one (x : ℝ) (r : ℕ) :
+theorem legInt_Ks_one (x : ℝ) (r : ℕ) :
     legInt_Ks x (r+2) 0 - x * legInt_Ks x (r+1) 0 = (r+1) * Real.sqrt (x^2-1)^2 * legInt_Ks x r 1 := by
   have := legInt_Ks_ibp x r 0
   simp only [CharP.cast_eq_zero, mul_zero, zero_add, one_mul] at this
@@ -1791,7 +1790,7 @@ noncomputable def legInt_cK (m p : ℕ) : ℂ :=
   2^m*(m.factorial:ℂ)*(2*m+p).factorial/(((2*m).factorial:ℂ)*p.factorial*π)
 
 /-- Ratio of consecutive constants `legInt_cK`. -/
-lemma legInt_cK_succ (m p : ℕ) :
+theorem legInt_cK_succ (m p : ℕ) :
     legInt_cK (m+1) (p+1) * (2*m+1) = legInt_cK m (p+2) * (2*m+p+3) * (p+2) := by
   have hπ : (π:ℂ) ≠ 0 := ofReal_ne_zero.2 Real.pi_ne_zero
   simp only [legInt_cK]
@@ -1815,7 +1814,7 @@ lemma legInt_cK_succ (m p : ℕ) :
   ring
 
 /-- Ratio of consecutive constants `legInt_cK`. -/
-lemma legInt_cK_succ' (m p : ℕ) :
+theorem legInt_cK_succ' (m p : ℕ) :
     legInt_cK (m+2) p * (2*m+3) = legInt_cK (m+1) (p+1) * (2*m+p+4) * (p+1) := by
   have hπ : (π:ℂ) ≠ 0 := ofReal_ne_zero.2 Real.pi_ne_zero
   simp only [legInt_cK]
@@ -1840,7 +1839,7 @@ lemma legInt_cK_succ' (m p : ℕ) :
   ring
 
 /-- DLMF 14.12.8 in the form `P^m_{m+p}(x) = c s^m K(p,m)`. -/
-lemma legInt_associatedP_Ks {x : ℝ} (hx : 1 < x) (m p : ℕ) :
+theorem legInt_associatedP_Ks {x : ℝ} (hx : 1 < x) (m p : ℕ) :
     associatedP ((m+p:ℕ):ℂ) m x = legInt_cK m p * (Real.sqrt (x^2-1):ℂ)^m * legInt_Ks x p m := by
   have hx1 : ((x:ℂ)-1) ∈ slitPlane := legInt_one_lt_mem hx
   set s := Real.sqrt (x^2-1) with hs_def

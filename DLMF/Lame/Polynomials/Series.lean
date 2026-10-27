@@ -5,15 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Lame.Polynomials.Defs
-public import DLMF.Lame.Eigenvalues
-public import DLMF.JacobiElliptic.SpecialValues
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Chebyshev.Basic
-public import Mathlib.Analysis.Matrix.Spectrum
-public import DLMF.Lame.Polynomials.P2pBase
-public import DLMF.Lame.Polynomials.P2pODE
 public import DLMF.Lame.Polynomials.P2pEigen
 public import DLMF.Lame.Polynomials.P2pIdent
+public import DLMF.Lame.Polynomials.P3lZeros
 
 /-!
 # Lamé polynomials: definitions, algebraic form, zeros and Fourier series (DLMF §§29.12, 29.15)
@@ -62,7 +56,7 @@ variable {k : ℝ}
 
 /-- For real `x` and `0 < k < 1`, `sn(x, k) = cos φ` with `φ = π/2 - am(x, k)` (29.2.5). -/
 @[dlmf 29.15.ii]
-lemma l29_sn_eq_cos (hk0 : 0 < k) (hk1 : k < 1) (x : ℝ) :
+theorem l29_sn_eq_cos (hk0 : 0 < k) (hk1 : k < 1) (x : ℝ) :
     jacobiSnk (x : ℂ) k = (Real.cos (Real.lamePhi x k) : ℂ) := by
   rw [jacobiSnk_ofReal hk0 hk1, Real.lamePhi, Real.cos_pi_div_two_sub, Real.jacobiSnm]
 
@@ -73,7 +67,7 @@ lemma l29_cn_eq_sin (hk0 : 0 < k) (hk1 : k < 1) (x : ℝ) :
 
 /-- §29.15(ii): `cos(jθ) = T_j(cos θ)`. -/
 @[dlmf 29.15.ii]
-lemma l29_T_cos (j : ℕ) (θ : ℝ) :
+theorem l29_T_cos (j : ℕ) (θ : ℝ) :
     (Chebyshev.T ℂ (j : ℤ)).eval (Real.cos θ : ℂ) = (Real.cos (j * θ) : ℂ) := by
   have := Chebyshev.T_complex_cos (θ : ℂ) j
   push_cast at this ⊢
@@ -81,7 +75,7 @@ lemma l29_T_cos (j : ℕ) (θ : ℝ) :
 
 /-- §29.15(ii): `sin((j+1)θ) = sin θ U_j(cos θ)`. -/
 @[dlmf 29.15.ii]
-lemma l29_U_cos (j : ℕ) (θ : ℝ) :
+theorem l29_U_cos (j : ℕ) (θ : ℝ) :
     (Real.sin θ : ℂ) * (Chebyshev.U ℂ (j : ℤ)).eval (Real.cos θ : ℂ) =
       (Real.sin ((j + 1) * θ) : ℂ) := by
   have := Chebyshev.U_complex_cos (θ : ℂ) j
@@ -616,14 +610,15 @@ theorem Real.lameBk_eq_lamePolyH_scdE (hk0 : 0 < k) (hk1 : k < 1) {n m : ℕ} (h
   exact this
 
 /-- §29.12(i): the Lamé polynomial `t^m` (`m ≤ n`) has exactly `m` zeros in `(0, K)` and
-exactly `n - m` zeros on the open segment from `K` to `K + iK'`. Admitted. -/
+exactly `n - m` zeros on the open segment from `K` to `K + iK'`. Proved by Sturm oscillation
+on both sides (`p3l_real_count`, `p3l_vert_count`). -/
 @[dlmf 29.12.i]
 theorem lamePolyEk_zeros (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) {n m : ℕ}
     (hm : m ≤ n) :
     {x : ℝ | x ∈ Ioo 0 (Real.compEllIntKm (k ^ 2)) ∧ lamePolyEk t n m x k = 0}.ncard = m ∧
       {y : ℝ | y ∈ Ioo 0 (Real.compEllIntKm (1 - k ^ 2)) ∧
-        lamePolyEk t n m (Real.compEllIntKm (k ^ 2) + I * y) k = 0}.ncard = n - m := by
-  sorry
+        lamePolyEk t n m (Real.compEllIntKm (k ^ 2) + I * y) k = 0}.ncard = n - m :=
+  ⟨p3l_real_count hk0 hk1 t hm, p3l_vert_count hk0 hk1 t hm⟩
 
 /-! ### Algebraic form and zeros (§§29.12(ii), 29.12(iii)) -/
 
@@ -632,7 +627,8 @@ theorem lamePolyEk_zeros (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType) {n m : �
 factor `(-1)^σ (-k⁻²)^τ` relating `(ξ - 1)^σ (ξ - k⁻²)^τ` to `cn^{2σ} dn^{2τ}`), where `P`
 has degree `n` and simple zeros, `m` of them in `(0, 1)` and `n - m` in `(1, k⁻²)`; it
 satisfies the algebraic form 29.2.2 of Lamé's equation. Here the polynomial form is stated as
-in `lamePolyEk_polynomial_form`, and the zero locations are added. Admitted. -/
+in `lamePolyEk_polynomial_form`, and the zero locations are added. Proved from the zero counts
+of §29.12(i) (`p3l_algebraic_form`). -/
 @[dlmf 29.12.E9, dlmf 29.12.E10]
 theorem lamePolyEk_algebraic_form (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
     {n m : ℕ} (hm : m ≤ n) :
@@ -641,8 +637,8 @@ theorem lamePolyEk_algebraic_form (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
       (P.roots.filter (· ∈ Ioo (1 : ℝ) (k ^ 2)⁻¹)).card = n - m ∧
       ∀ z : ℂ, lamePolyEk t n m z k = t.prefactor z k *
         (if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then jacobiSnk z k else 1) *
-        (P.map (algebraMap ℝ ℂ)).eval (jacobiSnk z k ^ 2) := by
-  sorry
+        (P.map (algebraMap ℝ ℂ)).eval (jacobiSnk z k ^ 2) :=
+  p3l_algebraic_form hk0 hk1 t hm
 
 /-- 29.12.11–29.12.12: with `ξ₁ < ⋯ < ξₙ` the zeros of `P` (29.12.10) and `ρ, σ, τ` as in
 29.12.9, the function

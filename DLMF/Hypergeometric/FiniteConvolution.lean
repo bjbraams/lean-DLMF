@@ -24,14 +24,14 @@ noncomputable section
 namespace DLMF.Hypergeometric
 
 /-- Cauchy product of scalar series, written as a coefficient convolution. -/
-lemma hasSum_coefficient_convolution {c d : ℕ → ℂ} {z u v : ℂ}
+theorem hasSum_coefficient_convolution {c d : ℕ → ℂ} {z u v : ℂ}
     (hc : HasSum (fun n => c n * z ^ n) u)
     (hd : HasSum (fun n => d n * z ^ n) v) :
     HasSum (fun n => (∑ k ∈ Finset.range (n + 1), c k * d (n - k)) * z ^ n) (u * v) := by
   exact Complex.hasSum_powerSeries_convolution hc hd
 
 /-- Chu–Vandermonde with a regular denominator, in binomial form. -/
-lemma poch_ratio_vandermonde (Q R : ℂ) (hR : ∀ k : ℕ, poch R k ≠ 0) (n : ℕ) :
+theorem poch_ratio_vandermonde (Q R : ℂ) (hR : ∀ k : ℕ, poch R k ≠ 0) (n : ℕ) :
     poch (R - Q) n / poch R n =
       ∑ k ∈ Finset.range (n + 1), (-1 : ℂ) ^ k * n.choose k * poch Q k / poch R k := by
   apply (div_eq_iff (hR n)).2
@@ -46,7 +46,7 @@ lemma poch_ratio_vandermonde (Q R : ℂ) (hR : ∀ k : ℕ, poch R k ≠ 0) (n :
   field_simp [hR k]
 
 /-- A binomial moment of rising factorials. -/
-lemma poch_binomial_moment (P X : ℂ) {n k : ℕ} (hk : k ≤ n) :
+theorem poch_binomial_moment (P X : ℂ) {n k : ℕ} (hk : k ≤ n) :
     ∑ j ∈ Finset.range (n + 1), (n.choose j : ℂ) * j.choose k * poch P j * poch X (n - j) =
       n.choose k * poch P k * poch (P + X + k) (n - k) := by
   rw [← Finset.sum_range_add_sum_Ico _ (by omega : k ≤ n + 1)]
@@ -68,7 +68,7 @@ lemma poch_binomial_moment (P X : ℂ) {n k : ℕ} (hk : k ≤ n) :
   linear_combination (poch P k * poch (P + k) i * poch X (n - k - i)) * hc'
 
 /-- A terminating `3F2` transformation as a finite binomial convolution. -/
-lemma terminating_3F2_convolution (P Q R D : ℂ) (hR : ∀ k : ℕ, poch R k ≠ 0) (n : ℕ) :
+theorem terminating_3F2_convolution (P Q R D : ℂ) (hR : ∀ k : ℕ, poch R k ≠ 0) (n : ℕ) :
     (∑ k ∈ Finset.range (n + 1), (-1 : ℂ) ^ k * n.choose k * poch P k * poch Q k /
       poch R k * poch (D + k) (n - k)) =
     ∑ j ∈ Finset.range (n + 1), (n.choose j : ℂ) * poch P j * poch (R - Q) j /
@@ -104,7 +104,7 @@ lemma terminating_3F2_convolution (P Q R D : ℂ) (hR : ∀ k : ℕ, poch R k �
   ring
 
 /-- Euler's transformation as a finite binomial convolution. -/
-lemma saalschutz_binomial_convolution (a b c : ℂ) (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
+theorem saalschutz_binomial_convolution (a b c : ℂ) (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
     ∑ k ∈ Finset.range (n + 1), (n.choose k : ℂ) * poch a k * poch b k / poch c k *
       poch (c - a - b) (n-k) = poch (c-a) n * poch (c-b) n / poch c n := by
   have h := regularized_saalschutz_convolution a b c n
@@ -129,7 +129,7 @@ lemma saalschutz_binomial_convolution (a b c : ℂ) (hc : ∀ k : ℕ, c ≠ -k)
   linear_combination (poch a k * poch b k * poch (c-a-b) (n-k) * poch c n) * hf
 
 /-- Pfaff–Saalschütz in the inner sum of the Wilson coefficient transformation. -/
-lemma wilson_inner_sum {P Q E F : ℂ}
+theorem wilson_inner_sum {P Q E F : ℂ}
     (hE : 0 < E.re) (hF : 0 < F.re) (n j : ℕ) (hj : j ≤ n)
     (hbal : Q = E + F - P + n - 1) :
     ∑ l ∈ Finset.range (n-j+1), poch (-((n-j : ℕ) : ℂ)) l * poch (P+j) l * poch Q l /
@@ -150,13 +150,13 @@ lemma wilson_inner_sum {P Q E F : ℂ}
   exact hs
 
 /-- Reflection of a finite rising factorial. -/
-lemma poch_one_sub_nat (Z : ℂ) (m : ℕ) :
+theorem poch_one_sub_nat (Z : ℂ) (m : ℕ) :
     poch (1-Z-m) m = (-1 : ℂ) ^ m * poch Z m := by
   rw [show 1-Z-m = -(Z+m-1) by ring, DLMF.Gamma.poch_neg_eq,
     show Z+m-1-m+1 = Z by ring]
 
 /-- The balanced inner Pfaff–Saalschütz sum with no singular numerator divisions. -/
-lemma balanced_inner_sum {P Q E F : ℂ}
+theorem balanced_inner_sum {P Q E F : ℂ}
     (hE : 0 < E.re) (hF : 0 < F.re) (n j : ℕ) (hj : j ≤ n)
     (hbal : Q = E + F - P + n - 1) :
     ∑ l ∈ Finset.range (n-j+1), poch (-((n-j : ℕ) : ℂ)) l * poch (P+j) l * poch Q l /
@@ -171,7 +171,7 @@ lemma balanced_inner_sum {P Q E F : ℂ}
   field_simp
 
 /-- Reindexing the double convolution arising from Euler's transformation. -/
-lemma balanced_4F3_double_sum (P Q N E F R : ℂ)
+theorem balanced_4F3_double_sum (P Q N E F R : ℂ)
     (hE : 0 < E.re) (hF : 0 < F.re) (n : ℕ) :
     (∑ k ∈ Finset.range (n+1), poch (-(n : ℂ)) k * poch P k /
       (poch E k * poch F k * k !) *
@@ -222,7 +222,7 @@ lemma balanced_4F3_double_sum (P Q N E F R : ℂ)
     poch (P+j) l * poch (R-Q) j * poch (R-N) j * poch (Q+N-R) l * (poch R j)⁻¹) * hch
 
 /-- Whipple's balanced terminating coefficient transformation in convolution form. -/
-lemma balanced_4F3_convolution (P Q N E F R : ℂ)
+theorem balanced_4F3_convolution (P Q N E F R : ℂ)
     (hE : 0 < E.re) (hF : 0 < F.re) (hR : 0 < R.re) (n : ℕ)
     (hbal : Q+N-R = E+F-P+n-1) :
     (∑ k ∈ Finset.range (n+1), poch (-(n : ℂ)) k * poch P k * poch Q k * poch N k /

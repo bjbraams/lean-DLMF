@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.ParabolicCylinder.TurningPoint
+public import DLMF.ParabolicCylinder.Weber
 
 /-!
 # Uniform expansions of the oscillatory W solution

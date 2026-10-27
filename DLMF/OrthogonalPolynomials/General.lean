@@ -5,18 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Tactic.CrossRefAttribute
-public import Mathlib.Algebra.Polynomial.Degree.Lemmas
-public import Mathlib.Algebra.Polynomial.FieldDivision
-public import Mathlib.Algebra.Polynomial.Sequence
 public import Mathlib.LinearAlgebra.Lagrange
-public import Mathlib.Topology.Algebra.Polynomial
-public import Mathlib.Analysis.Complex.Trigonometric
-public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Chebyshev.Basic
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Chebyshev.Orthogonality
-public import Mathlib.MeasureTheory.Integral.Bochner.Basic
-public import Mathlib.MeasureTheory.Function.L2Space
 public import TauCeti.Analysis.InnerProductSpace.PolynomialCompleteness
 
 /-!
@@ -53,7 +44,7 @@ variable {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOrthogonalPolynomials μ
 
 include h
 
-lemma ne_zero (n : ℕ) : p n ≠ 0 := by
+theorem ne_zero (n : ℕ) : p n ≠ 0 := by
   intro hz
   have := h.2.2.1 n
   simp [hz] at this
@@ -67,10 +58,10 @@ noncomputable def sequence : Polynomial.Sequence ℝ where
 noncomputable def basis : Module.Basis ℕ ℝ ℝ[X] :=
   h.sequence.basis (fun n => isUnit_iff_ne_zero.mpr (leadingCoeff_ne_zero.mpr (h.ne_zero n)))
 
-@[simp] lemma basis_apply (n : ℕ) : h.basis n = p n := by
+@[simp] theorem basis_apply (n : ℕ) : h.basis n = p n := by
   simp [basis, sequence]
 
-lemma repr_eq_zero_of_degree_lt {q : ℝ[X]} {k : ℕ} (hq : q.degree < k) :
+theorem repr_eq_zero_of_degree_lt {q : ℝ[X]} {k : ℕ} (hq : q.degree < k) :
     h.basis.repr q k = 0 := by
   have hmem : q ∈ Submodule.span ℝ (h.basis '' Set.Iio k) := by
     have heq : h.basis '' Set.Iio k = h.sequence '' Set.Iio k := by
@@ -85,7 +76,7 @@ lemma repr_eq_zero_of_degree_lt {q : ℝ[X]} {k : ℕ} (hq : q.degree < k) :
   exact (lt_irrefl k) (hs (Finsupp.mem_support_iff.mpr hn))
 
 /-- Expand a polynomial using only basis elements below a given degree bound. -/
-lemma expansion {q : ℝ[X]} {N : ℕ} (hq : q.degree < N) :
+theorem expansion {q : ℝ[X]} {N : ℕ} (hq : q.degree < N) :
     q = ∑ k ∈ Finset.range N, h.basis.repr q k • p k := by
   have hs : (h.basis.repr q).support ⊆ Finset.range N := by
     intro k hk
@@ -102,7 +93,7 @@ lemma expansion {q : ℝ[X]} {N : ℕ} (hq : q.degree < N) :
           (fun i a => a • h.basis i) (fun _ _ => zero_smul _ _))
 
 /-- Every polynomial is square integrable, by its finite orthogonal expansion. -/
-lemma memLp_eval (q : ℝ[X]) : MemLp (fun x => q.eval x) 2 μ := by
+theorem memLp_eval (q : ℝ[X]) : MemLp (fun x => q.eval x) 2 μ := by
   have hq := h.expansion (q := q) (N := q.natDegree + 1)
     (degree_le_natDegree.trans_lt (by exact_mod_cast Nat.lt_succ_self q.natDegree))
   rw [hq]
@@ -112,11 +103,11 @@ lemma memLp_eval (q : ℝ[X]) : MemLp (fun x => q.eval x) 2 μ := by
   exact ((memLp_two_iff_integrable_sq (p k).continuous.aestronglyMeasurable).mpr
     (h.2.1 k)).const_mul (h.basis.repr q k)
 
-lemma integrable_mul (q r : ℝ[X]) : Integrable (fun x => q.eval x * r.eval x) μ :=
+theorem integrable_mul (q r : ℝ[X]) : Integrable (fun x => q.eval x * r.eval x) μ :=
   (h.memLp_eval q).integrable_mul (h.memLp_eval r)
 
 /-- Orthogonal coordinates are computed by integrating against a basis polynomial. -/
-lemma integral_mul (q : ℝ[X]) (k : ℕ) :
+theorem integral_mul (q : ℝ[X]) (k : ℕ) :
     ∫ x, q.eval x * (p k).eval x ∂μ =
       h.basis.repr q k * ∫ x, (p k).eval x ^ 2 ∂μ := by
   let N := max (q.natDegree + 1) (k + 1)
@@ -145,17 +136,17 @@ lemma integral_mul (q : ℝ[X]) (k : ℕ) :
   · intro i _
     exact (h.integrable_mul (p i) (p k)).const_mul _
 
-lemma integral_mul_eq_zero_of_degree_lt {q : ℝ[X]} {k : ℕ} (hq : q.degree < k) :
+theorem integral_mul_eq_zero_of_degree_lt {q : ℝ[X]} {k : ℕ} (hq : q.degree < k) :
     ∫ x, q.eval x * (p k).eval x ∂μ = 0 := by
   rw [h.integral_mul, h.repr_eq_zero_of_degree_lt hq, zero_mul]
 
-lemma degree_X_mul (k : ℕ) : (X * p k).degree = ((k + 1 : ℕ) : WithBot ℕ) := by
+theorem degree_X_mul (k : ℕ) : (X * p k).degree = ((k + 1 : ℕ) : WithBot ℕ) := by
   rw [degree_mul, degree_X, degree_eq_natDegree (h.ne_zero k), h.1]
   norm_cast
   omega
 
 /-- The top coefficient in multiplication by `X` is the ratio of leading coefficients. -/
-lemma repr_X_mul_top (k : ℕ) :
+theorem repr_X_mul_top (k : ℕ) :
     h.basis.repr (X * p k) (k + 1) = (p k).leadingCoeff / (p (k + 1)).leadingCoeff := by
   have he := congrArg (fun q : ℝ[X] => q.coeff (k + 1))
     (h.expansion (q := X * p k) (N := k + 2) (by
@@ -175,7 +166,7 @@ lemma repr_X_mul_top (k : ℕ) :
   simpa only [h.1] using he.symm
 
 /-- Symmetry of multiplication by `X` in orthogonal coordinates, with squared-norm weights. -/
-lemma repr_X_mul_symm (i j : ℕ) :
+theorem repr_X_mul_symm (i j : ℕ) :
     h.basis.repr (X * p i) j / (∫ x, (p i).eval x ^ 2 ∂μ) =
       h.basis.repr (X * p j) i / (∫ x, (p j).eval x ^ 2 ∂μ) := by
   have he : (∫ x, (X * p i).eval x * (p j).eval x ∂μ) =
@@ -188,7 +179,7 @@ lemma repr_X_mul_symm (i j : ℕ) :
   exact (div_eq_div_iff (ne_of_gt (h.2.2.1 i)) (ne_of_gt (h.2.2.1 j))).mpr he
 
 /-- The squared L² norm of a polynomial is the sum of squared orthogonal coordinates. -/
-lemma integral_eval_sq {q : ℝ[X]} {N : ℕ} (hq : q.degree < N) :
+theorem integral_eval_sq {q : ℝ[X]} {N : ℕ} (hq : q.degree < N) :
     ∫ x, q.eval x ^ 2 ∂μ =
       ∑ k ∈ Finset.range N, (h.basis.repr q k) ^ 2 * ∫ x, (p k).eval x ^ 2 ∂μ := by
   have heval (t : ℝ) : q.eval t ^ 2 =
@@ -207,7 +198,7 @@ lemma integral_eval_sq {q : ℝ[X]} {N : ℕ} (hq : q.degree < N) :
   · intro i _
     exact (h.integrable_mul q (p i)).const_mul _
 
-lemma integral_eval_sq_pos {q : ℝ[X]} (hq : q ≠ 0) {N : ℕ} (hd : q.degree < N) :
+theorem integral_eval_sq_pos {q : ℝ[X]} (hq : q ≠ 0) {N : ℕ} (hd : q.degree < N) :
     0 < ∫ x, q.eval x ^ 2 ∂μ := by
   rw [h.integral_eval_sq hd]
   have hsum := h.expansion hd
@@ -387,7 +378,7 @@ theorem gauss_quadrature {μ : Measure ℝ} {p : ℕ → ℝ[X]}
   exact h.integral_eval_sq_pos hℓ hℓdeg
 
 /-- A real polynomial whose real roots all have even multiplicity does not change sign. -/
-lemma eval_nonneg_or_nonpos {p : ℝ[X]} (hp : p ≠ 0)
+theorem eval_nonneg_or_nonpos {p : ℝ[X]} (hp : p ≠ 0)
     (heven : ∀ x, Even (p.rootMultiplicity x)) :
     (∀ x, 0 ≤ p.eval x) ∨ (∀ x, p.eval x ≤ 0) := by
   have go : ∀ d, ∀ (p : ℝ[X]), p.natDegree = d → p ≠ 0 →
@@ -473,7 +464,7 @@ lemma eval_nonneg_or_nonpos {p : ℝ[X]} (hp : p ≠ 0)
           exact mul_nonpos_of_nonneg_of_nonpos (hpow x) (hq x)
   exact go p.natDegree p rfl hp heven
 
-lemma rootMultiplicity_prod_X_sub_C {s : Finset ℝ} {x : ℝ} (hx : x ∈ s) :
+theorem rootMultiplicity_prod_X_sub_C {s : Finset ℝ} {x : ℝ} (hx : x ∈ s) :
     (∏ a ∈ s, (X - C a : ℝ[X])).rootMultiplicity x = 1 := by
   have hsplit :
       (∏ a ∈ s, (X - C a : ℝ[X])) =
@@ -772,7 +763,7 @@ theorem orthogonal_polynomials_parseval {μ : Measure ℝ} {p : ℕ → ℝ[X]}
   rw [← pow_two, div_pow, Real.sq_sqrt (hc n).le]
 
 /-- Helper lemma for Chebyshev `U` orthogonality: the substitution `x = cos θ`. -/
-lemma integral_mul_sqrt_one_sub_sq (g : ℝ → ℝ) :
+theorem integral_mul_sqrt_one_sub_sq (g : ℝ → ℝ) :
     ∫ x : ℝ in (-1 : ℝ)..1, g x * Real.sqrt (1 - x ^ 2) =
       ∫ θ : ℝ in (0 : ℝ)..π, g (Real.cos θ) * Real.sin θ ^ 2 := by
   have hmeas :
@@ -810,7 +801,7 @@ lemma integral_mul_sqrt_one_sub_sq (g : ℝ → ℝ) :
   exact Real.sqrt_inv (1 - x ^ 2)
 
 /-- Helper lemma for Chebyshev `U` orthogonality. -/
-lemma integral_cos_mul {k : ℝ} (hk : k ≠ 0) (hs : Real.sin (k * π) = 0) :
+theorem integral_cos_mul {k : ℝ} (hk : k ≠ 0) (hs : Real.sin (k * π) = 0) :
     ∫ θ : ℝ in (0 : ℝ)..π, Real.cos (k * θ) = 0 := by
   rw [intervalIntegral.integral_comp_mul_left (f := Real.cos) hk]
   simp [integral_cos, hs, smul_eq_mul]

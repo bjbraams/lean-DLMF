@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Legendre.Continuation
+public import DLMF.Legendre.Associated
 
 /-!
 # Elementary tests of the DLMF left-cut zero rule

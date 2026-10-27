@@ -6,9 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.EllipticIntegrals.SymmetricSpecialCases
-public import Carlson.Elliptic.Landen
-public import Carlson.TwoVariable.QuadraticHybrid
-public import Carlson.Elliptic.LandenExercises
 public import Carlson.Elliptic.AGMSecondKind
 public import DLMF.EllipticIntegrals.SymmetricConnection
 
@@ -43,7 +40,7 @@ open scoped Real Topology NNReal
 
 namespace DLMF.EllipticIntegrals
 
-theorem ei19c_sq_mem_slitPlane {x : ℂ} (hx : 0 < x.re) : x ^ 2 ∈ slitPlane := by
+lemma ei19c_sq_mem_slitPlane {x : ℂ} (hx : 0 < x.re) : x ^ 2 ∈ slitPlane := by
   rw [mem_slitPlane_iff]
   by_cases h : x.im = 0
   · left; simp [pow_two, h]; positivity
@@ -54,7 +51,7 @@ theorem ei19c_sq_mem_slitPlane {x : ℂ} (hx : 0 < x.re) : x ^ 2 ∈ slitPlane :
     · linarith
     · exact h h1
 
-theorem ei19c_mul_mem_slitPlane {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) : x * y ∈ slitPlane := by
+lemma ei19c_mul_mem_slitPlane {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) : x * y ∈ slitPlane := by
   rw [mem_slitPlane_iff]
   by_cases h : (x * y).im = 0
   · left
@@ -66,7 +63,7 @@ theorem ei19c_mul_mem_slitPlane {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) : x 
     nlinarith
   · exact Or.inr h
 
-theorem ei19c_half_add_re_pos {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) : 0 < ((x + y) / 2).re := by
+lemma ei19c_half_add_re_pos {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) : 0 < ((x + y) / 2).re := by
   simp; linarith
 
 /-! ### §19.22(i) Complete integrals -/
@@ -251,7 +248,7 @@ def agmG (a₀ g₀ : ℝ≥0) : ℕ → ℝ
   | 0 => g₀
   | n + 1 => ((NNReal.agmSequences a₀ g₀ n).1 : ℝ)
 
-theorem p19sR1_agmA_succ (a₀ g₀ : ℝ≥0) (n : ℕ) :
+lemma p19sR1_agmA_succ (a₀ g₀ : ℝ≥0) (n : ℕ) :
     agmA a₀ g₀ (n + 1) = (agmA a₀ g₀ n + agmG a₀ g₀ n) / 2 := by
   cases n with
   | zero => simp only [agmA, agmG, NNReal.agmSequences_zero]; push_cast; ring
@@ -260,7 +257,7 @@ theorem p19sR1_agmA_succ (a₀ g₀ : ℝ≥0) (n : ℕ) :
     rw [NNReal.agmSequences_succ' (n := k)]
     push_cast; ring
 
-theorem p19sR1_agmG_succ (a₀ g₀ : ℝ≥0) (n : ℕ) :
+lemma p19sR1_agmG_succ (a₀ g₀ : ℝ≥0) (n : ℕ) :
     agmG a₀ g₀ (n + 1) = Real.sqrt (agmA a₀ g₀ n * agmG a₀ g₀ n) := by
   cases n with
   | zero => simp only [agmA, agmG, NNReal.agmSequences_zero, Real.coe_sqrt, NNReal.coe_mul]
@@ -270,7 +267,7 @@ theorem p19sR1_agmG_succ (a₀ g₀ : ℝ≥0) (n : ℕ) :
     simp only [Real.coe_sqrt, NNReal.coe_mul, mul_comm]
 
 /-- The DLMF AGM sequences agree with lean-codes' `Carlson.agmSeq`. -/
-theorem p19sR1_agmSeq_eq (a₀ g₀ : ℝ≥0) (n : ℕ) :
+lemma p19sR1_agmSeq_eq (a₀ g₀ : ℝ≥0) (n : ℕ) :
     Carlson.agmSeq a₀ g₀ n = (agmA a₀ g₀ n, agmG a₀ g₀ n) := by
   induction n with
   | zero => rfl
@@ -360,7 +357,7 @@ def agmQ (a₀ g₀ : ℝ≥0) : ℕ → ℝ
   | n + 1 => (1 / 2) * agmQ a₀ g₀ n * (agmA a₀ g₀ n - agmG a₀ g₀ n) / (agmA a₀ g₀ n + agmG a₀ g₀ n)
 
 /-- Helper for 19.22.9/19.22.10 (any `a₀, g₀ > 0`): `∑ₙ 2^{n-1} cₙ² = a₀² - (4/π) M R_G(0, a₀², g₀²)`. -/
-theorem p19sR1_RG_agm_hasSum {a₀ g₀ : ℝ≥0} (ha₀ : 0 < a₀) (hg : 0 < g₀) :
+lemma p19sR1_RG_agm_hasSum {a₀ g₀ : ℝ≥0} (ha₀ : 0 < a₀) (hg : 0 < g₀) :
     HasSum (fun n : ℕ => (((2 : ℝ) ^ ((n : ℤ) - 1) *
       (agmA a₀ g₀ n ^ 2 - agmG a₀ g₀ n ^ 2) : ℝ) : ℂ))
       (((a₀ : ℝ) : ℂ) ^ 2 - (4 / π) * symEllIntRG 0 (((a₀ : ℝ) : ℂ) ^ 2) (((g₀ : ℝ) : ℂ) ^ 2) *
@@ -401,7 +398,7 @@ theorem p19sR1_RG_agm_hasSum {a₀ g₀ : ℝ≥0} (ha₀ : 0 < a₀) (hg : 0 < 
     ring
 
 /-- Helper for 19.22.10: `Qₙ (a₀² - g₀²) = 2ⁿ cₙ²`. -/
-theorem p19sR1_agmQ_mul {a₀ g₀ : ℝ≥0} (ha₀ : 0 < a₀) (hg : 0 < g₀) (n : ℕ) :
+lemma p19sR1_agmQ_mul {a₀ g₀ : ℝ≥0} (ha₀ : 0 < a₀) (hg : 0 < g₀) (n : ℕ) :
     agmQ a₀ g₀ n * ((a₀ : ℝ) ^ 2 - (g₀ : ℝ) ^ 2) =
       2 ^ n * (agmA a₀ g₀ n ^ 2 - agmG a₀ g₀ n ^ 2) := by
   have ha' : (0 : ℝ) < a₀ := ha₀
@@ -596,7 +593,7 @@ theorem symEllIntRJ_zero_agm {a₀ g₀ : ℝ≥0} (ha : 0 < a₀) (hg : 0 < g�
 /-- Helper for 19.22.13: the Heron-type iteration `pₙ₊₁ = (pₙ² + aₙgₙ)/(2pₙ)` along a genuine
 AGM pair `(aₙ, gₙ)` converges to the common limit, via
 `pₙ₊₁² - aₙ₊₁² = (pₙ² - aₙ²)(pₙ² - gₙ²)/(4pₙ²)`. -/
-theorem p19sR1_tendsto_heron {a g p : ℕ → ℝ} {M : ℝ} (hM : 0 ≤ M) (hg : ∀ n, 0 < g n)
+lemma p19sR1_tendsto_heron {a g p : ℕ → ℝ} {M : ℝ} (hM : 0 ≤ M) (hg : ∀ n, 0 < g n)
     (hga : ∀ n, g n ≤ a n)
     (ha : ∀ n, a (n + 1) = (a n + g n) / 2) (hgs : ∀ n, g (n + 1) ^ 2 = a n * g n)
     (hp0 : 0 < p 0) (hp : ∀ n, p (n + 1) = (p n ^ 2 + a n * g n) / (2 * p n))

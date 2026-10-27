@@ -15,9 +15,13 @@ public import DLMF.Painleve.Rational
 DLMF normalization (`DLMF.Painleve.Defs`). The rational solutions of `PII` are bridged to the
 Beals–Wong construction of `DLMF.Painleve.Rational` (`rationalPIIPair`), whose `PII(c)` is DLMF's
 `PII` with `α = -c`. The explicit solutions 32.8.1–32.8.4 and the Yablonskii–Vorob'ev
-polynomials 32.8.7 are proved by polynomial identities; the general statements 32.8.5–32.8.6
-and 32.8.9 are admitted for general `n` and proved for small `n`. The special rational
-solutions of `PIII`–`PVI` (32.8.11–32.8.13, 32.8.16–32.8.18, 32.8.24–32.8.26,
+polynomials 32.8.7 are proved by polynomial identities. The general statements 32.8.5–32.8.6
+(exactness of the recurrence, monicity, the rational solutions for every `n`) are proved from a
+bilinear invariant: `Q_n` and `Q_{n+1}` are monic with simple zeros and satisfy the Hirota
+equations `D_z²(Q_{n+1}·Q_n) = 0` and `(D_z³ - zD_z)(Q_n·Q_{n+1}) = (n+1)Q_nQ_{n+1}`
+(`p3b_YV`); divisibility follows by checking the numerator at the simple zeros of `Q_n`. The
+generating function 32.8.8 is a Cauchy product; the Wronskian form 32.8.9 is admitted. The
+special rational solutions of `PIII`–`PVI` (32.8.11–32.8.13, 32.8.16–32.8.18, 32.8.24–32.8.26,
 32.8.28–32.8.32) are proved on every open set avoiding the singular points; the
 classification statements ("rational solutions exist iff …") are admitted.
 -/
@@ -32,7 +36,7 @@ namespace DLMF.Painleve
 /-! ## Bridge to Beals–Wong -/
 
 /-- The symmetry `w ↦ -w`, `α ↦ -α` of DLMF's `PII`. -/
-lemma b32_isPainleveIIOn_neg {α : ℂ} {w : ℂ → ℂ} {U : Set ℂ}
+theorem b32_isPainleveIIOn_neg {α : ℂ} {w : ℂ → ℂ} {U : Set ℂ}
     (h : IsPainleveIIOn α w U) : IsPainleveIIOn (-α) (fun z => -w z) U := by
   rw [isPainleveIIOn_iff_isPIIOn] at h ⊢
   simpa using h.neg
@@ -185,7 +189,7 @@ theorem yablonskiiVorobievQ_six :
 /-! ## Explicit rational solutions of `PII` (32.8.1–32.8.4) -/
 
 /-- Equality on an open set transports DLMF's `PII`. -/
-lemma b32_congr {α : ℂ} {w w' : ℂ → ℂ} {U : Set ℂ} (h : IsPainleveIIOn α w U)
+theorem b32_congr {α : ℂ} {w w' : ℂ → ℂ} {U : Set ℂ} (h : IsPainleveIIOn α w U)
     (hU : IsOpen U) (he : EqOn w w' U) : IsPainleveIIOn α w' U :=
   isPainleveIIOn_iff_isPIIOn.mpr ((isPainleveIIOn_iff_isPIIOn.mp h).congr hU he)
 
@@ -294,11 +298,233 @@ theorem painleveII_rational_four :
       div_eq_div_iff (mul_ne_zero h1 h3) (mul_ne_zero (mul_ne_zero h0 h1) h2)]
     ring
 
+/-! ## Bilinear invariant of the Yablonskii–Vorob'ev polynomials -/
+
+/-- A nonzero polynomial with only simple zeros divides every nonzero polynomial vanishing at
+its zeros. -/
+lemma p3b_dvd_of_simple {v N : ℂ[X]} (hv : v ≠ 0)
+    (hs : ∀ c, v.eval c = 0 → (derivative v).eval c ≠ 0) (hN0 : N ≠ 0)
+    (h : ∀ c, v.eval c = 0 → N.eval c = 0) : v ∣ N := by
+  classical
+  refine (IsAlgClosed.splits v).dvd_of_roots_le_roots hv ?_
+  have hnd : v.roots.Nodup := Multiset.nodup_iff_count_le_one.mpr fun c => by
+    rw [count_roots]
+    by_contra hc
+    push Not at hc
+    obtain ⟨h0, h1⟩ := (one_lt_rootMultiplicity_iff_isRoot hv).mp hc
+    exact hs c h0 h1
+  rw [Multiset.le_iff_subset hnd]
+  intro c hc
+  rw [mem_roots hv] at hc
+  exact (mem_roots hN0).mpr (h c hc)
+
+/-- A nonzero solution `f` of the bilinear equation `D²(f·g) = 0` has only simple zeros
+away from the zeros of `g`. -/
+lemma p3b_simple_of_D2 {f g : ℂ[X]} (hf : f ≠ 0) {c : ℂ} (hg : g.eval c ≠ 0)
+    (hD : derivative (derivative f) * g - 2 * derivative f * derivative g +
+      f * derivative (derivative g) = 0) (h0 : f.eval c = 0) :
+    (derivative f).eval c ≠ 0 := by
+  intro h1
+  set k := f.rootMultiplicity c with hk
+  have hk2 : 1 < k := (one_lt_rootMultiplicity_iff_isRoot hf).mpr ⟨h0, h1⟩
+  have hm1 : (derivative f).rootMultiplicity c = k - 1 := derivative_rootMultiplicity_of_root h0
+  have hm2 : (derivative (derivative f)).rootMultiplicity c = k - 2 := by
+    rw [derivative_rootMultiplicity_of_root h1, hm1]; omega
+  have hf2 : derivative (derivative f) ≠ 0 := by
+    intro h2
+    have e1 := derivative_eq_zero.mp h2
+    rw [eq_C_of_natDegree_eq_zero e1] at h1
+    have hf1 : derivative f = 0 := by
+      rw [eq_C_of_natDegree_eq_zero e1]; simpa using h1
+    have e0 := derivative_eq_zero.mp hf1
+    rw [eq_C_of_natDegree_eq_zero e0] at h0
+    exact hf (by rw [eq_C_of_natDegree_eq_zero e0]; simpa using h0)
+  have hg0 : g ≠ 0 := by rintro rfl; simp at hg
+  have hdvd : (X - C c) ^ (k - 1) ∣ derivative (derivative f) * g := by
+    have e : derivative (derivative f) * g =
+        2 * derivative f * derivative g - f * derivative (derivative g) := by
+      linear_combination hD
+    rw [e]
+    refine dvd_sub (dvd_mul_of_dvd_left (dvd_mul_of_dvd_right ?_ _) _)
+      (dvd_mul_of_dvd_left ?_ _)
+    · rw [← hm1]; exact pow_rootMultiplicity_dvd _ _
+    · exact (pow_dvd_pow _ (Nat.sub_le k 1)).trans (pow_rootMultiplicity_dvd _ _)
+  have hne := mul_ne_zero hf2 hg0
+  have := (le_rootMultiplicity_iff hne).mpr hdvd
+  rw [rootMultiplicity_mul hne, hm2, rootMultiplicity_eq_zero (by simpa using hg)] at this
+  omega
+/-- The bilinear equations propagate through one step of the Yablonskii–Vorob'ev recurrence:
+with jets of `u`, `v`, `s` and `s v = z u² - 4 u u'' + 4 u'²`. -/
+lemma p3b_step {u u1 u2 u3 u4 u5 v v1 v2 v3 v4 s s1 s2 s3 : ℂ[X]} {α : ℂ}
+    (hu1 : derivative u = u1) (hu2 : derivative u1 = u2) (hu3 : derivative u2 = u3)
+    (hu4 : derivative u3 = u4) (hu5 : derivative u4 = u5)
+    (hv1 : derivative v = v1) (hv2 : derivative v1 = v2) (hv3 : derivative v2 = v3)
+    (hv4 : derivative v3 = v4)
+    (hs1 : derivative s = s1) (hs2 : derivative s1 = s2) (hs3 : derivative s2 = s3)
+    (hv : v ≠ 0)
+    (hR : s * v = X * u ^ 2 - 4 * u * u2 + 4 * u1 ^ 2)
+    (hD : u2 * v - 2 * u1 * v1 + u * v2 = 0)
+    (hE : v3 * u - 3 * v2 * u1 + 3 * v1 * u2 - v * u3 - X * (v1 * u - v * u1) = C α * v * u) :
+    s2 * u - 2 * s1 * u1 + s * u2 = 0 ∧
+      u3 * s - 3 * u2 * s1 + 3 * u1 * s2 - u * s3 - X * (u1 * s - u * s1) =
+        C (α + 1) * u * s := by
+  set a := C α with ha
+  have hda : derivative a = 0 := derivative_C
+  have hR0 : s * v - (X * u * u - 4 * u * u2 + 4 * u1 * u1) = 0 := by
+    rw [hR]; ring
+  have hD0 := hD
+  have hE0 : v3 * u - 3 * v2 * u1 + 3 * v1 * u2 - v * u3 - X * (v1 * u - v * u1) - a * v * u = 0 :=
+    sub_eq_zero.mpr hE
+  have hR1 := congrArg derivative hR0
+  have hR2 := congrArg derivative hR1
+  have hR3 := congrArg derivative hR2
+  have hD1 := congrArg derivative hD0
+  have hD2 := congrArg derivative hD1
+  have hD3 := congrArg derivative hD2
+  have hE1 := congrArg derivative hE0
+  have hE2 := congrArg derivative hE1
+  simp only [derivative_mul, derivative_add, derivative_sub, derivative_X,
+    derivative_ofNat, derivative_zero, derivative_one, hda, hu1, hu2, hu3, hu4, hu5, hv1, hv2, hv3,
+    hv4, hs1, hs2, hs3] at hR1 hR2 hR3 hD1 hD2 hD3 hE1 hE2
+  constructor
+  · have h : v ^ 3 * (s2 * u - 2 * s1 * u1 + s * u2) = 0 := by
+      linear_combination (u*v^2) * hR2 + (- 2*u1*v^2 - 2*u*v*v1) * hR1 + (u2*v^2 + 2*u*v1^2 - u*v*v2
+          + 2*u1*v*v1) * hR0 + (- 2*v*u^2) * hD2 + (2*v1*u^2 + 6*u*u1*v) * hD1 + (- 4*v*u1^2 +
+          v*X*u^2 - 4*u*u1*v1) * hD0 + (2*v*u^2) * hE1 + (- 2*v1*u^2 - 2*u*u1*v) * hE0
+    exact (mul_eq_zero.mp h).resolve_left (pow_ne_zero 3 hv)
+  · have h : v ^ 4 * (u3 * s - 3 * u2 * s1 + 3 * u1 * s2 - u * s3 - X * (u1 * s - u * s1) -
+        (a + 1) * u * s) = 0 := by
+      linear_combination (- u*v^3) * hR3 + (3*u1*v^3 + 3*u*v1*v^2) * hR2 + (- 3*u2*v^3 + u*X*v^3 -
+          6*u*v*v1^2 - 6*u1*v1*v^2 + 3*u*v2*v^2) * hR1 + (u3*v^3 - u*v^3 + 6*u*v1^3 + u*v3*v^2 -
+          a*u*v^3 - u1*X*v^3 - 3*u1*v2*v^2 + 3*u2*v1*v^2 + 6*u1*v*v1^2 - u*v1*X*v^2 - 6*u*v*v1*v2) *
+          hR0 + (2*u^2*v^2) * hD3 + (- 6*u*u1*v^2 - 6*v*v1*u^2) * hD2 + (6*u^2*v1^2 + 6*u1^2*v^2 -
+          2*X*u^2*v^2 + 12*u*u1*v*v1) * hD1 + (- u^2*v^2 - 12*u*u1*v1^2 - 12*v*v1*u1^2 - 4*v*v3*u^2
+          + 2*a*u^2*v^2 + 4*v*v1*X*u^2 + 12*u*u1*v*v2) * hD0 + (- 2*u^2*v^2) * hE2 + (2*u*u1*v^2 +
+          6*v*v1*u^2) * hE1 + (- 6*u^2*v1^2 + 2*u1^2*v^2 + X*u^2*v^2 + 4*v*v2*u^2 - 8*u*u1*v*v1) *
+          hE0
+    rw [C_add, C_1, ← ha]
+    exact sub_eq_zero.mp ((mul_eq_zero.mp h).resolve_left (pow_ne_zero 4 hv))
+
+/-- One step of the Yablonskii–Vorob'ev recurrence on the bilinear invariant. -/
+lemma p3b_step_full {u v : ℂ[X]} {α : ℂ} (hv : v.Monic) (hu : u.Monic)
+    (hsv : ∀ c, v.eval c = 0 → (derivative v).eval c ≠ 0)
+    (hsu : ∀ c, u.eval c = 0 → (derivative u).eval c ≠ 0)
+    (hD : derivative (derivative u) * v - 2 * derivative u * derivative v +
+      u * derivative (derivative v) = 0)
+    (hE : derivative (derivative (derivative v)) * u -
+        3 * derivative (derivative v) * derivative u +
+        3 * derivative v * derivative (derivative u) - v * derivative (derivative (derivative u)) -
+        X * (derivative v * u - v * derivative u) = C α * v * u) :
+    let N := X * u ^ 2 + C 4 * (derivative u) ^ 2 - C 4 * u * derivative (derivative u)
+    N / v * v = N ∧ (N / v).Monic ∧
+      (∀ c, (N / v).eval c = 0 → (derivative (N / v)).eval c ≠ 0) ∧
+      derivative (derivative (N / v)) * u - 2 * derivative (N / v) * derivative u +
+        (N / v) * derivative (derivative u) = 0 ∧
+      derivative (derivative (derivative u)) * (N / v) -
+        3 * derivative (derivative u) * derivative (N / v) +
+        3 * derivative u * derivative (derivative (N / v)) -
+        u * derivative (derivative (derivative (N / v))) -
+        X * (derivative u * (N / v) - u * derivative (N / v)) = C (α + 1) * u * (N / v) := by
+  intro N
+  have h4 : (C 4 : ℂ[X]) = 4 := rfl
+  -- `N` is monic
+  have hNm : N.Monic := by
+    have e : N = X * u ^ 2 + (C 4 * (derivative u) ^ 2 - C 4 * u * derivative (derivative u)) := by
+      simp only [N]; ring
+    rw [e]
+    have hp : (X * u ^ 2).Monic := monic_X.mul (hu.pow 2)
+    refine hp.add_of_left (degree_lt_degree ?_)
+    have hpd : (X * u ^ 2).natDegree = 2 * u.natDegree + 1 := by
+      rw [natDegree_mul X_ne_zero (pow_ne_zero 2 hu.ne_zero), natDegree_X, natDegree_pow]; ring
+    have h1 := natDegree_derivative_le u
+    have h2 := natDegree_derivative_le (derivative u)
+    have hq : (C 4 * (derivative u) ^ 2 - C 4 * u * derivative (derivative u)).natDegree ≤
+        2 * u.natDegree := by
+      refine (natDegree_sub_le _ _).trans (max_le ?_ ?_)
+      · refine (natDegree_C_mul_le _ _).trans (natDegree_pow_le.trans ?_)
+        omega
+      · rw [mul_assoc]
+        refine (natDegree_C_mul_le _ _).trans (natDegree_mul_le.trans ?_)
+        omega
+    omega
+  -- exactness: `v ∣ N`
+  have hdvd : v ∣ N := by
+    refine p3b_dvd_of_simple hv.ne_zero hsv hNm.ne_zero fun c hc => ?_
+    have hD1 := congrArg derivative hD
+    simp only [derivative_mul, derivative_add, derivative_sub, derivative_ofNat, derivative_zero,
+      zero_mul, zero_add] at hD1
+    have e0 := congrArg (eval c) hD
+    have e1 := congrArg (eval c) hD1
+    have e2 := congrArg (eval c) hE
+    simp only [eval_mul, eval_add, eval_sub, eval_ofNat, eval_X, eval_C, eval_zero, hc] at e0 e1 e2
+    have hA := hsv c hc
+    simp only [N, eval_mul, eval_add, eval_sub, eval_pow, eval_X, eval_C]
+    have : (derivative v).eval c * (c * u.eval c ^ 2 + 4 * (derivative u).eval c ^ 2 -
+        4 * u.eval c * (derivative (derivative u)).eval c) = 0 := by
+      linear_combination (-2 * (derivative u).eval c) * e0 + (u.eval c) * e1 - (u.eval c) * e2
+    exact (mul_eq_zero.mp this).resolve_left hA
+  obtain ⟨s, hs⟩ := hdvd
+  have hsN : N / v = s := by rw [hs]; exact mul_div_cancel_left₀ s hv.ne_zero
+  rw [hsN]
+  have hsm : s.Monic := hv.of_mul_monic_left (hs ▸ hNm)
+  have hR : s * v = X * u ^ 2 - 4 * u * derivative (derivative u) + 4 * (derivative u) ^ 2 := by
+    have : N = v * s := hs
+    simp only [N, h4] at this
+    linear_combination -this
+  obtain ⟨hD', hE'⟩ := p3b_step (u := u) (v := v) (s := s) rfl rfl rfl rfl rfl rfl rfl rfl rfl
+    rfl rfl rfl hv.ne_zero hR hD hE
+  refine ⟨by rw [mul_comm]; exact hs.symm, hsm, fun c hc => ?_, hD', hE'⟩
+  by_cases huc : u.eval c = 0
+  · have e := congrArg (eval c) hR
+    simp only [eval_mul, eval_add, eval_sub, eval_pow, eval_X, eval_ofNat, hc, huc] at e
+    have : (derivative u).eval c ^ 2 = 0 := by linear_combination -e / 4
+    exact absurd (pow_eq_zero_iff two_ne_zero |>.mp this) (hsu c huc)
+  · exact p3b_simple_of_D2 hsm.ne_zero huc hD' hc
+
+/-- The bilinear invariant of the Yablonskii–Vorob'ev polynomials. -/
+lemma p3b_YV (n : ℕ) :
+    (yablonskiiVorobievQ n).Monic ∧ (yablonskiiVorobievQ (n + 1)).Monic ∧
+      (∀ c, (yablonskiiVorobievQ n).eval c = 0 →
+        (derivative (yablonskiiVorobievQ n)).eval c ≠ 0) ∧
+      (∀ c, (yablonskiiVorobievQ (n + 1)).eval c = 0 →
+        (derivative (yablonskiiVorobievQ (n + 1))).eval c ≠ 0) ∧
+      derivative (derivative (yablonskiiVorobievQ (n + 1))) * yablonskiiVorobievQ n -
+          2 * derivative (yablonskiiVorobievQ (n + 1)) * derivative (yablonskiiVorobievQ n) +
+          yablonskiiVorobievQ (n + 1) * derivative (derivative (yablonskiiVorobievQ n)) = 0 ∧
+      derivative (derivative (derivative (yablonskiiVorobievQ n))) *
+            yablonskiiVorobievQ (n + 1) -
+          3 * derivative (derivative (yablonskiiVorobievQ n)) *
+            derivative (yablonskiiVorobievQ (n + 1)) +
+          3 * derivative (yablonskiiVorobievQ n) *
+            derivative (derivative (yablonskiiVorobievQ (n + 1))) -
+          yablonskiiVorobievQ n *
+            derivative (derivative (derivative (yablonskiiVorobievQ (n + 1)))) -
+          X * (derivative (yablonskiiVorobievQ n) * yablonskiiVorobievQ (n + 1) -
+            yablonskiiVorobievQ n * derivative (yablonskiiVorobievQ (n + 1))) =
+        C ((n : ℂ) + 1) * yablonskiiVorobievQ n * yablonskiiVorobievQ (n + 1) := by
+  induction n with
+  | zero =>
+    simp only [yablonskiiVorobievQ]
+    refine ⟨monic_one, monic_X, fun c hc => by simp at hc, fun c _ => by simp, by simp, ?_⟩
+    simp
+  | succ n ih =>
+    obtain ⟨hv, hu, hsv, hsu, hD, hE⟩ := ih
+    obtain ⟨-, hm, hs, hD', hE'⟩ := p3b_step_full hv hu hsv hsu hD hE
+    have hQ : yablonskiiVorobievQ (n + 1 + 1) = (X * yablonskiiVorobievQ (n + 1) ^ 2 +
+        C 4 * (derivative (yablonskiiVorobievQ (n + 1))) ^ 2 -
+        C 4 * yablonskiiVorobievQ (n + 1) *
+          derivative (derivative (yablonskiiVorobievQ (n + 1)))) / yablonskiiVorobievQ n := by
+      rw [yablonskiiVorobievQ]
+    rw [hQ]
+    refine ⟨hu, hm, hsu, hs, hD', ?_⟩
+    convert hE' using 3
+    push_cast; ring
+
 /-! ## General statements on the Yablonskii–Vorob'ev polynomials (32.8.5–32.8.10) -/
 
 /-- DLMF 32.8.6: the division in the recurrence is exact, `Q_{n+1}Q_{n-1} = zQ_n² + 4(Q_n')² -
 4Q_nQ_n''` for `n ≥ 1` (here with `n + 1` in place of `n`), and every `Q_n` is monic.
-Verified for `n ≤ 5` by `yablonskiiVorobievQ_two` … `yablonskiiVorobievQ_six`. -/
+Proved from the bilinear invariant `p3b_YV`. -/
 @[dlmf 32.8.E6]
 theorem yablonskiiVorobievQ_recurrence (n : ℕ) :
     yablonskiiVorobievQ (n + 2) * yablonskiiVorobievQ n =
@@ -307,7 +533,15 @@ theorem yablonskiiVorobievQ_recurrence (n : ℕ) :
           C 4 * yablonskiiVorobievQ (n + 1) *
             derivative (derivative (yablonskiiVorobievQ (n + 1))) ∧
       (yablonskiiVorobievQ (n + 2)).Monic := by
-  sorry
+  obtain ⟨hv, hu, hsv, hsu, hD, hE⟩ := p3b_YV n
+  obtain ⟨h1, hm, -⟩ := p3b_step_full hv hu hsv hsu hD hE
+  have hQ : yablonskiiVorobievQ (n + 2) = (X * yablonskiiVorobievQ (n + 1) ^ 2 +
+      C 4 * (derivative (yablonskiiVorobievQ (n + 1))) ^ 2 -
+      C 4 * yablonskiiVorobievQ (n + 1) *
+        derivative (derivative (yablonskiiVorobievQ (n + 1)))) / yablonskiiVorobievQ n := by
+    rw [yablonskiiVorobievQ]
+  rw [hQ]
+  exact ⟨h1, hm⟩
 
 /-- DLMF 32.8.5: for `n ≥ 1`, `w(z; n) = d/dz ln(Q_{n-1}(z)/Q_n(z))` solves `PII` with `α = n`
 on the set where `Q_{n-1}Q_n ≠ 0` (the logarithmic derivative is taken as
@@ -317,7 +551,22 @@ forms `painleveII_rational_one` … `painleveII_rational_four`. -/
 theorem rationalPainleveII_isPainleveIIOn (n : ℕ) (hn : 1 ≤ n) :
     IsPainleveIIOn (n : ℂ) (rationalPainleveII n)
       {z | (yablonskiiVorobievQ (n - 1)).eval z ≠ 0 ∧ (yablonskiiVorobievQ n).eval z ≠ 0} := by
-  sorry
+  obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
+  obtain ⟨-, -, -, -, hD, hE⟩ := p3b_YV m
+  set v := yablonskiiVorobievQ m
+  set u := yablonskiiVorobievQ (m + 1)
+  have h := b32_isPainleveIIOn_logDeriv (α := (m : ℂ) + 1) (A := v) (B := u) rfl rfl rfl rfl rfl
+    rfl (by
+      linear_combination (-3 * v * derivative v * u ^ 2 + 3 * u * derivative u * v ^ 2) * hD +
+        (u ^ 2 * v ^ 2) * hE)
+  have hm : m + 1 - 1 = m := by omega
+  rw [hm]
+  push_cast
+  convert h using 2 with z
+  have h1 : (0 : ℤ) < ((m + 1 : ℕ) : ℤ) := by omega
+  have h2 : ((m + 1 : ℕ) : ℤ).toNat = m + 1 := by omega
+  rw [show ((m : ℤ) + 1) = ((m + 1 : ℕ) : ℤ) by push_cast; ring]
+  simp only [rationalPainleveII, h1, h2, ite_true, hm, v, u]
 
 /-- DLMF 32.8.5 for every integer `n`, including the seed `n = 0` and, for `n < 0`, the
 symmetric solutions `w(z; n) = -w(z; -n)`. Proved from `rationalPainleveII_isPainleveIIOn`. -/
@@ -348,13 +597,62 @@ theorem rationalPainleveII_isPainleveIIOn_int (n : ℤ) :
   · obtain ⟨m, rfl⟩ : ∃ m : ℕ, n = (m : ℤ) := ⟨n.toNat, by omega⟩
     simpa using rationalPainleveII_isPainleveIIOn m (by omega)
 
+open Nat in
 /-- DLMF 32.8.8: the generating function `∑_{m ≥ 0} p_m(z) λ^m = exp(zλ - (4/3)λ³)`, for all
 complex `z` and `λ`. -/
 @[dlmf 32.8.E8]
 theorem hasSum_yablonskiiVorobievP (z l : ℂ) :
     HasSum (fun m : ℕ => (yablonskiiVorobievP m).eval z * l ^ m)
       (Complex.exp (z * l - 4 / 3 * l ^ 3)) := by
-  sorry
+  set a : ℕ → ℂ := fun k => if 3 ∣ k then (-4 / 3 * l ^ 3) ^ (k / 3) / ((k / 3)! : ℂ) else 0
+    with ha_def
+  set b : ℕ → ℂ := fun k => (z * l) ^ k / (k ! : ℂ) with hb_def
+  have hinj : Function.Injective (fun j : ℕ => 3 * j) := fun i j h => by simpa using h
+  have hcomp : a ∘ (fun j => 3 * j) = fun j => (-4 / 3 * l ^ 3) ^ j / (j ! : ℂ) := by
+    funext j; simp [a]
+  have hzero : ∀ k ∉ Set.range (fun j : ℕ => 3 * j), a k = 0 := by
+    intro k hk
+    simp only [a, ite_eq_right_iff]
+    intro h; exact absurd ⟨k / 3, Nat.mul_div_cancel' h⟩ hk
+  have ha : HasSum a (Complex.exp (-4 / 3 * l ^ 3)) := by
+    rw [← hinj.hasSum_iff hzero, hcomp, Complex.exp_eq_exp_ℂ]
+    exact NormedSpace.expSeries_div_hasSum_exp _
+  have hna : Summable fun k => ‖a k‖ := by
+    rw [← hinj.summable_iff (f := fun k => ‖a k‖) (fun k hk => by simp [hzero k hk])]
+    have := NormedSpace.norm_expSeries_div_summable (𝔸 := ℂ) (-4 / 3 * l ^ 3)
+    convert this using 2 with j
+    simp [a]
+  have hb : HasSum b (Complex.exp (z * l)) := by
+    rw [Complex.exp_eq_exp_ℂ]; exact NormedSpace.expSeries_div_hasSum_exp _
+  have hnb : Summable fun k => ‖b k‖ := NormedSpace.norm_expSeries_div_summable (𝔸 := ℂ) _
+  have H := hasSum_sum_range_mul_of_summable_norm hna hnb
+  rw [ha.tsum_eq, hb.tsum_eq, ← Complex.exp_add] at H
+  convert H using 1
+  · funext m
+    have hfil : (Finset.range (m + 1)).filter (fun k => 3 ∣ k) =
+        (Finset.range (m / 3 + 1)).image (3 * ·) := by
+      ext k
+      simp only [Finset.mem_filter, Finset.mem_range, Finset.mem_image]
+      constructor
+      · rintro ⟨hk, j, rfl⟩; exact ⟨j, by omega, rfl⟩
+      · rintro ⟨j, hj, rfl⟩; exact ⟨by omega, dvd_mul_right 3 j⟩
+    have e1 : ∑ k ∈ Finset.range (m + 1), a k * b (m - k) =
+        ∑ k ∈ Finset.range (m + 1), if 3 ∣ k then
+          (-4 / 3 * l ^ 3) ^ (k / 3) / ((k / 3)! : ℂ) * b (m - k) else 0 := by
+      refine Finset.sum_congr rfl fun k _ => ?_
+      simp only [a]; split_ifs <;> simp
+    rw [e1, ← Finset.sum_filter, hfil, Finset.sum_image (fun i _ j _ h => hinj h)]
+    simp only [yablonskiiVorobievP, eval_finsetSum, eval_mul, eval_C, eval_pow, eval_X,
+      Finset.sum_mul]
+    refine Finset.sum_congr rfl fun j hj => ?_
+    have hj' : 3 * j ≤ m := by simp at hj; omega
+    rw [Nat.mul_div_cancel_left j (by norm_num : 0 < 3)]
+    have hl : l ^ m = (l ^ 3) ^ j * l ^ (m - 3 * j) := by
+      rw [← pow_mul, ← pow_add]; congr 1; omega
+    simp only [b, hl, mul_pow]
+    field_simp
+  · congr 1; ring
+
 
 /-- DLMF 32.8.9–32.8.10: for `n ≥ 2` (in fact `n ≥ 1`) the Wronskians `τ_n` of
 `p₁, p₃, …, p_{2n-1}` give `w(z; n) = d/dz ln(τ_{n-1}(z)/τ_n(z))`, a solution of `PII` with

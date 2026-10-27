@@ -63,7 +63,7 @@ theorem riemannNormalOperator_gauss (a b c : ℂ) (f : ℂ → ℂ) {z : ℂ}
   ring
 
 /-- A complex function of class `C²` at a point is analytic there. -/
-lemma analyticAt_of_contDiffAt_two {f : ℂ → ℂ} {z : ℂ} (hf : ContDiffAt ℂ 2 f z) :
+theorem analyticAt_of_contDiffAt_two {f : ℂ → ℂ} {z : ℂ} (hf : ContDiffAt ℂ 2 f z) :
     AnalyticAt ℂ f z := by
   have hev := hf.eventually (by norm_num)
   obtain ⟨U, hU, hUo, hzU⟩ := eventually_nhds_iff.mp hev

@@ -7,7 +7,7 @@ module
 
 public import DLMF.GeneralizedHypergeometric.MeijerG
 public import DLMF.GeneralizedHypergeometric.Basic
-public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
+public import TauCeti.Analysis.Complex.Conformal.Continuation.Basic
 
 /-!
 # Meijer G expansions, identities and differential equations (DLMF §§16.17–16.27)

@@ -6,10 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.OrthogonalPolynomials.General
-public import DLMF.OrthogonalPolynomials.GeneralIdentities
 public import DLMF.OrthogonalPolynomials.Integrals
 public import DLMF.OrthogonalPolynomials.JacobiDiscriminant
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Chebyshev.RootsExtrema
 
 /-!
 # The classical families as instances of the general theory
@@ -50,26 +48,26 @@ namespace DLMF.OrthogonalPolynomials
 def weightMeasure (I : Set ℝ) (w : ℝ → ℝ) : Measure ℝ :=
   (volume.restrict I).withDensity fun x => ((w x).toNNReal : ℝ≥0∞)
 
-lemma integral_weightMeasure {I : Set ℝ} (hI : MeasurableSet I) {w : ℝ → ℝ}
+theorem integral_weightMeasure {I : Set ℝ} (hI : MeasurableSet I) {w : ℝ → ℝ}
     (hw : Measurable w) (hwnn : ∀ x ∈ I, 0 ≤ w x) (g : ℝ → ℝ) :
     ∫ x, g x ∂weightMeasure I w = ∫ x in I, w x * g x := by
   rw [weightMeasure, integral_withDensity_eq_integral_smul hw.real_toNNReal]
   refine setIntegral_congr_fun hI fun x hx => ?_
   rw [NNReal.smul_def, smul_eq_mul, Real.coe_toNNReal _ (hwnn x hx)]
 
-lemma integrable_weightMeasure_iff {I : Set ℝ} (hI : MeasurableSet I) {w : ℝ → ℝ}
+theorem integrable_weightMeasure_iff {I : Set ℝ} (hI : MeasurableSet I) {w : ℝ → ℝ}
     (hw : Measurable w) (hwnn : ∀ x ∈ I, 0 ≤ w x) (g : ℝ → ℝ) :
     Integrable g (weightMeasure I w) ↔ IntegrableOn (fun x => w x * g x) I := by
   rw [weightMeasure, integrable_withDensity_iff_integrable_smul hw.real_toNNReal]
   refine integrableOn_congr_fun (fun x hx => ?_) hI
   rw [NNReal.smul_def, smul_eq_mul, Real.coe_toNNReal _ (hwnn x hx)]
 
-lemma ae_weightMeasure_mem {I : Set ℝ} (hI : MeasurableSet I) (w : ℝ → ℝ) :
+theorem ae_weightMeasure_mem {I : Set ℝ} (hI : MeasurableSet I) (w : ℝ → ℝ) :
     ∀ᵐ x ∂weightMeasure I w, x ∈ I :=
   (withDensity_absolutelyContinuous _ _).ae_le (ae_restrict_mem hI)
 
 /-- A nonzero polynomial has positive weighted square integral on a set of positive measure. -/
-lemma setIntegral_weight_mul_sq_pos {I : Set ℝ} (hI : MeasurableSet I) (hvol : 0 < volume I)
+theorem setIntegral_weight_mul_sq_pos {I : Set ℝ} (hI : MeasurableSet I) (hvol : 0 < volume I)
     {w : ℝ → ℝ} (hwpos : ∀ x ∈ I, 0 < w x) {q : ℝ[X]} (hq : q ≠ 0)
     (hint : IntegrableOn (fun x => w x * q.eval x ^ 2) I) :
     0 < ∫ x in I, w x * q.eval x ^ 2 := by
@@ -115,7 +113,7 @@ variable {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOrthogonalPolynomials μ
 include h
 
 /-- Factoring out a zero of `p n`: the cofactor is nonzero and of degree less than `n`. -/
-lemma exists_cofactor {n : ℕ} {x₀ : ℝ} (hx : x₀ ∈ (p n).roots) :
+theorem exists_cofactor {n : ℕ} {x₀ : ℝ} (hx : x₀ ∈ (p n).roots) :
     ∃ q : ℝ[X], q ≠ 0 ∧ q.degree < n ∧ ∀ x, (p n).eval x = (x - x₀) * q.eval x := by
   have hp0 := h.ne_zero n
   have hroot : IsRoot (p n) x₀ := (mem_roots hp0).1 hx
@@ -130,7 +128,7 @@ lemma exists_cofactor {n : ℕ} {x₀ : ℝ} (hx : x₀ ∈ (p n).roots) :
 
 /-- If `(x - x₀) q(x)²` integrates to zero against `μ` and `x₀ < x` almost everywhere, then
 `q = 0`; the contrapositive drives the support theorems. -/
-lemma eq_of_sign {q : ℝ[X]} (hq : q ≠ 0) {N : ℕ} (hd : q.degree < N) {s : ℝ → ℝ}
+theorem eq_of_sign {q : ℝ[X]} (hq : q ≠ 0) {N : ℕ} (hd : q.degree < N) {s : ℝ → ℝ}
     (hs : ∀ᵐ x ∂μ, 0 < s x) (hsi : Integrable (fun x => s x * q.eval x ^ 2) μ)
     (h0 : ∫ x, s x * q.eval x ^ 2 ∂μ = 0) : False := by
   have hnn : 0 ≤ᵐ[μ] fun x => s x * q.eval x ^ 2 :=
@@ -203,11 +201,11 @@ end IsOrthogonalPolynomials
 /-- The Hermite weight `e^{-x²}` on `ℝ`. -/
 def hermiteMeasure : Measure ℝ := weightMeasure univ fun x => Real.exp (-(x ^ 2))
 
-lemma hermitePolyHR_natDegree (n : ℕ) : (hermitePolyHR n).natDegree = n :=
+theorem hermitePolyHR_natDegree (n : ℕ) : (hermitePolyHR n).natDegree = n :=
   natDegree_eq_of_le_of_coeff_ne_zero (hermitePolyHR_natDegree_coeff n).1
     (by rw [(hermitePolyHR_natDegree_coeff n).2]; positivity)
 
-lemma hermitePolyHR_ne_zero (n : ℕ) : hermitePolyHR n ≠ 0 := fun h0 => by
+theorem hermitePolyHR_ne_zero (n : ℕ) : hermitePolyHR n ≠ 0 := fun h0 => by
   have := (hermitePolyHR_natDegree_coeff n).2
   rw [h0, coeff_zero] at this
   exact (pow_ne_zero n two_ne_zero) this.symm
@@ -222,7 +220,7 @@ theorem hermite_isOrthogonalPolynomials : IsOrthogonalPolynomials hermiteMeasure
   simp only [aeval_hermitePolyH_eq_eval, hmn, ite_false] at this
   exact this
 
-lemma aeval_hermitePolyH_complex (n : ℕ) (z : ℂ) :
+theorem aeval_hermitePolyH_complex (n : ℕ) (z : ℂ) :
     (aeval z (hermitePolyH n) : ℂ) = ((hermitePolyHR n).map (algebraMap ℝ ℂ)).eval z := by
   rw [aeval_def, eval₂_eq_eval_map, hermitePolyHR, Polynomial.map_map]
   congr 2
@@ -240,7 +238,7 @@ With `c = √(2n+1)` and `u_k = H_k(ξ)/c^k`, the recurrence reads
 `ξ u_k = (c/2) u_{k+1} + (k/c) u_{k-1}`. At an index where `|u_k|` is maximal over `k < n`
 (using `u_n = 0` at a zero `ξ` of `H_n`), this gives `|ξ| ≤ c/2 + (n-1)/c < c`. -/
 
-lemma eval_hermitePolyHR_succ_succ (k : ℕ) (ξ : ℝ) :
+theorem eval_hermitePolyHR_succ_succ (k : ℕ) (ξ : ℝ) :
     (hermitePolyHR (k + 2)).eval ξ =
       2 * ξ * (hermitePolyHR (k + 1)).eval ξ - 2 * (k + 1) * (hermitePolyHR k).eval ξ := by
   simp only [hermitePolyHR, hermitePolyH_recurrence, Polynomial.map_sub, Polynomial.map_mul,
@@ -248,7 +246,7 @@ lemma eval_hermitePolyHR_succ_succ (k : ℕ) (ξ : ℝ) :
   push_cast
   simp
 
-lemma eval_hermitePolyHR_one (ξ : ℝ) : (hermitePolyHR 1).eval ξ = 2 * ξ := by
+theorem eval_hermitePolyHR_one (ξ : ℝ) : (hermitePolyHR 1).eval ξ = 2 * ξ := by
   simp [hermitePolyHR]
 
 /-- Every zero of `H_n` satisfies `|ξ| < √(2n+1)` (DLMF 18.16.16). -/
@@ -338,11 +336,11 @@ theorem hermitePolyH_zeros_bound (n : ℕ) :
 /-! ### Real forms of complex-defined polynomials -/
 
 open DLMF.Hypergeometric DLMF.Confluent in
-lemma poch_ofReal_eq_eval (x : ℝ) (k : ℕ) : poch (x : ℂ) k = ((ascPochhammer ℝ k).eval x : ℝ) := by
+theorem poch_ofReal_eq_eval (x : ℝ) (k : ℕ) : poch (x : ℂ) k = ((ascPochhammer ℝ k).eval x : ℝ) := by
   rw [poch, ← ascPochhammer_map (algebraMap ℝ ℂ), eval_map]
   exact eval₂_at_apply (algebraMap ℝ ℂ) x
 
-lemma eval_map_ofReal (q : ℝ[X]) (x : ℝ) :
+theorem eval_map_ofReal (q : ℝ[X]) (x : ℝ) :
     (q.map (algebraMap ℝ ℂ)).eval (x : ℂ) = ((q.eval x : ℝ) : ℂ) := by
   rw [eval_map]
   exact eval₂_at_apply (algebraMap ℝ ℂ) x
@@ -359,7 +357,7 @@ def laguerrePolyLR (α : ℝ) (n : ℕ) : ℝ[X] :=
   ∑ j ∈ Finset.range (n + 1), C (laguerreCoeffR α n j) * X ^ j
 
 open DLMF.Hypergeometric DLMF.Confluent in
-lemma laguerreCoeffR_ofReal (α : ℝ) (n j : ℕ) :
+theorem laguerreCoeffR_ofReal (α : ℝ) (n j : ℕ) :
     ((laguerreCoeffR α n j : ℝ) : ℂ) =
       poch ((α : ℂ) + 1) n / n ! * kummerMCoeff (-(n : ℂ)) ((α : ℂ) + 1) j := by
   rw [show (α : ℂ) + 1 = ((α + 1 : ℝ) : ℂ) by push_cast; ring,
@@ -368,7 +366,7 @@ lemma laguerreCoeffR_ofReal (α : ℝ) (n j : ℕ) :
   push_cast
   ring
 
-lemma eval_map_laguerrePolyLR (α : ℝ) (n : ℕ) (z : ℂ) :
+theorem eval_map_laguerrePolyLR (α : ℝ) (n : ℕ) (z : ℂ) :
     ((laguerrePolyLR α n).map (algebraMap ℝ ℂ)).eval z = laguerrePolyL α n z := by
   rw [laguerrePolyL_eq_sum_coeff, laguerrePolyLR, Polynomial.map_sum, eval_finsetSum]
   refine Finset.sum_congr rfl fun j _ => ?_
@@ -377,11 +375,11 @@ lemma eval_map_laguerrePolyLR (α : ℝ) (n : ℕ) (z : ℂ) :
   rw [show algebraMap ℝ ℂ (laguerreCoeffR α n j) = ((laguerreCoeffR α n j : ℝ) : ℂ) from rfl,
     laguerreCoeffR_ofReal]
 
-lemma eval_laguerrePolyLR (α : ℝ) (n : ℕ) (x : ℝ) :
+theorem eval_laguerrePolyLR (α : ℝ) (n : ℕ) (x : ℝ) :
     (((laguerrePolyLR α n).eval x : ℝ) : ℂ) = laguerrePolyL α n x := by
   rw [← eval_map_ofReal, eval_map_laguerrePolyLR]
 
-lemma laguerreCoeffR_self_ne_zero {α : ℝ} (hα : -1 < α) (n : ℕ) : laguerreCoeffR α n n ≠ 0 := by
+theorem laguerreCoeffR_self_ne_zero {α : ℝ} (hα : -1 < α) (n : ℕ) : laguerreCoeffR α n n ≠ 0 := by
   have hp : 0 < (ascPochhammer ℝ n).eval (α + 1) := ascPochhammer_pos n _ (by linarith)
   have hneg : (ascPochhammer ℝ n).eval (-(n : ℝ)) ≠ 0 := by
     rw [ascPochhammer_eval_neg_eq_descPochhammer, descPochhammer_eval_eq_descFactorial,
@@ -391,13 +389,13 @@ lemma laguerreCoeffR_self_ne_zero {α : ℝ} (hα : -1 < α) (n : ℕ) : laguerr
   have hf : (n ! : ℝ) ≠ 0 := by exact_mod_cast n.factorial_ne_zero
   exact mul_ne_zero (div_ne_zero hp.ne' hf) (div_ne_zero hneg (mul_ne_zero hp.ne' hf))
 
-lemma laguerrePolyLR_coeff (α : ℝ) (n k : ℕ) :
+theorem laguerrePolyLR_coeff (α : ℝ) (n k : ℕ) :
     (laguerrePolyLR α n).coeff k = if k < n + 1 then laguerreCoeffR α n k else 0 := by
   simp only [laguerrePolyLR, finsetSum_coeff, coeff_C_mul_X_pow]
   rw [Finset.sum_ite_eq]
   simp [Finset.mem_range]
 
-lemma laguerrePolyLR_natDegree {α : ℝ} (hα : -1 < α) (n : ℕ) :
+theorem laguerrePolyLR_natDegree {α : ℝ} (hα : -1 < α) (n : ℕ) :
     (laguerrePolyLR α n).natDegree = n := by
   refine natDegree_eq_of_le_of_coeff_ne_zero ?_ ?_
   · refine natDegree_le_iff_coeff_eq_zero.2 fun k hk => ?_
@@ -406,7 +404,7 @@ lemma laguerrePolyLR_natDegree {α : ℝ} (hα : -1 < α) (n : ℕ) :
   · rw [laguerrePolyLR_coeff]
     simpa using laguerreCoeffR_self_ne_zero hα n
 
-lemma laguerrePolyLR_ne_zero {α : ℝ} (hα : -1 < α) (n : ℕ) : laguerrePolyLR α n ≠ 0 :=
+theorem laguerrePolyLR_ne_zero {α : ℝ} (hα : -1 < α) (n : ℕ) : laguerrePolyLR α n ≠ 0 :=
   fun h0 => laguerreCoeffR_self_ne_zero hα n (by
     have := laguerrePolyLR_coeff α n n
     simp only [h0, coeff_zero, show n < n + 1 by omega, ite_true] at this
@@ -418,7 +416,7 @@ def laguerreWeight (α : ℝ) (x : ℝ) : ℝ := x ^ α * Real.exp (-x)
 /-- The Laguerre measure `x^α e^{-x} dx` on `(0,∞)`. -/
 def laguerreMeasure (α : ℝ) : Measure ℝ := weightMeasure (Ioi 0) (laguerreWeight α)
 
-lemma integrableOn_eval_mul_laguerreWeight {α : ℝ} (hα : -1 < α) (q : ℝ[X]) :
+theorem integrableOn_eval_mul_laguerreWeight {α : ℝ} (hα : -1 < α) (q : ℝ[X]) :
     IntegrableOn (fun x => q.eval x * laguerreWeight α x) (Ioi 0) := by
   induction q using Polynomial.induction_on' with
   | add p q hp hq =>
@@ -474,7 +472,7 @@ def jacobiCoeffR (α β : ℝ) (n k : ℕ) : ℝ :=
 def jacobiPolyPR (α β : ℝ) (n : ℕ) : ℝ[X] :=
   ∑ k ∈ Finset.range (n + 1), C (jacobiCoeffR α β n k) * (C (1 / 2 : ℝ) * (X - C 1)) ^ k
 
-lemma jacobiCoeffR_ofReal (α β : ℝ) (n k : ℕ) :
+theorem jacobiCoeffR_ofReal (α β : ℝ) (n k : ℕ) :
     ((jacobiCoeffR α β n k : ℝ) : ℂ) = JacobiDisc.coef α β n k := by
   rw [JacobiDisc.coef,
     show (n : ℂ) + α + β + 1 = ((n + α + β + 1 : ℝ) : ℂ) by push_cast; ring,
@@ -484,7 +482,7 @@ lemma jacobiCoeffR_ofReal (α β : ℝ) (n k : ℕ) :
   push_cast
   ring
 
-lemma map_jacobiPolyPR (α β : ℝ) (n : ℕ) :
+theorem map_jacobiPolyPR (α β : ℝ) (n : ℕ) :
     (jacobiPolyPR α β n).map (algebraMap ℝ ℂ) = JacobiDisc.jacPoly α β n := by
   rw [jacobiPolyPR, JacobiDisc.jacPoly, Polynomial.map_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
@@ -493,15 +491,15 @@ lemma map_jacobiPolyPR (α β : ℝ) (n : ℕ) :
     jacobiCoeffR_ofReal]
   norm_num
 
-lemma eval_map_jacobiPolyPR {α : ℝ} (hα : -1 < α) (β : ℝ) (n : ℕ) (z : ℂ) :
+theorem eval_map_jacobiPolyPR {α : ℝ} (hα : -1 < α) (β : ℝ) (n : ℕ) (z : ℂ) :
     ((jacobiPolyPR α β n).map (algebraMap ℝ ℂ)).eval z = jacobiPolyP α β n z := by
   rw [map_jacobiPolyPR, JacobiDisc.eval_jacPoly (by simpa using hα)]
 
-lemma eval_jacobiPolyPR {α : ℝ} (hα : -1 < α) (β : ℝ) (n : ℕ) (x : ℝ) :
+theorem eval_jacobiPolyPR {α : ℝ} (hα : -1 < α) (β : ℝ) (n : ℕ) (x : ℝ) :
     (((jacobiPolyPR α β n).eval x : ℝ) : ℂ) = jacobiPolyP α β n x := by
   rw [← eval_map_ofReal, eval_map_jacobiPolyPR hα]
 
-lemma jacobiCoeffR_self_ne_zero {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
+theorem jacobiCoeffR_self_ne_zero {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
     jacobiCoeffR α β n n ≠ 0 := by
   have hp : 0 < (ascPochhammer ℝ n).eval (n + α + β + 1) := by
     rcases n with _ | n
@@ -512,19 +510,19 @@ lemma jacobiCoeffR_self_ne_zero {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n
     Nat.cast_one]
   exact div_ne_zero hp.ne' (by exact_mod_cast n.factorial_ne_zero)
 
-lemma jacPoly_ofReal_natDegree_lc {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
+theorem jacPoly_ofReal_natDegree_lc {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
     (JacobiDisc.jacPoly α β n).natDegree = n ∧
       (JacobiDisc.jacPoly α β n).leadingCoeff = JacobiDisc.coef α β n n * (1 / 2) ^ n :=
   JacobiDisc.jacPoly_natDegree_lc _ _ n (by
     rw [← jacobiCoeffR_ofReal]
     exact_mod_cast jacobiCoeffR_self_ne_zero hα hβ n)
 
-lemma jacobiPolyPR_natDegree {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
+theorem jacobiPolyPR_natDegree {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
     (jacobiPolyPR α β n).natDegree = n := by
   rw [← natDegree_map_eq_of_injective (algebraMap ℝ ℂ).injective, map_jacobiPolyPR]
   exact (jacPoly_ofReal_natDegree_lc hα hβ n).1
 
-lemma jacobiPolyPR_ne_zero {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
+theorem jacobiPolyPR_ne_zero {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
     jacobiPolyPR α β n ≠ 0 := fun h0 => by
   have hlc := (jacPoly_ofReal_natDegree_lc hα hβ n).2
   rw [← map_jacobiPolyPR, h0, Polynomial.map_zero, leadingCoeff_zero, ← jacobiCoeffR_ofReal]
@@ -538,10 +536,10 @@ lemma jacobiPolyPR_ne_zero {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : �
 def jacobiWeight (α β : ℝ) (x : ℝ) : ℝ := (1 - x) ^ α * (1 + x) ^ β
 
 /-- `jacobiMeasure` (`Classical.lean`) is the weight measure of `jacobiWeight`. -/
-lemma jacobiMeasure_eq_weightMeasure (α β : ℝ) :
+theorem jacobiMeasure_eq_weightMeasure (α β : ℝ) :
     jacobiMeasure α β = weightMeasure (Ioo (-1) 1) (jacobiWeight α β) := rfl
 
-lemma intervalIntegrable_jacobiWeight {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) :
+theorem intervalIntegrable_jacobiWeight {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) :
     IntervalIntegrable (jacobiWeight α β) volume (-1) 1 := by
   have h1 : IntervalIntegrable (fun x : ℝ => (1 + x) ^ β) volume (-1) 0 := by
     have := (intervalIntegral.intervalIntegrable_rpow' hβ (a := 0) (b := 1)).comp_add_right 1
@@ -559,7 +557,7 @@ lemma intervalIntegrable_jacobiWeight {α β : ℝ} (hα : -1 < α) (hβ : -1 < 
     linarith [hx.1]
   exact (h1.continuousOn_mul h2).trans (h3.mul_continuousOn h4)
 
-lemma integrableOn_eval_mul_jacobiWeight {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (q : ℝ[X]) :
+theorem integrableOn_eval_mul_jacobiWeight {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (q : ℝ[X]) :
     IntegrableOn (fun x => q.eval x * jacobiWeight α β x) (Ioo (-1) 1) :=
   (intervalIntegrable_iff_integrableOn_Ioo_of_le (by norm_num)).1
     ((intervalIntegrable_jacobiWeight hα hβ).continuousOn_mul q.continuous.continuousOn)
@@ -690,7 +688,7 @@ variable {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOrthogonalPolynomials μ
 include h
 
 /-- An orthogonal family spans all real polynomials. -/
-lemma span_range_eq_top : Submodule.span ℝ (Set.range p) = ⊤ :=
+theorem span_range_eq_top : Submodule.span ℝ (Set.range p) = ⊤ :=
   Polynomial.Sequence.span (⟨p, fun n => by
       rw [degree_eq_natDegree (h.ne_zero n), h.1 n]⟩ : Polynomial.Sequence ℝ) fun i =>
     isUnit_iff_ne_zero.mpr <| Polynomial.leadingCoeff_ne_zero.mpr <| h.ne_zero i
@@ -728,18 +726,18 @@ end IsOrthogonalPolynomials
 
 /-- An almost-everywhere statement for a weight measure, transferred to Lebesgue measure on the
 set where the weight is positive. -/
-lemma ae_of_ae_weightMeasure {I : Set ℝ} (hI : MeasurableSet I) {w : ℝ → ℝ} (hw : Measurable w)
+theorem ae_of_ae_weightMeasure {I : Set ℝ} (hI : MeasurableSet I) {w : ℝ → ℝ} (hw : Measurable w)
     (hwpos : ∀ x ∈ I, 0 < w x) {P : ℝ → Prop} (h : ∀ᵐ x ∂weightMeasure I w, P x) :
     ∀ᵐ x : ℝ, x ∈ I → P x := by
   rw [weightMeasure, ae_withDensity_iff (by fun_prop), ae_restrict_iff' hI] at h
   refine h.mono fun x hx hxI => hx hxI ?_
   simpa using hwpos x hxI
 
-lemma measurable_jacobiWeight (α β : ℝ) : Measurable (jacobiWeight α β) := by
+theorem measurable_jacobiWeight (α β : ℝ) : Measurable (jacobiWeight α β) := by
   unfold jacobiWeight
   fun_prop
 
-lemma measurable_laguerreWeight (α : ℝ) : Measurable (laguerreWeight α) := by
+theorem measurable_laguerreWeight (α : ℝ) : Measurable (laguerreWeight α) := by
   unfold laguerreWeight
   fun_prop
 
@@ -835,7 +833,7 @@ def ultrasphPolyR (lam : ℝ) (n : ℕ) : ℝ[X] :=
   C (ultrasphCoeffR lam n) * jacobiPolyPR (lam - 1 / 2) (lam - 1 / 2) n
 
 open DLMF.Hypergeometric in
-lemma eval_map_ultrasphPolyR {lam : ℝ} (hlam : -1 / 2 < lam) (n : ℕ) (z : ℂ) :
+theorem eval_map_ultrasphPolyR {lam : ℝ} (hlam : -1 / 2 < lam) (n : ℕ) (z : ℂ) :
     ((ultrasphPolyR lam n).map (algebraMap ℝ ℂ)).eval z = ultrasphPoly lam n z := by
   have hden : 0 < (ascPochhammer ℝ n).eval (lam + 1 / 2) := ascPochhammer_pos _ _ (by linarith)
   have hp : poch ((lam : ℂ) + 1 / 2) n ≠ 0 := by
@@ -851,11 +849,11 @@ lemma eval_map_ultrasphPolyR {lam : ℝ} (hlam : -1 / 2 < lam) (n : ℕ) (z : �
   push_cast
   ring
 
-lemma eval_ultrasphPolyR {lam : ℝ} (hlam : -1 / 2 < lam) (n : ℕ) (x : ℝ) :
+theorem eval_ultrasphPolyR {lam : ℝ} (hlam : -1 / 2 < lam) (n : ℕ) (x : ℝ) :
     (((ultrasphPolyR lam n).eval x : ℝ) : ℂ) = ultrasphPoly lam n x := by
   rw [← eval_map_ofReal, eval_map_ultrasphPolyR hlam]
 
-lemma ultrasphCoeffR_ne_zero {lam : ℝ} (hlam : -1 / 2 < lam) (hlam0 : lam ≠ 0) (n : ℕ) :
+theorem ultrasphCoeffR_ne_zero {lam : ℝ} (hlam : -1 / 2 < lam) (hlam0 : lam ≠ 0) (n : ℕ) :
     ultrasphCoeffR lam n ≠ 0 := by
   refine div_ne_zero (fun h0 => ?_) (ascPochhammer_pos _ _ (by linarith)).ne'
   obtain ⟨k, -, hk⟩ := (ascPochhammer_eval_eq_zero_iff n (2 * lam)).1 h0

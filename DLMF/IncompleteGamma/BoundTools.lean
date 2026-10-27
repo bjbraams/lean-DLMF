@@ -5,14 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.IncompleteGamma.RealIntegrals
-public import Mathlib.Analysis.SpecialFunctions.Gamma.BohrMollerup
-public import Mathlib.Analysis.Convex.Deriv
-public import Mathlib.Analysis.Convex.Slope
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
-public import Mathlib.Analysis.Convex.SpecificFunctions.Basic
-public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
-public import TauCeti.Analysis.SpecialFunctions.IncompleteGamma
+public import DLMF.IncompleteGamma.Basic
 
 /-!
 # Real-variable tools for the incomplete Gamma inequalities, DLMF §8.10

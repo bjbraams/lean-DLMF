@@ -36,23 +36,23 @@ def Real.jacobiThetaThreeNullQ (q : ℝ) : ℝ := ∑' n : ℤ, q ^ (n ^ 2)
 def Real.jacobiThetaFourNullQ (q : ℝ) : ℝ := ∑' n : ℤ, (-1 : ℝ) ^ n * q ^ (n ^ 2)
 
 /-- `q^{n²} ≤ q^{|n|}` for `0 < q ≤ 1`. -/
-lemma zpow_sq_le {q : ℝ} (hq0 : 0 < q) (hq1 : q ≤ 1) (n : ℤ) : q ^ (n ^ 2) ≤ q ^ |n| := by
+theorem zpow_sq_le {q : ℝ} (hq0 : 0 < q) (hq1 : q ≤ 1) (n : ℤ) : q ^ (n ^ 2) ≤ q ^ |n| := by
   apply zpow_le_zpow_right_of_le_one₀ hq0 hq1
   rw [← sq_abs]; nlinarith [abs_nonneg n]
 
 /-- `∑_{n∈ℤ} q^{|n|}` converges for `0 < q < 1`. -/
-lemma summable_zpow_abs {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) : Summable fun n : ℤ => q ^ |n| := by
+theorem summable_zpow_abs {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) : Summable fun n : ℤ => q ^ |n| := by
   apply Summable.of_nat_of_neg <;>
   · simp only [abs_neg, Nat.abs_cast, zpow_natCast]
     exact summable_geometric_of_lt_one hq0.le hq1
 
 /-- `∑_{n∈ℤ} q^{n²}` converges for `0 < q < 1`. -/
-lemma summable_zpow_sq {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) : Summable fun n : ℤ => q ^ (n ^ 2) :=
+theorem summable_zpow_sq {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) : Summable fun n : ℤ => q ^ (n ^ 2) :=
   (summable_zpow_abs hq0 hq1).of_nonneg_of_le (fun _ => (zpow_pos hq0 _).le)
     (zpow_sq_le hq0 hq1.le)
 
 /-- `∑_{n∈ℤ} (-1)ⁿ q^{n²}` converges absolutely for `0 < q < 1`. -/
-lemma summable_neg_one_zpow_mul {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
+theorem summable_neg_one_zpow_mul {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
     Summable fun n : ℤ => (-1 : ℝ) ^ n * q ^ (n ^ 2) := by
   refine (summable_zpow_sq hq0 hq1).of_norm_bounded fun n => ?_
   rw [norm_mul, norm_zpow, norm_neg, norm_one, one_zpow, one_mul,
@@ -82,11 +82,11 @@ def oddLatticeSwap : {p : ℤ × ℤ // ¬ Even (p.1 + p.2)} ≃ {p : ℤ × ℤ
   right_inv p := rfl
 
 /-- `(-1)^a (-1)^b = (-1)^{a+b}`. -/
-lemma neg_one_zpow_add (a b : ℤ) : (-1 : ℝ) ^ a * (-1 : ℝ) ^ b = (-1 : ℝ) ^ (a + b) :=
+theorem neg_one_zpow_add (a b : ℤ) : (-1 : ℝ) ^ a * (-1 : ℝ) ^ b = (-1 : ℝ) ^ (a + b) :=
   (zpow_add₀ (by norm_num) a b).symm
 
 /-- `q^{(u+v)²} q^{(u-v)²} = (q²)^{u²} (q²)^{v²}`. -/
-lemma zpow_lattice {q : ℝ} (hq0 : 0 < q) (u v : ℤ) :
+theorem zpow_lattice {q : ℝ} (hq0 : 0 < q) (u v : ℤ) :
     q ^ ((u + v) ^ 2) * q ^ ((u - v) ^ 2) = (q ^ 2) ^ (u ^ 2) * (q ^ 2) ^ (v ^ 2) := by
   rw [← zpow_add₀ hq0.ne', ← zpow_add₀ (by positivity), ← zpow_natCast, ← zpow_mul]
   congr 1; push_cast; ring
@@ -179,11 +179,11 @@ theorem Real.jacobiThetaThreeNullQ_mul_jacobiThetaFourNullQ {q : ℝ} (hq0 : 0 <
 
 
 /-- `r^{n²}` as a natural power. -/
-lemma zpow_sq_eq_pow (r : ℝ) (n : ℤ) : r ^ (n ^ 2) = r ^ (n.natAbs ^ 2) := by
+theorem zpow_sq_eq_pow (r : ℝ) (n : ℤ) : r ^ (n ^ 2) = r ^ (n.natAbs ^ 2) := by
   rw [← zpow_natCast]; congr 1; push_cast; rw [sq_abs]
 
 /-- Theta-type series are continuous on `[0, 1/2]` (Weierstrass M-test). -/
-lemma continuousOn_tsum_zpow_sq (c : ℤ → ℝ) (hc : ∀ n, |c n| ≤ 1) :
+theorem continuousOn_tsum_zpow_sq (c : ℤ → ℝ) (hc : ∀ n, |c n| ≤ 1) :
     ContinuousOn (fun r : ℝ => ∑' n : ℤ, c n * r ^ (n ^ 2)) (Icc 0 (1 / 2)) := by
   refine continuousOn_tsum (u := fun n : ℤ => (1 / 2 : ℝ) ^ |n|) (fun n => ?_)
     (summable_zpow_abs (by norm_num) (by norm_num)) (fun n r hr => ?_)
@@ -197,13 +197,13 @@ lemma continuousOn_tsum_zpow_sq (c : ℤ → ℝ) (hc : ∀ n, |c n| ≤ 1) :
           rw [one_mul]; exact h1.trans (zpow_sq_le (by norm_num) (by norm_num) n)
 
 /-- At `r = 0` only the `n = 0` term survives. -/
-lemma tsum_zpow_sq_zero (c : ℤ → ℝ) : ∑' n : ℤ, c n * (0 : ℝ) ^ (n ^ 2) = c 0 := by
+theorem tsum_zpow_sq_zero (c : ℤ → ℝ) : ∑' n : ℤ, c n * (0 : ℝ) ^ (n ^ 2) = c 0 := by
   rw [tsum_eq_single 0 fun n hn => by
     rw [zero_zpow _ (pow_ne_zero 2 hn), mul_zero]]
   simp
 
 /-- Theta-type series tend to their constant term as `r → 0⁺`. -/
-lemma tendsto_tsum_zpow_sq (c : ℤ → ℝ) (hc : ∀ n, |c n| ≤ 1) :
+theorem tendsto_tsum_zpow_sq (c : ℤ → ℝ) (hc : ∀ n, |c n| ≤ 1) :
     Tendsto (fun r : ℝ => ∑' n : ℤ, c n * r ^ (n ^ 2)) (𝓝[>] 0) (𝓝 (c 0)) := by
   have h := (continuousOn_tsum_zpow_sq c hc) 0 ⟨le_rfl, by norm_num⟩
   rw [ContinuousWithinAt, tsum_zpow_sq_zero] at h
@@ -211,24 +211,24 @@ lemma tendsto_tsum_zpow_sq (c : ℤ → ℝ) (hc : ∀ n, |c n| ≤ 1) :
     (mem_of_superset (Ico_mem_nhdsGT (by norm_num : (0 : ℝ) < 1 / 2)) Ico_subset_Icc_self))
 
 /-- `θ₃(r) → 1` as `r → 0⁺`. -/
-lemma Real.tendsto_jacobiThetaThreeNullQ : Tendsto Real.jacobiThetaThreeNullQ (𝓝[>] 0) (𝓝 1) := by
+theorem Real.tendsto_jacobiThetaThreeNullQ : Tendsto Real.jacobiThetaThreeNullQ (𝓝[>] 0) (𝓝 1) := by
   have h := tendsto_tsum_zpow_sq (fun _ => (1 : ℝ)) (fun _ => by simp)
   unfold Real.jacobiThetaThreeNullQ; simpa using h
 
 /-- `θ₄(r) → 1` as `r → 0⁺`. -/
-lemma Real.tendsto_jacobiThetaFourNullQ : Tendsto Real.jacobiThetaFourNullQ (𝓝[>] 0) (𝓝 1) := by
+theorem Real.tendsto_jacobiThetaFourNullQ : Tendsto Real.jacobiThetaFourNullQ (𝓝[>] 0) (𝓝 1) := by
   have h := tendsto_tsum_zpow_sq (fun n => (-1 : ℝ) ^ n) (fun n => by
     rw [abs_zpow, abs_neg, abs_one, one_zpow])
   unfold Real.jacobiThetaFourNullQ; simpa using h
 
 /-- `θ₃(q) ≥ 1`. -/
-lemma Real.one_le_jacobiThetaThreeNullQ {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
+theorem Real.one_le_jacobiThetaThreeNullQ {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
     1 ≤ Real.jacobiThetaThreeNullQ q := by
   have h := (summable_zpow_sq hq0 hq1).le_tsum 0 (fun n _ => (zpow_pos hq0 _).le)
   unfold Real.jacobiThetaThreeNullQ; simpa using h
 
 /-- `θ₄(q) ≥ 0`, from `θ₃(q) θ₄(q) = θ₄(q²)²`. -/
-lemma Real.jacobiThetaFourNullQ_nonneg {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
+theorem Real.jacobiThetaFourNullQ_nonneg {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
     0 ≤ Real.jacobiThetaFourNullQ q := by
   have h := Real.jacobiThetaThreeNullQ_mul_jacobiThetaFourNullQ hq0 hq1
   have h3 := Real.one_le_jacobiThetaThreeNullQ hq0 hq1
@@ -239,18 +239,18 @@ lemma Real.jacobiThetaFourNullQ_nonneg {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
   nlinarith [sq_nonneg (Real.jacobiThetaFourNullQ (q ^ 2))]
 
 /-- The nomes `q^{2^n}` tend to `0` from the right. -/
-lemma tendsto_pow_two_pow {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
+theorem tendsto_pow_two_pow {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
     Tendsto (fun n : ℕ => q ^ 2 ^ n) atTop (𝓝[>] 0) := by
   refine tendsto_nhdsWithin_iff.mpr ⟨?_, Eventually.of_forall fun n => pow_pos hq0 _⟩
   exact (tendsto_pow_atTop_nhds_zero_of_lt_one hq0.le hq1).comp
     (tendsto_pow_atTop_atTop_of_one_lt (by norm_num))
 
 /-- `q^{2^{n+1}} = (q^{2ⁿ})²`. -/
-lemma pow_two_pow_succ (q : ℝ) (n : ℕ) : q ^ 2 ^ (n + 1) = (q ^ 2 ^ n) ^ 2 := by
+theorem pow_two_pow_succ (q : ℝ) (n : ℕ) : q ^ 2 ^ (n + 1) = (q ^ 2 ^ n) ^ 2 := by
   rw [pow_succ, pow_mul]
 
 /-- `θ₄(q) > 0`: a zero would propagate to `θ₄(q^{2ⁿ}) → 1`. -/
-lemma Real.jacobiThetaFourNullQ_pos {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
+theorem Real.jacobiThetaFourNullQ_pos {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
     0 < Real.jacobiThetaFourNullQ q := by
   rcases (Real.jacobiThetaFourNullQ_nonneg hq0 hq1).lt_or_eq with h | h
   · exact h

@@ -5,15 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Gamma.Digamma
 public import DLMF.Gamma.Polygamma
-public import DLMF.Gamma.MellinBarnes
-public import Mathlib.Analysis.Fourier.Inversion
-public import Mathlib.MeasureTheory.Integral.Bochner.Basic
-public import Mathlib.MeasureTheory.Measure.Haar.NormedSpace
 public import Mathlib.NumberTheory.LSeries.RiemannZeta
-public import Mathlib.NumberTheory.ZetaValues
-public import Mathlib.Analysis.SpecialFunctions.Pow.Complex
+import DLMF.Gamma.RecipGammaDeriv
 
 /-!
 # Mellin–Barnes and related integrals; sums (DLMF §§5.13, 5.16)
@@ -80,7 +74,7 @@ holomorphic for `re v > 0`, and 5.13.2 is the value at `v = e^{i(π/2 - b)}`. -/
 def normSqHalfB (α : ℝ) (s : ℝ) : ℂ :=
   Complex.Gamma (α + I * ((s : ℂ) / 2)) * Complex.Gamma (α - I * ((s : ℂ) / 2))
 
-lemma continuous_normSqHalfB {α : ℝ} (hα : 0 < α) : Continuous (normSqHalfB α) := by
+theorem continuous_normSqHalfB {α : ℝ} (hα : 0 < α) : Continuous (normSqHalfB α) := by
   refine continuous_iff_continuousAt.2 fun s => ?_
   have h1 : ContinuousAt Complex.Gamma ((α : ℂ) + I * ((s : ℂ) / 2)) :=
     continuousAt_Gamma_of_re_pos (by simpa using hα)
@@ -89,7 +83,7 @@ lemma continuous_normSqHalfB {α : ℝ} (hα : 0 < α) : Continuous (normSqHalfB
   exact (h1.comp (f := fun s : ℝ => (α : ℂ) + I * ((s : ℂ) / 2)) (by fun_prop)).mul
     (h2.comp (f := fun s : ℝ => (α : ℂ) - I * ((s : ℂ) / 2)) (by fun_prop))
 
-lemma exists_norm_normSqHalfB_le {α : ℝ} (hα : 0 < α) :
+theorem exists_norm_normSqHalfB_le {α : ℝ} (hα : 0 < α) :
     ∃ C : ℝ, ∃ K : ℕ, ∀ s : ℝ,
       ‖normSqHalfB α s‖ ≤ C * (1 + |s|) ^ K * Real.exp (-(π * |s|) / 2) := by
   obtain ⟨C, K, hC⟩ := exists_norm_Gamma_le hα
@@ -116,7 +110,7 @@ lemma exists_norm_normSqHalfB_le {α : ℝ} (hα : 0 < α) :
 
 /-- The real-variable form of 5.13.2 before continuation: for `v > 0`,
 `∫ B(s) v^{is} ds = 4π Γ(2α) (v + 1/v)^{-2α}`. -/
-lemma integral_normSqHalfB_ofReal {α : ℝ} (hα : 0 < α) {v : ℝ} (hv : 0 < v) :
+theorem integral_normSqHalfB_ofReal {α : ℝ} (hα : 0 < α) {v : ℝ} (hv : 0 < v) :
     ∫ s : ℝ, normSqHalfB α s * (v : ℂ) ^ (((0 : ℝ) : ℂ) + I * s) =
       4 * π * Complex.Gamma (2 * α) * ((v : ℂ) + (v : ℂ)⁻¹) ^ (-(2 * α : ℂ)) := by
   set x : ℝ := (v ^ 2)⁻¹ with hxdef
@@ -175,7 +169,7 @@ lemma integral_normSqHalfB_ofReal {α : ℝ} (hα : 0 < α) {v : ℝ} (hv : 0 < 
 
 
 /-- The continuation of `integral_normSqHalfB_ofReal` to the right half-plane. -/
-lemma integral_normSqHalfB {α : ℝ} (hα : 0 < α) {v : ℂ} (hv : 0 < v.re) :
+theorem integral_normSqHalfB {α : ℝ} (hα : 0 < α) {v : ℂ} (hv : 0 < v.re) :
     ∫ s : ℝ, normSqHalfB α s * v ^ (((0 : ℝ) : ℂ) + I * s) =
       4 * π * Complex.Gamma (2 * α) * (v + v⁻¹) ^ (-(2 * α : ℂ)) := by
   obtain ⟨C, K, hCK⟩ := exists_norm_normSqHalfB_le hα
@@ -265,7 +259,7 @@ theorem mellin_barnes_norm_sq {a b : ℝ} (ha : 0 < a) (hb : 0 < b) (hbπ : b < 
 
 open Set in
 /-- The vertical-line integrand `t ↦ Γ(a + it) Γ(c - it)` is integrable for `re a, re c > 0`. -/
-lemma integrable_Gamma_add_mul_Gamma_sub {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) :
+theorem integrable_Gamma_add_mul_Gamma_sub {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) :
     Integrable (fun t : ℝ => Complex.Gamma (a + I * t) * Complex.Gamma (c - I * t)) := by
   have h := (integrable_Gamma_mul_Gamma_vertical (a := a + c) (σ := a.re) ha
     (by simp only [add_re]; linarith)).comp_add_right a.im
@@ -278,7 +272,7 @@ lemma integrable_Gamma_add_mul_Gamma_sub {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c
 open Set in
 /-- Inner integral in Barnes' first lemma: for `u > 0`,
 `∫ Γ(a+it) Γ(c-it) u^{it} dt = 2π Γ(a+c) u^c (1+u)^{-(a+c)}`. -/
-lemma integral_Gamma_mul_Gamma_mul_cpow {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) {u : ℝ}
+theorem integral_Gamma_mul_Gamma_mul_cpow {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) {u : ℝ}
     (hu : 0 < u) :
     ∫ t : ℝ, Complex.Gamma (a + I * t) * Complex.Gamma (c - I * t) * (u : ℂ) ^ (I * t) =
       2 * π * Complex.Gamma (a + c) * (u : ℂ) ^ c * ((1 + u : ℝ) : ℂ) ^ (-(a + c)) := by
@@ -429,7 +423,7 @@ from log-convexity of `Γ` and the reflection formula. -/
 namespace RamanujanAux
 
 /-- `|Γ(x+iy)| ≤ Γ(x)` for `x > 0`. -/
-lemma norm_Gamma_le_Gamma_re {z : ℂ} (hz : 0 < z.re) : ‖Complex.Gamma z‖ ≤ Real.Gamma z.re := by
+theorem norm_Gamma_le_Gamma_re {z : ℂ} (hz : 0 < z.re) : ‖Complex.Gamma z‖ ≤ Real.Gamma z.re := by
   have h := norm_Gamma_sq_eq hz z.im
   rw [show ((z.re : ℂ) + I * z.im) = z by rw [mul_comm]; exact re_add_im z] at h
   have hG := Real.Gamma_pos_of_pos hz
@@ -438,7 +432,7 @@ lemma norm_Gamma_le_Gamma_re {z : ℂ} (hz : 0 < z.re) : ‖Complex.Gamma z‖ �
     rw [h]; exact div_le_self (by positivity) hP
   exact (pow_le_pow_iff_left₀ (norm_nonneg _) hG.le two_ne_zero).1 h2
 
-lemma gammaVertProd_le_of_abs_le {x y Y : ℝ} (hx : 0 < x) (hy : |y| ≤ Y) :
+theorem gammaVertProd_le_of_abs_le {x y Y : ℝ} (hx : 0 < x) (hy : |y| ≤ Y) :
     gammaVertProd x y ≤ gammaVertProd x Y := by
   refine le_of_tendsto_of_tendsto' (tendsto_prod_gammaVertProd x y)
     (tendsto_prod_gammaVertProd x Y) fun n => ?_
@@ -449,7 +443,7 @@ lemma gammaVertProd_le_of_abs_le {x y Y : ℝ} (hx : 0 < x) (hy : |y| ≤ Y) :
   gcongr
 
 /-- A lower bound for `|Γ|` near the real axis: `Γ(x) ≤ √P(x₁,Y) |Γ(x+iy)|`. -/
-lemma Gamma_re_le_mul_norm_Gamma {x₁ Y : ℝ} (hx₁ : 0 < x₁) {z : ℂ} (hz : x₁ ≤ z.re)
+theorem Gamma_re_le_mul_norm_Gamma {x₁ Y : ℝ} (hx₁ : 0 < x₁) {z : ℂ} (hz : x₁ ≤ z.re)
     (hy : |z.im| ≤ Y) :
     Real.Gamma z.re ≤ Real.sqrt (gammaVertProd x₁ Y) * ‖Complex.Gamma z‖ := by
   have hzr : 0 < z.re := hx₁.trans_le hz
@@ -469,7 +463,7 @@ lemma Gamma_re_le_mul_norm_Gamma {x₁ Y : ℝ} (hx₁ : 0 < x₁) {z : ℂ} (hz
   exact (pow_le_pow_iff_left₀ hG.le (by positivity) two_ne_zero).1 h2
 
 /-- `1/Γ(z) = Γ(1-z) sin(πz)/π` for `re z < 1`. -/
-lemma recip_Gamma_eq_reflect {z : ℂ} (hz : z.re < 1) :
+theorem recip_Gamma_eq_reflect {z : ℂ} (hz : z.re < 1) :
     (Complex.Gamma z)⁻¹ = Complex.Gamma (1 - z) * Complex.sin (π * z) / π := by
   have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.2 Real.pi_ne_zero
   by_cases hs : Complex.sin (π * z) = 0
@@ -492,7 +486,7 @@ lemma recip_Gamma_eq_reflect {z : ℂ} (hz : z.re < 1) :
     exact (eq_inv_of_mul_eq_one_right h1).symm
 
 /-- `‖sin z‖ ≤ exp |im z|`. -/
-lemma norm_sin_le_exp_abs_im (z : ℂ) : ‖Complex.sin z‖ ≤ Real.exp |z.im| := by
+theorem norm_sin_le_exp_abs_im (z : ℂ) : ‖Complex.sin z‖ ≤ Real.exp |z.im| := by
   rw [Complex.sin]
   have h1 : ‖Complex.exp (-z * I)‖ = Real.exp z.im := by rw [norm_exp]; simp
   have h2 : ‖Complex.exp (z * I)‖ = Real.exp (-z.im) := by rw [norm_exp]; simp
@@ -511,7 +505,7 @@ def GammaShiftBound (w : ℝ) : Prop :=
   ∃ c C T : ℝ, 0 < c ∧ 0 < T ∧ ∀ t : ℝ, T ≤ t →
     c * t ^ w * Real.Gamma t ≤ Real.Gamma (t + w) ∧ Real.Gamma (t + w) ≤ C * t ^ w * Real.Gamma t
 
-lemma gammaShiftBound_of_mem_Icc {s : ℝ} (hs0 : 0 ≤ s) (hs1 : s ≤ 1) : GammaShiftBound s := by
+theorem gammaShiftBound_of_mem_Icc {s : ℝ} (hs0 : 0 ≤ s) (hs1 : s ≤ 1) : GammaShiftBound s := by
   refine ⟨1 / 2, 1, 1, by norm_num, one_pos, fun x hx => ?_⟩
   have hx0 : 0 < x := by linarith
   have hG := Real.Gamma_pos_of_pos hx0
@@ -564,7 +558,7 @@ lemma gammaShiftBound_of_mem_Icc {s : ℝ} (hs0 : 0 ≤ s) (hs1 : s ≤ 1) : Gam
   · simp only [Real.rpow_zero, add_zero]
     constructor <;> nlinarith
 
-lemma GammaShiftBound.add_one {w : ℝ} (h : GammaShiftBound w) : GammaShiftBound (w + 1) := by
+theorem GammaShiftBound.add_one {w : ℝ} (h : GammaShiftBound w) : GammaShiftBound (w + 1) := by
   obtain ⟨c, C, T, hc, hT, hb⟩ := h
   refine ⟨c / 2, 2 * C, max T (2 * |w| + 1), by positivity, by positivity, fun t ht => ?_⟩
   have htT : T ≤ t := le_trans (le_max_left _ _) ht
@@ -584,7 +578,7 @@ lemma GammaShiftBound.add_one {w : ℝ} (h : GammaShiftBound w) : GammaShiftBoun
           · nlinarith [Real.Gamma_pos_of_pos (show 0 < t + w by linarith)]
       _ = 2 * C * (t ^ w * t) * Real.Gamma t := by ring
 
-lemma GammaShiftBound.sub_one {w : ℝ} (h : GammaShiftBound w) : GammaShiftBound (w - 1) := by
+theorem GammaShiftBound.sub_one {w : ℝ} (h : GammaShiftBound w) : GammaShiftBound (w - 1) := by
   obtain ⟨c, C, T, hc, hT, hb⟩ := h
   refine ⟨c / 2, 2 * C, max T (2 * |w| + 4), by positivity, by positivity, fun t ht => ?_⟩
   have htT : T ≤ t := le_trans (le_max_left _ _) ht
@@ -606,7 +600,7 @@ lemma GammaShiftBound.sub_one {w : ℝ} (h : GammaShiftBound w) : GammaShiftBoun
   · nlinarith [Real.rpow_pos_of_pos ht0 (w - 1)]
   · nlinarith [Real.rpow_pos_of_pos ht0 (w - 1)]
 
-lemma gammaShiftBound (w : ℝ) : GammaShiftBound w := by
+theorem gammaShiftBound (w : ℝ) : GammaShiftBound w := by
   have hb := gammaShiftBound_of_mem_Icc (Int.fract_nonneg w) (Int.fract_lt_one w).le
   have key : ∀ n : ℤ, GammaShiftBound (Int.fract w + n) := by
     intro n
@@ -619,7 +613,7 @@ lemma gammaShiftBound (w : ℝ) : GammaShiftBound w := by
   simpa [Int.fract_add_floor] using key ⌊w⌋
 
 /-- The real Gamma ratio bound `Γ(t+α)/Γ(t+β) = O(t^{α-β})`. -/
-lemma exists_Gamma_ratio_le (α β : ℝ) : ∃ K T : ℝ, 0 ≤ K ∧ 0 < T ∧ ∀ t : ℝ, T ≤ t →
+theorem exists_Gamma_ratio_le (α β : ℝ) : ∃ K T : ℝ, 0 ≤ K ∧ 0 < T ∧ ∀ t : ℝ, T ≤ t →
     Real.Gamma (t + α) ≤ K * t ^ (α - β) * Real.Gamma (t + β) := by
   obtain ⟨_, C, T₁, _, hT₁, h1⟩ := gammaShiftBound α
   obtain ⟨c, _, T₂, hc, hT₂, h2⟩ := gammaShiftBound β
@@ -640,7 +634,7 @@ lemma exists_Gamma_ratio_le (α β : ℝ) : ∃ K T : ℝ, 0 ≤ K ∧ 0 < T ∧
 
 /-- **Integrals against `1/Γ(a+t)` are holomorphic in `a`**, given an integrable majorant on a
 closed disc of radius `2r` about `a₀`. -/
-lemma differentiableAt_integral_recip_Gamma_mul {G : ℝ → ℂ} (hG : Continuous G) {a₀ : ℂ}
+theorem differentiableAt_integral_recip_Gamma_mul {G : ℝ → ℂ} (hG : Continuous G) {a₀ : ℂ}
     {r : ℝ} (hr : 0 < r) {M : ℝ → ℝ} (hM : Integrable M)
     (hb : ∀ a ∈ Metric.closedBall a₀ (2 * r), ∀ t : ℝ,
       ‖(Complex.Gamma (a + t))⁻¹ * G t‖ ≤ M t) :
@@ -687,7 +681,7 @@ lemma differentiableAt_integral_recip_Gamma_mul {G : ℝ → ℂ} (hG : Continuo
 
 
 /-- A lower bound for `|Γ|` gives an upper bound for `1/|Γ|`. -/
-lemma norm_recip_Gamma_le_of_re {Y : ℝ} {z : ℂ} (hz : 1 ≤ z.re) (hy : |z.im| ≤ Y) :
+theorem norm_recip_Gamma_le_of_re {Y : ℝ} {z : ℂ} (hz : 1 ≤ z.re) (hy : |z.im| ≤ Y) :
     ‖(Complex.Gamma z)⁻¹‖ ≤ Real.sqrt (gammaVertProd 1 Y) / Real.Gamma z.re := by
   have h := Gamma_re_le_mul_norm_Gamma one_pos hz hy
   have hG := Real.Gamma_pos_of_pos (show 0 < z.re by linarith)
@@ -699,7 +693,7 @@ lemma norm_recip_Gamma_le_of_re {Y : ℝ} {z : ℂ} (hz : 1 ≤ z.re) (hy : |z.i
   linarith
 
 /-- The reflection bound `1/|Γ(z)| ≤ |Γ(1-z)| e^{π|im z|}/π` for `re z < 1`. -/
-lemma norm_recip_Gamma_le_reflect {z : ℂ} (hz : z.re < 1) :
+theorem norm_recip_Gamma_le_reflect {z : ℂ} (hz : z.re < 1) :
     ‖(Complex.Gamma z)⁻¹‖ ≤ ‖Complex.Gamma (1 - z)‖ * Real.exp (π * |z.im|) / π := by
   rw [recip_Gamma_eq_reflect hz, norm_div, norm_mul, norm_real, Real.norm_of_nonneg Real.pi_pos.le]
   gcongr
@@ -707,7 +701,7 @@ lemma norm_recip_Gamma_le_reflect {z : ℂ} (hz : z.re < 1) :
   simpa [abs_mul, abs_of_pos Real.pi_pos] using this
 
 /-- The complex Gamma ratio bound `|Γ(t+u)| ≤ K t^{re(u-v)} |Γ(t+v)|` for large `t`. -/
-lemma exists_norm_Gamma_ratio_le (u v : ℂ) : ∃ K T : ℝ, 0 ≤ K ∧ 0 < T ∧ ∀ t : ℝ, T ≤ t →
+theorem exists_norm_Gamma_ratio_le (u v : ℂ) : ∃ K T : ℝ, 0 ≤ K ∧ 0 < T ∧ ∀ t : ℝ, T ≤ t →
     ‖Complex.Gamma (t + u)‖ ≤ K * t ^ (u - v).re * ‖Complex.Gamma (t + v)‖ := by
   obtain ⟨K, T, hK, hT, h⟩ := exists_Gamma_ratio_le u.re v.re
   refine ⟨K * Real.sqrt (gammaVertProd 1 |v.im|), max T (|u.re| + |v.re| + 1), by positivity,
@@ -728,7 +722,7 @@ lemma exists_norm_Gamma_ratio_le (u v : ℂ) : ∃ K T : ℝ, 0 ≤ K ∧ 0 < T 
           ‖Complex.Gamma (t + v)‖) := by gcongr
     _ = _ := by ring
 
-lemma mul_recip_le_of_le_mul {x y k : ℝ} (hk : 0 ≤ k) (hy : 0 ≤ y) (h : x ≤ k * y) :
+theorem mul_recip_le_of_le_mul {x y k : ℝ} (hk : 0 ≤ k) (hy : 0 ≤ y) (h : x ≤ k * y) :
     x * y⁻¹ ≤ k := by
   rcases hy.lt_or_eq with hy | rfl
   · rw [← div_eq_mul_inv, div_le_iff₀ hy]; exact h
@@ -739,22 +733,22 @@ def ramanujanIntegrand (a b c d : ℂ) (t : ℝ) : ℂ :=
   1 / (Complex.Gamma (a + t) * Complex.Gamma (b + t) * Complex.Gamma (c - t) *
     Complex.Gamma (d - t))
 
-lemma norm_ramanujanIntegrand (a b c d : ℂ) (t : ℝ) :
+theorem norm_ramanujanIntegrand (a b c d : ℂ) (t : ℝ) :
     ‖ramanujanIntegrand a b c d t‖ = ‖(Complex.Gamma (a + t))⁻¹‖ *
       ‖(Complex.Gamma (b + t))⁻¹‖ * ‖(Complex.Gamma (c - t))⁻¹‖ *
       ‖(Complex.Gamma (d - t))⁻¹‖ := by
   rw [ramanujanIntegrand, one_div, mul_inv, mul_inv, mul_inv, norm_mul, norm_mul, norm_mul]
 
-lemma ramanujanIntegrand_neg (a b c d : ℂ) (u : ℝ) :
+theorem ramanujanIntegrand_neg (a b c d : ℂ) (u : ℝ) :
     ramanujanIntegrand a b c d (-u) = ramanujanIntegrand c d a b u := by
   simp only [ramanujanIntegrand, ofReal_neg, ← sub_eq_add_neg, sub_neg_eq_add]
   ring_nf
 
-lemma ramanujanIntegrand_swap (a b c d : ℂ) (t : ℝ) :
+theorem ramanujanIntegrand_swap (a b c d : ℂ) (t : ℝ) :
     ramanujanIntegrand a b c d t = ramanujanIntegrand b a c d t := by
   simp only [ramanujanIntegrand]; ring_nf
 
-lemma re_im_of_mem_closedBall {a a₀ : ℂ} {ρ : ℝ} (ha : a ∈ Metric.closedBall a₀ ρ) :
+theorem re_im_of_mem_closedBall {a a₀ : ℂ} {ρ : ℝ} (ha : a ∈ Metric.closedBall a₀ ρ) :
     a₀.re - ρ ≤ a.re ∧ a.re ≤ a₀.re + ρ ∧ |a.im| ≤ |a₀.im| + ρ := by
   rw [Metric.mem_closedBall, dist_eq_norm] at ha
   have h1 := abs_re_le_norm (a - a₀)
@@ -766,7 +760,7 @@ lemma re_im_of_mem_closedBall {a a₀ : ℂ} {ρ : ℝ} (ha : a ∈ Metric.close
   linarith
 
 /-- The right tail of Ramanujan's integrand, uniformly for `a` in a closed disc. -/
-lemma right_tail (a₀ b c d : ℂ) (ρ : ℝ) : ∃ K T : ℝ, 0 ≤ K ∧ 0 < T ∧
+theorem right_tail (a₀ b c d : ℂ) (ρ : ℝ) : ∃ K T : ℝ, 0 ≤ K ∧ 0 < T ∧
     ∀ a ∈ Metric.closedBall a₀ ρ, ∀ t : ℝ, T ≤ t →
       ‖ramanujanIntegrand a b c d t‖ ≤ K * t ^ (2 - (a₀.re - ρ) - (b + c + d).re) := by
   set α := a₀.re - ρ with hα
@@ -845,7 +839,7 @@ lemma right_tail (a₀ b c d : ℂ) (ρ : ℝ) : ∃ K T : ℝ, 0 ≤ K ∧ 0 < 
 
 /-- The left tail of Ramanujan's integrand (in the reflected form), uniformly for `a` in a
 closed disc. -/
-lemma left_tail (a₀ b c d : ℂ) (ρ : ℝ) : ∃ K T : ℝ, 0 ≤ K ∧ 0 < T ∧
+theorem left_tail (a₀ b c d : ℂ) (ρ : ℝ) : ∃ K T : ℝ, 0 ≤ K ∧ 0 < T ∧
     ∀ a ∈ Metric.closedBall a₀ ρ, ∀ u : ℝ, T ≤ u →
       ‖ramanujanIntegrand c d a b u‖ ≤ K * u ^ (2 - (a₀.re - ρ) - (b + c + d).re) := by
   set α := a₀.re - ρ with hα
@@ -918,7 +912,7 @@ lemma left_tail (a₀ b c d : ℂ) (ρ : ℝ) : ∃ K T : ℝ, 0 ≤ K ∧ 0 < T
     _ = Pc * Ea * Eb / π ^ 2 * K3 * K4 * u ^ (2 - (a₀.re - ρ) - (b + c + d).re) := by
         rw [← hexp]; ring
 
-lemma continuous_ramanujanIntegrand_uncurry (b c d : ℂ) :
+theorem continuous_ramanujanIntegrand_uncurry (b c d : ℂ) :
     Continuous fun p : ℂ × ℝ => ramanujanIntegrand p.1 b c d p.2 := by
   have hg : Continuous fun s : ℂ => (Complex.Gamma s)⁻¹ := differentiable_recip_Gamma.continuous
   have e : (fun p : ℂ × ℝ => ramanujanIntegrand p.1 b c d p.2) = fun p : ℂ × ℝ =>
@@ -932,13 +926,13 @@ lemma continuous_ramanujanIntegrand_uncurry (b c d : ℂ) :
   have h4 := hg.comp (by fun_prop : Continuous fun p : ℂ × ℝ => d - (p.2 : ℂ))
   exact ((h1.mul h2).mul h3).mul h4
 
-lemma ramanujanIntegrand_eq_mul (a b c d : ℂ) (t : ℝ) :
+theorem ramanujanIntegrand_eq_mul (a b c d : ℂ) (t : ℝ) :
     ramanujanIntegrand a b c d t = (Complex.Gamma (a + t))⁻¹ *
       (1 / (Complex.Gamma (b + t) * Complex.Gamma (c - t) * Complex.Gamma (d - t))) := by
   simp only [ramanujanIntegrand, one_div, mul_inv]; ring
 
 /-- **Ramanujan's integral is holomorphic in `a`** on the half-plane `re(a+b+c+d) > 3`. -/
-lemma differentiableOn_integral_ramanujanIntegrand (b c d : ℂ) :
+theorem differentiableOn_integral_ramanujanIntegrand (b c d : ℂ) :
     DifferentiableOn ℂ (fun a : ℂ => ∫ t : ℝ, ramanujanIntegrand a b c d t)
       {a | 3 < (a + b + c + d).re} := by
   intro a₀ ha₀
@@ -1023,11 +1017,11 @@ lemma differentiableOn_integral_ramanujanIntegrand (b c d : ℂ) :
 
 
 /-- `cos^α` is a.e.-strongly measurable. -/
-lemma measurable_cos_rpow (α : ℝ) : Measurable fun x : ℝ => ((Real.cos x ^ α : ℝ) : ℂ) :=
+theorem measurable_cos_rpow (α : ℝ) : Measurable fun x : ℝ => ((Real.cos x ^ α : ℝ) : ℂ) :=
   Complex.measurable_ofReal.comp (Real.continuous_cos.measurable.pow_const α)
 
 /-- The integral `∫_{-π/2}^{π/2} cos^α x · e^{iζx} dx` is entire in `ζ`. -/
-lemma differentiable_integral_cos_rpow_mul_exp {α : ℝ} (hα : -1 < α) :
+theorem differentiable_integral_cos_rpow_mul_exp {α : ℝ} (hα : -1 < α) :
     Differentiable ℂ fun ζ : ℂ => ∫ x in (-(π / 2))..(π / 2),
       ((Real.cos x ^ α : ℝ) : ℂ) * Complex.exp (ζ * x * I) := by
   intro ζ₀
@@ -1083,7 +1077,7 @@ lemma differentiable_integral_cos_rpow_mul_exp {α : ℝ} (hα : -1 < α) :
   exact key.2.differentiableAt
 
 /-- The Cauchy-type integral `∫_{-π/2}^{π/2} cos^α x e^{iζx} dx` for all complex `ζ`. -/
-lemma integral_cos_rpow_mul_cexp {α : ℝ} (hα : -1 < α) (ζ : ℂ) :
+theorem integral_cos_rpow_mul_cexp {α : ℝ} (hα : -1 < α) (ζ : ℂ) :
     ∫ x in (-(π / 2))..(π / 2), ((Real.cos x ^ α : ℝ) : ℂ) * Complex.exp (ζ * x * I) =
       ((π * Real.Gamma (α + 1) / 2 ^ α : ℝ) : ℂ) *
         ((Complex.Gamma (1 + α / 2 + ζ / 2))⁻¹ * (Complex.Gamma (1 + α / 2 - ζ / 2))⁻¹) := by
@@ -1130,7 +1124,7 @@ lemma integral_cos_rpow_mul_cexp {α : ℝ} (hα : -1 < α) (ζ : ℂ) :
 
 
 /-- Integrability on `ℝ` from continuity and `O(|t|^e)` tails with `e < -1`. -/
-lemma integrable_of_tails {f : ℝ → ℂ} (hf : Continuous f) {K T e : ℝ} (hT : 0 < T)
+theorem integrable_of_tails {f : ℝ → ℂ} (hf : Continuous f) {K T e : ℝ} (hT : 0 < T)
     (he : e < -1) (hp : ∀ t : ℝ, T ≤ t → ‖f t‖ ≤ K * t ^ e)
     (hm : ∀ t : ℝ, T ≤ t → ‖f (-t)‖ ≤ K * t ^ e) : Integrable f := by
   set φ : ℝ → ℝ := (Ici T).indicator fun t => K * t ^ e with hφ
@@ -1160,7 +1154,7 @@ lemma integrable_of_tails {f : ℝ → ℂ} (hf : Continuous f) {K T e : ℝ} (h
   exact (h2.union h3).union h1
 
 /-- The two-factor product `1/(Γ(b+x)Γ(d-x))` is integrable when `re(b+d) > 2`. -/
-lemma integrable_recip_Gamma_mul_recip_Gamma {b d : ℂ} (h : 2 < (b + d).re) :
+theorem integrable_recip_Gamma_mul_recip_Gamma {b d : ℂ} (h : 2 < (b + d).re) :
     Integrable fun x : ℝ => (Complex.Gamma (b + x))⁻¹ * (Complex.Gamma (d - x))⁻¹ := by
   have hg : Continuous fun s : ℂ => (Complex.Gamma s)⁻¹ := differentiable_recip_Gamma.continuous
   obtain ⟨K1, T1, hK1, hT1, h1⟩ := exists_norm_Gamma_ratio_le (1 - d) b
@@ -1219,7 +1213,7 @@ lemma integrable_recip_Gamma_mul_recip_Gamma {b d : ℂ} (h : 2 < (b + d).re) :
 def kern (p ζ : ℝ) : ℝ → ℂ := (Ioc (-(π / 2)) (π / 2)).indicator fun φ =>
   ((Real.cos φ ^ p : ℝ) : ℂ) * Complex.exp ((ζ : ℂ) * φ * I)
 
-lemma fourier_kern_eq (p ζ w : ℝ) :
+theorem fourier_kern_eq (p ζ w : ℝ) :
     𝓕 (kern p ζ) w = ∫ x in (-(π / 2))..(π / 2),
       ((Real.cos x ^ p : ℝ) : ℂ) * Complex.exp (((ζ : ℂ) - 2 * π * w) * x * I) := by
   rw [Real.fourier_real_eq_integral_exp_smul,
@@ -1232,13 +1226,13 @@ lemma fourier_kern_eq (p ζ w : ℝ) :
     congr 2; push_cast; ring
   · rw [indicator_of_notMem hv, indicator_of_notMem hv, mul_zero]
 
-lemma fourier_kern {p : ℝ} (hp : -1 < p) (ζ w : ℝ) :
+theorem fourier_kern {p : ℝ} (hp : -1 < p) (ζ w : ℝ) :
     𝓕 (kern p ζ) w = ((π * Real.Gamma (p + 1) / 2 ^ p : ℝ) : ℂ) *
       ((Complex.Gamma (1 + p / 2 + ((ζ : ℂ) - 2 * π * w) / 2))⁻¹ *
         (Complex.Gamma (1 + p / 2 - ((ζ : ℂ) - 2 * π * w) / 2))⁻¹) := by
   rw [fourier_kern_eq]; exact integral_cos_rpow_mul_cexp hp _
 
-lemma integrable_kern {p : ℝ} (hp : -1 < p) (ζ : ℝ) : Integrable (kern p ζ) := by
+theorem integrable_kern {p : ℝ} (hp : -1 < p) (ζ : ℝ) : Integrable (kern p ζ) := by
   rw [kern, integrable_indicator_iff measurableSet_Ioc]
   have hle : -(π / 2) ≤ π / 2 := by linarith [Real.pi_pos]
   have hii : IntervalIntegrable (fun x : ℝ => ((Real.cos x ^ p : ℝ) : ℂ) *
@@ -1247,7 +1241,7 @@ lemma integrable_kern {p : ℝ} (hp : -1 < p) (ζ : ℝ) : Integrable (kern p ζ
       (by fun_prop : Continuous fun x : ℝ => Complex.exp ((ζ : ℂ) * x * I)).continuousOn
   exact (intervalIntegrable_iff_integrableOn_Ioc_of_le hle).1 hii
 
-lemma continuousAt_kern (p ζ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-(π / 2)) (π / 2)) :
+theorem continuousAt_kern (p ζ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-(π / 2)) (π / 2)) :
     ContinuousAt (kern p ζ) x := by
   have hcos : 0 < Real.cos x := Real.cos_pos_of_mem_Ioo hx
   have hc : ContinuousAt (fun φ : ℝ => ((Real.cos φ ^ p : ℝ) : ℂ) *
@@ -1260,16 +1254,16 @@ lemma continuousAt_kern (p ζ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-(π / 2)) (π /
   filter_upwards [isOpen_Ioo.mem_nhds hx] with y hy
   simp [kern, indicator_of_mem (Ioo_subset_Ioc_self hy)]
 
-lemma fourier_const_mul (C : ℂ) (F : ℝ → ℂ) (x : ℝ) :
+theorem fourier_const_mul (C : ℂ) (F : ℝ → ℂ) (x : ℝ) :
     𝓕 (fun ξ => C * F ξ) x = C * 𝓕 F x := by
   rw [Real.fourier_real_eq_integral_exp_smul, Real.fourier_real_eq_integral_exp_smul,
     ← integral_const_mul]
   congr 1; funext v; simp only [smul_eq_mul]; ring
 
-lemma fourier_zero_eq_integral (F : ℝ → ℂ) : 𝓕 F 0 = ∫ v, F v := by
+theorem fourier_zero_eq_integral (F : ℝ → ℂ) : 𝓕 F 0 = ∫ v, F v := by
   rw [Real.fourier_real_eq_integral_exp_smul]; simp
 
-lemma fourier_fourier_kern {p : ℝ} (hp : -1 < p) (ζ : ℝ) (h𝓕 : Integrable (𝓕 (kern p ζ)))
+theorem fourier_fourier_kern {p : ℝ} (hp : -1 < p) (ζ : ℝ) (h𝓕 : Integrable (𝓕 (kern p ζ)))
     {x : ℝ} (hx : -x ∈ Ioo (-(π / 2)) (π / 2)) :
     𝓕 (𝓕 (kern p ζ)) x = kern p ζ (-x) := by
   have h := (integrable_kern hp ζ).fourierInv_fourier_eq h𝓕 (continuousAt_kern p ζ hx)
@@ -1279,7 +1273,7 @@ lemma fourier_fourier_kern {p : ℝ} (hp : -1 < p) (ζ : ℝ) (h𝓕 : Integrabl
 
 /-- **Ramanujan's integral for real parameters** with `a + c > 1` and `b + d > 2`, by the
 multiplication formula `∫ 𝓕h · G = ∫ h · 𝓕G` and Fourier inversion. -/
-lemma integral_ramanujanIntegrand_of_real {a b c d : ℝ} (hac : 1 < a + c) (hbd : 2 < b + d) :
+theorem integral_ramanujanIntegrand_of_real {a b c d : ℝ} (hac : 1 < a + c) (hbd : 2 < b + d) :
     ∫ t : ℝ, ramanujanIntegrand a b c d t =
       Complex.Gamma (a + b + c + d - 3) /
         (Complex.Gamma (a + c - 1) * Complex.Gamma (a + d - 1) *
@@ -1404,21 +1398,21 @@ def ramanujanR (a b c d : ℂ) : ℂ :=
     (Complex.Gamma (a + c - 1) * Complex.Gamma (a + d - 1) *
       Complex.Gamma (b + c - 1) * Complex.Gamma (b + d - 1))
 
-lemma ramanujanR_swap (a b c d : ℂ) : ramanujanR a b c d = ramanujanR b a c d := by
+theorem ramanujanR_swap (a b c d : ℂ) : ramanujanR a b c d = ramanujanR b a c d := by
   simp only [ramanujanR]; ring_nf
 
-lemma ramanujanR_neg (a b c d : ℂ) : ramanujanR a b c d = ramanujanR c d a b := by
+theorem ramanujanR_neg (a b c d : ℂ) : ramanujanR a b c d = ramanujanR c d a b := by
   simp only [ramanujanR]; ring_nf
 
-lemma integral_ramanujanIntegrand_swap (a b c d : ℂ) :
+theorem integral_ramanujanIntegrand_swap (a b c d : ℂ) :
     ∫ t : ℝ, ramanujanIntegrand a b c d t = ∫ t : ℝ, ramanujanIntegrand b a c d t := by
   simp_rw [ramanujanIntegrand_swap a b c d]
 
-lemma integral_ramanujanIntegrand_neg (a b c d : ℂ) :
+theorem integral_ramanujanIntegrand_neg (a b c d : ℂ) :
     ∫ t : ℝ, ramanujanIntegrand a b c d t = ∫ t : ℝ, ramanujanIntegrand c d a b t := by
   rw [← integral_neg_eq_self]; simp_rw [ramanujanIntegrand_neg]
 
-lemma differentiableOn_ramanujanR (b c d : ℂ) :
+theorem differentiableOn_ramanujanR (b c d : ℂ) :
     DifferentiableOn ℂ (fun a : ℂ => ramanujanR a b c d) {a | 3 < (a + b + c + d).re} := by
   intro a ha
   change 3 < (a + b + c + d).re at ha
@@ -1438,7 +1432,7 @@ lemma differentiableOn_ramanujanR (b c d : ℂ) :
     (hg.comp (by fun_prop))).mul (hg.comp (by fun_prop)) |>.differentiableAt
 
 /-- Identity theorem on a right half-plane, from agreement on a real half-line. -/
-lemma eqOn_of_real_halfline {f g : ℂ → ℂ} {s : ℝ}
+theorem eqOn_of_real_halfline {f g : ℂ → ℂ} {s : ℝ}
     (hf : DifferentiableOn ℂ f {a | s < a.re}) (hg : DifferentiableOn ℂ g {a | s < a.re})
     {x₀ : ℝ} (hx₀ : s ≤ x₀) (hfg : ∀ x : ℝ, x₀ < x → f x = g x) {a : ℂ} (ha : s < a.re) :
     f a = g a := by
@@ -1455,13 +1449,13 @@ lemma eqOn_of_real_halfline {f g : ℂ → ℂ} {s : ℝ}
       hx (Complex.ofReal_injective h)
   exact ht.frequently hev.frequently
 
-lemma halfplane_eq (k : ℂ) : {a : ℂ | 3 < (a + k).re} = {a : ℂ | 3 - k.re < a.re} := by
+theorem halfplane_eq (k : ℂ) : {a : ℂ | 3 < (a + k).re} = {a : ℂ | 3 - k.re < a.re} := by
   ext a
   change 3 < (a + k).re ↔ 3 - k.re < a.re
   rw [add_re]; constructor <;> intro h <;> linarith
 
 /-- One continuation step in the first parameter. -/
-lemma ramanujan_step (b c d : ℂ) {x₀ : ℝ} (hx₀ : 3 - (b + c + d).re ≤ x₀)
+theorem ramanujan_step (b c d : ℂ) {x₀ : ℝ} (hx₀ : 3 - (b + c + d).re ≤ x₀)
     (h : ∀ x : ℝ, x₀ < x →
       ∫ t : ℝ, ramanujanIntegrand x b c d t = ramanujanR x b c d)
     {a : ℂ} (ha : 3 < (a + b + c + d).re) :
@@ -1539,7 +1533,7 @@ theorem mellin_barnes_selberg {a : Fin 4 → ℂ} (ha : ∀ k, 0 < (a k).re) :
   sorry
 
 /-- `∑ 1/(2j+1)² = π²/8`. -/
-lemma hasSum_one_div_odd_sq :
+theorem hasSum_one_div_odd_sq :
     HasSum (fun j : ℕ => (1 : ℝ) / (2 * j + 1) ^ 2) (π ^ 2 / 8) := by
   set f : ℕ → ℝ := fun n => 1 / (n : ℝ) ^ 2 with hf
   have h : HasSum f (π ^ 2 / 6) := hasSum_zeta_two
@@ -1563,7 +1557,7 @@ lemma hasSum_one_div_odd_sq :
   simp only [hf]; push_cast; ring
 
 /-- Tail of the trigamma series. -/
-lemma tendsto_trigamma_nat_add_one : Tendsto (fun k : ℕ => Real.trigamma (k + 1)) atTop (𝓝 0) := by
+theorem tendsto_trigamma_nat_add_one : Tendsto (fun k : ℕ => Real.trigamma (k + 1)) atTop (𝓝 0) := by
   have hs : Summable fun n : ℕ => ((n : ℝ) + 1)⁻¹ ^ 2 := by
     have := (summable_nat_add_iff 1).mpr (Real.summable_one_div_nat_pow.mpr one_lt_two)
     simpa [one_div] using this
@@ -1573,7 +1567,7 @@ lemma tendsto_trigamma_nat_add_one : Tendsto (fun k : ℕ => Real.trigamma (k + 
 
 
 /-- Consecutive trigamma values differ by `1/(k+1)²`. -/
-lemma trigamma_succ_sub (k : ℕ) :
+theorem trigamma_succ_sub (k : ℕ) :
     Real.trigamma ((k : ℝ) + 1) - Real.trigamma (((k + 1 : ℕ) : ℝ) + 1) =
       1 / ((k : ℝ) + 1) ^ 2 := by
   have h := trigamma_add_one (x := (k : ℝ) + 1) (by positivity)
@@ -1581,7 +1575,7 @@ lemma trigamma_succ_sub (k : ℕ) :
   rw [h]; field_simp; ring
 
 /-- Even partial sums of the alternating trigamma series. -/
-lemma sum_alternating_trigamma_even (M : ℕ) :
+theorem sum_alternating_trigamma_even (M : ℕ) :
     ∑ k ∈ Finset.range (2 * M), (-1 : ℝ) ^ (k + 1) * Real.trigamma (k + 1) =
       -∑ j ∈ Finset.range M, (1 : ℝ) / (2 * j + 1) ^ 2 := by
   induction M with
@@ -1597,7 +1591,7 @@ lemma sum_alternating_trigamma_even (M : ℕ) :
     linear_combination -hd
 
 /-- Odd partial sums of the alternating trigamma series. -/
-lemma sum_alternating_trigamma_odd (M : ℕ) :
+theorem sum_alternating_trigamma_odd (M : ℕ) :
     ∑ k ∈ Finset.range (2 * M + 1), (-1 : ℝ) ^ (k + 1) * Real.trigamma (k + 1) =
       -∑ j ∈ Finset.range M, (1 : ℝ) / (2 * j + 1) ^ 2 - Real.trigamma ((2 * M : ℕ) + 1) := by
   rw [Finset.sum_range_succ, sum_alternating_trigamma_even]
@@ -1642,7 +1636,7 @@ open Finset
 open scoped ENNReal
 
 /-- `ψ'(k+2) ≤ 1/(k+1)`, by comparison with a telescoping series. -/
-lemma trigamma_add_two_le (k : ℕ) : Real.trigamma (k + 2) ≤ 1 / (k + 1) := by
+theorem trigamma_add_two_le (k : ℕ) : Real.trigamma (k + 2) ≤ 1 / (k + 1) := by
   rw [Real.trigamma_eq_tsum (by positivity)]
   refine Real.tsum_le_of_sum_range_le (fun n => by positivity) fun N => ?_
   have h := Real.sum_recip_sub_recip_range ((k : ℝ) + 1) N

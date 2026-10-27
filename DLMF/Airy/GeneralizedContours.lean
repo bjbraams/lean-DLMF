@@ -63,7 +63,7 @@ theorem reidAiryB_ordinary_ray (k : Fin 3) (z : ℂ) {p : ℤ} (hp : p ≤ 0) :
   simp only [reidAiryB, hp, ↓reduceIte]
 
 /-- Shifting the logarithmic variable by `cI`, with `e^{3cI} = 1`, rotates `z`. -/
-lemma reidKernel_add_mul_I {c : ℝ} (hc : exp (3 * (c * I)) = 1) (z p w : ℂ) :
+theorem reidKernel_add_mul_I {c : ℝ} (hc : exp (3 * (c * I)) = 1) (z p w : ℂ) :
     reidKernel z p (w + c * I) = exp (-p * (c * I)) * reidKernel (z * exp (c * I)) p w := by
   have h3 : exp (3 * (w + c * I)) = exp (3 * w) := by
     rw [show 3 * (w + c * I) = 3 * w + 3 * (c * I) by ring, exp_add, hc, mul_one]
@@ -73,7 +73,7 @@ lemma reidKernel_add_mul_I {c : ℝ} (hc : exp (3 * (c * I)) = 1) (z p w : ℂ) 
   ring
 
 /-- Rotating a ray by `c` with `e^{3cI} = 1` rotates `z` and multiplies by a constant. -/
-lemma reidRay_add {c : ℝ} (hc : exp (3 * (c * I)) = 1) (z p : ℂ) (θ r : ℝ) :
+theorem reidRay_add {c : ℝ} (hc : exp (3 * (c * I)) = 1) (z p : ℂ) (θ r : ℝ) :
     reidRay z p (θ + c) r =
       exp (c * I) * exp (-p * (c * I)) * reidRay (z * exp (c * I)) p θ r := by
   simp only [reidRay]
@@ -86,7 +86,7 @@ lemma reidRay_add {c : ℝ} (hc : exp (3 * (c * I)) = 1) (z p : ℂ) (θ r : ℝ
   ring
 
 /-- Shifting an arc by `c` with `e^{3cI} = 1` rotates `z` and multiplies by a constant. -/
-lemma reidArc_add {c : ℝ} (hc : exp (3 * (c * I)) = 1) (z p : ℂ) (α β : ℝ) :
+theorem reidArc_add {c : ℝ} (hc : exp (3 * (c * I)) = 1) (z p : ℂ) (α β : ℝ) :
     reidArc z p (α + c) (β + c) =
       exp (c * I) * exp (-p * (c * I)) * reidArc (z * exp (c * I)) p α β := by
   simp only [reidArc]
@@ -98,39 +98,39 @@ lemma reidArc_add {c : ℝ} (hc : exp (3 * (c * I)) = 1) (z p : ℂ) (α β : �
   ring
 
 /-- Rotation covariance of the Reid contour integrals. -/
-lemma reidContour_add {c : ℝ} (hc : exp (3 * (c * I)) = 1) (z p : ℂ) (α β : ℝ) :
+theorem reidContour_add {c : ℝ} (hc : exp (3 * (c * I)) = 1) (z p : ℂ) (α β : ℝ) :
     reidContour z p (α + c) (β + c) =
       exp (c * I) * exp (-p * (c * I)) * reidContour (z * exp (c * I)) p α β := by
   simp only [reidContour, reidRay_add hc, reidArc_add hc]
   ring
 
 /-- `e^{3 (2π/3) i} = 1`. -/
-lemma exp_three_two_pi_div_three : exp (3 * (((2 * π / 3 : ℝ) : ℂ) * I)) = 1 := by
+theorem exp_three_two_pi_div_three : exp (3 * (((2 * π / 3 : ℝ) : ℂ) * I)) = 1 := by
   rw [show 3 * (((2 * π / 3 : ℝ) : ℂ) * I) = 2 * π * I by push_cast; ring, exp_two_pi_mul_I]
 
 /-- `e^{-3 (2π/3) i} = 1`. -/
-lemma exp_three_neg_two_pi_div_three : exp (3 * (((-(2 * π / 3) : ℝ) : ℂ) * I)) = 1 := by
+theorem exp_three_neg_two_pi_div_three : exp (3 * (((-(2 * π / 3) : ℝ) : ℂ) * I)) = 1 := by
   rw [show 3 * (((-(2 * π / 3) : ℝ) : ℂ) * I) = -(2 * π * I) by push_cast; ring, exp_neg,
     exp_two_pi_mul_I, inv_one]
 
 /-- The arc integrand is continuous. -/
-lemma continuous_reidArc_integrand (z p : ℂ) :
+theorem continuous_reidArc_integrand (z p : ℂ) :
     Continuous fun θ : ℝ => I * exp (θ * I) * reidKernel z p (θ * I) := by
   unfold reidKernel; fun_prop
 
 /-- Additivity of Reid arcs over adjacent angular intervals. -/
-lemma reidArc_add_adjacent (z p : ℂ) (a b c : ℝ) :
+theorem reidArc_add_adjacent (z p : ℂ) (a b c : ℝ) :
     reidArc z p a b + reidArc z p b c = reidArc z p a c :=
   intervalIntegral.integral_add_adjacent_intervals
     ((continuous_reidArc_integrand z p).intervalIntegrable _ _)
     ((continuous_reidArc_integrand z p).intervalIntegrable _ _)
 
 /-- A degenerate Reid arc vanishes. -/
-lemma reidArc_self (z p : ℂ) (a : ℝ) : reidArc z p a a = 0 :=
+theorem reidArc_self (z p : ℂ) (a : ℝ) : reidArc z p a a = 0 :=
   intervalIntegral.integral_same
 
 /-- For integral `p`, the ray at angle `2π` equals the ray at angle `0`. -/
-lemma reidRay_two_pi (z : ℂ) (p : ℤ) (r : ℝ) : reidRay z p (2 * π) r = reidRay z p 0 r := by
+theorem reidRay_two_pi (z : ℂ) (p : ℤ) (r : ℝ) : reidRay z p (2 * π) r = reidRay z p 0 r := by
   have hc : exp (3 * (((2 * π : ℝ) : ℂ) * I)) = 1 := by
     rw [show 3 * (((2 * π : ℝ) : ℂ) * I) = ((3 : ℤ) : ℂ) * (2 * π * I) by push_cast; ring,
       exp_int_mul_two_pi_mul_I]
@@ -143,7 +143,7 @@ lemma reidRay_two_pi (z : ℂ) (p : ℤ) (r : ℝ) : reidRay z p (2 * π) r = re
   simpa using h
 
 /-- The derivative of the Reid kernel in the logarithmic variable. -/
-lemma hasDerivAt_reidKernel (z q w : ℂ) :
+theorem hasDerivAt_reidKernel (z q w : ℂ) :
     HasDerivAt (reidKernel z q) (reidKernel z q w * (-q + z * exp w - exp (3 * w))) w := by
   have h : HasDerivAt (fun w => -q * w + z * exp w - exp (3 * w) / 3)
       (-q + z * exp w - exp (3 * w)) w := by
@@ -154,7 +154,7 @@ lemma hasDerivAt_reidKernel (z q w : ℂ) :
   exact h.cexp
 
 /-- The arc integrand of the 9.13.32 combination is an exact derivative. -/
-lemma reidArc_integrand_identity (z : ℂ) (p : ℂ) (θ : ℝ) :
+theorem reidArc_integrand_identity (z : ℂ) (p : ℂ) (θ : ℝ) :
     I * exp (θ * I) * reidKernel z (p - 3) (θ * I) -
         z * (I * exp (θ * I) * reidKernel z (p - 1) (θ * I)) +
         (p - 1) * (I * exp (θ * I) * reidKernel z p (θ * I)) =
@@ -169,11 +169,11 @@ lemma reidArc_integrand_identity (z : ℂ) (p : ℂ) (θ : ℝ) :
   linear_combination (I * reidKernel z (p - 1) (θ * I)) * e3 + (p - 1) * I * e2
 
 /-- `e^w K_p(w) = K_{p-1}(w)`. -/
-lemma exp_mul_reidKernel (z p w : ℂ) : exp w * reidKernel z p w = reidKernel z (p - 1) w := by
+theorem exp_mul_reidKernel (z p w : ℂ) : exp w * reidKernel z p w = reidKernel z (p - 1) w := by
   simp only [reidKernel]; rw [← exp_add]; congr 1; ring
 
 /-- The `z`-derivative of the Reid kernel. -/
-lemma hasDerivAt_reidKernel_z (z p w : ℂ) :
+theorem hasDerivAt_reidKernel_z (z p w : ℂ) :
     HasDerivAt (fun z => reidKernel z p w) (reidKernel z (p - 1) w) z := by
   rw [← exp_mul_reidKernel]
   have h : HasDerivAt (fun z => -p * w + z * exp w - exp (3 * w) / 3) (exp w) z := by
@@ -182,7 +182,7 @@ lemma hasDerivAt_reidKernel_z (z p w : ℂ) :
   simpa only [reidKernel, mul_comm] using h.cexp
 
 /-- Norm of the Reid kernel on the unit circle. -/
-lemma norm_reidKernel_circle_le (z p : ℂ) (θ : ℝ) :
+theorem norm_reidKernel_circle_le (z p : ℂ) (θ : ℝ) :
     ‖reidKernel z p (θ * I)‖ ≤ Real.exp (θ * p.im + ‖z‖ + 1 / 3) := by
   rw [reidKernel, norm_exp]
   refine Real.exp_le_exp.mpr ?_
@@ -200,7 +200,7 @@ lemma norm_reidKernel_circle_le (z p : ℂ) (θ : ℝ) :
   linarith
 
 /-- Differentiation of a Reid arc in `z`. -/
-lemma hasDerivAt_reidArc (p : ℂ) (α β : ℝ) (z : ℂ) :
+theorem hasDerivAt_reidArc (p : ℂ) (α β : ℝ) (z : ℂ) :
     HasDerivAt (fun z => reidArc z p α β) (reidArc z (p - 1) α β) z := by
   have hc : ∀ q : ℂ, ∀ z, Continuous fun θ : ℝ => I * exp (θ * I) * reidKernel z q (θ * I) :=
     fun q z => continuous_reidArc_integrand z q
@@ -224,7 +224,7 @@ lemma hasDerivAt_reidArc (p : ℂ) (α β : ℝ) (z : ℂ) :
   exact h.2
 
 /-- The `z`-derivative of `B₀`. -/
-lemma deriv_reidAiryB0 (p : ℤ) :
+theorem deriv_reidAiryB0 (p : ℤ) :
     deriv (fun t => reidAiryB0 t p) = fun t => reidAiryB0 t (p - 1) := by
   funext z
   have h := (hasDerivAt_reidArc (p : ℂ) 0 (2 * π) z).div_const (2 * π * I)
@@ -233,7 +233,7 @@ lemma deriv_reidAiryB0 (p : ℤ) :
   exact h.deriv
 
 /-- The 9.13.32 combination of arc integrals is a boundary term. -/
-lemma reidArc_difference (z p : ℂ) (α β : ℝ) :
+theorem reidArc_difference (z p : ℂ) (α β : ℝ) :
     reidArc z (p - 3) α β - z * reidArc z (p - 1) α β + (p - 1) * reidArc z p α β =
       reidKernel z (p - 1) (α * I) - reidKernel z (p - 1) (β * I) := by
   have hc := continuous_reidArc_integrand
@@ -276,7 +276,7 @@ lemma cubic_bound_aux {B t : ℝ} (hB : 0 ≤ B) (ht : 0 ≤ t) :
     mul_nonneg ht (sq_nonneg (t - 1)), mul_nonneg ht (sq_nonneg (t - (B+1)))]
 
 /-- The Reid kernel on the ray through `e^{θI}`, when `e^{3θI} = 1`. -/
-lemma reidKernel_log_add {θ : ℝ} (hc : exp (3 * (θ * I)) = 1) (z q : ℂ) {t : ℝ} (ht : 0 < t) :
+theorem reidKernel_log_add {θ : ℝ} (hc : exp (3 * (θ * I)) = 1) (z q : ℂ) {t : ℝ} (ht : 0 < t) :
     reidKernel z q (log t + θ * I) =
       exp (-q * (log t + θ * I) + z * (t * exp (θ * I)) - (t : ℂ) ^ 3 / 3) := by
   have ht' : exp (log (t : ℂ)) = t := exp_log (ofReal_ne_zero.mpr ht.ne')
@@ -287,7 +287,7 @@ lemma reidKernel_log_add {θ : ℝ} (hc : exp (3 * (θ * I)) = 1) (z q : ℂ) {t
   rw [reidKernel, exp_add (log (t : ℂ)), ht', h3]
 
 /-- A uniform exponential bound for the Reid kernel on a ray. -/
-lemma norm_reidKernel_ray_le {θ : ℝ} (hc : exp (3 * (θ * I)) = 1) (z q : ℂ) {t : ℝ}
+theorem norm_reidKernel_ray_le {θ : ℝ} (hc : exp (3 * (θ * I)) = 1) (z q : ℂ) {t : ℝ}
     (ht : 0 < t) (hq : 1 ≤ t ∨ q.re ≤ 0) :
     ‖reidKernel z q (log t + θ * I)‖ ≤
       Real.exp (|θ| * ‖q‖ + (‖q‖ + ‖z‖ + 1) ^ 2 + 3) * Real.exp (-t) := by
@@ -322,14 +322,14 @@ lemma norm_reidKernel_ray_le {θ : ℝ} (hc : exp (3 * (θ * I)) = 1) (z q : ℂ
   nlinarith
 
 /-- Measurability of the Reid ray integrand. -/
-lemma measurable_reidRay_integrand (θ : ℝ) (z q : ℂ) :
+theorem measurable_reidRay_integrand (θ : ℝ) (z q : ℂ) :
     Measurable fun t : ℝ => exp (θ * I) * reidKernel z q (log t + θ * I) := by
   unfold reidKernel
   have : Measurable fun t : ℝ => log (t : ℂ) := measurable_log.comp measurable_ofReal
   fun_prop
 
 /-- Integrability of the Reid ray integrand. -/
-lemma integrableOn_reidRay {θ : ℝ} (hc : exp (3 * (θ * I)) = 1) (z q : ℂ) {r : ℝ}
+theorem integrableOn_reidRay {θ : ℝ} (hc : exp (3 * (θ * I)) = 1) (z q : ℂ) {r : ℝ}
     (hr : 0 ≤ r) (hq : 1 ≤ r ∨ q.re ≤ 0) :
     IntegrableOn (fun t : ℝ => exp (θ * I) * reidKernel z q (log t + θ * I)) (Ioi r) := by
   have hint : IntegrableOn (fun t : ℝ => Real.exp (|θ| * ‖q‖ + (‖q‖ + ‖z‖ + 1) ^ 2 + 3) *
@@ -341,7 +341,7 @@ lemma integrableOn_reidRay {θ : ℝ} (hc : exp (3 * (θ * I)) = 1) (z q : ℂ) 
     (hq.imp (fun h => h.trans ht.le) id)
 
 /-- Differentiation of a Reid ray integral in `z`. -/
-lemma hasDerivAt_reidRay {θ : ℝ} (hc : exp (3 * (θ * I)) = 1) (p : ℂ) {r : ℝ}
+theorem hasDerivAt_reidRay {θ : ℝ} (hc : exp (3 * (θ * I)) = 1) (p : ℂ) {r : ℝ}
     (hr : 0 ≤ r) (hq : 1 ≤ r ∨ p.re ≤ 0) (z : ℂ) :
     HasDerivAt (fun z => reidRay z p θ r) (reidRay z (p - 1) θ r) z := by
   have hq1 : 1 ≤ r ∨ (p - 1).re ≤ 0 := hq.imp id (fun h => by simp; linarith)
@@ -371,7 +371,7 @@ lemma hasDerivAt_reidRay {θ : ℝ} (hc : exp (3 * (θ * I)) = 1) (p : ℂ) {r :
   exact h.2
 
 /-- On a ray, the 9.13.32 integrand combination is an exact `t`-derivative. -/
-lemma hasDerivAt_reidKernel_log (z q : ℂ) (θ : ℝ) {t : ℝ} (ht : 0 < t) :
+theorem hasDerivAt_reidKernel_log (z q : ℂ) (θ : ℝ) {t : ℝ} (ht : 0 < t) :
     HasDerivAt (fun t : ℝ => reidKernel z (q - 1) (log t + θ * I))
       (-(exp (θ * I) * reidKernel z (q - 3) (log t + θ * I) -
         z * (exp (θ * I) * reidKernel z (q - 1) (log t + θ * I)) +
@@ -394,7 +394,7 @@ lemma hasDerivAt_reidKernel_log (z q : ℂ) (θ : ℝ) {t : ℝ} (ht : 0 < t) :
   ring
 
 /-- FTC on a Reid ray: the 9.13.32 combination equals the lower boundary value. -/
-lemma reidRay_difference {θ : ℝ} (hc : exp (3 * (θ * I)) = 1) (z p : ℂ) {r : ℝ}
+theorem reidRay_difference {θ : ℝ} (hc : exp (3 * (θ * I)) = 1) (z p : ℂ) {r : ℝ}
     (hr : 0 ≤ r) (hq : 1 ≤ r ∨ p.re ≤ 0) {g : ℝ → ℂ}
     (hg : ∀ t, 0 < t → g t = reidKernel z (p - 1) (log t + θ * I))
     (hgc : ContinuousWithinAt g (Ici r) r) :
@@ -434,13 +434,13 @@ lemma reidRay_difference {θ : ℝ} (hc : exp (3 * (θ * I)) = 1) (z p : ℂ) {r
   linear_combination -hFTC
 
 /-- `e^{3θI} = 1` at the angles `θ = 2πn/3`. -/
-lemma exp_three_mul_of_eq {θ : ℝ} (n : ℤ) (h : θ = n * (2 * π / 3)) :
+theorem exp_three_mul_of_eq {θ : ℝ} (n : ℤ) (h : θ = n * (2 * π / 3)) :
     exp (3 * (θ * I)) = 1 := by
   rw [h, show 3 * ((((n : ℝ) * (2 * π / 3) : ℝ) : ℂ) * I) = (n : ℂ) * (2 * π * I) by
     push_cast; ring, exp_int_mul_two_pi_mul_I]
 
 /-- The 9.13.32 combination vanishes on a Reid contour. -/
-lemma reidContour_difference {α β : ℝ} (hα : exp (3 * (α * I)) = 1)
+theorem reidContour_difference {α β : ℝ} (hα : exp (3 * (α * I)) = 1)
     (hβ : exp (3 * (β * I)) = 1) (z p : ℂ) :
     reidContour z (p - 3) α β - z * reidContour z (p - 1) α β + (p - 1) * reidContour z p α β =
       0 := by
@@ -459,7 +459,7 @@ lemma reidContour_difference {α β : ℝ} (hα : exp (3 * (α * I)) = 1)
   linear_combination -h1 + h3 + h2
 
 /-- Differentiation of a Reid contour integral in `z`. -/
-lemma hasDerivAt_reidContour {α β : ℝ} (hα : exp (3 * (α * I)) = 1)
+theorem hasDerivAt_reidContour {α β : ℝ} (hα : exp (3 * (α * I)) = 1)
     (hβ : exp (3 * (β * I)) = 1) (p z : ℂ) :
     HasDerivAt (fun z => reidContour z p α β) (reidContour z (p - 1) α β) z := by
   have h1 := hasDerivAt_reidRay hα p zero_le_one (Or.inl le_rfl) z
@@ -468,7 +468,7 @@ lemma hasDerivAt_reidContour {α β : ℝ} (hα : exp (3 * (α * I)) = 1)
   exact (h1.neg.add h2).add h3
 
 /-- Each `A_k` is a Reid contour integral between two admissible angles. -/
-lemma reidAiryA_angles (k : Fin 3) :
+theorem reidAiryA_angles (k : Fin 3) :
     ∃ α β : ℝ, exp (3 * (α * I)) = 1 ∧ exp (3 * (β * I)) = 1 ∧
       ∀ z p, reidAiryA k z p = reidContour z p α β / (2 * π * I) := by
   fin_cases k
@@ -480,7 +480,7 @@ lemma reidAiryA_angles (k : Fin 3) :
       exp_three_mul_of_eq 0 (by push_cast; ring), fun z p => rfl⟩
 
 /-- The `z`-derivative of `A_k` lowers `p` by one. -/
-lemma deriv_reidAiryA (k : Fin 3) (p : ℂ) :
+theorem deriv_reidAiryA (k : Fin 3) (p : ℂ) :
     deriv (fun t => reidAiryA k t p) = fun t => reidAiryA k t (p - 1) := by
   obtain ⟨α, β, hα, hβ, hA⟩ := reidAiryA_angles k
   funext z
@@ -488,12 +488,12 @@ lemma deriv_reidAiryA (k : Fin 3) (p : ℂ) :
   exact ((hasDerivAt_reidContour hα hβ p z).div_const _).deriv
 
 /-- The Reid ray angles `2πk/3` are admissible. -/
-lemma exp_three_reidAiryB_angle (k : Fin 3) :
+theorem exp_three_reidAiryB_angle (k : Fin 3) :
     exp (3 * (((2 * k.val * π / 3 : ℝ) : ℂ) * I)) = 1 :=
   exp_three_mul_of_eq k.val (by push_cast; ring)
 
 /-- The `z`-derivative of `B_k` lowers `p` by one, for `p ≤ 0`. -/
-lemma deriv_reidAiryB (k : Fin 3) {p : ℤ} (hp : p ≤ 0) :
+theorem deriv_reidAiryB (k : Fin 3) {p : ℤ} (hp : p ≤ 0) :
     deriv (fun t => reidAiryB k t p) = fun t => reidAiryB k t (p - 1) := by
   funext z
   simp only [reidAiryB_ordinary_ray k _ hp, reidAiryB_ordinary_ray k _ (by omega : p - 1 ≤ 0)]
@@ -503,7 +503,7 @@ lemma deriv_reidAiryB (k : Fin 3) {p : ℤ} (hp : p ≤ 0) :
   exact h.deriv
 
 /-- The 9.13.32 combination of ordinary Reid ray integrals from `0`. -/
-lemma reidRay_zero_difference {θ : ℝ} (hc : exp (3 * (θ * I)) = 1) (z : ℂ) {p : ℤ}
+theorem reidRay_zero_difference {θ : ℝ} (hc : exp (3 * (θ * I)) = 1) (z : ℂ) {p : ℤ}
     (hp : p ≤ 0) :
     reidRay z ((p : ℂ) - 3) θ 0 - z * reidRay z ((p : ℂ) - 1) θ 0 +
       ((p : ℂ) - 1) * reidRay z p θ 0 = 0 := by
@@ -530,14 +530,14 @@ lemma reidRay_zero_difference {θ : ℝ} (hc : exp (3 * (θ * I)) = 1) (z : ℂ)
   simp [zero_pow hn1]
 
 /-- On the unit circle, the Reid kernel with `p = -n` is a polynomial times `e^{zu-u³/3}`. -/
-lemma reidKernel_neg_nat_mul_I (z : ℂ) (n : ℕ) (θ : ℝ) :
+theorem reidKernel_neg_nat_mul_I (z : ℂ) (n : ℕ) (θ : ℝ) :
     reidKernel z (-(n : ℂ)) (θ * I) =
       exp (θ * I) ^ n * exp (z * exp (θ * I) - exp (θ * I) ^ 3 / 3) := by
   rw [reidKernel, ← exp_nat_mul, ← exp_nat_mul, ← exp_add]
   congr 1; push_cast; ring
 
 /-- On an admissible ray, the Reid kernel with `p = -n` is `u^n e^{zu-u³/3}` at `u = t e^{θI}`. -/
-lemma reidKernel_neg_nat_log {θ : ℝ} (hc : exp (3 * (θ * I)) = 1) (z : ℂ) (n : ℕ) {t : ℝ}
+theorem reidKernel_neg_nat_log {θ : ℝ} (hc : exp (3 * (θ * I)) = 1) (z : ℂ) (n : ℕ) {t : ℝ}
     (ht : 0 < t) :
     reidKernel z (-(n : ℂ)) (log t + θ * I) =
       (t * exp (θ * I)) ^ n * exp (z * (t * exp (θ * I)) - (t * exp (θ * I)) ^ 3 / 3) := by
@@ -552,7 +552,7 @@ lemma reidKernel_neg_nat_log {θ : ℝ} (hc : exp (3 * (θ * I)) = 1) (z : ℂ) 
   congr 1; ring
 
 /-- For `p = -n`, cutting a Reid contour at radius `1` or at `0` gives the same value. -/
-lemma reidContour_neg_nat_eq {α β : ℝ} (hα : exp (3 * (α * I)) = 1)
+theorem reidContour_neg_nat_eq {α β : ℝ} (hα : exp (3 * (α * I)) = 1)
     (hβ : exp (3 * (β * I)) = 1) (z : ℂ) (n : ℕ) :
     reidContour z (-(n : ℂ)) α β = -reidRay z (-(n : ℂ)) α 0 + reidRay z (-(n : ℂ)) β 0 := by
   set f : ℂ → ℂ := fun u => u ^ n * exp (z * u - u ^ 3 / 3)
@@ -604,7 +604,7 @@ lemma reidContour_neg_nat_eq {α β : ℝ} (hα : exp (3 * (α * I)) = 1)
   ring
 
 /-- The Reid ray from `0` at `z = 0` is a Gamma value. -/
-lemma reidRay_zero_neg_nat {θ : ℝ} (hc : exp (3 * (θ * I)) = 1) (n : ℕ) :
+theorem reidRay_zero_neg_nat {θ : ℝ} (hc : exp (3 * (θ * I)) = 1) (n : ℕ) :
     reidRay 0 (-(n : ℂ)) θ 0 =
       exp (θ * I) ^ (n + 1) *
         (((3 : ℝ) ^ (((n : ℝ) - 2) / 3) * Real.Gamma (((n : ℝ) + 1) / 3) : ℝ) : ℂ) := by
@@ -618,7 +618,7 @@ lemma reidRay_zero_neg_nat {θ : ℝ} (hc : exp (3 * (θ * I)) = 1) (n : ℕ) :
   ring_nf
 
 /-- `e^{2πi/3} = -1/2 + (√3/2) i`. -/
-lemma exp_two_pi_div_three_mul_I :
+theorem exp_two_pi_div_three_mul_I :
     exp (((2 * π / 3 : ℝ) : ℂ) * I) = -1 / 2 + (Real.sqrt 3 / 2 : ℝ) * I := by
   rw [exp_mul_I, ← ofReal_cos, ← ofReal_sin,
     show 2 * π / 3 = π - π / 3 by ring, Real.cos_pi_sub, Real.sin_pi_sub,
@@ -626,7 +626,7 @@ lemma exp_two_pi_div_three_mul_I :
   push_cast; ring
 
 /-- `Γ(1/3) Γ(2/3) √3 = 2π` (real form). -/
-lemma real_Gamma_one_third_mul_two_thirds :
+theorem real_Gamma_one_third_mul_two_thirds :
     Real.Gamma (1 / 3) * Real.Gamma (2 / 3) * Real.sqrt 3 = 2 * π := by
   have h := Real.Gamma_mul_Gamma_one_sub (1 / 3)
   rw [show (1 : ℝ) - 1 / 3 = 2 / 3 by norm_num, show π * (1 / 3) = π / 3 by ring,
@@ -636,7 +636,7 @@ lemma real_Gamma_one_third_mul_two_thirds :
   field_simp
 
 /-- The initial values of `A₀(z,0)` and its derivative `A₀(z,-1)` at `z = 0`. -/
-lemma reidAiryA_zero_initial :
+theorem reidAiryA_zero_initial :
     reidAiryA 0 0 0 = airyAi 0 ∧ reidAiryA 0 0 (-1) = airyAiDeriv 0 := by
   have hα : exp (3 * (((4 * π / 3 : ℝ) : ℂ) * I)) = 1 := exp_three_mul_of_eq 2 (by push_cast; ring)
   have hβ : exp (3 * (((2 * π / 3 : ℝ) : ℂ) * I)) = 1 := exp_three_mul_of_eq 1 (by push_cast; ring)
@@ -896,7 +896,7 @@ theorem reidAiry_connection_sum (z : ℂ) (p : ℤ) :
   linear_combination h1 + h2 + h3
 
 /-- Summing a function supported on multiples of three over `range (n + 1)`. -/
-lemma sum_range_ite_three_dvd {M : Type*} [AddCommMonoid M] (h : ℕ → M) (n : ℕ) :
+theorem sum_range_ite_three_dvd {M : Type*} [AddCommMonoid M] (h : ℕ → M) (n : ℕ) :
     ∑ k ∈ Finset.range (n + 1), (if 3 ∣ k then h k else 0) =
       ∑ i ∈ Finset.range (n / 3 + 1), h (3 * i) := by
   rw [← Finset.sum_filter]
@@ -914,7 +914,7 @@ lemma sum_range_ite_three_dvd {M : Type*} [AddCommMonoid M] (h : ℕ → M) (n :
 
 /-- The Taylor expansion `e^{zu-u³/3} = ∑ c_j u^j` with the Reid coefficients, with
 absolute convergence. -/
-lemma hasSum_reidTaylorCoeff' (z u : ℂ) :
+theorem hasSum_reidTaylorCoeff' (z u : ℂ) :
     Summable (fun j : ℕ => ‖reidTaylorCoeff z j * u ^ j‖) ∧
       HasSum (fun j : ℕ => reidTaylorCoeff z j * u ^ j) (exp (z * u - u ^ 3 / 3)) := by
   set f : ℕ → ℂ := fun a => (z * u) ^ a / a.factorial
@@ -969,7 +969,7 @@ lemma hasSum_reidTaylorCoeff' (z u : ℂ) :
   exact hsum.hasSum
 
 /-- The Taylor expansion `e^{zu-u³/3} = ∑ c_j u^j` with the Reid coefficients. -/
-lemma hasSum_reidTaylorCoeff (z u : ℂ) :
+theorem hasSum_reidTaylorCoeff (z u : ℂ) :
     HasSum (fun j : ℕ => reidTaylorCoeff z j * u ^ j) (exp (z * u - u ^ 3 / 3)) :=
   (hasSum_reidTaylorCoeff' z u).2
 
@@ -977,7 +977,7 @@ lemma hasSum_reidTaylorCoeff (z u : ℂ) :
 def reidTaylorTail (z : ℂ) (n : ℕ) (u : ℂ) : ℂ := ∑' j : ℕ, reidTaylorCoeff z (j + n) * u ^ j
 
 /-- The Taylor remainder series has infinite radius. -/
-lemma hasFPowerSeriesOnBall_reidTaylorTail (z : ℂ) (n : ℕ) :
+theorem hasFPowerSeriesOnBall_reidTaylorTail (z : ℂ) (n : ℕ) :
     HasFPowerSeriesOnBall (reidTaylorTail z n)
       (FormalMultilinearSeries.ofScalars ℂ fun j => reidTaylorCoeff z (j + n)) 0 ⊤ := by
   have hr : (FormalMultilinearSeries.ofScalars ℂ fun j => reidTaylorCoeff z (j + n)).radius = ⊤ := by
@@ -1004,11 +1004,11 @@ lemma hasFPowerSeriesOnBall_reidTaylorTail (z : ℂ) (n : ℕ) :
   rwa [he] at h
 
 /-- The Taylor remainder is entire. -/
-lemma differentiable_reidTaylorTail (z : ℂ) (n : ℕ) : Differentiable ℂ (reidTaylorTail z n) :=
+theorem differentiable_reidTaylorTail (z : ℂ) (n : ℕ) : Differentiable ℂ (reidTaylorTail z n) :=
   fun u => ((hasFPowerSeriesOnBall_reidTaylorTail z n).analyticAt_of_mem (by simp)).differentiableAt
 
 /-- `u^n · tail(u) = e^{zu-u³/3} - ∑_{j<n} c_j u^j`. -/
-lemma pow_mul_reidTaylorTail (z : ℂ) (n : ℕ) (u : ℂ) :
+theorem pow_mul_reidTaylorTail (z : ℂ) (n : ℕ) (u : ℂ) :
     u ^ n * reidTaylorTail z n u =
       exp (z * u - u ^ 3 / 3) - ∑ j ∈ Finset.range n, reidTaylorCoeff z j * u ^ j := by
   have hs := (hasSum_reidTaylorCoeff z u)
@@ -1019,7 +1019,7 @@ lemma pow_mul_reidTaylorTail (z : ℂ) (n : ℕ) (u : ℂ) :
 
 /-- The finite-part segment integral of `B_k` is a difference of primitive values of the
 Taylor remainder. -/
-lemma reidFinitePart_segment (z : ℂ) {n : ℕ} {G : ℂ → ℂ}
+theorem reidFinitePart_segment (z : ℂ) {n : ℕ} {G : ℂ → ℂ}
     (hG : ∀ u, HasDerivAt G (reidTaylorTail z n u) u) (θ : ℝ) :
     ∫ t : ℝ in (0 : ℝ)..1, exp (θ * I) * ((t : ℂ) * exp (θ * I)) ^ (-(n : ℂ)) *
         (exp (z * ((t : ℂ) * exp (θ * I)) - ((t : ℂ) * exp (θ * I)) ^ 3 / 3) -
@@ -1051,7 +1051,7 @@ def reidFinitePartH (z : ℂ) (m : ℕ) (G : ℂ → ℂ) (θ : ℝ) : ℂ :=
     θ * I * reidTaylorCoeff z m + G (exp (θ * I))
 
 /-- Arc integrals of the Reid integrand with `p = m + 1` are differences of `reidFinitePartH`. -/
-lemma reidArc_finitePart (z : ℂ) (m : ℕ) {G : ℂ → ℂ}
+theorem reidArc_finitePart (z : ℂ) (m : ℕ) {G : ℂ → ℂ}
     (hG : ∀ u, HasDerivAt G (reidTaylorTail z (m + 1) u) u) (α β : ℝ) :
     reidArc z ((m + 1 : ℕ) : ℂ) α β = reidFinitePartH z m G β - reidFinitePartH z m G α := by
   have hw : ∀ j ∈ Finset.range m, ((j : ℂ) + 1 - ((m + 1 : ℕ) : ℂ)) ≠ 0 := by
@@ -1113,7 +1113,7 @@ lemma reidArc_finitePart (z : ℂ) (m : ℕ) {G : ℂ → ℂ}
 
 /-- For `p = m + 1 ≥ 1`, the finite-part `B_k` in terms of the primitive `G` of the Taylor
 remainder. -/
-lemma reidAiryB_succ_eq (k : Fin 3) (z : ℂ) (m : ℕ) {G : ℂ → ℂ}
+theorem reidAiryB_succ_eq (k : Fin 3) (z : ℂ) (m : ℕ) {G : ℂ → ℂ}
     (hG : ∀ u, HasDerivAt G (reidTaylorTail z (m + 1) u) u) :
     reidAiryB k z ((m + 1 : ℕ) : ℤ) = reidRay z ((m + 1 : ℕ) : ℂ) (2 * k.val * π / 3) 1 +
       reidFinitePartH z m G (2 * k.val * π / 3) - G 0 := by
@@ -1124,7 +1124,7 @@ lemma reidAiryB_succ_eq (k : Fin 3) (z : ℂ) (m : ℕ) {G : ℂ → ℂ}
   ring
 
 /-- `B_j - B_k` is the Reid contour from angle `θ_k` to `θ_j`, for every integer `p`. -/
-lemma reidAiryB_sub_eq_reidContour (j k : Fin 3) (z : ℂ) (p : ℤ) :
+theorem reidAiryB_sub_eq_reidContour (j k : Fin 3) (z : ℂ) (p : ℤ) :
     reidAiryB j z p - reidAiryB k z p =
       reidContour z p (2 * k.val * π / 3) (2 * j.val * π / 3) := by
   have hj : exp (3 * (((2 * j.val * π / 3 : ℝ) : ℂ) * I)) = 1 := exp_three_reidAiryB_angle j
@@ -1147,7 +1147,7 @@ lemma reidAiryB_sub_eq_reidContour (j k : Fin 3) (z : ℂ) (p : ℤ) :
 
 /-- The correct form of 9.13.36 for the finite-part `B_k`: the branch of the logarithm on the
 ray `θ = 0` contributes the closed-contour term `B₀`. -/
-lemma reidAiryB_two_sub_zero (z : ℂ) (p : ℤ) :
+theorem reidAiryB_two_sub_zero (z : ℂ) (p : ℤ) :
     reidAiryB 2 z p - reidAiryB 0 z p =
       2 * π * I * reidAiryA 1 z p + 2 * π * I * reidAiryB0 z p := by
   rw [reidAiryB_sub_eq_reidContour]
@@ -1177,7 +1177,7 @@ lemma reidAiryB0_one (z : ℂ) : reidAiryB0 z 1 = 1 := by
   ring
 
 /-- Evidence that the printed DLMF 9.13.36 fails for the finite-part `B_k` at `p = 1`. -/
-lemma reidAiry_connection_36_ne_one (z : ℂ) :
+theorem reidAiry_connection_36_ne_one (z : ℂ) :
     reidAiryB 2 z 1 - reidAiryB 0 z 1 ≠ 2 * π * I * reidAiryA 1 z 1 := by
   rw [reidAiryB_two_sub_zero, reidAiryB0_one]
   intro h

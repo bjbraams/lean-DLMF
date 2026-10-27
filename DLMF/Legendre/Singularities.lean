@@ -25,18 +25,18 @@ open scoped Real Topology Nat
 namespace DLMF.Legendre
 
 /-- `u ~ v` when `u = v g` eventually and `g → 1`. -/
-lemma isEquivalent_of_eventuallyEq_mul {l : Filter ℝ} {u v g : ℝ → ℂ}
+theorem isEquivalent_of_eventuallyEq_mul {l : Filter ℝ} {u v g : ℝ → ℂ}
     (h : u =ᶠ[l] fun x => v x * g x) (hg : Tendsto g l (𝓝 1)) : u ~[l] v := by
   exact legBd_isEquivalent_of_eventuallyEq_mul h hg
 
 /-- The regularized Gauss pullback `x ↦ 𝐅(a,b;c;(1-x)/2)` is continuous at `x = 1`. -/
-lemma continuousAt_regularizedGaussHG_half_one (a b c : ℂ) :
+theorem continuousAt_regularizedGaussHG_half_one (a b c : ℂ) :
     ContinuousAt (fun x : ℝ => regularizedGaussHG a b c ((1-(x:ℂ))/2)) 1 := by
   have hG := (analyticAt_regularizedGaussHG a b c zero_mem_cutPlane).continuousAt
   exact hG.comp_of_eq (by fun_prop) (by simp)
 
 /-- The factor `((1+x)/2)^p K 𝐅(a,b;c;(1-x)/2)` tends to `1` at `x = 1` when `K 𝐅(a,b;c;0) = 1`. -/
-lemma tendsto_legendre_singular_factor (a b c p K : ℂ) (hK : K * regularizedGaussHG a b c 0 = 1)
+theorem tendsto_legendre_singular_factor (a b c p K : ℂ) (hK : K * regularizedGaussHG a b c 0 = 1)
     (l : Filter ℝ) (hl : l ≤ 𝓝 1) :
     Tendsto (fun x : ℝ => ((1+(x:ℂ))/2)^p * (K * regularizedGaussHG a b c ((1-(x:ℂ))/2)))
       l (𝓝 1) := by
@@ -51,7 +51,7 @@ lemma tendsto_legendre_singular_factor (a b c p K : ℂ) (hK : K * regularizedGa
   rwa [h1] at h
 
 /-- `(1-x²)^(m/2)/2^m = ((1-x)/2)^(m/2) ((1+x)/2)^(m/2)` on `(-1,1)`. -/
-lemma one_sub_sq_cpow_half_div (m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem one_sub_sq_cpow_half_div (m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     (1-(x:ℂ)^2)^((m:ℂ)/2)/2^m = ((1-(x:ℂ))/2)^((m:ℂ)/2) * ((1+(x:ℂ))/2)^((m:ℂ)/2) := by
   have h1 : (0:ℝ) ≤ (1-x)/2 := by linarith [hx.2]
   have h2 : (0:ℝ) ≤ (1+x)/2 := by linarith [hx.1]
@@ -70,7 +70,7 @@ lemma one_sub_sq_cpow_half_div (m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     _ = _ := by rw [ofReal_mul, mul_cpow_ofReal_nonneg h1 h2]; push_cast; rfl
 
 /-- For `x > 1`, `(x²-1)^(m/2)/2^m = ((x-1)/2)^(m/2) ((1+x)/2)^(m/2)` through the inherited branch. -/
-lemma legendreBranchPower_div_two_pow (m : ℕ) {x : ℝ} (hx : 1 < x) :
+theorem legendreBranchPower_div_two_pow (m : ℕ) {x : ℝ} (hx : 1 < x) :
     legendreBranchPower m x / 2^m = (((x:ℂ)-1)/2)^((m:ℂ)/2) * ((1+(x:ℂ))/2)^((m:ℂ)/2) := by
   have h1 : (0:ℝ) < x-1 := by linarith
   have h2 : (0:ℝ) < x+1 := by linarith
@@ -339,12 +339,12 @@ theorem legendre_singular_14 (μ : ℂ) (hμ : ∀ n : ℕ, μ ≠ n+1/2) :
   field_simp
 
 /-- For `x > 1`, the inherited branch is `(x²-1)^(μ/2) = x^μ (1-1/x²)^(μ/2)`. -/
-lemma legendreBranchPower_eq_cpow_mul (μ : ℂ) {x : ℝ} (hx : 1 < x) :
+theorem legendreBranchPower_eq_cpow_mul (μ : ℂ) {x : ℝ} (hx : 1 < x) :
     legendreBranchPower μ x = (x:ℂ)^μ * (1-1/(x:ℂ)^2)^(μ/2) := by
   exact legBd_branchPower_eq μ hx
 
 /-- `1/x² → 0` at infinity, as a complex function of real `x`. -/
-lemma tendsto_one_div_sq_atTop : Tendsto (fun x : ℝ => 1/(x:ℂ)^2) atTop (𝓝 0) := by
+theorem tendsto_one_div_sq_atTop : Tendsto (fun x : ℝ => 1/(x:ℂ)^2) atTop (𝓝 0) := by
   have h : Tendsto (fun x : ℝ => ((1/x^2 : ℝ) : ℂ)) atTop (𝓝 ((0:ℝ):ℂ)) :=
     (continuous_ofReal.tendsto 0).comp (by
       simpa [Function.comp_def] using (tendsto_inv_atTop_zero.comp (tendsto_pow_atTop (two_ne_zero))))

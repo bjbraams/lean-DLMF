@@ -5,9 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Mathieu.Hill.Floquet
-public import Mathlib.MeasureTheory.Function.LpSeminorm.Basic
-public import Mathlib.Topology.UniformSpace.UniformConvergence
+public import DLMF.Mathieu.Hill.Defs
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Arctan
+public import Mathlib.MeasureTheory.Covering.Besicovitch
 
 /-!
 # Expansions in series of eigenfunctions of Hill's equation (DLMF §28.30)

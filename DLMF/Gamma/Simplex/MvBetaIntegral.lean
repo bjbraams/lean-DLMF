@@ -7,12 +7,8 @@ module
 
 public import DLMF.Gamma.Simplex.MvBeta
 
-public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
 
-import Mathlib.MeasureTheory.Integral.Pi
-import DLMF.Gamma.Simplex.GammaPochhammer
 import DLMF.Gamma.Simplex.BetaIntegral
-import Mathlib.MeasureTheory.Function.SpecialFunctions.Basic
 import DLMF.Gamma.Simplex.Hyperplane
 import DLMF.Gamma.Simplex.PiSnoc
 import DLMF.Gamma.Simplex.ProdSlices
@@ -75,7 +71,7 @@ theorem measurableSet_mvBetaSimplex (n : ℕ) : MeasurableSet (mvBetaSimplex n) 
 
 /-- Splitting off the last coordinate identifies a solid-simplex section with an interval
 whose upper endpoint is the remaining slack coordinate. -/
-private theorem snoc_mem_mvBetaSimplex_iff {n : ℕ} (y : Fin n → ℝ) (t : ℝ) :
+private lemma snoc_mem_mvBetaSimplex_iff {n : ℕ} (y : Fin n → ℝ) (t : ℝ) :
     Fin.snoc y t ∈ mvBetaSimplex (n + 1) ↔
       (∀ i, 0 ≤ y i) ∧ 0 ≤ t ∧ t ≤ 1 - ∑ i, y i := by
   simp only [mvBetaSimplex, Set.mem_ofPred_eq, Fin.forall_fin_succ', Fin.snoc_last,
@@ -104,7 +100,7 @@ private abbrev mvBetaIntegrand {n : ℕ} (b₀ : ℂ) (b : Fin n → ℂ) (x : F
   ((1 - ∑ i, x i : ℝ) : ℂ) ^ (b₀ - 1) * ∏ i, (x i : ℂ) ^ (b i - 1)
 
 /-- The zero-dimensional solid-coordinate integral has the expected value. -/
-private theorem mvBetaIntegral_zero {b₀ : ℂ} (hb₀ : 0 < b₀.re) :
+private lemma mvBetaIntegral_zero {b₀ : ℂ} (hb₀ : 0 < b₀.re) :
     mvBetaIntegral (n := 0) b₀ Fin.elim0 = mvBeta (Fin.cons b₀ Fin.elim0) := by
   have hG : Gamma b₀ ≠ 0 := Gamma_ne_zero_of_re_pos hb₀
   simp [mvBetaIntegral, mvBetaSimplex, mvBeta, hG, measureReal_def]
@@ -112,7 +108,7 @@ private theorem mvBetaIntegral_zero {b₀ : ℂ} (hb₀ : 0 < b₀.re) :
   simp
 
 /-- The solid-simplex Dirichlet monomial is measurable. -/
-private theorem measurable_mvBetaIntegrand {n : ℕ} (b₀ : ℂ) (b : Fin n → ℂ) :
+private lemma measurable_mvBetaIntegrand {n : ℕ} (b₀ : ℂ) (b : Fin n → ℂ) :
     Measurable fun x : Fin n → ℝ =>
       ((1 - ∑ i, x i : ℝ) : ℂ) ^ (b₀ - 1) * ∏ i, (x i : ℂ) ^ (b i - 1) := by
   refine ((Complex.measurable_ofReal.pow_const (b₀ - 1)).comp ?_).mul ?_
@@ -121,7 +117,7 @@ private theorem measurable_mvBetaIntegrand {n : ℕ} (b₀ : ℂ) (b : Fin n →
       (Complex.measurable_ofReal.pow_const (b i - 1)).comp (measurable_pi_apply i)
 
 /-- Interior points of the solid simplex have strictly positive coordinates and slack. -/
-private theorem interior_mvBetaSimplex_subset (n : ℕ) :
+private lemma interior_mvBetaSimplex_subset (n : ℕ) :
     interior (mvBetaSimplex n) ⊆ {x | (∀ i, 0 < x i) ∧ ∑ i, x i < 1} := by
   intro x hx
   have hxmem : x ∈ mvBetaSimplex n := interior_subset hx
@@ -163,7 +159,7 @@ private theorem interior_mvBetaSimplex_subset (n : ℕ) :
         exact hnot hymem.2
 
 /-- Combining the last coordinate against the slack parameter recovers `mvBeta`. -/
-private theorem mvBeta_cons_mul_betaIntegral {n : ℕ} {b₀ : ℂ} {b : Fin (n + 1) → ℂ}
+private lemma mvBeta_cons_mul_betaIntegral {n : ℕ} {b₀ : ℂ} {b : Fin (n + 1) → ℂ}
     (hb₀ : 0 < b₀.re) (hb : ∀ i, 0 < (b i).re) :
     mvBeta (Fin.cons (b₀ + b (Fin.last n)) (fun i => b (Fin.castSucc i))) *
       betaIntegral (b (Fin.last n)) b₀ =
@@ -187,7 +183,7 @@ private theorem mvBeta_cons_mul_betaIntegral {n : ℕ} {b₀ : ℂ} {b : Fin (n 
 
 /-- Splitting off the last free coordinate expresses the beta simplex as intervals over the
 lower-dimensional simplex. -/
-private theorem piFinSnoc_preimage_mvBetaSimplex (n : ℕ) :
+private lemma piFinSnoc_preimage_mvBetaSimplex (n : ℕ) :
     piFinSnoc (fun _ : Fin (n + 1) ↦ ℝ) ⁻¹' mvBetaSimplex (n + 1) =
       {p : (Fin n → ℝ) × ℝ |
         p.1 ∈ mvBetaSimplex n ∧ p.2 ∈ Set.Icc 0 (1 - ∑ i, p.1 i)} := by
@@ -205,7 +201,7 @@ private theorem piFinSnoc_preimage_mvBetaSimplex (n : ℕ) :
 /-- For fixed leading coordinates, the last-coordinate section of the solid-simplex
 Dirichlet integrand is integrable.  Inside the smaller solid simplex this is a scaled Euler
 Beta kernel; outside it the section vanishes. -/
-private theorem integrable_mvBetaIntegrand_snoc_slice {n : ℕ} {b₀ : ℂ}
+private lemma integrable_mvBetaIntegrand_snoc_slice {n : ℕ} {b₀ : ℂ}
     {b : Fin (n + 1) → ℂ} (hb₀ : 0 < b₀.re) (hbl : 0 < (b (Fin.last n)).re)
     (y : Fin n → ℝ) :
     Integrable fun t : ℝ =>
@@ -267,7 +263,7 @@ private theorem integrable_mvBetaIntegrand_snoc_slice {n : ℕ} {b₀ : ℂ}
     exact integrable_zero ℝ ℂ volume
 
 /-- Evaluation of a last-coordinate section of the solid-simplex Dirichlet integrand. -/
-private theorem integral_mvBetaIntegrand_snoc_slice {n : ℕ} {b₀ : ℂ}
+private lemma integral_mvBetaIntegrand_snoc_slice {n : ℕ} {b₀ : ℂ}
     {b : Fin (n + 1) → ℂ} (y : Fin n → ℝ) (hs : 0 < 1 - ∑ i, y i) :
     ∫ t in Set.Icc 0 (1 - ∑ i, y i),
         mvBetaIntegrand b₀ b (piFinSnoc (fun _ : Fin (n + 1) ↦ ℝ) (y, t)) =
@@ -291,7 +287,7 @@ private theorem integral_mvBetaIntegrand_snoc_slice {n : ℕ} {b₀ : ℂ}
   ring_nf
 
 /-- The Beta integrand after adjoining the last coordinate, in product coordinates. -/
-private theorem mvBetaIntegrand_piFinSnoc {n : ℕ} (b₀ : ℂ) (b : Fin (n + 1) → ℂ)
+private lemma mvBetaIntegrand_piFinSnoc {n : ℕ} (b₀ : ℂ) (b : Fin (n + 1) → ℂ)
     (y : Fin n → ℝ) (t : ℝ) :
     mvBetaIntegrand b₀ b (piFinSnoc (fun _ : Fin (n + 1) ↦ ℝ) (y, t)) =
       ((1 - ∑ i, y i - t : ℝ) : ℂ) ^ (b₀ - 1) *
@@ -302,7 +298,7 @@ private theorem mvBetaIntegrand_piFinSnoc {n : ℕ} (b₀ : ℂ) (b : Fin (n + 1
 /-- The norm integral of the adjoined Beta integrand over the slice `{t | (y, t) ∈ simplex}`,
 for `y` off the hyperplane `∑ i, y i = 1`: it is the one-dimensional Beta norm integral times
 the norm of the lower-dimensional integrand, or zero outside the lower simplex. -/
-private theorem integral_norm_mvBetaIntegrand_snoc_slice {n : ℕ} (b₀ : ℂ)
+private lemma integral_norm_mvBetaIntegrand_snoc_slice {n : ℕ} (b₀ : ℂ)
     (b : Fin (n + 1) → ℂ) {y : Fin n → ℝ} (hsum : ∑ i, y i ≠ (1 : ℝ)) :
     (∫ t, ‖(piFinSnoc (fun _ : Fin (n + 1) ↦ ℝ) ⁻¹' mvBetaSimplex (n + 1)).indicator
         (mvBetaIntegrand b₀ b ∘ piFinSnoc (fun _ : Fin (n + 1) ↦ ℝ)) (y, t)‖) =
@@ -364,7 +360,7 @@ private theorem integral_norm_mvBetaIntegrand_snoc_slice {n : ℕ} (b₀ : ℂ)
 
 /-- Integrability of the lower-dimensional Beta integrand implies integrability after adjoining
 the last coordinate; the norm integral is evaluated slice by slice. -/
-private theorem integrableOn_mvBetaIntegrand_snoc_of_integrableOn {n : ℕ} {b₀ : ℂ}
+private lemma integrableOn_mvBetaIntegrand_snoc_of_integrableOn {n : ℕ} {b₀ : ℂ}
     {b : Fin (n + 1) → ℂ} (hb₀ : 0 < b₀.re) (hbl : 0 < (b (Fin.last n)).re)
     (hprev : IntegrableOn
       (mvBetaIntegrand (b₀ + b (Fin.last n)) (fun i : Fin n => b i.castSucc))
@@ -410,7 +406,7 @@ private theorem integrableOn_mvBetaIntegrand_snoc_of_integrableOn {n : ℕ} {b�
     ((integrable_indicator_iff (measurableSet_mvBetaSimplex n)).mpr (hprev.norm.const_mul _))
 
 /-- Integrability of the solid-simplex Dirichlet monomial, together with DLMF 5.14.2. -/
-private theorem mvBetaIntegral_eq_mvBeta_aux {n : ℕ} {b₀ : ℂ} {b : Fin n → ℂ}
+private lemma mvBetaIntegral_eq_mvBeta_aux {n : ℕ} {b₀ : ℂ} {b : Fin n → ℂ}
     (hb₀ : 0 < b₀.re) (hb : ∀ i, 0 < (b i).re) :
     IntegrableOn (fun x : Fin n → ℝ =>
         ((1 - ∑ i, x i : ℝ) : ℂ) ^ (b₀ - 1) * ∏ i, (x i : ℂ) ^ (b i - 1))

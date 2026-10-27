@@ -37,7 +37,7 @@ namespace DLMF.Hypergeometric
 open DLMF.Gamma
 
 /-- `(x)_n' / Γ(x) = (x)_n ((1/Γ)'(x) - (x)_n (1/Γ)'(x+n))`, valid for every `x`. -/
-lemma recip_Gamma_mul_deriv_poch (x : ℂ) (n : ℕ) :
+theorem recip_Gamma_mul_deriv_poch (x : ℂ) (n : ℕ) :
     (Gamma x)⁻¹ * deriv (fun y => poch y n) x =
       poch x n * (recipGammaDeriv 1 x - poch x n * recipGammaDeriv 1 (x + n)) := by
   have hp : HasDerivAt (fun y => poch y n) (deriv (fun y => poch y n) x) x :=
@@ -54,7 +54,7 @@ lemma recip_Gamma_mul_deriv_poch (x : ℂ) (n : ℕ) :
   linear_combination (-poch x n) * hu
 
 /-- `(1-y)_n / Γ(y) = (-1)^n / Γ(y-n)`, valid for every `y`. -/
-lemma recip_Gamma_mul_poch_one_sub (y : ℂ) (n : ℕ) :
+theorem recip_Gamma_mul_poch_one_sub (y : ℂ) (n : ℕ) :
     (Gamma y)⁻¹ * poch (1 - y) n = (-1) ^ n * (Gamma (y - n))⁻¹ := by
   induction n with
   | zero => simp [poch_zero]
@@ -67,7 +67,7 @@ lemma recip_Gamma_mul_poch_one_sub (y : ℂ) (n : ℕ) :
 
 /-- `(1-y)_n' / Γ(y) = (1-y)_n (1/Γ)'(y) - (-1)^n (1/Γ)'(y-n)`, where `'` on the Pochhammer
 symbol is the derivative in its base at `1 - y`; valid for every `y`. -/
-lemma recip_Gamma_mul_deriv_poch_one_sub (y : ℂ) (n : ℕ) :
+theorem recip_Gamma_mul_deriv_poch_one_sub (y : ℂ) (n : ℕ) :
     (Gamma y)⁻¹ * deriv (fun x => poch x n) (1 - y) =
       poch (1 - y) n * recipGammaDeriv 1 y - (-1) ^ n * recipGammaDeriv 1 (y - n) := by
   have hp : HasDerivAt (fun x => poch x n) (deriv (fun x => poch x n) (1 - y)) (1 - y) :=

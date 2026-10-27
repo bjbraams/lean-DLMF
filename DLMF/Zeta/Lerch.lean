@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Zeta.Polylog
-public import Mathlib.Analysis.SpecialFunctions.OrdinaryHypergeometric
+public import DLMF.Zeta.Hurwitz
 
 /-!
 # Lerch's transcendent (DLMF §25.14)

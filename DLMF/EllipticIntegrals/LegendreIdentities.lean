@@ -7,7 +7,6 @@ module
 
 public import DLMF.EllipticIntegrals.Legendre
 public import DLMF.EllipticIntegrals.Symmetric
-public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 
 /-!
 # Legendre's integrals: the statements of DLMF §19.2
@@ -71,7 +70,7 @@ theorem ellipticIntegrand_elliptic_part {F : Type*} [Field F] (p₁ p₂ p₃ p�
 /-! ### §19.2(ii) Legendre's integrals -/
 
 /-- `x^{1/2} = x · x^{-1/2}` for every complex `x` (both sides vanish at `0`). -/
-theorem ei19a_cpow_half_eq (x : ℂ) : x ^ (1 / 2 : ℂ) = x * x ^ (-(1 / 2 : ℂ)) := by
+lemma ei19a_cpow_half_eq (x : ℂ) : x ^ (1 / 2 : ℂ) = x * x ^ (-(1 / 2 : ℂ)) := by
   rcases eq_or_ne x 0 with rfl | hx
   · simp
   · conv_lhs => rw [show (1 / 2 : ℂ) = 1 + (-(1 / 2 : ℂ)) by ring]
@@ -129,7 +128,7 @@ theorem compEllIntEk_neg (k : ℂ) : compEllIntEk (-k) = compEllIntEk k := by
 
 /-- `∫₀^b (1 - k² sin²θ)^s dθ` is holomorphic in `k` on the principal domain
 `1 - k² ∈ ℂ \ (-∞, 0]`, for every exponent `s` and real `b`. -/
-theorem p19lR1_differentiableOn_integral_cpow (s : ℂ) (b : ℝ) :
+lemma p19lR1_differentiableOn_integral_cpow (s : ℂ) (b : ℝ) :
     DifferentiableOn ℂ (fun k : ℂ => ∫ θ in (0 : ℝ)..b, (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ s)
       {k | 1 - k ^ 2 ∈ slitPlane} := by
   have hU : IsOpen {k : ℂ | 1 - k ^ 2 ∈ slitPlane} :=
@@ -185,7 +184,7 @@ theorem differentiableOn_cCompEllIntKk_cCompEllIntEk :
   sorry
 
 /-- The substitution `t = sin θ`: `∫₀^{π/2} h(sin²θ) dθ = ∫₀¹ (1-t²)^{-1/2} h(t²) dt`. -/
-theorem p19lR1_integral_sin_subst (h : ℂ → ℂ) :
+lemma p19lR1_integral_sin_subst (h : ℂ → ℂ) :
     ∫ θ in (0 : ℝ)..(π / 2), h ((Real.sin θ : ℂ) ^ 2) =
       ∫ t in (0 : ℝ)..1, (1 - (t : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) * h ((t : ℂ) ^ 2) := by
   have hsub := intervalIntegral.integral_deriv_smul_comp_of_deriv_nonneg
@@ -263,7 +262,7 @@ theorem circular_hyperbolic_alternate {k2 α2 : ℝ} (hk0 : 0 < k2) (hk1 : k2 < 
 
 /-- A continuous, `π`-periodic, even function integrates over `[0, π]` to twice its integral
 over `[0, π/2]`. -/
-theorem ei19a_integral_zero_pi {g : ℝ → ℂ} (hc : Continuous g) (hp : Function.Periodic g π)
+lemma ei19a_integral_zero_pi {g : ℝ → ℂ} (hc : Continuous g) (hp : Function.Periodic g π)
     (he : ∀ x, g (-x) = g x) :
     ∫ x in (0 : ℝ)..π, g x = 2 * ∫ x in (0 : ℝ)..(π / 2), g x := by
   rw [← intervalIntegral.integral_add_adjacent_intervals (b := π / 2)
@@ -277,7 +276,7 @@ theorem ei19a_integral_zero_pi {g : ℝ → ℂ} (hc : Continuous g) (hp : Funct
 
 /-- For a continuous, `π`-periodic, even `g` and an integer `m`,
 `∫₀^{mπ + φ} g = 2m ∫₀^{π/2} g + ∫₀^φ g`. -/
-theorem ei19a_integral_add_int_mul_pi {g : ℝ → ℂ} (hc : Continuous g) (hp : Function.Periodic g π)
+lemma ei19a_integral_add_int_mul_pi {g : ℝ → ℂ} (hc : Continuous g) (hp : Function.Periodic g π)
     (he : ∀ x, g (-x) = g x) (m : ℤ) (φ : ℝ) :
     ∫ x in (0 : ℝ)..(m * π + φ), g x =
       2 * m * (∫ x in (0 : ℝ)..(π / 2), g x) + ∫ x in (0 : ℝ)..φ, g x := by
@@ -295,7 +294,7 @@ theorem ei19a_integral_add_int_mul_pi {g : ℝ → ℂ} (hc : Continuous g) (hp 
   rw [h1, h2, ei19a_integral_zero_pi hc hp he]; ring
 
 /-- For a continuous even `g`, `∫₀^{-φ} g = -∫₀^φ g`. -/
-theorem ei19a_integral_neg {g : ℝ → ℂ} (he : ∀ x, g (-x) = g x) (φ : ℝ) :
+lemma ei19a_integral_neg {g : ℝ → ℂ} (he : ∀ x, g (-x) = g x) (φ : ℝ) :
     ∫ x in (0 : ℝ)..(-φ), g x = -∫ x in (0 : ℝ)..φ, g x := by
   have h := intervalIntegral.integral_comp_neg (a := 0) (b := φ) g
   simp only [neg_zero, he] at h
@@ -303,7 +302,7 @@ theorem ei19a_integral_neg {g : ℝ → ℂ} (he : ∀ x, g (-x) = g x) (φ : �
 
 /-- The Legendre integrands `sin^{2j}θ (1 - k² sin²θ)^{p}` are continuous in real `θ` in the
 principal domain, `π`-periodic and even. -/
-theorem ei19a_legendre_integrand_props {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) (j : ℕ) (p : ℂ) :
+lemma ei19a_legendre_integrand_props {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) (j : ℕ) (p : ℂ) :
     let g : ℝ → ℂ := fun θ => (Real.sin θ : ℂ) ^ (2 * j) * (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ p
     Continuous g ∧ Function.Periodic g π ∧ ∀ x, g (-x) = g x := by
   refine ⟨?_, fun x => ?_, fun x => ?_⟩
@@ -351,7 +350,7 @@ theorem incEllInt_add_int_mul_pi {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) (m : �
 /-! ### §19.2(iii) Bulirsch's integrals -/
 
 /-- `cos²θ + (1 - k²) sin²θ = 1 - k² sin²θ`. -/
-theorem ei19a_cos_sq_add_comod (k θ : ℂ) :
+lemma ei19a_cos_sq_add_comod (k θ : ℂ) :
     Complex.cos θ ^ 2 + (1 - k ^ 2) * Complex.sin θ ^ 2 = 1 - k ^ 2 * Complex.sin θ ^ 2 := by
   linear_combination Complex.cos_sq_add_sin_sq θ
 
@@ -360,7 +359,7 @@ theorem ei19a_jacobiComodulusk_sq (k : ℂ) : jacobiComodulusk k ^ 2 = 1 - k ^ 2
   rw [jacobiComodulusk, one_div, Complex.cpow_ofNat_inv_pow]
 
 /-- With `p = 1` Bulirsch's `cel` needs no principal value. -/
-theorem ei19a_bulirschCel_one (kc : ℂ) (a b : ℝ) :
+lemma ei19a_bulirschCel_one (kc : ℂ) (a b : ℝ) :
     bulirschCel kc 1 a b = ei19a_segmentIntegral (fun θ => (a * Complex.cos θ ^ 2 +
       b * Complex.sin θ ^ 2) * (Complex.cos θ ^ 2 + kc ^ 2 * Complex.sin θ ^ 2) ^ (-(1 / 2 : ℂ)))
         (π / 2) := by
@@ -488,7 +487,7 @@ theorem symEllIntRC_eq_cauchyPV {x y : ℂ} (hy : IsNegReal y) :
   simp [symEllIntRC, hy]
 
 /-- `R_C(0, y) = (π/2) y^{-1/2}` for `y ∈ ℂ \ (-∞, 0]` (via `R_F(0, y, y)`, DLMF 19.16.20). -/
-theorem p19lR1_symEllIntRC_zero_left {y : ℂ} (hy : y ∈ slitPlane) :
+lemma p19lR1_symEllIntRC_zero_left {y : ℂ} (hy : y ∈ slitPlane) :
     symEllIntRC 0 y = π / 2 * y ^ (-(1 / 2 : ℂ)) := by
   rw [symEllIntRC_eq_symEllIntRF 0 (ei19c_not_isNegReal_of_mem_slitPlane hy),
     symEllIntRF_zero_left hy hy]
@@ -496,7 +495,7 @@ theorem p19lR1_symEllIntRC_zero_left {y : ℂ} (hy : y ∈ slitPlane) :
   rw [this, symEllIntR_const _ _ hy (by norm_num)]
 
 /-- `R_C(x, x) = x^{-1/2}` for `x ∈ ℂ \ (-∞, 0]` (DLMF 19.16.11 with `R_C = R_{-1/2}(1/2, 1)`). -/
-theorem p19lR1_symEllIntRC_self {x : ℂ} (hx : x ∈ slitPlane) :
+lemma p19lR1_symEllIntRC_self {x : ℂ} (hx : x ∈ slitPlane) :
     symEllIntRC x x = x ^ (-(1 / 2 : ℂ)) := by
   rw [symEllIntRC_eq_symEllIntR hx hx]
   have : (![x, x] : Fin 2 → ℂ) = fun _ => x := by funext i; fin_cases i <;> rfl
@@ -506,7 +505,7 @@ theorem p19lR1_symEllIntRC_self {x : ℂ} (hx : x ∈ slitPlane) :
   exact mul_ne_zero (by norm_num) ei19c_Gamma_half_ne
 
 /-- `R_C(0, y) = (π/2)/√y` for real `y > 0`. -/
-theorem p19lR1_symEllIntRC_zero_left_real {y : ℝ} (hy : 0 < y) :
+lemma p19lR1_symEllIntRC_zero_left_real {y : ℝ} (hy : 0 < y) :
     symEllIntRC 0 y = ((π / 2 / Real.sqrt y : ℝ) : ℂ) := by
   rw [p19lR1_symEllIntRC_zero_left (by simpa using hy),
     show (-(1 / 2 : ℂ)) = ((-(1 / 2) : ℝ) : ℂ) by push_cast; ring,
@@ -514,7 +513,7 @@ theorem p19lR1_symEllIntRC_zero_left_real {y : ℝ} (hy : 0 < y) :
   push_cast; ring
 
 /-- For `0 < y < x`, `artanh √((x-y)/x) = ln((√x + √(x-y))/√y)`. -/
-theorem p19lR1_artanh_eq_log {x y : ℝ} (hy : 0 < y) (hxy : y < x) :
+lemma p19lR1_artanh_eq_log {x y : ℝ} (hy : 0 < y) (hxy : y < x) :
     Real.artanh (Real.sqrt ((x - y) / x)) =
       Real.log ((Real.sqrt x + Real.sqrt (x - y)) / Real.sqrt y) := by
   have hx : 0 < x := hy.trans hxy

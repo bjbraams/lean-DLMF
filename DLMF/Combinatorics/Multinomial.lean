@@ -7,7 +7,6 @@ module
 
 public import DLMF.Combinatorics.Basic
 public import Mathlib.Data.Nat.Choose.Multinomial
-public import Mathlib.Combinatorics.Enumerative.Partition.Basic
 public import Mathlib.GroupTheory.Perm.Cycle.Type
 public import Mathlib.GroupTheory.Perm.Centralizer
 public import Mathlib.Order.Partition.Finpartition
@@ -48,12 +47,12 @@ namespace DLMF.Combinatorics
 /-! ### Helpers (agent p26a) -/
 
 /-- Reindexing a multinomial coefficient along an embedding. -/
-theorem q26a_multinomial_map {α β : Type*} (s : Finset α) (g : α ↪ β) (f : β → ℕ) :
+lemma q26a_multinomial_map {α β : Type*} (s : Finset α) (g : α ↪ β) (f : β → ℕ) :
     Nat.multinomial (s.map g) f = Nat.multinomial s (f ∘ g) := by
   simp [Nat.multinomial, sum_map, prod_map]
 
 /-- Counting the occurrences of `l` in `Fin.cons j g`. -/
-theorem q26a_sum_consEquiv_eq {k N : ℕ} (j : Fin k) (g : Fin N → Fin k) (l : Fin k) :
+lemma q26a_sum_consEquiv_eq {k N : ℕ} (j : Fin k) (g : Fin N → Fin k) (l : Fin k) :
     (∑ i : Fin (N + 1), if (Fin.consEquiv (fun _ => Fin k) (j, g)) i = l then 1 else 0) =
       #{i | g i = l} + if j = l then 1 else 0 := by
   rw [card_filter, Fin.sum_univ_succ]
@@ -62,7 +61,7 @@ theorem q26a_sum_consEquiv_eq {k N : ℕ} (j : Fin k) (g : Fin N → Fin k) (l :
 
 /-- The Pascal-type recurrence of multinomial coefficients:
 `(n; n₁, …, n_k) = ∑_{j, n_j > 0} (n-1; n₁, …, n_j - 1, …, n_k)`. -/
-theorem q26a_multinomial_rec {k N : ℕ} (n : Fin k → ℕ) (hN : ∑ i, n i = N + 1) :
+lemma q26a_multinomial_rec {k N : ℕ} (n : Fin k → ℕ) (hN : ∑ i, n i = N + 1) :
     Nat.multinomial univ n =
       ∑ j ∈ univ.filter (fun j => 0 < n j),
         Nat.multinomial univ (Function.update n j (n j - 1)) := by
@@ -120,7 +119,7 @@ theorem q26a_multinomial_rec {k N : ℕ} (n : Fin k → ℕ) (hN : ∑ i, n i = 
   exact_mod_cast this
 
 /-- Placements of `N` labeled objects into `k` boxes with prescribed occupancies. -/
-theorem q26a_card_boxPlacements (N : ℕ) : ∀ {k : ℕ} (n : Fin k → ℕ), ∑ i, n i = N →
+lemma q26a_card_boxPlacements (N : ℕ) : ∀ {k : ℕ} (n : Fin k → ℕ), ∑ i, n i = N →
     #{f : Fin N → Fin k | ∀ j, #{i | f i = j} = n j} = Nat.multinomial univ n := by
   induction N with
   | zero =>
@@ -170,7 +169,7 @@ theorem q26a_card_boxPlacements (N : ℕ) : ∀ {k : ℕ} (n : Fin k → ℕ), �
       simp at this; omega
 
 /-- The number of occurrences of `i` in `List.ofFn f`. -/
-theorem q26a_count_ofFn {k : ℕ} : ∀ {N : ℕ} (f : Fin N → Fin k) (i : Fin k),
+lemma q26a_count_ofFn {k : ℕ} : ∀ {N : ℕ} (f : Fin N → Fin k) (i : Fin k),
     (List.ofFn f).count i = #{x | f x = i} := by
   intro N
   induction N with
@@ -220,7 +219,7 @@ theorem multinomial_eq_prod_choose {k : ℕ} (n : Fin k → ℕ) :
 /-! ### Multiplicities of a partition (§26.4(i), Table 26.4.1) -/
 
 /-- The parts of a partition of `n` are among `0, …, n`. -/
-theorem c26a_toFinset_parts_subset {n : ℕ} (p : n.Partition) :
+lemma c26a_toFinset_parts_subset {n : ℕ} (p : n.Partition) :
     p.parts.toFinset ⊆ range (n + 1) := by
   intro j hj
   rw [Multiset.mem_toFinset] at hj
@@ -256,7 +255,7 @@ theorem parts_eq_sum_replicate {n : ℕ} (p : n.Partition) :
   intro j _ hj; rw [Multiset.mem_toFinset] at hj; simp [Multiset.count_eq_zero_of_notMem hj]
 
 /-- `m.multinomial · ∏_{x ∈ m} x! = (∑ m)!`. -/
-theorem c26a_multinomial_mul_prod_factorial (m : Multiset ℕ) :
+lemma c26a_multinomial_mul_prod_factorial (m : Multiset ℕ) :
     m.multinomial * (m.map Nat.factorial).prod = m.sum.factorial := by
   induction m using Multiset.induction_on with
   | empty => simp
@@ -282,11 +281,11 @@ theorem multinomial_parts_eq {n : ℕ} (p : n.Partition) :
   exact_mod_cast h
 
 /-- Transporting a partition along `a = b` keeps its parts. -/
-theorem q26a_parts_cast {a b : ℕ} (h : a = b) (p : b.Partition) : (h ▸ p).parts = p.parts := by
+lemma q26a_parts_cast {a b : ℕ} (h : a = b) (p : b.Partition) : (h ▸ p).parts = p.parts := by
   subst h; rfl
 
 /-- The parts of size `1` of a partition. -/
-theorem q26a_filter_lt_two_parts {n : ℕ} (p : n.Partition) :
+lemma q26a_filter_lt_two_parts {n : ℕ} (p : n.Partition) :
     p.parts.filter (fun j => ¬ 2 ≤ j) = Multiset.replicate (p.parts.count 1) 1 := by
   rw [← Multiset.filter_eq']
   refine Multiset.filter_congr fun j hj => ?_
@@ -294,7 +293,7 @@ theorem q26a_filter_lt_two_parts {n : ℕ} (p : n.Partition) :
   omega
 
 /-- The parts `≥ 2` and the parts `= 1` of a partition of `n` add up to `n`. -/
-theorem q26a_sum_filter_two_le {n : ℕ} (p : n.Partition) :
+lemma q26a_sum_filter_two_le {n : ℕ} (p : n.Partition) :
     (p.parts.filter (2 ≤ ·)).sum + p.parts.count 1 = n := by
   have h := Multiset.filter_add_not (2 ≤ ·) p.parts
   have := congrArg Multiset.sum h

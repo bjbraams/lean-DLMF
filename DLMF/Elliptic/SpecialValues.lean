@@ -5,9 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Elliptic.JacobiIdentities
 public import DLMF.Elliptic.AGM
 public import DLMF.Hypergeometric.Elementary
+public import DLMF.Elliptic.Jacobi
 
 /-!
 # The algebraic form of `F`, `arcsn`, and special values (Duverney Ch. 5)
@@ -35,7 +35,7 @@ noncomputable section
 namespace DLMF.Elliptic
 
 /-- `sin` maps `(0, arcsin x)` onto `(0, x)` for `0 ≤ x ≤ 1`. -/
-lemma sin_image_Ioo_arcsin {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x ≤ 1) :
+theorem sin_image_Ioo_arcsin {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x ≤ 1) :
     sin '' Ioo 0 (arcsin x) = Ioo 0 x := by
   have hb : arcsin x ≤ π / 2 := arcsin_le_pi_div_two x
   ext y

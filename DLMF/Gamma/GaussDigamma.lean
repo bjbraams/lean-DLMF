@@ -5,7 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Tactic.CrossRefAttribute
 public import DLMF.Gamma.Digamma
 public import DLMF.Gamma.Multiplication
 
@@ -37,7 +36,7 @@ namespace Real
 
 local notation "γ" => eulerMascheroniConstant
 
-lemma hasDerivAt_log_Gamma_add_div {m : ℕ} {s : ℝ} (hs : 0 < s) (k : ℕ) :
+theorem hasDerivAt_log_Gamma_add_div {m : ℕ} {s : ℝ} (hs : 0 < s) (k : ℕ) :
     HasDerivAt (fun y : ℝ => log (Gamma (y + k / m))) (digamma (s + k / m)) s := by
   have hpos : 0 < s + k / m :=
     add_pos_of_pos_of_nonneg hs (div_nonneg (Nat.cast_nonneg _) (Nat.cast_nonneg _))
@@ -48,12 +47,12 @@ lemma hasDerivAt_log_Gamma_add_div {m : ℕ} {s : ℝ} (hs : 0 < s) (k : ℕ) :
   have hlog := hG.hasDerivAt.log (Gamma_pos_of_pos hpos).ne'
   simpa [digamma, Function.comp_def] using hlog.comp s hshift
 
-lemma hasDerivAt_sum_log_Gamma_add_div {m : ℕ} {s : ℝ} (hs : 0 < s) :
+theorem hasDerivAt_sum_log_Gamma_add_div {m : ℕ} {s : ℝ} (hs : 0 < s) :
     HasDerivAt (fun y : ℝ => ∑ k ∈ range m, log (Gamma (y + k / m)))
       (∑ k ∈ range m, digamma (s + k / m)) s :=
   HasDerivAt.fun_sum fun k _ => hasDerivAt_log_Gamma_add_div hs k
 
-lemma hasDerivAt_log_Gamma_mul {m : ℕ} (hm : 0 < m) {s : ℝ} (hs : 0 < s) :
+theorem hasDerivAt_log_Gamma_mul {m : ℕ} (hm : 0 < m) {s : ℝ} (hs : 0 < s) :
     HasDerivAt (fun y : ℝ => log (Gamma (m * y))) (m * digamma (m * s)) s := by
   have hm0 : (0 : ℝ) < m := Nat.cast_pos.mpr hm
   have hs' : 0 < m * s := mul_pos hm0 hs
@@ -155,11 +154,11 @@ theorem digamma_one_div_two : digamma (1 / 2) = -γ - 2 * log 2 := by
   norm_num
   ring
 
-lemma cot_pi_div_three : cot (π / 3) = 1 / sqrt 3 := by
+theorem cot_pi_div_three : cot (π / 3) = 1 / sqrt 3 := by
   rw [cot_eq_cos_div_sin, cos_pi_div_three, sin_pi_div_three, div_div_eq_mul_div]
   ring
 
-lemma cot_pi_div_four : cot (π / 4) = 1 := by
+theorem cot_pi_div_four : cot (π / 4) = 1 := by
   rw [cot_eq_cos_div_sin, cos_pi_div_four, sin_pi_div_four]
   have hne : sqrt 2 ≠ 0 := by positivity
   field [hne]

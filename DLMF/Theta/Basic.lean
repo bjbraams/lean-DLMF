@@ -7,10 +7,7 @@ module
 
 public import DLMF.Elliptic.Theta
 public import DLMF.QSeries.Identities
-public import Mathlib.Analysis.SpecialFunctions.Complex.Log
-public import Mathlib.Analysis.Calculus.Deriv.Basic
 public import Mathlib.Analysis.Complex.LocallyUniformLimit
-public import Mathlib.Tactic.CrossRefAttribute
 
 /-!
 # Theta functions: definitions and periodic properties (DLMF §§20.1–20.2)
@@ -99,11 +96,11 @@ def jacobiThetaTau (j : ℕ) (z τ : ℂ) : ℂ :=
 /-! ### Elementary helpers -/
 
 /-- `(-1)^k = e^{iπk}` for integer `k`. -/
-lemma th20_neg_one_zpow (k : ℤ) : (-1 : ℂ) ^ k = cexp (π * I * k) := by
+theorem th20_neg_one_zpow (k : ℤ) : (-1 : ℂ) ^ k = cexp (π * I * k) := by
   rw [← exp_pi_mul_I, ← exp_int_mul]; ring_nf
 
 /-- `(e^w)^k = e^{kw}` for integer `k`. -/
-lemma th20_exp_zpow (w : ℂ) (k : ℤ) : cexp w ^ k = cexp (k * w) := by
+theorem th20_exp_zpow (w : ℂ) (k : ℤ) : cexp w ^ k = cexp (k * w) := by
   rw [← exp_int_mul]
 
 /-- The exponential is unchanged by adding `2πi` times an integer. -/
@@ -111,7 +108,7 @@ lemma th20_exp_add_int (w : ℂ) (k : ℤ) : cexp (w + k * (2 * π * I)) = cexp 
   rw [exp_add, exp_int_mul_two_pi_mul_I, mul_one]
 
 /-- `e^{iπ/2} = i`. -/
-lemma th20_exp_pi_div_two_mul_I : cexp (π / 2 * I) = I := by
+theorem th20_exp_pi_div_two_mul_I : cexp (π / 2 * I) = I := by
   rw [exp_mul_I, cos_pi_div_two, sin_pi_div_two]; ring
 
 /-- `cos(x + nπ) = (-1)ⁿ cos x` for complex `x`. -/
@@ -183,7 +180,7 @@ theorem jacobiThetaOneQ_cexp (z : ℂ) {τ : ℂ} (h1 : -1 < τ.re) (h2 : τ.re 
 /-! ### §20.2(i) Fourier series -/
 
 /-- Summability of the `θ₃` series for `Im τ > 0`. -/
-lemma th20_hasSum_three (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
+theorem th20_hasSum_three (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
     HasSum (fun n : ℤ => cexp (π * I * n ^ 2 * τ + 2 * I * n * z)) (jacobiThetaThreeTau z τ) := by
   have h := hasSum_jacobiTheta₂_term (z / π) hτ
   rw [jacobiThetaThreeTau]
@@ -261,7 +258,7 @@ theorem jacobiThetaOneTau_hasSum_sin (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
 /-! ### §20.2(ii) Periodicity and quasi-periodicity -/
 
 /-- Lattice quasi-periodicity of `θ₃` in exponential form. -/
-theorem th20_three_add_lattice (z τ : ℂ) (m n : ℤ) :
+lemma th20_three_add_lattice (z τ : ℂ) (m n : ℤ) :
     jacobiThetaThreeTau (z + (m + n * τ) * π) τ =
       cexp (-(π * I * τ * n ^ 2)) * cexp (-2 * I * n * z) * jacobiThetaThreeTau z τ := by
   rw [jacobiThetaThreeTau_eq_tsum, jacobiThetaThreeTau_eq_tsum, ← tsum_mul_left,
@@ -591,7 +588,7 @@ lemma p20R1_sin_add_nat_mul_pi (x : ℂ) (n : ℕ) : sin (x + n * π) = (-1) ^ n
     ring
 
 /-- The derivative of `θ₃(·|τ)` and its sine series (helper). -/
-theorem p20R1_three_deriv (u : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
+lemma p20R1_three_deriv (u : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
     HasDerivAt (fun w => jacobiThetaThreeTau w τ) ((1 / π) * jacobiTheta₂' (u / π) τ) u ∧
     HasSum (fun k : ℕ => -(2 * cexp (π * I * τ * ((k : ℂ) + 1) ^ 2) *
         (2 * ((k : ℂ) + 1) * sin (2 * ((k : ℂ) + 1) * u)))) ((1 / π) * jacobiTheta₂' (u / π) τ) := by
@@ -621,7 +618,7 @@ theorem p20R1_three_deriv (u : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
 
 
 /-- The derivative of `θ₂(·|τ)` and its sine series (helper). -/
-theorem p20R1_two_deriv (u : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
+lemma p20R1_two_deriv (u : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
     ∃ D : ℂ, HasDerivAt (fun w => jacobiThetaTwoTau w τ) D u ∧
     HasSum (fun n : ℕ => -(2 * cexp (π * I * τ * ((n : ℂ) + 1 / 2) ^ 2) *
         ((2 * n + 1) * sin ((2 * n + 1) * u)))) D := by
@@ -784,7 +781,7 @@ theorem jacobiThetaFourTau_half_periods (z τ : ℂ) :
 /-! ### Helpers: the triple product in theta form -/
 
 /-- `‖e^{iπτ}‖ < 1` for `Im τ > 0`. -/
-lemma th20_norm_nome_lt_one {τ : ℂ} (hτ : 0 < τ.im) : ‖cexp (π * I * τ)‖ < 1 := by
+theorem th20_norm_nome_lt_one {τ : ℂ} (hτ : 0 < τ.im) : ‖cexp (π * I * τ)‖ < 1 := by
   rw [norm_exp]
   have : (π * I * τ).re = -(π * τ.im) := by simp
   rw [this]
@@ -793,7 +790,7 @@ lemma th20_norm_nome_lt_one {τ : ℂ} (hτ : 0 < τ.im) : ‖cexp (π * I * τ)
 
 /-- Jacobi's triple product for `θ₃`: with `E = e^{iπτ}`, `Q = E²`, `w = e^{2iz}`,
 `θ₃(z|τ) = (Q;Q)_∞ (-Ew;Q)_∞ (-E/w;Q)_∞`. -/
-lemma th20_three_eq_qPochhammer (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
+theorem th20_three_eq_qPochhammer (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
     jacobiThetaThreeTau z τ =
       qPochhammerInf (cexp (π * I * τ) ^ 2) (cexp (π * I * τ) ^ 2) *
         qPochhammerInf (-(cexp (π * I * τ) * cexp (2 * I * z))) (cexp (π * I * τ) ^ 2) *
@@ -846,18 +843,18 @@ lemma th20_qPochhammerInf_eq_zero_iff {a q : ℂ} (hq : ‖q‖ < 1) :
     exact th20_qPochhammerInf_eq_zero hq hk
 
 /-- Transport of `HasProd` along a pointwise equality of factors. -/
-lemma th20_hasProd_congr {f g : ℕ → ℂ} {a : ℂ} (h : HasProd f a) (hfg : ∀ k, f k = g k) :
+theorem th20_hasProd_congr {f g : ℕ → ℂ} {a : ℂ} (h : HasProd f a) (hfg : ∀ k, f k = g k) :
     HasProd g a := by
   have : f = g := funext hfg
   exact this ▸ h
 
 /-- `e^{2iz} + e^{-2iz} = 2 cos 2z`. -/
-lemma th20_exp_add_inv (z : ℂ) : cexp (2 * I * z) + (cexp (2 * I * z))⁻¹ = 2 * cos (2 * z) := by
+theorem th20_exp_add_inv (z : ℂ) : cexp (2 * I * z) + (cexp (2 * I * z))⁻¹ = 2 * cos (2 * z) := by
   rw [← exp_neg, cos, show 2 * z * I = 2 * I * z by ring, show -(2 * z) * I = -(2 * I * z) by ring]
   ring
 
 /-- `‖e^{2πiτ}‖ < 1` in the form `‖(e^{iπτ})²‖ < 1`. -/
-lemma th20_norm_nome_sq_lt_one {τ : ℂ} (hτ : 0 < τ.im) : ‖cexp (π * I * τ) ^ 2‖ < 1 := by
+theorem th20_norm_nome_sq_lt_one {τ : ℂ} (hτ : 0 < τ.im) : ‖cexp (π * I * τ) ^ 2‖ < 1 := by
   rw [norm_pow]
   have h := th20_norm_nome_lt_one hτ
   nlinarith [norm_nonneg (cexp (π * I * τ))]
@@ -954,7 +951,7 @@ theorem jacobiThetaTau_eq_zero_iff {τ : ℂ} (hτ : 0 < τ.im) (z : ℂ) :
     constructor <;> intro h <;> linear_combination h
 
 /-- A lattice-type point `(a + bτ)π` with real `a, b` vanishes only if `a = b = 0` (`Im τ > 0`). -/
-lemma th20_lattice_eq_zero {τ : ℂ} (hτ : 0 < τ.im) {a b : ℝ} (h : 0 = ((a : ℂ) + b * τ) * π) :
+theorem th20_lattice_eq_zero {τ : ℂ} (hτ : 0 < τ.im) {a b : ℝ} (h : 0 = ((a : ℂ) + b * τ) * π) :
     a = 0 ∧ b = 0 := by
   have h' : (a : ℂ) + b * τ = 0 := by
     rcases mul_eq_zero.mp h.symm with h | h

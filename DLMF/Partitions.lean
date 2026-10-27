@@ -6,9 +6,13 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.Combinatorics.Enumerative.Partition.Basic
-public import Mathlib.Combinatorics.Enumerative.Partition.GenFun
-public import Mathlib.Combinatorics.Enumerative.Partition.Glaisher
-public import Mathlib.Combinatorics.Enumerative.Pentagonal.PowerSeries
+public import Mathlib.Algebra.Order.AbsoluteValue.Basic
+public import Mathlib.Data.Rat.Cast.Order
+public import Mathlib.Tactic.Continuity.Init
+public import Mathlib.Tactic.NormNum.Abs
+public import Mathlib.Tactic.NormNum.DivMod
+public import Mathlib.Tactic.NormNum.OfScientific
+public import Mathlib.Tactic.NormNum.Pow
 
 /-!
 # Partitions (AAR Chapter 11)

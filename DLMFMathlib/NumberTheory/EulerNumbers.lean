@@ -8,9 +8,6 @@ module
 public import DLMFMathlib.NumberTheory.EulerPolynomials
 public import Mathlib.NumberTheory.BernoulliPolynomials
 public import Mathlib.NumberTheory.ZetaValues
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
-public import Mathlib.Analysis.Normed.Ring.InfiniteSum
-public import Mathlib.Tactic.CrossRefAttribute
 
 /-!
 # Euler numbers: Bernoulli relation, generating functions, `β(2k+1)` (Duverney §2.3.2)

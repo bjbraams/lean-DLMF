@@ -7,12 +7,6 @@ module
 
 public import DLMF.BernoulliEuler.GeneratingFunctions
 public import DLMF.Combinatorics.Stirling
-public import DLMFMathlib.NumberTheory.BernoulliTaylor
-public import DLMFMathlib.NumberTheory.EulerNumbers
-public import Mathlib.Combinatorics.Enumerative.Stirling
-public import Mathlib.Data.Nat.Fib.Basic
-public import Mathlib.NumberTheory.Padics.PadicNorm
-public import Mathlib.Tactic.CrossRefAttribute
 public import Pochhammer.PochhammerTransform
 
 /-!
@@ -64,7 +58,7 @@ def genocchiNumber (n : ℕ) : ℚ := 2 * (1 - 2 ^ n) * bernoulli n
 @[dlmf 24.15.E2]
 theorem genocchiNumber_eq (n : ℕ) : genocchiNumber n = 2 * (1 - 2 ^ n) * bernoulli n := rfl
 
-theorem b24b_exp_ne_one {w : ℂ} (hw : ‖w‖ < 2 * π) (hw0 : w ≠ 0) : Complex.exp w ≠ 1 := by
+lemma b24b_exp_ne_one {w : ℂ} (hw : ‖w‖ < 2 * π) (hw0 : w ≠ 0) : Complex.exp w ≠ 1 := by
   intro h
   obtain ⟨n, hn⟩ := Complex.exp_eq_one_iff.mp h
   have hn0 : n ≠ 0 := by rintro rfl; simp at hn; exact hw0 hn
@@ -172,7 +166,7 @@ theorem hasSum_tangentNumber {t : ℂ} (ht : ‖t‖ < π / 2) :
 
 /-! ### Table 24.15.1 -/
 
-theorem b24b_bernoulli_values :
+lemma b24b_bernoulli_values :
     bernoulli 0 = 1 ∧ bernoulli 1 = -1 / 2 ∧ bernoulli 2 = 1 / 6 ∧ bernoulli 3 = 0 ∧
       bernoulli 4 = -1 / 30 ∧ bernoulli 5 = 0 ∧ bernoulli 6 = 1 / 42 ∧ bernoulli 7 = 0 ∧
       bernoulli 8 = -1 / 30 ∧ bernoulli 9 = 0 := by
@@ -229,11 +223,11 @@ open Polynomial
 def q24b_L : ℚ[X] →ₗ[ℚ] ℚ := Polynomial.lsum fun i => (_root_.bernoulli i) • LinearMap.id
 
 /-- `L` on monomials. -/
-theorem q24b_L_monomial (n : ℕ) (a : ℚ) : q24b_L (monomial n a) = a * _root_.bernoulli n := by
+lemma q24b_L_monomial (n : ℕ) (a : ℚ) : q24b_L (monomial n a) = a * _root_.bernoulli n := by
   simp [q24b_L]; ring
 
 /-- `L(p(X+1)) - L(p) = p'(0)`. -/
-theorem q24b_L_shift (p : ℚ[X]) :
+lemma q24b_L_shift (p : ℚ[X]) :
     q24b_L (p.comp (X + 1)) - q24b_L p = (derivative p).eval 0 := by
   induction p using Polynomial.induction_on' with
   | add p q hp hq => rw [add_comp, map_add, map_add, derivative_add, eval_add, ← hp, ← hq]; ring
@@ -252,7 +246,7 @@ theorem q24b_L_shift (p : ℚ[X]) :
     rcases n with _ | _ | n <;> simp
 
 /-- `(-1)(-2)⋯(-k) = (-1)ᵏ k!`. -/
-theorem q24b_descPochhammer_eval_neg_one (k : ℕ) :
+lemma q24b_descPochhammer_eval_neg_one (k : ℕ) :
     (descPochhammer ℚ k).eval (-1) = (-1) ^ k * k ! := by
   induction k with
   | zero => simp
@@ -261,7 +255,7 @@ theorem q24b_descPochhammer_eval_neg_one (k : ℕ) :
     push_cast; ring
 
 /-- `L(x(x-1)⋯(x-k+1)) = (-1)ᵏ k!/(k+1)`. -/
-theorem q24b_L_descPochhammer (k : ℕ) :
+lemma q24b_L_descPochhammer (k : ℕ) :
     q24b_L (descPochhammer ℚ k) = (-1) ^ k * k ! / (k + 1) := by
   have h := descPochhammer_succ_comp_X_sub_one (R := ℚ) k
   have hcomp : ((X : ℚ[X]) - 1).comp (X + 1) = X := by simp
@@ -280,7 +274,7 @@ theorem q24b_L_descPochhammer (k : ℕ) :
   rw [eq_div_iff hk, mul_comm, hs]
 
 /-- DLMF 24.15.6 (helper form). -/
-theorem q24b_bernoulli_eq_sum_stirlingSecond (n : ℕ) :
+lemma q24b_bernoulli_eq_sum_stirlingSecond (n : ℕ) :
     _root_.bernoulli n = ∑ k ∈ range (n + 1),
       (-1) ^ k * (k ! * Nat.stirlingSecond n k : ℚ) / (k + 1) := by
   have h := congrArg q24b_L (DLMF.Combinatorics.X_pow_eq_sum_stirlingSecond_mul_descPochhammer ℚ n)
@@ -291,7 +285,7 @@ theorem q24b_bernoulli_eq_sum_stirlingSecond (n : ℕ) :
   ring
 
 /-- DLMF 24.15.8 (helper form). -/
-theorem q24b_sum_stirlingFirst_mul_bernoulli (n : ℕ) :
+lemma q24b_sum_stirlingFirst_mul_bernoulli (n : ℕ) :
     ∑ k ∈ range (n + 1), (-1) ^ (n + k) *
         ((-1) ^ (n - k) * (Nat.stirlingFirst (n + 1) (k + 1) : ℚ)) * _root_.bernoulli k =
       n ! / (n + 1) := by
@@ -338,7 +332,7 @@ theorem bernoulli_eq_sum_stirlingSecond (n : ℕ) :
   q24b_bernoulli_eq_sum_stirlingSecond n
 
 /-- `[tᵐ] (eᵗ - 1)ᵏ = k! S(m, k)/m!`. -/
-theorem r24b_coeff_exp_sub_one_pow (m k : ℕ) :
+lemma r24b_coeff_exp_sub_one_pow (m k : ℕ) :
     PowerSeries.coeff m ((PowerSeries.exp ℚ - 1) ^ k) =
       (k ! * Nat.stirlingSecond m k : ℚ) / m ! := by
   induction m generalizing k with
@@ -483,7 +477,7 @@ theorem lucasNumber_succ (n : ℕ) : lucasNumber (n + 1) = Nat.fib n + Nat.fib (
 /-! ### Binet formulas and shifted sums (helpers for §24.15(iv)) -/
 
 /-- A sum over `j ≤ n` whose odd terms vanish is the sum of its even terms. -/
-theorem q24b_sum_range_even {M : Type*} [AddCommMonoid M] (n : ℕ) (f : ℕ → M)
+lemma q24b_sum_range_even {M : Type*} [AddCommMonoid M] (n : ℕ) (f : ℕ → M)
     (hf : ∀ j, Odd j → f j = 0) :
     ∑ k ∈ range (n / 2 + 1), f (2 * k) = ∑ j ∈ range (n + 1), f j := by
   induction n with
@@ -500,15 +494,15 @@ theorem q24b_sum_range_even {M : Type*} [AddCommMonoid M] (n : ℕ) (f : ℕ →
 noncomputable def q24b_s : ℂ := ((Real.sqrt 5 : ℝ) : ℂ)
 
 /-- `(√5)² = 5`. -/
-theorem q24b_s_sq : q24b_s ^ 2 = 5 := by
+lemma q24b_s_sq : q24b_s ^ 2 = 5 := by
   rw [q24b_s, ← Complex.ofReal_pow, Real.sq_sqrt (by norm_num)]; norm_num
 
 /-- `√5 ≠ 0`. -/
-theorem q24b_s_ne_zero : q24b_s ≠ 0 := by
+lemma q24b_s_ne_zero : q24b_s ≠ 0 := by
   intro h; have := q24b_s_sq; rw [h] at this; norm_num at this
 
 /-- Binet's formula for the Lucas numbers, in `ℂ`. -/
-theorem q24b_lucas_eq (m : ℕ) :
+lemma q24b_lucas_eq (m : ℕ) :
     (lucasNumber m : ℂ) = ((1 + q24b_s) / 2) ^ m + ((1 - q24b_s) / 2) ^ m := by
   induction m using Nat.strong_induction_on with
   | _ m ih =>
@@ -521,7 +515,7 @@ theorem q24b_lucas_eq (m : ℕ) :
       linear_combination (-(((1 + q24b_s) / 2) ^ m + ((1 - q24b_s) / 2) ^ m) / 4) * h
 
 /-- Binet's formula for the Fibonacci numbers, in `ℂ`. -/
-theorem q24b_fib_eq (m : ℕ) :
+lemma q24b_fib_eq (m : ℕ) :
     (Nat.fib m : ℂ) = (((1 + q24b_s) / 2) ^ m - ((1 - q24b_s) / 2) ^ m) / q24b_s := by
   rw [eq_div_iff q24b_s_ne_zero]
   induction m using Nat.strong_induction_on with
@@ -535,7 +529,7 @@ theorem q24b_fib_eq (m : ℕ) :
       linear_combination (-(((1 + q24b_s) / 2) ^ m - ((1 - q24b_s) / 2) ^ m) / 4) * h
 
 /-- `Eₙ(x+1) + Eₙ(x) = 2xⁿ` for complex `x`. -/
-theorem q24b_eulerPolyE_add_one_add (n : ℕ) (x : ℂ) :
+lemma q24b_eulerPolyE_add_one_add (n : ℕ) (x : ℂ) :
     eulerPolyE n (x + 1) + eulerPolyE n x = 2 * x ^ n := by
   have h := congrArg (Polynomial.aeval x) (Polynomial.euler_comp_X_add_one_add n)
   simp only [map_add, Polynomial.aeval_comp, Polynomial.aeval_X, map_one, map_mul, map_pow,
@@ -543,7 +537,7 @@ theorem q24b_eulerPolyE_add_one_add (n : ℕ) (x : ℂ) :
   exact h
 
 /-- `∑ⱼ (n choose j) (s/2)ʲ Eⱼ y^{n-j} = sⁿ Eₙ(1/2 + y/s)`. -/
-theorem q24b_sum_euler_shift (n : ℕ) (y : ℂ) :
+lemma q24b_sum_euler_shift (n : ℕ) (y : ℂ) :
     ∑ j ∈ range (n + 1), (n.choose j : ℂ) * (q24b_s / 2) ^ j * eulerNumber j * y ^ (n - j) =
       q24b_s ^ n * eulerPolyE n (1 / 2 + y / q24b_s) := by
   rw [eulerPolyE_add, mul_sum]
@@ -556,7 +550,7 @@ theorem q24b_sum_euler_shift (n : ℕ) (y : ℂ) :
 
 
 /-- `Bₙ(x+1) = Bₙ(x) + n x^{n-1}` for complex `x`. -/
-theorem q24b_bernoulliPolyB_add_one (n : ℕ) (x : ℂ) :
+lemma q24b_bernoulliPolyB_add_one (n : ℕ) (x : ℂ) :
     bernoulliPolyB n (x + 1) = bernoulliPolyB n x + n * x ^ (n - 1) := by
   have h := congrArg (Polynomial.aeval x) (Polynomial.bernoulli_comp_one_add_X n)
   simp only [Polynomial.aeval_comp, map_add, map_one, Polynomial.aeval_X, nsmul_eq_mul, map_mul,
@@ -564,7 +558,7 @@ theorem q24b_bernoulliPolyB_add_one (n : ℕ) (x : ℂ) :
   rw [bernoulliPolyB, add_comm x, h, bernoulliPolyB]
 
 /-- `∑ⱼ (n choose j) aʲ Bⱼ y^{n-j} = aⁿ Bₙ(y/a)`. -/
-theorem q24b_sum_bernoulli_shift (n : ℕ) {a : ℂ} (ha : a ≠ 0) (y : ℂ) :
+lemma q24b_sum_bernoulli_shift (n : ℕ) {a : ℂ} (ha : a ≠ 0) (y : ℂ) :
     ∑ j ∈ range (n + 1), (n.choose j : ℂ) * a ^ j * bernoulli j * y ^ (n - j) =
       a ^ n * bernoulliPolyB n (y / a) := by
   rw [bernoulliPolyB_eq_sum, mul_sum]

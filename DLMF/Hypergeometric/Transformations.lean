@@ -5,11 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Tactic.CrossRefAttribute
 public import DLMF.Hypergeometric.EulerIntegral
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.IntegrationByParts
-public import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
-public import Mathlib.Analysis.Analytic.IsolatedZeros
 
 /-!
 # Linear and quadratic transformations (AAR §2.2 and §3.1)
@@ -28,7 +24,7 @@ noncomputable section
 namespace DLMF.Hypergeometric
 
 /-- Powers multiply without a branch correction when both factors have positive real part. -/
-lemma mul_cpow_of_re_pos {u v : ℂ} (hu : 0 < u.re) (hv : 0 < v.re) (a : ℂ) :
+theorem mul_cpow_of_re_pos {u v : ℂ} (hu : 0 < u.re) (hv : 0 < v.re) (a : ℂ) :
     (u * v) ^ a = u ^ a * v ^ a := by
   have hu0 : u ≠ 0 := by intro h; simp [h] at hu
   have hv0 : v ≠ 0 := by intro h; simp [h] at hv
@@ -39,7 +35,7 @@ lemma mul_cpow_of_re_pos {u v : ℂ} (hu : 0 < u.re) (hv : 0 < v.re) (a : ℂ) :
     cpow_def_of_ne_zero hu0, cpow_def_of_ne_zero hv0]
 
 /-- The factors in Pfaff's change of variable stay in the right half-plane. -/
-lemma re_one_sub_mul_pos {z : ℂ} (hz : ‖z‖ < 1) {t : ℝ} (ht : t ∈ Set.Icc 0 1) :
+theorem re_one_sub_mul_pos {z : ℂ} (hz : ‖z‖ < 1) {t : ℝ} (ht : t ∈ Set.Icc 0 1) :
     0 < (1 - z * t).re := by
   have htn : ‖(t : ℂ)‖ ≤ 1 := by
     simpa [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg ht.1] using ht.2
@@ -89,7 +85,7 @@ theorem pfaff_transformation {a b c z : ℂ}
   ring
 
 /-- The real fractional substitution used in Euler's transformation. -/
-lemma euler_integrand_substitution (a b c : ℂ) {z u : ℝ}
+theorem euler_integrand_substitution (a b c : ℂ) {z u : ℝ}
     (hz0 : 0 ≤ z) (hz1 : z < 1) (hu : u ∈ Set.Ioo 0 1) :
     ((-(1 - z) / (1 - z * u) ^ 2 : ℝ) : ℂ) *
       (((((1 - u) / (1 - z * u) : ℝ) : ℂ) ^ (b - 1) *
@@ -123,7 +119,7 @@ lemma euler_integrand_substitution (a b c : ℂ) {z u : ℝ}
   field [hK0, hD0, cpow_ne_zero_iff]
 
 /-- Euler's transformation on the real interval, by a monotone fractional substitution. -/
-lemma euler_transformation_real {a b c : ℂ} {z : ℝ}
+theorem euler_transformation_real {a b c : ℂ} {z : ℝ}
     (hb : 0 < b.re) (hcb : 0 < (c - b).re) (hz0 : 0 ≤ z) (hz1 : z < 1) :
     ₂F₁ a b c (z : ℂ) =
       (1 - (z : ℂ)) ^ (c - a - b) * ₂F₁ (c - a) (c - b) c (z : ℂ) := by

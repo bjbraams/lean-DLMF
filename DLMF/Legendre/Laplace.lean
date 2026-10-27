@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Legendre.SecondKind
-public import DLMF.Hypergeometric.FurtherTransformations
 public import DLMF.OrthogonalPolynomials.Legendre
 
 /-!
@@ -30,7 +29,7 @@ noncomputable section
 namespace DLMF.Legendre
 
 /-- For `Re z > 0`, `z²` lies in the slit plane. -/
-lemma sq_mem_slitPlane {z : ℂ} (hz : 0 < z.re) : z ^ 2 ∈ slitPlane := by
+theorem sq_mem_slitPlane {z : ℂ} (hz : 0 < z.re) : z ^ 2 ∈ slitPlane := by
   rw [mem_slitPlane_iff]
   by_cases hy : z.im = 0
   · left; simp [pow_two, hy]; positivity
@@ -39,13 +38,13 @@ lemma sq_mem_slitPlane {z : ℂ} (hz : 0 < z.re) : z ^ 2 ∈ slitPlane := by
     exact mul_ne_zero (mul_ne_zero two_ne_zero hz.ne') hy
 
 /-- For `Re z > 0`, `1 - 1/z²` lies in the cut plane. -/
-lemma one_sub_recip_sq_mem_cutPlane {z : ℂ} (hz : 0 < z.re) : 1 - 1 / z ^ 2 ∈ cutPlane := by
+theorem one_sub_recip_sq_mem_cutPlane {z : ℂ} (hz : 0 < z.re) : 1 - 1 / z ^ 2 ∈ cutPlane := by
   rw [mem_cutPlane, sub_sub_cancel, one_div]
   exact recip_mem_slitPlane' (sq_mem_slitPlane hz)
 
 /-- Near `x ∈ (1, √2)`, Gauss's quadratic transformation and Pfaff's transformation give
 `P_ν(x) = x^ν F(-ν/2, (1-ν)/2; 1; 1 - 1/x²)`. -/
-lemma legendreP_eq_pfaff_real (ν : ℂ) {x : ℝ} (hx1 : 1 < x) (hx2 : x ^ 2 < 2) :
+theorem legendreP_eq_pfaff_real (ν : ℂ) {x : ℝ} (hx1 : 1 < x) (hx2 : x ^ 2 < 2) :
     legendreP ν x = (x : ℂ) ^ ν *
       regularizedGaussHG (-ν / 2) ((1 - ν) / 2) 1 (1 - 1 / (x : ℂ) ^ 2) := by
   have h1 : ∀ k : ℕ, (1 : ℂ) ≠ -(k : ℂ) := fun k h => by
@@ -118,7 +117,7 @@ theorem legendreP_eq_cpow_mul (ν : ℂ) {z : ℂ} (hz : 0 < z.re) :
 
 
 /-- Duplication for Pochhammer symbols: `(a)₂ₘ = 4ᵐ (a/2)ₘ ((a+1)/2)ₘ`. -/
-lemma poch_two_mul (a : ℂ) (m : ℕ) :
+theorem poch_two_mul (a : ℂ) (m : ℕ) :
     poch a (2 * m) = 4 ^ m * poch (a / 2) m * poch ((a + 1) / 2) m := by
   induction m with
   | zero => simp [poch_zero]
@@ -128,14 +127,14 @@ lemma poch_two_mul (a : ℂ) (m : ℕ) :
     ring
 
 /-- The regularized Gauss series as a `HasSum` on the unit disk. -/
-lemma hasSum_regularizedGaussHGFun (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem hasSum_regularizedGaussHGFun (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     HasSum (fun n : ℕ => (ascPochhammer ℂ n).eval a * (ascPochhammer ℂ n).eval b * z ^ n /
       n.factorial * (Gamma (c + n))⁻¹) (regularizedGaussHGFun a b c z) := by
   rw [regularizedGaussHGFun_eq_tsum]
   exact (summable_regularizedGaussHGFun_term a b c hz).hasSum
 
 /-- The binomial series `(1+t)^ν = ∑ (-ν)ₙ (-t)ⁿ / n!` for `|t| < 1`. -/
-lemma hasSum_one_add_cpow (ν : ℂ) {t : ℂ} (ht : ‖t‖ < 1) :
+theorem hasSum_one_add_cpow (ν : ℂ) {t : ℂ} (ht : ‖t‖ < 1) :
     HasSum (fun n : ℕ => poch (-ν) n * (-t) ^ n / n.factorial) ((1 + t) ^ ν) := by
   have h1 : ∀ k : ℕ, (1 : ℂ) ≠ -(k : ℂ) := fun k h => by
     have := congrArg re h; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
@@ -154,7 +153,7 @@ lemma hasSum_one_add_cpow (ν : ℂ) {t : ℂ} (ht : ‖t‖ < 1) :
 
 /-- `∫₀^π (1 + r cos φ)^ν dφ = π 𝐅(-ν/2, (1-ν)/2; 1; r²)` for `0 ≤ r < 1`, by termwise
 integration of the binomial series. -/
-lemma integral_one_add_mul_cos_cpow (ν : ℂ) {r : ℝ} (hr0 : 0 ≤ r) (hr : r < 1) :
+theorem integral_one_add_mul_cos_cpow (ν : ℂ) {r : ℝ} (hr0 : 0 ≤ r) (hr : r < 1) :
     ∫ φ in (0 : ℝ)..π, (((1 + r * Real.cos φ : ℝ)) : ℂ) ^ ν =
       π * regularizedGaussHGFun (-ν / 2) ((1 - ν) / 2) 1 ((r : ℂ) ^ 2) := by
   set F : ℕ → ℝ → ℂ := fun n φ => poch (-ν) n * (-((r * Real.cos φ : ℝ) : ℂ)) ^ n /

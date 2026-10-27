@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Lame.Polynomials.P2pEigen
-public import DLMF.Lame.P2lFourier
 public import DLMF.Lame.FourierSeries
 
 /-!
@@ -284,14 +283,14 @@ lemma p2p_integral_sq_sum {a b : ℝ} (N : ℕ) (c : ℕ → ℝ) (f : ℕ → �
   ring
 
 /-- `∑_{p ∈ (0, n]} f p = ∑_{p < n} f (p + 1)`. -/
-lemma p2p_sum_Ioc (f : ℕ → ℝ) (n : ℕ) :
+theorem p2p_sum_Ioc (f : ℕ → ℝ) (n : ℕ) :
     ∑ p ∈ Finset.Ioc 0 n, f p = ∑ p ∈ Finset.range n, f (p + 1) := by
   induction n with
   | zero => simp
   | succ n ih => rw [Finset.sum_Ioc_succ_top (Nat.zero_le _), ih, Finset.sum_range_succ]
 
 /-- The normalization integral of a finite cosine series in `φ = π/2 - am(x, k)`. -/
-lemma p2p_norm_cos {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → ℝ) {e : ℕ → ℕ}
+theorem p2p_norm_cos {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → ℝ) {e : ℕ → ℕ}
     (he : Function.Injective e) (hpar : ∀ p q, Even (e p + e q)) {w : ℝ → ℝ}
     (hw : ∀ y, w y = ∑ p ∈ Finset.range N, b p * Real.cos (e p * Real.lamePhi y k)) :
     ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.jacobiDnm x (k ^ 2) * w x ^ 2 =
@@ -307,7 +306,7 @@ lemma p2p_norm_cos {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → 
   · simp [h, he.ne h]
 
 /-- The normalization integral of a finite sine series in `φ = π/2 - am(x, k)`. -/
-lemma p2p_norm_sin {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → ℝ) {e : ℕ → ℕ}
+theorem p2p_norm_sin {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → ℝ) {e : ℕ → ℕ}
     (he : Function.Injective e) (hpar : ∀ p q, Even (e p + e q)) {w : ℝ → ℝ}
     (hw : ∀ y, w y = ∑ p ∈ Finset.range N, b p * Real.sin (e p * Real.lamePhi y k)) :
     ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.jacobiDnm x (k ^ 2) * w x ^ 2 =
@@ -323,14 +322,14 @@ lemma p2p_norm_sin {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → 
   · simp [h, he.ne h]
 
 /-- The value at `K` of a finite cosine series in `φ` (`φ(K) = 0`). -/
-lemma p2p_val_cos {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → ℝ) (e : ℕ → ℝ)
+theorem p2p_val_cos {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → ℝ) (e : ℕ → ℝ)
     {w : ℝ → ℝ}
     (hw : ∀ y, w y = ∑ p ∈ Finset.range N, b p * Real.cos (e p * Real.lamePhi y k)) :
     w (Real.compEllIntKm (k ^ 2)) = ∑ p ∈ Finset.range N, b p := by
   rw [hw, l29_lamePhi_K hk0 hk1]; simp
 
 /-- Minus the derivative at `K` of a finite sine series in `φ`: `dn(K) ∑ eₚ bₚ`. -/
-lemma p2p_deriv_sin {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → ℝ) (e : ℕ → ℝ)
+theorem p2p_deriv_sin {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → ℝ) (e : ℕ → ℝ)
     {w : ℝ → ℝ}
     (hw : ∀ y, w y = ∑ p ∈ Finset.range N, b p * Real.sin (e p * Real.lamePhi y k)) :
     -deriv w (Real.compEllIntKm (k ^ 2)) =
@@ -522,7 +521,7 @@ lemma p2p_dsum_aux (k : ℝ) (N : ℕ) (b : ℕ → ℝ) (α : ℝ) (I : ℕ →
   rw [A, B]; ring
 
 /-- The `dn`-type normalization integral for a cosine series `∑ bₚ cos((2p+δ)φ)`. -/
-lemma p2p_norm_dn_cos {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → ℝ) (δ : ℕ)
+theorem p2p_norm_dn_cos {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → ℝ) (δ : ℕ)
     (hb : b N = 0) {w : ℝ → ℝ}
     (hw : ∀ y, w y = Real.jacobiDnm y (k ^ 2) *
       ∑ p ∈ Finset.range N, b p * Real.cos (((2 * p + δ : ℕ) : ℝ) * Real.lamePhi y k)) :
@@ -553,7 +552,7 @@ lemma p2p_norm_dn_cos {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ �
   exact p2p_dsum_aux k N b _ _ (fun p q => (if 2 * p + δ + (2 * q + δ) = 2 then 1 else 0)) hb
 
 /-- The `dn`-type normalization integral for a sine series `∑ bₚ sin((2p+δ)φ)`. -/
-lemma p2p_norm_dn_sin {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → ℝ) (δ : ℕ)
+theorem p2p_norm_dn_sin {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → ℝ) (δ : ℕ)
     (hb : b N = 0) {w : ℝ → ℝ}
     (hw : ∀ y, w y = Real.jacobiDnm y (k ^ 2) *
       ∑ p ∈ Finset.range N, b p * Real.sin (((2 * p + δ : ℕ) : ℝ) * Real.lamePhi y k)) :
@@ -584,7 +583,7 @@ lemma p2p_norm_dn_sin {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ �
   exact p2p_dsum_aux k N b _ _ (fun p q => -(if 2 * p + δ + (2 * q + δ) = 2 then 1 else 0)) hb
 
 /-- The extra term of the `dn`-type normalization for `δ = 0`. -/
-lemma p2p_extra0 (b : ℕ → ℝ) (M : ℕ) (hb : b (M + 1) = 0) :
+theorem p2p_extra0 (b : ℕ → ℝ) (M : ℕ) (hb : b (M + 1) = 0) :
     ∑ p ∈ Finset.range (M + 1), ∑ q ∈ Finset.range (M + 1), b p * b q *
       (if 2 * p + 0 + (2 * q + 0) = 2 then (1 : ℝ) else 0) = 2 * b 0 * b 1 := by
   have key : ∀ p q : ℕ, (if 2 * p + 0 + (2 * q + 0) = 2 then (1 : ℝ) else 0) =
@@ -597,7 +596,7 @@ lemma p2p_extra0 (b : ℕ → ℝ) (M : ℕ) (hb : b (M + 1) = 0) :
   · simp; ring
 
 /-- The extra term of the `dn`-type normalization for `δ = 1`. -/
-lemma p2p_extra1 (b : ℕ → ℝ) (N : ℕ) :
+theorem p2p_extra1 (b : ℕ → ℝ) (N : ℕ) :
     ∑ p ∈ Finset.range (N + 1), ∑ q ∈ Finset.range (N + 1), b p * b q *
       (if 2 * p + 1 + (2 * q + 1) = 2 then (1 : ℝ) else 0) = b 0 ^ 2 := by
   have key : ∀ p q : ℕ, (if 2 * p + 1 + (2 * q + 1) = 2 then (1 : ℝ) else 0) =
@@ -607,7 +606,7 @@ lemma p2p_extra1 (b : ℕ → ℝ) (N : ℕ) :
   simp; ring
 
 /-- The extra term of the `dn`-type normalization for `δ = 2` vanishes. -/
-lemma p2p_extra2 (b : ℕ → ℝ) (N : ℕ) :
+theorem p2p_extra2 (b : ℕ → ℝ) (N : ℕ) :
     ∑ p ∈ Finset.range N, ∑ q ∈ Finset.range N, b p * b q *
       (if 2 * p + 2 + (2 * q + 2) = 2 then (1 : ℝ) else 0) = 0 := by
   have key : ∀ p q : ℕ, (if 2 * p + 2 + (2 * q + 2) = 2 then (1 : ℝ) else 0) = 0 := by
@@ -615,7 +614,7 @@ lemma p2p_extra2 (b : ℕ → ℝ) (N : ℕ) :
   simp [key]
 
 /-- The value at `K` of `dn` times a finite cosine series in `φ`. -/
-lemma p2p_val_dn_cos {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → ℝ) (e : ℕ → ℝ)
+theorem p2p_val_dn_cos {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → ℝ) (e : ℕ → ℝ)
     {w : ℝ → ℝ}
     (hw : ∀ y, w y = Real.jacobiDnm y (k ^ 2) *
       ∑ p ∈ Finset.range N, b p * Real.cos (e p * Real.lamePhi y k)) :
@@ -624,7 +623,7 @@ lemma p2p_val_dn_cos {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ �
   rw [hw, l29_lamePhi_K hk0 hk1]; simp
 
 /-- Minus the derivative at `K` of `dn` times a finite sine series in `φ`. -/
-lemma p2p_deriv_dn_sin {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → ℝ) (e : ℕ → ℝ)
+theorem p2p_deriv_dn_sin {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → ℝ) (e : ℕ → ℝ)
     {w : ℝ → ℝ}
     (hw : ∀ y, w y = Real.jacobiDnm y (k ^ 2) *
       ∑ p ∈ Finset.range N, b p * Real.sin (e p * Real.lamePhi y k)) :

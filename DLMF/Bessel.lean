@@ -3,7 +3,7 @@ Copyright (c) 2026 Bastiaan J Braams. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bastiaan J Braams
 -/
-module
+module -- shake: keep-all
 
 public import DLMF.Bessel.Asymptotics
 public import DLMF.Bessel.Basic
@@ -30,6 +30,7 @@ public import DLMF.Bessel.YSchlafli
 public import DLMF.Bessel.WeberSeries
 public import DLMF.Bessel.Zeros
 public import DLMF.Bessel.MathlibCoverage
+public import DLMF.Bessel.P3mGraf
 
 /-!
 # Bessel functions (AAR Chapter 4, §§4.5–4.15; DLMF Chapter 10)

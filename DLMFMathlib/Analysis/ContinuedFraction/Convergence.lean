@@ -6,13 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.Algebra.ContinuedFractions.ContinuantsRecurrence
-public import Mathlib.Algebra.ContinuedFractions.Translations
-public import Mathlib.Analysis.SpecificLimits.Normed
-public import Mathlib.Tactic.LinearCombination
-public import Mathlib.Tactic.FieldSimp
 public import Mathlib.Analysis.Calculus.Deriv.Inv
 public import Mathlib.Analysis.Calculus.FDeriv.Mul
-public import Mathlib.Analysis.Complex.Basic
 public import Mathlib.Analysis.PSeries
 
 /-!
@@ -69,33 +64,33 @@ section Algebra
 variable [Field K] (h : K) (a b : ℕ → K)
 
 /-- `A₀ = h`. -/
-lemma cfConv_nums_zero : (cfConv_ofFun h a b).nums 0 = h := rfl
+theorem cfConv_nums_zero : (cfConv_ofFun h a b).nums 0 = h := rfl
 
 /-- `B₀ = 1`. -/
-lemma cfConv_dens_zero : (cfConv_ofFun h a b).dens 0 = 1 := zeroth_den_eq_one
+theorem cfConv_dens_zero : (cfConv_ofFun h a b).dens 0 = 1 := zeroth_den_eq_one
 
 /-- `A₁ = b₀ h + a₀`. -/
-lemma cfConv_nums_one : (cfConv_ofFun h a b).nums 1 = b 0 * h + a 0 :=
+theorem cfConv_nums_one : (cfConv_ofFun h a b).nums 1 = b 0 * h + a 0 :=
   first_num_eq (g := cfConv_ofFun h a b) (gp := ⟨a 0, b 0⟩) rfl
 
 /-- `B₁ = b₀`. -/
-lemma cfConv_dens_one : (cfConv_ofFun h a b).dens 1 = b 0 :=
+theorem cfConv_dens_one : (cfConv_ofFun h a b).dens 1 = b 0 :=
   first_den_eq (g := cfConv_ofFun h a b) (gp := ⟨a 0, b 0⟩) rfl
 
 /-- The numerator recurrence. -/
-lemma cfConv_nums_step (n : ℕ) :
+theorem cfConv_nums_step (n : ℕ) :
     (cfConv_ofFun h a b).nums (n + 2) =
       b (n + 1) * (cfConv_ofFun h a b).nums (n + 1) + a (n + 1) * (cfConv_ofFun h a b).nums n :=
   nums_recurrence (g := cfConv_ofFun h a b) (n := n) (gp := ⟨a (n + 1), b (n + 1)⟩) rfl rfl rfl
 
 /-- The denominator recurrence. -/
-lemma cfConv_dens_step (n : ℕ) :
+theorem cfConv_dens_step (n : ℕ) :
     (cfConv_ofFun h a b).dens (n + 2) =
       b (n + 1) * (cfConv_ofFun h a b).dens (n + 1) + a (n + 1) * (cfConv_ofFun h a b).dens n :=
   dens_recurrence (g := cfConv_ofFun h a b) (n := n) (gp := ⟨a (n + 1), b (n + 1)⟩) rfl rfl rfl
 
 /-- The denominators do not depend on the integer part. -/
-lemma cfConv_dens_eq (h' : K) (n : ℕ) :
+theorem cfConv_dens_eq (h' : K) (n : ℕ) :
     (cfConv_ofFun h a b).dens n = (cfConv_ofFun h' a b).dens n := by
   induction n using Nat.strong_induction_on with
   | _ n ih =>
@@ -105,7 +100,7 @@ lemma cfConv_dens_eq (h' : K) (n : ℕ) :
     · rw [cfConv_dens_step, cfConv_dens_step, ih (n + 1) (by omega), ih n (by omega)]
 
 /-- The numerators are affine in the integer part: `A_n(h) = A_n(0) + h B_n`. -/
-lemma cfConv_nums_eq (n : ℕ) :
+theorem cfConv_nums_eq (n : ℕ) :
     (cfConv_ofFun h a b).nums n =
       (cfConv_ofFun 0 a b).nums n + h * (cfConv_ofFun 0 a b).dens n := by
   induction n using Nat.strong_induction_on with
@@ -118,7 +113,7 @@ lemma cfConv_nums_eq (n : ℕ) :
       ring
 
 /-- The convergents with integer part `h` are `h` plus those with integer part `0`. -/
-lemma cfConv_convs_eq (n : ℕ) (hD : (cfConv_ofFun 0 a b).dens n ≠ 0) :
+theorem cfConv_convs_eq (n : ℕ) (hD : (cfConv_ofFun 0 a b).dens n ≠ 0) :
     (cfConv_ofFun h a b).convs n = h + (cfConv_ofFun 0 a b).convs n := by
   change (cfConv_ofFun h a b).nums n / (cfConv_ofFun h a b).dens n =
     h + (cfConv_ofFun 0 a b).nums n / (cfConv_ofFun 0 a b).dens n
@@ -127,7 +122,7 @@ lemma cfConv_convs_eq (n : ℕ) (hD : (cfConv_ofFun 0 a b).dens n ≠ 0) :
   ring
 
 /-- The determinant formula `A_{m+1} B_m - B_{m+1} A_m = (-1)^m ∏_{k ≤ m} a_k`. -/
-lemma cfConv_det (m : ℕ) :
+theorem cfConv_det (m : ℕ) :
     (cfConv_ofFun h a b).nums (m + 1) * (cfConv_ofFun h a b).dens m -
         (cfConv_ofFun h a b).dens (m + 1) * (cfConv_ofFun h a b).nums m =
       (-1) ^ m * ∏ k ∈ range (m + 1), a k := by
@@ -140,7 +135,7 @@ lemma cfConv_det (m : ℕ) :
     linear_combination (-a (m + 1)) * ih
 
 /-- The continuants commute with field homomorphisms (numerators). -/
-lemma cfConv_nums_map {L : Type*} [Field L] (f : K →+* L) (n : ℕ) :
+theorem cfConv_nums_map {L : Type*} [Field L] (f : K →+* L) (n : ℕ) :
     (cfConv_ofFun (f h) (fun k => f (a k)) (fun k => f (b k))).nums n =
       f ((cfConv_ofFun h a b).nums n) := by
   induction n using Nat.strong_induction_on with
@@ -152,7 +147,7 @@ lemma cfConv_nums_map {L : Type*} [Field L] (f : K →+* L) (n : ℕ) :
       simp only [map_add, map_mul]
 
 /-- The continuants commute with field homomorphisms (denominators). -/
-lemma cfConv_dens_map {L : Type*} [Field L] (f : K →+* L) (n : ℕ) :
+theorem cfConv_dens_map {L : Type*} [Field L] (f : K →+* L) (n : ℕ) :
     (cfConv_ofFun (f h) (fun k => f (a k)) (fun k => f (b k))).dens n =
       f ((cfConv_ofFun h a b).dens n) := by
   induction n using Nat.strong_induction_on with
@@ -164,7 +159,7 @@ lemma cfConv_dens_map {L : Type*} [Field L] (f : K →+* L) (n : ℕ) :
       simp only [map_add, map_mul]
 
 /-- The convergents commute with field homomorphisms. -/
-lemma cfConv_convs_map {L : Type*} [Field L] (f : K →+* L) (n : ℕ) :
+theorem cfConv_convs_map {L : Type*} [Field L] (f : K →+* L) (n : ℕ) :
     (cfConv_ofFun (f h) (fun k => f (a k)) (fun k => f (b k))).convs n =
       f ((cfConv_ofFun h a b).convs n) := by
   change _ / _ = f (_ / _)
@@ -173,7 +168,7 @@ lemma cfConv_convs_map {L : Type*} [Field L] (f : K →+* L) (n : ℕ) :
 variable {h a b}
 
 /-- **Pincherle invariants**: a backward solution `w` pairs with the continuants. -/
-lemma cfConv_invariant {w : ℕ → K} (hw : ∀ k, w k = b k * w (k + 1) + a (k + 1) * w (k + 2))
+theorem cfConv_invariant {w : ℕ → K} (hw : ∀ k, w k = b k * w (k + 1) + a (k + 1) * w (k + 2))
     (m : ℕ) :
     (cfConv_ofFun h a b).nums (m + 1) * w (m + 1) +
         a (m + 1) * (cfConv_ofFun h a b).nums m * w (m + 2) = a 0 * w 1 + h * w 0 ∧
@@ -191,7 +186,7 @@ lemma cfConv_invariant {w : ℕ → K} (hw : ∀ k, w k = b k * w (k + 1) + a (k
 
 /-- The exact error of the `(m+1)`-st convergent:
 `h + a₀w₁/w₀ - A_{m+1}/B_{m+1} = (-1)^{m+1} (∏_{k ≤ m+1} a_k) w_{m+2} / (w₀ B_{m+1})`. -/
-lemma cfConv_error {w : ℕ → K} (hw : ∀ k, w k = b k * w (k + 1) + a (k + 1) * w (k + 2))
+theorem cfConv_error {w : ℕ → K} (hw : ∀ k, w k = b k * w (k + 1) + a (k + 1) * w (k + 2))
     (hw0 : w 0 ≠ 0) (m : ℕ) (hD : (cfConv_ofFun h a b).dens (m + 1) ≠ 0) :
     h + a 0 * w 1 / w 0 - (cfConv_ofFun h a b).convs (m + 1) =
       (-1) ^ (m + 1) * (∏ k ∈ range (m + 2), a k) * w (m + 2) /
@@ -211,7 +206,7 @@ def cfConv_G (a w : ℕ → K) (n : ℕ) : K := (-1) ^ n * (∏ k ∈ range (n +
 
 /-- The Casoratian of the denominators with `G`: `B_{n+1} G_n - B_n G_{n+1}` equals
 `(-1)^n (∏_{k ≤ n} a_k) w₀`. -/
-lemma cfConv_casoratian {w : ℕ → K} (hw : ∀ k, w k = b k * w (k + 1) + a (k + 1) * w (k + 2))
+theorem cfConv_casoratian {w : ℕ → K} (hw : ∀ k, w k = b k * w (k + 1) + a (k + 1) * w (k + 2))
     (n : ℕ) :
     (cfConv_ofFun h a b).dens (n + 1) * cfConv_G a w n -
         (cfConv_ofFun h a b).dens n * cfConv_G a w (n + 1) =
@@ -227,13 +222,13 @@ def cfConv_T (a w : ℕ → K) (N i : ℕ) : K :=
   (-1) ^ (N + i) * (∏ k ∈ range (N + i + 1), a k) * w 0 /
     (cfConv_G a w (N + i) * cfConv_G a w (N + i + 1))
 
-lemma cfConv_G_ne_zero {w : ℕ → K} (ha : ∀ k, a k ≠ 0) {n : ℕ} (hw : w (n + 1) ≠ 0) :
+theorem cfConv_G_ne_zero {w : ℕ → K} (ha : ∀ k, a k ≠ 0) {n : ℕ} (hw : w (n + 1) ≠ 0) :
     cfConv_G a w n ≠ 0 :=
   mul_ne_zero (mul_ne_zero (pow_ne_zero _ (neg_ne_zero.mpr one_ne_zero))
     (prod_ne_zero_iff.mpr fun k _ => ha k)) hw
 
 /-- Telescoping: `B_{N+j}/G_{N+j} = B_N/G_N + ∑_{i<j} T_i`. -/
-lemma cfConv_dens_div_eq {w : ℕ → K}
+theorem cfConv_dens_div_eq {w : ℕ → K}
     (hw : ∀ k, w k = b k * w (k + 1) + a (k + 1) * w (k + 2)) (ha : ∀ k, a k ≠ 0)
     {N : ℕ} (hwN : ∀ k ≥ N, w k ≠ 0) (j : ℕ) :
     (cfConv_ofFun h a b).dens (N + j) / cfConv_G a w (N + j) =
@@ -252,7 +247,7 @@ lemma cfConv_dens_div_eq {w : ℕ → K}
     linear_combination ih + key
 
 /-- Consecutive quotients: `T_{i+1} = T_i · (-w_k/(a_{k+1} w_{k+2}))` with `k = N+i+1`. -/
-lemma cfConv_T_succ {w : ℕ → K} (ha : ∀ k, a k ≠ 0) {N : ℕ} (hwN : ∀ k ≥ N, w k ≠ 0)
+theorem cfConv_T_succ {w : ℕ → K} (ha : ∀ k, a k ≠ 0) {N : ℕ} (hwN : ∀ k ≥ N, w k ≠ 0)
     (i : ℕ) :
     cfConv_T a w N (i + 1) =
       cfConv_T a w N i * (-(w (N + i + 1) / (a (N + i + 2) * w (N + i + 3)))) := by
@@ -269,7 +264,7 @@ lemma cfConv_T_succ {w : ℕ → K} (ha : ∀ k, a k ≠ 0) {N : ℕ} (hwN : ∀
   rw [pow_succ, pow_succ, pow_succ]
   field_simp
 
-lemma cfConv_T_ne_zero {w : ℕ → K} (hw0 : w 0 ≠ 0) (ha : ∀ k, a k ≠ 0) {N : ℕ}
+theorem cfConv_T_ne_zero {w : ℕ → K} (hw0 : w 0 ≠ 0) (ha : ∀ k, a k ≠ 0) {N : ℕ}
     (hwN : ∀ k ≥ N, w k ≠ 0) (i : ℕ) : cfConv_T a w N i ≠ 0 :=
   div_ne_zero (mul_ne_zero (mul_ne_zero (pow_ne_zero _ (neg_ne_zero.mpr one_ne_zero))
     (prod_ne_zero_iff.mpr fun k _ => ha k)) hw0)
@@ -303,7 +298,7 @@ theorem cfConv_tendsto_of_minimal (hw : ∀ k, w k = b k * w (k + 1) + a (k + 1)
 
 /-- Partial sums of a sequence whose terms eventually grow by a factor `q > 2` tend to infinity
 in norm. -/
-lemma cfConv_norm_sum_tendsto {T : ℕ → K} {q : ℝ} (hq : 2 < q) {N : ℕ} (hTN : T N ≠ 0)
+theorem cfConv_norm_sum_tendsto {T : ℕ → K} {q : ℝ} (hq : 2 < q) {N : ℕ} (hTN : T N ≠ 0)
     (hT : ∀ n ≥ N, q * ‖T n‖ ≤ ‖T (n + 1)‖) :
     Tendsto (fun n => ‖∑ k ∈ range n, T k‖) atTop atTop := by
   set C := ∑ k ∈ range N, ‖T k‖
@@ -417,7 +412,7 @@ theorem cfConv_tendsto_of_ratio (hw : ∀ k, w k = b k * w (k + 1) + a (k + 1) *
 
 /-- Under the hypotheses of the ratio criterion `cfConv_tendsto_of_ratio`, the denominators
 `B_m` are eventually nonzero. -/
-lemma cfConv_dens_eventually_ne_of_ratio
+theorem cfConv_dens_eventually_ne_of_ratio
     (hw : ∀ k, w k = b k * w (k + 1) + a (k + 1) * w (k + 2))
     (hw0 : w 0 ≠ 0) (ha : ∀ k, a k ≠ 0) {N : ℕ} (hwN : ∀ k ≥ N, w k ≠ 0) {q : ℝ} (hq : 2 < q)
     (hrat : ∀ k ≥ N, q * ‖a (k + 1) * w (k + 2)‖ ≤ ‖w k‖) :
@@ -462,7 +457,7 @@ variable {h : ℝ} {a b w : ℕ → ℝ}
 
 /-- Partial sums of real terms with `T_{n+1}/T_n ≥ 1` (hence of one sign and non-decreasing
 modulus) tend to infinity in absolute value. -/
-lemma cfConv_abs_sum_tendsto_real {T : ℕ → ℝ} (hT0 : T 0 ≠ 0)
+theorem cfConv_abs_sum_tendsto_real {T : ℕ → ℝ} (hT0 : T 0 ≠ 0)
     (hT : ∀ n, 1 ≤ T (n + 1) / T n) :
     Tendsto (fun n => |∑ k ∈ range n, T k|) atTop atTop := by
   have hsq : 0 < T 0 ^ 2 := by positivity
@@ -521,7 +516,7 @@ theorem cfConv_tendsto_of_ratio_real (hw : ∀ k, w k = b k * w (k + 1) + a (k +
 
 /-- Partial sums of real terms with `T_{n+1}/T_n ≤ -r`, `r > 1` (alternating signs and
 geometrically growing moduli) tend to infinity in absolute value. -/
-lemma cfConv_abs_sum_tendsto_alt {T : ℕ → ℝ} {r : ℝ} (hr : 1 < r) (hT0 : T 0 ≠ 0)
+theorem cfConv_abs_sum_tendsto_alt {T : ℕ → ℝ} {r : ℝ} (hr : 1 < r) (hT0 : T 0 ≠ 0)
     (hT : ∀ n, T (n + 1) / T n ≤ -r) :
     Tendsto (fun n => |∑ k ∈ range n, T k|) atTop atTop := by
   have hr0 : 0 < r := by linarith
@@ -628,7 +623,7 @@ theorem cfConv_tendsto_of_ratio_pos (hw : ∀ k, w k = b k * w (k + 1) + a (k + 
   exact hr'
 
 /-- The denominators are positive when all elements are positive. -/
-lemma cfConv_dens_pos (ha : ∀ k, 0 < a k) (hb : ∀ k, 0 < b k) (m : ℕ) :
+theorem cfConv_dens_pos (ha : ∀ k, 0 < a k) (hb : ∀ k, 0 < b k) (m : ℕ) :
     0 < (cfConv_ofFun h a b).dens m := by
   induction m using Nat.strong_induction_on with
   | _ m ih =>
@@ -805,7 +800,7 @@ section Finite
 variable {K : Type*} [Field K] {h : K} {a b : ℕ → K}
 
 /-- The Pincherle invariants for a solution of the recurrence up to index `m` only. -/
-lemma cfConv_invariant_fin {w : ℕ → K} (m : ℕ)
+theorem cfConv_invariant_fin {w : ℕ → K} (m : ℕ)
     (hw : ∀ k ≤ m, w k = b k * w (k + 1) + a (k + 1) * w (k + 2)) :
     (cfConv_ofFun h a b).nums (m + 1) * w (m + 1) +
         a (m + 1) * (cfConv_ofFun h a b).nums m * w (m + 2) = a 0 * w 1 + h * w 0 ∧
@@ -825,7 +820,7 @@ lemma cfConv_invariant_fin {w : ℕ → K} (m : ℕ)
 
 /-- A finite backward solution with `w_{N+1} = 1`, `w_{N+2} = 0` computes the `(N+1)`-st
 continuants: `B_{N+1} = w₀` and `A_{N+1} = a₀ w₁ + h w₀`. -/
-lemma cfConv_continuants_of_back {w : ℕ → K} (N : ℕ)
+theorem cfConv_continuants_of_back {w : ℕ → K} (N : ℕ)
     (hw : ∀ k ≤ N, w k = b k * w (k + 1) + a (k + 1) * w (k + 2))
     (h1 : w (N + 1) = 1) (h2 : w (N + 2) = 0) :
     (cfConv_ofFun h a b).dens (N + 1) = w 0 ∧
@@ -846,13 +841,13 @@ def cfConv_back (a b : ℕ → K) (N : ℕ) : ℕ → K × K
 def cfConv_backW (a b : ℕ → K) (N k : ℕ) : K :=
   if k ≤ N + 1 then (cfConv_back a b N (N + 1 - k)).1 else 0
 
-lemma cfConv_backW_succ (N : ℕ) : cfConv_backW a b N (N + 1) = 1 := by
+theorem cfConv_backW_succ (N : ℕ) : cfConv_backW a b N (N + 1) = 1 := by
   simp [cfConv_backW, cfConv_back]
 
-lemma cfConv_backW_succ_succ (N : ℕ) : cfConv_backW a b N (N + 2) = 0 := by
+theorem cfConv_backW_succ_succ (N : ℕ) : cfConv_backW a b N (N + 2) = 0 := by
   simp [cfConv_backW]
 
-lemma cfConv_backW_rec (N : ℕ) :
+theorem cfConv_backW_rec (N : ℕ) :
     ∀ k ≤ N, cfConv_backW a b N k =
       b k * cfConv_backW a b N (k + 1) + a (k + 1) * cfConv_backW a b N (k + 2) := by
   intro k hk
@@ -872,7 +867,7 @@ lemma cfConv_backW_rec (N : ℕ) :
 
 /-- Equivalence transformations: scaling `b_k ↦ r_k b_k`, `a_0 ↦ r_0 a_0`,
 `a_k ↦ r_{k-1} r_k a_k` multiplies the continuants by `∏_{k<n} r_k`. -/
-lemma cfConv_equiv_continuants (r : ℕ → K) (n : ℕ) :
+theorem cfConv_equiv_continuants (r : ℕ → K) (n : ℕ) :
     (cfConv_ofFun h (fun k => (if k = 0 then r 0 else r (k - 1) * r k) * a k)
         (fun k => r k * b k)).dens n = (∏ k ∈ range n, r k) * (cfConv_ofFun h a b).dens n ∧
       (cfConv_ofFun h (fun k => (if k = 0 then r 0 else r (k - 1) * r k) * a k)
@@ -890,7 +885,7 @@ lemma cfConv_equiv_continuants (r : ℕ → K) (n : ℕ) :
       constructor <;> ring
 
 /-- Equivalence transformations do not change the convergents. -/
-lemma cfConv_equiv_convs (r : ℕ → K) (hr : ∀ k, r k ≠ 0) (n : ℕ) :
+theorem cfConv_equiv_convs (r : ℕ → K) (hr : ∀ k, r k ≠ 0) (n : ℕ) :
     (cfConv_ofFun h (fun k => (if k = 0 then r 0 else r (k - 1) * r k) * a k)
         (fun k => r k * b k)).convs n = (cfConv_ofFun h a b).convs n := by
   obtain ⟨d, e⟩ := cfConv_equiv_continuants (h := h) (a := a) (b := b) r n
@@ -900,7 +895,7 @@ lemma cfConv_equiv_convs (r : ℕ → K) (hr : ∀ k, r k ≠ 0) (n : ℕ) :
   rw [mul_div_mul_left _ _ this]
 
 /-- With `h = 0`, the convergents are linear in `a₀`. -/
-lemma cfConv_convs_smul_a0 (c : K) (n : ℕ) :
+theorem cfConv_convs_smul_a0 (c : K) (n : ℕ) :
     (cfConv_ofFun 0 (fun k => if k = 0 then c * a 0 else a k) b).convs n =
       c * (cfConv_ofFun 0 a b).convs n := by
   have hd : ∀ n, (cfConv_ofFun 0 (fun k => if k = 0 then c * a 0 else a k) b).dens n =
@@ -927,7 +922,7 @@ section Stieltjes
 
 variable {h : ℂ} {a b : ℕ → ℂ}
 
-lemma cfConv_re_recip_pos {u : ℂ} (hu : 0 < u.re) : 0 < (u⁻¹).re := by
+theorem cfConv_re_recip_pos {u : ℂ} (hu : 0 < u.re) : 0 < (u⁻¹).re := by
   rw [Complex.inv_re]
   have : u ≠ 0 := fun h0 => by rw [h0, Complex.zero_re] at hu; exact lt_irrefl _ hu
   exact div_pos hu (Complex.normSq_pos.mpr this)
@@ -1014,7 +1009,7 @@ section Tails
 /-- **Shifting off the first level.** With `h = 0`, the continuants of
 `a₀/(b₀ + a₁/(b₁ + ⋯))` are expressed through those of the tail `a₁/(b₁ + a₂/(b₂ + ⋯))`:
 `A_{N+1} = a₀ B'_N` and `B_{N+1} = b₀ B'_N + A'_N`. -/
-lemma cfConv_shift_continuants {K : Type*} [Field K] (a b : ℕ → K) (N : ℕ) :
+theorem cfConv_shift_continuants {K : Type*} [Field K] (a b : ℕ → K) (N : ℕ) :
     (cfConv_ofFun 0 a b).nums (N + 1) =
         a 0 * (cfConv_ofFun 0 (fun k => a (k + 1)) (fun k => b (k + 1))).dens N ∧
       (cfConv_ofFun 0 a b).dens (N + 1) =
@@ -1217,7 +1212,7 @@ theorem cfConv_tendsto_of_tail {K : Type*} [NormedField K] {a b w : ℕ → K}
 /-- **Composition with a tail.** The continuants of `h + a₀/(b₀ + ⋯)` at index `J + 1 + n`
 are combinations of those at `J + 1` and `J` with the continuants of the tail
 `a_{J+1}/(b_{J+1} + a_{J+2}/(b_{J+2} + ⋯))`. -/
-lemma cfConv_compose {K : Type*} [Field K] (h : K) (a b : ℕ → K) (J n : ℕ) :
+theorem cfConv_compose {K : Type*} [Field K] (h : K) (a b : ℕ → K) (J n : ℕ) :
     (cfConv_ofFun h a b).nums (J + 1 + n) =
         (cfConv_ofFun h a b).nums (J + 1) *
             (cfConv_ofFun 0 (fun k => a (k + (J + 1))) (fun k => b (k + (J + 1)))).dens n +
@@ -1313,7 +1308,7 @@ section Holomorphy
 variable {Ω : Set ℂ} {h : ℂ → ℂ} {a b : ℕ → ℂ → ℂ}
 
 /-- Continuants of a continued fraction with holomorphic elements are holomorphic. -/
-lemma cfConv_continuants_differentiableOn (hh : DifferentiableOn ℂ h Ω)
+theorem cfConv_continuants_differentiableOn (hh : DifferentiableOn ℂ h Ω)
     (ha : ∀ k, DifferentiableOn ℂ (a k) Ω) (hb : ∀ k, DifferentiableOn ℂ (b k) Ω) (n : ℕ) :
     DifferentiableOn ℂ (fun z => (cfConv_ofFun (h z) (fun k => a k z) (fun k => b k z)).dens n) Ω ∧
       DifferentiableOn ℂ
@@ -1331,7 +1326,7 @@ lemma cfConv_continuants_differentiableOn (hh : DifferentiableOn ℂ h Ω)
         (((hb _).mul n1).add ((ha _).mul n0)).congr fun z _ => cfConv_nums_step _ _ _ n⟩
 
 /-- Convergents with holomorphic elements are holomorphic where the denominator is nonzero. -/
-lemma cfConv_convs_differentiableOn (hh : DifferentiableOn ℂ h Ω)
+theorem cfConv_convs_differentiableOn (hh : DifferentiableOn ℂ h Ω)
     (ha : ∀ k, DifferentiableOn ℂ (a k) Ω) (hb : ∀ k, DifferentiableOn ℂ (b k) Ω) (n : ℕ)
     (hd : ∀ z ∈ Ω, (cfConv_ofFun (h z) (fun k => a k z) (fun k => b k z)).dens n ≠ 0) :
     DifferentiableOn ℂ

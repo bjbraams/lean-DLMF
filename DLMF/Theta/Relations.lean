@@ -5,13 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Theta.Identities
-public import DLMF.Elliptic.ThetaAGM
 public import DLMF.JacobiElliptic.Basic
 public import DLMF.EllipticIntegrals.Symmetric
-public import Mathlib.MeasureTheory.Integral.Bochner.Basic
 public import DLMF.EllipticIntegrals.SymmetricRelations
-public import Carlson.Elliptic.SchwarzChristoffel
 
 /-!
 # Theta functions: relations to other functions (DLMF §20.9)
@@ -61,7 +57,7 @@ def thetaModulusK (τ : ℂ) : ℂ := jacobiThetaTwoNullTau τ ^ 2 / jacobiTheta
 def thetaComplModulusK (τ : ℂ) : ℂ := jacobiThetaFourNullTau τ ^ 2 / jacobiThetaThreeNullTau τ ^ 2
 
 /-- On the imaginary axis `k(it) = ρ(t)` is real (from `DLMF.JacobiElliptic.p22R1_real_at`). -/
-lemma p22R1_thetaModulusK_I_mul {t : ℝ} (ht : 0 < t) :
+theorem p22R1_thetaModulusK_I_mul {t : ℝ} (ht : 0 < t) :
     thetaModulusK (I * t) = (p22R1_rho t : ℂ) :=
   (p22R1_real_at ht).2.2.2.1
 /-- `R_F(0, 1 - k², 1) = K(k)` and `R_F(0, k², 1) = K'(k)` at `k = ρ(t)`, in terms of

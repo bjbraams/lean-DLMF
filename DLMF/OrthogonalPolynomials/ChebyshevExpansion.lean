@@ -7,7 +7,6 @@ module
 
 public import DLMF.OrthogonalPolynomials.Series
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Chebyshev.Orthogonality
-public import Mathlib.Analysis.Fourier.AddCircle
 public import DLMFMathlib.Analysis.SpecialFunctions.ChebyshevSeries
 
 /-!
@@ -58,7 +57,7 @@ theorem chebyshevCoeff_eq_integral_measureT (f : ℝ → ℝ) (n : ℕ) :
   rw [this]
 
 /-- The complex coefficients extend the existing real Chebyshev coefficients. -/
-lemma complexCoeff_ofReal (f : ℝ → ℝ) (n : ℕ) :
+theorem complexCoeff_ofReal (f : ℝ → ℝ) (n : ℕ) :
     Polynomial.Chebyshev.complexCoeff (fun x => (f x : ℂ)) n = (chebyshevCoeff f n : ℂ) := by
   unfold Polynomial.Chebyshev.complexCoeff chebyshevCoeff
   rw [Complex.ofReal_mul, Complex.ofReal_div, Complex.ofReal_ofNat,
@@ -149,13 +148,13 @@ def chebyshevCircleFun {f : ℝ → ℝ} (hf : ContinuousOn f (Icc (-1) 1)) :
     C(AddCircle (2 * π), ℂ) :=
   Polynomial.Chebyshev.complexCircleFun (Complex.continuous_ofReal.comp_continuousOn hf)
 
-lemma chebyshevCircleFun_coe {f : ℝ → ℝ} (hf : ContinuousOn f (Icc (-1) 1)) (θ : ℝ) :
+theorem chebyshevCircleFun_coe {f : ℝ → ℝ} (hf : ContinuousOn f (Icc (-1) 1)) (θ : ℝ) :
     chebyshevCircleFun hf (θ : AddCircle (2 * π)) = f (Real.cos θ) := rfl
 
 local instance instTwoPiPos : Fact (0 < 2 * π) := ⟨Real.two_pi_pos⟩
 
 /-- The full-period integral `∫₀^{2π} e^{-inθ} f(cos θ) dθ = π c_{|n|}`. -/
-lemma integral_exp_mul_comp_cos {f : ℝ → ℝ} (hcf : Continuous fun x : ℝ => f (Real.cos x))
+theorem integral_exp_mul_comp_cos {f : ℝ → ℝ} (hcf : Continuous fun x : ℝ => f (Real.cos x))
     (n : ℤ) :
     ∫ x in (0 : ℝ)..(2 * π), Complex.exp (-(I * n * x)) * ((f (Real.cos x) : ℝ) : ℂ) =
       π * chebyshevCoeff f n.natAbs := by
@@ -164,7 +163,7 @@ lemma integral_exp_mul_comp_cos {f : ℝ → ℝ} (hcf : Continuous fun x : ℝ 
   simpa only [complexCoeff_ofReal] using h
 
 /-- The Fourier coefficients of `θ ↦ f(cos θ)` are half the Chebyshev coefficients. -/
-lemma fourierCoeff_chebyshevCircleFun {f : ℝ → ℝ} (hf : ContinuousOn f (Icc (-1) 1)) (n : ℤ) :
+theorem fourierCoeff_chebyshevCircleFun {f : ℝ → ℝ} (hf : ContinuousOn f (Icc (-1) 1)) (n : ℤ) :
     fourierCoeff (chebyshevCircleFun hf) n = (chebyshevCoeff f n.natAbs / 2 : ℝ) := by
   have h := Polynomial.Chebyshev.fourierCoeff_complexCircleFun (f := fun x => (f x : ℂ))
     (Complex.continuous_ofReal.comp_continuousOn hf) n

@@ -6,20 +6,14 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Hypergeometric.Elementary
-public import DLMF.OrthogonalPolynomials.Topics
-public import DLMF.OrthogonalPolynomials.ScalarSeries
 public import DLMF.OrthogonalPolynomials.Mehler
 public import DLMF.Confluent.ProductsAddition
-public import Mathlib.Tactic.CrossRefAttribute
 public import DLMF.OrthogonalPolynomials.Explicit
-public import DLMF.Bessel.Basic
-public import DLMF.OrthogonalPolynomials.Differential
 public import DLMF.OrthogonalPolynomials.LegendreAddition
 public import DLMF.OrthogonalPolynomials.GegenbauerSeries
 public import DLMF.OrthogonalPolynomials.LaguerreSeries
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Chebyshev.RootsExtrema
 public import DLMFMathlib.Analysis.Complex.LagrangeBurmann
-public import Mathlib.Analysis.Convex.PathConnected
 public import DLMF.Hypergeometric.AppellF4
 /-!
 # Generating functions, connection formulas, and linearization
@@ -68,7 +62,7 @@ set_option autoImplicit false
 namespace DLMF.OrthogonalPolynomials
 
 /-- Cauchy product of scalar series, written as a coefficient convolution. -/
-lemma hasSum_scalar_convolution {c d : ℕ → ℂ} {z u v : ℂ}
+theorem hasSum_scalar_convolution {c d : ℕ → ℂ} {z u v : ℂ}
     (hc : HasSum (fun n => c n * z ^ n) u)
     (hd : HasSum (fun n => d n * z ^ n) v) :
     HasSum (fun n => (∑ k ∈ Finset.range (n + 1), c k * d (n - k)) * z ^ n) (u * v) := by
@@ -76,7 +70,7 @@ lemma hasSum_scalar_convolution {c d : ℕ → ℂ} {z u v : ℂ}
 
 
 /-- Insert zero odd coefficients into the exponential series. -/
-lemma hasSum_exp_quadratic (q z : ℂ) :
+theorem hasSum_exp_quadratic (q z : ℂ) :
     HasSum (fun n : ℕ => (if n % 2 = 0 then q ^ (n / 2) / (n / 2)! else 0) * z ^ n)
       (exp (q * z ^ 2)) := by
   have hinj : Function.Injective (fun k : ℕ => 2 * k) := by intro i j h; dsimp at h; omega
@@ -93,7 +87,7 @@ lemma hasSum_exp_quadratic (q z : ℂ) :
     simp [hodd]
 
 /-- Sum the even-indexed terms of a finite interval. -/
-lemma sum_even_range (f : ℕ → ℂ) (n : ℕ) :
+theorem sum_even_range (f : ℕ → ℂ) (n : ℕ) :
     (∑ k ∈ Finset.range (n + 1), if k % 2 = 0 then f k else 0) =
       ∑ k ∈ Finset.range (n / 2 + 1), f (2 * k) := by
   rw [← Finset.sum_filter]
@@ -111,7 +105,7 @@ lemma sum_even_range (f : ℕ → ℂ) (n : ℕ) :
     rfl
 
 /-- A quadratic exponential times the Hermite generating function. -/
-lemma hasSum_exp_quadratic_mul_hermite (q lam x z : ℂ) :
+theorem hasSum_exp_quadratic_mul_hermite (q lam x z : ℂ) :
     HasSum (fun n : ℕ => (∑ k ∈ Finset.range (n / 2 + 1),
       q ^ k / k ! * ((aeval x (hermitePolyH (n - 2 * k)) : ℂ) / (n - 2 * k)! *
         lam ^ (n - 2 * k))) * z ^ n)
@@ -130,7 +124,7 @@ lemma hasSum_exp_quadratic_mul_hermite (q lam x z : ℂ) :
   simp
 
 /-- The factorial ratio in the even-indexed Hermite formulas. -/
-lemma poch_neg_nat_even_mul_factorial {n k : ℕ} (hk : 2 * k ≤ n) :
+theorem poch_neg_nat_even_mul_factorial {n k : ℕ} (hk : 2 * k ≤ n) :
     poch (-(n : ℂ)) (2 * k) * ((n - 2 * k)! : ℂ) = n ! := by
   have h := poch_neg_nat_mul_factorial hk
   simpa [pow_mul] using h
@@ -141,7 +135,7 @@ section JacobiLagrange
 open Metric Set
 
 /-- Iterated derivatives of `(1 + a t)^s` on the slit-plane region. -/
-lemma jacGen_iteratedDeriv_cpow (a s : ℂ) (k : ℕ) {t : ℂ} (ht : 1 + a * t ∈ slitPlane) :
+theorem jacGen_iteratedDeriv_cpow (a s : ℂ) (k : ℕ) {t : ℂ} (ht : 1 + a * t ∈ slitPlane) :
     iteratedDeriv k (fun t => (1 + a * t) ^ s) t =
       a ^ k * ((-1) ^ k * poch (-s) k) * (1 + a * t) ^ (s - k) := by
   have hU : IsOpen {t : ℂ | 1 + a * t ∈ slitPlane} :=
@@ -163,7 +157,7 @@ lemma jacGen_iteratedDeriv_cpow (a s : ℂ) (k : ℕ) {t : ℂ} (ht : 1 + a * t 
     ring
 
 /-- `(-1)^k (-s)_k = (s - k + 1)_k`. -/
-lemma jacGen_neg_one_pow_mul_poch_neg (s : ℂ) (k : ℕ) :
+theorem jacGen_neg_one_pow_mul_poch_neg (s : ℂ) (k : ℕ) :
     (-1 : ℂ) ^ k * poch (-s) k = poch (s - k + 1) k := by
   have h := poch_one_sub_sub (s - k + 1) k
   rw [show 1 - (s - k + 1) - (k : ℂ) = -s by ring] at h
@@ -171,7 +165,7 @@ lemma jacGen_neg_one_pow_mul_poch_neg (s : ℂ) (k : ℕ) :
   simp
 
 /-- `(2/u)^α = 2^α / u^α` in the right half-plane. -/
-lemma jacGen_two_div_cpow (α : ℂ) {u : ℂ} (hu : 0 < u.re) :
+theorem jacGen_two_div_cpow (α : ℂ) {u : ℂ} (hu : 0 < u.re) :
     (2 / u) ^ α = 2 ^ α / u ^ α := by
   have hu0 : u ≠ 0 := fun h => by simp [h] at hu
   have harg : u.arg ≠ π := by
@@ -188,11 +182,11 @@ lemma jacGen_two_div_cpow (α : ℂ) {u : ℂ} (hu : 0 < u.re) :
 
 
 /-- Analyticity of `(1 + a t)^s` at `0`. -/
-lemma jacGen_analyticAt_cpow (a s : ℂ) : AnalyticAt ℂ (fun t => (1 + a * t) ^ s) 0 :=
+theorem jacGen_analyticAt_cpow (a s : ℂ) : AnalyticAt ℂ (fun t => (1 + a * t) ^ s) 0 :=
   AnalyticAt.cpow (by fun_prop) analyticAt_const (by simp [one_mem_slitPlane])
 
 /-- Taylor coefficients of `(1 + a t)^s (1 + b t)^u` at `0`. -/
-lemma jacGen_coeff_cpow_mul_cpow (a b s u : ℂ) (n : ℕ) :
+theorem jacGen_coeff_cpow_mul_cpow (a b s u : ℂ) (n : ℕ) :
     iteratedDeriv n (fun t => (1 + a * t) ^ s * (1 + b * t) ^ u) 0 / n ! =
       ∑ i ∈ Finset.range (n + 1), (poch (s - i + 1) i / i !) *
         (poch (u - (n - i : ℕ) + 1) (n - i) / (n - i)!) * a ^ i * b ^ (n - i) := by
@@ -213,7 +207,7 @@ lemma jacGen_coeff_cpow_mul_cpow (a b s u : ℂ) (n : ℕ) :
 /-- The Lagrange–Bürmann coefficient `[tⁿ] F φⁿ` for the Jacobi generating function
 (`F = (1 + (x+1)t/2)^α (1 + (x-1)t/2)^β`, `φ = (1 + (x+1)t/2)(1 + (x-1)t/2)`) is
 `P_n^{(α,β)}(x)`, by the binomial form 18.5.8. -/
-lemma jacGen_coeff_eq_jacobiPolyP {α β : ℂ} (hα : -1 < α.re) (x : ℂ) (n : ℕ) :
+theorem jacGen_coeff_eq_jacobiPolyP {α β : ℂ} (hα : -1 < α.re) (x : ℂ) (n : ℕ) :
     iteratedDeriv n (fun t => (1 + (x + 1) / 2 * t) ^ α * (1 + (x - 1) / 2 * t) ^ β *
       ((1 + (x + 1) / 2 * t) * (1 + (x - 1) / 2 * t)) ^ n) 0 / n ! = jacobiPolyP α β n x := by
   have hev : (fun t => (1 + (x + 1) / 2 * t) ^ α * (1 + (x - 1) / 2 * t) ^ β *
@@ -242,7 +236,7 @@ lemma jacGen_coeff_eq_jacobiPolyP {α β : ℂ} (hα : -1 < α.re) (x : ℂ) (n 
 
 
 /-- For `|x| ≤ 1` and `|z| < 1`, `1 - 2xz + z²` lies in the slit plane. -/
-lemma jacGen_mem_slitPlane {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem jacGen_mem_slitPlane {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1) :
     1 - 2 * x * z + z ^ 2 ∈ slitPlane := by
   rw [mem_slitPlane_iff]
   by_contra h
@@ -270,7 +264,7 @@ noncomputable def jacGenRhs (α β : ℂ) (x : ℝ) (z : ℂ) : ℂ :=
     (1 + (1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) + z) ^ β)
 
 /-- A point of the closed disc of radius `1/2` keeps `1 + c t` in the right half-plane. -/
-lemma jacGen_re_pos {c t : ℂ} (hc : ‖c‖ ≤ 1) (ht : ‖t‖ ≤ 1 / 2) : 0 < (1 + c * t).re := by
+theorem jacGen_re_pos {c t : ℂ} (hc : ‖c‖ ≤ 1) (ht : ‖t‖ ≤ 1 / 2) : 0 < (1 + c * t).re := by
   have h1 : ‖c * t‖ ≤ 1 / 2 := by
     rw [norm_mul]; nlinarith [norm_nonneg c, norm_nonneg t]
   have h2 := neg_abs_le (c * t).re
@@ -279,7 +273,7 @@ lemma jacGen_re_pos {c t : ℂ} (hc : ‖c‖ ≤ 1) (ht : ‖t‖ ≤ 1 / 2) : 
   linarith
 
 /-- The Jacobi generating function for small `|z|`, by the Lagrange–Bürmann formula. -/
-lemma jacGen_hasSum_small {α β : ℂ} (hα : -1 < α.re) {x : ℝ} (hx : |x| ≤ 1) {z : ℂ}
+theorem jacGen_hasSum_small {α β : ℂ} (hα : -1 < α.re) {x : ℝ} (hx : |x| ≤ 1) {z : ℂ}
     (hz : ‖z‖ < 1 / 10) :
     HasSum (fun n : ℕ => jacobiPolyP α β n x * z ^ n) (jacGenRhs α β x z) := by
   set a : ℂ := ((x : ℂ) + 1) / 2 with ha
@@ -403,7 +397,7 @@ lemma jacGen_hasSum_small {α β : ℂ} (hα : -1 < α.re) {x : ℝ} (hx : |x| �
 
 
 /-- The right side of 18.12.1 is holomorphic on the unit disc. -/
-lemma jacGen_differentiableOn (α β : ℂ) {x : ℝ} (hx : |x| ≤ 1) :
+theorem jacGen_differentiableOn (α β : ℂ) {x : ℝ} (hx : |x| ≤ 1) :
     DifferentiableOn ℂ (jacGenRhs α β x) (ball 0 1) := by
   intro z hz
   have hz1 : ‖z‖ < 1 := by simpa using hz
@@ -476,7 +470,7 @@ theorem ultrasphPoly_weighted_generating_function {lam : ℂ} (hlam : -1 / 2 < l
     ultrasphPoly_eq_coeff_gegenbauerSeries hlam hw]
 
 /-- Generating function of a sequence with constant-coefficient three-term recurrence. -/
-lemma hasSum_of_three_term {a : ℕ → ℂ} {p q z : ℂ}
+theorem hasSum_of_three_term {a : ℕ → ℂ} {p q z : ℂ}
     (hrec : ∀ n, a (n + 2) = p * a (n + 1) + q * a n) (hs : Summable fun n => a n * z ^ n)
     (hD : 1 - p * z - q * z ^ 2 ≠ 0) :
     HasSum (fun n => a n * z ^ n) ((a 0 + (a 1 - p * a 0) * z) / (1 - p * z - q * z ^ 2)) := by
@@ -498,7 +492,7 @@ lemma hasSum_of_three_term {a : ℕ → ℂ} {p q z : ℂ}
   linear_combination -heq
 
 /-- `1 - 2xz + z²` does not vanish for `|x| ≤ 1` and `‖z‖ < 1`. -/
-lemma one_sub_two_mul_add_sq_ne_zero {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem one_sub_two_mul_add_sq_ne_zero {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1) :
     1 - 2 * x * z + z ^ 2 ≠ 0 := by
   intro h
   have hre := congrArg Complex.re h
@@ -517,19 +511,19 @@ lemma one_sub_two_mul_add_sq_ne_zero {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : 
     nlinarith
 
 /-- Chebyshev polynomials at a real point are real. -/
-lemma chebyshevT_eval_ofReal (n : ℤ) (x : ℝ) :
+theorem chebyshevT_eval_ofReal (n : ℤ) (x : ℝ) :
     (Chebyshev.T ℂ n).eval (x : ℂ) = ((Chebyshev.T ℝ n).eval x : ℝ) := by
   rw [← Chebyshev.map_T (algebraMap ℝ ℂ), eval_map]
   exact eval₂_at_apply (algebraMap ℝ ℂ) x
 
 /-- Chebyshev polynomials of the second kind at a real point are real. -/
-lemma chebyshevU_eval_ofReal (n : ℤ) (x : ℝ) :
+theorem chebyshevU_eval_ofReal (n : ℤ) (x : ℝ) :
     (Chebyshev.U ℂ n).eval (x : ℂ) = ((Chebyshev.U ℝ n).eval x : ℝ) := by
   rw [← Chebyshev.map_U (algebraMap ℝ ℂ), eval_map]
   exact eval₂_at_apply (algebraMap ℝ ℂ) x
 
 /-- `|Uₙ(x)| ≤ n + 1` on `[-1, 1]`. -/
-lemma abs_eval_U_real_le {x : ℝ} (hx : |x| ≤ 1) (n : ℕ) :
+theorem abs_eval_U_real_le {x : ℝ} (hx : |x| ≤ 1) (n : ℕ) :
     |(Chebyshev.U ℝ n).eval x| ≤ n + 1 := by
   induction n with
   | zero => simp
@@ -564,7 +558,7 @@ theorem chebyshevT_generating_function {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz 
   · ring
 
 /-- `1 - z e^{iθ}` lies in the right half-plane for `‖z‖ < 1`. -/
-lemma one_sub_mul_exp_re_pos {z : ℂ} (hz : ‖z‖ < 1) (θ : ℝ) :
+theorem one_sub_mul_exp_re_pos {z : ℂ} (hz : ‖z‖ < 1) (θ : ℝ) :
     0 < (1 - z * exp (θ * I)).re := by
   have h : ‖z * exp (θ * I)‖ < 1 := by rw [norm_mul, norm_exp_ofReal_mul_I, mul_one]; exact hz
   have := Complex.re_le_norm (z * exp (θ * I))
@@ -695,7 +689,7 @@ theorem hermite_generating_function (x z : ℂ) :
   ring
 
 /-- The exponential generating function with an arbitrary starting degree. -/
-lemma hasSum_hermitePolyH_shifted (m : ℕ) (x t : ℂ) :
+theorem hasSum_hermitePolyH_shifted (m : ℕ) (x t : ℂ) :
     HasSum (fun n : ℕ => (aeval x (hermitePolyH (m + n)) : ℂ) * t ^ n / n !)
       ((aeval (x - t) (hermitePolyH m) : ℂ) * exp (2 * x * t - t ^ 2)) := by
   have hderiv (n : ℕ) (y : ℂ) :
@@ -749,7 +743,7 @@ lemma hasSum_hermitePolyH_shifted (m : ℕ) (x t : ℂ) :
 
 
 /-- Translation of a Hermite polynomial by an arbitrary complex number. -/
-lemma hermitePolyH_translation (m : ℕ) (x y : ℂ) :
+theorem hermitePolyH_translation (m : ℕ) (x y : ℂ) :
     (aeval (x + y) (hermitePolyH m) : ℂ) =
       ∑ k ∈ Finset.range (m + 1), (m.choose k : ℂ) * (2 * y) ^ k *
         aeval x (hermitePolyH (m - k)) := by
@@ -781,7 +775,7 @@ lemma hermitePolyH_translation (m : ℕ) (x y : ℂ) :
     Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero (m - k))]
 
 /-- The probabilists' Hermite polynomial as a finite monomial sum. -/
-lemma hermite_finite_sum (n : ℕ) (x : ℂ) :
+theorem hermite_finite_sum (n : ℕ) (x : ℂ) :
     (aeval x (hermite n) : ℂ) = ∑ k ∈ Finset.range (n / 2 + 1),
       (-1 : ℂ) ^ k * n.factorial /
         (2 ^ k * (k.factorial : ℂ) * (n - 2 * k).factorial) * x ^ (n - 2 * k) := by
@@ -1273,7 +1267,7 @@ noncomputable def gegenbauerProductCoeff (lam : ℂ) (a b k : ℕ) : ℂ :=
 set_option maxRecDepth 4096 in
 set_option maxHeartbeats 1000000 in
 /-- The interior coefficient recurrence follows from factorial and Pochhammer shifts. -/
-lemma gegenbauerProductCoeff_recurrence {lam : ℂ} (hlam : 0 < lam.re) (a b k : ℕ) :
+theorem gegenbauerProductCoeff_recurrence {lam : ℂ} (hlam : 0 < lam.re) (a b k : ℕ) :
     (b + k + 2 : ℂ) * gegenbauerProductCoeff lam a (b + 1) (k + 1) =
       (b + k + 1 + lam) * (a + b + 1) / (lam + a + b) * gegenbauerProductCoeff lam a b (k + 1) +
       (b + k + 1 + lam) * (a + b + 2 * lam + 1) / (lam + a + b + 2) *
@@ -1317,7 +1311,7 @@ lemma gegenbauerProductCoeff_recurrence {lam : ℂ} (hlam : 0 < lam.re) (a b k :
   ring
 
 /-- The coefficient of the trivial factor is one. -/
-lemma gegenbauerProductCoeff_zero {lam : ℂ} (hlam : 0 < lam.re) (a : ℕ) :
+theorem gegenbauerProductCoeff_zero {lam : ℂ} (hlam : 0 < lam.re) (a : ℕ) :
     gegenbauerProductCoeff lam a 0 0 = 1 := by
   have hp (j : ℕ) : poch lam j ≠ 0 := poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos hlam) j
   have hp2 (j : ℕ) : poch (2 * lam) j ≠ 0 :=
@@ -1331,7 +1325,7 @@ lemma gegenbauerProductCoeff_zero {lam : ℂ} (hlam : 0 < lam.re) (a : ℕ) :
 set_option maxRecDepth 4096 in
 set_option maxHeartbeats 1000000 in
 /-- The upper endpoint of the coefficient recurrence. -/
-lemma gegenbauerProductCoeff_top {lam : ℂ} (hlam : 0 < lam.re) (a b : ℕ) :
+theorem gegenbauerProductCoeff_top {lam : ℂ} (hlam : 0 < lam.re) (a b : ℕ) :
     (b + 1 : ℂ) * gegenbauerProductCoeff lam a (b + 1) 0 =
       (b + lam) * (a + b + 1) / (lam + a + b) * gegenbauerProductCoeff lam a b 0 := by
   have hp (j : ℕ) : poch lam j ≠ 0 := poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos hlam) j
@@ -1357,7 +1351,7 @@ lemma gegenbauerProductCoeff_top {lam : ℂ} (hlam : 0 < lam.re) (a b : ℕ) :
 set_option maxRecDepth 4096 in
 set_option maxHeartbeats 1000000 in
 /-- The lower endpoint of the coefficient recurrence. -/
-lemma gegenbauerProductCoeff_bottom {lam : ℂ} (hlam : 0 < lam.re) (a k : ℕ) :
+theorem gegenbauerProductCoeff_bottom {lam : ℂ} (hlam : 0 < lam.re) (a k : ℕ) :
     (k + 1 : ℂ) * gegenbauerProductCoeff lam a 0 (k + 1) =
       (k + lam) * (a + 2 * lam) / (lam + a + 1) * gegenbauerProductCoeff lam (a + 1) 0 k := by
   have hp (j : ℕ) : poch lam j ≠ 0 := poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos hlam) j
@@ -1383,7 +1377,7 @@ lemma gegenbauerProductCoeff_bottom {lam : ℂ} (hlam : 0 < lam.re) (a k : ℕ) 
   field_simp [hp, hp2, hf, h0, h1, hs, hs0, h2]
 
 /-- Multiplication by `2x` in the Gegenbauer basis, for positive degree. -/
-lemma two_mul_x_ultrasphPoly {lam : ℂ} (hlam : 0 < lam.re) {d : ℕ} (hd : 0 < d) (x : ℂ) :
+theorem two_mul_x_ultrasphPoly {lam : ℂ} (hlam : 0 < lam.re) {d : ℕ} (hd : 0 < d) (x : ℂ) :
     2 * x * ultrasphPoly lam d x =
       (d + 1 : ℂ) / (lam + d) * ultrasphPoly lam (d + 1) x +
       (d + 2 * lam - 1) / (lam + d) * ultrasphPoly lam (d - 1) x := by
@@ -1403,7 +1397,7 @@ noncomputable def gegenbauerLinearizationSum (lam : ℂ) (m n : ℕ) (x : ℂ) :
     ultrasphPoly lam (m + n - 2 * k) x
 
 /-- The finite coefficient sum obeys the Gegenbauer recurrence in its second degree. -/
-lemma gegenbauerLinearizationSum_recurrence {lam : ℂ} (hlam : 0 < lam.re)
+theorem gegenbauerLinearizationSum_recurrence {lam : ℂ} (hlam : 0 < lam.re)
     {m n : ℕ} (hnm : n + 2 ≤ m) (x : ℂ) :
     (n + 2 : ℂ) * gegenbauerLinearizationSum lam m (n + 2) x =
       2 * (n + lam + 1) * x * gegenbauerLinearizationSum lam m (n + 1) x -
@@ -1482,7 +1476,7 @@ lemma gegenbauerLinearizationSum_recurrence {lam : ℂ} (hlam : 0 < lam.re)
   linear_combination hi
 
 /-- Gegenbauer products are the finite coefficient sums when the second degree is smaller. -/
-lemma ultrasphPoly_product_eq_sum_of_le {lam : ℂ} (hlam : 0 < lam.re) (m n : ℕ)
+theorem ultrasphPoly_product_eq_sum_of_le {lam : ℂ} (hlam : 0 < lam.re) (m n : ℕ)
     (hnm : n ≤ m) (x : ℂ) :
     ultrasphPoly lam m x * ultrasphPoly lam n x = gegenbauerLinearizationSum lam m n x := by
   induction n using Nat.twoStepInduction with
@@ -1519,14 +1513,14 @@ lemma ultrasphPoly_product_eq_sum_of_le {lam : ℂ} (hlam : 0 < lam.re) (m n : �
     linear_combination ultrasphPoly lam m x * hC - hS
 
 /-- Symmetry of the coefficient in the two gap indices. -/
-lemma gegenbauerProductCoeff_swap (lam : ℂ) (a b k : ℕ) :
+theorem gegenbauerProductCoeff_swap (lam : ℂ) (a b k : ℕ) :
     gegenbauerProductCoeff lam a b k = gegenbauerProductCoeff lam b a k := by
   unfold gegenbauerProductCoeff
   rw [Nat.add_comm b a]
   ring
 
 /-- Match the gap-index coefficient to the DLMF normalization. -/
-lemma gegenbauerProductCoeff_eq (lam : ℂ) {m n k : ℕ} (hkm : k ≤ m) (hkn : k ≤ n) :
+theorem gegenbauerProductCoeff_eq (lam : ℂ) {m n k : ℕ} (hkm : k ≤ m) (hkn : k ≤ n) :
     gegenbauerProductCoeff lam (m - k) (n - k) k =
       (m + n + lam - 2 * k) * (m + n - 2 * k).factorial /
         ((m + n + lam - k) * k.factorial * (m - k).factorial * (n - k).factorial) *
@@ -1592,7 +1586,7 @@ theorem ultrasphPoly_geometric_convolution {lam : ℂ} (hlam : 0 < lam.re) (n : 
   exact sum_weighted_coeff_gegenbauerSeries hlam0 hw n
 
 /-- `U_{n+2} = 2 T_{n+2} + U_n`. -/
-lemma chebyshevU_eq_two_T_add_U (n : ℕ) (x : ℂ) :
+theorem chebyshevU_eq_two_T_add_U (n : ℕ) (x : ℂ) :
     (Chebyshev.U ℂ (n + 2)).eval x =
       2 * (Chebyshev.T ℂ (n + 2)).eval x + (Chebyshev.U ℂ n).eval x := by
   have hT := congrArg (fun p : ℂ[X] => p.eval x)
@@ -1766,7 +1760,7 @@ theorem hermitePolyH_even_convolution (n : ℕ) (x y : ℂ) :
 
 
 /-- The regularized `₀F₁` series converges absolutely everywhere. -/
-lemma summable_norm_regularized0F1 (c w : ℂ) :
+theorem summable_norm_regularized0F1 (c w : ℂ) :
     Summable fun n : ℕ => ‖regularizedHGFunCoeff (∅ : Multiset ℂ) {c} n * w ^ n‖ := by
   have hr : (FormalMultilinearSeries.ofScalars ℂ (regularizedHGFunCoeff ∅ {c})).radius = ⊤ :=
     top_le_iff.mp (hasFPowerSeriesOnBall_regularized0F1 c).r_le
@@ -1776,7 +1770,7 @@ lemma summable_norm_regularized0F1 (c w : ℂ) :
 
 
 /-- `(a)ₖ / Γ(a + k) = 1 / Γ(a)` away from the poles of `Γ`. -/
-lemma poch_div_Gamma_add_nat {a : ℂ} (ha : ∀ k : ℕ, a ≠ -k) (k : ℕ) :
+theorem poch_div_Gamma_add_nat {a : ℂ} (ha : ∀ k : ℕ, a ≠ -k) (k : ℕ) :
     poch a k / Complex.Gamma (a + k) = 1 / Complex.Gamma a := by
   have h := Complex.Gamma_add_nat_div_Gamma_eq (n := k) a ha
   have hG : Complex.Gamma a ≠ 0 := Complex.Gamma_ne_zero ha
@@ -1845,7 +1839,7 @@ open scoped ComplexConjugate
 
 /-- The square of `R conj(1 - w)`, `R² = 1 - 2xw + w²`, is never a nonpositive real for
 `|w| < 1`, `|x| ≤ 1`. -/
-lemma jacB_sq_not_nonpos {x : ℝ} (hx : |x| ≤ 1) {w : ℂ} (hw : ‖w‖ < 1) :
+theorem jacB_sq_not_nonpos {x : ℝ} (hx : |x| ≤ 1) {w : ℂ} (hw : ‖w‖ < 1) :
     ¬ (((1 - 2 * x * w + w ^ 2) * conj (1 - w) ^ 2).im = 0 ∧
       ((1 - 2 * x * w + w ^ 2) * conj (1 - w) ^ 2).re ≤ 0) := by
   rintro ⟨him, hre⟩
@@ -1897,7 +1891,7 @@ lemma jacB_sq_not_nonpos {x : ℝ} (hx : |x| ≤ 1) {w : ℂ} (hw : ‖w‖ < 1)
     linarith
 
 /-- `Re(R conj(1 - z)) > 0` on the unit disc, `R = (1 - 2xz + z²)^{1/2}` (principal branch). -/
-lemma jacB_re_pos {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem jacB_re_pos {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1) :
     0 < ((1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) * conj (1 - z)).re := by
   set g : ℂ → ℝ := fun w => ((1 - 2 * x * w + w ^ 2) ^ (1 / 2 : ℂ) * conj (1 - w)).re with hg
   have hne : ∀ w ∈ ball (0 : ℂ) 1, g w ≠ 0 := by
@@ -1935,7 +1929,7 @@ lemma jacB_re_pos {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1) :
 
 /-- `|(1 - R - z)/2|² ≤ |z|` on the unit disc (the two roots of `4U² - 4(1-z)U + 2(1-x)z`
 have product `(x-1)z/2`, and the one with the minus sign is the smaller). -/
-lemma jacB_norm_sq_le {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem jacB_norm_sq_le {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1) :
     ‖(1 - (1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) - z) / 2‖ ^ 2 ≤ ‖z‖ := by
   set R := (1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) with hR
   have hR2 : R ^ 2 = 1 - 2 * x * z + z ^ 2 :=
@@ -1968,7 +1962,7 @@ lemma jacB_norm_sq_le {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1) :
     _ = ‖z‖ := one_mul _
 
 /-- The companion bound `|(1 - R + z)/2|² ≤ |z|`, by `(x, z) ↦ (-x, -z)`. -/
-lemma jacB_norm_sq_le' {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem jacB_norm_sq_le' {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1) :
     ‖(1 - (1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) + z) / 2‖ ^ 2 ≤ ‖z‖ := by
   have h := jacB_norm_sq_le (x := -x) (by rwa [abs_neg]) (z := -z) (by rwa [norm_neg])
   have e : (1 - 2 * ((-x : ℝ) : ℂ) * -z + (-z) ^ 2) = 1 - 2 * x * z + z ^ 2 := by
@@ -1978,7 +1972,7 @@ lemma jacB_norm_sq_le' {x : ℝ} (hx : |x| ≤ 1) {z : ℂ} (hz : ‖z‖ < 1) :
 
 /-- The antidiagonal sums of Appell's `F₄` at `((x-1)/2, (x+1)/2)` are Jacobi polynomials
 (by 18.5.8). -/
-lemma jacB_coeff {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) (γ x : ℂ) (N : ℕ) :
+theorem jacB_coeff {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) (γ x : ℂ) (N : ℕ) :
     ∑ p ∈ Finset.antidiagonal N, appF4Coeff γ (α + β + 1 - γ) (α + 1) (β + 1) p.1 p.2 *
         ((x - 1) / 2) ^ p.1 * ((x + 1) / 2) ^ p.2 =
       poch γ N * poch (α + β + 1 - γ) N / (poch (α + 1) N * poch (β + 1) N) *
@@ -2008,7 +2002,7 @@ lemma jacB_coeff {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) (γ x : ℂ
   field_simp
 
 /-- Regrouping a summable double series along antidiagonals. -/
-lemma jacB_hasSum_antidiagonal {A : ℕ × ℕ → ℂ} {S : ℂ} (h : HasSum A S) :
+theorem jacB_hasSum_antidiagonal {A : ℕ × ℕ → ℂ} {S : ℂ} (h : HasSum A S) :
     HasSum (fun n => ∑ p ∈ Finset.antidiagonal n, A p) S := by
   have h' := (Finset.HasAntidiagonal.sigmaAntidiagonalEquivProd.hasSum_iff (f := A)).mpr h
   refine h'.sigma fun n => ?_
@@ -2018,7 +2012,7 @@ lemma jacB_hasSum_antidiagonal {A : ℕ × ℕ → ℂ} {S : ℂ} (h : HasSum A 
 /-- Brafman's generating function for small `|z|`, from Bailey's product formula
 `appF4_bailey`: with `U = (1 - R - z)/2`, `V = (1 - R + z)/2` one has `U(1 - V) = (x-1)z/2`
 and `V(1 - U) = (x+1)z/2`. -/
-lemma jacB_hasSum_small {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) (γ : ℂ) {x : ℝ}
+theorem jacB_hasSum_small {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) (γ : ℂ) {x : ℝ}
     (hx : |x| ≤ 1) : ∃ ε > 0, ∀ z ∈ ball (0 : ℂ) ε,
     HasSum (fun n : ℕ => poch γ n * poch (α + β + 1 - γ) n /
       (poch (α + 1) n * poch (β + 1) n) * jacobiPolyP α β n x * z ^ n)
@@ -2055,7 +2049,7 @@ lemma jacB_hasSum_small {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) (γ 
   ring
 
 /-- The right side of Brafman's formula is holomorphic on the unit disc. -/
-lemma jacB_differentiableOn (α β γ : ℂ) {x : ℝ} (hx : |x| ≤ 1) :
+theorem jacB_differentiableOn (α β γ : ℂ) {x : ℝ} (hx : |x| ≤ 1) :
     DifferentiableOn ℂ (fun z : ℂ =>
       ₂F₁ γ (α + β + 1 - γ) (α + 1) ((1 - (1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) - z) / 2) *
        ₂F₁ γ (α + β + 1 - γ) (β + 1) ((1 - (1 - 2 * x * z + z ^ 2) ^ (1 / 2 : ℂ) + z) / 2))
@@ -2104,11 +2098,11 @@ section JacobiWeighted
 open Metric Set
 
 /-- `|(μ)_m| ≤ (1 + |μ|)^m m!`. -/
-lemma jacW_norm_poch_le (μ : ℂ) (m : ℕ) : ‖poch μ m‖ ≤ (1 + ‖μ‖) ^ m * m ! := by
+theorem jacW_norm_poch_le (μ : ℂ) (m : ℕ) : ‖poch μ m‖ ≤ (1 + ‖μ‖) ^ m * m ! := by
   exact appF4_norm_poch_le μ m
 
 /-- `k! ≤ (1 + 1/(Re β + 1))^k |(β+1)_k|` for `Re β > -1`. -/
-lemma jacW_factorial_le_norm_poch {β : ℂ} (hβ : -1 < β.re) (k : ℕ) :
+theorem jacW_factorial_le_norm_poch {β : ℂ} (hβ : -1 < β.re) (k : ℕ) :
     (k ! : ℝ) ≤ (1 + 1 / (β.re + 1)) ^ k * ‖poch (β + 1) k‖ := by
   have hσ : 0 < β.re + 1 := by linarith
   induction k with
@@ -2131,7 +2125,7 @@ lemma jacW_factorial_le_norm_poch {β : ℂ} (hβ : -1 < β.re) (k : ℕ) :
       _ = _ := by ring
 
 /-- `(2k+m)! ≤ 2^{2k+m} 4^k k!² m!`. -/
-lemma jacW_factorial_two_mul_add_le (k m : ℕ) :
+theorem jacW_factorial_two_mul_add_le (k m : ℕ) :
     ((2 * k + m)! : ℝ) ≤ 2 ^ (2 * k + m) * 4 ^ k * (k ! * k ! * m !) := by
   have h1 : (2 * k + m)! = (2 * k + m).choose m * ((2 * k)! * m !) := by
     have := Nat.choose_mul_factorial_mul_factorial (Nat.le_add_left m (2 * k))
@@ -2161,7 +2155,7 @@ noncomputable def jacWTerm (l β y z : ℂ) (p : ℕ × ℕ) : ℂ :=
     (poch (β + 1) p.1 * p.1 ! * p.2 !)
 
 /-- A geometric bound for `jacWTerm`. -/
-lemma jacWTerm_norm_le (l : ℂ) {β : ℂ} (hβ : -1 < β.re) {y : ℂ} (hy : ‖y‖ ≤ 1) (z : ℂ)
+theorem jacWTerm_norm_le (l : ℂ) {β : ℂ} (hβ : -1 < β.re) {y : ℂ} (hy : ‖y‖ ≤ 1) (z : ℂ)
     (p : ℕ × ℕ) : ‖jacWTerm l β y z p‖ ≤
       (16 * (1 + ‖l‖) ^ 2 * (1 + 1 / (β.re + 1)) * ‖z‖) ^ p.1 * (2 * (1 + ‖l‖) * ‖z‖) ^ p.2 := by
   obtain ⟨k, m⟩ := p
@@ -2199,12 +2193,12 @@ lemma jacWTerm_norm_le (l : ℂ) {β : ℂ} (hβ : -1 < β.re) {y : ℂ} (hy : �
 
 
 /-- Duplication for rising factorials: `(2a)_{2m} = 4^m (a)_m (a + 1/2)_m`. -/
-lemma jacW_poch_two_mul (a : ℂ) (m : ℕ) :
+theorem jacW_poch_two_mul (a : ℂ) (m : ℕ) :
     poch (2 * a) (2 * m) = 4 ^ m * poch a m * poch (a + 1 / 2) m := by
   exact poch_two_mul_two_mul a m
 
 /-- The `m`-sums of `jacWTerm` are binomial series. -/
-lemma jacWTerm_hasSum_fiber (l β y : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (k : ℕ) :
+theorem jacWTerm_hasSum_fiber (l β y : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (k : ℕ) :
     HasSum (fun m => jacWTerm l β y z (k, m))
       (poch l (2 * k) / (poch (β + 1) k * k !) * (y * z) ^ k * (1 + z) ^ (-(l + 2 * k))) := by
   have hz' : ‖-z‖ < 1 := by rwa [norm_neg]
@@ -2223,7 +2217,7 @@ lemma jacWTerm_hasSum_fiber (l β y : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (k : ℕ
   field_simp
 
 /-- The `k`-sum of the fibre sums is `(1+z)^{-λ} ₂F₁(λ/2, λ/2 + 1/2; β+1; 4yz/(1+z)²)`. -/
-lemma jacWTerm_hasSum_outer (l β y : ℂ) {z : ℂ} (hz : ‖z‖ < 1)
+theorem jacWTerm_hasSum_outer (l β y : ℂ) {z : ℂ} (hz : ‖z‖ < 1)
     (hv : ‖4 * y * z / (1 + z) ^ 2‖ < 1) :
     HasSum (fun k : ℕ => poch l (2 * k) / (poch (β + 1) k * k !) * (y * z) ^ k *
       (1 + z) ^ (-(l + 2 * k)))
@@ -2249,7 +2243,7 @@ lemma jacWTerm_hasSum_outer (l β y : ℂ) {z : ℂ} (hz : ‖z‖ < 1)
   field_simp
 
 /-- The Jacobi coefficient of 18.12.3 as an antidiagonal sum of `jacWTerm`. -/
-lemma jacW_coeff_eq_sum_antidiagonal {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) (x z : ℂ)
+theorem jacW_coeff_eq_sum_antidiagonal {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) (x z : ℂ)
     (n : ℕ) :
     poch (α + β + 1) n / poch (β + 1) n * jacobiPolyP α β n x * z ^ n =
       ∑ p ∈ Finset.antidiagonal n, jacWTerm (α + β + 1) β ((x + 1) / 2) z p := by
@@ -2290,12 +2284,12 @@ lemma jacW_coeff_eq_sum_antidiagonal {α β : ℂ} (hα : -1 < α.re) (hβ : -1 
 
 
 /-- Regrouping a summable double series along antidiagonals. -/
-lemma jacW_hasSum_antidiagonal {A : ℕ × ℕ → ℂ} {S : ℂ} (h : HasSum A S) :
+theorem jacW_hasSum_antidiagonal {A : ℕ × ℕ → ℂ} {S : ℂ} (h : HasSum A S) :
     HasSum (fun n => ∑ p ∈ Finset.antidiagonal n, A p) S := by
   exact jacB_hasSum_antidiagonal h
 
 /-- 18.12.3 for small `|z|`, by summing the double series in two ways. -/
-lemma jacW_hasSum_small {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) {x : ℝ} (hx : |x| ≤ 1)
+theorem jacW_hasSum_small {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) {x : ℝ} (hx : |x| ≤ 1)
     {z : ℂ} (hz : ‖z‖ < 1 / (32 * ((1 + ‖α + β + 1‖) ^ 2 * (1 + 1 / (β.re + 1))))) :
     HasSum (fun n : ℕ => poch (α + β + 1) n / poch (β + 1) n * jacobiPolyP α β n x * z ^ n)
       ((1 + z) ^ (-α - β - 1) * ₂F₁ ((α + β + 1) / 2) ((α + β + 2) / 2)
@@ -2367,7 +2361,7 @@ lemma jacW_hasSum_small {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) {x :
 
 /-- The coefficients of 18.12.3 have radius of convergence at least `1`: for `0 ≤ r < 1`,
 `|(α+β+1)_n/(β+1)_n P_n^{(α,β)}(x)| rⁿ → 0`, by 18.12.1 and the Gauss series. -/
-lemma jacW_tendsto_coeff {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) {x : ℝ} (hx : |x| ≤ 1)
+theorem jacW_tendsto_coeff {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) {x : ℝ} (hx : |x| ≤ 1)
     {r : ℝ} (hr0 : 0 ≤ r) (hr : r < 1) :
     Tendsto (fun n : ℕ => ‖poch (α + β + 1) n / poch (β + 1) n * jacobiPolyP α β n x‖ * r ^ n)
       atTop (𝓝 0) := by
@@ -2398,7 +2392,7 @@ lemma jacW_tendsto_coeff {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) {x 
 
 /-- Star-convexity of the domain of 18.12.3: shrinking `z` towards `0` decreases
 `|z / (1 + z)²|` (`|1 + bz|² - b|1 + z|² = (1 - b)(1 - b|z|²)`). -/
-lemma jacW_norm_div_sq_le {z : ℂ} (hz : ‖z‖ < 1) {b : ℝ} (hb0 : 0 ≤ b) (hb1 : b ≤ 1) :
+theorem jacW_norm_div_sq_le {z : ℂ} (hz : ‖z‖ < 1) {b : ℝ} (hb0 : 0 ≤ b) (hb1 : b ≤ 1) :
     ‖(b : ℂ) * z / (1 + (b : ℂ) * z) ^ 2‖ ≤ ‖z / (1 + z) ^ 2‖ := by
   have hz2 : z.re ^ 2 + z.im ^ 2 < 1 := by
     have := Complex.sq_norm z
@@ -2423,7 +2417,7 @@ lemma jacW_norm_div_sq_le {z : ℂ} (hz : ‖z‖ < 1) {b : ℝ} (hb0 : 0 ≤ b)
   nlinarith [norm_nonneg z]
 
 /-- The coefficient series of 18.12.3 has radius at least `1`. -/
-lemma jacW_one_le_radius {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) {x : ℝ} (hx : |x| ≤ 1) :
+theorem jacW_one_le_radius {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) {x : ℝ} (hx : |x| ≤ 1) :
     1 ≤ (FormalMultilinearSeries.ofScalars ℂ
       (fun n : ℕ => poch (α + β + 1) n / poch (β + 1) n * jacobiPolyP α β n x)).radius := by
   refine ENNReal.le_of_forall_nnreal_lt fun r hr => ?_
@@ -2593,12 +2587,12 @@ theorem chebyshevT_poisson_generating_function {x : ℝ} (hx : |x| ≤ 1)
     ring
 
 /-- The exponential series in `ℂ`. -/
-lemma hasSum_cexp (z : ℂ) : HasSum (fun n : ℕ => z ^ n / (n.factorial : ℂ)) (exp z) := by
+theorem hasSum_cexp (z : ℂ) : HasSum (fun n : ℕ => z ^ n / (n.factorial : ℂ)) (exp z) := by
   rw [Complex.exp_eq_exp_ℂ]
   exact NormedSpace.expSeries_div_hasSum_exp z
 
 /-- The exponential series converges absolutely. -/
-lemma summable_norm_pow_div_factorial (z : ℂ) :
+theorem summable_norm_pow_div_factorial (z : ℂ) :
     Summable fun n : ℕ => ‖z ^ n / (n.factorial : ℂ)‖ := by
   simpa [norm_div, norm_pow] using Real.summable_pow_div_factorial ‖z‖
 
@@ -2665,7 +2659,7 @@ theorem laguerrePolyL_bessel_generating_function {α : ℝ} (hα : -1 < α)
   field_simp
 
 /-- The Laguerre generating function as a `HasSum`. -/
-lemma hasSum_laguerrePolyL_generating_function {α x t : ℂ} (hα : ∀ k : ℕ, α + 1 ≠ -(k : ℂ))
+theorem hasSum_laguerrePolyL_generating_function {α x t : ℂ} (hα : ∀ k : ℕ, α + 1 ≠ -(k : ℂ))
     (ht : ‖t‖ < 1) :
     HasSum (fun n : ℕ => laguerrePolyL α n x * t ^ n)
         ((1 - t) ^ (-α - 1) * exp (-x * t / (1 - t))) := by

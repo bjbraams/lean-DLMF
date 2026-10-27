@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Legendre.AdditionTools
-public import DLMF.Legendre.AssociatedRecurrences
 
 /-!
 # Tools for the addition theorems of the second kind
@@ -49,7 +48,7 @@ open scoped Real Topology Nat ComplexConjugate
 namespace DLMF.Legendre
 
 /-- Shifting a `2π`-periodic function by `π` multiplies its `m`-th Fourier coefficient by `(-1)^m`. -/
-lemma legQAdd_coeff_shift_pi {g : ℝ → ℂ} (hper : Function.Periodic g (2 * π)) (m : ℕ) :
+theorem legQAdd_coeff_shift_pi {g : ℝ → ℂ} (hper : Function.Periodic g (2 * π)) (m : ℕ) :
     legAdd_coeff (fun t => g (t + π)) m = (-1) ^ m * legAdd_coeff g m := by
   simp only [legAdd_coeff]
   set h : ℝ → ℂ := fun s => exp (-(((m:ℤ):ℂ) * s * I)) * g s
@@ -80,7 +79,7 @@ lemma legQAdd_coeff_shift_pi {g : ℝ → ℂ} (hper : Function.Periodic g (2 * 
   ring
 
 /-- The addition-theorem argument stays below one when `θ₁ < θ₂ < π`. -/
-lemma legQAdd_fY_lt_one {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h12 : θ₁ < θ₂) (h2 : θ₂ < π) (t : ℝ) :
+theorem legQAdd_fY_lt_one {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h12 : θ₁ < θ₂) (h2 : θ₂ < π) (t : ℝ) :
     legAdd_fY θ₁ θ₂ t ≤ Real.cos (θ₂ - θ₁) ∧ Real.cos (θ₂ - θ₁) < 1 := by
   have hs1 : 0 ≤ Real.sin θ₁ := Real.sin_nonneg_of_nonneg_of_le_pi h1 (by linarith)
   have hs2 : 0 ≤ Real.sin θ₂ := Real.sin_nonneg_of_nonneg_of_le_pi (by linarith) h2.le
@@ -91,12 +90,12 @@ lemma legQAdd_fY_lt_one {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h12 : θ₁ < θ
     exact Real.cos_lt_cos_of_nonneg_of_le_pi le_rfl (by linarith) (by linarith)
 
 /-- Reflection of the addition-theorem argument: replacing `θ₂` by `π - θ₂` and `t` by `t + π`. -/
-lemma legQAdd_fY_reflect (θ₁ θ₂ t : ℝ) :
+theorem legQAdd_fY_reflect (θ₁ θ₂ t : ℝ) :
     legAdd_fY θ₁ (π - θ₂) (t + π) = -legAdd_fY θ₁ θ₂ t := by
   simp only [legAdd_fY, Real.cos_pi_sub, Real.sin_pi_sub, Real.cos_add_pi]; ring
 
 /-- `𝖰_ν` of order zero in the even/odd basis. -/
-lemma legQAdd_ferrersQ_zero_eq (ν : ℂ) (x : ℝ) :
+theorem legQAdd_ferrersQ_zero_eq (ν : ℂ) (x : ℝ) :
     ferrersQ ν 0 x = π / 2 * (-sin (ν * π / 2) * Gamma ((ν + 1) / 2) * (Gamma ((ν + 2) / 2))⁻¹ *
       regularizedGaussHG (-ν / 2) ((ν + 1) / 2) (1 / 2) ((x:ℂ) ^ 2) +
       cos (ν * π / 2) * Gamma ((ν + 2) / 2) * (Gamma ((ν + 1) / 2))⁻¹ *
@@ -105,7 +104,7 @@ lemma legQAdd_ferrersQ_zero_eq (ν : ℂ) (x : ℝ) :
   simp only [ferrersEven, ferrersOdd, add_zero, sub_zero, neg_zero, zero_div, cpow_zero, one_mul]
 
 /-- Real `C²` regularity of `t ↦ 𝐅(a, b; c; y(t)²)` along a smooth path in `(-1, 1)`. -/
-lemma legQAdd_contDiff_hg_sq (a b c : ℂ) {y : ℝ → ℝ} (hy : ContDiff ℝ 2 y)
+theorem legQAdd_contDiff_hg_sq (a b c : ℂ) {y : ℝ → ℝ} (hy : ContDiff ℝ 2 y)
     (hy1 : ∀ t, y t ^ 2 < 1) :
     ContDiff ℝ 2 (fun t => regularizedGaussHG a b c ((y t : ℂ) ^ 2)) := by
   have hG : DifferentiableOn ℂ (fun z => regularizedGaussHG a b c z) cutPlane :=
@@ -122,7 +121,7 @@ lemma legQAdd_contDiff_hg_sq (a b c : ℂ) {y : ℝ → ℝ} (hy : ContDiff ℝ 
   push_cast; rfl
 
 /-- `t ↦ 𝖰_ν(y(t))` is `C²` along a smooth path in `(-1, 1)`, for every degree. -/
-lemma legQAdd_contDiff_ferrersQ (ν : ℂ) {y : ℝ → ℝ} (hy : ContDiff ℝ 2 y)
+theorem legQAdd_contDiff_ferrersQ (ν : ℂ) {y : ℝ → ℝ} (hy : ContDiff ℝ 2 y)
     (hy1 : ∀ t, y t ^ 2 < 1) : ContDiff ℝ 2 (fun t => ferrersQ ν 0 (y t)) := by
   simp only [legQAdd_ferrersQ_zero_eq]
   have hY : ContDiff ℝ 2 (fun t => (y t : ℂ)) := ofRealCLM.contDiff.comp hy
@@ -131,7 +130,7 @@ lemma legQAdd_contDiff_ferrersQ (ν : ℂ) {y : ℝ → ℝ} (hy : ContDiff ℝ 
 
 
 /-- Quadratic Gauss functions are bounded on `closedBall ν₀ 1 × [a, b]`, `-1 < a`, `b < 1`. -/
-lemma legQAdd_hg_sq_bound {A B : ℂ → ℂ} (hA : Continuous A) (hB : Continuous B) (c ν₀ : ℂ)
+theorem legQAdd_hg_sq_bound {A B : ℂ → ℂ} (hA : Continuous A) (hB : Continuous B) (c ν₀ : ℂ)
     {a b : ℝ} (ha : -1 < a) (hb : b < 1) :
     ∃ C, ∀ ν ∈ Metric.closedBall ν₀ 1, ∀ x ∈ Icc a b,
       ‖regularizedGaussHG (A ν) (B ν) c ((x:ℂ) ^ 2)‖ ≤ C := by
@@ -147,7 +146,7 @@ lemma legQAdd_hg_sq_bound {A B : ℂ → ℂ} (hA : Continuous A) (hB : Continuo
   exact ⟨C, fun ν hν x hx => hC (ν, x) ⟨hν, hx⟩⟩
 
 /-- A locally uniform bound for `𝖰_ν(x)` near a regular degree, `x ∈ [a, b] ⊂ (-1, 1)`. -/
-lemma legQAdd_ferrersQ_bound {ν₀ : ℂ} (hr : LegendreQRegular ν₀ 0) {a b : ℝ} (ha : -1 < a)
+theorem legQAdd_ferrersQ_bound {ν₀ : ℂ} (hr : LegendreQRegular ν₀ 0) {a b : ℝ} (ha : -1 < a)
     (hb : b < 1) : ∃ C, ∀ᶠ ν in 𝓝 ν₀, ∀ x ∈ Icc a b, ‖ferrersQ ν 0 x‖ ≤ C := by
   obtain ⟨c1, c2⟩ := continuousAt_Gamma_ferrersQ hr
   simp only [add_zero] at c1 c2
@@ -192,7 +191,7 @@ lemma legQAdd_ferrersQ_bound {ν₀ : ℂ} (hr : LegendreQRegular ν₀ 0) {a b 
           _ ≤ O := by rw [one_mul]; exact hO'
 
 /-- The Fourier coefficients of `t ↦ 𝖰_ν(y(t))` are continuous in the degree at a regular `ν₀`. -/
-lemma legQAdd_continuousAt_coeff {ν₀ : ℂ} (hr : LegendreQRegular ν₀ 0) {y : ℝ → ℝ}
+theorem legQAdd_continuousAt_coeff {ν₀ : ℂ} (hr : LegendreQRegular ν₀ 0) {y : ℝ → ℝ}
     (hy : ContDiff ℝ 2 y) {a b : ℝ} (ha : -1 < a) (hb : b < 1) (hab : ∀ t, y t ∈ Icc a b)
     (m : ℤ) : ContinuousAt (fun ν => legAdd_coeff (fun t => ferrersQ ν 0 (y t)) m) ν₀ := by
   have hy1 : ∀ t, y t ^ 2 < 1 := fun t => by
@@ -215,13 +214,13 @@ lemma legQAdd_continuousAt_coeff {ν₀ : ℂ} (hr : LegendreQRegular ν₀ 0) {
 
 
 /-- The argument of the addition theorem lies in `[cos (θ₁ + θ₂), cos (θ₂ - θ₁)] ⊂ (-1, 1)`. -/
-lemma legQAdd_fY_mem {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h12 : θ₁ < θ₂) (hs : θ₁ + θ₂ < π) (t : ℝ) :
+theorem legQAdd_fY_mem {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h12 : θ₁ < θ₂) (hs : θ₁ + θ₂ < π) (t : ℝ) :
     legAdd_fY θ₁ θ₂ t ∈ Icc (Real.cos (θ₁ + θ₂)) (Real.cos (θ₂ - θ₁)) :=
   ⟨(legAdd_fY_mem h1 (by linarith) hs t).1, (legQAdd_fY_lt_one h1 h12 (by linarith) t).1⟩
 
 /-- The Fourier coefficients of `φ ↦ 𝖰_ν(cos θ₁ cos θ₂ + sin θ₁ sin θ₂ cos φ)` for non-real `ν`,
 from 14.18.1 at `(θ₁, θ₂)` and `(θ₁, π - θ₂)` and the connection formula 14.9.10. -/
-lemma legQAdd_coeff_eq_of_im {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h12 : θ₁ < θ₂) (hs : θ₁ + θ₂ < π)
+theorem legQAdd_coeff_eq_of_im {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h12 : θ₁ < θ₂) (hs : θ₁ + θ₂ < π)
     (m : ℕ) {ν : ℂ} (hν : ν.im ≠ 0) :
     legAdd_coeff (fun t => ferrersQ ν 0 (legAdd_fY θ₁ θ₂ t)) m =
       (-1:ℂ) ^ m * ferrersP ν (-(m:ℂ)) (Real.cos θ₁) * ferrersQ ν m (Real.cos θ₂) := by
@@ -282,7 +281,7 @@ lemma legQAdd_coeff_eq_of_im {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h12 : θ₁
 
 
 /-- `legAdd_fY θ₁ θ₂` is smooth in the angle. -/
-lemma legQAdd_fY_contDiff (θ₁ θ₂ : ℝ) : ContDiff ℝ 2 (legAdd_fY θ₁ θ₂) := by
+theorem legQAdd_fY_contDiff (θ₁ θ₂ : ℝ) : ContDiff ℝ 2 (legAdd_fY θ₁ θ₂) := by
   unfold legAdd_fY
   exact contDiff_const.add (contDiff_const.mul Real.contDiff_cos)
 
@@ -343,7 +342,7 @@ theorem legQAdd_ferrersQ_addition (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ�
 roots) and `-1 ≤ c ≤ 1`, then `1 + z₁ z₂ - s₁ s₂ c` lies in the slit plane. Writing
 `zᵢ ± 1 = bᵢ², aᵢ²` with `aᵢ bᵢ = sᵢ`, `1 + z₁z₂ - c s₁s₂ = (1+c)/4 X² + (1-c)/4 Y²` with
 `X, Y = b₁b₂ ∓ a₁a₂`, and `Re (X Ȳ) = |z₁+1||z₂+1| - |z₁-1||z₂-1| > 0`, `Re (XY) = 2 Re (z₁+z₂) > 0`. -/
-lemma legQAdd_one_add_mem_slitPlane {z₁ z₂ s₁ s₂ : ℂ} (hz₁ : 0 < z₁.re) (hz₂ : 0 < z₂.re)
+theorem legQAdd_one_add_mem_slitPlane {z₁ z₂ s₁ s₂ : ℂ} (hz₁ : 0 < z₁.re) (hz₂ : 0 < z₂.re)
     (hs₁ : s₁ ^ 2 = z₁ ^ 2 - 1) (hs₂ : s₂ ^ 2 = z₂ ^ 2 - 1) {c : ℝ} (hc1 : -1 ≤ c) (hc2 : c ≤ 1) :
     1 + (z₁ * z₂ - s₁ * s₂ * c) ∈ slitPlane := by
   have hb0 : ∀ z : ℂ, 0 < z.re → z + 1 ≠ 0 := fun z hz h => by
@@ -429,7 +428,7 @@ lemma legQAdd_one_add_mem_slitPlane {z₁ z₂ s₁ s₂ : ℂ} (hz₁ : 0 < z�
 /-- The square-root branch `(z²-1)^{1/2} = exp ((log (z-1) + log (z+1))/2)` of DLMF 14.28.1. -/
 def legQAdd_sq (z : ℂ) : ℂ := exp ((log (z - 1) + log (z + 1)) / 2)
 
-lemma legQAdd_sq_sq {z : ℂ} (h1 : z - 1 ≠ 0) (h2 : z + 1 ≠ 0) : legQAdd_sq z ^ 2 = z ^ 2 - 1 := by
+theorem legQAdd_sq_sq {z : ℂ} (h1 : z - 1 ≠ 0) (h2 : z + 1 ≠ 0) : legQAdd_sq z ^ 2 = z ^ 2 - 1 := by
   rw [legQAdd_sq, ← exp_nat_mul, show ((2:ℕ):ℂ) * ((log (z - 1) + log (z + 1)) / 2) =
     log (z - 1) + log (z + 1) by push_cast; ring, exp_add, exp_log h1, exp_log h2]
   ring
@@ -437,14 +436,14 @@ lemma legQAdd_sq_sq {z : ℂ} (h1 : z - 1 ≠ 0) (h2 : z + 1 ≠ 0) : legQAdd_sq
 /-- The domain `Re z > 0`, `z ∉ (0, 1]` of DLMF 14.28.1. -/
 def legQAdd_D : Set ℂ := {z | 0 < z.re ∧ z - 1 ∈ slitPlane}
 
-lemma isOpen_legQAdd_D : IsOpen legQAdd_D :=
+theorem isOpen_legQAdd_D : IsOpen legQAdd_D :=
   (isOpen_lt continuous_const continuous_re).inter
     (isOpen_slitPlane.preimage (by fun_prop : Continuous fun z : ℂ => z - 1))
 
-lemma legQAdd_add_one_mem {z : ℂ} (hz : 0 < z.re) : z + 1 ∈ slitPlane :=
+theorem legQAdd_add_one_mem {z : ℂ} (hz : 0 < z.re) : z + 1 ∈ slitPlane :=
   Or.inl (by simp; linarith)
 
-lemma legQAdd_differentiableAt_sq {z : ℂ} (hz : z ∈ legQAdd_D) :
+theorem legQAdd_differentiableAt_sq {z : ℂ} (hz : z ∈ legQAdd_D) :
     DifferentiableAt ℂ legQAdd_sq z := by
   have h1 : DifferentiableAt ℂ (fun w : ℂ => log (w - 1)) z :=
     (differentiableAt_id.sub_const 1).clog hz.2
@@ -455,11 +454,11 @@ lemma legQAdd_differentiableAt_sq {z : ℂ} (hz : z ∈ legQAdd_D) :
 /-- The combined argument `z₁ z₂ - (z₁²-1)^{1/2} (z₂²-1)^{1/2} cos t` of DLMF 14.28.1. -/
 def legQAdd_Z (z₁ z₂ : ℂ) (t : ℝ) : ℂ := z₁ * z₂ - legQAdd_sq z₁ * legQAdd_sq z₂ * Real.cos t
 
-lemma legQAdd_Z_comm (z₁ z₂ : ℂ) (t : ℝ) : legQAdd_Z z₁ z₂ t = legQAdd_Z z₂ z₁ t := by
+theorem legQAdd_Z_comm (z₁ z₂ : ℂ) (t : ℝ) : legQAdd_Z z₁ z₂ t = legQAdd_Z z₂ z₁ t := by
   simp only [legQAdd_Z]; ring
 
 /-- The combined argument stays in the domain of holomorphy of `P_ν`, for every angle. -/
-lemma legQAdd_Z_mem {z₁ z₂ : ℂ} (hz₁ : z₁ ∈ legQAdd_D) (hz₂ : z₂ ∈ legQAdd_D) (t : ℝ) :
+theorem legQAdd_Z_mem {z₁ z₂ : ℂ} (hz₁ : z₁ ∈ legQAdd_D) (hz₂ : z₂ ∈ legQAdd_D) (t : ℝ) :
     (1 - legQAdd_Z z₁ z₂ t) / 2 ∈ cutPlane := by
   have hs : ∀ z ∈ legQAdd_D, legQAdd_sq z ^ 2 = z ^ 2 - 1 := fun z hz =>
     legQAdd_sq_sq (slitPlane_ne_zero hz.2) (slitPlane_ne_zero (legQAdd_add_one_mem hz.1))
@@ -474,7 +473,7 @@ lemma legQAdd_Z_mem {z₁ z₂ : ℂ} (hz₁ : z₁ ∈ legQAdd_D) (hz₂ : z₂
   · right; unfold legQAdd_Z; intro h'; apply h; linarith
 
 /-- `(cosh² ξ - 1)^{1/2} = sinh ξ` in the branch of 14.28.1, for `ξ > 0`. -/
-lemma legQAdd_sq_cosh {ξ : ℝ} (hξ : 0 < ξ) : legQAdd_sq (Real.cosh ξ) = Real.sinh ξ := by
+theorem legQAdd_sq_cosh {ξ : ℝ} (hξ : 0 < ξ) : legQAdd_sq (Real.cosh ξ) = Real.sinh ξ := by
   have hc : 1 < Real.cosh ξ := Real.one_lt_cosh.2 hξ.ne'
   have e1 : log ((Real.cosh ξ : ℂ) - 1) = (Real.log (Real.cosh ξ - 1) : ℂ) := by
     rw [show (Real.cosh ξ : ℂ) - 1 = ((Real.cosh ξ - 1 : ℝ) : ℂ) by push_cast; ring,
@@ -497,17 +496,17 @@ lemma legQAdd_sq_cosh {ξ : ℝ} (hξ : 0 < ξ) : legQAdd_sq (Real.cosh ξ) = Re
   exact (pow_left_inj₀ hpos.le hsh.le two_ne_zero).1 hsq
 
 /-- At real points the combined argument is that of 14.18.4. -/
-lemma legQAdd_Z_cosh {ξ₁ ξ₂ : ℝ} (h1 : 0 < ξ₁) (h2 : 0 < ξ₂) (t : ℝ) :
+theorem legQAdd_Z_cosh {ξ₁ ξ₂ : ℝ} (h1 : 0 < ξ₁) (h2 : 0 < ξ₂) (t : ℝ) :
     legQAdd_Z (Real.cosh ξ₁) (Real.cosh ξ₂) t = legAdd_hX ξ₁ ξ₂ t := by
   simp only [legQAdd_Z, legAdd_hX, legQAdd_sq_cosh h1, legQAdd_sq_cosh h2]
   push_cast; ring
 
 
-lemma legQAdd_continuousOn_sq : ContinuousOn legQAdd_sq legQAdd_D := fun _ hz =>
+theorem legQAdd_continuousOn_sq : ContinuousOn legQAdd_sq legQAdd_D := fun _ hz =>
   (legQAdd_differentiableAt_sq hz).continuousAt.continuousWithinAt
 
 /-- Joint continuity of `(z, t) ↦ P_ν(legQAdd_Z z z₂ t)` on `D × ℝ`. -/
-lemma legQAdd_continuousOn_joint (ν : ℂ) {z₂ : ℂ} (hz₂ : z₂ ∈ legQAdd_D) :
+theorem legQAdd_continuousOn_joint (ν : ℂ) {z₂ : ℂ} (hz₂ : z₂ ∈ legQAdd_D) :
     ContinuousOn (fun p : ℂ × ℝ => associatedP ν 0 (legQAdd_Z p.1 z₂ p.2)) (legQAdd_D ×ˢ univ) := by
   have hF : DifferentiableOn ℂ (fun w => regularizedGaussHG (ν + 1) (-ν) 1 w) cutPlane :=
     DifferentiableOn.regularizedGaussHG (differentiableOn_const _) (differentiableOn_const _)
@@ -523,7 +522,7 @@ lemma legQAdd_continuousOn_joint (ν : ℂ) {z₂ : ℂ} (hz₂ : z₂ ∈ legQA
       (by fun_prop : Continuous fun p : ℂ × ℝ => ((Real.cos p.2 : ℝ) : ℂ)).continuousOn))).div_const 2
 
 /-- The Fourier coefficients of `t ↦ P_ν(legQAdd_Z z z₂ t)` are holomorphic in `z ∈ D`. -/
-lemma legQAdd_coeff_differentiableOn (ν : ℂ) {z₂ : ℂ} (hz₂ : z₂ ∈ legQAdd_D) (m : ℤ) :
+theorem legQAdd_coeff_differentiableOn (ν : ℂ) {z₂ : ℂ} (hz₂ : z₂ ∈ legQAdd_D) (m : ℤ) :
     DifferentiableOn ℂ (fun z => legAdd_coeff (fun t => associatedP ν 0 (legQAdd_Z z z₂ t)) m)
       legQAdd_D := by
   have hj := legQAdd_continuousOn_joint ν hz₂
@@ -564,7 +563,7 @@ lemma legQAdd_coeff_differentiableOn (ν : ℂ) {z₂ : ℂ} (hz₂ : z₂ ∈ l
   exact (key.const_mul _).congr fun z _ => rfl
 
 /-- Half-plane intersections used to reach any point of `D` from the real axis. -/
-lemma legQAdd_U_props {κ σ : ℝ} (hκ : 0 < κ) :
+theorem legQAdd_U_props {κ σ : ℝ} (hκ : 0 < κ) :
     IsOpen {w : ℂ | 0 < w.re ∧ κ * (1 - w.re) < σ * w.im} ∧
     Convex ℝ {w : ℂ | 0 < w.re ∧ κ * (1 - w.re) < σ * w.im} ∧
     {w : ℂ | 0 < w.re ∧ κ * (1 - w.re) < σ * w.im} ⊆ legQAdd_D ∧
@@ -599,7 +598,7 @@ lemma legQAdd_U_props {κ σ : ℝ} (hκ : 0 < κ) :
 
 /-- **Identity theorem on `D`**: holomorphic functions on `D` that agree at the points `cosh ξ`,
 `ξ > 0`, agree on `D`. -/
-lemma legQAdd_extend {F G : ℂ → ℂ} (hF : DifferentiableOn ℂ F legQAdd_D)
+theorem legQAdd_extend {F G : ℂ → ℂ} (hF : DifferentiableOn ℂ F legQAdd_D)
     (hG : DifferentiableOn ℂ G legQAdd_D) (h : ∀ ξ : ℝ, 0 < ξ → F (Real.cosh ξ) = G (Real.cosh ξ))
     {z : ℂ} (hz : z ∈ legQAdd_D) : F z = G z := by
   obtain ⟨κ, σ, hκ, hzU⟩ : ∃ κ σ : ℝ, 0 < κ ∧ z ∈ {w : ℂ | 0 < w.re ∧ κ * (1 - w.re) < σ * w.im} := by
@@ -648,7 +647,7 @@ lemma legQAdd_extend {F G : ℂ → ℂ} (hF : DifferentiableOn ℂ F legQAdd_D)
 
 /-- `P^m_ν(z) = (ν-m+1)_{2m} P^{-m}_ν(z)` for every complex degree (14.9.13-type relation without
 exceptional degrees, by continuation in `ν`). -/
-lemma legQAdd_associatedP_nat_eq (ν : ℂ) (m : ℕ) {z : ℂ} (hz : z - 1 ∈ slitPlane)
+theorem legQAdd_associatedP_nat_eq (ν : ℂ) (m : ℕ) {z : ℂ} (hz : z - 1 ∈ slitPlane)
     (hz' : (1 - z) / 2 ∈ cutPlane) :
     associatedP ν m z = poch (ν - m + 1) (2 * m) * associatedP ν (-(m:ℂ)) z := by
   set D : ℂ → ℂ := fun ν => associatedP ν m z - poch (ν - m + 1) (2 * m) * associatedP ν (-(m:ℂ)) z
@@ -685,7 +684,7 @@ lemma legQAdd_associatedP_nat_eq (ν : ℂ) (m : ℕ) {z : ℂ} (hz : z - 1 ∈ 
 /-- The coefficient form of 14.18.4 used for 14.28.1: on `(1, ∞)`,
 `(-1)^m P^{-m}_ν(x₁) P^m_ν(x₂) = (-1)^m P^m_ν(x₁) P^m_ν(x₂)/(ν-m+1)_{2m}` (both sides vanish
 when the Pochhammer symbol does). -/
-lemma legQAdd_hyp_coeff_eq' (ν : ℂ) {ξ₁ ξ₂ : ℝ} (h1 : 0 < ξ₁) (h2 : 0 < ξ₂) (m : ℕ) :
+theorem legQAdd_hyp_coeff_eq' (ν : ℂ) {ξ₁ ξ₂ : ℝ} (h1 : 0 < ξ₁) (h2 : 0 < ξ₂) (m : ℕ) :
     legAdd_coeff (fun t => associatedP ν 0 (legQAdd_Z (Real.cosh ξ₁) (Real.cosh ξ₂) t)) m =
       (-1:ℂ) ^ m / poch (ν - m + 1) (2 * m) * associatedP ν m (Real.cosh ξ₁) *
         associatedP ν m (Real.cosh ξ₂) := by
@@ -736,7 +735,7 @@ theorem legQAdd_complex_coeff_eq (ν : ℂ) {z₁ z₂ : ℂ} (hz₁ : z₁ ∈ 
 
 
 /-- `t ↦ P_ν(legQAdd_Z z₁ z₂ t)` is `C²` on `ℝ`. -/
-lemma legQAdd_Z_contDiff (ν : ℂ) {z₁ z₂ : ℂ} (hz₁ : z₁ ∈ legQAdd_D) (hz₂ : z₂ ∈ legQAdd_D) :
+theorem legQAdd_Z_contDiff (ν : ℂ) {z₁ z₂ : ℂ} (hz₁ : z₁ ∈ legQAdd_D) (hz₂ : z₂ ∈ legQAdd_D) :
     ContDiff ℝ 2 (fun t : ℝ => associatedP ν 0 (legQAdd_Z z₁ z₂ t)) := by
   have hG : DifferentiableOn ℂ (fun z => regularizedGaussHG (ν + 1) (-ν) 1 z) cutPlane :=
     DifferentiableOn.regularizedGaussHG (differentiableOn_const _) (differentiableOn_const _)

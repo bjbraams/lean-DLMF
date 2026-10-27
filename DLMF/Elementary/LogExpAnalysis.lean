@@ -6,9 +6,11 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Elementary.LogExpBasic
-public import Mathlib.NumberTheory.Harmonic.EulerMascheroni
 public import Mathlib.Analysis.Analytic.Binomial
 public import DLMFMathlib.Analysis.SpecialFunctions.Complex.LogBoundary
+public import DLMF.Core.Framework
+public import Mathlib.Algebra.Order.Ring.Star
+public import Mathlib.Analysis.Complex.ExponentialBounds
 
 /-!
 # Logarithms, exponentials and powers: DLMF §§4.4–4.8
@@ -177,7 +179,7 @@ theorem tendsto_cpow_mul_exp_neg_sector (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδ
 def logInequalityCutoff : ℝ := sSup {x : ℝ | 0 < x ∧ x < 1 ∧ -Real.log (1 - x) ≤ 3 * x / 2}
 
 /-- Members of the logarithm cutoff set lie below `9/10`. -/
-theorem logR4_mem_le {x : ℝ} (hx : x ∈ {x : ℝ | 0 < x ∧ x < 1 ∧ -Real.log (1 - x) ≤ 3 * x / 2}) :
+lemma logR4_mem_le {x : ℝ} (hx : x ∈ {x : ℝ | 0 < x ∧ x < 1 ∧ -Real.log (1 - x) ≤ 3 * x / 2}) :
     x ≤ 9/10 := by
   obtain ⟨h0, h1, h2⟩ := hx
   by_contra h
@@ -191,18 +193,18 @@ theorem logR4_mem_le {x : ℝ} (hx : x ∈ {x : ℝ | 0 < x ∧ x < 1 ∧ -Real.
   linarith
 
 /-- The logarithm cutoff set is bounded above. -/
-theorem logR4_bdd : BddAbove {x : ℝ | 0 < x ∧ x < 1 ∧ -Real.log (1 - x) ≤ 3 * x / 2} :=
+lemma logR4_bdd : BddAbove {x : ℝ | 0 < x ∧ x < 1 ∧ -Real.log (1 - x) ≤ 3 * x / 2} :=
   ⟨9/10, fun _ hx => logR4_mem_le hx⟩
 
 /-- One half belongs to the logarithm cutoff set. -/
-theorem logR4_half_mem : (1/2:ℝ) ∈ {x : ℝ | 0 < x ∧ x < 1 ∧ -Real.log (1 - x) ≤ 3 * x / 2} := by
+lemma logR4_half_mem : (1/2:ℝ) ∈ {x : ℝ | 0 < x ∧ x < 1 ∧ -Real.log (1 - x) ≤ 3 * x / 2} := by
   refine ⟨by norm_num, by norm_num, ?_⟩
   rw [show (1:ℝ) - 1/2 = (2:ℝ)⁻¹ by norm_num, Real.log_inv, neg_neg]
   have := Real.log_two_lt_d9
   linarith
 
 /-- Convexity bound: below a member of the cutoff set the strict inequality holds. -/
-theorem logR4_strict {x y : ℝ} (hx : 0 < x) (hxy : x < y)
+lemma logR4_strict {x y : ℝ} (hx : 0 < x) (hxy : x < y)
     (hy : y ∈ {x : ℝ | 0 < x ∧ x < 1 ∧ -Real.log (1 - x) ≤ 3 * x / 2}) :
     -Real.log (1 - x) < 3 * x / 2 := by
   obtain ⟨hy0, hy1, hy2⟩ := hy
@@ -219,7 +221,7 @@ theorem logR4_strict {x y : ℝ} (hx : 0 < x) (hxy : x < y)
   nlinarith
 
 /-- The logarithm cutoff is at least one half. -/
-theorem logR4_cutoff_pos : 1/2 ≤ logInequalityCutoff := le_csSup logR4_bdd logR4_half_mem
+lemma logR4_cutoff_pos : 1/2 ≤ logInequalityCutoff := le_csSup logR4_bdd logR4_half_mem
 
 /-- The cutoff is the nonzero root of the equality case. -/
 theorem logInequalityCutoff_spec  :
@@ -410,17 +412,17 @@ theorem rpow_one_add_bounds {x y : ℝ} (hx : 0 < x) (hy : 0 < y) :
 def expInequalityCutoff : ℝ := sSup {x : ℝ | 0 < x ∧ Real.exp (-x) ≤ 1 - x / 2}
 
 /-- Members of the exponential cutoff set lie below two. -/
-theorem logR4_exp_mem_lt {x : ℝ} (hx : x ∈ {x : ℝ | 0 < x ∧ Real.exp (-x) ≤ 1 - x / 2}) :
+lemma logR4_exp_mem_lt {x : ℝ} (hx : x ∈ {x : ℝ | 0 < x ∧ Real.exp (-x) ≤ 1 - x / 2}) :
     x < 2 := by
   have := Real.exp_pos (-x)
   linarith [hx.2]
 
 /-- The exponential cutoff set is bounded above. -/
-theorem logR4_exp_bdd : BddAbove {x : ℝ | 0 < x ∧ Real.exp (-x) ≤ 1 - x / 2} :=
+lemma logR4_exp_bdd : BddAbove {x : ℝ | 0 < x ∧ Real.exp (-x) ≤ 1 - x / 2} :=
   ⟨2, fun _ hx => (logR4_exp_mem_lt hx).le⟩
 
 /-- One belongs to the exponential cutoff set. -/
-theorem logR4_exp_one_mem : (1:ℝ) ∈ {x : ℝ | 0 < x ∧ Real.exp (-x) ≤ 1 - x / 2} := by
+lemma logR4_exp_one_mem : (1:ℝ) ∈ {x : ℝ | 0 < x ∧ Real.exp (-x) ≤ 1 - x / 2} := by
   refine ⟨by norm_num, ?_⟩
   rw [Real.exp_neg]
   have := Real.exp_one_gt_d9
@@ -428,7 +430,7 @@ theorem logR4_exp_one_mem : (1:ℝ) ∈ {x : ℝ | 0 < x ∧ Real.exp (-x) ≤ 1
   linarith
 
 /-- Convexity bound below a member of the exponential cutoff set. -/
-theorem logR4_exp_strict {x y : ℝ} (hx : 0 < x) (hxy : x < y)
+lemma logR4_exp_strict {x y : ℝ} (hx : 0 < x) (hxy : x < y)
     (hy : y ∈ {x : ℝ | 0 < x ∧ Real.exp (-x) ≤ 1 - x / 2}) :
     Real.exp (-x) < 1 - x / 2 := by
   obtain ⟨hy0, hy2⟩ := hy
@@ -546,7 +548,7 @@ theorem log_one_add_hasSum_closed {z : ℂ} (hz : ‖z‖ ≤ 1) (hne : z ≠ -1
   simp [pow_add]
 
 /-- Natural-order positive logarithm series on the closed disk, excluding its pole. -/
-lemma logBoundary_one_sub {w : ℂ} (hw : ‖w‖ ≤ 1) (hne : w ≠ 1) :
+theorem logBoundary_one_sub {w : ℂ} (hw : ‖w‖ ≤ 1) (hne : w ≠ 1) :
     Tendsto (fun N : ℕ => ∑ n ∈ range N, w ^ (n + 1) / (n + 1))
       atTop (𝓝 (-Complex.log (1 - w))) := by
   have hn : -w ≠ (-1 : ℂ) := by simpa using hne
@@ -564,7 +566,7 @@ lemma logBoundary_one_sub {w : ℂ} (hw : ‖w‖ ≤ 1) (hne : w ≠ 1) :
     linear_combination -(w ^ (n + 1)) * hs
 
 /-- The real part of a translated closed-disk point is positive off its endpoint. -/
-lemma logBoundary_one_add_re_pos {w : ℂ} (hw : ‖w‖ ≤ 1) (hne : w ≠ -1) :
+theorem logBoundary_one_add_re_pos {w : ℂ} (hw : ‖w‖ ≤ 1) (hne : w ≠ -1) :
     0 < (1 + w).re := by
   have hs := Complex.sq_norm w
   rw [Complex.normSq_apply] at hs
@@ -576,7 +578,7 @@ lemma logBoundary_one_add_re_pos {w : ℂ} (hw : ‖w‖ ≤ 1) (hne : w ≠ -1)
   exact Complex.ext (by simpa using he) (by simpa using hi)
 
 /-- The principal logarithm quotient law for two points with positive real part. -/
-lemma logBoundary_log_div {u v : ℂ} (hu : 0 < u.re) (hv : 0 < v.re) :
+theorem logBoundary_log_div {u v : ℂ} (hu : 0 < u.re) (hv : 0 < v.re) :
     Complex.log (u / v) = Complex.log u - Complex.log v := by
   have hu0 : u ≠ 0 := by intro h; simp [h] at hu
   have hv0 : v ≠ 0 := by intro h; simp [h] at hv
@@ -593,7 +595,7 @@ lemma logBoundary_log_div {u v : ℂ} (hu : 0 < u.re) (hv : 0 < v.re) :
 
 /-- Odd logarithm series on the whole closed disk except the two divergent endpoints.
 The finite identity groups adjacent natural-order terms before taking an even subsequence. -/
-lemma logBoundary_odd {w : ℂ} (hw : ‖w‖ ≤ 1) (hp : w ≠ 1) (hm : w ≠ -1) :
+theorem logBoundary_odd {w : ℂ} (hw : ‖w‖ ≤ 1) (hp : w ≠ 1) (hm : w ≠ -1) :
     Tendsto (fun N : ℕ => ∑ n ∈ range N, 2 * w ^ (2 * n + 1) / (2 * n + 1))
       atTop (𝓝 (Complex.log ((1 + w) / (1 - w)))) := by
   have hplus := log_one_add_hasSum_closed hw hm
@@ -753,7 +755,7 @@ theorem log_add_hasSum_odd {a : ℝ} (ha : 0 < a) {z : ℂ} (hz : -a ≤ z.re) (
 def fallingPower (a : ℂ) (n : ℕ) : ℂ := ∏ j ∈ range n, (a - j)
 
 /-- Falling-factorial coefficients agree with Mathlib's generalized binomial coefficients. -/
-lemma fallingPower_choose (a : ℂ) (n : ℕ) :
+theorem fallingPower_choose (a : ℂ) (n : ℕ) :
     fallingPower a n/(n.factorial:ℂ)=Ring.choose a n := by
   have he : fallingPower a n=(descPochhammer ℂ n).eval a := by
     rw [descPochhammer_eval_eq_prod_range]

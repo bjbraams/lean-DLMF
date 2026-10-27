@@ -43,7 +43,7 @@ noncomputable section
 namespace DLMF.Confluent
 
 /-- Translation of integrals over a right half-line. -/
-lemma setIntegral_Ioi_comp_add_right {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+theorem setIntegral_Ioi_comp_add_right {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     (f : ℝ → E) (c d : ℝ) : ∫ t in Ioi c, f (t + d) = ∫ s in Ioi (c + d), f s := by
   rw [← integral_indicator measurableSet_Ioi, ← integral_indicator measurableSet_Ioi]
   conv_rhs => rw [← integral_add_right_eq_self (fun s => (Ioi (c + d)).indicator f s) d]
@@ -120,7 +120,7 @@ theorem lowerIncGamma_eq_regularized {a : ℂ} (ha : ∀ k : ℕ, a ≠ -k) (z :
   field_simp
 
 /-- The complement relation at nonintegral `a`, from the connection formula for `U`. -/
-lemma upperIncGamma_eq_Gamma_sub_of_mem {a : ℂ} (ha : a ∈ integerComplement) (z : ℂ) :
+theorem upperIncGamma_eq_Gamma_sub_of_mem {a : ℂ} (ha : a ∈ integerComplement) (z : ℂ) :
     upperIncGamma a z = Gamma a - lowerIncGamma a z := by
   have hai := forall_of_mem_integerComplement ha
   have hb : ∀ k : ℤ, 1 - a ≠ k := fun k hk => hai (1 - k) (by push_cast; linear_combination -hk)

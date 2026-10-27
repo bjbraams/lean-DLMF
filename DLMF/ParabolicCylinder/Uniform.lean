@@ -5,10 +5,11 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.ParabolicCylinder.AsymptoticsZeros
-public import DLMF.Airy.Basic
 public import DLMFMathlib.Analysis.Calculus.DoubleZeroSqrt
 public import DLMFMathlib.Analysis.Calculus.InverseSeries
+public import DLMF.Confluent.ParabolicCylinder
+public import DLMF.Core.Framework
+public import Mathlib.Analysis.SpecialFunctions.Sqrt
 
 /-!
 # Olver and Temme uniform cylinder expansions and coefficient systems
@@ -53,7 +54,7 @@ def pcfGammaCoeff (s : ℕ) : ℂ :=
 
 /-- Coefficients identified by limits: if `f(t) = ∑_{s<N} c_s t^{-s} + O(t^{-N})` for all `N`,
 then the successive limits `asymptoticCoeff f` are the `c_s`. -/
-lemma pcfLG_asymptoticCoeff_eq {f : ℝ → ℂ} {c : ℕ → ℂ}
+theorem pcfLG_asymptoticCoeff_eq {f : ℝ → ℂ} {c : ℕ → ℂ}
     (h : ∀ N : ℕ, (fun t : ℝ => f t - ∑ s ∈ Finset.range N, c s / (t:ℂ)^s) =O[atTop]
       (fun t : ℝ => (t:ℂ)^(-(N:ℤ)))) (n : ℕ) : asymptoticCoeff f n = c n := by
   induction n using Nat.strong_induction_on with
@@ -100,7 +101,7 @@ termination_by n => n
 
 open DLMF.Gamma in
 /-- The recurrence of `pcfLG_gammaG` in the form used by the exponentiation lemma. -/
-lemma pcfLG_gammaG_recurrence (n : ℕ) :
+theorem pcfLG_gammaG_recurrence (n : ℕ) :
     ((n : ℂ) + 1) * pcfLG_gammaG (n + 1) = ∑ k ∈ Finset.range (n + 1),
       ((k : ℂ) + 1) * stirlingShiftCoeff (1/2) k * pcfLG_gammaG (n - k) := by
   rw [pcfLG_gammaG]
@@ -116,7 +117,7 @@ lemma pcfLG_gammaG_recurrence (n : ℕ) :
 
 open DLMF.Gamma in
 /-- `Γ(1/2+t)/(√(2π) e^{-t} t^t)` is the exponential of the shifted Stirling remainder. -/
-lemma pcfLG_gamma_ratio_eq {t : ℝ} (ht : 0 < t) :
+theorem pcfLG_gamma_ratio_eq {t : ℝ} (ht : 0 < t) :
     Gamma (1/2+t)/((Real.sqrt (2*π):ℂ)*exp (-t)*(t:ℂ)^(t:ℂ)) =
       cexp (stirlingShiftRem (1/2) t) := by
   have hta : (t : ℂ) + 1/2 ∈ slitPlane := mem_slitPlane_iff.2 (Or.inl (by
@@ -134,7 +135,7 @@ lemma pcfLG_gamma_ratio_eq {t : ℝ} (ht : 0 < t) :
 
 open DLMF.Gamma in
 /-- The `pcfGammaCoeff` expansion with the coefficients `pcfLG_gammaG`. -/
-lemma pcfLG_gamma_expansion (N : ℕ) :
+theorem pcfLG_gamma_expansion (N : ℕ) :
     (fun z : ℝ => Gamma (1/2+z)/((Real.sqrt (2*π):ℂ)*exp (-z)*(z:ℂ)^(z:ℂ))-∑ s ∈ Finset.range N,
       pcfLG_gammaG s/(z:ℂ)^s) =O[atTop] (fun z : ℝ => (z:ℂ)^(-(N:ℤ))) := by
   have hE := isBigO_cexp_sub_of_hasAsymptoticExpansion
@@ -166,7 +167,7 @@ lemma pcfLG_gamma_expansion (N : ℕ) :
 
 open DLMF.Gamma in
 /-- The Bernoulli polynomials `B_n(1/2)` for `n ≤ 5`. -/
-lemma pcfLG_bernoulli_half (n : ℕ) (hn : n ≤ 5) :
+theorem pcfLG_bernoulli_half (n : ℕ) (hn : n ≤ 5) :
     Polynomial.aeval (1/2 : ℂ) (Polynomial.bernoulli n) =
       [1, 0, -1/12, 0, 7/240, 0].getD n 0 := by
   have hb5 : _root_.bernoulli 5 = 0 := bernoulli_eq_zero_of_odd ⟨2, rfl⟩ (by norm_num)
@@ -180,7 +181,7 @@ lemma pcfLG_bernoulli_half (n : ℕ) (hn : n ≤ 5) :
 
 open DLMF.Gamma in
 /-- The first five coefficients `γ_s`. -/
-lemma pcfLG_gammaG_values : pcfLG_gammaG 0 = 1 ∧ pcfLG_gammaG 1 = -1/24 ∧ pcfLG_gammaG 2 = 1/1152 ∧
+theorem pcfLG_gammaG_values : pcfLG_gammaG 0 = 1 ∧ pcfLG_gammaG 1 = -1/24 ∧ pcfLG_gammaG 2 = 1/1152 ∧
     pcfLG_gammaG 3 = 1003/414720 ∧ pcfLG_gammaG 4 = -4027/39813120 := by
   have h2 := pcfLG_bernoulli_half 2 (by norm_num)
   have h3 := pcfLG_bernoulli_half 3 (by norm_num)
@@ -200,7 +201,7 @@ lemma pcfLG_gammaG_values : pcfLG_gammaG 0 = 1 ∧ pcfLG_gammaG 1 = -1/24 ∧ pc
 
 open DLMF.Gamma in
 /-- The coefficients `pcfGammaCoeff` are the `pcfLG_gammaG`. -/
-lemma pcfLG_gammaCoeff_eq (s : ℕ) : pcfGammaCoeff s = pcfLG_gammaG s :=
+theorem pcfLG_gammaCoeff_eq (s : ℕ) : pcfGammaCoeff s = pcfLG_gammaG s :=
   pcfLG_asymptoticCoeff_eq pcfLG_gamma_expansion s
 
 /-- pcfGammaCoeff expansion. -/
@@ -244,7 +245,7 @@ def pcfOlverV (s : ℕ) : Polynomial ℝ :=
   if s=0 then 1 else pcfOlverU s+C (1/2:ℝ)*X*pcfOlverU (s-1)-(pcfOlverPair (s-1)).2
 
 /-- Coefficient recursion of `(X²-1)p' - kXp`. -/
-lemma olver_homog_coeff (k : ℝ) (p : Polynomial ℝ) (n : ℕ) :
+theorem olver_homog_coeff (k : ℝ) (p : Polynomial ℝ) (n : ℕ) :
     ((X^2-1)*derivative p-C k*X*p).coeff (n+1) = (n-k) * p.coeff n - (n+2) * p.coeff (n+2) := by
   have : (X^2-1)*derivative p-C k*X*p = X^2*derivative p - derivative p - C k*(X*p) := by ring
   rw [this, coeff_sub, coeff_sub, coeff_C_mul, coeff_X_mul, coeff_derivative]
@@ -254,13 +255,13 @@ lemma olver_homog_coeff (k : ℝ) (p : Polynomial ℝ) (n : ℕ) :
     simp [coeff_derivative]; ring
 
 /-- Constant coefficient of `(X²-1)p' - kXp`. -/
-lemma olver_homog_coeff_zero (k : ℝ) (p : Polynomial ℝ) :
+theorem olver_homog_coeff_zero (k : ℝ) (p : Polynomial ℝ) :
     ((X^2-1)*derivative p-C k*X*p).coeff 0 = - p.coeff 1 := by
   have : (X^2-1)*derivative p-C k*X*p = X^2*derivative p - derivative p - C k*(X*p) := by ring
   rw [this]; simp [coeff_derivative]
 
 /-- Polynomial solutions of `(X²-1)p' - 3Xp = 0` of degree `≤ 3` vanish. -/
-lemma olver_homog_three {p : Polynomial ℝ} (hp : (X^2-1)*derivative p-C 3*X*p=0)
+theorem olver_homog_three {p : Polynomial ℝ} (hp : (X^2-1)*derivative p-C 3*X*p=0)
     (hd : p.natDegree ≤ 3) : p = 0 := by
   have h4 : p.coeff 4 = 0 := coeff_eq_zero_of_natDegree_lt (by omega)
   have e0 := olver_homog_coeff_zero 3 p
@@ -279,7 +280,7 @@ lemma olver_homog_three {p : Polynomial ℝ} (hp : (X^2-1)*derivative p-C 3*X*p=
   · simp [coeff_eq_zero_of_natDegree_lt (lt_of_le_of_lt hd hn)]
 
 /-- Polynomial solutions of `(X²-1)p' - 6Xp = 0` of degree `≤ 4` vanish. -/
-lemma olver_homog_six {p : Polynomial ℝ} (hp : (X^2-1)*derivative p-C 6*X*p=0)
+theorem olver_homog_six {p : Polynomial ℝ} (hp : (X^2-1)*derivative p-C 6*X*p=0)
     (hd : p.natDegree ≤ 4) : p = 0 := by
   have h5 : p.coeff 5 = 0 := coeff_eq_zero_of_natDegree_lt (by omega)
   have h6 : p.coeff 6 = 0 := coeff_eq_zero_of_natDegree_lt (by omega)
@@ -302,17 +303,17 @@ lemma olver_homog_six {p : Polynomial ℝ} (hp : (X^2-1)*derivative p-C 6*X*p=0)
   · simp [coeff_eq_zero_of_natDegree_lt (lt_of_le_of_lt hd hn)]
 
 /-- A choice value is pinned down by a witness and uniqueness. -/
-lemma olver_epsilon_eq {Q : Polynomial ℝ → Prop} {w : Polynomial ℝ} (hw : Q w)
+theorem olver_epsilon_eq {Q : Polynomial ℝ → Prop} {w : Polynomial ℝ} (hw : Q w)
     (hu : ∀ p, Q p → p = w) : Classical.epsilon Q = w :=
   hu _ (Classical.epsilon_spec ⟨w, hw⟩)
 
 /-- Difference of two solutions of the `u`-equation. -/
-lemma olver_sub_eq {k : ℝ} {r p w : Polynomial ℝ} (hp : (X^2-1)*derivative p-C k*X*p=r)
+theorem olver_sub_eq {k : ℝ} {r p w : Polynomial ℝ} (hp : (X^2-1)*derivative p-C k*X*p=r)
     (hw : (X^2-1)*derivative w-C k*X*w=r) : (X^2-1)*derivative (p-w)-C k*X*(p-w)=0 := by
   rw [derivative_sub]; linear_combination hp - hw
 
 /-- The Olver operator `T_k p = (X²-1)p' - kXp` applied to a monomial. -/
-lemma pcfLG_olverOp_X_pow (k : ℝ) (j : ℕ) :
+theorem pcfLG_olverOp_X_pow (k : ℝ) (j : ℕ) :
     (X^2-1)*derivative (X^(j+1) : Polynomial ℝ)-C k*X*X^(j+1) =
       C ((j:ℝ)+1-k) * X^(j+2) - C ((j:ℝ)+1) * X^j := by
   rw [derivative_X_pow]
@@ -320,7 +321,7 @@ lemma pcfLG_olverOp_X_pow (k : ℝ) (j : ℕ) :
   simp; ring
 
 /-- Homogeneous solutions of the Olver operator below the critical degree vanish. -/
-lemma pcfLG_olver_homog {k : ℕ} (hk : 1 ≤ k) {q : Polynomial ℝ}
+theorem pcfLG_olver_homog {k : ℕ} (hk : 1 ≤ k) {q : Polynomial ℝ}
     (hq : (X^2-1)*derivative q-C (k:ℝ)*X*q=0)
     (hd : q.natDegree ≤ if Even k then k-2 else k) : q = 0 := by
   by_contra hq0
@@ -371,7 +372,7 @@ where
 
 
 /-- Linearity of the Olver operator. -/
-lemma pcfLG_olverOp_sub_C_mul (k a : ℝ) (p q : Polynomial ℝ) :
+theorem pcfLG_olverOp_sub_C_mul (k a : ℝ) (p q : Polynomial ℝ) :
     (X^2-1)*derivative (p - C a * q)-C k*X*(p - C a * q) =
       ((X^2-1)*derivative p-C k*X*p) - C a * ((X^2-1)*derivative q-C k*X*q) := by
   rw [derivative_sub, derivative_C_mul]; ring
@@ -449,7 +450,7 @@ lemma pcfLG_olver_exists_aux {k : ℕ} (i : ℕ) : ∀ r : Polynomial ℝ,
         exact hpp n hn
 
 /-- `(X²-1)^j` solves the homogeneous Olver equation with `k = 2j`. -/
-lemma pcfLG_olver_homog_sol (j : ℕ) :
+theorem pcfLG_olver_homog_sol (j : ℕ) :
     (X^2-1)*derivative ((X^2-1)^j : Polynomial ℝ)-C ((2*j:ℕ):ℝ)*X*(X^2-1)^j = 0 := by
   rcases j with _ | j
   · simp
@@ -458,7 +459,7 @@ lemma pcfLG_olver_homog_sol (j : ℕ) :
     simp; ring
 
 /-- Existence with the Olver degree bound. -/
-lemma pcfLG_olver_exists {k : ℕ} (hk : 1 ≤ k) {r : Polynomial ℝ}
+theorem pcfLG_olver_exists {k : ℕ} (hk : 1 ≤ k) {r : Polynomial ℝ}
     (hr : ∀ n, r.coeff n ≠ 0 → Odd (n+k) ∧ n < k) :
     ∃ p : Polynomial ℝ, (X^2-1)*derivative p-C (k:ℝ)*X*p = r ∧
       (p.natDegree ≤ if Even k then k-2 else k) ∧ ∀ n, p.coeff n ≠ 0 → Even (n+k) := by
@@ -514,49 +515,49 @@ lemma pcfLG_olver_exists {k : ℕ} (hk : 1 ≤ k) {r : Polynomial ℝ}
 def pcfLG_good (e D : ℕ) (f : Polynomial ℝ) : Prop :=
   ∀ n, f.coeff n ≠ 0 → Even (n + e) ∧ n ≤ D
 
-lemma pcfLG_good_mono {e D D' : ℕ} {f : Polynomial ℝ} (h : D ≤ D') (hf : pcfLG_good e D f) :
+theorem pcfLG_good_mono {e D D' : ℕ} {f : Polynomial ℝ} (h : D ≤ D') (hf : pcfLG_good e D f) :
     pcfLG_good e D' f := fun n hn => ⟨(hf n hn).1, (hf n hn).2.trans h⟩
 
-lemma pcfLG_good_add_two {e D : ℕ} {f : Polynomial ℝ} (hf : pcfLG_good (e+2) D f) :
+theorem pcfLG_good_add_two {e D : ℕ} {f : Polynomial ℝ} (hf : pcfLG_good (e+2) D f) :
     pcfLG_good e D f := fun n hn => by
   obtain ⟨⟨j, hj⟩, h2⟩ := hf n hn; exact ⟨⟨j-1, by omega⟩, h2⟩
 
-lemma pcfLG_good_two {e D : ℕ} {f : Polynomial ℝ} (hf : pcfLG_good e D f) :
+theorem pcfLG_good_two {e D : ℕ} {f : Polynomial ℝ} (hf : pcfLG_good e D f) :
     pcfLG_good (e+2) D f := fun n hn => by
   obtain ⟨⟨j, hj⟩, h2⟩ := hf n hn; exact ⟨⟨j+1, by omega⟩, h2⟩
 
-lemma pcfLG_good_zero (e D : ℕ) : pcfLG_good e D 0 := fun n hn => by simp at hn
+theorem pcfLG_good_zero (e D : ℕ) : pcfLG_good e D 0 := fun n hn => by simp at hn
 
-lemma pcfLG_good_add {e D : ℕ} {f g : Polynomial ℝ} (hf : pcfLG_good e D f)
+theorem pcfLG_good_add {e D : ℕ} {f g : Polynomial ℝ} (hf : pcfLG_good e D f)
     (hg : pcfLG_good e D g) : pcfLG_good e D (f + g) := fun n hn => by
   rw [coeff_add] at hn
   by_cases h : f.coeff n = 0
   · rw [h, zero_add] at hn; exact hg n hn
   · exact hf n h
 
-lemma pcfLG_good_C_mul {e D : ℕ} {f : Polynomial ℝ} (a : ℝ) (hf : pcfLG_good e D f) :
+theorem pcfLG_good_C_mul {e D : ℕ} {f : Polynomial ℝ} (a : ℝ) (hf : pcfLG_good e D f) :
     pcfLG_good e D (C a * f) := fun n hn => by
   rw [coeff_C_mul] at hn; exact hf n (right_ne_zero_of_mul hn)
 
-lemma pcfLG_good_sub {e D : ℕ} {f g : Polynomial ℝ} (hf : pcfLG_good e D f)
+theorem pcfLG_good_sub {e D : ℕ} {f g : Polynomial ℝ} (hf : pcfLG_good e D f)
     (hg : pcfLG_good e D g) : pcfLG_good e D (f - g) := by
   rw [sub_eq_add_neg, ← neg_one_mul, show (-1 : Polynomial ℝ) = C (-1) by simp]
   exact pcfLG_good_add hf (pcfLG_good_C_mul _ hg)
 
-lemma pcfLG_good_X_mul {e D : ℕ} {f : Polynomial ℝ} (hf : pcfLG_good e D f) :
+theorem pcfLG_good_X_mul {e D : ℕ} {f : Polynomial ℝ} (hf : pcfLG_good e D f) :
     pcfLG_good (e+1) (D+1) (X * f) := fun n hn => by
   rcases n with _ | n
   · simp at hn
   · rw [coeff_X_mul] at hn
     obtain ⟨⟨j, hj⟩, h2⟩ := hf n hn; exact ⟨⟨j+1, by omega⟩, by omega⟩
 
-lemma pcfLG_good_derivative {e D : ℕ} {f : Polynomial ℝ} (hf : pcfLG_good e (D+1) f) :
+theorem pcfLG_good_derivative {e D : ℕ} {f : Polynomial ℝ} (hf : pcfLG_good e (D+1) f) :
     pcfLG_good (e+1) D (derivative f) := fun n hn => by
   rw [coeff_derivative] at hn
   obtain ⟨⟨j, hj⟩, h2⟩ := hf (n+1) (left_ne_zero_of_mul hn); exact ⟨⟨j, by omega⟩, by omega⟩
 
 /-- One step of the Olver recursion: existence and uniqueness of `u_{s+1}`. -/
-lemma pcfLG_olver_step (s : ℕ) {r : Polynomial ℝ} (hr : pcfLG_good s (3*s+2) r) :
+theorem pcfLG_olver_step (s : ℕ) {r : Polynomial ℝ} (hr : pcfLG_good s (3*s+2) r) :
     ∃ p : Polynomial ℝ, ((X^2-1)*derivative p-C (3*(s+1:ℝ))*X*p=r ∧
       p.natDegree ≤ if Even (s+1) then 3*(s+1)-2 else 3*(s+1)) ∧
       pcfLG_good (s+1) (3*(s+1)) p ∧
@@ -581,7 +582,7 @@ lemma pcfLG_olver_step (s : ℕ) {r : Polynomial ℝ} (hr : pcfLG_good s (3*s+2)
     refine (natDegree_sub_le _ _).trans (max_le hqd hpd)
 
 /-- The right-hand side `r_s` of the Olver recursion has parity `s` and degree `≤ 3s+2`. -/
-lemma pcfLG_r_good {s : ℕ} {u ρ : Polynomial ℝ} (hu : pcfLG_good s (3*s) u)
+theorem pcfLG_r_good {s : ℕ} {u ρ : Polynomial ℝ} (hu : pcfLG_good s (3*s) u)
     (hρ : pcfLG_good (s+1) (3*s+1) ρ) :
     pcfLG_good s (3*s+2) (C (1/8:ℝ)*(C 3*X^2+C 2)*u - C (3/2*(s+1:ℝ))*X*ρ +
       C (1/2:ℝ)*(X^2-1)*derivative ρ) := by
@@ -599,7 +600,7 @@ lemma pcfLG_r_good {s : ℕ} {u ρ : Polynomial ℝ} (hu : pcfLG_good s (3*s) u)
   · exact pcfLG_good_add_two (pcfLG_good_mono (by omega) hρ')
 
 /-- Parity and degree invariants of the Olver pairs `(u_s, r_{s-1})`. -/
-lemma pcfLG_olverPair_inv (s : ℕ) :
+theorem pcfLG_olverPair_inv (s : ℕ) :
     pcfLG_good s (3*s) (pcfOlverPair s).1 ∧ pcfLG_good (s+1) (3*s+1) (pcfOlverPair s).2 := by
   induction s with
   | zero =>
@@ -632,7 +633,7 @@ theorem pcfOlverU_spec (s : ℕ) :
   exact hp
 
 /-- The first Olver pair `(u₁, r₀)`. -/
-lemma pcfOlverPair_one :
+theorem pcfOlverPair_one :
     pcfOlverPair 1 = (X*(X^2-C 6)*C (1/24:ℝ), C (1/8:ℝ)*(C 3*X^2+C 2)) := by
   simp only [pcfOlverPair]
   have hw : (X^2-1)*derivative (X*(X^2-C 6)*C (1/24:ℝ))-C (3*((0:ℕ)+1:ℝ))*X*(X*(X^2-C 6)*C (1/24:ℝ)) =
@@ -650,7 +651,7 @@ lemma pcfOlverPair_one :
     compute_degree
 
 /-- The chosen Olver polynomial equals any witness, given uniqueness of homogeneous solutions. -/
-lemma olver_epsilon_of {k : ℝ} {N : ℕ} {r w : Polynomial ℝ}
+theorem olver_epsilon_of {k : ℝ} {N : ℕ} {r w : Polynomial ℝ}
     (hw : (X^2-1)*derivative w-C k*X*w=r) (hwd : w.natDegree ≤ N)
     (hu : ∀ q : Polynomial ℝ, (X^2-1)*derivative q-C k*X*q=0 → q.natDegree ≤ N → q = 0) :
     Classical.epsilon (fun p : Polynomial ℝ => (X^2-1)*derivative p-C k*X*p=r ∧ p.natDegree ≤ N) = w :=
@@ -658,7 +659,7 @@ lemma olver_epsilon_of {k : ℝ} {N : ℕ} {r w : Polynomial ℝ}
     (hu _ (olver_sub_eq hp.1 hw) ((natDegree_sub_le _ _).trans (max_le hp.2 hwd)))
 
 /-- The second Olver pair `(u₂, r₁)`. -/
-lemma pcfOlverU_two : pcfOlverU 2 = (-C 9*X^4+C 249*X^2+C 145)*C (1/1152:ℝ) := by
+theorem pcfOlverU_two : pcfOlverU 2 = (-C 9*X^4+C 249*X^2+C 145)*C (1/1152:ℝ) := by
   rw [pcfOlverU, pcfOlverPair.eq_2 1, pcfOlverPair_one]
   dsimp only
   rw [olver_epsilon_of (w := (-C 9*X^4+C 249*X^2+C 145)*C (1/1152:ℝ))]
@@ -772,7 +773,7 @@ def pcfTemmePoly : ℕ → Polynomial ℝ
   | s+1 => -C 4*X^2*(X+1)^2*derivative (pcfTemmePoly s)-C (1/4:ℝ)*pcfPolyPrimitive ((C 20*X^2+C 20*X+C 3)*pcfTemmePoly s)
 
 /-- Real polynomials with equal derivatives and equal values at `0` are equal. -/
-lemma pcfPoly_eq_of_derivative_eq {P Q : Polynomial ℝ} (hd : derivative P = derivative Q)
+theorem pcfPoly_eq_of_derivative_eq {P Q : Polynomial ℝ} (hd : derivative P = derivative Q)
     (h0 : P.eval 0 = Q.eval 0) : P = Q := by
   have hc : ∀ x : ℝ, HasDerivAt (fun x => (P - Q).eval x) 0 x := fun x => by
     have := (P - Q).hasDerivAt x
@@ -782,19 +783,19 @@ lemma pcfPoly_eq_of_derivative_eq {P Q : Polynomial ℝ} (hd : derivative P = de
   rw [this x, eval_sub, h0, sub_self, eval_zero]
 
 /-- The primitive is additive. -/
-lemma pcfPolyPrimitive_add (p q : Polynomial ℝ) :
+theorem pcfPolyPrimitive_add (p q : Polynomial ℝ) :
     pcfPolyPrimitive (p + q) = pcfPolyPrimitive p + pcfPolyPrimitive q := by
   unfold pcfPolyPrimitive
   exact Polynomial.sum_add_index _ _ _ (fun n => by simp) (fun n a b => by rw [add_div, C_add, add_mul])
 
 /-- The primitive of a monomial. -/
-lemma pcfPolyPrimitive_monomial (n : ℕ) (c : ℝ) :
+theorem pcfPolyPrimitive_monomial (n : ℕ) (c : ℝ) :
     pcfPolyPrimitive (monomial n c) = C (c/(n+1)) * X^(n+1) := by
   unfold pcfPolyPrimitive
   exact Polynomial.sum_monomial_index _ _ (by simp)
 
 /-- The primitive has derivative `p`. -/
-lemma derivative_pcfPolyPrimitive (p : Polynomial ℝ) : derivative (pcfPolyPrimitive p) = p := by
+theorem derivative_pcfPolyPrimitive (p : Polynomial ℝ) : derivative (pcfPolyPrimitive p) = p := by
   induction p using Polynomial.induction_on' with
   | add p q hp hq => rw [pcfPolyPrimitive_add, derivative_add, hp, hq]
   | monomial n c =>
@@ -803,13 +804,13 @@ lemma derivative_pcfPolyPrimitive (p : Polynomial ℝ) : derivative (pcfPolyPrim
     · congr 1; push_cast; field_simp
 
 /-- The primitive vanishes at `0`. -/
-lemma eval_zero_pcfPolyPrimitive (p : Polynomial ℝ) : (pcfPolyPrimitive p).eval 0 = 0 := by
+theorem eval_zero_pcfPolyPrimitive (p : Polynomial ℝ) : (pcfPolyPrimitive p).eval 0 = 0 := by
   induction p using Polynomial.induction_on' with
   | add p q hp hq => rw [pcfPolyPrimitive_add, eval_add, hp, hq, add_zero]
   | monomial n c => simp [pcfPolyPrimitive_monomial]
 
 /-- Characterization of the primitive. -/
-lemma pcfPolyPrimitive_eq {p P : Polynomial ℝ} (hd : derivative P = p) (h0 : P.eval 0 = 0) :
+theorem pcfPolyPrimitive_eq {p P : Polynomial ℝ} (hd : derivative P = p) (h0 : P.eval 0 = 0) :
     pcfPolyPrimitive p = P :=
   pcfPoly_eq_of_derivative_eq (by rw [derivative_pcfPolyPrimitive, hd]) (by rw [eval_zero_pcfPolyPrimitive, h0])
 
@@ -856,7 +857,7 @@ def pcfInverseZeta (ζ : ℝ) : ℝ :=
   Classical.epsilon (fun t : ℝ => -1 < t ∧ pcfZeta t=ζ)
 
 /-- `ξ' = √(t²-1)` (DLMF 12.10.7). -/
-lemma pcfZ_hasDerivAt_xi {t : ℝ} (ht : 1 < t) :
+theorem pcfZ_hasDerivAt_xi {t : ℝ} (ht : 1 < t) :
     HasDerivAt pcfXi (Real.sqrt (t^2-1)) t := by
   have hy : 0 < t^2-1 := by nlinarith
   set r := Real.sqrt (t^2-1) with hr
@@ -880,7 +881,7 @@ lemma pcfZ_hasDerivAt_xi {t : ℝ} (ht : 1 < t) :
   nlinarith [hr2]
 
 /-- `η' = -√(1-t²)` (DLMF 12.10.23). -/
-lemma pcfZ_hasDerivAt_eta {t : ℝ} (ht : -1 < t) (ht1 : t < 1) :
+theorem pcfZ_hasDerivAt_eta {t : ℝ} (ht : -1 < t) (ht1 : t < 1) :
     HasDerivAt pcfEta (-Real.sqrt (1-t^2)) t := by
   have hy : 0 < 1-t^2 := by nlinarith
   set r := Real.sqrt (1-t^2) with hr
@@ -901,11 +902,11 @@ lemma pcfZ_hasDerivAt_eta {t : ℝ} (ht : -1 < t) (ht1 : t < 1) :
   nlinarith [hr2]
 
 /-- `η` is continuous. -/
-lemma pcfZ_continuous_eta : Continuous pcfEta := by
+theorem pcfZ_continuous_eta : Continuous pcfEta := by
   unfold pcfEta; fun_prop
 
 /-- `ξ` is continuous on `[1, ∞)`. -/
-lemma pcfZ_continuousOn_xi : ContinuousOn pcfXi (Ici 1) := by
+theorem pcfZ_continuousOn_xi : ContinuousOn pcfXi (Ici 1) := by
   intro t ht
   have ht : (1:ℝ) ≤ t := ht
   have h0 : 0 < t + Real.sqrt (t^2-1) := by positivity
@@ -916,7 +917,7 @@ lemma pcfZ_continuousOn_xi : ContinuousOn pcfXi (Ici 1) := by
     ((continuous_id.add hs).continuousAt.log h0.ne')).div_const 2
 
 /-- `ξ(t) = ∫₁ᵗ √(s²-1) ds`. -/
-lemma pcfZ_xi_eq_integral {t : ℝ} (ht : 1 ≤ t) :
+theorem pcfZ_xi_eq_integral {t : ℝ} (ht : 1 ≤ t) :
     pcfXi t = ∫ s in (1:ℝ)..t, Real.sqrt ((s - 1) * (s + 1)) := by
   rw [intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le ht
     (pcfZ_continuousOn_xi.mono Icc_subset_Ici_self)
@@ -926,7 +927,7 @@ lemma pcfZ_xi_eq_integral {t : ℝ} (ht : 1 ≤ t) :
   simp [pcfXi]
 
 /-- `η(t) = ∫ₜ¹ √(1-s²) ds`. -/
-lemma pcfZ_eta_eq_integral {t : ℝ} (ht : -1 ≤ t) (ht1 : t ≤ 1) :
+theorem pcfZ_eta_eq_integral {t : ℝ} (ht : -1 ≤ t) (ht1 : t ≤ 1) :
     pcfEta t = ∫ s in t..1, Real.sqrt ((1 - s) * (s + 1)) := by
   have h := intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le ht1
     pcfZ_continuous_eta.continuousOn
@@ -940,7 +941,7 @@ lemma pcfZ_eta_eq_integral {t : ℝ} (ht : -1 ≤ t) (ht1 : t ≤ 1) :
 
 /-- On `[-1, ∞)` the turning-point coordinate of DLMF 12.10.39 is the Airy coordinate of
 `t² - 1 = (t - 1)(t + 1)`. -/
-lemma pcfZ_eq_airyCoord {t : ℝ} (ht : -1 ≤ t) :
+theorem pcfZ_eq_airyCoord {t : ℝ} (ht : -1 ≤ t) :
     pcfZeta t = dblZero_airyCoord (fun s => s + 1) 1 t := by
   rcases lt_trichotomy t 1 with h | h | h
   · rw [dblZero_airyCoord_of_gt _ h, pcfZeta, pcfZ_eta_eq_integral ht h.le]
@@ -950,12 +951,12 @@ lemma pcfZ_eq_airyCoord {t : ℝ} (ht : -1 ≤ t) :
     simp only [h.le, ↓reduceIte]
 
 /-- `ζ` is continuous on `[-1, ∞)`. -/
-lemma pcfZ_continuousOn_zeta : ContinuousOn pcfZeta (Ici (-1)) :=
+theorem pcfZ_continuousOn_zeta : ContinuousOn pcfZeta (Ici (-1)) :=
   (dblZero_continuous_airyCoord (continuous_id.add continuous_const) 1).continuousOn.congr
     fun _ ht => pcfZ_eq_airyCoord ht
 
 /-- `η` decreases strictly on `[-1, 1]`. -/
-lemma pcfZ_eta_strictAntiOn : StrictAntiOn pcfEta (Icc (-1) 1) := by
+theorem pcfZ_eta_strictAntiOn : StrictAntiOn pcfEta (Icc (-1) 1) := by
   refine strictAntiOn_of_deriv_neg (convex_Icc _ _) pcfZ_continuous_eta.continuousOn ?_
   intro t ht
   rw [interior_Icc] at ht
@@ -963,7 +964,7 @@ lemma pcfZ_eta_strictAntiOn : StrictAntiOn pcfEta (Icc (-1) 1) := by
   exact Real.sqrt_pos.2 (by nlinarith [ht.1, ht.2])
 
 /-- `ξ` increases strictly on `[1, ∞)`. -/
-lemma pcfZ_xi_strictMonoOn : StrictMonoOn pcfXi (Ici 1) := by
+theorem pcfZ_xi_strictMonoOn : StrictMonoOn pcfXi (Ici 1) := by
   refine strictMonoOn_of_deriv_pos (convex_Ici _) pcfZ_continuousOn_xi ?_
   intro t ht
   rw [interior_Ici] at ht
@@ -972,12 +973,12 @@ lemma pcfZ_xi_strictMonoOn : StrictMonoOn pcfXi (Ici 1) := by
   exact Real.sqrt_pos.2 (by nlinarith)
 
 /-- `ξ(1) = 0`. -/
-lemma pcfZ_xi_one : pcfXi 1 = 0 := by simp [pcfXi]
+theorem pcfZ_xi_one : pcfXi 1 = 0 := by simp [pcfXi]
 /-- `η(1) = 0`. -/
-lemma pcfZ_eta_one : pcfEta 1 = 0 := by simp [pcfEta]
+theorem pcfZ_eta_one : pcfEta 1 = 0 := by simp [pcfEta]
 
 /-- `ζ` increases strictly on `[-1, ∞)`. -/
-lemma pcfZ_zeta_strictMonoOn : StrictMonoOn pcfZeta (Ici (-1)) := by
+theorem pcfZ_zeta_strictMonoOn : StrictMonoOn pcfZeta (Ici (-1)) := by
   intro a ha b hb hab
   have ha : (-1:ℝ) ≤ a := ha
   have hb : (-1:ℝ) ≤ b := hb
@@ -1010,13 +1011,13 @@ lemma pcfZ_zeta_strictMonoOn : StrictMonoOn pcfZeta (Ici (-1)) := by
       (by linarith [pcfZ_eta_strictAntiOn ⟨ha, (hab.trans hb1').le⟩ ⟨hb, hb1'.le⟩ hab]) e23
 
 /-- `ζ(-1) = -(3π/4)^{2/3}`. -/
-lemma pcfZ_zeta_neg_one : pcfZeta (-1) = -(3*π/4)^(2/3:ℝ) := by
+theorem pcfZ_zeta_neg_one : pcfZeta (-1) = -(3*π/4)^(2/3:ℝ) := by
   simp only [pcfZeta, show ¬ (1:ℝ) ≤ -1 by norm_num, ↓reduceIte, pcfEta, Real.arccos_neg_one]
   congr 2
   norm_num; ring
 
 /-- A crude lower bound `ξ(t) ≥ (t-1)²/2`. -/
-lemma pcfZ_xi_ge {t : ℝ} (ht : 1 ≤ t) : (t - 1)^2/2 ≤ pcfXi t := by
+theorem pcfZ_xi_ge {t : ℝ} (ht : 1 ≤ t) : (t - 1)^2/2 ≤ pcfXi t := by
   rw [pcfZ_xi_eq_integral ht]
   have h : ∫ s in (1:ℝ)..t, (s - 1) = (t - 1)^2/2 := by
     simp [intervalIntegral.integral_sub]; ring
@@ -1030,7 +1031,7 @@ lemma pcfZ_rpow_aux {A : ℝ} (hA : 0 < A) : (A ^ (2/3 - 1 : ℝ)) ^ 2 * A ^ (2/
   rw [← Real.rpow_natCast, ← Real.rpow_mul hA.le, ← Real.rpow_add hA]; norm_num
 
 /-- Away from the turning point, `ζ' = d > 0` with `d² ζ = t² - 1`. -/
-lemma pcfZ_hasDerivAt_zeta {t : ℝ} (ht : -1 < t) (ht1 : t ≠ 1) :
+theorem pcfZ_hasDerivAt_zeta {t : ℝ} (ht : -1 < t) (ht1 : t ≠ 1) :
     ∃ d : ℝ, 0 < d ∧ d^2 * pcfZeta t = t^2 - 1 ∧ HasDerivAt pcfZeta d t := by
   rcases lt_or_gt_of_ne ht1 with h | h
   · have hη : 0 < pcfEta t := pcfZ_eta_one ▸
@@ -1093,13 +1094,13 @@ theorem pcfInverseZeta_spec {ζ : ℝ} (hζ : -(3*π/4)^(2/3:ℝ) < ζ) :
   exact pcfZ_zeta_strictMonoOn.injOn (le_of_lt ht) (le_of_lt hs.1) (htz.trans hs.2.symm)
 
 /-- `pcfInverseZeta` is a left inverse of `pcfZeta` on `(-1, ∞)`. -/
-lemma pcfZ_inverse_zeta {t : ℝ} (ht : -1 < t) : pcfInverseZeta (pcfZeta t) = t := by
+theorem pcfZ_inverse_zeta {t : ℝ} (ht : -1 < t) : pcfInverseZeta (pcfZeta t) = t := by
   have hc : -(3*π/4)^(2/3:ℝ) < pcfZeta t := by
     rw [← pcfZ_zeta_neg_one]; exact pcfZ_zeta_strictMonoOn (le_refl (-1:ℝ)) ht.le ht
   exact ((pcfInverseZeta_spec hc).2.2 t ht rfl).symm
 
 /-- `pcfInverseZeta` is strictly increasing. -/
-lemma pcfZ_inverse_strictMonoOn : StrictMonoOn pcfInverseZeta (Ioi (-(3*π/4)^(2/3:ℝ))) := by
+theorem pcfZ_inverse_strictMonoOn : StrictMonoOn pcfInverseZeta (Ioi (-(3*π/4)^(2/3:ℝ))) := by
   intro a ha b hb hab
   have sa := pcfInverseZeta_spec ha
   have sb := pcfInverseZeta_spec hb
@@ -1109,7 +1110,7 @@ lemma pcfZ_inverse_strictMonoOn : StrictMonoOn pcfInverseZeta (Ioi (-(3*π/4)^(2
   linarith
 
 /-- Derivative of the inverse coordinate away from `ζ = 0`. -/
-lemma pcfZ_hasDerivAt_inverse {ζ : ℝ} (hζ : -(3*π/4)^(2/3:ℝ) < ζ) (hz : ζ ≠ 0) :
+theorem pcfZ_hasDerivAt_inverse {ζ : ℝ} (hζ : -(3*π/4)^(2/3:ℝ) < ζ) (hz : ζ ≠ 0) :
     ∃ d : ℝ, 0 < d ∧ d^2 * ζ = pcfInverseZeta ζ ^ 2 - 1 ∧
       HasDerivAt pcfInverseZeta d⁻¹ ζ := by
   have hs := pcfInverseZeta_spec hζ
@@ -1147,7 +1148,7 @@ theorem pcfZeta_analytic_at_one  :
 noncomputable def pcfTay_T (y : ℝ) : ℝ := 1 + y/4 - y^2/32 + y^3/128 - 5*y^4/2048
 
 /-- Truncated expansion `√(2+y) = √2 T(y) + O(y⁵)`, via `T² - (2+y) = O(y⁵)`. -/
-lemma pcfTay_sqrt : (fun y : ℝ => Real.sqrt (2+y) - Real.sqrt 2 * pcfTay_T y) =O[𝓝 0]
+theorem pcfTay_sqrt : (fun y : ℝ => Real.sqrt (2+y) - Real.sqrt 2 * pcfTay_T y) =O[𝓝 0]
     (fun y => y^5) := by
   have h2 : (0:ℝ) < Real.sqrt 2 := Real.sqrt_pos.2 two_pos
   refine invSer_isBigO_sub_of_pow_sub (n := 2) two_ne_zero h2.ne' ?_ ?_ ?_
@@ -1165,7 +1166,7 @@ lemma pcfTay_sqrt : (fun y : ℝ => Real.sqrt (2+y) - Real.sqrt 2 * pcfTay_T y) 
       ring
 
 /-- `∫₀¹ τ^{1/2} τ^k dτ = 1/(k+3/2)`. -/
-lemma pcfTay_integral_pow (k : ℕ) :
+theorem pcfTay_integral_pow (k : ℕ) :
     ∫ τ in (0:ℝ)..1, τ^(1/2:ℝ) * τ^k = 1/(k+3/2) := by
   have h : ∫ τ in (0:ℝ)..1, τ^(1/2:ℝ) * τ^k = ∫ τ in (0:ℝ)..1, τ^((1/2:ℝ) + k) := by
     refine intervalIntegral.integral_congr fun τ hτ => ?_
@@ -1184,7 +1185,7 @@ noncomputable def pcfTay_K (u : ℝ) : ℝ := dblZero_airyAvg (fun s => s + 1) 1
 noncomputable def pcfTay_Kp (u : ℝ) : ℝ := 2/3 + u/10 - u^2/112 + u^3/576 - 5*u^4/11264
 
 /-- `K(1+u) = ∫₀¹ τ^{1/2} √(2+uτ) dτ`. -/
-lemma pcfTay_K_eq (u : ℝ) :
+theorem pcfTay_K_eq (u : ℝ) :
     pcfTay_K u = ∫ τ in (0:ℝ)..1, τ^(1/2:ℝ) * Real.sqrt (2 + u*τ) := by
   unfold pcfTay_K dblZero_airyAvg
   refine intervalIntegral.integral_congr fun τ _ => ?_
@@ -1192,7 +1193,7 @@ lemma pcfTay_K_eq (u : ℝ) :
   congr 2; ring
 
 /-- Termwise integration of the truncated square root. -/
-lemma pcfTay_Kp_eq (u : ℝ) :
+theorem pcfTay_Kp_eq (u : ℝ) :
     ∫ τ in (0:ℝ)..1, τ^(1/2:ℝ) * (Real.sqrt 2 * pcfTay_T (u*τ)) = Real.sqrt 2 * pcfTay_Kp u := by
   have e : ∀ τ : ℝ, τ^(1/2:ℝ) * (Real.sqrt 2 * pcfTay_T (u*τ)) =
       ∑ k ∈ Finset.range 5, (Real.sqrt 2 * ([1, 1/4, -1/32, 1/128, -5/2048] : List ℝ).getD k 0
@@ -1211,7 +1212,7 @@ lemma pcfTay_Kp_eq (u : ℝ) :
 
 
 /-- `K(1+u) = √2 Kp(u) + O(u⁵)`. -/
-lemma pcfTay_K_expansion :
+theorem pcfTay_K_expansion :
     (fun u => pcfTay_K u - Real.sqrt 2 * pcfTay_Kp u) =O[𝓝 0] (fun u => u^5) := by
   obtain ⟨C, hC0, hC⟩ := pcfTay_sqrt.exists_pos
   obtain ⟨δ, hδ, hb⟩ := Metric.eventually_nhds_iff.1 hC.bound
@@ -1251,7 +1252,7 @@ lemma pcfTay_K_expansion :
   simpa using this
 
 /-- `(2^{1/3})³ = 2`. -/
-lemma pcfTay_c_cube : ((2:ℝ)^(1/3:ℝ))^3 = 2 := by
+theorem pcfTay_c_cube : ((2:ℝ)^(1/3:ℝ))^3 = 2 := by
   rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]; norm_num
 
 /-- Degree-4 Taylor polynomial of `((3/2)K)^{2/3}/2^{1/3}`. -/
@@ -1259,7 +1260,7 @@ noncomputable def pcfTay_R (u : ℝ) : ℝ :=
   1 + u/10 - 2*u^2/175 + 37*u^3/15750 - 1849*u^4/3031875
 
 /-- `K(1+u) → (2/3)√2` as `u → 0`. -/
-lemma pcfTay_K_tendsto : Tendsto pcfTay_K (𝓝 0) (𝓝 ((2/3) * Real.sqrt 2)) := by
+theorem pcfTay_K_tendsto : Tendsto pcfTay_K (𝓝 0) (𝓝 ((2/3) * Real.sqrt 2)) := by
   have hp : AnalyticAt ℝ (fun s : ℝ => s + 1) 1 := analyticAt_id.add analyticAt_const
   have h := (dblZero_analyticAt_airyAvg hp (by norm_num)).continuousAt
   have h2 : Tendsto (fun u : ℝ => 1 + u) (𝓝 0) (𝓝 1) := by
@@ -1270,7 +1271,7 @@ lemma pcfTay_K_tendsto : Tendsto pcfTay_K (𝓝 0) (𝓝 ((2/3) * Real.sqrt 2)) 
   exact this
 
 /-- `((3/2)K)^{2/3} = 2^{1/3} R(u) + O(u⁵)`, via the cube relation. -/
-lemma pcfTay_Z_expansion :
+theorem pcfTay_Z_expansion :
     (fun u => ((3/2) * pcfTay_K u)^(2/3:ℝ) - (2:ℝ)^(1/3:ℝ) * pcfTay_R u) =O[𝓝 0]
       (fun u => u^5) := by
   have hc : (0:ℝ) < (2:ℝ)^(1/3:ℝ) := by positivity
@@ -1304,13 +1305,13 @@ lemma pcfTay_Z_expansion :
 
 
 /-- `ζ(1+u) = u ((3/2)K(1+u))^{2/3}` (DLMF 12.10.39 as an Airy coordinate). -/
-lemma pcfTay_zeta_eq {u : ℝ} (hu : -2 ≤ u) :
+theorem pcfTay_zeta_eq {u : ℝ} (hu : -2 ≤ u) :
     pcfZeta (1 + u) = u * ((3/2) * pcfTay_K u)^(2/3:ℝ) := by
   rw [pcfZ_eq_airyCoord (by linarith), dblZero_airyCoord, pcfTay_K]
   ring_nf
 
 /-- Forward expansion `ζ(1+u) = 2^{1/3} u R(u) + O(u⁶)`. -/
-lemma pcfTay_zeta_expansion :
+theorem pcfTay_zeta_expansion :
     (fun u => pcfZeta (1 + u) - (2:ℝ)^(1/3:ℝ) * (u * pcfTay_R u)) =O[𝓝 0] (fun u => u^6) := by
   have h := (isBigO_refl (fun u : ℝ => u) (𝓝 0)).mul pcfTay_Z_expansion
   refine h.congr' ?_ (Eventually.of_forall fun u => by ring)
@@ -1326,7 +1327,7 @@ noncomputable def pcfTay_q (w : ℝ) : ℝ :=
   w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(w*(783876931167548774559650287/13221689470271539282265625000000000000000 - 143491386769361756420091123557*w/25451752230272713118361328125000000000000000) - 47119937620258209964619261/120197177002468538929687500000000000000) + 82288713654128684005237699/37776255629347255092187500000000000000) - 30517117985044689320850841/2158643178819843148125000000000000000) + 3043919389270844484453637/39248057796724420875000000000000000) - 392955749776850760448801/1090223827686789468750000000000000) + 3200410982445578048767/2076616814641503750000000000000) - 1444810931500592024107/207661681464150375000000000000) + 18399562789495057631/647257188979170000000000000) - 16908374496178801/160530056790468750000000) + 3148285199483107/8561603028825000000000) - 42209311381812853/32106011358093750000000) + 7972127151497/1853160828750000000) - 6165851047/463290207187500) + 146438784931/3529830150000000) - 14538540377/117661005000000) + 41220257/122245200000) - 90737/97453125) + 20917/6930000
 
 /-- The printed inverse polynomial inverts `w ↦ w R(w)` to order `w⁵`. -/
-lemma pcfTay_inversion_identity (w : ℝ) :
+theorem pcfTay_inversion_identity (w : ℝ) :
     pcfTay_v w * pcfTay_R (pcfTay_v w) - w = w^6 * pcfTay_q w := by
   unfold pcfTay_v pcfTay_R pcfTay_q; ring
 

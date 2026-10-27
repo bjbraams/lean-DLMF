@@ -5,8 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.Asymptotics.Lemmas
-public import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
+public import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
 
 /-!
 # Asymptotic expansions

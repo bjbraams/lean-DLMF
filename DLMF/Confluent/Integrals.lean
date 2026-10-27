@@ -5,30 +5,15 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Confluent.Basic
-public import DLMF.Confluent.Whittaker
-public import DLMF.Confluent.Recurrence
 public import DLMF.Confluent.Growth
 public import DLMF.Confluent.TricomiLaplace
-public import DLMF.Confluent.Continuation
 public import DLMF.Confluent.KummerDecay
-public import DLMF.Confluent.Relations
-public import DLMF.Bessel.Basic
-public import DLMF.Bessel.Modified
 public import DLMF.Bessel.Asymptotics
 public import DLMF.Bessel.Lommel
 public import DLMF.Bessel.NeumannSeries
-public import DLMF.Bessel.KIntegralRep
-public import DLMF.Hypergeometric.EulerIntegral
 public import DLMF.Hypergeometric.Boundary
-public import DLMF.Hypergeometric.ArgumentContinuation
-public import DLMF.Hypergeometric.IntegralRepresentations
-public import DLMF.Gamma.IntegralRepresentations
-public import DLMF.Gamma.BetaFunction
-public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
-public import Mathlib.MeasureTheory.Integral.Prod
-public import Mathlib.MeasureTheory.Integral.Bochner.Basic
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
+public import DLMF.Hypergeometric.Identities
+public import Mathlib.Tactic.Monotonicity.Lemmas
 
 /-!
 # Integrals (DLMF §§13.10, 13.23)
@@ -120,7 +105,7 @@ theorem deriv_kummerU_shift {a b z : ℂ} (ha : a ≠ 1) (hz : z ∈ slitPlane) 
   rw [deriv_kummerU (a - 1) (b - 1) hz, sub_add_cancel, sub_add_cancel]
 
 /-- General Kummer Laplace transform in the region of absolute termwise integration. -/
-lemma laplace_regularizedHGFun_of_norm_lt {a b c k z : ℂ}
+theorem laplace_regularizedHGFun_of_norm_lt {a b c k z : ℂ}
     (hb : 0 < b.re) (hzpos : 0 < z.re) (hk : ‖k‖ < z.re) :
     (∫ t : ℝ in Set.Ioi 0,
       exp (-z * t) * (t : ℂ) ^ (b - 1) * regularizedHGFun {a} {c} (k * t)) =
@@ -210,7 +195,7 @@ lemma laplace_regularizedHGFun_of_norm_lt {a b c k z : ℂ}
         DLMF.Hypergeometric.regularizedGaussHGFun_eq_tsum]
 
 /-- The transformed argument stays on the Gauss cut plane throughout the Laplace half-plane. -/
-lemma kummerLaplace_argument_mem_cutPlane {k z : ℂ}
+theorem kummerLaplace_argument_mem_cutPlane {k z : ℂ}
     (hz : k.re < z.re) (hz0 : 0 < z.re) :
     k / z ∈ DLMF.Hypergeometric.cutPlane := by
   have hzN : z ≠ 0 := by intro h; simp [h] at hz0
@@ -288,7 +273,7 @@ theorem laplace_regularizedHGFun_self {a b z : ℂ} (hb : 0 < b.re) (hz : 1 < z.
 
 /-- Absolute Gamma moments of the regularized Kummer coefficients at the boundary.
 The proved Gamma-ratio estimate retains the exact convergence inequality. -/
-lemma summable_kummer_gamma_moments (a c : ℂ) {b : ℝ} (hb : 0 < b)
+theorem summable_kummer_gamma_moments (a c : ℂ) {b : ℝ} (hb : 0 < b)
     (h : b < (c - a).re) :
     Summable (fun n : ℕ => ‖regularizedHGFunCoeff {a} {c} n‖ * Real.Gamma (b + n)) := by
   by_cases ha : ∀ k : ℕ, a ≠ -k
@@ -465,7 +450,7 @@ private lemma integrable_mellin_kummerU_kernel {a b lam : ℂ}
     exact (hnormIntegral u hu).symm
 
 /-- Tricomi's Mellin transform is absolutely integrable throughout its stated strip. -/
-lemma mellin_kummerU_integrable {a b lam : ℂ}
+theorem mellin_kummerU_integrable {a b lam : ℂ}
     (hlam0 : (b - 1).re < lam.re) (hlam1 : 0 < lam.re) (ha : lam.re < a.re) :
     IntegrableOn (fun t : ℝ => (t : ℂ) ^ (lam - 1) * kummerU a b t) (Set.Ioi 0) := by
   have ha0 : 0 < a.re := hlam1.trans ha
@@ -543,14 +528,14 @@ section HankelKernel
 open Set Asymptotics
 
 /-- `t^r e^{-st}` is integrable on `(0,∞)` for `r > -1`, `s > 0`. -/
-lemma cfInt_integrableOn_rpow_exp {r s : ℝ} (hr : -1 < r) (hs : 0 < s) :
+theorem cfInt_integrableOn_rpow_exp {r s : ℝ} (hr : -1 < r) (hs : 0 < s) :
     IntegrableOn (fun t : ℝ => t ^ r * Real.exp (-(s * t))) (Ioi 0) := by
   have h := integrableOn_rpow_mul_exp_neg_mul_rpow (p := 1) (s := r) (b := s) hr one_pos hs
   refine h.congr_fun (fun t ht => ?_) measurableSet_Ioi
   simp [Real.rpow_one, neg_mul]
 
 /-- `∫₀^∞ t^r e^{-st} dt = Γ(r+1) s^{-(r+1)}`. -/
-lemma cfInt_integral_rpow_exp {r s : ℝ} (hr : -1 < r) (hs : 0 < s) :
+theorem cfInt_integral_rpow_exp {r s : ℝ} (hr : -1 < r) (hs : 0 < s) :
     ∫ t : ℝ in Ioi 0, t ^ r * Real.exp (-(s * t)) = Real.Gamma (r + 1) * s ^ (-(r + 1)) := by
   have h := Real.integral_rpow_mul_exp_neg_mul_Ioi (a := r + 1) (r := s) (by linarith) hs
   rw [add_sub_cancel_right] at h
@@ -558,7 +543,7 @@ lemma cfInt_integral_rpow_exp {r s : ℝ} (hr : -1 < r) (hs : 0 < s) :
   ring
 
 /-- `∫₀^∞ e^{-st} t^r (1+t)^{-p} dt ≤ C s^{p-r-1} (1+s)^{-p}` for `r > -1`, `r - p > -1`. -/
-lemma cfInt_laplace_rpow_le {r p : ℝ} (hr : -1 < r) (hrp : -1 < r - p) :
+theorem cfInt_laplace_rpow_le {r p : ℝ} (hr : -1 < r) (hrp : -1 < r - p) :
     ∃ C, ∀ s : ℝ, 0 < s →
       IntegrableOn (fun t : ℝ => t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t))) (Ioi 0) ∧
       ∫ t : ℝ in Ioi 0, t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t)) ≤
@@ -701,7 +686,7 @@ lemma cfInt_laplace_rpow_le {r p : ℝ} (hr : -1 < r) (hrp : -1 < r - p) :
       _ = _ := by ring
 
 /-- Two comparable positive quantities have comparable real powers. -/
-lemma cfInt_rpow_le_of_le_mul {A B m M : ℝ} (hA : 0 < A) (hm : 0 < m) (h1 : m * A ≤ B)
+theorem cfInt_rpow_le_of_le_mul {A B m M : ℝ} (hA : 0 < A) (hm : 0 < m) (h1 : m * A ≤ B)
     (h2 : B ≤ M * A) (u : ℝ) : B ^ u ≤ max (m ^ u) (M ^ u) * A ^ u := by
   have hB : 0 < B := lt_of_lt_of_le (by positivity) h1
   have hM : 0 < M := by
@@ -716,7 +701,7 @@ lemma cfInt_rpow_le_of_le_mul {A B m M : ℝ} (hA : 0 < A) (hm : 0 < m) (h1 : m 
 
 /-- A function continuous on `[a₀,∞)` and `O(g)` at infinity, with `g` continuous and positive,
 is bounded by a multiple of `g` on `[a₀,∞)`. -/
-lemma cfInt_exists_bound_Ici {f : ℝ → ℂ} {g : ℝ → ℝ} (a₀ : ℝ) (hf : ContinuousOn f (Ici a₀))
+theorem cfInt_exists_bound_Ici {f : ℝ → ℂ} {g : ℝ → ℝ} (a₀ : ℝ) (hf : ContinuousOn f (Ici a₀))
     (hg : ContinuousOn g (Ici a₀)) (hgpos : ∀ t, a₀ ≤ t → 0 < g t) (h : f =O[atTop] g) :
     ∃ C, ∀ t, a₀ ≤ t → ‖f t‖ ≤ C * g t := by
   obtain ⟨C1, hC1⟩ := h.bound
@@ -735,7 +720,7 @@ lemma cfInt_exists_bound_Ici {f : ℝ → ℂ} {g : ℝ → ℝ} (a₀ : ℝ) (h
     exact h1.trans (mul_le_mul_of_nonneg_right (le_max_left _ _) hg0.le)
 
 /-- `‖cos w‖ ≤ e^{|Im w|}`. -/
-lemma cfInt_norm_cos_le (w : ℂ) : ‖Complex.cos w‖ ≤ Real.exp |w.im| := by
+theorem cfInt_norm_cos_le (w : ℂ) : ‖Complex.cos w‖ ≤ Real.exp |w.im| := by
   rw [Complex.cos]
   have h1 : ‖exp (w * I)‖ ≤ Real.exp |w.im| := by
     rw [Complex.norm_exp]; simp only [mul_re, I_re, mul_zero, I_im, mul_one, zero_sub]
@@ -749,7 +734,7 @@ lemma cfInt_norm_cos_le (w : ℂ) : ‖Complex.cos w‖ ≤ Real.exp |w.im| := b
   linarith
 
 /-- **Global bound for `J_ν` on the positive axis**: `|J_ν(y)| ≤ C y^{re ν} (1+y)^{-re ν - 1/2}`. -/
-lemma cfInt_exists_norm_besselJ_le (ν : ℂ) :
+theorem cfInt_exists_norm_besselJ_le (ν : ℂ) :
     ∃ C, ∀ y : ℝ, 0 < y → ‖besselJ ν y‖ ≤ C * (y ^ ν.re * (1 + y) ^ (-(ν.re + 1 / 2))) := by
   set σ := ν.re
   obtain ⟨M, hM⟩ := exists_norm_besselJ_mul_le ν (c := 1) one_pos
@@ -828,7 +813,7 @@ lemma cfInt_exists_norm_besselJ_le (ν : ℂ) :
           exact le_max_right _ _
 
 /-- `‖Γ(w+k)‖ Γ(re w) ≥ ‖Γ(w)‖ Γ(re w + k)` for `re w > 0`. -/
-lemma cfInt_norm_Gamma_add_nat_ge {w : ℂ} (hw : 0 < w.re) (k : ℕ) :
+theorem cfInt_norm_Gamma_add_nat_ge {w : ℂ} (hw : 0 < w.re) (k : ℕ) :
     ‖Gamma w‖ * Real.Gamma (w.re + k) ≤ ‖Gamma (w + k)‖ * Real.Gamma w.re := by
   induction k with
   | zero => simp
@@ -851,7 +836,7 @@ lemma cfInt_norm_Gamma_add_nat_ge {w : ℂ} (hw : 0 < w.re) (k : ℕ) :
       _ = _ := by ring
 
 /-- The kernel `t^{ν/2} J_ν(2√(xt))` in power-series form. -/
-lemma cfInt_kernel_eq (ν : ℂ) {x : ℂ} (hx : x ≠ 0) {t : ℝ} (ht : 0 < t) :
+theorem cfInt_kernel_eq (ν : ℂ) {x : ℂ} (hx : x ≠ 0) {t : ℝ} (ht : 0 < t) :
     (t : ℂ) ^ (ν / 2) * besselJ ν (2 * (x * t) ^ (1 / 2 : ℂ)) =
       x ^ (ν / 2) * ((t : ℂ) ^ ν * regularizedHGFun ∅ {ν + 1} (-x * t)) := by
   have htc : (t : ℂ) ≠ 0 := ofReal_ne_zero.mpr ht.ne'
@@ -861,7 +846,7 @@ lemma cfInt_kernel_eq (ν : ℂ) {x : ℂ} (hx : x ≠ 0) {t : ℝ} (ht : 0 < t)
   linear_combination (x ^ (ν / 2) * regularizedHGFun ∅ {ν + 1} (-x * t)) * hνt
 
 /-- The Hankel kernel `t^{ν/2} J_ν(2√(xt))` is continuous on `(0,∞)`. -/
-lemma cfInt_continuousOn_kernel (ν : ℂ) {x : ℂ} (hx : x ≠ 0) :
+theorem cfInt_continuousOn_kernel (ν : ℂ) {x : ℂ} (hx : x ≠ 0) :
     ContinuousOn (fun t : ℝ => (t : ℂ) ^ (ν / 2) * besselJ ν (2 * (x * t) ^ (1 / 2 : ℂ)))
       (Ioi 0) := by
   have h : ContinuousOn (fun t : ℝ => x ^ (ν / 2) * ((t : ℂ) ^ ν *
@@ -875,7 +860,7 @@ lemma cfInt_continuousOn_kernel (ν : ℂ) {x : ℂ} (hx : x ≠ 0) :
 
 /-- **The Laplace transform of the Hankel kernel**:
 `∫₀^∞ e^{-st} t^{ν/2} J_ν(2√(xt)) dt = x^{ν/2} s^{-ν-1} e^{-x/s}`, for `re ν > -1`, `s > 0`. -/
-lemma cfInt_laplace_kernel {ν x : ℂ} (hν : -1 < ν.re) (hx : x ≠ 0) {s : ℝ} (hs : 0 < s) :
+theorem cfInt_laplace_kernel {ν x : ℂ} (hν : -1 < ν.re) (hx : x ≠ 0) {s : ℝ} (hs : 0 < s) :
     ∫ t : ℝ in Ioi 0, exp (-(s * t : ℂ)) * ((t : ℂ) ^ (ν / 2) *
         besselJ ν (2 * (x * t) ^ (1 / 2 : ℂ))) =
       x ^ (ν / 2) * ((s : ℂ) ^ (-(ν + 1)) * exp (-x / s)) := by
@@ -983,7 +968,7 @@ lemma cfInt_laplace_kernel {ν x : ℂ} (hν : -1 < ν.re) (hx : x ≠ 0) {s : �
     ring
 
 /-- `2 ((r t)^{1/2})` as a real number. -/
-lemma cfInt_two_sqrt_eq {r t : ℝ} (hr : 0 ≤ r) (ht : 0 ≤ t) :
+theorem cfInt_two_sqrt_eq {r t : ℝ} (hr : 0 ≤ r) (ht : 0 ≤ t) :
     2 * ((r : ℂ) * t) ^ (1 / 2 : ℂ) = ((2 * (Real.sqrt r * Real.sqrt t) : ℝ) : ℂ) := by
   rw [show ((r : ℂ) * t) = ((r * t : ℝ) : ℂ) by push_cast; ring,
     show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring, ← ofReal_cpow (by positivity),
@@ -991,7 +976,7 @@ lemma cfInt_two_sqrt_eq {r t : ℝ} (hr : 0 ≤ r) (ht : 0 ≤ t) :
   push_cast; ring
 
 /-- The Hankel kernel bound `‖t^{ν/2} J_ν(2√(rt))‖ ≤ C t^{re ν} (1+t)^{-(re ν/2+1/4)}`. -/
-lemma cfInt_exists_norm_kernel_le (ν : ℂ) {r : ℝ} (hr : 0 < r) :
+theorem cfInt_exists_norm_kernel_le (ν : ℂ) {r : ℝ} (hr : 0 < r) :
     ∃ C, ∀ t : ℝ, 0 < t →
       ‖(t : ℂ) ^ (ν / 2) * besselJ ν (2 * ((r : ℂ) * t) ^ (1 / 2 : ℂ))‖ ≤
         C * (t ^ ν.re * (1 + t) ^ (-(ν.re / 2 + 1 / 4))) := by
@@ -1047,7 +1032,7 @@ lemma cfInt_exists_norm_kernel_le (ν : ℂ) {r : ℝ} (hr : 0 < r) :
       rw [hAu, hyσ, ← htt]; ring
 
 /-- The substitution `s ↦ 1/s` turning the Hankel–Laplace integral into a Tricomi `U` integral. -/
-lemma cfInt_recip_subst_U {a b ν x : ℂ} (hx : 0 < x.re) (hA : 0 < (ν - b + 2).re) :
+theorem cfInt_recip_subst_U {a b ν x : ℂ} (hx : 0 < x.re) (hA : 0 < (ν - b + 2).re) :
     ∫ s : ℝ in Ioi 0, (s : ℂ) ^ (a - 1) * (1 + (s : ℂ)) ^ (b - a - 1) *
         ((s : ℂ) ^ (-(ν + 1)) * exp (-x / s)) =
       Gamma (ν - b + 2) * kummerU (ν - b + 2) (ν - a + 2) x := by
@@ -1085,7 +1070,7 @@ lemma cfInt_recip_subst_U {a b ν x : ℂ} (hx : 0 < x.re) (hA : 0 < (ν - b + 2
   linear_combination (-(exp (-(x / s)) * (1 + (s : ℂ)) ^ (b - a - 1))) * (e1 - e2)
 
 /-- Tricomi's `U(a,b,z)` is entire in its first parameter, for fixed `b` and `z ≠ 0`. -/
-lemma cfInt_differentiable_kummerU_fst (b : ℂ) {z : ℂ} (hz : z ≠ 0) :
+theorem cfInt_differentiable_kummerU_fst (b : ℂ) {z : ℂ} (hz : z ≠ 0) :
     Differentiable ℂ (fun a => kummerU a b z) := by
   have hmem : ∀ c ∈ integerComplement, Differentiable ℂ (fun a => kummerU a c z) := by
     intro c hc
@@ -1121,7 +1106,7 @@ lemma cfInt_differentiable_kummerU_fst (b : ℂ) {z : ℂ} (hz : z ≠ 0) :
 
 /-- The substitution `s = 1/(1+v)` turning an Euler-type integral on `(0,1)` into a
 Tricomi `U` integral. -/
-lemma cfInt_euler_subst_U {a c ν x : ℂ} (hx : 0 < x.re) (ha : 0 < a.re) :
+theorem cfInt_euler_subst_U {a c ν x : ℂ} (hx : 0 < x.re) (ha : 0 < a.re) :
     ∫ s in Ioo (0 : ℝ) 1, (s : ℂ) ^ (c - 1) * (1 - (s : ℂ)) ^ (a - 1) *
         ((s : ℂ) ^ (-(ν + 1)) * exp (-x / s)) =
       exp (-x) * (Gamma a * kummerU a (ν + 2 - c) x) := by
@@ -1192,7 +1177,7 @@ lemma cfInt_euler_subst_U {a c ν x : ℂ} (hx : 0 < x.re) (ha : 0 < a.re) :
   linear_combination (exp (-x) * exp (-x * v) * (v : ℂ) ^ (a - 1)) * e
 
 /-- 13.10.14 in the Euler region `0 < re a`, in the Kummer-transformed form. -/
-lemma cfInt_bessel_M_euler {a b ν x : ℂ} (hx : 0 < x.re) (hxi : x.im = 0) (ha : 0 < a.re)
+theorem cfInt_bessel_M_euler {a b ν x : ℂ} (hx : 0 < x.re) (hxi : x.im = 0) (ha : 0 < a.re)
     (hν0 : -1 < ν.re) (hν1 : ν.re < 2 * (b - a).re - 3 / 2) :
     ∫ t : ℝ in Ioi 0, (t : ℂ) ^ (ν / 2) * besselJ ν (2 * (x * t) ^ (1 / 2 : ℂ)) *
         regularizedHGFun {b - a} {b} (-(t : ℂ)) =
@@ -1340,7 +1325,7 @@ lemma cfInt_bessel_M_euler {a b ν x : ℂ} (hx : 0 < x.re) (hxi : x.im = 0) (ha
 
 /-- The Gaussian cosine integral
 `∫₀^∞ cos(2xt) e^{-st²} dt = (√π/2) s^{-1/2} e^{-x²/s}`, for `s > 0`. -/
-lemma cfInt_integral_cos_gauss (x : ℝ) {s : ℝ} (hs : 0 < s) :
+theorem cfInt_integral_cos_gauss (x : ℝ) {s : ℝ} (hs : 0 < s) :
     ∫ t : ℝ in Ioi 0, Complex.cos (2 * x * t) * exp (-((t ^ 2 : ℝ) : ℂ) * s) =
       (Real.sqrt π : ℂ) / 2 * ((s : ℂ) ^ (-(1 / 2 : ℂ)) * exp (-(x : ℂ) ^ 2 / s)) := by
   set g : ℝ → ℝ := fun t => Real.cos (2 * x * t) * Real.exp (-(s * t ^ 2)) with hg
@@ -1395,7 +1380,7 @@ lemma cfInt_integral_cos_gauss (x : ℝ) {s : ℝ} (hs : 0 < s) :
 
 /-- The cosine transform 13.10.12 in the Euler region `re (B - a) > 0`, before the Kummer
 transformation of `U`. -/
-lemma cfInt_cosine_euler {a x : ℝ} {B : ℂ} (hx : 0 < x) (ha : 1 / 2 < a) (hB : 0 < (B - a).re) :
+theorem cfInt_cosine_euler {a x : ℝ} {B : ℂ} (hx : 0 < x) (ha : 1 / 2 < a) (hB : 0 < (B - a).re) :
     ∫ t : ℝ in Ioi 0, Complex.cos (2 * x * t) * regularizedHGFun {(a : ℂ)} {B} (-(t : ℂ) ^ 2) =
       (Real.sqrt π : ℂ) / (2 * Gamma (a : ℂ)) * exp (-(x : ℂ) ^ 2) *
         kummerU (B - a) (3 / 2 - a) ((x : ℂ) ^ 2) := by
@@ -1597,7 +1582,7 @@ open Set
 open scoped Nat
 
 /-- Laplace transform of `t^{β-1} 𝐅(;c;-xt)`. -/
-lemma confLP_laplace_0F1 {β c x : ℂ} (hβ : 0 < β.re) {s : ℝ} (hs : 0 < s) :
+theorem confLP_laplace_0F1 {β c x : ℂ} (hβ : 0 < β.re) {s : ℝ} (hs : 0 < s) :
     ∫ t : ℝ in Ioi 0, exp (-(s * t : ℂ)) * ((t : ℂ) ^ (β - 1) *
         regularizedHGFun (∅ : Multiset ℂ) {c} (-x * t)) =
       Gamma β * (s : ℂ) ^ (-β) * regularizedHGFun {β} {c} (-x / s) := by
@@ -1705,7 +1690,7 @@ lemma confLP_laplace_0F1 {β c x : ℂ} (hβ : 0 < β.re) {s : ℝ} (hs : 0 < s)
 
 
 /-- The inner integral `∫₀¹ s^{c-1}(1-s)^{a-1} s^{-(c+a)} e^{-y/s} ds = e^{-y} Γ(a) y^{-a}`. -/
-lemma confLP_inner_integral {a c y : ℂ} (hy : 0 < y.re) (ha : 0 < a.re) :
+theorem confLP_inner_integral {a c y : ℂ} (hy : 0 < y.re) (ha : 0 < a.re) :
     ∫ s in Ioo (0 : ℝ) 1, (s : ℂ) ^ (c - 1) * (1 - (s : ℂ)) ^ (a - 1) *
         ((s : ℂ) ^ (-(c + a)) * exp (-y / s)) =
       exp (-y) * (Gamma a * y ^ (-a)) := by
@@ -1716,7 +1701,7 @@ lemma confLP_inner_integral {a c y : ℂ} (hy : 0 < y.re) (ha : 0 < a.re) :
     show (1 : ℂ) - (a + 1) = -a by ring, mul_one]
 
 /-- `‖𝐅(;ν+1;-rt)‖ ≤ K (1+t)^{-(re ν/2 + 1/4)}` on `(0,∞)`. -/
-lemma confLP_exists_norm_0F1_le (ν : ℂ) {r : ℝ} (hr : 0 < r) :
+theorem confLP_exists_norm_0F1_le (ν : ℂ) {r : ℝ} (hr : 0 < r) :
     ∃ K, ∀ t : ℝ, 0 < t → ‖regularizedHGFun (∅ : Multiset ℂ) {ν + 1} (-(r : ℂ) * t)‖ ≤
       K * (1 + t) ^ (-(ν.re / 2 + 1 / 4)) := by
   obtain ⟨C, hC⟩ := cfInt_exists_norm_kernel_le ν hr
@@ -1734,14 +1719,14 @@ lemma confLP_exists_norm_0F1_le (ν : ℂ) {r : ℝ} (hr : 0 < r) :
   nlinarith [norm_nonneg (regularizedHGFun (∅ : Multiset ℂ) {ν + 1} (-(r : ℂ) * t))]
 
 /-- Continuity of `t ↦ 𝐅(;ν+1;-rt)`. -/
-lemma confLP_continuous_0F1 (ν : ℂ) (r : ℝ) :
+theorem confLP_continuous_0F1 (ν : ℂ) (r : ℝ) :
     Continuous fun t : ℝ => regularizedHGFun (∅ : Multiset ℂ) {ν + 1} (-(r : ℂ) * t) := by
   have h := continuous_regularized0F1.comp
     (show Continuous fun t : ℝ => ((ν + 1 : ℂ), -(r : ℂ) * t) by fun_prop)
   exact h
 
 /-- Integrability of the 13.10.13 integrand in the `₀F₁` form. -/
-lemma confLP_integrableOn {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (hb : 0 < b.re)
+theorem confLP_integrableOn {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (hb : 0 < b.re)
     (hν : 2 * a.re < ν.re + 1 / 2) :
     IntegrableOn (fun t : ℝ => exp (-(t : ℂ)) * (t : ℂ) ^ (b - 1) * regularizedHGFun {a} {b} t *
       regularizedHGFun (∅ : Multiset ℂ) {ν + 1} (-(r : ℂ) * t)) (Ioi 0) := by
@@ -1759,7 +1744,7 @@ lemma confLP_integrableOn {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (hb : 0 < b.re)
 
 
 /-- Norm-integral of a function that is real and nonnegative on `S`. -/
-lemma confLP_setIntegral_norm_of_ofReal {S : Set ℝ} {f : ℝ → ℂ} {g : ℝ → ℝ}
+theorem confLP_setIntegral_norm_of_ofReal {S : Set ℝ} {f : ℝ → ℂ} {g : ℝ → ℝ}
     (hS : MeasurableSet S) (hfg : ∀ s ∈ S, f s = (g s : ℂ)) (hg : ∀ s ∈ S, 0 ≤ g s) :
     ∫ s in S, ‖f s‖ = ‖∫ s in S, f s‖ := by
   rw [setIntegral_congr_fun hS (fun s hs => by
@@ -1768,13 +1753,13 @@ lemma confLP_setIntegral_norm_of_ofReal {S : Set ℝ} {f : ℝ → ℂ} {g : ℝ
     Real.norm_of_nonneg (setIntegral_nonneg hS hg)]
 
 /-- A set integral that is nonzero comes from an integrable function. -/
-lemma confLP_integrableOn_of_ne_zero {S : Set ℝ} {f : ℝ → ℂ} (h : ∫ s in S, f s ≠ 0) :
+theorem confLP_integrableOn_of_ne_zero {S : Set ℝ} {f : ℝ → ℂ} (h : ∫ s in S, f s ≠ 0) :
     IntegrableOn f S := by
   by_contra hf
   exact h (integral_undef hf)
 
 /-- The Euler kernel with real parameters is real and nonnegative. -/
-lemma confLP_eulerKernel_ofReal (γ β : ℝ) (t : ℝ) {s : ℝ} (hs : s ∈ Ioo (0 : ℝ) 1) :
+theorem confLP_eulerKernel_ofReal (γ β : ℝ) (t : ℝ) {s : ℝ} (hs : s ∈ Ioo (0 : ℝ) 1) :
     kumDec_eulerKernel (γ : ℂ) (β : ℂ) t s =
       ((Real.exp (-(t * s)) * s ^ (γ - 1) * (1 - s) ^ (β - γ - 1) : ℝ) : ℂ) := by
   simp only [kumDec_eulerKernel]
@@ -1789,13 +1774,13 @@ def confLP_Q (c a b μ : ℂ) (r s ρ : ℝ) : ℂ :=
     (exp (-(r : ℂ) / s * ρ) * (ρ : ℂ) ^ (b - 1) * (1 - (ρ : ℂ)) ^ (μ - b))
 
 /-- Measurability of the kernel `confLP_Q`. -/
-lemma confLP_measurable_Q (c a b μ : ℂ) (r : ℝ) :
+theorem confLP_measurable_Q (c a b μ : ℂ) (r : ℝ) :
     Measurable (Function.uncurry (confLP_Q c a b μ r)) := by
   unfold confLP_Q
   fun_prop
 
 /-- The modulus of the kernel `confLP_Q` on the open unit square. -/
-lemma confLP_norm_Q (c a b μ : ℂ) (r : ℝ) {s ρ : ℝ} (hs : s ∈ Ioo (0:ℝ) 1)
+theorem confLP_norm_Q (c a b μ : ℂ) (r : ℝ) {s ρ : ℝ} (hs : s ∈ Ioo (0:ℝ) 1)
     (hρ : ρ ∈ Ioo (0:ℝ) 1) :
     ‖confLP_Q c a b μ r s ρ‖ = s ^ (c.re - 1) * (1 - s) ^ (a.re - 1) * s ^ (-b.re) *
       (Real.exp (-(r / s * ρ)) * ρ ^ (b.re - 1) * (1 - ρ) ^ (μ.re - b.re)) := by
@@ -1811,7 +1796,7 @@ lemma confLP_norm_Q (c a b μ : ℂ) (r : ℝ) {s ρ : ℝ} (hs : s ∈ Ioo (0:�
   simp
 
 /-- With real parameters the kernel `confLP_Q` is real. -/
-lemma confLP_Q_ofReal (γ α β μ r : ℝ) {s ρ : ℝ} (hs : s ∈ Ioo (0:ℝ) 1)
+theorem confLP_Q_ofReal (γ α β μ r : ℝ) {s ρ : ℝ} (hs : s ∈ Ioo (0:ℝ) 1)
     (hρ : ρ ∈ Ioo (0:ℝ) 1) :
     confLP_Q (γ : ℂ) (α : ℂ) (β : ℂ) (μ : ℂ) r s ρ =
       ((s ^ (γ - 1) * (1 - s) ^ (α - 1) * s ^ (-β) *
@@ -1824,7 +1809,7 @@ lemma confLP_Q_ofReal (γ α β μ r : ℝ) {s ρ : ℝ} (hs : s ∈ Ioo (0:ℝ)
   ring_nf
 
 /-- The inner integral of `confLP_Q` over `s`. -/
-lemma confLP_integral_Q {c a b μ : ℂ} {r : ℝ} (hr : 0 < r) (hcab : c + a = b) (ha : 0 < a.re)
+theorem confLP_integral_Q {c a b μ : ℂ} {r : ℝ} (hr : 0 < r) (hcab : c + a = b) (ha : 0 < a.re)
     {ρ : ℝ} (hρ : ρ ∈ Ioo (0:ℝ) 1) :
     ∫ s in Ioo (0:ℝ) 1, confLP_Q c a b μ r s ρ =
       (ρ : ℂ) ^ (b - 1) * (1 - (ρ : ℂ)) ^ (μ - b) *
@@ -1842,7 +1827,7 @@ lemma confLP_integral_Q {c a b μ : ℂ} {r : ℝ} (hr : 0 < r) (hcab : c + a = 
 
 
 /-- Base case of 13.10.13 (in `₀F₁` form) in the Euler region. -/
-lemma confLP_base {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (ha : 0 < a.re) (hba : 0 < (b - a).re)
+theorem confLP_base {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (ha : 0 < a.re) (hba : 0 < (b - a).re)
     (hνb : 0 < (ν + 1 - b).re) (hν : 2 * a.re < ν.re + 1 / 2) :
     ∫ t : ℝ in Ioi 0, exp (-(t : ℂ)) * (t : ℂ) ^ (b - 1) * regularizedHGFun {a} {b} t *
         regularizedHGFun (∅ : Multiset ℂ) {ν + 1} (-(r : ℂ) * t) =
@@ -2078,7 +2063,7 @@ lemma confLP_base {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (ha : 0 < a.re) (hba : 0
 
 /-- 13.10.13 (in `₀F₁` form) for `0 < re b < re ν + 1`, `re ν > -1/2`, by analytic continuation
 in `a` from the Euler region. -/
-lemma confLP_of_strip {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (hb : 0 < b.re)
+theorem confLP_of_strip {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (hb : 0 < b.re)
     (hbν : 0 < (ν + 1 - b).re) (hν0 : -1 / 2 < ν.re) (hν : 2 * a.re < ν.re + 1 / 2) :
     ∫ t : ℝ in Ioi 0, exp (-(t : ℂ)) * (t : ℂ) ^ (b - 1) * regularizedHGFun {a} {b} t *
         regularizedHGFun (∅ : Multiset ℂ) {ν + 1} (-(r : ℂ) * t) =
@@ -2176,14 +2161,14 @@ lemma confLP_of_strip {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (hb : 0 < b.re)
 
 
 /-- `1/Γ(s) = s/Γ(s+1)` for every `s` (with `1/Γ = 0` at the poles). -/
-lemma confLP_recip_Gamma_eq (s : ℂ) : (Gamma s)⁻¹ = s * (Gamma (s + 1))⁻¹ := by
+theorem confLP_recip_Gamma_eq (s : ℂ) : (Gamma s)⁻¹ = s * (Gamma (s + 1))⁻¹ := by
   rcases eq_or_ne s 0 with rfl | hs
   · simp
   · rw [Complex.Gamma_add_one s hs, mul_inv, ← mul_assoc, mul_inv_cancel₀ hs, one_mul]
 
 /-- The contiguous relation `𝐌(a,b,z) = (b-a) 𝐌(a,b+1,z) + a 𝐌(a+1,b+1,z)`, for all
 parameters. -/
-lemma confLP_contiguous_b (a b z : ℂ) :
+theorem confLP_contiguous_b (a b z : ℂ) :
     regularizedHGFun {a} {b} z =
       (b - a) * regularizedHGFun {a} {b + 1} z + a * regularizedHGFun {a + 1} {b + 1} z := by
   rw [regularizedConfluent_eq_tsum, regularizedConfluent_eq_tsum, regularizedConfluent_eq_tsum,
@@ -2198,7 +2183,7 @@ lemma confLP_contiguous_b (a b z : ℂ) :
 
 /-- The contiguous relation `𝐌(A-1,B-1,x) = (B-1) 𝐌(A,B,x) - (B-A) x 𝐌(A,B+1,x)`, for all
 parameters. -/
-lemma confLP_contiguous_down (A B x : ℂ) :
+theorem confLP_contiguous_down (A B x : ℂ) :
     regularizedHGFun {A - 1} {B - 1} x =
       (B - 1) * regularizedHGFun {A} {B} x - (B - A) * x * regularizedHGFun {A} {B + 1} x := by
   set T : ℂ → ℂ → ℕ → ℂ := fun a b n => poch a n * x ^ n / n.factorial * (Gamma (b + n))⁻¹
@@ -2247,7 +2232,7 @@ def confLP_R (a b ν : ℂ) (r : ℝ) : ℂ :=
 
 /-- The order recurrence of the 13.10.13 integrals, from the `₀F₁` and Kummer contiguous
 relations. -/
-lemma confLP_Psi_rec {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (hb : 0 < b.re)
+theorem confLP_Psi_rec {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (hb : 0 < b.re)
     (hν : 2 * a.re < ν.re + 1 / 2) :
     confLP_Psi a b ν r = (ν + 1) * confLP_Psi a b (ν + 1) r -
       r * (b - a) * confLP_Psi a (b + 1) (ν + 2) r - r * a * confLP_Psi (a + 1) (b + 1) (ν + 2) r := by
@@ -2287,7 +2272,7 @@ lemma confLP_Psi_rec {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (hb : 0 < b.re)
   ring
 
 /-- The right sides satisfy the same recurrence. -/
-lemma confLP_R_rec (a b ν : ℂ) {r : ℝ} (hr : 0 < r) :
+theorem confLP_R_rec (a b ν : ℂ) {r : ℝ} (hr : 0 < r) :
     confLP_R a b ν r = (ν + 1) * confLP_R a b (ν + 1) r -
       r * (b - a) * confLP_R a (b + 1) (ν + 2) r - r * a * confLP_R (a + 1) (b + 1) (ν + 2) r := by
   have hr0 : (r : ℂ) ≠ 0 := ofReal_ne_zero.mpr hr.ne'
@@ -2303,7 +2288,7 @@ lemma confLP_R_rec (a b ν : ℂ) {r : ℝ} (hr : 0 < r) :
   linear_combination (a * exp (-(r : ℂ)) * regularizedHGFun {ν + 1 - b + 1} {ν + 1 - a + 1} r) * hpow
 
 /-- 13.10.13 in `₀F₁` form for all admissible parameters. -/
-lemma confLP_Psi_eq_R : ∀ n : ℕ, ∀ a b ν : ℂ, ∀ {r : ℝ}, 0 < r → 0 < b.re →
+theorem confLP_Psi_eq_R : ∀ n : ℕ, ∀ a b ν : ℂ, ∀ {r : ℝ}, 0 < r → 0 < b.re →
     -1 / 2 < ν.re + n → b.re < ν.re + 1 + n → 2 * a.re < ν.re + 1 / 2 →
     confLP_Psi a b ν r = confLP_R a b ν r := by
   intro n
@@ -2598,7 +2583,7 @@ theorem bessel_kummerU {a b ν x : ℂ} (hx : 0 < x.re) (hxi : x.im = 0)
         field_simp
 
 /-- `𝐅(a,b;c;0) = 1/Γ(c)`. -/
-lemma regularizedGaussHG_zero_arg (a b c : ℂ) : regularizedGaussHG a b c 0 = (Gamma c)⁻¹ := by
+theorem regularizedGaussHG_zero_arg (a b c : ℂ) : regularizedGaussHG a b c 0 = (Gamma c)⁻¹ := by
   rw [regularizedGaussHG_eq_regularizedGaussHGFun a b c (by simp), regularizedGaussHGFun_eq_tsum,
     tsum_eq_single 0 (fun n hn => by simp [zero_pow hn])]
   simp
@@ -3202,7 +3187,7 @@ section GaussStieltjes
 open Set
 
 /-- `𝐅(a,c;c;w) = (1-w)^{-a}/Γ(c)` on the cut plane. -/
-lemma regularizedGaussHG_self_right (a c : ℂ) {w : ℂ} (hw : w ∈ cutPlane) :
+theorem regularizedGaussHG_self_right (a c : ℂ) {w : ℂ} (hw : w ∈ cutPlane) :
     regularizedGaussHG a c c w = (1 - w) ^ (-a) * (Gamma c)⁻¹ := by
   have h0 : regularizedGaussHG 0 (c - a) c w = (Gamma c)⁻¹ :=
     eqOn_cutPlane_of_eqOn_disk (f := regularizedGaussHG 0 (c - a) c) (g := fun _ => (Gamma c)⁻¹)
@@ -3216,7 +3201,7 @@ lemma regularizedGaussHG_self_right (a c : ℂ) {w : ℂ} (hw : w ∈ cutPlane) 
     show c - a - c = -a by ring]
   exact hw
 
-lemma neg_ofReal_mem_cutPlane {t : ℝ} (ht : 0 ≤ t) : (-(t : ℂ)) ∈ cutPlane := by
+theorem neg_ofReal_mem_cutPlane {t : ℝ} (ht : 0 ≤ t) : (-(t : ℂ)) ∈ cutPlane := by
   change 1 - -(t : ℂ) ∈ slitPlane
   rw [sub_neg_eq_add]
   exact Or.inl (by simp; linarith)
@@ -3225,7 +3210,7 @@ lemma neg_ofReal_mem_cutPlane {t : ℝ} (ht : 0 ≤ t) : (-(t : ℂ)) ∈ cutPla
 def kummerUGaussKernel (a b c z : ℂ) (t : ℝ) : ℂ :=
   exp (-z * t) * (t : ℂ) ^ (c - 1) * regularizedGaussHG a (a - b + 1) c (-(t : ℂ))
 
-lemma kummerU_gauss_of_re_pos {a b c z : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) (hz : 0 < z.re) :
+theorem kummerU_gauss_of_re_pos {a b c z : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) (hz : 0 < z.re) :
     IntegrableOn (kummerUGaussKernel a b c z) (Ioi 0) ∧
       kummerU a b z = z ^ (c - a) * ∫ t : ℝ in Ioi 0, kummerUGaussKernel a b c z t := by
   obtain ⟨β, hβ⟩ : ∃ β : ℂ, β = a - b + 1 := ⟨_, rfl⟩
@@ -3383,7 +3368,7 @@ theorem whittakerW_gauss {κ μ c z : ℂ} (hc : 0 < c.re) (hz : 0 < z.re) :
   rw [← hp]; ring
 
 /-- Points of the slit plane stay uniformly away from the closed negative ray. -/
-lemma exists_forall_le_norm_add_of_mem_slitPlane {z₀ : ℂ} (hz₀ : z₀ ∈ slitPlane) :
+theorem exists_forall_le_norm_add_of_mem_slitPlane {z₀ : ℂ} (hz₀ : z₀ ∈ slitPlane) :
     ∃ δ > 0, ∀ t : ℝ, 0 ≤ t → ∀ z ∈ Metric.ball z₀ δ, δ ≤ ‖(t : ℂ) + z‖ := by
   have hd : ∃ d > 0, ∀ t : ℝ, 0 ≤ t → d ≤ ‖(t : ℂ) + z₀‖ := by
     by_cases hre : 0 < z₀.re
@@ -3408,7 +3393,7 @@ lemma exists_forall_le_norm_add_of_mem_slitPlane {z₀ : ℂ} (hz₀ : z₀ ∈ 
 
 /-- The Stieltjes transform of an integrable function on the positive half-line is
 holomorphic on the slit plane. -/
-lemma differentiableOn_stieltjes_integral {g : ℝ → ℂ} (hg : IntegrableOn g (Ioi 0)) :
+theorem differentiableOn_stieltjes_integral {g : ℝ → ℂ} (hg : IntegrableOn g (Ioi 0)) :
     DifferentiableOn ℂ (fun z => ∫ t : ℝ in Ioi 0, g t / ((t : ℂ) + z)) slitPlane := by
   intro z₀ hz₀
   obtain ⟨δ, hδ, hδb⟩ := exists_forall_le_norm_add_of_mem_slitPlane hz₀
@@ -3450,7 +3435,7 @@ lemma differentiableOn_stieltjes_integral {g : ℝ → ℂ} (hg : IntegrableOn g
 
 /-- Tricomi's Stieltjes representation 13.4.5 in the right half-plane, by Fubini against
 `1/(t+z) = ∫ e^{-(t+z)s} ds`, the Tricomi Laplace transform and Pfaff's transformation. -/
-lemma kummerU_stieltjes_of_re_pos {a b z : ℂ} (hz : 0 < z.re)
+theorem kummerU_stieltjes_of_re_pos {a b z : ℂ} (hz : 0 < z.re)
     (ha : (b - 1).re < a.re) (ha0 : 0 < a.re) :
     kummerU a b z = z ^ (1 - a) / (Gamma a * Gamma (1 + a - b)) *
       ∫ t : ℝ in Set.Ioi 0, kummerU (b - a) b t * exp (-(t : ℂ)) * (t : ℂ) ^ (a - 1) /
@@ -3569,7 +3554,7 @@ theorem kummerU_stieltjes {a b z : ℂ} (hz : z ∈ slitPlane)
     one_mem_slitPlane heq hz
 
 /-- `1/(t+z)` is `O((1+t)^{-1})` on the positive half-line, for `z` in the slit plane. -/
-lemma cfInt_norm_recip_add_le {z : ℂ} (hz : z ∈ slitPlane) :
+theorem cfInt_norm_recip_add_le {z : ℂ} (hz : z ∈ slitPlane) :
     ∃ K, ∀ t : ℝ, 0 < t → ‖((t : ℂ) + z)⁻¹‖ ≤ K * (1 + t) ^ (-1 : ℝ) := by
   obtain ⟨δ, hδ, hδb⟩ := exists_forall_le_norm_add_of_mem_slitPlane hz
   refine ⟨1 / δ + 1 + ‖z‖ / δ, fun t ht => ?_⟩
@@ -3591,7 +3576,7 @@ lemma cfInt_norm_recip_add_le {z : ℂ} (hz : z ∈ slitPlane) :
     inv_mul_eq_div, div_le_iff₀ hpos]
   linarith
 
-lemma cfInt_integrableOn_stieltjes {a b z : ℂ} {n : ℕ} (hz : z ∈ slitPlane)
+theorem cfInt_integrableOn_stieltjes {a b z : ℂ} {n : ℕ} (hz : z ∈ slitPlane)
     (h0 : -b.re < n) (h1 : (n : ℝ) < 1 + (a - b).re) :
     IntegrableOn (fun t : ℝ => regularizedHGFun {a} {b} (-(t : ℂ)) * (t : ℂ) ^ (b + n - 1) /
       ((t : ℂ) + z)) (Ioi 0) := by
@@ -3608,12 +3593,12 @@ lemma cfInt_integrableOn_stieltjes {a b z : ℂ} {n : ℕ} (hz : z ∈ slitPlane
   simp only [div_eq_mul_inv]
   ring
 
-lemma cfInt_integral_exp_Ioi {w : ℂ} (hw : 0 < w.re) :
+theorem cfInt_integral_exp_Ioi {w : ℂ} (hw : 0 < w.re) :
     ∫ s : ℝ in Ioi 0, exp (-w * s) = w⁻¹ := by
   rw [integral_exp_mul_complex_Ioi (by simpa using hw) 0]
   simp [div_neg, neg_div]
 
-lemma cfInt_integral_norm_exp_Ioi {w : ℂ} (hw : 0 < w.re) :
+theorem cfInt_integral_norm_exp_Ioi {w : ℂ} (hw : 0 < w.re) :
     ∫ s : ℝ in Ioi 0, ‖exp (-w * s)‖ = (w.re)⁻¹ := by
   have h := cfInt_integral_exp_Ioi (w := (w.re : ℂ)) (by simpa using hw)
   have he : ∀ s : ℝ, ‖exp (-w * s)‖ = Real.exp (-w.re * s) := fun s => by
@@ -3629,7 +3614,7 @@ lemma cfInt_integral_norm_exp_Ioi {w : ℂ} (hw : 0 < w.re) :
 /-- The base case `n = 0` of 13.4.6 in the right half-plane, by Fubini against
 `1/(t+z) = ∫ e^{-(t+z)s} ds`, the Kummer Laplace transform 13.10.3 and Tricomi's Laplace
 integral 13.4.4. -/
-lemma cfInt_stieltjes_zero_of_re_pos {a b z : ℂ} (hz : 0 < z.re) (hb : 0 < b.re)
+theorem cfInt_stieltjes_zero_of_re_pos {a b z : ℂ} (hz : 0 < z.re) (hb : 0 < b.re)
     (hab : b.re < 1 + a.re) :
     ∫ t : ℝ in Ioi 0, regularizedHGFun {a} {b} (-(t : ℂ)) * (t : ℂ) ^ (b - 1) / ((t : ℂ) + z) =
       z ^ (b - 1) * Gamma (1 + a - b) * kummerU a b z := by
@@ -3719,14 +3704,14 @@ lemma cfInt_stieltjes_zero_of_re_pos {a b z : ℂ} (hz : 0 < z.re) (hb : 0 < b.r
         rw [hK, show 1 + a - b = a - b + 1 by ring]
         linear_combination (-(Gamma (a - b + 1) * kummerU (a - b + 1) (2 - b) z)) * hzz
 
-lemma cfInt_add_ne_zero {z : ℂ} (hz : z ∈ slitPlane) {t : ℝ} (ht : 0 ≤ t) : (t : ℂ) + z ≠ 0 := by
+theorem cfInt_add_ne_zero {z : ℂ} (hz : z ∈ slitPlane) {t : ℝ} (ht : 0 ≤ t) : (t : ℂ) + z ≠ 0 := by
   obtain ⟨δ, hδ, hδb⟩ := exists_forall_le_norm_add_of_mem_slitPlane hz
   intro h
   have := hδb t ht z (Metric.mem_ball_self hδ)
   rw [h, norm_zero] at this; linarith
 
 /-- A Stieltjes transform is holomorphic on the slit plane as soon as `g(t)/(t+1)` is integrable. -/
-lemma cfInt_differentiableOn_stieltjes {g : ℝ → ℂ}
+theorem cfInt_differentiableOn_stieltjes {g : ℝ → ℂ}
     (hg : IntegrableOn (fun t : ℝ => g t / ((t : ℂ) + 1)) (Ioi 0)) :
     DifferentiableOn ℂ (fun z => ∫ t : ℝ in Ioi 0, g t / ((t : ℂ) + z)) slitPlane := by
   set h : ℝ → ℂ := fun t => g t / ((t : ℂ) + 1) with hh
@@ -3752,7 +3737,7 @@ lemma cfInt_differentiableOn_stieltjes {g : ℝ → ℂ}
   ring
 
 /-- The case `n = 0` of 13.4.6 on the slit plane. -/
-lemma cfInt_stieltjes_zero {a b z : ℂ} (hz : z ∈ slitPlane) (hb : 0 < b.re)
+theorem cfInt_stieltjes_zero {a b z : ℂ} (hz : z ∈ slitPlane) (hb : 0 < b.re)
     (hab : b.re < 1 + a.re) :
     ∫ t : ℝ in Ioi 0, regularizedHGFun {a} {b} (-(t : ℂ)) * (t : ℂ) ^ (b - 1) / ((t : ℂ) + z) =
       z ^ (b - 1) * Gamma (1 + a - b) * kummerU a b z := by
@@ -3781,7 +3766,7 @@ lemma cfInt_stieltjes_zero {a b z : ℂ} (hz : z ∈ slitPlane) (hb : 0 < b.re)
 
 /-- `b U(a,b+1,z) - a z U(a+1,b+2,z) = (b-a) U(a,b,z)`, from the contiguous relations 13.3.9
 and 13.3.10; it is the Tricomi counterpart of 13.3.20 with `n = 1`. -/
-lemma cfInt_kummerU_rel (a b : ℂ) {z : ℂ} (hz : z ≠ 0) :
+theorem cfInt_kummerU_rel (a b : ℂ) {z : ℂ} (hz : z ≠ 0) :
     b * kummerU a (b + 1) z - a * z * kummerU (a + 1) (b + 2) z = (b - a) * kummerU a b z := by
   have h1 := kummerU_contiguous_shift_a (a + 1) (b + 1) z hz
   have h2 := kummerU_contiguous_a_b a (b + 1) z hz
@@ -3790,7 +3775,7 @@ lemma cfInt_kummerU_rel (a b : ℂ) {z : ℂ} (hz : z ≠ 0) :
   linear_combination a * h1 + (b - a) * h2
 
 /-- 13.4.6 in the form `∫ 𝐌(a,b,-t) t^{b+n-1}/(t+z) dt = (-1)^n z^{b+n-1} Γ(1+a-b) U(a,b,z)`. -/
-lemma cfInt_stieltjes_nat : ∀ n : ℕ, ∀ a b z : ℂ, z ∈ slitPlane → -b.re < n →
+theorem cfInt_stieltjes_nat : ∀ n : ℕ, ∀ a b z : ℂ, z ∈ slitPlane → -b.re < n →
     (n : ℝ) < 1 + (a - b).re →
     ∫ t : ℝ in Ioi 0, regularizedHGFun {a} {b} (-(t : ℂ)) * (t : ℂ) ^ (b + n - 1) /
         ((t : ℂ) + z) =
@@ -3921,7 +3906,7 @@ open Set
 open scoped Nat
 
 /-- Subordination: `∫₀^∞ e^{-t²u - ζ²/(4u)} u^{-3/2} du = (2√π/ζ) e^{-ζt}` for `ζ, t > 0`. -/
-lemma confLP_subordination {ζ t : ℝ} (hζ : 0 < ζ) (ht : 0 < t) :
+theorem confLP_subordination {ζ t : ℝ} (hζ : 0 < ζ) (ht : 0 < t) :
     ∫ u : ℝ in Ioi 0, exp (-((t : ℂ) ^ 2 * u) - (ζ : ℂ) ^ 2 / (4 * u)) * (u : ℂ) ^ (-(3 / 2 : ℂ)) =
       2 * (Real.sqrt π : ℂ) / ζ * exp (-((ζ : ℂ) * t)) := by
   set y := ζ * t with hy
@@ -3988,7 +3973,7 @@ lemma confLP_subordination {ζ t : ℝ} (hζ : 0 < ζ) (ht : 0 < t) :
 
 
 /-- `(1+x)^m ≤ 2^m (1 + x^m)` for `x, m ≥ 0`. -/
-lemma confLP_one_add_rpow_le {x m : ℝ} (hx : 0 ≤ x) (hm : 0 ≤ m) :
+theorem confLP_one_add_rpow_le {x m : ℝ} (hx : 0 ≤ x) (hm : 0 ≤ m) :
     (1 + x) ^ m ≤ 2 ^ m * (1 + x ^ m) := by
   rcases le_total x 1 with h | h
   · calc (1 + x) ^ m ≤ 2 ^ m := Real.rpow_le_rpow (by linarith) (by linarith) hm
@@ -3999,7 +3984,7 @@ lemma confLP_one_add_rpow_le {x m : ℝ} (hx : 0 ≤ x) (hm : 0 ≤ m) :
       _ ≤ 2 ^ m * (1 + x ^ m) := by gcongr; linarith
 
 /-- A polynomial bound for the Gaussian-transform integrand. -/
-lemma confLP_gauss_bound (a b : ℂ) : ∃ C m : ℝ, 0 ≤ m ∧ ∀ t : ℝ, 0 < t →
+theorem confLP_gauss_bound (a b : ℂ) : ∃ C m : ℝ, 0 ≤ m ∧ ∀ t : ℝ, 0 < t →
     ‖exp (-(t : ℂ) ^ 2) * (t : ℂ) ^ (2 * b - 2) * regularizedHGFun {a} {b} ((t : ℂ) ^ 2)‖ ≤
       C * (t ^ (2 * b.re - 2) + t ^ (2 * b.re - 2 + m)) := by
   obtain ⟨C, hC⟩ := exists_norm_regularizedHGFun_neg_le (b - a) b
@@ -4033,7 +4018,7 @@ lemma confLP_gauss_bound (a b : ℂ) : ∃ C m : ℝ, 0 ≤ m ∧ ∀ t : ℝ, 0
         rw [Real.rpow_add ht]; ring
 
 /-- Integrability of the 13.10.6 integrand for `0 < re z`. -/
-lemma confLP_gauss_integrableOn {a b z : ℂ} (hb : (1 / 2 : ℝ) < b.re) (hz : 0 < z.re) :
+theorem confLP_gauss_integrableOn {a b z : ℂ} (hb : (1 / 2 : ℝ) < b.re) (hz : 0 < z.re) :
     IntegrableOn (fun t : ℝ => exp (-z * t - (t : ℂ) ^ 2) * (t : ℂ) ^ (2 * b - 2) *
       regularizedHGFun {a} {b} ((t : ℂ) ^ 2)) (Ioi 0) := by
   obtain ⟨C, m, hm, hC⟩ := confLP_gauss_bound a b
@@ -4063,13 +4048,13 @@ lemma confLP_gauss_integrableOn {a b z : ℂ} (hb : (1 / 2 : ℝ) < b.re) (hz : 
 
 
 /-- `((x²:ℝ):ℂ)^w = x^{2w}` for `x > 0`. -/
-lemma confLP_sq_cpow {x : ℝ} (hx : 0 < x) (w : ℂ) :
+theorem confLP_sq_cpow {x : ℝ} (hx : 0 < x) (w : ℂ) :
     (((x ^ 2 : ℝ)) : ℂ) ^ w = (x : ℂ) ^ (2 * w) := by
   have hxc : (x : ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.ne'
   rw [sq, ofReal_mul, mul_cpow_ofReal_nonneg hx.le hx.le, ← cpow_add _ _ hxc]; ring_nf
 
 /-- The inner `t`-integral of 13.10.6: a Kummer Laplace transform after `s = t²`. -/
-lemma confLP_gauss_inner {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) {u : ℝ} (hu : 0 < u) :
+theorem confLP_gauss_inner {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) {u : ℝ} (hu : 0 < u) :
     ∫ t : ℝ in Ioi 0, exp (-(t : ℂ) ^ 2) * (t : ℂ) ^ (2 * b - 2) *
         regularizedHGFun {a} {b} ((t : ℂ) ^ 2) * exp (-((t : ℂ) ^ 2 * u)) =
       1 / 2 * (Gamma (b - 1 / 2) * (((1 + u : ℝ)) : ℂ) ^ (-(b - 1 / 2)) *
@@ -4100,7 +4085,7 @@ lemma confLP_gauss_inner {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) {u : ℝ} (hu :
   ring
 
 /-- Pfaff's transformation in the form used for 13.10.6. -/
-lemma confLP_gauss_pfaff (a b : ℂ) {u : ℝ} (hu : 0 < u) :
+theorem confLP_gauss_pfaff (a b : ℂ) {u : ℝ} (hu : 0 < u) :
     (((1 + u : ℝ)) : ℂ) ^ (-(b - 1 / 2)) *
         DLMF.Hypergeometric.regularizedGaussHG a (b - 1 / 2) b (1 / ((1 + u : ℝ) : ℂ)) =
       (u : ℂ) ^ (-(b - 1 / 2)) *
@@ -4133,7 +4118,7 @@ lemma confLP_gauss_pfaff (a b : ℂ) {u : ℝ} (hu : 0 < u) :
 
 
 /-- The outer `u`-integral of 13.10.6: after `u = 1/v` it is Tricomi's Gauss-type integral 13.4.8. -/
-lemma confLP_gauss_outer {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) {ζ : ℝ} (hζ : 0 < ζ) :
+theorem confLP_gauss_outer {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) {ζ : ℝ} (hζ : 0 < ζ) :
     ∫ u : ℝ in Ioi 0, exp (-(ζ : ℂ) ^ 2 / (4 * u)) * (u : ℂ) ^ (-(3 / 2 : ℂ)) *
         ((u : ℂ) ^ (-(b - 1 / 2)) *
           DLMF.Hypergeometric.regularizedGaussHG (b - 1 / 2) (b - a) b (-(1 / (u : ℂ)))) =
@@ -4180,12 +4165,12 @@ lemma confLP_gauss_outer {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) {ζ : ℝ} (hζ
 
 
 /-- `π^{-1/2} = 1/√π` as complex numbers. -/
-lemma confLP_pi_cpow_neg_half : (π : ℂ) ^ (-(1 / 2 : ℂ)) = ((Real.sqrt π)⁻¹ : ℝ) := by
+theorem confLP_pi_cpow_neg_half : (π : ℂ) ^ (-(1 / 2 : ℂ)) = ((Real.sqrt π)⁻¹ : ℝ) := by
   rw [Real.sqrt_eq_rpow, ← Real.rpow_neg Real.pi_pos.le, ofReal_cpow Real.pi_pos.le]
   push_cast; ring_nf
 
 /-- 13.10.6 for real positive `z`, by subordination and Fubini. -/
-lemma confLP_gauss_real {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) {ζ : ℝ} (hζ : 0 < ζ) :
+theorem confLP_gauss_real {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) {ζ : ℝ} (hζ : 0 < ζ) :
     ∫ t : ℝ in Ioi 0, exp (-(ζ : ℂ) * t - (t : ℂ) ^ 2) * (t : ℂ) ^ (2 * b - 2) *
         regularizedHGFun {a} {b} ((t : ℂ) ^ 2) =
       (1 / 2) * (π : ℂ) ^ (-(1 / 2 : ℂ)) * Gamma (b - 1 / 2) *
@@ -4281,14 +4266,14 @@ lemma confLP_gauss_real {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) {ζ : ℝ} (hζ 
 
 
 /-- The integrand of 13.10.6 factors as `e^{-z t}` times a `z`-independent part. -/
-lemma confLP_gauss_factor (a b z : ℂ) (t : ℝ) :
+theorem confLP_gauss_factor (a b z : ℂ) (t : ℝ) :
     exp (-z * t - (t : ℂ) ^ 2) * (t : ℂ) ^ (2 * b - 2) * regularizedHGFun {a} {b} ((t : ℂ) ^ 2) =
       exp (-z * t) * (exp (-(t : ℂ) ^ 2) * (t : ℂ) ^ (2 * b - 2) *
         regularizedHGFun {a} {b} ((t : ℂ) ^ 2)) := by
   rw [sub_eq_add_neg, Complex.exp_add]; ring
 
 /-- Holomorphic dependence of the Gaussian transform of `𝐌` on `z`. -/
-lemma confLP_gauss_differentiableOn {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) :
+theorem confLP_gauss_differentiableOn {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) :
     DifferentiableOn ℂ (fun z : ℂ => ∫ t : ℝ in Ioi 0,
       exp (-z * t - (t : ℂ) ^ 2) * (t : ℂ) ^ (2 * b - 2) *
         regularizedHGFun {a} {b} ((t : ℂ) ^ 2)) {z : ℂ | 0 < z.re} := by
@@ -4355,7 +4340,7 @@ lemma confLP_gauss_differentiableOn {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) :
     ring
 
 /-- **DLMF 13.10.6** (proof). -/
-lemma confLP_gauss {a b z : ℂ} (hb : (1 / 2 : ℝ) < b.re) (hz : 0 < z.re) :
+theorem confLP_gauss {a b z : ℂ} (hb : (1 / 2 : ℝ) < b.re) (hz : 0 < z.re) :
     ∫ t : ℝ in Ioi 0,
         exp (-z * t - (t : ℂ) ^ 2) * (t : ℂ) ^ (2 * b - 2) *
           regularizedHGFun {a} {b} ((t : ℂ) ^ 2) =

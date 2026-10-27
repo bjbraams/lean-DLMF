@@ -5,9 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.Calculus.ParametricIntervalIntegral
 public import Mathlib.Analysis.Complex.CauchyIntegral
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
 /-!
 # Straight-segment primitives on star-convex domains
@@ -33,7 +31,7 @@ open scoped Interval Topology
 namespace Complex
 
 /-- Points of the segment `[0,w]` stay in a set star-convex about `0`. -/
-lemma starPrim_mem {U : Set ℂ} (hs : StarConvex ℝ 0 U) {w : ℂ} (hw : w ∈ U) {t : ℝ}
+theorem starPrim_mem {U : Set ℂ} (hs : StarConvex ℝ 0 U) {w : ℂ} (hw : w ∈ U) {t : ℝ}
     (ht : t ∈ Icc (0:ℝ) 1) : (t:ℂ)*w ∈ U := by
   have := hs hw (a := 1-t) (b := t) (by linarith [ht.2]) ht.1 (by ring)
   simpa [Complex.real_smul] using this

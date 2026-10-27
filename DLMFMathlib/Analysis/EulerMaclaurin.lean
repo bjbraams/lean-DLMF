@@ -6,8 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.NumberTheory.ZetaValues
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.IntegrationByParts
-public import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
 public import Mathlib.MeasureTheory.Function.Floor
 
 /-!

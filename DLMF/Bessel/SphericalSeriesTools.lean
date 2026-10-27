@@ -6,6 +6,10 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Core.Framework
+public import DLMF.Bessel.Basic
+public import Mathlib.Algebra.Order.Ring.Star
+public import Mathlib.Analysis.Complex.LocallyUniformLimit
+public import Mathlib.Analysis.Complex.TaylorSeries
 
 /-!
 # Tools for series in spherical Bessel functions (DLMF §§6.10, 7.6, 10.51)

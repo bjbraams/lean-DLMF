@@ -8,7 +8,6 @@ module
 public import DLMF.Painleve.Backlund
 public import DLMF.Airy.Basic
 public import Mathlib.Analysis.Complex.Polynomial.Basic
-public import Mathlib.Analysis.Meromorphic.Basic
 
 /-!
 # Airy solutions of Painlevé II at half-integral parameters
@@ -44,7 +43,7 @@ def airySeedDeriv (k a b : ℂ) (z : ℂ) : ℂ :=
   a * k * airyAiDeriv (k * z) + b * k * airyBiDeriv (k * z)
 
 /-- Differentiation of the Airy seed. -/
-lemma hasDerivAt_airySeed (k a b z : ℂ) :
+theorem hasDerivAt_airySeed (k a b z : ℂ) :
     HasDerivAt (airySeed k a b) (airySeedDeriv k a b z) z := by
   have hk : HasDerivAt (fun z : ℂ => k * z) k z := by simpa using (hasDerivAt_id z).const_mul k
   exact (((hasDerivAt_airyAi (k * z)).comp z hk).const_mul a |>.add
@@ -52,7 +51,7 @@ lemma hasDerivAt_airySeed (k a b z : ℂ) :
       dsimp only [airySeedDeriv]; ring)
 
 /-- The correctly scaled Airy seed solves `φ'' = -(z/2)φ`. -/
-lemma hasDerivAt_airySeedDeriv {k : ℂ} (hk : k ^ 3 = -1 / 2) (a b z : ℂ) :
+theorem hasDerivAt_airySeedDeriv {k : ℂ} (hk : k ^ 3 = -1 / 2) (a b z : ℂ) :
     HasDerivAt (airySeedDeriv k a b) (-(z / 2) * airySeed k a b z) z := by
   have hd : HasDerivAt (fun z : ℂ => k * z) k z := by simpa using (hasDerivAt_id z).const_mul k
   refine ((((hasDerivAt_airyAiDeriv (k * z)).comp z hd).const_mul (a * k)).add
@@ -64,7 +63,7 @@ lemma hasDerivAt_airySeedDeriv {k : ℂ} (hk : k ^ 3 = -1 / 2) (a b z : ℂ) :
 def airyPII (k a b : ℂ) (z : ℂ) : ℂ := airySeedDeriv k a b z / airySeed k a b z
 
 /-- The Airy logarithmic derivative satisfies the Riccati equation off its poles. -/
-lemma hasDerivAt_airyPII {k : ℂ} (hk : k ^ 3 = -1 / 2) (a b : ℂ) {z : ℂ}
+theorem hasDerivAt_airyPII {k : ℂ} (hk : k ^ 3 = -1 / 2) (a b : ℂ) {z : ℂ}
     (hz : airySeed k a b z ≠ 0) :
     HasDerivAt (airyPII k a b) (-airyPII k a b z ^ 2 - z / 2) z := by
   refine ((hasDerivAt_airySeedDeriv hk a b z).div (hasDerivAt_airySeed k a b z) hz).congr_deriv ?_
@@ -86,7 +85,7 @@ theorem exists_airy_scale : ∃ k : ℂ, k ^ 3 = -1 / 2 :=
   IsAlgClosed.exists_pow_nat_eq (-1 / 2) (by norm_num)
 
 /-- The `Ai` seed has a nonzero value at the origin, so its regular set is nonempty. -/
-lemma airySeed_one_zero_ne_zero (k : ℂ) : airySeed k 1 0 0 ≠ 0 := by
+theorem airySeed_one_zero_ne_zero (k : ℂ) : airySeed k 1 0 0 ≠ 0 := by
   simp only [airySeed, mul_zero, zero_mul, one_mul, add_zero]
   rw [airyAi_zero]
   apply div_ne_zero one_ne_zero
@@ -103,7 +102,7 @@ def airyPIIJet (k a b : ℂ) : ℕ → ℂ → ℂ × ℂ
       (airyPIIJet k a b n z).1 (airyPIIJet k a b n z).2
 
 /-- The Airy logarithmic quotient is meromorphic on the complex plane. -/
-lemma meromorphic_airyPII {k : ℂ} (hk : k ^ 3 = -1 / 2) (a b : ℂ) :
+theorem meromorphic_airyPII {k : ℂ} (hk : k ^ 3 = -1 / 2) (a b : ℂ) :
     Meromorphic (airyPII k a b) := by
   have hF : Differentiable ℂ (airySeed k a b) := fun z => (hasDerivAt_airySeed k a b z).differentiableAt
   have hG : Differentiable ℂ (airySeedDeriv k a b) :=
@@ -112,7 +111,7 @@ lemma meromorphic_airyPII {k : ℂ} (hk : k ^ 3 = -1 / 2) (a b : ℂ) :
   exact (hG.analyticAt z).meromorphicAt.div (hF.analyticAt z).meromorphicAt
 
 /-- Both components of each rational Airy jet are meromorphic on the plane. -/
-lemma meromorphic_airyPIIJet {k : ℂ} (hk : k ^ 3 = -1 / 2) (a b : ℂ) (n : ℕ) :
+theorem meromorphic_airyPIIJet {k : ℂ} (hk : k ^ 3 = -1 / 2) (a b : ℂ) (n : ℕ) :
     Meromorphic (fun z => (airyPIIJet k a b n z).1) ∧
       Meromorphic (fun z => (airyPIIJet k a b n z).2) := by
   induction n with

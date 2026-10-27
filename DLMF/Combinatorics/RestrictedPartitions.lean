@@ -7,10 +7,7 @@ module
 
 public import DLMF.Partitions
 public import DLMF.QSeries.QBinomial
-public import Mathlib.Analysis.Asymptotics.AsymptoticEquivalent
 public import Mathlib.Combinatorics.Enumerative.Partition.YoungDiagram
-public import Mathlib.Analysis.SpecificLimits.Normed
-public import Mathlib.NumberTheory.Divisors
 public import Mathlib.RingTheory.PowerSeries.Derivative
 public import TauCeti.Combinatorics.Enumerative.Partition.Conjugate
 
@@ -61,7 +58,7 @@ def partitionCountBoxed (k m n : ℕ) : ℕ :=
   #{p : n.Partition | p.parts.card ≤ k ∧ ∀ i ∈ p.parts, i ≤ m}
 
 /-- A partition of `n` has at most `n` parts. -/
-lemma c26b_card_parts_le {n : ℕ} (p : n.Partition) : p.parts.card ≤ n := by
+theorem c26b_card_parts_le {n : ℕ} (p : n.Partition) : p.parts.card ≤ n := by
   have h : p.parts.card • 1 ≤ p.parts.sum :=
     Multiset.card_nsmul_le_sum fun x hx => p.parts_pos hx
   simpa [p.parts_sum] using h

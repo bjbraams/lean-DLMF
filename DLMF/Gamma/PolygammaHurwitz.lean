@@ -65,7 +65,7 @@ theorem hurwitzZeta_one_nat {n : ℕ} (hn : 0 < n) :
   linear_combination -h
 
 /-- `t ↦ t^{s-1} e^{-rt}` is integrable on `(0, ∞)` for `Re s > 0`, `r > 0`. -/
-lemma integrableOn_cpow_mul_exp_neg_mul {s : ℂ} (hs : 0 < s.re) {r : ℝ} (hr : 0 < r) :
+theorem integrableOn_cpow_mul_exp_neg_mul {s : ℂ} (hs : 0 < s.re) {r : ℝ} (hr : 0 < r) :
     IntegrableOn (fun t : ℝ => (t : ℂ) ^ (s - 1) * exp (-((r : ℂ) * t))) (Ioi 0) := by
   have hg := integrableOn_rpow_mul_exp_neg_mul_rpow (s := s.re - 1) (p := 1) (b := r)
     (by linarith) one_pos hr

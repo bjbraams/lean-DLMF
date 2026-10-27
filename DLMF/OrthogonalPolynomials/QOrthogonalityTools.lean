@@ -6,8 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.QSeries.Saalschutz
-public import DLMF.QSeries.Heine
-public import DLMF.QSeries.QExponential
+public import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.SpecialFunctions.Bernstein
 
 /-!
 # Tools for orthogonality of `q`-families
@@ -31,7 +31,7 @@ noncomputable section
 namespace DLMF.OrthogonalPolynomials
 
 /-- The ratio rule `[n, m+1]_q (1 - q^{m+1}) = [n, m]_q (1 - q^{n-m})`. -/
-lemma qOrth_qBinom_succ_ratio {q : ℂ} (hq : ‖q‖ < 1) (m d : ℕ) :
+theorem qOrth_qBinom_succ_ratio {q : ℂ} (hq : ‖q‖ < 1) (m d : ℕ) :
     qBinom q (m + 1 + d) (m + 1) * (1 - q * q ^ m) =
       qBinom q (m + 1 + d) m * (1 - q * q ^ d) := by
   have h1 := qBinom_mul_qPochhammer q (m + 1) d
@@ -45,7 +45,7 @@ lemma qOrth_qBinom_succ_ratio {q : ℂ} (hq : ‖q‖ < 1) (m d : ℕ) :
   linear_combination h1 - h2
 
 /-- Term conversion between the reversed polynomial form and the `q^{-n}` form. -/
-lemma qOrth_term {q x c : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0) (hx : x ≠ 0) {n : ℕ}
+theorem qOrth_term {q x c : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0) (hx : x ≠ 0) {n : ℕ}
     (hc : c * x * q ^ n = q) {m : ℕ} (hm : m ≤ n) :
     qBinom q n m * qPochhammer x q (n - m) * x ^ m * qPochhammer c q m * qPochhammer q q m =
       qPochhammer x q n * qPochhammer (q⁻¹ ^ n) q m * q ^ m := by
@@ -108,7 +108,7 @@ theorem qOrth_saalschutz {q x c r s e : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0) 
     qPochhammer (x * r * s * q ^ m) q (n - m)) * hT
 
 /-- Moments of the little `q`-Jacobi weight, by the `q`-binomial theorem. -/
-lemma qOrth_littleQJacobi_moment {a b q : ℂ} (hq : ‖q‖ < 1) (haq : ‖a * q‖ < 1) (t : ℕ) :
+theorem qOrth_littleQJacobi_moment {a b q : ℂ} (hq : ‖q‖ < 1) (haq : ‖a * q‖ < 1) (t : ℕ) :
     HasSum (fun y : ℕ => (q ^ t) ^ y *
       (qPochhammer (b * q) q y * (a * q) ^ y / qPochhammer q q y))
       (qPochhammerInf (a * b * q ^ (t + 2)) q / qPochhammerInf (a * q ^ (t + 1)) q) := by
@@ -125,13 +125,13 @@ lemma qOrth_littleQJacobi_moment {a b q : ℂ} (hq : ‖q‖ < 1) (haq : ‖a * 
   · congr 2; ring
 
 /-- `(w;q)_n = 0` as soon as one factor `1 - w q^k`, `k < n`, vanishes. -/
-lemma qOrth_qPochhammer_eq_zero {w q : ℂ} {n k : ℕ} (hk : k < n) (h : w * q ^ k = 1) :
+theorem qOrth_qPochhammer_eq_zero {w q : ℂ} {n k : ℕ} (hk : k < n) (h : w * q ^ k = 1) :
     qPochhammer w q n = 0 := by
   rw [qPochhammer_eq_prod]
   exact prod_eq_zero (mem_range.mpr hk) (by rw [h, sub_self])
 
 /-- `(w;q)_n ≠ 0` when no factor vanishes. -/
-lemma qOrth_qPochhammer_ne_zero {w q : ℂ} {n : ℕ} (h : ∀ k < n, w * q ^ k ≠ 1) :
+theorem qOrth_qPochhammer_ne_zero {w q : ℂ} {n : ℕ} (h : ∀ k < n, w * q ^ k ≠ 1) :
     qPochhammer w q n ≠ 0 := by
   rw [qPochhammer_eq_prod]
   exact prod_ne_zero_iff.mpr fun k hk => sub_ne_zero.mpr (h k (mem_range.mp hk)).symm

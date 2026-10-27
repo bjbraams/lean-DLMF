@@ -6,13 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Confluent.Basic
-public import DLMF.Confluent.IntegralRepresentations
-public import Mathlib.Data.Set.Card
-public import Mathlib.Algebra.Order.Archimedean.Real.Basic
-public import Mathlib.Analysis.Asymptotics.Lemmas
-public import DLMF.Confluent.AsymptoticConsequences
 public import DLMF.ErrorFunctions.ZeroTools
-public import DLMF.Confluent.Recurrence
 public import DLMF.Confluent.ZeroTools
 
 /-!
@@ -49,7 +43,7 @@ theorem kummerM_posZeros_zero (b : ℝ) : (kummerMPosZeros 0 b).encard = 0 := by
 
 /-- Kummer's series has positive real part for nonnegative real numerator and
 positive real argument, including its totalized denominator value at zero. -/
-lemma kummerM_re_pos_of_nonneg {a b x : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b)
+theorem kummerM_re_pos_of_nonneg {a b x : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b)
     (hx : 0 < x) : 0 < (kummerM a b x).re := by
   rcases eq_or_lt_of_le hb with rfl | hb
   · have h : kummerM (a : ℂ) 0 x = 1 := by
@@ -92,7 +86,7 @@ theorem kummerM_posZeros_nonneg {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) :
 
 /-- For real parameters with `b ∉ -ℕ`, Kummer's series at a real point is real: it is the
 complexification of the real power series. -/
-lemma kummerM_ofReal_hasSum {a b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) (x : ℝ) :
+theorem kummerM_ofReal_hasSum {a b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) (x : ℝ) :
     HasSum (fun n => (ascPochhammer ℝ n).eval a /
         ((ascPochhammer ℝ n).eval b * n.factorial) * x ^ n) (kummerM a b x).re ∧
       kummerM a b x = ((kummerM a b x).re : ℂ) := by
@@ -127,7 +121,7 @@ def kumZ_Q (f f' : ℝ → ℝ) (m : ℕ) : Prop :=
     (∃ X, ∀ x, X ≤ x → 1 ≤ (-1) ^ m * f x)
 
 /-- The base case: a function bounded below by `1` on `[0, ∞)` has no positive zeros. -/
-lemma kumZ_Q_zero {f f' : ℝ → ℝ} (h1 : ∀ x, 0 ≤ x → 1 ≤ f x) : kumZ_Q f f' 0 := by
+theorem kumZ_Q_zero {f f' : ℝ → ℝ} (h1 : ∀ x, 0 ≤ x → 1 ≤ f x) : kumZ_Q f f' 0 := by
   refine ⟨fun j => j, by simp, fun j hj => absurd hj (Nat.not_lt_zero _),
     fun j hj1 hj => by omega, fun j hj => absurd hj (Nat.not_lt_zero _), fun x hx => ?_,
     ⟨0, fun x hx => by simpa using h1 x hx⟩⟩
@@ -135,7 +129,7 @@ lemma kumZ_Q_zero {f f' : ℝ → ℝ} (h1 : ∀ x, 0 ≤ x → 1 ≤ f x) : kum
   simp only [pow_zero, one_mul]; linarith
 
 /-- Under `kumZ_Q`, the positive zeros are exactly `y 1, …, y m`. -/
-lemma kumZ_Q_encard {f f' : ℝ → ℝ} {m : ℕ} (hQ : kumZ_Q f f' m) :
+theorem kumZ_Q_encard {f f' : ℝ → ℝ} {m : ℕ} (hQ : kumZ_Q f f' m) :
     {x : ℝ | 0 < x ∧ f x = 0}.encard = m := by
   obtain ⟨y, hy0, hymono, hyz, hysign, hylast, -⟩ := hQ
   have hmono : StrictMonoOn y (Iic m) := strictMonoOn_Iic_of_lt_succ fun j hj => hymono j hj
@@ -181,7 +175,7 @@ lemma kumZ_Q_encard {f f' : ℝ → ℝ} {m : ℕ} (hQ : kumZ_Q f f' m) :
 
 /-- A strictly increasing continuous function on an order-connected set, negative at its least
 point and positive somewhere, has exactly one zero there, with the expected signs. -/
-lemma kumZ_unique_zero {h : ℝ → ℝ} {S : Set ℝ} {p : ℝ} (hS : S.OrdConnected) (hp : p ∈ S)
+theorem kumZ_unique_zero {h : ℝ → ℝ} {S : Set ℝ} {p : ℝ} (hS : S.OrdConnected) (hp : p ∈ S)
     (hc : ContinuousOn h S) (hm : StrictMonoOn h S) (hhp : h p < 0)
     (ht : ∃ t ∈ S, 0 < h t) :
     ∃ z ∈ S, p < z ∧ h z = 0 ∧ (∀ x ∈ S, x < z → h x < 0) ∧ (∀ x ∈ S, z < x → 0 < h x) := by
@@ -201,7 +195,7 @@ lemma kumZ_unique_zero {h : ℝ → ℝ} {S : Set ℝ} {p : ℝ} (hS : S.OrdConn
 /-- The inductive step of the zero count: if `f' = (a/b) g` with `a < 0 < b`, `f 0 = 1`, and at
 the positive zeros of `g` the value `f = (x/b) g'` (from the differential equation), then the
 sign-pattern data for `g` with `k` zeros yields the data for `f` with `k + 1` zeros. -/
-lemma kumZ_step {f g g' : ℝ → ℝ} {a b : ℝ} {k : ℕ} (hab : a / b < 0) (hb : k = 0 ∨ 0 < b)
+theorem kumZ_step {f g g' : ℝ → ℝ} {a b : ℝ} {k : ℕ} (hab : a / b < 0) (hb : k = 0 ∨ 0 < b)
     (hf0 : f 0 = 1) (hfd : ∀ x, HasDerivAt f (a / b * g x) x)
     (hode : ∀ x, 0 < x → g x = 0 → f x = x / b * g' x)
     (hQ : kumZ_Q g g' k) : kumZ_Q f (fun x => a / b * g x) (k + 1) := by
@@ -345,7 +339,7 @@ lemma kumZ_step {f g g' : ℝ → ℝ} {a b : ℝ} {k : ℕ} (hab : a / b < 0) (
 
 
 /-- Linear growth: if `h' ≥ c > 0` beyond `X`, then eventually `h ≥ 1`. -/
-lemma kumZ_growth {h h' : ℝ → ℝ} (hd : ∀ x, HasDerivAt h (h' x) x) {c X : ℝ} (hc : 0 < c)
+theorem kumZ_growth {h h' : ℝ → ℝ} (hd : ∀ x, HasDerivAt h (h' x) x) {c X : ℝ} (hc : 0 < c)
     (hX : ∀ x, X ≤ x → c ≤ h' x) : ∃ T, ∀ x, T ≤ x → 1 ≤ h x := by
   have hcont : Continuous h := continuous_iff_continuousAt.2 fun x => (hd x).continuousAt
   refine ⟨X + |h X| / c + 1 / c, fun x hx => ?_⟩
@@ -367,7 +361,7 @@ lemma kumZ_growth {h h' : ℝ → ℝ} (hd : ∀ x, HasDerivAt h (h' x) x) {c X 
 
 /-- The step `k = 1 ↦ 0` for `a / b < 0` and `b < 0`: the critical point of `f` is a positive
 minimum. -/
-lemma kumZ_step_down {f g g' : ℝ → ℝ} {a b : ℝ} (hab : a / b < 0) (hb : b < 0)
+theorem kumZ_step_down {f g g' : ℝ → ℝ} {a b : ℝ} (hab : a / b < 0) (hb : b < 0)
     (hfd : ∀ x, HasDerivAt f (a / b * g x) x)
     (hode : ∀ x, 0 < x → g x = 0 → f x = x / b * g' x)
     (hQ : kumZ_Q g g' 1) : kumZ_Q f (fun x => a / b * g x) 0 := by
@@ -410,7 +404,7 @@ lemma kumZ_step_down {f g g' : ℝ → ℝ} {a b : ℝ} (hab : a / b < 0) (hb : 
     exact ⟨T, fun x hx => by simpa using hT x hx⟩
 
 /-- The step `k ↦ k` for `a / b > 0` and `b < 0`. -/
-lemma kumZ_step_same {f g g' : ℝ → ℝ} {a b : ℝ} {k : ℕ} (hab : 0 < a / b) (hb : b < 0)
+theorem kumZ_step_same {f g g' : ℝ → ℝ} {a b : ℝ} {k : ℕ} (hab : 0 < a / b) (hb : b < 0)
     (hf0 : f 0 = 1) (hfd : ∀ x, HasDerivAt f (a / b * g x) x)
     (hode : ∀ x, 0 < x → g x = 0 → f x = x / b * g' x)
     (hQ : kumZ_Q g g' k) : kumZ_Q f (fun x => a / b * g x) k := by
@@ -549,14 +543,14 @@ lemma kumZ_step_same {f g g' : ℝ → ℝ} {a b : ℝ} {k : ℕ} (hab : 0 < a /
 noncomputable def kumZ_F (a b : ℝ) : ℝ → ℝ := fun x => (kummerM a b x).re
 
 /-- Positive `b` is not a nonpositive integer. -/
-lemma kumZ_not_neg_nat {b : ℝ} (hb : 0 < b) : ∀ k : ℕ, (b : ℂ) ≠ -k := by
+theorem kumZ_not_neg_nat {b : ℝ} (hb : 0 < b) : ∀ k : ℕ, (b : ℂ) ≠ -k := by
   intro k hk
   have h := congrArg re hk
   simp only [ofReal_re, neg_re, natCast_re] at h
   linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
 
 /-- `b ∉ -ℕ` implies `b + 1 ∉ -ℕ`. -/
-lemma kumZ_succ_not_neg_nat {b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) :
+theorem kumZ_succ_not_neg_nat {b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) :
     ∀ k : ℕ, ((b + 1 : ℝ) : ℂ) ≠ -k := by
   intro k hk
   apply hb (k + 1)
@@ -564,15 +558,15 @@ lemma kumZ_succ_not_neg_nat {b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) :
   linear_combination hk
 
 /-- `M(a,b,x)` is real for real parameters and argument. -/
-lemma kumZ_F_real {a b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) (x : ℝ) :
+theorem kumZ_F_real {a b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) (x : ℝ) :
     kummerM a b x = (kumZ_F a b x : ℂ) :=
   (kummerM_ofReal_hasSum hb x).2
 
 /-- `M(a,b,0) = 1`. -/
-lemma kumZ_F_zero (a b : ℝ) : kumZ_F a b 0 = 1 := by simp [kumZ_F, kummerM_zero]
+theorem kumZ_F_zero (a b : ℝ) : kumZ_F a b 0 = 1 := by simp [kumZ_F, kummerM_zero]
 
 /-- `d/dx M(a,b,x) = (a/b) M(a+1,b+1,x)` on the real line. -/
-lemma kumZ_F_hasDerivAt {a b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) (x : ℝ) :
+theorem kumZ_F_hasDerivAt {a b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) (x : ℝ) :
     HasDerivAt (kumZ_F a b) (a / b * kumZ_F (a + 1) (b + 1) x) x := by
   have h := (hasDerivAt_kummerM_shift (a := (a : ℂ)) hb (x : ℂ)).real_of_complex
   refine h.congr_deriv ?_
@@ -581,7 +575,7 @@ lemma kumZ_F_hasDerivAt {a b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) (x : �
 
 /-- At a positive zero `x` of `M(a+1,b+1,·)`, Kummer's equation gives
 `M(a,b,x) = (x/b) M'(a+1,b+1,x)`. -/
-lemma kumZ_F_ode {a b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) (ha : a ≠ 0) {x : ℝ} (hx : 0 < x)
+theorem kumZ_F_ode {a b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) (ha : a ≠ 0) {x : ℝ} (hx : 0 < x)
     (hg : kumZ_F (a + 1) (b + 1) x = 0) :
     kumZ_F a b x = x / b * ((a + 1) / (b + 1) * kumZ_F (a + 1 + 1) (b + 1 + 1) x) := by
   have hb' := hb
@@ -618,7 +612,7 @@ lemma kumZ_F_ode {a b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) (ha : a ≠ 0)
     ofReal_re]
 
 /-- For `a ≥ 0 < b`, `M(a,b,x) ≥ 1` on `[0, ∞)`. -/
-lemma kumZ_F_one_le {a b : ℝ} (ha : 0 ≤ a) (hb : 0 < b) {x : ℝ} (hx : 0 ≤ x) :
+theorem kumZ_F_one_le {a b : ℝ} (ha : 0 ≤ a) (hb : 0 < b) {x : ℝ} (hx : 0 ≤ x) :
     1 ≤ kumZ_F a b x := by
   obtain ⟨hr, -⟩ := kummerM_ofReal_hasSum (a := a) (kumZ_not_neg_nat hb) x
   have hnonneg : ∀ n : ℕ, 0 ≤ (ascPochhammer ℝ n).eval a /
@@ -630,7 +624,7 @@ lemma kumZ_F_one_le {a b : ℝ} (ha : 0 ≤ a) (hb : 0 < b) {x : ℝ} (hx : 0 �
   simpa [kumZ_F] using hle
 
 /-- The sign-pattern data for `M(a,b,·)` with `⌈-a⌉ = n` zeros. -/
-lemma kumZ_F_Q (n : ℕ) : ∀ a b : ℝ, 0 < b → -(n : ℝ) ≤ a → a < -(n : ℝ) + 1 →
+theorem kumZ_F_Q (n : ℕ) : ∀ a b : ℝ, 0 < b → -(n : ℝ) ≤ a → a < -(n : ℝ) + 1 →
     kumZ_Q (kumZ_F a b) (fun x => a / b * kumZ_F (a + 1) (b + 1) x) n := by
   induction n with
   | zero =>
@@ -646,7 +640,7 @@ lemma kumZ_F_Q (n : ℕ) : ∀ a b : ℝ, 0 < b → -(n : ℝ) ≤ a → a < -(n
       (ih (a + 1) (b + 1) (by linarith) (by linarith) (by linarith))
 
 /-- A real number strictly between consecutive nonpositive integers is not in `-ℕ`. -/
-lemma kumZ_not_neg_nat_of_Ioo {b : ℝ} {n : ℕ} (h1 : -((n : ℝ) + 1) < b) (h2 : b < -(n : ℝ)) :
+theorem kumZ_not_neg_nat_of_Ioo {b : ℝ} {n : ℕ} (h1 : -((n : ℝ) + 1) < b) (h2 : b < -(n : ℝ)) :
     ∀ k : ℕ, (b : ℂ) ≠ -k := by
   intro k hk
   have hb : b = -(k : ℝ) := by
@@ -660,7 +654,7 @@ lemma kumZ_not_neg_nat_of_Ioo {b : ℝ} {n : ℕ} (h1 : -((n : ℝ) + 1) < b) (h
 
 /-- Sign-pattern data for `a > 0` and `b ∈ (-(n+1), -n)`: one zero when `n` is even, none when
 `n` is odd. -/
-lemma kumZ_F_Q_negb (n : ℕ) : ∀ a b : ℝ, 0 < a → -((n : ℝ) + 1) < b → b < -(n : ℝ) →
+theorem kumZ_F_Q_negb (n : ℕ) : ∀ a b : ℝ, 0 < a → -((n : ℝ) + 1) < b → b < -(n : ℝ) →
     kumZ_Q (kumZ_F a b) (fun x => a / b * kumZ_F (a + 1) (b + 1) x) ((n + 1) % 2) := by
   induction n with
   | zero =>
@@ -690,7 +684,7 @@ lemma kumZ_F_Q_negb (n : ℕ) : ∀ a b : ℝ, 0 < a → -((n : ℝ) + 1) < b �
       rwa [show (n + 1 + 1) % 2 = 0 by omega]
 
 /-- For noninteger `b < 0`, `b` lies strictly between `-⌈-b⌉` and `-⌈-b⌉ + 1`. -/
-lemma kumZ_ceil_bounds {b : ℝ} (hb : b < 0) (hbi : ∀ k : ℕ, b ≠ -(k : ℝ)) :
+theorem kumZ_ceil_bounds {b : ℝ} (hb : b < 0) (hbi : ∀ k : ℕ, b ≠ -(k : ℝ)) :
     1 ≤ ⌈-b⌉ ∧ -((⌈-b⌉.toNat : ℕ) : ℝ) < b ∧ b < -((⌈-b⌉.toNat : ℕ) : ℝ) + 1 := by
   have hc1 : 1 ≤ ⌈-b⌉ := by
     rw [Int.one_le_ceil_iff]; linarith
@@ -707,17 +701,17 @@ lemma kumZ_ceil_bounds {b : ℝ} (hb : b < 0) (hbi : ∀ k : ℕ, b ≠ -(k : �
   · rw [hn]; linarith [Int.ceil_lt_add_one (-b)]
 
 /-- Positive zeros of `M(a,b,·)` are the positive zeros of the real function `kumZ_F a b`. -/
-lemma kumZ_posZeros_eq {a b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) :
+theorem kumZ_posZeros_eq {a b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) :
     kummerMPosZeros a b = {x : ℝ | 0 < x ∧ kumZ_F a b x = 0} := by
   ext x
   simp only [kummerMPosZeros, mem_ofPred_eq, kumZ_F_real hb x, ofReal_eq_zero]
 
 /-- Real-to-complex transfer of `b ∉ -ℕ`. -/
-lemma kumZ_not_neg_nat_real {b : ℝ} (hbi : ∀ k : ℕ, b ≠ -(k : ℝ)) : ∀ k : ℕ, (b : ℂ) ≠ -k :=
+theorem kumZ_not_neg_nat_real {b : ℝ} (hbi : ∀ k : ℕ, b ≠ -(k : ℝ)) : ∀ k : ℕ, (b : ℂ) ≠ -k :=
   fun k hk => hbi k (by exact_mod_cast hk)
 
 /-- Sign-pattern data for `a < -m` and `b ∈ (-(m+1), -m)`: `⌈-a⌉ - (m+1)` zeros. -/
-lemma kumZ_F_Q_both (m : ℕ) : ∀ a b : ℝ, -((m : ℝ) + 1) < b → b < -(m : ℝ) → a < -(m : ℝ) →
+theorem kumZ_F_Q_both (m : ℕ) : ∀ a b : ℝ, -((m : ℝ) + 1) < b → b < -(m : ℝ) → a < -(m : ℝ) →
     kumZ_Q (kumZ_F a b) (fun x => a / b * kumZ_F (a + 1) (b + 1) x)
       (⌈-a⌉.toNat - (m + 1)) := by
   induction m with
@@ -751,7 +745,7 @@ lemma kumZ_F_Q_both (m : ℕ) : ∀ a b : ℝ, -((m : ℝ) + 1) < b → b < -(m 
 
 /-- Sign-pattern data for noninteger `a ∈ (-(p+1), -p)` and noninteger `b` with
 `⌈-b⌉ > p + 1`: `(⌈-b⌉ - (p+1)) mod 2` zeros. -/
-lemma kumZ_F_Q_swap (p : ℕ) : ∀ a b : ℝ, -((p : ℝ) + 1) < a → a < -(p : ℝ) →
+theorem kumZ_F_Q_swap (p : ℕ) : ∀ a b : ℝ, -((p : ℝ) + 1) < a → a < -(p : ℝ) →
     (∀ k : ℕ, b ≠ -(k : ℝ)) → (p : ℤ) + 1 < ⌈-b⌉ →
     kumZ_Q (kumZ_F a b) (fun x => a / b * kumZ_F (a + 1) (b + 1) x)
       ((⌈-b⌉ - (p + 1)) % 2).toNat := by
@@ -1012,14 +1006,14 @@ section LargeZeros
 open Asymptotics Metric
 
 /-- `log (t i) = log t + (π/2) i` for `t > 0`. -/
-lemma kumZ_log_ofReal_mul_I {t : ℝ} (ht : 0 < t) :
+theorem kumZ_log_ofReal_mul_I {t : ℝ} (ht : 0 < t) :
     log ((t : ℂ) * I) = Real.log t + (π / 2 : ℝ) * I := by
   apply Complex.ext
   · simp [log_re, abs_of_pos ht]
   · rw [log_im, arg_real_mul I ht, arg_I]; simp
 
 /-- `log` is `2/t`-Lipschitz on the disc of radius `t/2` about `t i`. -/
-lemma kumZ_norm_log_sub_le {t : ℝ} (ht : 0 < t) {z : ℂ} (hz : ‖z - t * I‖ ≤ t / 2) :
+theorem kumZ_norm_log_sub_le {t : ℝ} (ht : 0 < t) {z : ℂ} (hz : ‖z - t * I‖ ≤ t / 2) :
     ‖log z - log ((t : ℂ) * I)‖ ≤ 2 / t * ‖z - t * I‖ := by
   have hmem : ∀ u ∈ closedBall ((t : ℂ) * I) (t / 2), t / 2 ≤ u.im := by
     intro u hu
@@ -1041,13 +1035,13 @@ lemma kumZ_norm_log_sub_le {t : ℝ} (ht : 0 < t) {z : ℂ} (hz : ‖z - t * I�
       _ = 2 / t := by field_simp
 
 /-- Factorization `z^s = u^s exp(s (log z - log u))`. -/
-lemma kumZ_cpow_eq {u z : ℂ} (hu : u ≠ 0) (hz : z ≠ 0) (s : ℂ) :
+theorem kumZ_cpow_eq {u z : ℂ} (hu : u ≠ 0) (hz : z ≠ 0) (s : ℂ) :
     z ^ s = u ^ s * exp (s * (log z - log u)) := by
   rw [cpow_def_of_ne_zero hz, cpow_def_of_ne_zero hu, ← Complex.exp_add]
   ring_nf
 
 /-- Explicit form of the sector Poincaré bound for `𝐌` (DLMF 13.7.2, one term). -/
-lemma kumZ_sector_bound (a b : ℂ) (ha : ∀ k : ℕ, a ≠ -k) (hba : ∀ k : ℕ, b - a ≠ -k) :
+theorem kumZ_sector_bound (a b : ℂ) (ha : ∀ k : ℕ, a ≠ -k) (hba : ∀ k : ℕ, b - a ≠ -k) :
     ∃ K₁ > 0, ∃ R : ℝ, ∀ z : ℂ, R ≤ ‖z‖ → π / 4 ≤ z.arg → z.arg ≤ π - π / 4 →
       ‖regularizedHGFun {a} {b} z -
         (exp z * z ^ (a - b) / Gamma a + exp (π * I * a) * z ^ (-a) / Gamma (b - a))‖ ≤
@@ -1064,7 +1058,7 @@ lemma kumZ_sector_bound (a b : ℂ) (ha : ∀ k : ℕ, a ≠ -k) (hba : ∀ k : 
 
 
 /-- `‖exp ζ‖ ≤ 3` for `‖ζ‖ ≤ 1`. -/
-lemma kumZ_norm_exp_le_three {ζ : ℂ} (h : ‖ζ‖ ≤ 1) : ‖exp ζ‖ ≤ 3 := by
+theorem kumZ_norm_exp_le_three {ζ : ℂ} (h : ‖ζ‖ ≤ 1) : ‖exp ζ‖ ≤ 3 := by
   rw [Complex.norm_exp]
   have := Real.exp_one_lt_d9
   have h1 : ζ.re ≤ 1 := (re_le_norm ζ).trans h
@@ -1275,14 +1269,14 @@ theorem kumZ_core (a b : ℂ) (hb : ∀ k : ℕ, b ≠ -k) (ha : ∀ k : ℕ, a 
 
 
 /-- `‖log Y‖ ≤ |log ‖Y‖| + π`. -/
-lemma kumZ_norm_log_le (Y : ℂ) : ‖log Y‖ ≤ |Real.log ‖Y‖| + π := by
+theorem kumZ_norm_log_le (Y : ℂ) : ‖log Y‖ ≤ |Real.log ‖Y‖| + π := by
   refine (norm_le_abs_re_add_abs_im _).trans ?_
   rw [log_re, log_im]
   gcongr
   exact abs_arg_le_pi Y
 
 /-- The distance of the model zero from the ray point grows at most logarithmically. -/
-lemma kumZ_dist_bound (G v c α : ℂ) (hG : G ≠ 0) (hv : v ≠ 0) :
+theorem kumZ_dist_bound (G v c α : ℂ) (hG : G ≠ 0) (hv : v ≠ 0) :
     ∃ K : ℝ, ∀ t : ℝ, Real.exp 1 ≤ t → ‖α + log (G * ((t : ℂ) * v) ^ c)‖ ≤ K * Real.log t := by
   refine ⟨‖α‖ + |Real.log ‖G‖| + |c.re| + |c.re| * |Real.log ‖v‖| + |arg v * c.im| + π,
     fun t ht => ?_⟩
@@ -1330,7 +1324,7 @@ lemma kumZ_dist_bound (G v c α : ℂ) (hG : G ≠ 0) (hv : v ≠ 0) :
     _ ≤ _ := by nlinarith
 
 /-- `log (-(t i)) = log t - (π/2) i` for `t > 0`. -/
-lemma kumZ_log_neg_ofReal_mul_I {t : ℝ} (ht : 0 < t) :
+theorem kumZ_log_neg_ofReal_mul_I {t : ℝ} (ht : 0 < t) :
     log (-((t : ℂ) * I)) = Real.log t - (π / 2 : ℝ) * I := by
   have h : -((t : ℂ) * I) = (t : ℂ) * (-I) := by ring
   apply Complex.ext
@@ -1338,7 +1332,7 @@ lemma kumZ_log_neg_ofReal_mul_I {t : ℝ} (ht : 0 < t) :
   · rw [h, log_im, arg_real_mul _ ht, arg_neg_I]; simp
 
 /-- The Landau scale: `log (2πn) / (2πn) = O(n⁻¹ log n)`. -/
-lemma kumZ_scale_isBigO (C : ℝ) :
+theorem kumZ_scale_isBigO (C : ℝ) :
     (fun n : ℕ => C * Real.log (2 * n * π) / (2 * n * π)) =O[atTop]
       (fun n : ℕ => ‖(n : ℂ)⁻¹ * log n‖) := by
   refine IsBigO.of_bound (|C| * 4) ?_

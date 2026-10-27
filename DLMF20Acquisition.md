@@ -91,51 +91,51 @@ All 107 in-scope numbered IDs are covered by 124 tagged declarations (16 definit
 
 ## [§20.4 Values at z = 0](https://dlmf.nist.gov/20.4)
 
-- [20.4.E1](https://dlmf.nist.gov/20.4.E1): [`DLMF.Theta.jacobiTheta_zero_values`](DLMF/Theta/ZeroValues.lean#L92) (proved). All τ; derivatives are `deriv` in z.
-- [20.4.E2](https://dlmf.nist.gov/20.4.E2): [`DLMF.Theta.jacobiThetaOneDerivNullTau_prod`](DLMF/Theta/ZeroValues.lean#L107) (proved). Product as `Multipliable ∧ θ₁′(0) = 2e^{iπτ/4}∏′`, plus the (q²;q²)_∞³ form via `qPochhammerInf`.
-- [20.4.E3](https://dlmf.nist.gov/20.4.E3): [`DLMF.Theta.jacobiThetaTwoNullTau_prod`](DLMF/Theta/ZeroValues.lean#L118) (proved). Proved from 20.5.E2 at z = 0.
-- [20.4.E4](https://dlmf.nist.gov/20.4.E4): [`DLMF.Theta.jacobiThetaThreeNullTau_prod`](DLMF/Theta/ZeroValues.lean#L135) (proved). Proved from 20.5.E3 at z = 0.
-- [20.4.E5](https://dlmf.nist.gov/20.4.E5): [`DLMF.Theta.jacobiThetaFourNullTau_prod`](DLMF/Theta/ZeroValues.lean#L151) (proved). Proved from 20.5.E4 at z = 0.
-- [20.4.E6](https://dlmf.nist.gov/20.4.E6): [`DLMF.Theta.jacobiThetaOneDerivNullTau_eq_mul`](DLMF/Theta/ZeroValues.lean#L167) (proved). Jacobi’s derivative formula, Im τ > 0.
-- [20.4.E7](https://dlmf.nist.gov/20.4.E7): [`DLMF.Theta.jacobiTheta_iteratedDeriv_zero_values`](DLMF/Theta/ZeroValues.lean#L199) (proved). All τ; `iteratedDeriv`, from parity.
-- [20.4.E8](https://dlmf.nist.gov/20.4.E8): [`DLMF.Theta.jacobiThetaOne_third_deriv_ratio`](DLMF/Theta/ZeroValues.lean#L579) (proved). `HasSum` form; θ₁′(0|τ) ≠ 0 for Im τ > 0, so DLMF’s quotient is used unchanged.
-- [20.4.E9](https://dlmf.nist.gov/20.4.E9): [`DLMF.Theta.jacobiThetaTwo_second_deriv_ratio`](DLMF/Theta/ZeroValues.lean#L595) (proved). `HasSum` form, theta constant nonzero.
-- [20.4.E10](https://dlmf.nist.gov/20.4.E10): [`DLMF.Theta.jacobiThetaThree_second_deriv_ratio`](DLMF/Theta/ZeroValues.lean#L612) (proved). `HasSum` form.
-- [20.4.E11](https://dlmf.nist.gov/20.4.E11): [`DLMF.Theta.jacobiThetaFour_second_deriv_ratio`](DLMF/Theta/ZeroValues.lean#L631) (proved). `HasSum` form.
-- [20.4.E12](https://dlmf.nist.gov/20.4.E12): [`DLMF.Theta.jacobiTheta_deriv_ratio_sum`](DLMF/Theta/ZeroValues.lean#L649) (proved). Quotients of nonvanishing constants.
+- [20.4.E1](https://dlmf.nist.gov/20.4.E1): [`DLMF.Theta.jacobiTheta_zero_values`](DLMF/Theta/ZeroValues.lean#L50) (proved). All τ; derivatives are `deriv` in z.
+- [20.4.E2](https://dlmf.nist.gov/20.4.E2): [`DLMF.Theta.jacobiThetaOneDerivNullTau_prod`](DLMF/Theta/Products.lean#L1561) (proved). Product as `Multipliable ∧ θ₁′(0) = 2e^{iπτ/4}∏′`, plus the (q²;q²)_∞³ form via `qPochhammerInf`.
+- [20.4.E3](https://dlmf.nist.gov/20.4.E3): [`DLMF.Theta.jacobiThetaTwoNullTau_prod`](DLMF/Theta/Products.lean#L1572) (proved). Proved from 20.5.E2 at z = 0.
+- [20.4.E4](https://dlmf.nist.gov/20.4.E4): [`DLMF.Theta.jacobiThetaThreeNullTau_prod`](DLMF/Theta/Products.lean#L1589) (proved). Proved from 20.5.E3 at z = 0.
+- [20.4.E5](https://dlmf.nist.gov/20.4.E5): [`DLMF.Theta.jacobiThetaFourNullTau_prod`](DLMF/Theta/Products.lean#L1605) (proved). Proved from 20.5.E4 at z = 0.
+- [20.4.E6](https://dlmf.nist.gov/20.4.E6): [`DLMF.Theta.jacobiThetaOneDerivNullTau_eq_mul`](DLMF/Theta/Products.lean#L1621) (proved). Jacobi’s derivative formula, Im τ > 0.
+- [20.4.E7](https://dlmf.nist.gov/20.4.E7): [`DLMF.Theta.jacobiTheta_iteratedDeriv_zero_values`](DLMF/Theta/ZeroValues.lean#L65) (proved). All τ; `iteratedDeriv`, from parity.
+- [20.4.E8](https://dlmf.nist.gov/20.4.E8): [`DLMF.Theta.jacobiThetaOne_third_deriv_ratio`](DLMF/Theta/ZeroValues.lean#L445) (proved). `HasSum` form; θ₁′(0|τ) ≠ 0 for Im τ > 0, so DLMF’s quotient is used unchanged.
+- [20.4.E9](https://dlmf.nist.gov/20.4.E9): [`DLMF.Theta.jacobiThetaTwo_second_deriv_ratio`](DLMF/Theta/ZeroValues.lean#L461) (proved). `HasSum` form, theta constant nonzero.
+- [20.4.E10](https://dlmf.nist.gov/20.4.E10): [`DLMF.Theta.jacobiThetaThree_second_deriv_ratio`](DLMF/Theta/ZeroValues.lean#L478) (proved). `HasSum` form.
+- [20.4.E11](https://dlmf.nist.gov/20.4.E11): [`DLMF.Theta.jacobiThetaFour_second_deriv_ratio`](DLMF/Theta/ZeroValues.lean#L497) (proved). `HasSum` form.
+- [20.4.E12](https://dlmf.nist.gov/20.4.E12): [`DLMF.Theta.jacobiTheta_deriv_ratio_sum`](DLMF/Theta/ZeroValues.lean#L515) (proved). Quotients of nonvanishing constants.
 
 ## [§20.5 Infinite Products and Related Results](https://dlmf.nist.gov/20.5)
 
-- [20.5.E1](https://dlmf.nist.gov/20.5.E1): [`DLMF.Theta.jacobiThetaOneTau_hasProd`](DLMF/Theta/Products.lean#L271) (proved). Proved from the triple product (17.8.E1) via 20.5.E2; `Multipliable ∧ θ = 2q^{1/4} sin z ∏′` (valid also at sin z = 0).
-- [20.5.E2](https://dlmf.nist.gov/20.5.E2): [`DLMF.Theta.jacobiThetaTwoTau_hasProd`](DLMF/Theta/Products.lean#L227) (proved). Proved from the triple product and `qPochhammerInf_shift`.
-- [20.5.E3](https://dlmf.nist.gov/20.5.E3): [`DLMF.Theta.jacobiThetaThreeTau_hasProd`](DLMF/Theta/Products.lean#L294) (proved). Proved from the triple product.
-- [20.5.E4](https://dlmf.nist.gov/20.5.E4): [`DLMF.Theta.jacobiThetaFourTau_hasProd`](DLMF/Theta/Products.lean#L318) (proved). Proved from 20.5.E3 at z + π/2.
-- [20.5.E5](https://dlmf.nist.gov/20.5.E5): [`DLMF.Theta.jacobiThetaOneTau_hasProd_sin`](DLMF/Theta/Products.lean#L339) (proved). Im τ > 0; factors sin(nπτ) ≠ 0.
-- [20.5.E6](https://dlmf.nist.gov/20.5.E6): [`DLMF.Theta.jacobiThetaTwoTau_hasProd_cos`](DLMF/Theta/Products.lean#L371) (proved). Im τ > 0.
-- [20.5.E7](https://dlmf.nist.gov/20.5.E7): [`DLMF.Theta.jacobiThetaThreeTau_hasProd_cos`](DLMF/Theta/Products.lean#L411) (proved). Im τ > 0.
-- [20.5.E8](https://dlmf.nist.gov/20.5.E8): [`DLMF.Theta.jacobiThetaFourTau_hasProd_sin`](DLMF/Theta/Products.lean#L449) (proved). Im τ > 0.
-- [20.5.E9](https://dlmf.nist.gov/20.5.E9): [`DLMF.Theta.jacobiThetaThreeTau_triple_product`](DLMF/Theta/Products.lean#L486) (proved). Both the bilateral series (`HasSum` over ℤ) and the product; p = e^{iπz}.
-- [20.5.E10](https://dlmf.nist.gov/20.5.E10): [`DLMF.Theta.jacobiThetaOneTau_logDeriv`](DLMF/Theta/Products.lean#L822) (proved). Strip |Im z| < π Im τ; both series; at the real zeros of θ₁ both sides are 0 in Lean (removable singularity, see module docstring).
-- [20.5.E11](https://dlmf.nist.gov/20.5.E11): [`DLMF.Theta.jacobiThetaTwoTau_logDeriv`](DLMF/Theta/Products.lean#L878) (proved). Strip |Im z| < π Im τ; both series.
-- [20.5.E12](https://dlmf.nist.gov/20.5.E12): [`DLMF.Theta.jacobiThetaThreeTau_logDeriv`](DLMF/Theta/Products.lean#L933) (proved). Strip |Im z| < π Im τ/2; both series.
-- [20.5.E13](https://dlmf.nist.gov/20.5.E13): [`DLMF.Theta.jacobiThetaFourTau_logDeriv`](DLMF/Theta/Products.lean#L980) (proved). Strip |Im z| < π Im τ/2; both series.
-- [20.5.E14](https://dlmf.nist.gov/20.5.E14): [`DLMF.Theta.jacobiThetaOneTau_doubleProd`](DLMF/Theta/Products.lean#L1135) (admitted). Eisenstein order: inner limits L(n) exist and the outer symmetric limit converges; stated as ∃ L with both `Tendsto`s.
-- [20.5.E15](https://dlmf.nist.gov/20.5.E15): [`DLMF.Theta.jacobiThetaTwoTau_doubleProd`](DLMF/Theta/Products.lean#L1146) (admitted). As 20.5.E14.
-- [20.5.E16](https://dlmf.nist.gov/20.5.E16): [`DLMF.Theta.jacobiThetaThreeTau_doubleProd`](DLMF/Theta/Products.lean#L1157) (admitted). As 20.5.E14.
-- [20.5.E17](https://dlmf.nist.gov/20.5.E17): [`DLMF.Theta.jacobiThetaFourTau_doubleProd`](DLMF/Theta/Products.lean#L1168) (admitted). As 20.5.E14.
+- [20.5.E1](https://dlmf.nist.gov/20.5.E1): [`DLMF.Theta.jacobiThetaOneTau_hasProd`](DLMF/Theta/Products.lean#L272) (proved). Proved from the triple product (17.8.E1) via 20.5.E2; `Multipliable ∧ θ = 2q^{1/4} sin z ∏′` (valid also at sin z = 0).
+- [20.5.E2](https://dlmf.nist.gov/20.5.E2): [`DLMF.Theta.jacobiThetaTwoTau_hasProd`](DLMF/Theta/Products.lean#L228) (proved). Proved from the triple product and `qPochhammerInf_shift`.
+- [20.5.E3](https://dlmf.nist.gov/20.5.E3): [`DLMF.Theta.jacobiThetaThreeTau_hasProd`](DLMF/Theta/Products.lean#L295) (proved). Proved from the triple product.
+- [20.5.E4](https://dlmf.nist.gov/20.5.E4): [`DLMF.Theta.jacobiThetaFourTau_hasProd`](DLMF/Theta/Products.lean#L319) (proved). Proved from 20.5.E3 at z + π/2.
+- [20.5.E5](https://dlmf.nist.gov/20.5.E5): [`DLMF.Theta.jacobiThetaOneTau_hasProd_sin`](DLMF/Theta/Products.lean#L340) (proved). Im τ > 0; factors sin(nπτ) ≠ 0.
+- [20.5.E6](https://dlmf.nist.gov/20.5.E6): [`DLMF.Theta.jacobiThetaTwoTau_hasProd_cos`](DLMF/Theta/Products.lean#L372) (proved). Im τ > 0.
+- [20.5.E7](https://dlmf.nist.gov/20.5.E7): [`DLMF.Theta.jacobiThetaThreeTau_hasProd_cos`](DLMF/Theta/Products.lean#L412) (proved). Im τ > 0.
+- [20.5.E8](https://dlmf.nist.gov/20.5.E8): [`DLMF.Theta.jacobiThetaFourTau_hasProd_sin`](DLMF/Theta/Products.lean#L450) (proved). Im τ > 0.
+- [20.5.E9](https://dlmf.nist.gov/20.5.E9): [`DLMF.Theta.jacobiThetaThreeTau_triple_product`](DLMF/Theta/Products.lean#L487) (proved). Both the bilateral series (`HasSum` over ℤ) and the product; p = e^{iπz}.
+- [20.5.E10](https://dlmf.nist.gov/20.5.E10): [`DLMF.Theta.jacobiThetaOneTau_logDeriv`](DLMF/Theta/Products.lean#L823) (proved). Strip |Im z| < π Im τ; both series; at the real zeros of θ₁ both sides are 0 in Lean (removable singularity, see module docstring).
+- [20.5.E11](https://dlmf.nist.gov/20.5.E11): [`DLMF.Theta.jacobiThetaTwoTau_logDeriv`](DLMF/Theta/Products.lean#L879) (proved). Strip |Im z| < π Im τ; both series.
+- [20.5.E12](https://dlmf.nist.gov/20.5.E12): [`DLMF.Theta.jacobiThetaThreeTau_logDeriv`](DLMF/Theta/Products.lean#L934) (proved). Strip |Im z| < π Im τ/2; both series.
+- [20.5.E13](https://dlmf.nist.gov/20.5.E13): [`DLMF.Theta.jacobiThetaFourTau_logDeriv`](DLMF/Theta/Products.lean#L981) (proved). Strip |Im z| < π Im τ/2; both series.
+- [20.5.E14](https://dlmf.nist.gov/20.5.E14): [`DLMF.Theta.jacobiThetaOneTau_doubleProd`](DLMF/Theta/Products.lean#L1328) (proved). Eisenstein order: inner limits L(n) exist and the outer symmetric limit converges; stated as ∃ L with both `Tendsto`s.
+- [20.5.E15](https://dlmf.nist.gov/20.5.E15): [`DLMF.Theta.jacobiThetaTwoTau_doubleProd`](DLMF/Theta/Products.lean#L1387) (proved). As 20.5.E14.
+- [20.5.E16](https://dlmf.nist.gov/20.5.E16): [`DLMF.Theta.jacobiThetaThreeTau_doubleProd`](DLMF/Theta/Products.lean#L1428) (proved). As 20.5.E14.
+- [20.5.E17](https://dlmf.nist.gov/20.5.E17): [`DLMF.Theta.jacobiThetaFourTau_doubleProd`](DLMF/Theta/Products.lean#L1464) (proved). As 20.5.E14.
 
 ## [§20.6 Power Series](https://dlmf.nist.gov/20.6)
 
-- [20.6.E1](https://dlmf.nist.gov/20.6.E1): [`DLMF.Theta.thetaLatticeMinNorm`](DLMF/Theta/PowerSeries.lean#L57) (definition). The radius min_{(m,n)≠0} |(m+nτ)π| as a definition (`⨅`).
-- [20.6.E2](https://dlmf.nist.gov/20.6.E2): [`DLMF.Theta.jacobiThetaOneTau_powerSeries`](DLMF/Theta/PowerSeries.lean#L63) (admitted). Hypothesis |πz| < radius; summability of the exponent series is part of the conclusion.
-- [20.6.E3](https://dlmf.nist.gov/20.6.E3): [`DLMF.Theta.jacobiThetaTwoTau_powerSeries`](DLMF/Theta/PowerSeries.lean#L73) (admitted). As 20.6.E2.
-- [20.6.E4](https://dlmf.nist.gov/20.6.E4): [`DLMF.Theta.jacobiThetaThreeTau_powerSeries`](DLMF/Theta/PowerSeries.lean#L83) (admitted). As 20.6.E2.
-- [20.6.E5](https://dlmf.nist.gov/20.6.E5): [`DLMF.Theta.jacobiThetaFourTau_powerSeries`](DLMF/Theta/PowerSeries.lean#L93) (admitted). As 20.6.E2.
-- [20.6.E6](https://dlmf.nist.gov/20.6.E6): [`DLMF.Theta.thetaDelta`](DLMF/Theta/PowerSeries.lean#L35) (definition). Iterated sum, inner over m (Eisenstein order); index k = 2j.
-- [20.6.E7](https://dlmf.nist.gov/20.6.E7): [`DLMF.Theta.thetaAlpha`](DLMF/Theta/PowerSeries.lean#L42) (definition). Iterated sum.
-- [20.6.E8](https://dlmf.nist.gov/20.6.E8): [`DLMF.Theta.thetaBeta`](DLMF/Theta/PowerSeries.lean#L47) (definition). Iterated sum.
-- [20.6.E9](https://dlmf.nist.gov/20.6.E9): [`DLMF.Theta.thetaGamma`](DLMF/Theta/PowerSeries.lean#L52) (definition). Iterated sum.
-- [20.6.E10](https://dlmf.nist.gov/20.6.E10): [`DLMF.Theta.thetaAlpha_thetaBeta_eq`](DLMF/Theta/PowerSeries.lean#L103) (admitted). Both identities, j ≥ 1, Im τ > 0 (numerically checked for j = 1, 2).
+- [20.6.E1](https://dlmf.nist.gov/20.6.E1): [`DLMF.Theta.thetaLatticeMinNorm`](DLMF/Theta/PowerSeries.lean#L59) (definition). The radius min_{(m,n)≠0} |(m+nτ)π| as a definition (`⨅`).
+- [20.6.E2](https://dlmf.nist.gov/20.6.E2): [`DLMF.Theta.jacobiThetaOneTau_powerSeries`](DLMF/Theta/PowerSeries.lean#L65) (admitted). Hypothesis |πz| < radius; summability of the exponent series is part of the conclusion.
+- [20.6.E3](https://dlmf.nist.gov/20.6.E3): [`DLMF.Theta.jacobiThetaTwoTau_powerSeries`](DLMF/Theta/PowerSeries.lean#L75) (admitted). As 20.6.E2.
+- [20.6.E4](https://dlmf.nist.gov/20.6.E4): [`DLMF.Theta.jacobiThetaThreeTau_powerSeries`](DLMF/Theta/PowerSeries.lean#L85) (admitted). As 20.6.E2.
+- [20.6.E5](https://dlmf.nist.gov/20.6.E5): [`DLMF.Theta.jacobiThetaFourTau_powerSeries`](DLMF/Theta/PowerSeries.lean#L95) (admitted). As 20.6.E2.
+- [20.6.E6](https://dlmf.nist.gov/20.6.E6): [`DLMF.Theta.thetaDelta`](DLMF/Theta/PowerSeries.lean#L37) (definition). Iterated sum, inner over m (Eisenstein order); index k = 2j.
+- [20.6.E7](https://dlmf.nist.gov/20.6.E7): [`DLMF.Theta.thetaAlpha`](DLMF/Theta/PowerSeries.lean#L44) (definition). Iterated sum.
+- [20.6.E8](https://dlmf.nist.gov/20.6.E8): [`DLMF.Theta.thetaBeta`](DLMF/Theta/PowerSeries.lean#L49) (definition). Iterated sum.
+- [20.6.E9](https://dlmf.nist.gov/20.6.E9): [`DLMF.Theta.thetaGamma`](DLMF/Theta/PowerSeries.lean#L54) (definition). Iterated sum.
+- [20.6.E10](https://dlmf.nist.gov/20.6.E10): [`DLMF.Theta.thetaAlpha_thetaBeta_eq`](DLMF/Theta/PowerSeries.lean#L308) (proved). Both identities, j ≥ 1, Im τ > 0 (numerically checked for j = 1, 2).
 
 ## [§20.7 Identities](https://dlmf.nist.gov/20.7)
 
@@ -163,20 +163,20 @@ All 107 in-scope numbered IDs are covered by 124 tagged declarations (16 definit
 - [20.7.E22](https://dlmf.nist.gov/20.7.E22): [`DLMF.Theta.jacobiThetaTwoTau_landen_four`](DLMF/Theta/Identities.lean#L673) (proved).
 - [20.7.E23](https://dlmf.nist.gov/20.7.E23): [`DLMF.Theta.jacobiThetaThreeTau_landen_four`](DLMF/Theta/Identities.lean#L701) (proved).
 - [20.7.E24](https://dlmf.nist.gov/20.7.E24): [`DLMF.Theta.jacobiThetaFourTau_landen_four`](DLMF/Theta/Identities.lean#L729) (proved).
-- [20.7.E25](https://dlmf.nist.gov/20.7.E25): [`DLMF.Theta.hasDerivAt_jacobiThetaTwoTau_div_four`](DLMF/Theta/Identities.lean#L756) (admitted). **Corrected** (formalization): `HasDerivAt` at points with θ₄(z|τ) ≠ 0, where the quotient has no pole.
-- [20.7.E26](https://dlmf.nist.gov/20.7.E26): [`DLMF.Theta.jacobiThetaOneTau_add_one`](DLMF/Theta/Identities.lean#L814) (proved). All τ, from the series.
-- [20.7.E27](https://dlmf.nist.gov/20.7.E27): [`DLMF.Theta.jacobiThetaTwoTau_add_one`](DLMF/Theta/Identities.lean#L805) (proved). All τ.
-- [20.7.E28](https://dlmf.nist.gov/20.7.E28): [`DLMF.Theta.jacobiThetaThreeTau_add_one`](DLMF/Theta/Identities.lean#L775) (proved); Mathlib: [`jacobiTheta₂_add_right`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=jacobiTheta₂_add_right#doc) (partial: only the period 2 in τ, i.e. 20.7.28 followed by 20.7.29); Mathlib: [`jacobiTheta_two_add`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=jacobiTheta_two_add#doc) (partial: θ₃(0|τ + 2) = θ₃(0|τ), i.e. 20.7.28 followed by 20.7.29 at z = 0). All τ.
-- [20.7.E29](https://dlmf.nist.gov/20.7.E29): [`DLMF.Theta.jacobiThetaFourTau_add_one`](DLMF/Theta/Identities.lean#L791) (proved). All τ.
-- [20.7.E30](https://dlmf.nist.gov/20.7.E30): [`DLMF.Theta.jacobiThetaOneTau_neg_inv`](DLMF/Theta/Identities.lean#L861) (proved). Im τ > 0, principal square root; from 20.7.E31 and 20.2.E11.
-- [20.7.E31](https://dlmf.nist.gov/20.7.E31): [`DLMF.Theta.jacobiThetaTwoTau_neg_inv`](DLMF/Theta/Identities.lean#L847) (proved). Im τ > 0; from 20.7.E32 and the half-period shifts.
-- [20.7.E32](https://dlmf.nist.gov/20.7.E32): [`DLMF.Theta.jacobiThetaThreeTau_neg_inv`](DLMF/Theta/Identities.lean#L821) (proved); [`DLMF.Elliptic.jacobiThetaThreeTau_zero_neg_recip`](DLMF/Elliptic/Theta.lean#L147) (proved); Mathlib: [`jacobiTheta₂_functional_equation`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=jacobiTheta₂_functional_equation#doc) (exact in Mathlib's argument z/π: θ₃(z|τ) = (-iτ)^{-1/2} exp(iτ'z²/π) θ₃(zτ'|τ');  principal square root; the local form is DLMF.Theta.jacobiThetaThreeTau_neg_inv); Mathlib: [`jacobiTheta_S_smul`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=jacobiTheta_S_smul#doc) (special case z = 0, τ ∈ ℍ: θ₃(0|-1/τ) = (-iτ)^{1/2} θ₃(0|τ)). Im τ > 0; from Mathlib’s `jacobiTheta₂_functional_equation`.
-- [20.7.E33](https://dlmf.nist.gov/20.7.E33): [`DLMF.Theta.jacobiThetaFourTau_neg_inv`](DLMF/Theta/Identities.lean#L834) (proved). Im τ > 0; from 20.7.E32 and 20.2.E12.
-- [20.7.E34](https://dlmf.nist.gov/20.7.E34): [`DLMF.Theta.jacobiTheta_reduction_iq_sq`](DLMF/Theta/Identities.lean#L1000) (proved); [`DLMF.Theta.jacobiTheta_reduction_iq_rectangular`](DLMF/Theta/Identities.lean#L1120) (proved); [`DLMF.Theta.jacobiTheta_reduction_iq_eta`](DLMF/Theta/Identities.lean#L1142) (proved). **Corrected**: with principal √ the printed identity holds only up to sign. iq ↔ τ + 1/2, q² ↔ 2τ. With principal √ and i^{-1/4} = e^{-iπ/8} the printed form fails e.g. at τ = −2.19 + 1.29i, 2.03 + 0.90i, −2.85 + 0.88i. Acquired: the squared identity for all Im τ > 0, the printed form for τ = it, and the full-domain form with the explicit root e^{-iπ/8} η(τ)η(4τ)/η(2τ) (Mathlib `ModularForm.eta`; mpmath: no failure at 200 random (z, τ)). Nonvanishing hypotheses on the denominators.
+- [20.7.E25](https://dlmf.nist.gov/20.7.E25): [`DLMF.Theta.hasDerivAt_jacobiThetaTwoTau_div_four`](DLMF/Theta/Identities.lean#L889) (proved). **Corrected** (formalization): `HasDerivAt` at points with θ₄(z|τ) ≠ 0, where the quotient has no pole.
+- [20.7.E26](https://dlmf.nist.gov/20.7.E26): [`DLMF.Theta.jacobiThetaOneTau_add_one`](DLMF/Theta/Identities.lean#L801) (proved). All τ, from the series.
+- [20.7.E27](https://dlmf.nist.gov/20.7.E27): [`DLMF.Theta.jacobiThetaTwoTau_add_one`](DLMF/Theta/Identities.lean#L792) (proved). All τ.
+- [20.7.E28](https://dlmf.nist.gov/20.7.E28): [`DLMF.Theta.jacobiThetaThreeTau_add_one`](DLMF/Theta/Identities.lean#L762) (proved); Mathlib: [`jacobiTheta₂_add_right`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=jacobiTheta₂_add_right#doc) (partial: only the period 2 in τ, i.e. 20.7.28 followed by 20.7.29); Mathlib: [`jacobiTheta_two_add`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=jacobiTheta_two_add#doc) (partial: θ₃(0|τ + 2) = θ₃(0|τ), i.e. 20.7.28 followed by 20.7.29 at z = 0). All τ.
+- [20.7.E29](https://dlmf.nist.gov/20.7.E29): [`DLMF.Theta.jacobiThetaFourTau_add_one`](DLMF/Theta/Identities.lean#L778) (proved). All τ.
+- [20.7.E30](https://dlmf.nist.gov/20.7.E30): [`DLMF.Theta.jacobiThetaOneTau_neg_inv`](DLMF/Theta/Identities.lean#L997) (proved). Im τ > 0, principal square root; from 20.7.E31 and 20.2.E11.
+- [20.7.E31](https://dlmf.nist.gov/20.7.E31): [`DLMF.Theta.jacobiThetaTwoTau_neg_inv`](DLMF/Theta/Identities.lean#L983) (proved). Im τ > 0; from 20.7.E32 and the half-period shifts.
+- [20.7.E32](https://dlmf.nist.gov/20.7.E32): [`DLMF.Theta.jacobiThetaThreeTau_neg_inv`](DLMF/Theta/Identities.lean#L957) (proved); [`DLMF.Elliptic.jacobiThetaThreeTau_zero_neg_recip`](DLMF/Elliptic/Theta.lean#L147) (proved); Mathlib: [`jacobiTheta₂_functional_equation`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=jacobiTheta₂_functional_equation#doc) (exact in Mathlib's argument z/π: θ₃(z|τ) = (-iτ)^{-1/2} exp(iτ'z²/π) θ₃(zτ'|τ');  principal square root; the local form is DLMF.Theta.jacobiThetaThreeTau_neg_inv); Mathlib: [`jacobiTheta_S_smul`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=jacobiTheta_S_smul#doc) (special case z = 0, τ ∈ ℍ: θ₃(0|-1/τ) = (-iτ)^{1/2} θ₃(0|τ)). Im τ > 0; from Mathlib’s `jacobiTheta₂_functional_equation`.
+- [20.7.E33](https://dlmf.nist.gov/20.7.E33): [`DLMF.Theta.jacobiThetaFourTau_neg_inv`](DLMF/Theta/Identities.lean#L970) (proved). Im τ > 0; from 20.7.E32 and 20.2.E12.
+- [20.7.E34](https://dlmf.nist.gov/20.7.E34): [`DLMF.Theta.jacobiTheta_reduction_iq_sq`](DLMF/Theta/Identities.lean#L1136) (proved); [`DLMF.Theta.jacobiTheta_reduction_iq_rectangular`](DLMF/Theta/Identities.lean#L1256) (proved); [`DLMF.Theta.jacobiTheta_reduction_iq_eta`](DLMF/Theta/Identities.lean#L1278) (proved). **Corrected**: with principal √ the printed identity holds only up to sign. iq ↔ τ + 1/2, q² ↔ 2τ. With principal √ and i^{-1/4} = e^{-iπ/8} the printed form fails e.g. at τ = −2.19 + 1.29i, 2.03 + 0.90i, −2.85 + 0.88i. Acquired: the squared identity for all Im τ > 0, the printed form for τ = it, and the full-domain form with the explicit root e^{-iπ/8} η(τ)η(4τ)/η(2τ) (Mathlib `ModularForm.eta`; mpmath: no failure at 200 random (z, τ)). Nonvanishing hypotheses on the denominators.
 
 ## [§20.8 Watson’s Expansions](https://dlmf.nist.gov/20.8)
 
-- [20.8.E1](https://dlmf.nist.gov/20.8.E1): [`DLMF.Theta.jacobiTheta_watson_expansion`](DLMF/Theta/Identities.lean#L1167) (admitted). **Corrected** (formalization): hypothesis θ₂(z|τ) ≠ 0, since the left side is false at the zeros of θ₂ under x/0 = 0; `HasSum` over ℤ.
+- [20.8.E1](https://dlmf.nist.gov/20.8.E1): [`DLMF.Theta.jacobiTheta_watson_expansion`](DLMF/Theta/Identities.lean#L1303) (admitted). **Corrected** (formalization): hypothesis θ₂(z|τ) ≠ 0, since the left side is false at the zeros of θ₂ under x/0 = 0; `HasSum` over ℤ.
 
 ## [§20.9 Relations to Other Functions](https://dlmf.nist.gov/20.9)
 
@@ -188,11 +188,11 @@ All 107 in-scope numbered IDs are covered by 124 tagged declarations (16 definit
 
 ## [§20.10 Integrals](https://dlmf.nist.gov/20.10)
 
-- [20.10.E1](https://dlmf.nist.gov/20.10.E1): [`DLMF.Theta.mellin_jacobiThetaTwoNullTau`](DLMF/Theta/Integrals.lean#L184) (proved). Re s > 1; integrability is part of the conclusion (numerically checked at s = 2.5 + 0.3i).
-- [20.10.E2](https://dlmf.nist.gov/20.10.E2): [`DLMF.Theta.mellin_jacobiThetaThreeNullTau_sub_one`](DLMF/Theta/Integrals.lean#L257) (proved). Re s > 1.
-- [20.10.E3](https://dlmf.nist.gov/20.10.E3): [`DLMF.Theta.mellin_one_sub_jacobiThetaFourNullTau`](DLMF/Theta/Integrals.lean#L299) (admitted); [`DLMF.Theta.mellin_one_sub_jacobiThetaFourNullTau_one`](DLMF/Theta/Integrals.lean#L312) (admitted). **Corrected** (removable point): Re s > 0, s ≠ 1, plus the removable value ∫(1 − θ₄(0|ix²))dx = ln 2 at s = 1 (Mathlib’s totalized ζ(1) would make the printed right side 0). Numerically checked at s = 0.6 + 0.2i, 1.5, 3, 2.5 + 0.3i and at s = 1.
-- [20.10.E4](https://dlmf.nist.gov/20.10.E4): [`DLMF.Theta.laplace_jacobiThetaOneTau`](DLMF/Theta/Integrals.lean#L321) (admitted). Re s > 0, ℓ > 0, |Re β| + |Im β| ≤ ℓ, principal √s; both integrals and integrability (numerically checked at two choices of ℓ, β, s).
-- [20.10.E5](https://dlmf.nist.gov/20.10.E5): [`DLMF.Theta.laplace_jacobiThetaThreeTau`](DLMF/Theta/Integrals.lean#L340) (admitted). As 20.10.E4.
+- [20.10.E1](https://dlmf.nist.gov/20.10.E1): [`DLMF.Theta.mellin_jacobiThetaTwoNullTau`](DLMF/Theta/Integrals.lean#L186) (proved). Re s > 1; integrability is part of the conclusion (numerically checked at s = 2.5 + 0.3i).
+- [20.10.E2](https://dlmf.nist.gov/20.10.E2): [`DLMF.Theta.mellin_jacobiThetaThreeNullTau_sub_one`](DLMF/Theta/Integrals.lean#L259) (proved). Re s > 1.
+- [20.10.E3](https://dlmf.nist.gov/20.10.E3): [`DLMF.Theta.mellin_one_sub_jacobiThetaFourNullTau`](DLMF/Theta/Integrals.lean#L576) (proved); [`DLMF.Theta.mellin_one_sub_jacobiThetaFourNullTau_one`](DLMF/Theta/Integrals.lean#L591) (proved). **Corrected** (removable point): Re s > 0, s ≠ 1, plus the removable value ∫(1 − θ₄(0|ix²))dx = ln 2 at s = 1 (Mathlib’s totalized ζ(1) would make the printed right side 0). Numerically checked at s = 0.6 + 0.2i, 1.5, 3, 2.5 + 0.3i and at s = 1.
+- [20.10.E4](https://dlmf.nist.gov/20.10.E4): [`DLMF.Theta.laplace_jacobiThetaOneTau`](DLMF/Theta/Integrals.lean#L613) (admitted). Re s > 0, ℓ > 0, |Re β| + |Im β| ≤ ℓ, principal √s; both integrals and integrability (numerically checked at two choices of ℓ, β, s).
+- [20.10.E5](https://dlmf.nist.gov/20.10.E5): [`DLMF.Theta.laplace_jacobiThetaThreeTau`](DLMF/Theta/Integrals.lean#L632) (admitted). As 20.10.E4.
 
 ## [§20.11 Generalizations and Analogs](https://dlmf.nist.gov/20.11)
 
@@ -200,11 +200,11 @@ All 107 in-scope numbered IDs are covered by 124 tagged declarations (16 definit
 - [20.11.E2](https://dlmf.nist.gov/20.11.E2): [`DLMF.Theta.thetaGaussSum_reciprocity`](DLMF/Theta/Generalizations.lean#L43) (admitted). m, n > 0 coprime, mn even; the second equality is proved, the reciprocity is admitted.
 - [20.11.E3](https://dlmf.nist.gov/20.11.E3): [`DLMF.Theta.ramanujanThetaF`](DLMF/Theta/Generalizations.lean#L63) (definition). Definition f(a,b) (integer exponents).
 - [20.11.E4](https://dlmf.nist.gov/20.11.E4): [`DLMF.Theta.ramanujanThetaF_eq_jacobiThetaThreeTau`](DLMF/Theta/Generalizations.lean#L68) (proved). All τ, termwise from the ℤ-series.
-- [20.11.E5](https://dlmf.nist.gov/20.11.E5): [`DLMF.Theta.ordinaryHypergeometric_half_half_one_thetaModulusK`](DLMF/Theta/Generalizations.lean#L146) (admitted). Rectangular case τ = it, Mathlib’s series ₂F₁.
-- [20.11.E6](https://dlmf.nist.gov/20.11.E6): [`DLMF.Theta.combinedTheta`](DLMF/Theta/Generalizations.lean#L161) (definition); [`DLMF.Theta.combinedTheta_m_one`](DLMF/Theta/Generalizations.lean#L169) (proved). One definition `combinedTheta` covers 20.11.6–20.11.8; the three printed cases are proved as rewriting lemmas.
-- [20.11.E7](https://dlmf.nist.gov/20.11.E7): [`DLMF.Theta.combinedTheta_one_n`](DLMF/Theta/Generalizations.lean#L176) (proved). Proved case lemma.
-- [20.11.E8](https://dlmf.nist.gov/20.11.E8): [`DLMF.Theta.combinedTheta_m_n`](DLMF/Theta/Generalizations.lean#L183) (proved). Proved case lemma.
-- [20.11.E9](https://dlmf.nist.gov/20.11.E9): [`DLMF.Theta.combinedTheta_symmetry`](DLMF/Theta/Generalizations.lean#L190) (proved). **Corrected** (formalization): at points with θ₁(z), θ_m(z), θ_n(z) ≠ 0, since the quotient identities are false at the zeros under x/0 = 0; given nonzero normalizing constants (`th20_combinedConst_ne_zero` proves them for Im τ > 0).
+- [20.11.E5](https://dlmf.nist.gov/20.11.E5): [`DLMF.Theta.ordinaryHypergeometric_half_half_one_thetaModulusK`](DLMF/Theta/Generalizations.lean#L146) (proved). Rectangular case τ = it, Mathlib’s series ₂F₁.
+- [20.11.E6](https://dlmf.nist.gov/20.11.E6): [`DLMF.Theta.combinedTheta`](DLMF/Theta/Generalizations.lean#L171) (definition); [`DLMF.Theta.combinedTheta_m_one`](DLMF/Theta/Generalizations.lean#L179) (proved). One definition `combinedTheta` covers 20.11.6–20.11.8; the three printed cases are proved as rewriting lemmas.
+- [20.11.E7](https://dlmf.nist.gov/20.11.E7): [`DLMF.Theta.combinedTheta_one_n`](DLMF/Theta/Generalizations.lean#L186) (proved). Proved case lemma.
+- [20.11.E8](https://dlmf.nist.gov/20.11.E8): [`DLMF.Theta.combinedTheta_m_n`](DLMF/Theta/Generalizations.lean#L193) (proved). Proved case lemma.
+- [20.11.E9](https://dlmf.nist.gov/20.11.E9): [`DLMF.Theta.combinedTheta_symmetry`](DLMF/Theta/Generalizations.lean#L200) (proved). **Corrected** (formalization): at points with θ₁(z), θ_m(z), θ_n(z) ≠ 0, since the quotient identities are false at the zeros under x/0 = 0; given nonzero normalizing constants (`th20_combinedConst_ne_zero` proves them for Im τ > 0).
 
 ## Excluded numbered equations
 
@@ -236,13 +236,13 @@ A bibliographic pointer with no stated formula is not converted into an opaque a
 - [20.4.i.p1](https://dlmf.nist.gov/20.4#i.p1), [20.4.Px1.p1](https://dlmf.nist.gov/20.4#Px1.p1), [20.4.ii.p1](https://dlmf.nist.gov/20.4#ii.p1): Introduce the numbered equations; see the numbered entries.
 - [20.5.i.p1](https://dlmf.nist.gov/20.5#i.p1), [20.5.i.p2](https://dlmf.nist.gov/20.5#i.p2), [20.5.Px1.p1](https://dlmf.nist.gov/20.5#Px1.p1): Introduce 20.5.1–20.5.9; the substitution `p = e^{iπz}` is part of 20.5.E9.
 - [20.5.ii.p1](https://dlmf.nist.gov/20.5#ii.p1), [20.5.ii.p2](https://dlmf.nist.gov/20.5#ii.p2): The strip conditions `|Im z| < π Im τ` and `|Im z| < π Im τ/2` are hypotheses of 20.5.E10–E13.
-- [20.5.ii.p3](https://dlmf.nist.gov/20.5#ii.p3): Acquired: [`DLMF.Theta.jacobiTheta_logDeriv_series_uniform`](DLMF/Theta/Products.lean#L1026) (proved). Absolute and locally uniform convergence, in Weierstrass M-test form on compact subsets of the strips.
+- [20.5.ii.p3](https://dlmf.nist.gov/20.5#ii.p3): Acquired: [`DLMF.Theta.jacobiTheta_logDeriv_series_uniform`](DLMF/Theta/Products.lean#L1027) (proved). Absolute and locally uniform convergence, in Weierstrass M-test form on compact subsets of the strips.
 - [20.5.iii.p1](https://dlmf.nist.gov/20.5#iii.p1): Introduces 20.5.14–20.5.17.
-- [20.5.iii.p2](https://dlmf.nist.gov/20.5#iii.p2): Acquired: [`DLMF.Theta.jacobiTheta_doubleProd_not_absolutely_convergent`](DLMF/Theta/Products.lean#L1179) (proved). The double products are not absolutely convergent (lattice sum of `|z/((m+nτ)π)|` diverges); the Eisenstein order is built into 20.5.E14–E17.
-- [20.5.ii](https://dlmf.nist.gov/20.5.ii): [`DLMF.Theta.jacobiTheta_logDeriv_series_uniform`](DLMF/Theta/Products.lean#L1026) (proved).
-- [20.5.iii](https://dlmf.nist.gov/20.5.iii): [`DLMF.Theta.jacobiTheta_doubleProd_not_absolutely_convergent`](DLMF/Theta/Products.lean#L1179) (proved).
-- [20.6.p1](https://dlmf.nist.gov/20.6#p1): The hypothesis 20.6.1 and the coefficient definitions are numbered entries. Acquired: [`DLMF.Theta.thetaDelta_hasSum_lattice`](DLMF/Theta/PowerSeries.lean#L194) (proved); [`DLMF.Theta.thetaDelta_two_not_summable`](DLMF/Theta/PowerSeries.lean#L220) (proved). The remark that the order of summation matters only for `j = 1` is acquired as absolute summability for `2j ≥ 4` and non-summability for `j = 1`. The relation `δ_{2n} = c_n/(2n − 1)` (`n ≥ 2`) to the Weierstrass Laurent coefficients of §23.9 is left to the Chapter 23 acquisition (it needs `c_n`).
-- [20.6](https://dlmf.nist.gov/20.6): [`DLMF.Theta.thetaDelta_hasSum_lattice`](DLMF/Theta/PowerSeries.lean#L194) (proved); [`DLMF.Theta.thetaDelta_two_not_summable`](DLMF/Theta/PowerSeries.lean#L220) (proved).
+- [20.5.iii.p2](https://dlmf.nist.gov/20.5#iii.p2): Acquired: [`DLMF.Theta.jacobiTheta_doubleProd_not_absolutely_convergent`](DLMF/Theta/Products.lean#L1496) (proved). The double products are not absolutely convergent (lattice sum of `|z/((m+nτ)π)|` diverges); the Eisenstein order is built into 20.5.E14–E17.
+- [20.5.ii](https://dlmf.nist.gov/20.5.ii): [`DLMF.Theta.jacobiTheta_logDeriv_series_uniform`](DLMF/Theta/Products.lean#L1027) (proved).
+- [20.5.iii](https://dlmf.nist.gov/20.5.iii): [`DLMF.Theta.jacobiTheta_doubleProd_not_absolutely_convergent`](DLMF/Theta/Products.lean#L1496) (proved).
+- [20.6.p1](https://dlmf.nist.gov/20.6#p1): The hypothesis 20.6.1 and the coefficient definitions are numbered entries. Acquired: [`DLMF.Theta.thetaDelta_hasSum_lattice`](DLMF/Theta/PowerSeries.lean#L399) (proved); [`DLMF.Theta.thetaDelta_two_not_summable`](DLMF/Theta/PowerSeries.lean#L425) (proved). The remark that the order of summation matters only for `j = 1` is acquired as absolute summability for `2j ≥ 4` and non-summability for `j = 1`. The relation `δ_{2n} = c_n/(2n − 1)` (`n ≥ 2`) to the Weierstrass Laurent coefficients of §23.9 is left to the Chapter 23 acquisition (it needs `c_n`).
+- [20.6](https://dlmf.nist.gov/20.6): [`DLMF.Theta.thetaDelta_hasSum_lattice`](DLMF/Theta/PowerSeries.lean#L399) (proved); [`DLMF.Theta.thetaDelta_two_not_summable`](DLMF/Theta/PowerSeries.lean#L425) (proved).
 - [20.7.i.p1](https://dlmf.nist.gov/20.7#i.p1), [20.7.i.p2](https://dlmf.nist.gov/20.7#i.p2): Introduce 20.7.1–20.7.5.
 - [20.7.i.p3](https://dlmf.nist.gov/20.7#i.p3), [20.7.iii.p2](https://dlmf.nist.gov/20.7#iii.p2), [20.7.vii.p2](https://dlmf.nist.gov/20.7#vii.p2): Bibliographic pointers (Carlson 2011); no assertion.
 - [20.7.ii.p1](https://dlmf.nist.gov/20.7#ii.p1): Introduces 20.7.6–20.7.9; references.

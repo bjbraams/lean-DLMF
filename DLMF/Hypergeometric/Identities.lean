@@ -5,17 +5,11 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Tactic.CrossRefAttribute
-public import DLMF.Hypergeometric.EulerIntegral
-public import DLMF.Hypergeometric.Transformations
 public import DLMF.Hypergeometric.FurtherTransformations
 public import DLMF.Bailey
-public import DLMF.Gamma.VerticalBounds
 public import DLMF.Gamma.Inequalities
 public import DLMF.Gamma.Asymptotics
 public import ToMathlib.Analysis.Complex.Carlson
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.IntegrationByParts
 
 /-!
 # Summation identities and Chapter 3 transformations (AAR §§2.7–2.8, 3.3–3.5)
@@ -172,7 +166,7 @@ open scoped Topology
 namespace CarlsonAux
 
 /-- A polynomial factor is absorbed by any exponential: `(1+t)^K ≤ M e^{εt}` for `t ≥ 0`. -/
-lemma exists_one_add_pow_le_exp (K : ℕ) {ε : ℝ} (hε : 0 < ε) :
+theorem exists_one_add_pow_le_exp (K : ℕ) {ε : ℝ} (hε : 0 < ε) :
     ∃ M : ℝ, 0 < M ∧ ∀ t : ℝ, 0 ≤ t → (1 + t) ^ K ≤ M * Real.exp (ε * t) := by
   rcases Nat.eq_zero_or_pos K with rfl | hK
   · exact ⟨1, one_pos, fun t ht => by simpa using Real.one_le_exp (by positivity)⟩
@@ -263,13 +257,13 @@ theorem eq_zero_of_periodic_of_bound {f : ℂ → ℂ} {δ : ℝ} (hδ : 0 < δ)
 
 
 /-- `z / Γ(z+1) = 1 / Γ(z)` for every `z`, including the poles. -/
-lemma mul_recip_Gamma_add_one (z : ℂ) : z * (Gamma (z + 1))⁻¹ = (Gamma z)⁻¹ := by
+theorem mul_recip_Gamma_add_one (z : ℂ) : z * (Gamma (z + 1))⁻¹ = (Gamma z)⁻¹ := by
   rcases eq_or_ne z 0 with rfl | hz
   · simp [Complex.Gamma_zero]
   rw [Complex.Gamma_add_one z hz, mul_inv, ← mul_assoc, mul_inv_cancel₀ hz, one_mul]
 
 /-- `‖sin z‖ ≤ e^{|Im z|}`. -/
-lemma norm_sin_le_exp_abs_im (z : ℂ) : ‖Complex.sin z‖ ≤ Real.exp |z.im| := by
+theorem norm_sin_le_exp_abs_im (z : ℂ) : ‖Complex.sin z‖ ≤ Real.exp |z.im| := by
   have h := Complex.norm_sin_add_mul_I_sq z.re z.im
   rw [show (z.re : ℂ) + z.im * I = z from Complex.re_add_im z] at h
   have hc : Real.sin z.re ^ 2 + Real.sinh z.im ^ 2 ≤ Real.exp |z.im| ^ 2 := by
@@ -282,7 +276,7 @@ lemma norm_sin_le_exp_abs_im (z : ℂ) : ‖Complex.sin z‖ ≤ Real.exp |z.im|
   exact (pow_le_pow_iff_left₀ (norm_nonneg _) (Real.exp_pos _).le two_ne_zero).mp (h ▸ hc)
 
 /-- Growth of `1/Γ` to the right of `1/2`: `‖1/Γ(z)‖ ≤ e^{π|Im z|/2}/Γ(Re z)`. -/
-lemma norm_recip_Gamma_le_of_half_le {z : ℂ} (hz : 1 / 2 ≤ z.re) :
+theorem norm_recip_Gamma_le_of_half_le {z : ℂ} (hz : 1 / 2 ≤ z.re) :
     ‖(Gamma z)⁻¹‖ ≤ Real.exp (π * |z.im| / 2) / Real.Gamma z.re := by
   have h := DLMF.Gamma.norm_recip_Gamma_sq_le hz z.im
   have hz' : (z.re : ℂ) + I * z.im = z := by rw [mul_comm]; exact Complex.re_add_im z
@@ -296,7 +290,7 @@ lemma norm_recip_Gamma_le_of_half_le {z : ℂ} (hz : 1 / 2 ≤ z.re) :
 
 /-- Growth of `1/Γ` to the left of `1/2`, by reflection:
 `‖1/Γ(z)‖ ≤ e^{π|Im z|} Γ(1 - Re z)/π`. -/
-lemma norm_recip_Gamma_le_of_lt_half {z : ℂ} (hz : z.re < 1 / 2) :
+theorem norm_recip_Gamma_le_of_lt_half {z : ℂ} (hz : z.re < 1 / 2) :
     ‖(Gamma z)⁻¹‖ ≤ Real.exp (π * |z.im|) * Real.Gamma (1 - z.re) / π := by
   have hG := Real.Gamma_pos_of_pos (show 0 < 1 - z.re by linarith)
   by_cases hpole : ∃ m : ℕ, z = -m
@@ -348,7 +342,7 @@ lemma norm_recip_Gamma_le_of_lt_half {z : ℂ} (hz : z.re < 1 / 2) :
   linarith [mul_comm (Real.Gamma (1 - z.re)) (Real.exp (π * |z.im|))]
 
 /-- **Uniform vertical decay of `Γ`** on a strip `X₁ ≤ Re z ≤ X₂` with `X₁ > 0`. -/
-lemma exists_norm_Gamma_le_strip {X₁ X₂ : ℝ} (hX₁ : 0 < X₁) :
+theorem exists_norm_Gamma_le_strip {X₁ X₂ : ℝ} (hX₁ : 0 < X₁) :
     ∃ C : ℝ, ∃ K : ℕ, ∀ z : ℂ, X₁ ≤ z.re → z.re ≤ X₂ →
       ‖Gamma z‖ ≤ C * (1 + |z.im|) ^ K * Real.exp (-(π * |z.im|) / 2) := by
   set X := max X₁ X₂ with hXdef
@@ -397,7 +391,7 @@ lemma exists_norm_Gamma_le_strip {X₁ X₂ : ℝ} (hX₁ : 0 < X₁) :
       simp only [B]; ring
 
 /-- **Uniform vertical growth of `1/Γ`** on a strip `|Re z| ≤ X`. -/
-lemma exists_norm_recip_Gamma_le_strip (X : ℝ) :
+theorem exists_norm_recip_Gamma_le_strip (X : ℝ) :
     ∃ C : ℝ, ∃ K : ℕ, ∀ z : ℂ, |z.re| ≤ X →
       ‖(Gamma z)⁻¹‖ ≤ C * (1 + |z.im|) ^ K * Real.exp (π * |z.im| / 2) := by
   obtain ⟨C, K, hC⟩ := DLMF.Gamma.exists_norm_recip_Gamma_le X
@@ -407,19 +401,19 @@ lemma exists_norm_recip_Gamma_le_strip (X : ℝ) :
   rwa [hz'] at h
 
 /-- `1 + |y + β| ≤ (1 + |β|) (1 + |y|)`. -/
-lemma one_add_abs_add_le (y β : ℝ) : 1 + |y + β| ≤ (1 + |β|) * (1 + |y|) := by
+theorem one_add_abs_add_le (y β : ℝ) : 1 + |y + β| ≤ (1 + |β|) * (1 + |y|) := by
   have := abs_add_le y β
   nlinarith [abs_nonneg y, abs_nonneg β]
 
 /-- `‖sin(π(z + n))‖ = ‖sin(πz)‖` for integer `n`. -/
-lemma norm_sin_pi_mul_add_int (z : ℂ) (n : ℤ) :
+theorem norm_sin_pi_mul_add_int (z : ℂ) (n : ℤ) :
     ‖Complex.sin (π * (z + n))‖ = ‖Complex.sin (π * z)‖ := by
   rw [show (π : ℂ) * (z + n) = π * z + n * π by ring,
     Complex.sin_antiperiodic.add_int_mul_eq n]
   rcases Int.isUnit_iff.mp (Int.negOnePow n).isUnit with h | h <;> simp [h]
 
 /-- Asymptotics of a product of Gamma ratios: `Γ(k+p)Γ(k+q)/(Γ(k+r)Γ(k+s)) = O(k^{p+q-r-s})`. -/
-lemma isBigO_Gamma_ratio (p q r s : ℂ) :
+theorem isBigO_Gamma_ratio (p q r s : ℂ) :
     (fun k : ℕ => Gamma (k + p) * Gamma (k + q) * (Gamma (k + r))⁻¹ * (Gamma (k + s))⁻¹)
       =O[atTop] fun k : ℕ => (k : ℝ) ^ (p + q - r - s).re := by
   have hT (a : ℂ) : Tendsto (fun k : ℕ => Gamma (k + a) / (Gamma k * (k : ℂ) ^ a)) atTop (𝓝 1) :=
@@ -460,13 +454,13 @@ lemma isBigO_Gamma_ratio (p q r s : ℂ) :
         < 2 := by simpa using hk
   exact mul_le_mul_of_nonneg_right this.le (Real.rpow_nonneg (Nat.cast_nonneg k) _)
 
-lemma summable_norm_Gamma_ratio (p q r s : ℂ) (h : (p + q - r - s).re < -1) :
+theorem summable_norm_Gamma_ratio (p q r s : ℂ) (h : (p + q - r - s).re < -1) :
     Summable fun k : ℕ =>
       ‖Gamma (k + p) * Gamma (k + q) * (Gamma (k + r))⁻¹ * (Gamma (k + s))⁻¹‖ :=
   summable_of_isBigO_nat (Real.summable_nat_rpow.mpr h) (isBigO_Gamma_ratio p q r s).norm_left
 
 /-- Growth of the Gauss coefficients: `(a)_n (b)_n / ((c)_n n!) = O(n^{a+b-c-1})`. -/
-lemma isBigO_gaussHGCoeff (a b c : ℂ) (hc : ∀ k : ℕ, c ≠ -k) :
+theorem isBigO_gaussHGCoeff (a b c : ℂ) (hc : ∀ k : ℕ, c ≠ -k) :
     (gaussHGCoeff a b c) =O[atTop] fun n : ℕ => (n : ℝ) ^ (a + b - c - 1).re := by
   by_cases hpole : ∃ k : ℕ, a = -k ∨ b = -k
   · obtain ⟨k, hk⟩ := hpole
@@ -487,7 +481,7 @@ lemma isBigO_gaussHGCoeff (a b c : ℂ) (hc : ∀ k : ℕ, c ≠ -k) :
   exact hn
 
 /-- Reflection for `1/Γ` away from the positive integers: `1/Γ(z) = Γ(1-z) sin(πz)/π`. -/
-lemma recip_Gamma_eq_reflect {z : ℂ} (hz : ∀ m : ℕ, z ≠ m + 1) :
+theorem recip_Gamma_eq_reflect {z : ℂ} (hz : ∀ m : ℕ, z ≠ m + 1) :
     (Gamma z)⁻¹ = Gamma (1 - z) * Complex.sin (π * z) / π := by
   by_cases hpole : ∃ m : ℕ, z = -m
   · obtain ⟨m, rfl⟩ := hpole
@@ -518,7 +512,7 @@ lemma recip_Gamma_eq_reflect {z : ℂ} (hz : ∀ m : ℕ, z ≠ m + 1) :
   field_simp
 
 /-- `‖Γ(z)‖ = π / (‖sin(πz)‖ ‖Γ(1-z)‖)` away from the integers. -/
-lemma norm_Gamma_eq_reflect {z : ℂ} (hz : ∀ n : ℤ, z ≠ n) :
+theorem norm_Gamma_eq_reflect {z : ℂ} (hz : ∀ n : ℤ, z ≠ n) :
     ‖Gamma z‖ = π / (‖Complex.sin (π * z)‖ * ‖Gamma (1 - z)‖) := by
   have h := Complex.Gamma_mul_Gamma_one_sub z
   have hsin : Complex.sin (π * z) ≠ 0 := by
@@ -536,7 +530,7 @@ lemma norm_Gamma_eq_reflect {z : ℂ} (hz : ∀ n : ℤ, z ≠ n) :
   linarith [h2]
 
 /-- A uniform bound for `1/Γ` on the strip `-2 ≤ Re z ≤ 3`. -/
-lemma exists_norm_recip_Gamma_mid :
+theorem exists_norm_recip_Gamma_mid :
     ∃ M : ℝ, 0 ≤ M ∧ ∀ z : ℂ, -2 ≤ z.re → z.re ≤ 3 →
       ‖(Gamma z)⁻¹‖ ≤ M * Real.exp (π * |z.im|) := by
   have hcont : ContinuousOn Real.Gamma (Icc (1 / 2 : ℝ) 3) := fun x hx =>
@@ -568,7 +562,7 @@ lemma exists_norm_recip_Gamma_mid :
       _ ≤ max m⁻¹ (G₀ / π) * Real.exp (π * |z.im|) := by gcongr; exact le_max_right _ _
 
 /-- Uniform vertical decay of `Γ(d + p)` in terms of `Im d`, on a strip of `Re (d + p)`. -/
-lemma exists_norm_Gamma_add_le_strip (p : ℂ) {X₁ X₂ : ℝ} (hX₁ : 0 < X₁) :
+theorem exists_norm_Gamma_add_le_strip (p : ℂ) {X₁ X₂ : ℝ} (hX₁ : 0 < X₁) :
     ∃ C : ℝ, ∃ K : ℕ, 0 ≤ C ∧ ∀ d : ℂ, X₁ ≤ (d + p).re → (d + p).re ≤ X₂ →
       ‖Gamma (d + p)‖ ≤ C * (1 + |d.im|) ^ K * Real.exp (-(π * |d.im|) / 2) := by
   obtain ⟨C, K, hC⟩ := exists_norm_Gamma_le_strip (X₂ := X₂) hX₁
@@ -595,7 +589,7 @@ lemma exists_norm_Gamma_add_le_strip (p : ℂ) {X₁ X₂ : ℝ} (hX₁ : 0 < X�
           Real.exp (-(π * |d.im|) / 2) := by rw [mul_pow]; ring
 
 /-- Uniform vertical growth of `1/Γ(d + p)` in terms of `Im d`, on a strip `|Re (d + p)| ≤ X`. -/
-lemma exists_norm_recip_Gamma_add_le_strip (p : ℂ) (X : ℝ) :
+theorem exists_norm_recip_Gamma_add_le_strip (p : ℂ) (X : ℝ) :
     ∃ C : ℝ, ∃ K : ℕ, 0 ≤ C ∧ ∀ d : ℂ, |(d + p).re| ≤ X →
       ‖(Gamma (d + p))⁻¹‖ ≤ C * (1 + |d.im|) ^ K * Real.exp (π * |d.im| / 2) := by
   obtain ⟨C, K, hC⟩ := exists_norm_recip_Gamma_le_strip X
@@ -621,7 +615,7 @@ lemma exists_norm_recip_Gamma_add_le_strip (p : ℂ) (X : ℝ) :
           Real.exp (π * |d.im| / 2) := by rw [mul_pow]; ring
 
 /-- A majorant for `1/Γ(d + n)`, `n ∈ ℤ`, uniform for `x₁ ≤ Re d ≤ x₁ + 1`. -/
-lemma exists_recip_Gamma_shift_bound (x₁ : ℝ) :
+theorem exists_recip_Gamma_shift_bound (x₁ : ℝ) :
     ∃ B : ℤ → ℝ, (∀ n, 0 ≤ B n) ∧
       (∀ n : ℤ, (2 : ℝ) ≤ x₁ + n → B n = (Real.Gamma (x₁ + n))⁻¹) ∧
       (∀ n : ℤ, ¬ (2 : ℝ) ≤ x₁ + n → x₁ + 1 + n ≤ -1 → B n = Real.Gamma (1 - x₁ - n) / π) ∧
@@ -685,13 +679,13 @@ variable {a b c : ℂ}
 def term (a b c d : ℂ) (n : ℤ) : ℂ :=
   Gamma (a + n) * Gamma (b + n) / (Gamma (c + n) * Gamma (d + n))
 
-lemma norm_term (a b c d : ℂ) (n : ℤ) :
+theorem norm_term (a b c d : ℂ) (n : ℤ) :
     ‖term a b c d n‖ = ‖Gamma (a + n)‖ * ‖Gamma (b + n)‖ * ‖(Gamma (c + n))⁻¹‖ *
       ‖(Gamma (d + n))⁻¹‖ := by
   rw [term, div_eq_mul_inv, mul_inv, norm_mul, norm_mul, norm_mul]; ring
 
 /-- A majorant for Dougall's terms, uniform for `x₁ ≤ Re d ≤ x₁ + 1`. -/
-lemma exists_bound (ha : ∀ k : ℤ, a ≠ k) (hb : ∀ k : ℤ, b ≠ k) {x₁ : ℝ}
+theorem exists_bound (ha : ∀ k : ℤ, a ≠ k) (hb : ∀ k : ℤ, b ≠ k) {x₁ : ℝ}
     (hx₁ : 1 + (a + b - c).re < x₁) :
     ∃ u : ℤ → ℝ, Summable u ∧ (∀ n, 0 ≤ u n) ∧ ∀ (n : ℤ) (d : ℂ), x₁ ≤ d.re → d.re ≤ x₁ + 1 →
       ‖term a b c d n‖ ≤ Real.exp (π * |d.im|) * u n := by
@@ -798,14 +792,14 @@ lemma exists_bound (ha : ∀ k : ℤ, a ≠ k) (hb : ∀ k : ℤ, b ≠ k) {x₁
     apply le_of_eq
     field_simp
 
-lemma summable_term (ha : ∀ k : ℤ, a ≠ k) (hb : ∀ k : ℤ, b ≠ k) {d : ℂ}
+theorem summable_term (ha : ∀ k : ℤ, a ≠ k) (hb : ∀ k : ℤ, b ≠ k) {d : ℂ}
     (hd : 1 + (a + b - c).re < d.re) : Summable (term a b c d) := by
   obtain ⟨u, hu, -, hbd⟩ := exists_bound (c := c) ha hb hd
   exact Summable.of_norm_bounded (hu.mul_left (Real.exp (π * |d.im|)))
     fun n => hbd n d le_rfl (by linarith)
 
 /-- Dougall's sum is holomorphic in `d` on its half-plane of convergence. -/
-lemma differentiableOn_tsum (ha : ∀ k : ℤ, a ≠ k) (hb : ∀ k : ℤ, b ≠ k) :
+theorem differentiableOn_tsum (ha : ∀ k : ℤ, a ≠ k) (hb : ∀ k : ℤ, b ≠ k) :
     DifferentiableOn ℂ (fun d => ∑' n : ℤ, term a b c d n)
       {d : ℂ | 1 + (a + b - c).re < d.re} := by
   intro d₀ hd₀
@@ -839,7 +833,7 @@ lemma differentiableOn_tsum (ha : ∀ k : ℤ, a ≠ k) (hb : ∀ k : ℤ, b ≠
   exact (hball.differentiableAt (Metric.ball_mem_nhds _ hr0)).differentiableWithinAt
 
 /-- Termwise telescoping identity behind the recurrence in `d`. -/
-lemma term_recurrence (ha : ∀ k : ℤ, a ≠ k) (hb : ∀ k : ℤ, b ≠ k) (d : ℂ) (n : ℤ) :
+theorem term_recurrence (ha : ∀ k : ℤ, a ≠ k) (hb : ∀ k : ℤ, b ≠ k) (d : ℂ) (n : ℤ) :
     (d - a) * (d - b) * term a b c (d + 1) n - (c + d - a - b - 1) * term a b c d n =
       term a b (c - 1) d (n + 1) - term a b (c - 1) d n := by
   have hA : a + n ≠ 0 := fun h => ha (-n) (by push_cast; linear_combination h)
@@ -860,7 +854,7 @@ lemma term_recurrence (ha : ∀ k : ℤ, a ≠ k) (hb : ∀ k : ℤ, b ≠ k) (d
   ring
 
 /-- The first-order recurrence of Dougall's sum in `d`. -/
-lemma tsum_recurrence (ha : ∀ k : ℤ, a ≠ k) (hb : ∀ k : ℤ, b ≠ k) {d : ℂ}
+theorem tsum_recurrence (ha : ∀ k : ℤ, a ≠ k) (hb : ∀ k : ℤ, b ≠ k) {d : ℂ}
     (hd : 2 + (a + b - c).re < d.re) :
     (d - a) * (d - b) * ∑' n : ℤ, term a b c (d + 1) n =
       (c + d - a - b - 1) * ∑' n : ℤ, term a b c d n := by
@@ -878,15 +872,15 @@ lemma tsum_recurrence (ha : ∀ k : ℤ, a ≠ k) (hb : ∀ k : ℤ, b ≠ k) {d
   rw [h4.tsum_sub h3, hshift, sub_self]
 
 /-- `sin(π(z + j)) = (-1)^j sin(πz)` in the form used below. -/
-lemma sin_pi_mul_add_int (z : ℂ) (j : ℤ) :
+theorem sin_pi_mul_add_int (z : ℂ) (j : ℤ) :
     Complex.sin (π * (z + j)) = ((j.negOnePow : ℤ) : ℂ) * Complex.sin (π * z) := by
   rw [show (π : ℂ) * (z + j) = π * z + j * π by ring, Complex.sin_antiperiodic.add_int_mul_eq j]
 
-lemma negOnePow_sq_cast (j : ℤ) : ((j.negOnePow : ℤ) : ℂ) * ((j.negOnePow : ℤ) : ℂ) = 1 := by
+theorem negOnePow_sq_cast (j : ℤ) : ((j.negOnePow : ℤ) : ℂ) * ((j.negOnePow : ℤ) : ℂ) = 1 := by
   rcases Int.isUnit_iff.mp (Int.negOnePow j).isUnit with h | h <;> simp [h]
 
 /-- **Dougall's sum at an integer `d`**, from Gauss's summation. -/
-lemma tsum_at_int (ha : ∀ k : ℤ, a ≠ k) (hb : ∀ k : ℤ, b ≠ k) (m : ℤ)
+theorem tsum_at_int (ha : ∀ k : ℤ, a ≠ k) (hb : ∀ k : ℤ, b ≠ k) (m : ℤ)
     (hγ : ∀ k : ℕ, c + 1 - m ≠ -k) (hconv : 1 + (a + b).re < (c + m).re) :
     ∑' n : ℤ, term a b c m n =
       π ^ 2 * Gamma (c + m - a - b - 1) /
@@ -1216,10 +1210,10 @@ theorem tsum_eq_of_not_int (ha : ∀ k : ℤ, a ≠ k) (hb : ∀ k : ℤ, b ≠ 
   exact ((hLd.analyticOnNhd hUo).eqOn_of_preconnected_of_eventuallyEq (hRd.analyticOnNhd hUo)
     (convex_halfSpace_re_gt (1 + s)).isPreconnected hz₀ hev) hdU
 
-lemma term_comm (a b c d : ℂ) (n : ℤ) : term a b c d n = term a b d c n := by
+theorem term_comm (a b c d : ℂ) (n : ℤ) : term a b c d n = term a b d c n := by
   simp only [term, mul_comm (Gamma (c + n))]
 
-lemma rhs_comm (a b c d : ℂ) :
+theorem rhs_comm (a b c d : ℂ) :
     π ^ 2 * Gamma (d + c - a - b - 1) /
         (Complex.sin (π * a) * Complex.sin (π * b) * Gamma (d - a) * Gamma (c - a) *
           Gamma (d - b) * Gamma (c - b)) =
@@ -1229,7 +1223,7 @@ lemma rhs_comm (a b c d : ℂ) :
   rw [add_comm d c]; ring
 
 /-- Dougall's sum when both `c` and `d` are integers, with `d ≤ c`. -/
-lemma tsum_at_int_int (ha : ∀ k : ℤ, a ≠ k) (hb : ∀ k : ℤ, b ≠ k) {j m : ℤ} (hjm : m ≤ j)
+theorem tsum_at_int_int (ha : ∀ k : ℤ, a ≠ k) (hb : ∀ k : ℤ, b ≠ k) {j m : ℤ} (hjm : m ≤ j)
     (hconv : 1 + (a + b).re < ((j : ℂ) + m).re) :
     ∑' n : ℤ, term a b j m n =
       π ^ 2 * Gamma (j + m - a - b - 1) /
@@ -1256,7 +1250,7 @@ def s (a b c : ℂ) (n : ℕ) : ℂ :=
 def H (a b c : ℂ) (n : ℕ) : ℂ :=
   gaussHGCoeff a b (1 + a - b) n * (a + n) * (b + n) * poch c n * (Gamma (2 + a - c + n))⁻¹
 
-lemma wz_zero (a b c : ℂ) :
+theorem wz_zero (a b c : ℂ) :
     (1 + a / 2 - b - c) * s a b c 0 - (1 + a / 2 - c) * (1 + a - b - c) * s a b (c - 1) 0 =
       -(1 / 2) * H a b c 0 := by
   have e : (Gamma (1 + a - c))⁻¹ = (1 + a - c) * (Gamma (2 + a - c))⁻¹ := by
@@ -1266,7 +1260,7 @@ lemma wz_zero (a b c : ℂ) :
   rw [show 1 + a - (c - 1) = 2 + a - c by ring, e]
   ring
 
-lemma wz_succ (hb : ∀ k : ℕ, 1 + a - b ≠ -k) (c : ℂ) (n : ℕ) :
+theorem wz_succ (hb : ∀ k : ℕ, 1 + a - b ≠ -k) (c : ℂ) (n : ℕ) :
     (1 + a / 2 - b - c) * s a b c (n + 1) -
         (1 + a / 2 - c) * (1 + a - b - c) * s a b (c - 1) (n + 1) =
       -(1 / 2) * (H a b c (n + 1) - H a b c n) := by
@@ -1291,7 +1285,7 @@ lemma wz_succ (hb : ∀ k : ℕ, 1 + a - b ≠ -k) (c : ℂ) (n : ℕ) :
 def Lh (a b c : ℂ) : ℂ := ∑' n : ℕ, s a b c n
 
 /-- **The recurrence in `c`**, from the WZ pair. -/
-lemma recurrence (hb : ∀ k : ℕ, 1 + a - b ≠ -k) {c : ℂ} (h1 : Summable (s a b c))
+theorem recurrence (hb : ∀ k : ℕ, 1 + a - b ≠ -k) {c : ℂ} (h1 : Summable (s a b c))
     (h2 : Summable (s a b (c - 1))) (hH : Tendsto (H a b c) atTop (𝓝 0)) :
     (1 + a / 2 - b - c) * Lh a b c = (1 + a / 2 - c) * (1 + a - b - c) * Lh a b (c - 1) := by
   set T : ℕ → ℂ := fun n =>
@@ -1321,7 +1315,7 @@ lemma recurrence (hb : ∀ k : ℕ, 1 + a - b ≠ -k) {c : ℂ} (h1 : Summable (
 def P (a b c : ℂ) : ℂ :=
   Lh a b c * Gamma (1 + a / 2 - c) * Gamma (1 + a - b - c) * (Gamma (1 + a / 2 - b - c))⁻¹
 
-lemma P_sub_one (hb : ∀ k : ℕ, 1 + a - b ≠ -k) {c : ℂ} (h1 : Summable (s a b c))
+theorem P_sub_one (hb : ∀ k : ℕ, 1 + a - b ≠ -k) {c : ℂ} (h1 : Summable (s a b c))
     (h2 : Summable (s a b (c - 1))) (hH : Tendsto (H a b c) atTop (𝓝 0))
     (hc1 : 1 + a / 2 - c ≠ 0) (hc2 : 1 + a - b - c ≠ 0) :
     P a b (c - 1) = P a b c := by
@@ -1338,7 +1332,7 @@ lemma P_sub_one (hb : ∀ k : ℕ, 1 + a - b ≠ -k) {c : ℂ} (h1 : Summable (s
   linear_combination (Gamma (1 + a / 2 - c) * Gamma (1 + a - b - c) *
     (Gamma (1 + a / 2 - b - (c - 1)))⁻¹) * hrec.symm
 
-lemma isBigO_mul_add_mul_add (a b : ℂ) :
+theorem isBigO_mul_add_mul_add (a b : ℂ) :
     (fun n : ℕ => (a + n) * (b + n)) =O[atTop] fun n : ℕ => (n : ℝ) ^ (2 : ℝ) := by
   refine Asymptotics.IsBigO.of_bound ((‖a‖ + 1) * (‖b‖ + 1)) ?_
   filter_upwards [eventually_ge_atTop 1] with n hn
@@ -1353,25 +1347,25 @@ lemma isBigO_mul_add_mul_add (a b : ℂ) :
         mul_le_mul ha hb (norm_nonneg _) (by positivity)
     _ = (‖a‖ + 1) * (‖b‖ + 1) * (n * n) := by ring
 
-lemma s_neg_nat_eq_zero (a b : ℂ) {j n : ℕ} (h : j < n) : s a b (-(j : ℂ)) n = 0 := by
+theorem s_neg_nat_eq_zero (a b : ℂ) {j n : ℕ} (h : j < n) : s a b (-(j : ℂ)) n = 0 := by
   simp [s, poch_neg_nat_eq_zero h]
 
-lemma H_neg_nat_eq_zero (a b : ℂ) {j n : ℕ} (h : j < n) : H a b (-(j : ℂ)) n = 0 := by
+theorem H_neg_nat_eq_zero (a b : ℂ) {j n : ℕ} (h : j < n) : H a b (-(j : ℂ)) n = 0 := by
   simp [H, poch_neg_nat_eq_zero h]
 
-lemma summable_s_neg_nat (a b : ℂ) (j : ℕ) : Summable (s a b (-(j : ℂ))) :=
+theorem summable_s_neg_nat (a b : ℂ) (j : ℕ) : Summable (s a b (-(j : ℂ))) :=
   summable_of_ne_finset_zero (s := Finset.range (j + 1)) fun n hn => by
     simp only [Finset.mem_range, not_lt] at hn
     exact s_neg_nat_eq_zero a b (by omega)
 
-lemma tendsto_H_neg_nat (a b : ℂ) (j : ℕ) : Tendsto (H a b (-(j : ℂ))) atTop (𝓝 0) :=
+theorem tendsto_H_neg_nat (a b : ℂ) (j : ℕ) : Tendsto (H a b (-(j : ℂ))) atTop (𝓝 0) :=
   tendsto_const_nhds.congr' (by
     filter_upwards [eventually_gt_atTop j] with n hn
     exact (H_neg_nat_eq_zero a b hn).symm)
 
 /-- Convergence of the normalized Dixon series and decay of the certificate, for
 `Re(1 + a/2 - b - c) > 0`. -/
-lemma summable_s_and_tendsto_H (hb : ∀ k : ℕ, 1 + a - b ≠ -k) {c : ℂ}
+theorem summable_s_and_tendsto_H (hb : ∀ k : ℕ, 1 + a - b ≠ -k) {c : ℂ}
     (hc : 0 < (1 + a / 2 - b - c).re) :
     Summable (s a b c) ∧ Tendsto (H a b c) atTop (𝓝 0) := by
   by_cases hneg : ∃ j : ℕ, c = -j
@@ -1444,7 +1438,7 @@ lemma summable_s_and_tendsto_H (hb : ∀ k : ℕ, 1 + a - b ≠ -k) {c : ℂ}
 def K (a b : ℂ) : ℂ :=
   Gamma (1 + a / 2) * Gamma (1 + a - b) * (Gamma (1 + a))⁻¹ * (Gamma (1 + a / 2 - b))⁻¹
 
-lemma P_zero (a b : ℂ) : P a b 0 = K a b := by
+theorem P_zero (a b : ℂ) : P a b 0 = K a b := by
   have hL : Lh a b 0 = (Gamma (1 + a))⁻¹ := by
     rw [Lh, tsum_eq_single 0]
     · simp [s, gaussHGCoeff, poch_zero]
@@ -1455,7 +1449,7 @@ lemma P_zero (a b : ℂ) : P a b 0 = K a b := by
   ring
 
 /-- **Terminating Dixon** in normalized form: `P(-j) = K` for all `j`. -/
-lemma P_neg_nat (ha : ∀ k : ℕ, 1 + a / 2 ≠ -k) (hb : ∀ k : ℕ, 1 + a - b ≠ -k) (j : ℕ) :
+theorem P_neg_nat (ha : ∀ k : ℕ, 1 + a / 2 ≠ -k) (hb : ∀ k : ℕ, 1 + a - b ≠ -k) (j : ℕ) :
     P a b (-(j : ℂ)) = K a b := by
   induction j with
   | zero => simpa using P_zero a b
@@ -1469,7 +1463,7 @@ lemma P_neg_nat (ha : ∀ k : ℕ, 1 + a / 2 ≠ -k) (hb : ∀ k : ℕ, 1 + a - 
     push_cast; ring
 
 /-- `(c)_n / Γ(1-c) = (-1)^n / Γ(1-c-n)`, for every `c`. -/
-lemma poch_mul_recip_Gamma_one_sub (c : ℂ) (n : ℕ) :
+theorem poch_mul_recip_Gamma_one_sub (c : ℂ) (n : ℕ) :
     poch c n * (Gamma (1 - c))⁻¹ = (-1) ^ n * (Gamma (1 - c - n))⁻¹ := by
   induction n with
   | zero => simp [poch_zero]
@@ -1480,7 +1474,7 @@ lemma poch_mul_recip_Gamma_one_sub (c : ℂ) (n : ℕ) :
       push_cast; ring, ← h, pow_succ]
     ring
 
-lemma norm_poch_eq {c : ℂ} (hc : Gamma (1 - c) ≠ 0) (n : ℕ) :
+theorem norm_poch_eq {c : ℂ} (hc : Gamma (1 - c) ≠ 0) (n : ℕ) :
     ‖poch c n‖ = ‖Gamma (1 - c)‖ * ‖(Gamma (1 - c - n))⁻¹‖ := by
   have h := congrArg norm (poch_mul_recip_Gamma_one_sub c n)
   rw [norm_mul, norm_mul, norm_pow, norm_neg, norm_one, one_pow, one_mul, norm_inv] at h
@@ -1488,7 +1482,7 @@ lemma norm_poch_eq {c : ℂ} (hc : Gamma (1 - c) ≠ 0) (n : ℕ) :
   field_simp [norm_ne_zero_iff.mpr hc]
 
 /-- A majorant for the normalized Dixon terms, uniform for `x₁ ≤ Re(1-c) ≤ x₁ + 1`. -/
-lemma exists_bound (hb : ∀ k : ℕ, 1 + a - b ≠ -k) {x₁ : ℝ} (hx₁ : 2 ≤ x₁)
+theorem exists_bound (hb : ∀ k : ℕ, 1 + a - b ≠ -k) {x₁ : ℝ} (hx₁ : 2 ≤ x₁)
     (hx₁a : 2 ≤ a.re + x₁) (hx₁b : b.re - a.re / 2 < x₁) :
     ∃ u : ℕ → ℝ, Summable u ∧ (∀ n, 0 ≤ u n) ∧ ∀ (n : ℕ) (c : ℂ),
       x₁ ≤ (1 - c).re → (1 - c).re ≤ x₁ + 1 →
@@ -1575,7 +1569,7 @@ lemma exists_bound (hb : ∀ k : ℕ, 1 + a - b ≠ -k) {x₁ : ℝ} (hx₁ : 2 
         simp only [hu]; ring
 
 /-- Holomorphy of the normalized Dixon series in a left half-plane. -/
-lemma differentiableOn_Lh (hb : ∀ k : ℕ, 1 + a - b ≠ -k) {X : ℝ} (hX : 3 ≤ X)
+theorem differentiableOn_Lh (hb : ∀ k : ℕ, 1 + a - b ≠ -k) {X : ℝ} (hX : 3 ≤ X)
     (hXa : 3 ≤ a.re + X) (hXb : b.re - a.re / 2 + 1 < X) :
     DifferentiableOn ℂ (Lh a b) {c : ℂ | X < (1 - c).re} := by
   intro c₀ hc₀
@@ -1625,7 +1619,7 @@ lemma differentiableOn_Lh (hb : ∀ k : ℕ, 1 + a - b ≠ -k) {X : ℝ} (hX : 3
   exact (hball.differentiableAt (Metric.ball_mem_nhds _ hr0)).differentiableWithinAt
 
 /-- **Carlson's theorem in `c`**: `P(c) = K` on a left half-plane. -/
-lemma exists_P_eq_K (ha : ∀ k : ℕ, 1 + a / 2 ≠ -k) (hb : ∀ k : ℕ, 1 + a - b ≠ -k) :
+theorem exists_P_eq_K (ha : ∀ k : ℕ, 1 + a / 2 ≠ -k) (hb : ∀ k : ℕ, 1 + a - b ≠ -k) :
     ∃ X : ℝ, ∀ c : ℂ, c.re ≤ -X → P a b c = K a b := by
   obtain ⟨m₀, hm₀⟩ := exists_nat_ge (10 + 2 * |a.re| + 2 * |b.re|)
   have hm : (10 : ℝ) + 2 * |a.re| + 2 * |b.re| ≤ m₀ := hm₀
@@ -1769,7 +1763,7 @@ lemma exists_P_eq_K (ha : ∀ k : ℕ, 1 + a / 2 ≠ -k) (hb : ∀ k : ℕ, 1 + 
 def Rh (a b c : ℂ) : ℂ :=
   K a b * Gamma (1 + a / 2 - b - c) * (Gamma (1 + a / 2 - c))⁻¹ * (Gamma (1 + a - b - c))⁻¹
 
-lemma Rh_recurrence {c : ℂ} (hc : 1 + a / 2 - b - c ≠ 0) :
+theorem Rh_recurrence {c : ℂ} (hc : 1 + a / 2 - b - c ≠ 0) :
     (1 + a / 2 - b - c) * Rh a b c = (1 + a / 2 - c) * (1 + a - b - c) * Rh a b (c - 1) := by
   have g1 : Gamma (1 + a / 2 - b - (c - 1)) = (1 + a / 2 - b - c) * Gamma (1 + a / 2 - b - c) := by
     rw [show 1 + a / 2 - b - (c - 1) = (1 + a / 2 - b - c) + 1 by ring,
@@ -2250,7 +2244,7 @@ def compEllIntKkSeries (k : ℂ) : ℂ :=
   (π / 2) * ₂F₁ (1 / 2 : ℂ) (1 / 2) 1 (k ^ 2)
 
 /-- The reciprocal square root of the square of a positive real number. -/
-lemma cpow_sq_neg_half {x : ℝ} (hx : 0 < x) :
+theorem cpow_sq_neg_half {x : ℝ} (hx : 0 < x) :
     ((x : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) = (x : ℂ)⁻¹ := by
   have hh : ((x : ℂ) ^ 2) ^ (1 / 2 : ℂ) = (x : ℂ) := by
     rw [← ofReal_pow, show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by norm_num,
@@ -2258,7 +2252,7 @@ lemma cpow_sq_neg_half {x : ℝ} (hx : 0 < x) :
   rw [cpow_neg, hh]
 
 /-- The substitution `t = sin² θ` for the beta weight with parameters `1/2, 1/2`. -/
-lemma integral_beta_half_weight (f : ℝ → ℂ) :
+theorem integral_beta_half_weight (f : ℝ → ℂ) :
     (∫ t : ℝ in (0 : ℝ)..1,
       (t : ℂ) ^ (-(1 / 2 : ℂ)) * (1 - (t : ℂ)) ^ (-(1 / 2 : ℂ)) * f t) =
       2 * ∫ θ : ℝ in (0 : ℝ)..(π / 2), f (Real.sin θ ^ 2) := by

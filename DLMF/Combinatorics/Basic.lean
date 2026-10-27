@@ -6,10 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.RingTheory.Polynomial.Pochhammer
-public import Mathlib.Data.Fintype.Pi
-public import Mathlib.Algebra.BigOperators.Group.List.Basic
-public import Mathlib.Algebra.Order.BigOperators.Group.List
-public import Mathlib.Tactic.CrossRefAttribute
 
 /-!
 # Notation and basic definitions (DLMF §§26.1–26.2)
@@ -85,7 +81,7 @@ def latticePaths (steps : Finset (ℕ × ℕ)) (m n : ℕ) : Finset (List (ℕ �
 
 /-- A list of nonzero steps has at most as many entries as the sum of the coordinates of its
 endpoint. -/
-theorem c26a_length_le_sum {l : List (ℕ × ℕ)} (h : ∀ s ∈ l, s ≠ (0, 0)) :
+lemma c26a_length_le_sum {l : List (ℕ × ℕ)} (h : ∀ s ∈ l, s ≠ (0, 0)) :
     l.length ≤ l.sum.1 + l.sum.2 := by
   induction l with
   | nil => simp
@@ -138,7 +134,7 @@ def latticePathsFin {k : ℕ} (n : Fin k → ℕ) : Finset (List (Fin k)) :=
 
 
 /-- Decomposition of the lattice paths to `(m, n) ≠ (0, 0)` by their first step. -/
-theorem q26a_latticePaths_eq_biUnion {steps : Finset (ℕ × ℕ)} (h0 : (0, 0) ∉ steps) {m n : ℕ}
+lemma q26a_latticePaths_eq_biUnion {steps : Finset (ℕ × ℕ)} (h0 : (0, 0) ∉ steps) {m n : ℕ}
     (hmn : (m, n) ≠ (0, 0)) :
     latticePaths steps m n = (steps.filter fun s => s.1 ≤ m ∧ s.2 ≤ n).biUnion fun s =>
       (latticePaths steps (m - s.1) (n - s.2)).map ⟨List.cons s, List.cons_injective⟩ := by
@@ -205,12 +201,12 @@ theorem q26a_staysAbove_zero_iff (l : List (ℕ × ℕ)) :
   simp only [q26a_StaysAbove, StaysWeaklyAboveDiagonal, add_zero, Nat.cast_le]
 
 /-- The empty path stays in `x ≤ y + d` iff `0 ≤ d`. -/
-theorem q26a_staysAbove_nil (d : ℤ) : q26a_StaysAbove d [] ↔ 0 ≤ d := by
+lemma q26a_staysAbove_nil (d : ℤ) : q26a_StaysAbove d [] ↔ 0 ≤ d := by
   simp [q26a_StaysAbove]
 
 /-- A path stays in `x ≤ y + d` iff the origin does and the rest stays in the shifted
 half-plane. -/
-theorem q26a_staysAbove_cons (d : ℤ) (s : ℕ × ℕ) (l : List (ℕ × ℕ)) :
+lemma q26a_staysAbove_cons (d : ℤ) (s : ℕ × ℕ) (l : List (ℕ × ℕ)) :
     q26a_StaysAbove d (s :: l) ↔ 0 ≤ d ∧ q26a_StaysAbove (d + s.2 - s.1) l := by
   simp only [q26a_StaysAbove, mem_range, List.length_cons]
   constructor
@@ -232,23 +228,23 @@ theorem q26a_staysAbove_cons (d : ℤ) (s : ℕ × ℕ) (l : List (ℕ × ℕ)) 
 def q26a_ballot (d : ℤ) (m n : ℕ) : ℕ := #{l ∈ latticePaths unitSteps m n | q26a_StaysAbove d l}
 
 /-- No path stays in `x ≤ y + d` for `d < 0` (the origin fails). -/
-theorem q26a_ballot_neg {d : ℤ} (hd : d < 0) (m n : ℕ) : q26a_ballot d m n = 0 := by
+lemma q26a_ballot_neg {d : ℤ} (hd : d < 0) (m n : ℕ) : q26a_ballot d m n = 0 := by
   rw [q26a_ballot, card_eq_zero, filter_eq_empty_iff]
   intro l _ h
   have := h 0 (by simp)
   simp at this; omega
 
 /-- `(0, 0)` is not a unit step. -/
-theorem q26a_unitSteps_h0 : (0, 0) ∉ unitSteps := by decide
+lemma q26a_unitSteps_h0 : (0, 0) ∉ unitSteps := by decide
 
 /-- The empty path is counted when `0 ≤ d`. -/
-theorem q26a_ballot_zero_zero {d : ℤ} (hd : 0 ≤ d) : q26a_ballot d 0 0 = 1 := by
+lemma q26a_ballot_zero_zero {d : ℤ} (hd : 0 ≤ d) : q26a_ballot d 0 0 = 1 := by
   rw [q26a_ballot, q26a_latticePaths_zero q26a_unitSteps_h0]
   rw [filter_singleton]
   simp [(q26a_staysAbove_nil d).2 hd]
 
 /-- First-step recurrence for `q26a_ballot`. -/
-theorem q26a_ballot_step {d : ℤ} (hd : 0 ≤ d) {m n : ℕ} (hmn : (m, n) ≠ (0, 0)) :
+lemma q26a_ballot_step {d : ℤ} (hd : 0 ≤ d) {m n : ℕ} (hmn : (m, n) ≠ (0, 0)) :
     q26a_ballot d m n = ∑ s ∈ unitSteps.filter (fun s => s.1 ≤ m ∧ s.2 ≤ n),
       q26a_ballot (d + s.2 - s.1) (m - s.1) (n - s.2) := by
   rw [q26a_ballot, q26a_card_filter_latticePaths q26a_unitSteps_h0 hmn]
@@ -260,7 +256,7 @@ theorem q26a_ballot_step {d : ℤ} (hd : 0 ≤ d) {m n : ℕ} (hmn : (m, n) ≠ 
   simp [hd]
 
 /-- `q26a_ballot` recurrence at `(m+1, n+1)`. -/
-theorem q26a_ballot_succ_succ {d : ℤ} (hd : 0 ≤ d) (m n : ℕ) :
+lemma q26a_ballot_succ_succ {d : ℤ} (hd : 0 ≤ d) (m n : ℕ) :
     q26a_ballot d (m + 1) (n + 1) =
       q26a_ballot (d - 1) m (n + 1) + q26a_ballot (d + 1) (m + 1) n := by
   rw [q26a_ballot_step hd (by simp), show unitSteps.filter (fun s => s.1 ≤ m + 1 ∧ s.2 ≤ n + 1)
@@ -274,7 +270,7 @@ theorem q26a_ballot_succ_succ {d : ℤ} (hd : 0 ≤ d) (m n : ℕ) :
     sub_zero]
 
 /-- `q26a_ballot` recurrence at `(0, n+1)`. -/
-theorem q26a_ballot_zero_succ {d : ℤ} (hd : 0 ≤ d) (n : ℕ) :
+lemma q26a_ballot_zero_succ {d : ℤ} (hd : 0 ≤ d) (n : ℕ) :
     q26a_ballot d 0 (n + 1) = q26a_ballot (d + 1) 0 n := by
   rw [q26a_ballot_step hd (by simp), show unitSteps.filter (fun s => s.1 ≤ 0 ∧ s.2 ≤ n + 1)
       = {(0, 1)} by
@@ -283,7 +279,7 @@ theorem q26a_ballot_zero_succ {d : ℤ} (hd : 0 ≤ d) (n : ℕ) :
   simp
 
 /-- `q26a_ballot` recurrence at `(m+1, 0)`. -/
-theorem q26a_ballot_succ_zero {d : ℤ} (hd : 0 ≤ d) (m : ℕ) :
+lemma q26a_ballot_succ_zero {d : ℤ} (hd : 0 ≤ d) (m : ℕ) :
     q26a_ballot d (m + 1) 0 = q26a_ballot (d - 1) m 0 := by
   rw [q26a_ballot_step hd (by simp), show unitSteps.filter (fun s => s.1 ≤ m + 1 ∧ s.2 ≤ 0)
       = {(1, 0)} by

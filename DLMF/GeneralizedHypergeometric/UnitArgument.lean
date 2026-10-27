@@ -7,7 +7,6 @@ module
 
 public import DLMF.GeneralizedHypergeometric.Basic
 public import DLMF.Hypergeometric.Identities
-public import DLMF.Hypergeometric.Saalschutz
 
 /-!
 # Argument unity: DLMF §16.4
@@ -395,7 +394,7 @@ def gen3F2UnitThomae (a b c d e : ℂ) : ℂ :=
     genHG {a, d - b, d - c} {d, d + e - b - c} 1
 
 /-- Joint analyticity in the convergent unit-series parameter region (16.4, prose). -/
-theorem gen3F2_unit_parameter_analytic :
+lemma gen3F2_unit_parameter_analytic :
     AnalyticOnNhd ℂ (fun P : Fin 5 → ℂ => genHG {P 0, P 1, P 2} {P 3, P 4} 1)
       {P | genDenRegular {P 3, P 4} ∧ 0 < (P 3 + P 4 - P 0 - P 1 - P 2).re} := by
   sorry

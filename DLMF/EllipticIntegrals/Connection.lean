@@ -5,7 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.EllipticIntegrals.LegendreIdentities
 public import DLMF.EllipticIntegrals.Derivatives
 
 /-!
@@ -55,7 +54,7 @@ theorem legendre_relation_ofReal {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) :
 
 /-! ### Helpers for 19.7.1 and 19.7.2 -/
 
-theorem p19lR1_imag_integral {x c : ℝ} (hc : 0 < c) (hxc : c ^ 2 = 1 - x ^ 2) (r : ℂ) :
+lemma p19lR1_imag_integral {x c : ℝ} (hc : 0 < c) (hxc : c ^ 2 = 1 - x ^ 2) (r : ℂ) :
     ∫ θ in (0 : ℝ)..(π / 2), (1 - (I * x / c) ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ r =
       (((c ^ 2)⁻¹ : ℝ) : ℂ) ^ r *
         ∫ θ in (0 : ℝ)..(π / 2), (1 - (x : ℂ) ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ r := by
@@ -78,7 +77,7 @@ theorem p19lR1_imag_integral {x c : ℝ} (hc : 0 < c) (hxc : c ^ 2 = 1 - x ^ 2) 
   rw [e, Complex.mul_cpow_ofReal_nonneg (by positivity) hA]
   push_cast; ring_nf
 
-theorem p19lR1_inv_sq_cpow {c : ℝ} (hc : 0 < c) :
+lemma p19lR1_inv_sq_cpow {c : ℝ} (hc : 0 < c) :
     (((c ^ 2)⁻¹ : ℝ) : ℂ) ^ (-(1 / 2 : ℂ)) = c ∧ (((c ^ 2)⁻¹ : ℝ) : ℂ) ^ (1 / 2 : ℂ) = (c : ℂ)⁻¹ := by
   have h1 : (((c ^ 2)⁻¹ : ℝ) : ℂ) ^ (1 / 2 : ℂ) = (c : ℂ)⁻¹ := by
     rw [show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring, ← ofReal_cpow (by positivity),
@@ -87,7 +86,7 @@ theorem p19lR1_inv_sq_cpow {c : ℝ} (hc : 0 < c) :
   refine ⟨?_, h1⟩
   rw [cpow_neg, h1, inv_inv]
 
-theorem p19lR1_inv_mem_slitPlane {w : ℂ} (hw : w ∈ slitPlane) : w⁻¹ ∈ slitPlane := by
+lemma p19lR1_inv_mem_slitPlane {w : ℂ} (hw : w ∈ slitPlane) : w⁻¹ ∈ slitPlane := by
   rw [mem_slitPlane_iff] at hw ⊢
   have hw0 : w ≠ 0 := slitPlane_ne_zero (mem_slitPlane_iff.2 hw)
   have hn : 0 < normSq w := normSq_pos.2 hw0
@@ -99,7 +98,7 @@ theorem p19lR1_inv_mem_slitPlane {w : ℂ} (hw : w ∈ slitPlane) : w⁻¹ ∈ s
 theorem p19lR1_isOpen_U : IsOpen {k : ℂ | 1 - k ^ 2 ∈ slitPlane} :=
   isOpen_slitPlane.preimage (by fun_prop)
 
-theorem p19lR1_isPreconnected_U : IsPreconnected {k : ℂ | 1 - k ^ 2 ∈ slitPlane} := by
+lemma p19lR1_isPreconnected_U : IsPreconnected {k : ℂ | 1 - k ^ 2 ∈ slitPlane} := by
   refine (StarConvex.isPathConnected (a := (0 : ℂ)) ?_ (by simp)).isConnected.isPreconnected
   intro y hy a b ha hb hab
   simp only [smul_zero, zero_add, Set.mem_ofPred_eq, real_smul] at hy ⊢
@@ -111,18 +110,18 @@ theorem p19lR1_comod_differentiableAt {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
   unfold jacobiComodulusk
   exact (by fun_prop : DifferentiableAt ℂ (fun k : ℂ => 1 - k ^ 2) k).cpow_const hk
 
-theorem p19lR1_comod_ne_zero {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) : jacobiComodulusk k ≠ 0 := by
+lemma p19lR1_comod_ne_zero {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) : jacobiComodulusk k ≠ 0 := by
   intro h
   have := ei19a_jacobiComodulusk_sq k
   rw [h] at this
   exact slitPlane_ne_zero hk (by rw [← this]; ring)
 
-theorem p19lR1_comod_ofReal {x : ℝ} (hx : x ^ 2 ≤ 1) :
+lemma p19lR1_comod_ofReal {x : ℝ} (hx : x ^ 2 ≤ 1) :
     jacobiComodulusk x = (Real.sqrt (1 - x ^ 2) : ℂ) := by
   rw [jacobiComodulusk, Real.sqrt_eq_rpow, ofReal_cpow (by linarith)]
   push_cast; rfl
 
-theorem p19lR1_imag_mem {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
+lemma p19lR1_imag_mem {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
     1 - (I * k / jacobiComodulusk k) ^ 2 ∈ slitPlane := by
   have hne := p19lR1_comod_ne_zero hk
   have hne' : 1 - k ^ 2 ≠ 0 := slitPlane_ne_zero hk
@@ -141,7 +140,7 @@ theorem p19lR1_eqOn_U {f g : ℂ → ℂ} (hf : DifferentiableOn ℂ f {k : ℂ 
     (fun x h1 h2 => h x h1 (by linarith))
   simpa using this
 
-theorem p19lR1_imag_modulus {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
+lemma p19lR1_imag_modulus {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
     compEllIntKk (I * k / jacobiComodulusk k) = jacobiComodulusk k * compEllIntKk k ∧
       compEllIntEk (I * k / jacobiComodulusk k) = compEllIntEk k / jacobiComodulusk k := by
   have hD := differentiableOn_compEllIntKk_compEllIntEk
@@ -171,14 +170,14 @@ theorem p19lR1_imag_modulus {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
       (p19lR1_inv_sq_cpow hc0).2]
     ring
 
-theorem p19lR1_comod_comod {k : ℂ} (hk : 0 < k.re) :
+lemma p19lR1_comod_comod {k : ℂ} (hk : 0 < k.re) :
     jacobiComodulusk (jacobiComodulusk k) = k := by
   rw [jacobiComodulusk, ei19a_jacobiComodulusk_sq, sub_sub_cancel, one_div]
   have h := abs_arg_lt_pi_div_two_iff.2 (Or.inl hk)
   rw [abs_lt] at h
   exact Complex.pow_cpow_nat_inv (by norm_num) (by push_cast; linarith) (by push_cast; linarith)
 
-theorem p19lR1_imag_comodulus {k : ℂ} (hk : 0 < k.re) (hk2 : k ^ 2 ∈ slitPlane) :
+lemma p19lR1_imag_comodulus {k : ℂ} (hk : 0 < k.re) (hk2 : k ^ 2 ∈ slitPlane) :
     compEllIntKk (-I * jacobiComodulusk k / k) = k * compEllIntKk (jacobiComodulusk k) ∧
       compEllIntEk (-I * jacobiComodulusk k / k) = compEllIntEk (jacobiComodulusk k) / k := by
   have h1 : 1 - jacobiComodulusk k ^ 2 ∈ slitPlane := by
@@ -196,13 +195,13 @@ noncomputable def p19lR1_W (k : ℂ) : ℂ :=
     compEllIntEk (jacobiComodulusk k) * compEllIntKk k -
       compEllIntKk k * compEllIntKk (jacobiComodulusk k)
 
-theorem p19lR1_comod_neg (k : ℂ) : jacobiComodulusk (-k) = jacobiComodulusk k := by
+lemma p19lR1_comod_neg (k : ℂ) : jacobiComodulusk (-k) = jacobiComodulusk k := by
   simp [jacobiComodulusk]
 
-theorem p19lR1_W_neg (k : ℂ) : p19lR1_W (-k) = p19lR1_W k := by
+lemma p19lR1_W_neg (k : ℂ) : p19lR1_W (-k) = p19lR1_W k := by
   simp only [p19lR1_W, p19lR1_comod_neg, compEllIntKk_neg, compEllIntEk_neg]
 
-theorem p19lR1_sq_mem_slitPlane {k : ℂ} (hk : 0 < k.re) : k ^ 2 ∈ slitPlane := by
+lemma p19lR1_sq_mem_slitPlane {k : ℂ} (hk : 0 < k.re) : k ^ 2 ∈ slitPlane := by
   rw [mem_slitPlane_iff]
   rcases eq_or_ne k.im 0 with h | h
   · left; simp [sq, h]; nlinarith
@@ -212,7 +211,7 @@ theorem p19lR1_sq_mem_slitPlane {k : ℂ} (hk : 0 < k.re) : k ^ 2 ∈ slitPlane 
     · exact hk.ne' h3
     · exact h h3
 
-theorem p19lR1_one_sub_sq_mem_iff {z : ℂ} : 1 - z ^ 2 ∈ slitPlane ↔ z.im ≠ 0 ∨ z.re ^ 2 < 1 := by
+lemma p19lR1_one_sub_sq_mem_iff {z : ℂ} : 1 - z ^ 2 ∈ slitPlane ↔ z.im ≠ 0 ∨ z.re ^ 2 < 1 := by
   rw [mem_slitPlane_iff]
   simp only [sub_re, one_re, sub_im, one_im, sq, mul_re, mul_im, zero_sub, ne_eq, neg_eq_zero]
   constructor
@@ -231,10 +230,10 @@ theorem p19lR1_one_sub_sq_mem_iff {z : ℂ} : 1 - z ^ 2 ∈ slitPlane ↔ z.im �
         · norm_num at h''
     · left; nlinarith [sq_nonneg z.im]
 
-theorem p19lR1_isOpen_V : IsOpen {k : ℂ | 0 < k.re ∧ 1 - k ^ 2 ∈ slitPlane} :=
+lemma p19lR1_isOpen_V : IsOpen {k : ℂ | 0 < k.re ∧ 1 - k ^ 2 ∈ slitPlane} :=
   (isOpen_lt continuous_const continuous_re).inter p19lR1_isOpen_U
 
-theorem p19lR1_isPreconnected_V : IsPreconnected {k : ℂ | 0 < k.re ∧ 1 - k ^ 2 ∈ slitPlane} := by
+lemma p19lR1_isPreconnected_V : IsPreconnected {k : ℂ | 0 < k.re ∧ 1 - k ^ 2 ∈ slitPlane} := by
   refine (StarConvex.isPathConnected (a := ((1 / 2 : ℝ) : ℂ)) ?_ ?_).isConnected.isPreconnected
   · intro y hy a b ha hb hab
     simp only [Set.mem_ofPred_eq, real_smul, p19lR1_one_sub_sq_mem_iff] at hy ⊢
@@ -256,7 +255,7 @@ theorem p19lR1_isPreconnected_V : IsPreconnected {k : ℂ | 0 < k.re ∧ 1 - k ^
         nlinarith
   · simp only [Set.mem_ofPred_eq, p19lR1_one_sub_sq_mem_iff, ofReal_re, ofReal_im]; norm_num
 
-theorem p19lR1_W_of_re_pos {k : ℂ} (hk : 0 < k.re) (hk1 : 1 - k ^ 2 ∈ slitPlane) :
+lemma p19lR1_W_of_re_pos {k : ℂ} (hk : 0 < k.re) (hk1 : 1 - k ^ 2 ∈ slitPlane) :
     p19lR1_W k = π / 2 := by
   have hD := differentiableOn_compEllIntKk_compEllIntEk
   have hV : {k : ℂ | 0 < k.re ∧ 1 - k ^ 2 ∈ slitPlane} ⊆ {k : ℂ | 1 - k ^ 2 ∈ slitPlane} :=
@@ -287,14 +286,14 @@ theorem p19lR1_W_of_re_pos {k : ℂ} (hk : 0 < k.re) (hk1 : 1 - k ^ 2 ∈ slitPl
   rw [p19lR1_W]; exact h
 
 /-- The Legendre combination with DLMF's continued `K'`, `E'` equals `p19lR1_W` everywhere. -/
-theorem p19lR1_legendre_eq_W (k : ℂ) :
+lemma p19lR1_legendre_eq_W (k : ℂ) :
     compEllIntEk k * cCompEllIntKk k + cCompEllIntEk k * compEllIntKk k -
       compEllIntKk k * cCompEllIntKk k = p19lR1_W k := by
   unfold cCompEllIntKk cCompEllIntEk p19lR1_W
   rw [compEllIntKk_jacobiComodulusk, compEllIntKk_neg, compEllIntEk_neg]
   split_ifs <;> ring
 
-theorem p19lR1_cpow_cwa_upper {w : ℝ} (hw : w ≠ 0) (r : ℂ) :
+lemma p19lR1_cpow_cwa_upper {w : ℝ} (hw : w ≠ 0) (r : ℂ) :
     ContinuousWithinAt (fun z : ℂ => z ^ r) {z : ℂ | 0 ≤ z.im} (w : ℂ) := by
   have hw' : (w : ℂ) ≠ 0 := by exact_mod_cast hw
   rcases hw.lt_or_gt with h | h
@@ -308,7 +307,7 @@ theorem p19lR1_cpow_cwa_upper {w : ℝ} (hw : w ≠ 0) (r : ℂ) :
     exact cpow_def_of_ne_zero hz r
   · exact (continuousAt_cpow_const (ofReal_mem_slitPlane.2 h)).continuousWithinAt
 
-theorem p19lR1_abs_sin_ge {d : ℝ} (h1 : -(π / 2) ≤ d) (h2 : d ≤ π / 2) :
+lemma p19lR1_abs_sin_ge {d : ℝ} (h1 : -(π / 2) ≤ d) (h2 : d ≤ π / 2) :
     2 / π * |d| ≤ |Real.sin d| := by
   rcases le_or_gt 0 d with h | h
   · rw [abs_of_nonneg h, abs_of_nonneg (Real.sin_nonneg_of_nonneg_of_le_pi h (by linarith))]
@@ -319,7 +318,7 @@ theorem p19lR1_abs_sin_ge {d : ℝ} (h1 : -(π / 2) ≤ d) (h2 : d ≤ π / 2) :
     rw [abs_of_neg h, abs_of_neg (by linarith)]
     exact h3
 
-theorem p19lR1_sin_sq_sub_lower {θ₀ : ℝ} (h0 : 0 < θ₀) (h1 : θ₀ < π / 2) :
+lemma p19lR1_sin_sq_sub_lower {θ₀ : ℝ} (h0 : 0 < θ₀) (h1 : θ₀ < π / 2) :
     ∃ C > 0, ∀ θ ∈ Icc 0 (π / 2), C * |θ - θ₀| ≤ |Real.sin θ₀ ^ 2 - Real.sin θ ^ 2| := by
   set m := 2 / π * min θ₀ (π / 2 - θ₀) with hm
   have hm0 : 0 < m := mul_pos (by positivity) (lt_min h0 (by linarith))
@@ -345,7 +344,7 @@ theorem p19lR1_sin_sq_sub_lower {θ₀ : ℝ} (h0 : 0 < θ₀) (h1 : θ₀ < π 
     _ ≤ |Real.sin (θ₀ - θ)| * |Real.sin (θ₀ + θ)| :=
       mul_le_mul hs1 hs2 hm0.le (abs_nonneg _)
 
-theorem p19lR1_intervalIntegrable_abs_sub_rpow {θ₀ : ℝ} (h0 : 0 ≤ θ₀) (h1 : θ₀ ≤ π / 2) :
+lemma p19lR1_intervalIntegrable_abs_sub_rpow {θ₀ : ℝ} (h0 : 0 ≤ θ₀) (h1 : θ₀ ≤ π / 2) :
     IntervalIntegrable (fun θ : ℝ => |θ - θ₀| ^ (-(1 / 2) : ℝ)) volume 0 (π / 2) := by
   have hr : (-1 : ℝ) < -(1 / 2) := by norm_num
   refine (?_ : IntervalIntegrable _ volume 0 θ₀).trans (?_ : IntervalIntegrable _ volume θ₀ (π / 2))
@@ -362,7 +361,7 @@ theorem p19lR1_intervalIntegrable_abs_sub_rpow {θ₀ : ℝ} (h0 : 0 ≤ θ₀) 
     rw [uIoc_of_le h1] at hx
     rw [abs_of_nonneg (by linarith [hx.1])]
 
-theorem p19lR1_intervalIntegrable_dom {a : ℝ} (ha : 1 < a) :
+lemma p19lR1_intervalIntegrable_dom {a : ℝ} (ha : 1 < a) :
     IntervalIntegrable (fun θ : ℝ => |1 - a * Real.sin θ ^ 2| ^ (-(1 / 2) : ℝ)) volume 0 (π / 2) := by
   set θ₀ := Real.arcsin (1 / Real.sqrt a) with hθ₀
   have hsa : 0 < Real.sqrt a := Real.sqrt_pos.2 (by linarith)
@@ -400,7 +399,7 @@ theorem p19lR1_intervalIntegrable_dom {a : ℝ} (ha : 1 < a) :
         _ = (a * C) ^ (-(1 / 2) : ℝ) * |θ - θ₀| ^ (-(1 / 2) : ℝ) :=
             Real.mul_rpow (by positivity) (abs_nonneg _)
 
-theorem p19lR1_ae_ne_zero_cut {a : ℝ} (ha : 1 < a) :
+lemma p19lR1_ae_ne_zero_cut {a : ℝ} (ha : 1 < a) :
     ∀ᵐ θ : ℝ, θ ∈ uIoc (0 : ℝ) (π / 2) → 1 - a * Real.sin θ ^ 2 ≠ 0 := by
   filter_upwards [Measure.ae_ne volume (Real.arcsin (1 / Real.sqrt a))] with θ hne hθ h
   rw [uIoc_of_le (by positivity)] at hθ
@@ -411,7 +410,7 @@ theorem p19lR1_ae_ne_zero_cut {a : ℝ} (ha : 1 < a) :
     rw [← Real.sqrt_sq hs0, hsq, Real.sqrt_div' _ (by linarith : (0 : ℝ) ≤ a), Real.sqrt_one]
   rw [← hs, Real.arcsin_sin (by linarith [hθ.1, Real.pi_pos]) hθ.2]
 
-theorem p19lR1_tendsto_integral_cut {a : ℝ} (ha : 1 < a) {ρ : ℝ} (hρ : ρ = -(1 / 2) ∨ ρ = 1 / 2) :
+lemma p19lR1_tendsto_integral_cut {a : ℝ} (ha : 1 < a) {ρ : ℝ} (hρ : ρ = -(1 / 2) ∨ ρ = 1 / 2) :
     Tendsto (fun η : ℝ => ∫ θ in (0 : ℝ)..(π / 2),
         (1 - ((a : ℂ) - I * η) * (Real.sin θ : ℂ) ^ 2) ^ (ρ : ℂ)) (𝓝[>] 0)
       (𝓝 (∫ θ in (0 : ℝ)..(π / 2), (1 - (a : ℂ) * (Real.sin θ : ℂ) ^ 2) ^ (ρ : ℂ))) := by
@@ -469,7 +468,7 @@ theorem p19lR1_tendsto_integral_cut {a : ℝ} (ha : 1 < a) {ρ : ℝ} (hρ : ρ 
         one_mul, zero_add]
       exact mul_nonneg (le_of_lt hη) (sq_nonneg _)
 
-theorem p19lR1_W_eq (k : ℂ) : p19lR1_W k =
+lemma p19lR1_W_eq (k : ℂ) : p19lR1_W k =
     compEllIntEk k * (∫ θ in (0 : ℝ)..(π / 2),
       (1 - (1 - k ^ 2) * (Real.sin θ : ℂ) ^ 2) ^ ((-(1 / 2) : ℝ) : ℂ)) +
     (∫ θ in (0 : ℝ)..(π / 2), (1 - (1 - k ^ 2) * (Real.sin θ : ℂ) ^ 2) ^ ((1 / 2 : ℝ) : ℂ)) *
@@ -484,7 +483,7 @@ theorem p19lR1_W_eq (k : ℂ) : p19lR1_W k =
     rw [compEllIntEk_eq_integral, ei19a_jacobiComodulusk_sq]; push_cast; rfl
   rw [p19lR1_W, hK, hE]
 
-theorem p19lR1_W_imag {y : ℝ} (hy : 0 < y) : p19lR1_W (I * y) = π / 2 := by
+lemma p19lR1_W_imag {y : ℝ} (hy : 0 < y) : p19lR1_W (I * y) = π / 2 := by
   set kε : ℝ → ℂ := fun ε => (ε : ℂ) + I * (Real.sqrt (y ^ 2 + ε ^ 2) : ℂ) with hkε
   set η : ℝ → ℝ := fun ε => 2 * ε * Real.sqrt (y ^ 2 + ε ^ 2) with hη
   set a : ℝ := 1 + y ^ 2 with ha
@@ -595,7 +594,7 @@ theorem compEllInt_reciprocal_modulus {k : ℂ} (hk : 0 < k.re) {s : ℂ}
 
 /-! ### Helpers for 19.7.4 (substitution `θ = arcsin (k sin ψ)`) -/
 
-theorem p19lR1_ofReal_cpow_half {x : ℝ} (hx : 0 ≤ x) :
+lemma p19lR1_ofReal_cpow_half {x : ℝ} (hx : 0 ≤ x) :
     (x : ℂ) ^ (-(1 / 2 : ℂ)) = ((Real.sqrt x)⁻¹ : ℝ) ∧ (x : ℂ) ^ (1 / 2 : ℂ) = (Real.sqrt x : ℝ) := by
   constructor
   · rw [show -(1 / 2 : ℂ) = ((-(1 / 2) : ℝ) : ℂ) by push_cast; ring, ← ofReal_cpow hx,
@@ -603,7 +602,7 @@ theorem p19lR1_ofReal_cpow_half {x : ℝ} (hx : 0 ≤ x) :
   · rw [show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring, ← ofReal_cpow hx,
       ← Real.sqrt_eq_rpow]
 
-theorem p19lR1_sin_sq_le_of_le {x y : ℝ} (hx : 0 ≤ x) (hxy : x ≤ y) (hy : y ≤ π / 2) :
+lemma p19lR1_sin_sq_le_of_le {x y : ℝ} (hx : 0 ≤ x) (hxy : x ≤ y) (hy : y ≤ π / 2) :
     Real.sin x ^ 2 ≤ Real.sin y ^ 2 := by
   have h1 : Real.sin x ≤ Real.sin y :=
     Real.sin_le_sin_of_le_of_le_pi_div_two (by linarith [Real.pi_pos]) hy hxy
@@ -611,7 +610,7 @@ theorem p19lR1_sin_sq_le_of_le {x y : ℝ} (hx : 0 ≤ x) (hxy : x ≤ y) (hy : 
   nlinarith
 
 /-- `Π` for real data with `α² sin²φ < 1` on `0 ≤ φ ≤ π/2` needs no principal value. -/
-theorem p19lR1_Pi_ofReal_of_lt {φ α2 : ℝ} (hφ0 : 0 ≤ φ) (hφ1 : φ ≤ π / 2)
+lemma p19lR1_Pi_ofReal_of_lt {φ α2 : ℝ} (hφ0 : 0 ≤ φ) (hφ1 : φ ≤ π / 2)
     (hα : α2 * Real.sin φ ^ 2 < 1) (k : ℂ) :
     incEllIntPik φ α2 k = ∫ θ in (0 : ℝ)..φ, ((1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹ *
       (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ))) := by
@@ -633,7 +632,7 @@ theorem p19lR1_Pi_ofReal_of_lt {φ α2 : ℝ} (hφ0 : 0 ≤ φ) (hφ1 : φ ≤ �
     exact hpos.trans (le_abs_self _)
 
 /-- The substitution `θ = arcsin (k sin ψ)` on `[0, β]`. -/
-theorem p19lR1_arcsin_subst {k β : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hβ0 : 0 ≤ β) (hβ1 : β ≤ π / 2)
+lemma p19lR1_arcsin_subst {k β : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hβ0 : 0 ≤ β) (hβ1 : β ≤ π / 2)
     (g : ℝ → ℂ) :
     ∫ θ in (0 : ℝ)..(Real.arcsin (k * Real.sin β)), g θ =
       ∫ ψ in (0 : ℝ)..β, ((k * Real.cos ψ / Real.sqrt (1 - k ^ 2 * Real.sin ψ ^ 2) : ℝ) : ℂ) *
@@ -659,7 +658,7 @@ theorem p19lR1_arcsin_subst {k β : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hβ0 : 0 �
   simp only [Real.sin_zero, mul_zero, Real.arcsin_zero, real_smul, Function.comp] at h
   exact h.symm
 
-theorem p19lR1_recip_modulus {k β φ α2 : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hβ0 : 0 ≤ β)
+lemma p19lR1_recip_modulus {k β φ α2 : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hβ0 : 0 ≤ β)
     (hβ1 : β ≤ π / 2) (hφ : Real.arcsin (k * Real.sin β) = φ) (hα : α2 * Real.sin φ ^ 2 < 1) :
     incEllIntFk φ (1 / k : ℝ) = k * incEllIntFk β k ∧
       incEllIntEk φ (1 / k : ℝ) = (incEllIntEk β k - (1 - k ^ 2 : ℝ) * incEllIntFk β k) / k ∧
@@ -794,15 +793,15 @@ theorem incEllInt_reciprocal_modulus {k φ α2 : ℝ} (hk0 : 0 < k) (hk1 : k < 1
 noncomputable def p19lR1_T (k u : ℝ) : ℝ :=
   Real.arcsin (Real.sqrt (1 + k ^ 2) * Real.sin u / Real.sqrt (1 + k ^ 2 * Real.sin u ^ 2))
 
-theorem p19lR1_w_pos (k u : ℝ) : 0 < 1 + k ^ 2 * Real.sin u ^ 2 := by positivity
+lemma p19lR1_w_pos (k u : ℝ) : 0 < 1 + k ^ 2 * Real.sin u ^ 2 := by positivity
 
-theorem p19lR1_T_arg_le (k u : ℝ) :
+lemma p19lR1_T_arg_le (k u : ℝ) :
     (Real.sqrt (1 + k ^ 2) * Real.sin u / Real.sqrt (1 + k ^ 2 * Real.sin u ^ 2)) ^ 2 ≤ 1 := by
   rw [div_pow, mul_pow, Real.sq_sqrt (by positivity), Real.sq_sqrt (by positivity),
     div_le_one (by positivity)]
   nlinarith [Real.sin_sq_le_one u, sq_nonneg k, sq_nonneg (Real.sin u)]
 
-theorem p19lR1_sin_T (k u : ℝ) :
+lemma p19lR1_sin_T (k u : ℝ) :
     Real.sin (p19lR1_T k u) =
       Real.sqrt (1 + k ^ 2) * Real.sin u / Real.sqrt (1 + k ^ 2 * Real.sin u ^ 2) := by
   have h := p19lR1_T_arg_le k u
@@ -810,7 +809,7 @@ theorem p19lR1_sin_T (k u : ℝ) :
     Real.sqrt (1 + k ^ 2 * Real.sin u ^ 2) + 1)]) (by nlinarith [sq_nonneg (Real.sqrt (1 + k ^ 2) *
     Real.sin u / Real.sqrt (1 + k ^ 2 * Real.sin u ^ 2) - 1)])]
 
-theorem p19lR1_T_eq_arctan (k : ℝ) {u : ℝ} (hu : u ∈ Ioo (-(π / 2)) (π / 2)) :
+lemma p19lR1_T_eq_arctan (k : ℝ) {u : ℝ} (hu : u ∈ Ioo (-(π / 2)) (π / 2)) :
     p19lR1_T k u = Real.arctan (Real.sqrt (1 + k ^ 2) * Real.tan u) := by
   have hc := Real.cos_pos_of_mem_Ioo hu
   have hw := p19lR1_w_pos k u
@@ -825,7 +824,7 @@ theorem p19lR1_T_eq_arctan (k : ℝ) {u : ℝ} (hu : u ∈ Ioo (-(π / 2)) (π /
   have := (Real.sqrt_pos.2 hw).ne'
   field_simp
 
-theorem p19lR1_hasDerivAt_T (k : ℝ) {u : ℝ} (hu : u ∈ Ioo (-(π / 2)) (π / 2)) :
+lemma p19lR1_hasDerivAt_T (k : ℝ) {u : ℝ} (hu : u ∈ Ioo (-(π / 2)) (π / 2)) :
     HasDerivAt (p19lR1_T k) (Real.sqrt (1 + k ^ 2) / (1 + k ^ 2 * Real.sin u ^ 2)) u := by
   have hc := Real.cos_pos_of_mem_Ioo hu
   have h := (Real.hasDerivAt_arctan (Real.sqrt (1 + k ^ 2) * Real.tan u)).comp u
@@ -839,12 +838,12 @@ theorem p19lR1_hasDerivAt_T (k : ℝ) {u : ℝ} (hu : u ∈ Ioo (-(π / 2)) (π 
   field_simp
   nlinarith [Real.sin_sq_add_cos_sq u]
 
-theorem p19lR1_continuous_T (k : ℝ) : Continuous (p19lR1_T k) := by
+lemma p19lR1_continuous_T (k : ℝ) : Continuous (p19lR1_T k) := by
   unfold p19lR1_T
   refine Real.continuous_arcsin.comp ?_
   exact Continuous.div (by fun_prop) (by fun_prop) fun u => (Real.sqrt_pos.2 (p19lR1_w_pos k u)).ne'
 
-theorem p19lR1_T_subst (k : ℝ) {φ : ℝ} (hφ0 : 0 ≤ φ) (hφ1 : φ ≤ π / 2) (g : ℝ → ℂ) :
+lemma p19lR1_T_subst (k : ℝ) {φ : ℝ} (hφ0 : 0 ≤ φ) (hφ1 : φ ≤ π / 2) (g : ℝ → ℂ) :
     ∫ θ in (0 : ℝ)..(p19lR1_T k φ), g θ =
       ∫ u in (0 : ℝ)..φ, ((Real.sqrt (1 + k ^ 2) / (1 + k ^ 2 * Real.sin u ^ 2) : ℝ) : ℂ) *
         g (p19lR1_T k u) := by
@@ -859,7 +858,7 @@ theorem p19lR1_T_subst (k : ℝ) {φ : ℝ} (hφ0 : 0 ≤ φ) (hφ1 : φ ≤ π 
   simp only [h0, real_smul, Function.comp] at h
   exact h.symm
 
-theorem p19lR1_imod_pt (k u : ℝ) :
+lemma p19lR1_imod_pt (k u : ℝ) :
     (1 - (I * k) ^ 2 * (Real.sin u : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) =
         (((Real.sqrt (1 + k ^ 2 * Real.sin u ^ 2))⁻¹ : ℝ) : ℂ) ∧
       (1 - (I * k) ^ 2 * (Real.sin u : ℂ) ^ 2) ^ (1 / 2 : ℂ) =
@@ -888,7 +887,7 @@ theorem p19lR1_imod_pt (k u : ℝ) :
   push_cast
   exact ⟨rfl, rfl, rfl, rfl⟩
 
-theorem p19lR1_alg_Pi {k α2 c W s : ℝ} (hc : 0 < c) (hW : 0 < W) (hc2 : c ^ 2 = 1 + k ^ 2)
+lemma p19lR1_alg_Pi {k α2 c W s : ℝ} (hc : 0 < c) (hW : 0 < W) (hc2 : c ^ 2 = 1 + k ^ 2)
     (hW2 : W ^ 2 = 1 + k ^ 2 * s ^ 2) (hd : 1 - α2 * s ^ 2 ≠ 0) (hαk : α2 + k ^ 2 ≠ 0) :
     (1 - α2 * s ^ 2)⁻¹ * W⁻¹ = (1 / c) / ((α2 + k ^ 2) / (1 + k ^ 2)) *
       ((k / c) ^ 2 * (c * W⁻¹) + ((1 / c) ^ 2 * α2) * (c * W / (1 - α2 * s ^ 2))) := by
@@ -896,19 +895,19 @@ theorem p19lR1_alg_Pi {k α2 c W s : ℝ} (hc : 0 < c) (hW : 0 < W) (hc2 : c ^ 2
   field_simp
   linear_combination (-(α2)) * hW2
 
-theorem p19lR1_alg_E {k c J X Wφ sc : ℝ} (hc2 : c ^ 2 = 1 + k ^ 2) (hc : 0 < c) (hW : 0 < Wφ)
+lemma p19lR1_alg_E {k c J X Wφ sc : ℝ} (hc2 : c ^ 2 = 1 + k ^ 2) (hc : 0 < c) (hW : 0 < Wφ)
     (hX : X = k ^ 2 * sc / (c * Wφ)) :
     (1 + k ^ 2) * J - k ^ 2 * sc / Wφ = (1 / (1 / c)) * (c * J - X) := by
   rw [hX, ← hc2]; field_simp
 
-theorem p19lR1_alg1 {a w : ℝ} (hw : 0 < w) (h : w ^ 2 = a) (c : ℝ) : c / a * w = c * w⁻¹ := by
+lemma p19lR1_alg1 {a w : ℝ} (hw : 0 < w) (h : w ^ 2 = a) (c : ℝ) : c / a * w = c * w⁻¹ := by
   rw [← h]; field_simp
 
-theorem p19lR1_alg2 {a w : ℝ} (hw : 0 < w) (h : w ^ 2 = a) (c : ℝ) :
+lemma p19lR1_alg2 {a w : ℝ} (hw : 0 < w) (h : w ^ 2 = a) (c : ℝ) :
     c / a * w⁻¹ = c * (w ^ 3)⁻¹ := by
   rw [← h]; field_simp
 
-theorem p19lR1_alg_P {k α2 c W s : ℝ} (hc2 : c ^ 2 = 1 + k ^ 2) (hW : 0 < W)
+lemma p19lR1_alg_P {k α2 c W s : ℝ} (hc2 : c ^ 2 = 1 + k ^ 2) (hW : 0 < W)
     (hW2 : W ^ 2 = 1 + k ^ 2 * s ^ 2) (hd : 1 - α2 * s ^ 2 ≠ 0) :
     c / (1 + k ^ 2 * s ^ 2) * ((1 - (α2 + k ^ 2) / (1 + k ^ 2) * (c * s / W) ^ 2)⁻¹ * W) =
       c * W / (1 - α2 * s ^ 2) := by
@@ -920,7 +919,7 @@ theorem p19lR1_alg_P {k α2 c W s : ℝ} (hc2 : c ^ 2 = 1 + k ^ 2) (hW : 0 < W)
   rw [h1, ← hW2]
   field_simp
 
-theorem p19lR1_imod_X (k : ℝ) {φ : ℝ} (hφ1 : φ ≤ π / 2) (hφ0 : 0 ≤ φ) :
+lemma p19lR1_imod_X (k : ℝ) {φ : ℝ} (hφ1 : φ ≤ π / 2) (hφ0 : 0 ≤ φ) :
     (k / Real.sqrt (1 + k ^ 2)) ^ 2 * Real.sin (p19lR1_T k φ) * Real.cos (p19lR1_T k φ) /
         Real.sqrt (1 - (k / Real.sqrt (1 + k ^ 2)) ^ 2 * Real.sin (p19lR1_T k φ) ^ 2) =
       k ^ 2 * (Real.sin φ * Real.cos φ) /
@@ -1099,7 +1098,7 @@ theorem incEllInt_imaginary_modulus {k φ α2 : ℝ} (hφ0 : 0 ≤ φ) (hφ1 : �
 
 /-! ### Helpers for 19.7.7 (substitution `θ = arctan (sinh u)`) -/
 
-theorem p19lR1_mul_ofReal_cpow {r : ℝ} (hr : 0 < r) (z w : ℂ) :
+lemma p19lR1_mul_ofReal_cpow {r : ℝ} (hr : 0 < r) (z w : ℂ) :
     ((r : ℂ) * z) ^ w = (r : ℂ) ^ w * z ^ w := by
   have hr' : (r : ℂ) ≠ 0 := by exact_mod_cast hr.ne'
   rcases eq_or_ne z 0 with rfl | hz
@@ -1111,18 +1110,18 @@ theorem p19lR1_mul_ofReal_cpow {r : ℝ} (hr : 0 < r) (z w : ℂ) :
     ring_nf
 
 /-- A segment integral along `[0, iφ]`. -/
-theorem p19lR1_segmentIntegral_I (f : ℂ → ℂ) (φ : ℝ) :
+lemma p19lR1_segmentIntegral_I (f : ℂ → ℂ) (φ : ℝ) :
     ei19a_segmentIntegral f (I * φ) = I * ∫ u in (0 : ℝ)..φ, f (I * u) := by
   have h := ei19a_segmentIntegral_ofReal (fun z => I * f (I * z)) φ
   rw [intervalIntegral.integral_const_mul] at h
   rw [← h, ei19a_segmentIntegral, ei19a_segmentIntegral]
   congr 1; funext t; ring_nf
 
-theorem p19lR1_sin_I_sq (u : ℝ) : Complex.sin (I * u) ^ 2 = -((Real.sinh u : ℝ) : ℂ) ^ 2 := by
+lemma p19lR1_sin_I_sq (u : ℝ) : Complex.sin (I * u) ^ 2 = -((Real.sinh u : ℝ) : ℂ) ^ 2 := by
   rw [mul_comm, Complex.sin_mul_I, ofReal_sinh, mul_pow, I_sq]; ring
 
 /-- Substitution `θ = arctan (sinh u)`, `dθ = du / cosh u`. -/
-theorem p19lR1_subst_arctan_sinh {G : ℝ → ℂ} (hG : ContinuousOn G (Ioo (-(π / 2)) (π / 2)))
+lemma p19lR1_subst_arctan_sinh {G : ℝ → ℂ} (hG : ContinuousOn G (Ioo (-(π / 2)) (π / 2)))
     (φ : ℝ) :
     ∫ u in (0 : ℝ)..φ, ((Real.cosh u)⁻¹ : ℝ) • G (Real.arctan (Real.sinh u)) =
       ∫ θ in (0 : ℝ)..(Real.arctan (Real.sinh φ)), G θ := by
@@ -1142,7 +1141,7 @@ theorem p19lR1_subst_arctan_sinh {G : ℝ → ℂ} (hG : ContinuousOn G (Ioo (-(
       exact ⟨Real.neg_pi_div_two_lt_arctan _, Real.arctan_lt_pi_div_two _⟩))
   simpa [Real.sinh_zero, Real.arctan_zero] using h
 
-theorem p19lR1_sin_cos_arctan_sinh (u : ℝ) :
+lemma p19lR1_sin_cos_arctan_sinh (u : ℝ) :
     Real.sin (Real.arctan (Real.sinh u)) = Real.sinh u / Real.cosh u ∧
       Real.cos (Real.arctan (Real.sinh u)) = (Real.cosh u)⁻¹ := by
   have hs : Real.sqrt (1 + Real.sinh u ^ 2) = Real.cosh u := by
@@ -1151,7 +1150,7 @@ theorem p19lR1_sin_cos_arctan_sinh (u : ℝ) :
   exact ⟨rfl, rfl⟩
 
 /-- Along the substitution, `1 - (1 - b) sin²θ = (1 + b sinh²u)/cosh²u`. -/
-theorem p19lR1_one_sub_arctan_sinh (b : ℂ) (u : ℝ) :
+lemma p19lR1_one_sub_arctan_sinh (b : ℂ) (u : ℝ) :
     1 - (1 - b) * (Real.sin (Real.arctan (Real.sinh u)) : ℂ) ^ 2 =
       ((((Real.cosh u) ^ 2)⁻¹ : ℝ) : ℂ) * (1 + b * ((Real.sinh u : ℝ) : ℂ) ^ 2) := by
   rw [(p19lR1_sin_cos_arctan_sinh u).1]
@@ -1163,13 +1162,13 @@ theorem p19lR1_one_sub_arctan_sinh (b : ℂ) (u : ℝ) :
   linear_combination h2
 
 
-theorem p19lR1_conv_mem {b : ℂ} (hb : b ∈ slitPlane) (θ : ℝ) :
+lemma p19lR1_conv_mem {b : ℂ} (hb : b ∈ slitPlane) (θ : ℝ) :
     1 - (1 - b) * (Real.sin θ : ℂ) ^ 2 ∈ slitPlane := by
   have := ei19a_one_sub_mul_mem_slitPlane (z := 1 - b) (by rw [sub_sub_cancel]; exact hb)
     (sq_nonneg (Real.sin θ)) (Real.sin_sq_le_one θ)
   convert this using 2; push_cast; ring
 
-theorem p19lR1_cpow_arctan_sinh (b : ℂ) (u : ℝ) :
+lemma p19lR1_cpow_arctan_sinh (b : ℂ) (u : ℝ) :
     (1 - (1 - b) * (Real.sin (Real.arctan (Real.sinh u)) : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) =
       (Real.cosh u : ℂ) * (1 + b * ((Real.sinh u : ℝ) : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) ∧
     (1 - (1 - b) * (Real.sin (Real.arctan (Real.sinh u)) : ℂ) ^ 2) ^ (1 / 2 : ℂ) =
@@ -1179,7 +1178,7 @@ theorem p19lR1_cpow_arctan_sinh (b : ℂ) (u : ℝ) :
     p19lR1_mul_ofReal_cpow (by positivity), (p19lR1_inv_sq_cpow hc).1, (p19lR1_inv_sq_cpow hc).2]
   exact ⟨rfl, rfl⟩
 
-theorem p19lR1_imag_arg_F (φ : ℝ) {k : ℂ} (hk : k ^ 2 ∈ slitPlane) :
+lemma p19lR1_imag_arg_F (φ : ℝ) {k : ℂ} (hk : k ^ 2 ∈ slitPlane) :
     incEllIntFk (I * φ) k = I * incEllIntFk (Real.arctan (Real.sinh φ)) (jacobiComodulusk k) := by
   rw [incEllIntFk, p19lR1_segmentIntegral_I, incEllIntFk_ofReal_eq_integral,
     ei19a_jacobiComodulusk_sq]
@@ -1194,17 +1193,17 @@ theorem p19lR1_imag_arg_F (φ : ℝ) {k : ℂ} (hk : k ^ 2 ∈ slitPlane) :
       (continuousAt_cpow_const (p19lR1_conv_mem hk θ)).comp
         (f := fun θ : ℝ => 1 - (1 - k ^ 2) * (Real.sin θ : ℂ) ^ 2) (by fun_prop)).continuousOn
 
-theorem p19lR1_cos_ne_zero_of_mem {θ : ℝ} (h : θ ∈ Ioo (-(π / 2)) (π / 2)) : Real.cos θ ≠ 0 :=
+lemma p19lR1_cos_ne_zero_of_mem {θ : ℝ} (h : θ ∈ Ioo (-(π / 2)) (π / 2)) : Real.cos θ ≠ 0 :=
   (Real.cos_pos_of_mem_Ioo h).ne'
 
-theorem p19lR1_uIcc_sub_Ioo {ψ : ℝ} (h : ψ ∈ Ioo (-(π / 2)) (π / 2)) :
+lemma p19lR1_uIcc_sub_Ioo {ψ : ℝ} (h : ψ ∈ Ioo (-(π / 2)) (π / 2)) :
     uIcc 0 ψ ⊆ Ioo (-(π / 2)) (π / 2) := by
   intro x hx
   rcases le_total 0 ψ with h0 | h0
   · rw [uIcc_of_le h0] at hx; exact ⟨by linarith [hx.1, Real.pi_pos], by linarith [hx.2, h.2]⟩
   · rw [uIcc_of_ge h0] at hx; exact ⟨by linarith [hx.1, h.1], by linarith [hx.2, Real.pi_pos]⟩
 
-theorem p19lR1_imag_arg_E (φ : ℝ) {k : ℂ} (hk : k ^ 2 ∈ slitPlane) :
+lemma p19lR1_imag_arg_E (φ : ℝ) {k : ℂ} (hk : k ^ 2 ∈ slitPlane) :
     incEllIntEk (I * φ) k = I * (incEllIntFk (Real.arctan (Real.sinh φ)) (jacobiComodulusk k) -
         incEllIntEk (Real.arctan (Real.sinh φ)) (jacobiComodulusk k) +
           Real.tan (Real.arctan (Real.sinh φ)) *
@@ -1269,7 +1268,7 @@ theorem p19lR1_imag_arg_E (φ : ℝ) {k : ℂ} (hk : k ^ 2 ∈ slitPlane) :
   simp only [p19lR1_Δ, ← cpow_neg, hk'2]
   ring
 
-theorem p19lR1_one_add_mem {b : ℂ} (hb : b ∈ slitPlane) {x : ℝ} (hx : 0 ≤ x) :
+lemma p19lR1_one_add_mem {b : ℂ} (hb : b ∈ slitPlane) {x : ℝ} (hx : 0 ≤ x) :
     1 + b * x ∈ slitPlane := by
   rw [mem_slitPlane_iff] at hb ⊢
   simp only [add_re, one_re, mul_re, ofReal_re, ofReal_im, mul_zero, sub_zero, add_im, one_im,
@@ -1280,14 +1279,14 @@ theorem p19lR1_one_add_mem {b : ℂ} (hb : b ∈ slitPlane) {x : ℝ} (hx : 0 �
     · right; exact mul_ne_zero h hx.ne'
   · left; simp
 
-theorem p19lR1_path_bound {g : ℂ → ℂ} (hg : Continuous g) (w : ℂ)
+lemma p19lR1_path_bound {g : ℂ → ℂ} (hg : Continuous g) (w : ℂ)
     (hne : ∀ t ∈ Icc (0 : ℝ) 1, g (t * w) ≠ 0) :
     ∃ δ > 0, ∀ t ∈ Icc (0 : ℝ) 1, δ ≤ ‖g (t * w)‖ := by
   obtain ⟨t0, ht0, hmin⟩ := (isCompact_Icc (a := (0 : ℝ)) (b := 1)).exists_isMinOn
     (nonempty_Icc.2 zero_le_one) (by fun_prop : Continuous fun t : ℝ => ‖g (t * w)‖).continuousOn
   exact ⟨‖g (t0 * w)‖, norm_pos_iff.2 (hne t0 ht0), fun t ht => hmin ht⟩
 
-theorem p19lR1_incEllIntPik_ofReal_slit (ψ : ℝ) {β : ℂ} (hβ : 1 - β ∈ slitPlane) (k : ℂ) :
+lemma p19lR1_incEllIntPik_ofReal_slit (ψ : ℝ) {β : ℂ} (hβ : 1 - β ∈ slitPlane) (k : ℂ) :
     incEllIntPik ψ β k = ∫ θ in (0 : ℝ)..ψ, ((1 - β * (Real.sin θ : ℂ) ^ 2)⁻¹ *
       (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ))) := by
   obtain ⟨δ, hδ, hb⟩ := p19lR1_exists_norm_lower_gen hβ
@@ -1297,7 +1296,7 @@ theorem p19lR1_incEllIntPik_ofReal_slit (ψ : ℝ) {β : ℂ} (hβ : 1 - β ∈ 
     have := hb (t * ψ)
     push_cast at this; exact this
 
-theorem p19lR1_imag_arg_Pi (φ : ℝ) {k α2 : ℂ} (hk : k ^ 2 ∈ slitPlane) (hα : α2 ∈ slitPlane)
+lemma p19lR1_imag_arg_Pi (φ : ℝ) {k α2 : ℂ} (hk : k ^ 2 ∈ slitPlane) (hα : α2 ∈ slitPlane)
     (hα1 : α2 ≠ 1) :
     incEllIntPik (I * φ) α2 k = I * (incEllIntFk (Real.arctan (Real.sinh φ)) (jacobiComodulusk k) -
         α2 * incEllIntPik (Real.arctan (Real.sinh φ)) (1 - α2) (jacobiComodulusk k)) / (1 - α2) := by

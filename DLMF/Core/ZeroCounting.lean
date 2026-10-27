@@ -7,6 +7,7 @@ module
 
 public import DLMF.Core.Framework
 public import TauCeti.Analysis.Complex.Conformal.Rouche
+public import Mathlib.Analysis.Convex.Contractible
 
 /-!
 # Zero enumerations by modulus and one-zero-per-disc criteria

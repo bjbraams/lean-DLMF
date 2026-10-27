@@ -6,16 +6,12 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.OrthogonalPolynomials.Classical
-public import DLMF.OrthogonalPolynomials.Integrals
 public import DLMF.SphericalHarmonics.Basic
 public import DLMF.SphericalHarmonics.ZonalTools
-public import Mathlib.Analysis.Complex.Poisson
-public import Mathlib.LinearAlgebra.UnitaryGroup
 public import TauCeti.LinearAlgebra.CliffordAlgebra.Spin.Real.Three
 public import TauCeti.LinearAlgebra.CliffordAlgebra.Spin.Real.Basic
 public import TauCeti.LinearAlgebra.QuadraticForm.SpecialOrthogonal.WeightedSumSquares
 public import TauCeti.Analysis.PDE.PoissonIntegral.Ball
-public import TauCeti.Analysis.InnerProductSpace.Laplacian.Comparison
 
 /-!
 # Addition theorems, Funk–Hecke, Poisson, and `SU(2)` (AAR §§9.6–9.16)
@@ -386,7 +382,7 @@ def poissonKernelBall {n : ℕ} (x y : Fin n → ℝ) : ℝ :=
   (1 - ∑ i, x i ^ 2) / (∑ i, (x i - y i) ^ 2) ^ (n / 2 : ℝ)
 
 /-- The Poisson extension of existing harmonic boundary data is the original function. -/
-lemma ballPoissonIntegral_reproduces {n : ℕ} (hn : n ≠ 0)
+theorem ballPoissonIntegral_reproduces {n : ℕ} (hn : n ≠ 0)
     {f : EuclideanSpace ℝ (Fin n) → ℝ}
     (hf : HarmonicOnNhd f (ball 0 1)) (hcont : ContinuousOn f (closedBall 0 1))
     {x : EuclideanSpace ℝ (Fin n)} (hx : ‖x‖ < 1) :
@@ -394,7 +390,7 @@ lemma ballPoissonIntegral_reproduces {n : ℕ} (hn : n ≠ 0)
   exact zonal_poisson hn hf hcont hx
 
 /-- The unnormalized AAR kernel is sphere area times the Tau Ceti kernel. -/
-lemma poissonKernelBall_eq_area_mul {n : ℕ} (hn : n ≠ 0) (x y : EuclideanSpace ℝ (Fin n)) :
+theorem poissonKernelBall_eq_area_mul {n : ℕ} (hn : n ≠ 0) (x y : EuclideanSpace ℝ (Fin n)) :
     poissonKernelBall (fun i => x i) (fun i => y i) =
       volume.toSphere.real (univ : Set (sphere (0 : EuclideanSpace ℝ (Fin n)) 1)) *
         TauCeti.ballPoissonKernel n x y := by
@@ -443,7 +439,7 @@ def compactSO3EquivMatrix :
   exact (TauCeti.QuadraticMap.matrixSpecialOrthogonalEquivWeightedSumSquaresOne (Fin 3)).symm
 
 /-- The distinguished negative Spin scalar has special unitary matrix `-1`. -/
-lemma realSpinThreeEquivSpecialUnitary_negOne :
+theorem realSpinThreeEquivSpecialUnitary_negOne :
     (realSpinThreeEquivSpecialUnitary
       (spinGroup.negOne (realCliffordForm 3 0) (nondegenerate_realCliffordForm 3 0).ne_zero) :
         Matrix (Fin 2) (Fin 2) ℂ) = -1 := by
@@ -457,7 +453,7 @@ lemma realSpinThreeEquivSpecialUnitary_negOne :
 
 
 /-- The double cover `SU(2) → SO(3)` (AAR §9.16). -/
-theorem su2_covers_so3 :
+lemma su2_covers_so3 :
     ∃ Φ : SU2 →* specialOrthogonalGroup (Fin 3) ℝ, Function.Surjective Φ ∧
       (∀ g, Φ g = 1 ↔ g = 1 ∨ g.1 = (-1 : Matrix (Fin 2) (Fin 2) ℂ)) := by
   let E := realSpinThreeEquivSpecialUnitary

@@ -8,6 +8,7 @@ module
 public import DLMF.Core.Framework
 public import DLMFMathlib.Analysis.Complex.FactorialSeries
 public import DLMF.Confluent.Integrals
+public import DLMF.Confluent.ExpIntegral
 
 /-!
 # Entire and principal exponential, trigonometric and hyperbolic integrals
@@ -598,7 +599,7 @@ theorem Real.expIntEi_Ein {x : ℝ} (hx : 0 < x) {ε : ℝ} (hε : ε=1 ∨ ε =
   ring
 
 /-- `|Ei(-u)| ≤ e^{-u}/u` for `u > 0`. -/
-lemma liPV_abs_expIntEi_neg_le {u : ℝ} (hu : 0 < u) :
+theorem liPV_abs_expIntEi_neg_le {u : ℝ} (hu : 0 < u) :
     |Real.expIntEi (-u)| ≤ Real.exp (-u) / u := by
   have h := Real.expIntEi_negative hu
   rw [genExpIntE_one_eq_integral hu] at h
@@ -620,7 +621,7 @@ lemma liPV_abs_expIntEi_neg_le {u : ℝ} (hu : 0 < u) :
   exact hle
 
 /-- `li(δ) → 0` as `δ → 0⁺`. -/
-lemma liPV_tendsto_logIntLi_zero :
+theorem liPV_tendsto_logIntLi_zero :
     Tendsto Real.logIntLi (𝓝[>] (0 : ℝ)) (𝓝 0) := by
   have hlog : Tendsto (fun δ : ℝ => -Real.log δ) (𝓝[>] 0) atTop :=
     tendsto_neg_atBot_atTop.comp Real.tendsto_log_nhdsGT_zero
@@ -633,14 +634,14 @@ lemma liPV_tendsto_logIntLi_zero :
   exact liPV_abs_expIntEi_neg_le hδ
 
 /-- `li(t) = γ + log|log t| - Ein(-log t)`. -/
-lemma liPV_logIntLi_eq (t : ℝ) : Real.logIntLi t =
+theorem liPV_logIntLi_eq (t : ℝ) : Real.logIntLi t =
     Real.eulerMascheroniConstant + Real.log (Real.log t) - Real.expIntEin (-Real.log t) := by
   rw [Real.logIntLi, Real.expIntEi, Real.log_abs,
     show -((Real.log t : ℝ) : ℂ) = ((-Real.log t : ℝ) : ℂ) by push_cast; ring,
     expIntEin_ofReal, ofReal_re]
 
 /-- The real `Ein` differentiates to `(1 - e^{-t})/t` off the origin. -/
-lemma liPV_hasDerivAt_ein {t : ℝ} (ht : t ≠ 0) :
+theorem liPV_hasDerivAt_ein {t : ℝ} (ht : t ≠ 0) :
     HasDerivAt Real.expIntEin ((1 - Real.exp (-t)) / t) t := by
   have h := (hasDerivAt_expIntEin_complex (z := (t : ℂ)) (by exact_mod_cast ht)).real_of_complex
   have hf : (fun y : ℝ => (expIntEin (y : ℂ)).re) = Real.expIntEin := by
@@ -650,7 +651,7 @@ lemma liPV_hasDerivAt_ein {t : ℝ} (ht : t ≠ 0) :
   rw [← ofReal_neg, ← ofReal_exp, ← ofReal_one, ← ofReal_sub, ← ofReal_div, ofReal_re]
 
 /-- `li' = 1/log` on `(0, ∞) \ {1}`. -/
-lemma liPV_hasDerivAt {t : ℝ} (ht : 0 < t) (ht1 : t ≠ 1) :
+theorem liPV_hasDerivAt {t : ℝ} (ht : 0 < t) (ht1 : t ≠ 1) :
     HasDerivAt Real.logIntLi (1 / Real.log t) t := by
   have hl : Real.log t ≠ 0 := by
     intro h; rcases Real.log_eq_zero.mp h with h | h | h <;> [linarith; exact ht1 h; linarith]
@@ -663,7 +664,7 @@ lemma liPV_hasDerivAt {t : ℝ} (ht : 0 < t) (ht1 : t ≠ 1) :
   ring
 
 /-- The integrand `1/log t` is continuous on `[0, b]` for `b < 1` (with `1/log 0 = 0`). -/
-lemma liPV_continuousOn_left {b : ℝ} (hb : b < 1) :
+theorem liPV_continuousOn_left {b : ℝ} (hb : b < 1) :
     ContinuousOn (fun t : ℝ => 1 / Real.log t) (Icc 0 b) := by
   intro t ht
   rcases eq_or_lt_of_le ht.1 with h | h
@@ -677,7 +678,7 @@ lemma liPV_continuousOn_left {b : ℝ} (hb : b < 1) :
     exact (Real.log_neg h (by linarith [ht.2])).ne
 
 /-- `li(1-ε) - li(1+ε) → 0`. -/
-lemma liPV_tendsto_sub :
+theorem liPV_tendsto_sub :
     Tendsto (fun ε : ℝ => Real.logIntLi (1 - ε) - Real.logIntLi (1 + ε)) (𝓝[>] 0) (𝓝 0) := by
   have hs := (Real.hasDerivAt_log one_ne_zero).tendsto_slope_zero
   simp only [Real.log_one, sub_zero, inv_one, smul_eq_mul] at hs

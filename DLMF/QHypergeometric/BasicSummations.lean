@@ -5,11 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.QHypergeometric.Basic
 public import DLMF.QHypergeometric.Calculus
-public import DLMF.Gamma.QGamma
 public import DLMFMathlib.Analysis.Complex.SeparatingContour
-public import TauCeti.Analysis.Complex.Conformal.Continuation.Basic
 
 /-!
 # Low-order basic hypergeometric functions (DLMF §§17.5–17.6)
@@ -44,17 +41,17 @@ def qHeineBarnesLeft (a b q : ℂ) : Set ℂ :=
 def qHeineBarnesRight : Set ℂ := Set.range (fun n : ℕ => (n:ℂ))
 
 /-- The shared integer triangular exponent agrees with n-choose-two on nonnegative indices. -/
-lemma qTri_nat (n : ℕ) : DLMF.QSeries.TripleProduct.tri n=(n.choose 2:ℤ) := by
+theorem qTri_nat (n : ℕ) : DLMF.QSeries.TripleProduct.tri n=(n.choose 2:ℤ) := by
   simpa using (DLMF.QSeries.TripleProduct.tri_sub_cast n 0).symm
 /-- The `₂φ₁` term in phase-free form. -/
-theorem qaR4_phi21_term (a b c q z : ℂ) (n : ℕ) :
+lemma qaR4_phi21_term (a b c q z : ℂ) (n : ℕ) :
     qPhiTerm [a,b] [c] q z n=qPochhammer a q n*qPochhammer b q n/
       (qPochhammer c q n*qPochhammer q q n)*z^n := by
   have he : qPhiExponent [a,b] [c]=0 := by simp [qPhiExponent]
   simp [qPhiTerm,qPochhammerList,he]
 
 /-- The phase-free `₂φ₁` series converges to `qPhi` in the unit disk. -/
-theorem qaR4_phi21_hasSum {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz : ‖z‖<1)
+lemma qaR4_phi21_hasSum {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz : ‖z‖<1)
     (hc : qDenominatorRegular [c] q) :
     HasSum (fun n : ℕ => qPochhammer a q n*qPochhammer b q n/
       (qPochhammer c q n*qPochhammer q q n)*z^n) (qPhi [a,b] [c] q z) := by
@@ -66,7 +63,7 @@ theorem qaR4_phi21_hasSum {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz :
   exact h
 
 /-- Regularity of a lower parameter passes to its `q`-multiple. -/
-theorem qaR4_reg_mul_q {c q : ℂ} (hc : qDenominatorRegular [c] q) :
+lemma qaR4_reg_mul_q {c q : ℂ} (hc : qDenominatorRegular [c] q) :
     qDenominatorRegular [c*q] q := by
   intro x hx n
   simp only [List.mem_singleton] at hx
@@ -74,12 +71,12 @@ theorem qaR4_reg_mul_q {c q : ℂ} (hc : qDenominatorRegular [c] q) :
   simpa [pow_succ',mul_assoc] using hc c (by simp) (n+1)
 
 /-- Regularity of a lower parameter gives nonvanishing factorials. -/
-theorem qaR4_reg_poch_ne {c q : ℂ} (hq : ‖q‖<1) (hc : qDenominatorRegular [c] q) (n : ℕ) :
+lemma qaR4_reg_poch_ne {c q : ℂ} (hq : ‖q‖<1) (hc : qDenominatorRegular [c] q) (n : ℕ) :
     qPochhammer c q n≠0 :=
   qPochhammer_ne_zero_of_factors hq (fun j h => hc c (by simp) j (sub_eq_zero.mp h).symm) n
 
 /-- Regularity of a lower parameter gives `1-c≠0`. -/
-theorem qaR4_reg_one_sub_ne {c q : ℂ} (hc : qDenominatorRegular [c] q) : 1-c≠0 := by
+lemma qaR4_reg_one_sub_ne {c q : ℂ} (hc : qDenominatorRegular [c] q) : 1-c≠0 := by
   intro h; exact hc c (by simp) 0 (by simpa using (sub_eq_zero.mp h).symm)
 
 /-- Prepending a zero term to a series. -/
@@ -88,12 +85,12 @@ def qaR4_shift (f : ℕ → ℂ) : ℕ → ℂ
   | n+1 => f n
 
 /-- Prepending a zero term keeps the sum. -/
-theorem qaR4_hasSum_shift {f : ℕ → ℂ} {s : ℂ} (h : HasSum f s) : HasSum (qaR4_shift f) s := by
+lemma qaR4_hasSum_shift {f : ℕ → ℂ} {s : ℂ} (h : HasSum f s) : HasSum (qaR4_shift f) s := by
   apply (hasSum_nat_add_iff' 1).mp
   simpa [qaR4_shift] using h
 
 /-- Regularity of `c/q` gives regularity of `c`. -/
-theorem qaR4_reg_of_div_q {c q : ℂ} (hq0 : q≠0) (hc : qDenominatorRegular [c/q] q) :
+lemma qaR4_reg_of_div_q {c q : ℂ} (hq0 : q≠0) (hc : qDenominatorRegular [c/q] q) :
     qDenominatorRegular [c] q := by
   intro x hx n
   simp only [List.mem_singleton] at hx
@@ -102,13 +99,13 @@ theorem qaR4_reg_of_div_q {c q : ℂ} (hq0 : q≠0) (hc : qDenominatorRegular [c
   rwa [pow_succ',← mul_assoc,div_mul_cancel₀ _ hq0] at h
 
 /-- The factorial at `xq` through the factorial at `x`. -/
-theorem qaR4_poch_mul_q {x q : ℂ} (hx : 1-x≠0) (n : ℕ) :
+lemma qaR4_poch_mul_q {x q : ℂ} (hx : 1-x≠0) (n : ℕ) :
     qPochhammer (x*q) q n=qPochhammer x q n*(1-x*q^n)/(1-x) := by
   rw [← qPochhammer_succ,qPochhammer_succ']
   field_simp
 
 /-- The `₂φ₁` series with its first upper parameter multiplied by `q`, premultiplied by `1-a`. -/
-theorem qaR4_phi21_hasSum_pre {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz : ‖z‖<1)
+lemma qaR4_phi21_hasSum_pre {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz : ‖z‖<1)
     (hc : qDenominatorRegular [c] q) :
     HasSum (fun n : ℕ => qPochhammer a q (n+1)*qPochhammer b q n/
       (qPochhammer c q n*qPochhammer q q n)*z^n) ((1-a)*qPhi [a*q,b] [c] q z) := by
@@ -118,14 +115,14 @@ theorem qaR4_phi21_hasSum_pre {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (
   ring
 
 /-- The polynomial q-Chu–Vandermonde sum, from the q-Pfaff–Saalschütz sum at `s=0`. -/
-theorem qaR4_vandermonde_poly (q x r : ℂ) (n : ℕ) :
+lemma qaR4_vandermonde_poly (q x r : ℂ) (n : ℕ) :
     ∑ m ∈ range (n+1), qBinom q n m*qPochhammer r q m*qPochhammer x q (n-m)*x^m=
       qPochhammer (x*r) q n := by
   have h := sum_qBinom_saalschutz q x r 0 n
   simpa using h
 
 /-- The polynomial q-Chu–Vandermonde sum with the weight on the complementary index. -/
-theorem qaR4_vandermonde_poly' (q a x : ℂ) (n : ℕ) :
+lemma qaR4_vandermonde_poly' (q a x : ℂ) (n : ℕ) :
     ∑ k ∈ range (n+1), qBinom q n k*qPochhammer a q k*qPochhammer x q (n-k)*a^(n-k)=
       qPochhammer (a*x) q n := by
   rw [← qaR4_vandermonde_poly q a x n,← sum_range_reflect]
@@ -139,14 +136,14 @@ theorem qaR4_vandermonde_poly' (q a x : ℂ) (n : ℕ) :
   ring
 
 /-- Swapping the two upper parameters of a `₂φ₁`. -/
-theorem qaR4_qPhi_swap21 (a b c q z : ℂ) : qPhi [a,b] [c] q z=qPhi [b,a] [c] q z := by
+lemma qaR4_qPhi_swap21 (a b c q z : ℂ) : qPhi [a,b] [c] q z=qPhi [b,a] [c] q z := by
   unfold qPhi qPhiTerm qPhiExponent qPochhammerList
   simp only [List.map_cons,List.map_nil,List.prod_cons,List.prod_nil,List.length_cons,
     List.length_nil]
   congr 1; funext n; ring
 
 /-- `C(k+m,2)=C(k,2)+C(m,2)+km`. -/
-theorem qaR4_choose_two_add (k m : ℕ) : (k+m).choose 2=k.choose 2+m.choose 2+k*m := by
+lemma qaR4_choose_two_add (k m : ℕ) : (k+m).choose 2=k.choose 2+m.choose 2+k*m := by
   induction m with
   | zero => simp
   | succ m ih =>
@@ -155,7 +152,7 @@ theorem qaR4_choose_two_add (k m : ℕ) : (k+m).choose 2=k.choose 2+m.choose 2+k
     ring
 
 /-- The terminating `₂φ₁` term with the top parameter `q^{-n}` times `(c;q)_n`. -/
-theorem qaR4_term_chu {a c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hc0 : c≠0) {n k : ℕ} (hkn : k≤n)
+lemma qaR4_term_chu {a c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hc0 : c≠0) {n k : ℕ} (hkn : k≤n)
     (hck : qPochhammer c q k≠0) (z : ℂ) :
     qPhiTerm [q^(-(n:ℤ)),a] [c] q z k*qPochhammer c q n=
       qBinom q n k*qPochhammer a q k*qPochhammer (q^(1-(n:ℤ))/c) q (n-k)*
@@ -187,7 +184,7 @@ theorem qaR4_term_chu {a c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hc0 : c≠0)
       ((-1:ℂ)^k*(-1:ℂ)^k)*W*hE)
 
 /-- The terminating `₂φ₁` sum with top parameter `q^{-n}`, cleared by `(c;q)_n`. -/
-theorem qaR4_sum_chu {a c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hc0 : c≠0) {n : ℕ}
+lemma qaR4_sum_chu {a c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hc0 : c≠0) {n : ℕ}
     (hcn : qPochhammer c q n≠0) (z : ℂ) :
     qPhi [q^(-(n:ℤ)),a] [c] q z*qPochhammer c q n=q^(n.choose 2)*
       ∑ k ∈ range (n+1), qBinom q n k*qPochhammer a q k*qPochhammer (q^(1-(n:ℤ))/c) q (n-k)*
@@ -206,7 +203,7 @@ theorem qaR4_sum_chu {a c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hc0 : c≠0) 
   ring
 
 /-- The product `∏(a-cq^j)` as a reversed shifted factorial. -/
-theorem qaR4_prod_sub_eq {a c q : ℂ} (hq0 : q≠0) (hc0 : c≠0) (n : ℕ) :
+lemma qaR4_prod_sub_eq {a c q : ℂ} (hq0 : q≠0) (hc0 : c≠0) (n : ℕ) :
     (∏ j ∈ range n, (a-c*q^j))=q^(n.choose 2)*(-c)^n*qPochhammer (q^(1-(n:ℤ))/c*a) q n := by
   rw [qPochhammer_eq_prod]
   conv_rhs => rw [← prod_range_reflect]
@@ -223,13 +220,13 @@ theorem qaR4_prod_sub_eq {a c q : ℂ} (hq0 : q≠0) (hc0 : c≠0) (n : ℕ) :
   ring
 
 /-- Two functions continuous at `0` that agree on a punctured neighbourhood agree at `0`. -/
-theorem qaR4_eq_at_zero_of_punctured {f g : ℂ → ℂ} (hf : ContinuousAt f 0)
+lemma qaR4_eq_at_zero_of_punctured {f g : ℂ → ℂ} (hf : ContinuousAt f 0)
     (hg : ContinuousAt g 0) (h : ∀ᶠ c in 𝓝[≠] (0:ℂ), f c=g c) : f 0=g 0 :=
   tendsto_nhds_unique (hf.tendsto.mono_left nhdsWithin_le_nhds)
     ((hg.tendsto.mono_left nhdsWithin_le_nhds).congr' (h.mono fun _ h => h.symm))
 
 /-- The cleared second q-Chu–Vandermonde sum for nonzero `c`. -/
-theorem qaR4_chu_second_ne {a c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (n : ℕ) (hc0 : c≠0)
+lemma qaR4_chu_second_ne {a c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (n : ℕ) (hc0 : c≠0)
     (hcn : qPochhammer c q n≠0) :
     qPhi [q^(-(n:ℤ)),a] [c] q q*qPochhammer c q n=(range n).prod (fun j => a-c*q^j) := by
   rw [qaR4_sum_chu hq0 hq hc0 hcn,qaR4_prod_sub_eq hq0 hc0]
@@ -248,7 +245,7 @@ theorem qaR4_chu_second_ne {a c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (n : ℕ
   ring
 
 /-- The q-number `(1-q^c)/(1-q) → c` as `q → 1⁻` along the reals. -/
-theorem qaR4_tendsto_qnum (c : ℂ) :
+lemma qaR4_tendsto_qnum (c : ℂ) :
     Tendsto (fun q : ℝ => (1-(q:ℂ)^c)/(1-(q:ℂ))) (𝓝[<] 1) (𝓝 c) := by
   have h1 : (1:ℂ)∈slitPlane := by simp [slitPlane]
   have hd : HasDerivAt (fun q : ℝ => (q:ℂ)^c) c 1 := by
@@ -268,7 +265,7 @@ theorem qaR4_tendsto_qnum (c : ℂ) :
     rw [div_eq_div_iff hq1 hq2]; ring,div_eq_inv_mul]
 
 /-- `q^c → 1` as `q → 1⁻` along the reals. -/
-theorem qaR4_tendsto_cpow_one (c : ℂ) :
+lemma qaR4_tendsto_cpow_one (c : ℂ) :
     Tendsto (fun q : ℝ => (q:ℂ)^c) (𝓝[<] 1) (𝓝 1) := by
   have h1 : (1:ℂ)∈slitPlane := by simp [slitPlane]
   have hd : HasDerivAt (fun q : ℝ => (q:ℂ)^c) c 1 := by
@@ -277,7 +274,7 @@ theorem qaR4_tendsto_cpow_one (c : ℂ) :
   simpa using hd.continuousAt.tendsto.mono_left nhdsWithin_le_nhds
 
 /-- Every unilateral series takes the value `1` at the origin. -/
-theorem qaR4_qPhi_zero (a b : List ℂ) (q : ℂ) : qPhi a b q 0=1 := by
+lemma qaR4_qPhi_zero (a b : List ℂ) (q : ℂ) : qPhi a b q 0=1 := by
   unfold qPhi
   rw [tsum_eq_single 0]
   · simp [qPhiTerm,qPochhammerList,DLMF.QSeries.TripleProduct.tri,Function.comp_def,
@@ -286,7 +283,7 @@ theorem qaR4_qPhi_zero (a b : List ℂ) (q : ℂ) : qPhi a b q 0=1 := by
     simp [qPhiTerm,zero_pow hn]
 
 /-- One q-derivative step for the `₂φ₁` series. -/
-theorem qaR4_qDeriv_phi21 {a b c q d w : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
+lemma qaR4_qDeriv_phi21 {a b c q d w : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
     (hc : qDenominatorRegular [c] q) (hw : w≠0) (hdw : ‖d*w‖<1) :
     (qPhi [a,b] [c] q (d*w)-qPhi [a,b] [c] q (d*(q*w)))/((1-q)*w)=
       (1-a)*(1-b)*d/((1-c)*(1-q))*qPhi [a*q,b*q] [c*q] q (d*w) := by
@@ -324,7 +321,7 @@ theorem qaR4_qDeriv_phi21 {a b c q d w : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
     ring
 
 /-- The derivative of a `₂φ₁` series at the origin. -/
-theorem qaR4_hasDerivAt_phi21_zero {a b c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
+lemma qaR4_hasDerivAt_phi21_zero {a b c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
     (hc : qDenominatorRegular [c] q) :
     HasDerivAt (qPhi [a,b] [c] q) ((1-a)*(1-b)/((1-c)*(1-q))) 0 := by
   have han := qPhi_analytic_disc (a := [a,b]) (b := [c]) hq0 hq hc (by simp) 0 (by simp)
@@ -336,7 +333,7 @@ theorem qaR4_hasDerivAt_phi21_zero {a b c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1
   simp [qPhiCoeff,qaR4_phi21_term,qPochhammer_one]
 
 /-- The iterated q-derivative of `w ↦ ₂φ₁(dw)` on the whole disc `‖dw‖<1`. -/
-theorem qaR4_qDerivIterate_phi21 {a b c d q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
+lemma qaR4_qDerivIterate_phi21 {a b c d q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
     (hc : qDenominatorRegular [c] q) (k : ℕ) : ∀ w : ℂ, ‖d*w‖<1 →
     qDerivIterate k q (fun w => qPhi [a,b] [c] q (w*d)) w=
       qPochhammerList [a,b] q k*d^k/(qPochhammer c q k*(1-q)^k)*
@@ -387,7 +384,7 @@ theorem qaR4_qDerivIterate_phi21 {a b c d q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1
       ring
 
 /-- The `₂φ₁` series with all parameters shifted by `q^j`, premultiplied by its leading factors. -/
-theorem qaR4_phi21_hasSum_shiftpar {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz : ‖z‖<1)
+lemma qaR4_phi21_hasSum_shiftpar {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz : ‖z‖<1)
     (hc : qDenominatorRegular [c] q) (j : ℕ) :
     HasSum (fun m : ℕ => qPochhammer a q (m+j)*qPochhammer b q (m+j)/
       (qPochhammer c q (m+j)*qPochhammer q q m)*z^m)

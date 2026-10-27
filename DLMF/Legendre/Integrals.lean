@@ -5,11 +5,11 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Legendre.IntegralRepresentations
 public import DLMF.Legendre.BoundaryAsymptotics
 public import DLMF.Legendre.Singularities
-public import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
 public import Mathlib.MeasureTheory.Integral.Asymptotics
+public import DLMF.Legendre.IntegerTheory
+public import DLMF.Legendre.IntegralTools
 
 /-!
 # Definite integrals, orthogonality and primitive formulas
@@ -134,12 +134,12 @@ The products `𝖯_ν 𝖯_λ` are integrated through Green's identity
 recurrence 14.10.4 and evaluated at `-1` from the logarithmic behaviour of `𝖯_α` there
 (DLMF 15.8.10 at `m = 0`, `legBd_zeroBalanced_isBigO`). Helper names carry the prefix `legPI`. -/
 /-- `𝖯_α(x) = 𝐅(α+1,-α;1;(1-x)/2)`. -/
-lemma legPI_ferrersP_zero (α : ℂ) (x : ℝ) :
+theorem legPI_ferrersP_zero (α : ℂ) (x : ℝ) :
     ferrersP α 0 x = regularizedGaussHG (α+1) (-α) 1 ((1-(x:ℂ))/2) := by
   simp [ferrersP]
 
 /-- `𝖯_α` is continuous on `(-1,∞)`. -/
-lemma legPI_continuousAt_ferrersP (α : ℂ) {x : ℝ} (hx : -1 < x) :
+theorem legPI_continuousAt_ferrersP (α : ℂ) {x : ℝ} (hx : -1 < x) :
     ContinuousAt (ferrersP α 0) x := by
   have hw := legInt_half_mem_cutPlane hx
   have : ferrersP α 0 = fun y : ℝ => regularizedGaussHG (α+1) (-α) 1 ((1-(y:ℂ))/2) :=
@@ -148,19 +148,19 @@ lemma legPI_continuousAt_ferrersP (α : ℂ) {x : ℝ} (hx : -1 < x) :
   exact ContinuousAt.comp (g := regularizedGaussHG (α+1) (-α) 1)
     (differentiableAt_regularizedGaussHG _ _ _ hw).continuousAt (by fun_prop)
 
-lemma legPI_ferrersP_one (α : ℂ) : ferrersP α 0 1 = 1 := by
+theorem legPI_ferrersP_one (α : ℂ) : ferrersP α 0 1 = 1 := by
   rw [legPI_ferrersP_zero]
   have h1 : ∀ k : ℕ, (1:ℂ) ≠ -(k:ℂ) := fun k h => by
     have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)]
   simpa using regularizedGaussHG_zero_of_regular (a := α+1) (b := -α) h1
 
-lemma legPI_tendsto_ferrersP_one (α : ℂ) :
+theorem legPI_tendsto_ferrersP_one (α : ℂ) :
     Tendsto (ferrersP α 0) (𝓝[<] (1:ℝ)) (𝓝 1) := by
   have := (legPI_continuousAt_ferrersP α (show (-1:ℝ) < 1 by norm_num)).tendsto
   rw [legPI_ferrersP_one] at this
   exact this.mono_left nhdsWithin_le_nhds
 
-lemma legPI_tendsto_half :
+theorem legPI_tendsto_half :
     Tendsto (fun x : ℝ => (1+x)/2) (𝓝[>] (-1:ℝ)) (𝓝[>] 0) := by
   refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
   · have h : Tendsto (fun x : ℝ => (1+x)/2) (𝓝 (-1)) (𝓝 ((1+(-1))/2)) :=
@@ -186,20 +186,20 @@ theorem legPI_ferrersP_neg_one_isBigO (α : ℂ) :
 /-- The weight `(1-x²)^{-1/4}` used to dominate Ferrers functions on `(-1,1)`. -/
 def legPIw (x : ℝ) : ℝ := ((1-x^2)/4)^(-(1/4:ℝ))
 
-lemma legPIw_one_le {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) : 1 ≤ legPIw x :=
+theorem legPIw_one_le {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) : 1 ≤ legPIw x :=
   Real.one_le_rpow_of_pos_of_le_one_of_nonpos (by nlinarith [hx.1, hx.2]) (by nlinarith)
     (by norm_num)
 
-lemma legPIw_pos {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) : 0 < legPIw x :=
+theorem legPIw_pos {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) : 0 < legPIw x :=
   lt_of_lt_of_le one_pos (legPIw_one_le hx)
 
-lemma legPIw_eq {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem legPIw_eq {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     legPIw x = ((1+x)/2)^(-(1/4:ℝ)) * ((1-x)/2)^(-(1/4:ℝ)) := by
   rw [legPIw, ← Real.mul_rpow (by linarith [hx.1]) (by linarith [hx.2])]
   congr 1; ring
 
 /-- `|ln y| ≤ 4 y^{-1/4}` on `(0,1]`. -/
-lemma legPI_abs_log_le {y : ℝ} (hy0 : 0 < y) (hy1 : y ≤ 1) :
+theorem legPI_abs_log_le {y : ℝ} (hy0 : 0 < y) (hy1 : y ≤ 1) :
     |Real.log y| ≤ 4 * y^(-(1/4:ℝ)) := by
   have h := Real.abs_log_mul_self_rpow_lt y (1/4) hy0 hy1 (by norm_num)
   have hp : 0 < y^(1/4:ℝ) := Real.rpow_pos_of_pos hy0 _
@@ -207,11 +207,11 @@ lemma legPI_abs_log_le {y : ℝ} (hy0 : 0 < y) (hy1 : y ≤ 1) :
   rw [Real.rpow_neg hy0.le, ← div_eq_mul_inv, le_div_iff₀ hp]
   exact h.le
 
-lemma legPI_rpow_ge_one {y : ℝ} (hy0 : 0 < y) (hy1 : y ≤ 1) : 1 ≤ y^(-(1/4:ℝ)) :=
+theorem legPI_rpow_ge_one {y : ℝ} (hy0 : 0 < y) (hy1 : y ≤ 1) : 1 ≤ y^(-(1/4:ℝ)) :=
   Real.one_le_rpow_of_pos_of_le_one_of_nonpos hy0 hy1 (by norm_num)
 
 /-- `ln((1+x)/2) = O((1-x²)^{-1/4})` as `x → -1⁺`. -/
-lemma legPI_log_isBigO_left :
+theorem legPI_log_isBigO_left :
     (fun x : ℝ => Real.log ((1+x)/2)) =O[𝓝[>] (-1:ℝ)] legPIw := by
   refine Asymptotics.IsBigO.of_bound 4 ?_
   filter_upwards [Ioo_mem_nhdsGT (show (-1:ℝ) < 1 by norm_num)] with x hx
@@ -226,7 +226,7 @@ lemma legPI_log_isBigO_left :
       exact le_mul_of_one_le_right (Real.rpow_nonneg ht0.le _) (legPI_rpow_ge_one hs0 hs1)
 
 /-- `ln((1-x)/2) = O((1-x²)^{-1/4})` as `x → 1⁻`. -/
-lemma legPI_log_isBigO_right :
+theorem legPI_log_isBigO_right :
     (fun x : ℝ => Real.log ((1-x)/2)) =O[𝓝[<] (1:ℝ)] legPIw := by
   refine Asymptotics.IsBigO.of_bound 4 ?_
   filter_upwards [Ioo_mem_nhdsLT (show (-1:ℝ) < 1 by norm_num)] with x hx
@@ -240,13 +240,13 @@ lemma legPI_log_isBigO_right :
       gcongr
       exact le_mul_of_one_le_left (Real.rpow_nonneg hs0.le _) (legPI_rpow_ge_one ht0 ht1)
 
-lemma legPI_one_isBigO_left : (fun _ : ℝ => (1:ℝ)) =O[𝓝[>] (-1:ℝ)] legPIw := by
+theorem legPI_one_isBigO_left : (fun _ : ℝ => (1:ℝ)) =O[𝓝[>] (-1:ℝ)] legPIw := by
   refine Asymptotics.IsBigO.of_bound 1 ?_
   filter_upwards [Ioo_mem_nhdsGT (show (-1:ℝ) < 1 by norm_num)] with x hx
   rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_pos (legPIw_pos hx), abs_one, one_mul]
   exact legPIw_one_le hx
 
-lemma legPI_one_isBigO_right : (fun _ : ℝ => (1:ℝ)) =O[𝓝[<] (1:ℝ)] legPIw := by
+theorem legPI_one_isBigO_right : (fun _ : ℝ => (1:ℝ)) =O[𝓝[<] (1:ℝ)] legPIw := by
   refine Asymptotics.IsBigO.of_bound 1 ?_
   filter_upwards [Ioo_mem_nhdsLT (show (-1:ℝ) < 1 by norm_num)] with x hx
   rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_pos (legPIw_pos hx), abs_one, one_mul]
@@ -254,7 +254,7 @@ lemma legPI_one_isBigO_right : (fun _ : ℝ => (1:ℝ)) =O[𝓝[<] (1:ℝ)] legP
 
 /-- A function continuous on `(-1,1)` and `O((1-x²)^{-1/4})` at both ends is globally bounded by a
 multiple of `(1-x²)^{-1/4}`. -/
-lemma legPI_bound {f : ℝ → ℂ} (hc : ContinuousOn f (Ioo (-1) 1))
+theorem legPI_bound {f : ℝ → ℂ} (hc : ContinuousOn f (Ioo (-1) 1))
     (h1 : f =O[𝓝[>] (-1:ℝ)] legPIw) (h2 : f =O[𝓝[<] (1:ℝ)] legPIw) :
     ∃ M, ∀ x ∈ Ioo (-1:ℝ) 1, ‖f x‖ ≤ M * legPIw x := by
   obtain ⟨c1, -, hc1⟩ := h1.exists_pos
@@ -290,7 +290,7 @@ lemma legPI_bound {f : ℝ → ℂ} (hc : ContinuousOn f (Ioo (-1) 1))
         mul_le_mul_of_nonneg_right (le_max_right _ _) hw0.le
 
 /-- The product of two functions dominated by `(1-x²)^{-1/4}` is integrable on `[-1,1]`. -/
-lemma legPI_intervalIntegrable_mul {f g : ℝ → ℂ} (hf : ContinuousOn f (Ioo (-1) 1))
+theorem legPI_intervalIntegrable_mul {f g : ℝ → ℂ} (hf : ContinuousOn f (Ioo (-1) 1))
     (hg : ContinuousOn g (Ioo (-1) 1)) {M N : ℝ} (hfM : ∀ x ∈ Ioo (-1:ℝ) 1, ‖f x‖ ≤ M * legPIw x)
     (hgN : ∀ x ∈ Ioo (-1:ℝ) 1, ‖g x‖ ≤ N * legPIw x) :
     IntervalIntegrable (fun x => f x * g x) volume (-1) 1 := by
@@ -310,7 +310,7 @@ lemma legPI_intervalIntegrable_mul {f g : ℝ → ℂ} (hf : ContinuousOn f (Ioo
 
 
 /-- `t ln t → 0`, so `t ln t = O(1)`, as `x → -1⁺`, `t = (1+x)/2`. -/
-lemma legPI_tlogt_isBigO_left :
+theorem legPI_tlogt_isBigO_left :
     (fun x : ℝ => (1+x)/2 * Real.log ((1+x)/2)) =O[𝓝[>] (-1:ℝ)] legPIw := by
   have h : Tendsto (fun x : ℝ => (1+x)/2 * Real.log ((1+x)/2)) (𝓝[>] (-1:ℝ)) (𝓝 0) := by
     have := (Real.continuous_mul_log.tendsto 0).comp
@@ -319,7 +319,7 @@ lemma legPI_tlogt_isBigO_left :
   exact (h.isBigO_one ℝ).trans legPI_one_isBigO_left
 
 /-- `𝖯_α = O((1-x²)^{-1/4})` at `-1`. -/
-lemma legPI_ferrersP_isBigO_left (α : ℂ) : ferrersP α 0 =O[𝓝[>] (-1:ℝ)] legPIw := by
+theorem legPI_ferrersP_isBigO_left (α : ℂ) : ferrersP α 0 =O[𝓝[>] (-1:ℝ)] legPIw := by
   have h1 := (legPI_ferrersP_neg_one_isBigO α).trans legPI_tlogt_isBigO_left
   have h2 := (isBigO_ofReal_left.mpr legPI_log_isBigO_left).const_mul_left (legBdK (α+1) (-α))
   have h3 := ((isBigO_const_one ℝ (legBdK' (α+1) (-α) - 2 * Real.eulerMascheroniConstant *
@@ -327,14 +327,14 @@ lemma legPI_ferrersP_isBigO_left (α : ℂ) : ferrersP α 0 =O[𝓝[>] (-1:ℝ)]
   exact ((h1.sub h2).add h3).congr_left fun _ => by ring
 
 /-- `𝖯_α = O((1-x²)^{-1/4})` at `1`. -/
-lemma legPI_ferrersP_isBigO_right (α : ℂ) : ferrersP α 0 =O[𝓝[<] (1:ℝ)] legPIw :=
+theorem legPI_ferrersP_isBigO_right (α : ℂ) : ferrersP α 0 =O[𝓝[<] (1:ℝ)] legPIw :=
   ((legPI_tendsto_ferrersP_one α).isBigO_one ℝ).trans legPI_one_isBigO_right
 
-lemma legPI_continuousOn_ferrersP (α : ℂ) : ContinuousOn (ferrersP α 0) (Ioo (-1) 1) :=
+theorem legPI_continuousOn_ferrersP (α : ℂ) : ContinuousOn (ferrersP α 0) (Ioo (-1) 1) :=
   fun _ hx => (legPI_continuousAt_ferrersP α hx.1).continuousWithinAt
 
 /-- `𝖯_ν 𝖯_λ` is integrable on `[-1,1]`. -/
-lemma legPI_intervalIntegrable_PP (ν lam : ℂ) :
+theorem legPI_intervalIntegrable_PP (ν lam : ℂ) :
     IntervalIntegrable (fun x => ferrersP ν 0 x * ferrersP lam 0 x) volume (-1) 1 := by
   obtain ⟨M, hM⟩ := legPI_bound (legPI_continuousOn_ferrersP ν) (legPI_ferrersP_isBigO_left ν)
     (legPI_ferrersP_isBigO_right ν)
@@ -348,13 +348,13 @@ section Constants
 open DLMF.Gamma
 
 /-- `Γ(s)⁻¹ = s Γ(s+1)⁻¹` for all `s`. -/
-lemma legPI_recip_Gamma_eq (s : ℂ) : (Gamma s)⁻¹ = s * (Gamma (s+1))⁻¹ := by
+theorem legPI_recip_Gamma_eq (s : ℂ) : (Gamma s)⁻¹ = s * (Gamma (s+1))⁻¹ := by
   have := poch_mul_recip_Gamma_add_nat s 1
   rw [poch_one] at this
   simpa using this.symm
 
 /-- Derivative of `Γ(s)⁻¹ = s Γ(s+1)⁻¹`: `(1/Γ)'(s) = 1/Γ(s+1) + s (1/Γ)'(s+1)`. -/
-lemma legPI_recipGammaDeriv_rec (s : ℂ) :
+theorem legPI_recipGammaDeriv_rec (s : ℂ) :
     recipGammaDeriv 1 s = (Gamma (s+1))⁻¹ + s * recipGammaDeriv 1 (s+1) := by
   have hfun : (fun w : ℂ => (Gamma w)⁻¹) = fun w => w * (Gamma (w+1))⁻¹ :=
     funext legPI_recip_Gamma_eq
@@ -366,13 +366,13 @@ lemma legPI_recipGammaDeriv_rec (s : ℂ) :
   rw [h1.unique h2, one_mul]
 
 /-- `K_{α+1} = -K_α` for the constant `K_α = 1/(Γ(α+1)Γ(-α))`. -/
-lemma legPI_K_succ (α : ℂ) : legBdK (α+1+1) (-(α+1)) = -legBdK (α+1) (-α) := by
+theorem legPI_K_succ (α : ℂ) : legBdK (α+1+1) (-(α+1)) = -legBdK (α+1) (-α) := by
   unfold legBdK
   rw [legPI_recip_Gamma_eq (α+1), legPI_recip_Gamma_eq (-(α+1)), show -(α+1)+1 = -α by ring]
   ring
 
 /-- `(α+1)(K'_{α+1} + K'_α) = 2K_α`. -/
-lemma legPI_K'_succ (α : ℂ) :
+theorem legPI_K'_succ (α : ℂ) :
     (α+1) * (legBdK' (α+1+1) (-(α+1)) + legBdK' (α+1) (-α)) = 2 * legBdK (α+1) (-α) := by
   unfold legBdK' legBdK
   have r1 := legPI_recipGammaDeriv_rec (-(α+1))
@@ -384,13 +384,13 @@ lemma legPI_K'_succ (α : ℂ) :
     ((α+1)*recipGammaDeriv 1 (-α) - 2*(Gamma (-α))⁻¹) * r3 + (α+1)*(Gamma (-α))⁻¹ * r2
 
 /-- `π K_α = -sin(πα)`. -/
-lemma legPI_K_eq (α : ℂ) : (π:ℂ) * legBdK (α+1) (-α) = -sin (π*α) := by
+theorem legPI_K_eq (α : ℂ) : (π:ℂ) * legBdK (α+1) (-α) = -sin (π*α) := by
   have := legendre_recip_Gamma_reflection (-α)
   rw [show (1:ℂ) - -α = α+1 by ring, mul_neg, sin_neg] at this
   unfold legBdK; rw [← this]; ring
 
 /-- `K'_α = cos(πα) - 2ψ(α+1)K_α` when `α+1` is not a pole. -/
-lemma legPI_K'_eq {α : ℂ} (hα : ∀ m : ℕ, α+1 ≠ -(m:ℂ)) :
+theorem legPI_K'_eq {α : ℂ} (hα : ∀ m : ℕ, α+1 ≠ -(m:ℂ)) :
     legBdK' (α+1) (-α) = cos (π*α) - 2*digamma (α+1)*legBdK (α+1) (-α) := by
   have hr := legBd_reflection_deriv (-α)
   rw [show (1:ℂ) - -α = α+1 by ring, mul_neg, cos_neg] at hr
@@ -405,13 +405,13 @@ end Constants
 
 
 /-- `𝖯_α` solves the Legendre equation on `(-1,1)`. -/
-lemma legPI_ferrersP_isFerrersSolution (α : ℂ) : IsFerrersSolution α 0 (ferrersP α 0) :=
+theorem legPI_ferrersP_isFerrersSolution (α : ℂ) : IsFerrersSolution α 0 (ferrersP α 0) :=
   ((ferrersEven_isFerrersSolution α 0).add_smul (ferrersOdd_isFerrersSolution α 0) _ _).congr
     (ferrersP_eqOn_even_odd α 0).symm
 
 /-- Green's identity for two order-zero Legendre solutions:
 `((1-x²)(f g' - g f'))' = (ν(ν+1) - λ(λ+1)) f g`. -/
-lemma legPI_green {ν lam : ℂ} {f g : ℝ → ℂ} (hf : IsFerrersSolution ν 0 f)
+theorem legPI_green {ν lam : ℂ} {f g : ℝ → ℂ} (hf : IsFerrersSolution ν 0 f)
     (hg : IsFerrersSolution lam 0 g) {y : ℝ} (hy : y ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt (fun y : ℝ => (1-(y:ℂ)^2)*(f y*deriv g y-g y*deriv f y))
       ((ν*(ν+1) - lam*(lam+1)) * (f y * g y)) y := by
@@ -454,7 +454,7 @@ def legPIR (Kn Kl Cn Cl rn rl n l : ℂ) (v : Fin 11 → ℂ) : ℂ :=
     (-Cn*l - Cn)*v 5 +
     (Cl*n + Cl)*v 6
 
-lemma legPI_continuous_R (Kn Kl Cn Cl rn rl n l : ℂ) : Continuous (legPIR Kn Kl Cn Cl rn rl n l) := by
+theorem legPI_continuous_R (Kn Kl Cn Cl rn rl n l : ℂ) : Continuous (legPIR Kn Kl Cn Cl rn rl n l) := by
   unfold legPIR; fun_prop
 
 /-- The polynomial remainder in the boundary form at `+1`. -/
@@ -479,11 +479,11 @@ def legPIRp (kf kg cf cg rf rg n l : ℂ) (v : Fin 11 → ℂ) : ℂ :=
     (-cf*l - cf)*v 5 +
     (cg*n + cg)*v 6
 
-lemma legPI_continuous_Rp (kf kg cf cg rf rg n l : ℂ) : Continuous (legPIRp kf kg cf cg rf rg n l) := by
+theorem legPI_continuous_Rp (kf kg cf cg rf rg n l : ℂ) : Continuous (legPIRp kf kg cf cg rf rg n l) := by
   unfold legPIRp; fun_prop
 
 /-- Basic limits at a boundary point where `τ → 0⁺`. -/
-lemma legPI_basic_limits {l : Filter ℝ} {τ : ℝ → ℝ} (hτ : Tendsto τ l (𝓝[>] 0)) :
+theorem legPI_basic_limits {l : Filter ℝ} {τ : ℝ → ℝ} (hτ : Tendsto τ l (𝓝[>] 0)) :
     Tendsto (fun x => ((τ x : ℝ) : ℂ)) l (𝓝 0) ∧
     Tendsto (fun x => ((τ x : ℝ) : ℂ) * ((Real.log (τ x) : ℝ) : ℂ)) l (𝓝 0) ∧
     Tendsto (fun x => ((τ x : ℝ) : ℂ) * ((Real.log (τ x) : ℝ) : ℂ) * ((Real.log (τ x) : ℝ) : ℂ))
@@ -513,7 +513,7 @@ lemma legPI_basic_limits {l : Filter ℝ} {τ : ℝ → ℝ} (hτ : Tendsto τ l
     exact h3.congr fun x => by ring
 
 /-- `E → 0` and `ln τ · E → 0` when `E = O(τ ln τ)`. -/
-lemma legPI_err_limits {l : Filter ℝ} {τ : ℝ → ℝ} (hτ : Tendsto τ l (𝓝[>] 0)) {E : ℝ → ℂ}
+theorem legPI_err_limits {l : Filter ℝ} {τ : ℝ → ℝ} (hτ : Tendsto τ l (𝓝[>] 0)) {E : ℝ → ℂ}
     (hE : E =O[l] (fun x => τ x * Real.log (τ x))) :
     Tendsto E l (𝓝 0) ∧ Tendsto (fun x => ((Real.log (τ x) : ℝ) : ℂ) * E x) l (𝓝 0) := by
   obtain ⟨-, -, -, h1, h2⟩ := legPI_basic_limits hτ
@@ -621,7 +621,7 @@ theorem legPI_bdry_pos {l : Filter ℝ} {τ : ℝ → ℝ} (hτ : Tendsto τ l (
 
 /-- `𝖰_ν(-x) = -cos(νπ) 𝖰_ν(x) - (π/2) sin(νπ) 𝖯_ν(x)` (DLMF 14.9.10 solved for `𝖰_ν(-x)`), valid
 for every regular `ν`, integers included. -/
-lemma legPI_ferrersQ_neg {ν : ℂ} (h : LegendreQRegular ν 0) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem legPI_ferrersQ_neg {ν : ℂ} (h : LegendreQRegular ν 0) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersQ ν 0 (-x) = -cos (ν*π)*ferrersQ ν 0 x - π/2*sin (ν*π)*ferrersP ν 0 x := by
   have pyth := sin_sq_add_cos_sq (ν*π/2)
   rw [ferrersQ_even_odd, ferrersQ_even_odd, ferrersP_regular h hx, ferrersEven_neg, ferrersOdd_neg,
@@ -631,15 +631,15 @@ lemma legPI_ferrersQ_neg {ν : ℂ} (h : LegendreQRegular ν 0) {x : ℝ} (hx : 
     ferrersOdd ν 0 x * pyth
 
 /-- `𝖰_α` solves the Legendre equation on `(-1,1)`. -/
-lemma legPI_ferrersQ_isFerrersSolution (α : ℂ) : IsFerrersSolution α 0 (ferrersQ α 0) :=
+theorem legPI_ferrersQ_isFerrersSolution (α : ℂ) : IsFerrersSolution α 0 (ferrersQ α 0) :=
   ((ferrersEven_isFerrersSolution α 0).add_smul (ferrersOdd_isFerrersSolution α 0) _ _).congr
     (ferrersQ_eqOn_even_odd α 0).symm
 
-lemma legPI_continuousOn_of_solution {α : ℂ} {f : ℝ → ℂ} (hf : IsFerrersSolution α 0 f) :
+theorem legPI_continuousOn_of_solution {α : ℂ} {f : ℝ → ℂ} (hf : IsFerrersSolution α 0 f) :
     ContinuousOn f (Ioo (-1) 1) :=
   fun y hy => (hf y hy).1.continuousAt.continuousWithinAt
 
-lemma legPI_tendsto_half_right :
+theorem legPI_tendsto_half_right :
     Tendsto (fun x : ℝ => (1-x)/2) (𝓝[<] (1:ℝ)) (𝓝[>] 0) := by
   refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
   · have h : Tendsto (fun x : ℝ => (1-x)/2) (𝓝 1) (𝓝 ((1-1)/2)) :=
@@ -649,7 +649,7 @@ lemma legPI_tendsto_half_right :
     simp only [mem_Ioi]; linarith
 
 /-- `(1-x) ln(1-x) = O(τ ln τ)` with `τ = (1-x)/2`, as `x → 1⁻`. -/
-lemma legPI_one_sub_log_isBigO :
+theorem legPI_one_sub_log_isBigO :
     (fun x : ℝ => (1-x)*Real.log (1-x)) =O[𝓝[<] (1:ℝ)] (fun x => (1-x)/2 * Real.log ((1-x)/2)) := by
   refine Asymptotics.IsBigO.of_bound 4 ?_
   filter_upwards [Ioo_mem_nhdsLT (show (0:ℝ) < 1 by norm_num)] with x hx
@@ -668,7 +668,7 @@ lemma legPI_one_sub_log_isBigO :
   linarith
 
 /-- DLMF 14.8.3 in the variable `τ = (1-x)/2`: `𝖰_α + ½ ln τ - (-γ - ψ(α+1)) = O(τ ln τ)`. -/
-lemma legPI_ferrersQ_pos_isBigO {α : ℂ} (h : LegendreQRegular α 0) :
+theorem legPI_ferrersQ_pos_isBigO {α : ℂ} (h : LegendreQRegular α 0) :
     (fun x : ℝ => ferrersQ α 0 x + (1/2:ℂ) * Real.log ((1-x)/2) -
       (-Real.eulerMascheroniConstant - digamma (α+1))) =O[𝓝[<] (1:ℝ)]
       (fun x => (1-x)/2 * Real.log ((1-x)/2)) := by
@@ -682,7 +682,7 @@ lemma legPI_ferrersQ_pos_isBigO {α : ℂ} (h : LegendreQRegular α 0) :
     push_cast; ring
   rw [hl]; ring
 
-lemma legPI_tendsto_neg_left : Tendsto (fun x : ℝ => -x) (𝓝[>] (-1:ℝ)) (𝓝[<] 1) := by
+theorem legPI_tendsto_neg_left : Tendsto (fun x : ℝ => -x) (𝓝[>] (-1:ℝ)) (𝓝[<] 1) := by
   refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
   · have h : Tendsto (fun x : ℝ => -x) (𝓝 (-1)) (𝓝 (-(-1))) := tendsto_id.neg
     simpa using h.mono_left (nhdsWithin_le_nhds (s := Ioi (-1)))
@@ -690,7 +690,7 @@ lemma legPI_tendsto_neg_left : Tendsto (fun x : ℝ => -x) (𝓝[>] (-1:ℝ)) (�
     simp only [mem_Iio]; linarith
 
 /-- `𝖯_α - 1 = O(τ ln τ)` with `τ = (1-x)/2`, as `x → 1⁻`. -/
-lemma legPI_ferrersP_pos_isBigO (α : ℂ) :
+theorem legPI_ferrersP_pos_isBigO (α : ℂ) :
     (fun x : ℝ => ferrersP α 0 x + (0:ℂ) * Real.log ((1-x)/2) - 1) =O[𝓝[<] (1:ℝ)]
       (fun x => (1-x)/2 * Real.log ((1-x)/2)) := by
   have hfun : ferrersP α 0 = fun y : ℝ => regularizedGaussHG (α+1) (-α) 1 ((1-(y:ℂ))/2) :=
@@ -712,7 +712,7 @@ lemma legPI_ferrersP_pos_isBigO (α : ℂ) :
 
 /-- `𝖰_α` at `-1`: `𝖰_α - ½cos(απ) ln τ - c = O(τ ln τ)`, `τ = (1+x)/2`, with
 `c = cos(απ)(γ + ψ(α+1)) - (π/2) sin(απ)`. -/
-lemma legPI_ferrersQ_neg_isBigO {α : ℂ} (h : LegendreQRegular α 0) :
+theorem legPI_ferrersQ_neg_isBigO {α : ℂ} (h : LegendreQRegular α 0) :
     (fun x : ℝ => ferrersQ α 0 x + (-(1/2)*cos (α*π)) * Real.log ((1+x)/2) -
       (-cos (α*π)*(-Real.eulerMascheroniConstant - digamma (α+1)) - π/2*sin (α*π))) =O[𝓝[>] (-1:ℝ)]
       (fun x => (1+x)/2 * Real.log ((1+x)/2)) := by
@@ -733,13 +733,13 @@ lemma legPI_ferrersQ_neg_isBigO {α : ℂ} (h : LegendreQRegular α 0) :
   ring
 
 /-- `τ ln τ = O((1-x²)^{-1/4})` along any filter on which `τ → 0⁺`. -/
-lemma legPI_tlogt_isBigO_w {l : Filter ℝ} {τ : ℝ → ℝ} (hτ : Tendsto τ l (𝓝[>] 0))
+theorem legPI_tlogt_isBigO_w {l : Filter ℝ} {τ : ℝ → ℝ} (hτ : Tendsto τ l (𝓝[>] 0))
     (h1 : (fun _ : ℝ => (1:ℝ)) =O[l] legPIw) :
     (fun x => τ x * Real.log (τ x)) =O[l] legPIw :=
   (((legPI_basic_limits hτ).2.2.2.1).isBigO_one ℝ).trans h1
 
 /-- `𝖰_α = O((1-x²)^{-1/4})` at `1`. -/
-lemma legPI_ferrersQ_isBigO_right {α : ℂ} (h : LegendreQRegular α 0) :
+theorem legPI_ferrersQ_isBigO_right {α : ℂ} (h : LegendreQRegular α 0) :
     ferrersQ α 0 =O[𝓝[<] (1:ℝ)] legPIw := by
   have h1 := (legPI_ferrersQ_pos_isBigO h).trans
     (legPI_tlogt_isBigO_w legPI_tendsto_half_right legPI_one_isBigO_right)
@@ -749,7 +749,7 @@ lemma legPI_ferrersQ_isBigO_right {α : ℂ} (h : LegendreQRegular α 0) :
   exact ((h1.sub h2).add h3).congr_left fun _ => by ring
 
 /-- `𝖰_α = O((1-x²)^{-1/4})` at `-1`. -/
-lemma legPI_ferrersQ_isBigO_left {α : ℂ} (h : LegendreQRegular α 0) :
+theorem legPI_ferrersQ_isBigO_left {α : ℂ} (h : LegendreQRegular α 0) :
     ferrersQ α 0 =O[𝓝[>] (-1:ℝ)] legPIw := by
   have h1 := (legPI_ferrersQ_neg_isBigO h).trans legPI_tlogt_isBigO_left
   have h2 := (isBigO_ofReal_left.mpr legPI_log_isBigO_left).const_mul_left (-(1/2)*cos (α*π))
@@ -763,23 +763,23 @@ def legPIcpos (α : ℂ) : ℂ := -Real.eulerMascheroniConstant - digamma (α+1)
 /-- Constant term of `𝖰_α` at `-1` (in the variable `τ = (1+x)/2`). -/
 def legPIcneg (α : ℂ) : ℂ := -cos (α*π)*legPIcpos α - π/2*sin (α*π)
 
-lemma legPI_regular_succ {α : ℂ} (h : LegendreQRegular α 0) : LegendreQRegular (α+1) 0 :=
+theorem legPI_regular_succ {α : ℂ} (h : LegendreQRegular α 0) : LegendreQRegular (α+1) 0 :=
   fun n hn => h (n+1) (by push_cast; linear_combination hn)
 
-lemma legPI_regular_ne {α : ℂ} (h : LegendreQRegular α 0) : α + 1 ≠ 0 :=
+theorem legPI_regular_ne {α : ℂ} (h : LegendreQRegular α 0) : α + 1 ≠ 0 :=
   fun h' => h 0 (by push_cast; linear_combination h')
 
-lemma legPI_regular_arg {α : ℂ} (h : LegendreQRegular α 0) : ∀ m : ℕ, α+1 ≠ -(m:ℂ) :=
+theorem legPI_regular_arg {α : ℂ} (h : LegendreQRegular α 0) : ∀ m : ℕ, α+1 ≠ -(m:ℂ) :=
   fun m hm => h m (by linear_combination hm)
 
-lemma legPI_cpos_succ {α : ℂ} (h : LegendreQRegular α 0) :
+theorem legPI_cpos_succ {α : ℂ} (h : LegendreQRegular α 0) :
     (α+1)*(legPIcpos (α+1) - legPIcpos α) = -1 := by
   unfold legPIcpos
   rw [Complex.digamma_apply_add_one (α+1) (legPI_regular_arg h)]
   have := legPI_regular_ne h
   field_simp; ring
 
-lemma legPI_cneg_succ {α : ℂ} (h : LegendreQRegular α 0) :
+theorem legPI_cneg_succ {α : ℂ} (h : LegendreQRegular α 0) :
     (α+1)*(legPIcneg (α+1) + legPIcneg α) = -cos (α*π) := by
   have hc := legPI_cpos_succ h
   unfold legPIcneg
@@ -816,14 +816,14 @@ theorem legPI_integral_green {f g f1 g1 : ℝ → ℂ} {ν lam Bm Bp : ℂ}
   rw [intervalIntegral.integral_const_mul] at hI
   rw [eq_div_iff hc, ← hI]; ring
 
-lemma legPI_hx_neg : ∀ᶠ x : ℝ in 𝓝[>] (-1:ℝ), (x:ℂ) = -1 + 2*(((1+x)/2 : ℝ) : ℂ) :=
+theorem legPI_hx_neg : ∀ᶠ x : ℝ in 𝓝[>] (-1:ℝ), (x:ℂ) = -1 + 2*(((1+x)/2 : ℝ) : ℂ) :=
   Eventually.of_forall fun x => by push_cast; ring
 
-lemma legPI_hx_pos : ∀ᶠ x : ℝ in 𝓝[<] (1:ℝ), (x:ℂ) = 1 - 2*(((1-x)/2 : ℝ) : ℂ) :=
+theorem legPI_hx_pos : ∀ᶠ x : ℝ in 𝓝[<] (1:ℝ), (x:ℂ) = 1 - 2*(((1-x)/2 : ℝ) : ℂ) :=
   Eventually.of_forall fun x => by push_cast; ring
 
 /-- Expansion of `𝖰_{α+1}` at `-1` in the shape required by `legPI_bdry_neg`. -/
-lemma legPI_ferrersQ_neg_isBigO_succ {α : ℂ} (h : LegendreQRegular α 0) :
+theorem legPI_ferrersQ_neg_isBigO_succ {α : ℂ} (h : LegendreQRegular α 0) :
     (fun x : ℝ => ferrersQ (α+1) 0 x - (-(1/2)*cos (α*π)) * Real.log ((1+x)/2) -
       (-legPIcneg α + (legPIcneg (α+1) + legPIcneg α))) =O[𝓝[>] (-1:ℝ)]
       (fun x => (1+x)/2 * Real.log ((1+x)/2)) := by
@@ -833,24 +833,24 @@ lemma legPI_ferrersQ_neg_isBigO_succ {α : ℂ} (h : LegendreQRegular α 0) :
   ring
 
 /-- Expansion of `𝖰_{α+1}` at `+1` in the shape required by `legPI_bdry_pos`. -/
-lemma legPI_ferrersQ_pos_isBigO_succ {α : ℂ} (h : LegendreQRegular α 0) :
+theorem legPI_ferrersQ_pos_isBigO_succ {α : ℂ} (h : LegendreQRegular α 0) :
     (fun x : ℝ => ferrersQ (α+1) 0 x + (1/2:ℂ) * Real.log ((1-x)/2) -
       (legPIcpos α + (legPIcpos (α+1) - legPIcpos α))) =O[𝓝[<] (1:ℝ)]
       (fun x => (1-x)/2 * Real.log ((1-x)/2)) := by
   refine (legPI_ferrersQ_pos_isBigO (legPI_regular_succ h)).congr_left fun x => ?_
   unfold legPIcpos; ring
 
-lemma legPI_ferrersQ_rec {α : ℂ} (h : LegendreQRegular α 0) :
+theorem legPI_ferrersQ_rec {α : ℂ} (h : LegendreQRegular α 0) :
     ∀ x ∈ Ioo (-1:ℝ) 1, (1-(x:ℂ)^2)*deriv (ferrersQ α 0) x =
       (α+1)*(x*ferrersQ α 0 x - ferrersQ (α+1) 0 x) := fun x hx => by
   rw [ferrersQ_recurrence_4 α 0 h hx]; ring
 
-lemma legPI_ferrersP_rec (α : ℂ) :
+theorem legPI_ferrersP_rec (α : ℂ) :
     ∀ x ∈ Ioo (-1:ℝ) 1, (1-(x:ℂ)^2)*deriv (ferrersP α 0) x =
       (α+1)*(x*ferrersP α 0 x - ferrersP (α+1) 0 x) := fun x hx => by
   rw [ferrersP_recurrence_4 α 0 hx]; ring
 
-lemma legPI_intervalIntegrable_QQ {ν lam : ℂ} (hν : LegendreQRegular ν 0)
+theorem legPI_intervalIntegrable_QQ {ν lam : ℂ} (hν : LegendreQRegular ν 0)
     (hlam : LegendreQRegular lam 0) :
     IntervalIntegrable (fun x => ferrersQ ν 0 x * ferrersQ lam 0 x) volume (-1) 1 := by
   have c1 := legPI_continuousOn_of_solution (legPI_ferrersQ_isFerrersSolution ν)
@@ -860,7 +860,7 @@ lemma legPI_intervalIntegrable_QQ {ν lam : ℂ} (hν : LegendreQRegular ν 0)
     (legPI_ferrersQ_isBigO_right hlam)
   exact legPI_intervalIntegrable_mul c1 c2 hM hN
 
-lemma legPI_intervalIntegrable_PQ {lam : ℂ} (ν : ℂ) (hlam : LegendreQRegular lam 0) :
+theorem legPI_intervalIntegrable_PQ {lam : ℂ} (ν : ℂ) (hlam : LegendreQRegular lam 0) :
     IntervalIntegrable (fun x => ferrersP ν 0 x * ferrersQ lam 0 x) volume (-1) 1 := by
   have c2 := legPI_continuousOn_of_solution (legPI_ferrersQ_isFerrersSolution lam)
   obtain ⟨M, hM⟩ := legPI_bound (legPI_continuousOn_ferrersP ν) (legPI_ferrersP_isBigO_left ν)
@@ -891,7 +891,7 @@ theorem legPI_integral_QQ {ν lam : ℂ} (hν : LegendreQRegular ν 0) (hlam : L
     · rw [legPI_cpos_succ hν]; ring
 
 /-- Expansion of `𝖯_{α+1}` at `-1` in the shape required by `legPI_bdry_neg`. -/
-lemma legPI_ferrersP_neg_one_isBigO_succ (α : ℂ) :
+theorem legPI_ferrersP_neg_one_isBigO_succ (α : ℂ) :
     (fun x : ℝ => ferrersP (α+1) 0 x - legPIK α * Real.log ((1+x)/2) -
       (-legPIC α + (legBdK' (α+1+1) (-(α+1)) + legBdK' (α+1) (-α)))) =O[𝓝[>] (-1:ℝ)]
       (fun x => (1+x)/2 * Real.log ((1+x)/2)) := by
@@ -901,7 +901,7 @@ lemma legPI_ferrersP_neg_one_isBigO_succ (α : ℂ) :
   rw [hK]; ring
 
 /-- Expansion of `𝖯_{α+1}` at `+1` in the shape required by `legPI_bdry_pos`. -/
-lemma legPI_ferrersP_pos_isBigO_succ (α : ℂ) :
+theorem legPI_ferrersP_pos_isBigO_succ (α : ℂ) :
     (fun x : ℝ => ferrersP (α+1) 0 x + (0:ℂ) * Real.log ((1-x)/2) - (1 + 0)) =O[𝓝[<] (1:ℝ)]
       (fun x => (1-x)/2 * Real.log ((1-x)/2)) :=
   (legPI_ferrersP_pos_isBigO (α+1)).congr_left fun x => by ring
@@ -926,7 +926,7 @@ theorem legPI_integral_PQ {ν lam : ℂ} (hlam : LegendreQRegular lam 0)
     · rw [legPI_cpos_succ hlam]; ring
     · ring
 
-lemma legPI_regular_of_re_pos {α : ℂ} (h : 0 < α.re) : LegendreQRegular α 0 := by
+theorem legPI_regular_of_re_pos {α : ℂ} (h : 0 < α.re) : LegendreQRegular α 0 := by
   intro n hn
   have := congrArg Complex.re hn
   simp at this
@@ -950,7 +950,7 @@ theorem legPI_integral_PP (ν lam : ℂ) (h : (ν*(ν+1) - lam*(lam+1)) ≠ 0) :
   ring
 
 /-- Closed form of the boundary constant `K_ν C_λ - K_λ C_ν`. -/
-lemma legPI_boundary_const {ν lam : ℂ} (hν : LegendreQRegular ν 0) (hlam : LegendreQRegular lam 0) :
+theorem legPI_boundary_const {ν lam : ℂ} (hν : LegendreQRegular ν 0) (hlam : LegendreQRegular lam 0) :
     (π:ℂ)^2 * (legPIK ν * legPIC lam - legPIK lam * legPIC ν) =
       π*sin ((lam-ν)*π) + 2*sin (ν*π)*sin (lam*π)*(digamma (ν+1)-digamma (lam+1)) := by
   have hr : ∀ {α : ℂ}, LegendreQRegular α 0 → ∀ m : ℕ, α+1 ≠ -(m:ℂ) := by
@@ -968,7 +968,7 @@ lemma legPI_boundary_const {ν lam : ℂ} (hν : LegendreQRegular ν 0) (hlam : 
     (-(π:ℂ)*cos (π*ν) - 2*(digamma (ν+1) - digamma (lam+1))*sin (π*ν)) * k2
 
 /-- `K'_α = cos(πα) + 2 (1/Γ)'(α+1)/Γ(-α)` for every `α`. -/
-lemma legPI_K'_eq_all (α : ℂ) :
+theorem legPI_K'_eq_all (α : ℂ) :
     legBdK' (α+1) (-α) = cos (π*α) + 2*(DLMF.Gamma.recipGammaDeriv 1 (α+1) * (Gamma (-α))⁻¹) := by
   have hr := legBd_reflection_deriv (-α)
   rw [show (1:ℂ) - -α = α+1 by ring, mul_neg, cos_neg] at hr
@@ -980,7 +980,7 @@ lemma legPI_K'_eq_all (α : ℂ) :
 
 /-- Closed form of the boundary constant for all degrees, with `S(α) = π (1/Γ)'(α+1)/Γ(-α)`
 (the removable extension of `sin(πα) ψ(α+1)`). -/
-lemma legPI_boundary_const_all (ν lam : ℂ) :
+theorem legPI_boundary_const_all (ν lam : ℂ) :
     (π:ℂ)^2 * (legPIK ν * legPIC lam - legPIK lam * legPIC ν) =
       π*sin ((lam-ν)*π) + 2*(sin (π*lam) * (π * DLMF.Gamma.recipGammaDeriv 1 (ν+1) * (Gamma (-ν))⁻¹) -
         sin (π*ν) * (π * DLMF.Gamma.recipGammaDeriv 1 (lam+1) * (Gamma (-lam))⁻¹)) := by
@@ -1005,7 +1005,7 @@ diagonal ones 14.17.11, 13, 15. Helper names carry the prefix `legPIU_`. -/
 
 
 /-- Uniform bound for `𝐅(a,b;c;w)` on `‖a‖, ‖b‖, ‖c‖ ≤ R`, `‖w‖ ≤ 1/2`. -/
-lemma legPIU_bound_F (R : ℝ) : ∃ M : ℝ, ∀ a b c w : ℂ, ‖a‖ ≤ R → ‖b‖ ≤ R → ‖c‖ ≤ R →
+theorem legPIU_bound_F (R : ℝ) : ∃ M : ℝ, ∀ a b c w : ℂ, ‖a‖ ≤ R → ‖b‖ ≤ R → ‖c‖ ≤ R →
     ‖w‖ ≤ 1/2 → ‖regularizedGaussHGFun a b c w‖ ≤ M := by
   set S : Set (ℂ × ℂ × ℂ × ℂ) := Metric.closedBall 0 R ×ˢ (Metric.closedBall 0 R ×ˢ
     (Metric.closedBall 0 R ×ˢ Metric.closedBall 0 (1/2)))
@@ -1028,7 +1028,7 @@ lemma legPIU_bound_F (R : ℝ) : ∃ M : ℝ, ∀ a b c w : ℂ, ‖a‖ ≤ R �
   rwa [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ (by linarith)] at this
 
 /-- A continuous function is bounded on `‖a‖, ‖b‖ ≤ R`. -/
-lemma legPIU_bound_two {f : ℂ × ℂ → ℂ} (hf : Continuous f) (R : ℝ) :
+theorem legPIU_bound_two {f : ℂ × ℂ → ℂ} (hf : Continuous f) (R : ℝ) :
     ∃ M : ℝ, ∀ a b : ℂ, ‖a‖ ≤ R → ‖b‖ ≤ R → ‖f (a, b)‖ ≤ M := by
   obtain ⟨M, hM⟩ := ((isCompact_closedBall (0:ℂ) R).prod (isCompact_closedBall (0:ℂ) R)
     ).exists_bound_of_continuousOn hf.continuousOn
@@ -1037,7 +1037,7 @@ lemma legPIU_bound_two {f : ℂ × ℂ → ℂ} (hf : Continuous f) (R : ℝ) :
 
 /-- Uniform bound for the analytic part `H(a,b;w)` of DLMF 15.8.10 on `‖a‖, ‖b‖ ≤ R`,
 `‖w‖ ≤ 1/2`, from Cauchy's estimate in the third parameter. -/
-lemma legPIU_bound_H (R : ℝ) : ∃ M : ℝ, ∀ a b w : ℂ, ‖a‖ ≤ R → ‖b‖ ≤ R →
+theorem legPIU_bound_H (R : ℝ) : ∃ M : ℝ, ∀ a b w : ℂ, ‖a‖ ≤ R → ‖b‖ ≤ R →
     ‖w‖ ≤ 1/2 → ‖legBdZbH a b w‖ ≤ M := by
   obtain ⟨MF, hMF⟩ := legPIU_bound_F (R+2)
   have cK : Continuous fun p : ℂ × ℂ => legBdK p.1 p.2 := by
@@ -1101,7 +1101,7 @@ lemma legPIU_bound_H (R : ℝ) : ∃ M : ℝ, ∀ a b w : ℂ, ‖a‖ ≤ R →
 
 /-- `𝖯_α(x) = O((1-x²)^{-1/4})` on `(-1,1)` uniformly for `‖α‖ ≤ R`: the parameter-uniform form of
 DLMF 15.8.10 at `m = 0` used for diagonal integrals. -/
-lemma legPIU_bound_P (R : ℝ) : ∃ M : ℝ, ∀ α : ℂ, ‖α‖ ≤ R → ∀ x ∈ Ioo (-1:ℝ) 1,
+theorem legPIU_bound_P (R : ℝ) : ∃ M : ℝ, ∀ α : ℂ, ‖α‖ ≤ R → ∀ x ∈ Ioo (-1:ℝ) 1,
     ‖ferrersP α 0 x‖ ≤ M * legPIw x := by
   set R1 := |R| + 1
   obtain ⟨MF, hMF⟩ := legPIU_bound_F R1
@@ -1181,13 +1181,13 @@ lemma legPIU_bound_P (R : ℝ) : ∃ M : ℝ, ∀ α : ℂ, ‖α‖ ≤ R → �
           nlinarith
 
 /-- `λ ↦ 𝖯_λ(x)` is entire for `x > -1`. -/
-lemma legPIU_continuous_degree {x : ℝ} (hx : -1 < x) : Continuous fun α : ℂ => ferrersP α 0 x := by
+theorem legPIU_continuous_degree {x : ℝ} (hx : -1 < x) : Continuous fun α : ℂ => ferrersP α 0 x := by
   simp only [legPI_ferrersP_zero]
   exact (differentiable_regularizedGaussHG_comp (A := fun α : ℂ => α+1) (B := fun α : ℂ => -α)
     (C := fun _ => 1) (by fun_prop) (by fun_prop) (by fun_prop) (legInt_half_mem_cutPlane hx)).continuous
 
 /-- Dominated convergence: `∫₋₁¹ 𝖯_ν 𝖯_λ → ∫₋₁¹ 𝖯_ν²` as `λ → ν`. -/
-lemma legPIU_tendsto_PP (ν : ℂ) :
+theorem legPIU_tendsto_PP (ν : ℂ) :
     Tendsto (fun lam : ℂ => ∫ x : ℝ in -1..1, ferrersP ν 0 x * ferrersP lam 0 x) (𝓝 ν)
       (𝓝 (∫ x : ℝ in -1..1, ferrersP ν 0 x * ferrersP ν 0 x)) := by
   obtain ⟨M, hM⟩ := legPIU_bound_P (‖ν‖ + 1)
@@ -1225,7 +1225,7 @@ lemma legPIU_tendsto_PP (ν : ℂ) :
     exact tendsto_const_nhds.mul ((legPIU_continuous_degree hx.1).tendsto ν)
 
 /-- Dominated convergence: `∫₋₁¹ 𝖯_λ² → ∫₋₁¹ 𝖯_ν²` as `λ → ν`. -/
-lemma legPIU_tendsto_sq (ν : ℂ) :
+theorem legPIU_tendsto_sq (ν : ℂ) :
     Tendsto (fun lam : ℂ => ∫ x : ℝ in -1..1, (ferrersP lam 0 x)^2) (𝓝 ν)
       (𝓝 (∫ x : ℝ in -1..1, (ferrersP ν 0 x)^2)) := by
   obtain ⟨M, hM⟩ := legPIU_bound_P (‖ν‖ + 1)
@@ -1262,7 +1262,7 @@ lemma legPIU_tendsto_sq (ν : ℂ) :
 
 /-- Uniform zero-balanced bound (DLMF 15.8.10 at `m = 0`):
 `‖𝐅(a,b;a+b;1-t)‖ ≤ C t^{-1/4}` for `‖a‖, ‖b‖ ≤ R`, `0 < t ≤ 1/2`. -/
-lemma legPIU_bound_zb (R : ℝ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ a b : ℂ, ‖a‖ ≤ R → ‖b‖ ≤ R → ∀ t : ℝ, 0 < t →
+theorem legPIU_bound_zb (R : ℝ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ a b : ℂ, ‖a‖ ≤ R → ‖b‖ ≤ R → ∀ t : ℝ, 0 < t →
     t ≤ 1/2 → ‖regularizedGaussHGFun a b (a+b) (1 - (t:ℂ))‖ ≤ C * t^(-(1/4:ℝ)) := by
   set R1 := |R| + 1
   obtain ⟨MF, hMF⟩ := legPIU_bound_F R1
@@ -1303,7 +1303,7 @@ lemma legPIU_bound_zb (R : ℝ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ a b : ℂ, ‖a�
           mul_nonneg (le_max_right MK 0) (le_max_right MF 0)]
 
 /-- `‖𝐅(a,b;a+b;x²)‖ ≤ M (1-x²)^{-1/4}` on `(-1,1)`, uniformly for `‖a‖, ‖b‖ ≤ R`. -/
-lemma legPIU_bound_sq (R : ℝ) : ∃ M : ℝ, ∀ a b : ℂ, ‖a‖ ≤ R → ‖b‖ ≤ R → ∀ x ∈ Ioo (-1:ℝ) 1,
+theorem legPIU_bound_sq (R : ℝ) : ∃ M : ℝ, ∀ a b : ℂ, ‖a‖ ≤ R → ‖b‖ ≤ R → ∀ x ∈ Ioo (-1:ℝ) 1,
     ‖regularizedGaussHG a b (a+b) ((x:ℂ)^2)‖ ≤ M * legPIw x := by
   obtain ⟨C, hC0, hC⟩ := legPIU_bound_zb R
   obtain ⟨MF, hMF⟩ := legPIU_bound_F (2*|R| + 1)
@@ -1339,13 +1339,13 @@ lemma legPIU_bound_sq (R : ℝ) : ∃ M : ℝ, ∀ a b : ℂ, ‖a‖ ≤ R → 
           nlinarith [le_max_right MF 0]
 
 /-- A function continuous on a compact set is bounded there. -/
-lemma legPIU_bound_on {f : ℂ → ℂ} {K : Set ℂ} (hK : IsCompact K) (hf : ContinuousOn f K) :
+theorem legPIU_bound_on {f : ℂ → ℂ} {K : Set ℂ} (hK : IsCompact K) (hf : ContinuousOn f K) :
     ∃ B : ℝ, 0 ≤ B ∧ ∀ y ∈ K, ‖f y‖ ≤ B := by
   obtain ⟨B, hB⟩ := hK.exists_bound_of_continuousOn hf
   exact ⟨max B 0, le_max_right _ _, fun y hy => le_trans (hB y hy) (le_max_left _ _)⟩
 
 /-- `𝖰_λ(x) = O((1-x²)^{-1/4})` on `(-1,1)` uniformly for `λ` near a regular `ν`. -/
-lemma legPIU_bound_Q {ν : ℂ} (hν : LegendreQRegular ν 0) : ∃ r : ℝ, 0 < r ∧ ∃ M : ℝ,
+theorem legPIU_bound_Q {ν : ℂ} (hν : LegendreQRegular ν 0) : ∃ r : ℝ, 0 < r ∧ ∃ M : ℝ,
     ∀ lam : ℂ, ‖lam - ν‖ ≤ r → LegendreQRegular lam 0 ∧
       ∀ x ∈ Ioo (-1:ℝ) 1, ‖ferrersQ lam 0 x‖ ≤ M * legPIw x := by
   have hν1 := legHyp_nu hν
@@ -1423,7 +1423,7 @@ lemma legPIU_bound_Q {ν : ℂ} (hν : LegendreQRegular ν 0) : ∃ r : ℝ, 0 <
     _ = _ := by ring
 
 /-- Dominated convergence on `(-1,1)` with the weight `(1-x²)^{-1/4}`. -/
-lemma legPIU_tendsto_int {F : ℂ → ℝ → ℂ} {f : ℝ → ℂ} {ν : ℂ} {M N : ℝ}
+theorem legPIU_tendsto_int {F : ℂ → ℝ → ℂ} {f : ℝ → ℂ} {ν : ℂ} {M N : ℝ}
     (hf : ContinuousOn f (Ioo (-1) 1)) (hfN : ∀ x ∈ Ioo (-1:ℝ) 1, ‖f x‖ ≤ N * legPIw x)
     (hFc : ∀ lam, ContinuousOn (F lam) (Ioo (-1) 1))
     (hFM : ∀ᶠ lam in 𝓝 ν, ∀ x ∈ Ioo (-1:ℝ) 1, ‖F lam x‖ ≤ M * legPIw x)
@@ -1682,7 +1682,7 @@ theorem ferrers_product_integral_15 (ν : ℂ) (hν : 0 < ν.re) :
   ring
 
 /-- Green's identity for two Legendre solutions of the same order `μ`. -/
-lemma legPI_green_mu {ν lam μ : ℂ} {f g : ℝ → ℂ} (hf : IsFerrersSolution ν μ f)
+theorem legPI_green_mu {ν lam μ : ℂ} {f g : ℝ → ℂ} (hf : IsFerrersSolution ν μ f)
     (hg : IsFerrersSolution lam μ g) {y : ℝ} (hy : y ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt (fun y : ℝ => (1-(y:ℂ)^2)*(f y*deriv g y-g y*deriv f y))
       ((ν*(ν+1) - lam*(lam+1)) * (f y * g y)) y := by
@@ -1717,22 +1717,22 @@ theorem legPI_integral_green_B {f g B : ℝ → ℂ} {ν lam μ Bm Bp : ℂ}
   rw [eq_div_iff hc, ← hI]; ring
 
 /-- `𝖯^μ_α` solves the associated Legendre equation on `(-1,1)`. -/
-lemma legPI_ferrersP_isFerrersSolution_mu (α μ : ℂ) : IsFerrersSolution α μ (ferrersP α μ) :=
+theorem legPI_ferrersP_isFerrersSolution_mu (α μ : ℂ) : IsFerrersSolution α μ (ferrersP α μ) :=
   ((ferrersEven_isFerrersSolution α μ).add_smul (ferrersOdd_isFerrersSolution α μ) _ _).congr
     (ferrersP_eqOn_even_odd α μ).symm
 
 /-- `𝖰^μ_α` solves the associated Legendre equation on `(-1,1)`. -/
-lemma legPI_ferrersQ_isFerrersSolution_mu (α μ : ℂ) : IsFerrersSolution α μ (ferrersQ α μ) :=
+theorem legPI_ferrersQ_isFerrersSolution_mu (α μ : ℂ) : IsFerrersSolution α μ (ferrersQ α μ) :=
   ((ferrersEven_isFerrersSolution α μ).add_smul (ferrersOdd_isFerrersSolution α μ) _ _).congr
     (ferrersQ_eqOn_even_odd α μ).symm
 
 /-- A solution of the associated Legendre equation is continuous on `(-1,1)`. -/
-lemma legPI_continuousOn_of_solution' {α μ : ℂ} {f : ℝ → ℂ} (hf : IsFerrersSolution α μ f) :
+theorem legPI_continuousOn_of_solution' {α μ : ℂ} {f : ℝ → ℂ} (hf : IsFerrersSolution α μ f) :
     ContinuousOn f (Ioo (-1) 1) :=
   fun y hy => (hf y hy).1.continuousAt.continuousWithinAt
 
 /-- `(k+1)_j · k! = (k+j)!`. -/
-lemma legPI_poch_nat (k j : ℕ) : poch ((k:ℂ)+1) j * (k.factorial : ℂ) = ((k+j).factorial : ℂ) := by
+theorem legPI_poch_nat (k j : ℕ) : poch ((k:ℂ)+1) j * (k.factorial : ℂ) = ((k+j).factorial : ℂ) := by
   induction j with
   | zero => simp [poch_zero]
   | succ j ih =>
@@ -1740,7 +1740,7 @@ lemma legPI_poch_nat (k j : ℕ) : poch ((k:ℂ)+1) j * (k.factorial : ℂ) = ((
     push_cast; ring
 
 /-- `𝖯^m_k 𝖰^m_j → (k+m)!/((k-m)! 2m)` as `x → 1⁻`, for `1 ≤ m ≤ k`. -/
-lemma legPI_tendsto_PQ_one {k j m : ℕ} (hm : 0 < m) (hk : m ≤ k) :
+theorem legPI_tendsto_PQ_one {k j m : ℕ} (hm : 0 < m) (hk : m ≤ k) :
     Tendsto (fun x : ℝ => ferrersP k m x * ferrersQ j m x) (𝓝[<] (1:ℝ))
       (𝓝 (((k+m).factorial : ℂ) / ((k-m).factorial * (2*m)))) := by
   have hp : poch ((k:ℂ)-m+1) (2*m) ≠ 0 := by
@@ -1799,7 +1799,7 @@ lemma legPI_tendsto_PQ_one {k j m : ℕ} (hm : 0 < m) (hk : m ≤ k) :
 
 
 /-- `𝖯^m_k 𝖰^m_j → (-1)^{k+j+1} (k+m)!/((k-m)! 2m)` as `x → -1⁺`, for `1 ≤ m ≤ k`. -/
-lemma legPI_tendsto_PQ_neg_one {k j m : ℕ} (hm : 0 < m) (hk : m ≤ k) :
+theorem legPI_tendsto_PQ_neg_one {k j m : ℕ} (hm : 0 < m) (hk : m ≤ k) :
     Tendsto (fun x : ℝ => ferrersP k m x * ferrersQ j m x) (𝓝[>] (-1:ℝ))
       (𝓝 ((-1)^(k+j+1) * (((k+m).factorial : ℂ) / ((k-m).factorial * (2*m))))) := by
   have h := ((legPI_tendsto_PQ_one (j := j) hm hk).comp legPI_tendsto_neg_left).const_mul
@@ -1817,7 +1817,7 @@ lemma legPI_tendsto_PQ_neg_one {k j m : ℕ} (hm : 0 < m) (hk : m ≤ k) :
   linear_combination -(ferrersP (k:ℂ) (m:ℂ) (-x) * ferrersQ (j:ℂ) (m:ℂ) (-x)) * this
 
 /-- A function continuous on `(-1,1)` with finite limits at both ends is integrable on `[-1,1]`. -/
-lemma legPI_intervalIntegrable_of_tendsto {h : ℝ → ℂ} (hc : ContinuousOn h (Ioo (-1) 1)) {a b : ℂ}
+theorem legPI_intervalIntegrable_of_tendsto {h : ℝ → ℂ} (hc : ContinuousOn h (Ioo (-1) 1)) {a b : ℂ}
     (ha : Tendsto h (𝓝[>] (-1:ℝ)) (𝓝 a)) (hb : Tendsto h (𝓝[<] (1:ℝ)) (𝓝 b)) :
     IntervalIntegrable h volume (-1) 1 := by
   obtain ⟨M, hM⟩ := legPI_bound hc ((ha.isBigO_one ℝ).trans legPI_one_isBigO_left)
@@ -1947,7 +1947,7 @@ obtained from Green's identity, the boundary variable `x = 1 + 2τ` at `1⁺` wi
 logarithmic expansions DLMF 14.8.9 (`legBd_olverQ_log_isBigO`), and the power bounds
 DLMF 14.8.12, 14.8.15 at `∞`. Helper names carry the prefix `legExt_`. -/
 /-- Complex Green identity for two order-zero Legendre solutions on an open set. -/
-lemma legExt_green {ν lam : ℂ} {f g : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
+theorem legExt_green {ν lam : ℂ} {f g : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
     (hf : DifferentiableOn ℂ f U) (hg : DifferentiableOn ℂ g U)
     (ef : ∀ z ∈ U, (1-z^2)*iteratedDeriv 2 f z-2*z*deriv f z+(ν*(ν+1)-0^2/(1-z^2))*f z=0)
     (eg : ∀ z ∈ U, (1-z^2)*iteratedDeriv 2 g z-2*z*deriv g z+(lam*(lam+1)-0^2/(1-z^2))*g z=0)
@@ -1972,9 +1972,9 @@ lemma legExt_green {ν lam : ℂ} {f g : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen
 /-- The domain `{z | z - 1 ∈ slitPlane}` of the Legendre functions `P_ν, 𝑸_ν`. -/
 def legExtU : Set ℂ := {z : ℂ | z-1 ∈ slitPlane}
 
-lemma legExt_isOpen_U : IsOpen legExtU := isOpen_sub_one_mem_slitPlane
+theorem legExt_isOpen_U : IsOpen legExtU := isOpen_sub_one_mem_slitPlane
 
-lemma legExt_mem_U {x : ℝ} (hx : 1 < x) : (x:ℂ) ∈ legExtU := by
+theorem legExt_mem_U {x : ℝ} (hx : 1 < x) : (x:ℂ) ∈ legExtU := by
   show (x:ℂ) - 1 ∈ slitPlane
   exact Or.inl (by simp; linarith)
 
@@ -2021,7 +2021,7 @@ theorem legExt_integral_green {f g f1 g1 : ℂ → ℂ} {ν lam B1 : ℂ}
 
 /-- A function continuous on `(1,∞)` and `O(((x-1)/2)^{-1/2})` at `1⁺` is integrable on every
 `[1,R]`. -/
-lemma legExt_intervalIntegrable {h : ℝ → ℂ} (hc : ContinuousOn h (Ioi 1))
+theorem legExt_intervalIntegrable {h : ℝ → ℂ} (hc : ContinuousOn h (Ioi 1))
     (hO : h =O[𝓝[>] (1:ℝ)] (fun x : ℝ => ((x-1)/2)^(-(1/2:ℝ)))) {R : ℝ} (hR : 1 < R) :
     IntervalIntegrable h volume 1 R := by
   have hw : IntervalIntegrable (fun x : ℝ => (x-1)^(-(1/2:ℝ))) volume 1 2 := by
@@ -2059,7 +2059,7 @@ lemma legExt_intervalIntegrable {h : ℝ → ℂ} (hc : ContinuousOn h (Ioi 1))
   exact h1.trans h2
 
 /-- An expansion `f = -k ln τ + c + O(τ ln τ)` with `τ = (x-1)/2` gives `f = O(τ^{-1/4})`. -/
-lemma legExt_isBigO_weight {f : ℝ → ℂ} {k c : ℂ}
+theorem legExt_isBigO_weight {f : ℝ → ℂ} {k c : ℂ}
     (hf : (fun x => f x + k * Real.log ((x-1)/2) - c) =O[𝓝[>] (1:ℝ)]
       (fun x : ℝ => (x-1)/2 * Real.log ((x-1)/2))) :
     f =O[𝓝[>] (1:ℝ)] (fun x : ℝ => ((x-1)/2)^(-(1/4:ℝ))) := by
@@ -2094,7 +2094,7 @@ lemma legExt_isBigO_weight {f : ℝ → ℂ} {k c : ℂ}
   exact ((h1.sub h2).add h3).congr_left fun _ => by ring
 
 /-- Product of two functions with logarithmic expansions at `1⁺` is integrable on `[1,R]`. -/
-lemma legExt_intervalIntegrable_mul {f g : ℝ → ℂ} {kf cf kg cg : ℂ}
+theorem legExt_intervalIntegrable_mul {f g : ℝ → ℂ} {kf cf kg cg : ℂ}
     (hfc : ContinuousOn f (Ioi 1)) (hgc : ContinuousOn g (Ioi 1))
     (hf : (fun x => f x + kf * Real.log ((x-1)/2) - cf) =O[𝓝[>] (1:ℝ)]
       (fun x : ℝ => (x-1)/2 * Real.log ((x-1)/2)))
@@ -2129,7 +2129,7 @@ def legExtR (kf kg cf cg rf rg n l : ℂ) (v : Fin 11 → ℂ) : ℂ :=
     (-cf*l - cf)*v 5 +
     (cg*n + cg)*v 6
 
-lemma legExt_continuous_R (kf kg cf cg rf rg n l : ℂ) : Continuous (legExtR kf kg cf cg rf rg n l) := by
+theorem legExt_continuous_R (kf kg cf cg rf rg n l : ℂ) : Continuous (legExtR kf kg cf cg rf rg n l) := by
   unfold legExtR; fun_prop
 
 /-- Limit of the Green boundary form at an endpoint `x = 1 + 2τ`, `τ → 0⁺`, for expansions
@@ -2181,7 +2181,7 @@ theorem legExt_bdry {l : Filter ℝ} {τ : ℝ → ℝ} (hτ : Tendsto τ l (�
   linear_combination (cf - kf*U x) * hrg - (cg - kg*U x) * hrf
 
 
-lemma legExt_tendsto_half :
+theorem legExt_tendsto_half :
     Tendsto (fun x : ℝ => (x-1)/2) (𝓝[>] (1:ℝ)) (𝓝[>] 0) := by
   refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
   · have h : Tendsto (fun x : ℝ => (x-1)/2) (𝓝 1) (𝓝 ((1-1)/2)) :=
@@ -2190,11 +2190,11 @@ lemma legExt_tendsto_half :
   · filter_upwards [self_mem_nhdsWithin] with x (hx : 1 < x)
     simp only [mem_Ioi]; linarith
 
-lemma legExt_hx : ∀ᶠ x : ℝ in 𝓝[>] (1:ℝ), (x:ℂ) = 1 + 2*(((x-1)/2 : ℝ) : ℂ) :=
+theorem legExt_hx : ∀ᶠ x : ℝ in 𝓝[>] (1:ℝ), (x:ℂ) = 1 + 2*(((x-1)/2 : ℝ) : ℂ) :=
   Eventually.of_forall fun x => by push_cast; ring
 
 /-- `(x-1) ln(x-1) = O(τ ln τ)` with `τ = (x-1)/2`, as `x → 1⁺`. -/
-lemma legExt_sub_one_log_isBigO :
+theorem legExt_sub_one_log_isBigO :
     (fun x : ℝ => (x-1)*Real.log (x-1)) =O[𝓝[>] (1:ℝ)] (fun x => (x-1)/2 * Real.log ((x-1)/2)) := by
   refine Asymptotics.IsBigO.of_bound 4 ?_
   filter_upwards [Ioo_mem_nhdsGT (show (1:ℝ) < 2 by norm_num)] with x hx
@@ -2213,12 +2213,12 @@ lemma legExt_sub_one_log_isBigO :
   linarith
 
 /-- `P_α(z) = 𝐅(α+1,-α;1;(1-z)/2)` for every `z`. -/
-lemma legExt_associatedP_eq (α z : ℂ) :
+theorem legExt_associatedP_eq (α z : ℂ) :
     associatedP α 0 z = regularizedGaussHG (α+1) (-α) 1 ((1-z)/2) := by
   simp [associatedP]
 
 /-- `P_α - 1 = O(τ ln τ)` with `τ = (x-1)/2`, as `x → 1⁺`. -/
-lemma legExt_P_isBigO (α : ℂ) :
+theorem legExt_P_isBigO (α : ℂ) :
     (fun x : ℝ => associatedP α 0 x + (0:ℂ) * Real.log ((x-1)/2) - 1) =O[𝓝[>] (1:ℝ)]
       (fun x => (x-1)/2 * Real.log ((x-1)/2)) := by
   have hfun : (fun y : ℝ => associatedP α 0 y) =
@@ -2242,7 +2242,7 @@ lemma legExt_P_isBigO (α : ℂ) :
   ring
 
 /-- DLMF 14.8.9 in the variable `τ = (x-1)/2`: `Q_α + ½ ln τ - (-γ - ψ(α+1)) = O(τ ln τ)`. -/
-lemma legExt_Q_isBigO {α : ℂ} (h : LegendreQRegular α 0) :
+theorem legExt_Q_isBigO {α : ℂ} (h : LegendreQRegular α 0) :
     (fun x : ℝ => associatedQ α 0 x + (1/2:ℂ) * Real.log ((x-1)/2) - legPIcpos α)
       =O[𝓝[>] (1:ℝ)] (fun x => (x-1)/2 * Real.log ((x-1)/2)) := by
   have hp := legPI_regular_arg h
@@ -2264,13 +2264,13 @@ lemma legExt_Q_isBigO {α : ℂ} (h : LegendreQRegular α 0) :
   ring_nf
 
 /-- Expansion of `P_{α+1}` at `1⁺` in the shape required by `legExt_bdry`. -/
-lemma legExt_P_isBigO_succ (α : ℂ) :
+theorem legExt_P_isBigO_succ (α : ℂ) :
     (fun x : ℝ => associatedP (α+1) 0 x + (0:ℂ) * Real.log ((x-1)/2) - (1 + 0)) =O[𝓝[>] (1:ℝ)]
       (fun x => (x-1)/2 * Real.log ((x-1)/2)) :=
   (legExt_P_isBigO (α+1)).congr_left fun x => by ring
 
 /-- Expansion of `Q_{α+1}` at `1⁺` in the shape required by `legExt_bdry`. -/
-lemma legExt_Q_isBigO_succ {α : ℂ} (h : LegendreQRegular α 0) :
+theorem legExt_Q_isBigO_succ {α : ℂ} (h : LegendreQRegular α 0) :
     (fun x : ℝ => associatedQ (α+1) 0 x + (1/2:ℂ) * Real.log ((x-1)/2) -
       (legPIcpos α + (legPIcpos (α+1) - legPIcpos α))) =O[𝓝[>] (1:ℝ)]
       (fun x => (x-1)/2 * Real.log ((x-1)/2)) :=
@@ -2278,7 +2278,7 @@ lemma legExt_Q_isBigO_succ {α : ℂ} (h : LegendreQRegular α 0) :
 
 
 /-- `𝑸_ν(x) = O(x^{-Re ν - 1})` as `x → ∞`, for every degree `ν`. -/
-lemma legExt_olverQ_isBigO_atTop (ν : ℂ) :
+theorem legExt_olverQ_isBigO_atTop (ν : ℂ) :
     (fun x : ℝ => olverQ ν 0 x) =O[atTop] (fun x : ℝ => x^(-(ν.re+1))) := by
   set G := regularizedGaussHG ((ν+0+2)/2) ((ν+0+1)/2) (ν+3/2)
   have hG : Tendsto (fun x : ℝ => G (1/(x:ℂ)^2)) atTop (𝓝 (G 0)) :=
@@ -2301,7 +2301,7 @@ lemma legExt_olverQ_isBigO_atTop (ν : ℂ) :
   field_simp
 
 /-- `P_ν(x) = O(x^{Re ν})` as `x → ∞`, when `Re ν > -1/2`. -/
-lemma legExt_associatedP_isBigO_atTop {ν : ℂ} (hν : -1/2 < ν.re) :
+theorem legExt_associatedP_isBigO_atTop {ν : ℂ} (hν : -1/2 < ν.re) :
     (fun x : ℝ => associatedP ν 0 x) =O[atTop] (fun x : ℝ => x^(ν.re)) := by
   have h1 := (legBd_associatedP_tendsto_atTop hν 0).isBigO_one ℝ
   have hP : (fun x : ℝ => (x:ℂ)^ν) =O[atTop] (fun x : ℝ => x^(ν.re)) := by
@@ -2315,7 +2315,7 @@ lemma legExt_associatedP_isBigO_atTop {ν : ℂ} (hν : -1/2 < ν.re) :
   rw [← mul_assoc, ← cpow_add _ _ hx0]; simp
 
 /-- The Green boundary form tends to `0` at `∞` under power bounds with `a < b`. -/
-lemma legExt_tendsto_zero_atTop {f g f1 g1 : ℝ → ℂ} {ν lam : ℂ} {a b : ℝ} (hab : a < b)
+theorem legExt_tendsto_zero_atTop {f g f1 g1 : ℝ → ℂ} {ν lam : ℂ} {a b : ℝ} (hab : a < b)
     (hf : f =O[atTop] (fun x : ℝ => x^a)) (hf1 : f1 =O[atTop] (fun x : ℝ => x^(a+1)))
     (hg : g =O[atTop] (fun x : ℝ => x^(-b-1))) (hg1 : g1 =O[atTop] (fun x : ℝ => x^(-b-1))) :
     Tendsto (fun x : ℝ => (lam+1)*f x*(x*g x - g1 x) - (ν+1)*g x*(x*f x - f1 x)) atTop
@@ -2353,50 +2353,50 @@ lemma legExt_tendsto_zero_atTop {f g f1 g1 : ℝ → ℂ} {ν lam : ℂ} {a b : 
 
 
 /-- `𝑸_ν = Γ(ν+1) 𝑸_ν` at order zero. -/
-lemma legExt_associatedQ_eq (α : ℂ) :
+theorem legExt_associatedQ_eq (α : ℂ) :
     associatedQ α 0 = fun z => Gamma (α+1) * olverQ α 0 z := by
   funext z; simp [associatedQ]
 
-lemma legExt_differentiableOn_P (α : ℂ) : DifferentiableOn ℂ (associatedP α 0) legExtU :=
+theorem legExt_differentiableOn_P (α : ℂ) : DifferentiableOn ℂ (associatedP α 0) legExtU :=
   (associatedP_analytic α 0).differentiableOn
 
-lemma legExt_differentiableOn_Q (α : ℂ) : DifferentiableOn ℂ (associatedQ α 0) legExtU := by
+theorem legExt_differentiableOn_Q (α : ℂ) : DifferentiableOn ℂ (associatedQ α 0) legExtU := by
   rw [legExt_associatedQ_eq]
   exact (olverQ_analytic α 0).differentiableOn.const_mul _
 
-lemma legExt_ode_P (α : ℂ) : ∀ z ∈ legExtU, (1-z^2)*iteratedDeriv 2 (associatedP α 0) z -
+theorem legExt_ode_P (α : ℂ) : ∀ z ∈ legExtU, (1-z^2)*iteratedDeriv 2 (associatedP α 0) z -
     2*z*deriv (associatedP α 0) z + (α*(α+1)-0^2/(1-z^2))*associatedP α 0 z = 0 :=
   fun _ hz => associatedP_ode α 0 hz
 
-lemma legExt_ode_Q (α : ℂ) : ∀ z ∈ legExtU, (1-z^2)*iteratedDeriv 2 (associatedQ α 0) z -
+theorem legExt_ode_Q (α : ℂ) : ∀ z ∈ legExtU, (1-z^2)*iteratedDeriv 2 (associatedQ α 0) z -
     2*z*deriv (associatedQ α 0) z + (α*(α+1)-0^2/(1-z^2))*associatedQ α 0 z = 0 := by
   intro z hz
   have e := olverQ_ode α 0 hz
   rw [legExt_associatedQ_eq, iteratedDeriv_const_mul_field, deriv_const_mul_field]
   linear_combination Gamma (α+1) * e
 
-lemma legExt_rec_P (α : ℂ) : ∀ x : ℝ, 1 < x →
+theorem legExt_rec_P (α : ℂ) : ∀ x : ℝ, 1 < x →
     (1-(x:ℂ)^2)*deriv (associatedP α 0) x = (α+1)*(x*associatedP α 0 x - associatedP (α+1) 0 x) :=
   fun x hx => by rw [associatedP_recurrence_4 α 0 (legExt_mem_U hx)]; ring
 
-lemma legExt_rec_Q {α : ℂ} (h : LegendreQRegular α 0) : ∀ x : ℝ, 1 < x →
+theorem legExt_rec_Q {α : ℂ} (h : LegendreQRegular α 0) : ∀ x : ℝ, 1 < x →
     (1-(x:ℂ)^2)*deriv (associatedQ α 0) x = (α+1)*(x*associatedQ α 0 x - associatedQ (α+1) 0 x) :=
   fun x hx => by rw [associatedQ_recurrence_4 α 0 h (legExt_mem_U hx)]; ring
 
-lemma legExt_continuousOn {f : ℂ → ℂ} (hf : DifferentiableOn ℂ f legExtU) :
+theorem legExt_continuousOn {f : ℂ → ℂ} (hf : DifferentiableOn ℂ f legExtU) :
     ContinuousOn (fun x : ℝ => f x) (Ioi 1) := fun _ hx =>
   ((hf _ (legExt_mem_U hx)).differentiableAt (legExt_isOpen_U.mem_nhds (legExt_mem_U hx))
     ).continuousAt.comp_of_eq continuous_ofReal.continuousAt rfl |>.continuousWithinAt
 
 /-- `Q_ν(x) = O(x^{-Re ν - 1})` as `x → ∞`. -/
-lemma legExt_associatedQ_isBigO_atTop (α : ℂ) :
+theorem legExt_associatedQ_isBigO_atTop (α : ℂ) :
     (fun x : ℝ => associatedQ α 0 x) =O[atTop] (fun x : ℝ => x^(-α.re-1)) := by
   rw [legExt_associatedQ_eq]
   exact ((legExt_olverQ_isBigO_atTop α).const_mul_left _).congr' (EventuallyEq.refl _ _)
     (by filter_upwards with x; ring_nf)
 
 /-- Lowering the exponent of a power bound at `∞`. -/
-lemma legExt_isBigO_rpow_mono {f : ℝ → ℂ} {p q : ℝ} (hpq : p ≤ q)
+theorem legExt_isBigO_rpow_mono {f : ℝ → ℂ} {p q : ℝ} (hpq : p ≤ q)
     (h : f =O[atTop] (fun x : ℝ => x^p)) : f =O[atTop] (fun x : ℝ => x^q) := by
   refine h.trans (Asymptotics.IsBigO.of_bound 1 ?_)
   filter_upwards [eventually_ge_atTop 1] with x hx
@@ -2407,7 +2407,7 @@ lemma legExt_isBigO_rpow_mono {f : ℝ → ℂ} {p q : ℝ} (hpq : p ≤ q)
 /-! ### Uniform bounds on `(1,∞)` and the diagonal integral 14.17.20 -/
 
 /-- `𝑄_λ(x) = Γ(λ+1) √π 2^{-λ-1} x^{-λ-1} 𝐅(λ/2+1, λ/2+1/2; λ+3/2; x^{-2})` for `x > 0`. -/
-lemma legPIU_associatedQ_ext (lam : ℂ) {x : ℝ} (hx0 : 0 < x) :
+theorem legPIU_associatedQ_ext (lam : ℂ) {x : ℝ} (hx0 : 0 < x) :
     associatedQ lam 0 x = Gamma (lam+1) * ((Real.sqrt π : ℂ) * ((2:ℂ)^(lam+1))⁻¹ *
       ((x:ℂ)^(lam+1))⁻¹ * regularizedGaussHG ((lam+0+2)/2) ((lam+0+1)/2) (lam+3/2) (1/(x:ℂ)^2)) := by
   simp only [associatedQ, olverQ, legendreBranchPower, zero_div, zero_mul, Complex.exp_zero,
@@ -2418,7 +2418,7 @@ lemma legPIU_associatedQ_ext (lam : ℂ) {x : ℝ} (hx0 : 0 < x) :
   field_simp
 
 /-- `𝐅(a,b;a+b;y)` is `O((1-y)^{-1/4})` on `[0,1)`, uniformly for `‖a‖, ‖b‖ ≤ R`. -/
-lemma legPIU_bound_real (R : ℝ) : ∃ M : ℝ, 0 ≤ M ∧ ∀ a b : ℂ, ‖a‖ ≤ R → ‖b‖ ≤ R → ∀ y : ℝ, 0 ≤ y →
+theorem legPIU_bound_real (R : ℝ) : ∃ M : ℝ, 0 ≤ M ∧ ∀ a b : ℂ, ‖a‖ ≤ R → ‖b‖ ≤ R → ∀ y : ℝ, 0 ≤ y →
     y < 1 → ‖regularizedGaussHG a b (a+b) (y:ℂ)‖ ≤ M * (1-y)^(-(1/4:ℝ)) := by
   obtain ⟨C, hC0, hC⟩ := legPIU_bound_zb R
   obtain ⟨MF, hMF⟩ := legPIU_bound_F (2*|R| + 1)
@@ -2444,7 +2444,7 @@ lemma legPIU_bound_real (R : ℝ) : ∃ M : ℝ, 0 ≤ M ∧ ∀ a b : ℂ, ‖a
 
 /-- Uniform bound on `(1,∞)`: `‖𝑄_λ(x)‖ ≤ M (x-1)^{-1/4} x^{-(Re ν - r) - 3/4}` for `λ` near a
 regular `ν`, with `r ≤ r₀` prescribed. -/
-lemma legPIU_bound_Qext {ν : ℂ} (hν : LegendreQRegular ν 0) {r0 : ℝ} (hr0 : 0 < r0) :
+theorem legPIU_bound_Qext {ν : ℂ} (hν : LegendreQRegular ν 0) {r0 : ℝ} (hr0 : 0 < r0) :
     ∃ r : ℝ, 0 < r ∧ r ≤ r0 ∧ ∃ M : ℝ, 0 ≤ M ∧
     ∀ lam : ℂ, ‖lam - ν‖ ≤ r → LegendreQRegular lam 0 ∧ ∀ x : ℝ, 1 < x →
       ‖associatedQ lam 0 x‖ ≤ M * ((x-1)^(-(1/4:ℝ)) * x^(-(ν.re-r)-3/4)) := by
@@ -2519,7 +2519,7 @@ lemma legPIU_bound_Qext {ν : ℂ} (hν : LegendreQRegular ν 0) {r0 : ℝ} (hr0
     _ ≤ _ := mul_le_mul_of_nonneg_left hw (by positivity)
 
 /-- `λ ↦ 𝑄_λ(x)` is continuous at a regular `ν`, for `x > 1`. -/
-lemma legPIU_continuousAt_Qext {ν : ℂ} (hν : LegendreQRegular ν 0) {x : ℝ} (hx : 1 < x) :
+theorem legPIU_continuousAt_Qext {ν : ℂ} (hν : LegendreQRegular ν 0) {x : ℝ} (hx : 1 < x) :
     ContinuousAt (fun lam : ℂ => associatedQ lam 0 x) ν := by
   have hx0 : 0 < x := by linarith
   have hx0' : (x:ℂ) ≠ 0 := ofReal_ne_zero.mpr hx0.ne'
@@ -2545,7 +2545,7 @@ lemma legPIU_continuousAt_Qext {ν : ℂ} (hν : LegendreQRegular ν 0) {x : ℝ
       (fun lam => cpow_ne_zero_iff.mpr (Or.inl hx0'))).continuousAt
 
 /-- `(x-1)^{-1/2} x^p` is integrable on `(1,∞)` for `p < -1/2`. -/
-lemma legPIU_integrableOn_weight {p : ℝ} (hp : p < -1/2) :
+theorem legPIU_integrableOn_weight {p : ℝ} (hp : p < -1/2) :
     IntegrableOn (fun x : ℝ => (x-1)^(-(1/2:ℝ)) * x^p) (Ioi 1) := by
   have hw : IntervalIntegrable (fun x : ℝ => (x-1)^(-(1/2:ℝ))) volume 1 2 := by
     have := (intervalIntegral.intervalIntegrable_rpow' (r := -(1/2:ℝ)) (by norm_num)

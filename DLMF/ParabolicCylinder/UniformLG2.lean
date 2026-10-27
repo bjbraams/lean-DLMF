@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.ParabolicCylinder.UniformLG
-public import DLMFMathlib.Analysis.ODE.LiouvilleGreenFinite
 
 /-!
 # Uniform expansions of parabolic cylinder functions: second stage
@@ -1600,19 +1599,19 @@ lemma pcfLG2_trunc_isBigO_one (N : ℕ) (a : ℕ → ℂ) :
   exact pcfLG2_trunc_eval N a hu
 
 /-- An expansion gives boundedness. -/
-lemma pcfLG2_HasExp.isBigO_one {f : ℝ → ℂ} {a : ℕ → ℂ} (h : pcfLG2_HasExp f a) :
+theorem pcfLG2_HasExp.isBigO_one {f : ℝ → ℂ} {a : ℕ → ℂ} (h : pcfLG2_HasExp f a) :
     f =O[atTop] (fun _ => (1:ℂ)) := by
   have := h 0
   simpa using this
 
 /-- Uniqueness of asymptotic expansions. -/
-lemma pcfLG2_HasExp.unique {f : ℝ → ℂ} {a b : ℕ → ℂ} (ha : pcfLG2_HasExp f a)
+theorem pcfLG2_HasExp.unique {f : ℝ → ℂ} {a b : ℕ → ℂ} (ha : pcfLG2_HasExp f a)
     (hb : pcfLG2_HasExp f b) : a = b := by
   funext n
   rw [← pcfLG_asymptoticCoeff_eq ha n, pcfLG_asymptoticCoeff_eq hb n]
 
 /-- Products of expansions. -/
-lemma pcfLG2_HasExp.mul {f g : ℝ → ℂ} {a b : ℕ → ℂ} (ha : pcfLG2_HasExp f a)
+theorem pcfLG2_HasExp.mul {f g : ℝ → ℂ} {a b : ℕ → ℂ} (ha : pcfLG2_HasExp f a)
     (hb : pcfLG2_HasExp g b) : pcfLG2_HasExp (fun u => f u * g u) (pcfLG2_cauchy a b) := by
   intro N
   have hQ : ∀ n < N, (pcfLG2_trunc N a * pcfLG2_trunc N b - pcfLG2_trunc N (pcfLG2_cauchy a b)).coeff n = 0 := by
@@ -1638,19 +1637,19 @@ lemma pcfLG2_HasExp.mul {f g : ℝ → ℂ} {a b : ℕ → ℂ} (ha : pcfLG2_Has
   · filter_upwards with u; ring
 
 /-- Sums of expansions. -/
-lemma pcfLG2_HasExp.sub {f g : ℝ → ℂ} {a b : ℕ → ℂ} (ha : pcfLG2_HasExp f a)
+theorem pcfLG2_HasExp.sub {f g : ℝ → ℂ} {a b : ℕ → ℂ} (ha : pcfLG2_HasExp f a)
     (hb : pcfLG2_HasExp g b) : pcfLG2_HasExp (fun u => f u - g u) (fun n => a n - b n) := by
   intro N
   refine ((ha N).sub (hb N)).congr' (Eventually.of_forall fun u => ?_) EventuallyEq.rfl
   simp only [sub_div, Finset.sum_sub_distrib]; ring
 
 /-- Expansion of a function that is `O(u^{-N})` for every `N`. -/
-lemma pcfLG2_HasExp.of_isBigO {f : ℝ → ℂ}
+theorem pcfLG2_HasExp.of_isBigO {f : ℝ → ℂ}
     (h : ∀ N : ℕ, f =O[atTop] (fun u : ℝ => (u:ℂ)^(-(N:ℤ)))) : pcfLG2_HasExp f 0 := by
   intro N; simpa using h N
 
 /-- **Reciprocals of expansions.** -/
-lemma pcfLG2_HasExp.recip {f : ℝ → ℂ} {a d : ℕ → ℂ} (ha : pcfLG2_HasExp f a)
+theorem pcfLG2_HasExp.recip {f : ℝ → ℂ} {a d : ℕ → ℂ} (ha : pcfLG2_HasExp f a)
     (had : pcfLG2_cauchy a d = pcfLG2_delta) (hf : (fun u => (f u)⁻¹) =O[atTop] (fun _ => (1:ℂ)))
     (hf0 : ∀ᶠ u in atTop, f u ≠ 0) :
     pcfLG2_HasExp (fun u => (f u)⁻¹) d := by
@@ -1761,7 +1760,7 @@ lemma pcfLG2_exists_HasExp (c : ℕ → ℝ) :
   rwa [norm_inv, norm_pow] at hu
 
 /-- An expansion in `u` gives one in `μ²`. -/
-lemma pcfLG2_HasExp.comp_sq {f : ℝ → ℂ} {a : ℕ → ℂ} (h : pcfLG2_HasExp f a) (N : ℕ) :
+theorem pcfLG2_HasExp.comp_sq {f : ℝ → ℂ} {a : ℕ → ℂ} (h : pcfLG2_HasExp f a) (N : ℕ) :
     (fun μ : ℝ => f (μ^2) - ∑ s ∈ Finset.range N, a s / (μ^2:ℂ)^s) =O[atTop]
       (fun μ : ℝ => (μ:ℂ)^(-(2*N:ℤ))) := by
   have h2 : Tendsto (fun μ : ℝ => μ^2) atTop atTop := tendsto_pow_atTop two_ne_zero

@@ -28,7 +28,7 @@ namespace DLMF.EllipticIntegrals
 derivative of `h(t) = (α t + β) s(t)⁻¹` (written out with `u = √(t + x)` etc.), then
 `∫₀^∞ f = -β/s(0)`. Here `x` is admissible, `y, z` lie in the slit plane, and `β = 0` if
 `x = 0`. -/
-theorem p19sR1_integral_eq_of_lin {x y z α β : ℂ} (hx : x ∈ slitPlane ∨ x = 0)
+lemma p19sR1_integral_eq_of_lin {x y z α β : ℂ} (hx : x ∈ slitPlane ∨ x = 0)
     (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) (hβ : x = 0 → β = 0) {f : ℝ → ℂ}
     (hf : IntegrableOn f (Ioi 0))
     (hfe : ∀ t : ℝ, 0 < t → f t =
@@ -134,7 +134,7 @@ abbrev p19sR1_linDeriv (t u v w x y z α β : ℂ) : ℂ :=
       (-((u / (2 * (t + x)) * v + u * (v / (2 * (t + y)))) * w + u * v * (w / (2 * (t + z)))) /
         (u * v * w) ^ 2)
 
-theorem p19sR1_alg9 (t u v w x y z : ℂ) (hu : u ^ 2 = t + x) (hv : v ^ 2 = t + y)
+lemma p19sR1_alg9 (t u v w x y z : ℂ) (hu : u ^ 2 = t + x) (hv : v ^ 2 = t + y)
     (hw : w ^ 2 = t + z) (hu0 : u ≠ 0) (hv0 : v ≠ 0) (hw0 : w ≠ 0) :
     (3 / 2) * (x * (u * v * w * (t + x))⁻¹ + y * (u * v * w * (t + y))⁻¹ +
       z * (u * v * w * (t + z))⁻¹ - (u * v * w)⁻¹) = p19sR1_linDeriv t u v w x y z 3 0 := by
@@ -145,7 +145,7 @@ theorem p19sR1_alg9 (t u v w x y z : ℂ) (hu : u ^ 2 = t + x) (hv : v ^ 2 = t +
   field_simp
   ring
 
-theorem p19sR1_alg8 (t u v w x y z : ℂ) (hu : u ^ 2 = t + x) (hv : v ^ 2 = t + y)
+lemma p19sR1_alg8 (t u v w x y z : ℂ) (hu : u ^ 2 = t + x) (hv : v ^ 2 = t + y)
     (hw : w ^ 2 = t + z) (hu0 : u ≠ 0) (hv0 : v ≠ 0) (hw0 : w ≠ 0) :
     (3 / 2) * ((u * v * w * (t + x))⁻¹ + (u * v * w * (t + y))⁻¹ +
       (u * v * w * (t + z))⁻¹) = p19sR1_linDeriv t u v w x y z 0 (-3) := by
@@ -156,7 +156,7 @@ theorem p19sR1_alg8 (t u v w x y z : ℂ) (hu : u ^ 2 = t + x) (hv : v ^ 2 = t +
   field_simp
   ring
 
-theorem p19sR1_alg7 (t u v w x y z : ℂ) (hu : u ^ 2 = t + x) (hv : v ^ 2 = t + y)
+lemma p19sR1_alg7 (t u v w x y z : ℂ) (hu : u ^ 2 = t + x) (hv : v ^ 2 = t + y)
     (hw : w ^ 2 = t + z) (hu0 : u ≠ 0) (hv0 : v ≠ 0) (hw0 : w ≠ 0) :
     (3 / 2) * ((x - y) * (u * v * w * (t + x))⁻¹ + (z - y) * (u * v * w * (t + z))⁻¹ -
       (u * v * w)⁻¹) = p19sR1_linDeriv t u v w x y z 3 (3 * y) := by
@@ -168,20 +168,20 @@ theorem p19sR1_alg7 (t u v w x y z : ℂ) (hu : u ^ 2 = t + x) (hv : v ^ 2 = t +
   ring
 
 /-- An admissible argument is not a negative real. -/
-theorem p19sR1_not_isNegReal {x : ℂ} (hx : symEllIntArg x) : ¬ IsNegReal x := by
+lemma p19sR1_not_isNegReal {x : ℂ} (hx : symEllIntArg x) : ¬ IsNegReal x := by
   rcases hx with hx | rfl
   · exact ei19c_not_isNegReal_of_mem_slitPlane hx
   · simp [IsNegReal]
 
 /-- `R_D(y, z, x)` as `(3/2) ∫ (s(t) (t + x))⁻¹` with `s` written in the order `x, y, z`. -/
-theorem p19sR1_symEllIntRD_perm1 (x y z : ℂ) (hx : symEllIntArg x) :
+lemma p19sR1_symEllIntRD_perm1 (x y z : ℂ) (hx : symEllIntArg x) :
     symEllIntRD y z x = (3 / 2) * ∫ t in Ioi (0 : ℝ), (((t : ℂ) + x) ^ (1 / 2 : ℂ) *
       ((t : ℂ) + y) ^ (1 / 2 : ℂ) * ((t : ℂ) + z) ^ (1 / 2 : ℂ) * ((t : ℂ) + x))⁻¹ := by
   rw [symEllIntRD_eq_integral (p19sR1_not_isNegReal hx)]
   congr 2; funext t; simp only [symEllIntS]; ring_nf
 
 /-- `R_D(z, x, y)` as `(3/2) ∫ (s(t) (t + y))⁻¹` with `s` written in the order `x, y, z`. -/
-theorem p19sR1_symEllIntRD_perm2 (x y z : ℂ) (hy : symEllIntArg y) :
+lemma p19sR1_symEllIntRD_perm2 (x y z : ℂ) (hy : symEllIntArg y) :
     symEllIntRD z x y = (3 / 2) * ∫ t in Ioi (0 : ℝ), (((t : ℂ) + x) ^ (1 / 2 : ℂ) *
       ((t : ℂ) + y) ^ (1 / 2 : ℂ) * ((t : ℂ) + z) ^ (1 / 2 : ℂ) * ((t : ℂ) + y))⁻¹ := by
   rw [symEllIntRD_eq_integral (p19sR1_not_isNegReal hy)]
@@ -357,7 +357,7 @@ theorem p19sR1_six_mul_symEllIntRG {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y 
 
 /-- Integrability of `R_C`'s integrand `((t + x)^{1/2} (t + y))⁻¹`: `x` admissible, `y` in the
 slit plane. -/
-theorem p19sR1_integrableOn_RC {x y : ℂ} (hx : symEllIntArg x) (hy : y ∈ slitPlane) :
+lemma p19sR1_integrableOn_RC {x y : ℂ} (hx : symEllIntArg x) (hy : y ∈ slitPlane) :
     IntegrableOn (fun t : ℝ => (((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) + y))⁻¹) (Ioi 0) := by
   obtain ⟨c1, hc1, h1⟩ := p19sR1_norm_cpow_half_ge' hx
   obtain ⟨c2, hc2, h2⟩ := p19sR1_norm_add_ge hy
@@ -452,7 +452,7 @@ theorem p19sR1_symEllIntRD_self_left {x z : ℂ} (hx : x ∈ slitPlane) (hz : z 
     _ = _ := by field_simp; ring
 
 /-- A function with `‖f t‖ ≥ M/t` on `(0, 1)`, `M > 0`, is not integrable on `(0, ∞)`. -/
-theorem p19sR1_not_integrableOn_of_ge {f : ℝ → ℂ} {M : ℝ} (hM : 0 < M)
+lemma p19sR1_not_integrableOn_of_ge {f : ℝ → ℂ} {M : ℝ} (hM : 0 < M)
     (h : ∀ t ∈ Ioo (0 : ℝ) 1, M * t⁻¹ ≤ ‖f t‖) : ¬ IntegrableOn f (Ioi 0) := by
   intro hf
   have h1 : IntegrableOn f (Ioo 0 1) := hf.mono_set Ioo_subset_Ioi_self
@@ -473,7 +473,7 @@ theorem p19sR1_not_integrableOn_of_ge {f : ℝ → ℂ} {M : ℝ} (hM : 0 < M)
   norm_num at h3
 
 /-- `‖(t + w)^{1/2}‖ ≤ √(1 + ‖w‖)` for `0 ≤ t ≤ 1`. -/
-theorem p19sR1_norm_cpow_half_le {w : ℂ} {t : ℝ} (ht : 0 ≤ t) (ht1 : t ≤ 1) :
+lemma p19sR1_norm_cpow_half_le {w : ℂ} {t : ℝ} (ht : 0 ≤ t) (ht1 : t ≤ 1) :
     ‖((t : ℂ) + w) ^ (1 / 2 : ℂ)‖ ≤ Real.sqrt (1 + ‖w‖) := by
   rw [p19sR1_norm_cpow_half]
   refine Real.sqrt_le_sqrt ?_
@@ -481,7 +481,7 @@ theorem p19sR1_norm_cpow_half_le {w : ℂ} {t : ℝ} (ht : 0 ≤ t) (ht1 : t ≤
     _ ≤ 1 + ‖w‖ := by rw [Complex.norm_real, Real.norm_of_nonneg ht]; linarith
 
 /-- `‖t + w‖ ≤ 1 + ‖w‖` for `0 ≤ t ≤ 1`. -/
-theorem p19sR1_norm_add_le {w : ℂ} {t : ℝ} (ht : 0 ≤ t) (ht1 : t ≤ 1) :
+lemma p19sR1_norm_add_le {w : ℂ} {t : ℝ} (ht : 0 ≤ t) (ht1 : t ≤ 1) :
     ‖(t : ℂ) + w‖ ≤ 1 + ‖w‖ := by
   calc ‖(t : ℂ) + w‖ ≤ ‖(t : ℂ)‖ + ‖w‖ := norm_add_le _ _
     _ ≤ 1 + ‖w‖ := by rw [Complex.norm_real, Real.norm_of_nonneg ht]; linarith

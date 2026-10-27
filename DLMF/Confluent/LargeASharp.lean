@@ -60,7 +60,7 @@ namespace DLMF.Confluent
 
 /-! ### A quantitative Tannery estimate -/
 
-lemma one_le_ascPochhammer_eval {x : ℝ} (hx : 1 ≤ x) (n : ℕ) :
+theorem one_le_ascPochhammer_eval {x : ℝ} (hx : 1 ≤ x) (n : ℕ) :
     1 ≤ (ascPochhammer ℝ n).eval x := by
   induction n with
   | zero => simp
@@ -70,7 +70,7 @@ lemma one_le_ascPochhammer_eval {x : ℝ} (hx : 1 ≤ x) (n : ℕ) :
     nlinarith
 
 /-- `‖(d - κ)_n / κⁿ - (-1)ⁿ‖ ≤ n (1 + |d|)_n / κ` for `κ ≥ 1`. -/
-lemma norm_poch_sub_div_pow_sub_le (d : ℝ) {κ : ℝ} (hκ : 1 ≤ κ) (n : ℕ) :
+theorem norm_poch_sub_div_pow_sub_le (d : ℝ) {κ : ℝ} (hκ : 1 ≤ κ) (n : ℕ) :
     ‖poch ((d - κ : ℝ) : ℂ) n / (κ : ℂ) ^ n - (-1 : ℂ) ^ n‖ ≤
       n * (ascPochhammer ℝ n).eval (1 + |d|) / κ := by
   have hκ0 : 0 < κ := by linarith
@@ -217,7 +217,7 @@ theorem isBigO_regularizedConfluent_sub_div (d : ℝ) (b w : ℂ) :
 /-! ### Rates for the data at a fixed point -/
 
 /-- A product of two convergent families converges at the rate of its factors. -/
-lemma isBigO_mul_sub_mul {f g : ℝ → ℂ} {f₀ g₀ : ℂ}
+theorem isBigO_mul_sub_mul {f g : ℝ → ℂ} {f₀ g₀ : ℂ}
     (hf : (fun κ => f κ - f₀) =O[atTop] (fun κ : ℝ => κ⁻¹))
     (hg : (fun κ => g κ - g₀) =O[atTop] (fun κ : ℝ => κ⁻¹)) :
     (fun κ => f κ * g κ - f₀ * g₀) =O[atTop] (fun κ : ℝ => κ⁻¹) := by
@@ -230,13 +230,13 @@ lemma isBigO_mul_sub_mul {f g : ℝ → ℂ} {f₀ g₀ : ℂ}
   have h2 := hg.const_mul_left f₀
   exact (h1.add h2).congr_left fun κ => by ring
 
-lemma isBigO_add_sub_add {f g : ℝ → ℂ} {f₀ g₀ : ℂ}
+theorem isBigO_add_sub_add {f g : ℝ → ℂ} {f₀ g₀ : ℂ}
     (hf : (fun κ => f κ - f₀) =O[atTop] (fun κ : ℝ => κ⁻¹))
     (hg : (fun κ => g κ - g₀) =O[atTop] (fun κ : ℝ => κ⁻¹)) :
     (fun κ => f κ + g κ - (f₀ + g₀)) =O[atTop] (fun κ : ℝ => κ⁻¹) :=
   (hf.add hg).congr_left fun κ => by ring
 
-lemma largeAW_sub_isBigO (c s : ℝ) :
+theorem largeAW_sub_isBigO (c s : ℝ) :
     (fun κ : ℝ => largeAW c κ s - largeAV c s) =O[atTop] (fun κ : ℝ => κ⁻¹) := by
   have h := isBigO_regularizedConfluent_sub_div (c / 2) (c : ℂ) ((s ^ 2 / 4 : ℝ) : ℂ)
   have hV : largeAV c s =
@@ -284,7 +284,7 @@ lemma largeAW1_sub_isBigO (c s : ℝ) :
   push_cast
   field_simp
 
-lemma largeAP_sub_isBigO (c s : ℝ) :
+theorem largeAP_sub_isBigO (c s : ℝ) :
     (fun κ : ℝ => ((largeAP c κ s : ℝ) : ℂ) - ((largeAQ c s : ℝ) : ℂ)) =O[atTop]
       (fun κ : ℝ => κ⁻¹) := by
   refine Asymptotics.IsBigO.of_bound (|s ^ (c - 1 / 2)| * (s ^ 2 / 8)) ?_
@@ -303,7 +303,7 @@ lemma largeAP_sub_isBigO (c s : ℝ) :
       ≤ |s ^ (c - 1 / 2)| * (s ^ 2 / (8 * κ)) := by gcongr
     _ = |s ^ (c - 1 / 2)| * (s ^ 2 / 8) * κ⁻¹ := by field_simp
 
-lemma largeAH_sub_isBigO (c s : ℝ) :
+theorem largeAH_sub_isBigO (c s : ℝ) :
     (fun κ : ℝ => ((largeAH c κ s : ℝ) : ℂ) - ((largeAH0 c s : ℝ) : ℂ)) =O[atTop]
       (fun κ : ℝ => κ⁻¹) := by
   refine Asymptotics.IsBigO.of_bound (|s| / 4) ?_
@@ -328,7 +328,7 @@ theorem largeAU'_sub_largeAU0'_isBigO_const (c s : ℝ) :
 
 /-! ### The comparison estimate -/
 
-lemma largeAG_sub_largeAG0 (c κ t : ℝ) : largeAG c κ t - largeAG0 c t = t ^ 2 / (16 * κ ^ 2) := by
+theorem largeAG_sub_largeAG0 (c κ t : ℝ) : largeAG c κ t - largeAG0 c t = t ^ 2 / (16 * κ ^ 2) := by
   simp only [largeAG, largeAG0]
   ring
 
@@ -492,7 +492,7 @@ theorem norm_largeAU_sub_largeAU0_le_sharp (c : ℝ) {κ s₀ S : ℝ} (hκ : 0 
 
 /-! ### The rate along `S = 2√(κx)` -/
 
-lemma cube_div_eq (x : ℝ) (hx : 0 < x) {κ : ℝ} (hκ : 0 < κ) :
+theorem cube_div_eq (x : ℝ) (hx : 0 < x) {κ : ℝ} (hκ : 0 < κ) :
     (2 * Real.sqrt (κ * x)) ^ 3 / (16 * κ ^ 2) = x * Real.sqrt x / (2 * Real.sqrt κ) := by
   have hsk : 0 < Real.sqrt κ := Real.sqrt_pos.mpr hκ
   have hk : Real.sqrt κ ^ 2 = κ := Real.sq_sqrt hκ.le
@@ -580,7 +580,7 @@ theorem largeAU_sub_largeAU0_isBigO (c : ℝ) {x : ℝ} (hx : 0 < x) :
 /-- The prefactor identity behind the Bessel form:
 `√S (κx)^{(c-1)/2} e^{-x/2} 𝐌(c/2 - κ, c, x) - √S J_{c-1}(S) = 2^{1-c} (u_κ(S) - u₀(S))` with
 `S = 2√(κx)`. -/
-lemma largeA_besselJ_identity (c : ℝ) {κ x : ℝ} (hκ : 0 < κ) (hx : 0 < x) :
+theorem largeA_besselJ_identity (c : ℝ) {κ x : ℝ} (hκ : 0 < κ) (hx : 0 < x) :
     ((Real.sqrt (2 * Real.sqrt (κ * x)) * (κ * x) ^ ((c - 1) / 2) *
           Real.exp (-(x / 2)) : ℝ) : ℂ) *
         regularizedHGFun {((c / 2 - κ : ℝ) : ℂ)} {(c : ℂ)} (x : ℂ) -
@@ -633,11 +633,11 @@ lemma largeA_besselJ_identity (c : ℝ) {κ x : ℝ} (hκ : 0 < κ) (hx : 0 < x)
     (Real.sqrt (2 * Real.sqrt (κ * x)) : ℂ) *
       besselJ ((c - 1 : ℝ) : ℂ) (((2 : ℝ) : ℂ) * (Real.sqrt (κ * x) : ℂ)) * h3c
 
-lemma tendsto_half_sub_atBot (c : ℝ) : Tendsto (fun a : ℝ => c / 2 - a) atBot atTop :=
+theorem tendsto_half_sub_atBot (c : ℝ) : Tendsto (fun a : ℝ => c / 2 - a) atBot atTop :=
   (tendsto_neg_atBot_atTop.atTop_add (tendsto_const_nhds (x := c / 2))).congr fun a => by ring
 
 /-- `(c/2 - a)^{-1/2} = O(|a|^{-1/2})` as `a → -∞`. -/
-lemma recip_sqrt_half_sub_isBigO (c : ℝ) :
+theorem recip_sqrt_half_sub_isBigO (c : ℝ) :
     (fun a : ℝ => (Real.sqrt (c / 2 - a))⁻¹) =O[atBot] (fun a : ℝ => |a| ^ (-(1 / 2 : ℝ))) := by
   refine Asymptotics.IsBigO.of_bound (Real.sqrt 2) ?_
   filter_upwards [eventually_le_atBot (-|c| - 1)] with a ha
@@ -708,7 +708,7 @@ theorem regularizedConfluent_atBot_besselJ_isBigO (c : ℝ) {x : ℝ} (hx : 0 < 
 /-! ### The cosine form with rate -/
 
 /-- `u₀(S) = 2^{c-1} √(2/π) cos(S - cπ/2 + π/4) + O(S⁻¹)` as `S → +∞`. -/
-theorem largeAU0_sub_cos_isBigO (c : ℝ) :
+lemma largeAU0_sub_cos_isBigO (c : ℝ) :
     (fun S : ℝ => largeAU0 c S -
       (((2 : ℝ) ^ (c - 1) * Real.sqrt (2 / π) * Real.cos (S - c * π / 2 + π / 4) : ℝ) : ℂ))
       =O[atTop] (fun S : ℝ => S⁻¹) := by
@@ -821,7 +821,7 @@ theorem regularizedConfluent_atBot_cos_isBigO (c : ℝ) {x : ℝ} (hx : 0 < x) :
 /-! ### Fejér's formula with rate (DLMF 18.15.14) -/
 
 /-- `Γ(t + a)/Γ(t + b) = t^{a-b} (1 + O(t⁻¹))` as `t → +∞`. -/
-lemma Gamma_ratio_sub_one_isBigO (a b : ℂ) :
+theorem Gamma_ratio_sub_one_isBigO (a b : ℂ) :
     (fun t : ℝ => Complex.Gamma (t + a) / Complex.Gamma (t + b) / (t : ℂ) ^ (a - b) - 1)
       =O[atTop] (fun t : ℝ => t⁻¹) := by
   obtain ⟨C, hC⟩ := (DLMF.Gamma.Gamma_ratio_expansion a b 1).bound
@@ -846,7 +846,7 @@ lemma Gamma_ratio_sub_one_isBigO (a b : ℂ) :
         ring
 
 /-- `√(t + d) - √t ≤ d/√t`. -/
-lemma sqrt_add_sub_sqrt_le {d t : ℝ} (hd : 0 ≤ d) (ht : 0 < t) :
+theorem sqrt_add_sub_sqrt_le {d t : ℝ} (hd : 0 ≤ d) (ht : 0 < t) :
     Real.sqrt (t + d) - Real.sqrt t ≤ d / Real.sqrt t := by
   have hst : 0 < Real.sqrt t := Real.sqrt_pos.mpr ht
   have hprod : (Real.sqrt (t + d) - Real.sqrt t) * (Real.sqrt (t + d) + Real.sqrt t) = d := by
@@ -1044,7 +1044,7 @@ theorem laguerrePolyL_fejer_isBigO {α : ℝ} (hα : -1 < α) {x : ℝ} (hx : 0 
 `x^{(c-1)/2} e^{-x/2} U(a, c, x)/Γ(κ + 1/2) = (H₁ sin(π(c-a)) B₁ - H₂ sin(πa) B₂)/sin(πc)`
 with `κ = c/2 - a`, `H₁ = Γ(c-a)/(Γ(κ+1/2) κ^{(c-1)/2})`, `H₂ = Γ(1-a)/(Γ(κ+1/2) κ^{(1-c)/2})`,
 `B₁ = (κx)^{(c-1)/2} e^{-x/2} 𝐌(a, c, x)` and `B₂ = (κx)^{(1-c)/2} e^{-x/2} 𝐌(a-c+1, 2-c, x)`. -/
-lemma kummerU_large_a_eq_half (c : ℝ) (hc : ∀ k : ℤ, c ≠ k) {a x : ℝ} (hx : 0 < x)
+theorem kummerU_large_a_eq_half (c : ℝ) (hc : ∀ k : ℤ, c ≠ k) {a x : ℝ} (hx : 0 < x)
     (hκ : 0 < c / 2 - a) (hca : 0 < c - a) (h1a : 0 < 1 - a) :
     ((x ^ ((c - 1) / 2) * Real.exp (-(x / 2)) : ℝ) : ℂ) /
         Complex.Gamma (((c / 2 - a + 1 / 2 : ℝ) : ℂ)) * kummerU (a : ℂ) (c : ℂ) (x : ℂ) =
@@ -1142,14 +1142,14 @@ lemma kummerU_large_a_eq_half (c : ℝ) (hc : ∀ k : ℤ, c ≠ k) {a x : ℝ} 
   field_simp
   ring
 
-lemma tendsto_sqrt_two_mul_atBot (c : ℝ) {x : ℝ} (hx : 0 < x) :
+theorem tendsto_sqrt_two_mul_atBot (c : ℝ) {x : ℝ} (hx : 0 < x) :
     Tendsto (fun a : ℝ => Real.sqrt (2 * x * (c - 2 * a))) atBot atTop := by
   have h1 : Tendsto (fun a : ℝ => 4 * x * -a + 2 * x * c) atBot atTop :=
     (tendsto_neg_atBot_atTop.const_mul_atTop (by positivity)).atTop_add tendsto_const_nhds
   exact Real.tendsto_sqrt_atTop.comp (h1.congr fun a => by ring)
 
 /-- `J_μ(S) = O(S^{-1/2})` along `S = √(2x(c - 2a))`, `a → -∞`. -/
-lemma besselJ_sqrt_two_mul_isBigO (μ c : ℝ) {x : ℝ} (hx : 0 < x) :
+theorem besselJ_sqrt_two_mul_isBigO (μ c : ℝ) {x : ℝ} (hx : 0 < x) :
     (fun a : ℝ => besselJ (μ : ℂ) ((Real.sqrt (2 * x * (c - 2 * a)) : ℝ) : ℂ)) =O[atBot]
       (fun a : ℝ => Real.sqrt (2 * x * (c - 2 * a)) ^ (-(1 / 2 : ℝ))) := by
   have hS := tendsto_sqrt_two_mul_atBot c hx
@@ -1168,7 +1168,7 @@ lemma besselJ_sqrt_two_mul_isBigO (μ c : ℝ) {x : ℝ} (hx : 0 < x) :
   field_simp
 
 /-- `(c/2 - a)⁻¹ = O(|a|^{-1/2})` as `a → -∞`. -/
-lemma recip_half_sub_isBigO (c : ℝ) :
+theorem recip_half_sub_isBigO (c : ℝ) :
     (fun a : ℝ => (c / 2 - a)⁻¹) =O[atBot] (fun a : ℝ => |a| ^ (-(1 / 2 : ℝ))) := by
   refine Asymptotics.IsBigO.trans ?_ (recip_sqrt_half_sub_isBigO c)
   refine Asymptotics.IsBigO.of_bound 1 ?_
@@ -1184,7 +1184,7 @@ lemma recip_half_sub_isBigO (c : ℝ) :
         mul_le_of_le_one_left (by positivity) (inv_le_one_of_one_le₀ hsk)
 
 /-- `Γ(c/2 - a + p)/(Γ(c/2 - a + 1/2) (c/2 - a)^{p - 1/2}) - 1 = O((c/2 - a)⁻¹)`. -/
-lemma Gamma_half_ratio_isBigO (c p : ℝ) :
+theorem Gamma_half_ratio_isBigO (c p : ℝ) :
     (fun a : ℝ => Complex.Gamma (((c / 2 - a + p : ℝ) : ℂ)) /
         (Complex.Gamma (((c / 2 - a + 1 / 2 : ℝ) : ℂ)) *
           (((c / 2 - a) ^ (p - 1 / 2) : ℝ) : ℂ)) - 1) =O[atBot] (fun a : ℝ => (c / 2 - a)⁻¹) := by

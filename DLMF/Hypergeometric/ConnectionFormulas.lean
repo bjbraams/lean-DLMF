@@ -5,10 +5,11 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Hypergeometric.FurtherTransformations
 public import DLMF.Hypergeometric.CubicTools
 public import DLMFMathlib.Analysis.Complex.SegmentPrimitive
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Digamma
+public import Mathlib.Tactic.Basify
+public import Mathlib.Tactic.ENatToNat
 
 /-!
 # Quadratic and logarithmic connection formulas (DLMF §15.8)
@@ -33,7 +34,7 @@ noncomputable section
 
 namespace DLMF.Hypergeometric
 
-lemma half_not_int : ∀ k : ℤ, (1 / 2 : ℂ) ≠ (k : ℂ) := by
+theorem half_not_int : ∀ k : ℤ, (1 / 2 : ℂ) ≠ (k : ℂ) := by
   intro k h
   have h2 : (1 : ℝ) = 2 * k := by
     have := congrArg Complex.re h
@@ -42,7 +43,7 @@ lemma half_not_int : ∀ k : ℤ, (1 / 2 : ℂ) ≠ (k : ℂ) := by
   have : (1 : ℤ) = 2 * k := by exact_mod_cast h2
   omega
 
-lemma neg_half_not_int : ∀ k : ℤ, (-1 / 2 : ℂ) ≠ (k : ℂ) := by
+theorem neg_half_not_int : ∀ k : ℤ, (-1 / 2 : ℂ) ≠ (k : ℂ) := by
   intro k h
   apply half_not_int (-k)
   push_cast
@@ -481,7 +482,7 @@ theorem quadratic_odd_connection
 /-! ### Parameter derivatives for the logarithmic cases -/
 
 /-- `(1/Γ)' = -ψ/Γ` away from the poles. -/
-lemma hasDerivAt_recip_Gamma {x : ℂ} (hx : ∀ m : ℕ, x ≠ -(m : ℂ)) :
+theorem hasDerivAt_recip_Gamma {x : ℂ} (hx : ∀ m : ℕ, x ≠ -(m : ℂ)) :
     HasDerivAt (fun y => (Gamma y)⁻¹) (-(digamma x) * (Gamma x)⁻¹) x := by
   have hG := (differentiableAt_Gamma x hx).hasDerivAt
   have h0 := Gamma_ne_zero hx
@@ -490,7 +491,7 @@ lemma hasDerivAt_recip_Gamma {x : ℂ} (hx : ∀ m : ℕ, x ≠ -(m : ℂ)) :
   field_simp
 
 /-- `(1/Γ)'(-p) = (-1)^p p!`. -/
-lemma hasDerivAt_recip_Gamma_neg_nat (p : ℕ) :
+theorem hasDerivAt_recip_Gamma_neg_nat (p : ℕ) :
     HasDerivAt (fun y => (Gamma y)⁻¹) ((-1 : ℂ) ^ p * (p.factorial : ℂ)) (-(p : ℂ)) := by
   have heq : (fun y => (Gamma y)⁻¹) = fun y => poch y p * (y + p) * (Gamma (y + (p + 1 : ℕ)))⁻¹ := by
     funext y; rw [recip_Gamma_eq_poch_mul p y, poch_succ]
@@ -513,7 +514,7 @@ lemma hasDerivAt_recip_Gamma_neg_nat (p : ℕ) :
   ring
 
 /-- Logarithmic derivative of the Pochhammer symbol. -/
-lemma hasDerivAt_poch {x : ℂ} (hx : ∀ m : ℕ, x ≠ -(m : ℂ)) (n : ℕ) :
+theorem hasDerivAt_poch {x : ℂ} (hx : ∀ m : ℕ, x ≠ -(m : ℂ)) (n : ℕ) :
     HasDerivAt (fun y => poch y n) (poch x n * (digamma (x + n) - digamma x)) x := by
   induction n with
   | zero => simpa [poch_zero] using hasDerivAt_const x (1 : ℂ)
@@ -602,14 +603,14 @@ theorem hasSum_deriv_regularizedGaussHGFun_comp {A B C : ℂ → ℂ} (hA : Diff
     simpa only [coe_nnnorm] using
       norm_term_le_majorant hAw.le hBw.le hre hm (hV _ hVw).le (not_lt.mp hn)
 
-lemma deriv_recip_Gamma_eq {x : ℂ} (hx : ∀ m : ℕ, x ≠ -(m : ℂ)) :
+theorem deriv_recip_Gamma_eq {x : ℂ} (hx : ∀ m : ℕ, x ≠ -(m : ℂ)) :
     deriv (fun y => (Gamma y)⁻¹) x = -(digamma x) * (Gamma x)⁻¹ := (hasDerivAt_recip_Gamma hx).deriv
 
-lemma deriv_recip_Gamma_neg_nat (p : ℕ) :
+theorem deriv_recip_Gamma_neg_nat (p : ℕ) :
     deriv (fun y => (Gamma y)⁻¹) (-(p : ℂ)) = (-1 : ℂ) ^ p * (p.factorial : ℂ) :=
   (hasDerivAt_recip_Gamma_neg_nat p).deriv
 
-lemma hasDerivAt_recip_Gamma_any (x : ℂ) :
+theorem hasDerivAt_recip_Gamma_any (x : ℂ) :
     HasDerivAt (fun y => (Gamma y)⁻¹) (deriv (fun y => (Gamma y)⁻¹) x) x :=
   (differentiable_one_div_Gamma x).hasDerivAt
 
@@ -937,14 +938,14 @@ theorem logarithmic_connection_one_div_one_sub {a c z : ℂ} (m : ℕ)
   ring
 
 /-- The regularized function is symmetric in its numerator parameters. -/
-lemma regularizedGaussHGFun_comm (a b c z : ℂ) :
+theorem regularizedGaussHGFun_comm (a b c z : ℂ) :
     regularizedGaussHGFun a b c z = regularizedGaussHGFun b a c z := by
   rw [regularizedGaussHGFun_eq_tsum, regularizedGaussHGFun_eq_tsum]
   exact tsum_congr fun n => by ring
 
 /-- 15.8.5 with the second series Euler-transformed, so that both series share their
 logarithmic limits termwise. -/
-lemma regularized_connection_one_sub_recip' (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1)
+theorem regularized_connection_one_sub_recip' (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1)
     (ht : ‖1 - 1 / z‖ < 1) :
     sin (Real.pi * (c - a - b)) / Real.pi * regularizedGaussHGFun a b c z =
       z ^ (-a) / (Gamma (c - a) * Gamma (c - b)) * regularizedGaussHGFun a (a - c + 1)
@@ -996,11 +997,11 @@ lemma regularized_connection_one_sub_recip' (a b c : ℂ) {z : ℂ} (hz : ‖z�
   rw [← hfac]
   ring
 
-lemma not_neg_nat_of_not_int_sub {x : ℂ} (hx : ∀ k : ℤ, x ≠ (k : ℂ)) (n : ℕ) :
+theorem not_neg_nat_of_not_int_sub {x : ℂ} (hx : ∀ k : ℤ, x ≠ (k : ℂ)) (n : ℕ) :
     ∀ j : ℕ, x - n ≠ -(j : ℂ) := fun j h => hx (n - j) (by push_cast; linear_combination h)
 
 /-- `(1-x)_n = (-1)^n Γ(x)/Γ(x-n)`. -/
-lemma poch_one_sub_eq {x : ℂ} (hx : ∀ k : ℤ, x ≠ (k : ℂ)) (n : ℕ) :
+theorem poch_one_sub_eq {x : ℂ} (hx : ∀ k : ℤ, x ≠ (k : ℂ)) (n : ℕ) :
     poch (1 - x) n = (-1) ^ n * Gamma x / Gamma (x - n) := by
   induction n with
   | zero => simp [poch_zero, Gamma_ne_zero (not_neg_nat_of_not_int_sub hx 0 |> fun h j => by
@@ -1020,7 +1021,7 @@ lemma poch_one_sub_eq {x : ℂ} (hx : ∀ k : ℤ, x ≠ (k : ℂ)) (n : ℕ) :
     ring
 
 /-- `ψ(1-x+n) - ψ(1-x) = ψ(x-n) - ψ(x)`. -/
-lemma digamma_one_sub_add_nat {x : ℂ} (hx : ∀ k : ℤ, x ≠ (k : ℂ)) (n : ℕ) :
+theorem digamma_one_sub_add_nat {x : ℂ} (hx : ∀ k : ℤ, x ≠ (k : ℂ)) (n : ℕ) :
     digamma (1 - x + n) - digamma (1 - x) = digamma (x - n) - digamma x := by
   induction n with
   | zero => simp

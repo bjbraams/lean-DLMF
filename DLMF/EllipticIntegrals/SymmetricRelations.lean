@@ -12,11 +12,8 @@ public import DLMF.EllipticIntegrals.P19sR1Legendre
 public import DLMF.EllipticIntegrals.P19sR1Connection
 public import DLMF.EllipticIntegrals.LegendreIdentities
 public import Carlson.TwoVariable.GaussHypergeometric
-public import Carlson.TwoVariable.ParameterSymmetry
 public import DLMF.JacobiElliptic.Inverse
 public import DLMF.Weierstrass.Basic
-public import Mathlib.Analysis.SpecialFunctions.OrdinaryHypergeometric
-public import Mathlib.Tactic.CrossRefAttribute
 
 /-!
 # Relations of the symmetric integrals to other functions (DLMF §19.25)
@@ -583,7 +580,7 @@ theorem jacobiDeltam_values {u m : ℝ} (hm : m < 1)
 
 
 /-- Round-1 helper: the real `F(φ|m)` as the complex Legendre integral with `k = √m`. -/
-theorem p19sR1_incEllIntFm_ofReal {m : ℝ} (hm0 : 0 ≤ m) (hm : m < 1) (φ : ℝ) :
+lemma p19sR1_incEllIntFm_ofReal {m : ℝ} (hm0 : 0 ≤ m) (hm : m < 1) (φ : ℝ) :
     ((DLMF.Elliptic.Real.incEllIntFm φ m : ℝ) : ℂ) = ∫ θ in (0 : ℝ)..φ,
       (1 - ((√m : ℝ) : ℂ) ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) := by
   rw [DLMF.Elliptic.Real.incEllIntFm, ← intervalIntegral.integral_ofReal]
@@ -594,7 +591,7 @@ theorem p19sR1_incEllIntFm_ofReal {m : ℝ} (hm0 : 0 ≤ m) (hm : m < 1) (φ : �
   ring_nf
 
 /-- Round-1 helper: for `0 < u ≤ K(m)`, `0 < am(u|m) ≤ π/2`. -/
-theorem p19sR1_jacobiAmm_mem {u m : ℝ} (hm : m < 1) (hu : 0 < u)
+lemma p19sR1_jacobiAmm_mem {u m : ℝ} (hm : m < 1) (hu : 0 < u)
     (huK : u ≤ DLMF.Elliptic.Real.compEllIntKm m) :
     0 < DLMF.Elliptic.Real.jacobiAmm u m ∧ DLMF.Elliptic.Real.jacobiAmm u m ≤ π / 2 := by
   have hmono := DLMF.Elliptic.Real.strictMono_incEllIntFm hm
@@ -899,7 +896,7 @@ theorem p19sR1_symEllIntRF_zero_one_two :
   field_simp
 
 /-- Round-1 helper: `∫₀¹ t² dt/√(1 - t⁴) = ∫₀^{π/2} sin² θ dθ/√(1 + sin² θ)` (`t = sin θ`). -/
-theorem p19sR1_integral_sq_div_sqrt :
+lemma p19sR1_integral_sq_div_sqrt :
     ∫ t in (0 : ℝ)..1, t ^ 2 / Real.sqrt (1 - t ^ 4) =
       ∫ θ in (0 : ℝ)..(π / 2), Real.sin θ ^ 2 / Real.sqrt (1 + Real.sin θ ^ 2) := by
   have hcv := MeasureTheory.integral_image_eq_integral_abs_deriv_smul (f := Real.sin)

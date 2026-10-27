@@ -5,12 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Legendre.Hypergeometric
-public import DLMF.Legendre.Integer
-public import DLMF.Legendre.Neumann
-public import DLMF.Legendre.AssociatedRecurrences
 public import DLMF.Legendre.SpecialValues
-public import DLMF.OrthogonalPolynomials.Series
 public import DLMF.Legendre.SeriesTools
 public import DLMF.Legendre.FourierTools
 
@@ -31,7 +26,7 @@ namespace DLMF.Legendre
 
 
 /-- Eventual bound `‖Γ(k+a)/Γ(k+b)‖ ≤ 2 k^{Re(a-b)}` (from DLMF 5.11.12). -/
-lemma legFour_gamma_ratio_le (a b : ℂ) :
+theorem legFour_gamma_ratio_le (a b : ℂ) :
     ∀ᶠ k : ℕ in atTop, ‖Gamma (k+a)/Gamma (k+b)‖ ≤ 2 * (k:ℝ)^((a-b).re) := by
   have h := (DLMF.Gamma.Gamma_ratio_power (a := a) (b := b)).comp tendsto_natCast_atTop_atTop
   have h2 := (h.norm).eventually (gt_mem_nhds (show ‖(1:ℂ)‖ < 2 by norm_num))
@@ -43,7 +38,7 @@ lemma legFour_gamma_ratio_le (a b : ℂ) :
   exact hk.le
 
 /-- Eventual bound `‖(a)_k/k!‖ ≤ C k^{Re a - 1}`. -/
-lemma legFour_poch_div_factorial_le (a : ℂ) : ∃ C : ℝ, 0 ≤ C ∧
+theorem legFour_poch_div_factorial_le (a : ℂ) : ∃ C : ℝ, 0 ≤ C ∧
     ∀ᶠ k : ℕ in atTop, ‖poch a k/(k.factorial:ℂ)‖ ≤ C * (k:ℝ)^(a.re-1) := by
   by_cases ha : ∃ m : ℕ, a = -m
   · obtain ⟨m, rfl⟩ := ha
@@ -64,7 +59,7 @@ lemma legFour_poch_div_factorial_le (a : ℂ) : ∃ C : ℝ, 0 ≤ C ∧
       _ = _ := by ring
 
 /-- `‖sin w‖ ≤ exp |Im w|`. -/
-lemma legFour_norm_sin_le (w : ℂ) : ‖sin w‖ ≤ Real.exp |w.im| := by
+theorem legFour_norm_sin_le (w : ℂ) : ‖sin w‖ ≤ Real.exp |w.im| := by
   rw [Complex.sin]
   have h1 : ‖exp (-w * I)‖ ≤ Real.exp |w.im| := by
     rw [Complex.norm_exp]; simp only [mul_re, neg_re, I_re, mul_zero, neg_im, I_im, mul_one,
@@ -78,7 +73,7 @@ lemma legFour_norm_sin_le (w : ℂ) : ‖sin w‖ ≤ Real.exp |w.im| := by
   linarith
 
 /-- `‖cos w‖ ≤ exp |Im w|`. -/
-lemma legFour_norm_cos_le (w : ℂ) : ‖cos w‖ ≤ Real.exp |w.im| := by
+theorem legFour_norm_cos_le (w : ℂ) : ‖cos w‖ ≤ Real.exp |w.im| := by
   rw [Complex.cos]
   have h1 : ‖exp (w * I)‖ ≤ Real.exp |w.im| := by
     rw [Complex.norm_exp]; simp only [mul_re, I_re, mul_zero, I_im, mul_one, zero_sub]
@@ -93,7 +88,7 @@ lemma legFour_norm_cos_le (w : ℂ) : ‖cos w‖ ≤ Real.exp |w.im| := by
 
 /-- Absolute convergence of the Ferrers Fourier coefficients against bounded factors when
 `Re μ < 0`: the coefficients are `O(k^{2 Re μ - 1})`. -/
-lemma legFour_summable {ν μ : ℂ} (hμ : μ.re < 0) (s : ℕ → ℂ) {B : ℝ} (hs : ∀ k, ‖s k‖ ≤ B) :
+theorem legFour_summable {ν μ : ℂ} (hμ : μ.re < 0) (s : ℕ → ℂ) {B : ℝ} (hs : ∀ k, ‖s k‖ ≤ B) :
     Summable (fun k : ℕ => ‖Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*poch (μ+1/2) k/
       (k.factorial:ℂ)*s k‖) := by
   obtain ⟨C, hC, hP⟩ := legFour_poch_div_factorial_le (μ+1/2)
@@ -122,7 +117,7 @@ lemma legFour_summable {ν μ : ℂ} (hμ : μ.re < 0) (s : ℕ → ℂ) {B : �
     _ = _ := by ring
 
 /-- Eventual lower bound `‖Γ(k+a)/Γ(k+b)‖ ≥ k^{Re(a-b)}/2` (from DLMF 5.11.12). -/
-lemma legFour_gamma_ratio_ge (a b : ℂ) :
+theorem legFour_gamma_ratio_ge (a b : ℂ) :
     ∀ᶠ k : ℕ in atTop, (k:ℝ)^((a-b).re) / 2 ≤ ‖Gamma (k+a)/Gamma (k+b)‖ := by
   have h := (DLMF.Gamma.Gamma_ratio_power (a := a) (b := b)).comp tendsto_natCast_atTop_atTop
   have h2 := (h.norm).eventually (lt_mem_nhds (show (1/2:ℝ) < ‖(1:ℂ)‖ by norm_num))
@@ -135,7 +130,7 @@ lemma legFour_gamma_ratio_ge (a b : ℂ) :
 
 /-- Non-absolute convergence of the Ferrers Fourier coefficients against factors that are not
 small at two consecutive indices, when `Re μ ≥ 0`. -/
-lemma legFour_not_summable {ν μ : ℂ} (hμ : 0 ≤ μ.re) (s : ℕ → ℂ) {δ : ℝ} (hδ : 0 < δ)
+theorem legFour_not_summable {ν μ : ℂ} (hμ : 0 ≤ μ.re) (s : ℕ → ℂ) {δ : ℝ} (hδ : 0 < δ)
     (hs : ∀ k, δ ≤ ‖s k‖ + ‖s (k+1)‖) :
     ¬Summable (fun k : ℕ => ‖Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*poch (μ+1/2) k/
       (k.factorial:ℂ)*s k‖) := by
@@ -204,7 +199,7 @@ lemma legFour_not_summable {ν μ : ℂ} (hμ : 0 ≤ μ.re) (s : ℕ → ℂ) {
   exact Real.not_summable_one_div_natCast ((summable_nat_add_iff 1).mp hh)
 
 /-- `sin 2θ ≠ 0` for `0 < θ < π`, `θ ≠ π/2`. -/
-lemma legFour_sin_two_mul_ne {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) (hmid : θ ≠ π/2) :
+theorem legFour_sin_two_mul_ne {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) (hmid : θ ≠ π/2) :
     0 < |Real.sin (2*θ)| := by
   rw [abs_pos, Real.sin_two_mul]
   have hs : 0 < Real.sin θ := Real.sin_pos_of_pos_of_lt_pi h0 hπ
@@ -217,7 +212,7 @@ lemma legFour_sin_two_mul_ne {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) (hmid : θ
 
 /-- Summation by parts (Dirichlet's test with bounded variation): if the partial sums of `b`
 are bounded, `c → 0` and `∑ ‖c (n+1) - c n‖ < ∞`, then `∑ c n b n` converges. -/
-lemma legFS_dirichlet {c b : ℕ → ℂ} {M : ℝ} (hB : ∀ n, ‖∑ i ∈ Finset.range n, b i‖ ≤ M)
+theorem legFS_dirichlet {c b : ℕ → ℂ} {M : ℝ} (hB : ∀ n, ‖∑ i ∈ Finset.range n, b i‖ ≤ M)
     (hc : Tendsto c atTop (𝓝 0)) (hv : Summable (fun n => ‖c (n+1) - c n‖)) :
     ∃ l, Tendsto (fun n => ∑ i ∈ Finset.range n, c i * b i) atTop (𝓝 l) := by
   set B : ℕ → ℂ := fun n => ∑ i ∈ Finset.range n, b i with hBdef
@@ -247,7 +242,7 @@ noncomputable def legFS_coef (ν μ : ℂ) (k : ℕ) : ℂ :=
   Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*poch (μ+1/2) k/(k.factorial:ℂ)
 
 /-- `‖legFS_coef ν μ k‖ ≤ C k^{2 Re μ - 1}` eventually. -/
-lemma legFS_coef_bound (ν μ : ℂ) : ∃ C : ℝ, 0 ≤ C ∧
+theorem legFS_coef_bound (ν μ : ℂ) : ∃ C : ℝ, 0 ≤ C ∧
     ∀ᶠ k : ℕ in atTop, ‖legFS_coef ν μ k‖ ≤ C * (k:ℝ)^(2*μ.re-1) := by
   obtain ⟨C, hC, hP⟩ := legFour_poch_div_factorial_le (μ+1/2)
   refine ⟨2*C, by positivity, ?_⟩
@@ -269,7 +264,7 @@ lemma legFS_coef_bound (ν μ : ℂ) : ∃ C : ℝ, 0 ≤ C ∧
     _ = _ := by ring
 
 /-- The coefficients tend to zero when `Re μ < 1/2`. -/
-lemma legFS_coef_tendsto_zero (ν : ℂ) {μ : ℂ} (hμ : μ.re < 1/2) :
+theorem legFS_coef_tendsto_zero (ν : ℂ) {μ : ℂ} (hμ : μ.re < 1/2) :
     Tendsto (legFS_coef ν μ) atTop (𝓝 0) := by
   obtain ⟨C, hC, hb⟩ := legFS_coef_bound ν μ
   have h1 : Tendsto (fun k : ℕ => C * (k:ℝ)^(2*μ.re-1)) atTop (𝓝 0) := by
@@ -279,7 +274,7 @@ lemma legFS_coef_tendsto_zero (ν : ℂ) {μ : ℂ} (hμ : μ.re < 1/2) :
   exact squeeze_zero_norm' hb h1
 
 /-- One-step ratio of the coefficients, eventually. -/
-lemma legFS_coef_succ (ν μ : ℂ) : ∀ᶠ k : ℕ in atTop,
+theorem legFS_coef_succ (ν μ : ℂ) : ∀ᶠ k : ℕ in atTop,
     legFS_coef ν μ (k+1) = legFS_coef ν μ k *
       ((ν+μ+k+1)*(μ+1/2+k)/((ν+k+3/2)*(k+1))) := by
   filter_upwards [eventually_gt_atTop ⌈‖ν‖ + ‖μ‖ + 2⌉₊] with k hk
@@ -313,7 +308,7 @@ lemma legFS_coef_succ (ν μ : ℂ) : ∀ᶠ k : ℕ in atTop,
 
 /-- The coefficients have bounded variation when `Re μ < 1/2`:
 `‖c_{k+1} - c_k‖ = O(k^{2 Re μ - 2})`. -/
-lemma legFS_coef_var_summable (ν : ℂ) {μ : ℂ} (hμ : μ.re < 1/2) :
+theorem legFS_coef_var_summable (ν : ℂ) {μ : ℂ} (hμ : μ.re < 1/2) :
     Summable (fun k : ℕ => ‖legFS_coef ν μ (k+1) - legFS_coef ν μ k‖) := by
   obtain ⟨C, hC, hb⟩ := legFS_coef_bound ν μ
   set K₀ : ℂ := (ν+μ+1)*(μ+1/2) - (ν+3/2) with hK₀
@@ -363,7 +358,7 @@ lemma legFS_coef_var_summable (ν : ℂ) {μ : ℂ} (hμ : μ.re < 1/2) :
 
 /-- On the unit circle (`w ≠ 1`) and for `Re μ < 1/2`, the series `∑ c_k w^k` converges to
 `Γ(ν+μ+1) 𝐅(ν+μ+1, μ+1/2; ν+3/2; w)` (Dirichlet's test and Abel's limit theorem). -/
-lemma legFS_series_tendsto {ν μ : ℂ} (hr : LegendreQRegular ν μ) (hμ : μ.re < 1/2) {w : ℂ}
+theorem legFS_series_tendsto {ν μ : ℂ} (hr : LegendreQRegular ν μ) (hμ : μ.re < 1/2) {w : ℂ}
     (hw : ‖w‖ = 1) (hw1 : w ≠ 1) (hcut : w ∈ cutPlane) :
     Tendsto (fun N => ∑ k ∈ Finset.range N, legFS_coef ν μ k * w^k) atTop
       (𝓝 (Gamma (ν+μ+1) * regularizedGaussHG (ν+μ+1) (μ+1/2) (ν+3/2) w)) := by
@@ -414,7 +409,7 @@ lemma legFS_series_tendsto {ν μ : ℂ} (hr : LegendreQRegular ν μ) (hμ : μ
   rw [← this]; exact hl
 
 /-- `e^{2isθ}` lies in the cut plane for `0 < θ < π`, `s = ±1`. -/
-lemma legFS_exp_mem_cutPlane {s : ℝ} (hs : s = 1 ∨ s = -1) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
+theorem legFS_exp_mem_cutPlane {s : ℝ} (hs : s = 1 ∨ s = -1) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
     exp ((s:ℂ)*2*I*θ) ∈ cutPlane := by
   have hsin : 0 < Real.sin θ := Real.sin_pos_of_pos_of_lt_pi h0 hπ
   show 1 - _ ∈ slitPlane
@@ -429,16 +424,16 @@ lemma legFS_exp_mem_cutPlane {s : ℝ} (hs : s = 1 ∨ s = -1) {θ : ℝ} (h0 : 
   rw [hc]; simp; positivity
 
 /-- `‖e^{2isθ}‖ = 1`. -/
-lemma legFS_norm_exp {s : ℝ} (θ : ℝ) : ‖exp ((s:ℂ)*2*I*θ)‖ = 1 := by
+theorem legFS_norm_exp {s : ℝ} (θ : ℝ) : ‖exp ((s:ℂ)*2*I*θ)‖ = 1 := by
   rw [show (s:ℂ)*2*I*θ = ((2*s*θ:ℝ):ℂ)*I by push_cast; ring, norm_exp_ofReal_mul_I]
 
 /-- `sin((ν+μ+2k+1)θ)` and `cos((ν+μ+2k+1)θ)` through `e^{±i(ν+μ+1)θ} e^{±2ikθ}`. -/
-lemma legFS_exp_split (ν μ : ℂ) (θ : ℝ) (k : ℕ) (s : ℝ) :
+theorem legFS_exp_split (ν μ : ℂ) (θ : ℝ) (k : ℕ) (s : ℝ) :
     exp ((s:ℂ)*(ν+μ+1)*I*θ) * exp ((s:ℂ)*2*I*θ)^k = exp ((s:ℂ)*((ν+μ+2*k+1)*θ)*I) := by
   rw [← exp_nat_mul, ← exp_add]; congr 1; ring
 
 /-- Partial sums of the Fourier series in exponential form. -/
-lemma legFS_tendsto_pair {ν μ : ℂ} (hr : LegendreQRegular ν μ) (hμ : μ.re < 1/2) {θ : ℝ}
+theorem legFS_tendsto_pair {ν μ : ℂ} (hr : LegendreQRegular ν μ) (hμ : μ.re < 1/2) {θ : ℝ}
     (h0 : 0 < θ) (hπ : θ < π) {s : ℝ} (hs : s = 1 ∨ s = -1) :
     Tendsto (fun N => ∑ k ∈ Finset.range N, legFS_coef ν μ k * exp ((s:ℂ)*((ν+μ+2*k+1)*θ)*I))
       atTop (𝓝 (exp ((s:ℂ)*(ν+μ+1)*I*θ) * (Gamma (ν+μ+1) *
@@ -453,7 +448,7 @@ lemma legFS_tendsto_pair {ν μ : ℂ} (hr : LegendreQRegular ν μ) (hμ : μ.r
   rw [← legFS_exp_split ν μ θ k s]; ring
 
 /-- `2/√π · Γ(n+k+1)/Γ(n+k+3/2) = 2^{2n+2}(n!)²/(π(2n+1)!) · (n+1)_k/(n+3/2)_k`. -/
-lemma legFS_nat_coef (n k : ℕ) :
+theorem legFS_nat_coef (n k : ℕ) :
     (2:ℂ)/Real.sqrt π * (Gamma ((n:ℂ)+k+1)/Gamma ((n:ℂ)+k+3/2)) =
       2^(2*n+2)*(n.factorial:ℂ)^2/(π*((2*n+1).factorial:ℂ))*(poch (n+1) k/poch (n+3/2) k) := by
   have ha : ∀ m : ℕ, ((n:ℂ)+1) ≠ -(m:ℂ) := fun m h => by
@@ -492,7 +487,7 @@ lemma legFS_nat_coef (n k : ℕ) :
   field_simp
 
 /-- Integer degree and zero order are `Q`-regular. -/
-lemma legFS_nat_regular (n : ℕ) : LegendreQRegular (n:ℂ) 0 := fun m h => by
+theorem legFS_nat_regular (n : ℕ) : LegendreQRegular (n:ℂ) 0 := fun m h => by
   have := congrArg re h; simp at this; linarith [(m.cast_nonneg : (0:ℝ) ≤ m), (n.cast_nonneg : (0:ℝ) ≤ n)]
 
 /-- ferrersP fourier series. -/
@@ -597,21 +592,21 @@ theorem ferrersQ_fourier_absolute {ν μ : ℂ} (hν : LegendreQRegular ν μ) (
   have him : ((ν+μ+2*(k:ℂ)+1)*(θ:ℂ)).im = ((ν+μ)*θ).im := by simp [mul_im]
   exact (legFour_norm_cos_le _).trans_eq (by rw [him])
 
-lemma legFour_abs_sin_re_le (w : ℂ) : |Real.sin w.re| ≤ ‖sin w‖ := by
+theorem legFour_abs_sin_re_le (w : ℂ) : |Real.sin w.re| ≤ ‖sin w‖ := by
   have h : (sin w).re = Real.sin w.re * Real.cosh w.im := by
     rw [sin_eq]; simp [← ofReal_sin, ← ofReal_cosh, ← ofReal_cos, ← ofReal_sinh]
   refine le_trans ?_ (abs_re_le_norm _)
   rw [h, abs_mul, abs_of_pos (Real.cosh_pos _)]
   exact le_mul_of_one_le_right (abs_nonneg _) (Real.one_le_cosh _)
 
-lemma legFour_abs_cos_re_le (w : ℂ) : |Real.cos w.re| ≤ ‖cos w‖ := by
+theorem legFour_abs_cos_re_le (w : ℂ) : |Real.cos w.re| ≤ ‖cos w‖ := by
   have h : (cos w).re = Real.cos w.re * Real.cosh w.im := by
     rw [cos_eq]; simp [← ofReal_sin, ← ofReal_cosh, ← ofReal_cos, ← ofReal_sinh]
   refine le_trans ?_ (abs_re_le_norm _)
   rw [h, abs_mul, abs_of_pos (Real.cosh_pos _)]
   exact le_mul_of_one_le_right (abs_nonneg _) (Real.one_le_cosh _)
 
-lemma legFour_sin_pair {θ : ℝ} (x : ℝ) :
+theorem legFour_sin_pair {θ : ℝ} (x : ℝ) :
     |Real.sin (2*θ)| / 2 ≤ |Real.sin x| + |Real.sin (x + 2*θ)| := by
   have hs : |Real.sin (2*θ)| ≤ 1 := Real.abs_sin_le_one _
   have h1 : |Real.sin x| + |Real.cos x| ≥ 1 := by
@@ -631,7 +626,7 @@ lemma legFour_sin_pair {θ : ℝ} (x : ℝ) :
   have h4 := mul_le_mul_of_nonneg_left h1.le (abs_nonneg (Real.sin (2*θ)))
   nlinarith [abs_nonneg (Real.sin (x + 2*θ))]
 
-lemma legFour_cos_pair {θ : ℝ} (x : ℝ) :
+theorem legFour_cos_pair {θ : ℝ} (x : ℝ) :
     |Real.sin (2*θ)| / 2 ≤ |Real.cos x| + |Real.cos (x + 2*θ)| := by
   have h := legFour_sin_pair (θ := θ) (x + π/2)
   rw [Real.sin_add_pi_div_two, show x + π/2 + 2*θ = (x + 2*θ) + π/2 by ring,
@@ -949,12 +944,12 @@ def legendreQCFDen (ν : ℂ) (x : ℝ) (k : ℕ) : ℂ :=
 def legFS_wQ (ν μ : ℂ) (x : ℝ) (k : ℕ) : ℂ := olverQ (ν + k - 1) μ x
 
 /-- `x - 1 ∈ ℂ ∖ (-∞, 0]` for real `x > 1`. -/
-lemma legFS_sub_one_mem {x : ℝ} (hx : 1 < x) : (x:ℂ) - 1 ∈ slitPlane := by
+theorem legFS_sub_one_mem {x : ℝ} (hx : 1 < x) : (x:ℂ) - 1 ∈ slitPlane := by
   rw [show (x:ℂ) - 1 = ((x - 1 : ℝ) : ℂ) by push_cast; ring]
   exact ofReal_mem_slitPlane.mpr (by linarith)
 
 /-- `w_k = 𝑸^μ_{ν+k-1}(x)` solves the backward recurrence of 14.14.3 (from DLMF 14.10.3). -/
-lemma legFS_wQ_rec (ν μ : ℂ) {x : ℝ} (hx : 1 < x) (k : ℕ) :
+theorem legFS_wQ_rec (ν μ : ℂ) {x : ℝ} (hx : 1 < x) (k : ℕ) :
     legFS_wQ ν μ x k = legendreQCFDen ν x k * legFS_wQ ν μ x (k+1) +
       legendreQCFNum ν μ (k+1) * legFS_wQ ν μ x (k+2) := by
   have R := olverQ_recurrence_3 (ν+k-1) μ (legFS_sub_one_mem hx)
@@ -969,7 +964,7 @@ lemma legFS_wQ_rec (ν μ : ℂ) {x : ℝ} (hx : 1 < x) (k : ℕ) :
   linear_combination R
 
 /-- The hypergeometric form of `w_k`. -/
-lemma legFS_wQ_eq (ν μ : ℂ) {x : ℝ} (hx : 1 < x) (k : ℕ) :
+theorem legFS_wQ_eq (ν μ : ℂ) {x : ℝ} (hx : 1 < x) (k : ℕ) :
     legFS_wQ ν μ x k = Real.sqrt π * (1 - legFS_zeta x ^ 2)^μ * legFS_zeta x ^ (ν + k) *
       regularizedGaussHGFun (μ+1/2) ((ν+μ)+k) ((ν+1/2)+k) (legFS_zeta x ^ 2) := by
   have hz := legFS_sub_one_mem hx
@@ -980,19 +975,19 @@ lemma legFS_wQ_eq (ν μ : ℂ) {x : ℝ} (hx : 1 < x) (k : ℕ) :
   congr 2 <;> ring_nf
 
 /-- Eventually `0 < Re (c + k)`. -/
-lemma legFS_eventually_re_pos (c : ℂ) : ∀ᶠ k : ℕ in atTop, 0 < (c + k).re := by
+theorem legFS_eventually_re_pos (c : ℂ) : ∀ᶠ k : ℕ in atTop, 0 < (c + k).re := by
   obtain ⟨K, hK⟩ := exists_nat_gt (-c.re)
   filter_upwards [eventually_ge_atTop K] with k hk
   have : (K:ℝ) ≤ k := by exact_mod_cast hk
   simp; linarith
 
 /-- Eventually `c + k ≠ 0`. -/
-lemma legFS_eventually_ne (c : ℂ) : ∀ᶠ k : ℕ in atTop, c + k ≠ 0 := by
+theorem legFS_eventually_ne (c : ℂ) : ∀ᶠ k : ℕ in atTop, c + k ≠ 0 := by
   filter_upwards [legFS_eventually_re_pos c] with k hk h
   rw [h] at hk; simp at hk
 
 /-- The ratio limit for the fraction 14.14.3: `-w_k/(a_{k+1}w_{k+2}) → ζ^{-2}`. -/
-lemma legFS_wQ_ratio (ν μ : ℂ) {x : ℝ} (hx : 1 < x) :
+theorem legFS_wQ_ratio (ν μ : ℂ) {x : ℝ} (hx : 1 < x) :
     Tendsto (fun k => -(legFS_wQ ν μ x k /
       (legendreQCFNum ν μ (k+1) * legFS_wQ ν μ x (k+2)))) atTop
       (𝓝 ((legFS_zeta x ^ 2)⁻¹)) ∧ ∀ᶠ k in atTop, legFS_wQ ν μ x k ≠ 0 := by
@@ -1074,7 +1069,7 @@ lemma legFS_wQ_ratio (ν μ : ℂ) {x : ℝ} (hx : 1 < x) :
 /-! ### Tools for the continued fraction 14.14.1 -/
 
 /-- For real `x > 1`, `log (x-1) - log (x+1)` is the real logarithm of `(x-1)/(x+1)`. -/
-lemma legFS_log_diff {x : ℝ} (hx : 1 < x) :
+theorem legFS_log_diff {x : ℝ} (hx : 1 < x) :
     exp (log ((x:ℂ)-1) - log ((x:ℂ)+1)) = (((x-1)/(x+1) : ℝ) : ℂ) := by
   rw [exp_sub, exp_log, exp_log]
   · push_cast; ring
@@ -1082,7 +1077,7 @@ lemma legFS_log_diff {x : ℝ} (hx : 1 < x) :
   · rw [sub_ne_zero]; exact_mod_cast (show (x:ℝ) ≠ 1 by linarith)
 
 /-- For real `x > 1`, `(z²-1)^{-1/2}` at `z = x` is `1/√(x²-1)`. -/
-lemma legFS_branch_neg_one {x : ℝ} (hx : 1 < x) :
+theorem legFS_branch_neg_one {x : ℝ} (hx : 1 < x) :
     legendreBranchPower (-1) x = (((Real.sqrt (x^2-1))⁻¹ : ℝ) : ℂ) := by
   have hy : 0 < x^2 - 1 := by nlinarith
   have hl : log ((x:ℂ)-1) + log ((x:ℂ)+1) = ((Real.log (x^2-1) : ℝ) : ℂ) := by
@@ -1100,7 +1095,7 @@ lemma legFS_branch_neg_one {x : ℝ} (hx : 1 < x) :
 def legFS_cP (x : ℝ) : ℂ := ((2 / Real.sqrt (x^2-1) : ℝ) : ℂ)
 
 /-- `(2/√(x²-1))² (x²-1)/4 = 1`. -/
-lemma legFS_cP_sq {x : ℝ} (hx : 1 < x) : legFS_cP x ^ 2 * ((x:ℂ)^2-1) / 4 = 1 := by
+theorem legFS_cP_sq {x : ℝ} (hx : 1 < x) : legFS_cP x ^ 2 * ((x:ℂ)^2-1) / 4 = 1 := by
   have hy : 0 < x^2 - 1 := by nlinarith
   have hs := Real.sq_sqrt hy.le
   have hs0 := (Real.sqrt_pos.mpr hy).ne'
@@ -1112,7 +1107,7 @@ lemma legFS_cP_sq {x : ℝ} (hx : 1 < x) : legFS_cP x ^ 2 * ((x:ℂ)^2-1) / 4 = 
 def legFS_wP (ν μ : ℂ) (x : ℝ) (k : ℕ) : ℂ := legFS_cP x ^ k * associatedP ν (1 - μ - k) x
 
 /-- `w_k` solves the backward recurrence of 14.14.1 (from DLMF 14.10.6). -/
-lemma legFS_wP_rec (ν μ : ℂ) {x : ℝ} (hx : 1 < x) (k : ℕ) :
+theorem legFS_wP_rec (ν μ : ℂ) {x : ℝ} (hx : 1 < x) (k : ℕ) :
     legFS_wP ν μ x k = legendrePCFDen μ x k * legFS_wP ν μ x (k+1) +
       legendrePCFNum ν μ x (k+1) * legFS_wP ν μ x (k+2) := by
   have R := associatedP_recurrence_6 ν (-μ-k-1) (legFS_sub_one_mem hx)
@@ -1131,7 +1126,7 @@ lemma legFS_wP_rec (ν μ : ℂ) {x : ℝ} (hx : 1 < x) (k : ℕ) :
   linear_combination (legFS_cP x ^ k) * R - (legFS_cP x ^ k * (ν-μ-k) * (ν+μ+k+1) * p2) * hc
 
 /-- The Pfaff argument `t = z₀/(z₀-1) = (x-1)/(x+1)` for `z₀ = (1-x)/2`. -/
-lemma legFS_pfaff_arg {x : ℝ} (hx : 1 < x) :
+theorem legFS_pfaff_arg {x : ℝ} (hx : 1 < x) :
     (1-(x:ℂ))/2 / ((1-(x:ℂ))/2 - 1) = (((x-1)/(x+1) : ℝ) : ℂ) := by
   have h1 : (x:ℂ)+1 ≠ 0 := by exact_mod_cast (show x+1 ≠ 0 by linarith)
   push_cast
@@ -1139,13 +1134,13 @@ lemma legFS_pfaff_arg {x : ℝ} (hx : 1 < x) :
   ring
 
 /-- `0 < (x-1)/(x+1) < 1` for `x > 1`. -/
-lemma legFS_pfaff_arg_bounds {x : ℝ} (hx : 1 < x) : 0 < (x-1)/(x+1) ∧ (x-1)/(x+1) < 1 := by
+theorem legFS_pfaff_arg_bounds {x : ℝ} (hx : 1 < x) : 0 < (x-1)/(x+1) ∧ (x-1)/(x+1) < 1 := by
   constructor
   · exact div_pos (by linarith) (by linarith)
   · rw [div_lt_one (by linarith)]; linarith
 
 /-- The hypergeometric form of `w_k` via 14.3.9 and Pfaff's transformation. -/
-lemma legFS_wP_eq (ν μ : ℂ) {x : ℝ} (hx : 1 < x) (k : ℕ) :
+theorem legFS_wP_eq (ν μ : ℂ) {x : ℝ} (hx : 1 < x) (k : ℕ) :
     legFS_wP ν μ x k = legFS_cP x ^ k * exp ((μ+k-1)/2*(log ((x:ℂ)-1) - log ((x:ℂ)+1))) *
       (1-(1-(x:ℂ))/2)^(-(-ν)) *
       regularizedGaussHGFun (-ν) ((μ-ν-1)+k) (μ+k) (((x-1)/(x+1) : ℝ) : ℂ) := by
@@ -1164,7 +1159,7 @@ lemma legFS_wP_eq (ν μ : ℂ) {x : ℝ} (hx : 1 < x) (k : ℕ) :
   ring
 
 /-- The ratio limit for the fraction 14.14.1: `-w_k/(a_{k+1}w_{k+2}) → (x+1)/(x-1)`. -/
-lemma legFS_wP_ratio (ν μ : ℂ) {x : ℝ} (hx : 1 < x) :
+theorem legFS_wP_ratio (ν μ : ℂ) {x : ℝ} (hx : 1 < x) :
     Tendsto (fun k => -(legFS_wP ν μ x k /
       (legendrePCFNum ν μ x (k+1) * legFS_wP ν μ x (k+2)))) atTop
       (𝓝 ((exp (log ((x:ℂ)-1) - log ((x:ℂ)+1)))⁻¹)) ∧ ∀ᶠ k in atTop, legFS_wP ν μ x k ≠ 0 := by
@@ -1249,7 +1244,7 @@ lemma legFS_wP_ratio (ν μ : ℂ) {x : ℝ} (hx : 1 < x) :
       (div_ne_zero hGk (Gamma_ne_zero_of_re_pos hk))
 
 /-- `(2/√(x²-1)) (x²-1)/4 = √(x²-1)/2`. -/
-lemma legFS_cP_mul {x : ℝ} (hx : 1 < x) :
+theorem legFS_cP_mul {x : ℝ} (hx : 1 < x) :
     legFS_cP x * ((x:ℂ)^2-1) / 4 = (Real.sqrt (x^2-1) : ℂ) / 2 := by
   have hy : 0 < x^2 - 1 := by nlinarith
   have hs := Real.sq_sqrt hy.le

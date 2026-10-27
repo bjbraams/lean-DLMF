@@ -34,7 +34,7 @@ namespace DLMF.Hypergeometric
 abbrev shiftParams (a : Multiset ℂ) : Multiset ℂ := a.map (· + 1)
 
 /-- `(n+1) c_{n+1}(a;b) = (∏ a) c_n(a+1; b+1)` for the regularized coefficients. -/
-lemma regularizedHGFunCoeff_succ_deriv (a b : Multiset ℂ) (n : ℕ) :
+theorem regularizedHGFunCoeff_succ_deriv (a b : Multiset ℂ) (n : ℕ) :
     ((n : ℂ) + 1) * regularizedHGFunCoeff a b (n + 1) =
       a.prod * regularizedHGFunCoeff (shiftParams a) (shiftParams b) n := by
   unfold regularizedHGFunCoeff
@@ -58,7 +58,7 @@ lemma regularizedHGFunCoeff_succ_deriv (a b : Multiset ℂ) (n : ℕ) :
   field_simp
 
 /-- The regularized function as a `tsum` of its coefficients. -/
-lemma regularizedHGFun_eq_tsum' (a b : Multiset ℂ) (z : ℂ) :
+theorem regularizedHGFun_eq_tsum' (a b : Multiset ℂ) (z : ℂ) :
     regularizedHGFun a b z = ∑' n : ℕ, regularizedHGFunCoeff a b n * z ^ n := by
   simp only [regularizedHGFun, FormalMultilinearSeries.sum, regularizedHGFunSeries,
     ofScalars_apply_eq, smul_eq_mul]
@@ -86,7 +86,7 @@ theorem deriv_regularizedHGFun {a b : Multiset ℂ}
     field_simp
 
 /-- `n cₙ(i :: a'; b) = i (cₙ(i+1 :: a'; b) - cₙ(i :: a'; b))`. -/
-lemma regularizedHGFunCoeff_contiguous (i : ℂ) (a b : Multiset ℂ) (n : ℕ) :
+theorem regularizedHGFunCoeff_contiguous (i : ℂ) (a b : Multiset ℂ) (n : ℕ) :
     (n : ℂ) * regularizedHGFunCoeff (i ::ₘ a) b n =
       i * (regularizedHGFunCoeff ((i + 1) ::ₘ a) b n - regularizedHGFunCoeff (i ::ₘ a) b n) := by
   unfold regularizedHGFunCoeff
@@ -145,7 +145,7 @@ theorem hasSum_regularized1F2 (a b c z : ℂ) :
   exact hp.hasSum_mul_pow (by simp)
 
 /-- The regularized `₁F₂(1;b,c;·)` series is entire, even when a lower parameter is a pole. -/
-lemma hasFPowerSeriesOnBall_regularized1F2_one (b c : ℂ) :
+theorem hasFPowerSeriesOnBall_regularized1F2_one (b c : ℂ) :
     HasFPowerSeriesOnBall (regularizedHGFun {1} {b,c})
       (ofScalars ℂ (regularizedHGFunCoeff {1} {b,c})) 0 ⊤ := by
   have hr : (regularizedHGFunSeries {1} {b,c}).radius = ⊤ :=
@@ -168,7 +168,7 @@ lemma regularized1F2_one_coeff_recurrence (b c : ℂ) (n : ℕ) :
   linear_combination h
 
 /-- Cancelling the upper parameter one against the factorial in the regularized coefficient. -/
-lemma regularized1F2_one_coeff (b c : ℂ) (n : ℕ) :
+theorem regularized1F2_one_coeff (b c : ℂ) (n : ℕ) :
     regularizedHGFunCoeff {1} {b,c} n=1/(Gamma (b+n)*Gamma (c+n)) := by
   simp only [regularizedHGFunCoeff, Multiset.map_singleton, Multiset.prod_singleton,
     Multiset.insert_eq_cons, Multiset.map_cons, Multiset.prod_cons]
@@ -291,7 +291,7 @@ theorem regularized1F2_one_inhomogeneous_ode (b c z : ℂ) :
   linear_combination he
 
 /-- Coefficients of a power series are determined by its sums on a small disk. -/
-lemma scalarSeries_unique_ball {c d : ℕ → ℂ} {g : ℂ → ℂ} {ρ : ℝ} (hρ : 0 < ρ)
+theorem scalarSeries_unique_ball {c d : ℕ → ℂ} {g : ℂ → ℂ} {ρ : ℝ} (hρ : 0 < ρ)
     (hc : ∀ z : ℂ, ‖z‖ < ρ → HasSum (fun n => c n * z ^ n) (g z))
     (hd : ∀ z : ℂ, ‖z‖ < ρ → HasSum (fun n => d n * z ^ n) (g z)) : c = d := by
   set ρ' : NNReal := ⟨ρ / 2, by positivity⟩

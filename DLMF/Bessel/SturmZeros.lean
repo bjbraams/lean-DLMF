@@ -8,8 +8,6 @@ module
 public import Mathlib.Analysis.SpecialFunctions.Sqrt
 
 public import DLMF.Bessel.Elementary
-public import DLMF.Bessel.Theorems
-public import DLMF.Confluent.Asymptotics
 public import DLMFMathlib.Analysis.ODE.SturmComparison
 
 /-!
@@ -45,7 +43,7 @@ namespace DLMF.Bessel
 section RealZeros
 
 /-- `₀F̃₁(c; ·)` with real parameter commutes with complex conjugation. -/
-lemma regularized0F1_conj (c : ℝ) (w : ℂ) :
+theorem regularized0F1_conj (c : ℝ) (w : ℂ) :
     regularizedHGFun (∅ : Multiset ℂ) {(c : ℂ)} (conj w) =
       conj (regularizedHGFun (∅ : Multiset ℂ) {(c : ℂ)} w) := by
   rw [regularized0F1_eq_tsum, regularized0F1_eq_tsum, Complex.conj_tsum]
@@ -54,7 +52,7 @@ lemma regularized0F1_conj (c : ℝ) (w : ℂ) :
     conj_ofReal]
 
 /-- The Lommel identity for `g = ₀F̃₁(c; ·)` along the rays `A t²`, `B t²`. -/
-lemma hasDerivAt_lommel_regularized0F1 (c : ℝ) (A B : ℂ) {t : ℝ} (ht : 0 < t) :
+theorem hasDerivAt_lommel_regularized0F1 (c : ℝ) (A B : ℂ) {t : ℝ} (ht : 0 < t) :
     HasDerivAt (fun s : ℝ => ((s ^ (2 * c) : ℝ) : ℂ) *
         (B * regularizedHGFun (∅ : Multiset ℂ) {(c : ℂ)} (A * (s : ℂ) ^ 2) *
             regularizedHGFun (∅ : Multiset ℂ) {(c : ℂ) + 1} (B * (s : ℂ) ^ 2) -
@@ -86,7 +84,7 @@ lemma hasDerivAt_lommel_regularized0F1 (c : ℝ) (A B : ℂ) {t : ℝ} (ht : 0 <
       A * regularizedHGFun (∅ : Multiset ℂ) {(c : ℂ)} (B * (t : ℂ) ^ 2) * hga)
 
 /-- If `g(A) = 0` for `g = ₀F̃₁(c; ·)` with real `c > 0`, then `A` is real. -/
-lemma conj_eq_of_regularized0F1_eq_zero {c : ℝ} (hc : 0 < c) {A : ℂ}
+theorem conj_eq_of_regularized0F1_eq_zero {c : ℝ} (hc : 0 < c) {A : ℂ}
     (hA : regularizedHGFun (∅ : Multiset ℂ) {(c : ℂ)} A = 0) : conj A = A := by
   set g := regularizedHGFun (∅ : Multiset ℂ) {(c : ℂ)} with hgdef
   set g₁ := regularizedHGFun (∅ : Multiset ℂ) {(c : ℂ) + 1} with hg₁def
@@ -209,12 +207,12 @@ end RealZeros
 section LargeI
 
 /-- A complex power of a positive real as an exponential. -/
-lemma ofReal_cpow_eq_exp_log {r : ℝ} (hr : 0 < r) (s : ℂ) :
+theorem ofReal_cpow_eq_exp_log {r : ℝ} (hr : 0 < r) (s : ℂ) :
     (r : ℂ) ^ s = exp ((Real.log r : ℂ) * s) := by
   rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr hr.ne'), ofReal_log hr.le]
 
 /-- The leading term of `I_ν` from the leading term of `𝐌(ν+½, 2ν+1, 2x)`. -/
-lemma besselI_main_term {ν : ℂ} (hν : ∀ k : ℕ, 1 + 2 * ν ≠ -k) {x : ℝ} (hx : 0 < x) :
+theorem besselI_main_term {ν : ℂ} (hν : ∀ k : ℕ, 1 + 2 * ν ≠ -k) {x : ℝ} (hx : 0 < x) :
     ((x : ℂ) / 2) ^ ν * exp (-(x : ℂ)) * Gamma (2 * ν + 1) / Gamma (ν + 1) *
       (exp ((2 * x : ℝ) : ℂ) * ((2 * x : ℝ) : ℂ) ^ (ν + 1 / 2 - (2 * ν + 1)) /
         Gamma (ν + 1 / 2)) =
@@ -261,7 +259,7 @@ lemma besselI_main_term {ν : ℂ} (hν : ∀ k : ℕ, 1 + 2 * ν ≠ -k) {x : �
       field_simp
 
 /-- `I_ν(x) = c(x) 𝐌(ν+½, 2ν+1, 2x)` with `c(x) = (x/2)^ν e^{-x} Γ(2ν+1)/Γ(ν+1)`. -/
-lemma besselI_eq_mul_regularizedConfluent {ν : ℂ} (hν : ∀ k : ℕ, 1 + 2 * ν ≠ -k) {x : ℝ}
+theorem besselI_eq_mul_regularizedConfluent {ν : ℂ} (hν : ∀ k : ℕ, 1 + 2 * ν ≠ -k) {x : ℝ}
     (hx : 0 < x) :
     ((x : ℂ) / 2) ^ ν * exp (-(x : ℂ)) * Gamma (2 * ν + 1) / Gamma (ν + 1) *
       regularizedHGFun {ν + 1 / 2} {2 * ν + 1} ((2 * x : ℝ) : ℂ) = besselI ν x := by
@@ -368,7 +366,7 @@ def besselNormalDeriv (y y' : ℝ → ℝ) (x : ℝ) : ℝ := y x / (2 * Real.sq
 /-- The coefficient `1 - (ν² - 1/4)/x²` of the normal form `u'' + q u = 0`. -/
 def besselNormalCoeff (ν x : ℝ) : ℝ := 1 - (ν ^ 2 - 1 / 4) / x ^ 2
 
-lemma IsRealBesselSolution.hasDerivAt_normal (hy : IsRealBesselSolution ν y y' y'') {x : ℝ}
+theorem IsRealBesselSolution.hasDerivAt_normal (hy : IsRealBesselSolution ν y y' y'') {x : ℝ}
     (hx : 0 < x) :
     HasDerivAt (fun t => Real.sqrt t * y t) (besselNormalDeriv y y' x) x := by
   have h := (Real.hasDerivAt_sqrt hx.ne').mul (hy x hx).1
@@ -378,7 +376,7 @@ lemma IsRealBesselSolution.hasDerivAt_normal (hy : IsRealBesselSolution ν y y' 
   field_simp
 
 /-- The Liouville normal form: `u = √x y` solves `u'' + (1 - (ν² - 1/4)/x²) u = 0`. -/
-lemma IsRealBesselSolution.hasDerivAt_normalDeriv (hy : IsRealBesselSolution ν y y' y'')
+theorem IsRealBesselSolution.hasDerivAt_normalDeriv (hy : IsRealBesselSolution ν y y' y'')
     {x : ℝ} (hx : 0 < x) :
     HasDerivAt (fun t => 1 * besselNormalDeriv y y' t)
       (-(besselNormalCoeff ν x * (Real.sqrt x * y x))) x := by
@@ -399,7 +397,7 @@ lemma IsRealBesselSolution.hasDerivAt_normalDeriv (hy : IsRealBesselSolution ν 
   field_simp
   ring
 
-lemma eq_zero_of_sqrt_mul_eq_zero {x : ℝ} (hx : 0 < x) (h : Real.sqrt x * y x = 0) : y x = 0 :=
+theorem eq_zero_of_sqrt_mul_eq_zero {x : ℝ} (hx : 0 < x) (h : Real.sqrt x * y x = 0) : y x = 0 :=
   (mul_eq_zero.mp h).resolve_left (Real.sqrt_pos.mpr hx).ne'
 
 /-- For `|ν| < 1/2` every interval `(a, a + π)` with `a > 0` contains a zero of every real
@@ -516,7 +514,7 @@ theorem isRealBesselSolution_besselJ (ν : ℝ) :
     show ((x ^ 2 : ℝ) : ℂ) - (ν : ℂ) ^ 2 = ((x ^ 2 - ν ^ 2 : ℝ) : ℂ) by push_cast; ring] at h
   simpa only [add_re, re_ofReal_mul, zero_re] using h
 
-lemma besselJ_eq_zero_iff_re {ν x : ℝ} (hx : 0 < x) :
+theorem besselJ_eq_zero_iff_re {ν x : ℝ} (hx : 0 < x) :
     besselJ ν x = 0 ↔ (besselJ ν x).re = 0 := by
   constructor
   · intro h; rw [h, zero_re]

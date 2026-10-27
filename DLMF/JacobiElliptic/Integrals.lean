@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.JacobiElliptic.Derivatives
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.InverseDeriv
 
 /-!
 # Integrals of the Jacobian elliptic functions (DLMF §22.14)
@@ -46,7 +45,7 @@ section Helpers
 variable {m : ℝ}
 
 /-- The amplitude is strictly increasing (helper). -/
-lemma je22b_jacobiAmm_strictMono (hm : m < 1) : StrictMono fun u => Real.jacobiAmm u m := by
+theorem je22b_jacobiAmm_strictMono (hm : m < 1) : StrictMono fun u => Real.jacobiAmm u m := by
   simp only [Real.jacobiAmm, hm, ↓reduceDIte]
   exact (Real.incEllIntFmOrderIso hm).symm.strictMono
 
@@ -73,7 +72,7 @@ lemma je22b_jacobiCnm_pos (hm : m < 1) {x : ℝ} (hx0 : -Real.compEllIntKm m < x
   exact Real.cos_pos_of_mem_Ioo ⟨h0, h1⟩
 
 /-- `|sn| ≤ 1` and `|cn| ≤ 1` (helper). -/
-lemma je22b_abs_le_one (u : ℝ) : |Real.jacobiSnm u m| ≤ 1 ∧ |Real.jacobiCnm u m| ≤ 1 :=
+theorem je22b_abs_le_one (u : ℝ) : |Real.jacobiSnm u m| ≤ 1 ∧ |Real.jacobiCnm u m| ≤ 1 :=
   ⟨Real.abs_sin_le_one _, Real.abs_cos_le_one _⟩
 
 end Helpers

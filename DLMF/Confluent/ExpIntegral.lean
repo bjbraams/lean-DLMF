@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Confluent.IncompleteGamma
-public import DLMF.Gamma.IntegralRepresentations
 public import TauCeti.Analysis.Contour.WorkedExamples.HalfDisc.SineIntegral
 
 /-!
@@ -146,7 +145,7 @@ theorem genExpIntE_one_eq_integral {x : ℝ} (hx : 0 < x) :
 def Real.expIntEin (x : ℝ) : ℝ :=
   ∫ t in (0 : ℝ)..x, (1 - Real.exp (-t)) / t
 
-lemma intervalIntegrable_einIntegrand {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) :
+theorem intervalIntegrable_einIntegrand {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) :
     IntervalIntegrable (fun t : ℝ => (1 - Real.exp (-t)) / t) volume a b := by
   refine (intervalIntegrable_const (c := (1 : ℝ))).mono_fun'
     (by fun_prop : Measurable fun t : ℝ => (1 - Real.exp (-t)) / t).aestronglyMeasurable ?_
@@ -161,7 +160,7 @@ lemma intervalIntegrable_einIntegrand {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) 
   rw [abs_of_pos (by linarith)]
   linarith
 
-lemma integrableOn_exp_neg_div {a : ℝ} (ha : 0 < a) :
+theorem integrableOn_exp_neg_div {a : ℝ} (ha : 0 < a) :
     IntegrableOn (fun t : ℝ => Real.exp (-t) / t) (Ioi a) := by
   refine ((exp_neg_integrableOn_Ioi a one_pos).const_mul a⁻¹).mono'
     ((by fun_prop : Measurable fun t : ℝ => Real.exp (-t) / t).aestronglyMeasurable) ?_
@@ -172,14 +171,14 @@ lemma integrableOn_exp_neg_div {a : ℝ} (ha : 0 < a) :
   exact mul_le_mul_of_nonneg_right (inv_anti₀ ha ht.le) (Real.exp_pos _).le
 
 /-- `∫₀¹ dt/(1+t) = log 2`. -/
-lemma integral_one_div_one_add_zero_one : ∫ t in (0 : ℝ)..1, 1 / (1 + t) = Real.log 2 := by
+theorem integral_one_div_one_add_zero_one : ∫ t in (0 : ℝ)..1, 1 / (1 + t) = Real.log 2 := by
   have h := intervalIntegral.integral_comp_add_left (fun t : ℝ => 1 / t) (a := 0) (b := 1) 1
   simp only [add_zero] at h
   rw [h, integral_one_div_of_pos one_pos (by norm_num)]
   norm_num
 
 /-- `∫₁^∞ dt/(t(1+t)) = log 2`. -/
-lemma integral_Ioi_one_one_div_mul_one_add :
+theorem integral_Ioi_one_one_div_mul_one_add :
     ∫ t in Ioi (1 : ℝ), 1 / (t * (1 + t)) = Real.log 2 := by
   have hderiv : ∀ t ∈ Ioi (1 : ℝ), HasDerivAt (fun t => Real.log t - Real.log (1 + t))
       (1 / (t * (1 + t))) t := by
@@ -282,7 +281,7 @@ theorem genExpIntE_one_eq_Ein {x : ℝ} (hx : 0 < x) :
   rw [hE, hfg, hsub, hEin, hlog, hγ]
   ring
 
-lemma hasSum_einIntegrand {t : ℝ} (ht : t ≠ 0) :
+theorem hasSum_einIntegrand {t : ℝ} (ht : t ≠ 0) :
     HasSum (fun k : ℕ => (-1) ^ k * t ^ k / (k + 1)!) ((1 - Real.exp (-t)) / t) := by
   have h := NormedSpace.expSeries_div_hasSum_exp (-t)
   rw [← Real.exp_eq_exp_ℝ, ← hasSum_nat_add_iff' 1] at h
@@ -297,7 +296,7 @@ lemma hasSum_einIntegrand {t : ℝ} (ht : t ≠ 0) :
     ring
 
 /-- Termwise integration on `[0, x]` of a series dominated by a summable sequence. -/
-lemma hasSum_intervalIntegral_of_dominated {F : ℕ → ℝ → ℝ} {f : ℝ → ℝ} {b : ℕ → ℝ} (x : ℝ)
+theorem hasSum_intervalIntegral_of_dominated {F : ℕ → ℝ → ℝ} {f : ℝ → ℝ} {b : ℕ → ℝ} (x : ℝ)
     (hF : ∀ k, Continuous (F k)) (hb : ∀ k t, |t| ≤ |x| → |F k t| ≤ b k) (hs : Summable b)
     (hlim : ∀ t, t ≠ 0 → HasSum (fun k => F k t) (f t)) :
     HasSum (fun k => ∫ t in (0 : ℝ)..x, F k t) (∫ t in (0 : ℝ)..x, f t) := by

@@ -7,16 +7,9 @@ module
 
 public import DLMF.Gamma.Digamma
 public import DLMF.Gamma.GaussDigamma
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Complex
-public import Mathlib.Analysis.Complex.Trigonometric
-public import Mathlib.Data.Nat.Factorial.DoubleFactorial
-public import Mathlib.Analysis.SpecialFunctions.Gamma.Digamma
 public import Mathlib.NumberTheory.ZetaValues
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
-public import Mathlib.Analysis.Calculus.Deriv.Star
 public import Mathlib.Analysis.Complex.AbelLimit
-public import Mathlib.Analysis.SpecialFunctions.Complex.LogBounds
-public import Mathlib.RingTheory.RootsOfUnity.Complex
 
 /-!
 # Special values and extrema (DLMF §5.4)
@@ -63,7 +56,7 @@ theorem doubleFactorial_odd (n : ℕ) :
   linear_combination (-((2 * n + 1).doubleFactorial : ℂ)) * hpi
 
 /-- `Γ(z) Γ(z̄) = |Γ(z)|²`. -/
-lemma Gamma_mul_Gamma_conj (z : ℂ) :
+theorem Gamma_mul_Gamma_conj (z : ℂ) :
     Complex.Gamma z * Complex.Gamma (conj z) = (‖Complex.Gamma z‖ : ℂ) ^ 2 := by
   rw [Complex.Gamma_conj, mul_conj, Complex.normSq_eq_norm_sq, ofReal_pow]
 
@@ -218,7 +211,7 @@ theorem digamma_nat_add_half (n : ℕ) (hn : 0 < n) :
   ring
 
 /-- The digamma function commutes with complex conjugation. -/
-lemma digamma_conj (s : ℂ) : Complex.digamma (conj s) = conj (Complex.digamma s) := by
+theorem digamma_conj (s : ℂ) : Complex.digamma (conj s) = conj (Complex.digamma s) := by
   have hfun : (conj ∘ Complex.Gamma ∘ conj) = Complex.Gamma := by
     funext z
     simp [Function.comp_def, Complex.Gamma_conj]
@@ -229,10 +222,10 @@ lemma digamma_conj (s : ℂ) : Complex.digamma (conj s) = conj (Complex.digamma 
     rw [h, Complex.conj_conj]
   simp only [Complex.digamma_def, logDeriv_apply, hderiv, Complex.Gamma_conj, map_div₀]
 
-lemma neg_I_mul_ofReal_im (r : ℝ) : (-I * (r : ℂ)).im = -r := by
+theorem neg_I_mul_ofReal_im (r : ℝ) : (-I * (r : ℂ)).im = -r := by
   simp
 
-lemma cot_pi_mul_I (y : ℝ) (hy : y ≠ 0) :
+theorem cot_pi_mul_I (y : ℝ) (hy : y ≠ 0) :
     cot ((π : ℂ) * (I * y)) = -I * (Real.cosh (π * y) / Real.sinh (π * y)) := by
   have hsplit : (π : ℂ) * (I * y) = (0 : ℂ) + ((π * y : ℝ) : ℂ) * I := by push_cast; ring
   have hsinh : (Real.sinh (π * y) : ℂ) ≠ 0 := by
@@ -343,22 +336,22 @@ open Filter Topology Finset
 /-- The primitive `q`-th root of unity `e^{2πi/q}`. -/
 noncomputable def gaussRoot (q : ℕ) : ℂ := Complex.exp (2 * π * I / q)
 
-lemma isPrimitiveRoot_gaussRoot {q : ℕ} (hq : q ≠ 0) : IsPrimitiveRoot (gaussRoot q) q :=
+theorem isPrimitiveRoot_gaussRoot {q : ℕ} (hq : q ≠ 0) : IsPrimitiveRoot (gaussRoot q) q :=
   Complex.isPrimitiveRoot_exp q hq
 
-lemma norm_gaussRoot_pow (q k : ℕ) : ‖gaussRoot q ^ k‖ = 1 := by
+theorem norm_gaussRoot_pow (q k : ℕ) : ‖gaussRoot q ^ k‖ = 1 := by
   rw [norm_pow, gaussRoot, Complex.norm_exp]
   have : (2 * π * I / q : ℂ).re = 0 := by
     rw [show (2 * π * I / q : ℂ) = ((2 * π / q : ℝ) : ℂ) * I by push_cast; ring]
     simp
   simp [this]
 
-lemma gaussRoot_pow_ne_one {q k : ℕ} (hk0 : 0 < k) (hkq : k < q) : gaussRoot q ^ k ≠ 1 := by
+theorem gaussRoot_pow_ne_one {q k : ℕ} (hk0 : 0 < k) (hkq : k < q) : gaussRoot q ^ k ≠ 1 := by
   rw [Ne, (isPrimitiveRoot_gaussRoot (by omega)).pow_eq_one_iff_dvd]
   exact Nat.not_dvd_of_pos_of_lt hk0 hkq
 
 /-- Roots-of-unity filter. -/
-lemma sum_gaussRoot_pow_mul {q : ℕ} (hq : q ≠ 0) (j : ℕ) :
+theorem sum_gaussRoot_pow_mul {q : ℕ} (hq : q ≠ 0) (j : ℕ) :
     ∑ k ∈ range q, gaussRoot q ^ (k * j) = if q ∣ j then (q : ℂ) else 0 := by
   have hprim := isPrimitiveRoot_gaussRoot hq
   simp_rw [mul_comm _ j, pow_mul]
@@ -370,7 +363,7 @@ lemma sum_gaussRoot_pow_mul {q : ℕ} (hq : q ≠ 0) (j : ℕ) :
       zero_div]
 
 /-- One block of `q` consecutive terms of the filtered harmonic sum. -/
-lemma sum_gaussRoot_block {q p : ℕ} (hp : 0 < p) (hpq : p < q) (n : ℕ) :
+theorem sum_gaussRoot_block {q p : ℕ} (hp : 0 < p) (hpq : p < q) (n : ℕ) :
     ∑ r ∈ range q, (1 / ((q * n + r : ℕ) + 1 : ℂ)) *
         ∑ k ∈ range q, gaussRoot q ^ (k * (q * n + r + 1 + (q - p))) =
       q / (q * n + p) := by
@@ -411,7 +404,7 @@ lemma sum_gaussRoot_block {q p : ℕ} (hp : 0 < p) (hpq : p < q) (n : ℕ) :
   ring
 
 /-- The filtered harmonic sum over `[1, qN]` collapses to `∑ q/(qn+p)`. -/
-lemma sum_gaussRoot_filtered {q p : ℕ} (hp : 0 < p) (hpq : p < q) (N : ℕ) :
+theorem sum_gaussRoot_filtered {q p : ℕ} (hp : 0 < p) (hpq : p < q) (N : ℕ) :
     ∑ m ∈ range (q * N), (1 / ((m : ℕ) + 1 : ℂ)) *
         ∑ k ∈ range q, gaussRoot q ^ (k * (m + 1 + (q - p))) =
       ∑ n ∈ range N, (q : ℂ) / (q * n + p) := by
@@ -421,7 +414,7 @@ lemma sum_gaussRoot_filtered {q p : ℕ} (hp : 0 < p) (hpq : p < q) (N : ℕ) :
     rw [Nat.mul_succ, sum_range_add, ih, sum_range_succ, ← sum_gaussRoot_block hp hpq N]
 
 /-- The roots-of-unity decomposition of `∑_{n<N} q/(qn+p)`. -/
-lemma sum_gaussRoot_filtered_eq {q p : ℕ} (hp : 0 < p) (hpq : p < q) (N : ℕ) :
+theorem sum_gaussRoot_filtered_eq {q p : ℕ} (hp : 0 < p) (hpq : p < q) (N : ℕ) :
     ∑ n ∈ range N, (q : ℂ) / (q * n + p) =
       ∑ k ∈ range q, gaussRoot q ^ (k * (q - p)) *
         ∑ m ∈ range (q * N), (gaussRoot q ^ k) ^ (m + 1) / ((m : ℂ) + 1) := by
@@ -431,7 +424,7 @@ lemma sum_gaussRoot_filtered_eq {q p : ℕ} (hp : 0 < p) (hpq : p < q) (N : ℕ)
   refine sum_congr rfl fun k _ => sum_congr rfl fun m _ => ?_
   rw [← pow_mul, show k * (m + 1 + (q - p)) = k * (q - p) + k * (m + 1) by ring, pow_add]
   ring
-lemma re_lt_one_of_norm_eq_one {z : ℂ} (hz : ‖z‖ = 1) (hz1 : z ≠ 1) : z.re < 1 := by
+theorem re_lt_one_of_norm_eq_one {z : ℂ} (hz : ‖z‖ = 1) (hz1 : z ≠ 1) : z.re < 1 := by
   rcases (Complex.re_le_norm z).lt_or_eq with h | h
   · linarith
   · exfalso
@@ -445,7 +438,7 @@ lemma re_lt_one_of_norm_eq_one {z : ℂ} (hz : ‖z‖ = 1) (hz1 : z ≠ 1) : z.
 
 /-- `∑ zᵐ/m = -log(1-z)` on the unit circle away from `1` (Dirichlet test plus Abel's
 theorem). -/
-lemma tendsto_sum_pow_div_of_norm_eq_one {z : ℂ} (hz : ‖z‖ = 1) (hz1 : z ≠ 1) :
+theorem tendsto_sum_pow_div_of_norm_eq_one {z : ℂ} (hz : ‖z‖ = 1) (hz1 : z ≠ 1) :
     Tendsto (fun M : ℕ => ∑ m ∈ range M, z ^ (m + 1) / (m + 1)) atTop
       (𝓝 (-Complex.log (1 - z))) := by
   have h1z : 1 - z ≠ 0 := sub_ne_zero.mpr (Ne.symm hz1)
@@ -512,7 +505,7 @@ lemma tendsto_sum_pow_div_of_norm_eq_one {z : ℂ} (hz : ‖z‖ = 1) (hz1 : z �
   field_simp
 
 /-- `H_N - H_{qN} → -log q`. -/
-lemma tendsto_harmonic_sub_harmonic_mul {q : ℕ} (hq : 0 < q) :
+theorem tendsto_harmonic_sub_harmonic_mul {q : ℕ} (hq : 0 < q) :
     Tendsto (fun N : ℕ => (harmonic N : ℝ) - harmonic (q * N)) atTop (𝓝 (-Real.log q)) := by
   have hqN : Tendsto (fun N : ℕ => q * N) atTop atTop :=
     tendsto_atTop_mono (fun N => Nat.le_mul_of_pos_left N hq) tendsto_id
@@ -528,7 +521,7 @@ lemma tendsto_harmonic_sub_harmonic_mul {q : ℕ} (hq : 0 < q) :
 
 /-- Complex form of Gauss's digamma theorem:
 `ψ(p/q) + γ = -log q + ∑_{k=1}^{q-1} ω^{-kp} log(1 - ωᵏ)`, `ω = e^{2πi/q}`. -/
-lemma digamma_rat_complex (p q : ℕ) (hp : 0 < p) (hpq : p < q) :
+theorem digamma_rat_complex (p q : ℕ) (hp : 0 < p) (hpq : p < q) :
     ((Real.digamma (p / q) + Real.eulerMascheroniConstant : ℝ) : ℂ) =
       -(Real.log q : ℂ) + ∑ k ∈ Icc 1 (q - 1),
         gaussRoot q ^ (k * (q - p)) * Complex.log (1 - gaussRoot q ^ k) := by
@@ -591,14 +584,14 @@ lemma digamma_rat_complex (p q : ℕ) (hp : 0 < p) (hpq : p < q) :
   push_cast
   simp only [mul_neg, sum_neg_distrib, sub_neg_eq_add]
 
-lemma gaussRoot_pow_eq (q n : ℕ) :
+theorem gaussRoot_pow_eq (q n : ℕ) :
     gaussRoot q ^ n = Complex.exp (((2 * π * n / q : ℝ) : ℂ) * I) := by
   rw [gaussRoot, ← Complex.exp_nat_mul]
   congr 1
   push_cast
   ring
 
-lemma gaussRoot_pow_add_pow {p q : ℕ} (hq : 0 < q) (hpq : p ≤ q) (k : ℕ) :
+theorem gaussRoot_pow_add_pow {p q : ℕ} (hq : 0 < q) (hpq : p ≤ q) (k : ℕ) :
     gaussRoot q ^ (k * (q - p)) + gaussRoot q ^ (k * p) =
       ((2 * Real.cos (2 * π * k * p / q) : ℝ) : ℂ) := by
   have hq0 : (q : ℂ) ≠ 0 := by exact_mod_cast hq.ne'
@@ -620,7 +613,7 @@ lemma gaussRoot_pow_add_pow {p q : ℕ} (hq : 0 < q) (hpq : p ≤ q) (k : ℕ) :
   push_cast
   ring
 
-lemma log_one_sub_gaussRoot_pow_re (q k : ℕ) :
+theorem log_one_sub_gaussRoot_pow_re (q k : ℕ) :
     (Complex.log (1 - gaussRoot q ^ k)).re =
       (1 / 2) * Real.log (2 - 2 * Real.cos (2 * π * k / q)) := by
   rw [Complex.log_re, gaussRoot_pow_eq]

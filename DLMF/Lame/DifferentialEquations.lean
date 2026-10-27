@@ -8,10 +8,7 @@ module
 public import DLMF.Lame.Eigenvalues
 public import DLMF.Heun.Basic
 public import DLMFMathlib.Analysis.ODE.Singularities
-public import DLMF.JacobiElliptic.Derivatives
-public import DLMF.JacobiElliptic.ElementaryIdentities
-public import DLMF.Weierstrass.DifferentialEquations
-public import DLMF.JacobiElliptic.SpecialValues
+public import DLMF.Lame.P3lWeierstrass
 
 /-!
 # Lamé's equation: singularities and other forms (DLMF §§29.2, 29.10, 29.11)
@@ -300,7 +297,7 @@ theorem Real.isLameSolution_comp_lamePhi (hk0 : 0 < k) (hk1 : k < 1) {W : ℝ �
 `(e₂ - e₃)/(e₁ - e₃) = k²`, `g = (e₁ - e₃)h + ν(ν+1)e₃` (29.2.7), `η = (e₁-e₃)^{-1/2}(z - iK')`
 (29.2.8) and `g₂ = -4(e₂e₃ + e₃e₁ + e₁e₂)`, `g₃ = 4e₁e₂e₃` (29.2.12). If `w` solves Lamé's
 equation 29.2.1 on `U`, then `η ↦ w((e₁-e₃)^{1/2} η + iK')` solves the Weierstrass form 29.2.9
-on the corresponding set. Admitted. -/
+on the corresponding set. Proved in `DLMF.Lame.P3lWeierstrass` (`p3l_weierstrass`). -/
 @[dlmf 29.2.E6, dlmf 29.2.E7, dlmf 29.2.E8, dlmf 29.2.E9, dlmf 29.2.E12]
 theorem isLameWeierstrassSolutionOn_of_isLameSolutionOn (hk0 : 0 < k) (hk1 : k < 1)
     {e₁ e₂ e₃ : ℝ} (h12 : e₂ < e₁) (h23 : e₃ < e₂) (hsum : e₁ + e₂ + e₃ = 0)
@@ -309,8 +306,8 @@ theorem isLameWeierstrassSolutionOn_of_isLameSolutionOn (hk0 : 0 < k) (hk1 : k <
     IsLameWeierstrassSolutionOn ((e₁ - e₃) * h + ν * (ν + 1) * e₃) ν
       (-4 * (e₂ * e₃ + e₃ * e₁ + e₁ * e₂)) (4 * e₁ * e₂ * e₃)
       (fun η => w (Real.sqrt (e₁ - e₃) * η + I * Real.compEllIntKm (1 - k ^ 2)))
-      {η | (Real.sqrt (e₁ - e₃) : ℂ) * η + I * Real.compEllIntKm (1 - k ^ 2) ∈ U} := by
-  sorry
+      {η | (Real.sqrt (e₁ - e₃) : ℂ) * η + I * Real.compEllIntKm (1 - k ^ 2) ∈ U} :=
+  p3l_weierstrass hk0 hk1 h12 h23 hsum hk2 hU hw
 
 open PeriodPair in
 /-- 29.2.10–29.2.11: if `v` solves the algebraic Weierstrass form 29.2.10 on an open set `V`

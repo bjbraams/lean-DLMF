@@ -6,9 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.BernoulliEuler.Properties
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 public import Mathlib.Analysis.Complex.AbelLimit
-public import Mathlib.Analysis.SpecialFunctions.Complex.LogBounds
 
 /-!
 # Bernoulli and Euler polynomials: series expansions (DLMF §24.8)
@@ -35,7 +33,7 @@ namespace DLMF.BernoulliEuler
 /-! ### Helpers -/
 
 /-- Real form of DLMF 24.4.23: `Eₙ(x) = 2ⁿ⁺¹/(n+1) (Bₙ₊₁(x/2 + 1/2) - Bₙ₊₁(x/2))`. -/
-theorem q24a_eulerFun_eq_bernoulliFun_sub (n : ℕ) (x : ℝ) :
+lemma q24a_eulerFun_eq_bernoulliFun_sub (n : ℕ) (x : ℝ) :
     eulerFun n x = 2 ^ (n + 1) / (n + 1) *
       (bernoulliFun (n + 1) (x / 2 + 1 / 2) - bernoulliFun (n + 1) (x / 2)) := by
   have h := eulerPolyE_eq_bernoulliPolyB_sub n x
@@ -48,7 +46,7 @@ theorem q24a_eulerFun_eq_bernoulliFun_sub (n : ℕ) (x : ℝ) :
   exact_mod_cast h'
 
 /-- Restricting a series vanishing at even indices to the odd indices. -/
-theorem q24a_hasSum_odd {f : ℕ → ℝ} {a : ℝ} (h : HasSum f a) (h0 : ∀ j, f (2 * j) = 0) :
+lemma q24a_hasSum_odd {f : ℕ → ℝ} {a : ℝ} (h : HasSum f a) (h0 : ∀ j, f (2 * j) = 0) :
     HasSum (fun k => f (2 * k + 1)) a := by
   have hinj : Function.Injective (fun m : ℕ => 2 * m + 1) := fun a b h => by simp at h; omega
   refine (hinj.hasSum_iff fun n hn => ?_).mpr h
@@ -60,7 +58,7 @@ theorem q24a_hasSum_odd {f : ℕ → ℝ} {a : ℝ} (h : HasSum f a) (h0 : ∀ j
 
 /-- The complex logarithmic series on the unit circle: for `w = e^{iθ}`, `0 < θ < 2π`, the partial
 sums of `∑_{n≥1} wⁿ/n` converge to `-log(1 - w)` (Dirichlet's test and Abel's limit theorem). -/
-theorem r24a_tendsto_log_series {θ : ℝ} (h0 : 0 < θ) (h1 : θ < 2 * π) :
+lemma r24a_tendsto_log_series {θ : ℝ} (h0 : 0 < θ) (h1 : θ < 2 * π) :
     Tendsto (fun N : ℕ => ∑ n ∈ range N, Complex.exp (θ * Complex.I) ^ n / n) atTop
       (𝓝 (-Complex.log (1 - Complex.exp (θ * Complex.I)))) := by
   set w := Complex.exp (θ * Complex.I) with hw
@@ -130,7 +128,7 @@ theorem r24a_tendsto_log_series {θ : ℝ} (h0 : 0 < θ) (h1 : θ < 2 * π) :
 
 
 /-- `arg(1 - e^{iθ}) = (θ - π)/2` for `0 < θ < 2π`. -/
-theorem r24a_arg_one_sub_exp {θ : ℝ} (h0 : 0 < θ) (h1 : θ < 2 * π) :
+lemma r24a_arg_one_sub_exp {θ : ℝ} (h0 : 0 < θ) (h1 : θ < 2 * π) :
     Complex.arg (1 - Complex.exp (θ * Complex.I)) = (θ - π) / 2 := by
   have hs : 0 < Real.sin (θ / 2) := sin_pos_of_pos_of_lt_pi (by linarith) (by linarith)
   have he : 1 - Complex.exp (θ * Complex.I) = ((2 * Real.sin (θ / 2) : ℝ) : ℂ) *
@@ -154,7 +152,7 @@ theorem r24a_arg_one_sub_exp {θ : ℝ} (h0 : 0 < θ) (h1 : θ < 2 * π) :
 
 
 /-- Symmetric sums over `0 < |k| ≤ N` as sums over `k = 1, …, N`. -/
-theorem r24a_sum_symm_Icc {M : Type*} [AddCommMonoid M] (f : ℤ → M) (N : ℕ) :
+lemma r24a_sum_symm_Icc {M : Type*} [AddCommMonoid M] (f : ℤ → M) (N : ℕ) :
     ∑ k ∈ Icc (-(N : ℤ)) N with k ≠ 0, f k = ∑ k ∈ range N, (f (k + 1) + f (-(k + 1))) := by
   induction N with
   | zero => simp [Finset.filter_singleton]

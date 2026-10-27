@@ -54,7 +54,7 @@ section Laplace
 variable {V : Type*} [NormedAddCommGroup V] [NormedSpace ℂ V] [CompleteSpace V]
 
 /-- `t e^{-δ t} ≤ 1/δ` for `δ > 0`. -/
-lemma mul_exp_neg_mul_le_recip {δ : ℝ} (hδ : 0 < δ) (t : ℝ) :
+theorem mul_exp_neg_mul_le_recip {δ : ℝ} (hδ : 0 < δ) (t : ℝ) :
     t * Real.exp (-δ * t) ≤ δ⁻¹ := by
   have h1 := Real.add_one_le_exp (δ * t)
   have h2 : Real.exp (-δ * t) * Real.exp (δ * t) = 1 := by
@@ -153,7 +153,7 @@ end Laplace
 section Rotate
 
 /-- A power is dominated by any decaying exponential on `[1, ∞)`. -/
-lemma exists_rpow_mul_exp_neg_le' (k : ℝ) {b : ℝ} (hb : 0 < b) :
+theorem exists_rpow_mul_exp_neg_le' (k : ℝ) {b : ℝ} (hb : 0 < b) :
     ∃ K, 0 ≤ K ∧ ∀ r : ℝ, 1 ≤ r → r ^ k * Real.exp (-b * r) ≤ K := by
   have h := (tendsto_rpow_mul_exp_neg_mul_atTop_nhds_zero k b hb).eventually
     (eventually_le_nhds (zero_lt_one' ℝ))
@@ -238,14 +238,14 @@ end Rotate
 namespace Complex
 
 /-- `re (z e^{iy}) = |z| cos(arg z + y)`. -/
-lemma re_mul_exp_ofReal_mul_I (z : ℂ) (y : ℝ) :
+theorem re_mul_exp_ofReal_mul_I (z : ℂ) (y : ℝ) :
     (z * exp (y * I)).re = ‖z‖ * Real.cos (arg z + y) := by
   conv_lhs => rw [← norm_mul_exp_arg_mul_I z]
   rw [mul_assoc, ← exp_add, show (arg z : ℂ) * I + y * I = ((arg z + y : ℝ) : ℂ) * I by
     push_cast; ring, re_ofReal_mul, exp_ofReal_mul_I_re]
 
 /-- `(z e^{iθ})^w = z^w e^{iθw}` when `arg z + θ ∈ (-π, π]`. -/
-lemma cpow_mul_exp_ofReal_mul_I {z : ℂ} (hz : z ≠ 0) {θ : ℝ} (h1 : -π < arg z + θ)
+theorem cpow_mul_exp_ofReal_mul_I {z : ℂ} (hz : z ≠ 0) {θ : ℝ} (h1 : -π < arg z + θ)
     (h2 : arg z + θ ≤ π) (w : ℂ) :
     (z * exp (θ * I)) ^ w = z ^ w * exp (θ * I * w) := by
   have hlog : log (z * exp (θ * I)) = log z + θ * I := by
@@ -256,14 +256,14 @@ lemma cpow_mul_exp_ofReal_mul_I {z : ℂ} (hz : z ≠ 0) {θ : ℝ} (h1 : -π < 
   ring_nf
 
 /-- `(r e^{iθ})^w = r^w e^{iθw}` for `r > 0` and `θ ∈ (-π, π]`. -/
-lemma ofReal_mul_exp_cpow {r : ℝ} (hr : 0 < r) {θ : ℝ} (h1 : -π < θ) (h2 : θ ≤ π) (w : ℂ) :
+theorem ofReal_mul_exp_cpow {r : ℝ} (hr : 0 < r) {θ : ℝ} (h1 : -π < θ) (h2 : θ ≤ π) (w : ℂ) :
     ((r : ℂ) * exp (θ * I)) ^ w = (r : ℂ) ^ w * exp (θ * I * w) :=
   cpow_mul_exp_ofReal_mul_I (ofReal_ne_zero.mpr hr.ne')
     (by rw [arg_ofReal_of_nonneg hr.le, zero_add]; exact h1)
     (by rw [arg_ofReal_of_nonneg hr.le, zero_add]; exact h2) w
 
 /-- An angle in `(-3π/2, 3π/2)` with positive cosine lies in `(-π/2, π/2)`. -/
-lemma abs_lt_pi_div_two_of_cos_pos' {u : ℝ} (h1 : -(3 * Real.pi / 2) < u)
+theorem abs_lt_pi_div_two_of_cos_pos' {u : ℝ} (h1 : -(3 * Real.pi / 2) < u)
     (h2 : u < 3 * Real.pi / 2) (hc : 0 < Real.cos u) : |u| < Real.pi / 2 := by
   rw [abs_lt]
   constructor
@@ -277,7 +277,7 @@ lemma abs_lt_pi_div_two_of_cos_pos' {u : ℝ} (h1 : -(3 * Real.pi / 2) < u)
     linarith
 
 /-- If `re (z e^{iθ}) > 0` with `|θ| < π/2`, then `|arg z + θ| < π/2`. -/
-lemma abs_arg_add_lt_of_re_mul_exp_pos {z : ℂ} {θ : ℝ} (hθ : |θ| < Real.pi / 2)
+theorem abs_arg_add_lt_of_re_mul_exp_pos {z : ℂ} {θ : ℝ} (hθ : |θ| < Real.pi / 2)
     (h : 0 < (z * exp (θ * I)).re) : |arg z + θ| < Real.pi / 2 := by
   rw [re_mul_exp_ofReal_mul_I] at h
   have hc : 0 < Real.cos (arg z + θ) := by
@@ -288,7 +288,7 @@ lemma abs_arg_add_lt_of_re_mul_exp_pos {z : ℂ} {θ : ℝ} (hθ : |θ| < Real.p
 
 /-- If `re z > 0` and `re (z e^{iθ}) > 0` with `|θ| < π/2`, then `re (z e^{iy}) > 0` for every
 `y` between `0` and `θ`. -/
-lemma re_mul_exp_pos_of_mem_uIcc {z : ℂ} {θ y : ℝ} (hθ : |θ| < π / 2) (hz : 0 < z.re)
+theorem re_mul_exp_pos_of_mem_uIcc {z : ℂ} {θ y : ℝ} (hθ : |θ| < π / 2) (hz : 0 < z.re)
     (hzθ : 0 < (z * exp (θ * I)).re) (hy : y ∈ [[0, θ]]) : 0 < (z * exp (y * I)).re := by
   have hz0 : z ≠ 0 := fun h => by simp [h] at hz
   have h0 : |arg z| < π / 2 := Complex.abs_arg_lt_pi_div_two_iff.mpr (Or.inl hz)
@@ -305,14 +305,14 @@ lemma re_mul_exp_pos_of_mem_uIcc {z : ℂ} {θ y : ℝ} (hθ : |θ| < π / 2) (h
   exact Real.cos_pos_of_mem_Ioo ⟨by linarith [abs_nonneg (arg z + y), Real.pi_pos], h2⟩
 
 /-- `(r e^{iy})² = r² e^{2iy}`. -/
-lemma ofReal_mul_exp_ofReal_mul_I_sq (r y : ℝ) :
+theorem ofReal_mul_exp_ofReal_mul_I_sq (r y : ℝ) :
     ((r : ℂ) * exp (y * I)) ^ 2 = ((r ^ 2 : ℝ) : ℂ) * exp (((2 * y : ℝ) : ℂ) * I) := by
   rw [mul_pow, ← Complex.exp_nat_mul]
   push_cast
   ring_nf
 
 /-- `|sin u| ≤ |1 + s e^{iu}|` for real `s`. -/
-lemma abs_sin_le_norm_one_add_ofReal_mul_exp (s u : ℝ) :
+theorem abs_sin_le_norm_one_add_ofReal_mul_exp (s u : ℝ) :
     |Real.sin u| ≤ ‖1 + (s : ℂ) * exp (u * I)‖ := by
   have hsq : ‖1 + (s : ℂ) * exp (u * I)‖ ^ 2 =
       (1 + s * Real.cos u) ^ 2 + (s * Real.sin u) ^ 2 := by
@@ -326,14 +326,14 @@ lemma abs_sin_le_norm_one_add_ofReal_mul_exp (s u : ℝ) :
   exact Real.sqrt_le_sqrt h
 
 /-- `1 ≤ |1 + s e^{iu}|` for `s ≥ 0` and `cos u ≥ 0`. -/
-lemma one_le_norm_one_add_ofReal_mul_exp {s u : ℝ} (hs : 0 ≤ s) (hu : 0 ≤ Real.cos u) :
+theorem one_le_norm_one_add_ofReal_mul_exp {s u : ℝ} (hs : 0 ≤ s) (hu : 0 ≤ Real.cos u) :
     1 ≤ ‖1 + (s : ℂ) * exp (u * I)‖ := by
   have h := Complex.re_le_norm (1 + (s : ℂ) * exp (u * I))
   simp only [add_re, one_re, re_ofReal_mul, exp_ofReal_mul_I_re] at h
   nlinarith [mul_nonneg hs hu]
 
 /-- A uniform lower bound for `|1 + s e^{iu}|`, `s ≥ 0`, `|u| ≤ Φ < π`. -/
-lemma exists_pos_le_norm_one_add_ofReal_mul_exp {Φ : ℝ} (hΦ : Φ < π) :
+theorem exists_pos_le_norm_one_add_ofReal_mul_exp {Φ : ℝ} (hΦ : Φ < π) :
     ∃ c > 0, ∀ s : ℝ, 0 ≤ s → ∀ u : ℝ, |u| ≤ Φ → c ≤ ‖1 + (s : ℂ) * exp (u * I)‖ := by
   by_cases h : Φ ≤ π / 2
   · refine ⟨1, one_pos, fun s hs u hu => one_le_norm_one_add_ofReal_mul_exp hs ?_⟩
@@ -361,7 +361,7 @@ lemma exists_pos_le_norm_one_add_ofReal_mul_exp {Φ : ℝ} (hΦ : Φ < π) :
 end Complex
 
 /-- Points between `0` and `θ` have modulus at most `|θ|`. -/
-lemma abs_le_abs_of_mem_uIcc_zero {θ y : ℝ} (hy : y ∈ [[0, θ]]) : |y| ≤ |θ| := by
+theorem abs_le_abs_of_mem_uIcc_zero {θ y : ℝ} (hy : y ∈ [[0, θ]]) : |y| ≤ |θ| := by
   rcases le_total 0 θ with h | h
   · rw [uIcc_of_le h] at hy
     rw [abs_of_nonneg hy.1, abs_of_nonneg h]; exact hy.2

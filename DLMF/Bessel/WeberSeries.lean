@@ -7,7 +7,6 @@ module
 
 public import DLMF.Bessel.SecondKind
 public import DLMF.Bessel.BesselIntegral
-public import DLMF.Hypergeometric.ConnectionFormulas
 
 /-!
 # Weber's function at integer order, products and Jacobi–Anger series (Duverney Ch. 7)
@@ -39,7 +38,7 @@ noncomputable section
 namespace DLMF.Bessel
 
 /-- `1/Γ(z) = z/Γ(z+1)` for every `z`. -/
-lemma recip_Gamma_succ' (z : ℂ) : (Gamma z)⁻¹ = z * (Gamma (z + 1))⁻¹ := by
+theorem recip_Gamma_succ' (z : ℂ) : (Gamma z)⁻¹ = z * (Gamma (z + 1))⁻¹ := by
   simpa [one_div] using one_div_Gamma_eq_self_mul_one_div_Gamma_add_one z
 
 
@@ -100,7 +99,7 @@ theorem besselY_int_eq_deriv (n : ℤ) {z : ℂ} (hz : z ∈ slitPlane) :
 
 /-- Termwise differentiation of `₀F̃₁(;c;w)` in the parameter:
 `∂_c ₀F̃₁(;c;w) = ∑ wⁿ/n! · (1/Γ)'(c+n)`. -/
-lemma hasSum_deriv_regularized0F1_param (c₀ w : ℂ) :
+theorem hasSum_deriv_regularized0F1_param (c₀ w : ℂ) :
     HasSum (fun n : ℕ => w ^ n / n ! * deriv (fun y => (Gamma y)⁻¹) (c₀ + n))
       (deriv (fun c => regularizedHGFun (∅ : Multiset ℂ) {c} w) c₀) := by
   set T : ℕ → ℂ → ℂ := fun n c => w ^ n / n ! * (Gamma (c + n))⁻¹ with hT
@@ -140,7 +139,7 @@ lemma hasSum_deriv_regularized0F1_param (c₀ w : ℂ) :
   exact (hasSum_nat_add_iff' N).mp (by simpa using htail)
 
 /-- `∂J_ν(z)/∂ν = log(z/2) J_ν(z) + (z/2)^ν ∂_c ₀F̃₁(;c;-z²/4)|_{c=ν+1}`. -/
-lemma deriv_besselJ_order (ν : ℂ) {z : ℂ} (hz : z ≠ 0) :
+theorem deriv_besselJ_order (ν : ℂ) {z : ℂ} (hz : z ≠ 0) :
     deriv (fun μ => besselJ μ z) ν = log (z / 2) * besselJ ν z +
       (z / 2) ^ ν * deriv (fun c => regularizedHGFun (∅ : Multiset ℂ) {c} (-(z ^ 2 / 4)))
         (ν + 1) := by
@@ -281,7 +280,7 @@ theorem besselY_nat_eq_series (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane) :
 
 /-- Abel's identity for Bessel's equation: if `g` and `h` solve it on an open set `U ⊆ ℂ ∖ {0}`,
 then `z · W{g, h}(z)` has zero derivative on `U`. -/
-lemma hasDerivAt_mul_wronskian_bessel (ν : ℂ) {U : Set ℂ} (hU : IsOpen U)
+theorem hasDerivAt_mul_wronskian_bessel (ν : ℂ) {U : Set ℂ} (hU : IsOpen U)
     (h0 : ∀ z ∈ U, z ≠ 0) {g h : ℂ → ℂ} (hg : DifferentiableOn ℂ g U) (hh : DifferentiableOn ℂ h U)
     (hgo : ∀ z ∈ U, z ^ 2 * iteratedDeriv 2 g z + z * deriv g z + (z ^ 2 - ν ^ 2) * g z = 0)
     (hho : ∀ z ∈ U, z ^ 2 * iteratedDeriv 2 h z + z * deriv h z + (z ^ 2 - ν ^ 2) * h z = 0)
@@ -343,7 +342,7 @@ theorem eq_besselJ_besselY_of_ode (ν : ℂ) {U : Set ℂ} (hU : IsOpen U) (hUc 
   linear_combination (-f z) * e3
 
 /-- `∑_{i+j=n} C(n,i)/(Γ(a+i) Γ(b+j)) = (a+b+n-1)ₙ/(Γ(a+n) Γ(b+n))`, for all complex `a, b`. -/
-lemma sum_antidiagonal_choose_recip_Gamma (n : ℕ) : ∀ a b : ℂ,
+theorem sum_antidiagonal_choose_recip_Gamma (n : ℕ) : ∀ a b : ℂ,
     ∑ ij ∈ Finset.antidiagonal n, ((n.choose ij.1 : ℕ) : ℂ) * (Gamma (a + ij.1))⁻¹ *
         (Gamma (b + ij.2))⁻¹ =
       poch (a + b + n - 1) n * (Gamma (a + n))⁻¹ * (Gamma (b + n))⁻¹ := by
@@ -428,7 +427,7 @@ theorem besselJ_mul_besselJ (μ ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
 
 /-- The bilateral cosine and sine series `∑_{m∈ℤ} J_m(z) cos(mθ) = cos(z sin θ)` and
 `∑_{m∈ℤ} J_m(z) sin(mθ) = sin(z sin θ)`. -/
-lemma hasSum_besselJ_int_cos_sin (z : ℂ) (θ : ℝ) :
+theorem hasSum_besselJ_int_cos_sin (z : ℂ) (θ : ℝ) :
     HasSum (fun m : ℤ => besselJ m z * cos (m * θ)) (cos (z * sin θ)) ∧
       HasSum (fun m : ℤ => besselJ m z * sin (m * θ)) (sin (z * sin θ)) := by
   have h1 := hasSum_besselJ_jacobiAnger z θ

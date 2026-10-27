@@ -5,10 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Airy.Scorer
-public import DLMF.Airy.Zeros
-public import DLMF.Airy.ModulusTools
-public import DLMFMathlib.Analysis.ODE.SymmetricSquare
 public import DLMF.Airy.SquareTools
 
 /-!
@@ -24,12 +20,12 @@ open scoped Real Topology
 namespace DLMF.Airy
 
 /-- The derivative of a product of Airy solutions. -/
-lemma airy_product_deriv {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') (hg : IsAirySol g g') :
+theorem airy_product_deriv {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') (hg : IsAirySol g g') :
     deriv (fun z => f z * g z) = fun z => f' z * g z + f z * g' z :=
   ODE.product_deriv (fun z => (hf z).1) (fun z => (hg z).1)
 
 /-- The second derivative of a product of Airy solutions. -/
-lemma airy_product_second_deriv {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') (hg : IsAirySol g g') :
+theorem airy_product_second_deriv {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') (hg : IsAirySol g g') :
     deriv (deriv (fun z => f z * g z)) = fun z => 2 * z * f z * g z + 2 * f' z * g' z :=
   ODE.product_second_deriv hf hg
 
@@ -276,7 +272,7 @@ theorem airyAi_fourth_integral  :
   sorry
 
 /-- `Bi'(x) ≥ Bi'(0)` for `x ≥ 0`, since `Bi'' = x Bi ≥ 0` there. -/
-lemma airyBiDerivReal_ge {x : ℝ} (hx : 0 ≤ x) : airyBiDerivReal 0 ≤ airyBiDerivReal x := by
+theorem airyBiDerivReal_ge {x : ℝ} (hx : 0 ≤ x) : airyBiDerivReal 0 ≤ airyBiDerivReal x := by
   have hmono : MonotoneOn airyBiDerivReal (Ici 0) := by
     refine monotoneOn_of_deriv_nonneg (convex_Ici 0)
       (continuous_iff_continuousAt.mpr fun t =>
@@ -289,7 +285,7 @@ lemma airyBiDerivReal_ge {x : ℝ} (hx : 0 ≤ x) : airyBiDerivReal 0 ≤ airyBi
   exact hmono (mem_Ici.mpr le_rfl) (mem_Ici.mpr hx) hx
 
 /-- `Bi(x) ≥ Bi(0) + Bi'(0) x` for `x ≥ 0`. -/
-lemma airyBiReal_ge {x : ℝ} (hx : 0 ≤ x) :
+theorem airyBiReal_ge {x : ℝ} (hx : 0 ≤ x) :
     airyBiReal 0 + airyBiDerivReal 0 * x ≤ airyBiReal x := by
   have hmono : MonotoneOn (fun t => airyBiReal t - airyBiDerivReal 0 * t) (Ici 0) := by
     have hd : ∀ t, HasDerivAt (fun t => airyBiReal t - airyBiDerivReal 0 * t)
@@ -306,16 +302,16 @@ lemma airyBiReal_ge {x : ℝ} (hx : 0 ≤ x) :
   linarith
 
 /-- `Bi(x) → ∞` as `x → +∞`. -/
-lemma tendsto_airyBiReal_atTop : Tendsto airyBiReal atTop atTop := by
+theorem tendsto_airyBiReal_atTop : Tendsto airyBiReal atTop atTop := by
   refine tendsto_atTop_mono' _ (eventually_ge_atTop 0 |>.mono fun x hx => airyBiReal_ge hx) ?_
   exact tendsto_atTop_add_const_left _ _ (tendsto_id.const_mul_atTop airyBiDerivReal_zero_pos)
 
 /-- `Ai(x)/Bi(x) → 0` as `x → +∞`. -/
-lemma tendsto_airyAi_div_airyBi : Tendsto (fun x => airyAiReal x / airyBiReal x) atTop (𝓝 0) :=
+theorem tendsto_airyAi_div_airyBi : Tendsto (fun x => airyAiReal x / airyBiReal x) atTop (𝓝 0) :=
   tendsto_airyAiReal_atTop.div_atTop tendsto_airyBiReal_atTop
 
 /-- `Ai'(x)/Bi'(x) → 0` as `x → +∞`, via the Wronskian. -/
-lemma tendsto_airyAiDeriv_div_airyBiDeriv :
+theorem tendsto_airyAiDeriv_div_airyBiDeriv :
     Tendsto (fun x => airyAiDerivReal x / airyBiDerivReal x) atTop (𝓝 0) := by
   have h1 : Tendsto (fun x => airyBiReal x * airyBiDerivReal x) atTop atTop :=
     tendsto_atTop_mono' _ (eventually_ge_atTop 0 |>.mono fun x hx =>
@@ -335,11 +331,11 @@ lemma tendsto_airyAiDeriv_div_airyBiDeriv :
   linear_combination hW
 
 /-- `arctan(1/√3) = π/6`. -/
-lemma arctan_recip_sqrt_three : Real.arctan (1 / Real.sqrt 3) = π / 6 := by
+theorem arctan_recip_sqrt_three : Real.arctan (1 / Real.sqrt 3) = π / 6 := by
   rw [← Real.tan_pi_div_six, Real.arctan_tan (by linarith [Real.pi_pos]) (by linarith [Real.pi_pos])]
 
 /-- `Ai(0)/Bi(0) = 1/√3`. -/
-lemma airyReal_zero_ratio : airyAiReal 0 / airyBiReal 0 = 1 / Real.sqrt 3 := by
+theorem airyReal_zero_ratio : airyAiReal 0 / airyBiReal 0 = 1 / Real.sqrt 3 := by
   have hA : airyAiReal 0 = 1 / ((3 : ℝ) ^ (2 / 3 : ℝ) * Real.Gamma (2 / 3)) := by
     have h := airyAi_zero
     rw [Gamma_two_thirds_eq, ← ofReal_mul, ← ofReal_one, ← ofReal_div] at h
@@ -358,7 +354,7 @@ lemma airyReal_zero_ratio : airyAiReal 0 / airyBiReal 0 = 1 / Real.sqrt 3 := by
   field_simp
 
 /-- `Ai'(0)/Bi'(0) = -1/√3`. -/
-lemma airyDerivReal_zero_ratio : airyAiDerivReal 0 / airyBiDerivReal 0 = -(1 / Real.sqrt 3) := by
+theorem airyDerivReal_zero_ratio : airyAiDerivReal 0 / airyBiDerivReal 0 = -(1 / Real.sqrt 3) := by
   have hG' : Complex.Gamma (1 / 3) = ((Real.Gamma (1 / 3) : ℝ) : ℂ) := by
     rw [← Complex.Gamma_ofReal]; push_cast; ring_nf
   have hA : airyAiDerivReal 0 = -1 / ((3 : ℝ) ^ (1 / 3 : ℝ) * Real.Gamma (1 / 3)) := by
@@ -378,7 +374,7 @@ lemma airyDerivReal_zero_ratio : airyAiDerivReal 0 / airyBiDerivReal 0 = -(1 / R
   field_simp
 
 /-- A primitive of `1/(Ai² + Bi²)` on `[0, ∞)`. -/
-lemma hasDerivAt_arctan_airy_ratio {x : ℝ} (hx : 0 ≤ x) :
+theorem hasDerivAt_arctan_airy_ratio {x : ℝ} (hx : 0 ≤ x) :
     HasDerivAt (fun t => -π * Real.arctan (airyAiReal t / airyBiReal t))
       (1 / (airyAiReal x ^ 2 + airyBiReal x ^ 2)) x := by
   have hb := (airyBiReal_pos hx).ne'
@@ -393,7 +389,7 @@ lemma hasDerivAt_arctan_airy_ratio {x : ℝ} (hx : 0 ≤ x) :
   linear_combination (airyAiReal x ^ 2 + airyBiReal x ^ 2) * hW
 
 /-- A primitive of `x/(Ai'² + Bi'²)` on `[0, ∞)`. -/
-lemma hasDerivAt_arctan_airyDeriv_ratio {x : ℝ} (hx : 0 ≤ x) :
+theorem hasDerivAt_arctan_airyDeriv_ratio {x : ℝ} (hx : 0 ≤ x) :
     HasDerivAt (fun t => π * Real.arctan (airyAiDerivReal t / airyBiDerivReal t))
       (x / (airyAiDerivReal x ^ 2 + airyBiDerivReal x ^ 2)) x := by
   have hb := (airyBiDerivReal_zero_pos.trans_le (airyBiDerivReal_ge hx)).ne'

@@ -5,8 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Gamma.Pochhammer
-public import Mathlib.Analysis.SpecialFunctions.Pow.Real
+public import DLMF.Hypergeometric.Basic
 
 /-!
 # Gamma-ratio bounds for natural shifts
@@ -23,7 +22,7 @@ noncomputable section
 namespace DLMF.Gamma
 
 /-- Adding a nonnegative real number cannot decrease the norm in the right half-plane. -/
-lemma norm_le_norm_add_ofReal {z : ℂ} (hz : 0 ≤ z.re) {t : ℝ} (ht : 0 ≤ t) :
+theorem norm_le_norm_add_ofReal {z : ℂ} (hz : 0 ≤ z.re) {t : ℝ} (ht : 0 ≤ t) :
     ‖z‖ ≤ ‖z + t‖ := by
   apply (sq_le_sq₀ (norm_nonneg _) (norm_nonneg _)).mp
   rw [← normSq_eq_norm_sq, ← normSq_eq_norm_sq]

@@ -6,12 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.Analysis.Complex.Liouville
-public import Mathlib.Analysis.Complex.CauchyIntegral
 public import Mathlib.Analysis.Calculus.SmoothSeries
-public import Mathlib.Analysis.Calculus.ParametricIntegral
-public import Mathlib.Analysis.Calculus.ParametricIntervalIntegral
-public import Mathlib.Analysis.Normed.Operator.Bilinear
-public import Mathlib.Analysis.Normed.Module.FiniteDimension
 
 /-!
 # Holomorphy in parameters of series and integrals
@@ -189,7 +184,7 @@ variable {α : Type*} [MeasurableSpace α] {μ : Measure α}
 
 /-- A continuous linear map on a finite-dimensional space is the sum of the rank-one maps given by
 its values on a basis. -/
-lemma _root_.ContinuousLinearMap.eq_sum_smulRight_basis [FiniteDimensional ℂ E] {n : ℕ}
+theorem _root_.ContinuousLinearMap.eq_sum_smulRight_basis [FiniteDimensional ℂ E] {n : ℕ}
     (b : Module.Basis (Fin n) ℂ E) (L : E →L[ℂ] F) :
     L = ∑ i, (LinearMap.toContinuousLinearMap (b.coord i)).smulRight (L (b i)) := by
   ext y

@@ -5,18 +5,11 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Core.Upstream
-public import Mathlib.Analysis.Analytic.OfScalars
-public import Mathlib.Analysis.Analytic.ChangeOrigin
-public import Mathlib.Analysis.Analytic.Uniqueness
-public import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
 public import TauCeti.Analysis.Complex.Conformal.Continuation.Basic
 public import DLMF.GeneralizedHypergeometric.Basic
 public import Mathlib.Analysis.RCLike.Sqrt
 public import DLMF.QSeries.Identities
-public import DLMF.QSeries.QCalculus
 public import DLMF.QSeries.QExponential
-public import DLMF.QSeries.Saalschutz
 
 /-!
 # Basic hypergeometric series: common definitions (DLMF §§17.1,17.2,17.4)
@@ -262,7 +255,7 @@ theorem qaR4_choose_two_mul (k : ℕ) : (k.choose 2)*2+k=k*k := by
     nlinarith
 
 /-- Cancelling a natural power against an integer exponent difference. -/
-theorem qaR4_zpow_choose_sub {q : ℂ} (hq : q≠0) (c n : ℕ) :
+lemma qaR4_zpow_choose_sub {q : ℂ} (hq : q≠0) (c n : ℕ) :
     q^((c:ℤ)-(n:ℤ))*q^n=q^c := by
   rw [← zpow_natCast q n,← zpow_add₀ hq]
   simp
@@ -589,14 +582,14 @@ theorem qPhi_hasSum {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
   exact hs.hasSum
 
 /-- The integer-index factorial at a nonpositive index, uniformly in the index. -/
-theorem qaR4_qPochhammerInt_neg (x q : ℂ) (m : ℕ) :
+lemma qaR4_qPochhammerInt_neg (x q : ℂ) (m : ℕ) :
     qPochhammerInt x q (-(m:ℤ))=(qPochhammer (x*q^(-(m:ℤ))) q m)⁻¹ := by
   cases m with
   | zero => simp [qPochhammerInt]
   | succ n => rfl
 
 /-- One step down in the integer-index factorial. -/
-theorem qaR4_qPochhammerInt_neg_succ {x q : ℂ} (hq : q≠0) (m : ℕ) :
+lemma qaR4_qPochhammerInt_neg_succ {x q : ℂ} (hq : q≠0) (m : ℕ) :
     qPochhammerInt x q (-((m+1:ℕ):ℤ))=
       qPochhammerInt x q (-(m:ℤ))/(1-x*q^(-((m+1:ℕ):ℤ))) := by
   rw [qaR4_qPochhammerInt_neg,qaR4_qPochhammerInt_neg,qPochhammer_succ']
@@ -605,7 +598,7 @@ theorem qaR4_qPochhammerInt_neg_succ {x q : ℂ} (hq : q≠0) (m : ℕ) :
   rw [e,mul_inv,div_eq_mul_inv,mul_comm]
 
 /-- One step down in a product of integer-index factorials. -/
-theorem qaR4_qPochhammerListInt_neg_succ (l : List ℂ) {q : ℂ} (hq : q≠0) (m : ℕ) :
+lemma qaR4_qPochhammerListInt_neg_succ (l : List ℂ) {q : ℂ} (hq : q≠0) (m : ℕ) :
     qPochhammerListInt l q (-((m+1:ℕ):ℤ))=
       qPochhammerListInt l q (-(m:ℤ))/(l.map fun x => 1-x*q^(-((m+1:ℕ):ℤ))).prod := by
   induction l with
@@ -615,7 +608,7 @@ theorem qaR4_qPochhammerListInt_neg_succ (l : List ℂ) {q : ℂ} (hq : q≠0) (
     rw [ih,qaR4_qPochhammerInt_neg_succ hq,div_mul_div_comm]
 
 /-- The integer triangular number one step down. -/
-theorem qaR4_tri_neg_succ (m : ℕ) :
+lemma qaR4_tri_neg_succ (m : ℕ) :
     DLMF.QSeries.TripleProduct.tri (-((m+1:ℕ):ℤ))=
       DLMF.QSeries.TripleProduct.tri (-(m:ℤ))+((m+1:ℕ):ℤ) := by
   have h1 := DLMF.QSeries.TripleProduct.tri_mul_two (-((m+1:ℕ):ℤ))
@@ -625,7 +618,7 @@ theorem qaR4_tri_neg_succ (m : ℕ) :
   linarith
 
 /-- Factoring the reciprocal power out of a list product. -/
-theorem qaR4_list_prod_one_sub (l : List ℂ) {w Q : ℂ} (hw : w*Q=1) :
+lemma qaR4_list_prod_one_sub (l : List ℂ) {w Q : ℂ} (hw : w*Q=1) :
     (l.map fun x => 1-x*w).prod=w^l.length*(l.map fun x => Q-x).prod := by
   induction l with
   | nil => simp
@@ -634,7 +627,7 @@ theorem qaR4_list_prod_one_sub (l : List ℂ) {w Q : ℂ} (hw : w*Q=1) :
     linear_combination (-(w^l.length*(l.map fun x => Q-x).prod))*hw
 
 /-- The ratio recursion for bilateral terms at negative indices. -/
-theorem qaR4_qPsiTerm_neg_succ {a b : List ℂ} {q z : ℂ} (hq : q≠0) (hz : z≠0)
+lemma qaR4_qPsiTerm_neg_succ {a b : List ℂ} {q z : ℂ} (hq : q≠0) (hz : z≠0)
     (hr : a.length≤b.length) (ha : ∀ ai∈a, ∀ n : ℕ, ai≠q^(n+1)) (m : ℕ) :
     qPsiTerm a b q z (-((m+1:ℕ):ℤ))=
       (b.map fun x => q^(m+1)-x).prod/(a.map fun x => q^(m+1)-x).prod*
@@ -681,7 +674,7 @@ theorem qaR4_qPsiTerm_neg_succ {a b : List ℂ} {q z : ℂ} (hq : q≠0) (hz : z
   field_simp
   linear_combination (qPochhammerListInt a q (-(m:ℤ))*P)*hwe
 /-- The limit of a list product of `q^(m+1)-x` as `m→∞`. -/
-theorem qaR4_tendsto_list_prod_pow_sub (l : List ℂ) {q : ℂ} (hq : ‖q‖<1) :
+lemma qaR4_tendsto_list_prod_pow_sub (l : List ℂ) {q : ℂ} (hq : ‖q‖<1) :
     Tendsto (fun m : ℕ => (l.map fun x => q^(m+1)-x).prod) atTop
       (𝓝 ((-1:ℂ)^l.length*l.prod)) := by
   have hpow : Tendsto (fun m : ℕ => q^(m+1)) atTop (𝓝 0) := by
@@ -695,7 +688,7 @@ theorem qaR4_tendsto_list_prod_pow_sub (l : List ℂ) {q : ℂ} (hq : ‖q‖<1)
     simpa only [List.map_cons,List.prod_cons,List.length_cons] using h
 
 /-- Nonnegative-index bilateral terms are unilateral terms with the extra numerator `q`. -/
-theorem qaR4_qPsiTerm_natCast {a b : List ℂ} {q z : ℂ} (hq : ‖q‖<1) (n : ℕ) :
+lemma qaR4_qPsiTerm_natCast {a b : List ℂ} {q z : ℂ} (hq : ‖q‖<1) (n : ℕ) :
     qPsiTerm a b q z n=qPhiTerm (q::a) b q z n := by
   have hE : qPhiExponent (q::a) b=qPsiExponent a b := by
     simp only [qPhiExponent,qPsiExponent,List.length_cons]; push_cast; ring
@@ -708,7 +701,7 @@ theorem qaR4_qPsiTerm_natCast {a b : List ℂ} {q z : ℂ} (hq : ‖q‖<1) (n :
   field_simp
 
 /-- The negative-index bilateral terms are summable. -/
-theorem qaR4_qPsiTerm_neg_summable {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
+lemma qaR4_qPsiTerm_neg_summable {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
     (hab : qBilateralRegular a b q) (ha : a.prod≠0) (hz0 : z≠0)
     (hr : a.length≤b.length) (hz : ‖b.prod/(a.prod*z)‖<1) :
     Summable (fun m : ℕ => qPsiTerm a b q z (-(m:ℤ))) := by
@@ -735,7 +728,7 @@ theorem qaR4_qPsiTerm_neg_summable {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (h
   exact mul_le_mul_of_nonneg_right (le_of_lt hn) (norm_nonneg _)
 
 /-- Both halves of a bilateral series in its annulus are summable. -/
-theorem qaR4_qPsiTerm_summable_parts {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
+lemma qaR4_qPsiTerm_summable_parts {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
     (hab : qBilateralRegular a b q) (ha : a.prod≠0) (hz0 : z≠0)
     (hr : a.length≤b.length) (hz : ‖b.prod/(a.prod*z)‖<1)
     (hz' : a.length=b.length → ‖z‖<1) :
@@ -749,7 +742,7 @@ theorem qaR4_qPsiTerm_summable_parts {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) 
     simpa only [Nat.cast_add,Nat.cast_one] using h
 
 /-- The successor step of a finite factorial product. -/
-theorem qaR4_qPochhammerList_succ (l : List ℂ) (q : ℂ) (n : ℕ) :
+lemma qaR4_qPochhammerList_succ (l : List ℂ) (q : ℂ) (n : ℕ) :
     qPochhammerList l q (n+1)=qPochhammerList l q n*(l.map fun x => 1-x*q^n).prod := by
   induction l with
   | nil => simp [qPochhammerList]
@@ -759,7 +752,7 @@ theorem qaR4_qPochhammerList_succ (l : List ℂ) (q : ℂ) (n : ℕ) :
     ring
 
 /-- Rewriting `q^(m+1)-x` through the reciprocal parameter. -/
-theorem qaR4_list_prod_pow_sub_recip (l : List ℂ) (q : ℂ) (m : ℕ) (hl : ∀ x∈l, x≠0) :
+lemma qaR4_list_prod_pow_sub_recip (l : List ℂ) (q : ℂ) (m : ℕ) (hl : ∀ x∈l, x≠0) :
     (l.map fun x => q^(m+1)-x).prod=(-1:ℂ)^l.length*l.prod*
       ((l.map fun x => q/x).map fun y => 1-y*q^m).prod := by
   induction l with
@@ -774,7 +767,7 @@ theorem qaR4_list_prod_pow_sub_recip (l : List ℂ) (q : ℂ) (m : ℕ) (hl : �
     ring
 
 /-- Closed form of the negative-index bilateral terms. -/
-theorem qaR4_qPsiTerm_neg_closed {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hz0 : z≠0)
+lemma qaR4_qPsiTerm_neg_closed {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hz0 : z≠0)
     (hr : a.length≤b.length) (hab : qBilateralRegular a b q) (ha : a.prod≠0) (hb0 : b.prod≠0)
     (m : ℕ) :
     qPsiTerm a b q z (-(m:ℤ))=qPochhammerList (b.map fun bi => q/bi) q m/
@@ -912,7 +905,7 @@ theorem qPsi_coefficient_classical_limit (a b : List ℂ) (n : ℤ)
 /-- The scalar coefficient of the general unilateral series. -/
 def qPhiCoeff (a b : List ℂ) (q : ℂ) (n : ℕ) : ℂ := qPhiTerm a b q 1 n
 /-- The variable enters each unilateral term as its natural power. -/
-lemma qPhiTerm_eq_coeff_mul (a b : List ℂ) (q z : ℂ) (n : ℕ) :
+theorem qPhiTerm_eq_coeff_mul (a b : List ℂ) (q z : ℂ) (n : ℕ) :
     qPhiTerm a b q z n=qPhiCoeff a b q n*z^n := by
   simp [qPhiCoeff,qPhiTerm]
 /-- Mathlib's formal scalar power series associated with the general q-series. -/

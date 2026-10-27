@@ -55,7 +55,7 @@ def sphericalHarmonic (l : ℕ) (m : ℤ) (θ phi : ℝ) : ℂ :=
   if l < m.natAbs then 0 else if m < 0 then (-1)^m.natAbs*star (sphericalHarmonicNonneg l m.natAbs θ phi) else sphericalHarmonicNonneg l m.natAbs θ phi
 
 /-- Derivatives of the Legendre polynomial are real on the real axis. -/
-lemma iteratedDeriv_legendrePolyP_ofReal (l m : ℕ) (x : ℝ) :
+theorem iteratedDeriv_legendrePolyP_ofReal (l m : ℕ) (x : ℝ) :
     iteratedDeriv m (legendrePolyP l) (x:ℂ) =
       (((Polynomial.derivative^[m] (legendrePolyR l)).eval x : ℝ) : ℂ) := by
   have hf : legendrePolyP l = fun z => ((legendrePolyR l).map ofRealHom).eval z :=
@@ -64,7 +64,7 @@ lemma iteratedDeriv_legendrePolyP_ofReal (l m : ℕ) (x : ℝ) :
   exact eval_ofReal_map_ofRealHom _ _
 
 /-- The polynomial Ferrers function is real-valued. -/
-lemma star_ferrersPNat (l m : ℕ) (x : ℝ) : star (ferrersPNat l m x) = ferrersPNat l m x := by
+theorem star_ferrersPNat (l m : ℕ) (x : ℝ) : star (ferrersPNat l m x) = ferrersPNat l m x := by
   rw [ferrersPNat, iteratedDeriv_legendrePolyP_ofReal]
   simp only [star_mul', star_pow, star_neg, star_one, Complex.star_def, Complex.conj_ofReal]
 
@@ -280,7 +280,7 @@ theorem sphericalHarmonic_rodrigues (l : ℕ) (m : ℤ) (hm : m.natAbs ≤ l) {�
     linear_combination (0:ℂ) * hs1
 
 /-- The polynomial Ferrers function vanishes at `x = 1` for positive order. -/
-lemma ferrersPNat_one (l m : ℕ) : ferrersPNat l m 1 = if m = 0 then 1 else 0 := by
+theorem ferrersPNat_one (l m : ℕ) : ferrersPNat l m 1 = if m = 0 then 1 else 0 := by
   rcases m with _ | k
   · simp only [ferrersPNat, pow_zero, one_mul, iteratedDeriv_zero, ite_true, ofReal_one]
     rw [legendrePolyP, jacobi_at_one (by norm_num)]
@@ -302,7 +302,7 @@ theorem sphericalHarmonic_north (l : ℕ) (m : ℤ) (hm : m.natAbs ≤ l) (phi :
   · simp [h]
 
 /-- Gamma at `1/2 - s` for natural `s`, in factorial form. -/
-lemma Gamma_one_half_sub_nat_mul (s : ℕ) :
+theorem Gamma_one_half_sub_nat_mul (s : ℕ) :
     Gamma (1/2 - s) * ((2*s).factorial : ℂ) = (-4:ℂ)^s * s.factorial * Real.sqrt π := by
   induction s with
   | zero => simpa using legendre_Gamma_one_half
@@ -407,7 +407,7 @@ theorem sphericalHarmonic_negative_order (l : ℕ) (m : ℤ) (θ phi : ℝ) :
     rw [this]; simp
 
 /-- Parity of the polynomial Ferrers function. -/
-lemma ferrersPNat_neg (l m : ℕ) (x : ℝ) :
+theorem ferrersPNat_neg (l m : ℕ) (x : ℝ) :
     ferrersPNat l m (-x) = (-1)^(l+m) * ferrersPNat l m x := by
   have hP : legendrePolyP l = fun z => (-1:ℂ)^l * legendrePolyP l (-z) := by
     funext z
@@ -564,7 +564,7 @@ theorem sphericalHarmonic_orthonormal (l₁ l₂ : ℕ) (m₁ m₂ : ℤ) (h1 : 
 
 
 /-- A sum over a symmetric integer interval, paired by sign. -/
-lemma sum_Icc_neg_pair (g : ℤ → ℂ) (l : ℕ) :
+theorem sum_Icc_neg_pair (g : ℤ → ℂ) (l : ℕ) :
     ∑ m ∈ Finset.Icc (-(l:ℤ)) l, g m = g 0 + ∑ k ∈ Finset.range l, (g (k+1) + g (-(k+1))) := by
   induction l with
   | zero => simp
@@ -577,7 +577,7 @@ lemma sum_Icc_neg_pair (g : ℤ → ℂ) (l : ℕ) :
     ring
 
 /-- Product of a conjugated and a plain nonnegative-order spherical harmonic. -/
-lemma star_mul_sphericalHarmonicNonneg (l k : ℕ) {θ₁ θ₂ : ℝ} (h1 : θ₁ ∈ Icc 0 π) (h2 : θ₂ ∈ Icc 0 π)
+theorem star_mul_sphericalHarmonicNonneg (l k : ℕ) {θ₁ θ₂ : ℝ} (h1 : θ₁ ∈ Icc 0 π) (h2 : θ₂ ∈ Icc 0 π)
     (phi₁ phi₂ : ℝ) :
     star (sphericalHarmonicNonneg l k θ₁ phi₁) * sphericalHarmonicNonneg l k θ₂ phi₂ =
       (2*l+1)/(4*π) * LegendreAddition.coeff l k (Real.cos θ₁) (Real.cos θ₂) (Real.sin θ₁) (Real.sin θ₂) *

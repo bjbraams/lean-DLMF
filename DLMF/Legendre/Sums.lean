@@ -5,11 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Legendre.IntegerTheory
-public import DLMF.Legendre.Series
-public import DLMF.Legendre.Integrals
 public import DLMF.Legendre.Harmonics
-public import DLMF.Legendre.AdditionTools
 public import DLMF.Legendre.QAdditionTools
 
 /-!
@@ -43,12 +39,12 @@ theorem ferrersQ_addition (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 : 0 < θ₁) (h2 : 
   exact legQAdd_ferrersQ_addition ν h1.le h12 hs hr phi
 
 /-- Nonnegative integer order Ferrers P agrees with the polynomial form on `(-1, 1]`. -/
-lemma ferrersP_nat_eq_ferrersPNat (n k : ℕ) {x : ℝ} (hx : x ∈ Ioc (-1:ℝ) 1) :
+theorem ferrersP_nat_eq_ferrersPNat (n k : ℕ) {x : ℝ} (hx : x ∈ Ioc (-1:ℝ) 1) :
     ferrersP n k x = ferrersPNat n k x := by
   exact legAdd_ferrersP_nat_eq_ferrersPNat n k hx
 
 /-- Negative integer order Ferrers P in polynomial form on `(-1, 1]`. -/
-lemma ferrersP_neg_nat_eq_ferrersPNat (n k : ℕ) (hk : k ≤ n) {x : ℝ} (hx : x ∈ Ioc (-1:ℝ) 1) :
+theorem ferrersP_neg_nat_eq_ferrersPNat (n k : ℕ) (hk : k ≤ n) {x : ℝ} (hx : x ∈ Ioc (-1:ℝ) 1) :
     ferrersP n (-(k:ℂ)) x = (-1)^k * ((n-k).factorial / (n+k).factorial : ℂ) * ferrersPNat n k x := by
   exact legAdd_ferrersP_neg_nat_eq_ferrersPNat n k hk hx
 

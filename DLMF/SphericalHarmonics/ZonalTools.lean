@@ -6,12 +6,10 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.SphericalHarmonics.Basic
-public import DLMF.OrthogonalPolynomials.Integrals
-public import DLMF.OrthogonalPolynomials.Series
-public import DLMF.OrthogonalPolynomials.Differential
 public import DLMF.Legendre.IntegerTheory
 public import TauCeti.Analysis.PDE.PoissonIntegral.Ball
 public import TauCeti.Analysis.InnerProductSpace.Laplacian.Comparison
+public import DLMF.OrthogonalPolynomials.Legendre
 
 /-!
 # Zonal harmonics, Funk–Hecke and the spherical addition theorem
@@ -40,7 +38,7 @@ open DLMF.OrthogonalPolynomials
 namespace DLMF.SphericalHarmonics
 
 /-- `(2n+1) P_n = C_n^{(3/2)} - C_{n-2}^{(3/2)}` (DLMF 18.9.7 at `λ = 1/2`). -/
-lemma zonal_two_mul_add_one (n : ℕ) (x : ℂ) :
+theorem zonal_two_mul_add_one (n : ℕ) (x : ℂ) :
     (2 * n + 1 : ℂ) * legendrePolyP n x =
       ultrasphPoly (3 / 2) n x - (if n < 2 then 0 else ultrasphPoly (3 / 2) (n - 2) x) := by
   rw [legendre_eq_ultrasphPoly]
@@ -56,7 +54,7 @@ lemma zonal_two_mul_add_one (n : ℕ) (x : ℂ) :
     linear_combination 2 * h
 
 /-- The Poisson-kernel expansion `(1 - r²)/(1 - 2rt + r²)^{3/2} = ∑ (2j+1) P_j(t) r^j`. -/
-lemma zonal_kernel_hasSum {t : ℝ} (ht : |t| ≤ 1) {r : ℝ} (hr : |r| < 1) :
+theorem zonal_kernel_hasSum {t : ℝ} (ht : |t| ≤ 1) {r : ℝ} (hr : |r| < 1) :
     HasSum (fun j : ℕ => (2 * j + 1 : ℂ) * legendrePolyP j t * (r : ℂ) ^ j)
       (((1 - r ^ 2) / (1 - 2 * r * t + r ^ 2) ^ (3 / 2 : ℝ) : ℝ) : ℂ) := by
   have hz : ‖(r : ℂ)‖ < 1 := by rwa [Complex.norm_real, Real.norm_eq_abs]
@@ -93,7 +91,7 @@ lemma zonal_kernel_hasSum {t : ℝ} (ht : |t| ≤ 1) {r : ℝ} (hr : |r| < 1) :
 
 /-- Uniqueness of coefficients: a power series with coefficients of linear growth that vanishes
 on `(-1/2, 1/2)` has zero coefficients. -/
-lemma zonal_coeff_eq_zero (b : ℕ → ℂ) (C : ℝ) (hb : ∀ n, ‖b n‖ ≤ C * (n + 1))
+theorem zonal_coeff_eq_zero (b : ℕ → ℂ) (C : ℝ) (hb : ∀ n, ‖b n‖ ≤ C * (n + 1))
     (h : ∀ r : ℝ, |r| < 1 / 2 → HasSum (fun n => (r : ℂ) ^ n * b n) 0) (n : ℕ) : b n = 0 := by
   let p : FormalMultilinearSeries ℝ ℝ ℂ :=
     fun n => ContinuousMultilinearMap.mkPiRing ℝ (Fin n) (b n)
@@ -132,7 +130,7 @@ open MvPolynomial Laplacian
 variable {n : ℕ}
 
 /-- Polynomial evaluation on Euclidean space is smooth. -/
-lemma zonal_contDiff (P : MvPolynomial (Fin n) ℝ) :
+theorem zonal_contDiff (P : MvPolynomial (Fin n) ℝ) :
     ContDiff ℝ ⊤ (fun z : EuclideanSpace ℝ (Fin n) => eval (fun i => z i) P) := by
   induction P using MvPolynomial.induction_on with
   | C a => simpa using contDiff_const
@@ -142,7 +140,7 @@ lemma zonal_contDiff (P : MvPolynomial (Fin n) ℝ) :
     exact hp.mul (EuclideanSpace.proj i : EuclideanSpace ℝ (Fin n) →L[ℝ] ℝ).contDiff
 
 /-- The derivative of a polynomial on Euclidean space, in terms of `pderiv`. -/
-lemma zonal_hasFDerivAt (P : MvPolynomial (Fin n) ℝ) (y : EuclideanSpace ℝ (Fin n)) :
+theorem zonal_hasFDerivAt (P : MvPolynomial (Fin n) ℝ) (y : EuclideanSpace ℝ (Fin n)) :
     HasFDerivAt (fun z : EuclideanSpace ℝ (Fin n) => eval (fun i => z i) P)
       (∑ j, eval (fun i => y i) (pderiv j P) •
         (EuclideanSpace.proj j : EuclideanSpace ℝ (Fin n) →L[ℝ] ℝ)) y := by
@@ -168,7 +166,7 @@ lemma zonal_hasFDerivAt (P : MvPolynomial (Fin n) ℝ) (y : EuclideanSpace ℝ (
         ring
 
 /-- Directional derivatives along coordinate vectors are evaluations of `pderiv`. -/
-lemma zonal_fderiv_single (P : MvPolynomial (Fin n) ℝ) (y : EuclideanSpace ℝ (Fin n))
+theorem zonal_fderiv_single (P : MvPolynomial (Fin n) ℝ) (y : EuclideanSpace ℝ (Fin n))
     (i : Fin n) :
     fderiv ℝ (fun z : EuclideanSpace ℝ (Fin n) => eval (fun i => z i) P) y
       (EuclideanSpace.single i 1) = eval (fun i => y i) (pderiv i P) := by
@@ -177,7 +175,7 @@ lemma zonal_fderiv_single (P : MvPolynomial (Fin n) ℝ) (y : EuclideanSpace ℝ
   simp
 
 /-- The Laplacian of a polynomial function is the evaluation of `laplacianMv`. -/
-lemma zonal_laplacian_eval (P : MvPolynomial (Fin n) ℝ) (x : EuclideanSpace ℝ (Fin n)) :
+theorem zonal_laplacian_eval (P : MvPolynomial (Fin n) ℝ) (x : EuclideanSpace ℝ (Fin n)) :
     Δ (fun z : EuclideanSpace ℝ (Fin n) => eval (fun i => z i) P) x =
       eval (fun i => x i) (laplacianMv P) := by
   have hd : DifferentiableAt ℝ
@@ -197,7 +195,7 @@ lemma zonal_laplacian_eval (P : MvPolynomial (Fin n) ℝ) (x : EuclideanSpace �
   simp only [zonal_fderiv_single, laplacianMv, map_sum]
 
 /-- Harmonic polynomials give harmonic functions on Euclidean space. -/
-lemma zonal_harmonicOnNhd {P : MvPolynomial (Fin n) ℝ} (hP : laplacianMv P = 0)
+theorem zonal_harmonicOnNhd {P : MvPolynomial (Fin n) ℝ} (hP : laplacianMv P = 0)
     (s : Set (EuclideanSpace ℝ (Fin n))) :
     HarmonicOnNhd (fun z : EuclideanSpace ℝ (Fin n) => eval (fun i => z i) P) s := by
   intro x _
@@ -214,14 +212,14 @@ open MvPolynomial
 
 /-- Scaling the variables of a homogeneous polynomial; adapted from the Tau Ceti contributors'
 `MvPolynomial.IsHomogeneous.eval₂_const_mul`. -/
-lemma zonal_eval_smul {n m : ℕ} {P : MvPolynomial (Fin n) ℝ} (hP : P.IsHomogeneous m)
+theorem zonal_eval_smul {n m : ℕ} {P : MvPolynomial (Fin n) ℝ} (hP : P.IsHomogeneous m)
     (r : ℝ) (u : EuclideanSpace ℝ (Fin n)) :
     eval (fun j => (r • u) j) P = r ^ m * eval (fun j => u j) P := by
   exact hP.eval₂_const_mul (RingHom.id ℝ) (fun j => u j) r
 
 /-- The Poisson extension of harmonic boundary data is the original function; adapted from the
 Tau Ceti contributors' unit-ball Dirichlet theorem. -/
-lemma zonal_poisson {n : ℕ} (hn : n ≠ 0)
+theorem zonal_poisson {n : ℕ} (hn : n ≠ 0)
     {f : EuclideanSpace ℝ (Fin n) → ℝ}
     (hf : HarmonicOnNhd f (ball 0 1)) (hcont : ContinuousOn f (closedBall 0 1))
     {x : EuclideanSpace ℝ (Fin n)} (hx : ‖x‖ < 1) :
@@ -273,17 +271,17 @@ lemma zonal_poisson {n : ℕ} (hn : n ≠ 0)
     (he (mem_closedBall_zero_iff.mpr hx.le))
 
 /-- The coordinate dot product is the Euclidean inner product. -/
-lemma zonal_inner {n : ℕ} (ξ y : EuclideanSpace ℝ (Fin n)) : ∑ i, ξ i * y i = inner ℝ ξ y := by
+theorem zonal_inner {n : ℕ} (ξ y : EuclideanSpace ℝ (Fin n)) : ∑ i, ξ i * y i = inner ℝ ξ y := by
   simp [PiLp.inner_apply, mul_comm]
 
 /-- The area of the unit sphere in `ℝ³`. -/
-lemma zonal_area :
+theorem zonal_area :
     (volume : Measure (EuclideanSpace ℝ (Fin 3))).toSphere.real univ = 4 * π := by
   have := sphericalHarmonicInner_one_three
   simpa [sphericalHarmonicInner] using this
 
 /-- On the unit sphere, `|ξ · y| ≤ 1`. -/
-lemma zonal_abs_dot_le (ξ y : sphere (0 : EuclideanSpace ℝ (Fin 3)) 1) :
+theorem zonal_abs_dot_le (ξ y : sphere (0 : EuclideanSpace ℝ (Fin 3)) 1) :
     |∑ i, ξ.val i * y.val i| ≤ 1 := by
   rw [zonal_inner]
   have := abs_real_inner_le_norm ξ.val y.val
@@ -291,7 +289,7 @@ lemma zonal_abs_dot_le (ξ y : sphere (0 : EuclideanSpace ℝ (Fin 3)) 1) :
 
 /-- The kernel identity on the sphere: `(1 - r²)/(1 - 2rt + r²)^{3/2}` is the sphere area times the
 Tau Ceti Poisson kernel at `r ξ`. -/
-lemma zonal_kernel_eq (ξ y : sphere (0 : EuclideanSpace ℝ (Fin 3)) 1) {r : ℝ} (hr : |r| < 1) :
+theorem zonal_kernel_eq (ξ y : sphere (0 : EuclideanSpace ℝ (Fin 3)) 1) {r : ℝ} (hr : |r| < 1) :
     (1 - r ^ 2) / (1 - 2 * r * (∑ i, ξ.val i * y.val i) + r ^ 2) ^ (3 / 2 : ℝ) =
       (volume : Measure (EuclideanSpace ℝ (Fin 3))).toSphere.real univ *
         TauCeti.ballPoissonKernel 3 (r • ξ.val) y.val := by
@@ -481,7 +479,7 @@ section FunkHecke
 open MvPolynomial
 
 /-- The complexified real Legendre polynomial. -/
-lemma zonal_natDegree_legendre (j : ℕ) :
+theorem zonal_natDegree_legendre (j : ℕ) :
     ((DLMF.Legendre.legendrePolyR j).map Complex.ofRealHom).natDegree = j := by
   rw [Polynomial.natDegree_map, DLMF.Legendre.legendrePolyR, Polynomial.natDegree_comp,
     Polynomial.natDegree_map_eq_of_injective (RingHom.injective_int (Int.castRingHom ℝ)),
@@ -494,7 +492,7 @@ lemma zonal_natDegree_legendre (j : ℕ) :
 
 /-- Induction principle: a property of complex polynomials that is additive and holds for all
 multiples of Legendre polynomials holds for all polynomials. -/
-lemma zonal_legendre_induction (Φ : Polynomial ℂ → Prop)
+theorem zonal_legendre_induction (Φ : Polynomial ℂ → Prop)
     (hadd : ∀ p q, Φ p → Φ q → Φ (p + q))
     (hbase : ∀ (a : ℂ) (j : ℕ),
       Φ (Polynomial.C a * (DLMF.Legendre.legendrePolyR j).map Complex.ofRealHom))
@@ -738,12 +736,12 @@ section Addition
 open MvPolynomial
 
 /-- Continuous functions on the unit sphere are integrable. -/
-lemma zonal_integrable {g : sphere (0 : EuclideanSpace ℝ (Fin 3)) 1 → ℝ} (hg : Continuous g) :
+theorem zonal_integrable {g : sphere (0 : EuclideanSpace ℝ (Fin 3)) 1 → ℝ} (hg : Continuous g) :
     Integrable g (volume : Measure (EuclideanSpace ℝ (Fin 3))).toSphere :=
   hg.integrable_of_hasCompactSupport (.of_compactSpace _)
 
 /-- A continuous nonnegative function on the sphere with zero integral vanishes. -/
-lemma zonal_eq_zero_of_integral {g : sphere (0 : EuclideanSpace ℝ (Fin 3)) 1 → ℝ}
+theorem zonal_eq_zero_of_integral {g : sphere (0 : EuclideanSpace ℝ (Fin 3)) 1 → ℝ}
     (hg : Continuous g) (h0 : 0 ≤ g)
     (hint : ∫ y, g y ∂(volume : Measure (EuclideanSpace ℝ (Fin 3))).toSphere = 0) (y) :
     g y = 0 := by
@@ -753,14 +751,14 @@ lemma zonal_eq_zero_of_integral {g : sphere (0 : EuclideanSpace ℝ (Fin 3)) 1 �
   exact congrFun h2 y
 
 /-- `P_k(t)` on the real line is the real polynomial `legendrePolyR k`. -/
-lemma zonal_legendre_real (k : ℕ) (t : ℝ) :
+theorem zonal_legendre_real (k : ℕ) (t : ℝ) :
     legendrePolyP k t = (((DLMF.Legendre.legendrePolyR k).eval t : ℝ) : ℂ) := by
   rw [DLMF.Legendre.legendrePolyP_eq_eval, Polynomial.eval_map,
     show (t : ℂ) = Complex.ofRealHom t from rfl, Polynomial.eval₂_at_apply]
   rfl
 
 /-- Real orthogonality: `∫_{-1}^1 P_k² = 2/(2k+1)`. -/
-lemma zonal_legendre_sq (k : ℕ) :
+theorem zonal_legendre_sq (k : ℕ) :
     ∫ s : ℝ in (-1 : ℝ)..1, (DLMF.Legendre.legendrePolyR k).eval s *
       (DLMF.Legendre.legendrePolyR k).eval s = 2 / (2 * k + 1) := by
   have h := legendre_orthogonality k k
@@ -771,7 +769,7 @@ lemma zonal_legendre_sq (k : ℕ) :
   rw [h]; push_cast; ring
 
 /-- Real form of the Funk–Hecke formula for continuous real profiles. -/
-lemma zonal_funk_hecke_real {k : ℕ} {g : ℝ → ℝ} (hg : Continuous g)
+theorem zonal_funk_hecke_real {k : ℕ} {g : ℝ → ℝ} (hg : Continuous g)
     {S : MvPolynomial (Fin 3) ℝ} (hS : IsHarmonicHomogeneous k S)
     (ξ : sphere (0 : EuclideanSpace ℝ (Fin 3)) 1) :
     ∫ y : sphere (0 : EuclideanSpace ℝ (Fin 3)) 1,
@@ -787,7 +785,7 @@ lemma zonal_funk_hecke_real {k : ℕ} {g : ℝ → ℝ} (hg : Continuous g)
   exact_mod_cast h
 
 /-- `P_0 = 1` as a real polynomial. -/
-lemma zonal_legendreR_zero (s : ℝ) : (DLMF.Legendre.legendrePolyR 0).eval s = 1 := by
+theorem zonal_legendreR_zero (s : ℝ) : (DLMF.Legendre.legendrePolyR 0).eval s = 1 := by
   have h := zonal_legendre_real 0 s
   rw [legendrePolyP_zero] at h
   exact_mod_cast h.symm
@@ -907,7 +905,7 @@ theorem zonal_addition_sphere {k : ℕ}
   exact this
 
 /-- A coordinate vector with unit sum of squares, as a point of the unit sphere. -/
-lemma zonal_mem_sphere {x : Fin 3 → ℝ} (hx : ∑ i, x i ^ 2 = 1) :
+theorem zonal_mem_sphere {x : Fin 3 → ℝ} (hx : ∑ i, x i ^ 2 = 1) :
     (WithLp.toLp 2 x : EuclideanSpace ℝ (Fin 3)) ∈ sphere (0 : EuclideanSpace ℝ (Fin 3)) 1 := by
   rw [mem_sphere_zero_iff_norm, EuclideanSpace.norm_eq]
   simp only [Real.norm_eq_abs, sq_abs, hx, Real.sqrt_one]

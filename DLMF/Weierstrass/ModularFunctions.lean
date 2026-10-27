@@ -7,17 +7,8 @@ module
 
 public import DLMF.Weierstrass.Basic
 public import DLMF.JacobiElliptic.Basic
-public import DLMF.Theta.Basic
-public import DLMF.Theta.ZeroValues
 public import DLMF.Weierstrass.SpecialLattices
-public import Mathlib.NumberTheory.ModularForms.DedekindEta
-public import Mathlib.NumberTheory.ModularForms.Discriminant
-public import Mathlib.NumberTheory.ModularForms.LevelOne.GradedRing
-public import Mathlib.NumberTheory.ModularForms.CongruenceSubgroups
-public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
-public import Mathlib.Analysis.Meromorphic.Basic
-public import Mathlib.Analysis.Complex.UpperHalfPlane.MoebiusAction
-public import Mathlib.Analysis.Complex.UpperHalfPlane.FunctionsBoundedAtInfty
+public import Mathlib.LinearAlgebra.Matrix.FixedDetMatrices
 
 /-!
 # Elliptic modular functions (DLMF §§23.15–23.19)
@@ -140,7 +131,7 @@ theorem jacobiThetaOneDerivNullTau_eq (τ : ℂ) :
     jacobiThetaOneDerivNullTau τ = deriv (fun z ↦ jacobiThetaOneTau z τ) 0 := rfl
 
 /-- `e^{2πiτ} = (e^{iπτ})²`. -/
-theorem wp23_cexp_two_pi (τ : ℂ) : cexp (2 * π * I * τ) = cexp (π * I * τ) ^ 2 := by
+lemma wp23_cexp_two_pi (τ : ℂ) : cexp (2 * π * I * τ) = cexp (π * I * τ) ^ 2 := by
   rw [← Complex.exp_nat_mul]
   congr 1
   push_cast
@@ -173,7 +164,7 @@ theorem eta_hasProd (τ : ℍ) :
     ring
 
 /-- `η³ = θ₁'(0|τ)/2`. -/
-theorem p23R1_eta_cube (τ : ℍ) : η (τ : ℂ) ^ 3 = jacobiThetaOneDerivNullTau τ / 2 := by
+lemma p23R1_eta_cube (τ : ℍ) : η (τ : ℂ) ^ 3 = jacobiThetaOneDerivNullTau τ / 2 := by
   obtain ⟨hm, he⟩ := eta_hasProd τ
   obtain ⟨-, h1, -⟩ := jacobiThetaOneDerivNullTau_prod (τ := (τ : ℂ)) τ.im_pos
   rw [he, mul_pow, ← hm.multipliable.tprod_pow, h1, ← exp_nat_mul]
@@ -181,7 +172,7 @@ theorem p23R1_eta_cube (τ : ℍ) : η (τ : ℂ) ^ 3 = jacobiThetaOneDerivNullT
   ring_nf
 
 /-- Regrouping an infinite product in blocks of three. -/
-theorem p23R1_tprod_three {f : ℕ → ℂ} (hf : Multipliable f)
+lemma p23R1_tprod_three {f : ℕ → ℂ} (hf : Multipliable f)
     (hg : Multipliable (fun k : ℕ => f (3 * k) * f (3 * k + 1) * f (3 * k + 2))) :
     ∏' k : ℕ, (f (3 * k) * f (3 * k + 1) * f (3 * k + 2)) = ∏' n, f n := by
   have t1 := hg.hasProd.tendsto_prod_nat
@@ -201,7 +192,7 @@ theorem p23R1_tprod_three {f : ℕ → ℂ} (hf : Multipliable f)
   exact tendsto_nhds_unique t1 t2
 
 /-- `η(τ) = e^{iπτ/12} θ₃(π(1 + τ)/2 | 3τ)`. -/
-theorem p23R1_eta_theta (τ : ℍ) :
+lemma p23R1_eta_theta (τ : ℍ) :
     η (τ : ℂ) = cexp (π * I * τ / 12) * jacobiThetaThreeTau (π * (1 + τ) / 2) (3 * τ) := by
   have hτ' : 0 < (3 * (τ : ℂ)).im := by simpa using τ.im_pos
   obtain ⟨-, hm3, ht⟩ := jacobiThetaThreeTau_triple_product ((1 + τ) / 2) hτ'
@@ -226,7 +217,7 @@ theorem p23R1_eta_theta (τ : ℍ) :
   rw [ht, p23R1_tprod_three hm.multipliable hm3, he]
 
 /-- `J` and `λ` in terms of `A = θ₂⁴`, `C = θ₄⁴` (with `θ₃⁴ = A + C`). -/
-theorem p23R1_kleinJ_theta {τ : ℂ} (hτ : 0 < τ.im) :
+lemma p23R1_kleinJ_theta {τ : ℂ} (hτ : 0 < τ.im) :
     jacobiThetaTwoNullTau τ ^ 4 ≠ 0 ∧ jacobiThetaFourNullTau τ ^ 4 ≠ 0 ∧
     jacobiThetaTwoNullTau τ ^ 4 + jacobiThetaFourNullTau τ ^ 4 ≠ 0 ∧
     kleinJ τ = ((jacobiThetaTwoNullTau τ ^ 4) ^ 2 +
@@ -246,7 +237,7 @@ theorem p23R1_kleinJ_theta {τ : ℂ} (hτ : 0 < τ.im) :
   · rw [modularLambda, ← hJ]
 
 /-- The algebraic identity behind DLMF 23.19.2. -/
-theorem p23R1_J_lambda_alg {A C : ℂ} (hA : A ≠ 0) (hC : C ≠ 0) (hAC : A + C ≠ 0) :
+lemma p23R1_J_lambda_alg {A C : ℂ} (hA : A ≠ 0) (hC : C ≠ 0) (hAC : A + C ≠ 0) :
     (A ^ 2 + (A + C) ^ 2 + C ^ 2) ^ 3 / (54 * A ^ 2 * (A + C) ^ 2 * C ^ 2) =
       4 / 27 * (1 - A / (A + C) + (A / (A + C)) ^ 2) ^ 3 /
         (A / (A + C) * (1 - A / (A + C))) ^ 2 := by
@@ -256,7 +247,7 @@ theorem p23R1_J_lambda_alg {A C : ℂ} (hA : A ≠ 0) (hC : C ≠ 0) (hAC : A + 
   ring
 
 /-- DLMF 23.19.2 in helper form. -/
-theorem p23R1_kleinJ_lambda (τ : ℍ) :
+lemma p23R1_kleinJ_lambda (τ : ℍ) :
     kleinJ τ = 4 / 27 * (1 - modularLambda τ + modularLambda τ ^ 2) ^ 3 /
       (modularLambda τ * (1 - modularLambda τ)) ^ 2 := by
   obtain ⟨hA, hC, hAC, hJ, hl⟩ := p23R1_kleinJ_theta (τ := (τ : ℂ)) τ.im_pos
@@ -264,7 +255,7 @@ theorem p23R1_kleinJ_lambda (τ : ℍ) :
   exact p23R1_J_lambda_alg hA hC hAC
 
 /-- The lattice of an equianharmonic `H` is invariant under multiplication by `e^{πi/3}`. -/
-theorem p23R1_equi_inv {H : HalfPeriods} (h3 : H.ω₃ = cexp (π * I / 3) * H.ω₁) :
+lemma p23R1_equi_inv {H : HalfPeriods} (h3 : H.ω₃ = cexp (π * I / 3) * H.ω₁) :
     ∀ z, z ∈ H.lattice ↔ z / cexp (π * I / 3) ∈ H.lattice := by
   set ρ := cexp (π * I / 3) with hρ
   have hρ0 : ρ ≠ 0 := Complex.exp_ne_zero _
@@ -474,9 +465,173 @@ theorem modularLambda_hasProd (τ : ℍ) :
     HasProd (fun n : ℕ ↦ ((1 + cexp (π * I * τ) ^ (2 * (n + 1))) /
         (1 + cexp (π * I * τ) ^ (2 * n + 1))) ^ 8)
       (modularLambda τ / (16 * cexp (π * I * τ))) := by
-  sorry
+  set q := cexp (π * I * τ) with hq
+  have hτ := τ.im_pos
+  obtain ⟨m2, e2⟩ := jacobiThetaTwoNullTau_prod hτ
+  obtain ⟨m3, e3⟩ := jacobiThetaThreeNullTau_prod hτ
+  obtain ⟨-, n3, -⟩ := jacobiThetaNullTau_ne_zero hτ
+  have hq1 : ‖q‖ < 1 := by
+    rw [hq, Complex.norm_exp, Real.exp_lt_one_iff]
+    have : (↑π * I * (τ : ℂ)).re = -(π * (τ : ℂ).im) := by simp
+    rw [this, neg_lt_zero]
+    exact mul_pos Real.pi_pos hτ
+  have hx : ∀ k : ℕ, 1 - q ^ (2 * (k + 1)) ≠ 0 := fun k h => by
+    have h1 : q ^ (2 * (k + 1)) = 1 := by linear_combination -h
+    have := congrArg norm h1
+    rw [norm_pow, norm_one] at this
+    exact absurd this (pow_lt_one₀ (norm_nonneg _) hq1 (by omega)).ne
+  have hP3 : ∏' k : ℕ, ((1 - q ^ (2 * (k + 1))) * (1 + q ^ (2 * k + 1)) ^ 2) ≠ 0 := by
+    rw [← e3]; exact n3
+  have h := (m2.hasProd.pow 4).div₀ (m3.hasProd.pow 4) (pow_ne_zero 4 hP3)
+  have hq4 : cexp (π * I * τ / 4) ^ 4 = q := by
+    rw [← Complex.exp_nat_mul, hq]; congr 1; push_cast; ring
+  have hq0 : q ≠ 0 := Complex.exp_ne_zero _
+  convert h using 1
+  · funext k
+    rw [← div_pow, mul_div_mul_left _ _ (hx k), div_pow, div_pow, ← pow_mul, ← pow_mul]
+  · rw [modularLambda, e2, ← e3, mul_pow, mul_pow, hq4]
+    field_simp
+    ring
 
 /-! ### §23.18 Modular transformations -/
+
+/-- The anharmonic map attached to a matrix mod 2. -/
+noncomputable def p3w_anharm (a b c d : ZMod 2) (l : ℂ) : ℂ :=
+  if b = 0 ∧ c = 0 then l
+  else if a = 0 ∧ d = 0 then 1 - l
+  else if b = 0 then 1 / l
+  else if a = 0 then 1 / (1 - l)
+  else if c = 0 then -l / (1 - l)
+  else 1 - 1 / l
+
+/-- The six elements of `SL(2, ZMod 2)`. -/
+lemma p3w_sl2_zmod2 (a b c d : ZMod 2) (h : a * d - b * c = 1) :
+    (a = 1 ∧ b = 0 ∧ c = 0 ∧ d = 1) ∨ (a = 0 ∧ b = 1 ∧ c = 1 ∧ d = 0) ∨
+    (a = 1 ∧ b = 0 ∧ c = 1 ∧ d = 1) ∨ (a = 0 ∧ b = 1 ∧ c = 1 ∧ d = 1) ∨
+    (a = 1 ∧ b = 1 ∧ c = 0 ∧ d = 1) ∨ (a = 1 ∧ b = 1 ∧ c = 1 ∧ d = 0) := by
+  revert a b c d; decide
+
+/-- The anharmonic maps compose like the matrices mod 2. -/
+lemma p3w_anharm_mul (a b c d a' b' c' d' : ZMod 2) (h : a * d - b * c = 1)
+    (h' : a' * d' - b' * c' = 1) {l : ℂ} (h0 : l ≠ 0) (h1 : l ≠ 1) :
+    p3w_anharm (a * a' + b * c') (a * b' + b * d') (c * a' + d * c') (c * b' + d * d') l =
+      p3w_anharm a b c d (p3w_anharm a' b' c' d' l) := by
+  have h1' : 1 - l ≠ 0 := sub_ne_zero.mpr (Ne.symm h1)
+  have h1'' : l - 1 ≠ 0 := sub_ne_zero.mpr h1
+  rcases p3w_sl2_zmod2 a b c d h with ⟨rfl, rfl, rfl, rfl⟩ | ⟨rfl, rfl, rfl, rfl⟩ |
+    ⟨rfl, rfl, rfl, rfl⟩ | ⟨rfl, rfl, rfl, rfl⟩ | ⟨rfl, rfl, rfl, rfl⟩ | ⟨rfl, rfl, rfl, rfl⟩ <;>
+  rcases p3w_sl2_zmod2 a' b' c' d' h' with ⟨rfl, rfl, rfl, rfl⟩ | ⟨rfl, rfl, rfl, rfl⟩ |
+    ⟨rfl, rfl, rfl, rfl⟩ | ⟨rfl, rfl, rfl, rfl⟩ | ⟨rfl, rfl, rfl, rfl⟩ | ⟨rfl, rfl, rfl, rfl⟩ <;>
+  (try simp (config := {decide := true}) only [p3w_anharm, ite_true, ite_false]) <;>
+  first | ring1 | (field_simp; done) | (field_simp; ring1) |
+    (simp only [sub_sub_cancel]; field_simp; ring1) |
+    (rw [show 1 - 1 / (1 - l) = -l / (1 - l) by field_simp; ring]; field_simp; ring1) |
+    (rw [show 1 - 1 / (1 - l) = -l / (1 - l) by field_simp; ring]; field_simp)
+
+/-- The anharmonic map of `A ∈ SL(2, ℤ)`, through its reduction mod 2. -/
+noncomputable def p3w_anharmSL (A : SL(2, ℤ)) (l : ℂ) : ℂ :=
+  p3w_anharm (A 0 0) (A 0 1) (A 1 0) (A 1 1) l
+
+/-- The determinant condition mod 2. -/
+lemma p3w_det_zmod (A : SL(2, ℤ)) :
+    ((A 0 0 : ℤ) : ZMod 2) * (A 1 1 : ℤ) - (A 0 1 : ℤ) * (A 1 0 : ℤ) = 1 := by
+  have h := A.2
+  rw [Matrix.det_fin_two] at h
+  have := congrArg (fun x : ℤ => (x : ZMod 2)) h
+  push_cast at this
+  exact this
+
+/-- `ψ_{AB} = ψ_A ∘ ψ_B` away from `0, 1`. -/
+lemma p3w_anharmSL_mul (A B : SL(2, ℤ)) {l : ℂ} (h0 : l ≠ 0) (h1 : l ≠ 1) :
+    p3w_anharmSL (A * B) l = p3w_anharmSL A (p3w_anharmSL B l) := by
+  have e : ∀ i j, ((A * B) i j : ZMod 2) = (A i 0 : ZMod 2) * (B 0 j) + (A i 1) * (B 1 j) := by
+    intro i j
+    have : (A * B) i j = A i 0 * B 0 j + A i 1 * B 1 j := by
+      simp [Matrix.mul_apply, Fin.sum_univ_two]
+    rw [this]; push_cast; rfl
+  unfold p3w_anharmSL
+  rw [e, e, e, e]
+  exact p3w_anharm_mul _ _ _ _ _ _ _ _ (p3w_det_zmod A) (p3w_det_zmod B) h0 h1
+
+/-- `ψ_1 = id`. -/
+lemma p3w_anharmSL_one (l : ℂ) : p3w_anharmSL 1 l = l := by
+  simp [p3w_anharmSL, p3w_anharm]
+
+/-- `λ(τ) ≠ 0, 1` on `ℍ`. -/
+lemma p3w_modularLambda_ne (τ : ℍ) : modularLambda τ ≠ 0 ∧ modularLambda τ ≠ 1 := by
+  obtain ⟨n2, n3, n4⟩ := jacobiThetaNullTau_ne_zero τ.im_pos
+  have hj := jacobiThetaNull_fourth_power τ τ.im_pos
+  refine ⟨div_ne_zero (pow_ne_zero _ n2) (pow_ne_zero _ n3), fun h => ?_⟩
+  rw [modularLambda, div_eq_one_iff_eq (pow_ne_zero _ n3)] at h
+  exact pow_ne_zero 4 n4 (by linear_combination -hj - h)
+
+/-- `λ(τ + 1) = -λ/(1 - λ)`. -/
+lemma p3w_modularLambda_T (τ : ℍ) :
+    modularLambda (ModularGroup.T • τ : ℍ) = -modularLambda τ / (1 - modularLambda τ) := by
+  have hc : ((ModularGroup.T • τ : ℍ) : ℂ) = τ + 1 := by
+    rw [modular_T_smul, coe_vadd]; push_cast; ring
+  obtain ⟨n2, n3, n4⟩ := jacobiThetaNullTau_ne_zero τ.im_pos
+  have hj := jacobiThetaNull_fourth_power τ τ.im_pos
+  simp only [jacobiThetaTwoNullTau, jacobiThetaThreeNullTau, jacobiThetaFourNullTau] at n2 n3 n4 hj
+  rw [hc, modularLambda, modularLambda]
+  simp only [jacobiThetaTwoNullTau, jacobiThetaThreeNullTau]
+  rw [jacobiThetaTwoTau_add_one, jacobiThetaThreeTau_add_one]
+  have he : cexp (π * I / 4) ^ 4 = -1 := by
+    rw [← Complex.exp_nat_mul]; push_cast
+    rw [show (4 : ℂ) * (π * I / 4) = π * I by ring, exp_pi_mul_I]
+  have h1 : 1 - jacobiThetaTwoTau 0 τ ^ 4 / jacobiThetaThreeTau 0 τ ^ 4 =
+      jacobiThetaFourTau 0 τ ^ 4 / jacobiThetaThreeTau 0 τ ^ 4 := by
+    field_simp; linear_combination hj
+  rw [h1, mul_pow, he]
+  field_simp
+
+/-- `λ(-1/τ) = 1 - λ`. -/
+lemma p3w_modularLambda_S (τ : ℍ) :
+    modularLambda (ModularGroup.S • τ : ℍ) = 1 - modularLambda τ := by
+  have hc : ((ModularGroup.S • τ : ℍ) : ℂ) = -1 / τ := by
+    rw [modular_S_smul, coe_mk, inv_neg, neg_div, one_div]
+  have hτ0 : (τ : ℂ) ≠ 0 := τ.ne_zero
+  obtain ⟨n2, n3, n4⟩ := jacobiThetaNullTau_ne_zero τ.im_pos
+  have hj := jacobiThetaNull_fourth_power τ τ.im_pos
+  simp only [jacobiThetaTwoNullTau, jacobiThetaThreeNullTau, jacobiThetaFourNullTau] at n2 n3 n4 hj
+  have t3 := jacobiThetaThreeTau_neg_inv τ.im_pos 0
+  have t4 := jacobiThetaFourTau_neg_inv τ.im_pos 0
+  simp only [zero_mul, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, mul_zero,
+    zero_div, Complex.exp_zero, one_mul] at t3 t4
+  have hs : (-I * τ) ^ (1 / 2 : ℂ) ≠ 0 :=
+    cpow_ne_zero_iff.mpr (Or.inl (mul_ne_zero (neg_ne_zero.mpr I_ne_zero) hτ0))
+  rw [hc, modularLambda, modularLambda]
+  simp only [jacobiThetaTwoNullTau, jacobiThetaThreeNullTau]
+  rw [← t3, ← t4, mul_pow, mul_pow]
+  set s := (-I * (τ : ℂ)) ^ (1 / 2 : ℂ)
+  field_simp
+  linear_combination -hj
+
+/-- `λ(Aτ) = ψ_A(λ(τ))` for all `A ∈ SL(2, ℤ)` (induction over the generators `S`, `T`). -/
+lemma p3w_modularLambda_smul_anharm (A : SL(2, ℤ)) (τ : ℍ) :
+    modularLambda (A • τ : ℍ) = p3w_anharmSL A (modularLambda τ) := by
+  have hA : A ∈ Subgroup.closure {ModularGroup.S, ModularGroup.T} := by
+    rw [SpecialLinearGroup.SL2Z_generators]; trivial
+  revert τ
+  induction hA using Subgroup.closure_induction with
+  | mem x hx =>
+    intro τ
+    rcases hx with rfl | rfl
+    · rw [p3w_modularLambda_S]
+      simp (config := {decide := true}) [p3w_anharmSL, p3w_anharm]
+    · rw [p3w_modularLambda_T]
+      simp (config := {decide := true}) [p3w_anharmSL, p3w_anharm]
+  | one => intro τ; rw [one_smul, p3w_anharmSL_one]
+  | mul x y _ _ hx hy =>
+    intro τ
+    obtain ⟨h0, h1⟩ := p3w_modularLambda_ne τ
+    rw [mul_smul, hx, hy, p3w_anharmSL_mul x y h0 h1]
+  | inv x _ hx =>
+    intro τ
+    obtain ⟨h0, h1⟩ := p3w_modularLambda_ne (x⁻¹ • τ)
+    have := hx (x⁻¹ • τ)
+    rw [smul_inv_smul] at this
+    rw [this, ← p3w_anharmSL_mul _ _ h0 h1, inv_mul_cancel, p3w_anharmSL_one]
 
 /-- DLMF 23.18.1–23.18.2: `λ(𝒜τ)` equals `λ`, `1 - λ`, `1/λ`, `1/(1 - λ)`, `λ/(λ - 1)`,
 `1 - 1/λ` according as `[a b; c d]` has parities `[o e; e o]`, `[e o; o e]`, `[o e; o o]`,
@@ -491,7 +646,14 @@ theorem modularLambda_smul (A : SL(2, ℤ)) (τ : ℍ) :
     (Even a → Odd b → Odd c → Odd d → l' = 1 / (1 - l)) ∧
     (Odd a → Odd b → Even c → Odd d → l' = l / (l - 1)) ∧
     (Odd a → Odd b → Odd c → Even d → l' = 1 - 1 / l) := by
-  sorry
+  intro a b c d l l'
+  have key : l' = p3w_anharm (a : ZMod 2) b c d l := p3w_modularLambda_smul_anharm A τ
+  have hl1 : l - 1 = -(1 - l) := by ring
+  simp only [← ZMod.intCast_eq_one_iff_odd, ← ZMod.intCast_eq_zero_iff_even]
+  refine ⟨fun ha hb hc hd => ?_, fun ha hb hc hd => ?_, fun ha hb hc hd => ?_,
+    fun ha hb hc hd => ?_, fun ha hb hc hd => ?_, fun ha hb hc hd => ?_⟩ <;>
+  rw [key, ha, hb, hc, hd] <;> simp (config := {decide := true}) [p3w_anharm] <;>
+  rw [hl1, div_neg, neg_div]
 
 /-- DLMF 23.18.3: if `a - 1, b, c, d - 1` are all even then `λ(𝒜τ) = λ(τ)`. -/
 @[dlmf 23.18.E3]
@@ -504,24 +666,87 @@ theorem modularLambda_smul_of_even (A : SL(2, ℤ)) (τ : ℍ) (ha : Even (A 0 0
     obtain ⟨r, hr⟩ := hd; exact ⟨r, by omega⟩
   exact (modularLambda_smul A τ).1 hao hb hc hdo
 
+open Topology in
 /-- §23.18 after 23.18.3: `λ` is a cusp form of level zero for the subgroup of 23.18.3, which is
 the principal congruence subgroup `Γ(2)`. -/
 @[dlmf 23.18.E3]
 theorem isCuspForm_modularLambda : IsCuspForm (CongruenceSubgroup.Gamma 2) 0 modularLambda := by
-  sorry
-
-/-- DLMF 23.18.4: `J(𝒜τ) = J(τ)` for `𝒜 ∈ SL(2, ℤ)`, `ℑτ > 0`. -/
-@[dlmf 23.18.E4]
-theorem kleinJ_smul (A : SL(2, ℤ)) (τ : ℍ) : kleinJ (A • τ : ℍ) = kleinJ τ := by
-  sorry
-
-/-- §23.18 after 23.18.4: `J` is a modular function of level zero for `SL(2, ℤ)`.
-Corrected from the printed DLMF statement: DLMF calls `J` a "modular form of level zero", but `J`
-has a pole at `q = 0`, so it is not a modular form in the sense of DLMF 23.15(i) (which requires
-analyticity at `q = 0`); it is a modular function. -/
-@[dlmf 23.18.E4]
-theorem isModularFunction_kleinJ : IsModularFunction ⊤ 0 kleinJ := by
-  sorry
+  have hdiff : ∀ τ : ℂ, 0 < τ.im → DifferentiableAt ℂ modularLambda τ := fun τ hτ => by
+    obtain ⟨-, n3, -⟩ := jacobiThetaNullTau_ne_zero hτ
+    exact ((p22R1_differentiableAt_two hτ).pow 4).div ((p22R1_differentiableAt_three hτ).pow 4)
+      (pow_ne_zero 4 n3)
+  have hper : Function.Periodic modularLambda 2 := fun τ => by
+    simp only [modularLambda, jacobiThetaTwoNullTau, jacobiThetaThreeNullTau]
+    rw [show τ + 2 = τ + 1 + 1 by ring, jacobiThetaTwoTau_add_one, jacobiThetaTwoTau_add_one,
+      jacobiThetaThreeTau_add_one, jacobiThetaFourTau_add_one, mul_pow, mul_pow, ← mul_assoc,
+      ← mul_pow, ← Complex.exp_add,
+      show π * I / 4 + π * I / 4 = π * I / 2 by ring, ← Complex.exp_nat_mul]
+    rw [show ((4 : ℕ) : ℂ) * (π * I / 2) = 2 * π * I by push_cast; ring, Complex.exp_two_pi_mul_I,
+      one_mul]
+  set Iinf : Filter ℂ := Filter.comap Complex.im Filter.atTop with hI
+  have hev : ∀ᶠ τ in Iinf, 0 < τ.im := by
+    rw [hI]; exact Filter.preimage_mem_comap (Filter.Ioi_mem_atTop 0)
+  have hθ3 : Filter.Tendsto (fun τ => jacobiThetaThreeTau 0 τ) Iinf (𝓝 1) := by
+    have h1 := isBigO_at_im_infty_jacobiTheta_sub_one
+    have h2 : Filter.Tendsto (fun τ : ℂ => Real.exp (-π * τ.im)) Iinf (𝓝 0) := by
+      have : Filter.Tendsto (fun τ : ℂ => π * τ.im) Iinf Filter.atTop :=
+        Filter.tendsto_comap.const_mul_atTop Real.pi_pos
+      refine (Real.tendsto_exp_atBot.comp (Filter.tendsto_neg_atTop_atBot.comp this)).congr
+        fun τ => ?_
+      simp [neg_mul]
+    have h3 := (h1.trans_tendsto h2)
+    have h4 := h3.add_const 1
+    simp only [sub_add_cancel, zero_add] at h4
+    refine h4.congr fun τ => ?_
+    simp [jacobiThetaThreeTau, jacobiTheta_eq_jacobiTheta₂]
+  have hθ4 : Filter.Tendsto (fun τ => jacobiThetaFourTau 0 τ) Iinf (𝓝 1) := by
+    have hs : Filter.Tendsto (fun τ : ℂ => τ + 1) Iinf Iinf := by
+      rw [hI, Filter.tendsto_comap_iff]
+      simpa [Function.comp_def] using Filter.tendsto_comap
+    refine (hθ3.comp hs).congr fun τ => ?_
+    simp [jacobiThetaThreeTau_add_one]
+  have hzero : Filter.Tendsto modularLambda Iinf (𝓝 0) := by
+    have := ((hθ3.pow 4).sub (hθ4.pow 4)).div (hθ3.pow 4) (by norm_num)
+    simp only [one_pow, sub_self, zero_div] at this
+    refine this.congr' ?_
+    filter_upwards [hev] with τ hτ
+    have hj := jacobiThetaNull_fourth_power τ hτ
+    simp only [jacobiThetaTwoNullTau, jacobiThetaThreeNullTau, jacobiThetaFourNullTau] at hj
+    simp only [Pi.div_apply, modularLambda, jacobiThetaTwoNullTau, jacobiThetaThreeNullTau]
+    rw [hj]; ring
+  have hhol : ∀ᶠ τ in Iinf, DifferentiableAt ℂ modularLambda τ := hev.mono hdiff
+  have hbd : Filter.BoundedAtFilter Iinf modularLambda :=
+    Filter.ZeroAtFilter.boundedAtFilter hzero
+  set F := Function.Periodic.cuspFunction 2 modularLambda
+  have hF0 : DifferentiableAt ℂ F 0 :=
+    Function.Periodic.differentiableAt_cuspFunction_zero (by norm_num) hper hhol hbd
+  have hFn : ∀ᶠ q in 𝓝[≠] (0 : ℂ), DifferentiableAt ℂ F q :=
+    Function.Periodic.eventually_differentiableAt_cuspFunction_nhds_ne_zero (by norm_num) hper
+      hhol
+  have hFa : AnalyticAt ℂ F 0 := by
+    refine Complex.analyticAt_iff_eventually_differentiableAt.mpr ?_
+    have := hFn
+    rw [eventually_nhdsWithin_iff] at this
+    filter_upwards [this] with q hq
+    by_cases h0 : q = 0
+    · rw [h0]; exact hF0
+    · exact hq h0
+  refine ⟨⟨?_, fun A hA => ⟨1, fun τ => ?_⟩⟩, F, hFa,
+    Function.Periodic.cuspFunction_zero_of_zero_at_inf (by norm_num) hzero, fun τ => ?_⟩
+  · have hU : IsOpen {z : ℂ | 0 < z.im} := isOpen_upperHalfPlaneSet
+    exact (DifferentiableOn.analyticOnNhd (fun z hz => (hdiff z hz).differentiableWithinAt)
+      hU).meromorphicOn
+  · simp only [Int.cast_zero, zero_div, cpow_zero, one_mul]
+    rw [CongruenceSubgroup.Gamma_mem] at hA
+    obtain ⟨h1, h2, h3, h4⟩ := hA
+    rw [p3w_modularLambda_smul_anharm, p3w_anharmSL, h1, h2, h3, h4]
+    simp [p3w_anharm]
+  · rw [← Function.Periodic.eq_cuspFunction (by norm_num) hper τ]
+    congr 1
+    simp only [Function.Periodic.qParam]
+    congr 1
+    push_cast
+    ring
 
 /-- The Dedekind sum `s(d, c) = ∑_{r=1}^{c-1} (r/c)(dr/c - ⌊dr/c⌋ - 1/2)` (DLMF 23.18.7, as
 corrected in DLMF V1.0.11: no coprimality condition on `r`), for `c > 0`. -/
@@ -543,18 +768,179 @@ theorem eta_smul (A : SL(2, ℤ)) (hc : 0 < A 1 0) (τ : ℍ) :
       η (τ : ℂ) := by
   sorry
 
+/-- `η(Aτ)²⁴ = (cτ + d)¹² η(τ)²⁴`. -/
+lemma p3w_eta_pow_smul (A : SL(2, ℤ)) (τ : ℍ) :
+    η (A • τ : ℍ) ^ 24 = ((A 1 0 : ℂ) * τ + A 1 1) ^ 12 * η (τ : ℂ) ^ 24 := by
+  have hg : (Matrix.SpecialLinearGroup.mapGL ℝ A : GL (Fin 2) ℝ) ∈ 𝒮ℒ :=
+    MonoidHom.mem_range.mpr ⟨A, rfl⟩
+  have h := SlashInvariantForm.slash_action_eqn'' CuspForm.discriminant hg τ
+  have hs : (Matrix.SpecialLinearGroup.mapGL ℝ A : GL (Fin 2) ℝ) • τ = A • τ := rfl
+  rw [hs] at h
+  have hd : denom (Matrix.SpecialLinearGroup.mapGL ℝ A : GL (Fin 2) ℝ) τ =
+      (A 1 0 : ℂ) * τ + A 1 1 := by
+    simp [denom, Matrix.SpecialLinearGroup.mapGL]
+  rw [hd] at h
+  simpa [CuspForm.coe_discriminant, ModularForm.discriminant] using h
+
+/-- `η` is continuous on `ℍ`. -/
+lemma p3w_continuous_eta : Continuous fun τ : ℍ => η (τ : ℂ) :=
+  continuous_iff_continuousAt.mpr fun τ =>
+    ((ModularForm.differentiableAt_eta_of_mem_upperHalfPlaneSet τ.im_pos).continuousAt).comp
+      UpperHalfPlane.continuous_coe.continuousAt
+
 /-- §23.18, last sentence: `η` is a modular function of level `1/2` for `SL(2, ℤ)`. -/
 @[dlmf 23.18.E5]
 theorem isModularFunction_eta : IsModularFunction ⊤ 1 ModularForm.eta := by
-  sorry
+  refine ⟨?_, fun A _ => ?_⟩
+  · have hU : IsOpen {z : ℂ | 0 < z.im} := isOpen_upperHalfPlaneSet
+    exact (DifferentiableOn.analyticOnNhd (fun z hz =>
+      (ModularForm.differentiableAt_eta_of_mem_upperHalfPlaneSet hz).differentiableWithinAt)
+      hU).meromorphicOn
+  set s : ℍ → ℂ := fun τ => ((A 1 0 : ℂ) * τ + A 1 1) ^ (1 / 2 : ℂ) with hs
+  have hden : ∀ τ : ℍ, (A 1 0 : ℂ) * τ + A 1 1 ≠ 0 := fun τ => by
+    have := denom_ne_zero (Matrix.SpecialLinearGroup.mapGL ℝ A : GL (Fin 2) ℝ) τ
+    simpa [denom, Matrix.SpecialLinearGroup.mapGL] using this
+  have hs0 : ∀ τ, s τ ≠ 0 := fun τ => by
+    simp only [hs]; exact cpow_ne_zero_iff.mpr (Or.inl (hden τ))
+  have hη0 : ∀ τ : ℍ, η (τ : ℂ) ≠ 0 := fun τ => ModularForm.eta_ne_zero τ.im_pos
+  set g : ℍ → ℂ := fun τ => η (A • τ : ℍ) / (s τ * η (τ : ℂ)) with hgdef
+  have hg24 : ∀ τ, g τ ^ 24 = 1 := fun τ => by
+    simp only [hgdef, div_pow, mul_pow, p3w_eta_pow_smul]
+    have : s τ ^ 24 = ((A 1 0 : ℂ) * τ + A 1 1) ^ 12 := by
+      simp only [hs]
+      rw [← cpow_nat_mul]; norm_num
+    rw [this, div_self (mul_ne_zero (pow_ne_zero _ (hden τ)) (pow_ne_zero _ (hη0 τ)))]
+  have hscont : Continuous s := by
+    by_cases hc : (A 1 0 : ℂ) = 0
+    · simp only [hs, hc, zero_mul, zero_add]; exact continuous_const
+    · refine continuous_iff_continuousAt.mpr fun τ => ?_
+      have hslit : (A 1 0 : ℂ) * τ + A 1 1 ∈ Complex.slitPlane := by
+        refine Or.inr ?_
+        have hc' : (A 1 0 : ℝ) ≠ 0 := by exact_mod_cast (by exact_mod_cast hc : (A 1 0 : ℤ) ≠ 0)
+        simp [hc', τ.im_pos.ne']
+      exact (continuousAt_cpow_const hslit).comp (f := fun τ : ℍ => (A 1 0 : ℂ) * τ + A 1 1)
+        ((continuous_const.mul UpperHalfPlane.continuous_coe).add continuous_const).continuousAt
+  have hgcont : Continuous g := by
+    refine Continuous.div ?_ (hscont.mul p3w_continuous_eta) fun τ => mul_ne_zero (hs0 τ) (hη0 τ)
+    have he : (fun τ : ℍ => η ((A • τ : ℍ) : ℂ)) = fun τ : ℍ => η (mobius A τ) :=
+      funext fun τ => by rw [mobius_coe]
+    rw [he]
+    refine continuous_iff_continuousAt.mpr fun τ => ?_
+    have hpos : 0 < (mobius A τ).im := by rw [← mobius_coe]; exact (A • τ).im_pos
+    refine (ModularForm.differentiableAt_eta_of_mem_upperHalfPlaneSet hpos).continuousAt.comp
+      (f := fun τ : ℍ => mobius A τ) ?_
+    simp only [mobius]
+    exact (((continuous_const.mul UpperHalfPlane.continuous_coe).add continuous_const).div
+      ((continuous_const.mul UpperHalfPlane.continuous_coe).add continuous_const) hden).continuousAt
+  have hT : IsDiscrete {w : ℂ | w ^ 24 = 1} := by
+    refine Set.Finite.isDiscrete ?_
+    have := Polynomial.finite_setOfPred_isRoot (p := (Polynomial.X ^ 24 - Polynomial.C (1 : ℂ)))
+      (Polynomial.X_pow_sub_C_ne_zero (by norm_num) 1)
+    simpa [sub_eq_zero] using this
+  have hconst : ∀ τ, g τ = g UpperHalfPlane.I := fun τ =>
+    isPreconnected_univ.constant_of_mapsTo hT hgcont.continuousOn (fun τ _ => hg24 τ)
+      (Set.mem_univ _) (Set.mem_univ _)
+  refine ⟨g UpperHalfPlane.I, fun τ => ?_⟩
+  rw [← hconst τ]
+  simp only [hgdef, Int.cast_one]
+  rw [show ((1 : ℂ) / 2) = 1 / 2 from rfl]
+  field_simp [hs0 τ, hη0 τ]
+  rfl
+
 
 /-! ### §23.19 Interrelations -/
+
+/-- `|e^{iπτ}| < 1` on `ℍ`. -/
+lemma p3w_norm_nome_lt_one (τ : ℍ) : ‖cexp (π * I * τ)‖ < 1 := by
+  rw [Complex.norm_exp, Real.exp_lt_one_iff]
+  have : (↑π * I * (τ : ℂ)).re = -(π * (τ : ℂ).im) := by simp
+  rw [this, neg_lt_zero]
+  exact mul_pos Real.pi_pos τ.im_pos
+
+/-- `η(2τ)² = θ₂(0|τ)η(τ)/2`. -/
+lemma p3w_eta_two_mul_sq (τ : ℍ) :
+    η (2 * (τ : ℂ)) ^ 2 = jacobiThetaTwoTau 0 τ * η (τ : ℂ) / 2 := by
+  set τ2 : ℍ := ⟨2 * (τ : ℂ), by simpa using τ.im_pos⟩
+  obtain ⟨hm2, he2⟩ := eta_hasProd τ2
+  obtain ⟨hm, he⟩ := eta_hasProd τ
+  obtain ⟨mθ, eθ⟩ := jacobiThetaTwoNullTau_prod τ.im_pos
+  set q := cexp (π * I * τ) with hq
+  have hq2 : cexp (π * I * (τ2 : ℂ)) = q ^ 2 := by
+    rw [hq, ← Complex.exp_nat_mul]; congr 1; simp [τ2]; ring
+  rw [hq2] at hm2 he2
+  have h2 : η (2 * (τ : ℂ)) = η (τ2 : ℂ) := rfl
+  rw [h2, he2]
+  simp only [jacobiThetaTwoNullTau] at eθ
+  rw [eθ, he]
+  have hprod := (mθ.hasProd.mul hm).tprod_eq
+  have e1 : cexp (π * I * (τ2 : ℂ) / 12) ^ 2 = cexp (π * I * τ / 4) * cexp (π * I * τ / 12) := by
+    rw [← Complex.exp_nat_mul, ← Complex.exp_add]; congr 1; simp [τ2]; ring
+  rw [mul_pow, e1, ← hm2.multipliable.tprod_pow]
+  rw [show ∀ a b c d : ℂ, 2 * a * c * (b * d) / 2 = a * b * (c * d) by intros; ring]
+  congr 1
+  rw [← hprod]
+  refine tprod_congr fun n => ?_
+  rw [← pow_mul, show 2 * (2 * (n + 1)) = 2 * (n + 1) * 2 by ring, pow_mul]
+  ring
+
+/-- `η(τ/2)² = θ₄(0|τ)η(τ)`. -/
+lemma p3w_eta_half_sq (τ : ℍ) :
+    η ((τ : ℂ) / 2) ^ 2 = jacobiThetaFourTau 0 τ * η (τ : ℂ) := by
+  set τh : ℍ := ⟨(τ : ℂ) / 2, by simpa using τ.im_pos⟩
+  obtain ⟨hmh, heh⟩ := eta_hasProd τh
+  obtain ⟨hm, he⟩ := eta_hasProd τ
+  obtain ⟨-, eθ⟩ := jacobiThetaFourNullTau_prod τ.im_pos
+  set q := cexp (π * I * τ) with hq
+  have hqh : ∀ n : ℕ, cexp (π * I * (τh : ℂ)) ^ (2 * (n + 1)) = q ^ (n + 1) := by
+    intro n
+    rw [pow_mul, hq, ← Complex.exp_nat_mul]; congr 2; simp [τh]; ring
+  simp_rw [hqh] at heh
+  have h2 : η ((τ : ℂ) / 2) = η (τh : ℂ) := rfl
+  have hq1 : ‖q‖ < 1 := p3w_norm_nome_lt_one τ
+  have hA : Multipliable (fun k : ℕ => 1 - q ^ (2 * k + 1)) := by
+    have hs : Summable (fun k : ℕ => -q ^ (2 * k + 1)) := by
+      have : Summable (fun k : ℕ => q * (q ^ 2) ^ k) :=
+        (summable_geometric_of_norm_lt_one (by rw [norm_pow]; nlinarith [norm_nonneg q])).mul_left q
+      refine this.neg.congr fun k => ?_
+      rw [← pow_mul, ← pow_succ']
+    simpa [sub_eq_add_neg] using Complex.multipliable_one_add_of_summable hs
+  have hB : Multipliable (fun k : ℕ => 1 - q ^ (2 * (k + 1))) := hm.multipliable
+  have hsplit : ∏' n : ℕ, (1 - q ^ (n + 1)) =
+      (∏' k : ℕ, (1 - q ^ (2 * k + 1))) * ∏' k : ℕ, (1 - q ^ (2 * (k + 1))) := by
+    rw [← tprod_even_mul_odd (f := fun n : ℕ => 1 - q ^ (n + 1)) hA
+      (by simpa [show ∀ k : ℕ, 2 * k + 1 + 1 = 2 * (k + 1) by intro k; ring] using hB)]
+    congr 1
+  have hθ : jacobiThetaFourTau 0 τ =
+      (∏' k : ℕ, (1 - q ^ (2 * (k + 1)))) * (∏' k : ℕ, (1 - q ^ (2 * k + 1))) ^ 2 := by
+    simp only [jacobiThetaFourNullTau] at eθ
+    rw [eθ, ← (hB.hasProd.mul (hA.hasProd.pow 2)).tprod_eq]
+  rw [h2, heh, hsplit, hθ, he]
+  have e1 : cexp (π * I * (τh : ℂ) / 12) ^ 2 = cexp (π * I * τ / 12) := by
+    rw [← Complex.exp_nat_mul]; congr 1; simp [τh]; ring
+  rw [mul_pow, e1]
+  ring
 
 /-- DLMF 23.19.1: `λ(τ) = 16(η²(2τ)η(τ/2)/η³(τ))⁸`, `ℑτ > 0`. -/
 @[dlmf 23.19.E1]
 theorem modularLambda_eq_eta (τ : ℍ) :
     modularLambda τ = 16 * (η (2 * τ) ^ 2 * η ((τ : ℂ) / 2) / η (τ : ℂ) ^ 3) ^ 8 := by
-  sorry
+  have hA := p3w_eta_two_mul_sq τ
+  have hB := p3w_eta_half_sq τ
+  have hC := p23R1_eta_cube τ
+  rw [jacobiThetaOneDerivNullTau_eq_mul τ.im_pos] at hC
+  obtain ⟨n2, n3, n4⟩ := jacobiThetaNullTau_ne_zero τ.im_pos
+  simp only [jacobiThetaTwoNullTau, jacobiThetaThreeNullTau, jacobiThetaFourNullTau] at n2 n3 n4 hC
+  have hη : η (τ : ℂ) ≠ 0 := by
+    intro h; rw [h] at hC
+    exact mul_ne_zero (mul_ne_zero n2 n3) n4 (by linear_combination -2 * hC)
+  rw [show (η (2 * τ) ^ 2 * η ((τ : ℂ) / 2) / η (τ : ℂ) ^ 3) ^ 8 =
+      (η (2 * (τ : ℂ)) ^ 2) ^ 8 * (η ((τ : ℂ) / 2) ^ 2) ^ 4 / (η (τ : ℂ) ^ 3) ^ 8 by ring,
+    hA, hB, hC, modularLambda]
+  simp only [jacobiThetaTwoNullTau, jacobiThetaThreeNullTau]
+  field_simp
+  rw [show η (τ : ℂ) ^ 12 = (η (τ : ℂ) ^ 3) ^ 4 by ring, hC]
+  ring
+
 
 /-- DLMF 23.19.2: `J(τ) = (4/27)(1 - λ + λ²)³/(λ(1 - λ))²`, `ℑτ > 0`. -/
 @[dlmf 23.19.E2]
@@ -602,44 +988,47 @@ theorem kleinJ_eq_invariants (τ : ℍ) :
   field_simp
   ring
 
-section p23R1Disc
 
-open PeriodPair ModularForm EisensteinSeries
-
-/-- The lattice sums of the lattice `ℤ + ℤτ` are the full Eisenstein sums. -/
-theorem p23R1_G_ofTau (τ : ℍ) (k : ℕ) :
-    (HalfPeriods.ofTau (1 / 2) (by norm_num) τ).periodPair.G k =
-      ∑' v : Fin 2 → ℤ, eisSummand k v τ := by
-  set L := (HalfPeriods.ofTau (1 / 2) (by norm_num) τ).periodPair
-  simp only [PeriodPair.G]
-  rw [← ((finTwoArrowEquiv ℤ).trans
-    ((Equiv.prodComm ℤ ℤ).trans L.latticeEquivProd.toEquiv.symm)).tsum_eq]
-  refine tsum_congr fun v => ?_
-  simp only [Equiv.trans_apply, eisSummand]
-  rw [show ((L.latticeEquivProd.toEquiv.symm ((Equiv.prodComm ℤ ℤ) (finTwoArrowEquiv ℤ v)) :
-    L.lattice) : ℂ) = _ from L.latticeEquiv_symm_apply _]
-  simp [L, HalfPeriods.periodPair, _root_.zpow_neg, zpow_natCast]
-  ring_nf
-
-/-- `B₆ = 1/42`. -/
-theorem p23R1_bernoulli_six : bernoulli 6 = 1 / 42 := by decide +kernel
-
-/-- `ζ(6) = π⁶/945`. -/
-theorem p23R1_riemannZeta_six : riemannZeta 6 = π ^ 6 / 945 := by
-  have := riemannZeta_two_mul_nat (k := 3) (by norm_num)
-  norm_num [p23R1_bernoulli_six, Nat.factorial] at this
-  rw [this]; ring
-
-/-- `G_k(ℤ + ℤτ) = 2ζ(k)E_k(τ)` with Mathlib's normalised Eisenstein series. -/
-theorem p23R1_G_eq_E (τ : ℍ) {k : ℕ} (hk : 3 ≤ k) :
-    (HalfPeriods.ofTau (1 / 2) (by norm_num) τ).periodPair.G k =
-      2 * riemannZeta k * E hk τ := by
-  rw [p23R1_G_ofTau, tsum_eisSummand_eq_riemannZeta_mul_eisensteinSeries hk]
-  have : (E hk : ℍ → ℂ) τ = (1 / 2 : ℂ) * eisensteinSeries 0 k τ := rfl
-  rw [this]
+open ModularForm EisensteinSeries in
+/-- `J(τ)` is Mathlib's `E₄³/(E₄³ - E₆²)`. -/
+lemma p3w_kleinJ_eq_J (τ : ℍ) : kleinJ τ = ModularForm.p3wJ τ := by
+  rw [kleinJ_eq_invariants]
+  set L0 := (HalfPeriods.ofTau (1 / 2) (by norm_num) τ).periodPair
+  have z4 : riemannZeta ((4 : ℕ) : ℂ) = π ^ 4 / 90 := by exact_mod_cast riemannZeta_four
+  have z6 : riemannZeta ((6 : ℕ) : ℂ) = π ^ 6 / 945 := by exact_mod_cast p23R1_riemannZeta_six
+  have ha : L0.g₂ = 4 * π ^ 4 / 3 * E₄ τ := by
+    rw [PeriodPair.g₂, p23R1_G_eq_E τ (k := 4) (by norm_num), z4]; ring
+  have hb : L0.g₃ = 8 * π ^ 6 / 27 * E₆ τ := by
+    rw [PeriodPair.g₃, p23R1_G_eq_E τ (k := 6) (by norm_num), z6]; ring
+  have hD := p3w_E₄_cube_sub_E₆_sq_ne_zero τ
+  have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
+  simp only [HalfPeriods.g₂, HalfPeriods.g₃]
+  rw [ha, hb, p3wJ, show (4 * π ^ 4 / 3 * E₄ τ) ^ 3 - 27 * (8 * π ^ 6 / 27 * E₆ τ) ^ 2 =
+    64 * (π : ℂ) ^ 12 / 27 * (E₄ τ ^ 3 - E₆ τ ^ 2) by ring]
+  rw [div_eq_div_iff (mul_ne_zero (by simp [hπ]) hD) hD]
   ring
 
-end p23R1Disc
+/-- DLMF 23.18.4: `J(𝒜τ) = J(τ)` for `𝒜 ∈ SL(2, ℤ)`, `ℑτ > 0`. -/
+@[dlmf 23.18.E4]
+theorem kleinJ_smul (A : SL(2, ℤ)) (τ : ℍ) : kleinJ (A • τ : ℍ) = kleinJ τ := by
+  rw [p3w_kleinJ_eq_J, p3w_kleinJ_eq_J, ModularForm.p3wJ_smul]
+
+/-- §23.18 after 23.18.4: `J` is a modular function of level zero for `SL(2, ℤ)`.
+Corrected from the printed DLMF statement: DLMF calls `J` a "modular form of level zero", but `J`
+has a pole at `q = 0`, so it is not a modular form in the sense of DLMF 23.15(i) (which requires
+analyticity at `q = 0`); it is a modular function. -/
+@[dlmf 23.18.E4]
+theorem isModularFunction_kleinJ : IsModularFunction ⊤ 0 kleinJ := by
+  refine ⟨?_, fun A _ => ⟨1, fun τ => ?_⟩⟩
+  · have hU : IsOpen {z : ℂ | 0 < z.im} := isOpen_upperHalfPlaneSet
+    refine AnalyticOnNhd.meromorphicOn fun z hz => ?_
+    refine (ModularForm.p3wJ_analyticOnNhd z hz).congr ?_
+    filter_upwards [hU.mem_nhds hz] with w hw
+    simp only [Function.comp_apply]
+    have : kleinJ w = kleinJ ((⟨w, hw⟩ : ℍ) : ℂ) := rfl
+    rw [this, p3w_kleinJ_eq_J, ofComplex_apply_of_im_pos hw]
+  · simp only [Int.cast_zero, zero_div, cpow_zero, one_mul]
+    exact kleinJ_smul A τ
 
 open ModularForm in
 /-- DLMF 23.19.4: `Δ = (2π)¹²η²⁴(τ)` for the lattice with generators `1` and `τ`, `ℑτ > 0`. -/

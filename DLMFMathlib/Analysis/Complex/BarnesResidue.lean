@@ -5,10 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.Complex.CauchyIntegral
 public import Mathlib.Analysis.Complex.RemovableSingularity
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.ArctanDeriv
-public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
 public import Mathlib.Analysis.Normed.Module.Connected
 public import Mathlib.LinearAlgebra.Complex.FiniteDimensional

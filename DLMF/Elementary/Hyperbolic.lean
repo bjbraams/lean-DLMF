@@ -5,18 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Core.Framework
-public import DLMF.Core.Upstream
 public import DLMF.Elementary.Trigonometric
 public import DLMF.Elementary.LogExpAnalysis
-public import Mathlib.Analysis.Complex.SqrtDeriv
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Series
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
-public import Mathlib.Analysis.SpecialFunctions.Arsinh
-public import Mathlib.Analysis.SpecialFunctions.Arcosh
-public import Mathlib.Analysis.SpecialFunctions.Artanh
 public import TauCeti.Analysis.SpecialFunctions.Artanh
-public import DLMFMathlib.NumberTheory.EulerNumbers
+public import DLMFMathlib.NumberTheory.BernoulliTaylor
 
 /-!
 # Hyperbolic and inverse hyperbolic functions (DLMF §§4.28–4.41)
@@ -167,13 +159,13 @@ theorem cosh_zeros (z : ℂ) : Complex.cosh z=0 ↔ ∃ k : ℤ, z=((k:ℂ)+1/2)
 
 
 /-- The principal square root of the square of a nonnegative real number. -/
-private theorem hypR4_sqrt_sq_ofReal {x : ℝ} (hx : 0 ≤ x) : Complex.sqrt ((x:ℂ)^2) = x := by
+private lemma hypR4_sqrt_sq_ofReal {x : ℝ} (hx : 0 ≤ x) : Complex.sqrt ((x:ℂ)^2) = x := by
   have h : Complex.sqrt ((x^2:ℝ):ℂ) = (Real.sqrt (x^2):ℂ) :=
     Complex.sqrt_of_nonneg (by exact_mod_cast sq_nonneg x)
   rw [← Complex.ofReal_pow, h, Real.sqrt_sq hx]
 
 /-- Under `HyperbolicPositive`, `sinh z` and `cosh z` are positive reals with `γ² = 1 + σ²`. -/
-private theorem hypR4_pos_data {z : ℂ} (hz : HyperbolicPositive z) :
+private lemma hypR4_pos_data {z : ℂ} (hz : HyperbolicPositive z) :
     ∃ σ γ : ℝ, 0 < σ ∧ 0 < γ ∧ γ^2 = 1+σ^2 ∧ Complex.sinh z = σ ∧ Complex.cosh z = γ := by
   obtain ⟨hs0, hc0, hsr, hsi, hcr, hci⟩ := hz
   have hs : Complex.sinh z = ((Complex.sinh z).re:ℂ) := Complex.ext (by simp) (by simp [hsi])
@@ -384,7 +376,7 @@ theorem hyperbolic_special_values  :
 
 /-- A function with nonzero derivative at a point does not vanish on a punctured
 neighbourhood of that point (isolated zeros of analytic functions). -/
-private theorem hypR4_eventually_ne_zero {f : ℂ → ℂ} {p c : ℂ} (ha : AnalyticAt ℂ f p)
+private lemma hypR4_eventually_ne_zero {f : ℂ → ℂ} {p c : ℂ} (ha : AnalyticAt ℂ f p)
     (hd : HasDerivAt f c p) (hc : c ≠ 0) : ∀ᶠ z in 𝓝[≠] p, f z ≠ 0 := by
   rcases ha.eventually_eq_zero_or_eventually_ne_zero with h | h
   · exfalso
@@ -394,7 +386,7 @@ private theorem hypR4_eventually_ne_zero {f : ℂ → ℂ} {p c : ℂ} (ha : Ana
 
 /-- The norm of the reciprocal of a function tends to infinity at a zero, provided the function
 is continuous there and does not vanish nearby. -/
-private theorem hypR4_norm_inv_tendsto {f : ℂ → ℂ} {p : ℂ} (hf : ContinuousAt f p) (h0 : f p = 0)
+private lemma hypR4_norm_inv_tendsto {f : ℂ → ℂ} {p : ℂ} (hf : ContinuousAt f p) (h0 : f p = 0)
     (hne : ∀ᶠ z in 𝓝[≠] p, f z ≠ 0) : Tendsto (fun z => ‖(f z)⁻¹‖) (𝓝[≠] p) atTop := by
   have hn : Tendsto (fun z => ‖f z‖) (𝓝[≠] p) (𝓝[>] 0) := by
     apply tendsto_nhdsWithin_of_tendsto_nhds_of_eventually_within
@@ -478,7 +470,7 @@ theorem cosh_le_sinhc_cube (x : ℝ) : Real.cosh x ≤ (if x=0 then 1 else Real.
   sorry
 
 /-- A function vanishing at `0` with positive derivative on `(0,∞)` is positive there. -/
-private theorem hypR4_pos_of_deriv_pos {f f' : ℝ → ℝ} (hf : Continuous f) (h0 : f 0 = 0)
+private lemma hypR4_pos_of_deriv_pos {f f' : ℝ → ℝ} (hf : Continuous f) (h0 : f 0 = 0)
     (hd : ∀ x, 0 < x → HasDerivAt f (f' x) x) (hp : ∀ x, 0 < x → 0 < f' x) {x : ℝ}
     (hx : 0 < x) : 0 < f x := by
   have hm : StrictMonoOn f (Set.Ici 0) := by
@@ -489,7 +481,7 @@ private theorem hypR4_pos_of_deriv_pos {f f' : ℝ → ℝ} (hf : Continuous f) 
   rwa [h0] at this
 
 /-- `tanh x < x` and `x - x³/3 < tanh x` for `x > 0`. -/
-private theorem hypR4_tanh_bounds {x : ℝ} (hx : 0 < x) :
+private lemma hypR4_tanh_bounds {x : ℝ} (hx : 0 < x) :
     x - x^3/3 < Real.tanh x ∧ Real.tanh x < x := by
   have hc := Real.cosh_pos x
   -- sinh x < x cosh x
@@ -597,15 +589,15 @@ theorem arctan_le_tanh {x : ℝ} (hx : 0≤x) : Real.arctan x ≤ π/2*Real.tanh
   sorry
 
 /-- Powers of the rotated argument `iz` produce the alternating sign `(-1)^k`. -/
-private theorem hypR4_rot_pow (z c : ℂ) (k : ℕ) : (c*(I*z))^(2*k) = (-1:ℂ)^k*(c*z)^(2*k) := by
+private lemma hypR4_rot_pow (z c : ℂ) (k : ℕ) : (c*(I*z))^(2*k) = (-1:ℂ)^k*(c*z)^(2*k) := by
   rw [show c*(I*z) = I*(c*z) by ring, mul_pow, pow_mul, Complex.I_sq]
 
 /-- The square of the alternating sign is one. -/
-private theorem hypR4_neg_one_sq (k : ℕ) : (-1:ℂ)^k*(-1:ℂ)^k = 1 := by
+private lemma hypR4_neg_one_sq (k : ℕ) : (-1:ℂ)^k*(-1:ℂ)^k = 1 := by
   rw [← mul_pow]; norm_num
 
 /-- The rotated point `iz/π` has norm `‖z‖/π`. -/
-private theorem hypR4_norm_rot (z : ℂ) : ‖I*z/π‖ = ‖z‖/π := by
+private lemma hypR4_norm_rot (z : ℂ) : ‖I*z/π‖ = ‖z‖/π := by
   rw [norm_div, norm_mul, Complex.norm_I, one_mul, Complex.norm_real, Real.norm_of_nonneg Real.pi_pos.le]
 
 /-- hasSum tanh. -/
@@ -1242,7 +1234,7 @@ theorem norm_tanh_cartesian (z : ℂ) : ‖Complex.tanh z‖=Real.sqrt ((Real.co
 
 /-- Two analytic functions on a preconnected open set with equal squares agree everywhere once
 they agree at one point where they do not vanish. -/
-private theorem hypR4_sq_eq_continuation {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnected U)
+private lemma hypR4_sq_eq_continuation {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnected U)
     {r s : ℂ → ℂ} (hr : AnalyticOnNhd ℂ r U) (hs : AnalyticOnNhd ℂ s U)
     (hsq : ∀ z ∈ U, r z^2 = s z^2) {x : ℂ} (hx : x ∈ U) (hrx : r x = s x) (hsx : s x ≠ 0) :
     ∀ z ∈ U, r z = s z := by
@@ -1426,7 +1418,7 @@ theorem hasProd_cosh (z : ℂ) : HasProd (fun n : ℕ => 1+4*z^2/(((2*n+1:ℂ)^2
   exact this
 
 /-- Off the imaginary lattice `πiℤ`, the rotated point `iz/π` avoids the integers. -/
-private theorem hypR4_rot_mem {z : ℂ} (hz : ∀ n : ℤ, z≠(n:ℂ)*π*I) :
+private lemma hypR4_rot_mem {z : ℂ} (hz : ∀ n : ℤ, z≠(n:ℂ)*π*I) :
     I*z/π ∈ Complex.integerComplement := by
   have hπ : (π:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
   rintro ⟨n, hn⟩
@@ -1436,7 +1428,7 @@ private theorem hypR4_rot_mem {z : ℂ} (hz : ∀ n : ℤ, z≠(n:ℂ)*π*I) :
   linear_combination (-I)*h + z*Complex.I_sq
 
 /-- The Mittag-Leffler cotangent term at the rotated point `iz/π`. -/
-private theorem hypR4_cotTerm_rot {z : ℂ} (hz : ∀ n : ℤ, z≠(n:ℂ)*π*I) (n : ℕ) :
+private lemma hypR4_cotTerm_rot {z : ℂ} (hz : ∀ n : ℤ, z≠(n:ℂ)*π*I) (n : ℕ) :
     cotTerm (I*z/π) n = (-2*I*z*π)*(1/(z^2+(n+1:ℂ)^2*π^2)) := by
   have hπ : (π:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
   have h1 : I*z - (n+1)*π ≠ 0 := by
@@ -1579,7 +1571,7 @@ theorem arccoth_eq_inv {z : ℂ} (hz : z≠0) : arccoth z=arctanh z⁻¹ := by
 
 /-- A chosen hyperbolic cosine value lifts a sine value to a compatible logarithm branch.
 This uses Mathlib's principal logarithm and hyperbolic exponential definitions. -/
-private theorem hyper_sinh_cosh_log_lift (u s : ℂ) (hs : s^2=1+u^2) :
+private lemma hyper_sinh_cosh_log_lift (u s : ℂ) (hs : s^2=1+u^2) :
     Complex.sinh (Complex.log (s+u))=u ∧ Complex.cosh (Complex.log (s+u))=s := by
   have hprod:(s+u)*(s-u)=1 := by linear_combination hs
   have hne:s+u≠0 := by
@@ -1593,20 +1585,20 @@ private theorem hyper_sinh_cosh_log_lift (u s : ℂ) (hs : s^2=1+u^2) :
   constructor <;> ring
 
 /-- The factored principal square root in inverse cosh has its prescribed square. -/
-private theorem hyper_arccosh_root_sq (z : ℂ) :
+private lemma hyper_arccosh_root_sq (z : ℂ) :
     (Complex.sqrt (z-1)*Complex.sqrt (z+1))^2=z^2-1 := by
   rw [mul_pow,trig_sqrt_sq,trig_sqrt_sq]
   ring
 
 /-- The logarithmic inverse-cosh definition is a right inverse even at its cut values. -/
-private theorem hyper_cosh_arccosh (z : ℂ) : Complex.cosh (arccosh z)=z := by
+private lemma hyper_cosh_arccosh (z : ℂ) : Complex.cosh (arccosh z)=z := by
   have hs:z^2=1+(Complex.sqrt (z-1)*Complex.sqrt (z+1))^2 := by
     rw [hyper_arccosh_root_sq]
     ring
   exact (hyper_sinh_cosh_log_lift _ z hs).2
 
 /-- Compatible inverse-sinh/cosh branches are characterized by their two shared roots. -/
-private theorem hyper_mixed_inverse_fiber (u v σ : ℂ) (hσ : σ=1 ∨ σ= -1) :
+private lemma hyper_mixed_inverse_fiber (u v σ : ℂ) (hσ : σ=1 ∨ σ= -1) :
     Set.image2 (fun a b : ℂ=>a+σ*b) (arcsinhValues u) (arccoshValues v)=
       {w | ∃ r s : ℂ,r^2=1+u^2 ∧ s^2=v^2-1 ∧
         Complex.sinh w=u*v+σ*(r*s) ∧ Complex.cosh w=v*r+σ*(u*s)} := by
@@ -1632,12 +1624,12 @@ private theorem hyper_mixed_inverse_fiber (u v σ : ℂ) (hσ : σ=1 ∨ σ= -1)
     · rcases hσ with rfl|rfl <;> ring
 
 /-- The logarithmic inverse sinh is a right inverse also at the cut and branch points. -/
-private theorem hyper_sinh_arcsinh (z:ℂ) : Complex.sinh (arcsinh z)=z := by
+private lemma hyper_sinh_arcsinh (z:ℂ) : Complex.sinh (arcsinh z)=z := by
   exact (hyper_sinh_cosh_log_lift z (Complex.sqrt (z^2+1))
     (by rw [trig_sqrt_sq];ring)).1
 
 /-- Rotation of Mathlib's two sine fibers preserves the integer branch parity. -/
-private theorem hyper_sinh_fiber_forms (A w:ℂ) :
+private lemma hyper_sinh_fiber_forms (A w:ℂ) :
     Complex.sinh w=Complex.sinh A ↔
       ∃ k:ℤ,w=(-1:ℂ)^k*A+(k:ℂ)*π*I := by
   have hrot : Complex.sinh w=Complex.sinh A ↔
@@ -1674,7 +1666,7 @@ private theorem hyper_sinh_fiber_forms (A w:ℂ) :
       linear_combination I*hn+((2*k+1)*π)*Complex.I_sq
 
 /-- Rotation identifies the chosen logarithm/square-root inverse with the trigonometric one. -/
-private theorem hyper_arcsinh_rotation (z:ℂ) : arcsinh z=I*arcsinPrincipal (-I*z) := by
+private lemma hyper_arcsinh_rotation (z:ℂ) : arcsinh z=I*arcsinPrincipal (-I*z) := by
   have hq:1-(-I*z)^2=z^2+1 := by linear_combination -z^2*Complex.I_sq
   have hi:I*(-I*z)=z := by linear_combination -z*Complex.I_sq
   unfold arcsinh arcsinPrincipal
@@ -1682,11 +1674,11 @@ private theorem hyper_arcsinh_rotation (z:ℂ) : arcsinh z=I*arcsinPrincipal (-I
   linear_combination Complex.log (Complex.sqrt (z^2+1)+z)*Complex.I_sq
 
 /-- Rotation maps the inverse-sinh cut plane to the inverse-sine cut plane. -/
-private theorem hyper_asinh_coord {z:ℂ} (hz:z∈arcsinhDomain) : -I*z∈arcsinCutPlane := by
+private lemma hyper_asinh_coord {z:ℂ} (hz:z∈arcsinhDomain) : -I*z∈arcsinCutPlane := by
   simpa [arcsinhDomain,arcsinCutPlane,Complex.mul_re,Complex.mul_im] using hz
 
 /-- The inverse-sinh derivative follows from the proved rotated inverse-sine derivative. -/
-private theorem hyper_hasDerivAt_arcsinh {z:ℂ} (hz:z∈arcsinhDomain) :
+private lemma hyper_hasDerivAt_arcsinh {z:ℂ} (hz:z∈arcsinhDomain) :
     HasDerivAt arcsinh (Complex.sqrt (1+z^2))⁻¹ z := by
   have hd:=((hasDerivAt_arcsin_principal (hyper_asinh_coord hz)).comp z
     ((hasDerivAt_id z).const_mul (-I))).const_mul I
@@ -1698,19 +1690,19 @@ private theorem hyper_hasDerivAt_arcsinh {z:ℂ} (hz:z∈arcsinhDomain) :
     linear_combination (Complex.sqrt (1+z^2))⁻¹*Complex.I_sq
 
 /-- The two logarithm factors multiply to one, including the square-root cut. -/
-private theorem hyper_asinh_product (z:ℂ) :
+private lemma hyper_asinh_product (z:ℂ) :
     (Complex.sqrt (z^2+1)+z)*(Complex.sqrt (z^2+1)-z)=1 := by
   linear_combination trig_sqrt_sq (z^2+1)
 
 /-- The inverse-sinh logarithm argument is nonzero. -/
-private theorem hyper_asinh_log_ne (z:ℂ) : Complex.sqrt (z^2+1)+z≠0 := by
+private lemma hyper_asinh_log_ne (z:ℂ) : Complex.sqrt (z^2+1)+z≠0 := by
   intro h
   have hp:=hyper_asinh_product z
   rw [h,zero_mul] at hp
   exact zero_ne_one hp
 
 /-- The inverse-sinh logarithm argument avoids the negative real axis. -/
-private theorem hyper_asinh_log_slit (z:ℂ) : Complex.sqrt (z^2+1)+z∈Complex.slitPlane := by
+private lemma hyper_asinh_log_slit (z:ℂ) : Complex.sqrt (z^2+1)+z∈Complex.slitPlane := by
   let r:=Complex.sqrt (z^2+1)
   change r+z∈Complex.slitPlane
   rw [Complex.mem_slitPlane_iff]
@@ -1732,7 +1724,7 @@ private theorem hyper_asinh_log_slit (z:ℂ) : Complex.sqrt (z^2+1)+z∈Complex.
     nlinarith
 
 /-- The inverse-tanh Möbius argument lies in the principal logarithm cut plane. -/
-private theorem hyper_atanh_slit {z:ℂ} (hz:z∈arctanhDomain) : (1+z)/(1-z)∈Complex.slitPlane := by
+private lemma hyper_atanh_slit {z:ℂ} (hz:z∈arctanhDomain) : (1+z)/(1-z)∈Complex.slitPlane := by
   have hre:((1+z)/(1-z)).re=(1-z.re^2-z.im^2)/((1-z.re)^2+z.im^2) := by
     simp [Complex.div_re,Complex.normSq]
     ring
@@ -1755,7 +1747,7 @@ private theorem hyper_atanh_slit {z:ℂ} (hz:z∈arctanhDomain) : (1+z)/(1-z)∈
     · positivity
 
 /-- Neither linear factor vanishes on the inverse-tanh cut plane. -/
-private theorem hyper_atanh_nonzero {z:ℂ} (hz:z∈arctanhDomain) : 1+z≠0 ∧ 1-z≠0 := by
+private lemma hyper_atanh_nonzero {z:ℂ} (hz:z∈arctanhDomain) : 1+z≠0 ∧ 1-z≠0 := by
   constructor
   · intro h
     have he:z= -1 := by linear_combination h
@@ -1767,7 +1759,7 @@ private theorem hyper_atanh_nonzero {z:ℂ} (hz:z∈arctanhDomain) : 1+z≠0 ∧
     norm_num [arctanhDomain] at hz
 
 /-- Differentiate the principal inverse-tanh logarithm on its full cut plane. -/
-private theorem hyper_hasDerivAt_arctanh {z:ℂ} (hz:z∈arctanhDomain) :
+private lemma hyper_hasDerivAt_arctanh {z:ℂ} (hz:z∈arctanhDomain) :
     HasDerivAt arctanh (1/(1-z^2)) z := by
   obtain ⟨hp,hm⟩:=hyper_atanh_nonzero hz
   have hd0:=((hasDerivAt_id z).const_add 1).div ((hasDerivAt_id z).const_sub 1) hm
@@ -1781,7 +1773,7 @@ private theorem hyper_hasDerivAt_arctanh {z:ℂ} (hz:z∈arctanhDomain) :
     ring
 
 /-- Inversion maps the inverse-coth cut plane into the inverse-tanh cut plane. -/
-private theorem hyper_acoth_inv_mem {z:ℂ} (hz:z∈arccothDomain) : z≠0 ∧ z⁻¹∈arctanhDomain := by
+private lemma hyper_acoth_inv_mem {z:ℂ} (hz:z∈arccothDomain) : z≠0 ∧ z⁻¹∈arctanhDomain := by
   have hz0:z≠0 := by intro h;rw [h] at hz;norm_num [arccothDomain] at hz
   refine ⟨hz0,?_⟩
   by_cases hi:z.im≠0
@@ -1799,7 +1791,7 @@ private theorem hyper_acoth_inv_mem {z:ℂ} (hz:z∈arccothDomain) : z≠0 ∧ z
     exact inv_lt_one_of_one_lt₀ hx
 
 /-- The principal complex square root agrees with the nonnegative real square root. -/
-private theorem hyper_sqrt_ofReal (x:ℝ) (hx:0≤x) : Complex.sqrt (x:ℂ)=(Real.sqrt x:ℂ) := by
+private lemma hyper_sqrt_ofReal (x:ℝ) (hx:0≤x) : Complex.sqrt (x:ℂ)=(Real.sqrt x:ℂ) := by
   exact Complex.sqrt_of_nonneg (by exact_mod_cast hx)
 
 /-- Analyticity of the principal inverse on precisely its open cut domain. -/
@@ -1813,14 +1805,14 @@ theorem arcsinh_analytic  : AnalyticOnNhd ℂ arcsinh arcsinhDomain := by
 
 
 /-- Both linear factors of the factored inverse-cosh root lie in the principal slit plane. -/
-private theorem hypR4_acosh_slit {z : ℂ} (hz : z ∈ arccoshDomain) :
+private lemma hypR4_acosh_slit {z : ℂ} (hz : z ∈ arccoshDomain) :
     z-1 ∈ Complex.slitPlane ∧ z+1 ∈ Complex.slitPlane := by
   rcases hz with hi | hr
   · exact ⟨Or.inr (by simpa using hi), Or.inr (by simpa using hi)⟩
   · exact ⟨Or.inl (by simp; linarith), Or.inl (by simp; linarith)⟩
 
 /-- The factored inverse-cosh root does not vanish on the open domain. -/
-private theorem hypR4_acosh_root_ne {z : ℂ} (hz : z ∈ arccoshDomain) :
+private lemma hypR4_acosh_root_ne {z : ℂ} (hz : z ∈ arccoshDomain) :
     Complex.sqrt (z-1)*Complex.sqrt (z+1) ≠ 0 := by
   intro h
   have hs := hyper_arccosh_root_sq z
@@ -1833,7 +1825,7 @@ private theorem hypR4_acosh_root_ne {z : ℂ} (hz : z ∈ arccoshDomain) :
     subst this; rcases hz with h | h <;> norm_num at h
 
 /-- The inverse-cosh logarithm argument lies in the principal slit plane on the open domain. -/
-private theorem hypR4_acosh_log_slit {z : ℂ} (hz : z ∈ arccoshDomain) :
+private lemma hypR4_acosh_log_slit {z : ℂ} (hz : z ∈ arccoshDomain) :
     z+Complex.sqrt (z-1)*Complex.sqrt (z+1) ∈ Complex.slitPlane := by
   set s := Complex.sqrt (z-1)*Complex.sqrt (z+1)
   have hprod : (z+s)*(z-s) = 1 := by
@@ -1861,7 +1853,7 @@ private theorem hypR4_acosh_log_slit {z : ℂ} (hz : z ∈ arccoshDomain) :
   · linarith
 
 /-- The derivative of the principal inverse cosh on its open domain. -/
-private theorem hypR4_hasDerivAt_arccosh {z : ℂ} (hz : z ∈ arccoshDomain) :
+private lemma hypR4_hasDerivAt_arccosh {z : ℂ} (hz : z ∈ arccoshDomain) :
     HasDerivAt arccosh ((Complex.sqrt (z-1)*Complex.sqrt (z+1))⁻¹) z := by
   obtain ⟨h1, h2⟩ := hypR4_acosh_slit hz
   have hs := hypR4_acosh_root_ne hz
@@ -1932,7 +1924,7 @@ theorem arccoth_analytic  : AnalyticOnNhd ℂ arccoth arccothDomain := by
 
 
 /-- A right inverse `g (f z) = z` of an entire `g` cannot be analytic at a point where `g'` vanishes. -/
-private theorem hypR4_not_analytic_of_right_inv {f g g' : ℂ → ℂ} {p : ℂ}
+private lemma hypR4_not_analytic_of_right_inv {f g g' : ℂ → ℂ} {p : ℂ}
     (hinv : ∀ z, g (f z) = z) (hg : ∀ w, HasDerivAt g (g' w) w) (h0 : g' (f p) = 0) :
     ¬AnalyticAt ℂ f p := by
   intro ha
@@ -1946,7 +1938,7 @@ private theorem hypR4_not_analytic_of_right_inv {f g g' : ℂ → ℂ} {p : ℂ}
 
 /-- The principal inverse tanh is not continuous at `±1`, where `exp (2 arctanh z)` has a pole
 or a zero. -/
-private theorem hypR4_arctanh_exp (z : ℂ) (h1 : z ≠ 1) (h2 : z ≠ -1) :
+private lemma hypR4_arctanh_exp (z : ℂ) (h1 : z ≠ 1) (h2 : z ≠ -1) :
     Complex.exp (2*arctanh z)*(1-z) = 1+z := by
   have hm : 1-z ≠ 0 := sub_ne_zero.mpr (Ne.symm h1)
   have hp : 1+z ≠ 0 := by intro h; apply h2; linear_combination h
@@ -2134,7 +2126,7 @@ theorem arccoth_neg {z : ℂ} (hz : z ∈ arccothDomain) : arccoth (-z)= -arccot
 
 
 /-- Characterization of the principal square root by a root with positive real part. -/
-private theorem hypR4_sqrt_eq_of_sq {a w : ℂ} (hw : w^2 = a) (hre : 0 < w.re) :
+private lemma hypR4_sqrt_eq_of_sq {a w : ℂ} (hw : w^2 = a) (hre : 0 < w.re) :
     Complex.sqrt a = w := by
   have h1 := trig_sqrt_sq a
   have h : (Complex.sqrt a - w)*(Complex.sqrt a + w) = 0 := by linear_combination h1 - hw
@@ -2148,7 +2140,7 @@ private theorem hypR4_sqrt_eq_of_sq {a w : ℂ} (hw : w^2 = a) (hre : 0 < w.re) 
     linarith
 
 /-- The principal square root of `-w` for `w` in the upper half-plane. -/
-private theorem hypR4_sqrt_neg_of_im_pos {w : ℂ} (h : 0 < w.im) :
+private lemma hypR4_sqrt_neg_of_im_pos {w : ℂ} (h : 0 < w.im) :
     Complex.sqrt (-w) = -I*Complex.sqrt w := by
   apply hypR4_sqrt_eq_of_sq
   · rw [mul_pow, trig_sqrt_sq]; simp
@@ -2160,7 +2152,7 @@ private theorem hypR4_sqrt_neg_of_im_pos {w : ℂ} (h : 0 < w.im) :
     exact Real.sqrt_pos.mpr (by linarith)
 
 /-- The principal square root of `-w` for `w` in the lower half-plane. -/
-private theorem hypR4_sqrt_neg_of_im_neg {w : ℂ} (h : w.im < 0) :
+private lemma hypR4_sqrt_neg_of_im_neg {w : ℂ} (h : w.im < 0) :
     Complex.sqrt (-w) = I*Complex.sqrt w := by
   apply hypR4_sqrt_eq_of_sq
   · rw [mul_pow, trig_sqrt_sq]; simp
@@ -2171,30 +2163,30 @@ private theorem hypR4_sqrt_neg_of_im_neg {w : ℂ} (h : w.im < 0) :
     exact Real.sqrt_pos.mpr (by linarith)
 
 /-- The principal logarithm of `-u` for `u` in the upper half-plane. -/
-private theorem hypR4_log_neg_of_im_pos {u : ℂ} (h : 0 < u.im) :
+private lemma hypR4_log_neg_of_im_pos {u : ℂ} (h : 0 < u.im) :
     Complex.log (-u) = Complex.log u - π*I := by
   apply Complex.ext
   · simp [Complex.log_re]
   · simp [Complex.log_im, Complex.arg_neg_eq_arg_sub_pi_of_im_pos h]
 
 /-- The principal logarithm of `-u` for `u` in the lower half-plane. -/
-private theorem hypR4_log_neg_of_im_neg {u : ℂ} (h : u.im < 0) :
+private lemma hypR4_log_neg_of_im_neg {u : ℂ} (h : u.im < 0) :
     Complex.log (-u) = Complex.log u + π*I := by
   apply Complex.ext
   · simp [Complex.log_re]
   · simp [Complex.log_im, Complex.arg_neg_eq_arg_add_pi_of_im_neg h]
 
 /-- Imaginary part of a principal square root has the sign of the imaginary part. -/
-private theorem hypR4_sqrt_im_nonneg {w : ℂ} (h : 0 ≤ w.im) : 0 ≤ (Complex.sqrt w).im := by
+private lemma hypR4_sqrt_im_nonneg {w : ℂ} (h : 0 ≤ w.im) : 0 ≤ (Complex.sqrt w).im := by
   rw [Complex.sqrt, Complex.cpow_inv_two_im_eq_sqrt h]; exact Real.sqrt_nonneg _
 
 /-- Imaginary part of a principal square root in the lower half-plane. -/
-private theorem hypR4_sqrt_im_nonpos {w : ℂ} (h : w.im < 0) : (Complex.sqrt w).im ≤ 0 := by
+private lemma hypR4_sqrt_im_nonpos {w : ℂ} (h : w.im < 0) : (Complex.sqrt w).im ≤ 0 := by
   rw [Complex.sqrt, Complex.cpow_inv_two_im_eq_neg_sqrt h]
   exact neg_nonpos.mpr (Real.sqrt_nonneg _)
 
 /-- Real part of a principal square root is nonnegative. -/
-private theorem hypR4_sqrt_re_nonneg (w : ℂ) : 0 ≤ (Complex.sqrt w).re := by
+private lemma hypR4_sqrt_re_nonneg (w : ℂ) : 0 ≤ (Complex.sqrt w).re := by
   rw [Complex.sqrt, Complex.cpow_inv_two_re]; exact Real.sqrt_nonneg _
 
 /-- Corrected principal-branch sign: E20 at z=±i contradicts the printed E11 sign pairing. -/
@@ -2261,13 +2253,13 @@ theorem arcsinh_log {z : ℂ} (hz : z ∈ arcsinhDomain) : arcsinh z=Complex.log
   rfl
 
 /-- The principal square root is continuous off the open negative real axis. -/
-private theorem hypR4_sqrt_continuousAt {w : ℂ} (h : 0 ≤ w.re ∨ w.im ≠ 0) :
+private lemma hypR4_sqrt_continuousAt {w : ℂ} (h : 0 ≤ w.re ∨ w.im ≠ 0) :
     ContinuousAt Complex.sqrt w := by
   have := Complex.continuousAt_cpow_const_of_re_pos (w := (2⁻¹:ℂ)) h (by norm_num)
   exact this
 
 /-- One-sided limit of the principal square root at the cut, from the upper half-plane. -/
-private theorem hypR4_sqrt_tendsto_upper {f : ℝ → ℂ} {l : Filter ℝ} {w₀ : ℂ}
+private lemma hypR4_sqrt_tendsto_upper {f : ℝ → ℂ} {l : Filter ℝ} {w₀ : ℂ}
     (hf : Tendsto f l (𝓝 w₀)) (hre : w₀.re ≤ 0) (him : ∀ᶠ ε in l, 0 < (f ε).im) :
     Tendsto (fun ε => Complex.sqrt (f ε)) l (𝓝 (I*Complex.sqrt (-w₀))) := by
   have hc := ((hypR4_sqrt_continuousAt (w := -w₀) (Or.inl (by simp; linarith))).tendsto.comp
@@ -2278,7 +2270,7 @@ private theorem hypR4_sqrt_tendsto_upper {f : ℝ → ℂ} {l : Filter ℝ} {w�
   linear_combination (-(Complex.sqrt (f ε))) * (by simp : (I:ℂ)^2 = -1)
 
 /-- One-sided limit of the principal square root at the cut, from the lower half-plane. -/
-private theorem hypR4_sqrt_tendsto_lower {f : ℝ → ℂ} {l : Filter ℝ} {w₀ : ℂ}
+private lemma hypR4_sqrt_tendsto_lower {f : ℝ → ℂ} {l : Filter ℝ} {w₀ : ℂ}
     (hf : Tendsto f l (𝓝 w₀)) (hre : w₀.re ≤ 0) (him : ∀ᶠ ε in l, (f ε).im < 0) :
     Tendsto (fun ε => Complex.sqrt (f ε)) l (𝓝 (-I*Complex.sqrt (-w₀))) := by
   have hc := ((hypR4_sqrt_continuousAt (w := -w₀) (Or.inl (by simp; linarith))).tendsto.comp
@@ -2289,7 +2281,7 @@ private theorem hypR4_sqrt_tendsto_lower {f : ℝ → ℂ} {l : Filter ℝ} {w�
   linear_combination (-(Complex.sqrt (f ε))) * (by simp : (I:ℂ)^2 = -1)
 
 /-- Limits of the principal logarithm at a point `i t` of the positive imaginary axis. -/
-private theorem hypR4_tendsto_log_I {g : ℝ → ℂ} {l : Filter ℝ} {t : ℝ} (ht : 0 < t)
+private lemma hypR4_tendsto_log_I {g : ℝ → ℂ} {l : Filter ℝ} {t : ℝ} (ht : 0 < t)
     (hg : Tendsto g l (𝓝 (I*t))) :
     Tendsto (fun ε => Complex.log (g ε)) l (𝓝 (Real.log t + π/2*I)) := by
   have hs : I*(t:ℂ) ∈ Complex.slitPlane := by
@@ -2299,7 +2291,7 @@ private theorem hypR4_tendsto_log_I {g : ℝ → ℂ} {l : Filter ℝ} {t : ℝ}
   exact h
 
 /-- Limits of the principal logarithm at a point `-i t` of the negative imaginary axis. -/
-private theorem hypR4_tendsto_log_negI {g : ℝ → ℂ} {l : Filter ℝ} {t : ℝ} (ht : 0 < t)
+private lemma hypR4_tendsto_log_negI {g : ℝ → ℂ} {l : Filter ℝ} {t : ℝ} (ht : 0 < t)
     (hg : Tendsto g l (𝓝 (-I*t))) :
     Tendsto (fun ε => Complex.log (g ε)) l (𝓝 (Real.log t - π/2*I)) := by
   have hs : -I*(t:ℂ) ∈ Complex.slitPlane := by
@@ -2310,7 +2302,7 @@ private theorem hypR4_tendsto_log_negI {g : ℝ → ℂ} {l : Filter ℝ} {t : �
   rw [e]; exact h
 
 /-- The quantity `ε + i y` tends to `i y` along any filter tending to zero. -/
-private theorem hypR4_tendsto_line {l : Filter ℝ} (hl : l ≤ 𝓝 0) (c : ℂ) :
+private lemma hypR4_tendsto_line {l : Filter ℝ} (hl : l ≤ 𝓝 0) (c : ℂ) :
     Tendsto (fun ε : ℝ => (ε:ℂ)+c) l (𝓝 c) := by
   have : Tendsto (fun ε : ℝ => (ε:ℂ)+c) (𝓝 0) (𝓝 (((0:ℝ):ℂ)+c)) :=
     ((Complex.continuous_ofReal.add continuous_const).tendsto 0)
@@ -2399,7 +2391,7 @@ theorem arcsinh_lower_cut {y : ℝ} (hy : y≤ -1) :
     rw [e]; exact this
 
 /-- The right half of the inverse-cosh domain is star-convex about `2`. -/
-private theorem hypR4_acosh_right_starConvex :
+private lemma hypR4_acosh_right_starConvex :
     StarConvex ℝ (2:ℂ) {z : ℂ | z ∈ arccoshDomain ∧ 0 < z.re} := by
   intro y hy a b ha hb hab
   obtain ⟨hyd, hyr⟩ := hy
@@ -2420,7 +2412,7 @@ private theorem hypR4_acosh_right_starConvex :
     · nlinarith [mul_pos hb0 (sub_pos.mpr hr)]
 
 /-- On the right half of its domain the factored inverse-cosh root is the principal `√(z²-1)`. -/
-private theorem hypR4_acosh_root_pos {z : ℂ} (hz : z ∈ arccoshDomain) (hre : 0 < z.re) :
+private lemma hypR4_acosh_root_pos {z : ℂ} (hz : z ∈ arccoshDomain) (hre : 0 < z.re) :
     Complex.sqrt (z-1)*Complex.sqrt (z+1) = Complex.sqrt (z^2-1) := by
   set V := {z : ℂ | z ∈ arccoshDomain ∧ 0 < z.re}
   have hVo : IsOpen V := by
@@ -2461,7 +2453,7 @@ private theorem hypR4_acosh_root_pos {z : ℂ} (hz : z ∈ arccoshDomain) (hre :
     rw [h] at this; norm_num at this
 
 /-- The factored inverse-cosh root is `±√(z²-1)` according to the sign of `Re z`. -/
-private theorem hypR4_acosh_root_signed {z : ℂ} (hz : z ∈ arccoshDomain) (hre : z.re ≠ 0) :
+private lemma hypR4_acosh_root_signed {z : ℂ} (hz : z ∈ arccoshDomain) (hre : z.re ≠ 0) :
     Complex.sqrt (z-1)*Complex.sqrt (z+1) = (if 0<z.re then 1 else -1)*Complex.sqrt (z^2-1) := by
   rcases lt_or_gt_of_ne hre with hneg | hpos
   · simp only [show ¬ (0 < z.re) from not_lt.mpr hneg.le, ↓reduceIte]
@@ -2542,7 +2534,7 @@ theorem arccosh_imaginary {y : ℝ} (hy : y≠0) :
     rw [Complex.log_I]; ring
 
 /-- The principal square root has positive real part off the closed negative real axis. -/
-private theorem hypR4_sqrt_re_pos {w : ℂ} (h : w.im ≠ 0 ∨ 0 < w.re) : 0 < (Complex.sqrt w).re := by
+private lemma hypR4_sqrt_re_pos {w : ℂ} (h : w.im ≠ 0 ∨ 0 < w.re) : 0 < (Complex.sqrt w).re := by
   rw [Complex.sqrt, Complex.cpow_inv_two_re]
   apply Real.sqrt_pos.mpr
   rcases h with h | h
@@ -2551,7 +2543,7 @@ private theorem hypR4_sqrt_re_pos {w : ℂ} (h : w.im ≠ 0 ∨ 0 < w.re) : 0 < 
   · linarith [Complex.re_le_norm w]
 
 /-- Halving under the principal square root. -/
-private theorem hypR4_sqrt_half {w : ℂ} (h : w.im ≠ 0 ∨ 0 < w.re) :
+private lemma hypR4_sqrt_half {w : ℂ} (h : w.im ≠ 0 ∨ 0 < w.re) :
     Complex.sqrt (w/2) = Complex.sqrt w*((Real.sqrt 2)⁻¹:ℝ) := by
   apply hypR4_sqrt_eq_of_sq
   · rw [mul_pow, trig_sqrt_sq, ← Complex.ofReal_pow, inv_pow, Real.sq_sqrt (by norm_num)]
@@ -2560,7 +2552,7 @@ private theorem hypR4_sqrt_half {w : ℂ} (h : w.im ≠ 0 ∨ 0 < w.re) :
     exact mul_pos (hypR4_sqrt_re_pos h) (inv_pos.mpr (Real.sqrt_pos.mpr (by norm_num)))
 
 /-- `log (u²) = 2 log u` in the open right half-plane. -/
-private theorem hypR4_log_sq_of_re_pos {u : ℂ} (h : 0 < u.re) :
+private lemma hypR4_log_sq_of_re_pos {u : ℂ} (h : 0 < u.re) :
     Complex.log (u^2) = 2*Complex.log u := by
   have hu0 : u ≠ 0 := fun e => by rw [e] at h; simp at h
   have harg : |Complex.arg u| < π/2 := Complex.abs_arg_lt_pi_div_two_iff.mpr (Or.inl h)
@@ -2676,7 +2668,7 @@ theorem arccosh_inner_cut {x : ℝ} (hx : -1<x ∧ x≤1) :
     exact this
 
 /-- One-sided limit of the principal logarithm at the negative real axis, from above. -/
-private theorem hypR4_tendsto_log_cut_upper {g : ℝ → ℂ} {l : Filter ℝ} {t : ℝ} (ht : t < 0)
+private lemma hypR4_tendsto_log_cut_upper {g : ℝ → ℂ} {l : Filter ℝ} {t : ℝ} (ht : t < 0)
     (hg : Tendsto g l (𝓝 (t:ℂ))) (him : ∀ᶠ ε in l, 0 ≤ (g ε).im) :
     Tendsto (fun ε => Complex.log (g ε)) l (𝓝 (Real.log (-t) + π*I)) := by
   have h := (Complex.tendsto_log_nhdsWithin_im_nonneg_of_re_neg_of_im_zero
@@ -2685,7 +2677,7 @@ private theorem hypR4_tendsto_log_cut_upper {g : ℝ → ℂ} {l : Filter ℝ} {
   exact h
 
 /-- One-sided limit of the principal logarithm at the negative real axis, from below. -/
-private theorem hypR4_tendsto_log_cut_lower {g : ℝ → ℂ} {l : Filter ℝ} {t : ℝ} (ht : t < 0)
+private lemma hypR4_tendsto_log_cut_lower {g : ℝ → ℂ} {l : Filter ℝ} {t : ℝ} (ht : t < 0)
     (hg : Tendsto g l (𝓝 (t:ℂ))) (him : ∀ᶠ ε in l, (g ε).im < 0) :
     Tendsto (fun ε => Complex.log (g ε)) l (𝓝 (Real.log (-t) - π*I)) := by
   have h := (Complex.tendsto_log_nhdsWithin_im_neg_of_re_neg_of_im_zero
@@ -2884,7 +2876,7 @@ theorem cosh_inverse_family (z w : ℂ) :
 
 
 /-- `cosh` and `sinh` in terms of `exp (2w)`, after multiplying by `2 exp w`. -/
-private theorem hypR4_cosh_sinh_exp (w : ℂ) :
+private lemma hypR4_cosh_sinh_exp (w : ℂ) :
     2*Complex.exp w*Complex.cosh w = Complex.exp (2*w)+1 ∧
       2*Complex.exp w*Complex.sinh w = Complex.exp (2*w)-1 := by
   have h2 : Complex.exp (2*w) = Complex.exp w*Complex.exp w := by
@@ -2929,7 +2921,7 @@ theorem tanh_inverse_family {z w : ℂ} (hz : z≠1 ∧ z≠ -1) :
     exact ⟨n, by linear_combination 2*hn⟩
 
 /-- The open inverse-cosh domain is star-convex about `2`. -/
-private theorem hypR4_acosh_starConvex : StarConvex ℝ (2:ℂ) arccoshDomain := by
+private lemma hypR4_acosh_starConvex : StarConvex ℝ (2:ℂ) arccoshDomain := by
   intro y hy a b ha hb hab
   have hre : (a • (2:ℂ) + b • y).re = 2*a + b*y.re := by simp; ring
   have him : (a • (2:ℂ) + b • y).im = b*y.im := by simp
@@ -2943,7 +2935,7 @@ private theorem hypR4_acosh_starConvex : StarConvex ℝ (2:ℂ) arccoshDomain :=
     · nlinarith [mul_pos hb0 (sub_pos.mpr hr)]
 
 /-- A real point of the inverse-sech domain lies in `(0,1)`. -/
-private theorem hypR4_asech_real {z : ℂ} (hz : z ∈ arcsechDomain) (hy : z.im = 0) :
+private lemma hypR4_asech_real {z : ℂ} (hz : z ∈ arcsechDomain) (hy : z.im = 0) :
     0 < z.re ∧ z.re < 1 := by
   obtain ⟨hz0, hi⟩ := hz
   have he : z = (z.re:ℂ) := Complex.ext (by simp) (by simp [hy])
@@ -2959,7 +2951,7 @@ private theorem hypR4_asech_real {z : ℂ} (hz : z ∈ arcsechDomain) (hy : z.im
     exact ⟨hxpos, by rwa [one_lt_inv₀ hxpos] at hi⟩
 
 /-- `z √(z⁻¹-1) √(z⁻¹+1)` is the principal `√(1-z²)` on the whole inverse-sech domain. -/
-private theorem hypR4_asech_root {z : ℂ} (hz : z ∈ arcsechDomain) :
+private lemma hypR4_asech_root {z : ℂ} (hz : z ∈ arcsechDomain) :
     z*(Complex.sqrt (z⁻¹-1)*Complex.sqrt (z⁻¹+1)) = Complex.sqrt (1-z^2) := by
   have hVo : IsOpen arcsechDomain := by
     have hA : IsOpen arccoshDomain := by
@@ -3032,7 +3024,7 @@ private theorem hypR4_asech_root {z : ℂ} (hz : z ∈ arcsechDomain) :
     rw [h] at this; norm_num at this
 
 /-- On the inverse-sech domain, `1-z²` lies in the slit plane. -/
-private theorem hypR4_asech_slit {w : ℂ} (hw : w ∈ arcsechDomain) :
+private lemma hypR4_asech_slit {w : ℂ} (hw : w ∈ arcsechDomain) :
     1-w^2 ∈ Complex.slitPlane := by
   rw [Complex.mem_slitPlane_iff]
   by_cases hy : w.im = 0
@@ -3310,7 +3302,7 @@ theorem hasDerivAt_arccsch {z : ℂ} (hz : z∈arccschDomain) : HasDerivAt arccs
 
 
 /-- `1 + w²` lies in the principal slit plane on the open inverse-sinh domain. -/
-private theorem hypR4_one_add_sq_slit {w : ℂ} (hw : w.re ≠ 0 ∨ |w.im| < 1) :
+private lemma hypR4_one_add_sq_slit {w : ℂ} (hw : w.re ≠ 0 ∨ |w.im| < 1) :
     1+w^2 ∈ Complex.slitPlane := by
   rw [Complex.mem_slitPlane_iff]
   rcases hw with hr | hi
@@ -3323,7 +3315,7 @@ private theorem hypR4_one_add_sq_slit {w : ℂ} (hw : w.re ≠ 0 ∨ |w.im| < 1)
     nlinarith [abs_lt.mp hi, sq_nonneg w.re]
 
 /-- On the right half-plane `z √(1+z⁻²)` is the principal `√(1+z²)`. -/
-private theorem hypR4_acsch_root_pos {z : ℂ} (hre : 0 < z.re) :
+private lemma hypR4_acsch_root_pos {z : ℂ} (hre : 0 < z.re) :
     z*Complex.sqrt (1+z⁻¹^2) = Complex.sqrt (1+z^2) := by
   set V := {z : ℂ | 0 < z.re}
   have hVo : IsOpen V := isOpen_lt continuous_const Complex.continuous_re
@@ -3356,7 +3348,7 @@ private theorem hypR4_acsch_root_pos {z : ℂ} (hre : 0 < z.re) :
     rw [h] at this; norm_num at this
 
 /-- `z √(1+z⁻²) = ±√(1+z²)` according to the sign of `Re z`. -/
-private theorem hypR4_acsch_root_signed {z : ℂ} (hre : z.re ≠ 0) :
+private lemma hypR4_acsch_root_signed {z : ℂ} (hre : z.re ≠ 0) :
     z*Complex.sqrt (1+z⁻¹^2) = (if 0<z.re then 1 else -1)*Complex.sqrt (1+z^2) := by
   rcases lt_or_gt_of_ne hre with hneg | hpos
   · simp only [show ¬ (0 < z.re) from not_lt.mpr hneg.le, ↓reduceIte]
@@ -3485,7 +3477,7 @@ theorem arccosh_values_add (u v : ℂ) :
 
 
 /-- Off `±1`, the finite inverse-tanh values are the solutions of `exp (2w) (1-z) = 1+z`. -/
-private theorem hypR4_mem_arctanhValues_iff {z w : ℂ} (h1 : z ≠ 1) (h2 : z ≠ -1) :
+private lemma hypR4_mem_arctanhValues_iff {z w : ℂ} (h1 : z ≠ 1) (h2 : z ≠ -1) :
     w ∈ arctanhValues z ↔ Complex.exp (2*w)*(1-z) = 1+z := by
   obtain ⟨hc, hs⟩ := hypR4_cosh_sinh_exp w
   have hE : Complex.exp w ≠ 0 := Complex.exp_ne_zero w
@@ -3505,7 +3497,7 @@ private theorem hypR4_mem_arctanhValues_iff {z w : ℂ} (h1 : z ≠ 1) (h2 : z �
     linear_combination hs - z*hc + h'
 
 /-- Off `±1`, the finite inverse-coth values are the solutions of `exp (2w) (z-1) = z+1`. -/
-private theorem hypR4_mem_arccothValues_iff {z w : ℂ} (h1 : z ≠ 1) (h2 : z ≠ -1) :
+private lemma hypR4_mem_arccothValues_iff {z w : ℂ} (h1 : z ≠ 1) (h2 : z ≠ -1) :
     w ∈ arccothValues z ↔ Complex.exp (2*w)*(z-1) = z+1 := by
   obtain ⟨hc, hs⟩ := hypR4_cosh_sinh_exp w
   have hE : Complex.exp w ≠ 0 := Complex.exp_ne_zero w
@@ -3525,7 +3517,7 @@ private theorem hypR4_mem_arccothValues_iff {z w : ℂ} (h1 : z ≠ 1) (h2 : z �
     linear_combination hc - z*hs - h'
 
 /-- Solution sets of `exp (2w) c = d` add (Minkowski sum) by multiplying the coefficients. -/
-private theorem hypR4_expSet_add {c₁ d₁ c₂ d₂ : ℂ} (hc₁ : c₁ ≠ 0) (hd₁ : d₁ ≠ 0) :
+private lemma hypR4_expSet_add {c₁ d₁ c₂ d₂ : ℂ} (hc₁ : c₁ ≠ 0) (hd₁ : d₁ ≠ 0) :
     Set.image2 (fun a b : ℂ => a+b) {w | Complex.exp (2*w)*c₁ = d₁} {w | Complex.exp (2*w)*c₂ = d₂} =
       {w | Complex.exp (2*w)*(c₁*c₂) = d₁*d₂} := by
   ext w
@@ -3549,7 +3541,7 @@ private theorem hypR4_expSet_add {c₁ d₁ c₂ d₂ : ℂ} (hc₁ : c₁ ≠ 0
     linear_combination hw - d₂*ha
 
 /-- Solution sets of `exp (2w) c = d` subtract by cross-multiplying the coefficients. -/
-private theorem hypR4_expSet_sub {c₁ d₁ c₂ d₂ : ℂ} (hc₁ : c₁ ≠ 0) (hd₁ : d₁ ≠ 0) :
+private lemma hypR4_expSet_sub {c₁ d₁ c₂ d₂ : ℂ} (hc₁ : c₁ ≠ 0) (hd₁ : d₁ ≠ 0) :
     Set.image2 (fun a b : ℂ => a-b) {w | Complex.exp (2*w)*c₁ = d₁} {w | Complex.exp (2*w)*c₂ = d₂} =
       {w | Complex.exp (2*w)*(c₁*d₂) = d₁*c₂} := by
   have hneg : {w : ℂ | Complex.exp (2*w)*c₂ = d₂} = (fun w => -w) '' {w | Complex.exp (2*w)*d₂ = c₂} := by
@@ -3566,7 +3558,7 @@ private theorem hypR4_expSet_sub {c₁ d₁ c₂ d₂ : ℂ} (hc₁ : c₁ ≠ 0
   simp only [sub_neg_eq_add]
 
 /-- Two solution sets of `exp (2w) c = d` coincide when the ratios `d/c` agree. -/
-private theorem hypR4_expSet_congr {c d c' d' : ℂ} (hc : c ≠ 0) (hc' : c' ≠ 0)
+private lemma hypR4_expSet_congr {c d c' d' : ℂ} (hc : c ≠ 0) (hc' : c' ≠ 0)
     (h : c*d' = c'*d) : {w : ℂ | Complex.exp (2*w)*c = d} = {w | Complex.exp (2*w)*c' = d'} := by
   ext w
   simp only [Set.mem_ofPred_eq]
@@ -4052,7 +4044,7 @@ theorem antiderivative_arccoth {x : ℝ} (hx : 1<x) : HasDerivAt (fun t : ℝ =>
     ring
 
 /-- Two functions that agree on an open neighbourhood have the same derivative there. -/
-private theorem hypR4_deriv_eq {f g : ℂ → ℂ} {f' g' z : ℂ} {U : Set ℂ} (hU : IsOpen U)
+private lemma hypR4_deriv_eq {f g : ℂ → ℂ} {f' g' z : ℂ} {U : Set ℂ} (hU : IsOpen U)
     (hz : z ∈ U) (hf : HasDerivAt f f' z) (hg : HasDerivAt g g' z) (h : ∀ w ∈ U, f w = g w) :
     f' = g' :=
   hf.unique (hg.congr_of_eventuallyEq (Filter.eventuallyEq_of_mem (hU.mem_nhds hz) h))
@@ -4191,7 +4183,7 @@ theorem reciprocal_inverses_ofReal {x : ℝ} :
 
 /-- A nonvanishing holomorphic function on a disc about the origin, equal to `1` at the origin,
 has a holomorphic logarithm vanishing at the origin. -/
-private theorem hypR4_exists_log_ball {r : ℝ} {g : ℂ → ℂ}
+private lemma hypR4_exists_log_ball {r : ℝ} {g : ℂ → ℂ}
     (hg : DifferentiableOn ℂ g (Metric.ball 0 r)) (hne : ∀ z ∈ Metric.ball (0:ℂ) r, g z ≠ 0)
     (h0 : g 0 = 1) (hr : 0 < r) : ∃ L, HyperbolicNormalizedLog (Metric.ball 0 r) g L := by
   have hB : IsOpen (Metric.ball (0:ℂ) r) := Metric.isOpen_ball
@@ -4222,7 +4214,7 @@ private theorem hypR4_exists_log_ball {r : ℝ} {g : ℂ → ℂ}
   linear_combination -(Complex.exp (P z))*h + g z*he
 
 /-- `sinh` has no zeros other than the origin in the open disc of radius `π`. -/
-private theorem hypR4_sinh_ne_zero_ball {z : ℂ} (hz : ‖z‖ < π) (hz0 : z ≠ 0) :
+private lemma hypR4_sinh_ne_zero_ball {z : ℂ} (hz : ‖z‖ < π) (hz0 : z ≠ 0) :
     Complex.sinh z ≠ 0 := by
   intro h
   have hs : Complex.sin (z*I) = 0 := by rw [Complex.sin_mul_I, h, zero_mul]
@@ -4239,7 +4231,7 @@ private theorem hypR4_sinh_ne_zero_ball {z : ℂ} (hz : ‖z‖ < π) (hz0 : z �
     nlinarith [Real.pi_pos]
 
 /-- `cosh` has no zeros in the open disc of radius `π/2`. -/
-private theorem hypR4_cosh_ne_zero_ball {z : ℂ} (hz : ‖z‖ < π/2) : Complex.cosh z ≠ 0 := by
+private lemma hypR4_cosh_ne_zero_ball {z : ℂ} (hz : ‖z‖ < π/2) : Complex.cosh z ≠ 0 := by
   intro h
   have hs : Complex.cos (z*I) = 0 := by rw [Complex.cos_mul_I, h]
   obtain ⟨k, hk⟩ := Complex.cos_eq_zero_iff.mp hs
@@ -4313,7 +4305,7 @@ theorem exists_hyperbolic_logarithms :
         exact div_ne_zero (div_ne_zero (hypR4_sinh_ne_zero_ball (by linarith) hz0) (hc z hz)) hz0
 
 /-- `√(1-z²)+iz` never lies on the closed negative real axis. -/
-private theorem hypR4_sqrt_add_I_mul_slit (z : ℂ) :
+private lemma hypR4_sqrt_add_I_mul_slit (z : ℂ) :
     Complex.sqrt (1-z^2)+I*z ∈ Complex.slitPlane := by
   set q := Complex.sqrt (1-z^2) with hq
   have hq2 : q^2 = 1-z^2 := trig_sqrt_sq _

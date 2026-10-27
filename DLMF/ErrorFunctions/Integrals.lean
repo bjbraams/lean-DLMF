@@ -5,11 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.ErrorFunctions.Relations
 public import DLMF.ErrorFunctions.IntegralTools
-public import Mathlib.Analysis.SpecialFunctions.Sqrt
 public import DLMF.Bessel.KMellin
-public import DLMF.Gamma.MellinBarnes
 
 /-!
 # Integral representations and transforms, DLMF §§7.7 and 7.14
@@ -165,7 +162,7 @@ theorem exists_norm_erfc_mul_le {b : ℂ} (hb0 : b ≠ 0) (hb : |arg b| < π/4) 
           nlinarith [Real.exp_pos β]
 
 /-- The Gaussian quadratic tail integral (used before DLMF 7.7.6 is stated). -/
-theorem gaussian_quadratic_tail_aux {a : ℂ} (ha : 0 < a.re) (b c : ℂ) (x : ℝ) :
+lemma gaussian_quadratic_tail_aux {a : ℂ} (ha : 0 < a.re) (b c : ℂ) (x : ℝ) :
     (∫ t : ℝ in Ioi x, exp (-(a*(t : ℂ)^2+2*b*t+c)))=(π/a)^(1/2 : ℂ)/2*exp ((b^2-a*c)/a)*erfc (a^(1/2 : ℂ)*x+b/a^(1/2 : ℂ)) := by
   have hint : IntegrableOn (fun t : ℝ => exp (-(a*(t : ℂ)^2+2*b*t+c))) (Ioi x) := by
     have := integrable_cexp_quadratic ha (-2*b) (-c)
@@ -300,7 +297,7 @@ theorem erfc_rational_gaussian_integral {z : ℂ} (hz : |arg z| ≤ π/4) :
 /-! ### Tools for DLMF 7.7.2 -/
 
 /-- `1/(t-z) = i ∫₀^∞ e^{i(z-t)s} ds` for `Im z > 0`. -/
-lemma erfInt_recip_sub_eq_integral {z : ℂ} (hz : 0 < z.im) (t : ℝ) :
+theorem erfInt_recip_sub_eq_integral {z : ℂ} (hz : 0 < z.im) (t : ℝ) :
     1/((t:ℂ)-z) = I * ∫ s in Ioi (0:ℝ), exp (I*(z-t)*s) := by
   have hre : (I*(z-t)).re < 0 := by simp; linarith
   have hne : z - (t:ℂ) ≠ 0 := fun h => by
@@ -312,7 +309,7 @@ lemma erfInt_recip_sub_eq_integral {z : ℂ} (hz : 0 < z.im) (t : ℝ) :
   ring_nf
 
 /-- The Gaussian Fourier integral `∫ e^{-t²} e^{-its} dt = √π e^{-s²/4}`. -/
-lemma erfInt_gauss_fourier (s : ℝ) :
+theorem erfInt_gauss_fourier (s : ℝ) :
     ∫ t : ℝ, exp (-(t:ℂ)^2) * exp (-I*s*t) = Real.sqrt π * exp (-(s:ℂ)^2/4) := by
   have h := integral_cexp_quadratic (b := -1) (by simp) (-I*s) 0
   have hc : (π / -(-1:ℂ)) ^ (1/2:ℂ) = Real.sqrt π := by
@@ -328,7 +325,7 @@ lemma erfInt_gauss_fourier (s : ℝ) :
   ring_nf; rw [I_sq]; ring
 
 /-- `√π ∫₀^∞ e^{izs} e^{-s²/4} ds = π w(z)`. -/
-lemma erfInt_half_line_faddeeva (z : ℂ) :
+theorem erfInt_half_line_faddeeva (z : ℂ) :
     ∫ s in Ioi (0:ℝ), exp (I*z*s) * (Real.sqrt π * exp (-(s:ℂ)^2/4)) = π * faddeevaW z := by
   have h := gaussian_quadratic_tail_aux (a := 1/4) (by norm_num) (-I*z/2) 0 0
   have h4 : ((1/4:ℂ))^(1/2:ℂ) = 1/2 := by
@@ -347,7 +344,7 @@ lemma erfInt_half_line_faddeeva (z : ℂ) :
   linear_combination (exp (-z^2) * erfc (-I*z)) * hπ
 
 /-- **DLMF 7.7.2, first form**: `∫_{-∞}^{∞} e^{-t²}/(t-z) dt = πi w(z)` for `Im z > 0`. -/
-lemma erfInt_faddeeva_cauchy {z : ℂ} (hz : 0 < z.im) :
+theorem erfInt_faddeeva_cauchy {z : ℂ} (hz : 0 < z.im) :
     ∫ t : ℝ, exp (-(t : ℂ)^2)/(t-z) = π*I*faddeevaW z := by
   set F : ℝ → ℝ → ℂ := fun t s => exp (-(t:ℂ)^2) * exp (I*(z-t)*s) with hF
   have hint : Integrable (Function.uncurry F) (volume.prod (volume.restrict (Ioi 0))) := by
@@ -378,7 +375,7 @@ lemma erfInt_faddeeva_cauchy {z : ℂ} (hz : 0 < z.im) :
   rw [erfInt_half_line_faddeeva]; ring
 
 /-- `e^{-t²}/(t-z)` is integrable on `ℝ` for `Im z > 0`. -/
-lemma erfInt_integrable_gauss_div {z : ℂ} (hz : 0 < z.im) :
+theorem erfInt_integrable_gauss_div {z : ℂ} (hz : 0 < z.im) :
     Integrable (fun t : ℝ => exp (-(t : ℂ)^2)/(t-z)) := by
   have hne : ∀ t : ℝ, (t:ℂ) - z ≠ 0 := fun t h => by
     have := congrArg im h; simp at this; linarith
@@ -396,7 +393,7 @@ lemma erfInt_integrable_gauss_div {z : ℂ} (hz : 0 < z.im) :
     gcongr
 
 /-- **DLMF 7.7.2** (both forms). -/
-lemma erfInt_faddeeva_cauchy_both {z : ℂ} (hz : 0 < z.im) :
+theorem erfInt_faddeeva_cauchy_both {z : ℂ} (hz : 0 < z.im) :
     (∫ t : ℝ, exp (-(t : ℂ)^2)/(t-z))=π*I*faddeevaW z ∧
       (∫ t : ℝ in Ioi 0, exp (-(t : ℂ)^2)/((t : ℂ)^2-z^2))=π*I/(2*z)*faddeevaW z := by
   refine ⟨erfInt_faddeeva_cauchy hz, ?_⟩
@@ -441,7 +438,7 @@ theorem faddeevaW_cauchy_integral {z : ℂ} (hz : 0 < z.im) :
   erfInt_faddeeva_cauchy_both hz
 
 /-- The Gaussian rational integral with numerator `2t` is an exponential integral. -/
-lemma erfInt_goodwin_gaussian_e1 {z : ℂ} (hr : 0 < z.re) (hi : 0 < z.im) :
+theorem erfInt_goodwin_gaussian_e1 {z : ℂ} (hr : 0 < z.re) (hi : 0 < z.im) :
     (∫ t : ℝ in Ioi 0, (2*(t:ℂ))*exp (-(t:ℂ)^2)/((t:ℂ)^2-z^2)) =
       exp (-z^2)*genExpIntE 1 (-z^2) := by
   have hzi : 0 < (z^2).im := by
@@ -478,7 +475,7 @@ lemma erfInt_goodwin_gaussian_e1 {z : ℂ} (hr : 0 < z.re) (hi : 0 < z.im) :
   ring
 
 /-- Splitting the nonsingular upper-half-plane kernels gives the Goodwin integral. -/
-lemma goodwinStatonG_eq_E1_of_re_pos_of_im_pos {z : ℂ} (hr : 0 < z.re) (hi : 0 < z.im) :
+theorem goodwinStatonG_eq_E1_of_re_pos_of_im_pos {z : ℂ} (hr : 0 < z.re) (hi : 0 < z.im) :
     goodwinStatonG z = exp (-z^2)/2*genExpIntE 1 (-z^2)-π*I/2*faddeevaW z := by
   let A := ∫ t : ℝ in Ioi 0, exp (-(t:ℂ)^2)/((t:ℂ)-z)
   have hA := (erfInt_integrable_gauss_div hi).integrableOn (s := Ioi (0:ℝ))
@@ -516,7 +513,7 @@ lemma goodwinStatonG_eq_E1_of_re_pos_of_im_pos {z : ℂ} (hr : 0 < z.re) (hi : 0
   linear_combination (hsum-hdiff)/2
 
 /-- The principal logarithm needed when approaching the positive axis from above. -/
-lemma erfInt_goodwin_log_neg_sq {z : ℂ} (hr : 0 < z.re) (hi : 0 < z.im) :
+theorem erfInt_goodwin_log_neg_sq {z : ℂ} (hr : 0 < z.re) (hi : 0 < z.im) :
     log (-z^2) = 2*log z-π*I := by
   have hz : z ≠ 0 := fun h => by simp [h] at hr
   have ha : 0 < arg z := lt_of_le_of_ne (arg_nonneg_iff.mpr hi.le)
@@ -530,7 +527,7 @@ lemma erfInt_goodwin_log_neg_sq {z : ℂ} (hr : 0 < z.re) (hi : 0 < z.im) :
   · simp [mul_im, log_im]; linarith [Real.pi_pos]
 
 /-- Goodwin's logarithmic expression before taking the real boundary value. -/
-lemma goodwinStatonG_eq_Ein_of_re_pos_of_im_pos {z : ℂ} (hr : 0 < z.re) (hi : 0 < z.im) :
+theorem goodwinStatonG_eq_Ein_of_re_pos_of_im_pos {z : ℂ} (hr : 0 < z.re) (hi : 0 < z.im) :
     goodwinStatonG z = Real.sqrt π*dawsonF z - exp (-z^2)/2*
       (Real.eulerMascheroniConstant+2*log z-expIntEin (-z^2)) := by
   have hz : z ≠ 0 := fun h => by simp [h] at hr
@@ -541,7 +538,7 @@ lemma goodwinStatonG_eq_Ein_of_re_pos_of_im_pos {z : ℂ} (hr : 0 < z.re) (hi : 
 
 
 /-- Dominated continuity of the defining integral along a vertical line in the right half-plane. -/
-lemma tendsto_goodwinStatonG_vertical {x : ℝ} (hx : 0 < x) :
+theorem tendsto_goodwinStatonG_vertical {x : ℝ} (hx : 0 < x) :
     Tendsto (fun ε : ℝ => goodwinStatonG ((x:ℂ)+I*ε)) (𝓝 0) (𝓝 (goodwinStatonG x)) := by
   unfold goodwinStatonG
   refine tendsto_integral_filter_of_dominated_convergence (fun t => Real.exp (-t^2)/x)
@@ -1080,7 +1077,7 @@ section FresnelMellinBarnes
 
 
 /-- `∫₀^∞ t^{2a-1}/(t²+1) dt = Γ(a) Γ(1-a)/2` for `0 < Re a < 1`. -/
-lemma fresMB_integral_cpow_div {a : ℂ} (h0 : 0 < a.re) (h1 : a.re < 1) :
+theorem fresMB_integral_cpow_div {a : ℂ} (h0 : 0 < a.re) (h1 : a.re < 1) :
     ∫ t : ℝ in Ioi 0, (t : ℂ) ^ (2 * a - 1) / ((t : ℂ) ^ 2 + 1) = Gamma a * Gamma (1 - a) / 2 := by
   have h1a : 0 < (1 - a).re := by simp; linarith
   have hb := DLMF.Gamma.beta_on_Ioi h0 h1a
@@ -1111,7 +1108,7 @@ lemma fresMB_integral_cpow_div {a : ℂ} (h0 : 0 < a.re) (h1 : a.re < 1) :
   field_simp
 
 /-- Integrability of `t^q/(t²+1)` on `(0, ∞)` for `-1 < q < 1`. -/
-lemma fresMB_integrableOn_rpow_div {q : ℝ} (h0 : -1 < q) (h1 : q < 1) :
+theorem fresMB_integrableOn_rpow_div {q : ℝ} (h0 : -1 < q) (h1 : q < 1) :
     IntegrableOn (fun t : ℝ => t ^ q / (t ^ 2 + 1)) (Ioi 0) := by
   set p : ℝ := (q + 1) / 2 with hp
   have hp0 : 0 < p := by rw [hp]; linarith
@@ -1139,10 +1136,10 @@ def fresMB_kernel (k : ℕ) (w : ℂ) (p : ℝ × ℝ) : ℂ :=
   (p.1 : ℂ) ^ ((k : ℂ) - 1 / 2) / ((p.1 : ℂ) ^ 2 + 1) *
     ((p.2 : ℂ) ^ (w - 1) * exp (-(((π * p.1 / 2 : ℝ) : ℂ) * (p.2 : ℂ) ^ 2)))
 
-lemma fresMB_measurable_kernel (k : ℕ) (w : ℂ) : Measurable (fresMB_kernel k w) := by
+theorem fresMB_measurable_kernel (k : ℕ) (w : ℂ) : Measurable (fresMB_kernel k w) := by
   unfold fresMB_kernel; fun_prop
 
-lemma fresMB_norm_inner (k : ℕ) {w : ℂ} (hw : 0 < w.re) {t : ℝ} (ht : 0 < t) :
+theorem fresMB_norm_inner (k : ℕ) {w : ℂ} (hw : 0 < w.re) {t : ℝ} (ht : 0 < t) :
     ∫ x : ℝ in Ioi 0, ‖fresMB_kernel k w (t, x)‖ =
       (π / 2) ^ (-w.re / 2) * (1 / 2) * Real.Gamma (w.re / 2) *
         (t ^ ((k : ℝ) - 1 / 2 - w.re / 2) / (t ^ 2 + 1)) := by
@@ -1161,7 +1158,7 @@ lemma fresMB_norm_inner (k : ℕ) {w : ℂ} (hw : 0 < w.re) {t : ℝ} (ht : 0 < 
   norm_num
   ring
 
-lemma fresMB_integrable_kernel {k : ℕ} (hk : k ≤ 1) {w : ℂ} (hw : 0 < w.re)
+theorem fresMB_integrable_kernel {k : ℕ} (hk : k ≤ 1) {w : ℂ} (hw : 0 < w.re)
     (hw1 : w.re < 2 * k + 1) :
     Integrable (fresMB_kernel k w) ((volume.restrict (Ioi (0 : ℝ))).prod
       (volume.restrict (Ioi (0 : ℝ)))) := by
@@ -1177,7 +1174,7 @@ lemma fresMB_integrable_kernel {k : ℕ} (hk : k ≤ 1) {w : ℂ} (hw : 0 < w.re
       ((π / 2) ^ (-w.re / 2) * (1 / 2) * Real.Gamma (w.re / 2))) (fun t ht => ?_) measurableSet_Ioi
     exact (fresMB_norm_inner k hw ht).symm
 
-lemma fresMB_pointwise (aux : Bool) (w : ℂ) {x : ℝ} (hx : 0 < x) :
+theorem fresMB_pointwise (aux : Bool) (w : ℂ) {x : ℝ} (hx : 0 < x) :
     (x : ℂ) ^ (w - 1) • fresMB_aux aux x = 1 / (π * Real.sqrt 2) *
       ∫ t : ℝ in Ioi 0, fresMB_kernel (if aux then 1 else 0) w (t, x) := by
   have harg : |arg (x : ℂ)| ≤ π / 4 := by
@@ -1192,7 +1189,7 @@ lemma fresMB_pointwise (aux : Bool) (w : ℂ) {x : ℝ} (hx : 0 < x) :
     congr 1; push_cast; ring
   rw [e]; ring
 
-lemma fresMB_inner (k : ℕ) {w : ℂ} (hw : 0 < w.re) {t : ℝ} (ht : 0 < t) :
+theorem fresMB_inner (k : ℕ) {w : ℂ} (hw : 0 < w.re) {t : ℝ} (ht : 0 < t) :
     ∫ x : ℝ in Ioi 0, fresMB_kernel k w (t, x) =
       ((2 / π : ℝ) : ℂ) ^ (w / 2) * Gamma (w / 2) / 2 *
         ((t : ℂ) ^ (2 * ((k : ℂ) / 2 + 1 / 4 - w / 4) - 1) / ((t : ℂ) ^ 2 + 1)) := by
@@ -1210,7 +1207,7 @@ lemma fresMB_inner (k : ℕ) {w : ℂ} (hw : 0 < w.re) {t : ℝ} (ht : 0 < t) :
   rw [← e2]
   ring
 
-lemma fresMB_mellin (aux : Bool) {w : ℂ} (hw : 0 < w.re)
+theorem fresMB_mellin (aux : Bool) {w : ℂ} (hw : 0 < w.re)
     (hw1 : w.re < 2 * ((if aux then 1 else 0 : ℕ) : ℝ) + 1) :
     MellinConvergent (fun x : ℝ => fresMB_aux aux x) w ∧
       mellin (fun x : ℝ => fresMB_aux aux x) w = 1 / (π * Real.sqrt 2) *
@@ -1238,7 +1235,7 @@ lemma fresMB_mellin (aux : Bool) {w : ℂ} (hw : 0 < w.re)
 def fresMB_G (b : ℝ) (s : ℂ) : ℂ :=
   Gamma s * Gamma (s + 1 / 2) * Gamma (s + b) * Gamma (1 - b - s)
 
-lemma fresMB_continuous_G {b c : ℝ} (hc : 0 < c) (hcb : 0 < c + b) (hcb1 : c < 1 - b) :
+theorem fresMB_continuous_G {b c : ℝ} (hc : 0 < c) (hcb : 0 < c + b) (hcb1 : c < 1 - b) :
     Continuous fun y : ℝ => fresMB_G b (c + y * I) := by
   refine continuous_iff_continuousAt.mpr fun y => ?_
   unfold fresMB_G
@@ -1248,7 +1245,7 @@ lemma fresMB_continuous_G {b c : ℝ} (hc : 0 < c) (hcb : 0 < c + b) (hcb1 : c <
   · exact (DLMF.Gamma.continuousAt_Gamma_of_re_pos (by simp; linarith)).comp (by fun_prop)
   · exact (DLMF.Gamma.continuousAt_Gamma_of_re_pos (by simp; linarith)).comp (by fun_prop)
 
-lemma fresMB_bound_G {b c : ℝ} (hc : 0 < c) (hcb : 0 < c + b) (hcb1 : c < 1 - b) :
+theorem fresMB_bound_G {b c : ℝ} (hc : 0 < c) (hcb : 0 < c + b) (hcb1 : c < 1 - b) :
     ∃ C : ℝ, ∃ K : ℕ, ∀ y : ℝ,
       ‖fresMB_G b (c + y * I)‖ ≤ C * (1 + |y|) ^ K * Real.exp (-(2 * π * |y|)) := by
   obtain ⟨C₁, K₁, h₁⟩ := DLMF.Gamma.exists_norm_Gamma_shift_le hc 0
@@ -1281,7 +1278,7 @@ lemma fresMB_bound_G {b c : ℝ} (hc : 0 < c) (hcb : 0 < c + b) (hcb1 : c < 1 - 
           gcongr
     _ = _ := by rw [pow_add, pow_add, pow_add]; ring
 
-lemma fresMB_integrable_G {b c : ℝ} (hc : 0 < c) (hcb : 0 < c + b) (hcb1 : c < 1 - b) :
+theorem fresMB_integrable_G {b c : ℝ} (hc : 0 < c) (hcb : 0 < c + b) (hcb1 : c < 1 - b) :
     Integrable fun y : ℝ => fresMB_G b (c + y * I) := by
   obtain ⟨C, K, hC⟩ := fresMB_bound_G hc hcb hcb1
   refine ((DLMF.Gamma.integrable_one_add_abs_pow_mul_exp_neg (by positivity : 0 < 2 * π) K).const_mul
@@ -1292,11 +1289,11 @@ lemma fresMB_integrable_G {b c : ℝ} (hc : 0 < c) (hcb : 0 < c + b) (hcb1 : c <
 def fresMB_g (aux : Bool) : ℝ → ℂ :=
   fun X => fresMB_aux aux (((2 / Real.sqrt π * X ^ (1 / 4 : ℝ) : ℝ)) : ℂ)
 
-lemma fresMB_cpow_eq_exp {r : ℝ} (hr : 0 < r) (z : ℂ) :
+theorem fresMB_cpow_eq_exp {r : ℝ} (hr : 0 < r) (z : ℂ) :
     ((r : ℝ) : ℂ) ^ z = exp (((Real.log r : ℝ) : ℂ) * z) := by
   rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr hr.ne'), ← ofReal_log hr.le]
 
-lemma fresMB_two_pi_cpow :
+theorem fresMB_two_pi_cpow :
     (2 * π : ℂ) ^ (3 / 2 : ℂ) = 2 * π * ((Real.sqrt 2 * Real.sqrt π : ℝ) : ℂ) := by
   have h2π : (0 : ℝ) ≤ 2 * π := by positivity
   have e : (2 * π : ℂ) ^ (3 / 2 : ℂ) = (((2 * π) ^ (3 / 2 : ℝ) : ℝ) : ℂ) := by
@@ -1305,7 +1302,7 @@ lemma fresMB_two_pi_cpow :
     ← Real.sqrt_eq_rpow, Real.sqrt_mul (by norm_num)]
   push_cast; ring
 
-lemma fresMB_mellin_g (aux : Bool) {s : ℂ} (hs : 0 < s.re)
+theorem fresMB_mellin_g (aux : Bool) {s : ℂ} (hs : 0 < s.re)
     (hs1 : s.re < ((if aux then 1 else 0 : ℕ) : ℝ) / 2 + 1 / 4) :
     MellinConvergent (fresMB_g aux) s ∧
       mellin (fresMB_g aux) s = ((2 * π : ℂ) ^ (3 / 2 : ℂ))⁻¹ *
@@ -1371,7 +1368,7 @@ lemma fresMB_differentiable_aux (aux : Bool) : Differentiable ℂ (fresMB_aux au
 def fresMB_E (b c : ℝ) (z : ℂ) (y : ℝ) : ℂ :=
   exp (-((c : ℂ) + y * I) * (2 * log (π : ℂ) - log 16 + 4 * log z)) * fresMB_G b (c + y * I)
 
-lemma fresMB_real (aux : Bool) {c : ℝ} (hc : 0 < c)
+theorem fresMB_real (aux : Bool) {c : ℝ} (hc : 0 < c)
     (hc1 : c < ((if aux then 1 else 0 : ℕ) : ℝ) / 2 + 1 / 4) {x : ℝ} (hx : 0 < x) :
     Integrable (fresMB_E (3 / 4 - ((if aux then 1 else 0 : ℕ) : ℝ) / 2) c x) ∧
       ∫ y : ℝ, fresMB_E (3 / 4 - ((if aux then 1 else 0 : ℕ) : ℝ) / 2) c x y =
@@ -1453,20 +1450,20 @@ lemma fresMB_real (aux : Bool) {c : ℝ} (hc : 0 < c)
   field_simp
 
 /-- An absolutely integrable function has a convergent whole-line improper integral. -/
-lemma fresMB_hasIntegralWholeLine {f : ℝ → ℂ} (hf : Integrable f) :
+theorem fresMB_hasIntegralWholeLine {f : ℝ → ℂ} (hf : Integrable f) :
     HasIntegralWholeLine f (∫ y, f y) :=
   ⟨∫ y in Iic 0, f y, ∫ y in Ioi 0, f y,
     intervalIntegral_tendsto_integral_Iic 0 hf.integrableOn tendsto_id,
     intervalIntegral_tendsto_integral_Ioi 0 hf.integrableOn tendsto_id,
     intervalIntegral.integral_Iic_add_Ioi hf.integrableOn hf.integrableOn⟩
 
-lemma fresMB_continuous_E {b c : ℝ} (hc : 0 < c) (hcb : 0 < c + b) (hcb1 : c < 1 - b) (z : ℂ) :
+theorem fresMB_continuous_E {b c : ℝ} (hc : 0 < c) (hcb : 0 < c + b) (hcb1 : c < 1 - b) (z : ℂ) :
     Continuous (fresMB_E b c z) := by
   unfold fresMB_E
   exact (by fun_prop : Continuous fun y : ℝ => exp (-((c : ℂ) + y * I) *
     (2 * log (π : ℂ) - log 16 + 4 * log z))).mul (fresMB_continuous_G hc hcb hcb1)
 
-lemma fresMB_im_A (z : ℂ) : (2 * log (π : ℂ) - log 16 + 4 * log z).im = 4 * arg z := by
+theorem fresMB_im_A (z : ℂ) : (2 * log (π : ℂ) - log 16 + 4 * log z).im = 4 * arg z := by
   have h1 : (log (π : ℂ)).im = 0 := by
     rw [log_im, arg_ofReal_of_nonneg Real.pi_pos.le]
   have h2 : (log (16 : ℂ)).im = 0 := by
@@ -1474,7 +1471,7 @@ lemma fresMB_im_A (z : ℂ) : (2 * log (π : ℂ) - log 16 + 4 * log z).im = 4 *
   simp [h1, h2, log_im]
 
 /-- Absolute integrability of the Mellin–Barnes integrand in the sector `|arg z| < π/2`. -/
-lemma fresMB_integrable_E {b c : ℝ} (hc : 0 < c) (hcb : 0 < c + b) (hcb1 : c < 1 - b) {z : ℂ}
+theorem fresMB_integrable_E {b c : ℝ} (hc : 0 < c) (hcb : 0 < c + b) (hcb1 : c < 1 - b) {z : ℂ}
     (hz : |arg z| < π / 2) : Integrable (fresMB_E b c z) := by
   obtain ⟨C, K, hC⟩ := fresMB_bound_G hc hcb hcb1
   set A : ℂ := 2 * log (π : ℂ) - log 16 + 4 * log z with hA
@@ -1510,7 +1507,7 @@ def fresMB_B (b c : ℝ) (y : ℝ) : ℂ :=
   exp (-((c : ℂ) + (y / 4 : ℝ) * I) * (2 * log (π : ℂ) - log 16)) *
     fresMB_G b (c + (y / 4 : ℝ) * I)
 
-lemma fresMB_E_eq {b c : ℝ} {z : ℂ} (hz : 0 < z.re) (y : ℝ) :
+theorem fresMB_E_eq {b c : ℝ} {z : ℂ} (hz : 0 < z.re) (y : ℝ) :
     fresMB_E b c z y = fresMB_B b c (4 * y) * z⁻¹ ^ (((4 * c : ℝ) : ℂ) + I * ((4 * y : ℝ) : ℂ)) := by
   have hz0 : z ≠ 0 := by rintro rfl; simp at hz
   have harg : z.arg ≠ π := by
@@ -1525,7 +1522,7 @@ lemma fresMB_E_eq {b c : ℝ} {z : ℂ} (hz : 0 < z.re) (y : ℝ) :
     rw [← exp_add]; congr 1; push_cast; ring
   rw [he]; ring
 
-lemma fresMB_integral_E_eq {b c : ℝ} {z : ℂ} (hz : 0 < z.re) :
+theorem fresMB_integral_E_eq {b c : ℝ} {z : ℂ} (hz : 0 < z.re) :
     ∫ y, fresMB_E b c z y =
       (1 / 4 : ℂ) * ∫ y, fresMB_B b c y * z⁻¹ ^ (((4 * c : ℝ) : ℂ) + I * (y : ℂ)) := by
   simp_rw [fresMB_E_eq hz]
@@ -1533,7 +1530,7 @@ lemma fresMB_integral_E_eq {b c : ℝ} {z : ℂ} (hz : 0 < z.re) :
     fresMB_B b c y * z⁻¹ ^ (((4 * c : ℝ) : ℂ) + I * (y : ℂ))) 4]
   rw [real_smul]; norm_num
 
-lemma fresMB_bound_B {b c : ℝ} (hc : 0 < c) (hcb : 0 < c + b) (hcb1 : c < 1 - b) :
+theorem fresMB_bound_B {b c : ℝ} (hc : 0 < c) (hcb : 0 < c + b) (hcb1 : c < 1 - b) :
     ∃ C : ℝ, ∃ K : ℕ, ∀ y : ℝ,
       ‖fresMB_B b c y‖ ≤ C * (1 + |y|) ^ K * Real.exp (-(π * |y|) / 2) := by
   obtain ⟨C, K, hC⟩ := fresMB_bound_G hc hcb hcb1
@@ -1561,7 +1558,7 @@ lemma fresMB_bound_B {b c : ℝ} (hc : 0 < c) (hcb : 0 < c + b) (hcb1 : c < 1 - 
         gcongr
     _ = _ := by ring
 
-lemma fresMB_continuous_B {b c : ℝ} (hc : 0 < c) (hcb : 0 < c + b) (hcb1 : c < 1 - b) :
+theorem fresMB_continuous_B {b c : ℝ} (hc : 0 < c) (hcb : 0 < c + b) (hcb1 : c < 1 - b) :
     Continuous (fresMB_B b c) := by
   unfold fresMB_B
   refine Continuous.mul (by fun_prop) ?_
@@ -1569,7 +1566,7 @@ lemma fresMB_continuous_B {b c : ℝ} (hc : 0 < c) (hcb : 0 < c + b) (hcb1 : c <
 
 /-- The Mellin–Barnes integral for the auxiliary Fresnel functions (DLMF 7.7.13–14),
 in the right half-plane. -/
-lemma fresMB_complex (aux : Bool) {c : ℝ} (hc : 0 < c)
+theorem fresMB_complex (aux : Bool) {c : ℝ} (hc : 0 < c)
     (hc1 : c < ((if aux then 1 else 0 : ℕ) : ℝ) / 2 + 1 / 4) {z : ℂ} (hz : 0 < z.re) :
     ∫ y : ℝ, fresMB_E (3 / 4 - ((if aux then 1 else 0 : ℕ) : ℝ) / 2) c z y =
       2 * π * (2 * π : ℂ) ^ (3 / 2 : ℂ) * fresMB_aux aux z := by
@@ -2165,7 +2162,7 @@ noncomputable def erfInt_G (p α β γ : ℂ) (x : ℝ) : ℂ :=
   1/p*exp (p*(x:ℂ)^2)*erfc (α*x+γ/x) - exp (-2*α*γ)/p*((1+α/β)/2*exp (2*β*γ)*erfc (β*x+γ/x) +
     (α/β-1)/2*exp (-2*β*γ)*erfc (β*x+(-γ)/x))
 
-lemma erfInt_hasDerivAt_G {p α β γ : ℂ} (hp : p = α^2-β^2) (hp0 : p ≠ 0) (hβ : β ≠ 0)
+theorem erfInt_hasDerivAt_G {p α β γ : ℂ} (hp : p = α^2-β^2) (hp0 : p ≠ 0) (hβ : β ≠ 0)
     {x : ℝ} (hx : x ≠ 0) :
     HasDerivAt (erfInt_G p α β γ) (2*x*exp (p*(x:ℂ)^2)*erfc (α*x+γ/x)) x := by
   have hx' : (x:ℂ) ≠ 0 := by exact_mod_cast hx
@@ -2202,7 +2199,7 @@ lemma erfInt_hasDerivAt_G {p α β γ : ℂ} (hp : p = α^2-β^2) (hp0 : p ≠ 0
       (2*β*cexp (-(2*α*γ))*Q*((x:ℂ)^2*α-γ)/P) * hB
 
 /-- The derivative of `G(√t)`. -/
-lemma erfInt_hasDerivAt_G_sqrt {p α β γ : ℂ} (hp : p = α^2-β^2) (hp0 : p ≠ 0) (hβ : β ≠ 0)
+theorem erfInt_hasDerivAt_G_sqrt {p α β γ : ℂ} (hp : p = α^2-β^2) (hp0 : p ≠ 0) (hβ : β ≠ 0)
     {t : ℝ} (ht : 0 < t) :
     HasDerivAt (fun t : ℝ => erfInt_G p α β γ (Real.sqrt t))
       (exp (p*t)*erfc (α*Real.sqrt t+γ/Real.sqrt t)) t := by
@@ -2215,7 +2212,7 @@ lemma erfInt_hasDerivAt_G_sqrt {p α β γ : ℂ} (hp : p = α^2-β^2) (hp0 : p 
   rw [hsq, real_smul]; push_cast; field_simp
 
 /-- `erfc (βx + δ/x) → 0` as `x → ∞` when `Re β > 0` and `Re β² > 0`. -/
-lemma erfInt_tendsto_erfc_atTop {β : ℂ} (hβ : 0 < β.re) (hβ2 : 0 < (β^2).re) (δ : ℂ) :
+theorem erfInt_tendsto_erfc_atTop {β : ℂ} (hβ : 0 < β.re) (hβ2 : 0 < (β^2).re) (δ : ℂ) :
     Tendsto (fun x : ℝ => erfc (β*x+δ/x)) atTop (𝓝 0) := by
   have hinv : Tendsto (fun x : ℝ => x⁻¹) atTop (𝓝 0) := tendsto_inv_atTop_zero
   refine tendsto_erfc_zero_of_re ?_ ?_
@@ -2242,7 +2239,7 @@ lemma erfInt_tendsto_erfc_atTop {β : ℂ} (hβ : 0 < β.re) (hβ2 : 0 < (β^2).
 /-- **Core of DLMF 7.14.4**: with `p = α² - β²`, the Laplace-type integral
 `∫₀^∞ e^{pt} erfc(α√t + γ/√t) dt` equals `e^{-2αγ-2βγ}/(β(α+β))`, given integrability and the
 decay of `e^{px²} erfc(αx+γ/x)` at infinity. -/
-lemma erfInt_laplace_core {p α β γ : ℂ} (hp : p = α^2-β^2) (hp0 : p ≠ 0) (hβ : 0 < β.re)
+theorem erfInt_laplace_core {p α β γ : ℂ} (hp : p = α^2-β^2) (hp0 : p ≠ 0) (hβ : 0 < β.re)
     (hβ2 : 0 < (β^2).re) (hγ : 0 < γ.re) (hγ2 : 0 < (γ^2).re) (hαβ : α + β ≠ 0)
     (hint : IntegrableOn (fun t : ℝ => exp (p*t)*erfc (α*Real.sqrt t+γ/Real.sqrt t)) (Ioi 0))
     (hlim : Tendsto (fun x : ℝ => exp (p*(x:ℂ)^2)*erfc (α*x+γ/x)) atTop (𝓝 0)) :
@@ -2314,7 +2311,7 @@ lemma erfInt_laplace_core {p α β γ : ℂ} (hp : p = α^2-β^2) (hp0 : p ≠ 0
   ring
 
 /-- If `Re a > 0` and `Re c ≥ 0`, then `ac` is not a negative real number. -/
-lemma erfInt_re_mul_nonneg_or {a c : ℂ} (ha : 0 < a.re) (hc : 0 ≤ c.re) :
+theorem erfInt_re_mul_nonneg_or {a c : ℂ} (ha : 0 < a.re) (hc : 0 ≤ c.re) :
     0 ≤ (a*c).re ∨ (a*c).im ≠ 0 := by
   by_cases h : (a*c).im = 0
   · left
@@ -2328,7 +2325,7 @@ lemma erfInt_re_mul_nonneg_or {a c : ℂ} (ha : 0 < a.re) (hc : 0 ≤ c.re) :
   · exact Or.inr h
 
 /-- `(a t)^{1/2} = a^{1/2} √t` for `Re a > 0`, `t > 0`. -/
-lemma erfInt_cpow_half_mul_ofReal {a : ℂ} (ha : 0 < a.re) {t : ℝ} (ht : 0 < t) :
+theorem erfInt_cpow_half_mul_ofReal {a : ℂ} (ha : 0 < a.re) {t : ℝ} (ht : 0 < t) :
     (a*t)^(1/2 : ℂ) = a^(1/2 : ℂ)*Real.sqrt t := by
   have ha0 : a ≠ 0 := fun h => by simp [h] at ha
   have hr : 0 < (a^(1/2 : ℂ)*(Real.sqrt t:ℂ)).re := by
@@ -2338,7 +2335,7 @@ lemma erfInt_cpow_half_mul_ofReal {a : ℂ} (ha : 0 < a.re) {t : ℝ} (ht : 0 < 
   rw [← hsq, sq_cpow_half hr]
 
 /-- `(c/t)^{1/2} = c^{1/2}/√t` for `Re c > 0`, `t > 0`. -/
-lemma erfInt_cpow_half_div_ofReal {c : ℂ} (hc : 0 < c.re) {t : ℝ} (ht : 0 < t) :
+theorem erfInt_cpow_half_div_ofReal {c : ℂ} (hc : 0 < c.re) {t : ℝ} (ht : 0 < t) :
     (c/t)^(1/2 : ℂ) = c^(1/2 : ℂ)/Real.sqrt t := by
   have hc0 : c ≠ 0 := fun h => by simp [h] at hc
   have hs : 0 < Real.sqrt t := Real.sqrt_pos.2 ht
@@ -2349,7 +2346,7 @@ lemma erfInt_cpow_half_div_ofReal {c : ℂ} (hc : 0 < c.re) {t : ℝ} (ht : 0 < 
   rw [← hsq, sq_cpow_half hr]
 
 /-- `(ac)^{1/2} = a^{1/2} c^{1/2}` for `Re a > 0`, `Re c > 0`. -/
-lemma erfInt_cpow_half_mul {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) :
+theorem erfInt_cpow_half_mul {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) :
     (a*c)^(1/2 : ℂ) = a^(1/2 : ℂ)*c^(1/2 : ℂ) := by
   have ha0 : a ≠ 0 := fun h => by simp [h] at ha
   have hc0 : c ≠ 0 := fun h => by simp [h] at hc
@@ -2363,7 +2360,7 @@ lemma erfInt_cpow_half_mul {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) :
 
 /-- The sharp bound for the integrand of DLMF 7.14.4: for `Re a > 0`, `Re c > 0`, `t > 0`,
 `z = (at)^{1/2} + (c/t)^{1/2}` has `Re z > 0` and `Re z² ≥ Re a · t`. -/
-lemma erfInt_re_sq_ge {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) {t : ℝ} (ht : 0 < t) :
+theorem erfInt_re_sq_ge {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) {t : ℝ} (ht : 0 < t) :
     0 < ((a*t)^(1/2 : ℂ) + (c/t)^(1/2 : ℂ)).re ∧
       a.re*t ≤ (((a*t)^(1/2 : ℂ) + (c/t)^(1/2 : ℂ))^2).re := by
   have hat : 0 < (a*(t:ℂ)).re := by rw [re_mul_ofReal]; positivity
@@ -2389,7 +2386,7 @@ lemma erfInt_re_sq_ge {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) {t : ℝ} (ht 
 
 /-- Bound for the integrand of DLMF 7.14.4: `‖erfc((at)^{1/2} + (c/t)^{1/2})‖ ≤ 1` and
 `≤ e^{-Re a t}/√(π Re a t)`. -/
-lemma erfInt_norm_erfc_plus_le {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) {t : ℝ} (ht : 0 < t) :
+theorem erfInt_norm_erfc_plus_le {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) {t : ℝ} (ht : 0 < t) :
     ‖erfc ((a*t)^(1/2 : ℂ) + (c/t)^(1/2 : ℂ))‖ ≤ 1 ∧
       ‖erfc ((a*t)^(1/2 : ℂ) + (c/t)^(1/2 : ℂ))‖ ≤
         Real.exp (-(a.re*t))/Real.sqrt (π*(a.re*t)) := by
@@ -2401,7 +2398,7 @@ lemma erfInt_norm_erfc_plus_le {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) {t : 
   gcongr
 
 /-- A uniform exponential majorant for the integrand of DLMF 7.14.4. -/
-lemma erfInt_norm_plus_le {a b c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) {t : ℝ} (ht : 0 < t) :
+theorem erfInt_norm_plus_le {a b c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) {t : ℝ} (ht : 0 < t) :
     ‖exp ((a-b)*t)*erfc ((a*t)^(1/2 : ℂ) + (c/t)^(1/2 : ℂ))‖ ≤
       (Real.exp (|(a-b).re| + |b.re|) + 1/Real.sqrt (π*a.re)) * Real.exp (-(b.re*t)) := by
   obtain ⟨h1, h2⟩ := erfInt_norm_erfc_plus_le ha hc ht
@@ -2444,7 +2441,7 @@ lemma erfInt_norm_plus_le {a b c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) {t : ℝ
           linarith [Real.exp_pos (|(a-b).re| + |b.re|)]
 
 /-- Continuity of the integrand of DLMF 7.14.4 on `(0, ∞)`. -/
-lemma erfInt_continuousOn_plus (s : ℂ) {a c : ℂ} (ha : 0 ≤ a.re) (hc : 0 ≤ c.re) (σ : ℂ) :
+theorem erfInt_continuousOn_plus (s : ℂ) {a c : ℂ} (ha : 0 ≤ a.re) (hc : 0 ≤ c.re) (σ : ℂ) :
     ContinuousOn (fun t : ℝ => exp (s*t)*erfc (σ*(a*t)^(1/2 : ℂ) + (c/t)^(1/2 : ℂ))) (Ioi 0) := by
   intro t ht
   have ht : (0:ℝ) < t := ht
@@ -2464,7 +2461,7 @@ lemma erfInt_continuousOn_plus (s : ℂ) {a c : ℂ} (ha : 0 ≤ a.re) (hc : 0 �
     (hE.continuousAt.comp ((continuousAt_const.mul h1).add h2))
 
 /-- **DLMF 7.14.4 for `Re c > 0`, `a ≠ b`.** -/
-lemma erfInt_laplace_plus_of_re_pos {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 < c.re)
+theorem erfInt_laplace_plus_of_re_pos {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 < c.re)
     (hab : a ≠ b) :
     (∫ t : ℝ in Ioi 0, exp ((a-b)*t)*erfc ((a*t)^(1/2 : ℂ)+(c/t)^(1/2 : ℂ))) =
       exp (-2*((a*c)^(1/2 : ℂ)+(b*c)^(1/2 : ℂ)))/(b^(1/2 : ℂ)*(a^(1/2 : ℂ)+b^(1/2 : ℂ))) := by
@@ -2527,12 +2524,12 @@ lemma erfInt_laplace_plus_of_re_pos {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re
   ring_nf
 
 /-- Continuity of `w ↦ w^{1/2}` at points with `Re w ≥ 0`. -/
-lemma erfInt_continuousAt_cpow_half {w : ℂ} (hw : 0 ≤ w.re ∨ w.im ≠ 0) :
+theorem erfInt_continuousAt_cpow_half {w : ℂ} (hw : 0 ≤ w.re ∨ w.im ≠ 0) :
     ContinuousAt (fun z : ℂ => z^(1/2 : ℂ)) w :=
   continuousAt_cpow_const_of_re_pos hw (by norm_num)
 
 /-- `ε ↦ (c+ε)/t` and the half power: continuity at `ε = 0` for `Re c ≥ 0`, `t > 0`. -/
-lemma erfInt_tendsto_cpow_half_shift {c : ℂ} (hc : 0 ≤ c.re) {t : ℝ} (ht : 0 < t) :
+theorem erfInt_tendsto_cpow_half_shift {c : ℂ} (hc : 0 ≤ c.re) {t : ℝ} (ht : 0 < t) :
     Tendsto (fun ε : ℝ => ((c+ε)/t)^(1/2 : ℂ)) (𝓝[>] 0) (𝓝 ((c/t)^(1/2 : ℂ))) := by
   have hg : ContinuousAt (fun z : ℂ => z^(1/2:ℂ)) ((c + ((0:ℝ):ℂ))/(t:ℂ)) :=
     erfInt_continuousAt_cpow_half (Or.inl (by
@@ -2639,7 +2636,7 @@ theorem erfInt_laplace_plus {a b c : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) (hc : 
   simpa [hF, hR] using this
 
 /-- A crude global bound: `‖erf w‖ ≤ (2/√π) ‖w‖ e^{max(0, -Re w²)}`. -/
-lemma erfInt_norm_erf_le (w : ℂ) :
+theorem erfInt_norm_erf_le (w : ℂ) :
     ‖erf w‖ ≤ 2/Real.sqrt π * Real.exp (max 0 (-(w^2).re)) * ‖w‖ := by
   have hs : Convex ℝ (segment ℝ (0:ℂ) w) := convex_segment _ _
   have h := hs.norm_image_sub_le_of_norm_hasDerivWithin_le (f := erf)
@@ -2669,7 +2666,7 @@ lemma erfInt_norm_erf_le (w : ℂ) :
 
 /-- Bound for the integrand of the companion of DLMF 7.14.4: for `Re a > 0`, `Re c > 0`,
 `‖c‖ ≤ M`, `t > 0`. -/
-lemma erfInt_norm_erfc_minus_le {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) {M : ℝ}
+theorem erfInt_norm_erfc_minus_le {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) {M : ℝ}
     (hM : ‖c‖ ≤ M) {t : ℝ} (ht : 0 < t) :
     ‖erfc (-(a*t)^(1/2 : ℂ) + (c/t)^(1/2 : ℂ))‖ ≤ 1 + 2/Real.sqrt π *
       Real.exp (2*Real.sqrt (‖a‖*M)) * (Real.sqrt ‖a‖ * Real.sqrt t + Real.sqrt M / Real.sqrt t) := by
@@ -2724,7 +2721,7 @@ lemma erfInt_norm_erfc_minus_le {a c : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) {M :
         (Real.sqrt ‖a‖ * Real.sqrt t + Real.sqrt M / Real.sqrt t) := by gcongr
 
 /-- Integrability of `(A + B√t + C/√t) e^{-λt}` on `(0, ∞)`. -/
-lemma erfInt_integrableOn_majorant {l : ℝ} (hl : 0 < l) (A B C : ℝ) :
+theorem erfInt_integrableOn_majorant {l : ℝ} (hl : 0 < l) (A B C : ℝ) :
     IntegrableOn (fun t : ℝ => (A + B*Real.sqrt t + C/Real.sqrt t) * Real.exp (-(l*t))) (Ioi 0) := by
   have h0 : IntegrableOn (fun t : ℝ => t^(0:ℝ) * Real.exp (-l * t^(1:ℝ))) (Ioi 0) :=
     integrableOn_rpow_mul_exp_neg_mul_rpow (by norm_num) one_pos hl
@@ -2740,7 +2737,7 @@ lemma erfInt_integrableOn_majorant {l : ℝ} (hl : 0 < l) (A B C : ℝ) :
   ring_nf
 
 /-- **Companion of DLMF 7.14.4 for `Re c > 0`.** -/
-lemma erfInt_laplace_minus_of_re_pos {a b c : ℂ} (ha : 0 < a.re) (hba : 0 < (b-a).re)
+theorem erfInt_laplace_minus_of_re_pos {a b c : ℂ} (ha : 0 < a.re) (hba : 0 < (b-a).re)
     (hc : 0 < c.re) :
     (∫ t : ℝ in Ioi 0, exp ((a-b)*t)*erfc (-(a*t)^(1/2 : ℂ)+(c/t)^(1/2 : ℂ))) =
       exp (2*((a*c)^(1/2 : ℂ)-(b*c)^(1/2 : ℂ)))/(b^(1/2 : ℂ)*(b^(1/2 : ℂ)-a^(1/2 : ℂ))) := by

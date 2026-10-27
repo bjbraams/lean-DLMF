@@ -7,7 +7,6 @@ module
 
 public import DLMF.Combinatorics.Binomial
 public import Mathlib.Combinatorics.Enumerative.Catalan.Basic
-public import Mathlib.Data.Nat.Choose.Central
 public import Mathlib.Analysis.Analytic.Binomial
 public import DLMFMathlib.Combinatorics.S26aQuadraticSeries
 
@@ -117,14 +116,14 @@ theorem catalan_eq_choose_sub {n : ℕ} (hn : 1 ≤ n) :
   ring
 
 /-- The generalized binomial coefficient over `ℝ` as a falling factorial over `n!`. -/
-theorem q26a_ringChoose_eq (a : ℝ) (n : ℕ) :
+lemma q26a_ringChoose_eq (a : ℝ) (n : ℕ) :
     Ring.choose a n = (descPochhammer ℝ n).eval a / n.factorial := by
   rw [Ring.choose_eq_smul, ← Polynomial.aeval_eq_smeval, Polynomial.aeval_def,
     ← Polynomial.eval_map, descPochhammer_map,
     smul_eq_mul, div_eq_inv_mul]
 
 /-- `C(n) = -(1/2) (-4)^{n+1} binom(1/2, n+1)`. -/
-theorem q26a_catalan_eq_choose_half (n : ℕ) :
+lemma q26a_catalan_eq_choose_half (n : ℕ) :
     (catalan n : ℝ) = -(1 / 2) * (-4) ^ (n + 1) * Ring.choose (1 / 2 : ℝ) (n + 1) := by
   induction n with
   | zero =>

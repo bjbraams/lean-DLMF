@@ -10,8 +10,6 @@ public import Mathlib.Analysis.Complex.LocallyUniformLimit
 public import Mathlib.NumberTheory.LSeries.HurwitzZeta
 public import Mathlib.NumberTheory.ZetaValues
 public import Mathlib.Analysis.Calculus.Deriv.Polynomial
-public import Mathlib.Analysis.Complex.CauchyIntegral
-public import Mathlib.Analysis.Analytic.Uniqueness
 
 /-!
 # Euler–Maclaurin continuation of the Hurwitz zeta function: the core (DLMF §25.11(i))
@@ -75,7 +73,7 @@ lemma r25b_integral_bernoulli_mul_step {u u' : ℝ → ℂ} (p : ℕ)
 
 /-- The one-interval Euler–Maclaurin identity on `[0, 1]` for a family `f j` with
 `f j' = f (j+1)` on `[0, 1]`. -/
-lemma r25b_integral_eq_sum_bernoulliFun (f : ℕ → ℝ → ℂ)
+theorem r25b_integral_eq_sum_bernoulliFun (f : ℕ → ℝ → ℂ)
     (hf : ∀ j, ∀ x ∈ Icc (0 : ℝ) 1, HasDerivAt (f j) (f (j + 1) x) x) (p : ℕ) :
     ∫ x in (0 : ℝ)..1, f 0 x =
       ∑ j ∈ Finset.range p, ((-1 : ℂ) ^ j / (j + 1)!) *
@@ -96,18 +94,18 @@ lemma r25b_integral_eq_sum_bernoulliFun (f : ℕ → ℝ → ℂ)
     ring
 
 
-lemma r25b_hasDerivAt_cpow_shift {w c : ℂ} {t : ℝ} (h : w + t ∈ slitPlane) :
+theorem r25b_hasDerivAt_cpow_shift {w c : ℂ} {t : ℝ} (h : w + t ∈ slitPlane) :
     HasDerivAt (fun y : ℝ => (w + y) ^ c) (c * (w + t) ^ (c - 1)) t := by
   have := ((hasDerivAt_id (t : ℂ)).const_add w).cpow_const (c := c) h
   simpa using this.comp_ofReal
 
-lemma r25b_mem_slitPlane {w : ℂ} (hw : 0 < w.re) {t : ℝ} (ht : 0 ≤ t) : w + t ∈ slitPlane :=
+theorem r25b_mem_slitPlane {w : ℂ} (hw : 0 < w.re) {t : ℝ} (ht : 0 ≤ t) : w + t ∈ slitPlane :=
   Complex.mem_slitPlane_iff.mpr (Or.inl (by simp; linarith))
 
 /-- The derivative family of `t ↦ (w+t)^{-s}`. -/
 def r25b_fam (s w : ℂ) (j : ℕ) (t : ℝ) : ℂ := (-1) ^ j * poch s j * (w + t) ^ (-s - j)
 
-lemma r25b_hasDerivAt_fam {s w : ℂ} (hw : 0 < w.re) (j : ℕ) {t : ℝ} (ht : 0 ≤ t) :
+theorem r25b_hasDerivAt_fam {s w : ℂ} (hw : 0 < w.re) (j : ℕ) {t : ℝ} (ht : 0 ≤ t) :
     HasDerivAt (r25b_fam s w j) (r25b_fam s w (j + 1) t) t := by
   have h := (r25b_hasDerivAt_cpow_shift (c := -s - j) (r25b_mem_slitPlane hw ht)).const_mul
     ((-1) ^ j * poch s j)
@@ -136,7 +134,7 @@ lemma r25b_sum_range_two_mul (T : ℕ → ℂ) (M : ℕ) :
 
 /-- **The one-step Euler–Maclaurin identity**: for `Re w > 0` and `s ≠ 1`,
 `w^{-s} + F(w+1) - F(w) = -((s)_{2M+1}/(2M+1)!) ∫_0^1 (w+t)^{-s-2M-1} B_{2M+1}(t) dt`. -/
-lemma r25b_emF_diff {s w : ℂ} (hs : s ≠ 1) (hw : 0 < w.re) (M : ℕ) :
+theorem r25b_emF_diff {s w : ℂ} (hs : s ≠ 1) (hw : 0 < w.re) (M : ℕ) :
     w ^ (-s) + r25b_emF M s (w + 1) - r25b_emF M s w =
       -(poch s (2 * M + 1) / (2 * M + 1 : ℕ)!) *
         ∫ t in (0 : ℝ)..1, (w + t) ^ (-s - (2 * M + 1 : ℕ)) * (bernoulliFun (2 * M + 1) t : ℂ) := by
@@ -262,7 +260,7 @@ def r25b_emSeq (M : ℕ) (s z : ℂ) (N : ℕ) : ℂ :=
 def r25b_emD (M : ℕ) (s w : ℂ) : ℂ :=
   w ^ (-s) + r25b_emF M s (w + 1) - r25b_emF M s w
 
-lemma r25b_emSeq_add (M : ℕ) (s z : ℂ) (N₀ N : ℕ) :
+theorem r25b_emSeq_add (M : ℕ) (s z : ℂ) (N₀ N : ℕ) :
     r25b_emSeq M s z (N₀ + N) =
       r25b_emSeq M s z N₀ + ∑ n ∈ Finset.range N, r25b_emD M s (z + (N₀ + n : ℕ)) := by
   induction N with
@@ -286,7 +284,7 @@ lemma r25b_norm_poch_le {s : ℂ} {R : ℝ} (hR : 0 ≤ R) (hs : ‖s‖ ≤ R) 
 
 /-- A summable majorant for the Euler–Maclaurin increments on a bounded set of `(s, z)` with
 `Re s ≥ σ > -2M` and `s ≠ 1`. -/
-lemma r25b_exists_summable_bound_emD {M : ℕ} {K : Set (ℂ × ℂ)} {R σ : ℝ} (hR : 0 ≤ R)
+theorem r25b_exists_summable_bound_emD {M : ℕ} {K : Set (ℂ × ℂ)} {R σ : ℝ} (hR : 0 ≤ R)
     (hσ : 0 < σ + 2 * M) (hK : ∀ q ∈ K, ‖q.1‖ ≤ R ∧ ‖q.2‖ ≤ R ∧ σ ≤ q.1.re ∧ q.1 ≠ 1) :
     ∃ u : ℕ → ℝ, Summable u ∧ (∀ n, 0 ≤ u n) ∧
       ∀ n : ℕ, ∀ q ∈ K, ‖r25b_emD M q.1 (q.2 + (⌈R⌉₊ + 1 + n : ℕ))‖ ≤ u n := by
@@ -370,7 +368,7 @@ lemma r25b_tendsto_emSeq {M : ℕ} {s z : ℂ} (hs : s ≠ 1) (hM : 0 < s.re + 2
     rw [h'.limUnder_eq]))
 
 /-- `(z + N)^w → 0` as `N → ∞`, for `Re w < 0`. -/
-lemma r25b_tendsto_cpow_nat (z : ℂ) {w : ℂ} (hw : w.re < 0) :
+theorem r25b_tendsto_cpow_nat (z : ℂ) {w : ℂ} (hw : w.re < 0) :
     Tendsto (fun N : ℕ => (z + N) ^ w) atTop (𝓝 0) := by
   have h1 : Tendsto (fun N : ℕ => ‖z + N‖) atTop atTop := by
     refine tendsto_atTop_mono (fun N => ?_)
@@ -390,7 +388,7 @@ lemma r25b_tendsto_cpow_nat (z : ℂ) {w : ℂ} (hw : w.re < 0) :
         rw [← abs_mul]; exact neg_le_abs _
     _ ≤ π * |w.im| := by gcongr
 
-lemma r25b_emSeq_succ_M (M : ℕ) (s z : ℂ) (N : ℕ) :
+theorem r25b_emSeq_succ_M (M : ℕ) (s z : ℂ) (N : ℕ) :
     r25b_emSeq (M + 1) s z N =
       r25b_emSeq M s z N + r25b_emC s M * (z + N) ^ (-s - (2 * M + 1)) := by
   simp only [r25b_emSeq, r25b_emF, Finset.sum_range_succ]
@@ -436,7 +434,7 @@ namespace DLMF.Zeta
 open DLMF.Hypergeometric (poch poch_succ poch_zero)
 
 /-- The project's `hurwitzZetaComplex` is the Euler–Maclaurin limit for any admissible `M`. -/
-lemma s25b_hzc_eq_limUnder {M : ℕ} {s z : ℂ} (hs : s ≠ 1)
+theorem s25b_hzc_eq_limUnder {M : ℕ} {s z : ℂ} (hs : s ≠ 1)
     (hM : 0 < s.re + 2 * M) :
     DLMF.Confluent.hurwitzZetaComplex s z = limUnder atTop (r25b_emSeq M s z) := by
   have hdef : DLMF.Confluent.hurwitzZetaComplex s z =
@@ -450,14 +448,14 @@ lemma s25b_hzc_eq_limUnder {M : ℕ} {s z : ℂ} (hs : s ≠ 1)
   push_cast; linarith
 
 /-- **Existence of the defining limit of `hurwitzZetaComplex`** for `s ≠ 1`, any `z`. -/
-lemma s25b_tendsto_hzc {M : ℕ} {s z : ℂ} (hs : s ≠ 1) (hM : 0 < s.re + 2 * M) :
+theorem s25b_tendsto_hzc {M : ℕ} {s z : ℂ} (hs : s ≠ 1) (hM : 0 < s.re + 2 * M) :
     Tendsto (r25b_emSeq M s z) atTop (𝓝 (DLMF.Confluent.hurwitzZetaComplex s z)) := by
   rw [s25b_hzc_eq_limUnder hs hM]
   exact r25b_tendsto_emSeq hs hM
 
 /-- **Uniform convergence to `hurwitzZetaComplex`** on bounded sets with `Re s ≥ σ > -2M`,
 `s ≠ 1`. -/
-lemma s25b_tendstoUniformlyOn_hzc {M : ℕ} {K : Set (ℂ × ℂ)} {R σ : ℝ} (hR : 0 ≤ R)
+theorem s25b_tendstoUniformlyOn_hzc {M : ℕ} {K : Set (ℂ × ℂ)} {R σ : ℝ} (hR : 0 ≤ R)
     (hσ : 0 < σ + 2 * M) (hK : ∀ q ∈ K, ‖q.1‖ ≤ R ∧ ‖q.2‖ ≤ R ∧ σ ≤ q.1.re ∧ q.1 ≠ 1) :
     TendstoUniformlyOn (fun N (q : ℂ × ℂ) => r25b_emSeq M q.1 q.2 (⌈R⌉₊ + 1 + N))
       (fun q => DLMF.Confluent.hurwitzZetaComplex q.1 q.2) atTop K := by
@@ -471,7 +469,7 @@ lemma s25b_tendstoUniformlyOn_hzc {M : ℕ} {K : Set (ℂ × ℂ)} {R σ : ℝ} 
   have h2 := (s25b_tendsto_hzc (z := q.2) hq1 hM).comp hT
   exact tendsto_nhds_unique h1 h2
 
-lemma r25b_differentiableAt_poch (k : ℕ) (s : ℂ) :
+theorem r25b_differentiableAt_poch (k : ℕ) (s : ℂ) :
     DifferentiableAt ℂ (fun t => poch t k) s :=
   (ascPochhammer ℂ k).differentiableAt
 

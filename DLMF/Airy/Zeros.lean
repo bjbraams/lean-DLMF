@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Airy.ModulusPhase
-public import DLMF.Airy.Asymptotics
 public import DLMF.ErrorFunctions.ZeroTools
 
 /-!
@@ -59,7 +58,7 @@ def airyZeroArgument (offset : ℝ) (k : ℕ) : ℂ := (3 * π / 8 * (4 * (k + 1
 def airyComplexZeroArgument (offset : ℝ) (k : ℕ) : ℂ := airyZeroArgument offset k + 3 * I * Real.log 2 / 4
 
 /-- `Ai(x) → 0` as `x → +∞` on the real axis. -/
-lemma tendsto_airyAiReal_atTop : Tendsto airyAiReal atTop (𝓝 0) := by
+theorem tendsto_airyAiReal_atTop : Tendsto airyAiReal atTop (𝓝 0) := by
   have hv : Tendsto (fun x : ℝ => Real.exp (-airyZeta x) / (2 * Real.sqrt π * x ^ (1 / 4 : ℝ)))
       atTop (𝓝 0) :=
     (Real.tendsto_exp_neg_atTop_nhds_zero.comp tendsto_airyZeta).div_atTop
@@ -73,17 +72,17 @@ lemma tendsto_airyAiReal_atTop : Tendsto airyAiReal atTop (𝓝 0) := by
   exact h'
 
 /-- `Bi(x) > 0` for `x ≥ 0`. -/
-lemma airyBiReal_pos {x : ℝ} (hx : 0 ≤ x) : 0 < airyBiReal x := by
+theorem airyBiReal_pos {x : ℝ} (hx : 0 ≤ x) : 0 < airyBiReal x := by
   obtain ⟨r, hr, he⟩ := airyBi_ofReal_pos hx
   simp [airyBiReal, he, hr]
 
 /-- `Ai(x) > 0` for `x ≥ 0`. -/
-lemma airyAiReal_pos {x : ℝ} (hx : 0 ≤ x) : 0 < airyAiReal x := by
+theorem airyAiReal_pos {x : ℝ} (hx : 0 ≤ x) : 0 < airyAiReal x := by
   obtain ⟨r, hr, he⟩ := airyAi_ofReal_pos hx
   simp [airyAiReal, he, hr]
 
 /-- `Bi'(0) > 0`. -/
-lemma airyBiDerivReal_zero_pos : 0 < airyBiDerivReal 0 := by
+theorem airyBiDerivReal_zero_pos : 0 < airyBiDerivReal 0 := by
   have h := airyBiDeriv_zero
   rw [show (1 / 3 : ℂ) = ((1 / 3 : ℝ) : ℂ) by push_cast; ring, Complex.Gamma_ofReal,
     ← Complex.ofReal_div] at h
@@ -92,11 +91,11 @@ lemma airyBiDerivReal_zero_pos : 0 < airyBiDerivReal 0 := by
   positivity
 
 /-- `Ai'(0) < 0`. -/
-lemma airyAiDerivReal_zero_neg : airyAiDerivReal 0 < 0 := by
+theorem airyAiDerivReal_zero_neg : airyAiDerivReal 0 < 0 := by
   exact airyAiDerivReal_zero_lt
 
 /-- `((-1)^n)^2 = 1`. -/
-lemma neg_one_pow_sq_real (n : ℕ) : ((-1 : ℝ) ^ n) ^ 2 = 1 := by
+theorem neg_one_pow_sq_real (n : ℕ) : ((-1 : ℝ) ^ n) ^ 2 = 1 := by
   rw [← pow_mul, mul_comm, pow_mul]; simp
 
 /-! ### Real zeros through a monotone phase -/
@@ -119,7 +118,7 @@ structure PhaseZeroData (f g : ℝ → ℝ) (c : ℝ) : Prop where
 namespace PhaseZeroData
 
 /-- Every level above `g 0` is attained on `(-∞, 0]`. -/
-lemma exists_level (h : PhaseZeroData f g c) {L : ℝ} (hL : g 0 ≤ L) : ∃ x ≤ 0, g x = L := by
+theorem exists_level (h : PhaseZeroData f g c) {L : ℝ} (hL : g 0 ≤ L) : ∃ x ≤ 0, g x = L := by
   obtain ⟨x0, hx0⟩ := (h.tendsto.eventually (eventually_ge_atTop L)).exists_forall_of_atBot
   set x1 := min x0 0
   have h1 : L ≤ g x1 := hx0 x1 (min_le_left _ _)
@@ -128,7 +127,7 @@ lemma exists_level (h : PhaseZeroData f g c) {L : ℝ} (hL : g 0 ≤ L) : ∃ x 
   exact ⟨x, hx.2, hgx⟩
 
 /-- A zero of `f` is negative and lies on a level `c + jπ` with `j ≥ 1`. -/
-lemma level_of_zero (h : PhaseZeroData f g c) {x : ℝ} (hx : f x = 0) :
+theorem level_of_zero (h : PhaseZeroData f g c) {x : ℝ} (hx : f x = 0) :
     x < 0 ∧ ∃ j : ℕ, 1 ≤ j ∧ g x = c + j * π := by
   have hneg := h.neg x hx
   obtain ⟨j, hj⟩ := (h.zero_iff x hneg).1 hx
@@ -145,7 +144,7 @@ lemma level_of_zero (h : PhaseZeroData f g c) {x : ℝ} (hx : f x = 0) :
   exact_mod_cast this.symm
 
 /-- A point of `(-∞, 0]` on a level `c + jπ`, `j ≥ 1`, is a negative zero of `f`. -/
-lemma zero_of_level (h : PhaseZeroData f g c) {x : ℝ} (hx : x ≤ 0) {j : ℕ} (hj : 1 ≤ j)
+theorem zero_of_level (h : PhaseZeroData f g c) {x : ℝ} (hx : x ≤ 0) {j : ℕ} (hj : 1 ≤ j)
     (hg : g x = c + j * π) : x < 0 ∧ f x = 0 := by
   have hπ := Real.pi_pos
   have hj' : (1 : ℝ) ≤ j := by exact_mod_cast hj
@@ -161,7 +160,7 @@ noncomputable def pt (h : PhaseZeroData f g c) (j : ℕ) : ℝ :=
   Classical.choose (h.exists_level (le_max_right (c + j * π) (g 0)))
 
 /-- The level-`j` point lies in `(-∞, 0]` on the level `c + jπ`. -/
-lemma pt_spec (h : PhaseZeroData f g c) {j : ℕ} (hj : 1 ≤ j) :
+theorem pt_spec (h : PhaseZeroData f g c) {j : ℕ} (hj : 1 ≤ j) :
     h.pt j ≤ 0 ∧ g (h.pt j) = c + j * π := by
   have hs := Classical.choose_spec (h.exists_level (le_max_right (c + j * π) (g 0)))
   refine ⟨hs.1, ?_⟩
@@ -170,12 +169,12 @@ lemma pt_spec (h : PhaseZeroData f g c) {j : ℕ} (hj : 1 ≤ j) :
   have := h.zero_lt; have := Real.pi_pos; nlinarith
 
 /-- Uniqueness of the level-`j` point. -/
-lemma eq_pt (h : PhaseZeroData f g c) {x : ℝ} (hx : x ≤ 0) {j : ℕ} (hj : 1 ≤ j)
+theorem eq_pt (h : PhaseZeroData f g c) {x : ℝ} (hx : x ≤ 0) {j : ℕ} (hj : 1 ≤ j)
     (hg : g x = c + j * π) : x = h.pt j :=
   h.anti.injOn (mem_Iic.mpr hx) (mem_Iic.mpr (h.pt_spec hj).1) (by rw [hg, (h.pt_spec hj).2])
 
 /-- The level points decrease with the level. -/
-lemma pt_lt_pt (h : PhaseZeroData f g c) {i j : ℕ} (hi : 1 ≤ i) (hij : i < j) :
+theorem pt_lt_pt (h : PhaseZeroData f g c) {i j : ℕ} (hi : 1 ≤ i) (hij : i < j) :
     h.pt j < h.pt i := by
   have hj : 1 ≤ j := by omega
   by_contra hn; push Not at hn
@@ -186,7 +185,7 @@ lemma pt_lt_pt (h : PhaseZeroData f g c) {i j : ℕ} (hi : 1 ≤ i) (hij : i < j
   nlinarith
 
 /-- Exactly `k - 1` zeros lie strictly between the level-`k` point and `0`. -/
-lemma ncard_eq (h : PhaseZeroData f g c) {k : ℕ} (hk : 1 ≤ k) :
+theorem ncard_eq (h : PhaseZeroData f g c) {k : ℕ} (hk : 1 ≤ k) :
     ({y : ℝ | h.pt k < y ∧ y < 0 ∧ f y = 0} : Set ℝ).ncard = k - 1 := by
   have hS : ({y : ℝ | h.pt k < y ∧ y < 0 ∧ f y = 0} : Set ℝ) =
       h.pt '' (↑(Finset.Ico 1 k) : Set ℕ) := by
@@ -216,7 +215,7 @@ lemma ncard_eq (h : PhaseZeroData f g c) {k : ℕ} (hk : 1 ≤ k) :
   rw [hS, hinj.ncard_image, Set.ncard_coe_finset, Nat.card_Ico]
 
 /-- The `k`-th ordered zero is the level-`k` point. -/
-lemma airyRealZero_eq (h : PhaseZeroData f g c) {k : ℕ} (hk : 1 ≤ k) :
+theorem airyRealZero_eq (h : PhaseZeroData f g c) {k : ℕ} (hk : 1 ≤ k) :
     airyRealZero f k = h.pt k := by
   set P : ℝ → Prop := fun x => x < 0 ∧ f x = 0 ∧
       ({y : ℝ | x < y ∧ y < 0 ∧ f y = 0} : Set ℝ).ncard = k - 1 with hPdef
@@ -234,7 +233,7 @@ lemma airyRealZero_eq (h : PhaseZeroData f g c) {k : ℕ} (hk : 1 ≤ k) :
   rw [hxj, this]
 
 /-- The ordered-zero specification, with the phase value at the zero. -/
-lemma spec (h : PhaseZeroData f g c) {k : ℕ} (hk : 1 ≤ k) :
+theorem spec (h : PhaseZeroData f g c) {k : ℕ} (hk : 1 ≤ k) :
     airyRealZero f k < 0 ∧ f (airyRealZero f k) = 0 ∧
       ({y : ℝ | airyRealZero f k < y ∧ y < 0 ∧ f y = 0} : Set ℝ).ncard = k - 1 ∧
       g (airyRealZero f k) = c + k * π := by
@@ -243,7 +242,7 @@ lemma spec (h : PhaseZeroData f g c) {k : ℕ} (hk : 1 ≤ k) :
   exact ⟨this.1, this.2, h.ncard_eq hk, (h.pt_spec hk).2⟩
 
 /-- The ordered zeros decrease and exhaust the zeros of `f`. -/
-lemma enumeration (h : PhaseZeroData f g c) :
+theorem enumeration (h : PhaseZeroData f g c) :
     StrictAntiOn (airyRealZero f) (Ici 1) ∧
       ∀ x : ℝ, f x = 0 ↔ ∃ k : ℕ, 1 ≤ k ∧ airyRealZero f k = x := by
   refine ⟨fun i hi j hj hij => ?_, fun x => ⟨fun hx => ?_, ?_⟩⟩
@@ -253,7 +252,7 @@ lemma enumeration (h : PhaseZeroData f g c) :
   · rintro ⟨k, hk, rfl⟩; exact (h.spec hk).2.1
 
 /-- The zero set of `f` is infinite. -/
-lemma infinite (h : PhaseZeroData f g c) : Set.Infinite {x : ℝ | f x = 0} := by
+theorem infinite (h : PhaseZeroData f g c) : Set.Infinite {x : ℝ | f x = 0} := by
   have hinj : Set.InjOn (airyRealZero f) (Ici 1) := (h.enumeration).1.injOn
   have : airyRealZero f '' (Ici 1) ⊆ {x : ℝ | f x = 0} := by
     rintro _ ⟨k, hk, rfl⟩; exact (h.spec hk).2.1
@@ -275,7 +274,7 @@ theorem airyAi_real_zeros_negative {x : ℝ} (hx : airyAiReal x = 0) :
 
 
 /-- The zeros of `Ai` are the crossings `θ = jπ`. -/
-lemma phaseZeroData_airyAi : PhaseZeroData airyAiReal airyPhase 0 := by
+theorem phaseZeroData_airyAi : PhaseZeroData airyAiReal airyPhase 0 := by
   have hπ := Real.pi_pos
   have h0 : airyPhase 0 = π / 6 := by simp [airyPhase]
   refine ⟨airyPhase_continuous, airy_phase_monotone, tendsto_airyPhase_atBot, ?_, ?_, ?_,
@@ -336,7 +335,7 @@ theorem airyAiDeriv_real_zeros_negative {x : ℝ} (hx : airyAiDerivReal x = 0) :
 
 
 /-- The zeros of `Ai'` are the crossings `φ = (j - 1)π`. -/
-lemma phaseZeroData_airyAiDeriv : PhaseZeroData airyAiDerivReal airyDerivPhase (-π) := by
+theorem phaseZeroData_airyAiDeriv : PhaseZeroData airyAiDerivReal airyDerivPhase (-π) := by
   have hπ := Real.pi_pos
   have h0 : airyDerivPhase 0 = -π / 6 := by simp [airyDerivPhase]
   refine ⟨airyDerivPhase_continuous, airy_derivPhase_monotone, tendsto_airyDerivPhase_atBot,
@@ -378,7 +377,7 @@ theorem airyBi_real_zeros_negative {x : ℝ} (hx : airyBiReal x = 0) :
 
 
 /-- The zeros of `Bi` are the crossings `θ = (j - 1/2)π`. -/
-lemma phaseZeroData_airyBi : PhaseZeroData airyBiReal airyPhase (-(π / 2)) := by
+theorem phaseZeroData_airyBi : PhaseZeroData airyBiReal airyPhase (-(π / 2)) := by
   have hπ := Real.pi_pos
   have h0 : airyPhase 0 = π / 6 := by simp [airyPhase]
   refine ⟨airyPhase_continuous, airy_phase_monotone, tendsto_airyPhase_atBot, ?_, ?_, ?_,
@@ -427,7 +426,7 @@ theorem airyBiDeriv_real_zeros_negative {x : ℝ} (hx : airyBiDerivReal x = 0) :
 
 
 /-- The zeros of `Bi'` are the crossings `φ = (j - 1/2)π`. -/
-lemma phaseZeroData_airyBiDeriv : PhaseZeroData airyBiDerivReal airyDerivPhase (-(π / 2)) := by
+theorem phaseZeroData_airyBiDeriv : PhaseZeroData airyBiDerivReal airyDerivPhase (-(π / 2)) := by
   have hπ := Real.pi_pos
   have h0 : airyDerivPhase 0 = -π / 6 := by simp [airyDerivPhase]
   refine ⟨airyDerivPhase_continuous, airy_derivPhase_monotone, tendsto_airyDerivPhase_atBot,
@@ -466,7 +465,7 @@ forces `z₀ < 0`.
 -/
 
 /-- `re (2ζ(w)) = (4/3)|w|^{3/2} cos(3/2 arg w)`. -/
-lemma airyZeroC_re_two_zeta {w : ℂ} (hw : w ≠ 0) :
+theorem airyZeroC_re_two_zeta {w : ℂ} (hw : w ≠ 0) :
     (2 * airyZetaComplex w).re = 4 / 3 * ‖w‖ ^ (3 / 2 : ℝ) * Real.cos (3 / 2 * arg w) := by
   have h := airyRot_re_W w 0
   rw [← airyRot_two_zeta_mul_exp hw 0, ofReal_zero, zero_mul, exp_zero, mul_one, add_zero] at h
@@ -475,7 +474,7 @@ lemma airyZeroC_re_two_zeta {w : ℂ} (hw : w ≠ 0) :
   rw [← Complex.norm_exp, exp_log_two_add_airyLogZeta hw]
 
 /-- Along a horizontal ray `z₀ + T`, `arg → 0`. -/
-lemma airyZeroC_tendsto_arg (z0 : ℂ) :
+theorem airyZeroC_tendsto_arg (z0 : ℂ) :
     Tendsto (fun T : ℝ => arg (z0 + T)) atTop (𝓝 0) := by
   have h1 : Tendsto (fun T : ℝ => z0 / T + 1) atTop (𝓝 (0 + 1)) := by
     refine Tendsto.add_const 1 ?_
@@ -494,7 +493,7 @@ lemma airyZeroC_tendsto_arg (z0 : ℂ) :
   have hT0 : (T : ℂ) ≠ 0 := ofReal_ne_zero.mpr hT.ne'
   field_simp
 
-lemma airyZeroC_tendsto_norm (z0 : ℂ) :
+theorem airyZeroC_tendsto_norm (z0 : ℂ) :
     Tendsto (fun T : ℝ => ‖z0 + T‖) atTop atTop := by
   refine tendsto_atTop_mono (fun T => ?_) (tendsto_atTop_add_const_left _ (-‖z0‖) tendsto_id)
   have := norm_sub_norm_le (T : ℂ) (-z0)
@@ -505,7 +504,7 @@ lemma airyZeroC_tendsto_norm (z0 : ℂ) :
   rw [Real.norm_eq_abs] at this
   linarith
 
-lemma airyZeroC_tendsto_sector (z0 : ℂ) :
+theorem airyZeroC_tendsto_sector (z0 : ℂ) :
     Tendsto (fun T : ℝ => z0 + T) atTop (airySector (π / 2)) := by
   refine tendsto_inf.mpr ⟨tendsto_comap_iff.mpr (airyZeroC_tendsto_norm z0), ?_⟩
   refine tendsto_principal.mpr ?_
@@ -514,7 +513,7 @@ lemma airyZeroC_tendsto_sector (z0 : ℂ) :
   refine ⟨fun h => by simp [h] at hre, abs_arg_le_pi_div_two_iff.mpr hre.le⟩
 
 /-- `re (2ζ(z₀ + T)) → ∞`. -/
-lemma airyZeroC_tendsto_re_zeta (z0 : ℂ) :
+theorem airyZeroC_tendsto_re_zeta (z0 : ℂ) :
     Tendsto (fun T : ℝ => (2 * airyZetaComplex (z0 + T)).re) atTop atTop := by
   have hc : Tendsto (fun T : ℝ => Real.cos (3 / 2 * arg (z0 + T))) atTop (𝓝 1) := by
     have h0 := (airyZeroC_tendsto_arg z0).const_mul (3 / 2)
@@ -531,7 +530,7 @@ lemma airyZeroC_tendsto_re_zeta (z0 : ℂ) :
   rw [airyZeroC_re_two_zeta hw]
 
 /-- The Wronskian-type boundary term `conj(Ai) Ai'` decays along horizontal rays. -/
-lemma airyZeroC_tendsto_boundary (z0 : ℂ) :
+theorem airyZeroC_tendsto_boundary (z0 : ℂ) :
     Tendsto (fun T : ℝ => (starRingEnd ℂ) (airyAi (z0 + T)) * airyAiDeriv (z0 + T)) atTop
       (𝓝 0) := by
   have hT := airyZeroC_tendsto_sector z0
@@ -572,13 +571,13 @@ lemma airyZeroC_tendsto_boundary (z0 : ℂ) :
   rw [hprod, norm_neg, norm_div, Complex.norm_exp, neg_re]
   simp [abs_of_pos Real.pi_pos]
 
-lemma airyZeroC_hasDerivAt_u (z0 : ℂ) (t : ℝ) :
+theorem airyZeroC_hasDerivAt_u (z0 : ℂ) (t : ℝ) :
     HasDerivAt (fun t : ℝ => airyAi (z0 + t)) (airyAiDeriv (z0 + t)) t := by
   have h := ((hasDerivAt_airyAi (z0 + t)).comp (t : ℂ) ((hasDerivAt_id (t : ℂ)).const_add z0))
   simp only [mul_one] at h
   exact h.comp_ofReal
 
-lemma airyZeroC_hasDerivAt_v (z0 : ℂ) (t : ℝ) :
+theorem airyZeroC_hasDerivAt_v (z0 : ℂ) (t : ℝ) :
     HasDerivAt (fun t : ℝ => airyAiDeriv (z0 + t)) ((z0 + t) * airyAi (z0 + t)) t := by
   have h := ((hasDerivAt_airyAiDeriv (z0 + t)).comp (t : ℂ) ((hasDerivAt_id (t : ℂ)).const_add z0))
   simp only [mul_one] at h
@@ -586,7 +585,7 @@ lemma airyZeroC_hasDerivAt_v (z0 : ℂ) (t : ℝ) :
 
 /-- A function with nonnegative derivative on `[0, ∞)`, vanishing at `0` and at infinity,
 vanishes identically there, and so does its derivative on `(0, ∞)`. -/
-lemma airyZeroC_deriv_eq_zero {φ ψ : ℝ → ℝ} (hφ : ∀ t, HasDerivAt φ (ψ t) t) (h0 : φ 0 = 0)
+theorem airyZeroC_deriv_eq_zero {φ ψ : ℝ → ℝ} (hφ : ∀ t, HasDerivAt φ (ψ t) t) (h0 : φ 0 = 0)
     (hlim : Tendsto φ atTop (𝓝 0)) (hψ : ∀ t, 0 ≤ t → 0 ≤ ψ t) {t : ℝ} (ht : 0 < t) :
     ψ t = 0 := by
   have hmono : MonotoneOn φ (Ici 0) := by
@@ -606,7 +605,7 @@ lemma airyZeroC_deriv_eq_zero {φ ψ : ℝ → ℝ} (hφ : ∀ t, HasDerivAt φ 
   exact (hφ t).unique ((hasDerivAt_const t (0 : ℝ)).congr_of_eventuallyEq hev)
 
 /-- `Ai` does not vanish on a whole horizontal ray. -/
-lemma airyZeroC_not_forall (z0 : ℂ) : ¬ ∀ t : ℝ, 0 < t → airyAi (z0 + t) = 0 := by
+theorem airyZeroC_not_forall (z0 : ℂ) : ¬ ∀ t : ℝ, 0 < t → airyAi (z0 + t) = 0 := by
   intro h
   have hf : AnalyticOnNhd ℂ airyAi univ := fun z _ => differentiable_airyAi.analyticAt z
   have hT : Tendsto (fun t : ℝ => z0 + t) (𝓝[>] 1) (𝓝[≠] (z0 + 1)) := by
@@ -700,7 +699,7 @@ open Metric
 /-- The inverse of `z ↦ -2ζ(z)` on the upper sector. -/
 noncomputable def airyZ_Z (u : ℂ) : ℂ := exp (2 / 3 * log (-(3 / 4 : ℂ) * u))
 
-lemma airyZ_im_bound (u : ℂ) :
+theorem airyZ_im_bound (u : ℂ) :
     -π < (2 / 3 * log (-(3 / 4 : ℂ) * u)).im ∧ (2 / 3 * log (-(3 / 4 : ℂ) * u)).im ≤ π := by
   have h1 := neg_pi_lt_arg (-(3 / 4 : ℂ) * u)
   have h2 := arg_le_pi (-(3 / 4 : ℂ) * u)
@@ -709,33 +708,33 @@ lemma airyZ_im_bound (u : ℂ) :
     simp [log_im]
   rw [this]; constructor <;> nlinarith
 
-lemma airyZ_log_Z (u : ℂ) : log (airyZ_Z u) = 2 / 3 * log (-(3 / 4 : ℂ) * u) :=
+theorem airyZ_log_Z (u : ℂ) : log (airyZ_Z u) = 2 / 3 * log (-(3 / 4 : ℂ) * u) :=
   log_exp (airyZ_im_bound u).1 (airyZ_im_bound u).2
 
-lemma airyZ_arg_Z (u : ℂ) : arg (airyZ_Z u) = 2 / 3 * arg (-(3 / 4 : ℂ) * u) := by
+theorem airyZ_arg_Z (u : ℂ) : arg (airyZ_Z u) = 2 / 3 * arg (-(3 / 4 : ℂ) * u) := by
   rw [← log_im, airyZ_log_Z]; simp [log_im]
 
-lemma airyZ_Z_ne_zero (u : ℂ) : airyZ_Z u ≠ 0 := exp_ne_zero _
+theorem airyZ_Z_ne_zero (u : ℂ) : airyZ_Z u ≠ 0 := exp_ne_zero _
 
-lemma airyZ_cpow_Z (u w : ℂ) :
+theorem airyZ_cpow_Z (u w : ℂ) :
     airyZ_Z u ^ w = exp (2 / 3 * log (-(3 / 4 : ℂ) * u) * w) := by
   rw [cpow_def_of_ne_zero (airyZ_Z_ne_zero u), airyZ_log_Z]
 
-lemma airyZ_zeta_Z {u : ℂ} (hu : u ≠ 0) : airyZetaComplex (airyZ_Z u) = -u / 2 := by
+theorem airyZ_zeta_Z {u : ℂ} (hu : u ≠ 0) : airyZetaComplex (airyZ_Z u) = -u / 2 := by
   unfold airyZetaComplex
   rw [airyZ_cpow_Z, show 2 / 3 * log (-(3 / 4 : ℂ) * u) * (3 / 2) = log (-(3 / 4 : ℂ) * u) by ring,
     exp_log (mul_ne_zero (by norm_num) hu)]
   ring
 
-lemma airyZ_quarter_Z (u : ℂ) :
+theorem airyZ_quarter_Z (u : ℂ) :
     airyZ_Z u ^ (1 / 4 : ℂ) = exp (log (-(3 / 4 : ℂ) * u) / 6) := by
   rw [airyZ_cpow_Z]; congr 1; ring
 
-lemma airyZ_norm_Z (u : ℂ) : ‖airyZ_Z u‖ = Real.exp (2 / 3 * Real.log ‖-(3 / 4 : ℂ) * u‖) := by
+theorem airyZ_norm_Z (u : ℂ) : ‖airyZ_Z u‖ = Real.exp (2 / 3 * Real.log ‖-(3 / 4 : ℂ) * u‖) := by
   rw [airyZ_Z, norm_exp]; congr 1; simp [log_re]
 
 /-- Upper-sector bounds on the argument. -/
-lemma airyZ_arg_bounds {v : ℂ} (h1 : v.re < 0) (h2 : -v.re < v.im) :
+theorem airyZ_arg_bounds {v : ℂ} (h1 : v.re < 0) (h2 : -v.re < v.im) :
     π / 2 < arg v ∧ arg v < 3 * π / 4 := by
   have hπ := Real.pi_pos
   have hv : v ≠ 0 := fun h => by simp [h] at h1
@@ -755,7 +754,7 @@ lemma airyZ_arg_bounds {v : ℂ} (h1 : v.re < 0) (h2 : -v.re < v.im) :
   rw [hrot] at this; linarith
 
 
-lemma airyZ_zeta_recip_tendsto (α : ℝ) :
+theorem airyZ_zeta_recip_tendsto (α : ℝ) :
     Tendsto (fun z => ((airyZetaComplex z) ^ 1)⁻¹) (airySector α) (𝓝 0) := by
   rw [tendsto_zero_iff_norm_tendsto_zero]
   have hn : ∀ z : ℂ, ‖((airyZetaComplex z) ^ 1)⁻¹‖ = (2 / 3 * ‖z‖ ^ (3 / 2 : ℝ))⁻¹ := by
@@ -768,7 +767,7 @@ lemma airyZ_zeta_recip_tendsto (α : ℝ) :
     (tendsto_comap.mono_left inf_le_left)).const_mul_atTop (by norm_num : (0 : ℝ) < 2 / 3))).inv_tendsto_atTop
 
 /-- The leading-order part of a normalized expansion, in quantitative form. -/
-lemma airyZ_small {F : ℂ → ℂ} {c : ℕ → ℂ} {α : ℝ}
+theorem airyZ_small {F : ℂ → ℂ} {c : ℕ → ℂ} {α : ℝ}
     (h : HasAsymptoticExpansion (airySector α) (fun (n : ℕ) z => ((airyZetaComplex z) ^ n)⁻¹) c F)
     (hc : c 0 = 1) {η : ℝ} (hη : 0 < η) :
     ∃ R, ∀ w : ℂ, w ≠ 0 → |arg w| ≤ α → R ≤ ‖w‖ → ‖F w - 1‖ < η := by
@@ -781,17 +780,17 @@ lemma airyZ_small {F : ℂ → ℂ} {c : ℕ → ℂ} {α : ℝ}
   obtain ⟨R, hR⟩ := mem_atTop_sets.mp hs
   exact ⟨R, fun w hw0 hwa hwR => hsub (hR _ hwR) ⟨hw0, hwa⟩⟩
 
-lemma airyZ_exp_neg_pi_half : exp (-(π * I / 6)) * exp (-(π * I / 3)) = -I := by
+theorem airyZ_exp_neg_pi_half : exp (-(π * I / 6)) * exp (-(π * I / 3)) = -I := by
   rw [← exp_add, show -(π * I / 6) + -(π * I / 3) = -((π / 2 : ℂ) * I) by ring, exp_neg,
     exp_pi_div_two_mul_I, inv_I]
 
-lemma airyZ_bi_eq (z : ℂ) :
+theorem airyZ_bi_eq (z : ℂ) :
     airyBi z = 2 * exp (-(π * I / 6)) * airyAi (z * exp (-(2 * π * I / 3))) + I * airyAi (z * 1) := by
   rw [airyAi_mul_omega_recip, mul_one]
   have h := airyZ_exp_neg_pi_half
   linear_combination (-(airyAi z + I * airyBi z)) * h + airyBi z * I_sq
 
-lemma airyZ_biDeriv_eq (z : ℂ) :
+theorem airyZ_biDeriv_eq (z : ℂ) :
     airyBiDeriv z = 2 * exp (-(π * I / 6)) * exp (-(2 * π * I / 3)) *
       airyAiDeriv (z * exp (-(2 * π * I / 3))) + I * 1 * airyAiDeriv (z * 1) :=
   airyRot_deriv_of_eq hasDerivAt_airyBi hasDerivAt_airyAi _ _ _ _ airyZ_bi_eq z
@@ -799,34 +798,34 @@ lemma airyZ_biDeriv_eq (z : ℂ) :
 /-- The rotated point `Z(u) e^{-2πi/3}`. -/
 noncomputable def airyZ_W (u : ℂ) : ℂ := airyZ_Z u * exp (((-(2 * π / 3)) : ℝ) * I)
 
-lemma airyZ_arg_ok {u : ℂ} (hu : 0 ≤ arg (-(3 / 4 : ℂ) * u)) :
+theorem airyZ_arg_ok {u : ℂ} (hu : 0 ≤ arg (-(3 / 4 : ℂ) * u)) :
     -π < arg (airyZ_Z u) + (-(2 * π / 3)) ∧ arg (airyZ_Z u) + (-(2 * π / 3)) ≤ π := by
   rw [airyZ_arg_Z]
   have := arg_le_pi (-(3 / 4 : ℂ) * u)
   have hπ := Real.pi_pos
   constructor <;> nlinarith
 
-lemma airyZ_zeta_W {u : ℂ} (hu0 : u ≠ 0) (hu : 0 ≤ arg (-(3 / 4 : ℂ) * u)) :
+theorem airyZ_zeta_W {u : ℂ} (hu0 : u ≠ 0) (hu : 0 ≤ arg (-(3 / 4 : ℂ) * u)) :
     airyZetaComplex (airyZ_W u) = u / 2 := by
   rw [airyZ_W, airyRot_zeta_mul_exp (airyZ_Z_ne_zero u) (airyZ_arg_ok hu).1 (airyZ_arg_ok hu).2,
     airyZ_zeta_Z hu0, show (((-(2 * π / 3)) : ℝ) : ℂ) * I * (3 / 2) = -(π * I) by push_cast; ring,
     exp_neg, exp_pi_mul_I]
   ring
 
-lemma airyZ_quarter_W {u : ℂ} (hu : 0 ≤ arg (-(3 / 4 : ℂ) * u)) :
+theorem airyZ_quarter_W {u : ℂ} (hu : 0 ≤ arg (-(3 / 4 : ℂ) * u)) :
     airyZ_W u ^ (1 / 4 : ℂ) = exp (log (-(3 / 4 : ℂ) * u) / 6) * exp (-(π * I / 6)) := by
   rw [airyZ_W, Complex.cpow_mul_exp_ofReal_mul_I (airyZ_Z_ne_zero u) (airyZ_arg_ok hu).1
     (airyZ_arg_ok hu).2, airyZ_quarter_Z]
   congr 2; push_cast; ring
 
-lemma airyZ_W_eq (u : ℂ) : airyZ_W u = airyZ_Z u * exp (-(2 * π * I / 3)) := by
+theorem airyZ_W_eq (u : ℂ) : airyZ_W u = airyZ_Z u * exp (-(2 * π * I / 3)) := by
   rw [airyZ_W, airyRot_exp_two_pi_div_three.2]
 
 /-- The normalized `Bi` in the variable `u = -2ζ`. -/
 noncomputable def airyZ_Fbi (u : ℂ) : ℂ :=
   airyBi (airyZ_Z u) * (Real.sqrt π * exp (log (-(3 / 4 : ℂ) * u) / 6) * exp (u / 2))
 
-lemma airyZ_Fbi_eq {u : ℂ} (hu0 : u ≠ 0) (hu : 0 ≤ arg (-(3 / 4 : ℂ) * u)) :
+theorem airyZ_Fbi_eq {u : ℂ} (hu0 : u ≠ 0) (hu : 0 ≤ arg (-(3 / 4 : ℂ) * u)) :
     airyZ_Fbi u = airyAi (airyZ_W u) / airyPrefactor .ai (airyZ_W u) +
       I / 2 * exp u * (airyAi (airyZ_Z u) / airyPrefactor .ai (airyZ_Z u)) := by
   simp only [airyZ_Fbi, airyPrefactor]
@@ -848,7 +847,7 @@ lemma airyZ_Fbi_eq {u : ℂ} (hu0 : u ≠ 0) (hu : 0 ≤ arg (-(3 / 4 : ℂ) * u
 noncomputable def airyZ_Fbid (u : ℂ) : ℂ :=
   airyBiDeriv (airyZ_Z u) * (Real.sqrt π * exp (-(log (-(3 / 4 : ℂ) * u) / 6)) * exp (u / 2))
 
-lemma airyZ_Fbid_eq {u : ℂ} (hu0 : u ≠ 0) (hu : 0 ≤ arg (-(3 / 4 : ℂ) * u)) :
+theorem airyZ_Fbid_eq {u : ℂ} (hu0 : u ≠ 0) (hu : 0 ≤ arg (-(3 / 4 : ℂ) * u)) :
     airyZ_Fbid u = airyAiDeriv (airyZ_W u) / airyPrefactor .aiDeriv (airyZ_W u) -
       I / 2 * exp u * (airyAiDeriv (airyZ_Z u) / airyPrefactor .aiDeriv (airyZ_Z u)) := by
   simp only [airyZ_Fbid, airyPrefactor]
@@ -875,13 +874,13 @@ lemma airyZ_Fbid_eq {u : ℂ} (hu0 : u ≠ 0) (hu : 0 ≤ arg (-(3 / 4 : ℂ) * 
 noncomputable def airyZ_ctr (θ : ℝ) (k : ℕ) : ℂ :=
   ((Real.log 2 : ℝ) : ℂ) - ((2 * π * (k + θ) : ℝ) : ℂ) * I
 
-lemma airyZ_ctr_re (θ : ℝ) (k : ℕ) : (airyZ_ctr θ k).re = Real.log 2 := by
+theorem airyZ_ctr_re (θ : ℝ) (k : ℕ) : (airyZ_ctr θ k).re = Real.log 2 := by
   simp only [airyZ_ctr, sub_re, mul_re, ofReal_re, ofReal_im, I_re, I_im]; ring
 
-lemma airyZ_ctr_im (θ : ℝ) (k : ℕ) : (airyZ_ctr θ k).im = -(2 * π * (k + θ)) := by
+theorem airyZ_ctr_im (θ : ℝ) (k : ℕ) : (airyZ_ctr θ k).im = -(2 * π * (k + θ)) := by
   simp only [airyZ_ctr, sub_im, mul_im, ofReal_re, ofReal_im, I_re, I_im]; ring
 
-lemma airyZ_exp_ctr (θ : ℝ) (k : ℕ) : exp (airyZ_ctr θ k) = exp (airyZ_ctr θ 0) := by
+theorem airyZ_exp_ctr (θ : ℝ) (k : ℕ) : exp (airyZ_ctr θ k) = exp (airyZ_ctr θ 0) := by
   have : airyZ_ctr θ k = airyZ_ctr θ 0 + ((-(k : ℤ) : ℤ) : ℂ) * (2 * π * I) := by
     apply Complex.ext
     · simp only [airyZ_ctr_re, add_re, mul_re, intCast_re, intCast_im, ofReal_re, ofReal_im,
@@ -891,7 +890,7 @@ lemma airyZ_exp_ctr (θ : ℝ) (k : ℕ) : exp (airyZ_ctr θ k) = exp (airyZ_ctr
   rw [this, exp_add, exp_int_mul_two_pi_mul_I, mul_one]
 
 /-- Geometry of the discs `|u - u_k| ≤ 1/2`. -/
-lemma airyZ_geom {θ : ℝ} (hθ : |θ| ≤ 1 / 4) {k : ℕ} (hk : 1 ≤ k) {u : ℂ}
+theorem airyZ_geom {θ : ℝ} (hθ : |θ| ≤ 1 / 4) {k : ℕ} (hk : 1 ≤ k) {u : ℂ}
     (hu : u ∈ closedBall (airyZ_ctr θ k) (1 / 2)) :
     (-(3 / 4 : ℂ) * u).re < 0 ∧ -(-(3 / 4 : ℂ) * u).re < (-(3 / 4 : ℂ) * u).im ∧
       (k : ℝ) ≤ ‖-(3 / 4 : ℂ) * u‖ ∧ u.im < 0 := by
@@ -912,14 +911,14 @@ lemma airyZ_geom {θ : ℝ} (hθ : |θ| ≤ 1 / 4) {k : ℕ} (hk : 1 ≤ k) {u :
   rw [him, abs_of_pos (by nlinarith)]
   nlinarith
 
-lemma airyZ_exp_half_lt_two : Real.exp (1 / 2) < 2 := by
+theorem airyZ_exp_half_lt_two : Real.exp (1 / 2) < 2 := by
   have h := Real.exp_one_lt_d9
   have h2 : Real.exp (1 / 2) * Real.exp (1 / 2) = Real.exp 1 := by
     rw [← Real.exp_add]; norm_num
   nlinarith [Real.exp_pos (1 / 2)]
 
 /-- Zeros near the model zeros, for a function of the shape `G(W u) + c e^u G(Z u)`. -/
-lemma airyZ_zero_near {F G₁ G₂ : ℂ → ℂ} {c : ℂ} {θ : ℝ} (hθ : |θ| ≤ 1 / 4)
+theorem airyZ_zero_near {F G₁ G₂ : ℂ → ℂ} {c : ℂ} {θ : ℝ} (hθ : |θ| ≤ 1 / 4)
     (hFd : DifferentiableOn ℂ F {u | u.im < 0})
     (hG₁ : ∀ η > 0, ∃ R, ∀ w : ℂ, w ≠ 0 → |arg w| ≤ π / 2 → R ≤ ‖w‖ → ‖G₁ w - 1‖ < η)
     (hG₂ : ∀ η > 0, ∃ R, ∀ w : ℂ, w ≠ 0 → |arg w| ≤ π / 2 → R ≤ ‖w‖ → ‖G₂ w - 1‖ < η)
@@ -983,13 +982,13 @@ lemma airyZ_zero_near {F G₁ G₂ : ℂ → ℂ} {c : ℂ} {θ : ℝ} (hθ : |�
           gcongr
       _ < ‖(-1 : ℂ)‖ * (1 / 2) / 2 := by norm_num
 
-lemma airyZ_differentiableAt_Z {u : ℂ} (hu : u.im < 0) :
+theorem airyZ_differentiableAt_Z {u : ℂ} (hu : u.im < 0) :
     DifferentiableAt ℂ (fun u => log (-(3 / 4 : ℂ) * u)) u := by
   have hs : -(3 / 4 : ℂ) * u ∈ slitPlane := by
     rw [mem_slitPlane_iff]; right; simp; linarith
   exact ((differentiableAt_id.const_mul _).clog hs)
 
-lemma airyZ_Fbi_differentiableOn : DifferentiableOn ℂ airyZ_Fbi {u | u.im < 0} := by
+theorem airyZ_Fbi_differentiableOn : DifferentiableOn ℂ airyZ_Fbi {u | u.im < 0} := by
   intro u hu
   have hL := airyZ_differentiableAt_Z hu
   have hZ : DifferentiableAt ℂ airyZ_Z u := (hL.const_mul _).cexp
@@ -999,7 +998,7 @@ lemma airyZ_Fbi_differentiableOn : DifferentiableOn ℂ airyZ_Fbi {u | u.im < 0}
     (((differentiableAt_const _).mul (hL.div_const _).cexp).mul
       ((differentiableAt_id.div_const _).cexp))
 
-lemma airyZ_Fbid_differentiableOn : DifferentiableOn ℂ airyZ_Fbid {u | u.im < 0} := by
+theorem airyZ_Fbid_differentiableOn : DifferentiableOn ℂ airyZ_Fbid {u | u.im < 0} := by
   intro u hu
   have hL := airyZ_differentiableAt_Z hu
   have hZ : DifferentiableAt ℂ airyZ_Z u := (hL.const_mul _).cexp
@@ -1009,14 +1008,14 @@ lemma airyZ_Fbid_differentiableOn : DifferentiableOn ℂ airyZ_Fbid {u | u.im < 
     (((differentiableAt_const _).mul (hL.div_const _).neg.cexp).mul
       ((differentiableAt_id.div_const _).cexp))
 
-lemma airyZ_small_ai {η : ℝ} (hη : 0 < η) :
+theorem airyZ_small_ai {η : ℝ} (hη : 0 < η) :
     ∃ R, ∀ w : ℂ, w ≠ 0 → |arg w| ≤ π / 2 → R ≤ ‖w‖ →
       ‖airyAi w / airyPrefactor .ai w - 1‖ < η := by
   have h := airyRot_airyAi_expansion (δ := π / 2) (by positivity) (by linarith [Real.pi_pos])
   rw [show π - π / 2 = π / 2 by ring] at h
   exact airyZ_small h (by simp [airyExpansionCoeff, airyReal_airyU_zero]) hη
 
-lemma airyZ_small_aiDeriv {η : ℝ} (hη : 0 < η) :
+theorem airyZ_small_aiDeriv {η : ℝ} (hη : 0 < η) :
     ∃ R, ∀ w : ℂ, w ≠ 0 → |arg w| ≤ π / 2 → R ≤ ‖w‖ →
       ‖airyAiDeriv w / airyPrefactor .aiDeriv w - 1‖ < η := by
   have h := airyRot_airyAiDeriv_expansion (δ := π / 2) (by positivity) (by linarith [Real.pi_pos])
@@ -1024,7 +1023,7 @@ lemma airyZ_small_aiDeriv {η : ℝ} (hη : 0 < η) :
   exact airyZ_small h (by simp [airyExpansionCoeff, airyReal_airyV_zero]) hη
 
 /-- From zeros near the model zeros to infinitely many zeros in the upper sector. -/
-lemma airyZ_infinite {f : ℂ → ℂ} {F : ℂ → ℂ} {θ : ℝ} (hθ : |θ| ≤ 1 / 4)
+theorem airyZ_infinite {f : ℂ → ℂ} {F : ℂ → ℂ} {θ : ℝ} (hθ : |θ| ≤ 1 / 4)
     (hfF : ∀ u, F u = 0 → f (airyZ_Z u) = 0)
     (hK : ∃ K : ℕ, 1 ≤ K ∧ ∀ k, K ≤ k → ∃ u ∈ ball (airyZ_ctr θ k) (1 / 2), F u = 0) :
     Set.Infinite (airyUpperZeroSet f) := by
@@ -1242,7 +1241,7 @@ theorem airyBiDerivZero_value {k : ℕ} (hk : 1 ≤ k) :
 
 /-- Differentiability of the continuous-index level function `t ↦ g⁻¹((t + d)π)` of a
 decreasing phase `g` on `(-∞, 0]`. -/
-lemma hasDerivAt_phaseLevel {g : ℝ → ℝ} {g' d t₀ : ℝ} (hgc : Continuous g)
+theorem hasDerivAt_phaseLevel {g : ℝ → ℝ} {g' d t₀ : ℝ} (hgc : Continuous g)
     (hanti : StrictAntiOn g (Iic 0)) (htend : Tendsto g atBot atTop)
     (ht₀ : g 0 < (t₀ + d) * π)
     (hd : HasDerivAt g g' (Classical.epsilon fun x : ℝ => x ≤ 0 ∧ g x = (t₀ + d) * π))
@@ -1301,7 +1300,7 @@ lemma hasDerivAt_phaseLevel {g : ℝ → ℝ} {g' d t₀ : ℝ} (hgc : Continuou
   simpa [inv_div] using this
 
 /-- `(r²)^{-1/2} = r⁻¹` as a complex power, for `r > 0`. -/
-lemma ofReal_sq_cpow_neg_half {r : ℝ} (hr : 0 < r) :
+theorem ofReal_sq_cpow_neg_half {r : ℝ} (hr : 0 < r) :
     ((r ^ 2 : ℝ) : ℂ) ^ (-1 / 2 : ℂ) = ((r⁻¹ : ℝ) : ℂ) := by
   rw [show (-1 / 2 : ℂ) = ((-1 / 2 : ℝ) : ℂ) by push_cast; ring,
     ← Complex.ofReal_cpow (by positivity)]

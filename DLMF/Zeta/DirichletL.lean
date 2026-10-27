@@ -8,9 +8,7 @@ module
 public import DLMF.Zeta.Hurwitz
 public import Mathlib.NumberTheory.LSeries.DirichletContinuation
 public import Mathlib.NumberTheory.LSeries.Nonvanishing
-public import Mathlib.NumberTheory.EulerProduct.DirichletLSeries
 public import Mathlib.NumberTheory.MulChar.Lemmas
-public import Mathlib.Analysis.Fourier.ZMod
 
 /-!
 # Dirichlet `L`-functions (DLMF §25.15)
@@ -240,7 +238,7 @@ theorem eq_trivial_zero_of_LFunction_eq_zero {χ : DirichletCharacter ℂ N} (h�
     linear_combination -hwk + hw
 
 /-- `L(s̄, χ̄) = conj L(s, χ)` for a non-principal Dirichlet character. -/
-theorem r25b_LFunction_star_conj {χ : DirichletCharacter ℂ N} (hχ : χ ≠ 1) (s : ℂ) :
+lemma r25b_LFunction_star_conj {χ : DirichletCharacter ℂ N} (hχ : χ ≠ 1) (s : ℂ) :
     LFunction (star χ) (conj s) = conj (LFunction χ s) := by
   have hχ' : star χ ≠ 1 := by
     rw [MulChar.star_eq_inv]; exact fun h => hχ (inv_eq_one.mp h)
@@ -307,7 +305,7 @@ wording is too broad): for an even character
 `χ ≠ χ₁ (mod k)`, `k ≥ 2` (e.g. a primitive even character such as the quadratic character
 mod 5), `ρ = 0` is a zero with `0 ≤ Re ρ ≤ 1`, but `L(1 - ρ̄, χ) = L(1, χ) ≠ 0`. (The trivial zero
 at `s = 0` lies on the boundary of the closed critical strip; hence the hypothesis `ρ ≠ 0`.) -/
-theorem q25b_LFunction_one_sub_conj_counterexample {χ : DirichletCharacter ℂ N} (hχ : χ.Even)
+lemma q25b_LFunction_one_sub_conj_counterexample {χ : DirichletCharacter ℂ N} (hχ : χ.Even)
     (hN : N ≠ 1) (h1 : χ ≠ 1) :
     LFunction χ 0 = 0 ∧ LFunction χ (1 - (starRingEnd ℂ) 0) ≠ 0 := by
   refine ⟨by simpa using LFunction_neg_two_mul_nat_eq_zero hχ hN 0, ?_⟩

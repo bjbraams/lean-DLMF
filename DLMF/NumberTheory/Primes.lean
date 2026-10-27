@@ -7,11 +7,8 @@ module
 
 public import DLMF.NumberTheory.Functions
 public import DLMF.ExpIntegrals.Basic
-public import DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion
-public import Mathlib.NumberTheory.LSeries.RiemannZeta
 public import Mathlib.NumberTheory.CarmichaelNumber
 public import Mathlib.NumberTheory.LucasLehmer
-public import Mathlib.FieldTheory.Finite.Basic
 
 /-!
 # Asymptotic formulas: primes (DLMF §27.12)
@@ -61,7 +58,7 @@ theorem nthPrime_gt {n : ℕ} (hn : 0 < n) : (n : ℝ) * Real.log n < nthPrime n
 
 /-- Inclusion–exclusion (sieve of Eratosthenes): the number of `1 ≤ n ≤ N` divisible by no
 prime of a set `T` of primes is `∑_{S ⊆ T} (-1)^{|S|} ⌊N/∏S⌋`. -/
-theorem r27_sieve_card (N : ℕ) (T : Finset ℕ) (hT : ∀ p ∈ T, p.Prime) :
+lemma r27_sieve_card (N : ℕ) (T : Finset ℕ) (hT : ∀ p ∈ T, p.Prime) :
     ((Ioc 0 N).filter (fun n ↦ ∀ p ∈ T, ¬ p ∣ n)).card =
       ∑ S ∈ T.powerset, (-1 : ℤ) ^ S.card * ((N / ∏ p ∈ S, p : ℕ) : ℤ) := by
   have hdvd : ∀ S ∈ T.powerset, ∀ n, (∏ p ∈ S, p) ∣ n ↔ ∀ p ∈ S, p ∣ n := by
@@ -224,7 +221,7 @@ theorem not_prime_of_two_pow_not_modEq {n : ℕ} (h : ¬ 2 ^ n ≡ 2 [MOD n]) : 
   exact ZMod.pow_card 2
 
 /-- DLMF §27.12, Carmichael numbers (proof via Korselt's criterion). -/
-theorem q27_isCarmichael_iff_dlmf {n : ℕ} :
+lemma q27_isCarmichael_iff_dlmf {n : ℕ} :
     n.IsCarmichael ↔ 1 < n ∧ ¬ n.Prime ∧ ∀ b : ℕ, b ^ n ≡ b [MOD n] := by
   constructor
   · intro h

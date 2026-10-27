@@ -32,19 +32,19 @@ def qBinom (q : ℂ) : ℕ → ℕ → ℂ
   | n + 1, k + 1 => qBinom q n k + q ^ (k + 1) * qBinom q n (k + 1)
 
 /-- `[n 0]_q = 1`. -/
-@[simp] lemma qBinom_zero_right (q : ℂ) (n : ℕ) : qBinom q n 0 = 1 := by
+@[simp] theorem qBinom_zero_right (q : ℂ) (n : ℕ) : qBinom q n 0 = 1 := by
   cases n <;> rfl
 
 /-- `[0, k+1]_q = 0`. -/
-@[simp] lemma qBinom_zero_succ (q : ℂ) (k : ℕ) : qBinom q 0 (k + 1) = 0 := rfl
+@[simp] theorem qBinom_zero_succ (q : ℂ) (k : ℕ) : qBinom q 0 (k + 1) = 0 := rfl
 
 /-- The `q`-Pascal rule `[n+1, k+1]_q = [n, k]_q + q^{k+1} [n, k+1]_q` (Duverney (10.7)). -/
 @[dlmf 17.2.E31 "exact: first polynomial q-Pascal rule after successor reindexing"]
-lemma qBinom_succ_succ (q : ℂ) (n k : ℕ) :
+theorem qBinom_succ_succ (q : ℂ) (n k : ℕ) :
     qBinom q (n + 1) (k + 1) = qBinom q n k + q ^ (k + 1) * qBinom q n (k + 1) := rfl
 
 /-- `[n k]_q = 0` for `k > n`. -/
-lemma qBinom_eq_zero_of_lt (q : ℂ) {n k : ℕ} (h : n < k) : qBinom q n k = 0 := by
+theorem qBinom_eq_zero_of_lt (q : ℂ) {n k : ℕ} (h : n < k) : qBinom q n k = 0 := by
   induction n generalizing k with
   | zero => obtain ⟨k, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (by omega : k ≠ 0); rfl
   | succ n ih =>
@@ -52,13 +52,13 @@ lemma qBinom_eq_zero_of_lt (q : ℂ) {n k : ℕ} (h : n < k) : qBinom q n k = 0 
     rw [qBinom_succ_succ, ih (by omega), ih (by omega)]; ring
 
 /-- `[n n]_q = 1` (Duverney (10.6)). -/
-@[simp] lemma qBinom_self (q : ℂ) (n : ℕ) : qBinom q n n = 1 := by
+@[simp] theorem qBinom_self (q : ℂ) (n : ℕ) : qBinom q n n = 1 := by
   induction n with
   | zero => rfl
   | succ n ih => rw [qBinom_succ_succ, ih, qBinom_eq_zero_of_lt q (Nat.lt_succ_self n)]; ring
 
 /-- At `q = 1` the Gaussian coefficients are the binomial coefficients. -/
-lemma qBinom_one (n k : ℕ) : qBinom 1 n k = n.choose k := by
+theorem qBinom_one (n k : ℕ) : qBinom 1 n k = n.choose k := by
   induction n generalizing k with
   | zero => cases k <;> simp
   | succ n ih =>
@@ -67,7 +67,7 @@ lemma qBinom_one (n k : ℕ) : qBinom 1 n k = n.choose k := by
     | succ k => rw [qBinom_succ_succ, ih, ih, Nat.choose_succ_succ]; push_cast; ring
 
 /-- Splitting the first factor: `(x;q)_{n+1} = (1-x)(xq;q)_n`. -/
-lemma qPochhammer_succ' (x q : ℂ) (n : ℕ) :
+theorem qPochhammer_succ' (x q : ℂ) (n : ℕ) :
     qPochhammer x q (n + 1) = (1 - x) * qPochhammer (x * q) q n := by
   induction n with
   | zero => simp [qPochhammer_succ]
@@ -128,7 +128,7 @@ theorem qBinom_mul_qPochhammer (q : ℂ) (k m : ℕ) :
     linear_combination (1 - q * q ^ k) * h1 + q ^ (k + 1) * (1 - q * q ^ m) * h2
 
 /-- `q ↦ [n k]_q` is continuous (it is a polynomial in `q`). -/
-lemma continuous_qBinom (n k : ℕ) : Continuous fun q : ℂ => qBinom q n k := by
+theorem continuous_qBinom (n k : ℕ) : Continuous fun q : ℂ => qBinom q n k := by
   induction n generalizing k with
   | zero => cases k <;> simp only [qBinom_zero_right, qBinom_zero_succ] <;> fun_prop
   | succ n ih =>

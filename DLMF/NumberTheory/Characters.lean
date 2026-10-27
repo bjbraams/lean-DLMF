@@ -5,14 +5,15 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.NumberTheory.Functions
 public import Mathlib.NumberTheory.DirichletCharacter.Orthogonality
 public import Mathlib.NumberTheory.DirichletCharacter.GaussSum
 public import Mathlib.NumberTheory.LegendreSymbol.JacobiSymbol
-public import Mathlib.NumberTheory.LegendreSymbol.QuadraticReciprocity
 public import Mathlib.Analysis.SpecialFunctions.Complex.CircleAddChar
-public import Mathlib.Analysis.Complex.Polynomial.Basic
-public import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+public import Mathlib.Algebra.Order.Ring.Star
+public import Mathlib.Analysis.SpecialFunctions.Bernstein
+public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+public import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.NumberTheory.Chebyshev
 
 /-!
 # Dirichlet characters, quadratic characters, periodic functions (DLMF §§27.8–27.10)
@@ -55,7 +56,7 @@ theorem _root_.DirichletCharacter.isDirichletCharacterFn {k : ℕ} (χ : Dirichl
   exact hn
 
 /-- A function with the properties 27.8.1–27.8.4 only depends on `n mod k` (`n ≥ 1`). -/
-theorem r27_apply_eq_mod_add {k : ℕ} (hk : 0 < k) {f : ℕ → ℂ} (hf : IsDirichletCharacterFn k f)
+lemma r27_apply_eq_mod_add {k : ℕ} (hk : 0 < k) {f : ℕ → ℂ} (hf : IsDirichletCharacterFn k f)
     {a : ℕ} (ha : 0 < a) : f a = f (a % k + k) := by
   have hq : ∀ r, 0 < r → ∀ q, f (r + k * q) = f r := by
     intro r hr q
@@ -141,7 +142,7 @@ theorem card_dirichletCharacter (k : ℕ) [NeZero k] :
   exact DirichletCharacter.card_eq_totient_of_hasEnoughRootsOfUnity ℂ k
 
 /-- The conjugate character (proof of `DirichletCharacter.exists_conj`). -/
-theorem q27_exists_conj {k : ℕ} [NeZero k] (χ : DirichletCharacter ℂ k) :
+lemma q27_exists_conj {k : ℕ} [NeZero k] (χ : DirichletCharacter ℂ k) :
     ∃ ψ : DirichletCharacter ℂ k, ∀ n : ℕ, ψ n = starRingEnd ℂ (χ n) :=
   ⟨star χ, fun n ↦ by rw [MulChar.star_apply]; rfl⟩
 
@@ -152,7 +153,7 @@ theorem DirichletCharacter.exists_conj {k : ℕ} [NeZero k] (χ : DirichletChara
   q27_exists_conj χ
 
 /-- DLMF 27.8.6 (proof). -/
-theorem q27_sum_dirichletCharacter_mul_conj (k : ℕ) [NeZero k] (m n : ℕ) (hn : n.Coprime k) :
+lemma q27_sum_dirichletCharacter_mul_conj (k : ℕ) [NeZero k] (m n : ℕ) (hn : n.Coprime k) :
     ∑ χ : DirichletCharacter ℂ k, χ m * starRingEnd ℂ (χ n) =
       if m ≡ n [MOD k] then (k.totient : ℂ) else 0 := by
   obtain ⟨u, hu⟩ := (ZMod.isUnit_iff_coprime n k).mpr hn
@@ -189,14 +190,14 @@ def IsPrimitiveDLMF {k : ℕ} (χ : DirichletCharacter ℂ k) : Prop :=
   ∀ d, d ∣ k → d < k → ∃ a : ℕ, a ≡ 1 [MOD d] ∧ a.Coprime k ∧ χ a ≠ 1
 
 /-- `χ(a) = χ₀(a)` for the primitive character `χ₀` and `(a, k) = 1`. -/
-theorem q27_apply_eq_primitiveCharacter {k : ℕ} (χ : DirichletCharacter ℂ k) (a : ℕ)
+lemma q27_apply_eq_primitiveCharacter {k : ℕ} (χ : DirichletCharacter ℂ k) (a : ℕ)
     (ha : a.Coprime k) : χ a = χ.primitiveCharacter a := by
   have := χ.primitiveCharacter_apply_of_isCoprime (a := (a : ℤ))
     (Nat.isCoprime_iff_coprime.mpr ha)
   simpa using this.symm
 
 /-- `χ(a) = 1` when `(a, k) = 1` and `a ≡ 1` modulo the conductor. -/
-theorem q27_apply_eq_one_of_modEq_conductor {k : ℕ} (χ : DirichletCharacter ℂ k) (a : ℕ)
+lemma q27_apply_eq_one_of_modEq_conductor {k : ℕ} (χ : DirichletCharacter ℂ k) (a : ℕ)
     (ha : a.Coprime k) (hmod : a ≡ 1 [MOD χ.conductor]) : χ a = 1 := by
   rw [q27_apply_eq_primitiveCharacter χ a ha]
   have : (a : ZMod χ.conductor) = 1 := by
@@ -204,7 +205,7 @@ theorem q27_apply_eq_one_of_modEq_conductor {k : ℕ} (χ : DirichletCharacter �
   rw [this, map_one]
 
 /-- DLMF primitivity agrees with Mathlib's (proof). -/
-theorem q27_isPrimitiveDLMF_iff {k : ℕ} [NeZero k] (χ : DirichletCharacter ℂ k) :
+lemma q27_isPrimitiveDLMF_iff {k : ℕ} [NeZero k] (χ : DirichletCharacter ℂ k) :
     IsPrimitiveDLMF χ ↔ χ.IsPrimitive := by
   rw [DirichletCharacter.isPrimitive_def]
   constructor
@@ -243,7 +244,7 @@ theorem isPrimitiveDLMF_iff {k : ℕ} [NeZero k] (χ : DirichletCharacter ℂ k)
   q27_isPrimitiveDLMF_iff χ
 
 /-- Nonprincipal characters to a prime modulus are primitive (proof). -/
-theorem q27_isPrimitive_of_prime {k : ℕ} (hk : k.Prime) (χ : DirichletCharacter ℂ k)
+lemma q27_isPrimitive_of_prime {k : ℕ} (hk : k.Prime) (χ : DirichletCharacter ℂ k)
     (hχ : χ ≠ 1) : χ.IsPrimitive := by
   have : NeZero k := ⟨hk.ne_zero⟩
   rcases (Nat.dvd_prime hk).mp χ.conductor_dvd_level with h | h
@@ -263,7 +264,7 @@ def IsInducedModulus {k : ℕ} (χ : DirichletCharacter ℂ k) (d : ℕ) : Prop 
   d ∣ k ∧ ∀ a : ℕ, a.Coprime k → a ≡ 1 [MOD d] → χ a = 1
 
 /-- DLMF 27.8.8 (proof), with `χ₀` the primitive character. -/
-theorem q27_eq_mul_principal {k : ℕ} [NeZero k] (χ : DirichletCharacter ℂ k) :
+lemma q27_eq_mul_principal {k : ℕ} [NeZero k] (χ : DirichletCharacter ℂ k) :
     IsInducedModulus χ χ.conductor ∧ ∃ χ₀ : DirichletCharacter ℂ χ.conductor,
       ∀ n : ℕ, χ n = χ₀ n * (1 : DirichletCharacter ℂ k) n := by
   refine ⟨⟨χ.conductor_dvd_level, fun a ha hmod ↦ q27_apply_eq_one_of_modEq_conductor χ a ha hmod⟩,
@@ -332,7 +333,7 @@ theorem legendreSym_neg_one (p : ℕ) [Fact p.Prime] (hp : p ≠ 2) :
   omega
 
 /-- `(-1)^{(P²-1)/8} = χ₈(P)` for odd `P`. -/
-theorem n27_neg_one_pow_eq_chi8 {P : ℕ} (hP : P % 2 = 1) :
+lemma n27_neg_one_pow_eq_chi8 {P : ℕ} (hP : P % 2 = 1) :
     ((-1 : ℤ) ^ ((P ^ 2 - 1) / 8)) = ZMod.χ₈ P := by
   rw [ZMod.χ₈_nat_eq_if_mod_eight, neg_one_pow_eq_pow_mod_two, ← Nat.mod_mul_right_div_self]
   have hx : 1 ≤ P ^ 2 := Nat.one_le_pow _ _ (by omega)
@@ -440,7 +441,7 @@ def finiteFourierCoeff (k : ℕ) (f : ℕ → ℂ) (m : ℕ) : ℂ :=
   (k : ℂ)⁻¹ * ∑ n ∈ Finset.Icc 1 k, f n * Complex.exp (-(2 * π * I * m * n / k))
 
 /-- `∑_{m=1}^k g(m) = ∑_{a ∈ ℤ/k} g(a)`. -/
-theorem q27_sum_Icc_eq_sum_zmod {M : Type*} [AddCommMonoid M] {k : ℕ} [NeZero k]
+lemma q27_sum_Icc_eq_sum_zmod {M : Type*} [AddCommMonoid M] {k : ℕ} [NeZero k]
     (g : ZMod k → M) : ∑ m ∈ Icc 1 k, g m = ∑ a : ZMod k, g a := by
   have hk : 0 < k := Nat.pos_of_ne_zero (NeZero.ne k)
   refine sum_nbij' (fun m ↦ (m : ZMod k)) (fun a ↦ if a = 0 then k else a.val) ?_ ?_ ?_ ?_ ?_
@@ -467,7 +468,7 @@ theorem q27_sum_Icc_eq_sum_zmod {M : Type*} [AddCommMonoid M] {k : ℕ} [NeZero 
   · intro m _; rfl
 
 /-- Group `1 ≤ m ≤ n` by `e = n/(m, n)`: `m = (n/e) r` with `1 ≤ r ≤ e`, `(r, e) = 1`. -/
-theorem q27_sum_Icc_eq_sum_divisors_coprime {M : Type*} [AddCommMonoid M] (n : ℕ)
+lemma q27_sum_Icc_eq_sum_divisors_coprime {M : Type*} [AddCommMonoid M] (n : ℕ)
     (F : ℕ → M) :
     ∑ m ∈ Icc 1 n, F m =
       ∑ e ∈ n.divisors, ∑ r ∈ (Icc 1 e).filter (fun r ↦ r.Coprime e), F (n / e * r) := by
@@ -529,7 +530,7 @@ theorem q27_sum_Icc_eq_sum_divisors_coprime {M : Type*} [AddCommMonoid M] (n : �
     exact ⟨Nat.div_dvd_of_dvd (Nat.gcd_dvd_right _ _), hn.ne'⟩
 
 /-- `∑_{m=1}^k e^{2πimn/k} = k` if `k ∣ n` and `0` otherwise. -/
-theorem q27_sum_expFrac {k : ℕ} (hk : 0 < k) (n : ℕ) :
+lemma q27_sum_expFrac {k : ℕ} (hk : 0 < k) (n : ℕ) :
     ∑ m ∈ Icc 1 k, expFrac m n k = if k ∣ n then (k : ℂ) else 0 := by
   have hk0 : (k : ℂ) ≠ 0 := by exact_mod_cast hk.ne'
   set w := Complex.exp (2 * π * I * n / k) with hw
@@ -568,14 +569,14 @@ theorem q27_sum_expFrac {k : ℕ} (hk : 0 < k) (n : ℕ) :
     rw [hshift, geom_sum_eq hw1, hwk, sub_self, zero_div, mul_zero]
 
 /-- `f(n + kq) = f(n)` for `f` periodic mod `k`. -/
-theorem q27_isPeriodicFn_add_mul {α : Type*} {k : ℕ} {f : ℕ → α} (hf : IsPeriodicFn k f)
+lemma q27_isPeriodicFn_add_mul {α : Type*} {k : ℕ} {f : ℕ → α} (hf : IsPeriodicFn k f)
     {n : ℕ} (hn : 0 < n) (q : ℕ) : f (n + k * q) = f n := by
   induction q with
   | zero => simp
   | succ q ih => rw [mul_add, mul_one, ← add_assoc, hf _ (by omega), ih]
 
 /-- `e^{-2πimj/k} = e^{2πim(k-j)/k}` for `j ≤ k`. -/
-theorem q27_exp_neg_eq {k : ℕ} (hk : 0 < k) (m j : ℕ) (hj : j ≤ k) :
+lemma q27_exp_neg_eq {k : ℕ} (hk : 0 < k) (m j : ℕ) (hj : j ≤ k) :
     Complex.exp (-(2 * π * I * m * j / k)) = expFrac m (k - j) k := by
   have hk0 : (k : ℂ) ≠ 0 := by exact_mod_cast hk.ne'
   rw [expFrac, Nat.cast_sub hj, show (2 * π * I * m * ((k : ℂ) - j) / k) =
@@ -583,16 +584,16 @@ theorem q27_exp_neg_eq {k : ℕ} (hk : 0 < k) (m j : ℕ) (hj : j ≤ k) :
     Complex.exp_nat_mul_two_pi_mul_I, mul_one]
 
 /-- `e(ma/k) e(mb/k) = e(m(a+b)/k)`. -/
-theorem q27_expFrac_mul (m a b k : ℕ) : expFrac m a k * expFrac m b k = expFrac m (a + b) k := by
+lemma q27_expFrac_mul (m a b k : ℕ) : expFrac m a k * expFrac m b k = expFrac m (a + b) k := by
   rw [expFrac, expFrac, expFrac, ← Complex.exp_add]
   congr 1; push_cast; ring
 
 /-- `e(mn/k) = e(nm/k)`. -/
-theorem q27_expFrac_comm (m n k : ℕ) : expFrac m n k = expFrac n m k := by
+lemma q27_expFrac_comm (m n k : ℕ) : expFrac m n k = expFrac n m k := by
   rw [expFrac, expFrac]; congr 1; ring
 
 /-- DLMF 27.10.2–27.10.3 (proof). -/
-theorem q27_finiteFourier_expansion {k : ℕ} (hk : 0 < k) {f : ℕ → ℂ} (hf : IsPeriodicFn k f) :
+lemma q27_finiteFourier_expansion {k : ℕ} (hk : 0 < k) {f : ℕ → ℂ} (hf : IsPeriodicFn k f) :
     (∀ n : ℕ, 0 < n → f n = ∑ m ∈ Finset.Icc 1 k, finiteFourierCoeff k f m * expFrac m n k) ∧
       IsPeriodicFn k (finiteFourierCoeff k f) := by
   have hk0 : (k : ℂ) ≠ 0 := by exact_mod_cast hk.ne'
@@ -668,7 +669,7 @@ def ramanujanSum (k n : ℕ) : ℂ :=
   ∑ m ∈ (Finset.Icc 1 k).filter (fun m ↦ m.Coprime k), expFrac m n k
 
 /-- `c_k(n)` as a power sum over primitive roots (proof). -/
-theorem q27_ramanujanSum_eq_sum_primitiveRoots {k : ℕ} (hk : 0 < k) (n : ℕ) :
+lemma q27_ramanujanSum_eq_sum_primitiveRoots {k : ℕ} (hk : 0 < k) (n : ℕ) :
     ramanujanSum k n = ∑ ζ ∈ primitiveRoots k ℂ, ζ ^ n := by
   have : NeZero k := ⟨hk.ne'⟩
   set ζ := Complex.exp (2 * π * I / k) with hζ
@@ -711,7 +712,7 @@ theorem q27_ramanujanSum_eq_sum_primitiveRoots {k : ℕ} (hk : 0 < k) (n : ℕ) 
     push_cast; ring
 
 /-- DLMF 27.10.5 (proof, by Möbius inversion). -/
-theorem q27_ramanujanSum_eq_sum_divisors {k : ℕ} (hk : 0 < k) (n : ℕ) :
+lemma q27_ramanujanSum_eq_sum_divisors {k : ℕ} (hk : 0 < k) (n : ℕ) :
     ramanujanSum k n = ∑ d ∈ (n.gcd k).divisors, (d : ℂ) * μ (k / d) := by
   have hS : ∀ K > 0, ∑ d ∈ K.divisors, ramanujanSum d n =
       (fun K ↦ if K ∣ n then (K : ℂ) else 0) K := by
@@ -867,7 +868,7 @@ theorem gaussSumDLMF_one (k n : ℕ) : gaussSumDLMF (1 : DirichletCharacter ℂ 
   split_ifs <;> simp
 
 /-- DLMF 27.10.9 bridge to Mathlib (proof). -/
-theorem q27_gaussSumDLMF_eq_gaussSum {k : ℕ} [NeZero k] (χ : DirichletCharacter ℂ k) (n : ℕ) :
+lemma q27_gaussSumDLMF_eq_gaussSum {k : ℕ} [NeZero k] (χ : DirichletCharacter ℂ k) (n : ℕ) :
     gaussSumDLMF χ n = gaussSum χ ((ZMod.stdAddChar (N := k)).mulShift (n : ZMod k)) := by
   rw [gaussSumDLMF, gaussSum, ← q27_sum_Icc_eq_sum_zmod]
   refine sum_congr rfl fun m _ ↦ ?_
@@ -891,7 +892,7 @@ def GaussSumSeparable {k : ℕ} (χ : DirichletCharacter ℂ k) (n : ℕ) : Prop
   gaussSumDLMF χ n = starRingEnd ℂ (χ n) * gaussSumDLMF χ 1
 
 /-- Separability of Gauss sums (proof). -/
-theorem q27_gaussSumSeparable_iff {k : ℕ} [NeZero k] (χ : DirichletCharacter ℂ k) :
+lemma q27_gaussSumSeparable_iff {k : ℕ} [NeZero k] (χ : DirichletCharacter ℂ k) :
     (∀ n : ℕ, n.Coprime k → GaussSumSeparable χ n) ∧
       ((∀ n, GaussSumSeparable χ n) ↔ ∀ n : ℕ, n.gcd k ≠ 1 → gaussSumDLMF χ n = 0) := by
   have h1 : ∀ n : ℕ, n.Coprime k → GaussSumSeparable χ n := by
@@ -918,14 +919,14 @@ theorem gaussSumSeparable_iff {k : ℕ} [NeZero k] (χ : DirichletCharacter ℂ 
   exact q27_gaussSumSeparable_iff χ
 
 /-- For primitive `χ`, `G(n, χ) = χ̄(n) G(1, χ)` in Mathlib's normalization. -/
-theorem r27_gaussSum_mulShift {k : ℕ} [NeZero k] {χ : DirichletCharacter ℂ k}
+lemma r27_gaussSum_mulShift {k : ℕ} [NeZero k] {χ : DirichletCharacter ℂ k}
     (hχ : χ.IsPrimitive) (a : ZMod k) :
     gaussSum χ ((ZMod.stdAddChar (N := k)).mulShift a) =
       starRingEnd ℂ (χ a) * gaussSum χ (ZMod.stdAddChar (N := k)) := by
   rw [gaussSum_mulShift_of_isPrimitive _ hχ a, ← MulChar.star_apply', Complex.star_def]
 
 /-- `|G(1, χ)|² = k` for a primitive character `χ` mod `k`. -/
-theorem r27_gaussSum_mul_conj {k : ℕ} [NeZero k] {χ : DirichletCharacter ℂ k}
+lemma r27_gaussSum_mul_conj {k : ℕ} [NeZero k] {χ : DirichletCharacter ℂ k}
     (hχ : χ.IsPrimitive) :
     gaussSum χ (ZMod.stdAddChar (N := k)) * starRingEnd ℂ (gaussSum χ (ZMod.stdAddChar (N := k)))
       = k := by
@@ -988,7 +989,7 @@ theorem gaussSumDLMF_primitive {k : ℕ} [NeZero k] {χ : DirichletCharacter ℂ
     exact_mod_cast h
 
 /-- A character sum over `ZMod N` is a sum over the units. -/
-theorem s27_sum_char_eq_sum_units {N : ℕ} [NeZero N] (χ : DirichletCharacter ℂ N) (e : ZMod N → ℂ) :
+lemma s27_sum_char_eq_sum_units {N : ℕ} [NeZero N] (χ : DirichletCharacter ℂ N) (e : ZMod N → ℂ) :
     ∑ a : ZMod N, χ a * e a = ∑ u : (ZMod N)ˣ, χ u * e u := by
   classical
   have : ∑ u : (ZMod N)ˣ, χ u * e u =
@@ -1002,7 +1003,7 @@ theorem s27_sum_char_eq_sum_units {N : ℕ} [NeZero N] (χ : DirichletCharacter 
   rw [MulChar.map_nonunit _ this, zero_mul]
 
 /-- `ψ_k(q a) = ψ_d(a mod d)` when `k = d q`. -/
-theorem s27_stdAddChar_mul {k d q : ℕ} [NeZero k] [NeZero d] (hkq : k = d * q) (hd : d ∣ k)
+lemma s27_stdAddChar_mul {k d q : ℕ} [NeZero k] [NeZero d] (hkq : k = d * q) (hd : d ∣ k)
     (a : ZMod k) :
     ZMod.stdAddChar (N := k) ((q : ZMod k) * a) =
       ZMod.stdAddChar (N := d) (ZMod.castHom hd (ZMod d) a) := by
@@ -1020,7 +1021,7 @@ theorem s27_stdAddChar_mul {k d q : ℕ} [NeZero k] [NeZero d] (hkq : k = d * q)
   field_simp
 
 /-- Sums over the units through a surjective hom: `∑_u g(f u) = #ker · ∑_v g v`. -/
-theorem s27_sum_comp_surjective {G H : Type*} [Group G] [Fintype G] [Group H] [Fintype H]
+lemma s27_sum_comp_surjective {G H : Type*} [Group G] [Fintype G] [Group H] [Fintype H]
     [DecidableEq H] (f : G →* H) (hf : Function.Surjective f) (g : H → ℂ) :
     ∑ u, g (f u) = (#{u | f u = 1} : ℂ) * ∑ v, g v := by
   classical
@@ -1035,7 +1036,7 @@ theorem s27_sum_comp_surjective {G H : Type*} [Group G] [Fintype G] [Group H] [F
 
 
 /-- For `k = d q` with `d` the conductor, `G(q, χ) = #ker · G(1, χ*)`. -/
-theorem s27_gaussSum_mulShift_conductor {k : ℕ} [NeZero k] (χ : DirichletCharacter ℂ k)
+lemma s27_gaussSum_mulShift_conductor {k : ℕ} [NeZero k] (χ : DirichletCharacter ℂ k)
     [NeZero χ.conductor] {q : ℕ} (hkq : k = χ.conductor * q) :
     gaussSum χ ((ZMod.stdAddChar (N := k)).mulShift (q : ZMod k)) =
       (#{u | ZMod.unitsMap χ.conductor_dvd_level u = 1} : ℂ) *
@@ -1059,7 +1060,7 @@ theorem s27_gaussSum_mulShift_conductor {k : ℕ} [NeZero k] (χ : DirichletChar
 
 
 /-- §27.10 after 27.10.11 (proof). -/
-theorem s27_isPrimitive_of_separable {k : ℕ} [NeZero k] {χ : DirichletCharacter ℂ k}
+lemma s27_isPrimitive_of_separable {k : ℕ} [NeZero k] {χ : DirichletCharacter ℂ k}
     (h : ∀ n, GaussSumSeparable χ n) : χ.IsPrimitive := by
   classical
   by_contra hnp

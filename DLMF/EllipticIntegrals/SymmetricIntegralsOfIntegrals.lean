@@ -6,8 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.EllipticIntegrals.Symmetric
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
-public import Mathlib.Tactic.CrossRefAttribute
 
 /-!
 # Integrals of elliptic integrals (DLMF §19.28)

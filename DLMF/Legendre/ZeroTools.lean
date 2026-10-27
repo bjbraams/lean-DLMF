@@ -49,7 +49,7 @@ def lzt_IsSol (q y y' : ℝ → ℝ) : Prop :=
     HasDerivAt (fun t => (1 - t ^ 2) * y' t) (-(q x * y x)) x
 
 /-- The negative of a solution is a solution. -/
-lemma lzt_IsSol.neg {q y y' : ℝ → ℝ} (h : lzt_IsSol q y y') :
+theorem lzt_IsSol.neg {q y y' : ℝ → ℝ} (h : lzt_IsSol q y y') :
     lzt_IsSol q (fun x => -y x) (fun x => -y' x) := fun x hx => by
   refine ⟨(h x hx).1.neg, ?_⟩
   have := (h x hx).2.neg
@@ -61,7 +61,7 @@ lemma lzt_IsSol.neg {q y y' : ℝ → ℝ} (h : lzt_IsSol q y y') :
 def lzt_W (u u' y y' : ℝ → ℝ) (x : ℝ) : ℝ := (1 - x ^ 2) * (u' x * y x - u x * y' x)
 
 /-- Derivative of the weighted Wronskian: `W' = (qy - qu) u y`. -/
-lemma lzt_hasDerivAt_W {qy qu y y' u u' : ℝ → ℝ} (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
+theorem lzt_hasDerivAt_W {qy qu y y' u u' : ℝ → ℝ} (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
     {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt (lzt_W u u' y y') ((qy x - qu x) * u x * y x) x := by
   have h1 := (hu x hx).2.mul (hy x hx).1
@@ -72,13 +72,13 @@ lemma lzt_hasDerivAt_W {qy qu y y' u u' : ℝ → ℝ} (hy : lzt_IsSol qy y y') 
   · ring
 
 /-- The weighted Wronskian is continuous on subsets of `(-1, 1)`. -/
-lemma lzt_W_continuousOn {qy qu y y' u u' : ℝ → ℝ} (hy : lzt_IsSol qy y y')
+theorem lzt_W_continuousOn {qy qu y y' u u' : ℝ → ℝ} (hy : lzt_IsSol qy y y')
     (hu : lzt_IsSol qu u u') {s : Set ℝ} (hs : s ⊆ Ioo (-1:ℝ) 1) :
     ContinuousOn (lzt_W u u' y y') s := fun _x hx =>
   (lzt_hasDerivAt_W hy hu (hs hx)).continuousAt.continuousWithinAt
 
 /-- At a zero `a` followed by positive values, the derivative is nonnegative. -/
-lemma lzt_deriv_nonneg_right {y : ℝ → ℝ} {d a b : ℝ} (hd : HasDerivAt y d a) (h0 : y a = 0)
+theorem lzt_deriv_nonneg_right {y : ℝ → ℝ} {d a b : ℝ} (hd : HasDerivAt y d a) (h0 : y a = 0)
     (hab : a < b) (hpos : ∀ x ∈ Ioo a b, 0 < y x) : 0 ≤ d := by
   have hs := (hasDerivAt_iff_tendsto_slope.mp hd).mono_left (nhdsGT_le_nhdsNE a)
   refine ge_of_tendsto hs ?_
@@ -87,7 +87,7 @@ lemma lzt_deriv_nonneg_right {y : ℝ → ℝ} {d a b : ℝ} (hd : HasDerivAt y 
   exact (div_pos (hpos x hx) (sub_pos.mpr hx.1)).le
 
 /-- At a zero `b` preceded by positive values, the derivative is nonpositive. -/
-lemma lzt_deriv_nonpos_left {y : ℝ → ℝ} {d a b : ℝ} (hd : HasDerivAt y d b) (h0 : y b = 0)
+theorem lzt_deriv_nonpos_left {y : ℝ → ℝ} {d a b : ℝ} (hd : HasDerivAt y d b) (h0 : y b = 0)
     (hab : a < b) (hpos : ∀ x ∈ Ioo a b, 0 < y x) : d ≤ 0 := by
   have hs := (hasDerivAt_iff_tendsto_slope.mp hd).mono_left (nhdsLT_le_nhdsNE b)
   refine le_of_tendsto hs ?_
@@ -96,19 +96,19 @@ lemma lzt_deriv_nonpos_left {y : ℝ → ℝ} {d a b : ℝ} (hd : HasDerivAt y d
   exact (div_neg_of_pos_of_neg (hpos x hx) (sub_neg.mpr hx.2)).le
 
 /-- Nonnegativity at the left end by continuity. -/
-lemma lzt_nonneg_left {u : ℝ → ℝ} {a b : ℝ} (hc : ContinuousAt u a) (hab : a < b)
+theorem lzt_nonneg_left {u : ℝ → ℝ} {a b : ℝ} (hc : ContinuousAt u a) (hab : a < b)
     (hpos : ∀ x ∈ Ioo a b, 0 < u x) : 0 ≤ u a := by
   refine ge_of_tendsto (hc.tendsto.mono_left (nhdsWithin_le_nhds (s := Ioi a))) ?_
   filter_upwards [Ioo_mem_nhdsGT hab] with x hx using (hpos x hx).le
 
 /-- Nonnegativity at the right end by continuity. -/
-lemma lzt_nonneg_right {u : ℝ → ℝ} {a b : ℝ} (hc : ContinuousAt u b) (hab : a < b)
+theorem lzt_nonneg_right {u : ℝ → ℝ} {a b : ℝ} (hc : ContinuousAt u b) (hab : a < b)
     (hpos : ∀ x ∈ Ioo a b, 0 < u x) : 0 ≤ u b := by
   refine ge_of_tendsto (hc.tendsto.mono_left (nhdsWithin_le_nhds (s := Iio b))) ?_
   filter_upwards [Ioo_mem_nhdsLT hab] with x hx using (hpos x hx).le
 
 /-- A continuous function without zeros on an interval has constant sign there. -/
-lemma lzt_sign {f : ℝ → ℝ} {s : Set ℝ} (hs : s.OrdConnected) (hc : ContinuousOn f s)
+theorem lzt_sign {f : ℝ → ℝ} {s : Set ℝ} (hs : s.OrdConnected) (hc : ContinuousOn f s)
     (hne : ∀ x ∈ s, f x ≠ 0) : (∀ x ∈ s, 0 < f x) ∨ (∀ x ∈ s, f x < 0) := by
   by_contra h
   push Not at h
@@ -126,7 +126,7 @@ lemma lzt_sign {f : ℝ → ℝ} {s : Set ℝ} (hs : s.OrdConnected) (hc : Conti
 
 /-- **Divergence of a ratio at the right end.** If `u > 0`, `(1-x²)u² ≤ K(1-x)` and the
 weighted Wronskian satisfies `W ≤ -c₀ < 0` on `[s, 1)`, then `y/u` is unbounded above there. -/
-lemma lzt_ratio_right {y y' u u' : ℝ → ℝ} {s K c₀ : ℝ} (hs : s < 1) (hK : 0 < K) (hc₀ : 0 < c₀)
+theorem lzt_ratio_right {y y' u u' : ℝ → ℝ} {s K c₀ : ℝ} (hs : s < 1) (hK : 0 < K) (hc₀ : 0 < c₀)
     (hyd : ∀ x ∈ Ico s 1, HasDerivAt y (y' x) x) (hud : ∀ x ∈ Ico s 1, HasDerivAt u (u' x) x)
     (hup : ∀ x ∈ Ico s 1, 0 < u x) (hp : ∀ x ∈ Ico s 1, 0 < 1 - x ^ 2)
     (hb : ∀ x ∈ Ico s 1, (1 - x ^ 2) * u x ^ 2 ≤ K * (1 - x))
@@ -152,7 +152,7 @@ lemma lzt_ratio_right {y y' u u' : ℝ → ℝ} {s K c₀ : ℝ} (hs : s < 1) (h
 
 /-- **Divergence of a ratio at the left end.** If `u > 0`, `(1-x²)u² ≤ K(1+x)` and `W ≤ -c₀ < 0`
 on `(-1, s]`, then `y/u` takes negative values there. -/
-lemma lzt_ratio_left {y y' u u' : ℝ → ℝ} {s K c₀ : ℝ} (hs : -1 < s) (hK : 0 < K) (hc₀ : 0 < c₀)
+theorem lzt_ratio_left {y y' u u' : ℝ → ℝ} {s K c₀ : ℝ} (hs : -1 < s) (hK : 0 < K) (hc₀ : 0 < c₀)
     (hyd : ∀ x ∈ Ioc (-1) s, HasDerivAt y (y' x) x) (hud : ∀ x ∈ Ioc (-1) s, HasDerivAt u (u' x) x)
     (hup : ∀ x ∈ Ioc (-1) s, 0 < u x) (hp : ∀ x ∈ Ioc (-1) s, 0 < 1 - x ^ 2)
     (hb : ∀ x ∈ Ioc (-1) s, (1 - x ^ 2) * u x ^ 2 ≤ K * (1 + x))
@@ -179,16 +179,16 @@ section Comparison
 variable {qy qu y y' u u' : ℝ → ℝ}
 
 /-- `1 - x² > 0` on `(-1, 1)`. -/
-lemma lzt_p_pos {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) : 0 < 1 - x ^ 2 := by
+theorem lzt_p_pos {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) : 0 < 1 - x ^ 2 := by
   nlinarith [hx.1, hx.2]
 
 /-- Solutions are continuous on subsets of `(-1, 1)`. -/
-lemma lzt_IsSol.continuousOn {q y y' : ℝ → ℝ} (h : lzt_IsSol q y y') {s : Set ℝ}
+theorem lzt_IsSol.continuousOn {q y y' : ℝ → ℝ} (h : lzt_IsSol q y y') {s : Set ℝ}
     (hs : s ⊆ Ioo (-1:ℝ) 1) : ContinuousOn y s := fun _x hx =>
   (h _ (hs hx)).1.continuousAt.continuousWithinAt
 
 /-- `W = (1-x²)(u'y-uy')` is strictly decreasing where `u, y > 0` and `qy < qu`. -/
-lemma lzt_W_strictAntiOn (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
+theorem lzt_W_strictAntiOn (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qy x < qu x) {s : Set ℝ} (hs : s ⊆ Ioo (-1:ℝ) 1) (hcv : Convex ℝ s)
     (hpos : ∀ x ∈ interior s, 0 < u x ∧ 0 < y x) : StrictAntiOn (lzt_W u u' y y') s := by
   refine strictAntiOn_of_deriv_neg hcv (lzt_W_continuousOn hy hu hs) fun x hx => ?_
@@ -199,7 +199,7 @@ lemma lzt_W_strictAntiOn (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
   nlinarith
 
 /-- `W = (1-x²)(u'y-uy')` is strictly increasing where `u, y > 0` and `qu < qy`. -/
-lemma lzt_W_strictMonoOn (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
+theorem lzt_W_strictMonoOn (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qu x < qy x) {s : Set ℝ} (hs : s ⊆ Ioo (-1:ℝ) 1) (hcv : Convex ℝ s)
     (hpos : ∀ x ∈ interior s, 0 < u x ∧ 0 < y x) : StrictMonoOn (lzt_W u u' y y') s := by
   refine strictMonoOn_of_deriv_pos hcv (lzt_W_continuousOn hy hu hs) fun x hx => ?_
@@ -210,7 +210,7 @@ lemma lzt_W_strictMonoOn (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
   nlinarith
 
 /-- Sign-normalized core of `lzt_between`. -/
-lemma lzt_between_core (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
+theorem lzt_between_core (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qy x < qu x) {a b : ℝ} (ha : -1 < a) (hb : b < 1) (hab : a < b)
     (ya : y a = 0) (yb : y b = 0) (ypos : ∀ x ∈ Ioo a b, 0 < y x)
     (upos : ∀ x ∈ Ioo a b, 0 < u x) : False := by
@@ -252,7 +252,7 @@ theorem lzt_between (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
 
 
 /-- Sign-normalized core of `lzt_upper_right`. -/
-lemma lzt_upper_right_core (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
+theorem lzt_upper_right_core (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qy x < qu x) {z s₀ C K : ℝ} (hz : z ∈ Ioo (-1:ℝ) 1) (hs₀ : s₀ < 1)
     (hK : 0 < K) (yz : y z = 0) (ypos : ∀ x ∈ Ioo z 1, 0 < y x) (upos : ∀ x ∈ Ioo z 1, 0 < u x)
     (hC : ∀ x ∈ Ioo s₀ 1, y x ≤ C * u x)
@@ -324,14 +324,14 @@ theorem lzt_upper_right (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
 
 
 /-- The weighted Wronskian is odd in `y`. -/
-lemma lzt_W_neg (u u' y y' : ℝ → ℝ) (x : ℝ) :
+theorem lzt_W_neg (u u' y y' : ℝ → ℝ) (x : ℝ) :
     lzt_W u u' (fun x => -y x) (fun x => -y' x) x = -lzt_W u u' y y' x := by
   simp only [lzt_W]; ring
 
 variable {qw w w' : ℝ → ℝ}
 
 /-- Sign-normalized core of `lzt_lower_right`. -/
-lemma lzt_lower_right_core (hy : lzt_IsSol qy y y') (hw : lzt_IsSol qw w w')
+theorem lzt_lower_right_core (hy : lzt_IsSol qy y y') (hw : lzt_IsSol qw w w')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qw x < qy x) {z s₀ K : ℝ} (hz : z ∈ Ioo (-1:ℝ) 1) (hs₀ : s₀ < 1)
     (hK : 0 < K) (wz : w z = 0) (ypos : ∀ x ∈ Ioo z 1, 0 < y x) (wpos : ∀ x ∈ Ioo z 1, 0 < w x)
     (hb : ∀ x ∈ Ioo s₀ 1, (1 - x ^ 2) * w x ^ 2 ≤ K * (1 - x)) : False := by
@@ -365,7 +365,7 @@ lemma lzt_lower_right_core (hy : lzt_IsSol qy y y') (hw : lzt_IsSol qw w w')
   exact absurd hxC (not_lt.mpr (div_pos (ypos x hx') (wpos x hx')).le)
 
 /-- Sign-normalized core of `lzt_lower_left`. -/
-lemma lzt_lower_left_core (hy : lzt_IsSol qy y y') (hw : lzt_IsSol qw w w')
+theorem lzt_lower_left_core (hy : lzt_IsSol qy y y') (hw : lzt_IsSol qw w w')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qw x < qy x) {z s₀ K : ℝ} (hz : z ∈ Ioo (-1:ℝ) 1) (hs₀ : -1 < s₀)
     (hK : 0 < K) (wz : w z = 0) (ypos : ∀ x ∈ Ioo (-1) z, 0 < y x)
     (wpos : ∀ x ∈ Ioo (-1) z, 0 < w x)
@@ -397,7 +397,7 @@ lemma lzt_lower_left_core (hy : lzt_IsSol qy y y') (hw : lzt_IsSol qw w w')
   exact absurd hxC (not_lt.mpr (div_pos (ypos x hx') (wpos x hx')).le)
 
 /-- Sign-normalized core of `lzt_lower_whole`. -/
-lemma lzt_lower_whole_core (hy : lzt_IsSol qy y y') (hw : lzt_IsSol qw w w')
+theorem lzt_lower_whole_core (hy : lzt_IsSol qy y y') (hw : lzt_IsSol qw w w')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qw x < qy x) {s₀ s₀' K : ℝ} (hs₀ : s₀ < 1) (hs₀' : -1 < s₀')
     (hK : 0 < K) (ypos : ∀ x ∈ Ioo (-1) 1, 0 < y x) (wpos : ∀ x ∈ Ioo (-1) 1, 0 < w x)
     (hb : ∀ x ∈ Ioo s₀ 1, (1 - x ^ 2) * w x ^ 2 ≤ K * (1 - x))
@@ -445,7 +445,7 @@ lemma lzt_lower_whole_core (hy : lzt_IsSol qy y y') (hw : lzt_IsSol qw w w')
 
 
 /-- Bounds on `(1-x²)w²` are unchanged by `w ↦ -w`. -/
-lemma lzt_neg_sq_bound {w : ℝ → ℝ} {S : Set ℝ} {g : ℝ → ℝ}
+theorem lzt_neg_sq_bound {w : ℝ → ℝ} {S : Set ℝ} {g : ℝ → ℝ}
     (hb : ∀ x ∈ S, (1 - x ^ 2) * w x ^ 2 ≤ g x) : ∀ x ∈ S, (1 - x ^ 2) * (-w x) ^ 2 ≤ g x :=
   fun x hx => by rw [neg_sq]; exact hb x hx
 
@@ -688,7 +688,7 @@ noncomputable def lzt_baseConst (m : ℝ) (j : ℕ) : ℝ :=
   j ! / (2 ^ m * Real.Gamma (m + 1) * (ascPochhammer ℝ j).eval (2 * m + 1))
 
 /-- The normalizing constant of the polynomial case is positive. -/
-lemma lzt_baseConst_pos {m : ℝ} (hm : 0 ≤ m) (j : ℕ) : 0 < lzt_baseConst m j := by
+theorem lzt_baseConst_pos {m : ℝ} (hm : 0 ≤ m) (j : ℕ) : 0 < lzt_baseConst m j := by
   unfold lzt_baseConst
   have h1 : 0 < (ascPochhammer ℝ j).eval (2 * m + 1) := ascPochhammer_pos _ _ (by linarith)
   have h2 := Real.Gamma_pos_of_pos (show 0 < m + 1 by linarith)
@@ -748,7 +748,7 @@ theorem lzt_ferrersP_base {m : ℝ} (hm : 0 ≤ m) (j : ℕ) {x : ℝ} (hx : x �
 
 
 /-- `𝖯^μ_ν` solves the associated Legendre equation on `(-1, 1)`. -/
-lemma lzt_isSol_P (ν μ : ℂ) : IsFerrersSolution ν μ (ferrersP ν μ) :=
+theorem lzt_isSol_P (ν μ : ℂ) : IsFerrersSolution ν μ (ferrersP ν μ) :=
   ((ferrersEven_isFerrersSolution ν μ).add_smul (ferrersOdd_isFerrersSolution ν μ) _ _).congr
     (ferrersP_eqOn_even_odd ν μ).symm
 
@@ -777,7 +777,7 @@ theorem lzt_ferrersP_sol (ν μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
   linarith [this]
 
 /-- A real-valued `𝖯^μ_ν` agrees with its real part, together with its derivative. -/
-lemma lzt_ferrersP_real_data (ν μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem lzt_ferrersP_real_data (ν μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersP ν μ x = ((ferrersP ν μ x).re : ℂ) ∧
       deriv (ferrersP ν μ) x = ((deriv (ferrersP ν μ) x).re : ℂ) := by
   have hd := ((lzt_isSol_P ν μ) x hx).1
@@ -830,7 +830,7 @@ theorem lzt_ferrersP_simple {ν m : ℝ} (hm : 0 ≤ m) (hν : -1/2 ≤ ν) {x :
 
 
 /-- `((1+x)/(1-x))^{-m/2} ≤ (1-x²)^{m/2}` for `0 ≤ x < 1`, `m ≥ 0`. -/
-lemma lzt_rpow_le {m x : ℝ} (hm : 0 ≤ m) (hx0 : 0 ≤ x) (hx1 : x < 1) :
+theorem lzt_rpow_le {m x : ℝ} (hm : 0 ≤ m) (hx0 : 0 ≤ x) (hx1 : x < 1) :
     ((1 + x) / (1 - x)) ^ (-m / 2) ≤ (1 - x ^ 2) ^ (m / 2) := by
   have h1 : 0 < 1 + x := by linarith
   have h2 : 0 < 1 - x := by linarith

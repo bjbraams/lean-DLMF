@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Zeta.Polylog
+public import DLMF.Zeta.S25bDirichletTest
 
 /-!
 # The periodic zeta function (DLMF §25.13)

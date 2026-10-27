@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Mathieu.Basic
-public import Mathlib.Topology.Algebra.InfiniteSum.Real
 
 /-!
 # Analytic continuation of the eigenvalues (DLMF §28.7)

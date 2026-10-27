@@ -7,8 +7,9 @@ module
 
 public import DLMF.Elementary.LogExpBasic
 public import DLMF.Gamma.Asymptotics
-public import Mathlib.Combinatorics.Enumerative.Stirling
 public import DLMFMathlib.Analysis.Complex.LagrangeBurmann
+public import DLMF.Core.Framework
+public import Mathlib.Analysis.Real.Pi.Bounds
 
 /-!
 # Lambert W and Wright omega: DLMF §4.13

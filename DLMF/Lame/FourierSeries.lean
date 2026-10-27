@@ -50,7 +50,7 @@ namespace DLMF.Lame
 variable {ν k : ℝ}
 
 /-- `φ(K) = π/2 - am(K, k) = 0`. -/
-lemma l29_lamePhi_K (hk0 : 0 < k) (hk1 : k < 1) :
+theorem l29_lamePhi_K (hk0 : 0 < k) (hk1 : k < 1) :
     Real.lamePhi (Real.compEllIntKm (k ^ 2)) k = 0 := by
   rw [Real.lamePhi, Real.jacobiAmm_compEllIntKm (l29_sq_lt_one hk0 hk1), sub_self]
 
@@ -451,7 +451,7 @@ lemma p1l_green {h : ℝ} {w F F1 F2 : ℝ → ℝ} (hk : k ^ 2 < 1) (hw : Real.
   exact intervalIntegral.integral_eq_sub_of_hasDerivAt (fun x _ => hd x)
     (hcont.intervalIntegrable a b)
 
-lemma p1l_cos_phi (x : ℝ) : Real.cos (Real.lamePhi x k) = Real.jacobiSnm x (k ^ 2) := by
+theorem p1l_cos_phi (x : ℝ) : Real.cos (Real.lamePhi x k) = Real.jacobiSnm x (k ^ 2) := by
   simp [Real.lamePhi, Real.cos_pi_div_two_sub, Real.jacobiSnm]
 
 lemma p1l_sin_phi (x : ℝ) : Real.sin (Real.lamePhi x k) = Real.jacobiCnm x (k ^ 2) := by

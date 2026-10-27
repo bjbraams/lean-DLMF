@@ -5,12 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.Calculus.UniformLimitsDeriv
 
-public import DLMF.Confluent.Basic
 public import DLMF.Confluent.Whittaker
-public import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
-public import DLMF.Hypergeometric.Derivatives
 
 /-!
 # Recurrence relations and derivatives (DLMF §§13.3, 13.15)
@@ -49,28 +45,28 @@ theorem mulDerivMul_eq_mul_iteratedDeriv (n : ℕ) (f : ℂ → ℂ) (hf : ContD
 section KummerContiguous
 
 /-- Kummer's series converges everywhere. -/
-lemma hasSum_kummerM {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) :
+theorem hasSum_kummerM {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) :
     HasSum (fun n => kummerMCoeff a b n * z ^ n) (kummerM a b z) :=
   (hasFPowerSeriesOnBall_kummerM (a := a) hb).hasSum_mul_pow (by simp)
 
-lemma hasSum_deriv_kummerM {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) :
+theorem hasSum_deriv_kummerM {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) :
     HasSum (fun n : ℕ => (n + 1 : ℂ) * kummerMCoeff a b (n + 1) * z ^ n)
       (deriv (kummerM a b) z) :=
   (hasFPowerSeriesOnBall_kummerM (a := a) hb).deriv_ofScalars.hasSum_mul_pow (by simp)
 
-lemma hasSum_z_mul_deriv_kummerM {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) :
+theorem hasSum_z_mul_deriv_kummerM {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) :
     HasSum (fun n : ℕ => (n : ℂ) * kummerMCoeff a b n * z ^ n)
       (z * deriv (kummerM a b) z) :=
   (hasFPowerSeriesOnBall_kummerM (a := a) hb).hasSum_z_mul_deriv (by simp)
 
-lemma hasSum_z_mul_kummerM {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) :
+theorem hasSum_z_mul_kummerM {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) :
     HasSum (fun n : ℕ => (if n = 0 then 0 else kummerMCoeff a b (n - 1)) * z ^ n)
       (z * kummerM a b z) := by
   apply HasSum.mul_pow_shift (c := fun n => if n = 0 then 0 else kummerMCoeff a b (n - 1))
     ?_ (by simp)
   simpa using hasSum_kummerM hb z
 
-lemma kummerMCoeff_shift_a (a b : ℂ) (n : ℕ) :
+theorem kummerMCoeff_shift_a (a b : ℂ) (n : ℕ) :
     (n : ℂ) * kummerMCoeff a b n =
       a * kummerMCoeff (a + 1) b n - a * kummerMCoeff a b n := by
   simp only [kummerMCoeff]
@@ -83,7 +79,7 @@ lemma kummerMCoeff_shift_a (a b : ℂ) (n : ℕ) :
     push_cast
     ring
 
-lemma kummerMCoeff_shift_b_pred {a b : ℂ} (hb1 : ∀ k : ℕ, b - 1 ≠ -k) (n : ℕ) :
+theorem kummerMCoeff_shift_b_pred {a b : ℂ} (hb1 : ∀ k : ℕ, b - 1 ≠ -k) (n : ℕ) :
     (n : ℂ) * kummerMCoeff a b n =
       (b - 1) * kummerMCoeff a (b - 1) n - (b - 1) * kummerMCoeff a b n := by
   have hb : ∀ k : ℕ, b ≠ -k := by simpa using not_neg_nat_add_nat hb1 1
@@ -100,7 +96,7 @@ lemma kummerMCoeff_shift_b_pred {a b : ℂ} (hb1 : ∀ k : ℕ, b - 1 ≠ -k) (n
     field_simp
     ring
 
-lemma kummerMCoeff_shift_a_pred {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (n : ℕ) :
+theorem kummerMCoeff_shift_a_pred {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (n : ℕ) :
     (n : ℂ) * kummerMCoeff a b n =
       (b - a) * kummerMCoeff (a - 1) b n + (a - b) * kummerMCoeff a b n +
         (if n = 0 then 0 else kummerMCoeff a b (n - 1)) := by
@@ -117,7 +113,7 @@ lemma kummerMCoeff_shift_a_pred {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (n : �
     field_simp
     ring
 
-lemma kummerMCoeff_shift_b_succ {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (n : ℕ) :
+theorem kummerMCoeff_shift_b_succ {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (n : ℕ) :
     b * ((n + 1 : ℂ) * kummerMCoeff a b (n + 1)) =
       (a - b) * kummerMCoeff a (b + 1) n + b * kummerMCoeff a b n := by
   have hb0 : b ≠ 0 := by simpa using hb 0
@@ -133,7 +129,7 @@ lemma kummerMCoeff_shift_b_succ {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (n : �
   field_simp
   ring
 
-lemma kummerMCoeff_contiguous_shift_a {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (n : ℕ) :
+theorem kummerMCoeff_contiguous_shift_a {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (n : ℕ) :
     b * kummerMCoeff a b n - b * kummerMCoeff (a - 1) b n -
       (if n = 0 then 0 else kummerMCoeff a (b + 1) (n - 1)) = 0 := by
   cases n with
@@ -153,7 +149,7 @@ lemma kummerMCoeff_contiguous_shift_a {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (
     field_simp
     ring
 
-lemma kummerMCoeff_ode_contiguous {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (n : ℕ) :
+theorem kummerMCoeff_ode_contiguous {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (n : ℕ) :
     (a + 1) * (if n = 0 then 0 else kummerMCoeff (a + 2) (b + 2) (n - 1)) +
       (b + 1) * b * kummerMCoeff (a + 1) (b + 1) n -
       (b + 1) * (if n = 0 then 0 else kummerMCoeff (a + 1) (b + 1) (n - 1)) -
@@ -187,7 +183,7 @@ lemma kummerMCoeff_ode_contiguous {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (n : 
     ring
 
 /-- `z M'(a,b,z) = a (M(a+1,b,z) - M(a,b,z))`. -/
-lemma z_mul_deriv_kummerM_eq_shift_a {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) :
+theorem z_mul_deriv_kummerM_eq_shift_a {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) :
     z * deriv (kummerM a b) z = a * kummerM (a + 1) b z - a * kummerM a b z := by
   have h := hasSum_z_mul_deriv_kummerM (a := a) hb z
   have h' := ((hasSum_kummerM (a := a + 1) hb z).mul_left a).sub
@@ -198,7 +194,7 @@ lemma z_mul_deriv_kummerM_eq_shift_a {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z
   linear_combination (z ^ n) * kummerMCoeff_shift_a a b n
 
 /-- `z M'(a,b,z) = (b-1) (M(a,b-1,z) - M(a,b,z))`. -/
-lemma z_mul_deriv_kummerM_eq_shift_b_pred {a b : ℂ} (hb1 : ∀ k : ℕ, b - 1 ≠ -k) (z : ℂ) :
+theorem z_mul_deriv_kummerM_eq_shift_b_pred {a b : ℂ} (hb1 : ∀ k : ℕ, b - 1 ≠ -k) (z : ℂ) :
     z * deriv (kummerM a b) z =
       (b - 1) * kummerM a (b - 1) z - (b - 1) * kummerM a b z := by
   have hb : ∀ k : ℕ, b ≠ -k := by simpa using not_neg_nat_add_nat hb1 1
@@ -211,7 +207,7 @@ lemma z_mul_deriv_kummerM_eq_shift_b_pred {a b : ℂ} (hb1 : ∀ k : ℕ, b - 1 
   linear_combination (z ^ n) * kummerMCoeff_shift_b_pred (a := a) hb1 n
 
 /-- `z M'(a,b,z) = (b-a) M(a-1,b,z) + (a-b+z) M(a,b,z)`. -/
-lemma z_mul_deriv_kummerM_eq_shift_a_pred {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) :
+theorem z_mul_deriv_kummerM_eq_shift_a_pred {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) :
     z * deriv (kummerM a b) z =
       (b - a) * kummerM (a - 1) b z + (a - b) * kummerM a b z +
         z * kummerM a b z := by
@@ -224,7 +220,7 @@ lemma z_mul_deriv_kummerM_eq_shift_a_pred {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -
   linear_combination (z ^ n) * kummerMCoeff_shift_a_pred (a := a) hb n
 
 /-- `b M'(a,b,z) = (a-b) M(a,b+1,z) + b M(a,b,z)`. -/
-lemma deriv_kummerM_eq_shift_b_succ {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) :
+theorem deriv_kummerM_eq_shift_b_succ {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) :
     b * deriv (kummerM a b) z = (a - b) * kummerM a (b + 1) z + b * kummerM a b z := by
   have hb1 : ∀ k : ℕ, b + 1 ≠ -k := by simpa using not_neg_nat_add_nat hb 1
   have h := (hasSum_deriv_kummerM (a := a) hb z).mul_left b
@@ -333,7 +329,7 @@ theorem deriv_kummerM {a b z : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (hb0 : b ≠ 0)
   exact hd.unique hs
 
 /-- `a M(a+1,b+1,z) = (a-b) M(a,b+1,z) + b M(a,b,z)`. -/
-lemma kummerM_contiguous_shift_b_succ {a b z : ℂ} (hb : ∀ k : ℕ, b ≠ -k) :
+theorem kummerM_contiguous_shift_b_succ {a b z : ℂ} (hb : ∀ k : ℕ, b ≠ -k) :
     a * kummerM (a + 1) (b + 1) z =
       (a - b) * kummerM a (b + 1) z + b * kummerM a b z := by
   have hb0 : b ≠ 0 := by simpa using hb 0
@@ -345,7 +341,7 @@ lemma kummerM_contiguous_shift_b_succ {a b z : ℂ} (hb : ∀ k : ℕ, b ≠ -k)
   linear_combination h1 - h3
 
 /-- `(b-1) b (M(a,b,z) - M(a,b-1,z)) + a z M(a+1,b+1,z) = 0`. -/
-lemma kummerM_contiguous_mixed_b_pred {a b z : ℂ} (hb1 : ∀ k : ℕ, b - 1 ≠ -k) :
+theorem kummerM_contiguous_mixed_b_pred {a b z : ℂ} (hb1 : ∀ k : ℕ, b - 1 ≠ -k) :
     (b - 1) * b * kummerM a b z - (b - 1) * b * kummerM a (b - 1) z +
       a * z * kummerM (a + 1) (b + 1) z = 0 := by
   have hb : ∀ k : ℕ, b ≠ -k := by simpa using not_neg_nat_add_nat hb1 1
@@ -374,7 +370,7 @@ lemma kummerM_contiguous_up_aux {a b z : ℂ} (hb1 : ∀ k : ℕ, b - 1 ≠ -k) 
   linear_combination z * h3 - b * hC - b * h6 - b * h4
 
 /-- `(b-1) b M(a-1,b-1,z) - (b-1) b M(a,b,z) + (b-a) z M(a,b+1,z) = 0`. -/
-lemma kummerM_contiguous_up_shift_aux {a b z : ℂ} (hb1 : ∀ k : ℕ, b - 1 ≠ -k) :
+theorem kummerM_contiguous_up_shift_aux {a b z : ℂ} (hb1 : ∀ k : ℕ, b - 1 ≠ -k) :
     (b - 1) * b * kummerM (a - 1) (b - 1) z - (b - 1) * b * kummerM a b z +
       (b - a) * z * kummerM a (b + 1) z = 0 := by
   have h4 := kummerM_contiguous_shift_a (a := a) hb1 (z := z)
@@ -389,60 +385,60 @@ relations, and then transferred to integer parameters through
 `tendsto_kummerU_add_intCast`. The transfer needs `z ≠ 0`: at `z = 0` and integer `b`
 the totalized `kummerU` has no continued value. -/
 
-lemma eq_zero_of_tendsto_integerComplement {f : ℂ → ℂ} {b L : ℂ}
+theorem eq_zero_of_tendsto_integerComplement {f : ℂ → ℂ} {b L : ℂ}
     (hf : Tendsto f (𝓝[integerComplement] b) (𝓝 L))
     (h0 : ∀ c ∈ integerComplement, f c = 0) : L = 0 := by
   have := integerComplement_nhdsWithin_neBot b
   exact tendsto_nhds_unique hf (tendsto_const_nhds.congr'
     (eventually_nhdsWithin_of_forall fun c hc => (h0 c hc).symm))
 
-lemma tendsto_id_integerComplement (b : ℂ) :
+theorem tendsto_id_integerComplement (b : ℂ) :
     Tendsto (fun c : ℂ => c) (𝓝[integerComplement] b) (𝓝 b) :=
   (continuous_id.tendsto b).mono_left nhdsWithin_le_nhds
 
-lemma tendsto_kummerU_sub_one (a b : ℂ) {z : ℂ} (hz : z ≠ 0) :
+theorem tendsto_kummerU_sub_one (a b : ℂ) {z : ℂ} (hz : z ≠ 0) :
     Tendsto (fun c => kummerU a (c - 1) z) (𝓝[integerComplement] b)
       (𝓝 (kummerU a (b - 1) z)) := by
   have h := tendsto_kummerU_add_intCast a b (-1) hz
   push_cast at h
   simpa [sub_eq_add_neg] using h
 
-lemma tendsto_kummerU_add_one (a b : ℂ) {z : ℂ} (hz : z ≠ 0) :
+theorem tendsto_kummerU_add_one (a b : ℂ) {z : ℂ} (hz : z ≠ 0) :
     Tendsto (fun c => kummerU a (c + 1) z) (𝓝[integerComplement] b)
       (𝓝 (kummerU a (b + 1) z)) := by
   simpa using tendsto_kummerU_add_intCast a b 1 hz
 
-lemma tendsto_kummerU_add_two (a b : ℂ) {z : ℂ} (hz : z ≠ 0) :
+theorem tendsto_kummerU_add_two (a b : ℂ) {z : ℂ} (hz : z ≠ 0) :
     Tendsto (fun c => kummerU a (c + 2) z) (𝓝[integerComplement] b)
       (𝓝 (kummerU a (b + 2) z)) := by
   simpa using tendsto_kummerU_add_intCast a b 2 hz
 
-lemma intCompl_add_int {c : ℂ} (hc : c ∈ integerComplement) (k : ℤ) :
+theorem intCompl_add_int {c : ℂ} (hc : c ∈ integerComplement) (k : ℤ) :
     c + (k : ℂ) ∈ integerComplement := (add_intCast_mem_integerComplement k).mpr hc
 
-lemma intCompl_sub_one {c : ℂ} (hc : c ∈ integerComplement) : c - 1 ∈ integerComplement := by
+theorem intCompl_sub_one {c : ℂ} (hc : c ∈ integerComplement) : c - 1 ∈ integerComplement := by
   simpa [sub_eq_add_neg] using intCompl_add_int hc (-1)
 
-lemma intCompl_add_one {c : ℂ} (hc : c ∈ integerComplement) : c + 1 ∈ integerComplement := by
+theorem intCompl_add_one {c : ℂ} (hc : c ∈ integerComplement) : c + 1 ∈ integerComplement := by
   simpa using intCompl_add_int hc 1
 
-lemma intCompl_neg {c : ℂ} (hc : c ∈ integerComplement) : -c ∈ integerComplement :=
+theorem intCompl_neg {c : ℂ} (hc : c ∈ integerComplement) : -c ∈ integerComplement :=
   fun ⟨k, hk⟩ => hc ⟨-k, by push_cast; rw [hk]; ring⟩
 
-lemma intCompl_int_sub {c : ℂ} (hc : c ∈ integerComplement) (k : ℤ) :
+theorem intCompl_int_sub {c : ℂ} (hc : c ∈ integerComplement) (k : ℤ) :
     (k : ℂ) - c ∈ integerComplement := by
   simpa [sub_eq_add_neg, add_comm] using intCompl_add_int (intCompl_neg hc) k
 
-lemma intCompl_sub_int {c : ℂ} (hc : c ∈ integerComplement) (k : ℤ) :
+theorem intCompl_sub_int {c : ℂ} (hc : c ∈ integerComplement) (k : ℤ) :
     c - (k : ℂ) ∈ integerComplement := by
   have := intCompl_add_int hc (-k)
   push_cast at this
   simpa [sub_eq_add_neg] using this
 
-lemma ne_zero_of_intCompl {c : ℂ} (hc : c ∈ integerComplement) : c ≠ 0 :=
+theorem ne_zero_of_intCompl {c : ℂ} (hc : c ∈ integerComplement) : c ≠ 0 :=
   integerComplement.ne_zero hc
 
-lemma nonpole_of_intCompl {c : ℂ} (hc : c ∈ integerComplement) : ∀ k : ℕ, c ≠ -(k : ℂ) :=
+theorem nonpole_of_intCompl {c : ℂ} (hc : c ∈ integerComplement) : ∀ k : ℕ, c ≠ -(k : ℂ) :=
   not_neg_nat_of_mem_integerComplement hc
 
 theorem kummerU_contiguous_a_b_of_mem {a c z : ℂ} (hc : c ∈ integerComplement) (hz : z ≠ 0) :
@@ -982,7 +978,7 @@ theorem iteratedDeriv_mul_cpow_exp_neg_kummerM {a b : ℂ} (n : ℕ) {z : ℂ}
 /-! ### Derivatives of Tricomi's function -/
 
 /-- Kummer's function has derivative `(a/b) M(a+1,b+1,z)`. -/
-lemma hasDerivAt_kummerM_shift {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) :
+theorem hasDerivAt_kummerM_shift {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) :
     HasDerivAt (kummerM a b) (a / b * kummerM (a + 1) (b + 1) z) z := by
   have h := (hasFPowerSeriesOnBall_kummerM (a := a) hb).analyticAt_of_mem (y := z) (by simp)
   have hb0 : b ≠ 0 := by simpa using hb 0
@@ -990,7 +986,7 @@ lemma hasDerivAt_kummerM_shift {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ
   exact h.differentiableAt.hasDerivAt
 
 /-- Derivative of Tricomi's function at noninteger second parameter. -/
-lemma hasDerivAt_kummerU_of_mem (a : ℂ) {c w : ℂ} (hc : c ∈ integerComplement)
+theorem hasDerivAt_kummerU_of_mem (a : ℂ) {c w : ℂ} (hc : c ∈ integerComplement)
     (hw : w ∈ slitPlane) :
     HasDerivAt (kummerU a c) (-a * kummerU (a + 1) (c + 1) w) w := by
   by_cases ha : a = 0
@@ -1390,11 +1386,11 @@ theorem whittakerM_contiguous_up_shift {κ μ z : ℂ}
       kummerM (μ - κ + 1 / 2) (1 + 2 * μ + 1) z) * hs
 
 /-- Powers in the Whittaker prefactors. -/
-lemma cpow_add_half {z : ℂ} (hz : z ≠ 0) (s : ℂ) : z ^ (s + 1 / 2) = z ^ (1 / 2 : ℂ) * z ^ s := by
+theorem cpow_add_half {z : ℂ} (hz : z ≠ 0) (s : ℂ) : z ^ (s + 1 / 2) = z ^ (1 / 2 : ℂ) * z ^ s := by
   rw [cpow_add _ _ hz, mul_comm]
 
 /-- Powers in the Whittaker prefactors. -/
-lemma whittaker_pows {z μ : ℂ} (hz0 : z ≠ 0) :
+theorem whittaker_pows {z μ : ℂ} (hz0 : z ≠ 0) :
     z ^ (1 / 2 + μ) = z ^ (1 / 2 : ℂ) * z ^ μ ∧
     z ^ (1 / 2 + (μ + 1 / 2)) = z ^ (1 / 2 : ℂ) * z ^ (1 / 2 : ℂ) * z ^ μ ∧
     z ^ (1 / 2 + (μ - 1 / 2)) = z ^ μ ∧

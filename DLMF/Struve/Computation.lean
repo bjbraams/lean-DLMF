@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Struve.Asymptotics
+public import DLMF.Struve.Basic
 
 /-!
 # Mathematical approximation claims in DLMF computational sections

@@ -5,13 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Core.Upstream
-public import DLMFMathlib.NumberTheory.EulerNumbers
-public import DLMFMathlib.NumberTheory.BernoulliTaylor
 public import Mathlib.NumberTheory.ZetaValues
-public import Mathlib.Algebra.Polynomial.Taylor
-public import Mathlib.Algebra.Polynomial.HasseDeriv
-public import Mathlib.Algebra.Order.Floor.Ring
+public import DLMFMathlib.NumberTheory.EulerPolynomials
+public import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
 
 /-!
 # Bernoulli and Euler polynomials: definitions (DLMF §§24.1–24.2)
@@ -67,7 +64,7 @@ theorem b24a_aeval_ofReal (p : ℚ[X]) (x : ℝ) :
   rw [h, aeval_def, eval₂_eq_eval_map]; rfl
 
 /-- Complex evaluation of a rational polynomial at a rational point. -/
-theorem b24a_aeval_ratCast (p : ℚ[X]) (x : ℚ) : aeval (x : ℂ) p = ((p.eval x : ℚ) : ℂ) := by
+lemma b24a_aeval_ratCast (p : ℚ[X]) (x : ℚ) : aeval (x : ℂ) p = ((p.eval x : ℚ) : ℂ) := by
   have h := Polynomial.aeval_algebraMap_apply (R := ℚ) (A := ℚ) (B := ℂ) x p
   rw [show (algebraMap ℚ ℂ) x = (x : ℂ) from rfl] at h
   rw [h, Polynomial.coe_aeval_eq_eval]; rfl
@@ -115,7 +112,7 @@ theorem eulerNumber_def' (n : ℕ) :
 /-! ### The Appell property -/
 
 /-- Iterated derivatives of an Appell sequence `Pₙ' = n Pₙ₋₁`. -/
-theorem b24a_iterate_derivative (P : ℕ → ℚ[X])
+lemma b24a_iterate_derivative (P : ℕ → ℚ[X])
     (hP : ∀ n, derivative (P (n + 1)) = ((n : ℚ[X]) + 1) * P n) (k m : ℕ) :
     derivative^[k] (P (m + k)) = ((m + k).descFactorial k : ℚ[X]) * P m := by
   induction k with
@@ -127,7 +124,7 @@ theorem b24a_iterate_derivative (P : ℕ → ℚ[X])
     push_cast; ring
 
 /-- Hasse derivatives of an Appell sequence. -/
-theorem b24a_hasseDeriv (P : ℕ → ℚ[X])
+lemma b24a_hasseDeriv (P : ℕ → ℚ[X])
     (hP : ∀ n, derivative (P (n + 1)) = ((n : ℚ[X]) + 1) * P n) (k m : ℕ) :
     hasseDeriv k (P (m + k)) = ((m + k).choose k : ℚ[X]) * P m := by
   have h := congrFun (factorial_smul_hasseDeriv (R := ℚ) (k := k)) (P (m + k))
@@ -140,7 +137,7 @@ theorem b24a_hasseDeriv (P : ℕ → ℚ[X])
   push_cast; ring
 
 /-- High Hasse derivatives of an Appell sequence vanish. -/
-theorem b24a_hasseDeriv_eq_zero (P : ℕ → ℚ[X]) (h0 : P 0 = 1)
+lemma b24a_hasseDeriv_eq_zero (P : ℕ → ℚ[X]) (h0 : P 0 = 1)
     (hP : ∀ n, derivative (P (n + 1)) = ((n : ℚ[X]) + 1) * P n) {k n : ℕ} (hk : n < k) :
     hasseDeriv k (P n) = 0 := by
   have h := congrFun (factorial_smul_hasseDeriv (R := ℚ) (k := k)) (P n)
@@ -156,7 +153,7 @@ theorem b24a_hasseDeriv_eq_zero (P : ℕ → ℚ[X]) (h0 : P 0 = 1)
   exact (smul_eq_zero.mp h).resolve_left hk
 
 /-- The Appell (binomial) property `Pₙ(x+h) = ∑ₖ (n choose k) Pₖ(x) h^{n-k}` at complex points. -/
-theorem b24a_appell_aeval (P : ℕ → ℚ[X]) (h0 : P 0 = 1)
+lemma b24a_appell_aeval (P : ℕ → ℚ[X]) (h0 : P 0 = 1)
     (hP : ∀ n, derivative (P (n + 1)) = ((n : ℚ[X]) + 1) * P n) (n : ℕ) (x h : ℂ) :
     aeval (x + h) (P n) =
       ∑ k ∈ range (n + 1), (n.choose k : ℂ) * aeval x (P k) * h ^ (n - k) := by
@@ -181,12 +178,12 @@ theorem b24a_appell_aeval (P : ℕ → ℚ[X]) (h0 : P 0 = 1)
   simp [Polynomial.map_mul]
 
 /-- The Bernoulli polynomials satisfy `Bₙ₊₁' = (n+1) Bₙ`. -/
-theorem b24a_derivative_bernoulli (n : ℕ) :
+lemma b24a_derivative_bernoulli (n : ℕ) :
     derivative (Polynomial.bernoulli (n + 1)) = ((n : ℚ[X]) + 1) * Polynomial.bernoulli n := by
   rw [Polynomial.derivative_bernoulli_add_one]
 
 /-- The Euler polynomials satisfy `Eₙ₊₁' = (n+1) Eₙ`. -/
-theorem b24a_derivative_euler (n : ℕ) :
+lemma b24a_derivative_euler (n : ℕ) :
     derivative (Polynomial.euler (n + 1)) = ((n : ℚ[X]) + 1) * Polynomial.euler n :=
   Polynomial.derivative_euler_succ n
 

@@ -7,8 +7,6 @@ module
 
 public import DLMF.EllipticIntegrals.Symmetric
 public import Carlson.Elliptic.Asymptotic
-public import Mathlib.Analysis.Asymptotics.Defs
-public import Mathlib.Tactic.CrossRefAttribute
 
 /-!
 # Asymptotic approximations of the symmetric elliptic integrals (DLMF §19.27)

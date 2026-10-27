@@ -59,7 +59,7 @@ theorem ei19b_rpow_neg_half {x : ℝ} (hx : 0 ≤ x) : x ^ (-(1 / 2) : ℝ) = (R
 theorem ei19b_rpow_half (x : ℝ) : x ^ (1 / 2 : ℝ) = Real.sqrt x := (Real.sqrt_eq_rpow x).symm
 
 /-- On `[0, π/2]` the sine is monotone: `sin² θ ≤ sin² φ` for `0 ≤ θ ≤ φ ≤ π/2`. -/
-theorem ei19b_sin_sq_le {θ φ : ℝ} (h0 : 0 ≤ θ) (hθ : θ ≤ φ) (hφ : φ ≤ π / 2) :
+lemma ei19b_sin_sq_le {θ φ : ℝ} (h0 : 0 ≤ θ) (hθ : θ ≤ φ) (hφ : φ ≤ π / 2) :
     Real.sin θ ^ 2 ≤ Real.sin φ ^ 2 := by
   have hs : Real.sin θ ≤ Real.sin φ :=
     Real.sin_le_sin_of_le_of_le_pi_div_two (by linarith [Real.pi_pos]) hφ hθ
@@ -67,47 +67,47 @@ theorem ei19b_sin_sq_le {θ φ : ℝ} (h0 : 0 ≤ θ) (hθ : θ ≤ φ) (hφ : �
   exact pow_le_pow_left₀ h1 hs 2
 
 /-- `1 - m sin²θ ≥ cos²θ` for `m ≤ 1`. -/
-theorem ei19b_cos_sq_le {m : ℝ} (hm : m ≤ 1) (θ : ℝ) :
+lemma ei19b_cos_sq_le {m : ℝ} (hm : m ≤ 1) (θ : ℝ) :
     Real.cos θ ^ 2 ≤ 1 - m * Real.sin θ ^ 2 := by
   have := Real.sin_sq_add_cos_sq θ
   nlinarith [sq_nonneg (Real.sin θ)]
 
 /-- `1 - m sin²θ ≥ 1 - m sin²φ` for `0 ≤ m` and `0 ≤ θ ≤ φ ≤ π/2`. -/
-theorem ei19b_delta_sq_le {m θ φ : ℝ} (hm : 0 ≤ m) (h0 : 0 ≤ θ) (hθ : θ ≤ φ) (hφ : φ ≤ π / 2) :
+lemma ei19b_delta_sq_le {m θ φ : ℝ} (hm : 0 ≤ m) (h0 : 0 ≤ θ) (hθ : θ ≤ φ) (hφ : φ ≤ π / 2) :
     1 - m * Real.sin φ ^ 2 ≤ 1 - m * Real.sin θ ^ 2 := by
   nlinarith [ei19b_sin_sq_le h0 hθ hφ]
 
 /-- `1 - m sin²θ ≤ 1` for `m ≥ 0`. -/
-theorem ei19b_base_le_one {m : ℝ} (hm : 0 ≤ m) (θ : ℝ) : 1 - m * Real.sin θ ^ 2 ≤ 1 := by
+lemma ei19b_base_le_one {m : ℝ} (hm : 0 ≤ m) (θ : ℝ) : 1 - m * Real.sin θ ^ 2 ≤ 1 := by
   nlinarith [sq_nonneg (Real.sin θ)]
 
 /-- The third-kind factor `(1 - n sin²θ)⁻¹` is positive for `n < 1`. -/
-theorem ei19b_pi_factor_pos {n : ℝ} (hn : n < 1) (θ : ℝ) : 0 < (1 - n * Real.sin θ ^ 2)⁻¹ :=
+lemma ei19b_pi_factor_pos {n : ℝ} (hn : n < 1) (θ : ℝ) : 0 < (1 - n * Real.sin θ ^ 2)⁻¹ :=
   inv_pos.mpr (DLMF.Elliptic.one_sub_mul_sin_sq_pos hn θ)
 
 /-! ### Real forms of the integrals -/
 
 /-- `Re F(φ, k) = F(φ | k²)` for real `φ` and `k² ≤ 1`. -/
-theorem ei19b_re_incEllIntFk {φ k : ℝ} (hk : k ^ 2 ≤ 1) :
+lemma ei19b_re_incEllIntFk {φ k : ℝ} (hk : k ^ 2 ≤ 1) :
     (incEllIntFk φ k).re = DLMF.Elliptic.Real.incEllIntFm φ (k ^ 2) := by
   rw [incEllIntFk_eq_ofReal (m := k ^ 2) (by push_cast; ring) hk φ, ofReal_re]
 
 /-- `Re E(φ, k) = E(φ | k²)` for real `φ` and `k² ≤ 1`. -/
-theorem ei19b_re_incEllIntEk {φ k : ℝ} (hk : k ^ 2 ≤ 1) :
+lemma ei19b_re_incEllIntEk {φ k : ℝ} (hk : k ^ 2 ≤ 1) :
     (incEllIntEk φ k).re = DLMF.Elliptic.Real.incEllIntEm φ (k ^ 2) := by
   rw [incEllIntEk_eq_ofReal (m := k ^ 2) (by push_cast; ring) hk φ, ofReal_re]
 
 /-- `Re Π(φ, α², k) = Π(φ, α² | k²)` for real `φ`, `α² < 1` and `k² ≤ 1`. -/
-theorem ei19b_re_incEllIntPik {φ α2 k : ℝ} (hα : α2 < 1) (hk : k ^ 2 ≤ 1) :
+lemma ei19b_re_incEllIntPik {φ α2 k : ℝ} (hα : α2 < 1) (hk : k ^ 2 ≤ 1) :
     (incEllIntPik φ α2 k).re = DLMF.Elliptic.Real.incEllIntPim φ α2 (k ^ 2) := by
   rw [incEllIntPik_eq_ofReal (m := k ^ 2) (by push_cast; ring) hk hα φ, ofReal_re]
 
 /-- `E(k) = E(π/2, k)` with a real amplitude cast. -/
-theorem ei19b_compEllIntEk_eq (k : ℂ) : compEllIntEk k = incEllIntEk ((π / 2 : ℝ) : ℂ) k := by
+lemma ei19b_compEllIntEk_eq (k : ℂ) : compEllIntEk k = incEllIntEk ((π / 2 : ℝ) : ℂ) k := by
   rw [compEllIntEk]; push_cast; rfl
 
 /-- `Π(α², k) = Π(π/2, α², k)` with a real amplitude cast. -/
-theorem ei19b_compEllIntPik_eq (α2 k : ℂ) :
+lemma ei19b_compEllIntPik_eq (α2 k : ℂ) :
     compEllIntPik α2 k = incEllIntPik ((π / 2 : ℝ) : ℂ) α2 k := by
   rw [compEllIntPik]; push_cast; rfl
 
@@ -339,7 +339,7 @@ theorem incEllIntEk_bounds {φ k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ0 : 0 �
     simpa using h
 
 /-- Pointwise comparison of the third-kind integrands in the modulus. -/
-theorem ei19b_piIntegrand_mono {n m m' θ : ℝ} (hn : n < 1) (hm : m ≤ m')
+lemma ei19b_piIntegrand_mono {n m m' θ : ℝ} (hn : n < 1) (hm : m ≤ m')
     (hm' : m' * Real.sin θ ^ 2 < 1)
     (hm0 : m * Real.sin θ ^ 2 < 1) :
     DLMF.Elliptic.piIntegrand n m θ ≤ DLMF.Elliptic.piIntegrand n m' θ := by
@@ -484,7 +484,7 @@ theorem incEllIntFk_eq_log_sub_bounds {φ k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (
 
 /-! ### Helpers for 19.9.17–19.9.18 -/
 
-theorem p19lR1_hasDerivAt_artanh {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
+lemma p19lR1_hasDerivAt_artanh {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
     HasDerivAt Real.artanh (1 / (1 - x ^ 2)) x := by
   have h1 : 0 < 1 + x := by linarith [hx.1]
   have h2 : 0 < 1 - x := by linarith [hx.2]
@@ -501,7 +501,7 @@ theorem p19lR1_hasDerivAt_artanh {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
   field_simp
   ring
 
-theorem p19lR1_integral_cos_div {q φ : ℝ} (hq : 0 < q) (hφ0 : 0 ≤ φ) (hφ1 : φ < π / 2)
+lemma p19lR1_integral_cos_div {q φ : ℝ} (hq : 0 < q) (hφ0 : 0 ≤ φ) (hφ1 : φ < π / 2)
     (hqs : q * Real.sin φ < 1) :
     ∫ θ in (0 : ℝ)..φ, Real.cos θ / (1 - q ^ 2 * Real.sin θ ^ 2) =
       q⁻¹ * Real.artanh (q * Real.sin φ) := by
@@ -532,7 +532,7 @@ theorem p19lR1_integral_cos_div {q φ : ℝ} (hq : 0 < q) (hφ0 : 0 ≤ φ) (hφ
   simp
 
 /-- Cauchy–Schwarz for interval integrals of continuous nonnegative functions. -/
-theorem p19lR1_cauchy_schwarz {f g : ℝ → ℝ} {a b : ℝ} (hab : a ≤ b) (hf : Continuous f)
+lemma p19lR1_cauchy_schwarz {f g : ℝ → ℝ} {a b : ℝ} (hab : a ≤ b) (hf : Continuous f)
     (hg : Continuous g) (hf0 : ∀ x ∈ Icc a b, 0 ≤ f x) (hg0 : ∀ x ∈ Icc a b, 0 ≤ g x) :
     (∫ x in a..b, Real.sqrt (f x) * Real.sqrt (g x)) ^ 2 ≤
       (∫ x in a..b, f x) * ∫ x in a..b, g x := by
@@ -565,7 +565,7 @@ theorem p19lR1_cauchy_schwarz {f g : ℝ → ℝ} {a b : ℝ} (hab : a ≤ b) (h
   rw [discrim] at this
   nlinarith
 
-theorem p19lR1_hm_am {a b c : ℝ} (ha : 0 < a) (hb : 0 < b) (hc : 0 ≤ c) :
+lemma p19lR1_hm_am {a b c : ℝ} (ha : 0 < a) (hb : 0 < b) (hc : 0 ≤ c) :
     c / ((a + b) / 2) ≤ c * (a⁻¹ + b⁻¹) / 2 := by
   rw [div_le_iff₀ (by positivity)]
   have : c * (a⁻¹ + b⁻¹) / 2 * ((a + b) / 2) = c * ((a + b) ^ 2 / (4 * a * b)) := by
@@ -575,14 +575,14 @@ theorem p19lR1_hm_am {a b c : ℝ} (ha : 0 < a) (hb : 0 < b) (hc : 0 ≤ c) :
     rw [le_div_iff₀ (by positivity)]; nlinarith [sq_nonneg (a - b)]
   nlinarith
 
-theorem p19lR1_gm_am {b c : ℝ} (hb : 0 < b) (hc : 0 < c) :
+lemma p19lR1_gm_am {b c : ℝ} (hb : 0 < b) (hc : 0 < c) :
     c / ((c ^ 2 + b) / 2) ≤ (Real.sqrt b)⁻¹ := by
   have hsb := Real.sq_sqrt hb.le
   have hsb0 := Real.sqrt_pos.2 hb
   rw [div_le_iff₀ (by positivity), inv_mul_eq_div, le_div_iff₀ hsb0]
   nlinarith [sq_nonneg (c - Real.sqrt b)]
 
-theorem p19lR1_sqrt_AG {b c : ℝ} (hc : 0 < c) (hb : 0 < b) :
+lemma p19lR1_sqrt_AG {b c : ℝ} (hc : 0 < c) (hb : 0 < b) :
     Real.sqrt (c * ((c ^ 2)⁻¹ + b⁻¹) / 2) * Real.sqrt (c / ((c ^ 2 + b) / 2)) =
       (Real.sqrt b)⁻¹ := by
   rw [← Real.sqrt_mul (by positivity), ← Real.sqrt_inv]

@@ -120,7 +120,7 @@ theorem lzc_ncard_le {S T : Set ℝ} (hT : T.Finite)
     rw [heq] at h2; linarith
 
 /-- Just left of a zero with positive derivative, the function is negative. -/
-lemma lzc_neg_left_of_deriv_pos {f : ℝ → ℝ} {d z : ℝ} (hd : HasDerivAt f d z) (h0 : f z = 0)
+theorem lzc_neg_left_of_deriv_pos {f : ℝ → ℝ} {d z : ℝ} (hd : HasDerivAt f d z) (h0 : f z = 0)
     (hpos : 0 < d) : ∃ t < z, ∀ x ∈ Ioo t z, f x < 0 := by
   have hs := (hasDerivAt_iff_tendsto_slope.mp hd).mono_left (nhdsLT_le_nhdsNE z)
   have hev : ∀ᶠ x in 𝓝[<] z, 0 < slope f z x := hs.eventually (lt_mem_nhds hpos)
@@ -310,7 +310,7 @@ lemma lzc_zero_right_aux {u u' y y' : ℝ → ℝ} {c K s s0 : ℝ}
 
 /-- A solution independent of `u` has a zero between the last zero `s₀` of `u` and `1`, when `u`
 is recessive at `1`. -/
-lemma lzc_zero_right {u u' y y' : ℝ → ℝ} {c K s s0 : ℝ}
+theorem lzc_zero_right {u u' y y' : ℝ → ℝ} {c K s s0 : ℝ}
     (hud : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt u (u' x) x) (hyd : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt y (y' x) x)
     (hc : c ≠ 0) (hW : ∀ x ∈ Ioo (-1:ℝ) 1, (1 - x ^ 2) * (u x * y' x - y x * u' x) = c)
     (hs0 : s0 ∈ Ioo (-1:ℝ) 1) (hu0 : u s0 = 0) (hne : ∀ x ∈ Ioo s0 1, u x ≠ 0)
@@ -437,7 +437,7 @@ theorem lzc_parity_ends {f f' u u' v v' : ℝ → ℝ} {c₁ c₂ K s s' : ℝ}
   exact mul_pos this hsq
 
 /-- Near `1`, `𝖯^{-μ}_ν` (`μ ≥ 0`) has no zeros and `(1-x²)(𝖯^{-μ}_ν)² = O(1-x)`. -/
-lemma lzc_near_one (ν : ℝ) {μ : ℝ} (hμ : 0 ≤ μ) :
+theorem lzc_near_one (ν : ℝ) {μ : ℝ} (hμ : 0 ≤ μ) :
     ∃ s ∈ Ioo (-1:ℝ) 1, ∃ K > 0, ∀ x ∈ Ico s 1, (ferrersP ν (-μ : ℝ) x).re ≠ 0 ∧
       (1 - x ^ 2) * (ferrersP ν (-μ : ℝ) x).re ^ 2 ≤ K * (1 - x) := by
   obtain ⟨s₀, hs₀, M, hM⟩ := lzt_ferrersP_near_one ν hμ

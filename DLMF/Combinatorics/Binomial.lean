@@ -6,13 +6,10 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Combinatorics.Basic
-public import Mathlib.Data.Nat.Choose.Sum
 public import Mathlib.Data.Nat.Choose.Cast
 public import Mathlib.Data.Nat.Factorial.DoubleFactorial
 public import Mathlib.RingTheory.Binomial
-public import Mathlib.Analysis.SpecificLimits.Normed
 public import Mathlib.Analysis.SpecialFunctions.Stirling
-public import Mathlib.Analysis.Asymptotics.AsymptoticEquivalent
 
 /-!
 # Lattice paths: binomial coefficients (DLMF §26.3)
@@ -132,7 +129,7 @@ theorem choose_eq_div_mul {m n : ℕ} (hn : 1 ≤ n) (hnm : n ≤ m) :
   · rw [div_mul_eq_mul_div]; push_cast; rw [eq_div_iff hk]; linarith
 
 /-- `∑_{k=0}^{n} C(r+k, k) = C(r+n+1, n)`. -/
-theorem c26a_sum_choose_add (r n : ℕ) :
+lemma c26a_sum_choose_add (r n : ℕ) :
     ∑ k ∈ range (n + 1), (r + k).choose k = (r + n + 1).choose n := by
   induction n with
   | zero => simp
@@ -200,7 +197,7 @@ theorem centralBinom_eq_doubleFactorial (n : ℕ) :
 
 /-- Central binomial coefficients via Stirling's sequence: for `n ≥ 1`,
 `C(2n, n) √(πn) / 4ⁿ = stirlingSeq(2n) √π / stirlingSeq(n)²`. -/
-theorem c26a_centralBinom_stirling {n : ℕ} (hn : 1 ≤ n) :
+lemma c26a_centralBinom_stirling {n : ℕ} (hn : 1 ≤ n) :
     ((2 * n).choose n : ℝ) * Real.sqrt (Real.pi * n) / 4 ^ n =
       Stirling.stirlingSeq (2 * n) * Real.sqrt Real.pi / Stirling.stirlingSeq n ^ 2 := by
   unfold Stirling.stirlingSeq

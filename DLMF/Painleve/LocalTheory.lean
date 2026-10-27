@@ -7,8 +7,6 @@ module
 
 public import DLMF.Painleve.Basic
 public import Mathlib.Analysis.ODE.ExistUnique
-public import Mathlib.Analysis.Calculus.MeanValue
-public import Mathlib.Analysis.Calculus.ContDiff.RCLike
 
 /-!
 # Local real solutions of Painlevé II
@@ -31,7 +29,7 @@ def piiVectorField (c : ℝ) (y : ℝ × ℝ × ℝ) : ℝ × ℝ × ℝ :=
   (1, y.2.2, 2 * y.2.1 ^ 3 + y.1 * y.2.1 - c)
 
 /-- Painlevé II has a continuously differentiable polynomial vector field. -/
-lemma contDiff_piiVectorField (c : ℝ) : ContDiff ℝ 1 (piiVectorField c) := by
+theorem contDiff_piiVectorField (c : ℝ) : ContDiff ℝ 1 (piiVectorField c) := by
   unfold piiVectorField
   fun_prop
 

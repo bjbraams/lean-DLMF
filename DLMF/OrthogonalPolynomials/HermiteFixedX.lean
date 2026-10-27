@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.OrthogonalPolynomials.Integrals
-public import DLMF.Gamma.Inequalities
 public import DLMFMathlib.Analysis.ODE.Volterra
 
 /-!
@@ -45,23 +44,23 @@ def u' (n : ℕ) (x : ℝ) : ℝ :=
 /-- The frequency `√(2n+1)`. -/
 def freq (n : ℕ) : ℝ := √(2 * n + 1)
 
-lemma freq_pos (n : ℕ) : 0 < freq n := Real.sqrt_pos.2 (by positivity)
+theorem freq_pos (n : ℕ) : 0 < freq n := Real.sqrt_pos.2 (by positivity)
 
-lemma one_le_freq (n : ℕ) : 1 ≤ freq n := by
+theorem one_le_freq (n : ℕ) : 1 ≤ freq n := by
   rw [freq, Real.one_le_sqrt]
   have : (0 : ℝ) ≤ n := n.cast_nonneg
   linarith
 
-lemma freq_sq (n : ℕ) : freq n ^ 2 = 2 * n + 1 := Real.sq_sqrt (by positivity)
+theorem freq_sq (n : ℕ) : freq n ^ 2 = 2 * n + 1 := Real.sq_sqrt (by positivity)
 
-lemma hermitePolyHR_ode (n : ℕ) (x : ℝ) :
+theorem hermitePolyHR_ode (n : ℕ) (x : ℝ) :
     (hermitePolyHR n).derivative.derivative.eval x -
         2 * x * (hermitePolyHR n).derivative.eval x + 2 * n * (hermitePolyHR n).eval x = 0 := by
   have h := congrArg (fun p : ℤ[X] => (p.map (Int.castRingHom ℝ)).eval x)
     (hermitePolyH_differential_equation n)
   simpa [Polynomial.derivative_map, hermitePolyHR] using h
 
-lemma hasDerivAt_exp_neg_sq_half (x : ℝ) :
+theorem hasDerivAt_exp_neg_sq_half (x : ℝ) :
     HasDerivAt (fun x => exp (-x ^ 2 / 2)) (exp (-x ^ 2 / 2) * -x) x := by
   have h := ((hasDerivAt_pow 2 x).neg.div_const 2).exp
   simp only [Pi.neg_apply] at h
@@ -69,13 +68,13 @@ lemma hasDerivAt_exp_neg_sq_half (x : ℝ) :
   push_cast
   ring
 
-lemma hasDerivAt_u (n : ℕ) (x : ℝ) : HasDerivAt (u n) (u' n x) x := by
+theorem hasDerivAt_u (n : ℕ) (x : ℝ) : HasDerivAt (u n) (u' n x) x := by
   have h := (hasDerivAt_exp_neg_sq_half x).mul (Polynomial.hasDerivAt (hermitePolyHR n) x)
   refine h.congr_deriv ?_
   simp only [u']
   ring
 
-lemma hasDerivAt_u' (n : ℕ) (x : ℝ) :
+theorem hasDerivAt_u' (n : ℕ) (x : ℝ) :
     HasDerivAt (u' n) ((x ^ 2 - freq n ^ 2) * u n x) x := by
   have h := (hasDerivAt_exp_neg_sq_half x).mul
     ((Polynomial.hasDerivAt (hermitePolyHR n).derivative x).sub
@@ -86,7 +85,7 @@ lemma hasDerivAt_u' (n : ℕ) (x : ℝ) :
   linear_combination (exp (-x ^ 2 / 2)) * hermitePolyHR_ode n x
 
 /-- The perturbation estimate for `x ≥ 0`. -/
-lemma abs_u_sub_oscFree_le_of_nonneg (n : ℕ) {x : ℝ} (hx : 0 ≤ x) :
+theorem abs_u_sub_oscFree_le_of_nonneg (n : ℕ) {x : ℝ} (hx : 0 ≤ x) :
     |u n x - ODE.oscFree (freq n) 0 (u n 0) (u' n 0) x| ≤
       (|u n 0| + |u' n 0| / freq n) * (exp (x ^ 3 / 3 / freq n) - 1) := by
   have h := ODE.norm_sub_oscFree_le' (E := ℝ) (a := 0) (b := x) (ω := freq n)
@@ -100,7 +99,7 @@ lemma abs_u_sub_oscFree_le_of_nonneg (n : ℕ) {x : ℝ} (hx : 0 ≤ x) :
   simpa only [Real.norm_eq_abs, hint, abs_of_pos (freq_pos n)] using h
 
 /-- The perturbation estimate on all of `ℝ`, using the parity of the equation for `x < 0`. -/
-lemma abs_u_sub_oscFree_le (n : ℕ) (x : ℝ) :
+theorem abs_u_sub_oscFree_le (n : ℕ) (x : ℝ) :
     |u n x - ODE.oscFree (freq n) 0 (u n 0) (u' n 0) x| ≤
       (|u n 0| + |u' n 0| / freq n) * (exp (|x| ^ 3 / 3 / freq n) - 1) := by
   rcases le_or_gt 0 x with hx | hx
@@ -133,7 +132,7 @@ lemma abs_u_sub_oscFree_le (n : ℕ) (x : ℝ) :
 
 /-! ### The data at `0` -/
 
-lemma hermitePolyH_odd_at_zero (m : ℕ) : (hermitePolyH (2 * m + 1)).eval 0 = 0 := by
+theorem hermitePolyH_odd_at_zero (m : ℕ) : (hermitePolyH (2 * m + 1)).eval 0 = 0 := by
   induction m with
   | zero => simp
   | succ m ih =>
@@ -142,26 +141,26 @@ lemma hermitePolyH_odd_at_zero (m : ℕ) : (hermitePolyH (2 * m + 1)).eval 0 = 0
     simp only [eval_sub, eval_mul, eval_ofNat, eval_X, eval_C, ih, mul_zero, zero_mul,
       sub_zero]
 
-lemma hermitePolyHR_eval_zero (n : ℕ) :
+theorem hermitePolyHR_eval_zero (n : ℕ) :
     (hermitePolyHR n).eval 0 = ((hermitePolyH n).eval 0 : ℤ) :=
   eval_zero_map _ _
 
-lemma hermitePolyHR_derivative_eval_zero (k : ℕ) :
+theorem hermitePolyHR_derivative_eval_zero (k : ℕ) :
     (hermitePolyHR (k + 1)).derivative.eval 0 = 2 * (k + 1) * (hermitePolyHR k).eval 0 := by
   rw [hermitePolyHR, Polynomial.derivative_map, hermitePolyH_derivative, Polynomial.map_mul,
     Polynomial.map_C, eval_mul, eval_C]
   simp [hermitePolyHR]
 
-lemma hermitePolyHR_even_eval_zero (m : ℕ) :
+theorem hermitePolyHR_even_eval_zero (m : ℕ) :
     (hermitePolyHR (2 * m)).eval 0 =
       (-1) ^ m * ((2 * m).factorial / m.factorial : ℝ) := by
   rw [hermitePolyHR_eval_zero, hermitePolyH_even_at_zero, Int.cast_mul, Int.cast_pow,
     Int.cast_neg, Int.cast_one, Int.cast_natCast,
     Nat.cast_div (Nat.factorial_dvd_factorial (by omega)) (by positivity)]
 
-lemma u_zero (n : ℕ) : u n 0 = (hermitePolyHR n).eval 0 := by simp [u]
+theorem u_zero (n : ℕ) : u n 0 = (hermitePolyHR n).eval 0 := by simp [u]
 
-lemma u'_zero (n : ℕ) : u' n 0 = (hermitePolyHR n).derivative.eval 0 := by simp [u']
+theorem u'_zero (n : ℕ) : u' n 0 = (hermitePolyHR n).derivative.eval 0 := by simp [u']
 
 end HermiteFixedX
 
@@ -175,13 +174,13 @@ def hermiteLambda (n : ℕ) : ℝ :=
 
 namespace HermiteFixedX
 
-lemma hermiteLambda_even (m : ℕ) :
+theorem hermiteLambda_even (m : ℕ) :
     hermiteLambda (2 * m) = ((2 * m).factorial / m.factorial : ℝ) := by
   simp only [hermiteLambda, even_two_mul m, ↓reduceIte]
   rw [show (((2 * m : ℕ) : ℝ) / 2 + 1) = (m : ℝ) + 1 by push_cast; ring,
     Real.Gamma_nat_eq_factorial, Real.Gamma_nat_eq_factorial]
 
-lemma hermiteLambda_odd (m : ℕ) :
+theorem hermiteLambda_odd (m : ℕ) :
     hermiteLambda (2 * m + 1) =
       ((2 * m + 2).factorial / (m + 1).factorial : ℝ) / freq (2 * m + 1) := by
   have hne : ¬Even (2 * m + 1) := Nat.not_even_iff_odd.2 (odd_two_mul_add_one m)
@@ -192,7 +191,7 @@ lemma hermiteLambda_odd (m : ℕ) :
   field_simp
 
 /-- The data at `0` of the Hermite function in terms of `λ_n`. -/
-lemma data_zero (n : ℕ) :
+theorem data_zero (n : ℕ) :
     u n 0 = hermiteLambda n * Real.cos (n * π / 2) ∧
       u' n 0 = freq n * (hermiteLambda n * Real.sin (n * π / 2)) ∧
       |u n 0| + |u' n 0| / freq n = hermiteLambda n ∧ 0 < hermiteLambda n := by
@@ -241,21 +240,21 @@ lemma data_zero (n : ℕ) :
         abs_of_pos (by positivity)]
 
 /-- The free oscillation with the data of the Hermite function is `λ_n cos (√(2n+1) x - nπ/2)`. -/
-lemma oscFree_eq (n : ℕ) (x : ℝ) :
+theorem oscFree_eq (n : ℕ) (x : ℝ) :
     ODE.oscFree (freq n) 0 (u n 0) (u' n 0) x =
       hermiteLambda n * Real.cos (freq n * x - n * π / 2) := by
   obtain ⟨h0, h1, -, -⟩ := data_zero n
   rw [ODE.oscFree, h0, h1, Real.cos_sub, sub_zero, smul_eq_mul, smul_eq_mul]
   field_simp [(freq_pos n).ne']
 
-lemma exp_sub_one_le (y : ℝ) : Real.exp y - 1 ≤ y * Real.exp y := by
+theorem exp_sub_one_le (y : ℝ) : Real.exp y - 1 ≤ y * Real.exp y := by
   have h := Real.add_one_le_exp (-y)
   have he : Real.exp (-y) * Real.exp y = 1 := by rw [← Real.exp_add, neg_add_cancel, exp_zero]
   have hpos := Real.exp_pos y
   nlinarith
 
 /-- The explicit error bound behind DLMF 18.15.27 with `M = 1`. -/
-lemma abs_u_div_sub_cos_le (n : ℕ) (x : ℝ) :
+theorem abs_u_div_sub_cos_le (n : ℕ) (x : ℝ) :
     |u n x / hermiteLambda n - Real.cos (freq n * x - n * π / 2)| ≤
       |x| ^ 3 * Real.exp (|x| ^ 3 / 3) / (3 * freq n) := by
   obtain ⟨-, -, hM, hlam⟩ := data_zero n
@@ -310,11 +309,11 @@ namespace HermiteFixedX
 /-- Szegő's normalizing constant `Γ(n+1)/Γ(n/2+1)`. -/
 def szegoConst (n : ℕ) : ℝ := Real.Gamma (n + 1) / Real.Gamma (n / 2 + 1)
 
-lemma szegoConst_pos (n : ℕ) : 0 < szegoConst n :=
+theorem szegoConst_pos (n : ℕ) : 0 < szegoConst n :=
   div_pos (Real.Gamma_pos_of_pos (by positivity)) (Real.Gamma_pos_of_pos (by positivity))
 
 /-- `λ_n` and Szegő's constant agree up to a factor `1 + O(1/n)`. -/
-lemma lambda_div_szegoConst (n : ℕ) :
+theorem lambda_div_szegoConst (n : ℕ) :
     hermiteLambda n / szegoConst n ≤ 2 ∧
       |hermiteLambda n / szegoConst n - 1| ≤ 3 / (2 * n + 1) := by
   obtain ⟨m, rfl | rfl⟩ := Nat.even_or_odd' n

@@ -5,30 +5,16 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Combinatorics.Enumerative.Stirling
-public import Mathlib.RingTheory.Polynomial.Pochhammer
 public import Mathlib.Algebra.Group.ForwardDiff
-public import Mathlib.NumberTheory.Harmonic.Defs
 public import Mathlib.NumberTheory.Harmonic.EulerMascheroni
-public import Mathlib.Analysis.SpecialFunctions.Pow.Real
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
 public import Mathlib.Analysis.Complex.TaylorSeries
-public import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
-public import Mathlib.Analysis.Asymptotics.AsymptoticEquivalent
 public import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
 public import Mathlib.NumberTheory.Bernoulli
-public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 public import Mathlib.Analysis.Analytic.Binomial
-public import Mathlib.Analysis.Analytic.OfScalars
-public import Mathlib.Analysis.Analytic.Uniqueness
-public import Mathlib.GroupTheory.Perm.Cycle.Type
-public import Mathlib.GroupTheory.Perm.Fin
 public import Mathlib.Order.Partition.Finpartition
-public import Mathlib.Algebra.Polynomial.Roots
 public import Mathlib.Algebra.Polynomial.Derivative
-public import Mathlib.Algebra.Polynomial.Taylor
 public import Mathlib.RingTheory.Binomial
-public import Mathlib.Tactic.CrossRefAttribute
 public import DLMFMathlib.Combinatorics.R26aFinpartition
 public import DLMFMathlib.Combinatorics.Q26bSurjections
 
@@ -133,7 +119,7 @@ theorem signedStirlingFirst_one (k : ℕ) : signedStirlingFirst 1 k = if k = 1 t
 def c26a_esymmRange (m j : ℕ) : ℤ := ∑ B ∈ (Icc 1 m).powersetCard j, ∏ b ∈ B, (b : ℤ)
 
 /-- The recurrence `e_{j+1}(1,…,m+1) = e_{j+1}(1,…,m) + (m+1) e_j(1,…,m)`. -/
-theorem q26a_esymmRange_succ_succ (m j : ℕ) :
+lemma q26a_esymmRange_succ_succ (m j : ℕ) :
     c26a_esymmRange (m + 1) (j + 1) =
       c26a_esymmRange m (j + 1) + (m + 1) * c26a_esymmRange m j := by
   have hI : Icc 1 (m + 1) = insert (m + 1) (Icc 1 m) := by
@@ -155,15 +141,15 @@ theorem q26a_esymmRange_succ_succ (m j : ℕ) :
     exact hx ((mem_powersetCard.mp hB).1 (mem_insert_self _ _))
 
 /-- `e_0 = 1`. -/
-theorem q26a_esymmRange_zero (m : ℕ) : c26a_esymmRange m 0 = 1 := by
+lemma q26a_esymmRange_zero (m : ℕ) : c26a_esymmRange m 0 = 1 := by
   simp [c26a_esymmRange]
 
 /-- `e_j(1,…,m) = 0` for `j > m`. -/
-theorem q26a_esymmRange_eq_zero {m j : ℕ} (h : m < j) : c26a_esymmRange m j = 0 := by
+lemma q26a_esymmRange_eq_zero {m j : ℕ} (h : m < j) : c26a_esymmRange m j = 0 := by
   rw [c26a_esymmRange, powersetCard_eq_empty.mpr (by simp; omega), sum_empty]
 
 /-- `c(m+1, i) = e_{m+1-i}(1, …, m)`. -/
-theorem q26a_stirlingFirst_eq_esymm (m : ℕ) : ∀ i ≤ m + 1,
+lemma q26a_stirlingFirst_eq_esymm (m : ℕ) : ∀ i ≤ m + 1,
     (Nat.stirlingFirst (m + 1) i : ℤ) = c26a_esymmRange m (m + 1 - i) := by
   induction m with
   | zero =>
@@ -204,7 +190,7 @@ def q26a_hRev (k d : ℕ) : ℤ :=
   ∑ c ∈ Finset.Nat.antidiagonalTuple k d, ∏ i : Fin k, ((k : ℤ) - i) ^ (c i)
 
 /-- Splitting a sum over `antidiagonalTuple (k+1) d` by the first coordinate. -/
-theorem q26a_sum_antidiagonalTuple_succ {M : Type*} [AddCommMonoid M] (k d : ℕ)
+lemma q26a_sum_antidiagonalTuple_succ {M : Type*} [AddCommMonoid M] (k d : ℕ)
     (F : (Fin (k + 1) → ℕ) → M) :
     ∑ c ∈ Finset.Nat.antidiagonalTuple (k + 1) d, F c =
       ∑ p ∈ antidiagonal d, ∑ c ∈ Finset.Nat.antidiagonalTuple k p.2, F (Fin.cons p.1 c) := by
@@ -229,7 +215,7 @@ theorem q26a_sum_antidiagonalTuple_succ {M : Type*} [AddCommMonoid M] (k d : ℕ
   · intro c _; simp
 
 /-- First-coordinate expansion of `q26a_hRev`. -/
-theorem q26a_hRev_succ (k d : ℕ) :
+lemma q26a_hRev_succ (k d : ℕ) :
     q26a_hRev (k + 1) d = ∑ p ∈ antidiagonal d, ((k : ℤ) + 1) ^ p.1 * q26a_hRev k p.2 := by
   unfold q26a_hRev
   rw [q26a_sum_antidiagonalTuple_succ]
@@ -244,7 +230,7 @@ theorem q26a_hRev_succ (k d : ℕ) :
   exact prod_congr rfl fun i _ => by ring_nf
 
 /-- The recurrence `h_{d+1}(k+1,…,1) = h_{d+1}(k,…,1) + (k+1) h_d(k+1,…,1)`. -/
-theorem q26a_hRev_succ_succ (k d : ℕ) :
+lemma q26a_hRev_succ_succ (k d : ℕ) :
     q26a_hRev (k + 1) (d + 1) = q26a_hRev k (d + 1) + ((k : ℤ) + 1) * q26a_hRev (k + 1) d := by
   rw [q26a_hRev_succ, q26a_hRev_succ, Finset.Nat.sum_antidiagonal_succ, mul_sum]
   simp only [pow_zero, one_mul, pow_succ]
@@ -252,11 +238,11 @@ theorem q26a_hRev_succ_succ (k d : ℕ) :
   refine sum_congr rfl fun p _ => by ring
 
 /-- `q26a_hRev 0 d = δ_{d,0}`. -/
-theorem q26a_hRev_zero_left (d : ℕ) : q26a_hRev 0 d = if d = 0 then 1 else 0 := by
+lemma q26a_hRev_zero_left (d : ℕ) : q26a_hRev 0 d = if d = 0 then 1 else 0 := by
   rcases d with _ | d <;> simp [q26a_hRev]
 
 /-- `S(k+d, k) = h_d(k, k-1, …, 1)`. -/
-theorem q26a_stirlingSecond_eq_hRev (k d : ℕ) :
+lemma q26a_stirlingSecond_eq_hRev (k d : ℕ) :
     (Nat.stirlingSecond (k + d) k : ℤ) = q26a_hRev k d := by
   induction k generalizing d with
   | zero => rcases d with _ | d <;> simp [q26a_hRev_zero_left, Nat.stirlingSecond_succ_zero]
@@ -295,7 +281,7 @@ theorem stirlingSecond_eq_sum_antidiagonalTuple {n k : ℕ} (hkn : k ≤ n) :
     rw [Nat.cast_sub (by omega)]; push_cast; ring
 
 /-- The `k`-th forward difference of `x ↦ xⁿ` at `0` is `k! S(n, k)`. -/
-theorem q26a_fwdDiff_iter_pow (n k : ℕ) :
+lemma q26a_fwdDiff_iter_pow (n k : ℕ) :
     (fwdDiff 1)^[k] (fun x : ℕ => ((x : ℚ) ^ n)) 0 = k.factorial * Nat.stirlingSecond n k := by
   have hf : (fun x : ℕ => ((x : ℚ) ^ n)) = ∑ i ∈ range (n + 1),
       ((Nat.stirlingSecond n i * i.factorial : ℕ) : ℚ) • (fun x : ℕ => (x.choose i : ℚ)) := by
@@ -314,7 +300,7 @@ theorem q26a_fwdDiff_iter_pow (n k : ℕ) :
   · rw [Nat.stirlingSecond_eq_zero_of_lt (by simp at h; omega)]; simp
 
 /-- `∑_j (-1)^{k-j} C(k, j) jⁿ = k! S(n, k)`. -/
-theorem q26a_sum_alt_choose_pow (n k : ℕ) :
+lemma q26a_sum_alt_choose_pow (n k : ℕ) :
     ∑ j ∈ range (k + 1), (-1 : ℚ) ^ (k - j) * (k.choose j : ℚ) * (j : ℚ) ^ n =
       k.factorial * Nat.stirlingSecond n k := by
   have h := q26a_fwdDiff_iter_pow n k
@@ -368,7 +354,7 @@ theorem sum_signedStirlingFirst_mul_pow {R : Type*} [CommRing R] (n : ℕ) (x : 
   simp
 
 /-- The integer polynomial identity `Xⁿ = ∑_k S(n, k) · X(X-1)⋯(X-k+1)`. -/
-theorem c26a_X_pow_eq_sum_descPochhammer (n : ℕ) :
+lemma c26a_X_pow_eq_sum_descPochhammer (n : ℕ) :
     (X : ℤ[X]) ^ n = ∑ k ∈ range (n + 1), C (Nat.stirlingSecond n k : ℤ) * descPochhammer ℤ k := by
   rw [← sub_eq_zero]
   apply Polynomial.eq_zero_of_infinite_isRoot
@@ -413,7 +399,7 @@ theorem sum_Icc_stirlingSecond_mul_ascPochhammer {R : Type*} [CommRing R] {n : �
 /-! #### Helpers for 26.8.8–9 (agent p26a) -/
 
 /-- Coefficients of an everywhere absolutely convergent real power series are unique. -/
-theorem s26a_coeff_unique {a b : ℕ → ℝ} (ha : ∀ r : NNReal, Summable fun k => |a k| * (r : ℝ) ^ k)
+lemma s26a_coeff_unique {a b : ℕ → ℝ} (ha : ∀ r : NNReal, Summable fun k => |a k| * (r : ℝ) ^ k)
     (hb : ∀ r : NNReal, Summable fun k => |b k| * (r : ℝ) ^ k)
     (h : ∀ y : ℝ, ∑' k, a k * y ^ k = ∑' k, b k * y ^ k) : a = b := by
   have hrad : ∀ c : ℕ → ℝ, (∀ r : NNReal, Summable fun k => |c k| * (r : ℝ) ^ k) →
@@ -439,7 +425,7 @@ theorem s26a_coeff_unique {a b : ℕ → ℝ} (ha : ∀ r : NNReal, Summable fun
   exact FormalMultilinearSeries.ofScalars_series_injective ℝ ℝ (h1.eq_formalMultilinearSeries h2)
 
 /-- `∑_k c(n, k) aᵏ = a(a+1)⋯(a+n-1)` (unsigned Stirling numbers of the first kind). -/
-theorem s26a_sum_stirlingFirst_mul_pow (n : ℕ) (a : ℝ) :
+lemma s26a_sum_stirlingFirst_mul_pow (n : ℕ) (a : ℝ) :
     ∑ k ∈ range (n + 1), (Nat.stirlingFirst n k : ℝ) * a ^ k = (ascPochhammer ℝ n).eval a := by
   have h := descPochhammer_eq_sum ℝ n
   have h2 := congrArg (Polynomial.eval (-a)) h
@@ -462,13 +448,13 @@ theorem s26a_sum_stirlingFirst_mul_pow (n : ℕ) (a : ℝ) :
     (Nat.stirlingFirst n k : ℝ) * a ^ k * ((-1 : ℝ) ^ n) ^ 2 * hQ
 
 /-- The generalized binomial coefficient over `ℝ` as a falling factorial over `n!`. -/
-theorem s26a_ringChoose_eq (r : ℝ) (n : ℕ) :
+lemma s26a_ringChoose_eq (r : ℝ) (n : ℕ) :
     Ring.choose r n = (descPochhammer ℝ n).eval r / n.factorial := by
   rw [Ring.choose_eq_smul, ← Polynomial.aeval_eq_smeval, Polynomial.aeval_def,
     ← Polynomial.eval_map, descPochhammer_map, smul_eq_mul, div_eq_inv_mul]
 
 /-- The binomial series `∑ binom(y, n) xⁿ = (1+x)^y`, real `|x| < 1`. -/
-theorem s26a_hasSum_ringChoose_mul_pow {x : ℝ} (hx : |x| < 1) (y : ℝ) :
+lemma s26a_hasSum_ringChoose_mul_pow {x : ℝ} (hx : |x| < 1) (y : ℝ) :
     HasSum (fun n : ℕ => Ring.choose y n * x ^ n) ((1 + x) ^ y) := by
   have hb := (Real.one_add_rpow_hasFPowerSeriesOnBall_zero (a := y)).hasSum (y := x) (by
     rw [Metric.mem_eball, edist_zero_right, ← ofReal_norm, Real.norm_eq_abs]
@@ -478,7 +464,7 @@ theorem s26a_hasSum_ringChoose_mul_pow {x : ℝ} (hx : |x| < 1) (y : ℝ) :
   exact hb
 
 /-- `∑ binom(a+n-1, n) tⁿ = (1-t)^{-a}`, real `|t| < 1`. -/
-theorem s26a_hasSum_ringChoose_add_mul_pow {t : ℝ} (ht : |t| < 1) (a : ℝ) :
+lemma s26a_hasSum_ringChoose_add_mul_pow {t : ℝ} (ht : |t| < 1) (a : ℝ) :
     HasSum (fun n : ℕ => Ring.choose (a + n - 1) n * t ^ n) (1 / (1 - t) ^ a) := by
   have hb := (Real.one_div_one_sub_rpow_hasFPowerSeriesOnBall_zero a).hasSum (y := t) (by
     rw [Metric.mem_eball, edist_zero_right, ← ofReal_norm, Real.norm_eq_abs]
@@ -487,7 +473,7 @@ theorem s26a_hasSum_ringChoose_add_mul_pow {t : ℝ} (ht : |t| < 1) (a : ℝ) :
   exact hb
 
 /-- The rows of the bivariate series 26.8.9. -/
-theorem s26a_hasSum_signedStirlingFirst_row (x y : ℝ) (n : ℕ) :
+lemma s26a_hasSum_signedStirlingFirst_row (x y : ℝ) (n : ℕ) :
     HasSum (fun k : ℕ => (signedStirlingFirst n k : ℝ) * x ^ n / n.factorial * y ^ k)
       (Ring.choose y n * x ^ n) := by
   have h : HasSum (fun k : ℕ => (signedStirlingFirst n k : ℝ) * x ^ n / n.factorial * y ^ k)
@@ -503,7 +489,7 @@ theorem s26a_hasSum_signedStirlingFirst_row (x y : ℝ) (n : ℕ) :
   ring
 
 /-- The absolute rows of the bivariate series 26.8.9. -/
-theorem s26a_hasSum_signedStirlingFirst_row_abs (x y : ℝ) (n : ℕ) :
+lemma s26a_hasSum_signedStirlingFirst_row_abs (x y : ℝ) (n : ℕ) :
     HasSum (fun k : ℕ => |(signedStirlingFirst n k : ℝ) * x ^ n / n.factorial * y ^ k|)
       (Ring.choose (|y| + n - 1) n * |x| ^ n) := by
   have h : HasSum (fun k : ℕ => |(signedStirlingFirst n k : ℝ) * x ^ n / n.factorial * y ^ k|)
@@ -520,7 +506,7 @@ theorem s26a_hasSum_signedStirlingFirst_row_abs (x y : ℝ) (n : ℕ) :
   ring
 
 /-- The double series 26.8.9 converges absolutely. -/
-theorem s26a_summable_abs_signedStirlingFirst_bivariate {x : ℝ} (hx : |x| < 1) (y : ℝ) :
+lemma s26a_summable_abs_signedStirlingFirst_bivariate {x : ℝ} (hx : |x| < 1) (y : ℝ) :
     Summable (fun p : ℕ × ℕ => |(signedStirlingFirst p.1 p.2 : ℝ) * x ^ p.1 / p.1.factorial *
       y ^ p.2|) := by
   refine (summable_prod_of_nonneg fun _ => abs_nonneg _).mpr
@@ -529,14 +515,14 @@ theorem s26a_summable_abs_signedStirlingFirst_bivariate {x : ℝ} (hx : |x| < 1)
   exact (s26a_hasSum_ringChoose_add_mul_pow (t := |x|) (by rwa [abs_abs]) |y|).summable
 
 /-- The double series 26.8.9 is summable. -/
-theorem s26a_summable_signedStirlingFirst_bivariate {x : ℝ} (hx : |x| < 1) (y : ℝ) :
+lemma s26a_summable_signedStirlingFirst_bivariate {x : ℝ} (hx : |x| < 1) (y : ℝ) :
     Summable (fun p : ℕ × ℕ => (signedStirlingFirst p.1 p.2 : ℝ) * x ^ p.1 / p.1.factorial *
       y ^ p.2) :=
   Summable.of_norm (by simpa only [Real.norm_eq_abs] using
     s26a_summable_abs_signedStirlingFirst_bivariate hx y)
 
 /-- DLMF 26.8.9 (helper). -/
-theorem s26a_hasSum_signedStirlingFirst_bivariate {x : ℝ} (hx : |x| < 1) (y : ℝ) :
+lemma s26a_hasSum_signedStirlingFirst_bivariate {x : ℝ} (hx : |x| < 1) (y : ℝ) :
     HasSum (fun p : ℕ × ℕ => (signedStirlingFirst p.1 p.2 : ℝ) * x ^ p.1 / p.1.factorial *
       y ^ p.2) ((1 + x) ^ y) := by
   have hs := s26a_summable_signedStirlingFirst_bivariate hx y
@@ -545,7 +531,7 @@ theorem s26a_hasSum_signedStirlingFirst_bivariate {x : ℝ} (hx : |x| < 1) (y : 
   exact hs.hasSum
 
 /-- DLMF 26.8.8 (helper). -/
-theorem s26a_hasSum_signedStirlingFirst_div_factorial (k : ℕ) {x : ℝ} (hx : |x| < 1) :
+lemma s26a_hasSum_signedStirlingFirst_div_factorial (k : ℕ) {x : ℝ} (hx : |x| < 1) :
     HasSum (fun n : ℕ => (signedStirlingFirst n k : ℝ) * x ^ n / n.factorial)
       (Real.log (1 + x) ^ k / k.factorial) := by
   set A : ℕ → ℝ := fun k => ∑' n : ℕ, (signedStirlingFirst n k : ℝ) * x ^ n / n.factorial
@@ -616,7 +602,7 @@ theorem hasSum_signedStirlingFirst_bivariate {x : ℝ} (hx : |x| < 1) (y : ℝ) 
   s26a_hasSum_signedStirlingFirst_bivariate hx y
 
 /-- The series `∑ S(n, k) xⁿ` converges for `k|x| < 1` (from 26.8.6). -/
-theorem q26a_summable_stirlingSecond_mul_pow (k : ℕ) {x : ℝ} (hx : k * |x| < 1) :
+lemma q26a_summable_stirlingSecond_mul_pow (k : ℕ) {x : ℝ} (hx : k * |x| < 1) :
     Summable (fun n : ℕ => (Nat.stirlingSecond n k : ℝ) * x ^ n) := by
   have hc : ∀ n, (Nat.stirlingSecond n k : ℝ) * x ^ n = ∑ j ∈ range (k + 1),
       (1 / k.factorial : ℝ) * ((-1 : ℝ) ^ (k - j) * (k.choose j : ℝ)) * ((j : ℝ) * x) ^ n := by
@@ -760,7 +746,7 @@ theorem signedStirlingFirst_one_right {n : ℕ} (hn : 1 ≤ n) :
   simp [signedStirlingFirst, Nat.stirlingFirst_one_right]
 
 /-- The unsigned `c(n+1, 2) = n! H_n`. -/
-theorem c26a_stirlingFirst_two (n : ℕ) :
+lemma c26a_stirlingFirst_two (n : ℕ) :
     (Nat.stirlingFirst (n + 1) 2 : ℚ) = n.factorial * harmonic n := by
   induction n with
   | zero => simp [Nat.stirlingFirst_eq_zero_of_lt]
@@ -818,13 +804,13 @@ theorem stirlingSecond_two_right {n : ℕ} (hn : 1 ≤ n) :
 /-! ### Recurrence relations (§26.8(iv)) -/
 
 /-- The falling factorial evaluated (`smeval`) in a commutative ring, as `∑_k s(n,k) rᵏ`. -/
-theorem r26a_smeval_descPochhammer {R : Type*} [CommRing R] (n : ℕ) (r : R) :
+lemma r26a_smeval_descPochhammer {R : Type*} [CommRing R] (n : ℕ) (r : R) :
     (descPochhammer ℤ n).smeval r = ∑ k ∈ range (n + 1), (signedStirlingFirst n k : R) * r ^ k := by
   rw [← aeval_eq_smeval, aeval_eq_sum_range' (n := n + 1) (by simp [descPochhammer_natDegree])]
   simp [coeff_descPochhammer, zsmul_eq_mul]
 
 /-- The double coefficient `[Yᵐ][Xʰ]` of `c · Xᵃ Yᵇ` in `ℤ[X][Y]`. -/
-theorem r26a_coeff_coeff (c : ℤ) (a b h m : ℕ) :
+lemma r26a_coeff_coeff (c : ℤ) (a b h m : ℕ) :
     (((c : ℤ[X][X]) * (C X) ^ a * X ^ b).coeff m).coeff h =
       if a = h ∧ b = m then c else 0 := by
   rw [← C_pow, show ((c : ℤ[X][X])) = C (c : ℤ[X]) by simp, ← C_mul, coeff_C_mul_X_pow]
@@ -904,7 +890,7 @@ theorem choose_mul_signedStirlingFirst {n k h : ℕ} (hkn : k ≤ n) (hhk : h �
   · rw [signedStirlingFirst_eq_zero_of_lt (by omega : n - j < h), mul_zero, zero_mul]
 
 /-- DLMF 26.8.20 (range form): `s(n+1, k+1) = n! ∑_{j=0}^{n} (-1)^{n-j} s(j, k) / j!`. -/
-theorem c26a_signedStirlingFirst_succ_succ_eq_sum_range (n k : ℕ) :
+lemma c26a_signedStirlingFirst_succ_succ_eq_sum_range (n k : ℕ) :
     (signedStirlingFirst (n + 1) (k + 1) : ℚ) =
       n.factorial *
         ∑ j ∈ range (n + 1), (-1 : ℚ) ^ (n - j) / j.factorial * signedStirlingFirst j k := by
@@ -960,7 +946,7 @@ theorem stirlingSecond_succ_succ' (n k : ℕ) :
       Nat.stirlingSecond n k := Nat.stirlingSecond_succ_succ n k
 
 /-- Surjections `ι → Fin h ⊕ Fin m` with prescribed preimage `J` of the right summand. -/
-theorem r26a_card_surj_sum_fiber {ι : Type*} [Fintype ι] [DecidableEq ι] (h m : ℕ)
+lemma r26a_card_surj_sum_fiber {ι : Type*} [Fintype ι] [DecidableEq ι] (h m : ℕ)
     (J : Finset ι) :
     #{f : ι → Fin h ⊕ Fin m | Function.Surjective f ∧ ({x | (f x).isRight} : Finset ι) = J} =
       #{g : {x // x ∉ J} → Fin h | Function.Surjective g} *
@@ -1003,7 +989,7 @@ theorem r26a_card_surj_sum_fiber {ι : Type*} [Fintype ι] [DecidableEq ι] (h m
         exact Sum.inl_getLeft _ _
 
 /-- The number of surjections depends only on the domain up to equivalence. -/
-theorem r26a_card_surj_dom_congr {ι ι' β : Type*} [Fintype ι] [DecidableEq ι] [Fintype ι']
+lemma r26a_card_surj_dom_congr {ι ι' β : Type*} [Fintype ι] [DecidableEq ι] [Fintype ι']
     [DecidableEq ι'] [Fintype β] [DecidableEq β] (e : ι ≃ ι') :
     #{f : ι → β | Function.Surjective f} = #{f : ι' → β | Function.Surjective f} := by
   refine card_bij (fun f _ => f ∘ e.symm) ?_ ?_ ?_
@@ -1017,7 +1003,7 @@ theorem r26a_card_surj_dom_congr {ι ι' β : Type*} [Fintype ι] [DecidableEq �
     exact ⟨g ∘ e, by simpa using hg.comp e.surjective, by funext x; simp⟩
 
 /-- `#{surj Fin n → Fin (h+m)} = ∑_j C(n,j) #{surj Fin (n-j) → Fin h} #{surj Fin j → Fin m}`. -/
-theorem r26a_card_surj_add (n h m : ℕ) :
+lemma r26a_card_surj_add (n h m : ℕ) :
     #{f : Fin n → Fin (h + m) | Function.Surjective f} =
       ∑ j ∈ range (n + 1), n.choose j * (#{f : Fin (n - j) → Fin h | Function.Surjective f} *
         #{f : Fin j → Fin m | Function.Surjective f}) := by
@@ -1144,13 +1130,13 @@ theorem stirlingSecond_add_succ (n k : ℕ) :
 /-! ### Identities (§26.8(v)) -/
 
 /-- Dropping a vanishing `k = 0` term: `∑_{k=0}^n f k = ∑_{k=1}^n f k` when `f 0 = 0`. -/
-theorem c26a_sum_range_eq_sum_Icc {M : Type*} [AddCommMonoid M] (n : ℕ) {f : ℕ → M}
+lemma c26a_sum_range_eq_sum_Icc {M : Type*} [AddCommMonoid M] (n : ℕ) {f : ℕ → M}
     (h : f 0 = 0) : ∑ k ∈ range (n + 1), f k = ∑ k ∈ Icc 1 n, f k := by
   rw [range_eq_Ico, sum_eq_sum_Ico_succ_bot (by omega), h, zero_add]
   rfl
 
 /-- `(-1)^{n-k} = (-1)^n (-1)^k` for `k ≤ n`. -/
-theorem c26a_neg_one_pow_sub {R : Type*} [Monoid R] [HasDistribNeg R] {n k : ℕ} (hk : k ≤ n) :
+lemma c26a_neg_one_pow_sub {R : Type*} [Monoid R] [HasDistribNeg R] {n k : ℕ} (hk : k ≤ n) :
     (-1 : R) ^ (n - k) = (-1) ^ n * (-1) ^ k := by
   have : (-1 : R) ^ n = (-1) ^ (n - k) * (-1) ^ k := by rw [← pow_add, Nat.sub_add_cancel hk]
   rw [this, mul_assoc, ← pow_add, ← two_mul, pow_mul]; simp
@@ -1175,7 +1161,7 @@ theorem sum_signedStirlingFirst {n : ℕ} (hn : 1 < n) :
   rw [← c26a_sum_range_eq_sum_Icc n (signedStirlingFirst_zero_right (by omega)), h]
 
 /-- The falling factorial at `-1`: `(-1)(-2)⋯(-n) = (-1)ⁿ n!`. -/
-theorem c26a_descPochhammer_eval_neg_one (n : ℕ) :
+lemma c26a_descPochhammer_eval_neg_one (n : ℕ) :
     (descPochhammer ℤ n).eval (-1) = (-1) ^ n * (n.factorial : ℤ) := by
   have h := ascPochhammer_eval_neg_eq_descPochhammer (R := ℤ) (-1) n
   rw [neg_neg, ascPochhammer_eval_one] at h
@@ -1430,7 +1416,7 @@ def c26a_matS1 (n : ℕ) : Matrix (Fin (n + 1)) (Fin (n + 1)) ℤ :=
 def c26a_matS2 (n : ℕ) : Matrix (Fin (n + 1)) (Fin (n + 1)) ℤ :=
   fun i j => Nat.stirlingSecond i j
 
-theorem c26a_matS2_mul_matS1 (n : ℕ) : c26a_matS2 n * c26a_matS1 n = 1 := by
+lemma c26a_matS2_mul_matS1 (n : ℕ) : c26a_matS2 n * c26a_matS1 n = 1 := by
   ext a b
   have ha := a.isLt
   simp only [Matrix.mul_apply, c26a_matS1, c26a_matS2, Matrix.one_apply, Fin.ext_iff]
@@ -1516,7 +1502,7 @@ theorem tendsto_signedStirlingFirst_div (k : ℕ → ℕ)
   sorry
 
 /-- Faulhaber asymptotics: `∑_{j<K} j^p ~ K^{p+1}/(p+1)`. -/
-theorem q26a_sum_range_pow_isEquivalent (p : ℕ) :
+lemma q26a_sum_range_pow_isEquivalent (p : ℕ) :
     (fun K : ℕ => ∑ j ∈ range K, (j : ℝ) ^ p) ~[atTop] fun K => (K : ℝ) ^ (p + 1) / (p + 1) := by
   apply isEquivalent_of_tendsto_one
   have hval : ∀ K : ℕ, 0 < K → (∑ j ∈ range K, (j : ℝ) ^ p) / ((K : ℝ) ^ (p + 1) / (p + 1)) =
@@ -1547,7 +1533,7 @@ theorem q26a_sum_range_pow_isEquivalent (p : ℕ) :
   rw [Pi.div_apply, hval K hK]
 
 /-- Summing asymptotic equivalents of a nonnegative divergent comparison sequence. -/
-theorem q26a_sum_range_isEquivalent {u v : ℕ → ℝ} (h : u ~[atTop] v) (hv : 0 ≤ v)
+lemma q26a_sum_range_isEquivalent {u v : ℕ → ℝ} (h : u ~[atTop] v) (hv : 0 ≤ v)
     (hs : Tendsto (fun n => ∑ i ∈ range n, v i) atTop atTop) :
     (fun n => ∑ i ∈ range n, u i) ~[atTop] fun n => ∑ i ∈ range n, v i := by
   have := h.isLittleO.sum_range hv hs
@@ -1556,7 +1542,7 @@ theorem q26a_sum_range_isEquivalent {u v : ℕ → ℝ} (h : u ~[atTop] v) (hv :
   ext n; simp [sum_sub_distrib]
 
 /-- Unsigned form of DLMF 26.8.41: `c(n+k, k) ~ k^{2n}/(2ⁿ n!)`. -/
-theorem q26a_stirlingFirst_add_isEquivalent (n : ℕ) :
+lemma q26a_stirlingFirst_add_isEquivalent (n : ℕ) :
     (fun k : ℕ => (Nat.stirlingFirst (n + k) k : ℝ)) ~[atTop]
       fun k => (k : ℝ) ^ (2 * n) / (2 ^ n * n.factorial) := by
   induction n with
@@ -1697,7 +1683,7 @@ section CycleCount
 open Equiv Equiv.Perm
 
 /-- A relation that is an equivalence and relates every point to its image contains `SameCycle`. -/
-theorem q26a_sameCycle_le {α : Type*} {f : Perm α} {R : α → α → Prop} (hR : Equivalence R)
+lemma q26a_sameCycle_le {α : Type*} {f : Perm α} {R : α → α → Prop} (hR : Equivalence R)
     (hf : ∀ x, R x (f x)) {x y : α} (h : SameCycle f x y) : R x y := by
   obtain ⟨i, rfl⟩ := h
   induction i using Int.induction_on with
@@ -1716,7 +1702,7 @@ def q26a_cycleMax {α : Type*} [Fintype α] [LinearOrder α] (σ : Perm α) : Fi
 
 /-- Inserting `0` into a permutation of `Fin n` (via `decomposeFin`) does not change which
 nonzero points lie in a common cycle. -/
-theorem q26a_sameCycle_succ {n : ℕ} (p : Fin (n + 1)) (τ : Perm (Fin n)) (x y : Fin n) :
+lemma q26a_sameCycle_succ {n : ℕ} (p : Fin (n + 1)) (τ : Perm (Fin n)) (x y : Fin n) :
     SameCycle (decomposeFin.symm (p, τ)) x.succ y.succ ↔ SameCycle τ x y := by
   set σ := decomposeFin.symm (p, τ)
   constructor
@@ -1770,7 +1756,7 @@ theorem q26a_sameCycle_succ {n : ℕ} (p : Fin (n + 1)) (τ : Perm (Fin n)) (x y
       rw [← h1]; exact (SameCycle.refl _ _).apply_right
 
 /-- Inserting `0` adds a cycle exactly when `0` becomes a fixed point. -/
-theorem q26a_card_cycleMax_decomposeFin {n : ℕ} (p : Fin (n + 1)) (τ : Perm (Fin n)) :
+lemma q26a_card_cycleMax_decomposeFin {n : ℕ} (p : Fin (n + 1)) (τ : Perm (Fin n)) :
     #(q26a_cycleMax (decomposeFin.symm (p, τ))) = #(q26a_cycleMax τ) + if p = 0 then 1 else 0 := by
   simp only [q26a_cycleMax, card_filter, Fin.sum_univ_succ]
   rw [add_comm]
@@ -1802,7 +1788,7 @@ theorem q26a_card_cycleMax_decomposeFin {n : ℕ} (p : Fin (n + 1)) (τ : Perm (
         simpa using this
       exact hp (le_antisymm (h p hs) (Fin.zero_le _))
 /-- The number of cycles (fixed points included) equals the number of cycle maxima. -/
-theorem q26a_card_parts_partition {α : Type*} [Fintype α] [LinearOrder α] (σ : Perm α) :
+lemma q26a_card_parts_partition {α : Type*} [Fintype α] [LinearOrder α] (σ : Perm α) :
     Multiset.card σ.partition.parts = #(q26a_cycleMax σ) := by
   rw [parts_partition, Multiset.card_add, Multiset.card_replicate, cycleType_def,
     Multiset.card_map]
@@ -1846,7 +1832,7 @@ theorem q26a_card_parts_partition {α : Type*} [Fintype α] [LinearOrder α] (σ
     rw [this, card_sdiff_of_subset (subset_univ _), card_univ]
 
 /-- Permutations of `Fin n` with `k` cycle maxima are counted by `Nat.stirlingFirst n k`. -/
-theorem q26a_card_cycleMax_eq (n k : ℕ) :
+lemma q26a_card_cycleMax_eq (n k : ℕ) :
     #{σ : Perm (Fin n) | #(q26a_cycleMax σ) = k} = Nat.stirlingFirst n k := by
   induction n generalizing k with
   | zero =>

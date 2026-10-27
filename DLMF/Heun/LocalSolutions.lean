@@ -8,9 +8,6 @@ module
 public import DLMF.Heun.Basic
 public import DLMF.Heun.Equation
 public import DLMF.Hypergeometric.Series
-public import Mathlib.Analysis.Convex.PathConnected
-public import Mathlib.Analysis.SpecialFunctions.Pow.Complex
-public import Mathlib.Topology.Algebra.InfiniteSum.Basic
 
 /-!
 # Basic solutions of Heun's equation (DLMF §31.3)
@@ -88,7 +85,7 @@ theorem heunLocal_zero : heunLocal a q α β γ δ 0 = 1 := by
 /-! ### Convergence of the Maclaurin series of `Hl` -/
 
 /-- `(u m + v)/(a (m + 1)(m + γ)) → 0`. -/
-theorem p1h_tendsto_lin_div (u v a γ : ℂ) (ha : a ≠ 0) :
+lemma p1h_tendsto_lin_div (u v a γ : ℂ) (ha : a ≠ 0) :
     Tendsto (fun n : ℕ => (u * n + v) / (a * ((n : ℂ) + 1) * ((n : ℂ) + γ))) atTop (𝓝 0) := by
   have hw : Tendsto (fun n : ℕ => ((n : ℂ))⁻¹) atTop (𝓝 0) := tendsto_inv_atTop_nhds_zero_nat
   have h := ((tendsto_const_nhds (x := u)).add ((tendsto_const_nhds (x := v)).mul hw)).mul hw
@@ -103,7 +100,7 @@ theorem p1h_tendsto_lin_div (u v a γ : ℂ) (ha : a ≠ 0) :
   field_simp
 
 /-- One step of the majorant argument for a three-term recurrence. -/
-theorem p1h_step {a A B c₀ c c' : ℂ} {η δ r : ℝ} (hη : 0 < η) (hδ : 0 ≤ δ)
+lemma p1h_step {a A B c₀ c c' : ℂ} {η δ r : ℝ} (hη : 0 < η) (hδ : 0 ≤ δ)
     (h : c' = A * c + B * c₀) (h1 : ‖A + B - 1‖ ≤ η * δ / 2) (h2 : ‖B + 1 / a‖ ≤ δ / 2)
     (hr1 : 1 / ‖a‖ + δ ≤ r) (hr2 : 1 + η * (1 / ‖a‖ + δ) ≤ r) :
     max (η * ‖c'‖) ‖c' - c‖ ≤ r * max (η * ‖c‖) ‖c - c₀‖ := by
@@ -143,14 +140,14 @@ theorem p1h_step {a A B c₀ c c' : ℂ} {η δ r : ℝ} (hη : 0 < η) (hδ : 0
   gcongr
 
 /-- The recurrence of `heunLocalCoeff` in the form `c_{n+2} = A_n c_{n+1} + B_n c_n`. -/
-theorem p1h_coeff_add_two (a q α β γ δ : ℂ) (n : ℕ) :
+lemma p1h_coeff_add_two (a q α β γ δ : ℂ) (n : ℕ) :
     heunLocalCoeff a q α β γ δ (n + 2) =
       (heunRecQ a α β γ δ (n + 1) + q) / heunRecR a γ (n + 1) *
           heunLocalCoeff a q α β γ δ (n + 1) +
         -heunRecP α β (n + 1) / heunRecR a γ (n + 1) * heunLocalCoeff a q α β γ δ n := by
   rw [heunLocalCoeff]; ring
 
-theorem p1h_eventually_R_ne (a γ : ℂ) (ha : a ≠ 0) :
+lemma p1h_eventually_R_ne (a γ : ℂ) (ha : a ≠ 0) :
     ∀ᶠ n : ℕ in atTop, heunRecR a γ (n + 1) ≠ 0 := by
   obtain ⟨N, hN⟩ := exists_nat_gt ‖γ‖
   filter_upwards [eventually_ge_atTop N] with n hn
@@ -161,7 +158,7 @@ theorem p1h_eventually_R_ne (a γ : ℂ) (ha : a ≠ 0) :
   have : (N : ℝ) ≤ n := by exact_mod_cast hn
   linarith
 
-theorem p1h_tendsto_A_add_B (a q α β γ δ : ℂ) (ha : a ≠ 0) :
+lemma p1h_tendsto_A_add_B (a q α β γ δ : ℂ) (ha : a ≠ 0) :
     Tendsto (fun n : ℕ => (heunRecQ a α β γ δ (n + 1) + q) / heunRecR a γ (n + 1) +
       -heunRecP α β (n + 1) / heunRecR a γ (n + 1) - 1) atTop (𝓝 0) := by
   have h := (p1h_tendsto_lin_div (a * δ - 2 * a - δ + 2)
@@ -174,7 +171,7 @@ theorem p1h_tendsto_A_add_B (a q α β γ δ : ℂ) (ha : a ≠ 0) :
   push_cast
   ring_nf
 
-theorem p1h_tendsto_B (a α β γ : ℂ) (ha : a ≠ 0) :
+lemma p1h_tendsto_B (a α β γ : ℂ) (ha : a ≠ 0) :
     Tendsto (fun n : ℕ => -heunRecP α β (n + 1) / heunRecR a γ (n + 1) + 1 / a) atTop
       (𝓝 0) := by
   have h := (p1h_tendsto_lin_div ((-a * α - a * β + a * γ + 3 * a) / a)
@@ -193,7 +190,7 @@ theorem p1h_radius_pos {a : ℂ} (ha : a ≠ 0) : 0 < heunLocalRadius a :=
   lt_min one_pos (norm_pos_iff.2 ha)
 
 /-- Majorant bound: `∑ ‖c_n‖ tⁿ` converges for `0 ≤ t < min(1, |a|)`. -/
-theorem p1h_summable_norm {a q α β γ δ : ℂ} (ha : a ≠ 0) {t : ℝ} (ht0 : 0 ≤ t)
+lemma p1h_summable_norm {a q α β γ δ : ℂ} (ha : a ≠ 0) {t : ℝ} (ht0 : 0 ≤ t)
     (ht : t < heunLocalRadius a) :
     Summable (fun n => ‖heunLocalCoeff a q α β γ δ n‖ * t ^ n) := by
   set c := heunLocalCoeff a q α β γ δ
@@ -275,7 +272,7 @@ def p1hSh (u : ℕ → ℂ) : ℕ → ℂ
   | 0 => 0
   | n + 1 => u n
 
-theorem p1h_hasSum_sh {u : ℕ → ℂ} {S z : ℂ} (h : HasSum (fun n => u n * z ^ n) S) :
+lemma p1h_hasSum_sh {u : ℕ → ℂ} {S z : ℂ} (h : HasSum (fun n => u n * z ^ n) S) :
     HasSum (fun n => p1hSh u n * z ^ n) (z * S) :=
   HasSum.mul_pow_shift (c := p1hSh u) h rfl
 
@@ -341,7 +338,7 @@ theorem p1h_hasSum_heunOperator {a q α β γ δ : ℂ} {b : ℕ → ℂ} {f : �
     ring
 
 /-- `z (𝒟 Hl - q Hl) = 0` on the disk of convergence. -/
-theorem p1h_heunOperator_heunLocal {a q α β γ δ : ℂ} (ha : a ≠ 0) (hγ : ∀ n : ℕ, γ ≠ -(n : ℂ))
+lemma p1h_heunOperator_heunLocal {a q α β γ δ : ℂ} (ha : a ≠ 0) (hγ : ∀ n : ℕ, γ ≠ -(n : ℂ))
     {z : ℂ} (hz : ‖z‖ < heunLocalRadius a) :
     z * (heunOperator a α β γ δ (heunEps α β γ δ) (heunLocal a q α β γ δ) z -
       q * heunLocal a q α β γ δ z) = 0 := by
@@ -409,12 +406,12 @@ theorem heunLocal_isHeunSolOn (ha : a ≠ 0) (hγ : ∀ n : ℕ, γ ≠ -(n : �
 /-! ### Transformations used for the local solutions -/
 
 /-- Restriction of a solution to a subset. -/
-theorem p1h_isLinearODE2On_mono {p r w : ℂ → ℂ} {s t : Set ℂ} (h : IsLinearODE2On p r w t)
+lemma p1h_isLinearODE2On_mono {p r w : ℂ → ℂ} {s t : Set ℂ} (h : IsLinearODE2On p r w t)
     (hst : s ⊆ t) : IsLinearODE2On p r w s :=
   ⟨fun z hz => h.1 z (hst hz), fun z hz => h.2 z (hst hz)⟩
 
 /-- Heun's equation is symmetric in `α` and `β`. -/
-theorem p1h_isHeunSolOn_swap {w : ℂ → ℂ} {s : Set ℂ} (h : IsHeunSolOn a q α β γ δ ε w s) :
+lemma p1h_isHeunSolOn_swap {w : ℂ → ℂ} {s : Set ℂ} (h : IsHeunSolOn a q α β γ δ ε w s) :
     IsHeunSolOn a q β α γ δ ε w s := by
   have : heunCoeffR a q β α = heunCoeffR a q α β := by
     funext z; unfold heunCoeffR; ring
@@ -423,7 +420,7 @@ theorem p1h_isHeunSolOn_swap {w : ℂ → ℂ} {s : Set ℂ} (h : IsHeunSolOn a 
 
 /-- The homography `z ↦ 1 - z` (§31.2(v)): a solution of Heun's equation with parameters
 `(1 - a, αβ - q; α, β, δ, γ; ε)` composed with `1 - z` solves the original equation. -/
-theorem p1h_isHeunSolOn_one_sub {U V : Set ℂ} (hU : IsOpen U)
+lemma p1h_isHeunSolOn_one_sub {U V : Set ℂ} (hU : IsOpen U)
     (hUs : ∀ z ∈ U, z ≠ 0 ∧ z ≠ 1 ∧ z ≠ a ∧ 1 - z ∈ V) {w : ℂ → ℂ}
     (hw : IsHeunSolOn (1 - a) (α * β - q) α β δ γ ε w V) :
     IsHeunSolOn a q α β γ δ ε (fun z => w (1 - z)) U := by
@@ -453,7 +450,7 @@ theorem p1h_isHeunSolOn_one_sub {U V : Set ℂ} (hU : IsOpen U)
     ring
 
 /-- The homography `z ↦ (a - z)/(a - 1)` (§31.2(v)). -/
-theorem p1h_isHeunSolOn_comp_a (ha1 : a ≠ 1) {U V : Set ℂ} (hU : IsOpen U)
+lemma p1h_isHeunSolOn_comp_a (ha1 : a ≠ 1) {U V : Set ℂ} (hU : IsOpen U)
     (hUs : ∀ z ∈ U, z ≠ 0 ∧ z ≠ 1 ∧ z ≠ a ∧ (a - z) / (a - 1) ∈ V) {w : ℂ → ℂ}
     (hw : IsHeunSolOn (a / (a - 1)) ((α * β * a - q) / (a - 1)) α β ε δ γ w V) :
     IsHeunSolOn a q α β γ δ ε (fun z => w ((a - z) / (a - 1))) U := by
@@ -486,7 +483,7 @@ theorem p1h_isHeunSolOn_comp_a (ha1 : a ≠ 1) {U V : Set ℂ} (hU : IsOpen U)
 /-- The map `w ↦ z^{-α} w(1/z)` (§31.2(v), §31.3(ii)): a solution of Heun's equation with
 parameters `(1/a, q/a - α(β - ε) - (α/a)(β - δ); α, α - γ + 1, α - β + 1, δ; ε)` gives a
 solution of the original equation. -/
-theorem p1h_isHeunSolOn_infinity (ha0 : a ≠ 0) (hε : ε = heunEps α β γ δ) {U V : Set ℂ}
+lemma p1h_isHeunSolOn_infinity (ha0 : a ≠ 0) (hε : ε = heunEps α β γ δ) {U V : Set ℂ}
     (hU : IsOpen U) (hUs : ∀ z ∈ U, z ∈ slitPlane ∧ z ≠ 1 ∧ z ≠ a ∧ 1 / z ∈ V) {w : ℂ → ℂ}
     (hw : IsHeunSolOn (1 / a) (q / a - α * (β - ε) - α / a * (β - δ)) α (α - γ + 1)
       (α - β + 1) δ ε w V) :
@@ -535,18 +532,18 @@ theorem p1h_isHeunSolOn_infinity (ha0 : a ≠ 0) (hε : ε = heunEps α β γ δ
     ring
 
 /-- The domain `{|z| < min(1, |a|)} ∩ slitPlane` is open. -/
-theorem p1h_isOpen_ball_slit (a : ℂ) :
+lemma p1h_isOpen_ball_slit (a : ℂ) :
     IsOpen {z : ℂ | ‖z‖ < heunLocalRadius a ∧ z ∈ slitPlane} :=
   (isOpen_lt continuous_norm continuous_const).inter isOpen_slitPlane
 
 /-- A point of the disk of convergence of `Hl(a, ⋯)` is neither `1` nor `a`. -/
-theorem p1h_ne_of_radius {a z : ℂ} (hz : ‖z‖ < heunLocalRadius a) : z ≠ 1 ∧ z ≠ a := by
+lemma p1h_ne_of_radius {a z : ℂ} (hz : ‖z‖ < heunLocalRadius a) : z ≠ 1 ∧ z ≠ a := by
   refine ⟨fun h => ?_, fun h => ?_⟩
   · subst h; simp only [norm_one] at hz; exact absurd (hz.trans_le (min_le_left _ _)) (lt_irrefl _)
   · subst h; exact absurd (hz.trans_le (min_le_right _ _)) (lt_irrefl _)
 
 /-- The domain `{|1/z| < min(1, |1/a|)} ∩ slitPlane` is open. -/
-theorem p1h_isOpen_inv_slit (a : ℂ) :
+lemma p1h_isOpen_inv_slit (a : ℂ) :
     IsOpen {z : ℂ | ‖1 / z‖ < heunLocalRadius (1 / a) ∧ z ∈ slitPlane} := by
   have hc : ContinuousOn (fun z : ℂ => ‖1 / z‖) slitPlane := by
     refine ContinuousOn.norm (continuousOn_const.div continuousOn_id fun z hz => ?_)
@@ -557,14 +554,14 @@ theorem p1h_isOpen_inv_slit (a : ℂ) :
   simp [and_comm]
 
 /-- A one-variable power series is `ofScalars` of its coefficients. -/
-theorem p1h_eq_ofScalars_coeff (p : FormalMultilinearSeries ℂ ℂ ℂ) :
+lemma p1h_eq_ofScalars_coeff (p : FormalMultilinearSeries ℂ ℂ ℂ) :
     p = ofScalars ℂ (fun n => p.coeff n) := by
   ext n
   rw [apply_eq_prod_smul_coeff]
   simp [ofScalars, mul_comm]
 
 /-- Coefficients of a power series vanishing on a ball vanish. -/
-theorem p1h_coeff_eq_zero_of_hasSum {e : ℕ → ℂ} {r : ℝ} (hr : 0 < r)
+lemma p1h_coeff_eq_zero_of_hasSum {e : ℕ → ℂ} {r : ℝ} (hr : 0 < r)
     (h : ∀ z : ℂ, ‖z‖ < r → HasSum (fun n => e n * z ^ n) 0) : e = 0 := by
   have hrad : ENNReal.ofReal r ≤ (ofScalars ℂ e).radius := by
     refine ENNReal.le_of_forall_nnreal_lt fun t ht => ?_
@@ -831,7 +828,7 @@ theorem heunLocal_second_at_infinity_isHeunSolOn (ha0 : a ≠ 0)
 
 /-- The coefficients of `Hl(1/a, q/a; α, β, γ, ε; ·)` are `a^j` times those of
 `Hl(a, q; α, β, γ, δ; ·)`, where `ε = α + β + 1 - γ - δ`. -/
-theorem h31_heunLocalCoeff_inv (ha : a ≠ 0) (j : ℕ) :
+lemma h31_heunLocalCoeff_inv (ha : a ≠ 0) (j : ℕ) :
     heunLocalCoeff (1 / a) (q / a) α β γ (heunEps α β γ δ) j =
       a ^ j * heunLocalCoeff a q α β γ δ j := by
   induction j using Nat.strong_induction_on with
@@ -873,7 +870,7 @@ theorem heunLocal_eq_heunLocal_inv (ha : a ≠ 0) (z : ℂ) :
   field_simp
 
 /-- The domain of 31.3.13 is star-shaped with respect to `0`. -/
-theorem p1h_pfaff_domain_star {a : ℂ} {z : ℂ} {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1)
+lemma p1h_pfaff_domain_star {a : ℂ} {z : ℂ} {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1)
     (hz : ‖z‖ < heunLocalRadius a) (hz' : ‖z / (z - 1)‖ < heunLocalRadius (a / (a - 1))) :
     ‖(t : ℂ) * z‖ < heunLocalRadius a ∧
       ‖(t : ℂ) * z / ((t : ℂ) * z - 1)‖ < heunLocalRadius (a / (a - 1)) := by

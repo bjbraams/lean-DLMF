@@ -5,15 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Elliptic.Jacobi
-public import DLMF.Elliptic.Theta
-public import DLMF.QSeries.Identities
 public import DLMF.Theta.Identities
-public import DLMF.Theta.ZeroValues
 public import DLMF.Elliptic.ThetaAGM
-public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
-public import Mathlib.Analysis.SpecialFunctions.Pow.Complex
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 
 /-!
 # Jacobian elliptic functions: definitions (DLMF §22.2)
@@ -236,7 +229,7 @@ def jacobiCsTau (z τ : ℂ) : ℂ := jacobiPQTau .c .s z τ
 open DLMF.QSeries DLMF.QSeries.TripleProduct in
 /-- The triple-product form of `jacobiTheta₂`:
 `jacobiTheta₂ a τ = (Q;Q)_∞ (w;Q)_∞ (Q/w;Q)_∞` with `Q = e^{2πiτ}`, `w = -e^{πiτ + 2πia}`. -/
-theorem je22a_jacobiTheta₂_eq_prod (a : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
+lemma je22a_jacobiTheta₂_eq_prod (a : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
     jacobiTheta₂ a τ =
       qPochhammerInf (cexp (2 * π * I * τ)) (cexp (2 * π * I * τ)) *
         qPochhammerInf (-cexp (π * I * τ + 2 * π * I * a)) (cexp (2 * π * I * τ)) *
@@ -360,7 +353,7 @@ theorem je22a_thetaFour_add_half_pi (ζ τ : ℂ) :
 /-- The multiplier `e^{-iπτ/4 - iζ}` of the half-period shift `ζ ↦ ζ + πτ/2`. -/
 def je22a_shiftFactor (ζ τ : ℂ) : ℂ := cexp (-(π * I * τ / 4 + I * ζ))
 
-lemma je22a_shiftFactor_ne_zero (ζ τ : ℂ) : je22a_shiftFactor ζ τ ≠ 0 := Complex.exp_ne_zero _
+theorem je22a_shiftFactor_ne_zero (ζ τ : ℂ) : je22a_shiftFactor ζ τ ≠ 0 := Complex.exp_ne_zero _
 
 /-- `θ₃(ζ + πτ/2) = e^{-iπτ/4-iζ} θ₂(ζ)`. -/
 theorem je22a_thetaThree_add_half_tau (ζ τ : ℂ) :
@@ -411,7 +404,7 @@ theorem jacobiNomek_eq_exp_tau (k : ℂ) : jacobiNomek k = cexp (π * I * jacobi
 
 /-! ### `Im τ > 0`: positivity of `Re(K' conj K)` -/
 /-- Sign facts for the principal square root `w^{1/2}`. -/
-lemma p22R1_sqrt_parts (w : ℂ) :
+theorem p22R1_sqrt_parts (w : ℂ) :
     0 ≤ (w ^ (1 / 2 : ℂ)).re ∧ (0 ≤ w.im → 0 ≤ (w ^ (1 / 2 : ℂ)).im) ∧
       (w.im < 0 → (w ^ (1 / 2 : ℂ)).im ≤ 0) := by
   rcases eq_or_ne w 0 with rfl | hw
@@ -433,7 +426,7 @@ lemma p22R1_sqrt_parts (w : ℂ) :
     (Real.sin_nonpos_of_nonpos_of_neg_pi_le (by linarith) (by linarith))
 
 /-- `(w^{1/2})^2 = w`. -/
-lemma p22R1_sqrt_sq (w : ℂ) : (w ^ (1 / 2 : ℂ)) ^ 2 = w := by
+theorem p22R1_sqrt_sq (w : ℂ) : (w ^ (1 / 2 : ℂ)) ^ 2 = w := by
   rw [← cpow_natCast, ← cpow_mul]
   · norm_num
   all_goals simp [log_im]; nlinarith [neg_pi_lt_arg w, arg_le_pi w, Real.pi_pos]
@@ -515,7 +508,7 @@ lemma p22R1_re_sqrt_mul_conj_pos {m : ℂ} (hm : m.im ≠ 0 ∨ (m.im = 0 ∧ 0 
 
 
 /-- On `jacobiModulusDomain`, `k²` is non-real or lies in `(0, 1)`. -/
-lemma p22R1_sq_of_mem_domain {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
+theorem p22R1_sq_of_mem_domain {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
     (k ^ 2).im ≠ 0 ∨ ((k ^ 2).im = 0 ∧ 0 < (k ^ 2).re ∧ (k ^ 2).re < 1) := by
   obtain ⟨h0, h1⟩ := hk
   by_cases him : k.im = 0
@@ -671,7 +664,7 @@ def p22R1_oddLatticeEquiv : ℤ × ℤ ≃ {p : ℤ × ℤ // ¬ Even (p.1 + p.2
     omega
 
 /-- `θ₃(q)² - θ₄(q)² = 2q P(q²)²`. -/
-theorem p22R1_three_sq_sub_four_sq {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
+lemma p22R1_three_sq_sub_four_sq {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
     Real.jacobiThetaThreeNullQ q ^ 2 - Real.jacobiThetaFourNullQ q ^ 2 =
       2 * q * p22R1_P (q ^ 2) ^ 2 := by
   have hs3 := summable_zpow_sq hq0 hq1
@@ -712,7 +705,7 @@ theorem p22R1_three_sq_sub_four_sq {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
   rw [e]; ring
 
 /-- `P(q)² = 2 P(q²) θ₃(q²)`. -/
-theorem p22R1_P_sq {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
+lemma p22R1_P_sq {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
     p22R1_P q ^ 2 = 2 * (p22R1_P (q ^ 2) * Real.jacobiThetaThreeNullQ (q ^ 2)) := by
   have hq2 : 0 < q ^ 2 := by positivity
   have hq21 : q ^ 2 < 1 := by nlinarith
@@ -751,7 +744,7 @@ theorem p22R1_P_sq {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
     congr 1; push_cast; ring
 
 /-- Jacobi's identity for a real nome: `θ₃(q)⁴ = θ₄(q)⁴ + q P(q)⁴`, i.e. `θ₃⁴ = θ₂⁴ + θ₄⁴`. -/
-theorem p22R1_jacobi_real {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
+lemma p22R1_jacobi_real {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
     Real.jacobiThetaThreeNullQ q ^ 4 = Real.jacobiThetaFourNullQ q ^ 4 + q * p22R1_P q ^ 4 := by
   have h1 := Real.jacobiThetaThreeNullQ_sq_add_jacobiThetaFourNullQ_sq hq0 hq1
   have h2 := p22R1_three_sq_sub_four_sq hq0 hq1
@@ -786,16 +779,16 @@ noncomputable def p22R1_C (t : ℝ) : ℝ := Real.jacobiThetaFourNullQ (Real.exp
 lemma p22R1_nome {t : ℝ} (ht : 0 < t) : 0 < Real.exp (-(π * t)) ∧ Real.exp (-(π * t)) < 1 :=
   ⟨Real.exp_pos _, Real.exp_lt_one_iff.mpr (by nlinarith [Real.pi_pos])⟩
 
-lemma p22R1_B_ge {t : ℝ} (ht : 0 < t) : 1 ≤ p22R1_B t :=
+theorem p22R1_B_ge {t : ℝ} (ht : 0 < t) : 1 ≤ p22R1_B t :=
   Real.one_le_jacobiThetaThreeNullQ (p22R1_nome ht).1 (p22R1_nome ht).2
 
-lemma p22R1_C_pos {t : ℝ} (ht : 0 < t) : 0 < p22R1_C t :=
+theorem p22R1_C_pos {t : ℝ} (ht : 0 < t) : 0 < p22R1_C t :=
   Real.jacobiThetaFourNullQ_pos (p22R1_nome ht).1 (p22R1_nome ht).2
 
-lemma p22R1_three (t : ℝ) : jacobiThetaThreeTau 0 (I * t) = p22R1_B t :=
+theorem p22R1_three (t : ℝ) : jacobiThetaThreeTau 0 (I * t) = p22R1_B t :=
   jacobiThetaThreeTau_zero_I_mul t
 
-lemma p22R1_four (t : ℝ) : jacobiThetaFourTau 0 (I * t) = p22R1_C t :=
+theorem p22R1_four (t : ℝ) : jacobiThetaFourTau 0 (I * t) = p22R1_C t :=
   jacobiThetaFourTau_zero_I_mul t
 
 lemma p22R1_cpow_half {t : ℝ} (ht : 0 ≤ t) : (t : ℂ) ^ (1 / 2 : ℂ) = (Real.sqrt t : ℂ) := by
@@ -822,7 +815,7 @@ lemma p22R1_B_inv {t : ℝ} (ht : 0 < t) : p22R1_B (1 / t) = Real.sqrt t * p22R1
   exact_mod_cast h.symm
 
 /-- `θ₂(0|it) = θ₄(0|i/t)/√t`. -/
-lemma p22R1_two {t : ℝ} (ht : 0 < t) :
+theorem p22R1_two {t : ℝ} (ht : 0 < t) :
     jacobiThetaTwoTau 0 (I * t) = ((p22R1_C (1 / t) / Real.sqrt t : ℝ) : ℂ) := by
   have h := DLMF.Theta.jacobiThetaTwoTau_neg_inv (p22R1_im_pos ht) 0
   rw [p22R1_negI, p22R1_neg_inv_I ht, p22R1_cpow_half ht.le] at h
@@ -837,11 +830,11 @@ lemma p22R1_two {t : ℝ} (ht : 0 < t) :
 /-- `θ₂(0|it)` as a real function, `θ₄(0|i/t)/√t`. -/
 noncomputable def p22R1_A (t : ℝ) : ℝ := p22R1_C (1 / t) / Real.sqrt t
 
-lemma p22R1_A_pos {t : ℝ} (ht : 0 < t) : 0 < p22R1_A t :=
+theorem p22R1_A_pos {t : ℝ} (ht : 0 < t) : 0 < p22R1_A t :=
   div_pos (p22R1_C_pos (by positivity)) (Real.sqrt_pos.mpr ht)
 
 /-- Jacobi's identity on the imaginary axis: `B⁴ = A⁴ + C⁴`. -/
-lemma p22R1_fourth {t : ℝ} (ht : 0 < t) :
+theorem p22R1_fourth {t : ℝ} (ht : 0 < t) :
     p22R1_B t ^ 4 = p22R1_A t ^ 4 + p22R1_C t ^ 4 := by
   have h := p22R1_jacobi_real (p22R1_nome ht).1 (p22R1_nome ht).2
   have hA : p22R1_A t = Real.exp (-(π * t) / 4) * p22R1_P (Real.exp (-(π * t))) := by
@@ -913,7 +906,7 @@ lemma p22R1_tendsto_CB : Tendsto (fun t => p22R1_C t / p22R1_B t) atTop (𝓝 1)
   exact h
 
 /-- Every `0 < k < 1` is `θ₂²(0|it)/θ₃²(0|it)` for some `t > 0`. -/
-lemma p22R1_exists_rho {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) :
+theorem p22R1_exists_rho {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) :
     ∃ t : ℝ, 0 < t ∧ p22R1_rho t = k := by
   have hev1 : ∀ᶠ T in atTop, k < (p22R1_C T / p22R1_B T) ^ 2 := by
     have := (p22R1_tendsto_CB.pow 2)
@@ -944,7 +937,7 @@ lemma p22R1_exists_rho {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) :
 
 /-- The real case of DLMF 22.2.2 at `τ = it`: `k = ρ(t) = θ₂²/θ₃²(0|it) ∈ (0, 1)`,
 `τ(k) = it`, the three relations at `τ = it`, and `K(k) = (π/2)θ₃²`, `K'(k) = t K(k)`. -/
-lemma p22R1_real_at {t : ℝ} (ht : 0 < t) :
+theorem p22R1_real_at {t : ℝ} (ht : 0 < t) :
     0 < p22R1_rho t ∧ p22R1_rho t < 1 ∧ jacobiTauk (p22R1_rho t) = I * t ∧
       jacobiModulusTau (I * t) = p22R1_rho t ∧
       jacobiComodulusTau (I * t) = jacobiComodulusk (p22R1_rho t) ∧
@@ -1063,12 +1056,12 @@ lemma p22R1_differentiableOn_integral {U : Set ℂ} (hU : IsOpen U) {c : ℂ →
 
 
 /-- `K(k) ≠ 0` on `jacobiModulusDomain`. -/
-lemma p22R1_compEllIntKk_ne_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain) : compEllIntKk k ≠ 0 := by
+theorem p22R1_compEllIntKk_ne_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain) : compEllIntKk k ≠ 0 := by
   intro h
   have := jacobiTauk_im_pos hk
   simp [jacobiTauk, h] at this
 
-lemma p22R1_domain_eq :
+theorem p22R1_domain_eq :
     jacobiModulusDomain = {k : ℂ | 0 < k.re} ∩ {k : ℂ | 1 - k ^ 2 ∈ slitPlane} := by
   ext k
   simp only [jacobiModulusDomain, Set.mem_ofPred_eq, Set.mem_inter_iff, mem_slitPlane_iff]
@@ -1088,7 +1081,7 @@ lemma p22R1_domain_eq :
     · simp [pow_two, him] at h1; nlinarith
     · simp [pow_two, him] at h1
 
-lemma p22R1_isOpen_domain : IsOpen jacobiModulusDomain := by
+theorem p22R1_isOpen_domain : IsOpen jacobiModulusDomain := by
   rw [p22R1_domain_eq]
   exact (isOpen_lt continuous_const Complex.continuous_re).inter
     (isOpen_slitPlane.preimage (by fun_prop))
@@ -1096,7 +1089,7 @@ lemma p22R1_isOpen_domain : IsOpen jacobiModulusDomain := by
 lemma p22R1_half_mem : (1 / 2 : ℂ) ∈ jacobiModulusDomain := by
   refine ⟨by norm_num, fun _ => by norm_num⟩
 
-lemma p22R1_ofReal_mem {x : ℝ} (h0 : 0 < x) (h1 : x < 1) : (x : ℂ) ∈ jacobiModulusDomain :=
+theorem p22R1_ofReal_mem {x : ℝ} (h0 : 0 < x) (h1 : x < 1) : (x : ℂ) ∈ jacobiModulusDomain :=
   ⟨by simpa using h0, fun _ => by simpa using h1⟩
 
 lemma p22R1_isPreconnected_domain : IsPreconnected jacobiModulusDomain := by
@@ -1133,7 +1126,7 @@ lemma p22R1_differentiableOn_tau : DifferentiableOn ℂ jacobiTauk jacobiModulus
   ((differentiableOn_const I).mul p22R1_differentiableOn_Kp).div p22R1_differentiableOn_K
     fun _ hk => p22R1_compEllIntKk_ne_zero hk
 
-lemma p22R1_differentiableAt_three {τ : ℂ} (hτ : 0 < τ.im) :
+theorem p22R1_differentiableAt_three {τ : ℂ} (hτ : 0 < τ.im) :
     DifferentiableAt ℂ (fun τ => jacobiThetaThreeTau 0 τ) τ :=
   differentiableAt_jacobiTheta₂_snd _ hτ
 
@@ -1141,7 +1134,7 @@ lemma p22R1_differentiableAt_four {τ : ℂ} (hτ : 0 < τ.im) :
     DifferentiableAt ℂ (fun τ => jacobiThetaFourTau 0 τ) τ :=
   differentiableAt_jacobiTheta₂_snd _ hτ
 
-lemma p22R1_differentiableAt_two {τ : ℂ} (hτ : 0 < τ.im) :
+theorem p22R1_differentiableAt_two {τ : ℂ} (hτ : 0 < τ.im) :
     DifferentiableAt ℂ (fun τ => jacobiThetaTwoTau 0 τ) τ := by
   have h : DifferentiableAt ℂ (fun σ => jacobiTheta₂ ((0 + π * σ / 2) / π) σ) τ := by
     have h1 := (hasFDerivAt_jacobiTheta₂ ((0 + π * τ / 2) / π) hτ).differentiableAt
@@ -1150,7 +1143,7 @@ lemma p22R1_differentiableAt_two {τ : ℂ} (hτ : 0 < τ.im) :
   exact (by fun_prop : DifferentiableAt ℂ (fun σ : ℂ => cexp (π * I * σ / 4 + I * 0)) τ).mul h
 
 /-- Composition of a theta constant with `τ(k)` is holomorphic on the domain. -/
-lemma p22R1_differentiableOn_comp {f : ℂ → ℂ}
+theorem p22R1_differentiableOn_comp {f : ℂ → ℂ}
     (hf : ∀ τ : ℂ, 0 < τ.im → DifferentiableAt ℂ f τ) :
     DifferentiableOn ℂ (fun k => f (jacobiTauk k)) jacobiModulusDomain := fun k hk =>
   ((hf _ (jacobiTauk_im_pos hk)).comp k
@@ -1158,7 +1151,7 @@ lemma p22R1_differentiableOn_comp {f : ℂ → ℂ}
       (p22R1_isOpen_domain.mem_nhds hk))).differentiableWithinAt
 
 /-- Identity theorem on the domain from agreement on `(0, 1)`. -/
-lemma p22R1_eqOn_of_real {f g : ℂ → ℂ} (hf : DifferentiableOn ℂ f jacobiModulusDomain)
+theorem p22R1_eqOn_of_real {f g : ℂ → ℂ} (hf : DifferentiableOn ℂ f jacobiModulusDomain)
     (hg : DifferentiableOn ℂ g jacobiModulusDomain)
     (hreal : ∀ x : ℝ, 0 < x → x < 1 → f x = g x) : Set.EqOn f g jacobiModulusDomain := by
   refine (hf.analyticOnNhd p22R1_isOpen_domain).eqOn_of_preconnected_of_frequently_eq
@@ -1256,11 +1249,11 @@ theorem jacobiPQk_self (p : JacobiLetter) (z k : ℂ) : jacobiPQk p p z k = 1 :=
   simp [jacobiPQk, jacobiGlaisher]
 
 /-- `ζ = πz/(2K)` is odd in `z`. -/
-lemma jacobiZetak_neg (z k : ℂ) : jacobiZetak (-z) k = -jacobiZetak z k := by
+theorem jacobiZetak_neg (z k : ℂ) : jacobiZetak (-z) k = -jacobiZetak z k := by
   simp only [jacobiZetak]; ring
 
 /-- The normalized theta functions: `θ_s` is odd, `θ_c, θ_d, θ_n` are even. -/
-lemma jacobiLetterTheta_neg (p : JacobiLetter) (ζ τ : ℂ) :
+theorem jacobiLetterTheta_neg (p : JacobiLetter) (ζ τ : ℂ) :
     jacobiLetterTheta p (-ζ) τ = (if p = .s then -1 else 1) * jacobiLetterTheta p ζ τ := by
   cases p <;> simp [jacobiLetterTheta, jacobiThetaOneTau_neg, jacobiThetaTwoTau_neg,
     jacobiThetaThreeTau_neg, jacobiThetaFourTau_neg]
@@ -1348,7 +1341,7 @@ lemma p22R1_differentiableAt_two_comp {f : ℂ × ℂ → ℂ} {x : ℂ × ℂ} 
   exact he.mul h
 
 /-- The normalized theta functions are jointly holomorphic in `(ζ, τ)` for `Im τ > 0`. -/
-lemma p22R1_differentiableAt_letterTheta (p : JacobiLetter) {x : ℂ × ℂ} (hx : 0 < x.2.im) :
+theorem p22R1_differentiableAt_letterTheta (p : JacobiLetter) {x : ℂ × ℂ} (hx : 0 < x.2.im) :
     DifferentiableAt ℂ (fun y : ℂ × ℂ => jacobiLetterTheta p y.1 y.2) x := by
   have c2 : DifferentiableAt ℂ (fun y : ℂ × ℂ => jacobiThetaTwoTau 0 y.2) x :=
     p22R1_differentiableAt_two_comp (f := fun _ => 0) (differentiableAt_const _) hx

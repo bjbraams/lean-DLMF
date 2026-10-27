@@ -6,10 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.Analysis.Complex.LocallyUniformLimit
-public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
-public import Mathlib.Analysis.PSeries
-public import Mathlib.Analysis.Calculus.MeanValue
-public import Mathlib.Analysis.Complex.RealDeriv
 public import Mathlib.NumberTheory.LSeries.HurwitzZeta
 
 /-!
@@ -74,7 +70,7 @@ lemma s25b_summable_nat_add_rpow {a : ℝ} (ha : 0 < a) {p : ℝ} (hp : p < -1) 
   rw [abs_of_pos hpos, Real.rpow_neg hpos.le, one_div, inv_inv]
 
 /-- `x^{-σ-1} ≤ x^{-σ₀-1} + x^{-R-1}` for `x > 0` and `σ₀ ≤ σ ≤ R`. -/
-lemma s25b_rpow_le_add {x σ σ₀ R : ℝ} (hx : 0 < x) (h0 : σ₀ ≤ σ) (h1 : σ ≤ R) :
+theorem s25b_rpow_le_add {x σ σ₀ R : ℝ} (hx : 0 < x) (h0 : σ₀ ≤ σ) (h1 : σ ≤ R) :
     x ^ (-σ - 1) ≤ x ^ (-σ₀ - 1) + x ^ (-R - 1) := by
   rcases le_or_gt 1 x with hx1 | hx1
   · have := Real.rpow_le_rpow_of_exponent_le hx1 (show -σ - 1 ≤ -σ₀ - 1 by linarith)
@@ -149,7 +145,7 @@ theorem s25b_dirichlet_test {c : ℕ → ℂ} {C : ℝ} (hC : ∀ N, ‖∑ n �
     exact (s25b_sum_by_parts c (fun n => f n s) N).symm
 
 /-- `{Re s > 0} \ {1}` is preconnected. -/
-lemma s25b_isPreconnected_re_pos_diff_one :
+theorem s25b_isPreconnected_re_pos_diff_one :
     IsPreconnected ({s : ℂ | 0 < s.re} \ {1}) := by
   set Q1 : Set ℂ := {s | 0 < s.re ∧ 0 < s.im}
   set Q2 : Set ℂ := {s | 0 < s.re ∧ s.im < 0}

@@ -59,7 +59,7 @@ theorem b24a_aeval_eq_eval_map (p : ℚ[X]) (z : ℂ) :
 
 /-- The identity theorem for polynomial functions: a function of `z ∈ ℂ` given by a complex
 polynomial that vanishes at every real point vanishes everywhere. -/
-theorem b24a_eq_zero_of_real {f : ℂ → ℂ} (F : ℂ[X]) (hF : ∀ z, F.eval z = f z)
+lemma b24a_eq_zero_of_real {f : ℂ → ℂ} (F : ℂ[X]) (hF : ∀ z, F.eval z = f z)
     (hreal : ∀ x : ℝ, f x = 0) (z : ℂ) : f z = 0 := by
   have hF0 : F = 0 := by
     refine Polynomial.eq_zero_of_infinite_isRoot F ?_
@@ -68,11 +68,11 @@ theorem b24a_eq_zero_of_real {f : ℂ → ℂ} (F : ℂ[X]) (hF : ∀ z, F.eval 
     simp [Polynomial.IsRoot, hF, hreal]
   rw [← hF, hF0, Polynomial.eval_zero]
 
-theorem b24a_bernoulliPolyB_comp (n : ℕ) (p : ℚ[X]) (z : ℂ) :
+lemma b24a_bernoulliPolyB_comp (n : ℕ) (p : ℚ[X]) (z : ℂ) :
     aeval z ((Polynomial.bernoulli n).comp p) = bernoulliPolyB n (aeval z p) := by
   rw [Polynomial.aeval_comp]; rfl
 
-theorem b24a_eulerPolyE_comp (n : ℕ) (p : ℚ[X]) (z : ℂ) :
+lemma b24a_eulerPolyE_comp (n : ℕ) (p : ℚ[X]) (z : ℂ) :
     aeval z ((Polynomial.euler n).comp p) = eulerPolyE n (aeval z p) := by
   rw [Polynomial.aeval_comp]; rfl
 
@@ -105,7 +105,7 @@ theorem b24a_eq_zero_of_add_add_self {F : ℂ[X]} {h : ℂ} (hh : h ≠ 0)
   rw [this, map_zero]
 
 /-- Alternating telescoping sum. -/
-theorem b24a_sum_alt_telescope (g : ℕ → ℂ) (m : ℕ) :
+lemma b24a_sum_alt_telescope (g : ℕ → ℂ) (m : ℕ) :
     ∑ k ∈ range m, (-1 : ℂ) ^ k * (g (k + 1) + g k) = g 0 - (-1) ^ m * g m := by
   induction m with
   | zero => simp
@@ -247,7 +247,7 @@ theorem sum_Icc_neg_one_pow_mul_pow_eq_euler {n : ℕ} (hn : 1 ≤ n) (m : ℕ) 
 
 /-- Inclusion–exclusion over the prime factors of `m`:
 `[gcd(k, m) = 1] = ∑_{T ⊆ P(m)} (-1)^{|T|} [∏T ∣ k]`. -/
-theorem r24a_coprime_indicator (k : ℕ) {m : ℕ} (hm0 : m ≠ 0) :
+lemma r24a_coprime_indicator (k : ℕ) {m : ℕ} (hm0 : m ≠ 0) :
     (if Nat.Coprime k m then (1 : ℚ) else 0) = ∑ T ∈ m.primeFactors.powerset,
       (-1 : ℚ) ^ T.card * (if (∏ p ∈ T, p) ∣ k then 1 else 0) := by
   have h1 : (if Nat.Coprime k m then (1 : ℚ) else 0) =
@@ -278,7 +278,7 @@ theorem r24a_coprime_indicator (k : ℕ) {m : ℕ} (hm0 : m ≠ 0) :
     fun h p hp => (dvd_prod_of_mem _ hp).trans h⟩
 
 /-- Sum of `kⁿ` over the multiples of `d` in `[1, m]`: `dⁿ ∑_{j=1}^{m/d} jⁿ`. -/
-theorem r24a_sum_dvd_pow {d m : ℕ} (hd : 0 < d) (n : ℕ) :
+lemma r24a_sum_dvd_pow {d m : ℕ} (hd : 0 < d) (n : ℕ) :
     ∑ k ∈ Icc 1 m, (if d ∣ k then (1 : ℚ) else 0) * (k : ℚ) ^ n =
       (d : ℚ) ^ n * ∑ j ∈ Icc 1 (m / d), (j : ℚ) ^ n := by
   have hfilt : (Icc 1 m).filter (fun k => d ∣ k) =
@@ -302,7 +302,7 @@ theorem r24a_sum_dvd_pow {d m : ℕ} (hd : 0 < d) (n : ℕ) :
   push_cast; ring
 
 /-- Faulhaber with `B'`: `∑_{j=1}^{q} jⁿ = 1/(n+1) ∑_{j=1}^{n+1} (n+1 choose j) B'_{n+1-j} qʲ`. -/
-theorem r24a_sum_Icc_pow (q n : ℕ) :
+lemma r24a_sum_Icc_pow (q n : ℕ) :
     ∑ j ∈ Icc 1 q, (j : ℚ) ^ n = 1 / (n + 1) * ∑ j ∈ Icc 1 (n + 1),
       ((n + 1).choose j : ℚ) * bernoulli' (n + 1 - j) * (q : ℚ) ^ j := by
   rw [show Icc 1 q = Ico 1 (q + 1) from rfl, sum_Ico_pow, show Icc 1 (n + 1) = Ico 1 (n + 1 + 1)
@@ -548,7 +548,7 @@ def s24a_D (n k : ℕ) (y : ℂ) : ℂ :=
   ∑ j ∈ range (k + 1), (-1) ^ j * (k.choose j : ℂ) * ((j : ℂ) + y) ^ (n - 1)
 
 /-- `s24a_D` as an iterated forward difference. -/
-theorem s24a_D_eq_fwdDiff (n k : ℕ) (y : ℂ) :
+lemma s24a_D_eq_fwdDiff (n k : ℕ) (y : ℂ) :
     s24a_D n k y = (-1) ^ k * (fwdDiff 1)^[k] (fun r : ℂ => r ^ (n - 1)) y := by
   rw [fwdDiff_iter_eq_sum_shift, s24a_D, mul_sum]
   refine sum_congr rfl fun j hj => ?_
@@ -560,14 +560,14 @@ theorem s24a_D_eq_fwdDiff (n k : ℕ) (y : ℂ) :
   simp
 
 /-- Pascal recursion for `s24a_D`. -/
-theorem s24a_D_shift (n k : ℕ) (y : ℂ) :
+lemma s24a_D_shift (n k : ℕ) (y : ℂ) :
     s24a_D n k (y + 1) = s24a_D n k y - s24a_D n (k + 1) y := by
   rw [s24a_D_eq_fwdDiff, s24a_D_eq_fwdDiff, s24a_D_eq_fwdDiff, Function.iterate_succ_apply',
     fwdDiff, pow_succ]
   ring
 
 /-- `s24a_D n n = 0`: the `n`-th difference of `y^{n-1}` vanishes. -/
-theorem s24a_D_self {n : ℕ} (hn : 1 ≤ n) (y : ℂ) : s24a_D n n y = 0 := by
+lemma s24a_D_self {n : ℕ} (hn : 1 ≤ n) (y : ℂ) : s24a_D n n y = 0 := by
   rw [s24a_D_eq_fwdDiff, fwdDiff_iter_pow_eq_zero_of_lt (by omega)]
   simp
 
@@ -576,7 +576,7 @@ def s24a_h (n : ℕ) (ζ y : ℂ) : ℂ :=
   ∑ k ∈ range n, ((1 - ζ)⁻¹) ^ (k + 1) * s24a_D n k y
 
 /-- The difference equation `h(y+1) = ζ h(y) + y^{n-1}`. -/
-theorem s24a_h_shift {n : ℕ} (hn : 1 ≤ n) {ζ : ℂ} (hζ : ζ ≠ 1) (y : ℂ) :
+lemma s24a_h_shift {n : ℕ} (hn : 1 ≤ n) {ζ : ℂ} (hζ : ζ ≠ 1) (y : ℂ) :
     s24a_h n ζ (y + 1) = ζ * s24a_h n ζ y + y ^ (n - 1) := by
   have h1 : (1 : ℂ) - ζ ≠ 0 := sub_ne_zero.mpr (Ne.symm hζ)
   set a := (1 - ζ)⁻¹
@@ -593,7 +593,7 @@ theorem s24a_h_shift {n : ℕ} (hn : 1 ≤ n) {ζ : ℂ} (hζ : ζ ≠ 1) (y : �
   ring
 
 /-- Iterating `f(z+1) = ζ f(z) + q(z)`. -/
-theorem s24a_iter {f q : ℂ → ℂ} {ζ : ℂ} (hf : ∀ z, f (z + 1) = ζ * f z + q z) (y : ℂ) (s : ℕ) :
+lemma s24a_iter {f q : ℂ → ℂ} {ζ : ℂ} (hf : ∀ z, f (z + 1) = ζ * f z + q z) (y : ℂ) (s : ℕ) :
     f (y + s) = ζ ^ s * f y + ∑ t ∈ range s, ζ ^ (s - 1 - t) * q (y + (t : ℂ)) := by
   induction s with
   | zero => simp
@@ -611,7 +611,7 @@ theorem s24a_iter {f q : ℂ → ℂ} {ζ : ℂ} (hf : ∀ z, f (z + 1) = ζ * f
     ring
 
 /-- `ζ_r^j = ω^{rj}` with `ω = e^{2πi/m}`. -/
-theorem s24a_zeta_pow (m r j : ℕ) :
+lemma s24a_zeta_pow (m r j : ℕ) :
     Complex.exp (2 * π * Complex.I * r / m) ^ j =
       Complex.exp (2 * π * Complex.I / m) ^ (r * j) := by
   rw [← Complex.exp_nat_mul, ← Complex.exp_nat_mul]
@@ -621,7 +621,7 @@ theorem s24a_zeta_pow (m r j : ℕ) :
 
 /-- Sums over the nontrivial `m`-th roots of unity: `∑_{r=1}^{m-1} ζ_r^j` is `m - 1` for
 `j = m` and `-1` for `0 < j < m`. -/
-theorem s24a_sum_zeta_pow {m j : ℕ} (hm : 2 ≤ m) (hj0 : 0 < j) (hjm : j ≤ m) :
+lemma s24a_sum_zeta_pow {m j : ℕ} (hm : 2 ≤ m) (hj0 : 0 < j) (hjm : j ≤ m) :
     ∑ r ∈ Icc 1 (m - 1), Complex.exp (2 * π * Complex.I * r / m) ^ j =
       if j = m then (m : ℂ) - 1 else -1 := by
   have hω := Complex.isPrimitiveRoot_exp m (by omega)
@@ -645,7 +645,7 @@ theorem s24a_sum_zeta_pow {m j : ℕ} (hm : 2 ≤ m) (hj0 : 0 < j) (hjm : j ≤ 
     rw [e2] at hfull; rw [e1]; linear_combination hfull - hsplit
 
 /-- `ζ_r ≠ 1` for `1 ≤ r ≤ m - 1`. -/
-theorem s24a_zeta_ne_one {m r : ℕ} (hr : r ∈ Icc 1 (m - 1)) :
+lemma s24a_zeta_ne_one {m r : ℕ} (hr : r ∈ Icc 1 (m - 1)) :
     Complex.exp (2 * π * Complex.I * r / m) ≠ 1 := by
   simp only [mem_Icc] at hr
   have hω := Complex.isPrimitiveRoot_exp m (by omega)
@@ -653,19 +653,19 @@ theorem s24a_zeta_ne_one {m r : ℕ} (hr : r ∈ Icc 1 (m - 1)) :
   exact hω.pow_ne_one_of_pos_of_lt (by omega) (by omega)
 
 /-- `ζ_r^m = 1`. -/
-theorem s24a_zeta_pow_m (m r : ℕ) (hm : m ≠ 0) :
+lemma s24a_zeta_pow_m (m r : ℕ) (hm : m ≠ 0) :
     Complex.exp (2 * π * Complex.I * r / m) ^ m = 1 := by
   rw [s24a_zeta_pow, show r * m = m * r from mul_comm r m, pow_mul,
     (Complex.isPrimitiveRoot_exp m hm).pow_eq_one, one_pow]
 
 /-- `∑_{s<m} ζ_r^s = 0` for `1 ≤ r ≤ m - 1`. -/
-theorem s24a_geom_zeta {m r : ℕ} (hr : r ∈ Icc 1 (m - 1)) :
+lemma s24a_geom_zeta {m r : ℕ} (hr : r ∈ Icc 1 (m - 1)) :
     ∑ s ∈ range m, Complex.exp (2 * π * Complex.I * r / m) ^ s = 0 := by
   have hm : m ≠ 0 := by simp only [mem_Icc] at hr; omega
   rw [geom_sum_eq (s24a_zeta_ne_one hr), s24a_zeta_pow_m m r hm, sub_self, zero_div]
 
 /-- A polynomial function with a nonzero period is constant. -/
-theorem s24a_periodic_const (P : ℂ[X]) {c : ℂ} (hc : c ≠ 0) (hP : ∀ y, P.eval (y + c) = P.eval y)
+lemma s24a_periodic_const (P : ℂ[X]) {c : ℂ} (hc : c ≠ 0) (hP : ∀ y, P.eval (y + c) = P.eval y)
     (y z : ℂ) : P.eval y = P.eval z := by
   set Q := P - Polynomial.C (P.eval z)
   have hroot : ∀ k : ℕ, Q.eval (z + k * c) = 0 := by
@@ -1015,7 +1015,7 @@ theorem eulerPolyE_third {n : ℕ} (hn : 1 ≤ n) :
 /-! ### Helpers for §24.4(iv) -/
 
 /-- Splitting a sum over `range (2m)` into even and odd indices. -/
-theorem q24a_sum_range_two_mul {M : Type*} [AddCommMonoid M] (f : ℕ → M) (m : ℕ) :
+lemma q24a_sum_range_two_mul {M : Type*} [AddCommMonoid M] (f : ℕ → M) (m : ℕ) :
     ∑ k ∈ range (2 * m), f k = ∑ j ∈ range m, (f (2 * j) + f (2 * j + 1)) := by
   induction m with
   | zero => simp
@@ -1031,7 +1031,7 @@ theorem q24a_sum_Icc_one {M : Type*} [AddCommMonoid M] (f : ℕ → M) (n : ℕ)
   | succ n ih => rw [sum_Icc_succ_top (by omega), ih, sum_range_succ]
 
 /-- `∑_{k ≤ 2n+1} (2n+1 choose k)(1-2^k) Bₖ 2^k = (2n+1)E₂ₙ`, the core of 24.4.16–17. -/
-theorem q24a_eulerNumber_two_mul_sum (n : ℕ) :
+lemma q24a_eulerNumber_two_mul_sum (n : ℕ) :
     ((2 * n + 1 : ℕ) : ℂ) * eulerNumber (2 * n) = ∑ k ∈ range (2 * n + 2),
       ((2 * n + 1).choose k : ℂ) * (1 - 2 ^ k) * bernoulli k * 2 ^ k := by
   have h1 := eulerPolyE_eq_sum_bernoulli (2 * n) (1 / 2)
@@ -1056,7 +1056,7 @@ theorem q24a_eulerNumber_two_mul_sum (n : ℕ) :
 
 
 /-- Splitting `range (2n+2)` when the odd terms beyond the first vanish. -/
-theorem q24a_sum_range_even_split (g : ℕ → ℂ) (n : ℕ) (hg : ∀ j, 1 ≤ j → g (2 * j + 1) = 0) :
+lemma q24a_sum_range_even_split (g : ℕ → ℂ) (n : ℕ) (hg : ∀ j, 1 ≤ j → g (2 * j + 1) = 0) :
     ∑ k ∈ range (2 * n + 2), g k = g 0 + g 1 + ∑ j ∈ range n, g (2 * (j + 1)) := by
   rw [show 2 * n + 2 = 2 * (n + 1) by ring, q24a_sum_range_two_mul, sum_range_succ',
     sum_add_distrib, sum_congr rfl fun j _ => hg (j + 1) (by omega)]
@@ -1231,21 +1231,21 @@ theorem eulerNumber_two_mul_eq_one_sub_sum_bernoulli (n : ℕ) :
 /-- Generic umbral functional `yⁱ ↦ F i`. -/
 def b24a_umbral (F : ℕ → ℂ) (P : ℂ[X]) : ℂ := P.sum fun i a => a * F i
 
-theorem b24a_umbral_add (F : ℕ → ℂ) (p q : ℂ[X]) :
+lemma b24a_umbral_add (F : ℕ → ℂ) (p q : ℂ[X]) :
     b24a_umbral F (p + q) = b24a_umbral F p + b24a_umbral F q :=
   Polynomial.sum_add_index p q _ (fun i => by simp) (fun i a b => by ring)
 
-theorem b24a_umbral_monomial (F : ℕ → ℂ) (n : ℕ) (a : ℂ) :
+lemma b24a_umbral_monomial (F : ℕ → ℂ) (n : ℕ) (a : ℂ) :
     b24a_umbral F (Polynomial.monomial n a) = a * F n :=
   Polynomial.sum_monomial_index _ _ (by simp)
 
-theorem b24a_umbral_sum (F : ℕ → ℂ) (s : Finset ℕ) (p : ℕ → ℂ[X]) :
+lemma b24a_umbral_sum (F : ℕ → ℂ) (s : Finset ℕ) (p : ℕ → ℂ[X]) :
     b24a_umbral F (∑ i ∈ s, p i) = ∑ i ∈ s, b24a_umbral F (p i) := by
   induction s using Finset.induction_on with
   | empty => simp [b24a_umbral]
   | insert a s ha ih => rw [sum_insert ha, sum_insert ha, b24a_umbral_add, ih]
 
-theorem b24a_umbral_C_mul_X_add_C_pow (F : ℕ → ℂ) (n : ℕ) (a h : ℂ) :
+lemma b24a_umbral_C_mul_X_add_C_pow (F : ℕ → ℂ) (n : ℕ) (a h : ℂ) :
     b24a_umbral F (C a * (X + C h) ^ n) =
       a * ∑ k ∈ range (n + 1), (n.choose k : ℂ) * F k * h ^ (n - k) := by
   rw [add_pow, mul_sum, b24a_umbral_sum, mul_sum]

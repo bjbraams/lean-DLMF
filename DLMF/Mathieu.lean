@@ -3,7 +3,7 @@ Copyright (c) 2026 Bastiaan J Braams. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bastiaan J Braams
 -/
-module
+module -- shake: keep-all
 
 public import DLMF.Mathieu.Basic
 public import DLMF.Mathieu.ContFracDefs
@@ -34,6 +34,15 @@ public import DLMF.Mathieu.P2sBridge
 public import DLMF.Mathieu.Modified.P2mCrossSeries
 public import DLMF.Mathieu.Modified.P2mRadial
 public import DLMF.Mathieu.Modified.P2mConnection
+public import DLMF.Mathieu.Modified.P3mImaginary
+public import DLMF.Mathieu.Modified.P3mIntegrals
+public import DLMF.Mathieu.Modified.P3mWronskian
+public import DLMF.Mathieu.P3qJacobi
+public import DLMF.Mathieu.P3qSpectrum
+public import DLMF.Mathieu.P3qGeneral
+public import DLMF.Mathieu.P3qVector
+public import DLMF.Mathieu.P3qCeSe
+public import DLMF.Mathieu.P3qCeSeGen
 
 /-!
 # Mathieu functions and Hill's equation (DLMF Chapter 28)

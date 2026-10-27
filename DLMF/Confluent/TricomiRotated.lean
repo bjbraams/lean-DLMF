@@ -35,7 +35,7 @@ noncomputable section
 namespace DLMF.Confluent
 
 /-- `(z e^{iα})^w = z^w e^{iαw}` when `arg z + α ∈ (-π, π]`. -/
-lemma cpow_mul_exp_mul_I {z : ℂ} (hz : z ≠ 0) {α : ℝ} (h1 : -π < arg z + α)
+theorem cpow_mul_exp_mul_I {z : ℂ} (hz : z ≠ 0) {α : ℝ} (h1 : -π < arg z + α)
     (h2 : arg z + α ≤ π) (w : ℂ) :
     (z * exp (α * I)) ^ w = z ^ w * exp (α * I * w) := by
   have hlog : log (z * exp (α * I)) = log z + α * I := by
@@ -46,13 +46,13 @@ lemma cpow_mul_exp_mul_I {z : ℂ} (hz : z ≠ 0) {α : ℝ} (h1 : -π < arg z +
   ring_nf
 
 /-- `re (z e^{iy}) = |z| cos(arg z + y)`. -/
-lemma re_mul_exp_mul_I (z : ℂ) (y : ℝ) : (z * exp (y * I)).re = ‖z‖ * Real.cos (arg z + y) := by
+theorem re_mul_exp_mul_I (z : ℂ) (y : ℝ) : (z * exp (y * I)).re = ‖z‖ * Real.cos (arg z + y) := by
   conv_lhs => rw [← norm_mul_exp_arg_mul_I z]
   rw [mul_assoc, ← exp_add, show (arg z : ℂ) * I + y * I = ((arg z + y : ℝ) : ℂ) * I by
     push_cast; ring, re_ofReal_mul, exp_ofReal_mul_I_re]
 
 /-- A real angle in `(-3π/2, 3π/2)` with positive cosine lies in `(-π/2, π/2)`. -/
-lemma abs_lt_pi_div_two_of_cos_pos {u : ℝ} (h1 : -(3 * π / 2) < u) (h2 : u < 3 * π / 2)
+theorem abs_lt_pi_div_two_of_cos_pos {u : ℝ} (h1 : -(3 * π / 2) < u) (h2 : u < 3 * π / 2)
     (hc : 0 < Real.cos u) : |u| < π / 2 := by
   rw [abs_lt]
   constructor
@@ -67,7 +67,7 @@ lemma abs_lt_pi_div_two_of_cos_pos {u : ℝ} (h1 : -(3 * π / 2) < u) (h2 : u < 
 
 /-- Along the sector between two directions where `re (z e^{iy}) > 0`, the real part stays
 above the smaller endpoint value. -/
-lemma re_mul_exp_mul_I_ge {z : ℂ} {α : ℝ} (hα : |α| < π / 2) (hz0 : 0 < z.re)
+theorem re_mul_exp_mul_I_ge {z : ℂ} {α : ℝ} (hα : |α| < π / 2) (hz0 : 0 < z.re)
     (hzα : 0 < (z * exp (α * I)).re) {y : ℝ} (hy : y ∈ [[0, α]]) :
     min z.re (z * exp (α * I)).re ≤ (z * exp (y * I)).re := by
   have hz : z ≠ 0 := by intro h; rw [h] at hz0; simp at hz0
@@ -107,7 +107,7 @@ lemma re_mul_exp_mul_I_ge {z : ℂ} {α : ℝ} (hα : |α| < π / 2) (hz0 : 0 < 
   rw [← mul_min_of_nonneg _ _ hzn.le]
   exact mul_le_mul_of_nonneg_left (hmin.trans hcos) hzn.le
 
-lemma norm_cpow_le_exp (t w : ℂ) : ‖t ^ w‖ ≤ ‖t‖ ^ w.re * Real.exp (π * |w.im|) := by
+theorem norm_cpow_le_exp (t w : ℂ) : ‖t ^ w‖ ≤ ‖t‖ ^ w.re * Real.exp (π * |w.im|) := by
   refine (norm_cpow_le t w).trans ?_
   rw [div_eq_mul_inv, ← Real.exp_neg]
   refine mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr ?_) (Real.rpow_nonneg (norm_nonneg _) _)
@@ -116,7 +116,7 @@ lemma norm_cpow_le_exp (t w : ℂ) : ‖t ^ w‖ ≤ ‖t‖ ^ w.re * Real.exp (
     rw [abs_mul]; exact mul_le_mul_of_nonneg_right h1 (abs_nonneg _)
   linarith [neg_abs_le (arg t * w.im)]
 
-lemma norm_one_add_cpow_le {t c : ℂ} (ht : 0 ≤ t.re) {N : ℕ} (hN : |c.re| ≤ N) :
+theorem norm_one_add_cpow_le {t c : ℂ} (ht : 0 ≤ t.re) {N : ℕ} (hN : |c.re| ≤ N) :
     ‖(1 + t) ^ c‖ ≤ (1 + ‖t‖) ^ N * Real.exp (π * |c.im|) := by
   refine (norm_cpow_le_exp _ _).trans (mul_le_mul_of_nonneg_right ?_ (Real.exp_pos _).le)
   have h1 : 1 ≤ ‖1 + t‖ := by
@@ -131,7 +131,7 @@ lemma norm_one_add_cpow_le {t c : ℂ} (ht : 0 ≤ t.re) {N : ℕ} (hN : |c.re| 
       _ ≤ (1 + ‖t‖) ^ N := one_le_pow₀ (by linarith [norm_nonneg t])
 
 /-- `r^s e^{-br}` is bounded on `[1, ∞)` for `b > 0`. -/
-lemma exists_rpow_mul_exp_neg_le (s : ℝ) {b : ℝ} (hb : 0 < b) :
+theorem exists_rpow_mul_exp_neg_le (s : ℝ) {b : ℝ} (hb : 0 < b) :
     ∃ M, ∀ r : ℝ, 1 ≤ r → r ^ s * Real.exp (-b * r) ≤ M := by
   obtain ⟨R, hR⟩ := eventually_atTop.mp
     ((tendsto_rpow_mul_exp_neg_mul_atTop_nhds_zero s b hb).eventually (ge_mem_nhds zero_lt_one))
@@ -151,7 +151,7 @@ lemma exists_rpow_mul_exp_neg_le (s : ℝ) {b : ℝ} (hb : 0 < b) :
 /-- The integrand of Tricomi's Laplace representation. -/
 def tricomiKernel (a b z t : ℂ) : ℂ := exp (-z * t) * t ^ (a - 1) * (1 + t) ^ (b - a - 1)
 
-lemma norm_tricomiKernel_le (a b z t : ℂ) (ht : 0 ≤ t.re) {N : ℕ} (hN : |(b - a - 1).re| ≤ N) :
+theorem norm_tricomiKernel_le (a b z t : ℂ) (ht : 0 ≤ t.re) {N : ℕ} (hN : |(b - a - 1).re| ≤ N) :
     ‖tricomiKernel a b z t‖ ≤ Real.exp (-(z * t).re) * ‖t‖ ^ (a.re - 1) * (1 + ‖t‖) ^ N *
       (Real.exp (π * |a.im|) * Real.exp (π * |(b - a - 1).im|)) := by
   rw [tricomiKernel, norm_mul, norm_mul, Complex.norm_exp, neg_mul, neg_re]
@@ -164,19 +164,19 @@ lemma norm_tricomiKernel_le (a b z t : ℂ) (ht : 0 ≤ t.re) {N : ℕ} (hN : |(
           ((1 + ‖t‖) ^ N * Real.exp (π * |(b - a - 1).im|)) := by gcongr
     _ = _ := by ring
 
-lemma re_ofReal_mul_exp_pos {r y : ℝ} (hr : 0 < r) (hy : |y| < π / 2) :
+theorem re_ofReal_mul_exp_pos {r y : ℝ} (hr : 0 < r) (hy : |y| < π / 2) :
     0 < ((r : ℂ) * exp (y * I)).re := by
   rw [re_ofReal_mul, exp_ofReal_mul_I_re]
   exact mul_pos hr
     (Real.cos_pos_of_mem_Ioo ⟨by linarith [neg_abs_le y], by linarith [le_abs_self y]⟩)
 
-lemma abs_lt_of_mem_uIcc {α y : ℝ} (hα : |α| < π / 2) (hy : y ∈ [[0, α]]) : |y| < π / 2 := by
+theorem abs_lt_of_mem_uIcc {α y : ℝ} (hα : |α| < π / 2) (hy : y ∈ [[0, α]]) : |y| < π / 2 := by
   refine lt_of_le_of_lt ?_ hα
   rcases le_total 0 α with h | h
   · rw [uIcc_of_le h] at hy; rw [abs_of_nonneg hy.1, abs_of_nonneg h]; exact hy.2
   · rw [uIcc_of_ge h] at hy; rw [abs_of_nonpos hy.2, abs_of_nonpos h]; linarith [hy.1]
 
-lemma differentiableAt_tricomiKernel (a b z : ℂ) {t : ℂ} (ht : 0 < t.re) :
+theorem differentiableAt_tricomiKernel (a b z : ℂ) {t : ℂ} (ht : 0 < t.re) :
     DifferentiableAt ℂ (tricomiKernel a b z) t := by
   have h1 : t ∈ slitPlane := Or.inl ht
   have h2 : 1 + t ∈ slitPlane := Or.inl (by simp; linarith)
@@ -188,7 +188,7 @@ lemma differentiableAt_tricomiKernel (a b z : ℂ) {t : ℂ} (ht : 0 < t.re) :
 /-- **Rotation of Tricomi's Laplace integral**: for `re a > 0`, `|α| < π/2` and `z` with
 `re z > 0`, `re (z e^{iα}) > 0`,
 `U(a,b,z) = 1/Γ(a) · e^{iα} ∫₀^∞ e^{-z r e^{iα}} (r e^{iα})^{a-1} (1 + r e^{iα})^{b-a-1} dr`. -/
-lemma kummerU_eq_rotated_of_re_pos {a b z : ℂ} {α : ℝ} (ha : 0 < a.re) (hα : |α| < π / 2)
+theorem kummerU_eq_rotated_of_re_pos {a b z : ℂ} {α : ℝ} (ha : 0 < a.re) (hα : |α| < π / 2)
     (hz0 : 0 < z.re) (hzα : 0 < (z * exp (α * I)).re) :
     kummerU a b z = 1 / Gamma a * (exp (α * I) *
       ∫ r in Ioi (0 : ℝ), tricomiKernel a b z (r * exp (α * I))) := by
@@ -258,7 +258,7 @@ def tricomiRotated (a b : ℂ) (α : ℝ) (z : ℂ) : ℂ :=
   1 / Gamma a * (exp (α * I) * ∫ r in Ioi (0 : ℝ), tricomiKernel a b z (r * exp (α * I)))
 
 /-- A real majorant `e^{-δr} r^{s} (1+r)^N` is integrable on `(0, ∞)` for `s > -1`, `δ > 0`. -/
-lemma integrableOn_exp_mul_rpow_mul_one_add_pow {s δ : ℝ} (hs : -1 < s) (hδ : 0 < δ) (N : ℕ) :
+theorem integrableOn_exp_mul_rpow_mul_one_add_pow {s δ : ℝ} (hs : -1 < s) (hδ : 0 < δ) (N : ℕ) :
     IntegrableOn (fun r : ℝ => Real.exp (-δ * r) * r ^ s * (1 + r) ^ N) (Ioi 0) := by
   have h := (kummerU_laplace_integrable (a := (s + 1 : ℝ)) (b := (s + 1 : ℝ) + N + 1)
     (z := (δ : ℂ)) (by simp; linarith) (by simpa using hδ)).norm
@@ -270,11 +270,11 @@ lemma integrableOn_exp_mul_rpow_mul_one_add_pow {s δ : ℝ} (hs : -1 < s) (hδ 
     Real.norm_of_nonneg (by linarith)]
   simp
 
-lemma norm_mul_exp_I_eq (r : ℝ) (hr : 0 ≤ r) (y : ℝ) : ‖(r : ℂ) * exp (y * I)‖ = r := by
+theorem norm_mul_exp_I_eq (r : ℝ) (hr : 0 ≤ r) (y : ℝ) : ‖(r : ℂ) * exp (y * I)‖ = r := by
   rw [norm_mul, norm_exp_ofReal_mul_I, mul_one, Complex.norm_real, Real.norm_of_nonneg hr]
 
 /-- The rotated integral is holomorphic on the half-plane `re (z e^{iα}) > 0`. -/
-lemma differentiableOn_tricomiRotated {a b : ℂ} {α : ℝ} (ha : 0 < a.re) (hα : |α| < π / 2) :
+theorem differentiableOn_tricomiRotated {a b : ℂ} {α : ℝ} (ha : 0 < a.re) (hα : |α| < π / 2) :
     DifferentiableOn ℂ (tricomiRotated a b α) {z : ℂ | 0 < (z * exp (α * I)).re} := by
   intro z₀ hz₀
   change 0 < (z₀ * exp (α * I)).re at hz₀
@@ -397,7 +397,7 @@ theorem kummerU_eq_tricomiRotated {a b z : ℂ} {α : ℝ} (ha : 0 < a.re) (hα 
   exact hU.eqOn_of_preconnected_of_eventuallyEq hV hHc.isPreconnected hzsH hev hz
 
 /-- The binomial expansion of `(1 + tω)^β` at `t = 0⁺` with an `O(t^N)` remainder. -/
-lemma one_add_mul_cpow_sub_sum_isBigO (ω β : ℂ) (N : ℕ) :
+theorem one_add_mul_cpow_sub_sum_isBigO (ω β : ℂ) (N : ℕ) :
     (fun t : ℝ => (1 + (t : ℂ) * ω) ^ β -
       ∑ n ∈ Finset.range N, Ring.choose β n * ((t : ℂ) * ω) ^ n) =O[𝓝[>] 0] fun t => t ^ N := by
   have h := (Complex.one_add_cpow_hasFPowerSeriesAt_zero (a := β)).isBigO_sub_partialSum_pow N
@@ -414,10 +414,10 @@ lemma one_add_mul_cpow_sub_sum_isBigO (ω β : ℂ) (N : ℕ) :
 def rotSectorAtTop (δ α : ℝ) : Filter ℂ :=
   comap (fun z : ℂ => z * exp (α * I)) (sectorAtTop δ)
 
-lemma tendsto_rotSectorAtTop (δ α : ℝ) :
+theorem tendsto_rotSectorAtTop (δ α : ℝ) :
     Tendsto (fun z : ℂ => z * exp (α * I)) (rotSectorAtTop δ α) (sectorAtTop δ) := tendsto_comap
 
-lemma eventually_rotSectorAtTop {δ α : ℝ} (hδ : 0 < δ) (hα : |α| < π / 2) :
+theorem eventually_rotSectorAtTop {δ α : ℝ} (hδ : 0 < δ) (hα : |α| < π / 2) :
     ∀ᶠ z in rotSectorAtTop δ α, 1 ≤ ‖z‖ ∧ 0 < (z * exp (α * I)).re ∧
       |arg z + α| < π / 2 := by
   have h := (tendsto_rotSectorAtTop δ α).eventually (eventually_sectorAtTop (R := 1)
@@ -436,7 +436,7 @@ lemma eventually_rotSectorAtTop {δ α : ℝ} (hδ : 0 < δ) (hα : |α| < π / 
   exact abs_lt_pi_div_two_of_cos_pos (by linarith [neg_abs_le α]) (by linarith [le_abs_self α]) hc
 
 /-- Tricomi's expansion in the rotated sector, for `re a > 0`. -/
-lemma hasAsymptoticExpansion_kummerU_rotSector_of_re_pos {a b : ℂ} (ha : 0 < a.re) {δ α : ℝ}
+theorem hasAsymptoticExpansion_kummerU_rotSector_of_re_pos {a b : ℂ} (ha : 0 < a.re) {δ α : ℝ}
     (hδ : 0 < δ) (hα : |α| < π / 2) :
     HasAsymptoticExpansion (rotSectorAtTop δ α) (fun (n : ℕ) (z : ℂ) => z ^ (-((n : ℂ) + a)))
       (tricomiCoeff a b) (fun z => kummerU a b z) := by

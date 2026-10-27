@@ -34,12 +34,12 @@ noncomputable section
 namespace DLMF.Heun
 
 /-- A function with a nonzero limit is not `O(g)` for `g → 0`. -/
-theorem p1h_not_isBigO_of_tendsto {l : Filter ℂ} [l.NeBot] {f g : ℂ → ℂ} {c : ℂ} (hc : c ≠ 0)
+lemma p1h_not_isBigO_of_tendsto {l : Filter ℂ} [l.NeBot] {f g : ℂ → ℂ} {c : ℂ} (hc : c ≠ 0)
     (hf : Tendsto f l (𝓝 c)) (hg : Tendsto g l (𝓝 0)) : ¬ f =O[l] g := fun h =>
   hc (tendsto_nhds_unique hf (h.trans_tendsto hg))
 
 /-- `z ^ (-n) → 0` at infinity for `n > 0`. -/
-theorem p1h_tendsto_zpow_neg_cobounded {n : ℕ} (hn : 0 < n) :
+lemma p1h_tendsto_zpow_neg_cobounded {n : ℕ} (hn : 0 < n) :
     Tendsto (fun z : ℂ => z ^ (-(n : ℤ))) (Bornology.cobounded ℂ) (𝓝 0) := by
   have h := (tendsto_inv₀_cobounded (α := ℂ)).pow n
   simp only [zero_pow hn.ne'] at h
@@ -47,14 +47,14 @@ theorem p1h_tendsto_zpow_neg_cobounded {n : ℕ} (hn : 0 < n) :
   simp [zpow_neg, inv_pow]
 
 /-- If `f / g → c ≠ 0` and `g' / g → 0` then `f` is not `O(g')`. -/
-theorem p1h_not_isBigO_of_div {l : Filter ℂ} [l.NeBot] {f g g' : ℂ → ℂ} {c : ℂ} (hc : c ≠ 0)
+lemma p1h_not_isBigO_of_div {l : Filter ℂ} [l.NeBot] {f g g' : ℂ → ℂ} {c : ℂ} (hc : c ≠ 0)
     (hf : Tendsto (fun z => f z / g z) l (𝓝 c)) (hg : Tendsto (fun z => g' z / g z) l (𝓝 0)) :
     ¬ f =O[l] g' := fun h =>
   p1h_not_isBigO_of_tendsto hc hf hg
     (by simpa [div_eq_mul_inv] using h.mul (isBigO_refl (fun z => (g z)⁻¹) l))
 
 /-- `f = O(g)` from a limit of `f / g`, for `g` eventually nonzero. -/
-theorem p1h_isBigO_of_div {l : Filter ℂ} {f g : ℂ → ℂ} {c : ℂ}
+lemma p1h_isBigO_of_div {l : Filter ℂ} {f g : ℂ → ℂ} {c : ℂ}
     (hf : Tendsto (fun z => f z / g z) l (𝓝 c)) (hg : ∀ᶠ z in l, g z ≠ 0) : f =O[l] g :=
   isBigO_of_div_tendsto_nhds (hg.mono fun _ hz h => absurd h hz) c hf
 

@@ -5,10 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.JacobiElliptic.PeriodsPolesZeros
 public import DLMF.JacobiElliptic.Derivatives
 public import Mathlib.Analysis.ODE.ExistUnique
 public import Mathlib.Analysis.Calculus.Deriv.Prod
+public import DLMF.Elliptic.JacobiIdentities
 
 /-!
 # Jacobian elliptic functions: special values (DLMF §22.5)
@@ -502,7 +502,7 @@ lemma p22R1_residue_shift {f s : ℂ → ℂ} {c p : ℂ} (hfs : ∀ z, f (z + p
   simp only [Function.comp_apply, this]
   ring
 
-lemma p22R1_reg0 {k : ℂ} (hk : k ∈ jacobiModulusDomain) {q : JacobiLetter} (hq : q ≠ .s) :
+theorem p22R1_reg0 {k : ℂ} (hk : k ∈ jacobiModulusDomain) {q : JacobiLetter} (hq : q ≠ .s) :
     jacobiLetterTheta q (jacobiZetak 0 k) (jacobiTauk k) ≠ 0 := by
   have : jacobiZetak 0 k = 0 := by simp [jacobiZetak]
   rw [this, je22a_letterTheta_zero (jacobiTauk_im_pos hk)]
@@ -1433,7 +1433,7 @@ For `0 < k < 1` and real `u`, the theta-quotient `sn, cn, dn` agree with the amp
 uniqueness (`ODE_solution_unique_of_mem_Ioo`). (Moved here from `Basic`.) -/
 
 /-- For real `0 < k < 1`, the complex `sn, cn, dn` have no pole on the real line. -/
-lemma p22R1_reg_real {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (u : ℝ) :
+theorem p22R1_reg_real {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (u : ℝ) :
     jacobiLetterTheta .n (jacobiZetak u k) (jacobiTauk k) ≠ 0 := by
   have hk := p22R1_ofReal_mem hk0 hk1
   have hτ := jacobiTauk_im_pos hk
@@ -1446,7 +1446,7 @@ lemma p22R1_reg_real {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (u : ℝ) :
 
 open Set in
 /-- Joint real-line identification of the complex and real `sn, cn, dn` (ODE uniqueness). -/
-theorem p22R1_ofReal_all {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (u : ℝ) :
+lemma p22R1_ofReal_all {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (u : ℝ) :
     jacobiSnk u k = (Real.jacobiSnm u (k ^ 2) : ℂ) ∧
       jacobiCnk u k = (Real.jacobiCnm u (k ^ 2) : ℂ) ∧
       jacobiDnk u k = (Real.jacobiDnm u (k ^ 2) : ℂ) := by
@@ -1615,7 +1615,7 @@ lemma p22R1_theta_quarter_ne {τ : ℂ} (hτ : 0 < τ.im) (r : JacobiLetter) :
   · exact div_ne_zero h3 n3
   · exact div_ne_zero h4 n4
 
-lemma p22R1_amm_strictMono {m : ℝ} (hm : m < 1) : StrictMono fun u => Real.jacobiAmm u m := by
+theorem p22R1_amm_strictMono {m : ℝ} (hm : m < 1) : StrictMono fun u => Real.jacobiAmm u m := by
   simp only [Real.jacobiAmm, hm, ↓reduceDIte]
   exact (Real.incEllIntFmOrderIso hm).symm.strictMono
 

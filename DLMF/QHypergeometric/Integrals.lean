@@ -64,7 +64,7 @@ def mellinQBetaValue (q : ℝ) (α β : ℂ) : ℂ :=
       (DLMF.QSeries.qGamma q (1-a) * DLMF.QSeries.qGamma q (a+β)))
 
 /-- The q-Gamma function is continuous and nonzero on the right half-plane. -/
-theorem qaR4_qGamma_cont_ne (q : ℝ) (hq0 : 0<q) (hq1 : q<1) (x : ℂ) (hx : 0<x.re) :
+lemma qaR4_qGamma_cont_ne (q : ℝ) (hq0 : 0<q) (hq1 : q<1) (x : ℂ) (hx : 0<x.re) :
     ContinuousAt (DLMF.QSeries.qGamma (q:ℂ)) x ∧ DLMF.QSeries.qGamma (q:ℂ) x≠0 := by
   have hqn : ‖(q:ℂ)‖<1 := by rw [Complex.norm_real,Real.norm_eq_abs,abs_of_pos hq0]; exact hq1
   have hqc : (q:ℂ)≠0 := by exact_mod_cast hq0.ne'

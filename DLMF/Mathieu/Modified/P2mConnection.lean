@@ -8,8 +8,6 @@ module
 public import DLMF.Mathieu.Modified.Properties
 public import DLMF.Mathieu.IntegralEquations
 public import DLMF.Mathieu.SecondSolutions
-public import DLMF.Bessel.ProductIntegral
-public import DLMF.Bessel.BesselIntegral
 
 /-!
 # Connection formulas of the radial Mathieu functions: proofs (DLMF §28.22)
@@ -153,7 +151,7 @@ theorem p2m_fourierB_even_two_ne (n : ℕ) {q : ℝ} (hq : q ≠ 0) :
 
 /-- Termwise integration of `g ∑ c_n φ_n` over `[a, b]`, for `∑ ‖c_n‖ < ∞`, `‖φ_n‖ ≤ 1`
 (dominated interchange of sum and integral). -/
-theorem p2m_hasSum_integral_mul {c : ℕ → ℂ} (hc : Summable fun n => ‖c n‖)
+lemma p2m_hasSum_integral_mul {c : ℕ → ℂ} (hc : Summable fun n => ‖c n‖)
     {φ : ℕ → ℝ → ℂ} (hφc : ∀ n, Continuous (φ n)) (hφ : ∀ n x, ‖φ n x‖ ≤ 1)
     {g f : ℝ → ℂ} (hg : Continuous g) (hf : ∀ x, HasSum (fun n => c n * φ n x) (f x))
     (a b : ℝ) :
@@ -175,7 +173,7 @@ theorem p2m_hasSum_integral_mul {c : ℕ → ℂ} (hc : Summable fun n => ‖c n
   · exact ae_of_all _ fun x _ => (hf x).mul_left (g x)
 
 /-- `∫₀^π ce_{2n}(π/2 - t) dt = π A_0`. -/
-theorem p2m_integral_ce_even_shift (n : ℕ) (q : ℝ) :
+lemma p2m_integral_ce_even_shift (n : ℕ) (q : ℝ) :
     ∫ t in (0 : ℝ)..π, mathieuCe (2 * n) ((π / 2 - t : ℝ) : ℂ) q =
       π * mathieuFourierA (2 * n) 0 q := by
   have hc : Continuous fun u : ℝ => mathieuCe (2 * n) (u : ℂ) q :=
@@ -194,7 +192,7 @@ theorem p2m_integral_ce_even_shift (n : ℕ) (q : ℝ) :
   ring
 
 /-- `∑ (-1)^ℓ A^{2n}_{2ℓ} J_ℓ(h)² = (A^{2n}_0)² / ce_{2n}(π/2)` (from 10.9.26, 10.9.2, 28.10.1). -/
-theorem p2m_key_even (n : ℕ) {h : ℝ} (hh : 0 < h) :
+lemma p2m_key_even (n : ℕ) {h : ℝ} (hh : 0 < h) :
     HasSum (fun ℓ : ℕ => (-1 : ℂ) ^ ℓ * mathieuFourierA (2 * n) (2 * ℓ) (h ^ 2) *
       besselJ (ℓ : ℂ) (h : ℂ) ^ 2)
       (mathieuFourierA (2 * n) 0 (h ^ 2) ^ 2 / mathieuCe (2 * n) (π / 2) (h ^ 2)) := by
@@ -281,7 +279,7 @@ theorem p2m_key_even (n : ℕ) {h : ℝ} (hh : 0 < h) :
 
 
 /-- `∫₀^π cos t P(t) dt = 0` when `P(π - t) = P(t)`. -/
-theorem p2m_integral_cos_mul_symm {P : ℝ → ℂ} (hP : ∀ t, P (π - t) = P t) :
+lemma p2m_integral_cos_mul_symm {P : ℝ → ℂ} (hP : ∀ t, P (π - t) = P t) :
     ∫ t in (0 : ℝ)..π, (Real.cos t : ℂ) * P t = 0 := by
   have h := intervalIntegral.integral_comp_sub_left (a := 0) (b := π)
     (fun t : ℝ => (Real.cos t : ℂ) * P t) π
@@ -290,7 +288,7 @@ theorem p2m_integral_cos_mul_symm {P : ℝ → ℂ} (hP : ∀ t, P (π - t) = P 
   linear_combination -h / 2
 
 /-- `∫₀^π sin t ce_{2n+1}(π/2 - t) dt = (π/2) A_1`. -/
-theorem p2m_integral_ce_odd_shift (n : ℕ) (q : ℝ) :
+lemma p2m_integral_ce_odd_shift (n : ℕ) (q : ℝ) :
     ∫ t in (0 : ℝ)..π, (Real.sin t : ℂ) * mathieuCe (2 * n + 1) ((π / 2 - t : ℝ) : ℂ) q =
       π / 2 * mathieuFourierA (2 * n + 1) 1 q := by
   set f : ℝ → ℂ := fun u => (Real.cos u : ℂ) * mathieuCe (2 * n + 1) (u : ℂ) q
@@ -316,7 +314,7 @@ theorem p2m_integral_ce_odd_shift (n : ℕ) (q : ℝ) :
 
 /-- `∑ (-1)^ℓ A^{2n+1}_{2ℓ+1} J_ℓ(h) J_{ℓ+1}(h) = -h (A^{2n+1}_1)² / (2 ce'_{2n+1}(π/2))`
 (from 10.9.26, 10.9.2, 28.10.3). -/
-theorem p2m_key_odd (n : ℕ) {h : ℝ} (hh : 0 < h) :
+lemma p2m_key_odd (n : ℕ) {h : ℝ} (hh : 0 < h) :
     HasSum (fun ℓ : ℕ => (-1 : ℂ) ^ ℓ * mathieuFourierA (2 * n + 1) (2 * ℓ + 1) (h ^ 2) *
       (besselJ (ℓ : ℂ) (h : ℂ) * besselJ ((ℓ + 1 : ℕ) : ℂ) (h : ℂ)))
       (-(h * mathieuFourierA (2 * n + 1) 1 (h ^ 2) ^ 2) /
@@ -454,7 +452,7 @@ theorem p2m_key_odd (n : ℕ) {h : ℝ} (hh : 0 < h) :
   ring
 
 /-- `∫₀^π sin t se_{2n+1}(t) dt = (π/2) B_1`. -/
-theorem p2m_integral_se_odd (n : ℕ) (q : ℝ) :
+lemma p2m_integral_se_odd (n : ℕ) (q : ℝ) :
     ∫ t in (0 : ℝ)..π, (Real.sin t : ℂ) * mathieuSe (2 * n + 1) (t : ℂ) q =
       π / 2 * mathieuFourierB (2 * n + 1) 1 q := by
   set f : ℝ → ℂ := fun u => (Real.sin u : ℂ) * mathieuSe (2 * n + 1) (u : ℂ) q
@@ -481,7 +479,7 @@ theorem p2m_integral_se_odd (n : ℕ) (q : ℝ) :
 
 /-- `∑ B^{2n+1}_{2ℓ+1} J_ℓ(ih) J_{ℓ+1}(ih) = ih (B^{2n+1}_1)² / (2 se'_{2n+1}(0))`
 (from 10.9.26, 10.9.2, 28.10.5). -/
-theorem p2m_key_se_odd (n : ℕ) {h : ℝ} (hh : 0 < h) :
+lemma p2m_key_se_odd (n : ℕ) {h : ℝ} (hh : 0 < h) :
     HasSum (fun ℓ : ℕ => mathieuFourierB (2 * n + 1) (2 * ℓ + 1) (h ^ 2) *
       (besselJ (ℓ : ℂ) (I * h) * besselJ ((ℓ + 1 : ℕ) : ℂ) (I * h)))
       (I * h * mathieuFourierB (2 * n + 1) 1 (h ^ 2) ^ 2 /
@@ -644,14 +642,14 @@ theorem p2m_key_se_odd (n : ℕ) {h : ℝ} (hh : 0 < h) :
 
 
 /-- `∫₀^π w(t) P(t) dt = 0` when `w(π - t) = -w(t)` and `P(π - t) = P(t)`. -/
-theorem p2m_integral_antisymm_mul_symm {w P : ℝ → ℂ} (hw : ∀ t, w (π - t) = -w t)
+lemma p2m_integral_antisymm_mul_symm {w P : ℝ → ℂ} (hw : ∀ t, w (π - t) = -w t)
     (hP : ∀ t, P (π - t) = P t) : ∫ t in (0 : ℝ)..π, w t * P t = 0 := by
   have h := intervalIntegral.integral_comp_sub_left (a := 0) (b := π) (fun t : ℝ => w t * P t) π
   simp only [sub_self, sub_zero, hw, hP, neg_mul, intervalIntegral.integral_neg] at h
   linear_combination -h / 2
 
 /-- `y (J_1(y) + J_3(y)) = 4 J_2(y)`. -/
-theorem p2m_besselJ_one_add_three (y : ℂ) :
+lemma p2m_besselJ_one_add_three (y : ℂ) :
     y * (besselJ 1 y + besselJ 3 y) = 4 * besselJ 2 y := by
   by_cases hy : y = 0
   · subst hy; simp [DLMF.Bessel.besselJ_apply_zero]
@@ -665,7 +663,7 @@ theorem p2m_besselJ_one_add_three (y : ℂ) :
     rw [h]; field_simp; ring
 
 /-- `∫₀^π sin t cos t se_{2n+2}(π/2 - t) dt = (π/4) B_2`. -/
-theorem p2m_integral_se_even_shift (n : ℕ) (q : ℝ) :
+lemma p2m_integral_se_even_shift (n : ℕ) (q : ℝ) :
     ∫ t in (0 : ℝ)..π, (Real.sin t : ℂ) * (Real.cos t : ℂ) *
       mathieuSe (2 * n + 2) ((π / 2 - t : ℝ) : ℂ) q = π / 4 * mathieuFourierB (2 * n + 2) 2 q := by
   set f : ℝ → ℂ := fun u => (Real.sin u : ℂ) * (Real.cos u : ℂ) *
@@ -692,7 +690,7 @@ theorem p2m_integral_se_even_shift (n : ℕ) (q : ℝ) :
   ring
 
 /-- `J_a(h) J_b(h)` for integers `a, b` with `a + b = s ≥ 0`, as a product integral. -/
-theorem p2m_prod_int {a b : ℤ} {s : ℕ} (hab : a + b = s) {h : ℂ} (hh : h ∈ slitPlane) :
+lemma p2m_prod_int {a b : ℤ} {s : ℕ} (hab : a + b = s) {h : ℂ} (hh : h ∈ slitPlane) :
     besselJ (a : ℂ) h * besselJ (b : ℂ) h = 2 / π * ∫ θ in (0 : ℝ)..π / 2,
       besselJ (s : ℂ) (2 * h * (Real.cos θ : ℂ)) * Complex.cos (((a - b : ℤ) : ℂ) * θ) := by
   have h1 := DLMF.Bessel.besselJ_mul_besselJ_eq_integral (a : ℂ) (b : ℂ) (by
@@ -702,7 +700,7 @@ theorem p2m_prod_int {a b : ℤ} {s : ℕ} (hab : a + b = s) {h : ℂ} (hh : h �
 
 /-- The Bessel-product sum for `se_{2n+2}`, equal to `-h² (B^{2n+2}_2)² / se'_{2n+2}(π/2)`
 (from 10.9.26, 10.9.2, 28.10.7). -/
-theorem p2m_key_se_even (n : ℕ) {h : ℝ} (hh : 0 < h) :
+lemma p2m_key_se_even (n : ℕ) {h : ℝ} (hh : 0 < h) :
     HasSum (fun ℓ : ℕ => (-1 : ℂ) ^ ℓ * mathieuFourierB (2 * n + 2) (2 * ℓ + 2) (h ^ 2) *
       (4 * (besselJ (ℓ : ℂ) h * besselJ ((ℓ + 2 : ℕ) : ℂ) h) +
         2 * h * (besselJ ((ℓ + 1 : ℕ) : ℂ) h * besselJ ((ℓ + 2 : ℕ) : ℂ) h -
@@ -954,7 +952,7 @@ theorem p2m_key_se_even (n : ℕ) {h : ℝ} (hh : 0 < h) :
   ring
 
 /-- `‖J_n(w)‖ ≤ e^{‖w‖}` for integer `n`. -/
-theorem p2m_norm_besselJ_int_le (n : ℤ) (w : ℂ) : ‖besselJ (n : ℂ) w‖ ≤ Real.exp ‖w‖ := by
+lemma p2m_norm_besselJ_int_le (n : ℤ) (w : ℂ) : ‖besselJ (n : ℂ) w‖ ≤ Real.exp ‖w‖ := by
   rw [DLMF.Bessel.besselJ_int_eq_integral_cos n w, norm_mul]
   have hπ : 0 < π := Real.pi_pos
   have h1 : ‖∫ θ in (0 : ℝ)..π, Complex.cos (w * Complex.sin θ - n * θ)‖ ≤
@@ -976,7 +974,7 @@ theorem p2m_norm_besselJ_int_le (n : ℤ) (w : ℂ) : ‖besselJ (n : ℂ) w‖ 
     _ = Real.exp ‖w‖ := by field_simp
 
 /-- `‖J_n(h e^w)‖ ≤ e^{h e}` for `‖w‖ < 1`, `h > 0`. -/
-theorem p2m_norm_besselJExp_int_le (n : ℤ) {h : ℝ} (hh : 0 < h) {w : ℂ} (hw : ‖w‖ < 1) :
+lemma p2m_norm_besselJExp_int_le (n : ℤ) {h : ℝ} (hh : 0 < h) {w : ℂ} (hw : ‖w‖ < 1) :
     ‖besselJExp (n : ℂ) h w‖ ≤ Real.exp (h * Real.exp 1) := by
   rw [p1c_besselJExp_intCast]
   refine (p2m_norm_besselJ_int_le n _).trans (Real.exp_le_exp.2 ?_)
@@ -985,7 +983,7 @@ theorem p2m_norm_besselJExp_int_le (n : ℤ) {h : ℝ} (hh : 0 < h) {w : ℂ} (h
   exact (Complex.re_le_norm w).trans hw.le
 
 /-- The derivative of `z ↦ J_a(h e^{-z}) J_b(h e^z) - J_b(h e^{-z}) J_a(h e^z)` at `0`. -/
-theorem p2m_hasDerivAt_cross (a b : ℂ) {h : ℂ} (hh : h ≠ 0) :
+lemma p2m_hasDerivAt_cross (a b : ℂ) {h : ℂ} (hh : h ≠ 0) :
     HasDerivAt (fun z => besselJExp a h (-z) * besselJExp b h z -
         besselJExp b h (-z) * besselJExp a h z)
       (2 * (b - a) * besselJExp a h 0 * besselJExp b h 0 +
@@ -1006,7 +1004,7 @@ theorem p2m_hasDerivAt_cross (a b : ℂ) {h : ℂ} (hh : h ≠ 0) :
 
 /-- `Ms^{(1)'}_{2k+2}(0, h) = -(-1)^k h² B^{2k+2}_2 / se'_{2k+2}(π/2)` (termwise
 differentiation of 28.24.5). -/
-theorem p2m_radialMs_one_even_deriv (k : ℕ) {h : ℝ} (hh : 0 < h) :
+lemma p2m_radialMs_one_even_deriv (k : ℕ) {h : ℝ} (hh : 0 < h) :
     deriv (fun z => radialMathieuMs 1 (2 * k + 2) z h) 0 =
       -((-1 : ℂ) ^ k * h ^ 2 * mathieuFourierB (2 * k + 2) 2 (h ^ 2) /
         deriv (fun w => mathieuSe (2 * k + 2) w (h ^ 2)) (π / 2)) := by
@@ -1127,19 +1125,19 @@ theorem p1c_isMathieuSolution_comp {a q : ℂ} {w : ℂ → ℂ} (hw : IsModMath
 
 
 /-- `(h : ℂ)^2 = ((h^2 : ℝ) : ℂ)`. -/
-theorem p2m_sq_cast (h : ℝ) : (h : ℂ) ^ 2 = ((h ^ 2 : ℝ) : ℂ) := by push_cast; ring
+lemma p2m_sq_cast (h : ℝ) : (h : ℂ) ^ 2 = ((h ^ 2 : ℝ) : ℂ) := by push_cast; ring
 
 /-- `J_k(h e^0) = J_k(h)` for the continued Bessel function of integer order. -/
-theorem p2m_besselJExp_zero (k : ℤ) (h : ℂ) : besselJExp k h 0 = besselJ k h := by
+lemma p2m_besselJExp_zero (k : ℤ) (h : ℂ) : besselJExp k h 0 = besselJ k h := by
   rw [p1c_besselJExp_intCast, Complex.exp_zero, mul_one]
 
 /-- Integer orders with real `h` are admissible (without the normality of the noninteger
 case). -/
-theorem p2m_admissible_intCast (k : ℤ) (h : ℝ) : ModMathieuAdmissible (k : ℂ) (h : ℂ) :=
+lemma p2m_admissible_intCast (k : ℤ) (h : ℝ) : ModMathieuAdmissible (k : ℂ) (h : ℂ) :=
   Or.inr ⟨⟨k, rfl⟩, by rw [p2m_sq_cast]; exact ofReal_im _⟩
 
 /-- `Mc^{(j)}_m(·, h)` solves Mathieu's equation along the imaginary axis (`j = 1, …, 4`). -/
-theorem p2m_isMathieuSolution_McJ (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (m : ℕ) {h : ℝ}
+lemma p2m_isMathieuSolution_McJ (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (m : ℕ) {h : ℝ}
     (hh : 0 < h) :
     IsMathieuSolution (mathieuA m (h ^ 2)) ((h ^ 2 : ℝ) : ℂ)
       (fun t => radialMathieuMc j m (-I * t) h) := by
@@ -1156,7 +1154,7 @@ theorem p2m_isMathieuSolution_McJ (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) 
 
 /-- `Ms^{(j)}_m(·, h)` solves Mathieu's equation along the imaginary axis (`m ≥ 1`,
 `j = 1, …, 4`). -/
-theorem p2m_isMathieuSolution_MsJ (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) {m : ℕ} (hm : m ≠ 0)
+lemma p2m_isMathieuSolution_MsJ (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) {m : ℕ} (hm : m ≠ 0)
     {h : ℝ} (hh : 0 < h) :
     IsMathieuSolution (mathieuB m (h ^ 2)) ((h ^ 2 : ℝ) : ℂ)
       (fun t => radialMathieuMs j m (-I * t) h) := by
@@ -1173,7 +1171,7 @@ theorem p2m_isMathieuSolution_MsJ (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) 
   exact this.const_mul ((-1 : ℂ) ^ m)
 
 /-- `Mc^{(1)}_m(z, h)` is even in `z`. -/
-theorem p2m_radialMc_one_neg (m : ℕ) {h : ℝ} (hh : 0 < h) (z : ℂ) :
+lemma p2m_radialMc_one_neg (m : ℕ) {h : ℝ} (hh : 0 < h) (z : ℂ) :
     radialMathieuMc 1 m (-z) h = radialMathieuMc 1 m z h := by
   have hq : h ^ 2 ≠ 0 := by positivity
   obtain ⟨k, rfl | rfl⟩ := Nat.even_or_odd' m
@@ -1193,11 +1191,11 @@ theorem p2m_radialMc_one_neg (m : ℕ) {h : ℝ} (hh : 0 < h) (z : ℂ) :
     exact h2.unique (by convert h1 using 2 with ℓ; push_cast; ring)
 
 /-- `J_k(h e^0) = J_k(h)`, natural order. -/
-theorem p2m_besselJExp_zero_nat (k : ℕ) (h : ℂ) : besselJExp (k : ℂ) h 0 = besselJ (k : ℂ) h := by
+lemma p2m_besselJExp_zero_nat (k : ℕ) (h : ℂ) : besselJExp (k : ℂ) h 0 = besselJ (k : ℂ) h := by
   simpa using p2m_besselJExp_zero k h
 
 /-- `Mc^{(1)}_{2k}(0, h) = (-1)^k A^{2k}_0 / ce_{2k}(π/2)`. -/
-theorem p2m_radialMc_one_zero_even (k : ℕ) {h : ℝ} (hh : 0 < h) :
+lemma p2m_radialMc_one_zero_even (k : ℕ) {h : ℝ} (hh : 0 < h) :
     radialMathieuMc 1 (2 * k) 0 h = (-1 : ℂ) ^ k * mathieuFourierA (2 * k) 0 (h ^ 2) /
       mathieuCe (2 * k) (π / 2) (h ^ 2) := by
   have hq : h ^ 2 ≠ 0 := by positivity
@@ -1220,7 +1218,7 @@ theorem p2m_radialMc_one_zero_even (k : ℕ) {h : ℝ} (hh : 0 < h) :
   linear_combination e
 
 /-- `Mc^{(1)}_{2k+1}(0, h) = -(-1)^k h A^{2k+1}_1 / ce'_{2k+1}(π/2)`. -/
-theorem p2m_radialMc_one_zero_odd (k : ℕ) {h : ℝ} (hh : 0 < h) :
+lemma p2m_radialMc_one_zero_odd (k : ℕ) {h : ℝ} (hh : 0 < h) :
     radialMathieuMc 1 (2 * k + 1) 0 h = -((-1 : ℂ) ^ k * h * mathieuFourierA (2 * k + 1) 1 (h ^ 2) /
       deriv (fun w => mathieuCe (2 * k + 1) w (h ^ 2)) (π / 2)) := by
   have hq : h ^ 2 ≠ 0 := by positivity
@@ -1248,7 +1246,7 @@ theorem p2m_sqrt_two_div_pi_ne : ((Real.sqrt (2 / π) : ℝ) : ℂ) ≠ 0 := by
   exact_mod_cast this.ne'
 
 /-- `Mc^{(1)}_m(0, h) g_{e,m}(h) = √(2/π)`. -/
-theorem p2m_radialMc_one_zero_mul (m : ℕ) {h : ℝ} (hh : 0 < h) :
+lemma p2m_radialMc_one_zero_mul (m : ℕ) {h : ℝ} (hh : 0 < h) :
     radialMathieuMc 1 m 0 h * mathieuJoinGe m h = Real.sqrt (2 / π) := by
   have hq : h ^ 2 ≠ 0 := by positivity
   have hh' : (h : ℂ) ≠ 0 := by exact_mod_cast hh.ne'
@@ -1295,7 +1293,7 @@ theorem p2m_radialMathieuMc_one_eq (m : ℕ) {h : ℝ} (hh : 0 < h) (z : ℂ) :
   field_simp
 
 /-- `Ms^{(1)}_m(z, h)` is odd in `z`. -/
-theorem p2m_radialMs_one_neg {m : ℕ} (hm : m ≠ 0) {h : ℝ} (hh : 0 < h) (z : ℂ) :
+lemma p2m_radialMs_one_neg {m : ℕ} (hm : m ≠ 0) {h : ℝ} (hh : 0 < h) (z : ℂ) :
     radialMathieuMs 1 m (-z) h = -radialMathieuMs 1 m z h := by
   have hq : h ^ 2 ≠ 0 := by positivity
   obtain ⟨k, rfl | rfl⟩ := Nat.even_or_odd' m
@@ -1315,14 +1313,14 @@ theorem p2m_radialMs_one_neg {m : ℕ} (hm : m ≠ 0) {h : ℝ} (hh : 0 < h) (z 
     exact h2.unique (by convert h1.neg using 2 with ℓ; ring)
 
 /-- `J_k(h e^{πi/2}) = J_k(ih)`. -/
-theorem p2m_besselJExp_half_pi_I (k : ℕ) (h : ℂ) :
+lemma p2m_besselJExp_half_pi_I (k : ℕ) (h : ℂ) :
     besselJExp (k : ℂ) h (π / 2 * I) = besselJ (k : ℂ) (I * h) := by
   have := p1c_besselJExp_intCast k h (π / 2 * I)
   push_cast at this
   rw [this, Complex.exp_pi_div_two_mul_I, mul_comm]
 
 /-- `J_k(h e^{-πi/2}) = (-1)^k J_k(ih)`. -/
-theorem p2m_besselJExp_neg_half_pi_I (k : ℕ) (h : ℂ) :
+lemma p2m_besselJExp_neg_half_pi_I (k : ℕ) (h : ℂ) :
     besselJExp (k : ℂ) h (-(π / 2 * I)) = (-1 : ℂ) ^ k * besselJ (k : ℂ) (I * h) := by
   have := p1c_besselJExp_intCast k h (-(π / 2 * I))
   push_cast at this
@@ -1333,7 +1331,7 @@ theorem p2m_besselJExp_neg_half_pi_I (k : ℕ) (h : ℂ) :
   rw [this, zpow_natCast]
 
 /-- `Ms^{(1)}_{2k+1}(-πi/2, h) = -(-1)^k i h B^{2k+1}_1 / se'_{2k+1}(0)`. -/
-theorem p2m_radialMs_one_odd_val (k : ℕ) {h : ℝ} (hh : 0 < h) :
+lemma p2m_radialMs_one_odd_val (k : ℕ) {h : ℝ} (hh : 0 < h) :
     radialMathieuMs 1 (2 * k + 1) (-(π / 2 * I)) h = -((-1 : ℂ) ^ k * I * h *
       mathieuFourierB (2 * k + 1) 1 (h ^ 2) /
         deriv (fun w => mathieuSe (2 * k + 1) w (h ^ 2)) 0) := by
@@ -1360,7 +1358,7 @@ theorem p2m_radialMs_one_odd_val (k : ℕ) {h : ℝ} (hh : 0 < h) :
   field_simp
 
 /-- `Ms^{(1)}_m = c Se_m` with `c = Ms^{(1)'}_m(0)/se_m'(0)`. -/
-theorem p2m_radialMs_one_eq_mul {m : ℕ} (hm : m ≠ 0) {h : ℝ} (hh : 0 < h) (z : ℂ) :
+lemma p2m_radialMs_one_eq_mul {m : ℕ} (hm : m ≠ 0) {h : ℝ} (hh : 0 < h) (z : ℂ) :
     radialMathieuMs 1 m z h = deriv (fun z => radialMathieuMs 1 m z h) 0 /
       deriv (fun w => mathieuSe m w (h ^ 2)) 0 * modMathieuSe m z ((h ^ 2 : ℝ) : ℂ) := by
   rw [modMathieuSe_natCast hm]
@@ -1434,7 +1432,7 @@ theorem p2m_radialMathieuMs_one_eq {m : ℕ} (hm : m ≠ 0) {h : ℝ} (hh : 0 < 
 
 /-- Monodromy of the continued `Y_μ` under `z ↦ z + πi`, every order:
 `Y_μ(h e^{z+πi}) = e^{-iμπ} Y_μ(h e^z) + 2i cos(μπ) J_μ(h e^z)`. -/
-theorem p2m_besselYExp_add_pi_I (μ : ℂ) {h : ℂ} (hh : h ≠ 0) (z : ℂ) :
+lemma p2m_besselYExp_add_pi_I (μ : ℂ) {h : ℂ} (hh : h ≠ 0) (z : ℂ) :
     besselYExp μ h (z + π * I) = Complex.exp (-(μ * π * I)) * besselYExp μ h z +
       2 * I * Complex.cos (μ * π) * besselJExp μ h z := by
   have hc := p2m_continuousAt_besselYExp_order hh
@@ -1461,14 +1459,14 @@ theorem p2m_besselYExp_add_pi_I (μ : ℂ) {h : ℂ} (hh : h ≠ 0) (z : ℂ) :
   linear_combination (-(besselJExp c h z * Complex.cos (c * π))) * hsin
 
 /-- Integer-order case: `Y_k(h e^{z+πi}) = (-1)^k (Y_k(h e^z) + 2i J_k(h e^z))`. -/
-theorem p2m_besselYExp_add_pi_I_int (k : ℤ) {h : ℂ} (hh : h ≠ 0) (z : ℂ) :
+lemma p2m_besselYExp_add_pi_I_int (k : ℤ) {h : ℂ} (hh : h ≠ 0) (z : ℂ) :
     besselYExp k h (z + π * I) = (-1 : ℂ) ^ k * (besselYExp k h z + 2 * I * besselJExp k h z) := by
   rw [p2m_besselYExp_add_pi_I _ hh, DLMF.Bessel.cos_int_mul_pi_complex,
     show -((k : ℂ) * π * I) = -(I * k * π) by ring, p1c_exp_neg_I_int_mul_pi]
   ring
 
 /-- Term-wise monodromy `z ↦ z + πi` of the integer-order series 28.24.1 with `j = 2`. -/
-theorem p2m_modMathieuTerm_two_add_pi_I (m : ℤ) {h : ℂ} (hh : h ≠ 0) (z : ℂ) (n ℓ : ℤ) :
+lemma p2m_modMathieuTerm_two_add_pi_I (m : ℤ) {h : ℂ} (hh : h ≠ 0) (z : ℂ) (n ℓ : ℤ) :
     modMathieuTerm 2 m (z + π * I) h n ℓ =
       (-1 : ℂ) ^ m * (modMathieuTerm 2 m z h n ℓ + 2 * I * modMathieuTerm 1 m z h n ℓ) := by
   have e : Complex.exp (2 * -(π * I)) = 1 := by
@@ -1490,7 +1488,7 @@ theorem p2m_modMathieuTerm_two_add_pi_I (m : ℤ) {h : ℂ} (hh : h ≠ 0) (z : 
 
 /-- Monodromy of `M^{(2)}_k` for integer `k`, `h > 0`:
 `M^{(2)}_k(z + πi) = (-1)^k (M^{(2)}_k(z) + 2i M^{(1)}_k(z))` (DLMF 28.20.25 at integer order). -/
-theorem p2m_modMathieuM_two_add_pi_I (k : ℤ) {h : ℝ} (hh : 0 < h) (z : ℂ) :
+lemma p2m_modMathieuM_two_add_pi_I (k : ℤ) {h : ℝ} (hh : 0 < h) (z : ℂ) :
     modMathieuM 2 k (z + π * I) h =
       (-1 : ℂ) ^ k * (modMathieuM 2 k z h + 2 * I * modMathieuM 1 k z h) := by
   have hadm : ModMathieuAdmissible (k : ℂ) (h : ℂ) := by
@@ -1505,7 +1503,7 @@ theorem p2m_modMathieuM_two_add_pi_I (k : ℤ) {h : ℝ} (hh : 0 < h) (z : ℂ) 
   ring
 
 /-- `Mc^{(2)}_m(z + πi) = (-1)^m (Mc^{(2)}_m(z) + 2i Mc^{(1)}_m(z))`. -/
-theorem p2m_radialMc_two_add_pi_I (m : ℕ) {h : ℝ} (hh : 0 < h) (z : ℂ) :
+lemma p2m_radialMc_two_add_pi_I (m : ℕ) {h : ℝ} (hh : 0 < h) (z : ℂ) :
     radialMathieuMc 2 m (z + π * I) h =
       (-1 : ℂ) ^ m * (radialMathieuMc 2 m z h + 2 * I * radialMathieuMc 1 m z h) := by
   have := p2m_modMathieuM_two_add_pi_I (m : ℤ) hh z
@@ -1513,7 +1511,7 @@ theorem p2m_radialMc_two_add_pi_I (m : ℕ) {h : ℝ} (hh : 0 < h) (z : ℂ) :
   exact this
 
 /-- `Ms^{(2)}_m(z + πi) = (-1)^m (Ms^{(2)}_m(z) + 2i Ms^{(1)}_m(z))`. -/
-theorem p2m_radialMs_two_add_pi_I (m : ℕ) {h : ℝ} (hh : 0 < h) (z : ℂ) :
+lemma p2m_radialMs_two_add_pi_I (m : ℕ) {h : ℝ} (hh : 0 < h) (z : ℂ) :
     radialMathieuMs 2 m (z + π * I) h =
       (-1 : ℂ) ^ m * (radialMathieuMs 2 m z h + 2 * I * radialMathieuMs 1 m z h) := by
   have := p2m_modMathieuM_two_add_pi_I (-(m : ℤ)) hh z
@@ -1524,11 +1522,11 @@ theorem p2m_radialMs_two_add_pi_I (m : ℕ) {h : ℝ} (hh : 0 < h) (z : ℂ) :
   rw [hP]; ring
 
 /-- `fe_n(0, q) = 0` for real `q ≠ 0`. -/
-theorem p2m_mathieuFe_zero (n : ℕ) {q : ℝ} (hq : q ≠ 0) : mathieuFe n 0 q = 0 := by
+lemma p2m_mathieuFe_zero (n : ℕ) {q : ℝ} (hq : q ≠ 0) : mathieuFe n 0 q = 0 := by
   simp [mathieuFe, hq, (mathieuWII_spec _ _).2.1]
 
 /-- `fe_n'(0, q) ≠ 0` for real `q ≠ 0`. -/
-theorem p2m_deriv_mathieuFe_zero_ne (n : ℕ) {q : ℝ} (hq : q ≠ 0) :
+lemma p2m_deriv_mathieuFe_zero_ne (n : ℕ) {q : ℝ} (hq : q ≠ 0) :
     deriv (fun z => mathieuFe n z q) 0 ≠ 0 := by
   rw [show (fun z => mathieuFe n z q) =
       fun z => (mathieuFeDerivZero n q : ℂ) * mathieuWII (mathieuA n q) q z from
@@ -1607,7 +1605,7 @@ theorem p2m_radialMathieuMc_two_eq (m : ℕ) {h : ℝ} (hh : 0 < h) (z : ℂ) :
     mathieuJoinGe m h * π * mathieuFeC m (h ^ 2))) * hs
 
 /-- `ge_n(0, q) ≠ 0` and `ge_n'(0, q) = 0` for real `q ≠ 0`, `n ≥ 1`. -/
-theorem p2m_mathieuGe_zero {n : ℕ} (hn : n ≠ 0) {q : ℝ} (hq : q ≠ 0) :
+lemma p2m_mathieuGe_zero {n : ℕ} (hn : n ≠ 0) {q : ℝ} (hq : q ≠ 0) :
     mathieuGe n 0 q ≠ 0 ∧ deriv (fun z => mathieuGe n z q) 0 = 0 := by
   have hS := mathieuGeS_ne_zero hn hq
   have e : (fun z => mathieuGe n z q) =
@@ -1620,7 +1618,7 @@ theorem p2m_mathieuGe_zero {n : ℕ} (hn : n ≠ 0) {q : ℝ} (hq : q ≠ 0) :
       (mathieuWI_spec _ _).2.2, mul_zero]
 
 /-- `g_{o,m}(h) ≠ 0` for `h > 0`, `m ≥ 1`. -/
-theorem p2m_mathieuJoinGo_ne {m : ℕ} (hm : m ≠ 0) {h : ℝ} (hh : 0 < h) :
+lemma p2m_mathieuJoinGo_ne {m : ℕ} (hm : m ≠ 0) {h : ℝ} (hh : 0 < h) :
     mathieuJoinGo m h ≠ 0 := by
   have hq : h ^ 2 ≠ 0 := by positivity
   have hh' : (h : ℂ) ≠ 0 := by exact_mod_cast hh.ne'

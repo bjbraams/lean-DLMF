@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.NumberTheory.ModularForms.JacobiTheta.TwoVariable
-public import Mathlib.Tactic.CrossRefAttribute
 
 /-!
 # Jacobi's theta functions in DLMF normalization (Temme §12.3.2, DLMF §20.2)
@@ -43,7 +42,7 @@ def jacobiThetaTwoTau (z τ : ℂ) : ℂ := cexp (π * I * τ / 4 + I * z) *
 def jacobiThetaOneTau (z τ : ℂ) : ℂ := -jacobiThetaTwoTau (z + π / 2) τ
 
 /-- `(π : ℂ) ≠ 0`. -/
-lemma pi_ne_zero' : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
+theorem pi_ne_zero' : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
 
 /-- The series for `θ₃` (DLMF 20.2.3). -/
 @[dlmf 20.2.E3]

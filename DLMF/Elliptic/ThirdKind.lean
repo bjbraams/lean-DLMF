@@ -42,21 +42,21 @@ def Real.incEllIntPim (φ n m : ℝ) : ℝ := ∫ θ in (0 : ℝ)..φ, piIntegra
 def Real.compEllIntPim (n m : ℝ) : ℝ := Real.incEllIntPim (π / 2) n m
 
 /-- For `n, m < 1` the integrand of the third kind is continuous. -/
-lemma continuous_piIntegrand {n m : ℝ} (hn : n < 1) (hm : m < 1) :
+theorem continuous_piIntegrand {n m : ℝ} (hn : n < 1) (hm : m < 1) :
     Continuous (piIntegrand n m) :=
   ((by fun_prop : Continuous fun θ : ℝ => 1 - n * sin θ ^ 2).inv₀
     fun θ => (one_sub_mul_sin_sq_pos hn θ).ne').mul (continuous_one_sub_mul_sin_sq_rpow hm _)
 
 /-- The integrand is symmetric about `π/2`. -/
-lemma piIntegrand_pi_sub (n m θ : ℝ) : piIntegrand n m (π - θ) = piIntegrand n m θ := by
+theorem piIntegrand_pi_sub (n m θ : ℝ) : piIntegrand n m (π - θ) = piIntegrand n m θ := by
   simp [piIntegrand, sin_pi_sub]
 
 /-- The integrand is `π`-periodic. -/
-lemma piIntegrand_add_pi (n m θ : ℝ) : piIntegrand n m (θ + π) = piIntegrand n m θ := by
+theorem piIntegrand_add_pi (n m θ : ℝ) : piIntegrand n m (θ + π) = piIntegrand n m θ := by
   simp [piIntegrand, sin_add_pi]
 
 /-- The integrand is even. -/
-lemma piIntegrand_neg (n m θ : ℝ) : piIntegrand n m (-θ) = piIntegrand n m θ := by
+theorem piIntegrand_neg (n m θ : ℝ) : piIntegrand n m (-θ) = piIntegrand n m θ := by
   simp [piIntegrand, sin_neg]
 
 /-- `Π(φ, 0, m) = F(φ, m)`. -/
@@ -104,14 +104,14 @@ def piZeroPrimitive (c φ : ℝ) : ℝ :=
   (φ - arctan ((1 - c) * sin φ * cos φ / (cos φ ^ 2 + c * sin φ ^ 2))) / c
 
 /-- `cos²φ + c sin²φ > 0` for `c > 0`. -/
-lemma cos_sq_add_mul_sin_sq_pos {c : ℝ} (hc : 0 < c) (φ : ℝ) : 0 < cos φ ^ 2 + c * sin φ ^ 2 := by
+theorem cos_sq_add_mul_sin_sq_pos {c : ℝ} (hc : 0 < c) (φ : ℝ) : 0 < cos φ ^ 2 + c * sin φ ^ 2 := by
   rcases eq_or_ne (sin φ) 0 with h | h
   · have := sin_sq_add_cos_sq φ; rw [h] at this; nlinarith
   · have : 0 < sin φ ^ 2 := by positivity
     nlinarith [sq_nonneg (cos φ)]
 
 /-- The primitive has derivative `(cos²φ + c² sin²φ)⁻¹` on all of `ℝ`. -/
-lemma hasDerivAt_piZeroPrimitive {c : ℝ} (hc : 0 < c) (φ : ℝ) :
+theorem hasDerivAt_piZeroPrimitive {c : ℝ} (hc : 0 < c) (φ : ℝ) :
     HasDerivAt (piZeroPrimitive c) (1 / (cos φ ^ 2 + c ^ 2 * sin φ ^ 2)) φ := by
   have hD := cos_sq_add_mul_sin_sq_pos hc φ
   have hD2 := cos_sq_add_mul_sin_sq_pos (pow_pos hc 2) φ

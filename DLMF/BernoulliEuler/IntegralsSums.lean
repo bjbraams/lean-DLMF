@@ -7,13 +7,7 @@ module
 
 public import DLMFMathlib.NumberTheory.EulerNumbers
 public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
-public import Mathlib.Data.Fin.Tuple.NatAntidiagonal
-public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 public import Mathlib.NumberTheory.ZetaValues
-public import Mathlib.RingTheory.PowerSeries.Derivative
-public import Mathlib.RingTheory.PowerSeries.Exp
-public import Mathlib.RingTheory.PowerSeries.Inverse
-public import Mathlib.Tactic.CrossRefAttribute
 
 /-!
 # Integrals and sums of Bernoulli and Euler polynomials (DLMF §§24.13, 24.14)
@@ -61,15 +55,15 @@ namespace DLMF.BernoulliEuler
 
 /-! ### Helper lemmas -/
 
-theorem b24b_bernoulliFun_eq_aeval (n : ℕ) (x : ℝ) :
+lemma b24b_bernoulliFun_eq_aeval (n : ℕ) (x : ℝ) :
     bernoulliFun n x = aeval x (Polynomial.bernoulli n) := by
   simp [bernoulliFun, eval_map_algebraMap]
 
-theorem b24b_eulerFun_eq_aeval (n : ℕ) (x : ℝ) :
+lemma b24b_eulerFun_eq_aeval (n : ℕ) (x : ℝ) :
     eulerFun n x = aeval x (Polynomial.euler n) := by
   simp [eulerFun, eval_map_algebraMap]
 
-theorem b24b_bernoulliFun_succ_add_one (n : ℕ) (x : ℝ) :
+lemma b24b_bernoulliFun_succ_add_one (n : ℕ) (x : ℝ) :
     bernoulliFun (n + 1) (x + 1) = bernoulliFun (n + 1) x + (n + 1) * x ^ n := by
   have h := congrArg (aeval x) (bernoulli_comp_one_add_X (n + 1))
   simp only [aeval_comp, map_add, map_one, aeval_X, map_nsmul, map_pow,
@@ -77,25 +71,25 @@ theorem b24b_bernoulliFun_succ_add_one (n : ℕ) (x : ℝ) :
   rw [b24b_bernoulliFun_eq_aeval, b24b_bernoulliFun_eq_aeval, add_comm x, h, nsmul_eq_mul]
   push_cast; ring
 
-theorem b24b_integral_bernoulliFun (n : ℕ) (a b : ℝ) :
+lemma b24b_integral_bernoulliFun (n : ℕ) (a b : ℝ) :
     ∫ t in a..b, bernoulliFun n t =
       (bernoulliFun (n + 1) b - bernoulliFun (n + 1) a) / (n + 1) := by
   rw [integral_eq_sub_of_hasDerivAt (fun x _ => antideriv_bernoulliFun n x)
     (intervalIntegrable_bernoulliFun n _ _), sub_div]
 
-theorem b24b_antideriv_eulerFun (n : ℕ) (x : ℝ) :
+lemma b24b_antideriv_eulerFun (n : ℕ) (x : ℝ) :
     HasDerivAt (fun x => eulerFun (n + 1) x / (n + 1)) (eulerFun n x) x := by
   convert (hasDerivAt_eulerFun (n + 1) x).div_const ((n : ℝ) + 1) using 1
   have : (n : ℝ) + 1 ≠ 0 := Nat.cast_add_one_ne_zero n
   push_cast; field_simp
 
-theorem b24b_integral_eulerFun (n : ℕ) (a b : ℝ) :
+lemma b24b_integral_eulerFun (n : ℕ) (a b : ℝ) :
     ∫ t in a..b, eulerFun n t = (eulerFun (n + 1) b - eulerFun (n + 1) a) / (n + 1) := by
   rw [integral_eq_sub_of_hasDerivAt (fun x _ => b24b_antideriv_eulerFun n x)
     ((continuous_eulerFun n).intervalIntegrable _ _), sub_div]
 
 /-- `(n+1) Eₙ(2x) = 2ⁿ⁺¹ (Bₙ₊₁(x + 1/2) - Bₙ₊₁(x))`, from `euler_eq_bernoulli`. -/
-theorem b24b_eulerFun_two_mul (n : ℕ) (x : ℝ) :
+lemma b24b_eulerFun_two_mul (n : ℕ) (x : ℝ) :
     ((n : ℝ) + 1) * eulerFun n (2 * x) =
       2 ^ (n + 1) * (bernoulliFun (n + 1) (x + 1 / 2) - bernoulliFun (n + 1) x) := by
   have h := congrArg (aeval (2 * x)) (euler_eq_bernoulli n)
@@ -105,7 +99,7 @@ theorem b24b_eulerFun_two_mul (n : ℕ) (x : ℝ) :
   convert h using 3 <;> push_cast <;> ring_nf
 
 /-- `Eₙ(0) = -2 (2ⁿ⁺¹ - 1) Bₙ₊₁/(n+1)` (DLMF 24.4.26), on `ℝ`. -/
-theorem b24b_eulerFun_zero (n : ℕ) :
+lemma b24b_eulerFun_zero (n : ℕ) :
     eulerFun n 0 = -2 * (2 ^ (n + 1) - 1) * (_root_.bernoulli (n + 1) : ℝ) / (n + 1) := by
   have h := b24b_eulerFun_two_mul n 0
   rw [mul_zero, zero_add, bernoulliFun_eval_zero, show (1 / 2 : ℝ) = 2⁻¹ by norm_num,
@@ -115,12 +109,12 @@ theorem b24b_eulerFun_zero (n : ℕ) :
   field_simp
   ring
 
-theorem b24b_eulerFun_one (n : ℕ) : eulerFun (n + 1) 1 = -eulerFun (n + 1) 0 := by
+lemma b24b_eulerFun_one (n : ℕ) : eulerFun (n + 1) 1 = -eulerFun (n + 1) 0 := by
   have h := eulerFun_add_one_add (n + 1) 0
   rw [zero_add, zero_pow (Nat.succ_ne_zero n), mul_zero] at h
   linarith
 
-theorem b24b_eulerFun_half (n : ℕ) : eulerFun n (1 / 2) = eulerNumber n / 2 ^ n := by
+lemma b24b_eulerFun_half (n : ℕ) : eulerFun n (1 / 2) = eulerNumber n / 2 ^ n := by
   have : (1 / 2 : ℝ) = algebraMap ℚ ℝ (1 / 2) := by simp
   rw [eulerFun, this, eval_map, eval₂_at_apply]
   simp only [eulerNumber, eq_ratCast]
@@ -128,7 +122,7 @@ theorem b24b_eulerFun_half (n : ℕ) : eulerFun n (1 / 2) = eulerNumber n / 2 ^ 
   field_simp
 
 /-- Integration by parts for `∫₀¹ Bₙ Bₘ₊₁`. -/
-theorem q24b_integral_bernoulli_parts (n m : ℕ) :
+lemma q24b_integral_bernoulli_parts (n m : ℕ) :
     ∫ t in (0 : ℝ)..1, bernoulliFun n t * bernoulliFun (m + 1) t =
       (bernoulliFun (m + 1) 1 * bernoulliFun (n + 1) 1 -
         bernoulliFun (m + 1) 0 * bernoulliFun (n + 1) 0) / (n + 1) -
@@ -151,7 +145,7 @@ theorem q24b_integral_bernoulli_parts (n m : ℕ) :
   rw [this]; field_simp
 
 /-- `∫₀¹ Bₙ Bₘ₊₁ = (-1)ᵐ (m+1)! n!/(m+1+n)! B_{m+1+n}` for `n ≥ 1`. -/
-theorem q24b_integral_bernoulli_mul_aux (m : ℕ) :
+lemma q24b_integral_bernoulli_mul_aux (m : ℕ) :
     ∀ n : ℕ, 1 ≤ n → ∫ t in (0 : ℝ)..1, bernoulliFun n t * bernoulliFun (m + 1) t =
       (-1) ^ m * ((m + 1)! * n ! / (m + 1 + n)! : ℝ) * (_root_.bernoulli (m + 1 + n) : ℝ) := by
   induction m with
@@ -176,7 +170,7 @@ theorem q24b_integral_bernoulli_mul_aux (m : ℕ) :
     push_cast; field_simp; ring
 
 /-- Integration by parts for `∫₀¹ Eₙ Eₘ₊₁`. -/
-theorem q24b_integral_euler_parts (n m : ℕ) :
+lemma q24b_integral_euler_parts (n m : ℕ) :
     ∫ t in (0 : ℝ)..1, eulerFun n t * eulerFun (m + 1) t =
       -((m + 1) / (n + 1) * ∫ t in (0 : ℝ)..1, eulerFun (n + 1) t * eulerFun m t) := by
   have hn : (n : ℝ) + 1 ≠ 0 := Nat.cast_add_one_ne_zero n
@@ -196,7 +190,7 @@ theorem q24b_integral_euler_parts (n m : ℕ) :
   rw [this]; ring
 
 /-- `∫₀¹ Eₙ Eₘ = (-1)ᵐ m! n!/(m+n)! ∫₀¹ E_{m+n}`. -/
-theorem q24b_integral_euler_mul_aux (m : ℕ) : ∀ n : ℕ,
+lemma q24b_integral_euler_mul_aux (m : ℕ) : ∀ n : ℕ,
     ∫ t in (0 : ℝ)..1, eulerFun n t * eulerFun m t =
       (-1) ^ m * (m ! * n ! / (m + n)! : ℝ) * ∫ t in (0 : ℝ)..1, eulerFun (m + n) t := by
   induction m with
@@ -212,7 +206,7 @@ theorem q24b_integral_euler_mul_aux (m : ℕ) : ∀ n : ℕ,
     push_cast; field_simp; ring
 
 /-- `Bₙ(t) = ∑ₖ (n choose k) Bₖ t^{n-k}` on `ℝ`. -/
-theorem q24b_bernoulliFun_eq_sum (n : ℕ) (t : ℝ) :
+lemma q24b_bernoulliFun_eq_sum (n : ℕ) (t : ℝ) :
     bernoulliFun n t =
       ∑ k ∈ range (n + 1), ((n.choose k : ℝ) * _root_.bernoulli k) * t ^ (n - k) := by
   simp only [bernoulliFun, Polynomial.bernoulli, Polynomial.map_sum, eval_finsetSum,
@@ -364,12 +358,12 @@ variable {A : Type*} [CommRing A] [Algebra ℚ A]
 def q24b_egf (a : ℕ → A) : PowerSeries A := PowerSeries.mk fun n => algebraMap ℚ A (n ! : ℚ)⁻¹ * a n
 
 /-- Coefficients of `q24b_egf`. -/
-theorem q24b_coeff_egf (a : ℕ → A) (n : ℕ) :
+lemma q24b_coeff_egf (a : ℕ → A) (n : ℕ) :
     PowerSeries.coeff n (q24b_egf a) = algebraMap ℚ A (n ! : ℚ)⁻¹ * a n := by
   simp [q24b_egf]
 
 /-- The product of exponential generating functions is the binomial convolution. -/
-theorem q24b_egf_mul (a b : ℕ → A) :
+lemma q24b_egf_mul (a b : ℕ → A) :
     q24b_egf a * q24b_egf b =
       q24b_egf fun n => ∑ k ∈ range (n + 1), (n.choose k : A) * a k * b (n - k) := by
   ext n
@@ -389,16 +383,16 @@ theorem q24b_egf_mul (a b : ℕ → A) :
   linear_combination (-(a k * b (n - k))) * this
 
 /-- `exp` as an exponential generating function. -/
-theorem q24b_exp_eq_egf : PowerSeries.exp A = q24b_egf fun _ => (1 : A) := by
+lemma q24b_exp_eq_egf : PowerSeries.exp A = q24b_egf fun _ => (1 : A) := by
   ext n; simp [q24b_egf, PowerSeries.coeff_exp]
 
 /-- `e^{xt}` as an exponential generating function. -/
-theorem q24b_rescale_exp_eq_egf (x : A) :
+lemma q24b_rescale_exp_eq_egf (x : A) :
     PowerSeries.rescale x (PowerSeries.exp A) = q24b_egf fun n => x ^ n := by
   ext n; simp [q24b_egf, PowerSeries.coeff_exp, PowerSeries.coeff_rescale, mul_comm]
 
 /-- Mathlib's Bernoulli generating function in `q24b_egf` form. -/
-theorem q24b_egfB_gen (x : A) :
+lemma q24b_egfB_gen (x : A) :
     q24b_egf (fun n => aeval x (Polynomial.bernoulli n)) * (PowerSeries.exp A - 1) =
       PowerSeries.X * PowerSeries.rescale x (PowerSeries.exp A) := by
   rw [← bernoulli_generating_function x]
@@ -407,7 +401,7 @@ theorem q24b_egfB_gen (x : A) :
   simp [q24b_egf, Algebra.smul_def]
 
 /-- The Euler generating function: `(∑ Eₙ(x) tⁿ/n!) (eᵗ + 1) = 2 e^{xt}`. -/
-theorem q24b_egfE_gen (x : A) :
+lemma q24b_egfE_gen (x : A) :
     q24b_egf (fun n => aeval x (Polynomial.euler n)) * (PowerSeries.exp A + 1) =
       2 * PowerSeries.rescale x (PowerSeries.exp A) := by
   have h1 : PowerSeries.exp A + 1 = q24b_egf fun n => if n = 0 then (2 : A) else 1 := by
@@ -430,7 +424,7 @@ theorem q24b_egfE_gen (x : A) :
   · ring
 
 /-- `eᵗ - 1` can be cancelled (it is `t` times a unit). -/
-theorem q24b_cancel_exp_sub_one {f g : PowerSeries A}
+lemma q24b_cancel_exp_sub_one {f g : PowerSeries A}
     (h : f * (PowerSeries.exp A - 1) = g * (PowerSeries.exp A - 1)) : f = g := by
   set u : PowerSeries A := PowerSeries.mk fun n => algebraMap ℚ A (1 / (n + 1)!)
   have hu : PowerSeries.exp A - 1 = PowerSeries.X * u := by
@@ -443,14 +437,14 @@ theorem q24b_cancel_exp_sub_one {f g : PowerSeries A}
   exact hunit.mul_left_injective (PowerSeries.X_mul_cancel h)
 
 /-- `eᵗ + 1` is a unit. -/
-theorem q24b_isUnit_exp_add_one : IsUnit (PowerSeries.exp A + 1) := by
+lemma q24b_isUnit_exp_add_one : IsUnit (PowerSeries.exp A + 1) := by
   rw [PowerSeries.isUnit_iff_constantCoeff]
   simp only [map_add, PowerSeries.constantCoeff_exp, map_one]
   have : (1 + 1 : A) = algebraMap ℚ A 2 := by rw [map_ofNat]; norm_num
   rw [this]; exact (IsUnit.mk0 (2 : ℚ) two_ne_zero).map _
 
 /-- `d/dt e^{at} = a e^{at}`. -/
-theorem q24b_derivative_rescale_exp (a : A) :
+lemma q24b_derivative_rescale_exp (a : A) :
     PowerSeries.derivative (R := A) (PowerSeries.rescale a (PowerSeries.exp A)) =
       PowerSeries.C a * PowerSeries.rescale a (PowerSeries.exp A) := by
   ext n
@@ -466,7 +460,7 @@ theorem q24b_derivative_rescale_exp (a : A) :
   linear_combination (a ^ n * a) * this
 
 /-- Exponential generating functions determine their sequences. -/
-theorem q24b_egf_inj {a b : ℕ → A} (h : q24b_egf a = q24b_egf b) (n : ℕ) : a n = b n := by
+lemma q24b_egf_inj {a b : ℕ → A} (h : q24b_egf a = q24b_egf b) (n : ℕ) : a n = b n := by
   have h' := congrArg (PowerSeries.coeff n) h
   simp only [q24b_coeff_egf] at h'
   have hu : IsUnit (algebraMap ℚ A (n ! : ℚ)⁻¹) :=
@@ -474,7 +468,7 @@ theorem q24b_egf_inj {a b : ℕ → A} (h : q24b_egf a = q24b_egf b) (n : ℕ) :
   exact hu.mul_left_cancel h'
 
 /-- `(n+1)/(n+1)! = 1/n!` in `A`. -/
-theorem q24b_fact_succ (n : ℕ) :
+lemma q24b_fact_succ (n : ℕ) :
     algebraMap ℚ A ((n + 1)! : ℚ)⁻¹ * ((n : A) + 1) = algebraMap ℚ A (n ! : ℚ)⁻¹ := by
   have key : ((n : A) + 1) = algebraMap ℚ A (n + 1) := by
     rw [map_add, map_natCast, map_one]
@@ -483,7 +477,7 @@ theorem q24b_fact_succ (n : ℕ) :
   field_simp
 
 /-- Multiplication by `t` of an exponential generating function. -/
-theorem q24b_X_mul_egf (a : ℕ → A) :
+lemma q24b_X_mul_egf (a : ℕ → A) :
     PowerSeries.X * q24b_egf a = q24b_egf fun n => (n : A) * a (n - 1) := by
   ext n; rcases n with _ | n
   · simp [q24b_egf]
@@ -492,14 +486,14 @@ theorem q24b_X_mul_egf (a : ℕ → A) :
     push_cast; ring
 
 /-- The derivative of an exponential generating function shifts the sequence. -/
-theorem q24b_derivative_egf (a : ℕ → A) :
+lemma q24b_derivative_egf (a : ℕ → A) :
     PowerSeries.derivative (R := A) (q24b_egf a) = q24b_egf fun n => a (n + 1) := by
   ext n
   rw [PowerSeries.coeff_derivative, q24b_coeff_egf, q24b_coeff_egf, ← q24b_fact_succ n]
   ring
 
 /-- Rescaling an exponential generating function. -/
-theorem q24b_rescale_egf (a : A) (b : ℕ → A) :
+lemma q24b_rescale_egf (a : A) (b : ℕ → A) :
     PowerSeries.rescale a (q24b_egf b) = q24b_egf fun n => a ^ n * b n := by
   ext n; simp only [PowerSeries.coeff_rescale, q24b_coeff_egf]; ring
 
@@ -787,7 +781,7 @@ theorem sum_choose_mul_bernoulli_mul_bernoulli_div {m n : ℕ} (hm : 1 ≤ m) (h
 /-! ### Helpers for §24.14(ii) -/
 
 /-- Sums over `j + k + ℓ = n` as iterated sums. -/
-theorem q24b_sum_antidiagonalTuple_three {M : Type*} [AddCommMonoid M] (n : ℕ)
+lemma q24b_sum_antidiagonalTuple_three {M : Type*} [AddCommMonoid M] (n : ℕ)
     (F : ℕ → ℕ → ℕ → M) :
     ∑ v ∈ Finset.Nat.antidiagonalTuple 3 n, F (v 0) (v 1) (v 2) =
       ∑ a ∈ range (n + 1), ∑ c ∈ range (n - a + 1), F a c (n - a - c) := by
@@ -815,7 +809,7 @@ theorem q24b_sum_antidiagonalTuple_three {M : Type*} [AddCommMonoid M] (n : ℕ)
     congr 1; omega
 
 /-- Summing a sequence vanishing at odd indices over its even indices. -/
-private theorem sum_range_even_aux {M : Type*} [AddCommMonoid M] (n : ℕ) (f : ℕ → M)
+private lemma sum_range_even_aux {M : Type*} [AddCommMonoid M] (n : ℕ) (f : ℕ → M)
     (hf : ∀ j, Odd j → f j = 0) :
     ∑ k ∈ range (n / 2 + 1), f (2 * k) = ∑ j ∈ range (n + 1), f j := by
   induction n with
@@ -829,13 +823,13 @@ private theorem sum_range_even_aux {M : Type*} [AddCommMonoid M] (n : ℕ) (f : 
     · rw [hf _ ho, add_zero, show (n + 1) / 2 = n / 2 by obtain ⟨m, hm⟩ := ho; omega]
 
 /-- Differences of exponential generating functions. -/
-theorem q24b_egf_sub {A : Type*} [CommRing A] [Algebra ℚ A] (a b : ℕ → A) :
+lemma q24b_egf_sub {A : Type*} [CommRing A] [Algebra ℚ A] (a b : ℕ → A) :
     q24b_egf a - q24b_egf b = q24b_egf fun n => a n - b n := by
   ext n; simp only [map_sub, q24b_coeff_egf]; ring
 
 /-- The triple binomial convolution of a sequence vanishing at odd indices, at an even index,
 as a sum over `j + k + ℓ = n`. -/
-theorem q24b_triple_conv_even (b : ℕ → ℚ) (hb : ∀ j, Odd j → b j = 0) (n : ℕ) :
+lemma q24b_triple_conv_even (b : ℕ → ℚ) (hb : ∀ j, Odd j → b j = 0) (n : ℕ) :
     ∑ i ∈ range (2 * n + 1), ((2 * n).choose i : ℚ) * b i *
         ∑ j ∈ range (2 * n - i + 1), ((2 * n - i).choose j : ℚ) * b j * b (2 * n - i - j) =
       ∑ v ∈ Finset.Nat.antidiagonalTuple 3 n,
@@ -863,13 +857,13 @@ theorem q24b_triple_conv_even (b : ℕ → ℚ) (hb : ∀ j, Odd j → b j = 0) 
   field_simp
 
 /-- The derivative of the constant power series `2`. -/
-theorem q24b_derivative_two {A : Type*} [CommRing A] [Algebra ℚ A] :
+lemma q24b_derivative_two {A : Type*} [CommRing A] [Algebra ℚ A] :
     PowerSeries.derivative (R := A) (2 : PowerSeries A) = 0 := by
   rw [show (2 : PowerSeries A) = PowerSeries.C 2 from (map_ofNat PowerSeries.C 2).symm]
   exact PowerSeries.derivative_C
 
 /-- Sums over `j + k + ℓ + m = n` as a sum over the first index and a triple sum. -/
-theorem q24b_sum_antidiagonalTuple_four {M : Type*} [AddCommMonoid M] (n : ℕ)
+lemma q24b_sum_antidiagonalTuple_four {M : Type*} [AddCommMonoid M] (n : ℕ)
     (F : ℕ → ℕ → ℕ → ℕ → M) :
     ∑ v ∈ Finset.Nat.antidiagonalTuple 4 n, F (v 0) (v 1) (v 2) (v 3) =
       ∑ a ∈ range (n + 1), ∑ w ∈ Finset.Nat.antidiagonalTuple 3 (n - a),
@@ -900,7 +894,7 @@ theorem q24b_sum_antidiagonalTuple_four {M : Type*} [AddCommMonoid M] (n : ℕ)
 
 /-- The fourfold binomial convolution of a sequence vanishing at odd indices, at an even
 index, as a sum over `j + k + ℓ + m = n`. -/
-theorem q24b_quad_conv_even (b : ℕ → ℚ) (hb : ∀ j, Odd j → b j = 0) (n : ℕ) :
+lemma q24b_quad_conv_even (b : ℕ → ℚ) (hb : ∀ j, Odd j → b j = 0) (n : ℕ) :
     ∑ i ∈ range (2 * n + 1), ((2 * n).choose i : ℚ) * b i *
         ∑ j ∈ range (2 * n - i + 1), ((2 * n - i).choose j : ℚ) * b j *
           ∑ k ∈ range (2 * n - i - j + 1), ((2 * n - i - j).choose k : ℚ) * b k *

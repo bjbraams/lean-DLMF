@@ -27,7 +27,7 @@ def incompleteAiryAi (a z : ℂ) : ℂ :=
     lineIntegral (fun t => exp (t ^ 3 / 3 - z * t)) (exp (-π * I / 3)) a) / (2 * π * I)
 
 /-- A segment integral of a derivative is the difference of the primitive at the endpoints. -/
-lemma lineIntegral_eq_sub {f g : ℂ → ℂ} (hf : Continuous f) (hg : ∀ z, HasDerivAt g (f z) z)
+theorem lineIntegral_eq_sub {f g : ℂ → ℂ} (hf : Continuous f) (hg : ∀ z, HasDerivAt g (f z) z)
     (a b : ℂ) : lineIntegral f a b = g b - g a := by
   have hd (t : ℝ) : HasDerivAt (fun u : ℝ => g (a + u * (b - a))) ((b - a) * f (a + t * (b - a))) t := by
     have h := ((hg (a + t * (b - a))).comp (t : ℂ)
@@ -40,7 +40,7 @@ lemma lineIntegral_eq_sub {f g : ℂ → ℂ} (hf : Continuous f) (hg : ∀ z, H
   simpa [lineIntegral] using h
 
 /-- For an entire integrand, the segment integral differentiates in its upper endpoint. -/
-lemma hasDerivAt_lineIntegral_right {f : ℂ → ℂ} (hf : Differentiable ℂ f) (a b : ℂ) :
+theorem hasDerivAt_lineIntegral_right {f : ℂ → ℂ} (hf : Differentiable ℂ f) (a b : ℂ) :
     HasDerivAt (fun w => lineIntegral f a w) (f b) b := by
   obtain ⟨g, hg⟩ := hf.isExactOn_univ
   have hg' (w : ℂ) : HasDerivAt g (f w) w := hg w (mem_univ w)
@@ -50,7 +50,7 @@ lemma hasDerivAt_lineIntegral_right {f : ℂ → ℂ} (hf : Differentiable ℂ f
   exact (hg' b).sub_const _
 
 /-- For an entire integrand, the segment integral differentiates in its lower endpoint. -/
-lemma hasDerivAt_lineIntegral_left {f : ℂ → ℂ} (hf : Differentiable ℂ f) (a b : ℂ) :
+theorem hasDerivAt_lineIntegral_left {f : ℂ → ℂ} (hf : Differentiable ℂ f) (a b : ℂ) :
     HasDerivAt (fun w => lineIntegral f w b) (-f a) a := by
   obtain ⟨g, hg⟩ := hf.isExactOn_univ
   have hg' (w : ℂ) : HasDerivAt g (f w) w := hg w (mem_univ w)
@@ -60,7 +60,7 @@ lemma hasDerivAt_lineIntegral_left {f : ℂ → ℂ} (hf : Differentiable ℂ f)
   exact (hg' a).const_sub _
 
 /-- The Airy contour integrand is entire. -/
-lemma differentiable_airyIntegrand (z : ℂ) :
+theorem differentiable_airyIntegrand (z : ℂ) :
     Differentiable ℂ fun t : ℂ => exp (t ^ 3 / 3 - z * t) := by fun_prop
 
 /-- Differentiation with respect to the finite endpoint in DLMF §9.14. -/
@@ -71,7 +71,7 @@ theorem incompleteAiryAi_endpoint_derivative (a z : ℂ) :
     _).div_const _)
 
 /-- An arc integral of a derivative is the difference of the primitive at the endpoints. -/
-lemma arcIntegral_eq_sub {f g : ℂ → ℂ} (hf : Continuous f) (hg : ∀ z, HasDerivAt g (f z) z)
+theorem arcIntegral_eq_sub {f g : ℂ → ℂ} (hf : Continuous f) (hg : ∀ z, HasDerivAt g (f z) z)
     (α β : ℝ) : arcIntegral f α β = g (exp (β * I)) - g (exp (α * I)) := by
   have hd : ∀ θ : ℝ, HasDerivAt (fun θ : ℝ => g (exp (θ * I))) (I * exp (θ * I) * f (exp (θ * I))) θ := by
     intro θ
@@ -82,7 +82,7 @@ lemma arcIntegral_eq_sub {f g : ℂ → ℂ} (hf : Continuous f) (hg : ∀ z, Ha
     ((by fun_prop : Continuous fun θ : ℝ => I * exp (θ * I) * f (exp (θ * I))).intervalIntegrable _ _)
 
 /-- Integrability of the Airy contour integrand on a ray where it decays. -/
-lemma integrableOn_airy_ray (z : ℂ) {θ : ℝ} (hc : exp (3 * (((θ + π : ℝ) : ℂ) * I)) = 1) :
+theorem integrableOn_airy_ray (z : ℂ) {θ : ℝ} (hc : exp (3 * (((θ + π : ℝ) : ℂ) * I)) = 1) :
     IntegrableOn (fun t : ℝ => exp (θ * I) * exp ((t * exp (θ * I)) ^ 3 / 3 - z * (t * exp (θ * I))))
       (Ioi 1) := by
   have h := (integrableOn_reidRay hc z 0 zero_le_one (Or.inl le_rfl)).neg
@@ -94,7 +94,7 @@ lemma integrableOn_airy_ray (z : ℂ) {θ : ℝ} (hc : exp (3 * (((θ + π : ℝ
   · rw [exp_add, exp_log (ofReal_ne_zero.mpr ht0.ne'), exp_add_pi_mul_I]; ring
 
 /-- The primitive along a decaying ray tends to its value at `e^{θi}` plus the ray integral. -/
-lemma tendsto_primitive_airy_ray (z : ℂ) {θ : ℝ} (hc : exp (3 * (((θ + π : ℝ) : ℂ) * I)) = 1)
+theorem tendsto_primitive_airy_ray (z : ℂ) {θ : ℝ} (hc : exp (3 * (((θ + π : ℝ) : ℂ) * I)) = 1)
     {g : ℂ → ℂ} (hg : ∀ u, HasDerivAt g (exp (u ^ 3 / 3 - z * u)) u) :
     Tendsto (fun R : ℝ => g (R * exp (θ * I))) atTop
       (𝓝 (g (exp (θ * I)) + rayIntegral (fun t => exp (t ^ 3 / 3 - z * t)) θ 1)) := by

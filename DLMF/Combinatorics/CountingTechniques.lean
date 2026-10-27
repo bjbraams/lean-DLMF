@@ -6,9 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Combinatorics.Permutations
-public import Mathlib.Combinatorics.Enumerative.InclusionExclusion
-public import Mathlib.Data.Fintype.Sets
-public import DLMFMathlib.Combinatorics.Q26bSurjections
 
 /-!
 # Counting techniques (DLMF §26.18)

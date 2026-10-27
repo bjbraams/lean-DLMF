@@ -6,9 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Mathieu.Modified.Defs
-public import DLMF.Mathieu.Modified.P2mCrossSeries
-public import DLMF.Mathieu.Modified.P2mRadial
-public import DLMF.Bessel.Modified
+public import DLMF.Mathieu.Modified.P3mImaginary
 public import DLMF.Bessel.SecondKind
 
 /-!
@@ -54,15 +52,6 @@ theorem mathieuCyl_three_four (μ w : ℂ) :
     mathieuCyl 3 μ w = DLMF.Bessel.hankelH1 μ w ∧ mathieuCyl 4 μ w = DLMF.Bessel.hankelH2 μ w :=
   ⟨rfl, rfl⟩
 
-/-- `(r e^z)^μ = r^μ e^{μz}` for `r > 0` and `-π < Im z ≤ π` (principal powers). -/
-theorem p1c_cpow_ofReal_mul_exp (μ : ℂ) {r : ℝ} (hr : 0 < r) {z : ℂ} (hz₁ : -π < z.im)
-    (hz₂ : z.im ≤ π) : ((r : ℂ) * Complex.exp z) ^ μ = (r : ℂ) ^ μ * Complex.exp (μ * z) := by
-  have hr' : (r : ℂ) ≠ 0 := by exact_mod_cast hr.ne'
-  rw [Complex.cpow_def_of_ne_zero (mul_ne_zero hr' (Complex.exp_ne_zero z)),
-    Complex.cpow_def_of_ne_zero hr', Complex.log_ofReal_mul hr (Complex.exp_ne_zero z),
-    Complex.log_exp hz₁ hz₂, ← Complex.exp_add, Complex.ofReal_log hr.le]
-  ring_nf
-
 /-- For `h > 0` and `-π < Im z ≤ π`, `besselJExp μ h z` is the principal-branch `J_μ(h e^z)`. -/
 theorem p1c_besselJExp_eq (μ : ℂ) {h : ℝ} (hh : 0 < h) {z : ℂ} (hz₁ : -π < z.im)
     (hz₂ : z.im ≤ π) : besselJExp μ h z = besselJ μ (h * Complex.exp z) := by
@@ -77,7 +66,7 @@ theorem p1c_besselJExp_neg_h_intCast (k : ℤ) (h w : ℂ) :
   rw [p1c_besselJExp_intCast, p1c_besselJExp_intCast, neg_mul, besselJ_int_neg]
 
 /-- `e^{±πi/2} = ±i`. -/
-theorem p1c_exp_sigma {σ : ℂ} (hσ : σ = 1 ∨ σ = -1) : Complex.exp (σ * π * I / 2) = σ * I := by
+lemma p1c_exp_sigma {σ : ℂ} (hσ : σ = 1 ∨ σ = -1) : Complex.exp (σ * π * I / 2) = σ * I := by
   rcases hσ with rfl | rfl
   · rw [show (1 : ℂ) * π * I / 2 = (π / 2 : ℂ) * I by ring, Complex.exp_mul_I]
     simp [← Complex.ofReal_ofNat, ← Complex.ofReal_div, ← Complex.ofReal_cos, ← Complex.ofReal_sin]
@@ -406,8 +395,8 @@ theorem hasSum_modMathieuIe_even (m s : ℕ) {h : ℝ} (hh : 0 < h)
             besselI ((ℓ + s : ℕ) : ℂ) (h * Complex.exp z) +
           besselI ((ℓ + s : ℕ) : ℂ) (h * Complex.exp (-z)) *
             besselI ((ℓ : ℤ) - s : ℤ) (h * Complex.exp z))))
-      (mathieuEpsilon s * modMathieuIe (2 * m) z h) := by
-  sorry
+      (mathieuEpsilon s * modMathieuIe (2 * m) z h) :=
+  p3m_hasSum_modMathieuIe_even m s hh hA z
 
 open DLMF.Bessel in
 /-- **Modified-Bessel cross-product expansion** (DLMF 28.24.7), `B^{2m+2}_{2s+2}(h²) ≠ 0`:
@@ -423,8 +412,8 @@ theorem hasSum_modMathieuIo_even (m s : ℕ) {h : ℝ} (hh : 0 < h)
             besselI ((ℓ + s + 2 : ℕ) : ℂ) (h * Complex.exp z) -
           besselI ((ℓ + s + 2 : ℕ) : ℂ) (h * Complex.exp (-z)) *
             besselI ((ℓ : ℤ) - s : ℤ) (h * Complex.exp z))))
-      (modMathieuIo (2 * m + 2) z h) := by
-  sorry
+      (modMathieuIo (2 * m + 2) z h) :=
+  p3m_hasSum_modMathieuIo_even m s hh hB z
 
 open DLMF.Bessel in
 /-- **Modified-Bessel cross-product expansion** (DLMF 28.24.8), `B^{2m+1}_{2s+1}(h²) ≠ 0` (the
@@ -441,8 +430,8 @@ theorem hasSum_modMathieuIe_odd (m s : ℕ) {h : ℝ} (hh : 0 < h)
             besselI ((ℓ + s + 1 : ℕ) : ℂ) (h * Complex.exp z) +
           besselI ((ℓ + s + 1 : ℕ) : ℂ) (h * Complex.exp (-z)) *
             besselI ((ℓ : ℤ) - s : ℤ) (h * Complex.exp z))))
-      (modMathieuIe (2 * m + 1) z h) := by
-  sorry
+      (modMathieuIe (2 * m + 1) z h) :=
+  p3m_hasSum_modMathieuIe_odd m s hh hB z
 
 open DLMF.Bessel in
 /-- **Modified-Bessel cross-product expansion** (DLMF 28.24.9), `A^{2m+1}_{2s+1}(h²) ≠ 0`:
@@ -458,8 +447,8 @@ theorem hasSum_modMathieuIo_odd (m s : ℕ) {h : ℝ} (hh : 0 < h)
             besselI ((ℓ + s + 1 : ℕ) : ℂ) (h * Complex.exp z) -
           besselI ((ℓ + s + 1 : ℕ) : ℂ) (h * Complex.exp (-z)) *
             besselI ((ℓ : ℤ) - s : ℤ) (h * Complex.exp z))))
-      (modMathieuIo (2 * m + 1) z h) := by
-  sorry
+      (modMathieuIo (2 * m + 1) z h) :=
+  p3m_hasSum_modMathieuIo_odd m s hh hA z
 
 open DLMF.Bessel in
 /-- **Modified-Bessel cross-product expansion** (DLMF 28.24.10), `h > 0`, `|Im z| < π`
@@ -475,8 +464,8 @@ theorem hasSum_modMathieuKe_even (m s : ℕ) {h : ℝ} (hh : 0 < h)
             besselK ((ℓ + s : ℕ) : ℂ) (h * Complex.exp z) +
           besselI ((ℓ + s : ℕ) : ℂ) (h * Complex.exp (-z)) *
             besselK ((ℓ : ℤ) - s : ℤ) (h * Complex.exp z)))
-      (mathieuEpsilon s * modMathieuKe (2 * m) z h) := by
-  sorry
+      (mathieuEpsilon s * modMathieuKe (2 * m) z h) :=
+  p3m_hasSum_modMathieuKe_even m s hh hA hz
 
 open DLMF.Bessel in
 /-- **Modified-Bessel cross-product expansion** (DLMF 28.24.11), as 28.24.10,
@@ -493,8 +482,8 @@ theorem hasSum_modMathieuKo_even (m s : ℕ) {h : ℝ} (hh : 0 < h)
             besselK ((ℓ + s + 2 : ℕ) : ℂ) (h * Complex.exp z) -
           besselI ((ℓ + s + 2 : ℕ) : ℂ) (h * Complex.exp (-z)) *
             besselK ((ℓ : ℤ) - s : ℤ) (h * Complex.exp z)))
-      (modMathieuKo (2 * m + 2) z h) := by
-  sorry
+      (modMathieuKo (2 * m + 2) z h) :=
+  p3m_hasSum_modMathieuKo_even m s hh hB hz
 
 open DLMF.Bessel in
 /-- **Modified-Bessel cross-product expansion** (DLMF 28.24.12), as 28.24.10,
@@ -511,8 +500,8 @@ theorem hasSum_modMathieuKe_odd (m s : ℕ) {h : ℝ} (hh : 0 < h)
             besselK ((ℓ + s + 1 : ℕ) : ℂ) (h * Complex.exp z) -
           besselI ((ℓ + s + 1 : ℕ) : ℂ) (h * Complex.exp (-z)) *
             besselK ((ℓ : ℤ) - s : ℤ) (h * Complex.exp z)))
-      (modMathieuKe (2 * m + 1) z h) := by
-  sorry
+      (modMathieuKe (2 * m + 1) z h) :=
+  p3m_hasSum_modMathieuKe_odd m s hh hB hz
 
 open DLMF.Bessel in
 /-- **Modified-Bessel cross-product expansion** (DLMF 28.24.13), as 28.24.10,
@@ -529,7 +518,7 @@ theorem hasSum_modMathieuKo_odd (m s : ℕ) {h : ℝ} (hh : 0 < h)
             besselK ((ℓ + s + 1 : ℕ) : ℂ) (h * Complex.exp z) +
           besselI ((ℓ + s + 1 : ℕ) : ℂ) (h * Complex.exp (-z)) *
             besselK ((ℓ : ℤ) - s : ℤ) (h * Complex.exp z)))
-      (modMathieuKo (2 * m + 1) z h) := by
-  sorry
+      (modMathieuKo (2 * m + 1) z h) :=
+  p3m_hasSum_modMathieuKo_odd m s hh hA hz
 
 end DLMF.Mathieu

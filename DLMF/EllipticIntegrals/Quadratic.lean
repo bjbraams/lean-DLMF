@@ -5,9 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.EllipticIntegrals.LegendreIdentities
-public import DLMF.Elliptic.AGM
-public import DLMF.EllipticIntegrals.SymmetricRelations
 public import Carlson.Elliptic.AGMSecondKind
 public import DLMF.EllipticIntegrals.Connection
 public import DLMF.EllipticIntegrals.SymmetricQuadratic
@@ -81,13 +78,13 @@ theorem tendsto_agmSeq (a₀ g₀ : ℝ≥0) :
   · rw [← Filter.tendsto_add_atTop_iff_nat 1]
     exact NNReal.tendsto_agmSequences_fst_agm
 
-theorem ei19a_agmSeqG_le_agmSeqA {a₀ g₀ : ℝ≥0} (h : g₀ ≤ a₀) (n : ℕ) :
+lemma ei19a_agmSeqG_le_agmSeqA {a₀ g₀ : ℝ≥0} (h : g₀ ≤ a₀) (n : ℕ) :
     agmSeqG a₀ g₀ n ≤ agmSeqA a₀ g₀ n := by
   cases n with
   | zero => exact h
   | succ n => exact NNReal.agmSequences_fst_le_snd n n
 
-theorem ei19a_agmSeqA_pos {a₀ g₀ : ℝ≥0} (h : 0 < a₀) (n : ℕ) : 0 < agmSeqA a₀ g₀ n := by
+lemma ei19a_agmSeqA_pos {a₀ g₀ : ℝ≥0} (h : 0 < a₀) (n : ℕ) : 0 < agmSeqA a₀ g₀ n := by
   induction n with
   | zero => exact h
   | succ n ih =>
@@ -176,7 +173,7 @@ theorem compEllIntKk_eq_pi_div_agm {k : ℂ} {m : ℝ} (hk : k ^ 2 = m) (hm : m 
   push_cast; rfl
 
 /-- Bridge between lean-codes' `Carlson.agmSeq` and DLMF's `agmSeqA`, `agmSeqG`. -/
-theorem p19lR1_agmSeq_eq (a₀ g₀ : ℝ≥0) (n : ℕ) :
+lemma p19lR1_agmSeq_eq (a₀ g₀ : ℝ≥0) (n : ℕ) :
     Carlson.agmSeq a₀ g₀ n = ((agmSeqA a₀ g₀ n : ℝ), (agmSeqG a₀ g₀ n : ℝ)) := by
   induction n with
   | zero => rfl
@@ -184,7 +181,7 @@ theorem p19lR1_agmSeq_eq (a₀ g₀ : ℝ≥0) (n : ℕ) :
     rw [Carlson.agmSeq_succ, ih, (agmSeq_succ a₀ g₀ n).1, (agmSeq_succ a₀ g₀ n).2]
     simp [Carlson.agmStep, Real.coe_sqrt]
 
-theorem p19lR1_agmSeqC_sq_succ (a₀ g₀ : ℝ≥0) (n : ℕ) :
+lemma p19lR1_agmSeqC_sq_succ (a₀ g₀ : ℝ≥0) (n : ℕ) :
     agmSeqC a₀ g₀ (n + 1) ^ 2 =
       (agmSeqA a₀ g₀ (n + 1) : ℝ) ^ 2 - (agmSeqG a₀ g₀ (n + 1) : ℝ) ^ 2 := by
   have hle : agmSeqG a₀ g₀ (n + 1) ≤ agmSeqA a₀ g₀ (n + 1) :=
@@ -323,7 +320,7 @@ theorem compEllIntPik_eq_agm_of_one_lt {k : ℂ} {m α2 : ℝ} (hk : k ^ 2 = m) 
 /-! ### §19.8(ii) Landen transformations -/
 
 /-- For real `k` with `k² ≤ 1`, the principal `k' = √(1 - k²)` is the real square root. -/
-theorem ei19a_jacobiComodulusk_ofReal {k : ℝ} (hk : k ^ 2 ≤ 1) :
+lemma ei19a_jacobiComodulusk_ofReal {k : ℝ} (hk : k ^ 2 ≤ 1) :
     jacobiComodulusk k = (Real.sqrt (1 - k ^ 2) : ℂ) := by
   rw [jacobiComodulusk, Real.sqrt_eq_rpow, show (1 : ℂ) - (k : ℂ) ^ 2 = ((1 - k ^ 2 : ℝ) : ℂ) by
     push_cast; ring, show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring,

@@ -6,8 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Confluent.Recurrence
-public import DLMF.Confluent.Regularized
-public import DLMF.Hypergeometric.Continuation
 
 /-!
 # Analytic continuation of Kummer's function in its parameters (DLMF §13.2(i))

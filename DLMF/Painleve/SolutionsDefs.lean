@@ -5,17 +5,23 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Painleve.Defs
-public import Mathlib.Algebra.Polynomial.Derivative
-public import Mathlib.Algebra.Polynomial.FieldDivision
+public import DLMF.Weierstrass.Basic
 public import Mathlib.Algebra.Polynomial.Bivariate
-public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
-public import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
-public import Mathlib.Analysis.SpecialFunctions.Exp
-public import Mathlib.MeasureTheory.Integral.Bochner.Basic
-public import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
-public import Mathlib.Data.Fintype.Perm
-public import Mathlib.Order.Monotone.Defs
+public import Mathlib.Tactic.Echelon.Zsqrtd
+public import Mathlib.Tactic.Inclusion.Extension.Core.Core
+public import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+public import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Rational
+public import Mathlib.Tactic.NormNum.Irrational
+public import Mathlib.Tactic.NormNum.IsCoprime
+public import Mathlib.Tactic.NormNum.IsSquare
+public import Mathlib.Tactic.NormNum.LegendreSymbol
+public import Mathlib.Tactic.NormNum.ModEq
+public import Mathlib.Tactic.NormNum.NatFib
+public import Mathlib.Tactic.NormNum.NatLog
+public import Mathlib.Tactic.NormNum.NatSqrt
+public import Mathlib.Tactic.NormNum.Ordinal
+public import Mathlib.Tactic.NormNum.Prime
+public import Mathlib.Tactic.NormNum.RealSqrt
 
 /-!
 # Definitions for the solutions, reductions and applications of Painlevé equations
@@ -219,5 +225,24 @@ also hold for `n = 0` with `p_{-1} = 0`). -/
 @[dlmf 32.15.E2]
 def freudRecurrenceSq (z : ℝ) (n : ℕ) : ℝ :=
   if n = 0 then 0 else freudHankel z (n - 1) * freudHankel z (n + 1) / freudHankel z n ^ 2
+
+/-! ### Picard's solution of PVI (DLMF 32.10.32–32.10.34) -/
+
+/-- The invariant `g₂(z) = (z² - z + 1)/12` of Picard's elliptic function: with
+`Λ = 4℘ + (1 + z)/3` the equation `(∂Λ/∂u)² = Λ(Λ - 1)(Λ - z)` of DLMF 32.10.32 becomes
+`℘'² = 4℘³ - g₂℘ - g₃`, with roots `e₁ = -(1 + z)/12`, `e₂ = (2 - z)/12`, `e₃ = (2z - 1)/12`. -/
+def picardG₂ (z : ℂ) : ℂ := (z ^ 2 - z + 1) / 12
+
+/-- The invariant `g₃(z) = -(1 + z)(2 - z)(2z - 1)/432` of Picard's elliptic function
+(see `picardG₂`). -/
+def picardG₃ (z : ℂ) : ℂ := -((1 + z) * (2 - z) * (2 * z - 1)) / 432
+
+/-- **Picard's elliptic function** `Λ(u, z)` (DLMF 32.10.32), the inverse of
+`u = ∫_0^Λ dt/√(t(t-1)(t-z))`, in Weierstrass form
+`Λ(u, z) = 4℘(u + ω₀; g₂(z), g₃(z)) + (1 + z)/3`, where `ω₀` is a half-period with
+`℘(ω₀) = e₁ = -(1 + z)/12`, so that `Λ(0, z) = 0`. Meaningful for `z ∉ {0, 1}` (where
+`g₂³ ≠ 27g₃²`) and `u + ω₀` off the lattice (the poles of `Λ`). -/
+def picardLambda (ω₀ u z : ℂ) : ℂ :=
+  4 * DLMF.Weierstrass.weierstrassPInvariants (picardG₂ z) (picardG₃ z) (u + ω₀) + (1 + z) / 3
 
 end DLMF.Painleve

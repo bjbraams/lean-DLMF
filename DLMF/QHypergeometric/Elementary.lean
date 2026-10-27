@@ -5,11 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.QHypergeometric.Basic
 public import DLMF.QHypergeometric.BasicSummations
-public import DLMF.Gamma.QGamma
-public import DLMF.Bailey
-public import Mathlib.Algebra.Polynomial.Eval.Defs
 
 /-!
 # q-elementary functions and Carlitz polynomials (DLMF §17.3)
@@ -66,7 +62,7 @@ def qStirlingSecond (q : ℂ) : ℕ → ℕ → ℂ
   | m+1,s+1 => qStirlingSecond q m s+(∑ k∈range (s+1), q^k)*qStirlingSecond q m (s+1)
 /-- Even and odd projections of a convergent q-series and its alternating partner.
 This directly uses Mathlib `HasSum.even_add_odd` and summable injective subsequences. -/
-private theorem qSeries_even_odd {c : ℕ → ℂ} {u v : ℂ} (hu : HasSum c u)
+private lemma qSeries_even_odd {c : ℕ → ℂ} {u v : ℂ} (hu : HasSum c u)
     (hv : HasSum (fun n => (-1:ℂ)^n*c n) v) :
     HasSum (fun n => c (2*n)) ((u+v)/2) ∧
     HasSum (fun n => c (2*n+1)) ((u-v)/2) := by
@@ -228,7 +224,7 @@ theorem qCosBig_hasSum {q : ℂ} (hq : ‖q‖<1) (x : ℂ) : HasSum (fun n : �
 section qaR4_elementary_helpers
 open Polynomial
 /-- The integer triangular number is nonnegative. -/
-theorem qaR4_tri_nonneg (n : ℤ) : 0≤DLMF.QSeries.TripleProduct.tri n := by
+lemma qaR4_tri_nonneg (n : ℤ) : 0≤DLMF.QSeries.TripleProduct.tri n := by
   have h := DLMF.QSeries.TripleProduct.tri_mul_two n
   have : 0≤n*(n-1) := by
     rcases le_or_gt n 0 with h0 | h0
@@ -243,7 +239,7 @@ noncomputable def qaR4_qBinomPoly : ℕ → ℕ → Polynomial ℂ
   | n+1, k+1 => qaR4_qBinomPoly n k+X^(k+1)*qaR4_qBinomPoly n (k+1)
 
 /-- Evaluation of the Gaussian polynomial. -/
-theorem qaR4_qBinomPoly_eval (q : ℂ) (n k : ℕ) : (qaR4_qBinomPoly n k).eval q=qBinom q n k := by
+lemma qaR4_qBinomPoly_eval (q : ℂ) (n k : ℕ) : (qaR4_qBinomPoly n k).eval q=qBinom q n k := by
   induction n generalizing k with
   | zero => cases k <;> simp [qaR4_qBinomPoly,qBinom]
   | succ n ih =>
@@ -263,7 +259,7 @@ noncomputable def qaR4_carlitzG (q : ℂ) (m s : ℕ) : ℂ :=
   ∑ j∈range (s+1), (-1:ℂ)^j*q^(j.choose 2)*qBinom q s j*(1-q^(s-j))^m
 
 /-- The recursion of the Carlitz sum. -/
-theorem qaR4_carlitzG_succ (q : ℂ) (m s : ℕ) :
+lemma qaR4_carlitzG_succ (q : ℂ) (m s : ℕ) :
     qaR4_carlitzG q (m+1) (s+1)=(1-q^(s+1))*(qaR4_carlitzG q m (s+1)+q^s*qaR4_carlitzG q m s) := by
   unfold qaR4_carlitzG
   have hsplit : ∀ j∈range (s+1+1), (-1:ℂ)^j*q^(j.choose 2)*qBinom q (s+1) j*(1-q^(s+1-j))^(m+1)=

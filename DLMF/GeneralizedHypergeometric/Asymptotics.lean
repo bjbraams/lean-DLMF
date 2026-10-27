@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.GeneralizedHypergeometric.DifferentialEquations
-public import DLMF.GeneralizedHypergeometric.Integrals
 public import TauCeti.Analysis.Contour.Residue.Basic
 public import DLMFMathlib.Analysis.Complex.BarnesResidue
 

@@ -5,8 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.MeasureTheory.Integral.Gamma
-public import DLMF.Airy.Framework
 public import DLMF.Airy.Asymptotics
 
 /-!
@@ -33,7 +31,7 @@ open scoped Real Topology Nat
 namespace DLMF.Airy
 
 /-- `e^{at - t³/12} t^{-1/2}` is integrable on `(0, ∞)` for every real `a`. -/
-lemma airyMod_integrableOn_exp (a : ℝ) :
+theorem airyMod_integrableOn_exp (a : ℝ) :
     IntegrableOn (fun t : ℝ => Real.exp (a * t) * (Real.exp (-(t ^ 3 / 12)) * t ^ (-(1 / 2) : ℝ)))
       (Ioi 0) := by
   set c : ℝ := |a| + 1
@@ -68,7 +66,7 @@ noncomputable def airyMod_I (k : ℕ) : ℝ :=
   (1 / 12 : ℝ) ^ (-((k : ℝ) + 1 / 2) / 3) * (1 / 3) * Real.Gamma (((k : ℝ) + 1 / 2) / 3)
 
 /-- The moment integral `∫₀^∞ t^{k-1/2} e^{-t³/12} dt` converges and equals `airyMod_I k`. -/
-lemma airyMod_integral_I (k : ℕ) :
+theorem airyMod_integral_I (k : ℕ) :
     IntegrableOn (fun t : ℝ => t ^ ((k : ℝ) - 1 / 2) * Real.exp (-(1 / 12) * t ^ (3 : ℝ))) (Ioi 0) ∧
       ∫ t in Ioi (0 : ℝ), t ^ ((k : ℝ) - 1 / 2) * Real.exp (-(1 / 12) * t ^ (3 : ℝ)) =
         airyMod_I k := by
@@ -78,7 +76,7 @@ lemma airyMod_integral_I (k : ℕ) :
   congr 3 <;> ring
 
 /-- `I_{k+3} = (4k+2) I_k`. -/
-lemma airyMod_I_add_three (k : ℕ) : airyMod_I (k + 3) = (4 * k + 2) * airyMod_I k := by
+theorem airyMod_I_add_three (k : ℕ) : airyMod_I (k + 3) = (4 * k + 2) * airyMod_I k := by
   have ha : 0 < ((k : ℝ) + 1 / 2) / 3 := by positivity
   rw [airyMod_I, airyMod_I, show (((k + 3 : ℕ) : ℝ) + 1 / 2) / 3 = ((k : ℝ) + 1 / 2) / 3 + 1 by
     push_cast; ring, Real.Gamma_add_one ha.ne',
@@ -88,7 +86,7 @@ lemma airyMod_I_add_three (k : ℕ) : airyMod_I (k + 3) = (4 * k + 2) * airyMod_
 
 
 /-- `(1/12)^{-m/6} = (2^{1/3} 3^{1/6})^m`. -/
-lemma airyMod_twelve_rpow (m : ℕ) :
+theorem airyMod_twelve_rpow (m : ℕ) :
     (1 / 12 : ℝ) ^ (-((m : ℝ) / 6)) = ((2 : ℝ) ^ (1 / 3 : ℝ) * (3 : ℝ) ^ (1 / 6 : ℝ)) ^ m := by
   rw [Real.rpow_neg (by norm_num), one_div, Real.inv_rpow (by norm_num), inv_inv,
     show (m : ℝ) / 6 = (1 / 6) * m by ring, Real.rpow_mul_natCast (by norm_num)]
@@ -98,15 +96,15 @@ lemma airyMod_twelve_rpow (m : ℕ) :
   norm_num
 
 /-- Powers of `3^{1/6}`. -/
-lemma airyMod_three_rpow (m : ℕ) : (3 : ℝ) ^ ((m : ℝ) / 6) = ((3 : ℝ) ^ (1 / 6 : ℝ)) ^ m := by
+theorem airyMod_three_rpow (m : ℕ) : (3 : ℝ) ^ ((m : ℝ) / 6) = ((3 : ℝ) ^ (1 / 6 : ℝ)) ^ m := by
   rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]; congr 1; ring
 
 /-- Powers of `2^{1/3}`. -/
-lemma airyMod_two_rpow (m : ℕ) : (2 : ℝ) ^ ((m : ℝ) / 3) = ((2 : ℝ) ^ (1 / 3 : ℝ)) ^ m := by
+theorem airyMod_two_rpow (m : ℕ) : (2 : ℝ) ^ ((m : ℝ) / 3) = ((2 : ℝ) ^ (1 / 3 : ℝ)) ^ m := by
   rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]; congr 1; ring
 
 /-- `Γ(1/3) Γ(2/3) = 2π/√3`. -/
-lemma airyMod_gamma_third_reflection :
+theorem airyMod_gamma_third_reflection :
     Real.Gamma (1 / 3) * Real.Gamma (2 / 3) * Real.sqrt 3 = 2 * π := by
   have h := Real.Gamma_mul_Gamma_one_sub (1 / 3)
   rw [show (1 : ℝ) - 1 / 3 = 2 / 3 by norm_num, show π * (1 / 3) = π / 3 by ring,
@@ -115,7 +113,7 @@ lemma airyMod_gamma_third_reflection :
   field_simp
 
 /-- `I_0 = 4π^{3/2} / (3^{2/3} Γ(2/3))²`. -/
-lemma airyMod_I_zero : airyMod_I 0 = 4 * π * Real.sqrt π / ((3 : ℝ) ^ (2 / 3 : ℝ) * Real.Gamma (2 / 3)) ^ 2 := by
+theorem airyMod_I_zero : airyMod_I 0 = 4 * π * Real.sqrt π / ((3 : ℝ) ^ (2 / 3 : ℝ) * Real.Gamma (2 / 3)) ^ 2 := by
   set u : ℝ := (3 : ℝ) ^ (1 / 6 : ℝ) with hu
   set v : ℝ := (2 : ℝ) ^ (1 / 3 : ℝ) with hv
   have hu6 : u ^ 6 = 3 := by rw [hu, ← airyMod_three_rpow]; norm_num
@@ -140,7 +138,7 @@ lemma airyMod_I_zero : airyMod_I 0 = 4 * π * Real.sqrt π / ((3 : ℝ) ^ (2 / 3
 
 
 /-- `I_1 = 4π^{3/2} / (3^{2/3} Γ(2/3) 3^{1/3} Γ(1/3))`. -/
-lemma airyMod_I_one : airyMod_I 1 = 4 * π * Real.sqrt π /
+theorem airyMod_I_one : airyMod_I 1 = 4 * π * Real.sqrt π /
     (((3 : ℝ) ^ (2 / 3 : ℝ) * Real.Gamma (2 / 3)) * ((3 : ℝ) ^ (1 / 3 : ℝ) * Real.Gamma (1 / 3))) := by
   set u : ℝ := (3 : ℝ) ^ (1 / 6 : ℝ) with hu
   set v : ℝ := (2 : ℝ) ^ (1 / 3 : ℝ) with hv
@@ -163,7 +161,7 @@ lemma airyMod_I_one : airyMod_I 1 = 4 * π * Real.sqrt π /
     (4 * π) * hu6
 
 /-- `I_2 = 8π^{3/2} / (3^{1/3} Γ(1/3))²`. -/
-lemma airyMod_I_two : airyMod_I 2 = 8 * π * Real.sqrt π / ((3 : ℝ) ^ (1 / 3 : ℝ) * Real.Gamma (1 / 3)) ^ 2 := by
+theorem airyMod_I_two : airyMod_I 2 = 8 * π * Real.sqrt π / ((3 : ℝ) ^ (1 / 3 : ℝ) * Real.Gamma (1 / 3)) ^ 2 := by
   set u : ℝ := (3 : ℝ) ^ (1 / 6 : ℝ) with hu
   set v : ℝ := (2 : ℝ) ^ (1 / 3 : ℝ) with hv
   have hu6 : u ^ 6 = 3 := by rw [hu, ← airyMod_three_rpow]; norm_num
@@ -187,12 +185,12 @@ lemma airyMod_I_two : airyMod_I 2 = 8 * π * Real.sqrt π / ((3 : ℝ) ^ (1 / 3 
     (4 * u ^ 6 * Real.sqrt π) * R1 + (8 * π * Real.sqrt π) * hu6
 
 /-- Norm of `t^{-1/2}` for `t > 0`. -/
-lemma airyMod_norm_cpow_half {t : ℝ} (ht : 0 < t) :
+theorem airyMod_norm_cpow_half {t : ℝ} (ht : 0 < t) :
     ‖(t : ℂ) ^ (-1 / 2 : ℂ)‖ = t ^ (-(1 / 2) : ℝ) := by
   rw [Complex.norm_cpow_eq_rpow_re_of_pos ht]; norm_num
 
 /-- `e^{at - t³/12} t^m t^{-1/2}` is integrable on `(0, ∞)` for every real `a` and `m : ℕ`. -/
-lemma airyMod_integrableOn_exp_pow (a : ℝ) (m : ℕ) :
+theorem airyMod_integrableOn_exp_pow (a : ℝ) (m : ℕ) :
     IntegrableOn (fun t : ℝ => Real.exp (a * t) *
       (Real.exp (-(t ^ 3 / 12)) * (t ^ m * t ^ (-(1 / 2) : ℝ)))) (Ioi 0) := by
   refine ((airyMod_integrableOn_exp (a + 1)).const_mul (m ! : ℝ)).mono' ?_ ?_
@@ -216,7 +214,7 @@ lemma airyMod_integrableOn_exp_pow (a : ℝ) (m : ℕ) :
 
 /-- The weighted Nicholson integrand `e^{zt - t³/12} t^m t^{-1/2}` is integrable on `(0, ∞)`,
 and its integral is the power series `∑ I_{k+m} z^k / k!`. -/
-lemma airyMod_hasSum_pow (m : ℕ) (z : ℂ) :
+theorem airyMod_hasSum_pow (m : ℕ) (z : ℂ) :
     IntegrableOn (fun t : ℝ => exp (z * t - (t : ℂ) ^ 3 / 12) * ((t : ℂ) ^ m * (t : ℂ) ^ (-1 / 2 : ℂ)))
       (Ioi 0) ∧
     HasSum (fun k : ℕ => z ^ k / k ! * (airyMod_I (k + m) : ℂ))
@@ -295,14 +293,14 @@ lemma airyMod_hasSum_pow (m : ℕ) (z : ℂ) :
 
 /-- The Nicholson integrand `e^{zt - t³/12} t^{-1/2}` is integrable on `(0, ∞)`, and its integral
 is the power series `∑ I_k z^k / k!`. -/
-lemma airyMod_hasSum (z : ℂ) :
+theorem airyMod_hasSum (z : ℂ) :
     IntegrableOn (fun t : ℝ => exp (z * t - (t : ℂ) ^ 3 / 12) * (t : ℂ) ^ (-1 / 2 : ℂ)) (Ioi 0) ∧
     HasSum (fun k : ℕ => z ^ k / k ! * (airyMod_I k : ℂ))
       (∫ t : ℝ in Ioi 0, exp (z * t - (t : ℂ) ^ 3 / 12) * (t : ℂ) ^ (-1 / 2 : ℂ)) := by
   simpa using airyMod_hasSum_pow 0 z
 
 /-- Taylor recurrence at `0` for solutions of `f''' = 4 z f' + 2 f`. -/
-lemma airyMod_iteratedDeriv_rec {f f1 f2 : ℂ → ℂ} (h0 : ∀ z, HasDerivAt f (f1 z) z)
+theorem airyMod_iteratedDeriv_rec {f f1 f2 : ℂ → ℂ} (h0 : ∀ z, HasDerivAt f (f1 z) z)
     (h1 : ∀ z, HasDerivAt f1 (f2 z) z) (h2 : ∀ z, HasDerivAt f2 (4 * z * f1 z + 2 * f z) z)
     (n : ℕ) : iteratedDeriv (n + 3) f 0 = (4 * n + 2) * iteratedDeriv n f 0 := by
   have d0 : deriv f = f1 := funext fun z => (h0 z).deriv
@@ -333,7 +331,7 @@ lemma airyMod_iteratedDeriv_rec {f f1 f2 : ℂ → ℂ} (h0 : ∀ z, HasDerivAt 
 
 
 /-- The square sum `Ai² + Bi²` and its first two derivatives. -/
-lemma airyMod_hasDerivAt_sq (z : ℂ) :
+theorem airyMod_hasDerivAt_sq (z : ℂ) :
     HasDerivAt (fun w => airyAi w ^ 2 + airyBi w ^ 2)
       (2 * (airyAi z * airyAiDeriv z + airyBi z * airyBiDeriv z)) z ∧
     HasDerivAt (fun w => 2 * (airyAi w * airyAiDeriv w + airyBi w * airyBiDeriv w))
@@ -354,13 +352,13 @@ lemma airyMod_hasDerivAt_sq (z : ℂ) :
     exact h.congr_deriv (by simp only [id, Pi.add_apply, Pi.pow_apply]; push_cast; ring)
 
 /-- `π^{3/2} = π √π`. -/
-lemma airyMod_pi_cpow : (π : ℂ) ^ (3 / 2 : ℂ) = ((π * Real.sqrt π : ℝ) : ℂ) := by
+theorem airyMod_pi_cpow : (π : ℂ) ^ (3 / 2 : ℂ) = ((π * Real.sqrt π : ℝ) : ℂ) := by
   rw [show (3 / 2 : ℂ) = ((3 / 2 : ℝ) : ℂ) by push_cast; ring, ← ofReal_cpow Real.pi_pos.le,
     show (3 / 2 : ℝ) = 1 + 1 / 2 by norm_num, Real.rpow_add Real.pi_pos, Real.rpow_one,
     ← Real.sqrt_eq_rpow]
 
 /-- The Taylor coefficients of `Ai² + Bi²` at `0` are `π^{-3/2} I_n`. -/
-lemma airyMod_iteratedDeriv_sq (n : ℕ) :
+theorem airyMod_iteratedDeriv_sq (n : ℕ) :
     iteratedDeriv n (fun w => airyAi w ^ 2 + airyBi w ^ 2) 0 =
       ((π * Real.sqrt π : ℝ) : ℂ)⁻¹ * (airyMod_I n : ℂ) := by
   have hπ := Real.pi_pos
@@ -487,7 +485,7 @@ theorem airyMod_cross_integral (z : ℂ) :
 /-! ### The oscillatory expansions on the positive real axis -/
 
 /-- The positive real axis tends to infinity inside every Airy sector. -/
-lemma airyInt_tendsto_ofReal_sector {α : ℝ} (hα : 0 ≤ α) :
+theorem airyInt_tendsto_ofReal_sector {α : ℝ} (hα : 0 ≤ α) :
     Tendsto (fun s : ℝ => (s : ℂ)) atTop (airySector α) := by
   unfold airySector
   refine tendsto_inf.2 ⟨tendsto_comap_iff.2 ?_, tendsto_principal.2 ?_⟩
@@ -497,59 +495,59 @@ lemma airyInt_tendsto_ofReal_sector {α : ℝ} (hα : 0 ≤ α) :
     exact ⟨ofReal_ne_zero.2 hs.ne', by rw [arg_ofReal_of_nonneg hs.le]; simpa using hα⟩
 
 /-- `‖s^{1/4}‖ = s^{1/4}` for `s > 0`. -/
-lemma airyInt_norm_cpow_quarter {s : ℝ} (hs : 0 < s) :
+theorem airyInt_norm_cpow_quarter {s : ℝ} (hs : 0 < s) :
     ‖(s : ℂ) ^ (1 / 4 : ℂ)‖ = s ^ (1 / 4 : ℝ) := by
   rw [show (1 / 4 : ℂ) = ((1 / 4 : ℝ) : ℂ) by push_cast; ring, ← ofReal_cpow hs.le,
     Complex.norm_real, Real.norm_of_nonneg (by positivity)]
 
 /-- The oscillatory error envelope on the positive real axis. -/
-lemma airyInt_oscError_ofReal (kind : AiryKind) (N M : ℕ) {s : ℝ} (hs : 0 < s) :
+theorem airyInt_oscError_ofReal (kind : AiryKind) (N M : ℕ) {s : ℝ} (hs : 0 < s) :
     airyOscError kind N M s = ‖airyOscPrefactor kind s‖ *
       (airyZeta s ^ (-(2 * N : ℤ)) + airyZeta s ^ (-(2 * M + 1 : ℤ))) := by
   rw [airyOscError, airyReal_zeta_ofReal hs, ofReal_im, abs_zero, Real.exp_zero, mul_one,
     Complex.norm_real, Real.norm_of_nonneg (airyZeta_pos hs).le]
 
 /-- Norm of the oscillatory prefactor of `Ai(-s)`. -/
-lemma airyInt_norm_oscPrefactor_ai {s : ℝ} (hs : 0 < s) :
+theorem airyInt_norm_oscPrefactor_ai {s : ℝ} (hs : 0 < s) :
     ‖airyOscPrefactor .ai s‖ = (Real.sqrt π)⁻¹ * s ^ (-(1 / 4) : ℝ) := by
   rw [airyOscPrefactor, norm_div, norm_one, norm_mul, airyInt_norm_cpow_quarter hs,
     Complex.norm_real, Real.norm_of_nonneg (Real.sqrt_nonneg _), Real.rpow_neg hs.le]
   field_simp
 
 /-- Norm of the oscillatory prefactor of `Bi(-s)`. -/
-lemma airyInt_norm_oscPrefactor_bi {s : ℝ} (hs : 0 < s) :
+theorem airyInt_norm_oscPrefactor_bi {s : ℝ} (hs : 0 < s) :
     ‖airyOscPrefactor .bi s‖ = (Real.sqrt π)⁻¹ * s ^ (-(1 / 4) : ℝ) := by
   rw [airyOscPrefactor, norm_div, norm_one, norm_mul, airyInt_norm_cpow_quarter hs,
     Complex.norm_real, Real.norm_of_nonneg (Real.sqrt_nonneg _), Real.rpow_neg hs.le]
   field_simp
 
 /-- Norm of the oscillatory prefactor of `Ai'(-s)`. -/
-lemma airyInt_norm_oscPrefactor_aiDeriv {s : ℝ} (hs : 0 < s) :
+theorem airyInt_norm_oscPrefactor_aiDeriv {s : ℝ} (hs : 0 < s) :
     ‖airyOscPrefactor .aiDeriv s‖ = (Real.sqrt π)⁻¹ * s ^ (1 / 4 : ℝ) := by
   rw [airyOscPrefactor, norm_div, airyInt_norm_cpow_quarter hs,
     Complex.norm_real, Real.norm_of_nonneg (Real.sqrt_nonneg _)]
   ring
 
 /-- Norm of the oscillatory prefactor of `Bi'(-s)`. -/
-lemma airyInt_norm_oscPrefactor_biDeriv {s : ℝ} (hs : 0 < s) :
+theorem airyInt_norm_oscPrefactor_biDeriv {s : ℝ} (hs : 0 < s) :
     ‖airyOscPrefactor .biDeriv s‖ = (Real.sqrt π)⁻¹ * s ^ (1 / 4 : ℝ) := by
   rw [airyOscPrefactor, norm_div, airyInt_norm_cpow_quarter hs,
     Complex.norm_real, Real.norm_of_nonneg (Real.sqrt_nonneg _)]
   ring
 
 /-- `ζ(s)⁻¹ = (3/2) s^{-3/2}`. -/
-lemma airyInt_airyZeta_recip {s : ℝ} (hs : 0 < s) :
+theorem airyInt_airyZeta_recip {s : ℝ} (hs : 0 < s) :
     (airyZeta s)⁻¹ = 3 / 2 * s ^ (-(3 / 2) : ℝ) := by
   rw [airyZeta, Real.rpow_neg hs.le]; field_simp
 
 /-- `ζ(s) ≥ 2/3` for `s ≥ 1`. -/
-lemma airyInt_two_thirds_le_airyZeta {s : ℝ} (hs : 1 ≤ s) : 2 / 3 ≤ airyZeta s := by
+theorem airyInt_two_thirds_le_airyZeta {s : ℝ} (hs : 1 ≤ s) : 2 / 3 ≤ airyZeta s := by
   unfold airyZeta
   have : 1 ≤ s ^ (3 / 2 : ℝ) := Real.one_le_rpow hs (by norm_num)
   linarith
 
 /-- The envelope with `N = M = 0` is at most `(5/2)|pref|` for `s ≥ 1`. -/
-lemma airyInt_oscError_zero_le (kind : AiryKind) {s : ℝ} (hs : 1 ≤ s) :
+theorem airyInt_oscError_zero_le (kind : AiryKind) {s : ℝ} (hs : 1 ≤ s) :
     airyOscError kind 0 0 s ≤ 5 / 2 * ‖airyOscPrefactor kind s‖ := by
   have hs0 : 0 < s := by linarith
   rw [airyInt_oscError_ofReal kind 0 0 hs0]
@@ -562,7 +560,7 @@ lemma airyInt_oscError_zero_le (kind : AiryKind) {s : ℝ} (hs : 1 ≤ s) :
   nlinarith
 
 /-- The envelope with `N = 1, M = 0` is at most `(15/4)|pref| s^{-3/2}` for `s ≥ 1`. -/
-lemma airyInt_oscError_one_zero_le (kind : AiryKind) {s : ℝ} (hs : 1 ≤ s) :
+theorem airyInt_oscError_one_zero_le (kind : AiryKind) {s : ℝ} (hs : 1 ≤ s) :
     airyOscError kind 1 0 s ≤ 15 / 4 * ‖airyOscPrefactor kind s‖ * s ^ (-(3 / 2) : ℝ) := by
   have hs0 : 0 < s := by linarith
   rw [airyInt_oscError_ofReal kind 1 0 hs0]
@@ -580,7 +578,7 @@ lemma airyInt_oscError_one_zero_le (kind : AiryKind) {s : ℝ} (hs : 1 ≤ s) :
 
 
 /-- The four oscillatory expansions 9.7.9–9.7.12 restricted to the positive real axis. -/
-lemma airyInt_osc_real (kind : AiryKind) (N M : ℕ) :
+theorem airyInt_osc_real (kind : AiryKind) (N M : ℕ) :
     (fun s : ℝ => airyFunction kind (-(s : ℂ)) - airyOscApprox kind N M s) =O[atTop]
       (fun s : ℝ => airyOscError kind N M s) := by
   have hπ := Real.pi_pos
@@ -594,12 +592,12 @@ lemma airyInt_osc_real (kind : AiryKind) (N M : ℕ) :
   · exact (airy_biDeriv_oscillatory_expansion hδ hδ' N M).comp_tendsto hT
 
 /-- The oscillatory error bound is nonnegative. -/
-lemma airyInt_oscError_nonneg (kind : AiryKind) (N M : ℕ) (z : ℂ) :
+theorem airyInt_oscError_nonneg (kind : AiryKind) (N M : ℕ) (z : ℂ) :
     0 ≤ airyOscError kind N M z := by
   unfold airyOscError; positivity
 
 /-- Crude growth on the negative axis: `w(-s) = O(|prefactor|)`. -/
-lemma airyInt_neg_isBigO_prefactor (kind : AiryKind) :
+theorem airyInt_neg_isBigO_prefactor (kind : AiryKind) :
     (fun s : ℝ => airyFunction kind (-(s : ℂ))) =O[atTop]
       (fun s : ℝ => ‖airyOscPrefactor kind s‖) := by
   have h := airyInt_osc_real kind 0 0
@@ -613,7 +611,7 @@ lemma airyInt_neg_isBigO_prefactor (kind : AiryKind) :
 
 
 /-- Transfer a big-O bound by a prefactor of the form `π^{-1/2} s^a`. -/
-lemma airyInt_isBigO_of_norm_prefactor {g : ℝ → ℂ} {p : ℝ → ℝ} {a : ℝ}
+theorem airyInt_isBigO_of_norm_prefactor {g : ℝ → ℂ} {p : ℝ → ℝ} {a : ℝ}
     (hg : g =O[atTop] p) (hp : ∀ s : ℝ, 0 < s → p s = (Real.sqrt π)⁻¹ * s ^ a) :
     g =O[atTop] (fun s : ℝ => s ^ a) := by
   refine hg.trans (IsBigO.of_bound ((Real.sqrt π)⁻¹) ?_)
@@ -621,41 +619,41 @@ lemma airyInt_isBigO_of_norm_prefactor {g : ℝ → ℂ} {p : ℝ → ℝ} {a : 
   rw [hp s hs, norm_mul, Real.norm_of_nonneg (by positivity)]
 
 /-- `Ai(-s) = O(s^{-1/4})` as `s → ∞`. -/
-lemma airyInt_ai_neg_isBigO :
+theorem airyInt_ai_neg_isBigO :
     (fun s : ℝ => airyAi (-(s : ℂ))) =O[atTop] (fun s : ℝ => s ^ (-(1 / 4) : ℝ)) :=
   airyInt_isBigO_of_norm_prefactor (airyInt_neg_isBigO_prefactor .ai)
     fun _ hs => airyInt_norm_oscPrefactor_ai hs
 
 /-- `Bi(-s) = O(s^{-1/4})` as `s → ∞`. -/
-lemma airyInt_bi_neg_isBigO :
+theorem airyInt_bi_neg_isBigO :
     (fun s : ℝ => airyBi (-(s : ℂ))) =O[atTop] (fun s : ℝ => s ^ (-(1 / 4) : ℝ)) :=
   airyInt_isBigO_of_norm_prefactor (airyInt_neg_isBigO_prefactor .bi)
     fun _ hs => airyInt_norm_oscPrefactor_bi hs
 
 /-- `Ai'(-s) = O(s^{1/4})` as `s → ∞`. -/
-lemma airyInt_aiDeriv_neg_isBigO :
+theorem airyInt_aiDeriv_neg_isBigO :
     (fun s : ℝ => airyAiDeriv (-(s : ℂ))) =O[atTop] (fun s : ℝ => s ^ (1 / 4 : ℝ)) :=
   airyInt_isBigO_of_norm_prefactor (airyInt_neg_isBigO_prefactor .aiDeriv)
     fun _ hs => airyInt_norm_oscPrefactor_aiDeriv hs
 
 /-- `Bi'(-s) = O(s^{1/4})` as `s → ∞`. -/
-lemma airyInt_biDeriv_neg_isBigO :
+theorem airyInt_biDeriv_neg_isBigO :
     (fun s : ℝ => airyBiDeriv (-(s : ℂ))) =O[atTop] (fun s : ℝ => s ^ (1 / 4 : ℝ)) :=
   airyInt_isBigO_of_norm_prefactor (airyInt_neg_isBigO_prefactor .biDeriv)
     fun _ hs => airyInt_norm_oscPrefactor_biDeriv hs
 
 /-- The complex power `s^{1/4}` of a positive real is real. -/
-lemma airyInt_cpow_quarter_ofReal {s : ℝ} (hs : 0 < s) :
+theorem airyInt_cpow_quarter_ofReal {s : ℝ} (hs : 0 < s) :
     (s : ℂ) ^ (1 / 4 : ℂ) = ((s ^ (1 / 4 : ℝ) : ℝ) : ℂ) := by
   rw [show (1 / 4 : ℂ) = ((1 / 4 : ℝ) : ℂ) by push_cast; ring, ← ofReal_cpow hs.le]
 
 /-- The phase `ζ(s) - π/4` is real for `s > 0`. -/
-lemma airyInt_theta_ofReal {s : ℝ} (hs : 0 < s) :
+theorem airyInt_theta_ofReal {s : ℝ} (hs : 0 < s) :
     airyZetaComplex s - π / 4 = ((airyZeta s - π / 4 : ℝ) : ℂ) := by
   rw [airyReal_zeta_ofReal hs]; push_cast; ring
 
 /-- Envelope `N = 1, M = 0` for the derivative kinds is `O(s^{-5/4})`. -/
-lemma airyInt_oscError_deriv_isBigO {kind : AiryKind} (hk : kind = .aiDeriv ∨ kind = .biDeriv) :
+theorem airyInt_oscError_deriv_isBigO {kind : AiryKind} (hk : kind = .aiDeriv ∨ kind = .biDeriv) :
     (fun s : ℝ => airyOscError kind 1 0 s) =O[atTop] (fun s : ℝ => s ^ (-(5 / 4) : ℝ)) := by
   refine IsBigO.of_bound (15 / 4 * (Real.sqrt π)⁻¹) ?_
   filter_upwards [eventually_ge_atTop 1] with s hs
@@ -672,7 +670,7 @@ lemma airyInt_oscError_deriv_isBigO {kind : AiryKind} (hk : kind = .aiDeriv ∨ 
   rw [e]; linarith
 
 /-- `Ai'(-s) = π^{-1/2} s^{1/4} sin(ζ - π/4) + O(s^{-5/4})`. -/
-lemma airyInt_aiDeriv_neg_sub :
+theorem airyInt_aiDeriv_neg_sub :
     (fun s : ℝ => airyAiDeriv (-(s : ℂ)) -
       ((s ^ (1 / 4 : ℝ) / Real.sqrt π * Real.sin (airyZeta s - π / 4) : ℝ) : ℂ))
       =O[atTop] (fun s : ℝ => s ^ (-(5 / 4) : ℝ)) := by
@@ -684,7 +682,7 @@ lemma airyInt_aiDeriv_neg_sub :
   simp [airyReal_airyV_zero, ofReal_sin]
 
 /-- `Bi'(-s) = π^{-1/2} s^{1/4} cos(ζ - π/4) + O(s^{-5/4})`. -/
-lemma airyInt_biDeriv_neg_sub :
+theorem airyInt_biDeriv_neg_sub :
     (fun s : ℝ => airyBiDeriv (-(s : ℂ)) -
       ((s ^ (1 / 4 : ℝ) / Real.sqrt π * Real.cos (airyZeta s - π / 4) : ℝ) : ℂ))
       =O[atTop] (fun s : ℝ => s ^ (-(5 / 4) : ℝ)) := by
@@ -696,7 +694,7 @@ lemma airyInt_biDeriv_neg_sub :
   simp [airyReal_airyV_zero, ofReal_cos]
 
 /-- Envelope `N = 1, M = 0` for `Ai`, `Bi` is `O(s^{-7/4})`. -/
-lemma airyMod_oscError_isBigO {kind : AiryKind} (hk : kind = .ai ∨ kind = .bi) :
+theorem airyMod_oscError_isBigO {kind : AiryKind} (hk : kind = .ai ∨ kind = .bi) :
     (fun s : ℝ => airyOscError kind 1 0 s) =O[atTop] (fun s : ℝ => s ^ (-(7 / 4) : ℝ)) := by
   refine IsBigO.of_bound (15 / 4 * (Real.sqrt π)⁻¹) ?_
   filter_upwards [eventually_ge_atTop 1] with s hs
@@ -713,7 +711,7 @@ lemma airyMod_oscError_isBigO {kind : AiryKind} (hk : kind = .ai ∨ kind = .bi)
   rw [e]; linarith
 
 /-- `Ai(-s) = π^{-1/2} s^{-1/4} cos(ζ - π/4) + O(s^{-7/4})`. -/
-lemma airyMod_ai_neg_sub :
+theorem airyMod_ai_neg_sub :
     (fun s : ℝ => airyAi (-(s : ℂ)) -
       ((s ^ (-(1 / 4) : ℝ) / Real.sqrt π * Real.cos (airyZeta s - π / 4) : ℝ) : ℂ))
       =O[atTop] (fun s : ℝ => s ^ (-(7 / 4) : ℝ)) := by
@@ -727,7 +725,7 @@ lemma airyMod_ai_neg_sub :
   simp
 
 /-- `Bi(-s) = -π^{-1/2} s^{-1/4} sin(ζ - π/4) + O(s^{-7/4})`. -/
-lemma airyMod_bi_neg_sub :
+theorem airyMod_bi_neg_sub :
     (fun s : ℝ => airyBi (-(s : ℂ)) +
       ((s ^ (-(1 / 4) : ℝ) / Real.sqrt π * Real.sin (airyZeta s - π / 4) : ℝ) : ℂ))
       =O[atTop] (fun s : ℝ => s ^ (-(7 / 4) : ℝ)) := by

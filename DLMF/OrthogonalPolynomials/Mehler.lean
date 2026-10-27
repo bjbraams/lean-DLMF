@@ -5,9 +5,32 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.OrthogonalPolynomials.Differential
 public import DLMF.OrthogonalPolynomials.ScalarSeries
-public import Mathlib.Analysis.Complex.TaylorSeries
+public import DLMF.OrthogonalPolynomials.Classical
+public import Mathlib.Algebra.Order.Ring.Star
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.Tactic.Basify
+public import Mathlib.Tactic.ENatToNat
+public import Mathlib.Tactic.Echelon.Zsqrtd
+public import Mathlib.Tactic.Inclusion.Extension.Core.Core
+public import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+public import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Rational
+public import Mathlib.Tactic.NormNum.Irrational
+public import Mathlib.Tactic.NormNum.IsCoprime
+public import Mathlib.Tactic.NormNum.IsSquare
+public import Mathlib.Tactic.NormNum.LegendreSymbol
+public import Mathlib.Tactic.NormNum.ModEq
+public import Mathlib.Tactic.NormNum.NatFib
+public import Mathlib.Tactic.NormNum.NatLog
+public import Mathlib.Tactic.NormNum.NatSqrt
+public import Mathlib.Tactic.NormNum.Ordinal
+public import Mathlib.Tactic.NormNum.Parity
+public import Mathlib.Tactic.NormNum.Prime
+public import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.Tactic.Polynomial.Basic
+public import Mathlib.Tactic.ReduceModChar
 
 /-!
 # Mehler's Hermite kernel
@@ -29,13 +52,13 @@ def kernel (x y z : ℂ) : ℂ :=
   (1 - z ^ 2) ^ (-1 / 2 : ℂ) * exp ((2 * x * y * z - (x ^ 2 + y ^ 2) * z ^ 2) / (1 - z ^ 2))
 
 /-- The denominator stays in the right half-plane on the unit disk. -/
-lemma re_den_pos {z : ℂ} (hz : ‖z‖ < 1) : 0 < (1 - z ^ 2).re := by
+theorem re_den_pos {z : ℂ} (hz : ‖z‖ < 1) : 0 < (1 - z ^ 2).re := by
   have h : ‖z ^ 2‖ < 1 := by rw [norm_pow]; nlinarith [norm_nonneg z]
   simp only [sub_re, one_re]
   linarith [re_le_norm (z ^ 2)]
 
 /-- The derivative equation for the Gaussian kernel. -/
-lemma hasDerivAt_kernel (x y : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem hasDerivAt_kernel (x y : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     HasDerivAt (kernel x y)
       ((2 * x * y + (1 - 2 * (x ^ 2 + y ^ 2)) * z + 2 * x * y * z ^ 2 - z ^ 3) /
         (1 - z ^ 2) ^ 2 * kernel x y z) z := by
@@ -69,7 +92,7 @@ def Rec (x y : ℂ) (c : ℕ → ℂ) (n : ℕ) : Prop :=
     (if 3 ≤ n then (n - 2 : ℂ) * c (n - 3) else 0)
 
 /-- The Mehler coefficient recurrence and the constant coefficient determine the sequence. -/
-lemma rec_unique {x y : ℂ} {c d : ℕ → ℂ} (h0 : c 0 = d 0)
+theorem rec_unique {x y : ℂ} {c d : ℕ → ℂ} (h0 : c 0 = d 0)
     (hc : ∀ n, Rec x y c n) (hd : ∀ n, Rec x y d n) : c = d := by
   funext n
   induction n using Nat.strong_induction_on with
@@ -94,7 +117,7 @@ lemma rec_unique {x y : ℂ} {c d : ℕ → ℂ} (h0 : c 0 = d 0)
         (he.trans (hd n).symm)
 
 /-- Holomorphy of the kernel supplies a convergent sequence satisfying the recurrence. -/
-lemma exists_coefficients (x y : ℂ) :
+theorem exists_coefficients (x y : ℂ) :
     ∃ c : ℕ → ℂ, c 0 = 1 ∧ (∀ n, Rec x y c n) ∧
       ∀ z : ℂ, ‖z‖ < 1 → HasSum (fun n => c n * z ^ n) (kernel x y z) := by
   let c : ℕ → ℂ := fun n => iteratedDeriv n (kernel x y) 0 / n.factorial
@@ -160,7 +183,7 @@ def coeff (x y : ℂ) (n : ℕ) : ℂ :=
   (aeval x (hermitePolyH n) : ℂ) * aeval y (hermitePolyH n) / (2 ^ n * (n.factorial : ℂ))
 
 /-- The Hermite three-term recurrence implies the Mehler coefficient recurrence. -/
-lemma rec_coeff (x y : ℂ) (n : ℕ) : Rec x y (coeff x y) n := by
+theorem rec_coeff (x y : ℂ) (n : ℕ) : Rec x y (coeff x y) n := by
   rcases n with _ | _ | _ | n
   · norm_num [Rec, coeff, hermitePolyH_zero, hermitePolyH_one, map_ofNat]; ring
   · norm_num [Rec, coeff, aeval_hermitePolyH_succ_succ, hermitePolyH_zero, hermitePolyH_one, map_ofNat]; ring

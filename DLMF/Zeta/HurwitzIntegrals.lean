@@ -8,8 +8,6 @@ module
 public import DLMF.Zeta.Hurwitz
 public import DLMF.Zeta.IntegralReps
 public import DLMF.Constants.Catalan
-public import Mathlib.Analysis.SpecialFunctions.Complex.Arctan
-public import Mathlib.NumberTheory.Harmonic.Defs
 
 /-!
 # The Hurwitz zeta function: integrals, sums and `a`-asymptotics (DLMF §25.11(vii)–(xii))
@@ -388,7 +386,7 @@ lemma s25b_differentiableOn_altIntegral {a : ℂ} (ha : 0 < a.re) :
 /-- The alternating Hurwitz integral (DLMF 25.11.35, integral form) for `Re a > 0`,
 `Re s > 0`, `s ≠ 1`:
 `(1/Γ(s)) ∫_0^∞ x^{s-1} e^{-ax}/(1+e^{-x}) dx = 2^{-s}(ζ(s,a/2) - ζ(s,(1+a)/2))`. -/
-theorem s25b_altIntegral_eq {s a : ℂ} (hs0 : 0 < s.re) (hs1 : s ≠ 1) (ha : 0 < a.re) :
+lemma s25b_altIntegral_eq {s a : ℂ} (hs0 : 0 < s.re) (hs1 : s ≠ 1) (ha : 0 < a.re) :
     1 / Gamma s * q25b_lerchInt s a (-1) =
       2 ^ (-s) * (hurwitzZetaComplex s (a / 2) - hurwitzZetaComplex s ((1 + a) / 2)) := by
   have ha2 : 0 < (a / 2).re := by simp; linarith

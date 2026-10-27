@@ -5,9 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.BernoulliEuler.Basic
 public import DLMF.BernoulliEuler.Explicit
-public import Mathlib.Algebra.Order.Floor.Ring
 
 /-!
 # Bernoulli and Euler numbers: arithmetic properties (DLMF §24.10)
@@ -48,7 +46,7 @@ def RatModEq (M : ℤ) (a b : ℚ) : Prop := M ∣ (a - b).num
 /-! ### §24.10(i) Von Staudt–Clausen theorem -/
 
 /-- The denominator of `∑_{p ∈ s} 1/p` divides `∏_{p ∈ s} p`. -/
-theorem q24a_den_sum_inv_dvd (s : Finset ℕ) :
+lemma q24a_den_sum_inv_dvd (s : Finset ℕ) :
     (∑ p ∈ s, (1 : ℚ) / p).den ∣ ∏ p ∈ s, p := by
   induction s using Finset.induction_on with
   | empty => simp
@@ -103,7 +101,7 @@ theorem kummer_congruence_pow {p : ℕ} (hp : p.Prime) {m n ℓ : ℕ}
 
 /-- Euler numbers as a Newton series with any number `K ≥ m` of terms:
 `Eₘ = ∑_{k=0}^{K} 2⁻ᵏ ∑_{j=0}^{k} (-1)ʲ (k choose j) (2j+1)ᵐ`. -/
-theorem r24a_eulerNumber_newton {m K : ℕ} (hmK : m ≤ K) :
+lemma r24a_eulerNumber_newton {m K : ℕ} (hmK : m ≤ K) :
     (eulerNumber m : ℚ) = ∑ k ∈ range (K + 1), 1 / (2 : ℚ) ^ k *
       ∑ j ∈ range (k + 1), (-1 : ℚ) ^ j * (k.choose j : ℚ) * (2 * (j : ℚ) + 1) ^ m := by
   have h := q24a_eulerPolyE_newton m (1 / 2)
@@ -126,7 +124,7 @@ theorem r24a_eulerNumber_newton {m K : ℕ} (hmK : m ≤ K) :
   exact_mod_cast this
 
 /-- A rational `p a / 2ᴷ` with `a ∈ ℤ` and `p` an odd prime has numerator divisible by `p`. -/
-theorem r24a_dvd_num_of_eq {p : ℕ} (hp : p.Prime) (hp2 : p ≠ 2) {q : ℚ} {a : ℤ} (K : ℕ)
+lemma r24a_dvd_num_of_eq {p : ℕ} (hp : p.Prime) (hp2 : p ≠ 2) {q : ℚ} {a : ℤ} (K : ℕ)
     (hq : q = p * a / 2 ^ K) : (p : ℤ) ∣ q.num := by
   have h1 : (q.num : ℚ) * 2 ^ K = p * a * q.den := by
     rw [← Rat.mul_den_eq_num, hq]; field_simp

@@ -5,13 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Legendre.Conical
-public import DLMF.Legendre.SpecialValues
-public import DLMF.OrthogonalPolynomials.Legendre
-public import DLMF.OrthogonalPolynomials.ClassicalInstances
-public import DLMFMathlib.Analysis.ODE.SturmCount
-public import DLMF.Legendre.ZeroTools
 public import DLMF.Legendre.ZeroCounts
+public import DLMF.Legendre.Connections
+public import DLMF.Legendre.IntegerTheory
 
 /-!
 # Real Legendre zero counts and interlacing
@@ -52,7 +48,7 @@ def ferrersPExtraZero (ν μ : ℝ) : Bool :=
   decide (0 < μ ∧ ((⌊μ⌋ ≤ ⌊ν⌋ ∧ legendreFractionalPart ν ≤ legendreFractionalPart μ) ∨ (⌊ν⌋ < ⌊μ⌋ ∧ Even (⌊μ⌋-⌊ν⌋))))
 
 /-- The zero set of `𝖯^μ_ν` in `(-1, 1)` through the real part. -/
-lemma lzero_zeroSet_P (ν μ : ℝ) : ferrersZeroSet false ν μ =
+theorem lzero_zeroSet_P (ν μ : ℝ) : ferrersZeroSet false ν μ =
     {x | x ∈ Ioo (-1:ℝ) 1 ∧ (ferrersP ν μ x).re = 0} := by
   ext x
   simp only [ferrersZeroSet, Bool.false_eq_true, ite_false, mem_ofPred_eq]
@@ -69,7 +65,7 @@ theorem ferrersP_nonpositive_order_zero_count {ν μ : ℝ} (hν : -1/2 ≤ ν) 
   exact h
 
 /-- `𝖯^m_j ≡ 0` on `(-1, 1)` for integers `0 ≤ j < m`. -/
-lemma lzero_ferrersP_nat_lt {j m : ℕ} (hjm : j < m) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem lzero_ferrersP_nat_lt {j m : ℕ} (hjm : j < m) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersP (j : ℂ) (m : ℂ) x = 0 := by
   have htn : ‖((1:ℂ) - x) / 2‖ < 1 := by
     rw [show ((1:ℂ) - x) / 2 = (((1 - x) / 2 : ℝ) : ℂ) by push_cast; ring, norm_real,
@@ -193,7 +189,7 @@ theorem ferrersP_nat_degree_zero_count (n : ℕ) (μ : ℝ) (hnondeg : ∃ x ∈
 
 
 /-- Real form of a Wronskian identity `W{F, G} = c/(1-x²)` for real-valued `F`, `G`. -/
-lemma lzero_real_wronskian {F G : ℝ → ℂ} {f f' g g' : ℝ → ℝ} {x c : ℝ}
+theorem lzero_real_wronskian {F G : ℝ → ℂ} {f f' g g' : ℝ → ℝ} {x c : ℝ}
     (hx : x ∈ Ioo (-1:ℝ) 1) (hF : F x = f x) (hF' : deriv F x = f' x) (hG : G x = g x)
     (hG' : deriv G x = g' x) (hW : ferrersWronskian F G x = (c : ℂ) / (1 - (x : ℂ) ^ 2)) :
     (1 - x ^ 2) * (f x * g' x - g x * f' x) = c := by
@@ -204,7 +200,7 @@ lemma lzero_real_wronskian {F G : ℝ → ℂ} {f f' g g' : ℝ → ℝ} {x c : 
   rw [h]; field_simp
 
 /-- The real data of `x ↦ 𝖯^{-μ}_ν(-x)`. -/
-lemma lzero_reflect_data (ν μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem lzero_reflect_data (ν μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     (fun t => ferrersP ν (-μ:ℝ) (-t)) x = ((ferrersP ν (-μ:ℝ) (-x)).re : ℂ) ∧
       deriv (fun t => ferrersP ν (-μ:ℝ) (-t)) x =
         ((-(deriv (ferrersP ν (-μ:ℝ)) (-x)).re : ℝ) : ℂ) := by
@@ -214,7 +210,7 @@ lemma lzero_reflect_data (ν μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
   rw [deriv_comp_neg, e1]; simp
 
 /-- The sign of `sin(xπ)` for nonintegral `x` is `(-1)^⌊x⌋`. -/
-lemma lzero_sin_sign {x : ℝ} (hx : ∀ n : ℤ, x ≠ n) : 0 < (-1:ℝ) ^ ⌊x⌋ * Real.sin (x * π) := by
+theorem lzero_sin_sign {x : ℝ} (hx : ∀ n : ℤ, x ≠ n) : 0 < (-1:ℝ) ^ ⌊x⌋ * Real.sin (x * π) := by
   have hd : 0 < Int.fract x := lt_of_le_of_ne (Int.fract_nonneg x) (fun h => hx ⌊x⌋ (by
     rw [Int.fract] at h; linarith))
   have hd1 : Int.fract x < 1 := Int.fract_lt_one x
@@ -225,7 +221,7 @@ lemma lzero_sin_sign {x : ℝ} (hx : ∀ n : ℤ, x ≠ n) : 0 < (-1:ℝ) ^ ⌊x
   exact Real.sin_pos_of_pos_of_lt_pi (mul_pos hd Real.pi_pos) (by nlinarith [Real.pi_pos])
 
 /-- The extra-zero rule of DLMF 14.16(ii) as a parity condition. -/
-lemma lzero_extra_iff {ν μ : ℝ} (hνn : ∀ n : ℤ, ν ≠ n) (hμn : ∀ n : ℤ, μ ≠ n) (hμ : 0 < μ) :
+theorem lzero_extra_iff {ν μ : ℝ} (hνn : ∀ n : ℤ, ν ≠ n) (hμn : ∀ n : ℤ, μ ≠ n) (hμ : 0 < μ) :
     ferrersPExtraZero ν μ = true ↔ Even (max ⌈ν - μ⌉ 0 + ⌊μ⌋ + ⌊ν⌋) := by
   have ha0 : 0 < ν - ⌊ν⌋ := lt_of_le_of_ne (by linarith [Int.floor_le ν])
     (fun h => hνn ⌊ν⌋ (by linarith))
@@ -351,16 +347,16 @@ derivative at least `1/(2(1∓x))` because `|𝖯_n| ≤ 1`, so it is unbounded 
 produces one zero next to each end.
 -/
 
-lemma lzero_isSol_P (ν μ : ℂ) : IsFerrersSolution ν μ (ferrersP ν μ) :=
+theorem lzero_isSol_P (ν μ : ℂ) : IsFerrersSolution ν μ (ferrersP ν μ) :=
   ((ferrersEven_isFerrersSolution ν μ).add_smul (ferrersOdd_isFerrersSolution ν μ) _ _).congr
     (ferrersP_eqOn_even_odd ν μ).symm
 
-lemma lzero_isSol_Q (ν μ : ℂ) : IsFerrersSolution ν μ (ferrersQ ν μ) :=
+theorem lzero_isSol_Q (ν μ : ℂ) : IsFerrersSolution ν μ (ferrersQ ν μ) :=
   ((ferrersEven_isFerrersSolution ν μ).add_smul (ferrersOdd_isFerrersSolution ν μ) _ _).congr
     (ferrersQ_eqOn_even_odd ν μ).symm
 
 /-- A real-valued function `f : ℝ → ℂ` on an open set has real derivative there. -/
-lemma lzero_hasDerivAt_re {f : ℝ → ℂ} {x : ℝ} (hd : DifferentiableAt ℝ f x)
+theorem lzero_hasDerivAt_re {f : ℝ → ℂ} {x : ℝ} (hd : DifferentiableAt ℝ f x)
     (hreal : ∀ᶠ y in 𝓝 x, (f y).im = 0) :
     HasDerivAt (fun y => (f y).re) (deriv f x).re x ∧ (deriv f x).im = 0 ∧
       f x = ((f x).re : ℂ) ∧ deriv f x = ((deriv f x).re : ℂ) := by
@@ -387,17 +383,17 @@ def lzero_q (ν μ : ℝ) (x : ℝ) : ℝ := (ferrersQ ν μ x).re
 /-- The real part of the derivative of `𝖰^μ_ν`. -/
 def lzero_q' (ν μ : ℝ) (x : ℝ) : ℝ := (deriv (ferrersQ ν μ) x).re
 
-lemma lzero_evIoo {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) : ∀ᶠ y in 𝓝 x, y ∈ Ioo (-1:ℝ) 1 :=
+theorem lzero_evIoo {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) : ∀ᶠ y in 𝓝 x, y ∈ Ioo (-1:ℝ) 1 :=
   Ioo_mem_nhds hx.1 hx.2
 
-lemma lzero_P_data (ν μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem lzero_P_data (ν μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt (lzero_p ν μ) (lzero_p' ν μ x) x ∧
       ferrersP ν μ x = (lzero_p ν μ x : ℂ) ∧ deriv (ferrersP ν μ) x = (lzero_p' ν μ x : ℂ) := by
   obtain ⟨h1, -, h3, h4⟩ := lzero_hasDerivAt_re ((lzero_isSol_P ν μ x hx).1)
     ((lzero_evIoo hx).mono fun y hy => ferrersP_real ν μ hy)
   exact ⟨h1, h3, h4⟩
 
-lemma lzero_Q_data {ν μ : ℝ} (hr : LegendreQRegular ν μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem lzero_Q_data {ν μ : ℝ} (hr : LegendreQRegular ν μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt (lzero_q ν μ) (lzero_q' ν μ x) x ∧
       ferrersQ ν μ x = (lzero_q ν μ x : ℂ) ∧ deriv (ferrersQ ν μ) x = (lzero_q' ν μ x : ℂ) := by
   obtain ⟨h1, -, h3, h4⟩ := lzero_hasDerivAt_re ((lzero_isSol_Q ν μ x hx).1)
@@ -405,7 +401,7 @@ lemma lzero_Q_data {ν μ : ℝ} (hr : LegendreQRegular ν μ) {x : ℝ} (hx : x
   exact ⟨h1, h3, h4⟩
 
 /-- The real Wronskian of `𝖯^μ_ν` and `𝖰^μ_ν` (DLMF 14.2.4). -/
-lemma lzero_wronskian {ν μ : ℝ} (hr : LegendreQRegular ν μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem lzero_wronskian {ν μ : ℝ} (hr : LegendreQRegular ν μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     lzero_p ν μ x * lzero_q' ν μ x - lzero_q ν μ x * lzero_p' ν μ x =
       Real.Gamma (ν + μ + 1) / Real.Gamma (ν - μ + 1) / (1 - x ^ 2) := by
   have hW := ferrers_wronskian_4 ν μ hr hx
@@ -423,29 +419,29 @@ section NatDegree
 
 variable (n : ℕ)
 
-lemma lzero_nat_regular : LegendreQRegular ((n : ℝ) : ℂ) ((0 : ℝ) : ℂ) := fun k h => by
+theorem lzero_nat_regular : LegendreQRegular ((n : ℝ) : ℂ) ((0 : ℝ) : ℂ) := fun k h => by
   have := congrArg re h
   simp at this
   linarith [(n.cast_nonneg : (0 : ℝ) ≤ n)]
 
 /-- The Wronskian of `P_n` and `Q_n` is `1/(1-x²)`. -/
-lemma lzero_nat_wronskian {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem lzero_nat_wronskian {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     lzero_p n 0 x * lzero_q' n 0 x - lzero_q n 0 x * lzero_p' n 0 x = 1 / (1 - x ^ 2) := by
   rw [lzero_wronskian (lzero_nat_regular n) hx, add_zero, sub_zero,
     div_self (Real.Gamma_pos_of_pos (by positivity)).ne']
 
-lemma lzero_nat_p_eq {t : ℝ} (ht : t ∈ Ioo (-1:ℝ) 1) :
+theorem lzero_nat_p_eq {t : ℝ} (ht : t ∈ Ioo (-1:ℝ) 1) :
     (lzero_p n 0 t : ℂ) = DLMF.OrthogonalPolynomials.legendrePolyP n t := by
   rw [← (lzero_P_data n 0 ht).2.1, ← ferrersP_nat_polynomial n ht]
   push_cast; rfl
 
-lemma lzero_nat_p_abs_le {t : ℝ} (ht : t ∈ Ioo (-1:ℝ) 1) : |lzero_p n 0 t| ≤ 1 := by
+theorem lzero_nat_p_abs_le {t : ℝ} (ht : t ∈ Ioo (-1:ℝ) 1) : |lzero_p n 0 t| ≤ 1 := by
   have h := DLMF.OrthogonalPolynomials.norm_legendrePolyP_le_one n
     (x := t) (abs_le.mpr ⟨ht.1.le, ht.2.le⟩)
   rwa [← lzero_nat_p_eq n ht, norm_real, Real.norm_eq_abs] at h
 
 /-- The derivative of `Q_n / P_n` and its lower bounds near `±1`. -/
-lemma lzero_nat_ratio {y : ℝ} (hy : y ∈ Ioo (-1:ℝ) 1) (hp : lzero_p n 0 y ≠ 0) :
+theorem lzero_nat_ratio {y : ℝ} (hy : y ∈ Ioo (-1:ℝ) 1) (hp : lzero_p n 0 y ≠ 0) :
     HasDerivAt (fun t => lzero_q n 0 t / lzero_p n 0 t)
       ((lzero_q' n 0 y * lzero_p n 0 y - lzero_q n 0 y * lzero_p' n 0 y) / lzero_p n 0 y ^ 2) y ∧
     1 / 2 / (1 - y) ≤
@@ -472,7 +468,7 @@ lemma lzero_nat_ratio {y : ℝ} (hy : y ∈ Ioo (-1:ℝ) 1) (hp : lzero_p n 0 y 
   · rw [div_le_div_iff₀ (by positivity) (by positivity)]
     nlinarith
 
-lemma lzero_nat_pos_right {c : ℝ} (hc : c ∈ Ioo (-1:ℝ) 1)
+theorem lzero_nat_pos_right {c : ℝ} (hc : c ∈ Ioo (-1:ℝ) 1)
     (hne : ∀ t ∈ Ioo c 1, lzero_p n 0 t ≠ 0) :
     ∃ y ∈ Ioo c 1, 0 < lzero_q n 0 y / lzero_p n 0 y := by
   have hy₀ : (c + 1) / 2 < 1 := by linarith [hc.2]
@@ -485,7 +481,7 @@ lemma lzero_nat_pos_right {c : ℝ} (hc : c ∈ Ioo (-1:ℝ) 1)
     (fun y hy => (lzero_nat_ratio n (hsub' y hy) (hne y (hsub y hy))).2.1)
   exact ⟨y, ⟨by linarith [hy.1, hc.2], hy.2⟩, hy0⟩
 
-lemma lzero_nat_neg_left {d : ℝ} (hd : d ∈ Ioo (-1:ℝ) 1)
+theorem lzero_nat_neg_left {d : ℝ} (hd : d ∈ Ioo (-1:ℝ) 1)
     (hne : ∀ t ∈ Ioo (-1) d, lzero_p n 0 t ≠ 0) :
     ∃ y ∈ Ioo (-1) d, lzero_q n 0 y / lzero_p n 0 y < 0 := by
   have hy₀ : -1 < (d - 1) / 2 := by linarith [hd.1]
@@ -609,7 +605,7 @@ def InterlacesZeros (S T : Set ℝ) : Prop :=
   (∀ a ∈ S, ∀ b ∈ S, a < b → (¬∃ c ∈ S, a < c ∧ c < b) → ∃! c : ℝ, c ∈ T ∧ a < c ∧ c < b) ∧ (∀ a ∈ T, ∀ b ∈ T, a < b → (¬∃ c ∈ T, a < c ∧ c < b) → ∃! c : ℝ, c ∈ S ∧ a < c ∧ c < b)
 
 /-- Interlacing on `(-1, 1)` from a positive Wronskian. -/
-lemma lzero_interlace_of_wronskian {p p' q q' : ℝ → ℝ}
+theorem lzero_interlace_of_wronskian {p p' q q' : ℝ → ℝ}
     (hp : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt p (p' x) x) (hq : ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt q (q' x) x)
     (hw : ∀ x ∈ Ioo (-1:ℝ) 1, 0 < p x * q' x - q x * p' x) {S T : Set ℝ}
     (hS : ∀ x, x ∈ S ↔ x ∈ Ioo (-1:ℝ) 1 ∧ p x = 0) (hT : ∀ x, x ∈ T ↔ x ∈ Ioo (-1:ℝ) 1 ∧ q x = 0) :
@@ -806,7 +802,7 @@ def associatedPOneZero (ν μ : ℝ) : Prop :=
   (0 < μ ∧ ν < μ ∧ (∀ n : ℤ, μ ≠ n) ∧ Real.sin ((μ-ν)*π)*Real.sin (μ*π) < 0) ∨ (0 < μ ∧ μ ≤ ν ∧ (∀ n : ℤ, μ ≠ n) ∧ Odd (⌊μ⌋:ℤ))
 
 /-- A complex sum of nonnegative real terms with positive leading term is nonzero. -/
-lemma lzero_ne_zero_of_hasSum {f : ℕ → ℝ} {S : ℂ} (h : HasSum (fun k => (f k : ℂ)) S)
+theorem lzero_ne_zero_of_hasSum {f : ℕ → ℝ} {S : ℂ} (h : HasSum (fun k => (f k : ℂ)) S)
     (hf : ∀ k, 0 ≤ f k) (h0 : 0 < f 0) : S ≠ 0 := by
   have hr : HasSum f S.re := by simpa using Complex.reCLM.hasSum h
   intro hS
@@ -815,7 +811,7 @@ lemma lzero_ne_zero_of_hasSum {f : ℕ → ℝ} {S : ℂ} (h : HasSum (fun k => 
   linarith
 
 /-- The regularized Gauss series is positive for positive parameters on `(0, 1)`. -/
-lemma lzero_regularizedGaussHG_ne_zero {a b c w : ℝ} (ha : 0 < a) (hb : 0 < b) (hc : 0 < c)
+theorem lzero_regularizedGaussHG_ne_zero {a b c w : ℝ} (ha : 0 < a) (hb : 0 < b) (hc : 0 < c)
     (hw0 : 0 ≤ w) (hw1 : w < 1) : regularizedGaussHG a b c w ≠ 0 := by
   have hw : ‖(w : ℂ)‖ < 1 := by rw [norm_real, Real.norm_eq_abs, abs_of_nonneg hw0]; exact hw1
   rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw]
@@ -835,7 +831,7 @@ lemma lzero_regularizedGaussHG_ne_zero {a b c w : ℝ} (ha : 0 < a) (hb : 0 < b)
       Nat.cast_one, div_one, one_mul, Nat.cast_zero, add_zero]
     positivity
 
-lemma lzero_olverQ_ne_zero_of_nonneg {ν μ : ℝ} (hν : -1 < ν) (hμ : 0 ≤ μ) {x : ℝ} (hx : 1 < x) :
+theorem lzero_olverQ_ne_zero_of_nonneg {ν μ : ℝ} (hν : -1 < ν) (hμ : 0 ≤ μ) {x : ℝ} (hx : 1 < x) :
     olverQ ν μ x ≠ 0 := by
   have hx0 : (x : ℂ) ≠ 0 := by exact_mod_cast (show x ≠ 0 by linarith)
   unfold olverQ legendreBranchPower
@@ -866,7 +862,7 @@ theorem olverQ_no_exterior_zero {ν μ : ℝ} (hν : -1 < ν) {x : ℝ} (hx : 1 
 
 /-- A `C²` function on `[a, b]` vanishing at both ends, whose second derivative is positive at
 any positive critical point, is nonpositive on `[a, b]`. -/
-lemma lzero_nonpos_of_ode {g g' g'' : ℝ → ℝ} {a b : ℝ} (hab : a < b)
+theorem lzero_nonpos_of_ode {g g' g'' : ℝ → ℝ} {a b : ℝ} (hab : a < b)
     (hg : ∀ x ∈ Icc a b, HasDerivAt g (g' x) x) (hg' : ∀ x ∈ Icc a b, HasDerivAt g' (g'' x) x)
     (hode : ∀ x ∈ Icc a b, 0 < g x → g' x = 0 → 0 < g'' x) (ha : g a = 0) (hb : g b = 0) :
     ∀ x ∈ Icc a b, g x ≤ 0 := by
@@ -903,13 +899,13 @@ lemma lzero_nonpos_of_ode {g g' g'' : ℝ → ℝ} {a b : ℝ} (hab : a < b)
     have := (div_pos_iff_of_pos_right (sub_pos.mpr hx1)).mp hgξ; linarith
   exact absurd (hmax ⟨by linarith, hx3.le⟩) (not_le.mpr this)
 
-lemma lzero_mem {x : ℝ} (hx : 1 < x) : (x : ℂ) ∈ {z : ℂ | z - 1 ∈ slitPlane} := by
+theorem lzero_mem {x : ℝ} (hx : 1 < x) : (x : ℂ) ∈ {z : ℂ | z - 1 ∈ slitPlane} := by
   show (x : ℂ) - 1 ∈ slitPlane
   rw [show (x : ℂ) - 1 = ((x - 1 : ℝ) : ℂ) by push_cast; ring]
   exact ofReal_mem_slitPlane.mpr (by linarith)
 
 /-- The real ODE of `x ↦ Re 𝑸(x)` on `(1, ∞)`. -/
-lemma lzero_real_ode (ν μ : ℝ) {x : ℝ} (hx : 1 < x) :
+theorem lzero_real_ode (ν μ : ℝ) {x : ℝ} (hx : 1 < x) :
     let Q := olverQ ν μ
     HasDerivAt (fun t : ℝ => (Q t).re) (deriv Q x).re x ∧
       HasDerivAt (fun t : ℝ => (deriv Q t).re) (deriv (deriv Q) x).re x ∧
@@ -996,7 +992,7 @@ theorem olverQ_at_most_one_exterior_zero {ν μ : ℝ} (hν : ν < -1) (hnondeg 
 /-! ### Exterior zeros of `P^μ_ν` (DLMF 14.16(iii)) -/
 
 /-- A function with zero derivative on an interval is constant there. -/
-lemma lzero_const_of_deriv_zero {r r' : ℝ → ℝ} {s : Set ℝ} (hs : s.OrdConnected)
+theorem lzero_const_of_deriv_zero {r r' : ℝ → ℝ} {s : Set ℝ} (hs : s.OrdConnected)
     (hd : ∀ x ∈ s, HasDerivAt r (r' x) x) (h0 : ∀ x ∈ s, r' x = 0) {x y : ℝ} (hx : x ∈ s)
     (hy : y ∈ s) : r x = r y := by
   wlog hxy : x < y generalizing x y
@@ -1014,7 +1010,7 @@ lemma lzero_const_of_deriv_zero {r r' : ℝ → ℝ} {s : Set ℝ} (hs : s.OrdCo
 
 /-- On `(1, ∞)`: a function with `(x²-1)(v f' - f v') = c > 0` against a positive solution `v`
 with `(x²-1)v² = O(x-1)` is negative near `1`. -/
-lemma lzero_ext_neg_near_one {f f' v v' : ℝ → ℝ} {s K c : ℝ} (hs : 1 < s) (hK : 0 < K)
+theorem lzero_ext_neg_near_one {f f' v v' : ℝ → ℝ} {s K c : ℝ} (hs : 1 < s) (hK : 0 < K)
     (hc : 0 < c) (hfd : ∀ x ∈ Ioc 1 s, HasDerivAt f (f' x) x)
     (hvd : ∀ x ∈ Ioc 1 s, HasDerivAt v (v' x) x) (hv : ∀ x ∈ Ioc 1 s, 0 < v x)
     (hb : ∀ x ∈ Ioc 1 s, (x ^ 2 - 1) * v x ^ 2 ≤ K * (x - 1))
@@ -1054,7 +1050,7 @@ lemma lzero_ext_neg_near_one {f f' v v' : ℝ → ℝ} {s K c : ℝ} (hs : 1 < s
 
 /-- On `(1, ∞)`: a function with `(x²-1)(u f' - f u') = c > 0` against a positive solution `u`
 with `(x²-1)u² = O(x)` is eventually positive. -/
-lemma lzero_ext_pos_atTop {f f' u u' : ℝ → ℝ} {X K c : ℝ} (hX : 1 < X) (hK : 0 < K)
+theorem lzero_ext_pos_atTop {f f' u u' : ℝ → ℝ} {X K c : ℝ} (hX : 1 < X) (hK : 0 < K)
     (hc : 0 < c) (hfd : ∀ x ∈ Ici X, HasDerivAt f (f' x) x)
     (hud : ∀ x ∈ Ici X, HasDerivAt u (u' x) x) (hu : ∀ x ∈ Ici X, 0 < u x)
     (hb : ∀ x ∈ Ici X, (x ^ 2 - 1) * u x ^ 2 ≤ K * x)
@@ -1109,7 +1105,7 @@ lemma lzero_ext_pos_atTop {f f' u u' : ℝ → ℝ} {X K c : ℝ} (hX : 1 < X) (
   exact (div_pos_iff_of_pos_right (hu x hxX)).mp h3
 
 /-- A function with zero derivative on an interval is constant there. -/
-lemma lzero_ext_count {f f' Q Q' : ℝ → ℝ} {c t₁ T σ₁ σ₂ : ℝ} (ht₁ : 1 < t₁)
+theorem lzero_ext_count {f f' Q Q' : ℝ → ℝ} {c t₁ T σ₁ σ₂ : ℝ} (ht₁ : 1 < t₁)
     (hfd : ∀ x, 1 < x → HasDerivAt f (f' x) x) (hQd : ∀ x, 1 < x → HasDerivAt Q (Q' x) x)
     (hQ : ∀ x, 1 < x → 0 < Q x) (hc : c ≠ 0)
     (hW : ∀ x, 1 < x → (x ^ 2 - 1) * (Q x * f' x - f x * Q' x) = c)
@@ -1199,7 +1195,7 @@ lemma lzero_ext_count {f f' Q Q' : ℝ → ℝ} {c t₁ T σ₁ σ₂ : ℝ} (ht
     rw [hZ]; exact ⟨finite_empty, ncard_empty ℝ⟩
 
 /-- The rule of DLMF 14.16(iii) (as corrected) through the sign of `sin(μπ)/Γ(ν-μ+1)`. -/
-lemma lzero_oneZero_iff {ν μ : ℝ} : associatedPOneZero ν μ ↔
+theorem lzero_oneZero_iff {ν μ : ℝ} : associatedPOneZero ν μ ↔
     0 < μ ∧ (∀ n : ℤ, μ ≠ n) ∧ Real.sin (μ * π) * (Real.Gamma (ν - μ + 1))⁻¹ < 0 := by
   have hinv : ν < μ → (Real.Gamma (ν - μ + 1))⁻¹ =
       Real.sin ((μ - ν) * π) * Real.Gamma (μ - ν) / π := by
@@ -1260,7 +1256,7 @@ lemma lzero_oneZero_iff {ν μ : ℝ} : associatedPOneZero ν μ ↔
 
 /-- For positive parameters the regularized Gauss series on `[0, 1)` is real, positive and
 increasing. -/
-lemma lzero_regGauss_pos_mono {a b c w w' : ℝ} (ha : 0 < a) (hb : 0 < b) (hc : 0 < c)
+theorem lzero_regGauss_pos_mono {a b c w w' : ℝ} (ha : 0 < a) (hb : 0 < b) (hc : 0 < c)
     (hw0 : 0 ≤ w) (hww : w ≤ w') (hw1 : w' < 1) :
     0 < (regularizedGaussHG a b c w).re ∧ (regularizedGaussHG a b c w).im = 0 ∧
       (regularizedGaussHG a b c w).re ≤ (regularizedGaussHG a b c w').re := by
@@ -1314,7 +1310,7 @@ lemma lzero_regGauss_pos_mono {a b c w w' : ℝ} (ha : 0 < a) (hb : 0 < b) (hc :
 
 /-- Positivity of `𝑸^μ_ν` on `(1, ∞)` (`ν > -1`) and the bound `(x²-1)(𝑸^μ_ν)² = O(x)` at
 infinity (`ν ≥ -1/2`). -/
-lemma lzero_olverQ_pos_bound {ν : ℝ} (hν : -1/2 ≤ ν) (μ : ℝ) :
+theorem lzero_olverQ_pos_bound {ν : ℝ} (hν : -1/2 ≤ ν) (μ : ℝ) :
     (∀ x : ℝ, 1 < x → 0 < (olverQ ν μ x).re) ∧
       ∃ K > 0, ∀ x : ℝ, 2 ≤ x → (x ^ 2 - 1) * (olverQ ν μ x).re ^ 2 ≤ K * x := by
   -- reduce to `μ ≥ 0`
@@ -1420,7 +1416,7 @@ lemma lzero_olverQ_pos_bound {ν : ℝ} (hν : -1/2 ≤ ν) (μ : ℝ) :
       _ ≤ (π * S ^ 2 + 1) * x := by nlinarith
 
 /-- Real form of a Wronskian identity on `(1, ∞)` for functions real there. -/
-lemma lzero_ext_wr {F G : ℂ → ℂ} {x c : ℝ} (hx : 1 < x) (hF : (F x).im = 0)
+theorem lzero_ext_wr {F G : ℂ → ℂ} {x c : ℝ} (hx : 1 < x) (hF : (F x).im = 0)
     (hG : (G x).im = 0) (h : LegendreWronskian F G x = (c : ℂ) / ((x : ℂ) ^ 2 - 1)) :
     (x ^ 2 - 1) * ((F x).re * (deriv G x).re - (G x).re * (deriv F x).re) = c := by
   have hp : x ^ 2 - 1 ≠ 0 := by nlinarith
@@ -1431,7 +1427,7 @@ lemma lzero_ext_wr {F G : ℂ → ℂ} {x c : ℝ} (hx : 1 < x) (hF : (F x).im =
   field_simp
 
 /-- Near `x = 1⁺`, `P^{-m}_ν` (`m ≥ 0`) is positive and `O((x - 1)^{1/2}(x+1)^{-1/2})`. -/
-lemma lzero_assocP_near_one (ν : ℝ) {m : ℝ} (hm : 0 ≤ m) :
+theorem lzero_assocP_near_one (ν : ℝ) {m : ℝ} (hm : 0 ≤ m) :
     ∃ s : ℝ, 1 < s ∧ ∃ K : ℝ, 0 < K ∧ ∀ x : ℝ, x ∈ Ioc 1 s → 0 < (associatedP ν (-m : ℝ) x).re ∧
       (x ^ 2 - 1) * (associatedP ν (-m : ℝ) x).re ^ 2 ≤ K * (x - 1) := by
   set g : ℝ → ℂ := fun x => regularizedGaussHG ((ν:ℂ) + 1) (-(ν:ℂ)) (1 - ((-m:ℝ):ℂ))

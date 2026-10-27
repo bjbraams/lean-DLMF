@@ -5,11 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.BernoulliEuler.GeneratingFunctions
 public import DLMF.BernoulliEuler.Series
-public import Mathlib.Analysis.SpecialFunctions.Pow.Real
-public import Mathlib.Analysis.SpecialFunctions.Log.Basic
 public import Mathlib.Analysis.SpecialFunctions.Stirling
+public import Mathlib.Analysis.SpecialFunctions.Log.Base
 
 /-!
 # Bernoulli and Euler numbers and polynomials: inequalities (DLMF §24.9)
@@ -88,7 +86,7 @@ theorem abs_bernoulliFun_two_mul_lt {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 
 /-! ### Signs and monotonicity on `[0, 1/2]` (helpers for 24.9.2–24.9.5) -/
 
 /-- `(-1)ⁿ⁺¹ B₂ₙ = 2 (2n)!/(2π)^{2n} · ζ(2n)` with `ζ(2n)` the value of `∑ 1/m^{2n}`. -/
-theorem r24a_bernoulli_eq_zeta {n : ℕ} (hn : n ≠ 0) :
+lemma r24a_bernoulli_eq_zeta {n : ℕ} (hn : n ≠ 0) :
     ∃ Z : ℝ, HasSum (fun m : ℕ => 1 / (m : ℝ) ^ (2 * n)) Z ∧
       (-1) ^ (n + 1) * (bernoulli (2 * n) : ℝ) = 2 * (2 * n)! / (2 * π) ^ (2 * n) * Z := by
   refine ⟨_, hasSum_zeta_nat hn, ?_⟩
@@ -99,7 +97,7 @@ theorem r24a_bernoulli_eq_zeta {n : ℕ} (hn : n ≠ 0) :
   field_simp
 
 /-- `|sin(mθ)| ≤ m |sin θ|`. -/
-theorem r24a_abs_sin_nat_mul_le (m : ℕ) (θ : ℝ) : |sin (m * θ)| ≤ m * |sin θ| := by
+lemma r24a_abs_sin_nat_mul_le (m : ℕ) (θ : ℝ) : |sin (m * θ)| ≤ m * |sin θ| := by
   induction m with
   | zero => simp
   | succ m ih =>
@@ -115,7 +113,7 @@ theorem r24a_abs_sin_nat_mul_le (m : ℕ) (θ : ℝ) : |sin (m * θ)| ≤ m * |s
       _ ≤ (m + 1) * |sin θ| := by linarith
 
 /-- `∑ 1/m^{2n} ≤ π²/6` for `n ≥ 1`. -/
-theorem r24a_zeta_le {n : ℕ} (hn : 1 ≤ n) {Z : ℝ}
+lemma r24a_zeta_le {n : ℕ} (hn : 1 ≤ n) {Z : ℝ}
     (hz : HasSum (fun m : ℕ => 1 / (m : ℝ) ^ (2 * n)) Z) : Z ≤ π ^ 2 / 6 := by
   refine hasSum_le (fun m => ?_) hz hasSum_zeta_two
   rcases Nat.eq_zero_or_pos m with rfl | hm
@@ -126,7 +124,7 @@ theorem r24a_zeta_le {n : ℕ} (hn : 1 ≤ n) {Z : ℝ}
 
 /-- Sign of the odd Bernoulli polynomials: `(-1)ⁿ⁺¹ B₂ₙ₊₁(x) > 0` for `0 < x < 1/2`, `n ≥ 1`
 (from the Fourier series and `|sin mθ| ≤ m sin θ`). -/
-theorem r24a_bernoulliFun_odd_pos {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 < x) (hx1 : x < 1 / 2) :
+lemma r24a_bernoulliFun_odd_pos {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 < x) (hx1 : x < 1 / 2) :
     0 < (-1) ^ (n + 1) * bernoulliFun (2 * n + 1) x := by
   have hn0 : n ≠ 0 := by omega
   have hs := hasSum_one_div_nat_pow_mul_sin hn0 (x := x) ⟨hx0.le, by linarith⟩
@@ -167,7 +165,7 @@ theorem r24a_bernoulliFun_odd_pos {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 < 
 
 
 /-- Odd part of `ζ(2n)`: `∑ 1/(2k+1)^{2n} = ζ(2n)(1 - 4⁻ⁿ)`, and `η(2n) = ζ(2n)(1 - 2·4⁻ⁿ) ≤ 1`. -/
-theorem r24a_zeta_odd {n : ℕ} (hn : 1 ≤ n) {Z : ℝ}
+lemma r24a_zeta_odd {n : ℕ} (hn : 1 ≤ n) {Z : ℝ}
     (hz : HasSum (fun m : ℕ => 1 / (m : ℝ) ^ (2 * n)) Z) :
     HasSum (fun k : ℕ => 1 / (2 * (k : ℝ) + 1) ^ (2 * n)) (Z - Z / 4 ^ n) ∧
       Z - 2 * (Z / 4 ^ n) ≤ 1 := by
@@ -195,7 +193,7 @@ theorem r24a_zeta_odd {n : ℕ} (hn : 1 ≤ n) {Z : ℝ}
     linarith
 
 /-- Sign of the odd Euler polynomials: `(-1)ⁿ E₂ₙ₋₁(x) > 0` for `0 < x < 1/2`, `n ≥ 1`. -/
-theorem r24a_eulerFun_odd_pos {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 < x) (hx1 : x < 1 / 2) :
+lemma r24a_eulerFun_odd_pos {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 < x) (hx1 : x < 1 / 2) :
     0 < (-1) ^ n * eulerFun (2 * n - 1) x := by
   rcases Nat.lt_or_ge n 2 with h1 | h2
   · obtain rfl : n = 1 := by omega
@@ -258,7 +256,7 @@ theorem r24a_eulerFun_odd_pos {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 < x) (
 
 
 /-- Strict monotonicity on `[0, 1/2]` from a positive derivative on `(0, 1/2)`. -/
-theorem r24a_strictMonoOn_half {f f' : ℝ → ℝ} (hd : ∀ x, HasDerivAt f (f' x) x)
+lemma r24a_strictMonoOn_half {f f' : ℝ → ℝ} (hd : ∀ x, HasDerivAt f (f' x) x)
     (hpos : ∀ x ∈ Set.Ioo (0 : ℝ) (1 / 2), 0 < f' x) : StrictMonoOn f (Set.Icc 0 (1 / 2)) := by
   refine strictMonoOn_of_deriv_pos (convex_Icc _ _)
     (fun x _ => (hd x).continuousAt.continuousWithinAt) fun x hx => ?_
@@ -266,7 +264,7 @@ theorem r24a_strictMonoOn_half {f f' : ℝ → ℝ} (hd : ∀ x, HasDerivAt f (f
   rw [(hd x).deriv]; exact hpos x hx
 
 /-- `E₂ₙ(0) = 0` for `n ≥ 1`. -/
-theorem r24a_eulerFun_two_mul_zero {n : ℕ} (hn : 1 ≤ n) : eulerFun (2 * n) 0 = 0 := by
+lemma r24a_eulerFun_two_mul_zero {n : ℕ} (hn : 1 ≤ n) : eulerFun (2 * n) 0 = 0 := by
   have h1 := Polynomial.euler_eval_one_add_eval_zero (2 * n)
   have h2 := eulerFun_one_sub (2 * n) 0
   rw [zero_pow (by omega), mul_zero] at h1
@@ -278,7 +276,7 @@ theorem r24a_eulerFun_two_mul_zero {n : ℕ} (hn : 1 ≤ n) : eulerFun (2 * n) 0
 
 
 /-- `(-1)ⁿ B₂ₙ₋₁(x) > 0` for `0 < x < 1/2`, `n ≥ 1`. -/
-theorem r24a_bernoulliFun_odd_pos' {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 < x) (hx1 : x < 1 / 2) :
+lemma r24a_bernoulliFun_odd_pos' {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 < x) (hx1 : x < 1 / 2) :
     0 < (-1) ^ n * bernoulliFun (2 * n - 1) x := by
   rcases Nat.lt_or_ge n 2 with h1 | h2
   · obtain rfl : n = 1 := by omega
@@ -288,7 +286,7 @@ theorem r24a_bernoulliFun_odd_pos' {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 : 0 <
   exact r24a_bernoulliFun_odd_pos (by omega) hx0 hx1
 
 /-- `eulerFun n (1/2) = Eₙ / 2ⁿ`. -/
-theorem r24a_eulerFun_half (n : ℕ) : eulerFun n (1 / 2) = eulerNumber n / 2 ^ n := by
+lemma r24a_eulerFun_half (n : ℕ) : eulerFun n (1 / 2) = eulerNumber n / 2 ^ n := by
   have h := eulerPolyE_half n
   rw [show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring, eulerPolyE_ofReal] at h
   exact_mod_cast h
@@ -422,7 +420,7 @@ theorem eulerFun_two_mul_sub_one_bounds {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx0 
 /-! ### Stirling bounds (helpers for 24.9.6–24.9.7) -/
 
 /-- Upper bound from Robbins' stepwise bound: `log s(N) - log √π ≤ 1/(12N)`, `N ≥ 1`. -/
-theorem r24a_log_stirlingSeq_le {N : ℕ} (hN : 1 ≤ N) :
+lemma r24a_log_stirlingSeq_le {N : ℕ} (hN : 1 ≤ N) :
     log (Stirling.stirlingSeq N) - log √π ≤ 1 / (12 * N) := by
   have hstep : ∀ M : ℕ, log (Stirling.stirlingSeq N) - log (Stirling.stirlingSeq (N + M)) ≤
       1 / (12 * N) - 1 / (12 * ((N + M : ℕ) : ℝ)) := by
@@ -449,7 +447,7 @@ theorem r24a_log_stirlingSeq_le {N : ℕ} (hN : 1 ≤ N) :
   linarith [hstep M]
 
 /-- Lower bound from the first term of the Stirling difference series. -/
-theorem r24a_log_stirlingSeq_ge {N : ℕ} (hN : 1 ≤ N) :
+lemma r24a_log_stirlingSeq_ge {N : ℕ} (hN : 1 ≤ N) :
     1 / (3 * (2 * (N : ℝ) + 1) ^ 2) ≤ log (Stirling.stirlingSeq N) - log √π := by
   obtain ⟨m, rfl⟩ : ∃ m, N = m + 1 := ⟨N - 1, by omega⟩
   have h := Stirling.log_stirlingSeq_sdiff_hasSum m
@@ -463,7 +461,7 @@ theorem r24a_log_stirlingSeq_ge {N : ℕ} (hN : 1 ≤ N) :
   linarith
 
 /-- Two-sided Stirling bounds: `√π e^{1/(3(2N+1)²)} ≤ s(N) ≤ √π e^{1/(12N)}`, `N ≥ 1`. -/
-theorem r24a_stirlingSeq_bounds {N : ℕ} (hN : 1 ≤ N) :
+lemma r24a_stirlingSeq_bounds {N : ℕ} (hN : 1 ≤ N) :
     √π * exp (1 / (3 * (2 * (N : ℝ) + 1) ^ 2)) ≤ Stirling.stirlingSeq N ∧
       Stirling.stirlingSeq N ≤ √π * exp (1 / (12 * N)) := by
   have hpos : 0 < Stirling.stirlingSeq N := by
@@ -479,7 +477,7 @@ theorem r24a_stirlingSeq_bounds {N : ℕ} (hN : 1 ≤ N) :
     linarith
 
 /-- `N! = s(N) √(2N) (N/e)^N`. -/
-theorem r24a_factorial_eq (N : ℕ) (hN : 1 ≤ N) :
+lemma r24a_factorial_eq (N : ℕ) (hN : 1 ≤ N) :
     (N ! : ℝ) = Stirling.stirlingSeq N * (√(2 * N) * (N / exp 1) ^ N) := by
   unfold Stirling.stirlingSeq
   have : 0 < √(2 * (N : ℝ)) * (N / exp 1) ^ N := by
@@ -489,7 +487,7 @@ theorem r24a_factorial_eq (N : ℕ) (hN : 1 ≤ N) :
 
 
 /-- `exp x ≤ 1 + 2x` for `0 < x ≤ 1/2`. -/
-theorem r24a_exp_le_one_add_two_mul {x : ℝ} (h0 : 0 < x) (h1 : x ≤ 1 / 2) :
+lemma r24a_exp_le_one_add_two_mul {x : ℝ} (h0 : 0 < x) (h1 : x ≤ 1 / 2) :
     exp x ≤ 1 + 2 * x := by
   have := Real.exp_bound_div_one_sub_of_interval' h0 (by linarith)
   have h2 : 1 / (1 - x) ≤ 1 + 2 * x := by
@@ -497,7 +495,7 @@ theorem r24a_exp_le_one_add_two_mul {x : ℝ} (h0 : 0 < x) (h1 : x ≤ 1 / 2) :
   linarith
 
 /-- `(4n+1)² ≤ 9ⁿ` for `n ≥ 2`. -/
-theorem r24a_sq_le_nine_pow {n : ℕ} (hn : 2 ≤ n) : (4 * n + 1) ^ 2 ≤ 9 ^ n := by
+lemma r24a_sq_le_nine_pow {n : ℕ} (hn : 2 ≤ n) : (4 * n + 1) ^ 2 ≤ 9 ^ n := by
   induction n, hn using Nat.le_induction with
   | base => norm_num
   | succ k hk ih =>

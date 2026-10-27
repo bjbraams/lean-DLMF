@@ -5,7 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
 public import Mathlib.Probability.Distributions.Beta
 
 /-!

@@ -7,7 +7,7 @@ module
 
 public import DLMF.Gamma.Integrals
 public import DLMF.Gamma.Inequalities
-public import DLMF.Hypergeometric.FiniteConvolution
+public import DLMF.Hypergeometric.Saalschutz
 
 /-!
 # Barnes moments for continuous Hahn orthogonality
@@ -30,7 +30,7 @@ def weight (a b c d : ℂ) (x : ℝ) : ℂ :=
   Gamma (a + I * x) * Gamma (b + I * x) * Gamma (c - I * x) * Gamma (d - I * x)
 
 /-- Absolute integrability of the four-Gamma Barnes weight. -/
-lemma integrable_weight {a b c d : ℂ}
+theorem integrable_weight {a b c d : ℂ}
     (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 < c.re) (hd : 0 < d.re) :
     Integrable (weight a b c d) := by
   have hbound (w : ℂ) (hw : 0 < w.re) (t : ℝ) :
@@ -55,7 +55,7 @@ lemma integrable_weight {a b c d : ℂ}
     (mul_nonneg (norm_nonneg (Gamma (a + I * x))) (norm_nonneg (Gamma (c - I * x))))]
 
 /-- Evaluation of the four-Gamma weight with the unnormalized Lebesgue measure. -/
-lemma integral_weight {a b c d : ℂ}
+theorem integral_weight {a b c d : ℂ}
     (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 < c.re) (hd : 0 < d.re) :
     (∫ x : ℝ, weight a b c d x) = 2 * Real.pi *
       (Gamma (a + c) * Gamma (a + d) * Gamma (b + c) * Gamma (b + d) /
@@ -72,13 +72,13 @@ def moment (a b c d : ℂ) (k j : ℕ) : ℂ :=
     Gamma (b + d + j) / Gamma (a + b + c + d + j + k))
 
 /-- Gamma's finite-shift formula at a point in the right half-plane. -/
-lemma gamma_shift {w : ℂ} (hw : 0 < w.re) (k : ℕ) :
+theorem gamma_shift {w : ℂ} (hw : 0 < w.re) (k : ℕ) :
     Gamma (w + k) = poch w k * Gamma w := by
   exact (div_eq_iff (Gamma_ne_zero_of_re_pos hw)).mp
     (Gamma_add_nat_div_Gamma_eq (n := k) w (not_neg_nat_of_re_pos hw))
 
 /-- Multiplying the weight by Pochhammer factors shifts its first and fourth Gamma parameters. -/
-lemma poch_mul_weight {a b c d : ℂ} (ha : 0 < a.re) (hd : 0 < d.re) (k j : ℕ) (x : ℝ) :
+theorem poch_mul_weight {a b c d : ℂ} (ha : 0 < a.re) (hd : 0 < d.re) (k j : ℕ) (x : ℝ) :
     poch (a + I * x) k * poch (d - I * x) j * weight a b c d x =
       weight (a + k) b c (d + j) x := by
   dsimp only [weight]
@@ -88,7 +88,7 @@ lemma poch_mul_weight {a b c d : ℂ} (ha : 0 < a.re) (hd : 0 < d.re) (k j : ℕ
   ring
 
 /-- Absolute integrability and evaluation of every mixed Pochhammer moment. -/
-lemma mixed_moment {a b c d : ℂ}
+theorem mixed_moment {a b c d : ℂ}
     (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 < c.re) (hd : 0 < d.re) (k j : ℕ) :
     Integrable (fun x : ℝ => poch (a + I * x) k * poch (d - I * x) j * weight a b c d x) ∧
       (∫ x : ℝ, poch (a + I * x) k * poch (d - I * x) j * weight a b c d x) = moment a b c d k j := by
@@ -106,7 +106,7 @@ lemma mixed_moment {a b c d : ℂ}
     show a + k + b + c + (d + j) = a + b + c + d + j + k by ring]
 
 /-- Factor the mixed moment into its zeroth moment and two numerator Pochhammer factors. -/
-lemma moment_factor {a b c d : ℂ}
+theorem moment_factor {a b c d : ℂ}
     (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 < c.re) (hd : 0 < d.re) (k j : ℕ) :
     moment a b c d k j = moment a b c d 0 j *
       (poch (a + c) k * poch (a + d + j) k / poch (a + b + c + d + j) k) := by
@@ -124,7 +124,7 @@ def hahnSum (a b c d : ℂ) (n : ℕ) (x : ℝ) : ℂ :=
       (poch (a + c) k * poch (a + d) k * k.factorial)) * poch (a + I * x) k
 
 /-- Every continuous Hahn sum times a reversed rising factorial has an absolutely integrable weight. -/
-lemma integrable_hahnSum_basis {a b c d : ℂ}
+theorem integrable_hahnSum_basis {a b c d : ℂ}
     (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 < c.re) (hd : 0 < d.re) (n j : ℕ) :
     Integrable (fun x : ℝ => hahnSum a b c d n x * poch (d - I * x) j * weight a b c d x) := by
   simp only [hahnSum, Finset.sum_mul]
@@ -135,7 +135,7 @@ lemma integrable_hahnSum_basis {a b c d : ℂ}
       (poch (a + c) k * poch (a + d) k * k.factorial)))
 
 /-- Pfaff–Saalschutz makes every lower-degree reversed Pochhammer moment vanish. -/
-lemma integral_hahnSum_basis_zero {a b c d : ℂ}
+theorem integral_hahnSum_basis_zero {a b c d : ℂ}
     (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 < c.re) (hd : 0 < d.re) {n j : ℕ} (hj : j < n) :
     (∫ x : ℝ, hahnSum a b c d n x * poch (d - I * x) j * weight a b c d x) = 0 := by
   have hA (k : ℕ) : poch (a + c) k ≠ 0 :=
@@ -170,7 +170,7 @@ lemma integral_hahnSum_basis_zero {a b c d : ℂ}
   rw [hs, mul_zero]
 
 /-- A rising factorial in the reversed variable is a finite combination of rising factorials. -/
-lemma poch_reverse_basis (A v : ℂ) (k : ℕ) :
+theorem poch_reverse_basis (A v : ℂ) (k : ℕ) :
     poch (A - v) k = ∑ j ∈ Finset.range (k + 1),
       ((-1 : ℂ) ^ k * k.choose j * poch (-A - k + 1) (k - j)) * poch v j := by
   rw [show A - v = -(v - A) by ring, DLMF.Gamma.poch_neg_eq,
@@ -180,7 +180,7 @@ lemma poch_reverse_basis (A v : ℂ) (k : ℕ) :
   ring
 
 /-- A continuous Hahn sum annihilates the ordinary rising-factorial basis below its degree. -/
-lemma hahnSum_same_basis_zero {a b c d : ℂ}
+theorem hahnSum_same_basis_zero {a b c d : ℂ}
     (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 < c.re) (hd : 0 < d.re) {n k : ℕ} (hk : k < n) :
     Integrable (fun x : ℝ => hahnSum a b c d n x * poch (a + I * x) k * weight a b c d x) ∧
       (∫ x : ℝ, hahnSum a b c d n x * poch (a + I * x) k * weight a b c d x) = 0 := by
@@ -205,7 +205,7 @@ lemma hahnSum_same_basis_zero {a b c d : ℂ}
     (lt_of_le_of_lt (Nat.lt_succ_iff.mp (Finset.mem_range.mp hj)) hk), mul_zero]
 
 /-- Ordered-degree continuous Hahn orthogonality, including absolute integrability. -/
-lemma hahnSum_orthogonal_lt {a b c d : ℂ}
+theorem hahnSum_orthogonal_lt {a b c d : ℂ}
     (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 < c.re) (hd : 0 < d.re) {m n : ℕ} (hmn : m < n) :
     Integrable (fun x : ℝ => hahnSum a b c d m x * hahnSum a b c d n x * weight a b c d x) ∧
       (∫ x : ℝ, hahnSum a b c d m x * hahnSum a b c d n x * weight a b c d x) = 0 := by

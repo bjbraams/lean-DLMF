@@ -24,7 +24,7 @@ namespace DLMF.Confluent
 open Polynomial
 
 /-- Complex form of `H_n(x) = (√2)^n He_n(√2 x)`. -/
-lemma aeval_hermitePolyH_eq_hermite_complex (n : ℕ) (x : ℂ) :
+theorem aeval_hermitePolyH_eq_hermite_complex (n : ℕ) (x : ℂ) :
     aeval x (DLMF.OrthogonalPolynomials.hermitePolyH n) =
       (Real.sqrt 2 : ℂ) ^ n * aeval ((Real.sqrt 2 : ℂ) * x) (hermite n) := by
   have hs : (Real.sqrt 2:ℂ)^2=2 := by exact_mod_cast Real.sq_sqrt (by norm_num : (0:ℝ)≤2)
@@ -43,7 +43,7 @@ lemma aeval_hermitePolyH_eq_hermite_complex (n : ℕ) (x : ℂ) :
     linear_combination (-(Real.sqrt 2:ℂ)^n * x * aeval ((Real.sqrt 2 : ℂ) * x) (hermite n)) * hs
 
 /-- `2^{-n/2} (√2)^n = 1`. -/
-lemma two_cpow_neg_half_mul_sqrt_two_pow (n : ℕ) :
+theorem two_cpow_neg_half_mul_sqrt_two_pow (n : ℕ) :
     (2:ℂ)^(-(n:ℂ)/2) * (Real.sqrt 2 : ℂ)^n = 1 := by
   rw [← two_cpow_half, ← Complex.cpow_nat_mul, ← Complex.cpow_add _ _ two_ne_zero]
   ring_nf; simp

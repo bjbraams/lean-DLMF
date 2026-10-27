@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Hypergeometric.Saalschutz
-public import Mathlib.Tactic.CrossRefAttribute
 public import Mathlib.Data.Nat.Choose.Cast
 
 /-!
@@ -207,7 +206,7 @@ lemma appF4_coeff_of_le {a b c c' : ℂ} (hcc : c + c' = a + b + 1) (hc : ∀ k,
 
 /-- **Bailey's coefficient identity**: for `c + c' = a + b + 1` the coefficient of `XᴹYᴺ` in
 `F₄(a,b;c,c';X(1-Y),Y(1-X))` is the product of the Gauss coefficients. -/
-lemma appF4_coeff {a b c c' : ℂ} (hcc : c + c' = a + b + 1) (hc : ∀ k, poch c k ≠ 0)
+theorem appF4_coeff {a b c c' : ℂ} (hcc : c + c' = a + b + 1) (hc : ∀ k, poch c k ≠ 0)
     (hc' : ∀ k, poch c' k ≠ 0) (M N : ℕ) :
     ∑ m ∈ Finset.range (M + 1), ∑ n ∈ Finset.range (N + 1), appF4Term a b c c' M N m n =
       gaussHGCoeff a b c M * gaussHGCoeff a b c' N := by
@@ -222,7 +221,7 @@ lemma appF4_coeff {a b c c' : ℂ} (hcc : c + c' = a + b + 1) (hc : ∀ k, poch 
 
 
 /-- `|(μ)_m| ≤ (1 + |μ|)^m m!`. -/
-lemma appF4_norm_poch_le (μ : ℂ) (m : ℕ) : ‖poch μ m‖ ≤ (1 + ‖μ‖) ^ m * m ! := by
+theorem appF4_norm_poch_le (μ : ℂ) (m : ℕ) : ‖poch μ m‖ ≤ (1 + ‖μ‖) ^ m * m ! := by
   induction m with
   | zero => simp [poch_zero]
   | succ m ih =>
@@ -305,13 +304,13 @@ lemma appF4Coeff_norm_le (a b : ℂ) {c c' : ℂ} (hc : 0 < c.re) (hc' : 0 < c'.
 noncomputable def appF4E (m n M : ℕ) : ℂ :=
   if m ≤ M then (-1) ^ (M - m) * (n.choose (M - m) : ℂ) else 0
 
-lemma appF4E_eq_zero_of_lt {m n M : ℕ} (h : m + n < M) : appF4E m n M = 0 := by
+theorem appF4E_eq_zero_of_lt {m n M : ℕ} (h : m + n < M) : appF4E m n M = 0 := by
   unfold appF4E
   rw [ite_eq_left_of_eq_true _ _ (eq_true (by omega)), Nat.choose_eq_zero_of_lt (by omega)]
   simp
 
 /-- `X^m (1 - X)^n = ∑_M appF4E m n M X^M`. -/
-lemma appF4E_sum (m n : ℕ) (X : ℂ) :
+theorem appF4E_sum (m n : ℕ) (X : ℂ) :
     ∑ M ∈ Finset.range (m + n + 1), appF4E m n M * X ^ M = X ^ m * (1 - X) ^ n := by
   rw [show m + n + 1 = m + (n + 1) by ring, Finset.sum_range_add,
     Finset.sum_eq_zero (fun M hM => by
@@ -326,7 +325,7 @@ lemma appF4E_sum (m n : ℕ) (X : ℂ) :
   ring
 
 /-- A bound for one factor of the four-index family. -/
-lemma appF4E_norm_le (m n M : ℕ) {X : ℂ} (hX : ‖X‖ ≤ 1) :
+theorem appF4E_norm_le (m n M : ℕ) {X : ℂ} (hX : ‖X‖ ≤ 1) :
     ‖appF4E m n M * X ^ M‖ ≤ 2 ^ n * Real.sqrt ‖X‖ ^ m * Real.sqrt ‖X‖ ^ M := by
   unfold appF4E
   split_ifs with h
@@ -510,7 +509,7 @@ theorem appF4_bailey {a b c c' : ℂ} (hcc : c + c' = a + b + 1) (hc : 0 < c.re)
   exact hF4
 
 /-- Bailey's product formula in terms of the (totalized) function `appF4`. -/
-theorem appF4_eq_mul {a b c c' : ℂ} (hcc : c + c' = a + b + 1) (hc : 0 < c.re)
+lemma appF4_eq_mul {a b c c' : ℂ} (hcc : c + c' = a + b + 1) (hc : 0 < c.re)
     (hc' : 0 < c'.re) : ∃ δ > 0, ∀ X Y : ℂ, ‖X‖ < δ → ‖Y‖ < δ →
       appF4 a b c c' (X * (1 - Y)) (Y * (1 - X)) = ₂F₁ a b c X * ₂F₁ a b c' Y := by
   obtain ⟨δ, hδ, h⟩ := appF4_bailey hcc hc hc'

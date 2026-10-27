@@ -5,9 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Hypergeometric.Basic
 public import DLMF.Hypergeometric.Continuation
-public import Mathlib.Algebra.ContinuedFractions.Basic
 public import DLMFMathlib.Analysis.ContinuedFraction.Convergence
 
 /-!
@@ -75,7 +73,7 @@ def gaussCF_term (α β γ x : ℝ) (n : ℕ) : ℝ :=
 def gaussCF_R (α β γ x : ℝ) : ℝ := ∑' n, gaussCF_term α β γ x n
 
 /-- The real terms are the complex terms of `regularizedGaussHGFun` at real arguments. -/
-lemma gaussCF_term_ofReal (α β γ x : ℝ) (n : ℕ) :
+theorem gaussCF_term_ofReal (α β γ x : ℝ) (n : ℕ) :
     ((gaussCF_term α β γ x n : ℝ) : ℂ) = (ascPochhammer ℂ n).eval (α : ℂ) *
       (ascPochhammer ℂ n).eval (β : ℂ) * (x : ℂ) ^ n / n.factorial *
         (Gamma ((γ : ℂ) + n))⁻¹ := by
@@ -86,7 +84,7 @@ lemma gaussCF_term_ofReal (α β γ x : ℝ) (n : ℕ) :
   simp [gaussCF_term]
 
 /-- Summability of the real regularized series for `|x| < 1`. -/
-lemma gaussCF_summable (α β γ : ℝ) {x : ℝ} (hx : |x| < 1) :
+theorem gaussCF_summable (α β γ : ℝ) {x : ℝ} (hx : |x| < 1) :
     Summable (gaussCF_term α β γ x) := by
   have h := summable_regularizedGaussHGFun_term (α : ℂ) β γ (z := x)
     (by rwa [Complex.norm_real, Real.norm_eq_abs])
@@ -94,13 +92,13 @@ lemma gaussCF_summable (α β γ : ℝ) {x : ℝ} (hx : |x| < 1) :
   exact Complex.summable_ofReal.mp h
 
 /-- At real arguments `regularizedGaussHGFun` is the real function `gaussCF_R`. -/
-lemma gaussCF_ofReal (α β γ x : ℝ) :
+theorem gaussCF_ofReal (α β γ x : ℝ) :
     regularizedGaussHGFun (α : ℂ) β γ x = ((gaussCF_R α β γ x : ℝ) : ℂ) := by
   rw [regularizedGaussHGFun_eq_tsum, gaussCF_R, Complex.ofReal_tsum]
   simp_rw [gaussCF_term_ofReal]
 
 /-- The terms are nonnegative for nonnegative parameters and argument. -/
-lemma gaussCF_term_nonneg {α β γ x : ℝ} (hα : 0 ≤ α) (hβ : 0 ≤ β) (hγ : 0 < γ)
+theorem gaussCF_term_nonneg {α β γ x : ℝ} (hα : 0 ≤ α) (hβ : 0 ≤ β) (hγ : 0 < γ)
     (hx : 0 ≤ x) (n : ℕ) : 0 ≤ gaussCF_term α β γ x n := by
   have := poch_eval_nonneg hα n
   have := poch_eval_nonneg hβ n
@@ -109,18 +107,18 @@ lemma gaussCF_term_nonneg {α β γ x : ℝ} (hα : 0 ≤ α) (hβ : 0 ≤ β) (
   positivity
 
 /-- Positivity of the real regularized function for `α, β ≥ 0`, `γ > 0`, `0 ≤ x < 1`. -/
-lemma gaussCF_R_pos {α β γ x : ℝ} (hα : 0 ≤ α) (hβ : 0 ≤ β) (hγ : 0 < γ)
+theorem gaussCF_R_pos {α β γ x : ℝ} (hα : 0 ≤ α) (hβ : 0 ≤ β) (hγ : 0 < γ)
     (hx : 0 ≤ x) (hx1 : x < 1) : 0 < gaussCF_R α β γ x := by
   refine (gaussCF_summable α β γ (by rwa [abs_of_nonneg hx])).tsum_pos
     (gaussCF_term_nonneg hα hβ hγ hx) 0 ?_
   simp [gaussCF_term, Real.Gamma_pos_of_pos hγ]
 
 /-- Symmetry in the two numerator parameters. -/
-lemma gaussCF_R_symm (α β γ x : ℝ) : gaussCF_R α β γ x = gaussCF_R β α γ x := by
+theorem gaussCF_R_symm (α β γ x : ℝ) : gaussCF_R α β γ x = gaussCF_R β α γ x := by
   simp only [gaussCF_R, gaussCF_term, mul_comm ((ascPochhammer ℝ _).eval α)]
 
 /-- Termwise comparison of two real regularized Gauss series. -/
-lemma gaussCF_R_le_of_term {α β γ α' β' γ' x K : ℝ} (hx : |x| < 1)
+theorem gaussCF_R_le_of_term {α β γ α' β' γ' x K : ℝ} (hx : |x| < 1)
     (h : ∀ n, gaussCF_term α' β' γ' x n ≤ K * gaussCF_term α β γ x n) :
     gaussCF_R α' β' γ' x ≤ K * gaussCF_R α β γ x := by
   rw [gaussCF_R, gaussCF_R, ← tsum_mul_left]
@@ -128,13 +126,13 @@ lemma gaussCF_R_le_of_term {α β γ α' β' γ' x K : ℝ} (hx : |x| < 1)
     ((gaussCF_summable α β γ hx).mul_left K)
 
 /-- `β (β+1)_n = (β)_n (β+n)`. -/
-lemma gaussCF_ascP_succ (β : ℝ) (n : ℕ) :
+theorem gaussCF_ascP_succ (β : ℝ) (n : ℕ) :
     β * (ascPochhammer ℝ n).eval (β + 1) = (ascPochhammer ℝ n).eval β * (β + n) := by
   rw [← ascPochhammer_succ_eval, ascPochhammer_succ_left]
   simp [Polynomial.eval_comp]
 
 /-- Shifting `β, γ` by one: `𝐅(α, β+1; γ+1; x) ≤ 𝐅(α, β; γ; x) / β` for `0 < β ≤ γ`. -/
-lemma gaussCF_R_shift_le {α β γ x : ℝ} (hα : 0 ≤ α) (hβ : 0 < β) (hβγ : β ≤ γ)
+theorem gaussCF_R_shift_le {α β γ x : ℝ} (hα : 0 ≤ α) (hβ : 0 < β) (hβγ : β ≤ γ)
     (hx : 0 ≤ x) (hx1 : x < 1) :
     gaussCF_R α (β + 1) (γ + 1) x ≤ β⁻¹ * gaussCF_R α β γ x := by
   refine gaussCF_R_le_of_term (by rwa [abs_of_nonneg hx]) fun n => ?_
@@ -159,7 +157,7 @@ lemma gaussCF_R_shift_le {α β γ x : ℝ} (hα : 0 ≤ α) (hβ : 0 < β) (hβ
   linarith
 
 /-- Shifting `γ` by one: `𝐅(α, β; γ+1; x) ≤ 𝐅(α, β; γ; x) / γ` for `γ > 0`. -/
-lemma gaussCF_R_shift_c_le {α β γ x : ℝ} (hα : 0 ≤ α) (hβ : 0 ≤ β) (hγ : 0 < γ)
+theorem gaussCF_R_shift_c_le {α β γ x : ℝ} (hα : 0 ≤ α) (hβ : 0 ≤ β) (hγ : 0 < γ)
     (hx : 0 ≤ x) (hx1 : x < 1) :
     gaussCF_R α β (γ + 1) x ≤ γ⁻¹ * gaussCF_R α β γ x := by
   refine gaussCF_R_le_of_term (by rwa [abs_of_nonneg hx]) fun n => ?_
@@ -180,7 +178,7 @@ lemma gaussCF_R_shift_c_le {α β γ x : ℝ} (hα : 0 ≤ α) (hβ : 0 ≤ β) 
   exact inv_anti₀ hγ (by linarith [(Nat.cast_nonneg n : (0:ℝ) ≤ n)])
 
 /-- `𝐅(a,b;c) = c 𝐅(a,b+1;c+1) - a(c-b) z 𝐅(a+1,b+1;c+2)`. -/
-lemma gaussCF_rel_I (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem gaussCF_rel_I (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     regularizedGaussHGFun a b c z = c * regularizedGaussHGFun a (b + 1) (c + 1) z -
       a * (c - b) * z * regularizedGaussHGFun (a + 1) (b + 1) (c + 2) z := by
   have h1 := regularizedGaussHGFun_contiguous_c b a c hz
@@ -193,7 +191,7 @@ lemma gaussCF_rel_I (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
   linear_combination h1 + (c - b) * h2
 
 /-- `𝐅(a,b+1;c+1) = (c+1) 𝐅(a+1,b+1;c+2) - (b+1)(c-a+1) z 𝐅(a+1,b+2;c+3)`. -/
-lemma gaussCF_rel_II (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem gaussCF_rel_II (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     regularizedGaussHGFun a (b + 1) (c + 1) z =
       (c + 1) * regularizedGaussHGFun (a + 1) (b + 1) (c + 2) z -
         (b + 1) * (c - a + 1) * z * regularizedGaussHGFun (a + 1) (b + 2) (c + 3) z := by
@@ -216,12 +214,12 @@ def gaussCF_num (a b c z : ℂ) (k : ℕ) : ℂ :=
     else (b + ((k + 1) / 2 : ℕ)) * (c - a + ((k + 1) / 2 : ℕ))) * z
 
 /-- Gauss's fraction in the form `GenContFract.cfConv_ofFun`. -/
-lemma gaussContinuedFraction_eq (a b c z : ℂ) :
+theorem gaussContinuedFraction_eq (a b c z : ℂ) :
     gaussContinuedFraction a b c z =
       GenContFract.cfConv_ofFun c (gaussCF_num a b c z) (fun k => c + ((k + 1 : ℕ) : ℂ)) := rfl
 
 /-- The three-term recurrence of the backward solution. -/
-lemma gaussCF_w_rec (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (j : ℕ) :
+theorem gaussCF_w_rec (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (j : ℕ) :
     gaussCF_w a b c z j = (c + j) * gaussCF_w a b c z (j + 1) +
       gaussCF_num a b c z j * gaussCF_w a b c z (j + 2) := by
   rcases Nat.even_or_odd' j with ⟨m, rfl | rfl⟩
@@ -253,17 +251,17 @@ def gaussCF_numR (a b c x : ℝ) (k : ℕ) : ℝ :=
     else (b + ((k + 1) / 2 : ℕ)) * (c - a + ((k + 1) / 2 : ℕ))) * x
 
 /-- The backward solution at real arguments. -/
-lemma gaussCF_w_ofReal (a b c x : ℝ) (j : ℕ) :
+theorem gaussCF_w_ofReal (a b c x : ℝ) (j : ℕ) :
     gaussCF_w a b c x j = (gaussCF_wR a b c x j : ℂ) := by
   rw [gaussCF_w, gaussCF_wR, ← gaussCF_ofReal]; push_cast; rfl
 
 /-- The partial numerators at real arguments. -/
-lemma gaussCF_num_ofReal (a b c x : ℝ) (k : ℕ) :
+theorem gaussCF_num_ofReal (a b c x : ℝ) (k : ℕ) :
     gaussCF_num a b c x k = (gaussCF_numR a b c x k : ℂ) := by
   simp only [gaussCF_num, gaussCF_numR]; split_ifs <;> push_cast <;> ring
 
 /-- The real three-term recurrence of the backward solution. -/
-lemma gaussCF_wR_rec (a b c : ℝ) {x : ℝ} (hx : |x| < 1) (j : ℕ) :
+theorem gaussCF_wR_rec (a b c : ℝ) {x : ℝ} (hx : |x| < 1) (j : ℕ) :
     gaussCF_wR a b c x j = (c + j) * gaussCF_wR a b c x (j + 1) +
       gaussCF_numR a b c x j * gaussCF_wR a b c x (j + 2) := by
   have := gaussCF_w_rec (a : ℂ) b c (z := x) (by rwa [Complex.norm_real, Real.norm_eq_abs]) j
@@ -278,13 +276,13 @@ include ha hb hca hcb hx hx1
 
 omit hca in
 /-- Positivity of the real backward solution. -/
-lemma gaussCF_wR_pos (j : ℕ) : 0 < gaussCF_wR a b c x j := by
+theorem gaussCF_wR_pos (j : ℕ) : 0 < gaussCF_wR a b c x j := by
   have hc : 0 < c := by linarith
   exact gaussCF_R_pos (by positivity) (by positivity) (by positivity) hx.le hx1
 
 omit hx1 in
 /-- The partial numerators are negative. -/
-lemma gaussCF_numR_neg (j : ℕ) : gaussCF_numR a b c x j < 0 := by
+theorem gaussCF_numR_neg (j : ℕ) : gaussCF_numR a b c x j < 0 := by
   unfold gaussCF_numR
   have h1 : 0 < c - b := by linarith
   have h2 : 0 < c - a := by linarith
@@ -295,7 +293,7 @@ lemma gaussCF_numR_neg (j : ℕ) : gaussCF_numR a b c x j < 0 := by
 
 omit hx in
 /-- The ratio bound `2 |u_j| w_{j+2} ≤ (c+j) w_{j+1}` for `0 < x < 1/2`. -/
-lemma gaussCF_key (hx0 : 0 < x) (hx2 : x < 1 / 2) (j : ℕ) :
+theorem gaussCF_key (hx0 : 0 < x) (hx2 : x < 1 / 2) (j : ℕ) :
     2 * (-gaussCF_numR a b c x j) * gaussCF_wR a b c x (j + 2) ≤
       (c + j) * gaussCF_wR a b c x (j + 1) := by
   have hx := hx0
@@ -359,7 +357,7 @@ lemma gaussCF_key (hx0 : 0 < x) (hx2 : x < 1 / 2) (j : ℕ) :
 end Real
 
 /-- `𝐅(a,β;γ) = (γ + (β-a+1) z) 𝐅(a,β+1;γ+1) - (β+1)(γ-a+1) z 𝐅(a,β+2;γ+2)`. -/
-lemma gaussCF_rel_III (a β γ : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem gaussCF_rel_III (a β γ : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     regularizedGaussHGFun a β γ z =
       (γ + (β - a + 1) * z) * regularizedGaussHGFun a (β + 1) (γ + 1) z -
         (β + 1) * (γ - a + 1) * z * regularizedGaussHGFun a (β + 2) (γ + 2) z := by
@@ -381,7 +379,7 @@ lemma gaussCF_rel_III (a β γ : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
 def gaussCF_vR (a b c x : ℝ) (j : ℕ) : ℝ := gaussCF_R a (b + j) (c + j) x
 
 /-- The three-term recurrence of `𝐅(a, b+j; c+j; x)`. -/
-lemma gaussCF_vR_rec (a b c : ℝ) {x : ℝ} (hx : |x| < 1) (j : ℕ) :
+theorem gaussCF_vR_rec (a b c : ℝ) {x : ℝ} (hx : |x| < 1) (j : ℕ) :
     gaussCF_vR a b c x j = (c + j + (b + j - a + 1) * x) * gaussCF_vR a b c x (j + 1) -
       (b + j + 1) * (c + j - a + 1) * x * gaussCF_vR a b c x (j + 2) := by
   have e := gaussCF_rel_III (a : ℂ) ((b + j : ℝ) : ℂ) ((c + j : ℝ) : ℂ) (z := x)
@@ -405,12 +403,12 @@ variable {a b c x : ℝ} (ha : 0 < a) (hb : 0 < b) (hcb : b < c) (hx : 0 < x) (h
 include ha hb hcb hx hx1
 
 /-- Positivity of `𝐅(a, b+j; c+j; x)`. -/
-lemma gaussCF_vR_pos (j : ℕ) : 0 < gaussCF_vR a b c x j := by
+theorem gaussCF_vR_pos (j : ℕ) : 0 < gaussCF_vR a b c x j := by
   have hc : 0 < c := by linarith
   exact gaussCF_R_pos ha.le (by positivity) (by positivity) hx.le hx1
 
 /-- `𝐅(a, b+j+2; c+j+2) ≤ 𝐅(a, b+j; c+j) / ((b+j)(b+j+1))`. -/
-lemma gaussCF_vR_le (j : ℕ) :
+theorem gaussCF_vR_le (j : ℕ) :
     gaussCF_vR a b c x (j + 2) ≤ (b + j + 1)⁻¹ * ((b + j)⁻¹ * gaussCF_vR a b c x j) := by
   have hj : (0 : ℝ) ≤ j := Nat.cast_nonneg j
   have h1 := gaussCF_R_shift_le (α := a) (β := b + j + 1) (γ := c + j + 1) (x := x) ha.le
@@ -431,7 +429,7 @@ end Real3
 def gaussCF_uR (a b c x : ℝ) (j : ℕ) : ℝ := gaussCF_R (a + j) (b + j) (c + j) x
 
 /-- The three-term recurrence of `𝐅(a+j, b+j; c+j; x)` (the diagonal contiguous relation). -/
-lemma gaussCF_uR_rec (a b c : ℝ) {x : ℝ} (hx : |x| < 1) (j : ℕ) :
+theorem gaussCF_uR_rec (a b c : ℝ) {x : ℝ} (hx : |x| < 1) (j : ℕ) :
     gaussCF_uR a b c x j = (c + j - (a + b + 2 * j + 1) * x) * gaussCF_uR a b c x (j + 1) +
       (a + j + 1) * (b + j + 1) * (x * (1 - x)) * gaussCF_uR a b c x (j + 2) := by
   have e := regularizedGaussHGFun_contiguous_diagonal ((a + j : ℝ) : ℂ) ((b + j : ℝ) : ℂ)
@@ -452,7 +450,7 @@ lemma gaussCF_uR_rec (a b c : ℝ) {x : ℝ} (hx : |x| < 1) (j : ℕ) :
   linear_combination -e'
 
 /-- Euler's transformation for the real regularized function. -/
-lemma gaussCF_R_euler (α β γ : ℝ) {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x < 1) :
+theorem gaussCF_R_euler (α β γ : ℝ) {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x < 1) :
     gaussCF_R α β γ x = (1 - x) ^ (γ - α - β) * gaussCF_R (γ - α) (γ - β) γ x := by
   have e := regularizedGaussHGFun_euler (α : ℂ) β γ (z := x)
     (by rw [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hx0]; exact hx1)
@@ -465,7 +463,7 @@ lemma gaussCF_R_euler (α β γ : ℝ) {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x < 1) :
 
 /-- `𝐅(a+j+2, b+j+2; c+j+2) ≤ 𝐅(a+j, b+j; c+j) / ((1-x)² (c+j)(c+j+1))`, by Euler's
 transformation. -/
-lemma gaussCF_uR_le {a b c x : ℝ} (ha : 0 < a) (hca : a < c) (hcb : b < c)
+theorem gaussCF_uR_le {a b c x : ℝ} (ha : 0 < a) (hca : a < c) (hcb : b < c)
     (hx : 0 < x) (hx1 : x < 1) (j : ℕ) :
     gaussCF_uR a b c x (j + 2) ≤
       ((1 - x) ^ 2 * ((c + j) * (c + j + 1)))⁻¹ * gaussCF_uR a b c x j := by

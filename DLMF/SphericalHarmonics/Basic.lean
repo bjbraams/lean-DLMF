@@ -7,21 +7,10 @@ module
 
 public import TauCeti.RingTheory.MvPolynomial.Homogeneous
 public import Mathlib.Algebra.MvPolynomial.PDeriv
-public import Mathlib.Analysis.InnerProductSpace.Harmonic.Basic
-public import Mathlib.Analysis.InnerProductSpace.PiL2
-public import Mathlib.Data.Nat.Choose.Basic
-public import Mathlib.LinearAlgebra.Dimension.Finrank
-public import Mathlib.MeasureTheory.Constructions.Pi
 public import Mathlib.MeasureTheory.Constructions.HaarToSphere
-public import Mathlib.MeasureTheory.Integral.Bochner.Basic
-public import Mathlib.MeasureTheory.Measure.Haar.InnerProductSpace
-public import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
 public import Mathlib.MeasureTheory.Measure.Lebesgue.VolumeOfBalls
 public import Mathlib.RingTheory.MvPolynomial.Homogeneous
-public import Mathlib.Tactic.IntervalCases
 public import Mathlib.Analysis.Calculus.LineDeriv.IntegrationByParts
-public import Mathlib.Analysis.SpecialFunctions.Gaussian.GaussianIntegral
-public import Mathlib.MeasureTheory.Integral.Gamma
 public import Mathlib.RingTheory.MvPolynomial.EulerIdentity
 public import Mathlib.Topology.Algebra.MvPolynomial
 public import TauCeti.MeasureTheory.Constructions.HaarToSphere

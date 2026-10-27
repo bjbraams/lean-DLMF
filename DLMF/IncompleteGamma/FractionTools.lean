@@ -7,7 +7,6 @@ module
 
 public import DLMF.Core.Framework
 public import DLMF.Statistical.ContinuedFraction
-public import DLMFMathlib.Analysis.ContinuedFraction.Convergence
 public import DLMF.Confluent.ContinuedFractions
 public import DLMF.IncompleteGamma.Basic
 public import TauCeti.Analysis.Complex.Conformal.Vitali
@@ -42,7 +41,7 @@ open scoped Topology
 namespace DLMF.Confluent
 
 /-- Without vanishing partial numerators the project's continuants are Mathlib's. -/
-lemma incGF_cfContinuants_eq {a b : ℕ → ℂ} (ha : ∀ k, 1 ≤ k → a k ≠ 0) (n : ℕ) :
+theorem incGF_cfContinuants_eq {a b : ℕ → ℂ} (ha : ∀ k, 1 ≤ k → a k ≠ 0) (n : ℕ) :
     DLMF.cfContinuants a b 0 n =
       ((cfConv_ofFun 0 a b).nums n, (cfConv_ofFun 0 a b).dens n, false) := by
   induction n using Nat.strong_induction_on with
@@ -57,13 +56,13 @@ lemma incGF_cfContinuants_eq {a b : ℕ → ℂ} (ha : ∀ k, 1 ≤ k → a k �
       simp [han, GenContFract.nextConts, GenContFract.nextNum, GenContFract.nextDen]
 
 /-- `cfTail a b 0 N` is the `N`-th Mathlib convergent when no `a_k` (`k ≥ 1`) vanishes. -/
-lemma incGF_cfTail_eq {a b : ℕ → ℂ} (ha : ∀ k, 1 ≤ k → a k ≠ 0) (N : ℕ) :
+theorem incGF_cfTail_eq {a b : ℕ → ℂ} (ha : ∀ k, 1 ≤ k → a k ≠ 0) (N : ℕ) :
     DLMF.cfTail a b 0 N = (cfConv_ofFun 0 a b).convs N := by
   simp only [DLMF.cfTail, incGF_cfContinuants_eq ha]
   rfl
 
 /-- `HasContinuedFraction` in terms of Mathlib convergents. -/
-lemma incGF_hasContinuedFraction_iff {a b : ℕ → ℂ} (ha : ∀ k, 1 ≤ k → a k ≠ 0) (v : ℂ) :
+theorem incGF_hasContinuedFraction_iff {a b : ℕ → ℂ} (ha : ∀ k, 1 ≤ k → a k ≠ 0) (v : ℂ) :
     DLMF.HasContinuedFraction a b v ↔
       Tendsto (cfConv_ofFun 0 a b).convs atTop (𝓝 v) := by
   unfold DLMF.HasContinuedFraction
@@ -72,7 +71,7 @@ lemma incGF_hasContinuedFraction_iff {a b : ℕ → ℂ} (ha : ∀ k, 1 ≤ k �
   rw [this]
 
 /-- A continued fraction with real elements: its finite values are the real convergents. -/
-lemma incGF_cfTail_ofReal {A B : ℕ → ℂ} {a b : ℕ → ℝ} (hA : ∀ k, A k = a k)
+theorem incGF_cfTail_ofReal {A B : ℕ → ℂ} {a b : ℕ → ℝ} (hA : ∀ k, A k = a k)
     (hB : ∀ k, B k = b k) (ha : ∀ k, 1 ≤ k → a k ≠ 0) (N : ℕ) :
     DLMF.cfTail A B 0 N = ((cfConv_ofFun 0 a b).convs N : ℂ) := by
   have hA' : A = fun k => Complex.ofRealHom (a k) := funext hA
@@ -88,7 +87,7 @@ def incGF_padeNum (a x : ℝ) (k : ℕ) : ℝ :=
   if k = 0 then x else DLMF.Statistical.gammaIncCFNum a x k
 
 /-- The Padé numerators are positive for `a < 1`, `x > 0`. -/
-lemma incGF_padeNum_pos {a x : ℝ} (ha : a < 1) (hx : 0 < x) (k : ℕ) :
+theorem incGF_padeNum_pos {a x : ℝ} (ha : a < 1) (hx : 0 < x) (k : ℕ) :
     0 < incGF_padeNum a x k := by
   unfold incGF_padeNum
   split_ifs
@@ -96,7 +95,7 @@ lemma incGF_padeNum_pos {a x : ℝ} (ha : a < 1) (hx : 0 < x) (k : ℕ) :
   · exact DLMF.Statistical.gammaIncCFNum_pos ha hx k
 
 /-- The value `x w₁ / w₀` of the fraction is `x^{1-a} e^x Γ(a,x)`. -/
-lemma incGF_pade_value {a x : ℝ} (hx : 0 < x) :
+theorem incGF_pade_value {a x : ℝ} (hx : 0 < x) :
     0 + incGF_padeNum a x 0 * DLMF.Statistical.gammaIncCFTail a x 1 /
         DLMF.Statistical.gammaIncCFTail a x 0 =
       x ^ (1 - a) * Real.exp x * (upperIncGamma a x).re := by
@@ -113,7 +112,7 @@ lemma incGF_pade_value {a x : ℝ} (hx : 0 < x) :
     (Real.exp x * Real.exp (-x)) * e1 - x * DLMF.Statistical.gammaTail x (a - 1) 0 * e2
 
 /-- The backward recurrence of the fraction with first numerator `x`. -/
-lemma incGF_pade_rec {a x : ℝ} (hx : 0 < x) (k : ℕ) :
+theorem incGF_pade_rec {a x : ℝ} (hx : 0 < x) (k : ℕ) :
     DLMF.Statistical.gammaIncCFTail a x k =
       DLMF.Statistical.gammaIncCFDen x k * DLMF.Statistical.gammaIncCFTail a x (k + 1) +
         incGF_padeNum a x (k + 1) * DLMF.Statistical.gammaIncCFTail a x (k + 2) := by
@@ -121,7 +120,7 @@ lemma incGF_pade_rec {a x : ℝ} (hx : 0 < x) (k : ℕ) :
   simp [incGF_padeNum]
 
 /-- Even convergents lie strictly below `x^{1-a} e^x Γ(a,x)`. -/
-lemma incGF_pade_lt {a x : ℝ} (ha : a < 1) (hx : 0 < x) {n : ℕ} (hn : 1 ≤ n) :
+theorem incGF_pade_lt {a x : ℝ} (ha : a < 1) (hx : 0 < x) {n : ℕ} (hn : 1 ≤ n) :
     (cfConv_ofFun 0 (incGF_padeNum a x) (DLMF.Statistical.gammaIncCFDen x)).convs (2 * n) <
       x ^ (1 - a) * Real.exp x * (upperIncGamma a x).re := by
   rw [← incGF_pade_value (a := a) hx]
@@ -130,7 +129,7 @@ lemma incGF_pade_lt {a x : ℝ} (ha : a < 1) (hx : 0 < x) {n : ℕ} (hn : 1 ≤ 
     (incGF_pade_rec hx) hn
 
 /-- Odd convergents lie strictly above `x^{1-a} e^x Γ(a,x)`. -/
-lemma incGF_lt_pade {a x : ℝ} (ha : a < 1) (hx : 0 < x) (n : ℕ) :
+theorem incGF_lt_pade {a x : ℝ} (ha : a < 1) (hx : 0 < x) (n : ℕ) :
     x ^ (1 - a) * Real.exp x * (upperIncGamma a x).re <
       (cfConv_ofFun 0 (incGF_padeNum a x) (DLMF.Statistical.gammaIncCFDen x)).convs
         (2 * n + 1) := by
@@ -142,7 +141,7 @@ lemma incGF_lt_pade {a x : ℝ} (ha : a < 1) (hx : 0 < x) (n : ℕ) :
 /-! ### The fraction 8.9.1 -/
 
 /-- If `a₁ = 0` the project's finite continued fraction freezes at `a₀/b₀`. -/
-lemma incGF_cfContinuants_freeze {a b : ℕ → ℂ} (h1 : a 1 = 0) (n : ℕ) :
+theorem incGF_cfContinuants_freeze {a b : ℕ → ℂ} (h1 : a 1 = 0) (n : ℕ) :
     DLMF.cfContinuants a b 0 (n + 2) = (a 0, b 0, true) := by
   induction n with
   | zero => simp [DLMF.cfContinuants, h1]
@@ -151,7 +150,7 @@ lemma incGF_cfContinuants_freeze {a b : ℕ → ℂ} (h1 : a 1 = 0) (n : ℕ) :
     simp
 
 /-- A vanishing first partial numerator freezes the finite continued fractions. -/
-lemma incGF_cfTail_freeze {a b : ℕ → ℂ} (h1 : a 1 = 0) {n : ℕ} (hn : 1 ≤ n) :
+theorem incGF_cfTail_freeze {a b : ℕ → ℂ} (h1 : a 1 = 0) {n : ℕ} (hn : 1 ≤ n) :
     DLMF.cfTail a b 0 n = a 0 / b 0 := by
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
   rcases m with _ | m
@@ -162,7 +161,7 @@ lemma incGF_cfTail_freeze {a b : ℕ → ℂ} (h1 : a 1 = 0) {n : ℕ} (hn : 1 �
 def incGF_P (a : ℂ) (k : ℕ) : ℂ := ∏ j ∈ range k, (a + 1 + j)
 
 /-- The partial numerators `incGF_P a k` are nonzero away from negative integers. -/
-lemma incGF_P_ne_zero {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(n + 1)) (k : ℕ) : incGF_P a k ≠ 0 :=
+theorem incGF_P_ne_zero {a : ℂ} (ha : ∀ n : ℕ, a ≠ -(n + 1)) (k : ℕ) : incGF_P a k ≠ 0 :=
   prod_ne_zero_iff.mpr fun j _ h => ha j (by linear_combination h)
 
 /-- The backward solution of the fraction 8.9.1. -/
@@ -170,7 +169,7 @@ def incGF_w (a z : ℂ) (k : ℕ) : ℂ :=
   if k = 0 then 1 else kumCF_F 0 a z k / incGF_P a (k - 1)
 
 /-- The partial numerators of the fraction 8.9.1 do not vanish. -/
-lemma incGF_gammaStar_A_ne {a z : ℂ} (ha : ∀ n : ℕ, a ≠ -(n + 1)) (hz : z ≠ 0)
+theorem incGF_gammaStar_A_ne {a z : ℂ} (ha : ∀ n : ℕ, a ≠ -(n + 1)) (hz : z ≠ 0)
     {A : ℕ → ℂ} (hA0 : A 0 = 1) (hA1 : A 1 = -z) (hAo : ∀ m ≥ 1, A (2 * m + 1) = -(m + a) * z)
     (hAe : ∀ m ≥ 1, A (2 * m) = m * z) (k : ℕ) : A k ≠ 0 := by
   rcases Nat.even_or_odd' k with ⟨m, rfl | rfl⟩
@@ -303,7 +302,7 @@ open Set
 /-! ### The Stieltjes–Vitali argument on the slit plane -/
 
 /-- `Re √z > 0` on the slit plane. -/
-lemma incGF_re_sqrt_pos {z : ℂ} (hz : z ∈ slitPlane) : 0 < (z ^ (2⁻¹ : ℂ)).re := by
+theorem incGF_re_sqrt_pos {z : ℂ} (hz : z ∈ slitPlane) : 0 < (z ^ (2⁻¹ : ℂ)).re := by
   have hz0 : z ≠ 0 := slitPlane_ne_zero hz
   have h1 : -Real.pi < z.arg := neg_pi_lt_arg z
   have h2 : z.arg < Real.pi := arg_lt_pi_iff.mpr (by
@@ -317,7 +316,7 @@ lemma incGF_re_sqrt_pos {z : ℂ} (hz : z ∈ slitPlane) : 0 < (z ^ (2⁻¹ : �
   constructor <;> norm_num <;> nlinarith [Real.pi_pos]
 
 /-- A sequence of functions dominated by one continuous function is locally bounded. -/
-lemma incGF_isLocallyBoundedOn {F : ℕ → ℂ → ℂ} {Ω : Set ℂ} {β : ℂ → ℝ}
+theorem incGF_isLocallyBoundedOn {F : ℕ → ℂ → ℂ} {Ω : Set ℂ} {β : ℂ → ℝ}
     (hβ : ContinuousOn β Ω) (hF : ∀ n, ∀ z ∈ Ω, ‖F n z‖ ≤ β z) :
     TauCeti.IsLocallyBoundedOn F Ω := by
   refine TauCeti.isLocallyBoundedOn_def.mpr fun K hKΩ hK => ?_
@@ -366,7 +365,7 @@ def incGF_c (α : ℝ) (k : ℕ) : ℝ :=
   if k % 2 = 1 then ((k / 2 : ℕ) : ℝ) + 1 - α else ((k / 2 : ℕ) : ℝ)
 
 /-- The Legendre coefficients `c_k` are positive for `k ≥ 1` when `α < 1`. -/
-lemma incGF_c_pos {α : ℝ} (hα : α < 1) {k : ℕ} (hk : 1 ≤ k) : 0 < incGF_c α k := by
+theorem incGF_c_pos {α : ℝ} (hα : α < 1) {k : ℕ} (hk : 1 ≤ k) : 0 < incGF_c α k := by
   unfold incGF_c
   split_ifs with h
   · have : (0 : ℝ) ≤ ((k / 2 : ℕ) : ℝ) := Nat.cast_nonneg _
@@ -385,7 +384,7 @@ def incGF_LF (α : ℝ) (n : ℕ) (z : ℂ) : ℂ := (cfConv_ofFun 0 (incGF_LA �
 def incGF_beta (z : ℂ) : ℝ := ‖(z ^ (2⁻¹ : ℂ))⁻¹‖ / ((z ^ (2⁻¹ : ℂ))⁻¹).re
 
 /-- Stieltjes value-region bound for the convergents of Legendre's fraction. -/
-lemma incGF_LF_bound {α : ℝ} (hα : α < 1) {z : ℂ} (hz : z ∈ slitPlane) (n : ℕ) :
+theorem incGF_LF_bound {α : ℝ} (hα : α < 1) {z : ℂ} (hz : z ∈ slitPlane) (n : ℕ) :
     (cfConv_ofFun 0 (incGF_LA α z) (fun _ => 1)).dens n ≠ 0 ∧ ‖incGF_LF α n z‖ ≤ incGF_beta z := by
   have hs : 0 < ((z ^ (2⁻¹ : ℂ))⁻¹).re := cfConv_re_recip_pos (incGF_re_sqrt_pos hz)
   have hsq : ((z ^ (2⁻¹ : ℂ))⁻¹) ^ 2 = z⁻¹ := by rw [inv_pow, cpow_ofNat_inv_pow]
@@ -397,7 +396,7 @@ lemma incGF_LF_bound {α : ℝ} (hα : α < 1) {z : ℂ} (hz : z ∈ slitPlane) 
   simpa [incGF_LF, incGF_beta, incGF_LA] using h2
 
 /-- The bound function `incGF_beta` is continuous on the slit plane. -/
-lemma incGF_beta_continuousOn : ContinuousOn incGF_beta slitPlane := by
+theorem incGF_beta_continuousOn : ContinuousOn incGF_beta slitPlane := by
   intro z hz
   have hc : ContinuousAt (fun w : ℂ => w ^ (2⁻¹ : ℂ)) z := continuousAt_cpow_const hz
   have hne : z ^ (2⁻¹ : ℂ) ≠ 0 := by
@@ -407,7 +406,7 @@ lemma incGF_beta_continuousOn : ContinuousOn incGF_beta slitPlane := by
   exact (hi.norm.div (Complex.continuous_re.continuousAt.comp hi) hre).continuousWithinAt
 
 /-- The convergents of Legendre's fraction are holomorphic on the slit plane. -/
-lemma incGF_LF_differentiableOn (α : ℝ) (hα : α < 1) (n : ℕ) :
+theorem incGF_LF_differentiableOn (α : ℝ) (hα : α < 1) (n : ℕ) :
     DifferentiableOn ℂ (incGF_LF α n) slitPlane := by
   have := cfConv_convs_differentiableOn (Ω := slitPlane) (h := fun _ => 0)
     (a := fun k z => incGF_LA α z k) (b := fun _ _ => 1) (differentiableOn_const _)
@@ -424,7 +423,7 @@ lemma incGF_LF_differentiableOn (α : ℝ) (hα : α < 1) (n : ℕ) :
 def incGF_LT (α : ℝ) (z : ℂ) : ℂ := z ^ (1 - (α : ℂ)) * exp z * upperIncGamma α z
 
 /-- The target `z^{1-α} e^z Γ(α,z)` is holomorphic on the slit plane. -/
-lemma incGF_LT_differentiableOn (α : ℝ) : DifferentiableOn ℂ (incGF_LT α) slitPlane := by
+theorem incGF_LT_differentiableOn (α : ℝ) : DifferentiableOn ℂ (incGF_LT α) slitPlane := by
   intro z hz
   refine DifferentiableAt.differentiableWithinAt ?_
   exact ((differentiableAt_id.cpow_const hz).mul differentiableAt_exp).mul
@@ -432,7 +431,7 @@ lemma incGF_LT_differentiableOn (α : ℝ) : DifferentiableOn ℂ (incGF_LT α) 
 
 /-- The real case: Legendre's fraction converges for real `a < 1`, `x > 0` (from
 `DLMF.Statistical.tendsto_gammaIncContFract`). -/
-lemma incGF_LF_tendsto_real {α : ℝ} (hα : α < 1) {t : ℝ} (ht : 0 < t) :
+theorem incGF_LF_tendsto_real {α : ℝ} (hα : α < 1) {t : ℝ} (ht : 0 < t) :
     Tendsto (fun n => incGF_LF α n t) atTop (𝓝 (incGF_LT α t)) := by
   set aR : ℕ → ℝ := fun k => if k = 0 then 1 else incGF_c α k / t with haR
   set C : ℝ := t⁻¹ * (t ^ α * Real.exp (-t)) with hC

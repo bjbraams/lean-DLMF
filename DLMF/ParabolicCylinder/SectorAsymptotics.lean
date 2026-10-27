@@ -7,6 +7,7 @@ module
 
 public import DLMF.ParabolicCylinder.Basic
 public import DLMFMathlib.Analysis.Asymptotics.WatsonRotated
+public import DLMF.Core.Framework
 
 /-!
 # Sector asymptotics of `U(a,z)` past `|ph z| = π/2` (DLMF 12.9)
@@ -39,7 +40,7 @@ def pcfSect_gaussCoeff (n : ℕ) : ℂ :=
   if Even n then (-1 / 2 : ℂ) ^ (n / 2) / ((n / 2).factorial : ℂ) else 0
 
 /-- Partial sums of `∑ cₙ tⁿ` are partial sums of the exponential series of `-t²/2`. -/
-lemma pcfSect_sum_gaussCoeff (t : ℂ) (M : ℕ) :
+theorem pcfSect_sum_gaussCoeff (t : ℂ) (M : ℕ) :
     (∑ n ∈ Finset.range (2 * M), t ^ n * pcfSect_gaussCoeff n =
       ∑ k ∈ Finset.range M, (-(t ^ 2 / 2)) ^ k / (k.factorial : ℂ)) ∧
     (∑ n ∈ Finset.range (2 * M + 1), t ^ n * pcfSect_gaussCoeff n =
@@ -62,7 +63,7 @@ lemma pcfSect_sum_gaussCoeff (t : ℂ) (M : ℕ) :
     ring
 
 /-- Taylor remainders of `e^{-t²/2}` along a ray. -/
-lemma pcfSect_gauss_sub_sum_isBigO (θ : ℝ) (N : ℕ) :
+theorem pcfSect_gauss_sub_sum_isBigO (θ : ℝ) (N : ℕ) :
     (fun r : ℝ => cexp (-(((r : ℂ) * exp (θ * I)) ^ 2 / 2)) - ∑ n ∈ Finset.range N,
       ((r : ℂ) * exp (θ * I)) ^ n * pcfSect_gaussCoeff n) =O[𝓝[>] 0] fun r => r ^ N := by
   obtain ⟨M, hM⟩ : ∃ M : ℕ, N ≤ 2 * M ∧
@@ -101,7 +102,7 @@ lemma pcfSect_gauss_sub_sum_isBigO (θ : ℝ) (N : ℕ) :
 def pcfSect_kernel (μ t : ℂ) : ℂ := t ^ (μ - 1) * cexp (-(t ^ 2 / 2))
 
 /-- Modulus of the Gaussian factor along a ray. -/
-lemma pcfSect_norm_gauss (r y : ℝ) :
+theorem pcfSect_norm_gauss (r y : ℝ) :
     ‖cexp (-(((r : ℂ) * exp (y * I)) ^ 2 / 2))‖ = Real.exp (-(r ^ 2 * Real.cos (2 * y)) / 2) := by
   rw [Complex.norm_exp, Complex.ofReal_mul_exp_ofReal_mul_I_sq]
   congr 1
@@ -109,7 +110,7 @@ lemma pcfSect_norm_gauss (r y : ℝ) :
   ring
 
 /-- Bound for the kernel along a ray `|arg t| ≤ π/4`. -/
-lemma pcfSect_norm_kernel_le (μ : ℂ) {r : ℝ} (hr : 0 < r) {y : ℝ} (hy : |y| ≤ π / 4) :
+theorem pcfSect_norm_kernel_le (μ : ℂ) {r : ℝ} (hr : 0 < r) {y : ℝ} (hy : |y| ≤ π / 4) :
     ‖pcfSect_kernel μ ((r : ℂ) * exp (y * I))‖ ≤
       Real.exp (π * |μ.im|) * r ^ (μ.re - 1) * Real.exp (-(r ^ 2 * Real.cos (2 * y)) / 2) := by
   have hy1 : -π < y := by linarith [neg_abs_le y, Real.pi_pos]
@@ -131,17 +132,17 @@ lemma pcfSect_norm_kernel_le (μ : ℂ) {r : ℝ} (hr : 0 < r) {y : ℝ} (hy : |
     _ = _ := by ring
 
 /-- `cos (2y) ≥ 0` for `|y| ≤ π/4`. -/
-lemma pcfSect_cos_two_mul_nonneg {y : ℝ} (hy : |y| ≤ π / 4) : 0 ≤ Real.cos (2 * y) := by
+theorem pcfSect_cos_two_mul_nonneg {y : ℝ} (hy : |y| ≤ π / 4) : 0 ≤ Real.cos (2 * y) := by
   rw [← Real.cos_abs, abs_mul, abs_two]
   exact Real.cos_nonneg_of_mem_Icc ⟨by linarith [abs_nonneg y, Real.pi_pos], by linarith⟩
 
 /-- `cos (2y) > 0` for `|y| < π/4`. -/
-lemma pcfSect_cos_two_mul_pos {y : ℝ} (hy : |y| < π / 4) : 0 < Real.cos (2 * y) := by
+theorem pcfSect_cos_two_mul_pos {y : ℝ} (hy : |y| < π / 4) : 0 < Real.cos (2 * y) := by
   rw [← Real.cos_abs, abs_mul, abs_two]
   exact Real.cos_pos_of_mem_Ioo ⟨by linarith [abs_nonneg y, Real.pi_pos], by linarith⟩
 
 /-- A simpler kernel bound: `|K(r e^{iy})| ≤ C r^{re μ - 1}` for `|y| ≤ π/4`. -/
-lemma pcfSect_norm_kernel_le' (μ : ℂ) {r : ℝ} (hr : 0 < r) {y : ℝ} (hy : |y| ≤ π / 4) :
+theorem pcfSect_norm_kernel_le' (μ : ℂ) {r : ℝ} (hr : 0 < r) {y : ℝ} (hy : |y| ≤ π / 4) :
     ‖pcfSect_kernel μ ((r : ℂ) * exp (y * I))‖ ≤ Real.exp (π * |μ.im|) * r ^ (μ.re - 1) := by
   refine (pcfSect_norm_kernel_le μ hr hy).trans ?_
   have : Real.exp (-(r ^ 2 * Real.cos (2 * y)) / 2) ≤ 1 := by
@@ -154,7 +155,7 @@ lemma pcfSect_norm_kernel_le' (μ : ℂ) {r : ℝ} (hr : 0 < r) {y : ℝ} (hy : 
     _ = _ := mul_one _
 
 /-- Points `r e^{iy}`, `r > 0`, `|y| < π/2`, lie in the slit plane. -/
-lemma pcfSect_mem_slitPlane {r : ℝ} (hr : 0 < r) {y : ℝ} (hy : |y| < π / 2) :
+theorem pcfSect_mem_slitPlane {r : ℝ} (hr : 0 < r) {y : ℝ} (hy : |y| < π / 2) :
     (r : ℂ) * exp (y * I) ∈ slitPlane := by
   refine Or.inl ?_
   rw [re_ofReal_mul, exp_ofReal_mul_I_re]
@@ -162,7 +163,7 @@ lemma pcfSect_mem_slitPlane {r : ℝ} (hr : 0 < r) {y : ℝ} (hy : |y| < π / 2)
     linarith [le_abs_self y]⟩)
 
 /-- Continuity of the kernel along a ray. -/
-lemma pcfSect_continuousOn_kernel (μ : ℂ) {θ : ℝ} (hθ : |θ| < π / 2) :
+theorem pcfSect_continuousOn_kernel (μ : ℂ) {θ : ℝ} (hθ : |θ| < π / 2) :
     ContinuousOn (fun r : ℝ => pcfSect_kernel μ ((r : ℂ) * exp (θ * I))) (Ioi 0) := by
   intro r hr
   have hc : ContinuousAt (fun r : ℝ => (r : ℂ) * exp (θ * I)) r := by fun_prop
@@ -171,7 +172,7 @@ lemma pcfSect_continuousOn_kernel (μ : ℂ) {θ : ℝ} (hθ : |θ| < π / 2) :
     (by fun_prop)
 
 /-- Integrability of the kernel along a ray `|arg t| < π/4`, against any exponential. -/
-lemma pcfSect_integrableOn {μ : ℂ} (hμ : 0 < μ.re) (c : ℝ) {θ : ℝ} (hθ : |θ| < π / 4) :
+theorem pcfSect_integrableOn {μ : ℂ} (hμ : 0 < μ.re) (c : ℝ) {θ : ℝ} (hθ : |θ| < π / 4) :
     IntegrableOn (fun r : ℝ => Real.exp (-c * r) • pcfSect_kernel μ ((r : ℂ) * exp (θ * I)))
       (Ioi 0) := by
   set b := Real.cos (2 * θ) with hb
@@ -206,7 +207,7 @@ lemma pcfSect_integrableOn {μ : ℂ} (hμ : 0 < μ.re) (c : ℝ) {θ : ℝ} (h�
     _ = _ := by ring
 
 /-- The rotated Laplace transform of the kernel is entire. -/
-lemma pcfSect_differentiable_laplace {μ : ℂ} (hμ : 0 < μ.re) {θ : ℝ} (hθ : |θ| < π / 4) :
+theorem pcfSect_differentiable_laplace {μ : ℂ} (hμ : 0 < μ.re) {θ : ℝ} (hθ : |θ| < π / 4) :
     Differentiable ℂ (fun z : ℂ => exp (θ * I) * ∫ r in Ioi (0 : ℝ),
       cexp (-(z * exp (θ * I) * r)) * pcfSect_kernel μ ((r : ℂ) * exp (θ * I))) := by
   have hL : Differentiable ℂ (fun w : ℂ => ∫ r in Ioi (0 : ℝ), cexp (-(w * r)) •
@@ -285,7 +286,7 @@ theorem pcfSect_integral_rotate {a : ℂ} (ha : -1 / 2 < a.re) {θ : ℝ} (hθ :
 /-! ### Watson's lemma along rotated rays -/
 
 /-- `|(r e^{iy})^w| ≤ e^{π |im w|} r^{re w}` for `r > 0`, `|y| ≤ π`. -/
-lemma pcfSect_norm_cpow_le (w : ℂ) {r : ℝ} (hr : 0 < r) {y : ℝ} (hy1 : -π < y) (hy2 : y ≤ π) :
+theorem pcfSect_norm_cpow_le (w : ℂ) {r : ℝ} (hr : 0 < r) {y : ℝ} (hy1 : -π < y) (hy2 : y ≤ π) :
     ‖((r : ℂ) * exp (y * I)) ^ w‖ ≤ Real.exp (π * |w.im|) * r ^ w.re := by
   rw [Complex.ofReal_mul_exp_cpow hr hy1 hy2, norm_mul, Complex.norm_cpow_eq_rpow_re_of_pos hr,
     Complex.norm_exp]
@@ -302,7 +303,7 @@ lemma pcfSect_norm_cpow_le (w : ℂ) {r : ℝ} (hr : 0 < r) {y : ℝ} (hy1 : -π
     _ = _ := by ring
 
 /-- Small-`r` expansion of the kernel along a ray, in the form required by Watson's lemma. -/
-lemma pcfSect_kernel_sub_sum_isBigO (μ : ℂ) {θ : ℝ} (hθ1 : -π < θ) (hθ2 : θ ≤ π) (N : ℕ) :
+theorem pcfSect_kernel_sub_sum_isBigO (μ : ℂ) {θ : ℝ} (hθ1 : -π < θ) (hθ2 : θ ≤ π) (N : ℕ) :
     (fun r : ℝ => pcfSect_kernel μ ((r : ℂ) * exp (θ * I)) - ∑ n ∈ Finset.range N,
       (((r : ℂ) * exp (θ * I)) ^ ((n : ℂ) + μ - 1)) • pcfSect_gaussCoeff n)
       =O[𝓝[>] 0] fun r => r ^ ((N : ℝ) + μ.re - 1) := by
@@ -342,7 +343,7 @@ def pcfSect_IsExp (a : ℂ) (l : Filter ℂ) : Prop :=
     (fun z : ℂ => z ^ (-(2 * N : ℤ)))
 
 /-- Eventually `z ≠ 0` and `|z| ≥ 1` in a sector at infinity. -/
-lemma pcfSect_eventually_sector (α : ℝ) : ∀ᶠ z in sector α, z ≠ 0 ∧ 1 ≤ ‖z‖ := by
+theorem pcfSect_eventually_sector (α : ℝ) : ∀ᶠ z in sector α, z ≠ 0 ∧ 1 ≤ ‖z‖ := by
   have h1 : ∀ᶠ z in sector α, 1 ≤ ‖z‖ :=
     (inf_le_left : sector α ≤ _) (tendsto_comap.eventually (eventually_ge_atTop 1))
   have h2 : ∀ᶠ z in sector α, z ≠ 0 :=
@@ -351,7 +352,7 @@ lemma pcfSect_eventually_sector (α : ℝ) : ∀ᶠ z in sector α, z ≠ 0 ∧ 
 
 /-- Watson's lemma for `Γ(1/2 + a) e^{z²/4} U(a,z)` in a closed sector `|ph z| ≤ 3π/4 - δ`,
 for `re a > -1/2`. -/
-lemma pcfSect_hasAsymptoticExpansion {a : ℂ} (ha : -1 / 2 < a.re) {δ : ℝ} (hδ : 0 < δ) :
+theorem pcfSect_hasAsymptoticExpansion {a : ℂ} (ha : -1 / 2 < a.re) {δ : ℝ} (hδ : 0 < δ) :
     HasAsymptoticExpansion (sector (3 * π / 4 - δ))
       (fun (n : ℕ) (z : ℂ) => z ^ (-(((2 * n : ℕ) : ℂ) + (a + 1 / 2))))
       (fun n => Complex.Gamma (((2 * n : ℕ) : ℂ) + (a + 1 / 2)) • pcfSect_gaussCoeff (2 * n))
@@ -389,7 +390,7 @@ lemma pcfSect_hasAsymptoticExpansion {a : ℂ} (ha : -1 / 2 < a.re) {δ : ℝ} (
   exact ((hrot _ (by rwa [abs_neg])).sup (hrot _ hβ)).mono hcov
 
 /-- **DLMF 12.9.1 for `re a > -1/2`** in the closed sector `|ph z| ≤ 3π/4 - δ`. -/
-lemma pcfSect_isExp_of_re {a : ℂ} (ha : -1 / 2 < a.re) {δ : ℝ} (hδ : 0 < δ) :
+theorem pcfSect_isExp_of_re {a : ℂ} (ha : -1 / 2 < a.re) {δ : ℝ} (hδ : 0 < δ) :
     pcfSect_IsExp a (sector (3 * π / 4 - δ)) := by
   intro N
   set μ := a + 1 / 2 with hμd
@@ -445,7 +446,7 @@ lemma pcfSect_isExp_of_re {a : ℂ} (ha : -1 / 2 < a.re) {δ : ℝ} (hδ : 0 < �
   · exact (isBigO_refl _ _).const_mul_left _
 
 /-- Rewriting `(z^{a+1/2})` along the recurrence: `G(a-1) = G(a) + (a+1/2) z^{-2} G(a+1)`. -/
-lemma pcfSect_G_recurrence (a : ℂ) {z : ℂ} (hz : z ≠ 0) :
+theorem pcfSect_G_recurrence (a : ℂ) {z : ℂ} (hz : z ≠ 0) :
     pcfSect_G (a - 1) z = pcfSect_G a z + (a + 1 / 2) * (z ^ 2)⁻¹ * pcfSect_G (a + 1) z := by
   have h3 := pcfU_three_term a z
   have h1 : z ^ (a + 1 / 2) = z ^ (a - 1 + 1 / 2) * z := by
@@ -460,11 +461,11 @@ lemma pcfSect_G_recurrence (a : ℂ) {z : ℂ} (hz : z ≠ 0) :
     exp (z ^ 2 / 4) * z ^ (a - 1 + 1 / 2) * (a + 1 / 2) * pcfU (a + 1) z * hz2
 
 /-- `poch x (1 + n) = x · poch (x + 1) n`. -/
-lemma pcfSect_poch_succ_left (x : ℂ) (n : ℕ) : poch x (1 + n) = x * poch (x + 1) n := by
+theorem pcfSect_poch_succ_left (x : ℂ) (n : ℕ) : poch x (1 + n) = x * poch (x + 1) n := by
   rw [poch_add, poch_one]; push_cast; ring_nf
 
 /-- The coefficient recurrence behind `pcfSect_G_recurrence`. -/
-lemma pcfSect_uTerm_recurrence (a z : ℂ) (hz : z ≠ 0) (s : ℕ) :
+theorem pcfSect_uTerm_recurrence (a z : ℂ) (hz : z ≠ 0) (s : ℕ) :
     pcfSect_uTerm (a - 1) z (s + 1) =
       pcfSect_uTerm a z (s + 1) + (a + 1 / 2) * (z ^ 2)⁻¹ * pcfSect_uTerm (a + 1) z s := by
   set x := 1 / 2 + (a - 1) with hx
@@ -486,7 +487,7 @@ lemma pcfSect_uTerm_recurrence (a z : ℂ) (hz : z ≠ 0) (s : ℕ) :
   ring
 
 /-- The partial sums along the recurrence. -/
-lemma pcfSect_sum_uTerm_recurrence (a z : ℂ) (hz : z ≠ 0) (N : ℕ) :
+theorem pcfSect_sum_uTerm_recurrence (a z : ℂ) (hz : z ≠ 0) (N : ℕ) :
     ∑ s ∈ Finset.range N, pcfSect_uTerm (a - 1) z s = ∑ s ∈ Finset.range N, pcfSect_uTerm a z s +
       (a + 1 / 2) * (z ^ 2)⁻¹ * ∑ s ∈ Finset.range (N - 1), pcfSect_uTerm (a + 1) z s := by
   rcases N with _ | M
@@ -499,7 +500,7 @@ lemma pcfSect_sum_uTerm_recurrence (a z : ℂ) (hz : z ≠ 0) (N : ℕ) :
     ring
 
 /-- **The recurrence step**: the expansion for `a` and `a + 1` gives the expansion for `a - 1`. -/
-lemma pcfSect_isExp_sub_one {a : ℂ} {l : Filter ℂ} (hl : ∀ᶠ z in l, z ≠ 0 ∧ 1 ≤ ‖z‖)
+theorem pcfSect_isExp_sub_one {a : ℂ} {l : Filter ℂ} (hl : ∀ᶠ z in l, z ≠ 0 ∧ 1 ≤ ‖z‖)
     (h1 : pcfSect_IsExp a l) (h2 : pcfSect_IsExp (a + 1) l) : pcfSect_IsExp (a - 1) l := by
   intro N
   have hB : (fun z : ℂ => (a + 1 / 2) * (z ^ 2)⁻¹ * z ^ (-(2 * ((N - 1 : ℕ) : ℤ)))) =O[l]
@@ -541,12 +542,12 @@ theorem pcfSect_U_sector (a : ℂ) {δ : ℝ} (hδ : 0 < δ) :
 /-! ### The expansion along the logarithmic plane -/
 
 /-- `(e^v)^c = e^{cv}` for `-π < im v ≤ π`. -/
-lemma pcfSect_exp_cpow {v : ℂ} (h1 : -π < v.im) (h2 : v.im ≤ π) (c : ℂ) :
+theorem pcfSect_exp_cpow {v : ℂ} (h1 : -π < v.im) (h2 : v.im ≤ π) (c : ℂ) :
     (exp v) ^ c = exp (c * v) := by
   rw [Complex.cpow_def_of_ne_zero (exp_ne_zero v), Complex.log_exp h1 h2, mul_comm]
 
 /-- `arg (e^v) = im v` for `-π < im v ≤ π`. -/
-lemma pcfSect_arg_exp {v : ℂ} (h1 : -π < v.im) (h2 : v.im ≤ π) : arg (exp v) = v.im := by
+theorem pcfSect_arg_exp {v : ℂ} (h1 : -π < v.im) (h2 : v.im ≤ π) : arg (exp v) = v.im := by
   rw [← Complex.log_im, Complex.log_exp h1 h2]
 
 /-- The filter `re w → +∞` with `lo ≤ im w ≤ hi` on the logarithmic plane. -/
@@ -554,12 +555,12 @@ def pcfSect_logWedge (lo hi : ℝ) : Filter ℂ :=
   comap (fun w : ℂ => Real.exp w.re) atTop ⊓ 𝓟 {w : ℂ | lo ≤ w.im ∧ w.im ≤ hi}
 
 /-- Eventually `lo ≤ im w ≤ hi` along the logarithmic wedge. -/
-lemma pcfSect_eventually_logWedge (lo hi : ℝ) :
+theorem pcfSect_eventually_logWedge (lo hi : ℝ) :
     ∀ᶠ w in pcfSect_logWedge lo hi, lo ≤ w.im ∧ w.im ≤ hi :=
   (inf_le_right : pcfSect_logWedge lo hi ≤ _) (mem_principal.mpr fun _ hw => hw)
 
 /-- `w ↦ e^{w + iκ}` maps the logarithmic wedge into the sector `|ph z| ≤ 3π/4 - δ`. -/
-lemma pcfSect_tendsto_exp_logWedge {δ : ℝ} (hδ : 0 < δ) (κ : ℝ) {lo hi : ℝ}
+theorem pcfSect_tendsto_exp_logWedge {δ : ℝ} (hδ : 0 < δ) (κ : ℝ) {lo hi : ℝ}
     (hlo : -(3 * π / 4 - δ) ≤ lo + κ) (hhi : hi + κ ≤ 3 * π / 4 - δ) :
     Tendsto (fun w : ℂ => exp (w + κ * I)) (pcfSect_logWedge lo hi) (sector (3 * π / 4 - δ)) := by
   refine tendsto_inf.mpr ⟨tendsto_comap_iff.mpr ?_, tendsto_principal.mpr ?_⟩
@@ -576,7 +577,7 @@ lemma pcfSect_tendsto_exp_logWedge {δ : ℝ} (hδ : 0 < δ) (κ : ℝ) {lo hi :
     constructor <;> linarith
 
 /-- `U(b, e^v) = e^{-e^{2v}/4 - (b+1/2) v} G(b, e^v)` for `-π < im v ≤ π`. -/
-lemma pcfSect_pcfU_exp (b : ℂ) {v : ℂ} (h1 : -π < v.im) (h2 : v.im ≤ π) :
+theorem pcfSect_pcfU_exp (b : ℂ) {v : ℂ} (h1 : -π < v.im) (h2 : v.im ≤ π) :
     pcfU b (exp v) = exp (-exp (2 * v) / 4 - (b + 1 / 2) * v) * pcfSect_G b (exp v) := by
   rw [pcfSect_G, pcfSect_exp_cpow h1 h2, ← Complex.exp_nat_mul, ← mul_assoc, ← mul_assoc,
     ← Complex.exp_add, ← Complex.exp_add]
@@ -618,7 +619,7 @@ theorem pcfSect_U_logWedge (b : ℂ) {δ : ℝ} (hδ : 0 < δ) (κ : ℝ) {lo hi
     ring
 
 /-- Transferring an `O`-bound with exponential envelope through a constant factor. -/
-lemma pcfSect_isBigO_const_mul_envelope {α : Type*} {l : Filter α} {f E : α → ℂ}
+theorem pcfSect_isBigO_const_mul_envelope {α : Type*} {l : Filter α} {f E : α → ℂ}
     {e T : α → ℝ} (C : ℂ) {K : ℝ} (hK : 0 ≤ K) (h : f =O[l] (fun w => ‖E w‖ * e w))
     (he : ∀ w, 0 ≤ e w) (hT : ∀ w, ‖C * E w‖ * e w ≤ K * T w) :
     (fun w => C * f w) =O[l] T := by
@@ -633,7 +634,7 @@ lemma pcfSect_isBigO_const_mul_envelope {α : Type*} {l : Filter α} {f E : α �
     _ ≤ M * K * ‖T w‖ := by rw [← mul_assoc]; gcongr; exact Real.le_norm_self _
 
 /-- Equality of exponentials whose exponents differ by `2πik`. -/
-lemma pcfSect_exp_eq_of_eq_add {X Y : ℂ} (k : ℤ) (h : X = Y + k * (2 * π * I)) :
+theorem pcfSect_exp_eq_of_eq_add {X Y : ℂ} (k : ℤ) (h : X = Y + k * (2 * π * I)) :
     exp X = exp Y := by
   rw [h, Complex.exp_add, Complex.exp_int_mul_two_pi_mul_I, mul_one]
 
@@ -642,12 +643,12 @@ def pcfSect_vTerm (a z : ℂ) (s : ℕ) : ℂ :=
   poch (1 / 2 - a) (2 * s) / ((s.factorial : ℂ) * (2 * z ^ 2) ^ s)
 
 /-- `u_s(b, z)` depends only on `z²`. -/
-lemma pcfSect_uTerm_congr_sq (b : ℂ) {z z' : ℂ} (h : z ^ 2 = z' ^ 2) (s : ℕ) :
+theorem pcfSect_uTerm_congr_sq (b : ℂ) {z z' : ℂ} (h : z ^ 2 = z' ^ 2) (s : ℕ) :
     pcfSect_uTerm b z s = pcfSect_uTerm b z' s := by
   rw [pcfSect_uTerm, pcfSect_uTerm, h]
 
 /-- `u_s(-a, z') = v_s(a, z)` when `z'² = -z²`. -/
-lemma pcfSect_uTerm_neg_eq_vTerm (a : ℂ) {z z' : ℂ} (h : z' ^ 2 = -z ^ 2) (s : ℕ) :
+theorem pcfSect_uTerm_neg_eq_vTerm (a : ℂ) {z z' : ℂ} (h : z' ^ 2 = -z ^ 2) (s : ℕ) :
     pcfSect_uTerm (-a) z' s = pcfSect_vTerm a z s := by
   rw [pcfSect_uTerm, pcfSect_vTerm, h, show 1 / 2 + -a = 1 / 2 - a by ring,
     show 2 * -z ^ 2 = -1 * (2 * z ^ 2) by ring, mul_pow]
@@ -657,18 +658,18 @@ lemma pcfSect_uTerm_neg_eq_vTerm (a : ℂ) {z z' : ℂ} (h : z' ^ 2 = -z ^ 2) (s
   · field_simp
 
 /-- `e^{2(w + iκ)}` for the four quarter turns used in DLMF 12.9.3–12.9.4. -/
-lemma pcfSect_exp_two_mul_add (w : ℂ) (κ : ℝ) :
+theorem pcfSect_exp_two_mul_add (w : ℂ) (κ : ℝ) :
     exp (2 * (w + κ * I)) = exp (2 * w) * exp ((2 * κ : ℝ) * I) := by
   rw [← Complex.exp_add]; push_cast; ring_nf
 
 /-! ### The expansion of `V(a,z)` (DLMF 12.9.2) -/
 
 /-- Sectors at infinity are monotone in the opening. -/
-lemma pcfSect_sector_mono {α β : ℝ} (h : α ≤ β) : sector α ≤ sector β :=
+theorem pcfSect_sector_mono {α β : ℝ} (h : α ≤ β) : sector α ≤ sector β :=
   inf_le_inf_left _ (principal_mono.mpr fun _ hz => ⟨hz.1, hz.2.trans h⟩)
 
 /-- `re (z²) ≥ sin (2δ) |z|²` for `|ph z| ≤ π/4 - δ`. -/
-lemma pcfSect_re_sq_ge {z : ℂ} (hz : z ≠ 0) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π / 4)
+theorem pcfSect_re_sq_ge {z : ℂ} (hz : z ≠ 0) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π / 4)
     (harg : |arg z| ≤ π / 4 - δ) : Real.sin (2 * δ) * ‖z‖ ^ 2 ≤ (z ^ 2).re := by
   have hn : 0 < ‖z‖ := norm_pos_iff.mpr hz
   have hre : z.re = ‖z‖ * Real.cos (arg z) := by rw [Complex.cos_arg hz]; field_simp
@@ -683,7 +684,7 @@ lemma pcfSect_re_sq_ge {z : ℂ} (hz : z ≠ 0) {δ : ℝ} (hδ : 0 < δ) (hδπ
     (by linarith)
 
 /-- `e^{-z²/2} z^w = O(z^{-2N})` in the sector `|ph z| ≤ π/4 - δ`. -/
-lemma pcfSect_exp_neg_sq_mul_cpow_isBigO (w : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π / 4)
+theorem pcfSect_exp_neg_sq_mul_cpow_isBigO (w : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π / 4)
     (N : ℕ) : (fun z : ℂ => exp (-z ^ 2 / 2) * z ^ w) =O[sector (π / 4 - δ)]
       (fun z : ℂ => z ^ (-(2 * N : ℤ))) := by
   set c := Real.sin (2 * δ) with hc
@@ -726,7 +727,7 @@ lemma pcfSect_exp_neg_sq_mul_cpow_isBigO (w : ℂ) {δ : ℝ} (hδ : 0 < δ) (h�
     _ = _ := one_mul _
 
 /-- `z ↦ iz` maps `|ph z| ≤ π/4 - δ` into `|ph z| ≤ 3π/4 - δ`, with `arg (iz) = arg z + π/2`. -/
-lemma pcfSect_arg_I_mul {z : ℂ} (hz : z ≠ 0) (h : |arg z| ≤ π / 2) :
+theorem pcfSect_arg_I_mul {z : ℂ} (hz : z ≠ 0) (h : |arg z| ≤ π / 2) :
     arg (I * z) = arg z + π / 2 := by
   have e1 : ((π / 2 : ℝ) : ℂ) * I = π / 2 * I := by push_cast; ring
   have : I * z = exp (log z + (π / 2 : ℝ) * I) := by
@@ -735,7 +736,7 @@ lemma pcfSect_arg_I_mul {z : ℂ} (hz : z ≠ 0) (h : |arg z| ≤ π / 2) :
   rw [this, pcfSect_arg_exp, him] <;> rw [him] <;>
     linarith [(abs_le.mp h).1, (abs_le.mp h).2, Real.pi_pos]
 
-lemma pcfSect_tendsto_I_mul {δ : ℝ} (hδ : 0 < δ) :
+theorem pcfSect_tendsto_I_mul {δ : ℝ} (hδ : 0 < δ) :
     Tendsto (fun z : ℂ => I * z) (sector (π / 4 - δ)) (sector (3 * π / 4 - δ)) := by
   refine tendsto_inf.mpr ⟨tendsto_comap_iff.mpr ?_, tendsto_principal.mpr ?_⟩
   · have hn : (fun z : ℂ => ‖z‖) ∘ (fun z : ℂ => I * z) = fun z => ‖z‖ := by

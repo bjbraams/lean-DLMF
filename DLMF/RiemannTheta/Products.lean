@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.RiemannTheta.Symmetry
-public import Mathlib.LinearAlgebra.Matrix.Trace
 
 /-!
 # Products of Riemann theta functions (DLMF §21.6)

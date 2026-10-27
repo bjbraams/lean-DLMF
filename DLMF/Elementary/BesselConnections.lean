@@ -23,7 +23,7 @@ open scoped Real
 namespace DLMF.Elementary
 
 /-- Elementary half-integer evaluation used in the root correspondence. -/
-lemma besselJ_three_halves {z : ℂ} (hz : z ∈ slitPlane) :
+theorem besselJ_three_halves {z : ℂ} (hz : z ∈ slitPlane) :
     Complex.besselJ (3 / 2) z =
       (2 / (π * z)) ^ (1 / 2 : ℂ) * (sin z / z - cos z) := by
   have h := DLMF.Bessel.besselJ_add_sub (ν := 1 / 2) (slitPlane_ne_zero hz)

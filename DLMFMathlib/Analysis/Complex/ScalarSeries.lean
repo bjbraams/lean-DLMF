@@ -5,9 +5,12 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.Complex.TaylorSeries
 public import Mathlib.Analysis.Analytic.OfScalars
-public import Mathlib.Topology.Algebra.InfiniteSum.Ring
+public import Mathlib.Analysis.Analytic.Uniqueness
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Analysis.RCLike.Lemmas
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Mathlib.Tactic.Positivity.Finset
 
 /-!
 # Uniqueness and multiplication of scalar power series
@@ -23,7 +26,7 @@ open scoped Nat Topology
 namespace Complex
 
 /-- Recover a scalar power series from its sums on the unit disk. -/
-lemma powerSeries_coefficients_unique {c d : ℕ → ℂ} {f : ℂ → ℂ}
+theorem powerSeries_coefficients_unique {c d : ℕ → ℂ} {f : ℂ → ℂ}
     (hc : ∀ z : ℂ, ‖z‖ < 1 → HasSum (fun n => c n * z ^ n) (f z))
     (hd : ∀ z : ℂ, ‖z‖ < 1 → HasSum (fun n => d n * z ^ n) (f z)) : c = d := by
   have series {e : ℕ → ℂ}
@@ -44,7 +47,7 @@ lemma powerSeries_coefficients_unique {c d : ℕ → ℂ} {f : ℂ → ℂ}
     ((series hc).hasFPowerSeriesAt.eq_formalMultilinearSeries (series hd).hasFPowerSeriesAt)
 
 /-- Cauchy product of scalar series, written as a coefficient convolution. -/
-lemma hasSum_powerSeries_convolution {c d : ℕ → ℂ} {z u v : ℂ}
+theorem hasSum_powerSeries_convolution {c d : ℕ → ℂ} {z u v : ℂ}
     (hc : HasSum (fun n => c n * z ^ n) u)
     (hd : HasSum (fun n => d n * z ^ n) v) :
     HasSum (fun n => (∑ k ∈ Finset.range (n + 1), c k * d (n - k)) * z ^ n) (u * v) := by

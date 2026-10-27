@@ -6,8 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Core.Framework
-public import DLMF.Gamma.MellinBarnes
-public import TauCeti.Analysis.Complex.Conformal.Continuation.Basic
 
 /-!
 # Meijer G contours, normalization and convergence (DLMF §16.17)

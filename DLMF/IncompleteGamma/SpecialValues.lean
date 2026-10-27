@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.IncompleteGamma.Basic
+public import DLMF.ErrorFunctions.Basic
 
 /-!
 # Special values and confluent representations, DLMF §§8.4–8.5

@@ -5,10 +5,28 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.IncompleteGamma.ZerosIntegrals
 public import DLMF.Zeta.S25bHurwitzCore
-public import Mathlib.Analysis.Complex.LocallyUniformLimit
-public import Mathlib.NumberTheory.ZetaValues
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.Tactic.Echelon.Zsqrtd
+public import Mathlib.Tactic.Inclusion.Extension.Core.Core
+public import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+public import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Rational
+public import Mathlib.Tactic.NormNum.Irrational
+public import Mathlib.Tactic.NormNum.IsCoprime
+public import Mathlib.Tactic.NormNum.IsSquare
+public import Mathlib.Tactic.NormNum.LegendreSymbol
+public import Mathlib.Tactic.NormNum.ModEq
+public import Mathlib.Tactic.NormNum.NatFib
+public import Mathlib.Tactic.NormNum.NatLog
+public import Mathlib.Tactic.NormNum.NatSqrt
+public import Mathlib.Tactic.NormNum.Ordinal
+public import Mathlib.Tactic.NormNum.Parity
+public import Mathlib.Tactic.NormNum.Prime
+public import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.Tactic.Polynomial.Basic
+public import Mathlib.Tactic.ReduceModChar
 
 /-!
 # Continuation of the Hurwitz zeta function by Euler–Maclaurin summation (DLMF §25.11(i))
@@ -49,7 +67,7 @@ lemma r25b_hurwitzZetaComplex_eq_limUnder {M : ℕ} {s z : ℂ} (hs : s ≠ 1)
   s25b_hzc_eq_limUnder hs hM
 
 /-- **Existence of the defining limit of `hurwitzZetaComplex`** for `s ≠ 1`, any `z`. -/
-lemma r25b_tendsto_hurwitzZetaComplex {M : ℕ} {s z : ℂ} (hs : s ≠ 1) (hM : 0 < s.re + 2 * M) :
+theorem r25b_tendsto_hurwitzZetaComplex {M : ℕ} {s z : ℂ} (hs : s ≠ 1) (hM : 0 < s.re + 2 * M) :
     Tendsto (r25b_emSeq M s z) atTop (𝓝 (DLMF.Confluent.hurwitzZetaComplex s z)) :=
   s25b_tendsto_hzc hs hM
 

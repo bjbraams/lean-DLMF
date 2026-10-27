@@ -108,7 +108,7 @@ def eulerRegion : Set (ℂ × ℂ × ℂ × ℂ) :=
   {q | 0 < q.2.1.re ∧ 0 < (q.2.2.1 - q.2.1).re ∧ q.2.2.2 ∈ cutPlane}
 
 /-- The Euler region is open. -/
-lemma isOpen_eulerRegion : IsOpen eulerRegion := by
+theorem isOpen_eulerRegion : IsOpen eulerRegion := by
   have h1 : Continuous fun q : ℂ × ℂ × ℂ × ℂ => q.2.1.re := by fun_prop
   have h2 : Continuous fun q : ℂ × ℂ × ℂ × ℂ => (q.2.2.1 - q.2.1).re := by fun_prop
   have h3 : Continuous fun q : ℂ × ℂ × ℂ × ℂ => q.2.2.2 := by fun_prop
@@ -116,7 +116,7 @@ lemma isOpen_eulerRegion : IsOpen eulerRegion := by
     (isOpen_cutPlane.preimage h3))
 
 /-- Real powers bound complex powers of `t ∈ (0, 1)`. -/
-lemma norm_ofReal_cpow_le {t : ℝ} (ht0 : 0 < t) (ht1 : t ≤ 1) {w : ℂ} {β : ℝ} (hw : β ≤ w.re) :
+theorem norm_ofReal_cpow_le {t : ℝ} (ht0 : 0 < t) (ht1 : t ≤ 1) {w : ℂ} {β : ℝ} (hw : β ≤ w.re) :
     ‖(t : ℂ) ^ (w - 1)‖ ≤ ‖(t : ℂ) ^ ((β : ℂ) - 1)‖ := by
   rw [norm_cpow_eq_rpow_re_of_pos ht0, norm_cpow_eq_rpow_re_of_pos ht0]
   simp only [sub_re, ofReal_re, one_re]
@@ -232,7 +232,7 @@ def regularizedGaussHGShift (p : ℕ) : ℕ → ℂ → ℂ → ℂ → ℂ → 
       a * regularizedGaussHGShift p q (a + 1) b (c + 1) z
 
 /-- On the disk the `b`-shift recursion is the series, when its Euler integrals are convergent. -/
-lemma regularizedGaussHGShiftB_eq (p : ℕ) {a b c z : ℂ} (hb : 0 < b.re + p)
+theorem regularizedGaussHGShiftB_eq (p : ℕ) {a b c z : ℂ} (hb : 0 < b.re + p)
     (hc : (p : ℝ) < (c - b).re) (hz : ‖z‖ < 1) :
     regularizedGaussHGShiftB p a b c z = regularizedGaussHGFun a b c z := by
   induction p generalizing a b c with
@@ -249,7 +249,7 @@ lemma regularizedGaussHGShiftB_eq (p : ℕ) {a b c z : ℂ} (hb : 0 < b.re + p)
 
 /-- On the disk the fixed-shift recursion is the series, when its Euler integrals are
 convergent. -/
-lemma regularizedGaussHGShift_eq (p q : ℕ) {a b c z : ℂ} (hb : 0 < b.re + p)
+theorem regularizedGaussHGShift_eq (p q : ℕ) {a b c z : ℂ} (hb : 0 < b.re + p)
     (hc : (p : ℝ) < (c - b).re + q) (hz : ‖z‖ < 1) :
     regularizedGaussHGShift p q a b c z = regularizedGaussHGFun a b c z := by
   induction q generalizing a b c with
@@ -263,11 +263,11 @@ lemma regularizedGaussHGShift_eq (p q : ℕ) {a b c z : ℂ} (hb : 0 < b.re + p)
       regularizedGaussHGFun_contiguous_c a b c hz]
 
 /-- The base case of the `b`-shift recursion. -/
-lemma regularizedGaussHGShiftB_zero (a b c z : ℂ) :
+theorem regularizedGaussHGShiftB_zero (a b c z : ℂ) :
     regularizedGaussHGShiftB 0 a b c z = regularizedGaussHGIntegral a b c z := rfl
 
 /-- The step of the `b`-shift recursion. -/
-lemma regularizedGaussHGShiftB_succ (p : ℕ) (a b c z : ℂ) :
+theorem regularizedGaussHGShiftB_succ (p : ℕ) (a b c z : ℂ) :
     regularizedGaussHGShiftB (p + 1) a b c z = regularizedGaussHGShiftB p a (b + 1) c z -
       a * z * regularizedGaussHGShiftB p (a + 1) (b + 1) (c + 1) z := rfl
 
@@ -277,7 +277,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
 
 /-- The `b`-shift recursion along holomorphic maps is holomorphic where its Euler integrals
 converge. -/
-lemma differentiableOn_regularizedGaussHGShiftB (p : ℕ) {A B C Z : E → ℂ}
+theorem differentiableOn_regularizedGaussHGShiftB (p : ℕ) {A B C Z : E → ℂ}
     (hA : Differentiable ℂ A) (hB : Differentiable ℂ B) (hC : Differentiable ℂ C)
     (hZ : Differentiable ℂ Z) {W : Set E}
     (hW : ∀ w ∈ W, 0 < (B w).re + p ∧ (p : ℝ) < (C w - B w).re ∧ Z w ∈ cutPlane) :
@@ -308,7 +308,7 @@ lemma differentiableOn_regularizedGaussHGShiftB (p : ℕ) {A B C Z : E → ℂ}
 
 /-- The fixed-shift recursion along holomorphic maps is holomorphic where its Euler integrals
 converge. -/
-lemma differentiableOn_regularizedGaussHGShift (p q : ℕ) {A B C Z : E → ℂ}
+theorem differentiableOn_regularizedGaussHGShift (p q : ℕ) {A B C Z : E → ℂ}
     (hA : Differentiable ℂ A) (hB : Differentiable ℂ B) (hC : Differentiable ℂ C)
     (hZ : Differentiable ℂ Z) {W : Set E}
     (hW : ∀ w ∈ W, 0 < (B w).re + p ∧ (p : ℝ) < (C w - B w).re + q ∧ Z w ∈ cutPlane) :
@@ -335,7 +335,7 @@ end Comp
 
 /-- In the region where the fixed shift counts suffice, the fixed-shift recursion is the
 continuation. -/
-lemma regularizedGaussHG_eq_regularizedGaussHGShift (p q : ℕ) {a b c z : ℂ}
+theorem regularizedGaussHG_eq_regularizedGaussHGShift (p q : ℕ) {a b c z : ℂ}
     (hb : 0 < b.re + p) (hc : (p : ℝ) < (c - b).re + q) (hz : z ∈ cutPlane) :
     regularizedGaussHG a b c z = regularizedGaussHGShift p q a b c z := by
   have han : AnalyticOnNhd ℂ (fun z => regularizedGaussHGShift p q a b c z) cutPlane := by

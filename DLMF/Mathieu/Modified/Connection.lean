@@ -64,7 +64,7 @@ theorem radialMathieuMs_two_eq {m : ℕ} (hm : m ≠ 0) {h : ℝ} (hh : 0 < h) (
   p2m_radialMathieuMs_two_eq hm hh z
 
 /-- An even function differentiable at `0` has derivative `0` there. -/
-theorem p1c_deriv_zero_of_even {f : ℂ → ℂ} (hf : DifferentiableAt ℂ f 0)
+lemma p1c_deriv_zero_of_even {f : ℂ → ℂ} (hf : DifferentiableAt ℂ f 0)
     (he : ∀ z, f (-z) = f z) : deriv f 0 = 0 := by
   have h1 : HasDerivAt (fun z => f (-z)) (deriv f (-0) * -1) 0 :=
     (by simpa using hf.hasDerivAt : HasDerivAt f (deriv f (-0)) (-0)).comp (0 : ℂ)
@@ -76,7 +76,7 @@ theorem p1c_deriv_zero_of_even {f : ℂ → ℂ} (hf : DifferentiableAt ℂ f 0)
   linear_combination -this / 2
 
 /-- `(√(2/π))² = 2/π` in `ℂ`. -/
-theorem p1c_sqrt_two_div_pi_sq : ((Real.sqrt (2 / π) : ℝ) : ℂ) ^ 2 = 2 / π := by
+lemma p1c_sqrt_two_div_pi_sq : ((Real.sqrt (2 / π) : ℝ) : ℂ) ^ 2 = 2 / π := by
   rw [← ofReal_pow, Real.sq_sqrt (by positivity)]; push_cast; ring
 
 /-- **Values at `z = 0`** (DLMF 28.22.11), `h > 0`:
@@ -289,7 +289,7 @@ theorem mathieuFe_ge_zero_eq_joinG (m : ℕ) {h : ℝ} (hh : 0 < h) :
     linear_combination hW / 2 - mathieuGe m 0 (h ^ 2) * hP
 
 /-- Mathieu's equation is invariant under `t ↦ -t`. -/
-theorem p1c_isMathieuSolution_neg {a q : ℂ} {w : ℂ → ℂ} (hw : IsMathieuSolution a q w) :
+lemma p1c_isMathieuSolution_neg {a q : ℂ} {w : ℂ → ℂ} (hw : IsMathieuSolution a q w) :
     IsMathieuSolution a q (fun t => w (-t)) := by
   have hd : ∀ t, HasDerivAt (fun t => w (-t)) (-deriv w (-t)) t := fun t => by
     have := ((hw.differentiable (-t)).hasDerivAt).comp t (hasDerivAt_neg t)
@@ -303,7 +303,7 @@ theorem p1c_isMathieuSolution_neg {a q : ℂ} {w : ℂ → ℂ} (hw : IsMathieuS
   rw [show 2 * -t = -(2 * t) by ring, Complex.cos_neg]; ring
 
 /-- A Floquet solution with multiplier `ρ`, `ρ² ≠ 1`, vanishing at `0` is identically zero. -/
-theorem p1c_floquet_eq_zero {a q ρ : ℂ} {w : ℂ → ℂ} (hw : IsMathieuSolution a q w)
+lemma p1c_floquet_eq_zero {a q ρ : ℂ} {w : ℂ → ℂ} (hw : IsMathieuSolution a q w)
     (h0 : w 0 = 0) (hρ : ∀ t, w (t + π) = ρ * w t) (hρ0 : ρ ≠ 0) (hρ1 : ρ ^ 2 ≠ 1) :
     w = 0 := by
   have hneg := p1c_isMathieuSolution_neg hw
@@ -371,7 +371,7 @@ theorem modMathieuM_one_eq_modMathieuMe {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ)
   linear_combination this
 
 /-- Term-wise form of 28.22.14 (with the `-ν` series reindexed by `ℓ ↦ -ℓ`). -/
-theorem p1c_modMathieuTerm_two_eq {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ) ≠ ν) (z h : ℂ) (n ℓ : ℤ) :
+lemma p1c_modMathieuTerm_two_eq {ν : ℝ} (hν : ∀ m : ℤ, (m : ℝ) ≠ ν) (z h : ℂ) (n ℓ : ℤ) :
     modMathieuTerm 2 ν z h n ℓ = Complex.cot (ν * π) * modMathieuTerm 1 ν z h n ℓ -
       modMathieuTerm 1 (-(ν : ℂ)) z h (-n) (-ℓ) / Complex.sin (ν * π) := by
   have hk := p1c_not_int_add hν (n + ℓ)

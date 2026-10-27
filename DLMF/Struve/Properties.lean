@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Struve.Basic
-public import DLMF.Bessel.Elementary
 public import DLMF.Struve.Poisson
 public import DLMF.Bessel.NeumannSeries
 

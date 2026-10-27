@@ -42,6 +42,7 @@ Paths are relative to this directory.
 | [10.22.E37](https://dlmf.nist.gov/10.22.E37) | [integral_besselJ_orthogonal](Lommel.lean) (line 260); [integral_mul_besselJ_sq](Lommel.lean) (line 355) | proved |
 | [10.22.E51](https://dlmf.nist.gov/10.22.E51) | [sonine_integral](Sonine.lean) (line 131) | proved |
 | [10.23.E3](https://dlmf.nist.gov/10.23.E3) | [hasSum_besselJ_add](Elementary.lean) (line 210) | proved |
+| [10.23.E7](https://dlmf.nist.gov/10.23.E7) | [hasSum_besselJ_graf](P3mGraf.lean) | proved for J at integer order, stronger than DLMF (no restriction ‖v e^{±iα}‖ < ‖u‖; 2026-10-26); Y, H and general order open |
 | [10.23.E8](https://dlmf.nist.gov/10.23.E8) | [besselJ_addition](../SphericalHarmonics/BesselAddition.lean) | proved (moved 2026-10-22) |
 | [10.25.E1](https://dlmf.nist.gov/10.25.E1) | [besselI_ode](Modified.lean) (line 78); [besselK_ode](Modified.lean) (line 97); [besselK_ode_all](SecondKind.lean) (line 769) | proved |
 | [10.25.E2](https://dlmf.nist.gov/10.25.E2) | [besselI](Modified.lean) (line 29) | definition |

@@ -6,8 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMFMathlib.Analysis.Asymptotics.Watson
-public import Mathlib.Analysis.Calculus.Taylor
-public import Mathlib.MeasureTheory.Function.JacobianOneDim
 
 /-!
 # All-order Laplace expansions at a quadratic endpoint
@@ -37,7 +35,7 @@ open scoped Topology
 namespace Asymptotics
 
 /-- The map `v ↦ v²/2` sends `(0, v₀]` onto `(0, v₀²/2]`. -/
-lemma lapSad_image_half_sq {v₀ : ℝ} (hv₀ : 0 < v₀) :
+theorem lapSad_image_half_sq {v₀ : ℝ} (hv₀ : 0 < v₀) :
     (fun v : ℝ => v^2/2) '' Ioc 0 v₀ = Ioc 0 (v₀^2/2) := by
   ext τ
   constructor
@@ -50,7 +48,7 @@ lemma lapSad_image_half_sq {v₀ : ℝ} (hv₀ : 0 < v₀) :
       rw [Real.sq_sqrt (by linarith)]; ring
 
 /-- Change of variables `τ = v²/2` on `(0, v₀]`. -/
-lemma lapSad_integral_half_sq {v₀ : ℝ} (hv₀ : 0 < v₀) (g : ℝ → ℝ) :
+theorem lapSad_integral_half_sq {v₀ : ℝ} (hv₀ : 0 < v₀) (g : ℝ → ℝ) :
     ∫ τ in Ioc 0 (v₀^2/2), g τ = ∫ v in Ioc 0 v₀, v * g (v^2/2) := by
   rw [← lapSad_image_half_sq hv₀, integral_image_eq_integral_abs_deriv_smul measurableSet_Ioc
     (f' := fun v => v)]
@@ -164,7 +162,7 @@ theorem lapSad_hasAsymptoticExpansion_gauss_odd {G : ℝ → ℝ} {v₀ : ℝ} (
 
 /-- Uniqueness of truncated expansions: if `∑_{k<M} eₖ vᵏ = O(v^M)` as `v → 0`, `v ≠ 0`,
 then `eₖ = 0` for every `k < M`. -/
-lemma lapSad_coeff_eq_zero_of_isBigO : ∀ (M : ℕ) {e : ℕ → ℝ},
+theorem lapSad_coeff_eq_zero_of_isBigO : ∀ (M : ℕ) {e : ℕ → ℝ},
     (fun v : ℝ => ∑ k ∈ Finset.range M, e k * v^k) =O[𝓝[≠] 0] (fun v => v^M) →
     ∀ k < M, e k = 0
   | 0, _, _, k, hk => absurd hk (Nat.not_lt_zero k)
@@ -204,7 +202,7 @@ lemma lapSad_coeff_eq_zero_of_isBigO : ∀ (M : ℕ) {e : ℕ → ℝ},
 
 /-- Pairing the terms of degree `2j` and `2j+1`: `-T(-v) - T(v) = ∑_{j<N} -2 c_{2j} v^{2j}` for
 the polynomial `T(v) = ∑_{k<2N} c_k vᵏ`. -/
-lemma lapSad_sum_even_part (c : ℕ → ℝ) (v : ℝ) (N : ℕ) :
+theorem lapSad_sum_even_part (c : ℕ → ℝ) (v : ℝ) (N : ℕ) :
     -(∑ k ∈ Finset.range (2*N), c k * (-v)^k) - ∑ k ∈ Finset.range (2*N), c k * v^k =
       ∑ j ∈ Finset.range N, (-2 * c (2*j)) * v^(2*j) := by
   induction N with
@@ -220,7 +218,7 @@ lemma lapSad_sum_even_part (c : ℕ → ℝ) (v : ℝ) (N : ℕ) :
 
 /-- Odd part of an analytic function: if `U` has the power series `p` at `0`, then
 `v (-U(-v) - U(v)) = ∑_{j<N} (-2 p_{2j}) v^{2j+1} + O(v^{2N+1})` as `v → 0`. -/
-lemma lapSad_isBigO_odd_part {U : ℝ → ℝ} {p : FormalMultilinearSeries ℝ ℝ ℝ}
+theorem lapSad_isBigO_odd_part {U : ℝ → ℝ} {p : FormalMultilinearSeries ℝ ℝ ℝ}
     (hU : HasFPowerSeriesAt U p 0) (N : ℕ) :
     (fun v => v * (-U (-v) - U v) - ∑ j ∈ Finset.range N, (-2 * p.coeff (2*j)) * v^(2*j+1))
       =O[𝓝 0] fun v => v^(2*N+1) := by

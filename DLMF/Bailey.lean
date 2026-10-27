@@ -5,7 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Tactic.CrossRefAttribute
 public import DLMF.QSeries.Identities
 public import DLMF.QSeries.Saalschutz
 
@@ -88,7 +87,7 @@ private lemma lim_step (q A : ℂ) (N m : ℕ) (hm : m ≤ N + 1) :
 
 /-- The limiting `q`-Pfaff–Saalschütz identity, valid for all `q, A`:
 `∑_m [N m]_q q^{m(m-1)} A^m (Aq^m;q)_{N-m} = 1`. -/
-lemma sum_qBinom_limit (q A : ℂ) (N : ℕ) :
+theorem sum_qBinom_limit (q A : ℂ) (N : ℕ) :
     ∑ m ∈ range (N + 1), qBinom q N m * q ^ (m * (m - 1)) * A ^ m *
       qPochhammer (A * q ^ m) q (N - m) = 1 := by
   change ∑ m ∈ range (N + 1), limTerm q A N m = 1
@@ -109,7 +108,7 @@ lemma sum_qBinom_limit (q A : ℂ) (N : ℕ) :
     exact sub_eq_zero.mp hsum
 
 /-- The limiting identity in quotient form. -/
-lemma sum_limit_div (q A : ℂ) (N : ℕ) (hq : ∀ m ≤ N, qPochhammer q q m ≠ 0)
+theorem sum_limit_div (q A : ℂ) (N : ℕ) (hq : ∀ m ≤ N, qPochhammer q q m ≠ 0)
     (hA : qPochhammer A q N ≠ 0) :
     ∑ m ∈ range (N + 1), A ^ m * q ^ (m * (m - 1)) /
         (qPochhammer q q (N - m) * qPochhammer q q m * qPochhammer A q m) =
@@ -128,7 +127,7 @@ lemma sum_limit_div (q A : ℂ) (N : ℕ) (hq : ∀ m ≤ N, qPochhammer q q m �
 
 /-- The inner sum of the limiting Bailey lemma: for `j ≤ n`,
 `∑_{k=j}^n a^k q^{k²} / ((q)_{n-k} (q)_{k-j} (aq)_{k+j}) = a^j q^{j²} / ((q)_{n-j} (aq)_{n+j})`. -/
-lemma bailey_limit_inner {a q : ℂ} {n j : ℕ} (hqq : ∀ m ≤ n, qPochhammer q q m ≠ 0)
+theorem bailey_limit_inner {a q : ℂ} {n j : ℕ} (hqq : ∀ m ≤ n, qPochhammer q q m ≠ 0)
     (haq : qPochhammer (a * q) q (n + n) ≠ 0) (hj : j ≤ n) :
     ∑ k ∈ Ico j (n + 1), a ^ k * q ^ (k * k) /
         (qPochhammer q q (n - k) * (qPochhammer q q (k - j) * qPochhammer (a * q) q (k + j))) =
@@ -182,7 +181,7 @@ lemma bailey_limit_inner {a q : ℂ} {n j : ℕ} (hqq : ∀ m ≤ n, qPochhammer
 /-- The limiting form of Bailey's lemma at a fixed index `n` (`ρ₁, ρ₂ → ∞`): if `(α, β)` is a
 Bailey pair up to `n`, then
 `∑_k a^k q^{k²} β_k / (q)_{n-k} = ∑_k a^k q^{k²} α_k / ((q)_{n-k} (aq)_{n+k})`. -/
-lemma bailey_limit_relation {a q : ℂ} {α β : ℕ → ℂ} {n : ℕ}
+theorem bailey_limit_relation {a q : ℂ} {α β : ℕ → ℂ} {n : ℕ}
     (h : ∀ k ≤ n, β k = ∑ j ∈ range (k + 1),
       α j / (qPochhammer q q (k - j) * qPochhammer (a * q) q (k + j)))
     (hqq : ∀ m ≤ n, qPochhammer q q m ≠ 0) (haq : qPochhammer (a * q) q (n + n) ≠ 0) :
@@ -218,7 +217,7 @@ def IsBaileyPair (a q : ℂ) (α β : ℕ → ℂ) : Prop :=
 /-- The inner sum of Bailey's lemma, a shifted `q`-Pfaff–Saalschütz sum: for `j ≤ n`,
 `∑_{k=j}^n (ρ₁)_k (ρ₂)_k (x)_{n-k} x^k / ((q)_{n-k} (aq/ρ₁)_n (aq/ρ₂)_n (q)_{k-j} (aq)_{k+j})`
 equals `(ρ₁)_j (ρ₂)_j x^j / ((aq/ρ₁)_j (aq/ρ₂)_j (q)_{n-j} (aq)_{n+j})`, with `x = aq/(ρ₁ρ₂)`. -/
-lemma bailey_inner {a q ρ1 ρ2 : ℂ} {n j : ℕ} (hρ1 : ρ1 ≠ 0) (hρ2 : ρ2 ≠ 0)
+theorem bailey_inner {a q ρ1 ρ2 : ℂ} {n j : ℕ} (hρ1 : ρ1 ≠ 0) (hρ2 : ρ2 ≠ 0)
     (hqq : ∀ m ≤ n, qPochhammer q q m ≠ 0) (haq : qPochhammer (a * q) q (n + n) ≠ 0)
     (h1 : qPochhammer (a * q / ρ1) q n ≠ 0) (h2 : qPochhammer (a * q / ρ2) q n ≠ 0)
     (hj : j ≤ n) :
@@ -292,7 +291,7 @@ lemma bailey_inner {a q ρ1 ρ2 : ℂ} {n j : ℕ} (hρ1 : ρ1 ≠ 0) (hρ2 : ρ
   field_simp
 
 /-- Bailey's lemma at a fixed index `n`, with nondegeneracy hypotheses only up to `n`. -/
-lemma bailey_relation {a q rho1 rho2 : ℂ} {α β : ℕ → ℂ} {n : ℕ}
+theorem bailey_relation {a q rho1 rho2 : ℂ} {α β : ℕ → ℂ} {n : ℕ}
     (h : ∀ k ≤ n, β k = ∑ j ∈ range (k + 1),
       α j / (qPochhammer q q (k - j) * qPochhammer (a * q) q (k + j)))
     (hρ1 : rho1 ≠ 0) (hρ2 : rho2 ≠ 0) (hqq : ∀ m ≤ n, qPochhammer q q m ≠ 0)
@@ -363,7 +362,7 @@ private lemma choose_two_succ (n : ℕ) : (n + 1).choose 2 = n.choose 2 + n := b
 
 /-- `(qt;q)_k (-qt;q)_k (1-a) = (t;q)_k (-t;q)_k (1-aq^{2k})` when `t² = a`: the
 very-well-poised factor of `₈φ₇` for either square root of `a`. -/
-lemma qPochhammer_sqrt_factor {a q t : ℂ} (ht : t ^ 2 = a) (k : ℕ) :
+theorem qPochhammer_sqrt_factor {a q t : ℂ} (ht : t ^ 2 = a) (k : ℕ) :
     qPochhammer (q * t) q k * qPochhammer (-q * t) q k * (1 - a) =
       qPochhammer t q k * qPochhammer (-t) q k * (1 - a * q ^ (2 * k)) := by
   subst ht
@@ -374,7 +373,7 @@ lemma qPochhammer_sqrt_factor {a q t : ℂ} (ht : t ^ 2 = a) (k : ℕ) :
     linear_combination (1 - q * t * q ^ k) * (1 - -q * t * q ^ k) * ih
 
 /-- Reversal: `(xq^m;q)_k = (-x)^k q^{mk + k(k-1)/2} (y;q)_k` when `x y q^{m+k} = q`. -/
-lemma qPochhammer_mul_pow_eq_reverse {x y q : ℂ} (hq : q ≠ 0) (k : ℕ) :
+theorem qPochhammer_mul_pow_eq_reverse {x y q : ℂ} (hq : q ≠ 0) (k : ℕ) :
     ∀ m : ℕ, x * y * q ^ (m + k) = q →
       qPochhammer (x * q ^ m) q k = (-x) ^ k * q ^ (m * k + k.choose 2) * qPochhammer y q k := by
   induction k with
@@ -430,14 +429,14 @@ private lemma unit_partial (a q : ℂ) (n : ℕ) :
 
 /-- The unit Bailey pair identity in polynomial form: for `n ≥ 1`,
 `∑_k [n k]_q (-1)^k q^{k(k-1)/2} D_k (aq^{n+k+1};q)_{n-k} = 0`. -/
-lemma unit_poly (a q : ℂ) (n : ℕ) :
+theorem unit_poly (a q : ℂ) (n : ℕ) :
     ∑ k ∈ range (n + 1 + 1), qBinom q (n + 1) k * (-1) ^ k * q ^ k.choose 2 *
         unitD a q k * qPochhammer (a * q * q ^ (n + 1 + k)) q (n + 1 - k) = 0 := by
   rw [unit_partial a q n (n + 1) le_rfl, qBinom_eq_zero_of_lt q (Nat.lt_succ_self n)]
   ring
 
 /-- The unit Bailey pair relative to `a`: `δ_{n,0} = ∑_k α_k / ((q;q)_{n-k} (aq;q)_{n+k})`. -/
-lemma unit_pair (a q : ℂ) (n : ℕ) (hqq : ∀ m ≤ n, qPochhammer q q m ≠ 0)
+theorem unit_pair (a q : ℂ) (n : ℕ) (hqq : ∀ m ≤ n, qPochhammer q q m ≠ 0)
     (haq : qPochhammer (a * q) q (n + n) ≠ 0) :
     (if n = 0 then 1 else 0) = ∑ k ∈ range (n + 1),
       unitAlpha a q k / (qPochhammer q q (n - k) * qPochhammer (a * q) q (n + k)) := by
@@ -466,14 +465,14 @@ private lemma two_choose_add (k : ℕ) : k.choose 2 + k.choose 2 + k = k * k := 
   | zero => simp
   | succ k ih => rw [choose_two_succ]; nlinarith
 
-lemma qPochhammer_mul_one_sub_pow (a q : ℂ) (k : ℕ) :
+theorem qPochhammer_mul_one_sub_pow (a q : ℂ) (k : ℕ) :
     qPochhammer a q k * (1 - a * q ^ (2 * k)) = (1 - a) * unitD a q k := by
   rcases k with _ | k
   · simp [unitD]
   · simp only [unitD, qPochhammer_succ']
     ring
 
-lemma qPochhammer_ne_zero_of_forall {x q : ℂ} {n : ℕ} (h : ∀ k ≤ n, x * q ^ k ≠ 1) :
+theorem qPochhammer_ne_zero_of_forall {x q : ℂ} {n : ℕ} (h : ∀ k ≤ n, x * q ^ k ≠ 1) :
     ∀ m ≤ n + 1, qPochhammer x q m ≠ 0 := by
   intro m hm
   rw [qPochhammer_eq_prod, prod_ne_zero_iff]
@@ -531,7 +530,7 @@ def watsonR4 (a b c d e q : ℂ) (n k : ℕ) : ℂ :=
 
 /-- Watson's transformation in rational form, when `(aq;q)_{2n} ≠ 0`: two applications of
 Bailey's lemma to the unit Bailey pair, first with `(b, c)` and then with `(d, e)`. -/
-lemma watsonR_of_ne {a b c d e q : ℂ} (n : ℕ) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
+theorem watsonR_of_ne {a b c d e q : ℂ} (n : ℕ) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
     (hd : d ≠ 0) (he : e ≠ 0) (hq : q ≠ 0) (hqq : ∀ m ≤ n, qPochhammer q q m ≠ 0)
     (haq : qPochhammer (a * q) q (n + n) ≠ 0)
     (hB : qPochhammer (a * q / b) q n ≠ 0) (hC : qPochhammer (a * q / c) q n ≠ 0)
@@ -629,12 +628,12 @@ lemma watsonR_of_ne {a b c d e q : ℂ} (n : ℕ) (ha : a ≠ 0) (hb : b ≠ 0) 
   rw [sum_congr rfl h8, ← mul_sum, ← step2, mul_sum, mul_sum]
   exact (sum_congr rfl h4).symm
 
-lemma continuous_qPochhammer_comp {f : ℂ → ℂ} (hf : Continuous f) (q : ℂ) (k : ℕ) :
+theorem continuous_qPochhammer_comp {f : ℂ → ℂ} (hf : Continuous f) (q : ℂ) (k : ℕ) :
     Continuous fun t => qPochhammer (f t) q k := by
   simp only [qPochhammer_eq_prod]
   exact continuous_finsetProd _ fun i _ => continuous_const.sub (hf.mul continuous_const)
 
-lemma continuous_unitD (q : ℂ) (k : ℕ) : Continuous fun t => unitD t q k := by
+theorem continuous_unitD (q : ℂ) (k : ℕ) : Continuous fun t => unitD t q k := by
   rcases k with _ | k
   · simp only [unitD]; exact continuous_const
   · simp only [unitD]
@@ -659,7 +658,7 @@ private lemma eventually_qPochhammer_ne_zero (a q : ℂ) (hq : q ≠ 0) (m : ℕ
 
 /-- Watson's transformation in rational form, for all `a` with the natural denominators
 nonzero; the degenerate values of `a` with `(aq;q)_{2n} = 0` follow by continuity in `a`. -/
-lemma watsonR {a b c d e q : ℂ} (n : ℕ) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
+theorem watsonR {a b c d e q : ℂ} (n : ℕ) (ha : a ≠ 0) (hb : b ≠ 0) (hc : c ≠ 0)
     (hd : d ≠ 0) (he : e ≠ 0) (hq : q ≠ 0) (hqq : ∀ m ≤ n, qPochhammer q q m ≠ 0)
     (hB : qPochhammer (a * q / b) q n ≠ 0) (hC : qPochhammer (a * q / c) q n ≠ 0)
     (hD : qPochhammer (a * q / d) q n ≠ 0) (hE : qPochhammer (a * q / e) q n ≠ 0)
@@ -893,7 +892,7 @@ private lemma tendsto_sum_range_mul {u : ℕ → ℂ} {v : ℕ → ℕ → ℂ} 
 
 /-- The `n → ∞` form of the limiting Bailey lemma for the unit Bailey pair, for `‖a‖ ≤ 1`:
 `∑_k a^k q^{k²} / (q;q)_k = (aq;q)_∞⁻¹ ∑_k a^{2k} q^{2k²} α_k`. -/
-lemma sum_unit_bailey {a q : ℂ} (hq : ‖q‖ < 1) (ha : ‖a‖ ≤ 1) :
+theorem sum_unit_bailey {a q : ℂ} (hq : ‖q‖ < 1) (ha : ‖a‖ ≤ 1) :
     ∑' k : ℕ, a ^ k * q ^ (k * k) * (1 / qPochhammer q q k) =
       (∑' k : ℕ, a ^ k * q ^ (k * k) * (a ^ k * q ^ (k * k) * unitAlpha a q k)) /
         qPochhammerInf (a * q) q := by
@@ -1017,7 +1016,7 @@ private lemma qPochhammer_five_mul (q : ℂ) (M : ℕ) :
     ring
 
 /-- `(q;q)_∞ = (q, q², q³, q⁴, q⁵; q⁵)_∞`. -/
-lemma qPochhammerInf_mod_five {q : ℂ} (hq : ‖q‖ < 1) :
+theorem qPochhammerInf_mod_five {q : ℂ} (hq : ‖q‖ < 1) :
     qPochhammerInf q q = qPochhammerInf q (q ^ 5) * qPochhammerInf (q ^ 2) (q ^ 5) *
       qPochhammerInf (q ^ 3) (q ^ 5) * qPochhammerInf (q ^ 4) (q ^ 5) *
       qPochhammerInf (q ^ 5) (q ^ 5) := by

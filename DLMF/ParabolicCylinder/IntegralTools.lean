@@ -6,10 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.ParabolicCylinder.Relations
-public import DLMF.Confluent.IntegralRepresentations
-public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import DLMF.Confluent.TricomiLaplace
-public import DLMF.Hypergeometric.Elementary
 
 /-!
 # Tools for the cylinder Laplace integrals (DLMF 12.5.2–12.5.3)
@@ -43,7 +40,7 @@ noncomputable def pcfInt_F (c p w : ℂ) : ℂ :=
   ∫ t in Ioi (0:ℝ), (t:ℂ)^(c-1) * exp (-t) * (w + 2*t)^p
 
 /-- Adding a nonnegative real multiple of `2` keeps a point in the slit plane. -/
-lemma pcfInt_add_mem_slitPlane {w : ℂ} (hw : w ∈ slitPlane) {t : ℝ} (ht : 0 ≤ t) :
+theorem pcfInt_add_mem_slitPlane {w : ℂ} (hw : w ∈ slitPlane) {t : ℝ} (ht : 0 ≤ t) :
     w + 2*t ∈ slitPlane := by
   rw [mem_slitPlane_iff] at hw ⊢
   simp only [add_re, add_im, mul_re, mul_im, ofReal_re, ofReal_im, re_ofNat, im_ofNat]
@@ -52,7 +49,7 @@ lemma pcfInt_add_mem_slitPlane {w : ℂ} (hw : w ∈ slitPlane) {t : ℝ} (ht : 
   · right; simpa using h
 
 /-- The square of a point of the right half-plane lies in the slit plane. -/
-lemma pcfInt_sq_mem_slitPlane {z : ℂ} (hz : 0 < z.re) : z^2 ∈ slitPlane := by
+theorem pcfInt_sq_mem_slitPlane {z : ℂ} (hz : 0 < z.re) : z^2 ∈ slitPlane := by
   rw [mem_slitPlane_iff]
   by_cases h : z.im = 0
   · left; simp [sq, h]; nlinarith
@@ -61,7 +58,7 @@ lemma pcfInt_sq_mem_slitPlane {z : ℂ} (hz : 0 < z.re) : z^2 ∈ slitPlane := b
     intro h'; apply this; linarith
 
 /-- Near a point of the slit plane, `w + 2t` (`t ≥ 0`) stays uniformly away from `0`. -/
-lemma pcfInt_norm_add_ge {w₀ : ℂ} (hw₀ : w₀ ∈ slitPlane) :
+theorem pcfInt_norm_add_ge {w₀ : ℂ} (hw₀ : w₀ ∈ slitPlane) :
     ∃ ε > 0, ∀ w ∈ ball w₀ ε, ∀ t : ℝ, 0 ≤ t → ε ≤ ‖w + 2*t‖ := by
   obtain ⟨δ, hδ, hsub⟩ := isOpen_iff.mp isOpen_slitPlane w₀ hw₀
   refine ⟨δ/2, half_pos hδ, fun w hw t ht => ?_⟩
@@ -78,7 +75,7 @@ lemma pcfInt_norm_add_ge {w₀ : ℂ} (hw₀ : w₀ ∈ slitPlane) :
   linarith
 
 /-- An elementary bound `u^q ≤ K e^{t/2}` for `ε ≤ u ≤ R + 2t`. -/
-lemma pcfInt_rpow_bound (q : ℝ) {ε R : ℝ} (hε : 0 < ε) (hR : 0 ≤ R) :
+theorem pcfInt_rpow_bound (q : ℝ) {ε R : ℝ} (hε : 0 < ε) (hR : 0 ≤ R) :
     ∃ K : ℝ, 0 ≤ K ∧ ∀ u t : ℝ, 0 ≤ t → ε ≤ u → u ≤ R + 2*t → u^q ≤ K * Real.exp (t/2) := by
   set m : ℝ := |q| + 1 with hm
   have hm0 : 0 < m := by positivity
@@ -113,7 +110,7 @@ lemma pcfInt_rpow_bound (q : ℝ) {ε R : ℝ} (hε : 0 < ε) (hR : 0 ≤ R) :
       _ ≤ _ := by nlinarith [Real.rpow_nonneg hε.le q, Real.exp_pos (t/2)]
 
 /-- `‖u^p‖ ≤ ‖u‖^{Re p} e^{π |Im p|}`. -/
-lemma pcfInt_norm_cpow_le (u p : ℂ) : ‖u^p‖ ≤ ‖u‖^p.re * Real.exp (π * |p.im|) := by
+theorem pcfInt_norm_cpow_le (u p : ℂ) : ‖u^p‖ ≤ ‖u‖^p.re * Real.exp (π * |p.im|) := by
   refine (norm_cpow_le u p).trans ?_
   rw [div_eq_mul_inv, ← Real.exp_neg]
   apply mul_le_mul_of_nonneg_left _ (by positivity)
@@ -124,7 +121,7 @@ lemma pcfInt_norm_cpow_le (u p : ℂ) : ‖u^p‖ ≤ ‖u‖^p.re * Real.exp (�
   linarith [neg_abs_le (arg u * p.im)]
 
 /-- Local domination of the integrand of `pcfInt_F`. -/
-lemma pcfInt_dom {c : ℂ} (p : ℂ) {w₀ : ℂ} (hw₀ : w₀ ∈ slitPlane) :
+theorem pcfInt_dom {c : ℂ} (p : ℂ) {w₀ : ℂ} (hw₀ : w₀ ∈ slitPlane) :
     ∃ ε > 0, ∃ M : ℝ, 0 ≤ M ∧ ∀ w ∈ ball w₀ ε, ∀ t : ℝ, 0 < t →
       ‖(t:ℂ)^(c-1) * exp (-t) * (w + 2*t)^p‖ ≤ M * (t^(c.re-1) * Real.exp (-(1/2) * t^(1:ℝ))) := by
   obtain ⟨ε, hε, hε'⟩ := pcfInt_norm_add_ge hw₀
@@ -161,7 +158,7 @@ lemma pcfInt_dom {c : ℂ} (p : ℂ) {w₀ : ℂ} (hw₀ : w₀ ∈ slitPlane) :
     _ = _ := by ring
 
 /-- Continuity of the integrand of `pcfInt_F` on `(0,∞)`. -/
-lemma pcfInt_continuousOn (c p : ℂ) {w : ℂ} (hw : w ∈ slitPlane) :
+theorem pcfInt_continuousOn (c p : ℂ) {w : ℂ} (hw : w ∈ slitPlane) :
     ContinuousOn (fun t : ℝ => (t:ℂ)^(c-1) * exp (-t) * (w + 2*t)^p) (Ioi 0) := by
   intro t ht
   apply ContinuousAt.continuousWithinAt
@@ -174,12 +171,12 @@ lemma pcfInt_continuousOn (c p : ℂ) {w : ℂ} (hw : w ∈ slitPlane) :
   exact (h1.mul (continuous_ofReal.continuousAt.neg.cexp)).mul h3
 
 /-- Integrability of the majorant `M t^{Re c - 1} e^{-t/2}`. -/
-lemma pcfInt_integrable_majorant {c : ℂ} (hc : 0 < c.re) (M : ℝ) :
+theorem pcfInt_integrable_majorant {c : ℂ} (hc : 0 < c.re) (M : ℝ) :
     IntegrableOn (fun t : ℝ => M * (t^(c.re-1) * Real.exp (-(1/2) * t^(1:ℝ)))) (Ioi 0) :=
   (integrableOn_rpow_mul_exp_neg_mul_rpow (by linarith) one_pos (by norm_num)).const_mul M
 
 /-- The integrand of `pcfInt_F` is integrable for `w` in the slit plane. -/
-lemma pcfInt_integrableOn {c : ℂ} (hc : 0 < c.re) (p : ℂ) {w : ℂ} (hw : w ∈ slitPlane) :
+theorem pcfInt_integrableOn {c : ℂ} (hc : 0 < c.re) (p : ℂ) {w : ℂ} (hw : w ∈ slitPlane) :
     IntegrableOn (fun t : ℝ => (t:ℂ)^(c-1) * exp (-t) * (w + 2*t)^p) (Ioi 0) := by
   obtain ⟨ε, hε, M, -, hM⟩ := pcfInt_dom (c := c) p hw
   refine (pcfInt_integrable_majorant hc M).mono' ((pcfInt_continuousOn c p hw).aestronglyMeasurable
@@ -188,7 +185,7 @@ lemma pcfInt_integrableOn {c : ℂ} (hc : 0 < c.re) (p : ℂ) {w : ℂ} (hw : w 
   exact hM w (mem_ball_self hε) t ht
 
 /-- `pcfInt_F c p` is holomorphic on the slit plane. -/
-lemma pcfInt_differentiableOn {c : ℂ} (hc : 0 < c.re) (p : ℂ) :
+theorem pcfInt_differentiableOn {c : ℂ} (hc : 0 < c.re) (p : ℂ) :
     DifferentiableOn ℂ (pcfInt_F c p) slitPlane := by
   unfold pcfInt_F
   refine differentiableOn_integral_Ioi_of_locally_dominated isOpen_slitPlane 0
@@ -205,7 +202,7 @@ lemma pcfInt_differentiableOn {c : ℂ} (hc : 0 < c.re) (p : ℂ) :
     exact fun y hy => hM y hy t ht
 
 /-- Rescaling the Laplace integral of Kummer's `U` (real positive scale). -/
-lemma pcfInt_laplace_scale (c p : ℂ) {b : ℝ} (hb : 0 < b) :
+theorem pcfInt_laplace_scale (c p : ℂ) {b : ℝ} (hb : 0 < b) :
     ∫ s in Ioi (0:ℝ), exp (-(b:ℂ) * s) * (s:ℂ)^(c-1) * (1 + (s:ℂ))^p =
       (b:ℂ)^(-c) * ((2*b:ℝ):ℂ)^(-p) * pcfInt_F c p ((2*b:ℝ):ℂ) := by
   set g : ℝ → ℂ := fun t => (t:ℂ)^(c-1) * exp (-t) * (((2*b:ℝ):ℂ) + 2*t)^p with hg
@@ -244,16 +241,16 @@ lemma pcfInt_const_aux {x : ℝ} (hx : 0 < x) (e d : ℂ) :
   ring
 
 /-- `(x²)^{1/2} = x` for `x > 0`. -/
-lemma pcfInt_sq_cpow_half {x : ℝ} (hx : 0 < x) : ((x^2:ℝ):ℂ)^(1/2:ℂ) = x := by
+theorem pcfInt_sq_cpow_half {x : ℝ} (hx : 0 < x) : ((x^2:ℝ):ℂ)^(1/2:ℂ) = x := by
   rw [show (1/2:ℂ) = ((1/2:ℝ):ℂ) by push_cast; ring, ← ofReal_cpow (by positivity),
     ← Real.sqrt_eq_rpow, Real.sqrt_sq hx.le]
 
 /-- `(x²)^{-1/2} = x⁻¹` for `x > 0`. -/
-lemma pcfInt_sq_cpow_neg_half {x : ℝ} (hx : 0 < x) : ((x^2:ℝ):ℂ)^(-1/2:ℂ) = (x:ℂ)⁻¹ := by
+theorem pcfInt_sq_cpow_neg_half {x : ℝ} (hx : 0 < x) : ((x^2:ℝ):ℂ)^(-1/2:ℂ) = (x:ℂ)⁻¹ := by
   rw [show (-1/2:ℂ) = -(1/2) by ring, cpow_neg, pcfInt_sq_cpow_half hx]
 
 /-- DLMF 12.5.2 for real positive argument. -/
-lemma pcfInt_U_real_2 {a : ℂ} (ha : -1/2 < a.re) {x : ℝ} (hx : 0 < x) :
+theorem pcfInt_U_real_2 {a : ℂ} (ha : -1/2 < a.re) {x : ℝ} (hx : 0 < x) :
     pcfU a x = x * exp (-(x:ℂ)^2/4) / Gamma (a/2+1/4) * pcfInt_F (a/2+1/4) (-a/2-3/4) (x^2) := by
   have hα : 0 < (a/2+1/4).re := by simp; linarith
   have hre : 0 < (x:ℂ).re := by simpa using hx
@@ -273,7 +270,7 @@ lemma pcfInt_U_real_2 {a : ℂ} (ha : -1/2 < a.re) {x : ℝ} (hx : 0 < x) :
     ((2:ℂ)^(-(1/4:ℂ)-a/2) * key + x * h2)
 
 /-- DLMF 12.5.3 for real positive argument. -/
-lemma pcfInt_U_real_3 {a : ℂ} (ha : -3/2 < a.re) {x : ℝ} (hx : 0 < x) :
+theorem pcfInt_U_real_3 {a : ℂ} (ha : -3/2 < a.re) {x : ℝ} (hx : 0 < x) :
     pcfU a x = exp (-(x:ℂ)^2/4) / Gamma (a/2+3/4) * pcfInt_F (a/2+3/4) (-a/2-1/4) (x^2) := by
   have hα : 0 < (a/2+3/4).re := by simp; linarith
   have hre : 0 < (x:ℂ).re := by simpa using hx
@@ -295,7 +292,7 @@ lemma pcfInt_U_real_3 {a : ℂ} (ha : -3/2 < a.re) {x : ℝ} (hx : 0 < x) :
     ((2:ℂ)^(-3/4-a/2) * x * key + (2:ℂ)^(-3/4-a/2) * (2:ℂ)^(a/2+3/4) * hk + h2)
 
 /-- Identity theorem on the right half-plane from agreement on the positive reals. -/
-lemma pcfInt_eq_of_real {f g : ℂ → ℂ} (hf : DifferentiableOn ℂ f {z | 0 < z.re})
+theorem pcfInt_eq_of_real {f g : ℂ → ℂ} (hf : DifferentiableOn ℂ f {z | 0 < z.re})
     (hg : DifferentiableOn ℂ g {z | 0 < z.re}) (h : ∀ x : ℝ, 0 < x → f x = g x)
     {z : ℂ} (hz : 0 < z.re) : f z = g z := by
   have hU : IsOpen {z : ℂ | 0 < z.re} := isOpen_lt continuous_const continuous_re
@@ -315,20 +312,20 @@ lemma pcfInt_eq_of_real {f g : ℂ → ℂ} (hf : DifferentiableOn ℂ f {z | 0 
     (convex_halfSpace_re_gt 0).isPreconnected (by simp) hfreq hz
 
 /-- `z ↦ pcfInt_F c p (z²)` is holomorphic on the right half-plane. -/
-lemma pcfInt_differentiableOn_comp {c : ℂ} (hc : 0 < c.re) (p : ℂ) :
+theorem pcfInt_differentiableOn_comp {c : ℂ} (hc : 0 < c.re) (p : ℂ) :
     DifferentiableOn ℂ (fun z : ℂ => pcfInt_F c p (z^2)) {z | 0 < z.re} :=
   (pcfInt_differentiableOn hc p).comp (differentiableOn_id.pow 2)
     (fun _ hz => pcfInt_sq_mem_slitPlane hz)
 
 
 /-- `𝐅(a,b;c;0) = 1/Γ(c)` for every `c` (both sides vanish at the poles of `Γ`). -/
-lemma pcfInt_regularizedGaussHG_zero (a b c : ℂ) : regularizedGaussHG a b c 0 = (Gamma c)⁻¹ := by
+theorem pcfInt_regularizedGaussHG_zero (a b c : ℂ) : regularizedGaussHG a b c 0 = (Gamma c)⁻¹ := by
   rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ (by simp), regularizedGaussHGFun_eq_tsum,
     tsum_eq_single 0 (fun n hn => by simp [zero_pow hn])]
   simp
 
 /-- The substitution `x = t²/2` on the half-line. -/
-lemma pcfInt_sq_half_subst {g : ℝ → ℂ} (hg : IntegrableOn g (Ioi 0)) :
+theorem pcfInt_sq_half_subst {g : ℝ → ℂ} (hg : IntegrableOn g (Ioi 0)) :
     IntegrableOn (fun t : ℝ => (t:ℂ) * g (t^2/2)) (Ioi 0) ∧
       ∫ t in Ioi (0:ℝ), (t:ℂ) * g (t^2/2) = ∫ x in Ioi (0:ℝ), g x := by
   set h : ℝ → ℂ := fun y => (1/2:ℂ) * g ((1/2) * y) with hh
@@ -349,14 +346,14 @@ lemma pcfInt_sq_half_subst {g : ℝ → ℂ} (hg : IntegrableOn g (Ioi 0)) :
   push_cast; ring
 
 /-- `(t²)^s = t^{2s}` for `t > 0`. -/
-lemma pcfInt_sq_cpow {t : ℝ} (ht : 0 < t) (s : ℂ) : ((t^2:ℝ):ℂ)^s = (t:ℂ)^(2*s) := by
+theorem pcfInt_sq_cpow {t : ℝ} (ht : 0 < t) (s : ℂ) : ((t^2:ℝ):ℂ)^s = (t:ℂ)^(2*s) := by
   rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr (by positivity)),
     cpow_def_of_ne_zero (ofReal_ne_zero.mpr ht.ne'), ← ofReal_log (by positivity), Real.log_pow,
     ← ofReal_log ht.le]
   push_cast; ring_nf
 
 /-- The integrand of DLMF 12.12.1 in terms of the Laplace kernel of Kummer's `U`. -/
-lemma pcfInt_integrand_1 (μ a : ℂ) {t : ℝ} (ht : 0 < t) :
+theorem pcfInt_integrand_1 (μ a : ℂ) {t : ℝ} (ht : 0 < t) :
     exp (-t^2/4) * (t:ℂ)^(μ-1) * pcfU a t =
       (2:ℂ)^(-(1/4)-a/2) * (2:ℂ)^(μ/2-1) *
         ((t:ℂ) * tricomiLaplaceKernel (a/2+1/4) (μ/2) (1/2) 1 (t^2/2)) := by
@@ -377,7 +374,7 @@ lemma pcfInt_integrand_1 (μ a : ℂ) {t : ℝ} (ht : 0 < t) :
     (t:ℂ)^(2*(μ/2-1)) * kummerU (a/2+1/4) (1/2) ((t^2/2:ℝ):ℂ)) * e3
 
 /-- The integrand of DLMF 12.12.2 in terms of the Laplace kernel of Kummer's `U` at `z = 2`. -/
-lemma pcfInt_integrand_2 (μ a : ℂ) {t : ℝ} (ht : 0 < t) :
+theorem pcfInt_integrand_2 (μ a : ℂ) {t : ℝ} (ht : 0 < t) :
     exp (-3*t^2/4) * (t:ℂ)^(μ-1) * pcfU a t =
       (2:ℂ)^(-(1/4)-a/2) * (2:ℂ)^(μ/2-1) *
         ((t:ℂ) * tricomiLaplaceKernel (a/2+1/4) (μ/2) (1/2) 2 (t^2/2)) := by
@@ -400,7 +397,7 @@ lemma pcfInt_integrand_2 (μ a : ℂ) {t : ℝ} (ht : 0 < t) :
 /-- The value of the `U` Laplace integral at `z = 2`, `c = 1/2`, `a = -b` (via DLMF 13.10.7
 and DLMF 15.4.12). The 13.10.7 step repeats the proof of `laplace_kummerU`
 (`DLMF/Confluent/Integrals.lean`). -/
-lemma pcfInt_laplace_two {b : ℂ} (hb : 0 < b.re) :
+theorem pcfInt_laplace_two {b : ℂ} (hb : 0 < b.re) :
     ∫ t in Ioi (0:ℝ), tricomiLaplaceKernel (-b) b (1/2) 2 t =
       Gamma b * Gamma (b + 1/2) * (2:ℂ)^(-b) * cos (b*π/2) / Real.sqrt π := by
   have hm := (laplace_kummerU_gauss (a := -b) (b := b) (c := 1/2) (z := 2) hb
@@ -432,7 +429,7 @@ lemma pcfInt_laplace_two {b : ℂ} (hb : 0 < b.re) :
 
 
 /-- An integrable function has its Lebesgue integral as whole-line improper integral. -/
-lemma pcfInt_hasIntegralWholeLine {f : ℝ → ℂ} (hf : Integrable f) :
+theorem pcfInt_hasIntegralWholeLine {f : ℝ → ℂ} (hf : Integrable f) :
     HasIntegralWholeLine f (∫ y, f y) :=
   ⟨_, _, intervalIntegral_tendsto_integral_Iic 0 hf.integrableOn tendsto_id,
     intervalIntegral_tendsto_integral_Ioi 0 hf.integrableOn tendsto_id,
@@ -444,7 +441,7 @@ noncomputable def pcfInt_B (a z : ℂ) (c y : ℝ) : ℂ :=
   Gamma (c+y*I)*Gamma (1/2+1*a-2*(c+y*I))*2^((c:ℂ)+y*I)*z^(2*((c:ℂ)+y*I))*1
 
 /-- `‖z^{2t}‖ ≤ ‖z‖^{2c} e^{2|arg z||y|}` for `t = c+iy`. -/
-lemma pcfInt_norm_cpow_two_mul_le {z : ℂ} (hz : z ≠ 0) (c y : ℝ) :
+theorem pcfInt_norm_cpow_two_mul_le {z : ℂ} (hz : z ≠ 0) (c y : ℝ) :
     ‖z^(2*((c:ℂ)+y*I))‖ ≤ ‖z‖^(2*c) * Real.exp (2*|arg z| *|y|) := by
   rw [norm_cpow_of_ne_zero hz]
   have hre : (2*((c:ℂ)+y*I)).re = 2*c := by simp
@@ -456,7 +453,7 @@ lemma pcfInt_norm_cpow_two_mul_le {z : ℂ} (hz : z ≠ 0) (c y : ℝ) :
   linarith
 
 /-- The uniform bound `C ‖z‖^{2c} (1+|y|)^K e^{-(3π/2 - 2|arg z|)|y|}` for the 12.5.8 integrand. -/
-lemma pcfInt_norm_B_le (a : ℂ) {c : ℝ} (hc : 0 < c) (hca : 2*c < 1/2 + a.re) :
+theorem pcfInt_norm_B_le (a : ℂ) {c : ℝ} (hc : 0 < c) (hca : 2*c < 1/2 + a.re) :
     ∃ C : ℝ, ∃ K : ℕ, 0 ≤ C ∧ ∀ z : ℂ, z ≠ 0 → ∀ y : ℝ,
       ‖pcfInt_B a z c y‖ ≤ C * ‖z‖^(2*c) * ((1+|y|)^K * Real.exp (-((3*π/2 - 2*|arg z|)*|y|))) := by
   have hx0 : 0 < 1/2 + a.re - 2*c := by linarith
@@ -498,7 +495,7 @@ lemma pcfInt_norm_B_le (a : ℂ) {c : ℝ} (hc : 0 < c) (hca : 2*c < 1/2 + a.re)
         rw [← Real.exp_add, ← Real.exp_add]; ring_nf
 
 /-- Pointwise form of the 12.5.8 integrand from Kummer's Barnes integrand (duplication formula). -/
-lemma pcfInt_B_real_pt (a : ℂ) {x : ℝ} (hx : 0 < x) (c y : ℝ) :
+theorem pcfInt_B_real_pt (a : ℂ) {x : ℝ} (hx : 0 < x) (c y : ℝ) :
     Gamma (a/2+1/4 - ((c:ℂ)+y*I)) * Gamma (a/2+1/4+1/2 - ((c:ℂ)+y*I)) * Gamma ((c:ℂ)+y*I) *
       ((x^2/2:ℝ):ℂ)^((c:ℂ)+y*I) =
     (Real.sqrt π : ℂ) * (2:ℂ)^(1/2-a) * pcfInt_B a x c y := by
@@ -519,7 +516,7 @@ lemma pcfInt_B_real_pt (a : ℂ) {x : ℝ} (hx : 0 < x) (c y : ℝ) :
   linear_combination (Gamma (1/2+1*a-2*t) * Real.sqrt π * Gamma t * (x:ℂ)^(2*t)) * h2
 
 /-- DLMF 12.5.8 for real positive argument, from Kummer's Barnes integral (DLMF 13.4.17). -/
-lemma pcfInt_B_real (a : ℂ) {c : ℝ} (hc : 0 < c) (hca : 2*c < 1/2 + a.re) {x : ℝ} (hx : 0 < x) :
+theorem pcfInt_B_real (a : ℂ) {c : ℝ} (hc : 0 < c) (hca : 2*c < 1/2 + a.re) {x : ℝ} (hx : 0 < x) :
     ∫ y, pcfInt_B a x c y = 2*π*Gamma (1/2+1*a)*(exp ((x:ℂ)^2/4)*(x:ℂ)^(a+1/2))*pcfU a x := by
   set α : ℂ := a/2+1/4 with hα
   have hX : (0:ℝ) < x^2/2 := by positivity
@@ -572,17 +569,17 @@ lemma pcfInt_B_real (a : ℂ) {c : ℝ} (hc : 0 < c) (hca : 2*c < 1/2 + a.re) {x
 noncomputable def pcfInt_sector : Set ℂ := slitPlane ∩ (fun z : ℂ => |arg z|) ⁻¹' Iio (3*π/4)
 
 /-- The sector is open. -/
-lemma pcfInt_isOpen_sector : IsOpen pcfInt_sector :=
+theorem pcfInt_isOpen_sector : IsOpen pcfInt_sector :=
   ContinuousOn.isOpen_inter_preimage (fun _ hz => (continuousAt_arg hz).abs.continuousWithinAt)
     isOpen_slitPlane isOpen_Iio
 
 /-- Membership in the sector. -/
-lemma pcfInt_mem_sector {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) : z ∈ pcfInt_sector := by
+theorem pcfInt_mem_sector {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) : z ∈ pcfInt_sector := by
   refine ⟨mem_slitPlane_iff_arg.mpr ⟨fun h => ?_, hz0⟩, hz⟩
   rw [h, abs_of_pos Real.pi_pos] at hz; linarith [Real.pi_pos]
 
 /-- The sector is preconnected (the image of a strip under `exp`). -/
-lemma pcfInt_isPreconnected_sector : IsPreconnected pcfInt_sector := by
+theorem pcfInt_isPreconnected_sector : IsPreconnected pcfInt_sector := by
   have hS : IsPreconnected (im ⁻¹' Ioo (-(3*π/4)) (3*π/4)) :=
     ((convex_Ioo _ _).linear_preimage imLm).isPreconnected
   have himg : exp '' (im ⁻¹' Ioo (-(3*π/4)) (3*π/4)) = pcfInt_sector := by
@@ -602,7 +599,7 @@ lemma pcfInt_isPreconnected_sector : IsPreconnected pcfInt_sector := by
   exact hS.image _ continuous_exp.continuousOn
 
 /-- The 12.5.8 integrand is continuous in `y`. -/
-lemma pcfInt_B_continuous (a : ℂ) {z : ℂ} (hz : z ≠ 0) {c : ℝ} (hc : 0 < c)
+theorem pcfInt_B_continuous (a : ℂ) {z : ℂ} (hz : z ≠ 0) {c : ℝ} (hc : 0 < c)
     (hca : 2*c < 1/2 + a.re) : Continuous (pcfInt_B a z c) := by
   refine continuous_iff_continuousAt.mpr fun y => ?_
   unfold pcfInt_B
@@ -616,7 +613,7 @@ lemma pcfInt_B_continuous (a : ℂ) {z : ℂ} (hz : z ≠ 0) {c : ℝ} (hc : 0 <
       (Or.inl hz)).continuousAt
 
 /-- The 12.5.8 integrand is integrable for `|arg z| < 3π/4`. -/
-lemma pcfInt_B_integrable (a : ℂ) {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c : ℝ}
+theorem pcfInt_B_integrable (a : ℂ) {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c : ℝ}
     (hc : 0 < c) (hca : 2*c < 1/2 + a.re) : Integrable (pcfInt_B a z c) := by
   obtain ⟨C, K, -, hCK⟩ := pcfInt_norm_B_le a hc hca
   exact ((DLMF.Gamma.integrable_one_add_abs_pow_mul_exp_neg (c := 3*π/2 - 2*|arg z|)
@@ -625,7 +622,7 @@ lemma pcfInt_B_integrable (a : ℂ) {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*
     (Eventually.of_forall fun y => (hCK z hz0 y).trans (le_of_eq (by ring)))
 
 /-- The 12.5.8 integral is holomorphic in `z` on the sector. -/
-lemma pcfInt_B_differentiableOn (a : ℂ) {c : ℝ} (hc : 0 < c) (hca : 2*c < 1/2 + a.re) :
+theorem pcfInt_B_differentiableOn (a : ℂ) {c : ℝ} (hc : 0 < c) (hca : 2*c < 1/2 + a.re) :
     DifferentiableOn ℂ (fun z => ∫ y, pcfInt_B a z c y) pcfInt_sector := by
   obtain ⟨C, K, hC0, hCK⟩ := pcfInt_norm_B_le a hc hca
   refine Complex.differentiableOn_integral_of_locally_dominated pcfInt_isOpen_sector
@@ -659,7 +656,7 @@ lemma pcfInt_B_differentiableOn (a : ℂ) {c : ℝ} (hc : 0 < c) (hca : 2*c < 1/
       gcongr
 
 /-- DLMF 12.5.8, value and integrability. -/
-lemma pcfInt_B_integral (a : ℂ) {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c : ℝ}
+theorem pcfInt_B_integral (a : ℂ) {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c : ℝ}
     (hc : 0 < c) (hca : 2*c < 1/2 + a.re) :
     ∫ y, pcfInt_B a z c y = 2*π*Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*pcfU a z := by
   have hF := (pcfInt_B_differentiableOn a hc hca).analyticOnNhd pcfInt_isOpen_sector

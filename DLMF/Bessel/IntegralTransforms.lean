@@ -5,9 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Confluent.IntegralRepresentations
 public import DLMF.Confluent.Integrals
-public import DLMF.Bessel.Sonine
 
 /-!
 # Gaussian and Laplace integrals of Bessel functions

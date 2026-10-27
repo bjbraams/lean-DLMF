@@ -5,7 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.IncompleteGamma.SpecialValues
 public import DLMF.IncompleteGamma.RealIntegrals
 public import DLMF.IncompleteGamma.FractionTools
 public import DLMF.IncompleteGamma.BoundTools
@@ -306,7 +305,7 @@ theorem incompleteGamma_positive_exponential_integral {a : ℂ} (ha : 0 < a.re) 
 
 /-- A function continuous on `[0,∞)`, vanishing at `0`, with positive derivative on `(0,∞)`
 is positive on `(0,∞)`. -/
-lemma incG_pos_of_hasDerivAt {f f' : ℝ → ℝ} (hc : ContinuousOn f (Ici 0))
+theorem incG_pos_of_hasDerivAt {f f' : ℝ → ℝ} (hc : ContinuousOn f (Ici 0))
     (hd : ∀ x, 0 < x → HasDerivAt f (f' x) x) (hp : ∀ x, 0 < x → 0 < f' x) (h0 : f 0 = 0)
     {x : ℝ} (hx : 0 < x) : 0 < f x := by
   have hm : StrictMonoOn f (Ici 0) := strictMonoOn_of_deriv_pos (convex_Ici 0) hc
@@ -314,26 +313,26 @@ lemma incG_pos_of_hasDerivAt {f f' : ℝ → ℝ} (hc : ContinuousOn f (Ici 0))
   have := hm self_mem_Ici (mem_Ici.mpr hx.le) hx
   rwa [h0] at this
 
-lemma incG_hasDerivAt_rpow_mul_exp {a x : ℝ} (hx : 0 < x) :
+theorem incG_hasDerivAt_rpow_mul_exp {a x : ℝ} (hx : 0 < x) :
     HasDerivAt (fun x : ℝ => x^a*Real.exp x) ((a/x+1)*(x^a*Real.exp x)) x := by
   have h := ((Real.hasDerivAt_rpow_const (p := a) (Or.inl hx.ne')).mul (Real.hasDerivAt_exp x))
   convert h using 1
   rw [Real.rpow_sub hx, Real.rpow_one]; field_simp
 
-lemma incG_continuous_rpow_mul_exp {a : ℝ} (ha : 0 < a) :
+theorem incG_continuous_rpow_mul_exp {a : ℝ} (ha : 0 < a) :
     Continuous (fun x : ℝ => x^a*Real.exp x) :=
   (Real.continuous_rpow_const ha.le).mul Real.continuous_exp
 
-lemma incG_intervalIntegrable_rpow_mul_exp {a : ℝ} (ha : 0 < a) (u v : ℝ) :
+theorem incG_intervalIntegrable_rpow_mul_exp {a : ℝ} (ha : 0 < a) (u v : ℝ) :
     IntervalIntegrable (fun t : ℝ => t^(a-1)*Real.exp t) volume u v :=
   (intervalIntegral.intervalIntegrable_rpow' (by linarith)).mul_continuousOn
     Real.continuous_exp.continuousOn
 
-lemma incG_continuous_primitive_rpow_mul_exp {a : ℝ} (ha : 0 < a) :
+theorem incG_continuous_primitive_rpow_mul_exp {a : ℝ} (ha : 0 < a) :
     Continuous (fun x : ℝ => ∫ t in (0:ℝ)..x, t^(a-1)*Real.exp t) :=
   intervalIntegral.continuous_primitive (incG_intervalIntegrable_rpow_mul_exp ha) 0
 
-lemma incG_hasDerivAt_primitive_rpow_mul_exp {a x : ℝ} (ha : 0 < a) (hx : 0 < x) :
+theorem incG_hasDerivAt_primitive_rpow_mul_exp {a x : ℝ} (ha : 0 < a) (hx : 0 < x) :
     HasDerivAt (fun x : ℝ => ∫ t in (0:ℝ)..x, t^(a-1)*Real.exp t) (x^(a-1)*Real.exp x) x := by
   have hcont : ContinuousOn (fun t : ℝ => t^(a-1)*Real.exp t) (Ioi 0) := fun t ht =>
     ((Real.continuousAt_rpow_const _ _ (Or.inl (ne_of_gt ht))).mul

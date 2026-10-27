@@ -9,7 +9,6 @@ public import Mathlib.Analysis.Calculus.InverseFunctionTheorem.Analytic
 public import Mathlib.Analysis.Calculus.DSlope
 public import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
 public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
-public import Mathlib.MeasureTheory.Integral.DominatedConvergence
 
 /-!
 # Square roots at double zeros and Airy-type turning-point coordinates
@@ -192,7 +191,7 @@ def dblZero_airyCoord (p : ℝ → ℝ) (x₀ x : ℝ) : ℝ :=
   (x - x₀) * ((3/2) * dblZero_airyAvg p x₀ x) ^ (2/3:ℝ)
 
 /-- The weighted average is nonnegative. -/
-lemma dblZero_airyAvg_nonneg (p : ℝ → ℝ) (x₀ x : ℝ) : 0 ≤ dblZero_airyAvg p x₀ x :=
+theorem dblZero_airyAvg_nonneg (p : ℝ → ℝ) (x₀ x : ℝ) : 0 ≤ dblZero_airyAvg p x₀ x :=
   intervalIntegral.integral_nonneg zero_le_one fun _ hτ =>
     mul_nonneg (Real.rpow_nonneg hτ.1 _) (Real.sqrt_nonneg _)
 
@@ -236,7 +235,7 @@ theorem dblZero_airyCoord_of_gt (p : ℝ → ℝ) {x₀ x : ℝ} (hx : x < x₀)
   ring
 
 /-- At the turning point, `K(x₀) = (2/3) √(p x₀)`. -/
-lemma dblZero_airyAvg_self (p : ℝ → ℝ) (x₀ : ℝ) :
+theorem dblZero_airyAvg_self (p : ℝ → ℝ) (x₀ : ℝ) :
     dblZero_airyAvg p x₀ x₀ = (2/3) * Real.sqrt (p x₀) := by
   simp only [dblZero_airyAvg, sub_self, zero_mul, add_zero]
   rw [intervalIntegral.integral_mul_const, integral_rpow (Or.inl (by norm_num))]

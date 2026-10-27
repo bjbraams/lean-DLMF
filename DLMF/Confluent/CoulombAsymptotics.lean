@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Confluent.Coulomb
 public import DLMF.Confluent.TricomiRotated
+public import DLMF.Coulomb.Basic
 
 /-!
 # Irregular Coulomb functions and their asymptotics (Temme §7.3.2; DLMF 33.2.8, 33.11.1)
@@ -50,7 +50,7 @@ theorem hasAsymptoticExpansion_cpow_mul_kummerU_rotSector (a b : ℂ) {δ α : �
   rw [← cpow_add _ _ hz0, show a + -((k : ℂ) + a) = -(k : ℂ) by ring, cpow_neg, cpow_natCast]
 
 /-- A ray `ρ ↦ ρ c` tends to the rotated sector if `c e^{iα}` lies in the sector. -/
-lemma tendsto_ofReal_mul_rotSectorAtTop {c : ℂ} (hc : c ≠ 0) {δ α : ℝ}
+theorem tendsto_ofReal_mul_rotSectorAtTop {c : ℂ} (hc : c ≠ 0) {δ α : ℝ}
     (h : δ * ‖c‖ ≤ (c * exp (α * I)).re) :
     Tendsto (fun ρ : ℝ => (ρ : ℂ) * c) atTop (rotSectorAtTop δ α) := by
   refine tendsto_comap_iff.mpr (tendsto_inf.mpr ⟨tendsto_comap_iff.mpr ?_, ?_⟩)
@@ -66,31 +66,9 @@ lemma tendsto_ofReal_mul_rotSectorAtTop {c : ℂ} (hc : c ≠ 0) {δ α : ℝ}
       Real.norm_of_nonneg hρ, mul_assoc, Complex.re_ofReal_mul]
     nlinarith
 
-/-- The Coulomb phase shift `σ_ℓ(η) = ph Γ(ℓ+1+iη)` (DLMF 33.2.10), principal branch. -/
-@[dlmf 33.2.E10]
-def coulombSigma (ℓ : ℕ) (η : ℝ) : ℝ := arg (Gamma (ℓ + 1 + I * η))
-
-/-- The Coulomb phase `θ_ℓ(η,ρ) = ρ - η ln(2ρ) - ℓπ/2 + σ_ℓ(η)` (DLMF 33.2.9). -/
-@[dlmf 33.2.E9]
-def coulombTheta (ℓ : ℕ) (η ρ : ℝ) : ℝ := ρ - η * Real.log (2 * ρ) - ℓ * π / 2 + coulombSigma ℓ η
-
-/-- The outgoing Coulomb function
-`H^+_ℓ(η,ρ) = e^{iθ_ℓ} (-2iρ)^{ℓ+1+iη} U(ℓ+1+iη, 2ℓ+2, -2iρ)` (DLMF 33.2.8, upper signs). -/
-@[dlmf 33.2.E8]
-def coulombHPlus (ℓ : ℕ) (η ρ : ℝ) : ℂ :=
-  exp (I * coulombTheta ℓ η ρ) * (-2 * I * ρ) ^ ((ℓ : ℂ) + 1 + I * η) *
-    kummerU ((ℓ : ℂ) + 1 + I * η) (2 * ℓ + 2) (-2 * I * ρ)
-
-/-- The incoming Coulomb function
-`H^-_ℓ(η,ρ) = e^{-iθ_ℓ} (2iρ)^{ℓ+1-iη} U(ℓ+1-iη, 2ℓ+2, 2iρ)` (DLMF 33.2.8, lower signs). -/
-@[dlmf 33.2.E8]
-def coulombHMinus (ℓ : ℕ) (η ρ : ℝ) : ℂ :=
-  exp (-I * coulombTheta ℓ η ρ) * (2 * I * ρ) ^ ((ℓ : ℂ) + 1 - I * η) *
-    kummerU ((ℓ : ℂ) + 1 - I * η) (2 * ℓ + 2) (2 * I * ρ)
-
 /-- The expansion behind DLMF 33.11.1 for `ρ ↦ (ρ c)^a U(a, b, ρ c)` along a ray in a rotated
 sector. -/
-lemma hasAsymptoticExpansion_ray_cpow_mul_kummerU (a b : ℂ) {c : ℂ} (hc : c ≠ 0) {δ α : ℝ}
+theorem hasAsymptoticExpansion_ray_cpow_mul_kummerU (a b : ℂ) {c : ℂ} (hc : c ≠ 0) {δ α : ℝ}
     (hδ : 0 < δ) (hα : |α| < π / 2) (h : δ * ‖c‖ ≤ (c * exp (α * I)).re) :
     HasAsymptoticExpansion atTop (fun (k : ℕ) (ρ : ℝ) => ((ρ : ℂ) ^ k)⁻¹)
       (fun k => poch a k * poch (a - b + 1) k / (k ! * (-c) ^ k))
@@ -105,7 +83,7 @@ lemma hasAsymptoticExpansion_ray_cpow_mul_kummerU (a b : ℂ) {c : ℂ} (hc : c 
     field_simp
     rw [← pow_mul, pow_mul', neg_one_sq, one_pow, one_mul]
 
-lemma two_I_ne_zero : (2 * I : ℂ) ≠ 0 := mul_ne_zero two_ne_zero I_ne_zero
+theorem two_I_ne_zero : (2 * I : ℂ) ≠ 0 := mul_ne_zero two_ne_zero I_ne_zero
 
 /-- **Asymptotic expansion of `H^+_ℓ`** (DLMF 33.11.1, upper signs):
 `e^{-iθ_ℓ} H^+_ℓ(η,ρ) ~ ∑ (iη-ℓ)_k (iη+ℓ+1)_k / (k! (2iρ)^k)` as `ρ → +∞`. -/

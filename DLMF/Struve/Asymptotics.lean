@@ -5,13 +5,12 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Struve.AngerWeber
 public import DLMF.Airy.Scorer
-public import DLMF.Confluent.TricomiRotated
 public import DLMF.Struve.AsymptoticTools
 public import DLMF.Struve.TurningTools
 public import DLMF.Struve.LargeOrderTools
 public import ToMathlib.Analysis.Integral.Laplace
+public import DLMF.Struve.Representations
 
 /-!
 # Struve and Anger–Weber asymptotics
@@ -54,7 +53,7 @@ open DLMF.Confluent
 open scoped Interval
 
 /-- `cos y · (1 + r²) ≤ ‖1 + (r e^{iy})²‖`. -/
-lemma cos_mul_le_norm_one_add_sq (r y : ℝ) :
+theorem cos_mul_le_norm_one_add_sq (r y : ℝ) :
     Real.cos y * (1 + r ^ 2) ≤ ‖1 + ((r : ℂ) * exp (y * I)) ^ 2‖ := by
   set w := 1 + ((r : ℂ) * exp (y * I)) ^ 2 with hw
   have hexp : ((r : ℂ) * exp (y * I)) ^ 2 = ((r ^ 2 : ℝ) : ℂ) * exp (((2 * y : ℝ) : ℂ) * I) := by
@@ -73,7 +72,7 @@ lemma cos_mul_le_norm_one_add_sq (r y : ℝ) :
     _ = ‖w‖ := Real.sqrt_sq (norm_nonneg _)
 
 /-- `1 + (r e^{iy})²` lies in the slit plane for `|y| < π/2`. -/
-lemma one_add_sq_mem_slitPlane {r y : ℝ} (hy : |y| < π / 2) :
+theorem one_add_sq_mem_slitPlane {r y : ℝ} (hy : |y| < π / 2) :
     1 + ((r : ℂ) * exp (y * I)) ^ 2 ∈ slitPlane := by
   have hexp : ((r : ℂ) * exp (y * I)) ^ 2 = ((r ^ 2 : ℝ) : ℂ) * exp (((2 * y : ℝ) : ℂ) * I) := by
     rw [mul_pow, ← exp_nat_mul]; push_cast; ring_nf
@@ -93,13 +92,13 @@ lemma one_add_sq_mem_slitPlane {r y : ℝ} (hy : |y| < π / 2) :
     · right; exact mul_ne_zero (by positivity) hs
 
 /-- A point between `0` and `α` has modulus at most `|α|`. -/
-lemma abs_le_abs_of_mem_uIcc_zero_left {α y : ℝ} (hy : y ∈ [[0, α]]) : |y| ≤ |α| := by
+theorem abs_le_abs_of_mem_uIcc_zero_left {α y : ℝ} (hy : y ∈ [[0, α]]) : |y| ≤ |α| := by
   rcases le_total 0 α with h | h
   · rw [uIcc_of_le h] at hy; rw [abs_of_nonneg hy.1, abs_of_nonneg h]; exact hy.2
   · rw [uIcc_of_ge h] at hy; rw [abs_of_nonpos hy.2, abs_of_nonpos h]; linarith [hy.1]
 
 /-- A polynomial bound for `(1 + (r e^{iy})²)^a`, uniform in `|y| ≤ |α| < π/2`. -/
-lemma norm_one_add_sq_mul_exp_cpow_le {a : ℂ} {α : ℝ} (hα : |α| < π / 2) {N : ℕ} (hN : |a.re| ≤ N)
+theorem norm_one_add_sq_mul_exp_cpow_le {a : ℂ} {α : ℝ} (hα : |α| < π / 2) {N : ℕ} (hN : |a.re| ≤ N)
     {r y : ℝ} (hr : 0 ≤ r) (hy : |y| ≤ |α|) :
     ‖(1 + ((r : ℂ) * exp (y * I)) ^ 2) ^ a‖ ≤
       Real.cos α ^ (-(N : ℝ)) * (1 + r) ^ (2 * N) * Real.exp (π * |a.im|) := by
@@ -135,7 +134,7 @@ lemma norm_one_add_sq_mul_exp_cpow_le {a : ℂ} {α : ℝ} (hα : |α| < π / 2)
 def struveKKernel (a z t : ℂ) : ℂ := exp (-z * t) * (1 + t ^ 2) ^ a
 
 /-- Pointwise bound for the kernel on the ray `r e^{iy}`. -/
-lemma norm_struveKKernel_le {a : ℂ} {α : ℝ} (hα : |α| < π / 2) {N : ℕ} (hN : |a.re| ≤ N)
+theorem norm_struveKKernel_le {a : ℂ} {α : ℝ} (hα : |α| < π / 2) {N : ℕ} (hN : |a.re| ≤ N)
     (z : ℂ) {r y : ℝ} (hr : 0 ≤ r) (hy : |y| ≤ |α|) :
     ‖struveKKernel a z (r * exp (y * I))‖ ≤ Real.exp (-(z * (r * exp (y * I))).re) *
       (Real.cos α ^ (-(N : ℝ)) * (1 + r) ^ (2 * N) * Real.exp (π * |a.im|)) := by
@@ -143,7 +142,7 @@ lemma norm_struveKKernel_le {a : ℂ} {α : ℝ} (hα : |α| < π / 2) {N : ℕ}
   exact mul_le_mul_of_nonneg_left (norm_one_add_sq_mul_exp_cpow_le hα hN hr hy) (Real.exp_pos _).le
 
 /-- The kernel is holomorphic on the rays `r e^{iy}`, `|y| < π/2`. -/
-lemma differentiableAt_struveKKernel (a z : ℂ) {r y : ℝ} (hy : |y| < π / 2) :
+theorem differentiableAt_struveKKernel (a z : ℂ) {r y : ℝ} (hy : |y| < π / 2) :
     DifferentiableAt ℂ (struveKKernel a z) (r * exp (y * I)) := by
   unfold struveKKernel
   exact (by fun_prop : DifferentiableAt ℂ (fun t : ℂ => exp (-z * t)) _).mul
@@ -151,7 +150,7 @@ lemma differentiableAt_struveKKernel (a z : ℂ) {r y : ℝ} (hy : |y| < π / 2)
       (one_add_sq_mem_slitPlane hy))
 
 /-- Rotation of the ray in the Laplace integral of `𝐊_ν`, on the common half-plane. -/
-lemma integral_struveKKernel_rotate {a z : ℂ} {α : ℝ} (hα : |α| < π / 2) (hz0 : 0 < z.re)
+theorem integral_struveKKernel_rotate {a z : ℂ} {α : ℝ} (hα : |α| < π / 2) (hz0 : 0 < z.re)
     (hzα : 0 < (z * exp (α * I)).re) :
     ∫ r in Ioi (0 : ℝ), struveKKernel a z r =
       exp (α * I) * ∫ r in Ioi (0 : ℝ), struveKKernel a z (r * exp (α * I)) := by
@@ -215,7 +214,7 @@ def struveKRotIntegral (a : ℂ) (α : ℝ) (z : ℂ) : ℂ :=
   ∫ r in Ioi (0 : ℝ), struveKKernel a z (r * exp (α * I))
 
 /-- The rotated integral is holomorphic on the half-plane `re (z e^{iα}) > 0`. -/
-lemma differentiableOn_struveKRotIntegral (a : ℂ) {α : ℝ} (hα : |α| < π / 2) :
+theorem differentiableOn_struveKRotIntegral (a : ℂ) {α : ℝ} (hα : |α| < π / 2) :
     DifferentiableOn ℂ (struveKRotIntegral a α) {z : ℂ | 0 < (z * exp (α * I)).re} := by
   intro z₀ hz₀
   change 0 < (z₀ * exp (α * I)).re at hz₀
@@ -353,7 +352,7 @@ theorem struveK_eq_struveKRotated (ν : ℂ) {α : ℝ} (hα : |α| < π / 2) {z
 
 
 /-- `(a)(a-1)⋯(a-k+1)/Γ(a+1) = 1/Γ(a+1-k)`. -/
-lemma neg_one_pow_mul_poch_mul_recip_Gamma (a : ℂ) (k : ℕ) :
+theorem neg_one_pow_mul_poch_mul_recip_Gamma (a : ℂ) (k : ℕ) :
     (Gamma (a + 1))⁻¹ * ((-1) ^ k * poch (-a) k) = (Gamma (a + 1 - k))⁻¹ := by
   induction k with
   | zero => simp [poch]
@@ -366,7 +365,7 @@ lemma neg_one_pow_mul_poch_mul_recip_Gamma (a : ℂ) (k : ℕ) :
     ring
 
 /-- `Γ(k+1/2) k! 4^k = (2k)! √π`. -/
-lemma Gamma_nat_add_half_mul (k : ℕ) :
+theorem Gamma_nat_add_half_mul (k : ℕ) :
     Gamma (k + 1 / 2) * (k ! : ℂ) * 4 ^ k = ((2 * k) ! : ℂ) * Real.sqrt π := by
   have h := Complex.Gamma_mul_Gamma_add_half ((k : ℂ) + 1 / 2)
   rw [show (k : ℂ) + 1 / 2 + 1 / 2 = (k : ℂ) + 1 by ring, Complex.Gamma_nat_eq_factorial,
@@ -380,7 +379,7 @@ lemma Gamma_nat_add_half_mul (k : ℕ) :
   rw [h]; field_simp
 
 /-- The coefficient identity behind DLMF 11.6.1. -/
-lemma struveK_coeff_eq (ν : ℂ) {z : ℂ} (hz : z ≠ 0) (k : ℕ) :
+theorem struveK_coeff_eq (ν : ℂ) {z : ℂ} (hz : z ≠ 0) (k : ℕ) :
     2 * (z / 2) ^ ν / (Real.sqrt π * Gamma (ν + 1 / 2)) *
       ((z ^ (2 * k + 1))⁻¹ * (Gamma (((2 * k : ℕ) : ℂ) + 1) * Ring.choose (ν - 1 / 2) k)) =
       struveAsymptoticTerm ν z k := by
@@ -407,7 +406,7 @@ lemma struveK_coeff_eq (ν : ℂ) {z : ℂ} (hz : z ≠ 0) (k : ℕ) :
   field_simp
 
 /-- A sum over even indices below `N`, reindexed. -/
-lemma sum_range_ite_even (g : ℕ → ℂ) (N : ℕ) :
+theorem sum_range_ite_even (g : ℕ → ℂ) (N : ℕ) :
     ∑ n ∈ Finset.range N, (if Even n then g (n / 2) else 0) =
       ∑ k ∈ Finset.range ((N + 1) / 2), g k := by
   induction N with
@@ -427,7 +426,7 @@ def struveKCoeffA (a : ℂ) (α : ℝ) (n : ℕ) : ℂ :=
   if Even n then exp (α * I) ^ n * Ring.choose a (n / 2) else 0
 
 /-- Watson's lemma for the rotated Laplace integral of `𝐊_ν`. -/
-lemma hasAsymptoticExpansion_struveKRotIntegral (a : ℂ) {δ α : ℝ} (hδ : 0 < δ)
+theorem hasAsymptoticExpansion_struveKRotIntegral (a : ℂ) {δ α : ℝ} (hδ : 0 < δ)
     (hα : |α| < π / 2) :
     HasAsymptoticExpansion (rotSectorAtTop δ α)
       (fun (n : ℕ) (z : ℂ) => (z * exp (α * I)) ^ (-((n : ℂ) + 1)))
@@ -492,7 +491,7 @@ lemma hasAsymptoticExpansion_struveKRotIntegral (a : ℂ) {δ α : ℝ} (hδ : 0
   rw [hω]; ring_nf
 
 /-- `‖(z/2)^w‖ = 2^{-re w} ‖z^w‖`. -/
-lemma norm_div_two_cpow (z w : ℂ) : ‖(z / 2) ^ w‖ = 2 ^ (-w.re) * ‖z ^ w‖ := by
+theorem norm_div_two_cpow (z w : ℂ) : ‖(z / 2) ^ w‖ = 2 ^ (-w.re) * ‖z ^ w‖ := by
   rcases eq_or_ne z 0 with rfl | hz
   · rw [zero_div]
     rcases eq_or_ne w 0 with rfl | hw
@@ -507,7 +506,7 @@ lemma norm_div_two_cpow (z w : ℂ) : ‖(z / 2) ^ w‖ = 2 ^ (-w.re) * ‖z ^ w
     ring
 
 /-- `(z/2)^w = O(z^w)` along any filter. -/
-lemma isBigO_div_two_cpow (l : Filter ℂ) (w : ℂ) :
+theorem isBigO_div_two_cpow (l : Filter ℂ) (w : ℂ) :
     (fun z : ℂ => (z / 2) ^ w) =O[l] fun z => z ^ w :=
   IsBigO.of_bound (2 ^ (-w.re)) (Eventually.of_forall fun z => (norm_div_two_cpow z w).le)
 
@@ -566,7 +565,7 @@ theorem struveK_asymptotic_rotSector (ν : ℂ) {δ α : ℝ} (hδ : 0 < δ) (h�
     rw [Finset.sum_congr rfl hsum, sum_range_ite_even, show (2 * N + 1) / 2 = N by omega]
 
 /-- Unfolding an eventual statement in a rotated Watson sector. -/
-lemma exists_of_eventually_rotSectorAtTop {δ α : ℝ} {p : ℂ → Prop}
+theorem exists_of_eventually_rotSectorAtTop {δ α : ℝ} {p : ℂ → Prop}
     (h : ∀ᶠ z in rotSectorAtTop δ α, p z) :
     ∃ R, ∀ z : ℂ, R ≤ ‖z‖ → δ * ‖z‖ ≤ (z * exp (α * I)).re → p z := by
   rw [rotSectorAtTop, eventually_comap, sectorAtTop, eventually_inf_principal, eventually_comap,
@@ -577,7 +576,7 @@ lemma exists_of_eventually_rotSectorAtTop {δ α : ℝ} {p : ℂ → Prop}
   exact hR ‖z‖ hz (z * exp (α * I)) hn (by show δ * ‖z * exp (α * I)‖ ≤ (z * exp (α * I)).re; rw [hn]; exact hzs) z rfl
 
 /-- The closed sector `|arg z| ≤ π - δ` is covered by two rotated Watson sectors. -/
-lemma sector_le_sup_rotSectorAtTop {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) :
+theorem sector_le_sup_rotSectorAtTop {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) :
     DLMF.sector (π - δ) ≤ rotSectorAtTop (Real.sin (δ / 2)) (-((π - δ) / 2)) ⊔
       rotSectorAtTop (Real.sin (δ / 2)) ((π - δ) / 2) := by
   intro U hU
@@ -611,7 +610,7 @@ def struveMCoeffB (a : ℂ) (n : ℕ) : ℂ :=
 def struveMWeight (a : ℂ) (t : ℝ) : ℂ :=
   (Iic (1 : ℝ)).indicator (fun t : ℝ => (1 - (t : ℂ) ^ 2) ^ a) t
 
-lemma hasAsymptoticExpansion_struveMIntegral {a : ℂ} (ha : 0 < a.re) {δ : ℝ} (hδ : 0 < δ) :
+theorem hasAsymptoticExpansion_struveMIntegral {a : ℂ} (ha : 0 < a.re) {δ : ℝ} (hδ : 0 < δ) :
     HasAsymptoticExpansion (sectorAtTop δ) (fun (n : ℕ) (z : ℂ) => z ^ (-((n : ℂ) + 1)))
       (fun n => Gamma ((n : ℂ) + 1) • struveMCoeffB a n)
       (fun z => ∫ t in Ioi (0 : ℝ), exp (-(z * t)) • struveMWeight a t) := by
@@ -673,7 +672,7 @@ lemma hasAsymptoticExpansion_struveMIntegral {a : ℂ} (ha : 0 < a.re) {δ : ℝ
   exact hasAsymptoticExpansion_integral_cexp_smul_sector (μ := 1) (by simp) hδ hint hFexp
 
 /-- DLMF 11.5.4 written as a Laplace integral over `(0, ∞)`. -/
-lemma struveM_eq_integral_weight {ν : ℂ} (hν : -1 / 2 < ν.re) {z : ℂ} (hz : 0 < z.re) :
+theorem struveM_eq_integral_weight {ν : ℂ} (hν : -1 / 2 < ν.re) {z : ℂ} (hz : 0 < z.re) :
     struveM ν z = -(2 * (z / 2) ^ ν / (Real.sqrt π * Gamma (ν + 1 / 2))) *
       ∫ t in Ioi (0 : ℝ), exp (-(z * t)) • struveMWeight (ν - 1 / 2) t := by
   rw [struveM_eq_poisson hν (Or.inl hz), intervalIntegral.integral_of_le zero_le_one,
@@ -689,12 +688,12 @@ lemma struveM_eq_integral_weight {ν : ℂ} (hν : -1 / 2 < ν.re) {z : ℂ} (hz
   rw [h]; ring
 
 /-- Points of a Watson sector eventually have `‖z‖ ≥ 1` and `re z > 0`. -/
-lemma eventually_re_pos_sectorAtTop {δ : ℝ} (hδ : 0 < δ) :
+theorem eventually_re_pos_sectorAtTop {δ : ℝ} (hδ : 0 < δ) :
     ∀ᶠ z in sectorAtTop δ, 1 ≤ ‖z‖ ∧ 0 < z.re :=
   eventually_sectorAtTop (R := 1) fun z hz hzs => ⟨hz, by nlinarith⟩
 
 /-- DLMF 11.6.2 for `re ν > 1/2`, in the Watson sector `δ |z| ≤ re z`. -/
-lemma struveM_asymptotic_sectorAtTop_of_re {ν : ℂ} (hν : 1 / 2 < ν.re) {δ : ℝ} (hδ : 0 < δ)
+theorem struveM_asymptotic_sectorAtTop_of_re {ν : ℂ} (hν : 1 / 2 < ν.re) {δ : ℝ} (hδ : 0 < δ)
     (N : ℕ) :
     (fun z : ℂ => struveM ν z -
       ∑ k ∈ Finset.range N, (-1) ^ (k + 1) * struveAsymptoticTerm ν z k)
@@ -742,7 +741,7 @@ lemma struveM_asymptotic_sectorAtTop_of_re {ν : ℂ} (hν : 1 / 2 < ν.re) {δ 
     struveAsymptoticTerm ν z k), show (2 * N + 1) / 2 = N by omega]
 
 /-- The recurrence `𝐌_{ν-1} = 𝐌_{ν+1} + (2ν/z) 𝐌_ν + (z/2)^ν/(√π Γ(ν+3/2))`. -/
-lemma struveM_sub_one (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
+theorem struveM_sub_one (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     struveM (ν - 1) z = struveM (ν + 1) z + 2 * ν / z * struveM ν z +
       (z / 2) ^ ν / (Real.sqrt π * Gamma (ν + 3 / 2)) := by
   have hL := struveL_recurrence ν hz
@@ -751,7 +750,7 @@ lemma struveM_sub_one (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
   linear_combination hL + hI
 
 /-- The asymptotic coefficients satisfy the same recurrence. -/
-lemma struveAsymptoticTerm_sum_sub_one (ν : ℂ) {z : ℂ} (hz : z ≠ 0) (N : ℕ) :
+theorem struveAsymptoticTerm_sum_sub_one (ν : ℂ) {z : ℂ} (hz : z ≠ 0) (N : ℕ) :
     ∑ k ∈ Finset.range N, (-1) ^ (k + 1) * struveAsymptoticTerm (ν - 1) z k =
       ∑ k ∈ Finset.range (N + 1), (-1) ^ (k + 1) * struveAsymptoticTerm (ν + 1) z k +
       2 * ν / z * ∑ k ∈ Finset.range N, (-1) ^ (k + 1) * struveAsymptoticTerm ν z k +
@@ -792,7 +791,7 @@ lemma struveAsymptoticTerm_sum_sub_one (ν : ℂ) {z : ℂ} (hz : z ≠ 0) (N : 
   ring
 
 /-- One downward step of the recurrence for the expansion of `𝐌_ν`. -/
-lemma struveM_asymptotic_step {l : Filter ℂ} (hl : ∀ᶠ z in l, z ∈ slitPlane) {μ : ℂ} (N : ℕ)
+theorem struveM_asymptotic_step {l : Filter ℂ} (hl : ∀ᶠ z in l, z ∈ slitPlane) {μ : ℂ} (N : ℕ)
     (h1 : (fun z : ℂ => struveM (μ + 1) z -
       ∑ k ∈ Finset.range (N + 1), (-1) ^ (k + 1) * struveAsymptoticTerm (μ + 1) z k)
       =O[l] fun z : ℂ => z ^ (μ + 1 - 2 * ((N + 1 : ℕ) : ℂ) - 1))
@@ -847,7 +846,7 @@ theorem struveM_asymptotic_sectorAtTop (ν : ℂ) {δ : ℝ} (hδ : 0 < δ) (N :
     exact h
 
 /-- The sector `|arg z| ≤ π/2 - δ` lies in the Watson sector `sin δ · |z| ≤ re z`. -/
-lemma sector_le_sectorAtTop {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π / 2) :
+theorem sector_le_sectorAtTop {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π / 2) :
     DLMF.sector (π / 2 - δ) ≤ sectorAtTop (Real.sin δ) := by
   refine inf_le_inf_left _ (principal_mono.mpr fun z hz => ?_)
   obtain ⟨hz0, harg⟩ := hz
@@ -884,7 +883,7 @@ open scoped Interval
 
 
 /-- `‖𝐊₀(w)‖ ≤ M (cos α)^{-1/2} (re (w e^{iα}))^{-1/2}` from the rotated Laplace integral. -/
-lemma struvePrim_norm_struveK_zero_le {α : ℝ} (hα : |α| < π / 2) {w : ℂ}
+theorem struvePrim_norm_struveK_zero_le {α : ℝ} (hα : |α| < π / 2) {w : ℂ}
     (hw : 0 < (w * exp (α * I)).re) :
     ‖struveK 0 w‖ ≤ ‖(2 : ℂ) / (Real.sqrt π * Gamma (1 / 2))‖ *
       (Real.cos α ^ (-(1 / 2 : ℝ)) * ((1 / (w * exp (α * I)).re) ^ (1 / 2 : ℝ) *
@@ -926,7 +925,7 @@ lemma struvePrim_norm_struveK_zero_le {α : ℝ} (hα : |α| < π / 2) {w : ℂ}
 
 
 /-- Positive real multiples stay in the slit plane. -/
-lemma struvePrim_ofReal_mul_mem {t : ℝ} (ht : 0 < t) {z : ℂ} (hz : z ∈ slitPlane) :
+theorem struvePrim_ofReal_mul_mem {t : ℝ} (ht : 0 < t) {z : ℂ} (hz : z ∈ slitPlane) :
     (t : ℂ) * z ∈ slitPlane := by
   rw [mem_slitPlane_iff] at hz ⊢
   rw [re_ofReal_mul, im_ofReal_mul]
@@ -935,7 +934,7 @@ lemma struvePrim_ofReal_mul_mem {t : ℝ} (ht : 0 < t) {z : ℂ} (hz : z ∈ sli
   · right; exact mul_ne_zero ht.ne' h
 
 /-- A local bound `‖𝐊₀(t y)‖ ≤ C t^{-1/2}`, uniform for `y` near a point of the slit plane. -/
-lemma struvePrim_local_bound {z₀ : ℂ} (hz₀ : z₀ ∈ slitPlane) :
+theorem struvePrim_local_bound {z₀ : ℂ} (hz₀ : z₀ ∈ slitPlane) :
     ∃ V ∈ 𝓝 z₀, ∃ C : ℝ, ∀ y ∈ V, ∀ t : ℝ, 0 < t → ‖struveK 0 ((t : ℂ) * y)‖ ≤ C * t ^ (-(1 / 2 : ℝ)) := by
   set α : ℝ := -(arg z₀ / 2) with hα
   have hz0 : z₀ ≠ 0 := slitPlane_ne_zero hz₀
@@ -984,16 +983,16 @@ lemma struvePrim_local_bound {z₀ : ℂ} (hz₀ : z₀ ∈ slitPlane) :
 
 
 /-- `𝐊₀` is continuous on the slit plane. -/
-lemma struvePrim_continuousOn : ContinuousOn (struveK 0) slitPlane :=
+theorem struvePrim_continuousOn : ContinuousOn (struveK 0) slitPlane :=
   (DLMF.Bessel.analyticOnNhd_struveK 0).continuousOn
 
 /-- `t ↦ 𝐊₀(t z)` is continuous on `(0, ∞)` for `z` in the slit plane. -/
-lemma struvePrim_continuousOn_ray {z : ℂ} (hz : z ∈ slitPlane) :
+theorem struvePrim_continuousOn_ray {z : ℂ} (hz : z ∈ slitPlane) :
     ContinuousOn (fun t : ℝ => struveK 0 ((t : ℂ) * z)) (Ioi 0) :=
   struvePrim_continuousOn.comp (by fun_prop) fun t ht => struvePrim_ofReal_mul_mem ht hz
 
 /-- `t ↦ 𝐊₀(t z)` is interval integrable on `[0, 1]`. -/
-lemma struvePrim_intervalIntegrable {z : ℂ} (hz : z ∈ slitPlane) :
+theorem struvePrim_intervalIntegrable {z : ℂ} (hz : z ∈ slitPlane) :
     IntervalIntegrable (fun t : ℝ => struveK 0 ((t : ℂ) * z)) volume 0 1 := by
   obtain ⟨V, hV, C, hC⟩ := struvePrim_local_bound hz
   have hg : IntervalIntegrable (fun t : ℝ => C * t ^ (-(1 / 2 : ℝ))) volume 0 1 :=
@@ -1008,7 +1007,7 @@ lemma struvePrim_intervalIntegrable {z : ℂ} (hz : z ∈ slitPlane) :
       hC z (mem_of_mem_nhds hV) t ht.1)
 
 /-- The segment DLMF.primitive of `𝐊₀` is holomorphic on the slit plane. -/
-lemma struvePrim_differentiableOn :
+theorem struvePrim_differentiableOn :
     DifferentiableOn ℂ (fun w : ℂ => ∫ t in (0 : ℝ)..1, struveK 0 ((t : ℂ) * w)) slitPlane := by
   have hI : Ι (0 : ℝ) 1 = Ioc 0 1 := uIoc_of_le zero_le_one
   refine Complex.differentiableOn_intervalIntegral_of_locally_dominated
@@ -1032,7 +1031,7 @@ lemma struvePrim_differentiableOn :
         hC y hy t ht.1)
 
 /-- The DLMF.primitive `∫₀^z 𝐊₀` is a holomorphic antiderivative of `𝐊₀` on the slit plane. -/
-lemma struvePrim_hasDerivAt {z : ℂ} (hz : z ∈ slitPlane) :
+theorem struvePrim_hasDerivAt {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (DLMF.primitive (struveK 0)) (struveK 0 z) z := by
   have hP : DLMF.primitive (struveK 0) = fun w : ℂ => w * ∫ t in (0 : ℝ)..1, struveK 0 ((t : ℂ) * w) := by
     funext w; simp [DLMF.primitive, segmentIntegral]
@@ -1079,7 +1078,7 @@ lemma struvePrim_hasDerivAt {z : ℂ} (hz : z ∈ slitPlane) :
 
 
 /-- `∫₀^∞ ((1+τ²)^{-1/2} - (1+τ)⁻¹)/τ dτ = log 2`, with integrability. -/
-lemma struvePrim_integral_log_two :
+theorem struvePrim_integral_log_two :
     IntegrableOn (fun τ : ℝ => (1 / Real.sqrt (1 + τ ^ 2) - 1 / (1 + τ)) / τ) (Ioi 0) ∧
     ∫ τ in Ioi (0 : ℝ), (1 / Real.sqrt (1 + τ ^ 2) - 1 / (1 + τ)) / τ = Real.log 2 := by
   set F : ℝ → ℝ := fun τ => Real.log (1 + τ) - Real.log (1 + Real.sqrt (1 + τ ^ 2)) with hF
@@ -1148,7 +1147,7 @@ lemma struvePrim_integral_log_two :
   ring
 
 /-- `∫₀^∞ ((1+τ)⁻¹ - (1+xτ)⁻¹)/τ dτ = log x` for `x > 0`, with integrability. -/
-lemma struvePrim_integral_log {x : ℝ} (hx : 0 < x) :
+theorem struvePrim_integral_log {x : ℝ} (hx : 0 < x) :
     IntegrableOn (fun τ : ℝ => (1 / (1 + τ) - 1 / (1 + x * τ)) / τ) (Ioi 0) ∧
     ∫ τ in Ioi (0 : ℝ), (1 / (1 + τ) - 1 / (1 + x * τ)) / τ = Real.log x := by
   set G : ℝ → ℝ := fun τ => Real.log (1 + x * τ) - Real.log (1 + τ) with hG
@@ -1210,7 +1209,7 @@ lemma struvePrim_integral_log {x : ℝ} (hx : 0 < x) :
   simp [hG]
 
 /-- `∫₀^∞ ((1+xτ)⁻¹ - e^{-xτ})/τ dτ = γ` for `x > 0`, with integrability. -/
-lemma struvePrim_integral_euler {x : ℝ} (hx : 0 < x) :
+theorem struvePrim_integral_euler {x : ℝ} (hx : 0 < x) :
     IntegrableOn (fun τ : ℝ => (1 / (1 + x * τ) - Real.exp (-(x * τ))) / τ) (Ioi 0) ∧
     ∫ τ in Ioi (0 : ℝ), (1 / (1 + x * τ) - Real.exp (-(x * τ))) / τ =
       Real.eulerMascheroniConstant := by
@@ -1231,7 +1230,7 @@ lemma struvePrim_integral_euler {x : ℝ} (hx : 0 < x) :
       ← mul_assoc, mul_inv_cancel₀ hx.ne', one_mul, DLMF.Gamma.eulerMascheroni_eq_integral_recip_one_add]
 
 /-- The combined Frullani-type integral: `∫₀^∞ ((1+τ²)^{-1/2} - e^{-xτ})/τ dτ = log 2x + γ`. -/
-lemma struvePrim_integral_log_two_mul {x : ℝ} (hx : 0 < x) :
+theorem struvePrim_integral_log_two_mul {x : ℝ} (hx : 0 < x) :
     IntegrableOn (fun τ : ℝ => (1 / Real.sqrt (1 + τ ^ 2) - Real.exp (-(x * τ))) / τ) (Ioi 0) ∧
     ∫ τ in Ioi (0 : ℝ), (1 / Real.sqrt (1 + τ ^ 2) - Real.exp (-(x * τ))) / τ =
       Real.log (2 * x) + Real.eulerMascheroniConstant := by
@@ -1251,7 +1250,7 @@ lemma struvePrim_integral_log_two_mul {x : ℝ} (hx : 0 < x) :
 
 
 /-- The real Laplace form of `𝐊₀` on the positive axis (DLMF 11.5.2 with `ν = 0`). -/
-lemma struvePrim_struveK_zero_ofReal {t : ℝ} (ht : 0 < t) :
+theorem struvePrim_struveK_zero_ofReal {t : ℝ} (ht : 0 < t) :
     struveK 0 t = (((2 / π) * ∫ τ in Ioi (0 : ℝ),
       Real.exp (-(t * τ)) * (1 / Real.sqrt (1 + τ ^ 2)) : ℝ) : ℂ) := by
   rw [DLMF.Bessel.struveK_eq_integral 0 (by simpa using ht)]
@@ -1274,7 +1273,7 @@ lemma struvePrim_struveK_zero_ofReal {t : ℝ} (ht : 0 < t) :
   rw [mul_one, show (2 : ℂ) / (↑√π * ↑√π) = 2 / π from by rw [hss] ]
 
 /-- `∫₀^x e^{-uτ} du = (1 - e^{-xτ})/τ` for `τ ≠ 0`. -/
-lemma struvePrim_integral_exp {τ : ℝ} (hτ : τ ≠ 0) (x : ℝ) :
+theorem struvePrim_integral_exp {τ : ℝ} (hτ : τ ≠ 0) (x : ℝ) :
     ∫ u in (0 : ℝ)..x, Real.exp (-(u * τ)) = (1 - Real.exp (-(x * τ))) / τ := by
   have h : ∀ u ∈ [[(0 : ℝ), x]], HasDerivAt (fun u : ℝ => -Real.exp (-(u * τ)) / τ)
       (Real.exp (-(u * τ))) u := by
@@ -1290,7 +1289,7 @@ lemma struvePrim_integral_exp {τ : ℝ} (hτ : τ ≠ 0) (x : ℝ) :
   ring
 
 /-- Fubini for the DLMF.primitive: `∫₀^x 𝐊₀ = (2/π) ∫₀^∞ (1+τ²)^{-1/2} (1 - e^{-xτ})/τ dτ`. -/
-lemma struvePrim_primitive_ofReal {x : ℝ} (hx : 0 < x) :
+theorem struvePrim_primitive_ofReal {x : ℝ} (hx : 0 < x) :
     DLMF.primitive (struveK 0) x = (((2 / π) * ∫ τ in Ioi (0 : ℝ),
       (1 / Real.sqrt (1 + τ ^ 2)) * ((1 - Real.exp (-(x * τ))) / τ) : ℝ) : ℂ) := by
   set g : ℝ → ℝ := fun τ => 1 / Real.sqrt (1 + τ ^ 2) with hg
@@ -1393,7 +1392,7 @@ lemma struvePrim_primitive_ofReal {x : ℝ} (hx : 0 < x) :
 
 
 /-- For `τ > 0`, `0 ≤ (1 - (1+τ²)^{-1/2})/τ ≤ 1`. -/
-lemma struvePrim_quot_bounds {τ : ℝ} (hτ0 : 0 < τ) :
+theorem struvePrim_quot_bounds {τ : ℝ} (hτ0 : 0 < τ) :
     0 ≤ (1 - 1 / Real.sqrt (1 + τ ^ 2)) / τ ∧ (1 - 1 / Real.sqrt (1 + τ ^ 2)) / τ ≤ 1 := by
   have hS : 0 < Real.sqrt (1 + τ ^ 2) := Real.sqrt_pos.2 (by positivity)
   have hg1 : 1 / Real.sqrt (1 + τ ^ 2) ≤ 1 := by
@@ -1411,7 +1410,7 @@ lemma struvePrim_quot_bounds {τ : ℝ} (hτ0 : 0 < τ) :
   linarith
 
 /-- Integrability of the remainder integrand `e^{-xτ}(1 - (1+τ²)^{-1/2})/τ` on `(0, ∞)`. -/
-lemma struvePrim_rem_integrable {x : ℝ} (hx : 0 < x) :
+theorem struvePrim_rem_integrable {x : ℝ} (hx : 0 < x) :
     IntegrableOn (fun τ : ℝ => Real.exp (-(x * τ)) * ((1 - 1 / Real.sqrt (1 + τ ^ 2)) / τ))
       (Ioi 0) := by
   have hS : ∀ τ : ℝ, 0 < Real.sqrt (1 + τ ^ 2) := fun τ => Real.sqrt_pos.2 (by positivity)
@@ -1427,7 +1426,7 @@ lemma struvePrim_rem_integrable {x : ℝ} (hx : 0 < x) :
     _ = _ := mul_one _
 
 /-- On the positive axis, `∫₀^x 𝐊₀ - (2/π)(log 2x + γ) = (2/π) ∫₀^∞ e^{-xτ} (1 - (1+τ²)^{-1/2})/τ dτ`. -/
-lemma struvePrim_remainder_ofReal {x : ℝ} (hx : 0 < x) :
+theorem struvePrim_remainder_ofReal {x : ℝ} (hx : 0 < x) :
     DLMF.primitive (struveK 0) x - 2 / π * (log (2 * x) + Real.eulerMascheroniConstant) =
       (((2 / π) * ∫ τ in Ioi (0 : ℝ),
         Real.exp (-(x * τ)) * ((1 - 1 / Real.sqrt (1 + τ ^ 2)) / τ) : ℝ) : ℂ) := by
@@ -1445,7 +1444,7 @@ lemma struvePrim_remainder_ofReal {x : ℝ} (hx : 0 < x) :
   ring
 
 /-- `∫₀^x 𝐊₀ - (2/π)(log 2x + γ) → 0` as `x → +∞` (the constant in DLMF 11.6.3). -/
-lemma struvePrim_tendsto_ofReal :
+theorem struvePrim_tendsto_ofReal :
     Tendsto (fun x : ℝ => DLMF.primitive (struveK 0) x -
       2 / π * (log (2 * x) + Real.eulerMascheroniConstant)) atTop (𝓝 0) := by
   have hb : ∀ᶠ x : ℝ in atTop, ‖DLMF.primitive (struveK 0) x -
@@ -1474,12 +1473,12 @@ lemma struvePrim_tendsto_ofReal :
 
 
 /-- `arg (ρ e^{is}) = s` for `ρ > 0` and `s ∈ (-π, π]`. -/
-lemma struvePrim_arg_ray {ρ s : ℝ} (hρ : 0 < ρ) (hs : s ∈ Ioc (-π) π) :
+theorem struvePrim_arg_ray {ρ s : ℝ} (hρ : 0 < ρ) (hs : s ∈ Ioc (-π) π) :
     arg ((ρ : ℂ) * exp (s * I)) = s := by
   rw [arg_real_mul _ hρ, exp_mul_I, arg_cos_add_sin_mul_I hs]
 
 /-- Unpacking an eventual statement in `sector α`. -/
-lemma struvePrim_exists_of_eventually_sector {α : ℝ} {p : ℂ → Prop}
+theorem struvePrim_exists_of_eventually_sector {α : ℝ} {p : ℂ → Prop}
     (h : ∀ᶠ z in sector α, p z) :
     ∃ R : ℝ, ∀ z : ℂ, R ≤ ‖z‖ → z ≠ 0 → |arg z| ≤ α → p z := by
   rw [sector, eventually_inf_principal] at h
@@ -1490,7 +1489,7 @@ lemma struvePrim_exists_of_eventually_sector {α : ℝ} {p : ℂ → Prop}
 /-- **Integration of a derivative bound in a sector.** If `G` is holomorphic on the slit plane,
 `G(t) → 0` along the positive axis, and `‖G'(z)‖ ≤ C ‖z‖^{-(m+1)}` for large `z` with
 `|arg z| ≤ α < π`, then `G(z) = O(z^{-m})` in `sector α`. -/
-lemma struvePrim_isBigO_of_deriv {G G' : ℂ → ℂ} {α : ℝ} (hα0 : 0 ≤ α) (hα : α < π) {m : ℕ} (hm : 0 < m)
+theorem struvePrim_isBigO_of_deriv {G G' : ℂ → ℂ} {α : ℝ} (hα0 : 0 ≤ α) (hα : α < π) {m : ℕ} (hm : 0 < m)
     (hG : ∀ z ∈ slitPlane, HasDerivAt G (G' z) z)
     (hlim : Tendsto (fun t : ℝ => G t) atTop (𝓝 0)) {R C : ℝ} (hR : 0 < R)
     (hC : ∀ z : ℂ, R ≤ ‖z‖ → |arg z| ≤ α → ‖G' z‖ ≤ C * ‖z‖ ^ (-((m : ℤ) + 1))) :
@@ -1604,7 +1603,7 @@ lemma struvePrim_isBigO_of_deriv {G G' : ℂ → ℂ} {α : ℝ} (hα0 : 0 ≤ �
 
 
 /-- `Γ(1/2 - s) (2s)! = (-4)^s s! √π`. -/
-lemma struvePrim_Gamma_half_sub_nat (s : ℕ) :
+theorem struvePrim_Gamma_half_sub_nat (s : ℕ) :
     Gamma (1 / 2 - s) * ((2 * s).factorial : ℂ) = (-4 : ℂ) ^ s * s.factorial * Real.sqrt π := by
   induction s with
   | zero =>
@@ -1628,7 +1627,7 @@ lemma struvePrim_Gamma_half_sub_nat (s : ℕ) :
 
 /-- The `k = j+1` term of the expansion of `∫₀^z 𝐊₀` differentiates to the `k`-th term of the
 expansion of `𝐊₀` (DLMF 11.6.1 with `ν = 0`). -/
-lemma struvePrim_term_hasDerivAt (j : ℕ) {z : ℂ} (hz : z ≠ 0) :
+theorem struvePrim_term_hasDerivAt (j : ℕ) {z : ℂ} (hz : z ≠ 0) :
     HasDerivAt (fun w : ℂ => 2 / π * ((-1) ^ (j + 1 + 1) * ((2 * (j + 1)).factorial : ℂ) *
       (2 * (j + 1) - 1).factorial / (((j + 1).factorial : ℂ) ^ 2 * (2 * w) ^ (2 * (j + 1)))))
       (struveAsymptoticTerm 0 z (j + 1)) z := by
@@ -1687,7 +1686,7 @@ lemma struvePrim_term_hasDerivAt (j : ℕ) {z : ℂ} (hz : z ≠ 0) :
 
 
 /-- The constant term `2/(πz)` of the expansion of `𝐊₀`. -/
-lemma struvePrim_term_zero {z : ℂ} (hz : z ≠ 0) : struveAsymptoticTerm 0 z 0 = 2 / (π * z) := by
+theorem struvePrim_term_zero {z : ℂ} (hz : z ≠ 0) : struveAsymptoticTerm 0 z 0 = 2 / (π * z) := by
   have hG : Gamma (1 / 2) ≠ 0 := by
     rw [Complex.Gamma_one_half_eq]; exact (cpow_ne_zero_iff_of_exponent_ne_zero (by norm_num)).2
       (ofReal_ne_zero.2 Real.pi_pos.ne')
@@ -1775,14 +1774,14 @@ theorem struveK_primitive_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π)
     rwa [hexp z hz0] at h
 
 /-- `(1 - t²)^{-1/2}` is integrable on `(0, 1]`. -/
-lemma struvePrim_integrableOn_w :
+theorem struvePrim_integrableOn_w :
     IntegrableOn (fun t : ℝ => 1 / Real.sqrt (1 - t ^ 2)) (Ioc 0 1) := by
   refine intervalIntegral.integrableOn_deriv_of_nonneg (g := Real.arcsin) Real.continuous_arcsin.continuousOn
     (fun t ht => Real.hasDerivAt_arcsin (by linarith [ht.1]) (by linarith [ht.2]))
     (fun t _ => by positivity)
 
 /-- `∫₀¹ ((1-t²)^{-1/2} - (1+t²)^{-1/2})/t dt = log(1+√2)`, with integrability. -/
-lemma struvePrim_integral_w_sub_g :
+theorem struvePrim_integral_w_sub_g :
     IntegrableOn (fun t : ℝ => (1 / Real.sqrt (1 - t ^ 2) - 1 / Real.sqrt (1 + t ^ 2)) / t)
       (Ioc 0 1) ∧
     ∫ t in Ioc (0 : ℝ) 1, (1 / Real.sqrt (1 - t ^ 2) - 1 / Real.sqrt (1 + t ^ 2)) / t =
@@ -1834,7 +1833,7 @@ lemma struvePrim_integral_w_sub_g :
   norm_num
 
 /-- `∫₁^∞ (1+τ²)^{-1/2}/τ dτ = log(1+√2)`, with integrability. -/
-lemma struvePrim_integral_g_Ioi_one :
+theorem struvePrim_integral_g_Ioi_one :
     IntegrableOn (fun t : ℝ => 1 / Real.sqrt (1 + t ^ 2) / t) (Ioi 1) ∧
     ∫ t in Ioi (1 : ℝ), 1 / Real.sqrt (1 + t ^ 2) / t = Real.log (1 + Real.sqrt 2) := by
   set H : ℝ → ℝ := fun t => Real.log t - Real.log (1 + Real.sqrt (1 + t ^ 2)) with hH
@@ -1881,7 +1880,7 @@ lemma struvePrim_integral_g_Ioi_one :
 
 
 /-- The real Laplace form of `𝐌₀` on the positive axis (DLMF 11.5.4 with `ν = 0`). -/
-lemma struvePrim_struveM_zero_ofReal {u : ℝ} (hu : 0 < u) :
+theorem struvePrim_struveM_zero_ofReal {u : ℝ} (hu : 0 < u) :
     struveM 0 u = ((-(2 / π) * ∫ t in Ioc (0 : ℝ) 1,
       Real.exp (-(u * t)) * (1 / Real.sqrt (1 - t ^ 2)) : ℝ) : ℂ) := by
   rw [struveM_integral (ν := 0) (by norm_num) (ofReal_mem_slitPlane.2 hu)]
@@ -1905,7 +1904,7 @@ lemma struvePrim_struveM_zero_ofReal {u : ℝ} (hu : 0 < u) :
 
 /-- Fubini for the DLMF.primitive of `𝐌₀`:
 `∫₀^x 𝐌₀ = -(2/π) ∫₀¹ (1-t²)^{-1/2} (1 - e^{-xt})/t dt`. -/
-lemma struvePrim_primitive_M_ofReal {x : ℝ} (hx : 0 < x) :
+theorem struvePrim_primitive_M_ofReal {x : ℝ} (hx : 0 < x) :
     DLMF.primitive (struveM 0) x = ((-(2 / π) * ∫ t in Ioc (0 : ℝ) 1,
       (1 / Real.sqrt (1 - t ^ 2)) * ((1 - Real.exp (-(x * t))) / t) : ℝ) : ℂ) := by
   set g : ℝ → ℝ := fun t => 1 / Real.sqrt (1 - t ^ 2) with hg
@@ -1975,7 +1974,7 @@ lemma struvePrim_primitive_M_ofReal {x : ℝ} (hx : 0 < x) :
 
 
 /-- Dominated convergence for `∫_s h(t) (1 - e^{-xt}) dt → ∫_s h` as `x → ∞`, `s ⊆ (0, ∞)`. -/
-lemma struvePrim_tendsto_integral_one_sub_exp {s : Set ℝ} (hs : MeasurableSet s)
+theorem struvePrim_tendsto_integral_one_sub_exp {s : Set ℝ} (hs : MeasurableSet s)
     (hpos : s ⊆ Ioi 0) {h : ℝ → ℝ} (hi : IntegrableOn h s) :
     Tendsto (fun x : ℝ => ∫ t in s, h t * (1 - Real.exp (-(x * t)))) atTop
       (𝓝 (∫ t in s, h t)) := by
@@ -1999,7 +1998,7 @@ lemma struvePrim_tendsto_integral_one_sub_exp {s : Set ℝ} (hs : MeasurableSet 
   · exact (ae_restrict_iff' hs).mpr (Eventually.of_forall hlim)
 
 /-- `∫₀¹ (1-t²)^{-1/2}(1 - e^{-xt})/t dt - (log 2x + γ) → 0` as `x → ∞`. -/
-lemma struvePrim_tendsto_Phi :
+theorem struvePrim_tendsto_Phi :
     Tendsto (fun x : ℝ => (∫ t in Ioc (0 : ℝ) 1,
       (1 / Real.sqrt (1 - t ^ 2)) * ((1 - Real.exp (-(x * t))) / t)) -
         (Real.log (2 * x) + Real.eulerMascheroniConstant)) atTop (𝓝 0) := by
@@ -2099,7 +2098,7 @@ lemma struvePrim_tendsto_Phi :
 
 
 /-- `𝐌₀` is entire. -/
-lemma struvePrim_differentiable_struveM_zero : Differentiable ℂ (struveM 0) := by
+theorem struvePrim_differentiable_struveM_zero : Differentiable ℂ (struveM 0) := by
   have hL : Differentiable ℂ (struveL 0) := by simpa using struveL_nat_entire 0
   have hI : Differentiable ℂ (besselI 0) := by
     have he : besselI 0 = fun z => regularizedHGFun (∅ : Multiset ℂ) {0 + 1} (z ^ 2 / 4) := by
@@ -2110,7 +2109,7 @@ lemma struvePrim_differentiable_struveM_zero : Differentiable ℂ (struveM 0) :=
   exact hL.sub hI
 
 /-- The DLMF.primitive `∫₀^z 𝐌₀` differentiates to `𝐌₀`. -/
-lemma struvePrim_hasDerivAt_M (z : ℂ) :
+theorem struvePrim_hasDerivAt_M (z : ℂ) :
     HasDerivAt (DLMF.primitive (struveM 0)) (struveM 0 z) z := by
   have hP : DLMF.primitive (struveM 0) =
       fun w : ℂ => w * ∫ t in (0 : ℝ)..1, struveM 0 ((t : ℂ) * w) := by
@@ -2119,7 +2118,7 @@ lemma struvePrim_hasDerivAt_M (z : ℂ) :
   exact Complex.hasDerivAt_mul_integral_comp_mul struvePrim_differentiable_struveM_zero z
 
 /-- `∫₀^x 𝐌₀ + (2/π)(log 2x + γ) → 0` as `x → +∞` (the constant in DLMF 11.6.4). -/
-lemma struvePrim_tendsto_M_ofReal :
+theorem struvePrim_tendsto_M_ofReal :
     Tendsto (fun x : ℝ => DLMF.primitive (struveM 0) x +
       2 / π * (log (2 * x) + Real.eulerMascheroniConstant)) atTop (𝓝 0) := by
   have h0 := struvePrim_tendsto_Phi.const_mul (-(2 / π))
@@ -2225,7 +2224,7 @@ section LargeOrder
 open scoped Interval
 
 /-- In the sector `|arg ν| ≤ π - δ`, `‖ν + s‖ ≥ s sin δ` for `s > 0`. -/
-lemma mul_sin_le_norm_add_ofReal {ν : ℂ} {δ : ℝ} (hδ : 0 < δ) (harg : |arg ν| ≤ π - δ) {s : ℝ}
+theorem mul_sin_le_norm_add_ofReal {ν : ℂ} {δ : ℝ} (hδ : 0 < δ) (harg : |arg ν| ≤ π - δ) {s : ℝ}
     (hs : 0 < s) : s * Real.sin δ ≤ ‖ν + s‖ := by
   set θ := arg ν
   set r := ‖ν‖
@@ -2273,7 +2272,7 @@ lemma mul_sin_le_norm_add_ofReal {ν : ℂ} {δ : ℝ} (hδ : 0 < δ) (harg : |a
     _ = ‖ν + s‖ := Real.sqrt_sq (norm_nonneg _)
 
 /-- `‖1/Γ(s₀ + k)‖ ≤ ‖1/Γ(s₀)‖ / ((3/2) sin δ)^k` for `s₀ = ν + N + 3/2` in the sector. -/
-lemma norm_recip_Gamma_add_nat_le_of_arg {ν : ℂ} {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π)
+theorem norm_recip_Gamma_add_nat_le_of_arg {ν : ℂ} {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π)
     (harg : |arg ν| ≤ π - δ) (N k : ℕ) :
     ‖(Gamma (ν + N + 3 / 2 + k))⁻¹‖ ≤
       ‖(Gamma (ν + N + 3 / 2))⁻¹‖ / (3 / 2 * Real.sin δ) ^ k := by
@@ -2300,7 +2299,7 @@ lemma norm_recip_Gamma_add_nat_le_of_arg {ν : ℂ} {δ : ℝ} (hδ : 0 < δ) (h
     exact div_le_div₀ (by positivity) ih hρ hs1
 
 /-- Tail bound for the Struve series in the order variable. -/
-lemma struve_series_tail_isBigO {z : ℂ} (hz : z ≠ 0) {ε : ℂ} (hε : ‖ε‖ = 1) {δ : ℝ}
+theorem struve_series_tail_isBigO {z : ℂ} (hz : z ≠ 0) {ε : ℂ} (hε : ‖ε‖ = 1) {δ : ℝ}
     (hδ : 0 < δ) (hδπ : δ < π) (N : ℕ) (S : ℂ → ℂ)
     (hS : ∀ ν, HasSum (fun n : ℕ => ε ^ n * (z / 2) ^ (2 * n) * struveCoeff ν n) (S ν)) :
     (fun ν : ℂ => (z / 2) ^ (ν + 1) * S ν - (z / 2) ^ (ν + 1) *
@@ -2370,7 +2369,7 @@ lemma struve_series_tail_isBigO {z : ℂ} (hz : z ≠ 0) {ε : ℂ} (hε : ‖ε
     _ = _ := by rw [norm_inv]; ring
 
 /-- In the sector `|arg ν| ≤ π - δ`, `‖ν + s‖ ≥ ‖ν‖ sin δ` for `s ≥ 0`. -/
-lemma norm_mul_sin_le_norm_add_ofReal {ν : ℂ} {δ : ℝ} (hδ : 0 < δ) (harg : |arg ν| ≤ π - δ)
+theorem norm_mul_sin_le_norm_add_ofReal {ν : ℂ} {δ : ℝ} (hδ : 0 < δ) (harg : |arg ν| ≤ π - δ)
     {s : ℝ} (hs : 0 ≤ s) : ‖ν‖ * Real.sin δ ≤ ‖ν + s‖ := by
   set θ := arg ν
   set r := ‖ν‖
@@ -2414,7 +2413,7 @@ lemma norm_mul_sin_le_norm_add_ofReal {ν : ℂ} {δ : ℝ} (hδ : 0 < δ) (harg
     _ = ‖ν + s‖ := Real.sqrt_sq (norm_nonneg _)
 
 /-- Shifting a point of the sector to the right keeps it in the slit plane. -/
-lemma add_ofReal_mem_slitPlane_of_arg {ν : ℂ} (hν : ν ≠ 0) {δ : ℝ} (hδ : 0 < δ)
+theorem add_ofReal_mem_slitPlane_of_arg {ν : ℂ} (hν : ν ≠ 0) {δ : ℝ} (hδ : 0 < δ)
     (harg : |arg ν| ≤ π - δ) {s : ℝ} (hs : 0 ≤ s) : ν + s ∈ slitPlane := by
   have hslit : ν ∈ slitPlane := mem_slitPlane_iff_arg.mpr
     ⟨fun h => by rw [h, abs_of_pos Real.pi_pos] at harg; linarith, hν⟩
@@ -2423,7 +2422,7 @@ lemma add_ofReal_mem_slitPlane_of_arg {ν : ℂ} (hν : ν ≠ 0) {δ : ℝ} (h�
   · exact Or.inr (by simpa using h)
 
 /-- `log (ν + c) - log ν = ∫₀^c ds / (ν + s)` along a horizontal segment in the slit plane. -/
-lemma log_add_ofReal_sub_log {ν : ℂ} (hν : ∀ s : ℝ, 0 ≤ s → ν + s ∈ slitPlane) {c : ℝ}
+theorem log_add_ofReal_sub_log {ν : ℂ} (hν : ∀ s : ℝ, 0 ≤ s → ν + s ∈ slitPlane) {c : ℝ}
     (hc : 0 ≤ c) : log (ν + c) - log ν = ∫ s in (0 : ℝ)..c, (ν + s)⁻¹ := by
   have hd : ∀ s ∈ [[0, c]], HasDerivAt (fun s : ℝ => log (ν + s)) (ν + s)⁻¹ s := by
     intro s hs
@@ -2441,7 +2440,7 @@ lemma log_add_ofReal_sub_log {ν : ℂ} (hν : ∀ s : ℝ, 0 ≤ s → ν + s �
   simp
 
 /-- `log (z/2) = log z - log 2`. -/
-lemma log_div_two_eq {z : ℂ} (hz : z ≠ 0) : log (z / 2) = log z - log 2 := by
+theorem log_div_two_eq {z : ℂ} (hz : z ≠ 0) : log (z / 2) = log z - log 2 := by
   have h2 : (2 : ℂ) = ((2 : ℝ) : ℂ) := by norm_num
   apply Complex.ext
   · rw [log_re, sub_re, log_re, h2, ← ofReal_log (by norm_num), ofReal_re, ← h2, norm_div,
@@ -2450,11 +2449,11 @@ lemma log_div_two_eq {z : ℂ} (hz : z ≠ 0) : log (z / 2) = log z - log 2 := b
       div_eq_mul_inv, show (2 : ℂ)⁻¹ = ((2⁻¹ : ℝ) : ℂ) by push_cast; rfl,
       arg_mul_real (by norm_num)]
 
-lemma tendsto_norm_sector (α : ℝ) : Tendsto (fun ν : ℂ => ‖ν‖) (sector α) atTop :=
+theorem tendsto_norm_sector (α : ℝ) : Tendsto (fun ν : ℂ => ‖ν‖) (sector α) atTop :=
   tendsto_comap.mono_left inf_le_left
 
 /-- The Stirling correction in the leading large-order term tends to `0`. -/
-lemma tendsto_struve_stirling_exponent {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) :
+theorem tendsto_struve_stirling_exponent {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) :
     Tendsto (fun ν : ℂ => (ν + 1) * (log ν - log (ν + 3 / 2)) + 3 / 2 -
       DLMF.Gamma.binetMu (ν + 3 / 2)) (sector (π - δ)) (𝓝 0) := by
   have hsin : 0 < Real.sin δ := Real.sin_pos_of_pos_of_lt_pi hδ hδπ
@@ -2533,7 +2532,7 @@ lemma tendsto_struve_stirling_exponent {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < �
   exact add_le_add hAb hμb
 
 /-- The leading term of the Struve series written through Binet's formula. -/
-lemma struve_lead_eq {z : ℂ} (hz : z ≠ 0) {ν : ℂ} (hν : ν ≠ 0) (hw : ν + 3 / 2 ∈ slitPlane) :
+theorem struve_lead_eq {z : ℂ} (hz : z ≠ 0) {ν : ℂ} (hν : ν ≠ 0) (hw : ν + 3 / 2 ∈ slitPlane) :
     (z / 2) ^ (ν + 1) * struveCoeff ν 0 =
       z / (π * ν * Real.sqrt 2) * exp (ν * (1 + log z - log 2 - log ν)) *
         exp ((ν + 1) * (log ν - log (ν + 3 / 2)) + 3 / 2 - DLMF.Gamma.binetMu (ν + 3 / 2)) := by
@@ -2563,7 +2562,7 @@ lemma struve_lead_eq {z : ℂ} (hz : z ≠ 0) {ν : ℂ} (hν : ν ≠ 0) (hw : 
   ring
 
 /-- `(z/2)^{ν+1} / (Γ(3/2) Γ(ν+3/2))` has the leading behaviour of DLMF 11.6.5. -/
-lemma struve_lead_isEquivalent {z : ℂ} (hz : z ≠ 0) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) :
+theorem struve_lead_isEquivalent {z : ℂ} (hz : z ≠ 0) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) :
     (fun ν : ℂ => (z / 2) ^ (ν + 1) * struveCoeff ν 0) ~[sector (π - δ)]
       fun ν => z / (π * ν * Real.sqrt 2) * exp (ν * (1 + log z - log 2 - log ν)) := by
   refine isEquivalent_of_tendsto_one ?_
@@ -2583,7 +2582,7 @@ lemma struve_lead_isEquivalent {z : ℂ} (hz : z ≠ 0) {δ : ℝ} (hδ : 0 < δ
   rw [struve_lead_eq hz hν0 hw, mul_div_cancel_left₀ _ hg]
 
 /-- From the first term of the order expansion to the leading behaviour of DLMF 11.6.5. -/
-lemma isEquivalent_of_struve_order_expansion {f : ℂ → ℂ} {z : ℂ} (hz : z ≠ 0) {δ : ℝ}
+theorem isEquivalent_of_struve_order_expansion {f : ℂ → ℂ} {z : ℂ} (hz : z ≠ 0) {δ : ℝ}
     (hδ : 0 < δ) (hδπ : δ < π)
     (h : (fun ν : ℂ => f ν - (z / 2) ^ (ν + 1) * struveCoeff ν 0) =O[sector (π - δ)]
       fun ν : ℂ => (z / 2) ^ (ν + 1) / Gamma (ν + ((1 : ℕ) : ℂ) + 3 / 2)) :
@@ -2666,12 +2665,12 @@ noncomputable def struveLO_P (j : ℕ) : ℂ[X] :=
   ∏ r ∈ Finset.range j, (Polynomial.X - Polynomial.C (1/2 + r : ℂ))
 
 /-- `deg P_j ≤ j`. -/
-lemma struveLO_natDegree_P (j : ℕ) : (struveLO_P j).natDegree ≤ j := by
+theorem struveLO_natDegree_P (j : ℕ) : (struveLO_P j).natDegree ≤ j := by
   rw [struveLO_P, natDegree_prod_of_monic _ _ (fun r _ => monic_X_sub_C _)]
   simp only [natDegree_X_sub_C, Finset.sum_const, Finset.card_range, smul_eq_mul, mul_one, le_refl]
 
 /-- `(ν - 1/2 choose j) = P_j(ν)/j!`. -/
-lemma struveLO_b_eq_eval (ν : ℂ) (j : ℕ) :
+theorem struveLO_b_eq_eval (ν : ℂ) (j : ℕ) :
     struveLO_b (ν - 1/2) j = (struveLO_P j).eval ν / (j.factorial : ℂ) := by
   unfold struveLO_b struveLO_P
   rw [eval_prod]
@@ -2686,7 +2685,7 @@ noncomputable def struveLO_Q (μ : ℂ) (N : ℕ) : ℂ[X] :=
     reflect (2 * j) (struveLO_P j)
 
 /-- At `w = 1/ν`, `Q` is the sum of the binomial terms `(ν-1/2 choose j) (2j)!/(μν)^{2j}`. -/
-lemma struveLO_eval_Q (μ : ℂ) (N : ℕ) {ν : ℂ} (hν : ν ≠ 0) :
+theorem struveLO_eval_Q (μ : ℂ) (N : ℕ) {ν : ℂ} (hν : ν ≠ 0) :
     (struveLO_Q μ N).eval ν⁻¹ = ∑ j ∈ Finset.range N,
       struveLO_b (ν - 1/2) j * ((2 * j).factorial : ℂ) / (μ * ν) ^ (2 * j) := by
   unfold struveLO_Q
@@ -2704,7 +2703,7 @@ lemma struveLO_eval_Q (μ : ℂ) (N : ℕ) {ν : ℂ} (hν : ν ≠ 0) :
   field_simp
 
 /-- The coefficients of `Q` below degree `N` are `k! c_k(μ)` of DLMF 11.6.8. -/
-lemma struveLO_coeff_Q (μ : ℂ) {N k : ℕ} (hk : k < N) :
+theorem struveLO_coeff_Q (μ : ℂ) {N k : ℕ} (hk : k < N) :
     (struveLO_Q μ N).coeff k = (k.factorial : ℂ) * struveScaledCoeff μ k := by
   have hkf : (k.factorial : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
   unfold struveLO_Q struveScaledCoeff
@@ -2764,7 +2763,7 @@ theorem struveLO_poly_bound (μ : ℂ) (N : ℕ) : ∃ B : ℝ, ∀ ν : ℂ, 1 
   exact mul_le_mul_of_nonneg_right (hB _ hw) (by positivity)
 
 /-- In the closed sector `|arg ν| ≤ π/2 - δ`, `re ν ≥ sin δ · |ν|`. -/
-lemma struveLO_re_ge {ν : ℂ} {δ : ℝ} (hν : ν ≠ 0) (h : |arg ν| ≤ π / 2 - δ) (hδ : 0 < δ) :
+theorem struveLO_re_ge {ν : ℂ} {δ : ℝ} (hν : ν ≠ 0) (h : |arg ν| ≤ π / 2 - δ) (hδ : 0 < δ) :
     Real.sin δ * ‖ν‖ ≤ ν.re := by
   have hc : Real.cos (π / 2 - δ) ≤ Real.cos (arg ν) := by
     rw [← Real.cos_abs (arg ν)]
@@ -2773,7 +2772,7 @@ lemma struveLO_re_ge {ν : ℂ} {δ : ℝ} (hν : ν ≠ 0) (h : |arg ν| ≤ π
   exact hc
 
 /-- `log (z/2) = log z - log 2` for `z ≠ 0`. -/
-lemma struveLO_log_div_two {z : ℂ} (hz : z ≠ 0) : log (z / 2) = log z - log 2 := by
+theorem struveLO_log_div_two {z : ℂ} (hz : z ≠ 0) : log (z / 2) = log z - log 2 := by
   have h := log_mul_ofReal (1 / 2) (by norm_num) z hz
   rw [show z * ((1 / 2 : ℝ) : ℂ) = z / 2 by push_cast; ring] at h
   rw [h, show (2 : ℂ) = ((2 : ℝ) : ℂ) by norm_num, ← ofReal_log (by norm_num), one_div,
@@ -2781,7 +2780,7 @@ lemma struveLO_log_div_two {z : ℂ} (hz : z ≠ 0) : log (z / 2) = log z - log 
   push_cast; ring
 
 /-- The normalization in DLMF 11.6.6–11.6.7: `e^{(1-ν)(log z - log 2)} · 2 (z/2)^ν = z`. -/
-lemma struveLO_normalize {z : ℂ} (hz : z ≠ 0) (ν : ℂ) :
+theorem struveLO_normalize {z : ℂ} (hz : z ≠ 0) (ν : ℂ) :
     exp ((1 - ν) * (log z - log 2)) * (2 * (z / 2) ^ ν) = z := by
   have hz2 : z / 2 ≠ 0 := div_ne_zero hz two_ne_zero
   rw [cpow_def_of_ne_zero hz2, struveLO_log_div_two hz]
@@ -2793,7 +2792,7 @@ lemma struveLO_normalize {z : ℂ} (hz : z ≠ 0) (ν : ℂ) :
   ring
 
 /-- `‖(a choose j)‖ ≤ (2|ν|)^j` for `a = ν - 1/2`, `j ≤ N ≤ |ν|`. -/
-lemma struveLO_norm_b_le {ν : ℂ} {N j : ℕ} (hj : j ≤ N) (hN : (N : ℝ) ≤ ‖ν‖) :
+theorem struveLO_norm_b_le {ν : ℂ} {N j : ℕ} (hj : j ≤ N) (hN : (N : ℝ) ≤ ‖ν‖) :
     ‖struveLO_b (ν - 1 / 2) j‖ ≤ (2 * ‖ν‖) ^ j := by
   unfold struveLO_b
   rw [norm_div, norm_prod, Complex.norm_natCast]
@@ -2814,7 +2813,7 @@ lemma struveLO_norm_b_le {ν : ℂ} {N j : ℕ} (hj : j ≤ N) (hN : (N : ℝ) �
     _ = (2 * ‖ν‖) ^ j := by rw [Finset.prod_const, Finset.card_range]
 
 /-- The exponentially small tail terms are `O(|ν|^{-N})`. -/
-lemma struveLO_tail_term_le {x κ L : ℝ} (hx : 1 ≤ x) (hκ : 0 < κ) (hL : 0 < L) {c : ℝ}
+theorem struveLO_tail_term_le {x κ L : ℝ} (hx : 1 ≤ x) (hκ : 0 < κ) (hL : 0 < L) {c : ℝ}
     (hc : 2 * κ * x ≤ c) (N j : ℕ) :
     L * x * ((2 * x) ^ j * (Real.exp (-(c / 2)) * ((2 * j).factorial * (2 / c) ^ (2 * j + 1)))) ≤
       (L * 2 ^ j * (2 * j).factorial * (1 / κ) ^ (2 * j + 1) * (N + j + 1).factorial /
@@ -3067,7 +3066,7 @@ def struveBinomRem (a : ℝ) (m : ℕ) (u : ℝ) : ℝ :=
   (1 + u) ^ a - ∑ k ∈ Finset.range m, Ring.choose a k * u ^ k
 
 /-- `(k+1) (a choose k+1) = a (a-1 choose k)`. -/
-lemma succ_mul_ring_choose_succ (a : ℝ) (k : ℕ) :
+theorem succ_mul_ring_choose_succ (a : ℝ) (k : ℕ) :
     ((k : ℝ) + 1) * Ring.choose a (k + 1) = a * Ring.choose (a - 1) k := by
   have h1 := DLMF.Confluent.ring_choose_neg_eq_poch (-(a : ℂ)) (k + 1)
   have h2 := DLMF.Confluent.ring_choose_neg_eq_poch (-(a : ℂ) + 1) k
@@ -3083,7 +3082,7 @@ lemma succ_mul_ring_choose_succ (a : ℝ) (k : ℕ) :
   ring
 
 /-- `d/du` of the binomial remainder lowers `a` and `m` by one. -/
-lemma hasDerivAt_struveBinomRem (a : ℝ) (m : ℕ) {u : ℝ} (hu : -1 < u) :
+theorem hasDerivAt_struveBinomRem (a : ℝ) (m : ℕ) {u : ℝ} (hu : -1 < u) :
     HasDerivAt (struveBinomRem a (m + 1)) (a * struveBinomRem (a - 1) m u) u := by
   have h1 : HasDerivAt (fun u : ℝ => (1 + u) ^ a) (1 * a * (1 + u) ^ (a - 1)) u :=
     ((hasDerivAt_id u).const_add 1).rpow_const (Or.inl (by simp; linarith))
@@ -3102,18 +3101,18 @@ lemma hasDerivAt_struveBinomRem (a : ℝ) (m : ℕ) {u : ℝ} (hu : -1 < u) :
   ring
 
 /-- The binomial remainder is continuous on `[0, ∞)`. -/
-lemma continuousOn_struveBinomRem (a : ℝ) (m : ℕ) : ContinuousOn (struveBinomRem a m) (Ici 0) := by
+theorem continuousOn_struveBinomRem (a : ℝ) (m : ℕ) : ContinuousOn (struveBinomRem a m) (Ici 0) := by
   refine ((continuousOn_const.add continuousOn_id).rpow_const fun x hx => Or.inl ?_).sub
     (by fun_prop)
   have : (0 : ℝ) ≤ x := hx
   simp; linarith
 
 /-- The remainder after at least one term vanishes at `0`. -/
-lemma struveBinomRem_succ_zero (a : ℝ) (m : ℕ) : struveBinomRem a (m + 1) 0 = 0 := by
+theorem struveBinomRem_succ_zero (a : ℝ) (m : ℕ) : struveBinomRem a (m + 1) 0 = 0 := by
   simp [struveBinomRem, Finset.sum_range_succ']
 
 /-- Integral form of the binomial remainder. -/
-lemma struveBinomRem_succ_eq_integral (a : ℝ) (m : ℕ) {u : ℝ} (hu : 0 ≤ u) :
+theorem struveBinomRem_succ_eq_integral (a : ℝ) (m : ℕ) {u : ℝ} (hu : 0 ≤ u) :
     struveBinomRem a (m + 1) u = a * ∫ s in (0 : ℝ)..u, struveBinomRem (a - 1) m s := by
   rw [← intervalIntegral.integral_const_mul]
   have hint : IntervalIntegrable (fun s => a * struveBinomRem (a - 1) m s) volume 0 u :=
@@ -3125,7 +3124,7 @@ lemma struveBinomRem_succ_eq_integral (a : ℝ) (m : ℕ) {u : ℝ} (hu : 0 ≤ 
   exact hasDerivAt_struveBinomRem a m (by linarith [hs.1])
 
 /-- Sign and size of the binomial remainder for `a ≤ m` and `u ≥ 0`. -/
-lemma struveBinomRem_bound (m : ℕ) : ∀ a : ℝ, a ≤ m → ∀ u : ℝ, 0 ≤ u →
+theorem struveBinomRem_bound (m : ℕ) : ∀ a : ℝ, a ≤ m → ∀ u : ℝ, 0 ≤ u →
     0 ≤ Ring.choose a m * struveBinomRem a m u ∧ |struveBinomRem a m u| ≤ |Ring.choose a m| * u ^ m := by
   induction m with
   | zero =>
@@ -3318,7 +3317,7 @@ theorem angerFG_poch (ν : ℂ) (k : ℕ) :
     constructor <;> ring
 
 /-- The Taylor data of the Anger kernel in terms of `F_k`, `G_k`. -/
-lemma struveAs_coeffD_even_odd (ν : ℂ) (k : ℕ) :
+theorem struveAs_coeffD_even_odd (ν : ℂ) (k : ℕ) :
     struveAs_coeffD ν (2 * k) = angerF ν k ∧ struveAs_coeffD ν (2 * k + 1) = -ν * angerG ν k := by
   induction k with
   | zero => simp [struveAs_coeffD, angerF, angerG]
@@ -3330,7 +3329,7 @@ lemma struveAs_coeffD_even_odd (ν : ℂ) (k : ℕ) :
     constructor <;> ring
 
 /-- Points of a closed sector `|arg z| ≤ π - δ` near infinity are nonzero and in the slit plane. -/
-lemma struveAs_eventually_sector {δ : ℝ} (hδ : 0 < δ) :
+theorem struveAs_eventually_sector {δ : ℝ} (hδ : 0 < δ) :
     ∀ᶠ z in sector (π - δ), z ≠ 0 ∧ z ∈ slitPlane := by
   rw [sector, eventually_inf_principal]
   refine Eventually.of_forall fun z hz => ⟨hz.1, ?_⟩
@@ -3341,7 +3340,7 @@ lemma struveAs_eventually_sector {δ : ℝ} (hδ : 0 < δ) :
   linarith
 
 /-- DLMF 11.11.4 in the form of an asymptotic expansion in `z^{-n-1}`. -/
-lemma struveAs_angerA_sector (ν : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) :
+theorem struveAs_angerA_sector (ν : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) :
     HasAsymptoticExpansion (sector (π - δ)) (fun (n : ℕ) (z : ℂ) => z ^ (-((n : ℂ) + 1)))
       (fun n => struveAs_coeffD ν n / π) (angerA ν) := by
   have hs : 0 < Real.sin (δ / 2) := Real.sin_pos_of_pos_of_lt_pi (by linarith) (by linarith)
@@ -3351,7 +3350,7 @@ lemma struveAs_angerA_sector (ν : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < 
     (struveAs_angerA_hasAsymptoticExpansion ν hs hα)).mono (sector_le_sup_rotSectorAtTop hδ hδπ)
 
 /-- Pairing consecutive terms of a finite sum. -/
-lemma struveAs_sum_range_two_mul (c : ℕ → ℂ) (N : ℕ) :
+theorem struveAs_sum_range_two_mul (c : ℕ → ℂ) (N : ℕ) :
     ∑ n ∈ Finset.range (2 * N), c n = ∑ k ∈ Finset.range N, (c (2 * k) + c (2 * k + 1)) := by
   induction N with
   | zero => simp
@@ -3361,7 +3360,7 @@ lemma struveAs_sum_range_two_mul (c : ℕ → ℂ) (N : ℕ) :
     ring
 
 /-- The paired form of the `A_ν` expansion. -/
-lemma struveAs_angerA_paired (ν : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) (N : ℕ) :
+theorem struveAs_angerA_paired (ν : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) (N : ℕ) :
     (fun z : ℂ => angerA ν z-(∑ k ∈ Finset.range N, 1/π*(angerF ν k/z^(2*k+1)-ν*angerG ν k/z^(2*k+2)))) =O[sector (π-δ)] (fun z : ℂ => z^(-(2*N+1:ℤ))) := by
   have h := struveAs_angerA_sector ν hδ hδπ (2 * N)
   refine (h.congr' ?_ ?_)
@@ -3435,7 +3434,7 @@ def nonintegerOrderSector (ε : ℝ) : Filter ℂ :=
   sector π ⊓ 𝓟 {ν : ℂ | ∀ n : ℤ, ε ≤ ‖ν-n‖}
 
 /-- `Γ(a+k)⁻¹ Γ(b+k)⁻¹ ∏_{j<k} (a+j)(b+j) = Γ(a)⁻¹ Γ(b)⁻¹`, valid for all `a`, `b`. -/
-lemma struveAs_recipGamma_mul_prod (a b : ℂ) (k : ℕ) :
+theorem struveAs_recipGamma_mul_prod (a b : ℂ) (k : ℕ) :
     (Gamma (a + k))⁻¹ * (Gamma (b + k))⁻¹ * ∏ j ∈ Finset.range k, ((a + j) * (b + j)) =
       (Gamma a)⁻¹ * (Gamma b)⁻¹ := by
   induction k with
@@ -3456,7 +3455,7 @@ def struveAs_P2 (ν : ℂ) (k : ℕ) : ℂ :=
   ∏ j ∈ Finset.range (k + 1), (((j : ℂ) + 1 / 2) ^ 2 - (ν / 2) ^ 2)
 
 /-- Reflection: `Γ(1+x)⁻¹ Γ(1-x)⁻¹ = sin(πx)/(πx)`. -/
-lemma struveAs_recipGamma_one_add_mul {x : ℂ} (hx : x ≠ 0) :
+theorem struveAs_recipGamma_one_add_mul {x : ℂ} (hx : x ≠ 0) :
     (Gamma (x + 1))⁻¹ * (Gamma (1 - x))⁻¹ = sin (π * x) / (π * x) := by
   have h := Complex.Gamma_mul_Gamma_one_sub x
   rw [Complex.Gamma_add_one x hx]
@@ -3472,7 +3471,7 @@ lemma struveAs_recipGamma_one_add_mul {x : ℂ} (hx : x ≠ 0) :
     field_simp
 
 /-- Reflection: `Γ(1/2+x)⁻¹ Γ(1/2-x)⁻¹ = cos(πx)/π`. -/
-lemma struveAs_recipGamma_half_add_mul (x : ℂ) :
+theorem struveAs_recipGamma_half_add_mul (x : ℂ) :
     (Gamma (x + 1 / 2))⁻¹ * (Gamma (1 / 2 - x))⁻¹ = cos (π * x) / π := by
   have h := Complex.Gamma_mul_Gamma_one_sub (x + 1 / 2)
   rw [show 1 - (x + 1 / 2) = 1 / 2 - x by ring,
@@ -3480,21 +3479,21 @@ lemma struveAs_recipGamma_half_add_mul (x : ℂ) :
   rw [← mul_inv, h, inv_div]
 
 
-lemma struveAs_P1_ne_zero {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (k : ℕ) : struveAs_P1 ν k ≠ 0 := by
+theorem struveAs_P1_ne_zero {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (k : ℕ) : struveAs_P1 ν k ≠ 0 := by
   refine Finset.prod_ne_zero_iff.mpr fun j _ h => ?_
   have h' : ((j : ℂ) + 1 - ν / 2) * ((j : ℂ) + 1 + ν / 2) = 0 := by linear_combination h
   rcases mul_eq_zero.mp h' with h | h
   · exact hν (2 * j + 2) (by push_cast; linear_combination -2 * h)
   · exact hν (-(2 * j + 2)) (by push_cast; linear_combination 2 * h)
 
-lemma struveAs_P2_ne_zero {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (k : ℕ) : struveAs_P2 ν k ≠ 0 := by
+theorem struveAs_P2_ne_zero {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (k : ℕ) : struveAs_P2 ν k ≠ 0 := by
   refine Finset.prod_ne_zero_iff.mpr fun j _ h => ?_
   have h' : ((j : ℂ) + 1 / 2 - ν / 2) * ((j : ℂ) + 1 / 2 + ν / 2) = 0 := by linear_combination h
   rcases mul_eq_zero.mp h' with h | h
   · exact hν (2 * j + 1) (by push_cast; linear_combination -2 * h)
   · exact hν (-(2 * j + 1)) (by push_cast; linear_combination 2 * h)
 
-lemma struveAs_hasSum_S1 {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (z : ℂ) :
+theorem struveAs_hasSum_S1 {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (z : ℂ) :
     HasSum (fun k : ℕ => (-1) ^ k * (z / 2) ^ (2 * k) / struveAs_P1 ν k)
       (π * (ν / 2) / sin (π * (ν / 2)) * angerS1 ν z) := by
   have hx : ν / 2 ≠ 0 := fun h => hν 0 (by push_cast; linear_combination 2 * h)
@@ -3520,7 +3519,7 @@ lemma struveAs_hasSum_S1 {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (z : ℂ) :
   have hν0 : ν ≠ 0 := fun h0 => hx (by rw [h0, zero_div])
   field_simp
 
-lemma struveAs_hasSum_S2 {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (z : ℂ) :
+theorem struveAs_hasSum_S2 {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (z : ℂ) :
     HasSum (fun k : ℕ => (-1) ^ k * (z / 2) ^ (2 * k + 1) / struveAs_P2 ν k)
       (π / cos (π * (ν / 2)) * angerS2 ν z) := by
   have hs : sin (π * ν) ≠ 0 := sin_pi_mul_ne_zero_of_not_int hν
@@ -3551,7 +3550,7 @@ lemma struveAs_hasSum_S2 {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (z : ℂ) :
   field_simp
 
 /-- `π ν / sin(π ν) · 𝐉_ν(z)` as a pair of series rational in `ν`. -/
-lemma struveAs_angerJ_scaled_eq {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (z : ℂ) :
+theorem struveAs_angerJ_scaled_eq {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (z : ℂ) :
     π * ν / sin (π * ν) * angerJ ν z =
       π * (ν / 2) / sin (π * (ν / 2)) * angerS1 ν z +
         ν / 2 * (π / cos (π * (ν / 2)) * angerS2 ν z) := by
@@ -3566,7 +3565,7 @@ lemma struveAs_angerJ_scaled_eq {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (z : �
   field_simp
 
 
-lemma struveAs_norm_mul_ge {u v : ℂ} {e m : ℝ} (he : 0 ≤ e) (hu : e ≤ ‖u‖)
+theorem struveAs_norm_mul_ge {u v : ℂ} {e m : ℝ} (he : 0 ≤ e) (hu : e ≤ ‖u‖)
     (hv : e ≤ ‖v‖) (huv : 2 * m ≤ ‖u‖ + ‖v‖) : e * m ≤ ‖u * v‖ := by
   rw [norm_mul]
   rcases le_total ‖u‖ ‖v‖ with h | h
@@ -3575,7 +3574,7 @@ lemma struveAs_norm_mul_ge {u v : ℂ} {e m : ℝ} (he : 0 ≤ e) (hu : e ≤ �
   · have : m ≤ ‖u‖ := by linarith
     nlinarith [norm_nonneg v]
 
-lemma struveAs_factor_ge {ν : ℂ} {ε : ℝ} (hε : 0 < ε) (hν : ∀ n : ℤ, ε ≤ ‖ν - n‖) (a : ℤ) :
+theorem struveAs_factor_ge {ν : ℂ} {ε : ℝ} (hε : 0 < ε) (hν : ∀ n : ℤ, ε ≤ ‖ν - n‖) (a : ℤ) :
     ε / 2 * ((a : ℝ) / 2) ≤ ‖((a : ℂ) / 2) ^ 2 - (ν / 2) ^ 2‖ ∨ (a : ℝ) < 0 := by
   rcases lt_or_ge (a : ℝ) 0 with h | h
   · exact Or.inr h
@@ -3597,12 +3596,12 @@ lemma struveAs_factor_ge {ν : ℂ} {ε : ℝ} (hε : 0 < ε) (hν : ∀ n : ℤ
     ring] at this
   exact this
 
-lemma struveAs_factor_ge_sq (c x : ℂ) : ‖x‖ ^ 2 - ‖c‖ ^ 2 ≤ ‖c ^ 2 - x ^ 2‖ := by
+theorem struveAs_factor_ge_sq (c x : ℂ) : ‖x‖ ^ 2 - ‖c‖ ^ 2 ≤ ‖c ^ 2 - x ^ 2‖ := by
   have := norm_sub_norm_le (x ^ 2) (c ^ 2)
   rw [norm_pow, norm_pow, norm_sub_rev] at this
   exact this
 
-lemma struveAs_P1_tail_ge {ν : ℂ} {ε : ℝ} (hε : 0 < ε) (hν : ∀ n : ℤ, ε ≤ ‖ν - n‖)
+theorem struveAs_P1_tail_ge {ν : ℂ} {ε : ℝ} (hε : 0 < ε) (hν : ∀ n : ℤ, ε ≤ ‖ν - n‖)
     (hx : 2 ≤ ‖ν / 2‖) (k : ℕ) :
     ‖ν / 2‖ ^ 2 / 4 * ((ε / 2) ^ k * k !) ≤ ‖struveAs_P1 ν (k + 1)‖ := by
   rw [struveAs_P1, Finset.prod_range_succ', norm_mul, norm_prod, mul_comm (‖ν / 2‖ ^ 2 / 4)]
@@ -3624,7 +3623,7 @@ lemma struveAs_P1_tail_ge {ν : ℂ} {ε : ℝ} (hε : 0 < ε) (hν : ∀ n : �
       linarith
     · push_cast at h; linarith
 
-lemma struveAs_P2_tail_ge {ν : ℂ} {ε : ℝ} (hε : 0 < ε) (hν : ∀ n : ℤ, ε ≤ ‖ν - n‖)
+theorem struveAs_P2_tail_ge {ν : ℂ} {ε : ℝ} (hε : 0 < ε) (hν : ∀ n : ℤ, ε ≤ ‖ν - n‖)
     (hx : 2 ≤ ‖ν / 2‖) (k : ℕ) :
     (‖ν / 2‖ ^ 2 / 4) ^ 2 * ((ε / 2) ^ k * k !) ≤ ‖struveAs_P2 ν (k + 1)‖ := by
   rw [struveAs_P2, Finset.prod_range_succ', Finset.prod_range_succ', norm_mul, norm_mul,
@@ -3663,7 +3662,7 @@ lemma struveAs_P2_tail_ge {ν : ℂ} {ε : ℝ} (hε : 0 < ε) (hν : ∀ n : �
 
 /-- The quantitative form of DLMF 11.11.5: for `|ν| ≥ 4` at distance `≥ ε` from the integers,
 `|πν/sin(πν) 𝐉_ν(z) - 1 + νz/(ν²-1)| ≤ K/|ν/2|²`. -/
-lemma struveAs_angerJ_large_order_bound (z : ℂ) {ε : ℝ} (hε : 0 < ε) :
+theorem struveAs_angerJ_large_order_bound (z : ℂ) {ε : ℝ} (hε : 0 < ε) :
     ∃ K, ∀ ν : ℂ, (∀ n : ℤ, ε ≤ ‖ν - n‖) → 2 ≤ ‖ν / 2‖ →
       ‖π * ν / sin (π * ν) * angerJ ν z - 1 + ν * z / (ν ^ 2 - 1)‖ ≤ K / ‖ν / 2‖ ^ 2 := by
   set c := ‖z / 2‖ ^ 2 * (2 / ε)
@@ -3758,7 +3757,7 @@ theorem angerJ_large_order (z : ℂ) {ε : ℝ} (hε : 0 < ε) :
   ring
 
 /-- `‖sin w‖ ≤ e^{|Im w|}`. -/
-lemma struveAs_norm_sin_le (w : ℂ) : ‖sin w‖ ≤ Real.exp |w.im| := by
+theorem struveAs_norm_sin_le (w : ℂ) : ‖sin w‖ ≤ Real.exp |w.im| := by
   have e1 : ‖exp (-w * I)‖ ≤ Real.exp |w.im| := by
     rw [norm_exp]; exact Real.exp_le_exp.2 (by simp [le_abs_self])
   have e2 : ‖exp (w * I)‖ ≤ Real.exp |w.im| := by
@@ -3768,7 +3767,7 @@ lemma struveAs_norm_sin_le (w : ℂ) : ‖sin w‖ ≤ Real.exp |w.im| := by
   linarith
 
 /-- `‖cos w‖ ≤ e^{|Im w|}`. -/
-lemma struveAs_norm_cos_le (w : ℂ) : ‖cos w‖ ≤ Real.exp |w.im| := by
+theorem struveAs_norm_cos_le (w : ℂ) : ‖cos w‖ ≤ Real.exp |w.im| := by
   have e1 : ‖exp (-w * I)‖ ≤ Real.exp |w.im| := by
     rw [norm_exp]; exact Real.exp_le_exp.2 (by simp [le_abs_self])
   have e2 : ‖exp (w * I)‖ ≤ Real.exp |w.im| := by
@@ -3780,7 +3779,7 @@ lemma struveAs_norm_cos_le (w : ℂ) : ‖cos w‖ ≤ Real.exp |w.im| := by
 /-- The two tail bounds behind DLMF 11.11.5 and 11.11.6: for `|ν| ≥ 4` at distance `≥ ε`
 from the integers, the normalized series `πν/(2 sin(πν/2)) 𝐒₁` and `π/cos(πν/2) 𝐒₂` agree
 with their leading terms up to `K/|ν/2|²`. -/
-lemma struveAs_S_tail_bound (z : ℂ) {ε : ℝ} (hε : 0 < ε) :
+theorem struveAs_S_tail_bound (z : ℂ) {ε : ℝ} (hε : 0 < ε) :
     ∃ K, ∀ ν : ℂ, (∀ n : ℤ, ε ≤ ‖ν - n‖) → 2 ≤ ‖ν / 2‖ →
       ‖π * (ν / 2) / sin (π * (ν / 2)) * angerS1 ν z - 1‖ ≤ K / ‖ν / 2‖ ^ 2 ∧
       ‖ν / 2 * (π / cos (π * (ν / 2)) * angerS2 ν z - (z / 2) ^ (0 + 1) /
@@ -4465,7 +4464,7 @@ section StruveScaled
 open scoped Interval
 
 /-- `re z^{1/2} ≥ 0`. -/
-lemma struveSc_re_cpow_half_nonneg (z : ℂ) : 0 ≤ (z ^ (1 / 2 : ℂ)).re := by
+theorem struveSc_re_cpow_half_nonneg (z : ℂ) : 0 ≤ (z ^ (1 / 2 : ℂ)).re := by
   rcases eq_or_ne z 0 with rfl | hz
   · simp
   rw [cpow_def_of_ne_zero hz, exp_re]
@@ -4476,7 +4475,7 @@ lemma struveSc_re_cpow_half_nonneg (z : ℂ) : 0 ≤ (z ^ (1 / 2 : ℂ)).re := b
     rw [this]; linarith [arg_le_pi z]
 
 /-- `im z^{1/2} ≤ 0` when `im z ≤ 0`. -/
-lemma struveSc_im_cpow_half_nonpos {z : ℂ} (hz' : z ∈ slitPlane) (h : z.im ≤ 0) :
+theorem struveSc_im_cpow_half_nonpos {z : ℂ} (hz' : z ∈ slitPlane) (h : z.im ≤ 0) :
     (z ^ (1 / 2 : ℂ)).im ≤ 0 := by
   rcases eq_or_ne z 0 with rfl | hz
   · simp
@@ -4495,7 +4494,7 @@ lemma struveSc_im_cpow_half_nonpos {z : ℂ} (hz' : z ∈ slitPlane) (h : z.im �
     exact Real.sin_nonpos_of_nonpos_of_neg_pi_le (by linarith) (by linarith [neg_pi_lt_arg z])
 
 /-- `im z^{1/2} ≥ 0` when `im z ≥ 0`. -/
-lemma struveSc_im_cpow_half_nonneg {z : ℂ} (h : 0 ≤ z.im) : 0 ≤ (z ^ (1 / 2 : ℂ)).im := by
+theorem struveSc_im_cpow_half_nonneg {z : ℂ} (h : 0 ≤ z.im) : 0 ≤ (z ^ (1 / 2 : ℂ)).im := by
   rcases eq_or_ne z 0 with rfl | hz
   · simp
   rw [cpow_def_of_ne_zero hz, exp_im]
@@ -4506,7 +4505,7 @@ lemma struveSc_im_cpow_half_nonneg {z : ℂ} (h : 0 ≤ z.im) : 0 ≤ (z ^ (1 / 
   · linarith [arg_le_pi z, Real.pi_pos]
 
 /-- The square of the rotated point. -/
-lemma struveSc_sq (r a : ℝ) : ((r : ℂ) * exp (((-a : ℝ) : ℂ) * I)) ^ 2 =
+theorem struveSc_sq (r a : ℝ) : ((r : ℂ) * exp (((-a : ℝ) : ℂ) * I)) ^ 2 =
     ((r ^ 2 * Real.cos (2 * a) : ℝ) : ℂ) - ((r ^ 2 * Real.sin (2 * a) : ℝ) : ℂ) * I := by
   rw [mul_pow, ← exp_nat_mul, show ((2 : ℕ) : ℂ) * (((-a : ℝ) : ℂ) * I) =
     ((-(2 * a) : ℝ) : ℂ) * I by push_cast; ring, exp_mul_I, ← ofReal_cos, ← ofReal_sin,
@@ -4514,7 +4513,7 @@ lemma struveSc_sq (r a : ℝ) : ((r : ℂ) * exp (((-a : ℝ) : ℂ) * I)) ^ 2 =
   push_cast; ring
 
 /-- `1 + w²` lies in the slit plane on the rotated ray. -/
-lemma struveSc_mem_slitPlane {a : ℝ} (ha : |a| < π / 2) {r : ℝ} :
+theorem struveSc_mem_slitPlane {a : ℝ} (ha : |a| < π / 2) {r : ℝ} :
     1 + ((r : ℂ) * exp (((-a : ℝ) : ℂ) * I)) ^ 2 ∈ slitPlane := by
   rw [struveSc_sq, mem_slitPlane_iff]
   simp only [add_re, one_re, sub_re, ofReal_re, mul_re, ofReal_im, I_re, I_im, mul_zero,
@@ -4538,11 +4537,11 @@ lemma struveSc_mem_slitPlane {a : ℝ} (ha : |a| < π / 2) {r : ℝ} :
       · exact hs h1
 
 
-lemma struveSc_cos_pos {a : ℝ} (ha : |a| < π / 2) : 0 < Real.cos a :=
+theorem struveSc_cos_pos {a : ℝ} (ha : |a| < π / 2) : 0 < Real.cos a :=
   Real.cos_pos_of_mem_Ioo ⟨by linarith [neg_abs_le a], by linarith [le_abs_self a]⟩
 
 /-- `re (e^{ia} (1+w²)^{1/2}) ≥ 0` on the ray `w = r e^{-ia}`. -/
-lemma struveSc_re_rot_P {a : ℝ} (ha : |a| < π / 2) (r : ℝ) :
+theorem struveSc_re_rot_P {a : ℝ} (ha : |a| < π / 2) (r : ℝ) :
     0 ≤ (exp ((a : ℂ) * I) *
       (1 + ((r : ℂ) * exp (((-a : ℝ) : ℂ) * I)) ^ 2) ^ (1 / 2 : ℂ)).re := by
   set u := 1 + ((r : ℂ) * exp (((-a : ℝ) : ℂ) * I)) ^ 2 with hu
@@ -4567,7 +4566,7 @@ lemma struveSc_re_rot_P {a : ℝ} (ha : |a| < π / 2) (r : ℝ) :
     nlinarith [mul_nonneg hc.le hre]
 
 /-- `re (e^{ia} (1 - (1+w²)^{-1/2})) ≥ 0` on the ray `w = r e^{-ia}`. -/
-lemma struveSc_re_one_sub_q {a : ℝ} (ha : |a| < π / 2) (r : ℝ) :
+theorem struveSc_re_one_sub_q {a : ℝ} (ha : |a| < π / 2) (r : ℝ) :
     0 ≤ (exp ((a : ℂ) * I) *
       (1 - (1 + ((r : ℂ) * exp (((-a : ℝ) : ℂ) * I)) ^ 2) ^ (-(1 / 2 : ℂ)))).re := by
   set w := (r : ℂ) * exp (((-a : ℝ) : ℂ) * I) with hw
@@ -4614,7 +4613,7 @@ noncomputable def struveSc_phase (lam : ℝ) (w : ℂ) : ℂ :=
   (lam : ℂ) * w - log (w + (1 + w ^ 2) ^ (1 / 2 : ℂ))
 
 /-- `Ψ'(w) = λ - (1+w²)^{-1/2}`. -/
-lemma struveSc_hasDerivAt_phase (lam : ℝ) {w : ℂ} (hu : 1 + w ^ 2 ∈ slitPlane)
+theorem struveSc_hasDerivAt_phase (lam : ℝ) {w : ℂ} (hu : 1 + w ^ 2 ∈ slitPlane)
     (hx : w + (1 + w ^ 2) ^ (1 / 2 : ℂ) ∈ slitPlane) :
     HasDerivAt (struveSc_phase lam) ((lam : ℂ) - (1 + w ^ 2) ^ (-(1 / 2 : ℂ))) w := by
   have hu0 : 1 + w ^ 2 ≠ 0 := slitPlane_ne_zero hu
@@ -4634,7 +4633,7 @@ lemma struveSc_hasDerivAt_phase (lam : ℝ) {w : ℂ} (hu : 1 + w ^ 2 ∈ slitPl
   field_simp
   ring
 
-lemma struveSc_re_x_pos {a : ℝ} (ha : |a| < π / 2) {r : ℝ} (hr : 0 ≤ r) :
+theorem struveSc_re_x_pos {a : ℝ} (ha : |a| < π / 2) {r : ℝ} (hr : 0 ≤ r) :
     0 < ((r : ℂ) * exp (((-a : ℝ) : ℂ) * I) +
       (1 + ((r : ℂ) * exp (((-a : ℝ) : ℂ) * I)) ^ 2) ^ (1 / 2 : ℂ)).re := by
   have h1 := struveAs_re_cpow_half_pos (struveSc_mem_slitPlane (r := r) ha)
@@ -4643,7 +4642,7 @@ lemma struveSc_re_x_pos {a : ℝ} (ha : |a| < π / 2) {r : ℝ} (hr : 0 ≤ r) :
   nlinarith
 
 /-- The phase along the rotated ray. -/
-lemma struveSc_hasDerivAt_phase_ray (lam : ℝ) {a : ℝ} (ha : |a| < π / 2) {r : ℝ} (hr : 0 ≤ r) :
+theorem struveSc_hasDerivAt_phase_ray (lam : ℝ) {a : ℝ} (ha : |a| < π / 2) {r : ℝ} (hr : 0 ≤ r) :
     HasDerivAt (fun r : ℝ => struveSc_phase lam ((r : ℂ) * exp (((-a : ℝ) : ℂ) * I)))
       (exp (((-a : ℝ) : ℂ) * I) * ((lam : ℂ) -
         (1 + ((r : ℂ) * exp (((-a : ℝ) : ℂ) * I)) ^ 2) ^ (-(1 / 2 : ℂ)))) r := by
@@ -4654,11 +4653,11 @@ lemma struveSc_hasDerivAt_phase_ray (lam : ℝ) {a : ℝ} (ha : |a| < π / 2) {r
     simpa using (hasDerivAt_id r).ofReal_comp.mul_const (exp (((-a : ℝ) : ℂ) * I))
   exact (hd.comp r hl).congr_deriv (mul_comm _ _)
 
-lemma struveSc_phase_zero (lam : ℝ) : struveSc_phase lam 0 = 0 := by
+theorem struveSc_phase_zero (lam : ℝ) : struveSc_phase lam 0 = 0 := by
   simp [struveSc_phase]
 
 
-lemma struveSc_hasDerivAt_re {f : ℝ → ℂ} {f' : ℂ} {s : ℝ} (h : HasDerivAt f f' s) :
+theorem struveSc_hasDerivAt_re {f : ℝ → ℂ} {f' : ℂ} {s : ℝ} (h : HasDerivAt f f' s) :
     HasDerivAt (fun s => (f s).re) f'.re s := by
   have := reCLM.hasFDerivAt.comp_hasDerivAt s h
   convert this using 1
@@ -4666,7 +4665,7 @@ lemma struveSc_hasDerivAt_re {f : ℝ → ℂ} {f' : ℂ} {s : ℝ} (h : HasDeri
   · simp
 
 /-- **Growth of the phase.** With `ν = ρ e^{2ia}`, `re (ν Ψ(r e^{-ia})) ≥ (λ-1) cos a · ρ r`. -/
-lemma struveSc_re_phase_ge {lam : ℝ} {a : ℝ} (ha : |a| < π / 2) {ρ : ℝ}
+theorem struveSc_re_phase_ge {lam : ℝ} {a : ℝ} (ha : |a| < π / 2) {ρ : ℝ}
     (hρ : 0 ≤ ρ) {r : ℝ} (hr : 0 ≤ r) :
     (lam - 1) * Real.cos a * ρ * r ≤
       ((ρ : ℂ) * exp ((2 * a : ℝ) * I) *
@@ -4715,7 +4714,7 @@ lemma struveSc_re_phase_ge {lam : ℝ} {a : ℝ} (ha : |a| < π / 2) {ρ : ℝ}
 
 
 /-- Uniform bounds for `q = (1+w²)^{-1/2}` on the rotated rays: `|q| ≤ K`, `|1 - q| ≤ K r`. -/
-lemma struveSc_q_bounds {δ : ℝ} (hδ : 0 < δ) : ∃ K > 0, ∀ a : ℝ, |a| ≤ (π - δ) / 2 →
+theorem struveSc_q_bounds {δ : ℝ} (hδ : 0 < δ) : ∃ K > 0, ∀ a : ℝ, |a| ≤ (π - δ) / 2 →
     ∀ r : ℝ, 0 ≤ r →
       ‖(1 + ((r : ℂ) * exp (((-a : ℝ) : ℂ) * I)) ^ 2) ^ (-(1 / 2 : ℂ))‖ ≤ K ∧
       ‖1 - (1 + ((r : ℂ) * exp (((-a : ℝ) : ℂ) * I)) ^ 2) ^ (-(1 / 2 : ℂ))‖ ≤ K * r := by
@@ -4773,7 +4772,7 @@ lemma struveSc_q_bounds {δ : ℝ} (hδ : 0 < δ) : ∃ K > 0, ∀ a : ℝ, |a| 
 
 
 /-- `‖e^A - e^B‖ ≤ ‖A - B‖ e^M` when `re A, re B ≤ M`. -/
-lemma struveSc_norm_exp_sub_exp_le {A B : ℂ} {M : ℝ} (hA : A.re ≤ M) (hB : B.re ≤ M) :
+theorem struveSc_norm_exp_sub_exp_le {A B : ℂ} {M : ℝ} (hA : A.re ≤ M) (hB : B.re ≤ M) :
     ‖exp A - exp B‖ ≤ ‖A - B‖ * Real.exp M := by
   set g : ℝ → ℂ := fun t => exp (B + t * (A - B)) with hg
   have hd : ∀ t ∈ Icc (0 : ℝ) 1, HasDerivWithinAt g ((A - B) * g t) (Icc 0 1) t := by
@@ -4794,7 +4793,7 @@ lemma struveSc_norm_exp_sub_exp_le {A B : ℂ} {M : ℝ} (hA : A.re ≤ M) (hB :
   simpa [hg] using this
 
 /-- `‖Ψ(r e^{-ia}) - e^{-ia}(λ-1) r‖ ≤ K r²/2` from `|1 - q| ≤ K r`. -/
-lemma struveSc_phase_sub_lin (lam : ℝ) {a : ℝ} (ha : |a| < π / 2) {K : ℝ}
+theorem struveSc_phase_sub_lin (lam : ℝ) {a : ℝ} (ha : |a| < π / 2) {K : ℝ}
     (hK : ∀ s : ℝ, 0 ≤ s →
       ‖1 - (1 + ((s : ℂ) * exp (((-a : ℝ) : ℂ) * I)) ^ 2) ^ (-(1 / 2 : ℂ))‖ ≤ K * s)
     {r : ℝ} (hr : 0 ≤ r) :
@@ -4825,7 +4824,7 @@ lemma struveSc_phase_sub_lin (lam : ℝ) {a : ℝ} (ha : |a| < π / 2) {K : ℝ}
 
 
 /-- The integrand of the rotated representation of `𝐀_{-ν}(λν)` in terms of the phase. -/
-lemma struveSc_integrand_eq (lam : ℝ) {a : ℝ} (ha : |a| < π / 2) (ν : ℂ) {r : ℝ} (hr : 0 ≤ r) :
+theorem struveSc_integrand_eq (lam : ℝ) {a : ℝ} (ha : |a| < π / 2) (ν : ℂ) {r : ℝ} (hr : 0 ≤ r) :
     exp (-((lam : ℂ) * ν * exp (((-a : ℝ) : ℂ) * I) * r)) *
       struveAs_kernel (-ν) ((r : ℂ) * exp (((-a : ℝ) : ℂ) * I)) =
     exp (-(ν * struveSc_phase lam ((r : ℂ) * exp (((-a : ℝ) : ℂ) * I)))) *
@@ -4839,7 +4838,7 @@ lemma struveSc_integrand_eq (lam : ℝ) {a : ℝ} (ha : |a| < π / 2) (ν : ℂ)
 
 
 /-- `∫₀^∞ e^{-br} rⁿ dr = n!/b^{n+1}`, with integrability. -/
-lemma struveSc_integral_pow_exp (n : ℕ) {b : ℝ} (hb : 0 < b) :
+theorem struveSc_integral_pow_exp (n : ℕ) {b : ℝ} (hb : 0 < b) :
     IntegrableOn (fun r : ℝ => Real.exp (-(b * r)) * r ^ n) (Ioi 0) ∧
     ∫ r in Ioi (0 : ℝ), Real.exp (-(b * r)) * r ^ n = n ! / b ^ (n + 1) := by
   have hcongr : EqOn (fun r : ℝ => r ^ ((n + 1 : ℝ) - 1) * Real.exp (-(b * r)))
@@ -4859,7 +4858,7 @@ lemma struveSc_integral_pow_exp (n : ℕ) {b : ℝ} (hb : 0 < b) :
     field_simp
 
 /-- **The main estimate** behind DLMF 11.11.14. -/
-lemma struveSc_integral_est {lam : ℝ} (hlam : 1 < lam) {a : ℝ} (ha : |a| < π / 2) {K : ℝ}
+theorem struveSc_integral_est {lam : ℝ} (hlam : 1 < lam) {a : ℝ} (ha : |a| < π / 2) {K : ℝ}
     (hK : ∀ s : ℝ, 0 ≤ s →
       ‖(1 + ((s : ℂ) * exp (((-a : ℝ) : ℂ) * I)) ^ 2) ^ (-(1 / 2 : ℂ))‖ ≤ K ∧
       ‖1 - (1 + ((s : ℂ) * exp (((-a : ℝ) : ℂ) * I)) ^ 2) ^ (-(1 / 2 : ℂ))‖ ≤ K * s)
@@ -4983,7 +4982,7 @@ lemma struveSc_integral_est {lam : ℝ} (hlam : 1 < lam) {a : ℝ} (ha : |a| < �
 
 /-- Quantitative form of `struveSc_re_one_sub_q`:
 `re (e^{ia}(1 - q)) ≥ cos a · r²/(4(1+r²))`. -/
-lemma struveSc_re_one_sub_q_ge {a : ℝ} (ha : |a| < π / 2) (r : ℝ) :
+theorem struveSc_re_one_sub_q_ge {a : ℝ} (ha : |a| < π / 2) (r : ℝ) :
     Real.cos a * r ^ 2 / (4 * (1 + r ^ 2)) ≤ (exp ((a : ℂ) * I) *
       (1 - (1 + ((r : ℂ) * exp (((-a : ℝ) : ℂ) * I)) ^ 2) ^ (-(1 / 2 : ℂ)))).re := by
   set w := (r : ℂ) * exp (((-a : ℝ) : ℂ) * I) with hw
@@ -5042,7 +5041,7 @@ lemma struveSc_re_one_sub_q_ge {a : ℝ} (ha : |a| < π / 2) (r : ℝ) :
   nlinarith
 
 /-- Growth of the `λ = 1` phase: `re (ν Ψ₁(r e^{-ia})) ≥ cos a · ρ r³/(12(1+r²))`. -/
-lemma struveSc_re_phase_one_ge {a : ℝ} (ha : |a| < π / 2) {ρ : ℝ}
+theorem struveSc_re_phase_one_ge {a : ℝ} (ha : |a| < π / 2) {ρ : ℝ}
     (hρ : 0 ≤ ρ) {r : ℝ} (hr : 0 ≤ r) :
     Real.cos a * ρ * (r ^ 3 / (12 * (1 + r ^ 2))) ≤
       ((ρ : ℂ) * exp ((2 * a : ℝ) * I) *
@@ -5096,7 +5095,7 @@ lemma struveSc_re_phase_one_ge {a : ℝ} (ha : |a| < π / 2) {ρ : ℝ}
   linarith
 
 /-- `‖Ψ₁(w) - w³/6‖ ≤ (1/2 + K)/5 · r⁵` on the ray `w = r e^{-ia}`, given `‖q‖ ≤ K`. -/
-lemma struveSc_phase_one_sub_cube {a : ℝ} (ha : |a| < π / 2) {K : ℝ}
+theorem struveSc_phase_one_sub_cube {a : ℝ} (ha : |a| < π / 2) {K : ℝ}
     (hK : ∀ s : ℝ, 0 ≤ s →
       ‖(1 + ((s : ℂ) * exp (((-a : ℝ) : ℂ) * I)) ^ 2) ^ (-(1 / 2 : ℂ))‖ ≤ K)
     {r : ℝ} (hr : 0 ≤ r) :
@@ -5169,7 +5168,7 @@ lemma struveSc_phase_one_sub_cube {a : ℝ} (ha : |a| < π / 2) {K : ℝ}
   simpa [hf] using key
 
 /-- `∫₀^∞ e^{-b r³} rⁿ dr = b^{-(n+1)/3} Γ((n+1)/3)/3`, with integrability. -/
-lemma struveSc_integral_pow_exp_cube (n : ℕ) {b : ℝ} (hb : 0 < b) :
+theorem struveSc_integral_pow_exp_cube (n : ℕ) {b : ℝ} (hb : 0 < b) :
     IntegrableOn (fun r : ℝ => Real.exp (-(b * r ^ 3)) * r ^ n) (Ioi 0) ∧
     ∫ r in Ioi (0 : ℝ), Real.exp (-(b * r ^ 3)) * r ^ n =
       b ^ (-((n : ℝ) + 1) / 3) * (1 / 3) * Real.Gamma (((n : ℝ) + 1) / 3) := by
@@ -5185,7 +5184,7 @@ lemma struveSc_integral_pow_exp_cube (n : ℕ) {b : ℝ} (hb : 0 < b) :
     integral_rpow_mul_exp_neg_mul_rpow (by norm_num) hn hb]
 
 /-- `∫₀^∞ e^{-C r³} dr = Γ(4/3) C^{-1/3}` for `re C > 0`. -/
-lemma struveSc_integral_exp_cube {C : ℂ} (hC : 0 < C.re) :
+theorem struveSc_integral_exp_cube {C : ℂ} (hC : 0 < C.re) :
     ∫ r in Ioi (0 : ℝ), exp (-(C * (r : ℂ) ^ 3)) = Gamma (4 / 3) * C ^ (-(1 / 3 : ℂ)) := by
   have hsub := integral_comp_rpow_Ioi (fun y : ℝ => exp (-(C * (y : ℂ) ^ 3)))
     (p := 1 / 3) (by norm_num)
@@ -5206,7 +5205,7 @@ lemma struveSc_integral_exp_cube {C : ℂ} (hC : 0 < C.re) :
   rw [hc, mul_comm C]; ring
 
 /-- Integrability of `e^{-C r³}` on `(0,∞)` for `re C > 0`. -/
-lemma struveSc_integrableOn_exp_cube {C : ℂ} (hC : 0 < C.re) :
+theorem struveSc_integrableOn_exp_cube {C : ℂ} (hC : 0 < C.re) :
     IntegrableOn (fun r : ℝ => exp (-(C * (r : ℂ) ^ 3))) (Ioi 0) := by
   obtain ⟨hi, -⟩ := struveSc_integral_pow_exp_cube 0 hC
   refine Integrable.mono' hi ((by fun_prop : Continuous fun r : ℝ =>
@@ -5215,7 +5214,7 @@ lemma struveSc_integrableOn_exp_cube {C : ℂ} (hC : 0 < C.re) :
   rw [norm_exp, pow_zero, mul_one, neg_re, ← ofReal_pow, mul_comm, re_ofReal_mul, mul_comm]
 
 /-- `e^{-c ρ r³/(12(1+r²))} ≤ e^{-β r³} + e^{-β r}` with `β = cρ/24`. -/
-lemma struveSc_exp_split {c ρ r : ℝ} (hc : 0 ≤ c) (hρ : 0 ≤ ρ) (hr : 0 ≤ r) :
+theorem struveSc_exp_split {c ρ r : ℝ} (hc : 0 ≤ c) (hρ : 0 ≤ ρ) (hr : 0 ≤ r) :
     Real.exp (-(c * ρ * (r ^ 3 / (12 * (1 + r ^ 2))))) ≤
       Real.exp (-(c / 24 * ρ * r ^ 3)) + Real.exp (-(c / 24 * ρ * r)) := by
   have hcρ : 0 ≤ c * ρ := mul_nonneg hc hρ
@@ -5236,7 +5235,7 @@ lemma struveSc_exp_split {c ρ r : ℝ} (hc : 0 ≤ c) (hρ : 0 ≤ ρ) (hr : 0 
 
 set_option maxHeartbeats 400000 in
 /-- **The main estimate** behind DLMF 11.11.16. -/
-lemma struveSc_turning_est {a : ℝ} (ha : |a| < π / 2) {K c0 : ℝ} (hK0 : 0 ≤ K) (hc0 : 0 < c0)
+theorem struveSc_turning_est {a : ℝ} (ha : |a| < π / 2) {K c0 : ℝ} (hK0 : 0 ≤ K) (hc0 : 0 < c0)
     (hc0a : c0 ≤ Real.cos a)
     (hK : ∀ s : ℝ, 0 ≤ s →
       ‖(1 + ((s : ℂ) * exp (((-a : ℝ) : ℂ) * I)) ^ 2) ^ (-(1 / 2 : ℂ))‖ ≤ K ∧
@@ -5416,7 +5415,7 @@ lemma struveSc_turning_est {a : ℝ} (ha : |a| < π / 2) {K c0 : ℝ} (hK0 : 0 �
   nlinarith [a1, a2, a3]
 
 /-- `π⁻¹ Γ(4/3) 6^{1/3} = 2^{4/3}/(3^{7/6} Γ(2/3))`. -/
-lemma struveSc_const_turn :
+theorem struveSc_const_turn :
     1 / π * Real.Gamma (4 / 3) * (1 / 6 : ℝ) ^ (-(1 / 3 : ℝ)) =
       2 ^ (4 / 3 : ℝ) / (3 ^ (7 / 6 : ℝ) * Real.Gamma (2 / 3)) := by
   have h := struveTP_const_E
@@ -5427,7 +5426,7 @@ lemma struveSc_const_turn :
   ring
 
 /-- The DLMF 11.11.16 right-hand side as the Gamma-integral leading term. -/
-lemma struveSc_turning_rhs {a : ℝ} (ha : |a| < π / 2) {ρ : ℝ} (hρ : 0 < ρ) :
+theorem struveSc_turning_rhs {a : ℝ} (ha : |a| < π / 2) {ρ : ℝ} (hρ : 0 < ρ) :
     (2 : ℂ) ^ (4 / 3 : ℂ) / ((3 : ℂ) ^ (7 / 6 : ℂ) * Gamma (2 / 3) *
         ((ρ : ℂ) * exp ((2 * a : ℝ) * I)) ^ (1 / 3 : ℂ)) =
       1 / π * (exp (((-a : ℝ) : ℂ) * I) * (Gamma (4 / 3) *
@@ -5488,7 +5487,7 @@ lemma struveSc_turning_rhs {a : ℝ} (ha : |a| < π / 2) {ρ : ℝ} (hρ : 0 < �
       (((3 ^ (7 / 6 : ℝ) : ℝ) : ℂ) * ((Real.Gamma (2 / 3) : ℝ) : ℂ))) * hexp
 
 /-- The norm of the DLMF 11.11.16 right-hand side. -/
-lemma struveSc_norm_turning_rhs (ν : ℂ) :
+theorem struveSc_norm_turning_rhs (ν : ℂ) :
     ‖(2 : ℂ) ^ (4 / 3 : ℂ) / ((3 : ℂ) ^ (7 / 6 : ℂ) * Gamma (2 / 3) * ν ^ (1 / 3 : ℂ))‖ =
       2 ^ (4 / 3 : ℝ) / (3 ^ (7 / 6 : ℝ) * Real.Gamma (2 / 3)) / ‖ν‖ ^ (1 / 3 : ℝ) := by
   have e5 : Gamma (2 / 3 : ℂ) = ((Real.Gamma (2 / 3) : ℝ) : ℂ) := by
@@ -5506,19 +5505,19 @@ lemma struveSc_norm_turning_rhs (ν : ℂ) :
 /-- The real phase `φ(s) = λ s - arsinh s` of `𝐀_{-ν}(λν)` on the positive axis. -/
 noncomputable def struveSc_phiR (lam s : ℝ) : ℝ := lam * s - Real.arsinh s
 
-lemma struveSc_sqrt_pos (s : ℝ) : 0 < Real.sqrt (1 + s ^ 2) := Real.sqrt_pos.2 (by positivity)
+theorem struveSc_sqrt_pos (s : ℝ) : 0 < Real.sqrt (1 + s ^ 2) := Real.sqrt_pos.2 (by positivity)
 
-lemma struveSc_sqrt_sq (s : ℝ) : Real.sqrt (1 + s ^ 2) ^ 2 = 1 + s ^ 2 :=
+theorem struveSc_sqrt_sq (s : ℝ) : Real.sqrt (1 + s ^ 2) ^ 2 = 1 + s ^ 2 :=
   Real.sq_sqrt (by positivity)
 
-lemma struveSc_one_le_sqrt (s : ℝ) : 1 ≤ Real.sqrt (1 + s ^ 2) := by
+theorem struveSc_one_le_sqrt (s : ℝ) : 1 ≤ Real.sqrt (1 + s ^ 2) := by
   have := Real.sqrt_le_sqrt (show (1 : ℝ) ≤ 1 + s ^ 2 by nlinarith)
   rwa [Real.sqrt_one] at this
 
-lemma struveSc_abs_le_sqrt (s : ℝ) : |s| ≤ Real.sqrt (1 + s ^ 2) := by
+theorem struveSc_abs_le_sqrt (s : ℝ) : |s| ≤ Real.sqrt (1 + s ^ 2) := by
   rw [← Real.sqrt_sq_eq_abs]; exact Real.sqrt_le_sqrt (by linarith)
 
-lemma struveSc_hasDerivAt_sqrt (s : ℝ) :
+theorem struveSc_hasDerivAt_sqrt (s : ℝ) :
     HasDerivAt (fun s : ℝ => Real.sqrt (1 + s ^ 2)) (s / Real.sqrt (1 + s ^ 2)) s := by
   have h := ((hasDerivAt_pow 2 s).const_add 1).sqrt (by positivity)
   convert h using 1
@@ -5526,12 +5525,12 @@ lemma struveSc_hasDerivAt_sqrt (s : ℝ) :
   field_simp
   push_cast; ring
 
-lemma struveSc_hasDerivAt_phiR (lam s : ℝ) :
+theorem struveSc_hasDerivAt_phiR (lam s : ℝ) :
     HasDerivAt (struveSc_phiR lam) (lam - (Real.sqrt (1 + s ^ 2))⁻¹) s := by
   have h := ((hasDerivAt_id s).const_mul lam).sub (Real.hasDerivAt_arsinh s)
   exact h.congr_deriv (by simp)
 
-lemma struveSc_hasDerivAt_phiR' (lam s : ℝ) :
+theorem struveSc_hasDerivAt_phiR' (lam s : ℝ) :
     HasDerivAt (fun s : ℝ => lam - (Real.sqrt (1 + s ^ 2))⁻¹)
       (s / Real.sqrt (1 + s ^ 2) ^ 3) s := by
   have hS := struveSc_sqrt_pos s
@@ -5539,7 +5538,7 @@ lemma struveSc_hasDerivAt_phiR' (lam s : ℝ) :
   convert h using 1
   field_simp
 
-lemma struveSc_hasDerivAt_phiR'' (s : ℝ) :
+theorem struveSc_hasDerivAt_phiR'' (s : ℝ) :
     HasDerivAt (fun s : ℝ => s / Real.sqrt (1 + s ^ 2) ^ 3)
       ((1 - 2 * s ^ 2) / Real.sqrt (1 + s ^ 2) ^ 5) s := by
   have hS := struveSc_sqrt_pos s
@@ -5552,7 +5551,7 @@ lemma struveSc_hasDerivAt_phiR'' (s : ℝ) :
   rw [show Real.sqrt (1 + s ^ 2) ^ 4 = (Real.sqrt (1 + s ^ 2) ^ 2) ^ 2 by ring, h2]
   ring
 
-lemma struveSc_abs_phiR''' (s : ℝ) : |(1 - 2 * s ^ 2) / Real.sqrt (1 + s ^ 2) ^ 5| ≤ 1 := by
+theorem struveSc_abs_phiR''' (s : ℝ) : |(1 - 2 * s ^ 2) / Real.sqrt (1 + s ^ 2) ^ 5| ≤ 1 := by
   have hS := struveSc_sqrt_pos s
   have h1 := struveSc_one_le_sqrt s
   have h2 := struveSc_sqrt_sq s
@@ -5564,7 +5563,7 @@ lemma struveSc_abs_phiR''' (s : ℝ) : |(1 - 2 * s ^ 2) / Real.sqrt (1 + s ^ 2) 
   rw [abs_le]; constructor <;> nlinarith [sq_nonneg s, pow_nonneg (sq_nonneg s) 2]
 
 /-- `φ''` is `1`-Lipschitz. -/
-lemma struveSc_phiR''_lip (u v : ℝ) :
+theorem struveSc_phiR''_lip (u v : ℝ) :
     |u / Real.sqrt (1 + u ^ 2) ^ 3 - v / Real.sqrt (1 + v ^ 2) ^ 3| ≤ |u - v| := by
   have := (convex_univ : Convex ℝ (univ : Set ℝ)).norm_image_sub_le_of_norm_hasDerivWithin_le
     (f := fun s : ℝ => s / Real.sqrt (1 + s ^ 2) ^ 3)
@@ -5575,7 +5574,7 @@ lemma struveSc_phiR''_lip (u v : ℝ) :
   simpa [Real.norm_eq_abs] using this
 
 /-- Quadratic Taylor bound for `φ` at a critical point. -/
-lemma struveSc_phiR_taylor {lam s₀ : ℝ} (hcrit : lam = (Real.sqrt (1 + s₀ ^ 2))⁻¹) (t : ℝ) :
+theorem struveSc_phiR_taylor {lam s₀ : ℝ} (hcrit : lam = (Real.sqrt (1 + s₀ ^ 2))⁻¹) (t : ℝ) :
     |struveSc_phiR lam (s₀ + t) - struveSc_phiR lam s₀ -
       s₀ / Real.sqrt (1 + s₀ ^ 2) ^ 3 / 2 * t ^ 2| ≤ |t| ^ 3 := by
   set c₂ := s₀ / Real.sqrt (1 + s₀ ^ 2) ^ 3 with hc₂
@@ -5622,14 +5621,14 @@ lemma struveSc_phiR_taylor {lam s₀ : ℝ} (hcrit : lam = (Real.sqrt (1 + s₀ 
     _ = |t| ^ 3 := by rw [← sq_abs t]; ring
 
 /-- The saddle `s₀ = √(1-λ²)/λ` satisfies `√(1+s₀²) = 1/λ`. -/
-lemma struveSc_sqrt_saddle {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) :
+theorem struveSc_sqrt_saddle {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) :
     Real.sqrt (1 + (Real.sqrt (1 - lam ^ 2) / lam) ^ 2) = lam⁻¹ := by
   have hs : Real.sqrt (1 - lam ^ 2) ^ 2 = 1 - lam ^ 2 := Real.sq_sqrt (by nlinarith)
   rw [div_pow, hs, show 1 + (1 - lam ^ 2) / lam ^ 2 = lam⁻¹ ^ 2 by field_simp; ring,
     Real.sqrt_sq (inv_pos.2 h0).le]
 
 /-- Monotonicity of `φ` on both sides of the critical point. -/
-lemma struveSc_phiR_mono {lam s₀ : ℝ} (hs₀ : 0 ≤ s₀) (hcrit : lam = (Real.sqrt (1 + s₀ ^ 2))⁻¹) :
+theorem struveSc_phiR_mono {lam s₀ : ℝ} (hs₀ : 0 ≤ s₀) (hcrit : lam = (Real.sqrt (1 + s₀ ^ 2))⁻¹) :
     MonotoneOn (struveSc_phiR lam) (Ici s₀) ∧ AntitoneOn (struveSc_phiR lam) (Icc 0 s₀) := by
   have hS : ∀ s, 0 < Real.sqrt (1 + s ^ 2) := struveSc_sqrt_pos
   constructor
@@ -5655,17 +5654,17 @@ lemma struveSc_phiR_mono {lam s₀ : ℝ} (hs₀ : 0 ≤ s₀) (hcrit : lam = (R
     rw [hcrit, sub_nonpos]
     exact inv_anti₀ (hS s) this
 
-lemma struveSc_cpow_half_ofReal (s : ℝ) :
+theorem struveSc_cpow_half_ofReal (s : ℝ) :
     (1 + (s : ℂ) ^ 2) ^ (1 / 2 : ℂ) = ((Real.sqrt (1 + s ^ 2) : ℝ) : ℂ) := by
   rw [show 1 + (s : ℂ) ^ 2 = ((1 + s ^ 2 : ℝ) : ℂ) by push_cast; ring,
     show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; rfl, ← ofReal_cpow (by positivity),
     Real.sqrt_eq_rpow]
 
-lemma struveSc_q_ofReal (s : ℝ) :
+theorem struveSc_q_ofReal (s : ℝ) :
     (1 + (s : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) = (((Real.sqrt (1 + s ^ 2))⁻¹ : ℝ) : ℂ) := by
   rw [cpow_neg, struveSc_cpow_half_ofReal, ofReal_inv]
 
-lemma struveSc_phase_ofReal (lam s : ℝ) :
+theorem struveSc_phase_ofReal (lam s : ℝ) :
     struveSc_phase lam (s : ℂ) = ((struveSc_phiR lam s : ℝ) : ℂ) := by
   have hpos : 0 < s + Real.sqrt (1 + s ^ 2) := by
     have := struveSc_abs_le_sqrt s
@@ -5680,7 +5679,7 @@ lemma struveSc_phase_ofReal (lam s : ℝ) :
   push_cast; ring
 
 /-- DLMF 11.10.4 on the real contour, written with the real phase. -/
-lemma struveSc_angerA_real {lam : ℝ} (hlam : 0 < lam) {ν : ℂ} (hν : 0 < ν.re) :
+theorem struveSc_angerA_real {lam : ℝ} (hlam : 0 < lam) {ν : ℂ} (hν : 0 < ν.re) :
     angerA (-ν) (lam * ν) = 1 / π * ∫ s in Ioi (0 : ℝ),
       exp (-(ν * ((struveSc_phiR lam s : ℝ) : ℂ))) * (((Real.sqrt (1 + s ^ 2))⁻¹ : ℝ) : ℂ) := by
   have ha : |(0 : ℝ)| < π / 2 := by rw [abs_zero]; positivity
@@ -5711,42 +5710,42 @@ noncomputable def struveSc_Qf (lam t : ℝ) : ℝ :=
   if t = 0 then struveSc_Q0 lam else
     (struveSc_phiR lam (struveSc_s0 lam + t) - struveSc_phiR lam (struveSc_s0 lam)) / t ^ 2
 
-lemma struveSc_s0_pos {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) : 0 < struveSc_s0 lam :=
+theorem struveSc_s0_pos {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) : 0 < struveSc_s0 lam :=
   div_pos (Real.sqrt_pos.2 (by nlinarith)) h0
 
-lemma struveSc_crit {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) :
+theorem struveSc_crit {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) :
     lam = (Real.sqrt (1 + struveSc_s0 lam ^ 2))⁻¹ := by
   rw [struveSc_s0, struveSc_sqrt_saddle h0 h1, inv_inv]
 
-lemma struveSc_c2 {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) :
+theorem struveSc_c2 {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) :
     struveSc_s0 lam / Real.sqrt (1 + struveSc_s0 lam ^ 2) ^ 3 / 2 = struveSc_Q0 lam := by
   rw [struveSc_Q0, struveSc_s0, struveSc_sqrt_saddle h0 h1]
   field_simp
 
-lemma struveSc_Q0_pos {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) : 0 < struveSc_Q0 lam := by
+theorem struveSc_Q0_pos {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) : 0 < struveSc_Q0 lam := by
   have := struveSc_s0_pos h0 h1
   rw [struveSc_Q0]; positivity
 
-lemma struveSc_Q0_lt {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) :
+theorem struveSc_Q0_lt {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) :
     struveSc_Q0 lam < struveSc_s0 lam := by
   have := struveSc_s0_pos h0 h1
   have h3 : lam ^ 3 < 1 := pow_lt_one₀ h0.le h1 (by norm_num)
   rw [struveSc_Q0]; nlinarith
 
-lemma struveSc_D_eq {lam : ℝ} (t : ℝ) :
+theorem struveSc_D_eq {lam : ℝ} (t : ℝ) :
     struveSc_phiR lam (struveSc_s0 lam + t) - struveSc_phiR lam (struveSc_s0 lam) =
       t ^ 2 * struveSc_Qf lam t := by
   rcases eq_or_ne t 0 with rfl | ht
   · simp
   · simp only [struveSc_Qf, ht, ↓reduceIte]; field_simp
 
-lemma struveSc_D_taylor {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) (t : ℝ) :
+theorem struveSc_D_taylor {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) (t : ℝ) :
     |struveSc_phiR lam (struveSc_s0 lam + t) - struveSc_phiR lam (struveSc_s0 lam) -
       struveSc_Q0 lam * t ^ 2| ≤ |t| ^ 3 := by
   have := struveSc_phiR_taylor (struveSc_crit h0 h1) t
   rwa [struveSc_c2 h0 h1] at this
 
-lemma struveSc_Qf_lip {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) (t : ℝ) :
+theorem struveSc_Qf_lip {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) (t : ℝ) :
     |struveSc_Qf lam t - struveSc_Q0 lam| ≤ |t| := by
   rcases eq_or_ne t 0 with rfl | ht
   · simp [struveSc_Qf]
@@ -5758,7 +5757,7 @@ lemma struveSc_Qf_lip {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) (t : ℝ) :
       abs_of_pos ht2, show |t| ^ 3 = t ^ 2 * |t| by rw [← sq_abs t]; ring] at h
     exact le_of_mul_le_mul_left h ht2
 
-lemma struveSc_amp_lip {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) (t : ℝ) :
+theorem struveSc_amp_lip {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) (t : ℝ) :
     |(Real.sqrt (1 + (struveSc_s0 lam + t) ^ 2))⁻¹ - lam| ≤ |t| := by
   have hcrit := struveSc_crit h0 h1
   have := (convex_uIcc (0 : ℝ) t).norm_image_sub_le_of_norm_hasDerivWithin_le
@@ -5784,7 +5783,7 @@ lemma struveSc_amp_lip {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) (t : ℝ) :
   rw [← hcrit, sub_self, sub_zero, abs_sub_comm] at this
   simpa [abs_sub_comm] using this
 
-lemma struveSc_phiR_ge {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {s : ℝ} (hs : 0 ≤ s) :
+theorem struveSc_phiR_ge {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {s : ℝ} (hs : 0 ≤ s) :
     struveSc_phiR lam (struveSc_s0 lam) ≤ struveSc_phiR lam s := by
   have hs0 := struveSc_s0_pos h0 h1
   obtain ⟨hm, ha⟩ := struveSc_phiR_mono hs0.le (struveSc_crit h0 h1)
@@ -5793,7 +5792,7 @@ lemma struveSc_phiR_ge {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {s : ℝ} (hs :
   · exact hm (mem_Ici.2 le_rfl) (mem_Ici.2 h) h
 
 /-- The phase gap away from the saddle. -/
-lemma struveSc_phiR_gap {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {s : ℝ} (hs : 0 ≤ s)
+theorem struveSc_phiR_gap {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {s : ℝ} (hs : 0 ≤ s)
     (hout : s ∉ Icc (struveSc_s0 lam - struveSc_Q0 lam / 2) (struveSc_s0 lam + struveSc_Q0 lam / 2)) :
     struveSc_phiR lam (struveSc_s0 lam) + struveSc_Q0 lam * (struveSc_Q0 lam / 2) ^ 2 / 2 ≤
       struveSc_phiR lam s := by
@@ -5823,7 +5822,7 @@ lemma struveSc_phiR_gap {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {s : ℝ} (hs 
     linarith
 
 /-- An integrable majorant for `e^{-(φ - φ₀)} (1+s²)^{-1/2}`. -/
-lemma struveSc_W_le {lam : ℝ} {s : ℝ} (hs : 0 ≤ s) (c : ℝ) :
+theorem struveSc_W_le {lam : ℝ} {s : ℝ} (hs : 0 ≤ s) (c : ℝ) :
     Real.exp (-(struveSc_phiR lam s - c)) * (Real.sqrt (1 + s ^ 2))⁻¹ ≤
       Real.exp c * (Real.exp (-(lam * s)) * (1 + 2 * s)) := by
   have hS := struveSc_sqrt_pos s
@@ -5844,7 +5843,7 @@ lemma struveSc_W_le {lam : ℝ} {s : ℝ} (hs : 0 ≤ s) (c : ℝ) :
           ((s + Real.sqrt (1 + s ^ 2)) * (Real.sqrt (1 + s ^ 2))⁻¹)) := by ring
     _ ≤ _ := by gcongr
 
-lemma struveSc_integrableOn_maj {lam : ℝ} (h0 : 0 < lam) (c : ℝ) :
+theorem struveSc_integrableOn_maj {lam : ℝ} (h0 : 0 < lam) (c : ℝ) :
     IntegrableOn (fun s : ℝ => Real.exp c * (Real.exp (-(lam * s)) * (1 + 2 * s))) (Ioi 0) := by
   obtain ⟨i0, -⟩ := struveSc_integral_pow_exp 0 h0
   obtain ⟨i1, -⟩ := struveSc_integral_pow_exp 1 h0
@@ -5852,20 +5851,20 @@ lemma struveSc_integrableOn_maj {lam : ℝ} (h0 : 0 < lam) (c : ℝ) :
     (fun s _ => ?_) measurableSet_Ioi
   simp only [Pi.add_apply, pow_zero, pow_one]; ring
 
-lemma struveSc_continuous_phiR (lam : ℝ) : Continuous (struveSc_phiR lam) :=
+theorem struveSc_continuous_phiR (lam : ℝ) : Continuous (struveSc_phiR lam) :=
   (continuous_const.mul continuous_id).sub Real.continuous_arsinh
 
-lemma struveSc_exp_neg_le_recip {y : ℝ} (hy : 0 < y) : Real.exp (-y) ≤ 1 / y := by
+theorem struveSc_exp_neg_le_recip {y : ℝ} (hy : 0 < y) : Real.exp (-y) ≤ 1 / y := by
   rw [Real.exp_neg, inv_eq_one_div]
   exact one_div_le_one_div_of_le hy (by linarith [Real.add_one_le_exp y])
 
-lemma struveSc_cos_ge {δ θ : ℝ} (hδ : 0 ≤ δ) (hδπ : δ < π / 2) (hθ : |θ| ≤ π / 2 - δ) :
+theorem struveSc_cos_ge {δ θ : ℝ} (hδ : 0 ≤ δ) (hδπ : δ < π / 2) (hθ : |θ| ≤ π / 2 - δ) :
     Real.sin δ ≤ Real.cos θ := by
   rw [← Real.cos_abs, ← Real.cos_pi_div_two_sub]
   exact Real.cos_le_cos_of_nonneg_of_le_pi (abs_nonneg θ) (by linarith [Real.pi_pos]) hθ
 
 /-- **The main Laplace estimate** behind DLMF 11.11.15, uniform in `ph ν`. -/
-lemma struveSc_inner_est {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {δ : ℝ} (hδ : 0 < δ)
+theorem struveSc_inner_est {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {δ : ℝ} (hδ : 0 < δ)
     (hδπ : δ < π / 2) : ∃ C n₀ : ℝ, 0 < n₀ ∧ ∀ n θ : ℝ, n₀ ≤ n → |θ| ≤ π / 2 - δ →
       ‖(Real.sqrt n : ℂ) * (∫ s in Ioi (0 : ℝ), exp (-((n : ℂ) * exp ((θ : ℂ) * I) *
           ((struveSc_phiR lam s - struveSc_phiR lam (struveSc_s0 lam) : ℝ) : ℂ))) *
@@ -6070,7 +6069,7 @@ lemma struveSc_inner_est {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {δ : ℝ} (h
     _ = _ := by ring
 
 /-- `μ(λ)` of DLMF 11.11.12 is the phase at the saddle. -/
-lemma struveSc_angerMu_eq {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) :
+theorem struveSc_angerMu_eq {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) :
     DLMF.Struve.angerMu (lam : ℂ) = ((struveSc_phiR lam (struveSc_s0 lam) : ℝ) : ℂ) := by
   have hu : 0 < Real.sqrt (1 - lam ^ 2) := Real.sqrt_pos.2 (by nlinarith)
   have e1 : (1 - (lam : ℂ) ^ 2) ^ (1 / 2 : ℂ) = ((Real.sqrt (1 - lam ^ 2) : ℝ) : ℂ) := by
@@ -6088,7 +6087,7 @@ lemma struveSc_angerMu_eq {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) :
   · congr 1; field_simp; ring
 
 /-- The DLMF 11.11.15 right-hand side as the Laplace leading term. -/
-lemma struveSc_inner_rhs {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {n θ : ℝ} (hn : 0 < n)
+theorem struveSc_inner_rhs {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {n θ : ℝ} (hn : 0 < n)
     (hθ : |θ| < π) :
     (2 / (π * ((n : ℂ) * exp ((θ : ℂ) * I)))) ^ (1 / 2 : ℂ) *
         exp (-((n : ℂ) * exp ((θ : ℂ) * I)) * DLMF.Struve.angerMu (lam : ℂ)) /
@@ -6149,7 +6148,7 @@ lemma struveSc_inner_rhs {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) {n θ : ℝ} 
   field_simp
 
 
-lemma struveSc_one_sub_recip_sqrt (s : ℝ) : |1 - (Real.sqrt (1 + s ^ 2))⁻¹| ≤ s ^ 2 := by
+theorem struveSc_one_sub_recip_sqrt (s : ℝ) : |1 - (Real.sqrt (1 + s ^ 2))⁻¹| ≤ s ^ 2 := by
   have hS := struveSc_sqrt_pos s
   have h1 := struveSc_one_le_sqrt s
   have h2 := struveSc_sqrt_sq s
@@ -6160,7 +6159,7 @@ lemma struveSc_one_sub_recip_sqrt (s : ℝ) : |1 - (Real.sqrt (1 + s ^ 2))⁻¹|
   rw [this, div_le_iff₀ hS]
   nlinarith
 
-lemma struveSc_phiR_one_sub_cube {s : ℝ} (hs : 0 ≤ s) :
+theorem struveSc_phiR_one_sub_cube {s : ℝ} (hs : 0 ≤ s) :
     |struveSc_phiR 1 s - s ^ 3 / 6| ≤ 3 / 10 * s ^ 5 := by
   have ha : |(0 : ℝ)| < π / 2 := by rw [abs_zero]; positivity
   have h := struveSc_phase_one_sub_cube (a := 0) (K := 1) ha (fun t ht => by
@@ -6174,7 +6173,7 @@ lemma struveSc_phiR_one_sub_cube {s : ℝ} (hs : 0 ≤ s) :
   rw [norm_real, Real.norm_eq_abs] at h'
   linarith
 
-lemma struveSc_cubic_absorb {M u : ℝ} (hM : 0 ≤ M) (hu : 0 ≤ u) :
+theorem struveSc_cubic_absorb {M u : ℝ} (hM : 0 ≤ M) (hu : 0 ≤ u) :
     M * u - u ^ 3 / 48 ≤ M * (48 * M + 1) / 2 := by
   rcases le_or_gt (48 * M) (u ^ 2) with h | h
   · have : M * u ≤ u ^ 3 / 48 := by nlinarith
@@ -6183,7 +6182,7 @@ lemma struveSc_cubic_absorb {M u : ℝ} (hM : 0 ≤ M) (hu : 0 ≤ u) :
     have : M * u ≤ M * ((48 * M + 1) / 2) := mul_le_mul_of_nonneg_left hu2 hM
     nlinarith [pow_nonneg hu 3]
 
-lemma struveSc_X_split {ν τ M s : ℝ} (hτ : 0 < τ) (hντ : ν = τ ^ 3) (hM : 0 ≤ M)
+theorem struveSc_X_split {ν τ M s : ℝ} (hτ : 0 < τ) (hντ : ν = τ ^ 3) (hM : 0 ≤ M)
     (hτM : 48 * M ≤ τ ^ 2) (hs : 0 ≤ s) :
     Real.exp (-(ν * (s ^ 3 / (12 * (1 + s ^ 2)))) + M * τ * s) ≤
       Real.exp (M * (48 * M + 1) / 2) * Real.exp (-(ν / 48 * s ^ 3)) +
@@ -6220,7 +6219,7 @@ lemma struveSc_X_split {ν τ M s : ℝ} (hτ : 0 < τ) (hντ : ν = τ ^ 3) (h
       _ ≤ _ := le_add_of_nonneg_left (by positivity)
 
 /-- DLMF 11.10.4 on the real contour for `𝐀_{-ν}(z)`, `ν` real, `re z > 0`. -/
-lemma struveSc_angerA_shift (ν : ℝ) {z : ℂ} (hz : 0 < z.re) :
+theorem struveSc_angerA_shift (ν : ℝ) {z : ℂ} (hz : 0 < z.re) :
     angerA (-(ν : ℂ)) z = 1 / π * ∫ s in Ioi (0 : ℝ),
       exp (-((ν : ℂ) * ((struveSc_phiR 1 s : ℝ) : ℂ)) - (z - ν) * s) *
         (((Real.sqrt (1 + s ^ 2))⁻¹ : ℝ) : ℂ) := by
@@ -6241,7 +6240,7 @@ lemma struveSc_angerA_shift (ν : ℝ) {z : ℂ} (hz : 0 < z.re) :
   congr 2; ring
 
 /-- Rescaling the cubic model integral to the Scorer integral. -/
-lemma struveSc_lead_cube {τ : ℝ} (hτ : 0 < τ) (a : ℂ) :
+theorem struveSc_lead_cube {τ : ℝ} (hτ : 0 < τ) (a : ℂ) :
     ∫ s in Ioi (0 : ℝ), exp (-(((τ ^ 3 : ℝ) : ℂ) * (s : ℂ) ^ 3 / 6) - a * τ * s) =
       (((2 : ℝ) ^ (1 / 3 : ℝ) / τ : ℝ) : ℂ) *
         ∫ t in Ioi (0 : ℝ), exp (-(t : ℂ) ^ 3 / 3 + (-(((2 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ) * a) * t) := by
@@ -6267,7 +6266,7 @@ lemma struveSc_lead_cube {τ : ℝ} (hτ : 0 < τ) (a : ℂ) :
   push_cast at e1 e2 ⊢
   linear_combination (-(x : ℂ) ^ 3 / 6) * e1 + (-(a * x)) * e2
 
-lemma struveSc_phiR_one_ge {s : ℝ} (hs : 0 ≤ s) :
+theorem struveSc_phiR_one_ge {s : ℝ} (hs : 0 ≤ s) :
     s ^ 3 / (12 * (1 + s ^ 2)) ≤ struveSc_phiR 1 s := by
   have ha : |(0 : ℝ)| < π / 2 := by rw [abs_zero]; positivity
   have h := struveSc_re_phase_one_ge ha (ρ := 1) zero_le_one hs
@@ -6276,7 +6275,7 @@ lemma struveSc_phiR_one_ge {s : ℝ} (hs : 0 ≤ s) :
   rwa [struveSc_phase_ofReal, ofReal_re] at h
 
 /-- **The main estimate** behind DLMF 11.11.17. -/
-lemma struveSc_turnU_est {M : ℝ} (hM : 0 ≤ M) {τ : ℝ} (hτ1 : 1 ≤ τ) (hτM : 48 * M ≤ τ ^ 2)
+theorem struveSc_turnU_est {M : ℝ} (hM : 0 ≤ M) {τ : ℝ} (hτ1 : 1 ≤ τ) (hτM : 48 * M ≤ τ ^ 2)
     {a : ℂ} (ha : ‖a‖ ≤ M) :
     ‖(∫ s in Ioi (0 : ℝ), exp (-(((τ ^ 3 : ℝ) : ℂ) * ((struveSc_phiR 1 s : ℝ) : ℂ)) - a * τ * s) *
         (((Real.sqrt (1 + s ^ 2))⁻¹ : ℝ) : ℂ)) -

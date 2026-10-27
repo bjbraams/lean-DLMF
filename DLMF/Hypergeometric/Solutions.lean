@@ -7,10 +7,7 @@ module
 
 public import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
 
-public import DLMF.Hypergeometric.DiffEq
-public import DLMF.Hypergeometric.Derivatives
 public import DLMF.Hypergeometric.Continuation
-public import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Digamma
 
 /-!
@@ -59,7 +56,7 @@ def oneSecond (a b c z : ℂ) : ℂ :=
 def infinityFirst (a b c z : ℂ) : ℂ := z ^ (-a) * ₂F₁ a (a - c + 1) (a - b + 1) (1 / z)
 
 /-- Second derivative of `w ↦ w^s G(w)` for `G` analytic near a point of the slit plane. -/
-lemma iteratedDeriv_two_cpow_mul {G : ℂ → ℂ} {s z : ℂ} {U : Set ℂ} (hU : IsOpen U)
+theorem iteratedDeriv_two_cpow_mul {G : ℂ → ℂ} {s z : ℂ} {U : Set ℂ} (hU : IsOpen U)
     (hzU : z ∈ U) (hG : AnalyticOnNhd ℂ G U) (hUs : U ⊆ slitPlane) :
     deriv (fun w => w ^ s * G w) z = s * z ^ (s - 1) * G z + z ^ s * deriv G z ∧
     iteratedDeriv 2 (fun w => w ^ s * G w) z =
@@ -147,7 +144,7 @@ theorem one_first_ode {a b c z : ℂ} (hc : ∀ k : ℕ, a + b - c + 1 ≠ -(k :
   linear_combination h
 
 /-- The Gauss operator under the reflection `z ↦ 1 - z`. -/
-lemma gaussOperator_comp_one_sub (a b c : ℂ) (g : ℂ → ℂ) (z : ℂ) :
+theorem gaussOperator_comp_one_sub (a b c : ℂ) (g : ℂ → ℂ) (z : ℂ) :
     gaussOperator a b c (fun w => g (1 - w)) z = gaussOperator a b (a + b - c + 1) g (1 - z) := by
   have hd : deriv (fun w => g (1 - w)) z = -deriv g (1 - z) := by
     simpa [iteratedDeriv_one] using
@@ -173,7 +170,7 @@ theorem one_second_ode
     using hc) hz hs
 
 /-- Derivatives of `w ↦ w^s H(1/w)`. -/
-lemma iteratedDeriv_two_cpow_mul_recip {H : ℂ → ℂ} {s z : ℂ} {U : Set ℂ} (hU : IsOpen U)
+theorem iteratedDeriv_two_cpow_mul_recip {H : ℂ → ℂ} {s z : ℂ} {U : Set ℂ} (hU : IsOpen U)
     (hzU : z ∈ U) (hH : ∀ w ∈ U, AnalyticAt ℂ H w⁻¹) (hUs : U ⊆ slitPlane) :
     deriv (fun w => w ^ s * H w⁻¹) z =
       s * z ^ (s - 1) * H z⁻¹ - z ^ s * deriv H z⁻¹ / z ^ 2 ∧
@@ -386,7 +383,7 @@ theorem one_wronskian
   linear_combination -h0
 
 /-- Wronskian of a common factor times two functions. -/
-lemma solutionWronskian_mul_left {p f g : ℂ → ℂ} {z : ℂ} (hp : DifferentiableAt ℂ p z)
+theorem solutionWronskian_mul_left {p f g : ℂ → ℂ} {z : ℂ} (hp : DifferentiableAt ℂ p z)
     (hf : DifferentiableAt ℂ f z) (hg : DifferentiableAt ℂ g z) :
     solutionWronskian (fun w => p w * f w) (fun w => p w * g w) z =
       p z ^ 2 * solutionWronskian f g z := by
@@ -397,7 +394,7 @@ lemma solutionWronskian_mul_left {p f g : ℂ → ℂ} {z : ℂ} (hp : Different
   ring
 
 /-- Wronskian after the inversion `w ↦ w⁻¹`. -/
-lemma solutionWronskian_comp_recip {f g : ℂ → ℂ} {z : ℂ} (hz : z ≠ 0)
+theorem solutionWronskian_comp_recip {f g : ℂ → ℂ} {z : ℂ} (hz : z ≠ 0)
     (hf : DifferentiableAt ℂ f z⁻¹) (hg : DifferentiableAt ℂ g z⁻¹) :
     solutionWronskian (fun w => f w⁻¹) (fun w => g w⁻¹) z =
       -(z ^ 2)⁻¹ * solutionWronskian f g z⁻¹ := by
@@ -534,7 +531,7 @@ def logarithmicSecondBothTerminating (m l n : ℕ) (z : ℂ) : ℂ :=
 /-! ### Uniqueness for the Gauss equation on an open set -/
 
 /-- Differentiating the Gauss equation `n` times on an open set. -/
-lemma gaussOperator_iteratedDeriv {a b c : ℂ} {f : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
+theorem gaussOperator_iteratedDeriv {a b c : ℂ} {f : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
     (hf : AnalyticOnNhd ℂ f U) (hode : ∀ w ∈ U, gaussOperator a b c f w = 0) (n : ℕ) :
     ∀ w ∈ U, w * (1 - w) * iteratedDeriv (n + 2) f w +
       ((n : ℂ) * (1 - 2 * w) + (c - (a + b + 1) * w)) * iteratedDeriv (n + 1) f w +
@@ -579,7 +576,7 @@ lemma gaussOperator_iteratedDeriv {a b c : ℂ} {f : ℂ → ℂ} {U : Set ℂ} 
 
 /-- A solution of the Gauss equation on a connected open set vanishing to second order at a
 regular point vanishes identically. -/
-lemma gaussOperator_eq_zero_of_deriv_eq_zero {a b c : ℂ} {g : ℂ → ℂ} {U : Set ℂ}
+theorem gaussOperator_eq_zero_of_deriv_eq_zero {a b c : ℂ} {g : ℂ → ℂ} {U : Set ℂ}
     (hU : IsOpen U) (hUc : IsPreconnected U) (hg : AnalyticOnNhd ℂ g U)
     (hode : ∀ w ∈ U, gaussOperator a b c g w = 0) {z₀ : ℂ} (hz₀ : z₀ ∈ U) (h0 : z₀ ≠ 0)
     (h1 : z₀ ≠ 1) (hv : g z₀ = 0) (hdv : deriv g z₀ = 0) : ∀ w ∈ U, g w = 0 := by
@@ -605,7 +602,7 @@ lemma gaussOperator_eq_zero_of_deriv_eq_zero {a b c : ℂ} {g : ℂ → ℂ} {U 
   exact hg.eqOn_of_preconnected_of_eventuallyEq analyticOnNhd_const hUc hz₀ hev hw
 
 /-- The Gauss operator is linear on functions analytic near the point. -/
-lemma gaussOperator_sub_smul {a b c : ℂ} {f₁ f₂ f₃ : ℂ → ℂ} {α β z : ℂ}
+theorem gaussOperator_sub_smul {a b c : ℂ} {f₁ f₂ f₃ : ℂ → ℂ} {α β z : ℂ}
     (h₁ : AnalyticAt ℂ f₁ z) (h₂ : AnalyticAt ℂ f₂ z) (h₃ : AnalyticAt ℂ f₃ z) :
     gaussOperator a b c (fun w => f₁ w - α * f₂ w - β * f₃ w) z =
       gaussOperator a b c f₁ z - α * gaussOperator a b c f₂ z -
@@ -663,7 +660,7 @@ theorem _root_.HasFPowerSeriesOnBall.hasSum_gaussOperator {f : ℂ → ℂ} {c :
   · simp only [gaussOperator, iteratedDeriv_succ, iteratedDeriv_zero]; ring
 
 /-- The Gauss operator on `F · log`. -/
-lemma gaussOperator_mul_log {a b c : ℂ} {F : ℂ → ℂ} {z : ℂ} (hF : AnalyticAt ℂ F z)
+theorem gaussOperator_mul_log {a b c : ℂ} {F : ℂ → ℂ} {z : ℂ} (hF : AnalyticAt ℂ F z)
     (hz : z ∈ slitPlane) :
     gaussOperator a b c (fun v => F v * log v) z =
       log z * gaussOperator a b c F z + (2 * (1 - z) * deriv F z + (c - 1) * F z / z -
@@ -683,7 +680,7 @@ lemma gaussOperator_mul_log {a b c : ℂ} {F : ℂ → ℂ} {z : ℂ} (hF : Anal
   field_simp
   ring
 
-lemma hasDerivAt_recip_pow (p : ℕ) {v : ℂ} (hv : v ≠ 0) :
+theorem hasDerivAt_recip_pow (p : ℕ) {v : ℂ} (hv : v ≠ 0) :
     HasDerivAt (fun w : ℂ => w⁻¹ ^ p) (-(p : ℂ) * v⁻¹ ^ (p + 1)) v := by
   have h := (hasDerivAt_inv hv).pow p
   refine h.congr_deriv ?_
@@ -700,7 +697,7 @@ def logSing (a b : ℂ) (n : ℕ) (z : ℂ) : ℂ :=
     ((n - 1).factorial : ℂ) * (j.factorial : ℂ) /
       (((n - j - 2).factorial : ℂ) * poch (1 - a) (j + 1) * poch (1 - b) (j + 1)) * ((-z)⁻¹) ^ (j + 1)
 
-lemma poch_ne_zero_of_le {x : ℂ} {N k : ℕ} (hk : k ≤ N) (h : poch x N ≠ 0) : poch x k ≠ 0 := by
+theorem poch_ne_zero_of_le {x : ℂ} {N k : ℕ} (hk : k ≤ N) (h : poch x N ≠ 0) : poch x k ≠ 0 := by
   intro h0
   apply h
   obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le hk
@@ -816,7 +813,7 @@ theorem gaussOperator_logSing {a b : ℂ} {n : ℕ} (hn : 0 < n)
     field_simp
     ring
 
-lemma analyticAt_logSing (a b : ℂ) (n : ℕ) {z : ℂ} (hz : z ≠ 0) : AnalyticAt ℂ (logSing a b n) z := by
+theorem analyticAt_logSing (a b : ℂ) (n : ℕ) {z : ℂ} (hz : z ≠ 0) : AnalyticAt ℂ (logSing a b n) z := by
   unfold logSing
   have h : ∀ j ∈ Finset.range (n - 1), AnalyticAt ℂ (fun v : ℂ => ((n - 1).factorial : ℂ) *
       (j.factorial : ℂ) / (((n - j - 2).factorial : ℂ) * poch (1 - a) (j + 1) *
@@ -887,14 +884,14 @@ def logSingCoeff (a b : ℂ) (n j : ℕ) : ℂ :=
   ((n - 1).factorial : ℂ) * (j.factorial : ℂ) /
     (((n - j - 2).factorial : ℂ) * poch (1 - a) (j + 1) * poch (1 - b) (j + 1)) * (-1) ^ (j + 1)
 
-lemma logSing_eq (a b : ℂ) (n : ℕ) (v : ℂ) :
+theorem logSing_eq (a b : ℂ) (n : ℕ) (v : ℂ) :
     logSing a b n v = ∑ j ∈ Finset.range (n - 1), logSingCoeff a b n j * v⁻¹ ^ (j + 1) := by
   simp only [logSing, logSingCoeff]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [inv_neg, neg_eq_neg_one_mul, mul_pow, inv_pow]
   ring
 
-lemma hasDerivAt_logSing (a b : ℂ) (n : ℕ) {v : ℂ} (hv : v ≠ 0) :
+theorem hasDerivAt_logSing (a b : ℂ) (n : ℕ) {v : ℂ} (hv : v ≠ 0) :
     HasDerivAt (logSing a b n)
       (∑ j ∈ Finset.range (n - 1), logSingCoeff a b n j * (-((j + 1 : ℕ) : ℂ) * v⁻¹ ^ (j + 2))) v := by
   have h : logSing a b n = fun v => ∑ j ∈ Finset.range (n - 1), logSingCoeff a b n j * v⁻¹ ^ (j + 1) :=
@@ -910,20 +907,20 @@ def logSingPoly0 (a b : ℂ) (n : ℕ) (v : ℂ) : ℂ :=
 def logSingPoly1 (a b : ℂ) (n : ℕ) (v : ℂ) : ℂ :=
   ∑ j ∈ Finset.range (n - 1), logSingCoeff a b n j * (-((j + 1 : ℕ) : ℂ) * v ^ (n - j - 2))
 
-lemma pow_mul_recip_pow {v : ℂ} (hv : v ≠ 0) {n k : ℕ} (hk : k ≤ n) :
+theorem pow_mul_recip_pow {v : ℂ} (hv : v ≠ 0) {n k : ℕ} (hk : k ≤ n) :
     v ^ n * v⁻¹ ^ k = v ^ (n - k) := by
   obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le hk
   rw [Nat.add_sub_cancel_left, pow_add, inv_pow]
   field_simp
 
-lemma pow_mul_logSing (a b : ℂ) (n : ℕ) {v : ℂ} (hv : v ≠ 0) :
+theorem pow_mul_logSing (a b : ℂ) (n : ℕ) {v : ℂ} (hv : v ≠ 0) :
     v ^ n * logSing a b n v = logSingPoly0 a b n v := by
   rw [logSing_eq, logSingPoly0, Finset.mul_sum]
   refine Finset.sum_congr rfl fun j hj => ?_
   rw [Finset.mem_range] at hj
   rw [mul_left_comm, pow_mul_recip_pow hv (by omega), show n - (j + 1) = n - j - 1 by omega]
 
-lemma pow_mul_deriv_logSing (a b : ℂ) (n : ℕ) {v : ℂ} (hv : v ≠ 0) :
+theorem pow_mul_deriv_logSing (a b : ℂ) (n : ℕ) {v : ℂ} (hv : v ≠ 0) :
     v ^ n * deriv (logSing a b n) v = logSingPoly1 a b n v := by
   rw [(hasDerivAt_logSing a b n hv).deriv, logSingPoly1, Finset.mul_sum]
   refine Finset.sum_congr rfl fun j hj => ?_
@@ -932,15 +929,15 @@ lemma pow_mul_deriv_logSing (a b : ℂ) (n : ℕ) {v : ℂ} (hv : v ≠ 0) :
       logSingCoeff a b n j * (-((j + 1 : ℕ) : ℂ) * (v ^ n * v⁻¹ ^ (j + 2))) by ring,
     pow_mul_recip_pow hv (by omega), show n - (j + 2) = n - j - 2 by omega]
 
-lemma differentiable_logSingPoly0 (a b : ℂ) (n : ℕ) : Differentiable ℂ (logSingPoly0 a b n) := by
+theorem differentiable_logSingPoly0 (a b : ℂ) (n : ℕ) : Differentiable ℂ (logSingPoly0 a b n) := by
   unfold logSingPoly0
   fun_prop
 
-lemma differentiable_logSingPoly1 (a b : ℂ) (n : ℕ) : Differentiable ℂ (logSingPoly1 a b n) := by
+theorem differentiable_logSingPoly1 (a b : ℂ) (n : ℕ) : Differentiable ℂ (logSingPoly1 a b n) := by
   unfold logSingPoly1
   fun_prop
 
-lemma logSingCoeff_ne_zero {a b : ℂ} {n : ℕ} (hn : 2 ≤ n)
+theorem logSingCoeff_ne_zero {a b : ℂ} {n : ℕ} (hn : 2 ≤ n)
     (ha : poch (1 - a) (n - 1) ≠ 0) (hb : poch (1 - b) (n - 1) ≠ 0) :
     logSingCoeff a b n (n - 2) ≠ 0 := by
   unfold logSingCoeff
@@ -1117,18 +1114,18 @@ theorem wronskian_logSolution_ne_zero {a b : ℂ} {n : ℕ} (hn : 0 < n)
   rw [hKc, hK0] at this
   exact hG0 this
 
-lemma gaussOperator_congr {a b c : ℂ} {f g : ℂ → ℂ} {z : ℂ} (h : f =ᶠ[𝓝 z] g) :
+theorem gaussOperator_congr {a b c : ℂ} {f g : ℂ → ℂ} {z : ℂ} (h : f =ᶠ[𝓝 z] g) :
     gaussOperator a b c f z = gaussOperator a b c g z := by
   simp only [gaussOperator, iteratedDeriv_succ, iteratedDeriv_zero]
   rw [h.deriv.deriv_eq, h.deriv_eq, h.eq_of_nhds]
 
-lemma solutionWronskian_congr {f g₁ g₂ : ℂ → ℂ} {z : ℂ} (h : g₁ =ᶠ[𝓝 z] g₂) :
+theorem solutionWronskian_congr {f g₁ g₂ : ℂ → ℂ} {z : ℂ} (h : g₁ =ᶠ[𝓝 z] g₂) :
     solutionWronskian f g₁ z = solutionWronskian f g₂ z := by
   simp only [solutionWronskian]
   rw [h.deriv_eq, h.eq_of_nhds]
 
 /-- A coefficient sequence with `∑ ‖h k‖ r^k < ∞` for all `r < 1` has radius at least one. -/
-lemma one_le_radius_ofScalars {h : ℕ → ℂ}
+theorem one_le_radius_ofScalars {h : ℕ → ℂ}
     (hs : ∀ r : ℝ, 0 ≤ r → r < 1 → Summable fun k => ‖h k‖ * r ^ k) :
     1 ≤ (ofScalars ℂ h).radius := by
   refine ENNReal.le_of_forall_nnreal_lt fun r hr => ?_
@@ -1139,7 +1136,7 @@ lemma one_le_radius_ofScalars {h : ℕ → ℂ}
 
 /-- Coefficients eventually of polynomial growth relative to a Gauss series give radius at
 least one. -/
-lemma one_le_radius_of_le_gaussHGCoeff {h : ℕ → ℂ} (a b c : ℂ) {C : ℝ} (N : ℕ)
+theorem one_le_radius_of_le_gaussHGCoeff {h : ℕ → ℂ} (a b c : ℂ) {C : ℝ} (N : ℕ)
     (hC : ∀ k, N ≤ k → ‖h k‖ ≤ C * (k + 1) * ‖gaussHGCoeff a b c k‖) :
     1 ≤ (ofScalars ℂ h).radius := by
   refine one_le_radius_ofScalars fun r hr0 hr1 => ?_
@@ -1186,7 +1183,7 @@ lemma one_le_radius_of_le_gaussHGCoeff {h : ℕ → ℂ} (a b c : ℂ) {C : ℝ}
     _ = |C| * M * (((k : ℝ) + N + 1) * q ^ (k + N)) := by ring
 
 /-- Linear growth of `ψ(x + k)`. -/
-lemma exists_norm_digamma_add_nat_le {x : ℂ} (hx : ∀ m : ℕ, x ≠ -(m : ℂ)) :
+theorem exists_norm_digamma_add_nat_le {x : ℂ} (hx : ∀ m : ℕ, x ≠ -(m : ℂ)) :
     ∃ C : ℝ, ∀ k : ℕ, ‖digamma (x + k)‖ ≤ C * (k + 1) := by
   obtain ⟨N, hN⟩ : ∃ N : ℕ, ‖x‖ + 1 ≤ N := exists_nat_ge _
   set M : ℝ := 1 + ∑ j ∈ Finset.range N, ‖(x + j)⁻¹‖ with hM
@@ -1221,17 +1218,17 @@ lemma exists_norm_digamma_add_nat_le {x : ℂ} (hx : ∀ m : ℕ, x ≠ -(m : �
         have hk : (0 : ℝ) ≤ k := Nat.cast_nonneg k
         nlinarith
 
-lemma not_neg_nat_of_not_int' {x : ℂ} (hx : ∀ k : ℤ, x ≠ (k : ℂ)) : ∀ m : ℕ, x ≠ -(m : ℂ) :=
+theorem not_neg_nat_of_not_int' {x : ℂ} (hx : ∀ k : ℤ, x ≠ (k : ℂ)) : ∀ m : ℕ, x ≠ -(m : ℂ) :=
   fun m h => hx (-m) (by rw [h]; push_cast; ring)
 
-lemma natCast_not_neg_nat {n : ℕ} (hn : 0 < n) : ∀ k : ℕ, (n : ℂ) ≠ -(k : ℂ) := by
+theorem natCast_not_neg_nat {n : ℕ} (hn : 0 < n) : ∀ k : ℕ, (n : ℂ) ≠ -(k : ℂ) := by
   intro k hk
   have := congrArg re hk
   simp at this
   linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k), (Nat.cast_pos.mpr hn : (0 : ℝ) < n)]
 
 /-- The power series part is analytic on the unit disk, given a radius bound. -/
-lemma hasFPowerSeriesOnBall_ofScalars_sum {h : ℕ → ℂ} (hr : 1 ≤ (ofScalars ℂ h).radius) :
+theorem hasFPowerSeriesOnBall_ofScalars_sum {h : ℕ → ℂ} (hr : 1 ≤ (ofScalars ℂ h).radius) :
     HasFPowerSeriesOnBall (ofScalars ℂ h).sum (ofScalars ℂ h) 0 1 :=
   ((ofScalars ℂ h).hasFPowerSeriesOnBall (lt_of_lt_of_le one_pos hr)).mono one_pos hr
 
@@ -1325,7 +1322,7 @@ theorem logarithmic_second_fundamental
   · rw [solutionWronskian_congr hev]
     exact wronskian_logSolution_ne_zero hn hpa hpb hH hrec hz hs
 
-lemma factorial_le_norm_poch_natCast {n : ℕ} (hn : 0 < n) (k : ℕ) :
+theorem factorial_le_norm_poch_natCast {n : ℕ} (hn : 0 < n) (k : ℕ) :
     (k.factorial : ℝ) ≤ ‖poch (n : ℂ) k‖ :=
   factorial_le_norm_ascPochhammer_eval (by simp; exact_mod_cast hn) k
 
@@ -1489,7 +1486,7 @@ theorem logarithmic_second_terminating_fundamental
     exact wronskian_logSolution_ne_zero hn hpa hpb hH hrec hz hs
 
 /-- `ψ(1 + p - (k+1)) = ψ(1 + p - k) - (p - k)⁻¹` for `k < p`. -/
-lemma digamma_one_add_sub_succ {p k : ℕ} (hk : k < p) :
+theorem digamma_one_add_sub_succ {p k : ℕ} (hk : k < p) :
     digamma (1 + p - ((k + 1 : ℕ) : ℂ)) = digamma (1 + p - k) - ((p : ℂ) - k)⁻¹ ∧
       ((p : ℂ) - k) * ((p : ℂ) - k)⁻¹ = 1 := by
   have hxpos : ∀ j : ℕ, ((p - k - 1 : ℕ) : ℂ) + 1 ≠ -(j : ℂ) := by
@@ -1641,48 +1638,48 @@ end LogSolutions
 /-- The overlap of the series disks at `0` and at `1`. -/
 def connLens : Set ℂ := {z | ‖z‖ < 1 ∧ ‖1 - z‖ < 1}
 
-lemma connLens_eq : connLens = Metric.ball 0 1 ∩ Metric.ball 1 1 := by
+theorem connLens_eq : connLens = Metric.ball 0 1 ∩ Metric.ball 1 1 := by
   ext z
   simp only [connLens, Set.mem_ofPred_eq, Set.mem_inter_iff, Metric.mem_ball, dist_eq_norm,
     sub_zero, norm_sub_rev z 1]
 
-lemma isOpen_connLens : IsOpen connLens := by
+theorem isOpen_connLens : IsOpen connLens := by
   rw [connLens_eq]
   exact Metric.isOpen_ball.inter Metric.isOpen_ball
 
-lemma isPreconnected_connLens : IsPreconnected connLens := by
+theorem isPreconnected_connLens : IsPreconnected connLens := by
   rw [connLens_eq]
   exact ((convex_ball _ _).inter (convex_ball _ _)).isPreconnected
 
-lemma one_sub_mem_slitPlane_of_mem_connLens {z : ℂ} (hz : z ∈ connLens) : 1 - z ∈ slitPlane := by
+theorem one_sub_mem_slitPlane_of_mem_connLens {z : ℂ} (hz : z ∈ connLens) : 1 - z ∈ slitPlane := by
   refine mem_slitPlane_iff.mpr (Or.inl ?_)
   have := (re_le_norm z).trans_lt hz.1
   simp only [sub_re, one_re]
   linarith
 
-lemma ne_zero_of_mem_connLens {z : ℂ} (hz : z ∈ connLens) : z ≠ 0 := by
+theorem ne_zero_of_mem_connLens {z : ℂ} (hz : z ∈ connLens) : z ≠ 0 := by
   rintro rfl
   simp [connLens] at hz
 
-lemma ne_one_of_mem_connLens {z : ℂ} (hz : z ∈ connLens) : z ≠ 1 := by
+theorem ne_one_of_mem_connLens {z : ℂ} (hz : z ∈ connLens) : z ≠ 1 := by
   rintro rfl
   simp [connLens] at hz
 
-lemma analyticAt_ordinaryHypergeometric {a b c z : ℂ} (hz : ‖z‖ < 1) :
+theorem analyticAt_ordinaryHypergeometric {a b c z : ℂ} (hz : ‖z‖ < 1) :
     AnalyticAt ℂ (₂F₁ a b c) z :=
   (hasFPowerSeriesOnBall_ordinaryHypergeometric a b c).analyticAt_of_mem
     (mem_eball_one_of_norm_lt_one hz)
 
-lemma analyticAt_oneFirst {a b c z : ℂ} (hz : ‖1 - z‖ < 1) : AnalyticAt ℂ (oneFirst a b c) z :=
+theorem analyticAt_oneFirst {a b c z : ℂ} (hz : ‖1 - z‖ < 1) : AnalyticAt ℂ (oneFirst a b c) z :=
   (analyticAt_ordinaryHypergeometric hz).comp (analyticAt_const.sub analyticAt_id)
 
-lemma analyticAt_oneSecond {a b c z : ℂ} (hz : ‖1 - z‖ < 1) (hs : 1 - z ∈ slitPlane) :
+theorem analyticAt_oneSecond {a b c z : ℂ} (hz : ‖1 - z‖ < 1) (hs : 1 - z ∈ slitPlane) :
     AnalyticAt ℂ (oneSecond a b c) z :=
   ((analyticAt_const.sub analyticAt_id).cpow analyticAt_const hs).mul
     ((analyticAt_ordinaryHypergeometric hz).comp (analyticAt_const.sub analyticAt_id))
 
 /-- On the lens, `₂F₁(a,b;c;z)` is a combination of the two local solutions at `z = 1`. -/
-lemma exists_connection_one {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
+theorem exists_connection_one {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
     (hC : ∀ k : ℕ, a + b - c + 1 ≠ -(k : ℂ)) (hS : ∀ k : ℕ, c - a - b + 1 ≠ -(k : ℂ))
     (hs0 : c - a - b ≠ 0) :
     ∃ α β : ℂ, ∀ z ∈ connLens,
@@ -1802,7 +1799,7 @@ lemma exists_connection_one {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
   linear_combination hg0
 
 /-- Abel's theorem for `₂F₁` at `z = 1` when `Re(c-a-b) > 0`. -/
-lemma tendsto_ordinaryHypergeometric_left_one {a b c : ℂ} (h : 0 < (c - a - b).re) :
+theorem tendsto_ordinaryHypergeometric_left_one {a b c : ℂ} (h : 0 < (c - a - b).re) :
     Tendsto (fun x : ℝ => ₂F₁ a b c (x : ℂ)) (𝓝[<] 1) (𝓝 (₂F₁ a b c 1)) := by
   have hs : Summable (gaussHGCoeff a b c) := by
     simpa using ordinaryHypergeometric_summable_of_mem_sphere (z := 1) (by simp) h
@@ -1817,11 +1814,11 @@ lemma tendsto_ordinaryHypergeometric_left_one {a b c : ℂ} (h : 0 < (c - a - b)
   simp [gaussHGCoeff, poch, div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm]
 
 /-- Helper for the connection formulas: a complex number off `ℤ` is off `-ℕ`. -/
-lemma not_neg_nat_of_not_int {c : ℂ} (hc : ∀ k : ℤ, c ≠ (k : ℂ)) : ∀ k : ℕ, c ≠ -(k : ℂ) := by
+theorem not_neg_nat_of_not_int {c : ℂ} (hc : ∀ k : ℤ, c ≠ (k : ℂ)) : ∀ k : ℕ, c ≠ -(k : ℂ) := by
   intro k h
   exact hc (-(k : ℤ)) (by rw [h]; push_cast; ring)
 
-lemma sin_pi_mul_ne_zero_of_not_int {x : ℂ} (hx : ∀ k : ℤ, x ≠ (k : ℂ)) :
+theorem sin_pi_mul_ne_zero_of_not_int {x : ℂ} (hx : ∀ k : ℤ, x ≠ (k : ℂ)) :
     Complex.sin (π * x) ≠ 0 := by
   rw [Ne, Complex.sin_eq_zero_iff]
   rintro ⟨k, hk⟩
@@ -1832,7 +1829,7 @@ lemma sin_pi_mul_ne_zero_of_not_int {x : ℂ} (hx : ∀ k : ℤ, x ≠ (k : ℂ)
   linear_combination this
 
 /-- The connection formula 15.10.21 in a parameter region where every limit is available. -/
-lemma zero_first_connection_one_base {a b c : ℂ} (ha : ∀ k : ℤ, a ≠ (k : ℂ))
+theorem zero_first_connection_one_base {a b c : ℂ} (ha : ∀ k : ℤ, a ≠ (k : ℂ))
     (hb : ∀ k : ℤ, b ≠ (k : ℂ)) (hc : ∀ k : ℤ, c ≠ (k : ℂ)) (hca : ∀ k : ℤ, c - a ≠ (k : ℂ))
     (hcb : ∀ k : ℤ, c - b ≠ (k : ℂ)) (hs : ∀ k : ℤ, c - a - b ≠ (k : ℂ))
     (hre : 0 < (c - a - b).re) (hre1 : c.re < 1) {z : ℂ} (hz : z ∈ connLens) :
@@ -2023,7 +2020,7 @@ def connRhs (a b c z : ℂ) : ℂ :=
     (1 - z) ^ (c - a - b) * regularizedGaussHGFun (c - a) (c - b) (c - a - b + 1) (1 - z) *
       (Gamma a)⁻¹ * (Gamma b)⁻¹)
 
-lemma differentiable_connLhs_connRhs {A B C : ℂ → ℂ} (hA : Differentiable ℂ A)
+theorem differentiable_connLhs_connRhs {A B C : ℂ → ℂ} (hA : Differentiable ℂ A)
     (hB : Differentiable ℂ B) (hC : Differentiable ℂ C) {z : ℂ} (hz : z ∈ connLens) :
     Differentiable ℂ (fun w => connLhs (A w) (B w) (C w) z) ∧
       Differentiable ℂ (fun w => connRhs (A w) (B w) (C w) z) := by
@@ -2049,7 +2046,7 @@ lemma differentiable_connLhs_connRhs {A B C : ℂ → ℂ} (hA : Differentiable 
         (((hp.mul h2).mul (hiG _ hA)).mul (hiG _ hB)))
 
 /-- The regularized form of 15.10.21 in the base parameter region. -/
-lemma connLhs_eq_connRhs_base {a b c : ℂ} (ha : ∀ k : ℤ, a ≠ (k : ℂ))
+theorem connLhs_eq_connRhs_base {a b c : ℂ} (ha : ∀ k : ℤ, a ≠ (k : ℂ))
     (hb : ∀ k : ℤ, b ≠ (k : ℂ)) (hc : ∀ k : ℤ, c ≠ (k : ℂ)) (hca : ∀ k : ℤ, c - a ≠ (k : ℂ))
     (hcb : ∀ k : ℤ, c - b ≠ (k : ℂ)) (hs : ∀ k : ℤ, c - a - b ≠ (k : ℂ))
     (hre : 0 < (c - a - b).re) (hre1 : c.re < 1) {z : ℂ} (hz : z ∈ connLens) :
@@ -2088,14 +2085,14 @@ lemma connLhs_eq_connRhs_base {a b c : ℂ} (ha : ∀ k : ℤ, a ≠ (k : ℂ))
   field_simp
   ring
 
-lemma not_int_of_im_pos {x : ℂ} (h : 0 < x.im) : ∀ k : ℤ, x ≠ (k : ℂ) := by
+theorem not_int_of_im_pos {x : ℂ} (h : 0 < x.im) : ∀ k : ℤ, x ≠ (k : ℂ) := by
   intro k hk
   rw [hk] at h
   simp at h
 
 /-- The regularized form of 15.10.21 for all parameters, by analytic continuation in `c`,
 then `a`, then `b`. -/
-lemma connLhs_eq_connRhs (a b c : ℂ) {z : ℂ} (hz : z ∈ connLens) :
+theorem connLhs_eq_connRhs (a b c : ℂ) {z : ℂ} (hz : z ∈ connLens) :
     connLhs a b c z = connRhs a b c z := by
   have hVo : IsOpen ({w : ℂ | w.re < 0} ∩ {w : ℂ | 0 < w.im}) :=
     (isOpen_lt continuous_re continuous_const).inter (isOpen_lt continuous_const continuous_im)

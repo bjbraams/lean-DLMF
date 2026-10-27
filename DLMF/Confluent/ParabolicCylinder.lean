@@ -5,8 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Confluent.IncompleteGamma
 public import TauCeti.RingTheory.Polynomial.Hermite.Derivative
+public import DLMF.Confluent.Asymptotics
+public import DLMF.Confluent.Relations
 
 /-!
 # Parabolic cylinder functions (Temme §7.3.3; DLMF Chapter 12)
@@ -65,17 +66,17 @@ def pcfEven (a z : ℂ) : ℂ :=
 def pcfOdd (a z : ℂ) : ℂ :=
   z * exp (-z ^ 2 / 4) * kummerM (a / 2 + 3 / 4) (3 / 2) (z ^ 2 / 2)
 
-lemma five_halves_ne_neg_nat : ∀ k : ℕ, (5 / 2 : ℂ) ≠ -k := fun k h => by
+theorem five_halves_ne_neg_nat : ∀ k : ℕ, (5 / 2 : ℂ) ≠ -k := fun k h => by
   have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
 
-lemma hasDerivAt_kummerM_half_sq {α b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) :
+theorem hasDerivAt_kummerM_half_sq {α b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) :
     HasDerivAt (fun z : ℂ => kummerM α b (z ^ 2 / 2))
       (z * (α / b * kummerM (α + 1) (b + 1) (z ^ 2 / 2))) z := by
   have h := (hasDerivAt_kummerM_shift (a := α) hb (z ^ 2 / 2)).comp z
     (((hasDerivAt_pow 2 z).div_const 2))
   exact h.congr_deriv (by push_cast; ring)
 
-lemma hasDerivAt_exp_neg_sq_div_four (z : ℂ) :
+theorem hasDerivAt_exp_neg_sq_div_four (z : ℂ) :
     HasDerivAt (fun z : ℂ => exp (-z ^ 2 / 4)) (-z / 2 * exp (-z ^ 2 / 4)) z := by
   have h := (((hasDerivAt_pow 2 z).neg).div_const 4).cexp
   exact h.congr_deriv (by simp only [Pi.neg_apply]; push_cast; ring)
@@ -201,7 +202,7 @@ theorem pcfU_neg_half (z : ℂ) : pcfU (-1 / 2) z = exp (-z ^ 2 / 4) := by
   field_simp
   ring
 
-lemma two_cpow_half : (2 : ℂ) ^ (1 / 2 : ℂ) = (Real.sqrt 2 : ℂ) := by
+theorem two_cpow_half : (2 : ℂ) ^ (1 / 2 : ℂ) = (Real.sqrt 2 : ℂ) := by
   rw [Real.sqrt_eq_rpow, Complex.ofReal_cpow (by norm_num)]
   norm_num
 
@@ -250,7 +251,7 @@ theorem pcfU_eq_kummerU (a : ℂ) {z : ℂ} (hre : 0 < z.re) :
   linear_combination (-(z * N * G1⁻¹)) * hs2sq
 
 /-- Legendre duplication for Pochhammer symbols: `(2c)_{2s} = 4^s (c)_s (c + 1/2)_s`. -/
-lemma poch_two_mul (c : ℂ) (s : ℕ) :
+theorem poch_two_mul (c : ℂ) (s : ℕ) :
     poch (2 * c) (2 * s) = 4 ^ s * poch c s * poch (c + 1 / 2) s := by
   induction s with
   | zero => simp [poch_zero]
@@ -326,17 +327,17 @@ theorem pcfOddDeriv_zero (a : ℂ) : pcfOddDeriv a 0 = 1 := by
 def IsWeberSol (a : ℂ) (f f' : ℂ → ℂ) : Prop :=
   ∀ z, HasDerivAt f (f' z) z ∧ HasDerivAt f' ((z ^ 2 / 4 + a) * f z) z
 
-lemma isWeberSol_pcfEven (a : ℂ) : IsWeberSol a (pcfEven a) (pcfEvenDeriv a) :=
+theorem isWeberSol_pcfEven (a : ℂ) : IsWeberSol a (pcfEven a) (pcfEvenDeriv a) :=
   fun z => ⟨hasDerivAt_pcfEven a z, hasDerivAt_pcfEvenDeriv a z⟩
 
-lemma isWeberSol_pcfOdd (a : ℂ) : IsWeberSol a (pcfOdd a) (pcfOddDeriv a) :=
+theorem isWeberSol_pcfOdd (a : ℂ) : IsWeberSol a (pcfOdd a) (pcfOddDeriv a) :=
   fun z => ⟨hasDerivAt_pcfOdd a z, hasDerivAt_pcfOddDeriv a z⟩
 
-lemma isWeberSol_pcfU (a : ℂ) : IsWeberSol a (pcfU a) (pcfUDeriv a) :=
+theorem isWeberSol_pcfU (a : ℂ) : IsWeberSol a (pcfU a) (pcfUDeriv a) :=
   fun z => ⟨hasDerivAt_pcfU a z, hasDerivAt_pcfUDeriv a z⟩
 
 /-- The Wronskian of two solutions of Weber's equation is constant. -/
-lemma IsWeberSol.wronskian_eq {a : ℂ} {f f' g g' : ℂ → ℂ} (hf : IsWeberSol a f f')
+theorem IsWeberSol.wronskian_eq {a : ℂ} {f f' g g' : ℂ → ℂ} (hf : IsWeberSol a f f')
     (hg : IsWeberSol a g g') (z : ℂ) :
     f z * g' z - f' z * g z = f 0 * g' 0 - f' 0 * g 0 := by
   have hd : ∀ w, HasDerivAt (fun w => f w * g' w - f' w * g w) 0 w := fun w =>
@@ -362,17 +363,17 @@ theorem IsWeberSol.eq_of_initial {a : ℂ} {f f' g g' : ℂ → ℂ} (hf : IsWeb
 
 /-! ### Recurrences (DLMF 12.8) -/
 
-lemma pcfU_zero' (a : ℂ) :
+theorem pcfU_zero' (a : ℂ) :
     pcfU a 0 = (Real.sqrt π : ℂ) * (2 : ℂ) ^ (-(a / 2 + 1 / 4)) * (Gamma (3 / 4 + a / 2))⁻¹ := by
   simp [pcfU, pcfEven_zero, pcfOdd_zero]
 
-lemma pcfUDeriv_zero' (a : ℂ) :
+theorem pcfUDeriv_zero' (a : ℂ) :
     pcfUDeriv a 0 =
       -((Real.sqrt π : ℂ) * (2 : ℂ) ^ (-(a / 2 - 1 / 4)) * (Gamma (1 / 4 + a / 2))⁻¹) := by
   simp [pcfUDeriv, pcfEvenDeriv_zero, pcfOddDeriv_zero]
 
 /-- `s / Γ(s + 1) = 1 / Γ(s)` for every complex `s`, with Mathlib's totalized `Γ`. -/
-lemma mul_recip_Gamma_add_one' (s : ℂ) : s * (Gamma (s + 1))⁻¹ = (Gamma s)⁻¹ := by
+theorem mul_recip_Gamma_add_one' (s : ℂ) : s * (Gamma (s + 1))⁻¹ = (Gamma s)⁻¹ := by
   rcases eq_or_ne s 0 with rfl | hs
   · simp
   rw [Complex.Gamma_add_one s hs]
@@ -380,7 +381,7 @@ lemma mul_recip_Gamma_add_one' (s : ℂ) : s * (Gamma (s + 1))⁻¹ = (Gamma s)�
   · simp [hg]
   · field_simp
 
-lemma two_cpow_sub_one (x : ℂ) : (2 : ℂ) ^ (x - 1) = (2 : ℂ) ^ x / 2 := by
+theorem two_cpow_sub_one (x : ℂ) : (2 : ℂ) ^ (x - 1) = (2 : ℂ) ^ x / 2 := by
   rw [Complex.cpow_sub _ _ two_ne_zero, Complex.cpow_one]
 
 theorem deriv_pcfU (a : ℂ) : deriv (pcfU a) = pcfUDeriv a :=
@@ -473,7 +474,7 @@ section Hermite
 
 open Polynomial
 
-lemma pcfUDeriv_neg_half (z : ℂ) : pcfUDeriv (-1 / 2) z = -z / 2 * exp (-z ^ 2 / 4) := by
+theorem pcfUDeriv_neg_half (z : ℂ) : pcfUDeriv (-1 / 2) z = -z / 2 * exp (-z ^ 2 / 4) := by
   have h : pcfU (-1 / 2) = fun z => exp (-z ^ 2 / 4) := funext pcfU_neg_half
   have hd := hasDerivAt_pcfU (-1 / 2) z
   rw [h] at hd
@@ -524,17 +525,17 @@ end Hermite
 def pcfMoment (c z : ℂ) : ℂ :=
   ∫ t in Ioi (0 : ℝ), (t : ℂ) ^ c * exp (-(t : ℂ) ^ 2 / 2 - z * t)
 
-lemma pcf_exponent_le (t x : ℝ) : -t ^ 2 / 2 - x * t ≤ -t ^ 2 / 4 + x ^ 2 := by
+theorem pcf_exponent_le (t x : ℝ) : -t ^ 2 / 2 - x * t ≤ -t ^ 2 / 4 + x ^ 2 := by
   nlinarith [sq_nonneg (t / 2 + x)]
 
-lemma norm_pcfIntegrand (c z : ℂ) {t : ℝ} (ht : 0 < t) :
+theorem norm_pcfIntegrand (c z : ℂ) {t : ℝ} (ht : 0 < t) :
     ‖(t : ℂ) ^ c * exp (-(t : ℂ) ^ 2 / 2 - z * t)‖ =
       t ^ c.re * Real.exp (-t ^ 2 / 2 - z.re * t) := by
   rw [norm_mul, Complex.norm_cpow_eq_rpow_re_of_pos ht, Complex.norm_exp]
   congr 2
   simp [Complex.sub_re, Complex.mul_re, sq]
 
-lemma norm_pcfIntegrand_le (c z : ℂ) {R : ℝ} (hR : |z.re| ≤ R) {t : ℝ} (ht : 0 < t) :
+theorem norm_pcfIntegrand_le (c z : ℂ) {R : ℝ} (hR : |z.re| ≤ R) {t : ℝ} (ht : 0 < t) :
     ‖(t : ℂ) ^ c * exp (-(t : ℂ) ^ 2 / 2 - z * t)‖ ≤
       Real.exp (R ^ 2) * (t ^ c.re * Real.exp (-t ^ 2 / 4)) := by
   rw [norm_pcfIntegrand c z ht]
@@ -549,7 +550,7 @@ lemma norm_pcfIntegrand_le (c z : ℂ) {R : ℝ} (hR : |z.re| ≤ R) {t : ℝ} (
         mul_le_mul_of_nonneg_left he (Real.rpow_nonneg ht.le _)
     _ = _ := by ring
 
-lemma integrableOn_rpow_mul_exp_neg_sq_div_four {p : ℝ} (hp : -1 < p) :
+theorem integrableOn_rpow_mul_exp_neg_sq_div_four {p : ℝ} (hp : -1 < p) :
     IntegrableOn (fun t : ℝ => t ^ p * Real.exp (-t ^ 2 / 4)) (Ioi 0) := by
   have h := integrableOn_rpow_mul_exp_neg_mul_rpow (s := p) (p := 2) (b := 1 / 4) hp
     (by norm_num) (by norm_num)
@@ -558,12 +559,12 @@ lemma integrableOn_rpow_mul_exp_neg_sq_div_four {p : ℝ} (hp : -1 < p) :
   rw [show (t ^ (2 : ℝ)) = t ^ 2 from Real.rpow_two t]
   ring_nf
 
-lemma continuousOn_pcfIntegrand (c z : ℂ) :
+theorem continuousOn_pcfIntegrand (c z : ℂ) :
     ContinuousOn (fun t : ℝ => (t : ℂ) ^ c * exp (-(t : ℂ) ^ 2 / 2 - z * t)) (Ioi 0) := by
   refine ContinuousOn.mul (fun t ht => ?_) (by fun_prop)
   exact (Complex.continuousAt_ofReal_cpow_const t c (Or.inr (ne_of_gt ht))).continuousWithinAt
 
-lemma integrableOn_pcfIntegrand {c : ℂ} (hc : -1 < c.re) (z : ℂ) :
+theorem integrableOn_pcfIntegrand {c : ℂ} (hc : -1 < c.re) (z : ℂ) :
     IntegrableOn (fun t : ℝ => (t : ℂ) ^ c * exp (-(t : ℂ) ^ 2 / 2 - z * t)) (Ioi 0) := by
   refine Integrable.mono' ((integrableOn_rpow_mul_exp_neg_sq_div_four hc).const_mul
     (Real.exp (|z.re| ^ 2))) ((continuousOn_pcfIntegrand c z).aestronglyMeasurable
@@ -761,28 +762,28 @@ theorem pcfU_eq_integral {a : ℂ} (ha : -1 / 2 < a.re) (z : ℂ) :
 
 /-! ### Wronskians (DLMF 12.2) -/
 
-lemma hasDerivAt_pcfU_neg (a z : ℂ) :
+theorem hasDerivAt_pcfU_neg (a z : ℂ) :
     HasDerivAt (fun w => pcfU a (-w)) (-pcfUDeriv a (-z)) z := by
   have h := (hasDerivAt_pcfU a (-z)).comp z (hasDerivAt_neg z)
   exact h.congr_deriv (by ring)
 
-lemma hasDerivAt_pcfU_mul_I (b z : ℂ) :
+theorem hasDerivAt_pcfU_mul_I (b z : ℂ) :
     HasDerivAt (fun w => pcfU b (I * w)) (I * pcfUDeriv b (I * z)) z := by
   have h := (hasDerivAt_pcfU b (I * z)).comp z ((hasDerivAt_id z).const_mul I)
   exact h.congr_deriv (by ring)
 
-lemma hasDerivAt_pcfU_mul_neg_I (b z : ℂ) :
+theorem hasDerivAt_pcfU_mul_neg_I (b z : ℂ) :
     HasDerivAt (fun w => pcfU b (-I * w)) (-I * pcfUDeriv b (-I * z)) z := by
   have h := (hasDerivAt_pcfU b (-I * z)).comp z ((hasDerivAt_id z).const_mul (-I))
   exact h.congr_deriv (by ring)
 
-lemma isWeberSol_pcfU_neg (a : ℂ) :
+theorem isWeberSol_pcfU_neg (a : ℂ) :
     IsWeberSol a (fun w => pcfU a (-w)) (fun w => -pcfUDeriv a (-w)) := fun z => by
   refine ⟨hasDerivAt_pcfU_neg a z, ?_⟩
   have h := ((hasDerivAt_pcfUDeriv a (-z)).comp z (hasDerivAt_neg z)).neg
   exact h.congr_deriv (by ring)
 
-lemma isWeberSol_pcfU_mul_I (a : ℂ) :
+theorem isWeberSol_pcfU_mul_I (a : ℂ) :
     IsWeberSol a (fun w => pcfU (-a) (I * w)) (fun w => I * pcfUDeriv (-a) (I * w)) :=
   fun z => by
   refine ⟨hasDerivAt_pcfU_mul_I (-a) z, ?_⟩
@@ -795,7 +796,7 @@ lemma isWeberSol_pcfU_mul_I (a : ℂ) :
   simp only [hI4, Complex.I_sq]
   ring
 
-lemma isWeberSol_pcfU_mul_neg_I (a : ℂ) :
+theorem isWeberSol_pcfU_mul_neg_I (a : ℂ) :
     IsWeberSol a (fun w => pcfU (-a) (-I * w)) (fun w => -I * pcfUDeriv (-a) (-I * w)) :=
   fun z => by
   refine ⟨hasDerivAt_pcfU_mul_neg_I (-a) z, ?_⟩
@@ -857,7 +858,7 @@ theorem pcfU_wronskian_neg (a z : ℂ) :
   linear_combination (-A) * h22
 
 /-- Euler's reflection formula for reciprocals, valid for every complex `s`. -/
-lemma pi_mul_recip_Gamma_mul_recip_Gamma (s : ℂ) :
+theorem pi_mul_recip_Gamma_mul_recip_Gamma (s : ℂ) :
     (π : ℂ) * ((Gamma s)⁻¹ * (Gamma (1 - s))⁻¹) = Complex.sin (π * s) := by
   have hπ : (π : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
   rw [← mul_inv, Complex.Gamma_mul_Gamma_one_sub, inv_div]
@@ -943,7 +944,7 @@ theorem pcfU_wronskian_mul_neg_I (a z : ℂ) :
 
 /-! ### Connection formula 12.2.17 -/
 
-lemma IsWeberSol.lincomb {a : ℂ} {f f' g g' : ℂ → ℂ} (hf : IsWeberSol a f f')
+theorem IsWeberSol.lincomb {a : ℂ} {f f' g g' : ℂ → ℂ} (hf : IsWeberSol a f f')
     (hg : IsWeberSol a g g') (c₁ c₂ : ℂ) :
     IsWeberSol a (fun w => c₁ * f w + c₂ * g w) (fun w => c₁ * f' w + c₂ * g' w) := fun z =>
   ⟨((hf z).1.const_mul c₁).add ((hg z).1.const_mul c₂),
@@ -1076,16 +1077,16 @@ theorem hasDerivAt_pcfVDeriv (a z : ℂ) :
   rw [pcfV]
   ring
 
-lemma isWeberSol_pcfV (a : ℂ) : IsWeberSol a (pcfV a) (pcfVDeriv a) :=
+theorem isWeberSol_pcfV (a : ℂ) : IsWeberSol a (pcfV a) (pcfVDeriv a) :=
   fun z => ⟨hasDerivAt_pcfV a z, hasDerivAt_pcfVDeriv a z⟩
 
 theorem deriv_pcfV (a : ℂ) : deriv (pcfV a) = pcfVDeriv a :=
   funext fun z => (hasDerivAt_pcfV a z).deriv
 
-lemma pcfV_zero' (a : ℂ) : pcfV a 0 = pcfVZero a := by
+theorem pcfV_zero' (a : ℂ) : pcfV a 0 = pcfVZero a := by
   simp [pcfV, pcfEven_zero, pcfOdd_zero]
 
-lemma pcfVDeriv_zero' (a : ℂ) : pcfVDeriv a 0 = pcfVDerivZero a := by
+theorem pcfVDeriv_zero' (a : ℂ) : pcfVDeriv a 0 = pcfVDerivZero a := by
   simp [pcfVDeriv, pcfEvenDeriv_zero, pcfOddDeriv_zero]
 
 /-- `V(a,0)` (DLMF 12.2.8). -/
@@ -1106,12 +1107,12 @@ theorem pcfVDeriv_zero (a : ℂ) :
   simp only [div_eq_mul_inv, mul_inv, inv_pow]
   ring
 
-lemma hasDerivAt_pcfV_neg (a z : ℂ) :
+theorem hasDerivAt_pcfV_neg (a z : ℂ) :
     HasDerivAt (fun w => pcfV a (-w)) (-pcfVDeriv a (-z)) z := by
   have h := (hasDerivAt_pcfV a (-z)).comp z (hasDerivAt_neg z)
   exact h.congr_deriv (by ring)
 
-lemma isWeberSol_pcfV_neg (a : ℂ) :
+theorem isWeberSol_pcfV_neg (a : ℂ) :
     IsWeberSol a (fun w => pcfV a (-w)) (fun w => -pcfVDeriv a (-w)) := fun z => by
   refine ⟨hasDerivAt_pcfV_neg a z, ?_⟩
   have h := ((hasDerivAt_pcfVDeriv a (-z)).comp z (hasDerivAt_neg z)).neg
@@ -1119,7 +1120,7 @@ lemma isWeberSol_pcfV_neg (a : ℂ) :
 
 /-- Legendre duplication for reciprocals, valid for every `a`:
 `1/Γ(1/2 + a) = 2^{1/2-a} √π / (Γ(1/4 + a/2) Γ(3/4 + a/2))`. -/
-lemma recip_Gamma_half_add (a : ℂ) :
+theorem recip_Gamma_half_add (a : ℂ) :
     (Gamma (1 / 2 + a))⁻¹ = (Gamma (1 / 4 + a / 2))⁻¹ * (Gamma (3 / 4 + a / 2))⁻¹ *
       (2 : ℂ) ^ (1 / 2 - a) * (Real.sqrt π : ℂ) := by
   have hd := Complex.Gamma_mul_Gamma_add_half (1 / 4 + a / 2)
@@ -1132,18 +1133,18 @@ lemma recip_Gamma_half_add (a : ℂ) :
   rw [← mul_inv, hd, mul_inv, mul_inv]
   field_simp
 
-lemma sin_pi_quarter_sub (a : ℂ) :
+theorem sin_pi_quarter_sub (a : ℂ) :
     Complex.sin (π * (1 / 4 - a / 2)) = Complex.cos (π * (1 / 4 + a / 2)) := by
   rw [← Complex.sin_pi_div_two_sub]; ring_nf
 
-lemma sin_pi_mul_eq_sq (a : ℂ) :
+theorem sin_pi_mul_eq_sq (a : ℂ) :
     Complex.sin (π * a) =
       Complex.sin (π * (1 / 4 + a / 2)) ^ 2 - Complex.cos (π * (1 / 4 + a / 2)) ^ 2 := by
   rw [show (π : ℂ) * a = 2 * (π * (1 / 4 + a / 2)) - π / 2 by ring,
     Complex.sin_sub_pi_div_two, Complex.cos_two_mul]
   linear_combination (-1 : ℂ) * Complex.sin_sq_add_cos_sq (π * (1 / 4 + a / 2))
 
-lemma cos_pi_mul_eq_mul (a : ℂ) :
+theorem cos_pi_mul_eq_mul (a : ℂ) :
     Complex.cos (π * a) =
       2 * Complex.sin (π * (1 / 4 + a / 2)) * Complex.cos (π * (1 / 4 + a / 2)) := by
   rw [show (π : ℂ) * a = 2 * (π * (1 / 4 + a / 2)) - π / 2 by ring,
@@ -1185,7 +1186,7 @@ theorem pcfV_wronskian (a z : ℂ) :
     + (r * t * (π * (g1m * g3p) + c)) * q1 + (r * t * (π * (g1p * g3m) + s)) * q2
     + (r * t) * htr + R * hππ - r * hR
 
-lemma recip_Gamma_half_sub (a : ℂ) :
+theorem recip_Gamma_half_sub (a : ℂ) :
     (Gamma (1 / 2 - a))⁻¹ = (Gamma (1 / 4 - a / 2))⁻¹ * (Gamma (3 / 4 - a / 2))⁻¹ *
       (2 : ℂ) ^ (1 / 2 + a) * (Real.sqrt π : ℂ) := by
   have h := recip_Gamma_half_add (-a)
@@ -1193,7 +1194,7 @@ lemma recip_Gamma_half_sub (a : ℂ) :
     show (3 / 4 + -a / 2 : ℂ) = 3 / 4 - a / 2 by ring,
     show (1 / 2 - -a : ℂ) = 1 / 2 + a by ring] at h
 
-lemma two_cpow_mul_two_cpow (x y z : ℂ) (h : x + y = z) :
+theorem two_cpow_mul_two_cpow (x y z : ℂ) (h : x + y = z) :
     (2 : ℂ) ^ x * 2 ^ y = 2 ^ z := by
   rw [← Complex.cpow_add _ _ two_ne_zero, h]
 
@@ -1299,7 +1300,7 @@ theorem pcfV_neg_eq (a z : ℂ) :
       (2 * s * c * π * g1m * g3m * g1p) * pw + (2 * s * c * B * g1m) * q2 +
       (-(B * g1m * (1 + s ^ 2 - c ^ 2))) * q1 + (c * B * g1m) * htr
 
-lemma cos_nat_mul_pi' (n : ℕ) : Complex.cos (n * π) = (-1) ^ n := by
+theorem cos_nat_mul_pi' (n : ℕ) : Complex.cos (n * π) = (-1) ^ n := by
   rw [← Complex.ofReal_natCast, ← Complex.ofReal_mul, ← Complex.ofReal_cos,
     Real.cos_nat_mul_pi]
   push_cast; ring
@@ -1336,7 +1337,7 @@ theorem pcfV_eq {a : ℂ} (ha : ∀ n : ℕ, 1 / 2 + a ≠ -n) (z : ℂ) :
       π / Gamma (1 / 2 + a) * pcfV a z by ring, ← mul_assoc, div_mul_div_comm,
     mul_comm (Gamma (1 / 2 + a)) (π : ℂ), div_self (mul_ne_zero hπ0 hΓ), one_mul]
 
-lemma exp_neg_I_pi_quarter (a : ℂ) :
+theorem exp_neg_I_pi_quarter (a : ℂ) :
     exp (-I * π * (a / 2 - 1 / 4)) =
       Complex.sin (π * (1 / 4 + a / 2)) + Complex.cos (π * (1 / 4 + a / 2)) * I := by
   rw [show -I * π * (a / 2 - 1 / 4) = (-(π * (1 / 4 + a / 2) - π / 2)) * I by ring,
@@ -1344,7 +1345,7 @@ lemma exp_neg_I_pi_quarter (a : ℂ) :
     Complex.sin_sub_pi_div_two]
   ring
 
-lemma exp_I_pi_quarter (a : ℂ) :
+theorem exp_I_pi_quarter (a : ℂ) :
     exp (I * π * (a / 2 - 1 / 4)) =
       Complex.sin (π * (1 / 4 + a / 2)) - Complex.cos (π * (1 / 4 + a / 2)) * I := by
   rw [show I * π * (a / 2 - 1 / 4) = (π * (1 / 4 + a / 2) - π / 2) * I by ring,

@@ -3,7 +3,7 @@ Copyright (c) 2026 Bastiaan J Braams. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bastiaan J Braams
 -/
-module
+module -- shake: keep-all
 
 public import DLMF.BernoulliEuler.Basic
 public import DLMF.Constants.Dirichlet
@@ -600,7 +600,7 @@ def z25a_gbinom (z : ℂ) (m : ℕ) : ℂ :=
 /-! #### Helpers for 25.2.8–25.2.9: integration by parts against `B̃ₚ` -/
 
 /-- `B̃_q` is bounded. -/
-lemma q25a_periodicBernoulliB_bound (q : ℕ) : ∃ C : ℝ, ∀ x, |periodicBernoulliB q x| ≤ C := by
+theorem q25a_periodicBernoulliB_bound (q : ℕ) : ∃ C : ℝ, ∀ x, |periodicBernoulliB q x| ≤ C := by
   obtain ⟨C, hC⟩ := IsCompact.exists_bound_of_continuousOn (isCompact_Icc (a := (0 : ℝ)) (b := 1))
     (continuous_bernoulliFun q).continuousOn
   exact ⟨C, fun x => by
@@ -608,7 +608,7 @@ lemma q25a_periodicBernoulliB_bound (q : ℕ) : ∃ C : ℝ, ∀ x, |periodicBer
       hC _ ⟨Int.fract_nonneg x, (Int.fract_lt_one x).le⟩⟩
 
 /-- `B̃_q` is measurable. -/
-lemma q25a_measurable_periodicBernoulliB (q : ℕ) : Measurable (periodicBernoulliB q) :=
+theorem q25a_measurable_periodicBernoulliB (q : ℕ) : Measurable (periodicBernoulliB q) :=
   (continuous_bernoulliFun q).measurable.comp measurable_fract
 
 /-- `B̃_q` is continuous for `q ≠ 1`. -/
@@ -637,7 +637,7 @@ lemma q25a_hasDerivAt_periodicBernoulliB (p : ℕ) {x : ℝ} (hx : x ∉ range (
   · rw [hP]; push_cast; simp
 
 /-- A bounded measurable function divided by `x^w`, `Re w > 1`, is integrable on `(a, ∞)`. -/
-lemma q25a_integrableOn_bdd_div_cpow {f : ℝ → ℝ} (hf : Measurable f) {C : ℝ}
+theorem q25a_integrableOn_bdd_div_cpow {f : ℝ → ℝ} (hf : Measurable f) {C : ℝ}
     (hC : ∀ x, |f x| ≤ C) {w : ℂ} (hw : 1 < w.re) {a : ℝ} (ha : 0 < a) :
     IntegrableOn (fun x : ℝ => (f x : ℂ) / (x : ℂ) ^ w) (Ioi a) := by
   have hi := integrableOn_Ioi_cpow_of_lt (a := -w) (by simp; linarith) ha
@@ -650,7 +650,7 @@ lemma q25a_integrableOn_bdd_div_cpow {f : ℝ → ℝ} (hf : Measurable f) {C : 
 
 /-- Interval integrability of a bounded measurable function divided by `x^w` on `[a, b]`,
 `0 < a`. -/
-lemma q25a_intervalIntegrable_bdd_div_cpow {f : ℝ → ℝ} (hf : Measurable f) {C : ℝ}
+theorem q25a_intervalIntegrable_bdd_div_cpow {f : ℝ → ℝ} (hf : Measurable f) {C : ℝ}
     (hC : ∀ x, |f x| ≤ C) (w : ℂ) {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) :
     IntervalIntegrable (fun x : ℝ => (f x : ℂ) / (x : ℂ) ^ w) volume a b := by
   have hc : ContinuousOn (fun x : ℝ => ((x : ℂ) ^ w)⁻¹) (uIcc a b) := by
@@ -686,7 +686,7 @@ lemma q25a_hasDerivAt_pB_div_cpow (p : ℕ) (w : ℂ) {x : ℝ} (hx0 : 0 < x)
   · rw [show -w - 1 = -(w + 1) by ring, cpow_neg, cpow_neg]; push_cast; ring
 
 /-- Integration by parts against `B̃_{p+1}` on `[a, b]`, `0 < a ≤ b`, `p ≥ 1`. -/
-lemma q25a_integral_ibp {p : ℕ} (hp : 1 ≤ p) (w : ℂ) {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) :
+theorem q25a_integral_ibp {p : ℕ} (hp : 1 ≤ p) (w : ℂ) {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) :
     ∫ x in a..b, ((p + 1) * ((periodicBernoulliB p x : ℂ) / (x : ℂ) ^ w) -
         w * ((periodicBernoulliB (p + 1) x : ℂ) / (x : ℂ) ^ (w + 1))) =
       (periodicBernoulliB (p + 1) b : ℂ) / (b : ℂ) ^ w -
@@ -710,7 +710,7 @@ lemma q25a_integral_ibp {p : ℕ} (hp : 1 ≤ p) (w : ℂ) {a b : ℝ} (ha : 0 <
         hD (w + 1) ha hab).const_mul _
 
 /-- `B̃_q(b) / b^w → 0` as `b → ∞` for `Re w > 0`. -/
-lemma q25a_tendsto_pB_div_cpow (q : ℕ) {w : ℂ} (hw : 0 < w.re) :
+theorem q25a_tendsto_pB_div_cpow (q : ℕ) {w : ℂ} (hw : 0 < w.re) :
     Tendsto (fun b : ℝ => (periodicBernoulliB q b : ℂ) / (b : ℂ) ^ w) atTop (𝓝 0) := by
   obtain ⟨D, hD⟩ := q25a_periodicBernoulliB_bound q
   have hg : Tendsto (fun b : ℝ => D * b ^ (-w.re)) atTop (𝓝 0) := by
@@ -723,7 +723,7 @@ lemma q25a_tendsto_pB_div_cpow (q : ℕ) {w : ℂ} (hw : 0 < w.re) :
 
 /-- The recursion for `∫_a^∞ B̃_p(x) x^{-w} dx`, `p ≥ 1`, `Re w > 1`, `a > 0`:
 `(p+1) ∫ B̃_p x^{-w} = -B̃_{p+1}(a) a^{-w} + w ∫ B̃_{p+1} x^{-w-1}`. -/
-lemma q25a_recursion {p : ℕ} (hp : 1 ≤ p) {w : ℂ} (hw : 1 < w.re) {a : ℝ} (ha : 0 < a) :
+theorem q25a_recursion {p : ℕ} (hp : 1 ≤ p) {w : ℂ} (hw : 1 < w.re) {a : ℝ} (ha : 0 < a) :
     (p + 1) * ∫ x in Ioi a, (periodicBernoulliB p x : ℂ) / (x : ℂ) ^ w =
       -((periodicBernoulliB (p + 1) a : ℂ) / (a : ℂ) ^ w) +
         w * ∫ x in Ioi a, (periodicBernoulliB (p + 1) x : ℂ) / (x : ℂ) ^ (w + 1) := by
@@ -752,7 +752,7 @@ lemma q25a_recursion {p : ℕ} (hp : 1 ≤ p) {w : ℂ} (hw : 1 < w.re) {a : ℝ
   linear_combination this
 
 /-- `b^z → 0` as `b → ∞` for `Re z < 0`. -/
-lemma q25a_tendsto_cpow_atTop {z : ℂ} (hz : z.re < 0) :
+theorem q25a_tendsto_cpow_atTop {z : ℂ} (hz : z.re < 0) :
     Tendsto (fun b : ℝ => (b : ℂ) ^ z) atTop (𝓝 0) := by
   have hg : Tendsto (fun b : ℝ => b ^ (-(-z.re))) atTop (𝓝 0) :=
     tendsto_rpow_neg_atTop (by linarith)
@@ -978,7 +978,7 @@ lemma q25a_emRHS_succ {s : ℂ} {n N : ℕ} (hN : 1 ≤ N) (hs : -(2 * n : ℝ) 
   rw [e1, e3, e2, e4, e5]
   ring
 
-lemma q25a_gbinom_one (z : ℂ) : z25a_gbinom z 1 = z := by
+theorem q25a_gbinom_one (z : ℂ) : z25a_gbinom z 1 = z := by
   simp [z25a_gbinom]
 
 lemma q25a_zeta_eq_emRHS_of_one_lt {s : ℂ} (hs : 1 < s.re) {N : ℕ} (hN : 1 ≤ N) (n : ℕ) :
@@ -1099,7 +1099,7 @@ lemma q25a_isPreconnected {n : ℕ} (hn1 : 1 ≤ n) :
     · rintro ⟨-, h⟩; simp at h; linarith
 
 /-- 25.2.9 as an identity with `q25a_emRHS`. -/
-lemma q25a_zeta_eq_emRHS {s : ℂ} {n N : ℕ} (hn : 1 ≤ n) (hN : 1 ≤ N)
+theorem q25a_zeta_eq_emRHS {s : ℂ} {n N : ℕ} (hn : 1 ≤ n) (hN : 1 ≤ N)
     (hs : -(2 * n : ℝ) < s.re) (hs1 : s ≠ 1) : riemannZeta s = q25a_emRHS N n s := by
   set V : Set ℂ := {s : ℂ | -(2 * n : ℝ) < s.re} \ {s : ℂ | s.im = 0 ∧ 1 ≤ s.re} with hV
   have hVo : IsOpen V := (isOpen_lt continuous_const continuous_re).sdiff

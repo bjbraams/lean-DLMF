@@ -6,9 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.IncompleteGamma.SpecialValues
-public import DLMF.ExpIntegrals.Basic
 public import DLMF.Bessel.SphericalSeriesTools
-public import DLMF.Bessel.NeumannSeries
 
 /-!
 # Series, recurrences and derivatives, DLMF §§8.7–8.8
@@ -43,7 +41,7 @@ theorem scIncGamma_hasSum_alternating {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (z 
   field_simp [Gamma_ne_zero ha, hG]
 
 /-- Derivative of the exponential partial sum: `e_n' = e_n - z^n/n!`. -/
-lemma incrSer_hasDerivAt_expPartialSum (n : ℕ) (s : ℂ) :
+theorem incrSer_hasDerivAt_expPartialSum (n : ℕ) (s : ℂ) :
     HasDerivAt (expPartialSum n) (expPartialSum n s - s^n/(n.factorial : ℂ)) s := by
   induction n with
   | zero =>
@@ -63,7 +61,7 @@ lemma incrSer_hasDerivAt_expPartialSum (n : ℕ) (s : ℂ) :
     ring
 
 /-- `-n! e^{-s} e_n(s)` is a primitive of `s^n e^{-s}`. -/
-lemma incrSer_hasDerivAt_primitive (n : ℕ) (s : ℂ) :
+theorem incrSer_hasDerivAt_primitive (n : ℕ) (s : ℂ) :
     HasDerivAt (fun w => -(n.factorial : ℂ)*(exp (-w)*expPartialSum n w)) (s^n*exp (-s)) s := by
   have h := (((hasDerivAt_neg s).cexp).mul (incrSer_hasDerivAt_expPartialSum n s)).const_mul
     (-(n.factorial : ℂ))
@@ -253,7 +251,7 @@ theorem upperIncGamma_hasSum_exponential {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) 
   rw [he] at hs
   exact hs.congr_fun fun k => by ring
 
-lemma serRec_sum_antidiagonal_neg_one_pow {n : ℕ} (hn : 1 ≤ n) :
+theorem serRec_sum_antidiagonal_neg_one_pow {n : ℕ} (hn : 1 ≤ n) :
     ∑ p ∈ Finset.antidiagonal n, (-1 : ℂ)^p.1/((p.1)! * (p.2)!) = 0 := by
   rw [Finset.Nat.sum_antidiagonal_eq_sum_range_succ_mk]
   have hb := add_pow (-1 : ℂ) 1 n
@@ -271,7 +269,7 @@ lemma serRec_sum_antidiagonal_neg_one_pow {n : ℕ} (hn : 1 ≤ n) :
     simp
   rw [this, ← hb, zero_div]
 
-lemma serRec_sum_antidiagonal_expPartialSum (j : ℕ) :
+theorem serRec_sum_antidiagonal_expPartialSum (j : ℕ) :
     ∑ p ∈ Finset.antidiagonal j, expPartialSum p.1 (-1)/((p.2)! : ℂ) = 1 := by
   induction j with
   | zero => simp [expPartialSum]
@@ -292,7 +290,7 @@ lemma serRec_sum_antidiagonal_expPartialSum (j : ℕ) :
     simp only [one_mul] at h0
     linear_combination h0
 
-lemma serRec_sqrt_cpow {x : ℝ} (hx : 0 < x) (s : ℂ) :
+theorem serRec_sqrt_cpow {x : ℝ} (hx : 0 < x) (s : ℂ) :
     ((Real.sqrt x : ℝ) : ℂ)^s = (x : ℂ)^(s/2) := by
   have h1 : ((Real.sqrt x : ℝ) : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr hx).ne'
   have h2 : (x : ℂ) ≠ 0 := by exact_mod_cast hx.ne'
@@ -301,12 +299,12 @@ lemma serRec_sqrt_cpow {x : ℝ} (hx : 0 < x) (s : ℂ) :
   push_cast
   ring_nf
 
-lemma scSph_add_ne {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (k : ℕ) : a + k ≠ 0 := fun h =>
+theorem scSph_add_ne {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (k : ℕ) : a + k ≠ 0 := fun h =>
   ha k (by linear_combination h)
 
 /-- Euler image of `w ↦ γ*(a, 2w)`. -/
 
-lemma scSph_euler_F {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) :
+theorem scSph_euler_F {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) :
     Differentiable ℂ (fun w => scIncGamma a (2*w)) ∧ ∀ w,
       w * deriv (fun w => scIncGamma a (2*w)) w + a * scIncGamma a (2*w) =
         exp (-(2*w)) / Gamma a := by
@@ -396,7 +394,7 @@ lemma scSph_euler_F {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) :
   rw [(hFd w).deriv, hH w]
   linear_combination (exp (-(2*w))) * hEu w
 
-lemma scSph_generic {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (w : ℂ) :
+theorem scSph_generic {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (w : ℂ) :
     HasSum (fun n : ℕ => exp (-w) * (poch (1-a) n/Gamma (n+a+1)*(2*n+1) * sphericalI n w))
       (scIncGamma a (2*w)) := by
   have hΓ : ∀ k : ℕ, Gamma (k+a) ≠ 0 := fun k => Gamma_ne_zero (fun m e => ha (m+k)
@@ -525,7 +523,7 @@ lemma scSph_generic {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (w : ℂ) :
 /-- The coefficient recursion `c_{n+1}(n+1+a) = (1-a+n) c_n` holds for every `a`,
 the poles of `Γ` included. -/
 
-lemma scSph_coeff_succ (a : ℂ) (n : ℕ) :
+theorem scSph_coeff_succ (a : ℂ) (n : ℕ) :
     poch (1-a) (n+1)/Gamma ((n+1:ℕ)+a+1) * (n+1+a) = (1-a+n) * (poch (1-a) n/Gamma (n+a+1)) := by
   rw [poch_succ, show ((n+1:ℕ):ℂ)+a+1 = (n+a+1)+1 by push_cast; ring]
   by_cases h0 : (n:ℂ)+a+1 = 0
@@ -539,7 +537,7 @@ lemma scSph_coeff_succ (a : ℂ) (n : ℕ) :
 
 /-- Locally uniform geometric bound for the coefficients `(1-a)_n/Γ(n+a+1)`. -/
 
-lemma scSph_coeff_bound (a₀ : ℂ) : ∃ K : ℝ, ∀ n : ℕ, ∀ a ∈ Metric.closedBall a₀ (1/2),
+theorem scSph_coeff_bound (a₀ : ℂ) : ∃ K : ℝ, ∀ n : ℕ, ∀ a ∈ Metric.closedBall a₀ (1/2),
     ‖poch (1-a) n/Gamma (n+a+1)‖ ≤ K * 2^n := by
   set s := Metric.closedBall a₀ (1/2) with hs
   set A : ℝ := ‖a₀‖ + 1/2 with hA
@@ -1062,7 +1060,7 @@ theorem upperIncGammaOnLog_zero (w : ℂ) :
   ring
 
 /-- A full turn of the logarithmic variable does not change `exp`. -/
-lemma exp_add_two_pi_int_mul_I (w : ℂ) (m : ℤ) : exp (w+2*π*m*I)=exp w := by
+theorem exp_add_two_pi_int_mul_I (w : ℂ) (m : ℤ) : exp (w+2*π*m*I)=exp w := by
   rw [Complex.exp_add, show (2:ℂ)*π*m*I=m*(2*π*I) by ring, exp_int_mul_two_pi_mul_I, mul_one]
 
 /-- At nonpositive integral parameters the logarithmic-plane upper Gamma function changes by an

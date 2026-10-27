@@ -6,6 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Core.Framework
+public import DLMF.Hypergeometric.ArgumentContinuation
+public import DLMF.Statistical.IncompleteBeta
 
 /-!
 # Incomplete Beta continuation, recurrences and fractions, DLMF §8.17
@@ -70,7 +72,7 @@ theorem normIncBetaI_ofReal {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) {x : ℝ
   field_simp
 
 /-- The quadratic substitution `u = 4t(1-t)` in the symmetric Beta integral. -/
-lemma integral_beta_quadratic_subst {a : ℝ} (ha : 0 < a) {x : ℝ} (hx : 0 ≤ x) (hx1 : x ≤ 1/2) :
+theorem integral_beta_quadratic_subst {a : ℝ} (ha : 0 < a) {x : ℝ} (hx : 0 ≤ x) (hx1 : x ≤ 1/2) :
     (∫ u in (0:ℝ)..4*x*(1-x), u^(a-1)*(1-u)^((1/2:ℝ)-1)) =
       4^a * ∫ t in (0:ℝ)..x, t^(a-1)*(1-t)^(a-1) := by
   set f : ℝ → ℝ := fun t => 4*t*(1-t) with hf

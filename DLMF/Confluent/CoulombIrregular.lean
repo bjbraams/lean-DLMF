@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Confluent.CoulombAsymptotics
-public import DLMF.Confluent.ConnectionWronskians
+public import DLMF.Confluent.Coulomb
 
 /-!
 # The irregular Coulomb function and the Wronskian (DLMF 33.2.11–33.2.12, 33.10.1–33.10.2)
@@ -63,13 +63,13 @@ theorem conj_kummerU (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
       (continuousAt_kummerU_comp continuousAt_const continuousAt_id hz0)
   · exact continuousAt_kummerU_comp continuousAt_const continuous_conj.continuousAt hcz
 
-lemma exp_neg_I_mul_pi_div_two : exp (-(I * π / 2)) = -I := by
+theorem exp_neg_I_mul_pi_div_two : exp (-(I * π / 2)) = -I := by
   rw [show -(I * π / 2) = ((-(π / 2) : ℝ) : ℂ) * I by push_cast; ring, exp_mul_I,
     ← ofReal_cos, ← ofReal_sin, Real.cos_neg, Real.sin_neg, Real.cos_pi_div_two,
     Real.sin_pi_div_two]
   simp
 
-lemma log_neg_two_I_mul {ρ : ℝ} (hρ : 0 < ρ) :
+theorem log_neg_two_I_mul {ρ : ℝ} (hρ : 0 < ρ) :
     log (-2 * I * ρ) = Real.log (2 * ρ) - π / 2 * I := by
   have he : (-2 * I * ρ : ℂ) = ((2 * ρ : ℝ) : ℂ) * (-I) := by push_cast; ring
   apply Complex.ext
@@ -79,15 +79,11 @@ lemma log_neg_two_I_mul {ρ : ℝ} (hρ : 0 < ρ) :
   · rw [log_im, he, arg_real_mul _ (by positivity), arg_neg_I]
     simp
 
-lemma neg_two_I_mul_mem_slitPlane {ρ : ℝ} (hρ : 0 < ρ) : (-2 * I * ρ : ℂ) ∈ slitPlane := by
+theorem neg_two_I_mul_mem_slitPlane {ρ : ℝ} (hρ : 0 < ρ) : (-2 * I * ρ : ℂ) ∈ slitPlane := by
   rw [mem_slitPlane_iff]; right; simp [hρ.ne']
 
-lemma two_I_mul_mem_slitPlane {ρ : ℝ} (hρ : 0 < ρ) : (2 * I * ρ : ℂ) ∈ slitPlane := by
+theorem two_I_mul_mem_slitPlane {ρ : ℝ} (hρ : 0 < ρ) : (2 * I * ρ : ℂ) ∈ slitPlane := by
   rw [mem_slitPlane_iff]; right; simp [hρ.ne']
-
-/-- The constant in `H^+_ℓ = A^+ ρ^{ℓ+1} e^{iρ} U(ℓ+1+iη, 2ℓ+2, -2iρ)`. -/
-def coulombAPlus (ℓ : ℕ) (η : ℝ) : ℂ :=
-  exp (coulombSigma ℓ η * I) * Real.exp (π * η / 2) * 2 ^ (ℓ + 1) * (-1) ^ ℓ * (-I)
 
 /-- `H^+_ℓ` without the logarithmic phase: `H^+_ℓ = A^+ ρ^{ℓ+1} e^{iρ} U(ℓ+1+iη, 2ℓ+2, -2iρ)`. -/
 theorem coulombHPlus_eq (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
@@ -129,7 +125,7 @@ theorem coulombHMinus_eq_conj (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
   simp only [map_mul, map_add, map_neg, map_ofNat, conj_ofReal, conj_I, map_natCast, map_one]
   ring_nf
 
-lemma arg_two_I_mul {ρ : ℝ} (hρ : 0 < ρ) : arg (2 * I * ρ) = π / 2 := by
+theorem arg_two_I_mul {ρ : ℝ} (hρ : 0 < ρ) : arg (2 * I * ρ) = π / 2 := by
   rw [show (2 * I * ρ : ℂ) = ((2 * ρ : ℝ) : ℂ) * I by push_cast; ring,
     arg_real_mul _ (by positivity), arg_I]
 
@@ -218,10 +214,6 @@ theorem coulombF_eq_im (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
     rw [h]; field_simp; push_cast; ring
   exact_mod_cast this
 
-/-- **The irregular Coulomb function** `G_ℓ(η,ρ) = Re H^+_ℓ(η,ρ)`, defined by DLMF 33.2.11. -/
-@[dlmf 33.2.E11]
-def coulombG (ℓ : ℕ) (η ρ : ℝ) : ℝ := (coulombHPlus ℓ η ρ).re
-
 /-- **DLMF 33.2.11**: `H^±_ℓ = G_ℓ ± i F_ℓ` for `ρ > 0`. -/
 @[dlmf 33.2.E11]
 theorem coulombH_eq_G_add_I_mul_F (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
@@ -234,7 +226,7 @@ theorem coulombH_eq_G_add_I_mul_F (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < �
   · apply Complex.ext <;> simp
 
 /-- `F_ℓ = C_ℓ (2ℓ+1)! ρ^{ℓ+1} e^{iρ} 𝐌(ℓ+1+iη, 2ℓ+2, -2iρ)`, for every real `ρ`. -/
-lemma ofReal_coulombF_eq_regularized (ℓ : ℕ) (η ρ : ℝ) :
+theorem ofReal_coulombF_eq_regularized (ℓ : ℕ) (η ρ : ℝ) :
     (coulombF ℓ η ρ : ℂ) = (coulombC ℓ η : ℂ) * ((2 * ℓ + 1)! : ℂ) *
       ((ρ : ℂ) ^ (ℓ + 1) * exp (I * ρ)) *
         regularizedHGFun {(ℓ : ℂ) + 1 + I * η} {2 * (ℓ : ℂ) + 2} (-2 * I * ρ) := by
@@ -245,14 +237,14 @@ lemma ofReal_coulombF_eq_regularized (ℓ : ℕ) (η ρ : ℝ) :
   push_cast
   ring
 
-lemma hasDerivAt_re_comp {f : ℝ → ℂ} {f' : ℂ} {x : ℝ} (h : HasDerivAt f f' x) :
+theorem hasDerivAt_re_comp {f : ℝ → ℂ} {f' : ℂ} {x : ℝ} (h : HasDerivAt f f' x) :
     HasDerivAt (fun y => (f y).re) f'.re x := by
   have := reCLM.hasFDerivAt.comp_hasDerivAt x h
   convert this using 1
   · funext y; simp
   · simp
 
-lemma hasDerivAt_im_comp {f : ℝ → ℂ} {f' : ℂ} {x : ℝ} (h : HasDerivAt f f' x) :
+theorem hasDerivAt_im_comp {f : ℝ → ℂ} {f' : ℂ} {x : ℝ} (h : HasDerivAt f f' x) :
     HasDerivAt (fun y => (f y).im) f'.im x := by
   have := imCLM.hasFDerivAt.comp_hasDerivAt x h
   convert this using 1
@@ -260,7 +252,7 @@ lemma hasDerivAt_im_comp {f : ℝ → ℂ} {f' : ℂ} {x : ℝ} (h : HasDerivAt 
   · simp
 
 /-- The constant in the Coulomb Wronskian. -/
-lemma coulomb_wronskian_const (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
+theorem coulomb_wronskian_const (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
     2 * I * coulombAPlus ℓ η * ((coulombC ℓ η : ℂ) * ((2 * ℓ + 1)! : ℂ)) *
       ((ρ : ℂ) ^ (ℓ + 1) * exp (I * ρ)) ^ 2 *
       (-((-2 * I * ρ) ^ (-(2 * (ℓ : ℂ) + 2)) * exp (-2 * I * ρ)) /
@@ -303,7 +295,7 @@ lemma coulomb_wronskian_const (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
   linear_combination ((-1 : ℂ) ^ ℓ * 2 ^ ℓ * 2) * I_sq
 
 /-- The complex Wronskian `H^+_ℓ F_ℓ' - (H^+_ℓ)' F_ℓ = 1`, with explicit derivatives. -/
-theorem coulomb_wronskian_aux (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
+lemma coulomb_wronskian_aux (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
     ∃ h' f' : ℂ, HasDerivAt (fun x : ℝ => coulombHPlus ℓ η x) h' ρ ∧
       HasDerivAt (fun x : ℝ => (coulombF ℓ η x : ℂ)) f' ρ ∧
       coulombHPlus ℓ η ρ * f' - h' * coulombF ℓ η ρ = 1 := by
@@ -347,7 +339,7 @@ theorem coulomb_wronskian_aux (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
     linear_combination (2 * I * A * K * p0 ^ 2) * hW + hval
 
 /-- Derivatives of `F_ℓ` and `G_ℓ` and the Wronskian in real form. -/
-lemma coulomb_wronskian_real_aux (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
+theorem coulomb_wronskian_real_aux (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
     ∃ g' f' : ℝ, HasDerivAt (coulombG ℓ η) g' ρ ∧ HasDerivAt (coulombF ℓ η) f' ρ ∧
       HasDerivAt (fun x : ℝ => coulombHPlus ℓ η x) (g' + I * f') ρ ∧
       coulombG ℓ η ρ * f' - g' * coulombF ℓ η ρ = 1 := by

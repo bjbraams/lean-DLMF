@@ -6,9 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Airy.Framework
-public import DLMF.Airy.Relations
 public import DLMF.Airy.ModulusTools
-public import DLMFMathlib.Analysis.Asymptotics.Watson
 public import DLMFMathlib.Analysis.Asymptotics.AsymptoticInversion
 
 /-!
@@ -58,58 +56,58 @@ def airyPhaseSum (derivative : Bool) (N : ℕ) (x : ℝ) : ℝ :=
 /-! ### Real-axis calculus for `Ai`, `Bi` -/
 
 /-- `Ai'` is real on the real axis. -/
-lemma airyAiDeriv_ofReal_im (x : ℝ) : (airyAiDeriv x).im = 0 := by
+theorem airyAiDeriv_ofReal_im (x : ℝ) : (airyAiDeriv x).im = 0 := by
   exact airyDer_aiDeriv_ofReal_im x
 
 /-- `Bi'` is real on the real axis. -/
-lemma airyBiDeriv_ofReal_im (x : ℝ) : (airyBiDeriv x).im = 0 := by
+theorem airyBiDeriv_ofReal_im (x : ℝ) : (airyBiDeriv x).im = 0 := by
   exact airyDer_biDeriv_ofReal_im x
 
 /-- `Ai(x)` as the cast of its real part. -/
-lemma airyAi_ofReal_eq (x : ℝ) : airyAi x = (airyAiReal x : ℂ) :=
+theorem airyAi_ofReal_eq (x : ℝ) : airyAi x = (airyAiReal x : ℂ) :=
   Complex.ext (by simp [airyAiReal]) (by simp [airyAi_ofReal_im])
 
 /-- `Bi(x)` as the cast of its real part. -/
-lemma airyBi_ofReal_eq (x : ℝ) : airyBi x = (airyBiReal x : ℂ) :=
+theorem airyBi_ofReal_eq (x : ℝ) : airyBi x = (airyBiReal x : ℂ) :=
   Complex.ext (by simp [airyBiReal]) (by simp [airyBi_ofReal_im])
 
 /-- `Ai'(x)` as the cast of its real part. -/
-lemma airyAiDeriv_ofReal_eq (x : ℝ) : airyAiDeriv x = (airyAiDerivReal x : ℂ) :=
+theorem airyAiDeriv_ofReal_eq (x : ℝ) : airyAiDeriv x = (airyAiDerivReal x : ℂ) :=
   Complex.ext (by simp [airyAiDerivReal]) (by simp [airyAiDeriv_ofReal_im])
 
 /-- `Bi'(x)` as the cast of its real part. -/
-lemma airyBiDeriv_ofReal_eq (x : ℝ) : airyBiDeriv x = (airyBiDerivReal x : ℂ) :=
+theorem airyBiDeriv_ofReal_eq (x : ℝ) : airyBiDeriv x = (airyBiDerivReal x : ℂ) :=
   Complex.ext (by simp [airyBiDerivReal]) (by simp [airyBiDeriv_ofReal_im])
 
 /-- The real derivative of `Ai` on the real axis. -/
-lemma hasDerivAt_airyAiReal (x : ℝ) : HasDerivAt airyAiReal (airyAiDerivReal x) x :=
+theorem hasDerivAt_airyAiReal (x : ℝ) : HasDerivAt airyAiReal (airyAiDerivReal x) x :=
   (hasDerivAt_airyAi x).real_of_complex
 
 /-- The real derivative of `Bi` on the real axis. -/
-lemma hasDerivAt_airyBiReal (x : ℝ) : HasDerivAt airyBiReal (airyBiDerivReal x) x :=
+theorem hasDerivAt_airyBiReal (x : ℝ) : HasDerivAt airyBiReal (airyBiDerivReal x) x :=
   (hasDerivAt_airyBi x).real_of_complex
 
 /-- Airy's equation for `Ai` on the real axis. -/
-lemma hasDerivAt_airyAiDerivReal (x : ℝ) :
+theorem hasDerivAt_airyAiDerivReal (x : ℝ) :
     HasDerivAt airyAiDerivReal (x * airyAiReal x) x := by
   have h := (hasDerivAt_airyAiDeriv x).real_of_complex
   exact h.congr_deriv (by simp [airyAiReal])
 
 /-- Airy's equation for `Bi` on the real axis. -/
-lemma hasDerivAt_airyBiDerivReal (x : ℝ) :
+theorem hasDerivAt_airyBiDerivReal (x : ℝ) :
     HasDerivAt airyBiDerivReal (x * airyBiReal x) x := by
   have h := (hasDerivAt_airyBiDeriv x).real_of_complex
   exact h.congr_deriv (by simp [airyBiReal])
 
 /-- The real Wronskian `Ai Bi' - Ai' Bi = 1/π`. -/
-lemma wronskian_airyReal (x : ℝ) :
+theorem wronskian_airyReal (x : ℝ) :
     airyAiReal x * airyBiDerivReal x - airyAiDerivReal x * airyBiReal x = 1 / π := by
   have h := wronskian_airyAi_airyBi x
   rw [airyAi_ofReal_eq, airyBi_ofReal_eq, airyAiDeriv_ofReal_eq, airyBiDeriv_ofReal_eq] at h
   exact_mod_cast h
 
 /-- `Ai² + Bi² > 0` on the real axis. -/
-lemma airyModulusSq_pos (x : ℝ) : 0 < airyAiReal x ^ 2 + airyBiReal x ^ 2 := by
+theorem airyModulusSq_pos (x : ℝ) : 0 < airyAiReal x ^ 2 + airyBiReal x ^ 2 := by
   by_contra h
   have ha : airyAiReal x = 0 := by nlinarith [sq_nonneg (airyAiReal x), sq_nonneg (airyBiReal x)]
   have hb : airyBiReal x = 0 := by nlinarith [sq_nonneg (airyAiReal x), sq_nonneg (airyBiReal x)]
@@ -119,7 +117,7 @@ lemma airyModulusSq_pos (x : ℝ) : 0 < airyAiReal x ^ 2 + airyBiReal x ^ 2 := b
   exact this (by linarith)
 
 /-- `Ai'² + Bi'² > 0` on the real axis. -/
-lemma airyDerivModulusSq_pos (x : ℝ) : 0 < airyAiDerivReal x ^ 2 + airyBiDerivReal x ^ 2 := by
+theorem airyDerivModulusSq_pos (x : ℝ) : 0 < airyAiDerivReal x ^ 2 + airyBiDerivReal x ^ 2 := by
   by_contra h
   have ha : airyAiDerivReal x = 0 := by
     nlinarith [sq_nonneg (airyAiDerivReal x), sq_nonneg (airyBiDerivReal x)]
@@ -131,23 +129,23 @@ lemma airyDerivModulusSq_pos (x : ℝ) : 0 < airyAiDerivReal x ^ 2 + airyBiDeriv
   exact this (by linarith)
 
 /-- `M² = Ai² + Bi²`. -/
-lemma airyModulus_sq (x : ℝ) : airyModulus x ^ 2 = airyAiReal x ^ 2 + airyBiReal x ^ 2 :=
+theorem airyModulus_sq (x : ℝ) : airyModulus x ^ 2 = airyAiReal x ^ 2 + airyBiReal x ^ 2 :=
   Real.sq_sqrt (airyModulusSq_pos x).le
 
 /-- `N² = Ai'² + Bi'²`. -/
-lemma airyDerivModulus_sq (x : ℝ) :
+theorem airyDerivModulus_sq (x : ℝ) :
     airyDerivModulus x ^ 2 = airyAiDerivReal x ^ 2 + airyBiDerivReal x ^ 2 :=
   Real.sq_sqrt (airyDerivModulusSq_pos x).le
 
 /-- `M > 0`. -/
-lemma airyModulus_pos (x : ℝ) : 0 < airyModulus x := Real.sqrt_pos.mpr (airyModulusSq_pos x)
+theorem airyModulus_pos (x : ℝ) : 0 < airyModulus x := Real.sqrt_pos.mpr (airyModulusSq_pos x)
 
 /-- `N > 0`. -/
-lemma airyDerivModulus_pos (x : ℝ) : 0 < airyDerivModulus x :=
+theorem airyDerivModulus_pos (x : ℝ) : 0 < airyDerivModulus x :=
   Real.sqrt_pos.mpr (airyDerivModulusSq_pos x)
 
 /-- `M' = (Ai Ai' + Bi Bi')/M`. -/
-lemma hasDerivAt_airyModulus (x : ℝ) :
+theorem hasDerivAt_airyModulus (x : ℝ) :
     HasDerivAt airyModulus
       ((airyAiReal x * airyAiDerivReal x + airyBiReal x * airyBiDerivReal x) / airyModulus x) x := by
   have h := (((hasDerivAt_airyAiReal x).pow 2).add ((hasDerivAt_airyBiReal x).pow 2)).sqrt
@@ -161,7 +159,7 @@ lemma hasDerivAt_airyModulus (x : ℝ) :
   ring
 
 /-- `N' = x (Ai Ai' + Bi Bi')/N`. -/
-lemma hasDerivAt_airyDerivModulus (x : ℝ) :
+theorem hasDerivAt_airyDerivModulus (x : ℝ) :
     HasDerivAt airyDerivModulus
       (x * (airyAiReal x * airyAiDerivReal x + airyBiReal x * airyBiDerivReal x) /
         airyDerivModulus x) x := by
@@ -176,15 +174,15 @@ lemma hasDerivAt_airyDerivModulus (x : ℝ) :
   ring
 
 /-- `M` is continuous. -/
-lemma continuous_airyModulus : Continuous airyModulus :=
+theorem continuous_airyModulus : Continuous airyModulus :=
   continuous_iff_continuousAt.mpr fun x => (hasDerivAt_airyModulus x).continuousAt
 
 /-- `N` is continuous. -/
-lemma continuous_airyDerivModulus : Continuous airyDerivModulus :=
+theorem continuous_airyDerivModulus : Continuous airyDerivModulus :=
   continuous_iff_continuousAt.mpr fun x => (hasDerivAt_airyDerivModulus x).continuousAt
 
 /-- `θ' = -1/(π M²)`. -/
-lemma hasDerivAt_airyPhase (x : ℝ) : HasDerivAt airyPhase (-(1 / (π * airyModulus x ^ 2))) x := by
+theorem hasDerivAt_airyPhase (x : ℝ) : HasDerivAt airyPhase (-(1 / (π * airyModulus x ^ 2))) x := by
   have hc : Continuous fun t => 1 / (π * airyModulus t ^ 2) := by
     refine continuous_const.div (continuous_const.mul (continuous_airyModulus.pow 2)) fun t => ?_
     have := airyModulus_pos t; have := Real.pi_pos; positivity
@@ -193,7 +191,7 @@ lemma hasDerivAt_airyPhase (x : ℝ) : HasDerivAt airyPhase (-(1 / (π * airyMod
   exact h.const_sub _
 
 /-- `φ' = x/(π N²)`. -/
-lemma hasDerivAt_airyDerivPhase (x : ℝ) :
+theorem hasDerivAt_airyDerivPhase (x : ℝ) :
     HasDerivAt airyDerivPhase (x / (π * airyDerivModulus x ^ 2)) x := by
   have hc : Continuous fun t => t / (π * airyDerivModulus t ^ 2) := by
     refine continuous_id.div (continuous_const.mul (continuous_airyDerivModulus.pow 2)) fun t => ?_
@@ -203,26 +201,26 @@ lemma hasDerivAt_airyDerivPhase (x : ℝ) :
   exact h.const_add _
 
 /-- The derivative of `M` as a function. -/
-lemma deriv_airyModulus : deriv airyModulus = fun x =>
+theorem deriv_airyModulus : deriv airyModulus = fun x =>
     (airyAiReal x * airyAiDerivReal x + airyBiReal x * airyBiDerivReal x) / airyModulus x :=
   funext fun x => (hasDerivAt_airyModulus x).deriv
 
 /-- The derivative of `N` as a function. -/
-lemma deriv_airyDerivModulus : deriv airyDerivModulus = fun x =>
+theorem deriv_airyDerivModulus : deriv airyDerivModulus = fun x =>
     x * (airyAiReal x * airyAiDerivReal x + airyBiReal x * airyBiDerivReal x) /
       airyDerivModulus x :=
   funext fun x => (hasDerivAt_airyDerivModulus x).deriv
 
 /-- The derivative of `θ` as a function. -/
-lemma deriv_airyPhase : deriv airyPhase = fun x => -(1 / (π * airyModulus x ^ 2)) :=
+theorem deriv_airyPhase : deriv airyPhase = fun x => -(1 / (π * airyModulus x ^ 2)) :=
   funext fun x => (hasDerivAt_airyPhase x).deriv
 
 /-- The derivative of `φ` as a function. -/
-lemma deriv_airyDerivPhase : deriv airyDerivPhase = fun x => x / (π * airyDerivModulus x ^ 2) :=
+theorem deriv_airyDerivPhase : deriv airyDerivPhase = fun x => x / (π * airyDerivModulus x ^ 2) :=
   funext fun x => (hasDerivAt_airyDerivPhase x).deriv
 
 /-- The Lagrange identity combined with the Wronskian: `N² M² = (AA' + BB')² + π⁻²`. -/
-lemma airy_lagrange (x : ℝ) :
+theorem airy_lagrange (x : ℝ) :
     (airyAiDerivReal x ^ 2 + airyBiDerivReal x ^ 2) * (airyAiReal x ^ 2 + airyBiReal x ^ 2) * π ^ 2
       = (airyAiReal x * airyAiDerivReal x + airyBiReal x * airyBiDerivReal x) ^ 2 * π ^ 2 + 1 := by
   have hW := wronskian_airyReal x
@@ -233,7 +231,7 @@ lemma airy_lagrange (x : ℝ) :
     + 1) * hW'
 
 /-- `S = AA' + BB'`, half the derivative of `M²`. -/
-lemma hasDerivAt_airyCross (x : ℝ) :
+theorem hasDerivAt_airyCross (x : ℝ) :
     HasDerivAt (fun t => airyAiReal t * airyAiDerivReal t + airyBiReal t * airyBiDerivReal t)
       (airyAiDerivReal x ^ 2 + airyBiDerivReal x ^ 2 +
         x * (airyAiReal x ^ 2 + airyBiReal x ^ 2)) x := by
@@ -242,13 +240,13 @@ lemma hasDerivAt_airyCross (x : ℝ) :
   exact h.congr_deriv (by ring)
 
 /-- `M²` as a function. -/
-lemma airyModulus_sq_fun : (fun t => airyModulus t ^ 2) =
+theorem airyModulus_sq_fun : (fun t => airyModulus t ^ 2) =
     fun t => airyAiReal t ^ 2 + airyBiReal t ^ 2 := funext airyModulus_sq
 
 /-! ### The complex form of the modulus–phase representation -/
 
 /-- `Bi(0) = √3 Ai(0)`. -/
-lemma airyBiReal_zero_eq : airyBiReal 0 = Real.sqrt 3 * airyAiReal 0 := by
+theorem airyBiReal_zero_eq : airyBiReal 0 = Real.sqrt 3 * airyAiReal 0 := by
   have hA := airyAi_zero
   have hB := airyBi_zero
   rw [Gamma_two_thirds_eq] at hA hB
@@ -263,14 +261,14 @@ lemma airyBiReal_zero_eq : airyBiReal 0 = Real.sqrt 3 * airyAiReal 0 := by
   field_simp
 
 /-- `Ai(0) > 0`. -/
-lemma airyAiReal_zero_pos : 0 < airyAiReal 0 := by
+theorem airyAiReal_zero_pos : 0 < airyAiReal 0 := by
   obtain ⟨r, hr, he⟩ := airyAi_ofReal_pos (le_refl 0)
   rw [Complex.ofReal_zero] at he
   simp [airyAiReal, he, hr]
 
 
 /-- The complex combination `Bi + i Ai` on the real axis. -/
-lemma hasDerivAt_airyBiAiComplex (t : ℝ) :
+theorem hasDerivAt_airyBiAiComplex (t : ℝ) :
     HasDerivAt (fun s : ℝ => (airyBiReal s : ℂ) + I * airyAiReal s)
       ((airyBiDerivReal t : ℂ) + I * airyAiDerivReal t) t :=
   (hasDerivAt_airyBiReal t).ofReal_comp.add ((hasDerivAt_airyAiReal t).ofReal_comp.const_mul I)
@@ -334,11 +332,11 @@ theorem airyBi_add_I_airyAi (x : ℝ) :
   simp
 
 /-- `Γ(1/3)` is real. -/
-lemma Gamma_one_third_eq : Complex.Gamma (1 / 3) = ((Real.Gamma (1 / 3) : ℝ) : ℂ) := by
+theorem Gamma_one_third_eq : Complex.Gamma (1 / 3) = ((Real.Gamma (1 / 3) : ℝ) : ℂ) := by
   rw [show (1 / 3 : ℂ) = ((1 / 3 : ℝ) : ℂ) by push_cast; ring, Complex.Gamma_ofReal]
 
 /-- `Bi'(0) = -√3 Ai'(0)`. -/
-lemma airyBiDerivReal_zero_eq : airyBiDerivReal 0 = -(Real.sqrt 3 * airyAiDerivReal 0) := by
+theorem airyBiDerivReal_zero_eq : airyBiDerivReal 0 = -(Real.sqrt 3 * airyAiDerivReal 0) := by
   have hA := airyAiDeriv_zero
   have hB := airyBiDeriv_zero
   rw [Gamma_one_third_eq] at hA hB
@@ -354,7 +352,7 @@ lemma airyBiDerivReal_zero_eq : airyBiDerivReal 0 = -(Real.sqrt 3 * airyAiDerivR
   field_simp
 
 /-- `Ai'(0) < 0`. -/
-lemma airyAiDerivReal_zero_lt : airyAiDerivReal 0 < 0 := by
+theorem airyAiDerivReal_zero_lt : airyAiDerivReal 0 < 0 := by
   have h := airyAiDeriv_zero
   rw [Gamma_one_third_eq] at h
   simp only [← Complex.ofReal_mul, ← Complex.ofReal_one, ← Complex.ofReal_div,
@@ -435,21 +433,21 @@ theorem airyBiDeriv_add_I_airyAiDeriv (x : ℝ) :
   simp
 
 /-- `Ai = M sin θ` on the whole real axis. -/
-lemma airyAiReal_eq_modulus_sin (x : ℝ) : airyAiReal x = airyModulus x * Real.sin (airyPhase x) := by
+theorem airyAiReal_eq_modulus_sin (x : ℝ) : airyAiReal x = airyModulus x * Real.sin (airyPhase x) := by
   have h := congrArg Complex.im (airyBi_add_I_airyAi x)
   rw [show I * (airyPhase x : ℂ) = (airyPhase x : ℂ) * I by ring, exp_mul_I,
 ] at h
   simpa [Complex.cos_ofReal_re, Complex.sin_ofReal_re] using h
 
 /-- `Bi = M cos θ` on the whole real axis. -/
-lemma airyBiReal_eq_modulus_cos (x : ℝ) : airyBiReal x = airyModulus x * Real.cos (airyPhase x) := by
+theorem airyBiReal_eq_modulus_cos (x : ℝ) : airyBiReal x = airyModulus x * Real.cos (airyPhase x) := by
   have h := congrArg Complex.re (airyBi_add_I_airyAi x)
   rw [show I * (airyPhase x : ℂ) = (airyPhase x : ℂ) * I by ring, exp_mul_I,
 ] at h
   simpa [Complex.cos_ofReal_re, Complex.sin_ofReal_re] using h
 
 /-- `Ai' = N sin φ` on the whole real axis. -/
-lemma airyAiDerivReal_eq_modulus_sin (x : ℝ) :
+theorem airyAiDerivReal_eq_modulus_sin (x : ℝ) :
     airyAiDerivReal x = airyDerivModulus x * Real.sin (airyDerivPhase x) := by
   have h := congrArg Complex.im (airyBiDeriv_add_I_airyAiDeriv x)
   rw [show I * (airyDerivPhase x : ℂ) = (airyDerivPhase x : ℂ) * I by ring, exp_mul_I,
@@ -457,7 +455,7 @@ lemma airyAiDerivReal_eq_modulus_sin (x : ℝ) :
   simpa [Complex.cos_ofReal_re, Complex.sin_ofReal_re] using h
 
 /-- `Bi' = N cos φ` on the whole real axis. -/
-lemma airyBiDerivReal_eq_modulus_cos (x : ℝ) :
+theorem airyBiDerivReal_eq_modulus_cos (x : ℝ) :
     airyBiDerivReal x = airyDerivModulus x * Real.cos (airyDerivPhase x) := by
   have h := congrArg Complex.re (airyBiDeriv_add_I_airyAiDeriv x)
   rw [show I * (airyDerivPhase x : ℂ) = (airyDerivPhase x : ℂ) * I by ring, exp_mul_I,
@@ -466,7 +464,7 @@ lemma airyBiDerivReal_eq_modulus_cos (x : ℝ) :
 
 /-- A real number differs from the arctangent of its tangent by a multiple of `π`,
 when its cosine does not vanish. -/
-lemma exists_int_eq_arctan_tan {t : ℝ} (h : Real.cos t ≠ 0) :
+theorem exists_int_eq_arctan_tan {t : ℝ} (h : Real.cos t ≠ 0) :
     ∃ k : ℤ, t = Real.arctan (Real.tan t) + k * π := by
   set k : ℤ := ⌊t / π + 1 / 2⌋ with hk
   have hπ := Real.pi_pos
@@ -490,14 +488,14 @@ lemma exists_int_eq_arctan_tan {t : ℝ} (h : Real.cos t ≠ 0) :
   ring
 
 /-- `M N sin(θ - φ) = 1/π` on the whole real axis. -/
-lemma airy_modulus_phase_wronskian' (x : ℝ) :
+theorem airy_modulus_phase_wronskian' (x : ℝ) :
     airyModulus x * airyDerivModulus x * Real.sin (airyPhase x - airyDerivPhase x) = 1 / π := by
   rw [Real.sin_sub, ← wronskian_airyReal x, airyAiReal_eq_modulus_sin, airyBiReal_eq_modulus_cos,
     airyAiDerivReal_eq_modulus_sin, airyBiDerivReal_eq_modulus_cos]
   ring
 
 /-- `M N cos(θ - φ) = Ai Ai' + Bi Bi'` on the whole real axis. -/
-lemma airy_modulus_phase_cos (x : ℝ) :
+theorem airy_modulus_phase_cos (x : ℝ) :
     airyModulus x * airyDerivModulus x * Real.cos (airyPhase x - airyDerivPhase x) =
       airyAiReal x * airyAiDerivReal x + airyBiReal x * airyBiDerivReal x := by
   rw [Real.cos_sub, airyAiReal_eq_modulus_sin, airyBiReal_eq_modulus_cos,
@@ -505,7 +503,7 @@ lemma airy_modulus_phase_cos (x : ℝ) :
   ring
 
 /-- The energy `w'²/(-x) + w²` of a real solution of Airy's equation is monotone on `(-∞, 0)`. -/
-lemma airy_energy_monotoneOn {f f' : ℝ → ℝ} (hf : ∀ t, HasDerivAt f (f' t) t)
+theorem airy_energy_monotoneOn {f f' : ℝ → ℝ} (hf : ∀ t, HasDerivAt f (f' t) t)
     (hf' : ∀ t, HasDerivAt f' (t * f t) t) :
     MonotoneOn (fun t => f' t ^ 2 * (-t)⁻¹ + f t ^ 2) (Iio 0) := by
   have hd : ∀ t ∈ Iio (0 : ℝ), HasDerivAt (fun t => f' t ^ 2 * (-t)⁻¹ + f t ^ 2)
@@ -525,7 +523,7 @@ lemma airy_energy_monotoneOn {f f' : ℝ → ℝ} (hf : ∀ t, HasDerivAt f (f' 
   positivity
 
 /-- A uniform bound for `M²` on `(-∞, -1]`. -/
-lemma exists_airyModulus_sq_le :
+theorem exists_airyModulus_sq_le :
     ∃ C > 0, ∀ x ≤ -1, airyModulus x ^ 2 ≤ C ∧ airyDerivModulus x ^ 2 ≤ -x * C := by
   have hA := airy_energy_monotoneOn hasDerivAt_airyAiReal hasDerivAt_airyAiDerivReal
   have hB := airy_energy_monotoneOn hasDerivAt_airyBiReal hasDerivAt_airyBiDerivReal
@@ -800,7 +798,7 @@ theorem airyPhase_bessel_atan {x : ℝ} (hx : x < 0)
   linarith
 
 /-- On the positive real axis the log-plane `J` is the principal `J` at `ζ = (2/3)x^{3/2}`. -/
-lemma airyBesselJOnLog_airyLogZeta_ofReal (ν : ℂ) {x : ℝ} (hx : 0 < x) :
+theorem airyBesselJOnLog_airyLogZeta_ofReal (ν : ℂ) {x : ℝ} (hx : 0 < x) :
     airyBesselJOnLog ν (airyLogZeta x) = Complex.besselJ ν (airyZeta x) := by
   have hx0 : (x : ℂ) ≠ 0 := by exact_mod_cast hx.ne'
   rw [airyBesselJOnLog_airyLogZeta ν hx0, DLMF.Bessel.besselJ_eq_regularized,
@@ -820,14 +818,14 @@ lemma airyBesselJOnLog_airyLogZeta_ofReal (ν : ℂ) {x : ℝ} (hx : 0 < x) :
   ring
 
 /-- `Ai'(-x) = (x/3)(J_{2/3}(ζ) - J_{-2/3}(ζ))` for `x > 0` (DLMF 9.6.7). -/
-lemma airyAiDeriv_neg_eq_besselJ_real {x : ℝ} (hx : 0 < x) :
+theorem airyAiDeriv_neg_eq_besselJ_real {x : ℝ} (hx : 0 < x) :
     airyAiDeriv (-x) = (x / 3 : ℂ) *
       (Complex.besselJ (2 / 3) (airyZeta x) - Complex.besselJ (-2 / 3) (airyZeta x)) := by
   rw [airyAiDeriv_neg_eq_besselJ_complex_aux (by exact_mod_cast hx.ne'),
     airyBesselJOnLog_airyLogZeta_ofReal _ hx, airyBesselJOnLog_airyLogZeta_ofReal _ hx]
 
 /-- `Bi'(-x) = (x/√3)(J_{-2/3}(ζ) + J_{2/3}(ζ))` for `x > 0` (DLMF 9.6.9). -/
-lemma airyBiDeriv_neg_eq_besselJ_real {x : ℝ} (hx : 0 < x) :
+theorem airyBiDeriv_neg_eq_besselJ_real {x : ℝ} (hx : 0 < x) :
     airyBiDeriv (-x) = (x / Real.sqrt 3 : ℂ) *
       (Complex.besselJ (-2 / 3) (airyZeta x) + Complex.besselJ (2 / 3) (airyZeta x)) := by
   rw [airyBiDeriv_neg_eq_besselJ_complex_aux (by exact_mod_cast hx.ne'),
@@ -835,7 +833,7 @@ lemma airyBiDeriv_neg_eq_besselJ_real {x : ℝ} (hx : 0 < x) :
     show (-(2 / 3 : ℂ)) = -2 / 3 by ring]
 
 /-- `2/3` is not an integer. -/
-lemma two_thirds_ne_int : ∀ k : ℤ, (2 / 3 : ℂ) ≠ k := by
+theorem two_thirds_ne_int : ∀ k : ℤ, (2 / 3 : ℂ) ≠ k := by
   intro k hk
   have h := congrArg Complex.re hk
   norm_num [Complex.div_re, Complex.normSq] at h
@@ -844,7 +842,7 @@ lemma two_thirds_ne_int : ∀ k : ℤ, (2 / 3 : ℂ) ≠ k := by
   omega
 
 /-- `Y_{2/3} = (-J_{2/3}/2 - J_{-2/3})/(√3/2)`. -/
-lemma besselY_two_thirds_eq (z : ℂ) :
+theorem besselY_two_thirds_eq (z : ℂ) :
     DLMF.Bessel.besselY (2 / 3) z =
       (Complex.besselJ (2 / 3) z * (-1 / 2) - Complex.besselJ (-2 / 3) z) /
         ((Real.sqrt 3 / 2 : ℝ) : ℂ) := by
@@ -1116,7 +1114,7 @@ noncomputable def airyMod_kernel (x t : ℝ) : ℝ :=
   Real.exp (x * t) * (Real.exp (-(t ^ 3 / 12)) * t ^ (-(1 / 2) : ℝ))
 
 /-- The real Nicholson kernel is positive on `(0, ∞)`. -/
-lemma airyMod_kernel_pos (x : ℝ) {t : ℝ} (ht : 0 < t) : 0 < airyMod_kernel x t := by
+theorem airyMod_kernel_pos (x : ℝ) {t : ℝ} (ht : 0 < t) : 0 < airyMod_kernel x t := by
   unfold airyMod_kernel; positivity
 
 /-- **Nicholson's formula on the real line** (DLMF 9.11.4):
@@ -1138,11 +1136,11 @@ theorem airyMod_sq_eq_integral (x : ℝ) :
   exact_mod_cast h
 
 /-- The real Nicholson kernel is integrable on `(0, ∞)`. -/
-lemma airyMod_kernel_integrable (x : ℝ) : IntegrableOn (airyMod_kernel x) (Ioi 0) :=
+theorem airyMod_kernel_integrable (x : ℝ) : IntegrableOn (airyMod_kernel x) (Ioi 0) :=
   airyMod_integrableOn_exp x
 
 /-- A function positive on `(0, ∞)` and integrable there has positive integral. -/
-lemma airyMod_integral_pos {f : ℝ → ℝ} (hf : IntegrableOn f (Ioi 0))
+theorem airyMod_integral_pos {f : ℝ → ℝ} (hf : IntegrableOn f (Ioi 0))
     (hpos : ∀ t, 0 < t → 0 < f t) : 0 < ∫ t in Ioi (0 : ℝ), f t := by
   refine (setIntegral_pos_iff_support_of_nonneg_ae ?_ hf).2 ?_
   · filter_upwards [ae_restrict_mem measurableSet_Ioi] with t (ht : 0 < t)
@@ -1153,7 +1151,7 @@ lemma airyMod_integral_pos {f : ℝ → ℝ} (hf : IntegrableOn f (Ioi 0))
     rw [Real.volume_Ioi]; exact ENNReal.zero_lt_top
 
 /-- `M²` is strictly increasing on the whole real line. -/
-lemma airyMod_sq_strictMono : StrictMono fun x => airyModulus x ^ 2 := by
+theorem airyMod_sq_strictMono : StrictMono fun x => airyModulus x ^ 2 := by
   intro x y hxy
   simp only [airyMod_sq_eq_integral]
   have hπ : 0 < π * Real.sqrt π := by positivity
@@ -1168,7 +1166,7 @@ lemma airyMod_sq_strictMono : StrictMono fun x => airyModulus x ^ 2 := by
 
 /-- Scaling form of Nicholson's formula: for `s > 0`,
 `s^{1/2} M(-s)² = π^{-3/2} ∫₀^∞ e^{-u} e^{-u³/(12 s³)} u^{-1/2} du`. -/
-lemma airyMod_sqrt_mul_sq {s : ℝ} (hs : 0 < s) :
+theorem airyMod_sqrt_mul_sq {s : ℝ} (hs : 0 < s) :
     s ^ (1 / 2 : ℝ) * airyModulus (-s) ^ 2 = (∫ u in Ioi (0 : ℝ),
       Real.exp (-u) * (Real.exp (-(u ^ 3 / (12 * s ^ 3))) * u ^ (-(1 / 2) : ℝ))) /
         (π * Real.sqrt π) := by
@@ -1193,7 +1191,7 @@ lemma airyMod_sqrt_mul_sq {s : ℝ} (hs : 0 < s) :
   rw [← mul_assoc, hs0, h]
 
 /-- The scaled Nicholson integrand is integrable. -/
-lemma airyMod_scaled_integrable {s : ℝ} (hs : 0 ≤ s) : IntegrableOn (fun u : ℝ =>
+theorem airyMod_scaled_integrable {s : ℝ} (hs : 0 ≤ s) : IntegrableOn (fun u : ℝ =>
     Real.exp (-u) * (Real.exp (-(u ^ 3 / (12 * s ^ 3))) * u ^ (-(1 / 2) : ℝ))) (Ioi 0) := by
   have hint := Real.GammaIntegral_convergent (s := 1 / 2) (by norm_num)
   refine hint.mono' ?_ ?_
@@ -1216,7 +1214,7 @@ noncomputable def airyMod_rem (K : ℕ) (w : ℝ) : ℝ :=
   Real.exp (-w) - ∑ k ∈ Finset.range K, (-w) ^ k / k !
 
 /-- Derivative of the partial sums of `e^{-w}`. -/
-lemma airyMod_hasDerivAt_partial (K : ℕ) (w : ℝ) :
+theorem airyMod_hasDerivAt_partial (K : ℕ) (w : ℝ) :
     HasDerivAt (fun w : ℝ => ∑ k ∈ Finset.range (K + 1), (-w) ^ k / k !)
       (-∑ k ∈ Finset.range K, (-w) ^ k / k !) w := by
   induction K with
@@ -1231,7 +1229,7 @@ lemma airyMod_hasDerivAt_partial (K : ℕ) (w : ℝ) :
     ring
 
 /-- Derivative of the exponential remainder: `R_{K+1}' = -R_K`. -/
-lemma airyMod_hasDerivAt_rem (K : ℕ) (w : ℝ) :
+theorem airyMod_hasDerivAt_rem (K : ℕ) (w : ℝ) :
     HasDerivAt (airyMod_rem (K + 1)) (-airyMod_rem K w) w := by
   have h := ((Real.hasDerivAt_exp (-w)).comp w (hasDerivAt_neg w)).sub
     (airyMod_hasDerivAt_partial K w)
@@ -1239,12 +1237,12 @@ lemma airyMod_hasDerivAt_rem (K : ℕ) (w : ℝ) :
   exact h.congr_deriv (by ring)
 
 /-- `R_{K+1}(0) = 0`. -/
-lemma airyMod_rem_zero (K : ℕ) : airyMod_rem (K + 1) 0 = 0 := by
+theorem airyMod_rem_zero (K : ℕ) : airyMod_rem (K + 1) 0 = 0 := by
   simp [airyMod_rem, Finset.sum_range_succ']
 
 /-- The alternating bound for the exponential remainder: for `w ≥ 0`,
 `0 ≤ (-1)^K R_K(w) ≤ w^K / K!`. -/
-lemma airyMod_rem_bounds (K : ℕ) {w : ℝ} (hw : 0 ≤ w) :
+theorem airyMod_rem_bounds (K : ℕ) {w : ℝ} (hw : 0 ≤ w) :
     0 ≤ (-1) ^ K * airyMod_rem K w ∧ (-1) ^ K * airyMod_rem K w ≤ w ^ K / K ! := by
   induction K generalizing w with
   | zero =>
@@ -1281,7 +1279,7 @@ lemma airyMod_rem_bounds (K : ℕ) {w : ℝ} (hw : 0 ≤ w) :
       linarith
 
 /-- `Γ(m + 1/2) = √π ∏_{j<m} (2j+1) / 2^m`. -/
-lemma airyMod_gamma_half (m : ℕ) :
+theorem airyMod_gamma_half (m : ℕ) :
     Real.Gamma (m + 1 / 2) = Real.sqrt π * (∏ j ∈ Finset.range m, (2 * (j : ℝ) + 1)) / 2 ^ m := by
   induction m with
   | zero => simpa using Real.Gamma_one_half_eq
@@ -1291,7 +1289,7 @@ lemma airyMod_gamma_half (m : ℕ) :
     field_simp
 
 /-- The moment terms of the expansion of `M²` at `-∞`. -/
-lemma airyMod_term_identity (k : ℕ) {s : ℝ} (hs : 0 < s) :
+theorem airyMod_term_identity (k : ℕ) {s : ℝ} (hs : 0 < s) :
     (π * Real.sqrt π)⁻¹ * (Real.Gamma ((3 * k : ℕ) + 1 / 2) * s ^ (-(((3 * k : ℕ) : ℝ) + 1 / 2)) *
       ((-1) ^ k / (12 ^ k * k !))) =
       s ^ (-1 / 2 : ℝ) / π * airyModulusCoeff k * (-s) ^ (-(3 * k : ℤ)) := by
@@ -1311,7 +1309,7 @@ lemma airyMod_term_identity (k : ℕ) {s : ℝ} (hs : 0 < s) :
   exact neg_one_pow_eq_or ℝ k
 
 /-- The terms `e^{-st} t^{3k-1/2}` integrate to `Γ(3k+1/2) s^{-(3k+1/2)}`. -/
-lemma airyMod_term_integral (k : ℕ) {s : ℝ} (hs : 0 < s) :
+theorem airyMod_term_integral (k : ℕ) {s : ℝ} (hs : 0 < s) :
     IntegrableOn (fun t : ℝ => Real.exp (-s * t) * t ^ ((((3 * k : ℕ) : ℝ) + 1 / 2) - 1)) (Ioi 0) ∧
     ∫ t in Ioi (0 : ℝ), Real.exp (-s * t) * t ^ ((((3 * k : ℕ) : ℝ) + 1 / 2) - 1) =
       Real.Gamma ((3 * k : ℕ) + 1 / 2) * s ^ (-(((3 * k : ℕ) : ℝ) + 1 / 2)) :=
@@ -1321,7 +1319,7 @@ lemma airyMod_term_integral (k : ℕ) {s : ℝ} (hs : 0 < s) :
 /-- The error of the truncated expansion of `M²` at `-∞` as an integral of the exponential
 remainder: for `s > 0`, `M(-s)² - (s^{-1/2}/π) ∑_{k<N} c_k (-s)^{-3k} =
 π^{-3/2} ∫₀^∞ e^{-st} t^{-1/2} R_N(t³/12) dt`. -/
-lemma airyMod_sq_error_integral {s : ℝ} (hs : 0 < s) (N : ℕ) :
+theorem airyMod_sq_error_integral {s : ℝ} (hs : 0 < s) (N : ℕ) :
     IntegrableOn (fun t : ℝ => Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) * airyMod_rem N (t ^ 3 / 12))
       (Ioi 0) ∧
     airyModulus (-s) ^ 2 - s ^ (-1 / 2 : ℝ) / π * airyModulusSum false N (-s) =
@@ -1367,7 +1365,7 @@ lemma airyMod_sq_error_integral {s : ℝ} (hs : 0 < s) (N : ℕ) :
   ring
 
 /-- Signed first-neglected-term bound for the expansion of `M²` at `-∞` (DLMF §9.8(iv)). -/
-lemma airyMod_sq_error_bound {x : ℝ} (hx : x < 0) (N : ℕ) :
+theorem airyMod_sq_error_bound {x : ℝ} (hx : x < 0) (N : ℕ) :
     |(airyModulus x ^ 2) - ((-x) ^ (-1 / 2 : ℝ) / π) * airyModulusSum false N x| ≤ |((-x) ^ (-1 / 2 : ℝ) / π) * airyModulusCoeff N * x ^ (-(3 * N : ℤ))| ∧
       0 ≤ ((airyModulus x ^ 2) - ((-x) ^ (-1 / 2 : ℝ) / π) * airyModulusSum false N x) * (((-x) ^ (-1 / 2 : ℝ) / π) * airyModulusCoeff N * x ^ (-(3 * N : ℤ))) := by
   obtain ⟨s, hs, rfl⟩ : ∃ s : ℝ, 0 < s ∧ x = -s := ⟨-x, by linarith, by ring⟩
@@ -1426,7 +1424,7 @@ noncomputable def airyMod_kernel2 (x t : ℝ) : ℝ :=
   Real.exp (x * t) * (Real.exp (-(t ^ 3 / 12)) * (t ^ 2 * t ^ (-(1 / 2) : ℝ)))
 
 /-- The second Nicholson kernel is integrable on `(0, ∞)`. -/
-lemma airyMod_kernel2_integrable (x : ℝ) : IntegrableOn (airyMod_kernel2 x) (Ioi 0) :=
+theorem airyMod_kernel2_integrable (x : ℝ) : IntegrableOn (airyMod_kernel2 x) (Ioi 0) :=
   airyMod_integrableOn_exp_pow x 2
 
 /-- **Nicholson-type formula for `N²`** on the real line:
@@ -1462,7 +1460,7 @@ theorem airyMod_derivSq_eq_integral (x : ℝ) :
 
 /-- Strict monotonicity of Laplace-type integrals `∫₀^∞ e^{xt} w(t) dt` in `x` for a positive
 weight `w`. -/
-lemma airyMod_integral_exp_strictMono {w : ℝ → ℝ} (hw : ∀ t, 0 < t → 0 < w t)
+theorem airyMod_integral_exp_strictMono {w : ℝ → ℝ} (hw : ∀ t, 0 < t → 0 < w t)
     (hint : ∀ a : ℝ, IntegrableOn (fun t => Real.exp (a * t) * w t) (Ioi 0)) {x y : ℝ}
     (hxy : x < y) :
     ∫ t in Ioi (0 : ℝ), Real.exp (x * t) * w t < ∫ t in Ioi (0 : ℝ), Real.exp (y * t) * w t := by
@@ -1473,7 +1471,7 @@ lemma airyMod_integral_exp_strictMono {w : ℝ → ℝ} (hw : ∀ t, 0 < t → 0
   nlinarith
 
 /-- The moment terms `e^{-st} t^{m-1/2}` integrate to `Γ(m+1/2) s^{-(m+1/2)}`. -/
-lemma airyMod_mom_integral (m : ℕ) {s : ℝ} (hs : 0 < s) :
+theorem airyMod_mom_integral (m : ℕ) {s : ℝ} (hs : 0 < s) :
     IntegrableOn (fun t : ℝ => Real.exp (-s * t) * t ^ (((m : ℝ) + 1 / 2) - 1)) (Ioi 0) ∧
     ∫ t in Ioi (0 : ℝ), Real.exp (-s * t) * t ^ (((m : ℝ) + 1 / 2) - 1) =
       Real.Gamma (m + 1 / 2) * s ^ (-((m : ℝ) + 1 / 2)) :=
@@ -1481,7 +1479,7 @@ lemma airyMod_mom_integral (m : ℕ) {s : ℝ} (hs : 0 < s) :
     integral_exp_neg_mul_mul_rpow_sub_one (by positivity) hs⟩
 
 /-- The moment terms of the expansion of `N²` at `-∞` coming from `∫ e^{-st} t^{3/2} e^{-t³/12}`. -/
-lemma airyMod_deriv_term_identity (j : ℕ) {s : ℝ} (hs : 0 < s) :
+theorem airyMod_deriv_term_identity (j : ℕ) {s : ℝ} (hs : 0 < s) :
     (π * Real.sqrt π)⁻¹ / 2 * (Real.Gamma ((3 * j + 2 : ℕ) + 1 / 2) *
       s ^ (-(((3 * j + 2 : ℕ) : ℝ) + 1 / 2)) * ((-1) ^ j / (12 ^ j * j !))) =
       s ^ (1 / 2 : ℝ) / π * (-s) ^ (-(3 * (j + 1 : ℕ) : ℤ)) *
@@ -1514,7 +1512,7 @@ lemma airyMod_deriv_term_identity (j : ℕ) {s : ℝ} (hs : 0 < s) :
   ring
 
 /-- The truncation error of `π^{-3/2}/2 ∫₀^∞ e^{-st} t^{3/2} e^{-t³/12} dt` at `s → +∞`. -/
-lemma airyMod_kernel2_error {s : ℝ} (hs : 0 < s) (N : ℕ) :
+theorem airyMod_kernel2_error {s : ℝ} (hs : 0 < s) (N : ℕ) :
     |(π * Real.sqrt π)⁻¹ / 2 * (∫ t in Ioi (0 : ℝ), airyMod_kernel2 (-s) t) -
       ∑ j ∈ Finset.range N, s ^ (1 / 2 : ℝ) / π * (-s) ^ (-(3 * (j + 1 : ℕ) : ℤ)) *
         (airyDerivModulusCoeff (j + 1) - airyModulusCoeff (j + 1))| ≤
@@ -1582,7 +1580,7 @@ lemma airyMod_kernel2_error {s : ℝ} (hs : 0 < s) (N : ℕ) :
     _ = _ := by rw [div_pow, pow_mul]; field_simp
 
 /-- Error bound for the truncated expansion of `N²` at `-∞` with `N + 1` terms. -/
-lemma airyMod_derivSq_error {x : ℝ} (hx : x < 0) (N : ℕ) :
+theorem airyMod_derivSq_error {x : ℝ} (hx : x < 0) (N : ℕ) :
     |airyDerivModulus x ^ 2 - ∑ k ∈ Finset.range (N + 1),
         (-x) ^ (1 / 2 : ℝ) / π * x ^ (-(3 * k : ℤ)) * airyDerivModulusCoeff k| ≤
       (|airyModulusCoeff (N + 1)| + π * ((π * Real.sqrt π)⁻¹ / 2 *
@@ -1656,24 +1654,24 @@ lemma airyMod_derivSq_error {x : ℝ} (hx : x < 0) (N : ℕ) :
   nlinarith [this, e2]
 
 /-- The exponential remainder is continuous. -/
-lemma airyMod_rem_continuous (K : ℕ) : Continuous (airyMod_rem K) := by
+theorem airyMod_rem_continuous (K : ℕ) : Continuous (airyMod_rem K) := by
   unfold airyMod_rem; fun_prop
 
 /-- `|R_K(w)| ≤ w^K / K!` for `w ≥ 0`. -/
-lemma airyMod_rem_abs_le (K : ℕ) {w : ℝ} (hw : 0 ≤ w) : |airyMod_rem K w| ≤ w ^ K / K ! := by
+theorem airyMod_rem_abs_le (K : ℕ) {w : ℝ} (hw : 0 ≤ w) : |airyMod_rem K w| ≤ w ^ K / K ! := by
   have hb := airyMod_rem_bounds K hw
   have : |airyMod_rem K w| = (-1) ^ K * airyMod_rem K w := by
     rw [← abs_of_nonneg hb.1, abs_mul, abs_pow, abs_neg, abs_one, one_pow, one_mul]
   rw [this]; exact hb.2
 
 /-- The moment `t^{3K+3/2}` written in the kernel's factored form. -/
-lemma airyMod_pow_factor {t : ℝ} (ht : 0 < t) (K : ℕ) :
+theorem airyMod_pow_factor {t : ℝ} (ht : 0 < t) (K : ℕ) :
     t ^ ((((3 * K + 2 : ℕ) : ℝ) + 1 / 2) - 1) = t ^ (3 * K) * (t ^ 2 * t ^ (-(1 / 2) : ℝ)) := by
   rw [show (((3 * K + 2 : ℕ) : ℝ) + 1 / 2) - 1 = ((3 * K + 2 : ℕ) : ℝ) + (-(1 / 2)) by ring,
     Real.rpow_add ht, Real.rpow_natCast, pow_add]; ring
 
 /-- The pointwise first-neglected-term bound for the `N²` error integrand. -/
-lemma airyMod_derivErr_pointwise (s : ℝ) (K : ℕ) {t : ℝ} (ht : 0 < t) :
+theorem airyMod_derivErr_pointwise (s : ℝ) (K : ℕ) {t : ℝ} (ht : 0 < t) :
     0 ≤ (-1) ^ K * (Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) *
         (t ^ 2 * airyMod_rem K (t ^ 3 / 12) / 4 - airyMod_rem (K + 1) (t ^ 3 / 12) / (2 * t))) ∧
     (-1) ^ K * (Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) *
@@ -1709,7 +1707,7 @@ lemma airyMod_derivErr_pointwise (s : ℝ) (K : ℕ) {t : ℝ} (ht : 0 < t) :
 
 /-- The truncation error of `π^{-3/2}/2 ∫₀^∞ e^{-st} t^{3/2} e^{-t³/12} dt` as an integral of the
 exponential remainder. -/
-lemma airyMod_kernel2_error_integral {s : ℝ} (hs : 0 < s) (K : ℕ) :
+theorem airyMod_kernel2_error_integral {s : ℝ} (hs : 0 < s) (K : ℕ) :
     IntegrableOn (fun t : ℝ => Real.exp (-s * t) * (t ^ 2 * t ^ (-(1 / 2) : ℝ)) *
       airyMod_rem K (t ^ 3 / 12)) (Ioi 0) ∧
     (π * Real.sqrt π)⁻¹ / 2 * (∫ t in Ioi (0 : ℝ), airyMod_kernel2 (-s) t) -
@@ -1752,7 +1750,7 @@ lemma airyMod_kernel2_error_integral {s : ℝ} (hs : 0 < s) (K : ℕ) :
   simp only [hBi, airyMod_deriv_term_identity _ hs, add_sub_cancel_right]
 
 /-- The `N²` error integrand `e^{-st} t^{-1/2} (t² R_K/4 - R_{K+1}/(2t))` is integrable. -/
-lemma airyMod_derivErr_integrable (s : ℝ) (hs : 0 < s) (K : ℕ) :
+theorem airyMod_derivErr_integrable (s : ℝ) (hs : 0 < s) (K : ℕ) :
     IntegrableOn (fun t : ℝ => Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) *
       (t ^ 2 * airyMod_rem K (t ^ 3 / 12) / 4 - airyMod_rem (K + 1) (t ^ 3 / 12) / (2 * t)))
       (Ioi 0) := by
@@ -1787,7 +1785,7 @@ lemma airyMod_derivErr_integrable (s : ℝ) (hs : 0 < s) (K : ℕ) :
 
 /-- Integration by parts for the `M²` error integrand:
 `s ∫ e^{-st} t^{-1/2} R_{K+1}(t³/12) = ∫ e^{-st} t^{-1/2}(t² R_K/4 - R_{K+1}/(2t)) - ½ ∫ e^{-st} t^{3/2} R_K`. -/
-lemma airyMod_derivErr_ibp {s : ℝ} (hs : 0 < s) (K : ℕ) :
+theorem airyMod_derivErr_ibp {s : ℝ} (hs : 0 < s) (K : ℕ) :
     s * ∫ t in Ioi (0 : ℝ), Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) * airyMod_rem (K + 1) (t ^ 3 / 12) =
       (∫ t in Ioi (0 : ℝ), Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) *
         (t ^ 2 * airyMod_rem K (t ^ 3 / 12) / 4 - airyMod_rem (K + 1) (t ^ 3 / 12) / (2 * t))) -
@@ -1860,7 +1858,7 @@ lemma airyMod_derivErr_ibp {s : ℝ} (hs : 0 < s) (K : ℕ) :
 
 
 /-- `d_{K+1} = (d_{K+1} - a_{K+1}) (6K+7)/(12(K+1))` for the `N²` and `M²` coefficients. -/
-lemma airyMod_derivCoeff_eq (K : ℕ) :
+theorem airyMod_derivCoeff_eq (K : ℕ) :
     airyDerivModulusCoeff (K + 1) = (airyDerivModulusCoeff (K + 1) - airyModulusCoeff (K + 1)) *
       ((6 * K + 7) / (12 * (K + 1))) := by
   have hK : (0 : ℝ) ≤ K := Nat.cast_nonneg K
@@ -1872,7 +1870,7 @@ lemma airyMod_derivCoeff_eq (K : ℕ) :
   ring
 
 /-- The first neglected term of the `N²` expansion as a moment integral. -/
-lemma airyMod_derivMod_term_identity (K : ℕ) {s : ℝ} (hs : 0 < s) :
+theorem airyMod_derivMod_term_identity (K : ℕ) {s : ℝ} (hs : 0 < s) :
     (π * Real.sqrt π)⁻¹ * (Real.Gamma ((3 * K + 2 : ℕ) + 1 / 2) *
       s ^ (-(((3 * K + 2 : ℕ) : ℝ) + 1 / 2)) * ((6 * K + 7) / (24 * 12 ^ K * (K + 1 : ℕ)!))) *
         (-1) ^ K =
@@ -1890,7 +1888,7 @@ lemma airyMod_derivMod_term_identity (K : ℕ) {s : ℝ} (hs : 0 < s) :
   norm_num
 
 /-- Splitting the truncated `N²` series into the `M²` series and the kernel-2 series. -/
-lemma airyMod_derivSum_split {s : ℝ} (hs : 0 < s) (K : ℕ) :
+theorem airyMod_derivSum_split {s : ℝ} (hs : 0 < s) (K : ℕ) :
     s ^ (1 / 2 : ℝ) / π * airyModulusSum true (K + 1) (-s) =
       s * (s ^ (-1 / 2 : ℝ) / π * airyModulusSum false (K + 1) (-s)) +
         ∑ j ∈ Finset.range K, s ^ (1 / 2 : ℝ) / π * (-s) ^ (-(3 * (j + 1 : ℕ) : ℤ)) *
@@ -1912,7 +1910,7 @@ lemma airyMod_derivSum_split {s : ℝ} (hs : 0 < s) (K : ℕ) :
 /-- The error of the truncated expansion of `N²` at `-∞` as a single integral:
 `N(-s)² - (s^{1/2}/π) ∑_{k<K+1} d_k (-s)^{-3k} =
 π^{-3/2} ∫₀^∞ e^{-st} t^{-1/2} (t² R_K(t³/12)/4 - R_{K+1}(t³/12)/(2t)) dt`. -/
-lemma airyMod_derivSq_error_integral {s : ℝ} (hs : 0 < s) (K : ℕ) :
+theorem airyMod_derivSq_error_integral {s : ℝ} (hs : 0 < s) (K : ℕ) :
     airyDerivModulus (-s) ^ 2 - s ^ (1 / 2 : ℝ) / π * airyModulusSum true (K + 1) (-s) =
       (π * Real.sqrt π)⁻¹ * ∫ t in Ioi (0 : ℝ), Real.exp (-s * t) * t ^ (-(1 / 2) : ℝ) *
         (t ^ 2 * airyMod_rem K (t ^ 3 / 12) / 4 - airyMod_rem (K + 1) (t ^ 3 / 12) / (2 * t)) := by
@@ -1963,7 +1961,7 @@ theorem airyMod_cross_eq_integral (x : ℝ) :
   exact_mod_cast h
 
 /-- `|x|^{1/2} M(x)² < 1/π` for `x < 0`. -/
-lemma airyMod_sqrt_mul_sq_lt {s : ℝ} (hs : 0 < s) : s ^ (1 / 2 : ℝ) * airyModulus (-s) ^ 2 < 1 / π := by
+theorem airyMod_sqrt_mul_sq_lt {s : ℝ} (hs : 0 < s) : s ^ (1 / 2 : ℝ) * airyModulus (-s) ^ 2 < 1 / π := by
   have hπ := Real.pi_pos
   rw [airyMod_sqrt_mul_sq hs]
   have hG : ∫ u in Ioi (0 : ℝ), Real.exp (-u) * u ^ (-(1 / 2) : ℝ) = Real.sqrt π := by
@@ -2041,7 +2039,7 @@ theorem airy_modulus_deriv_monotone  :
 /-! ### The weighted Nicholson function for `|x|^{-1/4} N(x)` -/
 
 /-- `e^{-u} u^a e^{-v u³/12}` is integrable on `(0, ∞)` for `a > -1` and `v ≥ 0`. -/
-lemma airyMod_wInt {a : ℝ} (ha : -1 < a) {v : ℝ} (hv : 0 ≤ v) :
+theorem airyMod_wInt {a : ℝ} (ha : -1 < a) {v : ℝ} (hv : 0 ≤ v) :
     IntegrableOn (fun u : ℝ => Real.exp (-u) * u ^ a * Real.exp (-(v * u ^ 3 / 12))) (Ioi 0) := by
   have hint := Real.GammaIntegral_convergent (s := a + 1) (by linarith)
   rw [show a + 1 - 1 = a by ring] at hint
@@ -2065,7 +2063,7 @@ noncomputable def airyMod_wG (v : ℝ) : ℝ :=
     Real.exp (-(v * u ^ 3 / 12))
 
 /-- The `v`-derivative of the integrand of `G`. -/
-lemma airyMod_wG_hasDerivAt_integrand (u v : ℝ) :
+theorem airyMod_wG_hasDerivAt_integrand (u v : ℝ) :
     HasDerivAt (fun v : ℝ => Real.exp (-u) * (u ^ (-(1 / 2) : ℝ) + v / 2 * u ^ (3 / 2 : ℝ)) *
         Real.exp (-(v * u ^ 3 / 12)))
       (Real.exp (-u) * (u ^ (3 / 2 : ℝ) / 2 - u ^ 3 / 12 * (u ^ (-(1 / 2) : ℝ) +
@@ -2087,7 +2085,7 @@ lemma airyMod_wG_hasDerivAt_integrand (u v : ℝ) :
   ring
 
 /-- `u^{a} ≤ u^{b_1} + u^{b_2}` style domination: `u^a ≤ u^{-1/2} + u^{9/2}` for `-1/2 ≤ a ≤ 9/2`. -/
-lemma airyMod_rpow_le_sum {u a : ℝ} (hu : 0 < u) (ha1 : -(1 / 2) ≤ a) (ha2 : a ≤ 9 / 2) :
+theorem airyMod_rpow_le_sum {u a : ℝ} (hu : 0 < u) (ha1 : -(1 / 2) ≤ a) (ha2 : a ≤ 9 / 2) :
     u ^ a ≤ u ^ (-(1 / 2) : ℝ) + u ^ (9 / 2 : ℝ) := by
   rcases le_total u 1 with h | h
   · have := Real.rpow_le_rpow_of_exponent_ge hu h ha1
@@ -2098,12 +2096,12 @@ lemma airyMod_rpow_le_sum {u a : ℝ} (hu : 0 < u) (ha1 : -(1 / 2) ≤ a) (ha2 :
     linarith
 
 /-- Rewriting `u³ u^{a}` as `u^{a+3}` for `u > 0`. -/
-lemma airyMod_pow_three_mul_rpow {u : ℝ} (hu : 0 < u) (a : ℝ) :
+theorem airyMod_pow_three_mul_rpow {u : ℝ} (hu : 0 < u) (a : ℝ) :
     u ^ 3 * u ^ a = u ^ (a + 3) := by
   rw [Real.rpow_add hu, show (3 : ℝ) = ((3 : ℕ) : ℝ) by norm_num, Real.rpow_natCast]; ring
 
 /-- `G'(v) = ∫₀^∞ e^{-u}(u^{3/2}/2 - u^{5/2}/12 - (v/24) u^{9/2}) e^{-vu³/12} du` for `v > 0`. -/
-lemma airyMod_wG_hasDerivAt {v : ℝ} (hv : 0 < v) :
+theorem airyMod_wG_hasDerivAt {v : ℝ} (hv : 0 < v) :
     HasDerivAt airyMod_wG (∫ u in Ioi (0 : ℝ), Real.exp (-u) *
       (u ^ (3 / 2 : ℝ) / 2 - u ^ 3 / 12 * (u ^ (-(1 / 2) : ℝ) + v / 2 * u ^ (3 / 2 : ℝ))) *
         Real.exp (-(v * u ^ 3 / 12))) v := by
@@ -2183,7 +2181,7 @@ lemma airyMod_wG_hasDerivAt {v : ℝ} (hv : 0 < v) :
 
 /-- **The integration by parts behind 9.8(iii)**: `G'(v) = (1/12) ∫₀^∞ e^{-u}(u^{5/2} + u^{3/2})
 e^{-vu³/12} du`, which is positive. -/
-lemma airyMod_wG_deriv_eq {v : ℝ} (hv : 0 < v) :
+theorem airyMod_wG_deriv_eq {v : ℝ} (hv : 0 < v) :
     (∫ u in Ioi (0 : ℝ), Real.exp (-u) *
       (u ^ (3 / 2 : ℝ) / 2 - u ^ 3 / 12 * (u ^ (-(1 / 2) : ℝ) + v / 2 * u ^ (3 / 2 : ℝ))) *
         Real.exp (-(v * u ^ 3 / 12))) =
@@ -2270,7 +2268,7 @@ lemma airyMod_wG_deriv_eq {v : ℝ} (hv : 0 < v) :
   ring
 
 /-- `G'(v) > 0` for `v > 0`. -/
-lemma airyMod_wG_deriv_pos {v : ℝ} (hv : 0 < v) : 0 < deriv airyMod_wG v := by
+theorem airyMod_wG_deriv_pos {v : ℝ} (hv : 0 < v) : 0 < deriv airyMod_wG v := by
   rw [(airyMod_wG_hasDerivAt hv).deriv, airyMod_wG_deriv_eq hv]
   have i32 := airyMod_wInt (a := 3 / 2) (by norm_num) hv.le
   have i52 := airyMod_wInt (a := 5 / 2) (by norm_num) hv.le
@@ -2279,7 +2277,7 @@ lemma airyMod_wG_deriv_pos {v : ℝ} (hv : 0 < v) : 0 < deriv airyMod_wG v := by
       measurableSet_Ioi) fun u hu => by positivity)
 
 /-- `G` is strictly increasing on `(0, ∞)`. -/
-lemma airyMod_wG_strictMono : StrictMonoOn airyMod_wG (Ioi 0) := by
+theorem airyMod_wG_strictMono : StrictMonoOn airyMod_wG (Ioi 0) := by
   refine strictMonoOn_of_deriv_pos (convex_Ioi 0) ?_ ?_
   · exact fun v hv => (airyMod_wG_hasDerivAt hv).continuousAt.continuousWithinAt
   · intro v hv
@@ -2288,7 +2286,7 @@ lemma airyMod_wG_strictMono : StrictMonoOn airyMod_wG (Ioi 0) := by
 
 /-- Scaling `t = u/s` in the Nicholson-type integrals:
 `∫₀^∞ e^{-st} e^{-t³/12} t^p dt = s^{-(p+1)} ∫₀^∞ e^{-u} u^p e^{-s^{-3}u³/12} du`. -/
-lemma airyMod_wScale {s : ℝ} (hs : 0 < s) (p : ℝ) :
+theorem airyMod_wScale {s : ℝ} (hs : 0 < s) (p : ℝ) :
     (∫ t in Ioi (0 : ℝ), Real.exp (-s * t) * (Real.exp (-(t ^ 3 / 12)) * t ^ p)) =
       s ^ (-(p + 1)) * ∫ u in Ioi (0 : ℝ), Real.exp (-u) * u ^ p *
         Real.exp (-((s ^ 3)⁻¹ * u ^ 3 / 12)) := by
@@ -2312,7 +2310,7 @@ lemma airyMod_wScale {s : ℝ} (hs : 0 < s) (p : ℝ) :
   field_simp
 
 /-- **Scaling form for `N²`**: for `s > 0`, `π^{3/2} s^{-1/2} N(-s)² = G(s^{-3})`. -/
-lemma airyMod_wG_scaling {s : ℝ} (hs : 0 < s) :
+theorem airyMod_wG_scaling {s : ℝ} (hs : 0 < s) :
     s ^ (-(1 / 2) : ℝ) * airyDerivModulus (-s) ^ 2 = airyMod_wG ((s ^ 3)⁻¹) / (π * Real.sqrt π) := by
   have hv : 0 ≤ (s ^ 3)⁻¹ := by positivity
   have h0 : (∫ t in Ioi (0 : ℝ), airyMod_kernel (-s) t) = s ^ (-(-(1 / 2) + 1) : ℝ) *
@@ -2534,7 +2532,7 @@ theorem airy_derivPhase_monotone  :
 
 /-- A function whose derivative is bounded by `K s^{p-1}` (`p < 0`) on `[R, ∞)` converges at
 `+∞`, and its distance to the limit is at most `K s^p / (-p)`. -/
-lemma airyMod_tendsto_of_deriv_bound {F f : ℝ → ℝ} {R K p : ℝ} (hR : 0 < R) (hp : p < 0)
+theorem airyMod_tendsto_of_deriv_bound {F f : ℝ → ℝ} {R K p : ℝ} (hR : 0 < R) (hp : p < 0)
     (hF : ∀ s, R ≤ s → HasDerivAt F (f s) s) (hf : ∀ s, R ≤ s → |f s| ≤ K * s ^ (p - 1)) :
     ∃ L, Tendsto F atTop (𝓝 L) ∧ ∀ s, R ≤ s → |F s - L| ≤ K * s ^ p / (-p) := by
   set Q : ℝ → ℝ := fun s => K * s ^ p / (-p)
@@ -2591,7 +2589,7 @@ lemma airyMod_tendsto_of_deriv_bound {F f : ℝ → ℝ} {R K p : ℝ} (hR : 0 <
 
 
 /-- `s^a (-s)^{-3k} = (-1)^k s^{a-3k}` for `s > 0`. -/
-lemma airyMod_rpow_mul_zpow {s : ℝ} (hs : 0 < s) (a : ℝ) (k : ℕ) :
+theorem airyMod_rpow_mul_zpow {s : ℝ} (hs : 0 < s) (a : ℝ) (k : ℕ) :
     s ^ a * (-s) ^ (-(3 * k : ℤ)) = (-1) ^ k * s ^ (a - 3 * k) := by
   rw [show (-(3 * k : ℤ)) = -((3 * k : ℕ) : ℤ) by push_cast; ring, zpow_neg, zpow_natCast,
     neg_pow, show (-1 : ℝ) ^ (3 * k) = (-1) ^ k by rw [pow_mul]; norm_num,
@@ -2603,7 +2601,7 @@ lemma airyMod_rpow_mul_zpow {s : ℝ} (hs : 0 < s) (a : ℝ) (k : ℕ) :
   exact h1.symm
 
 /-- Derivative of the primitive scale `(2/3) s^{3/2} (-s)^{-3k} / (1 - 2k)`. -/
-lemma airyMod_hasDerivAt_sigma {s : ℝ} (hs : 0 < s) (k : ℕ) (c : ℝ) :
+theorem airyMod_hasDerivAt_sigma {s : ℝ} (hs : 0 < s) (k : ℕ) (c : ℝ) :
     HasDerivAt (fun s : ℝ => 2 / 3 * s ^ (3 / 2 : ℝ) * (-s) ^ (-(3 * k : ℤ)) * (c / (1 - 2 * k)))
       (s ^ (1 / 2 : ℝ) * (-s) ^ (-(3 * k : ℤ)) * c) s := by
   have hk : (1 - 2 * (k : ℝ)) ≠ 0 := by
@@ -2623,7 +2621,7 @@ lemma airyMod_hasDerivAt_sigma {s : ℝ} (hs : 0 < s) (k : ℕ) (c : ℝ) :
     field_simp
 
 /-- `|s^a (-s)^{-3k}| = s^{a-3k}`. -/
-lemma airyMod_abs_rpow_mul_zpow {s : ℝ} (hs : 0 < s) (a : ℝ) (k : ℕ) :
+theorem airyMod_abs_rpow_mul_zpow {s : ℝ} (hs : 0 < s) (a : ℝ) (k : ℕ) :
     |s ^ a * (-s) ^ (-(3 * k : ℤ))| = s ^ (a - 3 * k) := by
   rw [airyMod_rpow_mul_zpow hs, abs_mul, abs_pow, abs_neg, abs_one, one_pow, one_mul,
     abs_of_pos (Real.rpow_pos_of_pos hs _)]
@@ -2631,7 +2629,7 @@ lemma airyMod_abs_rpow_mul_zpow {s : ℝ} (hs : 0 < s) (a : ℝ) (k : ℕ) :
 /-- **Termwise integration of an expansion at `+∞`.** If `G' = g` and
 `g(s) ~ ∑ c_k s^{1/2} (-s)^{-3k}`, then `G(s) - L ~ ∑ c_k/(1-2k) · (2/3) s^{3/2} (-s)^{-3k}` for a
 constant `L = lim (G(s) - (2/3) c₀ s^{3/2})`. -/
-lemma airyMod_expansion_of_deriv {G g : ℝ → ℝ} {c : ℕ → ℝ}
+theorem airyMod_expansion_of_deriv {G g : ℝ → ℝ} {c : ℕ → ℝ}
     (hG : ∀ s, 0 < s → HasDerivAt G (g s) s)
     (hg : ∀ N : ℕ, (fun s => g s - ∑ k ∈ Finset.range N, s ^ (1 / 2 : ℝ) * (-s) ^ (-(3 * k : ℤ)) * c k)
       =O[atTop] (fun s => s ^ (1 / 2 : ℝ) * (-s) ^ (-(3 * N : ℤ)))) :
@@ -2721,7 +2719,7 @@ lemma airyMod_expansion_of_deriv {G g : ℝ → ℝ} {c : ℕ → ℝ}
 
 /-- The reciprocal of the formal series `∑ c_k X^k` with `c₀ = 1` has coefficients
 `airyReciprocalCoeff c`. -/
-lemma airyMod_coeff_recip_mk {c : ℕ → ℝ} (hc : c 0 = 1) (n : ℕ) :
+theorem airyMod_coeff_recip_mk {c : ℕ → ℝ} (hc : c 0 = 1) (n : ℕ) :
     PowerSeries.coeff n (PowerSeries.mk c)⁻¹ = airyReciprocalCoeff c n := by
   have h0 : PowerSeries.constantCoeff (PowerSeries.mk c) ≠ 0 := by
     simp [← PowerSeries.coeff_zero_eq_constantCoeff_apply, hc]
@@ -2747,7 +2745,7 @@ lemma airyMod_coeff_recip_mk {c : ℕ → ℝ} (hc : c 0 = 1) (n : ℕ) :
 
 /-- Convert an expansion `F(x) ~ ∑ c_k p(x) x^{-3k}` at `-∞` to an asymptotic power series of
 `F(-s)/p(-s)` in `w = (-s)^{-3}` at `+∞`. -/
-lemma airyMod_powerSeries_of_expansion {F p : ℝ → ℝ} {c : ℕ → ℝ}
+theorem airyMod_powerSeries_of_expansion {F p : ℝ → ℝ} {c : ℕ → ℝ}
     (hF : HasAsymptoticExpansion atBot (fun k (x : ℝ) => p x * x ^ (-(3 * k : ℤ))) c F)
     (hp : ∀ x < 0, p x ≠ 0) :
     HasAsymptoticPowerSeries atTop (fun s : ℝ => (-s) ^ (-(3 : ℤ))) (PowerSeries.mk c)
@@ -2774,7 +2772,7 @@ lemma airyMod_powerSeries_of_expansion {F p : ℝ → ℝ} {c : ℕ → ℝ}
 /-- **Reciprocal expansion of an integrand.** If `F(x) ~ ∑ c_k p(x) x^{-3k}` at `-∞` with
 `c₀ = 1` and `g(s) = s^{1/2} p(-s)/F(-s)`, then `g(s) ~ ∑ r_k s^{1/2} (-s)^{-3k}` with
 `r = airyReciprocalCoeff c`. -/
-lemma airyMod_integrand_expansion {F p g : ℝ → ℝ} {c : ℕ → ℝ}
+theorem airyMod_integrand_expansion {F p g : ℝ → ℝ} {c : ℕ → ℝ}
     (hF : HasAsymptoticExpansion atBot (fun k (x : ℝ) => p x * x ^ (-(3 * k : ℤ))) c F)
     (hp : ∀ x < 0, p x ≠ 0) (hc : c 0 = 1)
     (hg : ∀ s, 0 < s → g s = s ^ (1 / 2 : ℝ) * (F (-s) / p (-s))⁻¹) (N : ℕ) :
@@ -2923,7 +2921,7 @@ theorem airyDerivPhase_error {x : ℝ} (hx : x < 0) {N : ℕ} (hN : 0 ≤ N) :
 /-! ### The phase expansions 9.8.22 and 9.8.23 -/
 /-- If `u → 1`, `u sin θ - sin β → 0`, `u cos θ - cos β → 0` and `θ - β → L`, then
 `cos L = 1`. -/
-lemma airyMod_cos_eq_one_of_limits {u θ β : ℝ → ℝ} {L : ℝ} (hu : Tendsto u atTop (𝓝 1))
+theorem airyMod_cos_eq_one_of_limits {u θ β : ℝ → ℝ} {L : ℝ} (hu : Tendsto u atTop (𝓝 1))
     (hs : Tendsto (fun s => u s * Real.sin (θ s) - Real.sin (β s)) atTop (𝓝 0))
     (hc : Tendsto (fun s => u s * Real.cos (θ s) - Real.cos (β s)) atTop (𝓝 0))
     (hL : Tendsto (fun s => θ s - β s) atTop (𝓝 L)) : Real.cos L = 1 := by
@@ -2949,7 +2947,7 @@ lemma airyMod_cos_eq_one_of_limits {u θ β : ℝ → ℝ} {L : ℝ} (hu : Tends
   linarith
 
 /-- A real `x` with `cos x = 1` and `|x| < 2π` is `0`. -/
-lemma airyMod_eq_zero_of_cos_eq_one {x : ℝ} (h : Real.cos x = 1) (hx : |x| < 2 * π) : x = 0 := by
+theorem airyMod_eq_zero_of_cos_eq_one {x : ℝ} (h : Real.cos x = 1) (hx : |x| < 2 * π) : x = 0 := by
   obtain ⟨n, hn⟩ := (Real.cos_eq_one_iff x).mp h
   have hπ := Real.pi_pos
   rw [← hn] at hx ⊢
@@ -2962,7 +2960,7 @@ lemma airyMod_eq_zero_of_cos_eq_one {x : ℝ} (h : Real.cos x = 1) (hx : |x| < 2
 
 /-- Bounds for the limit `L` of `E` from derivative bounds `a ≤ E' ≤ b` on `(0,1)` and
 `|E'(s)| ≤ K s^{-5/2}` on `[1,∞)`. -/
-lemma airyMod_limit_bounds {E e : ℝ → ℝ} {L a b K : ℝ} (hc : ContinuousOn E (Ici 0))
+theorem airyMod_limit_bounds {E e : ℝ → ℝ} {L a b K : ℝ} (hc : ContinuousOn E (Ici 0))
     (hd : ∀ s, 0 < s → HasDerivAt E (e s) s) (hab : ∀ s, 0 < s → s < 1 → a ≤ e s ∧ e s ≤ b)
     (hK : ∀ s, 1 ≤ s → |e s| ≤ K * s ^ (-(5 / 2) : ℝ)) (hL : Tendsto E atTop (𝓝 L)) :
     E 0 + a - 2 / 3 * K ≤ L ∧ L ≤ E 0 + b + 2 / 3 * K := by
@@ -2997,19 +2995,19 @@ lemma airyMod_limit_bounds {E e : ℝ → ℝ} {L a b K : ℝ} (hc : ContinuousO
 
 
 /-- `(-s)^{-3k} = (-(s³)⁻¹)^k`. -/
-lemma airyMod_neg_zpow (s : ℝ) (k : ℕ) : (-s) ^ (-(3 * k : ℤ)) = (-(s ^ 3)⁻¹) ^ k := by
+theorem airyMod_neg_zpow (s : ℝ) (k : ℕ) : (-s) ^ (-(3 * k : ℤ)) = (-(s ^ 3)⁻¹) ^ k := by
   rw [show (-(3 * k : ℤ)) = -((3 * k : ℕ) : ℤ) by push_cast; ring, zpow_neg, zpow_natCast,
     pow_mul, ← inv_pow, neg_pow s 3, show (-1 : ℝ) ^ 3 = -1 by norm_num, neg_one_mul, inv_neg]
 
 /-- The first coefficients of the expansion of `M²`. -/
-lemma airyMod_coeff_values : airyModulusCoeff 0 = 1 ∧ airyModulusCoeff 1 = 5 / 32 ∧
+theorem airyMod_coeff_values : airyModulusCoeff 0 = 1 ∧ airyModulusCoeff 1 = 5 / 32 ∧
     0 < airyModulusCoeff 2 := by
   refine ⟨by simp [airyModulusCoeff], by norm_num [airyModulusCoeff, Finset.prod_range_succ], ?_⟩
   unfold airyModulusCoeff
   refine div_pos (Finset.prod_pos fun j _ => by positivity) (by positivity)
 
 /-- Two-sided bounds for `π s^{1/2} M(-s)²`: `1 - 5/(32 s³) ≤ π s^{1/2} M(-s)² < 1`. -/
-lemma airyMod_modulus_bounds {s : ℝ} (hs : 0 < s) :
+theorem airyMod_modulus_bounds {s : ℝ} (hs : 0 < s) :
     1 - 5 / 32 * (s ^ 3)⁻¹ ≤ π * s ^ (1 / 2 : ℝ) * airyModulus (-s) ^ 2 ∧
       π * s ^ (1 / 2 : ℝ) * airyModulus (-s) ^ 2 < 1 := by
   have hπ := Real.pi_pos
@@ -3041,7 +3039,7 @@ lemma airyMod_modulus_bounds {s : ℝ} (hs : 0 < s) :
 
 
 /-- If `f = O(s^b)` and `a + b < 0`, then `c s^a f(s) → 0`. -/
-lemma airyMod_tendsto_rpow_mul {f : ℝ → ℝ} {a b : ℝ} (c : ℝ) (hab : a + b < 0)
+theorem airyMod_tendsto_rpow_mul {f : ℝ → ℝ} {a b : ℝ} (c : ℝ) (hab : a + b < 0)
     (hf : f =O[atTop] (fun s => s ^ b)) : Tendsto (fun s => c * s ^ a * f s) atTop (𝓝 0) := by
   refine ((isBigO_refl (fun s => c * s ^ a) atTop).mul hf).trans_tendsto ?_
   have h := (tendsto_rpow_neg_atTop (y := -(a + b)) (by linarith)).const_mul c
@@ -3051,7 +3049,7 @@ lemma airyMod_tendsto_rpow_mul {f : ℝ → ℝ} {a b : ℝ} (c : ℝ) (hab : a 
   rw [Real.rpow_add hs]; ring
 
 /-- `Ai(-s) = π^{-1/2} s^{-1/4} cos(ζ - π/4) + O(s^{-7/4})`, real form. -/
-lemma airyMod_aiReal_neg_sub :
+theorem airyMod_aiReal_neg_sub :
     (fun s : ℝ => airyAiReal (-s) - s ^ (-(1 / 4) : ℝ) / Real.sqrt π * Real.cos (airyZeta s - π / 4))
       =O[atTop] (fun s : ℝ => s ^ (-(7 / 4) : ℝ)) := by
   refine (airyMod_ai_neg_sub.norm_left.congr_left fun s => ?_).of_norm_left
@@ -3059,7 +3057,7 @@ lemma airyMod_aiReal_neg_sub :
     norm_real]
 
 /-- `Bi(-s) = -π^{-1/2} s^{-1/4} sin(ζ - π/4) + O(s^{-7/4})`, real form. -/
-lemma airyMod_biReal_neg_sub :
+theorem airyMod_biReal_neg_sub :
     (fun s : ℝ => airyBiReal (-s) + s ^ (-(1 / 4) : ℝ) / Real.sqrt π * Real.sin (airyZeta s - π / 4))
       =O[atTop] (fun s : ℝ => s ^ (-(7 / 4) : ℝ)) := by
   refine (airyMod_bi_neg_sub.norm_left.congr_left fun s => ?_).of_norm_left
@@ -3067,19 +3065,19 @@ lemma airyMod_biReal_neg_sub :
     norm_real]
 
 /-- `√(π s^{1/2} M²) = √π s^{1/4} M` for `s > 0`. -/
-lemma airyMod_sqrt_eq {s m : ℝ} (hs : 0 < s) (hm : 0 ≤ m) (a : ℝ) :
+theorem airyMod_sqrt_eq {s m : ℝ} (hs : 0 < s) (hm : 0 ≤ m) (a : ℝ) :
     Real.sqrt (π * s ^ a * m ^ 2) = Real.sqrt π * s ^ (a / 2) * m := by
   rw [Real.sqrt_mul (by positivity), Real.sqrt_mul (by positivity), Real.sqrt_sq hm,
     Real.sqrt_eq_rpow (s ^ a), ← Real.rpow_mul hs.le]
   ring_nf
 
 /-- The phase `θ(-s)` has derivative `1/(π M(-s)²)`. -/
-lemma airyMod_phase_hasDerivAt (s : ℝ) :
+theorem airyMod_phase_hasDerivAt (s : ℝ) :
     HasDerivAt (fun s => airyPhase (-s)) (1 / (π * airyModulus (-s) ^ 2)) s := by
   convert (hasDerivAt_airyPhase (-s)).comp s (hasDerivAt_neg s) using 1 <;> first | rfl | ring
 
 /-- Reciprocal expansion of `1/(π M(-s)²)` as `s → ∞`. -/
-lemma airyMod_phase_integrand (N : ℕ) :
+theorem airyMod_phase_integrand (N : ℕ) :
     (fun s => 1 / (π * airyModulus (-s) ^ 2) - ∑ k ∈ Finset.range N,
       s ^ (1 / 2 : ℝ) * (-s) ^ (-(3 * k : ℤ)) * airyReciprocalCoeff airyModulusCoeff k) =O[atTop]
       (fun s => s ^ (1 / 2 : ℝ) * (-s) ^ (-(3 * N : ℤ))) := by
@@ -3094,7 +3092,7 @@ lemma airyMod_phase_integrand (N : ℕ) :
   field_simp
 
 /-- The phase expansion at `+∞` in the variable `s = -x`, with an undetermined constant. -/
-lemma airyMod_phase_expansion_s : ∃ L, Tendsto (fun s => airyPhase (-s) - 2 / 3 * s ^ (3 / 2 : ℝ))
+theorem airyMod_phase_expansion_s : ∃ L, Tendsto (fun s => airyPhase (-s) - 2 / 3 * s ^ (3 / 2 : ℝ))
       atTop (𝓝 L) ∧
     ∀ N : ℕ, (fun s => airyPhase (-s) - L - ∑ k ∈ Finset.range N,
       2 / 3 * s ^ (3 / 2 : ℝ) * (-s) ^ (-(3 * k : ℤ)) * airyPhaseCoeff k) =O[atTop]
@@ -3105,7 +3103,7 @@ lemma airyMod_phase_expansion_s : ∃ L, Tendsto (fun s => airyPhase (-s) - 2 / 
   simpa [airyPhaseCoeff] using hN N
 
 /-- The constant in the phase expansion is `π/4`. -/
-lemma airyMod_phase_limit {L : ℝ}
+theorem airyMod_phase_limit {L : ℝ}
     (hL : Tendsto (fun s => airyPhase (-s) - 2 / 3 * s ^ (3 / 2 : ℝ)) atTop (𝓝 L)) :
     L = π / 4 := by
   have hπ := Real.pi_pos
@@ -3206,7 +3204,7 @@ lemma airyMod_phase_limit {L : ℝ}
 
 
 /-- The first coefficients of the expansion of `N²`. -/
-lemma airyMod_derivCoeff_values : airyDerivModulusCoeff 0 = 1 ∧ airyDerivModulusCoeff 1 = -(7 / 32) ∧
+theorem airyMod_derivCoeff_values : airyDerivModulusCoeff 0 = 1 ∧ airyDerivModulusCoeff 1 = -(7 / 32) ∧
     airyDerivModulusCoeff 2 < 0 := by
   obtain ⟨c0, c1, c2⟩ := airyMod_coeff_values
   refine ⟨by simp [airyDerivModulusCoeff, c0], by rw [airyDerivModulusCoeff, c1]; norm_num, ?_⟩
@@ -3216,7 +3214,7 @@ lemma airyMod_derivCoeff_values : airyDerivModulusCoeff 0 = 1 ∧ airyDerivModul
   exact div_neg_of_pos_of_neg (by positivity) this
 
 /-- Two-sided bounds for `π s^{-1/2} N(-s)²`: `1 ≤ π s^{-1/2} N(-s)² ≤ 1 + 7/(32 s³)`. -/
-lemma airyMod_derivModulus_bounds {s : ℝ} (hs : 0 < s) :
+theorem airyMod_derivModulus_bounds {s : ℝ} (hs : 0 < s) :
     1 ≤ π * s ^ (-(1 / 2) : ℝ) * airyDerivModulus (-s) ^ 2 ∧
       π * s ^ (-(1 / 2) : ℝ) * airyDerivModulus (-s) ^ 2 ≤ 1 + 7 / 32 * (s ^ 3)⁻¹ := by
   have hπ := Real.pi_pos
@@ -3260,7 +3258,7 @@ lemma airyMod_derivModulus_bounds {s : ℝ} (hs : 0 < s) :
       _ = _ := by field_simp
 
 /-- `Ai'(-s) = π^{-1/2} s^{1/4} sin(ζ - π/4) + O(s^{-5/4})`, real form. -/
-lemma airyMod_aiDerivReal_neg_sub :
+theorem airyMod_aiDerivReal_neg_sub :
     (fun s : ℝ => airyAiDerivReal (-s) - s ^ (1 / 4 : ℝ) / Real.sqrt π * Real.sin (airyZeta s - π / 4))
       =O[atTop] (fun s : ℝ => s ^ (-(5 / 4) : ℝ)) := by
   refine (airyInt_aiDeriv_neg_sub.norm_left.congr_left fun s => ?_).of_norm_left
@@ -3268,7 +3266,7 @@ lemma airyMod_aiDerivReal_neg_sub :
     norm_real]
 
 /-- `Bi'(-s) = π^{-1/2} s^{1/4} cos(ζ - π/4) + O(s^{-5/4})`, real form. -/
-lemma airyMod_biDerivReal_neg_sub :
+theorem airyMod_biDerivReal_neg_sub :
     (fun s : ℝ => airyBiDerivReal (-s) - s ^ (1 / 4 : ℝ) / Real.sqrt π * Real.cos (airyZeta s - π / 4))
       =O[atTop] (fun s : ℝ => s ^ (-(5 / 4) : ℝ)) := by
   refine (airyInt_biDeriv_neg_sub.norm_left.congr_left fun s => ?_).of_norm_left
@@ -3276,13 +3274,13 @@ lemma airyMod_biDerivReal_neg_sub :
     norm_real]
 
 /-- The derivative phase `φ(-s)` has derivative `s/(π N(-s)²)`. -/
-lemma airyMod_derivPhase_hasDerivAt (s : ℝ) :
+theorem airyMod_derivPhase_hasDerivAt (s : ℝ) :
     HasDerivAt (fun s => airyDerivPhase (-s)) (s / (π * airyDerivModulus (-s) ^ 2)) s := by
   convert (hasDerivAt_airyDerivPhase (-s)).comp s (hasDerivAt_neg s) using 1 <;>
     first | rfl | ring
 
 /-- Reciprocal expansion of `s/(π N(-s)²)` as `s → ∞`. -/
-lemma airyMod_derivPhase_integrand (N : ℕ) :
+theorem airyMod_derivPhase_integrand (N : ℕ) :
     (fun s => s / (π * airyDerivModulus (-s) ^ 2) - ∑ k ∈ Finset.range N,
       s ^ (1 / 2 : ℝ) * (-s) ^ (-(3 * k : ℤ)) * airyReciprocalCoeff airyDerivModulusCoeff k)
       =O[atTop] (fun s => s ^ (1 / 2 : ℝ) * (-s) ^ (-(3 * N : ℤ))) := by
@@ -3301,7 +3299,7 @@ lemma airyMod_derivPhase_integrand (N : ℕ) :
   rw [e, hsq]
 
 /-- The derivative-phase expansion at `+∞` in `s = -x`, with an undetermined constant. -/
-lemma airyMod_derivPhase_expansion_s : ∃ L, Tendsto (fun s => airyDerivPhase (-s) -
+theorem airyMod_derivPhase_expansion_s : ∃ L, Tendsto (fun s => airyDerivPhase (-s) -
       2 / 3 * s ^ (3 / 2 : ℝ)) atTop (𝓝 L) ∧
     ∀ N : ℕ, (fun s => airyDerivPhase (-s) - L - ∑ k ∈ Finset.range N,
       2 / 3 * s ^ (3 / 2 : ℝ) * (-s) ^ (-(3 * k : ℤ)) * airyDerivPhaseCoeff k) =O[atTop]
@@ -3312,7 +3310,7 @@ lemma airyMod_derivPhase_expansion_s : ∃ L, Tendsto (fun s => airyDerivPhase (
   simpa [airyDerivPhaseCoeff] using hN N
 
 /-- The constant in the derivative-phase expansion is `-π/4`. -/
-lemma airyMod_derivPhase_limit {L : ℝ}
+theorem airyMod_derivPhase_limit {L : ℝ}
     (hL : Tendsto (fun s => airyDerivPhase (-s) - 2 / 3 * s ^ (3 / 2 : ℝ)) atTop (𝓝 L)) :
     L = -π / 4 := by
   have hπ := Real.pi_pos

@@ -6,9 +6,9 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.Analysis.Calculus.MeanValue
-public import Mathlib.Analysis.SpecialFunctions.Exponential
 public import Mathlib.Topology.MetricSpace.Contracting
-public import Mathlib.Analysis.Asymptotics.Defs
+public import Mathlib.Analysis.Complex.Basic
+public import Mathlib.Analysis.Complex.Exponential
 
 /-!
 # Localizing zeros of holomorphic functions near approximate zeros

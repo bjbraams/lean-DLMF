@@ -1,4 +1,4 @@
-module
+module -- shake: keep-all
 
 public import DLMF.ExpIntegrals.Basic
 public import DLMF.ExpIntegrals.Continuation

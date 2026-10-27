@@ -50,41 +50,41 @@ def coef (a b : ℂ) (n k : ℕ) : ℂ :=
 def jacPoly (a b : ℂ) (n : ℕ) : ℂ[X] :=
   ∑ k ∈ Finset.range (n + 1), C (coef a b n k) * (C (1 / 2 : ℂ) * (X - C 1)) ^ k
 
-lemma eval_jacPoly {a : ℂ} (hα : -1 < a.re) (b : ℂ) (n : ℕ) (x : ℂ) :
+theorem eval_jacPoly {a : ℂ} (hα : -1 < a.re) (b : ℂ) (n : ℕ) (x : ℂ) :
     (jacPoly a b n).eval x = jacobiPolyP a b n x := by
   rw [jacobi_finite_sum hα]
   simp only [jacPoly, eval_finsetSum, eval_mul, eval_C, eval_pow, eval_sub, eval_X, coef]
   refine Finset.sum_congr rfl fun k _ => ?_
   ring
 
-lemma degree_C_mul_le' (c : ℂ) (p : ℂ[X]) : (C c * p).degree ≤ p.degree := by
+theorem degree_C_mul_le' (c : ℂ) (p : ℂ[X]) : (C c * p).degree ≤ p.degree := by
   rw [← smul_eq_C_mul]
   exact degree_smul_le c p
 
-lemma degree_term_le (c : ℂ) (k : ℕ) :
+theorem degree_term_le (c : ℂ) (k : ℕ) :
     (C c * (C (1 / 2 : ℂ) * (X - C 1)) ^ k).degree ≤ (k : WithBot ℕ) := by
   refine (degree_C_mul_le' _ _).trans ?_
   rw [degree_pow, degree_C_mul (by norm_num), degree_X_sub_C]
   simp
 
-lemma jacPoly_eq (a b : ℂ) (n : ℕ) :
+theorem jacPoly_eq (a b : ℂ) (n : ℕ) :
     jacPoly a b n = (∑ k ∈ Finset.range n, C (coef a b n k) * (C (1 / 2 : ℂ) * (X - C 1)) ^ k) +
       C (coef a b n n * (1 / 2) ^ n) * (X - C 1) ^ n := by
   rw [jacPoly, Finset.sum_range_succ, mul_pow, ← C_pow, ← mul_assoc, ← C_mul]
 
-lemma lower_degree_lt (a b : ℂ) (n : ℕ) :
+theorem lower_degree_lt (a b : ℂ) (n : ℕ) :
     (∑ k ∈ Finset.range n, C (coef a b n k) * (C (1 / 2 : ℂ) * (X - C 1)) ^ k).degree <
       (n : WithBot ℕ) := by
   refine lt_of_le_of_lt (degree_sum_le _ _) ?_
   exact (Finset.sup_lt_iff (WithBot.bot_lt_coe n)).2 fun k hk =>
     lt_of_le_of_lt (degree_term_le _ k) (WithBot.coe_lt_coe.mpr (Finset.mem_range.mp hk))
 
-lemma degree_top (c : ℂ) (hc : c ≠ 0) (n : ℕ) :
+theorem degree_top (c : ℂ) (hc : c ≠ 0) (n : ℕ) :
     (C c * (X - C (1 : ℂ)) ^ n).degree = (n : WithBot ℕ) := by
   rw [degree_C_mul hc, degree_pow, degree_X_sub_C]
   simp
 
-lemma jacPoly_natDegree_lc (a b : ℂ) (n : ℕ) (hc : coef a b n n ≠ 0) :
+theorem jacPoly_natDegree_lc (a b : ℂ) (n : ℕ) (hc : coef a b n n ≠ 0) :
     (jacPoly a b n).natDegree = n ∧
       (jacPoly a b n).leadingCoeff = coef a b n n * (1 / 2) ^ n := by
   have hc' : coef a b n n * (1 / 2 : ℂ) ^ n ≠ 0 := mul_ne_zero hc (by norm_num)
@@ -103,19 +103,19 @@ lemma jacPoly_natDegree_lc (a b : ℂ) (n : ℕ) (hc : coef a b n n ≠ 0) :
 
 
 
-lemma eval_eq_lc_mul_prod_roots (p : ℂ[X]) (x : ℂ) :
+theorem eval_eq_lc_mul_prod_roots (p : ℂ[X]) (x : ℂ) :
     p.eval x = p.leadingCoeff * (p.roots.map fun r => x - r).prod := by
   conv_lhs => rw [← C_leadingCoeff_mul_prod_multiset_X_sub_C
     (IsAlgClosed.card_roots_eq_natDegree (k := ℂ) (p := p))]
   rw [eval_mul, eval_C, eval_multiset_prod, Multiset.map_map]
   simp
 
-lemma prod_map_const_mul {s : Multiset ℂ} (c : ℂ) (f : ℂ → ℂ) :
+theorem prod_map_const_mul {s : Multiset ℂ} (c : ℂ) (f : ℂ → ℂ) :
     (s.map fun x => c * f x).prod = c ^ Multiset.card s * (s.map f).prod := by
   rw [Multiset.prod_map_mul, Multiset.map_const', Multiset.prod_replicate]
 
 /-- Swapping the two polynomials in a resultant-type product over roots. -/
-lemma lc_pow_mul_prod_roots_eval (p q : ℂ[X]) :
+theorem lc_pow_mul_prod_roots_eval (p q : ℂ[X]) :
     p.leadingCoeff ^ q.natDegree * (p.roots.map fun x => q.eval x).prod =
       (-1) ^ (p.natDegree * q.natDegree) * q.leadingCoeff ^ p.natDegree *
         (q.roots.map fun y => p.eval y).prod := by
@@ -142,7 +142,7 @@ lemma lc_pow_mul_prod_roots_eval (p q : ℂ[X]) :
 
 
 
-lemma prod_range_prod_range_ite_lt (c : ℂ) (N : ℕ) :
+theorem prod_range_prod_range_ite_lt (c : ℂ) (N : ℕ) :
     ∏ i ∈ range N, ∏ j ∈ range N, (if i < j then c else 1) = c ^ N.choose 2 := by
   induction N with
   | zero => simp
@@ -161,7 +161,7 @@ lemma prod_range_prod_range_ite_lt (c : ℂ) (N : ℕ) :
       Nat.choose_succ_succ', Nat.choose_one_right, mul_one, ← pow_add, add_comm]
 
 /-- Products over ordered pairs of distinct indices, against squares over `i < j`. -/
-lemma prod_prod_erase_sub {N : ℕ} (v : Fin N → ℂ) :
+theorem prod_prod_erase_sub {N : ℕ} (v : Fin N → ℂ) :
     ∏ i, ∏ j ∈ univ.erase i, (v i - v j) =
       (-1) ^ N.choose 2 * ∏ i, ∏ j, (if i.val < j.val then (v i - v j) ^ 2 else 1) := by
   have hsplit : ∀ i, ∏ j ∈ univ.erase i, (v i - v j) =
@@ -194,7 +194,7 @@ lemma prod_prod_erase_sub {N : ℕ} (v : Fin N → ℂ) :
 
 
 /-- The algebraic induction step for the closed form of the discriminant. -/
-lemma disc_step_algebra (n : ℕ) {K K2 S0 S1 u1 v1 c1 u2 v2 c2 d e n2 pa1 pb1 f1 σ1 : ℂ}
+theorem disc_step_algebra (n : ℕ) {K K2 S0 S1 u1 v1 c1 u2 v2 c2 d e n2 pa1 pb1 f1 σ1 : ℂ}
     (hK : K ≠ 0) (hd : d ≠ 0) (hc2 : c2 ≠ 0) (hn2 : n2 ≠ 0) (he : e ≠ 0) (hc1 : c1 ≠ 0)
     (hu1 : u1 ≠ 0) (hv1 : v1 ≠ 0) (hu2 : u2 ≠ 0) (hv2 : v2 ≠ 0) (hpa : pa1 ≠ 0)
     (hpb : pb1 ≠ 0) (hf : f1 ≠ 0)
@@ -226,15 +226,15 @@ section Jacobi
 
 variable {α β : ℝ}
 
-lemma ne_zero_of_re_pos {z : ℂ} (h : 0 < z.re) : z ≠ 0 := fun h0 => by simp [h0] at h
+theorem ne_zero_of_re_pos {z : ℂ} (h : 0 < z.re) : z ≠ 0 := fun h0 => by simp [h0] at h
 
 /-- The leading coefficient of `P_n^{(α,β)}`. -/
 def kk (a b : ℂ) (n : ℕ) : ℂ := coef a b n n * (1 / 2) ^ n
 
-lemma coef_diag (a b : ℂ) (n : ℕ) : coef a b n n = poch (n + a + b + 1) n / n ! := by
+theorem coef_diag (a b : ℂ) (n : ℕ) : coef a b n n = poch (n + a + b + 1) n / n ! := by
   simp [coef, poch_zero]
 
-lemma kk_ne_zero (hα : -1 < α) (hβ : -1 < β) (n : ℕ) : kk α β n ≠ 0 := by
+theorem kk_ne_zero (hα : -1 < α) (hβ : -1 < β) (n : ℕ) : kk α β n ≠ 0 := by
   refine mul_ne_zero ?_ (by norm_num)
   rw [coef_diag]
   refine div_ne_zero ?_ (by exact_mod_cast n.factorial_ne_zero)
@@ -245,24 +245,24 @@ lemma kk_ne_zero (hα : -1 < α) (hβ : -1 < β) (n : ℕ) : kk α β n ≠ 0 :=
   push_cast
   linarith
 
-lemma coef_diag_ne_zero (hα : -1 < α) (hβ : -1 < β) (n : ℕ) : coef α β n n ≠ 0 :=
+theorem coef_diag_ne_zero (hα : -1 < α) (hβ : -1 < β) (n : ℕ) : coef α β n n ≠ 0 :=
   left_ne_zero_of_mul (kk_ne_zero hα hβ n)
 
-lemma natDegree_jacPoly (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
+theorem natDegree_jacPoly (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
     (jacPoly α β n).natDegree = n :=
   (jacPoly_natDegree_lc α β n (coef_diag_ne_zero hα hβ n)).1
 
-lemma leadingCoeff_jacPoly (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
+theorem leadingCoeff_jacPoly (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
     (jacPoly α β n).leadingCoeff = kk α β n :=
   (jacPoly_natDegree_lc α β n (coef_diag_ne_zero hα hβ n)).2
 
-lemma jacPoly_ne_zero (hα : -1 < α) (hβ : -1 < β) (n : ℕ) : jacPoly α β n ≠ 0 := by
+theorem jacPoly_ne_zero (hα : -1 < α) (hβ : -1 < β) (n : ℕ) : jacPoly α β n ≠ 0 := by
   intro h
   have := leadingCoeff_jacPoly hα hβ n
   rw [h, leadingCoeff_zero] at this
   exact kk_ne_zero hα hβ n this.symm
 
-lemma kk_succ (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
+theorem kk_succ (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
     kk α β (n + 2) = kk α β (n + 1) *
       ((2 * n + α + β + 3) * (2 * ((n + 1 : ℕ) : ℂ) + α + β + 2) /
         (2 * ((n + 1 + 1 : ℕ) : ℂ) * (n + α + β + 2))) := by
@@ -296,7 +296,7 @@ def recA (a b : ℂ) (n : ℕ) : ℂ :=
   ((n : ℂ) + a + 1) * ((n : ℂ) + b + 1) * (2 * ((n + 1 : ℕ) : ℂ) + a + b + 2) /
     (((n + 1 + 1 : ℕ) : ℂ) * ((n : ℂ) + a + b + 2) * (2 * (n : ℂ) + a + b + 2))
 
-lemma eval_jacPoly_two_of_root (hα : -1 < α) (hβ : -1 < β) (n : ℕ) {y : ℂ}
+theorem eval_jacPoly_two_of_root (hα : -1 < α) (hβ : -1 < β) (n : ℕ) {y : ℂ}
     (hy : (jacPoly α β (n + 1)).eval y = 0) :
     (jacPoly α β (n + 2)).eval y = -recA α β n * (jacPoly α β n).eval y := by
   have hα' : -1 < (α : ℂ).re := by simpa using hα
@@ -326,12 +326,12 @@ lemma eval_jacPoly_two_of_root (hα : -1 < α) (hβ : -1 < β) (n : ℕ) {y : �
 def SS (a b : ℂ) (n : ℕ) : ℂ :=
   ((jacPoly a b (n + 1)).roots.map fun x => (jacPoly a b n).eval x).prod
 
-lemma SS_zero (a b : ℂ) : SS a b 0 = 1 := by
+theorem SS_zero (a b : ℂ) : SS a b 0 = 1 := by
   have : ∀ x, (jacPoly a b 0).eval x = 1 := by
     intro x; simp [jacPoly, coef, poch_zero]
   simp [SS, this]
 
-lemma SS_succ (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
+theorem SS_succ (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
     kk α β (n + 2) ^ (n + 1) * SS α β (n + 1) =
       kk α β (n + 1) ^ (n + 2) * ((-1) ^ (n + 1) * recA α β n ^ (n + 1)) * SS α β n := by
   have h := lc_pow_mul_prod_roots_eval (jacPoly α β (n + 2)) (jacPoly α β (n + 1))
@@ -368,7 +368,7 @@ def ratioR (a b : ℂ) (n : ℕ) : ℂ :=
     (((n + 1 : ℕ) : ℂ) + b + 1) ^ (n + 1) * ((n : ℂ) + a + b + 2) ^ n /
     ((2 * (n : ℂ) + a + b + 3) ^ (2 * n + 1) * (2 * ((n + 1 : ℕ) : ℂ) + a + b + 2) ^ (2 * n + 2))
 
-lemma Fr_succ (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
+theorem Fr_succ (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
     Fr α β (n + 2) = Fr α β (n + 1) * ratioR α β n := by
   have hn : (0 : ℝ) ≤ n := Nat.cast_nonneg n
   set g : ℕ → ℂ := fun i => ((n : ℂ) + i + 2 + α + β) ^ (n + i) with hg
@@ -424,7 +424,7 @@ def EE (a b : ℂ) (n : ℕ) : ℂ :=
     ((2 * (n : ℂ) + a + b + 2) ^ (n + 1) * poch (a + 1) (n + 1) * poch (b + 1) (n + 1) *
       kk a b (n + 1) ^ (n + 1))
 
-lemma EE_succ (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
+theorem EE_succ (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
     EE α β (n + 1) = EE α β n * ratioR α β n := by
   have hn : (0 : ℝ) ≤ n := Nat.cast_nonneg n
   have h := disc_step_algebra n (K := kk α β (n + 1)) (K2 := kk α β (n + 2))
@@ -457,7 +457,7 @@ lemma EE_succ (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
   rw [hσ, hpa, hpb, hf]
   exact h
 
-lemma EE_zero (hα : -1 < α) (hβ : -1 < β) : EE α β 0 = 1 := by
+theorem EE_zero (hα : -1 < α) (hβ : -1 < β) : EE α β 0 = 1 := by
   have hk : kk α β 1 = ((α : ℂ) + β + 2) / 2 := by
     simp [kk, coef_diag, poch_one]; ring
   have h1 : (α : ℂ) + 1 ≠ 0 := ne_zero_of_re_pos (by simp; linarith)
@@ -467,7 +467,7 @@ lemma EE_zero (hα : -1 < α) (hβ : -1 < β) : EE α β 0 = 1 := by
   norm_num [poch_one]
   field_simp
 
-lemma EE_eq_Fr (hα : -1 < α) (hβ : -1 < β) (n : ℕ) : EE α β n = Fr α β (n + 1) := by
+theorem EE_eq_Fr (hα : -1 < α) (hβ : -1 < β) (n : ℕ) : EE α β n = Fr α β (n + 1) := by
   induction n with
   | zero => rw [EE_zero hα hβ]; simp [Fr]
   | succ n ih => rw [EE_succ hα hβ, ih, Fr_succ hα hβ]
@@ -477,7 +477,7 @@ section Main
 
 variable {α β : ℝ}
 
-lemma roots_jacPoly_eq (hα : -1 < α) (hβ : -1 < β) {n : ℕ} (x : Fin n → ℝ)
+theorem roots_jacPoly_eq (hα : -1 < α) (hβ : -1 < β) {n : ℕ} (x : Fin n → ℝ)
     (hroot : ∀ i, jacobiPolyP α β n (x i) = 0) (hinj : Function.Injective x) :
     (jacPoly α β n).roots = (univ.val.map fun i => (x i : ℂ)) := by
   have hα' : -1 < (α : ℂ).re := by simpa using hα
@@ -494,7 +494,7 @@ lemma roots_jacPoly_eq (hα : -1 < α) (hβ : -1 < β) {n : ℕ} (x : Fin n → 
   rw [IsAlgClosed.card_roots_eq_natDegree, natDegree_jacPoly hα hβ, Multiset.card_map,
     card_val, card_univ, Fintype.card_fin]
 
-lemma jacPoly_eq_nodal (hα : -1 < α) (hβ : -1 < β) {n : ℕ} (x : Fin n → ℝ)
+theorem jacPoly_eq_nodal (hα : -1 < α) (hβ : -1 < β) {n : ℕ} (x : Fin n → ℝ)
     (hroot : ∀ i, jacobiPolyP α β n (x i) = 0) (hinj : Function.Injective x) :
     jacPoly α β n = C (kk α β n) * Lagrange.nodal univ fun i => (x i : ℂ) := by
   conv_lhs => rw [← C_leadingCoeff_mul_prod_multiset_X_sub_C
@@ -502,7 +502,7 @@ lemma jacPoly_eq_nodal (hα : -1 < α) (hβ : -1 < β) {n : ℕ} (x : Fin n → 
   rw [leadingCoeff_jacPoly hα hβ, roots_jacPoly_eq hα hβ x hroot hinj, Multiset.map_map]
   rfl
 
-lemma disc_eq_EE (hα : -1 < α) (hβ : -1 < β) (m : ℕ) (x : Fin (m + 1) → ℝ)
+theorem disc_eq_EE (hα : -1 < α) (hβ : -1 < β) (m : ℕ) (x : Fin (m + 1) → ℝ)
     (hroot : ∀ i, jacobiPolyP α β (m + 1) (x i) = 0) (hinj : Function.Injective x) :
     (∏ i : Fin (m + 1), ∏ j : Fin (m + 1),
       if i.val < j.val then ((x i - x j : ℝ) : ℂ) ^ 2 else 1) = EE α β m := by

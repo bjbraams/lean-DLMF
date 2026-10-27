@@ -5,12 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.SpecialFunctions.Bessel
-public import Mathlib.Analysis.SpecialFunctions.Pow.Real
-public import Mathlib.Analysis.Calculus.Deriv.Basic
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
-public import Mathlib.Data.Set.Card
-public import Mathlib.Tactic
 public import DLMF.Bessel.Basic
 public import DLMF.Core.Framework
 
@@ -55,13 +49,17 @@ the radial functions `S^{m(j)}_n` and Flammer's functions of 30.1.1) are in
   `spheroidalSpectrum m γ2` is the set of real `λ` for which the transformed equation
   `(1-z²)g'' - 2(m+1)zg' + (λ - m(m+1) + γ²(1-z²))g = 0` has a nonzero entire solution, and
   `spheroidalEigenvalue n m γ2` is the element of the spectrum with exactly `n - m` smaller
-  elements (junk `0` if there is none). The admitted theorem `exists_spheroidalEigenvalue`
-  (Sturm–Liouville theory) asserts that it exists; the ordering 30.3.1 is then proved.
+  elements (junk `0` if there is none). The theorem `exists_spheroidalEigenvalue` (in
+  `DLMF.Spheroidal.Existence`, proved via `DLMF.Spheroidal.P3lSpectrum` by a Frobenius
+  solution at `z = 1` and Sturm oscillation)
+  asserts that it exists; the ordering 30.3.1 is then proved.
 * **Eigenfunctions (choice flagged).** `spheroidalPsFactor n m γ2` is the entire function `g`
   with the eigenvalue `λ^m_n(γ²)`, real on `ℝ`, with `∫_{-1}^1 (1-x²)^m g(x)² dx` given by
   30.4.1 and the sign of `g(0)` (`n - m` even) or `g'(0)` (`n - m` odd) of §30.4(i); it is
-  defined by choice, with existence and uniqueness admitted in
-  `existsUnique_isSpheroidalPsFactor` (simplicity of the eigenvalues). Since
+  defined by choice, with existence and uniqueness proved in
+  `existsUnique_isSpheroidalPsFactor` (`DLMF.Spheroidal.Existence`; simplicity and parity of the
+  eigenvalues,
+  `DLMF.Spheroidal.P3lParity`). Since
   `(1 - x²)^{m/2}` has derivative `0` at `x = 0`, the signs of `g(0)`, `g'(0)` are those of
   `𝖯s(0)`, `𝖯s'(0)`.
 * `𝑃s^m_n(z, γ²) = (-1)^m (z-1)^{m/2} (z+1)^{m/2} g(z)` with principal powers: this is real on
@@ -76,10 +74,6 @@ open Complex Set Filter
 open scoped Topology Real Classical
 
 namespace DLMF.Spheroidal
-
-/-- `dif_pos` without the deprecation. -/
-private theorem s30_dif_pos {c : Prop} [Decidable c] (h : c) {α : Sort*} {t : c → α}
-    {e : ¬c → α} : dite c t e = t h := by simp [h]
 
 /-! ### The spheroidal differential equation (§30.2) -/
 
@@ -174,30 +168,11 @@ def spheroidalSpectrum (m : ℕ) (γ2 : ℝ) : Set ℝ :=
 
 /-- **The eigenvalue** `λ^m_n(γ²)` (DLMF §30.3(i), 30.3.1), for real `γ²` and `n ≥ m`: the element
 of `spheroidalSpectrum m γ2` with exactly `n - m` smaller elements (junk `0` if there is none;
-the admitted `exists_spheroidalEigenvalue` asserts existence for `m ≤ n`). -/
+`exists_spheroidalEigenvalue` proves existence for `m ≤ n`). -/
 @[dlmf 30.3.i]
 def spheroidalEigenvalue (n m : ℕ) (γ2 : ℝ) : ℝ :=
   if h : ∃ lam ∈ spheroidalSpectrum m γ2,
       (spheroidalSpectrum m γ2 ∩ Iio lam).encard = ((n - m : ℕ) : ℕ∞) then h.choose else 0
-
-/-- **Existence of the eigenvalues** (DLMF §30.3(i)): for `m ≤ n` the spectrum has an element with
-exactly `n - m` smaller elements. Flagged existence theorem (admitted): the spectrum of the
-singular Sturm–Liouville problem on `(-1, 1)` is an unbounded increasing sequence of simple
-eigenvalues. -/
-@[dlmf 30.3.i]
-theorem exists_spheroidalEigenvalue {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
-    ∃ lam ∈ spheroidalSpectrum m γ2,
-      (spheroidalSpectrum m γ2 ∩ Iio lam).encard = ((n - m : ℕ) : ℕ∞) := by
-  sorry
-
-/-- The defining property of `λ^m_n(γ²)` (DLMF §30.3(i)), from `exists_spheroidalEigenvalue`. -/
-theorem spheroidalEigenvalue_spec {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
-    spheroidalEigenvalue n m γ2 ∈ spheroidalSpectrum m γ2 ∧
-      (spheroidalSpectrum m γ2 ∩ Iio (spheroidalEigenvalue n m γ2)).encard =
-        ((n - m : ℕ) : ℕ∞) := by
-  have h := exists_spheroidalEigenvalue hmn γ2
-  simp only [spheroidalEigenvalue, s30_dif_pos h]
-  exact h.choose_spec
 
 /-! ### Functions of the first kind (§30.4, §30.6) -/
 
@@ -219,25 +194,11 @@ structure IsSpheroidalPsFactor (n m : ℕ) (γ2 : ℝ) (g : ℂ → ℂ) : Prop 
   /-- The sign of `𝖯s'(0)` for `n - m` odd. -/
   sign_odd : Odd (n - m) → 0 < (-1 : ℝ) ^ ((n + m - 1) / 2) * (deriv g 0).re
 
-/-- **Existence and uniqueness of the normalized eigenfunction** (DLMF §30.4(i)). Flagged
-existence theorem (admitted): the eigenvalues are simple, the eigenfunction can be taken real,
-and an even (odd) nonzero solution has `g(0) ≠ 0` (`g'(0) ≠ 0`). -/
-@[dlmf 30.4.i]
-theorem existsUnique_isSpheroidalPsFactor {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
-    ∃! g, IsSpheroidalPsFactor n m γ2 g := by
-  sorry
 
 /-- The entire factor `g` of `𝖯s^m_n(x, γ²) = (1-x²)^{m/2} g(x)` (DLMF §30.3(i), §30.4(i)),
 defined by choice (junk `0` if it did not exist). -/
 def spheroidalPsFactor (n m : ℕ) (γ2 : ℝ) : ℂ → ℂ :=
   if h : ∃ g, IsSpheroidalPsFactor n m γ2 g then h.choose else 0
-
-/-- The defining property of `spheroidalPsFactor`, from `existsUnique_isSpheroidalPsFactor`. -/
-theorem spheroidalPsFactor_spec {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
-    IsSpheroidalPsFactor n m γ2 (spheroidalPsFactor n m γ2) := by
-  have h := (existsUnique_isSpheroidalPsFactor hmn γ2).exists
-  simp only [spheroidalPsFactor, s30_dif_pos h]
-  exact h.choose_spec
 
 /-- **The spheroidal wave function of the first kind** `𝖯s^m_n(x, γ²)` (DLMF §30.4(i)):
 `(1-x²)^{m/2} g(x)` with `g = spheroidalPsFactor n m γ2`; meaningful for `-1 ≤ x ≤ 1`. Prolate

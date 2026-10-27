@@ -5,12 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.Complex.CauchyIntegral
 public import Mathlib.Analysis.Complex.RemovableSingularity
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
-public import Mathlib.Analysis.Calculus.ParametricIntervalIntegral
-public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
-public import Mathlib.Analysis.Calculus.MeanValue
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
 public import DLMFMathlib.Analysis.Asymptotics.WatsonSector
 
@@ -92,19 +88,19 @@ def struveLO_I (r : ℝ) (g : ℂ → ℂ) (m : ℕ) (lam : ℂ) : ℂ :=
   ∮ t in C(0, r), g t * ((t + lam * sinh t) ^ m)⁻¹
 
 /-- `sinh t = t · σ(t)` with the entire slope `σ = dslope sinh 0`. -/
-lemma struveLO_sinh_eq (t : ℂ) : sinh t = t * dslope sinh 0 t := by
+theorem struveLO_sinh_eq (t : ℂ) : sinh t = t * dslope sinh 0 t := by
   have h := sub_smul_dslope sinh 0 t
   simp only [sub_zero, smul_eq_mul, sinh_zero] at h
   exact h.symm
 
 /-- The slope `σ = dslope sinh 0` is entire. -/
-lemma struveLO_differentiable_dslope : Differentiable ℂ (dslope sinh 0) := by
+theorem struveLO_differentiable_dslope : Differentiable ℂ (dslope sinh 0) := by
   intro t
   exact ((differentiableOn_dslope (s := univ) univ_mem).2
     differentiable_sinh.differentiableOn t (mem_univ _)).differentiableAt univ_mem
 
 /-- `σ(0) = 1`. -/
-lemma struveLO_dslope_zero : dslope sinh 0 0 = 1 := by
+theorem struveLO_dslope_zero : dslope sinh 0 0 = 1 := by
   rw [dslope_same, Complex.deriv_sinh, cosh_zero]
 
 /-- The good-set condition: on the closed disc `|λ - λ₀| ≤ ε` and `|t| ≤ r` the factor
@@ -113,7 +109,7 @@ def struveLO_Good (r ε : ℝ) (lam₀ : ℂ) : Prop :=
   ∀ lam ∈ closedBall lam₀ ε, ∀ t ∈ closedBall (0 : ℂ) r, 1 + lam * dslope sinh 0 t ≠ 0
 
 /-- For `1 + λ₀ ≠ 0` a good disc pair exists. -/
-lemma struveLO_good_exists {lam₀ : ℂ} (h : 1 + lam₀ ≠ 0) :
+theorem struveLO_good_exists {lam₀ : ℂ} (h : 1 + lam₀ ≠ 0) :
     ∃ r > 0, ∃ ε > 0, struveLO_Good r ε lam₀ := by
   set m := ‖1 + lam₀‖ with hm
   have hm0 : 0 < m := norm_pos_iff.2 h
@@ -143,7 +139,7 @@ lemma struveLO_good_exists {lam₀ : ℂ} (h : 1 + lam₀ ≠ 0) :
   linarith
 
 /-- On a good disc pair the denominator `t + λ sinh t` does not vanish for `0 < |t| ≤ r`. -/
-lemma struveLO_u_ne {r ε : ℝ} {lam₀ : ℂ} (hG : struveLO_Good r ε lam₀) {lam : ℂ}
+theorem struveLO_u_ne {r ε : ℝ} {lam₀ : ℂ} (hG : struveLO_Good r ε lam₀) {lam : ℂ}
     (hlam : lam ∈ closedBall lam₀ ε) {t : ℂ} (ht : t ∈ closedBall (0 : ℂ) r) (ht0 : t ≠ 0) :
     t + lam * sinh t ≠ 0 := by
   rw [struveLO_sinh_eq, show t + lam * (t * dslope sinh 0 t) = t * (1 + lam * dslope sinh 0 t) by
@@ -151,12 +147,12 @@ lemma struveLO_u_ne {r ε : ℝ} {lam₀ : ℂ} (hG : struveLO_Good r ε lam₀)
   exact mul_ne_zero ht0 (hG lam hlam t ht)
 
 /-- Points of the circle `|t| = r`, `r > 0`, as values of `circleMap`. -/
-lemma struveLO_circleMap_mem {r : ℝ} (hr : 0 < r) (θ : ℝ) :
+theorem struveLO_circleMap_mem {r : ℝ} (hr : 0 < r) (θ : ℝ) :
     circleMap 0 r θ ∈ closedBall (0 : ℂ) r ∧ circleMap 0 r θ ≠ 0 :=
   ⟨sphere_subset_closedBall (circleMap_mem_sphere 0 hr.le θ), circleMap_ne_center hr.ne'⟩
 
 /-- Derivative of `c (a + w b)^{-m}` in `w`. -/
-lemma struveLO_hasDerivAt_recip_pow (a b c : ℂ) (m : ℕ) {w : ℂ} (h : a + w * b ≠ 0) :
+theorem struveLO_hasDerivAt_recip_pow (a b c : ℂ) (m : ℕ) {w : ℂ} (h : a + w * b ≠ 0) :
     HasDerivAt (fun w => c * ((a + w * b) ^ m)⁻¹)
       (-(m : ℂ) * (c * b * ((a + w * b) ^ (m + 1))⁻¹)) w := by
   have hu : HasDerivAt (fun w => a + w * b) b w := by
@@ -171,7 +167,7 @@ lemma struveLO_hasDerivAt_recip_pow (a b c : ℂ) (m : ℕ) {w : ℂ} (h : a + w
     ring
 
 /-- Continuity of the circle integrands on a good disc. -/
-lemma struveLO_continuousOn {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : struveLO_Good r ε lam₀)
+theorem struveLO_continuousOn {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : struveLO_Good r ε lam₀)
     {g : ℂ → ℂ} (hg : Continuous g) (m : ℕ) :
     ContinuousOn (fun p : ℂ × ℝ => g (circleMap 0 r p.2) *
       ((circleMap 0 r p.2 + p.1 * sinh (circleMap 0 r p.2)) ^ m)⁻¹) (closedBall lam₀ ε ×ˢ univ) := by
@@ -203,7 +199,7 @@ theorem struveLO_hasDerivAt_I {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : str
 /-- The exact-derivative identity behind the recurrence: with `u = t + λ sinh t`,
 `λ² n(n+1) sinh² t u^{-n-2} - λ n sinh t u^{-n-1} - (1-λ²) n(n+1) u^{-n-2}` is the
 `t`-derivative of `-n (λ cosh t - 1) u^{-n-1}`. -/
-lemma struveLO_hasDerivAt_exact (lam : ℂ) (n : ℕ) {t : ℂ} (h : t + lam * sinh t ≠ 0) :
+theorem struveLO_hasDerivAt_exact (lam : ℂ) (n : ℕ) {t : ℂ} (h : t + lam * sinh t ≠ 0) :
     HasDerivAt (fun t => -(n : ℂ) * (lam * cosh t - 1) * ((t + lam * sinh t) ^ (n + 1))⁻¹)
       (lam ^ 2 * (n * (n + 1)) * (1 * sinh t * sinh t * ((t + lam * sinh t) ^ (n + 1 + 1))⁻¹) -
         lam * n * (1 * sinh t * ((t + lam * sinh t) ^ (n + 1))⁻¹) -
@@ -220,7 +216,7 @@ lemma struveLO_hasDerivAt_exact (lam : ℂ) (n : ℕ) {t : ℂ} (h : t + lam * s
   linear_combination (-(n : ℂ) * (n + 1) * (t + lam * sinh t)⁻¹ ^ (n + 2) * lam ^ 2) * cosh_sq t
 
 /-- Circle integrability of the integrands on a good disc. -/
-lemma struveLO_circleIntegrable {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : struveLO_Good r ε lam₀)
+theorem struveLO_circleIntegrable {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : struveLO_Good r ε lam₀)
     {g : ℂ → ℂ} (hg : Continuous g) (m : ℕ) {lam : ℂ} (hlam : lam ∈ closedBall lam₀ ε) (c : ℂ) :
     CircleIntegrable (fun t => c * (g t * ((t + lam * sinh t) ^ m)⁻¹)) 0 r := by
   refine ContinuousOn.circleIntegrable hr.le (continuousOn_const.mul (hg.continuousOn.mul
@@ -277,7 +273,7 @@ def struveLO_R (a : ℂ) (N : ℕ) (u : ℝ) : ℂ :=
   (1 + (u : ℂ)) ^ a - ∑ j ∈ Finset.range N, struveLO_b a j * (u : ℂ) ^ j
 
 /-- `(j+1) (a choose j+1) = a (a-1 choose j)`. -/
-lemma struveLO_succ_mul_b (a : ℂ) (j : ℕ) :
+theorem struveLO_succ_mul_b (a : ℂ) (j : ℕ) :
     ((j + 1 : ℕ) : ℂ) * struveLO_b a (j + 1) = a * struveLO_b (a - 1) j := by
   unfold struveLO_b
   rw [Finset.prod_range_succ', Nat.factorial_succ]
@@ -290,7 +286,7 @@ lemma struveLO_succ_mul_b (a : ℂ) (j : ℕ) :
   ring
 
 /-- Derivative of the binomial remainder in `u`. -/
-lemma struveLO_hasDerivAt_R (a : ℂ) (N : ℕ) {u : ℝ} (hu : -1 < u) :
+theorem struveLO_hasDerivAt_R (a : ℂ) (N : ℕ) {u : ℝ} (hu : -1 < u) :
     HasDerivAt (struveLO_R a (N + 1)) (a * struveLO_R (a - 1) N u) u := by
   have hpos : (0 : ℝ) < 1 + u := by linarith
   have h1 : HasDerivAt (fun x : ℝ => (1 + (x : ℂ)) ^ a) (a * (1 + (u : ℂ)) ^ (a - 1)) u := by
@@ -318,7 +314,7 @@ lemma struveLO_hasDerivAt_R (a : ℂ) (N : ℕ) {u : ℝ} (hu : -1 < u) :
   exact Finset.sum_congr rfl fun j _ => by ring
 
 /-- The remainder after at least one term vanishes at `0`. -/
-lemma struveLO_R_succ_zero (a : ℂ) (N : ℕ) : struveLO_R a (N + 1) 0 = 0 := by
+theorem struveLO_R_succ_zero (a : ℂ) (N : ℕ) : struveLO_R a (N + 1) 0 = 0 := by
   simp [struveLO_R, Finset.sum_range_succ', struveLO_b]
 
 /-- Bound for the binomial remainder: for `N ≤ re a` and `u > -1`,
@@ -382,14 +378,14 @@ theorem struveLO_norm_R_le : ∀ (N : ℕ) (a : ℂ), (N : ℝ) ≤ a.re → ∀
 /-! ### The Laplace integral of `𝐊_ν` with a binomial expansion -/
 
 /-- `1 + t² ≤ e^t` for `t ≥ 0`. -/
-lemma struveLO_one_add_sq_le_exp {t : ℝ} (ht : 0 ≤ t) : 1 + t ^ 2 ≤ Real.exp t := by
+theorem struveLO_one_add_sq_le_exp {t : ℝ} (ht : 0 ≤ t) : 1 + t ^ 2 ≤ Real.exp t := by
   have h := Real.sum_le_exp_of_nonneg ht 4
   simp only [Finset.sum_range_succ, Finset.sum_range_zero, Nat.factorial] at h
   norm_num at h
   nlinarith [sq_nonneg (t - 3 / 2), sq_nonneg t, mul_nonneg ht (sq_nonneg (t - 3/2))]
 
 /-- Laplace transform of an even power: `∫₀^∞ e^{-zt} t^{n} dt = n!/z^{n+1}` for `re z > 0`. -/
-lemma struveLO_integral_exp_mul_pow (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
+theorem struveLO_integral_exp_mul_pow (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
     ∫ t in Ioi (0 : ℝ), exp (-z * t) * (t : ℂ) ^ n = (n.factorial : ℂ) / z ^ (n + 1) := by
   have h := integral_cpow_mul_cexp_neg_mul_Ioi (s := (n : ℂ) + 1) (by simp; positivity) hz
   have hG : Gamma ((n : ℂ) + 1) = n.factorial := Complex.Gamma_nat_eq_factorial n
@@ -400,7 +396,7 @@ lemma struveLO_integral_exp_mul_pow (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
   ring_nf
 
 /-- Integrability of `e^{-zt} t^n` on `(0, ∞)` for `re z > 0`. -/
-lemma struveLO_integrableOn_exp_mul_pow (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
+theorem struveLO_integrableOn_exp_mul_pow (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
     IntegrableOn (fun t : ℝ => exp (-z * t) * (t : ℂ) ^ n) (Ioi 0) := by
   have hb := integrableOn_exp_neg_mul_mul_rpow_sub_one (s := (n : ℝ) + 1) (by positivity) hz
   refine hb.mono' (by fun_prop) ((ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall
@@ -491,21 +487,21 @@ theorem struveLO_K_integral_bound (N : ℕ) {z a : ℂ} (ha : (N : ℝ) ≤ a.re
 /-! ### The integral of `𝐌_ν` with a binomial expansion -/
 
 /-- `x^m/m! ≤ e^x` for `x ≥ 0`. -/
-lemma struveLO_pow_div_factorial_le_exp {x : ℝ} (hx : 0 ≤ x) (m : ℕ) :
+theorem struveLO_pow_div_factorial_le_exp {x : ℝ} (hx : 0 ≤ x) (m : ℕ) :
     x ^ m / m.factorial ≤ Real.exp x := by
   refine le_trans ?_ (Real.sum_le_exp_of_nonneg hx (m + 1))
   exact Finset.single_le_sum (f := fun i => x ^ i / i.factorial)
     (fun i _ => by positivity) (Finset.self_mem_range_succ m)
 
 /-- `e^{-y} ≤ m!/y^m` for `y > 0`. -/
-lemma struveLO_exp_neg_le {y : ℝ} (hy : 0 < y) (m : ℕ) :
+theorem struveLO_exp_neg_le {y : ℝ} (hy : 0 < y) (m : ℕ) :
     Real.exp (-y) ≤ m.factorial / y ^ m := by
   have h := struveLO_pow_div_factorial_le_exp hy.le m
   rw [Real.exp_neg, inv_le_comm₀ (Real.exp_pos _) (by positivity), inv_div]
   exact h
 
 /-- Tail bound: `|∫₁^∞ e^{-zt} tⁿ dt| ≤ e^{-c/2} n! (2/c)^{n+1}` for `c = re z > 0`. -/
-lemma struveLO_norm_integral_Ioi_one_le (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
+theorem struveLO_norm_integral_Ioi_one_le (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
     ‖∫ t in Ioi (1 : ℝ), exp (-z * t) * (t : ℂ) ^ n‖ ≤
       Real.exp (-(z.re / 2)) * (n.factorial * (2 / z.re) ^ (n + 1)) := by
   set c := z.re

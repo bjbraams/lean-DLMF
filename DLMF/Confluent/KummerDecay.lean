@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Confluent.Asymptotics
-public import DLMF.Confluent.Continuation
 
 /-!
 # Decay of Kummer's function on the negative real axis (DLMF 13.2.23, 13.7.2)
@@ -63,12 +62,12 @@ theorem hasAsymptoticExpansion_regularizedHGFun_neg (a b : ℂ) :
   · simp only [smul_eq_mul]
     rw [regularizedConfluent_kummer_transform a b (-(t : ℂ)), neg_neg]
 
-lemma kumDec_norm_cpow_ofReal {t : ℝ} (ht : 0 < t) (c : ℂ) :
+theorem kumDec_norm_cpow_ofReal {t : ℝ} (ht : 0 < t) (c : ℂ) :
     ‖(t : ℂ) ^ c‖ = t ^ c.re := by
   rw [norm_cpow_eq_rpow_re_of_pos ht]
 
 /-- `t^s ≤ 2^{|s|} (1+t)^s` for `t ≥ 1` and every real `s`. -/
-lemma kumDec_rpow_le_one_add {t : ℝ} (ht : 1 ≤ t) (s : ℝ) :
+theorem kumDec_rpow_le_one_add {t : ℝ} (ht : 1 ≤ t) (s : ℝ) :
     t ^ s ≤ 2 ^ |s| * (1 + t) ^ s := by
   have ht0 : 0 < t := by linarith
   rcases le_or_gt 0 s with hs | hs
@@ -132,7 +131,7 @@ theorem tendsto_cpow_mul_regularizedHGFun_neg (a b : ℂ) :
 
 /-- A function continuous on `[0,∞)` and `O(g)` at infinity, with `g` continuous and positive on
 `[0,∞)`, is bounded by a multiple of `g` on `[0,∞)`. -/
-lemma kumDec_exists_bound_of_isBigO {f : ℝ → ℂ} {g : ℝ → ℝ} (hf : ContinuousOn f (Ici 0))
+theorem kumDec_exists_bound_of_isBigO {f : ℝ → ℂ} {g : ℝ → ℝ} (hf : ContinuousOn f (Ici 0))
     (hg : ContinuousOn g (Ici 0)) (hgpos : ∀ t, 0 ≤ t → 0 < g t) (h : f =O[atTop] g) :
     ∃ C, ∀ t, 0 ≤ t → ‖f t‖ ≤ C * g t := by
   obtain ⟨C1, hC1⟩ := h.bound
@@ -150,7 +149,7 @@ lemma kumDec_exists_bound_of_isBigO {f : ℝ → ℂ} {g : ℝ → ℝ} (hf : Co
     rw [Real.norm_of_nonneg hg0.le] at h1
     exact h1.trans (mul_le_mul_of_nonneg_right (le_max_left _ _) hg0.le)
 
-lemma kumDec_continuous_neg (a b : ℂ) :
+theorem kumDec_continuous_neg (a b : ℂ) :
     Continuous fun t : ℝ => regularizedHGFun {a} {b} (-(t : ℂ)) :=
   continuous_regularizedConfluent.comp (by fun_prop :
     Continuous fun t : ℝ => (a, b, -(t : ℂ)))
@@ -174,7 +173,7 @@ theorem exists_norm_regularizedHGFun_neg_le (a b : ℂ) :
 def kumDec_eulerKernel (a b : ℂ) (t s : ℝ) : ℂ :=
   exp (-(t : ℂ) * s) * (s : ℂ) ^ (a - 1) * (1 - (s : ℂ)) ^ (b - a - 1)
 
-lemma kumDec_intervalIntegrable_eulerKernel {a b : ℂ} (ha : 0 < a.re) (hba : 0 < (b - a).re)
+theorem kumDec_intervalIntegrable_eulerKernel {a b : ℂ} (ha : 0 < a.re) (hba : 0 < (b - a).re)
     (t : ℝ) : IntervalIntegrable (kumDec_eulerKernel a b t) volume 0 1 := by
   have h := (Complex.betaIntegral_convergent (u := a) (v := b - a) ha hba).continuousOn_mul
     (g := fun s : ℝ => exp (-(t : ℂ) * s)) (by fun_prop)
@@ -182,7 +181,7 @@ lemma kumDec_intervalIntegrable_eulerKernel {a b : ℂ} (ha : 0 < a.re) (hba : 0
   simp only [kumDec_eulerKernel]
   ring
 
-lemma kumDec_norm_eulerKernel (a b : ℂ) {t s : ℝ} (hs : s ∈ Ioo (0 : ℝ) 1) :
+theorem kumDec_norm_eulerKernel (a b : ℂ) {t s : ℝ} (hs : s ∈ Ioo (0 : ℝ) 1) :
     ‖kumDec_eulerKernel a b t s‖ =
       Real.exp (-(t * s)) * s ^ (a.re - 1) * (1 - s) ^ ((b - a).re - 1) := by
   have h1 : (1 - (s : ℂ)) = ((1 - s : ℝ) : ℂ) := by push_cast; ring
@@ -190,14 +189,14 @@ lemma kumDec_norm_eulerKernel (a b : ℂ) {t s : ℝ} (hs : s ∈ Ioo (0 : ℝ) 
   rw [kumDec_norm_cpow_ofReal hs.1, h1, kumDec_norm_cpow_ofReal (by linarith [hs.2])]
   simp
 
-lemma kumDec_regularizedHGFun_neg_eq {a b : ℂ} (ha : 0 < a.re) (hba : 0 < (b - a).re) (t : ℝ) :
+theorem kumDec_regularizedHGFun_neg_eq {a b : ℂ} (ha : 0 < a.re) (hba : 0 < (b - a).re) (t : ℝ) :
     regularizedHGFun {a} {b} (-(t : ℂ)) =
       1 / (Gamma a * Gamma (b - a)) * ∫ s : ℝ in (0 : ℝ)..1, kumDec_eulerKernel a b t s := by
   rw [regularized_euler_integral ha hba]
   rfl
 
 /-- Base case of the locally uniform bound: the Euler region `0 < re a < re b`. -/
-lemma kumDec_bound_base {α₀ β₀ : ℂ} (ha : 0 < α₀.re) (hba : 0 < (β₀ - α₀).re) {ε : ℝ}
+theorem kumDec_bound_base {α₀ β₀ : ℂ} (ha : 0 < α₀.re) (hba : 0 < (β₀ - α₀).re) {ε : ℝ}
     (hε : 0 < ε) :
     ∃ C, ∀ᶠ p : ℂ × ℂ in 𝓝 (α₀, β₀), ∀ t : ℝ, 0 ≤ t →
       ‖regularizedHGFun {p.1} {p.2} (-(t : ℂ))‖ ≤ C * (1 + t) ^ (-α₀.re + ε) := by
@@ -300,24 +299,24 @@ def kumDec_Bnd (α₀ β₀ : ℂ) : Prop :=
   ∀ ε : ℝ, 0 < ε → ∃ C, ∀ᶠ p : ℂ × ℂ in 𝓝 (α₀, β₀), ∀ t : ℝ, 0 ≤ t →
     ‖regularizedHGFun {p.1} {p.2} (-(t : ℂ))‖ ≤ C * (1 + t) ^ (-α₀.re + ε)
 
-lemma kumDec_t_mul_rpow_le {t : ℝ} (ht : 0 ≤ t) (e : ℝ) :
+theorem kumDec_t_mul_rpow_le {t : ℝ} (ht : 0 ≤ t) (e : ℝ) :
     t * (1 + t) ^ (e - 1) ≤ (1 + t) ^ e := by
   have h : (1 + t) ^ e = (1 + t) ^ (e - 1) * (1 + t) := by
     rw [← Real.rpow_add_one (by linarith)]; ring_nf
   rw [h, mul_comm t]
   exact mul_le_mul_of_nonneg_left (by linarith) (by positivity)
 
-lemma kumDec_rpow_sub_one_le {t : ℝ} (ht : 0 ≤ t) (e : ℝ) :
+theorem kumDec_rpow_sub_one_le {t : ℝ} (ht : 0 ≤ t) (e : ℝ) :
     (1 + t) ^ (e - 1) ≤ (1 + t) ^ e :=
   Real.rpow_le_rpow_of_exponent_le (by linarith) (by linarith)
 
-lemma kumDec_eventually_shift {P : ℂ × ℂ → Prop} (α₀ β₀ u v : ℂ)
+theorem kumDec_eventually_shift {P : ℂ × ℂ → Prop} (α₀ β₀ u v : ℂ)
     (h : ∀ᶠ p : ℂ × ℂ in 𝓝 (α₀ + u, β₀ + v), P p) :
     ∀ᶠ p : ℂ × ℂ in 𝓝 (α₀, β₀), P (p.1 + u, p.2 + v) := by
   have hc : Continuous fun p : ℂ × ℂ => (p.1 + u, p.2 + v) := by fun_prop
   exact hc.continuousAt.eventually h
 
-lemma kumDec_eventually_norm_le (α₀ β₀ : ℂ) :
+theorem kumDec_eventually_norm_le (α₀ β₀ : ℂ) :
     ∀ᶠ p : ℂ × ℂ in 𝓝 (α₀, β₀), ‖p.1‖ ≤ ‖α₀‖ + 1 ∧ ‖p.2‖ ≤ ‖β₀‖ + 1 := by
   have c1 : Continuous fun p : ℂ × ℂ => ‖p.1‖ := by fun_prop
   have c2 : Continuous fun p : ℂ × ℂ => ‖p.2‖ := by fun_prop
@@ -327,7 +326,7 @@ lemma kumDec_eventually_norm_le (α₀ β₀ : ℂ) :
 
 /-- Lowering `re (b - a)` by one: 13.3.20 with `n = 1`,
 `𝐌(a,b,z) = b 𝐌(a,b+1,z) + a z 𝐌(a+1,b+2,z)`, keeps the decay exponent. -/
-lemma kumDec_bnd_step_b {α₀ β₀ : ℂ} (h1 : kumDec_Bnd α₀ (β₀ + 1))
+theorem kumDec_bnd_step_b {α₀ β₀ : ℂ} (h1 : kumDec_Bnd α₀ (β₀ + 1))
     (h2 : kumDec_Bnd (α₀ + 1) (β₀ + 2)) : kumDec_Bnd α₀ β₀ := by
   intro ε hε
   obtain ⟨C1, hC1⟩ := h1 ε hε
@@ -373,7 +372,7 @@ lemma kumDec_bnd_step_b {α₀ β₀ : ℂ} (h1 : kumDec_Bnd α₀ (β₀ + 1))
 
 /-- Lowering `re a` by one: 13.3.4, `𝐌(a,b,z) = 𝐌(a+1,b,z) - z 𝐌(a+1,b+1,z)`, keeps the decay
 exponent. -/
-lemma kumDec_bnd_step_a {α₀ β₀ : ℂ} (h1 : kumDec_Bnd (α₀ + 1) β₀)
+theorem kumDec_bnd_step_a {α₀ β₀ : ℂ} (h1 : kumDec_Bnd (α₀ + 1) β₀)
     (h2 : kumDec_Bnd (α₀ + 1) (β₀ + 1)) : kumDec_Bnd α₀ β₀ := by
   intro ε hε
   obtain ⟨C1, hC1⟩ := h1 ε hε
@@ -412,7 +411,7 @@ lemma kumDec_bnd_step_a {α₀ β₀ : ℂ} (h1 : kumDec_Bnd (α₀ + 1) β₀)
           (mul_le_mul_of_nonneg_left (kumDec_t_mul_rpow_le ht e) (abs_nonneg _))
     _ = _ := by ring
 
-lemma kumDec_bnd_all : ∀ (m k : ℕ) (α₀ β₀ : ℂ), -(m : ℝ) < α₀.re → -(k : ℝ) < (β₀ - α₀).re →
+theorem kumDec_bnd_all : ∀ (m k : ℕ) (α₀ β₀ : ℂ), -(m : ℝ) < α₀.re → -(k : ℝ) < (β₀ - α₀).re →
     kumDec_Bnd α₀ β₀ := by
   intro m
   induction m with

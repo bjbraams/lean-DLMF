@@ -5,11 +5,12 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.EllipticIntegrals.LegendreIdentities
 public import DLMF.JacobiElliptic.SpecialValues
 public import Mathlib.Analysis.SpecialFunctions.Arsinh
 public import Carlson.TwoVariable.R.ElementaryValues
 public import Carlson.TwoVariable.Reduction
+public import DLMF.EllipticIntegrals.Legendre
+public import DLMF.EllipticIntegrals.Symmetric
 
 /-!
 # Special cases of Legendre's integrals and of `R_C` (DLMF §19.6)
@@ -36,12 +37,12 @@ open DLMF.JacobiElliptic
 
 /-! ### §19.6(i) Complete elliptic integrals -/
 
-theorem ei19a_jacobiComodulusk_zero : jacobiComodulusk 0 = 1 := by simp [jacobiComodulusk]
+lemma ei19a_jacobiComodulusk_zero : jacobiComodulusk 0 = 1 := by simp [jacobiComodulusk]
 
-theorem ei19a_jacobiComodulusk_one : jacobiComodulusk 1 = 0 := by simp [jacobiComodulusk]
+lemma ei19a_jacobiComodulusk_one : jacobiComodulusk 1 = 0 := by simp [jacobiComodulusk]
 
 /-- `segmentIntegral f φ / φ → f 0` as `φ → 0` when `f` is continuous near `0`. -/
-theorem p19lR1_tendsto_segmentIntegral_div {f : ℂ → ℂ} (hf : ∀ᶠ z in 𝓝 0, ContinuousAt f z) :
+lemma p19lR1_tendsto_segmentIntegral_div {f : ℂ → ℂ} (hf : ∀ᶠ z in 𝓝 0, ContinuousAt f z) :
     Tendsto (fun φ => ei19a_segmentIntegral f φ / φ) (𝓝[≠] 0) (𝓝 (f 0)) := by
   rw [Metric.tendsto_nhdsWithin_nhds]
   intro ε hε
@@ -83,7 +84,7 @@ theorem p19lR1_tendsto_segmentIntegral_div {f : ℂ → ℂ} (hf : ∀ᶠ z in �
   · simp; linarith
 
 /-- `(1 - a sin²θ)^s` is continuous near `θ = 0`. -/
-theorem p19lR1_eventually_continuousAt_cpow (a s : ℂ) :
+lemma p19lR1_eventually_continuousAt_cpow (a s : ℂ) :
     ∀ᶠ z in 𝓝 (0 : ℂ), ContinuousAt (fun θ => (1 - a * Complex.sin θ ^ 2) ^ s) z := by
   have hc : Continuous fun θ : ℂ => 1 - a * Complex.sin θ ^ 2 := by fun_prop
   have h0 : (fun θ : ℂ => 1 - a * Complex.sin θ ^ 2) 0 ∈ slitPlane := by simp
@@ -91,11 +92,11 @@ theorem p19lR1_eventually_continuousAt_cpow (a s : ℂ) :
   exact (hc.continuousAt).cpow continuousAt_const hz
 
 /-- For `|φ| < π/2`, `cos φ > 0`. -/
-theorem p19lR1_cos_pos {φ : ℝ} (hφ : |φ| < π / 2) : 0 < Real.cos φ :=
+lemma p19lR1_cos_pos {φ : ℝ} (hφ : |φ| < π / 2) : 0 < Real.cos φ :=
   Real.cos_pos_of_mem_Ioo ⟨by linarith [neg_abs_le φ], by linarith [le_abs_self φ]⟩
 
 /-- `∫₀^φ sec θ dθ = arsinh(tan φ)` for `|φ| < π/2`. -/
-theorem p19lR1_integral_sec {φ : ℝ} (hφ : |φ| < π / 2) :
+lemma p19lR1_integral_sec {φ : ℝ} (hφ : |φ| < π / 2) :
     ∫ θ in (0 : ℝ)..φ, (Real.cos θ)⁻¹ = Real.arsinh (Real.tan φ) := by
   have hsub : ∀ θ ∈ uIcc (0 : ℝ) φ, |θ| < π / 2 := by
     intro θ hθ
@@ -121,7 +122,7 @@ theorem p19lR1_integral_sec {φ : ℝ} (hφ : |φ| < π / 2) :
       (p19lR1_cos_pos (hsub θ hθ)).ne'
 
 /-- `Re cos z = cos(Re z) cosh(Im z)`. -/
-theorem p19lR1_cos_re (z : ℂ) : (Complex.cos z).re = Real.cos z.re * Real.cosh z.im := by
+lemma p19lR1_cos_re (z : ℂ) : (Complex.cos z).re = Real.cos z.re * Real.cosh z.im := by
   conv_lhs => rw [← Complex.re_add_im z, Complex.cos_add_mul_I]
   simp [← Complex.ofReal_cos, ← Complex.ofReal_cosh, ← Complex.ofReal_sin, ← Complex.ofReal_sinh]
 
@@ -176,7 +177,7 @@ theorem p19lR1_Δ_ne_zero {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) (θ : ℝ) : 
   rw [p19lR1_Δ, Ne, cpow_eq_zero_iff]; exact fun h' => slitPlane_ne_zero h h'.1
 
 /-- `(1 - k² sin²θ)^{-1/2} = Δ⁻¹`. -/
-theorem p19lR1_cpow_neg_half {k : ℂ} (θ : ℝ) :
+lemma p19lR1_cpow_neg_half {k : ℂ} (θ : ℝ) :
     (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) = (p19lR1_Δ k θ)⁻¹ := by
   rw [cpow_neg]
 
@@ -238,7 +239,7 @@ theorem p19lR1_integral_cube {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) (φ : ℝ)
   ring
 
 /-- `∫₀^φ sec²θ Δ⁻¹ dθ = F(φ, k) - (E(φ, k) - Δ(φ) tan φ)/k′²` for real `|φ| < π/2`. -/
-theorem p19lR1_integral_sec_sq {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) {φ : ℝ} (hφ : |φ| < π / 2) :
+lemma p19lR1_integral_sec_sq {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) {φ : ℝ} (hφ : |φ| < π / 2) :
     ∫ θ in (0 : ℝ)..φ, (1 - 1 * (Real.sin θ : ℂ) ^ 2)⁻¹ *
         (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) =
       incEllIntFk φ k - (incEllIntEk φ k - p19lR1_Δ k φ * Real.tan φ) / (1 - k ^ 2) := by
@@ -308,7 +309,7 @@ theorem p19lR1_incEllIntPik_ofReal {φ : ℝ} {α2 k : ℂ} {δ : ℝ} (hδ : 0 
   simp only [← Complex.ofReal_sin]
 
 /-- In the principal domain `1 - k² sin²θ` is bounded away from `0` for real `θ`. -/
-theorem p19lR1_exists_norm_lower {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
+lemma p19lR1_exists_norm_lower {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
     ∃ δ > 0, ∀ θ : ℝ, δ ≤ ‖1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2‖ := by
   obtain ⟨u0, hu0, hmin⟩ := (isCompact_Icc (a := (0 : ℝ)) (b := 1)).exists_isMinOn
     (nonempty_Icc.2 zero_le_one)

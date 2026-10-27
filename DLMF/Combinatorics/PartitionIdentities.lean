@@ -8,14 +8,11 @@ module
 public import DLMF.Combinatorics.RestrictedPartitions
 public import DLMF.Bessel.Modified
 public import Mathlib.Combinatorics.Enumerative.Partition.Glaisher
-public import Mathlib.Combinatorics.Enumerative.Pentagonal.Basic
 public import DLMF.QSeries.QExponential
 public import Mathlib.Combinatorics.Enumerative.Pentagonal.PowerSeries
 public import Mathlib.RingTheory.PowerSeries.Expand
 public import DLMF.Combinatorics.S26aStaircase
 public import DLMF.Bailey
-public import Mathlib.Analysis.Analytic.OfScalars
-public import Mathlib.Analysis.Analytic.Uniqueness
 
 /-!
 # Integer partitions: other restrictions (DLMF §26.10)
@@ -848,7 +845,7 @@ theorem sum_qBinom_triangle_eq_prod (q x : ℂ) (k : ℕ) :
 /-! ### Staircase generating functions (agent p26a) -/
 
 /-- DLMF (26.10.10) (helper): the staircase count with minimal part `1`. -/
-theorem s26a_partitionCountDiff_eq_sum (k n : ℕ) :
+lemma s26a_partitionCountDiff_eq_sum (k n : ℕ) :
     partitionCountDiff k n =
       ∑ m ∈ range (n + 1) with k * m.choose 2 + m ≤ n,
         partitionCountAtMostParts m (n - (k * m.choose 2 + m)) := by
@@ -869,7 +866,7 @@ lemma s26a_qPochhammer_eq_prod (q : ℂ) (m : ℕ) :
     rw [qPochhammer_succ, ih, Finset.prod_Icc_succ_top (by omega), pow_succ' q m]
 
 /-- Generating function of `c n = ∑_{m, e m ≤ n} p_m(n - e m)` for `e m ≥ m`. -/
-theorem s26a_hasSum_staircase {q : ℂ} (hq : ‖q‖ < 1) (e : ℕ → ℕ) (he : ∀ m, m ≤ e m)
+lemma s26a_hasSum_staircase {q : ℂ} (hq : ‖q‖ < 1) (e : ℕ → ℕ) (he : ∀ m, m ≤ e m)
     (c : ℕ → ℕ) (hc : ∀ n, c n = ∑ m ∈ range (n + 1) with e m ≤ n,
       partitionCountAtMostParts m (n - e m)) :
     HasSum (fun n => (c n : ℂ) * q ^ n) (∑' m : ℕ, q ^ e m * ∏ j ∈ Icc 1 m, (1 - q ^ j)⁻¹) ∧
@@ -1003,7 +1000,7 @@ lemma r26a_card_restricted_count_ge (P : ℕ → Prop) [DecidablePred P] {a : �
       · rw [Multiset.count_cons_self]; omega
 
 /-- (26.10.11) for a predicate: `n p(P, n) = ∑_{t=1}^n p(P, n - t) ∑_{j ∣ t, P j} j`. -/
-theorem r26a_card_restricted_recurrence (P : ℕ → Prop) [DecidablePred P] (n : ℕ) :
+lemma r26a_card_restricted_recurrence (P : ℕ → Prop) [DecidablePred P] (n : ℕ) :
     n * #(Nat.Partition.restricted n P) =
       ∑ t ∈ Icc 1 n, #(Nat.Partition.restricted (n - t) P) * ∑ j ∈ t.divisors with P j, j := by
   set R := Nat.Partition.restricted n P
@@ -1165,7 +1162,7 @@ lemma r26a_natAbs_le_pentagonal (k : ℤ) : k.natAbs ≤ pentagonal k := by
 
 open PowerSeries PowerSeries.WithPiTopology in
 /-- (26.10.7), proved via `(q;q)_∞ (-q;q)_∞ = (q²;q²)_∞` and the pentagonal number theorem. -/
-theorem r26a_pentagonal_distinct (n : ℕ) :
+lemma r26a_pentagonal_distinct (n : ℕ) :
     ∑ k ∈ Icc (-(n : ℤ)) n with pentagonal k ≤ n,
         (-1 : ℤ) ^ k.natAbs * partitionCountDistinct (n - pentagonal k) =
       ∑ r ∈ Icc (-(n : ℤ)) n, if (n : ℤ) = r * (3 * r - 1) then (-1 : ℤ) ^ r.natAbs else 0 := by
@@ -1450,7 +1447,7 @@ theorem partitionCountIn_recurrence (S : Set ℕ) [DecidablePred (· ∈ S)] (n 
 /-! ### Rogers–Ramanujan (agent p26a) -/
 
 /-- Coefficients of two natural-number power series agreeing on the unit disk are equal. -/
-theorem s26a_coeff_unique_nat {a b : ℕ → ℕ} {F : ℂ → ℂ}
+lemma s26a_coeff_unique_nat {a b : ℕ → ℕ} {F : ℂ → ℂ}
     (ha : ∀ q : ℂ, ‖q‖ < 1 → HasSum (fun n => (a n : ℂ) * q ^ n) (F q))
     (hb : ∀ q : ℂ, ‖q‖ < 1 → HasSum (fun n => (b n : ℂ) * q ^ n) (F q)) : a = b := by
   have hser : ∀ c : ℕ → ℕ, (∀ q : ℂ, ‖q‖ < 1 → HasSum (fun n => (c n : ℂ) * q ^ n) (F q)) →
@@ -1487,7 +1484,7 @@ theorem s26a_coeff_unique_nat {a b : ℕ → ℕ} {F : ℂ → ℂ}
   exact_mod_cast congrFun this n
 
 /-- A product over two residue classes mod 5. -/
-theorem s26a_hasProd_two_progressions {q : ℂ} (hq : ‖q‖ < 1) {a b : ℕ} (ha : 1 ≤ a)
+lemma s26a_hasProd_two_progressions {q : ℂ} (hq : ‖q‖ < 1) {a b : ℕ} (ha : 1 ≤ a)
     (hab : a < b) (hb : b < 5) (S : Set ℕ) [DecidablePred (· ∈ S)]
     (hS : ∀ n, n ∈ S ↔ 1 ≤ n ∧ (n % 5 = a ∨ n % 5 = b)) :
     HasProd (fun j : ℕ => if j + 1 ∈ S then (1 - q ^ (j + 1))⁻¹ else 1)

@@ -5,12 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.OrthogonalPolynomials.Topics
-public import DLMF.OrthogonalPolynomials.Differential
-public import DLMF.OrthogonalPolynomials.Explicit
 public import DLMF.OrthogonalPolynomials.Integrals
 public import Mathlib.Analysis.SpecialFunctions.PolarCoord
-public import Mathlib.Tactic.CrossRefAttribute
 
 /-!
 # Disk and triangle orthogonal polynomials
@@ -50,7 +46,7 @@ def trianglePolynomial (α β γ : ℂ) (m n : ℕ) (x y : ℂ) : ℂ :=
     jacobiPolyP β γ n (2 * y / x - 1)
 
 /-- Reversed Jacobi coefficients in the normalization of the disk polynomials. -/
-lemma jacobi_disk_coefficients {α : ℂ} (hα : -1 < α.re) {m n : ℕ} (hmn : n ≤ m) (s : ℂ) :
+theorem jacobi_disk_coefficients {α : ℂ} (hα : -1 < α.re) {m n : ℕ} (hmn : n ≤ m) (s : ℂ) :
     jacobiPolyP α ((m - n : ℕ) : ℂ) n (2 * s - 1) / jacobiPolyP α ((m - n : ℕ) : ℂ) n 1 =
       ∑ j ∈ Finset.range (n + 1), (-1 : ℂ) ^ j * poch (α + 1) (m + n - j) *
         poch (-(m : ℂ)) j * poch (-(n : ℂ)) j /
@@ -101,7 +97,7 @@ lemma jacobi_disk_coefficients {α : ℂ} (hα : -1 < α.re) {m n : ℕ} (hmn : 
   simp only [hsgn2, mul_one]
 
 /-- Factor the larger holomorphic degree from the finite disk polynomial. -/
-lemma diskPolynomial_eq_jacobi_of_le {α : ℂ} (hα : -1 < α.re) {m n : ℕ} (hmn : n ≤ m) (z : ℂ) :
+theorem diskPolynomial_eq_jacobi_of_le {α : ℂ} (hα : -1 < α.re) {m n : ℕ} (hmn : n ≤ m) (z : ℂ) :
     diskPolynomial α m n z = z ^ (m - n) *
       (jacobiPolyP α ((m - n : ℕ) : ℂ) n (2 * (z * star z) - 1) / jacobiPolyP α ((m - n : ℕ) : ℂ) n 1) := by
   rw [jacobi_disk_coefficients hα hmn, Finset.mul_sum, diskPolynomial, min_eq_right hmn]
@@ -115,7 +111,7 @@ lemma diskPolynomial_eq_jacobi_of_le {α : ℂ} (hα : -1 < α.re) {m n : ℕ} (
   ring
 
 /-- Exchange the two disk degrees by conjugating the argument. -/
-lemma diskPolynomial_swap (α : ℂ) (m n : ℕ) (z : ℂ) :
+theorem diskPolynomial_swap (α : ℂ) (m n : ℕ) (z : ℂ) :
     diskPolynomial α m n z = diskPolynomial α n m (star z) := by
   unfold diskPolynomial
   rw [min_comm n m]
@@ -201,7 +197,7 @@ theorem diskPolynomial_at_one {α : ℂ} (hα : -1 < α.re) (m n : ℕ) : diskPo
   rw [key, poch_add_binomial, show -(m : ℂ) + (α + 1 + m) = α + 1 by ring, div_self hn]
 
 /-- Shifted Jacobi orthogonality on the open unit interval. -/
-lemma jacobi_unit_orthogonal {α β : ℝ} (hα : -1 < α) (hβ : -1 < β)
+theorem jacobi_unit_orthogonal {α β : ℝ} (hα : -1 < α) (hβ : -1 < β)
     {m n : ℕ} (hmn : m ≠ n) :
     (∫ t : ℝ in Ioo 0 1,
       jacobiPolyP α β m (2 * t - 1) * jacobiPolyP α β n (2 * t - 1) *

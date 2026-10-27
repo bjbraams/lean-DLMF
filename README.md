@@ -96,6 +96,31 @@ Hamiltonian structure, Bäcklund transformations, rational, elementary and speci
 solutions, real asymptotics and PDE reductions (ledger [Chapter 32](DLMF32Acquisition.md)).
 DLMF's PII with parameter α is the Beals–Wong PII(−α) of the older modules described below.
 
+Chapters 33–36, the final four chapters of the DLMF, were acquired on 2026-10-26 as four new
+entry points: [Coulomb](DLMF/Coulomb.lean) (Chapter 33; the existing Coulomb functions of the
+Confluent area moved down unchanged into `DLMF/Coulomb/Basic.lean`; the r, ε functions in
+`DLMF/Coulomb/Energy`), [WignerSymbols](DLMF/WignerSymbols.lean) (Chapter 34; 3j, 6j and 9j
+symbols with rational quantum numbers), [MatrixArgument](DLMF/MatrixArgument.lean) (Chapter 35;
+Tau Ceti's measure on symmetric matrices, zonal polynomials from DLMF 35.4.2–35.4.3,
+hypergeometric functions of matrix argument as sums over partitions) and
+[CoalescingSaddles](DLMF/CoalescingSaddles.lean) (Chapter 36; canonical integrals as absolutely
+convergent integrals along rotated contours). Ledgers: [Chapter 33](DLMF33Acquisition.md),
+[Chapter 34](DLMF34Acquisition.md), [Chapter 35](DLMF35Acquisition.md),
+[Chapter 36](DLMF36Acquisition.md). Applications, computation, graphics and numerical values are
+excluded, as elsewhere.
+
+Chapters 1 and 2, the general methods chapters, were acquired on 2026-10-27 as two new entry
+points, which completes the DLMF coverage (Chapter 3, numerical methods, is out of scope):
+[AlgebraicAnalytic](DLMF/AlgebraicAnalytic.lean) (Chapter 1; algebra, calculus, Fourier series,
+complex variables, zeros of polynomials, continued fractions, differential equations, integral
+transforms, summability, distributions and spectral theory) and
+[AsymptoticApproximations](DLMF/AsymptoticApproximations.lean) (Chapter 2; order symbols,
+Watson's lemma, Laplace, stationary-phase and Mellin methods, distributional methods,
+Liouville–Green approximation, Euler–Maclaurin and Darboux, Stokes phenomenon). Much of
+Chapter 1 is standard mathematics already in Mathlib or Tau Ceti and is recorded through
+`dlmf_upstream` pointers rather than reproved. Ledgers: [Chapter 1](DLMF1Acquisition.md),
+[Chapter 2](DLMF2Acquisition.md).
+
 DLMF errata and source corrections found anywhere in the project are collected in
 the [DLMF errata report](https://bjbraams.github.io/lean-DLMF/DLMFErrata.pdf) (LaTeX source
 [reports/DLMFErrata.tex](reports/DLMFErrata.tex), built by CI and published on GitHub Pages):
@@ -179,12 +204,15 @@ Mathlib's `Complex.digamma`; moving it into `DLMF.Gamma.Real` is left for a late
 
 ## Status
 
-After proof round 2 for Chapters 28–31 and the Chapter 32 acquisition (2026-10-26) there are
-**1,310 explicit source admissions**: Elementary 68, GeneralizedHypergeometric 112,
-QHypergeometric 101, EllipticIntegrals 187, Theta 22, RiemannTheta 10, JacobiElliptic 62,
-Weierstrass 53, BernoulliEuler 25, Zeta 46, Combinatorics 37, NumberTheory 36, Mathieu 173,
-Lame 44, Spheroidal 35, Heun 28, Painleve 83, and 188 in the older areas.
-The compiled audit finds **21,765 project theorems**, with **1,453 depending transitively on
+After proof round 3 for Chapters 20–32, the acquisition of Chapters 33–36 (2026-10-26), the
+restatement of Picard's solution 32.10.32–34, proof round 2 for Chapters 33–36 and the
+acquisition of Chapters 1–2 (all 2026-10-27) there are **1,771 explicit source admissions**:
+Elementary 68, GeneralizedHypergeometric 112, QHypergeometric 101, EllipticIntegrals 187,
+Theta 13, RiemannTheta 7, JacobiElliptic 35, Weierstrass 40, BernoulliEuler 25, Zeta 46,
+Combinatorics 37, NumberTheory 36, Mathieu 140, Lame 41, Spheroidal 33, Heun 26, Painleve 42,
+Coulomb 49, WignerSymbols 34, MatrixArgument 36, CoalescingSaddles 35, AlgebraicAnalytic 304,
+AsymptoticApproximations 136, and 188 in the older areas.
+The compiled audit finds **24,662 project theorems**, with **1,884 depending transitively on
 `sorryAx`**, and no other nonstandard axiom.
 Counts in the dated development history describe their earlier scope.
 

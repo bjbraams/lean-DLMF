@@ -5,7 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Tactic.CrossRefAttribute
 public import DLMF.Bessel.Basic
 
 /-!
@@ -86,7 +85,7 @@ theorem besselI_ode {ν z : ℂ} (hz : z ∈ slitPlane) :
   simpa only [iteratedDeriv_succ, iteratedDeriv_zero, besselI, one_mul] using he
 
 /-- `I_ν` is analytic on the principal slit plane, for every order. -/
-lemma analyticAt_besselI (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
+theorem analyticAt_besselI (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     AnalyticAt ℂ (besselI ν) z := by
   have he := analyticAt_besselSeries ν 1 hz
   have hf : (fun w : ℂ => (w / 2) ^ ν * regularizedHGFun ∅ {ν + 1} (1 * w ^ 2 / 4)) =

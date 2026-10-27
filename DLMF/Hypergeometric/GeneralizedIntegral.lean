@@ -26,7 +26,7 @@ namespace DLMF.Hypergeometric
 
 /-- Adding a numerator `a₀` and a denominator `b₀` multiplies the coefficients by
 `(a₀)ₙ/Γ(b₀+n)`. -/
-lemma regularizedHGFunCoeff_cons (a₀ b₀ : ℂ) (a b : Multiset ℂ) (n : ℕ) :
+theorem regularizedHGFunCoeff_cons (a₀ b₀ : ℂ) (a b : Multiset ℂ) (n : ℕ) :
     regularizedHGFunCoeff (a₀ ::ₘ a) (b₀ ::ₘ b) n =
       poch a₀ n / Gamma (b₀ + n) * regularizedHGFunCoeff a b n := by
   simp only [regularizedHGFunCoeff, Multiset.map_cons, Multiset.prod_cons, poch]

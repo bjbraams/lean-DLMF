@@ -6,9 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Airy.Scorer
-public import DLMF.Airy.Asymptotics
 public import DLMF.Airy.IntegralTools
-public import DLMF.Gamma.IntegralRepresentations
 
 /-!
 # Scorer exponential and integrated asymptotics, DLMF §9.12
@@ -23,14 +21,14 @@ open scoped Real Topology
 namespace DLMF.Airy
 
 /-- The principal logarithm of a rotated point, when no branch cut is crossed. -/
-lemma scorerTwo_log_mul_exp {z : ℂ} (hz : z ≠ 0) {c : ℝ} (h1 : -π < arg z + c)
+theorem scorerTwo_log_mul_exp {z : ℂ} (hz : z ≠ 0) {c : ℝ} (h1 : -π < arg z + c)
     (h2 : arg z + c ≤ π) : log (z * exp (c * I)) = log z + c * I := by
   rw [Complex.log, Complex.log, scorerAsym_arg_mul_exp hz h1 h2, norm_mul,
     norm_exp_ofReal_mul_I, mul_one]
   push_cast; ring
 
 /-- Principal powers of a rotated point, when no branch cut is crossed. -/
-lemma scorerTwo_cpow_mul_exp {z : ℂ} (hz : z ≠ 0) {c : ℝ} (h1 : -π < arg z + c)
+theorem scorerTwo_cpow_mul_exp {z : ℂ} (hz : z ≠ 0) {c : ℝ} (h1 : -π < arg z + c)
     (h2 : arg z + c ≤ π) (s : ℂ) : (z * exp (c * I)) ^ s = z ^ s * exp (s * c * I) := by
   rw [cpow_def_of_ne_zero (mul_ne_zero hz (exp_ne_zero _)), cpow_def_of_ne_zero hz,
     scorerTwo_log_mul_exp hz h1 h2, ← Complex.exp_add]
@@ -38,7 +36,7 @@ lemma scorerTwo_cpow_mul_exp {z : ℂ} (hz : z ≠ 0) {c : ℝ} (h1 : -π < arg 
 
 /-- Rotation by `c` maps a subset `S` of the sector `|arg z| ≤ α` into the sector
 `|arg z| ≤ β` when `|arg z + c| ≤ β < π` on `S`. -/
-lemma scorerTwo_tendsto {α β c : ℝ} {S : Set ℂ}
+theorem scorerTwo_tendsto {α β c : ℝ} {S : Set ℂ}
     (h : ∀ z ∈ S, z ≠ 0 → |arg z| ≤ α → |arg z + c| ≤ β) (hβ : β < π) :
     Tendsto (fun z : ℂ => z * exp (c * I)) (airySector α ⊓ 𝓟 S) (airySector β) := by
   refine tendsto_inf.mpr ⟨tendsto_comap_iff.mpr ?_, tendsto_principal.mpr ?_⟩
@@ -53,7 +51,7 @@ lemma scorerTwo_tendsto {α β c : ℝ} {S : Set ℂ}
     rw [scorerAsym_arg_mul_exp hz0 (by linarith) (by linarith)]; exact hb
 
 /-- Eventual membership facts on a half-sector. -/
-lemma scorerTwo_eventually {α ε : ℝ} :
+theorem scorerTwo_eventually {α ε : ℝ} :
     ∀ᶠ z in airySector α ⊓ 𝓟 {z : ℂ | 0 ≤ ε * arg z}, z ≠ 0 ∧ |arg z| ≤ α ∧ 0 ≤ ε * arg z := by
   have hA : ∀ᶠ z in airySector α, z ≠ 0 ∧ |arg z| ≤ α := mem_inf_of_right (mem_principal_self _)
   have hS : ∀ᶠ z in airySector α ⊓ 𝓟 {z : ℂ | 0 ≤ ε * arg z}, 0 ≤ ε * arg z :=
@@ -61,7 +59,7 @@ lemma scorerTwo_eventually {α ε : ℝ} :
   filter_upwards [hA.filter_mono inf_le_left, hS] with z h1 h2 using ⟨h1.1, h1.2, h2⟩
 
 /-- DLMF 9.12.29 on the half-sector `0 ≤ ε arg z`, for `δ ≤ π/3`. -/
-lemma scorerTwo_half {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {δ : ℝ} (hδ : 0 < δ) (hδ3 : δ ≤ π / 3)
+theorem scorerTwo_half {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {δ : ℝ} (hδ : 0 < δ) (hδ3 : δ ≤ π / 3)
     (N M : ℕ) :
     IsBigO (airySector (π - δ) ⊓ 𝓟 {z : ℂ | 0 ≤ ε * arg z})
       (fun z => scorerHi z + (1 / (π * z) *
@@ -191,7 +189,7 @@ lemma scorerTwo_half {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {δ : ℝ} (hδ : 0 <
   ring
 
 /-- The sector filter is monotone in the half-angle. -/
-lemma scorerTwo_sector_mono {α β : ℝ} (h : α ≤ β) : airySector α ≤ airySector β :=
+theorem scorerTwo_sector_mono {α β : ℝ} (h : α ≤ β) : airySector α ≤ airySector β :=
   inf_le_inf_left _ (principal_mono.mpr fun _ hz => ⟨hz.1, hz.2.trans h⟩)
 
 /-- scorerHi two scale expansion (DLMF 9.12.29). -/
@@ -223,7 +221,7 @@ theorem scorerHi_two_scale_expansion {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) 
 section ScorerPrimitive
 
 /-- `∫₀^∞ ((1+v)⁻¹ - (1+xv)⁻¹)/v dv = log x` for `x > 0`, with integrability. -/
-lemma scorerPrim_integral_log {x : ℝ} (hx : 0 < x) :
+theorem scorerPrim_integral_log {x : ℝ} (hx : 0 < x) :
     IntegrableOn (fun τ : ℝ => (1 / (1 + τ) - 1 / (1 + x * τ)) / τ) (Ioi 0) ∧
     ∫ τ in Ioi (0 : ℝ), (1 / (1 + τ) - 1 / (1 + x * τ)) / τ = Real.log x := by
   set G : ℝ → ℝ := fun τ => Real.log (1 + x * τ) - Real.log (1 + τ) with hG
@@ -285,7 +283,7 @@ lemma scorerPrim_integral_log {x : ℝ} (hx : 0 < x) :
   simp [hG]
 
 /-- `∫₀^∞ ((1+xv)⁻¹ - e^{-xv})/v dv = γ` for `x > 0`, with integrability. -/
-lemma scorerPrim_integral_euler {x : ℝ} (hx : 0 < x) :
+theorem scorerPrim_integral_euler {x : ℝ} (hx : 0 < x) :
     IntegrableOn (fun τ : ℝ => (1 / (1 + x * τ) - Real.exp (-(x * τ))) / τ) (Ioi 0) ∧
     ∫ τ in Ioi (0 : ℝ), (1 / (1 + x * τ) - Real.exp (-(x * τ))) / τ =
       Real.eulerMascheroniConstant := by
@@ -306,7 +304,7 @@ lemma scorerPrim_integral_euler {x : ℝ} (hx : 0 < x) :
       ← mul_assoc, mul_inv_cancel₀ hx.ne', one_mul, DLMF.Gamma.eulerMascheroni_eq_integral_recip_one_add]
 
 /-- `∫₀^∞ (e^{-v³/3} - (1+v³/3)⁻¹)/v dv = -γ/3`, with integrability. -/
-lemma scorerPrim_integral_cube :
+theorem scorerPrim_integral_cube :
     IntegrableOn (fun v : ℝ => (Real.exp (-(v ^ 3 / 3)) - 1 / (1 + v ^ 3 / 3)) / v) (Ioi 0) ∧
     ∫ v in Ioi (0 : ℝ), (Real.exp (-(v ^ 3 / 3)) - 1 / (1 + v ^ 3 / 3)) / v =
       -(Real.eulerMascheroniConstant / 3) := by
@@ -338,7 +336,7 @@ lemma scorerPrim_integral_cube :
 
 
 /-- `∫₀^∞ ((1+v³/3)⁻¹ - (1+v)⁻¹)/v dv = (log 3)/3`, with integrability. -/
-lemma scorerPrim_integral_rat :
+theorem scorerPrim_integral_rat :
     IntegrableOn (fun v : ℝ => (1 / (1 + v ^ 3 / 3) - 1 / (1 + v)) / v) (Ioi 0) ∧
     ∫ v in Ioi (0 : ℝ), (1 / (1 + v ^ 3 / 3) - 1 / (1 + v)) / v = Real.log 3 / 3 := by
   set H : ℝ → ℝ := fun v => Real.log (1 + v) - Real.log (1 + v ^ 3 / 3) / 3 with hH
@@ -403,7 +401,7 @@ lemma scorerPrim_integral_rat :
   simp [hH]
 
 /-- The tail `∫₀^∞ e^{-tv} (1 - e^{-v³/3})/v dv`: integrable, and between `0` and `2/(3t³)`. -/
-lemma scorerPrim_tail {t : ℝ} (ht : 0 < t) :
+theorem scorerPrim_tail {t : ℝ} (ht : 0 < t) :
     IntegrableOn (fun v : ℝ => Real.exp (-(t * v)) * (1 - Real.exp (-(v ^ 3 / 3))) / v) (Ioi 0) ∧
     0 ≤ ∫ v in Ioi (0 : ℝ), Real.exp (-(t * v)) * (1 - Real.exp (-(v ^ 3 / 3))) / v ∧
     ∫ v in Ioi (0 : ℝ), Real.exp (-(t * v)) * (1 - Real.exp (-(v ^ 3 / 3))) / v ≤ 2 / (3 * t ^ 3) := by
@@ -439,7 +437,7 @@ lemma scorerPrim_tail {t : ℝ} (ht : 0 < t) :
 /-- **The constant in 9.12.31 on the positive axis.** For `t > 0`,
 `∫₀^∞ e^{-v³/3} (1 - e^{-tv})/v dv - log t → (2γ + ln 3)/3` as `t → ∞`, and the integrand is
 integrable. -/
-lemma scorerPrim_integral_tendsto :
+theorem scorerPrim_integral_tendsto :
     (∀ t : ℝ, 0 < t → IntegrableOn
       (fun v : ℝ => Real.exp (-(v ^ 3 / 3)) * (1 - Real.exp (-(t * v))) / v) (Ioi 0)) ∧
     Tendsto (fun t : ℝ => (∫ v in Ioi (0 : ℝ), Real.exp (-(v ^ 3 / 3)) * (1 - Real.exp (-(t * v))) / v)
@@ -488,7 +486,7 @@ lemma scorerPrim_integral_tendsto :
 
 
 /-- `e^{-v³/3}` is integrable on `(0, ∞)`. -/
-lemma scorerPrim_integrableOn_exp_cube :
+theorem scorerPrim_integrableOn_exp_cube :
     IntegrableOn (fun v : ℝ => Real.exp (-(v ^ 3 / 3))) (Ioi 0) := by
   refine ((exp_neg_integrableOn_Ioi 0 one_pos).const_mul (Real.exp (2 / 3))).mono'
     (Continuous.aestronglyMeasurable (by fun_prop)) ?_
@@ -499,7 +497,7 @@ lemma scorerPrim_integrableOn_exp_cube :
   nlinarith [sq_nonneg (v - 1), mul_nonneg (sq_nonneg (v - 1)) (by linarith : (0 : ℝ) ≤ v + 2)]
 
 /-- `Hi(-u)` for real `u` as a real Laplace integral (DLMF 9.12.20). -/
-lemma scorerPrim_scorerHi_neg_ofReal (u : ℝ) :
+theorem scorerPrim_scorerHi_neg_ofReal (u : ℝ) :
     scorerHi (-(u : ℂ)) = (((∫ v in Ioi (0 : ℝ), Real.exp (-(v ^ 3 / 3)) * Real.exp (-(u * v))) / π : ℝ) : ℂ) := by
   rw [(scorerHi_exp_integral _).2]
   push_cast
@@ -510,7 +508,7 @@ lemma scorerPrim_scorerHi_neg_ofReal (u : ℝ) :
   rw [← Complex.exp_add]; congr 1; ring
 
 /-- `∫₀^x e^{-uv} du = (1 - e^{-xv})/v` for `v > 0`. -/
-lemma scorerPrim_integral_exp_mul {v : ℝ} (hv : 0 < v) (x : ℝ) :
+theorem scorerPrim_integral_exp_mul {v : ℝ} (hv : 0 < v) (x : ℝ) :
     ∫ u in (0 : ℝ)..x, Real.exp (-(u * v)) = (1 - Real.exp (-(x * v))) / v := by
   have hd : ∀ u : ℝ, HasDerivAt (fun u : ℝ => -Real.exp (-(u * v)) / v) (Real.exp (-(u * v))) u := by
     intro u
@@ -525,7 +523,7 @@ lemma scorerPrim_integral_exp_mul {v : ℝ} (hv : 0 < v) (x : ℝ) :
 
 /-- The primitive of `Hi(-t)` on the positive axis as a Laplace-type integral:
 `∫₀^x Hi(-t) dt = π^{-1} ∫₀^∞ e^{-v³/3} (1 - e^{-xv})/v dv`. -/
-lemma scorerPrim_primitive_ofReal {x : ℝ} (hx : 0 < x) :
+theorem scorerPrim_primitive_ofReal {x : ℝ} (hx : 0 < x) :
     primitive (fun t => scorerHi (-t)) x =
       (((∫ v in Ioi (0 : ℝ), Real.exp (-(v ^ 3 / 3)) * (1 - Real.exp (-(x * v))) / v) / π : ℝ) : ℂ) := by
   have hdiff : Differentiable ℂ (fun t : ℂ => scorerHi (-t)) :=
@@ -564,7 +562,7 @@ lemma scorerPrim_primitive_ofReal {x : ℝ} (hx : 0 < x) :
   ring
 
 /-- **The constant in 9.12.31**: `∫₀^x Hi(-t) dt - (log x)/π → (2γ + ln 3)/(3π)` as `x → +∞`. -/
-lemma scorerPrim_tendsto_ofReal :
+theorem scorerPrim_tendsto_ofReal :
     Tendsto (fun x : ℝ => primitive (fun t => scorerHi (-t)) x - Complex.log x / π) atTop
       (𝓝 ((2 * (Real.eulerMascheroniConstant : ℂ) + Complex.log 3) / (3 * π))) := by
   have h := (Complex.continuous_ofReal.tendsto _).comp
@@ -585,12 +583,12 @@ lemma scorerPrim_tendsto_ofReal :
 section
 open Complex
 /-- `arg (ρ e^{is}) = s` for `ρ > 0` and `s ∈ (-π, π]`. -/
-lemma scorerPrim_arg_ray {ρ s : ℝ} (hρ : 0 < ρ) (hs : s ∈ Ioc (-π) π) :
+theorem scorerPrim_arg_ray {ρ s : ℝ} (hρ : 0 < ρ) (hs : s ∈ Ioc (-π) π) :
     arg ((ρ : ℂ) * exp (s * I)) = s := by
   rw [arg_real_mul _ hρ, exp_mul_I, arg_cos_add_sin_mul_I hs]
 
 /-- Unpacking an eventual statement in `airySector α`. -/
-lemma scorerPrim_exists_of_eventually_sector {α : ℝ} {p : ℂ → Prop}
+theorem scorerPrim_exists_of_eventually_sector {α : ℝ} {p : ℂ → Prop}
     (h : ∀ᶠ z in airySector α, p z) :
     ∃ R : ℝ, ∀ z : ℂ, R ≤ ‖z‖ → z ≠ 0 → |arg z| ≤ α → p z := by
   rw [airySector, eventually_inf_principal] at h
@@ -601,7 +599,7 @@ lemma scorerPrim_exists_of_eventually_sector {α : ℝ} {p : ℂ → Prop}
 /-- **Integration of a derivative bound in a sector.** If `G` is holomorphic on the slit plane,
 `G(t) → 0` along the positive axis, and `‖G'(z)‖ ≤ C ‖z‖^{-(m+1)}` for large `z` with
 `|arg z| ≤ α < π`, then `G(z) = O(z^{-m})` in `airySector α`. -/
-lemma scorerPrim_isBigO_of_deriv {G G' : ℂ → ℂ} {α : ℝ} (hα0 : 0 ≤ α) (hα : α < π) {m : ℕ} (hm : 0 < m)
+theorem scorerPrim_isBigO_of_deriv {G G' : ℂ → ℂ} {α : ℝ} (hα0 : 0 ≤ α) (hα : α < π) {m : ℕ} (hm : 0 < m)
     (hG : ∀ z ∈ slitPlane, HasDerivAt G (G' z) z)
     (hlim : Tendsto (fun t : ℝ => G t) atTop (𝓝 0)) {R C : ℝ} (hR : 0 < R)
     (hC : ∀ z : ℂ, R ≤ ‖z‖ → |arg z| ≤ α → ‖G' z‖ ≤ C * ‖z‖ ^ (-((m : ℤ) + 1))) :
@@ -721,7 +719,7 @@ open Complex
 
 /-- The derivative of a term of the integrated Scorer expansion is the next term of the
 `Hi(-z)` expansion. -/
-lemma scorerPrim_term_hasDerivAt (k : ℕ) {w : ℂ} (hw : w ≠ 0) :
+theorem scorerPrim_term_hasDerivAt (k : ℕ) {w : ℂ} (hw : w ≠ 0) :
     HasDerivAt (fun w : ℂ => (-1 : ℂ) ^ k * ((3 * (k + 1) - 1).factorial : ℂ) /
         ((k + 1).factorial * (3 * w ^ 3) ^ (k + 1)))
       ((1 / w) * ((-1 : ℂ) ^ (k + 1) * ((3 * (k + 1) + 0).factorial : ℂ) /
@@ -750,7 +748,7 @@ lemma scorerPrim_term_hasDerivAt (k : ℕ) {w : ℂ} (hw : w ≠ 0) :
   ring
 
 /-- Each term of the integrated Scorer expansion tends to zero along the positive axis. -/
-lemma scorerPrim_term_tendsto (k : ℕ) :
+theorem scorerPrim_term_tendsto (k : ℕ) :
     Tendsto (fun t : ℝ => (-1 : ℂ) ^ k * ((3 * (k + 1) - 1).factorial : ℂ) /
         ((k + 1).factorial * (3 * (t : ℂ) ^ 3) ^ (k + 1))) atTop (𝓝 0) := by
   have hinv : Tendsto (fun t : ℝ => ((t : ℂ))⁻¹) atTop (𝓝 0) := by
@@ -772,7 +770,7 @@ lemma scorerPrim_term_tendsto (k : ℕ) :
   ring
 
 /-- The assembled 9.12.31 estimate, proved by integrating the 9.12.27 bound along rays. -/
-lemma scorerPrim_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < 2 * π / 3) (N : ℕ) :
+theorem scorerPrim_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < 2 * π / 3) (N : ℕ) :
     IsBigO (airySector (2 * π / 3 - δ))
       (fun z => primitive (fun t => scorerHi (-t)) z - Complex.log z / π -
         (2 * (Real.eulerMascheroniConstant : ℂ) + Complex.log 3) / (3 * π) -
@@ -866,14 +864,14 @@ lemma scorerPrim_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < 2 * π / 3) (
 
 
 /-- Rescaling the segment primitive: `∫₀^z f(ta) dt = a⁻¹ ∫₀^{za} f`. -/
-lemma scorerPrim_primitive_comp_mul (f : ℂ → ℂ) {a : ℂ} (ha : a ≠ 0) (z : ℂ) :
+theorem scorerPrim_primitive_comp_mul (f : ℂ → ℂ) {a : ℂ} (ha : a ≠ 0) (z : ℂ) :
     primitive (fun t => f (t * a)) z = a⁻¹ * primitive f (z * a) := by
   simp only [primitive, lineIntegral, zero_add, sub_zero]
   field_simp
   congr 1; congr 1; funext s; ring_nf
 
 /-- Linearity of the segment primitive for continuous integrands. -/
-lemma scorerPrim_primitive_lin {f g : ℂ → ℂ} (hf : Continuous f) (hg : Continuous g)
+theorem scorerPrim_primitive_lin {f g : ℂ → ℂ} (hf : Continuous f) (hg : Continuous g)
     (c₁ c₂ : ℂ) (z : ℂ) :
     primitive (fun t => c₁ * f t + c₂ * g t) z = c₁ * primitive f z + c₂ * primitive g z := by
   simp only [primitive, lineIntegral, zero_add, sub_zero]
@@ -886,7 +884,7 @@ lemma scorerPrim_primitive_lin {f g : ℂ → ℂ} (hf : Continuous f) (hg : Con
   ring
 
 /-- `e^{iπ/3}` cubed is `-1`, and likewise for `e^{-iπ/3}`. -/
-lemma scorerPrim_exp_cube (ε : ℝ) (hε : ε = 1 ∨ ε = -1) :
+theorem scorerPrim_exp_cube (ε : ℝ) (hε : ε = 1 ∨ ε = -1) :
     exp (((ε * (π / 3) : ℝ) : ℂ) * I) ^ 3 = -1 := by
   rw [← Complex.exp_nat_mul]
   rcases hε with rfl | rfl
@@ -897,7 +895,7 @@ lemma scorerPrim_exp_cube (ε : ℝ) (hε : ε = 1 ∨ ε = -1) :
 
 /-- **The Gi primitive via Hi(-z)**: `∫₀^z Gi = (Q(z e^{iπ/3}) + Q(z e^{-iπ/3}))/2`, where
 `Q(w) = ∫₀^w Hi(-t) dt` (from the rotation formula 9.12.12). -/
-lemma scorerPrim_primitive_scorerGi (z : ℂ) :
+theorem scorerPrim_primitive_scorerGi (z : ℂ) :
     primitive scorerGi z =
       (primitive (fun t => scorerHi (-t)) (z * exp (((1 * (π / 3) : ℝ) : ℂ) * I)) +
         primitive (fun t => scorerHi (-t)) (z * exp (((-1 * (π / 3) : ℝ) : ℂ) * I))) / 2 := by
@@ -935,7 +933,7 @@ lemma scorerPrim_primitive_scorerGi (z : ℂ) :
   ring
 
 /-- The rotated 9.12.31 remainder is `O(z^{-3N-3})` in the sector `|arg z| ≤ π/3 - δ`. -/
-lemma scorerPrim_rot_isBigO {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π / 3)
+theorem scorerPrim_rot_isBigO {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π / 3)
     (N : ℕ) :
     IsBigO (airySector (π / 3 - δ))
       (fun z => (fun w => primitive (fun t => scorerHi (-t)) w - log w / π -
@@ -971,7 +969,7 @@ lemma scorerPrim_rot_isBigO {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {δ : ℝ} (h�
   rw [this, mul_one]
 
 /-- The cubed rotated point: `(z e^{±iπ/3})³ = -z³`, applied to the 9.12.31 sum. -/
-lemma scorerPrim_rot_sum {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {z : ℂ} (hz : z ≠ 0) (N : ℕ) :
+theorem scorerPrim_rot_sum {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {z : ℂ} (hz : z ≠ 0) (N : ℕ) :
     (∑ k ∈ Finset.range N, (-1 : ℂ) ^ k * ((3 * (k + 1) - 1).factorial : ℂ) /
         ((k + 1).factorial * (3 * (z * exp (((ε * (π / 3) : ℝ) : ℂ) * I)) ^ 3) ^ (k + 1))) =
       ∑ k ∈ Finset.range N, -(1 : ℂ) * ((3 * (k + 1) - 1).factorial : ℂ) /
@@ -992,7 +990,7 @@ lemma scorerPrim_rot_sum {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {z : ℂ} (hz : z
   field_simp
 
 /-- The assembled 9.12.30 estimate, from 9.12.31 at the rotated points `z e^{±iπ/3}`. -/
-lemma scorerPrim_gi_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π / 3) (N : ℕ) :
+theorem scorerPrim_gi_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π / 3) (N : ℕ) :
     IsBigO (airySector (π / 3 - δ))
       (fun z => primitive (fun t => scorerGi t) z - log z / π -
         (2 * (Real.eulerMascheroniConstant : ℂ) + log 3) / (3 * π) -

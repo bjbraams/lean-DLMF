@@ -30,7 +30,7 @@ noncomputable section
 namespace DLMF.Bessel
 
 /-- Doubling preserves the closed sector filter. -/
-lemma tendsto_two_mul_sectorAtTop (δ : ℝ) :
+theorem tendsto_two_mul_sectorAtTop (δ : ℝ) :
     Tendsto (fun z : ℂ => 2 * z) (sectorAtTop δ) (sectorAtTop δ) := by
   refine tendsto_inf.mpr ⟨tendsto_comap_iff.mpr ?_, tendsto_principal.mpr ?_⟩
   · have h := (tendsto_norm_sectorAtTop δ).const_mul_atTop (two_pos : (0 : ℝ) < 2)
@@ -46,7 +46,7 @@ lemma tendsto_two_mul_sectorAtTop (δ : ℝ) :
     linarith
 
 /-- Doubling preserves the rotated sector filter. -/
-lemma tendsto_two_mul_rotSectorAtTop (δ α : ℝ) :
+theorem tendsto_two_mul_rotSectorAtTop (δ α : ℝ) :
     Tendsto (fun z : ℂ => 2 * z) (rotSectorAtTop δ α) (rotSectorAtTop δ α) := by
   refine tendsto_comap_iff.mpr ?_
   have h := (tendsto_two_mul_sectorAtTop δ).comp (tendsto_rotSectorAtTop δ α)
@@ -55,7 +55,7 @@ lemma tendsto_two_mul_rotSectorAtTop (δ α : ℝ) :
   ring
 
 /-- Eventually in a rotated sector, `z` lies in the slit plane. -/
-lemma eventually_mem_slitPlane_rotSectorAtTop {δ α : ℝ} (hδ : 0 < δ) (hα : |α| < π / 2) :
+theorem eventually_mem_slitPlane_rotSectorAtTop {δ α : ℝ} (hδ : 0 < δ) (hα : |α| < π / 2) :
     ∀ᶠ z in rotSectorAtTop δ α, z ∈ slitPlane := by
   filter_upwards [eventually_rotSectorAtTop hδ hα] with z hz
   have hz0 : z ≠ 0 := by
@@ -96,19 +96,19 @@ theorem hasAsymptoticExpansion_besselK (ν : ℂ) {δ α : ℝ} (hδ : 0 < δ) (
   field_simp
   linear_combination besselK ν z * hpow
 /-- Halving does not change the argument. -/
-lemma arg_div_two (z : ℂ) : arg (z / 2) = arg z := by
+theorem arg_div_two (z : ℂ) : arg (z / 2) = arg z := by
   rw [div_eq_mul_inv, show (2 : ℂ)⁻¹ = ((1 / 2 : ℝ) : ℂ) by push_cast; ring,
     arg_mul_real (by norm_num)]
 
 /-- `e^{-iπ/2} = -i`. -/
-lemma exp_neg_pi_div_two_mul_I' : exp ((-(π / 2) : ℝ) * I) = -I := by
+theorem exp_neg_pi_div_two_mul_I' : exp ((-(π / 2) : ℝ) * I) = -I := by
   rw [exp_mul_I]
   push_cast
   rw [cos_neg, sin_neg, cos_pi_div_two, sin_pi_div_two]
   ring
 
 /-- `I_ν(-iz) = e^{-iνπ/2} J_ν(z)` for `-π/2 < arg z` (DLMF 10.27.6). -/
-lemma besselI_neg_I_mul {z : ℂ} (hz : z ≠ 0) (harg : -(π / 2) < arg z) (ν : ℂ) :
+theorem besselI_neg_I_mul {z : ℂ} (hz : z ≠ 0) (harg : -(π / 2) < arg z) (ν : ℂ) :
     besselI ν (-I * z) = exp (-(I * ν * π / 2)) * besselJ ν z := by
   have hz2 : z / 2 ≠ 0 := div_ne_zero hz two_ne_zero
   have hc := cpow_mul_exp_mul_I hz2 (α := -(π / 2)) (by rw [arg_div_two]; linarith)
@@ -144,14 +144,14 @@ lemma hankelH1_eq_besselK_of_not_int {ν z : ℂ} (hν : ∀ k : ℤ, ν ≠ k) 
   linear_combination besselJ ν z * hem - besselJ (-ν) z * hep
 
 /-- `e^{iπ/2} = i`. -/
-lemma exp_pi_div_two_mul_I' : exp (((π / 2) : ℝ) * I) = I := by
+theorem exp_pi_div_two_mul_I' : exp (((π / 2) : ℝ) * I) = I := by
   rw [exp_mul_I]
   push_cast
   rw [cos_pi_div_two, sin_pi_div_two]
   ring
 
 /-- `I_ν(iz) = e^{iνπ/2} J_ν(z)` for `arg z ≤ π/2` (DLMF 10.27.6). -/
-lemma besselI_I_mul {z : ℂ} (hz : z ≠ 0) (harg : arg z ≤ π / 2) (ν : ℂ) :
+theorem besselI_I_mul {z : ℂ} (hz : z ≠ 0) (harg : arg z ≤ π / 2) (ν : ℂ) :
     besselI ν (I * z) = exp (I * ν * π / 2) * besselJ ν z := by
   have hz2 : z / 2 ≠ 0 := div_ne_zero hz two_ne_zero
   have hc := cpow_mul_exp_mul_I hz2 (α := π / 2)
@@ -163,7 +163,7 @@ lemma besselI_I_mul {z : ℂ} (hz : z ≠ 0) (harg : arg z ≤ π / 2) (ν : ℂ
   ring_nf
 
 /-- `J_ν` through `K_ν(∓iz)` at noninteger order. -/
-lemma besselJ_eq_besselK_of_not_int {ν z : ℂ} (hν : ∀ k : ℤ, ν ≠ k) (hz : z ≠ 0)
+theorem besselJ_eq_besselK_of_not_int {ν z : ℂ} (hν : ∀ k : ℤ, ν ≠ k) (hz : z ≠ 0)
     (harg : |arg z| < π / 2) :
     besselJ ν z = 1 / (π * I) * (exp (-(I * ν * π / 2)) * besselK ν (-I * z) -
       exp (I * ν * π / 2) * besselK ν (I * z)) := by
@@ -199,11 +199,11 @@ lemma besselJ_eq_besselK_of_not_int {ν z : ℂ} (hν : ∀ k : ℤ, ν ≠ k) (
   linear_combination J * hem - J * hem' - J' * hep + J' * hep'
 
 /-- For `re z > 0`, `iz` lies in the slit plane. -/
-lemma mem_slitPlane_I_mul {z : ℂ} (hz : 0 < z.re) : I * z ∈ slitPlane :=
+theorem mem_slitPlane_I_mul {z : ℂ} (hz : 0 < z.re) : I * z ∈ slitPlane :=
   mem_slitPlane_iff.mpr (Or.inr (by simp; exact hz.ne'))
 
 /-- For `re z > 0`, `-iz` lies in the slit plane. -/
-lemma mem_slitPlane_neg_I_mul {z : ℂ} (hz : 0 < z.re) : -I * z ∈ slitPlane :=
+theorem mem_slitPlane_neg_I_mul {z : ℂ} (hz : 0 < z.re) : -I * z ∈ slitPlane :=
   mem_slitPlane_iff.mpr (Or.inr (by simp; exact hz.ne'))
 
 /-- For `re z > 0`, `J_ν(z) = (πi)⁻¹ (e^{-iνπ/2} K_ν(-iz) - e^{iνπ/2} K_ν(iz))`;
@@ -226,7 +226,7 @@ theorem besselJ_eq_besselK (ν : ℂ) {z : ℂ} (hz : 0 < z.re) :
       (continuousAt_besselK_order (fun μ => μ) continuous_id ν (mem_slitPlane_I_mul hz))
 
 /-- For `z` in the slit plane with `arg z > -π/2`, `-iz` lies in the slit plane. -/
-lemma mem_slitPlane_neg_I_mul_of_arg {z : ℂ} (hz : z ∈ slitPlane) (harg : -(π / 2) < arg z) :
+theorem mem_slitPlane_neg_I_mul_of_arg {z : ℂ} (hz : z ∈ slitPlane) (harg : -(π / 2) < arg z) :
     -I * z ∈ slitPlane := by
   rw [mem_slitPlane_iff]
   by_cases hre : z.re = 0
@@ -256,7 +256,7 @@ theorem hankelH1_eq_besselK (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) (harg : 
         (mem_slitPlane_neg_I_mul_of_arg hz harg))
 
 /-- A unit ray `x ↦ cx` enters the rotated sector filter. -/
-lemma tendsto_mul_ofReal_rotSectorAtTop {c : ℂ} (hc : ‖c‖ = 1) {α : ℝ}
+theorem tendsto_mul_ofReal_rotSectorAtTop {c : ℂ} (hc : ‖c‖ = 1) {α : ℝ}
     (hre : 1 / 2 ≤ (c * exp (α * I)).re) :
     Tendsto (fun x : ℝ => c * x) atTop (rotSectorAtTop (1 / 2) α) := by
   refine tendsto_comap_iff.mpr
@@ -271,7 +271,7 @@ lemma tendsto_mul_ofReal_rotSectorAtTop {c : ℂ} (hc : ‖c‖ = 1) {α : ℝ}
     nlinarith
 
 /-- Leading term of Hankel's expansion of `K_ν` along a ray `w = c x`, `x → +∞`. -/
-lemma besselK_ray_isBigO (ν : ℂ) {c : ℂ} (hc : ‖c‖ = 1) {α : ℝ} (hα : |α| < π / 2)
+theorem besselK_ray_isBigO (ν : ℂ) {c : ℂ} (hc : ‖c‖ = 1) {α : ℝ} (hα : |α| < π / 2)
     (hre : 1 / 2 ≤ (c * exp (α * I)).re) :
     (fun x : ℝ => exp (c * x) * besselK ν (c * x) -
       (2 * (c * x)) ^ (-(1 / 2 : ℂ)) * (Real.sqrt π : ℂ)) =O[atTop]
@@ -292,7 +292,7 @@ lemma besselK_ray_isBigO (ν : ℂ) {c : ℂ} (hc : ‖c‖ = 1) {α : ℝ} (hα
   exact Real.rpow_le_rpow_of_nonpos hx (by linarith) (by norm_num)
 
 /-- The ray `-i x` lies in the sector rotated by `π/4`. -/
-lemma half_le_re_neg_I_mul_exp : 1 / 2 ≤ (-I * exp ((π / 4 : ℝ) * I)).re := by
+theorem half_le_re_neg_I_mul_exp : 1 / 2 ≤ (-I * exp ((π / 4 : ℝ) * I)).re := by
   have h : (-I * exp ((π / 4 : ℝ) * I)).re = Real.sin (π / 4) := by
     simp only [mul_re, neg_re, neg_im, I_re, I_im, exp_ofReal_mul_I_re, exp_ofReal_mul_I_im]
     ring
@@ -302,7 +302,7 @@ lemma half_le_re_neg_I_mul_exp : 1 / 2 ≤ (-I * exp ((π / 4 : ℝ) * I)).re :=
   linarith
 
 /-- The ray `i x` lies in the sector rotated by `-π/4`. -/
-lemma half_le_re_I_mul_exp : 1 / 2 ≤ (I * exp ((-(π / 4) : ℝ) * I)).re := by
+theorem half_le_re_I_mul_exp : 1 / 2 ≤ (I * exp ((-(π / 4) : ℝ) * I)).re := by
   have h : (I * exp ((-(π / 4) : ℝ) * I)).re = Real.sin (π / 4) := by
     simp only [mul_re, I_re, I_im, exp_ofReal_mul_I_re, exp_ofReal_mul_I_im, Real.sin_neg]
     ring
@@ -334,7 +334,7 @@ theorem hasAsymptoticExpansion_hankelH1 (ν : ℂ) :
   ring
 
 /-- `(2 x e^{iα})^{-1/2} = (2x)^{-1/2} e^{-iα/2}` for `x > 0`, `|α| ≤ π/2`. -/
-lemma two_mul_ray_cpow {x : ℝ} (hx : 0 < x) {α : ℝ} (hα : |α| ≤ π / 2) :
+theorem two_mul_ray_cpow {x : ℝ} (hx : 0 < x) {α : ℝ} (hα : |α| ≤ π / 2) :
     (2 * (exp (α * I) * x)) ^ (-(1 / 2 : ℂ)) =
       ((2 * x : ℝ) : ℂ) ^ (-(1 / 2 : ℂ)) * exp (-(α * I / 2)) := by
   have h2x : ((2 * x : ℝ) : ℂ) ≠ 0 := ofReal_ne_zero.mpr (by positivity)
@@ -347,7 +347,7 @@ lemma two_mul_ray_cpow {x : ℝ} (hx : 0 < x) {α : ℝ} (hα : |α| ≤ π / 2)
   ring
 
 /-- `√(2/(πx)) = 2√π/π · (2x)^{-1/2}`. -/
-lemma sqrt_two_div_pi_mul {x : ℝ} (hx : 0 < x) :
+theorem sqrt_two_div_pi_mul {x : ℝ} (hx : 0 < x) :
     (Real.sqrt (2 / (π * x)) : ℂ) =
       2 * (Real.sqrt π : ℂ) / π * ((2 * x : ℝ) : ℂ) ^ (-(1 / 2 : ℂ)) := by
   rw [show (-(1 / 2 : ℂ)) = ((-(1 / 2) : ℝ) : ℂ) by push_cast; ring,
@@ -433,7 +433,7 @@ theorem besselJ_sub_cos_isBigO (ν : ℂ) :
     (s * (Real.sqrt π : ℂ) * (T1 + T2)) * I_sq
 
 /-- For real order and positive argument, `J_ν(x)` is real. -/
-lemma besselJ_ofReal_eq_re (ν x : ℝ) (hx : 0 < x) :
+theorem besselJ_ofReal_eq_re (ν x : ℝ) (hx : 0 < x) :
     besselJ ν x = ((besselJ ν x).re : ℂ) := by
   have h : besselJ ν x = (((x / 2) ^ ν * ∑' n : ℕ, (-(x ^ 2 / 4)) ^ n / n.factorial *
       (Real.Gamma (ν + 1 + n))⁻¹ : ℝ) : ℂ) := by
@@ -448,7 +448,7 @@ lemma besselJ_ofReal_eq_re (ν x : ℝ) (hx : 0 < x) :
   rw [h, ofReal_re]
 
 /-- The real part of `J_ν` on the positive axis is continuous there. -/
-lemma continuousOn_re_besselJ (ν : ℂ) :
+theorem continuousOn_re_besselJ (ν : ℂ) :
     ContinuousOn (fun x : ℝ => (besselJ ν x).re) (Set.Ioi 0) := by
   intro x hx
   have hs : (x : ℂ) ∈ slitPlane := Or.inl (by simpa using hx)
@@ -456,7 +456,7 @@ lemma continuousOn_re_besselJ (ν : ℂ) :
     continuous_ofReal.continuousAt)).continuousWithinAt
 
 /-- Eventually `J_ν` has the sign of `cos(x - νπ/2 - π/4)` wherever that cosine is `±1`. -/
-lemma exists_besselJ_sign (ν : ℝ) : ∃ X : ℝ, 0 < X ∧ ∀ x, X ≤ x →
+theorem exists_besselJ_sign (ν : ℝ) : ∃ X : ℝ, 0 < X ∧ ∀ x, X ≤ x →
     (Real.cos (x - ν * π / 2 - π / 4) = 1 → 0 < (besselJ ν x).re) ∧
     (Real.cos (x - ν * π / 2 - π / 4) = -1 → (besselJ ν x).re < 0) := by
   obtain ⟨C, hC⟩ := (besselJ_sub_cos_isBigO (ν : ℂ)).bound
@@ -526,7 +526,7 @@ theorem besselJ_infinite_zeros_of_real (ν : ℝ) :
 
 
 /-- `(z^{-ν} J_ν(z))' = -z^{-ν} J_{ν+1}(z)` (DLMF 10.6.6). -/
-lemma hasDerivAt_cpow_neg_mul_besselJ (ν : ℂ) {x : ℝ} (hx : 0 < x) :
+theorem hasDerivAt_cpow_neg_mul_besselJ (ν : ℂ) {x : ℝ} (hx : 0 < x) :
     HasDerivAt (fun w : ℂ => w ^ (-ν) * besselJ ν w) (-((x : ℂ) ^ (-ν) * besselJ (ν + 1) x)) x := by
   have hs : (x : ℂ) ∈ slitPlane := Or.inl (by simpa using hx)
   have hx0 : (x : ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.ne'
@@ -539,7 +539,7 @@ lemma hasDerivAt_cpow_neg_mul_besselJ (ν : ℂ) {x : ℝ} (hx : 0 < x) :
   ring
 
 /-- `(z^{ν+1} J_{ν+1}(z))' = z^{ν+1} J_ν(z)` (DLMF 10.6.6). -/
-lemma hasDerivAt_cpow_mul_besselJ_succ (ν : ℂ) {x : ℝ} (hx : 0 < x) :
+theorem hasDerivAt_cpow_mul_besselJ_succ (ν : ℂ) {x : ℝ} (hx : 0 < x) :
     HasDerivAt (fun w : ℂ => w ^ (ν + 1) * besselJ (ν + 1) w)
       ((x : ℂ) ^ (ν + 1) * besselJ ν x) x := by
   have hs : (x : ℂ) ∈ slitPlane := Or.inl (by simpa using hx)

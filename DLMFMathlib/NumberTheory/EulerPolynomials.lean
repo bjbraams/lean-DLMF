@@ -5,10 +5,15 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.NumberTheory.BernoulliPolynomials
 public import Mathlib.Algebra.Polynomial.Derivative
 public import Mathlib.Algebra.Polynomial.Roots
 public import Mathlib.Analysis.Calculus.Deriv.Polynomial
+public import Mathlib.Algebra.Polynomial.Eval.SMul
+public import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.Data.Nat.Totient
+public import Mathlib.RingTheory.Polynomial.Basic
+public import Mathlib.Tactic.ContinuousFunctionalCalculus
+public import Mathlib.Tactic.NormNum.GCD
 
 /-!
 # Euler polynomials and Euler numbers

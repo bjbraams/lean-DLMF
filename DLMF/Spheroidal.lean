@@ -3,7 +3,7 @@ Copyright (c) 2026 Bastiaan J Braams. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bastiaan J Braams
 -/
-module
+module -- shake: keep-all
 
 public import DLMF.Spheroidal.Basic
 public import DLMF.Spheroidal.FerrersDefs
@@ -13,6 +13,9 @@ public import DLMF.Spheroidal.Angular
 public import DLMF.Spheroidal.FerrersSeries
 public import DLMF.Spheroidal.Radial
 public import DLMF.Spheroidal.P2yFerrersTools
+public import DLMF.Spheroidal.Existence
+public import DLMF.Spheroidal.P3lParity
+public import DLMF.Spheroidal.P3lSpectrum
 
 /-!
 # Spheroidal wave functions (DLMF Chapter 30)

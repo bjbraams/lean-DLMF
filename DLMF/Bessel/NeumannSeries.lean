@@ -5,7 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Tactic.CrossRefAttribute
 public import DLMF.Bessel.Modified
 public import Mathlib.Analysis.Complex.LocallyUniformLimit
 
@@ -277,12 +276,12 @@ def powerNeumannSummand (l : ℂ) (j k : ℕ) : ℂ :=
   (-1) ^ (j - k) * (l + 2 * k) * Gamma (l + k) / ((k ! : ℂ) * ((j - k) ! : ℂ) * Gamma (l + j + k + 1))
 
 /-- `Γ(λ+n) ≠ 0` for `λ ∉ -ℕ`. -/
-lemma Gamma_add_nat_ne_zero_of_ne {l : ℂ} (hl : ∀ n : ℕ, l ≠ -n) (n : ℕ) : Gamma (l + n) ≠ 0 := by
+theorem Gamma_add_nat_ne_zero_of_ne {l : ℂ} (hl : ∀ n : ℕ, l ≠ -n) (n : ℕ) : Gamma (l + n) ≠ 0 := by
   refine Complex.Gamma_ne_zero fun m h => hl (m + n) ?_
   push_cast; linear_combination h
 
 /-- `λ+n ≠ 0` for `λ ∉ -ℕ`. -/
-lemma add_nat_ne_zero_of_ne {l : ℂ} (hl : ∀ n : ℕ, l ≠ -n) (n : ℕ) : l + n ≠ 0 := fun h =>
+theorem add_nat_ne_zero_of_ne {l : ℂ} (hl : ∀ n : ℕ, l ≠ -n) (n : ℕ) : l + n ≠ 0 := fun h =>
   hl n (by linear_combination h)
 
 /-- Closed partial sums of `powerNeumannSummand`. -/

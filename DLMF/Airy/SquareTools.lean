@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Airy.Integrals
-public import DLMF.Airy.Zeros
 public import DLMFMathlib.Analysis.ODE.SymmetricSquare
 
 /-!
@@ -40,7 +39,7 @@ open scoped Real Topology
 namespace DLMF.Airy
 
 /-- `u^2 e^{-u/6} ≤ 72`, in the form `u^2 e^{-2u/3} ≤ 72 e^{-u/2}`. -/
-lemma airySq_sq_mul_exp_le {u : ℝ} (hu : 0 ≤ u) :
+theorem airySq_sq_mul_exp_le {u : ℝ} (hu : 0 ≤ u) :
     u ^ 2 * Real.exp (-(2 / 3) * u) ≤ 72 * Real.exp (-u / 2) := by
   have h := Real.quadratic_le_exp_of_nonneg (show 0 ≤ u / 6 by positivity)
   have h2 : u ^ 2 ≤ 72 * Real.exp (u / 6) := by nlinarith [sq_nonneg u]
@@ -50,14 +49,14 @@ lemma airySq_sq_mul_exp_le {u : ℝ} (hu : 0 ≤ u) :
   exact mul_le_mul_of_nonneg_right h2 (Real.exp_pos _).le
 
 /-- `ζ(u) ≥ 2u/3` for `u ≥ 1`. -/
-lemma airySq_zeta_ge {u : ℝ} (hu : 1 ≤ u) : 2 / 3 * u ≤ airyZeta u := by
+theorem airySq_zeta_ge {u : ℝ} (hu : 1 ≤ u) : 2 / 3 * u ≤ airyZeta u := by
   unfold airyZeta
   have : u ^ (1 : ℝ) ≤ u ^ (3 / 2 : ℝ) := Real.rpow_le_rpow_of_exponent_le hu (by norm_num)
   rw [Real.rpow_one] at this
   linarith
 
 /-- `0 < Ai(u) ≤ e^{-2u/3}` for `u ≥ 1`. -/
-lemma airySq_ai_le {u : ℝ} (hu : 1 ≤ u) : |airyAiReal u| ≤ Real.exp (-(2 / 3) * u) := by
+theorem airySq_ai_le {u : ℝ} (hu : 1 ≤ u) : |airyAiReal u| ≤ Real.exp (-(2 / 3) * u) := by
   have hu0 : 0 < u := by linarith
   rw [abs_of_pos (airyAiReal_pos hu0.le)]
   refine (airy_ai_bound hu0).trans ?_
@@ -71,7 +70,7 @@ lemma airySq_ai_le {u : ℝ} (hu : 1 ≤ u) : |airyAiReal u| ≤ Real.exp (-(2 /
     _ ≤ _ := Real.exp_le_exp.mpr (by linarith [airySq_zeta_ge hu])
 
 /-- `|Ai'(u)| ≤ u e^{-2u/3}` for `u ≥ 1`. -/
-lemma airySq_aiDeriv_le {u : ℝ} (hu : 1 ≤ u) :
+theorem airySq_aiDeriv_le {u : ℝ} (hu : 1 ≤ u) :
     |airyAiDerivReal u| ≤ u * Real.exp (-(2 / 3) * u) := by
   have hu0 : 0 < u := by linarith
   refine (airy_aiDeriv_bound hu0).trans ?_
@@ -94,7 +93,7 @@ lemma airySq_aiDeriv_le {u : ℝ} (hu : 1 ≤ u) :
 def airySq_Decay (h : ℝ → ℝ) : Prop := ∃ K, ∀ u, 1 ≤ u → |h u| ≤ K * Real.exp (-u / 2)
 
 /-- Extension of the decay bound to every half-line `[a, ∞)`, by compactness. -/
-lemma airySq_Decay.ext {h : ℝ → ℝ} (hd : airySq_Decay h) (hc : Continuous h) (a : ℝ) :
+theorem airySq_Decay.ext {h : ℝ → ℝ} (hd : airySq_Decay h) (hc : Continuous h) (a : ℝ) :
     ∃ K, 0 ≤ K ∧ ∀ u, a ≤ u → |h u| ≤ K * Real.exp (-u / 2) := by
   obtain ⟨K, hK⟩ := hd
   obtain ⟨M, hM⟩ := (isCompact_Icc (a := a) (b := 1)).exists_bound_of_continuousOn
@@ -115,22 +114,22 @@ lemma airySq_Decay.ext {h : ℝ → ℝ} (hd : airySq_Decay h) (hc : Continuous 
       rw [mul_assoc]; exact le_mul_of_one_le_right (le_max_right _ _) he
     nlinarith [le_max_left M 0]
 
-lemma airySq_decay_of_le {h : ℝ → ℝ} (hb : ∀ u, 1 ≤ u → |h u| ≤ 2 * (u ^ 2 * Real.exp (-(2 / 3) * u))) :
+theorem airySq_decay_of_le {h : ℝ → ℝ} (hb : ∀ u, 1 ≤ u → |h u| ≤ 2 * (u ^ 2 * Real.exp (-(2 / 3) * u))) :
     airySq_Decay h :=
   ⟨144, fun u hu => (hb u hu).trans (by nlinarith [airySq_sq_mul_exp_le (u := u) (by linarith)])⟩
 
-lemma airySq_decay_ai : airySq_Decay airyAiReal := by
+theorem airySq_decay_ai : airySq_Decay airyAiReal := by
   refine airySq_decay_of_le fun u hu => (airySq_ai_le hu).trans ?_
   have := Real.exp_pos (-(2 / 3) * u)
   nlinarith [one_le_pow₀ (n := 2) hu]
 
-lemma airySq_decay_aiDeriv : airySq_Decay airyAiDerivReal := by
+theorem airySq_decay_aiDeriv : airySq_Decay airyAiDerivReal := by
   refine airySq_decay_of_le fun u hu => (airySq_aiDeriv_le hu).trans ?_
   have := Real.exp_pos (-(2 / 3) * u)
   have : u ≤ u ^ 2 := by nlinarith
   nlinarith
 
-lemma airySq_decay_mul_ai : airySq_Decay fun u => u * airyAiReal u := by
+theorem airySq_decay_mul_ai : airySq_Decay fun u => u * airyAiReal u := by
   refine airySq_decay_of_le fun u hu => ?_
   have h := airySq_ai_le hu
   have := Real.exp_pos (-(2 / 3) * u)
@@ -140,7 +139,7 @@ lemma airySq_decay_mul_ai : airySq_Decay fun u => u * airyAiReal u := by
     mul_le_mul_of_nonneg_left h (by linarith)
   nlinarith
 
-lemma airySq_decay_ai_add : airySq_Decay fun u => airyAiReal u + u * airyAiDerivReal u := by
+theorem airySq_decay_ai_add : airySq_Decay fun u => airyAiReal u + u * airyAiDerivReal u := by
   refine airySq_decay_of_le fun u hu => ?_
   have h := airySq_ai_le hu
   have h' := airySq_aiDeriv_le hu
@@ -153,7 +152,7 @@ lemma airySq_decay_ai_add : airySq_Decay fun u => airyAiReal u + u * airyAiDeriv
   nlinarith
 
 /-- The Gaussian bound on the integrand `h(c(x+t²))`, uniformly for `x ≥ b`. -/
-lemma airySq_bound {h : ℝ → ℝ} (hd : airySq_Decay h) (hc : Continuous h) {c : ℝ} (hc0 : 0 < c)
+theorem airySq_bound {h : ℝ → ℝ} (hd : airySq_Decay h) (hc : Continuous h) {c : ℝ} (hc0 : 0 < c)
     (b : ℝ) : ∃ K, 0 ≤ K ∧ ∀ x, b ≤ x → ∀ t : ℝ,
       |h (c * (x + t ^ 2))| ≤ K * Real.exp (-(c / 2) * t ^ 2) := by
   obtain ⟨K, hK0, hK⟩ := hd.ext hc (c * b)
@@ -165,7 +164,7 @@ lemma airySq_bound {h : ℝ → ℝ} (hd : airySq_Decay h) (hc : Continuous h) {
   rw [← Real.exp_add]
   exact Real.exp_le_exp.mpr (by nlinarith [sq_nonneg t])
 
-lemma airySq_integrable {h : ℝ → ℝ} (hd : airySq_Decay h) (hc : Continuous h) {c : ℝ}
+theorem airySq_integrable {h : ℝ → ℝ} (hd : airySq_Decay h) (hc : Continuous h) {c : ℝ}
     (hc0 : 0 < c) (x : ℝ) : Integrable (fun t : ℝ => h (c * (x + t ^ 2))) := by
   obtain ⟨K, -, hK⟩ := airySq_bound hd hc hc0 x
   refine ((integrable_exp_neg_mul_sq (by positivity : 0 < c / 2)).const_mul K).mono'
@@ -173,7 +172,7 @@ lemma airySq_integrable {h : ℝ → ℝ} (hd : airySq_Decay h) (hc : Continuous
   rw [Real.norm_eq_abs]; exact hK x le_rfl t
 
 /-- Differentiation under the integral sign for `x ↦ ∫₀^∞ h(c(x+t²)) dt`. -/
-lemma airySq_hasDerivAt {h h' : ℝ → ℝ} (hd : airySq_Decay h) (hc : Continuous h)
+theorem airySq_hasDerivAt {h h' : ℝ → ℝ} (hd : airySq_Decay h) (hc : Continuous h)
     (hd' : airySq_Decay h') (hc' : Continuous h') (hder : ∀ u, HasDerivAt h (h' u) u)
     {c : ℝ} (hc0 : 0 < c) (x₀ : ℝ) :
     HasDerivAt (fun x => ∫ t in Ioi 0, h (c * (x + t ^ 2)))
@@ -202,9 +201,9 @@ lemma airySq_hasDerivAt {h h' : ℝ → ℝ} (hd : airySq_Decay h) (hc : Continu
 /-- The scale `c = 2^{2/3}` of the Ai² representation. -/
 def airySq_c : ℝ := (2 : ℝ) ^ (2 / 3 : ℝ)
 
-lemma airySq_c_pos : 0 < airySq_c := by unfold airySq_c; positivity
+theorem airySq_c_pos : 0 < airySq_c := by unfold airySq_c; positivity
 
-lemma airySq_c_cube : airySq_c ^ 3 = 4 := by
+theorem airySq_c_cube : airySq_c ^ 3 = 4 := by
   unfold airySq_c
   rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]; norm_num
 
@@ -218,27 +217,27 @@ def airySq_F2 (x : ℝ) : ℝ := ∫ t in Ioi 0, (fun u => u * airyAiReal u) (ai
 def airySq_F3 (x : ℝ) : ℝ :=
   ∫ t in Ioi 0, (fun u => airyAiReal u + u * airyAiDerivReal u) (airySq_c * (x + t ^ 2))
 
-lemma airySq_cont_ai : Continuous airyAiReal :=
+theorem airySq_cont_ai : Continuous airyAiReal :=
   continuous_iff_continuousAt.mpr fun x => (hasDerivAt_airyAiReal x).continuousAt
-lemma airySq_cont_aiDeriv : Continuous airyAiDerivReal :=
+theorem airySq_cont_aiDeriv : Continuous airyAiDerivReal :=
   continuous_iff_continuousAt.mpr fun x => (hasDerivAt_airyAiDerivReal x).continuousAt
 
-lemma airySq_hasDerivAt_F (x : ℝ) : HasDerivAt airySq_F (airySq_c * airySq_F1 x) x :=
+theorem airySq_hasDerivAt_F (x : ℝ) : HasDerivAt airySq_F (airySq_c * airySq_F1 x) x :=
   airySq_hasDerivAt airySq_decay_ai airySq_cont_ai airySq_decay_aiDeriv airySq_cont_aiDeriv
     hasDerivAt_airyAiReal airySq_c_pos x
 
-lemma airySq_hasDerivAt_F1 (x : ℝ) : HasDerivAt airySq_F1 (airySq_c * airySq_F2 x) x :=
+theorem airySq_hasDerivAt_F1 (x : ℝ) : HasDerivAt airySq_F1 (airySq_c * airySq_F2 x) x :=
   airySq_hasDerivAt airySq_decay_aiDeriv airySq_cont_aiDeriv airySq_decay_mul_ai
     (by have := airySq_cont_ai; fun_prop) hasDerivAt_airyAiDerivReal airySq_c_pos x
 
-lemma airySq_hasDerivAt_F2 (x : ℝ) : HasDerivAt airySq_F2 (airySq_c * airySq_F3 x) x :=
+theorem airySq_hasDerivAt_F2 (x : ℝ) : HasDerivAt airySq_F2 (airySq_c * airySq_F3 x) x :=
   airySq_hasDerivAt airySq_decay_mul_ai (by have := airySq_cont_ai; fun_prop) airySq_decay_ai_add
     (by have := airySq_cont_ai; have := airySq_cont_aiDeriv; fun_prop)
     (fun u => ((hasDerivAt_id u).mul (hasDerivAt_airyAiReal u)).congr_deriv (by simp))
     airySq_c_pos x
 
 /-- Integrability of `t · 2ct Ai'(c(x+t²))` on `(0, ∞)`. -/
-lemma airySq_integrable_ibp (x : ℝ) : IntegrableOn (fun t : ℝ => t * (2 * airySq_c * t *
+theorem airySq_integrable_ibp (x : ℝ) : IntegrableOn (fun t : ℝ => t * (2 * airySq_c * t *
       airyAiDerivReal (airySq_c * (x + t ^ 2)))) (Ioi 0) := by
   have hc0 := airySq_c_pos
   obtain ⟨K, hK0, hK⟩ := airySq_bound airySq_decay_aiDeriv airySq_cont_aiDeriv hc0 x
@@ -257,7 +256,7 @@ lemma airySq_integrable_ibp (x : ℝ) : IntegrableOn (fun t : ℝ => t * (2 * ai
   exact mul_le_mul_of_nonneg_left this (by positivity)
 
 /-- Integration by parts in `t`: `2c ∫₀^∞ t² Ai'(c(x+t²)) dt = -F(x)`. -/
-lemma airySq_ibp (x : ℝ) :
+theorem airySq_ibp (x : ℝ) :
     ∫ t in Ioi 0, t * (2 * airySq_c * t * airyAiDerivReal (airySq_c * (x + t ^ 2))) =
       -airySq_F x := by
   have hc0 := airySq_c_pos
@@ -295,7 +294,7 @@ lemma airySq_ibp (x : ℝ) :
   exact this
 
 /-- The product equation for `F`: the derivative of `F'' = c² F₂` is `4x F' + 2F`. -/
-lemma airySq_hasDerivAt_F2' (x : ℝ) :
+theorem airySq_hasDerivAt_F2' (x : ℝ) :
     HasDerivAt (fun x => airySq_c ^ 2 * airySq_F2 x)
       (4 * x * (airySq_c * airySq_F1 x) + 2 * airySq_F x) x := by
   have hc0 := airySq_c_pos
@@ -326,20 +325,20 @@ def airySq_det (y y1 y2 u u1 u2 v v1 v2 : ℝ → ℝ) (x : ℝ) : ℝ :=
     v x * (y1 x * u2 x - u1 x * y2 x)
 
 /-- The Wronskian of three solutions of the product equation is constant (no `y''` term). -/
-lemma airySq_det_const {y y1 y2 u u1 u2 v v1 v2 : ℝ → ℝ} (hy : airySq_IsProdSol y y1 y2)
+theorem airySq_det_const {y y1 y2 u u1 u2 v v1 v2 : ℝ → ℝ} (hy : airySq_IsProdSol y y1 y2)
     (hu : airySq_IsProdSol u u1 u2) (hv : airySq_IsProdSol v v1 v2) (x : ℝ) :
     airySq_det y y1 y2 u u1 u2 v v1 v2 x = airySq_det y y1 y2 u u1 u2 v v1 v2 0 :=
   ODE.thirdOrderWronskian_const (p := fun x => 4*x) (q := fun _ => 2) hy hu hv x 0
 
 /-- Cramer's rule for the first component of three-vectors. -/
-lemma airySq_cramer (y y1 y2 u u1 u2 v v1 v2 w w1 w2 : ℝ → ℝ) (x : ℝ) :
+theorem airySq_cramer (y y1 y2 u u1 u2 v v1 v2 w w1 w2 : ℝ → ℝ) (x : ℝ) :
     airySq_det u u1 u2 v v1 v2 w w1 w2 x * y x =
       airySq_det y y1 y2 v v1 v2 w w1 w2 x * u x + airySq_det u u1 u2 y y1 y2 w w1 w2 x * v x +
         airySq_det u u1 u2 v v1 v2 y y1 y2 x * w x :=
   ODE.thirdOrder_cramer y y1 y2 u u1 u2 v v1 v2 w w1 w2 x
 
 /-- Decomposition along a fundamental system with constant nonzero Wronskian. -/
-lemma airySq_decomp_gen {y y1 y2 u u1 u2 v v1 v2 w w1 w2 : ℝ → ℝ} (hy : airySq_IsProdSol y y1 y2)
+theorem airySq_decomp_gen {y y1 y2 u u1 u2 v v1 v2 w w1 w2 : ℝ → ℝ} (hy : airySq_IsProdSol y y1 y2)
     (hu : airySq_IsProdSol u u1 u2) (hv : airySq_IsProdSol v v1 v2) (hw : airySq_IsProdSol w w1 w2)
     {D : ℝ} (hW : ∀ x, airySq_det u u1 u2 v v1 v2 w w1 w2 x = D) (hD : D ≠ 0) (x : ℝ) :
     y x = airySq_det y y1 y2 v v1 v2 w w1 w2 0 / D * u x +
@@ -348,7 +347,7 @@ lemma airySq_decomp_gen {y y1 y2 u u1 u2 v v1 v2 w w1 w2 : ℝ → ℝ} (hy : ai
   ODE.thirdOrder_decomp (p := fun x => 4*x) (q := fun _ => 2) hy hu hv hw hW hD x 0
 
 /-- Products of real Airy solutions solve the product equation. -/
-lemma airySq_isProdSol_mul {f f' g g' : ℝ → ℝ} (hf : ∀ x, HasDerivAt f (f' x) x)
+theorem airySq_isProdSol_mul {f f' g g' : ℝ → ℝ} (hf : ∀ x, HasDerivAt f (f' x) x)
     (hf' : ∀ x, HasDerivAt f' (x * f x) x) (hg : ∀ x, HasDerivAt g (g' x) x)
     (hg' : ∀ x, HasDerivAt g' (x * g x) x) :
     airySq_IsProdSol (fun x => f x * g x) (fun x => f' x * g x + f x * g' x)
@@ -358,13 +357,13 @@ lemma airySq_isProdSol_mul {f f' g g' : ℝ → ℝ} (hf : ∀ x, HasDerivAt f (
     (fun x => ⟨hf x, hf' x⟩) (fun x => ⟨hg x, hg' x⟩) (fun x => hasDerivAt_id x)
 
 /-- The triple of `F`. -/
-lemma airySq_isProdSol_F :
+theorem airySq_isProdSol_F :
     airySq_IsProdSol airySq_F (fun x => airySq_c * airySq_F1 x) (fun x => airySq_c ^ 2 * airySq_F2 x) :=
   fun x => ⟨airySq_hasDerivAt_F x,
     ((airySq_hasDerivAt_F1 x).const_mul airySq_c).congr_deriv (by ring), airySq_hasDerivAt_F2' x⟩
 
 /-- Every solution of the product equation is a combination of `Ai², Ai Bi, Bi²`. -/
-lemma airySq_decomp {y y1 y2 : ℝ → ℝ} (hy : airySq_IsProdSol y y1 y2) :
+theorem airySq_decomp {y y1 y2 : ℝ → ℝ} (hy : airySq_IsProdSol y y1 y2) :
     ∃ a b d : ℝ, ∀ x, y x = a * airyAiReal x ^ 2 + b * (airyAiReal x * airyBiReal x) +
       d * airyBiReal x ^ 2 := by
   have hA := hasDerivAt_airyAiReal
@@ -395,7 +394,7 @@ lemma airySq_decomp {y y1 y2 : ℝ → ℝ} (hy : airySq_IsProdSol y y1 y2) :
   exact ⟨a, b, d, fun x => (hk x).trans (by ring)⟩
 
 /-- The Mellin value `∫₀^∞ s^{-1/2} Ai(s) ds = √π / (3^{5/6} Γ(5/6))` (DLMF 9.10.17 at `α = 1/2`). -/
-lemma airySq_mellin_half :
+theorem airySq_mellin_half :
     ∫ s in Ioi 0, s ^ (-(1 / 2) : ℝ) * airyAiReal s =
       Real.sqrt π / ((3 : ℝ) ^ (5 / 6 : ℝ) * Real.Gamma (5 / 6)) := by
   have h := (airyAi_mellin (α := 1 / 2) (by norm_num)).2
@@ -415,7 +414,7 @@ lemma airySq_mellin_half :
   exact_mod_cast h
 
 /-- `F(0) = ∫₀^∞ Ai(ct²) dt` through the substitutions `y = t²`, `s = cy`. -/
-lemma airySq_F_zero_eq :
+theorem airySq_F_zero_eq :
     airySq_F 0 = airySq_c ^ (-(1 / 2) : ℝ) / 2 * ∫ s in Ioi 0, s ^ (-(1 / 2) : ℝ) * airyAiReal s := by
   have hc0 := airySq_c_pos
   have h1 := integral_comp_rpow_Ioi_of_pos (g := fun y : ℝ => y ^ (-(1 / 2) : ℝ) / 2 *
@@ -448,7 +447,7 @@ lemma airySq_F_zero_eq :
   rw [← e4]; ring
 
 /-- The normalization `c F(0) = π Ai(0)²`. -/
-lemma airySq_F_zero : airySq_c * airySq_F 0 = π * airyAiReal 0 ^ 2 := by
+theorem airySq_F_zero : airySq_c * airySq_F 0 = π * airyAiReal 0 ^ 2 := by
   have hA : airyAiReal 0 = 1 / ((3 : ℝ) ^ (2 / 3 : ℝ) * Real.Gamma (2 / 3)) := by
     have h := airyAi_zero
     rw [Gamma_two_thirds_eq, ← ofReal_mul, ← ofReal_one, ← ofReal_div] at h
@@ -481,7 +480,7 @@ lemma airySq_F_zero : airySq_c * airySq_F 0 = π * airyAiReal 0 ^ 2 := by
     (3 : ℝ) ^ (5 / 6 : ℝ)) * hrefl - (2 * (3 : ℝ) ^ (5 / 6 : ℝ) * π) * hdup
 
 /-- `|F(x)| ≤ e^{-2x/3} ∫₀^∞ e^{-2t²/3} dt` for `x ≥ 1`. -/
-lemma airySq_F_le {x : ℝ} (hx : 1 ≤ x) :
+theorem airySq_F_le {x : ℝ} (hx : 1 ≤ x) :
     |airySq_F x| ≤ Real.exp (-(2 / 3) * x) * ∫ t in Ioi 0, Real.exp (-(2 / 3) * t ^ 2) := by
   have hc1 : 1 ≤ airySq_c := Real.one_le_rpow (by norm_num) (by norm_num)
   rw [← integral_const_mul, airySq_F, ← Real.norm_eq_abs]
@@ -496,7 +495,7 @@ lemma airySq_F_le {x : ℝ} (hx : 1 ≤ x) :
   exact Real.exp_le_exp.mpr (by nlinarith)
 
 /-- `x^{1/2} F(x) → 0` as `x → +∞`. -/
-lemma airySq_tendsto_F : Tendsto (fun x => x ^ (1 / 2 : ℝ) * airySq_F x) atTop (𝓝 0) := by
+theorem airySq_tendsto_F : Tendsto (fun x => x ^ (1 / 2 : ℝ) * airySq_F x) atTop (𝓝 0) := by
   have hl := (tendsto_rpow_mul_exp_neg_mul_atTop_nhds_zero (1 / 2) (2 / 3) (by norm_num)).mul_const
     (∫ t in Ioi 0, Real.exp (-(2 / 3) * t ^ 2))
   rw [zero_mul] at hl
@@ -506,7 +505,7 @@ lemma airySq_tendsto_F : Tendsto (fun x => x ^ (1 / 2 : ℝ) * airySq_F x) atTop
   exact mul_le_mul_of_nonneg_left (by simpa [neg_mul] using airySq_F_le hx) (by positivity)
 
 /-- `x^{1/2} Ai(x)² → 0` as `x → +∞`. -/
-lemma airySq_tendsto_ai_sq :
+theorem airySq_tendsto_ai_sq :
     Tendsto (fun x => x ^ (1 / 2 : ℝ) * airyAiReal x ^ 2) atTop (𝓝 0) := by
   have hl := tendsto_rpow_mul_exp_neg_mul_atTop_nhds_zero (1 / 2) (4 / 3) (by norm_num)
   refine squeeze_zero_norm' ?_ hl
@@ -518,7 +517,7 @@ lemma airySq_tendsto_ai_sq :
     _ = _ := by rw [← Real.exp_nat_mul]; ring_nf
 
 /-- `x^{1/2} Ai(x) Bi(x) → 1/(2π)` as `x → +∞`, from DLMF 9.7.5 and 9.7.7. -/
-lemma airySq_tendsto_ai_bi :
+theorem airySq_tendsto_ai_bi :
     Tendsto (fun x => x ^ (1 / 2 : ℝ) * (airyAiReal x * airyBiReal x)) atTop (𝓝 (1 / (2 * π))) := by
   have hw := IsEquivalent.refl (u := fun x : ℝ => ((x ^ (1 / 2 : ℝ) : ℝ) : ℂ)) (l := atTop)
   have h := hw.mul (airyAi_isEquivalent.mul airyBi_isEquivalent)
@@ -633,7 +632,7 @@ theorem airyAi_sq_eq_integral (x : ℝ) :
   linarith
 
 /-- The substitution `s = t²`: `F(x) = ½ ∫₀^∞ s^{-1/2} Ai(c(x+s)) ds`. -/
-lemma airySq_F_eq_half (x : ℝ) :
+theorem airySq_F_eq_half (x : ℝ) :
     airySq_F x = ∫ s in Ioi 0, s ^ (-(1 / 2) : ℝ) / 2 * airyAiReal (airySq_c * (x + s)) := by
   have h1 := integral_comp_rpow_Ioi_of_pos (g := fun s : ℝ => s ^ (-(1 / 2) : ℝ) / 2 *
     airyAiReal (airySq_c * (x + s))) (p := 2) (by norm_num)
@@ -652,20 +651,20 @@ lemma airySq_F_eq_half (x : ℝ) :
 /-! ### The Mellin transform of `Ai²` (DLMF 9.11.15) -/
 
 /-- Shift of a half-line integral to a whole-line integral with an indicator. -/
-lemma airySq_shift {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] (g : ℝ → E) (x : ℝ) :
+theorem airySq_shift {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] (g : ℝ → E) (x : ℝ) :
     ∫ s in Ioi 0, g s = ∫ v, (Ioi x).indicator (fun v => g (v - x)) v := by
   rw [← integral_indicator measurableSet_Ioi, ← integral_sub_right_eq_self _ x]
   congr 1; ext v
   simp only [indicator, mem_Ioi, sub_pos]
 
 /-- `|Ai| ≤ K` on `[0, ∞)`. -/
-lemma airySq_ai_bdd : ∃ K, ∀ u, 0 ≤ u → |airyAiReal u| ≤ K := by
+theorem airySq_ai_bdd : ∃ K, ∀ u, 0 ≤ u → |airyAiReal u| ≤ K := by
   obtain ⟨K, hK0, hK⟩ := airySq_decay_ai.ext airySq_cont_ai 0
   refine ⟨K, fun u hu => (hK u hu).trans ?_⟩
   exact mul_le_of_le_one_right hK0 (Real.exp_le_one_iff.mpr (by linarith))
 
 /-- Integrability of `t^{α-1} Ai(t)²` on `(0, ∞)`. -/
-lemma airySq_integrableOn_mellin {α : ℂ} (hα : 0 < α.re) :
+theorem airySq_integrableOn_mellin {α : ℂ} (hα : 0 < α.re) :
     IntegrableOn (fun t : ℝ => (t : ℂ) ^ (α - 1) * airyAi t ^ 2) (Ioi 0) := by
   obtain ⟨K, hK⟩ := airySq_ai_bdd
   have h := (airyAi_mellin hα).1.mul_bdd (c := K) (g := fun t : ℝ => airyAi t)
@@ -683,7 +682,7 @@ def airySq_Φ (α : ℂ) (x v : ℝ) : ℂ :=
     ((airyAiReal (airySq_c * v) : ℝ) : ℂ) else 0
 
 /-- The real kernel `s^{-1/2} Ai(c(x+s))` is integrable on `(0, ∞)`. -/
-lemma airySq_integrableOn_half (x : ℝ) :
+theorem airySq_integrableOn_half (x : ℝ) :
     IntegrableOn (fun s : ℝ => s ^ (-(1 / 2) : ℝ) / 2 * airyAiReal (airySq_c * (x + s))) (Ioi 0) := by
   rw [← integrableOn_Ioi_comp_rpow_iff _ (p := 2) (by norm_num)]
   refine (airySq_integrable airySq_decay_ai airySq_cont_ai airySq_c_pos x).integrableOn.congr_fun
@@ -696,7 +695,7 @@ lemma airySq_integrableOn_half (x : ℝ) :
   field_simp
 
 /-- Pointwise form: `x^{α-1} Ai(x)² = (c/2π) ∫ Φ(x, v) dv` for `x > 0`. -/
-lemma airySq_mellin_pt (α : ℂ) (x : ℝ) :
+theorem airySq_mellin_pt (α : ℂ) (x : ℝ) :
     (x : ℂ) ^ (α - 1) * airyAi x ^ 2 = ((airySq_c / (2 * π) : ℝ) : ℂ) * ∫ v, airySq_Φ α x v := by
   have e1 : (fun v => airySq_Φ α x v) = fun v => (x : ℂ) ^ (α - 1) * (Ioi x).indicator
       (fun v => ((((v - x) ^ (-(1 / 2) : ℝ) / 2 * airyAiReal (airySq_c * (x + (v - x))) : ℝ) : ℂ))
@@ -725,7 +724,7 @@ lemma airySq_mellin_pt (α : ℂ) (x : ℝ) :
 def airySq_kr (x v : ℝ) : ℝ :=
   (Ioi x).indicator (fun v => (v - x) ^ (-(1 / 2) : ℝ) * airyAiReal (airySq_c * v)) v
 
-lemma airySq_Φ_eq (α : ℂ) (x v : ℝ) :
+theorem airySq_Φ_eq (α : ℂ) (x v : ℝ) :
     airySq_Φ α x v = (x : ℂ) ^ (α - 1) * ((airySq_kr x v : ℝ) : ℂ) := by
   by_cases hv : x < v
   · simp only [airySq_Φ, airySq_kr, hv, ↓reduceIte]
@@ -734,7 +733,7 @@ lemma airySq_Φ_eq (α : ℂ) (x v : ℝ) :
   · simp only [airySq_Φ, airySq_kr, hv, ↓reduceIte]
     rw [indicator_of_notMem (by simpa using hv), ofReal_zero, mul_zero]
 
-lemma airySq_kr_shift (x : ℝ) : (fun v => airySq_kr x v) = fun v =>
+theorem airySq_kr_shift (x : ℝ) : (fun v => airySq_kr x v) = fun v =>
     (Ioi 0).indicator (fun s => s ^ (-(1 / 2) : ℝ) / 2 * airyAiReal (airySq_c * (x + s)) * 2) (v - x) := by
   funext v
   by_cases hv : x < v
@@ -744,12 +743,12 @@ lemma airySq_kr_shift (x : ℝ) : (fun v => airySq_kr x v) = fun v =>
   · rw [airySq_kr, indicator_of_notMem (by simpa using hv),
       indicator_of_notMem (by simpa using hv)]
 
-lemma airySq_kr_integrable (x : ℝ) : Integrable (fun v => airySq_kr x v) := by
+theorem airySq_kr_integrable (x : ℝ) : Integrable (fun v => airySq_kr x v) := by
   rw [airySq_kr_shift]
   have h := IntegrableOn.integrable_indicator ((airySq_integrableOn_half x).mul_const 2) measurableSet_Ioi
   exact h.comp_sub_right x
 
-lemma airySq_kr_integral (x : ℝ) : ∫ v, airySq_kr x v = 2 * airySq_F x := by
+theorem airySq_kr_integral (x : ℝ) : ∫ v, airySq_kr x v = 2 * airySq_F x := by
   have e : (fun v => airySq_kr x v) = fun v => (Ioi x).indicator (fun v =>
       (fun s => s ^ (-(1 / 2) : ℝ) / 2 * airyAiReal (airySq_c * (x + s)) * 2) (v - x)) v := by
     funext v
@@ -759,20 +758,20 @@ lemma airySq_kr_integral (x : ℝ) : ∫ v, airySq_kr x v = 2 * airySq_F x := by
     integral_mul_const, airySq_F_eq_half]
   ring
 
-lemma airySq_kr_nonneg {x : ℝ} (hx : 0 ≤ x) (v : ℝ) : 0 ≤ airySq_kr x v := by
+theorem airySq_kr_nonneg {x : ℝ} (hx : 0 ≤ x) (v : ℝ) : 0 ≤ airySq_kr x v := by
   rw [airySq_kr]
   refine indicator_nonneg (fun v hv => ?_) v
   have hv' : x < v := hv
   exact mul_nonneg (Real.rpow_nonneg (by linarith) _)
     (airyAiReal_pos (mul_nonneg airySq_c_pos.le (by linarith))).le
 
-lemma airySq_Φ_measurable (α : ℂ) : Measurable fun p : ℝ × ℝ => airySq_Φ α p.1 p.2 := by
+theorem airySq_Φ_measurable (α : ℂ) : Measurable fun p : ℝ × ℝ => airySq_Φ α p.1 p.2 := by
   unfold airySq_Φ
   refine Measurable.ite (measurableSet_lt measurable_fst measurable_snd) ?_ measurable_const
   have := airySq_cont_ai
   fun_prop
 
-lemma airySq_Φ_integrable {α : ℂ} (hα : 0 < α.re) :
+theorem airySq_Φ_integrable {α : ℂ} (hα : 0 < α.re) :
     Integrable (fun p : ℝ × ℝ => airySq_Φ α p.1 p.2) ((volume.restrict (Ioi 0)).prod volume) := by
   rw [integrable_prod_iff (airySq_Φ_measurable α).aestronglyMeasurable]
   constructor
@@ -795,7 +794,7 @@ lemma airySq_Φ_integrable {α : ℂ} (hα : 0 < α.re) :
     linear_combination -h
 
 /-- The inner `x`-integral is a Beta integral (DLMF 5.12.1). -/
-lemma airySq_inner (α : ℂ) (v : ℝ) :
+theorem airySq_inner (α : ℂ) (v : ℝ) :
     ∫ x in Ioi 0, airySq_Φ α x v = (Ioi 0).indicator (fun v : ℝ => betaIntegral α (1 / 2) *
       ((v : ℂ) ^ (α + 1 / 2 - 1) * ((airyAiReal (airySq_c * v) : ℝ) : ℂ))) v := by
   by_cases hv : 0 < v
@@ -816,7 +815,7 @@ lemma airySq_inner (α : ℂ) (v : ℝ) :
     simp only [airySq_Φ, this, ↓reduceIte]
 
 /-- Fubini: `∫₀^∞ ∫ Φ(x,v) dv dx = B(α, 1/2) ∫₀^∞ v^{α-1/2} Ai(cv) dv`. -/
-lemma airySq_double {α : ℂ} (hα : 0 < α.re) :
+theorem airySq_double {α : ℂ} (hα : 0 < α.re) :
     ∫ x in Ioi 0, ∫ v, airySq_Φ α x v = betaIntegral α (1 / 2) *
       ∫ v : ℝ in Ioi 0, (v : ℂ) ^ (α + 1 / 2 - 1) * ((airyAiReal (airySq_c * v) : ℝ) : ℂ) := by
   rw [integral_integral_swap (f := fun x v => airySq_Φ α x v) (airySq_Φ_integrable hα)]
@@ -824,11 +823,11 @@ lemma airySq_double {α : ℂ} (hα : 0 < α.re) :
   rw [integral_indicator measurableSet_Ioi, integral_const_mul]
 
 /-- Complex powers of a positive real as exponentials. -/
-lemma airySq_cpow_eq {b : ℝ} (hb : 0 < b) (z : ℂ) : ((b : ℝ) : ℂ) ^ z = exp ((Real.log b : ℂ) * z) := by
+theorem airySq_cpow_eq {b : ℝ} (hb : 0 < b) (z : ℂ) : ((b : ℝ) : ℂ) ^ z = exp ((Real.log b : ℂ) * z) := by
   rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr hb.ne'), ← ofReal_log hb.le]
 
 /-- The scaled Mellin transform `∫₀^∞ v^{w-1} Ai(cv) dv = c^{-w} M_Ai(w)` (DLMF 9.10.17). -/
-lemma airySq_scaled_mellin {w : ℂ} (hw : 0 < w.re) :
+theorem airySq_scaled_mellin {w : ℂ} (hw : 0 < w.re) :
     ∫ v : ℝ in Ioi 0, (v : ℂ) ^ (w - 1) * ((airyAiReal (airySq_c * v) : ℝ) : ℂ) =
       exp (-(Real.log airySq_c : ℂ) * w) *
         (Gamma w / ((3 : ℂ) ^ ((w + 2) / 3) * Gamma (w / 3 + 2 / 3))) := by

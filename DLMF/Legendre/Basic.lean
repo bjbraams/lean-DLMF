@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Hypergeometric.ArgumentContinuation
-public import DLMF.Hypergeometric.DiffEq
 public import DLMF.OrthogonalPolynomials.Classical
 
 /-!
@@ -32,7 +31,7 @@ namespace DLMF.Hypergeometric
 /-- The hypergeometric equation (DLMF 15.10.1) for the continuation `𝐅` on the cut plane, with
 `𝐅'` and `𝐅''` written through 15.5.1–15.5.2. -/
 @[dlmf 15.10.E1]
-lemma regularizedGaussHG_ode (a b c : ℂ) {z : ℂ} (hz : z ∈ cutPlane) :
+theorem regularizedGaussHG_ode (a b c : ℂ) {z : ℂ} (hz : z ∈ cutPlane) :
     z * (1 - z) * (poch a 2 * poch b 2 * regularizedGaussHG (a + 2) (b + 2) (c + 2) z) +
       (c - (a + b + 1) * z) * (a * b * regularizedGaussHG (a + 1) (b + 1) (c + 1) z) -
       a * b * regularizedGaussHG a b c z = 0 := by
@@ -57,7 +56,7 @@ def ferrersP (ν μ : ℂ) (x : ℝ) : ℂ :=
   (((1 + x) / (1 - x) : ℝ) : ℂ) ^ (μ / 2) * regularizedGaussHG (ν + 1) (-ν) (1 - μ) ((1 - x) / 2)
 
 /-- For `z ∉ (-∞, -1]`, the argument `(1-z)/2` lies in the cut plane. -/
-lemma mem_cutPlane_of_one_add {z : ℂ} (hz : 1 + z ∈ slitPlane) : (1 - z) / 2 ∈ cutPlane := by
+theorem mem_cutPlane_of_one_add {z : ℂ} (hz : 1 + z ∈ slitPlane) : (1 - z) / 2 ∈ cutPlane := by
   rw [mem_cutPlane, show 1 - (1 - z) / 2 = (1 + z) / 2 by ring]
   rw [mem_slitPlane_iff] at hz ⊢
   rcases hz with h | h
@@ -80,11 +79,11 @@ theorem legendreP_neg_sub_one (ν : ℂ) {z : ℂ} (hz : 1 + z ∈ slitPlane) :
 
 
 /-- The domain `ℂ ∖ (-∞, -1]` is open. -/
-lemma isOpen_one_add_mem_slitPlane : IsOpen {z : ℂ | 1 + z ∈ slitPlane} :=
+theorem isOpen_one_add_mem_slitPlane : IsOpen {z : ℂ | 1 + z ∈ slitPlane} :=
   isOpen_slitPlane.preimage (by fun_prop)
 
 /-- Chain rule for `z ↦ 𝐅(a,b;c;(1-z)/2)`. -/
-lemma hasDerivAt_regularizedGaussHG_half (a b c : ℂ) {z : ℂ} (hz : 1 + z ∈ slitPlane) :
+theorem hasDerivAt_regularizedGaussHG_half (a b c : ℂ) {z : ℂ} (hz : 1 + z ∈ slitPlane) :
     HasDerivAt (fun z => regularizedGaussHG a b c ((1 - z) / 2))
       (-(1 / 2) * (a * b * regularizedGaussHG (a + 1) (b + 1) (c + 1) ((1 - z) / 2))) z := by
   have hw := mem_cutPlane_of_one_add hz
@@ -95,7 +94,7 @@ lemma hasDerivAt_regularizedGaussHG_half (a b c : ℂ) {z : ℂ} (hz : 1 + z ∈
   exact (h.comp z hl).congr_deriv (by ring)
 
 /-- `P_ν'` through `𝐅(1-ν, ν+2; 2; (1-z)/2)`. -/
-lemma deriv_legendreP (ν : ℂ) {z : ℂ} (hz : 1 + z ∈ slitPlane) :
+theorem deriv_legendreP (ν : ℂ) {z : ℂ} (hz : 1 + z ∈ slitPlane) :
     deriv (legendreP ν) z =
       -(1 / 2) * (-ν * (ν + 1) * regularizedGaussHG (-ν + 1) (ν + 1 + 1) 2 ((1 - z) / 2)) := by
   have h := (hasDerivAt_regularizedGaussHG_half (-ν) (ν + 1) 1 hz).deriv
@@ -103,7 +102,7 @@ lemma deriv_legendreP (ν : ℂ) {z : ℂ} (hz : 1 + z ∈ slitPlane) :
   exact h
 
 /-- `P_ν''` through `𝐅(2-ν, ν+3; 3; (1-z)/2)`. -/
-lemma iteratedDeriv_two_legendreP (ν : ℂ) {z : ℂ} (hz : 1 + z ∈ slitPlane) :
+theorem iteratedDeriv_two_legendreP (ν : ℂ) {z : ℂ} (hz : 1 + z ∈ slitPlane) :
     iteratedDeriv 2 (legendreP ν) z =
       (1 / 4) * (-ν * (-ν + 1) * ((ν + 1) * (ν + 2)) *
         regularizedGaussHG (-ν + 2) (ν + 3) 3 ((1 - z) / 2)) := by

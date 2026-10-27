@@ -6,8 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMFMathlib.Analysis.ODE.LiouvilleGreen
-public import Mathlib.Analysis.Complex.RealDeriv
-public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 
 /-!
 # Liouville–Green approximation: the exponential and oscillatory cases

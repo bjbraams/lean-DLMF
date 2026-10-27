@@ -7,6 +7,7 @@ module
 
 public import DLMF.ErrorFunctions.Basic
 public import DLMF.Hypergeometric.GeneralizedCalculus
+public import DLMF.Confluent.ExpIntegral
 
 /-!
 # Symmetries, differential identities and interrelations, DLMF §§7.4–7.5 and 7.10–7.11
@@ -504,7 +505,7 @@ theorem fresnel_kummerM_pair (z : ℂ) :
   ring
 
 /-- The adjacent upper/lower Gamma ratio in a 1F2 coefficient, on the positive parameter half-planes. -/
-theorem regularized1F2_gamma_coeff {a c : ℂ} (ha : 0<a.re) (hc : 0<c.re) (n : ℕ) :
+lemma regularized1F2_gamma_coeff {a c : ℂ} (ha : 0<a.re) (hc : 0<c.re) (n : ℕ) :
     Gamma (a+1)*Gamma c*regularizedHGFunCoeff {a} {a+1,c} n=
       a*Gamma c/((a+n)*(n.factorial:ℂ)*Gamma (c+n)) := by
   have hna : ∀ k : ℕ, a≠-k := by

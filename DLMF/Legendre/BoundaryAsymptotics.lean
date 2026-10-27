@@ -6,9 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Hypergeometric.Boundary
-public import DLMF.Legendre.Hypergeometric
-public import DLMF.Gamma.Pochhammer
 public import DLMF.Gamma.RecipGammaDeriv
+public import DLMF.Legendre.Connections
 
 /-!
 # Boundary asymptotics of Legendre functions
@@ -40,20 +39,20 @@ open Complex Filter Set Asymptotics DLMF.Hypergeometric
 open scoped Real Topology Nat
 namespace DLMF.Legendre
 
-lemma legBd_eventually_norm_lt_one :
+theorem legBd_eventually_norm_lt_one :
     ∀ᶠ x : ℝ in 𝓝[<] (1:ℝ), ‖(x:ℂ)‖ < 1 := by
   filter_upwards [Ioo_mem_nhdsLT (show (-1:ℝ) < 1 by norm_num)] with x hx
   rw [Complex.norm_real, Real.norm_eq_abs, abs_lt]; exact hx
 
 /-- Regular-`c` case of the regularized Gauss limit. -/
-lemma legBd_tendsto_rGHG_one_of_regular {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k)
+theorem legBd_tendsto_rGHG_one_of_regular {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k)
     (h : 0 < (c-a-b).re) :
     Tendsto (fun x : ℝ => regularizedGaussHG a b c x) (𝓝[<] 1)
       (𝓝 (Gamma (c-a-b) * ((Gamma (c-a))⁻¹ * (Gamma (c-b))⁻¹))) := by
   simpa only [div_eq_mul_inv, mul_inv] using tendsto_regularizedGaussHG_left_one h
 
 /-- `(a)_{n+1} / Γ(1-a) = (-1)^{n+1} / Γ(-n-a)`. -/
-lemma legBd_poch_mul_recip_Gamma (a : ℂ) (n : ℕ) :
+theorem legBd_poch_mul_recip_Gamma (a : ℂ) (n : ℕ) :
     poch a (n+1) * (Gamma (1-a))⁻¹ = (-1)^(n+1) * (Gamma (-n-a))⁻¹ := by
   have h1 := DLMF.Gamma.poch_neg_eq (n+a) (n+1)
   rw [show (n:ℂ)+a-((n+1:ℕ):ℂ)+1 = a by push_cast; ring] at h1
@@ -89,7 +88,7 @@ theorem legBd_tendsto_rGHG_one_neg {a b c : ℂ} (h : (c-a-b).re < 0) :
     show a+b-c+(c-a-b) = 0 by ring, cpow_zero, one_mul]
 
 /-- `x² → 1⁻` as `x → 1⁻`. -/
-lemma legBd_tendsto_sq_nhdsLT :
+theorem legBd_tendsto_sq_nhdsLT :
     Tendsto (fun x : ℝ => x^2) (𝓝[<] (1:ℝ)) (𝓝[<] 1) := by
   refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
   · have := ((continuous_pow 2).tendsto (1:ℝ)).mono_left (nhdsWithin_le_nhds (s := Iio 1))
@@ -98,7 +97,7 @@ lemma legBd_tendsto_sq_nhdsLT :
     simp only [mem_Iio]; nlinarith [hx.1, hx.2]
 
 /-- `1-x² ≠ 0`-type cancellation `(1-x²)^(μ/2) (1-x²)^(-μ/2) = 1` on `(-1,1)`. -/
-lemma legBd_one_sub_sq_cpow_mul_neg (μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem legBd_one_sub_sq_cpow_mul_neg (μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     (1-(x:ℂ)^2)^(μ/2) * (1-(x:ℂ)^2)^(-μ/2) = 1 := by
   have hne : (1-(x:ℂ)^2) ≠ 0 := by
     rw [show (1:ℂ)-(x:ℂ)^2 = ((1-x^2:ℝ):ℂ) by push_cast; ring]
@@ -106,7 +105,7 @@ lemma legBd_one_sub_sq_cpow_mul_neg (μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ
   rw [← cpow_add _ _ hne, show μ/2+(-μ/2) = 0 by ring, cpow_zero]
 
 /-- The regularized pullbacks in `ferrersQ` tend to their Gauss values as `x → 1⁻`. -/
-lemma legBd_tendsto_rGHG_sq {a b c : ℂ} (h : 0 < (c-a-b).re) :
+theorem legBd_tendsto_rGHG_sq {a b c : ℂ} (h : 0 < (c-a-b).re) :
     Tendsto (fun x : ℝ => regularizedGaussHG a b c ((x:ℂ)^2)) (𝓝[<] 1)
       (𝓝 (Gamma (c-a-b) * ((Gamma (c-a))⁻¹ * (Gamma (c-b))⁻¹))) := by
   have := (legBd_tendsto_rGHG_one h).comp legBd_tendsto_sq_nhdsLT
@@ -162,14 +161,14 @@ theorem legBd_ferrersQ_tendsto {ν μ : ℂ} (h : LegendreQRegular ν μ) (hμ :
 
 
 /-- The regularized pullbacks with negative balance, `(1-x²)^(a+b-c) 𝐅(a,b;c;x²)`, as `x → 1⁻`. -/
-lemma legBd_tendsto_rGHG_sq_neg {a b c : ℂ} (h : (c-a-b).re < 0) :
+theorem legBd_tendsto_rGHG_sq_neg {a b c : ℂ} (h : (c-a-b).re < 0) :
     Tendsto (fun x : ℝ => (1-(x:ℂ)^2)^(a+b-c) * regularizedGaussHG a b c ((x:ℂ)^2)) (𝓝[<] 1)
       (𝓝 (Gamma (a+b-c) * ((Gamma a)⁻¹ * (Gamma b)⁻¹))) := by
   have := (legBd_tendsto_rGHG_one_neg h).comp legBd_tendsto_sq_nhdsLT
   simpa [Function.comp_def] using this
 
 /-- `(1-x²)^(μ/2) (1-x²)^(μ/2) = (1-x²)^μ` on `(-1,1)`. -/
-lemma legBd_one_sub_sq_cpow_half_mul (μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem legBd_one_sub_sq_cpow_half_mul (μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     (1-(x:ℂ)^2)^(μ/2) * (1-(x:ℂ)^2)^(μ/2) = (1-(x:ℂ)^2)^μ := by
   have hne : (1-(x:ℂ)^2) ≠ 0 := by
     rw [show (1:ℂ)-(x:ℂ)^2 = ((1-x^2:ℝ):ℂ) by push_cast; ring]
@@ -177,7 +176,7 @@ lemma legBd_one_sub_sq_cpow_half_mul (μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:�
   rw [← cpow_add _ _ hne]; ring_nf
 
 /-- `2^(-μ) 2^(ν+μ) / 2^(ν-μ) = 2 · 2^(μ-1)`. -/
-lemma legBd_two_cpow_identity (ν μ : ℂ) :
+theorem legBd_two_cpow_identity (ν μ : ℂ) :
     (2:ℂ)^(-μ) * 2^(ν+μ) * (2^(ν-μ))⁻¹ = 2 * 2^(μ-1) := by
   have h2 : (2:ℂ) ≠ 0 := by norm_num
   rw [← cpow_neg, ← cpow_add _ _ h2, ← cpow_add _ _ h2]
@@ -252,7 +251,7 @@ theorem legBd_ferrersQ_neg_tendsto {ν μ : ℂ} (hp : LegendreQRegular ν μ)
 
 
 /-- `u ~ v` when `u = v g` eventually and `g → 1`. -/
-lemma legBd_isEquivalent_of_eventuallyEq_mul {l : Filter ℝ} {u v g : ℝ → ℂ}
+theorem legBd_isEquivalent_of_eventuallyEq_mul {l : Filter ℝ} {u v g : ℝ → ℂ}
     (h : u =ᶠ[l] fun x => v x * g x) (hg : Tendsto g l (𝓝 1)) : u ~[l] v := by
   have h1 : g ~[l] Function.const _ (1:ℂ) := (isEquivalent_const_iff_tendsto one_ne_zero).mpr hg
   have h2 := (IsEquivalent.refl (u := v)).mul h1
@@ -262,7 +261,7 @@ lemma legBd_isEquivalent_of_eventuallyEq_mul {l : Filter ℝ} {u v g : ℝ → �
 
 /-- Transfer of a weighted limit to an asymptotic equivalence: if `r u → K` and `r v → M`
 with `K, M ≠ 0`, then `u ~ (K/M) v`. -/
-lemma legBd_isEquivalent_of_tendsto {l : Filter ℝ} {u v r : ℝ → ℂ} {K M : ℂ}
+theorem legBd_isEquivalent_of_tendsto {l : Filter ℝ} {u v r : ℝ → ℂ} {K M : ℂ}
     (hu : Tendsto (fun x => r x * u x) l (𝓝 K)) (hv : Tendsto (fun x => r x * v x) l (𝓝 M))
     (hK : K ≠ 0) (hM : M ≠ 0) :
     u ~[l] fun x => K / M * v x := by
@@ -277,7 +276,7 @@ lemma legBd_isEquivalent_of_tendsto {l : Filter ℝ} {u v r : ℝ → ℂ} {K M 
   field_simp
 
 /-- `(1-x²)^(μ/2) (2/(1-x))^(μ/2) → 2^μ` as `x → 1⁻`. -/
-lemma legBd_tendsto_weight_left (μ : ℂ) :
+theorem legBd_tendsto_weight_left (μ : ℂ) :
     Tendsto (fun x : ℝ => (1-(x:ℂ)^2)^(μ/2) * (2/(1-(x:ℂ)))^(μ/2)) (𝓝[<] 1) (𝓝 (2^μ)) := by
   have hc : ContinuousAt (fun x : ℝ => (2*(1+(x:ℂ)))^(μ/2)) 1 :=
     ContinuousAt.cpow (by fun_prop) continuousAt_const (Or.inl (by norm_num))
@@ -303,14 +302,14 @@ lemma legBd_tendsto_weight_left (μ : ℂ) :
 
 
 /-- `2^(μ-1)/2^μ = 1/2`. -/
-lemma legBd_two_cpow_sub_one_div (μ : ℂ) : (2:ℂ)^(μ-1) / 2^μ = 1/2 := by
+theorem legBd_two_cpow_sub_one_div (μ : ℂ) : (2:ℂ)^(μ-1) / 2^μ = 1/2 := by
   have h2 : (2:ℂ) ≠ 0 := by norm_num
   rw [cpow_sub _ _ h2, cpow_one]
   have : (2:ℂ)^μ ≠ 0 := by simp
   field_simp
 
 /-- `cos(μπ) ≠ 0` when `Re μ > 0` and `μ` is not a positive half-odd integer. -/
-lemma legBd_cos_ne_zero {μ : ℂ} (hμ : 0 < μ.re) (hh : ∀ n : ℕ, μ ≠ n+1/2) : cos (μ*π) ≠ 0 := by
+theorem legBd_cos_ne_zero {μ : ℂ} (hμ : 0 < μ.re) (hh : ∀ n : ℕ, μ ≠ n+1/2) : cos (μ*π) ≠ 0 := by
   intro h0
   obtain ⟨k, hk⟩ := Complex.cos_eq_zero_iff.mp h0
   have hpi : (π:ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
@@ -327,7 +326,7 @@ lemma legBd_cos_ne_zero {μ : ℂ} (hμ : 0 < μ.re) (hh : ∀ n : ℕ, μ ≠ n
   exact hh n (by rw [hμk]; push_cast; ring)
 
 /-- `1/x² → 1⁻` as `x → 1⁺`. -/
-lemma legBd_tendsto_recip_sq_nhdsGT :
+theorem legBd_tendsto_recip_sq_nhdsGT :
     Tendsto (fun x : ℝ => 1/x^2) (𝓝[>] (1:ℝ)) (𝓝[<] 1) := by
   refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
   · have := ((by fun_prop (disch := norm_num) : ContinuousAt (fun x : ℝ => 1/x^2) 1).tendsto).mono_left
@@ -338,7 +337,7 @@ lemma legBd_tendsto_recip_sq_nhdsGT :
     rw [div_lt_one (by positivity)]; nlinarith
 
 /-- `1-1/x² → 1⁻` as `x → ∞`. -/
-lemma legBd_tendsto_one_sub_recip_sq_atTop :
+theorem legBd_tendsto_one_sub_recip_sq_atTop :
     Tendsto (fun x : ℝ => 1-1/x^2) atTop (𝓝[<] 1) := by
   refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
   · have h : Tendsto (fun x : ℝ => 1/x^2) atTop (𝓝 0) := by
@@ -350,7 +349,7 @@ lemma legBd_tendsto_one_sub_recip_sq_atTop :
     linarith
 
 /-- For `x > 1`, the inherited branch is `(x²-1)^(μ/2) = x^μ (1-1/x²)^(μ/2)`. -/
-lemma legBd_branchPower_eq (μ : ℂ) {x : ℝ} (hx : 1 < x) :
+theorem legBd_branchPower_eq (μ : ℂ) {x : ℝ} (hx : 1 < x) :
     legendreBranchPower μ x = (x:ℂ)^μ * (1-1/(x:ℂ)^2)^(μ/2) := by
   have h0 : (0:ℝ) < x := by linarith
   have h1 : (0:ℝ) < x-1 := by linarith
@@ -372,7 +371,7 @@ lemma legBd_branchPower_eq (μ : ℂ) {x : ℝ} (hx : 1 < x) :
   congr 1; push_cast; ring
 
 /-- `Γ((t+1)/2)⁻¹ Γ((t+2)/2)⁻¹ = 2^t Γ(t+1)⁻¹ / √π` (reciprocal duplication, all `t`). -/
-lemma legBd_recip_half_Gammas (t : ℂ) :
+theorem legBd_recip_half_Gammas (t : ℂ) :
     (Gamma ((t+1)/2))⁻¹ * (Gamma ((t+2)/2))⁻¹ = 2^t * (Gamma (t+1))⁻¹ / (Real.sqrt π : ℂ) := by
   have hsq : (Real.sqrt π:ℂ) ≠ 0 := ofReal_ne_zero.mpr (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have h2 : (2:ℂ)^t ≠ 0 := by simp
@@ -424,7 +423,7 @@ theorem legBd_olverQ_tendsto (ν : ℂ) {μ : ℂ} (hμ : 0 < μ.re) :
   field_simp
 
 /-- `4^(μ/2) = 2^μ`. -/
-lemma legBd_four_cpow_half (μ : ℂ) : (4:ℂ)^(μ/2) = 2^μ := by
+theorem legBd_four_cpow_half (μ : ℂ) : (4:ℂ)^(μ/2) = 2^μ := by
   have hl : (log (2:ℂ)).im = 0 := by
     rw [show (2:ℂ) = ((2:ℝ):ℂ) by norm_num, ← ofReal_log (by norm_num), ofReal_im]
   rw [show (4:ℂ) = (2:ℂ)^(2:ℂ) by norm_num,
@@ -432,7 +431,7 @@ lemma legBd_four_cpow_half (μ : ℂ) : (4:ℂ)^(μ/2) = 2^μ := by
   ring_nf
 
 /-- `(1-1/x²)^(μ/2) (2/(x-1))^(μ/2) → 2^μ` as `x → 1⁺`. -/
-lemma legBd_tendsto_weight_right (μ : ℂ) :
+theorem legBd_tendsto_weight_right (μ : ℂ) :
     Tendsto (fun x : ℝ => (1-1/(x:ℂ)^2)^(μ/2) * (2/((x:ℂ)-1))^(μ/2)) (𝓝[>] 1) (𝓝 (2^μ)) := by
   have hc : ContinuousAt (fun x : ℝ => (2*((x:ℂ)+1)/(x:ℂ)^2)^(μ/2)) 1 :=
     ContinuousAt.cpow (by fun_prop (disch := norm_num)) continuousAt_const (Or.inl (by norm_num))
@@ -498,7 +497,7 @@ theorem legBd_associatedP_tendsto_atTop {ν : ℂ} (hν : -1/2 < ν.re) (μ : �
     regularizedGaussHG ((-μ-ν)/2) ((-μ-ν+1)/2) (-μ+1) (1-1/(x:ℂ)^2)) * hp
 
 /-- Regular-`c` case of the zero-balanced logarithmic limit. -/
-lemma legBd_tendsto_rGHG_log_of_regular {a b : ℂ} (hc : ∀ k : ℕ, a + b ≠ -(k : ℂ)) :
+theorem legBd_tendsto_rGHG_log_of_regular {a b : ℂ} (hc : ∀ k : ℕ, a + b ≠ -(k : ℂ)) :
     Tendsto (fun x : ℝ => regularizedGaussHG a b (a+b) x / (-Real.log (1 - x) : ℂ)) (𝓝[<] 1)
       (𝓝 ((Gamma a)⁻¹ * (Gamma b)⁻¹)) := by
   have hΓ : Gamma (a+b) ≠ 0 := Gamma_ne_zero fun k hk => hc k hk
@@ -601,7 +600,7 @@ theorem legBd_associatedP_half_tendsto_atTop (μ : ℂ) :
 
 
 /-- `2^(1/2)/√π = (2/π)^(1/2)` in complex powers. -/
-lemma legBd_sqrt_two_div_sqrt_pi :
+theorem legBd_sqrt_two_div_sqrt_pi :
     (2:ℂ)^(1/2:ℂ) / (Real.sqrt π : ℂ) = ((2/π:ℝ):ℂ)^(1/2:ℂ) := by
   have h1 : (2:ℂ)^(1/2:ℂ) = (((2:ℝ)^(1/2:ℝ) : ℝ) : ℂ) := by
     rw [ofReal_cpow (by norm_num)]; push_cast; rfl
@@ -711,7 +710,7 @@ def legBdZbCoeff (a b : ℂ) (n : ℕ) : ℂ :=
       (Gamma (c-a-b+1+n))⁻¹) (a+b)
 
 /-- `deriv (f · w^n) = deriv f · w^n` for a differentiable `f`. -/
-lemma legBd_deriv_mul_pow {f : ℂ → ℂ} {c₀ : ℂ} (hf : DifferentiableAt ℂ f c₀) (w : ℂ) (n : ℕ) :
+theorem legBd_deriv_mul_pow {f : ℂ → ℂ} {c₀ : ℂ} (hf : DifferentiableAt ℂ f c₀) (w : ℂ) (n : ℕ) :
     deriv (fun c => f c * w^n) c₀ = deriv f c₀ * w^n :=
   (hf.hasDerivAt.mul_const (w^n)).deriv
 
@@ -753,7 +752,7 @@ theorem legBd_zbH_hasSum (a b : ℂ) {w : ℂ} (hw : ‖w‖ < 1) :
   · rfl
 
 /-- `(1/Γ)'(1) = γ`. -/
-lemma legBd_recipGammaDeriv_one_one : recipGammaDeriv 1 1 = Real.eulerMascheroniConstant := by
+theorem legBd_recipGammaDeriv_one_one : recipGammaDeriv 1 1 = Real.eulerMascheroniConstant := by
   rw [recipGammaDeriv_one_eq (fun m h => by
     have := congrArg re h; simp at this; linarith [(m.cast_nonneg : (0:ℝ) ≤ m)]),
     Complex.digamma_one, Complex.Gamma_one]
@@ -776,7 +775,7 @@ theorem legBd_zbCoeff_zero (a b : ℂ) :
   ring
 
 /-- A power series converging on the unit disk is `H(0) + O(w)` at `w = 0`. -/
-lemma legBd_hasSum_sub_isBigO {h : ℕ → ℂ} {H : ℂ → ℂ}
+theorem legBd_hasSum_sub_isBigO {h : ℕ → ℂ} {H : ℂ → ℂ}
     (hH : ∀ w : ℂ, ‖w‖ < 1 → HasSum (fun n => h n * w^n) (H w)) :
     (fun w => H w - h 0) =O[𝓝 0] (fun w => w) := by
   have hs := (hH (1/2) (by norm_num)).summable
@@ -817,13 +816,13 @@ lemma legBd_hasSum_sub_isBigO {h : ℕ → ℂ} {H : ℂ → ℂ}
       nlinarith [mul_nonneg (mul_nonneg hC0 (norm_nonneg w)) (by linarith : (0:ℝ) ≤ 1/4 - ‖w‖)]
 
 /-- `t → 0` in `ℂ` as `t → 0⁺` in `ℝ`. -/
-lemma legBd_tendsto_ofReal_nhdsGT_zero :
+theorem legBd_tendsto_ofReal_nhdsGT_zero :
     Tendsto (fun t : ℝ => (t:ℂ)) (𝓝[>] 0) (𝓝 0) := by
   have := (continuous_ofReal.tendsto (0:ℝ)).mono_left (nhdsWithin_le_nhds (s := Ioi 0))
   simpa using this
 
 /-- `t = O(t ln t)` as `t → 0⁺`. -/
-lemma legBd_isBigO_self_mul_log :
+theorem legBd_isBigO_self_mul_log :
     (fun t : ℝ => (t:ℂ)) =O[𝓝[>] 0] (fun t : ℝ => t * Real.log t) := by
   refine Asymptotics.IsBigO.of_bound 1 ?_
   filter_upwards [Ioo_mem_nhdsGT (show (0:ℝ) < Real.exp (-1) by positivity)] with t ht
@@ -878,7 +877,7 @@ theorem legBd_zeroBalanced_isBigO (a b : ℂ) :
 
 /-- The derivative of the duplication formula for `1/Γ`:
 `(√π/2^(s+1)) K'((s+2)/2,(s+1)/2) = (1/Γ)'(s+1) + ln 2 / Γ(s+1)`. -/
-lemma legBd_duplication_deriv (s : ℂ) :
+theorem legBd_duplication_deriv (s : ℂ) :
     (Real.sqrt π : ℂ) / 2^(s+1) * legBdK' ((s+2)/2) ((s+1)/2) =
       recipGammaDeriv 1 (s+1) + Real.log 2 * (Gamma (s+1))⁻¹ := by
   have hfun : (fun u : ℂ => (Gamma (u+1))⁻¹) = fun u =>
@@ -915,7 +914,7 @@ lemma legBd_duplication_deriv (s : ℂ) :
 
 /-- Comparison of logarithmic scales: if `s ≤ t ≤ 2s` with `0 < s` and `t < 1` eventually, then
 `ln t = O(ln s)` and `t ln t = O(s ln s)`. -/
-lemma legBd_log_comparison {l : Filter ℝ} {s t : ℝ → ℝ}
+theorem legBd_log_comparison {l : Filter ℝ} {s t : ℝ → ℝ}
     (h : ∀ᶠ x in l, 0 < s x ∧ s x ≤ t x ∧ t x ≤ 2 * s x ∧ t x < 1) :
     (fun x => (Real.log (t x) : ℂ)) =O[l] (fun x => Real.log (s x)) ∧
     (fun x => t x * Real.log (t x)) =O[l] (fun x => s x * Real.log (s x)) := by
@@ -936,7 +935,7 @@ lemma legBd_log_comparison {l : Filter ℝ} {s t : ℝ → ℝ}
     nlinarith [abs_nonneg (Real.log (t x)), abs_nonneg (Real.log (s x))]
 
 /-- `x - 1 → 0⁺` as `x → 1⁺`. -/
-lemma legBd_tendsto_sub_one_nhdsGT :
+theorem legBd_tendsto_sub_one_nhdsGT :
     Tendsto (fun x : ℝ => x - 1) (𝓝[>] (1:ℝ)) (𝓝[>] 0) := by
   refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
   · have := ((continuous_sub_right (1:ℝ)).tendsto 1).mono_left (nhdsWithin_le_nhds (s := Ioi 1))
@@ -945,7 +944,7 @@ lemma legBd_tendsto_sub_one_nhdsGT :
     simp only [mem_Ioi, sub_pos]; exact hx
 
 /-- `1 - 1/x² → 0⁺` as `x → 1⁺`. -/
-lemma legBd_tendsto_one_sub_recip_sq_nhdsGT :
+theorem legBd_tendsto_one_sub_recip_sq_nhdsGT :
     Tendsto (fun x : ℝ => 1 - 1/x^2) (𝓝[>] (1:ℝ)) (𝓝[>] 0) := by
   refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
   · have := ((by fun_prop (disch := norm_num) : ContinuousAt (fun x : ℝ => 1 - 1/x^2) 1).tendsto).mono_left
@@ -1056,7 +1055,7 @@ theorem legBd_olverQ_log_isBigO (ν : ℂ) :
 
 /-- The derivative of the reflection formula for `1/Γ`:
 `π((1/Γ)'(s)/Γ(1-s) - (1/Γ)'(1-s)/Γ(s)) = π cos(πs)`. -/
-lemma legBd_reflection_deriv (s : ℂ) :
+theorem legBd_reflection_deriv (s : ℂ) :
     π * (recipGammaDeriv 1 s * (Gamma (1-s))⁻¹ - (Gamma s)⁻¹ * recipGammaDeriv 1 (1-s)) =
       π * cos (π * s) := by
   have hfun : (fun u : ℂ => π*((Gamma u)⁻¹*(Gamma (1-u))⁻¹)) = fun u => sin (π*u) :=
@@ -1077,7 +1076,7 @@ lemma legBd_reflection_deriv (s : ℂ) :
 /-- Constants of the logarithmic expansion of `𝖰_ν` at `x = 1`: with
 `A₁ = -(π/2) sin(νπ/2) Γ((ν+1)/2)/Γ((ν+2)/2)` and `A₂ = (π/2) cos(νπ/2) Γ((ν+2)/2)/Γ((ν+1)/2)`,
 `A₁K₁ + A₂K₂ = 1/2` and `A₁K₁' + A₂K₂' = ln 2 - ψ(ν+1)`. -/
-lemma legBd_ferrersQ_consts {ν : ℂ} (h : LegendreQRegular ν 0) :
+theorem legBd_ferrersQ_consts {ν : ℂ} (h : LegendreQRegular ν 0) :
     -π/2*sin (ν*π/2)*(Gamma ((ν+1)/2)/Gamma ((ν+2)/2)) * legBdK (-ν/2) ((ν+1)/2) +
       π/2*cos (ν*π/2)*(Gamma ((ν+2)/2)/Gamma ((ν+1)/2)) * legBdK ((1-ν)/2) ((ν+2)/2) = 1/2 ∧
     -π/2*sin (ν*π/2)*(Gamma ((ν+1)/2)/Gamma ((ν+2)/2)) * legBdK' (-ν/2) ((ν+1)/2) +
@@ -1157,7 +1156,7 @@ lemma legBd_ferrersQ_consts {ν : ℂ} (h : LegendreQRegular ν 0) :
     linear_combination (G1 * Db1 + G2 * Db2) * hpy + hkey
 
 /-- `1 - x → 0⁺` as `x → 1⁻`. -/
-lemma legBd_tendsto_one_sub_nhdsLT :
+theorem legBd_tendsto_one_sub_nhdsLT :
     Tendsto (fun x : ℝ => 1 - x) (𝓝[<] (1:ℝ)) (𝓝[>] 0) := by
   refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
   · have h : Tendsto (fun x : ℝ => 1 - x) (𝓝 1) (𝓝 (1-1)) := tendsto_const_nhds.sub tendsto_id
@@ -1166,7 +1165,7 @@ lemma legBd_tendsto_one_sub_nhdsLT :
     simp only [mem_Ioi, sub_pos]; exact hx
 
 /-- `1 - x² → 0⁺` as `x → 1⁻`. -/
-lemma legBd_tendsto_one_sub_sq_nhdsLT :
+theorem legBd_tendsto_one_sub_sq_nhdsLT :
     Tendsto (fun x : ℝ => 1 - x^2) (𝓝[<] (1:ℝ)) (𝓝[>] 0) := by
   refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
   · have := ((by fun_prop : Continuous fun x : ℝ => 1 - x^2).tendsto (1:ℝ)).mono_left

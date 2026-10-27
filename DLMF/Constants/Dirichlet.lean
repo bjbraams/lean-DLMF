@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.Analysis.Complex.AbelLimit
-public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
 public import Mathlib.NumberTheory.LSeries.RiemannZeta
 public import Mathlib.Analysis.PSeriesComplex
 
@@ -68,20 +67,20 @@ def dirichletEta (s : ℂ) : ℂ := ∑' n : ℕ, (-1 : ℂ) ^ n / (n + 1 : ℂ)
 def dirichletLambda (s : ℂ) : ℂ := ∑' n : ℕ, 1 / (2 * n + 1 : ℂ) ^ s
 
 /-- `∑ 1/(n+1)^s` converges for `Re s > 1`. -/
-lemma summable_one_div_nat_add_one_cpow {s : ℂ} (hs : 1 < s.re) :
+theorem summable_one_div_nat_add_one_cpow {s : ℂ} (hs : 1 < s.re) :
     Summable fun n : ℕ => 1 / (n + 1 : ℂ) ^ s := by
   refine ((Complex.summable_one_div_nat_cpow.mpr hs).comp_injective
     (add_left_injective 1)).congr fun n => ?_
   simp
 
 /-- `ζ(s) = ∑ 1/(n+1)^s` for `Re s > 1`, as a `HasSum`. -/
-lemma hasSum_zeta {s : ℂ} (hs : 1 < s.re) :
+theorem hasSum_zeta {s : ℂ} (hs : 1 < s.re) :
     HasSum (fun n : ℕ => 1 / (n + 1 : ℂ) ^ s) (riemannZeta s) := by
   rw [zeta_eq_tsum_one_div_nat_add_one_cpow hs]
   exact (summable_one_div_nat_add_one_cpow hs).hasSum
 
 /-- The terms `1/(2n+2)^s = 2^{-s}/(n+1)^s` sum to `2^{-s} ζ(s)`. -/
-lemma hasSum_even_terms {s : ℂ} (hs : 1 < s.re) :
+theorem hasSum_even_terms {s : ℂ} (hs : 1 < s.re) :
     HasSum (fun n : ℕ => 1 / (2 * (n : ℂ) + 2) ^ s) (2 ^ (-s) * riemannZeta s) := by
   refine ((hasSum_zeta hs).mul_left (2 ^ (-s))).congr_fun fun n => ?_
   have h : 2 * (n : ℂ) + 2 = ((2 : ℕ) : ℂ) * ((n + 1 : ℕ) : ℂ) := by push_cast; ring
@@ -90,7 +89,7 @@ lemma hasSum_even_terms {s : ℂ} (hs : 1 < s.re) :
   ring
 
 /-- `∑ 1/(2n+1)^s` converges for `Re s > 1`. -/
-lemma summable_odd_terms {s : ℂ} (hs : 1 < s.re) :
+theorem summable_odd_terms {s : ℂ} (hs : 1 < s.re) :
     Summable fun n : ℕ => 1 / (2 * (n : ℂ) + 1) ^ s := by
   refine ((hasSum_zeta hs).summable.comp_injective
     (mul_right_injective₀ (two_ne_zero' ℕ))).congr fun n => ?_

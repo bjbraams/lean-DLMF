@@ -5,13 +5,32 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Zeta.Hurwitz
 public import DLMF.Zeta.Q25bLerchContinuation
 public import DLMF.Polylog.Dilog
-public import Mathlib.Analysis.Analytic.Basic
-public import Mathlib.Analysis.SpecificLimits.Normed
-public import Mathlib.NumberTheory.ZetaValues
 public import Mathlib.Analysis.SpecialFunctions.Integrability.Log
+public import DLMF.Zeta.S25bHurwitzCore
+public import Mathlib.Analysis.CStarAlgebra.Classes
+public import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.NumberTheory.ArithmeticFunction.VonMangoldt
+public import Mathlib.Tactic.Basify
+public import Mathlib.Tactic.ENatToNat
+public import Mathlib.Tactic.Echelon.Zsqrtd
+public import Mathlib.Tactic.Inclusion.Extension.Core.Core
+public import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+public import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Rational
+public import Mathlib.Tactic.NormNum.Irrational
+public import Mathlib.Tactic.NormNum.IsCoprime
+public import Mathlib.Tactic.NormNum.IsSquare
+public import Mathlib.Tactic.NormNum.LegendreSymbol
+public import Mathlib.Tactic.NormNum.ModEq
+public import Mathlib.Tactic.NormNum.NatLog
+public import Mathlib.Tactic.NormNum.NatSqrt
+public import Mathlib.Tactic.NormNum.Ordinal
+public import Mathlib.Tactic.NormNum.Parity
+public import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.Tactic.Polynomial.Basic
+public import Mathlib.Tactic.ReduceModChar
 
 /-!
 # Polylogarithms of complex order (DLMF §25.12)
@@ -76,15 +95,15 @@ def polylog (s z : ℂ) : ℂ :=
 
 /-! ### Basic properties -/
 
-lemma z25b_mem_slitOne_of_norm_lt_one {z : ℂ} (hz : ‖z‖ < 1) : z ∈ z25b_slitOne :=
+theorem z25b_mem_slitOne_of_norm_lt_one {z : ℂ} (hz : ‖z‖ < 1) : z ∈ z25b_slitOne :=
   Or.inr (lt_of_le_of_lt (re_le_norm z) hz)
 
-lemma z25b_isOpen_slitOne : IsOpen z25b_slitOne :=
+theorem z25b_isOpen_slitOne : IsOpen z25b_slitOne :=
   (isOpen_ne_fun continuous_im continuous_const).union
     (isOpen_lt continuous_re continuous_const)
 
 /-- The series 25.12.10 converges absolutely in the open unit disk, for every complex `s`. -/
-lemma summable_polylogSeriesC_of_norm_lt_one (s : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem summable_polylogSeriesC_of_norm_lt_one (s : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     Summable fun n : ℕ => z ^ (n + 1) / ((n : ℂ) + 1) ^ s := by
   obtain ⟨K, hK⟩ := exists_nat_ge (-s.re)
   have hg : Summable fun n : ℕ => ((n + 1 : ℕ) : ℝ) ^ K * ‖z‖ ^ (n + 1) := by
@@ -145,7 +164,7 @@ lemma q25b_polylog_eq_mul {s : ℂ} {F : ℂ → ℂ} (hF : q25b_IsLerchCont s 1
   exact (q25b_hasSum_polylogSeriesC (hF.2 w hw)).tsum_eq
 
 /-- `z ∈ ℂ \ [1, ∞)` for `|z| ≤ 1`, `z ≠ 1`. -/
-lemma q25b_mem_slitOne_of_norm_le_one {z : ℂ} (hz : ‖z‖ ≤ 1) (h1 : z ≠ 1) : z ∈ z25b_slitOne := by
+theorem q25b_mem_slitOne_of_norm_le_one {z : ℂ} (hz : ‖z‖ ≤ 1) (h1 : z ≠ 1) : z ∈ z25b_slitOne := by
   by_contra h
   simp only [z25b_slitOne, mem_ofPred_eq, not_or, not_lt, ne_eq, not_not] at h
   have hre : z.re ≤ 1 := (re_le_norm z).trans hz
@@ -238,7 +257,7 @@ lemma q25b_hasDerivAt_polylog_two_zero : HasDerivAt (polylog 2) 1 0 := by
 
 open DLMF.Polylog in
 /-- **Bridge to the real dilogarithm**: `Li₂(x) = DLMF.Polylog.Real.dilog x` for real `x < 1`. -/
-theorem q25b_polylog_two_ofReal {x : ℝ} (hx : x < 1) :
+lemma q25b_polylog_two_ofReal {x : ℝ} (hx : x < 1) :
     polylog 2 x = (Real.dilog x : ℂ) := by
   have hmem : ∀ y : ℝ, y < 1 → (y : ℂ) ∈ z25b_slitOne := fun y hy => Or.inr (by simpa using hy)
   have hder : ∀ y : ℝ, y < 1 → HasDerivAt (fun t : ℝ => polylog 2 t - (Real.dilog t : ℂ)) 0 y := by

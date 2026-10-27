@@ -32,7 +32,7 @@ open MeasureTheory Set Filter Finset Asymptotics Complex
 open scoped Topology
 
 /-- Helper lemma for `integral_cpow_mul_cexp_neg_mul_Ioi`: the case of a positive real scale. -/
-lemma integral_cpow_mul_cexp_neg_mul_Ioi_of_real {s : ℂ} (hs : 0 < s.re) {r : ℝ} (hr : 0 < r) :
+theorem integral_cpow_mul_cexp_neg_mul_Ioi_of_real {s : ℂ} (hs : 0 < s.re) {r : ℝ} (hr : 0 < r) :
     ∫ u : ℝ in Set.Ioi 0, (u : ℂ) ^ (s - 1) * Complex.exp (-((r : ℂ) * u)) =
       Complex.Gamma s * (r : ℂ) ^ (-s) := by
   have hr0 : (r : ℂ) ≠ 0 := ofReal_ne_zero.mpr hr.ne'
@@ -153,12 +153,12 @@ namespace Asymptotics
 def sectorAtTop (δ : ℝ) : Filter ℂ :=
   comap (fun z : ℂ => ‖z‖) atTop ⊓ 𝓟 {z : ℂ | δ * ‖z‖ ≤ z.re}
 
-lemma eventually_sectorAtTop {δ : ℝ} {p : ℂ → Prop} {R : ℝ}
+theorem eventually_sectorAtTop {δ : ℝ} {p : ℂ → Prop} {R : ℝ}
     (h : ∀ z : ℂ, R ≤ ‖z‖ → δ * ‖z‖ ≤ z.re → p z) : ∀ᶠ z in sectorAtTop δ, p z := by
   rw [sectorAtTop, eventually_inf_principal]
   exact (tendsto_comap.eventually (eventually_ge_atTop R)).mono fun z hz hzs => h z hz hzs
 
-lemma tendsto_norm_sectorAtTop (δ : ℝ) : Tendsto (fun z : ℂ => ‖z‖) (sectorAtTop δ) atTop :=
+theorem tendsto_norm_sectorAtTop (δ : ℝ) : Tendsto (fun z : ℂ => ‖z‖) (sectorAtTop δ) atTop :=
   tendsto_comap.mono_left inf_le_left
 
 end Asymptotics
@@ -168,7 +168,7 @@ section Sector
 variable {V : Type*} [NormedAddCommGroup V] [NormedSpace ℂ V] [CompleteSpace V]
 
 /-- Integrability of `e^{-zt} G` for `re z ≥ c`, given that of `e^{-ct} G`. -/
-lemma integrableOn_cexp_neg_mul_smul_of_le {G : ℝ → V} {c : ℝ} {z : ℂ}
+theorem integrableOn_cexp_neg_mul_smul_of_le {G : ℝ → V} {c : ℝ} {z : ℂ}
     (hint : IntegrableOn (fun t => Real.exp (-c * t) • G t) (Ioi 0)) (hz : c ≤ z.re) :
     IntegrableOn (fun t : ℝ => Complex.exp (-(z * t)) • G t) (Ioi 0) := by
   have hGm : AEStronglyMeasurable G (volume.restrict (Ioi 0)) := by
@@ -307,7 +307,7 @@ theorem isBigO_integral_cexp_smul_sector {G : ℝ → V} {s c δ : ℝ} (hs : 0 
     _ = _ := by ring
 
 /-- `|z|^{-re s} = O(z^{-s})` as `z → ∞` in a sector, since `|arg z| ≤ π`. -/
-lemma isBigO_norm_rpow_cpow_neg_sector (δ : ℝ) (s : ℂ) :
+theorem isBigO_norm_rpow_cpow_neg_sector (δ : ℝ) (s : ℂ) :
     (fun z : ℂ => ‖z‖ ^ (-s.re)) =O[sectorAtTop δ] fun z => z ^ (-s) := by
   refine IsBigO.of_bound (Real.exp (Real.pi * |s.im|)) ?_
   refine eventually_sectorAtTop (R := 1) fun z hz _ => ?_

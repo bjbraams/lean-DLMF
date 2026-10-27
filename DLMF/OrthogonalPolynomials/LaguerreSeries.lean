@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.OrthogonalPolynomials.Differential
-public import Mathlib.RingTheory.PowerSeries.Derivative
 
 /-!
 # The formal Laguerre generating series
@@ -40,16 +39,16 @@ def LaguerreODE (α x : ℂ) (F : PowerSeries ℂ) : Prop :=
   (1 - X) ^ 2 * d⁄dX F = (C (α + 1) * (1 - X) - C x) * F
 
 /-- `L_0^{(α)} = 1`. -/
-lemma laguerreExtended_zero (α x : ℂ) : laguerreExtended α 0 x = 1 := by
+theorem laguerreExtended_zero (α x : ℂ) : laguerreExtended α 0 x = 1 := by
   simp [laguerreExtended, poch_zero]
 
 /-- `L_1^{(α)}(x) = α + 1 - x`. -/
-lemma laguerreExtended_one (α x : ℂ) : laguerreExtended α 1 x = α + 1 - x := by
+theorem laguerreExtended_one (α x : ℂ) : laguerreExtended α 1 x = α + 1 - x := by
   simp [laguerreExtended, Finset.sum_range_succ, poch_succ, poch_zero]
   ring
 
 /-- The Laguerre equation with the products expanded. -/
-lemma laguerreODE_iff (α x : ℂ) (F : PowerSeries ℂ) :
+theorem laguerreODE_iff (α x : ℂ) (F : PowerSeries ℂ) :
     LaguerreODE α x F ↔ d⁄dX F - C 2 * (X * d⁄dX F) + X * (X * d⁄dX F) =
       C (α + 1 - x) * F - C (α + 1) * (X * F) := by
   unfold LaguerreODE
@@ -60,7 +59,7 @@ lemma laguerreODE_iff (α x : ℂ) (F : PowerSeries ℂ) :
   rw [e1, e2]
 
 /-- The linear coefficient of a solution of the Laguerre equation. -/
-lemma coeff_one_of_laguerreODE {α x : ℂ} {F : PowerSeries ℂ} (h : LaguerreODE α x F) :
+theorem coeff_one_of_laguerreODE {α x : ℂ} {F : PowerSeries ℂ} (h : LaguerreODE α x F) :
     coeff 1 F = (α + 1 - x) * coeff 0 F := by
   have h0 := congrArg (coeff 0) ((laguerreODE_iff α x F).mp h)
   rw [LinearMap.map_add, LinearMap.map_sub, LinearMap.map_sub, coeff_C_mul, coeff_C_mul,
@@ -68,7 +67,7 @@ lemma coeff_one_of_laguerreODE {α x : ℂ} {F : PowerSeries ℂ} (h : LaguerreO
   simpa using h0
 
 /-- Solutions of the Laguerre equation satisfy the three-term recurrence. -/
-lemma coeff_add_two_of_laguerreODE {α x : ℂ} {F : PowerSeries ℂ} (h : LaguerreODE α x F)
+theorem coeff_add_two_of_laguerreODE {α x : ℂ} {F : PowerSeries ℂ} (h : LaguerreODE α x F)
     (n : ℕ) : (n + 2 : ℂ) * coeff (n + 2) F =
       (2 * n + α + 3 - x) * coeff (n + 1) F - (n + α + 1) * coeff n F := by
   have h1 := congrArg (coeff (n + 1)) ((laguerreODE_iff α x F).mp h)
@@ -84,7 +83,7 @@ lemma coeff_add_two_of_laguerreODE {α x : ℂ} {F : PowerSeries ℂ} (h : Lague
     linear_combination h1
 
 /-- The three-term recurrence implies the Laguerre equation. -/
-lemma laguerreODE_of_coeff {α x : ℂ} {F : PowerSeries ℂ}
+theorem laguerreODE_of_coeff {α x : ℂ} {F : PowerSeries ℂ}
     (h1 : coeff 1 F = (α + 1 - x) * coeff 0 F)
     (h2 : ∀ n : ℕ, (n + 2 : ℂ) * coeff (n + 2) F =
       (2 * n + α + 3 - x) * coeff (n + 1) F - (n + α + 1) * coeff n F) :
@@ -109,7 +108,7 @@ lemma laguerreODE_of_coeff {α x : ℂ} {F : PowerSeries ℂ}
       linear_combination this
 
 /-- A solution of the Laguerre equation is determined by its constant coefficient. -/
-lemma eq_of_laguerreODE {α x : ℂ} {F G : PowerSeries ℂ} (hF : LaguerreODE α x F)
+theorem eq_of_laguerreODE {α x : ℂ} {F G : PowerSeries ℂ} (hF : LaguerreODE α x F)
     (hG : LaguerreODE α x G) (h0 : coeff 0 F = coeff 0 G) : F = G := by
   ext n
   induction n using Nat.strong_induction_on with
@@ -124,7 +123,7 @@ lemma eq_of_laguerreODE {α x : ℂ} {F G : PowerSeries ℂ} (hF : LaguerreODE �
       exact mul_left_cancel₀ hn (hF2.trans hG2.symm)
 
 /-- The product of solutions solves the equation with parameters added. -/
-lemma laguerreODE_mul {α β x y : ℂ} {F G : PowerSeries ℂ} (hF : LaguerreODE α x F)
+theorem laguerreODE_mul {α β x y : ℂ} {F G : PowerSeries ℂ} (hF : LaguerreODE α x F)
     (hG : LaguerreODE β y G) : LaguerreODE (α + β + 1) (x + y) (F * G) := by
   unfold LaguerreODE at *
   rw [Derivation.leibniz, smul_eq_mul, smul_eq_mul]
@@ -133,7 +132,7 @@ lemma laguerreODE_mul {α β x y : ℂ} {F G : PowerSeries ℂ} (hF : LaguerreOD
 
 
 /-- The Laguerre series solves the Laguerre equation for `Re α > -1`. -/
-lemma laguerreODE_laguerreSeries {α : ℂ} (hα : -1 < α.re) (x : ℂ) :
+theorem laguerreODE_laguerreSeries {α : ℂ} (hα : -1 < α.re) (x : ℂ) :
     LaguerreODE α x (laguerreSeries α x) := by
   have hc : ∀ k : ℕ, α + 1 ≠ -(k : ℂ) := not_neg_nat_of_re_pos (by
     simp only [Complex.add_re, Complex.one_re]
@@ -145,7 +144,7 @@ lemma laguerreODE_laguerreSeries {α : ℂ} (hα : -1 < α.re) (x : ℂ) :
     exact laguerrePolyL_recurrence hα n x
 
 /-- The Laguerre addition theorem for `Re α, Re β > -1`. -/
-lemma laguerrePolyL_addition_of_re {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) (x y : ℂ) (n : ℕ) :
+theorem laguerrePolyL_addition_of_re {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) (x y : ℂ) (n : ℕ) :
     laguerreExtended (α + β + 1) n (x + y) =
       ∑ k ∈ Finset.range (n + 1), laguerreExtended α k x * laguerreExtended β (n - k) y := by
   have hγ : -1 < (α + β + 1).re := by
@@ -159,7 +158,7 @@ lemma laguerrePolyL_addition_of_re {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < 
 
 
 /-- `laguerreExtended` is entire in the parameter. -/
-lemma differentiable_laguerreExtended (n : ℕ) (x : ℂ) :
+theorem differentiable_laguerreExtended (n : ℕ) (x : ℂ) :
     Differentiable ℂ fun α : ℂ => laguerreExtended α n x := by
   unfold laguerreExtended
   refine Differentiable.fun_sum fun k _ => ?_
@@ -168,7 +167,7 @@ lemma differentiable_laguerreExtended (n : ℕ) (x : ℂ) :
     ((differentiable_id.add_const _).add_const _)
 
 /-- Two entire functions agreeing on `-1 < Re a` agree everywhere. -/
-lemma eq_of_differentiable_of_re_gt {f g : ℂ → ℂ} (hf : Differentiable ℂ f)
+theorem eq_of_differentiable_of_re_gt {f g : ℂ → ℂ} (hf : Differentiable ℂ f)
     (hg : Differentiable ℂ g) (h : ∀ a : ℂ, -1 < a.re → f a = g a) (a : ℂ) : f a = g a := by
   have hU : IsOpen {a : ℂ | -1 < a.re} := isOpen_lt continuous_const Complex.continuous_re
   refine AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq (z₀ := 0)

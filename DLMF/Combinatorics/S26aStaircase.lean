@@ -238,7 +238,7 @@ lemma s26a_src_facts (k s : ℕ) {m n : ℕ} (p : n.Partition)
 /-- The staircase bijection: partitions of `n` into exactly `m` parts, any two differing by at
 least `k`, all parts at least `s ≥ 1`, correspond to partitions of `n - (k C(m,2) + s m)` into at
 most `m` parts. -/
-theorem s26a_card_staircase (k s m : ℕ) (hs : 1 ≤ s) {n N : ℕ}
+lemma s26a_card_staircase (k s m : ℕ) (hs : 1 ≤ s) {n N : ℕ}
     (hN : N + (k * m.choose 2 + s * m) = n) :
     #{p : n.Partition | (∀ a ∈ p.parts, ∀ b ∈ p.parts.erase a, a + k ≤ b ∨ b + k ≤ a) ∧
         (∀ i ∈ p.parts, s ≤ i) ∧ p.parts.card = m} =
@@ -320,7 +320,7 @@ theorem s26a_card_staircase (k s m : ℕ) (hs : 1 ≤ s) {n N : ℕ}
       List.append_nil, s26a_sortDesc_coe]
 
 /-- If `n < k C(m,2) + s m` there is no such partition. -/
-theorem s26a_card_staircase_zero (k s m : ℕ) {n : ℕ} (h : n < k * m.choose 2 + s * m) :
+lemma s26a_card_staircase_zero (k s m : ℕ) {n : ℕ} (h : n < k * m.choose 2 + s * m) :
     #{p : n.Partition | (∀ a ∈ p.parts, ∀ b ∈ p.parts.erase a, a + k ≤ b ∨ b + k ≤ a) ∧
         (∀ i ∈ p.parts, s ≤ i) ∧ p.parts.card = m} = 0 := by
   rw [Finset.card_eq_zero, Finset.filter_eq_empty_iff]

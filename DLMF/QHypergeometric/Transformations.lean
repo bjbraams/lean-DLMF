@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.QHypergeometric.Basic
-public import DLMF.Bailey
 
 /-!
 # Further basic hypergeometric transformations (DLMF §17.9)

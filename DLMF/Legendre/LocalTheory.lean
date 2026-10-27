@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Legendre.Zeros
-public import DLMF.Legendre.Continuation
 
 /-!
 # Singular exponents and independence of Legendre solutions

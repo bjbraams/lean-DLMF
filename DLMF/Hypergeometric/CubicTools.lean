@@ -38,7 +38,7 @@ namespace DLMF.Hypergeometric
 
 
 /-- Powers of `t` with `t² = -3`. -/
-lemma hcub_tpow {t : ℂ} (ht : t ^ 2 = -3) :
+theorem hcub_tpow {t : ℂ} (ht : t ^ 2 = -3) :
     t ^ 3 = -3 * t ∧ t ^ 4 = 9 ∧ t ^ 5 = 9 * t ∧ t ^ 6 = -27 ∧ t ^ 7 = -27 * t ∧ t ^ 8 = 81 ∧
       t ^ 9 = 81 * t ∧ t ^ 10 = -243 ∧ t ^ 11 = -243 * t ∧ t ^ 12 = 729 := by
   have h3 : t ^ 3 = -3 * t := by rw [pow_succ, ht]
@@ -56,7 +56,7 @@ lemma hcub_tpow {t : ℂ} (ht : t ^ 2 = -3) :
 set_option maxRecDepth 10000 in
 /-- The Gauss-equation algebra of the cubic transformation: the operator of
 `(1+ω²u)^{-3a} F(φ(u))` is a multiple of the Gauss operator of `F` at `φ(u)`. -/
-lemma hcub_ode_alg {t a u P h0 h1 h2 : ℂ} (ht : t ^ 2 = -3)
+theorem hcub_ode_alg {t a u P h0 h1 h2 : ℂ} (ht : t ^ 2 = -3)
     (hq : 1 + (-1 - t) / 2 * u ≠ 0) (hr : 1 + (-1 + t) / 2 * u ≠ 0)
     (hode : 3 * t * u * (u - 1) / (1 + (-1 - t) / 2 * u) ^ 3 *
         (1 - 3 * t * u * (u - 1) / (1 + (-1 - t) / 2 * u) ^ 3) * h2 +
@@ -89,7 +89,7 @@ lemma hcub_ode_alg {t a u P h0 h1 h2 : ℂ} (ht : t ^ 2 = -3)
   ring_nf
 
 /-- The cubic map `φ(u) = K u (u - 1) / (1 + m u)³` and its derivatives. -/
-lemma hcub_phi_hasDerivAt {K m u : ℂ} (hq : 1 + m * u ≠ 0) :
+theorem hcub_phi_hasDerivAt {K m u : ℂ} (hq : 1 + m * u ≠ 0) :
     HasDerivAt (fun v => K * v * (v - 1) / (1 + m * v) ^ 3)
       (K * ((2 * u - 1) * (1 + m * u) - 3 * m * u * (u - 1)) / (1 + m * u) ^ 4) u := by
   have h : HasDerivAt (fun v => K * v * (v - 1) / (1 + m * v) ^ 3) _ u :=
@@ -101,7 +101,7 @@ lemma hcub_phi_hasDerivAt {K m u : ℂ} (hq : 1 + m * u ≠ 0) :
   ring
 
 /-- Second derivative of the cubic map. -/
-lemma hcub_phi_deriv_hasDerivAt {K m u : ℂ} (hq : 1 + m * u ≠ 0) :
+theorem hcub_phi_deriv_hasDerivAt {K m u : ℂ} (hq : 1 + m * u ≠ 0) :
     HasDerivAt (fun v => K * ((2 * v - 1) * (1 + m * v) - 3 * m * v * (v - 1)) / (1 + m * v) ^ 4)
       (K * ((2 * (1 + m * u) - 2 * m * (2 * u - 1)) * (1 + m * u) -
         4 * m * ((2 * u - 1) * (1 + m * u) - 3 * m * u * (u - 1))) / (1 + m * u) ^ 5) u := by
@@ -123,15 +123,15 @@ lemma hcub_phi_deriv_hasDerivAt {K m u : ℂ} (hq : 1 + m * u ≠ 0) :
 
 
 /-- `t = √3 i` satisfies `t² = -3`. -/
-lemma hcub_t_sq : ((Real.sqrt 3 : ℂ) * I) ^ 2 = -3 := by
+theorem hcub_t_sq : ((Real.sqrt 3 : ℂ) * I) ^ 2 = -3 := by
   rw [mul_pow, I_sq, ← ofReal_pow, Real.sq_sqrt (by norm_num)]; push_cast; ring
 
 /-- `‖√3 i‖ = √3`. -/
-lemma hcub_norm_t : ‖(Real.sqrt 3 : ℂ) * I‖ = Real.sqrt 3 := by
+theorem hcub_norm_t : ‖(Real.sqrt 3 : ℂ) * I‖ = Real.sqrt 3 := by
   rw [norm_mul, norm_I, mul_one, norm_real, Real.norm_eq_abs, abs_of_nonneg (Real.sqrt_nonneg _)]
 
 /-- `|ω| = |ω²| = 1`. -/
-lemma hcub_norm_m (ε : ℝ) (hε : ε = 1 ∨ ε = -1) : ‖(-1 + ε * ((Real.sqrt 3 : ℂ) * I)) / 2‖ = 1 := by
+theorem hcub_norm_m (ε : ℝ) (hε : ε = 1 ∨ ε = -1) : ‖(-1 + ε * ((Real.sqrt 3 : ℂ) * I)) / 2‖ = 1 := by
   have h3 := Real.sq_sqrt (show (0 : ℝ) ≤ 3 by norm_num)
   have hε2 : ε ^ 2 = 1 := by rcases hε with rfl | rfl <;> norm_num
   rw [show (-1 + ε * ((Real.sqrt 3 : ℂ) * I)) / 2 = ⟨-1 / 2, ε * Real.sqrt 3 / 2⟩ by
@@ -141,18 +141,18 @@ lemma hcub_norm_m (ε : ℝ) (hε : ε = 1 ∨ ε = -1) : ‖(-1 + ε * ((Real.s
   nlinarith
 
 /-- A crude bound `√3 < 7/4`. -/
-lemma hcub_sqrt3_lt : Real.sqrt 3 < 7 / 4 := by
+theorem hcub_sqrt3_lt : Real.sqrt 3 < 7 / 4 := by
   rw [Real.sqrt_lt' (by norm_num)]; norm_num
 
 /-- `Re(1 + m u) > 0` when `|m| = 1` and `|u| < 1`. -/
-lemma hcub_one_add_mul_re_pos {m u : ℂ} (hm : ‖m‖ = 1) (hu : ‖u‖ < 1) : 0 < (1 + m * u).re := by
+theorem hcub_one_add_mul_re_pos {m u : ℂ} (hm : ‖m‖ = 1) (hu : ‖u‖ < 1) : 0 < (1 + m * u).re := by
   have h := abs_re_le_norm (m * u)
   rw [norm_mul, hm, one_mul] at h
   rw [add_re, one_re]
   linarith [neg_abs_le (m * u).re]
 
 /-- `|1 + m u| ≥ 1 - |u|` when `|m| = 1`. -/
-lemma hcub_one_add_mul_norm_ge {m u : ℂ} (hm : ‖m‖ = 1) : 1 - ‖u‖ ≤ ‖1 + m * u‖ := by
+theorem hcub_one_add_mul_norm_ge {m u : ℂ} (hm : ‖m‖ = 1) : 1 - ‖u‖ ≤ ‖1 + m * u‖ := by
   have := norm_sub_norm_le (1 : ℂ) (-(m * u))
   rw [norm_one, norm_neg, norm_mul, hm, one_mul, sub_neg_eq_add] at this
   exact this
@@ -246,7 +246,7 @@ theorem hcub_cubic {a : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 / 3 ≠ -(k : ℂ)) {u
 
 
 /-- A number with real part in `(0, 1)` is not an integer. -/
-lemma hcub_not_int {s : ℂ} (h0 : 0 < s.re) (h1 : s.re < 1) : ∀ k : ℤ, s ≠ (k : ℂ) := by
+theorem hcub_not_int {s : ℂ} (h0 : 0 < s.re) (h1 : s.re < 1) : ∀ k : ℤ, s ≠ (k : ℂ) := by
   intro k hk
   have hr : s.re = (k : ℝ) := by rw [hk]; simp
   have a0 : (0 : ℝ) < k := hr ▸ h0
@@ -256,14 +256,14 @@ lemma hcub_not_int {s : ℂ} (h0 : 0 < s.re) (h1 : s.re < 1) : ∀ k : ℤ, s �
   omega
 
 /-- A number with positive real part is not a nonpositive integer. -/
-lemma hcub_not_neg_nat {s : ℂ} (h : 0 < s.re) : ∀ k : ℕ, s ≠ -(k : ℂ) := by
+theorem hcub_not_neg_nat {s : ℂ} (h : 0 < s.re) : ∀ k : ℕ, s ≠ -(k : ℂ) := by
   intro k hk
   have := congrArg re hk; simp at this
   have : (0 : ℝ) ≤ k := Nat.cast_nonneg k
   linarith
 
 /-- `Γ(1/3) Γ(2/3) = 2π/√3`. -/
-lemma hcub_gamma_third_mul : Gamma (1 / 3) * Gamma (2 / 3) = 2 * π / Real.sqrt 3 := by
+theorem hcub_gamma_third_mul : Gamma (1 / 3) * Gamma (2 / 3) = 2 * π / Real.sqrt 3 := by
   have h := Complex.Gamma_mul_Gamma_one_sub (1 / 3)
   rw [show (1 : ℂ) - 1 / 3 = 2 / 3 by norm_num] at h
   rw [h, show (π : ℂ) * (1 / 3) = ((π / 3 : ℝ) : ℂ) by push_cast; ring, ← ofReal_sin,
@@ -409,13 +409,13 @@ theorem hcub_conn {a w : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 / 3 ≠ -(k : ℂ))
 
 
 /-- `√3 > 0`. -/
-lemma hcub_sqrt3_pos : 0 < Real.sqrt 3 := Real.sqrt_pos.mpr (by norm_num)
+theorem hcub_sqrt3_pos : 0 < Real.sqrt 3 := Real.sqrt_pos.mpr (by norm_num)
 
 /-- `(√3)² = 3`. -/
-lemma hcub_sqrt3_sq : Real.sqrt 3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
+theorem hcub_sqrt3_sq : Real.sqrt 3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
 
 /-- `|u + ω|² - |1 + ωu|² = 2√3 Im u` for `ω = e^{2πi/3}`. -/
-lemma hcub_normSq_diff (u : ℂ) :
+theorem hcub_normSq_diff (u : ℂ) :
     normSq (u + (-1 + (Real.sqrt 3 : ℂ) * I) / 2) =
       normSq (1 + (-1 + (Real.sqrt 3 : ℂ) * I) / 2 * u) + 2 * Real.sqrt 3 * u.im := by
   simp only [normSq_apply, add_re, add_im, mul_re, mul_im, div_re, div_im, ofReal_re, ofReal_im,
@@ -426,12 +426,12 @@ lemma hcub_normSq_diff (u : ℂ) :
   ring
 
 /-- Comparison of norms through `normSq`. -/
-lemma hcub_norm_lt_of_normSq {z w : ℂ} (h : normSq z < normSq w) : ‖z‖ < ‖w‖ := by
+theorem hcub_norm_lt_of_normSq {z w : ℂ} (h : normSq z < normSq w) : ‖z‖ < ‖w‖ := by
   rw [normSq_eq_norm_sq, normSq_eq_norm_sq] at h
   exact lt_of_pow_lt_pow_left₀ 2 (norm_nonneg _) h
 
 /-- For `Im u > 0`, `|1 + ωu| < |u + ω|`. -/
-lemma hcub_norm_lt_of_im_pos {u : ℂ} (hu : 0 < u.im) :
+theorem hcub_norm_lt_of_im_pos {u : ℂ} (hu : 0 < u.im) :
     ‖1 + (-1 + (Real.sqrt 3 : ℂ) * I) / 2 * u‖ < ‖u + (-1 + (Real.sqrt 3 : ℂ) * I) / 2‖ := by
   apply hcub_norm_lt_of_normSq
   rw [hcub_normSq_diff]
@@ -439,25 +439,25 @@ lemma hcub_norm_lt_of_im_pos {u : ℂ} (hu : 0 < u.im) :
   nlinarith
 
 /-- Three-way exponentials: `e^{iπ/3}`, `e^{2πi/3}`, `e^{4πi/3}` through `t = √3 i`. -/
-lemma hcub_exp_third : exp (Real.pi * I / 3) = (1 + (Real.sqrt 3 : ℂ) * I) / 2 := by
+theorem hcub_exp_third : exp (Real.pi * I / 3) = (1 + (Real.sqrt 3 : ℂ) * I) / 2 := by
   rw [show (Real.pi : ℂ) * I / 3 = ((π / 3 : ℝ) : ℂ) * I by push_cast; ring, exp_mul_I,
     ← ofReal_cos, ← ofReal_sin, Real.cos_pi_div_three, Real.sin_pi_div_three]
   push_cast; ring
 
-lemma hcub_exp_two_third : exp (2 * Real.pi * I / 3) = (-1 + (Real.sqrt 3 : ℂ) * I) / 2 := by
+theorem hcub_exp_two_third : exp (2 * Real.pi * I / 3) = (-1 + (Real.sqrt 3 : ℂ) * I) / 2 := by
   rw [show 2 * (Real.pi : ℂ) * I / 3 = ((π - π / 3 : ℝ) : ℂ) * I by push_cast; ring, exp_mul_I,
     ← ofReal_cos, ← ofReal_sin, Real.cos_pi_sub, Real.sin_pi_sub, Real.cos_pi_div_three,
     Real.sin_pi_div_three]
   push_cast; ring
 
-lemma hcub_exp_four_third : exp (4 * Real.pi * I / 3) = (-1 - (Real.sqrt 3 : ℂ) * I) / 2 := by
+theorem hcub_exp_four_third : exp (4 * Real.pi * I / 3) = (-1 - (Real.sqrt 3 : ℂ) * I) / 2 := by
   rw [show 4 * (Real.pi : ℂ) * I / 3 = ((π / 3 + π : ℝ) : ℂ) * I by push_cast; ring, exp_mul_I,
     ← ofReal_cos, ← ofReal_sin, Real.cos_add_pi, Real.sin_add_pi, Real.cos_pi_div_three,
     Real.sin_pi_div_three]
   push_cast; ring
 
 /-- Principal cube root near `1`: if `‖y - 1‖ < 1/5` then `(y³)^{1/3} = y`. -/
-lemma hcub_cube_root {y : ℂ} (hy : ‖y - 1‖ < 1 / 5) : (y ^ 3) ^ (1 / 3 : ℂ) = y := by
+theorem hcub_cube_root {y : ℂ} (hy : ‖y - 1‖ < 1 / 5) : (y ^ 3) ^ (1 / 3 : ℂ) = y := by
   have him : |y.im| < 1 / 5 := by
     have := abs_im_le_norm (y - 1); simp at this; linarith
   have hre : 4 / 5 < y.re := by
@@ -479,7 +479,7 @@ lemma hcub_cube_root {y : ℂ} (hy : ‖y - 1‖ < 1 / 5) : (y ^ 3) ^ (1 / 3 : �
   simpa using this
 
 /-- The cubic map sends the disk `|u| < 1/10` into the unit disk. -/
-lemma hcub_phi_norm {u : ℂ} (hu : ‖u‖ < 1 / 10) :
+theorem hcub_phi_norm {u : ℂ} (hu : ‖u‖ < 1 / 10) :
     ‖3 * ((Real.sqrt 3 : ℂ) * I) * u * (u - 1) / (1 + (-1 - (Real.sqrt 3 : ℂ) * I) / 2 * u) ^ 3‖
       < 1 := by
   have hm : ‖(-1 - (Real.sqrt 3 : ℂ) * I) / 2‖ = 1 := by
@@ -499,7 +499,7 @@ lemma hcub_phi_norm {u : ℂ} (hu : ‖u‖ < 1 / 10) :
     _ ≤ _ := by gcongr
 
 /-- The algebraic identities behind the cubic change of variables (`t² = -3`). -/
-lemma hcub_alg {t u : ℂ} (ht : t ^ 2 = -3) (hq : 1 + (-1 - t) / 2 * u ≠ 0) :
+theorem hcub_alg {t u : ℂ} (ht : t ^ 2 = -3) (hq : 1 + (-1 - t) / 2 * u ≠ 0) :
     ((-1 - t) / 2 * ((-1 - t) / 2 * (1 + (-1 + t) / 2 * u) / (u + (-1 + t) / 2))) ^ 3 =
         ((-1 - t) / 2 * (1 + (-1 + t) / 2 * u) / (u + (-1 + t) / 2)) ^ 3 ∧
       (-1 - t) / 2 * ((-1 - t) / 2 * (1 + (-1 + t) / 2 * u) / (u + (-1 + t) / 2)) - 1 =
@@ -651,7 +651,7 @@ theorem hcub_main {a : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 / 3 ≠ -(k : ℂ))
   simpa only [hBf, hRf, hZf, hβ] using this
 
 /-- The point `u = 1/ζ` of DLMF 15.8.32 for real `z = X`, in terms of `t² = -3`. -/
-lemma hcub_seg_u {t X : ℂ} (ht : t ^ 2 = -3) (hω : -1 + t ≠ 0) (h1 : 1 - X ≠ 0)
+theorem hcub_seg_u {t X : ℂ} (ht : t ^ 2 = -3) (hω : -1 + t ≠ 0) (h1 : 1 - X ≠ 0)
     (hxm : 2 * X + 1 + t ≠ 0) :
     1 / ((-1 + t) / 2 * (1 - X) / (X - (-1 - t) / 2)) = 1 / 2 - t / 2 * (X + 1) / (1 - X) := by
   have hxm' : X - (-1 - t) / 2 ≠ 0 := by
@@ -661,7 +661,7 @@ lemma hcub_seg_u {t X : ℂ} (ht : t ^ 2 = -3) (hω : -1 + t ≠ 0) (h1 : 1 - X 
   linear_combination (X + 1) * ht
 
 /-- At `u = 1/ζ`, the point `ω²(1+ωu)/(u+ω)` is `1/X`. -/
-lemma hcub_seg_Z {t X : ℂ} (ht : t ^ 2 = -3) (h1 : 1 - X ≠ 0) (hX : X ≠ 0) :
+theorem hcub_seg_Z {t X : ℂ} (ht : t ^ 2 = -3) (h1 : 1 - X ≠ 0) (hX : X ≠ 0) :
     (-1 - t) / 2 * (1 + (-1 + t) / 2 * (1 / 2 - t / 2 * (X + 1) / (1 - X))) /
       ((1 / 2 - t / 2 * (X + 1) / (1 - X)) + (-1 + t) / 2) = X⁻¹ := by
   have hden : (1 / 2 - t / 2 * (X + 1) / (1 - X)) + (-1 + t) / 2 = -t * X / (1 - X) := by
@@ -676,7 +676,7 @@ lemma hcub_seg_Z {t X : ℂ} (ht : t ^ 2 = -3) (h1 : 1 - X ≠ 0) (hX : X ≠ 0)
   ring_nf
 
 /-- The algebraic form of the power identity on the segment. -/
-lemma hcub_seg_rel {t X : ℂ} (ht : t ^ 2 = -3) (h1 : 1 - X ≠ 0) (hX : X ≠ 0)
+theorem hcub_seg_rel {t X : ℂ} (ht : t ^ 2 = -3) (h1 : 1 - X ≠ 0) (hX : X ≠ 0)
     (hu : 1 / 2 - t / 2 * (X + 1) / (1 - X) ≠ 0) :
     (1 - X ^ 3) * (1 + (-1 - t) / 2 * (1 / 2 - t / 2 * (X + 1) / (1 - X))) ^ 3 / (-X) ^ 3 =
       3 * t * (1 - 1 / (1 / 2 - t / 2 * (X + 1) / (1 - X))) *
@@ -693,7 +693,7 @@ lemma hcub_seg_rel {t X : ℂ} (ht : t ^ 2 = -3) (h1 : 1 - X ≠ 0) (hX : X ≠ 
   ring_nf
 
 /-- The power bookkeeping of DLMF 15.8.32 on the segment `u = 1/2 + iY`. -/
-lemma hcub_cpow {a : ℂ} {x : ℝ} (hx : x < -1) {u : ℂ} (hre : u.re = 1 / 2) (him : 0 < u.im)
+theorem hcub_cpow {a : ℂ} {x : ℝ} (hx : x < -1) {u : ℂ} (hre : u.re = 1 / 2) (him : 0 < u.im)
     (hn : ‖u‖ < 1)
     (hrel : (1 - (x : ℂ) ^ 3) * (1 + (-1 - (Real.sqrt 3 : ℂ) * I) / 2 * u) ^ 3 / (-(x : ℂ)) ^ 3 =
       3 * ((Real.sqrt 3 : ℂ) * I) * (1 - 1 / u) * u ^ 2) :

@@ -8,9 +8,7 @@ module
 public import DLMF.Gamma.VerticalBounds
 public import DLMF.Gamma.BetaFunction
 public import Mathlib.Analysis.MellinInversion
-public import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
-public import Mathlib.Analysis.Complex.Liouville
-public import Mathlib.Analysis.Calculus.ParametricIntegral
+import DLMF.Gamma.RecipGammaDeriv
 
 /-!
 # The basic Mellin–Barnes integral
@@ -34,7 +32,7 @@ noncomputable section
 namespace DLMF.Gamma
 
 /-- A bound `C (1+|y|)^K e^{-π|y|/2}` for `Γ(x + i(β+y))`, any real shift `β`. -/
-lemma exists_norm_Gamma_shift_le {x : ℝ} (hx : 0 < x) (β : ℝ) :
+theorem exists_norm_Gamma_shift_le {x : ℝ} (hx : 0 < x) (β : ℝ) :
     ∃ C : ℝ, ∃ K : ℕ, ∀ y : ℝ,
       ‖Complex.Gamma (x + I * (β + y))‖ ≤ C * (1 + |y|) ^ K * Real.exp (-(π * |y|) / 2) := by
   obtain ⟨C, K, hC⟩ := exists_norm_Gamma_le hx
@@ -61,7 +59,7 @@ lemma exists_norm_Gamma_shift_le {x : ℝ} (hx : 0 < x) (β : ℝ) :
     _ = _ := by ring
 
 /-- The Beta integral as a Mellin transform (DLMF 5.12.3). -/
-lemma mellin_one_add_cpow_neg {a s : ℂ} (hs : 0 < s.re) (hsa : s.re < a.re) :
+theorem mellin_one_add_cpow_neg {a s : ℂ} (hs : 0 < s.re) (hsa : s.re < a.re) :
     mellin (fun t : ℝ => ((1 + t : ℝ) : ℂ) ^ (-a)) s = Gamma s * Gamma (a - s) / Gamma a := by
   have has : 0 < (a - s).re := by simp only [sub_re]; linarith
   have hb := beta_on_Ioi hs has
@@ -76,7 +74,7 @@ lemma mellin_one_add_cpow_neg {a s : ℂ} (hs : 0 < s.re) (hsa : s.re < a.re) :
   rw [cpow_neg, div_eq_mul_inv]
   push_cast; ring
 
-lemma integrableOn_rpow_mul_one_add_rpow {σ α : ℝ} (hσ : 0 < σ) (hσα : σ < α) :
+theorem integrableOn_rpow_mul_one_add_rpow {σ α : ℝ} (hσ : 0 < σ) (hσα : σ < α) :
     IntegrableOn (fun t : ℝ => t ^ (σ - 1) * (1 + t) ^ (-α)) (Ioi 0) := by
   have hcont : ContinuousOn (fun t : ℝ => t ^ (σ - 1) * (1 + t) ^ (-α)) (Ioi 0) := by
     intro t ht
@@ -110,7 +108,7 @@ lemma integrableOn_rpow_mul_one_add_rpow {σ α : ℝ} (hσ : 0 < σ) (hσα : �
           mul_le_mul_of_nonneg_left h2 (by positivity)
       _ = _ := by rw [← Real.rpow_add (by linarith)]; ring_nf
 
-lemma mellinConvergent_one_add_cpow_neg {a : ℂ} {σ : ℝ} (hσ : 0 < σ) (hσa : σ < a.re) :
+theorem mellinConvergent_one_add_cpow_neg {a : ℂ} {σ : ℝ} (hσ : 0 < σ) (hσa : σ < a.re) :
     MellinConvergent (fun t : ℝ => ((1 + t : ℝ) : ℂ) ^ (-a)) σ := by
   have hg := integrableOn_rpow_mul_one_add_rpow hσ hσa
   have hcont : ContinuousOn (fun t : ℝ => (t : ℂ) ^ ((σ : ℂ) - 1) • ((1 + t : ℝ) : ℂ) ^ (-a))
@@ -131,12 +129,12 @@ lemma mellinConvergent_one_add_cpow_neg {a : ℂ} {σ : ℝ} (hσ : 0 < σ) (hσ
   rw [norm_smul, norm_cpow_eq_rpow_re_of_pos ht0, norm_cpow_eq_rpow_re_of_pos (by linarith)]
   simp
 
-lemma continuousAt_Gamma_of_re_pos {s : ℂ} (hs : 0 < s.re) : ContinuousAt Complex.Gamma s :=
+theorem continuousAt_Gamma_of_re_pos {s : ℂ} (hs : 0 < s.re) : ContinuousAt Complex.Gamma s :=
   (Complex.differentiableAt_Gamma s fun m h => by
     have := congrArg re h; simp at this; linarith [(Nat.cast_nonneg m : (0 : ℝ) ≤ m)]).continuousAt
 
 /-- `y ↦ Γ(σ+iy) Γ(a-σ-iy)` is integrable for `0 < σ < re a`. -/
-lemma integrable_Gamma_mul_Gamma_vertical {a : ℂ} {σ : ℝ} (hσ : 0 < σ) (hσa : σ < a.re) :
+theorem integrable_Gamma_mul_Gamma_vertical {a : ℂ} {σ : ℝ} (hσ : 0 < σ) (hσa : σ < a.re) :
     Integrable (fun y : ℝ => Gamma (σ + y * I) * Gamma (a - (σ + y * I))) := by
   obtain ⟨C₁, K₁, h₁⟩ := exists_norm_Gamma_shift_le hσ 0
   obtain ⟨C₂, K₂, h₂⟩ := exists_norm_Gamma_shift_le (x := a.re - σ) (by linarith) a.im
@@ -203,7 +201,7 @@ lemma differentiable_recip_Gamma : Differentiable ℂ fun s : ℂ => (Gamma s)�
   simpa [one_div] using Complex.differentiable_one_div_Gamma
 
 /-- A bound for `1/Γ` on closed unit discs about the points `c + σ + iy`, `c` near `c₀`. -/
-lemma exists_norm_recip_Gamma_disc_le (c₀ : ℂ) (σ : ℝ) :
+theorem exists_norm_recip_Gamma_disc_le (c₀ : ℂ) (σ : ℝ) :
     ∃ C : ℝ, ∃ K : ℕ, ∀ c ∈ Metric.ball c₀ 1, ∀ y : ℝ, ∀ w : ℂ, ‖w - (c + σ + I * y)‖ ≤ 1 →
       ‖(Gamma w)⁻¹‖ ≤ C * (1 + |y|) ^ K * Real.exp (π * |y| / 2) := by
   obtain ⟨C, K, hC⟩ := exists_norm_recip_Gamma_le (|c₀.re + σ| + 2)
@@ -301,7 +299,7 @@ theorem differentiable_integral_mul_recip_Gamma {A : ℝ → ℂ} (hA : Continuo
   exact key.2.differentiableAt
 
 /-- `y ↦ Γ(σ+iy)` is integrable for `σ > 0`. -/
-lemma integrable_Gamma_vertical {σ : ℝ} (hσ : 0 < σ) :
+theorem integrable_Gamma_vertical {σ : ℝ} (hσ : 0 < σ) :
     Integrable (fun y : ℝ => Gamma (σ + y * I)) := by
   obtain ⟨C, K, hC⟩ := exists_norm_Gamma_shift_le hσ 0
   have hcont : Continuous fun y : ℝ => Gamma (σ + y * I) :=
@@ -344,7 +342,7 @@ theorem exp_neg_eq_integral {σ : ℝ} (hσ : 0 < σ) {u : ℝ} (hu : 0 < u) :
   · congr 1; funext y; ring
 
 /-- On a disc in the right half-plane, `|arg w|` stays below `π/2` uniformly. -/
-lemma exists_abs_arg_le_of_ball {w₀ : ℂ} (hw₀ : 0 < w₀.re) :
+theorem exists_abs_arg_le_of_ball {w₀ : ℂ} (hw₀ : 0 < w₀.re) :
     ∃ θ : ℝ, θ < π / 2 ∧ ∀ w ∈ Metric.ball w₀ (w₀.re / 2), |arg w| ≤ θ ∧
       w₀.re / 2 ≤ ‖w‖ ∧ ‖w‖ ≤ ‖w₀‖ + w₀.re / 2 ∧ 0 < w.re := by
   set ρ₀ := w₀.re / 2 with hρ₀
@@ -502,7 +500,7 @@ theorem differentiableOn_integral_mul_cpow {B : ℝ → ℂ} (hB : Continuous B)
   exact key.2.differentiableAt.differentiableWithinAt
 
 /-- A bound `C (1+|y|)^K e^{π|y|/2}` for `1/Γ(x + i(β+y))`. -/
-lemma exists_norm_recip_Gamma_shift_le (x β : ℝ) :
+theorem exists_norm_recip_Gamma_shift_le (x β : ℝ) :
     ∃ C : ℝ, ∃ K : ℕ, ∀ y : ℝ,
       ‖(Gamma (x + I * (β + y)))⁻¹‖ ≤ C * (1 + |y|) ^ K * Real.exp (π * |y| / 2) := by
   obtain ⟨C, K, hC⟩ := exists_norm_recip_Gamma_le |x|

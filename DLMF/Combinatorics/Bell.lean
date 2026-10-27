@@ -7,9 +7,6 @@ module
 
 public import DLMF.Combinatorics.Stirling
 public import Mathlib.Combinatorics.Enumerative.Bell
-public import Mathlib.Analysis.SpecialFunctions.Exponential
-public import Mathlib.Analysis.SpecialFunctions.Log.Basic
-public import Mathlib.Data.Nat.Choose.Cast
 
 /-!
 # Bell numbers (DLMF §26.7)
@@ -78,7 +75,7 @@ theorem card_finpartition_eq_bell (n : ℕ) :
     simpa [Nat.lt_succ_iff] using P.card_parts_le_card
 
 /-- DLMF 26.7.3, `k = 0` form valid for all `n` (`m ≥ n`). -/
-theorem q26a_bell_eq_sum_range_mul_sum {n m : ℕ} (hm : n ≤ m) :
+lemma q26a_bell_eq_sum_range_mul_sum {n m : ℕ} (hm : n ≤ m) :
     (Nat.bell n : ℚ) = ∑ k ∈ range (m + 1), (k : ℚ) ^ n / k.factorial *
       ∑ j ∈ range (m - k + 1), (-1 : ℚ) ^ j / j.factorial := by
   have h1 : (Nat.bell n : ℚ) = ∑ k ∈ range (m + 1), (Nat.stirlingSecond n k : ℚ) := by
@@ -170,7 +167,7 @@ theorem bell_eq_exp_neg_one_mul_tsum {n : ℕ} (hn : 1 ≤ n) :
   rw [h.tsum_eq, ← mul_assoc, ← Real.exp_add]; simp
 
 /-- `kⁿ/k! ≤ 2ⁿ/(k-n)!` for `k ≥ 2n`. -/
-theorem q26a_pow_div_factorial_le {n k : ℕ} (hk : 2 * n ≤ k) :
+lemma q26a_pow_div_factorial_le {n k : ℕ} (hk : 2 * n ≤ k) :
     (k : ℝ) ^ n / k.factorial ≤ 2 ^ n / (k - n).factorial := by
   have h1 : k ^ n ≤ 2 ^ n * k.descFactorial n := by
     calc k ^ n ≤ (2 * (k + 1 - n)) ^ n := Nat.pow_le_pow_left (by omega) n
@@ -186,7 +183,7 @@ theorem q26a_pow_div_factorial_le {n k : ℕ} (hk : 2 * n ≤ k) :
   nlinarith
 
 /-- `2ⁿ ≤ (n+1)!`. -/
-theorem q26a_two_pow_le_factorial_succ (n : ℕ) : 2 ^ n ≤ (n + 1).factorial := by
+lemma q26a_two_pow_le_factorial_succ (n : ℕ) : 2 ^ n ≤ (n + 1).factorial := by
   induction n with
   | zero => simp
   | succ m ih =>

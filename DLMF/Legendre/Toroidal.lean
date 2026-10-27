@@ -6,8 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Legendre.IntegralRepresentations
-public import DLMF.Legendre.Connections
-public import DLMF.Hypergeometric.Saalschutz
 
 /-!
 # Toroidal functions, coordinates and representations
@@ -40,7 +38,7 @@ def toroidalQ (n : ℕ) (μ : ℂ) (x : ℝ) : ℂ :=
 
 /-- For real `t > 1` with `t² - 1 = u²`, `u > 0`: the Whipple point of `t` is `t/u` and
 `(t²-1)^{-1/4} = exp(-(log u)/2)`. -/
-lemma legTor_point {t u : ℝ} (ht : 1 < t) (hu : 0 < u) (htu : t^2 - 1 = u^2) :
+theorem legTor_point {t u : ℝ} (ht : 1 < t) (hu : 0 < u) (htu : t^2 - 1 = u^2) :
     (t:ℂ)/exp ((log ((t:ℂ)-1)+log ((t:ℂ)+1))/2) = ((t/u:ℝ):ℂ) ∧
       legendreBranchPower (-1/2) t = exp (-(Real.log u:ℂ)/2) := by
   have hl : log ((t:ℂ)-1)+log ((t:ℂ)+1) = 2*(Real.log u:ℂ) := by
@@ -56,7 +54,7 @@ lemma legTor_point {t u : ℝ} (ht : 1 < t) (hu : 0 < u) (htu : t^2 - 1 = u^2) :
     rw [hl]; congr 1; ring
 
 /-- `P^μ_{-ν-1} = P^μ_ν` (DLMF 14.9.11 for `P`) on `(1,∞)`. -/
-lemma legTor_P_neg_degree (ν μ : ℂ) {y : ℝ} (hy : 1 < y) :
+theorem legTor_P_neg_degree (ν μ : ℂ) {y : ℝ} (hy : 1 < y) :
     associatedP (-ν-1) μ y = associatedP ν μ y := by
   have hz : 1 + (y:ℂ) ∈ slitPlane := Or.inl (by simp; linarith)
   unfold associatedP
@@ -64,7 +62,7 @@ lemma legTor_P_neg_degree (ν μ : ℂ) {y : ℝ} (hy : 1 < y) :
   congr 2 <;> ring
 
 /-- `(c/(s))^{1/2}` for positive reals as an exponential of logarithms. -/
-lemma legTor_cpow_half {c s : ℝ} (hc : 0 < c) (hs : 0 < s) :
+theorem legTor_cpow_half {c s : ℝ} (hc : 0 < c) (hs : 0 < s) :
     ((c/s:ℝ):ℂ)^(1/2:ℂ) = (c:ℂ)^(1/2:ℂ) * exp (-(Real.log s:ℂ)/2) := by
   rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr (div_pos hc hs).ne'),
     cpow_def_of_ne_zero (ofReal_ne_zero.mpr hc.ne'), ← ofReal_log (div_pos hc hs).le,
@@ -72,7 +70,7 @@ lemma legTor_cpow_half {c s : ℝ} (hc : 0 < c) (hs : 0 < s) :
   congr 1; push_cast; ring
 
 /-- `Γ(k + 1/2) ≠ 0` for integer `k`. -/
-lemma legTor_Gamma_half_ne (k : ℤ) : Gamma ((k:ℂ) + 1/2) ≠ 0 := by
+theorem legTor_Gamma_half_ne (k : ℤ) : Gamma ((k:ℂ) + 1/2) ≠ 0 := by
   refine Gamma_ne_zero fun j hj => ?_
   have := congrArg Complex.re hj
   simp at this
@@ -83,13 +81,13 @@ lemma legTor_Gamma_half_ne (k : ℤ) : Gamma ((k:ℂ) + 1/2) ≠ 0 := by
 /-! ### Quadratic transformations for DLMF 14.19.2–3 -/
 
 /-- Complex powers of a positive real as exponentials. -/
-lemma legTor_cpow_real {x : ℝ} (hx : 0 < x) (s : ℂ) : (x:ℂ)^s = exp ((Real.log x:ℂ) * s) := by
+theorem legTor_cpow_real {x : ℝ} (hx : 0 < x) (s : ℂ) : (x:ℂ)^s = exp ((Real.log x:ℂ) * s) := by
   rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr hx.ne'), ofReal_log hx.le]
 
 /-- Composite quadratic transformation (DLMF 15.8.21 then 15.8.13) behind DLMF 14.19.3:
 for `0 < q < 1` and `x = (1+q²)/(2q)`,
 `F(μ+½, ν+μ+½; ν+1; q²) = (1+q²)^{-(ν+μ+½)} F(a/2, (a+1)/2; ν+1; x^{-2})`, `a = ν+μ+½`. -/
-lemma legTor_quad (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 1 ≠ -(k:ℂ)) (ht : ∀ k : ℕ, 2*ν + 1 ≠ -(k:ℂ))
+theorem legTor_quad (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 1 ≠ -(k:ℂ)) (ht : ∀ k : ℕ, 2*ν + 1 ≠ -(k:ℂ))
     {q : ℝ} (hq0 : 0 < q) (hq1 : q < 1) :
     ₂F₁ (μ+1/2) (ν+μ+1/2) (ν+1) ((q^2:ℝ):ℂ) =
       exp (-(Real.log (1+q^2):ℂ)*(ν+μ+1/2)) *
@@ -136,7 +134,7 @@ lemma legTor_quad (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 1 ≠ -(k:ℂ)) (ht : �
   rw [hl]; push_cast; ring
 
 /-- DLMF 14.19.3 off the half-integer degrees `2ν ∈ ℤ`. -/
-lemma legTor_Q_hyp_generic (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 1 ≠ -(k:ℂ)) (ht : ∀ k : ℕ, 2*ν + 1 ≠ -(k:ℂ))
+theorem legTor_Q_hyp_generic (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 1 ≠ -(k:ℂ)) (ht : ∀ k : ℕ, 2*ν + 1 ≠ -(k:ℂ))
     {ξ : ℝ} (hξ : 0 < ξ) :
     olverQ (ν-1/2) μ (Real.cosh ξ)=Real.sqrt π*(1-Real.exp (-2*ξ):ℂ)^μ/exp ((ν+1/2)*ξ)*regularizedGaussHG (μ+1/2) (ν+μ+1/2) (ν+1) (Real.exp (-2*ξ)) := by
   set q := Real.exp (-ξ) with hqdef
@@ -206,7 +204,7 @@ lemma legTor_Q_hyp_generic (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 1 ≠ -(k:ℂ))
   rw [hl1, hl2, hlq]; push_cast; ring
 
 /-- DLMF 14.19.2 off the half-integer orders `2μ ∈ ℤ`. -/
-lemma legTor_P_hyp_generic (ν μ : ℂ) (hc1 : ∀ k : ℕ, 1 - 2*μ ≠ -(k:ℂ)) (hc2 : ∀ k : ℕ, 1 - μ ≠ -(k:ℂ))
+theorem legTor_P_hyp_generic (ν μ : ℂ) (hc1 : ∀ k : ℕ, 1 - 2*μ ≠ -(k:ℂ)) (hc2 : ∀ k : ℕ, 1 - μ ≠ -(k:ℂ))
     {ξ : ℝ} (hξ : 0 < ξ) :
     associatedP (ν-1/2) μ (Real.cosh ξ)=Gamma (1/2-μ)/(Real.sqrt π*(1-Real.exp (-2*ξ):ℂ)^μ*exp ((ν+1/2)*ξ))*regularizedGaussHG (1/2-μ) (1/2+ν-μ) (1-2*μ) (1-Real.exp (-2*ξ)) := by
   set q := Real.exp (-ξ) with hqdef
@@ -380,14 +378,14 @@ noncomputable def legInt_ht (θ : ℝ) : ℝ := (1 - Real.cos θ) / (1 + Real.co
 noncomputable def legInt_ht' (θ : ℝ) : ℝ := 2 * Real.sin θ / (1 + Real.cos θ) ^ 2
 
 /-- `-1 < cos θ < 1` and `0 < sin θ` on `(0, π)`. -/
-lemma legInt_cos_bounds {θ : ℝ} (hθ : θ ∈ Ioo (0:ℝ) π) :
+theorem legInt_cos_bounds {θ : ℝ} (hθ : θ ∈ Ioo (0:ℝ) π) :
     -1 < Real.cos θ ∧ Real.cos θ < 1 ∧ 0 < Real.sin θ := by
   have hs := Real.sin_pos_of_pos_of_lt_pi hθ.1 hθ.2
   have h := Real.sin_sq_add_cos_sq θ
   refine ⟨?_, ?_, hs⟩ <;> nlinarith [Real.cos_le_one θ, Real.neg_one_le_cos θ]
 
 /-- Change of variables `u = tan²(θ/2)` from `(0, ∞)` to `(0, π)`. -/
-lemma legInt_ht_cov {g : ℝ → ℂ} (hg : IntegrableOn g (Ioi 0)) :
+theorem legInt_ht_cov {g : ℝ → ℂ} (hg : IntegrableOn g (Ioi 0)) :
     IntegrableOn (fun θ => |legInt_ht' θ| • g (legInt_ht θ)) (Ioo 0 π) ∧
       ∫ θ in Ioo 0 π, |legInt_ht' θ| • g (legInt_ht θ) = ∫ u in Ioi 0, g u := by
   have hd : ∀ θ ∈ Ioo (0:ℝ) π, HasDerivWithinAt legInt_ht (legInt_ht' θ) (Ioo 0 π) θ := by
@@ -424,7 +422,7 @@ lemma legInt_ht_cov {g : ℝ → ℂ} (hg : IntegrableOn g (Ioi 0)) :
 
 /-- The Euler half-line kernel of DLMF 14.19.4 at `u = tan²(θ/2)`, with `2qx = 1+q²`,
 `2qs = 1-q²`. -/
-lemma legInt_toroidal_point (a : ℂ) (m : ℕ) {q x s θ : ℝ} (hq : 0 < q) (hqx : 1 + q^2 = 2*q*x)
+theorem legInt_toroidal_point (a : ℂ) (m : ℕ) {q x s θ : ℝ} (hq : 0 < q) (hqx : 1 + q^2 = 2*q*x)
     (hqs : 1 - q^2 = 2*q*s) (hq1 : q < 1) (hθ : θ ∈ Ioo (0:ℝ) π) :
     |legInt_ht' θ| • eulerHalfLineKernel a (m+1/2) (m+1/2) (((q^2)⁻¹:ℝ):ℂ) (legInt_ht θ) =
       (2:ℂ)^(-(2*m:ℂ)) * (q:ℂ)^a * ((Real.sin θ:ℂ)^(2*m) / ((x + Real.cos θ * s : ℝ):ℂ)^a) := by
@@ -477,7 +475,7 @@ lemma legInt_toroidal_point (a : ℂ) (m : ℕ) {q x s θ : ℝ} (hq : 0 < q) (h
   linear_combination (-(m:ℂ)+1/2) * l0'
 
 /-- The constant in DLMF 14.19.4, by the duplication formula. -/
-lemma legInt_toroidal_value (n m : ℕ) (F : ℂ) {q c s : ℝ} (hq0 : 0 < q) (hc0 : 0 < c) (hs0 : 0 < s) :
+theorem legInt_toroidal_value (n m : ℕ) (F : ℂ) {q c s : ℝ} (hq0 : 0 < q) (hc0 : 0 < c) (hs0 : 0 < s) :
     Gamma (n+m+1/2)*(s:ℂ)^m/(2^m*Real.sqrt π*Gamma (n-m+1/2)*Gamma (m+1/2)) *
       ((2:ℂ)^(2*m:ℂ) * (q:ℂ)^(-((n:ℂ)+m+1/2)) * (Gamma (m+1/2) * Gamma (m+1/2) *
         (exp (Real.log q * (2*((m:ℂ)-(-n-1/2)))) * exp ((Real.log q + Real.log c) * ((-n-1/2:ℂ)-m)) *
@@ -668,7 +666,7 @@ theorem toroidalQ_integral (n m : ℕ) (hmn : m ≤ n) {ξ : ℝ} (hξ : 0 < ξ)
 
 /-- Regrouping a summable double series on `ℕ × ℕ` along the diagonals `j - k = n ≥ 0` and
 `k - j = n + 1`. -/
-lemma legFS_diag_split {F : ℕ × ℕ → ℂ} {P : ℂ} {gp gm : ℕ → ℂ} (hF : HasSum F P)
+theorem legFS_diag_split {F : ℕ × ℕ → ℂ} {P : ℂ} {gp gm : ℕ → ℂ} (hF : HasSum F P)
     (hp : ∀ n, HasSum (fun k => F (k+n, k)) (gp n))
     (hm : ∀ n, HasSum (fun k => F (k, k+n+1)) (gm n)) :
     ∃ a b, HasSum gp a ∧ HasSum gm b ∧ a + b = P := by
@@ -702,7 +700,7 @@ lemma legFS_diag_split {F : ℕ × ℕ → ℂ} {P : ℂ} {gp gm : ℕ → ℂ} 
   · exact sm.hasSum.prod_fiberwise fun n => by simpa [hem, add_comm, add_assoc] using hm n
 
 /-- Absolute convergence of the binomial series `∑ (α)_j z^j/j!` for `|z| < 1`. -/
-lemma legFS_binom_norm_summable (α : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem legFS_binom_norm_summable (α : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     Summable (fun j : ℕ => ‖poch α j / (j ! : ℂ) * z^j‖) := by
   set t := ‖z‖
   set r := (1 + t)/2
@@ -735,7 +733,7 @@ lemma legFS_binom_norm_summable (α : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
 
 /-- The diagonal `j = k + m` of the product of the binomial series in `tE` and `tE⁻¹`:
 `∑_k (α)_{k+m}(α)_k t^{2k+m} E^m/((k+m)! k!) = E^m t^m (α)_m 𝐅(α, α+m; m+1; t²)`. -/
-lemma legFS_fiber (α : ℂ) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t < 1) {E : ℂ} (hE : E ≠ 0) (m : ℕ) :
+theorem legFS_fiber (α : ℂ) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t < 1) {E : ℂ} (hE : E ≠ 0) (m : ℕ) :
     HasSum (fun k : ℕ => (poch α (k+m) / ((k+m) ! : ℂ) * ((t:ℂ)*E)^(k+m)) *
         (poch α k / (k ! : ℂ) * ((t:ℂ)*E⁻¹)^k))
       (E^m * (t:ℂ)^m * poch α m * regularizedGaussHGFun α (α+m) (m+1) ((t:ℂ)^2)) := by
@@ -759,7 +757,7 @@ lemma legFS_fiber (α : ℂ) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t < 1) {E : ℂ} (
 
 /-- The Fourier modes of `(1 - tE)^{-α} (1 - t/E)^{-α}`, `0 ≤ t < 1`, `|E| = 1`: with
 `c_n = t^n (α)_n 𝐅(α, α+n; n+1; t²)`, `∑_{n ≥ 1} (Eⁿ + E⁻ⁿ) c_n = (1-tE)^{-α}(1-t/E)^{-α} - c_0`. -/
-lemma legFS_binom_product (α : ℂ) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t < 1) {E : ℂ} (hE : ‖E‖ = 1) :
+theorem legFS_binom_product (α : ℂ) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t < 1) {E : ℂ} (hE : ‖E‖ = 1) :
     HasSum (fun j : ℕ => (E^(j+1) + E⁻¹^(j+1)) * ((t:ℂ)^(j+1) * poch α (j+1) *
         regularizedGaussHGFun α (α+(j+1:ℕ)) ((j+1:ℕ)+1) ((t:ℂ)^2)))
       ((1 - (t:ℂ)*E)^(-α) * (1 - (t:ℂ)*E⁻¹)^(-α) -
@@ -801,7 +799,7 @@ lemma legFS_binom_product (α : ℂ) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t < 1) {E 
   ring
 
 /-- `w^s (w̄)^s = (|w|²)^s` for `w ∉ (-∞, 0]`. -/
-lemma legFS_cpow_mul_conj {w : ℂ} (hw : w ∈ slitPlane) (s : ℂ) :
+theorem legFS_cpow_mul_conj {w : ℂ} (hw : w ∈ slitPlane) (s : ℂ) :
     w^s * (starRingEnd ℂ w)^s = exp (((2 * Real.log ‖w‖ : ℝ) : ℂ) * s) := by
   have hw0 : w ≠ 0 := slitPlane_ne_zero hw
   have hc0 : starRingEnd ℂ w ≠ 0 := (map_ne_zero _).mpr hw0
@@ -813,13 +811,13 @@ lemma legFS_cpow_mul_conj {w : ℂ} (hw : w ∈ slitPlane) (s : ℂ) :
     add_conj, log_re]
 
 /-- Positive real powers through the real logarithm. -/
-lemma legFS_ofReal_cpow {x : ℝ} (hx : 0 < x) (s : ℂ) :
+theorem legFS_ofReal_cpow {x : ℝ} (hx : 0 < x) (s : ℂ) :
     (x:ℂ)^s = exp (((Real.log x : ℝ) : ℂ) * s) := by
   rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr hx.ne'), ← ofReal_log hx.le]
 
 /-- The closed form behind DLMF 14.19.6: with `t = e^{-ξ}`, `E = e^{iphi}`,
 `√π (1-t²)^μ e^{-ξ/2} (1-tE)^{-μ-1/2} (1-t/E)^{-μ-1/2} = (π/2)^{1/2} sinh^μ ξ (cosh ξ - cos phi)^{-μ-1/2}`. -/
-lemma legFS_toroidal_rhs (μ : ℂ) {ξ : ℝ} (hξ : 0 < ξ) (phi : ℝ) :
+theorem legFS_toroidal_rhs (μ : ℂ) {ξ : ℝ} (hξ : 0 < ξ) (phi : ℝ) :
     Real.sqrt π * (1 - (Real.exp (-2*ξ):ℂ))^μ / exp (ξ/2) *
       ((1 - (Real.exp (-ξ):ℂ)*exp (phi*I))^(-(μ+1/2)) * (1 - (Real.exp (-ξ):ℂ)*(exp (phi*I))⁻¹)^(-(μ+1/2))) =
     (π/2:ℂ)^(1/2:ℂ)*(Real.sinh ξ:ℂ)^μ/(Real.cosh ξ-Real.cos phi:ℂ)^(μ+1/2) := by
@@ -877,7 +875,7 @@ lemma legFS_toroidal_rhs (μ : ℂ) {ξ : ℝ} (hξ : 0 < ξ) (phi : ℝ) :
   ring
 
 /-- The hypergeometric form of `𝑸^μ_{n-1/2}(cosh ξ)` in terms of `t = e^{-ξ}` (DLMF 14.19.3). -/
-lemma legFS_toroidal_coef (μ : ℂ) {ξ : ℝ} (hξ : 0 < ξ) (n : ℕ) :
+theorem legFS_toroidal_coef (μ : ℂ) {ξ : ℝ} (hξ : 0 < ξ) (n : ℕ) :
     olverQ ((n:ℂ)-1/2) μ (Real.cosh ξ) = Real.sqrt π * (1 - (Real.exp (-2*ξ):ℂ))^μ / exp (ξ/2) *
       ((Real.exp (-ξ):ℂ)^n * regularizedGaussHGFun (μ+1/2) (μ+1/2+n) (n+1) ((Real.exp (-ξ):ℂ)^2)) := by
   have ht : ‖((Real.exp (-ξ):ℂ))^2‖ < 1 := by

@@ -8,6 +8,7 @@ module
 
 public import DLMF.GeneralizedHypergeometric.Basic
 public import TauCeti.Analysis.Complex.Conformal.Continuation.Basic
+public import Mathlib.Algebra.Order.Ring.Star
 
 /-!
 # Analytic properties and zeros: DLMF §§16.2,16.9

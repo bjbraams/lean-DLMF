@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.JacobiElliptic.ElementaryIdentities
+public import DLMF.JacobiElliptic.Basic
 
 /-!
 # Jacobian elliptic functions: Landen transformations (DLMF §22.7)

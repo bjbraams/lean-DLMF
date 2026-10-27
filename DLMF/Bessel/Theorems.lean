@@ -5,11 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Tactic.CrossRefAttribute
-public import DLMF.Bessel.Modified
 public import DLMF.Bessel.Generating
-public import DLMF.Bessel.Sonine
-public import DLMF.OrthogonalPolynomials.Classical
+public import Mathlib.Analysis.SpecialFunctions.Bernstein
 
 /-!
 # Recurrences, integrals, addition formulae, and zeros (AAR §§4.6–4.11, 4.14–4.15)

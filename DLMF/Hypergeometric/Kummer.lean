@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Hypergeometric.Solutions
-public import DLMF.Hypergeometric.Continuation
 
 /-!
 # Kummer's representations and connections (DLMF §15.10(ii))
@@ -51,28 +50,28 @@ def kummerSixLeft (a b c z : ℂ) : ℂ :=
 /-! ### Phase identities for principal powers -/
 
 /-- A principal power computed from any logarithm in the principal strip. -/
-lemma cpow_eq_exp_of_exp_eq {x L : ℂ} (hx : exp L = x) (h1 : -Real.pi < L.im)
+theorem cpow_eq_exp_of_exp_eq {x L : ℂ} (hx : exp L = x) (h1 : -Real.pi < L.im)
     (h2 : L.im ≤ Real.pi) (y : ℂ) : x ^ y = exp (L * y) := by
   have hx0 : x ≠ 0 := by rw [← hx]; exact exp_ne_zero L
   rw [cpow_def_of_ne_zero hx0, ← hx, log_exp h1 h2]
 
-lemma cpow_eq_exp_log {x : ℂ} (hx : x ≠ 0) (y : ℂ) : x ^ y = exp (log x * y) :=
+theorem cpow_eq_exp_log {x : ℂ} (hx : x ≠ 0) (y : ℂ) : x ^ y = exp (log x * y) :=
   cpow_def_of_ne_zero hx y
 
 /-- `z/(z-1) = exp(log z - log(1-z) + φ)` with `φ = -πi` in the upper and `φ = πi` in the
 lower half-plane. -/
-lemma exp_log_div_sub_one {z φ : ℂ} (hz0 : z ≠ 0) (hz1 : 1 - z ≠ 0)
+theorem exp_log_div_sub_one {z φ : ℂ} (hz0 : z ≠ 0) (hz1 : 1 - z ≠ 0)
     (hφ : exp φ = -1) : exp (log z - log (1 - z) + φ) = z / (z - 1) := by
   rw [exp_add, exp_sub, exp_log hz0, exp_log hz1, hφ]
   have : z - 1 = -(1 - z) := by ring
   rw [this]
   field_simp
 
-lemma exp_neg_pi_mul_I : exp (-(Real.pi * I)) = -1 := by
+theorem exp_neg_pi_mul_I : exp (-(Real.pi * I)) = -1 := by
   rw [exp_neg, exp_pi_mul_I]
   norm_num
 
-lemma im_log_div_sub_one_upper {z : ℂ} (hi : 0 < z.im) :
+theorem im_log_div_sub_one_upper {z : ℂ} (hi : 0 < z.im) :
     -Real.pi < (log z - log (1 - z) + -(Real.pi * I)).im ∧
       (log z - log (1 - z) + -(Real.pi * I)).im ≤ Real.pi := by
   have h1 : 0 ≤ z.arg := arg_nonneg_iff.mpr hi.le
@@ -83,7 +82,7 @@ lemma im_log_div_sub_one_upper {z : ℂ} (hi : 0 < z.im) :
     mul_zero, mul_one, add_zero]
   constructor <;> linarith
 
-lemma im_log_div_sub_one_lower {z : ℂ} (hi : z.im < 0) :
+theorem im_log_div_sub_one_lower {z : ℂ} (hi : z.im < 0) :
     -Real.pi < (log z - log (1 - z) + Real.pi * I).im ∧
       (log z - log (1 - z) + Real.pi * I).im ≤ Real.pi := by
   have h1 : z.arg < 0 := arg_neg_iff.mpr hi
@@ -95,7 +94,7 @@ lemma im_log_div_sub_one_lower {z : ℂ} (hi : z.im < 0) :
   constructor <;> linarith
 
 /-- `(z/(z-1))^y` in the upper half-plane. -/
-lemma div_sub_one_cpow_upper {z : ℂ} (hi : 0 < z.im) (y : ℂ) :
+theorem div_sub_one_cpow_upper {z : ℂ} (hi : 0 < z.im) (y : ℂ) :
     (z / (z - 1)) ^ y = exp ((log z - log (1 - z) + -(Real.pi * I)) * y) := by
   have hz0 : z ≠ 0 := by rintro rfl; simp at hi
   have hz1 : 1 - z ≠ 0 := by intro h; have := congrArg im h; simp at this; linarith
@@ -103,7 +102,7 @@ lemma div_sub_one_cpow_upper {z : ℂ} (hi : 0 < z.im) (y : ℂ) :
     (im_log_div_sub_one_upper hi).1 (im_log_div_sub_one_upper hi).2 y
 
 /-- `(z/(z-1))^y` in the lower half-plane. -/
-lemma div_sub_one_cpow_lower {z : ℂ} (hi : z.im < 0) (y : ℂ) :
+theorem div_sub_one_cpow_lower {z : ℂ} (hi : z.im < 0) (y : ℂ) :
     (z / (z - 1)) ^ y = exp ((log z - log (1 - z) + Real.pi * I) * y) := by
   have hz0 : z ≠ 0 := by rintro rfl; simp at hi
   have hz1 : 1 - z ≠ 0 := by intro h; have := congrArg im h; simp at this; linarith
@@ -111,7 +110,7 @@ lemma div_sub_one_cpow_lower {z : ℂ} (hi : z.im < 0) (y : ℂ) :
     (im_log_div_sub_one_lower hi).1 (im_log_div_sub_one_lower hi).2 y
 
 /-- `(1 - 1/z)^y` in the upper half-plane. -/
-lemma one_sub_recip_cpow_upper {z : ℂ} (hi : 0 < z.im) (y : ℂ) :
+theorem one_sub_recip_cpow_upper {z : ℂ} (hi : 0 < z.im) (y : ℂ) :
     (1 - 1 / z) ^ y = exp ((log (1 - z) - log z + Real.pi * I) * y) := by
   have hz0 : z ≠ 0 := by rintro rfl; simp at hi
   have hz1 : 1 - z ≠ 0 := by intro h; have := congrArg im h; simp at this; linarith
@@ -131,7 +130,7 @@ lemma one_sub_recip_cpow_upper {z : ℂ} (hi : 0 < z.im) (y : ℂ) :
     linarith
 
 /-- `(1/w)^y = w^(-y)` away from the negative real axis. -/
-lemma one_div_cpow_of_mem_slitPlane {w : ℂ} (hw : w ∈ slitPlane) (y : ℂ) :
+theorem one_div_cpow_of_mem_slitPlane {w : ℂ} (hw : w ∈ slitPlane) (y : ℂ) :
     (1 / w) ^ y = exp (-log w * y) := by
   have hw0 : w ≠ 0 := slitPlane_ne_zero hw
   refine cpow_eq_exp_of_exp_eq ?_ ?_ ?_ y
@@ -146,7 +145,7 @@ lemma one_div_cpow_of_mem_slitPlane {w : ℂ} (hw : w ∈ slitPlane) (y : ℂ) :
     simp only [neg_im, log_im]
     linarith
 
-lemma one_sub_mem_slitPlane_of_norm_lt_one {z : ℂ} (hz : ‖z‖ < 1) : 1 - z ∈ slitPlane := by
+theorem one_sub_mem_slitPlane_of_norm_lt_one {z : ℂ} (hz : ‖z‖ < 1) : 1 - z ∈ slitPlane := by
   refine mem_slitPlane_iff.mpr (Or.inl ?_)
   have := (re_le_norm z).trans_lt hz
   simp only [sub_re, one_re]
@@ -155,7 +154,7 @@ lemma one_sub_mem_slitPlane_of_norm_lt_one {z : ℂ} (hz : ‖z‖ < 1) : 1 - z 
 /-! ### Connections between zero and the charts at infinity -/
 
 /-- 15.10.25 without the phase hypotheses (none is needed). -/
-lemma zero_first_connection_left_gen {a b c z : ℂ} (hc : ∀ k : ℤ, c ≠ (k : ℂ))
+theorem zero_first_connection_left_gen {a b c z : ℂ} (hc : ∀ k : ℤ, c ≠ (k : ℂ))
     (hab : ∀ k : ℤ, a - b ≠ (k : ℂ)) (hz : ‖z‖ < 1) (hw : 1 < ‖1 - z‖) :
     ₂F₁ a b c z =
       Gamma c * Gamma (b - a) / (Gamma b * Gamma (c - a)) * kummerFiveLeft a b c z + Gamma c *
@@ -192,7 +191,7 @@ lemma zero_first_connection_left_gen {a b c z : ℂ} (hc : ∀ k : ℤ, c ≠ (k
     ₂F₁ b (c - a) (b - a + 1) (1 / (1 - z))) * hexp
 
 /-- 15.10.26 with a phase `φ = ∓πi` recording the half-plane of `z`. -/
-lemma zero_second_connection_left_gen {a b c z φ : ℂ} (hc : ∀ k : ℤ, c ≠ (k : ℂ))
+theorem zero_second_connection_left_gen {a b c z φ : ℂ} (hc : ∀ k : ℤ, c ≠ (k : ℂ))
     (hab : ∀ k : ℤ, a - b ≠ (k : ℂ)) (hz : ‖z‖ < 1) (hw : 1 < ‖1 - z‖)
     (hphase : ∀ y : ℂ, (z / (z - 1)) ^ y = exp ((log z - log (1 - z) + φ) * y)) :
     zeroSecond a b c z =

@@ -7,7 +7,6 @@ module
 
 public import DLMF.Mathieu.Noninteger.Properties
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
-public import Mathlib.Topology.UniformSpace.LocallyUniformConvergence
 
 /-!
 # Fourier series of the Mathieu functions of noninteger order (DLMF §28.14)
@@ -88,14 +87,14 @@ theorem hasSum_mathieuMe_ofReal (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {q : ℂ}
   exact (hs.of_norm).hasSum
 
 /-- `e^{iθz} + e^{iθ(-z)} = 2 cos(θz)`. -/
-theorem m28b_exp_add_exp_neg (θ z : ℂ) :
+lemma m28b_exp_add_exp_neg (θ z : ℂ) :
     Complex.exp (I * θ * z) + Complex.exp (I * θ * -z) = 2 * Complex.cos (θ * z) := by
   rw [show I * θ * z = (θ * z) * I by ring, show I * θ * -z = (-(θ * z)) * I by ring,
     Complex.exp_mul_I, Complex.exp_mul_I, Complex.cos_neg, Complex.sin_neg]
   ring
 
 /-- `-(i/2) (e^{iθz} - e^{iθ(-z)}) = sin(θz)`. -/
-theorem m28b_exp_sub_exp_neg (θ z : ℂ) :
+lemma m28b_exp_sub_exp_neg (θ z : ℂ) :
     -(I / 2) * (Complex.exp (I * θ * z) - Complex.exp (I * θ * -z)) = Complex.sin (θ * z) := by
   rw [show I * θ * z = (θ * z) * I by ring, show I * θ * -z = (-(θ * z)) * I by ring,
     Complex.exp_mul_I, Complex.exp_mul_I, Complex.cos_neg, Complex.sin_neg]
@@ -170,7 +169,7 @@ theorem p1b_norm_D_ge (ν a : ℂ) (B : ℝ) : ∃ M : ℕ, ∀ k : ℤ, (M : �
 
 /-- Ratio asymptotics on the right tail for a nontrivial absolutely summable solution of
 28.14.4 with `q ≠ 0`: `c_m / c_{m-1} + q/(4m²) = O(m⁻³)`. -/
-theorem p1b_ratio_tail {ν q a : ℂ} {c : ℤ → ℂ} (hq0 : q ≠ 0)
+lemma p1b_ratio_tail {ν q a : ℂ} {c : ℤ → ℂ} (hq0 : q ≠ 0)
     (hrec : ∀ m : ℤ, q * c (m + 1) - (a - (ν + 2 * m) ^ 2) * c m + q * c (m - 1) = 0)
     (hs : Summable (fun m => ‖c m‖)) (hne : c ≠ 0) :
     (fun m : ℕ => c m / c (m - 1) + q / (4 * (m : ℂ) ^ 2))

@@ -7,7 +7,6 @@ module
 
 public import DLMF.OrthogonalPolynomials.BoundsZeros
 public import DLMFMathlib.Analysis.ODE.SturmComparison
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Inverse
 
 /-!
 # Bounds for individual Jacobi zero angles
@@ -57,7 +56,7 @@ def q (α β : ℝ) (n : ℕ) (t : ℝ) : ℝ :=
       (2 * sin t ^ 2)
 
 /-- Both logarithms in the multiplier have positive arguments. -/
-lemma one_sub_cos_pos_and_one_add_cos_pos {t : ℝ} (ht : t ∈ Ioo 0 π) :
+theorem one_sub_cos_pos_and_one_add_cos_pos {t : ℝ} (ht : t ∈ Ioo 0 π) :
     0 < 1 - cos t ∧ 0 < 1 + cos t := by
   have h1 := cos_lt_cos_of_nonneg_of_le_pi (x := 0) (y := t) (by norm_num) ht.2.le ht.1
   have h2 := cos_lt_cos_of_nonneg_of_le_pi (x := t) (y := π) ht.1.le le_rfl ht.2
@@ -65,7 +64,7 @@ lemma one_sub_cos_pos_and_one_add_cos_pos {t : ℝ} (ht : t ∈ Ioo 0 π) :
   constructor <;> linarith
 
 /-- Derivative of the multiplier on the open angular interval. -/
-lemma hasDerivAt_weight (α β : ℝ) {t : ℝ} (ht : t ∈ Ioo 0 π) :
+theorem hasDerivAt_weight (α β : ℝ) {t : ℝ} (ht : t ∈ Ioo 0 π) :
     HasDerivAt (weight α β) (weight α β t * logDeriv α β t) t := by
   obtain ⟨hminus, hplus⟩ := one_sub_cos_pos_and_one_add_cos_pos ht
   have hs := sin_pos_of_pos_of_lt_pi ht.1 ht.2
@@ -82,7 +81,7 @@ lemma hasDerivAt_weight (α β : ℝ) {t : ℝ} (ht : t ∈ Ioo 0 π) :
   ring
 
 /-- Derivative of the logarithmic derivative. -/
-lemma hasDerivAt_logDeriv (α β : ℝ) {t : ℝ} (ht : t ∈ Ioo 0 π) :
+theorem hasDerivAt_logDeriv (α β : ℝ) {t : ℝ} (ht : t ∈ Ioo 0 π) :
     HasDerivAt (logDeriv α β)
       (-(gamma α β + delta α β * cos t) / sin t ^ 2) t := by
   have hs := sin_pos_of_pos_of_lt_pi ht.1 ht.2
@@ -96,7 +95,7 @@ lemma hasDerivAt_logDeriv (α β : ℝ) {t : ℝ} (ht : t ∈ Ioo 0 π) :
   ring
 
 /-- The angular function has the stated first derivative. -/
-lemma hasDerivAt_u (α β : ℝ) (n : ℕ) {t : ℝ} (ht : t ∈ Ioo 0 π) :
+theorem hasDerivAt_u (α β : ℝ) (n : ℕ) {t : ℝ} (ht : t ∈ Ioo 0 π) :
     HasDerivAt (u α β n) (u' α β n t) t := by
   refine ((hasDerivAt_weight α β ht).mul
     ((Polynomial.hasDerivAt (jacobiPolyPR α β n) (cos t)).comp t
@@ -105,7 +104,7 @@ lemma hasDerivAt_u (α β : ℝ) (n : ℕ) {t : ℝ} (ht : t ∈ Ioo 0 π) :
   ring
 
 /-- The angular Jacobi differential equation. -/
-lemma hasDerivAt_u' {α : ℝ} (hα : -1 < α) (β : ℝ) (n : ℕ)
+theorem hasDerivAt_u' {α : ℝ} (hα : -1 < α) (β : ℝ) (n : ℕ)
     {t : ℝ} (ht : t ∈ Ioo 0 π) :
     HasDerivAt (u' α β n) (-(q α β n t * u α β n t)) t := by
   have hs := sin_pos_of_pos_of_lt_pi ht.1 ht.2
@@ -139,7 +138,7 @@ lemma hasDerivAt_u' {α : ℝ} (hα : -1 < α) (β : ℝ) (n : ℕ)
     (weight α β t * (jacobiPolyPR α β n).derivative.derivative.eval (cos t)) * hc
 
 /-- The Jacobi angular coefficient dominates the constant-frequency comparison equation. -/
-lemma freq_sq_le_q {α β : ℝ} (hα : α ^ 2 ≤ 1 / 4) (hβ : β ^ 2 ≤ 1 / 4)
+theorem freq_sq_le_q {α β : ℝ} (hα : α ^ 2 ≤ 1 / 4) (hβ : β ^ 2 ≤ 1 / 4)
     (n : ℕ) {t : ℝ} (ht : t ∈ Ioo 0 π) :
     (n + gamma α β) ^ 2 ≤ q α β n t := by
   obtain ⟨hminus, hplus⟩ := one_sub_cos_pos_and_one_add_cos_pos ht
@@ -208,7 +207,7 @@ private lemma length_le_of_no_zero {α β : ℝ} (hα : -1 < α)
 
 /-- A uniform improvement of the comparison coefficient, unless both squared parameters
 are `1/4`. This avoids endpoint regularity assumptions for strict zero bounds. -/
-lemma improved_freq_sq_le_q {α β : ℝ} (hα : α ^ 2 ≤ 1 / 4) (hβ : β ^ 2 ≤ 1 / 4)
+theorem improved_freq_sq_le_q {α β : ℝ} (hα : α ^ 2 ≤ 1 / 4) (hβ : β ^ 2 ≤ 1 / 4)
     (n : ℕ) {t : ℝ} (ht : t ∈ Ioo 0 π) :
     (n + gamma α β) ^ 2 + ((1 / 4 - α ^ 2) + (1 / 4 - β ^ 2)) / 4 ≤ q α β n t := by
   have hs := sin_pos_of_pos_of_lt_pi ht.1 ht.2

@@ -5,7 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Mathieu.Basic
 public import DLMF.Mathieu.Noninteger.Defs
 public import DLMF.Bessel.Basic
 

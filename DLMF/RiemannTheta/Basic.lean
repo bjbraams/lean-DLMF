@@ -5,14 +5,12 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Core.Upstream
 public import DLMF.Elliptic.Theta
-public import Mathlib.LinearAlgebra.Matrix.PosDef
 public import Mathlib.Analysis.Complex.LocallyUniformLimit
-public import Mathlib.Analysis.Normed.Group.FunctionSeries
 public import Mathlib.Algebra.Order.Chebyshev
-public import Mathlib.Topology.Algebra.InfiniteSum.Real
 public import Mathlib.Algebra.Order.Star.Real
+public import Mathlib.MeasureTheory.Integral.Pi
+public import Mathlib.Analysis.Complex.Liouville
 
 /-!
 # Riemann theta functions (DLMF §§21.1–21.2)
@@ -95,7 +93,7 @@ lemma rth21_im_dotProduct_ofReal (x : ι → ℝ) (z : ι → ℂ) :
     ((fun i => (x i : ℂ)) ⬝ᵥ z).im = x ⬝ᵥ fun i => (z i).im := by
   simp [dotProduct, Complex.im_sum]
 
-lemma rth21_im_quad_ofReal (x : ι → ℝ) (Ω : Matrix ι ι ℂ) :
+theorem rth21_im_quad_ofReal (x : ι → ℝ) (Ω : Matrix ι ι ℂ) :
     ((fun i => (x i : ℂ)) ⬝ᵥ (Ω *ᵥ fun i => (x i : ℂ))).im =
       x ⬝ᵥ (Ω.map Complex.im *ᵥ x) := by
   simp [dotProduct, mulVec, Complex.im_sum, Finset.mul_sum]
@@ -105,7 +103,7 @@ lemma rth21_intVec (n : ι → ℤ) : (fun i => (n i : ℂ)) = fun i => (((n i :
   simp
 
 /-- `‖exp(2πi(½ n·Ω·n + n·z))‖ = exp(-π n·(Im Ω)·n - 2π n·Im z)`. -/
-lemma norm_riemannThetaTerm (z : ι → ℂ) (Ω : Matrix ι ι ℂ) (n : ι → ℤ) :
+theorem norm_riemannThetaTerm (z : ι → ℂ) (Ω : Matrix ι ι ℂ) (n : ι → ℤ) :
     ‖riemannThetaTerm z Ω n‖ = Real.exp (-π * ((fun i => (n i : ℝ)) ⬝ᵥ
       (Ω.map Complex.im *ᵥ fun i => (n i : ℝ))) -
         2 * π * ((fun i => (n i : ℝ)) ⬝ᵥ fun i => (z i).im)) := by
@@ -123,7 +121,7 @@ holds on the Siegel upper half-space and does not require `Ω` to be symmetric. 
 def rth21_PosIm (Ω : Matrix ι ι ℂ) : Prop :=
   ∀ x : ι → ℝ, x ≠ 0 → 0 < x ⬝ᵥ (Ω.map Complex.im *ᵥ x)
 
-lemma rth21_posIm_of_mem {Ω : Matrix ι ι ℂ} (h : Ω ∈ siegelUpperHalfSpace ι) :
+theorem rth21_posIm_of_mem {Ω : Matrix ι ι ℂ} (h : Ω ∈ siegelUpperHalfSpace ι) :
     rth21_PosIm Ω := fun x hx => by
   simpa using h.2.dotProduct_mulVec_pos hx
 
@@ -503,13 +501,163 @@ theorem riemannThetaScaled_bounded [DecidableEq ι] {Ω : Matrix ι ι ℂ}
         (hS.mul_left _).tsum_le_tsum hterm hprodS
     _ ≤ M ^ Fintype.card ι := hprodle
 
+section p3t
+
+open MeasureTheory
+
+/-- `∫₀¹ e^{2πikt} dt = δ_{k0}`. -/
+lemma p3t_integral_exp_int (k : ℤ) :
+    ∫ t in Set.Icc (0 : ℝ) 1, cexp (2 * π * I * k * t) = if k = 0 then 1 else 0 := by
+  rw [integral_Icc_eq_integral_Ioc, ← intervalIntegral.integral_of_le zero_le_one]
+  split_ifs with hk
+  · subst hk; simp
+  · have hc : (2 * π * I * k : ℂ) ≠ 0 := by
+      have := Real.pi_ne_zero
+      simp [hk, I_ne_zero, this]
+    rw [integral_exp_mul_complex hc]
+    have : cexp (2 * π * I * k * ((1 : ℝ) : ℂ)) = 1 := by
+      rw [ofReal_one, mul_one, show (2 * π * I * k : ℂ) = k * (2 * π * I) by ring]
+      exact exp_int_mul_two_pi_mul_I k
+    rw [this]; simp
+
+/-- The cube measure on `[0,1]^ι`. -/
+noncomputable abbrev p3t_cube (ι : Type*) [Fintype ι] : Measure (ι → ℝ) :=
+  Measure.pi fun _ : ι => volume.restrict (Set.Icc (0 : ℝ) 1)
+
+/-- A theta term at a real vector as a constant times a product. -/
+lemma p3t_term_real (Ω : Matrix ι ι ℂ) (n : ι → ℤ) (x : ι → ℝ) :
+    riemannThetaTerm (fun i => (x i : ℂ)) Ω n =
+      cexp (2 * π * I * ((1 / 2 : ℂ) * ((fun i => (n i : ℂ)) ⬝ᵥ (Ω *ᵥ fun i => (n i : ℂ))))) *
+        ∏ i, cexp (2 * π * I * (n i) * x i) := by
+  rw [riemannThetaTerm, mul_add, Complex.exp_add, ← Complex.exp_sum]
+  congr 2
+  simp only [dotProduct, Finset.mul_sum]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  ring
+
+/-- `∫_{[0,1]^g}` of a theta term is `δ_{n0}`. -/
+lemma p3t_integral_term (Ω : Matrix ι ι ℂ) (n : ι → ℤ) :
+    ∫ x, riemannThetaTerm (fun i => (x i : ℂ)) Ω n ∂(p3t_cube ι) = if n = 0 then 1 else 0 := by
+  simp_rw [p3t_term_real]
+  rw [integral_const_mul]
+  rw [integral_fintype_prod_eq_prod (f := fun i (t : ℝ) => cexp (2 * π * I * (n i) * t))]
+  simp_rw [p3t_integral_exp_int]
+  rw [Finset.prod_boole]
+  by_cases hn : n = 0
+  · subst hn; simp
+  · have : ∃ i, n i ≠ 0 := by
+      by_contra h; exact hn (funext fun i => not_not.mp fun hi => h ⟨i, hi⟩)
+    simp [hn, this]
+
+/-- The modulus of a theta term at a real vector. -/
+lemma p3t_norm_term_real (Ω : Matrix ι ι ℂ) (n : ι → ℤ) (x : ι → ℝ) :
+    ‖riemannThetaTerm (fun i => (x i : ℂ)) Ω n‖ = ‖riemannThetaTerm 0 Ω n‖ := by
+  rw [norm_riemannThetaTerm, norm_riemannThetaTerm]
+  simp
+
+/-- The cube has measure one. -/
+lemma p3t_cube_univ : (p3t_cube ι) Set.univ = 1 := by
+  rw [p3t_cube, Measure.pi_univ]
+  simp
+
+/-- `∫_{[0,1]^g} θ(x|Ω) dx = 1`, so `θ(·|Ω)` is not identically zero. -/
+lemma p3t_integral_riemannTheta {Ω : Matrix ι ι ℂ} (hΩ : Ω ∈ siegelUpperHalfSpace ι) :
+    ∫ x, riemannTheta (fun i => (x i : ℂ)) Ω ∂(p3t_cube ι) = 1 := by
+  have hfin : IsFiniteMeasure (p3t_cube ι) := ⟨by rw [p3t_cube_univ]; simp⟩
+  have hint : ∀ n, Integrable (fun x : ι → ℝ => riemannThetaTerm (fun i => (x i : ℂ)) Ω n)
+      (p3t_cube ι) := by
+    intro n
+    refine Integrable.of_bound ?_ ‖riemannThetaTerm 0 Ω n‖
+      (Eventually.of_forall fun x => (p3t_norm_term_real Ω n x).le)
+    refine Continuous.aestronglyMeasurable ?_
+    simp only [riemannThetaTerm, dotProduct]
+    fun_prop
+  have hsum : Summable fun n => ∫ x, ‖riemannThetaTerm (fun i => (x i : ℂ)) Ω n‖ ∂(p3t_cube ι) := by
+    simp_rw [p3t_norm_term_real, integral_const, smul_eq_mul]
+    exact (summable_norm_riemannThetaTerm 0 hΩ).mul_left _
+  simp only [riemannTheta]
+  rw [← integral_tsum_of_summable_integral_norm hint hsum]
+  simp_rw [p3t_integral_term]
+  exact tsum_ite_eq 0 1
+
+end p3t
+
 /-- `θ̂(z|Ω)` is not an analytic function of `z` (DLMF §21.2(i), after 21.2.2); genus
 `g ≥ 1`. -/
 @[dlmf 21.2.i "the scaled theta function is nonanalytic in z"]
 theorem not_differentiable_riemannThetaScaled [DecidableEq ι] [Nonempty ι] {Ω : Matrix ι ι ℂ}
     (hΩ : Ω ∈ siegelUpperHalfSpace ι) :
     ¬ Differentiable ℂ fun z : ι → ℂ => riemannThetaScaled z Ω := by
-  sorry
+  intro hd
+  obtain ⟨C, hC⟩ := riemannThetaScaled_bounded hΩ
+  have hb : Bornology.IsBounded (Set.range fun z => riemannThetaScaled z Ω) := by
+    rw [isBounded_iff_forall_norm_le]
+    exact ⟨C, by rintro _ ⟨z, rfl⟩; exact hC z⟩
+  have hconst : ∀ z, riemannThetaScaled z Ω = riemannThetaScaled 0 Ω := fun z =>
+    hd.apply_eq_apply_of_bounded hb z 0
+  have hreal : ∀ x : ι → ℝ, riemannThetaScaled (fun i => (x i : ℂ)) Ω =
+      riemannTheta (fun i => (x i : ℂ)) Ω := by
+    intro x
+    have h0 : (fun i => ((x i : ℂ)).im) = 0 := by funext i; simp
+    rw [riemannThetaScaled, h0]; simp
+  have hc1 : riemannThetaScaled 0 Ω = 1 := by
+    have h := p3t_integral_riemannTheta hΩ
+    have e : (fun x : ι → ℝ => riemannTheta (fun i => (x i : ℂ)) Ω) =
+        fun _ => riemannThetaScaled 0 Ω := by
+      funext x; rw [← hreal, hconst]
+    rw [e, MeasureTheory.integral_const, MeasureTheory.measureReal_def, p3t_cube_univ] at h
+    simpa using h
+  set Y := Ω.map Complex.im with hY
+  have hθ : ∀ z : ι → ℂ, riemannTheta z Ω =
+      (Real.exp (π * ((fun i => (z i).im) ⬝ᵥ (Y⁻¹ *ᵥ fun i => (z i).im))) : ℂ) := by
+    intro z
+    have h := hconst z
+    rw [hc1, riemannThetaScaled] at h
+    rw [← hY] at h
+    have he : (Real.exp (-π * ((fun i => (z i).im) ⬝ᵥ (Y⁻¹ *ᵥ fun i => (z i).im))) : ℂ) *
+        (Real.exp (π * ((fun i => (z i).im) ⬝ᵥ (Y⁻¹ *ᵥ fun i => (z i).im))) : ℂ) = 1 := by
+      rw [← ofReal_mul, ← Real.exp_add]; simp
+    calc riemannTheta z Ω = ((Real.exp (-π * ((fun i => (z i).im) ⬝ᵥ
+          (Y⁻¹ *ᵥ fun i => (z i).im))) : ℂ) * riemannTheta z Ω) *
+          (Real.exp (π * ((fun i => (z i).im) ⬝ᵥ (Y⁻¹ *ᵥ fun i => (z i).im))) : ℂ) := by
+          rw [mul_comm _ (riemannTheta z Ω), mul_assoc, he, mul_one]
+      _ = _ := by rw [h, one_mul]
+  obtain ⟨j⟩ := ‹Nonempty ι›
+  set v : ι → ℂ := Pi.single j 1 with hv
+  set g : ℂ → ℂ := fun w => riemannTheta (w • v) Ω with hgdef
+  have hg : Differentiable ℂ g := fun w0 =>
+    rth21_differentiableAt_comp (L := fun w => (w • v, Ω)) (by fun_prop)
+      (rth21_posIm_of_mem hΩ) fun n => by
+        simp only [riemannThetaTerm, dotProduct_smul, smul_eq_mul]
+        fun_prop
+  have him : ∀ w : ℂ, (fun i => ((w • v) i).im) = w.im • (Pi.single j 1 : ι → ℝ) := by
+    intro w; funext i
+    by_cases h : i = j
+    · subst h; simp [hv]
+    · simp [hv, h]
+  have hgr : ∀ w : ℂ, ∀ t : ℝ, g (w + t) = g w := by
+    intro w t
+    simp only [hgdef, hθ, him, add_im, ofReal_im, add_zero]
+  have hg' : ∀ w, deriv g w = 0 := by
+    intro w
+    have h1 : HasDerivAt (fun u => g (w + u)) (deriv g w) ((0 : ℝ) : ℂ) := by
+      rw [ofReal_zero]
+      exact HasDerivAt.comp_const_add w 0 (by rw [add_zero]; exact (hg w).hasDerivAt)
+    have h2 := h1.comp_ofReal
+    have h3 : (fun t : ℝ => g (w + t)) = fun _ => g w := funext fun t => hgr w t
+    rw [h3] at h2
+    exact h2.unique (hasDerivAt_const _ _)
+  have h4 := is_const_of_deriv_eq_zero hg hg' I 0
+  simp only [hgdef, hθ, him, I_im, zero_im, one_smul, zero_smul] at h4
+  have h5 : π * ((Pi.single j 1 : ι → ℝ) ⬝ᵥ (Y⁻¹ *ᵥ Pi.single j 1)) = 0 := by
+    have := congrArg Complex.re h4
+    simp only [ofReal_re, Matrix.mulVec_zero, zero_dotProduct, mul_zero, Real.exp_zero] at this
+    exact Real.exp_eq_one_iff _ |>.mp this
+  have h6 := hΩ.2.inv.dotProduct_mulVec_pos (x := (Pi.single j 1 : ι → ℝ))
+    (by simp)
+  rw [star_trivial] at h6
+  have := Real.pi_pos
+  nlinarith
 
 /-- The series form `Θ(φ|B) = ∑ₙ exp(½ n·B·n + n·φ)` of the alternative normalization
 (DLMF §21.1). -/
@@ -539,7 +687,7 @@ def riemannMatrixExample : Matrix (Fin 2) (Fin 2) ℂ := !![I, -1 / 2; -1 / 2, I
 theorem riemannMatrixExample_eq_omegaOne :
     riemannMatrixExample = !![I, -1 / 2; -1 / 2, I] := rfl
 
-lemma riemannMatrixExample_map_im : riemannMatrixExample.map Complex.im = 1 := by
+theorem riemannMatrixExample_map_im : riemannMatrixExample.map Complex.im = 1 := by
   ext i j
   fin_cases i <;> fin_cases j <;> simp [riemannMatrixExample]
 
@@ -633,12 +781,12 @@ theorem riemannMatrixOmegaTwo_mem : riemannMatrixOmegaTwo ∈ siegelUpperHalfSpa
 
 /-! ## Characteristics (DLMF §21.2(ii)) -/
 
-lemma rth21_dot_mulVec_comm {Ω : Matrix ι ι ℂ} (hΩ : Ωᵀ = Ω) (a b : ι → ℂ) :
+theorem rth21_dot_mulVec_comm {Ω : Matrix ι ι ℂ} (hΩ : Ωᵀ = Ω) (a b : ι → ℂ) :
     a ⬝ᵥ (Ω *ᵥ b) = b ⬝ᵥ (Ω *ᵥ a) := by
   rw [dotProduct_mulVec, ← mulVec_transpose, hΩ, dotProduct_comm]
 
 /-- The characteristic term as a multiple of a shifted theta term (DLMF 21.2.6, termwise). -/
-lemma riemannThetaCharTerm_eq (α β : ι → ℝ) (z : ι → ℂ) {Ω : Matrix ι ι ℂ} (hΩ : Ωᵀ = Ω)
+theorem riemannThetaCharTerm_eq (α β : ι → ℝ) (z : ι → ℂ) {Ω : Matrix ι ι ℂ} (hΩ : Ωᵀ = Ω)
     (n : ι → ℤ) :
     riemannThetaCharTerm α β z Ω n =
       cexp (2 * π * I * ((1 / 2 : ℂ) * ((fun i => (α i : ℂ)) ⬝ᵥ (Ω *ᵥ fun i => (α i : ℂ))) +

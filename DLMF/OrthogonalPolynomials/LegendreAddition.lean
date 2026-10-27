@@ -29,26 +29,26 @@ namespace DLMF.OrthogonalPolynomials.LegendreAddition
 /-- Derivatives of the Legendre polynomial. -/
 def jet (n k : ℕ) : ℂ → ℂ := iteratedDeriv k (legendrePolyP n)
 /-- The zeroth derivative. -/
-lemma jet_zero (n : ℕ) : jet n 0 = legendrePolyP n := rfl
+theorem jet_zero (n : ℕ) : jet n 0 = legendrePolyP n := rfl
 /-- The first derivative. -/
-lemma jet_one (n : ℕ) : jet n 1 = deriv (legendrePolyP n) := iteratedDeriv_one
+theorem jet_one (n : ℕ) : jet n 1 = deriv (legendrePolyP n) := iteratedDeriv_one
 /-- Differentiation advances the derivative order. -/
-lemma deriv_jet (n k : ℕ) : deriv (jet n k) = jet n (k+1) := by
+theorem deriv_jet (n k : ℕ) : deriv (jet n k) = jet n (k+1) := by
   exact (iteratedDeriv_succ).symm
 /-- Every derivative is entire. -/
-lemma analytic_jet (n k : ℕ) : AnalyticOnNhd ℂ (jet n k) univ := by
+theorem analytic_jet (n k : ℕ) : AnalyticOnNhd ℂ (jet n k) univ := by
   induction k with
   | zero => exact analyticOnNhd_jacobiPolyP 0 0 n
   | succ k ih => simpa only [← deriv_jet] using ih.deriv
 /-- Every derivative is differentiable. -/
-lemma diff_jet (n k : ℕ) : Differentiable ℂ (jet n k) :=
+theorem diff_jet (n k : ℕ) : Differentiable ℂ (jet n k) :=
   fun z => ((analytic_jet n k) z (mem_univ z)).differentiableAt
 /-- The derivative in HasDerivAt form. -/
-lemma hderiv_jet (n k : ℕ) (z : ℂ) : HasDerivAt (jet n k) (jet n (k+1) z) z := by
+theorem hderiv_jet (n k : ℕ) (z : ℂ) : HasDerivAt (jet n k) (jet n (k+1) z) z := by
   simpa only [deriv_jet] using (diff_jet n k z).hasDerivAt
 
 /-- Weighted derivative ladders, valid also at the endpoints. -/
-lemma weighted_ladders (n : ℕ) (z : ℂ) :
+theorem weighted_ladders (n : ℕ) (z : ℂ) :
       (1-z^2) * deriv (legendrePolyP n) z = (n+1) * (z * legendrePolyP n z - legendrePolyP (n+1) z) ∧
       (1-z^2) * deriv (legendrePolyP (n+1)) z = (n+1) * (legendrePolyP n z-z*legendrePolyP (n+1) z) := by
   have h0 := jacobi_raising_derivative (α := 0) (β := 0) (by norm_num) n z
@@ -71,7 +71,7 @@ lemma weighted_ladders (n : ℕ) (z : ℂ) :
     linear_combination h1
 
 /-- The two derivative ladders at order one. -/
-lemma base_ladders (n : ℕ) :
+theorem base_ladders (n : ℕ) :
     deriv (legendrePolyP (n+1)) = (fun z => z * deriv (legendrePolyP n) z + (n+1) * legendrePolyP n z) ∧
     deriv (legendrePolyP n) = (fun z => z * deriv (legendrePolyP (n+1)) z - (n+1) * legendrePolyP (n+1) z) := by
   have hmul := weighted_ladders n
@@ -102,7 +102,7 @@ lemma base_ladders (n : ℕ) :
       linear_combination (hmul z).1 - z * (hmul z).2
 
 /-- The raising ladder for every derivative order. -/
-lemma jet_raise (n k : ℕ) (z : ℂ) :
+theorem jet_raise (n k : ℕ) (z : ℂ) :
     jet (n+1) (k+1) z = z * jet n (k+1) z + (n+k+1) * jet n k z := by
   induction k generalizing z with
   | zero => simpa [jet, iteratedDeriv_one] using congrFun (base_ladders n).1 z
@@ -119,7 +119,7 @@ lemma jet_raise (n k : ℕ) (z : ℂ) :
     linear_combination hd
 
 /-- The lowering ladder for every derivative order. -/
-lemma jet_lower (n k : ℕ) (z : ℂ) :
+theorem jet_lower (n k : ℕ) (z : ℂ) :
     jet n (k+1) z = z * jet (n+1) (k+1) z - ((n : ℂ)+1-k) * jet (n+1) k z := by
   induction k generalizing z with
   | zero => simpa [jet, iteratedDeriv_one] using congrFun (base_ladders n).2 z
@@ -136,7 +136,7 @@ lemma jet_lower (n k : ℕ) (z : ℂ) :
     linear_combination hd
 
 /-- The differentiated Legendre equation. -/
-lemma jet_ode (n k : ℕ) (z : ℂ) :
+theorem jet_ode (n k : ℕ) (z : ℂ) :
     (1-z^2) * jet n (k+2) z - 2*(k+1)*z*jet n (k+1) z +
       ((n : ℂ)-k)*(n+k+1)*jet n k z = 0 := by
   induction k generalizing z with
@@ -157,7 +157,7 @@ lemma jet_ode (n k : ℕ) (z : ℂ) :
 end DLMF.OrthogonalPolynomials.LegendreAddition
 namespace DLMF.OrthogonalPolynomials.LegendreAddition
 /-- The Jacobi form of the derivatives, including the top derivative. -/
-lemma jet_eq_jacobi (n k : ℕ) (hk : k ≤ n) (z : ℂ) :
+theorem jet_eq_jacobi (n k : ℕ) (hk : k ≤ n) (z : ℂ) :
     jet n k z = poch (n+1) k / 2^k * jacobiPolyP k k (n-k) z := by
   induction k generalizing n z with
   | zero => simp [jet, legendrePolyP, poch_zero]
@@ -174,7 +174,7 @@ lemma jet_eq_jacobi (n k : ℕ) (hk : k ≤ n) (z : ℂ) :
     ring
 
 /-- The derivatives above the degree vanish. -/
-lemma jet_eq_zero {n k : ℕ} (hk : n < k) : jet n k = 0 := by
+theorem jet_eq_zero {n k : ℕ} (hk : n < k) : jet n k = 0 := by
   have hz : jet n (n+1) = 0 := by
     rw [← deriv_jet]
     have he : jet n n = fun _ => poch (n+1) n / 2^n := by
@@ -196,11 +196,11 @@ def weight (n k : ℕ) : ℂ := (n-k)! / ((n+k)! : ℂ)
 /-- The factorial-weighted product of associated Legendre derivatives. -/
 def coeff (n k : ℕ) (x y s t : ℂ) : ℂ :=
   weight n k * (s*t)^k * jet n k x * jet n k y
-lemma coeff_eq_zero {n k : ℕ} (hk : n < k) (x y s t : ℂ) : coeff n k x y s t = 0 := by
+theorem coeff_eq_zero {n k : ℕ} (hk : n < k) (x y s t : ℂ) : coeff n k x y s t = 0 := by
   simp [coeff, jet_eq_zero hk]
 
 /-- Ratios of the factorial weights at an interior index. -/
-lemma weight_shifts {n k : ℕ} (hk : k < n) :
+theorem weight_shifts {n k : ℕ} (hk : k < n) :
     weight (n+1) k = weight n k * (n-k+1) / (n+k+1) ∧
     weight (n-1) k = weight n k * (n+k) / (n-k) ∧
     weight n (k+1) = weight n k / ((n-k)*(n+k+1)) := by
@@ -233,7 +233,7 @@ lemma weight_shifts {n k : ℕ} (hk : k < n) :
 end DLMF.OrthogonalPolynomials.LegendreAddition
 namespace DLMF.OrthogonalPolynomials.LegendreAddition
 /-- The previous angular weight. -/
-lemma weight_prev {n k : ℕ} (hk0 : 0 < k) (hk : k ≤ n) :
+theorem weight_prev {n k : ℕ} (hk0 : 0 < k) (hk : k ≤ n) :
     weight n (k-1) = weight n k * (n+k) * (n-k+1) := by
   have hp : ((n+k)! : ℂ) = (n+k : ℂ) * (n+k-1)! := by
     conv_lhs => rw [show n+k = (n+k-1)+1 by omega, Nat.factorial_succ]
@@ -247,7 +247,7 @@ lemma weight_prev {n k : ℕ} (hk0 : 0 < k) (hk : k ≤ n) :
   field_simp [hsum]
 
 /-- Degree and derivative neighbors at a positive angular index. -/
-lemma jet_neighbors {n k : ℕ} (hn : 0 < n) (hk : 0 < k) (x : ℂ) :
+theorem jet_neighbors {n k : ℕ} (hn : 0 < n) (hk : 0 < k) (x : ℂ) :
     jet (n+1) k x = x * jet n k x + (n+k)*jet n (k-1) x ∧
     jet (n-1) k x = x * jet n k x - ((n : ℂ)-k+1)*jet n (k-1) x ∧
     (1-x^2)*jet n (k+1) x = 2*k*x*jet n k x - (n+k)*((n : ℂ)-k+1)*jet n (k-1) x := by
@@ -265,7 +265,7 @@ lemma jet_neighbors {n k : ℕ} (hn : 0 < n) (hk : 0 < k) (x : ℂ) :
   · linear_combination hC
 
 /-- The bilinear algebra of the associated Legendre recurrence. -/
-lemma bilinear_identity (n k x y u v U V : ℂ) (h0 : n-k ≠ 0) (h1 : n+k+1 ≠ 0) :
+theorem bilinear_identity (n k x y u v U V : ℂ) (h0 : n-k ≠ 0) (h1 : n+k+1 ≠ 0) :
     (n+1)*(n-k+1)/(n+k+1) * (x*u+(n+k)*v)*(y*U+(n+k)*V) +
       n*(n+k)/(n-k) * (x*u-(n-k+1)*v)*(y*U-(n-k+1)*V) =
     (2*n+1) * (x*y*u*U + 1/2*((n+k)*(n-k+1)*v*V +
@@ -273,7 +273,7 @@ lemma bilinear_identity (n k x y u v U V : ℂ) (h0 : n-k ≠ 0) (h1 : n+k+1 ≠
   field_simp; ring
 
 /-- The angular coefficient recurrence at an interior positive index. -/
-lemma coeff_recurrence_interior {n k : ℕ} (hk0 : 0 < k) (hk : k < n)
+theorem coeff_recurrence_interior {n k : ℕ} (hk0 : 0 < k) (hk : k < n)
     (x y s t : ℂ) (hs : s^2 = 1-x^2) (ht : t^2 = 1-y^2) :
     (n+1)*coeff (n+1) k x y s t + n*coeff (n-1) k x y s t =
       (2*n+1)*(x*y*coeff n k x y s t + s*t/2*(coeff n (k-1) x y s t + coeff n (k+1) x y s t)) := by
@@ -303,17 +303,17 @@ lemma coeff_recurrence_interior {n k : ℕ} (hk0 : 0 < k) (hk : k < n)
 end DLMF.OrthogonalPolynomials.LegendreAddition
 namespace DLMF.OrthogonalPolynomials.LegendreAddition
 /-- The zero angular weight is one. -/
-lemma weight_zero (n : ℕ) : weight n 0 = 1 := by
+theorem weight_zero (n : ℕ) : weight n 0 = 1 := by
   simp [weight, Nat.cast_ne_zero.mpr n.factorial_ne_zero]
 /-- The weight just below the top at the next degree. -/
-lemma weight_succ_diag (n : ℕ) : weight (n+1) n = weight n n / (2*n+1) := by
+theorem weight_succ_diag (n : ℕ) : weight (n+1) n = weight n n / (2*n+1) := by
   dsimp only [weight]
   rw [show n+1-n = 1 by omega, show n+1+n = (n+n)+1 by omega, Nat.sub_self]
   simp only [Nat.factorial_succ, Nat.factorial_zero, Nat.cast_one, Nat.cast_mul, Nat.cast_add]
   have hp : (2*n+1 : ℂ) ≠ 0 := by exact_mod_cast (show 2*n+1 ≠ 0 by omega)
   field_simp; ring
 /-- The ratio of consecutive top weights. -/
-lemma weight_succ_top (n : ℕ) :
+theorem weight_succ_top (n : ℕ) :
     weight (n+1) (n+1) = weight n n / ((2*n+2)*(2*n+1)) := by
   dsimp only [weight]
   rw [Nat.sub_self, Nat.sub_self, show n+1+(n+1) = (n+n+1)+1 by omega]
@@ -323,13 +323,13 @@ lemma weight_succ_top (n : ℕ) :
   simp only [div_eq_mul_inv, mul_inv_rev]
   ring
 /-- The next top derivative. -/
-lemma jet_succ_top (n : ℕ) (z : ℂ) :
+theorem jet_succ_top (n : ℕ) (z : ℂ) :
     jet (n+1) (n+1) z = (2*n+1) * jet n n z := by
   rw [jet_raise, jet_eq_zero (show n < n+1 by omega)]
   simp only [Pi.zero_apply, mul_zero, zero_add]
   ring
 /-- The derivative just below the top. -/
-lemma jet_below_top {n : ℕ} (hn : 0 < n) (z : ℂ) :
+theorem jet_below_top {n : ℕ} (hn : 0 < n) (z : ℂ) :
     jet n (n-1) z = z * jet n n z := by
   have hh := (jet_neighbors hn hn z).2.2
   rw [jet_eq_zero (show n < n+1 by omega)] at hh
@@ -338,7 +338,7 @@ lemma jet_below_top {n : ℕ} (hn : 0 < n) (z : ℂ) :
   apply mul_left_cancel₀ hne
   linear_combination hh
 /-- Angular recurrence at the last nonzero index of the middle degree. -/
-lemma coeff_recurrence_diag {n : ℕ} (hn : 0 < n) (x y s t : ℂ) :
+theorem coeff_recurrence_diag {n : ℕ} (hn : 0 < n) (x y s t : ℂ) :
     (n+1)*coeff (n+1) n x y s t + n*coeff (n-1) n x y s t =
       (2*n+1)*(x*y*coeff n n x y s t + s*t/2*(coeff n (n-1) x y s t + coeff n (n+1) x y s t)) := by
   rw [coeff_eq_zero (show n-1 < n by omega), coeff_eq_zero (show n < n+1 by omega)]
@@ -355,7 +355,7 @@ lemma coeff_recurrence_diag {n : ℕ} (hn : 0 < n) (x y s t : ℂ) :
   have hne : (2*n+1 : ℂ) ≠ 0 := by exact_mod_cast (show 2*n+1 ≠ 0 by omega)
   field_simp; ring
 /-- Angular recurrence at the new top index. -/
-lemma coeff_recurrence_top (n : ℕ) (x y s t : ℂ) :
+theorem coeff_recurrence_top (n : ℕ) (x y s t : ℂ) :
     (n+1)*coeff (n+1) (n+1) x y s t + n*coeff (n-1) (n+1) x y s t =
       (2*n+1)*(x*y*coeff n (n+1) x y s t + s*t/2*(coeff n n x y s t + coeff n (n+2) x y s t)) := by
   rw [coeff_eq_zero (show n-1 < n+1 by omega), coeff_eq_zero (show n < n+1 by omega),
@@ -366,7 +366,7 @@ lemma coeff_recurrence_top (n : ℕ) (x y s t : ℂ) :
   have hne' : (2*n+2 : ℂ) ≠ 0 := by exact_mod_cast (show 2*n+2 ≠ 0 by omega)
   field_simp; ring
 /-- Angular recurrence at index zero. -/
-lemma coeff_recurrence_zero {n : ℕ} (hn : 0 < n) (x y s t : ℂ)
+theorem coeff_recurrence_zero {n : ℕ} (hn : 0 < n) (x y s t : ℂ)
     (hs : s^2 = 1-x^2) (ht : t^2 = 1-y^2) :
     (n+1)*coeff (n+1) 0 x y s t + n*coeff (n-1) 0 x y s t =
       (2*n+1)*(x*y*coeff n 0 x y s t + s*t*coeff n 1 x y s t) := by
@@ -394,7 +394,7 @@ lemma coeff_recurrence_zero {n : ℕ} (hn : 0 < n) (x y s t : ℂ)
 end DLMF.OrthogonalPolynomials.LegendreAddition
 namespace DLMF.OrthogonalPolynomials.LegendreAddition
 /-- The positive-index coefficient recurrence, including the top and the zero tail. -/
-lemma coeff_recurrence {n k : ℕ} (hn : 0 < n) (hk : 0 < k)
+theorem coeff_recurrence {n k : ℕ} (hn : 0 < n) (hk : 0 < k)
     (x y s t : ℂ) (hs : s^2 = 1-x^2) (ht : t^2 = 1-y^2) :
     (n+1)*coeff (n+1) k x y s t + n*coeff (n-1) k x y s t =
       (2*n+1)*(x*y*coeff n k x y s t + s*t/2*(coeff n (k-1) x y s t + coeff n (k+1) x y s t)) := by
@@ -409,7 +409,7 @@ lemma coeff_recurrence {n k : ℕ} (hn : 0 < n) (hk : 0 < k)
       ring
 
 /-- The elementary cosine recurrence. -/
-lemma cosine_step (k : ℕ) (phi : ℂ) :
+theorem cosine_step (k : ℕ) (phi : ℂ) :
     2*cos phi*cos ((k+1)*phi) = cos ((k+2)*phi) + cos (k*phi) := by
   have h0 := cos_add (((k : ℂ)+1)*phi) phi
   have h1 := cos_sub (((k : ℂ)+1)*phi) phi
@@ -418,7 +418,7 @@ lemma cosine_step (k : ℕ) (phi : ℂ) :
   linear_combination -h0-h1
 
 /-- Multiplication of a finite cosine sum by its first cosine. -/
-lemma cosine_neighbor_sum (f : ℕ → ℂ) (n : ℕ) (phi : ℂ)
+theorem cosine_neighbor_sum (f : ℕ → ℂ) (n : ℕ) (phi : ℂ)
     (h1 : f (n+1) = 0) (h2 : f (n+2) = 0) :
     f 1 + ∑ k ∈ Finset.range (n+1), (f k + f (k+2)) * cos ((k+1)*phi) =
       cos phi * (f 0 + 2 * ∑ k ∈ Finset.range n, f (k+1)*cos ((k+1)*phi)) := by
@@ -452,7 +452,7 @@ lemma cosine_neighbor_sum (f : ℕ → ℂ) (n : ℕ) (phi : ℂ)
 def kernel (n : ℕ) (x y s t phi : ℂ) : ℂ :=
   coeff n 0 x y s t + 2*∑ k ∈ Finset.range n, coeff n (k+1) x y s t * cos ((k+1)*phi)
 /-- A larger finite cutoff gives the same kernel. -/
-lemma kernel_eq_sum (n N : ℕ) (hn : n ≤ N) (x y s t phi : ℂ) :
+theorem kernel_eq_sum (n N : ℕ) (hn : n ≤ N) (x y s t phi : ℂ) :
     kernel n x y s t phi = coeff n 0 x y s t +
       2*∑ k ∈ Finset.range N, coeff n (k+1) x y s t * cos ((k+1)*phi) := by
   rw [kernel, ← Finset.sum_range_add_sum_Ico _ hn]
@@ -464,7 +464,7 @@ lemma kernel_eq_sum (n N : ℕ) (hn : n ≤ N) (x y s t phi : ℂ) :
 end DLMF.OrthogonalPolynomials.LegendreAddition
 namespace DLMF.OrthogonalPolynomials.LegendreAddition
 /-- The angular kernel satisfies the Legendre degree recurrence. -/
-lemma kernel_recurrence {n : ℕ} (hn : 0 < n) (x y s t phi : ℂ)
+theorem kernel_recurrence {n : ℕ} (hn : 0 < n) (x y s t phi : ℂ)
     (hs : s^2 = 1-x^2) (ht : t^2 = 1-y^2) :
     (n+1)*kernel (n+1) x y s t phi + n*kernel (n-1) x y s t phi =
       (2*n+1)*(x*y+s*t*cos phi)*kernel n x y s t phi := by
@@ -487,7 +487,7 @@ lemma kernel_recurrence {n : ℕ} (hn : 0 < n) (x y s t phi : ℂ)
   linear_combination hzero + 2*hsum + (2*n+1)*s*t*hc
 
 /-- The first two angular kernels. -/
-lemma kernel_initial (x y s t phi : ℂ) :
+theorem kernel_initial (x y s t phi : ℂ) :
     kernel 0 x y s t phi = 1 ∧ kernel 1 x y s t phi = x*y+s*t*cos phi := by
   have h0 (z : ℂ) : jet 0 0 z = 1 := by simp [jet_zero, legendrePolyP_zero]
   have h1 (z : ℂ) : jet 1 0 z = z := by simp [jet_zero]
@@ -498,7 +498,7 @@ lemma kernel_initial (x y s t phi : ℂ) :
     ring
 
 /-- The finite angular kernel is the Legendre polynomial of the inner product. -/
-lemma legendre_eq_kernel (n : ℕ) (x y s t phi : ℂ)
+theorem legendre_eq_kernel (n : ℕ) (x y s t phi : ℂ)
     (hs : s^2 = 1-x^2) (ht : t^2 = 1-y^2) :
     legendrePolyP n (x*y+s*t*cos phi) = kernel n x y s t phi := by
   induction n using Nat.strong_induction_on with
@@ -518,7 +518,7 @@ lemma legendre_eq_kernel (n : ℕ) (x y s t phi : ℂ)
 end DLMF.OrthogonalPolynomials.LegendreAddition
 namespace DLMF.OrthogonalPolynomials.LegendreAddition
 /-- The angular coefficient in the Jacobi normalization. -/
-lemma coeff_eq_jacobi (n k : ℕ) (hk : k ≤ n) (x y s t : ℂ) :
+theorem coeff_eq_jacobi (n k : ℕ) (hk : k ≤ n) (x y s t : ℂ) :
     coeff n k x y s t =
       ((n-k)! : ℂ) * (n+k)! / (2^(2*k)*(n ! : ℂ)^2) * s^k * jacobiPolyP k k (n-k) x *
         t^k * jacobiPolyP k k (n-k) y := by

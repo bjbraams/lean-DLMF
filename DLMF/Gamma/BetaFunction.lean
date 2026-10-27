@@ -6,18 +6,9 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
-public import DLMF.Gamma.Basic
 public import TauCeti.Analysis.SpecialFunctions.Beta
-public import Mathlib.MeasureTheory.Integral.Bochner.Basic
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
-public import Mathlib.Analysis.SpecialFunctions.Pow.Complex
-public import Mathlib.Analysis.SpecialFunctions.Pow.Real
-public import Mathlib.MeasureTheory.Function.JacobianOneDim
 public import Mathlib.Analysis.Analytic.Binomial
-public import Mathlib.Analysis.Complex.Liouville
 public import Mathlib.Analysis.Fourier.Inversion
-public import Mathlib.Analysis.SpecialFunctions.JapaneseBracket
-public import Mathlib.MeasureTheory.Measure.Haar.NormedSpace
 public import DLMFMathlib.Analysis.Asymptotics.WatsonSector
 
 /-!
@@ -42,7 +33,7 @@ namespace DLMF.Gamma
 
 /-- Euler's Beta integral for real parameters, `∫₀¹ u^(a-1) (1-u)^(b-1) du = Γ(a)Γ(b)/Γ(a+b)`.
 This is the real form of Mathlib's `Complex.Gamma_mul_Gamma_eq_betaIntegral`. -/
-lemma real_betaIntegral {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
+theorem real_betaIntegral {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
     ∫ u : ℝ in (0 : ℝ)..1, u ^ (a - 1) * (1 - u) ^ (b - 1) =
       Real.Gamma a * Real.Gamma b / Real.Gamma (a + b) := by
   simpa only [ProbabilityTheory.beta] using
@@ -191,7 +182,7 @@ open scoped Topology
 
 /-- Helper lemma for `beta_shifted`: the case of a positive real shift, by the substitution
 `s = (1 + x) t / (x + t)`. -/
-lemma beta_shifted_of_pos {a b : ℂ} {x : ℝ} (hx : 0 < x) :
+theorem beta_shifted_of_pos {a b : ℂ} {x : ℝ} (hx : 0 < x) :
     ∫ t : ℝ in Set.Ioo 0 1,
         (t : ℂ) ^ (a - 1) * (1 - (t : ℂ)) ^ (b - 1) * ((t : ℂ) + x) ^ (-(a + b)) =
       betaIntegral a b * (1 + (x : ℂ)) ^ (-a) * (x : ℂ) ^ (-b) := by
@@ -412,7 +403,7 @@ range `|b| ≤ a - 1` follows by induction on `a` from the integration-by-parts 
 open Filter Topology
 
 /-- `cos ^ β` is integrable on `[0, π/2]` for `β > -1`; the integral is a positive Beta value. -/
-lemma intervalIntegrable_cos_rpow {β : ℝ} (hβ : -1 < β) :
+theorem intervalIntegrable_cos_rpow {β : ℝ} (hβ : -1 < β) :
     IntervalIntegrable (fun x : ℝ => Real.cos x ^ β) volume 0 (π / 2) := by
   have h := beta_sin_cos (a := 1 / 2) (b := (β + 1) / 2) (by norm_num) (by linarith)
   have heq : (fun θ : ℝ => Real.sin θ ^ (2 * (1 / 2 : ℝ) - 1) *
@@ -432,7 +423,7 @@ lemma intervalIntegrable_cos_rpow {β : ℝ} (hβ : -1 < β) :
   linarith
 
 /-- `cos ^ β` is integrable on `[-π/2, π/2]` for `β > -1`. -/
-lemma intervalIntegrable_cos_rpow' {β : ℝ} (hβ : -1 < β) :
+theorem intervalIntegrable_cos_rpow' {β : ℝ} (hβ : -1 < β) :
     IntervalIntegrable (fun x : ℝ => Real.cos x ^ β) volume (-(π / 2)) (π / 2) := by
   have h0 := intervalIntegrable_cos_rpow hβ
   have h1 : IntervalIntegrable (fun x : ℝ => Real.cos x ^ β) volume (-(π / 2)) 0 := by
@@ -441,7 +432,7 @@ lemma intervalIntegrable_cos_rpow' {β : ℝ} (hβ : -1 < β) :
   exact h1.trans h0
 
 /-- An even function: the integral over `[-c, c]` is twice that over `[0, c]`. -/
-lemma integral_symm_of_even {f : ℝ → ℝ} {c : ℝ}
+theorem integral_symm_of_even {f : ℝ → ℝ} {c : ℝ}
     (hf : IntervalIntegrable f volume 0 c) (heven : ∀ x, f (-x) = f x) :
     ∫ x in (-c)..c, f x = 2 * ∫ x in (0 : ℝ)..c, f x := by
   have h1 : IntervalIntegrable f volume (-c) 0 := by
@@ -455,7 +446,7 @@ lemma integral_symm_of_even {f : ℝ → ℝ} {c : ℝ}
   ring
 
 /-- An odd function integrates to zero over `[-c, c]`. -/
-lemma integral_symm_of_odd {f : ℝ → ℝ} {c : ℝ}
+theorem integral_symm_of_odd {f : ℝ → ℝ} {c : ℝ}
     (hf : IntervalIntegrable f volume 0 c) (hodd : ∀ x, f (-x) = -f x) :
     ∫ x in (-c)..c, f x = 0 := by
   have h1 : IntervalIntegrable f volume (-c) 0 := by
@@ -471,19 +462,19 @@ lemma integral_symm_of_odd {f : ℝ → ℝ} {c : ℝ}
   rw [h2]
   ring
 
-lemma intervalIntegrable_cos_rpow_mul {β : ℝ} (hβ : -1 < β) {g : ℝ → ℝ} (hg : Continuous g)
+theorem intervalIntegrable_cos_rpow_mul {β : ℝ} (hβ : -1 < β) {g : ℝ → ℝ} (hg : Continuous g)
     {s t : ℝ} (hst : Set.uIcc s t ⊆ Set.Icc (-(π / 2)) (π / 2)) :
     IntervalIntegrable (fun x : ℝ => Real.cos x ^ β * g x) volume s t :=
   ((intervalIntegrable_cos_rpow' hβ).mul_continuousOn hg.continuousOn).mono_set (by
     rwa [Set.uIcc_of_le (by linarith [Real.pi_pos] : -(π / 2) ≤ π / 2)])
 
-lemma intervalIntegrable_ofReal {f : ℝ → ℝ} {s t : ℝ} (hf : IntervalIntegrable f volume s t) :
+theorem intervalIntegrable_ofReal {f : ℝ → ℝ} {s t : ℝ} (hf : IntervalIntegrable f volume s t) :
     IntervalIntegrable (fun x => (f x : ℂ)) volume s t :=
   ⟨hf.1.ofReal, hf.2.ofReal⟩
 
 /-- The complex exponential integral of `cos ^ α` over `[-π/2, π/2]` is twice the cosine
 integral over `[0, π/2]`. -/
-lemma integral_cos_rpow_mul_exp {α : ℝ} (hα : -1 < α) (b : ℝ) :
+theorem integral_cos_rpow_mul_exp {α : ℝ} (hα : -1 < α) (b : ℝ) :
     ∫ x in (-(π / 2))..(π / 2), ((Real.cos x ^ α : ℝ) : ℂ) * Complex.exp (↑(b * x) * I) =
       ↑(2 * ∫ x in (0 : ℝ)..(π / 2), Real.cos x ^ α * Real.cos (b * x)) := by
   have hpt : ∀ x : ℝ, ((Real.cos x ^ α : ℝ) : ℂ) * Complex.exp (↑(b * x) * I) =
@@ -514,12 +505,12 @@ lemma integral_cos_rpow_mul_exp {α : ℝ} (hα : -1 < α) (b : ℝ) :
   simp
 
 
-lemma ae_ne_real (c : ℝ) : ∀ᵐ x ∂(volume : Measure ℝ), x ≠ c := by
+theorem ae_ne_real (c : ℝ) : ∀ᵐ x ∂(volume : Measure ℝ), x ≠ c := by
   rw [ae_iff]
   simp
 
 /-- The complex binomial series inside the unit disc. -/
-lemma hasSum_choose_mul_pow (a : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem hasSum_choose_mul_pow (a : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     HasSum (fun n : ℕ => Ring.choose a n * z ^ n) ((1 + z) ^ a) := by
   have h := (Complex.one_add_cpow_hasFPowerSeriesOnBall_zero (a := a)).hasSum
     (y := z) (by
@@ -528,7 +519,7 @@ lemma hasSum_choose_mul_pow (a : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
   simpa [binomialSeries, FormalMultilinearSeries.coeff_ofScalars, mul_comm] using h
 
 /-- The real binomial series inside the unit interval. -/
-lemma hasSum_choose_mul_pow_real (a : ℝ) {x : ℝ} (hx : |x| < 1) :
+theorem hasSum_choose_mul_pow_real (a : ℝ) {x : ℝ} (hx : |x| < 1) :
     HasSum (fun n : ℕ => Ring.choose a n * x ^ n) ((1 + x) ^ a) := by
   have h := (Real.one_add_rpow_hasFPowerSeriesOnBall_zero (a := a)).hasSum
     (y := x) (by
@@ -537,7 +528,7 @@ lemma hasSum_choose_mul_pow_real (a : ℝ) {x : ℝ} (hx : |x| < 1) :
   simpa [binomialSeries, FormalMultilinearSeries.coeff_ofScalars, mul_comm] using h
 
 /-- Absolute convergence of the binomial coefficients against `r ^ n` for `r < 1`. -/
-lemma summable_norm_choose_mul_pow (a : ℂ) {r : ℝ} (hr0 : 0 ≤ r) (hr : r < 1) :
+theorem summable_norm_choose_mul_pow (a : ℂ) {r : ℝ} (hr0 : 0 ≤ r) (hr : r < 1) :
     Summable (fun n : ℕ => ‖Ring.choose a n‖ * r ^ n) := by
   have h := (binomialSeries ℂ a).summable_norm_mul_pow (r := r.toNNReal)
     (lt_of_lt_of_le (ENNReal.coe_lt_one_iff.mpr (Real.toNNReal_lt_one.mpr hr))
@@ -545,7 +536,7 @@ lemma summable_norm_choose_mul_pow (a : ℂ) {r : ℝ} (hr0 : 0 ≤ r) (hr : r <
   simpa [binomialSeries, FormalMultilinearSeries.ofScalars_norm, Real.coe_toNNReal _ hr0] using h
 
 /-- `∫_{-π/2}^{π/2} e^{i(2n+μ)x} dx = (-1)ⁿ sin(πμ/2) / (n + μ/2)`. -/
-lemma integral_exp_shifted_freq (n : ℕ) {μ : ℝ} (hμ : 0 < μ) :
+theorem integral_exp_shifted_freq (n : ℕ) {μ : ℝ} (hμ : 0 < μ) :
     ∫ x in (-(π / 2))..(π / 2), Complex.exp (↑((2 * n + μ) * x) * I) =
       ↑(Real.sin (π * (μ / 2)) * (-1) ^ n / (n + μ / 2)) := by
   have hν : (0 : ℝ) < 2 * n + μ := by positivity
@@ -576,7 +567,7 @@ lemma integral_exp_shifted_freq (n : ℕ) {μ : ℝ} (hμ : 0 < μ) :
   ring
 
 /-- Termwise integration of the binomial series of `(1 + r e^{2ix})^α` against `e^{iμx}`. -/
-lemma hasSum_integral_one_add_mul_exp (α : ℝ) {μ r : ℝ} (hμ : 0 < μ) (hr0 : 0 ≤ r)
+theorem hasSum_integral_one_add_mul_exp (α : ℝ) {μ r : ℝ} (hμ : 0 < μ) (hr0 : 0 ≤ r)
     (hr1 : r < 1) :
     HasSum (fun n : ℕ =>
         ((Real.sin (π * (μ / 2)) * (Ring.choose α n * (-r) ^ n / (n + μ / 2)) : ℝ) : ℂ))
@@ -616,7 +607,7 @@ lemma hasSum_integral_one_add_mul_exp (α : ℝ) {μ r : ℝ} (hμ : 0 < μ) (hr
   rw [neg_pow]
   ring
 
-lemma integral_pow_mul_rpow (n : ℕ) {s : ℝ} (hs0 : 0 < s) (hs1 : s < 1) :
+theorem integral_pow_mul_rpow (n : ℕ) {s : ℝ} (hs0 : 0 < s) (hs1 : s < 1) :
     ∫ u in (0 : ℝ)..1, u ^ n * u ^ (s - 1) = 1 / (n + s) := by
   have hne : (n : ℝ) + (s - 1) ≠ 0 := by
     rcases Nat.eq_zero_or_pos n with rfl | hn
@@ -634,7 +625,7 @@ lemma integral_pow_mul_rpow (n : ℕ) {s : ℝ} (hs0 : 0 < s) (hs1 : s < 1) :
   simp
 
 /-- Termwise integration of the binomial series of `(1 - r u)^α` against `u^(s-1)`. -/
-lemma hasSum_integral_one_sub_mul (α : ℝ) {s r : ℝ} (hs0 : 0 < s) (hs1 : s < 1) (hr0 : 0 ≤ r)
+theorem hasSum_integral_one_sub_mul (α : ℝ) {s r : ℝ} (hs0 : 0 < s) (hs1 : s < 1) (hr0 : 0 ≤ r)
     (hr1 : r < 1) :
     HasSum (fun n : ℕ => Ring.choose α n * (-r) ^ n / (n + s))
       (∫ u in (0 : ℝ)..1, (1 - r * u) ^ α * u ^ (s - 1)) := by
@@ -680,7 +671,7 @@ lemma hasSum_integral_one_sub_mul (α : ℝ) {s r : ℝ} (hs0 : 0 < s) (hs1 : s 
 
 
 
-lemma norm_one_add_mul_exp_bounds {r x : ℝ} (hr0 : 0 ≤ r) (hr1 : r ≤ 1) :
+theorem norm_one_add_mul_exp_bounds {r x : ℝ} (hr0 : 0 ≤ r) (hr1 : r ≤ 1) :
     Real.cos x ≤ ‖1 + (r : ℂ) * Complex.exp (↑(2 * x) * I)‖ ∧
       ‖1 + (r : ℂ) * Complex.exp (↑(2 * x) * I)‖ ≤ 2 := by
   constructor
@@ -705,13 +696,13 @@ lemma norm_one_add_mul_exp_bounds {r x : ℝ} (hr0 : 0 ≤ r) (hr1 : r ≤ 1) :
 
 
 
-lemma mem_Ioo_of_mem_uIoc {x : ℝ} (hx : x ≠ π / 2) (hxI : x ∈ Set.uIoc (-(π / 2)) (π / 2)) :
+theorem mem_Ioo_of_mem_uIoc {x : ℝ} (hx : x ≠ π / 2) (hxI : x ∈ Set.uIoc (-(π / 2)) (π / 2)) :
     x ∈ Set.Ioo (-(π / 2)) (π / 2) := by
   rw [Set.uIoc_of_le (by linarith [Real.pi_pos])] at hxI
   exact ⟨hxI.1, lt_of_le_of_ne hxI.2 hx⟩
 
 /-- Abel limit `r → 1⁻` of the integral of `(1 + r e^{2ix})^α e^{iμx}`. -/
-lemma tendsto_integral_one_add_mul_exp {α : ℝ} (hα : -1 < α) (μ : ℝ) :
+theorem tendsto_integral_one_add_mul_exp {α : ℝ} (hα : -1 < α) (μ : ℝ) :
     Tendsto (fun r : ℝ => ∫ x in (-(π / 2))..(π / 2),
         (1 + (r : ℂ) * Complex.exp (↑(2 * x) * I)) ^ (α : ℂ) * Complex.exp (↑(μ * x) * I))
       (𝓝[<] 1)
@@ -754,7 +745,7 @@ lemma tendsto_integral_one_add_mul_exp {α : ℝ} (hα : -1 < α) (μ : ℝ) :
     simpa using this
 
 /-- The Beta integrand is integrable on `[0, 1]`; its integral is a positive Gamma value. -/
-lemma intervalIntegrable_beta_integrand {p q : ℝ} (hp : 0 < p) (hq : 0 < q) :
+theorem intervalIntegrable_beta_integrand {p q : ℝ} (hp : 0 < p) (hq : 0 < q) :
     IntervalIntegrable (fun u : ℝ => u ^ (p - 1) * (1 - u) ^ (q - 1)) volume 0 1 := by
   have h := real_betaIntegral hp hq
   by_contra hni
@@ -766,7 +757,7 @@ lemma intervalIntegrable_beta_integrand {p q : ℝ} (hp : 0 < p) (hq : 0 < q) :
   linarith
 
 /-- Abel limit `r → 1⁻` of `∫₀¹ (1 - r u)^α u^(s-1) du`. -/
-lemma tendsto_integral_one_sub_mul {α s : ℝ} (hα : -1 < α) (hs0 : 0 < s) :
+theorem tendsto_integral_one_sub_mul {α s : ℝ} (hα : -1 < α) (hs0 : 0 < s) :
     Tendsto (fun r : ℝ => ∫ u in (0 : ℝ)..1, (1 - r * u) ^ α * u ^ (s - 1)) (𝓝[<] 1)
       (𝓝 (∫ u in (0 : ℝ)..1, (1 - u) ^ α * u ^ (s - 1))) := by
   have hB : IntervalIntegrable (fun u : ℝ => u ^ (s - 1) * (1 - u) ^ α) volume 0 1 := by
@@ -803,7 +794,7 @@ lemma tendsto_integral_one_sub_mul {α s : ℝ} (hα : -1 < α) (hs0 : 0 < s) :
     simpa using this
 
 /-- `(1 + e^{2ix})^α e^{iμx} = (2 cos x)^α e^{i(α+μ)x}` for `|x| < π/2`. -/
-lemma one_add_exp_cpow_mul_exp {α μ x : ℝ} (hx : x ∈ Set.Ioo (-(π / 2)) (π / 2)) :
+theorem one_add_exp_cpow_mul_exp {α μ x : ℝ} (hx : x ∈ Set.Ioo (-(π / 2)) (π / 2)) :
     (1 + Complex.exp (↑(2 * x) * I)) ^ (α : ℂ) * Complex.exp (↑(μ * x) * I) =
       (((2 : ℝ) ^ α * Real.cos x ^ α : ℝ) : ℂ) * Complex.exp (↑((α + μ) * x) * I) := by
   have hc : 0 < Real.cos x := Real.cos_pos_of_mem_Ioo hx
@@ -831,7 +822,7 @@ lemma one_add_exp_cpow_mul_exp {α μ x : ℝ} (hx : x ∈ Set.Ioo (-(π / 2)) (
 
 /-- DLMF 5.12.5 in the range `a - 1 < b < a + 1`, by Abel summation of the binomial series
 of `(1 + e^{2ix})^{a-1}`. -/
-lemma integral_cos_rpow_mul_cos_of_lt {a b : ℝ} (ha : 0 < a) (h1 : a - 1 < b) (h2 : b < a + 1) :
+theorem integral_cos_rpow_mul_cos_of_lt {a b : ℝ} (ha : 0 < a) (h1 : a - 1 < b) (h2 : b < a + 1) :
     ∫ t in (0 : ℝ)..(π / 2), Real.cos t ^ (a - 1) * Real.cos (b * t) =
       π * Real.Gamma a /
         ((2 : ℝ) ^ a * (Real.Gamma ((a + b + 1) / 2) * Real.Gamma ((a - b + 1) / 2))) := by
@@ -903,7 +894,7 @@ lemma integral_cos_rpow_mul_cos_of_lt {a b : ℝ} (ha : 0 < a) (h1 : a - 1 < b) 
 
 /-- Integration by parts of `d/dt (cos^(a-1) t · sin (b t))`:
 `(a - 1 + b) K(a, b) = (a - 1) K(a - 1, b - 1)`. -/
-lemma integral_cos_rpow_mul_cos_shift {a : ℝ} (ha : 1 < a) (b : ℝ) :
+theorem integral_cos_rpow_mul_cos_shift {a : ℝ} (ha : 1 < a) (b : ℝ) :
     (a - 1 + b) * ∫ t in (0 : ℝ)..(π / 2), Real.cos t ^ (a - 1) * Real.cos (b * t) =
       (a - 1) * ∫ t in (0 : ℝ)..(π / 2), Real.cos t ^ (a - 1 - 1) * Real.cos ((b - 1) * t) := by
   have hp : 0 < a - 1 := by linarith
@@ -939,13 +930,13 @@ lemma integral_cos_rpow_mul_cos_shift {a : ℝ} (ha : 1 < a) (b : ℝ) :
     Real.one_rpow, mul_zero, Real.sin_zero, sub_zero] at hftc
   linarith
 
-lemma integral_cos_rpow_mul_cos_neg (a b : ℝ) :
+theorem integral_cos_rpow_mul_cos_neg (a b : ℝ) :
     ∫ t in (0 : ℝ)..(π / 2), Real.cos t ^ (a - 1) * Real.cos (-b * t) =
       ∫ t in (0 : ℝ)..(π / 2), Real.cos t ^ (a - 1) * Real.cos (b * t) := by
   simp only [neg_mul, Real.cos_neg]
 
 /-- DLMF 5.12.5 with the right-hand side written as `π Γ(a) / (2^a Γ(p) Γ(q))`. -/
-lemma integral_cos_rpow_mul_cos {a b : ℝ} (ha : 0 < a) (hb : |b| < a + 1) :
+theorem integral_cos_rpow_mul_cos {a b : ℝ} (ha : 0 < a) (hb : |b| < a + 1) :
     ∫ t in (0 : ℝ)..(π / 2), Real.cos t ^ (a - 1) * Real.cos (b * t) =
       π * Real.Gamma a /
         ((2 : ℝ) ^ a * (Real.Gamma ((a + b + 1) / 2) * Real.Gamma ((a - b + 1) / 2))) := by
@@ -1088,7 +1079,7 @@ theorem beta_sin_exp {a b : ℝ} (ha : 0 < a) (hba : |b| < a + 1) :
   field_simp
 
 /-- The real form of `beta_on_Ioi`, together with integrability of the integrand. -/
-lemma real_beta_on_Ioi {p q : ℝ} (hp : 0 < p) (hq : 0 < q) :
+theorem real_beta_on_Ioi {p q : ℝ} (hp : 0 < p) (hq : 0 < q) :
     IntegrableOn (fun u : ℝ => u ^ (p - 1) / (1 + u) ^ (p + q)) (Set.Ioi 0) ∧
       ∫ u : ℝ in Set.Ioi 0, u ^ (p - 1) / (1 + u) ^ (p + q) =
         Real.Gamma p * Real.Gamma q / Real.Gamma (p + q) := by
@@ -1119,7 +1110,7 @@ lemma real_beta_on_Ioi {p q : ℝ} (hp : 0 < p) (hq : 0 < q) :
   linarith
 
 /-- `cosh t ^ (2a)` written with exponentials, for the substitution `u = exp (2t)`. -/
-lemma cosh_rpow_eq_exp_mul (a t : ℝ) :
+theorem cosh_rpow_eq_exp_mul (a t : ℝ) :
     Real.cosh t ^ (2 * a) =
       Real.exp (-(2 * a * t)) * (1 + Real.exp (2 * t)) ^ (2 * a) / (2 : ℝ) ^ (2 * a) := by
   have h : Real.cosh t = Real.exp (-t) * (1 + Real.exp (2 * t)) / 2 := by
@@ -1131,7 +1122,7 @@ lemma cosh_rpow_eq_exp_mul (a t : ℝ) :
 
 /-- `∫ exp(2ct) / cosh(t)^(2a) dt` over `ℝ`, by the substitution `u = exp (2t)` in
 `real_beta_on_Ioi`. -/
-lemma integral_exp_div_cosh_rpow {a c : ℝ} (hc : |c| < a) :
+theorem integral_exp_div_cosh_rpow {a c : ℝ} (hc : |c| < a) :
     Integrable (fun t : ℝ => Real.exp (2 * c * t) / Real.cosh t ^ (2 * a)) ∧
       ∫ t : ℝ, Real.exp (2 * c * t) / Real.cosh t ^ (2 * a) =
         (2 : ℝ) ^ (2 * a - 1) *
@@ -1211,7 +1202,7 @@ open scoped Topology FourierTransform
 
 
 /-- A linear lower bound for `‖w + i t‖` on the right half-plane. -/
-lemma vb_norm_lower {w : ℂ} (hw : 0 < w.re) (t : ℝ) :
+theorem vb_norm_lower {w : ℂ} (hw : 0 < w.re) (t : ℝ) :
     w.re / (2 * (1 + ‖w‖)) * (1 + |t|) ≤ ‖w + I * t‖ := by
   have h1 : w.re ≤ ‖w + I * t‖ := by
     have := Complex.re_le_norm (w + I * t)
@@ -1234,13 +1225,13 @@ lemma vb_norm_lower {w : ℂ} (hw : 0 < w.re) (t : ℝ) :
   · nlinarith [abs_nonneg t]
 
 /-- A linear upper bound for `‖w + i t‖`. -/
-lemma vb_norm_upper (w : ℂ) (t : ℝ) : ‖w + I * t‖ ≤ (1 + ‖w‖) * (1 + |t|) := by
+theorem vb_norm_upper (w : ℂ) (t : ℝ) : ‖w + I * t‖ ≤ (1 + ‖w‖) * (1 + |t|) := by
   have h := norm_add_le w (I * (t : ℂ))
   rw [norm_mul, Complex.norm_I, Complex.norm_real, Real.norm_eq_abs, one_mul] at h
   nlinarith [norm_nonneg w, abs_nonneg t]
 
 /-- `‖w + i t‖ ^ (-σ)` is bounded by a multiple of `(1 + |t|) ^ (-σ)`. -/
-lemma vb_rpow_le {w : ℂ} (hw : 0 < w.re) (σ : ℝ) (t : ℝ) :
+theorem vb_rpow_le {w : ℂ} (hw : 0 < w.re) (σ : ℝ) (t : ℝ) :
     ‖w + I * t‖ ^ (-σ) ≤
       max ((w.re / (2 * (1 + ‖w‖))) ^ (-σ)) ((1 + ‖w‖) ^ (-σ)) * (1 + |t|) ^ (-σ) := by
   set c₁ := w.re / (2 * (1 + ‖w‖))
@@ -1261,17 +1252,17 @@ lemma vb_rpow_le {w : ℂ} (hw : 0 < w.re) (σ : ℝ) (t : ℝ) :
   · exact (Real.rpow_le_rpow hq0.le hq2 hσ).trans (le_max_right _ _)
   · exact (Real.rpow_le_rpow_of_nonpos hc₁ hq1 hσ).trans (le_max_left _ _)
 
-lemma vb_ne_zero {w : ℂ} (hw : 0 < w.re) (t : ℝ) : w + I * t ≠ 0 := by
+theorem vb_ne_zero {w : ℂ} (hw : 0 < w.re) (t : ℝ) : w + I * t ≠ 0 := by
   intro h
   have := congrArg Complex.re h
   simp at this
   linarith
 
-lemma vb_sub_eq (z : ℂ) (t : ℝ) : z - I * t = z + I * ((-t : ℝ) : ℂ) := by
+theorem vb_sub_eq (z : ℂ) (t : ℝ) : z - I * t = z + I * ((-t : ℝ) : ℂ) := by
   push_cast; ring
 
 /-- The real majorant `‖w + i t‖^{-α} ‖z - i t‖^{-β}` is integrable when `α + β > 1`. -/
-lemma vb_integrable_rpow {w z : ℂ} (hw : 0 < w.re) (hz : 0 < z.re) {α β : ℝ}
+theorem vb_integrable_rpow {w z : ℂ} (hw : 0 < w.re) (hz : 0 < z.re) {α β : ℝ}
     (h : 1 < α + β) :
     Integrable (fun t : ℝ => ‖w + I * t‖ ^ (-α) * ‖z - I * t‖ ^ (-β)) := by
   set C₁ := max ((w.re / (2 * (1 + ‖w‖))) ^ (-α)) ((1 + ‖w‖) ^ (-α))
@@ -1292,7 +1283,7 @@ lemma vb_integrable_rpow {w z : ℂ} (hw : 0 < w.re) (hz : 0 < z.re) {α β : �
     _ = C₁ * C₂ * ((1 + |t|) ^ (-α) * (1 + |t|) ^ (-β)) := by ring
 
 /-- `‖x ^ c‖ ≤ e^{π |Im c| / 2} ‖x‖ ^ {Re c}` on the right half-plane. -/
-lemma vb_norm_cpow_le {x : ℂ} (hx : 0 < x.re) (c : ℂ) :
+theorem vb_norm_cpow_le {x : ℂ} (hx : 0 < x.re) (c : ℂ) :
     ‖x ^ c‖ ≤ Real.exp (π / 2 * |c.im|) * ‖x‖ ^ c.re := by
   have hx0 : x ≠ 0 := fun h => by simp [h] at hx
   rw [norm_cpow_of_ne_zero hx0, div_eq_mul_inv, ← Real.exp_neg, mul_comm]
@@ -1302,7 +1293,7 @@ lemma vb_norm_cpow_le {x : ℂ} (hx : 0 < x.re) (c : ℂ) :
   rw [abs_mul] at this
   nlinarith [abs_nonneg c.im, abs_nonneg (arg x)]
 
-lemma vb_rpow_le_add {x σ σ₁ σ₂ : ℝ} (hx : 0 < x) (h₁ : σ₁ ≤ σ) (h₂ : σ ≤ σ₂) :
+theorem vb_rpow_le_add {x σ σ₁ σ₂ : ℝ} (hx : 0 < x) (h₁ : σ₁ ≤ σ) (h₂ : σ ≤ σ₂) :
     x ^ (-σ) ≤ x ^ (-σ₁) + x ^ (-σ₂) := by
   rcases le_total 1 x with h | h
   · have := Real.rpow_le_rpow_of_exponent_le h (neg_le_neg h₁)
@@ -1313,11 +1304,11 @@ lemma vb_rpow_le_add {x σ σ₁ σ₂ : ℝ} (hx : 0 < x) (h₁ : σ₁ ≤ σ)
 /-- The integrand of Cauchy's vertical Beta integral. -/
 def vbF (a b w z : ℂ) (t : ℝ) : ℂ := (w + I * t) ^ (-a) * (z - I * t) ^ (-b)
 
-lemma vb_re_sub {z : ℂ} (hz : 0 < z.re) (t : ℝ) : 0 < (z - I * t).re := by simpa using hz
+theorem vb_re_sub {z : ℂ} (hz : 0 < z.re) (t : ℝ) : 0 < (z - I * t).re := by simpa using hz
 
-lemma vb_re_add {w : ℂ} (hw : 0 < w.re) (t : ℝ) : 0 < (w + I * t).re := by simpa using hw
+theorem vb_re_add {w : ℂ} (hw : 0 < w.re) (t : ℝ) : 0 < (w + I * t).re := by simpa using hw
 
-lemma vb_norm_vbF_le {a b w z : ℂ} (hw : 0 < w.re) (hz : 0 < z.re) (t : ℝ) :
+theorem vb_norm_vbF_le {a b w z : ℂ} (hw : 0 < w.re) (hz : 0 < z.re) (t : ℝ) :
     ‖vbF a b w z t‖ ≤ Real.exp (π / 2 * |a.im|) * Real.exp (π / 2 * |b.im|) *
       (‖w + I * t‖ ^ (-a.re) * ‖z - I * t‖ ^ (-b.re)) := by
   unfold vbF
@@ -1331,10 +1322,10 @@ lemma vb_norm_vbF_le {a b w z : ℂ} (hw : 0 < w.re) (hz : 0 < z.re) (t : ℝ) :
         mul_le_mul h1 h2 (norm_nonneg _) (by positivity)
     _ = _ := by ring
 
-lemma vb_measurable_vbF (a b w z : ℂ) : Measurable (vbF a b w z) := by
+theorem vb_measurable_vbF (a b w z : ℂ) : Measurable (vbF a b w z) := by
   unfold vbF; fun_prop
 
-lemma vb_integrable_vbF {a b w z : ℂ} (hw : 0 < w.re) (hz : 0 < z.re)
+theorem vb_integrable_vbF {a b w z : ℂ} (hw : 0 < w.re) (hz : 0 < z.re)
     (hab : 1 < (a + b).re) : Integrable (vbF a b w z) := by
   have := (vb_integrable_rpow hw hz (α := a.re) (β := b.re) (by simpa using hab)).const_mul
     (Real.exp (π / 2 * |a.im|) * Real.exp (π / 2 * |b.im|))
@@ -1343,7 +1334,7 @@ lemma vb_integrable_vbF {a b w z : ℂ} (hw : 0 < w.re) (hz : 0 < z.re)
 
 /-- A parametric integral of functions holomorphic in the parameter, locally dominated by an
 integrable function, is holomorphic. -/
-lemma vb_differentiableOn_integral {α : Type*} [MeasurableSpace α] {μ : Measure α}
+theorem vb_differentiableOn_integral {α : Type*} [MeasurableSpace α] {μ : Measure α}
     {U : Set ℂ} (hU : IsOpen U) {F : ℂ → α → ℂ}
     (hmeas : ∀ z ∈ U, AEStronglyMeasurable (F z) μ)
     (hdiff : ∀ᵐ x ∂μ, DifferentiableOn ℂ (fun z => F z x) U)
@@ -1356,7 +1347,7 @@ lemma vb_differentiableOn_integral {α : Type*} [MeasurableSpace α] {μ : Measu
   exact ⟨Metric.closedBall z₀ ε, Metric.closedBall_mem_nhds z₀ hε, g, hg, hgb⟩
 
 /-- The vertical Beta integral is holomorphic in `b` on `Re (a + b) > 1`. -/
-lemma vb_differentiableOn_b {a w z : ℂ} (hw : 0 < w.re) (hz : 0 < z.re) :
+theorem vb_differentiableOn_b {a w z : ℂ} (hw : 0 < w.re) (hz : 0 < z.re) :
     DifferentiableOn ℂ (fun b => ∫ t, vbF a b w z t) {b : ℂ | 1 - a.re < b.re} := by
   have hU : IsOpen {b : ℂ | 1 - a.re < b.re} := isOpen_lt continuous_const continuous_re
   refine vb_differentiableOn_integral hU
@@ -1409,12 +1400,12 @@ lemma vb_differentiableOn_b {a w z : ℂ} (hw : 0 < w.re) (hz : 0 < z.re) :
         _ = _ := by ring
 
 /-- Laplace representation of `x^{-a}`. -/
-lemma vb_cpow_neg_eq_integral {a x : ℂ} (ha : 0 < a.re) (hx : 0 < x.re) :
+theorem vb_cpow_neg_eq_integral {a x : ℂ} (ha : 0 < a.re) (hx : 0 < x.re) :
     x ^ (-a) = (Complex.Gamma a)⁻¹ * ∫ s in Ioi (0 : ℝ), (s : ℂ) ^ (a - 1) * cexp (-(x * s)) := by
   rw [integral_cpow_mul_cexp_neg_mul_Ioi ha hx, ← mul_assoc,
     inv_mul_cancel₀ (Complex.Gamma_ne_zero_of_re_pos ha), one_mul]
 
-lemma vb_integrableOn_cpow_exp {b z : ℂ} (hb : 0 < b.re) (hz : 0 < z.re) :
+theorem vb_integrableOn_cpow_exp {b z : ℂ} (hb : 0 < b.re) (hz : 0 < z.re) :
     IntegrableOn (fun v : ℝ => (v : ℂ) ^ (b - 1) * cexp (-(z * v))) (Ioi 0) := by
   have h := integrableOn_rpow_mul_exp_neg_mul_rpow (p := 1) (s := b.re - 1) (b := z.re)
     (by linarith) one_pos hz
@@ -1424,7 +1415,7 @@ lemma vb_integrableOn_cpow_exp {b z : ℂ} (hb : 0 < b.re) (hz : 0 < z.re) :
   simp
 
 /-- The Fourier transform of `(z - i t)^{-b}`, by Fourier inversion. -/
-lemma vb_fourier_inner {b z : ℂ} (hb : 1 < b.re) (hz : 0 < z.re) {s : ℝ} (hs : 0 < s) :
+theorem vb_fourier_inner {b z : ℂ} (hb : 1 < b.re) (hz : 0 < z.re) {s : ℝ} (hs : 0 < s) :
     ∫ t : ℝ, cexp (-(I * t * s)) * (z - I * t) ^ (-b) =
       2 * π * (Complex.Gamma b)⁻¹ * ((s : ℂ) ^ (b - 1) * cexp (-(z * s))) := by
   set g : ℝ → ℂ := indicator (Ioi 0) fun v => (v : ℂ) ^ (b - 1) * cexp (-(z * v)) with hg
@@ -1503,7 +1494,7 @@ lemma vb_fourier_inner {b z : ℂ} (hb : 1 < b.re) (hz : 0 < z.re) {s : ℝ} (hs
   field_simp
 
 /-- The base case `Re a > 0`, `Re b > 1` of 5.12.8, by Fubini and `vb_fourier_inner`. -/
-lemma vb_base {a b w z : ℂ} (ha : 0 < a.re) (hb : 1 < b.re) (hw : 0 < w.re) (hz : 0 < z.re) :
+theorem vb_base {a b w z : ℂ} (ha : 0 < a.re) (hb : 1 < b.re) (hw : 0 < w.re) (hz : 0 < z.re) :
     ∫ t, vbF a b w z t = 2 * π * ((Complex.Gamma a)⁻¹ * (Complex.Gamma b)⁻¹ *
       (Complex.Gamma (a + b - 1) * (w + z) ^ (-(a + b - 1)))) := by
   set H : ℝ → ℝ → ℂ := fun t s =>
@@ -1576,7 +1567,7 @@ def vbR (a b w z : ℂ) : ℂ :=
   (w + z) ^ (1 - a - b) * Complex.Gamma (a + b) /
     ((a + b - 1) * Complex.Gamma a * Complex.Gamma b)
 
-lemma vb_eq_base {a b w z : ℂ} (ha : 0 < a.re) (hb : 1 < b.re) (hw : 0 < w.re)
+theorem vb_eq_base {a b w z : ℂ} (ha : 0 < a.re) (hb : 1 < b.re) (hw : 0 < w.re)
     (hz : 0 < z.re) : (1 / (2 * π)) * ∫ t, vbF a b w z t = vbR a b w z := by
   rw [vb_base ha hb hw hz, vbR]
   have hs : a + b - 1 ≠ 0 := fun h => by
@@ -1589,7 +1580,7 @@ lemma vb_eq_base {a b w z : ℂ} (ha : 0 < a.re) (hb : 1 < b.re) (hw : 0 < w.re)
   rw [hΓ, show (1 : ℂ) - a - b = -(a + b - 1) by ring]
   field_simp
 
-lemma vb_differentiableOn_vbR {a w z : ℂ} (hw : 0 < w.re) (hz : 0 < z.re) :
+theorem vb_differentiableOn_vbR {a w z : ℂ} (hw : 0 < w.re) (hz : 0 < z.re) :
     DifferentiableOn ℂ (fun b => vbR a b w z) {b : ℂ | 1 - a.re < b.re} := by
   intro b hb
   have hb' : 1 - a.re < b.re := hb
@@ -1615,7 +1606,7 @@ lemma vb_differentiableOn_vbR {a w z : ℂ} (hw : 0 < w.re) (hz : 0 < z.re) :
     (Complex.differentiable_one_div_Gamma b)
 
 /-- 5.12.8 for `Re a > 0`, by analytic continuation in `b` from `vb_eq_base`. -/
-lemma vb_eq_of_re_pos {a b w z : ℂ} (ha : 0 < a.re) (hab : 1 < (a + b).re) (hw : 0 < w.re)
+theorem vb_eq_of_re_pos {a b w z : ℂ} (ha : 0 < a.re) (hab : 1 < (a + b).re) (hw : 0 < w.re)
     (hz : 0 < z.re) : (1 / (2 * π)) * ∫ t, vbF a b w z t = vbR a b w z := by
   set U : Set ℂ := {b : ℂ | 1 - a.re < b.re} with hU
   have hUo : IsOpen U := isOpen_lt continuous_const continuous_re
@@ -1633,7 +1624,7 @@ lemma vb_eq_of_re_pos {a b w z : ℂ} (ha : 0 < a.re) (hab : 1 < (a + b).re) (hw
   exact hL.eqOn_of_preconnected_of_eventuallyEq hR (convex_halfSpace_re_gt _).isPreconnected
     h2 hev hbU
 
-lemma vb_integral_symm (a b w z : ℂ) : ∫ t, vbF a b w z t = ∫ t, vbF b a z w t := by
+theorem vb_integral_symm (a b w z : ℂ) : ∫ t, vbF a b w z t = ∫ t, vbF b a z w t := by
   have h := Measure.integral_comp_mul_left (vbF b a z w) (-1)
   rw [inv_neg, inv_one, abs_neg, abs_one, one_smul] at h
   rw [← h]

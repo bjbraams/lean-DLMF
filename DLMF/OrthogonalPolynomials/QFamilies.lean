@@ -5,10 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.OrthogonalPolynomials.Topics
-public import Mathlib.Tactic.CrossRefAttribute
 public import DLMF.OrthogonalPolynomials.Wilson
-public import DLMF.OrthogonalPolynomials.Explicit
 public import DLMF.OrthogonalPolynomials.GegenbauerSeries
 public import DLMF.QSeries.Identities
 public import DLMF.OrthogonalPolynomials.QOrthogonalityTools
@@ -365,7 +362,7 @@ theorem qHahn_orthogonal {a b q : ℝ} (hq : 0 < q) (hq1 : q < 1) (ha : 0 < a)
 
 
 /-- The finite monomial expansion of the little q-Jacobi polynomial. -/
-lemma littleQJacobi_eq_sum (a b q x : ℂ) (n : ℕ) :
+theorem littleQJacobi_eq_sum (a b q x : ℂ) (n : ℕ) :
     littleQJacobi a b q n x = ∑ j ∈ Finset.range (n + 1),
       (qPochhammer (q⁻¹ ^ n) q j * qPochhammer (a * b * q ^ (n + 1)) q j /
         (qPochhammer (a * q) q j * qPochhammer q q j) * q ^ j) * x ^ j := by
@@ -380,7 +377,7 @@ lemma littleQJacobi_eq_sum (a b q x : ℂ) (n : ℕ) :
   ring
 
 /-- A little q-Jacobi polynomial has zero weighted moments below its degree. -/
-lemma littleQJacobi_moment_hasSum {a b q : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0)
+theorem littleQJacobi_moment_hasSum {a b q : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0)
     (ha0 : a ≠ 0) (haq : ‖a * q‖ < 1)
     (hab : ∀ p : ℕ, a * b * q ^ (p + 2) ≠ 1)
     (ha1 : ∀ p : ℕ, a * q ^ (p + 1) ≠ 1) {i n : ℕ} (hin : i < n) :
@@ -405,7 +402,7 @@ lemma littleQJacobi_moment_hasSum {a b q : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 
   ring
 
 /-- Orthogonality of little q-Jacobi polynomials of strictly ordered degrees. -/
-lemma littleQJacobi_orthogonal_lt {a b q : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0)
+theorem littleQJacobi_orthogonal_lt {a b q : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0)
     (ha0 : a ≠ 0) (haq : ‖a * q‖ < 1)
     (hab : ∀ p : ℕ, a * b * q ^ (p + 2) ≠ 1)
     (ha1 : ∀ p : ℕ, a * q ^ (p + 1) ≠ 1) {m n : ℕ} (hmn : m < n) :
@@ -531,7 +528,7 @@ private lemma logGaussian_moment {s : ℝ} (hs : 0 < s) (k : ℕ) :
     rw [hI]
 
 /-- The scaled monomial moments of the Stieltjes–Wigert weight are reciprocal triangular powers of `q`. -/
-lemma stieltjesWigert_scaled_moment_real {q : ℝ} (hq : 0 < q) (hq1 : q < 1) (k : ℕ) :
+theorem stieltjesWigert_scaled_moment_real {q : ℝ} (hq : 0 < q) (hq1 : q < 1) (k : ℕ) :
     IntegrableOn (fun x : ℝ => (Real.sqrt q * x) ^ k *
       Real.exp (-(Real.log x) ^ 2 / (2 * Real.log q⁻¹))) (Set.Ioi 0) ∧
     ∫ x : ℝ in Set.Ioi 0, (Real.sqrt q * x) ^ k *
@@ -563,7 +560,7 @@ lemma stieltjesWigert_scaled_moment_real {q : ℝ} (hq : 0 < q) (hq1 : q < 1) (k
        _ = _ := by rw [heq]; ring
 
 /-- Cauchy’s finite q-binomial theorem cancels every moment below the polynomial’s degree. -/
-lemma stieltjesWigert_moment_sum {q : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0)
+theorem stieltjesWigert_moment_sum {q : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0)
     {i n : ℕ} (hin : i < n) :
     ∑ k ∈ Finset.range (n + 1), q ^ (k ^ 2) * (-1) ^ k /
       (qPochhammer q q k * qPochhammer q q (n - k)) / q ^ (i + k + 1).choose 2 = 0 := by
@@ -666,7 +663,7 @@ theorem stieltjesWigert_orthogonal {q : ℝ} (hq : 0 < q) (hq1 : q < 1) {m n : �
 
 
 /-- Split a finite q-Pochhammer product at an intermediate index. -/
-lemma qPochhammer_split (w q : ℂ) {n k : ℕ} (hk : k ≤ n) :
+theorem qPochhammer_split (w q : ℂ) {n k : ℕ} (hk : k ≤ n) :
     qPochhammer w q n = qPochhammer w q k * qPochhammer (w * q ^ k) q (n - k) := by
   conv_lhs => rw [← Nat.add_sub_cancel' hk]
   simp only [qPochhammer_eq_prod, Finset.prod_range_add]
@@ -677,7 +674,7 @@ lemma qPochhammer_split (w q : ℂ) {n k : ℕ} (hk : k ≤ n) :
   ring
 
 /-- Factor the Askey–Wilson quadratic kernel in a nonzero Laurent variable. -/
-lemma askeyWilson_laurent_kernel (a q : ℂ) {z : ℂ} (hz : z ≠ 0) (k : ℕ) :
+theorem askeyWilson_laurent_kernel (a q : ℂ) {z : ℂ} (hz : z ≠ 0) (k : ℕ) :
     (∏ j ∈ Finset.range k, (1 - 2 * a * q ^ j * ((z + z⁻¹) / 2) + a ^ 2 * q ^ (2 * j))) =
       qPochhammer (a * z) q k * qPochhammer (a / z) q k := by
   rw [qPochhammer_eq_prod, qPochhammer_eq_prod, ← Finset.prod_mul_distrib]
@@ -734,14 +731,14 @@ theorem continuousQHermite_orthogonality {q : ℝ} (hq : 0 < q) (hq1 : q < 1) (m
   sorry
 
 /-- The factor with index `m` makes `(q⁻ᵐ;q)_k` vanish for `m < k`. -/
-lemma qPochhammer_recip_pow_eq_zero {q : ℂ} (hq : q ≠ 0) {m k : ℕ} (hmk : m < k) :
+theorem qPochhammer_recip_pow_eq_zero {q : ℂ} (hq : q ≠ 0) {m k : ℕ} (hmk : m < k) :
     qPochhammer (q⁻¹ ^ m) q k = 0 := by
   rw [qPochhammer_eq_prod]
   apply Finset.prod_eq_zero (Finset.mem_range.mpr hmk)
   simp [inv_pow, pow_ne_zero _ hq]
 
 /-- Factoring the quadratic kernel on the q-Racah lattice. -/
-lemma qRacah_lattice_kernel {q : ℂ} (hq : q ≠ 0) (c d : ℂ) (y k : ℕ) :
+theorem qRacah_lattice_kernel {q : ℂ} (hq : q ≠ 0) (c d : ℂ) (y k : ℕ) :
     (∏ j ∈ Finset.range k,
       (1 - q ^ j * (q⁻¹ ^ y + c * d * q ^ (y + 1)) + c * d * q ^ (2 * j + 1))) =
       qPochhammer (q⁻¹ ^ y) q k * qPochhammer (c * d * q ^ (y + 1)) q k := by
@@ -754,7 +751,7 @@ lemma qRacah_lattice_kernel {q : ℂ} (hq : q ≠ 0) (c d : ℂ) (y k : ℕ) :
   linear_combination -c * d * q ^ j * q ^ j * hqpow
 
 /-- The terminating q-Racah sum may be padded to any larger degree. -/
-lemma qRacah_eq_sum_lattice {q : ℂ} (hq : q ≠ 0) (a b c d : ℂ)
+theorem qRacah_eq_sum_lattice {q : ℂ} (hq : q ≠ 0) (a b c d : ℂ)
     (n y N : ℕ) (hn : n ≤ N) :
     qRacah a b c d q n (q⁻¹ ^ y + c * d * q ^ (y + 1)) =
       ∑ k ∈ Finset.range (N + 1),
@@ -782,7 +779,7 @@ theorem qRacah_duality {a b c d q : ℂ} (hq : q ≠ 0) (hq1 : ‖q‖ < 1) (n y
   ring
 
 /-- `(1 - q^t)/(1 - q) → t` as `q → 1⁻`. -/
-lemma tendsto_one_sub_rpow_div (t : ℝ) :
+theorem tendsto_one_sub_rpow_div (t : ℝ) :
     Tendsto (fun q : ℝ => (1 - q ^ t) / (1 - q)) (𝓝[<] 1) (𝓝 t) := by
   have hd : HasDerivAt (fun q : ℝ => q ^ t) t 1 := by
     simpa using Real.hasDerivAt_rpow_const (x := 1) (p := t) (Or.inl one_ne_zero)
@@ -795,11 +792,11 @@ lemma tendsto_one_sub_rpow_div (t : ℝ) :
   field_simp
   ring
 
-lemma eventually_pos_nhdsWithin_lt_one : ∀ᶠ q : ℝ in 𝓝[<] 1, 0 < q :=
+theorem eventually_pos_nhdsWithin_lt_one : ∀ᶠ q : ℝ in 𝓝[<] 1, 0 < q :=
   nhdsWithin_le_nhds (lt_mem_nhds one_pos)
 
 /-- `(q^t;q)_k / (1-q)^k → (t)_k` as `q → 1⁻`. -/
-lemma tendsto_qPochhammer_rpow_div (t : ℝ) (k : ℕ) :
+theorem tendsto_qPochhammer_rpow_div (t : ℝ) (k : ℕ) :
     Tendsto (fun q : ℝ => qPochhammer ((q ^ t : ℝ) : ℂ) (q : ℂ) k / (1 - (q : ℂ)) ^ k)
       (𝓝[<] 1) (𝓝 (poch (t : ℂ) k)) := by
   induction k with
@@ -824,15 +821,15 @@ lemma ofReal_rpow_eq_cpow_aux {q : ℝ} (hq : 0 < q) (a b : ℝ) :
     ((q ^ a : ℝ) : ℂ) * ((q ^ b : ℝ) : ℂ) = ((q ^ (a + b) : ℝ) : ℂ) := by
   rw [Real.rpow_add hq]; push_cast; ring
 
-lemma ofReal_pow_eq_rpow {q : ℝ} (m : ℕ) : (q : ℂ) ^ m = ((q ^ (m : ℝ) : ℝ) : ℂ) := by
+theorem ofReal_pow_eq_rpow {q : ℝ} (m : ℕ) : (q : ℂ) ^ m = ((q ^ (m : ℝ) : ℝ) : ℂ) := by
   rw [Real.rpow_natCast]; push_cast; ring
 
-lemma ofReal_recip_pow_eq_rpow {q : ℝ} (hq : 0 < q) (m : ℕ) :
+theorem ofReal_recip_pow_eq_rpow {q : ℝ} (hq : 0 < q) (m : ℕ) :
     (q : ℂ)⁻¹ ^ m = ((q ^ (-(m : ℝ)) : ℝ) : ℂ) := by
   rw [Real.rpow_neg hq.le, Real.rpow_natCast]; push_cast; ring
 
 /-- The ratio limit for the four `q`-Pochhammer symbols of a `₂φ₁`-type term. -/
-lemma tendsto_qPoch_two_two (t₁ t₂ s₁ s₂ : ℝ) (k : ℕ) (hs₁ : poch (s₁ : ℂ) k ≠ 0)
+theorem tendsto_qPoch_two_two (t₁ t₂ s₁ s₂ : ℝ) (k : ℕ) (hs₁ : poch (s₁ : ℂ) k ≠ 0)
     (hs₂ : poch (s₂ : ℂ) k ≠ 0) :
     Tendsto (fun q : ℝ => qPochhammer ((q ^ t₁ : ℝ) : ℂ) (q : ℂ) k *
         qPochhammer ((q ^ t₂ : ℝ) : ℂ) (q : ℂ) k /
@@ -848,20 +845,20 @@ lemma tendsto_qPoch_two_two (t₁ t₂ s₁ s₂ : ℝ) (k : ℕ) (hs₁ : poch 
   simp only [Pi.div_apply]
   field_simp
 
-lemma tendsto_ofReal_nhdsWithin_lt_one :
+theorem tendsto_ofReal_nhdsWithin_lt_one :
     Tendsto (fun q : ℝ => (q : ℂ)) (𝓝[<] 1) (𝓝 1) := by
   simpa using (continuous_ofReal.tendsto (1 : ℝ)).mono_left
     (nhdsWithin_le_nhds (s := Set.Iio (1 : ℝ)))
 
-lemma one_sub_ofReal_pow_ne_zero {q : ℝ} (hq1 : q < 1) (k : ℕ) : ((1 : ℂ) - q) ^ k ≠ 0 :=
+theorem one_sub_ofReal_pow_ne_zero {q : ℝ} (hq1 : q < 1) (k : ℕ) : ((1 : ℂ) - q) ^ k ≠ 0 :=
   pow_ne_zero _ (by
     rw [← ofReal_one, ← ofReal_sub]; exact ofReal_ne_zero.mpr (sub_ne_zero.mpr (ne_of_gt hq1)))
 
-lemma ofReal_cpow_add_one {q : ℝ} (hq : 0 < q) (α : ℝ) :
+theorem ofReal_cpow_add_one {q : ℝ} (hq : 0 < q) (α : ℝ) :
     (q : ℂ) ^ ((α : ℂ) + 1) = ((q ^ (α + 1) : ℝ) : ℂ) := by
   rw [ofReal_cpow hq.le]; push_cast; ring_nf
 
-lemma tendsto_rpow_nhdsWithin_lt_one (t : ℝ) :
+theorem tendsto_rpow_nhdsWithin_lt_one (t : ℝ) :
     Tendsto (fun q : ℝ => ((q ^ t : ℝ) : ℂ)) (𝓝[<] 1) (𝓝 1) := by
   have h : Tendsto (fun q : ℝ => q ^ t) (𝓝 1) (𝓝 ((1 : ℝ) ^ t)) :=
     (Real.continuousAt_rpow_const 1 t (Or.inl one_ne_zero)).tendsto
@@ -871,7 +868,7 @@ lemma tendsto_rpow_nhdsWithin_lt_one (t : ℝ) :
   exact h2
 
 /-- The quadratic Askey–Wilson factor tends to the Wilson factor. -/
-lemma tendsto_askeyWilson_prod (a : ℝ) (x : ℂ) (k : ℕ) :
+theorem tendsto_askeyWilson_prod (a : ℝ) (x : ℂ) (k : ℕ) :
     Tendsto (fun q : ℝ => (∏ j ∈ Finset.range k, (1 - 2 * ((q ^ a : ℝ) : ℂ) * (q : ℂ) ^ j *
         (1 - x * (1 - q : ℂ) ^ 2 / 2) + ((q ^ a : ℝ) : ℂ) ^ 2 * (q : ℂ) ^ (2 * j))) /
         ((1 - q : ℂ) ^ 2) ^ k) (𝓝[<] 1)
@@ -899,7 +896,7 @@ lemma tendsto_askeyWilson_prod (a : ℝ) (x : ℂ) (k : ℕ) :
   refine h.congr' (Eventually.of_forall fun q => ?_)
   rw [Finset.prod_div_distrib, Finset.prod_const, Finset.card_range]
 
-lemma wilson_eq_sum_shifted {a b c d : ℂ} (hab : ∀ k : ℕ, poch (a + b) k ≠ 0)
+theorem wilson_eq_sum_shifted {a b c d : ℂ} (hab : ∀ k : ℕ, poch (a + b) k ≠ 0)
     (hac : ∀ k : ℕ, poch (a + c) k ≠ 0) (had : ∀ k : ℕ, poch (a + d) k ≠ 0) (n : ℕ) (x : ℂ) :
     wilson a b c d n x = ∑ k ∈ Finset.range (n + 1),
       poch (a + b + k) (n - k) * poch (a + c + k) (n - k) * poch (a + d + k) (n - k) *
@@ -916,14 +913,14 @@ lemma wilson_eq_sum_shifted {a b c d : ℂ} (hab : ∀ k : ℕ, poch (a + b) k �
   have := hab k; have := hac k; have := had k
   field_simp
 
-lemma aw_algebra (A Q u F1 F2 F3 G1 G2 G3 P : ℂ) (n m k : ℕ) (h1 : u ≠ 0) :
+theorem aw_algebra (A Q u F1 F2 F3 G1 G2 G3 P : ℂ) (n m k : ℕ) (h1 : u ≠ 0) :
     A⁻¹ ^ n * Q ^ k * (F1 / u ^ m) * (F2 / u ^ m) * (F3 / u ^ m) * (G1 / u ^ k) * (G2 / u ^ k) /
         (G3 / u ^ k) * (P / (u ^ 2) ^ k) =
     A⁻¹ ^ n * (Q ^ k * F1 * F2 * F3 * G1 * G2 / G3 * P) / ((u ^ m) ^ 3 * (u ^ k) ^ 3) := by
   field_simp
   ring
 
-lemma tendsto_sq_nhdsWithin_lt_one :
+theorem tendsto_sq_nhdsWithin_lt_one :
     Tendsto (fun q : ℝ => q ^ 2) (𝓝[<] 1) (𝓝[<] 1) := by
   refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
   · have h : Tendsto (fun q : ℝ => q ^ 2) (𝓝 1) (𝓝 (1 ^ 2)) := (continuous_pow 2).tendsto 1
@@ -935,7 +932,7 @@ lemma tendsto_sq_nhdsWithin_lt_one :
     nlinarith
 
 /-- `(q;q)_k / (1-q)^k → k!`. -/
-lemma tendsto_qPochhammer_self_div (k : ℕ) :
+theorem tendsto_qPochhammer_self_div (k : ℕ) :
     Tendsto (fun q : ℝ => qPochhammer (q : ℂ) (q : ℂ) k / (1 - (q : ℂ)) ^ k) (𝓝[<] 1)
       (𝓝 (k ! : ℂ)) := by
   have h := tendsto_qPochhammer_rpow_div 1 k
@@ -944,14 +941,14 @@ lemma tendsto_qPochhammer_self_div (k : ℕ) :
   refine h.congr' (Eventually.of_forall fun q => ?_)
   simp [Real.rpow_one]
 
-lemma tendsto_qPochhammer_sq_div (k : ℕ) :
+theorem tendsto_qPochhammer_sq_div (k : ℕ) :
     Tendsto (fun q : ℝ => qPochhammer ((q : ℂ) ^ 2) ((q : ℂ) ^ 2) k / (1 - (q : ℂ) ^ 2) ^ k)
       (𝓝[<] 1) (𝓝 (k ! : ℂ)) := by
   have h := (tendsto_qPochhammer_self_div k).comp tendsto_sq_nhdsWithin_lt_one
   refine h.congr' (Eventually.of_forall fun q => ?_)
   simp
 
-lemma dqh_algebra (Pn Pm Gk A x u v s : ℂ) (m k : ℕ) (hu : u ≠ 0) (hv : v ≠ 0) (hs : s ≠ 0)
+theorem dqh_algebra (Pn Pm Gk A x u v s : ℂ) (m k : ℕ) (hu : u ≠ 0) (hv : v ≠ 0) (hs : s ≠ 0)
     (hs2 : s ^ 2 = u * v) :
     Pn * (A * (s * x) ^ m / (Gk * Pm)) / s ^ (m + 2 * k) =
       Pn / u ^ (m + 2 * k) * A * x ^ m / (Gk / (u * v) ^ k * (Pm / u ^ m)) * (v⁻¹) ^ (2 * k) := by

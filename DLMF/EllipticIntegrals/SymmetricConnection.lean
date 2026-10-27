@@ -5,8 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.EllipticIntegrals.SymmetricSpecialCases
-public import DLMF.EllipticIntegrals.P19sR1Connection
 public import DLMF.EllipticIntegrals.SymmetricRelations
 
 /-!

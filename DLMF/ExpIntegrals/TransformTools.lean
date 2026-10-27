@@ -7,8 +7,6 @@ module
 
 public import DLMF.ExpIntegrals.Asymptotics
 public import DLMF.ExpIntegrals.Representations
-public import DLMF.Gamma.IntegralRepresentations
-public import DLMF.Gamma.GaussDigamma
 
 /-!
 # Tools for Laplace transforms and integrals of exponential and trigonometric integrals
@@ -39,26 +37,26 @@ namespace DLMF.Confluent
 
 
 /-- Complex Laplace transform of `1`: `∫₀^∞ e^{-ct} dt = 1/c` for `Re c > 0`. -/
-lemma eiTr_integral_exp_neg {c : ℂ} (hc : 0 < c.re) :
+theorem eiTr_integral_exp_neg {c : ℂ} (hc : 0 < c.re) :
     ∫ t : ℝ in Ioi 0, cexp (-c * t) = 1 / c := by
   have := integral_exp_mul_complex_Ioi (a := -c) (by simpa using hc) 0
   simp only [ofReal_zero, mul_zero, Complex.exp_zero] at this
   rw [this]; field_simp
 
 /-- `t ↦ e^{-ct}` is integrable on `(0, ∞)` for `Re c > 0`. -/
-lemma eiTr_integrableOn_exp_neg {c : ℂ} (hc : 0 < c.re) :
+theorem eiTr_integrableOn_exp_neg {c : ℂ} (hc : 0 < c.re) :
     IntegrableOn (fun t : ℝ => cexp (-c * t)) (Ioi 0) :=
   integrableOn_exp_mul_complex_Ioi (by simpa using hc) 0
 
 /-- Real form: `∫₀^∞ e^{-ct} dt = 1/c` for `c > 0`. -/
-lemma eiTr_real_integral_exp_neg {c : ℝ} (hc : 0 < c) :
+theorem eiTr_real_integral_exp_neg {c : ℝ} (hc : 0 < c) :
     ∫ t : ℝ in Ioi 0, Real.exp (-(c * t)) = 1 / c := by
   have := integral_exp_mul_Ioi (a := -c) (by linarith) 0
   simp only [mul_zero, Real.exp_zero, neg_mul] at this
   rw [this]; field_simp
 
 /-- `E₁(t) = ∫₁^∞ e^{-tu}/u du`. -/
-lemma eiTr_E1_eq {t : ℝ} (ht : 0 < t) :
+theorem eiTr_E1_eq {t : ℝ} (ht : 0 < t) :
     genExpIntE 1 t = ∫ u in Ioi (1 : ℝ), ((Real.exp (-(t * u)) / u : ℝ) : ℂ) := by
   rw [genExpIntE_eq_integral 1 ht]
   refine setIntegral_congr_fun measurableSet_Ioi fun u hu => ?_
@@ -67,14 +65,14 @@ lemma eiTr_E1_eq {t : ℝ} (ht : 0 < t) :
   push_cast; ring_nf
 
 /-- the lower bound on `Re a + u`. -/
-lemma eiTr_re_add_ge {a : ℂ} {u : ℝ} (hu : 1 ≤ u) :
+theorem eiTr_re_add_ge {a : ℂ} {u : ℝ} (hu : 1 ≤ u) :
     min 1 (1 + a.re) * u ≤ a.re + u := by
   rcases le_or_gt 0 a.re with h | h
   · nlinarith [min_le_left 1 (1 + a.re)]
   · nlinarith [min_le_right 1 (1 + a.re)]
 
 /-- Integrability of the kernel `e^{-at} e^{-tu}/u` on `(0,∞) × (1,∞)` for `Re a > -1`. -/
-lemma eiTr_integrable_E1_kernel {a : ℂ} (ha : -1 < a.re) :
+theorem eiTr_integrable_E1_kernel {a : ℂ} (ha : -1 < a.re) :
     Integrable (Function.uncurry fun (t u : ℝ) =>
       cexp (-a * t) * ((Real.exp (-(t * u)) / u : ℝ) : ℂ))
       ((volume.restrict (Ioi (0:ℝ))).prod (volume.restrict (Ioi (1:ℝ)))) := by
@@ -123,7 +121,7 @@ lemma eiTr_integrable_E1_kernel {a : ℂ} (ha : -1 < a.re) :
       exact inv_anti₀ (by positivity) (by nlinarith)
 
 /-- `u ↦ 1/((a+u)u)` is integrable on `(1, ∞)` for `Re a > -1`. -/
-lemma eiTr_integrableOn_recip_mul {a : ℂ} (ha : -1 < a.re) :
+theorem eiTr_integrableOn_recip_mul {a : ℂ} (ha : -1 < a.re) :
     IntegrableOn (fun u : ℝ => 1 / ((a + u) * u)) (Ioi 1) := by
   set δ := min 1 (1 + a.re)
   have hδ : 0 < δ := lt_min one_pos (by linarith)
@@ -144,7 +142,7 @@ lemma eiTr_integrableOn_recip_mul {a : ℂ} (ha : -1 < a.re) :
   nlinarith
 
 /-- `∫₁^∞ du/((a+u)u) = log(1+a)/a` (and `1` at `a = 0`) for `Re a > -1`. -/
-lemma eiTr_integral_recip_mul {a : ℂ} (ha : -1 < a.re) :
+theorem eiTr_integral_recip_mul {a : ℂ} (ha : -1 < a.re) :
     ∫ u in Ioi (1:ℝ), 1 / ((a + u) * u) = if a = 0 then 1 else log (1 + a) / a := by
   split_ifs with h0
   · subst h0
@@ -208,7 +206,7 @@ lemma eiTr_integral_recip_mul {a : ℂ} (ha : -1 < a.re) :
 
 /-- Fubini swap of a Laplace transform with an inner integral over `[0,1]` whose integrand grows
   at most quadratically in `t`. -/
-lemma eiTr_swap01 {a : ℂ} (ha : 0 < a.re) {F : ℝ → ℝ → ℂ}
+theorem eiTr_swap01 {a : ℂ} (ha : 0 < a.re) {F : ℝ → ℝ → ℂ}
     (hF : Measurable (Function.uncurry F)) {C : ℝ}
     (hb : ∀ t u : ℝ, 0 < t → u ∈ Ioc (0:ℝ) 1 → ‖F t u‖ ≤ C * (1 + t ^ 2)) :
     ∫ t in Ioi (0:ℝ), cexp (-a * t) * ∫ u in (0:ℝ)..1, F t u =
@@ -235,7 +233,7 @@ lemma eiTr_swap01 {a : ℂ} (ha : 0 < a.re) {F : ℝ → ℝ → ℂ}
       _ = _ := by ring
 
 /-- `log((1+ia)/(1-ia)) = log(1+ia) - log(1-ia)` for `Re a > 0`. -/
-lemma eiTr_log_div {a : ℂ} (ha : 0 < a.re) :
+theorem eiTr_log_div {a : ℂ} (ha : 0 < a.re) :
     log ((1 + a * I) / (1 - a * I)) = log (1 + a * I) - log (1 - a * I) := by
   have hz1 : (1 + a * I).im = a.re := by simp
   have hz2 : (1 - a * I).im = -a.re := by simp
@@ -275,7 +273,7 @@ lemma eiTr_log_div {a : ℂ} (ha : 0 < a.re) :
   rw [hn0] at hn; simp at hn; exact hn.symm
 
 /-- `log(ia) - log(-ia) = iπ` for `Re a > 0`. -/
-lemma eiTr_log_I_mul_sub {a : ℂ} (ha : 0 < a.re) :
+theorem eiTr_log_I_mul_sub {a : ℂ} (ha : 0 < a.re) :
     log (I * a) - log (-(I * a)) = π * I := by
   have him : 0 < (I * a).im := by simp [ha]
   apply Complex.ext
@@ -283,7 +281,7 @@ lemma eiTr_log_I_mul_sub {a : ℂ} (ha : 0 < a.re) :
   · simp only [sub_im, log_im, arg_neg_eq_arg_sub_pi_of_im_pos him]; simp
 
 /-- `arctan(1/a)`-free form: `∫₀¹ du/(a²+u²) = (π/2 - arctan a)/a` for `Re a > 0`. -/
-lemma eiTr_integral_recip_sq_add_sq {a : ℂ} (ha : 0 < a.re) :
+theorem eiTr_integral_recip_sq_add_sq {a : ℂ} (ha : 0 < a.re) :
     ∫ u in (0:ℝ)..1, 1 / (a ^ 2 + (u:ℂ) ^ 2) = (π / 2 - arctan a) / a := by
   have ha0 : a ≠ 0 := fun h => by rw [h] at ha; simp at ha
   have hm : ∀ u : ℝ, (u:ℂ) - I * a ∈ slitPlane := fun u => by
@@ -324,7 +322,7 @@ lemma eiTr_integral_recip_sq_add_sq {a : ℂ} (ha : 0 < a.re) :
   linear_combination (1:ℂ) * hl + (log (1 - a * I) - log (1 + a * I)) * I_sq
 
 /-- `a² + u² ≠ 0` for `Re a > 0` and real `u`. -/
-lemma eiTr_sq_add_sq_ne {a : ℂ} (ha : 0 < a.re) (u : ℝ) : a ^ 2 + (u:ℂ) ^ 2 ≠ 0 := by
+theorem eiTr_sq_add_sq_ne {a : ℂ} (ha : 0 < a.re) (u : ℝ) : a ^ 2 + (u:ℂ) ^ 2 ≠ 0 := by
   intro h
   have : (a + u * I) * (a - u * I) = 0 := by linear_combination h - (u:ℂ) ^ 2 * I_sq
   rcases mul_eq_zero.1 this with h' | h'
@@ -332,7 +330,7 @@ lemma eiTr_sq_add_sq_ne {a : ℂ} (ha : 0 < a.re) (u : ℝ) : a ^ 2 + (u:ℂ) ^ 
   · have := congrArg Complex.re h'; simp at this; linarith
 
 /-- Laplace transform of `sin(tu)`: `u/(a²+u²)` for `Re a > 0`. -/
-lemma eiTr_laplace_sin {a : ℂ} (ha : 0 < a.re) (u : ℝ) :
+theorem eiTr_laplace_sin {a : ℂ} (ha : 0 < a.re) (u : ℝ) :
     ∫ t in Ioi (0:ℝ), cexp (-a * t) * ((Real.sin (t * u) : ℝ) : ℂ) = u / (a ^ 2 + (u:ℂ) ^ 2) := by
   have h1 : 0 < (a + u * I).re := by simpa using ha
   have h2 : 0 < (a - u * I).re := by simpa using ha
@@ -355,7 +353,7 @@ lemma eiTr_laplace_sin {a : ℂ} (ha : 0 < a.re) (u : ℝ) :
   linear_combination (-(u:ℂ)) * I_sq
 
 /-- Laplace transform of `cos(tu)`: `a/(a²+u²)` for `Re a > 0`. -/
-lemma eiTr_laplace_cos {a : ℂ} (ha : 0 < a.re) (u : ℝ) :
+theorem eiTr_laplace_cos {a : ℂ} (ha : 0 < a.re) (u : ℝ) :
     ∫ t in Ioi (0:ℝ), cexp (-a * t) * ((Real.cos (t * u) : ℝ) : ℂ) = a / (a ^ 2 + (u:ℂ) ^ 2) := by
   have h1 : 0 < (a + u * I).re := by simpa using ha
   have h2 : 0 < (a - u * I).re := by simpa using ha
@@ -378,7 +376,7 @@ lemma eiTr_laplace_cos {a : ℂ} (ha : 0 < a.re) (u : ℝ) :
   ring
 
 /-- `Si(t) = ∫₀¹ sin(tu)/u du`. -/
-lemma eiTr_sinInt_eq (t : ℝ) :
+theorem eiTr_sinInt_eq (t : ℝ) :
     Real.sinInt t = ∫ u in (0:ℝ)..1, Real.sin (t * u) / u := by
   rcases eq_or_ne t 0 with rfl | ht
   · simp [Real.sinInt]
@@ -393,7 +391,7 @@ lemma eiTr_sinInt_eq (t : ℝ) :
   field_simp
 
 /-- `Ein(t) - Cin(t) = ∫₀¹ (cos(tu) - e^{-tu})/u du`. -/
-lemma eiTr_cinIntegrand_intervalIntegrable {b : ℝ} (hb : 0 ≤ b) :
+theorem eiTr_cinIntegrand_intervalIntegrable {b : ℝ} (hb : 0 ≤ b) :
     IntervalIntegrable (fun s : ℝ => (1 - Real.cos s) / s) volume 0 b := by
   refine (intervalIntegrable_const (c := b)).mono_fun'
     (by fun_prop : Measurable fun s : ℝ => (1 - Real.cos s) / s).aestronglyMeasurable ?_
@@ -407,7 +405,7 @@ lemma eiTr_cinIntegrand_intervalIntegrable {b : ℝ} (hb : 0 ≤ b) :
   nlinarith [hs.2]
 
 /-- `Ein(t) - Cin(t) = ∫₀¹ (cos(tu) - e^{-tu})/u du` for `t ≥ 0`. -/
-lemma eiTr_ein_sub_cin_eq {t : ℝ} (ht0 : 0 ≤ t) :
+theorem eiTr_ein_sub_cin_eq {t : ℝ} (ht0 : 0 ≤ t) :
     Real.expIntEin t - Real.cosIntCin t =
       ∫ u in (0:ℝ)..1, (Real.cos (t * u) - Real.exp (-(t * u))) / u := by
   rcases eq_or_ne t 0 with rfl | ht
@@ -428,18 +426,18 @@ lemma eiTr_ein_sub_cin_eq {t : ℝ} (ht0 : 0 ≤ t) :
   field_simp
 
 /-- The real sine integral `Si` is continuous. -/
-lemma eiTr_continuous_sinInt : Continuous Real.sinInt :=
+theorem eiTr_continuous_sinInt : Continuous Real.sinInt :=
   continuous_iff_continuousAt.2 fun x => (Real.hasDerivAt_sinInt x).continuousAt
 
 /-- `|Si(t)| ≤ t` for `t ≥ 0`. -/
-lemma eiTr_abs_sinInt_le {t : ℝ} (ht : 0 ≤ t) : |Real.sinInt t| ≤ t := by
+theorem eiTr_abs_sinInt_le {t : ℝ} (ht : 0 ≤ t) : |Real.sinInt t| ≤ t := by
   have h := intervalIntegral.norm_integral_le_of_norm_le_const (a := 0) (b := t) (C := 1)
     (f := Real.sinc) (fun x _ => by rw [Real.norm_eq_abs]; exact Real.abs_sinc_le_one x)
   rw [Real.sinInt, ← Real.norm_eq_abs]
   simpa [abs_of_nonneg ht] using h
 
 /-- Laplace transform of `Si`. -/
-lemma eiTr_laplace_sinInt {a : ℂ} (ha : 0 < a.re) :
+theorem eiTr_laplace_sinInt {a : ℂ} (ha : 0 < a.re) :
     IntegrableOn (fun t : ℝ => cexp (-a * t) * (Real.sinInt t : ℂ)) (Ioi 0) ∧
     ∫ t in Ioi (0:ℝ), cexp (-a * t) * (Real.sinInt t : ℂ) = (π / 2 - arctan a) / a := by
   constructor
@@ -477,7 +475,7 @@ lemma eiTr_laplace_sinInt {a : ℂ} (ha : 0 < a.re) :
 
 /-- Integrability of a Laplace transform of an inner `[0,1]` integral with quadratically bounded
   integrand. -/
-lemma eiTr_integrable01 {a : ℂ} (ha : 0 < a.re) {F : ℝ → ℝ → ℂ}
+theorem eiTr_integrable01 {a : ℂ} (ha : 0 < a.re) {F : ℝ → ℝ → ℂ}
     (hF : Measurable (Function.uncurry F)) {C : ℝ}
     (hb : ∀ t u : ℝ, 0 < t → u ∈ Ioc (0:ℝ) 1 → ‖F t u‖ ≤ C * (1 + t ^ 2)) :
     IntegrableOn (fun t : ℝ => cexp (-a * t) * ∫ u in (0:ℝ)..1, F t u) (Ioi 0) := by
@@ -507,7 +505,7 @@ lemma eiTr_integrable01 {a : ℂ} (ha : 0 < a.re) {F : ℝ → ℝ → ℂ}
   rw [integral_const_mul, intervalIntegral.integral_of_le zero_le_one]
 
 /-- `a²` lies in the slit plane when `Re a > 0`. -/
-lemma eiTr_sq_mem_slitPlane {a : ℂ} (ha : 0 < a.re) : a ^ 2 ∈ slitPlane := by
+theorem eiTr_sq_mem_slitPlane {a : ℂ} (ha : 0 < a.re) : a ^ 2 ∈ slitPlane := by
   rw [mem_slitPlane_iff]
   rcases eq_or_ne a.im 0 with h | h
   · left; simp [sq, h]; positivity
@@ -519,7 +517,7 @@ lemma eiTr_sq_mem_slitPlane {a : ℂ} (ha : 0 < a.re) : a ^ 2 ∈ slitPlane := b
     · exact h h1
 
 /-- `log(a²) = 2 log a` for `Re a > 0` (principal branch). -/
-lemma eiTr_log_sq {a : ℂ} (ha : 0 < a.re) : log (a ^ 2) = 2 * log a := by
+theorem eiTr_log_sq {a : ℂ} (ha : 0 < a.re) : log (a ^ 2) = 2 * log a := by
   have ha0 : a ≠ 0 := fun h => by rw [h] at ha; simp at ha
   have harg := abs_arg_lt_pi_div_two_iff.2 (Or.inl ha)
   rw [abs_lt] at harg
@@ -529,7 +527,7 @@ lemma eiTr_log_sq {a : ℂ} (ha : 0 < a.re) : log (a ^ 2) = 2 * log a := by
   · simp [log_im]; linarith
 
 /-- Closed form of the inner integral arising in the Laplace transform of `Ci`. -/
-lemma eiTr_integral_ci_kernel {a : ℂ} (ha : 0 < a.re) :
+theorem eiTr_integral_ci_kernel {a : ℂ} (ha : 0 < a.re) :
     ∫ u in (0:ℝ)..1, (a / (a ^ 2 + (u:ℂ) ^ 2) - 1 / (a + u)) / u =
       (log (1 + a) - log (1 + a ^ 2) / 2) / a := by
   have ha0 : a ≠ 0 := fun h => by rw [h] at ha; simp at ha
@@ -577,7 +575,7 @@ lemma eiTr_integral_ci_kernel {a : ℂ} (ha : 0 < a.re) :
 
 /-- Laplace transform of `E₁`: `∫₀^∞ e^{-at} E₁(t) dt = log(1+a)/a` for `Re a > -1`, with
   integrability. -/
-lemma eiTr_laplace_E1 {a : ℂ} (ha : -1 < a.re) :
+theorem eiTr_laplace_E1 {a : ℂ} (ha : -1 < a.re) :
     IntegrableOn (fun t : ℝ => cexp (-a * t) * genExpIntE 1 t) (Ioi 0) ∧
     ∫ t in Ioi (0:ℝ), cexp (-a * t) * genExpIntE 1 t = if a = 0 then 1 else log (1 + a) / a := by
   have hI := eiTr_integrable_E1_kernel ha
@@ -605,7 +603,7 @@ lemma eiTr_laplace_E1 {a : ℂ} (ha : -1 < a.re) :
         rw [integral_const_mul, eiTr_integral_exp_neg hc]; field_simp
 
 /-- Uniform bound for the kernel `(cos(tu) - e^{-tu})/u` on `u ∈ (0,1]`. -/
-lemma eiTr_ein_cin_bound {t u : ℝ} (ht : 0 < t) (hu : u ∈ Ioc (0:ℝ) 1) :
+theorem eiTr_ein_cin_bound {t u : ℝ} (ht : 0 < t) (hu : u ∈ Ioc (0:ℝ) 1) :
     ‖(((Real.cos (t * u) - Real.exp (-(t * u))) / u : ℝ) : ℂ)‖ ≤ 1 * (1 + t ^ 2) := by
   have hu0 := hu.1
   have hx : 0 ≤ t * u := by positivity
@@ -621,14 +619,14 @@ lemma eiTr_ein_cin_bound {t u : ℝ} (ht : 0 < t) (hu : u ∈ Ioc (0:ℝ) 1) :
   constructor <;> nlinarith [sq_nonneg (t - 1), mul_nonneg (sq_nonneg t) hu0.le]
 
 /-- The entire cosine integral `Cin` is continuous on `ℝ`. -/
-lemma eiTr_continuous_cosIntCin : Continuous Real.cosIntCin := by
+theorem eiTr_continuous_cosIntCin : Continuous Real.cosIntCin := by
   have h : Real.cosIntCin = fun x : ℝ => (cosIntCin (x:ℂ)).re := by
     funext x; rw [cosIntCin_ofReal]; simp
   rw [h]
   exact Complex.continuous_re.comp (cosIntCin_entire.continuous.comp continuous_ofReal)
 
 /-- `Ci(x) → 0` as `x → ∞`. -/
-lemma eiTr_tendsto_cosInt_real : Tendsto Real.cosInt atTop (𝓝 0) := by
+theorem eiTr_tendsto_cosInt_real : Tendsto Real.cosInt atTop (𝓝 0) := by
   have h := (Complex.continuous_re.tendsto 0).comp cosInt_tendsto_atTop
   simp only [Complex.zero_re] at h
   refine h.congr' ?_
@@ -636,18 +634,18 @@ lemma eiTr_tendsto_cosInt_real : Tendsto Real.cosInt atTop (𝓝 0) := by
   simp [Function.comp_apply, cosInt_ofReal hx]
 
 /-- `Si(x) - π/2 → 0` as `x → ∞`. -/
-lemma eiTr_tendsto_sinIntTail_real : Tendsto (fun x => Real.sinInt x - π / 2) atTop (𝓝 0) := by
+theorem eiTr_tendsto_sinIntTail_real : Tendsto (fun x => Real.sinInt x - π / 2) atTop (𝓝 0) := by
   have := Real.tendsto_sinInt_atTop.sub_const (π / 2)
   simpa using this
 
 /-- `sin t · log t = sinc t · (t log t)` for all real `t`. -/
-lemma eiTr_sin_mul_log (t : ℝ) : Real.sin t * Real.log t = Real.sinc t * (t * Real.log t) := by
+theorem eiTr_sin_mul_log (t : ℝ) : Real.sin t * Real.log t = Real.sinc t * (t * Real.log t) := by
   rcases eq_or_ne t 0 with rfl | ht
   · simp
   · rw [Real.sinc_of_ne_zero ht]; field_simp
 
 /-- `t ↦ sin t · Ci(t)` is continuous (with the totalized value at `0`). -/
-lemma eiTr_continuous_sin_mul_cosInt : Continuous fun t => Real.sin t * Real.cosInt t := by
+theorem eiTr_continuous_sin_mul_cosInt : Continuous fun t => Real.sin t * Real.cosInt t := by
   have h : (fun t => Real.sin t * Real.cosInt t) = fun t =>
       Real.sin t * (-Real.cosIntCin t + Real.eulerMascheroniConstant) +
         Real.sinc t * (t * Real.log t) := by
@@ -657,7 +655,7 @@ lemma eiTr_continuous_sin_mul_cosInt : Continuous fun t => Real.sin t * Real.cos
     (Real.continuous_sinc.mul Real.continuous_mul_log))
 
 /-- `t ↦ cos t · Ci(t)` is interval integrable on `[0, R]`. -/
-lemma eiTr_intervalIntegrable_cos_mul_cosInt (R : ℝ) :
+theorem eiTr_intervalIntegrable_cos_mul_cosInt (R : ℝ) :
     IntervalIntegrable (fun t => Real.cos t * Real.cosInt t) volume 0 R := by
   have h : (fun t => Real.cos t * Real.cosInt t) = fun t =>
       Real.cos t * (-Real.cosIntCin t + Real.eulerMascheroniConstant) +
@@ -668,7 +666,7 @@ lemma eiTr_intervalIntegrable_cos_mul_cosInt (R : ℝ) :
     _ _).add (intervalIntegral.intervalIntegrable_log'.continuousOn_mul Real.continuous_cos.continuousOn)
 
 /-- `∫₀^R cos t Ci(t) dt = sin R Ci(R) - Si(2R)/2` for `R ≥ 0`. -/
-lemma eiTr_integral_cos_mul_cosInt {R : ℝ} (hR : 0 ≤ R) :
+theorem eiTr_integral_cos_mul_cosInt {R : ℝ} (hR : 0 ≤ R) :
     ∫ t in (0:ℝ)..R, Real.cos t * Real.cosInt t = Real.sin R * Real.cosInt R - Real.sinInt (2 * R) / 2 := by
   have hc : Continuous fun t => Real.sin t * Real.cosInt t - Real.sinInt (2 * t) / 2 :=
     eiTr_continuous_sin_mul_cosInt.sub ((eiTr_continuous_sinInt.comp (continuous_const.mul continuous_id)).div_const 2)
@@ -685,7 +683,7 @@ lemma eiTr_integral_cos_mul_cosInt {R : ℝ} (hR : 0 ≤ R) :
     ring
 
 /-- `∫₀^R cos t · Ci(t) dt → -π/4` as `R → ∞`. -/
-lemma eiTr_tendsto_integral_cos_mul_cosInt :
+theorem eiTr_tendsto_integral_cos_mul_cosInt :
     Tendsto (fun R => ∫ t in (0:ℝ)..R, Real.cos t * Real.cosInt t) atTop (𝓝 (-(π / 4))) := by
   have h1 : Tendsto (fun R => Real.sin R * Real.cosInt R) atTop (𝓝 0) := by
     refine squeeze_zero_norm (a := fun R => ‖Real.cosInt R‖) (fun R => ?_)
@@ -701,7 +699,7 @@ lemma eiTr_tendsto_integral_cos_mul_cosInt :
   rw [eiTr_integral_cos_mul_cosInt hR]
 
 /-- `∫₀^R sin t si(t) dt = -cos R si(R) - π/2 + Si(2R)/2`. -/
-lemma eiTr_integral_sin_mul_sinIntTail (R : ℝ) :
+theorem eiTr_integral_sin_mul_sinIntTail (R : ℝ) :
     ∫ t in (0:ℝ)..R, Real.sin t * (Real.sinInt t - π / 2) =
       -Real.cos R * (Real.sinInt R - π / 2) + Real.sinInt (2 * R) / 2 - π / 2 := by
   rw [intervalIntegral.integral_eq_sub_of_hasDerivAt (f := fun t =>
@@ -721,7 +719,7 @@ lemma eiTr_integral_sin_mul_sinIntTail (R : ℝ) :
     ring
 
 /-- `∫₀^R sin t · (Si(t) - π/2) dt → -π/4` as `R → ∞`. -/
-lemma eiTr_tendsto_integral_sin_mul_sinIntTail :
+theorem eiTr_tendsto_integral_sin_mul_sinIntTail :
     Tendsto (fun R => ∫ t in (0:ℝ)..R, Real.sin t * (Real.sinInt t - π / 2)) atTop
       (𝓝 (-(π / 4))) := by
   have h1 : Tendsto (fun R => -Real.cos R * (Real.sinInt R - π / 2)) atTop (𝓝 0) := by
@@ -737,7 +735,7 @@ lemma eiTr_tendsto_integral_sin_mul_sinIntTail :
   exact (eiTr_integral_sin_mul_sinIntTail R).symm
 
 /-- `|log t| ≤ 4 t^{-1/4}` for `0 < t ≤ 1`. -/
-lemma eiTr_abs_log_le {t : ℝ} (ht : 0 < t) (ht1 : t ≤ 1) : |Real.log t| ≤ 4 * t ^ (-(1/4:ℝ)) := by
+theorem eiTr_abs_log_le {t : ℝ} (ht : 0 < t) (ht1 : t ≤ 1) : |Real.log t| ≤ 4 * t ^ (-(1/4:ℝ)) := by
   have h1 := Real.neg_rpow_div_le_log ht.le (by norm_num : (0:ℝ) < 1/4)
   have h2 := Real.log_nonpos ht.le ht1
   rw [abs_of_nonpos h2]
@@ -745,16 +743,16 @@ lemma eiTr_abs_log_le {t : ℝ} (ht : 0 < t) (ht1 : t ≤ 1) : |Real.log t| ≤ 
   linarith
 
 /-- `t^{-1/4} ≤ t^{-1/2}` for `0 < t ≤ 1`. -/
-lemma eiTr_rpow_quarter_le {t : ℝ} (ht : 0 < t) (ht1 : t ≤ 1) :
+theorem eiTr_rpow_quarter_le {t : ℝ} (ht : 0 < t) (ht1 : t ≤ 1) :
     t ^ (-(1/4:ℝ)) ≤ t ^ (-(1/2:ℝ)) :=
   Real.rpow_le_rpow_of_exponent_ge ht ht1 (by norm_num)
 
 /-- `1 ≤ t^{-1/4}` for `0 < t ≤ 1`. -/
-lemma eiTr_one_le_rpow {t : ℝ} (ht : 0 < t) (ht1 : t ≤ 1) : 1 ≤ t ^ (-(1/4:ℝ)) :=
+theorem eiTr_one_le_rpow {t : ℝ} (ht : 0 < t) (ht1 : t ≤ 1) : 1 ≤ t ^ (-(1/4:ℝ)) :=
   Real.one_le_rpow_of_pos_of_le_one_of_nonpos ht ht1 (by norm_num)
 
 /-- A function bounded by `A + B t^{-1/2}` on `(0,1]` and by `C/t²` on `(1,∞)` is integrable. -/
-lemma eiTr_integrableOn_Ioi_of_bound {h : ℝ → ℝ} (hm : AEStronglyMeasurable h (volume.restrict (Ioi 0)))
+theorem eiTr_integrableOn_Ioi_of_bound {h : ℝ → ℝ} (hm : AEStronglyMeasurable h (volume.restrict (Ioi 0)))
     {A B C : ℝ} (h1 : ∀ t ∈ Ioc (0:ℝ) 1, |h t| ≤ A + B * t ^ (-(1/2:ℝ)))
     (h2 : ∀ t : ℝ, 1 < t → |h t| ≤ C / t ^ 2) : IntegrableOn h (Ioi 0) := by
   rw [← Ioc_union_Ioi_eq_Ioi zero_le_one]
@@ -804,7 +802,7 @@ lemma eiTr_norm_aux_le {x : ℝ} (hx : 0 < x) :
     nlinarith [sq_nonneg (u - 1)]
 
 /-- `|Ci(x)| ≤ 2/x` for `x > 0`. -/
-lemma eiTr_abs_cosInt_le {x : ℝ} (hx : 0 < x) : |Real.cosInt x| ≤ 2 / x := by
+theorem eiTr_abs_cosInt_le {x : ℝ} (hx : 0 < x) : |Real.cosInt x| ≤ 2 / x := by
   obtain ⟨h1, h2⟩ := eiTr_norm_aux_le hx
   have h := cosInt_eq_aux (x:ℂ)
   rw [cosInt_ofReal hx] at h
@@ -819,7 +817,7 @@ lemma eiTr_abs_cosInt_le {x : ℝ} (hx : 0 < x) : |Real.cosInt x| ≤ 2 / x := b
     _ = 2 / x := by ring
 
 /-- `|Si(x) - π/2| ≤ 2/x` for `x > 0`. -/
-lemma eiTr_abs_sinIntTail_le {x : ℝ} (hx : 0 < x) : |Real.sinInt x - π / 2| ≤ 2 / x := by
+theorem eiTr_abs_sinIntTail_le {x : ℝ} (hx : 0 < x) : |Real.sinInt x - π / 2| ≤ 2 / x := by
   obtain ⟨h1, h2⟩ := eiTr_norm_aux_le hx
   have h := sinInt_eq_aux (x:ℂ)
   rw [sinInt_ofReal] at h
@@ -836,7 +834,7 @@ lemma eiTr_abs_sinIntTail_le {x : ℝ} (hx : 0 < x) : |Real.sinInt x - π / 2| �
     _ = 2 / x := by ring
 
 /-- `|Cin(t)| ≤ 1` for `0 ≤ t ≤ 1`. -/
-lemma eiTr_abs_cosIntCin_le {t : ℝ} (ht : 0 ≤ t) (ht1 : t ≤ 1) : |Real.cosIntCin t| ≤ 1 := by
+theorem eiTr_abs_cosIntCin_le {t : ℝ} (ht : 0 ≤ t) (ht1 : t ≤ 1) : |Real.cosIntCin t| ≤ 1 := by
   have h := intervalIntegral.norm_integral_le_of_norm_le_const (a := 0) (b := t) (C := 1)
     (f := fun s : ℝ => (1 - Real.cos s) / s) (fun s hs => ?_)
   · rw [Real.cosIntCin, ← Real.norm_eq_abs]
@@ -850,7 +848,7 @@ lemma eiTr_abs_cosIntCin_le {t : ℝ} (ht : 0 ≤ t) (ht1 : t ≤ 1) : |Real.cos
     nlinarith [hs.2]
 
 /-- `|Ci(t)| ≤ 2 + 4 t^{-1/4}` for `0 < t ≤ 1`. -/
-lemma eiTr_abs_cosInt_le_small {t : ℝ} (ht : 0 < t) (ht1 : t ≤ 1) :
+theorem eiTr_abs_cosInt_le_small {t : ℝ} (ht : 0 < t) (ht1 : t ≤ 1) :
     |Real.cosInt t| ≤ 2 + 4 * t ^ (-(1/4:ℝ)) := by
   have h1 := eiTr_abs_cosIntCin_le ht.le ht1
   have h2 := eiTr_abs_log_le ht ht1
@@ -866,7 +864,7 @@ lemma eiTr_abs_cosInt_le_small {t : ℝ} (ht : 0 < t) (ht1 : t ≤ 1) :
         rw [abs_of_pos (by linarith : (0:ℝ) < Real.eulerMascheroniConstant)]; linarith
 
 /-- `|Si(t) - π/2| ≤ 3` for `0 ≤ t ≤ 1`. -/
-lemma eiTr_abs_sinIntTail_le_small {t : ℝ} (ht : 0 ≤ t) (ht1 : t ≤ 1) :
+theorem eiTr_abs_sinIntTail_le_small {t : ℝ} (ht : 0 ≤ t) (ht1 : t ≤ 1) :
     |Real.sinInt t - π / 2| ≤ 3 := by
   have h1 : |Real.sinInt t| ≤ t := by
     have h := intervalIntegral.norm_integral_le_of_norm_le_const (a := 0) (b := t) (C := 1)
@@ -878,29 +876,29 @@ lemma eiTr_abs_sinIntTail_le_small {t : ℝ} (ht : 0 ≤ t) (ht1 : t ≤ 1) :
   linarith [Real.pi_lt_four]
 
 /-- The real cosine integral `Ci` is measurable. -/
-lemma eiTr_measurable_cosInt : Measurable Real.cosInt := by
+theorem eiTr_measurable_cosInt : Measurable Real.cosInt := by
   have : Real.cosInt = fun t => -Real.cosIntCin t + Real.log t + Real.eulerMascheroniConstant := by
     funext t; rfl
   rw [this]
   exact ((eiTr_continuous_cosIntCin.measurable.neg).add Real.measurable_log).add_const _
 
 /-- `Ci` is continuous at every `x > 0`. -/
-lemma eiTr_continuousAt_cosInt {x : ℝ} (hx : 0 < x) : ContinuousAt Real.cosInt x :=
+theorem eiTr_continuousAt_cosInt {x : ℝ} (hx : 0 < x) : ContinuousAt Real.cosInt x :=
   (Real.hasDerivAt_cosInt hx).continuousAt
 
 /-- `t Ci(t) = t (γ - Cin t) + t log t` (all real `t`). -/
-lemma eiTr_mul_cosInt (t : ℝ) : t * Real.cosInt t =
+theorem eiTr_mul_cosInt (t : ℝ) : t * Real.cosInt t =
     t * (-Real.cosIntCin t + Real.eulerMascheroniConstant) + t * Real.log t := by
   rw [Real.cosInt]; ring
 
 /-- `t ↦ t · Ci(t)` is continuous. -/
-lemma eiTr_continuous_mul_cosInt : Continuous fun t => t * Real.cosInt t := by
+theorem eiTr_continuous_mul_cosInt : Continuous fun t => t * Real.cosInt t := by
   simp_rw [eiTr_mul_cosInt]
   exact (continuous_id.mul (eiTr_continuous_cosIntCin.neg.add continuous_const)).add
     Real.continuous_mul_log
 
 /-- `Ci²` is integrable on `(0, ∞)`. -/
-lemma eiTr_integrableOn_cosInt_sq : IntegrableOn (fun t => Real.cosInt t ^ 2) (Ioi 0) := by
+theorem eiTr_integrableOn_cosInt_sq : IntegrableOn (fun t => Real.cosInt t ^ 2) (Ioi 0) := by
   refine eiTr_integrableOn_Ioi_of_bound (A := 4) (B := 32) (C := 4)
     (eiTr_measurable_cosInt.pow_const 2).aestronglyMeasurable (fun t ht => ?_) (fun t ht => ?_)
   · have h := eiTr_abs_cosInt_le_small ht.1 ht.2
@@ -919,7 +917,7 @@ lemma eiTr_integrableOn_cosInt_sq : IntegrableOn (fun t => Real.cosInt t ^ 2) (I
       _ = 4 / t ^ 2 := by ring
 
 /-- `t · Ci(t)² → 0` as `t → 0⁺`. -/
-lemma eiTr_tendsto_mul_cosInt_sq :
+theorem eiTr_tendsto_mul_cosInt_sq :
     Tendsto (fun t => t * Real.cosInt t ^ 2) (𝓝[>] 0) (𝓝 0) := by
   set c : ℝ → ℝ := fun t => -Real.cosIntCin t + Real.eulerMascheroniConstant
   have hc : Continuous c := eiTr_continuous_cosIntCin.neg.add continuous_const
@@ -942,7 +940,7 @@ lemma eiTr_tendsto_mul_cosInt_sq :
   exact (e t ht).symm
 
 /-- `t ↦ t · Ci(t)²` is continuous on `[0, R]`. -/
-lemma eiTr_continuousOn_mul_cosInt_sq (R : ℝ) :
+theorem eiTr_continuousOn_mul_cosInt_sq (R : ℝ) :
     ContinuousOn (fun t => t * Real.cosInt t ^ 2) (Icc 0 R) := by
   intro x hx
   rcases eq_or_lt_of_le hx.1 with h | h
@@ -954,7 +952,7 @@ lemma eiTr_continuousOn_mul_cosInt_sq (R : ℝ) :
   · exact (continuousAt_id.mul ((eiTr_continuousAt_cosInt h).pow 2)).continuousWithinAt
 
 /-- Integration by parts: `∫₀^R Ci² = R Ci(R)² - 2 ∫₀^R cos t · Ci(t) dt`. -/
-lemma eiTr_integral_cosInt_sq_eq {R : ℝ} (hR : 0 ≤ R) :
+theorem eiTr_integral_cosInt_sq_eq {R : ℝ} (hR : 0 ≤ R) :
     ∫ t in (0:ℝ)..R, Real.cosInt t ^ 2 =
       R * Real.cosInt R ^ 2 - 2 * ∫ t in (0:ℝ)..R, Real.cos t * Real.cosInt t := by
   have hi1 : IntervalIntegrable (fun t => Real.cosInt t ^ 2) volume 0 R := by
@@ -975,7 +973,7 @@ lemma eiTr_integral_cosInt_sq_eq {R : ℝ} (hR : 0 ≤ R) :
     ring
 
 /-- `∫₀^∞ Ci(t)² dt = π/2`. -/
-lemma eiTr_integral_cosInt_sq : ∫ t in Ioi (0:ℝ), Real.cosInt t ^ 2 = π / 2 := by
+theorem eiTr_integral_cosInt_sq : ∫ t in Ioi (0:ℝ), Real.cosInt t ^ 2 = π / 2 := by
   have hlim := intervalIntegral_tendsto_integral_Ioi 0 eiTr_integrableOn_cosInt_sq tendsto_id
   refine tendsto_nhds_unique hlim ?_
   have h1 : Tendsto (fun R => R * Real.cosInt R ^ 2) atTop (𝓝 0) := by
@@ -994,11 +992,11 @@ lemma eiTr_integral_cosInt_sq : ∫ t in Ioi (0:ℝ), Real.cosInt t ^ 2 = π / 2
   rw [eiTr_integral_cosInt_sq_eq hR]
 
 /-- `t ↦ Si(t) - π/2` is continuous. -/
-lemma eiTr_continuous_sinIntTail : Continuous fun t => Real.sinInt t - π / 2 :=
+theorem eiTr_continuous_sinIntTail : Continuous fun t => Real.sinInt t - π / 2 :=
   eiTr_continuous_sinInt.sub continuous_const
 
 /-- `(Si - π/2)²` is integrable on `(0, ∞)`. -/
-lemma eiTr_integrableOn_sinIntTail_sq :
+theorem eiTr_integrableOn_sinIntTail_sq :
     IntegrableOn (fun t => (Real.sinInt t - π / 2) ^ 2) (Ioi 0) := by
   refine eiTr_integrableOn_Ioi_of_bound (A := 9) (B := 0) (C := 4)
     (eiTr_continuous_sinIntTail.pow 2).aestronglyMeasurable (fun t ht => ?_) (fun t ht => ?_)
@@ -1012,7 +1010,7 @@ lemma eiTr_integrableOn_sinIntTail_sq :
       _ = 4 / t ^ 2 := by ring
 
 /-- Integration by parts: `∫₀^R (Si - π/2)² = R (Si(R) - π/2)² - 2 ∫₀^R sin t (Si(t) - π/2) dt`. -/
-lemma eiTr_integral_sinIntTail_sq_eq (R : ℝ) :
+theorem eiTr_integral_sinIntTail_sq_eq (R : ℝ) :
     ∫ t in (0:ℝ)..R, (Real.sinInt t - π / 2) ^ 2 =
       R * (Real.sinInt R - π / 2) ^ 2 -
         2 * ∫ t in (0:ℝ)..R, Real.sin t * (Real.sinInt t - π / 2) := by
@@ -1036,7 +1034,7 @@ lemma eiTr_integral_sinIntTail_sq_eq (R : ℝ) :
     ring
 
 /-- `∫₀^∞ (Si(t) - π/2)² dt = π/2`. -/
-lemma eiTr_integral_sinIntTail_sq : ∫ t in Ioi (0:ℝ), (Real.sinInt t - π / 2) ^ 2 = π / 2 := by
+theorem eiTr_integral_sinIntTail_sq : ∫ t in Ioi (0:ℝ), (Real.sinInt t - π / 2) ^ 2 = π / 2 := by
   have hlim := intervalIntegral_tendsto_integral_Ioi 0 eiTr_integrableOn_sinIntTail_sq tendsto_id
   refine tendsto_nhds_unique hlim ?_
   have h1 : Tendsto (fun R => R * (Real.sinInt R - π / 2) ^ 2) atTop (𝓝 0) := by
@@ -1060,7 +1058,7 @@ noncomputable def eiTr_H (t : ℝ) : ℝ :=
     Real.sin (t / 2) * Real.sinc (t / 2) * (t * Real.log t)
 
 /-- Explicit formula for `eiTr_H` at `t > 0`. -/
-lemma eiTr_H_eq {t : ℝ} (ht : 0 < t) : eiTr_H t =
+theorem eiTr_H_eq {t : ℝ} (ht : 0 < t) : eiTr_H t =
     Real.sin t * (Real.sinInt t - π / 2) - Real.cos t * Real.cosInt t + Real.cosInt (2 * t) := by
   have h1 : Real.sin (t / 2) * Real.sinc (t / 2) * (t * Real.log t) =
       (1 - Real.cos t) * Real.log t := by
@@ -1074,7 +1072,7 @@ lemma eiTr_H_eq {t : ℝ} (ht : 0 < t) : eiTr_H t =
   ring
 
 /-- `eiTr_H` is continuous. -/
-lemma eiTr_continuous_H : Continuous eiTr_H := by
+theorem eiTr_continuous_H : Continuous eiTr_H := by
   unfold eiTr_H
   have hc := eiTr_continuous_cosIntCin
   have hs := eiTr_continuous_sinInt
@@ -1082,7 +1080,7 @@ lemma eiTr_continuous_H : Continuous eiTr_H := by
   fun_prop
 
 /-- Derivative of `eiTr_H`: `cos x (Si(x) - π/2) + sin x Ci(x)` for `x > 0`. -/
-lemma eiTr_hasDerivAt_H {x : ℝ} (hx : 0 < x) :
+theorem eiTr_hasDerivAt_H {x : ℝ} (hx : 0 < x) :
     HasDerivAt eiTr_H (Real.cos x * (Real.sinInt x - π / 2) + Real.sin x * Real.cosInt x) x := by
   have hev : eiTr_H =ᶠ[𝓝 x] fun t =>
       Real.sin t * (Real.sinInt t - π / 2) - Real.cos t * Real.cosInt t + Real.cosInt (2 * t) := by
@@ -1100,11 +1098,11 @@ lemma eiTr_hasDerivAt_H {x : ℝ} (hx : 0 < x) :
   nlinarith [this]
 
 /-- `eiTr_H 0 = log 2`. -/
-lemma eiTr_H_zero : eiTr_H 0 = Real.log 2 := by
+theorem eiTr_H_zero : eiTr_H 0 = Real.log 2 := by
   simp [eiTr_H, Real.cosIntCin]
 
 /-- `eiTr_H(t) → 0` as `t → ∞`. -/
-lemma eiTr_tendsto_H : Tendsto eiTr_H atTop (𝓝 0) := by
+theorem eiTr_tendsto_H : Tendsto eiTr_H atTop (𝓝 0) := by
   have hb : ∀ (f g : ℝ → ℝ), (∀ x, |f x| ≤ 1) → Tendsto g atTop (𝓝 0) →
       Tendsto (fun x => f x * g x) atTop (𝓝 0) := fun f g hf hg => by
     refine squeeze_zero_norm (a := fun x => ‖g x‖) (fun x => ?_) (by simpa using hg.norm)
@@ -1120,7 +1118,7 @@ lemma eiTr_tendsto_H : Tendsto eiTr_H atTop (𝓝 0) := by
   rw [eiTr_H_eq ht]; rfl
 
 /-- `∫₀^R (cos t (Si(t) - π/2) + sin t Ci(t)) dt = eiTr_H R - log 2`. -/
-lemma eiTr_integral_cos_si_add_sin_ci {R : ℝ} (hR : 0 ≤ R) :
+theorem eiTr_integral_cos_si_add_sin_ci {R : ℝ} (hR : 0 ≤ R) :
     ∫ t in (0:ℝ)..R, (Real.cos t * (Real.sinInt t - π / 2) + Real.sin t * Real.cosInt t) =
       eiTr_H R - Real.log 2 := by
   rw [intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le hR eiTr_continuous_H.continuousOn
@@ -1129,7 +1127,7 @@ lemma eiTr_integral_cos_si_add_sin_ci {R : ℝ} (hR : 0 ≤ R) :
       eiTr_continuous_sin_mul_cosInt).intervalIntegrable 0 R), eiTr_H_zero]
 
 /-- `Ci · (Si - π/2)` is integrable on `(0, ∞)`. -/
-lemma eiTr_integrableOn_cosInt_mul_sinIntTail :
+theorem eiTr_integrableOn_cosInt_mul_sinIntTail :
     IntegrableOn (fun t => Real.cosInt t * (Real.sinInt t - π / 2)) (Ioi 0) := by
   refine eiTr_integrableOn_Ioi_of_bound (A := 6) (B := 12) (C := 4)
     (eiTr_measurable_cosInt.mul eiTr_continuous_sinIntTail.measurable).aestronglyMeasurable
@@ -1151,7 +1149,7 @@ lemma eiTr_integrableOn_cosInt_mul_sinIntTail :
       _ = 4 / t ^ 2 := by ring
 
 /-- Integration by parts for `∫₀^R Ci(t) (Si(t) - π/2) dt`. -/
-lemma eiTr_integral_cosInt_mul_sinIntTail_eq {R : ℝ} (hR : 0 ≤ R) :
+theorem eiTr_integral_cosInt_mul_sinIntTail_eq {R : ℝ} (hR : 0 ≤ R) :
     ∫ t in (0:ℝ)..R, Real.cosInt t * (Real.sinInt t - π / 2) =
       R * Real.cosInt R * (Real.sinInt R - π / 2) - (eiTr_H R - Real.log 2) := by
   have hi1 : IntervalIntegrable (fun t => Real.cosInt t * (Real.sinInt t - π / 2)) volume 0 R := by
@@ -1180,7 +1178,7 @@ lemma eiTr_integral_cosInt_mul_sinIntTail_eq {R : ℝ} (hR : 0 ≤ R) :
     ring
 
 /-- `∫₀^∞ Ci(t) (Si(t) - π/2) dt = log 2`. -/
-lemma eiTr_integral_cosInt_mul_sinIntTail :
+theorem eiTr_integral_cosInt_mul_sinIntTail :
     ∫ t in Ioi (0:ℝ), Real.cosInt t * (Real.sinInt t - π / 2) = Real.log 2 := by
   have hlim := intervalIntegral_tendsto_integral_Ioi 0 eiTr_integrableOn_cosInt_mul_sinIntTail
     tendsto_id
@@ -1205,25 +1203,25 @@ lemma eiTr_integral_cosInt_mul_sinIntTail :
 noncomputable def eiTr_e (t : ℝ) : ℝ := Real.expIntEin t - Real.log t - Real.eulerMascheroniConstant
 
 /-- The entire exponential integral `Ein` is continuous on `ℝ`. -/
-lemma eiTr_continuous_expIntEin : Continuous Real.expIntEin := by
+theorem eiTr_continuous_expIntEin : Continuous Real.expIntEin := by
   have h : Real.expIntEin = fun x : ℝ => (expIntEin (x:ℂ)).re := by
     funext x; rw [expIntEin_ofReal]; simp
   rw [h]
   exact Complex.continuous_re.comp (expIntEin_entire.continuous.comp continuous_ofReal)
 
 /-- `E₁(t)` equals the real function `eiTr_e t` for `t > 0`. -/
-lemma eiTr_E1_ofReal {t : ℝ} (ht : 0 < t) : genExpIntE 1 t = (eiTr_e t : ℂ) :=
+theorem eiTr_E1_ofReal {t : ℝ} (ht : 0 < t) : genExpIntE 1 t = (eiTr_e t : ℂ) :=
   genExpIntE_one_eq_Ein ht
 
 /-- Derivative of the real `E₁`: `-e^{-x}/x` for `x > 0`. -/
-lemma eiTr_hasDerivAt_e {x : ℝ} (hx : 0 < x) : HasDerivAt eiTr_e (-Real.exp (-x) / x) x := by
+theorem eiTr_hasDerivAt_e {x : ℝ} (hx : 0 < x) : HasDerivAt eiTr_e (-Real.exp (-x) / x) x := by
   have := ((liPV_hasDerivAt_ein hx.ne').sub (Real.hasDerivAt_log hx.ne')).sub_const
     Real.eulerMascheroniConstant
   refine this.congr_deriv ?_
   field_simp; ring
 
 /-- `0 ≤ E₁(t) ≤ e^{-t}/t` for `t > 0`. -/
-lemma eiTr_e_bounds {t : ℝ} (ht : 0 < t) : 0 ≤ eiTr_e t ∧ eiTr_e t ≤ Real.exp (-t) / t := by
+theorem eiTr_e_bounds {t : ℝ} (ht : 0 < t) : 0 ≤ eiTr_e t ∧ eiTr_e t ≤ Real.exp (-t) / t := by
   have h := genExpIntE_one_eq_integral ht
   rw [eiTr_E1_ofReal ht, ofReal_inj] at h
   rw [h]
@@ -1242,7 +1240,7 @@ lemma eiTr_e_bounds {t : ℝ} (ht : 0 < t) : 0 ≤ eiTr_e t ∧ eiTr_e t ≤ Rea
 
 
 /-- `|Ein(t)| ≤ 1` for `0 ≤ t ≤ 1`. -/
-lemma eiTr_abs_expIntEin_le {t : ℝ} (ht : 0 ≤ t) (ht1 : t ≤ 1) : |Real.expIntEin t| ≤ 1 := by
+theorem eiTr_abs_expIntEin_le {t : ℝ} (ht : 0 ≤ t) (ht1 : t ≤ 1) : |Real.expIntEin t| ≤ 1 := by
   have h := intervalIntegral.norm_integral_le_of_norm_le_const (a := 0) (b := t) (C := 1)
     (f := fun s : ℝ => (1 - Real.exp (-s)) / s) (fun s hs => ?_)
   · rw [Real.expIntEin, ← Real.norm_eq_abs]
@@ -1256,7 +1254,7 @@ lemma eiTr_abs_expIntEin_le {t : ℝ} (ht : 0 ≤ t) (ht1 : t ≤ 1) : |Real.exp
     linarith
 
 /-- `|E₁(t)| ≤ 2 + 4 t^{-1/4}` for `0 < t ≤ 1`. -/
-lemma eiTr_abs_e_le_small {t : ℝ} (ht : 0 < t) (ht1 : t ≤ 1) :
+theorem eiTr_abs_e_le_small {t : ℝ} (ht : 0 < t) (ht1 : t ≤ 1) :
     |eiTr_e t| ≤ 2 + 4 * t ^ (-(1/4:ℝ)) := by
   have h1 := eiTr_abs_expIntEin_le ht.le ht1
   have h2 := eiTr_abs_log_le ht ht1
@@ -1272,7 +1270,7 @@ lemma eiTr_abs_e_le_small {t : ℝ} (ht : 0 < t) (ht1 : t ≤ 1) :
         rw [abs_of_pos (by linarith : (0:ℝ) < Real.eulerMascheroniConstant)]; linarith
 
 /-- `|E₁(t)| ≤ 1/t` for `t ≥ 1`. -/
-lemma eiTr_e_le_recip {t : ℝ} (ht : 1 ≤ t) : |eiTr_e t| ≤ 1 / t := by
+theorem eiTr_e_le_recip {t : ℝ} (ht : 1 ≤ t) : |eiTr_e t| ≤ 1 / t := by
   have ht0 : 0 < t := by linarith
   obtain ⟨h1, h2⟩ := eiTr_e_bounds ht0
   rw [abs_of_nonneg h1]
@@ -1280,12 +1278,12 @@ lemma eiTr_e_le_recip {t : ℝ} (ht : 1 ≤ t) : |eiTr_e t| ≤ 1 / t := by
   exact Real.exp_le_one_iff.2 (by linarith)
 
 /-- The real `E₁` is measurable. -/
-lemma eiTr_measurable_e : Measurable eiTr_e := by
+theorem eiTr_measurable_e : Measurable eiTr_e := by
   unfold eiTr_e
   exact (eiTr_continuous_expIntEin.measurable.sub Real.measurable_log).sub_const _
 
 /-- `E₁²` is integrable on `(0, ∞)`. -/
-lemma eiTr_integrableOn_e_sq : IntegrableOn (fun t => eiTr_e t ^ 2) (Ioi 0) := by
+theorem eiTr_integrableOn_e_sq : IntegrableOn (fun t => eiTr_e t ^ 2) (Ioi 0) := by
   refine eiTr_integrableOn_Ioi_of_bound (A := 4) (B := 32) (C := 1)
     (eiTr_measurable_e.pow_const 2).aestronglyMeasurable (fun t ht => ?_) (fun t ht => ?_)
   · have h := eiTr_abs_e_le_small ht.1 ht.2
@@ -1303,7 +1301,7 @@ lemma eiTr_integrableOn_e_sq : IntegrableOn (fun t => eiTr_e t ^ 2) (Ioi 0) := b
       _ = 1 / t ^ 2 := by ring
 
 /-- `e^{-t} E₁(t)` is integrable on `(0, ∞)`. -/
-lemma eiTr_integrableOn_exp_mul_e :
+theorem eiTr_integrableOn_exp_mul_e :
     IntegrableOn (fun t => Real.exp (-t) * eiTr_e t) (Ioi 0) := by
   refine eiTr_integrableOn_Ioi_of_bound (A := 2) (B := 4) (C := 1)
     ((Real.continuous_exp.comp continuous_neg).measurable.mul eiTr_measurable_e).aestronglyMeasurable
@@ -1326,7 +1324,7 @@ lemma eiTr_integrableOn_exp_mul_e :
       _ = 1 / t ^ 2 := by ring
 
 /-- `t (c(t) + log t)² → 0` as `t → 0⁺` for continuous `c`. -/
-lemma eiTr_tendsto_mul_sq_add_log {c : ℝ → ℝ} (hc : Continuous c) (σ : ℝ) :
+theorem eiTr_tendsto_mul_sq_add_log {c : ℝ → ℝ} (hc : Continuous c) (σ : ℝ) :
     Tendsto (fun t => t * (c t + σ * Real.log t) ^ 2) (𝓝[>] 0) (𝓝 0) := by
   have e : ∀ t, 0 < t → t * (c t + σ * Real.log t) ^ 2 =
       t * c t ^ 2 + 2 * σ * c t * (t * Real.log t) + σ ^ 2 * (Real.log t * t ^ (1/2:ℝ)) ^ 2 := by
@@ -1348,7 +1346,7 @@ lemma eiTr_tendsto_mul_sq_add_log {c : ℝ → ℝ} (hc : Continuous c) (σ : �
   exact (e t ht).symm
 
 /-- `∫₀^∞ E₁(t)² dt = 2 log 2`. -/
-lemma eiTr_integral_e_sq : ∫ t in Ioi (0:ℝ), eiTr_e t ^ 2 = 2 * Real.log 2 := by
+theorem eiTr_integral_e_sq : ∫ t in Ioi (0:ℝ), eiTr_e t ^ 2 = 2 * Real.log 2 := by
   have hF0 : ContinuousWithinAt (fun t => t * eiTr_e t ^ 2) (Ici 0) 0 := by
     rw [← continuousWithinAt_Ioi_iff_Ici, ContinuousWithinAt]
     have := eiTr_tendsto_mul_sq_add_log (c := fun t => Real.expIntEin t - Real.eulerMascheroniConstant)
@@ -1391,7 +1389,7 @@ lemma eiTr_integral_e_sq : ∫ t in Ioi (0:ℝ), eiTr_e t ^ 2 = 2 * Real.log 2 :
   linarith
 
 /-- `e^y - 1 ≥ y e^{y/2}` for `y ≥ 0`. -/
-lemma eiTr_exp_sub_one_ge {y : ℝ} (hy : 0 ≤ y) : y * Real.exp (y / 2) ≤ Real.exp y - 1 := by
+theorem eiTr_exp_sub_one_ge {y : ℝ} (hy : 0 ≤ y) : y * Real.exp (y / 2) ≤ Real.exp y - 1 := by
   have h := Real.self_le_sinh_iff.2 (by linarith : 0 ≤ y / 2)
   rw [Real.sinh_eq] at h
   have e1 : Real.exp y = Real.exp (y / 2) * Real.exp (y / 2) := by
@@ -1402,11 +1400,11 @@ lemma eiTr_exp_sub_one_ge {y : ℝ} (hy : 0 ≤ y) : y * Real.exp (y / 2) ≤ Re
   nlinarith
 
 /-- `e^y - 1 > 0` for `y > 0`. -/
-lemma eiTr_exp_sub_one_pos {y : ℝ} (hy : 0 < y) : 0 < Real.exp y - 1 :=
+theorem eiTr_exp_sub_one_pos {y : ℝ} (hy : 0 < y) : 0 < Real.exp y - 1 :=
   sub_pos.2 (Real.one_lt_exp_iff.2 hy)
 
 /-- Integrability of the Binet kernel `t/((t²+x²)(e^{ct} - 1))` on `(0, ∞)`. -/
-lemma eiTr_integrableOn_K {c x : ℝ} (hc : 0 < c) (hx : 0 < x) :
+theorem eiTr_integrableOn_K {c x : ℝ} (hc : 0 < c) (hx : 0 < x) :
     IntegrableOn (fun t => t / ((t ^ 2 + x ^ 2) * (Real.exp (c * t) - 1))) (Ioi 0) := by
   have hi : IntegrableOn (fun t : ℝ => (1 / (c * x ^ 2)) * Real.exp (-(c / 2) * t)) (Ioi 0) :=
     (exp_neg_integrableOn_Ioi 0 (by positivity : 0 < c / 2)).const_mul _
@@ -1432,7 +1430,7 @@ lemma eiTr_integrableOn_K {c x : ℝ} (hc : 0 < c) (hx : 0 < x) :
           · nlinarith
 
 /-- Binet-kernel integral via the digamma function (DLMF 5.9.15, `DLMF.Gamma.digamma_coth`). -/
-lemma eiTr_K_eq {c x : ℝ} (hc : 0 < c) (hx : 0 < x) :
+theorem eiTr_K_eq {c x : ℝ} (hc : 0 < c) (hx : 0 < x) :
     ∫ t in Ioi (0:ℝ), t / ((t ^ 2 + x ^ 2) * (Real.exp (c * t) - 1)) =
       (Real.log (x * c / (2 * π)) - 1 / (2 * (x * c / (2 * π))) -
         Real.digamma (x * c / (2 * π))) / 2 := by
@@ -1457,7 +1455,7 @@ lemma eiTr_K_eq {c x : ℝ} (hc : 0 < c) (hx : 0 < x) :
   linarith
 
 /-- `ψ(2) = 1 - γ`. -/
-lemma eiTr_digamma_two : Real.digamma 2 = 1 - Real.eulerMascheroniConstant := by
+theorem eiTr_digamma_two : Real.digamma 2 = 1 - Real.eulerMascheroniConstant := by
   have := Real.digamma_add_one (x := 1) one_pos
   norm_num at this
   rw [this, Real.digamma_one]; ring
@@ -1466,13 +1464,13 @@ lemma eiTr_digamma_two : Real.digamma 2 = 1 - Real.eulerMascheroniConstant := by
 noncomputable def eiTr_g (x : ℝ) : ℝ := ∫ u in Ioi (0:ℝ), u * Real.exp (-x * u) / (u ^ 2 + 1)
 
 /-- The auxiliary function `g(x)` is real for `x > 0` and equals `eiTr_g x`. -/
-lemma eiTr_auxG_ofReal {x : ℝ} (hx : 0 < x) : expIntAuxG x = (eiTr_g x : ℂ) := by
+theorem eiTr_auxG_ofReal {x : ℝ} (hx : 0 < x) : expIntAuxG x = (eiTr_g x : ℂ) := by
   rw [(expIntAux_ofReal_laplace_Ioi hx).2, eiTr_g, ← integral_complex_ofReal]
   refine setIntegral_congr_fun measurableSet_Ioi fun u _ => ?_
   push_cast; ring_nf
 
 /-- `Ci(x) = -g(x) cos x` when `sin x = 0`, `x > 0`. -/
-lemma eiTr_cosInt_of_sin_eq_zero {x : ℝ} (hx : 0 < x) (hs : Real.sin x = 0) :
+theorem eiTr_cosInt_of_sin_eq_zero {x : ℝ} (hx : 0 < x) (hs : Real.sin x = 0) :
     Real.cosInt x = -eiTr_g x * Real.cos x := by
   have h := cosInt_eq_aux (x:ℂ)
   rw [cosInt_ofReal hx, eiTr_auxG_ofReal hx, ← ofReal_sin, hs, ← ofReal_cos] at h
@@ -1481,7 +1479,7 @@ lemma eiTr_cosInt_of_sin_eq_zero {x : ℝ} (hx : 0 < x) (hs : Real.sin x = 0) :
   exact_mod_cast this
 
 /-- `0 ≤ g(x) ≤ 1/x²` for `x > 0`. -/
-lemma eiTr_g_nonneg_le {x : ℝ} (hx : 0 < x) : 0 ≤ eiTr_g x ∧ eiTr_g x ≤ 1 / x ^ 2 := by
+theorem eiTr_g_nonneg_le {x : ℝ} (hx : 0 < x) : 0 ≤ eiTr_g x ∧ eiTr_g x ≤ 1 / x ^ 2 := by
   have hb := DLMF.Gamma.integrableOn_mul_exp_neg_mul hx
   constructor
   · refine setIntegral_nonneg measurableSet_Ioi fun u hu => ?_
@@ -1500,7 +1498,7 @@ lemma eiTr_g_nonneg_le {x : ℝ} (hx : 0 < x) : 0 ≤ eiTr_g x ∧ eiTr_g x ≤ 
 
 /-- Alternating sum `Σ (-1)ⁿ g(c(n+1))` as a Fermi-type integral, via the Laplace representation
   of `g`. -/
-lemma eiTr_hasSum_g {c : ℝ} (hc : 0 < c) :
+theorem eiTr_hasSum_g {c : ℝ} (hc : 0 < c) :
     HasSum (fun n : ℕ => (-1) ^ n * eiTr_g (c * (n + 1)))
       (∫ u in Ioi (0:ℝ), u / ((u ^ 2 + 1) * (Real.exp (c * u) + 1))) := by
   set F : ℕ → ℝ → ℝ := fun n u => (-1) ^ n * (u * Real.exp (-(c * (n + 1)) * u) / (u ^ 2 + 1))
@@ -1557,7 +1555,7 @@ lemma eiTr_hasSum_g {c : ℝ} (hc : 0 < c) :
   field_simp
 
 /-- Rewrite of the Fermi-type kernel in terms of two Bose-type (Binet) kernels. -/
-lemma eiTr_integral_fermi {c : ℝ} (hc : 0 < c) :
+theorem eiTr_integral_fermi {c : ℝ} (hc : 0 < c) :
     ∫ u in Ioi (0:ℝ), u / ((u ^ 2 + 1) * (Real.exp (c * u) + 1)) =
       (∫ u in Ioi (0:ℝ), u / ((u ^ 2 + 1 ^ 2) * (Real.exp (c * u) - 1))) -
         2 * ∫ u in Ioi (0:ℝ), u / ((u ^ 2 + 1 ^ 2) * (Real.exp ((2 * c) * u) - 1)) := by
@@ -1582,13 +1580,13 @@ lemma eiTr_integral_fermi {c : ℝ} (hc : 0 < c) :
 noncomputable def eiTr_f (x : ℝ) : ℝ := ∫ u in Ioi (0:ℝ), Real.exp (-x * u) / (u ^ 2 + 1)
 
 /-- The auxiliary function `f(x)` is real for `x > 0` and equals `eiTr_f x`. -/
-lemma eiTr_auxF_ofReal {x : ℝ} (hx : 0 < x) : expIntAuxF x = (eiTr_f x : ℂ) := by
+theorem eiTr_auxF_ofReal {x : ℝ} (hx : 0 < x) : expIntAuxF x = (eiTr_f x : ℂ) := by
   rw [(expIntAux_ofReal_laplace_Ioi hx).1, eiTr_f, ← integral_complex_ofReal]
   refine setIntegral_congr_fun measurableSet_Ioi fun u _ => ?_
   push_cast; ring_nf
 
 /-- `Si(x) - π/2 = -f(x) cos x` when `sin x = 0`, `x > 0`. -/
-lemma eiTr_sinIntTail_of_sin_eq_zero {x : ℝ} (hx : 0 < x) (hs : Real.sin x = 0) :
+theorem eiTr_sinIntTail_of_sin_eq_zero {x : ℝ} (hx : 0 < x) (hs : Real.sin x = 0) :
     Real.sinInt x - π / 2 = -eiTr_f x * Real.cos x := by
   have h := sinInt_eq_aux (x:ℂ)
   rw [sinInt_ofReal, eiTr_auxF_ofReal hx, ← ofReal_sin, hs, ofReal_zero, mul_zero, sub_zero] at h
@@ -1597,7 +1595,7 @@ lemma eiTr_sinIntTail_of_sin_eq_zero {x : ℝ} (hx : 0 < x) (hs : Real.sin x = 0
   exact_mod_cast this
 
 /-- Integrability of `e^{-xu}/(u²+1)` on `(0, ∞)` for `x > 0`. -/
-lemma eiTr_integrableOn_f_kernel {x : ℝ} (hx : 0 < x) :
+theorem eiTr_integrableOn_f_kernel {x : ℝ} (hx : 0 < x) :
     IntegrableOn (fun u : ℝ => Real.exp (-x * u) / (u ^ 2 + 1)) (Ioi 0) := by
   refine (exp_neg_integrableOn_Ioi 0 hx).mono' ((Continuous.div (by fun_prop) (by fun_prop)
     (fun u => by positivity)).aestronglyMeasurable) (Eventually.of_forall fun u => ?_)
@@ -1605,7 +1603,7 @@ lemma eiTr_integrableOn_f_kernel {x : ℝ} (hx : 0 < x) :
   exact div_le_self (by positivity) (by nlinarith [sq_nonneg u])
 
 /-- `0 ≤ f(x) ≤ 1/x` for `x > 0`. -/
-lemma eiTr_f_nonneg_le {x : ℝ} (hx : 0 < x) : 0 ≤ eiTr_f x ∧ eiTr_f x ≤ 1 / x := by
+theorem eiTr_f_nonneg_le {x : ℝ} (hx : 0 < x) : 0 ≤ eiTr_f x ∧ eiTr_f x ≤ 1 / x := by
   have hb := exp_neg_integrableOn_Ioi 0 hx
   constructor
   · exact setIntegral_nonneg measurableSet_Ioi fun u _ => by positivity
@@ -1618,7 +1616,7 @@ lemma eiTr_f_nonneg_le {x : ℝ} (hx : 0 < x) : 0 ≤ eiTr_f x ∧ eiTr_f x ≤ 
       div_le_self (by positivity) (by nlinarith [sq_nonneg u])
 
 /-- Alternating sum `Σ (-1)ⁿ f(c(n+1))/(n+1)` as an integral of `log(1 + e^{-cu})/(u²+1)`. -/
-lemma eiTr_hasSum_f {c : ℝ} (hc : 0 < c) :
+theorem eiTr_hasSum_f {c : ℝ} (hc : 0 < c) :
     HasSum (fun n : ℕ => (-1) ^ n * eiTr_f (c * (n + 1)) / (n + 1))
       (∫ u in Ioi (0:ℝ), Real.log (1 + Real.exp (-(c * u))) / (u ^ 2 + 1)) := by
   set F : ℕ → ℝ → ℝ := fun n u =>
@@ -1671,14 +1669,14 @@ lemma eiTr_hasSum_f {c : ℝ} (hc : 0 < c) :
 
 
 /-- `0 ≤ log(1 + e^{-y}) ≤ e^{-y}`. -/
-lemma eiTr_log_one_add_exp_le (y : ℝ) :
+theorem eiTr_log_one_add_exp_le (y : ℝ) :
     0 ≤ Real.log (1 + Real.exp (-y)) ∧ Real.log (1 + Real.exp (-y)) ≤ Real.exp (-y) := by
   have hp := Real.exp_pos (-y)
   exact ⟨Real.log_nonneg (by linarith), by
     have := Real.log_le_sub_one_of_pos (by linarith : 0 < 1 + Real.exp (-y)); linarith⟩
 
 /-- Integration by parts: `∫₀^∞ log(1+e^{-cu})/(u²+1) du = c ∫₀^∞ arctan u/(e^{cu}+1) du`. -/
-lemma eiTr_integral_log_eq {c : ℝ} (hc : 0 < c) :
+theorem eiTr_integral_log_eq {c : ℝ} (hc : 0 < c) :
     ∫ u in Ioi (0:ℝ), Real.log (1 + Real.exp (-(c * u))) / (u ^ 2 + 1) =
       c * ∫ u in Ioi (0:ℝ), Real.arctan u / (Real.exp (c * u) + 1) := by
   have he := exp_neg_integrableOn_Ioi 0 hc
@@ -1740,7 +1738,7 @@ lemma eiTr_integral_log_eq {c : ℝ} (hc : 0 < c) :
   linarith
 
 /-- Integrability of `arctan u/(e^{cu} - 1)` on `(0, ∞)`. -/
-lemma eiTr_integrableOn_arctanK {c : ℝ} (hc : 0 < c) :
+theorem eiTr_integrableOn_arctanK {c : ℝ} (hc : 0 < c) :
     IntegrableOn (fun u => Real.arctan u / (Real.exp (c * u) - 1)) (Ioi 0) := by
   have hi : IntegrableOn (fun t : ℝ => (1 / c) * Real.exp (-(c / 2) * t)) (Ioi 0) :=
     (exp_neg_integrableOn_Ioi 0 (by positivity : 0 < c / 2)).const_mul _
@@ -1767,7 +1765,7 @@ lemma eiTr_integrableOn_arctanK {c : ℝ} (hc : 0 < c) :
       _ ≤ (1 / c) * (Real.exp (c * t / 2))⁻¹ * (Real.exp (c * t) - 1) := by gcongr
 
 /-- Binet's second formula (DLMF 5.9.10, `DLMF.Gamma.log_Gamma_binet_arctan`) in rescaled form. -/
-lemma eiTr_arctanK_eq {c : ℝ} (hc : 0 < c) :
+theorem eiTr_arctanK_eq {c : ℝ} (hc : 0 < c) :
     ∫ u in Ioi (0:ℝ), Real.arctan u / (Real.exp (c * u) - 1) =
       2 * π / c * ((Real.log (Real.Gamma (c / (2 * π))) - (c / (2 * π) - 1 / 2) *
         Real.log (c / (2 * π)) + c / (2 * π) - 1 / 2 * Real.log (2 * π)) / 2) := by
@@ -1792,7 +1790,7 @@ lemma eiTr_arctanK_eq {c : ℝ} (hc : 0 < c) :
   linarith
 
 /-- `∫₀^∞ log(1+e^{-cu})/(u²+1) du` through Binet's second formula. -/
-lemma eiTr_integral_log_eq' {c : ℝ} (hc : 0 < c) :
+theorem eiTr_integral_log_eq' {c : ℝ} (hc : 0 < c) :
     ∫ u in Ioi (0:ℝ), Real.log (1 + Real.exp (-(c * u))) / (u ^ 2 + 1) =
       c * ((∫ u in Ioi (0:ℝ), Real.arctan u / (Real.exp (c * u) - 1)) -
         2 * ∫ u in Ioi (0:ℝ), Real.arctan u / (Real.exp ((2 * c) * u) - 1)) := by

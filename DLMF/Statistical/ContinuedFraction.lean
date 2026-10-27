@@ -5,10 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Statistical.IncompleteGamma
 public import DLMF.Confluent.TricomiRotated
 public import Mathlib.Algebra.ContinuedFractions.ContinuantsRecurrence
-public import Mathlib.Algebra.ContinuedFractions.Translations
+public import DLMF.Confluent.IncompleteGamma
 
 /-!
 # The continued fraction for `Γ(a,x)` (Temme §11.2.2; DLMF 8.9.2)
@@ -50,14 +49,14 @@ def gammaTail (x σ : ℝ) (m : ℕ) : ℝ :=
   ∫ t in Ioi (0 : ℝ), t ^ m * (1 + t) ^ σ * Real.exp (-x * t)
 
 /-- `(1+t)^σ ≤ (1+t)^{⌈|σ|⌉}` for `t ≥ 0`. -/
-lemma one_add_rpow_le_pow {t : ℝ} (ht : 0 ≤ t) (σ : ℝ) :
+theorem one_add_rpow_le_pow {t : ℝ} (ht : 0 ≤ t) (σ : ℝ) :
     (1 + t) ^ σ ≤ (1 + t) ^ (⌈|σ|⌉₊ : ℕ) := by
   rw [← Real.rpow_natCast]
   exact Real.rpow_le_rpow_of_exponent_le (by linarith)
     ((le_abs_self σ).trans (Nat.le_ceil _))
 
 /-- The tail integrands are integrable on `(0, ∞)` for `x > 0`. -/
-lemma integrableOn_gammaTail {x : ℝ} (hx : 0 < x) (σ : ℝ) (m : ℕ) :
+theorem integrableOn_gammaTail {x : ℝ} (hx : 0 < x) (σ : ℝ) (m : ℕ) :
     IntegrableOn (fun t : ℝ => t ^ m * (1 + t) ^ σ * Real.exp (-x * t)) (Ioi 0) := by
   have h := DLMF.Confluent.integrableOn_exp_mul_rpow_mul_one_add_pow (s := (m : ℝ))
     (by have := m.cast_nonneg (α := ℝ); linarith) hx ⌈|σ|⌉₊
@@ -76,7 +75,7 @@ lemma integrableOn_gammaTail {x : ℝ} (hx : 0 < x) (σ : ℝ) (m : ℕ) :
     nlinarith
 
 /-- The tail integrals are positive. -/
-lemma gammaTail_pos {x : ℝ} (hx : 0 < x) (σ : ℝ) (m : ℕ) : 0 < gammaTail x σ m := by
+theorem gammaTail_pos {x : ℝ} (hx : 0 < x) (σ : ℝ) (m : ℕ) : 0 < gammaTail x σ m := by
   have hpos : ∀ t ∈ Ioi (0 : ℝ), 0 < t ^ m * (1 + t) ^ σ * Real.exp (-x * t) := by
     intro t ht
     have ht0 : (0 : ℝ) < t := ht
@@ -93,7 +92,7 @@ lemma gammaTail_pos {x : ℝ} (hx : 0 < x) (σ : ℝ) (m : ℕ) : 0 < gammaTail 
 
 
 /-- The boundary term `t^m (1+t)^σ e^{-xt}` vanishes at infinity. -/
-lemma tendsto_gammaTail_boundary_atTop {x : ℝ} (hx : 0 < x) (σ : ℝ) (m : ℕ) :
+theorem tendsto_gammaTail_boundary_atTop {x : ℝ} (hx : 0 < x) (σ : ℝ) (m : ℕ) :
     Tendsto (fun t : ℝ => t ^ m * (1 + t) ^ σ * Real.exp (-x * t)) atTop (𝓝 0) := by
   set N := ⌈|σ|⌉₊
   have h := (tendsto_rpow_mul_exp_neg_mul_atTop_nhds_zero ((m + N : ℕ) : ℝ) x hx).const_mul
@@ -113,7 +112,7 @@ lemma tendsto_gammaTail_boundary_atTop {x : ℝ} (hx : 0 < x) (σ : ℝ) (m : �
     _ = 2 ^ N * (t ^ m * t ^ N * Real.exp (-x * t)) := by ring
 
 /-- Integration by parts: `x J_m(σ) = 0^m + m J_{m-1}(σ) + σ J_m(σ-1)`. -/
-lemma gammaTail_ibp {x : ℝ} (hx : 0 < x) (σ : ℝ) (m : ℕ) :
+theorem gammaTail_ibp {x : ℝ} (hx : 0 < x) (σ : ℝ) (m : ℕ) :
     x * gammaTail x σ m = (0 : ℝ) ^ m + m * gammaTail x σ (m - 1) + σ * gammaTail x (σ - 1) m := by
   set u : ℝ → ℝ := fun t => t ^ m * (1 + t) ^ σ
   set u' : ℝ → ℝ := fun t => m * t ^ (m - 1) * (1 + t) ^ σ + t ^ m * (σ * (1 + t) ^ (σ - 1))
@@ -171,7 +170,7 @@ lemma gammaTail_ibp {x : ℝ} (hx : 0 < x) (σ : ℝ) (m : ℕ) :
 
 
 /-- The shift `s = 1 + t` on `(1, ∞)`. -/
-lemma integral_Ioi_one_eq_shift {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+theorem integral_Ioi_one_eq_shift {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     (g : ℝ → E) : ∫ s in Ioi (1 : ℝ), g s = ∫ t in Ioi (0 : ℝ), g (1 + t) := by
   rw [← integral_indicator measurableSet_Ioi, ← integral_indicator measurableSet_Ioi]
   have h : ∀ t : ℝ, (Ioi (0 : ℝ)).indicator (fun t => g (1 + t)) t =
@@ -212,29 +211,29 @@ def posContFract (a b : ℕ → ℝ) : GenContFract ℝ where
   s := Stream'.Seq.ofStream fun k => ⟨a k, b k⟩
 
 /-- `A₀ = 0`. -/
-lemma posContFract_nums_zero (a b : ℕ → ℝ) : (posContFract a b).nums 0 = 0 := rfl
+theorem posContFract_nums_zero (a b : ℕ → ℝ) : (posContFract a b).nums 0 = 0 := rfl
 /-- `B₀ = 1`. -/
-lemma posContFract_dens_zero (a b : ℕ → ℝ) : (posContFract a b).dens 0 = 1 :=
+theorem posContFract_dens_zero (a b : ℕ → ℝ) : (posContFract a b).dens 0 = 1 :=
   GenContFract.zeroth_den_eq_one
 
 /-- `A₁ = a₀`. -/
-lemma posContFract_nums_one (a b : ℕ → ℝ) : (posContFract a b).nums 1 = a 0 := by
+theorem posContFract_nums_one (a b : ℕ → ℝ) : (posContFract a b).nums 1 = a 0 := by
   rw [GenContFract.first_num_eq (g := posContFract a b) (gp := ⟨a 0, b 0⟩) rfl]
   simp [posContFract]
 
 /-- `B₁ = b₀`. -/
-lemma posContFract_dens_one (a b : ℕ → ℝ) : (posContFract a b).dens 1 = b 0 :=
+theorem posContFract_dens_one (a b : ℕ → ℝ) : (posContFract a b).dens 1 = b 0 :=
   GenContFract.first_den_eq (g := posContFract a b) (gp := ⟨a 0, b 0⟩) rfl
 
 /-- The numerator recurrence. -/
-lemma posContFract_nums_step (a b : ℕ → ℝ) (n : ℕ) :
+theorem posContFract_nums_step (a b : ℕ → ℝ) (n : ℕ) :
     (posContFract a b).nums (n + 2) =
       b (n + 1) * (posContFract a b).nums (n + 1) + a (n + 1) * (posContFract a b).nums n :=
   GenContFract.nums_recurrence (g := posContFract a b) (n := n)
     (gp := ⟨a (n + 1), b (n + 1)⟩) rfl rfl rfl
 
 /-- The denominator recurrence. -/
-lemma posContFract_dens_step (a b : ℕ → ℝ) (n : ℕ) :
+theorem posContFract_dens_step (a b : ℕ → ℝ) (n : ℕ) :
     (posContFract a b).dens (n + 2) =
       b (n + 1) * (posContFract a b).dens (n + 1) + a (n + 1) * (posContFract a b).dens n :=
   GenContFract.dens_recurrence (g := posContFract a b) (n := n)
@@ -248,7 +247,7 @@ variable {a b w : ℕ → ℝ}
 
 /-- Pincherle-type invariants: a backward solution `w` of the recurrence pairs with the
 numerators and denominators. -/
-lemma posContFract_invariant (hw : ∀ k, w k = b k * w (k + 1) + a (k + 1) * w (k + 2))
+theorem posContFract_invariant (hw : ∀ k, w k = b k * w (k + 1) + a (k + 1) * w (k + 2))
     (m : ℕ) :
     (posContFract a b).nums (m + 1) * w (m + 1) +
         a (m + 1) * (posContFract a b).nums m * w (m + 2) = a 0 * w 1 ∧
@@ -266,7 +265,7 @@ lemma posContFract_invariant (hw : ∀ k, w k = b k * w (k + 1) + a (k + 1) * w 
     · rw [← ih.2, hw (m + 1)]; ring
 
 /-- The determinant formula `N_{m+1} D_m - D_{m+1} N_m = (-1)^m ∏_{k ≤ m} a_k`. -/
-lemma posContFract_det (m : ℕ) :
+theorem posContFract_det (m : ℕ) :
     (posContFract a b).nums (m + 1) * (posContFract a b).dens m -
         (posContFract a b).dens (m + 1) * (posContFract a b).nums m =
       (-1) ^ m * ∏ k ∈ Finset.range (m + 1), a k := by
@@ -280,7 +279,7 @@ lemma posContFract_det (m : ℕ) :
     linear_combination (-a (m + 1)) * ih
 
 /-- With positive elements the denominators are positive. -/
-lemma posContFract_dens_pos (ha : ∀ k, 0 < a k) (hb : ∀ k, 0 < b k) (m : ℕ) :
+theorem posContFract_dens_pos (ha : ∀ k, 0 < a k) (hb : ∀ k, 0 < b k) (m : ℕ) :
     0 < (posContFract a b).dens m := by
   induction m using Nat.strong_induction_on with
   | _ m ih =>
@@ -295,7 +294,7 @@ lemma posContFract_dens_pos (ha : ∀ k, 0 < a k) (hb : ∀ k, 0 < b k) (m : ℕ
       positivity
 
 /-- The error of the `(m+1)`-st convergent is at most `∏_{k ≤ m} a_k / (D_{m+1} D_m)`. -/
-lemma posContFract_error (ha : ∀ k, 0 < a k) (hb : ∀ k, 0 < b k) (hwpos : ∀ k, 0 < w k)
+theorem posContFract_error (ha : ∀ k, 0 < a k) (hb : ∀ k, 0 < b k) (hwpos : ∀ k, 0 < w k)
     (hw : ∀ k, w k = b k * w (k + 1) + a (k + 1) * w (k + 2)) (m : ℕ) :
     |a 0 * w 1 / w 0 - (posContFract a b).nums (m + 1) / (posContFract a b).dens (m + 1)| ≤
       (∏ k ∈ Finset.range (m + 1), a k) /
@@ -330,7 +329,7 @@ lemma posContFract_error (ha : ∀ k, 0 < a k) (hb : ∀ k, 0 < b k) (hwpos : �
 
 /-- **Seidel–Stern growth**: if `q_{n+2} = β_{n+1} q_{n+1} + q_n` with `β ≥ 0`, `q₀, q₁ > 0` and
 `∑ βₙ = ∞`, then `q_{n+1} q_n → ∞`. -/
-lemma tendsto_mul_of_seidelStern {q β : ℕ → ℝ} (hβ : ∀ n, 0 ≤ β n) (hq0 : 0 < q 0)
+theorem tendsto_mul_of_seidelStern {q β : ℕ → ℝ} (hβ : ∀ n, 0 ≤ β n) (hq0 : 0 < q 0)
     (hq1 : 0 < q 1) (hrec : ∀ n, q (n + 2) = β (n + 1) * q (n + 1) + q n)
     (hdiv : Tendsto (fun n => ∑ k ∈ Finset.range n, β k) atTop atTop) :
     Tendsto (fun n => q (n + 1) * q n) atTop atTop := by
@@ -375,7 +374,7 @@ def cfScale (a : ℕ → ℝ) : ℕ → ℝ
   | n + 2 => a (n + 1) * cfScale a n
 
 /-- The scaling is positive for positive partial numerators. -/
-lemma cfScale_pos (ha : ∀ k, 0 < a k) (n : ℕ) : 0 < cfScale a n := by
+theorem cfScale_pos (ha : ∀ k, 0 < a k) (n : ℕ) : 0 < cfScale a n := by
   induction n using Nat.strong_induction_on with
   | _ n ih =>
     rcases n with _ | _ | n
@@ -384,7 +383,7 @@ lemma cfScale_pos (ha : ∀ k, 0 < a k) (n : ℕ) : 0 < cfScale a n := by
     · have := ih n (by omega); have := ha (n + 1); simp only [cfScale]; positivity
 
 /-- `d_{m+1} d_m = ∏_{k ≤ m} a_k`. -/
-lemma cfScale_mul (a : ℕ → ℝ) (m : ℕ) :
+theorem cfScale_mul (a : ℕ → ℝ) (m : ℕ) :
     cfScale a (m + 1) * cfScale a m = ∏ k ∈ Finset.range (m + 1), a k := by
   induction m with
   | zero => simp [cfScale]
@@ -438,7 +437,7 @@ end General
 /-! ### The continued fraction for `Γ(a,x)` -/
 
 /-- `J_n(σ) = J_n(σ-1) + J_{n+1}(σ-1)`, from `(1+t)^σ = (1+t)^{σ-1}(1+t)`. -/
-lemma gammaTail_split {x : ℝ} (hx : 0 < x) (σ : ℝ) (n : ℕ) :
+theorem gammaTail_split {x : ℝ} (hx : 0 < x) (σ : ℝ) (n : ℕ) :
     gammaTail x σ n = gammaTail x (σ - 1) n + gammaTail x (σ - 1) (n + 1) := by
   rw [gammaTail, gammaTail, gammaTail, ← integral_add (integrableOn_gammaTail hx _ _)
     (integrableOn_gammaTail hx _ _)]
@@ -468,7 +467,7 @@ def gammaIncCFTail (α x : ℝ) : ℕ → ℝ
       else gammaTail x (α - 2 - (k / 2 : ℕ)) (k / 2) / (k / 2).factorial
 
 /-- The backward solution is positive. -/
-lemma gammaIncCFTail_pos {α x : ℝ} (hx : 0 < x) (k : ℕ) : 0 < gammaIncCFTail α x k := by
+theorem gammaIncCFTail_pos {α x : ℝ} (hx : 0 < x) (k : ℕ) : 0 < gammaIncCFTail α x k := by
   rcases k with _ | k
   · simp [gammaIncCFTail]
   · simp only [gammaIncCFTail]
@@ -476,42 +475,42 @@ lemma gammaIncCFTail_pos {α x : ℝ} (hx : 0 < x) (k : ℕ) : 0 < gammaIncCFTai
     split_ifs <;> exact div_pos (gammaTail_pos hx _ _) (by exact_mod_cast this)
 
 /-- `w_{2n+1} = J_n(a-1-n)/n!`. -/
-lemma gammaIncCFTail_even (α x : ℝ) (n : ℕ) :
+theorem gammaIncCFTail_even (α x : ℝ) (n : ℕ) :
     gammaIncCFTail α x (2 * n + 1) = gammaTail x (α - 1 - n) n / n.factorial := by
   simp only [gammaIncCFTail]
   rw [ite_eq_left_of_eq_true _ _ (eq_true (by omega)), show 2 * n / 2 = n by omega]
 
 /-- `w_{2n+2} = J_n(a-2-n)/n!`. -/
-lemma gammaIncCFTail_odd (α x : ℝ) (n : ℕ) :
+theorem gammaIncCFTail_odd (α x : ℝ) (n : ℕ) :
     gammaIncCFTail α x (2 * n + 2) = gammaTail x (α - 2 - n) n / n.factorial := by
   rw [show 2 * n + 2 = (2 * n + 1) + 1 by ring]
   simp only [gammaIncCFTail]
   rw [ite_eq_right_of_eq_false _ _ (eq_false (by omega)), show (2 * n + 1) / 2 = n by omega]
 
 /-- `a_{2n+1} = n+1-a`. -/
-lemma gammaIncCFNum_odd (α x : ℝ) (n : ℕ) : gammaIncCFNum α x (2 * n + 1) = n + 1 - α := by
+theorem gammaIncCFNum_odd (α x : ℝ) (n : ℕ) : gammaIncCFNum α x (2 * n + 1) = n + 1 - α := by
   simp only [gammaIncCFNum]
   rw [ite_eq_right_of_eq_false _ _ (eq_false (by omega)),
     ite_eq_left_of_eq_true _ _ (eq_true (by omega)), show (2 * n + 1) / 2 = n by omega]
 
 /-- `a_{2n+2} = n+1`. -/
-lemma gammaIncCFNum_even (α x : ℝ) (n : ℕ) : gammaIncCFNum α x (2 * n + 2) = n + 1 := by
+theorem gammaIncCFNum_even (α x : ℝ) (n : ℕ) : gammaIncCFNum α x (2 * n + 2) = n + 1 := by
   simp only [gammaIncCFNum]
   rw [ite_eq_right_of_eq_false _ _ (eq_false (by omega)),
     ite_eq_right_of_eq_false _ _ (eq_false (by omega)), show (2 * n + 2) / 2 = n + 1 by omega]
   push_cast; ring
 
 /-- `b_{2n} = x`. -/
-lemma gammaIncCFDen_even (x : ℝ) (n : ℕ) : gammaIncCFDen x (2 * n) = x := by
+theorem gammaIncCFDen_even (x : ℝ) (n : ℕ) : gammaIncCFDen x (2 * n) = x := by
   simp only [gammaIncCFDen]; rw [ite_eq_left_of_eq_true _ _ (eq_true (by omega))]
 
 /-- `b_{2n+1} = 1`. -/
-lemma gammaIncCFDen_odd (x : ℝ) (n : ℕ) : gammaIncCFDen x (2 * n + 1) = 1 := by
+theorem gammaIncCFDen_odd (x : ℝ) (n : ℕ) : gammaIncCFDen x (2 * n + 1) = 1 := by
   simp only [gammaIncCFDen]; rw [ite_eq_right_of_eq_false _ _ (eq_false (by omega))]
 
 /-- The backward recurrence `w_k = b_k w_{k+1} + a_{k+1} w_{k+2}`, from integration by parts
 and `(1+t)^σ = (1+t)^{σ-1}(1+t)`. -/
-lemma gammaIncCFTail_rec {α x : ℝ} (hx : 0 < x) (k : ℕ) :
+theorem gammaIncCFTail_rec {α x : ℝ} (hx : 0 < x) (k : ℕ) :
     gammaIncCFTail α x k = gammaIncCFDen x k * gammaIncCFTail α x (k + 1) +
       gammaIncCFNum α x (k + 1) * gammaIncCFTail α x (k + 2) := by
   rcases Nat.even_or_odd' k with ⟨n, rfl | rfl⟩
@@ -551,7 +550,7 @@ lemma gammaIncCFTail_rec {α x : ℝ} (hx : 0 < x) (k : ℕ) :
     linear_combination h
 
 /-- The partial numerators are positive for `a < 1`, `x > 0`. -/
-lemma gammaIncCFNum_pos {α x : ℝ} (hα : α < 1) (hx : 0 < x) (k : ℕ) : 0 < gammaIncCFNum α x k := by
+theorem gammaIncCFNum_pos {α x : ℝ} (hα : α < 1) (hx : 0 < x) (k : ℕ) : 0 < gammaIncCFNum α x k := by
   simp only [gammaIncCFNum]
   split_ifs with h0 h1
   · positivity
@@ -560,11 +559,11 @@ lemma gammaIncCFNum_pos {α x : ℝ} (hα : α < 1) (hx : 0 < x) (k : ℕ) : 0 <
     exact_mod_cast this
 
 /-- The partial denominators are positive. -/
-lemma gammaIncCFDen_pos {x : ℝ} (hx : 0 < x) (k : ℕ) : 0 < gammaIncCFDen x k := by
+theorem gammaIncCFDen_pos {x : ℝ} (hx : 0 < x) (k : ℕ) : 0 < gammaIncCFDen x k := by
   simp only [gammaIncCFDen]; split_ifs <;> linarith
 
 /-- `d_{2j} = ∏_{i<j} (i+1-a)`. -/
-lemma cfScale_gammaInc_even (α x : ℝ) (j : ℕ) :
+theorem cfScale_gammaInc_even (α x : ℝ) (j : ℕ) :
     cfScale (gammaIncCFNum α x) (2 * j) = ∏ i ∈ Finset.range j, ((i : ℝ) + 1 - α) := by
   induction j with
   | zero => simp [cfScale]
@@ -575,7 +574,7 @@ lemma cfScale_gammaInc_even (α x : ℝ) (j : ℕ) :
     ring
 
 /-- `d_{2j+1} = x^a e^{-x} j!`. -/
-lemma cfScale_gammaInc_odd (α x : ℝ) (j : ℕ) :
+theorem cfScale_gammaInc_odd (α x : ℝ) (j : ℕ) :
     cfScale (gammaIncCFNum α x) (2 * j + 1) = x ^ α * Real.exp (-x) * j.factorial := by
   induction j with
   | zero => simp [cfScale, gammaIncCFNum]
@@ -586,7 +585,7 @@ lemma cfScale_gammaInc_odd (α x : ℝ) (j : ℕ) :
     push_cast; ring
 
 /-- `∏_{i<j} (i+1-a)/(i+1) ≥ (1-a)/j` for `a ≤ 1`, `j ≥ 1`. -/
-lemma prod_ratio_ge {α : ℝ} (hα : α ≤ 1) (j : ℕ) :
+theorem prod_ratio_ge {α : ℝ} (hα : α ≤ 1) (j : ℕ) :
     (1 - α) / (j + 1) ≤ (∏ i ∈ Finset.range (j + 1), ((i : ℝ) + 1 - α)) / (j + 1).factorial := by
   induction j with
   | zero => simp
@@ -608,7 +607,7 @@ lemma prod_ratio_ge {α : ℝ} (hα : α ≤ 1) (j : ℕ) :
       _ = _ := by field_simp
 
 /-- The Seidel–Stern series of the `Γ(a,x)` fraction diverges. -/
-lemma gammaInc_seidelStern_div {α x : ℝ} (hα : α < 1) (hx : 0 < x) :
+theorem gammaInc_seidelStern_div {α x : ℝ} (hα : α < 1) (hx : 0 < x) :
     Tendsto (fun n => ∑ k ∈ Finset.range n, gammaIncCFDen x k *
       cfScale (gammaIncCFNum α x) k / cfScale (gammaIncCFNum α x) (k + 1)) atTop atTop := by
   set β : ℕ → ℝ := fun k => gammaIncCFDen x k * cfScale (gammaIncCFNum α x) k /

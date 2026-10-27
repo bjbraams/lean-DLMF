@@ -3,7 +3,7 @@ Copyright (c) 2026 Bastiaan J Braams. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bastiaan J Braams
 -/
-module
+module -- shake: keep-all
 
 public import DLMF.Lame.Basic
 public import DLMF.Lame.Polynomials.Defs
@@ -21,6 +21,8 @@ public import DLMF.Lame.Polynomials.P2pBase
 public import DLMF.Lame.Polynomials.P2pODE
 public import DLMF.Lame.Polynomials.P2pEigen
 public import DLMF.Lame.Polynomials.P2pIdent
+public import DLMF.Lame.P3lWeierstrass
+public import DLMF.Lame.Polynomials.P3lZeros
 
 /-!
 # Lamé functions (DLMF Chapter 29)

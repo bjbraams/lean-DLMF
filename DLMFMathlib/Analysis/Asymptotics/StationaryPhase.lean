@@ -6,10 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.MeasureTheory.Integral.Gamma
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.IntegrationByParts
-public import Mathlib.MeasureTheory.Integral.DominatedConvergence
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
-public import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
 public import DLMFMathlib.Analysis.Complex.RotateRay
 
 /-!
@@ -115,7 +111,7 @@ theorem statPh_norm_integral_le {a b : ℝ} (hab : a ≤ b) {φ φ' ψ ψ' : ℝ
 
 
 /-- Tail bound for a damped cubic phase: `‖∫_R^S e^{-s r³ + i c r³} dr‖ ≤ 2/(3 c R²)`. -/
-lemma statPh_norm_integral_damped_cube {s c R S : ℝ} (hs : 0 ≤ s) (hc : 0 < c) (hR : 0 < R)
+theorem statPh_norm_integral_damped_cube {s c R S : ℝ} (hs : 0 ≤ s) (hc : 0 < c) (hR : 0 < R)
     (hRS : R ≤ S) :
     ‖∫ r in R..S, exp ((-(s * r ^ 3) : ℝ) + ((c * r ^ 3 : ℝ) : ℂ) * I)‖ ≤ 2 / (3 * c * R ^ 2) := by
   set ψ : ℝ → ℝ := fun r => Real.exp (-(s * r ^ 3)) / (3 * c * r ^ 2) with hψd
@@ -168,7 +164,7 @@ lemma statPh_norm_integral_damped_cube {s c R S : ℝ} (hs : 0 ≤ s) (hc : 0 < 
   linarith
 
 /-- `|exp(i (r e^{iθ})³)| = e^{-r³ sin 3θ}`. -/
-lemma statPh_norm_exp_cube_ray (r θ : ℝ) :
+theorem statPh_norm_exp_cube_ray (r θ : ℝ) :
     ‖exp (((r : ℂ) * exp (θ * I)) ^ 3 * I)‖ = Real.exp (-(r ^ 3 * Real.sin (3 * θ))) := by
   rw [norm_exp]
   congr 1
@@ -180,7 +176,7 @@ lemma statPh_norm_exp_cube_ray (r θ : ℝ) :
 
 /-- The value of the cubic oscillatory integral along a ray `arg t = α`, `0 < α < π/6`:
 `e^{iα} ∫₀^∞ exp(i (r e^{iα})³) dr = Γ(4/3) e^{iπ/6}`. -/
-lemma statPh_integral_ray {α : ℝ} (hα0 : 0 < α) (hα : α < π / 6) :
+theorem statPh_integral_ray {α : ℝ} (hα0 : 0 < α) (hα : α < π / 6) :
     exp (α * I) * ∫ r in Ioi (0 : ℝ), exp (((r : ℂ) * exp (α * I)) ^ 3 * I) =
       (Real.Gamma (4 / 3) : ℂ) * exp ((π / 6 : ℝ) * I) := by
   set β := π / 6 - α with hβ
@@ -233,7 +229,7 @@ lemma statPh_integral_ray {α : ℝ} (hα0 : 0 < α) (hα : α < π / 6) :
 
 /-- The improper integral `∫₀^∞ e^{i t³} dt = Γ(4/3) e^{iπ/6}`, with the explicit rate
 `‖∫₀^R e^{it³} dt - Γ(4/3) e^{iπ/6}‖ ≤ 4/(3R²)`. -/
-lemma statPh_norm_integral_exp_cube_sub_le {R : ℝ} (hR : 0 < R) :
+theorem statPh_norm_integral_exp_cube_sub_le {R : ℝ} (hR : 0 < R) :
     ‖(∫ t in (0 : ℝ)..R, exp ((t : ℂ) ^ 3 * I)) -
       (Real.Gamma (4 / 3) : ℂ) * exp ((π / 6 : ℝ) * I)‖ ≤ 4 / (3 * R ^ 2) := by
   set L : ℂ := (Real.Gamma (4 / 3) : ℂ) * exp ((π / 6 : ℝ) * I)
@@ -316,7 +312,7 @@ theorem statPh_tendsto_integral_exp_cube :
 
 
 /-- Rescaling of the model integral: `λ^{1/3} ∫₀^δ e^{iλc x³} dx = c^{-1/3} ∫₀^{(λc)^{1/3} δ} e^{it³} dt`. -/
-lemma statPh_integral_model {lam c δ : ℝ} (hlam : 0 < lam) (hc : 0 < c) :
+theorem statPh_integral_model {lam c δ : ℝ} (hlam : 0 < lam) (hc : 0 < c) :
     ((lam ^ (1 / 3 : ℝ) : ℝ) : ℂ) * ∫ x in (0 : ℝ)..δ, exp (((lam * (c * x ^ 3) : ℝ) : ℂ) * I) =
       ((c ^ (-(1 / 3 : ℝ)) : ℝ) : ℂ) *
         ∫ t in (0 : ℝ)..((lam * c) ^ (1 / 3 : ℝ) * δ), exp ((t : ℂ) ^ 3 * I) := by
@@ -344,7 +340,7 @@ lemma statPh_integral_model {lam c δ : ℝ} (hlam : 0 < lam) (hc : 0 < c) :
   field_simp
 
 /-- `‖e^{ia} - e^{ib}‖ ≤ |a - b|` for real `a`, `b`. -/
-lemma statPh_norm_exp_sub_exp_le (a b : ℝ) :
+theorem statPh_norm_exp_sub_exp_le (a b : ℝ) :
     ‖exp ((a : ℂ) * I) - exp ((b : ℂ) * I)‖ ≤ |a - b| := by
   have : exp ((a : ℂ) * I) - exp ((b : ℂ) * I) = exp ((b : ℂ) * I) * (exp (I * ((a - b : ℝ) : ℂ)) - 1) := by
     rw [mul_sub, ← exp_add]; push_cast; ring_nf

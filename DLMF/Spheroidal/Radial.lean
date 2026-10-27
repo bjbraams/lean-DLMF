@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Spheroidal.FerrersDefs
-public import DLMF.Core.Framework
 
 /-!
 # Radial spheroidal wave functions (DLMF §30.11)

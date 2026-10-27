@@ -26,7 +26,7 @@ namespace DLMF.Statistical
 open DLMF.Confluent
 
 /-- Finite diagonal shifts of the incomplete Beta function. -/
-lemma normIncBetaI_diagonal_remainder {a b z : ℂ} (ha : ∀ k : ℕ, a+1 ≠ -k)
+theorem normIncBetaI_diagonal_remainder {a b z : ℂ} (ha : ∀ k : ℕ, a+1 ≠ -k)
     (hz : ‖z‖ < 1) (hz0 : z ≠ 0) (N : ℕ) :
     normIncBetaI a b z = normIncBetaI (a+N) (b-N) z +
       Gamma (a+b)*z^a*(1-z)^(b-1) *
@@ -51,7 +51,7 @@ lemma normIncBetaI_diagonal_remainder {a b z : ℂ} (ha : ∀ k : ℕ, a+1 ≠ -
     linear_combination (Gamma (a+b) / Gamma (b-N) / Gamma (a+N+1)) * hp
 
 /-- A beta-type Gauss function has a majorant independent of its positive real parameter. -/
-lemma incBeta_gauss_uniform_bound (b : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
+theorem incBeta_gauss_uniform_bound (b : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ a : ℝ, 0 < a →
       ‖regularizedGaussHG a b (a+1) z‖ ≤ C * ‖1 / Gamma ((a:ℂ)+1)‖ := by
   let g : ℕ → ℝ := fun k => ‖gaussHGCoeff 1 b 1 k * z^k‖
@@ -515,7 +515,7 @@ theorem Real.betaGeneratingCoeff_first {b x : ℝ} (hb : 0 < b) (hx : 0 < x) (hx
   ring
 
 /-- The removable function `(1-e^{-t})/t` has derivative `-1/2` at the origin. -/
-lemma hasDerivAt_one_sub_exp_neg_div_zero :
+theorem hasDerivAt_one_sub_exp_neg_div_zero :
     HasDerivAt (fun t : ℝ => if t = 0 then 1 else (1-Real.exp (-t))/t) (-1/2) 0 := by
   rw [hasDerivAt_iff_isLittleO]
   refine IsBigO.trans_isLittleO (g := fun t : ℝ => t^2) ?_
@@ -611,7 +611,7 @@ theorem Real.betaEta_equation {x₀ x : ℝ} (hx₀ : 0 < x₀) (hx₀1 : x₀ <
     exact div_pos (by linarith) (by linarith)
 
 /-- The radicand of the transition map is continuous on `(0,1)`. -/
-lemma incG_betaEta_sqrt_continuousOn {x₀ : ℝ} (hx₀ : 0 < x₀) (hx₀1 : x₀ < 1) :
+theorem incG_betaEta_sqrt_continuousOn {x₀ : ℝ} (hx₀ : 0 < x₀) (hx₀1 : x₀ < 1) :
     ContinuousOn (fun x : ℝ => Real.sqrt (-2*(x₀*Real.log (x/x₀)+(1-x₀)*Real.log ((1-x)/(1-x₀)))))
       (Ioo 0 1) := by
   refine Real.continuous_sqrt.comp_continuousOn (ContinuousOn.mul continuousOn_const ?_)
@@ -746,7 +746,7 @@ def Real.betaGeneralX (μ ζ : ℝ) : ℝ :=
   if ζ=μ then 1/(1+μ) else Classical.epsilon (fun x : ℝ => 0 < x ∧ x < 1 ∧ μ*Real.log ζ-ζ=Real.log x+μ*Real.log (1-x)+(1+μ)*Real.log (1+μ)-μ ∧ 0 < (ζ-μ)/(1/(1+μ)-x))
 
 /-- `ζ ↦ μ log ζ - ζ` increases strictly on `(0, μ]`. -/
-lemma incG_betaPhi_strictMonoOn (μ : ℝ) :
+theorem incG_betaPhi_strictMonoOn (μ : ℝ) :
     StrictMonoOn (fun ζ : ℝ => μ*Real.log ζ-ζ) (Ioc 0 μ) := by
   refine strictMonoOn_of_deriv_pos (convex_Ioc 0 μ) ?_ ?_
   · intro ζ hζ
@@ -759,7 +759,7 @@ lemma incG_betaPhi_strictMonoOn (μ : ℝ) :
     rw [hd.deriv, sub_pos, ← div_eq_mul_inv, one_lt_div hζ.1]; exact hζ.2
 
 /-- `ζ ↦ μ log ζ - ζ` decreases strictly on `[μ, ∞)`. -/
-lemma incG_betaPhi_strictAntiOn {μ : ℝ} (hμ : 0 < μ) :
+theorem incG_betaPhi_strictAntiOn {μ : ℝ} (hμ : 0 < μ) :
     StrictAntiOn (fun ζ : ℝ => μ*Real.log ζ-ζ) (Ici μ) := by
   refine strictAntiOn_of_deriv_neg (convex_Ici μ) ?_ ?_
   · intro ζ hζ
@@ -772,7 +772,7 @@ lemma incG_betaPhi_strictAntiOn {μ : ℝ} (hμ : 0 < μ) :
       ((Real.hasDerivAt_log hζ0.ne').const_mul μ).sub (hasDerivAt_id ζ)
     rw [hd.deriv, sub_neg, ← div_eq_mul_inv, div_lt_one hζ0]; exact hζ
 
-lemma incG_betaR_hasDerivAt {μ x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
+theorem incG_betaR_hasDerivAt {μ x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
     HasDerivAt (fun x : ℝ => Real.log x+μ*Real.log (1-x)+(1+μ)*Real.log (1+μ)-μ)
       (x⁻¹ - μ*(1-x)⁻¹) x := by
   have h1 := Real.hasDerivAt_log hx.ne'
@@ -782,12 +782,12 @@ lemma incG_betaR_hasDerivAt {μ x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
   · funext y; simp only [Pi.add_apply, id]
   · simp only [id]; rw [neg_div, one_div]; ring
 
-lemma incG_betaR_continuousAt {μ x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
+theorem incG_betaR_continuousAt {μ x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
     ContinuousAt (fun x : ℝ => Real.log x+μ*Real.log (1-x)+(1+μ)*Real.log (1+μ)-μ) x :=
   (incG_betaR_hasDerivAt hx hx1).continuousAt
 
 /-- `R` increases strictly on `(0, 1/(1+μ)]`. -/
-lemma incG_betaR_strictMonoOn {μ : ℝ} (hμ : 0 < μ) :
+theorem incG_betaR_strictMonoOn {μ : ℝ} (hμ : 0 < μ) :
     StrictMonoOn (fun x : ℝ => Real.log x+μ*Real.log (1-x)+(1+μ)*Real.log (1+μ)-μ)
       (Ioc 0 (1/(1+μ))) := by
   have hx0 : 1/(1+μ) < 1 := by rw [div_lt_one (by linarith)]; linarith
@@ -803,7 +803,7 @@ lemma incG_betaR_strictMonoOn {μ : ℝ} (hμ : 0 < μ) :
     rw [sub_pos, ← div_eq_mul_inv, ← one_div, div_lt_div_iff₀ this hx.1]; nlinarith
 
 /-- `R` decreases strictly on `[1/(1+μ), 1)`. -/
-lemma incG_betaR_strictAntiOn {μ : ℝ} (hμ : 0 < μ) :
+theorem incG_betaR_strictAntiOn {μ : ℝ} (hμ : 0 < μ) :
     StrictAntiOn (fun x : ℝ => Real.log x+μ*Real.log (1-x)+(1+μ)*Real.log (1+μ)-μ)
       (Ico (1/(1+μ)) 1) := by
   have hx0 : 0 < 1/(1+μ) := by positivity
@@ -819,13 +819,13 @@ lemma incG_betaR_strictAntiOn {μ : ℝ} (hμ : 0 < μ) :
     rw [sub_neg, ← div_eq_mul_inv, ← one_div, div_lt_div_iff₀ h0 this]; nlinarith
 
 /-- The two sides agree at the turning points. -/
-lemma incG_betaR_turning {μ : ℝ} (hμ : 0 < μ) :
+theorem incG_betaR_turning {μ : ℝ} (hμ : 0 < μ) :
     Real.log (1/(1+μ))+μ*Real.log (1-1/(1+μ))+(1+μ)*Real.log (1+μ)-μ = μ*Real.log μ-μ := by
   have h1 : (1:ℝ) - 1/(1+μ) = μ/(1+μ) := by field_simp; ring
   rw [h1, one_div, Real.log_inv, Real.log_div hμ.ne' (by linarith)]; ring
 
 /-- Existence of the transition variable on the correct side. -/
-lemma incG_betaZeta_exists {μ x : ℝ} (hμ : 0 < μ) (hx : 0 < x) (hx1 : x < 1)
+theorem incG_betaZeta_exists {μ x : ℝ} (hμ : 0 < μ) (hx : 0 < x) (hx1 : x < 1)
     (hne : x ≠ 1/(1+μ)) :
     ∃ ζ : ℝ, 0 < ζ ∧ μ*Real.log ζ-ζ=Real.log x+μ*Real.log (1-x)+(1+μ)*Real.log (1+μ)-μ ∧
       0 < (ζ-μ)/(1/(1+μ)-x) := by

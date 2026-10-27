@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.ParabolicCylinder.Integrals
-public import DLMFMathlib.Analysis.Complex.BarnesResidue
 
 /-!
 # Cylinder Barnes integrals with crossed-pole corrections
@@ -38,7 +37,7 @@ def pcfBarnesResidueSum (second : Bool) (a z : ℂ) (c : ℝ) : ℂ :=
 
 /-- Uniform vertical bounds for `Γ` on a strip `|Re w| ≤ X`: with the factor `|sin(π Re w)|`
 for all heights, and without it for `|Im w| ≥ 1`. -/
-lemma pcfBC_Gamma_bound (X : ℝ) :
+theorem pcfBC_Gamma_bound (X : ℝ) :
     ∃ C : ℝ, ∃ K : ℕ, 0 ≤ C ∧ ∀ x ∈ Icc (-X) X, ∀ y : ℝ,
       ‖Gamma (x + I*y)‖ * |Real.sin (π*x)| ≤ C * (1+|y|)^K * Real.exp (-(π*|y|)/2) ∧
       (1 ≤ |y| → ‖Gamma (x + I*y)‖ ≤ C * (1+|y|)^K * Real.exp (-(π*|y|)/2)) := by
@@ -94,7 +93,7 @@ lemma pcfBC_Gamma_bound (X : ℝ) :
     field_simp
 
 /-- Vertical bound for `Γ` on a line `Re w = x` missing the poles. -/
-lemma pcfBC_Gamma_bound_pt {x : ℝ} (hx : ∀ n : ℕ, x ≠ -n) :
+theorem pcfBC_Gamma_bound_pt {x : ℝ} (hx : ∀ n : ℕ, x ≠ -n) :
     ∃ C : ℝ, ∃ K : ℕ, 0 ≤ C ∧ ∀ y : ℝ,
       ‖Gamma (x + I*y)‖ ≤ C * (1+|y|)^K * Real.exp (-(π*|y|)/2) := by
   by_cases hx0 : 0 < x
@@ -111,7 +110,7 @@ lemma pcfBC_Gamma_bound_pt {x : ℝ} (hx : ∀ n : ℕ, x ≠ -n) :
     field_simp
 
 /-- `|Γ(x+iy)| ≤ Γ(x)/Γ(x') |Γ(x'+iy)|` for `0 < x ≤ x'`. -/
-lemma pcfBC_norm_Gamma_le_ratio {x x' : ℝ} (hx : 0 < x) (hxx : x ≤ x') (y : ℝ) :
+theorem pcfBC_norm_Gamma_le_ratio {x x' : ℝ} (hx : 0 < x) (hxx : x ≤ x') (y : ℝ) :
     ‖Gamma (x + I*y)‖ ≤ Real.Gamma x / Real.Gamma x' * ‖Gamma (x' + I*y)‖ := by
   have hx' : 0 < x' := hx.trans_le hxx
   have h1 := DLMF.Gamma.norm_Gamma_sq_eq hx y
@@ -127,7 +126,7 @@ lemma pcfBC_norm_Gamma_le_ratio {x x' : ℝ} (hx : 0 < x) (hxx : x ≤ x') (y : 
     _ = _ := by field_simp
 
 /-- Uniform vertical bound for `Γ` on a strip `0 < c₁ ≤ Re w ≤ c₂`. -/
-lemma pcfBC_Gamma_bound_strip {c₁ c₂ : ℝ} (hc : 0 < c₁) :
+theorem pcfBC_Gamma_bound_strip {c₁ c₂ : ℝ} (hc : 0 < c₁) :
     ∃ C : ℝ, ∃ K : ℕ, 0 ≤ C ∧ ∀ x ∈ Icc c₁ c₂, ∀ y : ℝ,
       ‖Gamma (x + I*y)‖ ≤ C * (1+|y|)^K * Real.exp (-(π*|y|)/2) := by
   by_cases h12 : c₁ ≤ c₂
@@ -154,11 +153,11 @@ lemma pcfBC_Gamma_bound_strip {c₁ c₂ : ℝ} (hc : 0 < c₁) :
 /-- The Barnes integrand `Γ(t) Γ(A-2t) 2^t z^{2t}` of DLMF 12.5.8 with `A = a + 1/2`. -/
 def pcfBC_F (A z t : ℂ) : ℂ := Gamma t * Gamma (A - 2*t) * 2^t * z^(2*t)
 
-lemma pcfBC_F_eq_B (a z : ℂ) (c y : ℝ) : pcfBC_F (1/2+1*a) z (c + y*I) = pcfInt_B a z c y := by
+theorem pcfBC_F_eq_B (a z : ℂ) (c y : ℝ) : pcfBC_F (1/2+1*a) z (c + y*I) = pcfInt_B a z c y := by
   unfold pcfBC_F pcfInt_B; ring_nf
 
 /-- Pointwise bound for the Barnes integrand from vertical bounds of the two Gamma factors. -/
-lemma pcfBC_norm_F_le {A z : ℂ} (hz : z ≠ 0) (x y : ℝ) {C1 C2 : ℝ} {K1 K2 : ℕ}
+theorem pcfBC_norm_F_le {A z : ℂ} (hz : z ≠ 0) (x y : ℝ) {C1 C2 : ℝ} {K1 K2 : ℕ}
     (hC1 : 0 ≤ C1) (hC2 : 0 ≤ C2)
     (g1 : ‖Gamma (x + I*y)‖ ≤ C1 * (1+|y|)^K1 * Real.exp (-(π*|y|)/2))
     (g2 : ‖Gamma ((A.re - 2*x : ℝ) + I*(A.im - 2*y : ℝ))‖ ≤
@@ -197,7 +196,7 @@ lemma pcfBC_norm_F_le {A z : ℂ} (hz : z ≠ 0) (x y : ℝ) {C1 C2 : ℝ} {K1 K
     _ = _ := by
         rw [← Real.exp_add, ← Real.exp_add]; ring_nf
 
-lemma pcfBC_F_differentiableAt {A z t : ℂ} (hz : z ≠ 0) (ht : 0 < t.re)
+theorem pcfBC_F_differentiableAt {A z t : ℂ} (hz : z ≠ 0) (ht : 0 < t.re)
     (hA : ∀ m : ℕ, A - 2*t ≠ -m) : DifferentiableAt ℂ (pcfBC_F A z) t := by
   have ht' : ∀ m : ℕ, t ≠ -m := fun m h => by
     rw [h] at ht; simp at ht; linarith [(m.cast_nonneg : (0:ℝ) ≤ m)]
@@ -206,24 +205,24 @@ lemma pcfBC_F_differentiableAt {A z t : ℂ} (hz : z ≠ 0) (ht : 0 < t.re)
     (by fun_prop))).mul (differentiableAt_id.const_cpow (Or.inl two_ne_zero))).mul
     ((differentiableAt_id.const_mul 2).const_cpow (Or.inl hz))
 
-lemma pcfBC_F_differentiableAt_param {A z t : ℂ} (hA : ∀ m : ℕ, A - 2*t ≠ -m) :
+theorem pcfBC_F_differentiableAt_param {A z t : ℂ} (hA : ∀ m : ℕ, A - 2*t ≠ -m) :
     DifferentiableAt ℂ (fun A => pcfBC_F A z t) A := by
   unfold pcfBC_F
   exact (((differentiableAt_const _).mul ((differentiableAt_Gamma _ hA).comp A
     (by fun_prop))).mul (differentiableAt_const _)).mul (differentiableAt_const _)
 
-lemma pcfBC_ne_pole {A : ℂ} {x : ℝ} (hav : ∀ n : ℕ, 2*x ≠ A.re + n) (y : ℝ) :
+theorem pcfBC_ne_pole {A : ℂ} {x : ℝ} (hav : ∀ n : ℕ, 2*x ≠ A.re + n) (y : ℝ) :
     ∀ m : ℕ, A - 2*((x:ℂ)+y*I) ≠ -m := fun m h => by
   have := congrArg re h; simp at this; exact hav m (by linarith)
 
-lemma pcfBC_F_continuous {A z : ℂ} (hz : z ≠ 0) {c : ℝ} (hc : 0 < c)
+theorem pcfBC_F_continuous {A z : ℂ} (hz : z ≠ 0) {c : ℝ} (hc : 0 < c)
     (hav : ∀ n : ℕ, 2*c ≠ A.re + n) : Continuous fun y : ℝ => pcfBC_F A z (c + y*I) :=
   continuous_iff_continuousAt.mpr fun y => by
     have h := (pcfBC_F_differentiableAt hz (by simp [hc]) (pcfBC_ne_pole hav y)).continuousAt
     exact h.comp (f := fun y : ℝ => (c:ℂ) + y*I) (by fun_prop)
 
 /-- The Barnes integrand is integrable on every line `Re t = c > 0` missing the poles. -/
-lemma pcfBC_F_integrable {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c : ℝ} (hc : 0 < c)
+theorem pcfBC_F_integrable {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c : ℝ} (hc : 0 < c)
     (hav : ∀ n : ℕ, 2*c ≠ A.re + n) : Integrable fun y : ℝ => pcfBC_F A z (c + y*I) := by
   obtain ⟨C1, K1, h1⟩ := DLMF.Gamma.exists_norm_Gamma_le hc
   have hC1 : 0 ≤ C1 := (norm_nonneg _).trans (by simpa using h1 0)
@@ -234,7 +233,7 @@ lemma pcfBC_F_integrable {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c 
     (Eventually.of_forall fun y => pcfBC_norm_F_le hz0 c y hC1 hC2 (h1 y) (h2 _))
 
 /-- `‖z‖^{2x} ≤ ‖z‖^{2c₁} + ‖z‖^{2c₂}` on `[c₁, c₂]`. -/
-lemma pcfBC_rpow_le {r : ℝ} (hr : 0 < r) {c₁ c₂ x : ℝ} (hx : x ∈ Icc c₁ c₂) :
+theorem pcfBC_rpow_le {r : ℝ} (hr : 0 < r) {c₁ c₂ x : ℝ} (hx : x ∈ Icc c₁ c₂) :
     r^(2*x) ≤ r^(2*c₁) + r^(2*c₂) := by
   rcases le_total 1 r with h1 | h1
   · have := Real.rpow_le_rpow_of_exponent_le h1 (show 2*x ≤ 2*c₂ by linarith [hx.2])
@@ -244,7 +243,7 @@ lemma pcfBC_rpow_le {r : ℝ} (hr : 0 < r) {c₁ c₂ x : ℝ} (hx : x ∈ Icc c
 
 open scoped Interval in
 /-- Horizontal cross-sections of the Barnes integrand vanish at `±i∞`. -/
-lemma pcfBC_F_horizontal {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c₁ c₂ : ℝ}
+theorem pcfBC_F_horizontal {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c₁ c₂ : ℝ}
     (hc : 0 < c₁) (h12 : c₁ ≤ c₂) :
     Tendsto (fun T : ℝ => ∫ x in c₁..c₂, pcfBC_F A z (x + T*I)) atTop (𝓝 0) ∧
     Tendsto (fun T : ℝ => ∫ x in c₁..c₂, pcfBC_F A z (x + T*I)) atBot (𝓝 0) := by
@@ -292,7 +291,7 @@ lemma pcfBC_F_horizontal {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c�
       linarith [neg_abs_le A.im, abs_nonneg A.im])
 
 /-- Shifting the Barnes line when no pole `t = (A+n)/2` lies in the closed strip. -/
-lemma pcfBC_shift_none {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c₁ c₂ : ℝ}
+theorem pcfBC_shift_none {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c₁ c₂ : ℝ}
     (hc : 0 < c₁) (h12 : c₁ < c₂) (hno : ∀ n : ℕ, (A.re + n)/2 ∉ Icc c₁ c₂) :
     (∫ y : ℝ, pcfBC_F A z (c₂ + y*I)) = ∫ y : ℝ, pcfBC_F A z (c₁ + y*I) := by
   have hav : ∀ c ∈ Icc c₁ c₂, ∀ n : ℕ, 2*c ≠ A.re + n := fun c hcI n h =>
@@ -315,7 +314,7 @@ def pcfBC_phi (A z : ℂ) (n : ℕ) (t : ℂ) : ℂ :=
   -(1/2) * Gamma t * Gamma (A - 2*t + n + 1) / (∏ j ∈ Finset.range n, (A - 2*t + j)) *
     2^t * z^(2*t)
 
-lemma pcfBC_phi_pole (A z : ℂ) (n : ℕ) : pcfBC_phi A z n ((A+n)/2) = pcfBC_res A z n := by
+theorem pcfBC_phi_pole (A z : ℂ) (n : ℕ) : pcfBC_phi A z n ((A+n)/2) = pcfBC_res A z n := by
   unfold pcfBC_phi pcfBC_res
   have h1 : A - 2*((A+n)/2) + n + 1 = 1 := by ring
   have h2 : ∏ j ∈ Finset.range n, (A - 2*((A+n)/2) + j) = (-1)^n * n.factorial := by
@@ -328,7 +327,7 @@ lemma pcfBC_phi_pole (A z : ℂ) (n : ℕ) : pcfBC_phi A z n ((A+n)/2) = pcfBC_r
   ring
 
 /-- `φ(t)/(t - p) = F(t)` away from the pole `p = (A+n)/2` and from the poles of index `< n`. -/
-lemma pcfBC_phi_div {A z t : ℂ} {n : ℕ} (ht : t ≠ (A+n)/2)
+theorem pcfBC_phi_div {A z t : ℂ} {n : ℕ} (ht : t ≠ (A+n)/2)
     (hj : ∀ j : ℕ, j < n → A - 2*t + j ≠ 0) :
     pcfBC_phi A z n t / (t - (A+n)/2) = pcfBC_F A z t := by
   have hn : A - 2*t + n ≠ 0 := fun h => ht (by linear_combination -h/2)
@@ -346,7 +345,7 @@ lemma pcfBC_phi_div {A z t : ℂ} {n : ℕ} (ht : t ≠ (A+n)/2)
   have hd' : 2*t - (A+n) ≠ 0 := fun h => hd (by linear_combination h/2)
   field_simp
 
-lemma pcfBC_phi_differentiableAt {A z t : ℂ} {n : ℕ} (hz : z ≠ 0) (ht : 0 < t.re)
+theorem pcfBC_phi_differentiableAt {A z t : ℂ} {n : ℕ} (hz : z ≠ 0) (ht : 0 < t.re)
     (hA : ∀ m : ℕ, A - 2*t + n + 1 ≠ -m) (hj : ∀ j : ℕ, j < n → A - 2*t + j ≠ 0) :
     DifferentiableAt ℂ (pcfBC_phi A z n) t := by
   have ht' : ∀ m : ℕ, t ≠ -m := fun m h => by
@@ -361,7 +360,7 @@ lemma pcfBC_phi_differentiableAt {A z t : ℂ} {n : ℕ} (hz : z ≠ 0) (ht : 0 
     ((differentiableAt_id.const_mul 2).const_cpow (Or.inl hz))
 
 /-- Shifting the Barnes line across exactly one pole `t = (A+n)/2`. -/
-lemma pcfBC_shift_one {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c₁ c₂ : ℝ}
+theorem pcfBC_shift_one {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c₁ c₂ : ℝ}
     (hc : 0 < c₁) {n : ℕ} (hn₁ : c₁ < (A.re + n)/2) (hn₂ : (A.re + n)/2 < c₂)
     (hno : ∀ m : ℕ, m ≠ n → (A.re + m)/2 ∉ Icc c₁ c₂) :
     (∫ y : ℝ, pcfBC_F A z (c₂ + y*I)) - (∫ y : ℝ, pcfBC_F A z (c₁ + y*I)) =
@@ -425,18 +424,18 @@ lemma pcfBC_shift_one {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c₁ 
 /-- The number of poles `t = (A+n)/2` to the left of the line `Re t = c`. -/
 def pcfBC_N (A : ℂ) (c : ℝ) : ℕ := (⌈2*c - A.re⌉).toNat
 
-lemma pcfBC_lt_N {A : ℂ} {c : ℝ} {n : ℕ} : n < pcfBC_N A c ↔ (A.re + n)/2 < c := by
+theorem pcfBC_lt_N {A : ℂ} {c : ℝ} {n : ℕ} : n < pcfBC_N A c ↔ (A.re + n)/2 < c := by
   unfold pcfBC_N
   rw [Int.lt_toNat, Int.lt_ceil]
   push_cast
   constructor <;> intro h <;> linarith
 
-lemma pcfBC_N_mono {A : ℂ} {c₁ c₂ : ℝ} (h : c₁ ≤ c₂) : pcfBC_N A c₁ ≤ pcfBC_N A c₂ := by
+theorem pcfBC_N_mono {A : ℂ} {c₁ c₂ : ℝ} (h : c₁ ≤ c₂) : pcfBC_N A c₁ ≤ pcfBC_N A c₂ := by
   unfold pcfBC_N
   exact Int.toNat_le_toNat (Int.ceil_mono (by linarith))
 
 /-- Moving the Barnes line from `c₁` to `c₂` picks up the residues of the crossed poles. -/
-lemma pcfBC_shift {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c₁ c₂ : ℝ}
+theorem pcfBC_shift {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c₁ c₂ : ℝ}
     (hc : 0 < c₁) (h12 : c₁ ≤ c₂) (hav₁ : ∀ n : ℕ, 2*c₁ ≠ A.re + n)
     (hav₂ : ∀ n : ℕ, 2*c₂ ≠ A.re + n) :
     (∫ y : ℝ, pcfBC_F A z (c₂ + y*I)) - 2*π*∑ n ∈ Finset.range (pcfBC_N A c₂), pcfBC_res A z n =
@@ -503,7 +502,7 @@ lemma pcfBC_shift {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c₁ c₂
       linear_combination hsh
 
 /-- DLMF 12.5.8 with crossed residues, in the regime `Re A > 0` (shift from a small line). -/
-lemma pcfBC_U_pos {a z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c : ℝ} (hc : 0 < c)
+theorem pcfBC_U_pos {a z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c : ℝ} (hc : 0 < c)
     (hav : ∀ n : ℕ, 2*c ≠ (1/2+1*a).re + n) (hA : 0 < (1/2+1*a).re) :
     (∫ y : ℝ, pcfBC_F (1/2+1*a) z (c + y*I)) =
       2*π*(Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*pcfU a z +
@@ -534,7 +533,7 @@ lemma pcfBC_U_pos {a z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c : ℝ} 
 def pcfBC_J (A z : ℂ) (c : ℝ) : ℂ :=
   (∫ y : ℝ, pcfBC_F A z (c + y*I)) - 2*π*∑ n ∈ Finset.range (pcfBC_N A c), pcfBC_res A z n
 
-lemma pcfBC_J_eq {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c₁ c₂ : ℝ}
+theorem pcfBC_J_eq {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c₁ c₂ : ℝ}
     (hc₁ : 0 < c₁) (hc₂ : 0 < c₂) (hav₁ : ∀ n : ℕ, 2*c₁ ≠ A.re + n)
     (hav₂ : ∀ n : ℕ, 2*c₂ ≠ A.re + n) : pcfBC_J A z c₁ = pcfBC_J A z c₂ := by
   rcases le_total c₁ c₂ with h | h
@@ -544,14 +543,14 @@ lemma pcfBC_J_eq {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c₁ c₂ 
 /-- A canonical admissible line, at distance `1/4` from the poles (in `2 Re t`). -/
 def pcfBC_cg (A : ℂ) : ℝ := (Int.fract A.re + 1/2)/2
 
-lemma pcfBC_cg_pos (A : ℂ) : 0 < pcfBC_cg A := by
+theorem pcfBC_cg_pos (A : ℂ) : 0 < pcfBC_cg A := by
   unfold pcfBC_cg; linarith [Int.fract_nonneg A.re]
 
-lemma pcfBC_two_cg (A : ℂ) : 2*pcfBC_cg A - A.re = 1/2 - ⌊A.re⌋ := by
+theorem pcfBC_two_cg (A : ℂ) : 2*pcfBC_cg A - A.re = 1/2 - ⌊A.re⌋ := by
   unfold pcfBC_cg; rw [← Int.self_sub_floor]; ring
 
 /-- No integer lies within `1/4` of `1/2 - m`. -/
-lemma pcfBC_not_int {m : ℤ} {h : ℝ} (h1 : 1/4 - (m:ℝ) < h) (h2 : h < 3/4 - m) (n : ℤ) :
+theorem pcfBC_not_int {m : ℤ} {h : ℝ} (h1 : 1/4 - (m:ℝ) < h) (h2 : h < 3/4 - m) (n : ℤ) :
     h ≠ n := by
   intro he
   rw [he] at h1 h2
@@ -561,7 +560,7 @@ lemma pcfBC_not_int {m : ℤ} {h : ℝ} (h1 : 1/4 - (m:ℝ) < h) (h2 : h < 3/4 -
   · have : (1:ℝ) ≤ ((n + m : ℤ) : ℝ) := by exact_mod_cast h3
     push_cast at this; linarith
 
-lemma pcfBC_avoid_near {A₀ A : ℂ} (hA : |A.re - A₀.re| < 1/4) (n : ℕ) :
+theorem pcfBC_avoid_near {A₀ A : ℂ} (hA : |A.re - A₀.re| < 1/4) (n : ℕ) :
     2*pcfBC_cg A₀ ≠ A.re + n := by
   have h0 := pcfBC_two_cg A₀
   have habs := abs_lt.mp hA
@@ -569,7 +568,7 @@ lemma pcfBC_avoid_near {A₀ A : ℂ} (hA : |A.re - A₀.re| < 1/4) (n : ℕ) :
   exact pcfBC_not_int (m := ⌊A₀.re⌋) (h := 2*pcfBC_cg A₀ - A.re) (by linarith) (by linarith) n
     (by push_cast; linarith)
 
-lemma pcfBC_N_near {A₀ A : ℂ} (hA : |A.re - A₀.re| < 1/4) :
+theorem pcfBC_N_near {A₀ A : ℂ} (hA : |A.re - A₀.re| < 1/4) :
     pcfBC_N A (pcfBC_cg A₀) = pcfBC_N A₀ (pcfBC_cg A₀) := by
   have h0 := pcfBC_two_cg A₀
   have habs := abs_lt.mp hA
@@ -581,7 +580,7 @@ lemma pcfBC_N_near {A₀ A : ℂ} (hA : |A.re - A₀.re| < 1/4) :
   rw [e1, e2]
 
 /-- A uniform lower bound for `|sin(π x)|` within `1/4` of a half-integer. -/
-lemma pcfBC_sin_lower (m : ℤ) : ∃ δ : ℝ, 0 < δ ∧
+theorem pcfBC_sin_lower (m : ℤ) : ∃ δ : ℝ, 0 < δ ∧
     ∀ x ∈ Icc ((m:ℝ) - 3/4) (m - 1/4), δ ≤ |Real.sin (π*x)| := by
   obtain ⟨x₁, hx₁, hmin⟩ := (isCompact_Icc (a := (m:ℝ) - 3/4) (b := m - 1/4)).exists_isMinOn
     (nonempty_Icc.mpr (by linarith)) ((Real.continuous_sin.comp (continuous_const.mul
@@ -600,7 +599,7 @@ lemma pcfBC_sin_lower (m : ℤ) : ∃ δ : ℝ, 0 < δ ∧
     push_cast at this; linarith [hx₁.2]
 
 /-- On a fixed admissible line the Barnes integral is holomorphic in `A` near `A₀`. -/
-lemma pcfBC_integral_differentiableOn {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) (A₀ : ℂ) :
+theorem pcfBC_integral_differentiableOn {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) (A₀ : ℂ) :
     DifferentiableOn ℂ (fun A => ∫ y : ℝ, pcfBC_F A z (pcfBC_cg A₀ + y*I))
       (Metric.ball A₀ (1/4)) := by
   set c₀ := pcfBC_cg A₀ with hc₀
@@ -658,7 +657,7 @@ lemma pcfBC_integral_differentiableOn {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 
       (DLMF.Gamma.integrable_one_add_abs_pow_mul_exp_neg hb _).const_mul _,
       Eventually.of_forall fun y A' hA' => hbound A' hA' y⟩)
 
-lemma pcfBC_res_differentiableAt {z : ℂ} (hz0 : z ≠ 0) {a₀ : ℂ}
+theorem pcfBC_res_differentiableAt {z : ℂ} (hz0 : z ≠ 0) {a₀ : ℂ}
     (ha : ∀ n : ℕ, a₀ ≠ -1/2 - n) (n : ℕ) :
     DifferentiableAt ℂ (fun a => pcfBC_res (1/2+1*a) z n) a₀ := by
   have hG : ∀ m : ℕ, (1/2+1*a₀+n)/2 ≠ -m := fun m h =>
@@ -672,11 +671,11 @@ lemma pcfBC_res_differentiableAt {z : ℂ} (hz0 : z ≠ 0) {a₀ : ℂ}
 /-- The canonical-line value `G(a)` of the residue-corrected Barnes integral. -/
 def pcfBC_G (z a : ℂ) : ℂ := pcfBC_J (1/2+1*a) z (pcfBC_cg (1/2+1*a))
 
-lemma pcfBC_G_eq_J {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) (a : ℂ) {c : ℝ} (hc : 0 < c)
+theorem pcfBC_G_eq_J {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) (a : ℂ) {c : ℝ} (hc : 0 < c)
     (hav : ∀ n : ℕ, 2*c ≠ (1/2+1*a).re + n) : pcfBC_J (1/2+1*a) z c = pcfBC_G z a :=
   pcfBC_J_eq hz0 hz hc (pcfBC_cg_pos _) hav (pcfBC_avoid_near (by simp))
 
-lemma pcfBC_G_differentiableAt {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {a₀ : ℂ}
+theorem pcfBC_G_differentiableAt {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {a₀ : ℂ}
     (ha : ∀ n : ℕ, a₀ ≠ -1/2 - n) : DifferentiableAt ℂ (pcfBC_G z) a₀ := by
   set A₀ : ℂ := 1/2+1*a₀
   set c₀ := pcfBC_cg A₀
@@ -703,7 +702,7 @@ lemma pcfBC_G_differentiableAt {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4)
   exact hI.comp (f := fun a : ℂ => 1/2+1*a) a₀ (by fun_prop)
 
 /-- **DLMF 12.5.8 for all regular parameters**: line integral = 2π (value + crossed residues). -/
-lemma pcfBC_U_integral {a z : ℂ} (ha : ∀ n : ℕ, a ≠ -1/2 - n) (hz0 : z ≠ 0)
+theorem pcfBC_U_integral {a z : ℂ} (ha : ∀ n : ℕ, a ≠ -1/2 - n) (hz0 : z ≠ 0)
     (hz : |arg z| < 3*π/4) {c : ℝ} (hc : 0 < c) (hav : ∀ n : ℕ, 2*c ≠ (1/2+1*a).re + n) :
     (∫ y : ℝ, pcfBC_F (1/2+1*a) z (c + y*I)) =
       2*π*(Gamma (1/2+1*a)*(exp (z^2/4)*z^(a+1/2))*pcfU a z +
@@ -741,18 +740,18 @@ lemma pcfBC_U_integral {a z : ℂ} (ha : ∀ n : ℕ, a ≠ -1/2 - n) (hz0 : z �
   simp only [W] at hJ
   linear_combination hJ
 
-lemma pcfBC_sum_false (a z : ℂ) (c : ℝ) : pcfBarnesResidueSum false a z c =
+theorem pcfBC_sum_false (a z : ℂ) (c : ℝ) : pcfBarnesResidueSum false a z c =
     ∑ n ∈ Finset.range (pcfBC_N (1/2+1*a) c), pcfBC_res (1/2+1*a) z n := by
   simp only [pcfBarnesResidueSum, pcfBarnesResidue, pcfBC_N, pcfBC_res, Bool.false_eq_true,
     ite_false, mul_one]
   rw [show (1/2:ℂ)+1*a = a+1/2 by ring]
 
-lemma pcfBC_sum_true (a z : ℂ) (c : ℝ) : pcfBarnesResidueSum true a z c =
+theorem pcfBC_sum_true (a z : ℂ) (c : ℝ) : pcfBarnesResidueSum true a z c =
     ∑ n ∈ Finset.range (pcfBC_N (1/2+1*(-a)) c), pcfBarnesResidue true a z n := by
   simp only [pcfBarnesResidueSum, pcfBC_N, ite_true]
   rw [show (1/2:ℂ)+1*(-a) = 1/2-a by ring]
 
-lemma pcfBC_res_true {a z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) (n : ℕ) :
+theorem pcfBC_res_true {a z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) (n : ℕ) :
     pcfBC_res (1/2+1*(-a)) (I*z) n + pcfBC_res (1/2+1*(-a)) (-I*z) n =
       2 * pcfBarnesResidue true a z n := by
   obtain ⟨e1, e2⟩ := pcfInt_I_mul_cpow hz0 hz ((1/2+1*(-a)) + n)

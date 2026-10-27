@@ -6,19 +6,11 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Gamma.Digamma
-public import DLMF.Gamma.IntegralRepresentations
 public import DLMF.Gamma.ComplexBinet
 public import DLMF.Gamma.Products
 public import DLMF.Gamma.SpecialValues
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Complex
-public import Mathlib.Analysis.Complex.Trigonometric
-public import Mathlib.Analysis.SpecialFunctions.Pow.Real
-public import Mathlib.Analysis.SpecialFunctions.Gamma.BohrMollerup
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Series
 public import Mathlib.Analysis.Real.Pi.Bounds
-public import Mathlib.NumberTheory.ZetaValues
-public import Mathlib.NumberTheory.Harmonic.EulerMascheroni
-public import Mathlib.Analysis.Complex.ExponentialBounds
 
 /-!
 # Inequalities (DLMF §5.6)
@@ -72,7 +64,7 @@ open Set
 local notation "γ" => Real.eulerMascheroniConstant
 
 /-- `γ < 3/5`, from `H₃₂ - log 32`. -/
-lemma eulerMascheroniConstant_lt_three_fifths : γ < 3 / 5 := by
+theorem eulerMascheroniConstant_lt_three_fifths : γ < 3 / 5 := by
   refine (Real.eulerMascheroniConstant_lt_eulerMascheroniSeq' 32).trans ?_
   have h : Real.eulerMascheroniSeq' 32 = (harmonic 32 : ℝ) - Real.log 32 := by
     simp [Real.eulerMascheroniSeq']
@@ -90,7 +82,7 @@ lemma eulerMascheroniConstant_lt_three_fifths : γ < 3 / 5 := by
   linarith [Real.log_two_gt_d9]
 
 /-- The trigamma function is antitone on `(0, ∞)`. -/
-lemma trigamma_le_of_le {x y : ℝ} (hx : 0 < x) (hxy : x ≤ y) :
+theorem trigamma_le_of_le {x y : ℝ} (hx : 0 < x) (hxy : x ≤ y) :
     Real.trigamma y ≤ Real.trigamma x := by
   have hy : 0 < y := hx.trans_le hxy
   rw [Real.trigamma_eq_tsum hy, Real.trigamma_eq_tsum hx]
@@ -100,7 +92,7 @@ lemma trigamma_le_of_le {x y : ℝ} (hx : 0 < x) (hxy : x ≤ y) :
   have h2 : x + n ≤ y + n := by linarith
   exact pow_le_pow_left₀ (by positivity) (inv_anti₀ h1 h2) 2
 
-lemma hasSum_recip_one_add_sq : HasSum (fun n : ℕ => ((1 : ℝ) + n)⁻¹ ^ 2) (π ^ 2 / 6) := by
+theorem hasSum_recip_one_add_sq : HasSum (fun n : ℕ => ((1 : ℝ) + n)⁻¹ ^ 2) (π ^ 2 / 6) := by
   have h := (hasSum_nat_add_iff' 1).mpr hasSum_zeta_two
   simp only [Finset.sum_range_one, Nat.cast_zero, ne_eq, OfNat.ofNat_ne_zero,
     not_false_eq_true, zero_pow, div_zero, sub_zero] at h
@@ -108,11 +100,11 @@ lemma hasSum_recip_one_add_sq : HasSum (fun n : ℕ => ((1 : ℝ) + n)⁻¹ ^ 2)
   push_cast
   rw [one_div, inv_pow, add_comm]
 
-lemma trigamma_one_eq : Real.trigamma 1 = π ^ 2 / 6 := by
+theorem trigamma_one_eq : Real.trigamma 1 = π ^ 2 / 6 := by
   rw [Real.trigamma_eq_tsum one_pos]
   exact hasSum_recip_one_add_sq.tsum_eq
 
-lemma summable_recip_one_add_cube : Summable fun n : ℕ => ((1 : ℝ) + n)⁻¹ ^ 3 := by
+theorem summable_recip_one_add_cube : Summable fun n : ℕ => ((1 : ℝ) + n)⁻¹ ^ 3 := by
   refine hasSum_recip_one_add_sq.summable.of_nonneg_of_le (fun n => by positivity) fun n => ?_
   have h1 : (1 : ℝ) ≤ 1 + n := by linarith [(Nat.cast_nonneg n : (0 : ℝ) ≤ n)]
   have h0 : ((1 : ℝ) + n)⁻¹ ≤ 1 := inv_le_one_of_one_le₀ h1
@@ -120,7 +112,7 @@ lemma summable_recip_one_add_cube : Summable fun n : ℕ => ((1 : ℝ) + n)⁻¹
   exact mul_le_of_le_one_right (by positivity) h0
 
 /-- `ζ(3) ≤ 4/3`, from `n⁻³ ≤ n⁻²/2` for `n ≥ 2` and `ζ(2) = π²/6`. -/
-lemma tsum_recip_one_add_cube_le : ∑' n : ℕ, ((1 : ℝ) + n)⁻¹ ^ 3 ≤ 4 / 3 := by
+theorem tsum_recip_one_add_cube_le : ∑' n : ℕ, ((1 : ℝ) + n)⁻¹ ^ 3 ≤ 4 / 3 := by
   set g : ℕ → ℝ := fun n : ℕ => ((1 : ℝ) + n)⁻¹ ^ 2 / 2 + if n = 0 then 1 / 2 else 0
   have hg : HasSum g (π ^ 2 / 6 / 2 + 1 / 2) :=
     (hasSum_recip_one_add_sq.div_const 2).add (hasSum_ite_eq 0 (1 / 2 : ℝ))
@@ -144,7 +136,7 @@ lemma tsum_recip_one_add_cube_le : ∑' n : ℕ, ((1 : ℝ) + n)⁻¹ ^ 3 ≤ 4 
     _ = π ^ 2 / 6 / 2 + 1 / 2 := hg.tsum_eq
     _ ≤ 4 / 3 := by nlinarith [Real.pi_lt_d2, Real.pi_pos]
 
-lemma recip_sq_sub_recip_sq_le {a s : ℝ} (ha : 0 < a) (hs : 0 ≤ s) :
+theorem recip_sq_sub_recip_sq_le {a s : ℝ} (ha : 0 < a) (hs : 0 ≤ s) :
     a⁻¹ ^ 2 - (a + s)⁻¹ ^ 2 ≤ 2 * s * a⁻¹ ^ 3 := by
   have hb : 0 < a + s := by linarith
   have key : a⁻¹ ^ 2 - (a + s)⁻¹ ^ 2 = s * (2 * a + s) / (a ^ 2 * (a + s) ^ 2) := by
@@ -155,7 +147,7 @@ lemma recip_sq_sub_recip_sq_le {a s : ℝ} (ha : 0 < a) (hs : 0 ≤ s) :
   nlinarith [this]
 
 /-- A Lipschitz bound for the trigamma function to the right of `1`. -/
-lemma trigamma_one_sub_le {s : ℝ} (hs : 0 ≤ s) :
+theorem trigamma_one_sub_le {s : ℝ} (hs : 0 ≤ s) :
     Real.trigamma 1 - Real.trigamma (1 + s) ≤ 8 / 3 * s := by
   have h1s : 0 < 1 + s := by linarith
   rw [Real.trigamma_eq_tsum one_pos, Real.trigamma_eq_tsum h1s,
@@ -171,13 +163,13 @@ lemma trigamma_one_sub_le {s : ℝ} (hs : 0 ≤ s) :
     _ ≤ 2 * s * (4 / 3) := mul_le_mul_of_nonneg_left tsum_recip_one_add_cube_le (by positivity)
     _ = 8 / 3 * s := by ring
 
-lemma hasDerivAt_digamma_trigamma {x : ℝ} (hx : 0 < x) :
+theorem hasDerivAt_digamma_trigamma {x : ℝ} (hx : 0 < x) :
     HasDerivAt Real.digamma (Real.trigamma x) x := by
   rw [Real.trigamma_eq_tsum hx]
   exact Real.hasDerivAt_digamma hx
 
 /-- Third-order Taylor lower bound for `log Γ` to the right of `1`. -/
-lemma log_Gamma_one_add_ge {t : ℝ} (ht : 0 ≤ t) :
+theorem log_Gamma_one_add_ge {t : ℝ} (ht : 0 ≤ t) :
     -γ * t + π ^ 2 / 6 * t ^ 2 / 2 - 4 / 9 * t ^ 3 ≤ Real.log (Real.Gamma (1 + t)) := by
   -- first derivative bound
   set g : ℝ → ℝ := fun s => Real.digamma (1 + s) + γ - π ^ 2 / 6 * s + 4 / 3 * s ^ 2
@@ -219,7 +211,7 @@ lemma log_Gamma_one_add_ge {t : ℝ} (ht : 0 ≤ t) :
   linarith
 
 /-- Second-order Taylor lower bound for `log Γ` to the left of `1`. -/
-lemma log_Gamma_one_sub_ge {r : ℝ} (hr0 : 0 ≤ r) (hr1 : r < 1) :
+theorem log_Gamma_one_sub_ge {r : ℝ} (hr0 : 0 ≤ r) (hr1 : r < 1) :
     γ * r + π ^ 2 / 6 * r ^ 2 / 2 ≤ Real.log (Real.Gamma (1 - r)) := by
   set k1 : ℝ → ℝ := fun s => -Real.digamma (1 - s) - γ - π ^ 2 / 6 * s
   have hk1d : ∀ s ∈ Ico (0 : ℝ) 1, HasDerivAt k1 (Real.trigamma (1 - s) - π ^ 2 / 6) s := by
@@ -258,7 +250,7 @@ lemma log_Gamma_one_sub_ge {r : ℝ} (hr0 : 0 ≤ r) (hr1 : r < 1) :
   linarith
 
 /-- `e^X + e^Y ≤ 2` once `4(X+Y) + (X-Y)² ≤ 0`, via `cosh d ≤ e^{d²/2}`. -/
-lemma exp_add_exp_le_two {X Y : ℝ} (h : 4 * (X + Y) + (X - Y) ^ 2 ≤ 0) :
+theorem exp_add_exp_le_two {X Y : ℝ} (h : 4 * (X + Y) + (X - Y) ^ 2 ≤ 0) :
     Real.exp X + Real.exp Y ≤ 2 := by
   have hc := Real.cosh_le_exp_half_sq ((X - Y) / 2)
   have heq : Real.exp X + Real.exp Y =
@@ -278,7 +270,7 @@ lemma exp_add_exp_le_two {X Y : ℝ} (h : 4 * (X + Y) + (X - Y) ^ 2 ≤ 0) :
     _ = 2 := by simp
 
 /-- The polynomial inequality behind DLMF 5.6.3. -/
-lemma recip_Gamma_sq_poly {t g Z : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) (hg0 : 1 / 2 ≤ g)
+theorem recip_Gamma_sq_poly {t g Z : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) (hg0 : 1 / 2 ≤ g)
     (hg1 : g ≤ 3 / 5) (hZ0 : 1643 / 1000 ≤ Z) (hZ1 : Z ≤ 1654 / 1000) :
     (g * ((1 + t) ^ 2 + (1 + t)) - Z * t ^ 2 * (2 + t) / 2 + 4 / 9 * t ^ 2 * (1 + t) ^ 2) ^ 2 ≤
       2 * (-g * (1 + t) + Z * ((1 + t) ^ 2 + 1) / 2 - 4 / 9 * t * (1 + t) ^ 2) *
@@ -323,11 +315,11 @@ lemma recip_Gamma_sq_poly {t g Z : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) (hg0 : 1
     _ ≤ 2 * f' * (1 + t) ^ 2 := hpoly
     _ ≤ 2 * f * (1 + t) ^ 2 := by gcongr
 
-lemma recip_sq_eq_exp {G : ℝ} (hG : 0 < G) : (1 / G) ^ 2 = Real.exp (-2 * Real.log G) := by
+theorem recip_sq_eq_exp {G : ℝ} (hG : 0 < G) : (1 / G) ^ 2 = Real.exp (-2 * Real.log G) := by
   rw [neg_mul, Real.exp_neg, show 2 * Real.log G = Real.log (G ^ 2) by
     rw [Real.log_pow]; norm_num, Real.exp_log (by positivity), one_div, inv_pow]
 
-lemma recip_Gamma_sq_add_of_one_le_of_lt_two {x : ℝ} (h1 : 1 ≤ x) (h2 : x < 2) :
+theorem recip_Gamma_sq_add_of_one_le_of_lt_two {x : ℝ} (h1 : 1 ≤ x) (h2 : x < 2) :
     (1 / Real.Gamma x) ^ 2 + (1 / Real.Gamma x⁻¹) ^ 2 ≤ 2 := by
   have hx0 : 0 < x := by linarith
   obtain ⟨t, rfl⟩ : ∃ t, x = 1 + t := ⟨x - 1, by ring⟩
@@ -411,7 +403,7 @@ theorem recip_Gamma_sq_add {x : ℝ} (hx : 0 < x) :
   exact recip_Gamma_sq_add_le_two hx
 
 /-- `ψ` is strictly increasing on `(0, ∞)`. -/
-lemma digamma_strictMonoOn : StrictMonoOn Real.digamma (Set.Ioi 0) := by
+theorem digamma_strictMonoOn : StrictMonoOn Real.digamma (Set.Ioi 0) := by
   intro x hx y hy hxy
   have hx' : (0 : ℝ) < x := hx
   have hy' : (0 : ℝ) < y := hy
@@ -426,7 +418,7 @@ lemma digamma_strictMonoOn : StrictMonoOn Real.digamma (Set.Ioi 0) := by
   linarith
 
 /-- `log Γ` is strictly convex on `(0, ∞)`. -/
-lemma strictConvexOn_log_Gamma :
+theorem strictConvexOn_log_Gamma :
     StrictConvexOn ℝ (Set.Ioi 0) fun y : ℝ => Real.log (Real.Gamma y) := by
   refine StrictMonoOn.strictConvexOn_of_deriv (convex_Ioi 0)
     (fun y hy => (Real.hasDerivAt_log_Gamma hy).continuousAt.continuousWithinAt) ?_
@@ -435,7 +427,7 @@ lemma strictConvexOn_log_Gamma :
   rw [(Real.hasDerivAt_log_Gamma ha).deriv, (Real.hasDerivAt_log_Gamma hb).deriv]
   exact digamma_strictMonoOn ha hb hab
 
-lemma log_Gamma_add_one' {y : ℝ} (hy : 0 < y) :
+theorem log_Gamma_add_one' {y : ℝ} (hy : 0 < y) :
     Real.log (Real.Gamma (y + 1)) = Real.log (Real.Gamma y) + Real.log y := by
   rw [Real.Gamma_add_one hy.ne', Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne', add_comm]
 
@@ -477,7 +469,7 @@ theorem Gamma_ratio_bounds {x s : ℝ} (hx : 0 < x) (hs0 : 0 < s) (hs1 : s < 1) 
     nlinarith
 
 /-- `log r ≤ (r - r⁻¹)/2` for `r ≥ 1` (logarithmic vs geometric mean). -/
-lemma log_le_half_sub_recip {r : ℝ} (hr : 1 ≤ r) : Real.log r ≤ (r - r⁻¹) / 2 := by
+theorem log_le_half_sub_recip {r : ℝ} (hr : 1 ≤ r) : Real.log r ≤ (r - r⁻¹) / 2 := by
   set k : ℝ → ℝ := fun r => (r - r⁻¹) / 2 - Real.log r with hk
   have hd : ∀ r : ℝ, 0 < r → HasDerivAt k ((1 + (r ^ 2)⁻¹) / 2 - r⁻¹) r := by
     intro r hr
@@ -499,7 +491,7 @@ lemma log_le_half_sub_recip {r : ℝ} (hr : 1 ≤ r) : Real.log r ≤ (r - r⁻�
   linarith
 
 /-- `log(b/a) ≤ (b - a)/√(ab)` for `0 < a ≤ b`. -/
-lemma log_div_le_sub_div_sqrt {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) :
+theorem log_div_le_sub_div_sqrt {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) :
     Real.log (b / a) ≤ (b - a) / Real.sqrt (a * b) := by
   set r := Real.sqrt (b / a) with hr
   have hba : 1 ≤ b / a := by rw [le_div_iff₀ ha]; linarith
@@ -521,7 +513,7 @@ lemma log_div_le_sub_div_sqrt {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) :
   linarith
 
 /-- `2(b - a)/(a + b) ≤ log(b/a)` for `0 < a ≤ b` (logarithmic vs arithmetic mean). -/
-lemma two_mul_sub_div_add_le_log {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) :
+theorem two_mul_sub_div_add_le_log {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) :
     2 * (b - a) / (a + b) ≤ Real.log (b / a) := by
   set k : ℝ → ℝ := fun r => Real.log r - 2 * (r - 1) / (r + 1) with hk
   have hd : ∀ r : ℝ, 0 < r → HasDerivAt k (r⁻¹ - 4 / (r + 1) ^ 2) r := by
@@ -549,7 +541,7 @@ lemma two_mul_sub_div_add_le_log {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) :
   linarith
 
 /-- `log Γ(z+1) - log Γ(z+s) - (1-s) ψ(z+c) → 0` as `z → ∞`, for `c > 0`. -/
-lemma tendsto_log_Gamma_ratio_sub_digamma {s c : ℝ} (hs0 : 0 < s) (hs1 : s < 1) (hc0 : 0 < c) :
+theorem tendsto_log_Gamma_ratio_sub_digamma {s c : ℝ} (hs0 : 0 < s) (hs1 : s < 1) (hc0 : 0 < c) :
     Tendsto (fun z : ℝ => Real.log (Real.Gamma (z + 1)) - Real.log (Real.Gamma (z + s)) -
       (1 - s) * Real.digamma (z + c)) atTop (𝓝 0) := by
   have hlogq : ∀ a b : ℝ, Tendsto (fun z : ℝ => Real.log (z + a) - Real.log (z + b)) atTop
@@ -602,7 +594,7 @@ lemma tendsto_log_Gamma_ratio_sub_digamma {s c : ℝ} (hs0 : 0 < s) (hs1 : s < 1
     nlinarith
 
 /-- A function on `(0, ∞)` with `F(y+1) ≤ F(y)` and `F(z) → 0` as `z → ∞` is nonnegative. -/
-lemma nonneg_of_antitone_step_of_tendsto {F : ℝ → ℝ} (hstep : ∀ y, 0 < y → F (y + 1) ≤ F y)
+theorem nonneg_of_antitone_step_of_tendsto {F : ℝ → ℝ} (hstep : ∀ y, 0 < y → F (y + 1) ≤ F y)
     (hlim : Tendsto F atTop (𝓝 0)) {y : ℝ} (hy : 0 < y) : 0 ≤ F y := by
   have hk : ∀ k : ℕ, F (y + k) ≤ F y := by
     intro k

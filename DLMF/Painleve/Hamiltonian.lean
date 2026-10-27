@@ -6,6 +6,14 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Painleve.Defs
+public import Mathlib.Analysis.Calculus.Deriv.Add
+public import Mathlib.Analysis.Calculus.Deriv.Inv
+public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.Calculus.Deriv.Pow
+public import Mathlib.Tactic.Basify
+public import Mathlib.Tactic.ENatToNat
+public import Mathlib.Tactic.Polynomial.Basic
+public import Mathlib.Tactic.ReduceModChar
 
 /-!
 # Hamiltonian structure: DLMF §32.6
@@ -388,7 +396,54 @@ theorem painleveIII_of_sigma {κ₀ κinf θ₀ θinf : ℂ} {σ σ₁ σ₂ : �
           κ₀ * z) / z) z ∧
         HasDerivAt p ((-2 * q z * p z ^ 2 + 2 * κinf * z * q z * p z + (2 * θ₀ + 1) * p z -
           κinf * (θ₀ + θinf) * z) / z) z := by
-  sorry
+  intro q p z hzU
+  have hid := hasDerivAt_id z
+  have h3 := (h₂ z hzU).hasDerivAt
+  have hd0 := hden z hzU
+  have hd4 : 4 * κ₀ ^ 2 * κinf ^ 2 * z ^ 2 - 4 * σ₁ z ^ 2 ≠ 0 := by
+    intro h; apply hd0; linear_combination h / 4
+  have hnd' := hnd z hzU
+  have hz0 := hz z hzU
+  have hE := (((((hid.mul h3).sub (h₁ z hzU)).pow 2).add
+    (((((h₁ z hzU).pow 2).sub ((hid.pow 2).const_mul (κ₀ ^ 2 * κinf ^ 2))).const_mul 2).mul
+      ((hid.mul (h₁ z hzU)).sub ((h₀ z hzU).const_mul 2)))).add
+    ((hid.const_mul (8 * κ₀ * κinf * θ₀ * θinf)).mul (h₁ z hzU))).sub
+    ((hid.pow 2).const_mul (4 * κ₀ ^ 2 * κinf ^ 2 * (θ₀ ^ 2 + θinf ^ 2)))
+  have h0 := a32_hasDerivAt_eq_zero hU (fun y hy => sub_eq_zero.mpr (hσ y hy)) hzU hE
+  simp only [Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, id] at h0
+  have key : deriv σ₂ z = (-4 * κ₀ ^ 2 * κinf ^ 2 * σ z * z + κ₀ ^ 2 * κinf ^ 2 * σ₁ z * z ^ 2 +
+      κ₀ ^ 2 * κinf ^ 2 * σ₂ z * z ^ 3 + 4 * κ₀ ^ 2 * κinf ^ 2 * θ₀ ^ 2 * z +
+      4 * κ₀ ^ 2 * κinf ^ 2 * θinf ^ 2 * z - 4 * κ₀ * κinf * σ₁ z * θ₀ * θinf -
+      4 * κ₀ * κinf * σ₂ z * θ₀ * θinf * z + 4 * σ z * σ₁ z * σ₂ z + σ₁ z ^ 3 -
+      3 * σ₁ z ^ 2 * σ₂ z * z) / (z * (z * σ₂ z - σ₁ z)) := by
+    rw [eq_div_iff (mul_ne_zero hz0 hnd')]
+    linear_combination h0 / 2
+  have hsv : σ z = (2 * κ₀ ^ 2 * κinf ^ 2 * σ₁ z * z ^ 3 + 4 * κ₀ ^ 2 * κinf ^ 2 * θ₀ ^ 2 * z ^ 2 +
+      4 * κ₀ ^ 2 * κinf ^ 2 * θinf ^ 2 * z ^ 2 - 8 * κ₀ * κinf * σ₁ z * θ₀ * θinf * z -
+      2 * σ₁ z ^ 3 * z - σ₁ z ^ 2 + 2 * σ₁ z * σ₂ z * z - σ₂ z ^ 2 * z ^ 2) /
+      (4 * κ₀ ^ 2 * κinf ^ 2 * z ^ 2 - 4 * σ₁ z ^ 2) := by
+    rw [eq_div_iff hd4]
+    linear_combination hσ z hzU
+  refine ⟨?_, ?_⟩
+  · have hd := (((((hid.mul h3).sub ((h₁ z hzU).const_mul (2 * θ₀ + 1))).add
+      (hid.const_mul (2 * κ₀ * κinf * θinf))).const_mul κ₀).div
+      (((hid.pow 2).const_mul (κ₀ ^ 2 * κinf ^ 2)).sub ((h₁ z hzU).pow 2)) hd0)
+    convert hd using 1
+    · funext x
+      simp only [Pi.sub_apply, Pi.add_apply, Pi.mul_apply, Pi.pow_apply, Pi.div_apply, id, q]
+    simp only [Pi.sub_apply, Pi.add_apply, Pi.mul_apply, Pi.pow_apply, id, q, p]
+    rw [key, hsv]
+    generalize hD : κ₀ ^ 2 * κinf ^ 2 * z ^ 2 - σ₁ z ^ 2 = D at hd0 ⊢
+    generalize hD4 : 4 * κ₀ ^ 2 * κinf ^ 2 * z ^ 2 - 4 * σ₁ z ^ 2 = D4 at hd4 ⊢
+    field_simp
+    subst hD hD4
+    ring
+  · refine (((h₁ z hzU).add (hid.const_mul (κ₀ * κinf))).div_const (2 * κ₀)).congr_deriv ?_
+    simp only [q, p]
+    generalize hD : κ₀ ^ 2 * κinf ^ 2 * z ^ 2 - σ₁ z ^ 2 = D at hd0 ⊢
+    field_simp
+    subst hD
+    ring
 
 /-! ### `P'III` -/
 
@@ -520,7 +575,50 @@ theorem painleveIIIPrime_of_sigma {η₀ ηinf θ₀ θinf : ℂ} {σ σ₁ σ�
     ∀ z ∈ U, HasDerivAt q ((2 * q z ^ 2 * p z - ηinf * q z ^ 2 - θ₀ * q z + η₀ * z) / z) z ∧
         HasDerivAt p ((-2 * q z * p z ^ 2 + 2 * ηinf * q z * p z + θ₀ * p z -
           ηinf * (θ₀ + θinf) / 2) / z) z := by
-  sorry
+  intro q p z hzU
+  have hid := hasDerivAt_id z
+  have h3 := (h₂ z hzU).hasDerivAt
+  have hd0 := hden z hzU
+  have hnd' := hnd z hzU
+  have hz0 := hz z hzU
+  have hE := ((((hid.pow 2).mul (h3.pow 2)).add
+    ((((h₁ z hzU).pow 2).const_mul 4 |>.sub_const (η₀ ^ 2 * ηinf ^ 2)).mul
+      ((hid.mul (h₁ z hzU)).sub (h₀ z hzU)))).add
+    ((h₁ z hzU).const_mul (η₀ * ηinf * θ₀ * θinf))).sub_const
+    (η₀ ^ 2 * ηinf ^ 2 * (θ₀ ^ 2 + θinf ^ 2) / 4)
+  have h0 := a32_hasDerivAt_eq_zero hU (fun y hy => sub_eq_zero.mpr (hσ y hy)) hzU hE
+  simp only [Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, id] at h0
+  have key0 : σ₂ z * (deriv σ₂ z * (2 * z ^ 2) - (-η₀ * ηinf * θ₀ * θinf + 8 * σ z * σ₁ z +
+      z * (η₀ ^ 2 * ηinf ^ 2 - 12 * σ₁ z ^ 2 - 2 * σ₂ z))) = 0 := by
+    linear_combination h0
+  have key : deriv σ₂ z = (-η₀ * ηinf * θ₀ * θinf + 8 * σ z * σ₁ z +
+      z * (η₀ ^ 2 * ηinf ^ 2 - 12 * σ₁ z ^ 2 - 2 * σ₂ z)) / (2 * z ^ 2) := by
+    rw [eq_div_iff (mul_ne_zero two_ne_zero (pow_ne_zero 2 hz0))]
+    linear_combination (mul_eq_zero.mp key0).resolve_left hnd'
+  have hsv : σ z = (η₀ ^ 2 * ηinf ^ 2 * σ₁ z * z + η₀ ^ 2 * ηinf ^ 2 * θ₀ ^ 2 / 4 +
+      η₀ ^ 2 * ηinf ^ 2 * θinf ^ 2 / 4 - η₀ * ηinf * σ₁ z * θ₀ * θinf - 4 * σ₁ z ^ 3 * z -
+      σ₂ z ^ 2 * z ^ 2) / (η₀ ^ 2 * ηinf ^ 2 - 4 * σ₁ z ^ 2) := by
+    rw [eq_div_iff hd0]
+    linear_combination hσ z hzU
+  refine ⟨?_, ?_⟩
+  · have hd := (((((hid.const_mul 2).mul h3).sub ((h₁ z hzU).const_mul (2 * θ₀))).add_const
+      (η₀ * ηinf * θinf)).const_mul η₀).div (((h₁ z hzU).pow 2).const_mul 4 |>.const_sub
+      (η₀ ^ 2 * ηinf ^ 2)) hd0
+    convert hd using 1
+    · funext x
+      simp only [Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, Pi.div_apply, id, q]
+    simp only [Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, id, q, p]
+    rw [key, hsv]
+    generalize hD : η₀ ^ 2 * ηinf ^ 2 - 4 * σ₁ z ^ 2 = D at hd0 ⊢
+    field_simp
+    subst hD
+    ring
+  · refine ((((h₁ z hzU).const_mul 2).add_const (η₀ * ηinf)).div_const (2 * η₀)).congr_deriv ?_
+    simp only [q, p]
+    generalize hD : η₀ ^ 2 * ηinf ^ 2 - 4 * σ₁ z ^ 2 = D at hd0 ⊢
+    field_simp
+    subst hD
+    ring
 
 /-! ### `PIII` with `γ = 0` -/
 
@@ -639,6 +737,41 @@ theorem painleveIIIGammaZero_of_sigma {κ₀ κinf θ : ℂ} {σ σ₁ σ₂ : �
     let p := fun z => -σ₁ z / (2 * κ₀)
     ∀ z ∈ U, HasDerivAt q ((2 * q z ^ 2 * p z + θ * q z - κ₀ * z) / z) z ∧
         HasDerivAt p ((-2 * q z * p z ^ 2 - θ * p z + κinf * z) / z) z := by
-  sorry
+  intro q p z hzU
+  have hid := hasDerivAt_id z
+  have h3 := (h₂ z hzU).hasDerivAt
+  have hs1 := hσ₁ z hzU
+  have hnd' := hnd z hzU
+  have hz0 := hz z hzU
+  have hE := (((((hid.mul h3).sub (h₁ z hzU)).pow 2).add
+    ((((h₁ z hzU).pow 2).const_mul 2).mul ((hid.mul (h₁ z hzU)).sub
+      ((h₀ z hzU).const_mul 2)))).sub ((hid.const_mul
+      (4 * κ₀ * κinf * (θ + 1))).mul (h₁ z hzU))).sub
+      ((hid.pow 2).const_mul (4 * κ₀ ^ 2 * κinf ^ 2))
+  have h0 := a32_hasDerivAt_eq_zero hU (fun y hy => sub_eq_zero.mpr (hσ y hy)) hzU hE
+  simp only [Pi.sub_apply, Pi.mul_apply, Pi.pow_apply, id] at h0
+  have key : deriv σ₂ z = (4 * κ₀ ^ 2 * κinf ^ 2 * z + 2 * κ₀ * κinf * σ₁ z * θ +
+      2 * κ₀ * κinf * σ₁ z + 2 * κ₀ * κinf * σ₂ z * θ * z + 2 * κ₀ * κinf * σ₂ z * z +
+      4 * σ z * σ₁ z * σ₂ z + σ₁ z ^ 3 - 3 * σ₁ z ^ 2 * σ₂ z * z) / (z * (z * σ₂ z - σ₁ z)) := by
+    rw [eq_div_iff (mul_ne_zero hz0 hnd')]
+    linear_combination h0 / 2
+  have hsv : σ z = (-κ₀ ^ 2 * κinf ^ 2 * z ^ 2 - κ₀ * κinf * σ₁ z * z * (θ + 1) +
+      σ₁ z ^ 3 * z / 2 + (σ₁ z - σ₂ z * z) ^ 2 / 4) / σ₁ z ^ 2 := by
+    rw [eq_div_iff (pow_ne_zero 2 hs1)]
+    linear_combination (-1 / 4 : ℂ) * hσ z hzU
+  refine ⟨?_, ?_⟩
+  · have hd := ((((hid.mul h3).add ((h₁ z hzU).const_mul θ)).add
+      (hid.const_mul (2 * κ₀ * κinf))).const_mul κ₀).div ((h₁ z hzU).pow 2) (pow_ne_zero 2 hs1)
+    convert hd using 1
+    · funext x
+      simp only [Pi.add_apply, Pi.mul_apply, Pi.pow_apply, Pi.div_apply, id, q]
+    simp only [Pi.add_apply, Pi.mul_apply, Pi.pow_apply, id, q, p]
+    rw [key, hsv]
+    field_simp
+    ring
+  · refine ((h₁ z hzU).neg.div_const (2 * κ₀)).congr_deriv ?_
+    simp only [q, p]
+    field_simp
+    ring
 
 end DLMF.Painleve

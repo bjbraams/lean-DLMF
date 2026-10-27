@@ -6,9 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Confluent.IntegralRepresentations
-public import DLMF.Confluent.Recurrence
 public import DLMF.Hypergeometric.EulerHalfLine
-public import Mathlib.MeasureTheory.Integral.Prod
 
 /-!
 # Tricomi's Laplace transform with unrestricted first parameter
@@ -31,7 +29,7 @@ def tricomiLaplaceKernel (a b c z : ℂ) (t : ℝ) : ℂ :=
   exp (-z * t) * (t : ℂ) ^ (b - 1) * kummerU a c t
 
 /-- Absolute integrability of the double Laplace kernel in its initial parameter region. -/
-lemma integrable_tricomi_double_kernel {a b c z : ℂ}
+theorem integrable_tricomi_double_kernel {a b c z : ℂ}
     (ha : 0 < a.re) (hb : 0 < b.re) (hbc : (c - 1).re < b.re) (hz : 0 < z.re) :
     Integrable (fun q : ℝ × ℝ => exp (-(z + q.2) * q.1) * (q.1 : ℂ) ^ (b - 1) *
       (q.2 : ℂ) ^ (a - 1) * (1 + (q.2 : ℂ)) ^ (c - a - 1))
@@ -86,7 +84,7 @@ lemma integrable_tricomi_double_kernel {a b c z : ℂ}
     exact (hnormIntegral u hu).symm
 
 /-- Tricomi's transform and its absolute integrability when the Laplace representation applies. -/
-lemma laplace_kummerU_gauss_of_re_pos {a b c z : ℂ}
+theorem laplace_kummerU_gauss_of_re_pos {a b c z : ℂ}
     (ha : 0 < a.re) (hb : 0 < b.re) (hbc : (c - 1).re < b.re) (hz : 0 < z.re) :
     IntegrableOn (tricomiLaplaceKernel a b c z) (Ioi 0) ∧
       (∫ t : ℝ in Ioi 0, tricomiLaplaceKernel a b c z t) =
@@ -126,7 +124,7 @@ lemma laplace_kummerU_gauss_of_re_pos {a b c z : ℂ}
   field_simp [Gamma_ne_zero_of_re_pos ha]
 
 /-- The Tricomi Laplace transform on its full parameter region, with absolute integrability. -/
-lemma laplace_kummerU_gauss {a b c z : ℂ}
+theorem laplace_kummerU_gauss {a b c z : ℂ}
     (hb : 0 < b.re) (hbc : (c - 1).re < b.re) (hz : 0 < z.re) :
     IntegrableOn (tricomiLaplaceKernel a b c z) (Ioi 0) ∧
       (∫ t : ℝ in Ioi 0, tricomiLaplaceKernel a b c z t) =

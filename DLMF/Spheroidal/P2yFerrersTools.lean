@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Legendre.IntegralTools
-public import Mathlib.Topology.ContinuousMap.Weierstrass
+public import DLMF.Legendre.IntegerTheory
 
 /-!
 # Tools for the Ferrers expansion of spheroidal functions (DLMF §30.8)
@@ -36,7 +36,7 @@ theorem p2y_integral_congr_Ioo {E : Type*} [NormedAddCommGroup E] [NormedSpace �
   exact h x ⟨hxI.1, lt_of_le_of_ne hxI.2 hx⟩
 
 /-- A continuous nonnegative function on `[-1, 1]` with zero integral vanishes on `(-1, 1)`. -/
-theorem p2y_eq_zero_of_integral_eq_zero {f : ℝ → ℝ} (hf : ContinuousOn f (Icc (-1) 1))
+lemma p2y_eq_zero_of_integral_eq_zero {f : ℝ → ℝ} (hf : ContinuousOn f (Icc (-1) 1))
     (h0 : ∀ x ∈ Icc (-1 : ℝ) 1, 0 ≤ f x) (hint : ∫ x in (-1 : ℝ)..1, f x = 0) :
     ∀ x ∈ Ioo (-1 : ℝ) 1, f x = 0 := by
   intro c hc
@@ -70,7 +70,7 @@ theorem p2y_eq_zero_of_integral_eq_zero {f : ℝ → ℝ} (hf : ContinuousOn f (
 
 /-- **Completeness of the monomials** in `L²((1-x²)^m dx)` on `[-1, 1]`: a continuous `H` all of
 whose weighted moments vanish is zero on `(-1, 1)` (Weierstrass approximation). -/
-theorem p2y_eq_zero_of_moments {H : ℝ → ℝ} (hH : ContinuousOn H (Icc (-1) 1)) (m : ℕ)
+lemma p2y_eq_zero_of_moments {H : ℝ → ℝ} (hH : ContinuousOn H (Icc (-1) 1)) (m : ℕ)
     (h : ∀ i : ℕ, ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * H x * x ^ i = 0) :
     ∀ x ∈ Ioo (-1 : ℝ) 1, H x = 0 := by
   have hw : ContinuousOn (fun x : ℝ => (1 - x ^ 2) ^ m * H x) (Icc (-1) 1) :=
@@ -152,7 +152,7 @@ theorem p2y_eq_zero_of_moments {H : ℝ → ℝ} (hH : ContinuousOn H (Icc (-1) 
 /-- The three-term recurrence of `P_ν^{(m)}` (from DLMF 14.10.3) on `(-1, 1)`:
 `(2ν+1) x P_ν^{(m)} = (ν-m+1) P_{ν+1}^{(m)} + (ν+m) P_{ν-1}^{(m)}`, the last term absent for
 `ν = m`. -/
-theorem p2y_D_rec (m ν : ℕ) (hν : m ≤ ν) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
+lemma p2y_D_rec (m ν : ℕ) (hν : m ≤ ν) {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
     (2 * (ν : ℝ) + 1) * x * (legInt_D ν m x).re =
       ((ν : ℝ) - m + 1) * (legInt_D (ν + 1) m x).re +
         ((ν : ℝ) + m) * (if m < ν then (legInt_D (ν - 1) m x).re else 0) := by
@@ -204,7 +204,7 @@ theorem p2y_D_rec (m ν : ℕ) (hν : m ≤ ν) {x : ℝ} (hx : x ∈ Ioo (-1 : 
     linarith
 
 /-- `P_m^{(m)}` is a nonzero constant. -/
-theorem p2y_D_self (m : ℕ) : ∃ c : ℝ, c ≠ 0 ∧ ∀ x : ℝ, (legInt_D m m x).re = c := by
+lemma p2y_D_self (m : ℕ) : ∃ c : ℝ, c ≠ 0 ∧ ∀ x : ℝ, (legInt_D m m x).re = c := by
   set q := legendrePolyR m with hq
   have hf : OrthogonalPolynomials.legendrePolyP m =
       fun z => ((legendrePolyR m).map ofRealHom).eval z := funext (legendrePolyP_eq_eval m)
@@ -249,7 +249,7 @@ theorem p2y_D_self (m : ℕ) : ∃ c : ℝ, c ≠ 0 ∧ ∀ x : ℝ, (legInt_D m
 
 /-- **Ferrers moments determine the monomial moments**: if `∫ (1-x²)^m H P_ν^{(m)} = 0` for every
 `ν ≥ m`, then `∫ (1-x²)^m H x^i = 0` for every `i`. -/
-theorem p2y_moments_of_ferrers {H : ℝ → ℝ} (hH : ContinuousOn H (Icc (-1) 1)) (m : ℕ)
+lemma p2y_moments_of_ferrers {H : ℝ → ℝ} (hH : ContinuousOn H (Icc (-1) 1)) (m : ℕ)
     (h : ∀ ν : ℕ, m ≤ ν → ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * H x * (legInt_D ν m x).re = 0) :
     ∀ i : ℕ, ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * H x * x ^ i = 0 := by
   have hc : ∀ (i ν : ℕ), ContinuousOn (fun x : ℝ => (1 - x ^ 2) ^ m * H x * x ^ i *

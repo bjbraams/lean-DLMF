@@ -5,7 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Weierstrass.Relations
 public import DLMF.Weierstrass.SpecialLattices
 
 /-!
@@ -34,7 +33,7 @@ namespace DLMF.Weierstrass
 
 /-- For a half-lattice point `a`, `(℘(a/2) - ℘(a))² = (℘(b + a) - ℘(a))(℘(b) - ℘(a))` for every
 `b` with `b, b + a ∉ 𝕃`. -/
-theorem p23R1_weierstrassP_half_sub_sq (L : PeriodPair) {a b : ℂ} (ha : a ∉ L.lattice)
+lemma p23R1_weierstrassP_half_sub_sq (L : PeriodPair) {a b : ℂ} (ha : a ∉ L.lattice)
     (h2a : 2 * a ∈ L.lattice) (hb : b ∉ L.lattice) (hab : b + a ∉ L.lattice) :
     (℘[L] (a / 2) - ℘[L] a) ^ 2 = (℘[L] (b + a) - ℘[L] a) * (℘[L] b - ℘[L] a) := by
   obtain ⟨K, hK⟩ := p23R1_halfPeriod_product L ha h2a

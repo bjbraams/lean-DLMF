@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Hypergeometric.DiffEq
-public import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
 
 /-!
 # Higher derivatives and contiguous relations (DLMF §15.5)
@@ -32,7 +31,7 @@ theorem ordinaryHypergeometric_symm (a b c : ℂ) : (₂F₁ a b c : ℂ → ℂ
   unfold ordinaryHypergeometric
   rw [ordinaryHypergeometricSeries_symm]
 
-private theorem hg_symm (a b c : ℂ) : (₂F₁ a b c : ℂ → ℂ) = ₂F₁ b a c :=
+private lemma hg_symm (a b c : ℂ) : (₂F₁ a b c : ℂ → ℂ) = ₂F₁ b a c :=
   ordinaryHypergeometric_symm a b c
 
 /-- The differential operator `f ↦ z * (z * f)'`. -/

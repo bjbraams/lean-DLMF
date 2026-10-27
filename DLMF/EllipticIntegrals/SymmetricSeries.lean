@@ -6,12 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.EllipticIntegrals.Symmetric
-public import Mathlib.Data.Fin.Tuple.NatAntidiagonal
-public import Mathlib.RingTheory.MvPolynomial.Symmetric.Defs
-public import Mathlib.RingTheory.Polynomial.Pochhammer
 public import Carlson.R.BinomialSeries
-public import Carlson.RPolynomial.Generating
-public import Carlson.R.Homogeneity
 
 /-!
 # Symmetric elliptic integrals: Taylor and related series (DLMF §19.19)
@@ -116,7 +111,7 @@ theorem symEllIntR_hasSum_T {n : ℕ} (a : ℂ) (b z : Fin n → ℂ) (hc : 0 < 
 
 /-- Complex homogeneity of `R_{-a}(𝐛; 𝐳)` (helper; any complex `a, 𝐛`): for slit-plane nodes and
 a slit-plane scale `μ` with `arg μ + arg zᵢ ∈ (-π, π)`, `R_{-a}(𝐛; μ𝐳) = μ^{-a} R_{-a}(𝐛; 𝐳)`. -/
-theorem p19sR1_symEllIntR_mul {ι : Type*} [Fintype ι] (a : ℂ) (b : ι → ℂ) {μ : ℂ} {z : ι → ℂ}
+lemma p19sR1_symEllIntR_mul {ι : Type*} [Fintype ι] (a : ℂ) (b : ι → ℂ) {μ : ℂ} {z : ι → ℂ}
     (hz : z ∈ Carlson.carlsonRSlitDomain) (hμ : μ ∈ slitPlane)
     (harg : ∀ i, arg μ + arg (z i) ∈ Ioo (-Real.pi) Real.pi) :
     symEllIntR a b (fun i => μ * z i) = μ ^ (-a) * symEllIntR a b z := by
@@ -133,7 +128,7 @@ theorem p19sR1_symEllIntR_mul {ι : Type*} [Fintype ι] (a : ℂ) (b : ι → �
 
 /-- Complex homogeneity on the right half-plane (helper): `R_{-a}(𝐛; μ𝐳) = μ^{-a} R_{-a}(𝐛; 𝐳)`
 for `ℜ μ > 0` and `ℜ zᵢ > 0`. -/
-theorem p19sR1_symEllIntR_mul_of_re_pos {ι : Type*} [Fintype ι] (a : ℂ) (b : ι → ℂ) {μ : ℂ}
+lemma p19sR1_symEllIntR_mul_of_re_pos {ι : Type*} [Fintype ι] (a : ℂ) (b : ι → ℂ) {μ : ℂ}
     {z : ι → ℂ} (hz : ∀ i, 0 < (z i).re) (hμ : 0 < μ.re) :
     symEllIntR a b (fun i => μ * z i) = μ ^ (-a) * symEllIntR a b z := by
   refine p19sR1_symEllIntR_mul a b (fun i => mem_slitPlane_iff.mpr (Or.inl (hz i)))
@@ -143,7 +138,7 @@ theorem p19sR1_symEllIntR_mul_of_re_pos {ι : Type*} [Fintype ι] (a : ℂ) (b :
   constructor <;> linarith [Real.pi_pos]
 
 /-- Helper for 19.19.3: `T_N` with vanishing last variable drops that variable. -/
-theorem p19sR1_symEllIntT_last_zero {n : ℕ} (N : ℕ) (b v : Fin (n + 1) → ℂ)
+lemma p19sR1_symEllIntT_last_zero {n : ℕ} (N : ℕ) (b v : Fin (n + 1) → ℂ)
     (hv : v (Fin.last n) = 0) :
     symEllIntT N b v = symEllIntT N (fun j : Fin n => b j.castSucc) (fun j => v j.castSucc) := by
   unfold symEllIntT

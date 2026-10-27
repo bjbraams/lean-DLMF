@@ -7,14 +7,12 @@ module
 
 public import DLMFMathlib.Analysis.Complex.TaylorParameter
 
-public import DLMF.Hypergeometric.Solutions
 public import DLMF.Bessel.Modified
 public import Mathlib.Analysis.SpecialFunctions.Arcosh
 public import Mathlib.Analysis.Complex.TaylorSeries
 public import DLMF.Gamma.Asymptotics
 public import DLMF.Gamma.RecipGammaDeriv
-public import DLMFMathlib.Analysis.Asymptotics.Watson
-public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
+public import DLMF.Hypergeometric.Continuation
 
 /-!
 # Large-parameter asymptotics (DLMF §15.12)
@@ -41,7 +39,7 @@ noncomputable section
 namespace DLMF.Hypergeometric
 
 /-- `c^m k! ≤ m! (c)_k` for real `c ≥ 1` and `k ≥ m`. -/
-lemma pow_mul_factorial_le_poch {c : ℝ} (hc : 1 ≤ c) {m k : ℕ} (hk : m ≤ k) :
+theorem pow_mul_factorial_le_poch {c : ℝ} (hc : 1 ≤ c) {m k : ℕ} (hk : m ≤ k) :
     c ^ m * k.factorial ≤ m.factorial * (ascPochhammer ℝ k).eval c := by
   induction k, hk using Nat.le_induction with
   | base =>
@@ -148,21 +146,21 @@ def largeDenominatorCoeff (a b c z : ℂ) (n : ℕ) : ℂ :=
   iteratedDeriv n (largeDenominatorGenerating a b c z) 0 / (n.factorial : ℂ)
 
 /-- `expSubOneDiv` is the difference quotient of `exp` at `0`. -/
-lemma expSubOneDiv_eq_dslope : expSubOneDiv = dslope exp 0 := by
+theorem expSubOneDiv_eq_dslope : expSubOneDiv = dslope exp 0 := by
   funext t
   by_cases ht : t = 0
   · subst ht; simp [expSubOneDiv, dslope_same, Complex.deriv_exp]
   · rw [expSubOneDiv, ite_eq_right_iff.mpr (fun h => absurd h ht), dslope_of_ne _ ht, slope_def_field, exp_zero, sub_zero]
 
 /-- `expSubOneDiv` is entire. -/
-lemma analyticAt_expSubOneDiv (t : ℂ) : AnalyticAt ℂ expSubOneDiv t := by
+theorem analyticAt_expSubOneDiv (t : ℂ) : AnalyticAt ℂ expSubOneDiv t := by
   rw [expSubOneDiv_eq_dslope]
   have h : DifferentiableOn ℂ (dslope exp 0) Set.univ :=
     (differentiableOn_dslope Filter.univ_mem).mpr differentiable_exp.differentiableOn
   exact h.analyticAt Filter.univ_mem
 
 /-- The generating function is analytic at `0`. -/
-lemma analyticAt_largeDenominatorGenerating (a b c z : ℂ) :
+theorem analyticAt_largeDenominatorGenerating (a b c z : ℂ) :
     AnalyticAt ℂ (largeDenominatorGenerating a b c z) 0 := by
   have h1 : expSubOneDiv 0 ∈ slitPlane := by simp [expSubOneDiv]
   have h2 : (1 - z + z * exp (-(0 : ℂ))) ∈ slitPlane := by simp
@@ -204,12 +202,12 @@ section ShiftExpansion
 open MeasureTheory Set Asymptotics
 open scoped Nat
 
-lemma hcub_ofReal_cpow_exp (t : ℝ) (w : ℂ) :
+theorem hcub_ofReal_cpow_exp (t : ℝ) (w : ℂ) :
     ((Real.exp t : ℝ) : ℂ) ^ w = exp (t * w) := by
   rw [cpow_def_of_ne_zero (by exact_mod_cast (Real.exp_pos t).ne'), ← ofReal_log (Real.exp_pos t).le,
     Real.log_exp]
 
-lemma hcub_image : (fun t : ℝ => 1 - Real.exp (-t)) '' Ioi 0 = Ioo 0 1 := by
+theorem hcub_image : (fun t : ℝ => 1 - Real.exp (-t)) '' Ioi 0 = Ioo 0 1 := by
   ext s
   simp only [mem_image, mem_Ioi, mem_Ioo]
   constructor
@@ -223,19 +221,19 @@ lemma hcub_image : (fun t : ℝ => 1 - Real.exp (-t)) '' Ioi 0 = Ioo 0 1 := by
       linarith
     · rw [neg_neg, Real.exp_log (by linarith)]; ring
 
-lemma hcub_hasDerivWithinAt (t : ℝ) :
+theorem hcub_hasDerivWithinAt (t : ℝ) :
     HasDerivWithinAt (fun t : ℝ => 1 - Real.exp (-t)) (Real.exp (-t)) (Ioi 0) t := by
   have h := ((Real.hasDerivAt_exp (-t)).comp t (hasDerivAt_neg t)).const_sub 1
   refine (h.congr_deriv ?_).hasDerivWithinAt
   simp
 
-lemma hcub_injOn : InjOn (fun t : ℝ => 1 - Real.exp (-t)) (Ioi 0) := by
+theorem hcub_injOn : InjOn (fun t : ℝ => 1 - Real.exp (-t)) (Ioi 0) := by
   intro x _ y _ h
   have : Real.exp (-x) = Real.exp (-y) := by simp only at h; linarith
   have := Real.exp_injective this
   linarith
 
-lemma hcub_cpow_mul_cpow_neg {b : ℝ} (hb : 0 < b) (a : ℂ) (s : ℕ) :
+theorem hcub_cpow_mul_cpow_neg {b : ℝ} (hb : 0 < b) (a : ℂ) (s : ℕ) :
     (b : ℂ) ^ a * (b : ℂ) ^ (-((s : ℂ) + a)) = ((b : ℂ)⁻¹) ^ s := by
   have hb0 : (b : ℂ) ≠ 0 := by exact_mod_cast hb.ne'
   rw [← cpow_add _ _ hb0, show a + -((s : ℂ) + a) = -(s : ℂ) by ring, cpow_neg, cpow_natCast,
@@ -243,7 +241,7 @@ lemma hcub_cpow_mul_cpow_neg {b : ℝ} (hb : 0 < b) (a : ℂ) (s : ℕ) :
 
 /-- `b^p Γ(b+c-p)/Γ(b+c+s) = ∑_{k<n-s} G_k b^{-s-k} + O(b^{-n})`, from the Gamma-ratio
 expansion 5.11.13. -/
-lemma hcub_ratio_shift (p c : ℂ) {s n : ℕ} (hs : s ≤ n) :
+theorem hcub_ratio_shift (p c : ℂ) {s n : ℕ} (hs : s ≤ n) :
     (fun b : ℝ => (b : ℂ) ^ p * Gamma ((b : ℂ) + (c - p)) / Gamma ((b : ℂ) + (c + s)) -
       ∑ k ∈ Finset.range (n - s),
         DLMF.Gamma.stirlingRatioG (c - p) (c + s) k * ((b : ℂ)⁻¹) ^ (s + k))
@@ -265,7 +263,7 @@ lemma hcub_ratio_shift (p c : ℂ) {s n : ℕ} (hs : s ≤ n) :
       hcub_cpow_mul_cpow_neg hb]
 
 /-- The scale `b ↦ b^{-n}` (complex-valued) at `+∞`. -/
-lemma hcub_isAsymptoticScale :
+theorem hcub_isAsymptoticScale :
     IsAsymptoticScale atTop (fun (n : ℕ) (b : ℝ) => ((b : ℂ)⁻¹) ^ n) := by
   intro n
   have h0 : (fun b : ℝ => (b : ℂ)⁻¹) =o[atTop] (fun _ => (1 : ℂ)) := by
@@ -275,11 +273,11 @@ lemma hcub_isAsymptoticScale :
   have := h0.mul_isBigO (isBigO_refl (fun b : ℝ => ((b : ℂ)⁻¹) ^ n) atTop)
   simpa [pow_succ, mul_comm] using this
 
-lemma hcub_frequently_ne (n : ℕ) : ∃ᶠ b : ℝ in atTop, ((b : ℂ)⁻¹) ^ n ≠ 0 := by
+theorem hcub_frequently_ne (n : ℕ) : ∃ᶠ b : ℝ in atTop, ((b : ℂ)⁻¹) ^ n ≠ 0 := by
   refine (eventually_gt_atTop (0 : ℝ)).mono (fun b hb => ?_) |>.frequently
   exact pow_ne_zero _ (inv_ne_zero (by exact_mod_cast hb.ne'))
 
-lemma hcub_differentiable_stirlingRatioG (c : ℂ) (k : ℕ) :
+theorem hcub_differentiable_stirlingRatioG (c : ℂ) (k : ℕ) :
     Differentiable ℂ (fun x => DLMF.Gamma.stirlingRatioG x c k) := by
   induction k using Nat.strong_induction_on with
   | _ k ih =>
@@ -298,7 +296,7 @@ lemma hcub_differentiable_stirlingRatioG (c : ℂ) (k : ℕ) :
       exact (((differentiable_const _).mul ((Polynomial.differentiable_aeval _).sub
         (differentiable_const _))).div_const _).mul (ih _ (by omega))
 
-lemma hcub_expSubOneDiv_re_pos {t : ℂ} (ht : ‖t‖ ≤ 1 / 2) : 0 < (expSubOneDiv t).re := by
+theorem hcub_expSubOneDiv_re_pos {t : ℂ} (ht : ‖t‖ ≤ 1 / 2) : 0 < (expSubOneDiv t).re := by
   rcases eq_or_ne t 0 with rfl | ht0
   · simp [expSubOneDiv]
   have h := Complex.norm_exp_sub_one_sub_id_le (x := t) (by linarith)
@@ -313,12 +311,12 @@ lemma hcub_expSubOneDiv_re_pos {t : ℂ} (ht : ‖t‖ ≤ 1 / 2) : 0 < (expSubO
   have h2 := abs_le.mp (h1.trans hn)
   linarith [h2.1]
 
-lemma hcub_expSubOneDiv_mem_slitPlane {t : ℂ} (ht : ‖t‖ ≤ 1 / 2) : expSubOneDiv t ∈ slitPlane :=
+theorem hcub_expSubOneDiv_mem_slitPlane {t : ℂ} (ht : ‖t‖ ≤ 1 / 2) : expSubOneDiv t ∈ slitPlane :=
   mem_slitPlane_iff.mpr (Or.inl (hcub_expSubOneDiv_re_pos ht))
 
 /-- Holomorphy in a parameter of Taylor coefficients, through Cauchy's integral formula on the
 circle of radius `r`. -/
-lemma hcub_differentiable_iteratedDeriv {G : ℂ → ℂ → ℂ} {r : ℝ} (hr : 0 < r)
+theorem hcub_differentiable_iteratedDeriv {G : ℂ → ℂ → ℂ} {r : ℝ} (hr : 0 < r)
     (hcont : ∀ a : ℂ, ∀ t : ℂ, ‖t‖ = r → ContinuousAt (fun p : ℂ × ℂ => G p.1 p.2) (a, t))
     (hdt : ∀ a : ℂ, DifferentiableOn ℂ (G a) (Metric.closedBall 0 r))
     (hda : ∀ t : ℂ, ‖t‖ = r → Differentiable ℂ (fun a => G a t)) (N : ℕ) :
@@ -327,7 +325,7 @@ lemma hcub_differentiable_iteratedDeriv {G : ℂ → ℂ → ℂ} {r : ℝ} (hr 
 
 
 /-- `(re C)_n ≤ ‖(C)_n‖` when `re C ≥ 0`. -/
-lemma hcub_poch_re_le_norm {C : ℂ} (hC : 0 ≤ C.re) (n : ℕ) :
+theorem hcub_poch_re_le_norm {C : ℂ} (hC : 0 ≤ C.re) (n : ℕ) :
     (ascPochhammer ℝ n).eval C.re ≤ ‖poch C n‖ := by
   induction n with
   | zero => simp [poch]
@@ -348,7 +346,7 @@ lemma hcub_div_le_aux {A A' P F M R : ℝ} (hA : 0 ≤ A) (hAA' : A ≤ A') (hP 
 
 /-- The large-denominator expansion 15.12.2 along a shifted ray `c + λ`, `λ → +∞`, with complex
 `c`. -/
-lemma hcub_large_denominator_shift (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (m : ℕ) :
+theorem hcub_large_denominator_shift (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (m : ℕ) :
     (fun l : ℝ => ₂F₁ a b (c + l) z - ∑ k ∈ Finset.range m, gaussHGCoeff a b (c + l) k * z ^ k)
       =O[atTop] fun l : ℝ => ((l : ℂ)⁻¹) ^ m := by
   set g : ℕ → ℝ := fun k => ‖gaussHGCoeff (‖a‖ : ℂ) (‖b‖ : ℂ) 1 k * z ^ k‖ with hg
@@ -415,7 +413,7 @@ lemma hcub_large_denominator_shift (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (m
     _ = _ := by ring
 
 
-lemma hcub_largeDen_taylor (a b c z : ℂ) (N : ℕ) :
+theorem hcub_largeDen_taylor (a b c z : ℂ) (N : ℕ) :
     (fun t => largeDenominatorGenerating a b c z t -
       ∑ n ∈ Finset.range N, largeDenominatorCoeff a b c z n * t ^ n) =O[𝓝 0] fun t => ‖t‖ ^ N := by
   have h := (analyticAt_largeDenominatorGenerating a b c z).hasFPowerSeriesAt.isBigO_sub_partialSum_pow
@@ -425,7 +423,7 @@ lemma hcub_largeDen_taylor (a b c z : ℂ) (N : ℕ) :
     FormalMultilinearSeries.ofScalars_apply_eq, smul_eq_mul, largeDenominatorCoeff]
 
 /-- Euler's integrand for `F(a,b;c+λ;z)` in the variable `s = 1 - e^{-t}`. -/
-lemma hcub_subst₂ (a b c z : ℂ) (l : ℝ) {t : ℝ} (ht : 0 < t) :
+theorem hcub_subst₂ (a b c z : ℂ) (l : ℝ) {t : ℝ} (ht : 0 < t) :
     |Real.exp (-t)| • (((1 - Real.exp (-t) : ℝ) : ℂ) ^ (b - 1) *
       (1 - ((1 - Real.exp (-t) : ℝ) : ℂ)) ^ (c + l - b - 1) *
         (1 - z * ((1 - Real.exp (-t) : ℝ) : ℂ)) ^ (-a)) =
@@ -462,7 +460,7 @@ lemma hcub_subst₂ (a b c z : ℂ) (l : ℝ) {t : ℝ} (ht : 0 < t) :
   congr 2
   ring
 
-lemma hcub_euler_eq_laplace₂ (a b c z : ℂ) (l : ℝ) :
+theorem hcub_euler_eq_laplace₂ (a b c z : ℂ) (l : ℝ) :
     ∫ s : ℝ in (0 : ℝ)..1, (s : ℂ) ^ (b - 1) * (1 - (s : ℂ)) ^ (c + l - b - 1) *
       (1 - z * s) ^ (-a) =
       ∫ t in Ioi (0 : ℝ), Real.exp (-l * t) •
@@ -473,7 +471,7 @@ lemma hcub_euler_eq_laplace₂ (a b c z : ℂ) (l : ℝ) :
   refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
   exact hcub_subst₂ a b c z l ht
 
-lemma hcub_one_sub_mul_mem_slitPlane {z : ℂ} (hz : ‖z‖ < 1) {s : ℝ} (hs : s ∈ Icc (0 : ℝ) 1) :
+theorem hcub_one_sub_mul_mem_slitPlane {z : ℂ} (hz : ‖z‖ < 1) {s : ℝ} (hs : s ∈ Icc (0 : ℝ) 1) :
     1 - z * s ∈ slitPlane := by
   refine mem_slitPlane_iff.mpr (Or.inl ?_)
   have h1 : ‖z * s‖ < 1 := by
@@ -483,7 +481,7 @@ lemma hcub_one_sub_mul_mem_slitPlane {z : ℂ} (hz : ‖z‖ < 1) {s : ℝ} (hs 
   simp only [sub_re, one_re]
   linarith
 
-lemma hcub_integrableOn₂ (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (hb : 0 < b.re) {l : ℝ}
+theorem hcub_integrableOn₂ (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (hb : 0 < b.re) {l : ℝ}
     (hl : (b - c).re < l) :
     IntegrableOn (fun t : ℝ => Real.exp (-l * t) •
       ((t : ℂ) ^ (b - 1) * largeDenominatorGenerating a b c z t)) (Ioi 0) := by
@@ -648,7 +646,7 @@ theorem hcub_largeDenMix_eq_of_re_pos (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1)
       simp only [smul_eq_mul]; congr 1; exact Finset.sum_congr rfl fun _ _ => mul_comm _ _)
   exact congrFun h N
 
-lemma hcub_differentiable_largeDenMix (a c z : ℂ) (N : ℕ) :
+theorem hcub_differentiable_largeDenMix (a c z : ℂ) (N : ℕ) :
     Differentiable ℂ (fun b => hcub_largeDenMix a b c z N) := by
   unfold hcub_largeDenMix
   refine Differentiable.fun_sum fun k _ => ?_
@@ -656,7 +654,7 @@ lemma hcub_differentiable_largeDenMix (a c z : ℂ) (N : ℕ) :
     (differentiable_const _)).div_const _).mul
     ((hcub_differentiable_stirlingRatioG _ _).comp ((differentiable_const _).sub differentiable_id))
 
-lemma hcub_one_sub_exp_mem_slitPlane {z : ℂ} (hz : ‖z‖ < 1) {t : ℂ} (ht : ‖t‖ ≤ 1 / 2) :
+theorem hcub_one_sub_exp_mem_slitPlane {z : ℂ} (hz : ‖z‖ < 1) {t : ℂ} (ht : ‖t‖ ≤ 1 / 2) :
     1 - z + z * exp (-t) ∈ slitPlane := by
   refine mem_slitPlane_iff.mpr (Or.inl ?_)
   have h1 : ‖exp (-t) - 1‖ ≤ 1 := by
@@ -669,7 +667,7 @@ lemma hcub_one_sub_exp_mem_slitPlane {z : ℂ} (hz : ‖z‖ < 1) {t : ℂ} (ht 
   rw [this, add_re, one_re]
   linarith [h3.1]
 
-lemma hcub_differentiable_largeDenominatorCoeff (a c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (N : ℕ) :
+theorem hcub_differentiable_largeDenominatorCoeff (a c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (N : ℕ) :
     Differentiable ℂ (fun b => largeDenominatorCoeff a b c z N) := by
   have hE : ∀ t : ℂ, DifferentiableAt ℂ expSubOneDiv t := fun t =>
     (analyticAt_expSubOneDiv t).differentiableAt

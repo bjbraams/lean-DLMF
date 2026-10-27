@@ -8,8 +8,6 @@ module
 public import DLMF.Heun.Basic
 public import DLMF.Heun.Equation
 public import DLMF.Hypergeometric.Riemann
-public import Mathlib.Analysis.SpecialFunctions.Pow.Complex
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Cotangent
 
 /-!
 # Solutions via quadratures, integral equations and representations (DLMF §31.8, §31.10)
@@ -111,7 +109,7 @@ theorem heun_hermiteDarboux (ha0 : a ≠ 0) (ha1 : a ≠ 1) (m : Fin 4 → ℕ)
 
 /-- Riccati form: if `w' = Λ w` and `Λ' + Λ² + pΛ + r = 0` on an open set, then `w` solves
 `w'' + p w' + r w = 0` there. -/
-theorem p2h_isLinearODE2On_of_riccati {p r w Λ Λ' : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
+lemma p2h_isLinearODE2On_of_riccati {p r w Λ Λ' : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
     (hw : ∀ z ∈ U, HasDerivAt w (Λ z * w z) z) (hΛ : ∀ z ∈ U, HasDerivAt Λ (Λ' z) z)
     (hR : ∀ z ∈ U, r z + p z * Λ z + Λ z ^ 2 + Λ' z = 0) : IsLinearODE2On p r w U := by
   have h1 : IsLinearODE2On (fun z => p z + 2 * Λ z) 0 (fun _ => (1 : ℂ)) U := by
@@ -125,7 +123,7 @@ theorem p2h_isLinearODE2On_of_riccati {p r w Λ Λ' : ℂ → ℂ} {U : Set ℂ}
 
 /-- Derivative of an analytic square root: if `S² = Ψ` near `z` and `S z ≠ 0`, then
 `S' = Ψ'/(2S)`. -/
-theorem p2h_hasDerivAt_sqrt {S Ψ : ℂ → ℂ} {Ψ' z : ℂ} {U : Set ℂ} (hU : IsOpen U) (hz : z ∈ U)
+lemma p2h_hasDerivAt_sqrt {S Ψ : ℂ → ℂ} {Ψ' z : ℂ} {U : Set ℂ} (hU : IsOpen U) (hz : z ∈ U)
     (hS : ∀ x ∈ U, S x ^ 2 = Ψ x) (hSa : AnalyticAt ℂ S z) (hΨ : HasDerivAt Ψ Ψ' z)
     (hS0 : S z ≠ 0) : HasDerivAt S (Ψ' / (2 * S z)) z := by
   have hd := hSa.differentiableAt.hasDerivAt
@@ -393,7 +391,7 @@ theorem heun_kernel_typeI_angles (hF : α + β + 1 = γ + δ + ε) (ha0 : a ≠ 
   sorry
 
 /-- Chain rule for `t ↦ C · u(cos² t)`: first and second derivatives. -/
-theorem p2h_deriv_cos_sq_comp {u : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U) (hu : ContDiffOn ℂ 2 u U)
+lemma p2h_deriv_cos_sq_comp {u : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U) (hu : ContDiffOn ℂ 2 u U)
     (C : ℂ) {t : ℂ} (ht : Complex.cos t ^ 2 ∈ U) :
     deriv (fun t' => C * u (Complex.cos t' ^ 2)) t =
         C * (deriv u (Complex.cos t ^ 2) * (-2 * Complex.cos t * Complex.sin t)) ∧
@@ -423,7 +421,7 @@ theorem p2h_deriv_cos_sq_comp {u : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U) (h
   ring
 
 /-- The normalized Riemann equation with `a₁ = 0`, cleared of denominators. -/
-theorem p2h_riemann_poly {a₂ b₁ b₂ c₁ c₂ x : ℂ} {u : ℂ → ℂ} (hx0 : x ≠ 0) (hx1 : 1 - x ≠ 0)
+lemma p2h_riemann_poly {a₂ b₁ b₂ c₁ c₂ x : ℂ} {u : ℂ → ℂ} (hx0 : x ≠ 0) (hx1 : 1 - x ≠ 0)
     (h : DLMF.Hypergeometric.riemannNormalOperator 0 a₂ b₁ b₂ c₁ c₂ u x = 0) :
     x * (1 - x) ^ 2 * deriv (deriv u) x +
       ((1 - a₂) * (1 - x) ^ 2 - (1 - b₁ - b₂) * x * (1 - x)) * deriv u x +
@@ -437,7 +435,7 @@ theorem p2h_riemann_poly {a₂ b₁ b₂ c₁ c₂ x : ℂ} {u : ℂ → ℂ} (h
     _ = 0 := by rw [h, mul_zero]
 
 /-- The normalized Riemann equation with `a₁ = b₁ = 0`, cleared of denominators. -/
-theorem p2h_riemann_poly₀ {a₂ b₂ c₁ c₂ x : ℂ} {u : ℂ → ℂ} (hx0 : x ≠ 0) (hx1 : 1 - x ≠ 0)
+lemma p2h_riemann_poly₀ {a₂ b₂ c₁ c₂ x : ℂ} {u : ℂ → ℂ} (hx0 : x ≠ 0) (hx1 : 1 - x ≠ 0)
     (h : DLMF.Hypergeometric.riemannNormalOperator 0 a₂ 0 b₂ c₁ c₂ u x = 0) :
     x * (1 - x) * deriv (deriv u) x + ((1 - a₂) * (1 - x) - (1 - b₂) * x) * deriv u x -
       c₁ * c₂ * u x = 0 := by
@@ -632,7 +630,7 @@ theorem heun_kernel_typeII_uvw (hF : α + β + 1 = γ + δ + ε) (ha0 : a ≠ 0)
 
 /-- A Bessel factor: if `𝒞` solves Bessel's equation of order `ν` near `xk`, then
 `F(y) = A y^ν 𝒞(yk)` satisfies `F'' + ((1-2ν)/x) F' = -k² F` at `x`. -/
-theorem p2h_bessel_factor {ν k x A : ℂ} {C : ℂ → ℂ} {S : Set ℂ} (hS : IsOpen S)
+lemma p2h_bessel_factor {ν k x A : ℂ} {C : ℂ → ℂ} {S : Set ℂ} (hS : IsOpen S)
     (hC : IsLinearODE2On (fun y => 1 / y) (fun y => 1 - ν ^ 2 / y ^ 2) C S)
     (hx : x ∈ slitPlane) (hxS : x * k ∈ S) (hk : k ≠ 0) :
     deriv (deriv fun y => A * (y ^ ν * C (y * k))) x +
@@ -759,7 +757,7 @@ theorem heun_kernel_typeII_spherical {Ω : Set (ℂ × ℂ × ℂ)} (hΩ : IsOpe
   sorry
 
 /-- First and second derivatives of `r ↦ r^m C` on the slit plane. -/
-theorem p2h_deriv_cpow_mul {r : ℂ} (m C : ℂ) (hr : r ∈ slitPlane) :
+lemma p2h_deriv_cpow_mul {r : ℂ} (m C : ℂ) (hr : r ∈ slitPlane) :
     deriv (fun r' => r' ^ m * C) r = m * r ^ (m - 1) * C ∧
       deriv (deriv fun r' => r' ^ m * C) r = m * (m - 1) * r ^ (m - 1 - 1) * C := by
   have hD : ∀ y ∈ slitPlane, HasDerivAt (fun r' => r' ^ m * C) (m * y ^ (m - 1) * C) y :=
@@ -775,7 +773,7 @@ theorem p2h_deriv_cpow_mul {r : ℂ} (m C : ℂ) (hr : r ∈ slitPlane) :
   ring
 
 /-- Chain rule for `t ↦ C · sin^q t · u(cos² t)`: first and second derivatives. -/
-theorem p2h_deriv_sin_cpow_cos_sq_comp {u : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
+lemma p2h_deriv_sin_cpow_cos_sq_comp {u : ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
     (hu : ContDiffOn ℂ 2 u U) (q C : ℂ) {t : ℂ} (ht : Complex.cos t ^ 2 ∈ U)
     (hs : Complex.sin t ∈ slitPlane) :
     deriv (fun t' => C * (Complex.sin t' ^ q * u (Complex.cos t' ^ 2))) t =

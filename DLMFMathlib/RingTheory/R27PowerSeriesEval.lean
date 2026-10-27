@@ -7,8 +7,10 @@ module
 
 public import Mathlib.RingTheory.PowerSeries.Basic
 public import Mathlib.Analysis.Normed.Ring.InfiniteSum
-public import Mathlib.Analysis.SpecificLimits.Normed
 public import Mathlib.Analysis.Complex.Basic
+public import Mathlib.Algebra.Order.Field.Power
+public import Mathlib.Analysis.Normed.Group.InfiniteSum
+public import Mathlib.Analysis.SpecificLimits.Basic
 
 /-!
 # Absolutely convergent evaluation of integer power series
@@ -88,14 +90,14 @@ theorem r27_absEval_pow {P : PowerSeries ℤ} {x s : ℂ} (hP : r27_absEval P x 
   | succ k ih => rw [pow_succ, pow_succ]; exact r27_absEval_mul ih hP
 
 /-- Evaluation of a negation. -/
-theorem r27_absEval_neg {P : PowerSeries ℤ} {x s : ℂ} (hP : r27_absEval P x s) :
+lemma r27_absEval_neg {P : PowerSeries ℤ} {x s : ℂ} (hP : r27_absEval P x s) :
     r27_absEval (-P) x (-s) := by
   refine ⟨?_, ?_⟩
   · simpa using hP.1
   · simpa [neg_mul] using hP.2.neg
 
 /-- Evaluation of a sum. -/
-theorem r27_absEval_add {P Q : PowerSeries ℤ} {x s t : ℂ} (hP : r27_absEval P x s)
+lemma r27_absEval_add {P Q : PowerSeries ℤ} {x s t : ℂ} (hP : r27_absEval P x s)
     (hQ : r27_absEval Q x t) : r27_absEval (P + Q) x (s + t) := by
   refine ⟨?_, ?_⟩
   · refine (hP.1.add hQ.1).of_nonneg_of_le (fun _ ↦ norm_nonneg _) fun n ↦ ?_
@@ -104,7 +106,7 @@ theorem r27_absEval_add {P Q : PowerSeries ℤ} {x s t : ℂ} (hP : r27_absEval 
   · simpa [add_mul] using hP.2.add hQ.2
 
 /-- Evaluation of a difference. -/
-theorem r27_absEval_sub {P Q : PowerSeries ℤ} {x s t : ℂ} (hP : r27_absEval P x s)
+lemma r27_absEval_sub {P Q : PowerSeries ℤ} {x s t : ℂ} (hP : r27_absEval P x s)
     (hQ : r27_absEval Q x t) : r27_absEval (P - Q) x (s - t) := by
   simpa [sub_eq_add_neg] using r27_absEval_add hP (r27_absEval_neg hQ)
 
@@ -119,7 +121,7 @@ theorem r27_absEval_of_bounded {P : PowerSeries ℤ} {C : ℝ} (hC : ∀ n, |((c
   exact ⟨hs, hs.of_norm.hasSum⟩
 
 /-- Evaluation of `1 - X ^ k`. -/
-theorem r27_absEval_one_sub_X_pow (x : ℂ) (k : ℕ) :
+lemma r27_absEval_one_sub_X_pow (x : ℂ) (k : ℕ) :
     r27_absEval (1 - X ^ k) x (1 - x ^ k) :=
   r27_absEval_sub (r27_absEval_one x) (r27_absEval_pow (r27_absEval_X x) k)
 

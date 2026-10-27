@@ -25,7 +25,7 @@ open scoped Topology Nat
 namespace DLMF.Hypergeometric
 
 /-- For every `σ > 1` and every `k` there is `τ > 1` with `τ ^ k ≤ σ`. -/
-lemma ghaR4_exists_pow_le {σ : ℝ} (hσ : 1 < σ) (k : ℕ) : ∃ τ : ℝ, 1 < τ ∧ τ ^ k ≤ σ := by
+theorem ghaR4_exists_pow_le {σ : ℝ} (hσ : 1 < σ) (k : ℕ) : ∃ τ : ℝ, 1 < τ ∧ τ ^ k ≤ σ := by
   have h : Tendsto (fun t : ℝ => t ^ k) (𝓝[>] 1) (𝓝 1) := by
     have := (continuous_pow k).tendsto (1 : ℝ)
     rw [one_pow] at this
@@ -35,7 +35,7 @@ lemma ghaR4_exists_pow_le {σ : ℝ} (hσ : 1 < σ) (k : ℕ) : ∃ τ : ℝ, 1 
 
 /-- Pochhammer symbols grow at most subexponentially faster than one with a regular
 parameter: `‖(μ)ₘ‖ ≤ C σ^m ‖(ν)ₘ‖` for every `σ > 1`. -/
-lemma ghaR4_norm_poch_le (μ ν : ℂ) (hν : ∀ k : ℕ, ν ≠ -k) {σ : ℝ} (hσ : 1 < σ) :
+theorem ghaR4_norm_poch_le (μ ν : ℂ) (hν : ∀ k : ℕ, ν ≠ -k) {σ : ℝ} (hσ : 1 < σ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ m : ℕ, ‖poch μ m‖ ≤ C * σ ^ m * ‖poch ν m‖ := by
   obtain ⟨K, hK⟩ := exists_nat_ge ((‖μ‖ + σ * ‖ν‖) / (σ - 1))
   have hpos : ∀ j, 0 < ‖poch ν j‖ := fun j => norm_pos_iff.mpr (poch_ne_zero_of_not_neg_nat hν j)
@@ -75,7 +75,7 @@ lemma ghaR4_norm_poch_le (μ ν : ℂ) (hν : ∀ k : ℕ, ν ≠ -k) {σ : ℝ}
         _ = C * σ ^ (m + 1) * (‖poch ν m‖ * ‖ν + m‖) := by ring
 
 /-- `‖(μ)ₘ‖ ≤ C σ^m m!` for every `σ > 1`. -/
-lemma ghaR4_norm_poch_le_factorial (μ : ℂ) {σ : ℝ} (hσ : 1 < σ) :
+theorem ghaR4_norm_poch_le_factorial (μ : ℂ) {σ : ℝ} (hσ : 1 < σ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ m : ℕ, ‖poch μ m‖ ≤ C * σ ^ m * (m ! : ℝ) := by
   obtain ⟨C, hC0, hC⟩ := ghaR4_norm_poch_le μ 1 (fun k h => by
     have := congrArg Complex.re h; simp at this; linarith [(k.cast_nonneg : (0 : ℝ) ≤ k)]) hσ
@@ -83,7 +83,7 @@ lemma ghaR4_norm_poch_le_factorial (μ : ℂ) {σ : ℝ} (hσ : 1 < σ) :
   simpa [poch_nat_one, Complex.norm_natCast] using hC m
 
 /-- `m! ≤ C σ^m ‖(ν)ₘ‖` for a regular `ν` and every `σ > 1`. -/
-lemma ghaR4_factorial_le_norm_poch (ν : ℂ) (hν : ∀ k : ℕ, ν ≠ -k) {σ : ℝ} (hσ : 1 < σ) :
+theorem ghaR4_factorial_le_norm_poch (ν : ℂ) (hν : ∀ k : ℕ, ν ≠ -k) {σ : ℝ} (hσ : 1 < σ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ m : ℕ, (m ! : ℝ) ≤ C * σ ^ m * ‖poch ν m‖ := by
   obtain ⟨C, hC0, hC⟩ := ghaR4_norm_poch_le 1 ν hν hσ
   refine ⟨C, hC0, fun m => ?_⟩
@@ -109,7 +109,7 @@ lemma ghaR4_summable_of_geom_bound {f : ℕ × ℕ → ℝ} {C s : ℝ} (hs0 : 0
 
 /-- A double power series dominated on a polydisc around each point of `U` converges there,
 and its sum is jointly analytic on `U`. -/
-lemma ghaR4_double_series_hasSum_analytic (c : ℕ × ℕ → ℂ) (U : Set (ℂ × ℂ))
+theorem ghaR4_double_series_hasSum_analytic (c : ℕ × ℕ → ℂ) (U : Set (ℂ × ℂ))
     (h : ∀ p ∈ U, ∃ A B : ℝ, ‖p.1‖ < A ∧ ‖p.2‖ < B ∧
       Summable (fun q : ℕ × ℕ => ‖c q‖ * A ^ q.1 * B ^ q.2)) :
     (∀ p ∈ U, HasSum (fun q : ℕ × ℕ => c q * p.1 ^ q.1 * p.2 ^ q.2)
@@ -139,7 +139,7 @@ lemma ghaR4_double_series_hasSum_analytic (c : ℕ × ℕ → ℂ) (U : Set (ℂ
     exact hd.analyticAt_of_finiteDimensional (hV.mem_nhds hpV)
 
 /-- Local domination on the unit bidisc from a subexponential coefficient bound. -/
-lemma ghaR4_dom_bidisc (c : ℕ × ℕ → ℂ)
+theorem ghaR4_dom_bidisc (c : ℕ × ℕ → ℂ)
     (hc : ∀ σ : ℝ, 1 < σ → ∃ C : ℝ, ∀ q : ℕ × ℕ, ‖c q‖ ≤ C * σ ^ (q.1 + q.2))
     {x y : ℂ} (hx : ‖x‖ < 1) (hy : ‖y‖ < 1) :
     ∃ A B : ℝ, ‖x‖ < A ∧ ‖y‖ < B ∧
@@ -161,7 +161,7 @@ lemma ghaR4_dom_bidisc (c : ℕ × ℕ → ℂ)
     _ = C * ((1 + t) / 2) ^ (q.1 + q.2) := by rw [mul_assoc, ← mul_pow, hst]
 
 /-- Local domination on the diamond `‖x‖+‖y‖<1` from a binomially weighted bound. -/
-lemma ghaR4_dom_diamond (c : ℕ × ℕ → ℂ)
+theorem ghaR4_dom_diamond (c : ℕ × ℕ → ℂ)
     (hc : ∀ σ : ℝ, 1 < σ → ∃ C : ℝ, ∀ q : ℕ × ℕ,
       ‖c q‖ ≤ C * σ ^ (q.1 + q.2) * ((q.1 + q.2).choose q.1 : ℝ))
     {x y : ℂ} (hxy : ‖x‖ + ‖y‖ < 1) :
@@ -196,7 +196,7 @@ lemma ghaR4_dom_diamond (c : ℕ × ℕ → ℂ)
     _ = C * ((1 + t) / 2) ^ (q.1 + q.2) := by rw [mul_assoc, ← mul_pow, hst]
 
 /-- Local domination on the F4 domain `√‖x‖+√‖y‖<1` from a squared-binomial bound. -/
-lemma ghaR4_dom_F4 (c : ℕ × ℕ → ℂ)
+theorem ghaR4_dom_F4 (c : ℕ × ℕ → ℂ)
     (hc : ∀ σ : ℝ, 1 < σ → ∃ C : ℝ, ∀ q : ℕ × ℕ,
       ‖c q‖ ≤ C * σ ^ (q.1 + q.2) * ((q.1 + q.2).choose q.1 : ℝ) ^ 2)
     {x y : ℂ} (hxy : Real.sqrt ‖x‖ + Real.sqrt ‖y‖ < 1) :

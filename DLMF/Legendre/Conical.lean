@@ -6,7 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Legendre.Toroidal
-public import DLMF.Legendre.Singularities
 
 /-!
 # Conical functions, Mehler–Fock transforms and special identities
@@ -41,7 +40,7 @@ theorem conical_ode (τ μ : ℝ) (hμ : 0 ≤ μ) (hτ : 0 ≤ τ) {x : ℝ} (h
   linear_combination h + (-(τ:ℂ)^2 * ferrersP (-1/2+I*τ) (-(μ:ℂ)) x) * I_sq
 
 /-- The conical Ferrers function is real-valued on `(-1,1)`. -/
-lemma conicalP_ofReal_re (τ μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem conicalP_ofReal_re (τ μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ((conicalP τ μ x).re : ℂ) = conicalP τ μ x := by
   rw [Complex.conj_eq_iff_re.mp]
   show (starRingEnd ℂ) (ferrersP (-1/2+I*τ) (-(μ:ℂ)) x) = ferrersP (-1/2+I*τ) (-(μ:ℂ)) x
@@ -54,7 +53,7 @@ lemma conicalP_ofReal_re (τ μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
   rw [e1, e2, ferrers_connection_5 _ _ hx]
 
 /-- Differentiability of the conical function on `(-1,1)`. -/
-lemma conicalP_differentiableAt (τ μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem conicalP_differentiableAt (τ μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     DifferentiableAt ℝ (conicalP τ μ) x :=
   (((hasDerivAt_ferrersEven _ _ hx).const_mul _).add ((hasDerivAt_ferrersOdd _ _ hx).const_mul _)
     ).differentiableAt.congr_of_eventuallyEq
@@ -239,7 +238,7 @@ theorem conical_associated_connection {τ μ : ℝ} (hτ : 0 < τ) (hμ : 0 ≤ 
 /-! ### Boundary behaviour at `x = 1⁻` (prefix `legCon_`) -/
 
 /-- `π sin(μπ)/Γ(1-μ) = Γ(μ) sin²(μπ)` for `μ > 0`, including integer `μ`. -/
-lemma legCon_reflect {μ : ℝ} (hμ : 0 < μ) :
+theorem legCon_reflect {μ : ℝ} (hμ : 0 < μ) :
     π * Real.sin (μ*π) * (Real.Gamma (1-μ))⁻¹ = Real.Gamma μ * Real.sin (μ*π)^2 := by
   by_cases h : Real.Gamma (1-μ) = 0
   · obtain ⟨m, hm⟩ := (Real.Gamma_eq_zero_iff _).mp h
@@ -258,7 +257,7 @@ lemma legCon_reflect {μ : ℝ} (hμ : 0 < μ) :
     linear_combination -hr
 
 /-- `(1-x²)^{μ/2} 𝖯^μ_ν(x) → 2^μ/Γ(1-μ)` as `x → 1⁻`, for every `μ`. -/
-lemma legCon_tendsto_P (ν μ : ℂ) :
+theorem legCon_tendsto_P (ν μ : ℂ) :
     Tendsto (fun x : ℝ => (1-(x:ℂ)^2)^(μ/2) * ferrersP ν μ x) (𝓝[<] 1)
       (𝓝 ((2:ℂ)^μ * (Gamma (1-μ))⁻¹)) := by
   have hc : ContinuousAt (fun x : ℝ => (1+(x:ℂ))^μ *
@@ -284,7 +283,7 @@ lemma legCon_tendsto_P (ν μ : ℂ) :
   push_cast; ring_nf
 
 /-- `(1-x²)^{μ/2} 𝖯^{-μ}_ν(-x) → 2^μ Γ(μ)/(Γ(μ-ν)Γ(μ+ν+1))` as `x → 1⁻`, for `Re μ > 0`. -/
-lemma legCon_tendsto_P_neg (ν : ℂ) {μ : ℝ} (hμ : 0 < μ) :
+theorem legCon_tendsto_P_neg (ν : ℂ) {μ : ℝ} (hμ : 0 < μ) :
     Tendsto (fun x : ℝ => (1-(x:ℂ)^2)^((μ:ℂ)/2) * ferrersP ν (-(μ:ℂ)) (-x)) (𝓝[<] 1)
       (𝓝 ((2:ℂ)^(μ:ℂ) * (Gamma (μ:ℂ) * ((Gamma ((μ:ℂ)-ν))⁻¹ * (Gamma ((μ:ℂ)+ν+1))⁻¹)))) := by
   have hF := legBd_tendsto_rGHG_one (a := ν+1) (b := -ν) (c := 1-(-(μ:ℂ)))
@@ -479,7 +478,7 @@ theorem conical_mehler_integral (τ : ℝ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < 
   sorry
 
 /-- The conical Pochhammer product `(1/2+iτ)ₖ(1/2-iτ)ₖ = ∏ (4τ²+(2j+1)²)/4ᵏ`. -/
-lemma poch_conical (τ : ℝ) (k : ℕ) :
+theorem poch_conical (τ : ℝ) (k : ℕ) :
     poch (1/2+I*τ) k * poch (1/2-I*τ) k = (∏ j ∈ Finset.range k, (4*τ^2+(2*j+1)^2:ℂ))/4^k := by
   induction k with
   | zero => simp [poch_zero]

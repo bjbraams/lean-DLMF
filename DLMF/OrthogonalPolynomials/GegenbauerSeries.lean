@@ -7,8 +7,6 @@ module
 
 public import DLMF.OrthogonalPolynomials.Differential
 public import DLMF.OrthogonalPolynomials.BinomialSeries
-public import Mathlib.Tactic.CrossRefAttribute
-public import Mathlib.RingTheory.PowerSeries.Derivative
 
 /-!
 # Gegenbauer polynomials and the formal series `G_λ(wX) G_λ(X/w)`
@@ -42,7 +40,7 @@ def gegenbauerSeries (lam w : ℂ) : PowerSeries ℂ := binomProductSeries lam l
 
 open PowerSeries in
 /-- The Gegenbauer generating-function differential equation. -/
-lemma gegenbauerSeries_ode (lam : ℂ) {w : ℂ} (hw : w ≠ 0) :
+theorem gegenbauerSeries_ode (lam : ℂ) {w : ℂ} (hw : w ≠ 0) :
     (1 - C (w + w⁻¹) * X + X ^ 2) * d⁄dX (gegenbauerSeries lam w) =
       C lam * (C (w + w⁻¹) - C 2 * X) * gegenbauerSeries lam w := by
   have h := binomProductSeries_ode lam lam hw
@@ -53,7 +51,7 @@ lemma gegenbauerSeries_ode (lam : ℂ) {w : ℂ} (hw : w ≠ 0) :
 
 open PowerSeries in
 /-- The Gegenbauer three-term recurrence for the series coefficients. -/
-lemma coeff_gegenbauerSeries_recurrence (lam : ℂ) {w : ℂ} (hw : w ≠ 0) (n : ℕ) :
+theorem coeff_gegenbauerSeries_recurrence (lam : ℂ) {w : ℂ} (hw : w ≠ 0) (n : ℕ) :
     (n + 2 : ℂ) * coeff (n + 2) (gegenbauerSeries lam w) =
       (w + w⁻¹) * (n + 1 + lam) * coeff (n + 1) (gegenbauerSeries lam w) -
         (n + 2 * lam) * coeff n (gegenbauerSeries lam w) := by
@@ -63,12 +61,12 @@ lemma coeff_gegenbauerSeries_recurrence (lam : ℂ) {w : ℂ} (hw : w ≠ 0) (n 
 
 open PowerSeries in
 /-- The constant coefficient of the Gegenbauer series. -/
-lemma coeff_zero_gegenbauerSeries (lam w : ℂ) : coeff 0 (gegenbauerSeries lam w) = 1 := by
+theorem coeff_zero_gegenbauerSeries (lam w : ℂ) : coeff 0 (gegenbauerSeries lam w) = 1 := by
   exact coeff_zero_binomProductSeries lam lam w
 
 open PowerSeries in
 /-- The linear coefficient of the Gegenbauer series. -/
-lemma coeff_one_gegenbauerSeries (lam w : ℂ) :
+theorem coeff_one_gegenbauerSeries (lam w : ℂ) :
     coeff 1 (gegenbauerSeries lam w) = lam * (w + w⁻¹) := by
   rw [gegenbauerSeries, coeff_one_binomProductSeries]; ring
 
@@ -92,7 +90,7 @@ theorem ultrasphPoly_eq_coeff_gegenbauerSeries {lam : ℂ} (hlam : -1 / 2 < lam.
 
 open PowerSeries in
 /-- Products of Gegenbauer series add the parameters. -/
-lemma gegenbauerSeries_mul (lam μ w : ℂ) :
+theorem gegenbauerSeries_mul (lam μ w : ℂ) :
     gegenbauerSeries lam w * gegenbauerSeries μ w = gegenbauerSeries (lam + μ) w := by
   unfold gegenbauerSeries binomProductSeries
   rw [← binomSeries_mul, map_mul, map_mul]
@@ -100,7 +98,7 @@ lemma gegenbauerSeries_mul (lam μ w : ℂ) :
 
 open PowerSeries in
 /-- Explicit coefficients of the Gegenbauer series. -/
-lemma coeff_gegenbauerSeries (lam w : ℂ) (n : ℕ) :
+theorem coeff_gegenbauerSeries (lam w : ℂ) (n : ℕ) :
     coeff n (gegenbauerSeries lam w) = ∑ k ∈ Finset.range (n + 1),
       poch lam k * poch lam (n - k) / ((k.factorial : ℂ) * (n - k).factorial) *
         (w ^ k * w⁻¹ ^ (n - k)) := by
@@ -148,7 +146,7 @@ theorem ultrasphPoly_cos_sum {lam : ℂ} (hlam : -1 / 2 < lam.re) (n : ℕ) (θ 
   ring
 
 /-- Every complex number is `(w + w⁻¹)/2` for some nonzero `w`. -/
-lemma exists_eq_half_add_recip (x : ℂ) : ∃ w : ℂ, w ≠ 0 ∧ x = (w + w⁻¹) / 2 := by
+theorem exists_eq_half_add_recip (x : ℂ) : ∃ w : ℂ, w ≠ 0 ∧ x = (w + w⁻¹) / 2 := by
   obtain ⟨θ, rfl⟩ := Complex.cos_surjective x
   refine ⟨exp (θ * I), Complex.exp_ne_zero _, ?_⟩
   rw [← Complex.exp_neg, Complex.cos]
@@ -156,7 +154,7 @@ lemma exists_eq_half_add_recip (x : ℂ) : ∃ w : ℂ, w ≠ 0 ∧ x = (w + w�
 
 open PowerSeries in
 /-- `(1 - 2yX + X²) P_{λ+1} = P_λ`. -/
-lemma gegenbauerSeries_add_one (lam : ℂ) {w : ℂ} (hw : w ≠ 0) :
+theorem gegenbauerSeries_add_one (lam : ℂ) {w : ℂ} (hw : w ≠ 0) :
     (1 - C (w + w⁻¹) * X + X ^ 2) * gegenbauerSeries (lam + 1) w = gegenbauerSeries lam w := by
   have this : C w * C w⁻¹ = (1 : PowerSeries ℂ) := by rw [← map_mul, mul_inv_cancel₀ hw, map_one]
   rw [← gegenbauerSeries_mul]
@@ -172,7 +170,7 @@ lemma gegenbauerSeries_add_one (lam : ℂ) {w : ℂ} (hw : w ≠ 0) :
 
 open PowerSeries in
 /-- Coefficient form of `G_λ(wX) G_λ(X/w) · G_μ(wX) G_μ(X/w) = G_{λ+μ}(wX) G_{λ+μ}(X/w)`. -/
-lemma sum_coeff_mul_coeff_gegenbauerSeries (lam μ w : ℂ) (n : ℕ) :
+theorem sum_coeff_mul_coeff_gegenbauerSeries (lam μ w : ℂ) (n : ℕ) :
     ∑ k ∈ Finset.range (n + 1), coeff k (gegenbauerSeries lam w) *
       coeff (n - k) (gegenbauerSeries μ w) = coeff n (gegenbauerSeries (lam + μ) w) := by
   rw [← gegenbauerSeries_mul, coeff_mul, Finset.Nat.sum_antidiagonal_eq_sum_range_succ_mk]
@@ -185,7 +183,7 @@ def weightedGegenbauerSeries (lam w : ℂ) : PowerSeries ℂ :=
 
 open PowerSeries in
 /-- Coefficients of the weighted Gegenbauer series. -/
-lemma coeff_weightedGegenbauerSeries {lam : ℂ} (hlam0 : lam ≠ 0) (w : ℂ) (k : ℕ) :
+theorem coeff_weightedGegenbauerSeries {lam : ℂ} (hlam0 : lam ≠ 0) (w : ℂ) (k : ℕ) :
     coeff k (weightedGegenbauerSeries lam w) =
       (k + 2 * lam) / (2 * lam) * coeff k (gegenbauerSeries lam w) := by
   rw [weightedGegenbauerSeries, map_add, coeff_C_mul]
@@ -198,7 +196,7 @@ lemma coeff_weightedGegenbauerSeries {lam : ℂ} (hlam0 : lam ≠ 0) (w : ℂ) (
 
 open PowerSeries in
 /-- The weighted series equals `(1 - yX)` times the series for `λ + 1`, `y = (w + w⁻¹)/2`. -/
-lemma weightedGegenbauerSeries_eq {lam : ℂ} (hlam0 : lam ≠ 0) {w : ℂ} (hw : w ≠ 0) :
+theorem weightedGegenbauerSeries_eq {lam : ℂ} (hlam0 : lam ≠ 0) {w : ℂ} (hw : w ≠ 0) :
     weightedGegenbauerSeries lam w =
       (1 - C ((w + w⁻¹) / 2) * X) * gegenbauerSeries (lam + 1) w := by
   have hode := gegenbauerSeries_ode lam hw
@@ -223,7 +221,7 @@ lemma weightedGegenbauerSeries_eq {lam : ℂ} (hlam0 : lam ≠ 0) {w : ℂ} (hw 
 
 open PowerSeries in
 /-- Coefficient form of `weightedGegenbauerSeries_eq` after multiplying by `1/(1 - yX)`. -/
-lemma sum_weighted_coeff_gegenbauerSeries {lam : ℂ} (hlam0 : lam ≠ 0) {w : ℂ} (hw : w ≠ 0)
+theorem sum_weighted_coeff_gegenbauerSeries {lam : ℂ} (hlam0 : lam ≠ 0) {w : ℂ} (hw : w ≠ 0)
     (n : ℕ) :
     ∑ k ∈ Finset.range (n + 1), (k + 2 * lam) / (2 * lam) * coeff k (gegenbauerSeries lam w) *
       ((w + w⁻¹) / 2) ^ (n - k) = coeff n (gegenbauerSeries (lam + 1) w) := by
@@ -250,7 +248,7 @@ def gegenbauerCoeff (lam : ℂ) (n k : ℕ) : ℂ :=
   else 0
 
 /-- The explicit sum of DLMF 18.5.10 over any range containing `0, …, n/2`. -/
-lemma ultrasphPoly_sum_eq_sum_coeff (lam y : ℂ) (n M : ℕ) (hM : n / 2 + 1 ≤ M) :
+theorem ultrasphPoly_sum_eq_sum_coeff (lam y : ℂ) (n M : ℕ) (hM : n / 2 + 1 ≤ M) :
     ∑ k ∈ Finset.range (n / 2 + 1), (-1 : ℂ) ^ k * poch lam (n - k) /
         ((k.factorial : ℂ) * (n - 2 * k).factorial) * y ^ (n - 2 * k) =
       ∑ k ∈ Finset.range M, gegenbauerCoeff lam n k * y ^ (n - 2 * k) := by
@@ -263,7 +261,7 @@ lemma ultrasphPoly_sum_eq_sum_coeff (lam y : ℂ) (n M : ℕ) (hM : n / 2 + 1 �
 
 
 /-- The recurrence for the constant terms of the explicit sum. -/
-lemma gegenbauerCoeff_rec_zero (lam : ℂ) (n : ℕ) :
+theorem gegenbauerCoeff_rec_zero (lam : ℂ) (n : ℕ) :
     (n + 2 : ℂ) * gegenbauerCoeff lam (n + 2) 0 =
       (n + lam + 1) * gegenbauerCoeff lam (n + 1) 0 := by
   simp only [gegenbauerCoeff, mul_zero, zero_le, ↓reduceIte, pow_zero, one_mul,
@@ -276,7 +274,7 @@ lemma gegenbauerCoeff_rec_zero (lam : ℂ) (n : ℕ) :
   ring
 
 /-- The termwise recurrence for the explicit sum DLMF 18.5.10. -/
-lemma gegenbauerCoeff_rec_succ (lam : ℂ) (n k : ℕ) :
+theorem gegenbauerCoeff_rec_succ (lam : ℂ) (n k : ℕ) :
     (n + 2 : ℂ) * gegenbauerCoeff lam (n + 2) (k + 1) =
       (n + lam + 1) * gegenbauerCoeff lam (n + 1) (k + 1) -
         (n + 2 * lam) * gegenbauerCoeff lam n k := by
@@ -322,7 +320,7 @@ lemma gegenbauerCoeff_rec_succ (lam : ℂ) (n k : ℕ) :
 
 
 /-- Absorbing a factor `y` into the power in the explicit sum. -/
-lemma gegenbauerCoeff_mul_pow_succ (lam y : ℂ) (n k : ℕ) :
+theorem gegenbauerCoeff_mul_pow_succ (lam y : ℂ) (n k : ℕ) :
     gegenbauerCoeff lam (n + 1) (k + 1) * (y * y ^ (n + 1 - 2 * (k + 1))) =
       gegenbauerCoeff lam (n + 1) (k + 1) * y ^ (n - 2 * k) := by
   by_cases h : 2 * (k + 1) ≤ n + 1
@@ -330,7 +328,7 @@ lemma gegenbauerCoeff_mul_pow_succ (lam y : ℂ) (n k : ℕ) :
   · simp [gegenbauerCoeff, h]
 
 /-- The explicit sums of DLMF 18.5.10 satisfy the Gegenbauer recurrence. -/
-lemma gegenbauerExplicit_rec (lam y : ℂ) (n : ℕ) :
+theorem gegenbauerExplicit_rec (lam y : ℂ) (n : ℕ) :
     (n + 2 : ℂ) * ∑ k ∈ Finset.range ((n + 2) / 2 + 1), (-1 : ℂ) ^ k * poch lam (n + 2 - k) /
         ((k.factorial : ℂ) * (n + 2 - 2 * k).factorial) * y ^ (n + 2 - 2 * k) =
       (n + lam + 1) * y * ∑ k ∈ Finset.range ((n + 1) / 2 + 1), (-1 : ℂ) ^ k *
@@ -452,7 +450,7 @@ theorem ultrasphPoly_quadratic_odd {lam : ℂ} (hlam : -1 / 2 < lam.re) (n : ℕ
 
 open Filter Topology in
 /-- `α ↦ P_n^{(α, g α)}(y)` is continuous where `Re α > -1`. -/
-lemma continuousAt_jacobiPolyP {g : ℂ → ℂ} (hg : Continuous g) (n : ℕ) (y : ℂ) {α₀ : ℂ}
+theorem continuousAt_jacobiPolyP {g : ℂ → ℂ} (hg : Continuous g) (n : ℕ) (y : ℂ) {α₀ : ℂ}
     (h0 : -1 < α₀.re) : ContinuousAt (fun α => jacobiPolyP α (g α) n y) α₀ := by
   have hU : IsOpen {α : ℂ | -1 < α.re} := isOpen_lt continuous_const Complex.continuous_re
   have heq : (fun α => jacobiPolyP α (g α) n y) =ᶠ[𝓝 α₀] fun α => ∑ k ∈ Finset.range (n + 1),
@@ -467,7 +465,7 @@ lemma continuousAt_jacobiPolyP {g : ℂ → ℂ} (hg : Continuous g) (n : ℕ) (
 
 
 /-- `2α + 1` is not a nonpositive integer when `Re α > -1` and `α ≠ -1/2`. -/
-lemma two_mul_add_one_ne_neg_nat {α : ℂ} (hα : -1 < α.re) (hα2 : α ≠ -1 / 2) :
+theorem two_mul_add_one_ne_neg_nat {α : ℂ} (hα : -1 < α.re) (hα2 : α ≠ -1 / 2) :
     ∀ k : ℕ, 2 * α + 1 ≠ -(k : ℂ) := by
   intro k hk
   have hre := congrArg Complex.re hk
@@ -480,7 +478,7 @@ lemma two_mul_add_one_ne_neg_nat {α : ℂ} (hα : -1 < α.re) (hα2 : α ≠ -1
 
 open Filter Topology in
 /-- Equality at `α = -1/2` from equality nearby, for functions continuous there. -/
-lemma eq_at_neg_half {F G : ℂ → ℂ} (hF : ContinuousAt F (-1 / 2)) (hG : ContinuousAt G (-1 / 2))
+theorem eq_at_neg_half {F G : ℂ → ℂ} (hF : ContinuousAt F (-1 / 2)) (hG : ContinuousAt G (-1 / 2))
     (h : ∀ α : ℂ, -1 < α.re → α ≠ -1 / 2 → F α = G α) : F (-1 / 2) = G (-1 / 2) := by
   have hU : IsOpen {α : ℂ | -1 < α.re} := isOpen_lt continuous_const Complex.continuous_re
   have hev : F =ᶠ[𝓝[≠] (-1 / 2 : ℂ)] G := by
@@ -586,7 +584,7 @@ theorem jacobi_quadratic_odd {α : ℂ} (hα : -1 < α.re) (n : ℕ) (x : ℂ) :
 /-! ### Analytic generating functions -/
 
 /-- For `‖w‖ = 1` and `‖z‖ < 1` the factor `1 - w z` has positive real part. -/
-lemma re_one_sub_mul_pos_of_norm_eq_one {w z : ℂ} (hw : ‖w‖ = 1) (hz : ‖z‖ < 1) :
+theorem re_one_sub_mul_pos_of_norm_eq_one {w z : ℂ} (hw : ‖w‖ = 1) (hz : ‖z‖ < 1) :
     0 < (1 - w * z).re := by
   have h := Complex.re_le_norm (w * z)
   rw [norm_mul, hw, one_mul] at h
@@ -616,14 +614,14 @@ theorem hasSum_coeff_gegenbauerSeries_mul_pow (lam : ℂ) (θ : ℝ) {z : ℂ} (
 
 
 /-- For `|x| ≤ 1`, `x = (w + w⁻¹)/2` with `w = exp (i arccos x)`. -/
-lemma ofReal_eq_half_add_recip_of_abs_le_one {x : ℝ} (hx : |x| ≤ 1) :
+theorem ofReal_eq_half_add_recip_of_abs_le_one {x : ℝ} (hx : |x| ≤ 1) :
     (x : ℂ) = (exp (Real.arccos x * I) + (exp (Real.arccos x * I))⁻¹) / 2 := by
   rw [← Complex.exp_neg, ← neg_mul, ← Complex.cos, ← Complex.ofReal_cos,
     Real.cos_arccos (abs_le.mp hx).1 (abs_le.mp hx).2]
 
 open PowerSeries in
 /-- If `∑ coeff n F zⁿ = s` then `∑ coeff n ((1 - aX) F) zⁿ = (1 - a z) s`. -/
-lemma hasSum_coeff_one_sub_mul {F : PowerSeries ℂ} {z s : ℂ}
+theorem hasSum_coeff_one_sub_mul {F : PowerSeries ℂ} {z s : ℂ}
     (hs : HasSum (fun n => coeff n F * z ^ n) s) (a : ℂ) :
     HasSum (fun n => coeff n ((1 - C a * X) * F) * z ^ n) ((1 - a * z) * s) := by
   have hX : HasSum (fun n => coeff n (X * F) * z ^ n) (z * s) := by

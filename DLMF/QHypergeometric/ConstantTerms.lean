@@ -6,8 +6,6 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.QHypergeometric.Basic
-public import Mathlib.Algebra.MonoidAlgebra.Basic
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 
 /-!
 # Constant terms of q-products (DLMF §17.14)

@@ -10,8 +10,27 @@ public import Mathlib.Analysis.Calculus.Deriv.Pow
 public import Mathlib.Analysis.Calculus.Deriv.Mul
 public import Mathlib.Analysis.Calculus.Deriv.Inv
 public import Mathlib.Analysis.Calculus.Deriv.Add
-public import Mathlib.Analysis.Calculus.Deriv.Comp
-public import Mathlib.Tactic
+public import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
+public import Mathlib.Tactic.Basify
+public import Mathlib.Tactic.ENatToNat
+public import Mathlib.Tactic.Echelon.Zsqrtd
+public import Mathlib.Tactic.Inclusion.Extension.Core.Core
+public import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
+public import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Rational
+public import Mathlib.Tactic.Measurability.Init
+public import Mathlib.Tactic.NormNum.Irrational
+public import Mathlib.Tactic.NormNum.IsCoprime
+public import Mathlib.Tactic.NormNum.IsSquare
+public import Mathlib.Tactic.NormNum.LegendreSymbol
+public import Mathlib.Tactic.NormNum.ModEq
+public import Mathlib.Tactic.NormNum.NatFib
+public import Mathlib.Tactic.NormNum.NatLog
+public import Mathlib.Tactic.NormNum.NatSqrt
+public import Mathlib.Tactic.NormNum.Ordinal
+public import Mathlib.Tactic.NormNum.Parity
+public import Mathlib.Tactic.NormNum.Prime
+public import Mathlib.Tactic.NormNum.RealSqrt
+public import Mathlib.Tactic.ReduceModChar
 
 /-!
 # Painlevé II in the Beals–Wong normalization
@@ -41,19 +60,19 @@ namespace IsPIIOn
 variable {c : 𝕜} {u : 𝕜 → 𝕜} {s t : Set 𝕜}
 
 /-- The first derivative of a Painlevé II solution. -/
-lemma hasDerivAt (h : IsPIIOn c u s) {x : 𝕜} (hx : x ∈ s) :
+theorem hasDerivAt (h : IsPIIOn c u s) {x : 𝕜} (hx : x ∈ s) :
     HasDerivAt u (deriv u x) x := (h.differentiableAt x hx).hasDerivAt
 
 /-- The second-order differential equation satisfied by a solution. -/
-lemma ode (h : IsPIIOn c u s) {x : 𝕜} (hx : x ∈ s) :
+theorem ode (h : IsPIIOn c u s) {x : 𝕜} (hx : x ∈ s) :
     deriv (deriv u) x = 2 * u x ^ 3 + x * u x - c := (h.hasDerivAt_deriv x hx).deriv
 
 /-- Restriction to a smaller set preserves the equation and differentiability. -/
-lemma mono (h : IsPIIOn c u s) (ht : t ⊆ s) : IsPIIOn c u t :=
+theorem mono (h : IsPIIOn c u s) (ht : t ⊆ s) : IsPIIOn c u t :=
   ⟨fun x hx => h.differentiableAt x (ht hx), fun x hx => h.hasDerivAt_deriv x (ht hx)⟩
 
 /-- Equality on an open set transports the equation, including both derivatives. -/
-lemma congr (h : IsPIIOn c u s) {v : 𝕜 → 𝕜} (hs : IsOpen s) (he : EqOn u v s) :
+theorem congr (h : IsPIIOn c u s) {v : 𝕜 → 𝕜} (hs : IsOpen s) (he : EqOn u v s) :
     IsPIIOn c v s := by
   have hnear (x : 𝕜) (hx : x ∈ s) : v =ᶠ[𝓝 x] u := by
     filter_upwards [hs.mem_nhds hx] with y hy using (he hy).symm
@@ -63,7 +82,7 @@ lemma congr (h : IsPIIOn c u s) {v : 𝕜 → 𝕜} (hs : IsOpen s) (he : EqOn u
     (by rw [he hx])
 
 /-- The elementary parameter reflection `u ↦ -u`, `c ↦ -c`, Theorem 15.4.2. -/
-lemma neg (h : IsPIIOn c u s) : IsPIIOn (-c) (fun x => -u x) s := by
+theorem neg (h : IsPIIOn c u s) : IsPIIOn (-c) (fun x => -u x) s := by
   refine ⟨fun x hx => (h.differentiableAt x hx).neg, fun x hx => ?_⟩
   have he : deriv (fun x => -u x) = fun x => -deriv u x := by
     funext x
@@ -75,7 +94,7 @@ end IsPIIOn
 
 /-- Build a solution from a first-order pair on an open set. This permits explicit
 first derivatives in the proofs of special solutions and transformations. -/
-lemma isPIIOn_of_hasDerivAt {c : 𝕜} {u v : 𝕜 → 𝕜} {s : Set 𝕜} (hs : IsOpen s)
+theorem isPIIOn_of_hasDerivAt {c : 𝕜} {u v : 𝕜 → 𝕜} {s : Set 𝕜} (hs : IsOpen s)
     (hu : ∀ x ∈ s, HasDerivAt u (v x) x)
     (hv : ∀ x ∈ s, HasDerivAt v (2 * u x ^ 3 + x * u x - c) x) : IsPIIOn c u s := by
   refine ⟨fun x hx => (hu x hx).differentiableAt, fun x hx => ?_⟩

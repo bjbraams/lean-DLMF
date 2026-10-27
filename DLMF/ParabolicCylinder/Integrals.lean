@@ -5,11 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.ParabolicCylinder.Relations
 public import DLMF.ParabolicCylinder.IntegralTools
 public import DLMF.ParabolicCylinder.ContourTools
 public import DLMF.ParabolicCylinder.ProductTools
-public import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
 public import DLMFMathlib.Analysis.ODE.SymmetricSquare
 
 /-!
@@ -227,7 +225,7 @@ theorem pcfU_barnes_integral {a z : ℂ} (ha : ∀ n : ℕ, 1*a ≠ -n-1/2) (hz0
   exact pcfInt_hasIntegralWholeLine (pcfInt_B_integrable a hz0 hz hc hca')
 
 /-- `arg (±i z) = arg z ± π/2` for `|arg z| < π/2`. -/
-lemma pcfInt_arg_I_mul {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) :
+theorem pcfInt_arg_I_mul {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) :
     arg (I*z) = arg z + π/2 ∧ arg (-I*z) = arg z - π/2 := by
   obtain ⟨h1, h2⟩ := abs_lt.mp hz
   constructor
@@ -236,7 +234,7 @@ lemma pcfInt_arg_I_mul {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) :
       arg_neg_I]; ring
 
 /-- `(±i z)^w = z^w e^{±iπw/2}` for `|arg z| < π/2`. -/
-lemma pcfInt_I_mul_cpow {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) (w : ℂ) :
+theorem pcfInt_I_mul_cpow {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) (w : ℂ) :
     (I*z)^w = z^w * exp (π/2*I*w) ∧ (-I*z)^w = z^w * exp (-(π/2)*I*w) := by
   obtain ⟨ha1, ha2⟩ := pcfInt_arg_I_mul hz0 hz
   have hl1 : log (I*z) = log z + π/2*I := by
@@ -371,7 +369,7 @@ theorem pcf_integral_2 {a : ℂ} (ha : a.re < -1/2) :
   exact T
 
 /-- `‖cos w‖ ≤ e^{|Im w|}`. -/
-lemma pcfCt_norm_cos_le (w : ℂ) : ‖cos w‖ ≤ Real.exp |w.im| := by
+theorem pcfCt_norm_cos_le (w : ℂ) : ‖cos w‖ ≤ Real.exp |w.im| := by
   rw [Complex.cos]
   have h1 : ‖exp (w*I)‖ ≤ Real.exp |w.im| := by
     rw [Complex.norm_exp]; apply Real.exp_le_exp.mpr; simp; linarith [neg_abs_le w.im]
@@ -383,7 +381,7 @@ lemma pcfCt_norm_cos_le (w : ℂ) : ‖cos w‖ ≤ Real.exp |w.im| := by
 
 /-- DLMF 12.5.4 as a Lebesgue integral: `e^{-t²/4} U(a,t) = √(2/π) ∫₀^∞ s^{-a-1/2} e^{-s²/2}
 cos(ts + (a/2+1/4)π) ds` for `re a < 1/2`, real `t`. -/
-lemma pcfCt_U_cos {a : ℂ} (ha : a.re < 1/2) (t : ℝ) :
+theorem pcfCt_U_cos {a : ℂ} (ha : a.re < 1/2) (t : ℝ) :
     IntegrableOn (fun s : ℝ => (s:ℂ)^(-a-1/2) * exp (-(s:ℂ)^2/2) * cos (t*s + (a/2+1/4)*π)) (Ioi 0) ∧
     exp (-(t:ℂ)^2/4) * pcfU a t =
       (Real.sqrt (2/π):ℂ) * ∫ s in Ioi (0:ℝ), (s:ℂ)^(-a-1/2) * exp (-(s:ℂ)^2/2) * cos (t*s + (a/2+1/4)*π) := by
@@ -417,7 +415,7 @@ lemma pcfCt_U_cos {a : ℂ} (ha : a.re < 1/2) (t : ℝ) :
 
 /-- DLMF 12.12.3 on the strip `-1/2 < re a < 1/2`, as a Lebesgue integral (Fubini against
 12.5.4 and the kernel `pcfCt_kernel`). -/
-lemma pcfCt_integral_3_strip {a : ℂ} (ha1 : -1/2 < a.re) (ha2 : a.re < 1/2) {x : ℝ} (hx : 0 < x) :
+theorem pcfCt_integral_3_strip {a : ℂ} (ha1 : -1/2 < a.re) (ha2 : a.re < 1/2) {x : ℝ} (hx : 0 < x) :
     IntegrableOn (fun t : ℝ => exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t) (Ioi 0) ∧
     ∫ t in Ioi (0:ℝ), exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t =
       (Real.sqrt (π/2):ℂ)*Gamma (1/2-a)*(x:ℂ)^(-a-3/2)*exp (x^2/4)*pcfU (-a) x := by
@@ -497,7 +495,7 @@ lemma pcfCt_integral_3_strip {a : ℂ} (ha1 : -1/2 < a.re) (ha2 : a.re < 1/2) {x
 
 
 /-- Elementary: `t^r ≤ t^{q₁} + t^{q₂}` for `t > 0` and `q₁ ≤ r ≤ q₂`. -/
-lemma pcfCt_rpow_le_add {t q1 q2 r : ℝ} (ht : 0 < t) (h1 : q1 ≤ r) (h2 : r ≤ q2) :
+theorem pcfCt_rpow_le_add {t q1 q2 r : ℝ} (ht : 0 < t) (h1 : q1 ≤ r) (h2 : r ≤ q2) :
     t ^ r ≤ t ^ q1 + t ^ q2 := by
   rcases le_total t 1 with h | h
   · have := Real.rpow_le_rpow_of_exponent_ge ht h h1
@@ -508,7 +506,7 @@ lemma pcfCt_rpow_le_add {t q1 q2 r : ℝ} (ht : 0 < t) (h1 : q1 ≤ r) (h2 : r �
     linarith
 
 /-- Local domination for the integrand of 12.12.3 in the parameter `a`. -/
-lemma pcfCt_integral_3_dom {a0 : ℂ} (ha0 : a0.re < 1/2) {x : ℝ} (hx : 0 < x) :
+theorem pcfCt_integral_3_dom {a0 : ℂ} (ha0 : a0.re < 1/2) {x : ℝ} (hx : 0 < x) :
     ∃ V ∈ 𝓝 a0, ∃ g : ℝ → ℝ, IntegrableOn g (Ioi 0) ∧ ∀ t ∈ Ioi (0:ℝ), ∀ a ∈ V,
       ‖exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t‖ ≤ g t := by
   set δ := (1/2 - a0.re)/2 with hδ
@@ -552,7 +550,7 @@ lemma pcfCt_integral_3_dom {a0 : ℂ} (ha0 : a0.re < 1/2) {x : ℝ} (hx : 0 < x)
           exact div_le_div₀ (by positivity) hrp hx2 hden
       _ = _ := by ring
 /-- DLMF 12.12.3 as a Lebesgue integral on `(0,∞)`, for all `Re a < 1/2`. -/
-lemma pcfCt_integral_3_all {a : ℂ} (ha : a.re < 1/2) {x : ℝ} (hx : 0 < x) :
+theorem pcfCt_integral_3_all {a : ℂ} (ha : a.re < 1/2) {x : ℝ} (hx : 0 < x) :
     IntegrableOn (fun t : ℝ => exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t) (Ioi 0) ∧
     ∫ t in Ioi (0:ℝ), exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t =
       (Real.sqrt (π/2):ℂ)*Gamma (1/2-a)*(x:ℂ)^(-a-3/2)*exp (x^2/4)*pcfU (-a) x := by
@@ -1008,7 +1006,7 @@ lemma pcfIntegral4_isThirdOrderSolution {a : ℂ} (ha : a.re < 1/2) :
 
 /-- The convergent integral in DLMF 12.12.4 is entire in the argument.
 This is the zeroth case of the common moment derivative theorem. -/
-theorem pcfIntegral4_kernel_differentiable {a : ℂ} (ha : a.re < 1/2) :
+lemma pcfIntegral4_kernel_differentiable {a : ℂ} (ha : a.re < 1/2) :
     Differentiable ℂ (fun z : ℂ => ∫ t : ℝ in Ioi 0,
       exp (2*a*t + z^2/2*Real.tanh t) / (Real.sqrt (Real.sinh (2*t)) : ℂ)) := by
   intro z
@@ -1022,7 +1020,7 @@ theorem pcfIntegral4_kernel_differentiable {a : ℂ} (ha : a.re < 1/2) :
 
 
 /-- A pole-safe sine/cosine factorization of the two cylinder solutions at the origin. -/
-lemma pcfProduct_zero_pair_v {v : ℂ} (hv : 0 < v.re) :
+theorem pcfProduct_zero_pair_v {v : ℂ} (hv : 0 < v.re) :
     pcfU (1/2-2*v) 0 = ((2 : ℂ)^(v-1/2)*Gamma v/(Real.sqrt π))*sin (π*v) ∧
     pcfUBar (1/2-2*v) 0 = ((2 : ℂ)^(v-1/2)*Gamma v/(Real.sqrt π))*cos (π*v) := by
   have hG : Gamma v ≠ 0 := Gamma_ne_zero_of_re_pos hv
@@ -1060,7 +1058,7 @@ lemma pcfProduct_zero_pair_v {v : ℂ} (hv : 0 < v.re) :
   exact ⟨hU, hV⟩
 
 /-- The cylinder-square initial value expressed through a beta integral. -/
-lemma pcfProduct_zero_beta_v {v : ℂ} (hv : 0 < v.re) :
+theorem pcfProduct_zero_beta_v {v : ℂ} (hv : 0 < v.re) :
     Gamma (2*v) * betaIntegral v (1/2) / π =
       (pcfU (1/2-2*v) 0)^2 + (pcfUBar (1/2-2*v) 0)^2 := by
   have hG : Gamma v ≠ 0 := Gamma_ne_zero_of_re_pos hv
@@ -1155,7 +1153,7 @@ lemma pcfIntegral4_deriv_zero_shift {a : ℂ} (ha : a.re < 1/2) :
 
 
 /-- Initial values determine solutions of the Weber product equation. -/
-lemma pcfProduct_eq_of_initial {a : ℂ} {y y1 y2 z z1 z2 : ℂ → ℂ}
+theorem pcfProduct_eq_of_initial {a : ℂ} {y y1 y2 z z1 z2 : ℂ → ℂ}
     (hy : ODE.IsThirdOrderSolution (fun x => x^2+4*a) (fun x => x) y y1 y2)
     (hz : ODE.IsThirdOrderSolution (fun x => x^2+4*a) (fun x => x) z z1 z2)
     (h0 : y 0 = z 0) (h1 : y1 0 = z1 0) (h2 : y2 0 = z2 0) : y = z := by

@@ -125,7 +125,7 @@ theorem sphProd_summable_coeff_mul (c : ℕ → ℂ) {C ρ : ℝ} (hρ : 0 ≤ �
   exact Summable.of_norm_bounded hu (fun n => h n w le_rfl)
 
 /-- `2n+1 ≤ 2·2ⁿ`. -/
-lemma sphProd_two_mul_add_one_le (n : ℕ) : (2*n+1 : ℝ) ≤ 2 * 2^n := by
+theorem sphProd_two_mul_add_one_le (n : ℕ) : (2*n+1 : ℝ) ≤ 2 * 2^n := by
   have h : (n:ℝ) + 1 ≤ 2^n := by
     have := Nat.lt_two_pow_self (n := n)
     exact_mod_cast this

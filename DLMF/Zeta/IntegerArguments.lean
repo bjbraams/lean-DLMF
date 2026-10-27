@@ -11,8 +11,6 @@ public import DLMF.BernoulliEuler.IntegralsSums
 public import DLMF.Polylog.Dilog
 public import DLMF.Hypergeometric.Clausen
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Digamma
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
-public import Mathlib.NumberTheory.LSeries.HurwitzZetaValues
 
 /-!
 # The Riemann zeta function at integer arguments (DLMF §25.6)

@@ -5,11 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Tactic.CrossRefAttribute
 public import DLMF.Bessel.Modified
 public import DLMF.Gamma.IntegralRepresentations
-public import Mathlib.Analysis.Normed.Group.Tannery
-public import Mathlib.Analysis.SpecialFunctions.Exponential
 
 /-!
 # Bessel functions of large order
@@ -40,11 +37,11 @@ section LargeOrder
 /-- The ratio `Γ(ν+1)/Γ(ν+1+n) = 1/(ν+1)_n`. -/
 def gammaShiftRatio (ν : ℝ) (n : ℕ) : ℝ := Real.Gamma (ν + 1) / Real.Gamma (ν + 1 + n)
 
-lemma gammaShiftRatio_zero (ν : ℝ) (hν : -1 < ν) : gammaShiftRatio ν 0 = 1 := by
+theorem gammaShiftRatio_zero (ν : ℝ) (hν : -1 < ν) : gammaShiftRatio ν 0 = 1 := by
   have h : Real.Gamma (ν + 1) ≠ 0 := (Real.Gamma_pos_of_pos (by linarith)).ne'
   simp [gammaShiftRatio, h]
 
-lemma gammaShiftRatio_succ {ν : ℝ} (hν : -1 < ν) (n : ℕ) :
+theorem gammaShiftRatio_succ {ν : ℝ} (hν : -1 < ν) (n : ℕ) :
     gammaShiftRatio ν (n + 1) = gammaShiftRatio ν n / (ν + 1 + n) := by
   have h1 : 0 < ν + 1 := by linarith
   have h : 0 < ν + 1 + n := by positivity
@@ -54,11 +51,11 @@ lemma gammaShiftRatio_succ {ν : ℝ} (hν : -1 < ν) (n : ℕ) :
     Real.Gamma_add_one h.ne']
   field_simp
 
-lemma gammaShiftRatio_nonneg {ν : ℝ} (hν : -1 < ν) (n : ℕ) : 0 ≤ gammaShiftRatio ν n := by
+theorem gammaShiftRatio_nonneg {ν : ℝ} (hν : -1 < ν) (n : ℕ) : 0 ≤ gammaShiftRatio ν n := by
   have h1 : 0 < ν + 1 := by linarith
   exact div_nonneg (Real.Gamma_pos_of_pos h1).le (Real.Gamma_pos_of_pos (by positivity)).le
 
-lemma gammaShiftRatio_le_one {ν : ℝ} (hν : 0 ≤ ν) (n : ℕ) : gammaShiftRatio ν n ≤ 1 := by
+theorem gammaShiftRatio_le_one {ν : ℝ} (hν : 0 ≤ ν) (n : ℕ) : gammaShiftRatio ν n ≤ 1 := by
   induction n with
   | zero => rw [gammaShiftRatio_zero ν (by linarith)]
   | succ n ih =>
@@ -66,7 +63,7 @@ lemma gammaShiftRatio_le_one {ν : ℝ} (hν : 0 ≤ ν) (n : ℕ) : gammaShiftR
     have h1 : 1 ≤ ν + 1 + n := by have := (Nat.cast_nonneg n : (0 : ℝ) ≤ n); linarith
     exact (div_le_self (gammaShiftRatio_nonneg (by linarith) n) h1).trans ih
 
-lemma gammaShiftRatio_mul_pow_le_one {ν : ℝ} (hν : 0 < ν) (n : ℕ) :
+theorem gammaShiftRatio_mul_pow_le_one {ν : ℝ} (hν : 0 < ν) (n : ℕ) :
     gammaShiftRatio ν n * ν ^ n ≤ 1 := by
   induction n with
   | zero => simp [gammaShiftRatio_zero ν (by linarith)]
@@ -81,7 +78,7 @@ lemma gammaShiftRatio_mul_pow_le_one {ν : ℝ} (hν : 0 < ν) (n : ℕ) :
     calc _ ≤ 1 * 1 := mul_le_mul ih h2 (div_nonneg hν.le h1.le) zero_le_one
       _ = 1 := one_mul 1
 
-lemma tendsto_div_add_const (c : ℝ) :
+theorem tendsto_div_add_const (c : ℝ) :
     Tendsto (fun ν : ℝ => ν / (ν + c)) atTop (𝓝 1) := by
   have h : Tendsto (fun ν : ℝ => (1 + c * ν⁻¹)⁻¹) atTop (𝓝 ((1 + c * 0)⁻¹)) :=
     (tendsto_const_nhds.add (tendsto_inv_atTop_zero.const_mul c)).inv₀ (by simp)
@@ -90,7 +87,7 @@ lemma tendsto_div_add_const (c : ℝ) :
   filter_upwards [eventually_gt_atTop (0 : ℝ)] with ν hν
   field_simp
 
-lemma tendsto_gammaShiftRatio_mul_pow (n : ℕ) :
+theorem tendsto_gammaShiftRatio_mul_pow (n : ℕ) :
     Tendsto (fun ν : ℝ => gammaShiftRatio ν n * ν ^ n) atTop (𝓝 1) := by
   induction n with
   | zero =>
@@ -106,7 +103,7 @@ lemma tendsto_gammaShiftRatio_mul_pow (n : ℕ) :
     rw [gammaShiftRatio_succ (by linarith), pow_succ, ← add_assoc]
     field_simp
 
-lemma tendsto_gammaShiftRatio_succ (n : ℕ) :
+theorem tendsto_gammaShiftRatio_succ (n : ℕ) :
     Tendsto (fun ν : ℝ => gammaShiftRatio ν (n + 1)) atTop (𝓝 0) := by
   have hb : Tendsto (fun ν : ℝ => 1 / (ν + 1 + n)) atTop (𝓝 0) :=
     tendsto_const_nhds.div_atTop
@@ -120,7 +117,7 @@ lemma tendsto_gammaShiftRatio_succ (n : ℕ) :
     exact div_le_div_of_nonneg_right (gammaShiftRatio_le_one hν n) h1.le
 
 /-- `Γ(ν+1) ₀F̃₁(;ν+1;v) = ∑ v^n Γ(ν+1)/(n! Γ(ν+1+n))` for real `ν > -1`. -/
-lemma Gamma_mul_regularized0F1_eq_tsum {ν : ℝ} (hν : -1 < ν) (v : ℂ) :
+theorem Gamma_mul_regularized0F1_eq_tsum {ν : ℝ} (hν : -1 < ν) (v : ℂ) :
     Complex.Gamma ((ν : ℂ) + 1) * regularizedHGFun (∅ : Multiset ℂ) {(ν : ℂ) + 1} v =
       ∑' n : ℕ, (gammaShiftRatio ν n : ℂ) * (v ^ n / n !) := by
   have hs := (hasFPowerSeriesOnBall_regularized0F1 ((ν : ℂ) + 1)).hasSum_mul_pow
@@ -233,7 +230,7 @@ theorem tendsto_Gamma_mul_besselI_sqrt_mul {x : ℂ} (hx : x ≠ 0) :
     ring
   rw [besselI, hsq, mul_div_assoc, mul_div_cancel_left₀ _ hp]
 
-lemma norm_Gamma_mul_regularized0F1_le {ν : ℝ} (hν : 0 ≤ ν) (v : ℂ) :
+theorem norm_Gamma_mul_regularized0F1_le {ν : ℝ} (hν : 0 ≤ ν) (v : ℂ) :
     ‖Complex.Gamma ((ν : ℂ) + 1) * regularizedHGFun (∅ : Multiset ℂ) {(ν : ℂ) + 1} v‖ ≤
       Real.exp ‖v‖ := by
   rw [Gamma_mul_regularized0F1_eq_tsum (by linarith)]
@@ -261,7 +258,7 @@ theorem norm_besselJ_le {ν : ℝ} (hν : 0 ≤ ν) (z : ℂ) :
   exact mul_le_mul_of_nonneg_left h (norm_nonneg _)
 
 /-- Stirling's formula with Binet's remainder: `Γ(ν+1) = √(2πν) (ν/e)^ν e^{β(ν)}`. -/
-lemma Gamma_add_one_eq_stirling {ν : ℝ} (hν : 0 < ν) :
+theorem Gamma_add_one_eq_stirling {ν : ℝ} (hν : 0 < ν) :
     Real.Gamma (ν + 1) = Real.sqrt (2 * π * ν) * (ν / Real.exp 1) ^ ν *
       Real.exp (DLMF.Gamma.binetIntegral ν) := by
   have hG := Real.Gamma_pos_of_pos hν
@@ -275,7 +272,7 @@ lemma Gamma_add_one_eq_stirling {ν : ℝ} (hν : 0 < ν) :
   congr 1
   ring
 
-lemma mul_ofReal_cpow {w : ℂ} (hw : w ≠ 0) {a : ℝ} (ha : 0 < a) (s : ℂ) :
+theorem mul_ofReal_cpow {w : ℂ} (hw : w ≠ 0) {a : ℝ} (ha : 0 < a) (s : ℂ) :
     (w * a) ^ s = w ^ s * (a : ℂ) ^ s := by
   have ha' : (a : ℂ) ≠ 0 := by exact_mod_cast ha.ne'
   rw [cpow_def_of_ne_zero (mul_ne_zero hw ha'), cpow_def_of_ne_zero hw,
@@ -291,7 +288,7 @@ def besselLargeOrderCorr (z : ℂ) (ν : ℝ) : ℂ :=
   cexp (-(DLMF.Gamma.binetIntegral ν : ℂ)) * (Complex.Gamma ((ν : ℂ) + 1) *
     regularizedHGFun (∅ : Multiset ℂ) {(ν : ℂ) + 1} (-(z ^ 2 / 4)))
 
-lemma tendsto_besselLargeOrderCorr (z : ℂ) :
+theorem tendsto_besselLargeOrderCorr (z : ℂ) :
     Tendsto (besselLargeOrderCorr z) atTop (𝓝 1) := by
   have hβ0 : Tendsto (fun ν : ℝ => DLMF.Gamma.binetIntegral ν) atTop (𝓝 0) := by
     have hb : Tendsto (fun ν : ℝ => 1 / (12 * ν)) atTop (𝓝 0) :=
@@ -309,7 +306,7 @@ lemma tendsto_besselLargeOrderCorr (z : ℂ) :
   rw [one_mul] at h
   exact h
 
-lemma besselJ_eq_main_mul_corr {z : ℂ} (hz : z ≠ 0) {ν : ℝ} (hν : 0 < ν) :
+theorem besselJ_eq_main_mul_corr {z : ℂ} (hz : z ≠ 0) {ν : ℝ} (hν : 0 < ν) :
     besselJ ν z = besselLargeOrderMain z ν * besselLargeOrderCorr z ν := by
   have hz2 : z / 2 ≠ 0 := div_ne_zero hz two_ne_zero
   have hA : 0 < Real.exp 1 / ν := div_pos (Real.exp_pos 1) hν
