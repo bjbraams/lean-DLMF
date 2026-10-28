@@ -34,24 +34,29 @@ abbrev poch (a : ℂ) (n : ℕ) : ℂ :=
 @[dlmf 5.2.E4]
 theorem poch_zero (a : ℂ) : poch a 0 = 1 := by simp [poch]
 
+/-- `(a)₁ = a`. -/
 theorem poch_one (a : ℂ) : poch a 1 = a := by simp [poch]
 
 @[dlmf 5.2.E4]
 theorem poch_succ (a : ℂ) (n : ℕ) : poch a (n + 1) = poch a n * (a + n) :=
   ascPochhammer_succ_eval n a
 
+/-- `(1)ₙ = n!`. -/
 theorem poch_nat_one (n : ℕ) : poch (1 : ℂ) n = n ! := by
   simp [poch, ascPochhammer_eval_one]
 
+/-- `(2)ₙ = (n + 1)!`. -/
 theorem poch_nat_two (n : ℕ) : poch (2 : ℂ) n = ((n + 1)! : ℂ) := by
   unfold poch
   rw [show (2 : ℂ) = ↑(2 : ℕ) by simp, ascPochhammer_nat_eq_natCast_ascFactorial]
   simp [Nat.ascFactorial_eq_div (n := 1) n, Nat.factorial_one, add_comm]
 
+/-- `(0)ₙ₊₁ = 0`. -/
 theorem poch_zero_succ (n : ℕ) : poch (0 : ℂ) (n + 1) = 0 := by
   rw [poch, (ascPochhammer_eval_eq_zero_iff _ _).2]
   exact ⟨0, Nat.succ_pos n, by simp⟩
 
+/-- `(a)ₙ ≠ 0` when `a` is not a nonpositive integer. -/
 theorem poch_ne_zero_of_not_neg_nat {a : ℂ} (ha : ∀ k : ℕ, a ≠ -k) (n : ℕ) :
     poch a n ≠ 0 := by
   intro h
@@ -140,6 +145,8 @@ theorem ordinaryHypergeometric_zero_left (b c z : ℂ) : ₂F₁ (0 : ℂ) b c z
 def gaussHGCoeff (a b c : ℂ) (n : ℕ) : ℂ :=
   poch a n * poch b n / (poch c n * n !)
 
+/-- Mathlib's `ordinaryHypergeometricCoefficient` agrees with the project coefficient
+  `gaussHGCoeff`. -/
 theorem ordinaryHypergeometricCoefficient_eq (a b c : ℂ) (n : ℕ) :
     ordinaryHypergeometricCoefficient a b c n = gaussHGCoeff a b c n := by
   simp [ordinaryHypergeometricCoefficient, gaussHGCoeff, poch, div_eq_mul_inv, mul_assoc,
@@ -174,12 +181,14 @@ theorem ordinaryHypergeometric_eq_sum_neg_nat (n : ℕ) (b c z : ℂ) :
     omega
   simp [gaussHGCoeff, poch_neg_nat_eq_zero hkn]
 
+/-- The coefficients of `₂F₁(1, 1; 2; z)` are `1/(n + 1)`. -/
 theorem gaussHGCoeff_one_one_two (n : ℕ) : gaussHGCoeff 1 1 2 n = 1 / (n + 1 : ℂ) := by
   have hfact : ((n + 1)! : ℂ) = (n ! : ℂ) * (n + 1) := by
     rw [Nat.factorial_succ, Nat.cast_mul, Nat.cast_add, Nat.cast_one, mul_comm]
   rw [gaussHGCoeff, poch_nat_one, poch_nat_two, hfact]
   field [Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero n)]
 
+/-- The series `₂F₁(1, 1; 2; z)` has radius of convergence `1`. -/
 theorem radius_ordinaryHypergeometric_one_one_two :
     (ordinaryHypergeometricSeries ℂ (1 : ℂ) 1 2).radius = 1 :=
   ordinaryHypergeometricSeries_radius_eq_one ℂ (1 : ℂ) 1 2 fun kn => by

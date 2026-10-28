@@ -133,7 +133,7 @@ theorem sum_choose_recip_poch {a : ℂ} (ha : -1 < a.re) (r : ℕ) :
   | succ N =>
     rw [Finset.sum_range_succ']
     simp only [Nat.cast_zero, Nat.cast_add, Nat.cast_one, pow_zero, Nat.choose_zero_right,
-      one_mul, mul_zero, add_zero, poch_zero, Nat.sub_zero, ↓reduceIte]
+      one_mul, mul_zero, add_zero, poch_zero, Nat.sub_zero]
     have ht (k : ℕ) (hk : k ∈ Finset.range (N + 1)) :
         (-1 : ℂ) ^ (k + 1) * ((N + 1).choose (k + 1) : ℂ) /
           (poch (a + (k + 1)) (k + 1) * poch (a + 2 * (k + 1) + 1) (N + 1 - (k + 1))) =
@@ -208,7 +208,7 @@ theorem jacobiInverseCoeff_mul_gaussCoeff {α β : ℂ} (hα : -1 < α.re) (hβ 
   have hd : poch (α + β + 2 * (j + t : ℕ) + 2) (n - (j + t)) ≠ 0 := by
     apply poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos ?_)
     simp only [add_re, mul_re, natCast_re, natCast_im, re_ofNat, im_ofNat, mul_zero,
-      sub_zero, add_zero]
+      sub_zero]
     linarith [Nat.cast_nonneg (α := ℝ) (j + t)]
   have hnum : poch (α + 1) (j + t) * poch (α + (j + t : ℕ) + 1) (n - (j + t)) =
       poch (α + 1) j * poch (α + j + 1) (n - j) := by
@@ -264,7 +264,7 @@ theorem jacobi_monomial_inverse {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.
     rw [Finset.sum_Ico_eq_sum_range, show n + 1 - j = n - j + 1 by omega]
     have ha : -1 < (α + β + 2 * j + 1).re := by
       simp only [add_re, mul_re, re_ofNat, im_ofNat, natCast_re, natCast_im, mul_zero,
-        sub_zero, add_zero, one_re]
+        sub_zero, one_re]
       linarith [Nat.cast_nonneg (α := ℝ) j]
     have he : (∑ t ∈ Finset.range (n - j + 1), jacobiInverseCoeff α β n (j + t) *
         (poch (α + 1) (j + t) / (j + t).factorial *
@@ -277,7 +277,7 @@ theorem jacobi_monomial_inverse {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.
       apply Finset.sum_congr rfl
       intro t ht
       have htn : j + t ≤ n := by have := Finset.mem_range.mp ht; omega
-      convert jacobiInverseCoeff_mul_gaussCoeff hα hβ n j t htn using 1 <;> congr 3 <;> ring
+      convert jacobiInverseCoeff_mul_gaussCoeff hα hβ n j t htn using 1; congr 3; ring
     rw [he, sum_choose_recip_poch ha]
     by_cases hj' : j = n
     · subst j

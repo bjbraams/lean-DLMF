@@ -69,14 +69,18 @@ def p3qHF (m q C0 Cp2 Cm2 Cp4 Cm4 : ℂ) : ℂ :=
     (m ^ 2 + 1) / (512 * (m - 1) ^ 2 * (m + 1) ^ 3 * (m + 2)) * Cp4 * q -
     (m ^ 2 + 1) / (512 * (m - 2) * (m - 1) ^ 3 * (m + 1) ^ 2) * Cm4 * q + 0 * C0
 
+/-- The trial vector of 28.6.26 vanishes for `|j| ≥ 3`. -/
 lemma p3qHT_eq_zero (m q : ℂ) {j : ℤ} (hj : 3 ≤ j.natAbs) : p3qHT m q j = 0 := by
   unfold p3qHT
   split_ifs <;> first | rfl | (exfalso; omega)
 
+/-- The residual quotients `p3qHS` vanish for `|j| ≥ 4`. -/
 lemma p3qHS_eq_zero (m q : ℂ) {j : ℤ} (hj : 4 ≤ j.natAbs) : p3qHS m q j = 0 := by
   unfold p3qHS
   split_ifs <;> first | rfl | (exfalso; omega)
 
+/-- Row identity: `((m+2j)² - P) T_j + q (T_{j-1} + T_{j+1}) = q³ p3qHS m q j` with
+`P = m² + q²/(2(m²-1))`. -/
 lemma p3q_h_row {m : ℂ} (hm : p3qGood m) (q : ℂ) (j : ℤ) :
     ((m + 2 * (j : ℂ)) ^ 2 - p3qHP m q) * p3qHT m q j +
       q * (p3qHT m q (j - 1) + p3qHT m q (j + 1)) = q ^ 3 * p3qHS m q j := by
@@ -89,14 +93,18 @@ lemma p3q_h_row {m : ℂ} (hm : p3qGood m) (q : ℂ) (j : ℤ) :
       p3qHT_eq_zero m q (by omega), p3qHS_eq_zero m q (by omega)]
     ring
 
+/-- Each component of the trial vector `p3qHT` is continuous in real `q`. -/
 lemma p3qHT_continuous (m : ℂ) (j : ℤ) : Continuous fun q : ℝ => p3qHT m q j := by
   unfold p3qHT
   split_ifs <;> fun_prop
 
+/-- Each residual quotient `p3qHS` is continuous in real `q`. -/
 lemma p3qHS_continuous (m : ℂ) (j : ℤ) : Continuous fun q : ℝ => p3qHS m q j := by
   unfold p3qHS
   split_ifs <;> fun_prop
 
+/-- The residual rows of the trial vector `v_i = T_{i-n}` are `O(q³)` in a recurrence whose
+diagonal agrees with `(m + 2(i - n))²` for `|i - n| ≤ 2`. -/
 lemma p3q_h_hr {D : ℝ → ℕ → ℂ} {β : ℂ} {n : ℕ} {m : ℂ} (hm : p3qGood m) (hn : 2 ≤ n)
     (hβ : n = 2 → β = 1)
     (hD : ∀ q i, n ≤ i + 2 → i ≤ n + 2 → D q i = (m + 2 * ((i : ℂ) - n)) ^ 2) (i : ℕ) :
@@ -123,6 +131,8 @@ lemma p3q_h_hr {D : ℝ → ℕ → ℂ} {β : ℂ} {n : ℕ} {m : ℂ} (hm : p3
   rw [show (((i + 1 : ℕ) : ℤ) - n) = ((i : ℤ) - n) + 1 by push_cast; ring]
   ring
 
+/-- A sum over `i < k + 5` of `f(i - (k+2)) h(i)`, with `f` supported in `|j| ≤ 2`,
+reduces to its five middle terms. -/
 lemma p3q_h_sum (k : ℕ) (f : ℤ → ℂ) (hf : ∀ j, 3 ≤ j.natAbs → f j = 0) (h : ℕ → ℂ) :
     ∑ i ∈ Finset.range (k + 2 + 3), f ((i : ℤ) - ((k + 2 : ℕ) : ℤ)) * h i =
       f (-2) * h k + f (-1) * h (k + 1) + f 0 * h (k + 2) + f 1 * h (k + 3) +
@@ -136,6 +146,7 @@ lemma p3q_h_sum (k : ℕ) (f : ℤ → ℂ) (hf : ∀ j, 3 ≤ j.natAbs → f j 
   rw [show ((k : ℕ) : ℤ) - ((k + 2 : ℕ) : ℤ) = -2 by push_cast; ring, e 1, e 2, e 3, e 4]
   norm_num
 
+/-- The normalization identity `c² ∑_j T_j² - 1 = q³ p3qHN m q`. -/
 lemma p3q_h_norm {m : ℂ} (hm : p3qGood m) (q : ℂ) :
     p3qHc m q ^ 2 * (p3qHT m q (-2) ^ 2 + p3qHT m q (-1) ^ 2 + p3qHT m q 0 ^ 2 +
       p3qHT m q 1 ^ 2 + p3qHT m q 2 ^ 2) - 1 = q ^ 3 * p3qHN m q := by
@@ -145,6 +156,8 @@ lemma p3q_h_norm {m : ℂ} (hm : p3qGood m) (q : ℂ) :
   field_simp
   ring
 
+/-- The normalized trial sum `c ∑_j T_j C_{2j}` differs from the 28.6.26 polynomial by
+`q³ p3qHF`. -/
 lemma p3q_h_final {m : ℂ} (hm : p3qGood m) (q C0 Cp2 Cm2 Cp4 Cm4 : ℂ) :
     p3qHc m q * (p3qHT m q (-2) * Cm4 + p3qHT m q (-1) * Cm2 + p3qHT m q 0 * C0 +
       p3qHT m q 1 * Cp2 + p3qHT m q 2 * Cp4) -

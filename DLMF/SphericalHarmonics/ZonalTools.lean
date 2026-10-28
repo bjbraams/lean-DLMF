@@ -210,13 +210,6 @@ section Reproduce
 
 open MvPolynomial
 
-/-- Scaling the variables of a homogeneous polynomial; adapted from the Tau Ceti contributors'
-`MvPolynomial.IsHomogeneous.eval₂_const_mul`. -/
-theorem zonal_eval_smul {n m : ℕ} {P : MvPolynomial (Fin n) ℝ} (hP : P.IsHomogeneous m)
-    (r : ℝ) (u : EuclideanSpace ℝ (Fin n)) :
-    eval (fun j => (r • u) j) P = r ^ m * eval (fun j => u j) P := by
-  exact hP.eval₂_const_mul (RingHom.id ℝ) (fun j => u j) r
-
 /-- The Poisson extension of harmonic boundary data is the original function; adapted from the
 Tau Ceti contributors' unit-ball Dirichlet theorem. -/
 theorem zonal_poisson {n : ℕ} (hn : n ≠ 0)
@@ -318,6 +311,38 @@ theorem zonal_kernel_eq (ξ y : sphere (0 : EuclideanSpace ℝ (Fin 3)) 1) {r : 
       abs_le.mp hi, abs_lt.mp hr]
   push_cast
   field_simp
+
+/-- Coefficient extraction: if `‖c j‖ ≤ (2j+1) C` and `∑ⱼ rʲ c j = rᵏ e` for all `|r| < 1/2`, then
+`c j = e` for `j = k` and `c j = 0` otherwise. -/
+private lemma zonal_coeff_eq_ite {c : ℕ → ℂ} {C : ℝ} (hC : 0 ≤ C) (e : ℂ) (k : ℕ)
+    (hc : ∀ j : ℕ, ‖c j‖ ≤ (2 * j + 1) * C)
+    (key : ∀ r : ℝ, |r| < 1 / 2 → HasSum (fun j => (r : ℂ) ^ j * c j) ((r : ℂ) ^ k * e))
+    (j : ℕ) : c j = if j = k then e else 0 := by
+  set b : ℕ → ℂ := fun j => c j - if j = k then e else 0 with hbdef
+  have hb := zonal_coeff_eq_zero b (2 * C + ‖e‖) (fun j => by
+    simp only [hbdef]
+    refine (norm_sub_le _ _).trans ?_
+    have h1 := hc j
+    have h2 : ‖(if j = k then e else 0)‖ ≤ ‖e‖ := by
+      split_ifs
+      · exact le_rfl
+      · simp only [norm_zero]; positivity
+    have hj : (0 : ℝ) ≤ j := Nat.cast_nonneg j
+    have he : 0 ≤ ‖e‖ := norm_nonneg e
+    nlinarith) (fun r hr => by
+      have h1 := key r hr
+      have h2 : HasSum (fun j => (r : ℂ) ^ j * (if j = k then e else 0)) ((r : ℂ) ^ k * e) := by
+        have := hasSum_ite_eq k ((r : ℂ) ^ k * e)
+        convert this using 1
+        funext j; split_ifs with h
+        · subst h; rfl
+        · simp
+      have := h1.sub h2
+      rw [sub_self] at this
+      refine this.congr_fun fun j => ?_
+      simp only [hbdef]; ring) j
+  simp only [hbdef, sub_eq_zero] at hb
+  exact hb
 
 /-- **Reproducing property of zonal Legendre kernels** (AAR §9.6): for a harmonic homogeneous
 polynomial `S` of degree `k` in three variables,
@@ -433,7 +458,8 @@ theorem zonal_reproduce {k : ℕ} {S : MvPolynomial (Fin 3) ℝ} (hS : IsHarmoni
     have hpo := zonal_poisson (f := ev) (by norm_num)
       (zonal_harmonicOnNhd hS.2 _) hev_cont.continuousOn hrx
     rw [hpo] at hI
-    have hsm : ev (r • ξ.val) = r ^ k * ev ξ := zonal_eval_smul hS.1 r ξ.val
+    have hsm : ev (r • ξ.val) = r ^ k * ev ξ :=
+      hS.1.eval₂_const_mul (RingHom.id ℝ) (fun j => ξ.val j) r
     rw [hsm, hA4] at hI
     convert hI using 1
     · funext j
@@ -441,36 +467,8 @@ theorem zonal_reproduce {k : ℕ} {S : MvPolynomial (Fin 3) ℝ} (hS : IsHarmoni
       rw [integral_const_mul]; ring
     · push_cast; ring
   -- coefficient extraction
-  set b : ℕ → ℂ := fun j => c j - if j = k then 4 * π * (ev ξ : ℂ) else 0 with hbdef
-  have hb := zonal_coeff_eq_zero b (2 * (M * A) + 4 * π * ‖(ev ξ : ℂ)‖) (fun j => by
-    simp only [hbdef]
-    refine (norm_sub_le _ _).trans ?_
-    have h1 := hc j
-    have h2 : ‖(if j = k then 4 * π * (ev ξ : ℂ) else 0)‖ ≤ 4 * π * ‖(ev ξ : ℂ)‖ := by
-      split_ifs
-      · rw [norm_mul, show ‖(4 * π : ℂ)‖ = 4 * π by
-          rw [show (4 * π : ℂ) = ((4 * π : ℝ) : ℂ) by push_cast; ring, Complex.norm_real,
-            Real.norm_eq_abs, abs_of_pos (by positivity)]]
-      · simp only [norm_zero]; positivity
-    have hj : (0 : ℝ) ≤ j := Nat.cast_nonneg j
-    have hMA : 0 ≤ M * A := mul_nonneg hM0 hA0
-    have he : 0 ≤ 4 * π * ‖(ev ξ : ℂ)‖ := by positivity
-    nlinarith) (fun r hr => by
-      have h1 := key r hr
-      have h2 : HasSum (fun j => (r : ℂ) ^ j * (if j = k then 4 * π * (ev ξ : ℂ) else 0))
-          (4 * π * (r : ℂ) ^ k * ev ξ) := by
-        have := hasSum_ite_eq k ((r : ℂ) ^ k * (4 * π * (ev ξ : ℂ)))
-        convert this using 1
-        · funext j; split_ifs with h
-          · subst h; rfl
-          · simp
-        · ring
-      have := h1.sub h2
-      rw [sub_self] at this
-      refine this.congr_fun fun j => ?_
-      simp only [hbdef]; ring) j
-  simp only [hbdef, sub_eq_zero] at hb
-  exact hb
+  exact zonal_coeff_eq_ite (mul_nonneg hM0 hA0) _ k hc
+    (fun r hr => by convert key r hr using 1; ring) j
 
 end Reproduce
 
@@ -552,6 +550,51 @@ theorem zonal_legendre_induction (Φ : Polynomial ℂ → Prop)
       have := Polynomial.natDegree_lt_natDegree hR0 hdlt
       rwa [h] at this
     exact ih _ hlt R rfl
+
+/-- Complex Weierstrass approximation on `[-1,1]`: a continuous `f : ℝ → ℂ` is within `2ε` of a
+complex polynomial, uniformly on `[-1,1]`. -/
+private lemma zonal_exists_poly_near {f : ℝ → ℂ} (hf : ContinuousOn f (Set.Icc (-1) 1))
+    (ε : ℝ) (hε : 0 < ε) :
+    ∃ Q : Polynomial ℂ, ∀ s ∈ Icc (-1 : ℝ) 1, ‖f s - Q.eval (s : ℂ)‖ ≤ 2 * ε := by
+  obtain ⟨p₁, hp₁⟩ := exists_polynomial_near_of_continuousOn (-1) 1 (fun s => (f s).re)
+    (Complex.continuous_re.comp_continuousOn hf) ε hε
+  obtain ⟨p₂, hp₂⟩ := exists_polynomial_near_of_continuousOn (-1) 1 (fun s => (f s).im)
+    (Complex.continuous_im.comp_continuousOn hf) ε hε
+  set Q : Polynomial ℂ := p₁.map Complex.ofRealHom +
+    Polynomial.C Complex.I * p₂.map Complex.ofRealHom with hQ
+  have hQe : ∀ s : ℝ,
+      Q.eval (s : ℂ) = ((p₁.eval s : ℝ) : ℂ) + Complex.I * ((p₂.eval s : ℝ) : ℂ) := by
+    intro s
+    simp only [hQ, Polynomial.eval_add, Polynomial.eval_mul, Polynomial.eval_C,
+      Polynomial.eval_map]
+    rw [show (s : ℂ) = Complex.ofRealHom s from rfl, Polynomial.eval₂_at_apply,
+      Polynomial.eval₂_at_apply]
+    rfl
+  refine ⟨Q, fun s hs => ?_⟩
+  rw [hQe s]
+  have hre := hp₁ s hs
+  have him := hp₂ s hs
+  have hfs : f s = ((f s).re : ℂ) + Complex.I * ((f s).im : ℂ) := by
+    rw [mul_comm]; exact (Complex.re_add_im (f s)).symm
+  rw [hfs]
+  have : ((f s).re : ℂ) + Complex.I * ((f s).im : ℂ) -
+      (((p₁.eval s : ℝ) : ℂ) + Complex.I * ((p₂.eval s : ℝ) : ℂ)) =
+      (((f s).re - p₁.eval s : ℝ) : ℂ) + Complex.I * (((f s).im - p₂.eval s : ℝ) : ℂ) := by
+    push_cast; ring
+  rw [this]
+  refine (norm_add_le _ _).trans ?_
+  rw [norm_mul, Complex.norm_I, one_mul, Complex.norm_real, Complex.norm_real,
+    Real.norm_eq_abs, Real.norm_eq_abs, abs_sub_comm, abs_sub_comm (f s).im]
+  linarith
+
+/-- A complex number with `‖a‖ ≤ ε C` for every `ε > 0` is zero. -/
+private lemma zonal_eq_zero_of_norm_le {a : ℂ} (C : ℝ) (h : ∀ ε : ℝ, 0 < ε → ‖a‖ ≤ ε * C) :
+    a = 0 := by
+  refine norm_le_zero_iff.mp (le_of_forall_pos_le_add fun δ hδ => ?_)
+  have hC : 0 < |C| + 1 := by positivity
+  calc ‖a‖ ≤ δ / (|C| + 1) * C := h _ (by positivity)
+    _ ≤ δ / (|C| + 1) * (|C| + 1) := by gcongr; linarith [le_abs_self C]
+    _ = 0 + δ := by field_simp; ring
 
 /-- **Funk–Hecke formula** in three dimensions (AAR Theorem 9.7.1), proved from the reproducing
 property of the zonal kernels, the Legendre expansion of polynomials and Weierstrass
@@ -671,61 +714,18 @@ theorem zonal_funk_hecke {k : ℕ} {f : ℝ → ℂ}
           · exact h
         rw [hI]; ring
   -- approximation
-  have hK : ∀ ε : ℝ, 0 < ε → ‖D f‖ ≤ 2 * ε * M * σ.real univ +
-      2 * π * (2 * ε * 2) * ‖(ev x : ℂ)‖ := by
+  have hK : ∀ ε : ℝ, 0 < ε →
+      ‖D f‖ ≤ ε * (2 * M * σ.real univ + 2 * π * 4 * ‖(ev x : ℂ)‖) := by
     intro ε hε
-    obtain ⟨p₁, hp₁⟩ := exists_polynomial_near_of_continuousOn (-1) 1 (fun s => (f s).re)
-      (Complex.continuous_re.comp_continuousOn hf) ε hε
-    obtain ⟨p₂, hp₂⟩ := exists_polynomial_near_of_continuousOn (-1) 1 (fun s => (f s).im)
-      (Complex.continuous_im.comp_continuousOn hf) ε hε
-    set Q : Polynomial ℂ := p₁.map Complex.ofRealHom +
-      Polynomial.C Complex.I * p₂.map Complex.ofRealHom with hQ
-    have hQe : ∀ s : ℝ,
-        Q.eval (s : ℂ) = ((p₁.eval s : ℝ) : ℂ) + Complex.I * ((p₂.eval s : ℝ) : ℂ) := by
-      intro s
-      simp only [hQ, Polynomial.eval_add, Polynomial.eval_mul, Polynomial.eval_C,
-        Polynomial.eval_map]
-      rw [show (s : ℂ) = Complex.ofRealHom s from rfl, Polynomial.eval₂_at_apply,
-        Polynomial.eval₂_at_apply]
-      rfl
+    obtain ⟨Q, hQ⟩ := zonal_exists_poly_near hf ε hε
     have hQc : ContinuousOn (fun s : ℝ => Q.eval (s : ℂ)) (Icc (-1) 1) :=
       ((Polynomial.continuous Q).comp continuous_ofReal).continuousOn
     have hfQ := hDsub f (fun s => Q.eval (s : ℂ)) hf hQc
     rw [hDpoly Q, sub_zero] at hfQ
     rw [← hfQ]
-    refine hDbound (fun s => f s - Q.eval (s : ℂ)) (2 * ε) fun s hs => ?_
-    rw [hQe s]
-    have hre := hp₁ s hs
-    have him := hp₂ s hs
-    have hfs : f s = ((f s).re : ℂ) + Complex.I * ((f s).im : ℂ) := by
-      rw [mul_comm]; exact (Complex.re_add_im (f s)).symm
-    rw [hfs]
-    have : ((f s).re : ℂ) + Complex.I * ((f s).im : ℂ) -
-        (((p₁.eval s : ℝ) : ℂ) + Complex.I * ((p₂.eval s : ℝ) : ℂ)) =
-        (((f s).re - p₁.eval s : ℝ) : ℂ) + Complex.I * (((f s).im - p₂.eval s : ℝ) : ℂ) := by
-      push_cast; ring
-    rw [this]
-    refine (norm_add_le _ _).trans ?_
-    rw [norm_mul, Complex.norm_I, one_mul, Complex.norm_real, Complex.norm_real,
-      Real.norm_eq_abs, Real.norm_eq_abs, abs_sub_comm, abs_sub_comm (f s).im]
-    linarith
-  have hD0 : D f = 0 := by
-    by_contra hne
-    have hpos : 0 < ‖D f‖ := norm_pos_iff.mpr hne
-    set B := 2 * M * σ.real univ + 2 * π * 4 * ‖(ev x : ℂ)‖ with hB
-    have hM0 : 0 ≤ M := (norm_nonneg _).trans (hM x (mem_univ _))
-    have hB0 : 0 ≤ B := by
-      have : 0 ≤ σ.real univ := measureReal_nonneg
-      positivity
-    have h := hK (‖D f‖ / (2 * (B + 1))) (by positivity)
-    have : 2 * (‖D f‖ / (2 * (B + 1))) * M * σ.real univ +
-        2 * π * (2 * (‖D f‖ / (2 * (B + 1))) * 2) * ‖(ev x : ℂ)‖ =
-        ‖D f‖ / (2 * (B + 1)) * B := by rw [hB]; ring
-    rw [this] at h
-    have h2 : ‖D f‖ / (2 * (B + 1)) * B < ‖D f‖ := by
-      rw [div_mul_eq_mul_div, div_lt_iff₀ (by positivity)]
-      nlinarith
-    linarith
+    refine (hDbound (fun s => f s - Q.eval (s : ℂ)) (2 * ε) hQ).trans (le_of_eq ?_)
+    ring
+  have hD0 : D f = 0 := zonal_eq_zero_of_norm_le _ hK
   simp only [hD, sub_eq_zero] at hD0
   exact hD0
 

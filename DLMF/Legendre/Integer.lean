@@ -49,11 +49,6 @@ noncomputable section
 
 namespace DLMF.Legendre
 
-/-- `1/Γ(z) = z/Γ(z+1)` for every `z`. -/
-theorem recip_Gamma_succ' (z : ℂ) : (Gamma z)⁻¹ = z * (Gamma (z + 1))⁻¹ := by
-  have h := one_div_Gamma_eq_self_mul_one_div_Gamma_add_one z
-  simpa [one_div] using h
-
 /-- `(x)ₙ₊₁ = x (x+1)ₙ`. -/
 theorem poch_succ_left (x : ℂ) (n : ℕ) :
     (ascPochhammer ℂ (n + 1)).eval x = x * (ascPochhammer ℂ n).eval (x + 1) := by
@@ -83,7 +78,8 @@ theorem regularizedGaussHGFun_legendreQ (a b : ℂ) {u : ℂ} (hu : ‖u‖ < 1)
           (n.factorial : ℂ) * (Gamma (c + 1 + n))⁻¹)) = fun _ => 0 := by
     funext n
     have hG : (Gamma (c - 1 + ((n + 1 : ℕ) : ℂ)))⁻¹ = (c + n) * (Gamma (c + 1 + n))⁻¹ := by
-      rw [show c - 1 + ((n + 1 : ℕ) : ℂ) = c + n by push_cast; ring, recip_Gamma_succ' (c + n),
+      rw [show c - 1 + ((n + 1 : ℕ) : ℂ) = c + n by push_cast; ring,
+          Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (c + n),
         show c + n + 1 = c + 1 + n by ring]
     have hG' : (Gamma (c + ((n + 1 : ℕ) : ℂ)))⁻¹ = (Gamma (c + 1 + n))⁻¹ := by
       rw [show c + ((n + 1 : ℕ) : ℂ) = c + 1 + n by push_cast; ring]
@@ -104,7 +100,7 @@ theorem regularizedGaussHGFun_legendreQ (a b : ℂ) {u : ℂ} (hu : ‖u‖ < 1)
         ((0 : ℕ).factorial : ℂ) * (Gamma (c + ((0 : ℕ) : ℂ)))⁻¹) = 0 := by
     simp only [ascPochhammer_zero, Polynomial.eval_one, pow_zero, Nat.factorial_zero,
       Nat.cast_one, Nat.cast_zero, add_zero, div_one, one_mul]
-    rw [recip_Gamma_succ' (c - 1), sub_add_cancel]; ring
+    rw [Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (c - 1), sub_add_cancel]; ring
   linear_combination h0 + hT
 
 

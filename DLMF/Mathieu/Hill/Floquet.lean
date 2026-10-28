@@ -187,21 +187,6 @@ lemma p1o_hill_shift (hQ : IsHillPotential Q) {u : ℝ → ℂ} (hu : IsHillSolu
   have hd := deriv_comp_add_const (f := u) (a := Real.pi) (x := 0)
   rw [h', hd, zero_add]
 
-/-- The derivative of a solution shifted by `π`, in terms of the basic solutions. -/
-lemma p1o_hill_deriv_shift (hQ : IsHillPotential Q) {u : ℝ → ℂ} (hu : IsHillSolution Q lam u)
-    (z : ℝ) : deriv u (z + Real.pi) = u Real.pi * deriv (fun x => hillWI Q x lam) z +
-      deriv u Real.pi * deriv (fun x => hillWII Q x lam) z := by
-  have h1 := (hillWI_spec hQ.continuous lam).1
-  have h2 := (hillWII_spec hQ.continuous lam).1
-  have hf : (fun x => u (x + Real.pi)) = fun x =>
-      u Real.pi * hillWI Q x lam + deriv u Real.pi * hillWII Q x lam :=
-    funext fun x => p1o_hill_shift hQ hu x
-  have := congrArg (fun f => deriv f z) hf
-  rw [deriv_comp_add_const] at this
-  rw [this]
-  exact (((h1.differentiable z).hasDerivAt.const_mul _).add
-    ((h2.differentiable z).hasDerivAt.const_mul _)).deriv
-
 /-- The Wronskian of the basic solutions is identically `1` (no first-derivative term). -/
 lemma p1o_hill_wronskian (hQ : Continuous Q) (x : ℝ) :
     hillWI Q x lam * deriv (fun x => hillWII Q x lam) x -

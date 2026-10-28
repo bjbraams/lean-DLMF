@@ -196,6 +196,7 @@ def weight (n k : ℕ) : ℂ := (n-k)! / ((n+k)! : ℂ)
 /-- The factorial-weighted product of associated Legendre derivatives. -/
 def coeff (n k : ℕ) (x y s t : ℂ) : ℂ :=
   weight n k * (s*t)^k * jet n k x * jet n k y
+/-- The coefficient `coeff n k` vanishes for `k > n`. -/
 theorem coeff_eq_zero {n k : ℕ} (hk : n < k) (x y s t : ℂ) : coeff n k x y s t = 0 := by
   simp [coeff, jet_eq_zero hk]
 

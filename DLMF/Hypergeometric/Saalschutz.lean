@@ -39,8 +39,8 @@ theorem hasSum_regularizedGaussHGFun_coeff (a b c : ℂ) {z : ℂ} (hz : ‖z‖
 
 /-- The binomial series `(1-z)^{-d} = ∑ (d)ₘ zᵐ/m!` on the unit disk. -/
 theorem hasSum_one_sub_cpow_neg (d : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
-    HasSum (fun n : ℕ => poch d n / n ! * z ^ n) ((1 - z) ^ (-d)) := by
-  exact hasSum_poch_div_factorial hz
+    HasSum (fun n : ℕ => poch d n / n ! * z ^ n) ((1 - z) ^ (-d)) :=
+  hasSum_poch_div_factorial hz
 
 /-- **Regularized Pfaff–Saalschütz convolution**, valid for all parameters: comparing coefficients
 in Euler's transformation `𝐅(c-a,c-b;c;z) = (1-z)^{a+b-c} 𝐅(a,b;c;z)` gives
@@ -55,7 +55,7 @@ theorem regularized_saalschutz_convolution (a b c : ℂ) (n : ℕ) :
     (d := fun n => poch (c - a) n * poch (c - b) n / (n ! * Gamma (c + n)))
     (fun z hz => by
       have hconv := Complex.hasSum_powerSeries_convolution (hasSum_regularizedGaussHGFun_coeff a b c hz)
-        (hasSum_one_sub_cpow_neg (c - a - b) hz)
+        (hasSum_poch_div_factorial (β := c - a - b) hz)
       rw [regularizedGaussHGFun_euler (c - a) (c - b) c hz,
         show c - (c - a) - (c - b) = -(c - a - b) by ring,
         show c - (c - a) = a by ring, show c - (c - b) = b by ring, mul_comm]

@@ -120,19 +120,8 @@ theorem logarithmic_connection_one_sub_recipGamma {a b z : ℂ} (m : ℕ)
     simp only [div_eq_mul_inv, mul_inv]
     ring
   -- derivative of the left side
-  have hπ : (Real.pi : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
-  have hRc := (analyticOnNhd_regularizedGaussHGFun_c a b hz c₀ (Set.mem_univ _)).differentiableAt
-  have hsin : HasDerivAt (fun c : ℂ => sin (Real.pi * (c - a - b)) / Real.pi)
-      (cos (Real.pi * (c₀ - a - b)) * (Real.pi * 1) / Real.pi) c₀ :=
-    ((((hasDerivAt_id c₀).sub_const a).sub_const b).const_mul (Real.pi : ℂ)).csin.div_const _
   have hm1 : c₀ - a - b = m := by rw [hc₀]; ring
-  have hL := hsin.mul hRc.hasDerivAt
-  have hcos : cos ((m : ℂ) * Real.pi) = (-1) ^ m := by
-    rw [show ((m : ℂ) * Real.pi) = ((m * Real.pi : ℝ) : ℂ) by push_cast; ring, ← ofReal_cos,
-      Real.cos_nat_mul_pi]
-    push_cast; ring
-  rw [hm1, mul_comm (Real.pi : ℂ) (m : ℂ), hcos, Complex.sin_nat_mul_pi, zero_div, zero_mul,
-    add_zero, mul_one, mul_div_cancel_right₀ _ hπ] at hL
+  have hL := hasDerivAt_sin_mul_regularizedGaussHGFun_c (a := a) (b := b) hz m
   have hwn : ‖w‖ < 1 := hw
   -- the first series and its derivative
   set S : ℂ → ℂ := fun c => regularizedGaussHGFun a b (a + b - c + 1) w with hSdef
@@ -243,9 +232,7 @@ theorem logarithmic_connection_one_sub_recipGamma {a b z : ℂ} (m : ℕ)
     rw [← regularizedGaussHGFun_eq_tsum] at h
     convert h using 1
     simp only [hQdef]; rw [hm1, e1, e2]
-  have hGk : ∀ k : ℕ, Gamma ((m : ℂ) + 1 + k) = ((k + m).factorial : ℂ) := by
-    intro k
-    rw [show (m : ℂ) + 1 + k = ((k + m : ℕ) : ℂ) + 1 by push_cast; ring, Gamma_nat_eq_factorial]
+  have hGk := Gamma_natCast_add_one_add_natCast m
   have hG1k : ∀ k : ℕ, Gamma (1 - (m : ℂ) + ((k + m : ℕ) : ℂ)) = (k.factorial : ℂ) := by
     intro k
     rw [show 1 - (m : ℂ) + ((k + m : ℕ) : ℂ) = (k : ℂ) + 1 by push_cast; ring,
@@ -456,19 +443,8 @@ theorem logarithmic_connection_one_sub_recip_recipGamma {a b z : ℂ} (m : ℕ)
     simp only [div_eq_mul_inv, mul_inv]
     ring
   set v := 1 - 1 / z with hvdef
-  have hπ : (Real.pi : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
-  have hRc := (analyticOnNhd_regularizedGaussHGFun_c a b hz c₀ (Set.mem_univ _)).differentiableAt
-  have hsin : HasDerivAt (fun c : ℂ => sin (Real.pi * (c - a - b)) / Real.pi)
-      (cos (Real.pi * (c₀ - a - b)) * (Real.pi * 1) / Real.pi) c₀ :=
-    ((((hasDerivAt_id c₀).sub_const a).sub_const b).const_mul (Real.pi : ℂ)).csin.div_const _
   have hm1 : c₀ - a - b = m := by rw [hc₀]; ring
-  have hL := hsin.mul hRc.hasDerivAt
-  have hcos : cos ((m : ℂ) * Real.pi) = (-1) ^ m := by
-    rw [show ((m : ℂ) * Real.pi) = ((m * Real.pi : ℝ) : ℂ) by push_cast; ring, ← ofReal_cos,
-      Real.cos_nat_mul_pi]
-    push_cast; ring
-  rw [hm1, mul_comm (Real.pi : ℂ) (m : ℂ), hcos, Complex.sin_nat_mul_pi, zero_div, zero_mul,
-    add_zero, mul_one, mul_div_cancel_right₀ _ hπ] at hL
+  have hL := hasDerivAt_sin_mul_regularizedGaussHGFun_c (a := a) (b := b) hz m
   have hvn : ‖v‖ < 1 := hw
   -- the first series
   set S : ℂ → ℂ := fun c => regularizedGaussHGFun a (a - c + 1) (a + b - c + 1) v with hSdef
@@ -584,9 +560,7 @@ theorem logarithmic_connection_one_sub_recip_recipGamma {a b z : ℂ} (m : ℕ)
     rw [← regularizedGaussHGFun_eq_tsum] at h
     convert h using 1
     simp only [hQdef]; rw [hm1, e2]
-  have hGk : ∀ k : ℕ, Gamma ((m : ℂ) + 1 + k) = ((k + m).factorial : ℂ) := by
-    intro k
-    rw [show (m : ℂ) + 1 + k = ((k + m : ℕ) : ℂ) + 1 by push_cast; ring, Gamma_nat_eq_factorial]
+  have hGk := Gamma_natCast_add_one_add_natCast m
   have hG1k : ∀ k : ℕ, Gamma (1 - (m : ℂ) + ((k + m : ℕ) : ℂ)) = (k.factorial : ℂ) := by
     intro k
     rw [show 1 - (m : ℂ) + ((k + m : ℕ) : ℂ) = (k : ℂ) + 1 by push_cast; ring,

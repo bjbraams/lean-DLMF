@@ -454,6 +454,8 @@ theorem isBigO_Gamma_ratio (p q r s : ℂ) :
         < 2 := by simpa using hk
   exact mul_le_mul_of_nonneg_right this.le (Real.rpow_nonneg (Nat.cast_nonneg k) _)
 
+/-- If `Re (p + q - r - s) < -1`, the norms of `Γ(k + p) Γ(k + q) / (Γ(k + r) Γ(k + s))` are
+  summable over `k ∈ ℕ`. -/
 theorem summable_norm_Gamma_ratio (p q r s : ℂ) (h : (p + q - r - s).re < -1) :
     Summable fun k : ℕ =>
       ‖Gamma (k + p) * Gamma (k + q) * (Gamma (k + r))⁻¹ * (Gamma (k + s))⁻¹‖ :=
@@ -679,6 +681,7 @@ variable {a b c : ℂ}
 def term (a b c d : ℂ) (n : ℤ) : ℂ :=
   Gamma (a + n) * Gamma (b + n) / (Gamma (c + n) * Gamma (d + n))
 
+/-- The norm of a Dougall term factors into the norms of its four Gamma factors. -/
 theorem norm_term (a b c d : ℂ) (n : ℤ) :
     ‖term a b c d n‖ = ‖Gamma (a + n)‖ * ‖Gamma (b + n)‖ * ‖(Gamma (c + n))⁻¹‖ *
       ‖(Gamma (d + n))⁻¹‖ := by
@@ -792,6 +795,8 @@ theorem exists_bound (ha : ∀ k : ℤ, a ≠ k) (hb : ∀ k : ℤ, b ≠ k) {x�
     apply le_of_eq
     field_simp
 
+/-- Dougall's bilateral series converges absolutely when `a, b` are not integers and `Re d > 1 + Re
+  (a + b - c)`. -/
 theorem summable_term (ha : ∀ k : ℤ, a ≠ k) (hb : ∀ k : ℤ, b ≠ k) {d : ℂ}
     (hd : 1 + (a + b - c).re < d.re) : Summable (term a b c d) := by
   obtain ⟨u, hu, -, hbd⟩ := exists_bound (c := c) ha hb hd
@@ -876,6 +881,7 @@ theorem sin_pi_mul_add_int (z : ℂ) (j : ℤ) :
     Complex.sin (π * (z + j)) = ((j.negOnePow : ℤ) : ℂ) * Complex.sin (π * z) := by
   rw [show (π : ℂ) * (z + j) = π * z + j * π by ring, Complex.sin_antiperiodic.add_int_mul_eq j]
 
+/-- `((-1)^j)² = 1` for `j ∈ ℤ`, cast to `ℂ`. -/
 theorem negOnePow_sq_cast (j : ℤ) : ((j.negOnePow : ℤ) : ℂ) * ((j.negOnePow : ℤ) : ℂ) = 1 := by
   rcases Int.isUnit_iff.mp (Int.negOnePow j).isUnit with h | h <;> simp [h]
 
@@ -1210,9 +1216,11 @@ theorem tsum_eq_of_not_int (ha : ∀ k : ℤ, a ≠ k) (hb : ∀ k : ℤ, b ≠ 
   exact ((hLd.analyticOnNhd hUo).eqOn_of_preconnected_of_eventuallyEq (hRd.analyticOnNhd hUo)
     (convex_halfSpace_re_gt (1 + s)).isPreconnected hz₀ hev) hdU
 
+/-- Dougall's terms are symmetric in the denominator parameters `c` and `d`. -/
 theorem term_comm (a b c d : ℂ) (n : ℤ) : term a b c d n = term a b d c n := by
   simp only [term, mul_comm (Gamma (c + n))]
 
+/-- The right-hand side of Dougall's formula is symmetric in `c` and `d`. -/
 theorem rhs_comm (a b c d : ℂ) :
     π ^ 2 * Gamma (d + c - a - b - 1) /
         (Complex.sin (π * a) * Complex.sin (π * b) * Gamma (d - a) * Gamma (c - a) *
@@ -1250,6 +1258,7 @@ def s (a b c : ℂ) (n : ℕ) : ℂ :=
 def H (a b c : ℂ) (n : ℕ) : ℂ :=
   gaussHGCoeff a b (1 + a - b) n * (a + n) * (b + n) * poch c n * (Gamma (2 + a - c + n))⁻¹
 
+/-- The WZ relation for Dixon's series at `n = 0`. -/
 theorem wz_zero (a b c : ℂ) :
     (1 + a / 2 - b - c) * s a b c 0 - (1 + a / 2 - c) * (1 + a - b - c) * s a b (c - 1) 0 =
       -(1 / 2) * H a b c 0 := by
@@ -1260,6 +1269,8 @@ theorem wz_zero (a b c : ℂ) :
   rw [show 1 + a - (c - 1) = 2 + a - c by ring, e]
   ring
 
+/-- The WZ relation for Dixon's series: the `c`-difference of `s` telescopes through the certificate
+  `H`. -/
 theorem wz_succ (hb : ∀ k : ℕ, 1 + a - b ≠ -k) (c : ℂ) (n : ℕ) :
     (1 + a / 2 - b - c) * s a b c (n + 1) -
         (1 + a / 2 - c) * (1 + a - b - c) * s a b (c - 1) (n + 1) =
@@ -1315,6 +1326,7 @@ theorem recurrence (hb : ∀ k : ℕ, 1 + a - b ≠ -k) {c : ℂ} (h1 : Summable
 def P (a b c : ℂ) : ℂ :=
   Lh a b c * Gamma (1 + a / 2 - c) * Gamma (1 + a - b - c) * (Gamma (1 + a / 2 - b - c))⁻¹
 
+/-- Under convergence, the normalization `P` is invariant under `c ↦ c - 1`. -/
 theorem P_sub_one (hb : ∀ k : ℕ, 1 + a - b ≠ -k) {c : ℂ} (h1 : Summable (s a b c))
     (h2 : Summable (s a b (c - 1))) (hH : Tendsto (H a b c) atTop (𝓝 0))
     (hc1 : 1 + a / 2 - c ≠ 0) (hc2 : 1 + a - b - c ≠ 0) :
@@ -1332,6 +1344,7 @@ theorem P_sub_one (hb : ∀ k : ℕ, 1 + a - b ≠ -k) {c : ℂ} (h1 : Summable 
   linear_combination (Gamma (1 + a / 2 - c) * Gamma (1 + a - b - c) *
     (Gamma (1 + a / 2 - b - (c - 1)))⁻¹) * hrec.symm
 
+/-- `(a + n)(b + n) = O(n²)`. -/
 theorem isBigO_mul_add_mul_add (a b : ℂ) :
     (fun n : ℕ => (a + n) * (b + n)) =O[atTop] fun n : ℕ => (n : ℝ) ^ (2 : ℝ) := by
   refine Asymptotics.IsBigO.of_bound ((‖a‖ + 1) * (‖b‖ + 1)) ?_
@@ -1347,17 +1360,21 @@ theorem isBigO_mul_add_mul_add (a b : ℂ) :
         mul_le_mul ha hb (norm_nonneg _) (by positivity)
     _ = (‖a‖ + 1) * (‖b‖ + 1) * (n * n) := by ring
 
+/-- For `c = -j`, the Dixon terms vanish beyond index `j`. -/
 theorem s_neg_nat_eq_zero (a b : ℂ) {j n : ℕ} (h : j < n) : s a b (-(j : ℂ)) n = 0 := by
   simp [s, poch_neg_nat_eq_zero h]
 
+/-- For `c = -j`, the WZ certificate vanishes beyond index `j`. -/
 theorem H_neg_nat_eq_zero (a b : ℂ) {j n : ℕ} (h : j < n) : H a b (-(j : ℂ)) n = 0 := by
   simp [H, poch_neg_nat_eq_zero h]
 
+/-- For `c = -j` the Dixon series terminates, hence is summable. -/
 theorem summable_s_neg_nat (a b : ℂ) (j : ℕ) : Summable (s a b (-(j : ℂ))) :=
   summable_of_ne_finset_zero (s := Finset.range (j + 1)) fun n hn => by
     simp only [Finset.mem_range, not_lt] at hn
     exact s_neg_nat_eq_zero a b (by omega)
 
+/-- For `c = -j` the WZ certificate tends to `0`. -/
 theorem tendsto_H_neg_nat (a b : ℂ) (j : ℕ) : Tendsto (H a b (-(j : ℂ))) atTop (𝓝 0) :=
   tendsto_const_nhds.congr' (by
     filter_upwards [eventually_gt_atTop j] with n hn
@@ -1438,6 +1455,7 @@ theorem summable_s_and_tendsto_H (hb : ∀ k : ℕ, 1 + a - b ≠ -k) {c : ℂ}
 def K (a b : ℂ) : ℂ :=
   Gamma (1 + a / 2) * Gamma (1 + a - b) * (Gamma (1 + a))⁻¹ * (Gamma (1 + a / 2 - b))⁻¹
 
+/-- At `c = 0` the normalization `P` equals the constant `K`. -/
 theorem P_zero (a b : ℂ) : P a b 0 = K a b := by
   have hL : Lh a b 0 = (Gamma (1 + a))⁻¹ := by
     rw [Lh, tsum_eq_single 0]
@@ -1474,6 +1492,8 @@ theorem poch_mul_recip_Gamma_one_sub (c : ℂ) (n : ℕ) :
       push_cast; ring, ← h, pow_succ]
     ring
 
+/-- `‖(c)ₙ‖ = ‖Γ(1 - c)‖ ‖1/Γ(1 - c - n)‖` when `Γ(1 - c) ≠ 0` (reflection form of the Pochhammer
+  symbol). -/
 theorem norm_poch_eq {c : ℂ} (hc : Gamma (1 - c) ≠ 0) (n : ℕ) :
     ‖poch c n‖ = ‖Gamma (1 - c)‖ * ‖(Gamma (1 - c - n))⁻¹‖ := by
   have h := congrArg norm (poch_mul_recip_Gamma_one_sub c n)
@@ -1763,6 +1783,8 @@ theorem exists_P_eq_K (ha : ∀ k : ℕ, 1 + a / 2 ≠ -k) (hb : ∀ k : ℕ, 1 
 def Rh (a b c : ℂ) : ℂ :=
   K a b * Gamma (1 + a / 2 - b - c) * (Gamma (1 + a / 2 - c))⁻¹ * (Gamma (1 + a - b - c))⁻¹
 
+/-- The normalized right-hand side of Dixon's formula satisfies the same recurrence in `c` as the
+  series. -/
 theorem Rh_recurrence {c : ℂ} (hc : 1 + a / 2 - b - c ≠ 0) :
     (1 + a / 2 - b - c) * Rh a b c = (1 + a / 2 - c) * (1 + a - b - c) * Rh a b (c - 1) := by
   have g1 : Gamma (1 + a / 2 - b - (c - 1)) = (1 + a / 2 - b - c) * Gamma (1 + a / 2 - b - c) := by
@@ -1888,7 +1910,7 @@ private lemma whipple_exp_ratio (a : ℂ) :
     Tendsto (fun t : ℂ => (1-exp (a*t))/(1-exp t)) (𝓝[≠] 0) (𝓝 a) := by
   have h (a : ℂ) : Tendsto (fun t : ℂ => (exp (a*t)-1)/t) (𝓝[≠] 0) (𝓝 a) := by
     have hd : HasDerivAt (fun t : ℂ => exp (a*t)) a 0 := by
-      convert ((hasDerivAt_id' (0:ℂ)).const_mul a).cexp using 1 <;> simp
+      convert ((hasDerivAt_id' (0:ℂ)).const_mul a).cexp using 1; simp
     simpa only [zero_add,mul_zero,exp_zero,smul_eq_mul,div_eq_mul_inv,mul_comm]
       using hd.tendsto_slope_zero
   have hh := (h a).div (h 1) (by norm_num : (1:ℂ) ≠ 0)

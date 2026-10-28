@@ -47,6 +47,7 @@ open DLMF.Confluent
 
 /-! ### `κ` -/
 
+/-- For `x > 0`, `x^{-1/2} > 0`. -/
 lemma c33b_rpow_neg_half_pos {x : ℝ} (hx : 0 < x) : 0 < x ^ (-(1 / 2 : ℝ)) :=
   Real.rpow_pos_of_pos hx _
 
@@ -106,14 +107,18 @@ theorem coulombfKummer_neg (κ : ℂ) (ℓ : ℕ) (r : ℝ) :
 def q2e_PhiK (κ : ℂ) (ℓ : ℕ) (z : ℂ) : ℂ :=
   (2 * z) ^ (ℓ + 1) * exp (-z / κ) * kummerM (ℓ + 1 - κ) (2 * ℓ + 2) (2 * z / κ) / (2 * ℓ + 1)!
 
+/-- The Kummer form of `f(ε,ℓ;r)` is the restriction of its complex extension `q2e_PhiK`. -/
 lemma q2e_coulombfKummer_eq (κ : ℂ) (ℓ : ℕ) (r : ℝ) : coulombfKummer κ ℓ r = q2e_PhiK κ ℓ r :=
   rfl
 
+/-- `M(a, 2ℓ+2, ·)` is entire. -/
 lemma q2e_kummerM_differentiable (a : ℂ) (ℓ : ℕ) :
     Differentiable ℂ (kummerM a (2 * ℓ + 2)) := fun z =>
   ((hasFPowerSeriesOnBall_kummerM (a := a) (two_mul_nat_add_two_ne_neg_nat ℓ)).analyticAt_of_mem
     (by simp)).differentiableAt
 
+/-- For `κ ≠ 0`, the complex Kummer form is `(2iκ)^{ℓ+1}/(2ℓ+1)!` times the Coulomb wave at `η =
+-iκ`, `ρ = -iz/κ`. -/
 lemma q2e_PhiK_eq_coulombWave {κ : ℂ} (hκ : κ ≠ 0) (ℓ : ℕ) (z : ℂ) :
     q2e_PhiK κ ℓ z = (2 * I * κ) ^ (ℓ + 1) / (2 * ℓ + 1)! *
       coulombWave ℓ (-I * κ) (-I / κ * z) := by
@@ -131,10 +136,12 @@ lemma q2e_PhiK_eq_coulombWave {κ : ℂ} (hκ : κ ≠ 0) (ℓ : ℕ) (z : ℂ) 
     (2 * ℓ + 1)!) * h4.symm
 
 
+/-- Function form of `q2e_PhiK_eq_coulombWave`. -/
 lemma q2e_PhiK_fun {κ : ℂ} (hκ : κ ≠ 0) (ℓ : ℕ) :
     q2e_PhiK κ ℓ = fun z => (2 * I * κ) ^ (ℓ + 1) / (2 * ℓ + 1)! *
       coulombWave ℓ (-I * κ) (-I / κ * z) := funext (q2e_PhiK_eq_coulombWave hκ ℓ)
 
+/-- Derivative of the complex Kummer form, through the Coulomb wave derivative. -/
 lemma q2e_hasDerivAt_PhiK {κ : ℂ} (hκ : κ ≠ 0) (ℓ : ℕ) (z : ℂ) :
     HasDerivAt (q2e_PhiK κ ℓ) ((2 * I * κ) ^ (ℓ + 1) / (2 * ℓ + 1)! *
       (-I / κ * coulombWaveDeriv ℓ (-I * κ) (-I / κ * z))) z := by
@@ -144,11 +151,14 @@ lemma q2e_hasDerivAt_PhiK {κ : ℂ} (hκ : κ ≠ 0) (ℓ : ℕ) (z : ℂ) :
   simp only [mul_one] at h
   exact (h.const_mul _).congr_deriv (by ring)
 
+/-- Function form of the derivative of the complex Kummer form. -/
 lemma q2e_deriv_PhiK {κ : ℂ} (hκ : κ ≠ 0) (ℓ : ℕ) :
     deriv (q2e_PhiK κ ℓ) = fun z => (2 * I * κ) ^ (ℓ + 1) / (2 * ℓ + 1)! *
       (-I / κ * coulombWaveDeriv ℓ (-I * κ) (-I / κ * z)) :=
   funext fun z => (q2e_hasDerivAt_PhiK hκ ℓ z).deriv
 
+/-- For `κ ≠ 0`, `ε = -1/κ²` and `z ≠ 0`, the complex Kummer form solves `Φ'' + (ε + 2/z -
+ℓ(ℓ+1)/z²) Φ = 0` (DLMF 33.14.1). -/
 lemma q2e_PhiK_ode {κ : ℂ} (hκ : κ ≠ 0) (ℓ : ℕ) {ε : ℂ} (hε : ε = -1 / κ ^ 2) {z : ℂ}
     (hz : z ≠ 0) :
     HasDerivAt (deriv (q2e_PhiK κ ℓ))
@@ -170,12 +180,14 @@ lemma q2e_PhiK_ode {κ : ℂ} (hκ : κ ≠ 0) (ℓ : ℕ) {ε : ℂ} (hε : ε 
 def q2e_Phi0 (ℓ : ℕ) (z : ℂ) : ℂ :=
   (2 * z) ^ (ℓ + 1) * regularizedHGFun 0 {(2 * ℓ + 2 : ℂ)} (-(2 * z))
 
+/-- `d/dz (2z)ⁿ = 2n (2z)^{n-1}`. -/
 lemma q2e_hasDerivAt_pow2 (n : ℕ) (z : ℂ) :
     HasDerivAt (fun z : ℂ => (2 * z) ^ n) (2 * n * (2 * z) ^ (n - 1)) z := by
   have h := (hasDerivAt_pow n (2 * z)).comp z ((hasDerivAt_id z).const_mul 2)
   simp only [mul_one] at h
   exact h.congr_deriv (by ring)
 
+/-- `d/dz ₀F̃₁(;c;-2z) = -2 ₀F̃₁(;c+1;-2z)`. -/
 lemma q2e_hasDerivAt_F (c : ℂ) (z : ℂ) :
     HasDerivAt (fun z : ℂ => regularizedHGFun 0 {c} (-(2 * z)))
       (-2 * regularizedHGFun 0 {c + 1} (-(2 * z))) z := by
@@ -184,6 +196,7 @@ lemma q2e_hasDerivAt_F (c : ℂ) (z : ℂ) :
   simp only [mul_one, id, Multiset.empty_eq_zero] at h
   exact h.congr_deriv (by ring)
 
+/-- Derivative of the confluent form `(2z)^{ℓ+1} ₀F̃₁(;2ℓ+2;-2z)`. -/
 lemma q2e_hasDerivAt_Phi0 (ℓ : ℕ) (z : ℂ) :
     HasDerivAt (q2e_Phi0 ℓ) (2 * (ℓ + 1) * (2 * z) ^ ℓ *
       regularizedHGFun 0 {(2 * ℓ + 2 : ℂ)} (-(2 * z)) -
@@ -192,12 +205,15 @@ lemma q2e_hasDerivAt_Phi0 (ℓ : ℕ) (z : ℂ) :
   refine h.congr_deriv ?_
   simp only [Nat.add_sub_cancel]; push_cast; ring
 
+/-- Function form of the derivative of the confluent form. -/
 lemma q2e_deriv_Phi0 (ℓ : ℕ) :
     deriv (q2e_Phi0 ℓ) = fun z => 2 * (ℓ + 1) * (2 * z) ^ ℓ *
       regularizedHGFun 0 {(2 * ℓ + 2 : ℂ)} (-(2 * z)) -
       2 * (2 * z) ^ (ℓ + 1) * regularizedHGFun 0 {(2 * ℓ + 2 : ℂ) + 1} (-(2 * z)) :=
   funext fun z => (q2e_hasDerivAt_Phi0 ℓ z).deriv
 
+/-- For `z ≠ 0`, the confluent form solves the `ε = 0` Coulomb equation `Φ'' + (2/z - ℓ(ℓ+1)/z²) Φ =
+0`. -/
 lemma q2e_Phi0_ode (ℓ : ℕ) {z : ℂ} (hz : z ≠ 0) :
     HasDerivAt (deriv (q2e_Phi0 ℓ))
       (-((0 : ℂ) + 2 / z - ℓ * (ℓ + 1) / z ^ 2) * q2e_Phi0 ℓ z) z := by
@@ -227,6 +243,7 @@ lemma q2e_Phi0_ode (ℓ : ℕ) {z : ℂ} (hz : z ≠ 0) :
     linear_combination (8 * z ^ 3 * z ^ m * 2 ^ m) * hc
 
 
+/-- The second derivative of an entire function is smooth. -/
 lemma q2e_contDiffAt_deriv2 {Φ : ℂ → ℂ} (hΦd : Differentiable ℂ Φ) (n : ℕ) (x : ℂ) :
     ContDiffAt ℂ n (deriv (deriv Φ)) x :=
   ((hΦd.contDiff (n := ((n : ℕ) : WithTop ℕ∞) + 1 + 1)).deriv'.deriv').contDiffAt
@@ -356,11 +373,13 @@ def q2e_Psi (ε : ℝ) (ℓ : ℕ) (z : ℂ) : ℂ :=
   else 2 ^ (ℓ + 1) * exp (-z / coulombKappa ε 1) *
     kummerM (ℓ + 1 - coulombKappa ε 1) (2 * ℓ + 2) (2 * z / coulombKappa ε 1) / (2 * ℓ + 1)!
 
+/-- `Φ(ε,ℓ;z) = z^{ℓ+1} Ψ(ε,ℓ;z)`. -/
 lemma q2e_Phi_eq (ε : ℝ) (ℓ : ℕ) : q2e_Phi ε ℓ = fun z => z ^ (ℓ + 1) * q2e_Psi ε ℓ z := by
   funext z
   unfold q2e_Phi q2e_Psi q2e_Phi0 q2e_PhiK
   split_ifs <;> ring
 
+/-- The reduced function `Ψ(ε,ℓ;·)` is entire. -/
 lemma q2e_Psi_differentiable (ε : ℝ) (ℓ : ℕ) : Differentiable ℂ (q2e_Psi ε ℓ) := by
   unfold q2e_Psi
   split_ifs with hε
@@ -374,6 +393,7 @@ lemma q2e_Psi_differentiable (ε : ℝ) (ℓ : ℕ) : Differentiable ℂ (q2e_Ps
       hk.comp ((differentiable_id.const_mul 2).div_const _)
     exact ((((differentiable_id.neg.div_const _).cexp).const_mul _).mul h1).div_const _
 
+/-- `Ψ(ε,ℓ;0) = α₀(ε,ℓ)`, the leading power-series coefficient. -/
 lemma q2e_Psi_zero (ε : ℝ) (ℓ : ℕ) : q2e_Psi ε ℓ 0 = coulombAlpha ε ℓ 0 := by
   have hG : Gamma (2 * ℓ + 2 : ℂ) = (2 * ℓ + 1)! := by
     rw [show (2 * ℓ + 2 : ℂ) = ((2 * ℓ + 1 : ℕ) : ℂ) + 1 by push_cast; ring,
@@ -386,6 +406,7 @@ lemma q2e_Psi_zero (ε : ℝ) (ℓ : ℕ) : q2e_Psi ε ℓ 0 = coulombAlpha ε �
     simp [hG, div_eq_mul_inv]
   · simp
 
+/-- For `z ≠ 0`, `Φ(ε,ℓ;·)` solves `Φ'' + (ε + 2/z - ℓ(ℓ+1)/z²) Φ = 0` (DLMF 33.14.1). -/
 theorem q2e_Phi_ode (ε : ℝ) (ℓ : ℕ) {z : ℂ} (hz : z ≠ 0) :
     HasDerivAt (deriv (q2e_Phi ε ℓ))
       (-((ε : ℂ) + 2 / z - ℓ * (ℓ + 1) / z ^ 2) * q2e_Phi ε ℓ z) z := by
@@ -406,6 +427,7 @@ theorem q2e_Phi_hasSum (ε : ℝ) (ℓ : ℕ) (z : ℂ) :
   q2e_hasSum_of_ode (q2e_Psi_differentiable ε ℓ) (q2e_Phi_eq ε ℓ)
     (fun _ hz => q2e_Phi_ode ε ℓ hz) (q2e_Psi_zero ε ℓ) z
 
+/-- `Φ(ε,ℓ;·)` is entire. -/
 theorem q2e_Phi_differentiable (ε : ℝ) (ℓ : ℕ) : Differentiable ℂ (q2e_Phi ε ℓ) := by
   rw [q2e_Phi_eq]; exact (differentiable_id.pow _).mul (q2e_Psi_differentiable ε ℓ)
 
@@ -428,6 +450,8 @@ theorem q2e_hasDerivAt_coulombf (ε : ℝ) (ℓ : ℕ) (x : ℝ) :
 
 /-! ### Taylor coefficients, ladder relations -/
 
+/-- The Taylor coefficients of `Φ(ε,ℓ;·)` at `0`: `Φ⁽ⁿ⁾(0) = 0` for `n ≤ ℓ` and `n! α_{n-ℓ-1}(ε,ℓ)`
+otherwise. -/
 lemma q2e_iteratedDeriv_Phi (ε : ℝ) (ℓ n : ℕ) :
     iteratedDeriv n (q2e_Phi ε ℓ) 0 =
       if n < ℓ + 1 then 0 else (n ! : ℂ) * coulombAlpha ε ℓ (n - (ℓ + 1)) := by
@@ -445,10 +469,13 @@ lemma q2e_eq_zero_of_iteratedDeriv {Q : ℂ → ℂ} (hQ : Differentiable ℂ Q)
   simp only [h, smul_zero] at hT
   exact hT.unique hasSum_zero
 
+/-- `(z^m Φ)⁽ⁿ⁾(0) = n^{(m)} Φ^{(n-m)}(0)` with the falling factorial `n^{(m)}`. -/
 lemma q2e_iD_pow_mul {Φ : ℂ → ℂ} (hΦ : Differentiable ℂ Φ) (m n : ℕ) :
     iteratedDeriv n (fun z => z ^ m * Φ z) 0 = n.descFactorial m * iteratedDeriv (n - m) Φ 0 :=
   ODE.iteratedDeriv_pow_mul_zero (hΦ.contDiff).contDiffAt m
 
+/-- The three-term recurrence `(k+2)(k+2ℓ+3) α_{k+2} + 2 α_{k+1} + ε α_k = 0` of the power-series
+coefficients. -/
 lemma q2e_alpha_rec (ε : ℝ) (ℓ k : ℕ) :
     ((k : ℝ) + 2) * ((k : ℝ) + 2 + 2 * ℓ + 1) * coulombAlpha ε ℓ (k + 2) +
       2 * coulombAlpha ε ℓ (k + 1) + ε * coulombAlpha ε ℓ k = 0 := by
@@ -457,9 +484,11 @@ lemma q2e_alpha_rec (ε : ℝ) (ℓ k : ℕ) :
   field_simp
   ring
 
+/-- `α₁(ε,ℓ) = -α₀(ε,ℓ)/(ℓ+1)`. -/
 lemma q2e_alpha_one (ε : ℝ) (ℓ : ℕ) :
     coulombAlpha ε ℓ 1 = -coulombAlpha ε ℓ 0 / (ℓ + 1) := rfl
 
+/-- `α₀(ε,ℓ+1) = α₀(ε,ℓ)/((ℓ+1)(2ℓ+3))`. -/
 lemma q2e_alpha_zero_succ (ε : ℝ) (ℓ : ℕ) :
     coulombAlpha ε (ℓ + 1) 0 = coulombAlpha ε ℓ 0 / ((ℓ + 1) * (2 * ℓ + 3)) := by
   simp only [coulombAlpha]

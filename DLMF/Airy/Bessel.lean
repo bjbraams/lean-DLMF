@@ -44,18 +44,22 @@ open DLMF.Bessel
 @[dlmf 9.6.E1]
 def airyZeta (x : ℝ) : ℝ := 2 / 3 * x ^ (3 / 2 : ℝ)
 
+/-- `ζ(x) > 0` for `x > 0`. -/
 theorem airyZeta_pos {x : ℝ} (hx : 0 < x) : 0 < airyZeta x := by
   unfold airyZeta; positivity
 
+/-- `ζ(x) → ∞` as `x → ∞`. -/
 theorem tendsto_airyZeta : Tendsto airyZeta atTop atTop :=
   (tendsto_rpow_atTop (by norm_num : (0 : ℝ) < 3 / 2)).const_mul_atTop (by norm_num)
 
 /-! ### Powers of `x` written through `q = x^{1/4}` -/
 
+/-- `x^{3/2} = (√x)³` for `x ≥ 0`. -/
 theorem rpow_three_halves_eq {x : ℝ} (hx : 0 ≤ x) :
     x ^ (3 / 2 : ℝ) = Real.sqrt x ^ 3 := by
   rw [Real.sqrt_eq_rpow, ← Real.rpow_natCast, ← Real.rpow_mul hx]; norm_num
 
+/-- `ζ(x) = (2/3)(√x)³` for `x ≥ 0`. -/
 theorem airyZeta_eq {x : ℝ} (hx : 0 ≤ x) : airyZeta x = 2 / 3 * Real.sqrt x ^ 3 := by
   rw [airyZeta, rpow_three_halves_eq hx]
 
@@ -74,6 +78,7 @@ theorem half_airyZeta_rpow_neg_third {x : ℝ} (hx : 0 < x) :
   rw [Real.rpow_neg (by have := airyZeta_pos hx; positivity), half_airyZeta_rpow_third hx.le,
     mul_inv, Real.rpow_neg (by norm_num), inv_inv]
 
+/-- `ζ(x)²/4 = x³/9` for `x ≥ 0`. -/
 theorem airyZeta_sq_div_four {x : ℝ} (hx : 0 ≤ x) :
     ((airyZeta x : ℂ)) ^ 2 / 4 = (x : ℂ) ^ 3 / 9 := by
   have h : airyZeta x ^ 2 / 4 = x ^ 3 / 9 := by
@@ -83,6 +88,7 @@ theorem airyZeta_sq_div_four {x : ℝ} (hx : 0 ≤ x) :
       _ = x ^ 3 / 9 := by rw [hs]
   exact_mod_cast h
 
+/-- The complex power `(ζ/2)^ν` is the cast of the real power, for real `ν`. -/
 theorem half_airyZeta_cpow {x : ℝ} (hx : 0 ≤ x) (ν : ℝ) :
     ((airyZeta x : ℂ) / 2) ^ (ν : ℂ) = (((airyZeta x / 2) ^ ν : ℝ) : ℂ) := by
   rw [Complex.ofReal_cpow (by unfold airyZeta; positivity)]
@@ -91,6 +97,7 @@ theorem half_airyZeta_cpow {x : ℝ} (hx : 0 ≤ x) (ν : ℝ) :
 
 /-! ### Bessel functions at `ζ` -/
 
+/-- `I_{1/3}(ζ) = 3^{-1/3} √x ₀F̃₁(;4/3;x³/9)` for `x ≥ 0`. -/
 theorem besselI_airyZeta_third {x : ℝ} (hx : 0 ≤ x) :
     besselI (1 / 3) (airyZeta x) = (((3 : ℝ) ^ (-(1 / 3 : ℝ)) * Real.sqrt x : ℝ) : ℂ) *
       regularizedHGFun (∅ : Multiset ℂ) {4 / 3} ((x : ℂ) ^ 3 / 9) := by
@@ -100,6 +107,7 @@ theorem besselI_airyZeta_third {x : ℝ} (hx : 0 ≤ x) :
   rw [h]
   norm_num
 
+/-- `I_{-1/3}(ζ) = 3^{1/3} x^{-1/2} ₀F̃₁(;2/3;x³/9)` for `x > 0`. -/
 theorem besselI_airyZeta_neg_third {x : ℝ} (hx : 0 < x) :
     besselI (-1 / 3) (airyZeta x) = (((3 : ℝ) ^ (1 / 3 : ℝ) * (Real.sqrt x)⁻¹ : ℝ) : ℂ) *
       regularizedHGFun (∅ : Multiset ℂ) {2 / 3} ((x : ℂ) ^ 3 / 9) := by
@@ -109,6 +117,7 @@ theorem besselI_airyZeta_neg_third {x : ℝ} (hx : 0 < x) :
   rw [show (-1 / 3 : ℂ) = -(1 / 3) by ring, h]
   norm_num
 
+/-- `J_{1/3}(ζ) = 3^{-1/3} √x ₀F̃₁(;4/3;-x³/9)` for `x ≥ 0`. -/
 theorem besselJ_airyZeta_third {x : ℝ} (hx : 0 ≤ x) :
     besselJ (1 / 3) (airyZeta x) = (((3 : ℝ) ^ (-(1 / 3 : ℝ)) * Real.sqrt x : ℝ) : ℂ) *
       regularizedHGFun (∅ : Multiset ℂ) {4 / 3} ((-(x : ℂ)) ^ 3 / 9) := by
@@ -119,6 +128,7 @@ theorem besselJ_airyZeta_third {x : ℝ} (hx : 0 ≤ x) :
   rw [h]
   norm_num
 
+/-- `J_{-1/3}(ζ) = 3^{1/3} x^{-1/2} ₀F̃₁(;2/3;-x³/9)` for `x > 0`. -/
 theorem besselJ_airyZeta_neg_third {x : ℝ} (hx : 0 < x) :
     besselJ (-1 / 3) (airyZeta x) = (((3 : ℝ) ^ (1 / 3 : ℝ) * (Real.sqrt x)⁻¹ : ℝ) : ℂ) *
       regularizedHGFun (∅ : Multiset ℂ) {2 / 3} ((-(x : ℂ)) ^ 3 / 9) := by
@@ -131,42 +141,51 @@ theorem besselJ_airyZeta_neg_third {x : ℝ} (hx : 0 < x) :
 
 /-! ### Constants -/
 
+/-- `3^{1/3}/3 = 3^{-2/3}`. -/
 theorem three_rpow_third_div : (3 : ℝ) ^ (1 / 3 : ℝ) / 3 = (3 : ℝ) ^ (-(2 / 3 : ℝ)) := by
   rw [← Real.rpow_sub_one (by norm_num)]; norm_num
 
+/-- `3^{-1/3}/3 = 3^{-4/3}`. -/
 theorem three_rpow_neg_third_div : (3 : ℝ) ^ (-(1 / 3 : ℝ)) / 3 = (3 : ℝ) ^ (-(4 / 3 : ℝ)) := by
   rw [← Real.rpow_sub_one (by norm_num)]; norm_num
 
+/-- `√3 · √3 = 3`. -/
 theorem sqrt_three_mul_self : Real.sqrt 3 * Real.sqrt 3 = 3 := Real.mul_self_sqrt (by norm_num)
 
+/-- `(√x/3) · 3^{1/3} x^{-1/2} = 3^{-2/3}` for `x > 0`. -/
 theorem airy_const₁ {x : ℝ} (hx : 0 < x) :
     Real.sqrt x / 3 * ((3 : ℝ) ^ (1 / 3 : ℝ) * (Real.sqrt x)⁻¹) = (3 : ℝ) ^ (-(2 / 3 : ℝ)) := by
   have hr : Real.sqrt x ≠ 0 := (Real.sqrt_pos.mpr hx).ne'
   rw [← three_rpow_third_div]
   field_simp
 
+/-- `(√x/3) · 3^{-1/3} √x = 3^{-4/3} x` for `x ≥ 0`. -/
 theorem airy_const₂ {x : ℝ} (hx : 0 ≤ x) :
     Real.sqrt x / 3 * ((3 : ℝ) ^ (-(1 / 3 : ℝ)) * Real.sqrt x) =
       (3 : ℝ) ^ (-(4 / 3 : ℝ)) * x := by
   rw [← three_rpow_neg_third_div]
   linear_combination ((3 : ℝ) ^ (-(1 / 3 : ℝ)) / 3) * Real.mul_self_sqrt hx
 
+/-- `√(x/3) = √3 · (√x/3)` for `x ≥ 0`. -/
 theorem sqrt_div_three {x : ℝ} (hx : 0 ≤ x) :
     Real.sqrt (x / 3) = Real.sqrt 3 * (Real.sqrt x / 3) := by
   have h3 : Real.sqrt 3 ≠ 0 := (Real.sqrt_pos.mpr (by norm_num)).ne'
   rw [Real.sqrt_div hx, div_eq_iff h3]
   linear_combination (-(Real.sqrt x / 3)) * sqrt_three_mul_self
 
+/-- `√(x/3) · 3^{1/3} x^{-1/2} = √3 · 3^{-2/3}` for `x > 0`. -/
 theorem airy_const₃ {x : ℝ} (hx : 0 < x) :
     Real.sqrt (x / 3) * ((3 : ℝ) ^ (1 / 3 : ℝ) * (Real.sqrt x)⁻¹) =
       Real.sqrt 3 * (3 : ℝ) ^ (-(2 / 3 : ℝ)) := by
   rw [sqrt_div_three hx.le, mul_assoc, airy_const₁ hx]
 
+/-- `√(x/3) · 3^{-1/3} √x = √3 · 3^{-4/3} x` for `x ≥ 0`. -/
 theorem airy_const₄ {x : ℝ} (hx : 0 ≤ x) :
     Real.sqrt (x / 3) * ((3 : ℝ) ^ (-(1 / 3 : ℝ)) * Real.sqrt x) =
       Real.sqrt 3 * ((3 : ℝ) ^ (-(4 / 3 : ℝ)) * x) := by
   rw [sqrt_div_three hx, mul_assoc, airy_const₂ hx]
 
+/-- Equal reals have equal complex casts. -/
 theorem ofReal_eq_of_eq {a b : ℝ} (h : a = b) : (a : ℂ) = b := by rw [h]
 
 /-! ### Bessel-function forms (DLMF 9.6(i)) -/
@@ -223,6 +242,7 @@ theorem airyBi_neg_eq_besselJ {x : ℝ} (hx : 0 < x) :
   linear_combination (-regularizedHGFun (∅ : Multiset ℂ) {2 / 3} ((-(x : ℂ)) ^ 3 / 9)) * c3 +
     regularizedHGFun (∅ : Multiset ℂ) {4 / 3} ((-(x : ℂ)) ^ 3 / 9) * c4
 
+/-- `1/3` is not an integer. -/
 theorem third_ne_int : ∀ k : ℤ, (1 / 3 : ℂ) ≠ k := by
   intro k hk
   have h := congrArg Complex.re hk
@@ -277,6 +297,7 @@ theorem isEquivalent_of_sub_isBigO {f m : ℝ → ℂ} {g : ℝ → ℝ} {c : �
     simp
   exact h.trans_isLittleO h4
 
+/-- `t^{-3/2} = t⁻¹ t^{-1/2}` for `t > 0`. -/
 theorem rpow_neg_three_halves {t : ℝ} (ht : 0 < t) :
     t ^ (-(3 / 2) : ℝ) = t⁻¹ * t ^ (-(1 / 2) : ℝ) := by
   rw [← Real.rpow_neg_one, ← Real.rpow_add ht]; norm_num
@@ -306,6 +327,7 @@ theorem besselK_isEquivalent (ν : ℂ) :
   simp only [Pi.mul_apply]
   rw [← mul_assoc, ← Complex.exp_add, neg_add_cancel, Complex.exp_zero, one_mul]
 
+/-- `x^{1/4} x^{1/4} = √x` for `x ≥ 0`. -/
 theorem sq_rpow_quarter {x : ℝ} (hx : 0 ≤ x) : x ^ (1 / 4 : ℝ) * x ^ (1 / 4 : ℝ) = Real.sqrt x := by
   rw [← Real.rpow_add' hx (by norm_num), Real.sqrt_eq_rpow]; norm_num
 
@@ -321,6 +343,7 @@ theorem sqrt_two_airyZeta {x : ℝ} (hx : 0 < x) :
   rw [div_mul_div_comm, div_eq_iff (by positivity)]
   linear_combination (4 * Real.sqrt x ^ 2) * hqq - (4 / 3 * Real.sqrt x ^ 3) * h33
 
+/-- `(2ζ)^{-1/2} = √3 / (2 √x x^{1/4})` for `x > 0`. -/
 theorem two_airyZeta_cpow {x : ℝ} (hx : 0 < x) :
     (2 * (airyZeta x : ℂ)) ^ (-(1 / 2 : ℂ)) =
       ((Real.sqrt 3 / (2 * Real.sqrt x * x ^ (1 / 4 : ℝ)) : ℝ) : ℂ) := by
@@ -361,6 +384,7 @@ theorem airyAi_isEquivalent :
       linear_combination (Real.sqrt π ^ 2) * h33 + 3 * hpp
     exact_mod_cast key
 
+/-- If `1 + 2ν > 0` then `1 + 2ν` is not a nonpositive integer. -/
 theorem one_add_two_mul_ne (ν : ℝ) (hν : 0 < 1 + 2 * ν) : ∀ k : ℕ, 1 + 2 * (ν : ℂ) ≠ -k := by
   intro k hk
   have h := congrArg Complex.re hk
@@ -422,6 +446,7 @@ theorem airyBi_isEquivalent :
 
 /-! ### Positivity on `[0, ∞)` -/
 
+/-- The complex `Γ(2/3)` is the cast of the real `Γ(2/3)`. -/
 theorem Gamma_two_thirds_eq : Complex.Gamma (2 / 3) = ((Real.Gamma (2 / 3) : ℝ) : ℂ) := by
   rw [← Complex.Gamma_ofReal]; push_cast; ring_nf
 

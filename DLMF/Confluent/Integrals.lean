@@ -542,148 +542,169 @@ theorem cfInt_integral_rpow_exp {r s : ℝ} (hr : -1 < r) (hs : 0 < s) :
   rw [h, one_div, Real.inv_rpow hs.le, Real.rpow_neg hs.le]
   ring
 
+/-- The Laplace integrand `t^r (1+t)^{-p} e^{-st}` is a.e. strongly measurable on `(0, ∞)`. -/
+private lemma cfInt_aestronglyMeasurable_laplace_rpow (r p s : ℝ) :
+    AEStronglyMeasurable (fun t : ℝ => t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t)))
+      (volume.restrict (Ioi 0)) := by
+  refine ContinuousOn.aestronglyMeasurable (fun t ht => ?_) measurableSet_Ioi
+  have ht0 : (0 : ℝ) < t := ht
+  exact (((Real.continuousAt_rpow_const _ _ (Or.inl ht0.ne')).mul
+    (Real.continuousAt_rpow_const _ _ (Or.inl (by simp only [Pi.add_apply, _root_.id]; linarith)) |>.comp
+      (continuous_const.add continuous_id).continuousAt)).mul
+    (Real.continuous_exp.comp (by fun_prop)).continuousAt).continuousWithinAt
+
+/-- The case `p ≥ 0` of `cfInt_laplace_rpow_le`. -/
+private lemma cfInt_laplace_rpow_le_of_nonneg {r p : ℝ} (hr : -1 < r) (hrp : -1 < r - p)
+    (hp : 0 ≤ p) :
+    ∃ C, ∀ s : ℝ, 0 < s →
+      IntegrableOn (fun t : ℝ => t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t))) (Ioi 0) ∧
+      ∫ t : ℝ in Ioi 0, t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t)) ≤
+        C * (s ^ (p - r - 1) * (1 + s) ^ (-p)) := by
+  have hmeas := cfInt_aestronglyMeasurable_laplace_rpow r p
+  refine ⟨2 ^ p * max (Real.Gamma (r + 1)) (Real.Gamma (r - p + 1)), fun s hs => ?_⟩
+  have hI1 := cfInt_integrableOn_rpow_exp hr hs
+  have hI2 := cfInt_integrableOn_rpow_exp hrp hs
+  have hle1 : ∀ t ∈ Ioi (0 : ℝ), t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t)) ≤
+      t ^ r * Real.exp (-(s * t)) := by
+    intro t ht
+    have ht0 : (0 : ℝ) < t := ht
+    have : (1 + t) ^ (-p) ≤ 1 := Real.rpow_le_one_of_one_le_of_nonpos (by linarith) (by linarith)
+    have h0 : 0 ≤ t ^ r * Real.exp (-(s * t)) := by positivity
+    nlinarith [Real.rpow_nonneg (by linarith : (0:ℝ) ≤ 1 + t) (-p),
+      mul_nonneg (Real.rpow_nonneg ht0.le r) (Real.exp_pos (-(s * t))).le]
+  have hle2 : ∀ t ∈ Ioi (0 : ℝ), t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t)) ≤
+      t ^ (r - p) * Real.exp (-(s * t)) := by
+    intro t ht
+    have ht0 : (0 : ℝ) < t := ht
+    have h1 : (1 + t) ^ (-p) ≤ t ^ (-p) :=
+      Real.rpow_le_rpow_of_nonpos ht0 (by linarith) (by linarith)
+    rw [show r - p = r + -p by ring, Real.rpow_add ht0]
+    have := mul_le_mul_of_nonneg_left h1 (Real.rpow_nonneg ht0.le r)
+    exact mul_le_mul_of_nonneg_right this (Real.exp_pos _).le
+  have hnn : ∀ t ∈ Ioi (0 : ℝ), 0 ≤ t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t)) := by
+    intro t ht
+    have ht0 : (0 : ℝ) < t := ht
+    have := Real.rpow_nonneg (by linarith : (0:ℝ) ≤ 1 + t) (-p)
+    positivity
+  have hInt : IntegrableOn (fun t : ℝ => t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t))) (Ioi 0) :=
+    hI1.mono' (hmeas s) (by
+      filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
+      rw [Real.norm_of_nonneg (hnn t ht)]; exact hle1 t ht)
+  refine ⟨hInt, ?_⟩
+  have hJ1 := setIntegral_mono_on hInt hI1 measurableSet_Ioi hle1
+  have hJ2 := setIntegral_mono_on hInt hI2 measurableSet_Ioi hle2
+  rw [cfInt_integral_rpow_exp hr hs] at hJ1
+  rw [cfInt_integral_rpow_exp hrp hs] at hJ2
+  have hG1 := Real.Gamma_pos_of_pos (by linarith : 0 < r + 1)
+  have hG2 := Real.Gamma_pos_of_pos (by linarith : 0 < r - p + 1)
+  have h2p : (1 : ℝ) ≤ 2 ^ p := Real.one_le_rpow (by norm_num) hp
+  rcases le_or_gt 1 s with hs1 | hs1
+  · -- `s ≥ 1`: use the first bound
+    refine hJ1.trans ?_
+    have e1 : s ^ (-(r + 1)) = s ^ (p - r - 1) * s ^ (-p) := by
+      rw [← Real.rpow_add hs]; ring_nf
+    have e2 : s ^ (-p) ≤ 2 ^ p * (1 + s) ^ (-p) := by
+      have key : (1 + s) ^ p ≤ 2 ^ p * s ^ p :=
+        (Real.rpow_le_rpow (by linarith) (by linarith) hp).trans_eq
+          (Real.mul_rpow (by norm_num) hs.le)
+      rw [Real.rpow_neg hs.le, Real.rpow_neg (by linarith), ← div_eq_mul_inv,
+        le_div_iff₀ (by positivity)]
+      calc (s ^ p)⁻¹ * (1 + s) ^ p ≤ (s ^ p)⁻¹ * (2 ^ p * s ^ p) := by gcongr
+        _ = 2 ^ p := by field_simp
+    rw [e1]
+    calc Real.Gamma (r + 1) * (s ^ (p - r - 1) * s ^ (-p))
+        ≤ max (Real.Gamma (r + 1)) (Real.Gamma (r - p + 1)) *
+            (s ^ (p - r - 1) * (2 ^ p * (1 + s) ^ (-p))) := by
+          gcongr
+          · exact le_max_left _ _
+      _ = _ := by ring
+  · -- `s < 1`: use the second bound
+    refine hJ2.trans ?_
+    have e1 : s ^ (-(r - p + 1)) = s ^ (p - r - 1) := by ring_nf
+    have e2 : 1 ≤ 2 ^ p * (1 + s) ^ (-p) := by
+      rw [Real.rpow_neg (by linarith), ← div_eq_mul_inv, le_div_iff₀ (by positivity), one_mul]
+      exact Real.rpow_le_rpow (by linarith) (by linarith) hp
+    rw [e1]
+    calc Real.Gamma (r - p + 1) * s ^ (p - r - 1)
+        ≤ max (Real.Gamma (r + 1)) (Real.Gamma (r - p + 1)) *
+            (s ^ (p - r - 1) * (2 ^ p * (1 + s) ^ (-p))) := by
+          have hs0 : 0 ≤ s ^ (p - r - 1) := by positivity
+          calc Real.Gamma (r - p + 1) * s ^ (p - r - 1)
+              ≤ max (Real.Gamma (r + 1)) (Real.Gamma (r - p + 1)) * (s ^ (p - r - 1) * 1) := by
+                rw [mul_one]; gcongr; exact le_max_right _ _
+            _ ≤ _ := by gcongr
+      _ = _ := by ring
+
+/-- The case `p < 0` of `cfInt_laplace_rpow_le`. -/
+private lemma cfInt_laplace_rpow_le_of_neg {r p : ℝ} (hr : -1 < r) (hp : p < 0) :
+    ∃ C, ∀ s : ℝ, 0 < s →
+      IntegrableOn (fun t : ℝ => t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t))) (Ioi 0) ∧
+      ∫ t : ℝ in Ioi 0, t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t)) ≤
+        C * (s ^ (p - r - 1) * (1 + s) ^ (-p)) := by
+  have hmeas := cfInt_aestronglyMeasurable_laplace_rpow r p
+  set q := -p with hq
+  have hq0 : 0 < q := by linarith
+  refine ⟨2 ^ q * (Real.Gamma (r + 1) + Real.Gamma (r + q + 1)), fun s hs => ?_⟩
+  have hI1 := cfInt_integrableOn_rpow_exp hr hs
+  have hI2 := cfInt_integrableOn_rpow_exp (r := r + q) (by linarith) hs
+  have hle : ∀ t ∈ Ioi (0 : ℝ), t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t)) ≤
+      2 ^ q * (t ^ r * Real.exp (-(s * t)) + t ^ (r + q) * Real.exp (-(s * t))) := by
+    intro t ht
+    have ht0 : (0 : ℝ) < t := ht
+    have h1 : (1 + t) ^ q ≤ 2 ^ q * (1 + t ^ q) := by
+      rcases le_or_gt t 1 with ht1 | ht1
+      · calc (1 + t) ^ q ≤ 2 ^ q := Real.rpow_le_rpow (by linarith) (by linarith) hq0.le
+          _ ≤ 2 ^ q * (1 + t ^ q) := le_mul_of_one_le_right (by positivity)
+              (by linarith [Real.rpow_nonneg ht0.le q])
+      · calc (1 + t) ^ q ≤ (2 * t) ^ q := Real.rpow_le_rpow (by linarith) (by linarith) hq0.le
+          _ = 2 ^ q * t ^ q := Real.mul_rpow (by norm_num) ht0.le
+          _ ≤ 2 ^ q * (1 + t ^ q) := by gcongr; linarith
+    rw [show -p = q by rw [hq]]
+    rw [Real.rpow_add ht0]
+    have he := (Real.exp_pos (-(s * t))).le
+    have htr := Real.rpow_nonneg ht0.le r
+    calc t ^ r * (1 + t) ^ q * Real.exp (-(s * t))
+        ≤ t ^ r * (2 ^ q * (1 + t ^ q)) * Real.exp (-(s * t)) := by gcongr
+      _ = _ := by ring
+  have hnn : ∀ t ∈ Ioi (0 : ℝ), 0 ≤ t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t)) := by
+    intro t ht
+    have ht0 : (0 : ℝ) < t := ht
+    have := Real.rpow_nonneg (by linarith : (0:ℝ) ≤ 1 + t) (-p)
+    positivity
+  have hS : IntegrableOn (fun t : ℝ => 2 ^ q * (t ^ r * Real.exp (-(s * t)) +
+      t ^ (r + q) * Real.exp (-(s * t)))) (Ioi 0) := (hI1.add hI2).const_mul (2 ^ q)
+  have hInt : IntegrableOn (fun t : ℝ => t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t))) (Ioi 0) :=
+    hS.mono' (hmeas s) (by
+      filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
+      rw [Real.norm_of_nonneg (hnn t ht)]; exact hle t ht)
+  refine ⟨hInt, ?_⟩
+  have hJ := setIntegral_mono_on hInt hS measurableSet_Ioi hle
+  rw [integral_const_mul, integral_add hI1 hI2, cfInt_integral_rpow_exp hr hs,
+    cfInt_integral_rpow_exp (by linarith) hs] at hJ
+  refine hJ.trans ?_
+  have e1 : s ^ (-(r + 1)) ≤ s ^ (p - r - 1) * (1 + s) ^ (-p) := by
+    rw [show p - r - 1 = -(r + 1) - q by rw [hq]; ring, ← hq, Real.rpow_sub hs, div_mul_eq_mul_div,
+      le_div_iff₀ (by positivity)]
+    exact mul_le_mul_of_nonneg_left (Real.rpow_le_rpow hs.le (by linarith) hq0.le) (by positivity)
+  have e2 : s ^ (-(r + q + 1)) ≤ s ^ (p - r - 1) * (1 + s) ^ (-p) := by
+    rw [show p - r - 1 = -(r + q + 1) by rw [hq]; ring, ← hq]
+    exact le_mul_of_one_le_right (by positivity) (Real.one_le_rpow (by linarith) hq0.le)
+  have hG1 := Real.Gamma_pos_of_pos (by linarith : 0 < r + 1)
+  have hG2 := Real.Gamma_pos_of_pos (by linarith : 0 < r + q + 1)
+  calc 2 ^ q * (Real.Gamma (r + 1) * s ^ (-(r + 1)) + Real.Gamma (r + q + 1) * s ^ (-(r + q + 1)))
+      ≤ 2 ^ q * (Real.Gamma (r + 1) * (s ^ (p - r - 1) * (1 + s) ^ (-p)) +
+          Real.Gamma (r + q + 1) * (s ^ (p - r - 1) * (1 + s) ^ (-p))) := by gcongr
+    _ = _ := by ring
+
 /-- `∫₀^∞ e^{-st} t^r (1+t)^{-p} dt ≤ C s^{p-r-1} (1+s)^{-p}` for `r > -1`, `r - p > -1`. -/
 theorem cfInt_laplace_rpow_le {r p : ℝ} (hr : -1 < r) (hrp : -1 < r - p) :
     ∃ C, ∀ s : ℝ, 0 < s →
       IntegrableOn (fun t : ℝ => t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t))) (Ioi 0) ∧
       ∫ t : ℝ in Ioi 0, t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t)) ≤
         C * (s ^ (p - r - 1) * (1 + s) ^ (-p)) := by
-  have hmeas : ∀ s : ℝ, AEStronglyMeasurable
-      (fun t : ℝ => t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t))) (volume.restrict (Ioi 0)) := by
-    intro s
-    refine ContinuousOn.aestronglyMeasurable (fun t ht => ?_) measurableSet_Ioi
-    have ht0 : (0 : ℝ) < t := ht
-    exact (((Real.continuousAt_rpow_const _ _ (Or.inl ht0.ne')).mul
-      (Real.continuousAt_rpow_const _ _ (Or.inl (by simp only [Pi.add_apply, _root_.id]; linarith)) |>.comp
-        (continuous_const.add continuous_id).continuousAt)).mul
-      (Real.continuous_exp.comp (by fun_prop)).continuousAt).continuousWithinAt
   rcases le_or_gt 0 p with hp | hp
-  · refine ⟨2 ^ p * max (Real.Gamma (r + 1)) (Real.Gamma (r - p + 1)), fun s hs => ?_⟩
-    have hI1 := cfInt_integrableOn_rpow_exp hr hs
-    have hI2 := cfInt_integrableOn_rpow_exp hrp hs
-    have hle1 : ∀ t ∈ Ioi (0 : ℝ), t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t)) ≤
-        t ^ r * Real.exp (-(s * t)) := by
-      intro t ht
-      have ht0 : (0 : ℝ) < t := ht
-      have : (1 + t) ^ (-p) ≤ 1 := Real.rpow_le_one_of_one_le_of_nonpos (by linarith) (by linarith)
-      have h0 : 0 ≤ t ^ r * Real.exp (-(s * t)) := by positivity
-      nlinarith [Real.rpow_nonneg (by linarith : (0:ℝ) ≤ 1 + t) (-p),
-        mul_nonneg (Real.rpow_nonneg ht0.le r) (Real.exp_pos (-(s * t))).le]
-    have hle2 : ∀ t ∈ Ioi (0 : ℝ), t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t)) ≤
-        t ^ (r - p) * Real.exp (-(s * t)) := by
-      intro t ht
-      have ht0 : (0 : ℝ) < t := ht
-      have h1 : (1 + t) ^ (-p) ≤ t ^ (-p) :=
-        Real.rpow_le_rpow_of_nonpos ht0 (by linarith) (by linarith)
-      rw [show r - p = r + -p by ring, Real.rpow_add ht0]
-      have := mul_le_mul_of_nonneg_left h1 (Real.rpow_nonneg ht0.le r)
-      exact mul_le_mul_of_nonneg_right this (Real.exp_pos _).le
-    have hnn : ∀ t ∈ Ioi (0 : ℝ), 0 ≤ t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t)) := by
-      intro t ht
-      have ht0 : (0 : ℝ) < t := ht
-      have := Real.rpow_nonneg (by linarith : (0:ℝ) ≤ 1 + t) (-p)
-      positivity
-    have hInt : IntegrableOn (fun t : ℝ => t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t))) (Ioi 0) :=
-      hI1.mono' (hmeas s) (by
-        filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
-        rw [Real.norm_of_nonneg (hnn t ht)]; exact hle1 t ht)
-    refine ⟨hInt, ?_⟩
-    have hJ1 := setIntegral_mono_on hInt hI1 measurableSet_Ioi hle1
-    have hJ2 := setIntegral_mono_on hInt hI2 measurableSet_Ioi hle2
-    rw [cfInt_integral_rpow_exp hr hs] at hJ1
-    rw [cfInt_integral_rpow_exp hrp hs] at hJ2
-    have hG1 := Real.Gamma_pos_of_pos (by linarith : 0 < r + 1)
-    have hG2 := Real.Gamma_pos_of_pos (by linarith : 0 < r - p + 1)
-    have h2p : (1 : ℝ) ≤ 2 ^ p := Real.one_le_rpow (by norm_num) hp
-    rcases le_or_gt 1 s with hs1 | hs1
-    · -- `s ≥ 1`: use the first bound
-      refine hJ1.trans ?_
-      have e1 : s ^ (-(r + 1)) = s ^ (p - r - 1) * s ^ (-p) := by
-        rw [← Real.rpow_add hs]; ring_nf
-      have e2 : s ^ (-p) ≤ 2 ^ p * (1 + s) ^ (-p) := by
-        have key : (1 + s) ^ p ≤ 2 ^ p * s ^ p :=
-          (Real.rpow_le_rpow (by linarith) (by linarith) hp).trans_eq
-            (Real.mul_rpow (by norm_num) hs.le)
-        rw [Real.rpow_neg hs.le, Real.rpow_neg (by linarith), ← div_eq_mul_inv,
-          le_div_iff₀ (by positivity)]
-        calc (s ^ p)⁻¹ * (1 + s) ^ p ≤ (s ^ p)⁻¹ * (2 ^ p * s ^ p) := by gcongr
-          _ = 2 ^ p := by field_simp
-      rw [e1]
-      calc Real.Gamma (r + 1) * (s ^ (p - r - 1) * s ^ (-p))
-          ≤ max (Real.Gamma (r + 1)) (Real.Gamma (r - p + 1)) *
-              (s ^ (p - r - 1) * (2 ^ p * (1 + s) ^ (-p))) := by
-            gcongr
-            · exact le_max_left _ _
-        _ = _ := by ring
-    · -- `s < 1`: use the second bound
-      refine hJ2.trans ?_
-      have e1 : s ^ (-(r - p + 1)) = s ^ (p - r - 1) := by ring_nf
-      have e2 : 1 ≤ 2 ^ p * (1 + s) ^ (-p) := by
-        rw [Real.rpow_neg (by linarith), ← div_eq_mul_inv, le_div_iff₀ (by positivity), one_mul]
-        exact Real.rpow_le_rpow (by linarith) (by linarith) hp
-      rw [e1]
-      calc Real.Gamma (r - p + 1) * s ^ (p - r - 1)
-          ≤ max (Real.Gamma (r + 1)) (Real.Gamma (r - p + 1)) *
-              (s ^ (p - r - 1) * (2 ^ p * (1 + s) ^ (-p))) := by
-            have hs0 : 0 ≤ s ^ (p - r - 1) := by positivity
-            calc Real.Gamma (r - p + 1) * s ^ (p - r - 1)
-                ≤ max (Real.Gamma (r + 1)) (Real.Gamma (r - p + 1)) * (s ^ (p - r - 1) * 1) := by
-                  rw [mul_one]; gcongr; exact le_max_right _ _
-              _ ≤ _ := by gcongr
-        _ = _ := by ring
-  · set q := -p with hq
-    have hq0 : 0 < q := by linarith
-    refine ⟨2 ^ q * (Real.Gamma (r + 1) + Real.Gamma (r + q + 1)), fun s hs => ?_⟩
-    have hI1 := cfInt_integrableOn_rpow_exp hr hs
-    have hI2 := cfInt_integrableOn_rpow_exp (r := r + q) (by linarith) hs
-    have hle : ∀ t ∈ Ioi (0 : ℝ), t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t)) ≤
-        2 ^ q * (t ^ r * Real.exp (-(s * t)) + t ^ (r + q) * Real.exp (-(s * t))) := by
-      intro t ht
-      have ht0 : (0 : ℝ) < t := ht
-      have h1 : (1 + t) ^ q ≤ 2 ^ q * (1 + t ^ q) := by
-        rcases le_or_gt t 1 with ht1 | ht1
-        · calc (1 + t) ^ q ≤ 2 ^ q := Real.rpow_le_rpow (by linarith) (by linarith) hq0.le
-            _ ≤ 2 ^ q * (1 + t ^ q) := le_mul_of_one_le_right (by positivity)
-                (by linarith [Real.rpow_nonneg ht0.le q])
-        · calc (1 + t) ^ q ≤ (2 * t) ^ q := Real.rpow_le_rpow (by linarith) (by linarith) hq0.le
-            _ = 2 ^ q * t ^ q := Real.mul_rpow (by norm_num) ht0.le
-            _ ≤ 2 ^ q * (1 + t ^ q) := by gcongr; linarith
-      rw [show -p = q by rw [hq]]
-      rw [Real.rpow_add ht0]
-      have he := (Real.exp_pos (-(s * t))).le
-      have htr := Real.rpow_nonneg ht0.le r
-      calc t ^ r * (1 + t) ^ q * Real.exp (-(s * t))
-          ≤ t ^ r * (2 ^ q * (1 + t ^ q)) * Real.exp (-(s * t)) := by gcongr
-        _ = _ := by ring
-    have hnn : ∀ t ∈ Ioi (0 : ℝ), 0 ≤ t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t)) := by
-      intro t ht
-      have ht0 : (0 : ℝ) < t := ht
-      have := Real.rpow_nonneg (by linarith : (0:ℝ) ≤ 1 + t) (-p)
-      positivity
-    have hS : IntegrableOn (fun t : ℝ => 2 ^ q * (t ^ r * Real.exp (-(s * t)) +
-        t ^ (r + q) * Real.exp (-(s * t)))) (Ioi 0) := (hI1.add hI2).const_mul (2 ^ q)
-    have hInt : IntegrableOn (fun t : ℝ => t ^ r * (1 + t) ^ (-p) * Real.exp (-(s * t))) (Ioi 0) :=
-      hS.mono' (hmeas s) (by
-        filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
-        rw [Real.norm_of_nonneg (hnn t ht)]; exact hle t ht)
-    refine ⟨hInt, ?_⟩
-    have hJ := setIntegral_mono_on hInt hS measurableSet_Ioi hle
-    rw [integral_const_mul, integral_add hI1 hI2, cfInt_integral_rpow_exp hr hs,
-      cfInt_integral_rpow_exp (by linarith) hs] at hJ
-    refine hJ.trans ?_
-    have e1 : s ^ (-(r + 1)) ≤ s ^ (p - r - 1) * (1 + s) ^ (-p) := by
-      rw [show p - r - 1 = -(r + 1) - q by rw [hq]; ring, ← hq, Real.rpow_sub hs, div_mul_eq_mul_div,
-        le_div_iff₀ (by positivity)]
-      exact mul_le_mul_of_nonneg_left (Real.rpow_le_rpow hs.le (by linarith) hq0.le) (by positivity)
-    have e2 : s ^ (-(r + q + 1)) ≤ s ^ (p - r - 1) * (1 + s) ^ (-p) := by
-      rw [show p - r - 1 = -(r + q + 1) by rw [hq]; ring, ← hq]
-      exact le_mul_of_one_le_right (by positivity) (Real.one_le_rpow (by linarith) hq0.le)
-    have hG1 := Real.Gamma_pos_of_pos (by linarith : 0 < r + 1)
-    have hG2 := Real.Gamma_pos_of_pos (by linarith : 0 < r + q + 1)
-    calc 2 ^ q * (Real.Gamma (r + 1) * s ^ (-(r + 1)) + Real.Gamma (r + q + 1) * s ^ (-(r + q + 1)))
-        ≤ 2 ^ q * (Real.Gamma (r + 1) * (s ^ (p - r - 1) * (1 + s) ^ (-p)) +
-            Real.Gamma (r + q + 1) * (s ^ (p - r - 1) * (1 + s) ^ (-p))) := by gcongr
-      _ = _ := by ring
+  · exact cfInt_laplace_rpow_le_of_nonneg hr hrp hp
+  · exact cfInt_laplace_rpow_le_of_neg hr hp
 
 /-- Two comparable positive quantities have comparable real powers. -/
 theorem cfInt_rpow_le_of_le_mul {A B m M : ℝ} (hA : 0 < A) (hm : 0 < m) (h1 : m * A ≤ B)
@@ -883,7 +904,7 @@ theorem cfInt_laplace_kernel {ν x : ℂ} (hν : -1 < ν.re) (hx : x ≠ 0) {s :
         |>.aestronglyMeasurable measurableSet_Ioi
     · filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
       have ht0 : (0 : ℝ) < t := ht
-      rw [norm_mul, kumDec_norm_cpow_ofReal ht0, Complex.norm_exp]
+      rw [norm_mul, norm_cpow_eq_rpow_re_of_pos ht0, Complex.norm_exp]
       apply le_of_eq; simp
   have hFi : ∀ k, IntegrableOn (F k) (Ioi 0) := fun k => (hIk k).const_mul _
   have hGpos : 0 < Real.Gamma (ν.re + 1) := Real.Gamma_pos_of_pos (by linarith)
@@ -899,7 +920,7 @@ theorem cfInt_laplace_kernel {ν x : ℂ} (hν : -1 < ν.re) (hx : x ≠ 0) {s :
         intro t ht
         have ht0 : (0 : ℝ) < t := ht
         simp only [hF, norm_mul, norm_pow, norm_neg]
-        rw [kumDec_norm_cpow_ofReal ht0, Complex.norm_exp]
+        rw [norm_cpow_eq_rpow_re_of_pos ht0, Complex.norm_exp]
         simp only [add_re, natCast_re, add_sub_cancel_right]
         have : (-(↑s * ↑t : ℂ)).re = -(s * t) := by simp
         rw [this]; ring
@@ -992,7 +1013,7 @@ theorem cfInt_exists_norm_kernel_le (ν : ℂ) {r : ℝ} (hr : 0 < r) :
   have hst : 0 < Real.sqrt t := Real.sqrt_pos.mpr ht
   set y := 2 * (q * Real.sqrt t) with hy
   have hy0 : 0 < y := by positivity
-  rw [cfInt_two_sqrt_eq hr.le ht.le, norm_mul, kumDec_norm_cpow_ofReal ht]
+  rw [cfInt_two_sqrt_eq hr.le ht.le, norm_mul, norm_cpow_eq_rpow_re_of_pos ht]
   have hre : (ν / 2).re = σ / 2 := by simp [hσ]
   rw [hre]
   set A := Real.sqrt (1 + t) with hA
@@ -1271,9 +1292,9 @@ theorem cfInt_bessel_M_euler {a b ν x : ℂ} (hx : 0 < x.re) (hxi : x.im = 0) (
     have hB' := (intervalIntegrable_iff_integrableOn_Ioo_of_le zero_le_one).mp hB.norm
     refine hB'.congr_fun (fun s hs => ?_) measurableSet_Ioo
     simp only [hw]
-    rw [norm_mul, kumDec_norm_cpow_ofReal hs.1,
+    rw [norm_mul, norm_cpow_eq_rpow_re_of_pos hs.1,
       show (1 : ℂ) - s = ((1 - s : ℝ) : ℂ) by push_cast; ring,
-      kumDec_norm_cpow_ofReal (by linarith [hs.2])]
+      norm_cpow_eq_rpow_re_of_pos (by linarith [hs.2])]
     simp only [sub_re, ofReal_re, one_re]
     rw [show c.re + p - σ - 1 - 1 = (p - σ - 1) + (c.re - 1) by ring, Real.rpow_add hs.1]
     ring
@@ -1433,9 +1454,9 @@ theorem cfInt_cosine_euler {a x : ℝ} {B : ℂ} (hx : 0 < x) (ha : 1 / 2 < a) (
     have hB'' := (intervalIntegrable_iff_integrableOn_Ioo_of_le zero_le_one).mp hB'.norm
     refine hB''.congr_fun (fun s hs => ?_) measurableSet_Ioo
     simp only [hw]
-    rw [norm_mul, kumDec_norm_cpow_ofReal hs.1,
+    rw [norm_mul, norm_cpow_eq_rpow_re_of_pos hs.1,
       show (1 : ℂ) - s = ((1 - s : ℝ) : ℂ) by push_cast; ring,
-      kumDec_norm_cpow_ofReal (by linarith [hs.2])]
+      norm_cpow_eq_rpow_re_of_pos (by linarith [hs.2])]
     simp only [sub_re, ofReal_re, one_re]
     rw [show a - 1 / 2 - 1 = -(1 / 2) + (a - 1) by ring, Real.rpow_add hs.1]
     ring
@@ -1605,7 +1626,7 @@ theorem confLP_laplace_0F1 {β c x : ℂ} (hβ : 0 < β.re) {s : ℝ} (hs : 0 < 
         |>.aestronglyMeasurable measurableSet_Ioi
     · filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
       have ht0 : (0 : ℝ) < t := ht
-      rw [norm_mul, kumDec_norm_cpow_ofReal ht0, Complex.norm_exp]
+      rw [norm_mul, norm_cpow_eq_rpow_re_of_pos ht0, Complex.norm_exp]
       apply le_of_eq; simp
   have hFi : ∀ k, IntegrableOn (F k) (Ioi 0) := fun k => (hIk k).const_mul _
   set β0 := β.re with hβ0
@@ -1623,7 +1644,7 @@ theorem confLP_laplace_0F1 {β c x : ℂ} (hβ : 0 < β.re) {s : ℝ} (hs : 0 < 
         intro t ht
         have ht0 : (0 : ℝ) < t := ht
         simp only [hF, norm_mul, norm_pow, norm_neg]
-        rw [kumDec_norm_cpow_ofReal ht0, Complex.norm_exp]
+        rw [norm_cpow_eq_rpow_re_of_pos ht0, Complex.norm_exp]
         have : (-(↑s * ↑t : ℂ)).re = -(s * t) := by simp
         rw [this]; simp [hβ0]
       rw [setIntegral_congr_fun measurableSet_Ioi this, integral_const_mul,
@@ -1710,7 +1731,7 @@ theorem confLP_exists_norm_0F1_le (ν : ℂ) {r : ℝ} (hr : 0 < r) :
     rw [cpow_def_of_ne_zero hx0]; exact exp_ne_zero _)
   refine ⟨C / ‖(r : ℂ) ^ (ν / 2)‖, fun t ht => ?_⟩
   have h := hC t ht
-  rw [cfInt_kernel_eq ν hx0 ht, norm_mul, norm_mul, kumDec_norm_cpow_ofReal ht] at h
+  rw [cfInt_kernel_eq ν hx0 ht, norm_mul, norm_mul, norm_cpow_eq_rpow_re_of_pos ht] at h
   have htσ : 0 < t ^ ν.re := Real.rpow_pos_of_pos ht _
   rw [div_mul_eq_mul_div, le_div_iff₀ hn]
   have : ‖(r : ℂ) ^ (ν / 2)‖ * (t ^ ν.re *
@@ -1787,9 +1808,9 @@ theorem confLP_norm_Q (c a b μ : ℂ) (r : ℝ) {s ρ : ℝ} (hs : s ∈ Ioo (0
   have h1 : (1 : ℂ) - s = ((1 - s : ℝ) : ℂ) := by push_cast; ring
   have h2 : (1 : ℂ) - ρ = ((1 - ρ : ℝ) : ℂ) := by push_cast; ring
   simp only [confLP_Q, norm_mul, Complex.norm_exp]
-  rw [h1, h2, kumDec_norm_cpow_ofReal hs.1, kumDec_norm_cpow_ofReal hs.1,
-    kumDec_norm_cpow_ofReal (by linarith [hs.2]), kumDec_norm_cpow_ofReal hρ.1,
-    kumDec_norm_cpow_ofReal (by linarith [hρ.2])]
+  rw [h1, h2, norm_cpow_eq_rpow_re_of_pos hs.1, norm_cpow_eq_rpow_re_of_pos hs.1,
+    norm_cpow_eq_rpow_re_of_pos (by linarith [hs.2]), norm_cpow_eq_rpow_re_of_pos hρ.1,
+    norm_cpow_eq_rpow_re_of_pos (by linarith [hρ.2])]
   have : (-(r : ℂ) / s * ρ).re = -(r / s * ρ) := by
     rw [show -(r : ℂ) / s * ρ = ((-(r / s * ρ) : ℝ) : ℂ) by push_cast; ring, ofReal_re]
   rw [this]
@@ -1826,6 +1847,158 @@ theorem confLP_integral_Q {c a b μ : ℂ} {r : ℝ} (hr : 0 < r) (hcab : c + a 
   ring
 
 
+/-- The Fubini integrand `confLP_Q` of the base case of 13.10.13 is integrable on the unit
+square, for `Re a, Re c > 0`, `c + a = b` and `Re(ν + 1 - b) > 0`. -/
+private lemma confLP_integrable_Q {a b c ν : ℂ} {r : ℝ} (hr : 0 < r) (ha : 0 < a.re)
+    (hc0 : 0 < c.re) (hνb : 0 < (ν + 1 - b).re) (hcab : c + a = b) :
+    Integrable (Function.uncurry (confLP_Q c a b ν r))
+      ((volume.restrict (Ioo (0:ℝ) 1)).prod (volume.restrict (Ioo (0:ℝ) 1))) := by
+  set γ := c.re with hγ
+  set α := a.re with hα
+  set β := b.re with hβ
+  have hβγα : β = γ + α := by simp [hβ, hγ, hα, ← hcab]
+  have hQm := confLP_measurable_Q c a b ν r
+  set Q := confLP_Q c a b ν r with hQ
+  set ν' := ν.re with hν'
+  have hcpow : ∀ {z : ℂ} (w : ℂ), z ≠ 0 → z ^ w ≠ 0 := fun w hz => by
+    rw [cpow_def_of_ne_zero hz]; exact exp_ne_zero _
+  have hnQ : ∀ ρ ∈ Ioo (0:ℝ) 1, ∀ s ∈ Ioo (0:ℝ) 1,
+      ‖Q s ρ‖ = ‖confLP_Q (γ:ℂ) (α:ℂ) (β:ℂ) (ν':ℂ) r s ρ‖ := by
+    intro ρ hρ s hs
+    rw [hQ, confLP_norm_Q _ _ _ _ _ hs hρ, confLP_norm_Q _ _ _ _ _ hs hρ]
+    simp only [ofReal_re]
+    rfl
+  have hRint : ∀ ρ ∈ Ioo (0:ℝ) 1, ∫ s in Ioo (0:ℝ) 1, confLP_Q (γ:ℂ) (α:ℂ) (β:ℂ) (ν':ℂ) r s ρ =
+      (ρ : ℂ) ^ ((β:ℂ) - 1) * (1 - (ρ : ℂ)) ^ ((ν':ℂ) - β) *
+        (exp (-((r : ℂ) * ρ)) * (Gamma (α:ℂ) * ((r : ℂ) * ρ) ^ (-(α:ℂ)))) := fun ρ hρ =>
+    confLP_integral_Q hr (by rw [hβγα]; push_cast; ring) (by simpa using ha) hρ
+  have hRnorm : ∀ ρ ∈ Ioo (0:ℝ) 1, ∫ s in Ioo (0:ℝ) 1, ‖Q s ρ‖ =
+      ‖∫ s in Ioo (0:ℝ) 1, confLP_Q (γ:ℂ) (α:ℂ) (β:ℂ) (ν':ℂ) r s ρ‖ := by
+    intro ρ hρ
+    rw [setIntegral_congr_fun measurableSet_Ioo (hnQ ρ hρ)]
+    refine confLP_setIntegral_norm_of_ofReal measurableSet_Ioo
+      (fun s hs => confLP_Q_ofReal γ α β ν' r hs hρ) (fun s hs => ?_)
+    have := hs.1; have := hs.2; have := hρ.1; have := hρ.2
+    positivity
+  refine (integrable_prod_iff' hQm.aestronglyMeasurable).mpr ⟨?_, ?_⟩
+  · filter_upwards [ae_restrict_mem measurableSet_Ioo] with ρ hρ
+    have hρc : (ρ:ℂ) ≠ 0 := ofReal_ne_zero.mpr hρ.1.ne'
+    have h1ρ : (1 - (ρ:ℂ)) ≠ 0 := by
+      rw [sub_ne_zero]; intro h; have := congrArg re h; simp at this; linarith [hρ.2]
+    have hrρ : (r:ℂ) * ρ ≠ 0 := mul_ne_zero (ofReal_ne_zero.mpr hr.ne') hρc
+    have hne : ∫ s in Ioo (0:ℝ) 1, confLP_Q (γ:ℂ) (α:ℂ) (β:ℂ) (ν':ℂ) r s ρ ≠ 0 := by
+      rw [hRint ρ hρ]
+      exact mul_ne_zero (mul_ne_zero (hcpow _ hρc) (hcpow _ h1ρ)) (mul_ne_zero (exp_ne_zero _)
+        (mul_ne_zero (Gamma_ne_zero_of_re_pos (by simpa using ha)) (hcpow _ hrρ)))
+    have hint := confLP_integrableOn_of_ne_zero hne
+    refine hint.norm.mono' ((hQm.comp (measurable_id.prodMk measurable_const)).aestronglyMeasurable) ?_
+    filter_upwards [ae_restrict_mem measurableSet_Ioo] with s hs
+    exact (hnQ ρ hρ s hs).le
+  · have hB := Complex.betaIntegral_convergent (u := ((γ : ℝ) : ℂ))
+      (v := ((ν' - β + 1 : ℝ) : ℂ)) (by simpa using hc0) (by
+        simp only [ofReal_re]
+        have : (ν + 1 - b).re = ν' - β + 1 := by simp [hν', hβ]; ring
+        linarith)
+    have hB' := (intervalIntegrable_iff_integrableOn_Ioo_of_le zero_le_one).mp hB.norm
+    refine (hB'.const_mul (‖Gamma (α:ℂ)‖ * r ^ (-α))).mono'
+      hQm.aestronglyMeasurable.norm.prod_swap.integral_prod_right' ?_
+    filter_upwards [ae_restrict_mem measurableSet_Ioo] with ρ hρ
+    rw [Real.norm_of_nonneg (integral_nonneg fun _ => norm_nonneg _)]
+    simp only [Function.uncurry_apply_pair]
+    rw [hRnorm ρ hρ, hRint ρ hρ]
+    have h1 : (1 : ℂ) - ρ = ((1 - ρ : ℝ) : ℂ) := by push_cast; ring
+    have hrρ : (r : ℂ) * ρ = ((r * ρ : ℝ) : ℂ) := by push_cast; ring
+    have h1ρ : (0:ℝ) < 1 - ρ := by linarith [hρ.2]
+    rw [h1, hrρ]
+    simp only [norm_mul, norm_cpow_eq_rpow_re_of_pos hρ.1, norm_cpow_eq_rpow_re_of_pos h1ρ,
+      norm_cpow_eq_rpow_re_of_pos (mul_pos hr hρ.1), Complex.norm_exp]
+    simp only [sub_re, ofReal_re, one_re, neg_re]
+    rw [show ν' - β + 1 - 1 = ν' - β by ring, Real.mul_rpow hr.le hρ.1.le]
+    have he : Real.exp (-(r * ρ)) ≤ 1 := Real.exp_le_one_iff.mpr (by nlinarith [hρ.1])
+    have hpow : ρ ^ (β - 1) * ρ ^ (-α) = ρ ^ (γ - 1) := by
+      rw [← Real.rpow_add hρ.1, hβγα]; ring_nf
+    have hρn : (0:ℝ) ≤ ρ ^ (γ - 1) * (1 - ρ) ^ (ν' - β) := by
+      have := hρ.1; positivity
+    calc ρ ^ (β - 1) * (1 - ρ) ^ (ν' - β) * (Real.exp (-(r * ρ)) *
+          (‖Gamma (α:ℂ)‖ * (r ^ (-α) * ρ ^ (-α))))
+        = (‖Gamma (α:ℂ)‖ * r ^ (-α)) * (ρ ^ (γ - 1) * (1 - ρ) ^ (ν' - β)) *
+            Real.exp (-(r * ρ)) := by rw [← hpow]; ring
+      _ ≤ (‖Gamma (α:ℂ)‖ * r ^ (-α)) * (ρ ^ (γ - 1) * (1 - ρ) ^ (ν' - β)) * 1 := by
+          gcongr
+      _ = _ := mul_one _
+
+/-- The Fubini integrand `t^{b-1} ₀F̃₁(;ν+1;-rt) e^{-ts} s^{c-1} (1-s)^{a-1}` of the base case
+of 13.10.13 is integrable on `(0, ∞) × (0, 1)`, for `Re a, Re c > 0`, `c + a = b` and
+`2 Re a < Re ν + 1/2`. -/
+private lemma confLP_integrable_G {a b c ν : ℂ} {r : ℝ} (hr : 0 < r) (ha : 0 < a.re)
+    (hc0 : 0 < c.re) (hcab : c + a = b) (hν : 2 * a.re < ν.re + 1 / 2) :
+    Integrable (Function.uncurry fun (t s : ℝ) =>
+        (t : ℂ) ^ (b - 1) * regularizedHGFun (∅ : Multiset ℂ) {ν + 1} (-(r : ℂ) * t) *
+          kumDec_eulerKernel c b t s)
+      ((volume.restrict (Ioi (0:ℝ))).prod (volume.restrict (Ioo (0:ℝ) 1))) := by
+  have hbc : b - c = a := by rw [← hcab]; ring
+  have hb0 : 0 < b.re := by rw [← hcab, add_re]; linarith
+  set p := ν.re / 2 + 1 / 4 with hp
+  have hap : a.re < p := by rw [hp]; linarith
+  set F : ℝ → ℂ := fun t => regularizedHGFun (∅ : Multiset ℂ) {ν + 1} (-(r : ℂ) * t) with hF
+  have hFc : Continuous F := confLP_continuous_0F1 ν r
+  obtain ⟨KF, hKF⟩ := confLP_exists_norm_0F1_le ν hr
+  set P : ℝ → ℂ := fun t => (t : ℂ) ^ (b - 1) * F t with hP
+  set E : ℝ → ℝ → ℂ := fun t s => kumDec_eulerKernel c b t s with hE
+  set G : ℝ → ℝ → ℂ := fun t s => P t * E t s with hG
+  show Integrable (Function.uncurry G) _
+  have hEm : Measurable (Function.uncurry E) := by
+    simp only [hE, kumDec_eulerKernel]
+    fun_prop
+  have hPm : Measurable P := by
+    simp only [hP]
+    exact (by fun_prop : Measurable fun t : ℝ => (t : ℂ) ^ (b - 1)).mul hFc.measurable
+  have hm1 : AEStronglyMeasurable (Function.uncurry G)
+      ((volume.restrict (Ioi (0:ℝ))).prod (volume.restrict (Ioo (0:ℝ) 1))) :=
+    ((hPm.comp measurable_fst).mul hEm).aestronglyMeasurable
+  set γ := c.re with hγ
+  set α := a.re with hα
+  set β := b.re with hβ
+  have hβγα : β = γ + α := by simp [hβ, hγ, hα, ← hcab]
+  refine (integrable_prod_iff hm1).mpr ⟨Eventually.of_forall fun t => ?_, ?_⟩
+  · have h := kumDec_intervalIntegrable_eulerKernel (a := c) (b := b) hc0
+      (by rw [hbc]; exact ha) t
+    exact ((intervalIntegrable_iff_integrableOn_Ioo_of_le zero_le_one).mp h).const_mul (P t)
+  · have hI := integrableOn_cpow_mul_regularizedHGFun_neg_mul (a := (γ : ℂ)) (b := (β : ℂ))
+      (c := (β : ℂ)) (h := F) (K := KF) (r := p) hFc.continuousOn hKF (by simpa using hb0)
+      (by simp only [ofReal_re]; linarith)
+    refine IntegrableOn.congr_fun (hI.norm.const_mul ‖Gamma (γ : ℂ) * Gamma (α : ℂ)‖) (fun t ht => ?_)
+      measurableSet_Ioi
+    have ht0 : (0:ℝ) < t := ht
+    simp only [Function.uncurry_apply_pair]
+    have hn : ∀ s ∈ Ioo (0:ℝ) 1, ‖G t s‖ = ‖P t‖ * ‖kumDec_eulerKernel (γ : ℂ) (β : ℂ) t s‖ := by
+      intro s hs
+      simp only [hG, hE, norm_mul]
+      rw [kumDec_norm_eulerKernel c b hs, kumDec_norm_eulerKernel (γ : ℂ) (β : ℂ) hs, hbc]
+      simp only [sub_re, ofReal_re]
+      rw [show β - γ = α by rw [hβγα]; ring]
+    rw [setIntegral_congr_fun measurableSet_Ioo hn, integral_const_mul,
+      confLP_setIntegral_norm_of_ofReal measurableSet_Ioo
+        (fun s hs => confLP_eulerKernel_ofReal γ β t hs) (fun s hs => by
+          have := hs.1; have := hs.2
+          exact mul_nonneg (mul_nonneg (Real.exp_pos _).le (Real.rpow_nonneg (by linarith) _))
+            (Real.rpow_nonneg (by linarith) _))]
+    have hR := kumDec_regularizedHGFun_neg_eq (a := (γ : ℂ)) (b := (β : ℂ)) (by simpa using hc0)
+      (by simp only [sub_re, ofReal_re]; linarith) t
+    rw [show (β : ℂ) - γ = (α : ℂ) by rw [hβγα]; push_cast; ring] at hR
+    have hGγ : Gamma (γ : ℂ) * Gamma (α : ℂ) ≠ 0 :=
+      mul_ne_zero (Gamma_ne_zero_of_re_pos (by simpa using hc0))
+        (Gamma_ne_zero_of_re_pos (by simpa using ha))
+    have hint : ∫ s in Ioo (0:ℝ) 1, kumDec_eulerKernel (γ : ℂ) (β : ℂ) t s =
+        Gamma (γ : ℂ) * Gamma (α : ℂ) * regularizedHGFun {(γ : ℂ)} {(β : ℂ)} (-(t : ℂ)) := by
+      rw [hR, intervalIntegral.integral_of_le zero_le_one, integral_Ioc_eq_integral_Ioo,
+        ← mul_assoc, mul_one_div_cancel hGγ, one_mul]
+    rw [hint, norm_mul, norm_mul, norm_mul, norm_mul]
+    simp only [norm_mul]
+    rw [norm_cpow_eq_rpow_re_of_pos ht0, norm_cpow_eq_rpow_re_of_pos ht0]
+    simp only [sub_re, ofReal_re, one_re]
+    ring
+
 /-- Base case of 13.10.13 (in `₀F₁` form) in the Euler region. -/
 theorem confLP_base {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (ha : 0 < a.re) (hba : 0 < (b - a).re)
     (hνb : 0 < (ν + 1 - b).re) (hν : 2 * a.re < ν.re + 1 / 2) :
@@ -1838,11 +2011,7 @@ theorem confLP_base {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (ha : 0 < a.re) (hba :
   have hb0 : 0 < b.re := by
     have : b.re = c.re + a.re := by simp [hc]
     linarith
-  set p := ν.re / 2 + 1 / 4 with hp
-  have hap : a.re < p := by rw [hp]; linarith
   set F : ℝ → ℂ := fun t => regularizedHGFun (∅ : Multiset ℂ) {ν + 1} (-(r : ℂ) * t) with hF
-  have hFc : Continuous F := confLP_continuous_0F1 ν r
-  obtain ⟨KF, hKF⟩ := confLP_exists_norm_0F1_le ν hr
   set P : ℝ → ℂ := fun t => (t : ℂ) ^ (b - 1) * F t with hP
   set E : ℝ → ℝ → ℂ := fun t s => kumDec_eulerKernel c b t s with hE
   set G : ℝ → ℝ → ℂ := fun t s => P t * E t s with hG
@@ -1868,60 +2037,9 @@ theorem confLP_base {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (ha : 0 < a.re) (hba :
       integral_Ioc_eq_integral_Ioo]
     field_simp
     rfl
-  -- Fubini 1
-  have hEm : Measurable (Function.uncurry E) := by
-    simp only [hE, kumDec_eulerKernel]
-    fun_prop
-  have hPm : Measurable P := by
-    simp only [hP]
-    exact (by fun_prop : Measurable fun t : ℝ => (t : ℂ) ^ (b - 1)).mul hFc.measurable
-  have hm1 : AEStronglyMeasurable (Function.uncurry G)
-      ((volume.restrict (Ioi (0:ℝ))).prod (volume.restrict (Ioo (0:ℝ) 1))) :=
-    ((hPm.comp measurable_fst).mul hEm).aestronglyMeasurable
-  set γ := c.re with hγ
-  set α := a.re with hα
-  set β := b.re with hβ
-  have hβγα : β = γ + α := by simp [hβ, hγ, hα, hc]
   have hGi : Integrable (Function.uncurry G)
-      ((volume.restrict (Ioi (0:ℝ))).prod (volume.restrict (Ioo (0:ℝ) 1))) := by
-    refine (integrable_prod_iff hm1).mpr ⟨Eventually.of_forall fun t => ?_, ?_⟩
-    · have h := kumDec_intervalIntegrable_eulerKernel (a := c) (b := b) hc0
-        (by rw [hbc]; exact ha) t
-      exact ((intervalIntegrable_iff_integrableOn_Ioo_of_le zero_le_one).mp h).const_mul (P t)
-    · have hI := integrableOn_cpow_mul_regularizedHGFun_neg_mul (a := (γ : ℂ)) (b := (β : ℂ))
-        (c := (β : ℂ)) (h := F) (K := KF) (r := p) hFc.continuousOn hKF (by simpa using hb0)
-        (by simp only [ofReal_re]; linarith)
-      refine IntegrableOn.congr_fun (hI.norm.const_mul ‖Gamma (γ : ℂ) * Gamma (α : ℂ)‖) (fun t ht => ?_)
-        measurableSet_Ioi
-      have ht0 : (0:ℝ) < t := ht
-      simp only [Function.uncurry_apply_pair]
-      have hn : ∀ s ∈ Ioo (0:ℝ) 1, ‖G t s‖ = ‖P t‖ * ‖kumDec_eulerKernel (γ : ℂ) (β : ℂ) t s‖ := by
-        intro s hs
-        simp only [hG, hE, norm_mul]
-        rw [kumDec_norm_eulerKernel c b hs, kumDec_norm_eulerKernel (γ : ℂ) (β : ℂ) hs, hbc]
-        simp only [sub_re, ofReal_re]
-        rw [show β - γ = α by rw [hβγα]; ring]
-      rw [setIntegral_congr_fun measurableSet_Ioo hn, integral_const_mul,
-        confLP_setIntegral_norm_of_ofReal measurableSet_Ioo
-          (fun s hs => confLP_eulerKernel_ofReal γ β t hs) (fun s hs => by
-            have := hs.1; have := hs.2
-            exact mul_nonneg (mul_nonneg (Real.exp_pos _).le (Real.rpow_nonneg (by linarith) _))
-              (Real.rpow_nonneg (by linarith) _))]
-      have hR := kumDec_regularizedHGFun_neg_eq (a := (γ : ℂ)) (b := (β : ℂ)) (by simpa using hc0)
-        (by simp only [sub_re, ofReal_re]; linarith) t
-      rw [show (β : ℂ) - γ = (α : ℂ) by rw [hβγα]; push_cast; ring] at hR
-      have hGγ : Gamma (γ : ℂ) * Gamma (α : ℂ) ≠ 0 :=
-        mul_ne_zero (Gamma_ne_zero_of_re_pos (by simpa using hc0))
-          (Gamma_ne_zero_of_re_pos (by simpa using ha))
-      have hint : ∫ s in Ioo (0:ℝ) 1, kumDec_eulerKernel (γ : ℂ) (β : ℂ) t s =
-          Gamma (γ : ℂ) * Gamma (α : ℂ) * regularizedHGFun {(γ : ℂ)} {(β : ℂ)} (-(t : ℂ)) := by
-        rw [hR, intervalIntegral.integral_of_le zero_le_one, integral_Ioc_eq_integral_Ioo,
-          ← mul_assoc, mul_one_div_cancel hGγ, one_mul]
-      rw [hint, norm_mul, norm_mul, norm_mul, norm_mul]
-      simp only [norm_mul]
-      rw [kumDec_norm_cpow_ofReal ht0, kumDec_norm_cpow_ofReal ht0]
-      simp only [sub_re, ofReal_re, one_re]
-      ring
+      ((volume.restrict (Ioi (0:ℝ))).prod (volume.restrict (Ioo (0:ℝ) 1))) :=
+    confLP_integrable_G hr ha hc0 (sub_add_cancel b a) hν
   have hst : ∀ s ∈ Ioo (0:ℝ) 1, ∫ t in Ioi 0, G t s =
       (s : ℂ) ^ (c - 1) * (1 - (s : ℂ)) ^ (a - 1) *
         (Gamma b * (s : ℂ) ^ (-b) * regularizedHGFun {b} {ν + 1} (-(r : ℂ) / s)) := by
@@ -1945,76 +2063,9 @@ theorem confLP_base {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (ha : 0 < a.re) (hba :
     simp only [hQ, confLP_Q]
     rw [show ν + 1 - b - 1 = ν - b by ring]
     field_simp
-  have hQm := confLP_measurable_Q c a b ν r
-  set ν' := ν.re with hν'
-  have hcpow : ∀ {z : ℂ} (w : ℂ), z ≠ 0 → z ^ w ≠ 0 := fun w hz => by
-    rw [cpow_def_of_ne_zero hz]; exact exp_ne_zero _
   have hQi : Integrable (Function.uncurry Q)
-      ((volume.restrict (Ioo (0:ℝ) 1)).prod (volume.restrict (Ioo (0:ℝ) 1))) := by
-    have hnQ : ∀ ρ ∈ Ioo (0:ℝ) 1, ∀ s ∈ Ioo (0:ℝ) 1,
-        ‖Q s ρ‖ = ‖confLP_Q (γ:ℂ) (α:ℂ) (β:ℂ) (ν':ℂ) r s ρ‖ := by
-      intro ρ hρ s hs
-      rw [hQ, confLP_norm_Q _ _ _ _ _ hs hρ, confLP_norm_Q _ _ _ _ _ hs hρ]
-      simp only [ofReal_re]
-      rfl
-    have hRint : ∀ ρ ∈ Ioo (0:ℝ) 1, ∫ s in Ioo (0:ℝ) 1, confLP_Q (γ:ℂ) (α:ℂ) (β:ℂ) (ν':ℂ) r s ρ =
-        (ρ : ℂ) ^ ((β:ℂ) - 1) * (1 - (ρ : ℂ)) ^ ((ν':ℂ) - β) *
-          (exp (-((r : ℂ) * ρ)) * (Gamma (α:ℂ) * ((r : ℂ) * ρ) ^ (-(α:ℂ)))) := fun ρ hρ =>
-      confLP_integral_Q hr (by rw [hβγα]; push_cast; ring) (by simpa using ha) hρ
-    have hRnorm : ∀ ρ ∈ Ioo (0:ℝ) 1, ∫ s in Ioo (0:ℝ) 1, ‖Q s ρ‖ =
-        ‖∫ s in Ioo (0:ℝ) 1, confLP_Q (γ:ℂ) (α:ℂ) (β:ℂ) (ν':ℂ) r s ρ‖ := by
-      intro ρ hρ
-      rw [setIntegral_congr_fun measurableSet_Ioo (hnQ ρ hρ)]
-      refine confLP_setIntegral_norm_of_ofReal measurableSet_Ioo
-        (fun s hs => confLP_Q_ofReal γ α β ν' r hs hρ) (fun s hs => ?_)
-      have := hs.1; have := hs.2; have := hρ.1; have := hρ.2
-      positivity
-    refine (integrable_prod_iff' hQm.aestronglyMeasurable).mpr ⟨?_, ?_⟩
-    · filter_upwards [ae_restrict_mem measurableSet_Ioo] with ρ hρ
-      have hρc : (ρ:ℂ) ≠ 0 := ofReal_ne_zero.mpr hρ.1.ne'
-      have h1ρ : (1 - (ρ:ℂ)) ≠ 0 := by
-        rw [sub_ne_zero]; intro h; have := congrArg re h; simp at this; linarith [hρ.2]
-      have hrρ : (r:ℂ) * ρ ≠ 0 := mul_ne_zero (ofReal_ne_zero.mpr hr.ne') hρc
-      have hne : ∫ s in Ioo (0:ℝ) 1, confLP_Q (γ:ℂ) (α:ℂ) (β:ℂ) (ν':ℂ) r s ρ ≠ 0 := by
-        rw [hRint ρ hρ]
-        exact mul_ne_zero (mul_ne_zero (hcpow _ hρc) (hcpow _ h1ρ)) (mul_ne_zero (exp_ne_zero _)
-          (mul_ne_zero (Gamma_ne_zero_of_re_pos (by simpa using ha)) (hcpow _ hrρ)))
-      have hint := confLP_integrableOn_of_ne_zero hne
-      refine hint.norm.mono' ((hQm.comp (measurable_id.prodMk measurable_const)).aestronglyMeasurable) ?_
-      filter_upwards [ae_restrict_mem measurableSet_Ioo] with s hs
-      exact (hnQ ρ hρ s hs).le
-    · have hB := Complex.betaIntegral_convergent (u := ((γ : ℝ) : ℂ))
-        (v := ((ν' - β + 1 : ℝ) : ℂ)) (by simpa using hc0) (by
-          simp only [ofReal_re]
-          have : (ν + 1 - b).re = ν' - β + 1 := by simp [hν', hβ]; ring
-          linarith)
-      have hB' := (intervalIntegrable_iff_integrableOn_Ioo_of_le zero_le_one).mp hB.norm
-      refine (hB'.const_mul (‖Gamma (α:ℂ)‖ * r ^ (-α))).mono'
-        hQm.aestronglyMeasurable.norm.prod_swap.integral_prod_right' ?_
-      filter_upwards [ae_restrict_mem measurableSet_Ioo] with ρ hρ
-      rw [Real.norm_of_nonneg (integral_nonneg fun _ => norm_nonneg _)]
-      simp only [Function.uncurry_apply_pair]
-      rw [hRnorm ρ hρ, hRint ρ hρ]
-      have h1 : (1 : ℂ) - ρ = ((1 - ρ : ℝ) : ℂ) := by push_cast; ring
-      have hrρ : (r : ℂ) * ρ = ((r * ρ : ℝ) : ℂ) := by push_cast; ring
-      have h1ρ : (0:ℝ) < 1 - ρ := by linarith [hρ.2]
-      rw [h1, hrρ]
-      simp only [norm_mul, kumDec_norm_cpow_ofReal hρ.1, kumDec_norm_cpow_ofReal h1ρ,
-        kumDec_norm_cpow_ofReal (mul_pos hr hρ.1), Complex.norm_exp]
-      simp only [sub_re, ofReal_re, one_re, neg_re]
-      rw [show ν' - β + 1 - 1 = ν' - β by ring, Real.mul_rpow hr.le hρ.1.le]
-      have he : Real.exp (-(r * ρ)) ≤ 1 := Real.exp_le_one_iff.mpr (by nlinarith [hρ.1])
-      have hpow : ρ ^ (β - 1) * ρ ^ (-α) = ρ ^ (γ - 1) := by
-        rw [← Real.rpow_add hρ.1, hβγα]; ring_nf
-      have hρn : (0:ℝ) ≤ ρ ^ (γ - 1) * (1 - ρ) ^ (ν' - β) := by
-        have := hρ.1; positivity
-      calc ρ ^ (β - 1) * (1 - ρ) ^ (ν' - β) * (Real.exp (-(r * ρ)) *
-            (‖Gamma (α:ℂ)‖ * (r ^ (-α) * ρ ^ (-α))))
-          = (‖Gamma (α:ℂ)‖ * r ^ (-α)) * (ρ ^ (γ - 1) * (1 - ρ) ^ (ν' - β)) *
-              Real.exp (-(r * ρ)) := by rw [← hpow]; ring
-        _ ≤ (‖Gamma (α:ℂ)‖ * r ^ (-α)) * (ρ ^ (γ - 1) * (1 - ρ) ^ (ν' - β)) * 1 := by
-            gcongr
-        _ = _ := mul_one _
+      ((volume.restrict (Ioo (0:ℝ) 1)).prod (volume.restrict (Ioo (0:ℝ) 1))) :=
+    confLP_integrable_Q hr ha hc0 hνb (sub_add_cancel b a)
   have hcab : c + a = b := by rw [hc]; ring
   have hνac : 0 < (ν + 1 - a - c).re := by
     rw [show ν + 1 - a - c = ν + 1 - b by rw [hc]; ring]; exact hνb
@@ -2123,7 +2174,7 @@ theorem confLP_of_strip {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (hb : 0 < b.re)
         intro y hy
         have ht0 : (0:ℝ) < t := ht
         simp only [hΦ, norm_mul]
-        rw [kumDec_norm_cpow_ofReal ht0]
+        rw [norm_cpow_eq_rpow_re_of_pos ht0]
         simp only [sub_re, one_re]
         refine mul_le_mul (mul_le_mul_of_nonneg_left (hy t ht0.le) (by positivity))
           (hKF t ht0) (norm_nonneg _) (by
@@ -2160,12 +2211,6 @@ theorem confLP_of_strip {a b ν : ℂ} {r : ℝ} (hr : 0 < r) (hb : 0 < b.re)
   exact hfin
 
 
-/-- `1/Γ(s) = s/Γ(s+1)` for every `s` (with `1/Γ = 0` at the poles). -/
-theorem confLP_recip_Gamma_eq (s : ℂ) : (Gamma s)⁻¹ = s * (Gamma (s + 1))⁻¹ := by
-  rcases eq_or_ne s 0 with rfl | hs
-  · simp
-  · rw [Complex.Gamma_add_one s hs, mul_inv, ← mul_assoc, mul_inv_cancel₀ hs, one_mul]
-
 /-- The contiguous relation `𝐌(a,b,z) = (b-a) 𝐌(a,b+1,z) + a 𝐌(a+1,b+1,z)`, for all
 parameters. -/
 theorem confLP_contiguous_b (a b z : ℂ) :
@@ -2178,7 +2223,7 @@ theorem confLP_contiguous_b (a b z : ℂ) :
   refine tsum_congr fun n => ?_
   have hp : a * poch (a + 1) n = poch a n * (a + n) := by
     rw [← poch_succ_left, poch_succ]
-  rw [confLP_recip_Gamma_eq (b + n), show b + n + 1 = b + 1 + n by ring]
+  rw [one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (b + n), show b + n + 1 = b + 1 + n by ring]
   linear_combination (-(z ^ n / n.factorial * (Gamma (b + 1 + n))⁻¹)) * hp
 
 /-- The contiguous relation `𝐌(A-1,B-1,x) = (B-1) 𝐌(A,B,x) - (B-A) x 𝐌(A,B+1,x)`, for all
@@ -2197,7 +2242,7 @@ theorem confLP_contiguous_down (A B x : ℂ) :
   have hu0 : u 0 = 0 := by
     simp only [hu, hT, poch_zero, pow_zero, Nat.factorial_zero, Nat.cast_one, div_one, one_mul,
       CharP.cast_eq_zero, add_zero]
-    rw [confLP_recip_Gamma_eq (B - 1), sub_add_cancel]
+    rw [one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (B - 1), sub_add_cancel]
     ring
   have husucc : ∀ n : ℕ, u (n + 1) = -(B - A) * x * T A (B + 1) n := by
     intro n
@@ -2206,7 +2251,8 @@ theorem confLP_contiguous_down (A B x : ℂ) :
       rw [poch_succ_left, sub_add_cancel]
     rw [hp1, poch_succ, Nat.factorial_succ, pow_succ]
     push_cast
-    rw [show B - 1 + ((n : ℂ) + 1) = B + n by ring, confLP_recip_Gamma_eq (B + n),
+    rw [show B - 1 + ((n : ℂ) + 1) = B + n by ring,
+      one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (B + n),
       show B + (n : ℂ) + 1 = B + 1 + n by ring, show B + ((n : ℂ) + 1) = B + 1 + n by ring]
     have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
     have hn : (n : ℂ) + 1 ≠ 0 := by exact_mod_cast n.succ_ne_zero
@@ -2479,8 +2525,9 @@ theorem bessel_kummerU {a b ν x : ℂ} (hx : 0 < x.re) (hxi : x.im = 0)
   obtain ⟨CL, hCL⟩ := cfInt_laplace_rpow_le (r := σ) (p := p) hν1 (by rw [hp]; linarith)
   have hnf : ∀ s : ℝ, 0 < s → ‖f s‖ = s ^ (α - 1) * (1 + s) ^ (β - α - 1) := by
     intro s hs
-    rw [hf, norm_mul, kumDec_norm_cpow_ofReal hs,
-      show (1 : ℂ) + s = ((1 + s : ℝ) : ℂ) by push_cast; ring, kumDec_norm_cpow_ofReal (by linarith)]
+    rw [hf, norm_mul, norm_cpow_eq_rpow_re_of_pos hs,
+      show (1 : ℂ) + s = ((1 + s : ℝ) : ℂ) by push_cast; ring,
+      norm_cpow_eq_rpow_re_of_pos (by linarith)]
     simp [hα, hβ]
   have hKb : ∀ t : ℝ, 0 < t → ‖K t‖ ≤ CK * (t ^ σ * (1 + t) ^ (-p)) := by
     intro t ht
@@ -3201,6 +3248,7 @@ theorem regularizedGaussHG_self_right (a c : ℂ) {w : ℂ} (hw : w ∈ cutPlane
     show c - a - c = -a by ring]
   exact hw
 
+/-- For real `t ≥ 0`, `-t` lies in the cut plane `ℂ \ [1, ∞)`. -/
 theorem neg_ofReal_mem_cutPlane {t : ℝ} (ht : 0 ≤ t) : (-(t : ℂ)) ∈ cutPlane := by
   change 1 - -(t : ℂ) ∈ slitPlane
   rw [sub_neg_eq_add]
@@ -3210,6 +3258,8 @@ theorem neg_ofReal_mem_cutPlane {t : ℝ} (ht : 0 ≤ t) : (-(t : ℂ)) ∈ cutP
 def kummerUGaussKernel (a b c z : ℂ) (t : ℝ) : ℂ :=
   exp (-z * t) * (t : ℂ) ^ (c - 1) * regularizedGaussHG a (a - b + 1) c (-(t : ℂ))
 
+/-- For `Re a, Re c, Re z > 0`, `U(a,b,z) = z^{c-a} ∫₀^∞ e^{-zt} t^{c-1} ₂F̃₁(a, a-b+1; c; -t) dt`,
+with the integrand integrable (DLMF 13.4.8 for `Re a > 0`). -/
 theorem kummerU_gauss_of_re_pos {a b c z : ℂ} (ha : 0 < a.re) (hc : 0 < c.re) (hz : 0 < z.re) :
     IntegrableOn (kummerUGaussKernel a b c z) (Ioi 0) ∧
       kummerU a b z = z ^ (c - a) * ∫ t : ℝ in Ioi 0, kummerUGaussKernel a b c z t := by
@@ -3576,6 +3626,8 @@ theorem cfInt_norm_recip_add_le {z : ℂ} (hz : z ∈ slitPlane) :
     inv_mul_eq_div, div_le_iff₀ hpos]
   linarith
 
+/-- For `-Re b < n < 1 + Re(a-b)` and `z` in the slit plane, `M̃(a,b,-t) t^{b+n-1}/(t+z)` is
+integrable on `(0, ∞)`. -/
 theorem cfInt_integrableOn_stieltjes {a b z : ℂ} {n : ℕ} (hz : z ∈ slitPlane)
     (h0 : -b.re < n) (h1 : (n : ℝ) < 1 + (a - b).re) :
     IntegrableOn (fun t : ℝ => regularizedHGFun {a} {b} (-(t : ℂ)) * (t : ℂ) ^ (b + n - 1) /
@@ -3593,11 +3645,13 @@ theorem cfInt_integrableOn_stieltjes {a b z : ℂ} {n : ℕ} (hz : z ∈ slitPla
   simp only [div_eq_mul_inv]
   ring
 
+/-- `∫₀^∞ e^{-ws} ds = 1/w` for `Re w > 0`. -/
 theorem cfInt_integral_exp_Ioi {w : ℂ} (hw : 0 < w.re) :
     ∫ s : ℝ in Ioi 0, exp (-w * s) = w⁻¹ := by
   rw [integral_exp_mul_complex_Ioi (by simpa using hw) 0]
   simp [div_neg, neg_div]
 
+/-- `∫₀^∞ |e^{-ws}| ds = 1/Re w` for `Re w > 0`. -/
 theorem cfInt_integral_norm_exp_Ioi {w : ℂ} (hw : 0 < w.re) :
     ∫ s : ℝ in Ioi 0, ‖exp (-w * s)‖ = (w.re)⁻¹ := by
   have h := cfInt_integral_exp_Ioi (w := (w.re : ℂ)) (by simpa using hw)
@@ -3704,6 +3758,7 @@ theorem cfInt_stieltjes_zero_of_re_pos {a b z : ℂ} (hz : 0 < z.re) (hb : 0 < b
         rw [hK, show 1 + a - b = a - b + 1 by ring]
         linear_combination (-(Gamma (a - b + 1) * kummerU (a - b + 1) (2 - b) z)) * hzz
 
+/-- For `z` in the slit plane and real `t ≥ 0`, `t + z ≠ 0`. -/
 theorem cfInt_add_ne_zero {z : ℂ} (hz : z ∈ slitPlane) {t : ℝ} (ht : 0 ≤ t) : (t : ℂ) + z ≠ 0 := by
   obtain ⟨δ, hδ, hδb⟩ := exists_forall_le_norm_add_of_mem_slitPlane hz
   intro h
@@ -3999,7 +4054,7 @@ theorem confLP_gauss_bound (a b : ℂ) : ∃ C m : ℝ, 0 ≤ m ∧ ∀ t : ℝ,
   have e : exp (-(t : ℂ) ^ 2) * (t : ℂ) ^ (2 * b - 2) * regularizedHGFun {a} {b} ((t : ℂ) ^ 2) =
       (t : ℂ) ^ (2 * b - 2) * regularizedHGFun {b - a} {b} (-((t ^ 2 : ℝ) : ℂ)) := by
     rw [← hk]; ring
-  rw [e, norm_mul, kumDec_norm_cpow_ofReal ht]
+  rw [e, norm_mul, norm_cpow_eq_rpow_re_of_pos ht]
   simp only [sub_re, mul_re, re_ofNat, im_ofNat, zero_mul, sub_zero]
   have h2 : (1 + t ^ 2) ^ (-γ) ≤ 2 ^ |γ| * (1 + t ^ (2 * |γ|)) := by
     calc (1 + t ^ 2) ^ (-γ) ≤ (1 + t ^ 2) ^ |γ| :=
@@ -4339,9 +4394,11 @@ theorem confLP_gauss_differentiableOn {a b : ℂ} (hb : (1 / 2 : ℝ) < b.re) :
     dsimp only [F]
     ring
 
-/-- **DLMF 13.10.6** (proof). -/
-theorem confLP_gauss {a b z : ℂ} (hb : (1 / 2 : ℝ) < b.re) (hz : 0 < z.re) :
-    ∫ t : ℝ in Ioi 0,
+/-- A Gaussian-weighted Laplace transform of `𝐌`; it converges for `0 < Re z`.
+It is placed after the Stieltjes section because its proof uses 13.4.8. -/
+@[dlmf 13.10.E6]
+theorem gauss_regularizedHGFun {a b z : ℂ} (hb : (1 / 2 : ℝ) < b.re) (hz : 0 < z.re) :
+    ∫ t : ℝ in Set.Ioi 0,
         exp (-z * t - (t : ℂ) ^ 2) * (t : ℂ) ^ (2 * b - 2) *
           regularizedHGFun {a} {b} ((t : ℂ) ^ 2) =
       (1 / 2) * (π : ℂ) ^ (-(1 / 2 : ℂ)) * Gamma (b - 1 / 2) *
@@ -4388,16 +4445,5 @@ theorem confLP_gauss {a b z : ℂ} (hb : (1 / 2 : ℝ) < b.re) (hz : 0 < z.re) :
     (by change 0 < ((1:ℝ) : ℂ).re; simp) hfreq hz
 
 end GaussTransform
-
-/-- A Gaussian-weighted Laplace transform of `𝐌`; it converges for `0 < Re z`.
-It is placed after the Stieltjes section because its proof uses 13.4.8. -/
-@[dlmf 13.10.E6]
-theorem gauss_regularizedHGFun {a b z : ℂ} (hb : (1 / 2 : ℝ) < b.re) (hz : 0 < z.re) :
-    ∫ t : ℝ in Set.Ioi 0,
-        exp (-z * t - (t : ℂ) ^ 2) * (t : ℂ) ^ (2 * b - 2) *
-          regularizedHGFun {a} {b} ((t : ℂ) ^ 2) =
-      (1 / 2) * (π : ℂ) ^ (-(1 / 2 : ℂ)) * Gamma (b - 1 / 2) *
-        kummerU (b - 1 / 2) (a + 1 / 2) (z ^ 2 / 4) :=
-  confLP_gauss hb hz
 
 end DLMF.Confluent

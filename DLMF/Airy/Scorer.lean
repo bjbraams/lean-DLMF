@@ -127,11 +127,13 @@ theorem hasFPowerSeriesOnBall_scorerHi :
     simp only [scorerHi, FormalMultilinearSeries.sum, ofScalars_apply_eq, smul_eq_mul]
   rwa [he] at h
 
+/-- Every complex number lies in the ball of infinite radius about `0`. -/
 theorem mem_eball_top (z : ℂ) : z ∈ Metric.eball (0 : ℂ) ⊤ := by simp
 /-- Hi is entire. -/
 theorem differentiable_scorerHi : Differentiable ℂ scorerHi := fun z =>
   (hasFPowerSeriesOnBall_scorerHi.analyticAt_of_mem (mem_eball_top z)).differentiableAt
 
+/-- The second Maclaurin coefficient of `Hi` is `1/(2π)`. -/
 theorem scorerHiCoeff_two : scorerHiCoeff 2 = 1 / (2 * π) := by
   simp only [scorerHiCoeff]
   norm_num
@@ -177,24 +179,19 @@ theorem exp_neg_eps_cube {ε : ℝ} (hε : ε = 1 ∨ ε = -1) : exp (-ε * (2 *
 
 end HiSeries
 
-/-- Hi is entire, DLMF §9.12(i). -/
-theorem scorerHi_entire  :
-    Differentiable ℂ scorerHi := by
-  exact differentiable_scorerHi
-
 /-- Gi is entire, DLMF §9.12(i). -/
 theorem scorerGi_entire  :
     Differentiable ℂ scorerGi := by
   exact differentiable_airyBi.sub differentiable_scorerHi
 
-/-- scorerHi ode (DLMF 9.12.1). -/
+/-- `Hi` solves the inhomogeneous Airy equation `w'' = z w + 1/π` (DLMF 9.12.1). -/
 @[dlmf 9.12.E1]
 theorem scorerHi_ode  :
     IsScorerSol scorerHi scorerHiDeriv := by
   exact fun z =>
     ⟨hasDerivAt_scorerHi z, hasDerivAt_scorerHiDeriv z⟩
 
-/-- scorerGi ode (DLMF 9.12.3). -/
+/-- `-Gi` solves `w'' = z w + 1/π`, that is, `Gi'' = z Gi - 1/π` (DLMF 9.12.3). -/
 @[dlmf 9.12.E3]
 theorem scorerGi_ode  :
     IsScorerSol (fun z => -scorerGi z) (fun z => -scorerGiDeriv z) := by
@@ -206,7 +203,7 @@ theorem scorerGi_ode  :
   exact ((hasDerivAt_airyBiDeriv z).sub (hasDerivAt_scorerHiDeriv z)).neg.congr_deriv
     (by simp only [scorerGi]; ring)
 
-/-- scorerHi rotated ode (DLMF 9.12.3). -/
+/-- For `ε = ±1`, `e^{-2πiε/3} Hi(z e^{-2πiε/3})` solves `w'' = z w + 1/π` (DLMF 9.12.3). -/
 @[dlmf 9.12.E3]
 theorem scorerHi_rotated_ode {ε : ℝ} (hε : ε = 1 ∨ ε = -1) :
     IsScorerSol (fun z => exp (-ε * (2 * π * I / 3)) * scorerHi (z * exp (-ε * (2 * π * I / 3))))
@@ -226,9 +223,11 @@ theorem scorerHi_rotated_ode {ε : ℝ} (hε : ε = 1 ∨ ε = -1) :
   refine ⟨e1.congr_deriv (by ring), e2.congr_deriv ?_⟩
   linear_combination (z * ω * scorerHi (z * ω) + 1 / π) * h3
 
-/-- scorer general solution (DLMF 9.12.2). -/
+/-- Every solution of `w'' = z w + 1/π` is a particular solution plus a combination of two
+independent Airy solutions (DLMF 9.12.2). -/
 @[dlmf 9.12.E2]
-theorem scorer_general_solution {w w' p p' f f' g g' : ℂ → ℂ} (hw : IsScorerSol w w') (hp : IsScorerSol p p')
+theorem scorer_general_solution {w w' p p' f f' g g' : ℂ → ℂ} (hw : IsScorerSol w w')
+    (hp : IsScorerSol p p')
     (hf : IsAirySol f f') (hg : IsAirySol g g') (hind : f 0 * g' 0 - f' 0 * g 0 ≠ 0) :
     ∃ a b : ℂ, ∀ z, w z = a * f z + b * g z + p z := by
   set D := f 0 * g' 0 - f' 0 * g 0
@@ -245,7 +244,7 @@ theorem scorer_general_solution {w w' p p' f f' g g' : ℂ → ℂ} (hw : IsScor
     (by field_simp; simp only [u0, u1, D]; ring) z
   linear_combination h
 
-/-- scorer zero (DLMF 9.12.6). -/
+/-- `Gi(0) = Hi(0)/2 = Bi(0)/3 = 1/(3^{7/6} Γ(2/3))` (DLMF 9.12.6). -/
 @[dlmf 9.12.E6]
 theorem scorer_zero  :
     scorerGi 0 = scorerHi 0 / 2 ∧ scorerGi 0 = airyBi 0 / 3 ∧
@@ -301,7 +300,7 @@ theorem scorerHiDeriv_zero : scorerHiDeriv 0 = scorerHiCoeff 1 := by
   simp only [Nat.cast_zero, zero_add, one_mul, pow_zero, mul_one] at h'
   exact h.unique h'
 
-/-- scorerDeriv zero (DLMF 9.12.7). -/
+/-- `Gi'(0) = Hi'(0)/2 = Bi'(0)/3 = 1/(3^{5/6} Γ(1/3))` (DLMF 9.12.7). -/
 @[dlmf 9.12.E7]
 theorem scorerDeriv_zero  :
     scorerGiDeriv 0 = scorerHiDeriv 0 / 2 ∧ scorerGiDeriv 0 = airyBiDeriv 0 / 3 ∧
@@ -350,18 +349,22 @@ theorem scorerDeriv_zero  :
 def IsAiryInhomSol (c : ℂ) (w w' : ℂ → ℂ) : Prop :=
   ∀ z, HasDerivAt w (w' z) z ∧ HasDerivAt w' (z * w z + c) z
 
+/-- A solution of the Airy equation solves the inhomogeneous equation with forcing `0`. -/
 theorem IsAiryInhomSol.of_airy {w w' : ℂ → ℂ} (h : IsAirySol w w') : IsAiryInhomSol 0 w w' :=
   fun z => ⟨(h z).1, (h z).2.congr_deriv (by ring)⟩
 
+/-- The sum of solutions with forcings `c` and `d` solves the equation with forcing `c + d`. -/
 theorem IsAiryInhomSol.add {c d : ℂ} {f f' g g' : ℂ → ℂ} (hf : IsAiryInhomSol c f f')
     (hg : IsAiryInhomSol d g g') :
     IsAiryInhomSol (c + d) (fun z => f z + g z) (fun z => f' z + g' z) := fun z =>
   ⟨(hf z).1.add (hg z).1, ((hf z).2.add (hg z).2).congr_deriv (by ring)⟩
 
+/-- Multiplying a solution with forcing `c` by `a` gives a solution with forcing `a c`. -/
 theorem IsAiryInhomSol.const_mul {c : ℂ} (a : ℂ) {f f' : ℂ → ℂ} (hf : IsAiryInhomSol c f f') :
     IsAiryInhomSol (a * c) (fun z => a * f z) (fun z => a * f' z) := fun z =>
   ⟨(hf z).1.const_mul a, ((hf z).2.const_mul a).congr_deriv (by ring)⟩
 
+/-- The forcing constant of an inhomogeneous Airy solution may be rewritten by an equality. -/
 theorem IsAiryInhomSol.congr_const {c d : ℂ} {f f' : ℂ → ℂ} (hf : IsAiryInhomSol c f f')
     (h : c = d) : IsAiryInhomSol d f f' := h ▸ hf
 
@@ -410,6 +413,8 @@ lemma airyWronskian3_eq {c : ℂ} {f f' g g' h h' : ℂ → ℂ} (hf : IsAiryInh
   simp only [airyWronskian3, df, dg, dh, (hf z).2.deriv, (hg z).2.deriv, (hh z).2.deriv]
   ring
 
+/-- For a cube root of unity `ν`, `t ↦ Ai(t ν)` (with derivative `ν Ai'(t ν)`) solves the Airy
+equation. -/
 theorem isAirySol_airyAi_mul {ν : ℂ} (hν : ν ^ 3 = 1) :
     IsAirySol (fun t => airyAi (t * ν)) (fun t => ν * airyAiDeriv (t * ν)) := by
   have h := isAirySol_rotated hν
@@ -423,6 +428,7 @@ theorem hasDerivAt_primitive {f : ℂ → ℂ} (hf : Differentiable ℂ f) (z : 
     funext w; simp [primitive, lineIntegral]
   rw [he]; exact Complex.hasDerivAt_mul_integral_comp_mul hf z
 
+/-- The primitive `∫₀^z f` vanishes at `z = 0`. -/
 theorem primitive_zero (f : ℂ → ℂ) : primitive f 0 = 0 := by simp [primitive, lineIntegral]
 
 /-- `Bi(0) = √3 Ai(0)`. -/
@@ -434,35 +440,39 @@ theorem airyBiDeriv_zero_eq : airyBiDeriv 0 = -(Real.sqrt 3 : ℂ) * airyAiDeriv
   simp only [airyBiDeriv, airyAiDeriv, airyFDeriv_zero, mul_zero, zero_add, zero_sub]
   ring
 
-theorem exp_neg_two_pi_I_div_three' : exp (-2 * π * I / 3) = -1 / 2 - (Real.sqrt 3 / 2 : ℝ) * I := by
+/-- `e^{-2πi/3} = -1/2 - (√3/2) i`, with the exponent written as `-2πi/3`. -/
+theorem exp_neg_two_pi_I_div_three' :
+    exp (-2 * π * I / 3) = -1 / 2 - (Real.sqrt 3 / 2 : ℝ) * I := by
   rw [show (-2 * π * I / 3 : ℂ) = -(2 * π * I / 3) by ring, exp_neg_two_pi_I_div_three]
 
+/-- `e^{-πi/3} = 1/2 - (√3/2) i`, with the exponent written as `-πi/3`. -/
 theorem exp_neg_pi_I_div_three' : exp (-π * I / 3) = (1 / 2 : ℂ) - (Real.sqrt 3 / 2 : ℝ) * I := by
   rw [show (-π * I / 3 : ℂ) = -(π * I / 3) by ring, exp_neg_pi_I_div_three]
 
-theorem sqrt_three_cube : ((Real.sqrt 3 : ℝ) : ℂ) ^ 3 = 3 * (Real.sqrt 3 : ℝ) := by
-  rw [pow_succ, sqrt_three_sq]
-
-theorem sqrt_three_four : ((Real.sqrt 3 : ℝ) : ℂ) ^ 4 = 9 := by
-  rw [show 4 = 2 * 2 by rfl, pow_mul, sqrt_three_sq]; norm_num
-
+/-- `Hi(0) = (2/√3) Ai(0)`, written as `(2√3/3) Ai(0)`. -/
 theorem scorerHi_zero_eq : scorerHi 0 = 2 * (Real.sqrt 3 : ℂ) / 3 * airyAi 0 := by
   have h1 := scorer_zero.1
   have h2 := scorer_zero.2.1
   rw [airyBi_zero_eq] at h2
   linear_combination -2 * h1 + 2 * h2
 
+/-- `Hi'(0) = -(2/√3) Ai'(0)`, written as `-(2√3/3) Ai'(0)`. -/
 theorem scorerHiDeriv_zero_eq : scorerHiDeriv 0 = -(2 * (Real.sqrt 3 : ℂ) / 3) * airyAiDeriv 0 := by
   have h1 := scorerDeriv_zero.1
   have h2 := scorerDeriv_zero.2.1
   rw [airyBiDeriv_zero_eq] at h2
   linear_combination -2 * h1 + 2 * h2
 
+/-- `√3 ^ 4 = 9` in `ℂ`, for the `sqrt3_ring` normalization. -/
+private lemma sqrt_three_pow_four : ((Real.sqrt 3 : ℝ) : ℂ) ^ 4 = 9 := by
+  rw [show 4 = 2 * 2 by rfl, pow_mul, sqrt_three_sq]; norm_num
+
 /-- Normalize polynomial identities in `√3` and `i`. -/
 macro "sqrt3_ring" : tactic =>
-  `(tactic| (ring_nf; simp only [sqrt_three_sq, sqrt_three_cube, sqrt_three_four, I_sq,
-    I_pow_three]; ring_nf))
+  `(tactic| (ring_nf; simp only [sqrt_three_sq, sqrt_three_pow_three_complex,
+    sqrt_three_pow_four, I_sq, I_pow_three]; ring_nf))
 
+/-- For `ε = ±1`, the values of `e^{±2πiε/3}`, `e^{-πiε/3}` and `e^{-πiε/6}` in Cartesian form. -/
 theorem exp_eps_values {ε : ℝ} (hε : ε = 1 ∨ ε = -1) :
     exp (ε * (2 * π * I / 3)) = -1 / 2 + ε * (Real.sqrt 3 / 2 : ℝ) * I ∧
     exp (-ε * (2 * π * I / 3)) = -1 / 2 - ε * (Real.sqrt 3 / 2 : ℝ) * I ∧
@@ -478,7 +488,7 @@ theorem exp_eps_values {ε : ℝ} (hε : ε = 1 ∨ ε = -1) :
       exp_pi_I_div_six]
     refine ⟨?_, ?_, ?_, ?_⟩ <;> ring
 
-/-- scorerGi variation (DLMF 9.12.4). -/
+/-- Variation of parameters: `Gi(z) = Bi(z) (1/3 - ∫₀^z Ai) + Ai(z) ∫₀^z Bi` (DLMF 9.12.4). -/
 @[dlmf 9.12.E4]
 theorem scorerGi_variation (z : ℂ) :
     scorerGi z = airyBi z * (1 / 3 - primitive airyAi z) + airyAi z * primitive airyBi z := by
@@ -501,7 +511,7 @@ theorem scorerGi_variation (z : ℂ) :
   · simp only [primitive_zero, sub_zero, mul_zero, add_zero]
     rw [scorerDeriv_zero.2.1]; ring
 
-/-- scorerHi variation (DLMF 9.12.5). -/
+/-- Variation of parameters: `Hi(z) = Bi(z) (2/3 + ∫₀^z Ai) - Ai(z) ∫₀^z Bi` (DLMF 9.12.5). -/
 @[dlmf 9.12.E5]
 theorem scorerHi_variation (z : ℂ) :
     scorerHi z = airyBi z * (2 / 3 + primitive airyAi z) - airyAi z * primitive airyBi z := by
@@ -557,13 +567,13 @@ theorem scorerHi_rotated_standard_system (z : ℂ) {ε : ℝ} (hε : ε = 1 ∨ 
     rw [← hW]; ring]
   simp [hp, Complex.exp_ne_zero]
 
-/-- scorerGi add scorerHi (DLMF 9.12.11). -/
+/-- `Gi(z) + Hi(z) = Bi(z)` (DLMF 9.12.11). -/
 @[dlmf 9.12.E11]
 theorem scorerGi_add_scorerHi (z : ℂ) :
     scorerGi z + scorerHi z = airyBi z := by
   simp [scorerGi]
 
-/-- scorerGi rotations (DLMF 9.12.12). -/
+/-- `Gi(z) = (e^{πi/3}/2) Hi(z e^{-2πi/3}) + (e^{-πi/3}/2) Hi(z e^{2πi/3})` (DLMF 9.12.12). -/
 @[dlmf 9.12.E12]
 theorem scorerGi_rotations (z : ℂ) :
     scorerGi z = exp (π * I / 3) / 2 * scorerHi (z * exp (-2 * π * I / 3)) +
@@ -578,23 +588,25 @@ theorem scorerGi_rotations (z : ℂ) :
       exp_two_pi_I_div_three]
     push_cast
     ring_nf
-    simp only [sqrt_three_sq, sqrt_three_cube, sqrt_three_four, I_sq, I_pow_three]
+    simp only [sqrt_three_sq, I_sq]
     ring
   refine isAiryInhomSol_scorerGi.eq_of_initial (hR.congr_const hc) ?_ ?_ z
   · simp only [zero_mul]
     rw [scorer_zero.1, exp_pi_I_div_three, exp_neg_pi_I_div_three']; ring
   · simp only [zero_mul]
-    rw [scorerDeriv_zero.1, exp_pi_I_div_three, exp_neg_pi_I_div_three', exp_neg_two_pi_I_div_three',
+    rw [scorerDeriv_zero.1, exp_pi_I_div_three, exp_neg_pi_I_div_three',
+        exp_neg_two_pi_I_div_three',
       exp_two_pi_I_div_three]
     push_cast
     ring_nf
-    simp only [sqrt_three_sq, sqrt_three_cube, sqrt_three_four, I_sq, I_pow_three]
+    simp only [sqrt_three_sq, I_sq]
     ring
 
-/-- scorerGi eq rotated scorerHi (DLMF 9.12.13). -/
+/-- For `ε = ±1`, `Gi(z) = e^{-πiε/3} Hi(z e^{2πiε/3}) + iε Ai(z)` (DLMF 9.12.13). -/
 @[dlmf 9.12.E13]
 theorem scorerGi_eq_rotated_scorerHi (z : ℂ) {ε : ℝ} (hε : ε = 1 ∨ ε = -1) :
-    scorerGi z = exp (-ε * (π * I / 3)) * scorerHi (z * exp (ε * (2 * π * I / 3))) + ε * I * airyAi z := by
+    scorerGi z = exp (-ε * (π * I / 3)) * scorerHi (z * exp (ε * (2 * π * I / 3))) + ε * I *
+        airyAi z := by
   have hε' : -ε = 1 ∨ -ε = -1 := by rcases hε with rfl | rfl <;> simp
   have h1 : exp (ε * (2 * π * I / 3)) ^ 3 = 1 := by
     have := exp_neg_eps_cube hε'; push_cast at this; simpa using this
@@ -609,12 +621,13 @@ theorem scorerGi_eq_rotated_scorerHi (z : ℂ) {ε : ℝ} (hε : ε = 1 ∨ ε =
   refine isAiryInhomSol_scorerGi.eq_of_initial (hR.congr_const hc) ?_ ?_ z
   · simp only [zero_mul]
     rw [scorer_zero.2.1, airyBi_zero_eq, scorerHi_zero_eq, e3]
-    push_cast; sqrt3_ring; try (simp only [hε2, hε3]; ring_nf)
+    push_cast; sqrt3_ring
   · simp only [zero_mul]
     rw [scorerDeriv_zero.2.1, airyBiDeriv_zero_eq, scorerHiDeriv_zero_eq, e3, e1]
-    push_cast; sqrt3_ring; try (simp only [hε2, hε3]; ring_nf)
+    push_cast; sqrt3_ring; try (simp only [hε2]; ring_nf)
 
-/-- scorerHi connection (DLMF 9.12.14). -/
+/-- For `ε = ±1`, `Hi(z) = e^{2πiε/3} Hi(z e^{2πiε/3}) + 2 e^{-πiε/6} Ai(z e^{-2πiε/3})`
+(DLMF 9.12.14). -/
 @[dlmf 9.12.E14]
 theorem scorerHi_connection (z : ℂ) {ε : ℝ} (hε : ε = 1 ∨ ε = -1) :
     scorerHi z = exp (ε * (2 * π * I / 3)) * scorerHi (z * exp (ε * (2 * π * I / 3))) +
@@ -623,8 +636,6 @@ theorem scorerHi_connection (z : ℂ) {ε : ℝ} (hε : ε = 1 ∨ ε = -1) :
   have h1 : exp (ε * (2 * π * I / 3)) ^ 3 = 1 := by
     have := exp_neg_eps_cube hε'; push_cast at this; simpa using this
   have h2 : exp (-ε * (2 * π * I / 3)) ^ 3 = 1 := exp_neg_eps_cube hε
-  have hε2 : (ε : ℂ) ^ 2 = 1 := by rcases hε with rfl | rfl <;> norm_num
-  have hε3 : (ε : ℂ) ^ 3 = ε := by rcases hε with rfl | rfl <;> norm_num
   obtain ⟨e1, e2, -, e4⟩ := exp_eps_values hε
   have hR := ((isAiryInhomSol_scorerHi.rotate h1).const_mul (exp (ε * (2 * π * I / 3)))).add
     ((IsAiryInhomSol.of_airy (isAirySol_airyAi_mul h2)).const_mul (2 * exp (-ε * (π * I / 6))))
@@ -634,10 +645,10 @@ theorem scorerHi_connection (z : ℂ) {ε : ℝ} (hε : ε = 1 ∨ ε = -1) :
   refine isAiryInhomSol_scorerHi.eq_of_initial (hR.congr_const hc) ?_ ?_ z
   · simp only [zero_mul]
     rw [scorerHi_zero_eq, e1, e4]
-    push_cast; sqrt3_ring; try (simp only [hε2, hε3]; ring_nf)
+    push_cast; sqrt3_ring
   · simp only [zero_mul]
     rw [scorerHiDeriv_zero_eq, e1, e2, e4]
-    push_cast; sqrt3_ring; try (simp only [hε2, hε3]; ring_nf)
+    push_cast; sqrt3_ring
 
 /-- Maclaurin coefficient of Gi, DLMF 9.12.15. -/
 def scorerGiCoeff (k : ℕ) : ℂ :=
@@ -712,9 +723,11 @@ theorem hasFPowerSeriesOnBall_scorerGiSeries :
     HasFPowerSeriesOnBall (fun z => ∑' k : ℕ, scorerGiCoeff k * z ^ k)
       (FormalMultilinearSeries.ofScalars ℂ scorerGiCoeff) 0 ⊤ := by
   have hr := radius_ofScalars_eq_top_of_rec3 scorerGiCoeff_rec
-  have h := (FormalMultilinearSeries.ofScalars ℂ scorerGiCoeff).hasFPowerSeriesOnBall (by rw [hr]; simp)
+  have h := (FormalMultilinearSeries.ofScalars ℂ scorerGiCoeff).hasFPowerSeriesOnBall
+      (by rw [hr]; simp)
   rw [hr] at h
-  have he : (FormalMultilinearSeries.ofScalars ℂ scorerGiCoeff).sum = fun z => ∑' k : ℕ, scorerGiCoeff k * z ^ k := by
+  have he : (FormalMultilinearSeries.ofScalars ℂ scorerGiCoeff).sum = fun z =>
+      ∑' k : ℕ, scorerGiCoeff k * z ^ k := by
     funext z
     simp only [FormalMultilinearSeries.sum, FormalMultilinearSeries.ofScalars_apply_eq, smul_eq_mul]
   rwa [he] at h
@@ -766,7 +779,8 @@ theorem scorerGiSeries_eq : (fun z => ∑' k : ℕ, scorerGiCoeff k * z ^ k) = s
     simp only [Nat.cast_zero, zero_add, one_mul, pow_zero, mul_one] at h'
     rw [h.unique h', scorerGiCoeff_one, scorerDeriv_zero.1, scorerHiDeriv_zero]
 
-/-- hasSum scorerGi (DLMF 9.12.15). -/
+/-- Maclaurin series `Gi(z) = 3^{-2/3} π⁻¹ ∑ cos((2k-1)π/3) Γ((k+1)/3) (3^{1/3} z)^k / k!`
+(DLMF 9.12.15). -/
 @[dlmf 9.12.E15]
 theorem hasSum_scorerGi (z : ℂ) :
     HasSum (fun k : ℕ => (3 : ℂ) ^ (-2 / 3 : ℂ) / π * cos ((2 * (k : ℂ) - 1) * π / 3) *
@@ -778,11 +792,13 @@ theorem hasSum_scorerGi (z : ℂ) :
   simp only [scorerGiCoeff]
   ring
 
-/-- hasSum scorerGiDeriv (DLMF 9.12.16). -/
+/-- Maclaurin series `Gi'(z) = 3^{-1/3} π⁻¹ ∑ cos((2k+1)π/3) Γ((k+2)/3) (3^{1/3} z)^k / k!`
+(DLMF 9.12.16). -/
 @[dlmf 9.12.E16]
 theorem hasSum_scorerGiDeriv (z : ℂ) :
     HasSum (fun k : ℕ => (3 : ℂ) ^ (-1 / 3 : ℂ) / π * cos ((2 * (k : ℂ) + 1) * π / 3) *
-      Gamma (((k : ℂ) + 2) / 3) * ((3 : ℂ) ^ (1 / 3 : ℂ) * z) ^ k / k.factorial) (scorerGiDeriv z) := by
+      Gamma (((k : ℂ) + 2) / 3) * ((3 : ℂ) ^ (1 / 3 : ℂ) * z) ^ k /
+          k.factorial) (scorerGiDeriv z) := by
   have h := hasFPowerSeriesOnBall_scorerGiSeries.deriv_ofScalars.hasSum_mul_pow (mem_eball_top z)
   rw [scorerGiSeries_eq] at h
   rw [show scorerGiDeriv z = deriv scorerGi z from rfl]
@@ -798,13 +814,13 @@ theorem hasSum_scorerGiDeriv (z : ℂ) :
   field_simp
   ring
 
-/-- hasSum scorerHi (DLMF 9.12.17). -/
+/-- Maclaurin series `Hi(z) = 3^{-2/3} π⁻¹ ∑ Γ((k+1)/3) (3^{1/3} z)^k / k!` (DLMF 9.12.17). -/
 @[dlmf 9.12.E17]
 theorem hasSum_scorerHi (z : ℂ) :
     HasSum (fun k : ℕ => scorerHiCoeff k * z ^ k) (scorerHi z) := by
   exact hasFPowerSeriesOnBall_scorerHi.hasSum_mul_pow (mem_eball_top z)
 
-/-- hasSum scorerHiDeriv (DLMF 9.12.18). -/
+/-- Maclaurin series `Hi'(z) = 3^{-1/3} π⁻¹ ∑ Γ((k+2)/3) (3^{1/3} z)^k / k!` (DLMF 9.12.18). -/
 @[dlmf 9.12.E18]
 theorem hasSum_scorerHiDeriv (z : ℂ) :
     HasSum (fun k : ℕ => (3 : ℂ) ^ (-1 / 3 : ℂ) / π * Gamma (((k : ℂ) + 2) / 3) *
@@ -885,7 +901,8 @@ theorem integrableOn_pow_mul_exp_cubic (m : ℕ) (z : ℂ) :
     have key : b * t ≤ t ^ 3 / 3 + b ^ 2 + 3 * b := by
       rcases le_or_gt (3 * b) (t ^ 2) with h | h
       · nlinarith
-      · nlinarith [sq_nonneg (b * t - b ^ 2 - 3 * b), sq_nonneg t, mul_pos ht (by linarith : (0:ℝ) < b)]
+      · nlinarith
+          [sq_nonneg (b * t - b ^ 2 - 3 * b), sq_nonneg t, mul_pos ht (by linarith : (0:ℝ) < b)]
     linarith
   calc t ^ m * Real.exp (-(t ^ 3 / 3) + z.re * t)
       ≤ (m ! * Real.exp t) * Real.exp (b ^ 2 + 3 * b + -1 * t - t) :=
@@ -933,7 +950,7 @@ theorem scorerHiCoeff_eq_integral (k : ℕ) :
       (π * k !) := by
   rw [scorerHiCoeff_eq_ofReal, integral_pow_mul_exp_neg_cube]; push_cast; ring
 
-/-- scorerHi exp integral (DLMF 9.12.20). -/
+/-- `Hi(z) = π⁻¹ ∫₀^∞ exp(-t³/3 + z t) dt`, with the integrand integrable (DLMF 9.12.20). -/
 @[dlmf 9.12.E20]
 theorem scorerHi_exp_integral (z : ℂ) :
     IntegrableOn (fun t : ℝ => exp (-(t : ℂ) ^ 3 / 3 + z * t)) (Ioi 0) ∧
@@ -956,7 +973,7 @@ theorem scorerHi_exp_integral (z : ℂ) :
   rw [scorerHiCoeff_eq_integral]
   field_simp
 
-/-- scorerGi exp cos integral (DLMF 9.12.21). -/
+/-- `Gi(z) = -π⁻¹ ∫₀^∞ exp(-t³/3 - z t/2) cos(√3 z t/2 + 2π/3) dt` (DLMF 9.12.21). -/
 @[dlmf 9.12.E21]
 theorem scorerGi_exp_cos_integral (z : ℂ) :
     scorerGi z = -(∫ t : ℝ in Ioi 0, exp (-(t : ℂ) ^ 3 / 3 - z * t / 2) *
@@ -990,14 +1007,16 @@ theorem scorerGi_exp_cos_integral (z : ℂ) :
       exp (-(t : ℂ) ^ 3 / 3 - z * t / 2) * exp (θ * I) by rw [← exp_add]] at e2
   linear_combination (1 / 2 : ℂ) * e1 + (1 / 2 : ℂ) * e2
 
-/-- scorerHi stieltjes integral (DLMF 9.12.22). -/
+/-- For `|arg z| < π/3`,
+`Hi(-z) = 4z²/(3^{3/2} π²) ∫₀^∞ K_{1/3}(t)/(ζ² + t²) dt` with `ζ = (2/3) z^{3/2}` (DLMF 9.12.22). -/
 @[dlmf 9.12.E22]
 theorem scorerHi_stieltjes_integral {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π / 3) :
     scorerHi (-z) = 4 * z ^ 2 / ((3 : ℂ) ^ (3 / 2 : ℂ) * π ^ 2) *
       ∫ t : ℝ in Ioi 0, DLMF.Bessel.besselK (1 / 3) t / (airyZetaComplex z ^ 2 + (t : ℂ) ^ 2) := by
   sorry
 
-/-- scorerGi principalValue (DLMF 9.12.23). -/
+/-- For `x > 0`, `Gi(x) = 4x²/(3^{3/2} π²) ⨍₀^∞ K_{1/3}(t)/(ζ² - t²) dt` (principal value at
+`t = ζ = (2/3) x^{3/2}`) (DLMF 9.12.23). -/
 @[dlmf 9.12.E23]
 theorem scorerGi_principalValue {x : ℝ} (hx : 0 < x) :
     scorerGi x = 4 * (x : ℂ) ^ 2 / ((3 : ℂ) ^ (3 / 2 : ℂ) * π ^ 2) *
@@ -1005,9 +1024,11 @@ theorem scorerGi_principalValue {x : ℝ} (hx : 0 < x) :
         ((airyZeta x : ℂ) ^ 2 - (t : ℂ) ^ 2)) (airyZeta x) := by
   sorry
 
-/-- Barnes contour on a separating vertical line; boundary values are ordinary improper integrals (DLMF 9.12.24). -/
+/-- Mellin–Barnes integral for `Hi` on a vertical line `Re s = σ ∈ (-1, 0)`, for
+`|arg(-z)| < 2π/3`; boundary values are ordinary improper integrals (DLMF 9.12.24). -/
 @[dlmf 9.12.E24]
-theorem scorerHi_mellinBarnes {z : ℂ} (hz0 : z ≠ 0) (hz : |arg (-z)| < 2 * π / 3) {σ : ℝ} (hσ0 : -1 < σ) (hσ1 : σ < 0) :
+theorem scorerHi_mellinBarnes {z : ℂ} (hz0 : z ≠ 0) (hz : |arg (-z)| < 2 * π / 3) {σ : ℝ}
+    (hσ0 : -1 < σ) (hσ1 : σ < 0) :
     HasIntegralWholeLine (fun y : ℝ => Gamma (1 / 3 + ((σ : ℂ) + y * I) / 3) *
       Gamma (-((σ : ℂ) + y * I)) *
         exp (((σ : ℂ) + y * I) * (log (3 : ℂ) / 3 + log (-z))))
@@ -1132,12 +1153,14 @@ theorem scorerAsym_integrableOn_rotate (m : ℕ) (c : ℝ) {θ : ℝ} (hθ : |θ
 noncomputable def scorerAsym_laplace (m : ℕ) (w : ℂ) : ℂ :=
   ∫ t in Ioi (0 : ℝ), cexp (-(w * t)) • ((t : ℂ) ^ m * cexp (-((t : ℂ) ^ 3 / 3)))
 
+/-- `e^{-ct} tᵐ e^{-t³/3}` is integrable on `(0, ∞)` for every real `c`. -/
 theorem scorerAsym_integrableOn_zero (m : ℕ) (c : ℝ) :
     IntegrableOn (fun t : ℝ => Real.exp (-c * t) • ((t : ℂ) ^ m * cexp (-((t : ℂ) ^ 3 / 3))))
       (Ioi 0) := by
   have h := scorerAsym_integrableOn_rotate m c (θ := 0) (by rw [abs_zero]; positivity)
   simpa using h
 
+/-- The Laplace integral `∫₀^∞ e^{-wt} tᵐ e^{-t³/3} dt` is an entire function of `w`. -/
 theorem scorerAsym_differentiable_laplace (m : ℕ) : Differentiable ℂ (scorerAsym_laplace m) :=
   fun w => (differentiableOn_integral_cexp_neg_mul_smul
     (scorerAsym_integrableOn_zero m (w.re - 1))).differentiableAt
@@ -1151,6 +1174,7 @@ theorem scorerAsym_scorerHi_eq (z : ℂ) : π * scorerHi z = scorerAsym_laplace 
   simp only [smul_eq_mul, pow_zero, one_mul]
   rw [← Complex.exp_add]; ring_nf
 
+/-- `π Hi'(z) = L₁(-z)`, the Laplace integral of `t e^{-t³/3}` at `-z`. -/
 theorem scorerAsym_scorerHiDeriv_eq (z : ℂ) : π * scorerHiDeriv z = scorerAsym_laplace 1 (-z) := by
   rw [scorerHiDeriv_exp_integral z, scorerAsym_laplace, mul_div_cancel₀ _
     (ofReal_ne_zero.mpr Real.pi_ne_zero)]
@@ -1220,6 +1244,8 @@ theorem scorerAsym_laplace_rotate (m : ℕ) {θ : ℝ} (hθ : |θ| < π / 6) (w 
 noncomputable def scorerAsym_coeff (n : ℕ) : ℂ :=
   if 3 ∣ n then (-1 / 3 : ℂ) ^ (n / 3) / ((n / 3).factorial : ℂ) else 0
 
+/-- Partial sums of the Taylor series `∑ aₙ tⁿ` of `e^{-t³/3}` up to `3M`, `3M+1` and `3M+2` terms
+equal the partial sums of the exponential series in `-t³/3`. -/
 theorem scorerAsym_sum_coeff (t : ℂ) (M : ℕ) :
     (∑ n ∈ Finset.range (3 * M), t ^ n * scorerAsym_coeff n =
       ∑ k ∈ Finset.range M, (-(t ^ 3 / 3)) ^ k / (k.factorial : ℂ)) ∧
@@ -1297,7 +1323,8 @@ theorem scorerAsym_sub_sum_isBigO (m : ℕ) (θ : ℝ) (N : ℕ) :
   rw [hn] at hb
   simp only [add_re, natCast_re, one_re]
   rw [Real.norm_of_nonneg (Real.rpow_nonneg hr.le _),
-    show (N : ℝ) + ((m : ℝ) + 1) - 1 = ((N + m : ℕ) : ℝ) by push_cast; ring, Real.rpow_natCast, norm_mul,
+    show (N : ℝ) + ((m : ℝ) + 1) - 1 =
+        ((N + m : ℕ) : ℝ) by push_cast; ring, Real.rpow_natCast, norm_mul,
     norm_pow, hnt]
   have h1 : (r ^ 3 / 3) ^ M ≤ r ^ N := by
     calc (r ^ 3 / 3) ^ M ≤ (r ^ 3) ^ M := by
@@ -1342,6 +1369,8 @@ theorem scorerAsym_laplace_expansion (m : ℕ) {α : ℝ} (hα0 : 0 ≤ α) (hα
   exact (h1.sup h2).mono hcov
 
 
+/-- A sum over `n < 3N` of a sequence vanishing at `n ≢ 0 (mod 3)` is the sum over `k < N` of
+its values at `3k`. -/
 theorem scorerAsym_sum_three {g : ℕ → ℂ} (h1 : ∀ k, g (3 * k + 1) = 0) (h2 : ∀ k, g (3 * k + 2) = 0)
     (N : ℕ) : ∑ n ∈ Finset.range (3 * N), g n = ∑ k ∈ Finset.range N, g (3 * k) := by
   induction N with
@@ -1389,11 +1418,13 @@ theorem scorerAsym_laplace_neg_isBigO (m : ℕ) {α : ℝ} (hα0 : 0 ≤ α) (h�
     rw [hpow, one_mul, norm_inv, norm_inv, norm_pow, norm_pow, norm_neg]
 
 
+/-- Eventually in the reflected sector `|arg(-z)| ≤ α`, `z ≠ 0`. -/
 theorem scorerAsym_eventually_ne_zero (α : ℝ) :
     ∀ᶠ z in comap (fun z : ℂ => -z) (airySector α), z ≠ 0 := by
   have h : ∀ᶠ w in airySector α, w ≠ 0 ∧ |arg w| ≤ α := mem_inf_of_right (mem_principal_self _)
   exact (tendsto_comap.eventually h).mono fun z hz => neg_ne_zero.mp hz.1
 
+/-- `(-1)^{3k+j} = (-1)^k (-1)^j`. -/
 theorem scorerAsym_neg_one_pow (k j : ℕ) : (-1 : ℂ) ^ (3 * k + j) = (-1) ^ k * (-1) ^ j := by
   rw [pow_add, pow_mul]; norm_num
 
@@ -1435,18 +1466,8 @@ theorem scorerAsym_scorerHiDeriv_isBigO {α : ℝ} (hα0 : 0 ≤ α) (hα : α <
     have hf : (k.factorial : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
     field_simp
 
-theorem scorerAsym_arg_mul_exp {z : ℂ} (hz : z ≠ 0) {c : ℝ} (h1 : -π < arg z + c)
-    (h2 : arg z + c ≤ π) : arg (z * exp (c * I)) = arg z + c := by
-  conv_lhs => rw [← norm_mul_exp_arg_mul_I z]
-  rw [mul_assoc, ← Complex.exp_add, show (arg z : ℂ) * I + c * I = ((arg z + c : ℝ) : ℂ) * I by
-    push_cast; ring, exp_mul_I]
-  exact arg_mul_cos_add_sin_mul_I (norm_pos_iff.mpr hz) ⟨h1, h2⟩
-
-/-- Rotation by `c` maps the sector `|arg z| ≤ α` into `|arg z| ≤ β` when `|c| + α ≤ β < π`. -/
-theorem scorerAsym_tendsto_rotate {α β c : ℝ} (hc : |c| + α ≤ β) (hβ : β < π) :
-    Tendsto (fun z : ℂ => z * exp (c * I)) (airySector α) (airySector β) := by
-  exact airyRot_tendsto_rotate hc hβ
-
+/-- Rotation by `e^{∓2πi/3}` maps the sector `|arg z| ≤ π/3 - δ` into the reflected sector
+`|arg(-z)| ≤ 2π/3 - δ`. -/
 theorem scorerAsym_tendsto_omega {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π / 3) :
     Tendsto (fun z : ℂ => z * exp (-2 * π * I / 3)) (airySector (π / 3 - δ))
         (comap (fun z : ℂ => -z) (airySector (2 * π / 3 - δ))) ∧
@@ -1461,11 +1482,11 @@ theorem scorerAsym_tendsto_omega {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π / 3) 
       Complex.exp_add, exp_pi_mul_I]; ring
   constructor
   · refine tendsto_comap_iff.mpr ?_
-    have := scorerAsym_tendsto_rotate (α := π / 3 - δ) (β := 2 * π / 3 - δ) (c := π / 3)
+    have := airyRot_tendsto_rotate (α := π / 3 - δ) (β := 2 * π / 3 - δ) (c := π / 3)
       (by rw [abs_of_pos (by positivity)]; linarith) (by linarith)
     exact this.congr fun z => (e1 z).symm
   · refine tendsto_comap_iff.mpr ?_
-    have := scorerAsym_tendsto_rotate (α := π / 3 - δ) (β := 2 * π / 3 - δ) (c := -(π / 3))
+    have := airyRot_tendsto_rotate (α := π / 3 - δ) (β := 2 * π / 3 - δ) (c := -(π / 3))
       (by rw [abs_neg, abs_of_pos (by positivity)]; linarith) (by linarith)
     exact this.congr fun z => (e2 z).symm
 
@@ -1485,6 +1506,7 @@ theorem scorerAsym_scorerGiDeriv_rotations (z : ℂ) :
   refine h.deriv.trans ?_
   simp
 
+/-- The cube roots of unity `e^{±2πi/3}` have norm `1`. -/
 theorem scorerAsym_norm_omega : ‖exp (-2 * π * I / 3)‖ = 1 ∧ ‖exp (2 * π * I / 3)‖ = 1 := by
   constructor
   · rw [show (-2 * π * I / 3 : ℂ) = ((-2 * π / 3 : ℝ) : ℂ) * I by push_cast; ring,
@@ -1492,6 +1514,7 @@ theorem scorerAsym_norm_omega : ‖exp (-2 * π * I / 3)‖ = 1 ∧ ‖exp (2 * 
   · rw [show (2 * π * I / 3 : ℂ) = ((2 * π / 3 : ℝ) : ℂ) * I by push_cast; ring,
       norm_exp_ofReal_mul_I]
 
+/-- The cube roots of unity `e^{±2πi/3}` cube to `1`. -/
 theorem scorerAsym_omega_cube : exp (-2 * π * I / 3) ^ 3 = 1 ∧ exp (2 * π * I / 3) ^ 3 = 1 := by
   constructor
   · rw [show (-2 * π * I / 3 : ℂ) = -(2 * π * I / 3) by ring]; exact omega_recip_cube
@@ -1504,15 +1527,18 @@ theorem scorerAsym_isBigO_recip_pow_mul {l : Filter ℂ} {c : ℂ} (hc : ‖c‖
     rw [one_mul, norm_inv, norm_inv, norm_pow, norm_pow, norm_mul, hc, mul_one])
 
 
+/-- The coefficients of 9.12.12: `e^{πi/3}/2 = -e^{-2πi/3}/2` and `e^{-πi/3}/2 = -e^{2πi/3}/2`. -/
 theorem scorerAsym_rot_coeffs :
-    exp (π * I / 3) / 2 = -exp (-2 * π * I / 3) / 2 ∧ exp (-π * I / 3) / 2 = -exp (2 * π * I / 3) / 2 := by
+    exp (π * I / 3) / 2 = -exp (-2 * π * I / 3) / 2 ∧
+      exp (-π * I / 3) / 2 = -exp (2 * π * I / 3) / 2 := by
   constructor
   · rw [show (-2 * π * I / 3 : ℂ) = π * I / 3 - π * I by ring, Complex.exp_sub, exp_pi_mul_I]
     ring
   · rw [show (2 * π * I / 3 : ℂ) = -π * I / 3 + π * I by ring, Complex.exp_add, exp_pi_mul_I]
     ring
 
-/-- scorerGi asymptotic (DLMF 9.12.25). -/
+/-- `Gi(z) ~ (πz)⁻¹ ∑ (3k)!/(k! (3z³)^k)` as `z → ∞` in `|arg z| ≤ π/3 - δ`, with remainder
+`O(z^{-3N-1})` (DLMF 9.12.25). -/
 @[dlmf 9.12.E25]
 theorem scorerGi_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π / 3) (N : ℕ) :
     IsBigO (comap (fun z : ℂ => z) (airySector (π / 3 - δ)))
@@ -1555,7 +1581,8 @@ theorem scorerGi_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π / 3) (N : 
     rw [show (3 * (N : ℂ) + 1) = ((3 * N + 0 + 1 : ℕ) : ℂ) by push_cast; ring, cpow_neg,
       cpow_natCast]
 
-/-- scorerGiDeriv asymptotic (DLMF 9.12.26). -/
+/-- `Gi'(z) ~ -(πz²)⁻¹ ∑ (3k+1)!/(k! (3z³)^k)` as `z → ∞` in `|arg z| ≤ π/3 - δ`, with
+remainder `O(z^{-3N-2})` (DLMF 9.12.26). -/
 @[dlmf 9.12.E26]
 theorem scorerGiDeriv_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π / 3) (N : ℕ) :
     IsBigO (comap (fun z : ℂ => z) (airySector (π / 3 - δ)))
@@ -1598,7 +1625,8 @@ theorem scorerGiDeriv_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π / 3) 
     rw [show (3 * (N : ℂ) + 2) = ((3 * N + 1 + 1 : ℕ) : ℂ) by push_cast; ring, cpow_neg,
       cpow_natCast]
 
-/-- scorerHi asymptotic (DLMF 9.12.27). -/
+/-- `Hi(z) ~ -(πz)⁻¹ ∑ (3k)!/(k! (3z³)^k)` as `z → ∞` in `|arg(-z)| ≤ 2π/3 - δ`, with
+remainder `O(z^{-3N-1})` (DLMF 9.12.27). -/
 @[dlmf 9.12.E27]
 theorem scorerHi_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < 2 * π / 3) (N : ℕ) :
     IsBigO (comap (fun z : ℂ => -z) (airySector (2 * π / 3 - δ)))
@@ -1611,7 +1639,8 @@ theorem scorerHi_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < 2 * π / 3) (
   rw [show (3 * (N : ℂ) + 1) = ((3 * N + 0 + 1 : ℕ) : ℂ) by push_cast; ring, cpow_neg,
     cpow_natCast]
 
-/-- scorerHiDeriv asymptotic (DLMF 9.12.28). -/
+/-- `Hi'(z) ~ (πz²)⁻¹ ∑ (3k+1)!/(k! (3z³)^k)` as `z → ∞` in `|arg(-z)| ≤ 2π/3 - δ`, with
+remainder `O(z^{-3N-2})` (DLMF 9.12.28). -/
 @[dlmf 9.12.E28]
 theorem scorerHiDeriv_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < 2 * π / 3) (N : ℕ) :
     IsBigO (comap (fun z : ℂ => -z) (airySector (2 * π / 3 - δ)))
@@ -1649,7 +1678,8 @@ theorem integral_pow_mul_exp_cubic_pos (m : ℕ) (x : ℝ) :
     have := (integrableOn_pow_mul_exp_cubic m x).re
     refine this.congr_fun (fun t _ => ?_) measurableSet_Ioi
     beta_reduce
-    rw [RCLike.re_to_complex, show (-(t : ℂ) ^ 3 / 3 + (x : ℂ) * t) = ((-(t ^ 3 / 3) + x * t : ℝ) : ℂ) by push_cast; ring,
+    rw [RCLike.re_to_complex, show (-(t : ℂ) ^ 3 / 3 + (x : ℂ) * t) =
+        ((-(t ^ 3 / 3) + x * t : ℝ) : ℂ) by push_cast; ring,
       ← ofReal_exp, ← ofReal_pow, ← ofReal_mul, ofReal_re]
   rw [setIntegral_pos_iff_support_of_nonneg_ae _ hi]
   · rw [show Function.support (fun t : ℝ => t ^ m * Real.exp (-(t ^ 3 / 3) + x * t)) ∩ Ioi 0 =
@@ -1702,6 +1732,7 @@ def scorerZ_gi' (x : ℝ) : ℝ := (scorerGiDeriv x).re
 /-- `Hi` on the real axis, as a real Laplace integral. -/
 def scorerZ_hi (x : ℝ) : ℝ := (∫ t in Ioi (0 : ℝ), Real.exp (-(t ^ 3 / 3) + x * t)) / π
 
+/-- `tᵐ e^{-t³/3 + xt}` is integrable on `(0, ∞)` for real `x`. -/
 theorem scorerZ_integrable (m : ℕ) (x : ℝ) :
     IntegrableOn (fun t : ℝ => t ^ m * Real.exp (-(t ^ 3 / 3) + x * t)) (Ioi 0) := by
   have := (integrableOn_pow_mul_exp_cubic m x).re
@@ -1711,12 +1742,14 @@ theorem scorerZ_integrable (m : ℕ) (x : ℝ) :
       ((-(t ^ 3 / 3) + x * t : ℝ) : ℂ) by push_cast; ring,
     ← ofReal_exp, ← ofReal_pow, ← ofReal_mul, ofReal_re]
 
+/-- `Hi(x)` is the real number `scorerZ_hi x` on the real axis. -/
 theorem scorerZ_hi_eq (x : ℝ) : scorerHi x = (scorerZ_hi x : ℂ) := by
   rw [(scorerHi_exp_integral x).2]
   have h := integral_pow_mul_exp_cubic_ofReal 0 x
   simp only [pow_zero, one_mul] at h
   rw [h, scorerZ_hi]; push_cast; rfl
 
+/-- On the real axis, `Hi'(x) = π⁻¹ ∫₀^∞ t e^{-t³/3 + xt} dt`, a real number. -/
 theorem scorerZ_hiDeriv_eq (x : ℝ) : scorerHiDeriv x =
     (((∫ t in Ioi (0 : ℝ), t ^ 1 * Real.exp (-(t ^ 3 / 3) + x * t)) / π : ℝ) : ℂ) := by
   rw [scorerHiDeriv_exp_integral]
@@ -1724,14 +1757,17 @@ theorem scorerZ_hiDeriv_eq (x : ℝ) : scorerHiDeriv x =
   simp only [pow_one] at h ⊢
   rw [h]; push_cast; rfl
 
+/-- `Gi(x)` is the real number `scorerZ_gi x` on the real axis. -/
 theorem scorerZ_gi_ofReal (x : ℝ) : scorerGi x = (scorerZ_gi x : ℂ) := by
   have h : scorerGi x = ((airyBiReal x - scorerZ_hi x : ℝ) : ℂ) := by
     rw [scorerGi, airyBi_ofReal_eq, scorerZ_hi_eq]; push_cast; ring
   rw [scorerZ_gi, h, ofReal_re]
 
+/-- On the real axis, `Gi = Bi - Hi`. -/
 theorem scorerZ_gi_eq (x : ℝ) : scorerZ_gi x = airyBiReal x - scorerZ_hi x := by
   rw [scorerZ_gi, scorerGi, sub_re, scorerZ_hi_eq, ofReal_re]; rfl
 
+/-- `Gi'(x)` is the real number `scorerZ_gi' x` on the real axis. -/
 theorem scorerZ_gi'_ofReal (x : ℝ) : scorerGiDeriv x = (scorerZ_gi' x : ℂ) := by
   have h : ∃ r : ℝ, scorerGiDeriv x = (r : ℂ) := by
     rw [scorerGiDeriv_eq, airyBiDeriv_ofReal_eq, scorerZ_hiDeriv_eq]
@@ -1740,9 +1776,11 @@ theorem scorerZ_gi'_ofReal (x : ℝ) : scorerGiDeriv x = (scorerZ_gi' x : ℂ) :
   obtain ⟨r, hr⟩ := h
   rw [scorerZ_gi', hr, ofReal_re]
 
+/-- The real function `Gi` has derivative `Gi'`. -/
 theorem scorerZ_hasDerivAt_gi (x : ℝ) : HasDerivAt scorerZ_gi (scorerZ_gi' x) x :=
   ((isAiryInhomSol_scorerGi x).1).real_of_complex
 
+/-- The real function `Gi'` has derivative `x Gi(x) - 1/π` (the inhomogeneous Airy equation). -/
 theorem scorerZ_hasDerivAt_gi' (x : ℝ) :
     HasDerivAt scorerZ_gi' (x * scorerZ_gi x - 1 / π) x := by
   have h : HasDerivAt scorerZ_gi' _ x := ((isAiryInhomSol_scorerGi x).2).real_of_complex
@@ -1751,21 +1789,26 @@ theorem scorerZ_hasDerivAt_gi' (x : ℝ) :
   simp only [add_re, re_ofReal_mul, neg_re, div_ofReal_re, one_re]
   rw [ofReal_re]; ring
 
+/-- The derivative of `x Gi(x) - 1/π` is `Gi(x) + x Gi'(x)`. -/
 theorem scorerZ_hasDerivAt_gi'' (x : ℝ) :
     HasDerivAt (fun t => t * scorerZ_gi t - 1 / π) (scorerZ_gi x + x * scorerZ_gi' x) x := by
   have := ((hasDerivAt_id x).mul (scorerZ_hasDerivAt_gi x)).sub_const (1 / π)
   convert this using 1 <;> simp
 
+/-- The real function `Gi` is continuous. -/
 theorem scorerZ_continuous_gi : Continuous scorerZ_gi :=
   continuous_iff_continuousAt.mpr fun x => (scorerZ_hasDerivAt_gi x).continuousAt
 
+/-- The real function `Gi'` is continuous. -/
 theorem scorerZ_continuous_gi' : Continuous scorerZ_gi' :=
   continuous_iff_continuousAt.mpr fun x => (scorerZ_hasDerivAt_gi' x).continuousAt
 
+/-- `Gi(0) > 0`. -/
 theorem scorerZ_gi_zero_pos : 0 < scorerZ_gi 0 := by
   rw [scorerZ_gi, ofReal_zero, scorer_zero.2.1, div_ofNat_re]
   exact div_pos (airyBiReal_pos le_rfl) (by norm_num)
 
+/-- `Gi'(0) > 0`. -/
 theorem scorerZ_gi'_zero_pos : 0 < scorerZ_gi' 0 := by
   rw [scorerZ_gi', ofReal_zero, scorerDeriv_zero.2.1, div_ofNat_re]
   exact div_pos airyBiDerivReal_zero_pos (by norm_num)
@@ -1782,6 +1825,7 @@ theorem scorerZ_real_bound {F : ℂ → ℂ} {p : ℂ}
   filter_upwards [hC, eventually_gt_atTop 0] with x hx hx0
   simpa [Function.comp, Complex.norm_cpow_eq_rpow_re_of_pos hx0] using hx
 
+/-- `Gi(x) > 0` for all sufficiently large real `x`. -/
 theorem scorerZ_gi_eventually_pos : ∀ᶠ x in atTop, 0 < scorerZ_gi x := by
   have hπ := Real.pi_pos
   obtain ⟨C, hC⟩ := scorerZ_real_bound (scorerGi_asymptotic (δ := π / 6)
@@ -1805,6 +1849,7 @@ theorem scorerZ_gi_eventually_pos : ∀ᶠ x in atTop, 0 < scorerZ_gi x := by
     nlinarith
   linarith
 
+/-- `Gi'(x) < 0` for all sufficiently large real `x`. -/
 theorem scorerZ_gi'_eventually_neg : ∀ᶠ x in atTop, scorerZ_gi' x < 0 := by
   have hπ := Real.pi_pos
   obtain ⟨C, hC⟩ := scorerZ_real_bound (scorerGiDeriv_asymptotic (δ := π / 6)
@@ -1929,6 +1974,7 @@ theorem scorerZ_gi_signs (M : ℝ) (σ : ℝ) (hσ : σ = 0 ∨ σ = π) :
     linarith [hx.2]
   · rw [hxθ, add_comm, Real.cos_add_nat_mul_two_pi]
 
+/-- `Gi` takes both positive and negative values below every real `M`. -/
 theorem scorerZ_gi_frequently (M : ℝ) :
     (∃ x < M, 0 < scorerZ_gi x) ∧ ∃ x < M, scorerZ_gi x < 0 := by
   have hπ := Real.pi_pos
@@ -1945,6 +1991,7 @@ theorem scorerZ_gi_frequently (M : ℝ) :
       exact div_pos (by simpa using integral_pow_mul_exp_cubic_pos 0 x) hπ
     linarith [airyModulus_pos x]
 
+/-- The real function `Gi` has infinitely many negative zeros. -/
 theorem scorerZ_gi_zeros_infinite : {x : ℝ | x < 0 ∧ scorerZ_gi x = 0}.Infinite :=
   ODE.sturmCount_infinite_zeros_atBot scorerZ_continuous_gi.continuousOn
     (fun M => (scorerZ_gi_frequently M).1) (fun M => (scorerZ_gi_frequently M).2)

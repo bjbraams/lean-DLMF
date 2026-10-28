@@ -39,12 +39,14 @@ noncomputable section
 
 namespace DLMF.Confluent
 
+/-- `exp(±πi) = -1`. -/
 theorem exp_sign_mul_pi_mul_I (sign : Bool) : exp ((if sign then 1 else -1) * π * I) = -1 := by
   cases sign
   · simp only [Bool.false_eq_true, ↓reduceIte]
     rw [show (-1 : ℂ) * π * I = -(π * I) by ring, exp_neg, exp_pi_mul_I]; norm_num
   · simp [exp_pi_mul_I]
 
+/-- The reflected solution `eʷ U(b-a, b, e^{±πi} w)` equals `eʷ U(b-a, b, -w)`. -/
 theorem kummerU_reflected_eq (a b : ℂ) (sign : Bool) :
     (fun w => exp w * kummerU (b - a) b (exp ((if sign then 1 else -1) * π * I) * w)) =
       fun w => exp w * kummerU (b - a) b (-w) := by
@@ -60,6 +62,7 @@ theorem hasDerivAt_kummerU_reflected (a b : ℂ) {z : ℂ} (hz' : -z ∈ slitPla
   · funext w; simp [Function.comp_apply]
   · simp only [Function.comp_apply]; ring
 
+/-- If `z` lies in the slit plane off the positive real axis, then so does `-z`. -/
 theorem neg_mem_slitPlane_of_arg_ne_zero {z : ℂ} (hz : z ∈ slitPlane) (h : z.arg ≠ 0) :
     -z ∈ slitPlane := by
   rw [mem_slitPlane_iff] at hz ⊢
@@ -166,6 +169,8 @@ theorem wronskian_kummerU_kummerUReflected (a b : ℂ) {z : ℂ} (hz : z ∈ sli
     rw [show ε * (c - b) * π * I = -(ε * (b - c) * π * I) by ring, mul_assoc, ← h, ← mul_assoc,
       ← exp_add, neg_add_cancel, exp_zero, one_mul]
 
+/-- The Wronskian of `U(a,b,z)` and `eᶻ U(b-a,b,-z)` is `e^{±(a-b)πi} z^{-b} eᶻ`, with the sign
+fixed by the half-plane of `z` (DLMF 13.2.36). -/
 theorem wronskian_kummerU_reflected (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
     (sign : Bool) (hsign : if sign then z.arg < 0 else 0 < z.arg) :
     wronskian (kummerU a b) (fun w => exp w * kummerU (b - a) b (-w)) z =
@@ -193,6 +198,8 @@ theorem wronskian_regularizedHGFun_kummerUReflected (a b : ℂ) {z : ℂ} (hz : 
   rw [div_eq_mul_inv, div_eq_mul_inv]
   linear_combination (z ^ (-b) * exp z * (Gamma (b - a))⁻¹) * he
 
+/-- The Wronskian of `U(a,b,z)` and `eᶻ U(b-a,b,-z)` is nonzero when `z` and `-z` lie in the slit
+plane. -/
 theorem wronskian_kummerU_reflected_ne_zero (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
     (hz' : -z ∈ slitPlane) :
     wronskian (kummerU a b) (fun w => exp w * kummerU (b - a) b (-w)) z ≠ 0 := by
@@ -311,14 +318,17 @@ theorem wronskian_shifted_regularized_kummerUReflected (a b : ℂ) {z : ℂ} (hz
 
 /-! ### Whittaker functions -/
 
+/-- The Wronskian at `z` depends only on the germ at `z` of its second function. -/
 theorem wronskian_congr_right {f g h : ℂ → ℂ} {z : ℂ} (hgh : g =ᶠ[𝓝 z] h) :
     wronskian f g z = wronskian f h z := by
   unfold wronskian; rw [hgh.eq_of_nhds, hgh.deriv_eq]
 
+/-- The Wronskian is linear in its second function: `W(f, c g) = c W(f, g)`. -/
 theorem wronskian_const_mul_right {f g : ℂ → ℂ} {z : ℂ} (c : ℂ) (hg : DifferentiableAt ℂ g z) :
     wronskian f (fun w => c * g w) z = c * wronskian f g z := by
   unfold wronskian; rw [deriv_const_mul _ hg]; ring
 
+/-- The Wronskian is linear in its first function: `W(c f, g) = c W(f, g)`. -/
 theorem wronskian_const_mul_left {f g : ℂ → ℂ} {z : ℂ} (c : ℂ) (hf : DifferentiableAt ℂ f z) :
     wronskian (fun w => c * f w) g z = c * wronskian f g z := by
   unfold wronskian; rw [deriv_const_mul _ hf]; ring
@@ -362,6 +372,7 @@ theorem eventually_whittakerW_reflected (κ μ : ℂ) {z : ℂ} (hz : z ∈ slit
   rw [he]
   ring
 
+/-- The Whittaker prefactor `e^{-w/2} w^r` is complex differentiable on the slit plane. -/
 theorem differentiableAt_whittakerPrefactor (r : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     DifferentiableAt ℂ (fun w : ℂ => exp (-w / 2) * w ^ r) z :=
   (hasDerivAt_whittakerPrefactor r hz).differentiableAt
@@ -438,6 +449,7 @@ theorem wronskian_kummerU_reflected_whittaker (κ μ : ℂ) {z : ℂ} (hz : z �
   have h := wronskian_kummerU_reflected (1 / 2 + μ - κ) (1 + 2 * μ) hz sign hsign
   rwa [show 1 + 2 * μ - (1 / 2 + μ - κ) = 1 / 2 + μ + κ by ring] at h
 
+/-- `z^s z^{-s} = 1` for `z ≠ 0`. -/
 theorem cpow_mul_cpow_neg_self {z : ℂ} (hz0 : z ≠ 0) (s : ℂ) : z ^ s * z ^ (-s) = 1 := by
   rw [← cpow_add _ _ hz0, add_neg_cancel, cpow_zero]
 

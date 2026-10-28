@@ -38,6 +38,8 @@ def logGammaContFractCoeff : ℕ → ℂ
   | 6 => 109352241009 / 48264275462
   | _ => 0
 
+/-- The generalized continued fraction `0 + a₀/(z + a₁/(z + ⋯))` with the coefficients
+`logGammaContFractCoeff` of DLMF 5.10.1 (Stieltjes's continued fraction for Binet's function). -/
 @[dlmf 5.10.E1]
 def logGammaContinuedFraction (z : ℂ) : GenContFract ℂ where
   h := 0

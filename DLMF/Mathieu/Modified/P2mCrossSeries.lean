@@ -82,16 +82,19 @@ theorem p2m_differentiable_besselJExp_order {h : ℂ} (hh : h ≠ 0) (z : ℂ) :
 def p2m_besselDExp (μ h z : ℂ) : ℂ :=
   besselJExp μ h z * Complex.cos (μ * π) - besselJExp (-μ) h z
 
+/-- For `h ≠ 0`, `μ ↦ J_μ(h e^z) cos μπ - J_{-μ}(h e^z)` is entire. -/
 theorem p2m_differentiable_besselDExp {h : ℂ} (hh : h ≠ 0) (z : ℂ) :
     Differentiable ℂ fun μ : ℂ => p2m_besselDExp μ h z := by
   unfold p2m_besselDExp
   exact ((p2m_differentiable_besselJExp_order hh z).mul (by fun_prop)).sub
     ((p2m_differentiable_besselJExp_order hh z).comp differentiable_neg)
 
+/-- At an integer order `n`, `J_n cos nπ - J_{-n} = 0`. -/
 lemma p2m_besselDExp_int (n : ℤ) (h z : ℂ) : p2m_besselDExp n h z = 0 := by
   have := p1c_besselJExp_neg_intCast n h z
   rw [p2m_besselDExp, DLMF.Bessel.cos_int_mul_pi_complex, ← Int.cast_neg, this]; ring
 
+/-- For `μ ∉ ℤ`, `Y_μ(h e^z) = (J_μ cos μπ - J_{-μ}) / sin μπ` (DLMF 10.2.3). -/
 theorem p2m_besselYExp_of_not_int {μ : ℂ} (hμ : ∀ k : ℤ, μ ≠ k) (h z : ℂ) :
     besselYExp μ h z = p2m_besselDExp μ h z / Complex.sin (μ * π) :=
   p1c_besselYExp_of_not_int (fun ⟨k, hk⟩ => hμ k hk) h z
@@ -481,6 +484,8 @@ theorem p2m_fam_bound {c Jx Cy : ℤ → ℂ} {Cc K EJ B EC A : ℝ} (hCc : 0 �
         rw [mul_pow, mul_pow, mul_pow, mul_pow, pow_add]
         field_simp
 
+/-- Under the factorial and geometric bounds on `c`, `J`, `𝒞`, the cross-product terms are
+summable. -/
 lemma p2m_fam_summable {c Jx Cy : ℤ → ℂ} {Cc K EJ B EC A : ℝ} (hCc : 0 ≤ Cc) (hK : 0 ≤ K)
     (hEJ : 0 ≤ EJ) (hB : 1 ≤ B) (hEC : 0 ≤ EC) (hA : 1 ≤ A)
     (hc : ∀ m : ℤ, ‖c m‖ * (m.natAbs ! : ℝ) ^ 2 ≤ Cc * K ^ m.natAbs)
@@ -490,6 +495,8 @@ lemma p2m_fam_summable {c Jx Cy : ℤ → ℂ} {Cc K EJ B EC A : ℝ} (hCc : 0 �
   Summable.of_norm_bounded (((p2m_summable_pow_div_factorial_int _).mul_left _))
     (fun ℓ => p2m_fam_bound hCc hK hEJ hB hEC hA hc hJ hC α β ℓ)
 
+/-- Explicit bound on the sum of the cross-product series under the factorial and geometric
+bounds on `c`, `J`, `𝒞`. -/
 theorem p2m_fam_tsum_le {c Jx Cy : ℤ → ℂ} {Cc K EJ B EC A : ℝ} (hCc : 0 ≤ Cc) (hK : 0 ≤ K)
     (hEJ : 0 ≤ EJ) (hB : 1 ≤ B) (hEC : 0 ≤ EC) (hA : 1 ≤ A)
     (hc : ∀ m : ℤ, ‖c m‖ * (m.natAbs ! : ℝ) ^ 2 ≤ Cc * K ^ m.natAbs)

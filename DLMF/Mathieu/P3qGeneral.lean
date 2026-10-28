@@ -156,22 +156,32 @@ def p3qGS (m q : ℂ) (j : ℤ) : ℂ :=
 
 /-- Nonvanishing of the denominators of `p3qGT`, `p3qGS`. -/
 structure p3qGood (m : ℂ) : Prop where
+  /-- `m - 1 ≠ 0`. -/
   h1 : m - 1 ≠ 0
+  /-- `m - 2 ≠ 0`. -/
   h2 : m - 2 ≠ 0
+  /-- `m - 3 ≠ 0`. -/
   h3 : m - 3 ≠ 0
+  /-- `m + 1 ≠ 0`. -/
   h1' : m + 1 ≠ 0
+  /-- `m + 2 ≠ 0`. -/
   h2' : m + 2 ≠ 0
+  /-- `m + 3 ≠ 0`. -/
   h3' : m + 3 ≠ 0
 
+/-- Under `p3qGood m`, `m² - 1 ≠ 0`. -/
 theorem p3qGood.sq1 {m : ℂ} (h : p3qGood m) : m ^ 2 - 1 ≠ 0 := by
   rw [show m ^ 2 - 1 = (m - 1) * (m + 1) by ring]; exact mul_ne_zero h.h1 h.h1'
 
+/-- Under `p3qGood m`, `m² - 4 ≠ 0`. -/
 lemma p3qGood.sq4 {m : ℂ} (h : p3qGood m) : m ^ 2 - 4 ≠ 0 := by
   rw [show m ^ 2 - 4 = (m - 2) * (m + 2) by ring]; exact mul_ne_zero h.h2 h.h2'
 
+/-- Under `p3qGood m`, `m² - 9 ≠ 0`. -/
 lemma p3qGood.sq9 {m : ℂ} (h : p3qGood m) : m ^ 2 - 9 ≠ 0 := by
   rw [show m ^ 2 - 9 = (m - 3) * (m + 3) by ring]; exact mul_ne_zero h.h3 h.h3'
 
+/-- Row `j = -4` of the generic row identity `p3q_gen_row`. -/
 lemma p3q_gen_row_m4 {m : ℂ} (hm : p3qGood m) (q : ℂ) :
     ((m + 2 * ((-4 : ℤ) : ℂ)) ^ 2 - p3qGP m q) * p3qGT m q (-4 : ℤ) +
       q * (p3qGT m q ((-4 : ℤ) - 1) + p3qGT m q ((-4 : ℤ) + 1)) =
@@ -182,6 +192,7 @@ lemma p3q_gen_row_m4 {m : ℂ} (hm : p3qGood m) (q : ℂ) :
   simp only [p3qGT_m3, p3qGS_m4]
   field_simp
 
+/-- Row `j = -3` of the generic row identity `p3q_gen_row`. -/
 lemma p3q_gen_row_m3 {m : ℂ} (hm : p3qGood m) (q : ℂ) :
     ((m + 2 * ((-3 : ℤ) : ℂ)) ^ 2 - p3qGP m q) * p3qGT m q (-3 : ℤ) +
       q * (p3qGT m q ((-3 : ℤ) - 1) + p3qGT m q ((-3 : ℤ) + 1)) =
@@ -193,6 +204,7 @@ lemma p3q_gen_row_m3 {m : ℂ} (hm : p3qGood m) (q : ℂ) :
   field_simp
   ring
 
+/-- Row `j = -2` of the generic row identity `p3q_gen_row`. -/
 lemma p3q_gen_row_m2 {m : ℂ} (hm : p3qGood m) (q : ℂ) :
     ((m + 2 * ((-2 : ℤ) : ℂ)) ^ 2 - p3qGP m q) * p3qGT m q (-2 : ℤ) +
       q * (p3qGT m q ((-2 : ℤ) - 1) + p3qGT m q ((-2 : ℤ) + 1)) =
@@ -204,6 +216,7 @@ lemma p3q_gen_row_m2 {m : ℂ} (hm : p3qGood m) (q : ℂ) :
   field_simp
   ring
 
+/-- Row `j = -1` of the generic row identity `p3q_gen_row`. -/
 lemma p3q_gen_row_m1 {m : ℂ} (hm : p3qGood m) (q : ℂ) :
     ((m + 2 * ((-1 : ℤ) : ℂ)) ^ 2 - p3qGP m q) * p3qGT m q (-1 : ℤ) +
       q * (p3qGT m q ((-1 : ℤ) - 1) + p3qGT m q ((-1 : ℤ) + 1)) =
@@ -215,6 +228,7 @@ lemma p3q_gen_row_m1 {m : ℂ} (hm : p3qGood m) (q : ℂ) :
   field_simp
   ring
 
+/-- Row `j = 0` of the generic row identity `p3q_gen_row`. -/
 lemma p3q_gen_row_p0 {m : ℂ} (hm : p3qGood m) (q : ℂ) :
     ((m + 2 * ((0 : ℤ) : ℂ)) ^ 2 - p3qGP m q) * p3qGT m q (0 : ℤ) +
       q * (p3qGT m q ((0 : ℤ) - 1) + p3qGT m q ((0 : ℤ) + 1)) =
@@ -226,6 +240,7 @@ lemma p3q_gen_row_p0 {m : ℂ} (hm : p3qGood m) (q : ℂ) :
   field_simp
   ring
 
+/-- Row `j = 1` of the generic row identity `p3q_gen_row`. -/
 lemma p3q_gen_row_p1 {m : ℂ} (hm : p3qGood m) (q : ℂ) :
     ((m + 2 * ((1 : ℤ) : ℂ)) ^ 2 - p3qGP m q) * p3qGT m q (1 : ℤ) +
       q * (p3qGT m q ((1 : ℤ) - 1) + p3qGT m q ((1 : ℤ) + 1)) =
@@ -237,6 +252,7 @@ lemma p3q_gen_row_p1 {m : ℂ} (hm : p3qGood m) (q : ℂ) :
   field_simp
   ring
 
+/-- Row `j = 2` of the generic row identity `p3q_gen_row`. -/
 lemma p3q_gen_row_p2 {m : ℂ} (hm : p3qGood m) (q : ℂ) :
     ((m + 2 * ((2 : ℤ) : ℂ)) ^ 2 - p3qGP m q) * p3qGT m q (2 : ℤ) +
       q * (p3qGT m q ((2 : ℤ) - 1) + p3qGT m q ((2 : ℤ) + 1)) =
@@ -248,6 +264,7 @@ lemma p3q_gen_row_p2 {m : ℂ} (hm : p3qGood m) (q : ℂ) :
   field_simp
   ring
 
+/-- Row `j = 3` of the generic row identity `p3q_gen_row`. -/
 lemma p3q_gen_row_p3 {m : ℂ} (hm : p3qGood m) (q : ℂ) :
     ((m + 2 * ((3 : ℤ) : ℂ)) ^ 2 - p3qGP m q) * p3qGT m q (3 : ℤ) +
       q * (p3qGT m q ((3 : ℤ) - 1) + p3qGT m q ((3 : ℤ) + 1)) =
@@ -259,6 +276,7 @@ lemma p3q_gen_row_p3 {m : ℂ} (hm : p3qGood m) (q : ℂ) :
   field_simp
   ring
 
+/-- Row `j = 4` of the generic row identity `p3q_gen_row`. -/
 lemma p3q_gen_row_p4 {m : ℂ} (hm : p3qGood m) (q : ℂ) :
     ((m + 2 * ((4 : ℤ) : ℂ)) ^ 2 - p3qGP m q) * p3qGT m q (4 : ℤ) +
       q * (p3qGT m q ((4 : ℤ) - 1) + p3qGT m q ((4 : ℤ) + 1)) =
@@ -269,10 +287,12 @@ lemma p3q_gen_row_p4 {m : ℂ} (hm : p3qGood m) (q : ℂ) :
   simp only [p3qGT_p3, p3qGS_p4]
   field_simp
 
+/-- The trial vector vanishes outside its support: `T_j = 0` for `|j| ≥ 4`. -/
 lemma p3qGT_eq_zero (m q : ℂ) {j : ℤ} (hj : 4 ≤ j.natAbs) : p3qGT m q j = 0 := by
   unfold p3qGT
   split_ifs <;> first | rfl | (exfalso; omega)
 
+/-- The residual quotient vanishes for `|j| ≥ 5`. -/
 lemma p3qGS_eq_zero (m q : ℂ) {j : ℤ} (hj : 5 ≤ j.natAbs) : p3qGS m q j = 0 := by
   unfold p3qGS
   split_ifs <;> first | rfl | (exfalso; omega)
@@ -301,12 +321,14 @@ lemma p3q_gen_row {m : ℂ} (hm : p3qGood m) (q : ℂ) (j : ℤ) :
       p3qGT_eq_zero m q (by omega), p3qGS_eq_zero m q (by omega)]
     ring
 
+/-- Each component `T_j(m, q)` is continuous in real `q`. -/
 lemma p3qGT_continuous (m : ℂ) (j : ℤ) : Continuous fun q : ℝ => p3qGT m q j := by
   unfold p3qGT
   split_ifs <;>
     (try simp only [p3qGT_m3, p3qGT_m2, p3qGT_m1, p3qGT_p0, p3qGT_p1, p3qGT_p2, p3qGT_p3]) <;>
     fun_prop
 
+/-- Each residual quotient `p3qGS m q j` is continuous in real `q`. -/
 lemma p3qGS_continuous (m : ℂ) (j : ℤ) : Continuous fun q : ℝ => p3qGS m q j := by
   unfold p3qGS
   split_ifs <;>
@@ -314,6 +336,7 @@ lemma p3qGS_continuous (m : ℂ) (j : ℤ) : Continuous fun q : ℝ => p3qGS m q
       p3qGS_p4]) <;>
     fun_prop
 
+/-- For a natural number `k ≥ 4`, the denominators `k ± 1, k ± 2, k ± 3` are nonzero. -/
 theorem p3qGood_natCast {k : ℕ} (hk : 4 ≤ k) : p3qGood (k : ℂ) := by
   refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩ <;>
   · intro h
@@ -351,16 +374,20 @@ lemma p3q_gen_hr {D : ℝ → ℕ → ℂ} {β : ℂ} {n : ℕ} {m : ℂ} (hm : 
   rw [show (((i + 1 : ℕ) : ℤ) - n) = ((i : ℤ) - n) + 1 by push_cast; ring]
   ring
 
+/-- The trial vector components `T_{i-n}(m, q)` are `O(1)` as `q → 0`. -/
 lemma p3q_gen_hv (m : ℂ) (n : ℕ) (i : ℕ) :
     (fun q : ℝ => p3qGT m q ((i : ℤ) - n)) =O[𝓝 0] (fun _ => (1 : ℝ)) :=
   p3q_cont_isBigO_one (p3qGT_continuous m _)
 
+/-- The shifted trial vector vanishes at `i = n + 4`. -/
 lemma p3q_gen_vN (m q : ℂ) (n : ℕ) : p3qGT m q (((n + 4 : ℕ) : ℤ) - n) = 0 :=
   p3qGT_eq_zero m q (by omega)
 
+/-- The shifted trial vector vanishes at `i = n + 5`. -/
 lemma p3q_gen_vN1 (m q : ℂ) (n : ℕ) : p3qGT m q (((n + 4 + 1 : ℕ) : ℤ) - n) = 0 :=
   p3qGT_eq_zero m q (by omega)
 
+/-- The shifted trial vector equals `1` at `i = n`. -/
 lemma p3q_gen_vn (m q : ℂ) (n : ℕ) : p3qGT m q ((n : ℤ) - n) = 1 := by
   simp [p3qGT, p3qGT_p0]
 

@@ -184,7 +184,7 @@ theorem legFour_not_summable {ν μ : ℂ} (hμ : 0 ≤ μ.re) (s : ℕ → ℂ)
     have hle : c * ‖s k‖ / ((k+1 : ℕ) : ℝ) ≤ a k := by
       refine le_trans ?_ hk
       gcongr
-      push_cast; linarith
+      linarith
     have hsk := hs k
     have hnn : 0 ≤ ‖1 / ((k+1 : ℕ) : ℝ)‖ := norm_nonneg _
     rw [Real.norm_of_nonneg (by positivity)]
@@ -490,7 +490,9 @@ theorem legFS_nat_coef (n k : ℕ) :
 theorem legFS_nat_regular (n : ℕ) : LegendreQRegular (n:ℂ) 0 := fun m h => by
   have := congrArg re h; simp at this; linarith [(m.cast_nonneg : (0:ℝ) ≤ m), (n.cast_nonneg : (0:ℝ) ≤ n)]
 
-/-- ferrersP fourier series. -/
+/-- DLMF 14.13.1: for `0 < θ < π`, `Re μ < 1/2` and `ν + μ ∉ {−1, −2, …}`, `𝖯^μ_ν(cos θ) =
+(2^{μ+1}/π^{1/2}) sin^μ θ Σ_{k≥0} Γ(ν+μ+k+1)/Γ(ν+k+3/2) · (μ+1/2)_k/k! · sin((ν+μ+2k+1)θ)`, the
+series converging as the limit of its partial sums. -/
 @[dlmf 14.13.E1]
 theorem ferrersP_fourier_series {ν μ : ℂ} (hν : LegendreQRegular ν μ) (hμ : μ.re < 1/2) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
     Tendsto (fun N : ℕ => ∑ k ∈ Finset.range N, 2^(μ+1)/Real.sqrt π*(Real.sin θ:ℂ)^μ*Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*poch (μ+1/2) k/(k.factorial:ℂ)*sin ((ν+μ+2*k+1)*θ)) atTop (𝓝 (ferrersP ν μ (Real.cos θ))) := by
@@ -541,7 +543,9 @@ theorem ferrersP_fourier_absolute {ν μ : ℂ} (hν : LegendreQRegular ν μ) (
   have him : ((ν+μ+2*(k:ℂ)+1)*(θ:ℂ)).im = ((ν+μ)*θ).im := by simp [mul_im]
   exact (legFour_norm_sin_le _).trans_eq (by rw [him])
 
-/-- ferrersP nat fourier. -/
+/-- DLMF 14.13.3: for `n ∈ ℕ` and `0 < θ < π`, `𝖯_n(cos θ) = 2^{2n+2}(n!)²/(π (2n+1)!) Σ_{k≥0}
+(1/2)_k (n+1)_k/(k! (n+3/2)_k) sin((n+2k+1)θ)`, the series converging as the limit of its partial
+sums. -/
 @[dlmf 14.13.E3]
 theorem ferrersP_nat_fourier (n : ℕ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
     Tendsto (fun N : ℕ => ∑ k ∈ Finset.range N, 2^(2*n+2)*(n.factorial:ℂ)^2/(π*((2*n+1).factorial:ℂ))*poch (1/2) k*poch (n+1) k/((k.factorial:ℂ)*poch (n+3/2) k)*sin ((n+2*k+1:ℂ)*θ)) atTop (𝓝 (ferrersP n 0 (Real.cos θ))) := by
@@ -555,7 +559,9 @@ theorem ferrersP_nat_fourier (n : ℕ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) 
           (poch (1/2) k/(k.factorial:ℂ)*sin (((n:ℂ)+2*k+1)*θ)) := by ring
     _ = _ := by rw [e]; ring
 
-/-- ferrersQ fourier series. -/
+/-- DLMF 14.13.2: for `0 < θ < π`, `Re μ < 1/2` and `ν + μ ∉ {−1, −2, …}`, `𝖰^μ_ν(cos θ) = π^{1/2}
+2^μ sin^μ θ Σ_{k≥0} Γ(ν+μ+k+1)/Γ(ν+k+3/2) · (μ+1/2)_k/k! · cos((ν+μ+2k+1)θ)`, the series converging
+as the limit of its partial sums. -/
 @[dlmf 14.13.E2]
 theorem ferrersQ_fourier_series {ν μ : ℂ} (hν : LegendreQRegular ν μ) (hμ : μ.re < 1/2) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
     Tendsto (fun N : ℕ => ∑ k ∈ Finset.range N, Real.sqrt π*2^μ*(Real.sin θ:ℂ)^μ*Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*poch (μ+1/2) k/(k.factorial:ℂ)*cos ((ν+μ+2*k+1)*θ)) atTop (𝓝 (ferrersQ ν μ (Real.cos θ))) := by
@@ -592,6 +598,7 @@ theorem ferrersQ_fourier_absolute {ν μ : ℂ} (hν : LegendreQRegular ν μ) (
   have him : ((ν+μ+2*(k:ℂ)+1)*(θ:ℂ)).im = ((ν+μ)*θ).im := by simp [mul_im]
   exact (legFour_norm_cos_le _).trans_eq (by rw [him])
 
+/-- For complex `w`, `|sin (re w)| ≤ ‖sin w‖`. -/
 theorem legFour_abs_sin_re_le (w : ℂ) : |Real.sin w.re| ≤ ‖sin w‖ := by
   have h : (sin w).re = Real.sin w.re * Real.cosh w.im := by
     rw [sin_eq]; simp [← ofReal_sin, ← ofReal_cosh, ← ofReal_cos, ← ofReal_sinh]
@@ -599,6 +606,7 @@ theorem legFour_abs_sin_re_le (w : ℂ) : |Real.sin w.re| ≤ ‖sin w‖ := by
   rw [h, abs_mul, abs_of_pos (Real.cosh_pos _)]
   exact le_mul_of_one_le_right (abs_nonneg _) (Real.one_le_cosh _)
 
+/-- For complex `w`, `|cos (re w)| ≤ ‖cos w‖`. -/
 theorem legFour_abs_cos_re_le (w : ℂ) : |Real.cos w.re| ≤ ‖cos w‖ := by
   have h : (cos w).re = Real.cos w.re * Real.cosh w.im := by
     rw [cos_eq]; simp [← ofReal_sin, ← ofReal_cosh, ← ofReal_cos, ← ofReal_sinh]
@@ -606,6 +614,7 @@ theorem legFour_abs_cos_re_le (w : ℂ) : |Real.cos w.re| ≤ ‖cos w‖ := by
   rw [h, abs_mul, abs_of_pos (Real.cosh_pos _)]
   exact le_mul_of_one_le_right (abs_nonneg _) (Real.one_le_cosh _)
 
+/-- For real `x` and `θ`, `|sin 2θ|/2 ≤ |sin x| + |sin (x + 2θ)|`. -/
 theorem legFour_sin_pair {θ : ℝ} (x : ℝ) :
     |Real.sin (2*θ)| / 2 ≤ |Real.sin x| + |Real.sin (x + 2*θ)| := by
   have hs : |Real.sin (2*θ)| ≤ 1 := Real.abs_sin_le_one _
@@ -626,6 +635,7 @@ theorem legFour_sin_pair {θ : ℝ} (x : ℝ) :
   have h4 := mul_le_mul_of_nonneg_left h1.le (abs_nonneg (Real.sin (2*θ)))
   nlinarith [abs_nonneg (Real.sin (x + 2*θ))]
 
+/-- For real `x` and `θ`, `|sin 2θ|/2 ≤ |cos x| + |cos (x + 2θ)|`. -/
 theorem legFour_cos_pair {θ : ℝ} (x : ℝ) :
     |Real.sin (2*θ)| / 2 ≤ |Real.cos x| + |Real.cos (x + 2*θ)| := by
   have h := legFour_sin_pair (θ := θ) (x + π/2)
@@ -633,7 +643,8 @@ theorem legFour_cos_pair {θ : ℝ} (x : ℝ) :
     Real.sin_add_pi_div_two] at h
   exact h
 
-/-- ferrersQ nat fourier. -/
+/-- DLMF 14.13.4: for `n ∈ ℕ` and `0 < θ < π`, `𝖰_n(cos θ) = 2^{2n+1}(n!)²/(2n+1)! Σ_{k≥0} (1/2)_k
+(n+1)_k/(k! (n+3/2)_k) cos((n+2k+1)θ)`, the series converging as the limit of its partial sums. -/
 @[dlmf 14.13.E4]
 theorem ferrersQ_nat_fourier (n : ℕ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
     Tendsto (fun N : ℕ => ∑ k ∈ Finset.range N, 2^(2*n+1)*(n.factorial:ℂ)^2/((2*n+1).factorial:ℂ)*poch (1/2) k*poch (n+1) k/((k.factorial:ℂ)*poch (n+3/2) k)*cos ((n+2*k+1:ℂ)*θ)) atTop (𝓝 (ferrersQ n 0 (Real.cos θ))) := by
@@ -657,7 +668,8 @@ theorem ferrersQ_nat_fourier (n : ℕ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) 
       rw [pow_succ]
       field_simp
 
-/-- legendreQPoly convolution. -/
+/-- DLMF 14.7.4: the polynomial `W_{n−1}` (`legendreQPoly n`) is the convolution `W_{n−1}(z) =
+Σ_{k=1}^{n} P_{k−1}(z) P_{n−k}(z)/k` of Legendre polynomials. -/
 @[dlmf 14.7.E4]
 theorem legendreQPoly_convolution (n : ℕ) (z : ℂ) :
     (legendreQPoly n).eval z=∑ j ∈ Finset.range n, legendreP j z*legendreP (n-j-1) z/(j+1:ℂ) := by
@@ -667,7 +679,8 @@ theorem legendreQPoly_convolution (n : ℕ) (z : ℂ) :
   simp only [legSerP]
   rw [show ((n-j-1:ℕ):ℂ) = (n:ℂ)-j-1 by rw [Nat.cast_sub (by omega), Nat.cast_sub hj.le]; simp]
 
-/-- legendreQPoly explicit. -/
+/-- DLMF 14.7.3: the explicit expansion `W_{n−1}(z) = Σ_{s=0}^{n−1} (n+s)! (ψ(n+1) − ψ(s+1))/(2^s
+(n−s)! (s!)²) (z−1)^s` of the polynomial `legendreQPoly n` (the `s = n` term of DLMF vanishes). -/
 @[dlmf 14.7.E3]
 theorem legendreQPoly_explicit (n : ℕ) (z : ℂ) :
     (legendreQPoly n).eval z=∑ s ∈ Finset.range n, ((n+s).factorial:ℂ)*(digamma (n+1)-digamma (s+1))/(2^s*(n-s).factorial*(s.factorial:ℂ)^2)*(z-1)^s := by
@@ -679,7 +692,8 @@ theorem legendreQPoly_explicit (n : ℕ) (z : ℂ) :
   push_cast
   ring
 
-/-- legendreQPoly initial. -/
+/-- DLMF 14.7.5: the first polynomials `W_{n−1}` are `W_0 = 1`, `W_1(x) = (3/2)x` and `W_2(x) =
+(5/2)x² − 2/3`. -/
 @[dlmf 14.7.E5]
 theorem legendreQPoly_initial  :
     legendreQPoly 1=1 ∧ legendreQPoly 2=Polynomial.C (3/2)*Polynomial.X ∧ legendreQPoly 3=Polynomial.C (5/2)*Polynomial.X^2-Polynomial.C (2/3) := by
@@ -694,7 +708,7 @@ theorem legendreQPoly_initial  :
     norm_num [← Polynomial.C_mul]
   exact ⟨rfl,h2,h3⟩
 
-/-- ferrersQ nat logarithm. -/
+/-- DLMF 14.7.2: for `n ∈ ℕ` and `-1 < x < 1`, `𝖰_n(x) = ½ 𝖯_n(x) ln((1+x)/(1−x)) − W_{n−1}(x)`. -/
 @[dlmf 14.7.E2]
 theorem ferrersQ_nat_logarithm (n : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersQ n 0 x=1/2*ferrersP n 0 x*log ((1+x)/(1-x):ℂ)-(legendreQPoly n).eval (x:ℂ) := by
@@ -724,13 +738,14 @@ theorem ferrersQ_nat_logarithm (n : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
       linear_combination ((n:ℂ)+1+1)⁻¹*(hQ - 1/2*log ((1+x)/(1-x):ℂ) * hP + (2 * (n : ℂ) + 3) * x * h1 -
         ((n : ℂ) + 1) * h0) - (ferrersQ ((n:ℂ)+1+1) 0 x - 1/2*log ((1+x)/(1-x):ℂ)*ferrersP ((n:ℂ)+1+1) 0 x)*hinv
 
-/-- olverQ nat normalization. -/
+/-- DLMF 14.7.6: for `n ∈ ℕ` and `z ∉ (−∞, 1]`, `Q_n(z) = n! 𝑸_n(z)`. -/
 @[dlmf 14.7.E6]
 theorem olverQ_nat_normalization (n : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     associatedQ n 0 z=(n.factorial:ℂ)*olverQ n 0 z := by
   simp [associatedQ, Gamma_nat_eq_factorial]
 
-/-- associatedQ nat logarithm. -/
+/-- DLMF 14.7.7: for `n ∈ ℕ` and `z ∉ (−∞, 1]`, `Q_n(z) = ½ P_n(z) (ln(z+1) − ln(z−1)) −
+W_{n−1}(z)`, with principal logarithms. -/
 @[dlmf 14.7.E7]
 theorem associatedQ_nat_logarithm (n : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     associatedQ n 0 z=1/2*associatedP n 0 z*(log (z+1)-log (z-1))-(legendreQPoly n).eval z := by
@@ -738,7 +753,8 @@ theorem associatedQ_nat_logarithm (n : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     log_add_one_sub_log_sub_one hz]
   ring
 
-/-- ferrersP generating. -/
+/-- DLMF 14.7.19 (real case): for `-1 < x < 1` and `|h| < 1`, `Σ_{n≥0} 𝖯_n(x) hⁿ = (1 − 2xh +
+h²)^{−1/2}`. -/
 @[dlmf 14.7.E19]
 theorem ferrersP_generating {x h : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) (hh : |h| < 1) :
     HasSum (fun n : ℕ => ferrersP n 0 x*(h:ℂ)^n) ((1-2*x*h+h^2:ℂ)^(-1/2:ℂ)) := by
@@ -748,7 +764,8 @@ theorem ferrersP_generating {x h : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) (hh : |h| < 
   have hs : 1+(x:ℂ) ∈ slitPlane := Or.inl (by simp; linarith [hx.1])
   rw [ferrersP_zero _ hx.1, legendreP_nat n hs]
 
-/-- ferrersQ generating. -/
+/-- DLMF 14.7.20: for `-1 < x < 1` and `|h| < 1`, `Σ_{n≥0} 𝖰_n(x) hⁿ = (1 − 2xh + h²)^{−1/2} ln((x −
+h + (1 − 2xh + h²)^{1/2})/(1−x²)^{1/2})`. -/
 @[dlmf 14.7.E20]
 theorem ferrersQ_generating {x h : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) (hh : |h| < 1) :
     HasSum (fun n : ℕ => ferrersQ n 0 x*(h:ℂ)^n) ((1-2*x*h+h^2:ℂ)^(-1/2:ℂ)*log ((x-h+(1-2*x*h+h^2:ℂ)^(1/2:ℂ))/(1-x^2:ℂ)^(1/2:ℂ))) := by
@@ -803,7 +820,8 @@ theorem ferrersQ_generating {x h : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) (hh : |h| < 
       Real.log_mul h1x.ne' h1x'.ne']
     push_cast; ring
 
-/-- associatedQ generating. -/
+/-- DLMF 14.7.22: for `x > 1` and `|h| < x − (x²−1)^{1/2}`, `Σ_{n≥0} Q_n(x) hⁿ = (1 − 2xh +
+h²)^{−1/2} ln((x − h + (1 − 2xh + h²)^{1/2})/(x²−1)^{1/2})`. -/
 @[dlmf 14.7.E22]
 theorem associatedQ_generating {x h : ℝ} (hx : 1 < x) (hh : |h| < x-Real.sqrt (x^2-1)) :
     HasSum (fun n : ℕ => associatedQ n 0 x*(h:ℂ)^n) ((1-2*x*h+h^2:ℂ)^(-1/2:ℂ)*log ((x-h+(1-2*x*h+h^2:ℂ)^(1/2:ℂ))/(x^2-1:ℂ)^(1/2:ℂ))) := by
@@ -861,7 +879,8 @@ theorem associatedQ_generating {x h : ℝ} (hx : 1 < x) (hh : |h| < x-Real.sqrt 
       Real.log_mul h1x.ne' h1x'.ne', add_comm 1 x]
     push_cast; ring
 
-/-- associatedP generating complex. -/
+/-- DLMF 14.7.19 (complex case): for `z ∉ (−∞, 1]` and `|h| < min |z ± (z²−1)^{1/2}|`, `Σ_{n≥0}
+P_n(z) hⁿ = (1 − 2zh + h²)^{−1/2}`. -/
 @[dlmf 14.7.E19]
 theorem associatedP_generating_complex {z h : ℂ} (hz : z-1 ∈ slitPlane) (hh : ‖h‖ < min ‖z+exp ((log (z-1)+log (z+1))/2)‖ ‖z-exp ((log (z-1)+log (z+1))/2)‖) :
     HasSum (fun n : ℕ => associatedP n 0 z*h^n) ((1-2*z*h+h^2)^(-1/2:ℂ)) := by
@@ -918,22 +937,26 @@ theorem associatedP_exterior_generating {z h : ℂ} (hz : z-1 ∈ slitPlane) (hh
     inv_pow]
   ring
 
-/-- legendrePCFNum. -/
+/-- DLMF 14.14.2: the partial numerators `(ν−μ−k+1)(ν+μ+k)(x²−1)/4` of the continued fraction
+14.14.1 for `P^μ_ν(x)`. -/
 @[dlmf 14.14.E2]
 def legendrePCFNum (ν μ : ℂ) (x : ℝ) (k : ℕ) : ℂ :=
   (ν-μ-k+1)*(ν+μ+k)*(x^2-1)/4
 
-/-- legendrePCFDen. -/
+/-- DLMF 14.14.2: the partial denominators `(μ+k) x` of the continued fraction 14.14.1 for
+`P^μ_ν(x)`. -/
 @[dlmf 14.14.E2]
 def legendrePCFDen (μ : ℂ) (x : ℝ) (k : ℕ) : ℂ :=
   (μ+k)*x
 
-/-- legendreQCFNum. -/
+/-- DLMF 14.14.4: the partial numerators of the continued fraction 14.14.3 for `Q^μ_ν(x)`: `1` at `k
+= 0` and `−(ν+μ+k)(ν−μ+k)` for `k ≥ 1`. -/
 @[dlmf 14.14.E4]
 def legendreQCFNum (ν μ : ℂ) (k : ℕ) : ℂ :=
   (if k=0 then 1 else -1)*(ν+μ+k)*(ν-μ+k)
 
-/-- legendreQCFDen. -/
+/-- DLMF 14.14.4: the partial denominators `(2ν+2k+1) x` of the continued fraction 14.14.3 for
+`Q^μ_ν(x)`. -/
 @[dlmf 14.14.E4]
 def legendreQCFDen (ν : ℂ) (x : ℝ) (k : ℕ) : ℂ :=
   (2*ν+2*k+1)*x
@@ -943,16 +966,11 @@ def legendreQCFDen (ν : ℂ) (x : ℝ) (k : ℕ) : ℂ :=
 /-- The backward solution `w_k = 𝑸^μ_{ν+k-1}(x)` of the fraction 14.14.3. -/
 def legFS_wQ (ν μ : ℂ) (x : ℝ) (k : ℕ) : ℂ := olverQ (ν + k - 1) μ x
 
-/-- `x - 1 ∈ ℂ ∖ (-∞, 0]` for real `x > 1`. -/
-theorem legFS_sub_one_mem {x : ℝ} (hx : 1 < x) : (x:ℂ) - 1 ∈ slitPlane := by
-  rw [show (x:ℂ) - 1 = ((x - 1 : ℝ) : ℂ) by push_cast; ring]
-  exact ofReal_mem_slitPlane.mpr (by linarith)
-
 /-- `w_k = 𝑸^μ_{ν+k-1}(x)` solves the backward recurrence of 14.14.3 (from DLMF 14.10.3). -/
 theorem legFS_wQ_rec (ν μ : ℂ) {x : ℝ} (hx : 1 < x) (k : ℕ) :
     legFS_wQ ν μ x k = legendreQCFDen ν x k * legFS_wQ ν μ x (k+1) +
       legendreQCFNum ν μ (k+1) * legFS_wQ ν μ x (k+2) := by
-  have R := olverQ_recurrence_3 (ν+k-1) μ (legFS_sub_one_mem hx)
+  have R := olverQ_recurrence_3 (ν+k-1) μ (legInt_one_lt_mem hx)
   rw [show ν+k-1+2 = ν+(k:ℂ)+2-1 by ring, show ν+k-1+1 = ν+(k:ℂ)+1-1 by ring] at R
   have e1 : legFS_wQ ν μ x (k+1) = olverQ (ν+(k:ℂ)+1-1) μ x := by
     unfold legFS_wQ; congr 1; push_cast; ring
@@ -967,7 +985,7 @@ theorem legFS_wQ_rec (ν μ : ℂ) {x : ℝ} (hx : 1 < x) (k : ℕ) :
 theorem legFS_wQ_eq (ν μ : ℂ) {x : ℝ} (hx : 1 < x) (k : ℕ) :
     legFS_wQ ν μ x k = Real.sqrt π * (1 - legFS_zeta x ^ 2)^μ * legFS_zeta x ^ (ν + k) *
       regularizedGaussHGFun (μ+1/2) ((ν+μ)+k) ((ν+1/2)+k) (legFS_zeta x ^ 2) := by
-  have hz := legFS_sub_one_mem hx
+  have hz := legInt_one_lt_mem hx
   have h2 : ‖legFS_zeta x ^ 2‖ < 1 := by
     rw [norm_pow]; have := legFS_norm_zeta_lt_one hz
     nlinarith [norm_nonneg (legFS_zeta x)]
@@ -991,7 +1009,7 @@ theorem legFS_wQ_ratio (ν μ : ℂ) {x : ℝ} (hx : 1 < x) :
     Tendsto (fun k => -(legFS_wQ ν μ x k /
       (legendreQCFNum ν μ (k+1) * legFS_wQ ν μ x (k+2)))) atTop
       (𝓝 ((legFS_zeta x ^ 2)⁻¹)) ∧ ∀ᶠ k in atTop, legFS_wQ ν μ x k ≠ 0 := by
-  have hz := legFS_sub_one_mem hx
+  have hz := legInt_one_lt_mem hx
   set ζ := legFS_zeta x with hζ
   have hζ0 : ζ ≠ 0 := legFS_zeta_ne_zero hz
   have h2 : ‖ζ ^ 2‖ < 1 := by
@@ -1110,7 +1128,7 @@ def legFS_wP (ν μ : ℂ) (x : ℝ) (k : ℕ) : ℂ := legFS_cP x ^ k * associa
 theorem legFS_wP_rec (ν μ : ℂ) {x : ℝ} (hx : 1 < x) (k : ℕ) :
     legFS_wP ν μ x k = legendrePCFDen μ x k * legFS_wP ν μ x (k+1) +
       legendrePCFNum ν μ x (k+1) * legFS_wP ν μ x (k+2) := by
-  have R := associatedP_recurrence_6 ν (-μ-k-1) (legFS_sub_one_mem hx)
+  have R := associatedP_recurrence_6 ν (-μ-k-1) (legInt_one_lt_mem hx)
   rw [legFS_branch_neg_one hx, show -μ-k-1+2 = 1-μ-k by ring,
     show -μ-k-1+1 = 1-μ-((k+1:ℕ):ℂ) by push_cast; ring,
     show -μ-(k:ℂ)-1 = 1-μ-((k+2:ℕ):ℂ) by push_cast; ring] at R
@@ -1144,7 +1162,7 @@ theorem legFS_wP_eq (ν μ : ℂ) {x : ℝ} (hx : 1 < x) (k : ℕ) :
     legFS_wP ν μ x k = legFS_cP x ^ k * exp ((μ+k-1)/2*(log ((x:ℂ)-1) - log ((x:ℂ)+1))) *
       (1-(1-(x:ℂ))/2)^(-(-ν)) *
       regularizedGaussHGFun (-ν) ((μ-ν-1)+k) (μ+k) (((x-1)/(x+1) : ℝ) : ℂ) := by
-  have hz := legFS_sub_one_mem hx
+  have hz := legInt_one_lt_mem hx
   have hcut : (1-(x:ℂ))/2 ∈ cutPlane := by
     rw [mem_cutPlane, show 1-(1-(x:ℂ))/2 = (((x+1)/2 : ℝ) : ℂ) by push_cast; ring]
     exact ofReal_mem_slitPlane.mpr (by linarith)
@@ -1305,7 +1323,7 @@ DLMF). -/
 theorem associatedQ_continued_fraction {ν μ : ℂ} (hne : ν ≠ μ) {x : ℝ} (hx : 1 < x) (hr : LegendreQRegular (ν-1) μ) (hnz : associatedQ (ν-1) μ x ≠ 0) (hterm : ∀ k : ℕ, legendreQCFNum ν μ (k+1) ≠ 0 ∨ legendreQCFDen ν x k ≠ 0) :
     HasContinuedFraction (legendreQCFNum ν μ) (legendreQCFDen ν x) ((ν-μ)*associatedQ ν μ x/associatedQ (ν-1) μ x) := by
   -- the hypotheses `hr` and `hterm` are not needed (stronger than DLMF)
-  have hz := legFS_sub_one_mem hx
+  have hz := legInt_one_lt_mem hx
   have hQ1 : associatedQ (ν-1) μ x = exp (μ*π*I) * Gamma (ν+μ) * olverQ (ν-1) μ x := by
     rw [associatedQ, show ν-1+μ+1 = ν+μ by ring]
   have hΓ : Gamma (ν+μ) ≠ 0 := fun h => hnz (by rw [hQ1, h, mul_zero, zero_mul])

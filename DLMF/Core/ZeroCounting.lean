@@ -271,17 +271,15 @@ theorem zcnt_injOn_infinite_of_discs {f : ℂ → ℂ} {S : Set ℂ} {c : ℕ �
     · exact h
     · exact absurd (congrArg norm hkl) (hlt l k _ _ h (hz l).2.2 (hz k).2.2).ne'
 
-/-- **Zero count one means exactly one zero.** If `f` is analytic on `closedBall c R` and its
-zero count in the open disc (with multiplicity) is `1`, then `f` has exactly one zero there. -/
-theorem zcnt_existsUnique_of_count_eq_one {f : ℂ → ℂ} {c : ℂ} {R : ℝ}
-    (hf : AnalyticOnNhd ℂ f (closedBall c R))
-    (hcount : (∑ᶠ z ∈ ball c R, analyticOrderNatAt f z) = 1) :
-    ∃! z, z ∈ ball c R ∧ f z = 0 := by
+/-- If a natural-valued function has finite sum `1` over a set `s`, then exactly one point
+of `s` has a nonzero value. -/
+private lemma existsUnique_ne_zero_of_finsum_mem_eq_one {α : Type*} {s : Set α} {g : α → ℕ}
+    (h : (∑ᶠ x ∈ s, g x) = 1) : ∃! z, z ∈ s ∧ g z ≠ 0 := by
   classical
-  -- the support of the order function in the ball is finite, since the sum is nonzero
-  have hfin : (ball c R ∩ Function.support (fun x => analyticOrderNatAt f x)).Finite := by
+  -- the support of `g` in `s` is finite, since the sum is nonzero
+  have hfin : (s ∩ Function.support g).Finite := by
     by_contra hinf
-    have : (∑ᶠ x ∈ ball c R, analyticOrderNatAt f x) = 0 := by
+    have : (∑ᶠ x ∈ s, g x) = 0 := by
       rw [finsum_mem_def]
       apply finsum_of_infinite_support
       intro hfin'
@@ -291,13 +289,34 @@ theorem zcnt_existsUnique_of_count_eq_one {f : ℂ → ℂ} {c : ℂ} {R : ℝ}
       simp only [Function.mem_support, ne_eq] at hxs ⊢
       simpa [hxb] using hxs
     omega
-  -- some point of the ball has nonzero order, hence is a zero
-  obtain ⟨z, hz, hzord⟩ : ∃ z ∈ ball c R, analyticOrderNatAt f z ≠ 0 := by
-    by_contra h
-    push Not at h
-    have : (∑ᶠ x ∈ ball c R, analyticOrderNatAt f x) = 0 :=
-      finsum_mem_eq_zero_of_forall_eq_zero fun x hx => h x hx
+  obtain ⟨z, hz, hzg⟩ : ∃ z ∈ s, g z ≠ 0 := by
+    by_contra h'
+    push Not at h'
+    have : (∑ᶠ x ∈ s, g x) = 0 := finsum_mem_eq_zero_of_forall_eq_zero fun x hx => h' x hx
     omega
+  refine ⟨z, ⟨hz, hzg⟩, ?_⟩
+  rintro y ⟨hy, hyg⟩
+  by_contra hyz
+  have h2 : ∑ i ∈ ({y, z} : Finset α), g i ≤ ∑ᶠ x ∈ s, g x := by
+    rw [← finsum_mem_inter_support, finsum_mem_eq_finite_toFinset_sum _ hfin]
+    apply Finset.sum_le_sum_of_subset_of_nonneg
+    · intro x hx
+      simp only [Finset.mem_insert, Finset.mem_singleton] at hx
+      rw [Set.Finite.mem_toFinset]
+      rcases hx with rfl | rfl
+      · exact ⟨hy, hyg⟩
+      · exact ⟨hz, hzg⟩
+    · intros; exact Nat.zero_le _
+  rw [Finset.sum_pair hyz] at h2
+  omega
+
+/-- **Zero count one means exactly one zero.** If `f` is analytic on `closedBall c R` and its
+zero count in the open disc (with multiplicity) is `1`, then `f` has exactly one zero there. -/
+theorem zcnt_existsUnique_of_count_eq_one {f : ℂ → ℂ} {c : ℂ} {R : ℝ}
+    (hf : AnalyticOnNhd ℂ f (closedBall c R))
+    (hcount : (∑ᶠ z ∈ ball c R, analyticOrderNatAt f z) = 1) :
+    ∃! z, z ∈ ball c R ∧ f z = 0 := by
+  obtain ⟨z, ⟨hz, hzord⟩, huniq⟩ := existsUnique_ne_zero_of_finsum_mem_eq_one hcount
   have hzero : ∀ y ∈ ball c R, analyticOrderNatAt f y ≠ 0 → f y = 0 := by
     intro y hy hord
     by_contra hne
@@ -315,30 +334,7 @@ theorem zcnt_existsUnique_of_count_eq_one {f : ℂ → ℂ} {c : ℂ} {R : ℝ}
     have h1 : analyticOrderAt f y ≠ 0 :=
       (hf y (ball_subset_closedBall hy)).analyticOrderAt_ne_zero.2 hy0
     simp [analyticOrderNatAt, ENat.toNat_eq_zero, h1, hfin_all y (ball_subset_closedBall hy)]
-  refine ⟨z, ⟨hz, hzero z hz hzord⟩, ?_⟩
-  rintro y ⟨hy, hy0⟩
-  by_contra hyz
-  have hsub : (({y, z} : Finset ℂ) : Set ℂ) ⊆ ball c R := by
-    intro x hx
-    simp only [Finset.coe_insert, Finset.coe_singleton, Set.mem_insert_iff,
-      Set.mem_singleton_iff] at hx
-    rcases hx with rfl | rfl
-    · exact hy
-    · exact hz
-  have h2 : ∑ i ∈ ({y, z} : Finset ℂ), analyticOrderNatAt f i ≤
-      ∑ᶠ x ∈ ball c R, analyticOrderNatAt f x := by
-    rw [← finsum_mem_inter_support, finsum_mem_eq_finite_toFinset_sum _ hfin]
-    apply Finset.sum_le_sum_of_subset_of_nonneg
-    · intro x hx
-      simp only [Finset.mem_insert, Finset.mem_singleton] at hx
-      rw [Set.Finite.mem_toFinset]
-      rcases hx with rfl | rfl
-      · exact ⟨hy, by simpa [Function.mem_support] using hpos x hy hy0⟩
-      · exact ⟨hz, by simpa [Function.mem_support] using hzord⟩
-    · intros; exact Nat.zero_le _
-  rw [Finset.sum_pair hyz] at h2
-  have := hpos y hy hy0
-  omega
+  exact ⟨z, ⟨hz, hzero z hz hzord⟩, fun y hy => huniq y ⟨hy.1, hpos y hy.1 hy.2⟩⟩
 
 /-- **Rouché transfer of a single zero.** If `f` and `g` are analytic on `closedBall c R`,
 `‖f z - g z‖ < ‖g z‖` on the bounding circle, and `g` has zero count `1` in the open disc, then

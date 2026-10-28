@@ -58,12 +58,14 @@ so the `n`-th term is `(1 + s/(n+1)) e^{-s/(n+1)}`. -/
 def weierstrassGammaTerm (s : ℂ) (n : ℕ) : ℂ :=
   (1 + s / (n + 1)) * exp (-s / (n + 1))
 
+/-- The complex cast of the harmonic number `H_n` is `∑_{i<n} 1/(i + 1)`. -/
 theorem harmonic_coe_eq_sum (n : ℕ) :
     (harmonic n : ℂ) = ∑ i ∈ range n, (1 : ℂ) / (i + 1) := by
   unfold harmonic
   push_cast
   simp [one_div]
 
+/-- For `‖z‖ ≤ 1`, `‖(1 + z) e^(-z) - 1‖ ≤ 3 ‖z‖²`. -/
 private lemma norm_one_add_mul_exp_neg_sub_one_le {z : ℂ} (hz : ‖z‖ ≤ 1) :
     ‖(1 + z) * exp (-z) - 1‖ ≤ 3 * ‖z‖ ^ 2 := by
   have hz' : ‖-z‖ ≤ 1 := by simpa
@@ -81,6 +83,7 @@ private lemma norm_one_add_mul_exp_neg_sub_one_le {z : ℂ} (hz : ‖z‖ ≤ 1)
         grw [h1, norm_mul z, h2]
     _ = 3 * ‖z‖ ^ 2 := by ring
 
+/-- The Weierstrass factors `(1 + s/(n+1)) e^(-s/(n+1))` differ from `1` by a summable sequence. -/
 theorem summable_weierstrassGammaTerm_sub_one (s : ℂ) :
     Summable fun n : ℕ => weierstrassGammaTerm s n - 1 := by
   have hbase : Summable fun n : ℕ => (1 : ℝ) / (n : ℝ) ^ 2 :=
@@ -108,6 +111,7 @@ theorem summable_weierstrassGammaTerm_sub_one (s : ℂ) :
     _ = (3 * ‖s‖ ^ 2) * ((1 : ℝ) / ((n + 1 : ℕ) : ℝ) ^ 2) := by
         rw [hnorm]; field
 
+/-- The Weierstrass product `∏ₙ (1 + s/(n+1)) e^(-s/(n+1))` is multipliable. -/
 theorem multipliable_weierstrassGammaTerm (s : ℂ) :
     Multipliable (weierstrassGammaTerm s) := by
   have h := Complex.multipliable_one_add_of_summable (summable_weierstrassGammaTerm_sub_one s)
@@ -115,6 +119,7 @@ theorem multipliable_weierstrassGammaTerm (s : ℂ) :
   ext n
   simp [weierstrassGammaTerm]
 
+/-- `n^s / Γₙ(s) = ∏_{j≤n} (s + j) / n!` for the Gauss approximants `Γₙ`. -/
 private lemma cpow_mul_recip_GammaSeq (s : ℂ) {n : ℕ} (hn : n ≠ 0) :
     (n : ℂ) ^ s * (GammaSeq s n)⁻¹ =
       (∏ j ∈ range (n + 1), (s + j)) / n.factorial := by
@@ -123,6 +128,7 @@ private lemma cpow_mul_recip_GammaSeq (s : ℂ) {n : ℕ} (hn : n ≠ 0) :
   rw [GammaSeq, inv_div]
   field [hpow]
 
+/-- The `n`-th partial Weierstrass product is `∏_{j<n} (s + j + 1)/n! · e^(-s Hₙ)`. -/
 private lemma prod_weierstrassGammaTerm (s : ℂ) (n : ℕ) :
     ∏ j ∈ range n, weierstrassGammaTerm s j =
       (∏ j ∈ range n, (s + (j + 1 : ℂ))) / n.factorial *
@@ -149,6 +155,8 @@ private lemma prod_weierstrassGammaTerm (s : ℂ) (n : ℕ) :
     simp [div_eq_mul_inv, mul_sum]
   rw [hdiv, hexp, mul_comm]
 
+/-- The `n`-th partial Weierstrass product times `s e^(γ s)` equals `e^(s(γ - (Hₙ - ln n))) /
+Γₙ(s)`. -/
 theorem weierstrassGamma_partial_eq (s : ℂ) {n : ℕ} (hn : n ≠ 0) :
     s * exp (γ * s) * ∏ j ∈ range n, weierstrassGammaTerm s j =
       exp (s * ((γ : ℂ) - ((harmonic n : ℝ) - Real.log n))) * (GammaSeq s n)⁻¹ := by
@@ -177,6 +185,7 @@ theorem weierstrassGamma_partial_eq (s : ℂ) {n : ℕ} (hn : n ≠ 0) :
     ring
   rw [← mul_assoc, hexp_combine]
 
+/-- The reciprocals of the Gauss approximants `Γₙ(s)` tend to `1/Γ(s)`. -/
 private lemma tendsto_recip_GammaSeq (s : ℂ) :
     Tendsto (fun n : ℕ => (GammaSeq s n)⁻¹) atTop (𝓝 (Gamma s)⁻¹) := by
   rcases eq_or_ne (Gamma s) 0 with hs0 | hs0
@@ -241,10 +250,12 @@ local notation "γ" => eulerMascheroniConstant
 def weierstrassGammaTerm (s : ℝ) (n : ℕ) : ℝ :=
   (1 + s / (n + 1)) * exp (-s / (n + 1))
 
+/-- The real Weierstrass factor agrees with the complex one at a real argument. -/
 theorem ofReal_weierstrassGammaTerm (s : ℝ) (n : ℕ) :
     (weierstrassGammaTerm s n : ℂ) = Complex.weierstrassGammaTerm s n := by
   simp [weierstrassGammaTerm, Complex.weierstrassGammaTerm, Complex.ofReal_exp]
 
+/-- The real Weierstrass product `∏ₙ (1 + s/(n+1)) e^(-s/(n+1))` is multipliable. -/
 theorem multipliable_weierstrassGammaTerm (s : ℝ) :
     Multipliable (weierstrassGammaTerm s) := by
   have hc : Summable fun n : ℕ => ((weierstrassGammaTerm s n - 1 : ℝ) : ℂ) := by
@@ -258,6 +269,8 @@ theorem multipliable_weierstrassGammaTerm (s : ℝ) :
   ext n
   simp [weierstrassGammaTerm]
 
+/-- The partial Weierstrass products `s e^(γ s) ∏_{j<n} (1 + s/(j+1)) e^(-s/(j+1))` tend to
+`1/Γ(s)`. -/
 theorem tendsto_weierstrassGamma_prod (s : ℝ) :
     Tendsto (fun n : ℕ => s * exp (γ * s) * ∏ j ∈ range n, weierstrassGammaTerm s j)
       atTop (𝓝 (Gamma s)⁻¹) := by
@@ -276,6 +289,8 @@ theorem tendsto_weierstrassGamma_prod (s : ℝ) :
     hre.congr fun _ => Complex.ofReal_re _
   simpa [Complex.ofReal_re] using this
 
+/-- DLMF 5.8.2, Weierstrass's product: `1/Γ(s) = s e^(γ s) ∏_{n≥1} (1 + s/n) e^(-s/n)` for real `s`.
+-/
 @[dlmf 5.8.E2]
 theorem one_div_Gamma_eq_tprod (s : ℝ) :
     (Gamma s)⁻¹ = s * exp (γ * s) * ∏' n : ℕ, weierstrassGammaTerm s n := by

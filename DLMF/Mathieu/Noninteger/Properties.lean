@@ -120,6 +120,7 @@ lemma m28b_data_transport {ν q ν' q' : ℂ} (F : ℂ × (ℤ → ℂ) → ℂ 
 
 /-! ### The case `q = 0` -/
 
+/-- For `ν ∉ ℤ` and `m ≠ 0`, `ν² ≠ (ν + 2m)²`. -/
 lemma m28b_sq_sub_ne {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {m : ℤ} (hm : m ≠ 0) :
     ν ^ 2 - (ν + 2 * m) ^ 2 ≠ 0 := by
   have e : ν ^ 2 - (ν + 2 * m) ^ 2 = -4 * m * (ν + m) := by ring
@@ -127,6 +128,7 @@ lemma m28b_sq_sub_ne {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) {m : ℤ} 
   refine mul_ne_zero (mul_ne_zero (by norm_num) (Int.cast_ne_zero.mpr hm)) fun h => ?_
   exact hν (-m) (by push_cast; linear_combination -h)
 
+/-- At `q = 0`, the sequence `δ_{m,0}` is a coefficient sequence for `me_ν` with `λ = ν²`. -/
 lemma m28b_isMeCoeffSeq_single (ν : ℂ) (t : ℝ) :
     IsMeCoeffSeq ν ((t : ℂ) * 0) (ν ^ 2) (Pi.single 0 1) := by
   refine ⟨fun m => ?_, ?_, ?_⟩
@@ -220,10 +222,12 @@ theorem mathieuNormalSegment_zero {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ �
 theorem m28b_not_int_neg {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) : ∀ m : ℤ, (m : ℂ) ≠ -ν :=
   fun m h => hν (-m) (by push_cast; rw [h, neg_neg])
 
+/-- If `ν ∉ ℤ` then `ν̄ ∉ ℤ`. -/
 lemma m28b_not_int_conj {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) :
     ∀ m : ℤ, (m : ℂ) ≠ conj ν :=
   fun m h => hν m (by rw [← Complex.conj_conj ν, ← h]; simp)
 
+/-- If `ν ∉ ℤ` then `ν + 2n ∉ ℤ` for every integer `n`. -/
 lemma m28b_not_int_add {ν : ℂ} (hν : ∀ m : ℤ, (m : ℂ) ≠ ν) (n : ℤ) :
     ∀ m : ℤ, (m : ℂ) ≠ ν + 2 * n :=
   fun m h => hν (m - 2 * n) (by push_cast; rw [h]; ring)
@@ -280,6 +284,7 @@ theorem m28b_data_neg_nu (ν q : ℂ) :
     (fun Λ c hp => ⟨_, _, by simpa using m28b_path_neg_nu hp, rfl⟩)
   exact this
 
+/-- `(-1)^m (-1)^m = 1` for an integer `m`. -/
 theorem m28b_negOnePow_mul_self (m : ℤ) : (-1 : ℂ) ^ m * (-1 : ℂ) ^ m = 1 := by
   rcases Int.even_or_odd m with h | h
   · rw [h.neg_one_zpow]; ring

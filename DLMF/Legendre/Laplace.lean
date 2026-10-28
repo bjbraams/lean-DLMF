@@ -28,19 +28,10 @@ noncomputable section
 
 namespace DLMF.Legendre
 
-/-- For `Re z > 0`, `z²` lies in the slit plane. -/
-theorem sq_mem_slitPlane {z : ℂ} (hz : 0 < z.re) : z ^ 2 ∈ slitPlane := by
-  rw [mem_slitPlane_iff]
-  by_cases hy : z.im = 0
-  · left; simp [pow_two, hy]; positivity
-  · right; simp [pow_two]
-    rw [show z.re * z.im + z.im * z.re = 2 * z.re * z.im by ring]
-    exact mul_ne_zero (mul_ne_zero two_ne_zero hz.ne') hy
-
 /-- For `Re z > 0`, `1 - 1/z²` lies in the cut plane. -/
 theorem one_sub_recip_sq_mem_cutPlane {z : ℂ} (hz : 0 < z.re) : 1 - 1 / z ^ 2 ∈ cutPlane := by
   rw [mem_cutPlane, sub_sub_cancel, one_div]
-  exact recip_mem_slitPlane' (sq_mem_slitPlane hz)
+  exact recip_mem_slitPlane' (Complex.sq_mem_slitPlane_of_re_pos hz)
 
 /-- Near `x ∈ (1, √2)`, Gauss's quadratic transformation and Pfaff's transformation give
 `P_ν(x) = x^ν F(-ν/2, (1-ν)/2; 1; 1 - 1/x²)`. -/

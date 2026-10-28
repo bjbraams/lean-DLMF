@@ -68,7 +68,8 @@ theorem reidContour_add_adjacent (z p : ℂ) (a b c : ℝ) :
   rw [reidContour, reidContour, reidContour, ← reidArc_add_adjacent z p a b c]
   ring
 
-/-- airyAi contour integral (DLMF 9.5.4). -/
+/-- `Ai(z) = (2πi)⁻¹ ∫ exp(t³/3 - zt) dt` along a contour from `∞ e^{-πi/3}` to
+`∞ e^{πi/3}` (DLMF 9.5.4). -/
 @[dlmf 9.5.E4]
 theorem airyAi_contour_integral (z : ℂ) :
     airyAi z = contourIntegral (fun t => exp (t ^ 3 / 3 - z * t)) (-π / 3) (π / 3) / (2 * π * I) := by
@@ -77,7 +78,8 @@ theorem airyAi_contour_integral (z : ℂ) :
   simp only [reidAiryA, Fin.val_zero]
   ring
 
-/-- airyBi contour integral (DLMF 9.5.5). -/
+/-- `Bi(z) = (2π)⁻¹ (∫_{-∞}^{∞e^{πi/3}} + ∫_{-∞}^{∞e^{-πi/3}}) exp(t³/3 - zt) dt`
+(DLMF 9.5.5). -/
 @[dlmf 9.5.E5]
 theorem airyBi_contour_integral (z : ℂ) :
     airyBi z = (contourIntegral (fun t => exp (t ^ 3 / 3 - z * t)) π (π / 3) +
@@ -469,7 +471,8 @@ theorem airyInt_integral_sin (x R : ℝ) :
   refine intervalIntegral.integral_congr fun t _ => ?_
   simp only [airyInt_osc_ofReal, exp_ofReal_mul_I_im]
 
-/-- airyAi cos integral (DLMF 9.5.1). -/
+/-- `Ai(x) = π⁻¹ ∫₀^∞ cos(t³/3 + xt) dt` for real `x`, as an improper integral
+(DLMF 9.5.1). -/
 @[dlmf 9.5.E1]
 theorem airyAi_cos_integral (x : ℝ) :
     HasIntegralAtTop (fun t : ℝ => (Real.cos (t ^ 3 / 3 + x * t) : ℂ)) 0 (π * airyAi x) := by
@@ -480,7 +483,8 @@ theorem airyAi_cos_integral (x : ℝ) :
   have hv : ((-(airyInt_w x).im : ℝ) : ℂ) = (ofReal ∘ re) (I * airyInt_w x) := by simp
   rw [hv]; exact h
 
-/-- airyBi real integral (DLMF 9.5.3). -/
+/-- `Bi(x) = π⁻¹ ∫₀^∞ (exp(-t³/3 + xt) + sin(t³/3 + xt)) dt` for real `x`, the first
+integral absolutely convergent and the second improper (DLMF 9.5.3). -/
 @[dlmf 9.5.E3]
 theorem airyBi_real_integral (x : ℝ) :
     IntegrableOn (fun t : ℝ => exp (-(t : ℂ) ^ 3 / 3 + x * t)) (Ioi 0) ∧
@@ -495,7 +499,8 @@ theorem airyBi_real_integral (x : ℝ) :
   rw [hv]; exact h
 
 
-/-- scorerGi sin integral (DLMF 9.12.19). -/
+/-- `Gi(x) = π⁻¹ ∫₀^∞ sin(t³/3 + xt) dt` for real `x`, as an improper integral
+(DLMF 9.12.19). -/
 @[dlmf 9.12.E19]
 theorem scorerGi_sin_integral (x : ℝ) :
     HasIntegralAtTop (fun t : ℝ => (Real.sin (t ^ 3 / 3 + x * t) : ℂ)) 0 (π * scorerGi x) := by
@@ -504,7 +509,8 @@ theorem scorerGi_sin_integral (x : ℝ) :
     (ofReal_ne_zero.mpr Real.pi_ne_zero)]
   exact h
 
-/-- airyAi neg cos integral (DLMF 9.5.2). -/
+/-- `Ai(-x) = (√x/π) ∫_{-1}^∞ cos(x^{3/2}(t³/3 + t² - 2/3)) dt` for `x > 0`, as an
+improper integral (DLMF 9.5.2). -/
 @[dlmf 9.5.E2]
 theorem airyAi_neg_cos_integral {x : ℝ} (hx : 0 < x) :
     HasIntegralAtTop (fun t : ℝ => (Real.cos (x ^ (3 / 2 : ℝ) * (t ^ 3 / 3 + t ^ 2 - 2 / 3)) : ℂ))
@@ -628,6 +634,47 @@ theorem airyInt_integral_symm (f : ℝ → ℂ) (hf : Continuous f) (R : ℝ) :
     add_comm, intervalIntegral.integral_add_adjacent_intervals (hf.intervalIntegrable _ _)
       (hf.intervalIntegrable _ _)]
 
+/-- The rectangle identity for the entire integrand `airyInt_osc x` with primitive `G`: the
+integrals over `[-R, R]` and `[-R, R] + ci` differ by the two vertical edge integrals. -/
+private lemma airyInt_gauss_rect {x : ℝ} {G : ℂ → ℂ} (hG : ∀ w, HasDerivAt G (airyInt_osc x w) w)
+    (hoc : Continuous (airyInt_osc x)) (c R : ℝ) :
+    (∫ a in (-R)..R, airyInt_osc x a) - ∫ a in (-R)..R, airyInt_osc x (a + c * I) =
+      -(∫ b in (0 : ℝ)..c, I * airyInt_osc x (R + b * I)) +
+        ∫ b in (0 : ℝ)..c, I * airyInt_osc x ((-R : ℝ) + b * I) := by
+  have h1 := airyInt_integral_line hG hoc 0 1 (-R) R
+  have h2 := airyInt_integral_line hG hoc (c * I) 1 (-R) R
+  have h3 := airyInt_integral_line hG hoc R I 0 c
+  have h4 := airyInt_integral_line hG hoc (-R : ℝ) I 0 c
+  simp only [one_mul, mul_one, zero_add, ofReal_zero, zero_mul, add_zero] at h1 h2 h3 h4
+  have e2 : ∫ a in (-R)..R, airyInt_osc x (a + c * I) =
+      ∫ r in (-R)..R, airyInt_osc x (c * I + r) := by
+    refine intervalIntegral.integral_congr fun a _ => ?_; simp only [add_comm]
+  rw [e2, h1, h2, h3, h4]
+  push_cast
+  ring_nf
+
+/-- The two vertical edge integrals of `airyInt_gauss_rect` tend to `0` as `R → ∞`. -/
+private lemma airyInt_gauss_vert_tendsto {x c : ℝ} (hx : 0 ≤ x) (hc : 0 ≤ c) :
+    Tendsto (fun R : ℝ => -(∫ b in (0 : ℝ)..c, I * airyInt_osc x (R + b * I)) +
+      ∫ b in (0 : ℝ)..c, I * airyInt_osc x ((-R : ℝ) + b * I)) atTop (𝓝 0) := by
+  set V : ℝ → ℂ := fun s => ∫ b in (0 : ℝ)..c, I * airyInt_osc x (s + b * I)
+  have hV : ∀ s : ℝ, 1 ≤ s ^ 2 → ‖V s‖ ≤ Real.exp (c ^ 3 / 3) / s ^ 2 := fun s hs =>
+    airyInt_vert_bound hx hc hs
+  have hb : Tendsto (fun R : ℝ => Real.exp (c ^ 3 / 3) / R ^ 2) atTop (𝓝 0) :=
+    (tendsto_const_nhds (x := Real.exp (c ^ 3 / 3))).div_atTop (tendsto_pow_atTop two_ne_zero)
+  have h1 : Tendsto V atTop (𝓝 0) := by
+    refine squeeze_zero_norm' ?_ hb
+    filter_upwards [eventually_ge_atTop 1] with R hR
+    exact hV R (by nlinarith)
+  have h2 : Tendsto (fun R => V (-R)) atTop (𝓝 0) := by
+    refine squeeze_zero_norm' ?_ hb
+    filter_upwards [eventually_ge_atTop 1] with R hR
+    have := hV (-R) (by nlinarith)
+    rwa [neg_sq] at this
+  have h := h1.neg.add h2
+  rw [neg_zero, add_zero] at h
+  exact h
+
 /-- Real case of 9.5.7: `Ai(x) = e^{-ζ}/π ∫₀^∞ e^{-√x t²} cos(t³/3) dt` for `x > 0`. -/
 theorem airyInt_gauss_real {x : ℝ} (hx : 0 < x) :
     airyAi x = exp (-(2 / 3 * (Real.sqrt x : ℂ) ^ 3)) / π *
@@ -639,25 +686,8 @@ theorem airyInt_gauss_real {x : ℝ} (hx : 0 < x) :
     obtain ⟨g, hg⟩ := hd.isExactOn_univ
     exact ⟨g, fun w => hg w (mem_univ w)⟩
   have hoc := airyInt_continuous_osc x
-  set V : ℝ → ℂ := fun s => ∫ b in (0 : ℝ)..c, I * airyInt_osc x (s + b * I)
   set k : ℝ → ℂ := fun t => exp (-(c : ℂ) * (t : ℂ) ^ 2) * cos ((t : ℂ) ^ 3 / 3)
-  -- the rectangle identity
-  have hrect : ∀ R : ℝ, (∫ a in (-R)..R, airyInt_osc x a) -
-      ∫ a in (-R)..R, airyInt_osc x (a + c * I) = -V R + V (-R) := by
-    intro R
-    have h1 := airyInt_integral_line hG hoc 0 1 (-R) R
-    have h2 := airyInt_integral_line hG hoc (c * I) 1 (-R) R
-    have h3 := airyInt_integral_line hG hoc R I 0 c
-    have h4 := airyInt_integral_line hG hoc (-R : ℝ) I 0 c
-    simp only [one_mul, mul_one, zero_add, ofReal_zero, zero_mul, add_zero] at h1 h2 h3 h4
-    have e2 : ∫ a in (-R)..R, airyInt_osc x (a + c * I) =
-        ∫ r in (-R)..R, airyInt_osc x (c * I + r) := by
-      refine intervalIntegral.integral_congr fun a _ => ?_; simp only [add_comm]
-    have e3 : V R = ∫ r in (0 : ℝ)..c, I * airyInt_osc x (R + r * I) := rfl
-    have e4 : V (-R) = ∫ r in (0 : ℝ)..c, I * airyInt_osc x ((-R : ℝ) + r * I) := rfl
-    rw [e2, h1, h2, e3, e4, h3, h4]
-    push_cast
-    ring_nf
+  have hrect := airyInt_gauss_rect hG hoc c
   -- limits
   have hlim1 : Tendsto (fun R : ℝ => ∫ a in (-R)..R, airyInt_osc x a) atTop
       (𝓝 (2 * (π * airyAi x))) := by
@@ -667,9 +697,7 @@ theorem airyInt_gauss_real {x : ℝ} (hx : 0 < x) :
       ← intervalIntegral.integral_const_mul]
     refine intervalIntegral.integral_congr fun a _ => ?_
     rw [airyInt_osc_add_neg]
-  have hkint : Integrable k := by
-    have := airyInt_integrable_gauss_cos (s := (c : ℂ)) (by simpa using hc0)
-    exact this
+  have hkint : Integrable k := airyInt_integrable_gauss_cos (s := (c : ℂ)) (by simpa using hc0)
   have hlim2 : Tendsto (fun R : ℝ => ∫ a in (-R)..R, airyInt_osc x (a + c * I)) atTop
       (𝓝 (2 * exp (-(2 / 3 * (c : ℂ) ^ 3)) * ∫ t : ℝ in Ioi 0, k t)) := by
     have h := (intervalIntegral_tendsto_integral_Ioi 0 hkint.integrableOn tendsto_id).const_mul
@@ -684,21 +712,7 @@ theorem airyInt_gauss_real {x : ℝ} (hx : 0 < x) :
     rw [hcdef, airyInt_osc_shift hx.le, airyInt_osc_shift hx.le, ← hcdef, Complex.cos]
     push_cast
     ring_nf
-  have hV : ∀ s : ℝ, 1 ≤ s ^ 2 → ‖V s‖ ≤ Real.exp (c ^ 3 / 3) / s ^ 2 := fun s hs =>
-    airyInt_vert_bound hx.le hc0.le hs
-  have hVlim : Tendsto (fun R : ℝ => -V R + V (-R)) atTop (𝓝 0) := by
-    have hb : Tendsto (fun R : ℝ => Real.exp (c ^ 3 / 3) / R ^ 2) atTop (𝓝 0) :=
-      (tendsto_const_nhds (x := Real.exp (c ^ 3 / 3))).div_atTop (tendsto_pow_atTop two_ne_zero)
-    have h1 : Tendsto V atTop (𝓝 0) := by
-      refine squeeze_zero_norm' ?_ hb
-      filter_upwards [eventually_ge_atTop 1] with R hR
-      exact hV R (by nlinarith)
-    have h2 : Tendsto (fun R => V (-R)) atTop (𝓝 0) := by
-      refine squeeze_zero_norm' ?_ hb
-      filter_upwards [eventually_ge_atTop 1] with R hR
-      have := hV (-R) (by nlinarith)
-      rwa [neg_sq] at this
-    simpa using h1.neg.add h2
+  have hVlim := airyInt_gauss_vert_tendsto (x := x) hx.le hc0.le
   have huniq := tendsto_nhds_unique (hlim1.sub hlim2) (hVlim.congr fun R => (hrect R).symm)
   have hpi : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   rw [div_mul_eq_mul_div, eq_div_iff hpi]
@@ -758,6 +772,38 @@ For `x > 0` the substitution `s = t³/3` turns 9.5.6 into Schläfli's integral f
 section CubicForm
 
 open DLMF.Bessel
+/-- The substitution `s = t³/3` in Schläfli's integral for `K_{-1/3}(ζ)`: the transformed
+integrand is `3 · 3^{2/3} exp(-t³/3 - x³/(3t³))`. -/
+private lemma airyInt_cubic_pt {x : ℝ} (hx : 0 < x) {t : ℝ} (ht : 0 < t) :
+    (|(3 : ℝ)| * t ^ ((3 : ℝ) - 1)) •
+      (exp (-((3⁻¹ * t ^ (3 : ℝ) : ℝ) : ℂ) -
+          (airyZeta x : ℂ) ^ 2 / (4 * ((3⁻¹ * t ^ (3 : ℝ) : ℝ) : ℂ))) *
+        ((3⁻¹ * t ^ (3 : ℝ) : ℝ) : ℂ) ^ (-(-1 / 3 : ℂ) - 1)) =
+      ((3 * (3 : ℝ) ^ (2 / 3 : ℝ) : ℝ) : ℂ) *
+        exp (-(t : ℂ) ^ 3 / 3 - (x : ℂ) ^ 3 / (3 * (t : ℂ) ^ 3)) := by
+  have ht3 : t ^ (3 : ℝ) = t ^ 3 := Real.rpow_natCast t 3
+  have ht2 : t ^ ((3 : ℝ) - 1) = t ^ 2 := by
+    rw [show (3 : ℝ) - 1 = (2 : ℕ) by norm_num, Real.rpow_natCast]
+  rw [ht3, ht2, abs_of_pos (by norm_num : (0 : ℝ) < 3), Complex.real_smul]
+  have hs : 0 < 3⁻¹ * t ^ 3 := by positivity
+  have hpow : ((3⁻¹ * t ^ 3 : ℝ) : ℂ) ^ (-(-1 / 3 : ℂ) - 1) =
+      (((3 : ℝ) ^ (2 / 3 : ℝ) * (t ^ 2)⁻¹ : ℝ) : ℂ) := by
+    rw [show -(-1 / 3 : ℂ) - 1 = ((-(2 / 3) : ℝ) : ℂ) by push_cast; ring, ← ofReal_cpow hs.le]
+    congr 1
+    rw [Real.mul_rpow (by norm_num) (by positivity), Real.inv_rpow (by norm_num),
+      ← Real.rpow_neg (by norm_num), neg_neg, ← Real.rpow_natCast t 3, ← Real.rpow_mul ht.le,
+      show ((3 : ℕ) : ℝ) * -(2 / 3) = -((2 : ℕ) : ℝ) by norm_num, Real.rpow_neg ht.le,
+      Real.rpow_natCast]
+  have hX2 : (airyZeta x : ℂ) ^ 2 = 4 * ((x : ℂ) ^ 3 / 9) := by
+    rw [← airyZeta_sq_div_four hx.le]; ring
+  have htc : (t : ℂ) ≠ 0 := ofReal_ne_zero.mpr ht.ne'
+  have hexp : -((3⁻¹ * t ^ 3 : ℝ) : ℂ) - (airyZeta x : ℂ) ^ 2 / (4 * ((3⁻¹ * t ^ 3 : ℝ) : ℂ)) =
+      -(t : ℂ) ^ 3 / 3 - (x : ℂ) ^ 3 / (3 * (t : ℂ) ^ 3) := by
+    rw [hX2]; push_cast; field_simp; ring
+  rw [hpow, hexp]
+  push_cast
+  field_simp
+
 /-- Real case of 9.5.6, via Schläfli's integral for `K_{1/3}`. -/
 theorem airyInt_cubic_real {x : ℝ} (hx : 0 < x) :
     airyAi x = Real.sqrt 3 / (2 * π) *
@@ -774,31 +820,8 @@ theorem airyInt_cubic_real {x : ℝ} (hx : 0 < x) :
   rw [mul_zero, inv_inv] at e1
   have hpt : ∀ t : ℝ, 0 < t → (|(3 : ℝ)| * t ^ ((3 : ℝ) - 1)) • h (3⁻¹ * t ^ (3 : ℝ)) =
       ((3 * (3 : ℝ) ^ (2 / 3 : ℝ) : ℝ) : ℂ) *
-        exp (-(t : ℂ) ^ 3 / 3 - (x : ℂ) ^ 3 / (3 * (t : ℂ) ^ 3)) := by
-    intro t ht
-    have ht3 : t ^ (3 : ℝ) = t ^ 3 := Real.rpow_natCast t 3
-    have ht2 : t ^ ((3 : ℝ) - 1) = t ^ 2 := by
-      rw [show (3 : ℝ) - 1 = (2 : ℕ) by norm_num, Real.rpow_natCast]
-    rw [ht3, ht2, abs_of_pos (by norm_num : (0 : ℝ) < 3), Complex.real_smul, hh]
-    simp only
-    have hs : 0 < 3⁻¹ * t ^ 3 := by positivity
-    have hpow : ((3⁻¹ * t ^ 3 : ℝ) : ℂ) ^ (-(-1 / 3 : ℂ) - 1) =
-        (((3 : ℝ) ^ (2 / 3 : ℝ) * (t ^ 2)⁻¹ : ℝ) : ℂ) := by
-      rw [show -(-1 / 3 : ℂ) - 1 = ((-(2 / 3) : ℝ) : ℂ) by push_cast; ring, ← ofReal_cpow hs.le]
-      congr 1
-      rw [Real.mul_rpow (by norm_num) (by positivity), Real.inv_rpow (by norm_num),
-        ← Real.rpow_neg (by norm_num), neg_neg, ← Real.rpow_natCast t 3, ← Real.rpow_mul ht.le,
-        show ((3 : ℕ) : ℝ) * -(2 / 3) = -((2 : ℕ) : ℝ) by norm_num, Real.rpow_neg ht.le,
-        Real.rpow_natCast]
-    have hX2 : (X : ℂ) ^ 2 = 4 * ((x : ℂ) ^ 3 / 9) := by
-      rw [hXdef, ← airyZeta_sq_div_four hx.le]; ring
-    have htc : (t : ℂ) ≠ 0 := ofReal_ne_zero.mpr ht.ne'
-    have hexp : -((3⁻¹ * t ^ 3 : ℝ) : ℂ) - (X : ℂ) ^ 2 / (4 * ((3⁻¹ * t ^ 3 : ℝ) : ℂ)) =
-        -(t : ℂ) ^ 3 / 3 - (x : ℂ) ^ 3 / (3 * (t : ℂ) ^ 3) := by
-      rw [hX2]; push_cast; field_simp; ring
-    rw [hpow, hexp]
-    push_cast
-    field_simp
+        exp (-(t : ℂ) ^ 3 / 3 - (x : ℂ) ^ 3 / (3 * (t : ℂ) ^ 3)) :=
+    fun t ht => airyInt_cubic_pt hx ht
   have hF : (3 : ℂ) * ∫ s : ℝ in Ioi 0, h s = ((3 * (3 : ℝ) ^ (2 / 3 : ℝ) : ℝ) : ℂ) *
       ∫ t : ℝ in Ioi 0, exp (-(t : ℂ) ^ 3 / 3 - (x : ℂ) ^ 3 / (3 * (t : ℂ) ^ 3)) := by
     calc (3 : ℂ) * ∫ s : ℝ in Ioi 0, h s = ∫ y : ℝ in Ioi 0, h (3⁻¹ * y) := by
@@ -922,7 +945,8 @@ theorem airyInt_cubic_zero :
 
 end CubicForm
 
-/-- airyAi cubic integral (DLMF 9.5.6). -/
+/-- `Ai(z) = (√3/(2π)) ∫₀^∞ exp(-t³/3 - z³/(3t³)) dt` for `|arg z| < π/6`
+(DLMF 9.5.6). -/
 @[dlmf 9.5.E6]
 theorem airyAi_cubic_integral {z : ℂ} (hz : |arg z| < π / 6) :
     airyAi z = Real.sqrt 3 / (2 * π) *
@@ -964,7 +988,8 @@ theorem airyAi_cubic_integral {z : ℂ} (hz : |arg z| < π / 6) :
     (fun x hx _ => by rw [airyInt_cubic_real hx]) (airyInt_mem_sector hα hz0 hz)
   exact h
 
-/-- airyAi gaussian cos integral (DLMF 9.5.7). -/
+/-- `Ai(z) = (e^{-ζ}/π) ∫₀^∞ exp(-z^{1/2} t²) cos(t³/3) dt` for `|arg z| < π`, with
+`ζ = (2/3) z^{3/2}` (DLMF 9.5.7). -/
 @[dlmf 9.5.E7]
 theorem airyAi_gaussian_cos_integral {z : ℂ} (hz : z ∈ slitPlane) :
     airyAi z = exp (-airyZetaComplex z) / π *
@@ -1024,7 +1049,7 @@ theorem airyInt_laplace_pointwise {z : ℂ} (hz0 : z ≠ 0) {θ : ℝ} (hθ : |�
   set v : ℂ := (r : ℂ) * exp (θ * I)
   set w : ℂ := 1 + v
   have hv0 : v ≠ 0 := airyRot_ofReal_mul_exp_ne_zero hr θ
-  have hw : w ∈ slitPlane := airyRot_one_add_mem_slitPlane hr.le hθ
+  have hw : w ∈ slitPlane := airySt_one_add_mem hr.le hθ
   have hw0 : w ≠ 0 := slitPlane_ne_zero hw
   have hcr : 0 < Real.exp ρ * r := by positivity
   have h2w : 2 + ((Real.exp ρ * r : ℝ) : ℂ) / airyZetaComplex z = ((2 : ℝ) : ℂ) * w := by
@@ -1049,7 +1074,8 @@ theorem airyInt_laplace_pointwise {z : ℂ} (hz0 : z ≠ 0) {θ : ℝ} (hθ : |�
   ring
 
 
-/-- airyAi laplace integral (DLMF 9.5.8). -/
+/-- The Laplace-type integral `Ai(z) = e^{-ζ} ζ^{-1/6} / (√π 48^{1/6} Γ(5/6))
+∫₀^∞ e^{-t} t^{-1/6} (2 + t/ζ)^{-1/6} dt` for `|arg z| < 2π/3` (DLMF 9.5.8). -/
 @[dlmf 9.5.E8]
 theorem airyAi_laplace_integral {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 2 * π / 3) :
     airyAi z = exp (-airyZetaComplex z) * exp (-airyLogZeta z / 6) /

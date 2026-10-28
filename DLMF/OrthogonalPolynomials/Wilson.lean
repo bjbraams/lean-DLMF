@@ -38,6 +38,8 @@ def wilson (a b c d : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
         (∏ j ∈ Finset.range k, ((a + j) ^ 2 + x)) /
         (poch (a + b) k * poch (a + c) k * poch (a + d) k * k.factorial)
 
+/-- The continuous dual Hahn polynomial `S_n(x; a, b, c)` with polynomial argument `x = y²`,
+as the finite `₃F₂` sum of DLMF 18.26.2. -/
 @[dlmf 18.26.E2]
 def continuousDualHahn (a b c : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
   poch (a + b) n * poch (a + c) n *
@@ -45,12 +47,16 @@ def continuousDualHahn (a b c : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
       (∏ j ∈ Finset.range k, ((a + j) ^ 2 + x)) /
       (poch (a + b) k * poch (a + c) k * k.factorial)
 
+/-- The Racah polynomial `R_n(x; α, β, γ, δ)` in the variable `x = λ(y)`, as the finite `₄F₃`
+sum of DLMF 18.26.3. -/
 @[dlmf 18.26.E3]
 def racah (α β γ δ : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
   ∑ k ∈ Finset.range (n + 1), poch (-(n : ℂ)) k * poch (n + α + β + 1) k *
     (∏ j ∈ Finset.range k, ((j : ℂ) * (j + γ + δ + 1) - x)) /
     (poch (α + 1) k * poch (β + δ + 1) k * poch (γ + 1) k * k.factorial)
 
+/-- The dual Hahn polynomial `R_n(x; γ, δ, N)` in the variable `x = λ(y)`, as the finite `₃F₂`
+sum of DLMF 18.26.4. -/
 @[dlmf 18.26.E4]
 def dualHahn (γ δ : ℂ) (N n : ℕ) (x : ℂ) : ℂ :=
   ∑ k ∈ Finset.range (n + 1), poch (-(n : ℂ)) k *
@@ -66,6 +72,7 @@ theorem poch_mul_eq_prod (u v : ℂ) (k : ℕ) :
     rw [poch_succ, poch_succ, Finset.prod_range_succ, ← ih]
     ring
 
+/-- `∏_{j<k} ((a+j)² + y²) = (a+iy)_k (a-iy)_k`. -/
 theorem poch_conjugate_pair (a y : ℂ) (k : ℕ) :
     ∏ j ∈ Finset.range k, ((a + j) ^ 2 + y ^ 2) = poch (a + I * y) k * poch (a - I * y) k := by
   rw [poch_mul_eq_prod]
@@ -75,6 +82,7 @@ theorem poch_conjugate_pair (a y : ℂ) (k : ℕ) :
     _ = (a + I * y + j) * (a - I * y + j) + (I ^ 2 + 1) * y ^ 2 := by ring
     _ = _ := by rw [I_sq]; ring
 
+/-- `∏_{j<k} (j(j+v) - y(y+v)) = (-y)_k (y+v)_k`. -/
 theorem poch_quadratic_pair (v y : ℂ) (k : ℕ) :
     ∏ j ∈ Finset.range k, ((j : ℂ) * (j + v) - y * (y + v)) =
       poch (-y) k * poch (y + v) k := by
@@ -187,6 +195,7 @@ theorem tendsto_poch_ratio_atTop (u v : ℂ) (k : ℕ) :
   simp only [Pi.div_apply]
   rw [div_div_div_cancel_right₀ hd']
 
+/-- For fixed `u` and `k`, eventually as `d → ∞` the symbol `(u+d)_k` is nonzero. -/
 theorem eventually_poch_add_ne_zero (u : ℂ) (k : ℕ) :
     ∀ᶠ d : ℝ in atTop, poch (u + d) k ≠ 0 := by
   filter_upwards [(tendsto_poch_add_div_pow u k).eventually_ne one_ne_zero] with d hd h
@@ -293,7 +302,7 @@ theorem wilson_central_difference {a b c d : ℂ}
     have := prod_sq_add_shift a y (-1) k
     simp only [neg_mul, one_mul, neg_div] at this
     rw [show y - I / 2 = y + -(I / 2) by ring, this]
-    congr 2 <;> ring
+    congr 2; ring
   have e3 : ∀ k, ∏ j ∈ Finset.range k, ((a + 1 / 2 + j) ^ 2 + y ^ 2) =
       poch (a + I * y + 1 / 2) k * poch (a - I * y + 1 / 2) k := fun k => by
     have := prod_sq_add_shift (a + 1 / 2) y 0 k
@@ -301,7 +310,7 @@ theorem wilson_central_difference {a b c d : ℂ}
     rw [this]; congr 2 <;> ring
   simp_rw [e1, e2, e3]
   rw [← mul_sub, ← Finset.sum_sub_distrib, Finset.sum_range_succ']
-  simp only [poch_zero, mul_one, one_mul, Nat.factorial_zero, Nat.cast_one, div_one, sub_self,
+  simp only [poch_zero, mul_one, Nat.factorial_zero, Nat.cast_one, div_one, sub_self,
     add_zero]
   rw [Finset.mul_sum, Finset.mul_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
@@ -341,7 +350,7 @@ theorem continuousDualHahn_central_difference {a b c : ℂ}
     have := prod_sq_add_shift a y (-1) k
     simp only [neg_mul, one_mul, neg_div] at this
     rw [show y - I / 2 = y + -(I / 2) by ring, this]
-    congr 2 <;> ring
+    congr 2; ring
   have e3 : ∀ k, ∏ j ∈ Finset.range k, ((a + 1 / 2 + j) ^ 2 + y ^ 2) =
       poch (a + I * y + 1 / 2) k * poch (a - I * y + 1 / 2) k := fun k => by
     have := prod_sq_add_shift (a + 1 / 2) y 0 k
@@ -349,7 +358,7 @@ theorem continuousDualHahn_central_difference {a b c : ℂ}
     rw [this]; congr 2 <;> ring
   simp_rw [e1, e2, e3]
   rw [← mul_sub, ← Finset.sum_sub_distrib, Finset.sum_range_succ']
-  simp only [poch_zero, mul_one, one_mul, Nat.factorial_zero, Nat.cast_one, div_one, sub_self,
+  simp only [poch_zero, mul_one, Nat.factorial_zero, Nat.cast_one, div_one, sub_self,
     add_zero]
   rw [Finset.mul_sum, Finset.mul_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun k _ => ?_

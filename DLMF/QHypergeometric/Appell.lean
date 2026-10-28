@@ -125,130 +125,50 @@ theorem summable_qAppell (a ap b bp c cp q x y : ℂ) (hq : ‖q‖<1)
     calc _ ≤ A*B*‖x‖^p.1*‖y‖^p.2*(Dq*Dc*(Dq*Dcp)) := by gcongr <;> simp_all
       _ = _ := by ring
 
-/-- Reduction of the first q-Appell function to a 3-phi-2. -/
-@[dlmf 17.11.E1]
-theorem qAppell1_transformation (a b bp c q x y : ℂ)
-    (hq : ‖q‖<1) (ha0 : a≠0) (ha : ‖a‖<1) (hx : ‖x‖<1) (hy : ‖y‖<1)
-    (hc : qDenominatorRegular [c,b*x,bp*y] q) :
-    qAppell1 a b bp c q x y =
-      qPochhammerListInf [a,b*x,bp*y] q / qPochhammerListInf [c,x,y] q *
-        qPhi [c/a,x,y] [b*x,bp*y] q a := by
-  have hcr : ∀ k : ℕ, c*q^k ≠ 1 := hc c (by simp)
-  have hbxr : ∀ k : ℕ, b*x*q^k ≠ 1 := hc (b*x) (by simp)
-  have hbyr : ∀ k : ℕ, bp*y*q^k ≠ 1 := hc (bp*y) (by simp)
-  have hcf : ∀ k : ℕ, 1 - c*q^k ≠ 0 := fun k => sub_ne_zero.mpr (hcr k).symm
-  have hbxf : ∀ k : ℕ, 1 - b*x*q^k ≠ 0 := fun k => sub_ne_zero.mpr (hbxr k).symm
-  have hbyf : ∀ k : ℕ, 1 - bp*y*q^k ≠ 0 := fun k => sub_ne_zero.mpr (hbyr k).symm
-  have haf : ∀ k : ℕ, 1 - a*q^k ≠ 0 := one_sub_mul_pow_ne_zero_of_norm ha hq
-  have hxf : ∀ k : ℕ, 1 - x*q^k ≠ 0 := one_sub_mul_pow_ne_zero_of_norm hx hq
-  have hyf : ∀ k : ℕ, 1 - y*q^k ≠ 0 := one_sub_mul_pow_ne_zero_of_norm hy hq
-  have hpow : ∀ (w : ℂ) (j : ℕ), ‖w*q^j‖ ≤ ‖w‖ := fun w j => by
-    rw [norm_mul, norm_pow]
-    exact mul_le_of_le_one_right (norm_nonneg _) (pow_le_one₀ (norm_nonneg _) hq.le)
-  set C : ℕ → ℂ := fun j => qPochhammer (c/a) q j / qPochhammer q q j * a^j with hC
-  set F : ℂ → ℂ → ℕ → ℕ → ℂ := fun β w j m => qPochhammer β q m / qPochhammer q q m * (w*q^j)^m
-    with hF
-  set G : (ℕ × ℕ) × ℕ → ℂ := fun z => C z.2 * (F b x z.2 z.1.1 * F bp y z.2 z.1.2) with hG
+/-- Summability of the transformed double series in `qAppell2_transformation`. -/
+private lemma qAppell2_transformation_summable {a b bp c cp q x y : ℂ} (hq : ‖q‖<1) (hb : ‖b‖<1)
+    (hy : ‖y‖<1) (hcpr : ∀ k : ℕ, cp*q^k ≠ 1) (haxr : ∀ k : ℕ, a*x*q^k ≠ 1) :
+    Summable (fun p : ℕ × ℕ => qPochhammerList [a,bp] q p.1 * qPochhammerList [c/b,x] q p.2 *
+            b^p.2 * y^p.1 /
+            (qPochhammerList [q,cp] q p.1 * qPochhammer q q p.2 *
+              qPochhammer (a*x) q (p.1+p.2))) := by
+  obtain ⟨A, hA0, hA⟩ := qbR4_qPochhammer_bdd a hq
+  obtain ⟨Bp, hBp0, hBp⟩ := qbR4_qPochhammer_bdd bp hq
+  obtain ⟨Cb, hCb0, hCb⟩ := qbR4_qPochhammer_bdd (c/b) hq
+  obtain ⟨X, hX0, hX⟩ := qbR4_qPochhammer_bdd x hq
   obtain ⟨Dq, hDq0, hDq⟩ := qbR4_qPochhammer_inv_bdd hq (qbR4_q_regular hq)
-  have hFb : ∀ (β w : ℂ), ∃ M, 0 ≤ M ∧ ∀ j m, ‖F β w j m‖ ≤ M * ‖w‖^m := by
-    intro β w
-    obtain ⟨B, hB0, hB⟩ := qbR4_qPochhammer_bdd β hq
-    refine ⟨B*Dq, by positivity, fun j m => ?_⟩
-    simp only [hF, div_eq_mul_inv, norm_mul, norm_pow]
-    gcongr
-    · exact hB m
-    · exact hDq m
-    · simpa [norm_mul, norm_pow] using hpow w j
-  obtain ⟨Mb, hMb0, hMb⟩ := hFb b x
-  obtain ⟨My, hMy0, hMy⟩ := hFb bp y
-  have hCb : ∃ M, 0 ≤ M ∧ ∀ j, ‖C j‖ ≤ M * ‖a‖^j := by
-    obtain ⟨B, hB0, hB⟩ := qbR4_qPochhammer_bdd (c/a) hq
-    refine ⟨B*Dq, by positivity, fun j => ?_⟩
-    simp only [hC]
-    generalize c/a = ca at hB ⊢
-    simp only [div_eq_mul_inv, norm_mul, norm_pow]
-    gcongr
-    · exact hB j
-    · exact hDq j
-  obtain ⟨Mc, hMc0, hMc⟩ := hCb
-  have hGs : Summable G := by
-    have h2 : Summable fun p : ℕ × ℕ => ‖x‖^p.1 * ‖y‖^p.2 :=
-      Summable.mul_of_nonneg (summable_geometric_of_lt_one (norm_nonneg _) hx)
-        (summable_geometric_of_lt_one (norm_nonneg _) hy) (fun _ => by positivity)
-        (fun _ => by positivity)
-    have h3 := Summable.mul_of_nonneg h2 (summable_geometric_of_lt_one (norm_nonneg _) ha)
-      (fun _ => by positivity) (fun _ => by positivity)
-    refine Summable.of_norm_bounded (h3.mul_left (Mc*Mb*My)) fun z => ?_
-    simp only [hG, norm_mul]
-    calc _ ≤ (Mc*‖a‖^z.2) * ((Mb*‖x‖^z.1.1) * (My*‖y‖^z.1.2)) := by
-          gcongr
-          · exact hMc _
-          · exact hMb _ _
-          · exact hMy _ _
-      _ = _ := by ring
-  have hc0 : qPochhammerInf c q ≠ 0 := qPochhammerInf_ne_zero hq hcf
-  have hstep1 : ∀ p : ℕ × ℕ, qAppell1Term a b bp c q x y p =
-      qPochhammerInf a q / qPochhammerInf c q * ∑' j : ℕ, G (p, j) := by
-    rintro ⟨m, n⟩
-    have hk : ‖a*q^(m+n)‖ < 1 := lt_of_le_of_lt (hpow a _) ha
-    have hqb := q_binomial_theorem (a := c/a) hq hk
-    rw [show c/a*(a*q^(m+n)) = c*q^(m+n) by field_simp] at hqb
-    have hW : ∀ j : ℕ, G ((m,n), j) = qPochhammer b q m / qPochhammer q q m * x^m *
-        (qPochhammer bp q n / qPochhammer q q n * y^n) *
-        (qPochhammer (c/a) q j / qPochhammer q q j * (a*q^(m+n))^j) := by
-      intro j
-      simp only [hG, hC, hF, mul_pow, pow_add, ← pow_mul]
-      ring
-    rw [tsum_congr hW, tsum_mul_left, ← hqb]
-    have hA := qPochhammer_eq_div_inf hq haf (m+n)
-    have hCc := qPochhammer_eq_div_inf hq hcf (m+n)
-    have h1 := qPochhammerInf_shift_ne_zero hq haf (m+n)
-    have h2 := qPochhammerInf_shift_ne_zero hq hcf (m+n)
-    have hqm := qPochhammer_self_ne_zero hq m
-    have hqn := qPochhammer_self_ne_zero hq n
-    simp only [qAppell1Term]
-    rw [hA, hCc]
-    field_simp
-  have hGu : Summable (Function.uncurry fun (p : ℕ × ℕ) (j : ℕ) => G (p, j)) := hGs
-  have hsF : ∀ (β w : ℂ) (M : ℝ), ‖w‖ < 1 → (∀ j m, ‖F β w j m‖ ≤ M * ‖w‖^m) →
-      ∀ j, Summable fun m => ‖F β w j m‖ := fun β w M hw hM j =>
-    Summable.of_nonneg_of_le (fun _ => norm_nonneg _) (hM j)
-      ((summable_geometric_of_lt_one (norm_nonneg _) hw).mul_left M)
-  have hstep4 : ∀ j : ℕ, ∑' p : ℕ × ℕ, G (p, j) =
-      C j * (qPochhammerInf (b*(x*q^j)) q / qPochhammerInf (x*q^j) q *
-        (qPochhammerInf (bp*(y*q^j)) q / qPochhammerInf (y*q^j) q)) := by
-    intro j
-    rw [q_binomial_theorem hq (lt_of_le_of_lt (hpow x j) hx),
-      q_binomial_theorem hq (lt_of_le_of_lt (hpow y j) hy),
-      tsum_mul_tsum_of_summable_norm (hsF b x Mb hx hMb j) (hsF bp y My hy hMy j),
-      ← tsum_mul_left]
-  have hfin : ∀ j : ℕ, qPochhammerInf a q / qPochhammerInf c q *
-      (C j * (qPochhammerInf (b*(x*q^j)) q / qPochhammerInf (x*q^j) q *
-        (qPochhammerInf (bp*(y*q^j)) q / qPochhammerInf (y*q^j) q))) =
-      qPochhammerListInf [a,b*x,bp*y] q / qPochhammerListInf [c,x,y] q *
-        qPhiTerm [c/a,x,y] [b*x,bp*y] q a j := by
-    intro j
-    have e1 := qPochhammerInf_mul_qPochhammer (a := x) hq j
-    have e2 := qPochhammerInf_mul_qPochhammer (a := y) hq j
-    have e3 := qPochhammerInf_mul_qPochhammer (a := b*x) hq j
-    have e4 := qPochhammerInf_mul_qPochhammer (a := bp*y) hq j
-    rw [show b*(x*q^j) = b*x*q^j by ring, show bp*(y*q^j) = bp*y*q^j by ring]
-    have n1 := qPochhammerInf_shift_ne_zero hq hxf j
-    have n2 := qPochhammerInf_shift_ne_zero hq hyf j
-    have n3 := qPochhammer_ne_zero_of_factors hq hbxf j
-    have n4 := qPochhammer_ne_zero_of_factors hq hbyf j
-    have n5 := qPochhammer_self_ne_zero hq j
-    have n6 := qPochhammerInf_ne_zero_of_norm_lt_one hx hq
-    have n7 := qPochhammerInf_ne_zero_of_norm_lt_one hy hq
-    have n8 := qPochhammer_ne_zero_of_factors hq hxf j
-    have n9 := qPochhammer_ne_zero_of_factors hq hyf j
-    simp only [qPhiTerm, qPhiExponent, qPochhammerListInf, qPochhammerList, List.map_cons,
-      List.map_nil, List.prod_cons, List.prod_nil, mul_one, List.length_cons, List.length_nil, hC]
-    norm_num
-    rw [e1, e2, e3, e4]
-    field_simp
-  rw [qAppell1, tsum_congr hstep1, tsum_mul_left, ← hGu.tsum_comm, tsum_congr hstep4,
-    ← tsum_mul_left, tsum_congr hfin, tsum_mul_left, qPhi]
+  obtain ⟨Dcp, hDcp0, hDcp⟩ := qbR4_qPochhammer_inv_bdd hq hcpr
+  obtain ⟨Dax, hDax0, hDax⟩ := qbR4_qPochhammer_inv_bdd hq haxr
+  refine qbR4_summable_of_geom hy hb (A*Bp*(Cb*X)*(Dq*Dcp*Dq*Dax)) fun p => ?_
+  simp only [qPochhammerList, List.map_cons, List.map_nil, List.prod_cons,
+    List.prod_nil, mul_one]
+  rw [div_eq_mul_inv]
+  simp only [mul_inv, norm_mul, norm_pow]
+  calc _ ≤ A*Bp*(Cb*X)*‖b‖^p.2*‖y‖^p.1*(Dq*Dcp*Dq*Dax) := by
+        gcongr <;> simp_all
+    _ = _ := by ring
+
+/-- Summability of the transformed double series in `qAppell3_transformation`. -/
+private lemma qAppell3_transformation_summable {a ap b bp c q x y : ℂ} (hq : ‖q‖<1) (ha : ‖a‖<1)
+    (hy : ‖y‖<1) (hcar : ∀ k : ℕ, c/a*q^k ≠ 1) (hbxr : ∀ k : ℕ, b*x*q^k ≠ 1) :
+    Summable (fun p : ℕ × ℕ => qPochhammerList [ap,bp] q p.1 * qPochhammer x q p.2 *
+            qPochhammer (c/a) q (p.1+p.2) * a^p.2 * y^p.1 /
+            (qPochhammerList [q,c/a] q p.1 * qPochhammerList [q,b*x] q p.2)) := by
+  obtain ⟨Ap, hAp0, hAp⟩ := qbR4_qPochhammer_bdd ap hq
+  obtain ⟨Bp, hBp0, hBp⟩ := qbR4_qPochhammer_bdd bp hq
+  obtain ⟨Ca, hCa0, hCa⟩ := qbR4_qPochhammer_bdd (c/a) hq
+  obtain ⟨X, hX0, hX⟩ := qbR4_qPochhammer_bdd x hq
+  obtain ⟨Dq, hDq0, hDq⟩ := qbR4_qPochhammer_inv_bdd hq (qbR4_q_regular hq)
+  obtain ⟨Dca, hDca0, hDca⟩ := qbR4_qPochhammer_inv_bdd hq hcar
+  obtain ⟨Dbx, hDbx0, hDbx⟩ := qbR4_qPochhammer_inv_bdd hq hbxr
+  refine qbR4_summable_of_geom hy ha (Ap*Bp*X*Ca*(Dq*Dca*(Dq*Dbx))) fun p => ?_
+  simp only [qPochhammerList, List.map_cons, List.map_nil, List.prod_cons,
+    List.prod_nil, mul_one]
+  rw [div_eq_mul_inv]
+  simp only [mul_inv, norm_mul, norm_pow]
+  calc _ ≤ Ap*Bp*X*Ca*‖a‖^p.2*‖y‖^p.1*(Dq*Dca*(Dq*Dbx)) := by
+        gcongr <;> simp_all
+    _ = _ := by ring
 
 /-- Transformation of the second q-Appell function to a normally convergent double series. -/
 @[dlmf 17.11.E2]
@@ -273,23 +193,7 @@ theorem qAppell2_transformation (a b bp c cp q x y : ℂ)
             b^p.2 * y^p.1 /
             (qPochhammerList [q,cp] q p.1 * qPochhammer q q p.2 *
               qPochhammer (a*x) q (p.1+p.2)) with hUdef
-  have hU : Summable U := by
-    obtain ⟨A, hA0, hA⟩ := qbR4_qPochhammer_bdd a hq
-    obtain ⟨Bp, hBp0, hBp⟩ := qbR4_qPochhammer_bdd bp hq
-    obtain ⟨Cb, hCb0, hCb⟩ := qbR4_qPochhammer_bdd (c/b) hq
-    obtain ⟨X, hX0, hX⟩ := qbR4_qPochhammer_bdd x hq
-    obtain ⟨Dq, hDq0, hDq⟩ := qbR4_qPochhammer_inv_bdd hq (qbR4_q_regular hq)
-    obtain ⟨Dcp, hDcp0, hDcp⟩ := qbR4_qPochhammer_inv_bdd hq hcpr
-    obtain ⟨Dax, hDax0, hDax⟩ := qbR4_qPochhammer_inv_bdd hq haxr
-    have hs := qbR4_summable_of_geom hy hb (A*Bp*(Cb*X)*(Dq*Dcp*Dq*Dax)) (f := fun p => U p)
-    refine hs fun p => ?_
-    simp only [hUdef, qPochhammerList, List.map_cons, List.map_nil, List.prod_cons,
-      List.prod_nil, mul_one]
-    rw [div_eq_mul_inv]
-    simp only [mul_inv, norm_mul, norm_pow]
-    calc _ ≤ A*Bp*(Cb*X)*‖b‖^p.2*‖y‖^p.1*(Dq*Dcp*Dq*Dax) := by
-          gcongr <;> simp_all
-      _ = _ := by ring
+  have hU : Summable U := qAppell2_transformation_summable hq hb hy hcpr haxr
   -- inner sums by Heine
   have hinner : ∀ n : ℕ, ∑' m : ℕ, qAppell2Term a b bp c cp q x y (m, n) =
       qPochhammerListInf [b,a*x] q / qPochhammerListInf [c,x] q * ∑' j : ℕ, U (n, j) := by
@@ -360,23 +264,7 @@ theorem qAppell3_transformation (a ap b bp c q x y : ℂ)
   set U : ℕ × ℕ → ℂ := fun p => qPochhammerList [ap,bp] q p.1 * qPochhammer x q p.2 *
             qPochhammer (c/a) q (p.1+p.2) * a^p.2 * y^p.1 /
             (qPochhammerList [q,c/a] q p.1 * qPochhammerList [q,b*x] q p.2) with hUdef
-  have hU : Summable U := by
-    obtain ⟨Ap, hAp0, hAp⟩ := qbR4_qPochhammer_bdd ap hq
-    obtain ⟨Bp, hBp0, hBp⟩ := qbR4_qPochhammer_bdd bp hq
-    obtain ⟨Ca, hCa0, hCa⟩ := qbR4_qPochhammer_bdd (c/a) hq
-    obtain ⟨X, hX0, hX⟩ := qbR4_qPochhammer_bdd x hq
-    obtain ⟨Dq, hDq0, hDq⟩ := qbR4_qPochhammer_inv_bdd hq (qbR4_q_regular hq)
-    obtain ⟨Dca, hDca0, hDca⟩ := qbR4_qPochhammer_inv_bdd hq hcar
-    obtain ⟨Dbx, hDbx0, hDbx⟩ := qbR4_qPochhammer_inv_bdd hq hbxr
-    have hs := qbR4_summable_of_geom hy ha (Ap*Bp*X*Ca*(Dq*Dca*(Dq*Dbx))) (f := fun p => U p)
-    refine hs fun p => ?_
-    simp only [hUdef, qPochhammerList, List.map_cons, List.map_nil, List.prod_cons,
-      List.prod_nil, mul_one]
-    rw [div_eq_mul_inv]
-    simp only [mul_inv, norm_mul, norm_pow]
-    calc _ ≤ Ap*Bp*X*Ca*‖a‖^p.2*‖y‖^p.1*(Dq*Dca*(Dq*Dbx)) := by
-          gcongr <;> simp_all
-      _ = _ := by ring
+  have hU : Summable U := qAppell3_transformation_summable hq ha hy hcar hbxr
   have hinner : ∀ n : ℕ, ∑' m : ℕ, qAppell3Term a ap b bp c q x y (m, n) =
       qPochhammerListInf [a,b*x] q / qPochhammerListInf [c,x] q * ∑' j : ℕ, U (n, j) := by
     intro n
@@ -489,6 +377,39 @@ lemma qbR4_tsum_pi_prod : ∀ (n : ℕ) (f : Fin n → ℕ → ℂ), (∀ i, Sum
       simp only [he]
       rw [← tsum_mul_tsum_of_summable_norm (hf 0) ih1, ih2, Fin.prod_univ_succ]
 
+/-- Multiplying by a power of `q` with `‖q‖ ≤ 1` does not increase the norm. -/
+private lemma qbR4_norm_mul_pow_le {q : ℂ} (hq : ‖q‖<1) (w : ℂ) (j : ℕ) : ‖w*q^j‖ ≤ ‖w‖ := by
+  rw [norm_mul, norm_pow]
+  exact mul_le_of_le_one_right (norm_nonneg _) (pow_le_one₀ (norm_nonneg _) hq.le)
+
+/-- The terms `(β;q)_m/(q;q)_m (w q^j)^m` of a shifted q-binomial series are bounded by
+`M ‖w‖^m`, uniformly in the shift `j`. -/
+private lemma qbR4_shift_term_bdd {q : ℂ} (hq : ‖q‖<1) (β w : ℂ) :
+    ∃ M, 0 ≤ M ∧ ∀ j m, ‖qPochhammer β q m / qPochhammer q q m * (w*q^j)^m‖ ≤ M * ‖w‖^m := by
+  obtain ⟨Dq, hDq0, hDq⟩ := qbR4_qPochhammer_inv_bdd hq (qbR4_q_regular hq)
+  obtain ⟨B, hB0, hB⟩ := qbR4_qPochhammer_bdd β hq
+  refine ⟨B*Dq, by positivity, fun j m => ?_⟩
+  simp only [div_eq_mul_inv, norm_mul, norm_pow]
+  gcongr
+  · exact hB m
+  · exact hDq m
+  · simpa [norm_mul, norm_pow] using qbR4_norm_mul_pow_le hq w j
+
+/-- Shifting the argument of a ratio of infinite q-shifted factorials by `q^j`:
+`(β w q^j;q)_∞/(w q^j;q)_∞ = (β w;q)_∞/(w;q)_∞ · (w;q)_j/(β w;q)_j`. -/
+private lemma qbR4_inf_ratio_shift {q β w : ℂ} (hq : ‖q‖<1) (hwf : ∀ k : ℕ, 1 - w*q^k ≠ 0)
+    (hbwf : ∀ k : ℕ, 1 - β*w*q^k ≠ 0) (j : ℕ) :
+    qPochhammerInf (β*(w*q^j)) q / qPochhammerInf (w*q^j) q =
+      qPochhammerInf (β*w) q / qPochhammerInf w q *
+        (qPochhammer w q j / qPochhammer (β*w) q j) := by
+  have e1 := qPochhammerInf_mul_qPochhammer (a := w) hq j
+  have e3 := qPochhammerInf_mul_qPochhammer (a := β*w) hq j
+  rw [show β*(w*q^j) = β*w*q^j by ring, e1, e3]
+  have n1 := qPochhammerInf_shift_ne_zero hq hwf j
+  have n3 := qPochhammer_ne_zero_of_factors hq hbwf j
+  have n8 := qPochhammer_ne_zero_of_factors hq hwf j
+  field_simp
+
 /-- The full n-variable generalization, including the empty-variable case. -/
 @[dlmf 17.11.E4]
 theorem qLauricella_transformation (n : ℕ) (a c q : ℂ) (b x : Fin n → ℂ)
@@ -505,34 +426,14 @@ theorem qLauricella_transformation (n : ℕ) (a c q : ℂ) (b x : Fin n → ℂ)
   have hbxf : ∀ i, ∀ k : ℕ, 1 - b i*x i*q^k ≠ 0 := fun i k => sub_ne_zero.mpr (hbxr i k).symm
   have haf : ∀ k : ℕ, 1 - a*q^k ≠ 0 := one_sub_mul_pow_ne_zero_of_norm ha hq
   have hxf : ∀ i, ∀ k : ℕ, 1 - x i*q^k ≠ 0 := fun i => one_sub_mul_pow_ne_zero_of_norm (hx i) hq
-  have hpow : ∀ (w : ℂ) (j : ℕ), ‖w*q^j‖ ≤ ‖w‖ := fun w j => by
-    rw [norm_mul, norm_pow]
-    exact mul_le_of_le_one_right (norm_nonneg _) (pow_le_one₀ (norm_nonneg _) hq.le)
+  have hpow := qbR4_norm_mul_pow_le hq
   set C : ℕ → ℂ := fun j => qPochhammer (c/a) q j / qPochhammer q q j * a^j with hC
   set F : ℂ → ℂ → ℕ → ℕ → ℂ := fun β w j m => qPochhammer β q m / qPochhammer q q m * (w*q^j)^m
     with hF
   set G : (Fin n → ℕ) × ℕ → ℂ := fun z => C z.2 * ∏ i, F (b i) (x i) z.2 (z.1 i) with hG
-  obtain ⟨Dq, hDq0, hDq⟩ := qbR4_qPochhammer_inv_bdd hq (qbR4_q_regular hq)
-  have hFb : ∀ (β w : ℂ), ∃ M, 0 ≤ M ∧ ∀ j m, ‖F β w j m‖ ≤ M * ‖w‖^m := by
-    intro β w
-    obtain ⟨B, hB0, hB⟩ := qbR4_qPochhammer_bdd β hq
-    refine ⟨B*Dq, by positivity, fun j m => ?_⟩
-    simp only [hF, div_eq_mul_inv, norm_mul, norm_pow]
-    gcongr
-    · exact hB m
-    · exact hDq m
-    · simpa [norm_mul, norm_pow] using hpow w j
-  choose M hM0 hM using fun i => hFb (b i) (x i)
-  have hCb : ∃ M, 0 ≤ M ∧ ∀ j, ‖C j‖ ≤ M * ‖a‖^j := by
-    obtain ⟨B, hB0, hB⟩ := qbR4_qPochhammer_bdd (c/a) hq
-    refine ⟨B*Dq, by positivity, fun j => ?_⟩
-    simp only [hC]
-    generalize c/a = ca at hB ⊢
-    simp only [div_eq_mul_inv, norm_mul, norm_pow]
-    gcongr
-    · exact hB j
-    · exact hDq j
-  obtain ⟨Mc, hMc0, hMc⟩ := hCb
+  choose M hM0 hM using fun i => qbR4_shift_term_bdd hq (b i) (x i)
+  obtain ⟨Mc, hMc0, hMc'⟩ := qbR4_shift_term_bdd hq (c/a) a
+  have hMc : ∀ j, ‖C j‖ ≤ Mc * ‖a‖^j := fun j => by simpa [hC] using hMc' 0 j
   have hGs : Summable G := by
     have h2 := qbR4_summable_pi_geom n (fun i => ‖x i‖) (fun i => norm_nonneg _) hx
     have h3 := Summable.mul_of_nonneg h2 (summable_geometric_of_lt_one (norm_nonneg _) ha)
@@ -585,18 +486,8 @@ theorem qLauricella_transformation (n : ℕ) (a c q : ℂ) (b x : Fin n → ℂ)
         qPochhammerListInf (c :: List.ofFn x) q *
         qPhiTerm ((c/a) :: List.ofFn x) (List.ofFn (fun i => b i*x i)) q a j := by
     intro j
-    have hr : ∀ i, qPochhammerInf (b i*(x i*q^j)) q / qPochhammerInf (x i*q^j) q =
-        qPochhammerInf (b i*x i) q / qPochhammerInf (x i) q *
-          (qPochhammer (x i) q j / qPochhammer (b i*x i) q j) := by
-      intro i
-      have e1 := qPochhammerInf_mul_qPochhammer (a := x i) hq j
-      have e3 := qPochhammerInf_mul_qPochhammer (a := b i*x i) hq j
-      rw [show b i*(x i*q^j) = b i*x i*q^j by ring, e1, e3]
-      have n1 := qPochhammerInf_shift_ne_zero hq (hxf i) j
-      have n3 := qPochhammer_ne_zero_of_factors hq (hbxf i) j
-      have n8 := qPochhammer_ne_zero_of_factors hq (hxf i) j
-      field_simp
-    rw [prod_congr rfl fun i _ => hr i, prod_mul_distrib, prod_div_distrib, prod_div_distrib]
+    rw [prod_congr rfl fun i _ => qbR4_inf_ratio_shift hq (hxf i) (hbxf i) j, prod_mul_distrib,
+      prod_div_distrib, prod_div_distrib]
     have n2 : ∏ i, qPochhammerInf (x i) q ≠ 0 := prod_ne_zero_iff.mpr fun i _ =>
       qPochhammerInf_ne_zero_of_norm_lt_one (hx i) hq
     have n3 : ∏ i, qPochhammer (x i) q j ≠ 0 := prod_ne_zero_iff.mpr fun i _ =>
@@ -624,7 +515,7 @@ theorem qLauricellaTerm_two (a b bp c q x y : ℂ) (m : Fin 2 → ℕ) :
   simp [qLauricellaTerm,qAppell1Term,Fin.sum_univ_two,Fin.prod_univ_two]
   ring
 
-/-- DLMF17.11p2: the multivariate transformation specializes to the first q-Appell series
+/-- DLMF 17.11p2: the multivariate transformation specializes to the first q-Appell series
 when n=2. Reindexing holds even for totalized series; convergence hypotheses are unchanged. -/
 @[dlmf 17.11]
 theorem qLauricella_two (a b bp c q x y : ℂ) :
@@ -637,5 +528,21 @@ theorem qLauricella_two (a b bp c q x y : ℂ) :
     _ = ∑' p : ℕ × ℕ, qAppell1Term a b bp c q x y p :=
           (finTwoArrowEquiv ℕ).tsum_eq _
     _ = qAppell1 a b bp c q x y := rfl
+
+/-- Reduction of the first q-Appell function to a 3-phi-2. -/
+@[dlmf 17.11.E1]
+theorem qAppell1_transformation (a b bp c q x y : ℂ)
+    (hq : ‖q‖<1) (ha0 : a≠0) (ha : ‖a‖<1) (hx : ‖x‖<1) (hy : ‖y‖<1)
+    (hc : qDenominatorRegular [c,b*x,bp*y] q) :
+    qAppell1 a b bp c q x y =
+      qPochhammerListInf [a,b*x,bp*y] q / qPochhammerListInf [c,x,y] q *
+        qPhi [c/a,x,y] [b*x,bp*y] q a := by
+  have h2 : List.ofFn (fun i : Fin 2 => ![b,bp] i * ![x,y] i) = [b*x,bp*y] := by
+    simp [List.ofFn_succ]
+  have h2' : List.ofFn ![x,y] = [x,y] := by simp [List.ofFn_succ]
+  have h := qLauricella_transformation 2 a c q ![b,bp] ![x,y] hq ha0 ha
+    (Fin.forall_fin_two.mpr ⟨hx, hy⟩) (by rw [h2]; exact hc)
+  rw [qLauricella_two, h2, h2'] at h
+  exact h
 
 end DLMF.QHypergeometric

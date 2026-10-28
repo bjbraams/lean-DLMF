@@ -1070,8 +1070,8 @@ Twenty-eight were proved, reducing the source admission count from 262 to 234.
 * [Gamma](DLMF/Gamma.lean), 6:
   * Barnes' first lemma (5.13.3) and `Σ ψ'(k+2)/(k+1) = ζ(3)` (5.16.2).
   * The Glaisher–Kinkelin constant in terms of `ζ'(-1)`, and `Γ(az+b)` for large `z` (5.11.7).
-  * The Dirichlet simplex integrals 5.14.1–2, from the multivariate Beta integral ported from
-    lean-codes into `DLMF/Gamma/Simplex/` (see CREDITS).
+  * The Dirichlet simplex integrals 5.14.1–2, from the multivariate Beta integral of lean-codes
+    (see CREDITS).
 * [QSeries](DLMF/QSeries.lean), 2: the Jacobi triple product (10.4.1), from the finite Rothe
   identity and Tannery's theorem, and `θ(τ) = ∏(1-q^{2n})(1+q^{2n-1})²`.
 

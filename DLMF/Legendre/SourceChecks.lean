@@ -79,14 +79,14 @@ theorem dlmf_14_27_no_boundary_zero {s : ℝ} (hs : s=1 ∨ s=-1) {x : ℝ} (hx 
     rw [associatedP_one_neg_half hz, norm_div, norm_mul, Complex.norm_exp]
     have hre : (-(log ((x+s*I*ε:ℂ)+1)-log ((x+s*I*ε:ℂ)-1))/4).re =
         -(Real.log ‖(x+s*I*ε:ℂ)+1‖-Real.log ‖(x+s*I*ε:ℂ)-1‖)/4 := by
-      norm_num [Complex.div_re, Complex.log_re] <;> ring
+      norm_num [Complex.div_re, Complex.log_re]
     rw [hre]
   have hcont : ContinuousAt M 0 := by
     dsimp [M]
-    fun_prop (disch := simp [hp,hm,hden])
+    fun_prop (disch := simp [hp,hm])
   have hpos : 0 < M 0 := by
     dsimp [M]
-    simp only [Complex.ofReal_zero,mul_zero,add_zero]
+    simp only [mul_zero,add_zero]
     exact div_pos (mul_pos (Real.exp_pos _) (norm_pos_iff.mpr hnum)) (norm_pos_iff.mpr hden)
   have ht0 : Tendsto M (𝓝[>] (0:ℝ)) (𝓝 0) := by
     have h := hz0.norm

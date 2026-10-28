@@ -29,14 +29,17 @@ open scoped Topology Real
 
 namespace DLMF.Mathieu
 
+/-- The lower neighbour term is additive: `lo(A - B) = lo A - lo B`. -/
 lemma p3qLo_sub (β : ℂ) (A B : ℕ → ℂ) (i : ℕ) :
     p3qLo β (fun j => A j - B j) i = p3qLo β A i - p3qLo β B i := by
   rcases i with _ | _ | i <;> simp [p3qLo]; ring
 
+/-- The lower neighbour term is homogeneous: `lo(c A) = c lo A`. -/
 lemma p3qLo_smul (β c : ℂ) (A : ℕ → ℂ) (i : ℕ) :
     p3qLo β (fun j => c * A j) i = c * p3qLo β A i := by
   rcases i with _ | _ | i <;> simp [p3qLo]; ring
 
+/-- A scalar multiple of a solution of the recurrence `L A = a A` is again a solution. -/
 theorem p3qRec.smul {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (h : p3qRec d β q a A) (c : ℂ) :
     p3qRec d β q a (fun i => c * A i) := by
   intro i
@@ -44,6 +47,7 @@ theorem p3qRec.smul {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (h : p3qR
   simp only [p3qL, p3qLo_smul] at this ⊢
   linear_combination c * this
 
+/-- A big-O relation `f = O(g)` at `0` gives `C ≥ 0` with `‖f q‖ ≤ C ‖g q‖` near `0`. -/
 lemma p3q_eventually_bound {f : ℝ → ℂ} {g : ℝ → ℝ} (h : f =O[𝓝 0] g) :
     ∃ C, 0 ≤ C ∧ ∀ᶠ q in 𝓝 0, ‖f q‖ ≤ C * ‖g q‖ := by
   obtain ⟨C, hC⟩ := h.exists_nonneg
@@ -178,6 +182,7 @@ lemma p3q_vec_bound {d : ℝ → ℕ → ℂ} {β : ℂ} (hβ : ‖β‖ ≤ 2) 
     _ ≤ _ := by linarith
 
 
+/-- For `ε > 0`, eventually as `q → 0`, `|q| ≤ ε`. -/
 lemma p3q_small_nhds (ε : ℝ) (hε : 0 < ε) : ∀ᶠ q : ℝ in 𝓝 0, |q| ≤ ε := by
   have : ∀ᶠ q : ℝ in 𝓝 0, q ∈ Metric.ball (0 : ℝ) ε := Metric.ball_mem_nhds _ hε
   filter_upwards [this] with q hq
@@ -234,6 +239,8 @@ lemma p3q_tail {α v g : ℝ → ℕ → ℂ} {n K : ℕ} {C B R : ℝ} (hC : 0 
           have := mul_le_mul_of_nonneg_left hpow hD2
           linarith
 
+/-- If `‖f_q(i)‖ ≤ |q|^K D 2^{-i}` near `q = 0`, then each `f_q` is summable and
+`∑_i f_q(i) = O(q^K)`. -/
 lemma p3q_tsum_isBigO {f : ℝ → ℕ → ℂ} {K : ℕ} {D : ℝ} (_hD : 0 ≤ D)
     (h : ∀ᶠ q : ℝ in 𝓝 0, ∀ i, ‖f q i‖ ≤ |q| ^ K * (D * (1 / 2) ^ i)) :
     (∀ᶠ q : ℝ in 𝓝 0, Summable (f q)) ∧
@@ -247,6 +254,7 @@ lemma p3q_tsum_isBigO {f : ℝ → ℕ → ℂ} {K : ℕ} {D : ℝ} (_hD : 0 ≤
     _ = 2 * D * ‖q ^ K‖ := by
         rw [tsum_mul_left, tsum_mul_left, tsum_geometric_two, norm_pow, Real.norm_eq_abs]; ring
 
+/-- If `Re r > 0` near `0` and `r² - 1 = O(k)`, then `r - 1 = O(k)`. -/
 lemma p3q_isBigO_sub_one_of_sq {r : ℝ → ℂ} {k : ℝ → ℝ}
     (hre : ∀ᶠ q : ℝ in 𝓝 0, 0 < (r q).re)
     (h : (fun q => r q ^ 2 - 1) =O[𝓝 0] k) : (fun q => r q - 1) =O[𝓝 0] k := by
@@ -457,6 +465,7 @@ lemma p3q_expand {d : ℝ → ℕ → ℂ} {β : ℂ} (hβ : ‖β‖ ≤ 2) (h�
 
 /-! ### The Mathieu recurrences -/
 
+/-- For small `q`, `a_{2n}(q)` is at distance `≥ 1` from every diagonal entry `4i²`, `i ≠ n`. -/
 lemma p3q_gap_AE (n : ℕ) : ∀ᶠ q : ℝ in 𝓝 0, ∀ i ≠ n,
     1 ≤ ‖(mathieuA (2 * n) q : ℂ) - 4 * (i : ℂ) ^ 2‖ := by
   filter_upwards [p3q_mathieuA_near (2 * n), p3q_eventually_small] with q h1 h2
@@ -465,6 +474,8 @@ lemma p3q_gap_AE (n : ℕ) : ∀ᶠ q : ℝ in 𝓝 0, ∀ i ≠ n,
     p3q_norm_ofReal_sub]
   exact p3q_gap_aux h2 (by simpa using h1) (p3q_sq_sep hi 0) (by simp)
 
+/-- For small `q`, `a_{2n+1}(q)` is at distance `≥ 1` from every diagonal entry of 28.4.6
+other than the `n`-th. -/
 lemma p3q_gap_AO (n : ℕ) : ∀ᶠ q : ℝ in 𝓝 0, ∀ i ≠ n,
     1 ≤ ‖(mathieuA (2 * n + 1) q : ℂ) -
       ((2 * (i : ℂ) + 1) ^ 2 + if i = 0 then (q : ℂ) else 0)‖ := by
@@ -475,6 +486,8 @@ lemma p3q_gap_AO (n : ℕ) : ∀ᶠ q : ℝ in 𝓝 0, ∀ i ≠ n,
       split_ifs <;> push_cast <;> ring, p3q_norm_ofReal_sub]
   exact p3q_gap_aux h2 (by simpa using h1) (p3q_sq_sep hi 1) (by split_ifs <;> simp)
 
+/-- For small `q`, `b_{2n+1}(q)` is at distance `≥ 1` from every diagonal entry of 28.4.7
+other than the `n`-th. -/
 lemma p3q_gap_BO (n : ℕ) : ∀ᶠ q : ℝ in 𝓝 0, ∀ i ≠ n,
     1 ≤ ‖(mathieuB (2 * n + 1) q : ℂ) -
       ((2 * (i : ℂ) + 1) ^ 2 - if i = 0 then (q : ℂ) else 0)‖ := by
@@ -486,6 +499,7 @@ lemma p3q_gap_BO (n : ℕ) : ∀ᶠ q : ℝ in 𝓝 0, ∀ i ≠ n,
       split_ifs <;> push_cast <;> ring, p3q_norm_ofReal_sub]
   exact p3q_gap_aux h2 (by simpa using h1) (p3q_sq_sep hi 1) (by split_ifs <;> simp)
 
+/-- For small `q`, `b_{2n+2}(q)` is at distance `≥ 1` from every `(2i+2)²`, `i ≠ n`. -/
 lemma p3q_gap_BE (n : ℕ) : ∀ᶠ q : ℝ in 𝓝 0, ∀ i ≠ n,
     1 ≤ ‖(mathieuB (2 * n + 2) q : ℂ) - (2 * (i : ℂ) + 2) ^ 2‖ := by
   filter_upwards [p3q_mathieuB_near (m := 2 * n + 2) (by omega), p3q_eventually_small]
@@ -495,6 +509,8 @@ lemma p3q_gap_BE (n : ℕ) : ∀ᶠ q : ℝ in 𝓝 0, ∀ i ≠ n,
       push_cast; ring, p3q_norm_ofReal_sub]
   exact p3q_gap_aux h2 (by simpa using h1) (p3q_sq_sep hi 2) (by simp)
 
+/-- For `δ ≤ 2`, `|cos((2i+δ)z)|` and `|sin((2i+δ)z)|` are at most
+`e^{2|Im z|} (e^{2|Im z|})^i`. -/
 lemma p3q_trig_bound (z : ℂ) {δ : ℕ} (hδ : δ ≤ 2) (i : ℕ) :
     ‖Complex.cos ((2 * (i : ℂ) + δ) * z)‖ ≤
         Real.exp (2 * |z.im|) * Real.exp (2 * |z.im|) ^ i ∧
@@ -512,6 +528,7 @@ lemma p3q_trig_bound (z : ℂ) {δ : ℕ} (hδ : δ ≤ 2) (i : ℕ) :
     exact Real.exp_le_exp.2 him
   exact ⟨(p2f_norm_cos_le _).trans he, (p2f_norm_sin_le _).trans he⟩
 
+/-- `se'_{2n+1}(0, q) = ∑_i (2i+1) B^{2n+1}_{2i+1}(q)`. -/
 lemma p3q_hasSum_deriv_se_odd (n : ℕ) (q : ℝ) :
     HasSum (fun i : ℕ => ((2 * i + 1 : ℕ) : ℂ) * mathieuFourierB (2 * n + 1) (2 * i + 1) q)
       (mathieuSeDerivZero (2 * n + 1) q : ℂ) := by
@@ -525,6 +542,7 @@ lemma p3q_hasSum_deriv_se_odd (n : ℕ) (q : ℝ) :
     · rw [p1a2_fourierB_odd_even]; simp
     · exact absurd ⟨j, rfl⟩ hx
 
+/-- `se'_{2n+2}(0, q) = ∑_i (2i+2) B^{2n+2}_{2i+2}(q)`. -/
 lemma p3q_hasSum_deriv_se_even (n : ℕ) (q : ℝ) :
     HasSum (fun i : ℕ => ((2 * i + 2 : ℕ) : ℂ) * mathieuFourierB (2 * n + 2) (2 * i + 2) q)
       (mathieuSeDerivZero (2 * n + 2) q : ℂ) := by
@@ -540,6 +558,7 @@ lemma p3q_hasSum_deriv_se_even (n : ℕ) (q : ℝ) :
       · exact absurd ⟨j, by ring⟩ hx
     · rw [p1a2_fourierB_even_odd]; simp
 
+/-- For `c ≤ 2`, `|(2i+c)/(2n+c)| ≤ 2 · 2^i`. -/
 lemma p3q_u_bound (c : ℕ) (hc : c ≤ 2) (n : ℕ) (i : ℕ) :
     ‖((2 * i + c : ℕ) : ℂ) / ((2 * n + c : ℕ) : ℂ)‖ ≤ 2 * 2 ^ i := by
   have h1 : ((2 * i + c : ℕ) : ℝ) ≤ 2 * 2 ^ i := by

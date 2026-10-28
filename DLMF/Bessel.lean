@@ -20,6 +20,7 @@ public import DLMF.Bessel.NeumannSeries
 public import DLMF.Bessel.ProductIntegral
 public import DLMF.Bessel.Schlafli
 public import DLMF.Bessel.SecondKind
+public import DLMF.Bessel.Sonine
 public import DLMF.Bessel.SphericalSeriesTools
 public import DLMF.Bessel.SphericalProductTools
 public import DLMF.Bessel.KMellin

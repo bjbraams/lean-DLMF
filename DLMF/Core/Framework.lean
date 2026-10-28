@@ -81,7 +81,8 @@ theorem hasSum_primitive_monomials {f : ℂ → ℂ} (c : ℕ → ℂ) (d : ℕ 
     (fun n=>(hF n).aestronglyMeasurable)
     (fun n=>ae_of_all _ fun t ht=>by
       have ht' : t∈Ioc (0:ℝ) 1 := by simpa using ht
-      have ht1 : ‖(t:ℂ)‖≤1 := by rw [Complex.norm_real,Real.norm_eq_abs,abs_of_pos ht'.1]; exact ht'.2
+      have ht1 : ‖(t:ℂ)‖≤1 := by
+        rw [Complex.norm_real,Real.norm_eq_abs,abs_of_pos ht'.1]; exact ht'.2
       simp only [F,B,norm_mul,norm_pow]
       calc
         ‖c n‖*(‖(t:ℂ)‖*‖z‖)^(d n) ≤ ‖c n‖*(1*‖z‖)^(d n) := by gcongr

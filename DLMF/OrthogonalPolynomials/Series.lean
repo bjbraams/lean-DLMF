@@ -272,6 +272,33 @@ theorem jacGen_re_pos {c t : ℂ} (hc : ‖c‖ ≤ 1) (ht : ‖t‖ ≤ 1 / 2) 
   simp only [add_re, one_re]
   linarith
 
+/-- On the circle `|t| = 1/2`, `|z (1 + a t)(1 + b t)| ≤ 1/4` when `|a|, |b| ≤ 1` and
+`|z| ≤ 1/10`. -/
+private lemma jacGen_norm_mul_le {a b z t : ℂ} (ha1 : ‖a‖ ≤ 1) (hb1 : ‖b‖ ≤ 1)
+    (hzn : ‖z‖ ≤ 1 / 10) (htn : ‖t‖ = 1 / 2) : ‖z * ((1 + a * t) * (1 + b * t))‖ ≤ 1 / 4 := by
+  have h1 : ‖1 + a * t‖ ≤ 3 / 2 := (norm_add_le _ _).trans (by
+    rw [norm_one, norm_mul, htn]; nlinarith)
+  have h2 : ‖1 + b * t‖ ≤ 3 / 2 := (norm_add_le _ _).trans (by
+    rw [norm_one, norm_mul, htn]; nlinarith)
+  rw [norm_mul, norm_mul]
+  calc ‖z‖ * (‖1 + a * t‖ * ‖1 + b * t‖) ≤ (1 / 10) * ((3 / 2) * (3 / 2)) := by gcongr
+    _ ≤ 1 / 4 := by norm_num
+
+/-- The factor `c - z a b (t + w)` does not vanish on `|t| ≤ 1/2` when `|a|, |b| ≤ 1`,
+`|z| ≤ 1/10`, `|c| ≥ 9/10` and `|w| ≤ 2/9`. -/
+private lemma jacGen_sub_ne_zero {a b c z w t : ℂ} (ha1 : ‖a‖ ≤ 1) (hb1 : ‖b‖ ≤ 1)
+    (hzn : ‖z‖ ≤ 1 / 10) (hcn : 9 / 10 ≤ ‖c‖) (hwn : ‖w‖ ≤ 2 / 9) (htn : ‖t‖ ≤ 1 / 2) :
+    c - z * a * b * (t + w) ≠ 0 := by
+  intro h
+  have h1 : ‖z * a * b * (t + w)‖ ≤ 1 / 10 := by
+    rw [norm_mul, norm_mul, norm_mul]
+    have : ‖t + w‖ ≤ 1 := (norm_add_le _ _).trans (by linarith)
+    calc ‖z‖ * ‖a‖ * ‖b‖ * ‖t + w‖ ≤ (1 / 10) * 1 * 1 * 1 := by gcongr
+      _ = 1 / 10 := by norm_num
+  rw [sub_eq_zero] at h
+  rw [h] at hcn
+  linarith
+
 /-- The Jacobi generating function for small `|z|`, by the Lagrange–Bürmann formula. -/
 theorem jacGen_hasSum_small {α β : ℂ} (hα : -1 < α.re) {x : ℝ} (hx : |x| ≤ 1) {z : ℂ}
     (hz : ‖z‖ < 1 / 10) :
@@ -334,27 +361,10 @@ theorem jacGen_hasSum_small {α β : ℂ} (hα : -1 < α.re) {x : ℝ} (hx : |x|
     have h2 := norm_sub_norm_le (1 : ℂ) ((x : ℂ) * z)
     rw [norm_one] at h2
     rw [hc]; linarith
-  have hg0 : ∀ t ∈ closedBall (0 : ℂ) (1 / 2), c - z * a * b * (t + w) ≠ 0 := by
-    intro t ht h
-    have htn := hball t ht
-    have h1 : ‖z * a * b * (t + w)‖ ≤ 1 / 10 := by
-      rw [norm_mul, norm_mul, norm_mul]
-      have : ‖t + w‖ ≤ 1 := (norm_add_le _ _).trans (by linarith)
-      calc ‖z‖ * ‖a‖ * ‖b‖ * ‖t + w‖ ≤ (1 / 10) * 1 * 1 * 1 := by gcongr
-        _ = 1 / 10 := by norm_num
-    rw [sub_eq_zero] at h
-    rw [h] at hcn
-    linarith
-  have hzΦ : ∀ t ∈ sphere (0 : ℂ) (1 / 2), ‖z * ((1 + a * t) * (1 + b * t))‖ ≤ 1 / 4 := by
-    intro t ht
-    have htn : ‖t‖ = 1 / 2 := by simpa using ht
-    have h1 : ‖1 + a * t‖ ≤ 3 / 2 := (norm_add_le _ _).trans (by
-      rw [norm_one, norm_mul, htn]; nlinarith)
-    have h2 : ‖1 + b * t‖ ≤ 3 / 2 := (norm_add_le _ _).trans (by
-      rw [norm_one, norm_mul, htn]; nlinarith)
-    rw [norm_mul, norm_mul]
-    calc ‖z‖ * (‖1 + a * t‖ * ‖1 + b * t‖) ≤ (1 / 10) * ((3 / 2) * (3 / 2)) := by gcongr
-      _ ≤ 1 / 4 := by norm_num
+  have hg0 : ∀ t ∈ closedBall (0 : ℂ) (1 / 2), c - z * a * b * (t + w) ≠ 0 :=
+    fun t ht => jacGen_sub_ne_zero ha1 hb1 hzn hcn hwn (hball t ht)
+  have hzΦ : ∀ t ∈ sphere (0 : ℂ) (1 / 2), ‖z * ((1 + a * t) * (1 + b * t))‖ ≤ 1 / 4 :=
+    fun t ht => jacGen_norm_mul_le ha1 hb1 hzn (by simpa using ht)
   have hfac : ∀ t ∈ sphere (0 : ℂ) (1 / 2),
       t - z * ((1 + a * t) * (1 + b * t)) = (t - w) * (c - z * a * b * (t + w)) := by
     intro t _
@@ -747,7 +757,7 @@ theorem hermitePolyH_translation (m : ℕ) (x y : ℂ) :
     (aeval (x + y) (hermitePolyH m) : ℂ) =
       ∑ k ∈ Finset.range (m + 1), (m.choose k : ℂ) * (2 * y) ^ k *
         aeval x (hermitePolyH (m - k)) := by
-  have hc := scalarSeries_unique
+  have hc := Complex.powerSeries_coefficients_unique
     (c := fun n => (aeval (x + y) (hermitePolyH n) : ℂ) / n !)
     (d := fun n => ∑ k ∈ Finset.range (n + 1),
       ((2 * y) ^ k / k !) * ((aeval x (hermitePolyH (n - k)) : ℂ) / (n - k)!))
@@ -779,7 +789,7 @@ theorem hermite_finite_sum (n : ℕ) (x : ℂ) :
     (aeval x (hermite n) : ℂ) = ∑ k ∈ Finset.range (n / 2 + 1),
       (-1 : ℂ) ^ k * n.factorial /
         (2 ^ k * (k.factorial : ℂ) * (n - 2 * k).factorial) * x ^ (n - 2 * k) := by
-  have hc := scalarSeries_unique
+  have hc := Complex.powerSeries_coefficients_unique
     (c := fun j => (aeval x (hermite j) : ℂ) / j !)
     (d := fun j => ∑ k ∈ Finset.range (j / 2 + 1),
       (-1 / 2 : ℂ) ^ k / k ! * (x ^ (j - 2 * k) / (j - 2 * k)!))
@@ -834,7 +844,7 @@ theorem hermitePolyH_addition (a b x y : ℝ) (hab : a ^ 2 + b ^ 2 = 1) (n : ℕ
       ∑ k ∈ Finset.range (n + 1), (n.choose k : ℝ) * a ^ k * b ^ (n - k) *
         aeval x (hermitePolyH k) * aeval y (hermitePolyH (n - k)) := by
   have hab' : (a : ℂ) ^ 2 + (b : ℂ) ^ 2 = 1 := by exact_mod_cast hab
-  have hcoeff := scalarSeries_unique
+  have hcoeff := Complex.powerSeries_coefficients_unique
     (c := fun n => (aeval ((a : ℂ) * x + b * y) (hermitePolyH n) : ℂ) / n !)
     (d := fun n => ∑ k ∈ Finset.range (n + 1),
       ((aeval (x : ℂ) (hermitePolyH k) : ℂ) / k ! * (a : ℂ) ^ k) *
@@ -910,7 +920,7 @@ theorem hermitePolyH_multiplication (lam x : ℂ) (n : ℕ) :
     aeval (lam * x) (hermitePolyH n) = ∑ k ∈ Finset.range (n / 2 + 1),
       poch (-(n : ℂ)) (2 * k) / k.factorial * lam ^ (n - 2 * k) * (lam ^ 2 - 1) ^ k *
         aeval x (hermitePolyH (n - 2 * k)) := by
-  have hc := scalarSeries_unique
+  have hc := Complex.powerSeries_coefficients_unique
     (c := fun j => (aeval (lam * x) (hermitePolyH j) : ℂ) / j !)
     (d := fun j => ∑ k ∈ Finset.range (j / 2 + 1),
       (lam ^ 2 - 1) ^ k / k ! *
@@ -1145,7 +1155,7 @@ theorem monomial_laguerrePolyL_expansion {α : ℂ} (hα : -1 < α.re) (n : ℕ)
 theorem monomial_hermitePolyH_expansion (n : ℕ) (x : ℂ) :
     (2 * x) ^ n = ∑ k ∈ Finset.range (n / 2 + 1),
       poch (-(n : ℂ)) (2 * k) / k.factorial * aeval x (hermitePolyH (n - 2 * k)) := by
-  have hc := scalarSeries_unique
+  have hc := Complex.powerSeries_coefficients_unique
     (c := fun j => (2 * x) ^ j / j !)
     (d := fun j => ∑ k ∈ Finset.range (j / 2 + 1),
       (1 : ℂ) ^ k / k ! * ((aeval x (hermitePolyH (j - 2 * k)) : ℂ) / (j - 2 * k)! *
@@ -1174,7 +1184,7 @@ theorem hermitePolyH_linearization (m n : ℕ) (x : ℂ) :
     (aeval x (hermitePolyH m) : ℂ) * aeval x (hermitePolyH n) =
       ∑ k ∈ Finset.range (min m n + 1), (m.choose k : ℂ) * n.choose k * 2 ^ k * k.factorial *
         aeval x (hermitePolyH (m + n - 2 * k)) := by
-  have hc := scalarSeries_unique
+  have hc := Complex.powerSeries_coefficients_unique
     (c := fun j => (aeval x (hermitePolyH m) : ℂ) * aeval x (hermitePolyH j) / j !)
     (d := fun j => ∑ k ∈ Finset.range (m + 1),
       (m.choose k : ℂ) * 2 ^ k *
@@ -1338,8 +1348,8 @@ theorem gegenbauerProductCoeff_top {lam : ℂ} (hlam : 0 < lam.re) (a b : ℕ) :
   have h0 : lam + a + b ≠ 0 := by simpa using hn 0
   have h1 : lam + a + b + 1 ≠ 0 := by simpa using hn 1
   unfold gegenbauerProductCoeff
-  simp only [Nat.add_zero, Nat.cast_zero, add_zero, Nat.factorial_zero, Nat.cast_one,
-    poch_zero, one_mul, mul_one, show a + (b + 1) = (a + b) + 1 by omega,
+  simp only [Nat.cast_zero, add_zero, Nat.factorial_zero, Nat.cast_one,
+    poch_zero, one_mul, show a + (b + 1) = (a + b) + 1 by omega,
     poch_succ, Nat.factorial_succ]
   push_cast
   have h20 : 2 * lam + a + b ≠ 0 := by
@@ -1368,8 +1378,8 @@ theorem gegenbauerProductCoeff_bottom {lam : ℂ} (hlam : 0 < lam.re) (a k : ℕ
     intro he; have hh := congrArg Complex.re he; simp at hh
     linarith [Nat.cast_nonneg (α := ℝ) a]
   unfold gegenbauerProductCoeff
-  simp only [Nat.add_zero, Nat.cast_zero, add_zero, Nat.factorial_zero, Nat.cast_one,
-    poch_zero, one_mul, mul_one, show (a + 1) + k = a + k + 1 by omega,
+  simp only [Nat.cast_zero, add_zero, Nat.factorial_zero, Nat.cast_one,
+    poch_zero, mul_one, show (a + 1) + k = a + k + 1 by omega,
     Nat.add_succ, poch_succ, Nat.factorial_succ]
   push_cast
   have hs0 : lam + a + k ≠ 0 := hn k
@@ -1494,7 +1504,7 @@ theorem ultrasphPoly_product_eq_sum_of_le {lam : ℂ} (hlam : 0 < lam.re) (m n :
       rw [gegenbauerProductCoeff_zero hlam] at he
       norm_num at he
       push_cast [Nat.cast_sub (show 1 ≤ m by omega)] at he
-      convert he using 1 <;> ring
+      convert he using 1; ring
     have he := two_mul_x_ultrasphPoly hlam hm x
     rw [ultrasphPoly_one_eq (by linarith : -1 / 2 < lam.re)]
     unfold gegenbauerLinearizationSum
@@ -1674,7 +1684,7 @@ theorem chebyshevU_odd_sum (n : ℕ) (x : ℂ) :
   | zero =>
     have h := congrArg (Polynomial.eval x) (Chebyshev.T_add_two ℂ 1)
     simp only [Polynomial.eval_mul, Polynomial.eval_sub,
-      Polynomial.eval_one, Polynomial.eval_pow, Polynomial.eval_X, Polynomial.eval_ofNat] at h
+      Polynomial.eval_X, Polynomial.eval_ofNat] at h
     norm_num [Chebyshev.T_two, Chebyshev.T_one] at h
     simp [Chebyshev.U_one]
     rw [h]
@@ -2097,10 +2107,6 @@ section JacobiWeighted
 
 open Metric Set
 
-/-- `|(μ)_m| ≤ (1 + |μ|)^m m!`. -/
-theorem jacW_norm_poch_le (μ : ℂ) (m : ℕ) : ‖poch μ m‖ ≤ (1 + ‖μ‖) ^ m * m ! := by
-  exact appF4_norm_poch_le μ m
-
 /-- `k! ≤ (1 + 1/(Re β + 1))^k |(β+1)_k|` for `Re β > -1`. -/
 theorem jacW_factorial_le_norm_poch {β : ℂ} (hβ : -1 < β.re) (k : ℕ) :
     (k ! : ℝ) ≤ (1 + 1 / (β.re + 1)) ^ k * ‖poch (β + 1) k‖ := by
@@ -2168,7 +2174,7 @@ theorem jacWTerm_norm_le (l : ℂ) {β : ℂ} (hβ : -1 < β.re) {y : ℂ} (hy :
     have h0 : ‖poch (β + 1) k‖ = 0 := le_antisymm h (norm_nonneg _)
     rw [h0, mul_zero] at hP
     exact absurd hP (not_le.mpr (by exact_mod_cast k.factorial_pos))
-  have hL := jacW_norm_poch_le l (2 * k + m)
+  have hL := appF4_norm_poch_le l (2 * k + m)
   have hF := jacW_factorial_two_mul_add_le k m
   have hk : (0 : ℝ) < k ! := by exact_mod_cast k.factorial_pos
   have hm : (0 : ℝ) < m ! := by exact_mod_cast m.factorial_pos
@@ -2283,11 +2289,6 @@ theorem jacW_coeff_eq_sum_antidiagonal {α β : ℂ} (hα : -1 < α.re) (hβ : -
     _ = _ := by rw [hsq, mul_one]
 
 
-/-- Regrouping a summable double series along antidiagonals. -/
-theorem jacW_hasSum_antidiagonal {A : ℕ × ℕ → ℂ} {S : ℂ} (h : HasSum A S) :
-    HasSum (fun n => ∑ p ∈ Finset.antidiagonal n, A p) S := by
-  exact jacB_hasSum_antidiagonal h
-
 /-- 18.12.3 for small `|z|`, by summing the double series in two ways. -/
 theorem jacW_hasSum_small {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) {x : ℝ} (hx : |x| ≤ 1)
     {z : ℂ} (hz : ‖z‖ < 1 / (32 * ((1 + ‖α + β + 1‖) ^ 2 * (1 + 1 / (β.re + 1))))) :
@@ -2349,7 +2350,7 @@ theorem jacW_hasSum_small {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) {x
   -- sum by fibres and by antidiagonals
   have hfib := hsum.hasSum.prod_fiberwise (fun k => jacWTerm_hasSum_fiber l β y hz1 k)
   have hval := (jacWTerm_hasSum_outer l β y hz1 hv).unique hfib
-  have hanti := jacW_hasSum_antidiagonal hsum.hasSum
+  have hanti := jacB_hasSum_antidiagonal hsum.hasSum
   rw [← hval] at hanti
   convert hanti using 1
   · funext n

@@ -61,19 +61,17 @@ theorem one_sub_exp_mul_I (θ : ℂ) :
   rw [hR, I_mul_I, h0, h1]
   ring
 
-theorem pred_add_one {m : ℕ} (hm : 0 < m) : m - 1 + 1 = m :=
-  Nat.sub_add_cancel (Nat.one_le_of_lt hm)
-
 /-- The product of `1 - μ^k` over the nontrivial `m`-th roots of unity is `m`. -/
 theorem prod_one_sub_exp_two_pi {m : ℕ} (hm : 0 < m) :
     ∏ k ∈ range (m - 1), (1 - exp (2 * π * I / m) ^ (k + 1)) = m := by
   have hμ : IsPrimitiveRoot (exp (2 * π * I / m)) (m - 1 + 1) := by
-    simpa [pred_add_one hm] using isPrimitiveRoot_exp m hm.ne'
+    simpa [Nat.sub_one_add_one_eq_of_pos hm] using isPrimitiveRoot_exp m hm.ne'
   have h := hμ.prod_one_sub_pow_eq_order
   have heq : (↑(m - 1) + 1 : ℂ) = m := by
-    rw [← Nat.cast_succ, Nat.succ_eq_add_one, pred_add_one hm]
+    rw [← Nat.cast_succ, Nat.succ_eq_add_one, Nat.sub_one_add_one_eq_of_pos hm]
   exact h.trans heq
 
+/-- `∑_{k<n} k = n(n - 1)/2` in `ℂ`. -/
 theorem sum_range_id_complex (n : ℕ) :
     ∑ k ∈ range n, (k : ℂ) = (↑(n * (n - 1)) : ℂ) / 2 := by
   have h : ((∑ k ∈ range n, k) * 2 : ℂ) = ↑(n * (n - 1)) := by
@@ -81,6 +79,7 @@ theorem sum_range_id_complex (n : ℕ) :
   rw [← Nat.cast_sum]
   exact (eq_div_iff_mul_eq (by norm_num : (2 : ℂ) ≠ 0)).2 h
 
+/-- `∑_{k<n} (k + 1) = n(n + 1)/2` in `ℂ`. -/
 theorem sum_range_succ_coe (n : ℕ) :
     ∑ k ∈ range n, (k + 1 : ℂ) = (↑(n * (n + 1)) : ℂ) / 2 := by
   have hsum := sum_range_id_complex n
@@ -104,6 +103,7 @@ theorem sum_range_succ_coe (n : ℕ) :
         · field
         · field
 
+/-- `exp(∑_{k<m-1} iπ(k + 1)/m) = i^(m-1)` for `m > 0`. -/
 theorem exp_sum_pi_div {m : ℕ} (hm : 0 < m) :
     exp (∑ k ∈ range (m - 1), I * π * (k + 1) / m) = I ^ (m - 1) := by
   have hm0 : (m : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr hm.ne'
@@ -119,13 +119,14 @@ theorem exp_sum_pi_div {m : ℕ} (hm : 0 < m) :
       ring
     rw [hfactor, hs]
     have hpred : ((m - 1) * (m - 1 + 1) : ℕ) = (m - 1) * m := by
-      rw [pred_add_one hm]
+      rw [Nat.sub_one_add_one_eq_of_pos hm]
     simp [hpred]
     field [hm0]
   rw [hsum]
   have : I * π * ↑(m - 1) / 2 = ↑(m - 1) * (π / 2 * I) := by ring
   rw [this, exp_nat_mul, exp_pi_div_two_mul_I]
 
+/-- With `ω = e^(2πi/m)`: `1 - ω^(k+1) = -2i e^(iπ(k+1)/m) sin(π(k + 1)/m)`. -/
 theorem one_sub_root_eq_sin {m k : ℕ} (hm : 0 < m) :
     (1 : ℂ) - exp (2 * π * I / m) ^ (k + 1) =
       -2 * I * exp (I * π * (k + 1) / m) * (Real.sin (π * (k + 1 : ℝ) / m) : ℂ) := by
@@ -144,6 +145,7 @@ theorem one_sub_root_eq_sin {m k : ℕ} (hm : 0 < m) :
   congr 2
   ring
 
+/-- `(-2i)ⁿ iⁿ = 2ⁿ`. -/
 theorem pow_neg_two_I_mul_I (n : ℕ) : (-2 * I : ℂ) ^ n * I ^ n = (2 : ℂ) ^ n := by
   rw [mul_pow, mul_assoc, ← pow_add, ← two_mul, pow_mul, I_sq, ← mul_pow]
   norm_num
@@ -192,6 +194,7 @@ theorem prod_sin_pi_div {m : ℕ} (hm : 0 < m) :
     _ = m / (2 : ℝ) ^ (m - 1) :=
         (eq_div_iff_mul_eq hne).2 (by rw [mul_comm]; exact hreal.symm)
 
+/-- `sin(πk/m) > 0` for `1 ≤ k < m`. -/
 theorem sin_pi_div_pos {m k : ℕ} (hm : 0 < m) (hk : k ∈ Ico 1 m) :
     0 < sin (π * k / m) := by
   have hk1 : 1 ≤ k := (Finset.mem_Ico.mp hk).1
@@ -281,6 +284,8 @@ def multiplicationGamma (m : ℕ) (s : ℝ) : ℝ :=
   (∏ k ∈ range m, Gamma ((s + k) / m)) * (m : ℝ) ^ (s - 1 / 2) /
     (2 * π) ^ ((m - 1 : ℝ) / 2)
 
+/-- The normalized Gauss product `multiplicationGamma m` satisfies the Gamma recurrence `G(s + 1) =
+s G(s)` for `s ≠ 0`. -/
 theorem multiplicationGamma_add_one {m : ℕ} (hm : 0 < m) {s : ℝ} (hs : s ≠ 0) :
     multiplicationGamma m (s + 1) = s * multiplicationGamma m s := by
   have hm0 : (0 : ℝ) < m := Nat.cast_pos.mpr hm
@@ -298,7 +303,7 @@ theorem multiplicationGamma_add_one {m : ℕ} (hm : 0 < m) {s : ℝ} (hs : s ≠
       ∏ k ∈ range m, Gamma ((s + k) / m) =
         Gamma (s / m) * ∏ k ∈ Ico 1 m, Gamma ((s + k) / m) := by
     have hsucc' := prod_range_succ' (fun k : ℕ => Gamma ((s + k) / m)) (m - 1)
-    rw [Complex.pred_add_one hm] at hsucc'
+    rw [Nat.sub_one_add_one_eq_of_pos hm] at hsucc'
     have hIco :
         ∏ k ∈ range (m - 1), Gamma ((s + (k + 1 : ℕ)) / m) =
           ∏ k ∈ Ico 1 m, Gamma ((s + k) / m) := by
@@ -329,6 +334,7 @@ theorem multiplicationGamma_add_one {m : ℕ} (hm : 0 < m) {s : ℝ} (hs : s ≠
   simp_rw [multiplicationGamma, hshift, hrpow]
   field
 
+/-- `multiplicationGamma m 1 = 1`. -/
 theorem multiplicationGamma_one {m : ℕ} (hm : 0 < m) : multiplicationGamma m 1 = 1 := by
   have hm0 : (0 : ℝ) < m := Nat.cast_pos.mpr hm
   have hIco :
@@ -353,6 +359,7 @@ theorem multiplicationGamma_one {m : ℕ} (hm : 0 < m) : multiplicationGamma m 1
   simp_rw [multiplicationGamma, hprod, hrpow, prod_Gamma_div hm]
   field
 
+/-- `x ↦ log Γ((x + k)/m)` is convex on `(0, ∞)`. -/
 theorem convexOn_log_Gamma_comp_add_div {m : ℕ} (hm : 0 < m) (k : ℕ) :
     ConvexOn ℝ (Set.Ioi 0) (fun x : ℝ => log (Gamma ((x + k) / m))) := by
   refine ⟨convex_Ioi 0, ?_⟩
@@ -373,6 +380,7 @@ theorem convexOn_log_Gamma_comp_add_div {m : ℕ} (hm : 0 < m) (k : ℕ) :
   have h := convexOn_log_Gamma.2 hx' hy' ha hb hab
   simpa [Function.comp_apply, hcombo] using h
 
+/-- `x ↦ ∑_{k<m} log Γ((x + k)/m)` is convex on `(0, ∞)`. -/
 theorem convexOn_sum_log_Gamma_div {m : ℕ} (hm : 0 < m) :
     ConvexOn ℝ (Set.Ioi 0)
       (fun x : ℝ => ∑ k ∈ range m, log (Gamma ((x + k) / m))) := by
@@ -387,6 +395,8 @@ theorem convexOn_sum_log_Gamma_div {m : ℕ} (hm : 0 < m) :
     simp_rw [sum_insert hk]
     exact (convexOn_log_Gamma_comp_add_div hm k).add ih
 
+/-- On `(0, ∞)`, `log` of `multiplicationGamma m s` is `∑_{k<m} log Γ((s + k)/m) + (s - 1/2) log m -
+log((2π)^((m-1)/2))`. -/
 theorem log_multiplicationGamma_eq {m : ℕ} (hm : 0 < m) :
     Set.EqOn (log ∘ multiplicationGamma m)
       (fun s => ∑ k ∈ range m, log (Gamma ((s + k) / m)) +
@@ -406,6 +416,7 @@ theorem log_multiplicationGamma_eq {m : ℕ} (hm : 0 < m) :
     log_div hnum hC.ne', log_mul hprod.ne' hrpow.ne',
     log_prod (fun k hk => (hGpos k hk).ne'), log_rpow hm0]
 
+/-- `multiplicationGamma m` is log-convex on `(0, ∞)`. -/
 theorem multiplicationGamma_log_convex_Ioi {m : ℕ} (hm : 0 < m) :
     ConvexOn ℝ (Set.Ioi (0 : ℝ)) (log ∘ multiplicationGamma m) := by
   have hsum := convexOn_sum_log_Gamma_div hm
@@ -420,6 +431,7 @@ theorem multiplicationGamma_log_convex_Ioi {m : ℕ} (hm : 0 < m) :
   rw [heq]
   ring
 
+/-- `multiplicationGamma m s > 0` for `s > 0`. -/
 theorem multiplicationGamma_pos {m : ℕ} (hm : 0 < m) {s : ℝ} (hs : 0 < s) :
     0 < multiplicationGamma m s := by
   have hm0 : (0 : ℝ) < m := Nat.cast_pos.mpr hm
@@ -428,6 +440,8 @@ theorem multiplicationGamma_pos {m : ℕ} (hm : 0 < m) {s : ℝ} (hs : 0 < s) :
   exact prod_pos fun k _ =>
     Gamma_pos_of_pos <| div_pos (add_pos_of_pos_of_nonneg hs (Nat.cast_nonneg _)) hm0
 
+/-- Gauss's multiplication formula in Bohr–Mollerup form: `multiplicationGamma m s = Γ(s)` for `s >
+0`. -/
 theorem multiplicationGamma_eq_Gamma {m : ℕ} (hm : 0 < m) {s : ℝ} (hs : 0 < s) :
     multiplicationGamma m s = Gamma s :=
   eq_Gamma_of_log_convex (multiplicationGamma_log_convex_Ioi hm)
@@ -488,14 +502,17 @@ namespace Complex
 def gaussMulConst (m : ℕ) : ℂ :=
   ↑(Real.rpow (2 * Real.pi) ((m - 1 : ℝ) / 2))
 
+/-- The constant `(2π)^((m-1)/2)` is nonzero. -/
 theorem gaussMulConst_ne_zero (m : ℕ) : gaussMulConst m ≠ 0 :=
   ofReal_ne_zero.mpr (Real.rpow_pos_of_pos (mul_pos two_pos Real.pi_pos) _).ne'
 
+/-- `z ↦ ∏_{k<m} 1/Γ(z + k/m)` is entire. -/
 theorem differentiable_prod_one_div_Gamma_add_div (m : ℕ) :
     Differentiable ℂ fun z : ℂ => ∏ k ∈ range m, (Gamma (z + k / m))⁻¹ :=
   Differentiable.fun_finsetProd fun _ _ =>
     differentiable_one_div_Gamma.comp (differentiable_id.add (differentiable_const _))
 
+/-- `z ↦ m^(mz - 1/2) / (Γ(mz) (2π)^((m-1)/2))` is entire. -/
 theorem differentiable_mul_cpow_one_div_Gamma (m : ℕ) (hm : 0 < m) :
     Differentiable ℂ fun z : ℂ =>
       (Gamma (m * z))⁻¹ * (m : ℂ) ^ (m * z - 1 / 2) / gaussMulConst m := by
@@ -504,6 +521,7 @@ theorem differentiable_mul_cpow_one_div_Gamma (m : ℕ) (hm : 0 < m) :
   · exact differentiable_one_div_Gamma.comp (differentiable_id.const_mul _)
   · exact ((differentiable_id.const_mul (m : ℂ)).sub_const (1 / 2)).const_cpow (Or.inl hm0)
 
+/-- `gaussMulConst m = (2π)^((m-1)/2)` as a complex power. -/
 theorem gaussMulConst_eq_cpow (m : ℕ) :
     gaussMulConst m = (2 * π : ℂ) ^ ((m - 1 : ℂ) / 2) := by
   simpa [gaussMulConst] using

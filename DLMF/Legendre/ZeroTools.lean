@@ -747,17 +747,12 @@ theorem lzt_ferrersP_base {m : ℝ} (hm : 0 ≤ m) (j : ℕ) {x : ℝ} (hx : x �
   field_simp
 
 
-/-- `𝖯^μ_ν` solves the associated Legendre equation on `(-1, 1)`. -/
-theorem lzt_isSol_P (ν μ : ℂ) : IsFerrersSolution ν μ (ferrersP ν μ) :=
-  ((ferrersEven_isFerrersSolution ν μ).add_smul (ferrersOdd_isFerrersSolution ν μ) _ _).congr
-    (ferrersP_eqOn_even_odd ν μ).symm
-
 /-- Real form of the associated Legendre equation for the real parts of `𝖯^μ_ν`. -/
 theorem lzt_ferrersP_sol (ν μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt (fun t => (ferrersP ν μ t).re) (deriv (ferrersP ν μ) x).re x ∧
     HasDerivAt (fun t => (1 - t ^ 2) * (deriv (ferrersP ν μ) t).re)
       (-((ν * (ν + 1) - μ ^ 2 / (1 - x ^ 2)) * (ferrersP ν μ x).re)) x := by
-  obtain ⟨hd, f2, hf2, heq⟩ := lzt_isSol_P ν μ x hx
+  obtain ⟨hd, f2, hf2, heq⟩ := ferrersP_isFerrersSolution ν μ x hx
   have hre : ∀ {g : ℝ → ℂ} {g' : ℂ}, HasDerivAt g g' x → HasDerivAt (fun t => (g t).re) g'.re x :=
     fun h => by
       have h1 := Complex.reCLM.hasFDerivAt.comp_hasDerivAt x h
@@ -780,7 +775,7 @@ theorem lzt_ferrersP_sol (ν μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
 theorem lzt_ferrersP_real_data (ν μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersP ν μ x = ((ferrersP ν μ x).re : ℂ) ∧
       deriv (ferrersP ν μ) x = ((deriv (ferrersP ν μ) x).re : ℂ) := by
-  have hd := ((lzt_isSol_P ν μ) x hx).1
+  have hd := ((ferrersP_isFerrersSolution ν μ) x hx).1
   have hreal : ∀ᶠ y in 𝓝 x, (ferrersP ν μ y).im = 0 :=
     Filter.eventually_of_mem (Ioo_mem_nhds hx.1 hx.2) fun y hy => ferrersP_real ν μ hy
   have him : HasDerivAt (fun y => (ferrersP ν μ y).im) (deriv (ferrersP ν μ) x).im x := by

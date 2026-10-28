@@ -29,14 +29,15 @@ theorem airy_product_second_deriv {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f'
     deriv (deriv (fun z => f z * g z)) = fun z => 2 * z * f z * g z + 2 * f' z * g' z :=
   ODE.product_second_deriv hf hg
 
-/-- airy product ode (DLMF 9.11.1). -/
+/-- A product `w = f g` of two Airy solutions satisfies the third-order equation
+`w''' - 4 z w' - 2 w = 0` (DLMF 9.11.1). -/
 @[dlmf 9.11.E1]
 theorem airy_product_ode {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') (hg : IsAirySol g g') (z : ℂ) :
     iteratedDeriv 3 (fun t => f t * g t) z - 4 * z * deriv (fun t => f t * g t) z - 2 * f z * g z = 0 := by
   have h := ODE.product_third_deriv hf hg (fun z => hasDerivAt_id z) z
   linear_combination h
 
-/-- airy product wronskian (DLMF 9.11.2). -/
+/-- The Wronskian of `Ai², Ai Bi, Bi²` is `2/π³` (DLMF 9.11.2). -/
 @[dlmf 9.11.E2]
 theorem airy_product_wronskian (z : ℂ) :
     airyWronskian3 (fun t => airyAi t ^ 2) (fun t => airyAi t * airyBi t) (fun t => airyBi t ^ 2) z = 2 / π ^ 3 := by
@@ -54,14 +55,15 @@ theorem airy_product_wronskian (z : ℂ) :
     _ = 2 * (airyAi z * airyBiDeriv z - airyAiDeriv z * airyBi z) ^ 3 := by ring
     _ = 2 / π ^ 3 := by rw [wronskian_airyAi_airyBi]; ring
 
-/-- airyAi sq bessel integral (DLMF 9.11.3). -/
+/-- For `x ≥ 0`, `∫₀^∞ J₀(t³/12 + x t) t dt = 4π√3 Ai(x)²` as an improper integral (DLMF 9.11.3). -/
 @[dlmf 9.11.E3]
 theorem airyAi_sq_bessel_integral {x : ℝ} (hx : 0 ≤ x) :
     HasIntegralAtTop (fun t : ℝ => Complex.besselJ 0 ((t : ℂ) ^ 3 / 12 + x * t) * t)
       0 (4 * π * Real.sqrt 3 * airyAi x ^ 2) := by
   sorry
 
-/-- airy modulus sq exp integral (DLMF 9.11.4). -/
+/-- `Ai(z)² + Bi(z)² = π^{-3/2} ∫₀^∞ exp(z t - t³/12) t^{-1/2} dt`, the integral converging
+absolutely (DLMF 9.11.4). -/
 @[dlmf 9.11.E4]
 theorem airy_modulus_sq_exp_integral (z : ℂ) :
     IntegrableOn (fun t : ℝ => exp (z * t - (t : ℂ) ^ 3 / 12) * (t : ℂ) ^ (-1 / 2 : ℂ)) (Ioi 0) ∧
@@ -70,7 +72,7 @@ theorem airy_modulus_sq_exp_integral (z : ℂ) :
           (π : ℂ) ^ (3 / 2 : ℂ) :=
   airyMod_modulus_sq_exp_integral z
 
-/-- airy product antiderivative 5 (DLMF 9.11.5). -/
+/-- For Airy solutions `f, g`, an antiderivative of `f g` is `-f' g' + z f g` (DLMF 9.11.5). -/
 @[dlmf 9.11.E5]
 theorem airy_product_antiderivative_5 {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') (hg : IsAirySol g g') (z : ℂ) :
     HasDerivAt (fun t => -f' t * g' t + t * f t * g t) (f z * g z) z := by
@@ -78,7 +80,8 @@ theorem airy_product_antiderivative_5 {f f' g g' : ℂ → ℂ} (hf : IsAirySol 
     (((hasDerivAt_id z).mul (hf z).1).mul (hg z).1)
   exact h.congr_deriv (by simp only [_root_.id, Pi.mul_apply, Pi.neg_apply]; ring)
 
-/-- airy product antiderivative 6 (DLMF 9.11.6). -/
+/-- For Airy solutions `f, g` with Wronskian `𝒲 = f g' - f' g`, an antiderivative of `f g'` is
+`(f g + 𝒲 z)/2` (DLMF 9.11.6). -/
 @[dlmf 9.11.E6]
 theorem airy_product_antiderivative_6 {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') (hg : IsAirySol g g') (z : ℂ) :
     HasDerivAt (fun t => (f t * g t + t * (f 0 * g' 0 - f' 0 * g 0)) / 2) (f z * g' z) z := by
@@ -87,25 +90,28 @@ theorem airy_product_antiderivative_6 {f f' g g' : ℂ → ℂ} (hf : IsAirySol 
   have hW := hf.wronskian_eq hg z
   exact h.congr_deriv (by linear_combination -hW / 2)
 
-/-- airy product antiderivative 7 (DLMF 9.11.7). -/
+/-- For Airy solutions `f, g`, an antiderivative of `f' g'` is `(f g' + f' g + z f' g' - z² f g)/3`
+(DLMF 9.11.7). -/
 @[dlmf 9.11.E7]
 theorem airy_product_antiderivative_7 {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') (hg : IsAirySol g g') (z : ℂ) :
     HasDerivAt (fun t => (f t * g' t + f' t * g t + t * f' t * g' t - t ^ 2 * f t * g t) / 3) (f' z * g' z) z := by
   have h := (((((hf z).1.mul (hg z).2).add ((hf z).2.mul (hg z).1)).add
     (((hasDerivAt_id z).mul (hf z).2).mul (hg z).2)).sub
       (((hasDerivAt_pow 2 z).mul (hf z).1).mul (hg z).1)).div_const 3
-  exact h.congr_deriv (by simp only [_root_.id, Pi.mul_apply, Pi.neg_apply]; ring)
+  exact h.congr_deriv (by simp only [_root_.id, Pi.mul_apply]; ring)
 
-/-- airy product antiderivative 8 (DLMF 9.11.8). -/
+/-- For Airy solutions `f, g`, an antiderivative of `z f g` is
+`(f g' + f' g)/6 - (z f' g' - z² f g)/3` (DLMF 9.11.8). -/
 @[dlmf 9.11.E8]
 theorem airy_product_antiderivative_8 {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') (hg : IsAirySol g g') (z : ℂ) :
     HasDerivAt (fun t => (f t * g' t + f' t * g t) / 6 - (t * f' t * g' t - t ^ 2 * f t * g t) / 3) (z * f z * g z) z := by
   have h := ((((hf z).1.mul (hg z).2).add ((hf z).2.mul (hg z).1)).div_const 6).sub
     (((((hasDerivAt_id z).mul (hf z).2).mul (hg z).2).sub
       (((hasDerivAt_pow 2 z).mul (hf z).1).mul (hg z).1)).div_const 3)
-  exact h.congr_deriv (by simp only [_root_.id, Pi.mul_apply, Pi.neg_apply]; ring)
+  exact h.congr_deriv (by simp only [_root_.id, Pi.mul_apply]; ring)
 
-/-- airy product antiderivative 9 (DLMF 9.11.9). -/
+/-- For Airy solutions `f, g` with Wronskian `𝒲`, an antiderivative of `z f g'` is
+`f' g'/2 + 𝒲 z²/4` (DLMF 9.11.9). -/
 @[dlmf 9.11.E9]
 theorem airy_product_antiderivative_9 {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') (hg : IsAirySol g g') (z : ℂ) :
     HasDerivAt (fun t => f' t * g' t / 2 + t ^ 2 * (f 0 * g' 0 - f' 0 * g 0) / 4) (z * f z * g' z) z := by
@@ -114,7 +120,8 @@ theorem airy_product_antiderivative_9 {f f' g g' : ℂ → ℂ} (hf : IsAirySol 
   have hW := hf.wronskian_eq hg z
   exact h.congr_deriv (by linear_combination -(z / 2) * hW)
 
-/-- airy product antiderivative 10 (DLMF 9.11.10). -/
+/-- For Airy solutions `f, g`, an antiderivative of `z f' g'` is
+`(3/10)(-f g + z f g' + z f' g) + (z² f' g' - z³ f g)/5` (DLMF 9.11.10). -/
 @[dlmf 9.11.E10]
 theorem airy_product_antiderivative_10 {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') (hg : IsAirySol g g') (z : ℂ) :
     HasDerivAt (fun t => 3 / 10 * (-f t * g t + t * f t * g' t + t * f' t * g t) + (t ^ 2 * f' t * g' t - t ^ 3 * f t * g t) / 5) (z * f' z * g' z) z := by
@@ -130,7 +137,8 @@ theorem airy_product_antiderivative_10 {f f' g g' : ℂ → ℂ} (hf : IsAirySol
   · simp only [Pi.mul_apply, _root_.id]
     ring
 
-/-- airy quotient antiderivative (DLMF 9.11.11). -/
+/-- For Airy solutions `f, g` with nonzero Wronskian `𝒲`, if `F` has derivative `F'` at `g(z)/f(z)`
+and `f(z) ≠ 0`, then `F(g/f)/𝒲` has derivative `F'/f(z)²` at `z` (DLMF 9.11.11). -/
 @[dlmf 9.11.E11]
 theorem airy_quotient_antiderivative {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') (hg : IsAirySol g g') {F : ℂ → ℂ} {F' z : ℂ}
     (hF : HasDerivAt F F' (g z / f z)) (hfz : f z ≠ 0)
@@ -141,7 +149,7 @@ theorem airy_quotient_antiderivative {f f' g g' : ℂ → ℂ} (hf : IsAirySol f
     linear_combination hf.wronskian_eq hg z
   exact h.congr_deriv (by rw [he]; field_simp)
 
-/-- airyAi reciprocal square antiderivative (DLMF 9.11.12). -/
+/-- Where `Ai z ≠ 0`, an antiderivative of `1/Ai(z)²` is `π Bi(z)/Ai(z)` (DLMF 9.11.12). -/
 @[dlmf 9.11.E12]
 theorem airyAi_recip_sq_antiderivative {z : ℂ} (hz : airyAi z ≠ 0) :
     HasDerivAt (fun t => π * airyBi t / airyAi t) (1 / airyAi z ^ 2) z := by
@@ -154,7 +162,8 @@ theorem airyAi_recip_sq_antiderivative {z : ℂ} (hz : airyAi z ≠ 0) :
     have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
     field_simp
 
-/-- airyAiBi reciprocal antiderivative (DLMF 9.11.13). -/
+/-- Where `Ai Bi ≠ 0` and `Bi/Ai` lies in the slit plane, an antiderivative of `1/(Ai Bi)` is
+`π ln(Bi/Ai)` (DLMF 9.11.13). -/
 @[dlmf 9.11.E13]
 theorem airyAiBi_recip_antiderivative {z : ℂ} (ha : airyAi z ≠ 0) (hb : airyBi z ≠ 0)
     (hlog : airyBi z / airyAi z ∈ slitPlane) :
@@ -170,7 +179,8 @@ theorem airyAiBi_recip_antiderivative {z : ℂ} (ha : airyAi z ≠ 0) (hb : airy
     have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
     field_simp [ha, hb, hπ]
 
-/-- airy modulus rational antiderivative (DLMF 9.11.14). -/
+/-- Where `Ai² + Bi² ≠ 0`, an antiderivative of `Ai Bi/(Ai² + Bi²)²` is `(π/2) Bi²/(Ai² + Bi²)`
+(DLMF 9.11.14). -/
 @[dlmf 9.11.E14]
 theorem airy_modulus_rational_antiderivative {z : ℂ} (hz : airyAi z ^ 2 + airyBi z ^ 2 ≠ 0) :
     HasDerivAt (fun t => π / 2 * airyBi t ^ 2 / (airyAi t ^ 2 + airyBi t ^ 2))
@@ -186,7 +196,9 @@ theorem airy_modulus_rational_antiderivative {z : ℂ} (hz : airyAi z ^ 2 + airy
   field_simp
   linear_combination 2 * airyAi z * airyBi z * hW
 
-/-- airyAi sq mellin (DLMF 9.11.15), from the representation
+/-- The Mellin transform of `Ai²`: for `Re α > 0`,
+`∫₀^∞ t^{α-1} Ai(t)² dt = 2Γ(α)/(√π 12^{(2α+5)/6} Γ(α/3 + 5/6))` (DLMF 9.11.15). Proved from
+the representation
 `Ai(x)² = (2^{2/3}/π) ∫₀^∞ Ai(2^{2/3}(x + t²)) dt` (`airyAi_sq_eq_integral`), Fubini with the
 Beta integral, and the Mellin transform of `Ai` (9.10.17). -/
 @[dlmf 9.11.E15]
@@ -217,9 +229,10 @@ theorem airyAi_sq_mellin {α : ℂ} (hα : 0 < α.re) :
     rw [show (12 : ℝ) = 2 ^ 2 * 3 by norm_num, Real.log_mul (by norm_num) (by norm_num),
       Real.log_pow]; push_cast; ring
   have h12 : (12 : ℂ) ^ ((2 * α + 5) / 6) = exp ((Real.log 12 : ℂ) * ((2 * α + 5) / 6)) := by
-    rw [show (12 : ℂ) = ((12 : ℝ) : ℂ) by norm_num, airySq_cpow_eq (by norm_num)]
+    rw [show (12 : ℂ) = ((12 : ℝ) : ℂ) by norm_num, Complex.ofReal_cpow_eq_exp_log_mul (by
+        norm_num)]
   have h3 : (3 : ℂ) ^ ((2 * α + 5) / 6) = exp ((Real.log 3 : ℂ) * ((2 * α + 5) / 6)) := by
-    rw [show (3 : ℂ) = ((3 : ℝ) : ℂ) by norm_num, airySq_cpow_eq (by norm_num)]
+    rw [show (3 : ℂ) = ((3 : ℝ) : ℂ) by norm_num, Complex.ofReal_cpow_eq_exp_log_mul (by norm_num)]
   have hc : ((airySq_c : ℝ) : ℂ) = exp (Real.log airySq_c : ℂ) := by
     rw [← ofReal_exp, Real.exp_log airySq_c_pos]
   have key : ((airySq_c : ℝ) : ℂ) * exp (-(Real.log airySq_c : ℂ) * (α + 1 / 2)) *
@@ -253,19 +266,19 @@ theorem airyAi_sq_mellin {α : ℂ} (hα : 0 < α.re) :
   field_simp
   ring
 
-/-- airyAi cube integral (DLMF 9.11.16). -/
+/-- `∫_{-∞}^{∞} Ai(t)³ dt = Γ(1/3)²/(4π²)` (DLMF 9.11.16). -/
 @[dlmf 9.11.E16]
 theorem airyAi_cube_integral  :
     HasIntegralWholeLine (fun t => airyAi t ^ 3) (Gamma (1 / 3) ^ 2 / (4 * π ^ 2)) := by
   sorry
 
-/-- airyAi sq airyBi integral (DLMF 9.11.17). -/
+/-- `∫_{-∞}^{∞} Ai(t)² Bi(t) dt = Γ(1/3)²/(4√3 π²)` (DLMF 9.11.17). -/
 @[dlmf 9.11.E17]
 theorem airyAi_sq_airyBi_integral  :
     HasIntegralWholeLine (fun t => airyAi t ^ 2 * airyBi t) (Gamma (1 / 3) ^ 2 / (4 * Real.sqrt 3 * π ^ 2)) := by
   sorry
 
-/-- airyAi fourth integral (DLMF 9.11.18). -/
+/-- `∫₀^∞ Ai(t)⁴ dt = ln 3/(24π²)` (DLMF 9.11.18). -/
 @[dlmf 9.11.E18]
 theorem airyAi_fourth_integral  :
     (∫ t : ℝ in Ioi 0, airyAi t ^ 4) = log 3 / (24 * π ^ 2) := by
@@ -403,7 +416,7 @@ theorem hasDerivAt_arctan_airyDeriv_ratio {x : ℝ} (hx : 0 ≤ x) :
   field_simp at hW
   linear_combination (x * (airyAiDerivReal x ^ 2 + airyBiDerivReal x ^ 2)) * hW
 
-/-- airy modulus reciprocal integrals (DLMF 9.11.19). -/
+/-- `∫₀^∞ dt/(Ai(t)² + Bi(t)²) = ∫₀^∞ t dt/(Ai'(t)² + Bi'(t)²) = π²/6` (DLMF 9.11.19). -/
 @[dlmf 9.11.E19]
 theorem airy_modulus_reciprocal_integrals  :
     (∫ t : ℝ in Ioi 0, 1 / (airyAi t ^ 2 + airyBi t ^ 2)) = (π : ℂ) ^ 2 / 6 ∧

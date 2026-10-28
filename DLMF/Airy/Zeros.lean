@@ -90,10 +90,6 @@ theorem airyBiDerivReal_zero_pos : 0 < airyBiDerivReal 0 := by
   have := Real.Gamma_pos_of_pos (by norm_num : (0 : ℝ) < 1 / 3)
   positivity
 
-/-- `Ai'(0) < 0`. -/
-theorem airyAiDerivReal_zero_neg : airyAiDerivReal 0 < 0 := by
-  exact airyAiDerivReal_zero_lt
-
 /-- `((-1)^n)^2 = 1`. -/
 theorem neg_one_pow_sq_real (n : ℕ) : ((-1 : ℝ) ^ n) ^ 2 = 1 := by
   rw [← pow_mul, mul_comm, pow_mul]; simp
@@ -107,12 +103,19 @@ variable {f g : ℝ → ℝ} {c : ℝ}
 /-- Hypotheses describing the zeros of `f` as the level crossings `g = c + jπ` of a phase `g`
 that decreases on `(-∞, 0]` from `g 0 ∈ (c, c + π)` to `+∞`. -/
 structure PhaseZeroData (f g : ℝ → ℝ) (c : ℝ) : Prop where
+  /-- The phase is continuous. -/
   cont : Continuous g
+  /-- The phase is strictly decreasing on `(-∞, 0]`. -/
   anti : StrictAntiOn g (Iic 0)
+  /-- The phase tends to `+∞` as `x → -∞`. -/
   tendsto : Tendsto g atBot atTop
+  /-- The phase at `0` lies above the level `c`. -/
   lt_zero : c < g 0
+  /-- The phase at `0` lies below the level `c + π`. -/
   zero_lt : g 0 < c + π
+  /-- On `x < 0` the zeros of `f` are exactly the level crossings `g x = c + jπ`. -/
   zero_iff : ∀ x < 0, f x = 0 ↔ ∃ j : ℤ, g x = c + j * π
+  /-- All zeros of `f` are negative. -/
   neg : ∀ x, f x = 0 → x < 0
 
 namespace PhaseZeroData
@@ -287,7 +290,7 @@ theorem phaseZeroData_airyAi : PhaseZeroData airyAiReal airyPhase 0 := by
     exact ⟨fun ⟨n, hn⟩ => ⟨n, by rw [← hn]; ring⟩, fun ⟨n, hn⟩ => ⟨n, by rw [hn]; ring⟩⟩
 
 /-- Infinitely many real zeros, DLMF §9.9(i). -/
-theorem airyAi_infinite_real_zeros  :
+theorem airyAi_infinite_real_zeros :
     Set.Infinite {x : ℝ | airyAiReal x = 0} := by
   exact phaseZeroData_airyAi.infinite
 
@@ -299,7 +302,7 @@ theorem airyAiZero_spec {k : ℕ} (hk : 1 ≤ k) :
   exact ⟨h1, h2, h3⟩
 
 /-- The real zeros are exhausted in their stated order, DLMF §9.9(i). -/
-theorem airyAiZero_enumeration  :
+theorem airyAiZero_enumeration :
     StrictAntiOn airyAiZero (Ici 1) ∧ ∀ x : ℝ, airyAiReal x = 0 ↔ ∃ k : ℕ, 1 ≤ k ∧ airyAiZero k = x := by
   exact phaseZeroData_airyAi.enumeration
 
@@ -349,7 +352,7 @@ theorem phaseZeroData_airyAiDeriv : PhaseZeroData airyAiDerivReal airyDerivPhase
       fun ⟨n, hn⟩ => ⟨n - 1, by rw [hn]; push_cast; ring⟩⟩
 
 /-- Infinitely many real zeros, DLMF §9.9(i). -/
-theorem airyAiDeriv_infinite_real_zeros  :
+theorem airyAiDeriv_infinite_real_zeros :
     Set.Infinite {x : ℝ | airyAiDerivReal x = 0} := by
   exact phaseZeroData_airyAiDeriv.infinite
 
@@ -361,7 +364,7 @@ theorem airyAiDerivZero_spec {k : ℕ} (hk : 1 ≤ k) :
   exact ⟨h1, h2, h3⟩
 
 /-- The real zeros are exhausted in their stated order, DLMF §9.9(i). -/
-theorem airyAiDerivZero_enumeration  :
+theorem airyAiDerivZero_enumeration :
     StrictAntiOn airyAiDerivZero (Ici 1) ∧ ∀ x : ℝ, airyAiDerivReal x = 0 ↔ ∃ k : ℕ, 1 ≤ k ∧ airyAiDerivZero k = x := by
   exact phaseZeroData_airyAiDeriv.enumeration
 
@@ -391,7 +394,7 @@ theorem phaseZeroData_airyBi : PhaseZeroData airyBiReal airyPhase (-(π / 2)) :=
       fun ⟨n, hn⟩ => ⟨n - 1, by rw [hn]; push_cast; ring⟩⟩
 
 /-- Infinitely many real zeros, DLMF §9.9(i). -/
-theorem airyBi_infinite_real_zeros  :
+theorem airyBi_infinite_real_zeros :
     Set.Infinite {x : ℝ | airyBiReal x = 0} := by
   exact phaseZeroData_airyBi.infinite
 
@@ -403,7 +406,7 @@ theorem airyBiZero_spec {k : ℕ} (hk : 1 ≤ k) :
   exact ⟨h1, h2, h3⟩
 
 /-- The real zeros are exhausted in their stated order, DLMF §9.9(i). -/
-theorem airyBiZero_enumeration  :
+theorem airyBiZero_enumeration :
     StrictAntiOn airyBiZero (Ici 1) ∧ ∀ x : ℝ, airyBiReal x = 0 ↔ ∃ k : ℕ, 1 ≤ k ∧ airyBiZero k = x := by
   exact phaseZeroData_airyBi.enumeration
 
@@ -440,7 +443,7 @@ theorem phaseZeroData_airyBiDeriv : PhaseZeroData airyBiDerivReal airyDerivPhase
       fun ⟨n, hn⟩ => ⟨n - 1, by rw [hn]; push_cast; ring⟩⟩
 
 /-- Infinitely many real zeros, DLMF §9.9(i). -/
-theorem airyBiDeriv_infinite_real_zeros  :
+theorem airyBiDeriv_infinite_real_zeros :
     Set.Infinite {x : ℝ | airyBiDerivReal x = 0} := by
   exact phaseZeroData_airyBiDeriv.infinite
 
@@ -452,7 +455,7 @@ theorem airyBiDerivZero_spec {k : ℕ} (hk : 1 ≤ k) :
   exact ⟨h1, h2, h3⟩
 
 /-- The real zeros are exhausted in their stated order, DLMF §9.9(i). -/
-theorem airyBiDerivZero_enumeration  :
+theorem airyBiDerivZero_enumeration :
     StrictAntiOn airyBiDerivZero (Ici 1) ∧ ∀ x : ℝ, airyBiDerivReal x = 0 ↔ ∃ k : ℕ, 1 ≤ k ∧ airyBiDerivZero k = x := by
   exact phaseZeroData_airyBiDeriv.enumeration
 
@@ -493,6 +496,7 @@ theorem airyZeroC_tendsto_arg (z0 : ℂ) :
   have hT0 : (T : ℂ) ≠ 0 := ofReal_ne_zero.mpr hT.ne'
   field_simp
 
+/-- `‖z₀ + T‖ → ∞` as `T → +∞`. -/
 theorem airyZeroC_tendsto_norm (z0 : ℂ) :
     Tendsto (fun T : ℝ => ‖z0 + T‖) atTop atTop := by
   refine tendsto_atTop_mono (fun T => ?_) (tendsto_atTop_add_const_left _ (-‖z0‖) tendsto_id)
@@ -504,6 +508,8 @@ theorem airyZeroC_tendsto_norm (z0 : ℂ) :
   rw [Real.norm_eq_abs] at this
   linarith
 
+/-- The horizontal ray `z₀ + T`, `T → +∞`, eventually lies in the sector `|arg z| ≤ π/2`
+and tends to infinity there. -/
 theorem airyZeroC_tendsto_sector (z0 : ℂ) :
     Tendsto (fun T : ℝ => z0 + T) atTop (airySector (π / 2)) := by
   refine tendsto_inf.mpr ⟨tendsto_comap_iff.mpr (airyZeroC_tendsto_norm z0), ?_⟩
@@ -571,12 +577,14 @@ theorem airyZeroC_tendsto_boundary (z0 : ℂ) :
   rw [hprod, norm_neg, norm_div, Complex.norm_exp, neg_re]
   simp [abs_of_pos Real.pi_pos]
 
+/-- `t ↦ Ai(z₀ + t)` has derivative `Ai'(z₀ + t)` along the real line. -/
 theorem airyZeroC_hasDerivAt_u (z0 : ℂ) (t : ℝ) :
     HasDerivAt (fun t : ℝ => airyAi (z0 + t)) (airyAiDeriv (z0 + t)) t := by
   have h := ((hasDerivAt_airyAi (z0 + t)).comp (t : ℂ) ((hasDerivAt_id (t : ℂ)).const_add z0))
   simp only [mul_one] at h
   exact h.comp_ofReal
 
+/-- `t ↦ Ai'(z₀ + t)` has derivative `(z₀ + t) Ai(z₀ + t)` along the real line. -/
 theorem airyZeroC_hasDerivAt_v (z0 : ℂ) (t : ℝ) :
     HasDerivAt (fun t : ℝ => airyAiDeriv (z0 + t)) ((z0 + t) * airyAi (z0 + t)) t := by
   have h := ((hasDerivAt_airyAiDeriv (z0 + t)).comp (t : ℂ) ((hasDerivAt_id (t : ℂ)).const_add z0))
@@ -699,6 +707,7 @@ open Metric
 /-- The inverse of `z ↦ -2ζ(z)` on the upper sector. -/
 noncomputable def airyZ_Z (u : ℂ) : ℂ := exp (2 / 3 * log (-(3 / 4 : ℂ) * u))
 
+/-- The imaginary part of `(2/3) log(-(3/4) u)` lies in `(-π, π]`. -/
 theorem airyZ_im_bound (u : ℂ) :
     -π < (2 / 3 * log (-(3 / 4 : ℂ) * u)).im ∧ (2 / 3 * log (-(3 / 4 : ℂ) * u)).im ≤ π := by
   have h1 := neg_pi_lt_arg (-(3 / 4 : ℂ) * u)
@@ -708,28 +717,35 @@ theorem airyZ_im_bound (u : ℂ) :
     simp [log_im]
   rw [this]; constructor <;> nlinarith
 
+/-- `log Z(u) = (2/3) log(-(3/4) u)`. -/
 theorem airyZ_log_Z (u : ℂ) : log (airyZ_Z u) = 2 / 3 * log (-(3 / 4 : ℂ) * u) :=
   log_exp (airyZ_im_bound u).1 (airyZ_im_bound u).2
 
+/-- `arg Z(u) = (2/3) arg(-(3/4) u)`. -/
 theorem airyZ_arg_Z (u : ℂ) : arg (airyZ_Z u) = 2 / 3 * arg (-(3 / 4 : ℂ) * u) := by
   rw [← log_im, airyZ_log_Z]; simp [log_im]
 
+/-- `Z(u) ≠ 0`. -/
 theorem airyZ_Z_ne_zero (u : ℂ) : airyZ_Z u ≠ 0 := exp_ne_zero _
 
+/-- Complex powers of `Z(u)`: `Z(u)^w = exp((2/3) log(-(3/4) u) w)`. -/
 theorem airyZ_cpow_Z (u w : ℂ) :
     airyZ_Z u ^ w = exp (2 / 3 * log (-(3 / 4 : ℂ) * u) * w) := by
   rw [cpow_def_of_ne_zero (airyZ_Z_ne_zero u), airyZ_log_Z]
 
+/-- `ζ(Z(u)) = -u/2` for `u ≠ 0`, so `Z` inverts `z ↦ -2ζ(z)`. -/
 theorem airyZ_zeta_Z {u : ℂ} (hu : u ≠ 0) : airyZetaComplex (airyZ_Z u) = -u / 2 := by
   unfold airyZetaComplex
   rw [airyZ_cpow_Z, show 2 / 3 * log (-(3 / 4 : ℂ) * u) * (3 / 2) = log (-(3 / 4 : ℂ) * u) by ring,
     exp_log (mul_ne_zero (by norm_num) hu)]
   ring
 
+/-- `Z(u)^{1/4} = exp(log(-(3/4) u)/6)`. -/
 theorem airyZ_quarter_Z (u : ℂ) :
     airyZ_Z u ^ (1 / 4 : ℂ) = exp (log (-(3 / 4 : ℂ) * u) / 6) := by
   rw [airyZ_cpow_Z]; congr 1; ring
 
+/-- `‖Z(u)‖ = exp((2/3) log ‖(3/4) u‖)`, the modulus `‖(3/4) u‖^{2/3}` for `u ≠ 0`. -/
 theorem airyZ_norm_Z (u : ℂ) : ‖airyZ_Z u‖ = Real.exp (2 / 3 * Real.log ‖-(3 / 4 : ℂ) * u‖) := by
   rw [airyZ_Z, norm_exp]; congr 1; simp [log_re]
 
@@ -742,7 +758,8 @@ theorem airyZ_arg_bounds {v : ℂ} (h1 : v.re < 0) (h2 : -v.re < v.im) :
     by_contra h
     rcases arg_le_pi_div_two_iff.mp (not_lt.mp h) with h' | h' <;> linarith
   refine ⟨ha, ?_⟩
-  have hrot := DLMF.Airy.airyRot_arg_mul_exp hv (α := -(π / 4)) (by linarith) (by linarith [arg_le_pi v])
+  have hrot := Complex.arg_mul_exp_ofReal_mul_I hv (α := -(π / 4)) (by linarith)
+    (by linarith [arg_le_pi v])
   have hre : 0 < (v * exp (((-(π / 4) : ℝ) : ℂ) * I)).re := by
     rw [show (((-(π / 4) : ℝ) : ℂ) * I) = ((-(π / 4) : ℝ) : ℂ) * I from rfl, exp_mul_I]
     simp only [mul_re, add_re, mul_im, add_im, ← ofReal_cos, ← ofReal_sin, ofReal_re, ofReal_im,
@@ -754,6 +771,7 @@ theorem airyZ_arg_bounds {v : ℂ} (h1 : v.re < 0) (h2 : -v.re < v.im) :
   rw [hrot] at this; linarith
 
 
+/-- `1/ζ(z) → 0` as `z → ∞` in the sector `|arg z| ≤ α`. -/
 theorem airyZ_zeta_recip_tendsto (α : ℝ) :
     Tendsto (fun z => ((airyZetaComplex z) ^ 1)⁻¹) (airySector α) (𝓝 0) := by
   rw [tendsto_zero_iff_norm_tendsto_zero]
@@ -780,16 +798,20 @@ theorem airyZ_small {F : ℂ → ℂ} {c : ℕ → ℂ} {α : ℝ}
   obtain ⟨R, hR⟩ := mem_atTop_sets.mp hs
   exact ⟨R, fun w hw0 hwa hwR => hsub (hR _ hwR) ⟨hw0, hwa⟩⟩
 
+/-- `e^{-πi/6} e^{-πi/3} = -i`. -/
 theorem airyZ_exp_neg_pi_half : exp (-(π * I / 6)) * exp (-(π * I / 3)) = -I := by
   rw [← exp_add, show -(π * I / 6) + -(π * I / 3) = -((π / 2 : ℂ) * I) by ring, exp_neg,
     exp_pi_div_two_mul_I, inv_I]
 
+/-- `Bi(z) = 2 e^{-πi/6} Ai(z e^{-2πi/3}) + i Ai(z)`, a rearranged connection formula. -/
 theorem airyZ_bi_eq (z : ℂ) :
     airyBi z = 2 * exp (-(π * I / 6)) * airyAi (z * exp (-(2 * π * I / 3))) + I * airyAi (z * 1) := by
   rw [airyAi_mul_omega_recip, mul_one]
   have h := airyZ_exp_neg_pi_half
   linear_combination (-(airyAi z + I * airyBi z)) * h + airyBi z * I_sq
 
+/-- The derivative form of `airyZ_bi_eq`:
+`Bi'(z) = 2 e^{-πi/6} e^{-2πi/3} Ai'(z e^{-2πi/3}) + i Ai'(z)`. -/
 theorem airyZ_biDeriv_eq (z : ℂ) :
     airyBiDeriv z = 2 * exp (-(π * I / 6)) * exp (-(2 * π * I / 3)) *
       airyAiDeriv (z * exp (-(2 * π * I / 3))) + I * 1 * airyAiDeriv (z * 1) :=
@@ -798,6 +820,8 @@ theorem airyZ_biDeriv_eq (z : ℂ) :
 /-- The rotated point `Z(u) e^{-2πi/3}`. -/
 noncomputable def airyZ_W (u : ℂ) : ℂ := airyZ_Z u * exp (((-(2 * π / 3)) : ℝ) * I)
 
+/-- For `arg(-(3/4) u) ≥ 0`, the rotation of `Z(u)` by `-2π/3` stays within the principal
+argument range. -/
 theorem airyZ_arg_ok {u : ℂ} (hu : 0 ≤ arg (-(3 / 4 : ℂ) * u)) :
     -π < arg (airyZ_Z u) + (-(2 * π / 3)) ∧ arg (airyZ_Z u) + (-(2 * π / 3)) ≤ π := by
   rw [airyZ_arg_Z]
@@ -805,6 +829,7 @@ theorem airyZ_arg_ok {u : ℂ} (hu : 0 ≤ arg (-(3 / 4 : ℂ) * u)) :
   have hπ := Real.pi_pos
   constructor <;> nlinarith
 
+/-- `ζ(W(u)) = u/2` when `u ≠ 0` and `arg(-(3/4) u) ≥ 0`. -/
 theorem airyZ_zeta_W {u : ℂ} (hu0 : u ≠ 0) (hu : 0 ≤ arg (-(3 / 4 : ℂ) * u)) :
     airyZetaComplex (airyZ_W u) = u / 2 := by
   rw [airyZ_W, airyRot_zeta_mul_exp (airyZ_Z_ne_zero u) (airyZ_arg_ok hu).1 (airyZ_arg_ok hu).2,
@@ -812,12 +837,14 @@ theorem airyZ_zeta_W {u : ℂ} (hu0 : u ≠ 0) (hu : 0 ≤ arg (-(3 / 4 : ℂ) *
     exp_neg, exp_pi_mul_I]
   ring
 
+/-- `W(u)^{1/4} = exp(log(-(3/4) u)/6) e^{-πi/6}` when `arg(-(3/4) u) ≥ 0`. -/
 theorem airyZ_quarter_W {u : ℂ} (hu : 0 ≤ arg (-(3 / 4 : ℂ) * u)) :
     airyZ_W u ^ (1 / 4 : ℂ) = exp (log (-(3 / 4 : ℂ) * u) / 6) * exp (-(π * I / 6)) := by
   rw [airyZ_W, Complex.cpow_mul_exp_ofReal_mul_I (airyZ_Z_ne_zero u) (airyZ_arg_ok hu).1
     (airyZ_arg_ok hu).2, airyZ_quarter_Z]
   congr 2; push_cast; ring
 
+/-- `W(u) = Z(u) e^{-2πi/3}`. -/
 theorem airyZ_W_eq (u : ℂ) : airyZ_W u = airyZ_Z u * exp (-(2 * π * I / 3)) := by
   rw [airyZ_W, airyRot_exp_two_pi_div_three.2]
 
@@ -825,6 +852,7 @@ theorem airyZ_W_eq (u : ℂ) : airyZ_W u = airyZ_Z u * exp (-(2 * π * I / 3)) :
 noncomputable def airyZ_Fbi (u : ℂ) : ℂ :=
   airyBi (airyZ_Z u) * (Real.sqrt π * exp (log (-(3 / 4 : ℂ) * u) / 6) * exp (u / 2))
 
+/-- The normalized `Bi` as a combination of the normalized `Ai` at `W(u)` and at `Z(u)`. -/
 theorem airyZ_Fbi_eq {u : ℂ} (hu0 : u ≠ 0) (hu : 0 ≤ arg (-(3 / 4 : ℂ) * u)) :
     airyZ_Fbi u = airyAi (airyZ_W u) / airyPrefactor .ai (airyZ_W u) +
       I / 2 * exp u * (airyAi (airyZ_Z u) / airyPrefactor .ai (airyZ_Z u)) := by
@@ -847,6 +875,7 @@ theorem airyZ_Fbi_eq {u : ℂ} (hu0 : u ≠ 0) (hu : 0 ≤ arg (-(3 / 4 : ℂ) *
 noncomputable def airyZ_Fbid (u : ℂ) : ℂ :=
   airyBiDeriv (airyZ_Z u) * (Real.sqrt π * exp (-(log (-(3 / 4 : ℂ) * u) / 6)) * exp (u / 2))
 
+/-- The normalized `Bi'` as a combination of the normalized `Ai'` at `W(u)` and `Z(u)`. -/
 theorem airyZ_Fbid_eq {u : ℂ} (hu0 : u ≠ 0) (hu : 0 ≤ arg (-(3 / 4 : ℂ) * u)) :
     airyZ_Fbid u = airyAiDeriv (airyZ_W u) / airyPrefactor .aiDeriv (airyZ_W u) -
       I / 2 * exp u * (airyAiDeriv (airyZ_Z u) / airyPrefactor .aiDeriv (airyZ_Z u)) := by
@@ -874,12 +903,15 @@ theorem airyZ_Fbid_eq {u : ℂ} (hu0 : u ≠ 0) (hu : 0 ≤ arg (-(3 / 4 : ℂ) 
 noncomputable def airyZ_ctr (θ : ℝ) (k : ℕ) : ℂ :=
   ((Real.log 2 : ℝ) : ℂ) - ((2 * π * (k + θ) : ℝ) : ℂ) * I
 
+/-- The model-zero centres have real part `log 2`. -/
 theorem airyZ_ctr_re (θ : ℝ) (k : ℕ) : (airyZ_ctr θ k).re = Real.log 2 := by
   simp only [airyZ_ctr, sub_re, mul_re, ofReal_re, ofReal_im, I_re, I_im]; ring
 
+/-- The model-zero centre `u_k` has imaginary part `-2π(k + θ)`. -/
 theorem airyZ_ctr_im (θ : ℝ) (k : ℕ) : (airyZ_ctr θ k).im = -(2 * π * (k + θ)) := by
   simp only [airyZ_ctr, sub_im, mul_im, ofReal_re, ofReal_im, I_re, I_im]; ring
 
+/-- `e^{u_k}` does not depend on `k`. -/
 theorem airyZ_exp_ctr (θ : ℝ) (k : ℕ) : exp (airyZ_ctr θ k) = exp (airyZ_ctr θ 0) := by
   have : airyZ_ctr θ k = airyZ_ctr θ 0 + ((-(k : ℤ) : ℤ) : ℂ) * (2 * π * I) := by
     apply Complex.ext
@@ -911,6 +943,7 @@ theorem airyZ_geom {θ : ℝ} (hθ : |θ| ≤ 1 / 4) {k : ℕ} (hk : 1 ≤ k) {u
   rw [him, abs_of_pos (by nlinarith)]
   nlinarith
 
+/-- `e^{1/2} < 2`. -/
 theorem airyZ_exp_half_lt_two : Real.exp (1 / 2) < 2 := by
   have h := Real.exp_one_lt_d9
   have h2 : Real.exp (1 / 2) * Real.exp (1 / 2) = Real.exp 1 := by
@@ -946,7 +979,7 @@ theorem airyZ_zero_near {F G₁ G₂ : ℂ → ℂ} {c : ℂ} {θ : ℝ} (hθ : 
     have hargZ : π / 3 < arg (airyZ_Z u) ∧ arg (airyZ_Z u) < π / 2 := by
       rw [airyZ_arg_Z]; constructor <;> linarith
     have hargW : arg (airyZ_W u) = arg (airyZ_Z u) + (-(2 * π / 3)) :=
-      airyRot_arg_mul_exp (airyZ_Z_ne_zero u) (airyZ_arg_ok (by linarith)).1
+      Complex.arg_mul_exp_ofReal_mul_I (airyZ_Z_ne_zero u) (airyZ_arg_ok (by linarith)).1
         (airyZ_arg_ok (by linarith)).2
     have hnormZ : R ≤ ‖airyZ_Z u‖ := by
       rw [airyZ_norm_Z]
@@ -982,12 +1015,14 @@ theorem airyZ_zero_near {F G₁ G₂ : ℂ → ℂ} {c : ℂ} {θ : ℝ} (hθ : 
           gcongr
       _ < ‖(-1 : ℂ)‖ * (1 / 2) / 2 := by norm_num
 
+/-- `u ↦ log(-(3/4) u)` is holomorphic on the lower half-plane. -/
 theorem airyZ_differentiableAt_Z {u : ℂ} (hu : u.im < 0) :
     DifferentiableAt ℂ (fun u => log (-(3 / 4 : ℂ) * u)) u := by
   have hs : -(3 / 4 : ℂ) * u ∈ slitPlane := by
     rw [mem_slitPlane_iff]; right; simp; linarith
   exact ((differentiableAt_id.const_mul _).clog hs)
 
+/-- The normalized `Bi` is holomorphic on the lower half-plane. -/
 theorem airyZ_Fbi_differentiableOn : DifferentiableOn ℂ airyZ_Fbi {u | u.im < 0} := by
   intro u hu
   have hL := airyZ_differentiableAt_Z hu
@@ -998,6 +1033,7 @@ theorem airyZ_Fbi_differentiableOn : DifferentiableOn ℂ airyZ_Fbi {u | u.im < 
     (((differentiableAt_const _).mul (hL.div_const _).cexp).mul
       ((differentiableAt_id.div_const _).cexp))
 
+/-- The normalized `Bi'` is holomorphic on the lower half-plane. -/
 theorem airyZ_Fbid_differentiableOn : DifferentiableOn ℂ airyZ_Fbid {u | u.im < 0} := by
   intro u hu
   have hL := airyZ_differentiableAt_Z hu
@@ -1008,6 +1044,7 @@ theorem airyZ_Fbid_differentiableOn : DifferentiableOn ℂ airyZ_Fbid {u | u.im 
     (((differentiableAt_const _).mul (hL.div_const _).neg.cexp).mul
       ((differentiableAt_id.div_const _).cexp))
 
+/-- `Ai(w)/(leading term) → 1` uniformly as `w → ∞` in `|arg w| ≤ π/2` (quantitative form). -/
 theorem airyZ_small_ai {η : ℝ} (hη : 0 < η) :
     ∃ R, ∀ w : ℂ, w ≠ 0 → |arg w| ≤ π / 2 → R ≤ ‖w‖ →
       ‖airyAi w / airyPrefactor .ai w - 1‖ < η := by
@@ -1015,6 +1052,7 @@ theorem airyZ_small_ai {η : ℝ} (hη : 0 < η) :
   rw [show π - π / 2 = π / 2 by ring] at h
   exact airyZ_small h (by simp [airyExpansionCoeff, airyReal_airyU_zero]) hη
 
+/-- `Ai'(w)/(leading term) → 1` as `w → ∞` in `|arg w| ≤ π/2` (quantitative form). -/
 theorem airyZ_small_aiDeriv {η : ℝ} (hη : 0 < η) :
     ∃ R, ∀ w : ℂ, w ≠ 0 → |arg w| ≤ π / 2 → R ≤ ‖w‖ →
       ‖airyAiDeriv w / airyPrefactor .aiDeriv w - 1‖ < η := by
@@ -1069,7 +1107,7 @@ theorem airyBi_complex_zeros_sector {z : ℂ} (hz : airyBi z = 0) (him : z.im �
   sorry
 
 /-- Infinitely many zeros in the upper sector, DLMF §9.9(i). -/
-theorem airyBi_infinite_complex_zeros  :
+theorem airyBi_infinite_complex_zeros :
     Set.Infinite (airyUpperZeroSet airyBi) := by
   refine airyZ_infinite (F := airyZ_Fbi) (θ := -(1 / 4)) (by norm_num [abs_of_neg]) ?_ ?_
   · intro u hu
@@ -1092,7 +1130,7 @@ theorem airyBiComplexZero_spec {k : ℕ} (hk : 1 ≤ k) :
   sorry
 
 /-- Complex-zero enumeration in increasing modulus, DLMF §9.9(i). -/
-theorem airyBiComplexZero_enumeration  :
+theorem airyBiComplexZero_enumeration :
     StrictMonoOn (fun k => ‖airyBiComplexZero k‖) (Ici 1) ∧
       ∀ z ∈ airyUpperZeroSet airyBi, ∃ k : ℕ, 1 ≤ k ∧ airyBiComplexZero k = z := by
   sorry
@@ -1103,7 +1141,7 @@ theorem airyBiDeriv_complex_zeros_sector {z : ℂ} (hz : airyBiDeriv z = 0) (him
   sorry
 
 /-- Infinitely many zeros in the upper sector, DLMF §9.9(i). -/
-theorem airyBiDeriv_infinite_complex_zeros  :
+theorem airyBiDeriv_infinite_complex_zeros :
     Set.Infinite (airyUpperZeroSet airyBiDeriv) := by
   refine airyZ_infinite (F := airyZ_Fbid) (θ := 1 / 4) (by norm_num [abs_of_pos]) ?_ ?_
   · intro u hu
@@ -1126,12 +1164,12 @@ theorem airyBiDerivComplexZero_spec {k : ℕ} (hk : 1 ≤ k) :
   sorry
 
 /-- Complex-zero enumeration in increasing modulus, DLMF §9.9(i). -/
-theorem airyBiDerivComplexZero_enumeration  :
+theorem airyBiDerivComplexZero_enumeration :
     StrictMonoOn (fun k => ‖airyBiDerivComplexZero k‖) (Ici 1) ∧
       ∀ z ∈ airyUpperZeroSet airyBiDeriv, ∃ k : ℕ, 1 ≤ k ∧ airyBiDerivComplexZero k = z := by
   sorry
 
-/-- airyAiZero phase (DLMF 9.9.1). -/
+/-- The phases at the zeros: `θ(a_k) = kπ` and `φ(a'_{k+1}) = kπ` (DLMF 9.9.1). -/
 @[dlmf 9.9.E1]
 theorem airyAiZero_phase {k : ℕ} (hk : 1 ≤ k) :
     airyPhase (airyAiZero k) = k * π ∧ airyDerivPhase (airyAiDerivZero (k + 1)) = k * π := by
@@ -1140,7 +1178,7 @@ theorem airyAiZero_phase {k : ℕ} (hk : 1 ≤ k) :
   · rw [airyAiDerivZero, (phaseZeroData_airyAiDeriv.spec (by omega : 1 ≤ k + 1)).2.2.2]
     push_cast; ring
 
-/-- airyBiZero phase (DLMF 9.9.2). -/
+/-- The phases at the zeros: `θ(b_k) = (k - 1/2)π` and `φ(b'_k) = (k - 1/2)π` (DLMF 9.9.2). -/
 @[dlmf 9.9.E2]
 theorem airyBiZero_phase {k : ℕ} (hk : 1 ≤ k) :
     airyPhase (airyBiZero k) = ((k : ℝ) - 1 / 2) * π ∧
@@ -1149,7 +1187,7 @@ theorem airyBiZero_phase {k : ℕ} (hk : 1 ≤ k) :
   · rw [airyBiZero, (phaseZeroData_airyBi.spec hk).2.2.2]; ring
   · rw [airyBiDerivZero, (phaseZeroData_airyBiDeriv.spec hk).2.2.2]; ring
 
-/-- airyAiZero value (DLMF 9.9.3). -/
+/-- `Ai'(a_k) = (-1)^{k-1}/(π M(a_k))` (DLMF 9.9.3). -/
 @[dlmf 9.9.E3]
 theorem airyAiZero_value {k : ℕ} (hk : 1 ≤ k) :
     airyAiDeriv (airyAiZero k) = (-1 : ℂ) ^ (k - 1) / (π * airyModulus (airyAiZero k)) := by
@@ -1171,7 +1209,7 @@ theorem airyAiZero_value {k : ℕ} (hk : 1 ≤ k) :
   rw [airyAiDeriv_ofReal_eq, hr, Nat.add_sub_cancel]
   push_cast; rfl
 
-/-- airyBiZero value (DLMF 9.9.3). -/
+/-- `Bi'(b_k) = (-1)^{k-1}/(π M(b_k))` (DLMF 9.9.3). -/
 @[dlmf 9.9.E3]
 theorem airyBiZero_value {k : ℕ} (hk : 1 ≤ k) :
     airyBiDeriv (airyBiZero k) = (-1 : ℂ) ^ (k - 1) / (π * airyModulus (airyBiZero k)) := by
@@ -1194,7 +1232,7 @@ theorem airyBiZero_value {k : ℕ} (hk : 1 ≤ k) :
   rw [airyBiDeriv_ofReal_eq, hr, Nat.add_sub_cancel]
   push_cast; rfl
 
-/-- airyAiDerivZero value (DLMF 9.9.4). -/
+/-- `Ai(a'_k) = (-1)^{k-1}/(π N(a'_k))` (DLMF 9.9.4). -/
 @[dlmf 9.9.E4]
 theorem airyAiDerivZero_value {k : ℕ} (hk : 1 ≤ k) :
     airyAi (airyAiDerivZero k) = (-1 : ℂ) ^ (k - 1) / (π * airyDerivModulus (airyAiDerivZero k)) := by
@@ -1216,7 +1254,7 @@ theorem airyAiDerivZero_value {k : ℕ} (hk : 1 ≤ k) :
   rw [airyAi_ofReal_eq, hr, Nat.add_sub_cancel]
   push_cast; rfl
 
-/-- airyBiDerivZero value (DLMF 9.9.4). -/
+/-- `Bi(b'_k) = (-1)^k/(π N(b'_k))` (DLMF 9.9.4). -/
 @[dlmf 9.9.E4]
 theorem airyBiDerivZero_value {k : ℕ} (hk : 1 ≤ k) :
     airyBi (airyBiDerivZero k) = (-1 : ℂ) ^ (k) / (π * airyDerivModulus (airyBiDerivZero k)) := by
@@ -1317,7 +1355,8 @@ theorem airyAiZeroContinuous_natCast {k : ℕ} (hk : 1 ≤ k) :
   have hε := Classical.epsilon_spec (p := fun x : ℝ => x ≤ 0 ∧ airyPhase x = k * π) ⟨_, hP⟩
   exact airy_phase_monotone.injOn hε.1 hP.1 (hε.2.trans hP.2.symm)
 
-/-- airyAiZeroContinuous derivative value (DLMF 9.9.5). -/
+/-- `Ai'(a_k) = (-1)^{k-1} (-a'(k))^{-1/2}`, with `a(k)` the continuous zero function
+(DLMF 9.9.5). -/
 @[dlmf 9.9.E5]
 theorem airyAiZeroContinuous_derivative_value {k : ℕ} (hk : 1 ≤ k) :
     airyAiDeriv (airyAiZero k) = (-1 : ℂ) ^ (k - 1) *
@@ -1353,7 +1392,8 @@ theorem airyAiDerivZeroContinuous_natCast {k : ℕ} (hk : 1 ≤ k) :
     (p := fun x : ℝ => x ≤ 0 ∧ airyDerivPhase x = ((k : ℝ) - 1) * π) ⟨_, hP⟩
   exact airy_derivPhase_monotone.injOn hε.1 hP.1 (hε.2.trans hP.2.symm)
 
-/-- airyAiDerivZeroContinuous derivative value (DLMF 9.9.5). -/
+/-- `Ai(a'_k) = (-1)^{k-1} (a'_k · da'(k)/dk)^{-1/2}`, with `a'(k)` the continuous zero
+function (DLMF 9.9.5). -/
 @[dlmf 9.9.E5]
 theorem airyAiDerivZeroContinuous_derivative_value {k : ℕ} (hk : 1 ≤ k) :
     airyAi (airyAiDerivZero k) = (-1 : ℂ) ^ (k - 1) *
@@ -1386,7 +1426,7 @@ theorem airyAiDerivZeroContinuous_derivative_value {k : ℕ} (hk : 1 ≤ k) :
 
 /-- The common all-order T,U,V,W expansions, including every printed coefficient and real/complex zero family in DLMF 9.9.6–9.9.21 (DLMF 9.9.18). -/
 @[dlmf 9.9.E6, dlmf 9.9.E7, dlmf 9.9.E8, dlmf 9.9.E9, dlmf 9.9.E10, dlmf 9.9.E11, dlmf 9.9.E12, dlmf 9.9.E13, dlmf 9.9.E14, dlmf 9.9.E15, dlmf 9.9.E16, dlmf 9.9.E17, dlmf 9.9.E18, dlmf 9.9.E19, dlmf 9.9.E20, dlmf 9.9.E21]
-theorem airy_zero_common_asymptotic_coefficients  :
+theorem airy_zero_common_asymptotic_coefficients :
     ∃ cT cU cV cW : ℕ → ℂ,
       (∀ n < 6, cT n = ([1, 5/48, -5/36, 77125/82944, -108056875/6967296, 162375596875/334430208] : List ℂ)[n]! ∧
       ∀ n < 6, cU n = ([1, -7/48, 35/288, -181223/207360, 18683371/1244160, -91145884361/191102976] : List ℂ)[n]! ∧

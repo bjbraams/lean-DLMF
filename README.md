@@ -212,7 +212,7 @@ Theta 13, RiemannTheta 7, JacobiElliptic 35, Weierstrass 40, BernoulliEuler 25, 
 Combinatorics 37, NumberTheory 36, Mathieu 140, Lame 41, Spheroidal 33, Heun 26, Painleve 42,
 Coulomb 49, WignerSymbols 34, MatrixArgument 36, CoalescingSaddles 35, AlgebraicAnalytic 304,
 AsymptoticApproximations 136, and 188 in the older areas.
-The compiled audit finds **24,662 project theorems**, with **1,884 depending transitively on
+The compiled audit finds **24,494 project theorems**, with **1,884 depending transitively on
 `sorryAx`**, and no other nonstandard axiom.
 Counts in the dated development history describe their earlier scope.
 

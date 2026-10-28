@@ -48,6 +48,7 @@ noncomputable section
 
 namespace DLMF.OrthogonalPolynomials
 
+/-- `|cos θ + i sin θ cos t| = √(1 - sin²θ sin²t)`. -/
 theorem norm_laplace_integrand (θ t : ℝ) :
     ‖(Real.cos θ : ℂ) + I * Real.sin θ * Real.cos t‖ =
       Real.sqrt (1 - Real.sin θ ^ 2 * Real.sin t ^ 2) := by
@@ -182,6 +183,7 @@ theorem conj_legendrePolyP (n : ℕ) (x : ℝ) : conj (legendrePolyP n x) = lege
     rw [show n + 1 + 1 = n + 2 by ring]
     linear_combination hc - hr
 
+/-- `x ↦ P_n(x)` is continuous on `ℝ`. -/
 theorem continuous_legendrePolyP_ofReal (n : ℕ) : Continuous fun x : ℝ => legendrePolyP n x :=
   (continuous_iff_continuousAt.mpr fun z =>
     ((analyticOnNhd_jacobiPolyP 0 0 n) z (Set.mem_univ z)).continuousAt).comp continuous_ofReal
@@ -190,6 +192,7 @@ theorem continuous_legendrePolyP_ofReal (n : ℕ) : Continuous fun x : ℝ => le
 def legendreCoeff (f : ℝ → ℂ) (n : ℕ) : ℂ :=
   (n + 1 / 2) * ∫ x : ℝ in (-1 : ℝ)..1, f x * legendrePolyP n x
 
+/-- `∫_{-1}^1 f P_n = 2/(2n+1) · c_n(f)`, by definition of the Legendre coefficient. -/
 theorem integral_mul_legendrePolyP_eq (f : ℝ → ℂ) (n : ℕ) :
     ∫ x : ℝ in (-1 : ℝ)..1, f x * legendrePolyP n x = 2 / (2 * n + 1) * legendreCoeff f n := by
   rw [legendreCoeff]
@@ -223,7 +226,7 @@ theorem integral_norm_sub_sum_legendrePolyP_sq {f : ℝ → ℂ} (hf : Continuou
     simp only [map_mul, map_div₀, map_add, map_one, map_ofNat, map_natCast] at h
     rw [intervalIntegral.integral_of_le (by norm_num), ← h]
     refine setIntegral_congr_fun measurableSet_Ioc fun x _ => ?_
-    simp only [hP, map_mul, conj_legendrePolyP]
+    simp only [hP, conj_legendrePolyP]
     ring
   have hF3 : ∀ m n, ∫ x : ℝ in (-1 : ℝ)..1, P m x * P n x =
       if m = n then (2 : ℂ) / (2 * (n : ℂ) + 1) else 0 := legendre_orthogonality
@@ -342,6 +345,7 @@ theorem sum_legendreCoeff_sq_le {f : ℝ → ℂ} (hf : ContinuousOn f (Icc (-1)
 /-- The rotated Laplace integrand `u(ψ) = 1 - κ sin²(ψ/2)`, `κ = 2i sin θ e^{-iθ}`. -/
 def laplaceKappa (θ : ℝ) : ℂ := 2 * Real.sin θ ^ 2 + 2 * I * Real.sin θ * Real.cos θ
 
+/-- `cos θ + i sin θ cos ψ = e^{iθ} (1 - κ(θ) sin²(ψ/2))`. -/
 theorem laplace_integrand_eq (θ ψ : ℝ) :
     (Real.cos θ : ℂ) + I * Real.sin θ * Real.cos ψ =
       Complex.exp (θ * I) * (1 - laplaceKappa θ * Real.sin (ψ / 2) ^ 2) := by
@@ -380,16 +384,19 @@ theorem integral_laplace_eq_add_conj (n : ℕ) (θ : ℝ) :
   push_cast
   ring
 
+/-- `κ(θ) = 2 sin²θ + 2i sin θ cos θ` split into real and imaginary parts. -/
 theorem laplaceKappa_eq (θ : ℝ) : laplaceKappa θ =
     ((2 * Real.sin θ ^ 2 : ℝ) : ℂ) + ((2 * Real.sin θ * Real.cos θ : ℝ) : ℂ) * I := by
   rw [laplaceKappa]; push_cast; ring
 
+/-- `Re κ(θ) = 2 sin²θ`. -/
 theorem laplaceKappa_re (θ : ℝ) : (laplaceKappa θ).re = 2 * Real.sin θ ^ 2 := by
   rw [laplaceKappa_eq]
   simp only [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.I_re, Complex.I_im,
     Complex.ofReal_im]
   ring
 
+/-- `|1 - κ(θ) sin²(ψ/2)|ⁿ ≤ exp(-n sin²θ sin²ψ / 2)`. -/
 theorem norm_one_sub_laplaceKappa_pow_le (n : ℕ) (θ ψ : ℝ) :
     ‖(1 - laplaceKappa θ * Real.sin (ψ / 2) ^ 2) ^ n‖ ≤
       Real.exp (-(n * Real.sin θ ^ 2 / 2) * Real.sin ψ ^ 2) := by

@@ -33,15 +33,6 @@ noncomputable section
 
 namespace DLMF.Hypergeometric
 
-/-- Reflection of a Pochhammer symbol: `(1 - y - m)_m = (-1)^m (y)_m`. -/
-lemma appF4_poch_reflect (y : ℂ) (m : ℕ) : poch (1 - y - m) m = (-1 : ℂ) ^ m * poch y m := by
-  exact poch_reflect y m
-
-/-- The binomial theorem for rising factorials (Chu–Vandermonde). -/
-lemma appF4_poch_add_binomial (u v : ℂ) (n : ℕ) :
-    ∑ j ∈ Finset.range (n + 1), (n.choose j : ℂ) * poch u j * poch v (n - j) = poch (u + v) n := by
-  exact poch_add_binomial_sum u v n
-
 /-- The coefficients of Appell's `F₄`:
 `(a)_{m+n} (b)_{m+n} / ((c)_m (c')_n m! n!)`. -/
 noncomputable def appF4Coeff (a b c c' : ℂ) (m n : ℕ) : ℂ :=
@@ -60,7 +51,7 @@ lemma appF4_term (a b c c' : ℂ) (hc : ∀ k, poch c k ≠ 0) (hc' : ∀ k, poc
       poch c (t + d) * ((-1) ^ e * poch (1 - c - ((t + d + e : ℕ) : ℂ)) e) := by
     rw [poch_add]
     congr 1
-    have := appF4_poch_reflect (c + ((t + d : ℕ) : ℂ)) e
+    have := poch_reflect (c + ((t + d : ℕ) : ℂ)) e
     rw [show 1 - (c + ((t + d : ℕ) : ℂ)) - (e : ℂ) = 1 - c - ((t + d + e : ℕ) : ℂ) by
       push_cast; ring] at this
     rw [this, ← mul_assoc, ← pow_add, ← two_mul, pow_mul]; simp
@@ -68,7 +59,7 @@ lemma appF4_term (a b c c' : ℂ) (hc : ∀ k, poch c k ≠ 0) (hc' : ∀ k, poc
       ((-1) ^ d * poch (1 - c' - ((d + e + f : ℕ) : ℂ)) d) := by
     rw [show d + e + f = (e + f) + d by ring, poch_add]
     congr 1
-    have := appF4_poch_reflect (c' + ((e + f : ℕ) : ℂ)) d
+    have := poch_reflect (c' + ((e + f : ℕ) : ℂ)) d
     rw [show 1 - (c' + ((e + f : ℕ) : ℂ)) - (d : ℂ) = 1 - c' - (((e + f) + d : ℕ) : ℂ) by
       push_cast; ring] at this
     rw [this, ← mul_assoc, ← pow_add, ← two_mul, pow_mul]; simp
@@ -109,7 +100,7 @@ lemma appF4_inner {a b c c' : ℂ} (hcc : c + c' = a + b + 1) (hc : ∀ k, poch 
       poch a (t + s + f) * poch b (t + s + f) *
         poch (1 - a - b - ((t + s : ℕ) : ℂ) - ((s + f : ℕ) : ℂ)) s /
         (poch c (t + s) * poch c' (s + f) * (f ! * t ! * s !)) := by
-  have hv := appF4_poch_add_binomial (1 - c' - ((s + f : ℕ) : ℂ)) (1 - c - ((t + s : ℕ) : ℂ)) s
+  have hv := poch_add_binomial_sum (1 - c' - ((s + f : ℕ) : ℂ)) (1 - c - ((t + s : ℕ) : ℂ)) s
   rw [show 1 - c' - ((s + f : ℕ) : ℂ) + (1 - c - ((t + s : ℕ) : ℂ)) =
     1 - a - b - ((t + s : ℕ) : ℂ) - ((s + f : ℕ) : ℂ) by linear_combination (-1 : ℂ) * hcc] at hv
   rw [← hv, Finset.mul_sum, Finset.sum_div]
@@ -135,7 +126,7 @@ lemma appF4_outer (a b c c' : ℂ) {M N : ℕ} (hMN : M ≤ N) :
     show (N : ℂ) - M + 1 - (a + N) = 1 - a - M by ring,
     show (N : ℂ) - M + 1 - (b + N) = 1 - b - M by ring,
     show (N : ℂ) - M + 1 + M = (N : ℕ) + 1 by ring, Gamma_nat_eq_factorial,
-    appF4_poch_reflect, appF4_poch_reflect] at h
+    poch_reflect, poch_reflect] at h
   have hG : ∀ k ∈ Finset.range (M + 1), Gamma ((N : ℂ) - M + 1 + k) = ((N - (M - k))! : ℂ) := by
     intro k hk
     have hkM : k ≤ M := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
@@ -304,6 +295,7 @@ lemma appF4Coeff_norm_le (a b : ℂ) {c c' : ℂ} (hc : 0 < c.re) (hc' : 0 < c'.
 noncomputable def appF4E (m n M : ℕ) : ℂ :=
   if m ≤ M then (-1) ^ (M - m) * (n.choose (M - m) : ℂ) else 0
 
+/-- The coefficient `appF4E m n M` vanishes when `m + n < M`. -/
 theorem appF4E_eq_zero_of_lt {m n M : ℕ} (h : m + n < M) : appF4E m n M = 0 := by
   unfold appF4E
   rw [ite_eq_left_of_eq_true _ _ (eq_true (by omega)), Nat.choose_eq_zero_of_lt (by omega)]

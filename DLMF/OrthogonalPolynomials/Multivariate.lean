@@ -32,6 +32,7 @@ set_option autoImplicit false
 
 namespace DLMF.OrthogonalPolynomials
 
+/-- The disk polynomials `R_{m,n}^{(α)}(z)` in `z` and `z̄` (DLMF 18.37.6). -/
 @[dlmf 18.37.E6]
 def diskPolynomial (α : ℂ) (m n : ℕ) (z : ℂ) : ℂ :=
   ∑ j ∈ Finset.range (min m n + 1), (-1 : ℂ) ^ j * poch (α + 1) (m + n - j) *
@@ -194,7 +195,7 @@ theorem diskPolynomial_at_one {α : ℂ} (hα : -1 < α.re) (m n : ℕ) : diskPo
     push_cast
     field_simp
     linear_combination (poch (α + 1 + m) (n - j) * poch (-(m : ℂ)) j * (n.choose j : ℂ)) * hs
-  rw [key, poch_add_binomial, show -(m : ℂ) + (α + 1 + m) = α + 1 by ring, div_self hn]
+  rw [key, poch_add_binomial_sum, show -(m : ℂ) + (α + 1 + m) = α + 1 by ring, div_self hn]
 
 /-- Shifted Jacobi orthogonality on the open unit interval. -/
 theorem jacobi_unit_orthogonal {α β : ℝ} (hα : -1 < α) (hβ : -1 < β)

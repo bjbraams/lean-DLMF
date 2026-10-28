@@ -30,7 +30,8 @@ open DLMF.OrthogonalPolynomials
 def ferrersPNat (l m : ℕ) (x : ℝ) : ℂ :=
   (-1)^m*(Real.sqrt (1-x^2):ℂ)^m*iteratedDeriv m (legendrePolyP l) x
 
-/-- ferrersPNat eq. -/
+/-- DLMF 14.7.8: for natural `l, m` and `-1 < x < 1`, the explicit form `(-1)^m (1-x²)^{m/2} d^m
+P_l(x)/dx^m` agrees with the Ferrers function `𝖯^m_l(x)`. -/
 @[dlmf 14.7.E8]
 theorem ferrersPNat_eq (l m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersPNat l m x=ferrersP l m x := by
@@ -44,12 +45,15 @@ theorem ferrersPNat_eq (l m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
   rw [← Complex.ofReal_pow, Real.sqrt_eq_rpow, ← Real.rpow_natCast, ← Real.rpow_mul h1]
   congr 2; ring
 
-/-- sphericalHarmonicNonneg. -/
+/-- DLMF 14.30.1 for `m ≥ 0`: the spherical harmonic `Y_{l,m}(θ, φ) = √((l-m)! (2l+1)/(4π (l+m)!))
+e^{imφ} 𝖯^m_l(cos θ)`. -/
 @[dlmf 14.30.E1]
 def sphericalHarmonicNonneg (l m : ℕ) (θ phi : ℝ) : ℂ :=
   Real.sqrt (((l-m).factorial:ℝ)*(2*l+1)/(4*π*(l+m).factorial))*exp (I*m*phi)*ferrersPNat l m (Real.cos θ)
 
-/-- sphericalHarmonic. -/
+/-- DLMF 14.30.1: the spherical harmonic `Y_{l,m}(θ, φ)` for integer `m`, equal to
+`sphericalHarmonicNonneg l m` for `m ≥ 0`, to `(-1)^{|m|}` times the complex conjugate of
+`Y_{l,|m|}` for `m < 0`, and to `0` when `|m| > l`. -/
 @[dlmf 14.30.E1]
 def sphericalHarmonic (l : ℕ) (m : ℤ) (θ phi : ℝ) : ℂ :=
   if l < m.natAbs then 0 else if m < 0 then (-1)^m.natAbs*star (sphericalHarmonicNonneg l m.natAbs θ phi) else sphericalHarmonicNonneg l m.natAbs θ phi
@@ -68,7 +72,8 @@ theorem star_ferrersPNat (l m : ℕ) (x : ℝ) : star (ferrersPNat l m x) = ferr
   rw [ferrersPNat, iteratedDeriv_legendrePolyP_ofReal]
   simp only [star_mul', star_pow, star_neg, star_one, Complex.star_def, Complex.conj_ofReal]
 
-/-- sphericalHarmonic ferrers. -/
+/-- DLMF 14.30.1: for `|m| ≤ l` (`m` of either sign) and `0 < θ < π`, `Y_{l,m}(θ, φ) = √((l-m)!
+(2l+1)/(4π (l+m)!)) e^{imφ} 𝖯^m_l(cos θ)`. -/
 @[dlmf 14.30.E1]
 theorem sphericalHarmonic_ferrers (l : ℕ) (m : ℤ) (hm : m.natAbs ≤ l) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) (phi : ℝ) :
     sphericalHarmonic l m θ phi=Real.sqrt ((((l:ℤ)-m).toNat.factorial:ℝ)*(2*l+1)/(4*π*((l:ℤ)+m).toNat.factorial))*exp (I*m*phi)*ferrersP l m (Real.cos θ) := by
@@ -115,7 +120,8 @@ theorem sphericalHarmonic_ferrers (l : ℕ) (m : ℤ) (hm : m.natAbs ≤ l) {θ 
       sphericalHarmonicNonneg, ferrersPNat_eq l k hx]
     push_cast; ring_nf
 
-/-- surfaceHarmonic. -/
+/-- DLMF 14.30.2: the real surface harmonic of the first kind `cos(mφ) 𝖯^m_l(cos θ)` (or `sin(mφ)
+𝖯^m_l(cos θ)` when `sine` is true), for natural `l, m`. -/
 @[dlmf 14.30.E2]
 def surfaceHarmonic (sine : Bool) (l m : ℕ) (θ phi : ℝ) : ℂ :=
   (if sine then Real.sin (m*phi) else Real.cos (m*phi))*ferrersPNat l m (Real.cos θ)
@@ -220,7 +226,8 @@ private lemma rod_iteratedDeriv_real (l j : ℕ) (x : ℝ) :
     Polynomial.iterate_derivative_C_mul, Polynomial.eval_mul, Polynomial.eval_C]
   push_cast; ring
 
-/-- sphericalHarmonic rodrigues. -/
+/-- DLMF 14.30.3: for `|m| ≤ l` and `0 < θ < π`, `Y_{l,m}(θ, φ) = ((-1)^{l+m}/(2^l l!)) √((l-m)!
+(2l+1)/(4π (l+m)!)) e^{imφ} sin^m θ · d^{l+m}(1-x²)^l/dx^{l+m}` evaluated at `x = cos θ`. -/
 @[dlmf 14.30.E3]
 theorem sphericalHarmonic_rodrigues (l : ℕ) (m : ℤ) (hm : m.natAbs ≤ l) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) (phi : ℝ) :
     sphericalHarmonic l m θ phi=(-1:ℂ)^((l:ℤ)+m)/(2^l*(l.factorial:ℂ))*Real.sqrt ((((l:ℤ)-m).toNat.factorial:ℝ)*(2*l+1)/(4*π*((l:ℤ)+m).toNat.factorial))*exp (I*m*phi)*(Real.sin θ:ℂ)^m*iteratedDeriv ((l:ℤ)+m).toNat (fun x : ℝ => (1-x^2:ℂ)^l) (Real.cos θ) := by
@@ -287,11 +294,12 @@ theorem ferrersPNat_one (l m : ℕ) : ferrersPNat l m 1 = if m = 0 then 1 else 0
     simp [Nat.cast_ne_zero.mpr l.factorial_ne_zero]
   · simp [ferrersPNat]
 
-/-- sphericalHarmonic north. -/
+/-- DLMF 14.30.4: for `|m| ≤ l`, at the north pole `Y_{l,m}(0, φ) = √((2l+1)/(4π))` if `m = 0` and
+`0` otherwise. -/
 @[dlmf 14.30.E4]
 theorem sphericalHarmonic_north (l : ℕ) (m : ℤ) (hm : m.natAbs ≤ l) (phi : ℝ) :
     sphericalHarmonic l m 0 phi=if m=0 then (Real.sqrt ((2*l+1)/(4*π)):ℂ) else 0 := by
-  rw [sphericalHarmonic, if_neg (not_lt.2 hm)]
+  rw [sphericalHarmonic, ite_eq_right (not_lt.2 hm)]
   simp only [sphericalHarmonicNonneg, Real.cos_zero, ferrersPNat_one, Int.natAbs_eq_zero]
   by_cases h : m = 0
   · subst h
@@ -319,7 +327,8 @@ theorem Gamma_one_half_sub_nat_mul (s : ℕ) :
     push_cast at ih ⊢
     linear_combination (-2*(2*(s:ℂ)+2)) * ih
 
-/-- sphericalHarmonic equator. -/
+/-- DLMF 14.30.5: for `|m| ≤ l`, at the equator `Y_{l,m}(π/2, φ) = (-1)^{(l+m)/2} e^{imφ} √((l-m)!
+(l+m)! (2l+1)/(4π))/(2^l ((l-m)/2)! ((l+m)/2)!)` when `l + m` is even, and `0` otherwise. -/
 @[dlmf 14.30.E5]
 theorem sphericalHarmonic_equator (l : ℕ) (m : ℤ) (hm : m.natAbs ≤ l) (phi : ℝ) :
     sphericalHarmonic l m (π/2) phi=if Even ((l:ℤ)+m) then (-1:ℂ)^(((l:ℤ)+m)/2)*exp (I*m*phi)/(2^l*((((l:ℤ)-m)/2).toNat.factorial:ℂ)*((((l:ℤ)+m)/2).toNat.factorial:ℂ))*Real.sqrt ((((l:ℤ)-m).toNat.factorial:ℝ)*((l:ℤ)+m).toNat.factorial*(2*l+1)/(4*π)) else 0 := by
@@ -385,7 +394,7 @@ theorem sphericalHarmonic_equator (l : ℕ) (m : ℤ) (hm : m.natAbs ≤ l) (phi
       push_cast at this; linear_combination -this/2
     rw [e2, Gamma_neg_nat_eq_zero]; simp
 
-/-- sphericalHarmonic negative order. -/
+/-- DLMF 14.30.6: `Y_{l,-m}(θ, φ) = (-1)^m conj(Y_{l,m}(θ, φ))` for all integers `m`. -/
 @[dlmf 14.30.E6]
 theorem sphericalHarmonic_negative_order (l : ℕ) (m : ℤ) (θ phi : ℝ) :
     sphericalHarmonic l (-m) θ phi=(-1:ℂ)^m*star (sphericalHarmonic l m θ phi) := by
@@ -423,7 +432,7 @@ theorem ferrersPNat_neg (l m : ℕ) (x : ℝ) :
   simp only [ferrersPNat, ofReal_neg, hD, neg_sq]
   ring
 
-/-- sphericalHarmonic parity. -/
+/-- DLMF 14.30.7: `Y_{l,m}(π-θ, φ+π) = (-1)^l Y_{l,m}(θ, φ)`. -/
 @[dlmf 14.30.E7]
 theorem sphericalHarmonic_parity (l : ℕ) (m : ℤ) (θ phi : ℝ) :
     sphericalHarmonic l m (π-θ) (phi+π)=(-1)^l*sphericalHarmonic l m θ phi := by
@@ -464,7 +473,7 @@ private lemma sphericalHarmonic_eq_sign_mul (l : ℕ) (m : ℤ) (hm : m.natAbs �
     sphericalHarmonic l m θ phi = shSign m *
       (Real.sqrt (((l-m.natAbs).factorial:ℝ)*(2*l+1)/(4*π*(l+m.natAbs).factorial)) : ℂ) *
         exp (I*m*phi) * ferrersPNat l m.natAbs (Real.cos θ) := by
-  rw [sphericalHarmonic, if_neg (not_lt.2 hm), shSign]
+  rw [sphericalHarmonic, ite_eq_right (not_lt.2 hm), shSign]
   split_ifs with h
   · rw [sphericalHarmonicNonneg]
     simp only [star_mul', star_ferrersPNat, Complex.star_def, Complex.conj_ofReal, ← Complex.exp_conj,
@@ -518,7 +527,8 @@ private lemma integral_exp_I_int (n : ℤ) :
     push_cast at this
     simp [this]
 
-/-- sphericalHarmonic orthonormal. -/
+/-- DLMF 14.30.8: for `|m₁| ≤ l₁` and `|m₂| ≤ l₂`, `∫₀^{2π} ∫₀^π conj(Y_{l₁,m₁}(θ, φ)) Y_{l₂,m₂}(θ,
+φ) sin θ dθ dφ = δ_{l₁,l₂} δ_{m₁,m₂}`. -/
 @[dlmf 14.30.E8]
 theorem sphericalHarmonic_orthonormal (l₁ l₂ : ℕ) (m₁ m₂ : ℤ) (h1 : m₁.natAbs ≤ l₁) (h2 : m₂.natAbs ≤ l₂) :
     (∫ phi : ℝ in 0..2*π, ∫ θ : ℝ in 0..π, star (sphericalHarmonic l₁ m₁ θ phi)*sphericalHarmonic l₂ m₂ θ phi*Real.sin θ)=if l₁=l₂ ∧ m₁=m₂ then 1 else 0 := by
@@ -542,10 +552,11 @@ theorem sphericalHarmonic_orthonormal (l₁ l₂ : ℕ) (m₁ m₂ : ℤ) (h1 : 
     integral_exp_I_int, hJ]
   by_cases hm : m₂ = m₁
   · subst hm
-    rw [sub_self, if_pos rfl, integral_ferrersPNat_mul_sin, integral_ferrersPNat_orth _ _ _ h1 h2]
+    rw [sub_self, ite_eq_left rfl, integral_ferrersPNat_mul_sin,
+        integral_ferrersPNat_orth _ _ _ h1 h2]
     by_cases hl : l₁ = l₂
     · subst hl
-      simp only [and_self, if_true]
+      simp only [and_self, ite_true]
       have hss := shSign_mul_self m₂
       have hX : 0 ≤ ((l₁-m₂.natAbs).factorial:ℝ)*(2*l₁+1)/(4*π*(l₁+m₂.natAbs).factorial) := by positivity
       have hc : c₁ * c₁ = ((l₁-m₂.natAbs).factorial:ℂ)*(2*l₁+1)/(4*π*(l₁+m₂.natAbs).factorial) := by
@@ -560,7 +571,7 @@ theorem sphericalHarmonic_orthonormal (l₁ l₂ : ℕ) (m₁ m₂ : ℤ) (h1 : 
             (((l₁+m₂.natAbs).factorial:ℂ)/((l₁-m₂.natAbs).factorial*(l₁+1/2:ℂ))) := by ring
         _ = 1 := by rw [hss, hc]; field_simp; ring
     · simp [hl]
-  · rw [if_neg (sub_ne_zero.mpr hm), if_neg (fun h => hm h.2.symm)]; simp
+  · rw [ite_eq_right (sub_ne_zero.mpr hm), ite_eq_right (fun h => hm h.2.symm)]; simp
 
 
 /-- A sum over a symmetric integer interval, paired by sign. -/
@@ -606,7 +617,8 @@ theorem star_mul_sphericalHarmonicNonneg (l k : ℕ) {θ₁ θ₂ : ℝ} (h1 : �
       (Real.sin θ₁:ℂ)^k * (Real.sin θ₂:ℂ)^k *
       iteratedDeriv k (legendrePolyP l) (Real.cos θ₁) * iteratedDeriv k (legendrePolyP l) (Real.cos θ₂))) * hs
 
-/-- sphericalHarmonic addition. -/
+/-- DLMF 14.30.9 (addition theorem): for `θ₁, θ₂ ∈ [0, π]`, `P_l(cos θ₁ cos θ₂ + sin θ₁ sin θ₂
+cos(φ₁-φ₂)) = (4π/(2l+1)) Σ_{m=-l}^{l} conj(Y_{l,m}(θ₁, φ₁)) Y_{l,m}(θ₂, φ₂)`. -/
 @[dlmf 14.30.E9]
 theorem sphericalHarmonic_addition (l : ℕ) (θ₁ θ₂ phi₁ phi₂ : ℝ) (h1 : θ₁ ∈ Icc 0 π) (h2 : θ₂ ∈ Icc 0 π) :
     legendrePolyP l (Real.cos θ₁*Real.cos θ₂+Real.sin θ₁*Real.sin θ₂*Real.cos (phi₁-phi₂))=4*π/(2*l+1:ℂ)*∑ m ∈ Finset.Icc (-(l:ℤ)) l, star (sphericalHarmonic l m θ₁ phi₁)*sphericalHarmonic l m θ₂ phi₂ := by

@@ -42,15 +42,17 @@ theorem Gamma_mul_one_add_cpow_neg_barnes {a : ℂ} {σ : ℝ} (hσ : σ < 0) (h
   rw [show (((-σ : ℝ) : ℂ) + ((-y : ℝ) : ℂ) * I) = -((σ : ℂ) + I * y) by push_cast; ring,
     show a - -((σ : ℂ) + I * y) = a + σ + I * y by ring, neg_neg]
 
+/-- For `σ < 0 < Re a + σ`, `y ↦ Γ(-(σ + iy)) Γ(a + σ + iy)` is integrable on the real line. -/
 theorem integrable_Gamma_neg_mul_Gamma {a : ℂ} {σ : ℝ} (hσ : σ < 0) (haσ : 0 < a.re + σ) :
     Integrable (fun y : ℝ => Gamma (-((σ : ℂ) + I * y)) * Gamma (a + σ + I * y)) := by
   have h := (integrable_Gamma_mul_Gamma_vertical (a := a) (σ := -σ) (by linarith)
     (by linarith)).comp_neg
   refine h.congr (Eventually.of_forall fun y => ?_)
-  simp only [Function.comp_apply]
+  simp only
   rw [show (((-σ : ℝ) : ℂ) + ((-y : ℝ) : ℂ) * I) = -((σ : ℂ) + I * y) by push_cast; ring,
     show a - -((σ : ℂ) + I * y) = a + σ + I * y by ring]
 
+/-- For `σ < 0 < Re a + σ`, `y ↦ Γ(-(σ + iy)) Γ(a + σ + iy)` is continuous on the real line. -/
 theorem continuous_Gamma_neg_mul_Gamma {a : ℂ} {σ : ℝ} (hσ : σ < 0) (haσ : 0 < a.re + σ) :
     Continuous (fun y : ℝ => Gamma (-((σ : ℂ) + I * y)) * Gamma (a + σ + I * y)) := by
   refine continuous_iff_continuousAt.mpr fun y => ContinuousAt.mul ?_ ?_

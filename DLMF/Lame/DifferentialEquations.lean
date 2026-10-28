@@ -416,43 +416,12 @@ theorem isLameAlgebraicSolutionOn_iff_isHeunSolOn {h ν k : ℂ} {w : ℂ → �
 
 /-! ### Imaginary periods (§29.10) -/
 
-/-- `k' = √(1 - k²)` is again a modulus in `(0, 1)`. -/
-lemma l29_comodulus (hk0 : 0 < k) (hk1 : k < 1) :
-    0 < Real.sqrt (1 - k ^ 2) ∧ Real.sqrt (1 - k ^ 2) < 1 ∧
-      Real.sqrt (1 - k ^ 2) ^ 2 = 1 - k ^ 2 := by
-  have h1 : 0 < 1 - k ^ 2 := by nlinarith
-  refine ⟨Real.sqrt_pos.2 h1, ?_, Real.sq_sqrt h1.le⟩
-  rw [Real.sqrt_lt' one_pos]; nlinarith
-
 /-- `k' = √(1 - k²)` as the complex comodulus of a real modulus. -/
 lemma p2l_comod_ofReal {x : ℝ} (hx : x ^ 2 ≤ 1) :
     jacobiComodulusk (x : ℂ) = ((Real.sqrt (1 - x ^ 2) : ℝ) : ℂ) := by
   rw [jacobiComodulusk, show (1 - (x : ℂ) ^ 2) = ((1 - x ^ 2 : ℝ) : ℂ) by push_cast; ring,
     show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring,
     ← Complex.ofReal_cpow (by linarith), Real.sqrt_eq_rpow]
-
-/-- Away from the poles `2pK + (2q+1)iK'`, `sn, cn, dn` are finite. -/
-lemma p2l_regular_of_not_pole (hk0 : 0 < k) (hk1 : k < 1) {z : ℂ}
-    (hz : ∀ p q : ℤ,
-      z ≠ 2 * p * Real.compEllIntKm (k ^ 2) + (2 * q + 1) * I * Real.compEllIntKm (1 - k ^ 2)) :
-    jacobiRegulark .n z k := by
-  have hkD : (k : ℂ) ∈ jacobiModulusDomain := p22R1_ofReal_mem hk0 hk1
-  have hτ := jacobiTauk_im_pos hkD
-  have hK : compEllIntKk (k : ℂ) = (Real.compEllIntKm (k ^ 2) : ℂ) :=
-    compEllIntKk_ofReal (by nlinarith)
-  have hK' : compEllIntKpk (k : ℂ) = (Real.compEllIntKm (1 - k ^ 2) : ℂ) :=
-    compEllIntKpk_ofReal (by positivity)
-  have hK0 := compEllIntKk_ne_zero hkD
-  intro h0
-  have h4 : jacobiThetaFourTau (jacobiZetak z k) (jacobiTauk k) = 0 := by
-    simp only [jacobiLetterTheta, div_eq_zero_iff] at h0
-    exact h0.resolve_right (je22a_thetaFour_zero_ne_zero hτ)
-  obtain ⟨m, n, hmn⟩ := ((DLMF.Theta.jacobiThetaTau_eq_zero_iff hτ _).2.2.2).1 h4
-  apply hz m n
-  rw [jacobiZetak, jacobiTauk, hK', hK] at hmn
-  rw [hK] at hK0
-  field_simp at hmn
-  linear_combination hmn
 
 /-- The imaginary transformation behind 29.10: with `k' = √(1 - k²)`,
 `k'² sn²(i(z - K - iK'), k') = dn²(z, k)` (identically, including Lean's junk values). -/
@@ -585,7 +554,7 @@ theorem isLameSolutionOn_imaginary (hk0 : 0 < k) (hk1 : k < 1) {h' : ℂ} {w : �
       (c : ℂ) ^ 2 * jacobiSnk (φ z) c ^ 2) * w (φ z) = 0 := by
     by_cases hpole : ∀ p q : ℤ,
         z ≠ 2 * p * Real.compEllIntKm (k ^ 2) + (2 * q + 1) * I * Real.compEllIntKm (1 - k ^ 2)
-    · have hreg := p2l_regular_of_not_pole hk0 hk1 hpole
+    · have hreg := p2p_regular hk0 hk1 hpole
       rw [p2l_comod_sq_sn_imag hk0 hk1 z, ← (jacobi_sq_sum hkD hreg).2]
       ring
     · simp only [not_forall, not_not] at hpole

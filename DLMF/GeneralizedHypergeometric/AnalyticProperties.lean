@@ -259,12 +259,16 @@ theorem genHG_unit_diverges {a b : Multiset ℂ} (h : a.card = b.card + 1)
 /- The next finite-product normalization follows the private ratio-test lemmas
 in Mathlib's `RegularizedHypergeometric`, due to Moritz Doll.  Here it is
 extended to the positive-degree case, where the coefficient ratio tends to infinity. -/
+
+/-- `∏ (aᵢ + n) = n ^ card a * ∏ (aᵢ / n + 1)` for `n ≠ 0`. -/
 private lemma gen_prod_shift (a : Multiset ℂ) {n : ℕ} (hn : n ≠ 0) :
     (a.map (· + (n : ℂ))).prod = n ^ a.card * (a.map (· / (n : ℂ) + 1)).prod := calc
   _ = (a.map (fun j ↦ n * (j / (n : ℂ) + 1))).prod := by
     congr; ext; field_simp
   _ = _ := by simp [Multiset.prod_map_mul]
 
+/-- The shifted-product ratio `∏(aᵢ+n)/(∏(bⱼ+n)(n+1))` factored as a power of `n`
+times normalized products. -/
 private lemma gen_prod_ratio (a b : Multiset ℂ) {n : ℕ} (hn : n ≠ 0) :
     (a.map (· + (n : ℂ))).prod / ((b.map (· + (n : ℂ))).prod * (n + 1)) =
       n ^ (a.card - (b.card : ℤ) - 1) * (a.map (· / (n : ℂ) + 1)).prod /
@@ -280,6 +284,7 @@ private lemma gen_prod_ratio (a b : Multiset ℂ) {n : ℕ} (hn : n ≠ 0) :
       grind
     _ = _ := by ring
 
+/-- The normalized product `∏ (aᵢ / n + 1)` tends to `1` as `n → ∞`. -/
 private lemma gen_prod_normalized_tendsto (a : Multiset ℂ) :
     Tendsto (fun n : ℕ ↦ (a.map (· / (n : ℂ) + 1)).prod) atTop (𝓝 1) := by
   suffices ∀ i ∈ a, Tendsto (fun n : ℕ ↦ (i / n + 1)) atTop (𝓝 ((fun _ : ℂ ↦ 1) i)) by
@@ -287,6 +292,7 @@ private lemma gen_prod_normalized_tendsto (a : Multiset ℂ) :
   intro i hi
   simpa using (tendsto_const_div_atTop_nhds_zero_nat i).add_const 1
 
+/-- The ratio of normalized products appearing in `gen_prod_ratio` tends to `1`. -/
 private lemma gen_prod_normalized_ratio_tendsto (a b : Multiset ℂ) :
     Tendsto (fun n : ℕ ↦ (a.map (· / (n : ℂ) + 1)).prod /
       ((b.map (· / (n : ℂ) + 1)).prod * (1 + (n : ℂ)⁻¹))) atTop (𝓝 1) := by
@@ -297,17 +303,13 @@ private lemma gen_prod_normalized_ratio_tendsto (a b : Multiset ℂ) :
   apply this.congr
   simp
 
-/-- Peeling the first factor off a Pochhammer symbol: `(x)_{n+1} = x (x+1)_n`. -/
-lemma ghbR4_poch_succ_left (x : ℂ) (n : ℕ) : poch x (n + 1) = x * poch (x + 1) n := by
-  simp [poch, ascPochhammer_succ_left, Polynomial.eval_comp]
-
 /-- Telescoping (hockey-stick) identity for partial sums of Pochhammer ratios. -/
 lemma ghbR4_hockey (x : ℂ) (N : ℕ) :
     ∑ n ∈ range (N + 1), poch x n / (n.factorial : ℂ) = poch (x + 1) N / (N.factorial : ℂ) := by
   induction N with
   | zero => simp [poch_zero]
   | succ N ih =>
-    rw [sum_range_succ, ih, ghbR4_poch_succ_left, poch_succ, Nat.factorial_succ]
+    rw [sum_range_succ, ih, poch_succ_left, poch_succ, Nat.factorial_succ]
     have := (Nat.cast_ne_zero (R := ℂ)).mpr N.factorial_ne_zero
     have : ((N : ℂ) + 1) ≠ 0 := by exact_mod_cast N.succ_ne_zero
     push_cast
@@ -541,6 +543,119 @@ lemma ghbR4_tail_bound {d : ℕ → ℂ} {D : ℂ} {K : ℝ} {n₀ : ℕ} (hn₀
   calc ‖d n - D‖ ≤ K * (1 / ((n : ℝ) - 1)) := this
     _ = K / ((n : ℝ) - 1) := by ring
 
+/-- For `Re γ ≤ 0` there are regular parameters `α, β` with `β - α = 1 + γ` whose model
+series `∑ (α)_n/(β)_n` diverges. -/
+private lemma gen_one_model {γ : ℂ} (hγ : γ.re ≤ 0) :
+    ∃ α β : ℂ, (∀ k : ℕ, α ≠ -k) ∧ (∀ k : ℕ, β ≠ -k) ∧ β - α = 1 + γ ∧
+      ¬∃ L, Tendsto (fun N : ℕ => ∑ n ∈ range N, poch α n / poch β n) atTop (𝓝 L) := by
+  by_cases h0 : γ = 0
+  · refine ⟨1, 2, fun k hk => ?_, fun k hk => ?_, by rw [h0]; ring,
+      ghbR4_harmonic_not_conv⟩ <;>
+    · have := congrArg Complex.re hk; simp at this; linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)]
+  · refine ⟨-γ, 1, fun k hk => ?_, fun k hk => ?_, by ring, ?_⟩
+    · rw [neg_inj] at hk
+      have hre := congrArg Complex.re hk
+      simp at hre
+      have hk0 : (k : ℝ) = 0 := by linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)]
+      apply h0; rw [hk]; exact_mod_cast hk0
+    · have := congrArg Complex.re hk; simp at this; linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)]
+    · simpa only [poch_nat_one] using ghbR4_model_not_conv hγ h0
+
+/-- If `d (n+1) ∏(wᵢ+n) = d n ∏(uᵢ+n)` for bounded `d`, where `u, w` have equal cardinality
+and equal sums, then the increments `d (n+1) - d n` are `O(n⁻²)`. -/
+private lemma gen_ratio_step {d : ℕ → ℂ} {u w : Multiset ℂ} {k : ℕ} (hu : u.card = k + 2)
+    (hw : w.card = k + 2) (hsum : u.sum = w.sum) {B : ℝ} (hB' : ∀ n, ‖d n‖ ≤ B)
+    (hratio : ∀ n : ℕ, d (n + 1) * (w.map (· + (n : ℂ))).prod =
+      d n * (u.map (· + (n : ℂ))).prod) :
+    ∃ K2 : ℝ, ∃ n₀ : ℕ, 2 ≤ n₀ ∧ ∀ n, n₀ ≤ n → ‖d (n + 1) - d n‖ ≤ K2 / (n : ℝ) ^ 2 := by
+  obtain ⟨K, hK⟩ := ghbR4_prod_diff_bound u w (hu.trans hw.symm) hsum
+  have hB0 : 0 ≤ B := (norm_nonneg _).trans (hB' 0)
+  set R : ℝ := (w.map (‖·‖)).sum
+  have hR : ∀ y ∈ w, ‖y‖ ≤ R := fun y hy =>
+    Multiset.single_le_sum (fun z hz => by
+      obtain ⟨t, -, rfl⟩ := Multiset.mem_map.mp hz; exact norm_nonneg t) _
+      (Multiset.mem_map_of_mem _ hy)
+  refine ⟨B * K * 2 ^ (k + 2), max 2 ⌈2 * R⌉₊, le_max_left _ _, fun n hn => ?_⟩
+  have hn2 : (2 : ℝ) ≤ n := by exact_mod_cast (le_max_left _ _).trans hn
+  have hnR : 2 * R ≤ n := (Nat.le_ceil _).trans (by exact_mod_cast (le_max_right _ _).trans hn)
+  have hlow := ghbR4_prod_lower w (x := n) (by positivity)
+    (fun y hy => by linarith [hR y hy])
+  have hdiff := hK n (by linarith)
+  rw [hu, Nat.add_sub_cancel] at hdiff
+  rw [hw] at hlow
+  simp only [Complex.ofReal_natCast] at hlow hdiff
+  have hpos : 0 < ((n : ℝ) / 2) ^ (k + 2) := by positivity
+  have hW : (w.map (· + (n : ℂ))).prod ≠ 0 := by
+    intro h0; rw [h0, norm_zero] at hlow; linarith
+  have hK0 : 0 ≤ K * (n : ℝ) ^ k := (norm_nonneg _).trans hdiff
+  have heq : d (n + 1) - d n = d n * ((u.map (· + (n : ℂ))).prod -
+      (w.map (· + (n : ℂ))).prod) / (w.map (· + (n : ℂ))).prod := by
+    have := hratio n
+    field_simp
+    linear_combination this
+  rw [heq, norm_div, norm_mul]
+  calc ‖d n‖ * ‖(u.map (· + (n : ℂ))).prod - (w.map (· + (n : ℂ))).prod‖ /
+        ‖(w.map (· + (n : ℂ))).prod‖
+      ≤ B * (K * (n : ℝ) ^ k) / ((n : ℝ) / 2) ^ (k + 2) := by
+        gcongr
+        exact hB' n
+    _ = B * K * 2 ^ (k + 2) / (n : ℝ) ^ 2 := by
+        have : (n : ℝ) ≠ 0 := by positivity
+        have h2 : ((1 : ℝ) / 2) ^ k * 2 ^ k = 1 := by rw [← mul_pow]; norm_num
+        field_simp
+        linear_combination (-(B * K * (n : ℝ) ^ 2 * (n : ℝ) ^ k)) * h2
+
+/-- Comparison test: if `m n ~ C₂ n^{-(γ+1)}` with `Re γ > -1` and `c n / m n → D₀ ≠ 0` at
+rate `O(1/n)`, then convergence of `∑ c n` implies convergence of `∑ m n`. -/
+private lemma gen_one_compare {c m : ℕ → ℂ} {v D0 C2 γ : ℂ} {K2 : ℝ} {n₀ : ℕ}
+    (hn₀ : 2 ≤ n₀) (hσ : -1 < γ.re) (hmne : ∀ n, m n ≠ 0) (hD0 : D0 ≠ 0)
+    (hC2 : Tendsto (fun n : ℕ => m n * (n : ℂ) ^ (γ + 1)) atTop (𝓝 C2))
+    (htail : ∀ n, n₀ ≤ n → ‖c n / m n - D0‖ ≤ K2 / ((n : ℝ) - 1))
+    (hv : Tendsto (fun N : ℕ => ∑ n ∈ range N, c n) atTop (𝓝 v)) :
+    ∃ L, Tendsto (fun N : ℕ => ∑ n ∈ range N, m n) atTop (𝓝 L) := by
+  set σ := γ.re
+  have hmb : ∀ᶠ n : ℕ in atTop, ‖m n‖ ≤ (‖C2‖ + 1) * ((n : ℝ) ^ (σ + 1))⁻¹ := by
+    have := hC2.norm.eventually (gt_mem_nhds (lt_add_one ‖C2‖))
+    filter_upwards [this, eventually_gt_atTop 0] with n hn hn0
+    rw [norm_mul, norm_natCast_cpow_of_pos hn0] at hn
+    have : (0 : ℝ) < (n : ℝ) ^ (σ + 1) := Real.rpow_pos_of_pos (by exact_mod_cast hn0) _
+    simp only [Complex.add_re, Complex.one_re] at hn
+    rw [← div_eq_mul_inv, le_div_iff₀ this]
+    exact hn.le
+  have hdiffb : ∀ᶠ n : ℕ in atTop,
+      ‖c n - D0 * m n‖ ≤ (2 * (‖C2‖ + 1) * K2) * ((n : ℝ) ^ (σ + 2))⁻¹ := by
+    filter_upwards [hmb, eventually_ge_atTop n₀] with n hmn hn
+    have hn2 : (2 : ℝ) ≤ n := by exact_mod_cast hn₀.trans hn
+    have ht := htail n hn
+    have hK20 : 0 ≤ K2 := by
+      have := (norm_nonneg _).trans ht
+      exact (div_nonneg_iff.mp this).elim (fun h => h.1) (fun h => by linarith [h.2])
+    have hcd : c n - D0 * m n = m n * (c n / m n - D0) := by field_simp [hmne n]
+    have hp : (0 : ℝ) < (n : ℝ) ^ (σ + 1) := Real.rpow_pos_of_pos (by linarith) _
+    have hp2 : (n : ℝ) ^ (σ + 2) = (n : ℝ) ^ (σ + 1) * n := by
+      rw [show σ + 2 = (σ + 1) + 1 by ring, Real.rpow_add_one (by positivity)]
+    rw [hcd, norm_mul, hp2]
+    calc ‖m n‖ * ‖c n / m n - D0‖
+          ≤ ((‖C2‖ + 1) * ((n : ℝ) ^ (σ + 1))⁻¹) * (K2 / ((n : ℝ) - 1)) :=
+          mul_le_mul hmn ht (norm_nonneg _) (by positivity)
+      _ ≤ ((‖C2‖ + 1) * ((n : ℝ) ^ (σ + 1))⁻¹) * (2 * K2 / n) := by
+          refine mul_le_mul_of_nonneg_left ?_ (by positivity)
+          rw [div_le_div_iff₀ (by linarith) (by linarith)]
+          nlinarith
+      _ = (2 * (‖C2‖ + 1) * K2) * ((n : ℝ) ^ (σ + 1) * n)⁻¹ := by
+          field_simp
+  have hsumm : Summable fun n => c n - D0 * m n := by
+    refine Summable.of_norm_bounded_eventually
+      ((Real.summable_nat_rpow_inv.mpr (by linarith : (1 : ℝ) < σ + 2)).mul_left
+        (2 * (‖C2‖ + 1) * K2)) ?_
+    exact Nat.cofinite_eq_atTop ▸ hdiffb
+  refine ⟨(v - ∑' n, (c n - D0 * m n)) / D0, ?_⟩
+  refine ((hv.sub hsumm.hasSum.tendsto_sum_nat).div_const D0).congr fun N => ?_
+  rw [← Finset.sum_sub_distrib]
+  have hx : ∀ x, c x - (c x - D0 * m x) = D0 * m x := fun x => by ring
+  simp only [hx, ← Finset.mul_sum]
+  field_simp
+
 /-- At one, natural-order convergence requires strictly positive real excess unless the series terminates. -/
 theorem genHG_one_converges_iff {a b : Multiset ℂ} (h : a.card = b.card + 1)
     (hb : genDenRegular b) (ha : ¬genTerminates a) :
@@ -561,43 +676,12 @@ theorem genHG_one_converges_iff {a b : Multiset ℂ} (h : a.card = b.card + 1)
   have hv' : Tendsto (fun N : ℕ => ∑ n ∈ range N, genCoeff a b n) atTop (𝓝 v) := by
     simpa only [genSeriesConvergesTo, one_pow, mul_one] using hv
   -- the comparison model
-  classical
-  set α : ℂ := if γ = 0 then 1 else -γ with hα
-  set β : ℂ := if γ = 0 then 2 else 1 with hβ
-  have hαp : ∀ k : ℕ, α ≠ -k := by
-    intro k hk
-    by_cases h0 : γ = 0
-    · simp only [hα, h0, ite_true] at hk
-      have := congrArg Complex.re hk; simp at this; linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)]
-    · simp only [hα, h0, ite_false, neg_inj] at hk
-      have hre := congrArg Complex.re hk
-      simp at hre
-      have hk0 : (k : ℝ) = 0 := by linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)]
-      apply h0; rw [hk]; exact_mod_cast hk0
-  have hβp : ∀ k : ℕ, β ≠ -k := by
-    intro k hk
-    have := congrArg Complex.re hk
-    by_cases h0 : γ = 0 <;> simp [hβ, h0] at this <;> linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)]
-  have hβα : β - α = 1 + γ := by
-    by_cases h0 : γ = 0 <;> simp only [hα, hβ, h0, ite_true, ite_false] <;> ring
+  obtain ⟨α, β, hαp, hβp, hβα, hmodel⟩ := gen_one_model hγ
   set m : ℕ → ℂ := fun n => poch α n / poch β n with hm
   have hmne : ∀ n, m n ≠ 0 := fun n =>
     div_ne_zero (poch_ne_zero_of_not_neg_nat hαp n) (poch_ne_zero_of_not_neg_nat hβp n)
-  have hmodel : ¬∃ L, Tendsto (fun N : ℕ => ∑ n ∈ range N, m n) atTop (𝓝 L) := by
-    by_cases h0 : γ = 0
-    · simpa only [hm, hα, hβ, h0, ite_true] using ghbR4_harmonic_not_conv
-    · have := ghbR4_model_not_conv hγ h0
-      simp only [hm, hα, hβ, h0, ite_false, poch_nat_one]
-      exact this
-
   have ha' := ghbR4_not_neg_of_not_terminates ha
   set c : ℕ → ℂ := fun n => genCoeff a b n with hc
-  have hcne : ∀ n, c n ≠ 0 := by
-    intro n
-    unfold c genCoeff
-    refine div_ne_zero ?_ (mul_ne_zero (genPoch_ne_zero hb n)
-      ((Nat.cast_ne_zero (R := ℂ)).mpr n.factorial_ne_zero))
-    exact genPoch_ne_zero (b := a) (fun x hx k => ha' x hx k) n
   -- asymptotics of both sequences
   have hC1 := ghbR4_genCoeff_tendsto h ha' hb
   rw [← hγdef] at hC1
@@ -628,12 +712,9 @@ theorem genHG_one_converges_iff {a b : Multiset ℂ} (h : a.card = b.card + 1)
     have := hmne n
     simp only [Pi.div_apply, hd, hc]
     field_simp
-  set D0 := C1 / C2
-  have hD0 : D0 ≠ 0 := div_ne_zero hC1ne hC2ne
   -- the exact ratio identity
   set u : Multiset ℂ := β ::ₘ a
   set w : Multiset ℂ := α ::ₘ 1 ::ₘ b
-  have hcard : u.card = w.card := by simp [u, w, h]
   have hsum : u.sum = w.sum := by
     simp only [u, w, Multiset.sum_cons]
     have : β - α = 1 + (b.sum - a.sum) := by rw [hβα, hγdef, genExcess]
@@ -660,98 +741,12 @@ theorem genHG_one_converges_iff {a b : Multiset ℂ} (h : a.card = b.card + 1)
       div_eq_div_iff (mul_ne_zero hmn hαn) hmn]
     simp only [hc]
     linear_combination (β + n) * (α + n) * M * hcs
-  -- boundedness of `d`
+  -- boundedness of `d` and the `O(n⁻²)` increments
   obtain ⟨B, hB⟩ := isBounded_iff_forall_norm_le.mp (Metric.isBounded_range_of_tendsto d hdlim)
-  have hB' : ∀ n, ‖d n‖ ≤ B := fun n => hB _ ⟨n, rfl⟩
-  have hB0 : 0 ≤ B := (norm_nonneg _).trans (hB' 0)
-  -- polynomial bounds
-  obtain ⟨K, hK⟩ := ghbR4_prod_diff_bound u w hcard hsum
-  have hucard : u.card = b.card + 2 := by simp [u, h]
-  have hwcard : w.card = b.card + 2 := by simp [w]
-  set R : ℝ := (w.map (‖·‖)).sum
-  have hR : ∀ y ∈ w, ‖y‖ ≤ R := fun y hy =>
-    Multiset.single_le_sum (fun z hz => by
-      obtain ⟨t, -, rfl⟩ := Multiset.mem_map.mp hz; exact norm_nonneg t) _
-      (Multiset.mem_map_of_mem _ hy)
-  set n₀ : ℕ := max 2 ⌈2 * R⌉₊
-  have hn₀ : 2 ≤ n₀ := le_max_left _ _
-  have hstep : ∀ n, n₀ ≤ n →
-      ‖d (n + 1) - d n‖ ≤ B * K * 2 ^ (b.card + 2) / (n : ℝ) ^ 2 := by
-    intro n hn
-    have hn2 : (2 : ℝ) ≤ n := by exact_mod_cast hn₀.trans hn
-    have hnR : 2 * R ≤ n := (Nat.le_ceil _).trans (by exact_mod_cast (le_max_right _ _).trans hn)
-    have hlow := ghbR4_prod_lower w (x := n) (by positivity)
-      (fun y hy => by linarith [hR y hy])
-    have hdiff := hK n (by linarith)
-    rw [hucard, Nat.add_sub_cancel] at hdiff
-    rw [hwcard] at hlow
-    simp only [Complex.ofReal_natCast] at hlow hdiff
-    have hpos : 0 < ((n : ℝ) / 2) ^ (b.card + 2) := by positivity
-    have hW : (w.map (· + (n : ℂ))).prod ≠ 0 := by
-      intro h0; rw [h0, norm_zero] at hlow; linarith
-    have hK0 : 0 ≤ K * (n : ℝ) ^ b.card := (norm_nonneg _).trans hdiff
-    have heq : d (n + 1) - d n = d n * ((u.map (· + (n : ℂ))).prod -
-        (w.map (· + (n : ℂ))).prod) / (w.map (· + (n : ℂ))).prod := by
-      have := hratio n
-      field_simp
-      linear_combination this
-    rw [heq, norm_div, norm_mul]
-    calc ‖d n‖ * ‖(u.map (· + (n : ℂ))).prod - (w.map (· + (n : ℂ))).prod‖ /
-          ‖(w.map (· + (n : ℂ))).prod‖
-        ≤ B * (K * (n : ℝ) ^ b.card) / ((n : ℝ) / 2) ^ (b.card + 2) := by
-          gcongr
-          exact hB' n
-      _ = B * K * 2 ^ (b.card + 2) / (n : ℝ) ^ 2 := by
-          have : (n : ℝ) ≠ 0 := by positivity
-          have h2 : ((1 : ℝ) / 2) ^ b.card * 2 ^ b.card = 1 := by rw [← mul_pow]; norm_num
-          field_simp
-          linear_combination (-(B * K * (n : ℝ) ^ 2 * (n : ℝ) ^ b.card)) * h2
-  have htail := ghbR4_tail_bound hn₀ hdlim hstep
-  set K2 := B * K * 2 ^ (b.card + 2)
-  -- bound on the model terms
-  set σ := γ.re
-  have hmb : ∀ᶠ n : ℕ in atTop, ‖m n‖ ≤ (‖C2‖ + 1) * ((n : ℝ) ^ (σ + 1))⁻¹ := by
-    have := hC2.norm.eventually (gt_mem_nhds (lt_add_one ‖C2‖))
-    filter_upwards [this, eventually_gt_atTop 0] with n hn hn0
-    rw [norm_mul, norm_natCast_cpow_of_pos hn0] at hn
-    have : (0 : ℝ) < (n : ℝ) ^ (σ + 1) := Real.rpow_pos_of_pos (by exact_mod_cast hn0) _
-    simp only [Complex.add_re, Complex.one_re] at hn
-    rw [← div_eq_mul_inv, le_div_iff₀ this]
-    exact hn.le
-  have hdiffb : ∀ᶠ n : ℕ in atTop,
-      ‖c n - D0 * m n‖ ≤ (2 * (‖C2‖ + 1) * K2) * ((n : ℝ) ^ (σ + 2))⁻¹ := by
-    filter_upwards [hmb, eventually_ge_atTop n₀] with n hmn hn
-    have hn2 : (2 : ℝ) ≤ n := by exact_mod_cast hn₀.trans hn
-    have ht := htail n hn
-    have hK20 : 0 ≤ K2 := by
-      have := (norm_nonneg _).trans ht
-      exact (div_nonneg_iff.mp this).elim (fun h => h.1) (fun h => by linarith [h.2])
-    have hcd : c n - D0 * m n = m n * (d n - D0) := by
-      simp only [hd]; field_simp [hmne n]
-    have hp : (0 : ℝ) < (n : ℝ) ^ (σ + 1) := Real.rpow_pos_of_pos (by linarith) _
-    have hp2 : (n : ℝ) ^ (σ + 2) = (n : ℝ) ^ (σ + 1) * n := by
-      rw [show σ + 2 = (σ + 1) + 1 by ring, Real.rpow_add_one (by positivity)]
-    rw [hcd, norm_mul, hp2]
-    calc ‖m n‖ * ‖d n - D0‖ ≤ ((‖C2‖ + 1) * ((n : ℝ) ^ (σ + 1))⁻¹) * (K2 / ((n : ℝ) - 1)) :=
-          mul_le_mul hmn ht (norm_nonneg _) (by positivity)
-      _ ≤ ((‖C2‖ + 1) * ((n : ℝ) ^ (σ + 1))⁻¹) * (2 * K2 / n) := by
-          refine mul_le_mul_of_nonneg_left ?_ (by positivity)
-          rw [div_le_div_iff₀ (by linarith) (by linarith)]
-          nlinarith
-      _ = (2 * (‖C2‖ + 1) * K2) * ((n : ℝ) ^ (σ + 1) * n)⁻¹ := by
-          field_simp
-  have hsumm : Summable fun n => c n - D0 * m n := by
-    refine Summable.of_norm_bounded_eventually
-      ((Real.summable_nat_rpow_inv.mpr (by linarith : (1 : ℝ) < σ + 2)).mul_left
-        (2 * (‖C2‖ + 1) * K2)) ?_
-    exact Nat.cofinite_eq_atTop ▸ hdiffb
-  apply hmodel
-  refine ⟨(v - ∑' n, (c n - D0 * m n)) / D0, ?_⟩
-  refine ((hv'.sub hsumm.hasSum.tendsto_sum_nat).div_const D0).congr fun N => ?_
-  rw [← Finset.sum_sub_distrib]
-  have hx : ∀ x, genCoeff a b x - (c x - D0 * m x) = D0 * m x := fun x => by simp [hc]
-  simp only [hx, ← Finset.mul_sum]
-  field_simp
+  obtain ⟨K2, n₀, hn₀, hstep⟩ := gen_ratio_step (k := b.card) (by simp [u, h]) (by simp [w])
+    hsum (fun n => hB _ ⟨n, rfl⟩) hratio
+  exact hmodel (gen_one_compare hn₀ hle hmne (div_ne_zero hC1ne hC2ne) hC2
+    (ghbR4_tail_bound hn₀ hdlim hstep) hv')
 
 /-- The nonterminating p>q+1 formal series has radius zero. -/
 theorem genHG_radius_zero {a b : Multiset ℂ} (h : b.card + 1 < a.card)

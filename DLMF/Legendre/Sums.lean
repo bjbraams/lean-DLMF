@@ -22,7 +22,9 @@ open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
 namespace DLMF.Legendre
 
-/-- ferrersP addition. -/
+/-- DLMF 14.18.1: for `θ₁, θ₂ ≥ 0` with `θ₁ + θ₂ < π` and real `φ`, `𝖯_ν(cos θ₁ cos θ₂ + sin θ₁ sin
+θ₂ cos φ) = 𝖯_ν(cos θ₁) 𝖯_ν(cos θ₂) + 2 Σ_{m≥1} (-1)^m 𝖯^{-m}_ν(cos θ₁) 𝖯^m_ν(cos θ₂) cos(mφ)`, as a
+convergent series. -/
 @[dlmf 14.18.E1]
 theorem ferrersP_addition (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2 : 0 ≤ θ₂) (hs : θ₁+θ₂ < π) (phi : ℝ) :
     HasSum (fun j : ℕ => let m:=j+1; 2*(-1)^m*ferrersP ν (-m) (Real.cos θ₁)*ferrersP ν m (Real.cos θ₂)*Real.cos (m*phi)) (ferrersP ν 0 (Real.cos θ₁*Real.cos θ₂+Real.sin θ₁*Real.sin θ₂*Real.cos phi)-ferrersP ν 0 (Real.cos θ₁)*ferrersP ν 0 (Real.cos θ₂)) := by
@@ -30,7 +32,9 @@ theorem ferrersP_addition (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2 
   -- the integer case `legAdd_fer_nat`.
   exact legAdd_ferrersP_addition_of_nat h1 h2 hs (legAdd_fer_nat h1 h2 hs) ν phi
 
-/-- ferrersQ addition. -/
+/-- DLMF 14.18.3: for `0 < θ₁ < θ₂` with `θ₁ < π/2`, `θ₁ + θ₂ < π`, real `φ` and `ν` not a negative
+integer, `𝖰_ν(cos θ₁ cos θ₂ + sin θ₁ sin θ₂ cos φ) = 𝖯_ν(cos θ₁) 𝖰_ν(cos θ₂) + 2 Σ_{m≥1} (-1)^m
+𝖯^{-m}_ν(cos θ₁) 𝖰^m_ν(cos θ₂) cos(mφ)`, as a convergent series. -/
 @[dlmf 14.18.E3]
 theorem ferrersQ_addition (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 : 0 < θ₁) (h2 : 0 < θ₂) (hs : θ₁+θ₂ < π) (hhalf : θ₁ < π/2) (h12 : θ₁ < θ₂) (hr : LegendreQRegular ν 0) (phi : ℝ) :
     HasSum (fun j : ℕ => let m:=j+1; 2*(-1)^m*ferrersP ν (-m) (Real.cos θ₁)*ferrersQ ν m (Real.cos θ₂)*Real.cos (m*phi)) (ferrersQ ν 0 (Real.cos θ₁*Real.cos θ₂+Real.sin θ₁*Real.sin θ₂*Real.cos phi)-ferrersP ν 0 (Real.cos θ₁)*ferrersQ ν 0 (Real.cos θ₂)) := by
@@ -38,17 +42,8 @@ theorem ferrersQ_addition (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 : 0 < θ₁) (h2 : 
   -- The hypothesis `θ₁ < π/2` is not needed.
   exact legQAdd_ferrersQ_addition ν h1.le h12 hs hr phi
 
-/-- Nonnegative integer order Ferrers P agrees with the polynomial form on `(-1, 1]`. -/
-theorem ferrersP_nat_eq_ferrersPNat (n k : ℕ) {x : ℝ} (hx : x ∈ Ioc (-1:ℝ) 1) :
-    ferrersP n k x = ferrersPNat n k x := by
-  exact legAdd_ferrersP_nat_eq_ferrersPNat n k hx
-
-/-- Negative integer order Ferrers P in polynomial form on `(-1, 1]`. -/
-theorem ferrersP_neg_nat_eq_ferrersPNat (n k : ℕ) (hk : k ≤ n) {x : ℝ} (hx : x ∈ Ioc (-1:ℝ) 1) :
-    ferrersP n (-(k:ℂ)) x = (-1)^k * ((n-k).factorial / (n+k).factorial : ℂ) * ferrersPNat n k x := by
-  exact legAdd_ferrersP_neg_nat_eq_ferrersPNat n k hk hx
-
-/-- ferrersP nat addition. -/
+/-- DLMF 14.18.2: for natural `n`, `θ₁, θ₂ ≥ 0` with `θ₁ + θ₂ < π` and real `φ`, `P_n(cos θ₁ cos θ₂
++ sin θ₁ sin θ₂ cos φ) = Σ_{m=-n}^{n} (-1)^m 𝖯^{-m}_n(cos θ₁) 𝖯^m_n(cos θ₂) cos(mφ)`. -/
 @[dlmf 14.18.E2]
 theorem ferrersP_nat_addition (n : ℕ) {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2 : 0 ≤ θ₂) (hs : θ₁+θ₂ < π) (phi : ℝ) :
     ferrersP n 0 (Real.cos θ₁*Real.cos θ₂+Real.sin θ₁*Real.sin θ₂*Real.cos phi)=∑ m ∈ Finset.Icc (-(n:ℤ)) n, (-1:ℂ)^m*ferrersP n (-m) (Real.cos θ₁)*ferrersP n m (Real.cos θ₂)*Real.cos (m*phi) := by
@@ -83,8 +78,9 @@ theorem ferrersP_nat_addition (n : ℕ) {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (
       ferrersP n k (Real.cos θ₁) * ferrersP n (-(k:ℂ)) (Real.cos θ₂) =
         (-1)^k * DLMF.OrthogonalPolynomials.LegendreAddition.coeff n k (Real.cos θ₁) (Real.cos θ₂) (Real.sin θ₁) (Real.sin θ₂) := by
     intro k hkn
-    rw [ferrersP_neg_nat_eq_ferrersPNat n k hkn hx1, ferrersP_neg_nat_eq_ferrersPNat n k hkn hx2,
-      ferrersP_nat_eq_ferrersPNat n k hx1, ferrersP_nat_eq_ferrersPNat n k hx2,
+    rw [legAdd_ferrersP_neg_nat_eq_ferrersPNat n k hkn hx1,
+      legAdd_ferrersP_neg_nat_eq_ferrersPNat n k hkn hx2,
+      legAdd_ferrersP_nat_eq_ferrersPNat n k hx1, legAdd_ferrersP_nat_eq_ferrersPNat n k hx2,
       hF k θ₁ h1 hθ1, hF k θ₂ h2 hθ2]
     have hs : ((-1:ℂ))^k * (-1)^k = 1 := by rw [← mul_pow]; norm_num
     simp only [DLMF.OrthogonalPolynomials.LegendreAddition.coeff, DLMF.OrthogonalPolynomials.LegendreAddition.weight]
@@ -124,13 +120,16 @@ theorem associatedP_addition (ν : ℂ) {ξ₁ ξ₂ : ℝ} (h1 : 0 < ξ₁) (h2
   -- Fourier expansion in `phi`; coefficients by Carlson's theorem from the integer case.
   exact legAdd_associatedP_addition ν h1 h2 phi
 
-/-- associatedQ addition. -/
+/-- DLMF 14.18.5: for `0 < ξ₁ < ξ₂`, real `φ` and `ν` not a negative integer, `Q_ν(cosh ξ₁ cosh ξ₂ -
+sinh ξ₁ sinh ξ₂ cos φ) = P_ν(cosh ξ₁) Q_ν(cosh ξ₂) + 2 Σ_{m≥1} (-1)^m P^{-m}_ν(cosh ξ₁) Q^m_ν(cosh
+ξ₂) cos(mφ)`, as a convergent series. -/
 @[dlmf 14.18.E5]
 theorem associatedQ_addition (ν : ℂ) {ξ₁ ξ₂ : ℝ} (h1 : 0 < ξ₁) (h2 : 0 < ξ₂) (h12 : ξ₁ < ξ₂) (hr : LegendreQRegular ν 0) (phi : ℝ) :
     HasSum (fun j : ℕ => let m:=j+1; 2*(-1)^m*associatedP ν (-m) (Real.cosh ξ₁)*associatedQ ν m (Real.cosh ξ₂)*Real.cos (m*phi)) (associatedQ ν 0 (Real.cosh ξ₁*Real.cosh ξ₂-Real.sinh ξ₁*Real.sinh ξ₂*Real.cos phi)-associatedP ν 0 (Real.cosh ξ₁)*associatedQ ν 0 (Real.cosh ξ₂)) := by
   sorry
 
-/-- legendre christoffel 6. -/
+/-- DLMF 14.18.6 (Christoffel–Darboux): for `x, y ∉ (-∞, 1]`, `(x-y) Σ_{k=0}^{n} (2k+1) P_k(x)
+P_k(y) = (n+1)(P_{n+1}(x) P_n(y) - P_n(x) P_{n+1}(y))`. -/
 @[dlmf 14.18.E6]
 theorem legendre_christoffel_6 (n : ℕ) {x y : ℂ} (hx : x-1 ∈ slitPlane) (hy : y-1 ∈ slitPlane) :
     (x-y)*(∑ k ∈ Finset.range (n+1), (2*k+1:ℂ)*associatedP k 0 x*associatedP k 0 y)=(n+1:ℂ)*(associatedP (n+1) 0 x*associatedP n 0 y-associatedP n 0 x*associatedP (n+1) 0 y) := by
@@ -160,7 +159,8 @@ theorem legendre_christoffel_6 (n : ℕ) {x y : ℂ} (hx : x-1 ∈ slitPlane) (h
   push_cast at this
   exact this
 
-/-- legendre christoffel 7. -/
+/-- DLMF 14.18.7: for `x, y ∉ (-∞, 1]`, `(x-y) Σ_{k=0}^{n} (2k+1) P_k(x) Q_k(y) = (n+1)(P_{n+1}(x)
+Q_n(y) - P_n(x) Q_{n+1}(y)) - 1`. -/
 @[dlmf 14.18.E7]
 theorem legendre_christoffel_7 (n : ℕ) {x y : ℂ} (hx : x-1 ∈ slitPlane) (hy : y-1 ∈ slitPlane) :
     (x-y)*(∑ k ∈ Finset.range (n+1), (2*k+1:ℂ)*associatedP k 0 x*associatedQ k 0 y)=(n+1:ℂ)*(associatedP (n+1) 0 x*associatedQ n 0 y-associatedP n 0 x*associatedQ (n+1) 0 y)-1 := by
@@ -182,13 +182,15 @@ theorem legendre_christoffel_7 (n : ℕ) {x y : ℂ} (hx : x-1 ∈ slitPlane) (h
     rw [show (n:ℂ)+1-1 = n by ring] at hp hq
     linear_combination -legendreQ ((n:ℂ)+1) y * hp + legendreP ((n:ℂ)+1) x * hq
 
-/-- ferrersP zonal series. -/
+/-- DLMF 14.18.8: for non-integer `ν` and `-1 < x < 1`, `𝖯_ν(-x) = (sin(νπ)/π) Σ_{n≥0}
+(2n+1)/((ν-n)(ν+n+1)) 𝖯_n(x)`, as a convergent series. -/
 @[dlmf 14.18.E8]
 theorem ferrersP_zonal_series {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     HasSum (fun n : ℕ => sin (ν*π)/π*(2*n+1)/((ν-n)*(ν+n+1))*ferrersP n 0 x) (ferrersP ν 0 (-x)) := by
   sorry
 
-/-- ferrersP dougall series. -/
+/-- DLMF 14.18.9: for non-integer `ν`, real `μ ≥ 0` and `-1 < x ≤ 1`, the partial sums of
+`(sin(νπ)/π) Σ_{n≥0} (-1)^n (2n+1)/((ν-n)(ν+n+1)) 𝖯^{-μ}_n(x)` converge to `𝖯^{-μ}_ν(x)`. -/
 @[dlmf 14.18.E9]
 theorem ferrersP_dougall_series {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) {μ : ℝ} (hμ : 0 ≤ μ) {x : ℝ} (hx : x ∈ Ioc (-1:ℝ) 1) :
     Tendsto (fun N : ℕ => ∑ n ∈ Finset.range N, sin (ν*π)/π*(-1)^n*(2*n+1)/((ν-n)*(ν+n+1))*ferrersP n (-μ) x) atTop (𝓝 (ferrersP ν (-μ) x)) := by
@@ -382,6 +384,7 @@ private noncomputable def heine_q (z w : ℂ) (M : ℕ) : Polynomial ℂ :=
   Polynomial.C w⁻¹ * (1 + ∑ k ∈ Finset.range M,
     Polynomial.C (2 * ((z + w) ^ (k + 1))⁻¹) * Polynomial.Chebyshev.T ℂ ((k + 1 : ℕ) : ℤ))
 
+/-- The Chebyshev approximant `heine_q z w M` has degree at most `M`. -/
 private lemma heine_q_natDegree (z w : ℂ) (M : ℕ) : (heine_q z w M).natDegree ≤ M := by
   unfold heine_q
   refine (Polynomial.natDegree_C_mul_le _ _).trans ?_
@@ -731,7 +734,8 @@ private lemma heine_ellipse_lip (z₁ z₂ : ℂ) :
     rwa [show z₁ - z₂ + (z₂ + 1) = z₁ + 1 by ring] at this
   linarith
 
-/-- legendre heine series. -/
+/-- DLMF 14.28.2 (Heine's formula): for `z₁ ∉ (-∞, 1]` and `z₂` inside the confocal ellipse (foci
+`±1`) through `z₁`, `Σ_{n≥0} (2n+1) Q_n(z₁) P_n(z₂) = 1/(z₁ - z₂)`. -/
 @[dlmf 14.28.E2]
 theorem legendre_heine_series {z₁ z₂ : ℂ} (hz₁ : z₁-1 ∈ slitPlane) (hr : legendreEllipseRadius z₂ < legendreEllipseRadius z₁) :
     HasSum (fun n : ℕ => (2*n+1:ℂ)*associatedQ n 0 z₁*DLMF.OrthogonalPolynomials.legendrePolyP n z₂) (1/(z₁-z₂)) := by
@@ -781,7 +785,9 @@ theorem legendre_heine_series {z₁ z₂ : ℂ} (hz₁ : z₁-1 ∈ slitPlane) (
   refine (heine_bound_tendsto (K * (m₂ + 1) / ‖z₁ - z₂‖) hρ0 hρ1).congr fun n => ?_
   ring
 
-/-- legendre heine uniform. -/
+/-- DLMF 14.28.2 (uniform convergence): for `2 < R₂ < R₁`, the partial sums of `Σ_n (2n+1) Q_n(z₁)
+P_n(z₂)` converge to `1/(z₁ - z₂)` uniformly for `z₁ ∉ (-∞, 1]` with `|z₁-1| + |z₁+1| ≥ R₁` and
+`|z₂-1| + |z₂+1| ≤ R₂`. -/
 @[dlmf 14.28.E2]
 theorem legendre_heine_uniform {R₁ R₂ : ℝ} (hR₂ : 2 < R₂) (hR : R₂ < R₁) :
     TendstoUniformlyOn (fun N : ℕ => fun p : ℂ × ℂ => ∑ n ∈ Finset.range N, (2*n+1:ℂ)*associatedQ n 0 p.1*DLMF.OrthogonalPolynomials.legendrePolyP n p.2) (fun p => 1/(p.1-p.2)) atTop {p : ℂ × ℂ | p.1-1 ∈ slitPlane ∧ R₁ ≤ legendreEllipseRadius p.1 ∧ legendreEllipseRadius p.2 ≤ R₂} := by
@@ -848,7 +854,9 @@ theorem legendre_heine_uniform {R₁ R₂ : ℝ} (hR₂ : 2 < R₂) (hR : R₂ <
         gcongr
     _ = _ := by ring
 
-/-- associatedP complex addition. -/
+/-- DLMF 14.28.1: for `Re z₁, Re z₂ > 0` off the cut, real `φ`, and `Z = z₁z₂ -
+(z₁²-1)^{1/2}(z₂²-1)^{1/2} cos φ` off the cut, `P_ν(Z) = P_ν(z₁) P_ν(z₂) + 2 Σ_{m≥1} (-1)^m
+P^m_ν(z₁) P^m_ν(z₂) cos(mφ)/(ν-m+1)_{2m}`, as a convergent series. -/
 @[dlmf 14.28.E1]
 theorem associatedP_complex_addition (ν : ℂ) {z₁ z₂ : ℂ} (h1 : 0 < z₁.re) (h2 : 0 < z₂.re) (hz1 : z₁-1 ∈ slitPlane) (hz2 : z₂-1 ∈ slitPlane) (phi : ℝ) (harg : z₁*z₂-exp ((log (z₁-1)+log (z₁+1))/2)*exp ((log (z₂-1)+log (z₂+1))/2)*Real.cos phi-1 ∈ slitPlane) :
     HasSum (fun j : ℕ => let m:=j+1; 2*(-1)^m*1/poch (ν-m+1) (2*m)*associatedP ν m z₁*associatedP ν m z₂*Real.cos (m*phi)) (associatedP ν 0 (z₁*z₂-exp ((log (z₁-1)+log (z₁+1))/2)*exp ((log (z₂-1)+log (z₂+1))/2)*Real.cos phi)-associatedP ν 0 z₁*associatedP ν 0 z₂) := by

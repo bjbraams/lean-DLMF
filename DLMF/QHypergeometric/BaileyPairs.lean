@@ -64,7 +64,7 @@ theorem generalBaileyTransform (u v α δ : ℕ → ℂ)
     _ = ∑' n, ∑' j, F n j := hcomm
     _ = ∑' n, generalBaileyBeta u v α n * δ n := tsum_congr hrow
 
-/-- DLMF17.12: an infinite chain is obtained by successive applications of17.12.5.
+/-- DLMF 17.12: an infinite chain is obtained by successive applications of 17.12.5.
 The transform parameters may vary at each step. Every displayed quotient denominator,
 including the denominators in the Bailey-pair relation, is required to be nonzero. -/
 @[dlmf 17.12]

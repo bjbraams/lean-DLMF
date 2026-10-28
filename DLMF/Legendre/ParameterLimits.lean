@@ -125,17 +125,21 @@ theorem legendreSinSqTrigamma_eq (ν : ℂ) :
       (Gamma (ν + 1))⁻¹ * DLMF.Gamma.recipGammaDeriv 2 (ν + 1)) * ((Gamma (-ν))⁻¹) ^ 2 :=
   (tendsto_sin_sq_mul_deriv_digamma_add_one ν).limUnder_eq
 
-/-- legendreSinDigamma limit. -/
+/-- `sin(πv) ψ(v+1)` tends to `legendreSinDigamma ν` as `v → ν`, `v ≠ ν`, for every complex `ν` (the
+singularities at negative integers are removable). -/
 theorem legendreSinDigamma_limit (ν : ℂ) :
     Tendsto (fun v => sin (π*v)*digamma (v+1)) (𝓝[≠] ν) (𝓝 (legendreSinDigamma ν)) := by
   rw [legendreSinDigamma_eq]; exact tendsto_sin_mul_digamma_add_one ν
 
-/-- legendreSinSqTrigamma limit. -/
+/-- `sin²(πv) ψ'(v+1)` tends to `legendreSinSqTrigamma ν` as `v → ν`, `v ≠ ν`, for every complex `ν`
+(the singularities at negative integers are removable). -/
 theorem legendreSinSqTrigamma_limit (ν : ℂ) :
     Tendsto (fun v => (sin (π*v))^2*deriv digamma (v+1)) (𝓝[≠] ν) (𝓝 (legendreSinSqTrigamma ν)) := by
   rw [legendreSinSqTrigamma_eq]; exact tendsto_sin_sq_mul_deriv_digamma_add_one ν
 
-/-- ferrersPP integral all degrees. -/
+/-- DLMF 14.17.10: for `λ ≠ ν` and `λ ≠ -ν-1`, `∫_{-1}^{1} 𝖯_ν(x) 𝖯_λ(x) dx = 2(2(sin(πλ) sin(πν)
+ψ(ν+1) - sin(πν) sin(πλ) ψ(λ+1)) + π sin((λ-ν)π))/(π² (λ-ν)(λ+ν+1))`, where `sin(πν) ψ(ν+1)` is
+taken by continuity at negative integers. -/
 @[dlmf 14.17.E10]
 theorem ferrersPP_integral_all_degrees (ν lam : ℂ) (h0 : lam ≠ ν) (h1 : lam ≠ -ν-1) :
     (∫ x : ℝ in -1..1, ferrersP ν 0 x*ferrersP lam 0 x)=2*(2*(sin (π*lam)*legendreSinDigamma ν-sin (π*ν)*legendreSinDigamma lam)+π*sin ((lam-ν)*π))/(π^2*(lam-ν)*(lam+ν+1)) := by
@@ -153,7 +157,8 @@ theorem ferrersPP_integral_all_degrees (ν lam : ℂ) (h0 : lam ≠ ν) (h1 : la
   field_simp
   ring
 
-/-- ferrersP sq integral all degrees. -/
+/-- DLMF 14.17.11: for `ν ≠ -1/2`, `∫_{-1}^{1} (𝖯_ν(x))² dx = (π² - 2 sin²(πν) ψ'(ν+1))/(π²
+(ν+1/2))`, where `sin²(πν) ψ'(ν+1)` is taken by continuity at negative integers. -/
 @[dlmf 14.17.E11]
 theorem ferrersP_sq_integral_all_degrees {ν : ℂ} (hν : ν ≠ -1/2) :
     (∫ x : ℝ in -1..1, (ferrersP ν 0 x)^2)=(π^2-2*legendreSinSqTrigamma ν)/(π^2*(ν+1/2)) := by
@@ -173,7 +178,8 @@ theorem ferrersP_sq_integral_all_degrees {ν : ℂ} (hν : ν ≠ -1/2) :
         nhdsWithin_le_nhds) (mul_ne_zero (pow_ne_zero 2 hπ) h3)
   exact tendsto_nhds_unique (((legPIU_tendsto_sq ν).mono_left nhdsWithin_le_nhds).congr' heq) hR
 
-/-- ferrersP negative order parameter limit. -/
+/-- DLMF 14.9.3 (limit form): for natural `m` and `-1 < x < 1`, `(-1)^m Γ(v-m+1)/Γ(v+m+1) 𝖯^m_v(x) →
+𝖯^{-m}_ν(x)` as `v → ν`, `v ≠ ν`; this covers the degrees where the Gamma quotient is singular. -/
 @[dlmf 14.9.E3]
 theorem ferrersP_negative_order_parameter_limit (ν : ℂ) (m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     Tendsto (fun v : ℂ => (-1)^m*Gamma (v-m+1)/Gamma (v+m+1)*ferrersP v m x) (𝓝[≠] ν) (𝓝 (ferrersP ν (-m) x)) := by
@@ -188,7 +194,8 @@ theorem ferrersP_negative_order_parameter_limit (ν : ℂ) (m : ℕ) {x : ℝ} (
   filter_upwards [eventually_affine_ne_neg_nat one_ne_zero (-(m:ℂ)+1) ν] with v hv
   exact ferrersP_negative_integer_order v m (fun n hn => hv n (by linear_combination hn)) hx
 
-/-- associatedP negative order parameter limit. -/
+/-- DLMF 14.9.13 (limit form): for natural `m` and `z ∉ (-∞, 1]`, `Γ(v-m+1)/Γ(v+m+1) P^m_v(z) →
+P^{-m}_ν(z)` as `v → ν`, `v ≠ ν`; this covers the degrees where the Gamma quotient is singular. -/
 @[dlmf 14.9.E13]
 theorem associatedP_negative_order_parameter_limit (ν : ℂ) (m : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     Tendsto (fun v : ℂ => Gamma (v-m+1)/Gamma (v+m+1)*associatedP v m z) (𝓝[≠] ν) (𝓝 (associatedP ν (-m) z)) := by

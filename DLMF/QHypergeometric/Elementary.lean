@@ -10,14 +10,14 @@ public import DLMF.QHypergeometric.BasicSummations
 /-!
 # q-elementary functions and Carlitz polynomials (DLMF §17.3)
 
-DLMF scales the two q-exponentials by1−q. Their product definitions retain analytic
+DLMF scales the two q-exponentials by 1−q. Their product definitions retain analytic
 continuation, while the series statements below retain their actual convergence domains.
 The existing Jackson calculus, shifted factorials and Gaussian polynomial are reused.
 The q-elementary series use the proved Heine/Euler q-series and Mathlib's even/odd
 HasSum decomposition; all norm bounds retain the original complex convergence domains.
 
 The Carlitz Stirling polynomial is defined by its polynomial recurrence, so the values at
-q=0 and q=1 are removable extensions rather than totalized0/0 values of the closed formula.
+q=0 and q=1 are removable extensions rather than totalized 0/0 values of the closed formula.
 The Eulerian expression likewise uses geometric polynomials at these removable points.
 -/
 
@@ -82,7 +82,8 @@ private lemma qSeries_even_odd {c : ℕ → ℂ} {u v : ℂ} (hu : HasSum c u)
   have hov : (∑' n, c (2*n+1))=(u-v)/2 := by linear_combination (1/2:ℂ)*h1-(1/2:ℂ)*h2
   exact ⟨hev ▸ he,hov ▸ ho⟩
 
-/-- qExp hasSum. -/
+/-- The series `∑_n (1-q)^n x^n/(q;q)_n` of the scaled little q-exponential, for `|(1-q)x| < 1`
+(DLMF 17.3.E1). -/
 @[dlmf 17.3.E1]
 theorem qExp_hasSum {q x : ℂ} (hq : ‖q‖<1) (hx : ‖(1-q)*x‖<1) : HasSum (fun n : ℕ => (1-q)^n*x^n/qPochhammer q q n) (qExp q x) := by
   have hs := (summable_q_binomial_series (a := 0) hq hx).hasSum
@@ -92,7 +93,8 @@ theorem qExp_hasSum {q x : ℂ} (hq : ‖q‖<1) (hx : ‖(1-q)*x‖<1) : HasSum
     simp [qPochhammer_zero_param,mul_pow,div_eq_mul_inv,mul_comm]
   · simp [qExp,qPochhammerInf]
 
-/-- qExpBig hasSum. -/
+/-- The series `∑_n (1-q)^n q^(n(n-1)/2) x^n/(q;q)_n` of the scaled big q-exponential, for all `x`
+(DLMF 17.3.E2). -/
 @[dlmf 17.3.E2]
 theorem qExpBig_hasSum {q : ℂ} (hq : ‖q‖<1) (x : ℂ) : HasSum (fun n : ℕ => (1-q)^n*q^(n.choose 2)*x^n/qPochhammer q q n) (qExpBig q x) := by
   by_cases hq0 : q=0
@@ -118,9 +120,9 @@ theorem qExpBig_hasSum {q : ℂ} (hq : ‖q‖<1) (x : ℂ) : HasSum (fun n : �
       rw [qTri_nat,zpow_natCast,zpow_one,hp]
       have hsign : (-1:ℂ)^n*(-1:ℂ)^n=1 := by rw [← mul_pow]; norm_num
       linear_combination (norm := ring_nf) -(q^(n.choose 2)*(1-q)^n*x^n/qPochhammer q q n)*hsign
-    · simp [qExpBig,neg_mul]
+    · simp [qExpBig]
 
-/-- qSin hasSum. -/
+/-- The odd power series of the little q-sine, for `|(1-q)x| < 1` (DLMF 17.3.E3). -/
 @[dlmf 17.3.E3]
 theorem qSin_hasSum {q x : ℂ} (hq : ‖q‖<1) (hx : ‖(1-q)*x‖<1) : HasSum (fun n : ℕ => (1-q)^(2*n+1)*(-1:ℂ)^n*x^(2*n+1)/qPochhammer q q (2*n+1)) (qSin q x) := by
   have hi : ‖(1-q)*(I*x)‖<1 := by
@@ -144,10 +146,10 @@ theorem qSin_hasSum {q x : ℂ} (hq : ‖q‖<1) (hx : ‖(1-q)*x‖<1) : HasSum
     have hp : (I*x)^(2*n+1)=(-1:ℂ)^n*I*x^(2*n+1) := by
       rw [mul_pow,pow_add,pow_mul,I_sq,pow_one]
     rw [hp]
-    field_simp [qPochhammer_self_ne_zero hq (2*n+1)] <;> ring
+    field_simp [qPochhammer_self_ne_zero hq (2*n+1)]
   · simp [qSin,div_div]
 
-/-- qSinBig hasSum. -/
+/-- The odd power series of the big q-sine, for all `x` (DLMF 17.3.E4). -/
 @[dlmf 17.3.E4]
 theorem qSinBig_hasSum {q : ℂ} (hq : ‖q‖<1) (x : ℂ) : HasSum (fun n : ℕ => (1-q)^(2*n+1)*q^(n*(2*n+1))*(-1:ℂ)^n*x^(2*n+1)/qPochhammer q q (2*n+1)) (qSinBig q x) := by
   have hu := qExpBig_hasSum hq (I*x)
@@ -167,12 +169,13 @@ theorem qSinBig_hasSum {q : ℂ} (hq : ‖q‖<1) (x : ℂ) : HasSum (fun n : �
     rw [hp]
     have hc : (2*n+1).choose 2=n*(2*n+1) := by
       rw [Nat.choose_two_right,show 2*n+1-1=2*n by omega,
-        show (2*n+1)*(2*n)=(n*(2*n+1))*2 by ring,Nat.mul_div_cancel] <;> norm_num
+        show (2*n+1)*(2*n)=(n*(2*n+1))*2 by ring,Nat.mul_div_cancel]
+      norm_num
     rw [hc]
-    field_simp [qPochhammer_self_ne_zero hq (2*n+1)] <;> ring
+    field_simp [qPochhammer_self_ne_zero hq (2*n+1)]
   · simp [qSinBig,div_div]
 
-/-- qCos hasSum. -/
+/-- The even power series of the little q-cosine, for `|(1-q)x| < 1` (DLMF 17.3.E5). -/
 @[dlmf 17.3.E5]
 theorem qCos_hasSum {q x : ℂ} (hq : ‖q‖<1) (hx : ‖(1-q)*x‖<1) : HasSum (fun n : ℕ => (1-q)^(2*n)*(-1:ℂ)^n*x^(2*n)/qPochhammer q q (2*n)) (qCos q x) := by
   have hi : ‖(1-q)*(I*x)‖<1 := by
@@ -198,7 +201,7 @@ theorem qCos_hasSum {q x : ℂ} (hq : ‖q‖<1) (hx : ‖(1-q)*x‖<1) : HasSum
     ring
   · simp [qCos]
 
-/-- qCosBig hasSum. -/
+/-- The even power series of the big q-cosine, for all `x` (DLMF 17.3.E6). -/
 @[dlmf 17.3.E6]
 theorem qCosBig_hasSum {q : ℂ} (hq : ‖q‖<1) (x : ℂ) : HasSum (fun n : ℕ => (1-q)^(2*n)*q^(n*(2*n-1))*(-1:ℂ)^n*x^(2*n)/qPochhammer q q (2*n)) (qCosBig q x) := by
   have hu := qExpBig_hasSum hq (I*x)
@@ -216,7 +219,9 @@ theorem qCosBig_hasSum {q : ℂ} (hq : ‖q‖<1) (x : ℂ) : HasSum (fun n : �
     have hp : (I*x)^(2*n)=(-1:ℂ)^n*x^(2*n) := by rw [mul_pow,pow_mul,I_sq]
     rw [hp]
     have hc : (2*n).choose 2=n*(2*n-1) := by
-      rw [Nat.choose_two_right,show (2*n)*(2*n-1)=(n*(2*n-1))*2 by ring,Nat.mul_div_cancel] <;> norm_num
+      rw [Nat.choose_two_right,show (2*n)*(2*n-1)=(n*(2*n-1))*2 by ring,
+        Nat.mul_div_cancel]
+      norm_num
     rw [hc]
     ring
   · simp [qCosBig]
@@ -288,7 +293,7 @@ lemma qaR4_carlitzG_succ (q : ℂ) (m s : ℕ) :
 
 end qaR4_elementary_helpers
 
-/-- qEulerian closed. -/
+/-- The closed form of Carlitz's Eulerian polynomial for `q ≠ 1` (DLMF 17.3.E8). -/
 @[dlmf 17.3.E8]
 theorem qEulerian_closed {q : ℂ} (hq1 : q≠1) (m s : ℕ) : qEulerian m s q=q^(DLMF.QSeries.TripleProduct.tri ((s:ℤ)-m)+DLMF.QSeries.TripleProduct.tri s)*(∑ j∈range (s+1), (-1:ℂ)^j*q^(j.choose 2)*qBinom q (m+1) j*(1-q^(s-j))^m/(1-q)^m) := by
   unfold qEulerian
@@ -306,7 +311,8 @@ theorem qEulerian_closed {q : ℂ} (hq1 : q≠1) (m s : ℕ) : qEulerian m s q=q
     field_simp]
   ring
 
-/-- qStirling closed. -/
+/-- The closed form of Carlitz's second-kind q-Stirling number for `q ≠ 0`, `|q| < 1` (DLMF
+17.3.E9). -/
 @[dlmf 17.3.E9]
 theorem qStirling_closed {q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (m s : ℕ) : qStirlingSecond q m s=q^(-(s.choose 2:ℤ))*(1-q)^s/qPochhammer q q s*(∑ j∈range (s+1), (-1:ℂ)^j*q^(j.choose 2)*qBinom q s j*(1-q^(s-j))^m/(1-q)^m) := by
   rw [← sum_div]
@@ -345,7 +351,7 @@ theorem qStirling_closed {q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (m s : ℕ) : 
       field_simp
       ring
 
-/-- qEulerian polynomial. -/
+/-- Carlitz's Eulerian expression is a polynomial in `q`. -/
 theorem qEulerian_polynomial (m s : ℕ) : ∃ P : Polynomial ℂ, ∀ q : ℂ, qEulerian m s q=P.eval q := by
   open Polynomial in
   refine ⟨X^((DLMF.QSeries.TripleProduct.tri ((s:ℤ)-m)+DLMF.QSeries.TripleProduct.tri s).toNat)*
@@ -353,7 +359,7 @@ theorem qEulerian_polynomial (m s : ℕ) : ∃ P : Polynomial ℂ, ∀ q : ℂ, 
       (∑ k∈range (s-j), X^k)^m,fun q => ?_⟩
   simp [qEulerian,eval_finsetSum,qaR4_qBinomPoly_eval]
 
-/-- qStirling polynomial. -/
+/-- Carlitz's second-kind q-Stirling number is a polynomial in `q`. -/
 theorem qStirling_polynomial (m s : ℕ) : ∃ P : Polynomial ℂ, ∀ q : ℂ, qStirlingSecond q m s=P.eval q := by
   refine ⟨qaR4_qStirlingPoly m s,fun q => ?_⟩
   induction m generalizing s with
@@ -363,7 +369,7 @@ theorem qStirling_polynomial (m s : ℕ) : ∃ P : Polynomial ℂ, ∀ q : ℂ, 
     | zero => simp [qaR4_qStirlingPoly,qStirlingSecond]
     | succ s => simp [qaR4_qStirlingPoly,qStirlingSecond,ih,Polynomial.eval_finsetSum]
 
-/-- qBernoulli polynomial in qpow. -/
+/-- Carlitz's q-Bernoulli expression `β_n(x,q)` is a polynomial of degree at most `n` in `q^x`. -/
 theorem qBernoulli_polynomial_in_qpow {q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (n : ℕ) : ∃ P : Polynomial ℂ, P.natDegree≤n ∧ ∀ x : ℂ, qBernoulli n x q=P.eval (q^x) := by
   open Polynomial in
   refine ⟨∑ j∈range (n+1), C ((1-q)^((1:ℤ)-n)*((-1:ℂ)^j*(n.choose j:ℂ)*(j+1:ℂ)/(1-q^(j+1))))*X^j,
@@ -378,7 +384,8 @@ theorem qBernoulli_polynomial_in_qpow {q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (
     rw [cpow_nat_mul]
     ring
 
-/-- qBernoulli rational integer argument. -/
+/-- At integer argument Carlitz's q-Bernoulli expression is a rational function of `q` with
+nonvanishing denominator in the punctured unit disk. -/
 theorem qBernoulli_rational_integer_argument (n : ℕ) (x : ℤ) : ∃ P Q : Polynomial ℂ, ∀ q : ℂ, q≠0 → ‖q‖<1 → Q.eval q≠0 ∧ qBernoulli n x q=P.eval q/Q.eval q := by
   classical
   open Polynomial in

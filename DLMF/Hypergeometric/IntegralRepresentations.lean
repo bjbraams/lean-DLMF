@@ -165,7 +165,7 @@ theorem barnes_integral_one_sub {a b c z : ℂ} {σ : ℝ} (hz : ‖z‖ < 1)
     intro y
     have hs : ∀ k : ℕ, -((σ : ℂ) + I * y) ≠ -(k : ℂ) := by
       apply not_neg_nat_of_re_pos; simp; linarith
-    have h := (hasSum_one_sub_cpow_neg (-((σ : ℂ) + I * y)) hz).mul_left
+    have h := (hasSum_poch_div_factorial (β := -((σ : ℂ) + I * y)) hz).mul_left
       (Gamma (a + σ + I * y) * Gamma (b + σ + I * y) * Gamma (c - a - b - σ - I * y) *
         Gamma (-((σ : ℂ) + I * y)))
     rw [neg_neg] at h
@@ -198,7 +198,8 @@ theorem barnes_integral_one_sub {a b c z : ℂ} {σ : ℝ} (hz : ‖z‖ < 1)
     fun_prop
   set e : ℕ → ℝ := fun n => Real.Gamma (n + τ) * (‖z‖ ^ n / n !) with he
   have he_s : Summable e := by
-    have h := (hasSum_one_sub_cpow_neg (τ : ℂ) (z := (‖z‖ : ℂ)) (by simpa using hz)).summable
+    have h := (hasSum_poch_div_factorial (β := (τ : ℂ)) (z := (‖z‖ : ℂ))
+      (by simpa using hz)).summable
     have h' : Summable fun n : ℕ => (ascPochhammer ℝ n).eval τ / n ! * ‖z‖ ^ n := by
       rw [← Complex.summable_ofReal]
       refine h.congr fun n => ?_
@@ -480,7 +481,7 @@ theorem hypSV_hasSum_shift_series (p q r s c A B : ℂ) (hc : 0 < c.re) {x : ℂ
     (P M (mk.1 + mk.2) * ‖x‖ ^ (mk.1 + mk.2) * ‖Gamma ((C : ℂ) + ((mk.1 + mk.2 : ℕ) : ℂ))‖⁻¹)
     with hH
   have hPle {z : ℂ} (hz : ‖z‖ ≤ M) (n : ℕ) : ‖poch z n‖ ≤ P M n :=
-    (norm_poch_le z n).trans (ascPochhammer_eval_mono (norm_nonneg z) hz n)
+    (norm_poch_le z n).trans (poch_eval_mono (norm_nonneg z) hz n)
   have hPadd (m k : ℕ) : P M m * P (M + m) k = P M (m + k) := by
     apply Complex.ofReal_injective
     simp only [hP]
@@ -489,7 +490,7 @@ theorem hypSV_hasSum_shift_series (p q r s c A B : ℂ) (hc : 0 < c.re) {x : ℂ
     have := poch_add (M : ℂ) m k
     simp only [poch] at this
     rw [this]; push_cast; ring
-  have hP0 (y : ℝ) (hy : 0 ≤ y) (n : ℕ) : 0 ≤ P y n := ascPochhammer_eval_nonneg hy n
+  have hP0 (y : ℝ) (hy : 0 ≤ y) (n : ℕ) : 0 ≤ P y n := poch_eval_nonneg hy n
   have hH0 : ∀ mk, 0 ≤ H mk := fun mk => by
     simp only [hH]
     have a1 := hP0 M hM0 mk.1
@@ -509,7 +510,7 @@ theorem hypSV_hasSum_shift_series (p q r s c A B : ℂ) (hc : 0 < c.re) {x : ℂ
     have e2 := hPle (z := q) (by rw [hM]; linarith [norm_nonneg p, norm_nonneg r, norm_nonneg s]) m
     have e3 := hPle (z := r) (by rw [hM]; linarith [norm_nonneg p, norm_nonneg q, norm_nonneg s]) k
     have e4 : ‖poch (s + m) k‖ ≤ P (M + m) k := by
-      refine (norm_poch_le _ k).trans (ascPochhammer_eval_mono (norm_nonneg _) ?_ k)
+      refine (norm_poch_le _ k).trans (poch_eval_mono (norm_nonneg _) ?_ k)
       calc ‖s + m‖ ≤ ‖s‖ + ‖(m : ℂ)‖ := norm_add_le _ _
         _ ≤ M + m := by
           rw [Complex.norm_natCast, hM]; linarith [norm_nonneg p, norm_nonneg q, norm_nonneg r]

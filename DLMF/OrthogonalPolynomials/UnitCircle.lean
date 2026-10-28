@@ -45,14 +45,18 @@ def IsUnitCircleOP (μ : Measure ℂ) (p : ℕ → ℂ[X]) : Prop :=
     (∀ n, 0 < ∫ z, ‖(p n).eval z‖ ^ 2 ∂μ) ∧
     ∀ m n, m ≠ n → ∫ z, (p m).eval z * star ((p n).eval z) ∂μ = 0
 
+/-- The Verblunsky coefficient `α_n = -conj(φ_{n+1}(0))` of a monic OPUC sequence
+(DLMF 18.33.25). -/
 @[dlmf 18.33.E25]
 def verblunskyCoefficient (p : ℕ → ℂ[X]) (n : ℕ) : ℂ := -star ((p (n + 1)).eval 0)
 
+/-- The Szegő–Askey polynomials `∑_k (λ+1)_k (λ)_{n-k} / (k! (n-k)!) zᵏ` (DLMF 18.33.13). -/
 @[dlmf 18.33.E13]
 def szegoAskey (lam : ℂ) (n : ℕ) (z : ℂ) : ℂ :=
   ∑ k ∈ Finset.range (n + 1), poch (lam + 1) k * poch lam (n - k) /
     ((k.factorial : ℂ) * (n - k).factorial) * z ^ k
 
+/-- The `q`-analogue of the Szegő–Askey polynomials (DLMF 18.33.15). -/
 @[dlmf 18.33.E15]
 def szegoAskeyQ (a q : ℂ) (n : ℕ) (z : ℂ) : ℂ :=
   ∑ k ∈ Finset.range (n + 1), qPochhammer (a * q ^ 2) (q ^ 2) k *
@@ -66,9 +70,10 @@ variable {μ : Measure ℂ} {p : ℕ → ℂ[X]}
 /-- The `L²(μ)` inner product of two polynomials. -/
 def ip (μ : Measure ℂ) (f g : ℂ[X]) : ℂ := ∫ z, f.eval z * star (g.eval z) ∂μ
 
+/-- For a measure on the unit circle, `f(z) conj(g(z))` is integrable for polynomials `f, g`. -/
 theorem integrable_eval_mul (h : IsUnitCircleOP μ p) (f g : ℂ[X]) :
     Integrable (fun z => f.eval z * star (g.eval z)) μ := by
-  haveI := h.1
+  have := h.1
   have hc : Continuous fun z => f.eval z * star (g.eval z) :=
     (f.continuous.mul (continuous_star.comp g.continuous))
   obtain ⟨C, hC⟩ := (isCompact_sphere (0 : ℂ) 1).exists_bound_of_continuousOn hc.continuousOn
@@ -76,34 +81,40 @@ theorem integrable_eval_mul (h : IsUnitCircleOP μ p) (f g : ℂ[X]) :
   filter_upwards [h.2.1] with z hz
   exact hC z (by simpa using hz)
 
+/-- The inner product `ip μ` is additive in its first argument. -/
 theorem ip_add_left (h : IsUnitCircleOP μ p) (f g k : ℂ[X]) :
     ip μ (f + g) k = ip μ f k + ip μ g k := by
   unfold ip
   rw [← integral_add (integrable_eval_mul h f k) (integrable_eval_mul h g k)]
   congr 1; funext z; simp [eval_add]; ring
 
+/-- The inner product `ip μ` respects subtraction in its first argument. -/
 theorem ip_sub_left (h : IsUnitCircleOP μ p) (f g k : ℂ[X]) :
     ip μ (f - g) k = ip μ f k - ip μ g k := by
   unfold ip
   rw [← integral_sub (integrable_eval_mul h f k) (integrable_eval_mul h g k)]
   congr 1; funext z; simp [eval_sub]; ring
 
+/-- `⟨c f, k⟩ = c ⟨f, k⟩`. -/
 theorem ip_C_mul_left (f k : ℂ[X]) (c : ℂ) : ip μ (C c * f) k = c * ip μ f k := by
   unfold ip
   rw [← integral_const_mul]
   congr 1; funext z; simp; ring
 
+/-- `⟨f, c k⟩ = conj(c) ⟨f, k⟩`. -/
 theorem ip_C_mul_right (f k : ℂ[X]) (c : ℂ) : ip μ f (C c * k) = star c * ip μ f k := by
   unfold ip
   rw [← integral_const_mul]
   congr 1; funext z; simp; ring
 
+/-- The inner product `ip μ` is additive in its second argument. -/
 theorem ip_add_right (h : IsUnitCircleOP μ p) (f g k : ℂ[X]) :
     ip μ f (g + k) = ip μ f g + ip μ f k := by
   unfold ip
   rw [← integral_add (integrable_eval_mul h f g) (integrable_eval_mul h f k)]
   congr 1; funext z; simp [eval_add]; ring
 
+/-- The inner product `ip μ` commutes with finite sums in its second argument. -/
 theorem ip_sum_right (h : IsUnitCircleOP μ p) (f : ℂ[X]) {ι : Type*} (s : Finset ι)
     (g : ι → ℂ[X]) : ip μ f (∑ i ∈ s, g i) = ∑ i ∈ s, ip μ f (g i) := by
   classical
@@ -111,12 +122,14 @@ theorem ip_sum_right (h : IsUnitCircleOP μ p) (f : ℂ[X]) {ι : Type*} (s : Fi
   | empty => simp [ip]
   | insert a s ha ih => rw [Finset.sum_insert ha, Finset.sum_insert ha, ip_add_right h, ih]
 
+/-- Hermitian symmetry: `⟨g, f⟩ = conj ⟨f, g⟩`. -/
 theorem ip_swap (f g : ℂ[X]) : ip μ g f = star (ip μ f g) := by
   unfold ip
   change _ = (starRingEnd ℂ) _
   rw [← integral_conj]
   congr 1; funext z; simp [mul_comm]
 
+/-- Multiplication by `z` is an isometry on the unit circle: `⟨z f, z g⟩ = ⟨f, g⟩`. -/
 theorem ip_X_mul (h : IsUnitCircleOP μ p) (f g : ℂ[X]) : ip μ (X * f) (X * g) = ip μ f g := by
   unfold ip
   refine integral_congr_ae ?_
@@ -126,8 +139,10 @@ theorem ip_X_mul (h : IsUnitCircleOP μ p) (f g : ℂ[X]) : ip μ (X * f) (X * g
     rw [Complex.star_def, Complex.mul_conj, Complex.normSq_eq_norm_sq, hz]; simp
   linear_combination (f.eval z * star (g.eval z)) * this
 
+/-- `⟨f, 0⟩ = 0`. -/
 theorem ip_zero_right (f : ℂ[X]) : ip μ f 0 = 0 := by simp [ip]
 
+/-- `⟨0, f⟩ = 0`. -/
 theorem ip_zero_left (f : ℂ[X]) : ip μ 0 f = 0 := by simp [ip]
 
 /-- Peeling off the leading term against the monic `p d`. -/
@@ -173,12 +188,14 @@ theorem ip_p_eq_zero (h : IsUnitCircleOP μ p) (m : ℕ) :
 
 end IsUnitCircleOP
 
+/-- The reversed polynomial `f*` of degree `n` has constant term `conj(fₙ)`. -/
 theorem reflectedPolynomial_eval_zero (n : ℕ) (f : ℂ[X]) :
     (reflectedPolynomial n f).eval 0 = star (f.coeff n) := by
   unfold reflectedPolynomial
   rw [eval_finsetSum, Finset.sum_range_succ']
   simp
 
+/-- The reversed polynomial at degree `n` has degree at most `n`. -/
 theorem natDegree_reflectedPolynomial_le (n : ℕ) (f : ℂ[X]) :
     (reflectedPolynomial n f).natDegree ≤ n := by
   unfold reflectedPolynomial
@@ -186,6 +203,7 @@ theorem natDegree_reflectedPolynomial_le (n : ℕ) (f : ℂ[X]) :
   have hk' := Finset.mem_range.mp hk
   exact (natDegree_C_mul_X_pow_le _ _).trans (by omega)
 
+/-- The `j`-th coefficient of `f*` (at degree `n`) is `conj(f_{n-j})` for `j ≤ n`, else `0`. -/
 theorem coeff_reflectedPolynomial (n : ℕ) (f : ℂ[X]) (j : ℕ) :
     (reflectedPolynomial n f).coeff j = if j ≤ n then star (f.coeff (n - j)) else 0 := by
   unfold reflectedPolynomial
@@ -200,14 +218,17 @@ theorem coeff_reflectedPolynomial (n : ℕ) (f : ℂ[X]) (j : ℕ) :
     have := Finset.mem_range.mp hk
     simp only [ite_eq_right_iff]; intro h; omega
 
+/-- Reversal at a fixed degree is additive. -/
 theorem reflectedPolynomial_add (n : ℕ) (f g : ℂ[X]) :
     reflectedPolynomial n (f + g) = reflectedPolynomial n f + reflectedPolynomial n g := by
   ext j; simp only [coeff_add, coeff_reflectedPolynomial]; split_ifs <;> simp
 
+/-- Reversal is conjugate-linear: `(c f)* = conj(c) f*`. -/
 theorem reflectedPolynomial_C_mul (n : ℕ) (c : ℂ) (f : ℂ[X]) :
     reflectedPolynomial n (C c * f) = C (star c) * reflectedPolynomial n f := by
   ext j; simp only [coeff_C_mul, coeff_reflectedPolynomial]; split_ifs <;> simp [mul_comm]
 
+/-- `(z f)*` at degree `n + 1` equals `f*` at degree `n`. -/
 theorem reflectedPolynomial_X_mul {n : ℕ} {f : ℂ[X]} :
     reflectedPolynomial (n + 1) (X * f) = reflectedPolynomial n f := by
   ext j
@@ -218,6 +239,7 @@ theorem reflectedPolynomial_X_mul {n : ℕ} {f : ℂ[X]} :
   · omega
   · rfl
 
+/-- Reversing twice: `(f*)*` at degree `n + 1` is `z f` when `deg f ≤ n`. -/
 theorem reflectedPolynomial_reflectedPolynomial {n : ℕ} {f : ℂ[X]} (hf : f.natDegree ≤ n) :
     reflectedPolynomial (n + 1) (reflectedPolynomial n f) = X * f := by
   ext j
@@ -254,6 +276,7 @@ namespace IsUnitCircleOP
 
 variable {μ : Measure ℂ} {p : ℕ → ℂ[X]}
 
+/-- The monic orthogonal polynomials have nonzero squared norm. -/
 theorem ip_self_ne_zero (h : IsUnitCircleOP μ p) (d : ℕ) : ip μ (p d) (p d) ≠ 0 := by
   have hpos := h.2.2.2.2.1 d
   have heq : ip μ (p d) (p d) = ((∫ z, ‖(p d).eval z‖ ^ 2 ∂μ : ℝ) : ℂ) := by
@@ -309,6 +332,7 @@ theorem ip_reflected_X_pow (h : IsUnitCircleOP μ p) {n j : ℕ} (hj1 : 1 ≤ j)
     field_simp
   rw [key, ip_p_eq_zero h n _ (by rw [natDegree_X_pow]; omega), star_zero]
 
+/-- The Szegő recursion in terms of `φ_{n+1}(0)`: `φ_{n+1} = z φ_n + φ_{n+1}(0) φ_n*`. -/
 theorem szego (h : IsUnitCircleOP μ p) (n : ℕ) :
     p (n + 1) = X * p n + C ((p (n + 1)).eval 0) * reflectedPolynomial n (p n) := by
   set c0 := (p (n + 1)).eval 0
@@ -356,6 +380,7 @@ theorem szego (h : IsUnitCircleOP μ p) (n : ℕ) :
   rw [ht0, mul_zero, hr] at ht
   linear_combination ht
 
+/-- `‖φ_n*‖ = ‖φ_n‖` in `L²(μ)`. -/
 theorem ip_reflected_self (h : IsUnitCircleOP μ p) (n : ℕ) :
     ip μ (reflectedPolynomial n (p n)) (reflectedPolynomial n (p n)) = ip μ (p n) (p n) := by
   have hdeg : (p n).natDegree ≤ n := (h.2.2.1 n).2.le
@@ -369,6 +394,7 @@ theorem ip_reflected_self (h : IsUnitCircleOP μ p) (n : ℕ) :
   have : z ^ n * star z ^ n = 1 := by rw [← mul_pow, hzz, one_pow]
   linear_combination (star ((p n).eval z) * (p n).eval z) * this
 
+/-- `⟨f, f⟩` is the real number `∫ |f|² dμ`. -/
 theorem ip_self_eq_ofReal (h : IsUnitCircleOP μ p) (f : ℂ[X]) :
     ip μ f f = ((∫ z, ‖f.eval z‖ ^ 2 ∂μ : ℝ) : ℂ) := by
   unfold ip
@@ -376,6 +402,7 @@ theorem ip_self_eq_ofReal (h : IsUnitCircleOP μ p) (f : ℂ[X]) :
   congr 1; funext z
   rw [Complex.star_def, Complex.mul_conj, Complex.normSq_eq_norm_sq]
 
+/-- `‖φ_{n+1}‖² = (1 - |φ_{n+1}(0)|²) ‖φ_n‖²`, in inner-product form. -/
 theorem ip_succ_self (h : IsUnitCircleOP μ p) (n : ℕ) :
     ip μ (p (n + 1)) (p (n + 1)) =
       (1 - (p (n + 1)).eval 0 * star ((p (n + 1)).eval 0)) * ip μ (p n) (p n) := by
@@ -401,8 +428,35 @@ theorem ip_succ_self (h : IsUnitCircleOP μ p) (n : ℕ) :
   rw [e1, e2, hR, ip_X_mul h, hRX]
   ring
 
-/-- The norm ratio, as a helper for 18.33.25 and 18.33.26. -/
-lemma norm_ratio_aux (h : IsUnitCircleOP μ p) (n : ℕ) :
+/-- `|a|² = a conj(a)` in `ℂ`. -/
+theorem norm_sq_eq_mul_star (a : ℂ) : (((‖a‖ ^ 2 : ℝ)) : ℂ) = a * star a := by
+  rw [Complex.star_def, Complex.mul_conj, Complex.normSq_eq_norm_sq]
+
+end IsUnitCircleOP
+
+open IsUnitCircleOP
+
+/-- Szegő's recurrence `φ_{n+1}(z) = z φ_n(z) - conj(α_n) φ_n*(z)` (DLMF 18.33.23). -/
+@[dlmf 18.33.E23]
+theorem szego_recurrence {μ : Measure ℂ} {p : ℕ → ℂ[X]} (h : IsUnitCircleOP μ p) (n : ℕ) :
+    p (n + 1) = X * p n - C (star (verblunskyCoefficient p n)) * reflectedPolynomial n (p n) := by
+  rw [szego h n, verblunskyCoefficient, star_neg, star_star, map_neg]
+  ring
+
+/-- The reversed Szegő recurrence `φ_{n+1}* = φ_n* - α_n z φ_n` (DLMF 18.33.24). -/
+@[dlmf 18.33.E24]
+theorem szego_reflected_recurrence {μ : Measure ℂ} {p : ℕ → ℂ[X]} (h : IsUnitCircleOP μ p) (n : ℕ) :
+    reflectedPolynomial (n + 1) (p (n + 1)) = reflectedPolynomial n (p n) -
+      C (verblunskyCoefficient p n) * X * p n := by
+  conv_lhs => rw [szego h n]
+  rw [reflectedPolynomial_add, reflectedPolynomial_X_mul, reflectedPolynomial_C_mul,
+    reflectedPolynomial_reflectedPolynomial (h.2.2.1 n).2.le, verblunskyCoefficient, map_neg]
+  ring
+
+/-- The squared norms of consecutive unit-circle orthogonal polynomials satisfy
+`‖φ_{n+1}‖² = (1 - |α_n|²) ‖φ_n‖²` (DLMF 18.33.26). -/
+@[dlmf 18.33.E26]
+theorem unitCircle_norm_ratio {μ : Measure ℂ} {p : ℕ → ℂ[X]} (h : IsUnitCircleOP μ p) (n : ℕ) :
     (∫ z, ‖(p (n + 1)).eval z‖ ^ 2 ∂μ) =
       (1 - ‖verblunskyCoefficient p n‖ ^ 2) * ∫ z, ‖(p n).eval z‖ ^ 2 ∂μ := by
   have h1 := ip_succ_self h n
@@ -414,32 +468,11 @@ lemma norm_ratio_aux (h : IsUnitCircleOP μ p) (n : ℕ) :
   rw [hc] at h1
   exact_mod_cast h1
 
-theorem norm_sq_eq_mul_star (a : ℂ) : (((‖a‖ ^ 2 : ℝ)) : ℂ) = a * star a := by
-  rw [Complex.star_def, Complex.mul_conj, Complex.normSq_eq_norm_sq]
-
-end IsUnitCircleOP
-
-open IsUnitCircleOP
-
-@[dlmf 18.33.E23]
-theorem szego_recurrence {μ : Measure ℂ} {p : ℕ → ℂ[X]} (h : IsUnitCircleOP μ p) (n : ℕ) :
-    p (n + 1) = X * p n - C (star (verblunskyCoefficient p n)) * reflectedPolynomial n (p n) := by
-  rw [szego h n, verblunskyCoefficient, star_neg, star_star, map_neg]
-  ring
-
-@[dlmf 18.33.E24]
-theorem szego_reflected_recurrence {μ : Measure ℂ} {p : ℕ → ℂ[X]} (h : IsUnitCircleOP μ p) (n : ℕ) :
-    reflectedPolynomial (n + 1) (p (n + 1)) = reflectedPolynomial n (p n) -
-      C (verblunskyCoefficient p n) * X * p n := by
-  conv_lhs => rw [szego h n]
-  rw [reflectedPolynomial_add, reflectedPolynomial_X_mul, reflectedPolynomial_C_mul,
-    reflectedPolynomial_reflectedPolynomial (h.2.2.1 n).2.le, verblunskyCoefficient, map_neg]
-  ring
-
+/-- The Verblunsky coefficients satisfy `|α_n| < 1` (DLMF 18.33.25). -/
 @[dlmf 18.33.E25]
 theorem verblunskyCoefficient_norm_lt_one {μ : Measure ℂ} {p : ℕ → ℂ[X]} (h : IsUnitCircleOP μ p) (n : ℕ) :
     ‖verblunskyCoefficient p n‖ < 1 := by
-  have h1 := norm_ratio_aux h n
+  have h1 := unitCircle_norm_ratio h n
   have hp1 := h.2.2.2.2.1 (n + 1)
   have hp0 := h.2.2.2.2.1 n
   have hlt : ‖verblunskyCoefficient p n‖ ^ 2 < 1 := by
@@ -450,12 +483,8 @@ theorem verblunskyCoefficient_norm_lt_one {μ : Measure ℂ} {p : ℕ → ℂ[X]
   have := norm_nonneg (verblunskyCoefficient p n)
   nlinarith
 
-@[dlmf 18.33.E26]
-theorem unitCircle_norm_ratio {μ : Measure ℂ} {p : ℕ → ℂ[X]} (h : IsUnitCircleOP μ p) (n : ℕ) :
-    (∫ z, ‖(p (n + 1)).eval z‖ ^ 2 ∂μ) =
-      (1 - ‖verblunskyCoefficient p n‖ ^ 2) * ∫ z, ‖(p n).eval z‖ ^ 2 ∂μ := by
-  exact norm_ratio_aux h n
-
+/-- The inverse Szegő recurrence `(1 - |α_n|²) z φ_n = φ_{n+1} + conj(α_n) φ_{n+1}*`
+(DLMF 18.33.27). -/
 @[dlmf 18.33.E27]
 theorem inverse_szego_recurrence {μ : Measure ℂ} {p : ℕ → ℂ[X]} (h : IsUnitCircleOP μ p) (n : ℕ) :
     C (1 - ((‖verblunskyCoefficient p n‖ ^ 2 : ℝ) : ℂ)) * X * p n = p (n + 1) +
@@ -466,6 +495,8 @@ theorem inverse_szego_recurrence {μ : Measure ℂ} {p : ℕ → ℂ[X]} (h : Is
   simp only [map_sub, map_one, map_mul]
   ring
 
+/-- The inverse reversed recurrence `(1 - |α_n|²) φ_n* = φ_{n+1}* + α_n φ_{n+1}`
+(DLMF 18.33.28). -/
 @[dlmf 18.33.E28]
 theorem inverse_reflected_szego_recurrence {μ : Measure ℂ} {p : ℕ → ℂ[X]} (h : IsUnitCircleOP μ p) (n : ℕ) :
     C (1 - ((‖verblunskyCoefficient p n‖ ^ 2 : ℝ) : ℂ)) * reflectedPolynomial n (p n) =
@@ -476,6 +507,8 @@ theorem inverse_reflected_szego_recurrence {μ : Measure ℂ} {p : ℕ → ℂ[X
   simp only [map_sub, map_one, map_mul]
   ring
 
+/-- The three-term recurrence of monic OPUC eliminating the reversed polynomials
+(DLMF 18.33.30). -/
 @[dlmf 18.33.E30]
 theorem unitCircle_three_term_recurrence {μ : Measure ℂ} {p : ℕ → ℂ[X]} (h : IsUnitCircleOP μ p) (n : ℕ) :
     C (star (verblunskyCoefficient p n)) * p (n + 2) =
@@ -488,17 +521,22 @@ theorem unitCircle_three_term_recurrence {μ : Measure ℂ} {p : ℕ → ℂ[X]}
   linear_combination (C (star (verblunskyCoefficient p n))) * e23 +
     (C (star (verblunskyCoefficient p (n + 1)))) * e27
 
+/-- Verblunsky's theorem: every sequence in the open unit disk is the sequence of Verblunsky
+coefficients of a unique probability measure on the unit circle (DLMF 18.33(vi)). -/
 @[dlmf 18.33.vi]
 theorem verblunsky_theorem (a : ℕ → ℂ) (ha : ∀ n, ‖a n‖ < 1) :
     ∃! μ : Measure ℂ, ∃ p : ℕ → ℂ[X], IsUnitCircleOP μ p ∧ verblunskyCoefficient p = a := by
   sorry
 
+/-- Orthogonality of the Szegő–Askey polynomials for the weight `(1 - cos θ)^λ` on the
+unit circle (DLMF 18.33.14). -/
 @[dlmf 18.33.E14]
 theorem szegoAskey_orthogonal {lam : ℝ} (hlam : -1 / 2 < lam) {m n : ℕ} (hmn : m ≠ n) :
     ∫ θ : ℝ in (0 : ℝ)..(2 * Real.pi), szegoAskey lam m (exp (I * θ)) *
       star (szegoAskey lam n (exp (I * θ))) * (Real.rpow (1 - Real.cos θ) lam : ℂ) = 0 := by
   sorry
 
+/-- Orthogonality of the `q`-Szegő–Askey polynomials on the unit circle (DLMF 18.33.16). -/
 @[dlmf 18.33.E16]
 theorem szegoAskeyQ_orthogonal {a q : ℝ} (hq : 0 < q) (hq1 : q < 1) (ha : |a * q| < 1) {m n : ℕ} (hmn : m ≠ n) :
     ∫ θ : ℝ in (0 : ℝ)..(2 * Real.pi), szegoAskeyQ a q m (exp (I * θ)) *

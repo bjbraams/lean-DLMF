@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import ComplexAnalysis.Pow
 public import DLMF.Confluent.Whittaker
 public import DLMF.Confluent.MobiusTaylor
 
@@ -44,18 +45,6 @@ theorem ball_norm_subset_slitPlane {x : ℂ} (hx : 0 < x.re) :
   simp only [normSq_apply, sub_re, sub_im, h.2, zero_sub, neg_mul_neg] at hs
   nlinarith [mul_nonpos_of_nonpos_of_nonneg h.1 hx.le, sq_nonneg w.re]
 
-/-- Principal powers multiply without a branch correction when both factors
-lie in the right half-plane. -/
-theorem cpow_mul_of_re_pos {u v : ℂ} (hu : 0 < u.re) (hv : 0 < v.re) (s : ℂ) :
-    (u * v) ^ s = u ^ s * v ^ s := by
-  have hu0 := slitPlane_ne_zero (Or.inl hu : u ∈ slitPlane)
-  have hv0 := slitPlane_ne_zero (Or.inl hv : v ∈ slitPlane)
-  have hua := abs_lt.mp (abs_arg_lt_pi_div_two_iff.mpr (Or.inl hu))
-  have hva := abs_lt.mp (abs_arg_lt_pi_div_two_iff.mpr (Or.inl hv))
-  rw [cpow_def_of_ne_zero (mul_ne_zero hu0 hv0), cpow_def_of_ne_zero hu0,
-    cpow_def_of_ne_zero hv0, log_mul hu0 hv0 ⟨by linarith, by linarith⟩, ← exp_add]
-  congr 1; ring
-
 /-- The power factor in the downward-parameter Taylor formulas. -/
 theorem cpow_add_shift_factor {x y : ℂ} (hx : 0 < x.re) (hy : ‖y‖ < ‖x‖)
     (b : ℂ) (n : ℕ) :
@@ -70,7 +59,7 @@ theorem cpow_add_shift_factor {x y : ℂ} (hx : 0 < x.re) (hy : ‖y‖ < ‖x�
     simp only [add_re, one_re]
     linarith
   have hp : (x + y) ^ (1 - b) = ((x + y) / x) ^ (1 - b) * x ^ (1 - b) := by
-    rw [← cpow_mul_of_re_pos hr hx, div_mul_cancel₀ _ hx0]
+    rw [← Complex.mul_cpow_of_re_pos hr hx, div_mul_cancel₀ _ hx0]
   rw [hp, mul_assoc, ← cpow_add _ _ hx0,
     show 1 - b + (b - (n : ℂ) - 1) = -(n : ℂ) by ring, cpow_neg, cpow_natCast]
   rfl
@@ -90,7 +79,7 @@ theorem re_add_div_pos {x y : ℂ} (hyx : ‖y‖ < ‖x‖) : 0 < ((x + y) / x)
 theorem add_cpow_eq_div_cpow_mul {x y : ℂ} (hx : 0 < x.re) (hyx : ‖y‖ < ‖x‖) (s : ℂ) :
     (x + y) ^ s = ((x + y) / x) ^ s * x ^ s := by
   have hx0 := slitPlane_ne_zero (Or.inl hx : x ∈ slitPlane)
-  rw [← cpow_mul_of_re_pos (re_add_div_pos hyx) hx, div_mul_cancel₀ _ hx0]
+  rw [← Complex.mul_cpow_of_re_pos (re_add_div_pos hyx) hx, div_mul_cancel₀ _ hx0]
 
 /-- `x^{n/2} = (x^{1/2})^n`. -/
 theorem cpow_nat_div_two (x : ℂ) (n : ℕ) : x ^ ((n : ℂ) / 2) = (x ^ (1 / 2 : ℂ)) ^ n := by
@@ -183,7 +172,7 @@ theorem cpow_first_parameter_prefactor {x y : ℂ} (hx : 0 < x.re)
   have harg : ((x + y) / x).arg ≠ Real.pi := by
     have := abs_lt.mp (abs_arg_lt_pi_div_two_iff.mpr (Or.inl hr)); linarith [Real.pi_pos]
   have hp : (x + y) ^ s = ((x + y) / x) ^ s * x ^ s := by
-    rw [← cpow_mul_of_re_pos hr hx, div_mul_cancel₀ _ hx0]
+    rw [← Complex.mul_cpow_of_re_pos hr hx, div_mul_cancel₀ _ hx0]
   rw [hp, show x / (x + y) = ((x + y) / x)⁻¹ from (inv_div _ _).symm,
     inv_cpow _ _ harg, ← cpow_neg, mul_right_comm _ (x ^ s), ← cpow_add _ _ hr0,
     sub_eq_add_neg]

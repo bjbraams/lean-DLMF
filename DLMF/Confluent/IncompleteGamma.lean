@@ -158,7 +158,7 @@ theorem lowerIncGamma_add_upperIncGamma {a : ℂ} (ha : ∀ k : ℕ, a ≠ -k) {
         (by fun_prop : Continuous fun c : ℂ => (c, c + 1, -z))).continuousAt (x := a)
       exact hG.sub ((hG.mul (continuousAt_const_cpow hz)).mul hM)
     · rw [upperIncGamma_eq_Gamma_sub_of_mem hc z,
-        lowerIncGamma_eq_regularized (nonpole_of_intCompl hc)]
+        lowerIncGamma_eq_regularized (not_neg_nat_of_mem_integerComplement hc)]
   rw [key, lowerIncGamma_eq_regularized ha]
   ring
 

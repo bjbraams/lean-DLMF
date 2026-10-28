@@ -25,6 +25,7 @@ basis change and Gamma-shift formula reuse `HahnMoments`, avoiding a second proo
 
 open Complex Filter Set MeasureTheory
 open scoped Real Topology Nat
+open DLMF.Gamma (Gamma_add_nat_eq_poch_mul_Gamma)
 noncomputable section
 namespace DLMF.OrthogonalPolynomials.PollaczekMoments
 /-- A rescaled Gamma pair, suited to the existing half-plane Mellin--Barnes API. -/
@@ -287,14 +288,15 @@ theorem mixed_moment {lam θ : ℝ} (hlam : 0 < lam) (hθ : |θ| < π) (k j : �
     push_cast
     rw [show (lam:ℂ)+k+I*x = ((lam:ℂ)+I*x)+k by ring,
       show (lam:ℂ)+j-I*x = ((lam:ℂ)-I*x)+j by ring,
-      HahnMoments.gamma_shift (by simpa using hlam), HahnMoments.gamma_shift (by simpa using hlam)]
+      Gamma_add_nat_eq_poch_mul_Gamma (by simpa using hlam),
+      Gamma_add_nat_eq_poch_mul_Gamma (by simpa using hlam)]
     ring
   simp_rw [he]
   refine ⟨integrable_tilted_Gamma (by positivity) (by positivity) hθ, ?_⟩
   rw [tilted_Gamma_integral (by positivity) (by positivity) hθ]
   push_cast
   rw [show (lam:ℂ)+k+((lam:ℂ)+j) = (2*(lam:ℂ)+j)+k by ring,
-    HahnMoments.gamma_shift (by simp; positivity)]
+    Gamma_add_nat_eq_poch_mul_Gamma (by simp; positivity)]
   have hexp : exp (I*θ*((lam:ℂ)+k-((lam:ℂ)+j))/2) =
       exp (-I*θ*j/2)*phase θ^k := by
     dsimp only [phase]

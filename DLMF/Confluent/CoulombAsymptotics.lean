@@ -83,6 +83,7 @@ theorem hasAsymptoticExpansion_ray_cpow_mul_kummerU (a b : ℂ) {c : ℂ} (hc : 
     field_simp
     rw [← pow_mul, pow_mul', neg_one_sq, one_pow, one_mul]
 
+/-- `2i ≠ 0`. -/
 theorem two_I_ne_zero : (2 * I : ℂ) ≠ 0 := mul_ne_zero two_ne_zero I_ne_zero
 
 /-- **Asymptotic expansion of `H^+_ℓ`** (DLMF 33.11.1, upper signs):

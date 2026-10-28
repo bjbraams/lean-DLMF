@@ -85,6 +85,8 @@ private def saalCert (q r s : ℂ) (n : ℕ) (x : ℂ) : ℕ → ℂ
       qPochhammer s q (k + 1) * qPochhammer (x * q) q (n - k) *
       qPochhammer (x * r * s * q ^ (k + 1)) q (n - k))
 
+/-- One step of the recursion in `n` for the `q`-Saalschütz sum, as a telescoping difference
+of `saalCert`. -/
 private lemma saal_step (q r s x : ℂ) (n m : ℕ) (hm : m ≤ n + 1) :
     saalTerm q r s (n + 1) x m - (1 - x * r) * (1 - x * s) * saalTerm q r s n (x * q) m =
       saalCert q r s n x (m + 1) - saalCert q r s n x m := by
@@ -148,6 +150,7 @@ theorem sum_qBinom_saalschutz (q x r s : ℂ) (n : ℕ) :
       show x * q * r = x * r * q by ring, show x * q * s = x * s * q by ring]
     ring
 
+/-- If `(x;q)_n ≠ 0` then `(x;q)_m ≠ 0` for every `m ≤ n`. -/
 theorem qPochhammer_ne_zero_of_le {x q : ℂ} {m n : ℕ} (h : qPochhammer x q n ≠ 0) (hm : m ≤ n) :
     qPochhammer x q m ≠ 0 := by
   obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le hm

@@ -425,6 +425,7 @@ lemma p3m_wronskian_alg {F1 F2 P1 P2 R1 R2 m1 m2 q1 q2 : ℂ} {u v h2 B : ℝ} (
   have : v / 2 * (4 * (B * (B * u))) = 2 * h2 * B ^ 2 := by rw [← huv]; ring
   nlinarith [sq_nonneg B, mul_nonneg hu (sq_nonneg B)]
 
+/-- If `‖F‖ ≤ b` and `‖F - m‖ ≤ b u/2` with `u ≤ 2`, then `‖m‖ ≤ 2b`. -/
 lemma p3m_main_bound {F m : ℂ} {b u : ℝ} (hb : 0 ≤ b) (hu2 : u ≤ 2) (hF : ‖F‖ ≤ b)
     (hFm : ‖F - m‖ ≤ b * (u / 2)) : ‖m‖ ≤ 2 * b := by
   have := norm_sub_le F (F - m)
@@ -465,6 +466,7 @@ lemma p3m_assemble {F1 F2 G1a G1c G2a G2c H1a H1c H2a H2c m1 m2 m1a m1c m2a m2c 
   · have := sub_b r1a r1c; linarith
   · have := sub_b r2a r2c; linarith
 
+/-- The tail-bound constant `p3m_L` is nonnegative. -/
 lemma p3m_L_nonneg {Cc K C : ℝ} (hCc : 0 ≤ Cc) (hK : 0 ≤ K) (hC : 0 ≤ C) (β : ℤ) :
     0 ≤ p3m_L Cc K C β := by
   unfold p3m_L
@@ -510,6 +512,7 @@ lemma p3m_main_term (ν : ℂ) {h : ℝ} (hh : 0 < h) (c : ℤ → ℂ) (n : ℤ
     rw [hb]; field_simp
   linear_combination ((((-1 : ℂ) ^ n * c n * p2m_Jz h x 0) ^ 2) / 2) * hb'
 
+/-- `((-1)^n)² = 1` for an integer `n`. -/
 lemma p3m_negOnePow_zpow_sq (n : ℤ) : ((-1 : ℂ) ^ n) ^ 2 = 1 := by
   rw [← zpow_natCast, ← zpow_mul, mul_comm, zpow_mul]; norm_num
 

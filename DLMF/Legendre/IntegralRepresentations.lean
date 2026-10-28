@@ -242,7 +242,9 @@ theorem legInt_associatedP_pfaff (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane
   ring
 
 /-- DLMF 14.25.1, proved by the substitution `s = tanh²(t/2)`, Euler's integral and Pfaff. -/
-theorem legInt_associatedP_complex_integral {ν μ : ℂ} (h0 : -1 < ν.re) (h1 : ν.re < μ.re) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+@[dlmf 14.25.E1]
+theorem associatedP_complex_integral {ν μ : ℂ} (h0 : -1 < ν.re) (h1 : ν.re < μ.re) {z : ℂ} (hz :
+    z-1 ∈ slitPlane) :
     HasIntegralAtTop (fun t : ℝ => legendreBranchPower μ z/(2^ν*Gamma (μ-ν)*Gamma (ν+1))*((Real.sinh t:ℂ)^(2*ν+1)/(z+Real.cosh t)^(ν+μ+1))) 0 (associatedP ν (-μ) z) := by
   have hz1' : z+1 ∈ slitPlane := by simpa [add_comm] using one_add_mem_slitPlane_of_sub_one hz
   have hA0 : z + 1 ≠ 0 := slitPlane_ne_zero hz1'
@@ -417,20 +419,6 @@ theorem legInt_zeta_mem_slitPlane {z : ℂ} (hz : z-1 ∈ slitPlane) : legInt_ze
 
 /-! ### DLMF 14.25.2 -/
 
-/-- Splitting a principal power of a product of two factors in the right half-plane. -/
-theorem legInt_cpow_mul_of_re {A B : ℂ} (hA : 0 < A.re) (hB : 0 < B.re) (p : ℂ) :
-    (A * B) ^ p = A ^ p * B ^ p := by
-  have hA0 : A ≠ 0 := fun h => by simp [h] at hA
-  have hB0 : B ≠ 0 := fun h => by simp [h] at hB
-  have h1 := abs_arg_lt_pi_div_two_iff.mpr (Or.inl hA)
-  have h2 := abs_arg_lt_pi_div_two_iff.mpr (Or.inl hB)
-  have hlog : log (A * B) = log A + log B := by
-    rw [log_mul_eq_add_log_iff hA0 hB0]
-    rw [abs_lt] at h1 h2
-    constructor <;> linarith [Real.pi_pos]
-  rw [cpow_def_of_ne_zero (mul_ne_zero hA0 hB0), cpow_def_of_ne_zero hA0, cpow_def_of_ne_zero hB0,
-    hlog, add_mul, exp_add]
-
 /-- `z + √(z²-1) cosh t = ζ⁻¹ ((cosh t + 1)/2) (1 - ζ² s)`, split into principal powers. -/
 theorem legInt_cpow_root_cosh {z : ℂ} (hz : z-1 ∈ slitPlane) {t : ℝ} (ht : 0 < t) (p : ℂ) :
     (z + legInt_root z * Real.cosh t) ^ p = ((legInt_zeta z) ^ p)⁻¹ *
@@ -466,7 +454,7 @@ theorem legInt_cpow_root_cosh {z : ℂ} (hz : z-1 ∈ slitPlane) {t : ℝ} (ht :
   rw [halg, legInt_cpow_mul_of_im (Or.inl hr) hW0 (Or.inl (by simp)) p]
   have hsplit : (ζ⁻¹ * B)^p = (ζ⁻¹)^p * B^p := by
     rcases lt_or_ge 0 ζ.re with h | h
-    · refine legInt_cpow_mul_of_re ?_ hBre p
+    · refine Complex.mul_cpow_of_re_pos ?_ hBre p
       rw [inv_re]; exact div_pos h (normSq_pos.mpr hζ0)
     · have him : ζ.im ≠ 0 := by
         rcases mem_slitPlane_iff.mp hζs with h' | h'
@@ -626,7 +614,9 @@ theorem legInt_olverQ_eq_QForm (ν μ : ℂ) (hc : ∀ k : ℕ, ν + 3/2 ≠ -(k
   exact legInt_olverQ_eq_QForm_real ν μ hc ht
 
 /-- DLMF 14.25.2, proved by the substitution `s = tanh²(t/2)`, Euler's integral and the `ζ`-form. -/
-theorem legInt_olverQ_complex_integral {ν μ : ℂ} (h0 : -1/2 < μ.re) (h1 : μ.re < (ν+1).re) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+@[dlmf 14.25.E2]
+theorem olverQ_complex_integral {ν μ : ℂ} (h0 : -1/2 < μ.re) (h1 : μ.re < (ν+1).re) {z : ℂ} (hz :
+    z-1 ∈ slitPlane) :
     HasIntegralAtTop (fun t : ℝ => Real.sqrt π*legendreBranchPower μ z/(2^μ*Gamma (μ+1/2)*Gamma (ν-μ+1))*((Real.sinh t:ℂ)^(2*μ)/(z+exp ((log (z-1)+log (z+1))/2)*Real.cosh t)^(ν+μ+1))) 0 (olverQ ν μ z) := by
   have hx : (legInt_zeta z)^2 ∈ cutPlane := by
     refine mem_cutPlane_of_norm_lt_one ?_
@@ -1107,7 +1097,8 @@ theorem ferrersP_mehler_dirichlet {μ : ℂ} (hμ : μ.re < 1/2) (ν : ℂ) {θ 
   rw [← he]
   field_simp
 
-/-- ferrersP fractional integral. -/
+/-- DLMF 14.12.2: for `Re μ > 0` and `-1 < x < 1`, `𝖯^{−μ}_ν(x) = (1−x²)^{−μ/2}/Γ(μ) ∫_x^1 𝖯_ν(t)
+(t−x)^{μ−1} dt`. -/
 @[dlmf 14.12.E2]
 theorem ferrersP_fractional_integral {μ : ℂ} (hμ : 0 < μ.re) (ν : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersP ν (-μ) x=(1-x^2:ℂ)^(-μ/2)/Gamma μ*∫ t : ℝ in x..1, ferrersP ν 0 t*(t-x:ℂ)^(μ-1) := by
@@ -1167,7 +1158,8 @@ theorem ferrersP_fractional_integral {μ : ℂ} (hμ : 0 < μ.re) (ν : ℂ) {x 
   rw [show (-μ)/2 = -μ/2 by ring, hpow]
   field_simp
 
-/-- associatedP fractional integral. -/
+/-- DLMF 14.12.5: for `Re μ > 0` and `x > 1`, `P^{−μ}_ν(x) = (x²−1)^{−μ/2}/Γ(μ) ∫_1^x P_ν(t)
+(x−t)^{μ−1} dt`. -/
 @[dlmf 14.12.E5]
 theorem associatedP_fractional_integral {μ : ℂ} (hμ : 0 < μ.re) (ν : ℂ) {x : ℝ} (hx : 1 < x) :
     associatedP ν (-μ) x=(x^2-1:ℂ)^(-μ/2)/Gamma μ*∫ t : ℝ in 1..x, associatedP ν 0 t*(x-t:ℂ)^(μ-1) := by
@@ -1221,11 +1213,13 @@ theorem associatedP_cosh_integral {ν μ : ℂ} (hν : LegendreQRegular ν μ) (
     HasIntegralAtTop (fun t : ℝ => Real.sqrt 2*Gamma (μ+1/2)*(x^2-1:ℂ)^(μ/2)/(Real.sqrt π*Gamma (ν+μ+1)*Gamma (μ-ν))*cosh ((ν+1/2)*t)/(x+Real.cosh t:ℂ)^(μ+1/2)) 0 (associatedP ν (-μ) x) :=
   legInt_associatedP_cosh_integral h hconv hx
 
-/-- olverQ real integral. -/
+/-- DLMF 14.12.6: for `−1/2 < Re μ < Re ν + 1` and `x > 1`, `𝑸^μ_ν(x) = π^{1/2} (x²−1)^{μ/2}/(2^μ
+Γ(μ+1/2) Γ(ν−μ+1)) ∫_0^∞ sinh^{2μ} t/(x + (x²−1)^{1/2} cosh t)^{ν+μ+1} dt`, as an improper integral
+over `(0, ∞)`. -/
 @[dlmf 14.12.E6]
 theorem olverQ_real_integral {ν μ : ℂ} (h0 : -1/2 < μ.re) (h1 : μ.re < (ν+1).re) {x : ℝ} (hx : 1 < x) :
     HasIntegralAtTop (fun t : ℝ => Real.sqrt π*(x^2-1:ℂ)^(μ/2)/(2^μ*Gamma (μ+1/2)*Gamma (ν-μ+1))*(Real.sinh t:ℂ)^(2*μ)/(x+Real.sqrt (x^2-1)*Real.cosh t:ℂ)^(ν+μ+1)) 0 (olverQ ν μ x) := by
-  have h := legInt_olverQ_complex_integral h0 h1 (legInt_one_lt_mem hx)
+  have h := olverQ_complex_integral h0 h1 (legInt_one_lt_mem hx)
   have hr : exp ((log ((x:ℂ)-1)+log ((x:ℂ)+1))/2) = (Real.sqrt (x^2-1) : ℂ) := by
     have := legInt_zeta_real hx
     rw [legInt_zeta, legInt_root] at this
@@ -1235,7 +1229,8 @@ theorem olverQ_real_integral {ν μ : ℂ} (h0 : -1/2 < μ.re) (h1 : μ.re < (ν
   convert h using 3 with t
   ring
 
-/-- associatedP fourier integral. -/
+/-- DLMF 14.12.7: for `m ∈ ℕ` and `x > 1`, `P^m_ν(x) = ((ν+1)_m/π) ∫_0^π (x + (x²−1)^{1/2} cos θ)^ν
+cos(mθ) dθ`. -/
 @[dlmf 14.12.E7]
 theorem associatedP_fourier_integral (ν : ℂ) (m : ℕ) {x : ℝ} (hx : 1 < x) :
     associatedP ν m x=poch (ν+1) m/π*∫ θ : ℝ in 0..π, (x+Real.sqrt (x^2-1)*Real.cos θ:ℂ)^ν*Real.cos (m*θ) := by
@@ -1290,7 +1285,8 @@ theorem associatedP_fourier_integral (ν : ℂ) (m : ℕ) {x : ℝ} (hx : 1 < x)
         - poch (ν+1) k*(ν+1+k)/π * hr
   rw [(key m).1, legInt_L]; push_cast; rfl
 
-/-- associatedP nat integral. -/
+/-- DLMF 14.12.8: for integers `0 ≤ m ≤ n` and `x > 1`, `P^m_n(x) = 2^m m! (n+m)!
+(x²−1)^{m/2}/((2m)! (n−m)! π) ∫_0^π (x + (x²−1)^{1/2} cos θ)^{n−m} sin^{2m} θ dθ`. -/
 @[dlmf 14.12.E8]
 theorem associatedP_nat_integral (n m : ℕ) (hmn : m ≤ n) {x : ℝ} (hx : 1 < x) :
     associatedP n m x=2^m*(m.factorial:ℂ)*(n+m).factorial*(x^2-1:ℂ)^((m:ℂ)/2)/(((2*m).factorial:ℂ)*(n-m).factorial*π)*∫ θ : ℝ in 0..π, (x+Real.sqrt (x^2-1)*Real.cos θ:ℂ)^(n-m)*(Real.sin θ:ℂ)^(2*m) := by
@@ -1311,12 +1307,14 @@ theorem associatedP_nat_integral (n m : ℕ) (hmn : m ≤ n) {x : ℝ} (hx : 1 <
     show m+p+m = 2*m+p by ring]
   ring
 
-/-- legendreUCoordinate. -/
+/-- DLMF 14.12.10: the upper limit `u = ½ ln((x+1)/(x−1))` (for `x > 1`) used in 14.12.9 and in the
+uniform expansions of 14.15(ii). -/
 @[dlmf 14.12.E10]
 def legendreUCoordinate (x : ℝ) : ℝ :=
   1/2*Real.log ((x+1)/(x-1))
 
-/-- olverQ nat finite integral. -/
+/-- DLMF 14.12.9: for `m, n ∈ ℕ` and `x > 1`, `𝑸^m_n(x) = (1/n!) ∫_0^u (x − (x²−1)^{1/2} cosh t)^n
+cosh(mt) dt`, where `u = ½ ln((x+1)/(x−1))` (`legendreUCoordinate`). -/
 @[dlmf 14.12.E9]
 theorem olverQ_nat_finite_integral (n m : ℕ) {x : ℝ} (hx : 1 < x) :
     olverQ n m x=1/(n.factorial:ℂ)*∫ t : ℝ in 0..legendreUCoordinate x, (x-Real.sqrt (x^2-1)*Real.cosh t:ℂ)^n*Real.cosh (m*t) := by
@@ -1372,7 +1370,8 @@ theorem olverQ_nat_finite_integral (n m : ℕ) {x : ℝ} (hx : 1 < x) :
         hr/(n.factorial:ℂ)
   rw [(key m).1]; ring
 
-/-- olverQ nat interval integral. -/
+/-- DLMF 14.12.11: for `m, n ∈ ℕ` and `x > 1`, `𝑸^m_n(x) = (x²−1)^{m/2}/(2^{n+1} n!) ∫_{−1}^1
+(1−t²)^n/(x−t)^{n+m+1} dt`. -/
 @[dlmf 14.12.E11]
 theorem olverQ_nat_interval_integral (n m : ℕ) {x : ℝ} (hx : 1 < x) :
     olverQ n m x=(x^2-1:ℂ)^((m:ℂ)/2)/(2^(n+1)*(n.factorial:ℂ))*∫ t : ℝ in -1..1, (1-t^2:ℂ)^n/(x-t:ℂ)^(n+m+1) := by
@@ -1443,11 +1442,6 @@ theorem olverQ_nat_interval_integral (n m : ℕ) {x : ℝ} (hx : 1 < x) :
 
 /-! ### Helpers for DLMF 14.12.12 (prefix `legIR_`) -/
 
-/-- For real `t > 1`, `t - 1` lies in the slit plane. -/
-theorem legIR_sub_one_mem {t : ℝ} (ht : 1 < t) : (t:ℂ) - 1 ∈ slitPlane := by
-  rw [show (t:ℂ)-1 = ((t-1:ℝ):ℂ) by push_cast; ring]
-  exact ofReal_mem_slitPlane.2 (by linarith)
-
 /-- A terminating `₂F₁(-N,-n;c+1;w)` sum with `w ≥ 0` has real part at least `1`. -/
 theorem legIR_sum_re_ge (N n c : ℕ) {w : ℝ} (hw : 0 ≤ w) :
     1 ≤ (∑ k ∈ Finset.range (N+1), gaussHGCoeff (-(N:ℂ)) (-(n:ℂ)) ((c:ℂ)+1) k * (w:ℂ)^k).re := by
@@ -1488,7 +1482,7 @@ theorem legIR_norm_associatedP_ge (n m : ℕ) (hmn : m ≤ n) : ∃ C > 0, ∀ t
     have := congrArg re h; simp at this; linarith
   have hΓ : Gamma ((m:ℂ)+1) ≠ 0 := Gamma_ne_zero (fun k h => hc k h)
   refine ⟨‖K‖ / ‖Gamma ((m:ℂ)+1)‖, by positivity, fun t ht => ?_⟩
-  have hs := legIR_sub_one_mem ht
+  have hs := legInt_one_lt_mem ht
   rw [associatedP_integer_hypergeometric_8 _ m hs]
   have h1z : 1 - (1-(t:ℂ))/2 = (((1+t)/2 : ℝ) : ℂ) := by push_cast; ring
   have hz : (1-(t:ℂ))/2 ∈ cutPlane := by
@@ -1537,7 +1531,8 @@ theorem legIR_olverQ_tendsto_zero (n m : ℕ) :
   push_cast; ring
 
 
-/-- olverQ nat reduction integral. -/
+/-- DLMF 14.12.12: for integers `0 ≤ m ≤ n` and `x > 1`, `𝑸^m_n(x) = P^m_n(x)/(n−m)! ∫_x^∞
+dt/((t²−1)(P^m_n(t))²)`, as an improper integral over `(x, ∞)`. -/
 @[dlmf 14.12.E12]
 theorem olverQ_nat_reduction_integral (n m : ℕ) (hmn : m ≤ n) {x : ℝ} (hx : 1 < x) :
     HasIntegralAtTop (fun t : ℝ => associatedP n m x/((n-m).factorial:ℂ)/((t^2-1:ℂ)*(associatedP n m t)^2)) x (olverQ n m x) := by
@@ -1554,7 +1549,7 @@ theorem olverQ_nat_reduction_integral (n m : ℕ) (hmn : m ≤ n) {x : ℝ} (hx 
   have hderiv : ∀ t : ℝ, 1 < t → HasDerivAt F
       (associatedP n m x/((n-m).factorial:ℂ)/((t^2-1:ℂ)*(associatedP n m t)^2)) t := by
     intro t ht
-    have hs := legIR_sub_one_mem ht
+    have hs := legInt_one_lt_mem ht
     have hQd := ((olverQ_analytic n m) _ hs).differentiableAt.hasDerivAt
     have hPd := ((associatedP_analytic n m) _ hs).differentiableAt.hasDerivAt
     have h := ((hQd.div hPd (hPne t ht)).comp_ofReal).const_mul (-associatedP n m x)
@@ -1569,7 +1564,7 @@ theorem olverQ_nat_reduction_integral (n m : ℕ) (hmn : m ≤ n) {x : ℝ} (hx 
     field_simp
   have hcont : ∀ t : ℝ, 1 < t → ContinuousAt (fun t : ℝ => associatedP n m x/((n-m).factorial:ℂ)/((t^2-1:ℂ)*(associatedP n m t)^2)) t := by
     intro t ht
-    have hs := legIR_sub_one_mem ht
+    have hs := legInt_one_lt_mem ht
     have hPc : ContinuousAt (fun s : ℝ => associatedP n m s) t :=
       ((associatedP_analytic n m) _ hs).continuousAt.comp continuous_ofReal.continuousAt
     have ht2 : (t:ℂ)^2-1 ≠ 0 := by
@@ -1605,7 +1600,8 @@ theorem olverQ_nat_reduction_integral (n m : ℕ) (hmn : m ≤ n) {x : ℝ} (hx 
   filter_upwards [eventually_ge_atTop x] with R hR
   exact (hint R hR).symm
 
-/-- olverQ nat neumann. -/
+/-- DLMF 14.12.13 (Neumann's integral): for `n ∈ ℕ` and `z ∉ (−∞, 1]`, `𝑸_n(z) = (1/(2·n!)) ∫_{−1}^1
+P_n(t)/(z−t) dt`. -/
 @[dlmf 14.12.E13]
 theorem olverQ_nat_neumann (n : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     olverQ n 0 z=1/(2*(n.factorial:ℂ))*∫ t : ℝ in -1..1, legendreP n t/(z-t) := by
@@ -1625,7 +1621,8 @@ theorem olverQ_nat_neumann (n : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
   simp
   field_simp
 
-/-- olverQ nat heine. -/
+/-- DLMF 14.12.14 (Heine's integral): for `n ∈ ℕ` and `x > 1`, `𝑸_n(x) = (1/n!) ∫_0^∞ dt/(x +
+(x²−1)^{1/2} cosh t)^{n+1}`, as an improper integral over `(0, ∞)`. -/
 @[dlmf 14.12.E14]
 theorem olverQ_nat_heine (n : ℕ) {x : ℝ} (hx : 1 < x) :
     HasIntegralAtTop (fun t : ℝ => 1/((n.factorial:ℂ)*(x+Real.sqrt (x^2-1)*Real.cosh t:ℂ)^(n+1))) 0 (olverQ n 0 x) := by
@@ -1636,19 +1633,8 @@ theorem olverQ_nat_heine (n : ℕ) {x : ℝ} (hx : 1 < x) :
   simp only [legInt_W]; push_cast
   field_simp
 
-/-- associatedP complex integral. -/
-@[dlmf 14.25.E1]
-theorem associatedP_complex_integral {ν μ : ℂ} (h0 : -1 < ν.re) (h1 : ν.re < μ.re) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    HasIntegralAtTop (fun t : ℝ => legendreBranchPower μ z/(2^ν*Gamma (μ-ν)*Gamma (ν+1))*((Real.sinh t:ℂ)^(2*ν+1)/(z+Real.cosh t)^(ν+μ+1))) 0 (associatedP ν (-μ) z) :=
-  legInt_associatedP_complex_integral h0 h1 hz
-
-/-- olverQ complex integral. -/
-@[dlmf 14.25.E2]
-theorem olverQ_complex_integral {ν μ : ℂ} (h0 : -1/2 < μ.re) (h1 : μ.re < (ν+1).re) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    HasIntegralAtTop (fun t : ℝ => Real.sqrt π*legendreBranchPower μ z/(2^μ*Gamma (μ+1/2)*Gamma (ν-μ+1))*((Real.sinh t:ℂ)^(2*μ)/(z+exp ((log (z-1)+log (z+1))/2)*Real.cosh t)^(ν+μ+1))) 0 (olverQ ν μ z) :=
-  legInt_olverQ_complex_integral h0 h1 hz
-
-/-- ferrersP negative order integral. -/
+/-- DLMF 14.6.6: for `m ≥ 1` and `-1 < x < 1`, `𝖯^{−m}_ν(x) = (1−x²)^{−m/2} ∫_x^1 ⋯ ∫_x^1 𝖯_ν(x)
+(dx)^m`, the `m`-fold iterated integral over `(x, 1)`. -/
 @[dlmf 14.6.E6]
 theorem ferrersP_negative_order_integral (ν : ℂ) (m : ℕ) (hm : 0 < m) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersP ν (-m) x=(1-x^2:ℂ)^(-(m:ℂ)/2)*((fun f : ℝ → ℂ => fun x => ∫ t : ℝ in x..1, f t)^[m]) (ferrersP ν 0) x := by
@@ -1667,7 +1653,8 @@ theorem ferrersP_negative_order_integral (ν : ℂ) (m : ℕ) (hm : 0 < m) {x : 
   rw [hc, show (1:ℂ) - -(m:ℂ) = m+1 by ring]
   ring
 
-/-- associatedP negative order integral. -/
+/-- DLMF 14.6.7: for `m ≥ 1` and `x > 1`, `P^{−m}_ν(x) = (x²−1)^{−m/2} ∫_1^x ⋯ ∫_1^x P_ν(x) (dx)^m`,
+the `m`-fold iterated integral over `(1, x)`. -/
 @[dlmf 14.6.E7]
 theorem associatedP_negative_order_integral (ν : ℂ) (m : ℕ) (hm : 0 < m) {x : ℝ} (hx : 1 < x) :
     associatedP ν (-m) x=(x^2-1:ℂ)^(-(m:ℂ)/2)*((fun f : ℝ → ℂ => fun x => ∫ t : ℝ in 1..x, f t)^[m]) (fun x : ℝ => associatedP ν 0 x) x := by
@@ -1675,7 +1662,8 @@ theorem associatedP_negative_order_integral (ν : ℂ) (m : ℕ) (hm : 0 < m) {x
   rw [legInt_iterate_associated ν m hx.le, legInt_associatedP_neg_nat ν m hz,
     legInt_legendreBranchPower_real _ hx]
 
-/-- associatedQ negative order integral. -/
+/-- DLMF 14.6.8: for `m ≥ 1`, `Re ν > m − 1` and `x > 1`, `Q^{−m}_ν(x) = (−1)^m (x²−1)^{−m/2} ∫_x^∞
+⋯ ∫_x^∞ Q_ν(x) (dx)^m`, the `m`-fold iterated improper integral over `(x, ∞)`. -/
 @[dlmf 14.6.E8]
 theorem associatedQ_negative_order_integral (ν : ℂ) (m : ℕ) (hm : 0 < m) (hν : (m:ℝ)-1 < ν.re) {x : ℝ} (hx : 1 < x) :
     associatedQ ν (-m) x=(-1)^m*(x^2-1:ℂ)^(-(m:ℂ)/2)*((fun f : ℝ → ℂ => fun x => improperAtTop f x)^[m]) (fun x : ℝ => associatedQ ν 0 x) x := by

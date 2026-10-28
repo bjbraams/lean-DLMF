@@ -7,7 +7,8 @@ module
 
 public import DLMF.Hypergeometric.GeneralizedCalculus
 public import DLMF.Core.Framework
-public import DLMF.Hypergeometric.FurtherTransformations
+public import DLMF.Hypergeometric.Solutions
+public import DLMF.Hypergeometric.ArgumentContinuation
 public import Mathlib.RingTheory.PowerSeries.Basic
 
 /-!
@@ -314,9 +315,10 @@ theorem genPoch_reflect_mul (a : Multiset ℂ) {m j : ℕ} (hj : j ≤ m) :
     genPoch a j * genPoch (a.map fun x => 1 - m - x) (m - j) =
       (-1 : ℂ) ^ ((m - j) * a.card) * genPoch a m := by
   induction a using Multiset.induction_on with
-  | empty => simp [genPoch, Multiset.empty_eq_zero]
+  | empty => simp [genPoch]
   | @cons x a ih =>
-    simp only [genPoch, Multiset.map_cons, Multiset.prod_cons, Multiset.card_cons, Multiset.map_map, Function.comp_def] at *
+    simp only [genPoch, Multiset.map_cons, Multiset.prod_cons, Multiset.card_cons,
+      Multiset.map_map, Function.comp_def] at *
     have hx := poch_one_sub_sub_mul (x := x) hj
     rw [show 1 - m - x = 1 - x - m by ring]
     rw [Nat.mul_add, pow_add, pow_mul]

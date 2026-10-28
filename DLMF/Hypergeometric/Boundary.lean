@@ -89,7 +89,7 @@ theorem hasSum_regularizedGauss_one {a b c : ℂ} (h : 0 < (c - a - b).re) :
       have hi := recip_Gamma_eq_poch_mul m (-(m : ℂ) - u)
       rw [show -(m : ℂ) - u + ((m + 1 : ℕ) : ℂ) = 1 - u by push_cast; ring,
         show -(m : ℂ) - u = 1 - u - (N : ℂ) by dsimp [N]; push_cast; ring,
-        poch_one_sub_nat] at hi
+        poch_reflect] at hi
       have hn : (-1 : ℂ) ^ N * (-1) ^ N = 1 := by rw [← mul_pow]; simp
       simp only [div_eq_mul_inv]
       rw [show -(m : ℂ) - u = 1 - u - (N : ℂ) by dsimp [N]; push_cast; ring, hi]

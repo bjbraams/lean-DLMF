@@ -190,15 +190,18 @@ def p2lRho (k : ℝ) (weighted : Bool) (φ : ℝ) : ℝ :=
 def p2lPhiFun (w : ℝ → ℝ) (k : ℝ) (weighted : Bool) (φ : ℝ) : ℝ :=
   w (Real.incEllIntFm (π / 2 - φ) (k ^ 2)) / p2lRho k weighted φ
 
+/-- For `k² < 1`, `1 - k² cos²φ > 0`. -/
 theorem p2l_one_sub_pos (hk : k ^ 2 < 1) (φ : ℝ) : 0 < 1 - k ^ 2 * Real.cos φ ^ 2 := by
   have := Real.cos_sq_le_one φ
   nlinarith [sq_nonneg k, sq_nonneg (Real.cos φ)]
 
+/-- For `k² < 1`, the weight `ρ(φ)` is positive. -/
 theorem p2lRho_pos (hk : k ^ 2 < 1) (weighted : Bool) (φ : ℝ) : 0 < p2lRho k weighted φ := by
   unfold p2lRho; split_ifs
   · exact one_pos
   · exact Real.rpow_pos_of_pos (p2l_one_sub_pos hk φ) _
 
+/-- For `k² < 1`, the weight `ρ(φ)` is `C²`. -/
 lemma p2l_contDiff_rho (hk : k ^ 2 < 1) (weighted : Bool) : ContDiff ℝ 2 (p2lRho k weighted) := by
   unfold p2lRho; cases weighted
   · simp only [Bool.false_eq_true, ↓reduceIte]
@@ -206,6 +209,7 @@ lemma p2l_contDiff_rho (hk : k ^ 2 < 1) (weighted : Bool) : ContDiff ℝ 2 (p2lR
       fun φ => (p2l_one_sub_pos hk φ).ne'
   · simpa using contDiff_const
 
+/-- For `k² < 1`, the incomplete elliptic integral `ψ ↦ F(ψ, k)` is `C²`. -/
 lemma p2l_contDiff_incEllIntFm (hk : k ^ 2 < 1) :
     ContDiff ℝ 2 (fun ψ => Real.incEllIntFm ψ (k ^ 2)) := by
   have hd : deriv (fun ψ => Real.incEllIntFm ψ (k ^ 2)) =
@@ -221,7 +225,8 @@ lemma p2l_contDiff_incEllIntFm (hk : k ^ 2 < 1) :
     fun ψ => (hpos ψ).ne'
 
 /-- A solution of Lamé's equation is `C²`. -/
-theorem p2l_contDiff_lame {h ν : ℝ} {w : ℝ → ℝ} (hk : k ^ 2 < 1) (hw : Real.IsLameSolution h ν k w) :
+theorem p2l_contDiff_lame {h ν : ℝ} {w : ℝ → ℝ} (hk : k ^ 2 < 1)
+    (hw : Real.IsLameSolution h ν k w) :
     ContDiff ℝ 2 w := by
   have hdd : deriv (deriv w) =
       fun x => -(h - ν * (ν + 1) * k ^ 2 * Real.jacobiSnm x (k ^ 2) ^ 2) * w x :=
@@ -236,11 +241,13 @@ theorem p2l_contDiff_lame {h ν : ℝ} {w : ℝ → ℝ} (hk : k ^ 2 < 1) (hw : 
 
 variable {w : ℝ → ℝ} {weighted : Bool}
 
+/-- If `w` is `C²` then so is `φ ↦ w(F(π/2 - φ, k))/ρ(φ)`, for `k² < 1`. -/
 lemma p2lPhiFun_contDiff (hk : k ^ 2 < 1) (hw : ContDiff ℝ 2 w) :
     ContDiff ℝ 2 (p2lPhiFun w k weighted) :=
   (hw.comp ((p2l_contDiff_incEllIntFm hk).comp (contDiff_const.sub contDiff_id))).div
     (p2l_contDiff_rho hk weighted) fun φ => (p2lRho_pos hk weighted φ).ne'
 
+/-- `F(ψ - 2π, k) = F(ψ, k) - 4K(k)` for `k² < 1`. -/
 lemma p2l_incEllIntFm_sub_two_pi (hk : k ^ 2 < 1) (ψ : ℝ) :
     Real.incEllIntFm (ψ - 2 * π) (k ^ 2) =
       Real.incEllIntFm ψ (k ^ 2) - 4 * Real.compEllIntKm (k ^ 2) := by
@@ -249,15 +256,19 @@ lemma p2l_incEllIntFm_sub_two_pi (hk : k ^ 2 < 1) (ψ : ℝ) :
   rw [show ψ - 2 * π + π + π = ψ by ring] at h2
   linarith
 
+/-- The weight `ρ` is even: `ρ(-φ) = ρ(φ)`. -/
 lemma p2lRho_neg (φ : ℝ) : p2lRho k weighted (-φ) = p2lRho k weighted φ := by
   simp [p2lRho, Real.cos_neg]
 
+/-- The weight `ρ` is symmetric about `π/2`: `ρ(π - φ) = ρ(φ)`. -/
 lemma p2lRho_pi_sub (φ : ℝ) : p2lRho k weighted (π - φ) = p2lRho k weighted φ := by
   simp [p2lRho, Real.cos_pi_sub]
 
+/-- The weight `ρ` is `2π`-periodic. -/
 lemma p2lRho_add_two_pi (φ : ℝ) : p2lRho k weighted (φ + 2 * π) = p2lRho k weighted φ := by
   simp [p2lRho, Real.cos_add_two_pi]
 
+/-- If `w` has period `4K`, then `φ ↦ w(F(π/2 - φ, k))/ρ(φ)` has period `2π`. -/
 theorem p2lPhiFun_periodic (hk : k ^ 2 < 1)
     (h4 : ∀ x, w (x + 4 * Real.compEllIntKm (k ^ 2)) = w x) :
     Function.Periodic (p2lPhiFun w k weighted) (2 * π) := fun φ => by
@@ -268,6 +279,7 @@ theorem p2lPhiFun_periodic (hk : k ^ 2 < 1)
   rw [sub_add_cancel] at this
   exact this.symm
 
+/-- If `w(2K - x) = σ w(x)`, then `F(-φ) = σ F(φ)` for `F(φ) = w(F(π/2 - φ, k))/ρ(φ)`. -/
 theorem p2lPhiFun_neg (hk : k ^ 2 < 1) {σ : ℝ}
     (hσ : ∀ x, w (2 * Real.compEllIntKm (k ^ 2) - x) = σ * w x) (φ : ℝ) :
     p2lPhiFun w k weighted (-φ) = σ * p2lPhiFun w k weighted φ := by
@@ -279,19 +291,23 @@ theorem p2lPhiFun_neg (hk : k ^ 2 < 1) {σ : ℝ}
     ring
   rw [this, hσ, mul_div_assoc]
 
+/-- If `w(-x) = δ w(x)`, then `F(π - φ) = δ F(φ)` for `F(φ) = w(F(π/2 - φ, k))/ρ(φ)`. -/
 lemma p2lPhiFun_pi_sub {δ : ℝ} (hδ : ∀ x, w (-x) = δ * w x) (φ : ℝ) :
     p2lPhiFun w k weighted (π - φ) = δ * p2lPhiFun w k weighted φ := by
   simp only [p2lPhiFun, p2lRho_pi_sub]
   rw [show π / 2 - (π - φ) = -(π / 2 - φ) by ring, Real.incEllIntFm_neg, hδ, mul_div_assoc]
 
+/-- `cos φ(x) = sn(x, k)` for `φ(x) = π/2 - am(x, k)`. -/
 theorem p2l_lamePhi_cos (x : ℝ) : Real.cos (Real.lamePhi x k) = Real.jacobiSnm x (k ^ 2) := by
   simp [Real.lamePhi, Real.cos_pi_div_two_sub, Real.jacobiSnm]
 
+/-- At `φ = φ(x)` the weight is `ρ(φ(x)) = 1` (weighted) or `dn(x, k)`. -/
 lemma p2lRho_lamePhi (x : ℝ) :
     p2lRho k weighted (Real.lamePhi x k) =
       if weighted then 1 else Real.jacobiDnm x (k ^ 2) := by
   simp [p2lRho, p2l_lamePhi_cos, Real.jacobiDnm]
 
+/-- At `φ = φ(x)`, `w(F(π/2 - φ, k))/ρ(φ) = w(x)/ρ(φ(x))`, i.e. `w(x)` or `w(x)/dn(x, k)`. -/
 lemma p2lPhiFun_lamePhi (hk : k ^ 2 < 1) (x : ℝ) :
     p2lPhiFun w k weighted (Real.lamePhi x k) =
       w x / (if weighted then 1 else Real.jacobiDnm x (k ^ 2)) := by

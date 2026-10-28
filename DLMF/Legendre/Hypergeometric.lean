@@ -83,7 +83,8 @@ theorem associatedP_integer_hypergeometric_8 (ν : ℂ) (m : ℕ) {z : ℂ} (hz 
   linear_combination (poch (ν-((k+1:ℕ):ℂ)+1) (2*(k+1)) *
     regularizedGaussHG (ν+((k+1:ℕ):ℂ)+1) (((k+1:ℕ):ℂ)-ν) (((k+1:ℕ):ℂ)+1) ((1-z)/2)) * hg
 
-/-- associated hypergeometric 9. -/
+/-- DLMF 14.3.9: for `z ∉ (-∞, 1]`, `P^{-μ}_ν(z) = ((z-1)/(z+1))^{μ/2} 𝐅(ν+1, -ν; μ+1; (1-z)/2)`,
+with principal branches. -/
 @[dlmf 14.3.E9]
 theorem associated_hypergeometric_9 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     associatedP ν (-μ) z=exp (μ/2*(log (z-1)-log (z+1)))*regularizedGaussHG (ν+1) (-ν) (μ+1) ((1-z)/2) := by
@@ -91,13 +92,16 @@ theorem associated_hypergeometric_9 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPl
   rw [show 1-(-μ) = μ+1 by ring,
     show -μ/2*(log (z+1)-log (z-1)) = μ/2*(log (z-1)-log (z+1)) by ring]
 
-/-- associated hypergeometric 15. -/
+/-- DLMF 14.3.15: for `z ∉ (-∞, 1]`, `P^{-μ}_ν(z) = 2^{-μ} (z²-1)^{μ/2} 𝐅(μ-ν, ν+μ+1; μ+1;
+(1-z)/2)`. -/
 @[dlmf 14.3.E15]
 theorem associated_hypergeometric_15 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     associatedP ν (-μ) z=2^(-μ)*legendreBranchPower μ z*regularizedGaussHG (μ-ν) (ν+μ+1) (μ+1) ((1-z)/2) := by
   exact associatedP_neg_euler ν μ hz
 
-/-- associated hypergeometric 16. -/
+/-- DLMF 14.3.16: for `z ∉ (-∞, 1]`, `cos(νπ) P^{-μ}_ν(z) = 2^ν π^{1/2} z^{ν-μ}
+(z²-1)^{μ/2}/Γ(ν+μ+1) 𝐅((μ-ν)/2, (μ-ν+1)/2; 1/2-ν; 1/z²) - π^{1/2} (z²-1)^{μ/2}/(2^{ν+1} Γ(μ-ν)
+z^{ν+μ+1}) 𝐅((ν+μ+2)/2, (ν+μ+1)/2; ν+3/2; 1/z²)`. -/
 @[dlmf 14.3.E16]
 theorem associated_hypergeometric_16 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     cos (ν*π)*associatedP ν (-μ) z=2^ν*Real.sqrt π*z^(ν-μ)*legendreBranchPower μ z/Gamma (ν+μ+1)*regularizedGaussHG ((μ-ν)/2) ((μ-ν+1)/2) (1/2-ν) (1/z^2)-Real.sqrt π*legendreBranchPower μ z/(2^(ν+1)*Gamma (μ-ν)*z^(ν+μ+1))*regularizedGaussHG ((ν+μ+2)/2) ((ν+μ+1)/2) (ν+3/2) (1/z^2) := by
@@ -213,17 +217,19 @@ theorem associated_hypergeometric_16 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitP
   have h32 : ((3/2:ℝ):ℂ) ∈ D := Or.inl (by simp; norm_num)
   exact hf.eqOn_of_preconnected_of_frequently_eq hg hDc h32 hfreq hz
 
-/-- associated hypergeometric 18. -/
+/-- DLMF 14.3.18: for `Re z > 0` off the cut, `P^{-μ}_ν(z) = 2^{-μ} z^{ν-μ} (z²-1)^{μ/2} 𝐅((μ-ν)/2,
+(μ-ν+1)/2; μ+1; 1-1/z²)`. -/
 @[dlmf 14.3.E18]
 theorem associated_hypergeometric_18 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (hre : 0 < z.re) :
     associatedP ν (-μ) z=2^(-μ)*z^(ν-μ)*legendreBranchPower μ z*regularizedGaussHG ((μ-ν)/2) ((μ-ν+1)/2) (μ+1) (1-1/z^2) := by
   exact associatedP_neg_eq_quadratic ν μ hz hre
 
-/-- associated hypergeometric 20. -/
+/-- DLMF 14.3.20: for `z ∉ (-∞, 1]`, `(2 sin(μπ)/π) 𝑸^μ_ν(z) = P^μ_ν(z)/Γ(ν+μ+1) -
+P^{-μ}_ν(z)/Γ(ν-μ+1)`. -/
 @[dlmf 14.3.E20]
 theorem associated_hypergeometric_20 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     2*sin (μ*π)/π*olverQ ν μ z=associatedP ν μ z/Gamma (ν+μ+1)-associatedP ν (-μ) z/Gamma (ν-μ+1) := by
-  exact associated_connection_15 ν μ hz
+  exact olverQ_connection ν μ hz
 
 /-- Combined boundary value at the hypergeometric cut; separate totalized values on that cut are not used. -/
 @[dlmf 14.3.E17]
@@ -326,13 +332,6 @@ theorem legHyp_hasDerivAt_Gamma {s : ℂ} (hs : ∀ m : ℕ, s ≠ -m) :
   rw [digamma_def, logDeriv_apply]
   field_simp [Gamma_ne_zero hs]
 
-/-- `sin(πν) ≠ 0` off the integers. -/
-theorem legHyp_sin_ne {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) : sin (π*ν) ≠ 0 := by
-  intro h
-  obtain ⟨k, hk⟩ := Complex.sin_eq_zero_iff.mp h
-  have hπ : (π:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
-  exact hν k (mul_left_cancel₀ hπ (by rw [hk]; ring))
-
 /-- `sin(πν) ≠ 0` forces `ν` to be non-integral. -/
 theorem legHyp_not_int {ν : ℂ} (h : sin (π*ν) ≠ 0) : ∀ n : ℤ, ν ≠ n := by
   rintro n rfl
@@ -347,10 +346,6 @@ theorem legHyp_pole_add {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) : ∀ m : ℕ, 
 theorem legHyp_pole_neg {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) : ∀ m : ℕ, -ν ≠ -m := fun m h =>
   hν m (by push_cast; linear_combination -h)
 
-/-- A non-pole of `Γ` stays a non-pole after adding a natural number. -/
-theorem legHyp_pole_add_nat {s : ℂ} (hs : ∀ m : ℕ, s ≠ -m) (n : ℕ) : ∀ m : ℕ, s + n ≠ -m :=
-  fun m h => hs (m + n) (by push_cast; linear_combination h)
-
 /-- Off the integers, the term is `-(sin πν/π) Γ(ν+1+n) Γ(-ν+n) wⁿ/(n! Γ(c+n))`. -/
 theorem legHyp_T_eq (c w : ℂ) {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (n : ℕ) :
     legHypT c w n ν = -(sin (π*ν)/π) * (Gamma (ν+1+n) * Gamma (-ν+n) *
@@ -360,7 +355,7 @@ theorem legHyp_T_eq (c w : ℂ) {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (n : �
   have hr := Complex.Gamma_mul_Gamma_one_sub (-ν)
   have hg1 := Gamma_ne_zero (legHyp_pole_add hν)
   have hg2 := Gamma_ne_zero (legHyp_pole_neg hν)
-  have hs := legHyp_sin_ne hν
+  have hs := DLMF.Hypergeometric.sin_pi_mul_ne_zero_of_not_int hν
   have hπ : (π:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
   rw [show (1:ℂ) - -ν = ν + 1 by ring, show (π:ℂ) * -ν = -(π*ν) by ring, Complex.sin_neg] at hr
   unfold legHypT
@@ -377,8 +372,8 @@ theorem legHyp_hasDerivAt_T (c w : ℂ) {ν₀ : ℂ} (hν : ∀ n : ℤ, ν₀ 
       (Gamma (ν₀+1+n) * Gamma (-ν₀+n) * (w^n / n.factorial * (Gamma (c+n))⁻¹))) ν₀ := by
   set d : ℂ := w^n / n.factorial * (Gamma (c+n))⁻¹
   have hπ : (π:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
-  have hp1 := legHyp_pole_add_nat (legHyp_pole_add hν) n
-  have hp2 := legHyp_pole_add_nat (legHyp_pole_neg hν) n
+  have hp1 := DLMF.Hypergeometric.not_neg_nat_add_nat (legHyp_pole_add hν) n
+  have hp2 := DLMF.Hypergeometric.not_neg_nat_add_nat (legHyp_pole_neg hν) n
   have hG1 : HasDerivAt (fun ν : ℂ => Gamma (ν+1+n)) (Gamma (ν₀+1+n) * digamma (ν₀+1+n)) ν₀ := by
     have h := (legHyp_hasDerivAt_Gamma hp1).comp ν₀ (((hasDerivAt_id' ν₀).add_const 1).add_const (n:ℂ))
     rw [mul_one] at h; exact h
@@ -392,7 +387,8 @@ theorem legHyp_hasDerivAt_T (c w : ℂ) {ν₀ : ℂ} (hν : ∀ n : ℤ, ν₀ 
   have hev : legHypT c w n =ᶠ[𝓝 ν₀] fun ν => -(sin (π*ν)/π) * (Gamma (ν+1+n) * Gamma (-ν+n)) * d := by
     have hopen : IsOpen {ν : ℂ | sin (π*ν) ≠ 0} :=
       isOpen_ne_fun (by fun_prop) continuous_const
-    filter_upwards [hopen.mem_nhds (legHyp_sin_ne hν)] with ν hν'
+    filter_upwards [hopen.mem_nhds (DLMF.Hypergeometric.sin_pi_mul_ne_zero_of_not_int hν)] with ν
+        hν'
     rw [legHyp_T_eq c w (legHyp_not_int hν') n]; ring
   refine (hall.congr_of_eventuallyEq hev).congr_deriv ?_
   field_simp
@@ -408,7 +404,7 @@ theorem legHyp_hasSum_R (c w : ℂ) (hw : ‖w‖ < 1) {ν₀ : ℂ} (hν : ∀ 
         - deriv (fun ν => regularizedGaussHGFun (ν+1) (-ν) c w) ν₀)) := by
   intro S
   obtain ⟨h0, h1⟩ := legHyp_hasSum_deriv c w hw ν₀
-  have hs := legHyp_sin_ne hν
+  have hs := DLMF.Hypergeometric.sin_pi_mul_ne_zero_of_not_int hν
   have hπ : (π:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
   have hS : HasSum S (-(π / sin (π*ν₀)) * regularizedGaussHGFun (ν₀+1) (-ν₀) c w) := by
     refine (h0.mul_left (-(π / sin (π*ν₀)))).congr_fun fun n => ?_
@@ -570,12 +566,15 @@ theorem legHyp_eventually_regular {ν : ℂ} (hν : ∀ m : ℕ, ν+1 ≠ -m) :
 theorem legHyp_nu {ν : ℂ} (hν : LegendreQRegular ν 0) : ∀ m : ℕ, ν+1 ≠ -m := fun m h =>
   hν m (by linear_combination h)
 
-/-- legendreDegreeA. -/
+/-- DLMF 14.11.3: the function `𝖠^μ_ν(x) = sin(νπ) ((1+x)/(1-x))^{μ/2} Σ_{k≥0} ((1-x)/2)^k Γ(k-ν)
+Γ(k+ν+1)/(k! Γ(k-μ+1)) (ψ(k+ν+1) - ψ(k-ν))` (as a `tsum`) appearing in the degree derivatives
+14.11.1–2. -/
 @[dlmf 14.11.E3]
 def legendreDegreeA (ν μ : ℂ) (x : ℝ) : ℂ :=
   sin (ν*π)*((1+x)/(1-x):ℂ)^(μ/2)*∑' k : ℕ, ((1-x)/2:ℂ)^k*Gamma (k-ν)*Gamma (k+ν+1)/((k.factorial:ℂ)*Gamma (k-μ+1))*(digamma (k+ν+1)-digamma (k-ν))
 
-/-- legendreDegreeA hasSum. -/
+/-- DLMF 14.11.3: for non-integer `ν` and `-1 < x < 1`, the series `sin(νπ) ((1+x)/(1-x))^{μ/2} Σ_k
+((1-x)/2)^k Γ(k-ν) Γ(k+ν+1)/(k! Γ(k-μ+1)) (ψ(k+ν+1) - ψ(k-ν))` converges to `𝖠^μ_ν(x)`. -/
 @[dlmf 14.11.E3]
 theorem legendreDegreeA_hasSum {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     HasSum (fun k : ℕ => sin (ν*π)*((1+x)/(1-x):ℂ)^(μ/2)*((1-x)/2:ℂ)^k*Gamma (k-ν)*Gamma (k+ν+1)/((k.factorial:ℂ)*Gamma (k-μ+1))*(digamma (k+ν+1)-digamma (k-ν))) (legendreDegreeA ν μ x) := by
@@ -585,7 +584,8 @@ theorem legendreDegreeA_hasSum {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (μ : �
   refine (hR.mul_left (sin (ν*π)*((1+x)/(1-x):ℂ)^(μ/2))).congr_fun fun k => ?_
   ring
 
-/-- ferrersP degree deriv. -/
+/-- DLMF 14.11.1: for non-integer `ν` and `-1 < x < 1`, `∂𝖯^μ_ν(x)/∂ν = π cot(νπ) 𝖯^μ_ν(x) - (1/π)
+𝖠^μ_ν(x)`, with `𝖠^μ_ν` the series 14.11.3. -/
 @[dlmf 14.11.E1]
 theorem ferrersP_degree_deriv {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt (fun ν => ferrersP ν μ x) (π*cos (ν*π)/sin (ν*π)*ferrersP ν μ x-legendreDegreeA ν μ x/π) ν := by
@@ -607,13 +607,15 @@ theorem ferrersP_degree_deriv {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (μ : ℂ
   rw [hR.tsum_eq, hP ν]
   have hpref : ((1+x)/(1-x):ℂ)^(μ/2) = pref := by simp only [pref]; push_cast; rfl
   rw [hpref, mul_comm (ν:ℂ) π]
-  have hs := legHyp_sin_ne hν
+  have hs := DLMF.Hypergeometric.sin_pi_mul_ne_zero_of_not_int hν
   have hπ : (π:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
   generalize sin (π*ν) = s at hs ⊢
   field_simp
   ring
 
-/-- ferrersQ degree deriv. -/
+/-- DLMF 14.11.2: for non-integer `ν` and `ν + μ` and `-1 < x < 1`, `∂𝖰^μ_ν(x)/∂ν = -(π²/2)
+𝖯^μ_ν(x) + π sin(μπ)/(sin(νπ) sin((ν+μ)π)) 𝖰^μ_ν(x) - cot((ν+μ)π)/2 · 𝖠^μ_ν(x) + 𝖠^μ_ν(-x)/(2
+sin((ν+μ)π))`. -/
 @[dlmf 14.11.E2]
 theorem ferrersQ_degree_deriv {ν μ : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (hplus : ∀ n : ℤ, ν+μ ≠ n) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt (fun ν => ferrersQ ν μ x) (-π^2/2*ferrersP ν μ x+π*sin (μ*π)/(sin (ν*π)*sin ((ν+μ)*π))*ferrersQ ν μ x-cos ((ν+μ)*π)/(2*sin ((ν+μ)*π))*legendreDegreeA ν μ x+legendreDegreeA ν μ (-x)/(2*sin ((ν+μ)*π))) ν := by
@@ -622,8 +624,9 @@ theorem ferrersQ_degree_deriv {ν μ : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (hplus
   have hreg : ∀ ν' : ℂ, sin ((ν'+μ)*π) ≠ 0 → LegendreQRegular ν' μ := fun ν' h n hn => h (by
     rw [Complex.sin_eq_zero_iff]; exact ⟨-(n:ℤ)-1, by rw [hn]; push_cast; ring⟩)
   have hsθ : sin ((ν+μ)*π) ≠ 0 := by
-    rw [mul_comm]; exact legHyp_sin_ne hplus
-  have hsν : sin (ν*π) ≠ 0 := by rw [mul_comm]; exact legHyp_sin_ne hν
+    rw [mul_comm]; exact DLMF.Hypergeometric.sin_pi_mul_ne_zero_of_not_int hplus
+  have hsν : sin (ν*π) ≠ 0 := by rw [mul_comm]; exact
+      DLMF.Hypergeometric.sin_pi_mul_ne_zero_of_not_int hν
   set G : ℂ → ℂ := fun ν' => π/2 * ((cos ((ν'+μ)*π) * ferrersP ν' μ x - ferrersP ν' μ (-x)) /
     sin ((ν'+μ)*π))
   have hQG : ∀ ν', sin ((ν'+μ)*π) ≠ 0 → ferrersQ ν' μ x = G ν' := fun ν' h => by
@@ -657,7 +660,8 @@ theorem ferrersQ_degree_deriv {ν μ : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (hplus
   field_simp
   ring
 
-/-- ferrersP order deriv zero. -/
+/-- DLMF 14.11.4: when `ν` is not a negative integer and `-1 < x < 1`, `∂𝖯^μ_ν(x)/∂μ` at `μ = 0`
+equals `ψ(ν+1) 𝖯_ν(x) + 𝖰_ν(x)`. -/
 @[dlmf 14.11.E4]
 theorem ferrersP_order_deriv_zero {ν : ℂ} (hν : LegendreQRegular ν 0) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt (fun μ => ferrersP ν μ x) (digamma (ν+1)*ferrersP ν 0 x+ferrersQ ν 0 x) 0 := by
@@ -686,7 +690,8 @@ theorem ferrersP_order_deriv_zero {ν : ℂ} (hν : LegendreQRegular ν 0) {x : 
     linear_combination -this
   rwa [hD] at hp
 
-/-- ferrersQ order deriv zero. -/
+/-- DLMF 14.11.5: when `ν` is not a negative integer and `-1 < x < 1`, `∂𝖰^μ_ν(x)/∂μ` at `μ = 0`
+equals `-(π²/4) 𝖯_ν(x) + ψ(ν+1) 𝖰_ν(x)`. -/
 @[dlmf 14.11.E5]
 theorem ferrersQ_order_deriv_zero {ν : ℂ} (hν : LegendreQRegular ν 0) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt (fun μ => ferrersQ ν μ x) (-π^2/4*ferrersP ν 0 x+digamma (ν+1)*ferrersQ ν 0 x) 0 := by
@@ -720,7 +725,8 @@ theorem ferrersQ_order_deriv_zero {ν : ℂ} (hν : LegendreQRegular ν 0) {x : 
     linear_combination -this
   rwa [hD] at hp
 
-/-- associatedP order deriv zero. -/
+/-- DLMF 14.11.4 (associated case): when `ν` is not a negative integer and `z ∉ (-∞, 1]`,
+`∂P^μ_ν(z)/∂μ` at `μ = 0` equals `ψ(ν+1) P_ν(z) + Q_ν(z)`. -/
 @[dlmf 14.11.E4]
 theorem associatedP_order_deriv_zero {ν : ℂ} (hν : LegendreQRegular ν 0) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     HasDerivAt (fun μ => associatedP ν μ z) (digamma (ν+1)*associatedP ν 0 z+associatedQ ν 0 z) 0 := by

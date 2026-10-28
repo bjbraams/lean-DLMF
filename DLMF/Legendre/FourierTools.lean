@@ -259,17 +259,6 @@ theorem legFS_PQ_hyp (ν μ : ℂ) (hr : LegendreQRegular ν μ) {θ : ℝ} (h0 
 
 /-! ### A Tannery limit for `𝐅(a, b+k; c+k; z)` -/
 
-/-- `‖(a)_n‖ ≤ (‖a‖)_n`. -/
-theorem legFS_norm_poch_le (a : ℂ) (n : ℕ) : ‖poch a n‖ ≤ ‖poch (‖a‖:ℂ) n‖ := by
-  induction n with
-  | zero => simp [poch]
-  | succ n ih =>
-    simp only [poch, ascPochhammer_succ_eval, norm_mul] at ih ⊢
-    refine mul_le_mul ih ?_ (norm_nonneg _) (norm_nonneg _)
-    rw [show ((‖a‖:ℂ) + n) = ((‖a‖ + n : ℝ) : ℂ) by push_cast; ring, Complex.norm_real,
-      Real.norm_of_nonneg (by positivity)]
-    exact (norm_add_le _ _).trans (by simp)
-
 /-- The ratio `(b+k)_n Γ(c+k)/Γ(c+k+n)` appearing in `Γ(c+k) 𝐅(a, b+k; c+k; z)`. -/
 def legFS_q (b c : ℂ) (k n : ℕ) : ℂ := poch (b+k) n * Gamma (c+k) / Gamma (c+k+n)
 
@@ -371,7 +360,7 @@ theorem legFS_tannery (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
   · filter_upwards [legFS_q_bound b c hε] with k hk n
     rw [norm_mul, norm_mul, norm_mul, norm_div, norm_div, norm_pow, norm_pow, Complex.norm_real,
       Real.norm_of_nonneg hr0, show r^n = (1+ε)^n * ‖z‖^n from mul_pow _ _ _]
-    have h1 := legFS_norm_poch_le a n
+    have h1 := DLMF.OrthogonalPolynomials.norm_poch_le_norm_poch_norm a n
     have h2 := hk n
     have : 0 ≤ ‖z‖^n := by positivity
     have : 0 ≤ ‖((n.factorial : ℕ) : ℂ)‖ := norm_nonneg _

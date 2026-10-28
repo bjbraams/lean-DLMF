@@ -21,7 +21,8 @@ open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
 namespace DLMF.Legendre
 
-/-- toroidalCoordinates. -/
+/-- DLMF 14.19.1: the toroidal coordinates map `(η, θ, φ) ↦ (x, y, z) = (c sinh η cos φ, c sinh η
+sin φ, c sin θ)/(cosh η - cos θ)`. -/
 @[dlmf 14.19.E1]
 def toroidalCoordinates (c η θ phi : ℝ) : ℝ × ℝ × ℝ :=
   (c*Real.sinh η*Real.cos phi/(Real.cosh η-Real.cos θ),c*Real.sinh η*Real.sin phi/(Real.cosh η-Real.cos θ),c*Real.sin θ/(Real.cosh η-Real.cos θ))
@@ -301,7 +302,8 @@ theorem legTor_P_hyp_generic (ν μ : ℂ) (hc1 : ∀ k : ℕ, 1 - 2*μ ≠ -(k:
   congr 2
   rw [hl1, hl2, hlq]; push_cast; ring
 
-/-- toroidalP hypergeometric. -/
+/-- DLMF 14.19.2: for `μ` not a positive half-odd integer and `ξ > 0`, `P^μ_{ν-1/2}(cosh ξ) =
+Γ(1/2-μ)/(π^{1/2} (1-e^{-2ξ})^μ e^{(ν+1/2)ξ}) 𝐅(1/2-μ, 1/2+ν-μ; 1-2μ; 1-e^{-2ξ})`. -/
 @[dlmf 14.19.E2]
 theorem toroidalP_hypergeometric (ν μ : ℂ) (hμ : ∀ n : ℕ, μ ≠ n+1/2) {ξ : ℝ} (hξ : 0 < ξ) :
     associatedP (ν-1/2) μ (Real.cosh ξ)=Gamma (1/2-μ)/(Real.sqrt π*(1-Real.exp (-2*ξ):ℂ)^μ*exp ((ν+1/2)*ξ))*regularizedGaussHG (1/2-μ) (1/2+ν-μ) (1-2*μ) (1-Real.exp (-2*ξ)) := by
@@ -346,7 +348,8 @@ theorem toroidalP_hypergeometric (ν μ : ℂ) (hμ : ∀ n : ℕ, μ ≠ n+1/2)
       (fun k hk => hμ' ⟨2*(k:ℤ)+2, by push_cast; linear_combination hk⟩) hξ]
     rw [← mul_assoc, ← mul_div_assoc, inv_mul_cancel₀ hG, one_div]
 
-/-- toroidalQ hypergeometric. -/
+/-- DLMF 14.19.3: for `ξ > 0`, `𝑸^μ_{ν-1/2}(cosh ξ) = π^{1/2} (1-e^{-2ξ})^μ e^{-(ν+1/2)ξ} 𝐅(μ+1/2,
+ν+μ+1/2; ν+1; e^{-2ξ})`. -/
 @[dlmf 14.19.E3]
 theorem toroidalQ_hypergeometric (ν μ : ℂ) {ξ : ℝ} (hξ : 0 < ξ) :
     olverQ (ν-1/2) μ (Real.cosh ξ)=Real.sqrt π*(1-Real.exp (-2*ξ):ℂ)^μ/exp ((ν+1/2)*ξ)*regularizedGaussHG (μ+1/2) (ν+μ+1/2) (ν+1) (Real.exp (-2*ξ)) := by
@@ -893,7 +896,9 @@ theorem legFS_toroidal_coef (μ : ℂ) {ξ : ℝ} (hξ : 0 < ξ) (n : ℕ) :
   have : ((Real.exp (-ξ):ℂ))^n ≠ 0 := pow_ne_zero _ (ofReal_ne_zero.mpr (Real.exp_pos _).ne')
   field_simp
 
-/-- toroidalQ fourier. -/
+/-- DLMF 14.19.6: for `Re μ > -1/2`, `ξ > 0` and real `φ`, `(π/2)^{1/2} sinh^μ ξ/(cosh ξ - cos
+φ)^{μ+1/2} = 𝑸^μ_{-1/2}(cosh ξ) + 2 Σ_{n≥1} Γ(μ+n+1/2)/Γ(μ+1/2) 𝑸^μ_{n-1/2}(cosh ξ) cos(nφ)`, as a
+convergent series. -/
 @[dlmf 14.19.E6]
 theorem toroidalQ_fourier {μ : ℂ} (hμ : -1/2 < μ.re) {ξ : ℝ} (hξ : 0 < ξ) (phi : ℝ) :
     HasSum (fun j : ℕ => let n:=j+1; 2*Gamma (μ+n+1/2)/Gamma (μ+1/2)*olverQ (n-1/2) μ (Real.cosh ξ)*Real.cos (n*phi)) ((π/2:ℂ)^(1/2:ℂ)*(Real.sinh ξ:ℂ)^μ/(Real.cosh ξ-Real.cos phi:ℂ)^(μ+1/2)-olverQ (-1/2) μ (Real.cosh ξ)) := by
@@ -922,7 +927,8 @@ theorem toroidalQ_fourier {μ : ℂ} (hμ : -1/2 < μ.re) {ξ : ℝ} (hξ : 0 < 
   simp only [poch]
   ring
 
-/-- toroidal whipple P. -/
+/-- DLMF 14.19.7 (Whipple): for natural `n, m` and `ξ > 0`, `P^m_{n-1/2}(cosh ξ) =
+Γ(n+m+1/2)/Γ(n-m+1/2) (2/(π sinh ξ))^{1/2} 𝑸^n_{m-1/2}(coth ξ)`. -/
 @[dlmf 14.19.E7]
 theorem toroidal_whipple_P (n m : ℕ) {ξ : ℝ} (hξ : 0 < ξ) :
     toroidalP n m (Real.cosh ξ)=Gamma (n+m+1/2)/Gamma (n-m+1/2)*(2/(π*Real.sinh ξ):ℂ)^(1/2:ℂ)*toroidalQ m n (Real.cosh ξ/Real.sinh ξ) := by
@@ -968,7 +974,8 @@ theorem toroidal_whipple_P (n m : ℕ) {ξ : ℝ} (hξ : 0 < ξ) :
     have := Int.cast_inj.mp h'
     omega
 
-/-- toroidal whipple Q. -/
+/-- DLMF 14.19.8 (Whipple): for natural `n, m` and `ξ > 0`, `𝑸^m_{n-1/2}(cosh ξ) =
+Γ(m-n+1/2)/Γ(m+n+1/2) (π/(2 sinh ξ))^{1/2} P^n_{m-1/2}(coth ξ)`. -/
 @[dlmf 14.19.E8]
 theorem toroidal_whipple_Q (n m : ℕ) {ξ : ℝ} (hξ : 0 < ξ) :
     toroidalQ n m (Real.cosh ξ)=Gamma (m-n+1/2)/Gamma (m+n+1/2)*(π/(2*Real.sinh ξ):ℂ)^(1/2:ℂ)*toroidalP m n (Real.cosh ξ/Real.sinh ξ) := by

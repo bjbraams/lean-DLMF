@@ -78,11 +78,13 @@ lemma p2p_am_mem {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {x : ℝ}
   · have := hmono hx.1; simpa [Real.jacobiAmm_zero hm] using this
   · have := hmono hx.2; simpa [Real.jacobiAmm_compEllIntKm hm] using this
 
+/-- For `0 < k < 1` and `0 < x < K`, `sn(x, k) > 0`. -/
 theorem p2p_sn_pos {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {x : ℝ}
     (hx : x ∈ Ioo 0 (Real.compEllIntKm (k ^ 2))) : 0 < Real.jacobiSnm x (k ^ 2) := by
   have h := p2p_am_mem hk0 hk1 hx
   exact Real.sin_pos_of_pos_of_lt_pi h.1 (by linarith [h.2, Real.pi_pos])
 
+/-- For `0 < k < 1` and `0 < x < K`, `cn(x, k) > 0`. -/
 theorem p2p_cn_pos {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {x : ℝ}
     (hx : x ∈ Ioo 0 (Real.compEllIntKm (k ^ 2))) : 0 < Real.jacobiCnm x (k ^ 2) := by
   have h := p2p_am_mem hk0 hk1 hx

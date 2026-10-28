@@ -330,6 +330,78 @@ theorem ultrasphPoly_odd_bound {lam x : ℝ} (hlam : -1 / 2 < lam) (hlam0 : lam 
   · rw [← hx0, hp0, abs_zero]
     exact div_pos (abs_pos.mpr hD) hsqrt
 
+/-- The even-degree Gamma estimate behind Lorch's inequality:
+`(2m+λ)^{1-λ} Γ(m+λ)/(Γ(λ) m!) < 2^{1-λ}/Γ(λ)` for `0 < λ < 1`. -/
+private lemma bernstein_even_bound {lam : ℝ} (hlam : 0 < lam) (hlam1 : lam < 1) (m : ℕ) :
+    (2 * m + lam : ℝ) ^ (1 - lam) *
+        (Real.Gamma (m + lam) / Real.Gamma lam / Real.Gamma (m + 1)) <
+      (2 : ℝ) ^ (1 - lam) / Real.Gamma lam := by
+  have hGl : 0 < Real.Gamma lam := Real.Gamma_pos_of_pos hlam
+  have hG := opIneq_Gamma_even hlam hlam1 m
+  have hN2 : (2 * m + lam : ℝ) = 2 * (m + lam / 2) := by ring
+  have hmpos : 0 < (m : ℝ) + lam / 2 := by positivity
+  rw [hN2, Real.mul_rpow (by norm_num) hmpos.le]
+  have hpow : ((m : ℝ) + lam / 2) ^ (1 - lam) * ((m : ℝ) + lam / 2) ^ (lam - 1) = 1 := by
+    rw [← Real.rpow_add hmpos]; norm_num
+  have h2 : (0 : ℝ) < 2 ^ (1 - lam) := by positivity
+  have h3 : (0 : ℝ) < ((m : ℝ) + lam / 2) ^ (1 - lam) := by positivity
+  rw [div_div, mul_comm (Real.Gamma lam), ← div_div]
+  rw [← mul_div_assoc, div_lt_div_iff_of_pos_right hGl]
+  calc 2 ^ (1 - lam) * ((m : ℝ) + lam / 2) ^ (1 - lam) *
+        (Real.Gamma (m + lam) / Real.Gamma (m + 1))
+      < 2 ^ (1 - lam) * ((m : ℝ) + lam / 2) ^ (1 - lam) * ((m : ℝ) + lam / 2) ^ (lam - 1) := by
+        gcongr
+    _ = 2 ^ (1 - lam) := by rw [mul_assoc, hpow, mul_one]
+
+/-- The odd-degree Gamma estimate behind Lorch's inequality, with `N = 2m+1+λ` and
+`r = Γ(m+1+λ)/m!`: `N^{2-2λ} (2r/Γ(λ))²/(N² + λ(1-λ)) < (2^{1-λ}/Γ(λ))²` for `0 < λ < 1`. -/
+private lemma bernstein_odd_bound {lam : ℝ} (hlam : 0 < lam) (hlam1 : lam < 1) (m : ℕ) :
+    (2 * m + 1 + lam : ℝ) ^ (2 - 2 * lam) *
+      ((2 * (Real.Gamma (m + 1 + lam) / Real.Gamma (m + 1)) / Real.Gamma lam) ^ 2 /
+        ((2 * m + 1 + lam : ℝ) ^ 2 + lam * (1 - lam))) <
+      ((2 : ℝ) ^ (1 - lam) / Real.Gamma lam) ^ 2 := by
+  set N : ℝ := 2 * m + 1 + lam with hNe
+  have hNpos : 0 < N := by positivity
+  set c := lam * (1 - lam) with hc
+  have hc0 : 0 < c := by have : 0 < 1 - lam := by linarith
+                         positivity
+  set r := Real.Gamma (m + 1 + lam) / Real.Gamma (m + 1) with hr
+  have hG := opIneq_Gamma_odd hlam hlam1 m
+  have hNc : 0 < N ^ 2 + c := by positivity
+  have hi2 : (N / 2) ^ (2 * lam) = N ^ (2 * lam) / 2 ^ (2 * lam) :=
+    Real.div_rpow hNpos.le (by norm_num) _
+  have hi3 : N ^ (2 - 2 * lam) * N ^ (2 * lam) = N ^ 2 := by
+    rw [← Real.rpow_add hNpos]; norm_num
+  have hi4 : ((2 : ℝ) ^ (1 - lam)) ^ 2 * 2 ^ (2 * lam) = 4 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num), ← Real.rpow_add (by norm_num)]
+    rw [show (1 - lam) * ((2 : ℕ) : ℝ) + 2 * lam = (2 : ℝ) by push_cast; ring]
+    norm_num
+  have h2l : (0 : ℝ) < 2 ^ (2 * lam) := by positivity
+  have hNl : (0 : ℝ) < N ^ (2 * lam) := by positivity
+  rw [hi2] at hG
+  -- multiply out
+  have key : N ^ (2 - 2 * lam) * (2 * r) ^ 2 * N ^ 2 <
+      ((2 : ℝ) ^ (1 - lam)) ^ 2 * (N ^ 2 + c) * N ^ 2 := by
+    have e : ((2 : ℝ) ^ (1 - lam)) ^ 2 = 4 / 2 ^ (2 * lam) := by
+      rw [← hi4]; field_simp
+    rw [e]
+    have hpos : 0 < N ^ (2 - 2 * lam) := by positivity
+    have := mul_lt_mul_of_pos_left hG (show 0 < 4 * N ^ (2 - 2 * lam) by positivity)
+    calc N ^ (2 - 2 * lam) * (2 * r) ^ 2 * N ^ 2
+        = 4 * N ^ (2 - 2 * lam) * (r ^ 2 * N ^ 2) := by ring
+      _ < 4 * N ^ (2 - 2 * lam) * (N ^ (2 * lam) / 2 ^ (2 * lam) * (N ^ 2 + c)) := this
+      _ = 4 / 2 ^ (2 * lam) * (N ^ 2 + c) * (N ^ (2 - 2 * lam) * N ^ (2 * lam)) := by ring
+      _ = _ := by rw [hi3]
+  have hN2 : 0 < N ^ 2 := by positivity
+  have key2 : N ^ (2 - 2 * lam) * (2 * r) ^ 2 < ((2 : ℝ) ^ (1 - lam)) ^ 2 * (N ^ 2 + c) :=
+    lt_of_mul_lt_mul_right key hN2.le
+  calc N ^ (2 - 2 * lam) * ((2 * r / Real.Gamma lam) ^ 2 / (N ^ 2 + c))
+      = N ^ (2 - 2 * lam) * (2 * r) ^ 2 / (N ^ 2 + c) / Real.Gamma lam ^ 2 := by ring
+    _ < ((2 : ℝ) ^ (1 - lam)) ^ 2 * (N ^ 2 + c) / (N ^ 2 + c) / Real.Gamma lam ^ 2 := by
+      gcongr
+    _ = ((2 : ℝ) ^ (1 - lam) / Real.Gamma lam) ^ 2 := by
+      field_simp
+
 /-- Lorch's sharpened Bernstein inequality for Gegenbauer polynomials, `0 < λ < 1`.
 Proof: the Sonine-type function of `opIneq_gegenbauer_sonine` bounds
 `(1 - x²)^λ C_n^{(λ)}(x)²` by its value at `x = 0`, and the values `C_n^{(λ)}(0)`,
@@ -412,24 +484,11 @@ theorem ultrasphPoly_bernstein_bound {lam x : ℝ} (hlam : 0 < lam) (hlam1 : lam
     have hS0 : S = ((ascPochhammer ℝ m).eval lam / m !) ^ 2 := by
       rw [hSdef, hd0, hq0, mul_pow, ← pow_mul, mul_comm m 2, pow_mul, neg_one_sq, one_pow]
       ring
-    have hG := opIneq_Gamma_even hlam hlam1 m
     rw [hasc lam hlam, ← Real.Gamma_nat_eq_factorial] at hS0
-    have hN2 : N = 2 * (m + lam / 2) := by rw [hN]; push_cast; ring
-    have hmpos : 0 < (m : ℝ) + lam / 2 := by positivity
     have hlt : N ^ (1 - lam) * (Real.Gamma (m + lam) / Real.Gamma lam / Real.Gamma (m + 1)) <
         (2 : ℝ) ^ (1 - lam) / Real.Gamma lam := by
-      rw [hN2, Real.mul_rpow (by norm_num) hmpos.le]
-      have hpow : ((m : ℝ) + lam / 2) ^ (1 - lam) * ((m : ℝ) + lam / 2) ^ (lam - 1) = 1 := by
-        rw [← Real.rpow_add hmpos]; norm_num
-      have h2 : (0 : ℝ) < 2 ^ (1 - lam) := by positivity
-      have h3 : (0 : ℝ) < ((m : ℝ) + lam / 2) ^ (1 - lam) := by positivity
-      rw [div_div, mul_comm (Real.Gamma lam), ← div_div]
-      rw [← mul_div_assoc, div_lt_div_iff_of_pos_right hGl]
-      calc 2 ^ (1 - lam) * ((m : ℝ) + lam / 2) ^ (1 - lam) *
-            (Real.Gamma (m + lam) / Real.Gamma (m + 1))
-          < 2 ^ (1 - lam) * ((m : ℝ) + lam / 2) ^ (1 - lam) * ((m : ℝ) + lam / 2) ^ (lam - 1) := by
-            gcongr
-        _ = 2 ^ (1 - lam) := by rw [mul_assoc, hpow, mul_one]
+      rw [show N = 2 * m + lam by rw [hN]; push_cast; ring]
+      exact bernstein_even_bound hlam hlam1 m
     rw [hS0, ← mul_pow]
     have h0 : 0 ≤ N ^ (1 - lam) * (Real.Gamma (m + lam) / Real.Gamma lam /
         Real.Gamma (m + 1)) := by
@@ -470,44 +529,10 @@ theorem ultrasphPoly_bernstein_bound {lam x : ℝ} (hlam : 0 < lam) (hlam1 : lam
     have hS0 : S = (2 * r / Real.Gamma lam) ^ 2 / (N ^ 2 + c) := by
       rw [hSdef, hq0, hq'0, mul_pow, ← pow_mul, mul_comm m 2, pow_mul, neg_one_sq, one_pow]
       ring
-    have hG := opIneq_Gamma_odd hlam hlam1 m
-    have hNe : N = 2 * m + 1 + lam := by rw [hN]; push_cast; ring
-    rw [← hNe, ← hc, ← hr] at hG
-    have hNc : 0 < N ^ 2 + c := by positivity
-    have hi2 : (N / 2) ^ (2 * lam) = N ^ (2 * lam) / 2 ^ (2 * lam) :=
-      Real.div_rpow hNpos.le (by norm_num) _
-    have hi3 : N ^ (2 - 2 * lam) * N ^ (2 * lam) = N ^ 2 := by
-      rw [← Real.rpow_add hNpos]; norm_num
-    have hi4 : ((2 : ℝ) ^ (1 - lam)) ^ 2 * 2 ^ (2 * lam) = 4 := by
-      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num), ← Real.rpow_add (by norm_num)]
-      rw [show (1 - lam) * ((2 : ℕ) : ℝ) + 2 * lam = (2 : ℝ) by push_cast; ring]
-      norm_num
-    have h2l : (0 : ℝ) < 2 ^ (2 * lam) := by positivity
-    have hNl : (0 : ℝ) < N ^ (2 * lam) := by positivity
-    rw [hi2] at hG
-    -- multiply out
-    have key : N ^ (2 - 2 * lam) * (2 * r) ^ 2 * N ^ 2 <
-        ((2 : ℝ) ^ (1 - lam)) ^ 2 * (N ^ 2 + c) * N ^ 2 := by
-      have e : ((2 : ℝ) ^ (1 - lam)) ^ 2 = 4 / 2 ^ (2 * lam) := by
-        rw [← hi4]; field_simp
-      rw [e]
-      have hpos : 0 < N ^ (2 - 2 * lam) := by positivity
-      have := mul_lt_mul_of_pos_left hG (show 0 < 4 * N ^ (2 - 2 * lam) by positivity)
-      calc N ^ (2 - 2 * lam) * (2 * r) ^ 2 * N ^ 2
-          = 4 * N ^ (2 - 2 * lam) * (r ^ 2 * N ^ 2) := by ring
-        _ < 4 * N ^ (2 - 2 * lam) * (N ^ (2 * lam) / 2 ^ (2 * lam) * (N ^ 2 + c)) := this
-        _ = 4 / 2 ^ (2 * lam) * (N ^ 2 + c) * (N ^ (2 - 2 * lam) * N ^ (2 * lam)) := by ring
-        _ = _ := by rw [hi3]
-    have hN2 : 0 < N ^ 2 := by positivity
-    have key2 : N ^ (2 - 2 * lam) * (2 * r) ^ 2 < ((2 : ℝ) ^ (1 - lam)) ^ 2 * (N ^ 2 + c) :=
-      lt_of_mul_lt_mul_right key hN2.le
     rw [hS0, hNsq]
-    calc N ^ (2 - 2 * lam) * ((2 * r / Real.Gamma lam) ^ 2 / (N ^ 2 + c))
-        = N ^ (2 - 2 * lam) * (2 * r) ^ 2 / (N ^ 2 + c) / Real.Gamma lam ^ 2 := by ring
-      _ < ((2 : ℝ) ^ (1 - lam)) ^ 2 * (N ^ 2 + c) / (N ^ 2 + c) / Real.Gamma lam ^ 2 := by
-        gcongr
-      _ = ((2 : ℝ) ^ (1 - lam) / Real.Gamma lam) ^ 2 := by
-        field_simp
+    have hNe : N = 2 * m + 1 + lam := by rw [hN]; push_cast; ring
+    rw [hNe]
+    exact bernstein_odd_bound hlam hlam1 m
 
 /-- The parameter-zero Laguerre estimate is the norm bound for a positive cosine transform. -/
 theorem laguerrePolyL_zero_parameter_bound (n : ℕ) {x : ℝ} (hx : 0 ≤ x) :
@@ -979,6 +1004,7 @@ def rootDiscriminant {n : ℕ} (leading : ℝ) (x : Fin n → ℝ) : ℝ :=
 
 /-! ### Helpers for the discriminant formulas -/
 
+/-- For real `c`, the real part of `(c)_n` is `∏_{k<n} (c + k)`. -/
 theorem re_poch_ofReal (c : ℝ) (n : ℕ) :
     (poch (c : ℂ) n).re = ∏ k ∈ Finset.range n, (c + k) := by
   have h := poch_mul_pow (c : ℂ) 1 n
@@ -988,6 +1014,7 @@ theorem re_poch_ofReal (c : ℝ) (n : ℕ) :
     push_cast; rfl
   rw [this, Complex.ofReal_re]
 
+/-- `∏_{j=1}^n f(j) = ∏_{k<n} f(k+1)`. -/
 theorem prod_Icc_one_eq_prod_range {M : Type*} [CommMonoid M] (f : ℕ → M) (n : ℕ) :
     ∏ j ∈ Finset.Icc 1 n, f j = ∏ k ∈ Finset.range n, f (k + 1) := by
   induction n with
@@ -995,6 +1022,8 @@ theorem prod_Icc_one_eq_prod_range {M : Type*} [CommMonoid M] (f : ℕ → M) (n
   | succ n ih =>
     rw [Finset.prod_Icc_succ_top (by omega), ih, Finset.prod_range_succ]
 
+/-- The per-factor identity converting the AAR form of the Jacobi discriminant into the DLMF
+form. -/
 theorem jacobiDisc_factor {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) {m k : ℕ} (hk : k ≤ m) :
     ((k + 1 : ℕ) : ℝ) ^ (((k + 1 : ℕ) : ℤ) - 2 * ((m + 1 : ℕ) : ℤ) + 2) *
         (((k + 1 : ℕ) : ℝ) + α) ^ (k + 1 - 1) * (((k + 1 : ℕ) : ℝ) + β) ^ (k + 1 - 1) *
@@ -1086,10 +1115,12 @@ def lagPoly (a : ℂ) (n : ℕ) : ℂ[X] := ∑ j ∈ range (n + 1), C (lcoef a 
 /-- The leading coefficient `(-1)^n / n!`. -/
 def KL (n : ℕ) : ℂ := (-1) ^ n / n !
 
+/-- `lagPoly a n` evaluates to `L_n^{(a)}`. -/
 theorem eval_lagPoly (a : ℂ) (n : ℕ) (x : ℂ) : (lagPoly a n).eval x = laguerrePolyL a n x := by
   rw [laguerrePolyL_eq_sum_coeff]
   simp [lagPoly, eval_finsetSum, lcoef]
 
+/-- The coefficients of `lagPoly a n`. -/
 theorem coeff_lagPoly (a : ℂ) (n k : ℕ) :
     (lagPoly a n).coeff k = if k < n + 1 then lcoef a n k else 0 := by
   simp only [lagPoly, finsetSum_coeff, coeff_C_mul_X_pow]
@@ -1098,19 +1129,23 @@ theorem coeff_lagPoly (a : ℂ) (n k : ℕ) :
 
 variable {α : ℝ}
 
+/-- For `α > -1`, `(α+1)_n ≠ 0`. -/
 theorem poch_ne_zero' (hα : -1 < α) (n : ℕ) : poch ((α : ℂ) + 1) n ≠ 0 :=
   poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) _
 
+/-- The leading coefficient of `L_n^{(α)}` is `(-1)ⁿ/n!`. -/
 theorem lcoef_self (hα : -1 < α) (n : ℕ) : lcoef α n n = KL n := by
   have hp := poch_ne_zero' hα n
   have hf : (n ! : ℂ) ≠ 0 := by exact_mod_cast n.factorial_ne_zero
   rw [lcoef, kummerMCoeff, poch_neg_coe_nat, Nat.descFactorial_self, KL]
   field_simp
 
+/-- `(-1)ⁿ/n! ≠ 0`. -/
 theorem KL_ne_zero (n : ℕ) : KL n ≠ 0 := by
   unfold KL
   exact div_ne_zero (pow_ne_zero _ (by norm_num)) (by exact_mod_cast n.factorial_ne_zero)
 
+/-- For `α > -1`, `lagPoly α n` has degree `n`. -/
 theorem natDegree_lagPoly (hα : -1 < α) (n : ℕ) : (lagPoly α n).natDegree = n := by
   refine natDegree_eq_of_le_of_coeff_ne_zero ?_ ?_
   · rw [natDegree_le_iff_coeff_eq_zero]
@@ -1124,18 +1159,21 @@ theorem natDegree_lagPoly (hα : -1 < α) (n : ℕ) : (lagPoly α n).natDegree =
     · rw [lcoef_self hα]; exact KL_ne_zero n
     · omega
 
+/-- For `α > -1`, the leading coefficient of `lagPoly α n` is `(-1)ⁿ/n!`. -/
 theorem leadingCoeff_lagPoly (hα : -1 < α) (n : ℕ) : (lagPoly α n).leadingCoeff = KL n := by
   rw [leadingCoeff, natDegree_lagPoly hα, coeff_lagPoly]
   split_ifs with h
   · exact lcoef_self hα n
   · omega
 
+/-- For `α > -1`, `lagPoly α n ≠ 0`. -/
 theorem lagPoly_ne_zero (hα : -1 < α) (n : ℕ) : lagPoly α n ≠ 0 := by
   intro h
   have := leadingCoeff_lagPoly hα n
   rw [h, leadingCoeff_zero] at this
   exact KL_ne_zero n this.symm
 
+/-- If `x` lists `n` distinct real zeros of `L_n^{(α)}`, they are all its complex roots. -/
 theorem roots_lagPoly_eq (hα : -1 < α) {n : ℕ} (x : Fin n → ℝ)
     (hroot : ∀ i, laguerrePolyL α n (x i) = 0) (hinj : Function.Injective x) :
     (lagPoly α n).roots = (univ.val.map fun i => (x i : ℂ)) := by
@@ -1152,6 +1190,7 @@ theorem roots_lagPoly_eq (hα : -1 < α) {n : ℕ} (x : Fin n → ℝ)
   rw [IsAlgClosed.card_roots_eq_natDegree, natDegree_lagPoly hα, Multiset.card_map,
     card_val, card_univ, Fintype.card_fin]
 
+/-- `L_n^{(α)} = (-1)ⁿ/n! ∏ (X - xᵢ)` over its `n` distinct real zeros. -/
 theorem lagPoly_eq_nodal (hα : -1 < α) {n : ℕ} (x : Fin n → ℝ)
     (hroot : ∀ i, laguerrePolyL α n (x i) = 0) (hinj : Function.Injective x) :
     lagPoly α n = C (KL n) * Lagrange.nodal univ fun i => (x i : ℂ) := by
@@ -1162,9 +1201,12 @@ theorem lagPoly_eq_nodal (hα : -1 < α) {n : ℕ} (x : Fin n → ℝ)
 /-- `∏ L_m(y)` over the zeros `y` of `L_{m+1}`. -/
 def SSL (a : ℂ) (m : ℕ) : ℂ := ((lagPoly a (m + 1)).roots.map fun y => (lagPoly a m).eval y).prod
 
+/-- `SSL a 0 = 1`. -/
 theorem SSL_zero (a : ℂ) : SSL a 0 = 1 := by
   simp [SSL, lagPoly, lcoef, poch_zero, kummerMCoeff]
 
+/-- At a zero of `L_{m+1}^{(α)}` the three-term recurrence gives
+`L_{m+2}^{(α)} = -(m+α+1)/(m+2) L_m^{(α)}`. -/
 theorem eval_lagPoly_two_of_root (hα : -1 < α) (m : ℕ) {y : ℂ}
     (hy : (lagPoly α (m + 1)).eval y = 0) :
     (lagPoly α (m + 2)).eval y = -((m : ℂ) + α + 1) / (m + 2) * (lagPoly α m).eval y := by
@@ -1177,6 +1219,7 @@ theorem eval_lagPoly_two_of_root (hα : -1 < α) (m : ℕ) {y : ℂ}
   field_simp
   linear_combination h
 
+/-- The recursion for the product of `L_m^{(α)}` over the zeros of `L_{m+1}^{(α)}`. -/
 theorem SSL_succ (hα : -1 < α) (m : ℕ) :
     SSL α (m + 1) = (-1) ^ (m + 1) * ((m : ℂ) + 1 + α) ^ (m + 1) / ((m + 1) ! : ℂ) * SSL α m := by
   have key := lc_pow_mul_prod_roots_eval (lagPoly α (m + 2)) (lagPoly α (m + 1))
@@ -1212,12 +1255,14 @@ theorem SSL_succ (hα : -1 < α) (m : ℕ) :
   apply mul_right_cancel₀ (pow_ne_zero (m + 1) hf1)
   linear_combination key
 
+/-- Closed form of the product of `L_m^{(α)}` over the zeros of `L_{m+1}^{(α)}`. -/
 theorem SSL_eq (hα : -1 < α) (m : ℕ) :
     SSL α m = ∏ k ∈ range m, (-1) ^ (k + 1) * ((k : ℂ) + 1 + α) ^ (k + 1) / ((k + 1) ! : ℂ) := by
   induction m with
   | zero => simp [SSL_zero]
   | succ m ih => rw [SSL_succ hα, ih, prod_range_succ]; ring
 
+/-- The Laguerre discriminant expressed through `SSL`. -/
 theorem disc_eq (hα : -1 < α) (m : ℕ) (x : Fin (m + 1) → ℝ)
     (hroot : ∀ i, laguerrePolyL α (m + 1) (x i) = 0) (hinj : Function.Injective x) :
     (∏ i : Fin (m + 1), ∏ j : Fin (m + 1),
@@ -1277,6 +1322,7 @@ theorem disc_eq (hα : -1 < α) (m : ℕ) (x : Fin (m + 1) → ℝ)
     ((∏ i, ∏ j, (if i.val < j.val then (xc i - xc j) ^ 2 else (1 : ℂ))) *
       (K ^ (m + 1) * poch ((α : ℂ) + 1) (m + 1))) * hσ
 
+/-- Reindexing identity for the products `∏ (k+1+c)^{k+1}`. -/
 theorem prod_pow_succ_shift (c : ℂ) (m : ℕ) :
     (∏ k ∈ range m, ((k : ℂ) + 1 + c) ^ (k + 1)) * ((m : ℂ) + 1 + c) ^ (m + 1) =
       (∏ k ∈ range (m + 1), ((k : ℂ) + 1 + c) ^ k) * ∏ k ∈ range (m + 1), ((k : ℂ) + 1 + c) := by
@@ -1284,6 +1330,7 @@ theorem prod_pow_succ_shift (c : ℂ) (m : ℕ) :
   simp_rw [← pow_succ]
   rw [prod_range_succ]
 
+/-- `((m+1)!)^{m+1} = ∏_{k<m} (k+1)! · ∏_{k ≤ m} (k+1)^{k+1}`. -/
 theorem factorial_pow_eq (m : ℕ) :
     (((m + 1)! : ℕ) : ℂ) ^ (m + 1) =
       (∏ k ∈ range m, (((k + 1)! : ℕ) : ℂ)) * ∏ k ∈ range (m + 1), ((k : ℂ) + 1) ^ (k + 1) := by
@@ -1296,6 +1343,7 @@ theorem factorial_pow_eq (m : ℕ) :
     rw [mul_pow, pow_succ (((m + 1)! : ℂ)), ih]
     ring
 
+/-- `∏_{k<m} (-1)^{k+1} = (-1)^{C(m+1,2)}`. -/
 theorem prod_neg_one_pow_succ (m : ℕ) :
     ∏ k ∈ range m, (-1 : ℂ) ^ (k + 1) = (-1) ^ (m + 1).choose 2 := by
   rw [prod_pow_eq_pow_sum]
@@ -1303,11 +1351,13 @@ theorem prod_neg_one_pow_succ (m : ℕ) :
   rw [Nat.choose_two_right, ← Finset.sum_range_id (m + 1), Finset.sum_range_succ']
   simp
 
+/-- `(c)_n = ∏_{k<n} (c + k)`. -/
 theorem poch_eq_prod (c : ℂ) (n : ℕ) : poch c n = ∏ k ∈ range n, (c + k) := by
   have h := poch_mul_pow c 1 n
   simp only [one_pow, mul_one] at h
   exact h
 
+/-- Closed form of the discriminant of the Laguerre polynomial `L_{m+1}^{(α)}` (Stieltjes). -/
 theorem disc_closed (hα : -1 < α) (m : ℕ) (x : Fin (m + 1) → ℝ)
     (hroot : ∀ i, laguerrePolyL α (m + 1) (x i) = 0) (hinj : Function.Injective x) :
     KL (m + 1) ^ (2 * m) * (∏ i : Fin (m + 1), ∏ j : Fin (m + 1),
@@ -1431,6 +1481,7 @@ namespace HerDisc
 
 open Polynomial Finset JacobiDisc
 
+/-- `H_n` has degree at most `n` and leading coefficient `2ⁿ`. -/
 theorem coeff_hermitePolyH_self (n : ℕ) :
     (hermitePolyH n).natDegree ≤ n ∧ (hermitePolyH n).coeff n = 2 ^ n := by
   induction n with
@@ -1456,22 +1507,26 @@ theorem coeff_hermitePolyH_self (n : ℕ) :
 /-- The Hermite polynomial over `ℂ`. -/
 def hP (n : ℕ) : ℂ[X] := (hermitePolyH n).map (Int.castRingHom ℂ)
 
+/-- The complex Hermite polynomial `H_n` has degree `n`. -/
 theorem natDegree_hP (n : ℕ) : (hP n).natDegree = n := by
   obtain ⟨hd, hc⟩ := coeff_hermitePolyH_self n
   have hne : (hermitePolyH n).natDegree = n :=
     natDegree_eq_of_le_of_coeff_ne_zero hd (by rw [hc]; positivity)
   rw [hP, natDegree_map_eq_of_injective (RingHom.injective_int _), hne]
 
+/-- The leading coefficient of `H_n` is `2ⁿ`. -/
 theorem leadingCoeff_hP (n : ℕ) : (hP n).leadingCoeff = 2 ^ n := by
   rw [leadingCoeff, natDegree_hP, hP, coeff_map, (coeff_hermitePolyH_self n).2]
   simp
 
+/-- The complex Hermite polynomial is nonzero. -/
 theorem hP_ne_zero (n : ℕ) : hP n ≠ 0 := by
   intro h
   have := leadingCoeff_hP n
   rw [h, leadingCoeff_zero] at this
   exact (pow_ne_zero n two_ne_zero) this.symm
 
+/-- At a real point the complex Hermite polynomial takes the real value of `H_n`. -/
 theorem eval_hP_ofReal (n : ℕ) (r : ℝ) :
     (hP n).eval (r : ℂ) = ((aeval r (hermitePolyH n) : ℝ) : ℂ) := by
   rw [hP, eval_map, aeval_def]
@@ -1480,16 +1535,19 @@ theorem eval_hP_ofReal (n : ℕ) (r : ℝ) :
     RingHom.ext_int _ _] at h
   exact h.symm
 
+/-- The Hermite recurrence `H_{n+2} = 2X H_{n+1} - 2(n+1) H_n`. -/
 theorem hP_recurrence (n : ℕ) :
     hP (n + 2) = 2 * X * hP (n + 1) - C (2 * (n + 1) : ℂ) * hP n := by
   simp only [hP, hermitePolyH_recurrence, Polynomial.map_sub, Polynomial.map_mul,
     Polynomial.map_ofNat, map_X, map_C]
   simp
 
+/-- `H_{n+1}' = 2(n+1) H_n`. -/
 theorem derivative_hP (n : ℕ) : derivative (hP (n + 1)) = C (2 * (n + 1) : ℂ) * hP n := by
   simp only [hP, derivative_map, hermitePolyH_derivative, Polynomial.map_mul, map_C]
   simp
 
+/-- If `x` lists `n` distinct real zeros of `H_n`, they are all its complex roots. -/
 theorem roots_hP_eq {n : ℕ} (x : Fin n → ℝ)
     (hroot : ∀ i, (aeval (x i) (hermitePolyH n) : ℝ) = 0) (hinj : Function.Injective x) :
     (hP n).roots = (univ.val.map fun i => (x i : ℂ)) := by
@@ -1505,6 +1563,7 @@ theorem roots_hP_eq {n : ℕ} (x : Fin n → ℝ)
   rw [IsAlgClosed.card_roots_eq_natDegree, natDegree_hP, Multiset.card_map,
     card_val, card_univ, Fintype.card_fin]
 
+/-- `H_n = 2ⁿ ∏ (X - xᵢ)` over its `n` distinct real zeros. -/
 theorem hP_eq_nodal {n : ℕ} (x : Fin n → ℝ)
     (hroot : ∀ i, (aeval (x i) (hermitePolyH n) : ℝ) = 0) (hinj : Function.Injective x) :
     hP n = C (2 ^ n) * Lagrange.nodal univ fun i => (x i : ℂ) := by
@@ -1516,9 +1575,11 @@ theorem hP_eq_nodal {n : ℕ} (x : Fin n → ℝ)
 /-- `∏ H_m(y)` over the zeros `y` of `H_{m+1}`. -/
 def SSH (m : ℕ) : ℂ := ((hP (m + 1)).roots.map fun y => (hP m).eval y).prod
 
+/-- `SSH 0 = 1`. -/
 theorem SSH_zero : SSH 0 = 1 := by
   simp [SSH, hP, hermitePolyH_zero]
 
+/-- The recursion for the product of `H_m` over the zeros of `H_{m+1}`. -/
 theorem SSH_succ (m : ℕ) : SSH (m + 1) = (-(2 * ((m : ℂ) + 1))) ^ (m + 1) * SSH m := by
   have key := lc_pow_mul_prod_roots_eval (hP (m + 2)) (hP (m + 1))
   rw [natDegree_hP, natDegree_hP, leadingCoeff_hP, leadingCoeff_hP] at key
@@ -1537,11 +1598,13 @@ theorem SSH_succ (m : ℕ) : SSH (m + 1) = (-(2 * ((m : ℂ) + 1))) ^ (m + 1) * 
   rw [he.neg_one_pow, one_mul, ← pow_mul, ← pow_mul, mul_comm (m + 1) (m + 2)] at key
   exact mul_left_cancel₀ (pow_ne_zero _ two_ne_zero) key
 
+/-- Closed form of the product of `H_m` over the zeros of `H_{m+1}`. -/
 theorem SSH_eq (m : ℕ) : SSH m = ∏ k ∈ range m, (-(2 * ((k : ℂ) + 1))) ^ (k + 1) := by
   induction m with
   | zero => simp [SSH_zero]
   | succ m ih => rw [SSH_succ, ih, prod_range_succ]; ring
 
+/-- The Hermite discriminant expressed through `SSH`. -/
 theorem disc_eq (m : ℕ) (x : Fin (m + 1) → ℝ)
     (hroot : ∀ i, (aeval (x i) (hermitePolyH (m + 1)) : ℝ) = 0) (hinj : Function.Injective x) :
     (∏ i : Fin (m + 1), ∏ j : Fin (m + 1),
@@ -1576,10 +1639,12 @@ theorem disc_eq (m : ℕ) (x : Fin (m + 1) → ℝ)
     ((∏ i, ∏ j, (if i.val < j.val then (xc i - xc j) ^ 2 else (1 : ℂ))) *
       ((2 : ℂ) ^ (m + 1)) ^ (m + 1)) * hσ
 
+/-- `∑_{k<m} (k+1) = C(m+1, 2)`. -/
 theorem sum_range_succ_eq_choose (m : ℕ) : ∑ k ∈ range m, (k + 1) = (m + 1).choose 2 := by
   rw [Nat.choose_two_right, ← Finset.sum_range_id (m + 1), Finset.sum_range_succ']
   simp
 
+/-- Closed form of the discriminant of the Hermite polynomial `H_{m+1}` (Stieltjes). -/
 theorem disc_closed (m : ℕ) (x : Fin (m + 1) → ℝ)
     (hroot : ∀ i, (aeval (x i) (hermitePolyH (m + 1)) : ℝ) = 0) (hinj : Function.Injective x) :
     ((2 : ℂ) ^ (m + 1)) ^ (2 * m) * (∏ i : Fin (m + 1), ∏ j : Fin (m + 1),

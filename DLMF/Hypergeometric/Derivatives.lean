@@ -26,13 +26,11 @@ noncomputable section
 
 namespace DLMF.Hypergeometric
 
+/-- `₂F₁(a, b; c; z)` is symmetric in the numerator parameters `a` and `b`. -/
 theorem ordinaryHypergeometric_symm (a b c : ℂ) : (₂F₁ a b c : ℂ → ℂ) = ₂F₁ b a c := by
   funext z
   unfold ordinaryHypergeometric
   rw [ordinaryHypergeometricSeries_symm]
-
-private lemma hg_symm (a b c : ℂ) : (₂F₁ a b c : ℂ → ℂ) = ₂F₁ b a c :=
-  ordinaryHypergeometric_symm a b c
 
 /-- The differential operator `f ↦ z * (z * f)'`. -/
 def mulDerivMul (f : ℂ → ℂ) (z : ℂ) : ℂ := z * deriv (fun w => w * f w) z
@@ -61,6 +59,7 @@ theorem iteratedDeriv_hypergeometric
     simp only [poch_succ, Nat.cast_add, Nat.cast_one, div_eq_mul_inv, mul_inv_rev]
     ring
 
+/-- For `z ≠ 0`, `z * z ^ (a - 1) = z ^ a`. -/
 private lemma mul_cpow_pred {z : ℂ} (hz : z ≠ 0) (a : ℂ) :
     z * z ^ (a - 1) = z ^ a := by
   calc
@@ -68,6 +67,7 @@ private lemma mul_cpow_pred {z : ℂ} (hz : z ≠ 0) (a : ℂ) :
     _ = z ^ ((1 : ℂ) + (a - 1)) := (cpow_add _ _ hz).symm
     _ = _ := by congr 1; ring
 
+/-- Product rule for `z ^ s * ₂F₁(a, b; c; z)` inside the unit disk and the slit plane. -/
 private lemma deriv_cpow_mul_hg {a b c z : ℂ} (s : ℂ)
     (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hz : ‖z‖ < 1) (hs : z ∈ slitPlane) :
     deriv (fun w => w ^ s * ₂F₁ a b c w) z =
@@ -76,6 +76,8 @@ private lemma deriv_cpow_mul_hg {a b c z : ℂ} (s : ℂ)
   have hp := (hasDerivAt_id z).cpow_const (c := s) hs
   simpa only [mul_one, hF.deriv, id_eq, Pi.mul_def] using (hp.mul hF).deriv
 
+/-- The operator `mulDerivMul` maps `z ^ (a - 1) ₂F₁(a, b; c; z)` to `a z ^ a ₂F₁(a + 1, b; c; z)`.
+  -/
 private lemma mulDerivMul_hg {a b c z : ℂ}
     (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hz : ‖z‖ < 1) (hs : z ∈ slitPlane) :
     mulDerivMul (fun w => w ^ (a - 1) * ₂F₁ a b c w) z =
@@ -89,6 +91,7 @@ private lemma mulDerivMul_hg {a b c z : ℂ}
   have h := ordinaryHypergeometric_mul_deriv_eq_shift_a (a := a) (b := b) hc hz
   linear_combination z * z ^ (a - 1) * h
 
+/-- The derivative of `z ^ (c - 1) ₂F₁(a, b; c; z)` is `(c - 1) z ^ (c - 2) ₂F₁(a, b; c - 1; z)`. -/
 private lemma deriv_cpow_mul_hg_lower {a b c z : ℂ}
     (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hcm : ∀ k : ℕ, c - 1 ≠ -(k : ℂ))
     (hz : ‖z‖ < 1) (hs : z ∈ slitPlane) :
@@ -163,6 +166,7 @@ theorem iteratedDeriv_mul_cpow
     simp only [poch_succ, Nat.cast_add, Nat.cast_one]
     ring
 
+/-- Leibniz rule for `w ↦ w h(w)`: `(w h)^{(m+1)} = z h^{(m+1)} + (m + 1) h^{(m)}`. -/
 private lemma iteratedDeriv_mul_id {h : ℂ → ℂ} (hh : ContDiff ℂ ⊤ h) (m : ℕ) (z : ℂ) :
     iteratedDeriv (m + 1) (fun w => w * h w) z =
       z * iteratedDeriv (m + 1) h z + (m + 1) * iteratedDeriv m h z := by
@@ -203,7 +207,7 @@ theorem iterate_mulDerivMul_eq (n : ℕ) {f : ℂ → ℂ} (hf : ContDiff ℂ �
         (iteratedDeriv n (fun t : ℂ => t ^ n * f t)) z :=
       (hg.differentiable_iteratedDeriv n (WithTop.coe_lt_top _)).differentiableAt
     have hpz : deriv (fun w : ℂ => w ^ (n + 1)) z = (n + 1 : ℂ) * z ^ n := by
-      simpa [Nat.add_one_sub_one] using (hasDerivAt_pow (n + 1) z).deriv
+      simp
     have hprod :
         deriv (fun w => w ^ (n + 1) * iteratedDeriv n (fun t => t ^ n * f t) w) z =
           (n + 1 : ℂ) * z ^ n * iteratedDeriv n (fun t => t ^ n * f t) z +
@@ -229,7 +233,7 @@ theorem contiguous_ab {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hz :
     (b - a) * ₂F₁ a b c z + a * ₂F₁ (a + 1) b c z - b * ₂F₁ a (b + 1) c z = 0 := by
   have ha := ordinaryHypergeometric_mul_deriv_eq_shift_a (a := a) (b := b) hc hz
   have hb := ordinaryHypergeometric_mul_deriv_eq_shift_a (a := b) (b := a) hc hz
-  simp only [hg_symm b a c, hg_symm (b + 1) a c] at hb
+  simp only [ordinaryHypergeometric_symm b a c, ordinaryHypergeometric_symm (b + 1) a c] at hb
   linear_combination hb - ha
 
 @[dlmf 15.5.E13]
@@ -237,7 +241,7 @@ theorem contiguous_a_b_pred {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
     (c - a - b) * ₂F₁ a b c z + a * (1 - z) * ₂F₁ (a + 1) b c z - (c - b) * ₂F₁ a (b - 1) c z = 0 := by
   have ha := ordinaryHypergeometric_mul_deriv_eq_shift_a (a := a) (b := b) hc hz
   have hb := ordinaryHypergeometric_mul_one_sub_mul_deriv_eq (a := b) (b := a) hc hz
-  simp only [hg_symm b a c, hg_symm (b - 1) a c] at hb
+  simp only [ordinaryHypergeometric_symm b a c, ordinaryHypergeometric_symm (b - 1) a c] at hb
   linear_combination hb - (1 - z) * ha
 
 /-- One step along the antidiagonal: `(b-a)(1-z)F(a,b) = (c-a)F(a-1,b) + (b-c)F(a,b-1)`; it is
@@ -248,7 +252,8 @@ theorem contiguous_a_pred_b_pred {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : 
   have hab := contiguous_ab (a := a) (b := b) hc hz
   have h1 := contiguous_a_b_pred (a := a) (b := b) hc hz
   have h2 := contiguous_a_b_pred (a := b) (b := a) hc hz
-  simp only [hg_symm b a c, hg_symm b (a - 1) c, hg_symm (b + 1) a c] at h2
+  simp only [ordinaryHypergeometric_symm b a c, ordinaryHypergeometric_symm b (a - 1) c,
+      ordinaryHypergeometric_symm (b + 1) a c] at h2
   linear_combination (1 - z) * hab + h2 - h1
 
 /-- Raising `c` together with `a` or `b`: `c(b-a)F(a,b;c) = (c-a) b F(a,b+1;c+1) - (c-b) a F(a+1,b;c+1)`,
@@ -258,7 +263,8 @@ theorem contiguous_c_pair {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (
       (c - a) * b * ₂F₁ a (b + 1) (c + 1) z - (c - b) * a * ₂F₁ (a + 1) b (c + 1) z := by
   have h1 := contiguous_c (a := a) (b := b) hc hz
   have h2 := contiguous_c (a := b) (b := a) hc hz
-  simp only [hg_symm b a c, hg_symm b a (c + 1), hg_symm (b + 1) a (c + 1)] at h2
+  simp only [ordinaryHypergeometric_symm b a c, ordinaryHypergeometric_symm b a (c + 1),
+      ordinaryHypergeometric_symm (b + 1) a (c + 1)] at h2
   linear_combination (c - a) * h2 - (c - b) * h1
 
 /-- A three-term relation along the antidiagonal `(a,b) → (a+1,b-1) → (a+2,b-2)` with `c`
@@ -355,9 +361,10 @@ theorem contiguous_a_pred_c_succ {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : 
     c * (1 - z) * ₂F₁ a b c z - c * ₂F₁ (a - 1) b c z + (c - b) * z * ₂F₁ a b (c + 1) z = 0 := by
   have hs := contiguous_shift_b (a := b) (b := a - 1) hc hz
   have hc' := contiguous_c (a := b) (b := a) hc hz
-  simp only [sub_add_cancel, hg_symm b (a - 1) c, hg_symm b a c,
-    hg_symm (b + 1) a (c + 1)] at hs
-  simp only [hg_symm b a c, hg_symm b a (c + 1), hg_symm (b + 1) a (c + 1)] at hc'
+  simp only [sub_add_cancel, ordinaryHypergeometric_symm b (a - 1) c,
+    ordinaryHypergeometric_symm b a c, ordinaryHypergeometric_symm (b + 1) a (c + 1)] at hs
+  simp only [ordinaryHypergeometric_symm b a c, ordinaryHypergeometric_symm b a (c + 1),
+      ordinaryHypergeometric_symm (b + 1) a (c + 1)] at hc'
   linear_combination -hs - z * hc'
 
 @[dlmf 15.5.E17]
@@ -395,7 +402,8 @@ theorem contiguous_diagonal {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
     (a := a + 1) (b := b + 1) hc1 hz
   have h₂ := contiguous_a_b_pred (a := a) (b := b + 1) hc1 hz
   have h₃ := contiguous_c (a := b) (b := a) hc hz
-  simp only [hg_symm b a c, hg_symm b a (c + 1), hg_symm (b + 1) a (c + 1)] at h₃
+  simp only [ordinaryHypergeometric_symm b a c, ordinaryHypergeometric_symm b a (c + 1),
+      ordinaryHypergeometric_symm (b + 1) a (c + 1)] at h₃
   have hd : (c + 1) * deriv (₂F₁ (a + 1) (b + 1) (c + 1)) z =
       (a + 1) * (b + 1) * ₂F₁ (a + 2) (b + 2) (c + 2) z := by
     rw [deriv_ordinaryHypergeometric hc1 hz]
@@ -408,24 +416,23 @@ theorem contiguous_diagonal {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
 contiguous derivative relation `deriv_contiguous_c_succ`. -/
 
 /-- `1 - w` lies in the slit plane when `‖w‖ < 1`. -/
-private lemma one_sub_mem_slitPlane {w : ℂ} (hw : ‖w‖ < 1) : 1 - w ∈ slitPlane := by
-  rw [Complex.mem_slitPlane_iff]
-  left
-  simp only [Complex.sub_re, Complex.one_re]
-  have := Complex.abs_re_le_norm w
-  linarith [le_abs_self w.re]
+theorem one_sub_mem_slitPlane_of_norm_lt_one {w : ℂ} (hw : ‖w‖ < 1) : 1 - w ∈ slitPlane := by
+  simpa [sub_eq_add_neg] using mem_slitPlane_of_norm_lt_one (z := -w) (by simpa using hw)
 
+/-- Product rule for `(1 - z) ^ t * ₂F₁(a, b; c; z)` inside the unit disk. -/
 private lemma deriv_one_sub_cpow_mul_hg {a b c z : ℂ} (t : ℂ)
     (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hz : ‖z‖ < 1) :
     deriv (fun w => (1 - w) ^ t * ₂F₁ a b c w) z =
       -(t * (1 - z) ^ (t - 1)) * ₂F₁ a b c z + (1 - z) ^ t * deriv (₂F₁ a b c) z := by
   have hF := hasDerivAt_ordinaryHypergeometric (a := a) (b := b) hc hz
-  have hq := ((hasDerivAt_id z).const_sub 1).cpow_const (c := t) (one_sub_mem_slitPlane hz)
+  have hq := ((hasDerivAt_id z).const_sub 1).cpow_const (c := t)
+      (one_sub_mem_slitPlane_of_norm_lt_one hz)
   have h := (hq.mul hF).deriv
-  simp only [id_eq, Pi.mul_def, mul_one] at h
+  simp only [id_eq, Pi.mul_def] at h
   rw [h, hF.deriv]
   ring
 
+/-- Product rule for `z ^ s (1 - z) ^ t ₂F₁(a, b; c; z)` inside the unit disk and the slit plane. -/
 private lemma deriv_cpow_mul_one_sub_cpow_mul_hg {a b c z : ℂ} (s t : ℂ)
     (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hz : ‖z‖ < 1) (hs : z ∈ slitPlane) :
     deriv (fun w => w ^ s * (1 - w) ^ t * ₂F₁ a b c w) z =
@@ -434,7 +441,8 @@ private lemma deriv_cpow_mul_one_sub_cpow_mul_hg {a b c z : ℂ} (s t : ℂ)
         z ^ s * (1 - z) ^ t * deriv (₂F₁ a b c) z := by
   have hF := hasDerivAt_ordinaryHypergeometric (a := a) (b := b) hc hz
   have hp := (hasDerivAt_id z).cpow_const (c := s) hs
-  have hq := ((hasDerivAt_id z).const_sub 1).cpow_const (c := t) (one_sub_mem_slitPlane hz)
+  have hq := ((hasDerivAt_id z).const_sub 1).cpow_const (c := t)
+      (one_sub_mem_slitPlane_of_norm_lt_one hz)
   have h := ((hp.mul hq).mul hF).deriv
   simp only [id_eq, Pi.mul_def, mul_one] at h
   rw [h, hF.deriv]
@@ -464,7 +472,7 @@ theorem iterate_mulDerivMul_euler
       deriv_cpow_mul_one_sub_cpow_mul_hg (c - a + n) (a - n + b - c) hc hz hzs]
     have hd := ordinaryHypergeometric_mul_one_sub_mul_deriv_eq (a := a - n) (b := b) hc hz
     have hz0 : z ≠ 0 := slitPlane_ne_zero hzs
-    have h1z : (1 : ℂ) - z ≠ 0 := slitPlane_ne_zero (one_sub_mem_slitPlane hz)
+    have h1z : (1 : ℂ) - z ≠ 0 := slitPlane_ne_zero (one_sub_mem_slitPlane_of_norm_lt_one hz)
     have e1 : z ^ (c - a + ((n + 1 : ℕ) : ℂ) - 1) = z ^ (c - a + n) := by
       congr 1; push_cast; ring
     have e2 : (1 - z) ^ (a - ((n + 1 : ℕ) : ℂ) + b - c) = (1 - z) ^ (a - n + b - c - 1) := by
@@ -491,7 +499,7 @@ theorem iteratedDeriv_euler {a b c z : ℂ} (n : ℕ) (hc : ∀ k : ℕ, c ≠ -
           ((1 - w) ^ (a + b - (c + 1)) * ₂F₁ a b (c + 1) w)) := by
       filter_upwards [isOpen_lt continuous_norm continuous_const |>.mem_nhds hz] with w hw
       rw [deriv_one_sub_cpow_mul_hg (a + b - c) hc hw]
-      have hw1 : (1 : ℂ) - w ≠ 0 := slitPlane_ne_zero (one_sub_mem_slitPlane hw)
+      have hw1 : (1 : ℂ) - w ≠ 0 := slitPlane_ne_zero (one_sub_mem_slitPlane_of_norm_lt_one hw)
       have hd := deriv_contiguous_c_succ (a := a) (b := b) hc hw
       have hpow : (1 - w) ^ (a + b - c) = (1 - w) * (1 - w) ^ (a + b - c - 1) :=
         (mul_cpow_pred hw1 _).symm
@@ -571,12 +579,13 @@ theorem iterate_oneSubMulDerivMul
         (fun w => (-1 : ℂ) ^ n * poch a n * poch (c - b) n / poch c n *
           ((1 - w) ^ (a + n) * ₂F₁ (a + n) b (c + n) w)) := by
       filter_upwards [isOpen_lt continuous_norm continuous_const |>.mem_nhds hz] with w hw
-      rw [ih hw, ← mul_cpow_pred (slitPlane_ne_zero (one_sub_mem_slitPlane hw)) (a + n)]
+      rw [ih hw, ← mul_cpow_pred (slitPlane_ne_zero (one_sub_mem_slitPlane_of_norm_lt_one hw))
+          (a + n)]
       ring
     rw [Function.iterate_succ_apply', oneSubMulDerivMul, heq.deriv_eq, deriv_const_mul_field,
       deriv_one_sub_cpow_mul_hg (a + n) hcn hz]
     have hd := one_sub_mul_deriv_eq_shift_a_c (a := a + n) (b := b) hcn hz
-    have h1z : (1 : ℂ) - z ≠ 0 := slitPlane_ne_zero (one_sub_mem_slitPlane hz)
+    have h1z : (1 : ℂ) - z ≠ 0 := slitPlane_ne_zero (one_sub_mem_slitPlane_of_norm_lt_one hz)
     have e1 : (1 - z) ^ (a + ((n + 1 : ℕ) : ℂ) - 1) = (1 - z) ^ (a + n) := by
       congr 1; push_cast; ring
     have e2 : a + ((n + 1 : ℕ) : ℂ) = a + n + 1 := by push_cast; ring
@@ -616,7 +625,7 @@ theorem iterate_oneSubMulDerivMul_cpow
           (w ^ (c - n - 1) * (1 - w) ^ (b - c + n + 1) * ₂F₁ (a - n) b (c - n) w)) := by
       filter_upwards [isOpen_lt continuous_norm continuous_const |>.mem_nhds hz,
         isOpen_slitPlane.mem_nhds hzs] with w hw hs
-      have h1w : (1 : ℂ) - w ≠ 0 := slitPlane_ne_zero (one_sub_mem_slitPlane hw)
+      have h1w : (1 : ℂ) - w ≠ 0 := slitPlane_ne_zero (one_sub_mem_slitPlane_of_norm_lt_one hw)
       have hw1 : (1 - w) * (1 - w) ^ (b - c + n) = (1 - w) ^ (b - c + n + 1) := by
         rw [← mul_cpow_pred h1w (b - c + n + 1)]
         congr 2
@@ -627,7 +636,7 @@ theorem iterate_oneSubMulDerivMul_cpow
       deriv_cpow_mul_one_sub_cpow_mul_hg (c - n - 1) (b - c + n + 1) hcn' hz hzs]
     have hd := mul_one_sub_deriv_eq_shift_down (a := a - n) (b := b) hcn' hcn1 hz
     have hz0 : z ≠ 0 := slitPlane_ne_zero hzs
-    have h1z : (1 : ℂ) - z ≠ 0 := slitPlane_ne_zero (one_sub_mem_slitPlane hz)
+    have h1z : (1 : ℂ) - z ≠ 0 := slitPlane_ne_zero (one_sub_mem_slitPlane_of_norm_lt_one hz)
     have e1 : poch (c - ((n + 1 : ℕ) : ℂ)) (n + 1) = (c - n - 1) * poch (c - n) n := by
       rw [poch_succ_left, show c - ((n + 1 : ℕ) : ℂ) + 1 = c - n by push_cast; ring,
         show c - ((n + 1 : ℕ) : ℂ) = c - n - 1 by push_cast; ring]
@@ -675,7 +684,7 @@ theorem iteratedDeriv_two_cpow
       rw [deriv_cpow_mul_one_sub_cpow_mul_hg (c - 1) (a + b - c) hc hw hs]
       have hd := mul_one_sub_deriv_eq_shift_down_two (a := a) (b := b) hc hcm hw
       have hw0 : w ≠ 0 := slitPlane_ne_zero hs
-      have h1w : (1 : ℂ) - w ≠ 0 := slitPlane_ne_zero (one_sub_mem_slitPlane hw)
+      have h1w : (1 : ℂ) - w ≠ 0 := slitPlane_ne_zero (one_sub_mem_slitPlane_of_norm_lt_one hw)
       have f1 : w ^ (c - 1) = w * w ^ (c - 1 - 1) := (mul_cpow_pred hw0 _).symm
       have f2 : (1 - w) ^ (a + b - c) = (1 - w) * (1 - w) ^ (a + b - c - 1) :=
         (mul_cpow_pred h1w _).symm
@@ -700,15 +709,21 @@ theorem contiguous_ultrasphPoly_raise {a c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k
     (2*z*(a - 2*c + 2)) * ((-c*(2*c - 1)*(2*a - 2*c + 1)) * ₂F₁ a (-a + 2*c - 1) c z + (-(a - 2*c)*(2*c - 1)*(a - 2*c + 1)/2) * ₂F₁ a ((-a + 2*c - 1) + 2) (c + 1) z + (a*(a + 1)*(2*c - 1)/2) * ₂F₁ (a + 2) (-a + 2*c - 1) (c + 1) z) = 0 := by
   have h0 := DLMF.Hypergeometric.contiguous_ab (a := a) (b := ((-a + 2*c - 1) - 1)) (c := c) hc hz
   have h1 := contiguous_c (a := ((-a + 2*c - 1) - 1)) (b := a) (c := c) hc hz
-  simp only [hg_symm ((-a + 2*c - 1) - 1) a c, hg_symm ((-a + 2*c - 1) - 1) a (c + 1), hg_symm (((-a + 2*c - 1) - 1) + 1) a (c + 1)] at h1
+  simp only [ordinaryHypergeometric_symm ((-a + 2*c - 1) - 1) a c,
+    ordinaryHypergeometric_symm ((-a + 2*c - 1) - 1) a (c + 1),
+    ordinaryHypergeometric_symm (((-a + 2*c - 1) - 1) + 1) a (c + 1)] at h1
   have h2 := contiguous_shift_b (a := a) (b := ((-a + 2*c - 1) - 1)) (c := c) hc hz
   have h3 := DLMF.Hypergeometric.contiguous_c_succ_shift (a := a) (b := ((-a + 2*c - 1) - 1)) (c := c) hc hz
   have h4 := DLMF.Hypergeometric.contiguous_ab (a := a) (b := (-a + 2*c - 1)) (c := c) hc hz
   have h5 := DLMF.Hypergeometric.contiguous_a_b_pred (a := a) (b := (-a + 2*c - 1)) (c := c) hc hz
   have h6 := contiguous_c (a := (-a + 2*c - 1)) (b := a) (c := c) hc hz
-  simp only [hg_symm (-a + 2*c - 1) a c, hg_symm (-a + 2*c - 1) a (c + 1), hg_symm ((-a + 2*c - 1) + 1) a (c + 1)] at h6
+  simp only [ordinaryHypergeometric_symm (-a + 2*c - 1) a c,
+    ordinaryHypergeometric_symm (-a + 2*c - 1) a (c + 1),
+    ordinaryHypergeometric_symm ((-a + 2*c - 1) + 1) a (c + 1)] at h6
   have h7 := contiguous_c (a := ((-a + 2*c - 1) + 1)) (b := a) (c := c) hc hz
-  simp only [hg_symm ((-a + 2*c - 1) + 1) a c, hg_symm ((-a + 2*c - 1) + 1) a (c + 1), hg_symm (((-a + 2*c - 1) + 1) + 1) a (c + 1)] at h7
+  simp only [ordinaryHypergeometric_symm ((-a + 2*c - 1) + 1) a c,
+    ordinaryHypergeometric_symm ((-a + 2*c - 1) + 1) a (c + 1),
+    ordinaryHypergeometric_symm (((-a + 2*c - 1) + 1) + 1) a (c + 1)] at h7
   have h8 := contiguous_shift_b (a := (a + 1)) (b := ((-a + 2*c - 1) - 1)) (c := c) hc hz
   ring_nf at h0 h1 h2 h3 h4 h5 h6 h7 h8 ⊢
   linear_combination (-c*(2*c - 1)*(a - 2*c + 2)) * h0 + (-z*(a - c)*(2*c - 1)*(a - c + 1)) * h1 + ((2*c - 1)*(z - 1)*(a - 2*c + 2)*(a - c + 1)) * h2 + (-z*(2*c - 1)*(a - c + 1)) * h3 + (c*z*(2*c - 1)*(a - 2*c + 2)) * h4 + (c*(2*c - 1)*(a - 2*c + 2)) * h5 + (-z*(a - c)*(2*c - 1)*(a - 2*c + 2)) * h6 + (-z*(2*c - 1)*(a - 2*c + 1)*(a - 2*c + 2)) * h7 + (a*(2*c - 1)*(a - 2*c + 2)) * h8

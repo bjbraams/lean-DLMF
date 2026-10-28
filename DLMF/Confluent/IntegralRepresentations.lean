@@ -1101,6 +1101,7 @@ theorem exp_neg_eq_integral_barnes {σ : ℝ} (hσ : σ < 0) {v : ℝ} (hv : 0 <
   rw [show (((-σ : ℝ) : ℂ) + ((-y : ℝ) : ℂ) * I) = -((σ : ℂ) + I * y) by push_cast; ring, neg_neg]
 
 open Set MeasureTheory DLMF.Gamma in
+/-- For `σ < 0`, `y ↦ Γ(-(σ + iy))` is integrable on the real line. -/
 theorem integrable_Gamma_neg_vertical {σ : ℝ} (hσ : σ < 0) :
     Integrable (fun y : ℝ => Gamma (-((σ : ℂ) + I * y))) := by
   refine (integrable_Gamma_vertical (σ := -σ) (by linarith)).comp_neg.congr
@@ -1713,7 +1714,7 @@ theorem kummerU_barnes_exp {a b : ℂ} {x σ : ℝ}
         rw [show b + 1 - 1 + σ + I * t = (b - 1 + σ + I * t) + 1 by ring,
           Complex.Gamma_add_one _ hw, show a + 1 + σ + I * t = (a + σ + I * t) + 1 by ring,
           div_eq_mul_inv, div_eq_mul_inv, div_eq_mul_inv,
-          recip_Gamma_eq_mul_recip_Gamma_add_one (a + σ + I * t)]
+          one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (a + σ + I * t)]
         ring
       rw [integral_congr_ae (ae_of_all _ hpt), integral_add hi1 (hi2.const_mul _),
         MeasureTheory.integral_const_mul]

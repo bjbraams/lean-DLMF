@@ -55,6 +55,7 @@ theorem hasSum_poissonWeight (x : ℝ) : HasSum (poissonWeight x) 1 := by
   simp only [poissonWeight]
   ring
 
+/-- For `x ≥ 0` the Poisson weight `e^{-x} xⁿ/n!` is nonnegative. -/
 theorem poissonWeight_nonneg {x : ℝ} (hx : 0 ≤ x) (n : ℕ) : 0 ≤ poissonWeight x n := by
   unfold poissonWeight; positivity
 
@@ -66,6 +67,7 @@ def marcumP (μ x y : ℝ) : ℝ :=
 def marcumQ (μ x y : ℝ) : ℝ :=
   ∑' n : ℕ, poissonWeight x n * (1 - TauCeti.regularizedGamma (μ + n) y)
 
+/-- For `x ≥ 0`, the series `∑ₙ e^{-x} xⁿ/n! · P(μ+n, y)` defining `marcumP μ x y` converges. -/
 theorem summable_marcumP_term (μ : ℝ) {x : ℝ} (hx : 0 ≤ x) (y : ℝ) :
     Summable fun n : ℕ => poissonWeight x n * TauCeti.regularizedGamma (μ + n) y :=
   Summable.of_nonneg_of_le
@@ -74,6 +76,8 @@ theorem summable_marcumP_term (μ : ℝ) {x : ℝ} (hx : 0 ≤ x) (y : ℝ) :
       (TauCeti.regularizedGamma_le_one _ _))
     (hasSum_poissonWeight x).summable
 
+/-- For `x ≥ 0`, the series `∑ₙ e^{-x} xⁿ/n! · (1 - P(μ+n, y))` defining `marcumQ μ x y`
+converges. -/
 theorem summable_marcumQ_term (μ : ℝ) {x : ℝ} (hx : 0 ≤ x) (y : ℝ) :
     Summable fun n : ℕ => poissonWeight x n * (1 - TauCeti.regularizedGamma (μ + n) y) := by
   simp_rw [mul_sub, mul_one]
@@ -157,6 +161,7 @@ theorem marcumQ_add_one {μ x y : ℝ} (hμ : 0 < μ) (hx : 0 < x) (hy : 0 < y) 
 /-- The coefficient `(y/x)^{ν/2} e^{-x-y}` of the Marcum recurrence. -/
 def marcumCoeff (ν x y : ℝ) : ℝ := (y / x) ^ (ν / 2) * Real.exp (-x - y)
 
+/-- For `x, y > 0`, `x · marcumCoeff (μ+1) x y = √(xy) · marcumCoeff μ x y`. -/
 theorem x_mul_marcumCoeff_add_one (μ : ℝ) {x y : ℝ} (hx : 0 < x) (hy : 0 < y) :
     x * marcumCoeff (μ + 1) x y = marcumCoeff μ x y * Real.sqrt (x * y) := by
   have hq : 0 < y / x := div_pos hy hx
@@ -167,6 +172,7 @@ theorem x_mul_marcumCoeff_add_one (μ : ℝ) {x y : ℝ} (hx : 0 < x) (hy : 0 < 
     ← Real.sqrt_eq_rpow, ← hs]
   ring
 
+/-- For `x, y > 0`, `y · marcumCoeff (μ-1) x y = √(xy) · marcumCoeff μ x y`. -/
 theorem y_mul_marcumCoeff_sub_one (μ : ℝ) {x y : ℝ} (hx : 0 < x) (hy : 0 < y) :
     y * marcumCoeff (μ - 1) x y = marcumCoeff μ x y * Real.sqrt (x * y) := by
   have hq : 0 < y / x := div_pos hy hx

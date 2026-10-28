@@ -38,6 +38,7 @@ namespace DLMF.CoalescingSaddles
 
 /-! ### Fold (`K = 1`) -/
 
+/-- `Re w = 0` iff `w²` is real and nonpositive. -/
 lemma s36a_re_eq_zero_iff_sq {w : ℂ} : w.re = 0 ↔ (w ^ 2).im = 0 ∧ (w ^ 2).re ≤ 0 := by
   rw [sq, Complex.mul_im, Complex.mul_re]
   constructor
@@ -153,6 +154,43 @@ lemma q2s_cusp_stokes_mp {x : Fin 2 → ℝ} (hx : x ∈ cuspoidStokesSet 2) :
       rw [hy, ha'] at M; linarith
     nlinarith [sq_nonneg t]
 
+/-- The second coordinate of the Stokes path of 36.5.2: with `s = √3`, `k = 3 + 3s`,
+`m = 10 + 6s`, the function `W(u) = (6u² + k - √D(u))/2` is nonnegative, solves the quadratic
+`W² - (6u² + k) W + u⁴ + k u² - m u - (1 + k - m) = 0`, and has `W(1) = 0`,
+`W(-1/2) = (9 + 6s)/4`. -/
+private lemma q2s_cusp_path_W {s k m : ℝ} (hs : s ^ 2 = 3) (hs0 : 0 < s) (hk : k = 3 + 3 * s)
+    (hm : m = 10 + 6 * s) {W : ℝ → ℝ}
+    (hW : ∀ u, W u = (6 * u ^ 2 + k - Real.sqrt (32 * u ^ 4 + 8 * k * u ^ 2 + 4 * m * u +
+      k ^ 2 + 4 * (1 + k - m))) / 2) :
+    (∀ u, 0 ≤ W u) ∧
+      (∀ u, W u ^ 2 - (6 * u ^ 2 + k) * W u + (u ^ 4 + k * u ^ 2 - m * u - (1 + k - m)) = 0) ∧
+      W 1 = 0 ∧ W (-1 / 2) = (9 + 6 * s) / 4 := by
+  have hk0 : 0 < k := by rw [hk]; positivity
+  set B : ℝ → ℝ := fun u => 6 * u ^ 2 + k with hB
+  set D : ℝ → ℝ := fun u => 32 * u ^ 4 + 8 * k * u ^ 2 + 4 * m * u + k ^ 2 + 4 * (1 + k - m)
+    with hD
+  have hW' : ∀ u, W u = (B u - Real.sqrt (D u)) / 2 := hW
+  have hB0 : ∀ u, 0 ≤ B u := fun u => add_nonneg (by positivity) hk0.le
+  have hDfac : ∀ u, D u = (2 * u + 1) ^ 2 * (8 * u ^ 2 - 8 * u + 12 + 6 * s) := by
+    intro u; simp only [hD, hk, hm]; linear_combination (9 : ℝ) * hs
+  have hD0 : ∀ u, 0 ≤ D u := by
+    intro u; rw [hDfac]
+    exact mul_nonneg (sq_nonneg _) (by nlinarith [sq_nonneg (2 * u - 1)])
+  have hBD : ∀ u, B u ^ 2 - D u = 4 * ((u - 1) ^ 2 * (u ^ 2 + 2 * u + 6 + 3 * s)) := by
+    intro u; simp only [hB, hD, hk, hm]; ring_nf
+  refine ⟨fun u => ?_, fun u => ?_, ?_, ?_⟩
+  · have h1 : Real.sqrt (D u) ≤ B u := by
+      rw [Real.sqrt_le_left (hB0 u)]
+      have := hBD u
+      nlinarith [sq_nonneg (u - 1), sq_nonneg (u + 1)]
+    rw [hW']; linarith
+  · have := Real.sq_sqrt (hD0 u)
+    rw [hW']; simp only [hB, hD] at this ⊢
+    linear_combination (1 / 4 : ℝ) * this
+  · have hD1 : D 1 = B 1 ^ 2 := by have := hBD 1; norm_num at this; linarith
+    rw [hW', hD1, Real.sqrt_sq (hB0 1)]; ring
+  · have hDm : D (-1 / 2) = 0 := by rw [hDfac]; norm_num
+    rw [hW', hDm, Real.sqrt_zero]; simp only [hB, hk]; ring
 
 /-- The sufficiency half of 36.5.2: on the curve `y³ = (27/4)(√27 - 5)x²`, `x ≠ 0`, an explicit
 path of constant `Re Φ₂` joins the real critical point to a nonreal one. -/
@@ -195,29 +233,9 @@ lemma q2s_cusp_stokes_mpr {x : Fin 2 → ℝ} (hx : x 0 ≠ 0)
   set μ : ℂ := (t : ℂ) * (-1 / 2 + β * I) with hμ
   have hμim : μ.im = t * β := by simp [hμ]
   -- the path
-  set B : ℝ → ℝ := fun u => 6 * u ^ 2 + k with hB
-  set D : ℝ → ℝ := fun u => 32 * u ^ 4 + 8 * k * u ^ 2 + 4 * m * u + k ^ 2 + 4 * (1 + k - m)
-    with hD
-  set W : ℝ → ℝ := fun u => (B u - Real.sqrt (D u)) / 2 with hW
-  have hDfac : ∀ u, D u = (2 * u + 1) ^ 2 * (8 * u ^ 2 - 8 * u + 12 + 6 * s) := by
-    intro u; simp only [hD, hk, hm]; linear_combination (9 : ℝ) * hs
-  have hD0 : ∀ u, 0 ≤ D u := by
-    intro u; rw [hDfac]
-    exact mul_nonneg (sq_nonneg _) (by nlinarith [sq_nonneg (2 * u - 1)])
-  have hBD : ∀ u, B u ^ 2 - D u = 4 * ((u - 1) ^ 2 * (u ^ 2 + 2 * u + 6 + 3 * s)) := by
-    intro u; simp only [hB, hD, hk, hm]; ring_nf
-  have hW0 : ∀ u, 0 ≤ W u := by
-    intro u
-    have hB0 : 0 ≤ B u := by simp only [hB]; positivity
-    have h1 : Real.sqrt (D u) ≤ B u := by
-      rw [Real.sqrt_le_left hB0]
-      have := hBD u
-      nlinarith [sq_nonneg (u - 1), sq_nonneg (u + 1)]
-    simp only [hW]; linarith
-  have hWq : ∀ u, W u ^ 2 - B u * W u + (B u ^ 2 - D u) / 4 = 0 := by
-    intro u
-    have := Real.sq_sqrt (hD0 u)
-    simp only [hW]; linear_combination (1 / 4 : ℝ) * this
+  set W : ℝ → ℝ := fun u => (6 * u ^ 2 + k - Real.sqrt (32 * u ^ 4 + 8 * k * u ^ 2 + 4 * m * u +
+    k ^ 2 + 4 * (1 + k - m))) / 2 with hW
+  obtain ⟨hW0, hq, hW1, hWm⟩ := q2s_cusp_path_W hs hs0 hk hm (W := W) fun _ => rfl
   set γ : ℝ → ℂ := fun r => (t : ℂ) * ((1 - 3 / 2 * r : ℝ) + I * (Real.sqrt (W (1 - 3 / 2 * r))))
     with hγ
   refine ⟨t, μ, by rw [hμim]; exact mul_ne_zero ht0 hβ0.ne', ?_, ?_, ?_, γ, ?_, ?_, ?_, ?_⟩
@@ -236,27 +254,18 @@ lemma q2s_cusp_stokes_mpr {x : Fin 2 → ℝ} (hx : x 0 ≠ 0)
     · exact ht0 h1
     · exact hβ0.ne' h1
   · refine Continuous.continuousOn ?_
-    simp only [hγ, hW, hB, hD]
+    simp only [hγ, hW]
     fun_prop
-  · have hB1 : 0 ≤ B 1 := by simp only [hB]; positivity
-    have hD1 : D 1 = B 1 ^ 2 := by have := hBD 1; norm_num at this; linarith
-    have hW1 : W 1 = 0 := by simp only [hW]; rw [hD1, Real.sqrt_sq hB1]; ring
-    simp only [hγ]
+  · simp only [hγ]
     norm_num [hW1]
-  · have hDm : D (-1 / 2) = 0 := by rw [hDfac]; norm_num
-    have hWm : W (-1 / 2) = (9 + 6 * s) / 4 := by
-      simp only [hW]; rw [hDm, Real.sqrt_zero]; simp only [hB, hk]; ring
-    simp only [hγ, hμ]
+  · simp only [hγ, hμ]
     rw [show (1 - 3 / 2 * 1 : ℝ) = -1 / 2 by norm_num, hWm, ← hβ]
     push_cast; ring
   · intro r _
     set u : ℝ := 1 - 3 / 2 * r with hu
     set w : ℝ := Real.sqrt (W u) with hw
     have hw2 : w ^ 2 = W u := Real.sq_sqrt (hW0 u)
-    have hC : (B u ^ 2 - D u) / 4 = u ^ 4 + k * u ^ 2 - m * u - (1 + k - m) := by
-      simp only [hB, hD]; ring
-    have hq : W u ^ 2 - (6 * u ^ 2 + k) * W u + (u ^ 4 + k * u ^ 2 - m * u - (1 + k - m)) = 0 := by
-      have := hWq u; rw [hC] at this; simpa only [hB] using this
+    have hq := hq u
     simp only [hγ, q2s_cusp_pot]
     rw [← hydef, ← hx0def, ← hu, ← hw]
     simp [pow_succ, mul_re, mul_im]

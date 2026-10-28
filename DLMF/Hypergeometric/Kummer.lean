@@ -49,15 +49,6 @@ def kummerSixLeft (a b c z : ℂ) : ℂ :=
 
 /-! ### Phase identities for principal powers -/
 
-/-- A principal power computed from any logarithm in the principal strip. -/
-theorem cpow_eq_exp_of_exp_eq {x L : ℂ} (hx : exp L = x) (h1 : -Real.pi < L.im)
-    (h2 : L.im ≤ Real.pi) (y : ℂ) : x ^ y = exp (L * y) := by
-  have hx0 : x ≠ 0 := by rw [← hx]; exact exp_ne_zero L
-  rw [cpow_def_of_ne_zero hx0, ← hx, log_exp h1 h2]
-
-theorem cpow_eq_exp_log {x : ℂ} (hx : x ≠ 0) (y : ℂ) : x ^ y = exp (log x * y) :=
-  cpow_def_of_ne_zero hx y
-
 /-- `z/(z-1) = exp(log z - log(1-z) + φ)` with `φ = -πi` in the upper and `φ = πi` in the
 lower half-plane. -/
 theorem exp_log_div_sub_one {z φ : ℂ} (hz0 : z ≠ 0) (hz1 : 1 - z ≠ 0)
@@ -67,10 +58,8 @@ theorem exp_log_div_sub_one {z φ : ℂ} (hz0 : z ≠ 0) (hz1 : 1 - z ≠ 0)
   rw [this]
   field_simp
 
-theorem exp_neg_pi_mul_I : exp (-(Real.pi * I)) = -1 := by
-  rw [exp_neg, exp_pi_mul_I]
-  norm_num
-
+/-- For `Im z > 0`, the logarithm `log z - log (1 - z) - πi` of `z/(z-1)` lies in the principal
+  strip. -/
 theorem im_log_div_sub_one_upper {z : ℂ} (hi : 0 < z.im) :
     -Real.pi < (log z - log (1 - z) + -(Real.pi * I)).im ∧
       (log z - log (1 - z) + -(Real.pi * I)).im ≤ Real.pi := by
@@ -82,6 +71,8 @@ theorem im_log_div_sub_one_upper {z : ℂ} (hi : 0 < z.im) :
     mul_zero, mul_one, add_zero]
   constructor <;> linarith
 
+/-- For `Im z < 0`, the logarithm `log z - log (1 - z) + πi` of `z/(z-1)` lies in the principal
+  strip. -/
 theorem im_log_div_sub_one_lower {z : ℂ} (hi : z.im < 0) :
     -Real.pi < (log z - log (1 - z) + Real.pi * I).im ∧
       (log z - log (1 - z) + Real.pi * I).im ≤ Real.pi := by
@@ -145,12 +136,6 @@ theorem one_div_cpow_of_mem_slitPlane {w : ℂ} (hw : w ∈ slitPlane) (y : ℂ)
     simp only [neg_im, log_im]
     linarith
 
-theorem one_sub_mem_slitPlane_of_norm_lt_one {z : ℂ} (hz : ‖z‖ < 1) : 1 - z ∈ slitPlane := by
-  refine mem_slitPlane_iff.mpr (Or.inl ?_)
-  have := (re_le_norm z).trans_lt hz
-  simp only [sub_re, one_re]
-  linarith
-
 /-! ### Connections between zero and the charts at infinity -/
 
 /-- 15.10.25 without the phase hypotheses (none is needed). -/
@@ -182,7 +167,7 @@ theorem zero_first_connection_left_gen {a b c z : ℂ} (hc : ∀ k : ℤ, c ≠ 
   rw [show a + (c - b) - c + 1 = a - b + 1 by ring, h1u, show c - a - (c - b) = b - a by ring,
     show c - (c - b) = b by ring, show b - a + 1 = b - a + 1 by ring,
     ordinaryHypergeometric_symm (c - a) b, one_div_cpow_of_mem_slitPlane hslit,
-    cpow_eq_exp_log h1z (-a), cpow_eq_exp_log h1z (-b)]
+    cpow_def_of_ne_zero h1z (-a), cpow_def_of_ne_zero h1z (-b)]
   have hexp : exp (log (1 - z) * -a) * (exp (-log (1 - z) * (b - a))) =
       exp (log (1 - z) * -b) := by
     rw [← exp_add]
@@ -226,7 +211,7 @@ theorem zero_second_connection_left_gen {a b c z φ : ℂ} (hc : ∀ k : ℤ, c 
     show b - a + 1 - (b - c + 1) = c - a by ring, show b - a + 1 - (1 - a) = b by ring,
     ordinaryHypergeometric_symm (c - b) a, ordinaryHypergeometric_symm (c - a) b] at key
   rw [zeroSecond, key]
-  simp only [hphase, cpow_eq_exp_log h1z, cpow_eq_exp_log hz0]
+  simp only [hphase, cpow_def_of_ne_zero h1z, cpow_def_of_ne_zero hz0]
   have e1 : exp (log z * (1 - c)) * (exp (log (1 - z) * -(a - c + 1)) *
       exp ((log z - log (1 - z) + φ) * (c - 1))) = exp (φ * (c - 1)) * exp (log (1 - z) * -a) := by
     simp only [← exp_add]
@@ -376,7 +361,7 @@ theorem kummer_five_representations
     simp only [kummerFive, infinityFirst, kummerFiveLeft]
     rw [pfaff_transformation_of_ne_neg_nat hc hwn hwn', hww,
       show a - b + 1 - (a - c + 1) = c - b by ring, one_sub_recip_cpow_upper hi,
-      cpow_eq_exp_log hz0, cpow_eq_exp_log h1z]
+      cpow_def_of_ne_zero hz0, cpow_def_of_ne_zero h1z]
     have e : exp (↑a * ↑Real.pi * I) * (exp (log z * -a) *
         exp ((log (1 - z) - log z + ↑Real.pi * I) * -a)) = exp (log (1 - z) * -a) := by
       simp only [← exp_add]
@@ -386,7 +371,8 @@ theorem kummer_five_representations
   · simp only [kummerFive, infinityFirst]
     rw [euler_transformation_of_ne_neg_nat hc hwn, show a - b + 1 - a - (a - c + 1) = c - a - b by
       ring, show a - b + 1 - a = 1 - b by ring, show a - b + 1 - (a - c + 1) = c - b by ring,
-      one_sub_recip_cpow_upper hi, cpow_eq_exp_log hz0, cpow_eq_exp_log hz0, cpow_eq_exp_log h1z]
+      one_sub_recip_cpow_upper hi, cpow_def_of_ne_zero hz0, cpow_def_of_ne_zero hz0,
+          cpow_def_of_ne_zero h1z]
     have e : exp (↑a * ↑Real.pi * I) * (exp (log z * -a) *
         exp ((log (1 - z) - log z + ↑Real.pi * I) * (c - a - b))) =
         exp ((c - b) * ↑Real.pi * I) * exp (log z * (b - c)) * exp (log (1 - z) * (c - a - b)) := by
@@ -396,7 +382,7 @@ theorem kummer_five_representations
   · rw [hleft, kummerFiveLeft, euler_transformation_of_ne_neg_nat hc hy, h1y,
       show a - b + 1 - a - (c - b) = 1 - c by ring, show a - b + 1 - a = 1 - b by ring,
       show a - b + 1 - (c - b) = a - c + 1 by ring, div_sub_one_cpow_upper hi,
-      cpow_eq_exp_log hz0, cpow_eq_exp_log h1z, cpow_eq_exp_log h1z]
+      cpow_def_of_ne_zero hz0, cpow_def_of_ne_zero h1z, cpow_def_of_ne_zero h1z]
     have e : exp (log (1 - z) * -a) * exp ((log z - log (1 - z) + -(↑Real.pi * I)) * (1 - c)) =
         exp ((c - 1) * ↑Real.pi * I) * exp (log z * (1 - c)) * exp (log (1 - z) * (c - a - 1)) := by
       simp only [← exp_add]
@@ -453,7 +439,8 @@ theorem kummer_five_left_connection_zero {a b c z : ℂ} (hc : ∀ k : ℤ, c �
   rw [hk, key, pfaff_transformation_of_ne_neg_nat (not_neg_nat_of_not_int hc) hz hu, zeroSecond,
     zeroSecond, pfaff_transformation_of_ne_neg_nat hc2 hz hu,
     show 2 - c - (b - c + 1) = 1 - b by ring, show c - b - c + 1 = 1 - b by ring,
-    div_sub_one_cpow_upper hi, cpow_eq_exp_log hz0, cpow_eq_exp_log h1z, cpow_eq_exp_log h1z]
+    div_sub_one_cpow_upper hi, cpow_def_of_ne_zero hz0, cpow_def_of_ne_zero h1z,
+        cpow_def_of_ne_zero h1z]
   have e : exp (log (1 - z) * -a) * exp ((log z - log (1 - z) + -(↑Real.pi * I)) * (1 - c)) =
       exp ((c - 1) * ↑Real.pi * I) * (exp (log z * (1 - c)) *
         exp (log (1 - z) * -(a - c + 1))) := by
@@ -538,7 +525,8 @@ theorem kummer_five_connection_one {a b c z : ℂ} (_hc : ∀ k : ℤ, c ≠ (k 
   rw [show a + (a - c + 1) - (a - b + 1) + 1 = a + b - c + 1 by ring,
     show a - b + 1 - a - (a - c + 1) = c - a - b by ring, show a - b + 1 - a = 1 - b by ring,
     show a - b + 1 - (a - c + 1) = c - b by ring, one_sub_recip_cpow_upper hi,
-    cpow_eq_exp_log hz0 (-a), cpow_eq_exp_log hz0 (b - c), cpow_eq_exp_log h1z (c - a - b)]
+    cpow_def_of_ne_zero hz0 (-a), cpow_def_of_ne_zero hz0 (b - c), cpow_def_of_ne_zero h1z
+        (c - a - b)]
   have e : exp (↑a * ↑Real.pi * I) * (exp (log z * -a) *
       exp ((log (1 - z) - log z + ↑Real.pi * I) * (c - a - b))) =
       exp ((c - b) * ↑Real.pi * I) * (exp (log z * (b - c)) * exp (log (1 - z) * (c - a - b))) := by

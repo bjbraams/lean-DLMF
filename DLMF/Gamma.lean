@@ -36,6 +36,7 @@ public import DLMF.Gamma.VerticalBounds
 public import DLMF.Gamma.MellinBarnes
 public import DLMF.Gamma.RecipGammaDeriv
 public import DLMF.Gamma.ShiftedLineBounds
+public import DLMF.Gamma.Simplex.PochhammerIdentities
 
 /-!
 # The Gamma and Beta functions (AAR Chapter 1; DLMF Chapter 5)

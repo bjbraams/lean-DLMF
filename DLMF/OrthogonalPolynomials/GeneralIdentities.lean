@@ -33,17 +33,21 @@ set_option autoImplicit false
 
 namespace DLMF.OrthogonalPolynomials
 
+/-- The squared norm `h_n = ∫ p_n² dμ` (DLMF 18.2.5). -/
 @[dlmf 18.2.E5]
 def squaredNorm (μ : Measure ℝ) (p : ℕ → ℝ[X]) (n : ℕ) : ℝ :=
   ∫ x, (p n).eval x ^ 2 ∂μ
 
+/-- The Christoffel–Darboux kernel `K_n(x, y) = ∑_{k ≤ n} p_k(x) p_k(y)/h_k` (DLMF 18.2.12). -/
 @[dlmf 18.2.E12]
 def christoffelDarbouxKernel (μ : Measure ℝ) (p : ℕ → ℝ[X]) (n : ℕ) (x y : ℝ) : ℝ :=
   ∑ k ∈ Finset.range (n + 1), (p k).eval x * (p k).eval y / squaredNorm μ p k
 
+/-- The `n`-th moment `∫ xⁿ dμ` (DLMF 18.2.26). -/
 @[dlmf 18.2.E26]
 def moment (μ : Measure ℝ) (n : ℕ) : ℝ := ∫ x, x ^ n ∂μ
 
+/-- The Hankel determinant `det (μ_{i+j})_{i,j<n}` (DLMF 18.2.27). -/
 @[dlmf 18.2.E27]
 def hankelDeterminant (μ : Measure ℝ) (n : ℕ) : ℝ :=
   Matrix.det (fun i j : Fin n => moment μ (i.val + j.val))
@@ -240,6 +244,54 @@ theorem monic_squaredNorm_ratio {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsO
   have he := (div_eq_div_iff (ne_of_gt (h.2.2.1 n)) (ne_of_gt (h.2.2.1 (n + 1)))).mp hs
   simpa [squaredNorm] using he.symm
 
+/-- For strictly increasing nodes `y₀ < ⋯ < yₙ`, the products `∏_{j ≠ i} (yᵢ - yⱼ)` at
+consecutive nodes have opposite signs. -/
+private lemma prod_erase_sub_mul_succ_neg {n : ℕ} {y : Fin (n + 1) → ℝ} (hymono : StrictMono y)
+    (i : Fin n) :
+    (∏ j ∈ Finset.univ.erase i.castSucc, (y i.castSucc - y j)) *
+      (∏ j ∈ Finset.univ.erase i.succ, (y i.succ - y j)) < 0 := by
+  set d : Fin (n + 1) → ℝ := fun i => ∏ j ∈ Finset.univ.erase i, (y i - y j) with hd_def
+  change d i.castSucc * d i.succ < 0
+  set a := i.castSucc
+  set b := i.succ
+  have hab : a ≠ b := Fin.castSucc_lt_succ.ne
+  have hlt : y a < y b := hymono Fin.castSucc_lt_succ
+  have hb : b ∈ Finset.univ.erase a := Finset.mem_erase.2 ⟨hab.symm, Finset.mem_univ _⟩
+  have ha : a ∈ Finset.univ.erase b := Finset.mem_erase.2 ⟨hab, Finset.mem_univ _⟩
+  have hda : d a = (y a - y b) * ∏ j ∈ (Finset.univ.erase a).erase b, (y a - y j) :=
+    (Finset.mul_prod_erase _ (fun j => y a - y j) hb).symm
+  have hdb : d b = (y b - y a) * ∏ j ∈ (Finset.univ.erase a).erase b, (y b - y j) := by
+    rw [Finset.erase_right_comm]
+    exact (Finset.mul_prod_erase _ (fun j => y b - y j) ha).symm
+  have hP : 0 < ∏ j ∈ (Finset.univ.erase a).erase b, ((y a - y j) * (y b - y j)) := by
+    refine Finset.prod_pos fun j hj => ?_
+    obtain ⟨hjb, hja⟩ : j ≠ b ∧ j ≠ a := by
+      simp only [Finset.mem_erase] at hj
+      exact ⟨hj.1, hj.2.1⟩
+    have hja' : j.val ≠ i.val := fun h' => hja (Fin.ext (by simp [a, h']))
+    have hjb' : j.val ≠ i.val + 1 := fun h' => hjb (Fin.ext (by simp [b, h']))
+    rcases lt_or_gt_of_ne hja' with hjl | hjg
+    · have h1 : y j < y a := hymono (by simp [Fin.lt_def, a, hjl])
+      exact mul_pos (by linarith) (by linarith)
+    · have h2 : y b < y j := hymono (by simp [Fin.lt_def, b]; omega)
+      exact mul_pos_of_neg_of_neg (by linarith) (by linarith)
+  rw [hda, hdb]
+  have : (y a - y b) * (∏ j ∈ (Finset.univ.erase a).erase b, (y a - y j)) *
+      ((y b - y a) * ∏ j ∈ (Finset.univ.erase a).erase b, (y b - y j)) =
+      -((y b - y a) ^ 2) * ∏ j ∈ (Finset.univ.erase a).erase b, ((y a - y j) * (y b - y j)) := by
+    rw [Finset.prod_mul_distrib]
+    ring
+  rw [this]
+  exact mul_neg_of_neg_of_pos (neg_neg_of_pos (by nlinarith)) hP
+
+/-- A real polynomial taking values of opposite signs at `a ≤ b` has a zero in `(a, b)`. -/
+private lemma exists_eval_eq_zero_of_mul_neg {f : ℝ[X]} {a b : ℝ} (hab : a ≤ b)
+    (h : f.eval a * f.eval b < 0) : ∃ ξ ∈ Set.Ioo a b, f.eval ξ = 0 := by
+  have hcont : ContinuousOn (fun t => f.eval t) (Set.Icc a b) := f.continuous.continuousOn
+  rcases mul_neg_iff.mp h with ⟨ha, hb⟩ | ⟨ha, hb⟩
+  · exact intermediate_value_Ioo' hab hcont ⟨hb, ha⟩
+  · exact intermediate_value_Ioo hab hcont ⟨ha, hb⟩
+
 @[dlmf 18.2.vi]
 theorem zeros_interlace {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOrthogonalPolynomials μ p) (n : ℕ) :
     ∃ x : Fin n → ℝ, ∃ y : Fin (n + 1) → ℝ, StrictMono x ∧ StrictMono y ∧
@@ -273,38 +325,7 @@ theorem zeros_interlace {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOrthogona
     rw [derivative_C_mul, eval_mul, eval_C,
       Lagrange.eval_nodal_derivative_eval_node_eq (Finset.mem_univ i), Lagrange.eval_nodal]
   -- Consecutive values of `d` have opposite signs.
-  have hdd (i : Fin n) : d i.castSucc * d i.succ < 0 := by
-    set a := i.castSucc
-    set b := i.succ
-    have hab : a ≠ b := Fin.castSucc_lt_succ.ne
-    have hlt : y a < y b := hymono Fin.castSucc_lt_succ
-    have hb : b ∈ Finset.univ.erase a := Finset.mem_erase.2 ⟨hab.symm, Finset.mem_univ _⟩
-    have ha : a ∈ Finset.univ.erase b := Finset.mem_erase.2 ⟨hab, Finset.mem_univ _⟩
-    have hda : d a = (y a - y b) * ∏ j ∈ (Finset.univ.erase a).erase b, (y a - y j) :=
-      (Finset.mul_prod_erase _ (fun j => y a - y j) hb).symm
-    have hdb : d b = (y b - y a) * ∏ j ∈ (Finset.univ.erase a).erase b, (y b - y j) := by
-      rw [Finset.erase_right_comm]
-      exact (Finset.mul_prod_erase _ (fun j => y b - y j) ha).symm
-    have hP : 0 < ∏ j ∈ (Finset.univ.erase a).erase b, ((y a - y j) * (y b - y j)) := by
-      refine Finset.prod_pos fun j hj => ?_
-      obtain ⟨hjb, hja⟩ : j ≠ b ∧ j ≠ a := by
-        simp only [Finset.mem_erase] at hj
-        exact ⟨hj.1, hj.2.1⟩
-      have hja' : j.val ≠ i.val := fun h' => hja (Fin.ext (by simp [a, h']))
-      have hjb' : j.val ≠ i.val + 1 := fun h' => hjb (Fin.ext (by simp [b, h']))
-      rcases lt_or_gt_of_ne hja' with hjl | hjg
-      · have h1 : y j < y a := hymono (by simp [Fin.lt_def, a, hjl])
-        exact mul_pos (by linarith) (by linarith)
-      · have h2 : y b < y j := hymono (by simp [Fin.lt_def, b]; omega)
-        exact mul_pos_of_neg_of_neg (by linarith) (by linarith)
-    rw [hda, hdb]
-    have : (y a - y b) * (∏ j ∈ (Finset.univ.erase a).erase b, (y a - y j)) *
-        ((y b - y a) * ∏ j ∈ (Finset.univ.erase a).erase b, (y b - y j)) =
-        -((y b - y a) ^ 2) * ∏ j ∈ (Finset.univ.erase a).erase b, ((y a - y j) * (y b - y j)) := by
-      rw [Finset.prod_mul_distrib]
-      ring
-    rw [this]
-    exact mul_neg_of_neg_of_pos (neg_neg_of_pos (by nlinarith)) hP
+  have hdd (i : Fin n) : d i.castSucc * d i.succ < 0 := prod_erase_sub_mul_succ_neg hymono i
   -- The kernel on the diagonal is positive.
   have hK (t : ℝ) : 0 < christoffelDarbouxKernel μ p n t t := by
     unfold christoffelDarbouxKernel
@@ -338,26 +359,8 @@ theorem zeros_interlace {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOrthogona
       (mul_nonpos_of_nonneg_of_nonpos hBB (hdd i).le) hge
     linarith
   -- A zero of `p n` strictly between consecutive zeros of `p (n+1)`.
-  have hex (i : Fin n) : ∃ ξ ∈ Set.Ioo (y i.castSucc) (y i.succ), (p n).eval ξ = 0 := by
-    have hle : y i.castSucc ≤ y i.succ := (hymono Fin.castSucc_lt_succ).le
-    have hcont : ContinuousOn (fun t => (p n).eval t) (Set.Icc (y i.castSucc) (y i.succ)) :=
-      (p n).continuous.continuousOn
-    rcases lt_or_gt_of_ne (show (p n).eval (y i.castSucc) ≠ 0 from fun h0 => by
-        have := hsign i; rw [h0, zero_mul] at this; exact lt_irrefl _ this) with hneg | hpos'
-    · have hpos2 : 0 < (p n).eval (y i.succ) := by
-        by_contra hle'
-        push Not at hle'
-        have := hsign i
-        nlinarith
-      obtain ⟨ξ, hξ, hξ0⟩ := intermediate_value_Ioo hle hcont ⟨hneg, hpos2⟩
-      exact ⟨ξ, hξ, hξ0⟩
-    · have hneg2 : (p n).eval (y i.succ) < 0 := by
-        by_contra hle'
-        push Not at hle'
-        have := hsign i
-        nlinarith
-      obtain ⟨ξ, hξ, hξ0⟩ := intermediate_value_Ioo' hle hcont ⟨hneg2, hpos'⟩
-      exact ⟨ξ, hξ, hξ0⟩
+  have hex (i : Fin n) : ∃ ξ ∈ Set.Ioo (y i.castSucc) (y i.succ), (p n).eval ξ = 0 :=
+    exists_eval_eq_zero_of_mul_neg (hymono Fin.castSucc_lt_succ).le (hsign i)
   choose x hxI hx0 using hex
   refine ⟨x, y, fun i j hij => ?_, hymono, hx0, hyroot, fun i => hxI i⟩
   have hle : y i.succ ≤ y j.castSucc :=
@@ -416,15 +419,19 @@ theorem symmetric_measure_parity {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : Is
   linarith
 
 
+/-- The weighted squared norm `∫ x p_n² dμ` (DLMF 18.2.6). -/
 @[dlmf 18.2.E6]
 def firstWeightedSquaredNorm (μ : Measure ℝ) (p : ℕ → ℝ[X]) (n : ℕ) : ℝ :=
   ∫ x, x * (p n).eval x ^ 2 ∂μ
 
+/-- The Hankel determinant with its last column shifted by one, `0` at `n = 0`
+(DLMF 18.2.28). -/
 @[dlmf 18.2.E28]
 def shiftedHankelDeterminant (μ : Measure ℝ) (n : ℕ) : ℝ :=
   if n = 0 then 0 else
     Matrix.det (fun i j : Fin n => moment μ (i.val + if j.val + 1 = n then n else j.val))
 
+/-- The Poisson kernel `∑ p_n(x) p_n(y)/h_n zⁿ` (DLMF 18.2.41). -/
 @[dlmf 18.2.E41]
 def poissonKernel (μ : Measure ℝ) (p : ℕ → ℝ[X]) (z x y : ℝ) : ℝ :=
   ∑' n : ℕ, (p n).eval x * (p n).eval y / squaredNorm μ p n * z ^ n
@@ -437,6 +444,7 @@ def IsSzegoWeight (w : ℝ → ℝ) : Prop :=
   Integrable (fun x => |Real.log (w x)| / Real.sqrt (1 - x ^ 2))
     (volume.restrict (Set.Ioo (-1 : ℝ) 1))
 
+/-- The Nevai class `M(a, b)`: `√β_n → a/2` and `α_n → b` (DLMF 18.2.40). -/
 @[dlmf 18.2.E40]
 def IsNevaiClass (a b : ℝ) (α β : ℕ → ℝ) : Prop :=
   Tendsto (fun n => Real.sqrt (β n)) atTop (𝓝 (a / 2)) ∧ Tendsto α atTop (𝓝 b)

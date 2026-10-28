@@ -428,6 +428,7 @@ theorem legQAdd_one_add_mem_slitPlane {z₁ z₂ s₁ s₂ : ℂ} (hz₁ : 0 < z
 /-- The square-root branch `(z²-1)^{1/2} = exp ((log (z-1) + log (z+1))/2)` of DLMF 14.28.1. -/
 def legQAdd_sq (z : ℂ) : ℂ := exp ((log (z - 1) + log (z + 1)) / 2)
 
+/-- If `z ≠ ±1`, then `(legQAdd_sq z)² = z² - 1`. -/
 theorem legQAdd_sq_sq {z : ℂ} (h1 : z - 1 ≠ 0) (h2 : z + 1 ≠ 0) : legQAdd_sq z ^ 2 = z ^ 2 - 1 := by
   rw [legQAdd_sq, ← exp_nat_mul, show ((2:ℕ):ℂ) * ((log (z - 1) + log (z + 1)) / 2) =
     log (z - 1) + log (z + 1) by push_cast; ring, exp_add, exp_log h1, exp_log h2]
@@ -436,13 +437,16 @@ theorem legQAdd_sq_sq {z : ℂ} (h1 : z - 1 ≠ 0) (h2 : z + 1 ≠ 0) : legQAdd_
 /-- The domain `Re z > 0`, `z ∉ (0, 1]` of DLMF 14.28.1. -/
 def legQAdd_D : Set ℂ := {z | 0 < z.re ∧ z - 1 ∈ slitPlane}
 
+/-- The domain `legQAdd_D = {z : Re z > 0, z ∉ (0, 1]}` of DLMF 14.28.1 is open. -/
 theorem isOpen_legQAdd_D : IsOpen legQAdd_D :=
   (isOpen_lt continuous_const continuous_re).inter
     (isOpen_slitPlane.preimage (by fun_prop : Continuous fun z : ℂ => z - 1))
 
+/-- If `Re z > 0`, then `z + 1` lies in the slit plane. -/
 theorem legQAdd_add_one_mem {z : ℂ} (hz : 0 < z.re) : z + 1 ∈ slitPlane :=
   Or.inl (by simp; linarith)
 
+/-- The square-root branch `legQAdd_sq` is complex differentiable at every point of `legQAdd_D`. -/
 theorem legQAdd_differentiableAt_sq {z : ℂ} (hz : z ∈ legQAdd_D) :
     DifferentiableAt ℂ legQAdd_sq z := by
   have h1 : DifferentiableAt ℂ (fun w : ℂ => log (w - 1)) z :=
@@ -454,6 +458,7 @@ theorem legQAdd_differentiableAt_sq {z : ℂ} (hz : z ∈ legQAdd_D) :
 /-- The combined argument `z₁ z₂ - (z₁²-1)^{1/2} (z₂²-1)^{1/2} cos t` of DLMF 14.28.1. -/
 def legQAdd_Z (z₁ z₂ : ℂ) (t : ℝ) : ℂ := z₁ * z₂ - legQAdd_sq z₁ * legQAdd_sq z₂ * Real.cos t
 
+/-- The addition-theorem argument is symmetric: `legQAdd_Z z₁ z₂ t = legQAdd_Z z₂ z₁ t`. -/
 theorem legQAdd_Z_comm (z₁ z₂ : ℂ) (t : ℝ) : legQAdd_Z z₁ z₂ t = legQAdd_Z z₂ z₁ t := by
   simp only [legQAdd_Z]; ring
 
@@ -502,6 +507,7 @@ theorem legQAdd_Z_cosh {ξ₁ ξ₂ : ℝ} (h1 : 0 < ξ₁) (h2 : 0 < ξ₂) (t 
   push_cast; ring
 
 
+/-- The square-root branch `legQAdd_sq` is continuous on `legQAdd_D`. -/
 theorem legQAdd_continuousOn_sq : ContinuousOn legQAdd_sq legQAdd_D := fun _ hz =>
   (legQAdd_differentiableAt_sq hz).continuousAt.continuousWithinAt
 
@@ -511,7 +517,7 @@ theorem legQAdd_continuousOn_joint (ν : ℂ) {z₂ : ℂ} (hz₂ : z₂ ∈ leg
   have hF : DifferentiableOn ℂ (fun w => regularizedGaussHG (ν + 1) (-ν) 1 w) cutPlane :=
     DifferentiableOn.regularizedGaussHG (differentiableOn_const _) (differentiableOn_const _)
       (differentiableOn_const _) differentiableOn_id fun w hw => hw
-  simp only [legAdd_associatedP_zero_eq]
+  simp only [legExt_associatedP_eq]
   refine hF.continuousOn.comp (f := fun p : ℂ × ℝ => (1 - legQAdd_Z p.1 z₂ p.2) / 2) ?_
     (fun p hp => legQAdd_Z_mem hp.1 hz₂ p.2)
   have hs : ContinuousOn (fun p : ℂ × ℝ => legQAdd_sq p.1) (legQAdd_D ×ˢ univ) :=
@@ -538,7 +544,7 @@ theorem legQAdd_coeff_differentiableOn (ν : ℂ) {z₂ : ℂ} (hz₂ : z₂ ∈
       exact ((by fun_prop : Continuous fun t : ℝ => exp (-((m:ℂ) * t * I))).mul
         (hct z hz)).aestronglyMeasurable
     · refine ae_of_all _ fun t => ?_
-      simp only [legAdd_associatedP_zero_eq]
+      simp only [legExt_associatedP_eq]
       refine (differentiableOn_const _).mul (DifferentiableOn.regularizedGaussHG
         (differentiableOn_const _) (differentiableOn_const _) (differentiableOn_const _) ?_
         (fun z hz => legQAdd_Z_mem hz hz₂ t))
@@ -750,7 +756,7 @@ theorem legQAdd_Z_contDiff (ν : ℂ) {z₁ z₂ : ℂ} (hz₁ : z₁ ∈ legQAd
   have := hG2.comp_contDiff hh fun t => legQAdd_Z_mem hz₁ hz₂ t
   convert this using 1
   funext t
-  simp only [Function.comp, legAdd_associatedP_zero_eq]
+  simp only [Function.comp, legExt_associatedP_eq]
 
 /-- **Addition theorem for `P_ν` in the complex plane** (DLMF 14.28.1), for `Re z₁, Re z₂ > 0`,
 `z₁, z₂ ∉ (0, 1]`, every complex degree and every angle. -/

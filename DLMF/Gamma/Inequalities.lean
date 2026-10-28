@@ -92,6 +92,7 @@ theorem trigamma_le_of_le {x y : ℝ} (hx : 0 < x) (hxy : x ≤ y) :
   have h2 : x + n ≤ y + n := by linarith
   exact pow_le_pow_left₀ (by positivity) (inv_anti₀ h1 h2) 2
 
+/-- `∑_{n≥0} 1/(1+n)² = π²/6`. -/
 theorem hasSum_recip_one_add_sq : HasSum (fun n : ℕ => ((1 : ℝ) + n)⁻¹ ^ 2) (π ^ 2 / 6) := by
   have h := (hasSum_nat_add_iff' 1).mpr hasSum_zeta_two
   simp only [Finset.sum_range_one, Nat.cast_zero, ne_eq, OfNat.ofNat_ne_zero,
@@ -100,10 +101,7 @@ theorem hasSum_recip_one_add_sq : HasSum (fun n : ℕ => ((1 : ℝ) + n)⁻¹ ^ 
   push_cast
   rw [one_div, inv_pow, add_comm]
 
-theorem trigamma_one_eq : Real.trigamma 1 = π ^ 2 / 6 := by
-  rw [Real.trigamma_eq_tsum one_pos]
-  exact hasSum_recip_one_add_sq.tsum_eq
-
+/-- `∑ 1/(1+n)³` converges. -/
 theorem summable_recip_one_add_cube : Summable fun n : ℕ => ((1 : ℝ) + n)⁻¹ ^ 3 := by
   refine hasSum_recip_one_add_sq.summable.of_nonneg_of_le (fun n => by positivity) fun n => ?_
   have h1 : (1 : ℝ) ≤ 1 + n := by linarith [(Nat.cast_nonneg n : (0 : ℝ) ≤ n)]
@@ -136,6 +134,7 @@ theorem tsum_recip_one_add_cube_le : ∑' n : ℕ, ((1 : ℝ) + n)⁻¹ ^ 3 ≤ 
     _ = π ^ 2 / 6 / 2 + 1 / 2 := hg.tsum_eq
     _ ≤ 4 / 3 := by nlinarith [Real.pi_lt_d2, Real.pi_pos]
 
+/-- For `a > 0`, `s ≥ 0`: `a⁻² - (a + s)⁻² ≤ 2 s a⁻³`. -/
 theorem recip_sq_sub_recip_sq_le {a s : ℝ} (ha : 0 < a) (hs : 0 ≤ s) :
     a⁻¹ ^ 2 - (a + s)⁻¹ ^ 2 ≤ 2 * s * a⁻¹ ^ 3 := by
   have hb : 0 < a + s := by linarith
@@ -163,6 +162,7 @@ theorem trigamma_one_sub_le {s : ℝ} (hs : 0 ≤ s) :
     _ ≤ 2 * s * (4 / 3) := mul_le_mul_of_nonneg_left tsum_recip_one_add_cube_le (by positivity)
     _ = 8 / 3 * s := by ring
 
+/-- For `x > 0`, `ψ` has derivative `ψ'(x)` at `x`. -/
 theorem hasDerivAt_digamma_trigamma {x : ℝ} (hx : 0 < x) :
     HasDerivAt Real.digamma (Real.trigamma x) x := by
   rw [Real.trigamma_eq_tsum hx]
@@ -185,7 +185,7 @@ theorem log_Gamma_one_add_ge {t : ℝ} (ht : 0 ≤ t) :
       (fun s hs => (hgd s (interior_subset hs)).hasDerivWithinAt) fun s hs => ?_
     rw [interior_Ici] at hs
     have := trigamma_one_sub_le (le_of_lt hs)
-    rw [trigamma_one_eq] at this
+    rw [trigamma_one] at this
     linarith
   have hg0 : g 0 = 0 := by simp [g, Real.digamma_one]
   have hgnn : ∀ s, 0 ≤ s → 0 ≤ g s := fun s hs =>
@@ -225,7 +225,7 @@ theorem log_Gamma_one_sub_ge {r : ℝ} (hr0 : 0 ≤ r) (hr1 : r < 1) :
       (fun s hs => (hk1d s (interior_subset hs)).hasDerivWithinAt) fun s hs => ?_
     rw [interior_Ico] at hs
     have := trigamma_le_of_le (x := 1 - s) (y := 1) (by linarith [hs.2]) (by linarith [hs.1])
-    rw [trigamma_one_eq] at this
+    rw [trigamma_one] at this
     linarith
   have hk10 : k1 0 = 0 := by simp [k1, Real.digamma_one]
   have h0mem : (0 : ℝ) ∈ Ico (0 : ℝ) 1 := ⟨le_rfl, one_pos⟩
@@ -315,10 +315,12 @@ theorem recip_Gamma_sq_poly {t g Z : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) (hg0 :
     _ ≤ 2 * f' * (1 + t) ^ 2 := hpoly
     _ ≤ 2 * f * (1 + t) ^ 2 := by gcongr
 
+/-- For `G > 0`, `(1/G)² = exp(-2 log G)`. -/
 theorem recip_sq_eq_exp {G : ℝ} (hG : 0 < G) : (1 / G) ^ 2 = Real.exp (-2 * Real.log G) := by
   rw [neg_mul, Real.exp_neg, show 2 * Real.log G = Real.log (G ^ 2) by
     rw [Real.log_pow]; norm_num, Real.exp_log (by positivity), one_div, inv_pow]
 
+/-- DLMF 5.6.3 on `[1, 2)`: `Γ(x)⁻² + Γ(1/x)⁻² ≤ 2` for `1 ≤ x < 2`. -/
 theorem recip_Gamma_sq_add_of_one_le_of_lt_two {x : ℝ} (h1 : 1 ≤ x) (h2 : x < 2) :
     (1 / Real.Gamma x) ^ 2 + (1 / Real.Gamma x⁻¹) ^ 2 ≤ 2 := by
   have hx0 : 0 < x := by linarith
@@ -363,7 +365,8 @@ theorem recip_Gamma_sq_add_of_one_le_of_lt_two {x : ℝ} (h1 : 1 ≤ x) (h2 : x 
         nlinarith [key]
 
 /-- DLMF 5.6.3, the inequality `Γ(x)⁻² + Γ(1/x)⁻² ≤ 2` for `x > 0`. -/
-theorem recip_Gamma_sq_add_le_two {x : ℝ} (hx : 0 < x) :
+@[dlmf 5.6.E3]
+theorem recip_Gamma_sq_add {x : ℝ} (hx : 0 < x) :
     (1 / Real.Gamma x) ^ 2 + (1 / Real.Gamma x⁻¹) ^ 2 ≤ 2 := by
   wlog h1 : 1 ≤ x generalizing x
   · have hx' : 1 ≤ x⁻¹ := (one_le_inv₀ hx).2 (le_of_lt (not_le.1 h1))
@@ -390,17 +393,13 @@ theorem recip_Gamma_sq_add_le_two {x : ℝ} (hx : 0 < x) :
 
 end RecipGammaSq
 
+/-- DLMF 5.6.2: `1/Γ(x) + 1/Γ(1/x) ≤ 2` for `x > 0`. -/
 @[dlmf 5.6.E2]
 theorem recip_Gamma_add_recip_Gamma_recip {x : ℝ} (hx : 0 < x) :
     1 / Real.Gamma x + 1 / Real.Gamma x⁻¹ ≤ 2 := by
-  have h := recip_Gamma_sq_add_le_two hx
+  have h := recip_Gamma_sq_add hx
   nlinarith [sq_nonneg (1 / Real.Gamma x - 1 / Real.Gamma x⁻¹),
     sq_nonneg (1 / Real.Gamma x + 1 / Real.Gamma x⁻¹ - 2)]
-
-@[dlmf 5.6.E3]
-theorem recip_Gamma_sq_add {x : ℝ} (hx : 0 < x) :
-    (1 / Real.Gamma x) ^ 2 + (1 / Real.Gamma x⁻¹) ^ 2 ≤ 2 := by
-  exact recip_Gamma_sq_add_le_two hx
 
 /-- `ψ` is strictly increasing on `(0, ∞)`. -/
 theorem digamma_strictMonoOn : StrictMonoOn Real.digamma (Set.Ioi 0) := by
@@ -427,6 +426,7 @@ theorem strictConvexOn_log_Gamma :
   rw [(Real.hasDerivAt_log_Gamma ha).deriv, (Real.hasDerivAt_log_Gamma hb).deriv]
   exact digamma_strictMonoOn ha hb hab
 
+/-- `log Γ(y + 1) = log Γ(y) + log y` for `y > 0`. -/
 theorem log_Gamma_add_one' {y : ℝ} (hy : 0 < y) :
     Real.log (Real.Gamma (y + 1)) = Real.log (Real.Gamma y) + Real.log y := by
   rw [Real.Gamma_add_one hy.ne', Real.log_mul hy.ne' (Real.Gamma_pos_of_pos hy).ne', add_comm]
@@ -475,7 +475,7 @@ theorem log_le_half_sub_recip {r : ℝ} (hr : 1 ≤ r) : Real.log r ≤ (r - r�
     intro r hr
     have := (((hasDerivAt_id r).sub (hasDerivAt_inv hr.ne')).div_const 2).sub
       (Real.hasDerivAt_log hr.ne')
-    exact this.congr_deriv (by first | ring | (simp only [id_eq]; ring))
+    exact this.congr_deriv (by ring)
   have hmono : MonotoneOn k (Set.Ici 1) := by
     refine monotoneOn_of_deriv_nonneg (convex_Ici 1)
       (fun r hr => (hd r (by linarith [Set.mem_Ici.mp hr])).continuousAt.continuousWithinAt)
@@ -686,6 +686,7 @@ theorem Gamma_ratio_digamma_bounds {x s : ℝ} (hx : 0 < x) (hs0 : 0 < s) (hs1 :
     simp only [hG] at h
     linarith
 
+/-- DLMF 5.6.6: `|Γ(x + iy)| ≤ |Γ(x)|` for `x > 0`. -/
 @[dlmf 5.6.E6]
 theorem norm_Gamma_add_mul_I_le {x y : ℝ} (hx : 0 < x) :
     ‖Complex.Gamma (x + I * y)‖ ≤ |Real.Gamma x| := by
@@ -699,6 +700,7 @@ theorem norm_Gamma_add_mul_I_le {x y : ℝ} (hx : 0 < x) :
     Complex.norm_cpow_eq_rpow_re_of_pos ht']
   simp
 
+/-- DLMF 5.6.7: `|Γ(x + iy)| ≥ (sech(π y))^(1/2) Γ(x)` for `x ≥ 1/2`. -/
 @[dlmf 5.6.E7]
 theorem norm_Gamma_add_mul_I_ge {x y : ℝ} (hx : 1 / 2 ≤ x) :
     ‖Complex.Gamma (x + I * y)‖ ≥ Real.sqrt (1 / Real.cosh (π * y)) * Real.Gamma x := by

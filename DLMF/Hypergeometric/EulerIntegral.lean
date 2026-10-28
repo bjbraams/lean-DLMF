@@ -7,6 +7,7 @@ module
 
 public import DLMF.Hypergeometric.Series
 public import Mathlib.Analysis.Normed.Group.Tannery
+public import Carlson.TwoVariable.GaussHypergeometric
 
 /-!
 # Euler's integral representation (AAR §2.2)
@@ -18,7 +19,8 @@ $$
 \int_0^1 t^{b-1}(1-t)^{c-b-1}(1-zt)^{-a}\,dt.
 $$
 
-Gauss's summation theorem (the case `z = 1`) is recorded as `gauss_summation`.
+Gauss's summation theorem (the case `z = 1`) is recorded as `gauss_summation`; its proof is
+`Carlson.ordinaryHypergeometric_one` from lean-codes.
 -/
 
 @[expose] public section
@@ -153,7 +155,7 @@ section GaussSummation
 open Filter Nat
 open scoped Topology
 
-/-- Helper lemma for `gauss_summation`: the value at `1` as a sum of Gauss coefficients. -/
+/-- The value of `₂F₁(a, b; c; 1)` as the sum of the Gauss coefficients. -/
 theorem ordinaryHypergeometric_one_eq_tsum (a b c : ℂ) :
     ₂F₁ a b c (1 : ℂ) = ∑' n, gaussHGCoeff a b c n := by
   rw [ordinaryHypergeometric_eq_tsum]
@@ -162,100 +164,7 @@ theorem ordinaryHypergeometric_one_eq_tsum (a b c : ℂ) :
   funext n
   simp [gaussHGCoeff, poch, div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm]
 
-/-- Helper lemma for `gauss_summation`: `n t_n → 0` for the Gauss coefficients at `z = 1`. -/
-theorem tendsto_natCast_mul_gaussHGCoeff {a b c : ℂ} (h : 0 < (c - a - b).re) :
-    Tendsto (fun n : ℕ => (n : ℂ) * gaussHGCoeff a b c n) atTop (𝓝 0) := by
-  by_cases hpole : ∃ k : ℕ, a = -k ∨ b = -k ∨ c = -k
-  · obtain ⟨k, hk⟩ := hpole
-    apply tendsto_const_nhds.congr'
-    filter_upwards [eventually_gt_atTop k] with n hn
-    rcases hk with rfl | rfl | rfl <;> simp [gaussHGCoeff, poch_neg_nat_eq_zero hn]
-  push Not at hpole
-  have ht := (tendsto_gaussHGCoeff_div_cpow (fun k => (hpole k).1) (fun k => (hpole k).2.1)
-    (fun k => (hpole k).2.2)).norm
-  have hre : (a + b - c).re < 0 := by simp only [sub_re, add_re] at h ⊢; linarith
-  have hp : Tendsto (fun n : ℕ => (n : ℝ) ^ (a + b - c).re) atTop (𝓝 0) := by
-    have := (tendsto_rpow_neg_atTop (y := -(a + b - c).re) (by linarith)).comp
-      tendsto_natCast_atTop_atTop
-    simpa only [neg_neg, Function.comp_def] using this
-  have hprod := ht.mul hp
-  rw [mul_zero] at hprod
-  rw [tendsto_zero_iff_norm_tendsto_zero]
-  apply hprod.congr'
-  filter_upwards [eventually_gt_atTop 0] with n hn
-  have hnr : (0 : ℝ) < n := Nat.cast_pos.mpr hn
-  rw [norm_div, norm_natCast_cpow_of_pos hn, norm_mul, Complex.norm_natCast,
-    show (a + b - c - 1).re = (a + b - c).re - 1 by simp, Real.rpow_sub hnr, Real.rpow_one]
-  have : (0 : ℝ) < (n : ℝ) ^ (a + b - c).re := Real.rpow_pos_of_pos hnr _
-  field_simp
-
-/-- Helper lemma for `gauss_summation`: the termwise form of the contiguous relation
-`c(c-a-b)F(c) - (c-a)(c-b)F(c+1) = 0` at `z = 1`, which telescopes. -/
-theorem gaussHGCoeff_contiguous_one_telescope {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (n : ℕ) :
-    c * (c - a - b) * gaussHGCoeff a b c n - (c - a) * (c - b) * gaussHGCoeff a b (c + 1) n =
-      c * ((n : ℂ) * gaussHGCoeff a b c n -
-        ((n + 1 : ℕ) : ℂ) * gaussHGCoeff a b c (n + 1)) := by
-  have hc0 : c ≠ 0 := by simpa using hc 0
-  have hcn : c + n ≠ 0 := by simpa using not_neg_nat_add_nat hc n 0
-  have hp : poch c n ≠ 0 := poch_ne_zero_of_not_neg_nat hc n
-  have hrel : poch (c + 1) n = poch c n * (c + n) / c := by
-    rw [eq_div_iff hc0, ← poch_succ, poch_succ_left, mul_comm]
-  have hf : (n ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
-  rw [gaussHGCoeff, gaussHGCoeff, gaussHGCoeff, poch_succ a, poch_succ b, poch_succ c,
-    Nat.factorial_succ, hrel]
-  push_cast
-  field_simp
-  ring
-
-/-- Helper lemma for `gauss_summation`: the contiguous relation
-`c(c-a-b)F(a,b;c;1) = (c-a)(c-b)F(a,b;c+1;1)` (AAR (2.2.3)). -/
-theorem tsum_gaussHGCoeff_contiguous_one {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k)
-    (h : 0 < (c - a - b).re) :
-    c * (c - a - b) * ∑' n, gaussHGCoeff a b c n =
-      (c - a) * (c - b) * ∑' n, gaussHGCoeff a b (c + 1) n := by
-  have hs : Summable (gaussHGCoeff a b c) := by
-    simpa using ordinaryHypergeometric_summable_of_mem_sphere (z := 1) (by simp) h
-  have h1 : 0 < (c + 1 - a - b).re := by
-    simp only [sub_re, add_re, one_re] at h ⊢
-    linarith
-  have hs1 : Summable (gaussHGCoeff a b (c + 1)) := by
-    simpa using ordinaryHypergeometric_summable_of_mem_sphere (z := 1) (by simp) h1
-  set d : ℕ → ℂ := fun n => (n : ℂ) * gaussHGCoeff a b c n with hd
-  have hsg : Summable fun n =>
-      c * (c - a - b) * gaussHGCoeff a b c n - (c - a) * (c - b) * gaussHGCoeff a b (c + 1) n :=
-    (hs.mul_left _).sub (hs1.mul_left _)
-  have hpart : Tendsto (fun N => ∑ i ∈ Finset.range N,
-      (c * (c - a - b) * gaussHGCoeff a b c i -
-        (c - a) * (c - b) * gaussHGCoeff a b (c + 1) i)) atTop (𝓝 0) := by
-    have hdN : Tendsto (fun N => c * (d 0 - d N)) atTop (𝓝 0) := by
-      have := ((tendsto_natCast_mul_gaussHGCoeff h).const_mul c).neg
-      rw [mul_zero, neg_zero] at this
-      refine this.congr fun N => ?_
-      simp [d]
-    refine hdN.congr fun N => ?_
-    simp_rw [gaussHGCoeff_contiguous_one_telescope hc]
-    rw [← Finset.mul_sum, Finset.sum_range_sub']
-  have key := tendsto_nhds_unique hsg.hasSum.tendsto_sum_nat hpart
-  rw [(hs.mul_left _).tsum_sub (hs1.mul_left _), tsum_mul_left, tsum_mul_left] at key
-  linear_combination key
-
-/-- Helper lemma for `gauss_summation`: iterating the contiguous relation. -/
-theorem poch_mul_tsum_gaussHGCoeff_one {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k)
-    (h : 0 < (c - a - b).re) (n : ℕ) :
-    poch c n * poch (c - a - b) n * ∑' k, gaussHGCoeff a b c k =
-      poch (c - a) n * poch (c - b) n * ∑' k, gaussHGCoeff a b (c + n) k := by
-  induction n with
-  | zero => simp [poch_zero]
-  | succ n ih =>
-    have hn' : 0 < (c + n - a - b).re := by
-      simp only [sub_re, add_re, natCast_re] at h ⊢
-      linarith [(Nat.cast_nonneg n : (0 : ℝ) ≤ n)]
-    have G := tsum_gaussHGCoeff_contiguous_one (not_neg_nat_add_nat hc n) hn'
-    rw [show c + ((n + 1 : ℕ) : ℂ) = c + n + 1 by push_cast; ring, poch_succ c,
-      poch_succ (c - a - b), poch_succ (c - a), poch_succ (c - b)]
-    linear_combination (c + n) * (c - a - b + n) * ih + poch (c - a) n * poch (c - b) n * G
-
-/-- Helper lemma for `gauss_summation`: real parts bound Pochhammer norms from below. -/
+/-- For `Re z ≥ 0`, `(Re z)ₖ ≤ ‖(z)ₖ‖`. -/
 theorem poch_eval_re_le_norm_poch {z : ℂ} (hz : 0 ≤ z.re) (k : ℕ) :
     (ascPochhammer ℝ k).eval z.re ≤ ‖poch z k‖ := by
   induction k with
@@ -266,154 +175,13 @@ theorem poch_eval_re_le_norm_poch {z : ℂ} (hz : 0 ≤ z.re) (k : ℕ) :
       simpa using re_le_norm (z + k)
     exact mul_le_mul ih hle (by positivity) (norm_nonneg _)
 
-/-- Helper lemma for `gauss_summation`. -/
-theorem pow_le_poch_eval {x : ℝ} (hx : 0 ≤ x) (k : ℕ) :
-    x ^ k ≤ (ascPochhammer ℝ k).eval x := by
-  induction k with
-  | zero => simp
-  | succ k ih =>
-    rw [pow_succ, ascPochhammer_succ_eval]
-    exact mul_le_mul ih (le_add_of_nonneg_right (Nat.cast_nonneg k)) hx
-      (poch_eval_nonneg hx k)
-
-/-- Helper lemma for `gauss_summation`: `F(a,b;c+n;1) → 1` as `n → ∞`. -/
-theorem tendsto_tsum_gaussHGCoeff_add_nat (a b c : ℂ) :
-    Tendsto (fun n : ℕ => ∑' k, gaussHGCoeff a b (c + n) k) atTop (𝓝 1) := by
-  obtain ⟨N₀, hN₀⟩ := exists_nat_gt (‖a‖ + ‖b‖ + 1 - c.re)
-  set r : ℝ := c.re + N₀ with hr
-  have hr0 : 0 < r := by linarith [norm_nonneg a, norm_nonneg b]
-  have hre : 0 < ((r : ℂ) - (‖a‖ : ℂ) - (‖b‖ : ℂ)).re := by simp; linarith
-  have h_sum : Summable fun k => ‖gaussHGCoeff (‖a‖ : ℂ) (‖b‖ : ℂ) (r : ℂ) k‖ := by
-    simpa using (ordinaryHypergeometric_summable_of_mem_sphere (z := 1) (by simp) hre).norm
-  have hB (k : ℕ) : ‖gaussHGCoeff (‖a‖ : ℂ) (‖b‖ : ℂ) (r : ℂ) k‖ =
-      (ascPochhammer ℝ k).eval ‖a‖ * (ascPochhammer ℝ k).eval ‖b‖ /
-        ((ascPochhammer ℝ k).eval r * k !) := by
-    rw [gaussHGCoeff, poch_ofReal, poch_ofReal, poch_ofReal, norm_div, norm_mul, norm_mul,
-      Complex.norm_real, Complex.norm_real, Complex.norm_real, Complex.norm_natCast,
-      Real.norm_of_nonneg (poch_eval_nonneg (norm_nonneg a) k),
-      Real.norm_of_nonneg (poch_eval_nonneg (norm_nonneg b) k),
-      Real.norm_of_nonneg (poch_eval_nonneg hr0.le k)]
-  have hnorm (n k : ℕ) : ‖gaussHGCoeff a b (c + n) k‖ =
-      ‖poch a k‖ * ‖poch b k‖ / (‖poch (c + n) k‖ * k !) := by
-    rw [gaussHGCoeff, norm_div, norm_mul, norm_mul, Complex.norm_natCast]
-  have hcre (n : ℕ) : (c + n).re = c.re + n := by simp
-  have h_bound : ∀ᶠ (n : ℕ) in atTop, ∀ k,
-      ‖gaussHGCoeff a b (c + n) k‖ ≤ ‖gaussHGCoeff (‖a‖ : ℂ) (‖b‖ : ℂ) (r : ℂ) k‖ := by
-    filter_upwards [eventually_ge_atTop N₀] with n hn k
-    have hrn : r ≤ (c + n).re := by
-      rw [hcre, hr]
-      exact add_le_add_right (Nat.cast_le.mpr hn) _
-    rw [hnorm, hB]
-    apply div_le_div₀ (mul_nonneg (poch_eval_nonneg (norm_nonneg a) k)
-        (poch_eval_nonneg (norm_nonneg b) k))
-      (mul_le_mul (norm_poch_le a k) (norm_poch_le b k) (norm_nonneg _)
-        (poch_eval_nonneg (norm_nonneg a) k))
-      (mul_pos (ascPochhammer_pos k r hr0) (Nat.cast_pos.mpr k.factorial_pos))
-    exact mul_le_mul_of_nonneg_right
-      ((poch_eval_mono hr0.le hrn k).trans (poch_eval_re_le_norm_poch (hr0.le.trans hrn) k))
-      (Nat.cast_nonneg _)
-  have hab : ∀ k : ℕ, Tendsto (fun n : ℕ => gaussHGCoeff a b (c + n) k) atTop
-      (𝓝 (if k = 0 then 1 else 0)) := by
-    intro k
-    rcases k with _ | k
-    · simp [gaussHGCoeff, poch_zero]
-    · simp only [Nat.add_one_ne_zero, ↓reduceIte]
-      set C : ℝ := ‖poch a (k + 1)‖ * ‖poch b (k + 1)‖ / (k + 1)! with hC
-      have hden : Tendsto (fun n : ℕ => (c.re + n) ^ (k + 1) * ((k + 1)! : ℝ)) atTop atTop :=
-        ((tendsto_pow_atTop (Nat.add_one_ne_zero k)).comp
-          (tendsto_atTop_add_const_left _ c.re (tendsto_natCast_atTop_atTop (R := ℝ)))).atTop_mul_const
-          (Nat.cast_pos.mpr (k + 1).factorial_pos)
-      refine squeeze_zero_norm' ?_
-        ((tendsto_const_nhds (x := ‖poch a (k + 1)‖ * ‖poch b (k + 1)‖)).div_atTop hden)
-      filter_upwards [eventually_ge_atTop N₀] with n hn
-      have hpos : 0 < c.re + n := by
-        have : (N₀ : ℝ) ≤ n := Nat.cast_le.mpr hn
-        linarith [norm_nonneg a, norm_nonneg b]
-      rw [hnorm]
-      apply div_le_div_of_nonneg_left (by positivity)
-        (mul_pos (pow_pos hpos _) (Nat.cast_pos.mpr (k + 1).factorial_pos))
-      refine mul_le_mul_of_nonneg_right ?_ (Nat.cast_nonneg _)
-      rw [← hcre]
-      exact (pow_le_poch_eval (by rw [hcre]; exact hpos.le) _).trans
-        (poch_eval_re_le_norm_poch (by rw [hcre]; exact hpos.le) _)
-  have := tendsto_tsum_of_dominated_convergence h_sum hab h_bound
-  rwa [tsum_ite_eq] at this
-
-/-- Helper lemma for `gauss_summation`: the Pochhammer ratio tends to the Gamma quotient. -/
-theorem tendsto_poch_ratio_gauss {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (h : 0 < (c - a - b).re) :
-    Tendsto (fun n : ℕ => poch (c - a) n * poch (c - b) n / (poch c n * poch (c - a - b) n))
-      atTop (𝓝 (Gamma c * Gamma (c - a - b) / (Gamma (c - a) * Gamma (c - b)))) := by
-  have hab := not_neg_nat_of_re_pos h
-  have hpole (s : ℂ) (k : ℕ) (hs : s = -k) (f : ℕ → ℂ) :
-      ∀ᶠ n in atTop, (0 : ℂ) = f n * poch s n := by
-    filter_upwards [eventually_gt_atTop k] with n hn
-    rw [hs, poch_neg_nat_eq_zero hn, mul_zero]
-  by_cases hca : ∀ k : ℕ, c - a ≠ -k
-  · by_cases hcb : ∀ k : ℕ, c - b ≠ -k
-    · have hlim (s : ℂ) : Tendsto (fun n : ℕ => 1 + s / (n : ℂ)) atTop (𝓝 1) := by
-        simpa using (tendsto_const_div_atTop_nhds_zero_nat s).const_add 1
-      have ht := (((hlim c).mul (hlim (c - a - b))).div
-        ((hlim (c - a)).mul (hlim (c - b))) (by norm_num)).mul
-        (((GammaSeq_tendsto_Gamma c).mul (GammaSeq_tendsto_Gamma (c - a - b))).div
-          ((GammaSeq_tendsto_Gamma (c - a)).mul (GammaSeq_tendsto_Gamma (c - b)))
-          (mul_ne_zero (Gamma_ne_zero hca) (Gamma_ne_zero hcb)))
-      simp only [mul_one, div_one, one_mul] at ht
-      apply ht.congr'
-      filter_upwards [eventually_ne_atTop 0] with n hn
-      have hn0 : (n : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr hn
-      have hs (s : ℂ) (h : ∀ k : ℕ, s ≠ -k) : s + (n : ℂ) ≠ 0 := by
-        simpa only [ne_eq, eq_neg_iff_add_eq_zero] using h n
-      have hp (s : ℂ) : (n : ℂ) ^ s ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl hn0)
-      simp only [Pi.div_apply]
-      rw [GammaSeq_eq_poch, GammaSeq_eq_poch, GammaSeq_eq_poch, GammaSeq_eq_poch]
-      simp only [cpow_sub _ _ hn0]
-      have := hs c hc
-      have := hs _ hab
-      have := hs _ hca
-      have := hs _ hcb
-      have := hp a
-      have := hp b
-      have := hp c
-      have := poch_ne_zero_of_not_neg_nat hc n
-      have := poch_ne_zero_of_not_neg_nat hab n
-      have := poch_ne_zero_of_not_neg_nat hca n
-      have := poch_ne_zero_of_not_neg_nat hcb n
-      have := (Nat.cast_ne_zero (R := ℂ)).mpr n.factorial_ne_zero
-      have h1 (s : ℂ) (h : ∀ k : ℕ, s ≠ -k) : 1 + s / (n : ℂ) = (s + n) / n := by
-        field_simp
-        ring
-      rw [h1 c hc, h1 _ hab, h1 _ hca, h1 _ hcb]
-      field_simp
-    · push Not at hcb
-      obtain ⟨k, hk⟩ := hcb
-      rw [hk, Gamma_neg_nat_eq_zero, mul_zero, div_zero]
-      apply tendsto_const_nhds.congr'
-      filter_upwards [hpole _ k hk (poch (c - a))] with n hn
-      rw [← hk, ← hn, zero_div]
-  · push Not at hca
-    obtain ⟨k, hk⟩ := hca
-    rw [hk, Gamma_neg_nat_eq_zero, zero_mul, div_zero]
-    apply tendsto_const_nhds.congr'
-    filter_upwards [hpole _ k hk (poch (c - b))] with n hn
-    rw [← hk, mul_comm (poch (c - a) n), ← hn, zero_div]
-
 /-- Gauss's summation theorem: `₂F₁(a,b;c;1) = Γ(c)Γ(c-a-b)/(Γ(c-a)Γ(c-b))`
 when `Re(c-a-b) > 0` and `c` is not a nonpositive integer. -/
 @[dlmf 15.4.E20]
 theorem gauss_summation {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) (h : 0 < (c - a - b).re) :
     ₂F₁ a b c (1 : ℂ) =
-      Gamma c * Gamma (c - a - b) / (Gamma (c - a) * Gamma (c - b)) := by
-  have hab := not_neg_nat_of_re_pos h
-  rw [ordinaryHypergeometric_one_eq_tsum]
-  have hconst (n : ℕ) : ∑' k, gaussHGCoeff a b c k =
-      poch (c - a) n * poch (c - b) n / (poch c n * poch (c - a - b) n) *
-        ∑' k, gaussHGCoeff a b (c + n) k := by
-    rw [div_mul_eq_mul_div, eq_div_iff (mul_ne_zero (poch_ne_zero_of_not_neg_nat hc n)
-      (poch_ne_zero_of_not_neg_nat hab n))]
-    linear_combination poch_mul_tsum_gaussHGCoeff_one hc h n
-  have hlim := (tendsto_poch_ratio_gauss hc h).mul (tendsto_tsum_gaussHGCoeff_add_nat a b c)
-  rw [mul_one] at hlim
-  exact tendsto_nhds_unique (tendsto_const_nhds.congr hconst) hlim
+      Gamma c * Gamma (c - a - b) / (Gamma (c - a) * Gamma (c - b)) :=
+  Carlson.ordinaryHypergeometric_one hc h
 
 end GaussSummation
 

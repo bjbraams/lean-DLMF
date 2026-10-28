@@ -39,6 +39,7 @@ theorem real_betaIntegral {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
   simpa only [ProbabilityTheory.beta] using
     TauCeti.integral_rpow_mul_one_sub_rpow ha hb
 
+/-- DLMF 5.12.2: `∫₀^{π/2} sin^(2a-1)θ cos^(2b-1)θ dθ = B(a, b)/2` for `a, b > 0`. -/
 @[dlmf 5.12.E2]
 theorem beta_sin_cos {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
     ∫ θ : ℝ in (0 : ℝ)..(π / 2), Real.sin θ ^ (2 * a - 1) * Real.cos θ ^ (2 * b - 1) =
@@ -98,6 +99,7 @@ theorem beta_sin_cos {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
   rw [hpow hs, hpow hc]
   field_simp
 
+/-- DLMF 5.12.3: `∫₀^∞ t^(a-1)/(1 + t)^(a+b) dt = B(a, b)` for `Re a, Re b > 0`. -/
 @[dlmf 5.12.E3]
 theorem beta_on_Ioi {a b : ℂ} (_ha : 0 < a.re) (_hb : 0 < b.re) :
     ∫ t : ℝ in Set.Ioi 0, (t : ℂ) ^ (a - 1) / (1 + (t : ℂ)) ^ (a + b) =
@@ -280,6 +282,8 @@ theorem beta_shifted_of_pos {a b : ℂ} {x : ℝ} (hx : 0 < x) :
   push_cast
   ring
 
+/-- DLMF 5.12.4: `∫₀¹ t^(a-1)(1 - t)^(b-1)/(t + z)^(a+b) dt = B(a, b)(1 + z)^(-a) z^(-b)` for `Re a,
+Re b > 0` and `z` off the closed negative real axis. -/
 @[dlmf 5.12.E4]
 theorem beta_shifted {a b z : ℂ} (ha : 0 < a.re) (hb : 0 < b.re)
     (hz : z ∈ slitPlane) :
@@ -462,12 +466,15 @@ theorem integral_symm_of_odd {f : ℝ → ℝ} {c : ℝ}
   rw [h2]
   ring
 
+/-- For `β > -1` and continuous `g`, `cos^β x · g x` is interval integrable on subintervals of
+`[-π/2, π/2]`. -/
 theorem intervalIntegrable_cos_rpow_mul {β : ℝ} (hβ : -1 < β) {g : ℝ → ℝ} (hg : Continuous g)
     {s t : ℝ} (hst : Set.uIcc s t ⊆ Set.Icc (-(π / 2)) (π / 2)) :
     IntervalIntegrable (fun x : ℝ => Real.cos x ^ β * g x) volume s t :=
   ((intervalIntegrable_cos_rpow' hβ).mul_continuousOn hg.continuousOn).mono_set (by
     rwa [Set.uIcc_of_le (by linarith [Real.pi_pos] : -(π / 2) ≤ π / 2)])
 
+/-- The complex cast of an interval-integrable real function is interval integrable. -/
 theorem intervalIntegrable_ofReal {f : ℝ → ℝ} {s t : ℝ} (hf : IntervalIntegrable f volume s t) :
     IntervalIntegrable (fun x => (f x : ℂ)) volume s t :=
   ⟨hf.1.ofReal, hf.2.ofReal⟩
@@ -505,6 +512,7 @@ theorem integral_cos_rpow_mul_exp {α : ℝ} (hα : -1 < α) (b : ℝ) :
   simp
 
 
+/-- Almost every real number differs from a given `c`. -/
 theorem ae_ne_real (c : ℝ) : ∀ᵐ x ∂(volume : Measure ℝ), x ≠ c := by
   rw [ae_iff]
   simp
@@ -607,6 +615,7 @@ theorem hasSum_integral_one_add_mul_exp (α : ℝ) {μ r : ℝ} (hμ : 0 < μ) (
   rw [neg_pow]
   ring
 
+/-- `∫₀¹ uⁿ u^(s-1) du = 1/(n + s)` for `0 < s < 1`. -/
 theorem integral_pow_mul_rpow (n : ℕ) {s : ℝ} (hs0 : 0 < s) (hs1 : s < 1) :
     ∫ u in (0 : ℝ)..1, u ^ n * u ^ (s - 1) = 1 / (n + s) := by
   have hne : (n : ℝ) + (s - 1) ≠ 0 := by
@@ -671,6 +680,7 @@ theorem hasSum_integral_one_sub_mul (α : ℝ) {s r : ℝ} (hs0 : 0 < s) (hs1 : 
 
 
 
+/-- For `0 ≤ r ≤ 1`, `cos x ≤ |1 + r e^(2ix)| ≤ 2`. -/
 theorem norm_one_add_mul_exp_bounds {r x : ℝ} (hr0 : 0 ≤ r) (hr1 : r ≤ 1) :
     Real.cos x ≤ ‖1 + (r : ℂ) * Complex.exp (↑(2 * x) * I)‖ ∧
       ‖1 + (r : ℂ) * Complex.exp (↑(2 * x) * I)‖ ≤ 2 := by
@@ -696,6 +706,7 @@ theorem norm_one_add_mul_exp_bounds {r x : ℝ} (hr0 : 0 ≤ r) (hr1 : r ≤ 1) 
 
 
 
+/-- A point of `(-π/2, π/2]` other than `π/2` lies in `(-π/2, π/2)`. -/
 theorem mem_Ioo_of_mem_uIoc {x : ℝ} (hx : x ≠ π / 2) (hxI : x ∈ Set.uIoc (-(π / 2)) (π / 2)) :
     x ∈ Set.Ioo (-(π / 2)) (π / 2) := by
   rw [Set.uIoc_of_le (by linarith [Real.pi_pos])] at hxI
@@ -930,6 +941,7 @@ theorem integral_cos_rpow_mul_cos_shift {a : ℝ} (ha : 1 < a) (b : ℝ) :
     Real.one_rpow, mul_zero, Real.sin_zero, sub_zero] at hftc
   linarith
 
+/-- `∫₀^{π/2} cos^(a-1)t cos(-bt) dt = ∫₀^{π/2} cos^(a-1)t cos(bt) dt`. -/
 theorem integral_cos_rpow_mul_cos_neg (a b : ℝ) :
     ∫ t in (0 : ℝ)..(π / 2), Real.cos t ^ (a - 1) * Real.cos (-b * t) =
       ∫ t in (0 : ℝ)..(π / 2), Real.cos t ^ (a - 1) * Real.cos (b * t) := by
@@ -991,6 +1003,8 @@ theorem integral_cos_rpow_mul_cos {a b : ℝ} (ha : 0 < a) (hb : |b| < a + 1) :
 
 end CosineBeta
 
+/-- DLMF 5.12.5: `∫₀^{π/2} cos^(a-1)t cos(bt) dt = π / (2^a a B((a + b + 1)/2, (a - b + 1)/2))` for
+`a > 0`, `|b| < a + 1`. -/
 @[dlmf 5.12.E5]
 theorem beta_cos_cos {a b : ℝ} (ha : 0 < a) (hba : |b| < a + 1) :
     ∫ t : ℝ in (0 : ℝ)..(π / 2), Real.cos t ^ (a - 1) * Real.cos (b * t) =
@@ -1005,6 +1019,8 @@ theorem beta_cos_cos {a b : ℝ} (ha : 0 < a) (hba : |b| < a + 1) :
   have h2 : 0 < (2 : ℝ) ^ a := by positivity
   field_simp
 
+/-- DLMF 5.12.6: `∫₀^π sin^(a-1)t e^(ibt) dt = π e^(iπb/2) / (2^(a-1) a B((a + b + 1)/2, (a - b +
+1)/2))` for `a > 0`, `|b| < a + 1`. -/
 @[dlmf 5.12.E6]
 theorem beta_sin_exp {a b : ℝ} (ha : 0 < a) (hba : |b| < a + 1) :
     ∫ t : ℝ in (0 : ℝ)..π, (Real.sin t : ℂ) ^ (a - 1 : ℂ) * Complex.exp (I * b * t) =
@@ -1162,8 +1178,10 @@ theorem integral_exp_div_cosh_rpow {a c : ℝ} (hc : |c| < a) :
   refine ⟨?_, ?_⟩
   · rw [← integrableOn_univ]
     exact (keyI.mp hint).const_mul _
-  · rw [MeasureTheory.integral_const_mul, ← setIntegral_univ, ← key, hval, show a + c + (a - c) = 2 * a by ring]
+  · rw [MeasureTheory.integral_const_mul, ← setIntegral_univ, ← key, hval,
+      show a + c + (a - c) = 2 * a by ring]
 
+/-- DLMF 5.12.7: `∫₀^∞ cosh(2bt)/cosh^(2a)t dt = 4^(a-1) B(a + b, a - b)` for `|b| < a`. -/
 @[dlmf 5.12.E7]
 theorem beta_cosh {a b : ℝ} (ha : |b| < a) :
     ∫ t : ℝ in Set.Ioi 0, Real.cosh (2 * b * t) / Real.cosh t ^ (2 * a) =
@@ -1252,12 +1270,7 @@ theorem vb_rpow_le {w : ℂ} (hw : 0 < w.re) (σ : ℝ) (t : ℝ) :
   · exact (Real.rpow_le_rpow hq0.le hq2 hσ).trans (le_max_right _ _)
   · exact (Real.rpow_le_rpow_of_nonpos hc₁ hq1 hσ).trans (le_max_left _ _)
 
-theorem vb_ne_zero {w : ℂ} (hw : 0 < w.re) (t : ℝ) : w + I * t ≠ 0 := by
-  intro h
-  have := congrArg Complex.re h
-  simp at this
-  linarith
-
+/-- `z - it = z + i(-t)`. -/
 theorem vb_sub_eq (z : ℂ) (t : ℝ) : z - I * t = z + I * ((-t : ℝ) : ℂ) := by
   push_cast; ring
 
@@ -1293,6 +1306,7 @@ theorem vb_norm_cpow_le {x : ℂ} (hx : 0 < x.re) (c : ℂ) :
   rw [abs_mul] at this
   nlinarith [abs_nonneg c.im, abs_nonneg (arg x)]
 
+/-- For `x > 0` and `σ₁ ≤ σ ≤ σ₂`, `x^(-σ) ≤ x^(-σ₁) + x^(-σ₂)`. -/
 theorem vb_rpow_le_add {x σ σ₁ σ₂ : ℝ} (hx : 0 < x) (h₁ : σ₁ ≤ σ) (h₂ : σ ≤ σ₂) :
     x ^ (-σ) ≤ x ^ (-σ₁) + x ^ (-σ₂) := by
   rcases le_total 1 x with h | h
@@ -1304,10 +1318,14 @@ theorem vb_rpow_le_add {x σ σ₁ σ₂ : ℝ} (hx : 0 < x) (h₁ : σ₁ ≤ �
 /-- The integrand of Cauchy's vertical Beta integral. -/
 def vbF (a b w z : ℂ) (t : ℝ) : ℂ := (w + I * t) ^ (-a) * (z - I * t) ^ (-b)
 
+/-- `Re(z - it) > 0` when `Re z > 0`. -/
 theorem vb_re_sub {z : ℂ} (hz : 0 < z.re) (t : ℝ) : 0 < (z - I * t).re := by simpa using hz
 
+/-- `Re(w + it) > 0` when `Re w > 0`. -/
 theorem vb_re_add {w : ℂ} (hw : 0 < w.re) (t : ℝ) : 0 < (w + I * t).re := by simpa using hw
 
+/-- Bound on the integrand `(w + it)^(-a) (z - it)^(-b)` of 5.12.8 by `e^(π|Im a|/2) e^(π|Im b|/2)
+|w + it|^(-Re a) |z - it|^(-Re b)`. -/
 theorem vb_norm_vbF_le {a b w z : ℂ} (hw : 0 < w.re) (hz : 0 < z.re) (t : ℝ) :
     ‖vbF a b w z t‖ ≤ Real.exp (π / 2 * |a.im|) * Real.exp (π / 2 * |b.im|) *
       (‖w + I * t‖ ^ (-a.re) * ‖z - I * t‖ ^ (-b.re)) := by
@@ -1322,15 +1340,9 @@ theorem vb_norm_vbF_le {a b w z : ℂ} (hw : 0 < w.re) (hz : 0 < z.re) (t : ℝ)
         mul_le_mul h1 h2 (norm_nonneg _) (by positivity)
     _ = _ := by ring
 
+/-- The integrand `vbF a b w z` of 5.12.8 is measurable. -/
 theorem vb_measurable_vbF (a b w z : ℂ) : Measurable (vbF a b w z) := by
   unfold vbF; fun_prop
-
-theorem vb_integrable_vbF {a b w z : ℂ} (hw : 0 < w.re) (hz : 0 < z.re)
-    (hab : 1 < (a + b).re) : Integrable (vbF a b w z) := by
-  have := (vb_integrable_rpow hw hz (α := a.re) (β := b.re) (by simpa using hab)).const_mul
-    (Real.exp (π / 2 * |a.im|) * Real.exp (π / 2 * |b.im|))
-  exact this.mono' (vb_measurable_vbF a b w z).aestronglyMeasurable
-    (Eventually.of_forall fun t => vb_norm_vbF_le hw hz t)
 
 /-- A parametric integral of functions holomorphic in the parameter, locally dominated by an
 integrable function, is holomorphic. -/
@@ -1405,6 +1417,7 @@ theorem vb_cpow_neg_eq_integral {a x : ℂ} (ha : 0 < a.re) (hx : 0 < x.re) :
   rw [integral_cpow_mul_cexp_neg_mul_Ioi ha hx, ← mul_assoc,
     inv_mul_cancel₀ (Complex.Gamma_ne_zero_of_re_pos ha), one_mul]
 
+/-- For `Re b, Re z > 0`, `v^(b-1) e^(-zv)` is integrable on `(0, ∞)`. -/
 theorem vb_integrableOn_cpow_exp {b z : ℂ} (hb : 0 < b.re) (hz : 0 < z.re) :
     IntegrableOn (fun v : ℝ => (v : ℂ) ^ (b - 1) * cexp (-(z * v))) (Ioi 0) := by
   have h := integrableOn_rpow_mul_exp_neg_mul_rpow (p := 1) (s := b.re - 1) (b := z.re)
@@ -1567,6 +1580,8 @@ def vbR (a b w z : ℂ) : ℂ :=
   (w + z) ^ (1 - a - b) * Complex.Gamma (a + b) /
     ((a + b - 1) * Complex.Gamma a * Complex.Gamma b)
 
+/-- DLMF 5.12.8 for `Re a > 0`, `Re b > 1`: `(1/2π) ∫ (w + it)^(-a)(z - it)^(-b) dt = (w +
+z)^(1-a-b) Γ(a + b) / ((a + b - 1) Γ(a) Γ(b))`. -/
 theorem vb_eq_base {a b w z : ℂ} (ha : 0 < a.re) (hb : 1 < b.re) (hw : 0 < w.re)
     (hz : 0 < z.re) : (1 / (2 * π)) * ∫ t, vbF a b w z t = vbR a b w z := by
   rw [vb_base ha hb hw hz, vbR]
@@ -1580,6 +1595,7 @@ theorem vb_eq_base {a b w z : ℂ} (ha : 0 < a.re) (hb : 1 < b.re) (hw : 0 < w.r
   rw [hΓ, show (1 : ℂ) - a - b = -(a + b - 1) by ring]
   field_simp
 
+/-- The right-hand side `vbR a b w z` of 5.12.8 is holomorphic in `b` on `Re b > 1 - Re a`. -/
 theorem vb_differentiableOn_vbR {a w z : ℂ} (hw : 0 < w.re) (hz : 0 < z.re) :
     DifferentiableOn ℂ (fun b => vbR a b w z) {b : ℂ | 1 - a.re < b.re} := by
   intro b hb
@@ -1624,6 +1640,7 @@ theorem vb_eq_of_re_pos {a b w z : ℂ} (ha : 0 < a.re) (hab : 1 < (a + b).re) (
   exact hL.eqOn_of_preconnected_of_eventuallyEq hR (convex_halfSpace_re_gt _).isPreconnected
     h2 hev hbU
 
+/-- Swapping `(a, w)` with `(b, z)` leaves the integral of 5.12.8 unchanged. -/
 theorem vb_integral_symm (a b w z : ℂ) : ∫ t, vbF a b w z t = ∫ t, vbF b a z w t := by
   have h := Measure.integral_comp_mul_left (vbF b a z w) (-1)
   rw [inv_neg, inv_one, abs_neg, abs_one, one_smul] at h

@@ -626,19 +626,6 @@ lemma q2b_abs_sub_arctan_le (x : ℝ) : |x - Real.arctan x| ≤ |x| ^ 3 / 3 := b
     rw [abs_of_nonpos hx, ← abs_neg, abs_of_nonneg (by linarith)]
     linarith
 
-/-- Summability of the Weierstrass series in `phaseShift`. -/
-lemma q2b_summable_sub_arctan (η : ℝ) :
-    Summable (fun n : ℕ => η / (n + 1) - Real.arctan (η / (n + 1))) := by
-  have hs : Summable (fun n : ℕ => |η| ^ 3 / 3 * (1 / ((n : ℝ) + 1) ^ 3)) :=
-    ((summable_nat_add_iff 1).mpr
-      (Real.summable_one_div_nat_pow.mpr (by norm_num : 1 < 3))).mul_left _
-      |>.congr fun n => by push_cast; rfl
-  refine Summable.of_norm_bounded hs fun n => ?_
-  rw [Real.norm_eq_abs]
-  refine (q2b_abs_sub_arctan_le _).trans_eq ?_
-  rw [abs_div, abs_of_pos (by positivity : (0 : ℝ) < n + 1)]
-  field_simp
-
 /-- The Weierstrass series in `phaseShift` is `O(|η|³)`. -/
 lemma q2b_abs_tsum_sub_arctan_le (η : ℝ) :
     |∑' n : ℕ, (η / (n + 1) - Real.arctan (η / (n + 1)))| ≤
@@ -647,8 +634,8 @@ lemma q2b_abs_tsum_sub_arctan_le (η : ℝ) :
     ((summable_nat_add_iff 1).mpr (Real.summable_one_div_nat_pow.mpr (by norm_num : 1 < 3))).congr
       fun n => by push_cast; rfl
   rw [← tsum_mul_left]
-  refine (norm_tsum_le_tsum_norm (q2b_summable_sub_arctan η).norm).trans ?_
-  refine (q2b_summable_sub_arctan η).norm.tsum_le_tsum (fun n => ?_) (hs.mul_left _)
+  refine (norm_tsum_le_tsum_norm (q2a_summable_phase η).norm).trans ?_
+  refine (q2a_summable_phase η).norm.tsum_le_tsum (fun n => ?_) (hs.mul_left _)
   rw [Real.norm_eq_abs]
   refine (q2b_abs_sub_arctan_le _).trans_eq ?_
   rw [abs_div, abs_of_pos (by positivity : (0 : ℝ) < n + 1)]

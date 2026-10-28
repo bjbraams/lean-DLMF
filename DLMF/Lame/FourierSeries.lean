@@ -63,6 +63,7 @@ lemma p2l_hasSum_two_mul_add {f : ℕ → ℝ} {a : ℝ} (r : ℕ)
   refine (hg.hasSum_iff fun j hj => h0 j fun hjr => hj ⟨j / 2, ?_⟩).2 h
   simp only; omega
 
+/-- `(-1)^j = 1` iff `j` is even, and `(-1)^j = -1` iff `j` is odd (in `ℝ`). -/
 lemma p2l_neg_one_pow_mod (j : ℕ) : ((-1 : ℝ) ^ j = 1 ↔ j % 2 = 0) ∧
     ((-1 : ℝ) ^ j = -1 ↔ j % 2 = 1) := by
   rcases Nat.even_or_odd j with h | h
@@ -96,11 +97,13 @@ lemma p2l_lameEsk_sin (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ
     (fun x => (Real.lameEsk_parity hν hk0 hk1 m x).2.1)
     (fun x => (Real.lameEsk_parity hν hk0 hk1 m x).1) weighted x
 
+/-- For `k² < 1`, `x ↦ cos(j φ(x))` is continuous, `φ = π/2 - am(x, k)`. -/
 lemma p2l_continuous_cos_phi (hk : k ^ 2 < 1) (j : ℕ) :
     Continuous fun t => Real.cos (j * Real.lamePhi t k) :=
   Real.continuous_cos.comp (continuous_const.mul
     (continuous_iff_continuousAt.2 fun t => (p1l_hasDerivAt_phi hk t).continuousAt))
 
+/-- For `k² < 1`, `x ↦ sin(j φ(x))` is continuous, `φ = π/2 - am(x, k)`. -/
 lemma p2l_continuous_sin_phi (hk : k ^ 2 < 1) (j : ℕ) :
     Continuous fun t => Real.sin (j * Real.lamePhi t k) :=
   Real.continuous_sin.comp (continuous_const.mul
@@ -167,14 +170,17 @@ lemma p2l_integral_sin_false (w : ℝ → ℝ) (j : ℕ) :
   rw [Real.lameSinCoeff, ← mul_assoc, show π / 4 * (4 / π) = 1 by field_simp, one_mul]
   congr 1; funext t; simp only [Bool.false_eq_true, ↓reduceIte]; ring
 
+/-- For `ν ≥ -1/2`, `0 < k < 1`, the Lamé function `x ↦ Ec^m_ν(x, k²)` is continuous. -/
 lemma p2l_continuous_lameEck (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
     Continuous fun x => Real.lameEck ν m x k :=
   (Real.lameEck_isLameEigenfunction hν hk0 hk1 m).1.differentiable.continuous
 
+/-- For `ν ≥ -1/2`, `0 < k < 1`, the Lamé function `x ↦ Es^m_ν(x, k²)` is continuous. -/
 lemma p2l_continuous_lameEsk (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
     Continuous fun x => Real.lameEsk ν m x k :=
   (Real.lameEsk_isLameEigenfunction hν hk0 hk1 m).1.differentiable.continuous
 
+/-- For `k² < 1`, `x ↦ dn(x, k)` is continuous on `ℝ`. -/
 lemma p2l_continuous_dn (hk : k ^ 2 < 1) : Continuous fun x => Real.jacobiDnm x (k ^ 2) :=
   continuous_iff_continuousAt.2 fun x => (Real.hasDerivAt_jacobiDnm hk x).continuousAt
 
@@ -318,6 +324,7 @@ lemma p2l_contDiff_lame_three {h : ℝ} {w : ℝ → ℝ} (hk : k ^ 2 < 1)
   rw [hdd]
   exact ((contDiff_const.sub (contDiff_const.mul (hsn.pow 2))).neg).mul hw1
 
+/-- For `k² < 1`, the incomplete elliptic integral `ψ ↦ F(ψ, k)` is `C³`. -/
 lemma p2l_contDiff_incEllIntFm_three (hk : k ^ 2 < 1) :
     ContDiff ℝ 3 (fun ψ => Real.incEllIntFm ψ (k ^ 2)) := by
   have hd : deriv (fun ψ => Real.incEllIntFm ψ (k ^ 2)) =
@@ -332,6 +339,7 @@ lemma p2l_contDiff_incEllIntFm_three (hk : k ^ 2 < 1) :
   exact (contDiff_const.sub (contDiff_const.mul (Real.contDiff_sin.pow 2))).rpow_const_of_ne
     fun ψ => (hpos ψ).ne'
 
+/-- For `k² < 1`, the weight `ρ(φ)` (`1` or `(1 - k² cos²φ)^{1/2}`) is `C³`. -/
 lemma p2l_contDiff_rho_three (hk : k ^ 2 < 1) (weighted : Bool) :
     ContDiff ℝ 3 (p2lRho k weighted) := by
   unfold p2lRho; cases weighted
@@ -340,6 +348,7 @@ lemma p2l_contDiff_rho_three (hk : k ^ 2 < 1) (weighted : Bool) :
       fun φ => (p2l_one_sub_pos hk φ).ne'
   · simpa using contDiff_const
 
+/-- If `w` is `C³` then so is `φ ↦ w(F(π/2 - φ, k))/ρ(φ)`, for `k² < 1`. -/
 lemma p2lPhiFun_contDiff_three (hk : k ^ 2 < 1) {w : ℝ → ℝ} (hw : ContDiff ℝ 3 w)
     (weighted : Bool) : ContDiff ℝ 3 (p2lPhiFun w k weighted) :=
   (hw.comp ((p2l_contDiff_incEllIntFm_three hk).comp (contDiff_const.sub contDiff_id))).div
@@ -451,30 +460,31 @@ lemma p1l_green {h : ℝ} {w F F1 F2 : ℝ → ℝ} (hk : k ^ 2 < 1) (hw : Real.
   exact intervalIntegral.integral_eq_sub_of_hasDerivAt (fun x _ => hd x)
     (hcont.intervalIntegrable a b)
 
-theorem p1l_cos_phi (x : ℝ) : Real.cos (Real.lamePhi x k) = Real.jacobiSnm x (k ^ 2) := by
-  simp [Real.lamePhi, Real.cos_pi_div_two_sub, Real.jacobiSnm]
-
+/-- `sin φ(x) = cn(x, k)` for `φ(x) = π/2 - am(x, k)`. -/
 lemma p1l_sin_phi (x : ℝ) : Real.sin (Real.lamePhi x k) = Real.jacobiCnm x (k ^ 2) := by
   simp [Real.lamePhi, Real.sin_pi_div_two_sub, Real.jacobiCnm]
 
-lemma p1l_continuous_dn (hk : k ^ 2 < 1) : Continuous fun x => Real.jacobiDnm x (k ^ 2) :=
-  continuous_iff_continuousAt.2 fun x => (Real.hasDerivAt_jacobiDnm hk x).continuousAt
-
+/-- For `k² < 1`, `x ↦ cn(x, k)` is continuous on `ℝ`. -/
 lemma p1l_continuous_cn (hk : k ^ 2 < 1) : Continuous fun x => Real.jacobiCnm x (k ^ 2) :=
   continuous_iff_continuousAt.2 fun x => (Real.hasDerivAt_jacobiCnm hk x).continuousAt
 
+/-- For `k² < 1`, `x ↦ φ(x) = π/2 - am(x, k)` is continuous. -/
 lemma p1l_continuous_phi (hk : k ^ 2 < 1) : Continuous fun x => Real.lamePhi x k :=
   continuous_iff_continuousAt.2 fun x => (p1l_hasDerivAt_phi hk x).continuousAt
 
+/-- `φ(0) = π/2`, since `am(0, k) = 0`. -/
 lemma p1l_phi_zero (hk : k ^ 2 < 1) : Real.lamePhi 0 k = π / 2 := by
   simp [Real.lamePhi, Real.jacobiAmm_zero hk]
 
+/-- `φ(K) = 0`, since `am(K, k) = π/2`. -/
 lemma p1l_phi_K (hk : k ^ 2 < 1) : Real.lamePhi (Real.compEllIntKm (k ^ 2)) k = 0 := by
   rw [Real.lamePhi, Real.jacobiAmm_compEllIntKm hk, sub_self]
 
+/-- `sn(0, k) = 0` for `k² < 1`. -/
 lemma p1l_sn_zero (hk : k ^ 2 < 1) : Real.jacobiSnm 0 (k ^ 2) = 0 := by
   simp [Real.jacobiSnm, Real.jacobiAmm_zero hk]
 
+/-- `cn(K, k) = 0` for `k² < 1`. -/
 lemma p1l_cn_K (hk : k ^ 2 < 1) : Real.jacobiCnm (Real.compEllIntKm (k ^ 2)) (k ^ 2) = 0 := by
   simp [Real.jacobiCnm, Real.jacobiAmm_compEllIntKm hk]
 
@@ -514,7 +524,7 @@ lemma p1l_int_unw {h j : ℝ} {w g g1 : ℝ → ℝ} (hk : k ^ 2 < 1)
     · simp only [D, S, Cn, φ, Function.comp_apply]; ring
   have hS : Continuous S := l29_continuous_sn hk
   have hC : Continuous Cn := p1l_continuous_cn hk
-  have hD : Continuous D := p1l_continuous_dn hk
+  have hD : Continuous D := p2l_continuous_dn hk
   have hP : Continuous φ := p1l_continuous_phi hk
   have hF2 : Continuous fun x =>
       j * k ^ 2 * S x * Cn x * g1 (j * φ x) - j ^ 2 * D x ^ 2 * g (j * φ x) := by
@@ -530,7 +540,7 @@ lemma p1l_int_unw {h j : ℝ} {w g g1 : ℝ → ℝ} (hk : k ^ 2 < 1)
         k ^ 2 / 2 * (ν - j + 1) * (ν + j) * (w x * g ((j - 2) * φ x))) := by
     intro x
     have hD2 := Real.mul_jacobiSnm_sq_add_jacobiDnm_sq hk x
-    have hc := p1l_cos_phi (k := k) x
+    have hc := p2l_lamePhi_cos (k := k) x
     have hs := p1l_sin_phi (k := k) x
     rw [show (j + 2) * φ x = j * φ x + 2 * φ x by ring,
       show (j - 2) * φ x = j * φ x + -(2 * φ x) by ring, hadd, hadd, Real.cos_neg, Real.sin_neg,
@@ -597,7 +607,7 @@ lemma p1l_int_w {h j : ℝ} {w g g1 : ℝ → ℝ} (hk : k ^ 2 < 1)
     simp only [D, S, Cn, Pi.mul_apply, Pi.neg_apply, Pi.pow_apply]; ring
   have hS : Continuous S := l29_continuous_sn hk
   have hC : Continuous Cn := p1l_continuous_cn hk
-  have hD : Continuous D := p1l_continuous_dn hk
+  have hD : Continuous D := p2l_continuous_dn hk
   have hP : Continuous φ := p1l_continuous_phi hk
   have hF2 : Continuous fun x => -(k ^ 2) * D x * (Cn x ^ 2 - S x ^ 2) * g (j * φ x) +
         3 * j * k ^ 2 * D x * S x * Cn x * g1 (j * φ x) - j ^ 2 * D x ^ 3 * g (j * φ x) := by
@@ -618,7 +628,7 @@ lemma p1l_int_w {h j : ℝ} {w g g1 : ℝ → ℝ} (hk : k ^ 2 < 1)
     intro x
     have hD2 := Real.mul_jacobiSnm_sq_add_jacobiDnm_sq hk x
     have hSC := Real.jacobiSnm_sq_add_jacobiCnm_sq x (k ^ 2)
-    have hc := p1l_cos_phi (k := k) x
+    have hc := p2l_lamePhi_cos (k := k) x
     have hs := p1l_sin_phi (k := k) x
     rw [show (j + 2) * φ x = j * φ x + 2 * φ x by ring,
       show (j - 2) * φ x = j * φ x + -(2 * φ x) by ring, hadd, hadd, Real.cos_neg, Real.sin_neg,

@@ -272,19 +272,10 @@ theorem legInt_iterate_ferrers (ν : ℂ) (k : ℕ) {x : ℝ} (hx : x ∈ Ioc (-
 def legInt_K (a b : ℂ) (k : ℕ) (w : ℂ) : ℂ :=
   (w-1)^k * regularizedGaussHG a b ((k:ℂ)+1) ((1-w)/2)
 
-/-- `(1-w)/2` lies in the cut plane when `1+w` lies in the slit plane. -/
-theorem legInt_half_mem_cutPlane' {w : ℂ} (hw : 1+w ∈ slitPlane) : (1-w)/2 ∈ cutPlane := by
-  rw [mem_cutPlane, show 1-(1-w)/2 = (1+w)/2 by ring]
-  rw [mem_slitPlane_iff] at hw ⊢
-  simp only [div_ofNat_re, div_ofNat_im]
-  rcases hw with h | h
-  · left; linarith
-  · right; intro h'; apply h; linarith
-
 /-- `K_{k+1}' = K_k` where `1+w` lies in the slit plane. -/
 theorem legInt_hasDerivAt_K (a b : ℂ) (k : ℕ) {w : ℂ} (hw : 1+w ∈ slitPlane) :
     HasDerivAt (legInt_K a b (k+1)) (legInt_K a b k w) w := by
-  have hc := legInt_half_mem_cutPlane' hw
+  have hc := mem_cutPlane_of_one_add hw
   have hψ : HasDerivAt (fun z : ℂ => (1-z)/2) (-1/2) w := by
     simpa using ((hasDerivAt_id' w).const_sub 1).div_const 2
   have h := ((legInt_hasDerivAt_G a b k hc).comp w hψ).const_mul ((-2)^(k+1):ℂ)
@@ -304,7 +295,7 @@ theorem legInt_hasDerivAt_K (a b : ℂ) (k : ℕ) {w : ℂ} (hw : 1+w ∈ slitPl
 /-- `K_k` is continuous where `1+w` lies in the slit plane. -/
 theorem legInt_continuousAt_K (a b : ℂ) (k : ℕ) {w : ℂ} (hw : 1+w ∈ slitPlane) :
     ContinuousAt (legInt_K a b k) w := by
-  have hc := legInt_half_mem_cutPlane' hw
+  have hc := mem_cutPlane_of_one_add hw
   unfold legInt_K
   refine ContinuousAt.mul (by fun_prop) ?_
   exact ContinuousAt.comp (g := regularizedGaussHG a b ((k:ℂ)+1))
@@ -1239,14 +1230,6 @@ theorem legInt_heine_bdry {x : ℝ} (hx : 1 < x) (n : ℕ) :
   rw [mul_zero] at h3
   refine h3.congr fun R => ?_
   rw [inv_pow, zero_add, pow_one, ← div_eq_mul_inv, div_div, ← pow_succ']
-
-/-- At order zero and natural degree, `𝑸_n = Q_n/n!`. -/
-theorem legInt_olverQ_nat_zero_order (n : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    olverQ n 0 z = legendreQ n z / n.factorial := by
-  have hreg : LegendreQRegular (n:ℂ) 0 := fun k hk => by
-    have := congrArg re hk; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
-  rw [olverQ_normalization hreg, associatedQ_zero_order _ hz, add_zero, Gamma_nat_eq_factorial]
-  simp
 
 /-- Heine's integral for `Q_n` on `(1,∞)`, unnormalized. -/
 theorem legInt_heine (x : ℝ) (hx : 1 < x) (n : ℕ) :

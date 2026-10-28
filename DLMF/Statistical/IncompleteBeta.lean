@@ -132,6 +132,7 @@ theorem cpow_eq_cpow_sub_one_mul {a : ℂ} (ha : a ≠ 0) (t : ℂ) : t ^ a = t 
   · rw [ht, zero_cpow ha, mul_zero]
   · rw [cpow_sub _ _ ht, cpow_one, div_mul_cancel₀ _ ht]
 
+/-- If `0 < Re a` then `0 < Re (a + 1)`. -/
 theorem re_add_one_pos {a : ℂ} (ha : 0 < a.re) : 0 < (a + 1).re := by simp; linarith
 
 /-- `B_x(a,b) = B_x(a+1,b) + B_x(a,b+1)`, from `t + (1 - t) = 1`. -/

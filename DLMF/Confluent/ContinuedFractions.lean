@@ -54,6 +54,8 @@ def kummerMContFractCoeff (a b : ℂ) (k : ℕ) : ℂ :=
     let m : ℂ := ((k + 1) / 2 : ℕ)
     (a + m) / ((b + 2 * m - 1) * (b + 2 * m))
 
+/-- The continued fraction `1 + a₀z/(1 + a₁z/(1 + ⋯))` with the Kummer coefficients
+`kummerMContFractCoeff a b k` (DLMF 13.5.1). -/
 @[dlmf 13.5.E2]
 def kummerMContinuedFraction (a b z : ℂ) : GenContFract ℂ where
   h := 1
@@ -68,11 +70,15 @@ def kummerUContFractCoeff (a b : ℂ) (k : ℕ) : ℂ :=
     let m : ℂ := ((k + 1) / 2 : ℕ)
     a - b + m + 1
 
+/-- The continued fraction `1 + u₀/z/(1 + u₁/z/(1 + ⋯))` with the Tricomi coefficients
+`kummerUContFractCoeff a b k` (DLMF 13.5.2). -/
 @[dlmf 13.5.E4]
 def kummerUContinuedFraction (a b z : ℂ) : GenContFract ℂ where
   h := 1
   s := Stream'.Seq.ofStream fun k => ⟨kummerUContFractCoeff a b k / z, 1⟩
 
+/-- Coefficient form of the contiguous relation `M(c,d) - M(c+1,d+1) = (c-d) z M(c+1,d+2) /
+(d(d+1))`. -/
 theorem kumCF_coeff_I {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k) (n : ℕ) :
     d * (d + 1) * (kummerMCoeff c d n - kummerMCoeff (c + 1) (d + 1) n) =
       (c - d) * (if n = 0 then 0 else kummerMCoeff (c + 1) (d + 2) (n - 1)) := by
@@ -103,6 +109,7 @@ theorem kumCF_coeff_I {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k) (n : ℕ) :
     field_simp
     ring
 
+/-- Coefficient form of the contiguous relation `M(c,d) - M(c,d+1) = c z M(c+1,d+2) / (d(d+1))`. -/
 theorem kumCF_coeff_II {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k) (n : ℕ) :
     d * (d + 1) * (kummerMCoeff c d n - kummerMCoeff c (d + 1) n) =
       c * (if n = 0 then 0 else kummerMCoeff (c + 1) (d + 2) (n - 1)) := by
@@ -153,15 +160,12 @@ theorem kumCF_one_sub {d : ℂ} (hd : ∀ k : ℕ, d + 1 ≠ -k) (z : ℂ) :
     rw [e3]
     field_simp
 
-theorem kumCF_shift_ne {d : ℂ} (hd : ∀ k : ℕ, d ≠ -k) (j : ℕ) : ∀ k : ℕ, d + j ≠ -k := by
-  intro k h; apply hd (k + j); push_cast; linear_combination h
-
 /-- Contiguous relation `d(d+1)(M(c,d,z) - M(c+1,d+1,z)) = (c-d) z M(c+1,d+2,z)`. -/
 theorem kumCF_contig_I {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k) (z : ℂ) :
     d * (d + 1) * (kummerM c d z - kummerM (c + 1) (d + 1) z) =
       (c - d) * (z * kummerM (c + 1) (d + 2) z) := by
-  have hd1 : ∀ k : ℕ, d + 1 ≠ -k := by simpa using kumCF_shift_ne hd 1
-  have hd2 : ∀ k : ℕ, d + 2 ≠ -k := by simpa using kumCF_shift_ne hd 2
+  have hd1 : ∀ k : ℕ, d + 1 ≠ -k := by simpa using DLMF.Hypergeometric.not_neg_nat_add_nat hd 1
+  have hd2 : ∀ k : ℕ, d + 2 ≠ -k := by simpa using DLMF.Hypergeometric.not_neg_nat_add_nat hd 2
   have h := ((hasSum_kummerM (a := c) hd z).sub (hasSum_kummerM (a := c + 1) hd1 z)).mul_left
     (d * (d + 1))
   have h' := (hasSum_z_mul_kummerM (a := c + 1) hd2 z).mul_left (c - d)
@@ -175,8 +179,8 @@ theorem kumCF_contig_I {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k) (z : ℂ) :
 theorem kumCF_contig_II {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k) (z : ℂ) :
     d * (d + 1) * (kummerM c d z - kummerM c (d + 1) z) =
       c * (z * kummerM (c + 1) (d + 2) z) := by
-  have hd1 : ∀ k : ℕ, d + 1 ≠ -k := by simpa using kumCF_shift_ne hd 1
-  have hd2 : ∀ k : ℕ, d + 2 ≠ -k := by simpa using kumCF_shift_ne hd 2
+  have hd1 : ∀ k : ℕ, d + 1 ≠ -k := by simpa using DLMF.Hypergeometric.not_neg_nat_add_nat hd 1
+  have hd2 : ∀ k : ℕ, d + 2 ≠ -k := by simpa using DLMF.Hypergeometric.not_neg_nat_add_nat hd 2
   have h := ((hasSum_kummerM (a := c) hd z).sub (hasSum_kummerM (a := c) hd1 z)).mul_left
     (d * (d + 1))
   have h' := (hasSum_z_mul_kummerM (a := c + 1) hd2 z).mul_left c
@@ -186,6 +190,7 @@ theorem kumCF_contig_II {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k) (z : ℂ) :
   rw [← mul_sub_right_distrib, ← mul_assoc, kumCF_coeff_II hd n]
   ring
 
+/-- `(c + m + n)/(d + 2m + n) → 1/2` as `m → ∞`. -/
 theorem kumCF_ratio_tendsto (c d : ℂ) (n : ℕ) :
     Tendsto (fun m : ℕ => (c + m + n) / (d + 2 * m + n)) atTop (𝓝 (1 / 2)) := by
   have h1 : Tendsto (fun m : ℕ => ((c + n) / (m : ℂ) + 1) / ((d + n) / (m : ℂ) + 2)) atTop
@@ -199,6 +204,7 @@ theorem kumCF_ratio_tendsto (c d : ℂ) (n : ℕ) :
   rw [div_add_one hm', div_add' _ _ _ hm', div_div_div_cancel_right₀ hm']
   ring_nf
 
+/-- `(c+m)_n / (d+2m)_n → 2^{-n}` as `m → ∞`. -/
 theorem kumCF_poch_ratio_tendsto (c d : ℂ) (n : ℕ) :
     Tendsto (fun m : ℕ => poch (c + m) n / poch (d + 2 * m) n) atTop (𝓝 ((1 / 2) ^ n)) := by
   induction n with
@@ -209,6 +215,7 @@ theorem kumCF_poch_ratio_tendsto (c d : ℂ) (n : ℕ) :
     refine this.congr fun m => ?_
     rw [poch_succ, poch_succ, mul_div_mul_comm]
 
+/-- If `|c| + |d| ≤ m`, then `|(c+m)_n| ≤ |(d+2m)_n|`. -/
 theorem kumCF_norm_poch_le {c d : ℂ} {m : ℕ} (hm : ‖c‖ + ‖d‖ ≤ m) (n : ℕ) :
     ‖poch (c + m) n‖ ≤ ‖poch (d + 2 * m) n‖ := by
   induction n with
@@ -255,6 +262,7 @@ theorem kumCF_tendsto_exp_half (c d z : ℂ) :
     calc ‖poch (c + m) n‖ / ‖poch (d + 2 * m) n‖ * ‖z‖ ^ n ≤ 1 * ‖z‖ ^ n := by gcongr
       _ = _ := one_mul _
 
+/-- `1/(d + 2m + n) → 0` as `m → ∞`. -/
 theorem kumCF_recip_tendsto (d : ℂ) (n : ℕ) :
     Tendsto (fun m : ℕ => 1 / (d + 2 * m + n)) atTop (𝓝 0) := by
   have h1 : Tendsto (fun m : ℕ => (1 / (m : ℂ)) / ((d + n) / (m : ℂ) + 2)) atTop
@@ -268,6 +276,7 @@ theorem kumCF_recip_tendsto (d : ℂ) (n : ℕ) :
   rw [div_add' _ _ _ hm', div_div_div_cancel_right₀ hm']
   ring_nf
 
+/-- A property holding eventually along even and along odd indices holds eventually. -/
 theorem kumCF_eventually_of_even_odd {P : ℕ → Prop} (he : ∀ᶠ m in atTop, P (2 * m))
     (ho : ∀ᶠ m in atTop, P (2 * m + 1)) : ∀ᶠ j in atTop, P j := by
   obtain ⟨M1, h1⟩ := eventually_atTop.mp he
@@ -280,19 +289,23 @@ theorem kumCF_eventually_of_even_odd {P : ℕ → Prop} (he : ∀ᶠ m in atTop,
 /-- The backward solution `F_{2m} = M(a+m, b+2m)`, `F_{2m+1} = M(a+m+1, b+2m+1)`. -/
 def kumCF_F (a b z : ℂ) (j : ℕ) : ℂ := kummerM (a + ((j + 1) / 2 : ℕ)) (b + j) z
 
+/-- The even-indexed Kummer function in the continued-fraction chain is `M(a+m, b+2m, z)`. -/
 theorem kumCF_F_even (a b z : ℂ) (m : ℕ) :
     kumCF_F a b z (2 * m) = kummerM (a + m) (b + 2 * m) z := by
   simp only [kumCF_F, show (2 * m + 1) / 2 = m by omega]; push_cast; rfl
 
+/-- The odd-indexed Kummer function in the continued-fraction chain is `M(a+1+m, b+1+2m, z)`. -/
 theorem kumCF_F_odd (a b z : ℂ) (m : ℕ) :
     kumCF_F a b z (2 * m + 1) = kummerM (a + 1 + m) (b + 1 + 2 * m) z := by
   simp only [kumCF_F, show (2 * m + 1 + 1) / 2 = m + 1 by omega]; push_cast; ring_nf
 
+/-- The even Kummer continued-fraction coefficient is `(a-b-m)/((b+2m)(b+2m+1))`. -/
 theorem kumCF_coeff_even (a b : ℂ) (m : ℕ) :
     kummerMContFractCoeff a b (2 * m) = (a - b - m) / ((b + 2 * m) * (b + 2 * m + 1)) := by
   simp only [kummerMContFractCoeff, show (2 * m + 1) % 2 = 1 by omega, ↓reduceIte,
     show 2 * m / 2 = m by omega]
 
+/-- The odd Kummer continued-fraction coefficient is `(a+1+m)/((b+1+2m)(b+2m+2))`. -/
 theorem kumCF_coeff_odd (a b : ℂ) (m : ℕ) :
     kummerMContFractCoeff a b (2 * m + 1) =
       (a + 1 + m) / ((b + 1 + 2 * m) * (b + 1 + 2 * m + 1)) := by
@@ -300,6 +313,7 @@ theorem kumCF_coeff_odd (a b : ℂ) (m : ℕ) :
   simp only [kummerMContFractCoeff, h, ↓reduceIte, show (2 * m + 1 + 1) / 2 = m + 1 by omega]
   push_cast; ring_nf
 
+/-- The contiguous relation `M(c,d,z) = M(c+1,d+1,z) + (c-d) z M(c+1,d+2,z)/(d(d+1))`. -/
 theorem kumCF_rel_I {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k) (z : ℂ) :
     kummerM c d z = kummerM (c + 1) (d + 1) z +
       (c - d) / (d * (d + 1)) * z * kummerM (c + 1) (d + 2) z := by
@@ -310,6 +324,7 @@ theorem kumCF_rel_I {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k) (z : ℂ) :
   field_simp
   linear_combination h
 
+/-- The contiguous relation `M(c,d,z) = M(c,d+1,z) + c z M(c+1,d+2,z)/(d(d+1))`. -/
 theorem kumCF_rel_II {c d : ℂ} (hd : ∀ k : ℕ, d ≠ -k) (z : ℂ) :
     kummerM c d z = kummerM c (d + 1) z +
       c / (d * (d + 1)) * z * kummerM (c + 1) (d + 2) z := by
@@ -342,8 +357,9 @@ theorem kumCF_F_rec' {a b : ℂ} (z : ℂ) (j : ℕ) (hbj : ∀ k : ℕ, b + j �
 theorem kumCF_F_rec {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) (j : ℕ) :
     kumCF_F a b z j = kumCF_F a b z (j + 1) +
       kummerMContFractCoeff a b j * z * kumCF_F a b z (j + 2) :=
-  kumCF_F_rec' z j (kumCF_shift_ne hb j)
+  kumCF_F_rec' z j (DLMF.Hypergeometric.not_neg_nat_add_nat hb j)
 
+/-- The even and odd Kummer continued-fraction coefficients tend to `0`. -/
 theorem kumCF_coeff_tendsto (a b : ℂ) :
     Tendsto (fun m : ℕ => kummerMContFractCoeff a b (2 * m)) atTop (𝓝 0) ∧
       Tendsto (fun m : ℕ => kummerMContFractCoeff a b (2 * m + 1)) atTop (𝓝 0) := by
@@ -357,6 +373,8 @@ theorem kumCF_coeff_tendsto (a b : ℂ) :
     refine this.congr fun m => ?_
     rw [kumCF_coeff_odd]; simp only [div_eq_mul_inv, mul_inv]; push_cast; ring
 
+/-- Under the stated nondegeneracy conditions, every Kummer continued-fraction coefficient is
+nonzero. -/
 theorem kumCF_coeff_ne_zero {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (ha1 : ∀ m : ℕ, a + 1 + m ≠ 0)
     (hab : ∀ m : ℕ, a - b - m ≠ 0) (j : ℕ) : kummerMContFractCoeff a b j ≠ 0 := by
   have hb' : ∀ n : ℕ, b + n ≠ 0 := fun n h => hb n (by linear_combination h)
@@ -832,6 +850,8 @@ def whittakerMContFractCoeff (κ μ : ℂ) (k : ℕ) : ℂ :=
     let m : ℂ := ((k + 1) / 2 : ℕ)
     (1 / 2 + μ - κ + m) / ((2 * μ + 2 * m) * (2 * μ + 2 * m + 1))
 
+/-- The continued fraction with the Whittaker `M` coefficients `whittakerMContFractCoeff κ μ k`
+(DLMF 13.17.1). -/
 @[dlmf 13.17.E2]
 def whittakerMContinuedFraction (κ μ z : ℂ) : GenContFract ℂ where
   h := 1
@@ -846,6 +866,8 @@ def whittakerWContFractCoeff (κ μ : ℂ) (k : ℕ) : ℂ :=
     let m : ℂ := ((k + 1) / 2 : ℕ)
     1 / 2 - μ - κ + m
 
+/-- The continued fraction with the Whittaker `W` coefficients `whittakerWContFractCoeff κ μ k`
+(DLMF 13.17.3). -/
 @[dlmf 13.17.E4]
 def whittakerWContinuedFraction (κ μ z : ℂ) : GenContFract ℂ where
   h := 1

@@ -26,7 +26,7 @@ open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
 namespace DLMF.Legendre
 
-/-- ferrersP zero 1. -/
+/-- DLMF 14.5.1: for all complex `ν, μ`, `𝖯^μ_ν(0) = 2^μ π^{1/2}/(Γ((ν-μ)/2+1) Γ((1-ν-μ)/2))`. -/
 @[dlmf 14.5.E1]
 theorem ferrersP_zero_1 (ν μ : ℂ) :
     ferrersP ν μ 0=2^μ*Real.sqrt π/(Gamma ((ν-μ)/2+1)*Gamma ((1-ν-μ)/2)) := by
@@ -47,7 +47,8 @@ theorem ferrersP_zero_1 (ν μ : ℂ) :
   field_simp
   ring
 
-/-- ferrersP zero 2. -/
+/-- DLMF 14.5.2: for all complex `ν, μ`, `𝖯^μ_ν` has derivative `-2^{μ+1} π^{1/2}/(Γ((ν-μ+1)/2)
+Γ(-(ν+μ)/2))` at `x = 0`. -/
 @[dlmf 14.5.E2]
 theorem ferrersP_zero_2 (ν μ : ℂ) :
     HasDerivAt (ferrersP ν μ) (-2^(μ+1)*Real.sqrt π/(Gamma ((ν-μ+1)/2)*Gamma (-(ν+μ)/2))) 0 := by
@@ -62,7 +63,8 @@ theorem ferrersP_zero_2 (ν μ : ℂ) :
     filter_upwards [Ioo_mem_nhds (show (-1:ℝ) < 0 by norm_num) (show (0:ℝ) < 1 by norm_num)]
       with x hx using ferrersP_eq_quadratic ν μ hx
   refine (hd.congr_of_eventuallyEq hev).congr_deriv ?_
-  rw [regularizedGaussHG_zero_of_regular three_halves_ne_neg_nat, legendre_Gamma_three_halves,
+  rw [regularizedGaussHG_zero_of_regular DLMF.Hypergeometric.three_halves_not_neg_nat,
+      legendre_Gamma_three_halves,
     cpow_add _ _ (by norm_num : (2:ℂ) ≠ 0), cpow_one]
   have hs : (Real.sqrt π : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hpi : (π:ℂ) = (Real.sqrt π : ℂ)^2 := by
@@ -71,7 +73,8 @@ theorem ferrersP_zero_2 (ν μ : ℂ) :
   field_simp
   ring
 
-/-- ferrersQ zero 3. -/
+/-- DLMF 14.5.3: when `ν+μ ∉ {-1,-2,…}`, `𝖰^μ_ν(0) = -2^{μ-1} π^{1/2} sin((ν+μ)π/2)
+Γ((ν+μ+1)/2)/Γ((ν-μ)/2+1)`. -/
 @[dlmf 14.5.E3]
 theorem ferrersQ_zero_3 (ν μ : ℂ) (h : LegendreQRegular ν μ) :
     ferrersQ ν μ 0=-2^(μ-1)*Real.sqrt π*sin ((ν+μ)*π/2)*Gamma ((ν+μ+1)/2)/Gamma ((ν-μ)/2+1) := by
@@ -86,7 +89,8 @@ theorem ferrersQ_zero_3 (ν μ : ℂ) (h : LegendreQRegular ν μ) :
   rw [hpi]
   field_simp
 
-/-- ferrersQ zero 4. -/
+/-- DLMF 14.5.4: when `ν+μ ∉ {-1,-2,…}`, `𝖰^μ_ν` has derivative `2^μ π^{1/2} cos((ν+μ)π/2)
+Γ((ν+μ)/2+1)/Γ((ν-μ+1)/2)` at `x = 0`. -/
 @[dlmf 14.5.E4]
 theorem ferrersQ_zero_4 (ν μ : ℂ) (h : LegendreQRegular ν μ) :
     HasDerivAt (ferrersQ ν μ) (2^μ*Real.sqrt π*cos ((ν+μ)*π/2)*Gamma ((ν+μ)/2+1)/Gamma ((ν-μ+1)/2)) 0 := by
@@ -104,7 +108,8 @@ theorem ferrersQ_zero_4 (ν μ : ℂ) (h : LegendreQRegular ν μ) :
     ring
   rw [he]
   refine hd.congr_deriv ?_
-  rw [regularizedGaussHG_zero_of_regular three_halves_ne_neg_nat, legendre_Gamma_three_halves,
+  rw [regularizedGaussHG_zero_of_regular DLMF.Hypergeometric.three_halves_not_neg_nat,
+      legendre_Gamma_three_halves,
     show (ν+μ+2)/2 = (ν+μ)/2+1 by ring]
   have hs : (Real.sqrt π : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   have hpi : (π:ℂ) = (Real.sqrt π : ℂ)^2 := by
@@ -113,7 +118,7 @@ theorem ferrersQ_zero_4 (ν μ : ℂ) (h : LegendreQRegular ν μ) :
   field_simp
   ring
 
-/-- ferrersP degree 0. -/
+/-- DLMF 14.5.5: `𝖯_0(x) = 1` for `-1 < x < 1`. -/
 @[dlmf 14.5.E5]
 theorem ferrersP_degree_0 {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersP 0 0 x=1 := by
@@ -124,7 +129,7 @@ theorem ferrersP_degree_0 {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
   rw [hN]
   exact DLMF.OrthogonalPolynomials.legendrePolyP_zero _
 
-/-- ferrersP degree 1. -/
+/-- DLMF 14.5.6: `𝖯_1(x) = x` for `-1 < x < 1`. -/
 @[dlmf 14.5.E6]
 theorem ferrersP_degree_1 {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersP 1 0 x=x := by
@@ -135,7 +140,7 @@ theorem ferrersP_degree_1 {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
   rw [hN]
   exact DLMF.OrthogonalPolynomials.legendrePolyP_one _
 
-/-- ferrersP degree 2. -/
+/-- DLMF 14.5.28: `𝖯_2(x) = (3x²-1)/2` for `-1 < x < 1`. -/
 @[dlmf 14.5.E28]
 theorem ferrersP_degree_2 {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersP 2 0 x=(3*x^2-1)/2 := by
@@ -149,7 +154,7 @@ theorem ferrersP_degree_2 {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     DLMF.OrthogonalPolynomials.legendrePolyP_one] at h
   linear_combination h/2
 
-/-- associatedP degree 0. -/
+/-- DLMF 14.5.5: `P_0(z) = 1` for `z-1` in the slit plane (`z ∉ (-∞, 1]`). -/
 @[dlmf 14.5.E5]
 theorem associatedP_degree_0 {z : ℂ} (hz : z-1 ∈ slitPlane) :
     associatedP 0 0 z=1 := by
@@ -160,7 +165,7 @@ theorem associatedP_degree_0 {z : ℂ} (hz : z-1 ∈ slitPlane) :
   rw [hN]
   exact DLMF.OrthogonalPolynomials.legendrePolyP_zero _
 
-/-- associatedP degree 1. -/
+/-- DLMF 14.5.6: `P_1(z) = z` for `z-1` in the slit plane (`z ∉ (-∞, 1]`). -/
 @[dlmf 14.5.E6]
 theorem associatedP_degree_1 {z : ℂ} (hz : z-1 ∈ slitPlane) :
     associatedP 1 0 z=z := by
@@ -171,7 +176,7 @@ theorem associatedP_degree_1 {z : ℂ} (hz : z-1 ∈ slitPlane) :
   rw [hN]
   exact DLMF.OrthogonalPolynomials.legendrePolyP_one _
 
-/-- associatedP degree 2. -/
+/-- DLMF 14.5.28: `P_2(z) = (3z²-1)/2` for `z-1` in the slit plane (`z ∉ (-∞, 1]`). -/
 @[dlmf 14.5.E28]
 theorem associatedP_degree_2 {z : ℂ} (hz : z-1 ∈ slitPlane) :
     associatedP 2 0 z=(3*z^2-1)/2 := by
@@ -217,20 +222,13 @@ theorem ofReal_mul_regularizedGaussHG_log_ratio {x : ℝ} (hx : x ∈ Ioo (-1:�
     rw [Complex.norm_real, Real.norm_eq_abs, abs_lt]; exact ⟨hx.1, hx.2⟩
   have hw : ‖(x:ℂ)^2‖ < 1 := by rw [norm_pow]; nlinarith [norm_nonneg (x:ℂ)]
   rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw,
-    regularizedGaussHGFun_eq_div_Gamma three_halves_ne_neg_nat, legendre_Gamma_three_halves,
+    regularizedGaussHGFun_eq_div_Gamma DLMF.Hypergeometric.three_halves_not_neg_nat,
+        legendre_Gamma_three_halves,
     ← log_ratio hx1]
   have hs : (Real.sqrt π : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   field_simp
 
-/-- At order zero and natural degree, `𝑸_n = Q_n/n!`. -/
-theorem olverQ_nat_zero_order (n : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    olverQ n 0 z = legendreQ n z / n.factorial := by
-  have hreg : LegendreQRegular (n:ℂ) 0 := fun k hk => by
-    have := congrArg re hk; simp at this; linarith [(k.cast_nonneg : (0:ℝ) ≤ k)]
-  rw [olverQ_normalization hreg, associatedQ_zero_order _ hz, add_zero, Gamma_nat_eq_factorial]
-  simp
-
-/-- ferrersQ degree 0. -/
+/-- DLMF 14.5.7: `𝖰_0(x) = (1/2) ln((1+x)/(1-x))` for `-1 < x < 1`. -/
 @[dlmf 14.5.E7]
 theorem ferrersQ_degree_0 {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersQ 0 0 x=1/2*log ((1+x)/(1-x):ℂ) := by
@@ -242,7 +240,7 @@ theorem ferrersQ_degree_0 {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
   rw [legendre_Gamma_one_half, mul_assoc, hA, hpi]
   field_simp
 
-/-- ferrersQ degree 1. -/
+/-- DLMF 14.5.8: `𝖰_1(x) = (x/2) ln((1+x)/(1-x)) - 1` for `-1 < x < 1`. -/
 @[dlmf 14.5.E8]
 theorem ferrersQ_degree_1 {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersQ 1 0 x=x/2*log ((1+x)/(1-x):ℂ)-1 := by
@@ -258,7 +256,7 @@ theorem ferrersQ_degree_1 {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
   field_simp at hA ⊢
   linear_combination (x:ℂ) * hA
 
-/-- ferrersQ degree 2. -/
+/-- DLMF 14.5.29: `𝖰_2(x) = ((3x²-1)/4) ln((1+x)/(1-x)) - 3x/2` for `-1 < x < 1`. -/
 @[dlmf 14.5.E29]
 theorem ferrersQ_degree_2 {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersQ 2 0 x=(3*x^2-1:ℂ)/4*log ((1+x)/(1-x):ℂ)-3*x/2 := by
@@ -278,28 +276,31 @@ theorem ferrersQ_degree_2 {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
   field_simp at hA ⊢
   linear_combination (6*(x:ℂ)^2-2) * hA
 
-/-- olverQ degree 0. -/
+/-- DLMF 14.5.9: `𝑸_0(z) = (1/2)(ln(z+1) - ln(z-1))` for `z-1` in the slit plane (`z ∉ (-∞, 1]`),
+principal logarithms. -/
 @[dlmf 14.5.E9]
 theorem olverQ_degree_0 {z : ℂ} (hz : z-1 ∈ slitPlane) :
     olverQ 0 0 z=1/2*(log (z+1)-log (z-1)) := by
-  have h := olverQ_nat_zero_order 0 hz
+  have h := legInt_olverQ_nat_zero_order 0 hz
   norm_num at h
   rw [h, legendreQ_zero hz, log_add_one_sub_log_sub_one hz]
 
-/-- olverQ degree 1. -/
+/-- DLMF 14.5.10: `𝑸_1(z) = (z/2)(ln(z+1) - ln(z-1)) - 1` for `z-1` in the slit plane (`z ∉ (-∞,
+1]`), principal logarithms. -/
 @[dlmf 14.5.E10]
 theorem olverQ_degree_1 {z : ℂ} (hz : z-1 ∈ slitPlane) :
     olverQ 1 0 z=z/2*(log (z+1)-log (z-1))-1 := by
-  have h := olverQ_nat_zero_order 1 hz
+  have h := legInt_olverQ_nat_zero_order 1 hz
   norm_num at h
   rw [h, legendreQ_one hz, legendreQ_zero hz, log_add_one_sub_log_sub_one hz]
   ring
 
-/-- olverQ degree 2. -/
+/-- DLMF 14.5.30: `𝑸_2(z) = ((3z²-1)/8)(ln(z+1) - ln(z-1)) - 3z/4` for `z-1` in the slit plane (`z ∉
+(-∞, 1]`), principal logarithms. -/
 @[dlmf 14.5.E30]
 theorem olverQ_degree_2 {z : ℂ} (hz : z-1 ∈ slitPlane) :
     olverQ 2 0 z=(3*z^2-1)/8*(log (z+1)-log (z-1))-3*z/4 := by
-  have h := olverQ_nat_zero_order 2 hz
+  have h := legInt_olverQ_nat_zero_order 2 hz
   norm_num at h
   have hr := legendreQ_recurrence (ν := 1) one_ne_zero hz
   norm_num at hr
@@ -307,7 +308,7 @@ theorem olverQ_degree_2 {z : ℂ} (hz : z-1 ∈ slitPlane) :
   rw [legendreQ_one hz, legendreQ_zero hz] at hr
   linear_combination hr/4
 
-/-- ferrersP half order 11. -/
+/-- DLMF 14.5.11: for `0 < θ < π`, `𝖯^{1/2}_ν(cos θ) = (2/(π sin θ))^{1/2} cos((ν+1/2)θ)`. -/
 @[dlmf 14.5.E11]
 theorem ferrersP_half_order_11 (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
     ferrersP ν (1/2) (Real.cos θ)=(2/(π*Real.sin θ):ℂ)^(1/2:ℂ)*cos ((ν+1/2)*θ)/(1) := by
@@ -350,7 +351,8 @@ theorem ferrersP_half_order_11 (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < �
   congr 2
   push_cast; ring
 
-/-- ferrersP half order 12. -/
+/-- DLMF 14.5.12: for `0 < θ < π`, `𝖯^{-1/2}_ν(cos θ) = (2/(π sin θ))^{1/2} sin((ν+1/2)θ)/(ν+1/2)`,
+with the limiting value `(2/(π sin θ))^{1/2} θ` at `ν = -1/2`. -/
 @[dlmf 14.5.E12]
 theorem ferrersP_half_order_12 (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
     ferrersP ν (-1/2) (Real.cos θ)=if ν=-1/2 then (2/(π*Real.sin θ):ℂ)^(1/2:ℂ)*θ else (2/(π*Real.sin θ):ℂ)^(1/2:ℂ)*sin ((ν+1/2)*θ)/(ν+1/2) := by
@@ -430,7 +432,8 @@ theorem ferrersP_half_order_12 (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < �
       show (2*(ν+1)-1) = 2*(ν+1/2) by ring]
     field_simp
 
-/-- ferrersQ half order 13. -/
+/-- DLMF 14.5.13: for `ν+1/2 ∉ {-1,-2,…}` and `0 < θ < π`, `𝖰^{1/2}_ν(cos θ) = -(π/(2 sin θ))^{1/2}
+sin((ν+1/2)θ)`. -/
 @[dlmf 14.5.E13]
 theorem ferrersQ_half_order_13 (ν : ℂ) (h : LegendreQRegular ν (1/2)) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
     ferrersQ ν (1/2) (Real.cos θ)=-(π/(2*Real.sin θ):ℂ)^(1/2:ℂ)*sin ((ν+1/2)*θ)/(1) := by
@@ -512,7 +515,8 @@ theorem ferrersQ_half_order_13 (ν : ℂ) (h : LegendreQRegular ν (1/2)) {θ : 
   linear_combination (π * Q * R * sp⁻¹ / 2) * htrig + (π * cos ((ν + 1/2) * π/2) * Q * R * sp⁻¹ / 2) * hF2
     - (sin ((ν + 1/2) * θ) / 2) * hT - (sin ((ν + 1/2) * θ) * Q * R / 2) * hpi'
 
-/-- ferrersQ half order 14. -/
+/-- DLMF 14.5.14: for `ν-1/2 ∉ {-1,-2,…}` and `0 < θ < π`, `𝖰^{-1/2}_ν(cos θ) = (π/(2 sin θ))^{1/2}
+cos((ν+1/2)θ)/(ν+1/2)`. -/
 @[dlmf 14.5.E14]
 theorem ferrersQ_half_order_14 (ν : ℂ) (h : LegendreQRegular ν (-1/2)) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
     ferrersQ ν (-1/2) (Real.cos θ)=(π/(2*Real.sin θ):ℂ)^(1/2:ℂ)*cos ((ν+1/2)*θ)/(ν+1/2) := by
@@ -608,7 +612,7 @@ theorem ferrersQ_half_order_14 (ν : ℂ) (h : LegendreQRegular ν (-1/2)) {θ :
   rw [show (1:ℂ)/b = 2/(ν + 1/2) by rw [hb]; field_simp]
   exact alg _ _ _ _ _ _ _ _ _ _ _ _ _ _ hsC hsp hn hF2 htrig hT hpi2
 
-/-- associatedP half order 15. -/
+/-- DLMF 14.5.15: for `ξ > 0`, `P^{1/2}_ν(cosh ξ) = (2/(π sinh ξ))^{1/2} cosh((ν+1/2)ξ)`. -/
 @[dlmf 14.5.E15]
 theorem associatedP_half_order_15 (ν : ℂ) {ξ : ℝ} (hξ : 0 < ξ) :
     associatedP ν (1/2) (Real.cosh ξ)=(2/(π*Real.sinh ξ):ℂ)^(1/2:ℂ)*cosh ((ν+1/2)*ξ) := by
@@ -685,7 +689,8 @@ theorem associatedP_half_order_15 (ν : ℂ) {ξ : ℝ} (hξ : 0 < ξ) :
     div_eq_iff (mul_ne_zero two_ne_zero hEe)]
   ring
 
-/-- associatedP half order 16. -/
+/-- DLMF 14.5.16: for `ξ > 0`, `P^{-1/2}_ν(cosh ξ) = (2/(π sinh ξ))^{1/2} sinh((ν+1/2)ξ)/(ν+1/2)`,
+with the limiting value `(2/(π sinh ξ))^{1/2} ξ` at `ν = -1/2`. -/
 @[dlmf 14.5.E16]
 theorem associatedP_half_order_16 (ν : ℂ) {ξ : ℝ} (hξ : 0 < ξ) :
     associatedP ν (-1/2) (Real.cosh ξ)=if ν=-1/2 then (2/(π*Real.sinh ξ):ℂ)^(1/2:ℂ)*ξ else (2/(π*Real.sinh ξ):ℂ)^(1/2:ℂ)*sinh ((ν+1/2)*ξ)/(ν+1/2) := by
@@ -779,7 +784,8 @@ theorem associatedP_half_order_16 (ν : ℂ) {ξ : ℝ} (hξ : 0 < ξ) :
     · rw [hT, hξ2]; simp only [← exp_add]; congr 1; push_cast; ring
     · rw [hT, hξ2]; simp only [← exp_add]; congr 1; push_cast; ring
 
-/-- olverQ half order 1. -/
+/-- DLMF 14.5.17 (order `+1/2`): for `ξ > 0`, `𝑸^{1/2}_ν(cosh ξ) = (π/(2 sinh ξ))^{1/2}
+e^{-(ν+1/2)ξ}/Γ(ν+3/2)`. -/
 @[dlmf 14.5.E17]
 theorem olverQ_half_order_1 (ν : ℂ) {ξ : ℝ} (hξ : 0 < ξ) :
     olverQ ν (1/2) (Real.cosh ξ)=(π/(2*Real.sinh ξ):ℂ)^(1/2:ℂ)*exp (-(ν+1/2)*ξ)/Gamma (ν+3/2) := by
@@ -849,7 +855,8 @@ theorem olverQ_half_order_1 (ν : ℂ) {ξ : ℝ} (hξ : 0 < ξ) :
     · have : -(n:ℂ)/2 + 1/2 = -(j:ℂ) := by rw [hj]; push_cast; ring
       rw [this, poch_neg_nat_eq_zero (by omega : j < n + 1)]; simp
 
-/-- olverQ half order 2. -/
+/-- DLMF 14.5.17 (order `-1/2`): for `ξ > 0`, `𝑸^{-1/2}_ν(cosh ξ) = (π/(2 sinh ξ))^{1/2}
+e^{-(ν+1/2)ξ}/Γ(ν+3/2)`. -/
 @[dlmf 14.5.E17]
 theorem olverQ_half_order_2 (ν : ℂ) {ξ : ℝ} (hξ : 0 < ξ) :
     olverQ ν (-1/2) (Real.cosh ξ)=(π/(2*Real.sinh ξ):ℂ)^(1/2:ℂ)*exp (-(ν+1/2)*ξ)/Gamma (ν+3/2) := by
@@ -919,7 +926,7 @@ theorem olverQ_half_order_2 (ν : ℂ) {ξ : ℝ} (hξ : 0 < ξ) :
     · have : (ν + 1/2)/2 = -((j+1:ℕ):ℂ) := by rw [hν, hj]; push_cast; ring
       rw [this, poch_neg_nat_eq_zero (by omega : j + 1 < n + 1)]; simp
 
-/-- ferrersP negative degree order. -/
+/-- DLMF 14.5.18: for `0 < θ < π`, `𝖯^{-ν}_ν(cos θ) = (sin θ)^ν/(2^ν Γ(ν+1))`. -/
 @[dlmf 14.5.E18]
 theorem ferrersP_negative_degree_order (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
     ferrersP ν (-ν) (Real.cos θ)=(Real.sin θ:ℂ)^ν/(2^ν*Gamma (ν+1)) := by
@@ -976,7 +983,7 @@ theorem regularizedGaussHG_legendre_neg_degree (ν : ℂ) {w : ℂ} (hw : w ∈ 
         poch_neg_nat_eq_zero (Nat.lt_succ_self k)]
       simp
 
-/-- associatedP negative degree order. -/
+/-- DLMF 14.5.19: for `ξ > 0`, `P^{-ν}_ν(cosh ξ) = (sinh ξ)^ν/(2^ν Γ(ν+1))`. -/
 @[dlmf 14.5.E19]
 theorem associatedP_negative_degree_order (ν : ℂ) {θ : ℝ} (h0 : 0 < θ) :
     associatedP ν (-ν) (Real.cosh θ)=(Real.sinh θ:ℂ)^ν/(2^ν*Gamma (ν+1)) := by

@@ -123,6 +123,7 @@ theorem hasSum_digamma_one_add_zeta {z : ℂ} (hz : ‖z‖ < 1) :
   rw [← hsum.tsum_comm]
   exact hcol.hasSum
 
+/-- DLMF 5.7.4: `ψ(1 + z) = -γ + ∑_{k≥2} (-1)^k ζ(k) z^(k-1)` for `|z| < 1`. -/
 @[dlmf 5.7.E4]
 theorem digamma_one_add_zeta {z : ℂ} (hz : ‖z‖ < 1) :
     Complex.digamma (1 + z) =
@@ -194,9 +195,11 @@ theorem eq_zero_of_hasSum_pow {d : ℕ → ℂ} {r : ℝ} (hr : 0 < r) (h0 : d 0
   have hd := (FormalMultilinearSeries.ofScalars_series_eq_zero ℂ).mp this
   exact congrFun hd n
 
+/-- `1/Γ` is entire. -/
 theorem differentiable_recip_Gamma' : Differentiable ℂ fun z : ℂ => (Complex.Gamma z)⁻¹ := by
   simpa [one_div] using Complex.differentiable_one_div_Gamma
 
+/-- The constant Taylor coefficient of `1/Γ` at `0` vanishes. -/
 theorem recipGammaCoeff_zero : recipGammaCoeff 0 = 0 := by
   simp [recipGammaCoeff, Complex.Gamma_zero]
 
@@ -238,6 +241,8 @@ theorem mul_deriv_recipGamma {z : ℂ} (hz0 : z ≠ 0) (hz : ‖z‖ < 1) :
   field_simp
   ring
 
+/-- DLMF 5.7.2: the recurrence `(k - 1) c_k = γ c_{k-1} - ∑_{j=2}^{k-1} (-1)^j ζ(j) c_{k-j}` for the
+Taylor coefficients of `1/Γ`. -/
 @[dlmf 5.7.E2]
 theorem recipGammaCoeff_recurrence {k : ℕ} (hk : 1 < k) :
     (k - 1 : ℂ) * recipGammaCoeff k =
@@ -361,6 +366,7 @@ theorem norm_riemannZeta_add_two_sub_one_le (k : ℕ) :
 def logGammaZetaSeries (z : ℂ) : ℂ :=
   ∑' k : ℕ, (-1 : ℂ) ^ (k + 2) * (riemannZeta (k + 2) - 1) * z ^ (k + 2) / (k + 2)
 
+/-- The series `logGammaZetaSeries z` is bounded by `1` in modulus on the unit disk. -/
 theorem norm_logGammaZetaSeries_le {z : ℂ} (hz : ‖z‖ < 1) : ‖logGammaZetaSeries z‖ ≤ 1 := by
   have hg : HasSum (fun k : ℕ => (1 / 2 : ℝ) ^ k * (1 / 2)) 1 := by
     convert hasSum_geometric_two.mul_right (1 / 2 : ℝ) using 1; norm_num
@@ -379,6 +385,7 @@ theorem norm_logGammaZetaSeries_le {z : ℂ} (hz : ‖z‖ < 1) : ‖logGammaZet
     _ ≤ (1 / 2 : ℝ) ^ k * (((k : ℝ) + 2) * (1 / 2)) := by gcongr
     _ = _ := by ring
 
+/-- On the unit disk, `logGammaZetaSeries` has derivative `ψ(1 + z) + γ - z/(1 + z)`. -/
 theorem hasDerivAt_logGammaZetaSeries {z : ℂ} (hz : ‖z‖ < 1) :
     HasDerivAt logGammaZetaSeries
       (Complex.digamma (1 + z) + Real.eulerMascheroniConstant - z / (1 + z)) z := by
@@ -414,6 +421,8 @@ theorem hasDerivAt_logGammaZetaSeries {z : ℂ} (hz : ‖z‖ < 1) :
   rw [← heq]
   exact hd
 
+/-- DLMF 5.7.3: `ln Γ(1 + z) = -ln(1 + z) + z(1 - γ) + ∑_{k≥2} (-1)^k (ζ(k) - 1) z^k / k` for `|z| <
+1`. -/
 @[dlmf 5.7.E3]
 theorem log_Gamma_one_add {z : ℂ} (hz : ‖z‖ < 1) :
     log (Complex.Gamma (1 + z)) =
@@ -493,6 +502,8 @@ theorem log_Gamma_one_add {z : ℂ} (hz : ‖z‖ < 1) :
       _ < π := by linarith
   rw [← hexp, Complex.log_exp (by linarith [(abs_lt.mp him).1]) (abs_lt.mp him).2.le]
 
+/-- DLMF 5.7.5: for `|z| < 1`, `z ∉ {0, ±1}`, `ψ(1 + z) = 1/(2z) - (π/2) cot(πz) + 1/(z² - 1) + 1 -
+γ - ∑_{k≥1} (ζ(2k + 1) - 1) z^(2k)`. -/
 @[dlmf 5.7.E5]
 theorem digamma_one_add_odd_zeta {z : ℂ} (hz : ‖z‖ < 1) (hz0 : z ≠ 0) (hz1 : z ≠ 1)
     (hzm : z ≠ -1) :
@@ -596,6 +607,7 @@ theorem digamma_half_diff (z : ℂ) (hz : ∀ k : ℕ, z ≠ -k) :
   field_simp
   ring
 
+/-- DLMF 5.7.8: `Im ψ(1 + iy) = ∑_{k≥1} y/(k² + y²)` for real `y`. -/
 @[dlmf 5.7.E8]
 theorem digamma_one_add_mul_I_im_series (y : ℝ) :
     (Complex.digamma (1 + I * y)).im = ∑' k : ℕ, y / ((k + 1 : ℝ) ^ 2 + y ^ 2) := by

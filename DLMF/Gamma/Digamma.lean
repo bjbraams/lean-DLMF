@@ -40,6 +40,7 @@ local notation "γ" => eulerMascheroniConstant
 def digamma (x : ℝ) : ℝ :=
   deriv Gamma x / Gamma x
 
+/-- For `x > 0`, `ψ(x)` is the derivative of `log Γ` at `x`. -/
 theorem digamma_eq_deriv_log {x : ℝ} (hx : 0 < x) :
     digamma x = deriv (log ∘ Gamma) x := by
   have hG : DifferentiableAt ℝ Gamma x :=
@@ -69,6 +70,7 @@ theorem digamma_eq_re_digamma {x : ℝ} (hx : 0 < x) :
   conv_rhs => rw [hre]
   rw [Complex.div_ofReal_re, Complex.ofReal_re]
 
+/-- DLMF 5.4.12: `ψ(1) = -γ`. -/
 @[dlmf 5.4.E12]
 theorem digamma_one : digamma 1 = -γ := by
   simp [digamma, hasDerivAt_Gamma_one.deriv]
@@ -77,6 +79,8 @@ theorem digamma_one : digamma 1 = -γ := by
 def digammaSeriesTerm (x : ℝ) (n : ℕ) : ℝ :=
   (n + 1 : ℝ)⁻¹ - (x + n)⁻¹
 
+/-- For `x > 0` and `n ≠ 0`, `log Γₙ(x) = x log n + log n! - ∑_{k≤n} log(x + k)` for the Gauss
+approximant `Γₙ`. -/
 theorem log_GammaSeq {x : ℝ} (hx : 0 < x) {n : ℕ} (hn : n ≠ 0) :
     log (GammaSeq x n) =
       x * log n + log n.factorial - ∑ k ∈ range (n + 1), log (x + k) := by
@@ -88,6 +92,7 @@ theorem log_GammaSeq {x : ℝ} (hx : 0 < x) {n : ℕ} (hn : n ≠ 0) :
   congr 1
   exact log_prod fun k _ => (add_pos_of_pos_of_nonneg hx (Nat.cast_nonneg k)).ne'
 
+/-- The derivative of `log Γₙ` at `x > 0` is `log n - ∑_{k≤n} 1/(x + k)`. -/
 theorem hasDerivAt_log_GammaSeq {x : ℝ} (hx : 0 < x) {n : ℕ} (hn : n ≠ 0) :
     HasDerivAt (fun y : ℝ => log (GammaSeq y n))
       (log n - ∑ k ∈ range (n + 1), (x + k)⁻¹) x := by
@@ -103,6 +108,7 @@ theorem hasDerivAt_log_GammaSeq {x : ℝ} (hx : 0 < x) {n : ℕ} (hn : n ≠ 0) 
   refine (hlin.sub hsum).congr_of_eventuallyEq ?_
   filter_upwards [Ioi_mem_nhds hx] with y hy using log_GammaSeq hy hn
 
+/-- Each `log Γₙ` is convex on `(0, ∞)`. -/
 theorem convexOn_log_GammaSeq {n : ℕ} (hn : n ≠ 0) :
     ConvexOn ℝ (Ioi 0) (fun y : ℝ => log (GammaSeq y n)) := by
   have hlin : ConvexOn ℝ (Ioi 0) (fun y : ℝ => y * log n) := by
@@ -131,11 +137,13 @@ theorem convexOn_log_GammaSeq {n : ℕ} (hn : n ≠ 0) :
   refine (((hlin.add hconst).add hsum).congr fun y hy => ?_)
   simp [log_GammaSeq hy hn, sub_eq_add_neg, sum_neg_distrib, Pi.add_apply]
 
+/-- `log Γₙ(x) → log Γ(x)` for `x > 0`. -/
 theorem tendsto_log_GammaSeq {x : ℝ} (hx : 0 < x) :
     Tendsto (fun n : ℕ => log (GammaSeq x n)) atTop (𝓝 (log (Gamma x))) := by
   have hpos : 0 < Gamma x := Gamma_pos_of_pos hx
   exact (GammaSeq_tendsto_Gamma x).log hpos.ne'
 
+/-- `log n - H_{n+1} → -γ`. -/
 theorem tendsto_log_sub_harmonic_succ :
     Tendsto (fun n : ℕ => log n - (harmonic (n + 1) : ℝ)) atTop (𝓝 (-γ)) := by
   have hγ : Tendsto (fun n : ℕ => (harmonic (n + 1) : ℝ) - log (n + 1)) atTop (𝓝 γ) := by
@@ -156,6 +164,7 @@ theorem tendsto_log_sub_harmonic_succ :
   · ext n; ring
   · simp
 
+/-- The series `∑ (1/(n+1) - 1/(x+n))` converges for `x > 0`. -/
 theorem summable_digammaSeriesTerm {x : ℝ} (hx : 0 < x) :
     Summable (digammaSeriesTerm x) := by
   refine Summable.of_norm_bounded_eventually_nat
@@ -173,22 +182,27 @@ theorem summable_digammaSeriesTerm {x : ℝ} (hx : 0 < x) :
       gcongr <;> linarith
     _ = |x - 1| * (1 / (n : ℝ) ^ 2) := by ring
 
+/-- The partial sums `∑_{k≤n} (1/(k+1) - 1/(x+k))` tend to the full sum. -/
 theorem tendsto_partial_digammaSeries {x : ℝ} (hx : 0 < x) :
     Tendsto (fun n : ℕ => ∑ k ∈ range (n + 1), digammaSeriesTerm x k) atTop
       (𝓝 (∑' n, digammaSeriesTerm x n)) :=
   (summable_digammaSeriesTerm hx).hasSum.tendsto_sum_nat.comp (tendsto_add_atTop_nat 1)
 
+/-- `log n - ∑_{k≤n} 1/(x+k) = (log n - H_{n+1}) + ∑_{k≤n} (1/(k+1) - 1/(x+k))`. -/
 theorem eq_partial_digammaSeries (x : ℝ) (n : ℕ) :
     log n - ∑ k ∈ range (n + 1), (x + k)⁻¹ =
       log n - (harmonic (n + 1) : ℝ) + ∑ k ∈ range (n + 1), digammaSeriesTerm x k := by
   simp [digammaSeriesTerm, harmonic, sum_sub_distrib]
 
+/-- `log n - ∑_{k≤n} 1/(x+k) → -γ + ∑ (1/(n+1) - 1/(x+n))` for `x > 0`. -/
 theorem tendsto_log_sub_sum_recip {x : ℝ} (hx : 0 < x) :
     Tendsto (fun n : ℕ => log n - ∑ k ∈ range (n + 1), (x + k)⁻¹) atTop
       (𝓝 (-γ + ∑' n, digammaSeriesTerm x n)) := by
   simp_rw [eq_partial_digammaSeries]
   exact tendsto_log_sub_harmonic_succ.add (tendsto_partial_digammaSeries hx)
 
+/-- `log n - ∑_{k≤n} 1/(x+k) → ψ(x)` for `x > 0`, i.e. the derivatives of `log Γₙ` converge to `ψ`.
+-/
 theorem tendsto_deriv_log_GammaSeq {x : ℝ} (hx : 0 < x) :
     Tendsto (fun n : ℕ => log n - ∑ k ∈ range (n + 1), (x + k)⁻¹) atTop
       (𝓝 (digamma x)) := by
@@ -270,6 +284,7 @@ theorem digamma_eq_tsum {x : ℝ} (hx : 0 < x) :
     digamma x = -γ + ∑' n, digammaSeriesTerm x n :=
   tendsto_nhds_unique (tendsto_deriv_log_GammaSeq hx) (tendsto_log_sub_sum_recip hx)
 
+/-- The derivative in `x` of `1/(n+1) - 1/(x+n)` is `1/(x+n)²`. -/
 theorem hasDerivAt_digammaSeriesTerm {x : ℝ} (hx : 0 < x) (n : ℕ) :
     HasDerivAt (fun y : ℝ => digammaSeriesTerm y n) ((x + (n : ℝ))⁻¹ ^ 2) x := by
   have hne : x + n ≠ 0 := (add_pos_of_pos_of_nonneg hx (Nat.cast_nonneg n)).ne'
@@ -285,6 +300,7 @@ theorem hasDerivAt_digammaSeriesTerm {x : ℝ} (hx : 0 < x) (n : ℕ) :
   have hder : 0 - -((x + n) ^ 2)⁻¹ * 1 = (x + (n : ℝ))⁻¹ ^ 2 := by simp [pow_two]
   simpa [hder] using hsub'
 
+/-- `∑ 1/(x+n)²` converges for `x > 0`. -/
 theorem summable_trigamma {x : ℝ} (hx : 0 < x) :
     Summable fun n : ℕ => (x + n)⁻¹ ^ 2 := by
   have h := (Real.summable_one_div_nat_add_rpow x 2).mpr one_lt_two
@@ -339,11 +355,13 @@ theorem hasDerivAt_digamma {x : ℝ} (hx : 0 < x) :
 def trigamma (x : ℝ) : ℝ :=
   deriv digamma x
 
+/-- DLMF 5.15.1: `ψ'(x) = ∑_{n≥0} 1/(x+n)²` for `x > 0`. -/
 @[dlmf 5.15.E1]
 theorem trigamma_eq_tsum {x : ℝ} (hx : 0 < x) :
     trigamma x = ∑' n : ℕ, (x + n)⁻¹ ^ 2 := by
   rw [trigamma, (hasDerivAt_digamma hx).deriv]
 
+/-- Telescoping: `∑_{n<N} (1/(x+n) - 1/(x+n+1)) = 1/x - 1/(x+N)`. -/
 theorem sum_recip_sub_recip_range (x : ℝ) (N : ℕ) :
     ∑ n ∈ range N, ((x + n)⁻¹ - (x + n + 1)⁻¹) = x⁻¹ - (x + N)⁻¹ := by
   induction N with
@@ -362,6 +380,7 @@ theorem digamma_add_one {x : ℝ} (hx : 0 < x) : digamma (x + 1) = digamma x + x
     Complex.ofReal_one, Complex.digamma_apply_add_one _ hx', Complex.add_re,
     ← Complex.ofReal_inv, Complex.ofReal_re]
 
+/-- `ψ(x + n) = ψ(x) + ∑_{k<n} 1/(x+k)` for `x > 0`. -/
 theorem digamma_add_nat {x : ℝ} (hx : 0 < x) (n : ℕ) :
     digamma (x + n) = digamma x + ∑ k ∈ range n, (x + k)⁻¹ := by
   induction n with
@@ -378,6 +397,7 @@ theorem digamma_nat_add_one (n : ℕ) :
   have := digamma_add_nat (by positivity : (0 : ℝ) < 1) n
   simpa [digamma_one, harmonic, add_comm, add_left_comm] using this
 
+/-- For `x > 0`, `log Γ` has derivative `ψ(x)` at `x`. -/
 theorem hasDerivAt_log_Gamma {x : ℝ} (hx : 0 < x) :
     HasDerivAt (fun y : ℝ => log (Gamma y)) (digamma x) x := by
   have hG : DifferentiableAt ℝ Gamma x :=
@@ -386,6 +406,7 @@ theorem hasDerivAt_log_Gamma {x : ℝ} (hx : 0 < x) :
   have hlog := hG.hasDerivAt.log (Gamma_pos_of_pos hx).ne'
   simpa [digamma, Function.comp_def] using hlog
 
+/-- For `0 < x < 1`, `y ↦ log sin(π y)` has derivative `π cot(π x)` at `x`. -/
 theorem hasDerivAt_log_sin_pi {x : ℝ} (hx : x ∈ Ioo (0 : ℝ) 1) :
     HasDerivAt (fun y : ℝ => log (sin (π * y))) (π * cot (π * x)) x := by
   have hsin : sin (π * x) ≠ 0 :=

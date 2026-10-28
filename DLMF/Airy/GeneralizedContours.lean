@@ -625,16 +625,6 @@ theorem exp_two_pi_div_three_mul_I :
     Real.cos_pi_div_three, Real.sin_pi_div_three]
   push_cast; ring
 
-/-- `Γ(1/3) Γ(2/3) √3 = 2π` (real form). -/
-theorem real_Gamma_one_third_mul_two_thirds :
-    Real.Gamma (1 / 3) * Real.Gamma (2 / 3) * Real.sqrt 3 = 2 * π := by
-  have h := Real.Gamma_mul_Gamma_one_sub (1 / 3)
-  rw [show (1 : ℝ) - 1 / 3 = 2 / 3 by norm_num, show π * (1 / 3) = π / 3 by ring,
-    Real.sin_pi_div_three] at h
-  rw [h]
-  have : Real.sqrt 3 ≠ 0 := (Real.sqrt_pos.mpr (by norm_num : (0:ℝ) < 3)).ne'
-  field_simp
-
 /-- The initial values of `A₀(z,0)` and its derivative `A₀(z,-1)` at `z = 0`. -/
 theorem reidAiryA_zero_initial :
     reidAiryA 0 0 0 = airyAi 0 ∧ reidAiryA 0 0 (-1) = airyAiDeriv 0 := by
@@ -651,7 +641,7 @@ theorem reidAiryA_zero_initial :
     rw [reidContour_neg_nat_eq hα hβ, reidRay_zero_neg_nat hα, reidRay_zero_neg_nat hβ]
     ring
   have hs : Real.sqrt 3 ^ 2 = 3 := Real.sq_sqrt (by norm_num)
-  have hG := real_Gamma_one_third_mul_two_thirds
+  have hG := airyMod_gamma_third_reflection
   have hpi : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   have I_sq : I ^ 2 = -1 := I_sq
   constructor
@@ -689,7 +679,8 @@ theorem reidAiryA_zero_initial :
     linear_combination (-(Real.Gamma (1 / 3) : ℂ) * (Real.Gamma (2 / 3) : ℂ) * I ^ 4 * (Real.sqrt 3 : ℂ) ^ 2 - 3 * (Real.Gamma (1 / 3) : ℂ) * (Real.Gamma (2 / 3) : ℂ) * I ^ 4 + 4 * (Real.Gamma (1 / 3) : ℂ) * (Real.Gamma (2 / 3) : ℂ) * I ^ 3 * (Real.sqrt 3 : ℂ) - 2 * (Real.Gamma (1 / 3) : ℂ) * (Real.Gamma (2 / 3) : ℂ) * I ^ 2) * hsc +
       (-9 * (Real.Gamma (1 / 3) : ℂ) * (Real.Gamma (2 / 3) : ℂ) * I ^ 2 + 12 * (Real.Gamma (1 / 3) : ℂ) * (Real.Gamma (2 / 3) : ℂ) * I * (Real.sqrt 3 : ℂ) + 3 * (Real.Gamma (1 / 3) : ℂ) * (Real.Gamma (2 / 3) : ℂ)) * I_sq + (-16 * I) * hGc
 
-/-- reidAiryA zero parameter (DLMF 9.13.28). -/
+/-- At `p = 0` Reid's first contour function is Airy's: `A(z, 0) = Ai(z)` on `L₁`
+(DLMF 9.13.28). -/
 @[dlmf 9.13.E28]
 theorem reidAiryA_zero_parameter (z : ℂ) :
     reidAiryA 0 z 0 = airyAi z := by
@@ -713,7 +704,8 @@ theorem reidAiryA_zero_parameter (z : ℂ) :
   · exact reidAiryA_zero_initial.1
   · exact reidAiryA_zero_initial.2
 
-/-- reidAiryB zero parameter (DLMF 9.13.30). -/
+/-- At `p = 0`, `B₀(z, 0) = 0` and the first ray function is `B(z, 0) = π Hi(z)`
+(DLMF 9.13.30). -/
 @[dlmf 9.13.E30]
 theorem reidAiryB_zero_parameter (z : ℂ) :
     reidAiryB0 z 0 = 0 ∧ reidAiryB 0 z 0 = π * scorerHi z := by
@@ -739,7 +731,8 @@ theorem reidAiryB_zero_parameter (z : ℂ) :
       ht']
     ring_nf
 
-/-- reidAiryA ode (DLMF 9.13.31). -/
+/-- Reid's `A_k(z, p)` solves the third-order equation `w''' - z w' + (p - 1) w = 0`
+(DLMF 9.13.31). -/
 @[dlmf 9.13.E31]
 theorem reidAiryA_ode (k : Fin 3) (z p : ℂ) :
     iteratedDeriv 3 (fun t => reidAiryA k t p) z - z * deriv (fun t => reidAiryA k t p) z + (p - 1) * reidAiryA k z p = 0 := by
@@ -753,7 +746,8 @@ theorem reidAiryA_ode (k : Fin 3) (z p : ℂ) :
   rw [hA, hA, hA]
   linear_combination reidContour_difference hα hβ z p / (2 * π * I)
 
-/-- reidAiryB ode (DLMF 9.13.31). -/
+/-- For `p ≤ 0`, Reid's ray function `B_k(z, p)` solves `w''' - z w' + (p - 1) w = 0`
+(DLMF 9.13.31). -/
 @[dlmf 9.13.E31]
 theorem reidAiryB_ode (k : Fin 3) (z : ℂ) {p : ℤ} (hp : p ≤ 0) :
     iteratedDeriv 3 (fun t => reidAiryB k t p) z - z * deriv (fun t => reidAiryB k t p) z + ((p : ℂ) - 1) * reidAiryB k z p = 0 := by
@@ -768,7 +762,8 @@ theorem reidAiryB_ode (k : Fin 3) (z : ℂ) {p : ℤ} (hp : p ≤ 0) :
   push_cast
   exact reidRay_zero_difference (exp_three_reidAiryB_angle k) z hp
 
-/-- reidAiryA difference (DLMF 9.13.32). -/
+/-- The difference equation `A_k(z, p-3) - z A_k(z, p-1) + (p-1) A_k(z, p) = 0`
+(DLMF 9.13.32). -/
 @[dlmf 9.13.E32]
 theorem reidAiryA_difference (k : Fin 3) (z p : ℂ) :
     reidAiryA k z (p - 3) - z * reidAiryA k z (p - 1) + (p - 1) * reidAiryA k z p = 0 := by
@@ -776,7 +771,7 @@ theorem reidAiryA_difference (k : Fin 3) (z p : ℂ) :
   rw [hA, hA, hA]
   linear_combination reidContour_difference hα hβ z p / (2 * π * I)
 
-/-- reidAiryB difference (DLMF 9.13.32). -/
+/-- For `p ≤ 0`, `B_k(z, p-3) - z B_k(z, p-1) + (p-1) B_k(z, p) = 0` (DLMF 9.13.32). -/
 @[dlmf 9.13.E32]
 theorem reidAiryB_difference (k : Fin 3) (z : ℂ) {p : ℤ} (hp : p ≤ 0) :
     reidAiryB k z (p - 3) - z * reidAiryB k z (p - 1) + ((p : ℂ) - 1) * reidAiryB k z p = 0 := by
@@ -785,7 +780,8 @@ theorem reidAiryB_difference (k : Fin 3) (z : ℂ) {p : ℤ} (hp : p ≤ 0) :
   push_cast
   exact reidRay_zero_difference (exp_three_reidAiryB_angle k) z hp
 
-/-- reidAiryB0 difference (DLMF 9.13.32). -/
+/-- The closed-contour function satisfies
+`B₀(z, p-3) - z B₀(z, p-1) + (p-1) B₀(z, p) = 0` for all integer `p` (DLMF 9.13.32). -/
 @[dlmf 9.13.E32]
 theorem reidAiryB0_difference (z : ℂ) (p : ℤ) :
     reidAiryB0 z (p - 3) - z * reidAiryB0 z (p - 1) + ((p : ℂ) - 1) * reidAiryB0 z p = 0 := by
@@ -834,7 +830,8 @@ theorem reidAiryB0_difference (z : ℂ) (p : ℤ) :
   push_cast
   linear_combination key / (2 * π * I)
 
-/-- reidAiryB0 ode (DLMF 9.13.31). -/
+/-- The closed-contour function `B₀(z, p)` solves `w''' - z w' + (p - 1) w = 0`
+(DLMF 9.13.31). -/
 @[dlmf 9.13.E31]
 theorem reidAiryB0_ode (z : ℂ) (p : ℤ) :
     iteratedDeriv 3 (fun t => reidAiryB0 t p) z - z * deriv (fun t => reidAiryB0 t p) z + ((p : ℂ) - 1) * reidAiryB0 z p = 0 := by
@@ -846,7 +843,8 @@ theorem reidAiryB0_ode (z : ℂ) (p : ℤ) :
   have := reidAiryB0_difference z p
   simpa using this
 
-/-- reidAiryA rotations (DLMF 9.13.33). -/
+/-- Rotation relations: `A₁(z, p) = e^{-2(p-1)πi/3} A₀(z e^{2πi/3}, p)` and
+`A₂(z, p) = e^{2(p-1)πi/3} A₀(z e^{-2πi/3}, p)` (indices `0, 1, 2` here; DLMF 9.13.33). -/
 @[dlmf 9.13.E33]
 theorem reidAiryA_rotations (z p : ℂ) :
     reidAiryA 1 z p = exp (-2 * (p - 1) * π * I / 3) * reidAiryA 0 (z * exp (2 * π * I / 3)) p ∧
@@ -871,7 +869,8 @@ theorem reidAiryA_rotations (z p : ℂ) :
     simp only [reidAiryA, Fin.val_two, Fin.val_zero, h]
     ring
 
-/-- reidAiryA zero rotations (DLMF 9.13.29). -/
+/-- At `p = 0`, `A₁(z, 0) = e^{2πi/3} Ai(z e^{2πi/3})` and
+`A₂(z, 0) = e^{-2πi/3} Ai(z e^{-2πi/3})` (indices `0, 1, 2` here; DLMF 9.13.29). -/
 @[dlmf 9.13.E29]
 theorem reidAiryA_zero_rotations (z : ℂ) :
     reidAiryA 1 z 0 = exp (2 * π * I / 3) * airyAi (z * exp (2 * π * I / 3)) ∧
@@ -881,7 +880,8 @@ theorem reidAiryA_zero_rotations (z : ℂ) :
   rw [h1, h2, hA, hA]
   constructor <;> congr 2 <;> ring
 
-/-- reidAiry connection sum (DLMF 9.13.34). -/
+/-- The three contour functions and the closed-contour one sum to zero:
+`A₀ + A₁ + A₂ + B₀ = 0` (DLMF 9.13.34). -/
 @[dlmf 9.13.E34]
 theorem reidAiry_connection_sum (z : ℂ) (p : ℤ) :
     reidAiryA 0 z p + reidAiryA 1 z p + reidAiryA 2 z p + reidAiryB0 z p = 0 := by
@@ -1186,7 +1186,8 @@ theorem reidAiry_connection_36_ne_one (z : ℂ) :
   push_cast at h
   exact hpi (by linear_combination h)
 
-/-- reidAiry connection 35 (DLMF 9.13.35). -/
+/-- `B₁(z, p) - B₂(z, p) = 2πi A₀(z, p)` with indices `0, 1, 2` as here (DLMF's
+`B₂ - B₃ = 2πi A₁`, 9.13.35). -/
 @[dlmf 9.13.E35]
 theorem reidAiry_connection_35 (z : ℂ) (p : ℤ) :
     reidAiryB 1 z p - reidAiryB 2 z p = 2 * π * I * reidAiryA 0 z p := by
@@ -1197,7 +1198,8 @@ theorem reidAiry_connection_35 (z : ℂ) (p : ℤ) :
   rw [mul_div_cancel₀ _ hpi]
   congr 1 <;> push_cast <;> ring
 
-/-- reidAiry connection 37 (DLMF 9.13.37). -/
+/-- `B₀(z, p) - B₁(z, p) = 2πi A₂(z, p)` with indices `0, 1, 2` as here (DLMF's
+`B₁ - B₂ = 2πi A₃`, 9.13.37). -/
 @[dlmf 9.13.E37]
 theorem reidAiry_connection_37 (z : ℂ) (p : ℤ) :
     reidAiryB 0 z p - reidAiryB 1 z p = 2 * π * I * reidAiryA 2 z p := by
@@ -1224,7 +1226,8 @@ lemma reidAiryB0_of_nonpos (z : ℂ) {p : ℤ} (hp : p ≤ 0) : reidAiryB0 z p =
   rw [← exp_nat_mul, ← exp_nat_mul, ← exp_add]
   push_cast; ring_nf
 
-/-- reidAiry connection 36 (DLMF 9.13.36), corrected.
+/-- The corrected connection formula `B₂ - B₀ = 2πi (A₁ + B₀(z, p))` (indices `0, 1, 2` as
+here; DLMF 9.13.36, corrected).
 
 DLMF prints `B₃ - B₁ = 2πi A₂` for all integer `p`. That is false for `p ≥ 1` whenever
 `B₀(z,p) ≠ 0`, whatever regularization of the divergent ray integrals 9.13.27 is used:

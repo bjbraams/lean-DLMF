@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.MatrixArgument.Basic
+public import Mathlib.Analysis.Matrix.Order
 public import Mathlib.Analysis.SpecialFunctions.OrdinaryHypergeometric
 public import Mathlib.Data.Nat.Factorial.DoubleFactorial
 

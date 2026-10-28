@@ -44,6 +44,7 @@ section SoninePolya
 
 variable {y y' y'' : ℝ → ℝ}
 
+/-- A function with nonnegative derivative on `(a, b)` is monotone on `[a, b]`. -/
 private lemma monotoneOn_of_hasDerivAt_nonneg' {S S' : ℝ → ℝ} {a b : ℝ}
     (hS : ∀ x ∈ Icc a b, HasDerivAt S (S' x) x) (h : ∀ x ∈ Ioo a b, 0 ≤ S' x) :
     MonotoneOn S (Icc a b) := by
@@ -54,6 +55,7 @@ private lemma monotoneOn_of_hasDerivAt_nonneg' {S S' : ℝ → ℝ} {a b : ℝ}
   · rw [interior_Icc] at hx
     exact h x hx
 
+/-- A function with nonpositive derivative on `(a, b)` is antitone on `[a, b]`. -/
 private lemma antitoneOn_of_hasDerivAt_nonpos' {S S' : ℝ → ℝ} {a b : ℝ}
     (hS : ∀ x ∈ Icc a b, HasDerivAt S (S' x) x) (h : ∀ x ∈ Ioo a b, S' x ≤ 0) :
     AntitoneOn S (Icc a b) := by

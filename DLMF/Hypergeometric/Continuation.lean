@@ -96,7 +96,7 @@ theorem norm_ascPochhammer_eval_le {a : ℂ} {r : ℝ} (hr : ‖a‖ ≤ r) (n :
     ‖(ascPochhammer ℂ n).eval a‖ ≤ ‖(ascPochhammer ℂ n).eval (r : ℂ)‖ := by
   rw [ascPochhammer_eval_ofReal, Complex.norm_real, Real.norm_eq_abs]
   exact (norm_poch_le a n).trans
-    ((ascPochhammer_eval_mono (norm_nonneg a) hr n).trans (le_abs_self _))
+    ((poch_eval_mono (norm_nonneg a) hr n).trans (le_abs_self _))
 
 /-- Lower bound for the Pochhammer symbol when `1 ≤ Re w`. -/
 theorem factorial_le_norm_ascPochhammer_eval {w : ℂ} (hw : 1 ≤ w.re) (k : ℕ) :
@@ -215,6 +215,8 @@ theorem mem_eball_radius_regularizedGaussHGFunSeries (a b c : ℂ) {z : ℂ} (hz
   Metric.eball_subset_eball (radius_regularizedGaussHGFunSeries_ge_one a b c)
     (mem_eball_one_of_norm_lt_one hz)
 
+/-- For `‖z‖ < 1`, the terms `(a)ₙ (b)ₙ zⁿ / (n! Γ(c + n))` of the regularized Gauss series are
+  summable. -/
 theorem summable_regularizedGaussHGFun_term (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :
     Summable fun n : ℕ =>
       (ascPochhammer ℂ n).eval a * (ascPochhammer ℂ n).eval b * z ^ n / n.factorial *
@@ -229,6 +231,8 @@ theorem summable_regularizedGaussHGFun_term (a b c : ℂ) {z : ℂ} (hz : ‖z�
   rw [hc, coeff_regularizedGaussHGFunSeries]
   ring
 
+/-- For real `α, β` and `n ≥ N`, the norm of the `n`-th coefficient of the regularized series with
+  `c = 1 - N` is `|(α)ₙ| |(β)ₙ| / (n! (n - N)!)`. -/
 theorem norm_regularizedGaussHGFunSeries_apply_ofReal (α β : ℝ) (N n : ℕ) (hn : N ≤ n) :
     ‖regularizedGaussHGFunSeries (α : ℂ) (β : ℂ) (1 - N) n‖ =
       ‖(ascPochhammer ℂ n).eval (α : ℂ)‖ * ‖(ascPochhammer ℂ n).eval (β : ℂ)‖ /
@@ -457,13 +461,16 @@ theorem regularizedGaussHGFun_eq_div_Gamma {a b c : ℂ} (hc : ∀ k : ℕ, c �
     regularizedGaussHGFun a b c z = ₂F₁ a b c z / Gamma c :=
   (ordinaryHypergeometric_div_Gamma_eq hc).symm
 
+/-- If `c` is not a nonpositive integer, then neither is `c + 1`. -/
 theorem not_neg_nat_add_one {c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) :
     ∀ k : ℕ, c + 1 ≠ -(k : ℂ) := by
   simpa using not_neg_nat_add_nat hc 1
 
+/-- If `c` is not a nonpositive integer, then `c ≠ 0`. -/
 theorem ne_zero_of_not_neg_nat {c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) : c ≠ 0 := by
   simpa using hc 0
 
+/-- `Γ(c + 1) = c Γ(c)` for `c` not a nonpositive integer. -/
 theorem Gamma_succ_of_not_neg_nat {c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) :
     Gamma (c + 1) = c * Gamma c :=
   Gamma_add_one c (ne_zero_of_not_neg_nat hc)
@@ -477,6 +484,7 @@ theorem eq_of_eqOn_not_neg_nat_sub_one {f g : ℂ → ℂ} (hf : AnalyticOnNhd �
       have := congrArg Complex.re h
       simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]⟩ h
 
+/-- Two entire functions that agree off the nonpositive integers agree everywhere. -/
 theorem eqFun_of_eqOn_not_neg_nat (f g : ℂ → ℂ)
     (hf : AnalyticOnNhd ℂ f univ) (hg : AnalyticOnNhd ℂ g univ)
     (h : ∀ c : ℂ, (∀ k : ℕ, c ≠ -(k : ℂ)) → f c = g c) (c : ℂ) : f c = g c :=

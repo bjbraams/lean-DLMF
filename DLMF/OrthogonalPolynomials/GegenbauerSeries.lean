@@ -22,7 +22,7 @@ separately: its terms satisfy the same three-term recurrence. Comparing coeffici
 with the Jacobi hypergeometric sum in `x²` then gives the quadratic transformations
 DLMF 18.7.15–18.7.16; the Jacobi forms 18.7.13–18.7.14 follow by the Gegenbauer–Jacobi
 relation, extended to `α = -1/2` by continuity in `α`. The multiplicativity `G_λ G_μ = G_{λ+μ}`
-(Chu–Vandermonde, `poch_add_binomial`) gives the convolution identities in `Series.lean`.
+(Chu–Vandermonde, `poch_add_binomial_sum`) gives the convolution identities in `Series.lean`.
 -/
 
 @[expose] public section

@@ -39,29 +39,11 @@ open Complex Filter Set Asymptotics DLMF.Hypergeometric
 open scoped Real Topology Nat
 namespace DLMF.Legendre
 
+/-- For real `x` tending to `1` from the left, eventually `‖(x : ℂ)‖ < 1`. -/
 theorem legBd_eventually_norm_lt_one :
     ∀ᶠ x : ℝ in 𝓝[<] (1:ℝ), ‖(x:ℂ)‖ < 1 := by
   filter_upwards [Ioo_mem_nhdsLT (show (-1:ℝ) < 1 by norm_num)] with x hx
   rw [Complex.norm_real, Real.norm_eq_abs, abs_lt]; exact hx
-
-/-- Regular-`c` case of the regularized Gauss limit. -/
-theorem legBd_tendsto_rGHG_one_of_regular {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k)
-    (h : 0 < (c-a-b).re) :
-    Tendsto (fun x : ℝ => regularizedGaussHG a b c x) (𝓝[<] 1)
-      (𝓝 (Gamma (c-a-b) * ((Gamma (c-a))⁻¹ * (Gamma (c-b))⁻¹))) := by
-  simpa only [div_eq_mul_inv, mul_inv] using tendsto_regularizedGaussHG_left_one h
-
-/-- `(a)_{n+1} / Γ(1-a) = (-1)^{n+1} / Γ(-n-a)`. -/
-theorem legBd_poch_mul_recip_Gamma (a : ℂ) (n : ℕ) :
-    poch a (n+1) * (Gamma (1-a))⁻¹ = (-1)^(n+1) * (Gamma (-n-a))⁻¹ := by
-  have h1 := DLMF.Gamma.poch_neg_eq (n+a) (n+1)
-  rw [show (n:ℂ)+a-((n+1:ℕ):ℂ)+1 = a by push_cast; ring] at h1
-  have h2 := DLMF.Gamma.poch_mul_recip_Gamma_add_nat (-(n+a)) (n+1)
-  rw [h1, show -((n:ℂ)+a)+((n+1:ℕ):ℂ) = 1-a by push_cast; ring,
-    show -((n:ℂ)+a) = -n-a by ring] at h2
-  rw [← h2]
-  have : ((-1:ℂ)^(n+1))^2 = 1 := by rw [← pow_mul, mul_comm, pow_mul]; norm_num
-  linear_combination (-(poch a (n+1) * (Gamma (1-a))⁻¹)) * this
 
 /-- DLMF 15.4.20 as an Abelian limit for the regularized function, valid for every `c`:
 `𝐅(a,b;c;x) → Γ(c-a-b)/(Γ(c-a)Γ(c-b))` as `x → 1⁻` when `Re(c-a-b) > 0`. -/

@@ -25,13 +25,16 @@ noncomputable section
 
 namespace Real
 
+/-- For `a, b > 0` the interval `[a, b]` (in either order) lies in `(0, ∞)`. -/
 theorem uIcc_subset_Ioi {a b : ℝ} (ha : 0 < a) (hb : 0 < b) : uIcc a b ⊆ Ioi (0 : ℝ) := by
   intro x hx
   exact (lt_min ha hb).trans_le hx.1
 
+/-- The digamma function is continuous on `(0, ∞)`. -/
 theorem continuousOn_digamma : ContinuousOn digamma (Ioi 0) :=
   fun _ hx => (hasDerivAt_digamma hx).continuousAt.continuousWithinAt
 
+/-- The digamma function is interval integrable between any two positive reals. -/
 theorem intervalIntegrable_digamma {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
     IntervalIntegrable digamma volume a b :=
   (continuousOn_digamma.mono (uIcc_subset_Ioi ha hb)).intervalIntegrable

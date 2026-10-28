@@ -15,9 +15,9 @@ Finite sums retain parameter poles occurring only after the final retained term.
 sums retain their actual convergence disks. Cleared products handle regular zero upper
 parameters without evaluating0 times an infinite product quotient.
 
-Two printed DLMF formulas have explicit counterexamples below. The corrected17.7.19 uses
+Two printed DLMF formulas have explicit counterexamples below. The corrected 17.7.19 uses
 Gasper–Rahman, Basic Hypergeometric Series, (1.9.7), with argument a⁻¹q^(−Σm).
-The corrected17.7.23 follows George Gasper, Lecture Notes for an Introductory Minicourse on
+The corrected 17.7.23 follows George Gasper, Lecture Notes for an Introductory Minicourse on
 q-Series (1995), (4.1.23), with p and q interchanged:
 https://sites.math.northwestern.edu/~george/preprints/ggLecNotesq-Series/ggLecNotesq-Series.pdf .
 The first denominator is(p;p)_k and the final shifted-factorial base is p. No false printed
@@ -45,13 +45,13 @@ def qFourPhiThreeValue (a b c q : ℂ) : ℂ :=
 /-- Pointwise definedness of integer shifted factorials before taking ratios. -/
 def qIntPochhammerListDefined (p : List ℂ) (q : ℂ) (k : ℤ) : Prop :=
   0≤k ∨ ∀ a∈p, qPochhammer (a*q^k) q (-k).toNat≠0
-/-- two phi two sum. -/
+/-- The `2φ2` summation `2φ2(a,q/a;-q,b;q,-b) = (ab,bq/a;q²)_∞/(b;q)_∞` (DLMF 17.7.E1). -/
 @[dlmf 17.7.E1]
 theorem two_phi_two_sum {a b q : ℂ} (ha : a≠0) (hq : ‖q‖<1) (hd : qDenominatorRegular [-q,b] q) :
     qPhi [a,q/a] [-q,b] q (-b)=qPochhammerListInf [a*b,b*q/a] (q^2)/qPochhammerInf b q := by
   sorry
 
-/-- two phi two square sum. -/
+/-- The `2φ2` summation at argument `-q` with lower parameters `±ab√q` (DLMF 17.7.E2). -/
 @[dlmf 17.7.E2]
 theorem two_phi_two_square_sum {a b q : ℂ} (hq : ‖q‖<1)
     (hd : qDenominatorRegular [a*b*Complex.sqrt q,-a*b*Complex.sqrt q] q) :
@@ -270,7 +270,8 @@ theorem q_pfaff_saalschutz {a b c q : ℂ} (hc0 : c≠0) (hq0 : q≠0) (hq : ‖
   refine sum_congr rfl fun k _ => ?_
   simp [qPhiTerm, qPhiExponent, qPochhammerList, mul_assoc]
 
-/-- nonterminating saalschutz. -/
+/-- The nonterminating q-Saalschütz sum, combining two balanced `3φ2` series at argument `q` (DLMF
+17.7.E5). -/
 @[dlmf 17.7.E5]
 theorem nonterminating_saalschutz {a b c e f q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
     (he : e≠0) (hf : f≠0) (hbal : e*f=a*b*c*q)
@@ -281,7 +282,8 @@ theorem nonterminating_saalschutz {a b c e f q : ℂ} (hq0 : q≠0) (hq : ‖q�
       qPochhammerListInf [q/e,f/a,f/b,f/c] q/qPochhammerListInf [a*q/e,b*q/e,c*q/e,f] q := by
   sorry
 
-/-- q dixon terminating. -/
+/-- The terminating q-Dixon sum of a well-poised `3φ2` with upper parameter `q^(-2n)` (DLMF
+17.7.E6). -/
 @[dlmf 17.7.E6]
 theorem q_dixon_terminating {b c q : ℂ} (hb : b≠0) (hc : c≠0) (hq0 : q≠0) (hq : ‖q‖<1) (n : ℕ)
     (hd : qDenominatorRegularThrough [q^(1-(2*n:ℤ))/b,q^(1-(2*n:ℤ))/c] q (2*n)) :
@@ -290,7 +292,7 @@ theorem q_dixon_terminating {b c q : ℂ} (hb : b≠0) (hc : c≠0) (hq0 : q≠0
         (qPochhammerList [q,b*c] q n*qPochhammerList [b,c] q (2*n)) := by
   sorry
 
-/-- four phi three sum. -/
+/-- The very-well-poised `4φ3` summation at argument `q√a/(bc)` (DLMF 17.7.E7). -/
 @[dlmf 17.7.E7]
 theorem four_phi_three_sum {a b c q : ℂ} (hq : ‖q‖<1) (hz : ‖q*Complex.sqrt a‖<‖b*c‖)
     (hd : qDenominatorRegular [-Complex.sqrt a,a*q/b,a*q/c] q) :
@@ -298,7 +300,7 @@ theorem four_phi_three_sum {a b c q : ℂ} (hq : ‖q‖<1) (hz : ‖q*Complex.s
       (q*Complex.sqrt a/(b*c))=qFourPhiThreeValue a b c q := by
   sorry
 
-/-- eight phi seven quadratic sum. -/
+/-- A quadratic very-well-poised `8φ7` summation with `ℓ = -c√(ab/q)` (DLMF 17.7.E8). -/
 @[dlmf 17.7.E8]
 theorem eight_phi_seven_quadratic_sum {a b c q ell : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hc : c≠0)
     (hell : ell= -c*Complex.sqrt (a*b/q)) (hz : ‖ell*q‖<‖a*b‖)
@@ -309,7 +311,8 @@ theorem eight_phi_seven_quadratic_sum {a b c q ell : ℂ} (hq0 : q≠0) (hq : �
         (qPochhammerListInf [ell*q/a,ell*q/b] q*qPochhammerListInf [q,a*b*q,c^2*q,c^2*q/(a*b)] (q^2)) := by
   sorry
 
-/-- four phi three parity. -/
+/-- A terminating `4φ3` summation at argument `q` whose value depends on the parity of `n` (DLMF
+17.7.E9). -/
 @[dlmf 17.7.E9]
 theorem four_phi_three_parity {a c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (n : ℕ)
     (hd : qDenominatorRegularThrough [Complex.sqrt (a*q),-Complex.sqrt (a*q),c^2] q n) :
@@ -319,7 +322,7 @@ theorem four_phi_three_parity {a c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (n : 
         qPochhammerList [a*q,c^2*q] (q^2) (n/2) := by
   sorry
 
-/-- eight phi seven even sum. -/
+/-- A very-well-poised `8φ7` summation with parameters built from `-c` (DLMF 17.7.E10). -/
 @[dlmf 17.7.E10]
 theorem eight_phi_seven_even_sum {a c d q : ℂ} (ha : a≠0) (hd0 : d≠0) (hq : ‖q‖<1) (hc : ‖c‖<1)
     (hd : qDenominatorRegular [Complex.sqrt (-c),-Complex.sqrt (-c),-c*q/a,-a*c,-q,c*q/d,c*d] q) :
@@ -329,7 +332,8 @@ theorem eight_phi_seven_even_sum {a c d q : ℂ} (ha : a≠0) (hd0 : d≠0) (hq 
         qPochhammerListInf [c*d,c*q/d,-a*c,-c*q/a] q := by
   sorry
 
-/-- four phi three infinite product. -/
+/-- A terminating balanced `4φ3` with parameters `q^(-n), q^(n+1), c, -c` summed by infinite
+products (DLMF 17.7.E11). -/
 @[dlmf 17.7.E11]
 theorem four_phi_three_infinite_product {c e q : ℂ} (he : e≠0) (hq0 : q≠0) (hq : ‖q‖<1) (n : ℕ)
     (hd : qDenominatorRegular [e,c^2*q/e,-q] q) :
@@ -346,7 +350,7 @@ theorem four_phi_three_base_square_first {a b q : ℂ} (hq0 : q≠0) (hq : ‖q�
       qPochhammer (-q) q n*((range n).prod (fun j => a-b*q^j))/qPochhammerList [-a*q,b] q n := by
   sorry
 
-/-- The n=0 removable quotient is1, and the cleared product retains a=0. -/
+/-- The n=0 removable quotient is 1, and the cleared product retains a=0. -/
 @[dlmf 17.7.E13]
 theorem four_phi_three_base_square_second {a b q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (n : ℕ)
     (hd : qDenominatorRegularThrough [b,b*q,a^2] (q^2) n) :
@@ -547,7 +551,7 @@ lemma qbR4_jackson_bcd_ne {a b c d e q : ℂ} (hq0 : q≠0) (n : ℕ) (ha : a≠
     show q/(b*c*d/a) = a*q/(b*c*d) by field_simp] at hE
   exact left_ne_zero_of_mul (left_ne_zero_of_mul hE)
 
-/-- jackson eight phi seven. -/
+/-- Jackson's terminating very-well-poised balanced `8φ7` summation (DLMF 17.7.E14). -/
 @[dlmf 17.7.E14]
 theorem jackson_eight_phi_seven {a b c d e q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (n : ℕ)
     (hbcd : b*c*d≠0) (he : e≠0) (hbal : a^2*q=b*c*d*e*q^(-(n:ℤ)))
@@ -647,7 +651,7 @@ theorem jackson_eight_phi_seven {a b c d e q : ℂ} (hq0 : q≠0) (hq : ‖q‖<
   have h1 : Tendsto g (𝓝[≠] b) (𝓝 (g b)) := hg.tendsto.mono_left nhdsWithin_le_nhds
   exact tendsto_nhds_unique h1 (tendsto_const_nhds.congr' hev.symm)
 
-/-- six phi five sum. -/
+/-- The nonterminating very-well-poised `6φ5` summation (DLMF 17.7.E15). -/
 @[dlmf 17.7.E15]
 theorem six_phi_five_sum {a b c d q : ℂ} (hq : ‖q‖<1) (hz : ‖a*q‖<‖b*c*d‖)
     (hd : qDenominatorRegular [Complex.sqrt a,-Complex.sqrt a,a*q/b,a*q/c,a*q/d] q) :
@@ -773,7 +777,8 @@ lemma qbR4_six_rational {a b c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (n : ℕ)
   have h1 : Tendsto g (𝓝[≠] a) (𝓝 (g a)) := hg.tendsto.mono_left nhdsWithin_le_nhds
   exact tendsto_nhds_unique h1 (tendsto_const_nhds.congr' hev.symm)
 
-/-- six phi five terminating. -/
+/-- The terminating very-well-poised `6φ5` summation with upper parameter `q^(-n)` (DLMF
+17.7.E16). -/
 @[dlmf 17.7.E16]
 theorem six_phi_five_terminating {a b c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (n : ℕ) (hbc : b*c≠0)
     (hd : qDenominatorRegularThrough [Complex.sqrt a,-Complex.sqrt a,a*q/b,a*q/c,a*q^(n+1)] q n) :
@@ -822,7 +827,7 @@ theorem six_phi_five_terminating {a b c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) 
   rw [sum_congr rfl hterm, qbR4_six_rational hq0 hq n hb hc hB hC hN]
   simp only [qPochhammerList, List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one]
 
-/-- nonterminating eight phi seven. -/
+/-- The nonterminating very-well-poised balanced `8φ7` summation (DLMF 17.7.E17). -/
 @[dlmf 17.7.E17]
 theorem nonterminating_eight_phi_seven {a b c d e f q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
     (habcdef : a*b*c*d*e*f≠0) (hbal : q*a^2=b*c*d*e*f)
@@ -857,7 +862,7 @@ theorem q_karlsson_minton_zero_corrected {a q : ℂ} (ha : a≠0) (hq0 : q≠0) 
     qPhi (a::qMintonUpper p q) (qMintonLower p) q (a⁻¹*q^(-(qMintonWeight p:ℤ)))=0 := by
   sorry
 
-/-- bibasic gosper. -/
+/-- Gosper's bibasic summation of a finite series in the two bases `p` and `q` (DLMF 17.7.E20). -/
 @[dlmf 17.7.E20]
 theorem bibasic_gosper {a c p q : ℂ} (ha : a≠1) (hc : c≠0) (n : ℕ)
     (hd : qPochhammer q q n*qPochhammer (a*p/c) p n≠0) :
@@ -883,7 +888,7 @@ theorem bibasic_gosper {a c p q : ℂ} (ha : a≠1) (hc : c≠0) (n : ℕ)
     field_simp
     ring
 
-/-- bibasic gasper. -/
+/-- Gasper's bibasic summation of a finite series in the two bases `p` and `q` (DLMF 17.7.E21). -/
 @[dlmf 17.7.E21]
 theorem bibasic_gasper {a b c p q : ℂ} (ha : a≠1) (hb : b≠1) (hbc : b*c≠0) (hq : q≠0) (n : ℕ)
     (hd : qPochhammerList [q,a*q/b] q n*qPochhammerList [a*p/c,b*c*p] p n≠0) :
@@ -929,7 +934,7 @@ theorem bibasic_gasper {a b c p q : ℂ} (ha : a≠1) (hb : b≠1) (hbc : b*c≠
     field_simp
     ring
 
-/-- bibasic bilateral finite. -/
+/-- A bilateral finite bibasic summation over the indices `-m ≤ k ≤ n` (DLMF 17.7.E22). -/
 @[dlmf 17.7.E22]
 theorem bibasic_bilateral_finite {a b c d p q : ℂ} (hbc : b*c≠0) (hp : p≠0) (hq : q≠0) (m n : ℕ)
     (hP : d*(1-a*d)*(1-b/d)*(1-c/d)*(1-a*d/(b*c))≠0)
@@ -959,7 +964,7 @@ theorem bibasic_difference_corrected {a b p q : ℂ} (hb : b≠0) (hp : p≠0) (
       (-1:ℂ)^k*p^(k.choose 2))=(if n=0 then 1 else 0) := by
   sorry
 
-/-- The printed argument in17.7.19 gives a nonzero terminating series. -/
+/-- The printed argument in 17.7.19 gives a nonzero terminating series. -/
 @[dlmf 17.7.E19]
 theorem karlsson_printed_counter : qPhi [2] [] (1/2) (1/4)=(1/2:ℂ) := by
   have hzero (k : ℕ) (hk : 2≤k) : qPochhammer (2:ℂ) (1/2) k=0 := by
@@ -973,7 +978,7 @@ theorem karlsson_printed_counter : qPhi [2] [] (1/2) (1/4)=(1/2:ℂ) := by
     simp only [List.map_cons,List.map_nil,List.prod_cons,List.prod_nil,mul_one,h,zero_div,zero_mul])]
   norm_num [sum_range_succ, qPochhammer]
 
-/-- The expression printed in17.7.23, before the primary-source corrections. -/
+/-- The expression printed in 17.7.23, before the primary-source corrections. -/
 def bibasicDifferencePrinted (p q a b : ℂ) (n : ℕ) : ℂ :=
   (1-a/q)*(1-b/q)*∑ k∈range (n+1),
     qPochhammerListInt [a*p^k,b*p^(-(k:ℤ))] q ((n:ℤ)-1)*(1-a*p^(2*k)/b)/

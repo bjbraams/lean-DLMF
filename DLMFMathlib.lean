@@ -73,6 +73,19 @@ public import DLMFMathlib.Analysis.ODE.P2sOscillation
 public import DLMFMathlib.Analysis.ODE.P2sGrowth
 public import DLMFMathlib.Analysis.ODE.P2sSturmOsc
 public import DLMFMathlib.NumberTheory.ModularForms.P3wJSurjective
+public import DLMFMathlib.Algebra.BigOperators
+public import DLMFMathlib.Algebra.Polynomial.OfReal
+public import DLMFMathlib.Analysis.Analytic.OfScalarsUnique
+public import DLMFMathlib.Analysis.Calculus.Deriv.Sign
+public import DLMFMathlib.Analysis.Complex.NonInteger
+public import DLMFMathlib.Analysis.SpecialFunctions.Complex.ArgLog
+public import DLMFMathlib.Analysis.SpecialFunctions.Gamma.Values
+public import DLMFMathlib.Analysis.SpecialFunctions.ImproperIntegralsExtra
+public import DLMFMathlib.Analysis.SpecialFunctions.Pow.ComplexReal
+public import DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
+public import DLMFMathlib.Analysis.SpecialFunctions.Trigonometric.ComplexValues
+public import DLMFMathlib.Combinatorics.Enumerative.PentagonalBounds
+public import DLMFMathlib.NumberTheory.LSeries.ZetaValues
 
 /-!
 # Supporting results for Mathlib

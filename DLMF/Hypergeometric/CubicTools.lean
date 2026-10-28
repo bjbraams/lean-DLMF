@@ -255,13 +255,6 @@ theorem hcub_not_int {s : ℂ} (h0 : 0 < s.re) (h1 : s.re < 1) : ∀ k : ℤ, s 
   have b1 : k < 1 := by exact_mod_cast a1
   omega
 
-/-- A number with positive real part is not a nonpositive integer. -/
-theorem hcub_not_neg_nat {s : ℂ} (h : 0 < s.re) : ∀ k : ℕ, s ≠ -(k : ℂ) := by
-  intro k hk
-  have := congrArg re hk; simp at this
-  have : (0 : ℝ) ≤ k := Nat.cast_nonneg k
-  linarith
-
 /-- `Γ(1/3) Γ(2/3) = 2π/√3`. -/
 theorem hcub_gamma_third_mul : Gamma (1 / 3) * Gamma (2 / 3) = 2 * π / Real.sqrt 3 := by
   have h := Complex.Gamma_mul_Gamma_one_sub (1 / 3)
@@ -327,7 +320,7 @@ theorem hcub_conn {a w : ℂ} (hc : ∀ k : ℕ, 2 * a + 2 / 3 ≠ -(k : ℂ))
   have e2 : ∀ b : ℂ, ₂F₁ (b + 1 / 3) (b + 2 / 3) (4 / 3) w = Gamma (4 / 3) * F₂ b := fun b => by
     simp only [hF₂]
     rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ hw,
-      regularizedGaussHGFun_eq_div_Gamma (hcub_not_neg_nat (by norm_num))]
+      regularizedGaussHGFun_eq_div_Gamma (not_neg_nat_of_re_pos (by norm_num))]
     field_simp [hGne (4 / 3) (by norm_num)]
   have e3 : ∀ b : ℂ, (∀ k : ℕ, 2 * b + 2 / 3 ≠ -(k : ℂ)) →
       ₂F₁ b (b + 1 / 3) (2 * b + 2 / 3) (1 - w) = Gamma (2 * b + 2 / 3) * F₃ b := fun b hb => by
@@ -444,12 +437,14 @@ theorem hcub_exp_third : exp (Real.pi * I / 3) = (1 + (Real.sqrt 3 : ℂ) * I) /
     ← ofReal_cos, ← ofReal_sin, Real.cos_pi_div_three, Real.sin_pi_div_three]
   push_cast; ring
 
+/-- `exp(2πi/3) = (-1 + i√3)/2`. -/
 theorem hcub_exp_two_third : exp (2 * Real.pi * I / 3) = (-1 + (Real.sqrt 3 : ℂ) * I) / 2 := by
   rw [show 2 * (Real.pi : ℂ) * I / 3 = ((π - π / 3 : ℝ) : ℂ) * I by push_cast; ring, exp_mul_I,
     ← ofReal_cos, ← ofReal_sin, Real.cos_pi_sub, Real.sin_pi_sub, Real.cos_pi_div_three,
     Real.sin_pi_div_three]
   push_cast; ring
 
+/-- `exp(4πi/3) = (-1 - i√3)/2`. -/
 theorem hcub_exp_four_third : exp (4 * Real.pi * I / 3) = (-1 - (Real.sqrt 3 : ℂ) * I) / 2 := by
   rw [show 4 * (Real.pi : ℂ) * I / 3 = ((π / 3 + π : ℝ) : ℂ) * I by push_cast; ring, exp_mul_I,
     ← ofReal_cos, ← ofReal_sin, Real.cos_add_pi, Real.sin_add_pi, Real.cos_pi_div_three,

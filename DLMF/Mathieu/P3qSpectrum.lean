@@ -36,6 +36,8 @@ namespace DLMF.Mathieu
 
 /-! ### The recurrences 28.4.5–28.4.8 as `p3qRec` -/
 
+/-- The coefficients `A^{2n}_{2i}` satisfy the recurrence 28.4.5 in `p3qRec` form,
+with diagonal `4i²` and `β = 2`. -/
 theorem p3q_rec_AE (n : ℕ) (q : ℝ) :
     p3qRec (fun i => 4 * (i : ℂ) ^ 2) 2 q (mathieuA (2 * n) q)
       (fun i => mathieuFourierA (2 * n) (2 * i) q) := by
@@ -54,6 +56,8 @@ theorem p3q_rec_AE (n : ℕ) (q : ℝ) :
     push_cast at this ⊢
     linear_combination -this
 
+/-- The coefficients `A^{2n+1}_{2i+1}` satisfy 28.4.6 in `p3qRec` form, with diagonal
+`(2i+1)² + q δ_{i0}` and `β = 1`. -/
 theorem p3q_rec_AO (n : ℕ) (q : ℝ) :
     p3qRec (fun i => (2 * (i : ℂ) + 1) ^ 2 + if i = 0 then (q : ℂ) else 0) 1 q
       (mathieuA (2 * n + 1) q) (fun i => mathieuFourierA (2 * n + 1) (2 * i + 1) q) := by
@@ -72,6 +76,8 @@ theorem p3q_rec_AO (n : ℕ) (q : ℝ) :
     · simp only [p3qL, p3qLo]; push_cast at this ⊢; norm_num at this ⊢
       linear_combination -this
 
+/-- The coefficients `B^{2n+1}_{2i+1}` satisfy 28.4.7 in `p3qRec` form, with diagonal
+`(2i+1)² - q δ_{i0}` and `β = 1`. -/
 theorem p3q_rec_BO (n : ℕ) (q : ℝ) :
     p3qRec (fun i => (2 * (i : ℂ) + 1) ^ 2 - if i = 0 then (q : ℂ) else 0) 1 q
       (mathieuB (2 * n + 1) q) (fun i => mathieuFourierB (2 * n + 1) (2 * i + 1) q) := by
@@ -90,6 +96,8 @@ theorem p3q_rec_BO (n : ℕ) (q : ℝ) :
     · simp only [p3qL, p3qLo]; push_cast at this ⊢; norm_num at this ⊢
       linear_combination -this
 
+/-- The coefficients `B^{2n+2}_{2i+2}` satisfy 28.4.8 in `p3qRec` form, with diagonal
+`(2i+2)²` and `β = 1`. -/
 theorem p3q_rec_BE (n : ℕ) (q : ℝ) :
     p3qRec (fun i => (2 * (i : ℂ) + 2) ^ 2) 1 q
       (mathieuB (2 * n + 2) q) (fun i => mathieuFourierB (2 * n + 2) (2 * i + 2) q) := by
@@ -109,6 +117,7 @@ theorem p3q_rec_BE (n : ℕ) (q : ℝ) :
       linear_combination -this
 
 
+/-- Some Fourier coefficient `A^n_m(q)` is nonzero (since `ce_n(0, q) > 0`). -/
 lemma p3q_fourierA_ne (n : ℕ) (q : ℝ) : ∃ m, mathieuFourierA n m q ≠ 0 := by
   by_contra h
   push Not at h
@@ -118,6 +127,7 @@ lemma p3q_fourierA_ne (n : ℕ) (q : ℝ) : ∃ m, mathieuFourierA n m q ≠ 0 :
   rw [mathieuCe_zero, Complex.ofReal_eq_zero] at this
   exact (mathieuCeZero_pos n q).ne' this
 
+/-- For `n ≥ 1`, some Fourier coefficient `B^n_m(q)` is nonzero (since `se_n'(0, q) > 0`). -/
 lemma p3q_fourierB_ne {n : ℕ} (hn : n ≠ 0) (q : ℝ) : ∃ m, mathieuFourierB n m q ≠ 0 := by
   by_contra h
   push Not at h
@@ -127,24 +137,28 @@ lemma p3q_fourierB_ne {n : ℕ} (hn : n ≠ 0) (q : ℝ) : ∃ m, mathieuFourier
   rw [deriv_mathieuSe_zero, Complex.ofReal_eq_zero] at this
   exact (mathieuSeDerivZero_pos n q).ne' this
 
+/-- Some coefficient `A^{2n}_{2i}(q)` is nonzero. -/
 theorem p3q_ne_AE (n : ℕ) (q : ℝ) : ∃ i, mathieuFourierA (2 * n) (2 * i) q ≠ 0 := by
   obtain ⟨m, hm⟩ := p3q_fourierA_ne (2 * n) q
   obtain ⟨j, rfl | rfl⟩ := Nat.even_or_odd' m
   · exact ⟨j, hm⟩
   · exact absurd (p1a2_fourierA_even_odd n j q) hm
 
+/-- Some coefficient `A^{2n+1}_{2i+1}(q)` is nonzero. -/
 theorem p3q_ne_AO (n : ℕ) (q : ℝ) : ∃ i, mathieuFourierA (2 * n + 1) (2 * i + 1) q ≠ 0 := by
   obtain ⟨m, hm⟩ := p3q_fourierA_ne (2 * n + 1) q
   obtain ⟨j, rfl | rfl⟩ := Nat.even_or_odd' m
   · exact absurd (p1a2_fourierA_odd_even n j q) hm
   · exact ⟨j, hm⟩
 
+/-- Some coefficient `B^{2n+1}_{2i+1}(q)` is nonzero. -/
 theorem p3q_ne_BO (n : ℕ) (q : ℝ) : ∃ i, mathieuFourierB (2 * n + 1) (2 * i + 1) q ≠ 0 := by
   obtain ⟨m, hm⟩ := p3q_fourierB_ne (n := 2 * n + 1) (by omega) q
   obtain ⟨j, rfl | rfl⟩ := Nat.even_or_odd' m
   · exact absurd (p1a2_fourierB_odd_even n j q) hm
   · exact ⟨j, hm⟩
 
+/-- Some coefficient `B^{2n+2}_{2i+2}(q)` is nonzero. -/
 theorem p3q_ne_BE (n : ℕ) (q : ℝ) : ∃ i, mathieuFourierB (2 * n + 2) (2 * i + 2) q ≠ 0 := by
   obtain ⟨m, hm⟩ := p3q_fourierB_ne (n := 2 * n + 2) (by omega) q
   obtain ⟨j, rfl | rfl⟩ := Nat.even_or_odd' m
@@ -153,6 +167,7 @@ theorem p3q_ne_BE (n : ℕ) (q : ℝ) : ∃ i, mathieuFourierB (2 * n + 2) (2 * 
     · exact ⟨j, by rw [show 2 * j + 2 = 2 * (j + 1) by ring]; exact hm⟩
   · exact absurd (p1a2_fourierB_even_odd n j q) hm
 
+/-- A sequence with `|c_m| ≤ C e^{-m}` tends to `0` along any reindexing `f` with `i ≤ f i`. -/
 lemma p3q_tendsto_of_decay {c : ℕ → ℂ}
     (hc : ∃ C, 0 ≤ C ∧ ∀ m : ℕ, ‖c m‖ ≤ C * Real.exp (-(1 * m)))
     {f : ℕ → ℕ} (hf : ∀ i, i ≤ f i) : Tendsto (fun i => c (f i)) atTop (𝓝 0) := by
@@ -165,22 +180,27 @@ lemma p3q_tendsto_of_decay {c : ℕ → ℂ}
   gcongr
   exact_mod_cast hf i
 
+/-- `A^{2n}_{2i}(q) → 0` as `i → ∞`. -/
 theorem p3q_lim_AE (n : ℕ) (q : ℝ) :
     Tendsto (fun i => mathieuFourierA (2 * n) (2 * i) q) atTop (𝓝 0) :=
   p3q_tendsto_of_decay (p2f_fourierA_decay _ q 1) (fun i => by omega)
 
+/-- `A^{2n+1}_{2i+1}(q) → 0` as `i → ∞`. -/
 theorem p3q_lim_AO (n : ℕ) (q : ℝ) :
     Tendsto (fun i => mathieuFourierA (2 * n + 1) (2 * i + 1) q) atTop (𝓝 0) :=
   p3q_tendsto_of_decay (p2f_fourierA_decay _ q 1) (fun i => by omega)
 
+/-- `B^{2n+1}_{2i+1}(q) → 0` as `i → ∞`. -/
 theorem p3q_lim_BO (n : ℕ) (q : ℝ) :
     Tendsto (fun i => mathieuFourierB (2 * n + 1) (2 * i + 1) q) atTop (𝓝 0) :=
   p3q_tendsto_of_decay (p2f_fourierB_decay (by omega) q 1) (fun i => by omega)
 
+/-- `B^{2n+2}_{2i+2}(q) → 0` as `i → ∞`. -/
 theorem p3q_lim_BE (n : ℕ) (q : ℝ) :
     Tendsto (fun i => mathieuFourierB (2 * n + 2) (2 * i + 2) q) atTop (𝓝 0) :=
   p3q_tendsto_of_decay (p2f_fourierB_decay (by omega) q 1) (fun i => by omega)
 
+/-- For real `x, y`, `‖(x : ℂ) - y‖ = |x - y|`. -/
 theorem p3q_norm_ofReal_sub (x y : ℝ) : ‖(x : ℂ) - (y : ℂ)‖ = |x - y| := by
   rw [← Complex.ofReal_sub, Complex.norm_real, Real.norm_eq_abs]
 
@@ -278,6 +298,8 @@ lemma p3q_interlace {V : ℝ → ℝ} {B L : ℝ} (hV : Continuous V) (hB : ∀ 
     · exact ODE.p2s_ne_of_deriv hV he hd
 
 
+/-- `a_m(q)` lies in its Sturm–Liouville spectrum on `[0, π/2]` and has exactly `⌊m/2⌋`
+smaller spectral values there. -/
 lemma p3q_A_mem (m : ℕ) (q : ℝ) :
     mathieuA m q ∈ ODE.p2lSpec (fun x : ℝ => 2 * q * Real.cos (2 * x)) (π / 2) false
       (if Even m then false else true) ∧
@@ -287,6 +309,8 @@ lemma p3q_A_mem (m : ℕ) (q : ℝ) :
   rw [p2s_specA] at h
   exact ⟨h.1, p2s_ncard_of_encard h.2⟩
 
+/-- For `m ≥ 1`, `b_m(q)` lies in its Sturm–Liouville spectrum on `[0, π/2]` and has exactly
+`⌊(m-1)/2⌋` smaller spectral values there. -/
 lemma p3q_B_mem {m : ℕ} (hm : m ≠ 0) (q : ℝ) :
     mathieuB m q ∈ ODE.p2lSpec (fun x : ℝ => 2 * q * Real.cos (2 * x)) (π / 2) true
       (if Even m then true else false) ∧
@@ -330,6 +354,7 @@ lemma p3q_mathieuB_lt_succ {m : ℕ} (hm : m ≠ 0) (q : ℝ) : mathieuB m q < m
 
 /-! ### Identification of the window -/
 
+/-- If `x` is within `4c < 1/2` of both `(k+s)²` and `(k'+s)²`, then `k = k'`. -/
 lemma p3q_sq_eq_of_close {k k' s : ℕ} {x c : ℝ} (hc : c < 1 / 8)
     (h1 : |x - ((k + s : ℕ) : ℝ) ^ 2| ≤ 4 * c) (h2 : |x - ((k' + s : ℕ) : ℝ) ^ 2| ≤ 4 * c) :
     k = k' := by
@@ -405,36 +430,43 @@ lemma p3q_ivt {G : ℝ → ℝ → ℝ} (hGa : ∀ q, Continuous fun a => G a q)
   · have h2 : G β q < 0 := by nlinarith
     exact intermediate_value_Ioo' hαβ.le hcont ⟨h2, h1⟩
 
+/-- `w_I(z; a, q)` and its `z`-derivative are entire functions of `a`. -/
 lemma p3q_diff_I (q z : ℂ) :
     Differentiable ℂ (fun a => mathieuWI a q z) ∧
       Differentiable ℂ (fun a => deriv (mathieuWI a q) z) :=
   p2f_differentiable_param (W := mathieuWI) isMathieuSolution_mathieuWI
     (fun a q => (mathieuWI_spec a q).2.1) (fun a q => (mathieuWI_spec a q).2.2) q z
 
+/-- `w_II(z; a, q)` and its `z`-derivative are entire functions of `a`. -/
 lemma p3q_diff_II (q z : ℂ) :
     Differentiable ℂ (fun a => mathieuWII a q z) ∧
       Differentiable ℂ (fun a => deriv (mathieuWII a q) z) :=
   p2f_differentiable_param (W := mathieuWII) isMathieuSolution_mathieuWII
     (fun a q => (mathieuWII_spec a q).2.1) (fun a q => (mathieuWII_spec a q).2.2) q z
 
+/-- `w_I(z; a, q)` and its `z`-derivative are entire functions of `q`. -/
 lemma p3q_diff_I_q (a z : ℂ) :
     Differentiable ℂ (fun q => mathieuWI a q z) ∧
       Differentiable ℂ (fun q => deriv (mathieuWI a q) z) :=
   p2f_differentiable_param_q (W := mathieuWI) isMathieuSolution_mathieuWI
     (fun a q => (mathieuWI_spec a q).2.1) (fun a q => (mathieuWI_spec a q).2.2) a z
 
+/-- `w_II(z; a, q)` and its `z`-derivative are entire functions of `q`. -/
 lemma p3q_diff_II_q (a z : ℂ) :
     Differentiable ℂ (fun q => mathieuWII a q z) ∧
       Differentiable ℂ (fun q => deriv (mathieuWII a q) z) :=
   p2f_differentiable_param_q (W := mathieuWII) isMathieuSolution_mathieuWII
     (fun a q => (mathieuWII_spec a q).2.1) (fun a q => (mathieuWII_spec a q).2.2) a z
 
+/-- For an entire `f`, `x ↦ Re f(x)` is continuous on `ℝ`. -/
 lemma p3q_cont_re {f : ℂ → ℂ} (hf : Differentiable ℂ f) : Continuous fun x : ℝ => (f x).re :=
   Complex.continuous_re.comp (hf.continuous.comp Complex.continuous_ofReal)
 
+/-- Cast identity `(s : ℂ) (π/2) = ((s π/2 : ℝ) : ℂ)`. -/
 lemma p3q_ofReal_mul_half_pi (s : ℝ) : (s : ℂ) * ((π : ℂ) / 2) = ((s * (π / 2) : ℝ) : ℂ) := by
   push_cast; ring
 
+/-- At `q = 0`, `a = s²`: `Re w_I'(π/2) = -s sin(sπ/2)`. -/
 lemma p3q_AE0 (s : ℝ) :
     (deriv (mathieuWI ((s ^ 2 : ℝ) : ℂ) ((0 : ℝ) : ℂ)) ((π : ℂ) / 2)).re =
       -Real.sin (s * (π / 2)) * s := by
@@ -442,6 +474,7 @@ lemma p3q_AE0 (s : ℝ) :
     p3q_ofReal_mul_half_pi, ← Complex.ofReal_sin, ← Complex.ofReal_neg, ← Complex.ofReal_mul,
     Complex.ofReal_re]
 
+/-- At `q = 0`, `a = -1`: `Re w_I'(π/2) = sinh(π/2)`. -/
 lemma p3q_AE0_neg :
     (deriv (mathieuWI ((-1 : ℝ) : ℂ) ((0 : ℝ) : ℂ)) ((π : ℂ) / 2)).re = Real.sinh (π / 2) := by
   rw [Complex.ofReal_zero, p1a1_deriv_mathieuWI_q_zero (s := I) (by push_cast; simp)]
@@ -451,11 +484,13 @@ lemma p3q_AE0_neg :
     linear_combination (-(((Real.sinh (π / 2) : ℝ) : ℂ))) * Complex.I_sq]
   exact Complex.ofReal_re _
 
+/-- At `q = 0`, `a = s²`: `Re w_I(π/2) = cos(sπ/2)`. -/
 lemma p3q_AO0 (s : ℝ) :
     (mathieuWI ((s ^ 2 : ℝ) : ℂ) ((0 : ℝ) : ℂ) ((π : ℂ) / 2)).re = Real.cos (s * (π / 2)) := by
   rw [Complex.ofReal_zero, p1a1_mathieuWI_q_zero (s := (s : ℂ)) (by push_cast; ring),
     p3q_ofReal_mul_half_pi, ← Complex.ofReal_cos, Complex.ofReal_re]
 
+/-- At `q = 0`, `a = s²`: `Re w_II'(π/2) = cos(sπ/2)`. -/
 lemma p3q_BO0 (s : ℝ) :
     (deriv (mathieuWII ((s ^ 2 : ℝ) : ℂ) ((0 : ℝ) : ℂ)) ((π : ℂ) / 2)).re =
       Real.cos (s * (π / 2)) := by
@@ -466,37 +501,45 @@ lemma p3q_BO0 (s : ℝ) :
   · rw [Complex.ofReal_zero, p1a1_deriv_mathieuWII_q_zero (s := (s : ℂ)) (by push_cast; ring)
       (by exact_mod_cast hs), p3q_ofReal_mul_half_pi, ← Complex.ofReal_cos, Complex.ofReal_re]
 
+/-- At `q = 0`, `a = s²`, `s ≠ 0`: `Re w_II(π/2) = sin(sπ/2)/s`. -/
 lemma p3q_BE0 {s : ℝ} (hs : s ≠ 0) :
     (mathieuWII ((s ^ 2 : ℝ) : ℂ) ((0 : ℝ) : ℂ) ((π : ℂ) / 2)).re = Real.sin (s * (π / 2)) / s := by
   rw [Complex.ofReal_zero, p1a1_mathieuWII_q_zero (s := (s : ℂ)) (by push_cast; ring)
     (by exact_mod_cast hs), p3q_ofReal_mul_half_pi, ← Complex.ofReal_sin, ← Complex.ofReal_div,
     Complex.ofReal_re]
 
+/-- `sin((2i+1)π/2) = (-1)^i`. -/
 lemma p3q_sin_odd (i : ℕ) : Real.sin (((2 * i + 1 : ℕ) : ℝ) * (π / 2)) = (-1) ^ i := by
   rw [show ((2 * i + 1 : ℕ) : ℝ) * (π / 2) = (i : ℝ) * π + π / 2 by push_cast; ring,
     Real.sin_add_pi_div_two, Real.cos_nat_mul_pi]
 
+/-- `cos(2i · π/2) = (-1)^i`. -/
 lemma p3q_cos_even (i : ℕ) : Real.cos (((2 * i : ℕ) : ℝ) * (π / 2)) = (-1) ^ i := by
   rw [show ((2 * i : ℕ) : ℝ) * (π / 2) = (i : ℝ) * π by push_cast; ring, Real.cos_nat_mul_pi]
 
 
+/-- A complex number fixed by conjugation with zero real part is `0`. -/
 lemma p3q_real_eq_zero {z : ℂ} (hz : (starRingEnd ℂ) z = z) (h : z.re = 0) : z = 0 := by
   rw [← Complex.conj_eq_iff_re.1 hz, h, Complex.ofReal_zero]
 
+/-- For real `a, q`, `w_I'(π/2; a, q)` is real (fixed by conjugation). -/
 lemma p3q_dI_real (a q : ℝ) :
     (starRingEnd ℂ) (deriv (mathieuWI a q) ((π : ℂ) / 2)) =
       deriv (mathieuWI a q) ((π : ℂ) / 2) := by
   rw [← p2s_hpi]; exact p1a1_deriv_mathieuWI_real a q _
 
+/-- For real `a, q`, `w_I(π/2; a, q)` is real (fixed by conjugation). -/
 lemma p3q_I_real (a q : ℝ) :
     (starRingEnd ℂ) (mathieuWI a q ((π : ℂ) / 2)) = mathieuWI a q ((π : ℂ) / 2) := by
   rw [← p2s_hpi]; exact p1a1_mathieuWI_real a q _
 
+/-- For real `a, q`, `w_II'(π/2; a, q)` is real (fixed by conjugation). -/
 lemma p3q_dII_real (a q : ℝ) :
     (starRingEnd ℂ) (deriv (mathieuWII a q) ((π : ℂ) / 2)) =
       deriv (mathieuWII a q) ((π : ℂ) / 2) := by
   rw [← p2s_hpi]; exact p1a1_deriv_mathieuWII_real a q _
 
+/-- For real `a, q`, `w_II(π/2; a, q)` is real (fixed by conjugation). -/
 lemma p3q_II_real (a q : ℝ) :
     (starRingEnd ℂ) (mathieuWII a q ((π : ℂ) / 2)) = mathieuWII a q ((π : ℂ) / 2) := by
   rw [← p2s_hpi]; exact p1a1_mathieuWII_real a q _
@@ -605,6 +648,7 @@ lemma p3q_exists_spec_B {k : ℕ} (hk : k ≠ 0) : ∀ᶠ q : ℝ in 𝓝 0, ∃
     · have := hc.1; push_cast at this ⊢; linarith
     · have := hc.2; push_cast at this ⊢; linarith
 
+/-- Every point of the spectrum `mathieuSpecA k q` is `a_m(q)` for some `m ≡ k (mod 2)`. -/
 lemma p3q_eq_mathieuA_of_mem {k : ℕ} {q c : ℝ} (hc : c ∈ mathieuSpecA k q) :
     ∃ m, m % 2 = k % 2 ∧ mathieuA m q = c := by
   have hfin : (mathieuSpecA k q ∩ Iio c).Finite := by
@@ -619,6 +663,7 @@ lemma p3q_eq_mathieuA_of_mem {k : ℕ} {q c : ℝ} (hc : c ∈ mathieuSpecA k q)
     simp only [this]
   rw [mathieuA, hS, show (2 * j + k % 2) / 2 = j by omega, hj]
 
+/-- Every point of `mathieuSpecB k q` is `b_m(q)` for some `m ≥ 1`, `m ≡ k (mod 2)`. -/
 lemma p3q_eq_mathieuB_of_mem {k : ℕ} {q c : ℝ} (hc : c ∈ mathieuSpecB k q) :
     ∃ m, m ≠ 0 ∧ m % 2 = k % 2 ∧ mathieuB m q = c := by
   have hfin : (mathieuSpecB k q ∩ Iio c).Finite := by
@@ -634,6 +679,8 @@ lemma p3q_eq_mathieuB_of_mem {k : ℕ} {q c : ℝ} (hc : c ∈ mathieuSpecB k q)
   rw [mathieuB, ite_eq_right_of_eq_false _ _ (eq_false (by omega)), hS,
     show (2 * j + 2 - k % 2 - 1) / 2 = j by omega, hj]
 
+/-- If `c` lies strictly between `(k-1)²` (or `-1` for `k = 0`) and `(k+1)²`, and is within
+`4x < 1/2` of `k'²` with `k' ≡ k (mod 2)`, then `k' = k`. -/
 lemma p3q_window_eq {k k' : ℕ} {c x : ℝ} (hx : x < 1 / 8) (hpar : k' % 2 = k % 2)
     (hL : (if k = 0 then (-1 : ℝ) else ((k : ℝ) - 1) ^ 2) < c) (hR : c < ((k : ℝ) + 1) ^ 2)
     (h : |c - (k' : ℝ) ^ 2| ≤ 4 * x) : k' = k := by
@@ -646,6 +693,7 @@ lemma p3q_window_eq {k k' : ℕ} {c x : ℝ} (hx : x < 1 / 8) (hpar : k' % 2 = k
     have : (k' : ℝ) + 2 ≤ k := by exact_mod_cast h1
     nlinarith [(Nat.cast_nonneg k' : (0 : ℝ) ≤ _)]
 
+/-- Eventually as `q → 0`, `|q| < 1/8`. -/
 theorem p3q_eventually_small : ∀ᶠ q : ℝ in 𝓝 0, |q| < 1 / 8 := by
   have : ∀ᶠ q : ℝ in 𝓝 0, q ∈ Metric.ball (0 : ℝ) (1 / 8) := Metric.ball_mem_nhds _ (by norm_num)
   filter_upwards [this] with q hq
@@ -691,6 +739,7 @@ theorem p3q_mathieuB_near {m : ℕ} (hm : m ≠ 0) :
 
 /-! ### Eigenvalue estimates for the four classes -/
 
+/-- Distinct squares of the same parity are separated: `|(2i+c)² - (2n+c)²| ≥ 4` for `i ≠ n`. -/
 theorem p3q_sq_sep {i n : ℕ} (h : i ≠ n) (c : ℕ) :
     4 ≤ |(((2 * i + c : ℕ) : ℝ)) ^ 2 - (((2 * n + c : ℕ) : ℝ)) ^ 2| := by
   rcases lt_or_gt_of_ne h with h' | h'
@@ -701,18 +750,22 @@ theorem p3q_sq_sep {i n : ℕ} (h : i ≠ n) (c : ℕ) :
     rw [abs_of_nonneg (by nlinarith [(Nat.cast_nonneg (2 * n + c) : (0 : ℝ) ≤ _)])]
     nlinarith [(Nat.cast_nonneg (2 * n + c) : (0 : ℝ) ≤ _)]
 
+/-- Triangle-inequality gap: if `|x - y| ≤ 4|q| < 1/2`, `|z - y| ≥ 4` and `|e| ≤ |q|`,
+then `|x - (z + e)| ≥ 1`. -/
 theorem p3q_gap_aux {x y z e q : ℝ} (hq : |q| < 1 / 8) (h1 : |x - y| ≤ 4 * |q|)
     (h2 : 4 ≤ |z - y|) (he : |e| ≤ |q|) : 1 ≤ |x - (z + e)| := by
   have := abs_add_three (-(x - (z + e))) (x - y) (-e)
   rw [show -(x - (z + e)) + (x - y) + -e = z - y by ring, abs_neg, abs_neg] at this
   linarith
 
+/-- A real function whose complex cast is `O(k)` is itself `O(k)`. -/
 theorem p3q_real_of_complex {f : ℝ → ℝ} {g : ℝ → ℂ} {k : ℝ → ℝ} {l : Filter ℝ}
     (h : g =O[l] k) (he : ∀ q, ((f q : ℝ) : ℂ) = g q) : f =O[l] k := by
   have : (fun q => ((f q : ℝ) : ℂ)) =O[l] k := by simpa only [he] using h
   rw [← isBigO_norm_left] at this ⊢
   simpa only [Complex.norm_real] using this
 
+/-- If `f(q) = q^e s(q)` with `s` continuous and `e' ≤ e`, then `f = O(q^{e'})` at `0`. -/
 theorem p3q_isBigO_of_eq {f s : ℝ → ℂ} {e e' : ℕ} (he : e' ≤ e)
     (h : ∀ q : ℝ, f q = (q : ℂ) ^ e * s q) (hs : Continuous s) :
     f =O[𝓝 0] (fun q : ℝ => q ^ e') := by
@@ -723,6 +776,7 @@ theorem p3q_isBigO_of_eq {f s : ℝ → ℂ} {e e' : ℕ} (he : e' ≤ e)
     simp))
   simpa only [mul_one, ← h] using this
 
+/-- A continuous function is `O(1)` at `0`. -/
 theorem p3q_cont_isBigO_one {s : ℝ → ℂ} (hs : Continuous s) :
     s =O[𝓝 0] (fun _ => (1 : ℝ)) := (hs.tendsto 0).isBigO_one ℝ
 

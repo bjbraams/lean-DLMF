@@ -41,15 +41,18 @@ namespace DLMF.CoalescingSaddles
 
 /-! ### The rotated cuspoid contour -/
 
+/-- `(K + 2) · θ_K = π/2` for the cuspoid contour angle `θ_K`. -/
 lemma s36a_angle_mul (K : ℕ) : ((K : ℝ) + 2) * cuspoidAngle K = π / 2 := by
   unfold cuspoidAngle; field_simp
 
+/-- `(e^{iθ_K})^{K+2} = i`. -/
 lemma s36a_exp_angle_pow (K : ℕ) : exp ((cuspoidAngle K : ℂ) * I) ^ (K + 2) = I := by
   rw [← exp_nat_mul]
   have : ((K + 2 : ℕ) : ℂ) * ((cuspoidAngle K : ℂ) * I) = (π / 2 : ℝ) * I := by
     rw [← s36a_angle_mul]; push_cast; ring
   rw [this]; push_cast; exact exp_pi_div_two_mul_I
 
+/-- `(e^{-iθ_K})^{K+2} = -i`. -/
 lemma s36a_exp_neg_angle_pow (K : ℕ) : exp (-(cuspoidAngle K : ℂ) * I) ^ (K + 2) = -I := by
   rw [← exp_nat_mul]
   have : ((K + 2 : ℕ) : ℂ) * (-(cuspoidAngle K : ℂ) * I) = -(π : ℂ) / 2 * I := by
@@ -66,6 +69,7 @@ theorem norm_cuspoidContourDir (K : ℕ) (r : ℝ) : ‖cuspoidContourDir K r‖
   · rw [show -(cuspoidAngle K : ℂ) * I = ((-cuspoidAngle K : ℝ) : ℂ) * I by push_cast; ring]
     exact norm_exp_ofReal_mul_I _
 
+/-- The cuspoid contour point at parameter `r` has modulus `|r|`. -/
 theorem norm_cuspoidContour (K : ℕ) (r : ℝ) : ‖cuspoidContour K r‖ = |r| := by
   rw [cuspoidContour, norm_mul, norm_cuspoidContourDir, mul_one, norm_real, Real.norm_eq_abs]
 
@@ -88,18 +92,22 @@ theorem cuspoidContour_pow (K : ℕ) (r : ℝ) :
       rw [abs_of_neg h.1, ho.neg_pow]; push_cast; ring
     rw [this]; ring
 
+/-- The direction factor of the cuspoid contour is measurable. -/
 theorem measurable_cuspoidContourDir (K : ℕ) : Measurable (cuspoidContourDir K) := by
   unfold cuspoidContourDir
   exact Measurable.ite ((measurableSet_le measurable_const measurable_id).union
     (MeasurableSet.const _)) measurable_const measurable_const
 
+/-- The cuspoid contour parametrization is measurable. -/
 theorem measurable_cuspoidContour (K : ℕ) : Measurable (cuspoidContour K) :=
   measurable_ofReal.mul (measurable_cuspoidContourDir K)
 
+/-- The cuspoid potential is continuous in `t`. -/
 theorem continuous_cuspoidPotential (K : ℕ) (x : Fin K → ℝ) :
     Continuous fun t => cuspoidPotential K t x := by
   unfold cuspoidPotential; fun_prop
 
+/-- `a^j ≤ 1 + a^K` for `a ≥ 0` and `j ≤ K`. -/
 lemma s36a_pow_le_one_add (a : ℝ) (ha : 0 ≤ a) {j K : ℕ} (hj : j ≤ K) : a ^ j ≤ 1 + a ^ K := by
   rcases le_total a 1 with h | h
   · have := pow_le_one₀ ha h (n := j); have := pow_nonneg ha K; linarith
@@ -141,6 +149,7 @@ theorem s36a_young (K : ℕ) {a C : ℝ} (ha : 0 ≤ a) (hC : 0 ≤ C) :
     have := pow_nonneg ha (K + 2)
     linarith
 
+/-- `a² - 1 ≤ a^{K+2}` for `a ≥ 0`. -/
 theorem s36a_pow_ge_sq_sub_one (K : ℕ) {a : ℝ} (ha : 0 ≤ a) : a ^ 2 - 1 ≤ a ^ (K + 2) := by
   rcases le_total a 1 with h | h
   · nlinarith [pow_nonneg ha (K + 2)]
@@ -168,6 +177,7 @@ theorem s36a_norm_integrand_le (K : ℕ) (x : Fin K → ℝ) {κ : ℝ} (hκ : 0
     rw [mul_add, mul_one] at h1; linarith
   nlinarith [mul_le_mul_of_nonneg_left key hκ.le]
 
+/-- The cuspoid contour integrand `r ↦ dir(r) exp(iκ Φ_K(t(r); x))` is measurable. -/
 lemma s36a_measurable_integrand (K : ℕ) (x : Fin K → ℝ) (κ : ℂ) :
     Measurable fun r : ℝ =>
       cuspoidContourDir K r * exp (I * κ * cuspoidPotential K (cuspoidContour K r) x) :=
@@ -189,14 +199,17 @@ theorem integrable_cuspoidIntegral_integrand (K : ℕ) (x : Fin K → ℝ) :
       cuspoidContourDir K r * exp (I * cuspoidPotential K (cuspoidContour K r) x) := by
   simpa using integrable_cuspoidIntegrand K x one_pos
 
+/-- For even `K` the contour direction is `e^{iθ_K}` on the whole line. -/
 theorem s36a_dir_of_even {K : ℕ} (hK : Even K) (r : ℝ) :
     cuspoidContourDir K r = exp ((cuspoidAngle K : ℂ) * I) := by
   simp [cuspoidContourDir, hK]
 
+/-- For `r ≥ 0` the contour direction is `e^{iθ_K}`. -/
 theorem s36a_dir_of_nonneg (K : ℕ) {r : ℝ} (hr : 0 ≤ r) :
     cuspoidContourDir K r = exp ((cuspoidAngle K : ℂ) * I) := by
   simp [cuspoidContourDir, hr]
 
+/-- For odd `K` and `r < 0` the contour direction is `e^{-iθ_K}`. -/
 theorem s36a_dir_of_odd_neg {K : ℕ} (hK : ¬ Even K) {r : ℝ} (hr : r < 0) :
     cuspoidContourDir K r = exp (-(cuspoidAngle K : ℂ) * I) := by
   simp [cuspoidContourDir, hK, not_le.mpr hr]
@@ -221,17 +234,20 @@ theorem cuspoidIntegral_zero_dim (x : Fin 0 → ℝ) :
   simp_rw [hint]
   rw [integral_const_mul, integral_complex_ofReal, integral_gaussian, div_one, mul_comm]
 
+/-- `∫_0^∞ e^{-r^n} dr = Γ(1/n + 1)` for `n > 0`. -/
 theorem s36a_integral_exp_neg_pow (n : ℕ) (hn : 0 < n) :
     ∫ r in Ioi (0 : ℝ), Real.exp (-r ^ n) = Real.Gamma (1 / n + 1) := by
   rw [← integral_exp_neg_rpow (by exact_mod_cast hn : (0 : ℝ) < n)]
   refine setIntegral_congr_fun measurableSet_Ioi fun r _ => ?_
   simp [Real.rpow_natCast]
 
+/-- The contour direction at `r = -1`: `e^{iθ_K}` for even `K` and `e^{-iθ_K}` for odd `K`. -/
 theorem s36a_dir_neg_one (K : ℕ) : cuspoidContourDir K (-1) =
     if Even K then exp ((cuspoidAngle K : ℂ) * I) else exp (-(cuspoidAngle K : ℂ) * I) := by
   have h : ¬ (0 : ℝ) ≤ -1 := by norm_num
   by_cases hK : Even K <;> simp [cuspoidContourDir, h, hK]
 
+/-- The contour direction is constant on the negative half line. -/
 theorem s36a_dir_neg {K : ℕ} {r : ℝ} (hr : r < 0) :
     cuspoidContourDir K r = cuspoidContourDir K (-1) := by
   rw [s36a_dir_neg_one]
@@ -284,10 +300,12 @@ theorem cuspoidIntegral_at_zero (K : ℕ) :
 
 /-! ### Symmetries (§36.2(iii)) -/
 
+/-- Complex conjugation commutes with the (real-coefficient) cuspoid potential. -/
 theorem conj_cuspoidPotential (K : ℕ) (t : ℂ) (x : Fin K → ℝ) :
     conj (cuspoidPotential K t x) = cuspoidPotential K (conj t) x := by
   simp [cuspoidPotential, map_sum, conj_ofReal]
 
+/-- For even `K`, `Φ_K(-t; x) = Φ_K(t; x')` with `x'_m = (-1)^{m+1} x_m`. -/
 lemma s36a_potential_neg_even {K : ℕ} (hK : Even K) (t : ℂ) (x : Fin K → ℝ) :
     cuspoidPotential K (-t) x = cuspoidPotential K t (fun m => (-1) ^ ((m : ℕ) + 1) * x m) := by
   unfold cuspoidPotential
@@ -296,6 +314,7 @@ lemma s36a_potential_neg_even {K : ℕ} (hK : Even K) (t : ℂ) (x : Fin K → �
   refine Finset.sum_congr rfl fun m _ => ?_
   rw [neg_pow]; push_cast; ring
 
+/-- For odd `K`, `Φ_K(-t; x) = -Φ_K(t; x')` with `x'_m = (-1)^m x_m`. -/
 lemma s36a_potential_neg_odd {K : ℕ} (hK : ¬ Even K) (t : ℂ) (x : Fin K → ℝ) :
     cuspoidPotential K (-t) x = -cuspoidPotential K t (fun m => (-1) ^ (m : ℕ) * x m) := by
   unfold cuspoidPotential
@@ -342,12 +361,14 @@ theorem cuspoidIntegral_odd_conj {K : ℕ} (hK : ¬ Even K) (x : Fin K → ℝ) 
 
 /-! ### The fold: `Ψ₁` and the Airy function -/
 
+/-- The fold ray integral along `arg t = π/6` equals `i w(x)`, with `w` the Airy ray integral. -/
 lemma s36a_airy_ray (x : ℝ) :
     ∫ r in Ioi (0 : ℝ), exp (((π / 6 : ℝ) : ℂ) * I) *
       DLMF.Airy.airyInt_osc x (r * exp (((π / 6 : ℝ) : ℂ) * I)) = I * DLMF.Airy.airyInt_w x := by
   rw [DLMF.Airy.airyInt_w, DLMF.Airy.rayIntegral, ← integral_const_mul]
   exact setIntegral_congr_fun measurableSet_Ioi fun r _ => DLMF.Airy.airyInt_osc_rotate x r
 
+/-- For `K = 1` the sign flip `x_m ↦ (-1)^m x_m` is the identity. -/
 lemma s36a_flip_one (x : ℝ) : (fun m : Fin 1 => (-1 : ℝ) ^ (m : ℕ) * ![x] m) = ![x] := by
   funext m; rw [Fin.fin_one_eq_zero m]; simp
 
@@ -420,6 +441,7 @@ theorem cuspoidIntegral_one (x : ℝ) :
 
 /-! ### The hyperbolic umbilic -/
 
+/-- For odd `K` and `r ≠ 0`, the conjugate of the direction at `-r` is the direction at `r`. -/
 lemma s36a_conj_dir_neg {K : ℕ} (hK : ¬ Even K) {r : ℝ} (hr : r ≠ 0) :
     conj (cuspoidContourDir K (-r)) = cuspoidContourDir K r := by
   rcases lt_or_gt_of_ne hr with h | h
@@ -428,10 +450,13 @@ lemma s36a_conj_dir_neg {K : ℕ} (hK : ¬ Even K) {r : ℝ} (hr : r ≠ 0) :
   · rw [s36a_dir_of_odd_neg hK (by linarith), s36a_dir_of_nonneg K h.le, ← exp_conj]
     congr 1; simp [conj_ofReal]
 
+/-- For odd `K` and `r ≠ 0`, the conjugate of the contour point at `-r` is minus the point at `r`.
+-/
 lemma s36a_conj_contour_neg {K : ℕ} (hK : ¬ Even K) {r : ℝ} (hr : r ≠ 0) :
     conj (cuspoidContour K (-r)) = -cuspoidContour K r := by
   simp only [cuspoidContour, map_mul, conj_ofReal, s36a_conj_dir_neg hK hr]; push_cast; ring
 
+/-- Almost every point of `ℝ²` has both coordinates nonzero. -/
 lemma s36a_ae_ne_zero_prod : ∀ᵐ p : ℝ × ℝ ∂volume, p.1 ≠ 0 ∧ p.2 ≠ 0 := by
   rw [Measure.volume_eq_prod]
   have h0 : ∀ᵐ r : ℝ ∂volume, r ≠ 0 := compl_mem_ae_iff.mpr (measure_singleton (0 : ℝ))
@@ -519,6 +544,7 @@ theorem ellipticUmbilicPotentialAB_eq (a b : ℂ) (x y z : ℝ) :
   simp only [I_sq]
   ring
 
+/-- The three elliptic umbilic ray directions are `±√3/2 + i/2` and `-i`. -/
 lemma s36a_rayDir_eq (j : Fin 3) : ellipticUmbilicRayDir j =
     ![(Real.sqrt 3 / 2 : ℝ) + I / 2, -(Real.sqrt 3 / 2 : ℝ) + I / 2, -I] j := by
   fin_cases j
@@ -536,13 +562,12 @@ lemma s36a_rayDir_eq (j : Fin 3) : ellipticUmbilicRayDir j =
       Real.sin_add_pi, Real.cos_pi_div_two, Real.sin_pi_div_two]
     simp
 
+/-- The three elliptic umbilic ray directions are `±√3/2 + i/2` and `-i` (complex `√3` form). -/
 lemma s36a_rayDir_eq' (j : Fin 3) : ellipticUmbilicRayDir j =
     ![(Real.sqrt 3 : ℂ) / 2 + I / 2, -(Real.sqrt 3 : ℂ) / 2 + I / 2, -I] j := by
   rw [s36a_rayDir_eq]; fin_cases j <;> simp; ring
 
-lemma s36a_sqrt3_sq : ((Real.sqrt 3 : ℝ) : ℂ) ^ 2 = 3 := by
-  rw [← ofReal_pow, Real.sq_sqrt (by norm_num)]; norm_num
-
+/-- The elliptic umbilic cycle coefficients `ε_{jk}` are symmetric. -/
 lemma s36a_cycle_symm (j k : Fin 3) : ellipticUmbilicCycle j k = ellipticUmbilicCycle k j := by
   fin_cases j <;> fin_cases k <;> rfl
 
@@ -590,7 +615,7 @@ theorem ellipticUmbilicIntegral_rotate (x y z : ℝ) :
         ellipticUmbilicIntegral x y z ∧
       ellipticUmbilicIntegral (-x / 2 + Real.sqrt 3 / 2 * y) (-(Real.sqrt 3 / 2) * x - y / 2) z =
         ellipticUmbilicIntegral x y z := by
-  have hs := s36a_sqrt3_sq
+  have hs := Airy.sqrt_three_sq
   set s : ℂ := ((Real.sqrt 3 : ℝ) : ℂ) with hs_def
   have hd := s36a_rayDir_eq'
   constructor
@@ -677,6 +702,8 @@ lemma s36a_quadrant_conj {κ x y z : ℝ} {j k j' k' : Fin 3}
   · ring
   · congr 1; push_cast; ring
 
+/-- Conjugation permutes the elliptic umbilic ray directions up to sign: `conj ρ_j = -ρ_{σ j}` with
+`σ = (0 1)`. -/
 lemma s36a_conj_rayDir (j : Fin 3) :
     conj (ellipticUmbilicRayDir j) = -ellipticUmbilicRayDir (![1, 0, 2] j) := by
   have h2 : conj (2 : ℂ) = 2 := map_ofNat _ 2
@@ -696,8 +723,9 @@ theorem ellipticUmbilicIntegral_conj (x y z : ℝ) :
   simp [ellipticUmbilicCycle]
   ring
 
+/-- Each elliptic umbilic ray direction `ρ_j` satisfies `ρ_j³ = i`. -/
 theorem s36a_rayDir_cube (j : Fin 3) : ellipticUmbilicRayDir j ^ 3 = I := by
-  have hs := s36a_sqrt3_sq
+  have hs := Airy.sqrt_three_sq
   rw [s36a_rayDir_eq']
   fin_cases j <;> simp
   · linear_combination (3 * I / 8 + (Real.sqrt 3 : ℂ) / 8) * hs +
@@ -706,6 +734,7 @@ theorem s36a_rayDir_cube (j : Fin 3) : ellipticUmbilicRayDir j ^ 3 = I := by
       (I / 8 - 3 * (Real.sqrt 3 : ℂ) / 8) * I_sq
   · linear_combination (-I) * I_sq
 
+/-- For `d³ = i`, `∫_0^∞ d exp(i (rd)³/2) dr = d (1/2)^{-1/3} Γ(4/3)`. -/
 lemma s36a_ray_integral_zero (d : ℂ) (hd : d ^ 3 = I) :
     ∫ r in Ioi (0 : ℝ), d * exp (I * ((r * d) ^ 3 / 2)) =
       d * (((1 / 2 : ℝ) ^ (-1 / 3 : ℝ) * Real.Gamma (1 / 3 + 1) : ℝ) : ℂ) := by
@@ -830,7 +859,6 @@ lemma q2s_im_potential_arc (K : ℕ) (x : Fin K → ℝ) {R y : ℝ} (hR : 0 ≤
   rw [Finset.sum_neg_distrib, ← Finset.mul_sum, ← Finset.sum_mul] at this
   linarith
 
-
 /-- Lower bound `Im Φ_K(R e^{iy}) ≥ (R²/π) y` on the arc `0 ≤ y ≤ π/(2(K+2))` for large `R`. -/
 lemma q2s_im_potential_arc_ge (K : ℕ) (x : Fin K → ℝ) {R y : ℝ} (hR : 1 ≤ R)
     (hRC : 2 * π * (∑ m, |x m|) ≤ R ^ 2) (hy : 0 ≤ y) (hyθ : y ≤ cuspoidAngle K) :
@@ -905,6 +933,11 @@ lemma q2s_arc_bound (K : ℕ) (x : Fin K → ℝ) {κ : ℝ} (hκ : 0 < κ) {R :
     _ ≤ R * (1 / a) := by gcongr; exact DLMF.Airy.airyInt_integral_exp_neg_le ha0 _
     _ = π / (κ * R) := by rw [ha]; field_simp
 
+/-- An entire function has an entire primitive. -/
+private lemma q2s_exists_primitive {f : ℂ → ℂ} (hf : Differentiable ℂ f) :
+    ∃ G : ℂ → ℂ, ∀ t, HasDerivAt G (f t) t := by
+  obtain ⟨g, hg⟩ := hf.isExactOn_univ
+  exact ⟨g, fun t => hg t (mem_univ t)⟩
 
 /-- The right tail: `∫₀^R exp(iκΦ_K(t; x)) dt` tends to the integral over the rotated ray
 `arg t = π/(2(K+2))` (Cauchy's theorem on the sector and the Jordan-type arc bound). -/
@@ -915,11 +948,7 @@ lemma q2s_tendsto_right (K : ℕ) (x : Fin K → ℝ) {κ : ℝ} (hκ : 0 < κ) 
   set f : ℂ → ℂ := fun w => exp (I * κ * cuspoidPotential K w x) with hf
   have hfc : Continuous f := by
     rw [hf]; exact continuous_exp.comp (continuous_const.mul (continuous_cuspoidPotential K x))
-  obtain ⟨G, hG⟩ : ∃ G : ℂ → ℂ, ∀ w, HasDerivAt G (f w) w := by
-    have hd : Differentiable ℂ f := by
-      rw [hf]; unfold cuspoidPotential; fun_prop
-    obtain ⟨g, hg⟩ := hd.isExactOn_univ
-    exact ⟨g, fun w => hg w (mem_univ w)⟩
+  obtain ⟨G, hG⟩ := q2s_exists_primitive (f := f) (by rw [hf]; unfold cuspoidPotential; fun_prop)
   set u := exp ((cuspoidAngle K : ℂ) * I) with hu
   have hsplit : ∀ R : ℝ, ∫ t in (0 : ℝ)..R, f t =
       (∫ r in (0 : ℝ)..R, u * f (r * u)) -
@@ -956,7 +985,6 @@ lemma q2s_tendsto_right (K : ℕ) (x : Fin K → ℝ) {κ : ℝ} (hκ : 0 < κ) 
   refine this.congr fun R => ?_
   simp only [id]
   rw [hsplit R]
-
 
 /-- Conjugation commutes with interval integrals. -/
 lemma q2s_intervalIntegral_conj (f : ℝ → ℂ) (a b : ℝ) :
@@ -1017,7 +1045,6 @@ lemma q2s_tendsto_left (K : ℕ) (x : Fin K → ℝ) {κ : ℝ} (hκ : 0 < κ) :
     rw [hc, s36a_potential_neg_odd hK, hx]
     ring_nf
 
-
 /-- The improper real integral `∫ exp(iκΦ_K(t; x)) dt` converges (both tails) to the
 rotated-contour integral, for every phase `κ > 0`. -/
 lemma q2s_hasIntegralWholeLine (K : ℕ) (x : Fin K → ℝ) {κ : ℝ} (hκ : 0 < κ) :
@@ -1039,7 +1066,6 @@ lemma q2s_hasIntegralWholeLine_const_mul {f : ℝ → ℂ} {v : ℂ} (c : ℂ)
   · unfold HasIntegralAtTop at hw ⊢
     simp_rw [intervalIntegral.integral_const_mul]
     exact hw.const_mul c
-
 
 /-- The improper real integral `∫_{-∞}^{∞} exp(iΦ_K(t; x)) dt` converges (both tails separately)
 to the rotated-contour integral `Ψ_K(x)` (DLMF 36.2.4; contour rotation, Jordan's lemma). -/
@@ -1077,6 +1103,7 @@ theorem hasIteratedIntegral_ellipticUmbilicIntegral (x y z : ℝ) :
     hyperbolicUmbilicDiffraction x y z 1 = hyperbolicUmbilicIntegral x y z := by
   simp [hyperbolicUmbilicDiffraction, hyperbolicUmbilicIntegral]
 
+/-- The elliptic umbilic diffraction catastrophe at `k = 1` is the canonical integral. -/
 @[simp] theorem ellipticUmbilicDiffraction_one (x y z : ℝ) :
     ellipticUmbilicDiffraction x y z 1 = ellipticUmbilicIntegral x y z := by
   simp [ellipticUmbilicDiffraction, ellipticUmbilicIntegral]
@@ -1168,7 +1195,6 @@ lemma q2s_integrable_fold (c : ℂ) :
     (q2s_measurable_fold c).aestronglyMeasurable
     (ae_of_all _ fun r => by simpa using q2s_norm_fold_le c r)
 
-
 /-- The fold integral with a complex linear coefficient:
 `∫ exp(i(t³ + ct)) dt = (2π/3^{1/3}) Ai(c/3^{1/3})` over the cubic V-contour (36.2.13 for
 complex `c`). -/
@@ -1246,10 +1272,7 @@ lemma q2s_fold_airy (c : ℂ) :
       integral_comp_mul_left_Ioi g' 0 ha, mul_zero, hg', DLMF.Airy.rayIntegral, Complex.real_smul]
     ring
   -- the Airy contour integral as two rays
-  obtain ⟨G, hG⟩ : ∃ G : ℂ → ℂ, ∀ t, HasDerivAt G (Kf t) t := by
-    have hd : Differentiable ℂ Kf := by rw [hKf]; fun_prop
-    obtain ⟨g, hg⟩ := hd.isExactOn_univ
-    exact ⟨g, fun t => hg t (mem_univ t)⟩
+  obtain ⟨G, hG⟩ := q2s_exists_primitive (f := Kf) (by rw [hKf]; fun_prop)
   have hKc : Continuous Kf := by rw [hKf]; fun_prop
   have hcont := DLMF.Airy.airyInt_contourIntegral_eq_rays hG hKc (-π / 3) (π / 3)
     (DLMF.Airy.airyInt_integrableOn_ray w (DLMF.Airy.airyInt_exp_three_mul _ (-1)
@@ -1266,7 +1289,6 @@ lemma q2s_fold_airy (c : ℂ) :
   push_cast
   field_simp
   linear_combination (A - B) * I_sq
-
 
 /-- `Im(c t) ≥ -|c| |r|` on the cubic V-contour, real `c`. -/
 lemma q2s_im_lin_contour_ge (c : ℝ) (r : ℝ) :
@@ -1383,14 +1405,18 @@ theorem hyperbolicUmbilicIntegral_eq_contour (x y z : ℝ) :
         (5 * π / 12) (π / 12) := by
   sorry
 
-/-- DLMF 36.2.9: `Ψ^{(H)}(x) = (2π/3^{1/3}) ∫ exp(i(s³ + xs)) Ai((zs + y)/3^{1/3}) ds`, the contour
-running from `∞e^{5πi/6}` to `∞e^{πi/6}` (the integrand is entire). -/
-@[dlmf 36.2.E9]
-theorem hyperbolicUmbilicIntegral_eq_airy (x y z : ℝ) :
-    hyperbolicUmbilicIntegral x y z = 2 * π / (((3 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ) *
-      DLMF.Airy.contourIntegral (fun s => exp (I * (s ^ 3 + x * s)) *
-        DLMF.Airy.airyAi ((z * s + y) / (((3 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ)))
-        (5 * π / 6) (π / 6) := by
+/-- Integrating out the inner variable of `Ψ^{(H)}` with the fold-Airy formula:
+`Ψ^{(H)}(x) = (2π/3^{1/3}) ∫ d(r) exp(i(t³ + xt)) Ai((zt + y)/3^{1/3}) dr`, `t = t(r)` on the
+cubic V-contour, the integrand being integrable. -/
+private lemma q2s_hyperbolic_fold (x y z : ℝ) :
+    Integrable (fun r : ℝ => cuspoidContourDir 1 r *
+      (exp (I * (cuspoidContour 1 r ^ 3 + x * cuspoidContour 1 r)) *
+        DLMF.Airy.airyAi ((z * cuspoidContour 1 r + y) / (((3 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ)))) ∧
+      hyperbolicUmbilicIntegral x y z = 2 * π / (((3 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ) *
+        ∫ r : ℝ, cuspoidContourDir 1 r *
+          (exp (I * (cuspoidContour 1 r ^ 3 + x * cuspoidContour 1 r)) *
+            DLMF.Airy.airyAi ((z * cuspoidContour 1 r + y) /
+              (((3 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ))) := by
   set a : ℂ := (((3 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ) with ha
   set h0 : ℂ → ℂ := fun s => exp (I * (s ^ 3 + x * s)) * DLMF.Airy.airyAi ((z * s + y) / a)
     with hh0
@@ -1434,6 +1460,23 @@ theorem hyperbolicUmbilicIntegral_eq_airy (x y z : ℝ) :
     refine this.congr (ae_of_all _ fun r => ?_)
     simp only
     rw [← mul_assoc, inv_mul_cancel₀ ha0, one_mul]
+  exact ⟨hfint, hval⟩
+
+/-- DLMF 36.2.9: `Ψ^{(H)}(x) = (2π/3^{1/3}) ∫ exp(i(s³ + xs)) Ai((zs + y)/3^{1/3}) ds`, the contour
+running from `∞e^{5πi/6}` to `∞e^{πi/6}` (the integrand is entire). -/
+@[dlmf 36.2.E9]
+theorem hyperbolicUmbilicIntegral_eq_airy (x y z : ℝ) :
+    hyperbolicUmbilicIntegral x y z = 2 * π / (((3 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ) *
+      DLMF.Airy.contourIntegral (fun s => exp (I * (s ^ 3 + x * s)) *
+        DLMF.Airy.airyAi ((z * s + y) / (((3 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ)))
+        (5 * π / 6) (π / 6) := by
+  set a : ℂ := (((3 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ) with ha
+  set h0 : ℂ → ℂ := fun s => exp (I * (s ^ 3 + x * s)) * DLMF.Airy.airyAi ((z * s + y) / a)
+    with hh0
+  set f : ℝ → ℂ := fun r => cuspoidContourDir 1 r * h0 (cuspoidContour 1 r) with hf
+  obtain ⟨hfint, hval⟩ := q2s_hyperbolic_fold x y z
+  change Integrable f at hfint
+  change hyperbolicUmbilicIntegral x y z = 2 * π / a * ∫ r, f r at hval
   have hθ : (cuspoidAngle 1 : ℂ) = ((π / 6 : ℝ) : ℂ) := by
     unfold cuspoidAngle; push_cast; ring
   have h56 : exp (((5 * π / 6 : ℝ) : ℂ) * I) = -exp (-(cuspoidAngle 1 : ℂ) * I) := by
@@ -1464,13 +1507,10 @@ theorem hyperbolicUmbilicIntegral_eq_airy (x y z : ℝ) :
     have := (hfint.comp_neg.integrableOn (s := Ioi 0)).neg
     refine this.congr_fun (fun r (hr : 0 < r) => ?_) measurableSet_Ioi
     rw [Pi.neg_apply, hneg r hr, neg_neg]
-  obtain ⟨G, hG⟩ : ∃ G : ℂ → ℂ, ∀ t, HasDerivAt G (h0 t) t := by
-    have hd : Differentiable ℂ h0 := by
-      rw [hh0]
-      exact (by fun_prop : Differentiable ℂ fun s : ℂ => exp (I * (s ^ 3 + x * s))).mul
-        (DLMF.Airy.differentiable_airyAi.comp (by fun_prop))
-    obtain ⟨g, hg⟩ := hd.isExactOn_univ
-    exact ⟨g, fun t => hg t (mem_univ t)⟩
+  obtain ⟨G, hG⟩ := q2s_exists_primitive (f := h0) (by
+    rw [hh0]
+    exact (by fun_prop : Differentiable ℂ fun s : ℂ => exp (I * (s ^ 3 + x * s))).mul
+      (DLMF.Airy.differentiable_airyAi.comp (by fun_prop)))
   have hc : Continuous h0 := by
     rw [hh0]
     exact (by fun_prop : Continuous fun s : ℂ => exp (I * (s ^ 3 + x * s))).mul
@@ -1617,7 +1657,6 @@ lemma q2s_E_ray (θ : ℝ) {d : ℂ} (hd : d = I * exp (θ * I)) (c : ℂ) {β :
     integral_comp_mul_left_Ioi g 0 hβ, mul_zero, hg, DLMF.Airy.rayIntegral, Complex.real_smul]
   ring
 
-
 /-- The three Airy ray integrals `P_θ(w) = ∫₀^∞ e^{iθ} exp((te^{iθ})³/3 - w t e^{iθ}) dt` at
 `θ = -π/3, π/3, π` give `Ai` and `Bi` (DLMF 9.5.4, 9.5.5). -/
 lemma q2s_airy_rays (w : ℂ) :
@@ -1629,10 +1668,7 @@ lemma q2s_airy_rays (w : ℂ) :
           DLMF.Airy.rayIntegral (fun t => exp (t ^ 3 / 3 - w * t)) (-π / 3) 0 -
           2 * DLMF.Airy.rayIntegral (fun t => exp (t ^ 3 / 3 - w * t)) π 0 := by
   set Kf : ℂ → ℂ := fun t => exp (t ^ 3 / 3 - w * t) with hKf
-  obtain ⟨G, hG⟩ : ∃ G : ℂ → ℂ, ∀ t, HasDerivAt G (Kf t) t := by
-    have hd : Differentiable ℂ Kf := by rw [hKf]; fun_prop
-    obtain ⟨g, hg⟩ := hd.isExactOn_univ
-    exact ⟨g, fun t => hg t (mem_univ t)⟩
+  obtain ⟨G, hG⟩ := q2s_exists_primitive (f := Kf) (by rw [hKf]; fun_prop)
   have hKc : Continuous Kf := by rw [hKf]; fun_prop
   have i1 := DLMF.Airy.airyInt_integrableOn_ray w (DLMF.Airy.airyInt_exp_three_mul (-π / 3) (-1)
     (by push_cast; ring))
@@ -1650,6 +1686,73 @@ lemma q2s_airy_rays (w : ℂ) :
       DLMF.Airy.airyInt_contourIntegral_eq_rays hG hKc _ _ i3 i1]
     field_simp; ring
 
+/-- The constant `β = 12^{1/3}/2` of 36.2.20: `β > 0`, `β³ = 3/2`, `12^{1/3} = 2β` and
+`(2/3)^{2/3} = β⁻²`. -/
+private lemma q2s_E_beta {β : ℝ} (hβdef : β = (12 : ℝ) ^ (1 / 3 : ℝ) / 2) :
+    0 < β ∧ (β : ℂ) ^ 3 = 3 / 2 ∧ (((12 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ) = 2 * β ∧
+      (((2 / 3 : ℝ) ^ (2 / 3 : ℝ) : ℝ) : ℂ) = ((β⁻¹ : ℝ) : ℂ) ^ 2 := by
+  have hβ : 0 < β := by rw [hβdef]; positivity
+  have h12c : ((12 : ℝ) ^ (1 / 3 : ℝ)) ^ 3 = 12 := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]; norm_num
+  have hβr : β ^ 3 = 3 / 2 := by rw [hβdef, div_pow, h12c]; norm_num
+  refine ⟨hβ, by rw [← ofReal_pow, hβr]; norm_num, by rw [hβdef]; push_cast; ring, ?_⟩
+  have : (2 / 3 : ℝ) ^ (2 / 3 : ℝ) = (β⁻¹) ^ 2 := by
+    have hpos : (0 : ℝ) ≤ (2 / 3 : ℝ) ^ (2 / 3 : ℝ) := by positivity
+    have hc1 : ((2 / 3 : ℝ) ^ (2 / 3 : ℝ)) ^ 3 = 4 / 9 := by
+      rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]; norm_num [Real.rpow_two]
+    have hc2 : (β⁻¹ ^ 2) ^ 3 = 4 / 9 := by
+      rw [inv_pow, inv_pow, ← pow_mul, show 2 * 3 = 3 * 2 by rfl, pow_mul, hβr]; norm_num
+    exact (pow_left_inj₀ hpos (by positivity) (by norm_num : (3 : ℕ) ≠ 0)).mp
+      (hc1.trans hc2.symm)
+  rw [this]; push_cast; ring
+
+/-- The elliptic umbilic ray directions as `ρ_j = i e^{iθ_j}` with `θ = (-π/3, π/3, π)`. -/
+private lemma q2s_E_rayDir (j : Fin 3) :
+    ellipticUmbilicRayDir j = I * exp ((((![-π / 3, π / 3, π] : Fin 3 → ℝ) j : ℝ) : ℂ) * I) := by
+  have hs3 : Real.sin (π / 3) = Real.sqrt 3 / 2 := Real.sin_pi_div_three
+  rw [s36a_rayDir_eq', exp_mul_I, ← ofReal_cos, ← ofReal_sin]
+  fin_cases j
+  · simp only [Fin.zero_eta, Matrix.cons_val_zero, Real.cos_neg, Real.sin_neg,
+      Real.cos_pi_div_three, neg_div]
+    rw [hs3]; push_cast; linear_combination ((Real.sqrt 3 : ℂ) / 2) * I_sq
+  · simp only [Fin.mk_one, Matrix.cons_val_one, Matrix.cons_val_zero, Real.cos_pi_div_three]
+    rw [hs3]; push_cast; linear_combination (-(Real.sqrt 3 : ℂ) / 2) * I_sq
+  · simp
+
+/-- At `z = 0` each quadrant integral of `Ψ^{(E)}` factorizes into two Airy ray integrals
+`P_θ(w) = ∫₀^∞ e^{iθ} exp((te^{iθ})³/3 - w t e^{iθ}) dt` at `w = (x ∓ iy)/(2β)`. -/
+private lemma q2s_E_quadrant_z_zero (x y : ℝ) {β : ℝ} (hβ : 0 < β) (hβ3 : (β : ℂ) ^ 3 = 3 / 2)
+    (j k : Fin 3) :
+    ellipticUmbilicQuadrant 1 x y 0 j k =
+      (I * (β⁻¹ : ℝ) * DLMF.Airy.rayIntegral
+          (fun s => exp (s ^ 3 / 3 - ((x : ℂ) - I * y) / (2 * β) * s))
+          ((![-π / 3, π / 3, π] : Fin 3 → ℝ) j) 0) *
+        (I * (β⁻¹ : ℝ) * DLMF.Airy.rayIntegral
+          (fun s => exp (s ^ 3 / 3 - ((x : ℂ) + I * y) / (2 * β) * s))
+          ((![-π / 3, π / 3, π] : Fin 3 → ℝ) k) 0) := by
+  set c : ℂ := (x : ℂ) - I * y with hc
+  set c' : ℂ := (x : ℂ) + I * y with hc'
+  unfold ellipticUmbilicQuadrant
+  set f : ℝ → ℂ := fun r : ℝ => ellipticUmbilicRayDir j *
+    exp (I * (((r : ℂ) * ellipticUmbilicRayDir j) ^ 3 / 2 +
+      c / 2 * ((r : ℂ) * ellipticUmbilicRayDir j))) with hf
+  set g : ℝ → ℂ := fun q : ℝ => ellipticUmbilicRayDir k *
+    exp (I * (((q : ℂ) * ellipticUmbilicRayDir k) ^ 3 / 2 +
+      c' / 2 * ((q : ℂ) * ellipticUmbilicRayDir k))) with hg
+  have hfac : (fun p : ℝ × ℝ => ellipticUmbilicRayDir j * ellipticUmbilicRayDir k *
+      exp (I * ((1 : ℝ) : ℂ) * ellipticUmbilicPotentialAB ((p.1 : ℂ) * ellipticUmbilicRayDir j)
+        ((p.2 : ℂ) * ellipticUmbilicRayDir k) x y 0)) =
+      fun p : ℝ × ℝ => f p.1 * g p.2 := by
+    funext p
+    simp only [hf, hg, ellipticUmbilicPotentialAB_eq, ofReal_zero, ofReal_one, zero_mul,
+      add_zero, mul_one]
+    rw [mul_mul_mul_comm (ellipticUmbilicRayDir j), ← exp_add]
+    congr 2
+    all_goals (try simp only [hc, hc'])
+    all_goals ring
+  rw [hfac, Measure.volume_eq_prod, setIntegral_prod_mul f g, hf, hg,
+    q2s_E_ray _ (q2s_E_rayDir j) c hβ hβ3, q2s_E_ray _ (q2s_E_rayDir k) c' hβ hβ3]
+
 /-- DLMF 36.2.20:
 `Ψ^{(E)}(x, y, 0) = 2π²(2/3)^{2/3} Re(Ai((x + iy)/12^{1/3}) Bi((x - iy)/12^{1/3}))`. -/
 @[dlmf 36.2.E20]
@@ -1658,66 +1761,15 @@ theorem ellipticUmbilicIntegral_z_zero (x y : ℝ) :
       ((DLMF.Airy.airyAi ((x + I * y) / (((12 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ)) *
         DLMF.Airy.airyBi ((x - I * y) / (((12 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ))).re : ℂ) := by
   set β : ℝ := (12 : ℝ) ^ (1 / 3 : ℝ) / 2 with hβdef
-  have h12 : (0 : ℝ) < (12 : ℝ) ^ (1 / 3 : ℝ) := by positivity
-  have hβ : 0 < β := by positivity
-  have h12c : ((12 : ℝ) ^ (1 / 3 : ℝ)) ^ 3 = 12 := by
-    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]; norm_num
-  have hβr : β ^ 3 = 3 / 2 := by rw [hβdef, div_pow, h12c]; norm_num
-  have hβ3 : (β : ℂ) ^ 3 = 3 / 2 := by rw [← ofReal_pow, hβr]; norm_num
-  have h2β : (((12 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ) = 2 * β := by rw [hβdef]; push_cast; ring
-  have hβ2 : (((2 / 3 : ℝ) ^ (2 / 3 : ℝ) : ℝ) : ℂ) = ((β⁻¹ : ℝ) : ℂ) ^ 2 := by
-    have : (2 / 3 : ℝ) ^ (2 / 3 : ℝ) = (β⁻¹) ^ 2 := by
-      have hpos : (0 : ℝ) ≤ (2 / 3 : ℝ) ^ (2 / 3 : ℝ) := by positivity
-      have hc1 : ((2 / 3 : ℝ) ^ (2 / 3 : ℝ)) ^ 3 = 4 / 9 := by
-        rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]; norm_num [Real.rpow_two]
-      have hc2 : (β⁻¹ ^ 2) ^ 3 = 4 / 9 := by
-        rw [inv_pow, inv_pow, ← pow_mul, show 2 * 3 = 3 * 2 by rfl, pow_mul, hβr]; norm_num
-      exact (pow_left_inj₀ hpos (by positivity) (by norm_num : (3 : ℕ) ≠ 0)).mp
-        (hc1.trans hc2.symm)
-    rw [this]; push_cast; ring
+  obtain ⟨hβ, hβ3, h2β, hβ2⟩ := q2s_E_beta hβdef
   set θ : Fin 3 → ℝ := ![-π / 3, π / 3, π] with hθ
-  have hs3 : Real.sin (π / 3) = Real.sqrt 3 / 2 := Real.sin_pi_div_three
-  have hdir : ∀ j : Fin 3, ellipticUmbilicRayDir j = I * exp ((θ j : ℂ) * I) := by
-    intro j
-    rw [s36a_rayDir_eq', exp_mul_I, ← ofReal_cos, ← ofReal_sin]
-    fin_cases j
-    · simp only [hθ, Fin.zero_eta, Matrix.cons_val_zero, Real.cos_neg, Real.sin_neg,
-        Real.cos_pi_div_three, neg_div]
-      rw [hs3]; push_cast; linear_combination ((Real.sqrt 3 : ℂ) / 2) * I_sq
-    · simp only [hθ, Fin.mk_one, Matrix.cons_val_one, Matrix.cons_val_zero,
-        Real.cos_pi_div_three]
-      rw [hs3]; push_cast; linear_combination (-(Real.sqrt 3 : ℂ) / 2) * I_sq
-    · simp [hθ]
   set c : ℂ := (x : ℂ) - I * y with hc
   set c' : ℂ := (x : ℂ) + I * y with hc'
   set P : ℝ → ℂ → ℂ := fun t w =>
     DLMF.Airy.rayIntegral (fun s => exp (s ^ 3 / 3 - w * s)) t 0 with hP
-  have hR : ∀ (j : Fin 3) (b : ℂ), ∫ r in Ioi (0 : ℝ), ellipticUmbilicRayDir j *
-      exp (I * (((r : ℂ) * ellipticUmbilicRayDir j) ^ 3 / 2 +
-        b / 2 * ((r : ℂ) * ellipticUmbilicRayDir j))) = I * (β⁻¹ : ℝ) * P (θ j) (b / (2 * β)) :=
-    fun j b => q2s_E_ray (θ j) (hdir j) b hβ hβ3
   have hQ : ∀ j k, ellipticUmbilicQuadrant 1 x y 0 j k =
-      (I * (β⁻¹ : ℝ) * P (θ j) (c / (2 * β))) * (I * (β⁻¹ : ℝ) * P (θ k) (c' / (2 * β))) := by
-    intro j k
-    unfold ellipticUmbilicQuadrant
-    set f : ℝ → ℂ := fun r : ℝ => ellipticUmbilicRayDir j *
-      exp (I * (((r : ℂ) * ellipticUmbilicRayDir j) ^ 3 / 2 +
-        c / 2 * ((r : ℂ) * ellipticUmbilicRayDir j))) with hf
-    set g : ℝ → ℂ := fun q : ℝ => ellipticUmbilicRayDir k *
-      exp (I * (((q : ℂ) * ellipticUmbilicRayDir k) ^ 3 / 2 +
-        c' / 2 * ((q : ℂ) * ellipticUmbilicRayDir k))) with hg
-    have hfac : (fun p : ℝ × ℝ => ellipticUmbilicRayDir j * ellipticUmbilicRayDir k *
-        exp (I * ((1 : ℝ) : ℂ) * ellipticUmbilicPotentialAB ((p.1 : ℂ) * ellipticUmbilicRayDir j)
-          ((p.2 : ℂ) * ellipticUmbilicRayDir k) x y 0)) =
-        fun p : ℝ × ℝ => f p.1 * g p.2 := by
-      funext p
-      simp only [hf, hg, ellipticUmbilicPotentialAB_eq, ofReal_zero, ofReal_one, zero_mul,
-        add_zero, mul_one]
-      rw [mul_mul_mul_comm (ellipticUmbilicRayDir j), ← exp_add]
-      congr 2
-      all_goals (try simp only [hc, hc'])
-      all_goals ring
-    rw [hfac, Measure.volume_eq_prod, setIntegral_prod_mul f g, hf, hg, hR, hR]
+      (I * (β⁻¹ : ℝ) * P (θ j) (c / (2 * β))) * (I * (β⁻¹ : ℝ) * P (θ k) (c' / (2 * β))) :=
+    q2s_E_quadrant_z_zero x y hβ hβ3
   have hw : conj ((x + I * y) / (((12 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ)) =
       (x - I * y) / (((12 : ℝ) ^ (1 / 3 : ℝ) : ℝ) : ℂ) := by
     simp [map_div₀, conj_ofReal]

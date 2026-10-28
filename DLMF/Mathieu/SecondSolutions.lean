@@ -623,54 +623,6 @@ lemma p1a1_mathieuFeDerivZero_even_neg (m : ℕ) (q : ℝ) :
       push_cast; rw [p1a1_mathieuFeU_add_pi, norm_mul]; simp),
     p1a1_sqrt_div_sq hA]
 
-/-- Helper for §28.5 (`p1a1_C_even_neg`). -/
-lemma p1a1_C_even_neg (m : ℕ) (q : ℝ) : mathieuFeC (2 * m) (-q) = mathieuFeC (2 * m) q := by
-  rcases eq_or_ne q 0 with rfl | hq
-  · simp
-  have hnq : ¬ (2 * m = 0 ∧ q = 0) := fun h => hq h.2
-  have hnq' : ¬ (2 * m = 0 ∧ -q = 0) := fun h => hq (neg_eq_zero.mp h.2)
-  simp only [mathieuFeC, hnq, hnq', ↓reduceIte]
-  rw [p1a1_mathieuCeZero_even_neg, p1a1_mathieuFeDerivZero_even_neg]
-  set a : ℂ := (mathieuA (2 * m) q : ℂ)
-  have hA' := deriv_mathieuWI_half_pi_mathieuA_even m q
-  have hW := mathieuWI_wronskian a q (π / 2)
-  rw [hA', zero_mul, sub_zero] at hW
-  have hμ1 : mathieuFeMu (2 * m) (-q) =
-      mathieuWI a q (π / 2) * deriv (mathieuWII a q) (π / 2) *
-        (2 * mathieuWII a q (π / 2) * mathieuWI a q (π / 2)) / π := by
-    rw [mathieuFeMu, mathieuA_even_neg, Complex.ofReal_neg, ← mathieuWI_pi_neg_q,
-      mathieuWII_pi _ (-(q : ℂ)), p1a1_mathieuWII_half_pi_neg_q,
-      p1a1_deriv_mathieuWII_half_pi_neg_q, m28a_mathieuWI_pi, hA']
-    ring
-  have hμ2 : mathieuFeMu (2 * m) q =
-      mathieuWI a q (π / 2) * deriv (mathieuWII a q) (π / 2) *
-        (2 * mathieuWII a q (π / 2) * deriv (mathieuWII a q) (π / 2)) / π := by
-    rw [mathieuFeMu, m28a_mathieuWI_pi, mathieuWII_pi, hA']
-    ring
-  rw [hμ1, hμ2]
-  have hAr : conj (mathieuWI a q (π / 2)) = mathieuWI a q (π / 2) := by
-    have := p1a1_mathieuWI_real (mathieuA (2 * m) q) q (π / 2); push_cast at this; exact this
-  have hBr : conj (deriv (mathieuWII a q) (π / 2)) = deriv (mathieuWII a q) (π / 2) := by
-    have := p1a1_deriv_mathieuWII_real (mathieuA (2 * m) q) q (π / 2)
-    push_cast at this; exact this
-  have hr := p1a1_real_ratio hAr hBr hW
-  have hA0 : (‖mathieuWI a q (π / 2)‖ : ℂ) ≠ 0 :=
-    Complex.ofReal_ne_zero.mpr (norm_ne_zero_iff.mpr (left_ne_zero_of_mul_eq_one hW))
-  have hB0 : (‖deriv (mathieuWII a q) (π / 2)‖ : ℂ) ≠ 0 :=
-    Complex.ofReal_ne_zero.mpr (norm_ne_zero_iff.mpr (right_ne_zero_of_mul_eq_one hW))
-  have hc : (mathieuCeZero (2 * m) q : ℂ) ≠ 0 :=
-    Complex.ofReal_ne_zero.mpr (mathieuCeZero_pos _ q).ne'
-  have hπ : (π : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
-  have hr' : mathieuWI a q (π / 2) * (‖deriv (mathieuWII a q) (π / 2)‖ : ℂ) =
-      deriv (mathieuWII a q) (π / 2) * ‖mathieuWI a q (π / 2)‖ := by
-    rw [div_eq_iff hA0] at hr; exact hr
-  push_cast
-  generalize mathieuWI a q (π / 2) = A at *
-  generalize deriv (mathieuWII a q) (π / 2) = Bp at *
-  generalize mathieuWII a q (π / 2) = B at *
-  field_simp
-  linear_combination ((mathieuFeDerivZero (2 * m) q : ℂ) * A * Bp * B) * hr'
-
 /-- Helper for §28.5 (`p1a1_feU_neg_q_odd`). -/
 lemma p1a1_feU_neg_q_odd {a q : ℂ} (hB' : deriv (mathieuWII a q) (π / 2) = 0) (z : ℂ) :
     mathieuWII a (-q) z - mathieuWI a (-q) π * mathieuWII a (-q) π / π * z * mathieuWI a (-q) z =
@@ -756,53 +708,6 @@ lemma p1a1_mathieuFeDerivZero_odd_neg (m : ℕ) (q : ℝ) :
       (fun x => by push_cast; rw [p1a1_mathieuGeU_add_pi (by omega), norm_mul]; simp),
     p1a1_sqrt_div_sq hB]
 
-/-- Helper for §28.5 (`p1a1_C_odd_neg`). -/
-lemma p1a1_C_odd_neg (m : ℕ) (q : ℝ) :
-    mathieuFeC (2 * m + 1) (-q) = -mathieuGeS (2 * m + 1) q := by
-  have hnq' : ¬ (2 * m + 1 = 0 ∧ -q = 0) := fun h => by omega
-  simp only [mathieuFeC, hnq', ↓reduceIte, mathieuGeS]
-  rw [p1a1_mathieuCeZero_odd_neg, p1a1_mathieuFeDerivZero_odd_neg]
-  set b : ℂ := (mathieuB (2 * m + 1) q : ℂ)
-  have hB' := deriv_mathieuWII_half_pi_mathieuB_odd m q
-  have hW := mathieuWI_wronskian b q (π / 2)
-  rw [hB', mul_zero, zero_sub] at hW
-  have hμ1 : mathieuFeMu (2 * m + 1) (-q) =
-      deriv (mathieuWI b q) (π / 2) * mathieuWII b q (π / 2) *
-        (2 * mathieuWII b q (π / 2) * mathieuWI b q (π / 2)) / π := by
-    rw [mathieuFeMu, mathieuA_odd_neg, Complex.ofReal_neg, ← mathieuWI_pi_neg_q,
-      mathieuWII_pi _ (-(q : ℂ)), p1a1_mathieuWII_half_pi_neg_q,
-      p1a1_deriv_mathieuWII_half_pi_neg_q, m28a_mathieuWI_pi, hB']
-    ring
-  have hμ2 : mathieuGeMu (2 * m + 1) q =
-      2 * mathieuWI b q (π / 2) * deriv (mathieuWI b q) (π / 2) *
-        (deriv (mathieuWI b q) (π / 2) * mathieuWII b q (π / 2)) / π := by
-    rw [mathieuGeMu, deriv_mathieuWI_pi, m28a_deriv_mathieuWII_pi, hB']
-    ring
-  rw [hμ1, hμ2]
-  have hAr : conj (-deriv (mathieuWI b q) (π / 2)) = -deriv (mathieuWI b q) (π / 2) := by
-    have := p1a1_deriv_mathieuWI_real (mathieuB (2 * m + 1) q) q (π / 2)
-    push_cast at this; rw [map_neg, this]
-  have hBr : conj (mathieuWII b q (π / 2)) = mathieuWII b q (π / 2) := by
-    have := p1a1_mathieuWII_real (mathieuB (2 * m + 1) q) q (π / 2)
-    push_cast at this; exact this
-  have hW' : -deriv (mathieuWI b q) (π / 2) * mathieuWII b q (π / 2) = 1 := by
-    rw [neg_mul]; exact hW
-  have hA0 : (‖deriv (mathieuWI b q) (π / 2)‖ : ℂ) ≠ 0 :=
-    Complex.ofReal_ne_zero.mpr (norm_ne_zero_iff.mpr (fun h => by rw [h] at hW; simp at hW))
-  have hB0 : (‖mathieuWII b q (π / 2)‖ : ℂ) ≠ 0 :=
-    Complex.ofReal_ne_zero.mpr (norm_ne_zero_iff.mpr (fun h => by rw [h] at hW; simp at hW))
-  have hr := p1a1_real_ratio hAr hBr hW'
-  rw [norm_neg, div_eq_iff hA0] at hr
-  have hs : (mathieuSeDerivZero (2 * m + 1) q : ℂ) ≠ 0 :=
-    Complex.ofReal_ne_zero.mpr (mathieuSeDerivZero_pos _ q).ne'
-  have hπ : (π : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
-  push_cast
-  generalize mathieuWI b q (π / 2) = A at *
-  generalize deriv (mathieuWI b q) (π / 2) = Ap at *
-  generalize mathieuWII b q (π / 2) = B at *
-  field_simp
-  linear_combination (-((mathieuGeZero (2 * m + 1) q : ℂ) * Ap * B * A)) * hr
-
 /-- Helper for §28.5 (`p1a1_mathieuSeDerivZero_even_neg`). -/
 lemma p1a1_mathieuSeDerivZero_even_neg (m : ℕ) (q : ℝ) :
     mathieuSeDerivZero (2 * m + 2) (-q) = mathieuSeDerivZero (2 * m + 2) q /
@@ -848,51 +753,6 @@ lemma p1a1_mathieuGeZero_even_neg (m : ℕ) (q : ℝ) :
     p1a1_integral_comp_add_of_periodic (g := fun x => ‖mathieuGeU (2 * m + 2) x q‖ ^ 2)
       (fun x => by push_cast; rw [p1a1_mathieuGeU_add_pi (by omega), norm_mul]; simp),
     p1a1_sqrt_div_sq hBp]
-
-/-- Helper for §28.5 (`p1a1_S_even_neg`). -/
-lemma p1a1_S_even_neg (m : ℕ) (q : ℝ) :
-    mathieuGeS (2 * m + 2) (-q) = mathieuGeS (2 * m + 2) q := by
-  rw [mathieuGeS, mathieuGeS, p1a1_mathieuGeZero_even_neg, p1a1_mathieuSeDerivZero_even_neg]
-  set b : ℂ := (mathieuB (2 * m + 2) q : ℂ)
-  have hB := mathieuWII_half_pi_mathieuB_even m q
-  have hW := mathieuWI_wronskian b q (π / 2)
-  rw [hB, mul_zero, sub_zero] at hW
-  have hμ1 : mathieuGeMu (2 * m + 2) (-q) =
-      2 * deriv (mathieuWII b q) (π / 2) * deriv (mathieuWI b q) (π / 2) *
-        (mathieuWI b q (π / 2) * deriv (mathieuWII b q) (π / 2)) / π := by
-    rw [mathieuGeMu, mathieuB_even_neg, Complex.ofReal_neg,
-      ← mathieuWI_pi_eq_deriv_mathieuWII_pi _ (-(q : ℂ)), ← mathieuWI_pi_neg_q,
-      deriv_mathieuWI_pi _ (-(q : ℂ)), p1a1_mathieuWI_half_pi_neg_q,
-      p1a1_deriv_mathieuWI_half_pi_neg_q, m28a_mathieuWI_pi, hB]
-    ring
-  have hμ2 : mathieuGeMu (2 * m + 2) q =
-      2 * mathieuWI b q (π / 2) * deriv (mathieuWI b q) (π / 2) *
-        (mathieuWI b q (π / 2) * deriv (mathieuWII b q) (π / 2)) / π := by
-    rw [mathieuGeMu, deriv_mathieuWI_pi, m28a_deriv_mathieuWII_pi, hB]
-    ring
-  rw [hμ1, hμ2]
-  have hAr : conj (mathieuWI b q (π / 2)) = mathieuWI b q (π / 2) := by
-    have := p1a1_mathieuWI_real (mathieuB (2 * m + 2) q) q (π / 2); push_cast at this; exact this
-  have hBr : conj (deriv (mathieuWII b q) (π / 2)) = deriv (mathieuWII b q) (π / 2) := by
-    have := p1a1_deriv_mathieuWII_real (mathieuB (2 * m + 2) q) q (π / 2)
-    push_cast at this; exact this
-  have hW' : deriv (mathieuWII b q) (π / 2) * mathieuWI b q (π / 2) = 1 := by
-    rw [mul_comm]; exact hW
-  have hA0 : (‖mathieuWI b q (π / 2)‖ : ℂ) ≠ 0 :=
-    Complex.ofReal_ne_zero.mpr (norm_ne_zero_iff.mpr (left_ne_zero_of_mul_eq_one hW))
-  have hB0 : (‖deriv (mathieuWII b q) (π / 2)‖ : ℂ) ≠ 0 :=
-    Complex.ofReal_ne_zero.mpr (norm_ne_zero_iff.mpr (right_ne_zero_of_mul_eq_one hW))
-  have hr := p1a1_real_ratio hBr hAr hW'
-  rw [div_eq_iff hB0] at hr
-  have hs : (mathieuSeDerivZero (2 * m + 2) q : ℂ) ≠ 0 :=
-    Complex.ofReal_ne_zero.mpr (mathieuSeDerivZero_pos _ q).ne'
-  have hπ : (π : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
-  push_cast
-  generalize mathieuWI b q (π / 2) = A at *
-  generalize deriv (mathieuWI b q) (π / 2) = Ap at *
-  generalize deriv (mathieuWII b q) (π / 2) = Bp at *
-  field_simp
-  linear_combination ((mathieuGeZero (2 * m + 2) q : ℂ) * Bp * Ap * A) * hr
 
 /-- `∫₀^{2π} ‖f‖² > 0` for an entire function `f ≢ 0`. -/
 lemma p1a1_integral_normSq_pos_of_ne_zero {f : ℂ → ℂ} (hf : Differentiable ℂ f)
@@ -1222,22 +1082,148 @@ theorem mathieuFeC_mathieuGeS_tendsto {n : ℕ} (hn : n ≠ 0) (z : ℂ) :
 
 /-- **DLMF 28.5.6** (first relation): `C_{2m}(-q) = C_{2m}(q)`. -/
 @[dlmf 28.5.E6]
-theorem mathieuFeC_even_neg (m : ℕ) (q : ℝ) : mathieuFeC (2 * m) (-q) = mathieuFeC (2 * m) q :=
-  p1a1_C_even_neg m q
+theorem mathieuFeC_even_neg (m : ℕ) (q : ℝ) : mathieuFeC (2 * m) (-q) = mathieuFeC (2 * m) q := by
+  rcases eq_or_ne q 0 with rfl | hq
+  · simp
+  have hnq : ¬ (2 * m = 0 ∧ q = 0) := fun h => hq h.2
+  have hnq' : ¬ (2 * m = 0 ∧ -q = 0) := fun h => hq (neg_eq_zero.mp h.2)
+  simp only [mathieuFeC, hnq, hnq', ↓reduceIte]
+  rw [p1a1_mathieuCeZero_even_neg, p1a1_mathieuFeDerivZero_even_neg]
+  set a : ℂ := (mathieuA (2 * m) q : ℂ)
+  have hA' := deriv_mathieuWI_half_pi_mathieuA_even m q
+  have hW := mathieuWI_wronskian a q (π / 2)
+  rw [hA', zero_mul, sub_zero] at hW
+  have hμ1 : mathieuFeMu (2 * m) (-q) =
+      mathieuWI a q (π / 2) * deriv (mathieuWII a q) (π / 2) *
+        (2 * mathieuWII a q (π / 2) * mathieuWI a q (π / 2)) / π := by
+    rw [mathieuFeMu, mathieuA_even_neg, Complex.ofReal_neg, ← mathieuWI_pi_neg_q,
+      mathieuWII_pi _ (-(q : ℂ)), p1a1_mathieuWII_half_pi_neg_q,
+      p1a1_deriv_mathieuWII_half_pi_neg_q, m28a_mathieuWI_pi, hA']
+    ring
+  have hμ2 : mathieuFeMu (2 * m) q =
+      mathieuWI a q (π / 2) * deriv (mathieuWII a q) (π / 2) *
+        (2 * mathieuWII a q (π / 2) * deriv (mathieuWII a q) (π / 2)) / π := by
+    rw [mathieuFeMu, m28a_mathieuWI_pi, mathieuWII_pi, hA']
+    ring
+  rw [hμ1, hμ2]
+  have hAr : conj (mathieuWI a q (π / 2)) = mathieuWI a q (π / 2) := by
+    have := p1a1_mathieuWI_real (mathieuA (2 * m) q) q (π / 2); push_cast at this; exact this
+  have hBr : conj (deriv (mathieuWII a q) (π / 2)) = deriv (mathieuWII a q) (π / 2) := by
+    have := p1a1_deriv_mathieuWII_real (mathieuA (2 * m) q) q (π / 2)
+    push_cast at this; exact this
+  have hr := p1a1_real_ratio hAr hBr hW
+  have hA0 : (‖mathieuWI a q (π / 2)‖ : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (norm_ne_zero_iff.mpr (left_ne_zero_of_mul_eq_one hW))
+  have hB0 : (‖deriv (mathieuWII a q) (π / 2)‖ : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (norm_ne_zero_iff.mpr (right_ne_zero_of_mul_eq_one hW))
+  have hc : (mathieuCeZero (2 * m) q : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (mathieuCeZero_pos _ q).ne'
+  have hπ : (π : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
+  have hr' : mathieuWI a q (π / 2) * (‖deriv (mathieuWII a q) (π / 2)‖ : ℂ) =
+      deriv (mathieuWII a q) (π / 2) * ‖mathieuWI a q (π / 2)‖ := by
+    rw [div_eq_iff hA0] at hr; exact hr
+  push_cast
+  generalize mathieuWI a q (π / 2) = A at *
+  generalize deriv (mathieuWII a q) (π / 2) = Bp at *
+  generalize mathieuWII a q (π / 2) = B at *
+  field_simp
+  linear_combination ((mathieuFeDerivZero (2 * m) q : ℂ) * A * Bp * B) * hr'
 
 /-- **DLMF 28.5.6** (second relation, **corrected sign**): `C_{2m+1}(-q) = -S_{2m+1}(q)`
 (DLMF prints `C_{2m+1}(-q) = S_{2m+1}(q)`, which contradicts its own sign rule; see the module
 docstring). -/
 @[dlmf 28.5.E6]
 theorem mathieuFeC_odd_neg (m : ℕ) (q : ℝ) :
-    mathieuFeC (2 * m + 1) (-q) = -mathieuGeS (2 * m + 1) q :=
-  p1a1_C_odd_neg m q
+    mathieuFeC (2 * m + 1) (-q) = -mathieuGeS (2 * m + 1) q := by
+  have hnq' : ¬ (2 * m + 1 = 0 ∧ -q = 0) := fun h => by omega
+  simp only [mathieuFeC, hnq', ↓reduceIte, mathieuGeS]
+  rw [p1a1_mathieuCeZero_odd_neg, p1a1_mathieuFeDerivZero_odd_neg]
+  set b : ℂ := (mathieuB (2 * m + 1) q : ℂ)
+  have hB' := deriv_mathieuWII_half_pi_mathieuB_odd m q
+  have hW := mathieuWI_wronskian b q (π / 2)
+  rw [hB', mul_zero, zero_sub] at hW
+  have hμ1 : mathieuFeMu (2 * m + 1) (-q) =
+      deriv (mathieuWI b q) (π / 2) * mathieuWII b q (π / 2) *
+        (2 * mathieuWII b q (π / 2) * mathieuWI b q (π / 2)) / π := by
+    rw [mathieuFeMu, mathieuA_odd_neg, Complex.ofReal_neg, ← mathieuWI_pi_neg_q,
+      mathieuWII_pi _ (-(q : ℂ)), p1a1_mathieuWII_half_pi_neg_q,
+      p1a1_deriv_mathieuWII_half_pi_neg_q, m28a_mathieuWI_pi, hB']
+    ring
+  have hμ2 : mathieuGeMu (2 * m + 1) q =
+      2 * mathieuWI b q (π / 2) * deriv (mathieuWI b q) (π / 2) *
+        (deriv (mathieuWI b q) (π / 2) * mathieuWII b q (π / 2)) / π := by
+    rw [mathieuGeMu, deriv_mathieuWI_pi, m28a_deriv_mathieuWII_pi, hB']
+    ring
+  rw [hμ1, hμ2]
+  have hAr : conj (-deriv (mathieuWI b q) (π / 2)) = -deriv (mathieuWI b q) (π / 2) := by
+    have := p1a1_deriv_mathieuWI_real (mathieuB (2 * m + 1) q) q (π / 2)
+    push_cast at this; rw [map_neg, this]
+  have hBr : conj (mathieuWII b q (π / 2)) = mathieuWII b q (π / 2) := by
+    have := p1a1_mathieuWII_real (mathieuB (2 * m + 1) q) q (π / 2)
+    push_cast at this; exact this
+  have hW' : -deriv (mathieuWI b q) (π / 2) * mathieuWII b q (π / 2) = 1 := by
+    rw [neg_mul]; exact hW
+  have hA0 : (‖deriv (mathieuWI b q) (π / 2)‖ : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (norm_ne_zero_iff.mpr (fun h => by rw [h] at hW; simp at hW))
+  have hB0 : (‖mathieuWII b q (π / 2)‖ : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (norm_ne_zero_iff.mpr (fun h => by rw [h] at hW; simp at hW))
+  have hr := p1a1_real_ratio hAr hBr hW'
+  rw [norm_neg, div_eq_iff hA0] at hr
+  have hs : (mathieuSeDerivZero (2 * m + 1) q : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (mathieuSeDerivZero_pos _ q).ne'
+  have hπ : (π : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
+  push_cast
+  generalize mathieuWI b q (π / 2) = A at *
+  generalize deriv (mathieuWI b q) (π / 2) = Ap at *
+  generalize mathieuWII b q (π / 2) = B at *
+  field_simp
+  linear_combination (-((mathieuGeZero (2 * m + 1) q : ℂ) * Ap * B * A)) * hr
 
 /-- **DLMF 28.5.6** (third relation): `S_{2m+2}(-q) = S_{2m+2}(q)`. -/
 @[dlmf 28.5.E6]
 theorem mathieuGeS_even_neg (m : ℕ) (q : ℝ) :
-    mathieuGeS (2 * m + 2) (-q) = mathieuGeS (2 * m + 2) q :=
-  p1a1_S_even_neg m q
+    mathieuGeS (2 * m + 2) (-q) = mathieuGeS (2 * m + 2) q := by
+  rw [mathieuGeS, mathieuGeS, p1a1_mathieuGeZero_even_neg, p1a1_mathieuSeDerivZero_even_neg]
+  set b : ℂ := (mathieuB (2 * m + 2) q : ℂ)
+  have hB := mathieuWII_half_pi_mathieuB_even m q
+  have hW := mathieuWI_wronskian b q (π / 2)
+  rw [hB, mul_zero, sub_zero] at hW
+  have hμ1 : mathieuGeMu (2 * m + 2) (-q) =
+      2 * deriv (mathieuWII b q) (π / 2) * deriv (mathieuWI b q) (π / 2) *
+        (mathieuWI b q (π / 2) * deriv (mathieuWII b q) (π / 2)) / π := by
+    rw [mathieuGeMu, mathieuB_even_neg, Complex.ofReal_neg,
+      ← mathieuWI_pi_eq_deriv_mathieuWII_pi _ (-(q : ℂ)), ← mathieuWI_pi_neg_q,
+      deriv_mathieuWI_pi _ (-(q : ℂ)), p1a1_mathieuWI_half_pi_neg_q,
+      p1a1_deriv_mathieuWI_half_pi_neg_q, m28a_mathieuWI_pi, hB]
+    ring
+  have hμ2 : mathieuGeMu (2 * m + 2) q =
+      2 * mathieuWI b q (π / 2) * deriv (mathieuWI b q) (π / 2) *
+        (mathieuWI b q (π / 2) * deriv (mathieuWII b q) (π / 2)) / π := by
+    rw [mathieuGeMu, deriv_mathieuWI_pi, m28a_deriv_mathieuWII_pi, hB]
+    ring
+  rw [hμ1, hμ2]
+  have hAr : conj (mathieuWI b q (π / 2)) = mathieuWI b q (π / 2) := by
+    have := p1a1_mathieuWI_real (mathieuB (2 * m + 2) q) q (π / 2); push_cast at this; exact this
+  have hBr : conj (deriv (mathieuWII b q) (π / 2)) = deriv (mathieuWII b q) (π / 2) := by
+    have := p1a1_deriv_mathieuWII_real (mathieuB (2 * m + 2) q) q (π / 2)
+    push_cast at this; exact this
+  have hW' : deriv (mathieuWII b q) (π / 2) * mathieuWI b q (π / 2) = 1 := by
+    rw [mul_comm]; exact hW
+  have hA0 : (‖mathieuWI b q (π / 2)‖ : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (norm_ne_zero_iff.mpr (left_ne_zero_of_mul_eq_one hW))
+  have hB0 : (‖deriv (mathieuWII b q) (π / 2)‖ : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (norm_ne_zero_iff.mpr (right_ne_zero_of_mul_eq_one hW))
+  have hr := p1a1_real_ratio hBr hAr hW'
+  rw [div_eq_iff hB0] at hr
+  have hs : (mathieuSeDerivZero (2 * m + 2) q : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (mathieuSeDerivZero_pos _ q).ne'
+  have hπ : (π : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
+  push_cast
+  generalize mathieuWI b q (π / 2) = A at *
+  generalize deriv (mathieuWI b q) (π / 2) = Ap at *
+  generalize deriv (mathieuWII b q) (π / 2) = Bp at *
+  field_simp
+  linear_combination ((mathieuGeZero (2 * m + 2) q : ℂ) * Bp * Ap * A) * hr
 
 /-- **DLMF 28.5.7**: `fe_0(z, 0) = z`. -/
 @[dlmf 28.5.E7]

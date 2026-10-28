@@ -149,11 +149,6 @@ theorem wilson_inner_sum {P Q E F : ℂ}
     show E-P-Q = 1-F-n by rw [hbal]; ring] at hs
   exact hs
 
-/-- Reflection of a finite rising factorial. -/
-theorem poch_one_sub_nat (Z : ℂ) (m : ℕ) :
-    poch (1-Z-m) m = (-1 : ℂ) ^ m * poch Z m := by
-  rw [show 1-Z-m = -(Z+m-1) by ring, DLMF.Gamma.poch_neg_eq,
-    show Z+m-1-m+1 = Z by ring]
 
 /-- The balanced inner Pfaff–Saalschütz sum with no singular numerator divisions. -/
 theorem balanced_inner_sum {P Q E F : ℂ}
@@ -166,7 +161,7 @@ theorem balanced_inner_sum {P Q E F : ℂ}
   rw [wilson_inner_sum hE hF n j hj hbal,
     show P-F-n+1+j = 1-(F-P)-(n-j : ℕ) by push_cast [Nat.cast_sub hj]; ring,
     show 1-F-n = 1-(F+j)-(n-j : ℕ) by push_cast [Nat.cast_sub hj]; ring,
-    poch_one_sub_nat, poch_one_sub_nat]
+    poch_reflect, poch_reflect]
   have hs : (-1 : ℂ) ^ (n-j) ≠ 0 := pow_ne_zero _ (by norm_num)
   field_simp
 

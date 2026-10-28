@@ -53,6 +53,7 @@ def p2p_symD (a c : ℕ → ℝ) : ℕ → ℝ
   | 0 => 1
   | p + 1 => p2p_symD a c p * Real.sqrt (a p / c (p + 1))
 
+/-- If `a_p c_{p+1} > 0` for `p < n`, the symmetrizer entries `d_p`, `p ≤ n`, are positive. -/
 lemma p2p_symD_pos {a c : ℕ → ℝ} {n : ℕ} (h : ∀ p < n, 0 < a p * c (p + 1)) :
     ∀ p ≤ n, 0 < p2p_symD a c p := by
   intro p hp
@@ -71,11 +72,14 @@ def p2p_tridiagSym (a b c : ℕ → ℝ) (n : ℕ) : Matrix (Fin (n + 1)) (Fin (
   diagonal (fun i : Fin (n + 1) => p2p_symD a c i) * p2p_tridiag a b c n *
     diagonal (fun i : Fin (n + 1) => (p2p_symD a c i)⁻¹)
 
+/-- Entries of the symmetrized tridiagonal matrix: `(D M D⁻¹)_{ij} = d_i M_{ij} / d_j`. -/
 lemma p2p_tridiagSym_apply (a b c : ℕ → ℝ) (n : ℕ) (i j : Fin (n + 1)) :
     p2p_tridiagSym a b c n i j =
       p2p_symD a c i * p2p_tridiag a b c n i j * (p2p_symD a c j)⁻¹ := by
   simp [p2p_tridiagSym, mul_diagonal, diagonal_mul]
 
+/-- The symmetrized tridiagonal matrix `D M D⁻¹` has the same characteristic
+polynomial as `M`, when `a_p c_{p+1} > 0`. -/
 lemma p2p_charpoly_tridiagSym {a b c : ℕ → ℝ} {n : ℕ} (h : ∀ p < n, 0 < a p * c (p + 1)) :
     (p2p_tridiagSym a b c n).charpoly = (p2p_tridiag a b c n).charpoly := by
   rw [p2p_tridiagSym, charpoly_mul_comm, ← mul_assoc, diagonal_mul_diagonal]
@@ -86,6 +90,7 @@ lemma p2p_charpoly_tridiagSym {a b c : ℕ → ℝ} {n : ℕ} (h : ∀ p < n, 0 
   funext i
   exact inv_mul_cancel₀ (p2p_symD_pos h i (by omega)).ne'
 
+/-- If `a_p c_{p+1} > 0` for `p < n`, the symmetrized tridiagonal matrix is symmetric. -/
 lemma p2p_tridiagSym_isHermitian {a b c : ℕ → ℝ} {n : ℕ} (h : ∀ p < n, 0 < a p * c (p + 1)) :
     (p2p_tridiagSym a b c n).IsHermitian := by
   refine IsHermitian.ext fun i j => ?_
@@ -245,6 +250,8 @@ open Matrix
 def p2p_ext {n : ℕ} (u : Fin (n + 1) → ℝ) (q : ℕ) : ℝ :=
   if h : q < n + 1 then u ⟨q, h⟩ else 0
 
+/-- Row `p` of `M u` for the tridiagonal `M`: `a_p u_{p+1} + b_p u_p + c_p u_{p-1}`, with `u`
+extended by zero and the last term absent for `p = 0`. -/
 theorem p2p_row (a b c : ℕ → ℝ) {n : ℕ} (u : Fin (n + 1) → ℝ) {p : ℕ} (hp : p < n + 1) :
     (p2p_tridiag a b c n *ᵥ u) ⟨p, hp⟩ =
       a p * p2p_ext u (p + 1) + b p * p2p_ext u p +
@@ -277,6 +284,7 @@ theorem p2p_row (a b c : ℕ → ℝ) {n : ℕ} (u : Fin (n + 1) → ℝ) {p : �
       · simp [h1]
       · simp [h1, p2p_ext]
 
+/-- The forward recursion `v_{p+1} = ((H - β_p) v_p - γ_p v_{p-1}) / α_p` (`v_{-1} = 0`). -/
 theorem p2p_lameRecVec_succ (r : LameRecurrence) (ν k H : ℝ) (p : ℕ) :
     lameRecVec r ν k H (p + 1) = ((H - r.beta ν k p) * lameRecVec r ν k H p -
       r.gamma ν k p * (if p = 0 then 0 else lameRecVec r ν k H (p - 1))) / r.alpha ν k p := by
@@ -284,6 +292,7 @@ theorem p2p_lameRecVec_succ (r : LameRecurrence) (ν k H : ℝ) (p : ℕ) :
   · simp [lameRecVec, lameRecVecPair]
   · simp [lameRecVec, lameRecVecPair]
 
+/-- The forward recursion starts at `v₀ = 1`. -/
 theorem p2p_lameRecVec_zero (r : LameRecurrence) (ν k H : ℝ) : lameRecVec r ν k H 0 = 1 := rfl
 
 /-- If `H` is an eigenvalue of the matrix 29.15.2 (with `α_p γ_{p+1} > 0`), the forward
@@ -418,6 +427,7 @@ def p2p_chebPair (e o : ℝ) : ℕ → ℝ[X] × ℝ[X]
     (2 * X * (p2p_chebPair e o p).2 - (p2p_chebPair e o p).1,
       2 * (2 * X * (p2p_chebPair e o p).2 - (p2p_chebPair e o p).1) - (p2p_chebPair e o p).2)
 
+/-- For `e, o ≠ 0`, both polynomials `E_p`, `O_p` of the Chebyshev-type pair have degree `p`. -/
 lemma p2p_chebPair_degree {e o : ℝ} (he : e ≠ 0) (ho : o ≠ 0) (p : ℕ) :
     (p2p_chebPair e o p).1.degree = p ∧ (p2p_chebPair e o p).2.degree = p := by
   have h2X : ∀ q : ℝ[X], (2 * X * q).degree = q.degree + 1 := fun q => by
@@ -439,6 +449,7 @@ lemma p2p_chebPair_degree {e o : ℝ} (he : e ≠ 0) (ho : o ≠ 0) (p : ℕ) :
     refine ⟨h1, ?_⟩
     rw [degree_sub_eq_left_of_degree_lt (by rw [h2, h1, ih.2]; exact hlt), h2, h1]
 
+/-- `T_{2p}(s) = E_p(s²)` and `T_{2p+1}(s) = s O_p(s²)` for the pair with `e = o = 1`. -/
 lemma p2p_chebPair_eval_T (p : ℕ) (s : ℂ) :
     (Chebyshev.T ℂ ((2 * p : ℕ) : ℤ)).eval s =
         ((p2p_chebPair 1 1 p).1.map (algebraMap ℝ ℂ)).eval (s ^ 2) ∧
@@ -463,6 +474,7 @@ lemma p2p_chebPair_eval_T (p : ℕ) (s : ℂ) :
       Polynomial.map_mul, map_X]
     simp; ring
 
+/-- `U_{2p}(s) = E_p(s²)` and `U_{2p+1}(s) = s O_p(s²)` for the pair with `e = 1`, `o = 2`. -/
 lemma p2p_chebPair_eval_U (p : ℕ) (s : ℂ) :
     (Chebyshev.U ℂ ((2 * p : ℕ) : ℤ)).eval s =
         ((p2p_chebPair 1 2 p).1.map (algebraMap ℝ ℂ)).eval (s ^ 2) ∧
@@ -498,12 +510,15 @@ def p2p_Q : LamePolyType → ℕ → ℝ[X]
   | .scE, p => (p2p_chebPair 1 2 p).2
   | .scdE, p => (p2p_chebPair 1 2 p).2
 
+/-- The polynomial `Q_p` of each Lamé polynomial type has degree `p`. -/
 lemma p2p_Q_degree (t : LamePolyType) (p : ℕ) : (p2p_Q t p).degree = p := by
   have hT := p2p_chebPair_degree (e := 1) (o := 1) one_ne_zero one_ne_zero p
   have hU := p2p_chebPair_degree (e := 1) (o := 2) one_ne_zero two_ne_zero p
   have hc : (if p = 0 then (1 / 2 : ℝ) else 1) ≠ 0 := by split_ifs <;> norm_num
   cases t <;> simp only [p2p_Q, degree_C_mul hc, hT, hU]
 
+/-- The Chebyshev basis function of type `t` is `basis_p(s) = s^ε Q_p(s²)`, with `ε = 1` for
+the types `sE, scE, sdE, scdE` and `ε = 0` otherwise. -/
 lemma p2p_basis_eq (t : LamePolyType) (p : ℕ) (s : ℂ) :
     t.basis p s = (if t = .sE ∨ t = .scE ∨ t = .sdE ∨ t = .scdE then s else 1) *
       ((p2p_Q t p).map (algebraMap ℝ ℂ)).eval (s ^ 2) := by

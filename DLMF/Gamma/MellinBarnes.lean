@@ -74,6 +74,7 @@ theorem mellin_one_add_cpow_neg {a s : ℂ} (hs : 0 < s.re) (hsa : s.re < a.re) 
   rw [cpow_neg, div_eq_mul_inv]
   push_cast; ring
 
+/-- `t^(σ-1) (1 + t)^(-α)` is integrable on `(0, ∞)` when `0 < σ < α`. -/
 theorem integrableOn_rpow_mul_one_add_rpow {σ α : ℝ} (hσ : 0 < σ) (hσα : σ < α) :
     IntegrableOn (fun t : ℝ => t ^ (σ - 1) * (1 + t) ^ (-α)) (Ioi 0) := by
   have hcont : ContinuousOn (fun t : ℝ => t ^ (σ - 1) * (1 + t) ^ (-α)) (Ioi 0) := by
@@ -108,6 +109,7 @@ theorem integrableOn_rpow_mul_one_add_rpow {σ α : ℝ} (hσ : 0 < σ) (hσα :
           mul_le_mul_of_nonneg_left h2 (by positivity)
       _ = _ := by rw [← Real.rpow_add (by linarith)]; ring_nf
 
+/-- The Mellin transform of `(1 + t)^(-a)` converges at `σ` when `0 < σ < Re a`. -/
 theorem mellinConvergent_one_add_cpow_neg {a : ℂ} {σ : ℝ} (hσ : 0 < σ) (hσa : σ < a.re) :
     MellinConvergent (fun t : ℝ => ((1 + t : ℝ) : ℂ) ^ (-a)) σ := by
   have hg := integrableOn_rpow_mul_one_add_rpow hσ hσa
@@ -129,6 +131,7 @@ theorem mellinConvergent_one_add_cpow_neg {a : ℂ} {σ : ℝ} (hσ : 0 < σ) (h
   rw [norm_smul, norm_cpow_eq_rpow_re_of_pos ht0, norm_cpow_eq_rpow_re_of_pos (by linarith)]
   simp
 
+/-- The complex Gamma function is continuous at every point of the right half-plane. -/
 theorem continuousAt_Gamma_of_re_pos {s : ℂ} (hs : 0 < s.re) : ContinuousAt Complex.Gamma s :=
   (Complex.differentiableAt_Gamma s fun m h => by
     have := congrArg re h; simp at this; linarith [(Nat.cast_nonneg m : (0 : ℝ) ≤ m)]).continuousAt
@@ -159,7 +162,7 @@ theorem integrable_Gamma_mul_Gamma_vertical {a : ℂ} {σ : ℝ} (hσ : 0 < σ) 
         mul_le_mul b₁ b₂ (norm_nonneg _) ((norm_nonneg _).trans b₁)
     _ = C₁ * C₂ * ((1 + |y|) ^ (K₁ + K₂) * Real.exp (-(π * |y|))) := by
         rw [pow_add, show -(π * |y|) = -(π * |y|) / 2 + -(π * |y|) / 2 by ring, Real.exp_add]
-        ring
+        ring_nf
 
 /-- **The basic Mellin–Barnes integral** (DLMF 5.13.? in Mellin form): for `0 < σ < re a` and
 `u > 0`, `Γ(a) (1+u)^{-a} = 1/(2π) ∫ Γ(σ+iy) Γ(a-σ-iy) u^{-σ-iy} dy`. -/
@@ -196,9 +199,6 @@ theorem Gamma_mul_one_add_cpow_neg {a : ℂ} {σ : ℝ} (hσ : 0 < σ) (hσa : �
     (u : ℂ) ^ (-((σ : ℂ) + y * I))) = J
   push_cast
   field_simp
-
-lemma differentiable_recip_Gamma : Differentiable ℂ fun s : ℂ => (Gamma s)⁻¹ := by
-  simpa [one_div] using Complex.differentiable_one_div_Gamma
 
 /-- A bound for `1/Γ` on closed unit discs about the points `c + σ + iy`, `c` near `c₀`. -/
 theorem exists_norm_recip_Gamma_disc_le (c₀ : ℂ) (σ : ℝ) :
@@ -374,6 +374,31 @@ theorem exists_abs_arg_le_of_ball {w₀ : ℂ} (hw₀ : 0 < w₀.re) :
   rw [Real.cos_arccos (by linarith) hκ1, Real.cos_abs] at h1
   linarith
 
+/-- On an annular sector `ρ₀ ≤ |w| ≤ R`, `|arg w| ≤ θ`, the power `w^(τ + iy)` is bounded by
+`(ρ₀^τ + R^τ) e^(θ|y|)`. -/
+private lemma norm_cpow_ofReal_add_I_mul_le {w : ℂ} {θ ρ₀ R : ℝ} (hρ0 : 0 < ρ₀)
+    (harg : |arg w| ≤ θ) (h1 : ρ₀ ≤ ‖w‖) (h2 : ‖w‖ ≤ R) (hre : 0 < w.re) (τ y : ℝ) :
+    ‖w ^ ((τ : ℂ) + I * y)‖ ≤ (ρ₀ ^ τ + R ^ τ) * Real.exp (θ * |y|) := by
+  have hpow : ∀ r : ℝ, ρ₀ ≤ r → r ≤ R → r ^ τ ≤ ρ₀ ^ τ + R ^ τ := by
+    intro r hr1 hr2
+    have hr0 : 0 < r := by linarith
+    rcases le_total 0 τ with hτ | hτ
+    · have := Real.rpow_le_rpow hr0.le hr2 hτ
+      linarith [Real.rpow_nonneg hρ0.le τ]
+    · have := Real.rpow_le_rpow_of_nonpos hρ0 hr1 hτ
+      linarith [Real.rpow_nonneg (show (0 : ℝ) ≤ R by linarith) τ]
+  have hw0 : w ≠ 0 := by rintro rfl; simp at hre
+  rw [norm_cpow_of_ne_zero hw0]
+  simp only [add_re, ofReal_re, mul_re, I_re, I_im, ofReal_im, zero_mul, sub_zero, mul_zero,
+    add_zero, add_im, mul_im, one_mul, zero_add]
+  rw [div_eq_mul_inv, ← Real.exp_neg]
+  have hy : -(arg w * y) ≤ θ * |y| := by
+    have h3 : |arg w * y| ≤ θ * |y| := by
+      rw [abs_mul]; exact mul_le_mul_of_nonneg_right harg (abs_nonneg y)
+    linarith [neg_abs_le (arg w * y)]
+  exact mul_le_mul (hpow _ h1 h2) (Real.exp_le_exp.mpr hy) (Real.exp_pos _).le
+    (add_nonneg (Real.rpow_nonneg hρ0.le τ) (Real.rpow_nonneg (by linarith) τ))
+
 /-- **Integrals against `w^{σ+iy}` are holomorphic in the right half-plane**: if `B` is continuous
 with `|B(y)| ≤ C (1+|y|)^K e^{-π|y|/2}`, then `w ↦ ∫ B(y) w^{σ+iy} dy` is holomorphic on
 `re w > 0`. -/
@@ -387,31 +412,10 @@ theorem differentiableOn_integral_mul_cpow {B : ℝ → ℂ} (hB : Continuous B)
   set R := ‖w₀‖ + w₀.re / 2
   have hρ0 : 0 < ρ₀ := by positivity
   have hC0 : 0 ≤ C := (norm_nonneg _).trans (by simpa using hBb 0)
-  have hpow : ∀ τ : ℝ, ∀ r : ℝ, ρ₀ ≤ r → r ≤ R → r ^ τ ≤ ρ₀ ^ τ + R ^ τ := by
-    intro τ r hr1 hr2
-    have hr0 : 0 < r := by linarith
-    rcases le_total 0 τ with hτ | hτ
-    · have := Real.rpow_le_rpow hr0.le hr2 hτ
-      linarith [Real.rpow_nonneg hρ0.le τ]
-    · have := Real.rpow_le_rpow_of_nonpos hρ0 hr1 hτ
-      linarith [Real.rpow_nonneg (show (0 : ℝ) ≤ R by linarith) τ]
-  -- the norm of `w^{σ'+iy}`
   have hnorm : ∀ w ∈ Metric.ball w₀ (w₀.re / 2), ∀ τ : ℝ, ∀ y : ℝ,
-      ‖w ^ ((τ : ℂ) + I * y)‖ ≤ (ρ₀ ^ τ + R ^ τ) * Real.exp (θ * |y|) := by
-    intro w hw τ y
+      ‖w ^ ((τ : ℂ) + I * y)‖ ≤ (ρ₀ ^ τ + R ^ τ) * Real.exp (θ * |y|) := fun w hw τ y => by
     obtain ⟨harg, h1, h2, hre⟩ := hball w hw
-    have hw0 : w ≠ 0 := by rintro rfl; simp at hre
-    rw [norm_cpow_of_ne_zero hw0]
-    simp only [add_re, ofReal_re, mul_re, I_re, I_im, ofReal_im, zero_mul, sub_zero, mul_zero,
-      add_zero, add_im, mul_im, one_mul, zero_add]
-    rw [div_eq_mul_inv, ← Real.exp_neg]
-    have hy : -(arg w * y) ≤ θ * |y| := by
-      have := abs_mul (arg w) y
-      have h3 : |arg w * y| ≤ θ * |y| := by
-        rw [abs_mul]; exact mul_le_mul_of_nonneg_right harg (abs_nonneg y)
-      linarith [neg_abs_le (arg w * y)]
-    exact mul_le_mul (hpow τ _ h1 h2) (Real.exp_le_exp.mpr hy) (Real.exp_pos _).le
-      (by positivity)
+    exact norm_cpow_ofReal_add_I_mul_le hρ0 harg h1 h2 hre τ y
   set c := π / 2 - θ with hc
   have hc0 : 0 < c := by linarith
   set F : ℂ → ℝ → ℂ := fun w y => B y * w ^ ((σ : ℂ) + I * y) with hF

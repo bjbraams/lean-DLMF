@@ -477,6 +477,19 @@ lemma p2m_integral_se_odd (n : ℕ) (q : ℝ) :
   rw [p1a2_quarter_B1]
   ring
 
+/-- For `n ≥ 1` the Fourier coefficients `B^n_{2ℓ+a}(q)` are absolutely summable in `ℓ`
+(they decay faster than any geometric sequence). -/
+private lemma p2m_summable_norm_fourierB {n : ℕ} (hn : n ≠ 0) (q : ℝ) (a : ℕ) :
+    Summable fun ℓ : ℕ => ‖mathieuFourierB n (2 * ℓ + a) q‖ := by
+  obtain ⟨C, hC0, hC⟩ := p2f_fourierB_decay hn q 1
+  refine Summable.of_nonneg_of_le (fun _ => norm_nonneg _) (fun ℓ => ?_)
+    ((summable_geometric_of_lt_one (Real.exp_pos (-1)).le
+      (Real.exp_lt_one_iff.mpr (by norm_num))).mul_left C)
+  refine (hC (2 * ℓ + a)).trans ?_
+  rw [← Real.exp_nat_mul]
+  gcongr
+  push_cast; nlinarith
+
 /-- `∑ B^{2n+1}_{2ℓ+1} J_ℓ(ih) J_{ℓ+1}(ih) = ih (B^{2n+1}_1)² / (2 se'_{2n+1}(0))`
 (from 10.9.26, 10.9.2, 28.10.5). -/
 lemma p2m_key_se_odd (n : ℕ) {h : ℝ} (hh : 0 < h) :
@@ -504,15 +517,8 @@ lemma p2m_key_se_odd (n : ℕ) {h : ℝ} (hh : 0 < h) :
       besselJ ((ℓ : ℂ) + 1) (I * h) * ((-1) ^ ℓ * besselJ (ℓ : ℂ) (I * h)) by push_cast; ring, h1]
     congr 2; funext θ; congr 2; ring
   have hsB : Summable fun ℓ => ‖c ℓ‖ := by
-    obtain ⟨C, hC0, hC⟩ := p2f_fourierB_decay (n := 2 * n + 1) (by omega) (h ^ 2) 1
-    refine Summable.of_nonneg_of_le (fun _ => norm_nonneg _) (fun ℓ => ?_)
-      ((summable_geometric_of_lt_one (Real.exp_pos (-1)).le
-        (Real.exp_lt_one_iff.mpr (by norm_num))).mul_left C)
-    simp only [c, norm_mul, norm_pow, norm_neg, norm_one, one_pow, one_mul]
-    refine (hC (2 * ℓ + 1)).trans ?_
-    rw [← Real.exp_nat_mul]
-    gcongr
-    push_cast; nlinarith
+    simpa only [c, norm_mul, norm_pow, norm_neg, norm_one, one_pow, one_mul] using
+      p2m_summable_norm_fourierB (n := 2 * n + 1) (by omega) (h ^ 2) 1
   have hJ1 : Continuous (besselJ 1) := continuous_iff_continuousAt.2 fun x => by
     simpa using (Complex.analyticAt_besselJ_int 1 x).continuousAt
   have hGc : Continuous G := hJ1.comp (by fun_prop)
@@ -698,6 +704,114 @@ lemma p2m_prod_int {a b : ℤ} {s : ℕ} (hab : a + b = s) {h : ℂ} (hh : h ∈
   rw [h1, show (a : ℂ) + b = (s : ℂ) by exact_mod_cast hab]
   congr 2; funext θ; push_cast; ring_nf
 
+/-- The Bessel-product terms of the sum in `p2m_key_se_even` as Fourier integrals:
+`(-1)^ℓ (4 J_ℓ J_{ℓ+2} + 2h (J_{ℓ+1} J_{ℓ+2} - J_ℓ J_{ℓ+3}))(h)`
+`= (2/π) ∫₀^{π/2} g(θ) sin((2ℓ+2)θ) dθ` with `g(θ) = 2h (J₁ + J₃)(2h cos θ) sin θ`. -/
+private lemma p2m_key_se_even_prod {h : ℝ} (hh : 0 < h) (ℓ : ℕ) :
+    (-1 : ℂ) ^ ℓ * (4 * (besselJ (ℓ : ℂ) h * besselJ ((ℓ + 2 : ℕ) : ℂ) h) +
+        2 * h * (besselJ ((ℓ + 1 : ℕ) : ℂ) h * besselJ ((ℓ + 2 : ℕ) : ℂ) h -
+          besselJ (ℓ : ℂ) h * besselJ ((ℓ + 3 : ℕ) : ℂ) h)) =
+      2 / π * ∫ θ in (0 : ℝ)..π / 2, 2 * h * (besselJ 1 (2 * (h : ℂ) * (Real.cos θ : ℂ)) +
+        besselJ 3 (2 * (h : ℂ) * (Real.cos θ : ℂ))) * (Real.sin θ : ℂ) *
+          Complex.sin ((2 * ℓ + 2) * θ) := by
+  set Y : ℝ → ℂ := fun θ => 2 * (h : ℂ) * (Real.cos θ : ℂ)
+  set g : ℝ → ℂ := fun θ => 2 * h * (besselJ 1 (Y θ) + besselJ 3 (Y θ)) * (Real.sin θ : ℂ)
+  show _ = 2 / π * ∫ θ in (0 : ℝ)..π / 2, g θ * Complex.sin ((2 * ℓ + 2) * θ)
+  have hslit : (h : ℂ) ∈ slitPlane := by
+    rw [mem_slitPlane_iff]; left; simpa using hh
+  have hneg : ∀ k : ℕ, besselJ (((-(k : ℤ)) : ℤ) : ℂ) (h : ℂ) = (-1 : ℂ) ^ k * besselJ (k : ℂ) h :=
+    fun k => by
+      have := DLMF.Bessel.besselJ_neg_int (k : ℤ) (h : ℂ)
+      rw [zpow_natCast] at this; push_cast at this ⊢; exact this
+
+  have hP : (-1 : ℂ) ^ ℓ * (-1) ^ ℓ = 1 := by rw [← pow_add, ← two_mul, pow_mul]; simp
+  have P1 : besselJ ((ℓ + 2 : ℕ) : ℂ) h * ((-1) ^ ℓ * besselJ (ℓ : ℂ) h) =
+      2 / π * ∫ θ in (0 : ℝ)..π / 2, besselJ 2 (Y θ) * Complex.cos ((2 * ℓ + 2) * θ) := by
+    have := p2m_prod_int (a := ((ℓ + 2 : ℕ) : ℤ)) (b := -(ℓ : ℤ)) (s := 2) (by push_cast; ring)
+      hslit
+    rw [hneg] at this
+    simp only [Int.cast_natCast] at this
+    rw [this]; congr 2; funext θ; simp only [Y]; push_cast; ring_nf
+  have P2 : besselJ ((ℓ + 2 : ℕ) : ℂ) h * ((-1) ^ (ℓ + 1) * besselJ ((ℓ + 1 : ℕ) : ℂ) h) =
+      2 / π * ∫ θ in (0 : ℝ)..π / 2, besselJ 1 (Y θ) * Complex.cos ((2 * ℓ + 3) * θ) := by
+    have := p2m_prod_int (a := ((ℓ + 2 : ℕ) : ℤ)) (b := -((ℓ + 1 : ℕ) : ℤ)) (s := 1)
+      (by push_cast; ring) hslit
+    rw [hneg] at this
+    simp only [Int.cast_natCast] at this
+    rw [this]; congr 2; funext θ; simp only [Y]; push_cast; ring_nf
+  have P3 : besselJ ((ℓ + 3 : ℕ) : ℂ) h * ((-1) ^ ℓ * besselJ (ℓ : ℂ) h) =
+      2 / π * ∫ θ in (0 : ℝ)..π / 2, besselJ 3 (Y θ) * Complex.cos ((2 * ℓ + 3) * θ) := by
+    have := p2m_prod_int (a := ((ℓ + 3 : ℕ) : ℤ)) (b := -(ℓ : ℤ)) (s := 3) (by push_cast; ring)
+      hslit
+    rw [hneg] at this
+    simp only [Int.cast_natCast] at this
+    rw [this]; congr 2; funext θ; simp only [Y]; push_cast; ring_nf
+  have lhs : (-1 : ℂ) ^ ℓ * (4 * (besselJ (ℓ : ℂ) h * besselJ ((ℓ + 2 : ℕ) : ℂ) h) +
+      2 * h * (besselJ ((ℓ + 1 : ℕ) : ℂ) h * besselJ ((ℓ + 2 : ℕ) : ℂ) h -
+        besselJ (ℓ : ℂ) h * besselJ ((ℓ + 3 : ℕ) : ℂ) h)) =
+      4 * (besselJ ((ℓ + 2 : ℕ) : ℂ) h * ((-1) ^ ℓ * besselJ (ℓ : ℂ) h)) -
+      2 * h * (besselJ ((ℓ + 2 : ℕ) : ℂ) h * ((-1) ^ (ℓ + 1) * besselJ ((ℓ + 1 : ℕ) : ℂ) h)) -
+      2 * h * (besselJ ((ℓ + 3 : ℕ) : ℂ) h * ((-1) ^ ℓ * besselJ (ℓ : ℂ) h)) := by
+    rw [pow_succ]; ring
+  rw [lhs, P1, P2, P3]
+  have hJc : ∀ k : ℤ, Continuous (besselJ (k : ℂ)) := fun k =>
+    continuous_iff_continuousAt.2 fun x => (Complex.analyticAt_besselJ_int k x).continuousAt
+  have hJ1 : Continuous (besselJ 1) := by simpa using hJc 1
+  have hJ2 : Continuous (besselJ 2) := by simpa using hJc 2
+  have hJ3 : Continuous (besselJ 3) := by simpa using hJc 3
+  have hY : Continuous Y := by fun_prop
+  have e : ∀ θ : ℝ, g θ * Complex.sin ((2 * ℓ + 2) * θ) =
+      4 * (besselJ 2 (Y θ) * Complex.cos ((2 * ℓ + 2) * θ)) -
+      2 * h * (besselJ 1 (Y θ) * Complex.cos ((2 * ℓ + 3) * θ)) -
+      2 * h * (besselJ 3 (Y θ) * Complex.cos ((2 * ℓ + 3) * θ)) := by
+    intro θ
+    have hr := p2m_besselJ_one_add_three (Y θ)
+    have c2 : Complex.cos ((2 * ℓ + 3) * θ) =
+        Complex.cos ((2 * ℓ + 2) * θ) * Complex.cos θ -
+          Complex.sin ((2 * ℓ + 2) * θ) * Complex.sin θ := by
+      rw [← Complex.cos_add]; ring_nf
+    simp only [g]
+    rw [c2]
+    simp only [Y, Complex.ofReal_cos, Complex.ofReal_sin] at hr ⊢
+    linear_combination Complex.cos ((2 * ℓ + 2) * θ) * hr
+  simp_rw [e]
+  have i1 : IntervalIntegrable (fun θ : ℝ => besselJ 2 (Y θ) * Complex.cos ((2 * ℓ + 2) * θ))
+      volume 0 (π / 2) := ((hJ2.comp hY).mul (by fun_prop)).intervalIntegrable _ _
+  have i2 : IntervalIntegrable (fun θ : ℝ => besselJ 1 (Y θ) * Complex.cos ((2 * ℓ + 3) * θ))
+      volume 0 (π / 2) := ((hJ1.comp hY).mul (by fun_prop)).intervalIntegrable _ _
+  have i3 : IntervalIntegrable (fun θ : ℝ => besselJ 3 (Y θ) * Complex.cos ((2 * ℓ + 3) * θ))
+      volume 0 (π / 2) := ((hJ3.comp hY).mul (by fun_prop)).intervalIntegrable _ _
+  rw [intervalIntegral.integral_sub ((i1.const_mul 4).sub (i2.const_mul _)) (i3.const_mul _),
+    intervalIntegral.integral_sub (i1.const_mul 4) (i2.const_mul _),
+    intervalIntegral.integral_const_mul, intervalIntegral.integral_const_mul,
+    intervalIntegral.integral_const_mul]
+  ring
+
+/-- `J₁(y) + J₃(y) = (1/π) ∫₀^π (2 cos t cos 2t cos(y sin t) + 4 sin t cos² t sin(y sin t)) dt`,
+from Bessel's integral 10.9.2. -/
+private lemma p2m_besselJ_one_add_three_integral (y : ℂ) :
+    besselJ 1 y + besselJ 3 y = 1 / π * ∫ t in (0 : ℝ)..π,
+      (2 * (Real.cos t : ℂ) * (Real.cos (2 * t) : ℂ) * Complex.cos (y * (Real.sin t : ℂ)) +
+        4 * (Real.sin t : ℂ) * (Real.cos t : ℂ) * ((Real.cos t : ℂ) *
+          Complex.sin (y * (Real.sin t : ℂ)))) := by
+  have e1 : besselJ 1 y = 1 / π * ∫ t in (0 : ℝ)..π, Complex.cos (y * Complex.sin t - t) := by
+    simpa using DLMF.Bessel.besselJ_int_eq_integral_cos 1 y
+  have e3 : besselJ 3 y = 1 / π * ∫ t in (0 : ℝ)..π,
+      Complex.cos (y * Complex.sin t - 3 * t) := by
+    simpa using DLMF.Bessel.besselJ_int_eq_integral_cos 3 y
+  rw [e1, e3, ← mul_add, ← intervalIntegral.integral_add (by
+    exact (by fun_prop : Continuous fun t : ℝ =>
+      Complex.cos (y * Complex.sin t - t)).intervalIntegrable _ _)
+    (by exact (by fun_prop : Continuous fun t : ℝ =>
+      Complex.cos (y * Complex.sin t - 3 * t)).intervalIntegrable _ _)]
+  congr 2; funext t
+  simp only [Complex.ofReal_cos, Complex.ofReal_sin, Complex.ofReal_mul, Complex.ofReal_ofNat]
+  rw [show y * Complex.sin t - 3 * t = (y * Complex.sin t - t) - 2 * t by ring,
+    Complex.cos_sub (y * Complex.sin t - t), Complex.cos_sub, Complex.sin_sub,
+    Complex.cos_two_mul, Complex.sin_two_mul]
+  linear_combination (-2 * Complex.cos (y * Complex.sin t) * Complex.cos t) *
+    Complex.sin_sq_add_cos_sq (t : ℂ)
+
 /-- The Bessel-product sum for `se_{2n+2}`, equal to `-h² (B^{2n+2}_2)² / se'_{2n+2}(π/2)`
 (from 10.9.26, 10.9.2, 28.10.7). -/
 lemma p2m_key_se_even (n : ℕ) {h : ℝ} (hh : 0 < h) :
@@ -710,89 +824,13 @@ lemma p2m_key_se_even (n : ℕ) {h : ℝ} (hh : 0 < h) :
   set B := fun ℓ : ℕ => mathieuFourierB (2 * n + 2) (2 * ℓ + 2) (h ^ 2)
   set Y : ℝ → ℂ := fun θ => 2 * (h : ℂ) * (Real.cos θ : ℂ)
   set g : ℝ → ℂ := fun θ => 2 * h * (besselJ 1 (Y θ) + besselJ 3 (Y θ)) * (Real.sin θ : ℂ)
-  have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
-  have hslit : (h : ℂ) ∈ slitPlane := by
-    rw [mem_slitPlane_iff]; left; simpa using hh
-  have hneg : ∀ k : ℕ, besselJ (((-(k : ℤ)) : ℤ) : ℂ) (h : ℂ) = (-1 : ℂ) ^ k * besselJ (k : ℂ) h :=
-    fun k => by
-      have := DLMF.Bessel.besselJ_neg_int (k : ℤ) (h : ℂ)
-      rw [zpow_natCast] at this; push_cast at this ⊢; exact this
   have hprod : ∀ ℓ : ℕ, (-1 : ℂ) ^ ℓ * (4 * (besselJ (ℓ : ℂ) h * besselJ ((ℓ + 2 : ℕ) : ℂ) h) +
         2 * h * (besselJ ((ℓ + 1 : ℕ) : ℂ) h * besselJ ((ℓ + 2 : ℕ) : ℂ) h -
           besselJ (ℓ : ℂ) h * besselJ ((ℓ + 3 : ℕ) : ℂ) h)) =
-      2 / π * ∫ θ in (0 : ℝ)..π / 2, g θ * Complex.sin ((2 * ℓ + 2) * θ) := by
-    intro ℓ
-    have hP : (-1 : ℂ) ^ ℓ * (-1) ^ ℓ = 1 := by rw [← pow_add, ← two_mul, pow_mul]; simp
-    have P1 : besselJ ((ℓ + 2 : ℕ) : ℂ) h * ((-1) ^ ℓ * besselJ (ℓ : ℂ) h) =
-        2 / π * ∫ θ in (0 : ℝ)..π / 2, besselJ 2 (Y θ) * Complex.cos ((2 * ℓ + 2) * θ) := by
-      have := p2m_prod_int (a := ((ℓ + 2 : ℕ) : ℤ)) (b := -(ℓ : ℤ)) (s := 2) (by push_cast; ring)
-        hslit
-      rw [hneg] at this
-      simp only [Int.cast_natCast] at this
-      rw [this]; congr 2; funext θ; simp only [Y]; push_cast; ring_nf
-    have P2 : besselJ ((ℓ + 2 : ℕ) : ℂ) h * ((-1) ^ (ℓ + 1) * besselJ ((ℓ + 1 : ℕ) : ℂ) h) =
-        2 / π * ∫ θ in (0 : ℝ)..π / 2, besselJ 1 (Y θ) * Complex.cos ((2 * ℓ + 3) * θ) := by
-      have := p2m_prod_int (a := ((ℓ + 2 : ℕ) : ℤ)) (b := -((ℓ + 1 : ℕ) : ℤ)) (s := 1)
-        (by push_cast; ring) hslit
-      rw [hneg] at this
-      simp only [Int.cast_natCast] at this
-      rw [this]; congr 2; funext θ; simp only [Y]; push_cast; ring_nf
-    have P3 : besselJ ((ℓ + 3 : ℕ) : ℂ) h * ((-1) ^ ℓ * besselJ (ℓ : ℂ) h) =
-        2 / π * ∫ θ in (0 : ℝ)..π / 2, besselJ 3 (Y θ) * Complex.cos ((2 * ℓ + 3) * θ) := by
-      have := p2m_prod_int (a := ((ℓ + 3 : ℕ) : ℤ)) (b := -(ℓ : ℤ)) (s := 3) (by push_cast; ring)
-        hslit
-      rw [hneg] at this
-      simp only [Int.cast_natCast] at this
-      rw [this]; congr 2; funext θ; simp only [Y]; push_cast; ring_nf
-    have lhs : (-1 : ℂ) ^ ℓ * (4 * (besselJ (ℓ : ℂ) h * besselJ ((ℓ + 2 : ℕ) : ℂ) h) +
-        2 * h * (besselJ ((ℓ + 1 : ℕ) : ℂ) h * besselJ ((ℓ + 2 : ℕ) : ℂ) h -
-          besselJ (ℓ : ℂ) h * besselJ ((ℓ + 3 : ℕ) : ℂ) h)) =
-        4 * (besselJ ((ℓ + 2 : ℕ) : ℂ) h * ((-1) ^ ℓ * besselJ (ℓ : ℂ) h)) -
-        2 * h * (besselJ ((ℓ + 2 : ℕ) : ℂ) h * ((-1) ^ (ℓ + 1) * besselJ ((ℓ + 1 : ℕ) : ℂ) h)) -
-        2 * h * (besselJ ((ℓ + 3 : ℕ) : ℂ) h * ((-1) ^ ℓ * besselJ (ℓ : ℂ) h)) := by
-      rw [pow_succ]; ring
-    rw [lhs, P1, P2, P3]
-    have hJc : ∀ k : ℤ, Continuous (besselJ (k : ℂ)) := fun k =>
-      continuous_iff_continuousAt.2 fun x => (Complex.analyticAt_besselJ_int k x).continuousAt
-    have hJ1 : Continuous (besselJ 1) := by simpa using hJc 1
-    have hJ2 : Continuous (besselJ 2) := by simpa using hJc 2
-    have hJ3 : Continuous (besselJ 3) := by simpa using hJc 3
-    have hY : Continuous Y := by fun_prop
-    have e : ∀ θ : ℝ, g θ * Complex.sin ((2 * ℓ + 2) * θ) =
-        4 * (besselJ 2 (Y θ) * Complex.cos ((2 * ℓ + 2) * θ)) -
-        2 * h * (besselJ 1 (Y θ) * Complex.cos ((2 * ℓ + 3) * θ)) -
-        2 * h * (besselJ 3 (Y θ) * Complex.cos ((2 * ℓ + 3) * θ)) := by
-      intro θ
-      have hr := p2m_besselJ_one_add_three (Y θ)
-      have c2 : Complex.cos ((2 * ℓ + 3) * θ) =
-          Complex.cos ((2 * ℓ + 2) * θ) * Complex.cos θ -
-            Complex.sin ((2 * ℓ + 2) * θ) * Complex.sin θ := by
-        rw [← Complex.cos_add]; ring_nf
-      simp only [g]
-      rw [c2]
-      simp only [Y, Complex.ofReal_cos, Complex.ofReal_sin] at hr ⊢
-      linear_combination Complex.cos ((2 * ℓ + 2) * θ) * hr
-    simp_rw [e]
-    have i1 : IntervalIntegrable (fun θ : ℝ => besselJ 2 (Y θ) * Complex.cos ((2 * ℓ + 2) * θ))
-        volume 0 (π / 2) := ((hJ2.comp hY).mul (by fun_prop)).intervalIntegrable _ _
-    have i2 : IntervalIntegrable (fun θ : ℝ => besselJ 1 (Y θ) * Complex.cos ((2 * ℓ + 3) * θ))
-        volume 0 (π / 2) := ((hJ1.comp hY).mul (by fun_prop)).intervalIntegrable _ _
-    have i3 : IntervalIntegrable (fun θ : ℝ => besselJ 3 (Y θ) * Complex.cos ((2 * ℓ + 3) * θ))
-        volume 0 (π / 2) := ((hJ3.comp hY).mul (by fun_prop)).intervalIntegrable _ _
-    rw [intervalIntegral.integral_sub ((i1.const_mul 4).sub (i2.const_mul _)) (i3.const_mul _),
-      intervalIntegral.integral_sub (i1.const_mul 4) (i2.const_mul _),
-      intervalIntegral.integral_const_mul, intervalIntegral.integral_const_mul,
-      intervalIntegral.integral_const_mul]
-    ring
-  have hsB : Summable fun ℓ => ‖B ℓ‖ := by
-    obtain ⟨C, hC0, hC⟩ := p2f_fourierB_decay (n := 2 * n + 2) (by omega) (h ^ 2) 1
-    refine Summable.of_nonneg_of_le (fun _ => norm_nonneg _) (fun ℓ => ?_)
-      ((summable_geometric_of_lt_one (Real.exp_pos (-1)).le
-        (Real.exp_lt_one_iff.mpr (by norm_num))).mul_left C)
-    refine (hC (2 * ℓ + 2)).trans ?_
-    rw [← Real.exp_nat_mul]
-    gcongr
-    push_cast; nlinarith
+      2 / π * ∫ θ in (0 : ℝ)..π / 2, g θ * Complex.sin ((2 * ℓ + 2) * θ) :=
+    p2m_key_se_even_prod hh
+  have hsB : Summable fun ℓ => ‖B ℓ‖ :=
+    p2m_summable_norm_fourierB (n := 2 * n + 2) (by omega) (h ^ 2) 2
   have hJc : ∀ k : ℤ, Continuous (besselJ (k : ℂ)) := fun k =>
     continuous_iff_continuousAt.2 fun x => (Complex.analyticAt_besselJ_int k x).continuousAt
   have hJ1 : Continuous (besselJ 1) := by simpa using hJc 1
@@ -835,28 +873,7 @@ lemma p2m_key_se_even (n : ℕ) {h : ℝ} (hh : 0 < h) :
       (2 * (Real.cos p.2 : ℂ) * (Real.cos (2 * p.2) : ℂ))).mul hFc).add
       ((by fun_prop : Continuous fun p : ℝ × ℝ => (4 * (Real.sin p.2 : ℂ) * (Real.cos p.2 : ℂ))).mul
         ((by fun_prop : Continuous fun p : ℝ × ℝ => (Real.cos p.2 : ℂ)).mul hFs))
-  have hJ13 : ∀ y : ℂ, besselJ 1 y + besselJ 3 y = 1 / π * ∫ t in (0 : ℝ)..π,
-      (2 * (Real.cos t : ℂ) * (Real.cos (2 * t) : ℂ) * Complex.cos (y * (Real.sin t : ℂ)) +
-        4 * (Real.sin t : ℂ) * (Real.cos t : ℂ) * ((Real.cos t : ℂ) *
-          Complex.sin (y * (Real.sin t : ℂ)))) := by
-    intro y
-    have e1 : besselJ 1 y = 1 / π * ∫ t in (0 : ℝ)..π, Complex.cos (y * Complex.sin t - t) := by
-      simpa using DLMF.Bessel.besselJ_int_eq_integral_cos 1 y
-    have e3 : besselJ 3 y = 1 / π * ∫ t in (0 : ℝ)..π,
-        Complex.cos (y * Complex.sin t - 3 * t) := by
-      simpa using DLMF.Bessel.besselJ_int_eq_integral_cos 3 y
-    rw [e1, e3, ← mul_add, ← intervalIntegral.integral_add (by
-      exact (by fun_prop : Continuous fun t : ℝ =>
-        Complex.cos (y * Complex.sin t - t)).intervalIntegrable _ _)
-      (by exact (by fun_prop : Continuous fun t : ℝ =>
-        Complex.cos (y * Complex.sin t - 3 * t)).intervalIntegrable _ _)]
-    congr 2; funext t
-    simp only [Complex.ofReal_cos, Complex.ofReal_sin, Complex.ofReal_mul, Complex.ofReal_ofNat]
-    rw [show y * Complex.sin t - 3 * t = (y * Complex.sin t - t) - 2 * t by ring,
-      Complex.cos_sub (y * Complex.sin t - t), Complex.cos_sub, Complex.sin_sub,
-      Complex.cos_two_mul, Complex.sin_two_mul]
-    linear_combination (-2 * Complex.cos (y * Complex.sin t) * Complex.cos t) *
-      Complex.sin_sq_add_cos_sq (t : ℂ)
+  have hJ13 := p2m_besselJ_one_add_three_integral
   have hI1 : ∫ θ in (0 : ℝ)..π / 2, g θ * se θ =
       2 * h * (1 / π * ∫ θ in (0 : ℝ)..π / 2, ∫ t in (0 : ℝ)..π, F θ t) := by
     rw [← intervalIntegral.integral_const_mul, ← intervalIntegral.integral_const_mul]
@@ -1124,9 +1141,6 @@ theorem p1c_isMathieuSolution_comp {a q : ℂ} {w : ℂ → ℂ} (hw : IsModMath
   linear_combination ((2 * q * Complex.cos (2 * t) - a) * w (c * t)) * hc
 
 
-/-- `(h : ℂ)^2 = ((h^2 : ℝ) : ℂ)`. -/
-lemma p2m_sq_cast (h : ℝ) : (h : ℂ) ^ 2 = ((h ^ 2 : ℝ) : ℂ) := by push_cast; ring
-
 /-- `J_k(h e^0) = J_k(h)` for the continued Bessel function of integer order. -/
 lemma p2m_besselJExp_zero (k : ℤ) (h : ℂ) : besselJExp k h 0 = besselJ k h := by
   rw [p1c_besselJExp_intCast, Complex.exp_zero, mul_one]
@@ -1134,7 +1148,7 @@ lemma p2m_besselJExp_zero (k : ℤ) (h : ℂ) : besselJExp k h 0 = besselJ k h :
 /-- Integer orders with real `h` are admissible (without the normality of the noninteger
 case). -/
 lemma p2m_admissible_intCast (k : ℤ) (h : ℝ) : ModMathieuAdmissible (k : ℂ) (h : ℂ) :=
-  Or.inr ⟨⟨k, rfl⟩, by rw [p2m_sq_cast]; exact ofReal_im _⟩
+  Or.inr ⟨⟨k, rfl⟩, by rw [p1c_hsq]; exact ofReal_im _⟩
 
 /-- `Mc^{(j)}_m(·, h)` solves Mathieu's equation along the imaginary axis (`j = 1, …, 4`). -/
 lemma p2m_isMathieuSolution_McJ (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (m : ℕ) {h : ℝ}
@@ -1146,10 +1160,10 @@ lemma p2m_isMathieuSolution_McJ (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (m
   have hh' : (h : ℂ) ≠ 0 := by exact_mod_cast hh.ne'
   have hw := isModMathieuSolution_modMathieuM j hj₁ hj₄ hadm hh'
   have hl : mathieuLambda (m : ℂ) ((h : ℂ) ^ 2) = (mathieuA m (h ^ 2) : ℂ) := by
-    rw [p2m_sq_cast, show (m : ℂ) = ((m : ℤ) : ℂ) by simp, mathieuLambda_intCast,
+    rw [p1c_hsq, show (m : ℂ) = ((m : ℤ) : ℂ) by simp, mathieuLambda_intCast,
       mathieuLambdaInt]
     simp
-  rw [hl, p2m_sq_cast] at hw
+  rw [hl, p1c_hsq] at hw
   exact p1c_isMathieuSolution_comp hw (c := -I) (by rw [neg_sq, I_sq])
 
 /-- `Ms^{(j)}_m(·, h)` solves Mathieu's equation along the imaginary axis (`m ≥ 1`,
@@ -1163,10 +1177,10 @@ lemma p2m_isMathieuSolution_MsJ (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) {m
   have hh' : (h : ℂ) ≠ 0 := by exact_mod_cast hh.ne'
   have hw := isModMathieuSolution_modMathieuM j hj₁ hj₄ hadm hh'
   have hl : mathieuLambda (-(m : ℂ)) ((h : ℂ) ^ 2) = (mathieuB m (h ^ 2) : ℂ) := by
-    rw [p2m_sq_cast, show -(m : ℂ) = (Int.cast (-(m : ℤ)) : ℂ) by simp, mathieuLambda_intCast,
+    rw [p1c_hsq, show -(m : ℂ) = (Int.cast (-(m : ℤ)) : ℂ) by simp, mathieuLambda_intCast,
       mathieuLambdaInt]
     simp [hm]
-  rw [hl, p2m_sq_cast] at hw
+  rw [hl, p1c_hsq] at hw
   have := p1c_isMathieuSolution_comp hw (c := -I) (by rw [neg_sq, I_sq])
   exact this.const_mul ((-1 : ℂ) ^ m)
 

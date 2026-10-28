@@ -107,6 +107,7 @@ theorem re_mul_exp_mul_I_ge {z : ℂ} {α : ℝ} (hα : |α| < π / 2) (hz0 : 0 
   rw [← mul_min_of_nonneg _ _ hzn.le]
   exact mul_le_mul_of_nonneg_left (hmin.trans hcos) hzn.le
 
+/-- `|t^w| ≤ |t|^{Re w} e^{π |Im w|}` for all complex `t` and `w`. -/
 theorem norm_cpow_le_exp (t w : ℂ) : ‖t ^ w‖ ≤ ‖t‖ ^ w.re * Real.exp (π * |w.im|) := by
   refine (norm_cpow_le t w).trans ?_
   rw [div_eq_mul_inv, ← Real.exp_neg]
@@ -116,6 +117,7 @@ theorem norm_cpow_le_exp (t w : ℂ) : ‖t ^ w‖ ≤ ‖t‖ ^ w.re * Real.exp
     rw [abs_mul]; exact mul_le_mul_of_nonneg_right h1 (abs_nonneg _)
   linarith [neg_abs_le (arg t * w.im)]
 
+/-- For `Re t ≥ 0` and `|Re c| ≤ N`, `|(1+t)^c| ≤ (1+|t|)^N e^{π |Im c|}`. -/
 theorem norm_one_add_cpow_le {t c : ℂ} (ht : 0 ≤ t.re) {N : ℕ} (hN : |c.re| ≤ N) :
     ‖(1 + t) ^ c‖ ≤ (1 + ‖t‖) ^ N * Real.exp (π * |c.im|) := by
   refine (norm_cpow_le_exp _ _).trans (mul_le_mul_of_nonneg_right ?_ (Real.exp_pos _).le)
@@ -151,6 +153,8 @@ theorem exists_rpow_mul_exp_neg_le (s : ℝ) {b : ℝ} (hb : 0 < b) :
 /-- The integrand of Tricomi's Laplace representation. -/
 def tricomiKernel (a b z t : ℂ) : ℂ := exp (-z * t) * t ^ (a - 1) * (1 + t) ^ (b - a - 1)
 
+/-- For `Re t ≥ 0`, the Tricomi kernel `e^{-zt} t^{a-1} (1+t)^{b-a-1}` is bounded by `e^{-Re(zt)}
+|t|^{Re a - 1} (1+|t|)^N` times a constant. -/
 theorem norm_tricomiKernel_le (a b z t : ℂ) (ht : 0 ≤ t.re) {N : ℕ} (hN : |(b - a - 1).re| ≤ N) :
     ‖tricomiKernel a b z t‖ ≤ Real.exp (-(z * t).re) * ‖t‖ ^ (a.re - 1) * (1 + ‖t‖) ^ N *
       (Real.exp (π * |a.im|) * Real.exp (π * |(b - a - 1).im|)) := by
@@ -164,18 +168,21 @@ theorem norm_tricomiKernel_le (a b z t : ℂ) (ht : 0 ≤ t.re) {N : ℕ} (hN : 
           ((1 + ‖t‖) ^ N * Real.exp (π * |(b - a - 1).im|)) := by gcongr
     _ = _ := by ring
 
+/-- For `r > 0` and `|y| < π/2`, `Re(r e^{iy}) > 0`. -/
 theorem re_ofReal_mul_exp_pos {r y : ℝ} (hr : 0 < r) (hy : |y| < π / 2) :
     0 < ((r : ℂ) * exp (y * I)).re := by
   rw [re_ofReal_mul, exp_ofReal_mul_I_re]
   exact mul_pos hr
     (Real.cos_pos_of_mem_Ioo ⟨by linarith [neg_abs_le y], by linarith [le_abs_self y]⟩)
 
+/-- If `|α| < π/2` and `y` lies between `0` and `α`, then `|y| < π/2`. -/
 theorem abs_lt_of_mem_uIcc {α y : ℝ} (hα : |α| < π / 2) (hy : y ∈ [[0, α]]) : |y| < π / 2 := by
   refine lt_of_le_of_lt ?_ hα
   rcases le_total 0 α with h | h
   · rw [uIcc_of_le h] at hy; rw [abs_of_nonneg hy.1, abs_of_nonneg h]; exact hy.2
   · rw [uIcc_of_ge h] at hy; rw [abs_of_nonpos hy.2, abs_of_nonpos h]; linarith [hy.1]
 
+/-- The Tricomi kernel is complex differentiable in `t` on the right half-plane. -/
 theorem differentiableAt_tricomiKernel (a b z : ℂ) {t : ℂ} (ht : 0 < t.re) :
     DifferentiableAt ℂ (tricomiKernel a b z) t := by
   have h1 : t ∈ slitPlane := Or.inl ht
@@ -270,6 +277,7 @@ theorem integrableOn_exp_mul_rpow_mul_one_add_pow {s δ : ℝ} (hs : -1 < s) (h�
     Real.norm_of_nonneg (by linarith)]
   simp
 
+/-- `|r e^{iy}| = r` for real `r ≥ 0`. -/
 theorem norm_mul_exp_I_eq (r : ℝ) (hr : 0 ≤ r) (y : ℝ) : ‖(r : ℂ) * exp (y * I)‖ = r := by
   rw [norm_mul, norm_exp_ofReal_mul_I, mul_one, Complex.norm_real, Real.norm_of_nonneg hr]
 
@@ -414,9 +422,12 @@ theorem one_add_mul_cpow_sub_sum_isBigO (ω β : ℂ) (N : ℕ) :
 def rotSectorAtTop (δ α : ℝ) : Filter ℂ :=
   comap (fun z : ℂ => z * exp (α * I)) (sectorAtTop δ)
 
+/-- Rotation by `e^{iα}` maps the rotated sector filter into the sector filter. -/
 theorem tendsto_rotSectorAtTop (δ α : ℝ) :
     Tendsto (fun z : ℂ => z * exp (α * I)) (rotSectorAtTop δ α) (sectorAtTop δ) := tendsto_comap
 
+/-- For `δ > 0` and `|α| < π/2`, eventually along the rotated sector, `|z| ≥ 1`, `Re(z e^{iα}) > 0`
+and `|arg z + α| < π/2`. -/
 theorem eventually_rotSectorAtTop {δ α : ℝ} (hδ : 0 < δ) (hα : |α| < π / 2) :
     ∀ᶠ z in rotSectorAtTop δ α, 1 ≤ ‖z‖ ∧ 0 < (z * exp (α * I)).re ∧
       |arg z + α| < π / 2 := by

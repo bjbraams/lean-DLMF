@@ -121,7 +121,8 @@ def qIdem (f : ℂ → List ℂ → ℂ) (a : List ℂ) : ℂ :=
   ∑ j ∈ range (a.length-1), f (a[j+1]!) (a.eraseIdx (j+1))
 
 open DLMF.QSeries
-/-- qPochhammer order hasProd. -/
+/-- The product formula for the generalized q-shifted factorial `(a;q)_ν` as the convergent infinite
+product of `(1-a q^j)/(1-a q^(ν+j))` (DLMF 17.2.E3). -/
 @[dlmf 17.2.E3]
 theorem qPochhammer_order_hasProd {a q ν : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
     (hd : ∀ j : ℕ, 1-a*q^(ν+j)≠0) :
@@ -137,7 +138,8 @@ theorem qPochhammer_order_hasProd {a q ν : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
     simp [cpow_add _ _ hq0,mul_assoc]
   · rfl
 
-/-- qPochhammer order nat. -/
+/-- For natural `n`, the generalized q-shifted factorial `(a;q)_n` defined via infinite products
+agrees with the finite q-Pochhammer symbol. -/
 theorem qPochhammer_order_nat {a q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (n : ℕ)
     (hd : qPochhammerInf (a*q^n) q≠0) : qPochhammerOrder a q n=qPochhammer a q n := by
   unfold qPochhammerOrder
@@ -145,7 +147,7 @@ theorem qPochhammer_order_nat {a q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (n : �
   apply (div_eq_iff hd).2
   exact qPochhammerInf_mul_qPochhammer hq n
 
-/-- qPochhammer invert base. -/
+/-- Inverting the base: `(a;q⁻¹)_n = (a⁻¹;q)_n (-a)^n q^(-n(n-1)/2)` (DLMF 17.2.E7). -/
 @[dlmf 17.2.E7]
 theorem qPochhammer_invert_base {a q : ℂ} (ha : a≠0) (hq : q≠0) (n : ℕ) : qPochhammer a q⁻¹ n=qPochhammer a⁻¹ q n*(-a)^n*q^(-(n.choose 2:ℤ)) := by
   induction n with
@@ -158,7 +160,8 @@ theorem qPochhammer_invert_base {a q : ℂ} (ha : a≠0) (hq : q≠0) (n : ℕ) 
     field_simp
     ring
 
-/-- qPochhammer invert base ratio. -/
+/-- Ratio form of base inversion: `(a;q⁻¹)_n/(b;q⁻¹)_n = (a⁻¹;q)_n/(b⁻¹;q)_n (a/b)^n` (DLMF
+17.2.E8). -/
 @[dlmf 17.2.E8]
 theorem qPochhammer_invert_base_ratio {a b q : ℂ} (ha : a≠0) (hb : b≠0) (hq : q≠0) (n : ℕ) : qPochhammer a q⁻¹ n/qPochhammer b q⁻¹ n=qPochhammer a⁻¹ q n/qPochhammer b⁻¹ q n*(a/b)^n := by
   rw [qPochhammer_invert_base ha hq,qPochhammer_invert_base hb hq]
@@ -168,7 +171,8 @@ theorem qPochhammer_invert_base_ratio {a b q : ℂ} (ha : a≠0) (hb : b≠0) (h
   congr 1
   field_simp
 
-/-- qPochhammer reverse. -/
+/-- Reversal of a q-shifted factorial: `(a;q)_n = (q^(1-n)/a;q)_n (-a)^n q^(n(n-1)/2)` (DLMF
+17.2.E9). -/
 @[dlmf 17.2.E9]
 theorem qPochhammer_reverse {a q : ℂ} (ha : a≠0) (hq : q≠0) (n : ℕ) : qPochhammer a q n=qPochhammer (q^(1-(n:ℤ))/a) q n*(-a)^n*q^(n.choose 2) := by
   induction n with
@@ -186,7 +190,8 @@ theorem qPochhammer_reverse {a q : ℂ} (ha : a≠0) (hq : q≠0) (n : ℕ) : qP
     field_simp
     ring
 
-/-- qPochhammer reverse ratio. -/
+/-- Ratio form of reversal: `(a;q)_n/(b;q)_n = (q^(1-n)/a;q)_n/(q^(1-n)/b;q)_n (a/b)^n` (DLMF
+17.2.E10). -/
 @[dlmf 17.2.E10]
 theorem qPochhammer_reverse_ratio {a b q : ℂ} (ha : a≠0) (hb : b≠0) (hq : q≠0) (n : ℕ) : qPochhammer a q n/qPochhammer b q n=qPochhammer (q^(1-(n:ℤ))/a) q n/qPochhammer (q^(1-(n:ℤ))/b) q n*(a/b)^n := by
   rw [qPochhammer_reverse ha hq,qPochhammer_reverse hb hq]
@@ -196,7 +201,7 @@ theorem qPochhammer_reverse_ratio {a b q : ℂ} (ha : a≠0) (hb : b≠0) (hq : 
   congr 1
   field_simp
 
-/-- qPochhammer shift negative. -/
+/-- Negative shift: `(a q^(-n);q)_n = (q/a;q)_n (-a/q)^n q^(-n(n-1)/2)` (DLMF 17.2.E11). -/
 @[dlmf 17.2.E11]
 theorem qPochhammer_shift_negative {a q : ℂ} (ha : a≠0) (hq : q≠0) (n : ℕ) : qPochhammer (a*q^(-(n:ℤ))) q n=qPochhammer (q/a) q n*(-a/q)^n*q^(-(n.choose 2:ℤ)) := by
   have h := DLMF.QSeries.TripleProduct.qPochhammer_shift_down hq ha n
@@ -207,7 +212,8 @@ theorem qPochhammer_shift_negative {a q : ℂ} (ha : a≠0) (hq : q≠0) (n : �
   field_simp
   linear_combination h
 
-/-- qPochhammer negative. -/
+/-- The q-shifted factorial of negative index `-n`, as the inverse of `(a q^(-n);q)_n` and in the
+closed form `(-q/a)^n q^(n(n-1)/2)/(q/a;q)_n` (DLMF 17.2.E2). -/
 @[dlmf 17.2.E2]
 theorem qPochhammer_negative {a q : ℂ} (ha : a≠0) (hq : q≠0) (n : ℕ)
     (hd : qPochhammer (q/a) q n≠0) :
@@ -223,10 +229,11 @@ theorem qPochhammer_negative {a q : ℂ} (ha : a≠0) (hq : q≠0) (n : ℕ)
   simp only [zpow_neg,zpow_natCast,div_pow]
   field_simp
   ring_nf
-  simp [← inv_pow,ha]
+  simp [-inv_pow]
   rw [mul_assoc,← mul_pow,mul_inv_cancel₀ ha,one_pow,mul_one]
 
-/-- qPochhammer shift negative ratio. -/
+/-- Ratio form of the negative shift: `(a q^(-n);q)_n/(b q^(-n);q)_n = (q/a;q)_n/(q/b;q)_n (a/b)^n`
+(DLMF 17.2.E12). -/
 @[dlmf 17.2.E12]
 theorem qPochhammer_shift_negative_ratio {a b q : ℂ} (ha : a≠0) (hb : b≠0) (hq : q≠0) (n : ℕ) : qPochhammer (a*q^(-(n:ℤ))) q n/qPochhammer (b*q^(-(n:ℤ))) q n=qPochhammer (q/a) q n/qPochhammer (q/b) q n*(a/b)^n := by
   rw [qPochhammer_shift_negative ha hq,qPochhammer_shift_negative hb hq]
@@ -260,7 +267,8 @@ lemma qaR4_zpow_choose_sub {q : ℂ} (hq : q≠0) (c n : ℕ) :
   rw [← zpow_natCast q n,← zpow_add₀ hq]
   simp
 
-/-- qPochhammer sub index. -/
+/-- The q-shifted factorial `(a;q)_(n-k)` expressed through `(a;q)_n` and `(q^(1-n)/a;q)_k` (DLMF
+17.2.E13). -/
 @[dlmf 17.2.E13]
 theorem qPochhammer_sub_index {a q : ℂ} (ha : a≠0) (hq : q≠0) {k n : ℕ} (hk : k≤n) (hd : qPochhammer (q^(1-(n:ℤ))/a) q k≠0) : qPochhammer a q (n-k)=qPochhammer a q n/qPochhammer (q^(1-(n:ℤ))/a) q k*(-q/a)^k*q^((k.choose 2:ℤ)-(n:ℤ)*k) := by
   obtain ⟨m,rfl⟩ := Nat.exists_eq_add_of_le' hk
@@ -285,7 +293,7 @@ theorem qPochhammer_sub_index {a q : ℂ} (ha : a≠0) (hq : q≠0) {k n : ℕ} 
     qPochhammer a q m*(((-(a*q^m))^k*(-(q/a))^k)*E*q^(k.choose 2)) by ring,hAB,
     show q^((m+1)*k)*E*q^(k.choose 2)=E*q^((m+1)*k)*q^(k.choose 2) by ring,h1,mul_one]
 
-/-- qPochhammer sub index ratio. -/
+/-- Ratio form of the index subtraction formula for `(a;q)_(n-k)/(b;q)_(n-k)` (DLMF 17.2.E14). -/
 @[dlmf 17.2.E14]
 theorem qPochhammer_sub_index_ratio {a b q : ℂ} (ha : a≠0) (hb : b≠0) (hq : q≠0) {k n : ℕ} (hk : k≤n) (hda : qPochhammer (q^(1-(n:ℤ))/a) q k≠0) (hdb : qPochhammer (q^(1-(n:ℤ))/b) q k≠0) : qPochhammer a q (n-k)/qPochhammer b q (n-k)=qPochhammer a q n/qPochhammer b q n*(qPochhammer (q^(1-(n:ℤ))/b) q k/qPochhammer (q^(1-(n:ℤ))/a) q k)*(b/a)^k := by
   rw [qPochhammer_sub_index ha hq hk hda,qPochhammer_sub_index hb hq hk hdb]
@@ -296,7 +304,8 @@ theorem qPochhammer_sub_index_ratio {a b q : ℂ} (ha : a≠0) (hb : b≠0) (hq 
   have h1 : (-q/b)^k≠0 := pow_ne_zero _ (div_ne_zero (neg_ne_zero.mpr hq) hb)
   field_simp
 
-/-- qPochhammer shift negative general. -/
+/-- The shifted factorial `(a q^(-n);q)_k` in terms of `(a;q)_k`, `(q/a;q)_n` and `(q^(1-k)/a;q)_n`
+(DLMF 17.2.E15). -/
 @[dlmf 17.2.E15]
 theorem qPochhammer_shift_negative_general {a q : ℂ} (ha : a≠0) (hq : q≠0) (k n : ℕ) (hd : qPochhammer (q^(1-(k:ℤ))/a) q n≠0) : qPochhammer (a*q^(-(n:ℤ))) q k=qPochhammer a q k*qPochhammer (q/a) q n/qPochhammer (q^(1-(k:ℤ))/a) q n*q^(-(n:ℤ)*k) := by
   have h1 := qPochhammer_add (a*q^(-(n:ℤ))) q n k
@@ -329,7 +338,8 @@ theorem qPochhammer_shift_negative_general {a q : ℂ} (ha : a≠0) (hq : q≠0)
   field_simp at h2 ⊢
   linear_combination -h2
 
-/-- qPochhammer shift negative sub. -/
+/-- The shifted factorial `(a q^(-n);q)_(n-k)` in terms of `(q/a;q)_n` and `(q/a;q)_k` (DLMF
+17.2.E16). -/
 @[dlmf 17.2.E16]
 theorem qPochhammer_shift_negative_sub {a q : ℂ} (ha : a≠0) (hq : q≠0) {k n : ℕ} (hk : k≤n) (hd : qPochhammer (q/a) q k≠0) : qPochhammer (a*q^(-(n:ℤ))) q (n-k)=qPochhammer (q/a) q n/qPochhammer (q/a) q k*(-a/q)^(n-k)*q^((k.choose 2:ℤ)-(n.choose 2:ℤ)) := by
   obtain ⟨j,rfl⟩ := Nat.exists_eq_add_of_le' hk
@@ -353,7 +363,7 @@ theorem qPochhammer_shift_negative_sub {a q : ℂ} (ha : a≠0) (hq : q≠0) {k 
   field_simp at h1 ⊢
   linear_combination -h1
 
-/-- qPochhammer shift positive. -/
+/-- Positive shift: `(a q^n;q)_k = (a;q)_k (a q^k;q)_n/(a;q)_n` (DLMF 17.2.E17). -/
 @[dlmf 17.2.E17]
 theorem qPochhammer_shift_positive {a q : ℂ} (k n : ℕ) (hd : qPochhammer a q n≠0) : qPochhammer (a*q^n) q k=qPochhammer a q k*qPochhammer (a*q^k) q n/qPochhammer a q n := by
   apply (eq_div_iff hd).2
@@ -361,7 +371,7 @@ theorem qPochhammer_shift_positive {a q : ℂ} (k n : ℕ) (hd : qPochhammer a q
   rw [Nat.add_comm n k,qPochhammer_add] at h
   simpa [mul_comm] using h.symm
 
-/-- qPochhammer shift sub. -/
+/-- The shifted factorial `(a q^k;q)_(n-k) = (a;q)_n/(a;q)_k` for `k ≤ n` (DLMF 17.2.E18). -/
 @[dlmf 17.2.E18]
 theorem qPochhammer_shift_sub {a q : ℂ} {k n : ℕ} (hk : k≤n) (hd : qPochhammer a q k≠0) : qPochhammer (a*q^k) q (n-k)=qPochhammer a q n/qPochhammer a q k := by
   apply (eq_div_iff hd).2
@@ -369,7 +379,7 @@ theorem qPochhammer_shift_sub {a q : ℂ} {k n : ℕ} (hk : k≤n) (hd : qPochha
   rw [Nat.add_sub_of_le hk] at h
   simpa [mul_comm] using h.symm
 
-/-- qPochhammer even. -/
+/-- Splitting by parity: `(a;q)_(2n) = (a, a q;q²)_n` (DLMF 17.2.E19). -/
 @[dlmf 17.2.E19]
 theorem qPochhammer_even (a q : ℂ) (n : ℕ) : qPochhammer a q (2*n)=qPochhammerList [a,a*q] (q^2) n := by
   induction n with
@@ -380,7 +390,7 @@ theorem qPochhammer_even (a q : ℂ) (n : ℕ) : qPochhammer a q (2*n)=qPochhamm
       mul_one,qPochhammer_succ,qPochhammer_zero,pow_zero,pow_mul,pow_succ]
     ring
 
-/-- qPochhammer blocks. -/
+/-- Splitting into `k` blocks: `(a;q)_(kn) = ∏_(j<k) (a q^j;q^k)_n` (DLMF 17.2.E20). -/
 @[dlmf 17.2.E20]
 theorem qPochhammer_blocks (a q : ℂ) (k n : ℕ) : qPochhammer a q (k*n)=∏ j∈range k, qPochhammer (a*q^j) (q^k) n := by
   induction n with
@@ -395,16 +405,17 @@ theorem qPochhammer_blocks (a q : ℂ) (k n : ℕ) : qPochhammer a q (k*n)=∏ j
     rw [pow_mul]
     ring
 
-/-- qPochhammer squared. -/
+/-- Squared argument and base: `(a²;q²)_n = (a;q)_n (-a;q)_n` (DLMF 17.2.E21). -/
 @[dlmf 17.2.E21]
 theorem qPochhammer_squared (a q : ℂ) (n : ℕ) : qPochhammer (a^2) (q^2) n=qPochhammer a q n*qPochhammer (-a) q n := by
   induction n with
   | zero => simp
   | succ n ih =>
-    simp only [qPochhammer_succ,ih,pow_mul]
+    simp only [qPochhammer_succ,ih]
     ring
 
-/-- qPochhammer vwp ratio. -/
+/-- The very-well-poised factor: `(q√a,-q√a;q)_n/(√a,-√a;q)_n = (a q²;q²)_n/(a;q²)_n = (1-a
+q^(2n))/(1-a)` (DLMF 17.2.E22). -/
 @[dlmf 17.2.E22]
 theorem qPochhammer_vwp_ratio {a q : ℂ} (n : ℕ) (hd : qPochhammer a (q^2) n≠0) (ha : a≠1) : qPochhammerList [q*Complex.sqrt a,-q*Complex.sqrt a] q n/qPochhammerList [Complex.sqrt a,-Complex.sqrt a] q n=qPochhammer (a*q^2) (q^2) n/qPochhammer a (q^2) n ∧ qPochhammer (a*q^2) (q^2) n/qPochhammer a (q^2) n=(1-a*q^(2*n))/(1-a) := by
   have hs : (Complex.sqrt a)^2=a := by
@@ -420,12 +431,14 @@ theorem qPochhammer_vwp_ratio {a q : ℂ} (n : ℕ) (hd : qPochhammer a (q^2) n�
     rw [qPochhammer_one,Nat.add_comm 1 n,qPochhammer_succ] at h
     simpa [← pow_mul,mul_comm] using h.symm
 
-/-- qPochhammer root ratio. -/
+/-- The `k`-th root analogue of the very-well-poised factor, with `ω` a primitive `k`-th root of
+unity (DLMF 17.2.E23). -/
 @[dlmf 17.2.E23]
 theorem qPochhammer_root_ratio {a q : ℂ} {k : ℕ} (hk : 0<k) (n : ℕ) (hd : qPochhammer a (q^k) n≠0) (ha : a≠1) : let ω := Complex.exp (2*π*I/k); let r := a^(1/(k:ℂ)); (∏ j∈range k, qPochhammer (q*ω^j*r) q n)/(∏ j∈range k, qPochhammer (ω^j*r) q n)=qPochhammer (a*q^k) (q^k) n/qPochhammer a (q^k) n ∧ qPochhammer (a*q^k) (q^k) n/qPochhammer a (q^k) n=(1-a*q^(k*n))/(1-a) := by
   sorry
 
-/-- qPochhammer parameter limit. -/
+/-- Limits in a parameter: `(a/τ;q)_n τ^n → (-a)^n q^(n(n-1)/2)` as `τ → 0`, and likewise `(aσ;q)_n
+σ^(-n)` as `σ → ∞` (DLMF 17.2.E24). -/
 @[dlmf 17.2.E24]
 theorem qPochhammer_parameter_limit (a q : ℂ) (n : ℕ) : Tendsto (fun τ : ℂ => qPochhammer (a/τ) q n*τ^n) (𝓝[≠] 0) (𝓝 ((-a)^n*q^(n.choose 2))) ∧ Tendsto (fun σ : ℂ => qPochhammer (a*σ) q n*σ^(-(n:ℤ))) (Filter.cocompact ℂ) (𝓝 ((-a)^n*q^(n.choose 2))) := by
   have hfirst : Tendsto (fun τ : ℂ => qPochhammer (a/τ) q n*τ^n)
@@ -453,7 +466,8 @@ theorem qPochhammer_parameter_limit (a q : ℂ) (n : ℕ) : Tendsto (fun τ : �
       (tendsto_inv₀_cobounded' : Tendsto (Inv.inv : ℂ → ℂ) (Bornology.cobounded ℂ) (𝓝[≠] 0))
   simpa only [Function.comp_def,div_inv_eq_mul,zpow_neg,zpow_natCast,inv_pow] using hfirst.comp hinv
 
-/-- qPochhammer parameter ratio limit. -/
+/-- Ratio limits: `(a/τ;q)_n/(b/τ;q)_n → (a/b)^n` as `τ → 0`, and likewise for `(aσ;q)_n/(bσ;q)_n`
+as `σ → ∞` (DLMF 17.2.E25). -/
 @[dlmf 17.2.E25]
 theorem qPochhammer_parameter_ratio_limit {a b q : ℂ} (hb : b≠0) (hq : q≠0) (n : ℕ) : Tendsto (fun τ : ℂ => qPochhammer (a/τ) q n/qPochhammer (b/τ) q n) (𝓝[≠] 0) (𝓝 ((a/b)^n)) ∧ Tendsto (fun σ : ℂ => qPochhammer (a*σ) q n/qPochhammer (b*σ) q n) (Filter.cocompact ℂ) (𝓝 ((a/b)^n)) := by
   have hn : (-b)^n*q^(n.choose 2)≠0 :=
@@ -477,7 +491,8 @@ theorem qPochhammer_parameter_ratio_limit {a b q : ℂ} (hb : b≠0) (hq : q≠0
       (tendsto_inv₀_cobounded' : Tendsto (Inv.inv : ℂ → ℂ) (Bornology.cobounded ℂ) (𝓝[≠] 0))
   simpa only [Function.comp_def,div_inv_eq_mul] using hfirst.comp hinv
 
-/-- qPochhammer double parameter limit. -/
+/-- The double parameter limit `(a/τ;q)_n (b/τ;q)_n/(c/τ²;q)_n → (-1)^n (ab/c)^n q^(n(n-1)/2)` as `τ
+→ 0` (DLMF 17.2.E26). -/
 @[dlmf 17.2.E26]
 theorem qPochhammer_double_parameter_limit {a b c q : ℂ} (hc : c≠0) (hq : q≠0) (n : ℕ) : Tendsto (fun τ : ℂ => qPochhammer (a/τ) q n*qPochhammer (b/τ) q n/qPochhammer (c/τ^2) q n) (𝓝[≠] 0) (𝓝 ((-1:ℂ)^n*(a*b/c)^n*q^(n.choose 2))) := by
   have hn : (-c)^n*q^(n.choose 2)≠0 :=
@@ -506,7 +521,8 @@ theorem qPochhammer_double_parameter_limit {a b c q : ℂ} (hc : c≠0) (hq : q�
   rw [mul_mul_mul_comm,← pow_mul,show 2*n=n+n by omega,pow_add]
   exact mul_div_mul_right _ _ (mul_ne_zero (pow_ne_zero n hτ0) (pow_ne_zero n hτ0))
 
-/-- qPhi hasSum. -/
+/-- For `|q| < 1`, regular lower parameters and `r ≤ s + 1` (with `|z| < 1` when `r = s + 1`), the
+basic hypergeometric series `rφs` converges to `qPhi`. -/
 theorem qPhi_hasSum {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
     (hb : qDenominatorRegular b q)
     (hr : a.length≤b.length+1) (hz : a.length=b.length+1 → ‖z‖<1) :
@@ -553,7 +569,7 @@ theorem qPhi_hasSum {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
   have hpow := tendsto_pow_atTop_nhds_zero_of_norm_lt_one hq
   have hlimF (p : List ℂ) : Tendsto (F p) atTop (𝓝 1) := by
     induction p with
-    | nil => simpa [F] using (tendsto_const_nhds : Tendsto (fun _ : ℕ => (1:ℂ)) atTop (𝓝 1))
+    | nil => simp [F]
     | cons c p ih =>
       have h := ((tendsto_const_nhds : Tendsto (fun _ : ℕ => (1:ℂ)) atTop (𝓝 1)).sub
         (hpow.const_mul c)).mul ih
@@ -801,7 +817,8 @@ lemma qaR4_qPsiTerm_neg_closed {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hz0 :
     field_simp
     rw [pow_add]
     linear_combination (Fb*qPochhammerList (b.map fun bi => q/bi) q m*(-1:ℂ)^a.length)*h1
-/-- qPsi hasSum. -/
+/-- In its annulus of convergence the bilateral basic hypergeometric series `rψs` converges to
+`qPsi`. -/
 theorem qPsi_hasSum {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
     (hab : qBilateralRegular a b q) (ha : a.prod≠0) (hz0 : z≠0)
     (hr : a.length≤b.length) (hz : ‖b.prod/(a.prod*z)‖<1)
@@ -809,7 +826,8 @@ theorem qPsi_hasSum {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
   obtain ⟨h1,h2⟩ := qaR4_qPsiTerm_summable_parts hq0 hq hab ha hz0 hr hz hz'
   exact (h1.of_nat_of_neg_add_one h2).hasSum
 
-/-- qPsi split. -/
+/-- A convergent bilateral series `rψs` splits into its nonnegative-index part and the reversed
+negative-index part (DLMF 17.4.E3). -/
 @[dlmf 17.4.E3]
 theorem qPsi_split {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
     (hab : qBilateralRegular a b q) (ha : a.prod≠0) (hb0 : b.prod≠0) (hz0 : z≠0)
@@ -828,7 +846,8 @@ theorem qPsi_split {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
   push_cast
   rfl
 
-/-- qPhi terminates. -/
+/-- A basic hypergeometric series with upper parameter `q^(-N)` terminates: it equals its partial
+sum through index `N`. -/
 theorem qPhi_terminates {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
     (N : ℕ) (hb : qDenominatorRegularThrough b q N) :
     qPhi (q^(-(N:ℤ))::a) b q z=qPhiPartial (q^(-(N:ℤ))::a) b q z N := by
@@ -839,7 +858,8 @@ theorem qPhi_terminates {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖
   have hz := qPochhammer_recip_pow_eq_zero hq0 hNk
   simp [qPhiTerm,qPochhammerList,hz]
 
-/-- qIdem expansion. -/
+/-- Expanding the idem notation: `f x a` plus the idem sum over `x :: a` is the sum over all ways of
+singling out one parameter. -/
 theorem qIdem_expansion (f : ℂ → List ℂ → ℂ) (x : ℂ) (a : List ℂ) :
     f x a+qIdem f (x::a)=∑ j∈range (a.length+1), f ((x::a)[j]!) ((x::a).eraseIdx j) := by
   simp only [qIdem,List.length_cons,Nat.add_sub_cancel]
@@ -863,7 +883,7 @@ theorem qPsi_split_indices {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q
   congr 1
   ring
 
-/-- Formal coefficient limit in17.4.2, with its integer phase/scaling exponent. -/
+/-- Formal coefficient limit in 17.4.2, with its integer phase/scaling exponent. -/
 @[dlmf 17.4.E2]
 theorem qPhi_coefficient_classical_limit (a b : List ℂ) (z : ℂ) (n : ℕ)
     (hb : DLMF.Hypergeometric.genDenRegular (b:Multiset ℂ)) :
@@ -934,7 +954,7 @@ theorem qPhi_hasFPowerSeriesOnBall {a b : List ℂ} {q : ℂ} (hq0 : q≠0) (hq 
   have hs := qPhi_hasSum (z := z) hq0 hq hb hr (fun h => hz'.trans (hz h))
   convert hs using 1
   · ext n
-    simp [qPhiPowerSeries,FormalMultilinearSeries.ofScalars_apply_eq,smul_eq_mul,
+    simp [qPhiPowerSeries,smul_eq_mul,
       qPhiTerm_eq_coeff_mul,mul_comm]
   · simp
 
@@ -981,7 +1001,7 @@ theorem qPhi_iteratedDeriv_zero {a b : List ℂ} {q : ℂ} (hq0 : q≠0) (hq : �
   have hn : (n.factorial:ℂ)≠0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero n)
   simpa [mul_comm] using ((eq_div_iff hn).mp hc).symm
 
-/-- zero phi zero. -/
+/-- Euler's product: `0φ0(-;-;q,z) = (z;q)_∞` for `|q| < 1` (DLMF 17.5.E1). -/
 @[dlmf 17.5.E1]
 theorem zero_phi_zero {q : ℂ} (hq : ‖q‖<1) (z : ℂ) : qPhi [] [] q z=qPochhammerInf z q := by
   calc

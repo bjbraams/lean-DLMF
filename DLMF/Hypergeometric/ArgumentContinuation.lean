@@ -47,18 +47,23 @@ namespace DLMF.Hypergeometric
 /-- The cut plane `ℂ ∖ [1, ∞)`, the natural domain of `₂F₁` in its argument. -/
 def cutPlane : Set ℂ := {z | 1 - z ∈ slitPlane}
 
+/-- `z` lies in the cut plane `ℂ \ [1, ∞)` iff `1 - z` lies in the slit plane. -/
 theorem mem_cutPlane {z : ℂ} : z ∈ cutPlane ↔ 1 - z ∈ slitPlane := Iff.rfl
 
+/-- The cut plane `ℂ \ [1, ∞)` is open. -/
 theorem isOpen_cutPlane : IsOpen cutPlane :=
   isOpen_slitPlane.preimage (continuous_const.sub continuous_id)
 
+/-- `0` lies in the cut plane. -/
 theorem zero_mem_cutPlane : (0 : ℂ) ∈ cutPlane := by
   show (1 : ℂ) - 0 ∈ slitPlane
   simp
 
+/-- On the cut plane, `1 - z ≠ 0`. -/
 theorem one_sub_ne_zero_of_mem_cutPlane {z : ℂ} (hz : z ∈ cutPlane) : 1 - z ≠ 0 :=
   slitPlane_ne_zero hz
 
+/-- The open unit disk lies in the cut plane. -/
 theorem mem_cutPlane_of_norm_lt_one {z : ℂ} (hz : ‖z‖ < 1) : z ∈ cutPlane := by
   show 1 - z ∈ slitPlane
   rw [mem_slitPlane_iff]
@@ -66,6 +71,7 @@ theorem mem_cutPlane_of_norm_lt_one {z : ℂ} (hz : ‖z‖ < 1) : z ∈ cutPlan
   simp only [sub_re, one_re]
   linarith [re_le_norm z]
 
+/-- The cut plane is star-convex about `0`. -/
 theorem starConvex_zero_cutPlane : StarConvex ℝ 0 cutPlane := by
   intro y hy a b ha hb hab
   have h := starConvex_one_slitPlane (hy : 1 - y ∈ slitPlane) ha hb hab
@@ -75,6 +81,7 @@ theorem starConvex_zero_cutPlane : StarConvex ℝ 0 cutPlane := by
   have : (a : ℂ) + b = 1 := by exact_mod_cast hab
   linear_combination (-1 : ℂ) * this
 
+/-- The cut plane is preconnected. -/
 theorem isPreconnected_cutPlane : IsPreconnected cutPlane :=
   (starConvex_zero_cutPlane.isPathConnected zero_mem_cutPlane).isConnected.isPreconnected
 
@@ -152,17 +159,21 @@ theorem regularizedGaussHGIntegral_eq_regularizedGaussHGFun {a b c : ℂ} (hb : 
     (t : ℂ) ^ (b - 1) * (1 - (t : ℂ)) ^ (c - b - 1) * (1 - z * t) ^ (-a) with hI
   field_simp
 
+/-- For `z` in the cut plane, `t ↦ (1 - z t)^s` is continuous on `[0, 1]`. -/
 theorem continuousOn_one_sub_mul_cpow {z : ℂ} (hz : z ∈ cutPlane) (s : ℂ) :
     ContinuousOn (fun t : ℝ => (1 - z * t) ^ s) (Icc (0 : ℝ) 1) :=
   (continuousOn_const.sub (continuousOn_const.mul continuous_ofReal.continuousOn)).cpow
     continuousOn_const (fun _ ht => one_sub_mul_mem_slitPlane hz ht)
 
+/-- For `Re c > Re b > 0` and `z` in the cut plane, the Euler kernel is integrable on `[0, 1]`. -/
 theorem intervalIntegrable_eulerKernel {a b c : ℂ} (hb : 0 < b.re) (hcb : 0 < (c - b).re)
     {z : ℂ} (hz : z ∈ cutPlane) : IntervalIntegrable (eulerKernel a b c z) volume 0 1 := by
   have h := (betaIntegral_convergent hb hcb).mul_continuousOn
     (by rw [uIcc_of_le zero_le_one]; exact continuousOn_one_sub_mul_cpow hz (-a))
   exact h
 
+/-- For `z` in the cut plane and `t ∈ [0, 1]`, the Euler kernel is complex-differentiable in `z`,
+  with derivative `eulerKernelDeriv`. -/
 theorem hasDerivAt_eulerKernel {a b c z : ℂ} (hz : z ∈ cutPlane) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) 1) :
     HasDerivAt (fun w => eulerKernel a b c w t) (eulerKernelDeriv a b c z t) z := by
   have h1 : HasDerivAt (fun w : ℂ => 1 - w * (t : ℂ)) (-(1 * (t : ℂ))) z :=
@@ -246,12 +257,14 @@ def shiftC (b c : ℂ) : ℕ := ⌈1 + shiftB b - (c - b).re⌉₊
 /-- The recursion fuel. -/
 def shiftMeasure (b c : ℂ) : ℕ := shiftB b + shiftC b c
 
+/-- For `x > 0`, `⌈x - 1⌉₊ < ⌈x⌉₊`. -/
 theorem ceil_sub_one_lt_ceil {x : ℝ} (hx : 0 < x) : ⌈x - 1⌉₊ < ⌈x⌉₊ := by
   have h1 : 0 < ⌈x⌉₊ := Nat.ceil_pos.mpr hx
   have : ⌈x - 1⌉₊ ≤ ⌈x⌉₊ - 1 :=
     Nat.ceil_le.mpr (by push_cast [Nat.cast_sub h1]; linarith [Nat.le_ceil x])
   omega
 
+/-- Raising `c` by one decreases a positive `c`-shift count. -/
 theorem shiftC_add_one_lt {b c : ℂ} (h : 0 < shiftC b c) : shiftC b (c + 1) < shiftC b c := by
   have hx : 0 < 1 + (shiftB b : ℝ) - (c - b).re := Nat.ceil_pos.mp h
   have : 1 + (shiftB b : ℝ) - (c + 1 - b).re = 1 + (shiftB b : ℝ) - (c - b).re - 1 := by
@@ -260,6 +273,7 @@ theorem shiftC_add_one_lt {b c : ℂ} (h : 0 < shiftC b c) : shiftC b (c + 1) < 
   rw [this]
   exact ceil_sub_one_lt_ceil hx
 
+/-- Raising `b` by one decreases a positive `b`-shift count. -/
 theorem shiftB_add_one_lt {b : ℂ} (h : 0 < shiftB b) : shiftB (b + 1) < shiftB b := by
   have hx : 0 < 1 - b.re := Nat.ceil_pos.mp h
   have : 1 - (b + 1).re = 1 - b.re - 1 := by simp only [add_re, one_re]; ring
@@ -267,11 +281,13 @@ theorem shiftB_add_one_lt {b : ℂ} (h : 0 < shiftB b) : shiftB (b + 1) < shiftB
   rw [this]
   exact ceil_sub_one_lt_ceil hx
 
+/-- No `c`-shift is needed when `Re (c - b) ≥ 1 + shiftB b`. -/
 theorem shiftC_eq_zero_of {b c : ℂ} (h : (c - b).re ≥ 1 + shiftB b) : shiftC b c = 0 := by
   unfold shiftC
   rw [Nat.ceil_eq_zero]
   linarith
 
+/-- When both shift counts vanish, `Re b ≥ 1` and `Re (c - b) ≥ 1`, so Euler's integral applies. -/
 theorem euler_region_of_shift_eq_zero {b c : ℂ} (hB : shiftB b = 0) (hC : shiftC b c = 0) :
     1 ≤ b.re ∧ 1 ≤ (c - b).re := by
   have hB' : 1 - b.re ≤ 0 := Nat.ceil_eq_zero.mp hB
@@ -297,12 +313,14 @@ plane `ℂ ∖ [1, ∞)`, for all parameters (DLMF §15.2(i)). Its domain is `cu
 Mathlib's `regularizedGaussHGFun` and the Euler integral is `regularizedGaussHGIntegral`. -/
 def regularizedGaussHG (a b c z : ℂ) : ℂ := regularizedGaussHGAux (shiftMeasure b c) a b c z
 
+/-- Unfolding the recursion when a `c`-shift is needed: the contiguous relation in `c`. -/
 theorem regularizedGaussHGAux_succ_of_pos_c {n : ℕ} {a b c z : ℂ} (h : 0 < shiftC b c) :
     regularizedGaussHGAux (n + 1) a b c z =
       (c - a) * regularizedGaussHGAux n a b (c + 1) z + a
           * regularizedGaussHGAux n (a + 1) b (c + 1) z := by
   simp only [regularizedGaussHGAux, h, ↓reduceIte]
 
+/-- Unfolding the recursion when only a `b`-shift is needed: the contiguous relation in `b`. -/
 lemma regularizedGaussHGAux_succ_of_pos_b {n : ℕ} {a b c z : ℂ} (hc : ¬ 0 < shiftC b c)
     (hb : 0 < shiftB b) :
     regularizedGaussHGAux (n + 1) a b c z =
@@ -310,6 +328,7 @@ lemma regularizedGaussHGAux_succ_of_pos_b {n : ℕ} {a b c z : ℂ} (hc : ¬ 0 <
           * regularizedGaussHGAux n (a + 1) (b + 1) (c + 1) z := by
   simp only [regularizedGaussHGAux, hc, hb, ↓reduceIte]
 
+/-- Unfolding the recursion when no shift is needed: Euler's integral. -/
 theorem regularizedGaussHGAux_succ_of_zero {n : ℕ} {a b c z : ℂ} (hc : ¬ 0 < shiftC b c)
     (hb : ¬ 0 < shiftB b) : regularizedGaussHGAux (n + 1) a b c z
         = regularizedGaussHGIntegral a b c z := by
@@ -398,11 +417,13 @@ theorem analyticOnNhd_regularizedGaussHG (a b c : ℂ) : AnalyticOnNhd ℂ (regu
     cutPlane :=
   analyticOnNhd_regularizedGaussHGAux _ le_rfl
 
+/-- The continued regularized function `𝐅(a, b; c; z)` is analytic on the cut plane. -/
 @[fun_prop]
 theorem analyticAt_regularizedGaussHG (a b c : ℂ) {z : ℂ} (hz : z ∈ cutPlane) :
     AnalyticAt ℂ (regularizedGaussHG a b c) z :=
   analyticOnNhd_regularizedGaussHG a b c z hz
 
+/-- The continued regularized function `𝐅(a, b; c; z)` is differentiable on the cut plane. -/
 @[fun_prop]
 theorem differentiableAt_regularizedGaussHG (a b c : ℂ) {z : ℂ} (hz : z ∈ cutPlane) :
     DifferentiableAt ℂ (regularizedGaussHG a b c) z :=

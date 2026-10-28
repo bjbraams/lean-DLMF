@@ -63,12 +63,14 @@ theorem conj_kummerU (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
       (continuousAt_kummerU_comp continuousAt_const continuousAt_id hz0)
   · exact continuousAt_kummerU_comp continuousAt_const continuous_conj.continuousAt hcz
 
+/-- `exp(-iπ/2) = -i`. -/
 theorem exp_neg_I_mul_pi_div_two : exp (-(I * π / 2)) = -I := by
   rw [show -(I * π / 2) = ((-(π / 2) : ℝ) : ℂ) * I by push_cast; ring, exp_mul_I,
     ← ofReal_cos, ← ofReal_sin, Real.cos_neg, Real.sin_neg, Real.cos_pi_div_two,
     Real.sin_pi_div_two]
   simp
 
+/-- For `ρ > 0`, `log(-2iρ) = log(2ρ) - iπ/2`. -/
 theorem log_neg_two_I_mul {ρ : ℝ} (hρ : 0 < ρ) :
     log (-2 * I * ρ) = Real.log (2 * ρ) - π / 2 * I := by
   have he : (-2 * I * ρ : ℂ) = ((2 * ρ : ℝ) : ℂ) * (-I) := by push_cast; ring
@@ -79,9 +81,11 @@ theorem log_neg_two_I_mul {ρ : ℝ} (hρ : 0 < ρ) :
   · rw [log_im, he, arg_real_mul _ (by positivity), arg_neg_I]
     simp
 
+/-- For `ρ > 0`, `-2iρ` lies in the slit plane. -/
 theorem neg_two_I_mul_mem_slitPlane {ρ : ℝ} (hρ : 0 < ρ) : (-2 * I * ρ : ℂ) ∈ slitPlane := by
   rw [mem_slitPlane_iff]; right; simp [hρ.ne']
 
+/-- For `ρ > 0`, `2iρ` lies in the slit plane. -/
 theorem two_I_mul_mem_slitPlane {ρ : ℝ} (hρ : 0 < ρ) : (2 * I * ρ : ℂ) ∈ slitPlane := by
   rw [mem_slitPlane_iff]; right; simp [hρ.ne']
 
@@ -125,6 +129,7 @@ theorem coulombHMinus_eq_conj (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
   simp only [map_mul, map_add, map_neg, map_ofNat, conj_ofReal, conj_I, map_natCast, map_one]
   ring_nf
 
+/-- For `ρ > 0`, `arg(2iρ) = π/2`. -/
 theorem arg_two_I_mul {ρ : ℝ} (hρ : 0 < ρ) : arg (2 * I * ρ) = π / 2 := by
   rw [show (2 * I * ρ : ℂ) = ((2 * ρ : ℝ) : ℂ) * I by push_cast; ring,
     arg_real_mul _ (by positivity), arg_I]
@@ -237,6 +242,7 @@ theorem ofReal_coulombF_eq_regularized (ℓ : ℕ) (η ρ : ℝ) :
   push_cast
   ring
 
+/-- The real part of a differentiable complex function of a real variable has derivative `Re f'`. -/
 theorem hasDerivAt_re_comp {f : ℝ → ℂ} {f' : ℂ} {x : ℝ} (h : HasDerivAt f f' x) :
     HasDerivAt (fun y => (f y).re) f'.re x := by
   have := reCLM.hasFDerivAt.comp_hasDerivAt x h
@@ -244,6 +250,8 @@ theorem hasDerivAt_re_comp {f : ℝ → ℂ} {f' : ℂ} {x : ℝ} (h : HasDerivA
   · funext y; simp
   · simp
 
+/-- The imaginary part of a differentiable complex function of a real variable has derivative `Im
+f'`. -/
 theorem hasDerivAt_im_comp {f : ℝ → ℂ} {f' : ℂ} {x : ℝ} (h : HasDerivAt f f' x) :
     HasDerivAt (fun y => (f y).im) f'.im x := by
   have := imCLM.hasFDerivAt.comp_hasDerivAt x h

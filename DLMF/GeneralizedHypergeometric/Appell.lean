@@ -92,8 +92,11 @@ def appellThetaY (f : ℂ→ℂ→ℂ) : ℂ→ℂ→ℂ := fun x y => y*appellD
 /-- Analytic continuation of a two-variable germ along a continuous parameterized path.
 This is the two-variable domain analogue of TauCeti.IsAnalyticContinuationAlong. -/
 structure IsAppellContinuation (F : ℝ→(ℂ × ℂ→ℂ)) (γ : ℝ→ℂ × ℂ) : Prop where
+  /-- The path is continuous on `[0,1]`. -/
   continuousOn : ContinuousOn γ (Icc 0 1)
+  /-- Each germ `F t` is analytic at the path point `γ t`. -/
   analyticAt : ∀ t∈Icc 0 1,AnalyticAt ℂ (F t) (γ t)
+  /-- Nearby germs agree near the path: `F u = F t` near `γ u` for `u` close to `t`. -/
   locallyEq : ∀ t∈Icc 0 1,∀ᶠ u in 𝓝[Icc 0 1] t,F u=ᶠ[𝓝 (γ u)] F t
 
 /-- A chosen branch is reached from a seed germ by a specified analytic continuation. -/
@@ -116,17 +119,20 @@ def appF2Coeff (a b b' c c' : ℂ) (m n : ℕ) : ℂ :=
 def appF3Coeff (a a' b b' c : ℂ) (m n : ℕ) : ℂ :=
   poch a m*poch a' n*poch b m*poch b' n/(poch c (m+n)*(m !*n !))
 
-/-- The totalized double series; continuations are represented by analytic germs. -/
+/-- Appell's F₁ as the totalized double series `∑ₘₙ cₘₙ xᵐ yⁿ` (DLMF 16.13.E1);
+continuations are represented by analytic germs. -/
 @[dlmf 16.13.E1]
 def appF1 (a b b' c x y : ℂ) : ℂ :=
   ∑' p : ℕ × ℕ,appF1Coeff a b b' c p.1 p.2*x^p.1*y^p.2
 
-/-- The totalized double series; continuations are represented by analytic germs. -/
+/-- Appell's F₂ as the totalized double series `∑ₘₙ cₘₙ xᵐ yⁿ` (DLMF 16.13.E2);
+continuations are represented by analytic germs. -/
 @[dlmf 16.13.E2]
 def appF2 (a b b' c c' x y : ℂ) : ℂ :=
   ∑' p : ℕ × ℕ,appF2Coeff a b b' c c' p.1 p.2*x^p.1*y^p.2
 
-/-- The totalized double series; continuations are represented by analytic germs. -/
+/-- Appell's F₃ as the totalized double series `∑ₘₙ cₘₙ xᵐ yⁿ` (DLMF 16.13.E3);
+continuations are represented by analytic germs. -/
 @[dlmf 16.13.E3]
 def appF3 (a a' b b' c x y : ℂ) : ℂ :=
   ∑' p : ℕ × ℕ,appF3Coeff a a' b b' c p.1 p.2*x^p.1*y^p.2
@@ -556,7 +562,35 @@ lemma ghaR4_choose_fact {A B : ℕ} : ((A + B) ! : ℝ) ≤ 2 ^ (A + B) * (A ! *
         rw [← h]; push_cast; ring
     _ ≤ _ := by gcongr
 
-/-- Gamma bound for the Horn G3 pair. -/
+/-- The mixed case of `ghaR4_gamma_G3_bound`: a forward Gamma factor at shift
+`k = (j+1) + N` and a backward one at shift `j+1 ≤ N` multiply to at most
+`C₁ C₂ σ^{4N} 4^N N!`. -/
+private lemma ghaR4_gamma_mixed_bound {σ C1 C2 : ℝ} (hσ : 1 < σ) (hC1 : 0 ≤ C1)
+    (hC2 : 0 ≤ C2) {x y : ℂ} {k j N : ℕ} (hkN : k = (j + 1) + N) (hjN : j + 1 ≤ N)
+    (hx : ‖x‖ ≤ C1 * σ ^ k * k !) (hy : ‖y‖ * (j + 1) ! ≤ C2 * σ ^ (j + 1)) :
+    ‖x‖ * ‖y‖ ≤ C1 * C2 * σ ^ (4 * N) * 4 ^ N * N ! := by
+  have hσ0 : 0 ≤ σ := by linarith
+  have hf : ((k ! : ℕ) : ℝ) ≤ 2 ^ k * ((j + 1) ! * N !) := by
+    rw [hkN]; exact ghaR4_choose_fact
+  have hj0 : (0 : ℝ) < (j + 1) ! := by exact_mod_cast (j + 1).factorial_pos
+  have hy' : ‖y‖ ≤ C2 * σ ^ (j + 1) / (j + 1) ! := by rw [le_div_iff₀ hj0]; exact hy
+  calc ‖x‖ * ‖y‖ ≤ (C1 * σ ^ k * k !) * (C2 * σ ^ (j + 1) / (j + 1) !) :=
+        mul_le_mul hx hy' (norm_nonneg _) (by positivity)
+    _ ≤ (C1 * σ ^ k * (2 ^ k * ((j + 1) ! * N !))) * (C2 * σ ^ (j + 1) / (j + 1) !) := by
+        gcongr
+    _ = C1 * C2 * σ ^ (k + (j + 1)) * 2 ^ k * N ! := by
+        rw [pow_add]; field_simp; ring
+    _ ≤ C1 * C2 * σ ^ (4 * N) * 2 ^ (2 * N) * N ! := by
+        have hs := pow_le_pow_right₀ hσ.le (show k + (j + 1) ≤ 4 * N by omega)
+        have h2' := pow_le_pow_right₀ (show (1 : ℝ) ≤ 2 by norm_num)
+          (show k ≤ 2 * N by omega)
+        have h0 : 0 ≤ C1 * C2 := by positivity
+        have := mul_le_mul (mul_le_mul_of_nonneg_left hs h0) h2' (by positivity) (by positivity)
+        exact mul_le_mul_of_nonneg_right this (by positivity)
+    _ = _ := by rw [show (2:ℝ) ^ (2 * N) = 4 ^ N by rw [pow_mul]; norm_num]
+
+/-- Gamma bound for the Horn G3 pair:
+`|Γ(a+2n-m) Γ(a'+2m-n)| ≤ C σ^{4(m+n)} 4^{m+n} (m+n)!` for non-integral `a, a'`. -/
 lemma ghaR4_gamma_G3_bound {a a' : ℂ} (ha : ∀ k : ℤ, a ≠ k) (ha' : ∀ k : ℤ, a' ≠ k)
     {σ : ℝ} (hσ : 1 < σ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ m n : ℕ,
       ‖Gamma (a + 2 * n - m) * Gamma (a' + 2 * m - n)‖ ≤
@@ -565,22 +599,23 @@ lemma ghaR4_gamma_G3_bound {a a' : ℂ} (ha : ∀ k : ℤ, a ≠ k) (ha' : ∀ k
   obtain ⟨C2, hC2, h2⟩ := ghaR4_gamma_int_bound ha' hσ
   refine ⟨C1 * C2, by positivity, fun m n => ?_⟩
   have hσ0 : 0 ≤ σ := by linarith
-  have hσ1 : ∀ i j : ℕ, i ≤ j → σ ^ i ≤ σ ^ j := fun i j h => pow_le_pow_right₀ hσ.le h
-  have h4 : ∀ i j : ℕ, i ≤ j → (2 : ℝ) ^ i ≤ 2 ^ j := fun i j h => pow_le_pow_right₀ (by norm_num) h
   have h41 : (1 : ℝ) ≤ 4 ^ (m + n) := one_le_pow₀ (by norm_num)
   have hfN : (0 : ℝ) < (m + n) ! := by exact_mod_cast (m + n).factorial_pos
   rw [norm_mul]
   rcases le_or_gt m (2 * n) with hm | hm
-  · rcases le_or_gt n (2 * m) with hn | hn
+  · obtain ⟨k, hk⟩ := Nat.exists_eq_add_of_le hm
+    have e1 : a + 2 * (n : ℂ) - m = a + k := by
+      have : (2 * n : ℕ) = m + k := hk
+      rw [show (2 : ℂ) * n = ((2 * n : ℕ) : ℂ) by push_cast; ring, this]; push_cast; ring
+    rw [e1]
+    rcases le_or_gt n (2 * m) with hn | hn
     · -- both arguments are a shift by a natural number
-      obtain ⟨k, hk⟩ := Nat.exists_eq_add_of_le hm
       obtain ⟨l, hl⟩ := Nat.exists_eq_add_of_le hn
-      have e1 : a + 2 * (n : ℂ) - m = a + k := by
-        have : (2 * n : ℕ) = m + k := hk; rw [show (2 : ℂ) * n = ((2 * n : ℕ) : ℂ) by push_cast; ring, this]; push_cast; ring
       have e2 : a' + 2 * (m : ℂ) - n = a' + l := by
-        have : (2 * m : ℕ) = n + l := hl; rw [show (2 : ℂ) * m = ((2 * m : ℕ) : ℂ) by push_cast; ring, this]; push_cast; ring
+        have : (2 * m : ℕ) = n + l := hl
+        rw [show (2 : ℂ) * m = ((2 * m : ℕ) : ℂ) by push_cast; ring, this]; push_cast; ring
       have hkl : k + l = m + n := by omega
-      rw [e1, e2]
+      rw [e2]
       have hf : ((k ! : ℕ) : ℝ) * l ! ≤ (m + n) ! := by
         rw [← hkl]; exact_mod_cast Nat.le_of_dvd (Nat.factorial_pos _)
           (Nat.factorial_mul_factorial_dvd_factorial_add k l)
@@ -588,7 +623,7 @@ lemma ghaR4_gamma_G3_bound {a a' : ℂ} (ha : ∀ k : ℤ, a ≠ k) (ha' : ∀ k
             mul_le_mul (h1 k).1 (h2 l).1 (norm_nonneg _) (by positivity)
         _ = C1 * C2 * σ ^ (k + l) * (k ! * l !) := by rw [pow_add]; ring
         _ ≤ C1 * C2 * σ ^ (4 * (m + n)) * (m + n) ! := by
-            have hs := hσ1 (k + l) (4 * (m + n)) (by omega)
+            have hs := pow_le_pow_right₀ hσ.le (show k + l ≤ 4 * (m + n) by omega)
             have h0 : 0 ≤ C1 * C2 := by positivity
             exact mul_le_mul (mul_le_mul_of_nonneg_left hs h0) hf (by positivity) (by positivity)
         _ ≤ _ := by
@@ -596,63 +631,20 @@ lemma ghaR4_gamma_G3_bound {a a' : ℂ} (ha : ∀ k : ℤ, a ≠ k) (ha' : ∀ k
             nlinarith
     · -- `2m < n`: the first argument is a forward shift, the second a backward one
       obtain ⟨j, hj⟩ := Nat.exists_eq_add_of_lt hn
-      -- n = 2m + j + 1; first argument a + (2n - m), second a' - (j+1)
-      obtain ⟨k, hk⟩ := Nat.exists_eq_add_of_le hm
-      have e1 : a + 2 * (n : ℂ) - m = a + k := by
-        have : (2 * n : ℕ) = m + k := hk; rw [show (2 : ℂ) * n = ((2 * n : ℕ) : ℂ) by push_cast; ring, this]; push_cast; ring
       have e2 : a' + 2 * (m : ℂ) - n = a' - ((j + 1 : ℕ) : ℂ) := by
         rw [hj]; push_cast; ring
-      rw [e1, e2]
-      have hkN : k = (j + 1) + (m + n) := by omega
-      have hf : ((k ! : ℕ) : ℝ) ≤ 2 ^ k * ((j + 1) ! * (m + n) !) := by
-        rw [hkN]; exact ghaR4_choose_fact
-      have hj0 : (0 : ℝ) < (j + 1) ! := by exact_mod_cast (j + 1).factorial_pos
-      have hb2 := (h2 (j + 1)).2
-      have hb2' : ‖Gamma (a' - ((j + 1 : ℕ) : ℂ))‖ ≤ C2 * σ ^ (j + 1) / (j + 1) ! := by
-        rw [le_div_iff₀ hj0]; exact hb2
-      calc ‖Gamma (a + k)‖ * ‖Gamma (a' - ((j + 1 : ℕ) : ℂ))‖
-          ≤ (C1 * σ ^ k * k !) * (C2 * σ ^ (j + 1) / (j + 1) !) :=
-            mul_le_mul (h1 k).1 hb2' (norm_nonneg _) (by positivity)
-        _ ≤ (C1 * σ ^ k * (2 ^ k * ((j + 1) ! * (m + n) !))) * (C2 * σ ^ (j + 1) / (j + 1) !) := by
-            gcongr
-        _ = C1 * C2 * σ ^ (k + (j + 1)) * 2 ^ k * (m + n) ! := by
-            rw [pow_add]; field_simp; ring
-        _ ≤ C1 * C2 * σ ^ (4 * (m + n)) * 2 ^ (2 * (m + n)) * (m + n) ! := by
-            have hs := hσ1 (k + (j + 1)) (4 * (m + n)) (by omega)
-            have h2' := h4 k (2 * (m + n)) (by omega)
-            have h0 : 0 ≤ C1 * C2 := by positivity
-            have := mul_le_mul (mul_le_mul_of_nonneg_left hs h0) h2' (by positivity) (by positivity)
-            exact mul_le_mul_of_nonneg_right this (by positivity)
-        _ = _ := by rw [show (2:ℝ) ^ (2 * (m + n)) = 4 ^ (m + n) by rw [pow_mul]; norm_num]
+      rw [e2]
+      exact ghaR4_gamma_mixed_bound hσ hC1 hC2 (by omega) (by omega) (h1 k).1 (h2 (j + 1)).2
   · -- `2n < m`
     obtain ⟨j, hj⟩ := Nat.exists_eq_add_of_lt hm
-    have hn : n ≤ 2 * m := by omega
-    obtain ⟨l, hl⟩ := Nat.exists_eq_add_of_le hn
+    obtain ⟨l, hl⟩ := Nat.exists_eq_add_of_le (show n ≤ 2 * m by omega)
     have e1 : a + 2 * (n : ℂ) - m = a - ((j + 1 : ℕ) : ℂ) := by
       rw [hj]; push_cast; ring
     have e2 : a' + 2 * (m : ℂ) - n = a' + l := by
-      have : (2 * m : ℕ) = n + l := hl; rw [show (2 : ℂ) * m = ((2 * m : ℕ) : ℂ) by push_cast; ring, this]; push_cast; ring
-    rw [e1, e2]
-    have hlN : l = (j + 1) + (m + n) := by omega
-    have hf : ((l ! : ℕ) : ℝ) ≤ 2 ^ l * ((j + 1) ! * (m + n) !) := by
-      rw [hlN]; exact ghaR4_choose_fact
-    have hj0 : (0 : ℝ) < (j + 1) ! := by exact_mod_cast (j + 1).factorial_pos
-    have hb1' : ‖Gamma (a - ((j + 1 : ℕ) : ℂ))‖ ≤ C1 * σ ^ (j + 1) / (j + 1) ! := by
-      rw [le_div_iff₀ hj0]; exact (h1 (j + 1)).2
-    calc ‖Gamma (a - ((j + 1 : ℕ) : ℂ))‖ * ‖Gamma (a' + l)‖
-        ≤ (C1 * σ ^ (j + 1) / (j + 1) !) * (C2 * σ ^ l * l !) :=
-          mul_le_mul hb1' (h2 l).1 (norm_nonneg _) (by positivity)
-      _ ≤ (C1 * σ ^ (j + 1) / (j + 1) !) * (C2 * σ ^ l * (2 ^ l * ((j + 1) ! * (m + n) !))) := by
-          gcongr
-      _ = C1 * C2 * σ ^ (l + (j + 1)) * 2 ^ l * (m + n) ! := by
-          rw [pow_add]; field_simp; ring
-      _ ≤ C1 * C2 * σ ^ (4 * (m + n)) * 2 ^ (2 * (m + n)) * (m + n) ! := by
-          have hs := hσ1 (l + (j + 1)) (4 * (m + n)) (by omega)
-          have h2' := h4 l (2 * (m + n)) (by omega)
-          have h0 : 0 ≤ C1 * C2 := by positivity
-          have := mul_le_mul (mul_le_mul_of_nonneg_left hs h0) h2' (by positivity) (by positivity)
-          exact mul_le_mul_of_nonneg_right this (by positivity)
-      _ = _ := by rw [show (2:ℝ) ^ (2 * (m + n)) = 4 ^ (m + n) by rw [pow_mul]; norm_num]
+      have : (2 * m : ℕ) = n + l := hl
+      rw [show (2 : ℂ) * m = ((2 * m : ℕ) : ℂ) by push_cast; ring, this]; push_cast; ring
+    rw [e1, e2, mul_comm ‖Gamma (a - _)‖, mul_comm C1 C2]
+    exact ghaR4_gamma_mixed_bound hσ hC2 hC1 (by omega) (by omega) (h2 l).1 (h1 (j + 1)).2
 
 /-- 16.14.E6: hornG3 summable. -/
 @[dlmf 16.14.E6]
@@ -1145,6 +1137,33 @@ theorem appF1_euler_analytic (a b b' c : ℂ) (ha : 0<a.re) (hca : 0<(c-a).re) :
     (differentiableOn_const _).mul hd
   exact this.analyticOnNhd_of_finiteDimensional hU
 
+/-- For `u ∈ (0, 1]` and `‖x‖, ‖y‖ < 1`, the product of the binomial series of
+`(1 - u x)^{-b}` and `(1 - u y)^{-b'}`, as a double series in `u^{m+n}`. -/
+private lemma appF1_hasSum_binom_prod (b b' : ℂ) {x y : ℂ} (hx : ‖x‖ < 1) (hy : ‖y‖ < 1)
+    {u : ℝ} (hu : u ∈ Ioc (0:ℝ) 1) :
+    HasSum (fun q : ℕ × ℕ => poch b q.1 / q.1 ! * x ^ q.1 * (poch b' q.2 / q.2 ! * y ^ q.2) *
+      (u:ℂ) ^ (q.1 + q.2)) (((1 - (u:ℂ) * x) ^ b)⁻¹ * ((1 - (u:ℂ) * y) ^ b')⁻¹) := by
+  have hu' : u ∈ Icc (0:ℝ) 1 := Ioc_subset_Icc_self hu
+  have h1 := hasSum_one_sub_mul_cpow (a := b) hu' hx
+  have h2 := hasSum_one_sub_mul_cpow (a := b') hu' hy
+  have hs : Summable fun q : ℕ × ℕ => (poch b q.1 / q.1 ! * (x * u) ^ q.1) *
+      (poch b' q.2 / q.2 ! * (y * u) ^ q.2) := by
+    refine Summable.of_norm ?_
+    have hux : ‖x * u‖ < 1 := by
+      rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hu.1]
+      nlinarith [norm_nonneg x, hu.2]
+    have huy : ‖y * u‖ < 1 := by
+      rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hu.1]
+      nlinarith [norm_nonneg y, hu.2]
+    have := (ghaR4_summable_norm_binom b hux).mul_of_nonneg (ghaR4_summable_norm_binom b' huy)
+      (fun _ => norm_nonneg _) (fun _ => norm_nonneg _)
+    exact this.congr fun q => by simp only [norm_mul]
+  have := h1.mul h2 hs
+  rw [cpow_neg, cpow_neg, mul_comm x, mul_comm y] at this
+  refine this.congr_fun fun q => ?_
+  rw [pow_add, mul_pow, mul_pow]
+  ring
+
 /-- 16.15.E1: appF1 euler germ. -/
 @[dlmf 16.15.E1]
 theorem appF1_euler_germ (a b b' c : ℂ) (ha : 0<a.re) (hca : 0<(c-a).re) :
@@ -1180,27 +1199,7 @@ theorem appF1_euler_germ (a b b' c : ℂ) (ha : 0<a.re) (hca : 0<(c-a).re) :
     (g := fun u => ((1 - (u:ℂ) * x) ^ b)⁻¹ * ((1 - (u:ℂ) * y) ^ b')⁻¹)
     (by
       filter_upwards [ae_restrict_mem measurableSet_Ioc] with u hu
-      have hu' : u ∈ Icc (0:ℝ) 1 := Ioc_subset_Icc_self hu
-      have h1 := hasSum_one_sub_mul_cpow (a := b) hu' hx
-      have h2 := hasSum_one_sub_mul_cpow (a := b') hu' hy
-      have hs : Summable fun q : ℕ × ℕ => (poch b q.1 / q.1 ! * (x * u) ^ q.1) *
-          (poch b' q.2 / q.2 ! * (y * u) ^ q.2) := by
-        refine Summable.of_norm ?_
-        have hux : ‖x * u‖ < 1 := by
-          rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hu.1]
-          nlinarith [norm_nonneg x, hu.2]
-        have huy : ‖y * u‖ < 1 := by
-          rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hu.1]
-          nlinarith [norm_nonneg y, hu.2]
-        have := (ghaR4_summable_norm_binom b hux).mul_of_nonneg (ghaR4_summable_norm_binom b' huy)
-          (fun _ => norm_nonneg _) (fun _ => norm_nonneg _)
-        exact this.congr fun q => by simp only [norm_mul]
-      have := h1.mul h2 hs
-      rw [cpow_neg, cpow_neg, mul_comm x, mul_comm y] at this
-      refine this.congr_fun fun q => ?_
-      simp only [hddef]
-      rw [pow_add, mul_pow, mul_pow]
-      ring)
+      exact appF1_hasSum_binom_prod b b' hx hy hu)
   have hsum := hasSum_appF1 a b b' c hc (x := x) (y := y) ⟨hx, hy⟩
   refine hsum.unique ?_
   unfold appF1Euler
@@ -1222,14 +1221,7 @@ theorem appF1_euler_germ (a b b' c : ℂ) (ha : 0<a.re) (hca : 0<(c-a).re) :
     push_cast
     ring
   rw [hbeta]
-  have hE := euler_term_eq_gaussHGCoeff (a := 1) (b := a) (c := c) (m + n) ha hca
-  have hf : ((m + n) ! : ℂ) ≠ 0 := by exact_mod_cast (m + n).factorial_ne_zero
-  have hB : Gamma c / (Gamma a * Gamma (c - a)) * betaIntegral (a + (m + n : ℕ)) (c - a) =
-      poch a (m + n) / poch c (m + n) := by
-    rw [poch_nat_one, div_self hf, one_mul] at hE
-    rw [hE, gaussHGCoeff, poch_nat_one]
-    have hpc := poch_ne_zero_of_not_neg_nat hc (m + n)
-    field_simp
+  have hB := ghaR4_gamma_beta ha hca (m + n)
   calc appF1Coeff a b b' c m n * x ^ m * y ^ n
       = (Gamma c / (Gamma a * Gamma (c - a)) * betaIntegral (a + (m + n : ℕ)) (c - a)) *
           (poch b m / m ! * x ^ m * (poch b' n / n ! * y ^ n)) := by
@@ -1307,6 +1299,24 @@ theorem appF2_euler_analytic (a b b' c c' : ℂ) (hb : 0<b.re) (hb' : 0<b'.re) (
       {p | appellSquareSlit p} := (differentiableOn_const _).mul hd
   exact this.analyticOnNhd_of_finiteDimensional hU
 
+/-- For `z ∈ [0, 1]²` and `‖x‖ + ‖y‖ < 1`, the double binomial series of
+`(1 - z₁ x - z₂ y)^{-a}` in the monomials `z₁^m z₂^n`. -/
+private lemma appF2_hasSum_binom2_mul (a : ℂ) {x y : ℂ} (hp : ‖x‖ + ‖y‖ < 1) {z : ℝ × ℝ}
+    (hz : z ∈ Icc (0:ℝ) 1 ×ˢ Icc (0:ℝ) 1) :
+    HasSum (fun q : ℕ × ℕ => poch a (q.1 + q.2) / (q.1 ! * q.2 ! : ℂ) * x ^ q.1 * y ^ q.2 *
+      ((z.1:ℂ) ^ q.1 * (z.2:ℂ) ^ q.2)) (((1 - (z.1:ℂ) * x - (z.2:ℂ) * y) ^ a)⁻¹) := by
+  have hz1 : ‖x * z.1‖ ≤ ‖x‖ := by
+    rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hz.1.1]
+    nlinarith [norm_nonneg x, hz.1.2]
+  have hz2 : ‖y * z.2‖ ≤ ‖y‖ := by
+    rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hz.2.1]
+    nlinarith [norm_nonneg y, hz.2.2]
+  have h := (ghaR4_hasSum_binom2 a (s := x * z.1) (t := y * z.2) (by linarith)).1
+  rw [cpow_neg, mul_comm x, mul_comm y] at h
+  refine h.congr_fun fun q => ?_
+  rw [mul_pow, mul_pow]
+  ring
+
 /-- 16.15.E2: appF2 euler germ. -/
 @[dlmf 16.15.E2]
 theorem appF2_euler_germ (a b b' c c' : ℂ) (hb : 0<b.re) (hb' : 0<b'.re) (hcb : b.re<c.re) (hcb' : b'.re<c'.re) :
@@ -1352,18 +1362,7 @@ theorem appF2_euler_germ (a b b' c c' : ℂ) (hb : 0<b.re) (hb' : 0<b'.re) (hcb 
     (g := fun z => ((1 - (z.1:ℂ) * x - (z.2:ℂ) * y) ^ a)⁻¹)
     (by
       filter_upwards [ae_restrict_mem hsq] with z hz
-      have hz1 : ‖x * z.1‖ ≤ ‖x‖ := by
-        rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hz.1.1]
-        nlinarith [norm_nonneg x, hz.1.2]
-      have hz2 : ‖y * z.2‖ ≤ ‖y‖ := by
-        rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hz.2.1]
-        nlinarith [norm_nonneg y, hz.2.2]
-      have h := (ghaR4_hasSum_binom2 a (s := x * z.1) (t := y * z.2) (by linarith)).1
-      rw [cpow_neg, mul_comm x, mul_comm y] at h
-      refine h.congr_fun fun q => ?_
-      simp only [hddef]
-      rw [mul_pow, mul_pow]
-      ring)
+      exact appF2_hasSum_binom2_mul a hp hz)
   have hsum := hasSum_appF2 a b b' c c' hc hc' (x := x) (y := y) hp
   refine hsum.unique ?_
   unfold appF2Euler
@@ -1622,6 +1621,73 @@ lemma ghaR4_appF4Coeff_geom (a b c c' : ℂ) (hc : AppellRegular c) (hc' : Appel
           rw [← pow_add, show (8:ℝ) = 2 ^ 3 by norm_num, ← pow_mul, ← pow_mul, mul_comm]
         rw [this]; ring
 
+/-- Summing the four-index family `appF4Fam` over its last two indices gives the `(m, n)`
+term `c_{mn} (X(1-Y))ᵐ (Y(1-X))ⁿ` of the `F₄` double series. -/
+private lemma ghaR4_appF4Fam_hasSum_fst (a b c c' X Y : ℂ) (p : ℕ × ℕ) :
+    HasSum (fun q => appF4Fam a b c c' X Y (p, q))
+      (appF4Coeff a b c c' p.1 p.2 * (X * (1 - Y)) ^ p.1 * (Y * (1 - X)) ^ p.2) := by
+  obtain ⟨m, n⟩ := p
+  have hfin := hasSum_sum_of_ne_finset_zero (L := SummationFilter.unconditional _)
+    (s := Finset.range (m + n + 1) ×ˢ Finset.range (m + n + 1))
+    (f := fun q => appF4Fam a b c c' X Y ((m, n), q)) (fun q hq => by
+      obtain ⟨M, N⟩ := q
+      simp only [Finset.mem_product, Finset.mem_range, not_and_or, not_lt] at hq
+      unfold appF4Fam
+      simp only
+      rcases hq with h | h
+      · rw [appF4E_eq_zero_of_lt (by omega)]; simp
+      · rw [appF4E_eq_zero_of_lt (m := n) (n := m) (by omega)]; simp)
+  convert hfin using 1
+  rw [Finset.sum_product]
+  simp only [appF4Fam]
+  have h1 := appF4E_sum m n X
+  have h2 := appF4E_sum n m Y
+  rw [show n + m + 1 = m + n + 1 by ring] at h2
+  have : ∑ x ∈ Finset.range (m + n + 1), ∑ y ∈ Finset.range (m + n + 1),
+      appF4Coeff a b c c' m n * (appF4E m n x * X ^ x) * (appF4E n m y * Y ^ y) =
+      appF4Coeff a b c c' m n * ((∑ x ∈ Finset.range (m + n + 1), appF4E m n x * X ^ x) *
+        (∑ y ∈ Finset.range (m + n + 1), appF4E n m y * Y ^ y)) := by
+    rw [Finset.sum_mul_sum, Finset.mul_sum]
+    refine Finset.sum_congr rfl fun x _ => ?_
+    rw [Finset.mul_sum]
+    exact Finset.sum_congr rfl fun y _ => by ring
+  rw [this, h1, h2]
+  simp only [mul_pow]
+  ring
+
+/-- Under `c + c' = a + b + 1`, summing `appF4Fam` over its first two indices gives the
+product of the `(M, N)` terms of `₂F₁(a,b;c;X)` and `₂F₁(a,b;c';Y)`. -/
+private lemma ghaR4_appF4Fam_hasSum_snd {a b c c' : ℂ} (hcc : c + c' = a + b + 1)
+    (hpc : ∀ k, poch c k ≠ 0) (hpc' : ∀ k, poch c' k ≠ 0) (X Y : ℂ) (q : ℕ × ℕ) :
+    HasSum (fun p => appF4Fam a b c c' X Y (p, q))
+      (gaussHGCoeff a b c q.1 * X ^ q.1 * (gaussHGCoeff a b c' q.2 * Y ^ q.2)) := by
+  obtain ⟨M, N⟩ := q
+  have hfin := hasSum_sum_of_ne_finset_zero (L := SummationFilter.unconditional _)
+    (s := Finset.range (M + 1) ×ˢ Finset.range (N + 1))
+    (f := fun p => appF4Fam a b c c' X Y (p, (M, N))) (fun p hp => by
+      obtain ⟨m, n⟩ := p
+      simp only [Finset.mem_product, Finset.mem_range, not_and_or, not_lt] at hp
+      unfold appF4Fam appF4E
+      simp only
+      rcases hp with h | h
+      · rw [ite_eq_right_of_eq_false _ _ (eq_false (by omega))]; simp
+      · rw [ite_eq_right_of_eq_false (c := n ≤ N) _ _ (eq_false (by omega))]; simp)
+  convert hfin using 1
+  rw [Finset.sum_product]
+  simp only
+  rw [show gaussHGCoeff a b c M * X ^ M * (gaussHGCoeff a b c' N * Y ^ N) =
+    (gaussHGCoeff a b c M * gaussHGCoeff a b c' N) * (X ^ M * Y ^ N) by ring,
+    ← appF4_coeff hcc hpc hpc' M N, Finset.sum_mul]
+  refine Finset.sum_congr rfl fun m hm => ?_
+  rw [Finset.sum_mul]
+  refine Finset.sum_congr rfl fun n hn => ?_
+  have hmM : m ≤ M := Nat.lt_succ_iff.mp (Finset.mem_range.mp hm)
+  have hnN : n ≤ N := Nat.lt_succ_iff.mp (Finset.mem_range.mp hn)
+  unfold appF4Fam appF4Term appF4E
+  simp only
+  rw [ite_eq_left_of_eq_true _ _ (eq_true hmM), ite_eq_left_of_eq_true _ _ (eq_true hnN)]
+  ring
+
 /-- Bailey's product formula at all regular lower parameters (stronger than `appF4_bailey`,
 which assumes positive real parts). The proof is that of `appF4_bailey` in
 `DLMF.Hypergeometric.AppellF4`, with its coefficient bound replaced by `ghaR4_appF4Coeff_geom`. -/
@@ -1676,65 +1742,9 @@ lemma ghaR4_appF4_bailey {a b c c' : ℂ} (hcc : c + c' = a + b + 1) (hc : Appel
           gcongr
       _ = _ := by rw [hrX, hrY]; simp only [mul_pow]; ring
   have hS := hsum.hasSum
-  have hfib1 : ∀ p : ℕ × ℕ, HasSum (fun q => appF4Fam a b c c' X Y (p, q))
-      (appF4Coeff a b c c' p.1 p.2 * (X * (1 - Y)) ^ p.1 * (Y * (1 - X)) ^ p.2) := by
-    rintro ⟨m, n⟩
-    have hfin := hasSum_sum_of_ne_finset_zero (L := SummationFilter.unconditional _)
-      (s := Finset.range (m + n + 1) ×ˢ Finset.range (m + n + 1))
-      (f := fun q => appF4Fam a b c c' X Y ((m, n), q)) (fun q hq => by
-        obtain ⟨M, N⟩ := q
-        simp only [Finset.mem_product, Finset.mem_range, not_and_or, not_lt] at hq
-        unfold appF4Fam
-        simp only
-        rcases hq with h | h
-        · rw [appF4E_eq_zero_of_lt (by omega)]; simp
-        · rw [appF4E_eq_zero_of_lt (m := n) (n := m) (by omega)]; simp)
-    convert hfin using 1
-    rw [Finset.sum_product]
-    simp only [appF4Fam]
-    have h1 := appF4E_sum m n X
-    have h2 := appF4E_sum n m Y
-    rw [show n + m + 1 = m + n + 1 by ring] at h2
-    have : ∑ x ∈ Finset.range (m + n + 1), ∑ y ∈ Finset.range (m + n + 1),
-        appF4Coeff a b c c' m n * (appF4E m n x * X ^ x) * (appF4E n m y * Y ^ y) =
-        appF4Coeff a b c c' m n * ((∑ x ∈ Finset.range (m + n + 1), appF4E m n x * X ^ x) *
-          (∑ y ∈ Finset.range (m + n + 1), appF4E n m y * Y ^ y)) := by
-      rw [Finset.sum_mul_sum, Finset.mul_sum]
-      refine Finset.sum_congr rfl fun x _ => ?_
-      rw [Finset.mul_sum]
-      exact Finset.sum_congr rfl fun y _ => by ring
-    rw [this, h1, h2]
-    simp only [mul_pow]
-    ring
+  have hfib1 := ghaR4_appF4Fam_hasSum_fst a b c c' X Y
   have hF4 := hS.prod_fiberwise hfib1
-  have hfib2 : ∀ q : ℕ × ℕ, HasSum (fun p => appF4Fam a b c c' X Y (p, q))
-      (gaussHGCoeff a b c q.1 * X ^ q.1 * (gaussHGCoeff a b c' q.2 * Y ^ q.2)) := by
-    rintro ⟨M, N⟩
-    have hfin := hasSum_sum_of_ne_finset_zero (L := SummationFilter.unconditional _)
-      (s := Finset.range (M + 1) ×ˢ Finset.range (N + 1))
-      (f := fun p => appF4Fam a b c c' X Y (p, (M, N))) (fun p hp => by
-        obtain ⟨m, n⟩ := p
-        simp only [Finset.mem_product, Finset.mem_range, not_and_or, not_lt] at hp
-        unfold appF4Fam appF4E
-        simp only
-        rcases hp with h | h
-        · rw [ite_eq_right_of_eq_false _ _ (eq_false (by omega))]; simp
-        · rw [ite_eq_right_of_eq_false (c := n ≤ N) _ _ (eq_false (by omega))]; simp)
-    convert hfin using 1
-    rw [Finset.sum_product]
-    simp only
-    rw [show gaussHGCoeff a b c M * X ^ M * (gaussHGCoeff a b c' N * Y ^ N) =
-      (gaussHGCoeff a b c M * gaussHGCoeff a b c' N) * (X ^ M * Y ^ N) by ring,
-      ← appF4_coeff hcc hpc hpc' M N, Finset.sum_mul]
-    refine Finset.sum_congr rfl fun m hm => ?_
-    rw [Finset.sum_mul]
-    refine Finset.sum_congr rfl fun n hn => ?_
-    have hmM : m ≤ M := Nat.lt_succ_iff.mp (Finset.mem_range.mp hm)
-    have hnN : n ≤ N := Nat.lt_succ_iff.mp (Finset.mem_range.mp hn)
-    unfold appF4Fam appF4Term appF4E
-    simp only
-    rw [ite_eq_left_of_eq_true _ _ (eq_true hmM), ite_eq_left_of_eq_true _ _ (eq_true hnN)]
-    ring
+  have hfib2 := ghaR4_appF4Fam_hasSum_snd hcc hpc hpc' X Y
   have hS' : HasSum (fun x : (ℕ × ℕ) × (ℕ × ℕ) => appF4Fam a b c c' X Y (x.2, x.1))
       (∑' p, appF4Fam a b c c' X Y p) :=
     ((Equiv.prodComm (ℕ × ℕ) (ℕ × ℕ)).hasSum_iff (f := appF4Fam a b c c' X Y)).mpr hS

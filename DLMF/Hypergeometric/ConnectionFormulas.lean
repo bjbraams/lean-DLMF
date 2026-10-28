@@ -34,6 +34,7 @@ noncomputable section
 
 namespace DLMF.Hypergeometric
 
+/-- `1/2` is not an integer. -/
 theorem half_not_int : ∀ k : ℤ, (1 / 2 : ℂ) ≠ (k : ℂ) := by
   intro k h
   have h2 : (1 : ℝ) = 2 * k := by
@@ -42,12 +43,6 @@ theorem half_not_int : ∀ k : ℤ, (1 / 2 : ℂ) ≠ (k : ℂ) := by
     linarith
   have : (1 : ℤ) = 2 * k := by exact_mod_cast h2
   omega
-
-theorem neg_half_not_int : ∀ k : ℤ, (-1 / 2 : ℂ) ≠ (k : ℂ) := by
-  intro k h
-  apply half_not_int (-k)
-  push_cast
-  linear_combination -h
 
 @[dlmf 15.8.E24]
 theorem quadratic_connection_well_poised
@@ -393,7 +388,7 @@ theorem regularized_quadratic_connection_complementary (a c : ℂ) {z : ℂ}
     have hGc := Gamma_ne_zero hc
     have hGh := Gamma_ne_zero hhalf
     have hGt := Gamma_ne_zero hthree
-    field_simp [hGc, hGh, hGt] <;> ring
+    field_simp [hGc, hGh, hGt]
 
 @[dlmf 15.8.E27]
 theorem quadratic_even_connection
@@ -603,16 +598,50 @@ theorem hasSum_deriv_regularizedGaussHGFun_comp {A B C : ℂ → ℂ} (hA : Diff
     simpa only [coe_nnnorm] using
       norm_term_le_majorant hAw.le hBw.le hre hm (hV _ hVw).le (not_lt.mp hn)
 
+/-- Away from the poles, `(1/Γ)'(x) = -ψ(x)/Γ(x)`. -/
 theorem deriv_recip_Gamma_eq {x : ℂ} (hx : ∀ m : ℕ, x ≠ -(m : ℂ)) :
     deriv (fun y => (Gamma y)⁻¹) x = -(digamma x) * (Gamma x)⁻¹ := (hasDerivAt_recip_Gamma hx).deriv
 
+/-- At `x = -p`, `(1/Γ)'(-p) = (-1)^p p!`. -/
 theorem deriv_recip_Gamma_neg_nat (p : ℕ) :
     deriv (fun y => (Gamma y)⁻¹) (-(p : ℂ)) = (-1 : ℂ) ^ p * (p.factorial : ℂ) :=
   (hasDerivAt_recip_Gamma_neg_nat p).deriv
 
+/-- `1/Γ` is differentiable everywhere, with derivative `deriv (1/Γ)`. -/
 theorem hasDerivAt_recip_Gamma_any (x : ℂ) :
     HasDerivAt (fun y => (Gamma y)⁻¹) (deriv (fun y => (Gamma y)⁻¹) x) x :=
   (differentiable_one_div_Gamma x).hasDerivAt
+
+/-- `Γ(m + 1 + k) = (k + m)!`. -/
+theorem Gamma_natCast_add_one_add_natCast (m k : ℕ) :
+    Gamma ((m : ℂ) + 1 + k) = ((k + m).factorial : ℂ) := by
+  rw [show (m : ℂ) + 1 + k = ((k + m : ℕ) : ℂ) + 1 by push_cast; ring, Gamma_nat_eq_factorial]
+
+/-- `Γ(1 - m + (k + m)) = k!`. -/
+theorem Gamma_one_sub_natCast_add_natCast (m k : ℕ) :
+    Gamma (1 - (m : ℂ) + ((k + m : ℕ) : ℂ)) = (k.factorial : ℂ) := by
+  rw [show 1 - (m : ℂ) + ((k + m : ℕ) : ℂ) = (k : ℂ) + 1 by push_cast; ring, Gamma_nat_eq_factorial]
+
+/-- At `c = a + b + m`, the `c`-derivative of `sin(π(c - a - b))/π · 𝐅(a, b; c; z)` is
+`(-1)^m 𝐅(a, b; a + b + m; z)`; this is the left side in the limit `c - a - b → m`. -/
+theorem hasDerivAt_sin_mul_regularizedGaussHGFun_c {a b z : ℂ} (hz : ‖z‖ < 1) (m : ℕ) :
+    HasDerivAt (fun c => sin (Real.pi * (c - a - b)) / Real.pi * regularizedGaussHGFun a b c z)
+      ((-1) ^ m * regularizedGaussHGFun a b (a + b + m) z) (a + b + m) := by
+  have hπ : (Real.pi : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
+  have hRc := (analyticOnNhd_regularizedGaussHGFun_c a b hz (a + b + m)
+    (Set.mem_univ _)).differentiableAt
+  have hsin : HasDerivAt (fun c : ℂ => sin (Real.pi * (c - a - b)) / Real.pi)
+      (cos (Real.pi * (a + b + m - a - b)) * (Real.pi * 1) / Real.pi) (a + b + m) :=
+    ((((hasDerivAt_id _).sub_const a).sub_const b).const_mul (Real.pi : ℂ)).csin.div_const _
+  have hm1 : a + b + (m : ℂ) - a - b = m := by ring
+  have hL := hsin.mul hRc.hasDerivAt
+  have hcos : cos ((m : ℂ) * Real.pi) = (-1) ^ m := by
+    rw [show ((m : ℂ) * Real.pi) = ((m * Real.pi : ℝ) : ℂ) by push_cast; ring, ← ofReal_cos,
+      Real.cos_nat_mul_pi]
+    push_cast; ring
+  rw [hm1, mul_comm (Real.pi : ℂ) (m : ℂ), hcos, Complex.sin_nat_mul_pi, zero_div, zero_mul,
+    add_zero, mul_one, mul_div_cancel_right₀ _ hπ] at hL
+  exact hL
 
 @[dlmf 15.8.E10]
 theorem logarithmic_connection_one_sub {a b z : ℂ} (m : ℕ)
@@ -643,19 +672,8 @@ theorem logarithmic_connection_one_sub {a b z : ℂ} (m : ℕ)
     simp only [div_eq_mul_inv, mul_inv]
     ring
   -- derivative of the left side
-  have hπ : (Real.pi : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
-  have hRc := (analyticOnNhd_regularizedGaussHGFun_c a b hz c₀ (Set.mem_univ _)).differentiableAt
-  have hsin : HasDerivAt (fun c : ℂ => sin (Real.pi * (c - a - b)) / Real.pi)
-      (cos (Real.pi * (c₀ - a - b)) * (Real.pi * 1) / Real.pi) c₀ :=
-    ((((hasDerivAt_id c₀).sub_const a).sub_const b).const_mul (Real.pi : ℂ)).csin.div_const _
   have hm1 : c₀ - a - b = m := by rw [hc₀]; ring
-  have hL := hsin.mul hRc.hasDerivAt
-  have hcos : cos ((m : ℂ) * Real.pi) = (-1) ^ m := by
-    rw [show ((m : ℂ) * Real.pi) = ((m * Real.pi : ℝ) : ℂ) by push_cast; ring, ← ofReal_cos,
-      Real.cos_nat_mul_pi]
-    push_cast; ring
-  rw [hm1, mul_comm (Real.pi : ℂ) (m : ℂ), hcos, Complex.sin_nat_mul_pi, zero_div, zero_mul,
-    add_zero, mul_one, mul_div_cancel_right₀ _ hπ] at hL
+  have hL := hasDerivAt_sin_mul_regularizedGaussHGFun_c (a := a) (b := b) hz m
   have hwn : ‖w‖ < 1 := hw
   -- the first series and its derivative
   set S : ℂ → ℂ := fun c => regularizedGaussHGFun a b (a + b - c + 1) w with hSdef
@@ -767,12 +785,8 @@ theorem logarithmic_connection_one_sub {a b z : ℂ} (m : ℕ)
     rw [← regularizedGaussHGFun_eq_tsum] at h
     convert h using 1
     simp only [hQdef]; rw [hm1, e1, e2]
-  have hGk : ∀ k : ℕ, Gamma ((m : ℂ) + 1 + k) = ((k + m).factorial : ℂ) := by
-    intro k
-    rw [show (m : ℂ) + 1 + k = ((k + m : ℕ) : ℂ) + 1 by push_cast; ring, Gamma_nat_eq_factorial]
-  have hG1k : ∀ k : ℕ, Gamma (1 - (m : ℂ) + ((k + m : ℕ) : ℂ)) = (k.factorial : ℂ) := by
-    intro k
-    rw [show 1 - (m : ℂ) + ((k + m : ℕ) : ℂ) = (k : ℂ) + 1 by push_cast; ring, Gamma_nat_eq_factorial]
+  have hGk := Gamma_natCast_add_one_add_natCast m
+  have hG1k := Gamma_one_sub_natCast_add_natCast m
   have hsS_shift : ∀ k : ℕ, sS (k + m) = P * w ^ m * q k := by
     intro k
     simp only [hsS, hq, hPdef, hGk, hG1k]
@@ -997,6 +1011,8 @@ theorem regularized_connection_one_sub_recip' (a b c : ℂ) {z : ℂ} (hz : ‖z
   rw [← hfac]
   ring
 
+/-- If `x` is not an integer, then neither is `x - n`; in particular it is not a nonpositive
+  integer. -/
 theorem not_neg_nat_of_not_int_sub {x : ℂ} (hx : ∀ k : ℤ, x ≠ (k : ℂ)) (n : ℕ) :
     ∀ j : ℕ, x - n ≠ -(j : ℂ) := fun j h => hx (n - j) (by push_cast; linear_combination h)
 
@@ -1074,19 +1090,8 @@ theorem logarithmic_connection_one_sub_recip {a b z : ℂ} (m : ℕ)
     simp only [div_eq_mul_inv, mul_inv]
     ring
   set v := 1 - 1 / z with hvdef
-  have hπ : (Real.pi : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
-  have hRc := (analyticOnNhd_regularizedGaussHGFun_c a b hz c₀ (Set.mem_univ _)).differentiableAt
-  have hsin : HasDerivAt (fun c : ℂ => sin (Real.pi * (c - a - b)) / Real.pi)
-      (cos (Real.pi * (c₀ - a - b)) * (Real.pi * 1) / Real.pi) c₀ :=
-    ((((hasDerivAt_id c₀).sub_const a).sub_const b).const_mul (Real.pi : ℂ)).csin.div_const _
   have hm1 : c₀ - a - b = m := by rw [hc₀]; ring
-  have hL := hsin.mul hRc.hasDerivAt
-  have hcos : cos ((m : ℂ) * Real.pi) = (-1) ^ m := by
-    rw [show ((m : ℂ) * Real.pi) = ((m * Real.pi : ℝ) : ℂ) by push_cast; ring, ← ofReal_cos,
-      Real.cos_nat_mul_pi]
-    push_cast; ring
-  rw [hm1, mul_comm (Real.pi : ℂ) (m : ℂ), hcos, Complex.sin_nat_mul_pi, zero_div, zero_mul,
-    add_zero, mul_one, mul_div_cancel_right₀ _ hπ] at hL
+  have hL := hasDerivAt_sin_mul_regularizedGaussHGFun_c (a := a) (b := b) hz m
   have hvn : ‖v‖ < 1 := hw
   -- the first series
   set S : ℂ → ℂ := fun c => regularizedGaussHGFun a (a - c + 1) (a + b - c + 1) v with hSdef
@@ -1201,12 +1206,8 @@ theorem logarithmic_connection_one_sub_recip {a b z : ℂ} (m : ℕ)
     rw [← regularizedGaussHGFun_eq_tsum] at h
     convert h using 1
     simp only [hQdef]; rw [hm1, e2]
-  have hGk : ∀ k : ℕ, Gamma ((m : ℂ) + 1 + k) = ((k + m).factorial : ℂ) := by
-    intro k
-    rw [show (m : ℂ) + 1 + k = ((k + m : ℕ) : ℂ) + 1 by push_cast; ring, Gamma_nat_eq_factorial]
-  have hG1k : ∀ k : ℕ, Gamma (1 - (m : ℂ) + ((k + m : ℕ) : ℂ)) = (k.factorial : ℂ) := by
-    intro k
-    rw [show 1 - (m : ℂ) + ((k + m : ℕ) : ℂ) = (k : ℂ) + 1 by push_cast; ring, Gamma_nat_eq_factorial]
+  have hGk := Gamma_natCast_add_one_add_natCast m
+  have hG1k := Gamma_one_sub_natCast_add_natCast m
   have hβm : β + m = 1 - b := by rw [hβ]; ring
   have hsS_shift : ∀ k : ℕ, sS (k + m) = P * v ^ m * q k := by
     intro k

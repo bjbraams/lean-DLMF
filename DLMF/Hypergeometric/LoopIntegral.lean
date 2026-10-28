@@ -54,12 +54,14 @@ def hypergeometricLoop (a b c z : ℂ) (ρ : ℝ) : ℂ :=
 def loopLogIntegrand (a b c z : ℂ) (w : ℂ) : ℂ :=
   (1 + exp w) ^ (b - 1) * exp ((c - b - 1) * w) * (1 - z * (1 + exp w)) ^ (-a) * exp w
 
+/-- `(eˣ)^s = e^{s x}` for real `x`. -/
 theorem ofReal_exp_cpow (x : ℝ) (s : ℂ) : ((Real.exp x : ℝ) : ℂ) ^ s = exp (s * x) := by
   rw [cpow_def_of_ne_zero (by exact_mod_cast (Real.exp_pos x).ne'), ofReal_exp, log_exp]
   · ring
   · simp [Real.pi_pos]
   · simp [Real.pi_pos.le]
 
+/-- `ρ^s = e^{s log ρ}` for real `ρ > 0`. -/
 theorem ofReal_cpow_eq_exp_mul_log {ρ : ℝ} (hρ : 0 < ρ) (s : ℂ) :
     (ρ : ℂ) ^ s = exp (s * Real.log ρ) := by
   rw [← Real.exp_log hρ, ofReal_exp_cpow, Real.log_exp]
@@ -92,6 +94,7 @@ theorem differentiableAt_loopLogIntegrand (a b c z : ℂ) {w : ℂ} (hw : w.re <
   exact (((hA.cpow (differentiableAt_const _) h1).mul hC).mul
     (hB.cpow (differentiableAt_const _) h2)).mul differentiableAt_exp
 
+/-- If `‖z‖ |t| < 1`, then `1 - z t` lies in the slit plane. -/
 theorem one_sub_mul_ofReal_mem_slitPlane {z : ℂ} {t : ℝ} (h : ‖z‖ * |t| < 1) :
     1 - z * t ∈ slitPlane := by
   rw [mem_slitPlane_iff]; left
@@ -131,11 +134,13 @@ theorem continuousOn_loopSeg_rest (a b c z s : ℂ) {T : ℝ} (hT : T < 1) (hz :
   · exact ContinuousAt.cpow (by fun_prop) continuousAt_const (ofReal_mem_slitPlane.mpr h1)
   · exact ContinuousAt.cpow (by fun_prop) continuousAt_const (one_sub_mul_ofReal_mem_slitPlane h2)
 
+/-- Regrouping of the segment integrand of the loop integral. -/
 theorem loopSegIntegrand_eq (a b c z s : ℂ) (t : ℝ) :
     loopSegIntegrand a b c z s t = (t : ℂ) ^ (b - 1) *
       (((1 - t : ℝ) : ℂ) ^ (c - b - 1) * exp (s * π * I * (c - b - 1)) * (1 - z * t) ^ (-a)) := by
   unfold loopSegIntegrand; ring
 
+/-- For `Re b > 0`, `T < 1` and `‖z‖ |T| < 1`, the segment integrand is integrable on `[0, T]`. -/
 theorem intervalIntegrable_loopSegIntegrand (a b c z s : ℂ) (hb : 0 < b.re) {T : ℝ}
     (hT : T < 1) (hz : ‖z‖ * |T| < 1) (hz1 : ‖z‖ < 1) :
     IntervalIntegrable (loopSegIntegrand a b c z s) volume 0 T := by
@@ -275,6 +280,7 @@ theorem hypergeometricLoop_eq (a b c z : ℂ) (hb : 0 < b.re) {ρ₁ ρ₂ : ℝ
   unfold hypergeometricLoop
   linear_combination -h1 + h2 - hrect
 
+/-- For `w ≠ 0`, `‖w^s‖ ≤ ‖w‖^{Re s} e^{π |Im s|}`. -/
 theorem norm_cpow_le_rpow_mul_exp {w : ℂ} (hw : w ≠ 0) (s : ℂ) :
     ‖w ^ s‖ ≤ ‖w‖ ^ s.re * Real.exp (π * |s.im|) := by
   rw [norm_cpow_of_ne_zero hw, div_eq_mul_inv, ← Real.exp_neg]
@@ -283,6 +289,7 @@ theorem norm_cpow_le_rpow_mul_exp {w : ℂ} (hw : w ≠ 0) (s : ℂ) :
   have h2 : |arg w * s.im| ≤ π * |s.im| := by rw [abs_mul]; gcongr
   linarith [neg_abs_le (arg w * s.im)]
 
+/-- For `0 < m ≤ r ≤ M`, `r^τ ≤ m^τ + M^τ` for every real `τ`. -/
 theorem rpow_le_add_rpow {m M r : ℝ} (hm : 0 < m) (hr : m ≤ r) (hrM : r ≤ M) (τ : ℝ) :
     r ^ τ ≤ m ^ τ + M ^ τ := by
   have hr0 : 0 < r := by linarith
@@ -566,6 +573,7 @@ theorem differentiable_hypergeometricLoop (a b z : ℂ) (hb : 0 < b.re) {ρ : �
   unfold hypergeometricLoop
   exact ((hseg (-1)).add hcirc).sub (hseg 1)
 
+/-- `e^{-πi(x - 1)} - e^{πi(x - 1)} = 2i sin(πx)`. -/
 theorem exp_neg_sub_exp_loop (x : ℂ) :
     exp (-1 * π * I * (x - 1)) - exp (1 * π * I * (x - 1)) = 2 * I * sin (π * x) := by
   have h1 : exp (-1 * π * I * (x - 1)) = -exp (-(π * x * I)) := by

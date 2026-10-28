@@ -62,6 +62,8 @@ theorem airyMod_integrableOn_exp (a : ℝ) :
           mul_le_mul_of_nonneg_right (Real.exp_le_exp.mpr key) (by positivity)
       _ = _ := by rw [sub_eq_add_neg, Real.exp_add]; ring
 
+/-- The closed form `12^{(k+1/2)/3} Γ((k+1/2)/3)/3` of the moment
+`∫₀^∞ t^{k-1/2} e^{-t³/12} dt`. -/
 noncomputable def airyMod_I (k : ℕ) : ℝ :=
   (1 / 12 : ℝ) ^ (-((k : ℝ) + 1 / 2) / 3) * (1 / 3) * Real.Gamma (((k : ℝ) + 1 / 2) / 3)
 
@@ -212,6 +214,27 @@ theorem airyMod_integrableOn_exp_pow (a : ℝ) (m : ℕ) :
       _ = m ! * (Real.exp ((a + 1) * t) * (Real.exp (-(t ^ 3 / 12)) * t ^ (-(1 / 2) : ℝ))) := by
           rw [add_mul, one_mul, Real.exp_add]; ring
 
+/-- The `k`-th term of the termwise integration: `∫₀^∞ (zt)^k/k! e^{-t³/12} t^{m-1/2} dt`
+equals `z^k/k! · I_{k+m}`. -/
+private lemma airyMod_integral_term (m k : ℕ) (z : ℂ) :
+    ∫ t : ℝ in Ioi 0, (z * t) ^ k / k ! *
+      (exp (-((t : ℂ) ^ 3 / 12)) * ((t : ℂ) ^ m * (t : ℂ) ^ (-1 / 2 : ℂ))) =
+      z ^ k / k ! * (airyMod_I (k + m) : ℂ) := by
+  have hI := (airyMod_integral_I (k + m)).2
+  rw [← hI, ← integral_complex_ofReal, ← integral_const_mul]
+  refine setIntegral_congr_fun measurableSet_Ioi fun t (ht : 0 < t) => ?_
+  have e1 : t ^ (3 : ℝ) = t ^ 3 := by norm_cast
+  have e2 : ((t ^ (1 / 2 : ℝ) : ℝ) : ℂ) = (t : ℂ) ^ (1 / 2 : ℂ) := by
+    rw [ofReal_cpow ht.le]; push_cast; ring_nf
+  have e3 : (t : ℂ) ^ (-1 / 2 : ℂ) = ((t : ℂ) ^ (1 / 2 : ℂ))⁻¹ := by
+    rw [← cpow_neg]; ring_nf
+  have e4 : (t : ℂ) ^ (1 / 2 : ℂ) ≠ 0 := by
+    rw [Ne, cpow_eq_zero_iff]; simp [ht.ne']
+  rw [Real.rpow_sub ht, Real.rpow_natCast, e1, ofReal_mul, ofReal_div, e2, ofReal_exp, e3]
+  push_cast
+  field_simp
+  ring_nf
+
 /-- The weighted Nicholson integrand `e^{zt - t³/12} t^m t^{-1/2}` is integrable on `(0, ∞)`,
 and its integral is the power series `∑ I_{k+m} z^k / k!`. -/
 theorem airyMod_hasSum_pow (m : ℕ) (z : ℂ) :
@@ -274,22 +297,7 @@ theorem airyMod_hasSum_pow (m : ℕ) (z : ℂ) :
     (Eventually.of_forall fun t => (hsumB t).summable)
     (hint.congr_fun (fun t _ => (hsumB t).tsum_eq.symm) measurableSet_Ioi)
     (Eventually.of_forall hsumF)
-  refine h.congr_fun fun k => ?_
-  have hI := (airyMod_integral_I (k + m)).2
-  rw [← hI, ← integral_complex_ofReal, ← integral_const_mul]
-  refine setIntegral_congr_fun measurableSet_Ioi fun t (ht : 0 < t) => ?_
-  simp only [F]
-  have e1 : t ^ (3 : ℝ) = t ^ 3 := by norm_cast
-  have e2 : ((t ^ (1 / 2 : ℝ) : ℝ) : ℂ) = (t : ℂ) ^ (1 / 2 : ℂ) := by
-    rw [ofReal_cpow ht.le]; push_cast; ring_nf
-  have e3 : (t : ℂ) ^ (-1 / 2 : ℂ) = ((t : ℂ) ^ (1 / 2 : ℂ))⁻¹ := by
-    rw [← cpow_neg]; ring_nf
-  have e4 : (t : ℂ) ^ (1 / 2 : ℂ) ≠ 0 := by
-    rw [Ne, cpow_eq_zero_iff]; simp [ht.ne']
-  rw [Real.rpow_sub ht, Real.rpow_natCast, e1, ofReal_mul, ofReal_div, e2, ofReal_exp, e3]
-  push_cast
-  field_simp
-  ring_nf
+  exact h.congr_fun fun k => (airyMod_integral_term m k z).symm
 
 /-- The Nicholson integrand `e^{zt - t³/12} t^{-1/2}` is integrable on `(0, ∞)`, and its integral
 is the power series `∑ I_k z^k / k!`. -/

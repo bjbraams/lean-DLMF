@@ -53,6 +53,8 @@ def p3qRec (d : ℕ → ℂ) (β q a : ℂ) (A : ℕ → ℂ) : Prop :=
 /-- The symmetrizing weights `w₀ = β`, `w_i = 1`. -/
 def p3qW (β : ℂ) (i : ℕ) : ℂ := if i = 0 then β else 1
 
+/-- Telescoped Green identity: `∑_{i≤N} w_i (A_i (Lv)_i - (LA)_i v_i)` equals the boundary
+term `w_N q (A_N v_{N+1} - A_{N+1} v_N)`. -/
 lemma p3q_pair_aux (d : ℕ → ℂ) (β q : ℂ) (A v : ℕ → ℂ) (N : ℕ) :
     ∑ i ∈ Finset.range (N + 1), p3qW β i * (A i * p3qL d β q v i - p3qL d β q A i * v i) =
       p3qW β N * q * (A N * v (N + 1) - A (N + 1) * v N) := by
@@ -78,6 +80,8 @@ lemma p3q_pair {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (hrec : p3qRec
   rw [Finset.mul_sum, ← sub_eq_zero, ← Finset.sum_sub_distrib, ← h]
   refine Finset.sum_congr rfl fun i _ => by ring
 
+/-- Row estimate for a solution of `L A = a A`:
+`|a - d_i| |A_i| ≤ |q| (|lo_i| + |A_{i+1}|)`. -/
 lemma p3q_row {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (hrec : p3qRec d β q a A) (i : ℕ) :
     ‖a - d i‖ * ‖A i‖ ≤ ‖q‖ * (‖p3qLo β A i‖ + ‖A (i + 1)‖) := by
   have h := hrec i
@@ -87,6 +91,7 @@ lemma p3q_row {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (hrec : p3qRec 
   gcongr
   exact norm_add_le _ _
 
+/-- For `|β| ≤ 2`, the lower neighbour term is bounded by `2M` when `|A_{i-1}| ≤ M`. -/
 theorem p3q_lo_le {β : ℂ} (hβ : ‖β‖ ≤ 2) (A : ℕ → ℂ) {i : ℕ} {M : ℝ} (hM : 0 ≤ M)
     (h : ∀ j, j + 1 = i → ‖A j‖ ≤ M) : ‖p3qLo β A i‖ ≤ 2 * M := by
   rcases i with _ | _ | i
@@ -96,6 +101,7 @@ theorem p3q_lo_le {β : ℂ} (hβ : ‖β‖ ≤ 2) (A : ℕ → ℂ) {i : ℕ} 
   · simp only [p3qLo]
     linarith [h (i + 1) rfl]
 
+/-- A nonnegative sequence tending to `0` attains its maximum on every tail `[i, ∞)`. -/
 theorem p3q_exists_tail_max {f : ℕ → ℝ} (hf : Tendsto f atTop (𝓝 0)) (hf0 : ∀ i, 0 ≤ f i)
     (i : ℕ) : ∃ k ≥ i, ∀ j ≥ i, f j ≤ f k := by
   by_cases h : ∃ j ≥ i, 0 < f j
@@ -128,6 +134,8 @@ theorem p3q_window {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (hβ : ‖
     nlinarith [norm_nonneg q]
   exact le_of_mul_le_mul_right this hM
 
+/-- Upward decay step: above the isolated index `n`, `|A_i| ≤ 3|q| |A_{i-1}|`
+(for `|q| ≤ 1/4`, `A → 0`). -/
 lemma p3q_up {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (hβ : ‖β‖ ≤ 2)
     (hrec : p3qRec d β q a A) (hA : Tendsto A atTop (𝓝 0)) (hq : ‖q‖ ≤ 1 / 4) {n : ℕ}
     (hgap : ∀ i ≠ n, 1 ≤ ‖a - d i‖) {i : ℕ} (hi : n < i) :
@@ -149,6 +157,8 @@ lemma p3q_up {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (hβ : ‖β‖ 
       (fun j hj => by rw [show j = i - 1 by omega])
     nlinarith [norm_nonneg (A (i - 1))]
 
+/-- Downward decay step: below the isolated index `n`, `|A_i| ≤ 3|q| |A_{i+1}|`
+(for `|q| ≤ 1/4`). -/
 lemma p3q_down {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (hβ : ‖β‖ ≤ 2)
     (hrec : p3qRec d β q a A) (hq : ‖q‖ ≤ 1 / 4) {n : ℕ}
     (hgap : ∀ i ≠ n, 1 ≤ ‖a - d i‖) {i : ℕ} (hi : i < n) :
@@ -204,15 +214,18 @@ theorem p3q_decay {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (hβ : ‖�
     rwa [show Nat.dist i n = j by simp [Nat.dist]; omega]
 
 
+/-- For `k ≤ m`, `x^m = O(x^k)` as `x → 0`. -/
 theorem p3q_pow_isBigO {m k : ℕ} (h : k ≤ m) :
     (fun x : ℝ => x ^ m) =O[𝓝 0] (fun x => x ^ k) := by
   rcases h.lt_or_eq with h | rfl
   · exact (isLittleO_pow_pow h).isBigO
   · exact isBigO_refl _ _
 
+/-- The weights `w_i` are nonzero when `β ≠ 0`. -/
 lemma p3qW_ne_zero {β : ℂ} (hβ : β ≠ 0) (i : ℕ) : p3qW β i ≠ 0 := by
   unfold p3qW; split_ifs <;> simp [hβ]
 
+/-- The weights satisfy `|w_i| ≤ 2` when `|β| ≤ 2`. -/
 lemma p3qW_norm_le {β : ℂ} (hβ : ‖β‖ ≤ 2) (i : ℕ) : ‖p3qW β i‖ ≤ 2 := by
   unfold p3qW; split_ifs <;> norm_num [hβ]
 

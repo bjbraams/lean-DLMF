@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.OrthogonalPolynomials.Series
+public import ToMathlib.Analysis.SpecialFunctions.GammaShiftBounds
 
 /-!
 # Gegenbauer's addition theorem for Bessel functions (DLMF 10.23.8)
@@ -80,28 +81,6 @@ theorem shBes_hasSum_series (c w : ℂ) :
   convert h using 2 with m
   ring
 
-/-- `‖Γ(c + N)⁻¹‖ ≤ ‖Γ(c)⁻¹‖ / N!` for `1 ≤ Re c`. -/
-theorem shBes_norm_recip_Gamma_add_nat {c : ℂ} (hc : 1 ≤ c.re) (N : ℕ) :
-    ‖(Gamma (c + N))⁻¹‖ ≤ ‖(Gamma c)⁻¹‖ / N ! := by
-  induction N with
-  | zero => simp
-  | succ N ih =>
-    have hne : c + N ≠ 0 := by
-      intro h
-      have := congrArg Complex.re h
-      simp at this
-      linarith [(Nat.cast_nonneg N : (0 : ℝ) ≤ N)]
-    have hge : (N + 1 : ℝ) ≤ ‖c + N‖ := by
-      have := Complex.re_le_norm (c + N)
-      simp at this
-      linarith
-    rw [show c + ((N + 1 : ℕ) : ℂ) = (c + N) + 1 by push_cast; ring, Gamma_add_one _ hne,
-      mul_inv, norm_mul, norm_inv, Nat.factorial_succ, Nat.cast_mul]
-    have hp : (0 : ℝ) < ‖c + N‖ := norm_pos_iff.mpr hne
-    calc ‖c + N‖⁻¹ * ‖(Gamma (c + N))⁻¹‖ ≤ (N + 1 : ℝ)⁻¹ * (‖(Gamma c)⁻¹‖ / N !) := by
-          gcongr
-      _ = _ := by push_cast; field_simp
-
 /-- `N! ≤ ‖(c)_N‖` for `1 ≤ Re c`. -/
 theorem shBes_factorial_le_norm_poch {c : ℂ} (hc : 1 ≤ c.re) (N : ℕ) :
     (N ! : ℝ) ≤ ‖poch c N‖ := by
@@ -141,7 +120,7 @@ theorem shBes_norm_F_le {c : ℂ} (hc : 1 ≤ c.re) (k : ℕ) (s : ℂ) :
   rw [show ‖(Gamma c)⁻¹‖ * (∑' m : ℕ, ‖s‖ ^ m / m !) / (k ! : ℝ) =
     ‖(Gamma c)⁻¹‖ / (k ! : ℝ) * ∑' m : ℕ, ‖s‖ ^ m / (m ! : ℝ) by ring]
   refine hs.norm_le_of_bounded hE fun m => ?_
-  have hG := shBes_norm_recip_Gamma_add_nat hc (k + m)
+  have hG := Complex.norm_inv_Gamma_add_nat_le hc (k + m)
   have hfac : ((k ! : ℝ) * m !) ≤ (k + m) ! := by
     exact_mod_cast Nat.le_of_dvd (Nat.factorial_pos _)
       (Nat.factorial_mul_factorial_dvd_factorial_add k m)
@@ -267,7 +246,7 @@ theorem shBes_hasSum_product {c : ℂ} (hc : 1 ≤ c.re) (x y : ℂ) :
     have hv := Real.summable_pow_div_factorial (‖y‖)
     have huv := (hu.mul_of_nonneg hv (fun _ => by positivity) (fun _ => by positivity)).mul_left K
     refine Summable.of_norm_bounded huv fun p => ?_
-    have h1 := shBes_norm_recip_Gamma_add_nat hc p.1
+    have h1 := Complex.norm_inv_Gamma_add_nat_le hc p.1
     have h2 := shBes_norm_F_le hc (2 * p.1 + p.2) x
     have hf1 : (1 : ℝ) ≤ p.1 ! := by
       exact_mod_cast Nat.one_le_iff_ne_zero.mpr (Nat.factorial_ne_zero _)
@@ -374,6 +353,55 @@ def shBes_equiv : (Σ k : ℕ, Fin (k / 2 + 1)) ≃ ℕ × ℕ where
     obtain ⟨n, l⟩ := q
     simp
 
+/-- For `Re ν > 0`, the double family of the Bessel addition theorem,
+`(n, l) ↦ (ν+n) C^ν_n(cos φ) · aⁿ (a²)ˡ/l! · ν⁻¹/(ν+1)_{n+l} · F_{ν+1+n+2l}(s)`, is summable. -/
+private lemma shBes_summable_family {ν : ℂ} (hν : 0 < ν.re) (phi : ℝ) (a s : ℂ) :
+    Summable fun p : ℕ × ℕ => (ν + p.1) * ultrasphPoly ν p.1 (Real.cos phi) *
+      (a ^ p.1 * (a ^ 2) ^ p.2 / p.2 !) * (ν⁻¹ * (poch (ν + 1) (p.1 + p.2))⁻¹) *
+      regularizedHGFun (∅ : Multiset ℂ) {ν + 1 + ((p.1 + 2 * p.2 : ℕ) : ℂ)} s := by
+  have hre1 : 1 ≤ (ν + 1).re := by simp; linarith
+  set t : ℝ := Real.cos phi with ht
+  set Xf : ℕ → ℂ := fun n => (ν + n) * ultrasphPoly ν n t with hXf
+  set Yf : ℕ → ℕ → ℂ := fun n l => a ^ n * (a ^ 2) ^ l / l ! with hYf
+  set Zf : ℕ → ℕ → ℂ := fun n l => ν⁻¹ * (poch (ν + 1) (n + l))⁻¹ with hZf
+  set Vf : ℕ → ℕ → ℂ := fun n l =>
+    regularizedHGFun (∅ : Multiset ℂ) {ν + 1 + ((n + 2 * l : ℕ) : ℂ)} s with hVf
+  set G : ℕ × ℕ → ℂ := fun p => Xf p.1 * Yf p.1 p.2 * Zf p.1 p.2 * Vf p.1 p.2 with hG
+  show Summable G
+  set B : ℝ := 1 + ‖ν‖ with hB
+  set M : ℝ := ‖(Gamma (ν + 1))⁻¹‖ * ∑' m : ℕ, ‖s‖ ^ m / (m ! : ℝ) with hM
+  have hM0 : 0 ≤ M := mul_nonneg (norm_nonneg _) (tsum_nonneg fun m => by positivity)
+  have hu := Real.summable_pow_div_factorial (4 * B * ‖a‖)
+  have hv := Real.summable_pow_div_factorial (‖a‖ ^ 2)
+  have huv := (hu.mul_of_nonneg hv (fun _ => by positivity) (fun _ => by positivity)).mul_left
+    ((‖ν‖ + 1) * ‖ν‖⁻¹ * M)
+  refine Summable.of_norm_bounded huv fun p => ?_
+  obtain ⟨n, l⟩ := p
+  have h1 : ‖Xf n‖ ≤ (‖ν‖ + 1) * (4 * B) ^ n := shBes_norm_ultrasph_le hν n phi
+  have h2 : ‖Yf n l‖ = ‖a‖ ^ n * (‖a‖ ^ 2) ^ l / l ! := by
+    simp only [hYf, norm_div, norm_mul, norm_pow, Complex.norm_natCast]
+  have h3 : ‖Zf n l‖ ≤ ‖ν‖⁻¹ := by
+    simp only [hZf]
+    rw [norm_mul, norm_inv, norm_inv]
+    have hp := shBes_factorial_le_norm_poch hre1 (n + l)
+    have hf : (1 : ℝ) ≤ (n + l) ! := by
+      exact_mod_cast Nat.one_le_iff_ne_zero.mpr (Nat.factorial_ne_zero _)
+    calc ‖ν‖⁻¹ * ‖poch (ν + 1) (n + l)‖⁻¹ ≤ ‖ν‖⁻¹ * 1 := by
+          gcongr
+          exact inv_le_one_of_one_le₀ (hf.trans hp)
+      _ = _ := mul_one _
+  have h4 : ‖Vf n l‖ ≤ M / n ! := by
+    refine (shBes_norm_F_le hre1 (n + 2 * l) s).trans ?_
+    gcongr
+    omega
+  simp only [hG]
+  rw [norm_mul, norm_mul, norm_mul, h2]
+  have hnf : (0 : ℝ) < n ! := by exact_mod_cast Nat.factorial_pos n
+  calc ‖Xf n‖ * (‖a‖ ^ n * (‖a‖ ^ 2) ^ l / l !) * ‖Zf n l‖ * ‖Vf n l‖
+      ≤ ((‖ν‖ + 1) * (4 * B) ^ n) * (‖a‖ ^ n * (‖a‖ ^ 2) ^ l / l !) * ‖ν‖⁻¹ * (M / n !) := by
+        gcongr
+    _ = _ := by rw [mul_pow (4 * B)]; field_simp
+
 /-- Gegenbauer's addition theorem, AAR (4.10.5), for positive radii and nonzero distance.
 DLMF's radius-ordering restriction is unnecessary for `J`. -/
 @[dlmf 10.23.E8]
@@ -443,41 +471,7 @@ theorem besselJ_addition {ν : ℂ} {r rho phi : ℝ} (hν : 0 < ν.re)
         rw [← pow_mul, ← pow_add, Nat.sub_add_cancel h2l], Nat.cast_sub h2l]
     push_cast
     ring
-  -- summability
-  set B : ℝ := 1 + ‖ν‖ with hB
-  set M : ℝ := ‖(Gamma (ν + 1))⁻¹‖ * ∑' m : ℕ, ‖s‖ ^ m / (m ! : ℝ) with hM
-  have hM0 : 0 ≤ M := mul_nonneg (norm_nonneg _) (tsum_nonneg fun m => by positivity)
-  have hGs : Summable G := by
-    have hu := Real.summable_pow_div_factorial (4 * B * ‖a‖)
-    have hv := Real.summable_pow_div_factorial (‖a‖ ^ 2)
-    have huv := (hu.mul_of_nonneg hv (fun _ => by positivity) (fun _ => by positivity)).mul_left
-      ((‖ν‖ + 1) * ‖ν‖⁻¹ * M)
-    refine Summable.of_norm_bounded huv fun p => ?_
-    obtain ⟨n, l⟩ := p
-    have h1 : ‖Xf n‖ ≤ (‖ν‖ + 1) * (4 * B) ^ n := shBes_norm_ultrasph_le hν n phi
-    have h2 : ‖Yf n l‖ = ‖a‖ ^ n * (‖a‖ ^ 2) ^ l / l ! := by
-      simp only [hYf, norm_div, norm_mul, norm_pow, Complex.norm_natCast]
-    have h3 : ‖Zf n l‖ ≤ ‖ν‖⁻¹ := by
-      simp only [hZf]
-      rw [norm_mul, norm_inv, norm_inv]
-      have hp := shBes_factorial_le_norm_poch hre1 (n + l)
-      have hf : (1 : ℝ) ≤ (n + l) ! := by
-        exact_mod_cast Nat.one_le_iff_ne_zero.mpr (Nat.factorial_ne_zero _)
-      calc ‖ν‖⁻¹ * ‖poch (ν + 1) (n + l)‖⁻¹ ≤ ‖ν‖⁻¹ * 1 := by
-            gcongr
-            exact inv_le_one_of_one_le₀ (hf.trans hp)
-        _ = _ := mul_one _
-    have h4 : ‖Vf n l‖ ≤ M / n ! := by
-      refine (shBes_norm_F_le hre1 (n + 2 * l) s).trans ?_
-      gcongr
-      omega
-    simp only [hG]
-    rw [norm_mul, norm_mul, norm_mul, h2]
-    have hnf : (0 : ℝ) < n ! := by exact_mod_cast Nat.factorial_pos n
-    calc ‖Xf n‖ * (‖a‖ ^ n * (‖a‖ ^ 2) ^ l / l !) * ‖Zf n l‖ * ‖Vf n l‖
-        ≤ ((‖ν‖ + 1) * (4 * B) ^ n) * (‖a‖ ^ n * (‖a‖ ^ 2) ^ l / l !) * ‖ν‖⁻¹ * (M / n !) := by
-          gcongr
-      _ = _ := by rw [mul_pow (4 * B)]; field_simp
+  have hGs : Summable G := shBes_summable_family hν phi a s
   -- regrouping by total degree
   have hA := hGs.hasSum
   have hk : HasSum (fun k => ∑ l ∈ Finset.range (k / 2 + 1), G (k - 2 * l, l)) (∑' p, G p) := by

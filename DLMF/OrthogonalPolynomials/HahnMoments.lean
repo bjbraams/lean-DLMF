@@ -22,6 +22,7 @@ Mathlib integral API and the project's proved vertical Gamma bounds.
 open Complex MeasureTheory Filter
 open scoped Real Nat
 open DLMF.Hypergeometric
+open DLMF.Gamma (Gamma_add_nat_eq_poch_mul_Gamma)
 noncomputable section
 namespace DLMF.OrthogonalPolynomials.HahnMoments
 
@@ -37,7 +38,7 @@ theorem integrable_weight {a b c d : ℂ}
       ‖Gamma (w + I * t)‖ ≤ |Real.Gamma w.re| := by
     have h := DLMF.Gamma.norm_Gamma_add_mul_I_le (x := w.re) (y := w.im + t) hw
     have he : (w.re : ℂ) + I * ((w.im + t : ℝ) : ℂ) = w + I * t := by
-      apply Complex.ext <;> simp <;> ring
+      apply Complex.ext <;> simp
     rwa [he] at h
   have hpair := DLMF.Gamma.integrable_Gamma_add_mul_Gamma_sub ha hc
   apply Integrable.mono' (f := weight a b c d) (hpair.norm.const_mul (|Real.Gamma b.re| * |Real.Gamma d.re|))
@@ -71,12 +72,6 @@ def moment (a b c d : ℂ) (k j : ℕ) : ℂ :=
   2 * Real.pi * (Gamma (a + c + k) * Gamma (a + d + j + k) * Gamma (b + c) *
     Gamma (b + d + j) / Gamma (a + b + c + d + j + k))
 
-/-- Gamma's finite-shift formula at a point in the right half-plane. -/
-theorem gamma_shift {w : ℂ} (hw : 0 < w.re) (k : ℕ) :
-    Gamma (w + k) = poch w k * Gamma w := by
-  exact (div_eq_iff (Gamma_ne_zero_of_re_pos hw)).mp
-    (Gamma_add_nat_div_Gamma_eq (n := k) w (not_neg_nat_of_re_pos hw))
-
 /-- Multiplying the weight by Pochhammer factors shifts its first and fourth Gamma parameters. -/
 theorem poch_mul_weight {a b c d : ℂ} (ha : 0 < a.re) (hd : 0 < d.re) (k j : ℕ) (x : ℝ) :
     poch (a + I * x) k * poch (d - I * x) j * weight a b c d x =
@@ -84,7 +79,8 @@ theorem poch_mul_weight {a b c d : ℂ} (ha : 0 < a.re) (hd : 0 < d.re) (k j : �
   dsimp only [weight]
   rw [show a + k + I * x = (a + I * x) + k by ring,
     show d + j - I * x = (d - I * x) + j by ring,
-    gamma_shift (by simpa using ha), gamma_shift (by simpa using hd)]
+    Gamma_add_nat_eq_poch_mul_Gamma (by simpa using ha),
+    Gamma_add_nat_eq_poch_mul_Gamma (by simpa using hd)]
   ring
 
 /-- Absolute integrability and evaluation of every mixed Pochhammer moment. -/
@@ -112,9 +108,9 @@ theorem moment_factor {a b c d : ℂ}
       (poch (a + c) k * poch (a + d + j) k / poch (a + b + c + d + j) k) := by
   unfold moment
   simp only [Nat.cast_zero, add_zero]
-  rw [gamma_shift (by simp; linarith : 0 < (a + c).re),
-    gamma_shift (by simp; positivity : 0 < (a + d + j).re),
-    gamma_shift (by simp; positivity : 0 < (a + b + c + d + j).re)]
+  rw [Gamma_add_nat_eq_poch_mul_Gamma (by simp; linarith : 0 < (a + c).re),
+    Gamma_add_nat_eq_poch_mul_Gamma (by simp; positivity : 0 < (a + d + j).re),
+    Gamma_add_nat_eq_poch_mul_Gamma (by simp; positivity : 0 < (a + b + c + d + j).re)]
   ring
 
 /-- The unnormalized terminating continuous Hahn sum. -/

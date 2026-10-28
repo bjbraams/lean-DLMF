@@ -196,7 +196,7 @@ theorem analyticOnNhd_ultrasphPoly_param (n : ℕ) (x : ℂ) :
   have hc : ∀ k : ℕ, lam + 1 / 2 ≠ -(k : ℂ) := not_neg_nat_of_re_pos (by
     simp only [Complex.add_re, Complex.div_ofNat_re, Complex.one_re]
     have := hlam
-    simp only [Set.mem_setOf_eq] at this
+    simp only [Set.mem_ofPred_eq] at this
     linarith)
   have heq : (fun lam => ultrasphPoly lam n x) = fun lam => poch (2 * lam) n / n.factorial *
       ∑ k ∈ Finset.range (n + 1),
@@ -519,7 +519,7 @@ theorem ultrasphPoly_raise_parameter {lam : ℂ} (hlam : -1 / 2 < lam.re) (n : �
       (by intro x _; fun_prop)
       (isOpen_half_shift_disk.inter isOpen_ne :
         IsOpen ({x : ℂ | ‖(1 - x) / 2‖ < 1} ∩ {x : ℂ | x ≠ 1}))
-      ⟨0, by rw [Set.mem_setOf_eq, sub_zero, norm_div, norm_one]; norm_num, by simp⟩ ?_
+      ⟨0, by rw [Set.mem_ofPred_eq, sub_zero, norm_div, norm_one]; norm_num, by simp⟩ ?_
     rintro x ⟨hx, hx1⟩
     have hy : (1 - x) / 2 ≠ 0 := by
       intro h
@@ -593,7 +593,7 @@ theorem ultrasphPoly_raise_parameter_sq {lam : ℂ} (hlam : -1 / 2 < lam.re) (n 
     subst hn0
     have hl0 : lam = 0 := by simpa using hN
     subst hl0
-    simp [ultrasphPoly, poch_succ_left]
+    simp [ultrasphPoly]
   have hc : ∀ k : ℕ, lam + 1 / 2 ≠ -(k : ℂ) := not_neg_nat_of_re_pos (by
     simp only [Complex.add_re, Complex.div_ofNat_re, Complex.one_re]
     linarith)
@@ -813,6 +813,7 @@ theorem jacobiPolyP_half_half (n : ℕ) (x : ℂ) :
   unfold jacobiPolyP
   rw [show (n : ℂ) + -1 / 2 + -1 / 2 + 1 = n by ring, show (-1 / 2 : ℂ) + 1 = 1 / 2 by norm_num]
 
+/-- `(1/2)_n ≠ 0`. -/
 theorem poch_half_ne_zero (n : ℕ) : poch (1 / 2 : ℂ) n ≠ 0 :=
   poch_ne_zero_of_not_neg_nat (fun k hk => by
     have := congrArg Complex.re hk
@@ -1038,6 +1039,7 @@ theorem jacobi_raise_alpha {α β : ℂ} (hα : -1 < α.re) (n : ℕ) (x : ℂ) 
       (poch (α + 1 + 1) n) * hrel
   exact congrFun key x
 
+/-- `(3/2)_n ≠ 0`. -/
 theorem poch_three_half_ne_zero (n : ℕ) : poch (3 / 2 : ℂ) n ≠ 0 :=
   poch_ne_zero_of_not_neg_nat (fun k hk => by
     have := congrArg Complex.re hk

@@ -44,6 +44,7 @@ variable {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOrthogonalPolynomials μ
 
 include h
 
+/-- Orthogonal polynomials are nonzero. -/
 theorem ne_zero (n : ℕ) : p n ≠ 0 := by
   intro hz
   have := h.2.2.1 n
@@ -58,9 +59,11 @@ noncomputable def sequence : Polynomial.Sequence ℝ where
 noncomputable def basis : Module.Basis ℕ ℝ ℝ[X] :=
   h.sequence.basis (fun n => isUnit_iff_ne_zero.mpr (leadingCoeff_ne_zero.mpr (h.ne_zero n)))
 
+/-- The orthogonal-polynomial basis sends `n` to `p n`. -/
 @[simp] theorem basis_apply (n : ℕ) : h.basis n = p n := by
   simp [basis, sequence]
 
+/-- A polynomial of degree `< k` has zero `k`-th coordinate in the orthogonal basis. -/
 theorem repr_eq_zero_of_degree_lt {q : ℝ[X]} {k : ℕ} (hq : q.degree < k) :
     h.basis.repr q k = 0 := by
   have hmem : q ∈ Submodule.span ℝ (h.basis '' Set.Iio k) := by
@@ -103,6 +106,7 @@ theorem memLp_eval (q : ℝ[X]) : MemLp (fun x => q.eval x) 2 μ := by
   exact ((memLp_two_iff_integrable_sq (p k).continuous.aestronglyMeasurable).mpr
     (h.2.1 k)).const_mul (h.basis.repr q k)
 
+/-- The product of two polynomials is `μ`-integrable. -/
 theorem integrable_mul (q r : ℝ[X]) : Integrable (fun x => q.eval x * r.eval x) μ :=
   (h.memLp_eval q).integrable_mul (h.memLp_eval r)
 
@@ -136,10 +140,12 @@ theorem integral_mul (q : ℝ[X]) (k : ℕ) :
   · intro i _
     exact (h.integrable_mul (p i) (p k)).const_mul _
 
+/-- `p k` is orthogonal to every polynomial of degree `< k`. -/
 theorem integral_mul_eq_zero_of_degree_lt {q : ℝ[X]} {k : ℕ} (hq : q.degree < k) :
     ∫ x, q.eval x * (p k).eval x ∂μ = 0 := by
   rw [h.integral_mul, h.repr_eq_zero_of_degree_lt hq, zero_mul]
 
+/-- `deg (X p_k) = k + 1`. -/
 theorem degree_X_mul (k : ℕ) : (X * p k).degree = ((k + 1 : ℕ) : WithBot ℕ) := by
   rw [degree_mul, degree_X, degree_eq_natDegree (h.ne_zero k), h.1]
   norm_cast
@@ -198,6 +204,7 @@ theorem integral_eval_sq {q : ℝ[X]} {N : ℕ} (hq : q.degree < N) :
   · intro i _
     exact (h.integrable_mul q (p i)).const_mul _
 
+/-- A nonzero polynomial of degree `< N` has positive squared norm. -/
 theorem integral_eval_sq_pos {q : ℝ[X]} (hq : q ≠ 0) {N : ℕ} (hd : q.degree < N) :
     0 < ∫ x, q.eval x ^ 2 ∂μ := by
   rw [h.integral_eval_sq hd]
@@ -464,6 +471,7 @@ theorem eval_nonneg_or_nonpos {p : ℝ[X]} (hp : p ≠ 0)
           exact mul_nonpos_of_nonneg_of_nonpos (hpow x) (hq x)
   exact go p.natDegree p rfl hp heven
 
+/-- Each point of `s` is a simple root of `∏_{a ∈ s} (X - a)`. -/
 theorem rootMultiplicity_prod_X_sub_C {s : Finset ℝ} {x : ℝ} (hx : x ∈ s) :
     (∏ a ∈ s, (X - C a : ℝ[X])).rootMultiplicity x = 1 := by
   have hsplit :
@@ -483,6 +491,71 @@ theorem rootMultiplicity_prod_X_sub_C {s : Finset ℝ} {x : ℝ} (hx : x ∈ s) 
     (mul_ne_zero (X_sub_C_ne_zero x) hne)
   rw [hsplit, hmul, rootMultiplicity_X_sub_C_self,
     rootMultiplicity_eq_zero hnd, add_zero]
+
+/-- If `P = q r` where `q = ∏_{a ∈ s} (X - a)` runs over the roots of `P` of odd multiplicity,
+then every root of `r` has even multiplicity. -/
+private lemma even_rootMultiplicity_of_eq_mul {P q r : ℝ[X]} {s : Finset ℝ} (hP0 : P ≠ 0)
+    (hs : s = P.roots.toFinset.filter (fun a => ¬ Even (P.rootMultiplicity a)))
+    (hq : q = ∏ a ∈ s, (X - C a)) (hr : P = q * r) (x : ℝ) : Even (r.rootMultiplicity x) := by
+  classical
+  have hq0 : q ≠ 0 := hq ▸ (monic_prod_of_monic _ _ (fun a _ => monic_X_sub_C a)).ne_zero
+  have hr0 : r ≠ 0 := fun hr0 => hP0 (by rw [hr, hr0, mul_zero])
+  have hsum := rootMultiplicity_mul (x := x) (mul_ne_zero hq0 hr0)
+  rw [← hr] at hsum
+  by_cases hx : x ∈ s
+  · have hqx : q.rootMultiplicity x = 1 := hq ▸ rootMultiplicity_prod_X_sub_C hx
+    have hodd : ¬ Even (P.rootMultiplicity x) := by
+      have hx' := hx; rw [hs] at hx'; exact (Finset.mem_filter.mp hx').2
+    have : P.rootMultiplicity x = 1 + r.rootMultiplicity x := by
+      rw [hsum, hqx]
+    cases Nat.even_or_odd (r.rootMultiplicity x) with
+    | inl h => exact h
+    | inr h =>
+      have : Even (P.rootMultiplicity x) := by
+        rw [this, add_comm]
+        obtain ⟨k, hk⟩ := h
+        exact ⟨k + 1, by omega⟩
+      exact (hodd this).elim
+  · have hqx : q.rootMultiplicity x = 0 := by
+      apply rootMultiplicity_eq_zero
+      intro hxroot
+      have : (∏ a ∈ s, (x - a : ℝ)) = 0 := by
+        simpa [hq, eval_prod, eval_sub, eval_X, eval_C] using (hxroot : q.eval x = 0)
+      obtain ⟨a, ha, ha0⟩ := Finset.prod_eq_zero_iff.mp this
+      have : a = x := sub_eq_zero.mp ha0 |>.symm
+      exact hx (this ▸ ha)
+    have hpeven : Even (P.rootMultiplicity x) := by
+      by_cases hmem : x ∈ P.roots.toFinset
+      · have : x ∈ s ↔ ¬ Even (P.rootMultiplicity x) := by
+          simp [hs, Finset.mem_filter, hmem]
+        simpa [this] using hx
+      · have : P.rootMultiplicity x = 0 := by
+          apply rootMultiplicity_eq_zero
+          intro hxroot
+          exact hmem (Multiset.mem_toFinset.2 ((mem_roots hP0).2 hxroot))
+        rw [this]
+        exact show Even (0 : ℕ) from ⟨0, by simp⟩
+    have : r.rootMultiplicity x = P.rootMultiplicity x := by
+      rw [hsum, hqx, zero_add]
+    rwa [this]
+
+/-- If `r` has constant sign and `∫ (q r) q dμ = 0`, then `q r = 0` `μ`-almost everywhere. -/
+private lemma ae_eval_mul_eq_zero {μ : Measure ℝ} {q r : ℝ[X]}
+    (hsign : (∀ t, 0 ≤ r.eval t) ∨ (∀ t, r.eval t ≤ 0))
+    (hfi : Integrable (fun t => (q * r).eval t * q.eval t) μ)
+    (hint : ∫ t, (q * r).eval t * q.eval t ∂μ = 0) :
+    (fun t => (q * r).eval t) =ᵐ[μ] 0 := by
+  have key (t : ℝ) (ht : (q * r).eval t * q.eval t = 0) : (q * r).eval t = 0 := by
+    simp only [eval_mul, mul_eq_zero] at ht ⊢; tauto
+  rcases hsign with hpos | hneg
+  · have hnn : ∀ t, 0 ≤ (q * r).eval t * q.eval t := fun t => by
+      simp only [eval_mul]; nlinarith [hpos t, sq_nonneg (q.eval t)]
+    exact ((integral_eq_zero_iff_of_nonneg hnn hfi).mp hint).mono fun t ht => key t ht
+  · have hnn : ∀ t, 0 ≤ -((q * r).eval t * q.eval t) := fun t => by
+      simp only [eval_mul]; nlinarith [hneg t, sq_nonneg (q.eval t)]
+    have hz := (integral_eq_zero_iff_of_nonneg hnn hfi.neg).mp
+      (by rw [MeasureTheory.integral_neg, hint, neg_zero])
+    exact hz.mono fun t ht => key t (neg_eq_zero.mp ht)
 
 /-- The degree-`n` orthogonal polynomial has `n` distinct real zeros (AAR §5.4). -/
 @[dlmf 18.2.vi]
@@ -520,95 +593,13 @@ theorem orthogonal_polynomials_roots {μ : Measure ℝ} {p : ℕ → ℝ[X]}
       rw [degree_eq_natDegree hq0, hqdeg]
       exact_mod_cast hlt
     have hinter := h.integral_mul_eq_zero_of_degree_lt (q := q) hqd
-    have heven : ∀ x, Even (r.rootMultiplicity x) := by
-      intro x
-      have hsum := rootMultiplicity_mul (x := x) (mul_ne_zero hq0 hr0)
-      rw [← hr] at hsum
-      by_cases hx : x ∈ s
-      · have hqx : q.rootMultiplicity x = 1 := rootMultiplicity_prod_X_sub_C hx
-        have hodd : ¬ Even ((p n).rootMultiplicity x) := (Finset.mem_filter.mp hx).2
-        have : (p n).rootMultiplicity x = 1 + r.rootMultiplicity x := by
-          rw [hsum, hqx]
-        cases Nat.even_or_odd (r.rootMultiplicity x) with
-        | inl h => exact h
-        | inr h =>
-          have : Even ((p n).rootMultiplicity x) := by
-            rw [this, add_comm]
-            obtain ⟨k, hk⟩ := h
-            exact ⟨k + 1, by omega⟩
-          exact (hodd this).elim
-      · have hqx : q.rootMultiplicity x = 0 := by
-          apply rootMultiplicity_eq_zero
-          intro hxroot
-          have : (∏ a ∈ s, (x - a : ℝ)) = 0 := by
-            simpa [q, eval_prod, eval_sub, eval_X, eval_C] using (hxroot : q.eval x = 0)
-          obtain ⟨a, ha, ha0⟩ := Finset.prod_eq_zero_iff.mp this
-          have : a = x := sub_eq_zero.mp ha0 |>.symm
-          exact hx (this ▸ ha)
-        have hpeven : Even ((p n).rootMultiplicity x) := by
-          by_cases hmem : x ∈ (p n).roots.toFinset
-          · have : x ∈ s ↔ ¬ Even ((p n).rootMultiplicity x) := by
-              simp [s, Finset.mem_filter, hmem]
-            simpa [this] using hx
-          · have : (p n).rootMultiplicity x = 0 := by
-              apply rootMultiplicity_eq_zero
-              intro hxroot
-              exact hmem (Multiset.mem_toFinset.2 ((mem_roots hp0).2 hxroot))
-            rw [this]
-            exact show Even (0 : ℕ) from ⟨0, by simp⟩
-        have : r.rootMultiplicity x = (p n).rootMultiplicity x := by
-          rw [hsum, hqx, zero_add]
-        rwa [this]
+    have heven : ∀ x, Even (r.rootMultiplicity x) :=
+      even_rootMultiplicity_of_eq_mul hp0 rfl rfl hr
     have hsign := eval_nonneg_or_nonpos hr0 heven
-    have hprod (t : ℝ) :
-        (p n).eval t * q.eval t = q.eval t ^ 2 * r.eval t := by
-      have ht := congrArg (eval t) hr
-      simp only [eval_mul] at ht
-      rw [ht]
-      ring
-    have hfi : Integrable (fun t => (p n).eval t * q.eval t) μ :=
-      h.integrable_mul (p n) q
     have hp0ae : (fun t => (p n).eval t) =ᵐ[μ] 0 := by
-      rcases hsign with hrpos | hrneg
-      · have hnn : ∀ t, 0 ≤ (p n).eval t * q.eval t := fun t => by
-          rw [hprod]
-          exact mul_nonneg (sq_nonneg _) (hrpos t)
-        have hinter' : ∫ t, (p n).eval t * q.eval t ∂μ = 0 := by
-          simpa [mul_comm] using hinter
-        have hz : (fun t => (p n).eval t * q.eval t) =ᵐ[μ] 0 :=
-          (integral_eq_zero_iff_of_nonneg hnn hfi).mp hinter'
-        refine hz.mono fun t ht => ?_
-        have ht0 : (p n).eval t * q.eval t = 0 := by
-          simpa using ht
-        have : q.eval t ^ 2 * r.eval t = 0 := by
-          rw [← hprod, ht0]
-        have : q.eval t * r.eval t = 0 :=
-          mul_eq_zero.mpr ((mul_eq_zero.mp this).imp_left sq_eq_zero_iff.mp)
-        have ht' : (p n).eval t = q.eval t * r.eval t := by
-          simpa [eval_mul] using congrArg (eval t) hr
-        exact ht'.trans this
-      · have hnn : ∀ t, 0 ≤ -((p n).eval t * q.eval t) := fun t => by
-          rw [hprod]
-          have : r.eval t ≤ 0 := hrneg t
-          nlinarith [sq_nonneg (q.eval t)]
-        have hfi' : Integrable (fun t => -((p n).eval t * q.eval t)) μ := hfi.neg
-        have hinter' : ∫ t, -((p n).eval t * q.eval t) ∂μ = 0 := by
-          rw [MeasureTheory.integral_neg]
-          have : ∫ t, (p n).eval t * q.eval t ∂μ = 0 := by simpa [mul_comm] using hinter
-          rw [this, neg_zero]
-        have hz : (fun t => -((p n).eval t * q.eval t)) =ᵐ[μ] 0 :=
-          (integral_eq_zero_iff_of_nonneg hnn hfi').mp hinter'
-        refine hz.mono fun t ht => ?_
-        have ht0 : (p n).eval t * q.eval t = 0 := by
-          have : -((p n).eval t * q.eval t) = 0 := by simpa using ht
-          linarith
-        have hqr : q.eval t ^ 2 * r.eval t = 0 := by
-          rw [← hprod, ht0]
-        have : q.eval t * r.eval t = 0 :=
-          mul_eq_zero.mpr ((mul_eq_zero.mp hqr).imp_left sq_eq_zero_iff.mp)
-        have ht' : (p n).eval t = q.eval t * r.eval t := by
-          simpa [eval_mul] using congrArg (eval t) hr
-        exact ht'.trans this
+      rw [hr]
+      exact ae_eval_mul_eq_zero hsign (by rw [← hr]; exact h.integrable_mul (p n) q)
+        (by rw [← hr]; simpa [mul_comm] using hinter)
     have hsq : ∫ t, (p n).eval t ^ 2 ∂μ = 0 := by
       refine integral_eq_zero_of_ae ?_
       filter_upwards [hp0ae] with t ht

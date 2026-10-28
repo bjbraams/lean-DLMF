@@ -21,7 +21,8 @@ open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
 namespace DLMF.Legendre
 
-/-- Real conical Ferrers function. -/
+/-- The conical Ferrers function `𝖯^{-μ}_{-1/2+iτ}(x)`, i.e. `ferrersP (-1/2 + iτ) (-μ) x`, for real
+`τ, μ, x`. -/
 def conicalP (τ μ x : ℝ) : ℂ :=
   ferrersP (-1/2+I*τ) (-μ) x
 
@@ -30,7 +31,8 @@ def conicalP (τ μ x : ℝ) : ℂ :=
 def conicalQHat (τ μ x : ℝ) : ℂ :=
   ((exp (μ*π*I)*ferrersQ (-1/2+I*τ) (-μ) x).re:ℂ)-π/2*Real.sin (μ*π)*conicalP τ μ x
 
-/-- conical ode. -/
+/-- DLMF 14.20.1: for `μ, τ ≥ 0`, the conical function `w = 𝖯^{-μ}_{-1/2+iτ}(x)` satisfies `(1-x²)
+w'' - 2x w' - (τ² + 1/4 + μ²/(1-x²)) w = 0` on `-1 < x < 1`. -/
 @[dlmf 14.20.E1]
 theorem conical_ode (τ μ : ℝ) (hμ : 0 ≤ μ) (hτ : 0 ≤ τ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     (1-x^2:ℂ)*iteratedDeriv 2 (conicalP τ μ) x-2*x*deriv (conicalP τ μ) x-(τ^2+1/4+μ^2/(1-x^2):ℂ)*conicalP τ μ x=0 := by
@@ -59,7 +61,9 @@ theorem conicalP_differentiableAt (τ μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:�
     ).differentiableAt.congr_of_eventuallyEq
     ((ferrersP_eqOn_even_odd _ _).eventuallyEq_of_mem (isOpen_Ioo.mem_nhds hx))
 
-/-- conicalQHat connection. -/
+/-- DLMF 14.20.3: for `τ, μ ≥ 0` (excluding `τ = 0` with `μ` a positive half-odd integer) and `-1 <
+x < 1`, `𝖰̂^{-μ}_{-1/2+iτ}(x) = (π e^{-τπ} sin(μπ) sinh(τπ) 𝖯^{-μ}_{-1/2+iτ}(x) + π (e^{-τπ}
+cos²(μπ) + sinh(τπ)) 𝖯^{-μ}_{-1/2+iτ}(-x))/(2(cosh²(τπ) - sin²(μπ)))`. -/
 @[dlmf 14.20.E3]
 theorem conicalQHat_connection {τ μ : ℝ} (hτ : 0 ≤ τ) (hμ : 0 ≤ μ) (hex : τ ≠ 0 ∨ ∀ n : ℕ, μ ≠ n+1/2) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     conicalQHat τ μ x=π*Real.exp (-τ*π)*Real.sin (μ*π)*Real.sinh (τ*π)/(2*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2))*conicalP τ μ x+π*(Real.exp (-τ*π)*(Real.cos (μ*π))^2+Real.sinh (τ*π))/(2*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2))*conicalP τ μ (-x) := by
@@ -153,7 +157,8 @@ theorem conicalQHat_connection {τ μ : ℝ} (hτ : 0 ≤ τ) (hμ : 0 ≤ μ) (
   push_cast at h3 ⊢
   linear_combination h3
 
-/-- conical wronskian. -/
+/-- DLMF 14.20.4: for `τ, μ ≥ 0` and `-1 < x < 1`, `𝒲{𝖯^{-μ}_{-1/2+iτ}(x), 𝖯^{-μ}_{-1/2+iτ}(-x)} =
+2/(|Γ(μ+1/2+iτ)|² (1-x²))`. -/
 @[dlmf 14.20.E4]
 theorem conical_wronskian (τ μ : ℝ) (hτ : 0 ≤ τ) (hμ : 0 ≤ μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersWronskian (conicalP τ μ) (fun x => conicalP τ μ (-x)) x=2/((‖Gamma (μ+1/2+I*τ)‖^2:ℂ)*(1-x^2)) := by
@@ -166,7 +171,9 @@ theorem conical_wronskian (τ μ : ℝ) (hτ : 0 ≤ τ) (hμ : 0 ≤ μ) {x : �
     normSq_eq_norm_sq]
   push_cast; ring
 
-/-- conicalQHat wronskian. -/
+/-- DLMF 14.20.5: for `τ, μ ≥ 0` (excluding `τ = 0` with `μ` a positive half-odd integer) and `-1 <
+x < 1`, `𝒲{𝖯^{-μ}_{-1/2+iτ}, 𝖰̂^{-μ}_{-1/2+iτ}}(x) = π (e^{-τπ} cos²(μπ) + sinh(τπ))/(|Γ(μ+1/2+iτ)|²
+(cosh²(τπ) - sin²(μπ)) (1-x²))`. -/
 @[dlmf 14.20.E5]
 theorem conicalQHat_wronskian {τ μ : ℝ} (hτ : 0 ≤ τ) (hμ : 0 ≤ μ) (hex : τ ≠ 0 ∨ ∀ n : ℕ, μ ≠ n+1/2) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersWronskian (conicalP τ μ) (conicalQHat τ μ) x=π*(Real.exp (-τ*π)*(Real.cos (μ*π))^2+Real.sinh (τ*π))/((‖Gamma (μ+1/2+I*τ)‖^2:ℂ)*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2)*(1-x^2)) := by
@@ -197,7 +204,8 @@ theorem conicalQHat_wronskian {τ μ : ℝ} (hτ : 0 ≤ τ) (hμ : 0 ≤ μ) (h
   rw [← hfin]
   linear_combination B * hW'
 
-/-- conical associated connection. -/
+/-- DLMF 14.20.6: for `τ > 0`, `μ ≥ 0` and `x > 1`, `P^{-μ}_{-1/2+iτ}(x) = i e^{-μπi}/(sinh(τπ)
+|Γ(μ+1/2+iτ)|²) (Q^μ_{-1/2+iτ}(x) - Q^μ_{-1/2-iτ}(x))`. -/
 @[dlmf 14.20.E6]
 theorem conical_associated_connection {τ μ : ℝ} (hτ : 0 < τ) (hμ : 0 ≤ μ) {x : ℝ} (hx : 1 < x) :
     associatedP (-1/2+I*τ) (-μ) x=I*exp (-μ*π*I)/(Real.sinh (τ*π)*(‖Gamma (μ+1/2+I*τ)‖^2:ℂ))*(associatedQ (-1/2+I*τ) μ x-associatedQ (-1/2-I*τ) μ x) := by
@@ -314,7 +322,8 @@ theorem legCon_tendsto_P_neg (ν : ℂ) {μ : ℝ} (hμ : 0 < μ) :
     show 1-x^2 = (1-x)*(1+x) by ring, Real.log_mul h2.ne' h0.ne', Real.log_div h2.ne' h0.ne']
   congr 1; push_cast; ring
 
-/-- conical singular 7. -/
+/-- DLMF 14.20.7: for `τ ≥ 0` and `μ > 0` (excluding `τ = 0` with `μ` a positive half-odd integer),
+`𝖰̂^{μ}_{-1/2+iτ}(x) ~ (Γ(μ)/2) (2/(1-x))^{μ/2}` as `x → 1⁻`. -/
 @[dlmf 14.20.E7]
 theorem conical_singular_7 {τ μ : ℝ} (hτ : 0 ≤ τ) (hμ : 0 < μ) (hex : τ ≠ 0 ∨ ∀ n : ℕ, μ ≠ n+1/2) :
     (fun x : ℝ => conicalQHat τ (-1*μ) x) ~[𝓝[<] (1:ℝ)] (fun x : ℝ => Gamma (μ:ℂ)/2*(2/(1-x):ℂ)^((μ:ℂ)/2)) := by
@@ -381,7 +390,9 @@ theorem conical_singular_7 {τ μ : ℝ} (hτ : 0 ≤ τ) (hμ : 0 < μ) (hex : 
     legBd_two_cpow_sub_one_div]
   ring
 
-/-- conical singular 8. -/
+/-- DLMF 14.20.8: for `τ ≥ 0` and `μ > 0` (excluding `τ = 0` with `μ` a positive half-odd integer),
+`𝖰̂^{-μ}_{-1/2+iτ}(x) ~ π Γ(μ) (e^{-τπ} cos²(μπ) + sinh(τπ))/(2(cosh²(τπ) - sin²(μπ))
+|Γ(μ+1/2+iτ)|²) (2/(1-x))^{μ/2}` as `x → 1⁻`. -/
 @[dlmf 14.20.E8]
 theorem conical_singular_8 {τ μ : ℝ} (hτ : 0 ≤ τ) (hμ : 0 < μ) (hex : τ ≠ 0 ∨ ∀ n : ℕ, μ ≠ n+1/2) :
     (fun x : ℝ => conicalQHat τ (1*μ) x) ~[𝓝[<] (1:ℝ)] (fun x : ℝ => π*Gamma (μ:ℂ)*(Real.exp (-τ*π)*(Real.cos (μ*π))^2+Real.sinh (τ*π))/(2*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2)*(‖Gamma (μ+1/2+I*τ)‖^2:ℂ))*(2/(1-x):ℂ)^((μ:ℂ)/2)) := by
@@ -471,7 +482,8 @@ theorem conical_singular_8 {τ μ : ℝ} (hτ : 0 ≤ τ) (hμ : 0 < μ) (hex : 
   push_cast
   ring
 
-/-- conical mehler integral. -/
+/-- DLMF 14.20.9 (Mehler's integral): for real `τ` and `0 < θ < π`, `𝖯_{-1/2+iτ}(cos θ) = (2/π) ∫₀^θ
+cosh(τt)/√(2(cos t - cos θ)) dt`. -/
 @[dlmf 14.20.E9]
 theorem conical_mehler_integral (τ : ℝ) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
     conicalP τ 0 (Real.cos θ)=2/π*∫ t : ℝ in 0..θ, (Real.cosh (τ*t)/Real.sqrt (2*(Real.cos t-Real.cos θ)):ℂ) := by
@@ -540,23 +552,27 @@ theorem conical_positive (τ : ℝ) {θ : ℝ} (h0 : 0 ≤ θ) (hπ : θ < π) :
   simp [hg] at h1
   simpa using lt_of_lt_of_le one_pos h1
 
-/-- mehlerFockTransform. -/
+/-- DLMF 14.20.11: the generalized Mehler–Fock transform `f(τ) = (τ/π) sinh(τπ) Γ(1/2-μ+iτ)
+Γ(1/2-μ-iτ) ∫₁^∞ P^μ_{-1/2+iτ}(x) g(x) dx`, taken as an improper integral at `+∞`. -/
 @[dlmf 14.20.E11]
 def mehlerFockTransform (μ : ℝ) (g : ℝ → ℂ) (τ : ℝ) : ℂ :=
   τ/π*Real.sinh (τ*π)*Gamma (1/2-μ+I*τ)*Gamma (1/2-μ-I*τ)*improperAtTop (fun x : ℝ => associatedP (-1/2+I*τ) μ x*g x) 1
 
-/-- mehlerFockInverse. -/
+/-- DLMF 14.20.12: the inverse Mehler–Fock transform `g(x) = ∫₀^∞ P^μ_{-1/2+iτ}(x) f(τ) dτ`, taken
+as an improper integral at `+∞`. -/
 @[dlmf 14.20.E12]
 def mehlerFockInverse (μ : ℝ) (f : ℝ → ℂ) (x : ℝ) : ℂ :=
   improperAtTop (fun τ : ℝ => associatedP (-1/2+I*τ) μ x*f τ) 0
 
-/-- conical stieltjes integral. -/
+/-- DLMF 14.20.13: for real `τ` and `x > 1`, the improper integral `(cosh(τπ)/π) ∫₁^∞
+P_{-1/2+iτ}(t)/(x+t) dt` converges to `P_{-1/2+iτ}(x)`. -/
 @[dlmf 14.20.E13]
 theorem conical_stieltjes_integral (τ : ℝ) {x : ℝ} (hx : 1 < x) :
     HasIntegralAtTop (fun t : ℝ => Real.cosh (τ*π)/π*associatedP (-1/2+I*τ) 0 t/(x+t)) 1 (associatedP (-1/2+I*τ) 0 x) := by
   sorry
 
-/-- conical product transform. -/
+/-- DLMF 14.20.14: for `x, y > 1`, the improper integral `∫₀^∞ π τ tanh(τπ)/cosh(τπ) P_{-1/2+iτ}(x)
+P_{-1/2+iτ}(y) dτ` converges to `1/(x+y)`. -/
 @[dlmf 14.20.E14]
 theorem conical_product_transform {x y : ℝ} (hx : 1 < x) (hy : 1 < y) :
     HasIntegralAtTop (fun τ : ℝ => π*τ*Real.tanh (τ*π)/Real.cosh (τ*π)*associatedP (-1/2+I*τ) 0 x*associatedP (-1/2+I*τ) 0 y) 0 (1/(y+x:ℂ)) := by

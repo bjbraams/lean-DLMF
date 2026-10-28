@@ -167,11 +167,13 @@ theorem coulombh_hasSum {ε : ℝ} (hε : ε ≠ 0) (ℓ : ℕ) {r : ℝ} (hr : 
 
 /-! ### `ε = 0`: Bessel functions -/
 
+/-- `√(8r)/2 = √(2r)`. -/
 lemma c33b_sqrt_eight (r : ℝ) : Real.sqrt (8 * r) / 2 = Real.sqrt (2 * r) := by
   rw [show 8 * r = 2 ^ 2 * (2 * r) by ring, Real.sqrt_mul (by positivity),
     Real.sqrt_sq (by norm_num)]
   ring
 
+/-- For `x ≥ 0`, `√x (√x)^{2ℓ+1} = x^{ℓ+1}`. -/
 lemma c33b_pow_sqrt {x : ℝ} (hx : 0 ≤ x) (ℓ : ℕ) :
     (Real.sqrt x : ℂ) * (Real.sqrt x : ℂ) ^ (2 * ℓ + 1) = (x : ℂ) ^ (ℓ + 1) := by
   rw [← pow_succ', show 2 * ℓ + 1 + 1 = 2 * (ℓ + 1) by ring, pow_mul, ← Complex.ofReal_pow,

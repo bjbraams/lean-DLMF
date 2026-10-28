@@ -81,6 +81,7 @@ theorem integral_exp_mul_pow {z : ℝ} (hz : 0 < z) (j : ℕ) :
           one_div_pow]
         field_simp
 
+/-- `e^(-zt) t^j` is integrable on `(0, ∞)` for `z > 0`. -/
 theorem integrableOn_exp_mul_pow {z : ℝ} (hz : 0 < z) (j : ℕ) :
     IntegrableOn (fun t => Real.exp (-z * t) * t ^ j) (Ioi 0) := by
   have := integrableOn_rpow_mul_exp_neg_mul_rpow (p := 1) (s := j) (b := z) (by
@@ -95,6 +96,7 @@ def binetPoly (n : ℕ) (t : ℝ) : ℝ :=
 /-- `Sₙ = ∑ₘ (2π(m+1))^{-(2n+2)}`. -/
 def binetRemConst (n : ℕ) : ℝ := ∑' m : ℕ, 1 / (2 * π * (m + 1)) ^ (2 * n + 2)
 
+/-- `binetPoly n t = ∑_{j<n} B_{2j+2}/(2j+2)! t^(2j)`. -/
 theorem binetPoly_eq_range (n : ℕ) (t : ℝ) : binetPoly n t =
     ∑ j ∈ Finset.range n,
       (bernoulli (2 * (j + 1)) : ℝ) / (2 * (j + 1)).factorial * t ^ (2 * j) := by
@@ -183,6 +185,7 @@ theorem abs_binetBeta_div_sub_binetPoly_le (n : ℕ) {t : ℝ} (ht : 0 < t) :
     _ = 2 * binetRemConst n * t ^ (2 * n) := by
         rw [tsum_mul_left, binetRemConst]; ring
 
+/-- `e^(-zs) s^j binetPoly n s` is integrable on `(0, ∞)` for `z > 0`. -/
 theorem integrableOn_exp_mul_pow_mul_binetPoly {z : ℝ} (hz : 0 < z) (n j : ℕ) :
     IntegrableOn (fun s => Real.exp (-z * s) * (s ^ j * binetPoly n s)) (Ioi 0) := by
   simp only [binetPoly, Finset.mul_sum]
@@ -265,6 +268,8 @@ theorem factorial_two_mul_sub (k : ℕ) (hk : 1 ≤ k) :
 end StirlingSeries
 
 open Set in
+/-- DLMF 5.11.1, Stirling's series: `ln Γ(z) = (z - 1/2) ln z - z + (1/2) ln(2π) + ∑_{k=1}^n
+B₂ₖ/(2k(2k-1) z^(2k-1)) + O(z^(-2n-1))` along `z = t + x`, `t → ∞`. -/
 @[dlmf 5.11.E1]
 theorem log_Gamma_stirling (n : ℕ) {x : ℝ} (hx : 1 < x) :
     Asymptotics.IsBigO atTop
@@ -317,6 +322,8 @@ theorem log_Gamma_stirling (n : ℕ) {x : ℝ} (hx : 1 < x) :
     (pow_le_pow_left₀ ht.le (by linarith) _)) (by positivity)
 
 open Set in
+/-- DLMF 5.11.2: `ψ(z) = ln z - 1/(2z) - ∑_{k=1}^n B₂ₖ/(2k z^(2k)) + O(z^(-2n-2))` along `z = t +
+x`, `t → ∞`. -/
 @[dlmf 5.11.E2]
 theorem digamma_stirling (n : ℕ) {x : ℝ} (hx : 1 < x) :
     Asymptotics.IsBigO atTop
@@ -465,6 +472,7 @@ def stirlingG : ℕ → ℂ
       (bernoulli (k.val + 2) : ℂ) / (k.val + 2) * stirlingG (n - k.val)) / (n + 1)
 termination_by n => n
 
+/-- DLMF 5.11.9: `|Γ(x + iy)| ~ √(2π) |y|^(x-1/2) e^(-π|y|/2)` as `y → ∞`. -/
 @[dlmf 5.11.E9]
 theorem norm_Gamma_imag_large {x : ℝ} :
     Asymptotics.IsEquivalent atTop
@@ -633,6 +641,7 @@ theorem tendsto_Gamma_add_div_Gamma_mul_cpow (a : ℂ) :
       cpow_add _ _ htC, cpow_one]
     field_simp
 
+/-- DLMF 5.11.12: `Γ(t + a)/Γ(t + b) ~ t^(a-b)` as real `t → ∞`. -/
 @[dlmf 5.11.E12]
 theorem Gamma_ratio_power {a b : ℂ} :
     Tendsto (fun t : ℝ => Complex.Gamma (t + a) / Complex.Gamma (t + b) /
@@ -673,6 +682,7 @@ theorem tendsto_Gamma_div_stirling :
   simp only [Function.comp_apply]
   rw [Real.exp_sub, Real.exp_log hG, hd]
 
+/-- DLMF 5.11.7: `Γ(at + b) = O(√(2π) e^(-at) (at)^(at+b-1/2))` as `t → ∞`, for `a > 0`. -/
 @[dlmf 5.11.E7]
 theorem Gamma_linear_argument {a : ℝ} (ha : 0 < a) {b : ℂ} :
     Asymptotics.IsBigO atTop
@@ -740,16 +750,19 @@ def HasSeriesAtZero (f : ℝ → ℂ) (c : ℕ → ℂ) : Prop :=
   ∀ N : ℕ, (fun s : ℝ => f s - ∑ n ∈ Finset.range N, c n * (s : ℂ) ^ n) =O[𝓝[>] 0]
     fun s => s ^ N
 
+/-- `sᴺ` (as a complex number) is `O(sᴺ)` as `s → 0⁺`. -/
 theorem isBigO_ofReal_pow (N : ℕ) :
     (fun s : ℝ => (s : ℂ) ^ N) =O[𝓝[>] (0 : ℝ)] fun s => s ^ N :=
   IsBigO.of_bound 1 (Eventually.of_forall fun s => by simp)
 
+/-- A complex polynomial evaluated at real `s` is bounded as `s → 0⁺`. -/
 theorem isBigO_polynomial_eval_one (q : Polynomial ℂ) :
     (fun s : ℝ => q.eval (s : ℂ)) =O[𝓝[>] (0 : ℝ)] fun _ => (1 : ℝ) := by
   have hc : Continuous fun s : ℝ => q.eval (s : ℂ) :=
     q.continuous.comp continuous_ofReal
   exact (hc.continuousAt (x := 0)).tendsto.isBigO_one ℝ |>.mono nhdsWithin_le_nhds
 
+/-- A complex polynomial whose coefficients below degree `N` vanish is `O(sᴺ)` as `s → 0⁺`. -/
 theorem isBigO_polynomial_eval_of_coeff (q : Polynomial ℂ) (N : ℕ)
     (h : ∀ m < N, q.coeff m = 0) :
     (fun s : ℝ => q.eval (s : ℂ)) =O[𝓝[>] (0 : ℝ)] fun s => s ^ N := by
@@ -758,17 +771,20 @@ theorem isBigO_polynomial_eval_of_coeff (q : Polynomial ℂ) (N : ℕ)
   refine (h1.congr_left fun s => ?_).congr_right fun s => mul_one _
   rw [hr, Polynomial.eval_mul, Polynomial.eval_pow, Polynomial.eval_X]
 
+/-- A finite power sum `∑_{n<N} cₙ zⁿ` is the evaluation of the truncated power series. -/
 theorem sum_range_eq_eval_trunc (c : ℕ → ℂ) (N : ℕ) (z : ℂ) :
     ∑ n ∈ Finset.range N, c n * z ^ n = (PowerSeries.trunc N (PowerSeries.mk c)).eval z := by
   rw [Polynomial.eval, PowerSeries.eval₂_trunc_eq_sum_range]
   simp
 
+/-- A function with an expansion at `0⁺` is bounded near `0⁺`. -/
 theorem HasSeriesAtZero.isBigO_one {f : ℝ → ℂ} {c : ℕ → ℂ} (hf : HasSeriesAtZero f c) :
     f =O[𝓝[>] (0 : ℝ)] fun _ => (1 : ℝ) := by
   have h := hf 0
   simp only [Finset.range_zero, Finset.sum_empty, sub_zero, pow_zero] at h
   exact h
 
+/-- Expansions at `0⁺` multiply: the coefficients of `f g` are those of the product power series. -/
 theorem HasSeriesAtZero.mul {f g : ℝ → ℂ} {c d : ℕ → ℂ} (hf : HasSeriesAtZero f c)
     (hg : HasSeriesAtZero g d) :
     HasSeriesAtZero (fun s => f s * g s)
@@ -801,11 +817,13 @@ theorem HasSeriesAtZero.mul {f g : ℝ → ℂ} {c d : ℕ → ℂ} (hf : HasSer
   rw [hsum, Polynomial.eval_sub, Polynomial.eval_mul, ← hfF, ← hgG]
   ring
 
+/-- `A |s| ≤ 1` for all `s` near `0⁺`. -/
 theorem eventually_mul_abs_le_one (A : ℝ) : ∀ᶠ s in 𝓝[>] (0 : ℝ), A * |s| ≤ 1 := by
   have h : Tendsto (fun s : ℝ => A * |s|) (𝓝 0) (𝓝 0) := by
     simpa using (continuous_const.mul continuous_abs).tendsto (0 : ℝ) (f := fun s : ℝ => A * |s|)
   exact nhdsWithin_le_nhds (h.eventually (Iic_mem_nhds zero_lt_one))
 
+/-- `e^(-as) = ∑ (-a)ⁿ sⁿ/n!` as an expansion at `0⁺`. -/
 theorem hasSeriesAtZero_exp (a : ℂ) :
     HasSeriesAtZero (fun s => cexp (-a * s)) (fun n => (-a) ^ n / (n ! : ℂ)) := by
   intro N
@@ -825,6 +843,7 @@ theorem hasSeriesAtZero_exp (a : ℂ) :
   simp only [norm_mul, norm_neg, Complex.norm_real, Real.norm_eq_abs, mul_pow, norm_pow]
   ring
 
+/-- `binetPoly N s = ∑_{n<2N} B_{n+2}/(n+2)! sⁿ` (odd Bernoulli numbers beyond `B₁` vanish). -/
 theorem binetPoly_eq_sum_range_two_mul (N : ℕ) (s : ℝ) :
     binetPoly N s = ∑ n ∈ Finset.range (2 * N),
       (bernoulli (n + 2) : ℝ) / ((n + 2)! : ℝ) * s ^ n := by
@@ -837,6 +856,7 @@ theorem binetPoly_eq_sum_range_two_mul (N : ℕ) (s : ℝ) :
       bernoulli_eq_zero_of_odd (n := 2 * N + 1 + 2) ⟨N + 1, by ring⟩ (by omega)]
     simp only [Rat.cast_zero, zero_div, zero_mul, add_zero]
 
+/-- `β(s)/s` has the expansion `∑ B_{n+2}/(n+2)! sⁿ` at `0⁺`. -/
 theorem hasSeriesAtZero_binetBeta_div :
     HasSeriesAtZero (fun s => ((binetBeta s / s : ℝ) : ℂ))
       (fun n => ((bernoulli (n + 2) : ℚ) : ℂ) / ((n + 2)! : ℂ)) := by
@@ -884,11 +904,14 @@ theorem integrableOn_cexp_mul_binetBeta_div {w : ℂ} (hw : 0 < w.re) :
     simp only [neg_mul, neg_re, mul_re, ofReal_re, ofReal_im, mul_zero, sub_zero]
     rw [mul_div_assoc]
 
+/-- `|β(s)/s| ≤ 1/12` for `s > 0`. -/
 theorem norm_binetBeta_div_le {s : ℝ} (hs : 0 < s) : ‖((binetBeta s / s : ℝ) : ℂ)‖ ≤ 1 / 12 := by
   rw [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (div_nonneg (binetBeta_nonneg hs)
     hs.le), div_le_iff₀ hs]
   linarith [binetBeta_le hs]
 
+/-- The Laplace transform `w ↦ ∫₀^∞ e^(-ws) β(s)/s ds` is differentiable in `w` for `Re w > 0`, with
+derivative under the integral sign. -/
 theorem hasDerivAt_laplace_binetMu {w₀ : ℂ} (hw₀ : 0 < w₀.re) :
     HasDerivAt (fun w : ℂ => ∫ s in Ioi (0 : ℝ), cexp (-w * s) * ((binetBeta s / s : ℝ) : ℂ))
       (∫ s in Ioi (0 : ℝ), -(s : ℂ) * cexp (-w₀ * s) * ((binetBeta s / s : ℝ) : ℂ)) w₀ := by
@@ -1011,10 +1034,13 @@ def stirlingLogPart (a : ℂ) (t : ℝ) : ℂ :=
 def stirlingLogCoeff (a : ℂ) (n : ℕ) : ℂ :=
   (-1) ^ n * (a ^ (n + 2) / ((n + 1) * (n + 2)) - a ^ (n + 1) / (2 * (n + 1)))
 
+/-- The `m`-th coefficient of the truncation to degree `< M` of `mk f` is `f m` if `m < M` and `0`
+otherwise. -/
 theorem coeff_trunc_mk (f : ℕ → ℂ) (M m : ℕ) :
     (PowerSeries.trunc M (PowerSeries.mk f)).coeff m = if m < M then f m else 0 := by
   simp [PowerSeries.coeff_trunc]
 
+/-- `t (t⁻¹)^(N+2) = t^(-(N+1))` eventually as `t → ∞`. -/
 theorem isBigO_rpow_neg_of_recip_pow (N : ℕ) :
     (fun t : ℝ => t * (t⁻¹) ^ (N + 2)) =ᶠ[atTop] fun t => t ^ (-((N : ℝ) + 1)) := by
   filter_upwards [eventually_gt_atTop 0] with t ht
@@ -1022,6 +1048,8 @@ theorem isBigO_rpow_neg_of_recip_pow (N : ℕ) :
     Real.rpow_natCast, inv_pow, pow_succ _ (N + 1)]
   field_simp
 
+/-- The elementary part `(t + a - 1/2)(log(t + a) - log t) - a` has an asymptotic expansion in
+powers `t^(-(n+1))` with coefficients `stirlingLogCoeff a`. -/
 theorem hasAsymptoticExpansion_stirlingLogPart (a : ℂ) :
     HasAsymptoticExpansion atTop (fun (n : ℕ) (t : ℝ) => t ^ (-((n : ℝ) + 1)))
       (stirlingLogCoeff a) (stirlingLogPart a) := by
@@ -1134,11 +1162,13 @@ theorem hasAsymptoticExpansion_stirlingLogPart (a : ℂ) :
 def stirlingShiftCoeff (a : ℂ) (n : ℕ) : ℂ :=
   (-1) ^ n * Polynomial.aeval a (Polynomial.bernoulli (n + 2)) / ((n + 1) * (n + 2))
 
+/-- `Bₙ(a) = ∑_{i≤n} Bᵢ C(n, i) a^(n-i)`. -/
 theorem aeval_bernoulli_eq_sum (a : ℂ) (n : ℕ) :
     Polynomial.aeval a (Polynomial.bernoulli n) =
       ∑ i ∈ Finset.range (n + 1), ((bernoulli i : ℚ) : ℂ) * (n.choose i : ℂ) * a ^ (n - i) := by
   simp [Polynomial.bernoulli, map_sum, Polynomial.aeval_monomial]
 
+/-- `(-1)^k B_{k+2} = B_{k+2}` (odd Bernoulli numbers beyond `B₁` vanish). -/
 theorem neg_one_pow_mul_bernoulli_add_two (k : ℕ) :
     (-1 : ℂ) ^ k * ((bernoulli (k + 2) : ℚ) : ℂ) = ((bernoulli (k + 2) : ℚ) : ℂ) := by
   rcases Nat.even_or_odd k with hk | hk
@@ -1146,6 +1176,8 @@ theorem neg_one_pow_mul_bernoulli_add_two (k : ℕ) :
   · rw [bernoulli_eq_zero_of_odd (hk.add_even even_two) (by omega)]
     simp
 
+/-- The coefficients of the elementary and the Laplace parts add up to the coefficients `(-1)ⁿ
+B_{n+2}(a)/((n+1)(n+2))` of DLMF 5.11.8. -/
 theorem stirlingLogCoeff_add_coeff (a : ℂ) (n : ℕ) :
     stirlingLogCoeff a n + Real.Gamma ((n : ℝ) + 1) • PowerSeries.coeff n
         (PowerSeries.mk (fun n => (-a) ^ n / (n ! : ℂ)) *
@@ -1206,6 +1238,7 @@ theorem stirlingLogCoeff_add_coeff (a : ℂ) (n : ℕ) :
 def stirlingShiftRem (a : ℂ) (t : ℝ) : ℂ :=
   binetExponent (t + a) - (((t : ℂ) + a - 1 / 2) * log t - t + (1 / 2) * log (2 * π))
 
+/-- The shifted Stirling remainder is the elementary part plus `μ(t + a)`. -/
 theorem stirlingShiftRem_eq (a : ℂ) :
     stirlingShiftRem a = stirlingLogPart a + fun t : ℝ => binetMu ((t : ℂ) + a) := by
   funext t
@@ -1314,6 +1347,7 @@ theorem cexp_poly_sub_isBigO (d G : ℕ → ℂ) (hG0 : G 0 = 1)
         mul_le_mul hKx hMV (norm_nonneg _) ((norm_nonneg _).trans hKx)
     _ = K * M * x ^ (N + 1) := by ring
 
+/-- `t^(-(n+1)) = (t⁻¹)^(n+1)` for `t > 0`. -/
 theorem rpow_neg_add_one_eq_recip_pow {t : ℝ} (ht : 0 < t) (n : ℕ) :
     t ^ (-((n : ℝ) + 1)) = (t⁻¹) ^ (n + 1) := by
   rw [Real.rpow_neg ht.le, show (n : ℝ) + 1 = ((n + 1 : ℕ) : ℝ) by push_cast; ring,
@@ -1363,9 +1397,12 @@ theorem isBigO_cexp_sub_of_hasAsymptoticExpansion {L : ℝ → ℂ} {d G : ℕ �
   simp only [hPd]
   ring
 
+/-- `G₀(a, b) = 1` for the coefficients of DLMF 5.11.15. -/
 theorem stirlingRatioG_zero (a b : ℂ) : stirlingRatioG a b 0 = 1 := by
   rw [stirlingRatioG]
 
+/-- The coefficients `Gₙ(a, b)` of DLMF 5.11.15 satisfy `(n + 1) G_{n+1} = ∑_{k≤n} (k + 1)(cₖ(a) -
+cₖ(b)) G_{n-k}`, with `cₖ` the coefficients of 5.11.8. -/
 theorem stirlingRatioG_recurrence (a b : ℂ) (n : ℕ) :
     ((n : ℂ) + 1) * stirlingRatioG a b (n + 1) = ∑ k ∈ Finset.range (n + 1),
       ((k : ℂ) + 1) * (stirlingShiftCoeff a k - stirlingShiftCoeff b k) *
@@ -1464,11 +1501,14 @@ def recipFacBinom (β : ℂ) (k : ℕ) : ℂ := (-1) ^ k * poch (-β) k / k.fact
 def recipFacRem (β : ℂ) (n : ℕ) (s : ℝ) : ℂ :=
   (1 + (s : ℂ)) ^ β - ∑ k ∈ Finset.range n, recipFacBinom β k * (s : ℂ) ^ k
 
+/-- The zeroth binomial coefficient `C(β, 0) = 1`. -/
 theorem recipFacBinom_zero (β : ℂ) : recipFacBinom β 0 = 1 := by simp [recipFacBinom, poch_zero]
 
+/-- `(a)_{n+1} = a (a + 1)_n`. -/
 theorem poch_succ_left' (a : ℂ) (n : ℕ) : poch a (n + 1) = a * poch (a + 1) n := by
   simp [poch, ascPochhammer_succ_left, Polynomial.eval_comp, add_comm]
 
+/-- `C(β, k + 1)(k + 1) = β C(β - 1, k)`. -/
 theorem recipFacBinom_succ (β : ℂ) (k : ℕ) :
     recipFacBinom β (k + 1) * (k + 1) = β * recipFacBinom (β - 1) k := by
   simp only [recipFacBinom, poch_succ_left', Nat.factorial_succ]
@@ -1479,16 +1519,20 @@ theorem recipFacBinom_succ (β : ℂ) (k : ℕ) :
   field_simp
   ring
 
+/-- `1 + s` lies in the slit plane for real `s > -1`. -/
 theorem one_add_ofReal_mem_slitPlane {s : ℝ} (hs : -1 < s) : 1 + (s : ℂ) ∈ slitPlane := by
   rw [show 1 + (s : ℂ) = ((1 + s : ℝ) : ℂ) by push_cast; ring]
   exact ofReal_mem_slitPlane.mpr (by linarith)
 
+/-- `u ↦ (1 + u)^β` has derivative `β (1 + s)^(β-1)` at real `s > -1`. -/
 theorem hasDerivAt_one_add_cpow (β : ℂ) {s : ℝ} (hs : -1 < s) :
     HasDerivAt (fun u : ℝ => (1 + (u : ℂ)) ^ β) (β * (1 + (s : ℂ)) ^ (β - 1)) s := by
   have h := ((hasDerivAt_id (s : ℂ)).const_add 1).cpow_const (c := β)
     (one_add_ofReal_mem_slitPlane hs)
   simpa using h.comp_ofReal
 
+/-- The remainder of the binomial series of `(1 + s)^β` after `n + 1` terms has derivative `β` times
+the remainder of `(1 + s)^(β-1)` after `n` terms. -/
 theorem hasDerivAt_recipFacRem (β : ℂ) (n : ℕ) {s : ℝ} (hs : -1 < s) :
     HasDerivAt (recipFacRem β (n + 1)) (β * recipFacRem (β - 1) n s) s := by
   have hp : ∀ k ∈ Finset.range (n + 1), HasDerivAt
@@ -1506,16 +1550,19 @@ theorem hasDerivAt_recipFacRem (β : ℂ) (n : ℕ) {s : ℝ} (hs : -1 < s) :
   push_cast
   ring
 
+/-- The binomial remainder after `n + 1` terms vanishes at `s = 0`. -/
 theorem recipFacRem_zero_right (β : ℂ) (n : ℕ) : recipFacRem β (n + 1) 0 = 0 := by
   rw [recipFacRem, Finset.sum_range_succ']
   simp [recipFacBinom_zero]
 
+/-- The binomial remainder is continuous on `(-1, ∞)`. -/
 theorem continuousOn_recipFacRem (β : ℂ) (n : ℕ) : ContinuousOn (recipFacRem β n) (Ioi (-1)) := by
   intro s hs
   refine ContinuousAt.continuousWithinAt ?_
   refine ContinuousAt.sub ?_ (by fun_prop)
   exact ContinuousAt.cpow (by fun_prop) continuousAt_const (one_add_ofReal_mem_slitPlane hs)
 
+/-- The binomial remainder after `n` terms is bounded by `K sⁿ (1 + s)^max(Re β, 0)` for `s ≥ 0`. -/
 theorem exists_norm_recipFacRem_le (n : ℕ) : ∀ β : ℂ, ∃ K : ℝ, 0 ≤ K ∧ ∀ s : ℝ, 0 ≤ s →
     ‖recipFacRem β n s‖ ≤ K * s ^ n * (1 + s) ^ max β.re 0 := by
   induction n with
@@ -1566,6 +1613,7 @@ theorem exists_norm_recipFacRem_le (n : ℕ) : ∀ β : ℂ, ∃ K : ℝ, 0 ≤ 
           rw [sub_zero, abs_of_nonneg hs]; ring
 
 
+/-- `s^(p-1) (1 + s)^(-A)` is integrable on `(0, ∞)` when `0 < Re p < Re A`. -/
 theorem integrableOn_cpow_mul_one_add_cpow {p A : ℂ} (hp : 0 < p.re) (hpA : p.re < A.re) :
     IntegrableOn (fun s : ℝ => (s : ℂ) ^ (p - 1) * ((1 + s : ℝ) : ℂ) ^ (-A)) (Ioi 0) := by
   have hg := integrableOn_rpow_mul_one_add_rpow hp hpA
@@ -1585,6 +1633,7 @@ theorem integrableOn_cpow_mul_one_add_cpow {p A : ℂ} (hp : 0 < p.re) (hpA : p.
   rw [norm_mul, norm_cpow_eq_rpow_re_of_pos hs0, norm_cpow_eq_rpow_re_of_pos (by linarith)]
   simp
 
+/-- `Γ(α + k) = (α)ₖ Γ(α)` for `Re α > 0`. -/
 theorem Gamma_add_nat_eq_poch_mul_Gamma {α : ℂ} (hα : 0 < α.re) (k : ℕ) :
     Complex.Gamma (α + k) = poch α k * Complex.Gamma α := by
   induction k with
@@ -1718,6 +1767,7 @@ def ratioThreeShiftCoeff (a b c : ℂ) : ℕ → ℂ
   | 0 => 0
   | j + 1 => (-1 : ℂ) ^ j * poch (c - a + 1) j * poch (c - b) (j + 1) / j.factorial
 
+/-- Shift identity for the partial sums of 5.11.19 in the parameter `a`. -/
 theorem ratioThreeSum_shift (a b c : ℂ) (t : ℝ) (n : ℕ)
     (hne : ∀ k < n, a + b - c + t - 1 - k ≠ 0) :
     ((t : ℂ) + a - 1) * ratioThreeSum (a - 1) b c n t =
@@ -1768,9 +1818,6 @@ theorem isBigO_Gamma_add_div_Gamma_add (u v : ℂ) :
     exact Real.rpow_le_rpow_of_exponent_le ht (by simp)
   exact ((h.trans h1).add (Asymptotics.isBigO_refl (fun t : ℝ => (t : ℂ) ^ (u - v)) atTop))
     |>.congr_left fun t => by ring
-
-theorem norm_ofReal_cpow_of_pos {t : ℝ} (ht : 0 < t) (w : ℂ) : ‖(t : ℂ) ^ w‖ = t ^ w.re :=
-  norm_cpow_eq_rpow_re_of_pos ht w
 
 /-- 5.11.19 when `Re (c - a) > 0`, via the Beta-integral remainder. -/
 theorem ratioThree_isBigO_of_re_pos {a b c : ℂ} (n : ℕ) (hα : 0 < (c - a).re) :
@@ -1830,8 +1877,8 @@ theorem ratioThree_isBigO_of_re_pos {a b c : ℂ} (n : ℕ) (hα : 0 < (c - a).r
       (isBigO_Gamma_add_div_Gamma_add u1 v1)
   refine h1.trans (h2.trans (Asymptotics.IsBigO.of_bound 1 ?_))
   filter_upwards [eventually_gt_atTop 0] with t ht
-  rw [one_mul, norm_mul, norm_mul, norm_mul, norm_ofReal_cpow_of_pos ht,
-    norm_ofReal_cpow_of_pos ht, norm_ofReal_cpow_of_pos ht]
+  rw [one_mul, norm_mul, norm_mul, norm_mul, norm_cpow_eq_rpow_re_of_pos ht,
+    norm_cpow_eq_rpow_re_of_pos ht, norm_cpow_eq_rpow_re_of_pos ht]
   have he : (b - 0).re + ((u1 : ℂ) - (v1 : ℂ)).re = (a + b - c - n).re := by
     simp only [sub_re, ofReal_re, add_re, natCast_re, zero_re, hu1, hv1, hpdef]
     ring
@@ -1899,6 +1946,9 @@ theorem ratioThree_isBigO_shift {a b c : ℂ} (n : ℕ)
       rw [sub_zero, mul_comm]
   exact ((hA.trans_eventuallyEq hA').add hB).congr' heq EventuallyEq.rfl
 
+/-- Inductive core of the remainder bound for 5.11.19: the error of the `n`-term
+reciprocal-factorial expansion of `Γ(t + a)Γ(t + b)/Γ(t + c)` is `O(Γ(t) t^(a+b-c-n))`, by induction
+on `m` with `Re(c - a) + m > 0`. -/
 lemma ratioThree_isBigO_aux {b c : ℂ} (n : ℕ) (m : ℕ) : ∀ a : ℂ, 0 < (c - a).re + m →
     (fun t : ℝ => Complex.Gamma (t + a) * Complex.Gamma (t + b) / Complex.Gamma (t + c) -
         ratioThreeSum a b c n t) =O[atTop]

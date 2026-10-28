@@ -27,7 +27,7 @@ is Rodrigues’ formula for P_n(1-2x). The affine normalization is already
 proved locally by `DLMF.OrthogonalPolynomials.aeval_shiftedLegendre_eq_legendrePolyP`.
 The upstream Rodrigues proof is not duplicated here. -/
 
-/-- ferrersP nat polynomial. -/
+/-- DLMF 14.7.1: for natural `n` and `-1 < x < 1`, `𝖯^0_n(x) = P_n(x)`, the Legendre polynomial. -/
 @[dlmf 14.7.E1]
 theorem ferrersP_nat_polynomial (n : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersP n 0 x=DLMF.OrthogonalPolynomials.legendrePolyP n x := by
@@ -119,7 +119,8 @@ theorem iteratedDeriv_legendrePolyP_rodrigues (n m : ℕ) (z : ℂ) :
 
 end RodriguesHelpers
 
-/-- ferrersP nat order rodrigues. -/
+/-- DLMF 14.7.8 and 14.7.10: for natural `n, m` and `-1 < x < 1`, `𝖯^m_n(x) = (-1)^{m+n}
+(1-x²)^{m/2}/(2^n n!) · d^{m+n}(1-x²)^n/dx^{m+n}`. -/
 @[dlmf 14.7.E8, dlmf 14.7.E10]
 theorem ferrersP_nat_order_rodrigues (n m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersP n m x=(-1)^(m+n)*(1-x^2:ℂ)^((m:ℂ)/2)/(2^n*(n.factorial:ℂ))*iteratedDeriv (m+n) (fun x : ℝ => (1-x^2:ℂ)^n) x := by
@@ -151,7 +152,8 @@ theorem ferrersP_nat_order_rodrigues (n m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:�
   linear_combination -((-1:ℂ)^m * (1-(x:ℂ)^2)^((m:ℂ)/2) * (2^n*(n.factorial:ℂ))⁻¹ *
     (((Polynomial.derivative^[m+n] R).eval x : ℝ) : ℂ)) * hsq
 
-/-- associatedP nat order rodrigues. -/
+/-- DLMF 14.7.14: for natural `n, m` and `z ∉ (-∞, 1]`, `P^m_n(z) = (z²-1)^{m/2}/(2^n n!) ·
+d^{m+n}(z²-1)^n/dz^{m+n}`. -/
 @[dlmf 14.7.E14]
 theorem associatedP_nat_order_rodrigues (n m : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     associatedP n m z=legendreBranchPower m z/(2^n*(n.factorial:ℂ))*iteratedDeriv (m+n) (fun z : ℂ => (z^2-1)^n) z := by
@@ -163,7 +165,7 @@ theorem associatedP_nat_order_rodrigues (n m : ℕ) {z : ℂ} (hz : z-1 ∈ slit
     iteratedDeriv_legendrePolyP_rodrigues]
   ring
 
-/-- associatedP equal nat order. -/
+/-- DLMF 14.7.15: for natural `m` and `z ∉ (-∞, 1]`, `P^m_m(z) = ((2m)!/(2^m m!)) (z²-1)^{m/2}`. -/
 @[dlmf 14.7.E15]
 theorem associatedP_equal_nat_order (m : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     associatedP m m z=((2*m).factorial:ℂ)/(2^m*(m.factorial:ℂ))*legendreBranchPower m z := by
@@ -186,7 +188,7 @@ theorem associatedP_equal_nat_order (m : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane)
   field_simp
   linear_combination ((2*m).choose m) * legendreBranchPower m z * hsq
 
-/-- ferrersP order gt degree. -/
+/-- DLMF 14.7.16: for natural `n < m` and `-1 < x < 1`, `𝖯^m_n(x) = 0`. -/
 @[dlmf 14.7.E16]
 theorem ferrersP_order_gt_degree (n m : ℕ) (h : n < m) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersP n m x=0 := by
@@ -198,7 +200,7 @@ theorem ferrersP_order_gt_degree (n m : ℕ) (h : n < m) {x : ℝ} (hx : x ∈ I
   rw [Nat.sub_add_cancel hm, poch_neg_nat_eq_zero h]
   simp
 
-/-- associatedP order gt degree. -/
+/-- DLMF 14.7.16 (associated case): for natural `n < m` and `z ∉ (-∞, 1]`, `P^m_n(z) = 0`. -/
 @[dlmf 14.7.E16]
 theorem associatedP_order_gt_degree (n m : ℕ) (h : n < m) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     associatedP n m z=0 := by
@@ -249,19 +251,20 @@ theorem ferrersQ_neg_of_add_eq_nat {ν μ : ℂ} {N : ℕ} (hN : ν+μ = N) (x :
   rw [ferrersW1_neg, ferrersW2_neg, hN, pow_succ]
   linear_combination (-π/2*ferrersW1 ν μ x) * h2 - (π/2*ferrersW2 ν μ x) * h1
 
-/-- ferrersP nat reflection. -/
+/-- DLMF 14.7.17: for natural `n, m` and `-1 < x < 1`, `𝖯^m_n(-x) = (-1)^{n+m} 𝖯^m_n(x)`. -/
 @[dlmf 14.7.E17]
 theorem ferrersP_nat_reflection (n m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersP n m (-x)=(-1)^(n+m)*ferrersP n m x := by
   exact ferrersP_neg_of_add_eq_nat (by push_cast; ring) hx
 
-/-- ferrersQ nat reflection 1. -/
+/-- DLMF 14.7.18: for natural `m ≤ n` and `-1 < x < 1`, `𝖰^m_n(-x) = (-1)^{n+m+1} 𝖰^m_n(x)`. -/
 @[dlmf 14.7.E18]
 theorem ferrersQ_nat_reflection_1 (n m : ℕ) (h : m ≤ n) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersQ n (1*m) (-x)=(-1)^(n+m+1)*ferrersQ n (1*m) x := by
   exact ferrersQ_neg_of_add_eq_nat (by push_cast; ring) x
 
-/-- ferrersQ nat reflection 2. -/
+/-- DLMF 14.7.18 (negative order): for natural `m ≤ n` and `-1 < x < 1`, `𝖰^{-m}_n(-x) =
+(-1)^{n+m+1} 𝖰^{-m}_n(x)`. -/
 @[dlmf 14.7.E18]
 theorem ferrersQ_nat_reflection_2 (n m : ℕ) (h : m ≤ n) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersQ n (-1*m) (-x)=(-1)^(n+m+1)*ferrersQ n (-1*m) x := by

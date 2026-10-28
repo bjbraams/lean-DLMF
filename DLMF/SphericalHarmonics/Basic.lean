@@ -86,6 +86,7 @@ theorem harmonicHomogeneousDim_three (k : ℕ) :
 theorem laplacianMv_C {n : ℕ} (r : ℝ) : laplacianMv (C r : MvPolynomial (Fin n) ℝ) = 0 := by
   simp [laplacianMv]
 
+/-- Every constant polynomial is a homogeneous harmonic polynomial of degree `0`. -/
 theorem isHarmonicHomogeneous_C (n : ℕ) (r : ℝ) :
     IsHarmonicHomogeneous (n := n) 0 (C r) := by
   refine ⟨?_, laplacianMv_C r⟩

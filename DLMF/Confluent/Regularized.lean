@@ -39,6 +39,7 @@ theorem regularizedConfluent_eq_tsum (a b z : ℂ) :
   rw [regularizedHGFunCoeff_singleton]
   ring
 
+/-- The power series of the regularized `₁F̃₁(a;b;·)` has infinite radius of convergence. -/
 theorem radius_regularizedConfluentSeries (a b : ℂ) :
     (regularizedHGFunSeries {a} {b}).radius = ⊤ :=
   radius_regularizedHGFunSeries_eq_top (by simp)
@@ -52,6 +53,7 @@ theorem hasFPowerSeriesOnBall_regularizedConfluent (a b : ℂ) :
     (regularizedHGFunSeries {a} {b}) 0 ⊤
   simpa only [hr] using (regularizedHGFunSeries {a} {b}).hasFPowerSeriesOnBall (by rw [hr]; simp)
 
+/-- The series `∑ (a)_n zⁿ / (n! Γ(b+n))` converges for all `a, b, z`. -/
 theorem summable_regularizedConfluent_term (a b z : ℂ) :
     Summable fun n : ℕ => poch a n * z ^ n / n.factorial * (Gamma (b + n))⁻¹ := by
   have h := (hasFPowerSeriesOnBall_regularizedConfluent a b).hasSum_mul_pow
@@ -60,6 +62,8 @@ theorem summable_regularizedConfluent_term (a b z : ℂ) :
   rw [regularizedHGFunCoeff_singleton]
   ring
 
+/-- For `b = 1 - N` and `n ≥ N`, the `n`-th term of the regularized series has norm `|(α)_n| / (n!
+(n-N)!)`. -/
 theorem norm_regularizedConfluentSeries_apply_ofReal (α : ℝ) (N n : ℕ) (hn : N ≤ n) :
     ‖regularizedHGFunSeries {(α : ℂ)} {1 - (N : ℂ)} n‖ =
       ‖poch (α : ℂ) n‖ / (n.factorial * (n - N).factorial) := by
@@ -146,12 +150,14 @@ theorem analyticOnNhd_regularizedConfluent_a (b z : ℂ) :
     AnalyticOnNhd ℂ (fun a => regularizedHGFun {a} {b} z) univ :=
   analyticOnNhd_regularizedConfluent_comp differentiable_id (differentiable_const b) z
 
+/-- `w ↦ ₁F̃₁(A(w); B(w); z)` is analytic when `A` and `B` are entire. -/
 @[fun_prop]
 theorem analyticAt_regularizedConfluent_comp {A B : ℂ → ℂ} (hA : Differentiable ℂ A)
     (hB : Differentiable ℂ B) (z w : ℂ) :
     AnalyticAt ℂ (fun w => regularizedHGFun {A w} {B w} z) w :=
   analyticOnNhd_regularizedConfluent_comp hA hB z w (mem_univ w)
 
+/-- `w ↦ ₁F̃₁(A(w); B(w); z)` is entire when `A` and `B` are entire. -/
 @[fun_prop]
 theorem differentiable_regularizedConfluent_comp {A B : ℂ → ℂ} (hA : Differentiable ℂ A)
     (hB : Differentiable ℂ B) (z : ℂ) :
@@ -160,6 +166,7 @@ theorem differentiable_regularizedConfluent_comp {A B : ℂ → ℂ} (hA : Diffe
 
 /-! ### Derivative -/
 
+/-- Coefficient identity `(n+1) c_{n+1}(a;b) = a c_n(a+1;b+1)` for the regularized `₁F̃₁`. -/
 theorem regularizedHGFunCoeff_singleton_succ (a b : ℂ) (n : ℕ) :
     (n + 1 : ℂ) * regularizedHGFunCoeff {a} {b} (n + 1) =
       a * regularizedHGFunCoeff {a + 1} {b + 1} n := by
@@ -183,6 +190,7 @@ theorem deriv_regularizedConfluent (a b z : ℂ) :
   funext n
   rw [← mul_assoc, regularizedHGFunCoeff_singleton_succ]
 
+/-- The regularized `₁F̃₁(a;b;·)` is complex differentiable everywhere. -/
 theorem differentiableAt_regularizedConfluent (a b z : ℂ) :
     DifferentiableAt ℂ (regularizedHGFun {a} {b}) z :=
   ((hasFPowerSeriesOnBall_regularizedConfluent a b).analyticAt_of_mem

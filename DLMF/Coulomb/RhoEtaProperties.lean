@@ -104,6 +104,7 @@ theorem coulomb_coeff_turningPoint (η : ℝ) (ℓ : ℕ) (h : turningPoint η �
 
 /-! ### §33.2(ii) The regular solution -/
 
+/-- `Γ(ℓ + 1 + iη) ≠ 0`. -/
 theorem c33a_Gamma_ne_zero (ℓ : ℕ) (η : ℝ) : Gamma ((ℓ : ℂ) + 1 + I * η) ≠ 0 := by
   refine Complex.Gamma_ne_zero fun m hm => ?_
   have := congrArg Complex.re hm
@@ -161,6 +162,7 @@ theorem ofReal_coulombF_eq_whittakerM_neg (ℓ : ℕ) (η ρ : ℝ) :
   linear_combination (coulombC ℓ η * exp (I * ρ) *
     kummerM (ℓ + 1 + I * η) (2 * ℓ + 2) (-(2 * I * ρ))) * hI.symm
 
+/-- For `η ≠ 0`, `|Γ(1 + iη)|² = πη / sinh(πη)`. -/
 theorem c33a_normSq_Gamma_one (η : ℝ) (hη : η ≠ 0) :
     ‖Gamma (1 + I * η)‖ ^ 2 = π * η / Real.sinh (π * η) := by
   have hconj : Gamma (1 - I * η) = conj (Gamma (1 + I * η)) := by
@@ -178,6 +180,7 @@ theorem c33a_normSq_Gamma_one (η : ℝ) (hη : η ≠ 0) :
   rw [hconj, Complex.mul_conj, Complex.normSq_eq_norm_sq] at hmul
   exact_mod_cast hmul
 
+/-- `|Γ(ℓ + 1 + iη)|² = |Γ(1 + iη)|² ∏_{k=1}^{ℓ} (η² + k²)`. -/
 theorem c33a_normSq_Gamma_succ (ℓ : ℕ) (η : ℝ) :
     ‖Gamma ((ℓ : ℂ) + 1 + I * η)‖ ^ 2 =
       ‖Gamma (1 + I * η)‖ ^ 2 * ∏ k ∈ Finset.Icc 1 ℓ, (η ^ 2 + (k : ℝ) ^ 2) := by
@@ -538,6 +541,7 @@ theorem analytic_coulombH (ℓ : ℕ) :
 
 /-! ### §33.4 Recurrence relations and derivatives -/
 
+/-- `R_{ℓ+1}(η) = √((ℓ+1)² + η²)/(ℓ+1)`. -/
 theorem c33a_recurrenceR_succ (ℓ : ℕ) (η : ℝ) :
     recurrenceR (ℓ + 1) η = Real.sqrt (((ℓ : ℝ) + 1) ^ 2 + η ^ 2) / (ℓ + 1) := by
   have hl : (0 : ℝ) < (ℓ : ℝ) + 1 := by positivity
@@ -545,6 +549,7 @@ theorem c33a_recurrenceR_succ (ℓ : ℕ) (η : ℝ) :
       (((ℓ : ℝ) + 1) ^ 2 + η ^ 2) / ((ℓ : ℝ) + 1) ^ 2 by push_cast; field_simp,
     Real.sqrt_div' _ (by positivity), Real.sqrt_sq hl.le]
 
+/-- `R_{ℓ+1}(η) > 0`. -/
 theorem c33a_recurrenceR_pos (ℓ : ℕ) (η : ℝ) : 0 < recurrenceR (ℓ + 1) η := by
   rw [c33a_recurrenceR_succ]
   apply div_pos (Real.sqrt_pos.mpr (by positivity)) (by positivity)
@@ -669,11 +674,12 @@ lemma q2a_hasDerivAt_HPlus (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
     push_cast
     ring
 
-/-- DLMF 33.4.4 for `H^+_ℓ`, proved from the contiguous relations of `U`. -/
-lemma q2a_deriv_HPlus_upper (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
+/-- **DLMF 33.4.4 for `H^+`**: `(H^+_ℓ)' = S_{ℓ+1} H^+_ℓ - R_{ℓ+1} H^+_{ℓ+1}`, `ρ > 0`. -/
+@[dlmf 33.4.E4]
+theorem deriv_coulombHPlus_upper (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
     deriv (fun x : ℝ => coulombHPlus ℓ η x) ρ =
-      (recurrenceS (ℓ + 1) η ρ : ℂ) * coulombHPlus ℓ η ρ -
-        (recurrenceR (ℓ + 1) η : ℂ) * coulombHPlus (ℓ + 1) η ρ := by
+      recurrenceS (ℓ + 1) η ρ * coulombHPlus ℓ η ρ -
+        recurrenceR (ℓ + 1) η * coulombHPlus (ℓ + 1) η ρ := by
   have hz : (-2 * I * ρ : ℂ) ≠ 0 := slitPlane_ne_zero (neg_two_I_mul_mem_slitPlane hρ)
   have hr := q2a_kummerU_rel1 ((ℓ : ℂ) + 1 + I * η) (2 * ℓ + 2) (-2 * I * ρ) hz
   have hA := q2a_R_mul_APlus_succ ℓ η
@@ -702,11 +708,12 @@ lemma q2a_deriv_HPlus_upper (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
     _ = 0 := by rw [hr, mul_zero]
 
 
-/-- DLMF 33.4.3 for `H^+_{ℓ+1}`, proved from the contiguous relations of `U`. -/
-lemma q2a_deriv_HPlus_lower (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
+/-- **DLMF 33.4.3 for `H^+`**: `(H^+_{ℓ+1})' = R_{ℓ+1} H^+_ℓ - S_{ℓ+1} H^+_{ℓ+1}`, `ρ > 0`. -/
+@[dlmf 33.4.E3]
+theorem deriv_coulombHPlus_lower (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
     deriv (fun x : ℝ => coulombHPlus (ℓ + 1) η x) ρ =
-      (recurrenceR (ℓ + 1) η : ℂ) * coulombHPlus ℓ η ρ -
-        (recurrenceS (ℓ + 1) η ρ : ℂ) * coulombHPlus (ℓ + 1) η ρ := by
+      recurrenceR (ℓ + 1) η * coulombHPlus ℓ η ρ -
+        recurrenceS (ℓ + 1) η ρ * coulombHPlus (ℓ + 1) η ρ := by
   have hz : (-2 * I * ρ : ℂ) ≠ 0 := slitPlane_ne_zero (neg_two_I_mul_mem_slitPlane hρ)
   have hr := q2a_kummerU_rel2 ((ℓ : ℂ) + 1 + I * η) (2 * ℓ + 2) (-2 * I * ρ) hz
   have hA := q2a_R_mul_APlus ℓ η
@@ -756,7 +763,7 @@ lemma q2a_upper_FG (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
     deriv (coulombF ℓ η) ρ =
       recurrenceS (ℓ + 1) η ρ * coulombF ℓ η ρ - recurrenceR (ℓ + 1) η * coulombF (ℓ + 1) η ρ := by
   obtain ⟨g', f', hG, hF, hH, -⟩ := coulomb_wronskian_real_aux ℓ η hρ
-  have h := q2a_deriv_HPlus_upper ℓ η hρ
+  have h := deriv_coulombHPlus_upper ℓ η hρ
   rw [hH.deriv, (coulombH_eq_G_add_I_mul_F ℓ η hρ).1,
     (coulombH_eq_G_add_I_mul_F (ℓ + 1) η hρ).1] at h
   rw [hG.deriv, hF.deriv]
@@ -769,7 +776,7 @@ lemma q2a_lower_FG (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
     deriv (coulombF (ℓ + 1) η) ρ =
       recurrenceR (ℓ + 1) η * coulombF ℓ η ρ - recurrenceS (ℓ + 1) η ρ * coulombF (ℓ + 1) η ρ := by
   obtain ⟨g', f', hG, hF, hH, -⟩ := coulomb_wronskian_real_aux (ℓ + 1) η hρ
-  have h := q2a_deriv_HPlus_lower ℓ η hρ
+  have h := deriv_coulombHPlus_lower ℓ η hρ
   rw [hH.deriv, (coulombH_eq_G_add_I_mul_F ℓ η hρ).1,
     (coulombH_eq_G_add_I_mul_F (ℓ + 1) η hρ).1] at h
   rw [hG.deriv, hF.deriv]
@@ -864,6 +871,7 @@ theorem coulombG_recurrence (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
   rw [recurrenceT]
   linear_combination h2 - h1
 
+/-- For `ρ > 0`, `H⁺_ℓ = G_ℓ + i F_ℓ` has derivative `G_ℓ' + i F_ℓ'`. -/
 theorem c33a_hasDerivAt_coulombHPlus (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
     HasDerivAt (fun x : ℝ => coulombHPlus ℓ η x)
       (deriv (coulombG ℓ η) ρ + I * deriv (coulombF ℓ η) ρ) ρ := by
@@ -871,6 +879,7 @@ theorem c33a_hasDerivAt_coulombHPlus (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 
   rw [hG.deriv, hF.deriv]
   exact hH
 
+/-- For `ρ > 0`, `H⁻_ℓ = G_ℓ - i F_ℓ` has derivative `G_ℓ' - i F_ℓ'`. -/
 lemma c33a_hasDerivAt_coulombHMinus (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
     HasDerivAt (fun x : ℝ => coulombHMinus ℓ η x)
       (deriv (coulombG ℓ η) ρ - I * deriv (coulombF ℓ η) ρ) ρ := by
@@ -881,17 +890,6 @@ lemma c33a_hasDerivAt_coulombHMinus (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 <
   filter_upwards [eventually_gt_nhds hρ] with x hx
   exact (coulombH_eq_G_add_I_mul_F ℓ η hx).2
 
-/-- **DLMF 33.4.3 for `H^+`**: `(H^+_{ℓ+1})' = R_{ℓ+1} H^+_ℓ - S_{ℓ+1} H^+_{ℓ+1}`, `ρ > 0`. -/
-@[dlmf 33.4.E3]
-theorem deriv_coulombHPlus_lower (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
-    deriv (fun x : ℝ => coulombHPlus (ℓ + 1) η x) ρ =
-      recurrenceR (ℓ + 1) η * coulombHPlus ℓ η ρ -
-        recurrenceS (ℓ + 1) η ρ * coulombHPlus (ℓ + 1) η ρ := by
-  rw [(c33a_hasDerivAt_coulombHPlus (ℓ + 1) η hρ).deriv, deriv_coulombG_lower ℓ η hρ,
-    deriv_coulombF_lower ℓ η hρ, (coulombH_eq_G_add_I_mul_F ℓ η hρ).1,
-    (coulombH_eq_G_add_I_mul_F (ℓ + 1) η hρ).1]
-  push_cast; ring
-
 /-- **DLMF 33.4.3 for `H^-`**: `(H^-_{ℓ+1})' = R_{ℓ+1} H^-_ℓ - S_{ℓ+1} H^-_{ℓ+1}`, `ρ > 0`. -/
 @[dlmf 33.4.E3]
 theorem deriv_coulombHMinus_lower (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
@@ -901,17 +899,6 @@ theorem deriv_coulombHMinus_lower (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < �
   rw [(c33a_hasDerivAt_coulombHMinus (ℓ + 1) η hρ).deriv, deriv_coulombG_lower ℓ η hρ,
     deriv_coulombF_lower ℓ η hρ, (coulombH_eq_G_add_I_mul_F ℓ η hρ).2,
     (coulombH_eq_G_add_I_mul_F (ℓ + 1) η hρ).2]
-  push_cast; ring
-
-/-- **DLMF 33.4.4 for `H^+`**: `(H^+_ℓ)' = S_{ℓ+1} H^+_ℓ - R_{ℓ+1} H^+_{ℓ+1}`, `ρ > 0`. -/
-@[dlmf 33.4.E4]
-theorem deriv_coulombHPlus_upper (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
-    deriv (fun x : ℝ => coulombHPlus ℓ η x) ρ =
-      recurrenceS (ℓ + 1) η ρ * coulombHPlus ℓ η ρ -
-        recurrenceR (ℓ + 1) η * coulombHPlus (ℓ + 1) η ρ := by
-  rw [(c33a_hasDerivAt_coulombHPlus ℓ η hρ).deriv, deriv_coulombG_upper ℓ η hρ,
-    deriv_coulombF_upper ℓ η hρ, (coulombH_eq_G_add_I_mul_F ℓ η hρ).1,
-    (coulombH_eq_G_add_I_mul_F (ℓ + 1) η hρ).1]
   push_cast; ring
 
 /-- **DLMF 33.4.4 for `H^-`**: `(H^-_ℓ)' = S_{ℓ+1} H^-_ℓ - R_{ℓ+1} H^-_{ℓ+1}`, `ρ > 0`. -/

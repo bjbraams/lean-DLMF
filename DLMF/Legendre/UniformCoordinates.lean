@@ -7,6 +7,7 @@ module
 
 public import Mathlib.Analysis.SpecialFunctions.Arsinh
 public import Mathlib.Analysis.SpecialFunctions.Artanh
+public import TauCeti.Analysis.SpecialFunctions.Artanh
 public import DLMFMathlib.Analysis.Calculus.DoubleZeroSqrt
 public import DLMF.Bessel.Elementary
 public import DLMF.ParabolicCylinder.Basic
@@ -28,27 +29,33 @@ namespace DLMF.Legendre
 
 open DLMF.Bessel DLMF.Confluent
 
-/-- legendreOrderAlpha. -/
+/-- DLMF 14.15.5: the ratio `α = (ν+1/2)/μ` used in the large-order uniform expansions
+14.15.4–14.15.10. -/
 @[dlmf 14.15.E5]
 def legendreOrderAlpha (ν μ : ℝ) : ℝ :=
   (ν+1/2)/μ
 
-/-- legendreOrderP. -/
+/-- DLMF 14.15.6: the auxiliary variable `p = x/(α²x² + 1 − α²)^{1/2}` of the large-order expansion
+14.15.4. -/
 @[dlmf 14.15.E6]
 def legendreOrderP (α x : ℝ) : ℝ :=
   x/Real.sqrt (α^2*x^2+1-α^2)
 
-/-- legendreOrderRho. -/
+/-- DLMF 14.15.7: the exponent `ρ = ½ ln((1+p)/(1−p)) + (α/2) ln((1−αp)/(1+αp))`, with `p` from
+14.15.6, of the large-order expansion 14.15.4. -/
 @[dlmf 14.15.E7]
 def legendreOrderRho (α x : ℝ) : ℝ :=
   let p:=legendreOrderP α x; Real.log ((1+p)/(1-p))/2+α/2*Real.log ((1-α*p)/(1+α*p))
 
-/-- LegendreEtaRelation. -/
+/-- DLMF 14.15.10: the relation `α ln((α²+η²)^{1/2} + α) − α ln η − (α²+η²)^{1/2} = ½ ln(((1+α²)x² +
+1 − α² − 2x(α²x² − α² + 1)^{1/2})/((x²−1)(1−α²))) + (α/2) ln((α²(2x²−1) + 1 + 2αx(α²x² − α² +
+1)^{1/2})/(1−α²))` defining `η` in 14.15.8–14.15.9. -/
 @[dlmf 14.15.E10]
 def LegendreEtaRelation (α x η : ℝ) : Prop :=
   α*Real.log (Real.sqrt (α^2+η^2)+α)-α*Real.log η-Real.sqrt (α^2+η^2) = Real.log (((1+α^2)*x^2+1-α^2-2*x*Real.sqrt (α^2*x^2-α^2+1))/((x^2-1)*(1-α^2)))/2+α/2*Real.log ((α^2*(2*x^2-1)+1+2*α*x*Real.sqrt (α^2*x^2-α^2+1))/(1-α^2))
 
-/-- legendreOrderEta. -/
+/-- DLMF 14.15.10: the variable `η`, chosen as a positive solution of `LegendreEtaRelation α x η`
+(unique for `0 ≤ α < 1`, `x > 1`; see `legendreOrderEta_spec`). -/
 @[dlmf 14.15.E10]
 def legendreOrderEta (α x : ℝ) : ℝ :=
   Classical.epsilon (fun η : ℝ => 0 < η ∧ LegendreEtaRelation α x η)
@@ -121,7 +128,8 @@ theorem legO_tendsto_atTop {α : ℝ} (hα : 0 ≤ α) : Tendsto (legO_L α) atT
 noncomputable def legO_R (α x : ℝ) : ℝ :=
   Real.log (((1+α^2)*x^2+1-α^2-2*x*Real.sqrt (α^2*x^2-α^2+1))/((x^2-1)*(1-α^2)))/2+α/2*Real.log ((α^2*(2*x^2-1)+1+2*α*x*Real.sqrt (α^2*x^2-α^2+1))/(1-α^2))
 
-/-- legendreOrderEta spec. -/
+/-- DLMF 14.15.10: for `0 ≤ α < 1` and `x > 1`, `η = legendreOrderEta α x` is positive, satisfies
+`LegendreEtaRelation α x η`, and is the unique positive solution. -/
 @[dlmf 14.15.E10]
 theorem legendreOrderEta_spec {α x : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) (hx : 1 < x) :
     0 < legendreOrderEta α x ∧ LegendreEtaRelation α x (legendreOrderEta α x) ∧ ∀ η : ℝ, 0 < η → LegendreEtaRelation α x η → η=legendreOrderEta α x := by
@@ -388,12 +396,14 @@ theorem legendreOrderEta_bijective {α : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) :
       rw [← (hE x hxI).2] at hx
       exact (hL.lt_iff_gt hb (hE x hxI).1).1 hx
 
-/-- legendreDegreeAlpha. -/
+/-- DLMF 14.15.19: the ratio `α = μ/(ν+1/2)` used in the large-degree uniform expansions
+14.15.15–14.15.22. -/
 @[dlmf 14.15.E19]
 def legendreDegreeAlpha (ν μ : ℝ) : ℝ :=
   μ/(ν+1/2)
 
-/-- legendreDegreeBeta. -/
+/-- DLMF 14.15.20: the normalizing factor `β = e^μ ((ν−μ+1/2)/(ν+μ+1/2))^{ν/2+1/4} ((ν+1/2)² −
+μ²)^{−μ/2}` of the large-degree expansions 14.15.15–14.15.18. -/
 @[dlmf 14.15.E20]
 def legendreDegreeBeta (ν μ : ℝ) : ℝ :=
   Real.exp μ*((ν-μ+1/2)/(ν+μ+1/2))^(ν/2+1/4)*((ν+1/2)^2-μ^2)^(-μ/2)
@@ -406,7 +416,8 @@ sign conditions `x < 1 → 0 < y` and `1 < x → y < 0` select it (corrected 202
 def LegendreYRelation (α x y : ℝ) : Prop :=
   if x=1 then y=0 else if x ≤ Real.sqrt (1-α^2) then α^2 ≤ y ∧ Real.sqrt (y-α^2)-α*Real.arctan (Real.sqrt (y-α^2)/α)=Real.arccos (x/Real.sqrt (1-α^2))-α/2*Real.arccos (((1+α^2)*x^2-1+α^2)/((1-α^2)*(1-x^2))) else y ≤ α^2 ∧ (x < 1 → 0 < y) ∧ (1 < x → y < 0) ∧ Real.sqrt (α^2-y)+α/2*Real.log |y|-α*Real.log (Real.sqrt (α^2-y)+α)=Real.log ((x+Real.sqrt (x^2-1+α^2))/Real.sqrt (1-α^2))+α/2*Real.log ((1-α^2)*|1-x^2|/((1+α^2)*x^2-1+α^2+2*α*x*Real.sqrt (x^2-1+α^2)))
 
-/-- legendreDegreeY. -/
+/-- DLMF 14.15.21–14.15.22: the variable `y`, chosen as a solution of `LegendreYRelation α x y`
+(unique for `0 ≤ α < 1`, `x ≥ 0`; see `legendreDegreeY_spec`). -/
 def legendreDegreeY (α x : ℝ) : ℝ :=
   Classical.epsilon (LegendreYRelation α x)
 
@@ -1020,7 +1031,8 @@ theorem legY_existsUnique {a x : ℝ} (ha : 0 ≤ a) (ha1 : a < 1) (hx : 0 ≤ x
       have := (Real.sqrt_inj (by linarith [h₁.1]) (by linarith [h₂.1])).1 this
       linarith
 
-/-- legendreDegreeY spec. -/
+/-- DLMF 14.15.21–14.15.22: for `0 ≤ α < 1` and `x ≥ 0`, `legendreDegreeY α x` satisfies
+`LegendreYRelation α x` and is its unique solution. -/
 @[dlmf 14.15.E21, dlmf 14.15.E22]
 theorem legendreDegreeY_spec {α x : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) (hx : 0 ≤ x) :
     LegendreYRelation α x (legendreDegreeY α x) ∧ ∀ y : ℝ, LegendreYRelation α x y → y=legendreDegreeY α x := by
@@ -1028,9 +1040,10 @@ theorem legendreDegreeY_spec {α x : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) (hx :
   have hs := Classical.epsilon_spec hex
   exact ⟨hs, fun y hy => huniq y _ hy hs⟩
 
-/-- Mapping and endpoint properties in DLMF 14.15(iv). -/
-theorem legendreDegreeY_monotone {α : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) :
-    StrictAntiOn (legendreDegreeY α) (Ici 0) ∧ legendreDegreeY α (Real.sqrt (1-α^2))=α^2 ∧ legendreDegreeY α 1=0 ∧ Tendsto (legendreDegreeY α) atTop atBot := by
+/-- The degree coordinate `Y = legendreDegreeY α` of DLMF 14.15(iv) is strictly decreasing on
+`[0, ∞)`, for `0 ≤ α < 1`. -/
+private lemma legY_strictAntiOn {α : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) :
+    StrictAntiOn (legendreDegreeY α) (Ici 0) := by
   set a := α
   set Y := legendreDegreeY a with hYdef
   have hc0 := legY_x0_pos hα1 hα
@@ -1084,64 +1097,91 @@ theorem legendreDegreeY_monotone {α : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) :
       · exact (sq_nonneg a).trans (r1 x hx h1.ne h0).1
       · exact (r2 x (not_le.1 h0) h1).1.le
     · rw [h1, hY1]
-  refine ⟨?_, ?_, hY1, ?_⟩
-  · intro x₁ hx₁ x₂ hx₂ h12
-    have hx₁ : 0 ≤ x₁ := hx₁
-    have hx₂ : 0 ≤ x₂ := hx₂
-    by_cases hA : x₂ ≤ Real.sqrt (1 - a^2) ∧ x₂ ≠ 1
-    · obtain ⟨hA0, hA1⟩ := hA
-      have hB0 : x₁ ≤ Real.sqrt (1 - a^2) := by linarith
-      have hB1 : x₁ ≠ 1 := by intro h; linarith
-      obtain ⟨hy₁, he₁⟩ := r1 x₁ hx₁ hB1 hB0
-      obtain ⟨hy₂, he₂⟩ := r1 x₂ hx₂ hA1 hA0
-      have hR := legY_R1_strictAntiOn hα hα1 ⟨hx₁, hB0⟩ ⟨hx₂, hA0⟩ h12
+  intro x₁ hx₁ x₂ hx₂ h12
+  have hx₁ : 0 ≤ x₁ := hx₁
+  have hx₂ : 0 ≤ x₂ := hx₂
+  by_cases hA : x₂ ≤ Real.sqrt (1 - a^2) ∧ x₂ ≠ 1
+  · obtain ⟨hA0, hA1⟩ := hA
+    have hB0 : x₁ ≤ Real.sqrt (1 - a^2) := by linarith
+    have hB1 : x₁ ≠ 1 := by intro h; linarith
+    obtain ⟨hy₁, he₁⟩ := r1 x₁ hx₁ hB1 hB0
+    obtain ⟨hy₂, he₂⟩ := r1 x₂ hx₂ hA1 hA0
+    have hR := legY_R1_strictAntiOn hα hα1 ⟨hx₁, hB0⟩ ⟨hx₂, hA0⟩ h12
+    rw [← he₁, ← he₂] at hR
+    have := (legY_L1_strictMonoOn hα).lt_iff_lt (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
+      |>.1 hR
+    rw [Real.sqrt_lt_sqrt_iff (by linarith)] at this
+    linarith
+  rcases lt_trichotomy x₂ 1 with h2 | h2 | h2
+  · have h20 : Real.sqrt (1 - a^2) < x₂ := by
+      by_contra h; exact hA ⟨not_lt.1 h, h2.ne⟩
+    obtain ⟨-, hy₂, he₂⟩ := r2 x₂ h20 h2
+    by_cases h10 : x₁ ≤ Real.sqrt (1 - a^2)
+    · exact lt_of_lt_of_le hy₂ (r1 x₁ hx₁ (by intro h; linarith) h10).1
+    · obtain ⟨hp₁, hy₁, he₁⟩ := r2 x₁ (not_le.1 h10) (by linarith)
+      have ha0 : 0 < a := by
+        rcases hα.eq_or_lt with h | h
+        · exfalso; rw [← h] at h20; simp at h20; linarith
+        · exact h
+      have hR := legY_R2_strictAntiOn ha0 hα1 ⟨(not_le.1 h10).le, by linarith⟩
+        ⟨h20.le, h2⟩ h12
       rw [← he₁, ← he₂] at hR
-      have := (legY_L1_strictMonoOn hα).lt_iff_lt (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
-        |>.1 hR
+      have hI : ∀ y, 0 < y → y < a^2 → Real.sqrt (a^2 - y) ∈ Ico 0 a := by
+        intro y hy hya
+        refine ⟨Real.sqrt_nonneg _, ?_⟩
+        rw [Real.sqrt_lt' ha0]; linarith
+      have := (legY_L2_strictAntiOn ha0).lt_iff_gt (hI _ (r2 x₂ h20 h2).1 hy₂)
+        (hI _ hp₁ hy₁) |>.1 hR
       rw [Real.sqrt_lt_sqrt_iff (by linarith)] at this
       linarith
-    rcases lt_trichotomy x₂ 1 with h2 | h2 | h2
-    · have h20 : Real.sqrt (1 - a^2) < x₂ := by
-        by_contra h; exact hA ⟨not_lt.1 h, h2.ne⟩
-      obtain ⟨-, hy₂, he₂⟩ := r2 x₂ h20 h2
-      by_cases h10 : x₁ ≤ Real.sqrt (1 - a^2)
-      · exact lt_of_lt_of_le hy₂ (r1 x₁ hx₁ (by intro h; linarith) h10).1
-      · obtain ⟨hp₁, hy₁, he₁⟩ := r2 x₁ (not_le.1 h10) (by linarith)
-        have ha0 : 0 < a := by
-          rcases hα.eq_or_lt with h | h
-          · exfalso; rw [← h] at h20; simp at h20; linarith
-          · exact h
-        have hR := legY_R2_strictAntiOn ha0 hα1 ⟨(not_le.1 h10).le, by linarith⟩
-          ⟨h20.le, h2⟩ h12
-        rw [← he₁, ← he₂] at hR
-        have hI : ∀ y, 0 < y → y < a^2 → Real.sqrt (a^2 - y) ∈ Ico 0 a := by
-          intro y hy hya
-          refine ⟨Real.sqrt_nonneg _, ?_⟩
-          rw [Real.sqrt_lt' ha0]; linarith
-        have := (legY_L2_strictAntiOn ha0).lt_iff_gt (hI _ (r2 x₂ h20 h2).1 hy₂)
-          (hI _ hp₁ hy₁) |>.1 hR
-        rw [Real.sqrt_lt_sqrt_iff (by linarith)] at this
-        linarith
-    · subst h2
-      rw [hY1]
-      by_cases h10 : x₁ ≤ Real.sqrt (1 - a^2)
-      · rcases h10.lt_or_eq with h | h
-        · exact lt_of_le_of_lt (sq_nonneg a) (r1' x₁ hx₁ h)
-        · have ha0 : 0 < a := by
-            rcases hα.eq_or_lt with h' | h'
-            · exfalso; rw [← h'] at h; simp at h; linarith
-            · exact h'
-          exact lt_of_lt_of_le (by positivity) (r1 x₁ hx₁ (by intro h; linarith) h10).1
-      · exact (r2 x₁ (not_le.1 h10) h12).1
-    · obtain ⟨hn₂, he₂⟩ := r3 x₂ h2
-      rcases le_or_gt x₁ 1 with h1 | h1
-      · exact lt_of_lt_of_le hn₂ (hnn x₁ hx₁ h1)
-      · obtain ⟨hn₁, he₁⟩ := r3 x₁ h1
-        have hR := legY_R2_strictMonoOn hα hα1 h1 h2 h12
-        rw [← he₁, ← he₂] at hR
-        have := (legY_L2_strictMonoOn hα).lt_iff_lt (hsr _ hn₁) (hsr _ hn₂) |>.1 hR
-        rw [Real.sqrt_lt_sqrt_iff (by linarith [sq_nonneg a])] at this
-        linarith
+  · subst h2
+    rw [hY1]
+    by_cases h10 : x₁ ≤ Real.sqrt (1 - a^2)
+    · rcases h10.lt_or_eq with h | h
+      · exact lt_of_le_of_lt (sq_nonneg a) (r1' x₁ hx₁ h)
+      · have ha0 : 0 < a := by
+          rcases hα.eq_or_lt with h' | h'
+          · exfalso; rw [← h'] at h; simp at h; linarith
+          · exact h'
+        exact lt_of_lt_of_le (by positivity) (r1 x₁ hx₁ (by intro h; linarith) h10).1
+    · exact (r2 x₁ (not_le.1 h10) h12).1
+  · obtain ⟨hn₂, he₂⟩ := r3 x₂ h2
+    rcases le_or_gt x₁ 1 with h1 | h1
+    · exact lt_of_lt_of_le hn₂ (hnn x₁ hx₁ h1)
+    · obtain ⟨hn₁, he₁⟩ := r3 x₁ h1
+      have hR := legY_R2_strictMonoOn hα hα1 h1 h2 h12
+      rw [← he₁, ← he₂] at hR
+      have := (legY_L2_strictMonoOn hα).lt_iff_lt (hsr _ hn₁) (hsr _ hn₂) |>.1 hR
+      rw [Real.sqrt_lt_sqrt_iff (by linarith [sq_nonneg a])] at this
+      linarith
+
+/-- Mapping and endpoint properties in DLMF 14.15(iv). -/
+theorem legendreDegreeY_monotone {α : ℝ} (hα : 0 ≤ α) (hα1 : α < 1) :
+    StrictAntiOn (legendreDegreeY α) (Ici 0) ∧ legendreDegreeY α (Real.sqrt (1-α^2))=α^2 ∧
+        legendreDegreeY α 1=0 ∧ Tendsto (legendreDegreeY α) atTop atBot := by
+  set a := α
+  set Y := legendreDegreeY a with hYdef
+  have hc0 := legY_x0_pos hα1 hα
+  have hc1 := legY_x0_le_one a
+  have hrel : ∀ x, 0 ≤ x → LegendreYRelation a x (Y x) := fun x hx =>
+    (legendreDegreeY_spec hα hα1 hx).1
+  have hY1 : Y 1 = 0 := (legY_rel_one a _).1 (hrel 1 zero_le_one)
+  -- region 1
+  have r1 : ∀ x, 0 ≤ x → x ≠ 1 → x ≤ Real.sqrt (1 - a^2) →
+      a^2 ≤ Y x ∧ legY_L1 a (Real.sqrt (Y x - a^2)) = legY_R1 a x := fun x hx h1 h0 =>
+    (legY_rel_left h1 h0).1 (hrel x hx)
+  -- region 3
+  have r3 : ∀ x, 1 < x → Y x < 0 ∧ legY_L2 a (Real.sqrt (a^2 - Y x)) = legY_R2 a x := by
+    intro x h1
+    have h0 : ¬ x ≤ Real.sqrt (1 - a^2) := fun h => by linarith
+    obtain ⟨-, -, hn, he⟩ := (legY_rel_right (ne_of_gt h1) h0).1 (hrel x (by linarith))
+    exact ⟨hn h1, he⟩
+  have hsr : ∀ y, y < 0 → Real.sqrt (a^2 - y) ∈ Ioi a := by
+    intro y hy
+    show a < Real.sqrt (a^2 - y)
+    calc a = Real.sqrt (a^2) := (Real.sqrt_sq hα).symm
+      _ < _ := Real.sqrt_lt_sqrt (by positivity) (by linarith)
+  refine ⟨legY_strictAntiOn hα hα1, ?_, hY1, ?_⟩
   · rcases hα.eq_or_lt with h | ha0
     · have : Real.sqrt (1 - a^2) = 1 := by rw [← h]; simp
       rw [this, hY1, ← h]; ring
@@ -1186,32 +1226,40 @@ def besselEnvelopeCross (ν : ℝ) : ℝ :=
 def legendreBesselEnvelope (second : Bool) (ν x : ℝ) : ℝ :=
   if x ≤ besselEnvelopeCross ν then Real.sqrt 2*(if second then ‖besselY ν x‖ else (besselJ ν x).re) else Real.sqrt (‖besselJ ν x‖^2+‖besselY ν x‖^2)
 
-/-- cylinderEnvelopeCross. -/
+/-- DLMF 14.15.23: the crossing point `X_c`, the largest positive root of `U(−c, x) = Ū(−c, x)`,
+that separates the two branches of the parabolic-cylinder envelopes. -/
 @[dlmf 14.15.E23]
 def cylinderEnvelopeCross (c : ℝ) : ℝ :=
   sSup {x : ℝ | 0 < x ∧ pcfU (-c) x=pcfUBar (-c) x}
 
-/-- legendreCylinderEnvelope. -/
+/-- DLMF 14.15.23: the envelope functions `env U(−c, x)` (or `env Ū(−c, x)` when `barred`),
+equal to `(U(−c,x)² + Ū(−c,x)²)^{1/2}` for `x ≤ X_c` and to `√2 U(−c,x)` (resp. `√2 Ū(−c,x)`)
+for `x > X_c`. -/
 @[dlmf 14.15.E23]
 def legendreCylinderEnvelope (barred : Bool) (c x : ℝ) : ℝ :=
   if x ≤ cylinderEnvelopeCross c then Real.sqrt (‖pcfU (-c) x‖^2+‖pcfUBar (-c) x‖^2) else Real.sqrt 2*(if barred then (pcfUBar (-c) x).re else (pcfU (-c) x).re)
 
-/-- legendreCylinderA. -/
+/-- DLMF 14.15.26: the turning-point parameter `a = ((ν+μ+1/2)|ν−μ+1/2|)^{1/2}/(ν+1/2)` of the
+parabolic-cylinder expansions 14.15.24–14.15.31. -/
 @[dlmf 14.15.E26]
 def legendreCylinderA (ν μ : ℝ) : ℝ :=
   Real.sqrt ((ν+μ+1/2)*|ν-μ+1/2|)/(ν+1/2)
 
-/-- legendreCylinderAlpha. -/
+/-- DLMF 14.15.26: the parameter `α = (2|ν−μ+1/2|/(ν+1/2))^{1/2}` of the parabolic-cylinder
+expansions 14.15.24–14.15.31. -/
 @[dlmf 14.15.E26]
 def legendreCylinderAlpha (ν μ : ℝ) : ℝ :=
   Real.sqrt (2*|ν-μ+1/2|/(ν+1/2))
 
-/-- LegendreCylinderRelation. -/
+/-- DLMF 14.15.27–14.15.29, 14.15.31: the relation between `x` and `ζ` defining the
+parabolic-cylinder variable, with branches for `a = 0` (`ζ² = −ln(1−x²)`, `xζ ≥ 0`), for `μ ≤ ν+1/2`
+with `x ≥ a` (14.15.27) or `|x| < a` (14.15.28), and for `μ > ν+1/2` (14.15.31). -/
 @[dlmf 14.15.E27, dlmf 14.15.E28, dlmf 14.15.E29, dlmf 14.15.E31]
 def LegendreCylinderRelation (ν μ x ζ : ℝ) : Prop :=
   let a:=legendreCylinderA ν μ; let α:=legendreCylinderAlpha ν μ; if a=0 then ζ^2=-Real.log (1-x^2) ∧ 0 ≤ x*ζ else if μ ≤ ν+1/2 then if x = -a then ζ = -α else if a ≤ x then α ≤ ζ ∧ ζ*Real.sqrt (ζ^2-α^2)/2-α^2/2*Real.arcosh (ζ/α)=Real.sqrt (1-a^2)*Real.artanh (Real.sqrt ((x^2-a^2)/(1-a^2))/x)-Real.arcosh (x/a) else |ζ| ≤ α ∧ α^2/2*Real.arcsin (ζ/α)+ζ/2*Real.sqrt (α^2-ζ^2)=Real.arcsin (x/a)-Real.sqrt (1-a^2)*Real.arctan (x*Real.sqrt ((1-a^2)/(a^2-x^2))) else ζ*Real.sqrt (ζ^2+α^2)/2+α^2/2*Real.arsinh (ζ/α)=Real.sqrt (1+a^2)*Real.artanh (x*Real.sqrt ((1+a^2)/(x^2+a^2)))-Real.arsinh (x/a)
 
-/-- legendreCylinderZeta. -/
+/-- DLMF 14.15.27–14.15.29, 14.15.31: the variable `ζ`, chosen as a solution of
+`LegendreCylinderRelation ν μ x ζ` (unique under the hypotheses of `legendreCylinderZeta_spec`). -/
 def legendreCylinderZeta (ν μ x : ℝ) : ℝ :=
   Classical.epsilon (LegendreCylinderRelation ν μ x)
 
@@ -1418,10 +1466,6 @@ theorem legC_G_hasDerivAt {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : x ∈ Ioo
     field_simp
     rw [hw2, hc2]; ring
 
-/-- Helper `legC_continuousAt_artanh` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
-theorem legC_continuousAt_artanh {v : ℝ} (hv : v ∈ Ioo (-1:ℝ) 1) : ContinuousAt Real.artanh v :=
-  (legC_hasDerivAt_artanh hv).continuousAt
-
 /-- Helper `legC_G_nonneg` for DLMF 14.15(v) (Legendre–cylinder coordinate). -/
 theorem legC_G_nonneg {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : x ∈ Ico a 1) : 0 ≤ legC_G a x := by
   have hc2p : 0 < 1 - a^2 := by nlinarith
@@ -1453,7 +1497,7 @@ theorem legC_G_nonneg {a x : ℝ} (ha : 0 < a) (ha1 : a < 1) (hx : x ∈ Ico a 1
         ((continuous_id.div_const a).continuousWithinAt) fun z hz => ?_
       show 1 ≤ z/a; rw [le_div_iff₀ ha]; linarith [hz.1]
     have h3 : ContinuousAt (fun y => Real.artanh (Real.sqrt (y^2-a^2)/(c*y))) y :=
-      ContinuousAt.comp (g := Real.artanh) (legC_continuousAt_artanh hv) h1
+      ContinuousAt.comp (g := Real.artanh) (Real.continuousAt_artanh hv) h1
     exact ((continuousAt_const.mul h3).continuousWithinAt).sub h2
   have hmono : MonotoneOn (legC_G a) (Ico a 1) := by
     refine monotoneOn_of_deriv_nonneg (convex_Ico a 1) hcont ?_ ?_
@@ -1652,7 +1696,9 @@ theorem legC_A_eq_zero {ν μ : ℝ} (h : μ = ν+1/2) :
     legendreCylinderA ν μ = 0 := by
   rw [legendreCylinderA, show ν-μ+1/2 = 0 by linarith]; simp
 
-/-- legendreCylinderZeta spec. -/
+/-- DLMF 14.15.27–14.15.29, 14.15.31: for `ν > −1/2`, `μ > 0`, `-1 < x < 1`, and `x ≥ −a` when `μ ≤
+ν+1/2`, `legendreCylinderZeta ν μ x` satisfies `LegendreCylinderRelation ν μ x` and is its unique
+solution. -/
 @[dlmf 14.15.E27, dlmf 14.15.E28, dlmf 14.15.E29, dlmf 14.15.E31]
 theorem legendreCylinderZeta_spec {ν μ x : ℝ} (hν : -1/2 < ν) (hμ : 0 < μ) (hx : x ∈ Ioo (-1:ℝ) 1) (hdom : μ ≤ ν+1/2 → -legendreCylinderA ν μ ≤ x) :
     LegendreCylinderRelation ν μ x (legendreCylinderZeta ν μ x) ∧ ∀ ζ : ℝ, LegendreCylinderRelation ν μ x ζ → ζ=legendreCylinderZeta ν μ x := by
@@ -1716,7 +1762,9 @@ theorem legendreCylinderZeta_spec {ν μ x : ℝ} (hν : -1/2 < ν) (hμ : 0 < �
       obtain ⟨ζ, h⟩ := legC_P_surj hα0 (Real.sqrt (1+a^2)*Real.artanh (x*Real.sqrt ((1+a^2)/(x^2+a^2)))-Real.arsinh (x/a))
       exact ⟨⟨ζ, h⟩, fun ζ₁ ζ₂ h1 h2 => (legC_P_strictMono hα0).injective (h1.trans h2.symm)⟩
 
-/-- legendreCylinderAmplitude. -/
+/-- The amplitude `((ζ²−α²)/(x²−a²))^{1/4}` (for `μ ≤ ν+1/2`) or `((ζ²+α²)/(x²+a²))^{1/4}` (for `μ >
+ν+1/2`) in DLMF 14.15.24, 14.15.25 and 14.15.30, defined as a punctured limit so that the removable
+singularity at the turning point `x = a` is filled in. -/
 def legendreCylinderAmplitude (ν μ x : ℝ) : ℝ :=
   limUnder (𝓝[≠] x) (fun t : ℝ => let a:=legendreCylinderA ν μ; let α:=legendreCylinderAlpha ν μ; let ζ:=legendreCylinderZeta ν μ t; if μ ≤ ν+1/2 then ((ζ^2-α^2)/(t^2-a^2))^(1/4:ℝ) else ((ζ^2+α^2)/(t^2+a^2))^(1/4:ℝ))
 

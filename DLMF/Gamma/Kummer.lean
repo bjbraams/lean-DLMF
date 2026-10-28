@@ -27,6 +27,7 @@ noncomputable section
 
 namespace Real
 
+/-- `log Γ` is interval integrable between any two positive reals. -/
 theorem intervalIntegrable_log_Gamma {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
     IntervalIntegrable (fun x : ℝ => log (Gamma x)) volume a b := by
   have hmin : 0 < min a b := lt_min ha hb
@@ -34,6 +35,8 @@ theorem intervalIntegrable_log_Gamma {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
     fun x hx => (hasDerivAt_log_Gamma (hmin.trans_le hx.1)).continuousAt.continuousWithinAt
   exact hcont.intervalIntegrable
 
+/-- Logarithmic reflection formula: `log Γ(x) + log Γ(1 - x) = log π - log sin(π x)` for `0 < x <
+1`. -/
 theorem log_Gamma_add_log_Gamma_one_sub {x : ℝ} (hx0 : 0 < x) (hx1 : x < 1) :
     log (Gamma x) + log (Gamma (1 - x)) = log π - log (sin (π * x)) := by
   have h1x : 0 < 1 - x := sub_pos.mpr hx1

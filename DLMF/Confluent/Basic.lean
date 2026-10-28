@@ -42,6 +42,7 @@ abbrev kummerMCoeff (a c : ℂ) (n : ℕ) : ℂ :=
 def kummerM (a c z : ℂ) : ℂ :=
   ∑' n : ℕ, poch a n / (poch c n * n !) * z ^ n
 
+/-- `M(a,c,0) = 1`. -/
 @[simp]
 theorem kummerM_zero (a c : ℂ) : kummerM a c 0 = 1 := by
   unfold kummerM
@@ -94,29 +95,22 @@ theorem kummerM_of_zero_param (c z : ℂ) : kummerM 0 c z = 1 := by
   · intro n hn
     simp [hn]
 
+/-- The coefficients of the regularized `₁F₁` are `(a)_n / (n! Γ(c+n))`. -/
 theorem regularizedHGFunCoeff_singleton (a c : ℂ) (n : ℕ) :
     regularizedHGFunCoeff {a} {c} n = poch a n / (n ! * Gamma (c + n)) := by
   simp [regularizedHGFunCoeff, poch]
 
+/-- The regularized generalized hypergeometric function is the sum of its coefficient series. -/
 theorem regularizedHGFun_eq_tsum (a b : Multiset ℂ) (z : ℂ) :
     regularizedHGFun a b z = ∑' n : ℕ, regularizedHGFunCoeff a b n * z ^ n := by
   unfold regularizedHGFun regularizedHGFunSeries
   rw [FormalMultilinearSeries.sum]
   simp_rw [FormalMultilinearSeries.ofScalars_apply_eq, smul_eq_mul]
 
+/-- The regularized generalized hypergeometric function at `0` is its zeroth coefficient. -/
 theorem regularizedHGFun_zero (a b : Multiset ℂ) :
-    regularizedHGFun a b 0 = regularizedHGFunCoeff a b 0 := by
-  rw [regularizedHGFun_eq_tsum]
-  have h : (fun n : ℕ => regularizedHGFunCoeff a b n * (0 : ℂ) ^ n) =
-      fun n => if n = 0 then regularizedHGFunCoeff a b 0 else 0 := by
-    ext n
-    cases n with
-    | zero => simp
-    | succ n => simp [pow_succ]
-  rw [h, tsum_eq_single 0]
-  · simp
-  · intro n hn
-    simp [hn]
+    regularizedHGFun a b 0 = regularizedHGFunCoeff a b 0 :=
+  Complex.regularizedHGFun_zero
 
 /-- The coefficient comparison with Mathlib's regularized confluent series. -/
 theorem kummerMCoeff_eq_mul_regularizedHGFunCoeff {a c : ℂ}
@@ -549,6 +543,7 @@ def erf (z : ℂ) : ℂ :=
 /-- Complementary error function `erfc z = 1 - erf z`. -/
 def erfc (z : ℂ) : ℂ := 1 - erf z
 
+/-- `erf 0 = 0`. -/
 theorem erf_zero : erf 0 = 0 := by simp [erf]
 
 /-- The coefficient identity for the Gaussian antiderivative. -/

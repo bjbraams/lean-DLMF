@@ -315,6 +315,8 @@ lemma p2m_continuous_besselJExp {h : ℂ} (hh : h ≠ 0) :
   rw [e]
   exact (c1.mul c2).mul c4
 
+/-- For `h ≠ 0`, the numerator `J_μ cos μπ - J_{-μ}` of `Y_μ(h e^z)` is jointly continuous
+in `(μ, z)`. -/
 lemma p2m_continuous_besselDExp {h : ℂ} (hh : h ≠ 0) :
     Continuous fun p : ℂ × ℂ => p2m_besselDExp p.1 h p.2 := by
   have hJ := p2m_continuous_besselJExp hh
@@ -358,6 +360,7 @@ lemma p2m_continuousAt_besselYExp {h : ℂ} (hh : h ≠ 0) (μ₀ z₀ : ℂ) :
       rw [hk]; exact DLMF.Bessel.sin_int_mul_pi_complex k)
     exact (p2m_besselYExp_of_not_int hp' h p.2).symm
 
+/-- For `μ ∉ ℤ` and `h ≠ 0`, `d/dz Y_μ(h e^z) = μ Y_μ(h e^z) - h e^z Y_{μ+1}(h e^z)`. -/
 lemma p2m_hasDerivAt_besselYExp_of_not_int {μ : ℂ} (hμ : ∀ k : ℤ, μ ≠ k) {h : ℂ}
     (hh : h ≠ 0) (z : ℂ) :
     HasDerivAt (fun z => besselYExp μ h z)
@@ -531,6 +534,7 @@ def p2m_Jz (h z : ℂ) : ℤ → ℂ := fun k => besselJExp k h (-z)
 /-- `k ↦ 𝒞^{(j)}_{ν+k}(h e^z)`. -/
 def p2m_Cz (j : ℕ) (ν h z : ℂ) : ℤ → ℂ := fun k => mathieuCylExp j (ν + k) h z
 
+/-- For `1 ≤ j ≤ 4` and `h ≠ 0`, `z ↦ 𝒞^{(j)}_μ(h e^z)` is continuous. -/
 lemma p2m_continuous_mathieuCylExp (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (μ : ℂ) {h : ℂ}
     (hh : h ≠ 0) : Continuous fun z => mathieuCylExp j μ h z :=
   continuous_iff_continuousAt.mpr fun z =>
@@ -611,6 +615,8 @@ theorem p2m_coeff_decay {ν h : ℂ} (hν : ModMathieuAdmissible ν h) (hh : h �
   obtain ⟨hrec, M, hM⟩ := p2m_coeff_facts hν
   exact p2m_decay_int (pow_ne_zero 2 hh) hM hrec
 
+/-- The terms of the cross-product series 28.24.1 are the family `p2m_fam` with shifts
+`α = -n`, `β = n`. -/
 lemma p2m_modMathieuTerm_eq_fam (j : ℕ) (ν z h : ℂ) (n : ℤ) :
     modMathieuTerm j ν z h n =
       p2m_fam (mathieuMeCoeff ν (h ^ 2)) (p2m_Jz h z) (p2m_Cz j ν h z) (-n) n := by
@@ -652,6 +658,8 @@ lemma p2m_hasDerivAt_fam (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (ν : ℂ
 def p2m_F (j : ℕ) (ν h : ℂ) (c : ℤ → ℂ) (α β : ℤ) (z : ℂ) : ℂ :=
   ∑' ℓ, p2m_fam c (p2m_Jz h z) (p2m_Cz j ν h z) α β ℓ
 
+/-- Under factorial decay of the coefficients `c`, the cross-product series `F_{α,β}(z)`
+converges (to its `tsum`). -/
 theorem p2m_hasSum_F (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (ν : ℂ) {h : ℂ} (hh : h ≠ 0)
     {c : ℤ → ℂ} {Cc K : ℝ} (hCc : 0 ≤ Cc) (hK : 0 ≤ K)
     (hc : ∀ m : ℤ, ‖c m‖ * (m.natAbs ! : ℝ) ^ 2 ≤ Cc * K ^ m.natAbs) (α β : ℤ) (z : ℂ) :
@@ -711,6 +719,7 @@ lemma p2m_second_alg {x k km kp Am2 Am1 A0 Ap1 Ap2 : ℂ} (hx : x ≠ 0) (hkm : 
   field_simp
   ring
 
+/-- Three-term recurrence `J_{k-1} + J_{k+1} = (2k/x) J_k` at `x = h e^{-z}`. -/
 lemma p2m_Jz_rec {h : ℂ} (hh : h ≠ 0) (z : ℂ) (k : ℤ) :
     p2m_Jz h z (k - 1) + p2m_Jz h z (k + 1) = 2 * k / (h * Complex.exp (-z)) * p2m_Jz h z k := by
   have := p2m_besselJExp_rec (k : ℂ) hh (-z)
@@ -718,6 +727,7 @@ lemma p2m_Jz_rec {h : ℂ} (hh : h ≠ 0) (z : ℂ) (k : ℤ) :
   push_cast
   exact this
 
+/-- Three-term recurrence `𝒞_{μ-1} + 𝒞_{μ+1} = (2μ/x) 𝒞_μ` at `x = h e^z`, `μ = ν + k`. -/
 lemma p2m_Cz_rec (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (ν : ℂ) {h : ℂ} (hh : h ≠ 0) (z : ℂ)
     (k : ℤ) : p2m_Cz j ν h z (k - 1) + p2m_Cz j ν h z (k + 1) =
       2 * (ν + k) / (h * Complex.exp z) * p2m_Cz j ν h z k := by
@@ -828,6 +838,8 @@ lemma p2m_F_ode (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (ν : ℂ) {h : �
       (-1 : ℂ) ^ ℓ * p2m_Jz h z (ℓ - n) * p2m_Cz j ν h z (n + ℓ) * hr
   · ring
 
+/-- `M^{(j)}_ν(z, h)` is the cross-product series `F_{-n,n}` divided by the coefficient
+`c_n`, `n` the normalizing index. -/
 theorem p2m_modMathieuM_eq_F (j : ℕ) (ν h : ℂ) :
     (fun z => modMathieuM j ν z h) = fun z => (mathieuMeCoeff ν (h ^ 2) (modMathieuIndex ν h))⁻¹ *
       p2m_F j ν h (mathieuMeCoeff ν (h ^ 2)) (-modMathieuIndex ν h) (modMathieuIndex ν h) z := by
@@ -886,6 +898,7 @@ lemma p2m_besselYExp_neg_intCast (k : ℤ) {h : ℂ} (hh : h ≠ 0) (z : ℂ) :
   rw [Int.cast_neg, p2m_besselYExp_neg _ hh, DLMF.Bessel.cos_int_mul_pi_complex,
     DLMF.Bessel.sin_int_mul_pi_complex, zero_mul, add_zero]
 
+/-- For an integer `k`, `𝒞^{(j)}_{-k}(h e^z) = (-1)^k 𝒞^{(j)}_k(h e^z)`. -/
 lemma p2m_mathieuCylExp_neg_intCast (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (k : ℤ) {h : ℂ}
     (hh : h ≠ 0) (z : ℂ) :
     mathieuCylExp j ((-k : ℤ) : ℂ) h z = (-1 : ℂ) ^ k * mathieuCylExp j k h z := by
@@ -908,16 +921,19 @@ theorem p2m_mathieuSe_add_pi {N : ℕ} (hN : N ≠ 0) (z : ℂ) (q : ℝ) :
     rw [show 2 * (s + 1) = 2 * s + 2 by ring, mathieuSe_even_add_pi, pow_add, pow_mul]; simp
   · rw [mathieuSe_odd_add_pi, pow_succ, pow_mul]; simp
 
+/-- For `K ∈ ℤ`, `cos(K(x + π)) = (-1)^K cos(Kx)`. -/
 theorem p2m_cos_add_int_mul_pi (K : ℤ) (x : ℂ) :
     Complex.cos (K * (x + π)) = (-1 : ℂ) ^ K * Complex.cos (K * x) := by
   rw [mul_add, Complex.cos_add, DLMF.Bessel.cos_int_mul_pi_complex,
     DLMF.Bessel.sin_int_mul_pi_complex]; ring
 
+/-- For `K ∈ ℤ`, `sin(K(x + π)) = (-1)^K sin(Kx)`. -/
 theorem p2m_sin_add_int_mul_pi (K : ℤ) (x : ℂ) :
     Complex.sin (K * (x + π)) = (-1 : ℂ) ^ K * Complex.sin (K * x) := by
   rw [mul_add, Complex.sin_add, DLMF.Bessel.cos_int_mul_pi_complex,
     DLMF.Bessel.sin_int_mul_pi_complex]; ring
 
+/-- If `K ≡ N (mod 2)` then `(-1)^N (-1)^K = 1`. -/
 lemma p2m_negOnePow_mul_eq_one {N : ℕ} {K : ℤ} (hK : ∃ k : ℤ, K = N + 2 * k) :
     (-1 : ℂ) ^ N * (-1 : ℂ) ^ K = 1 := by
   obtain ⟨k, rfl⟩ := hK
@@ -1002,13 +1018,16 @@ theorem p2m_mathieuMeCoeff_ce (N : ℕ) (q : ℝ) (k : ℤ) :
   field_simp
   ring
 
+/-- `(-1)^{a-b} = (-1)^a (-1)^b` for integers `a, b`. -/
 theorem p2m_negOnePow_sub (a b : ℤ) : (-1 : ℂ) ^ (a - b) = (-1 : ℂ) ^ a * (-1 : ℂ) ^ b := by
   rw [zpow_sub₀ (by norm_num), div_eq_mul_inv,
     inv_eq_of_mul_eq_one_right (m28b_negOnePow_mul_self b)]
 
+/-- `(-1)^{-a} = (-1)^a` for an integer `a`. -/
 lemma p2m_negOnePow_neg (a : ℤ) : (-1 : ℂ) ^ (-a) = (-1 : ℂ) ^ a := by
   rw [zpow_neg, inv_eq_of_mul_eq_one_right (m28b_negOnePow_mul_self a)]
 
+/-- `(√2)² = 2` in `ℂ`. -/
 lemma p2m_sqrt_two_sq : ((Real.sqrt 2 : ℝ) : ℂ) ^ 2 = 2 := by
   rw [← Complex.ofReal_pow, Real.sq_sqrt (by norm_num)]; push_cast; rfl
 

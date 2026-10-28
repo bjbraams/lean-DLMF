@@ -7,6 +7,7 @@ module
 
 public import DLMF.CoalescingSaddles.Defs
 public import DLMF.CoalescingSaddles.DifferentialEquations
+public import DLMFMathlib.Analysis.Analytic.OfScalarsUnique
 
 /-!
 # Convergent series for the canonical integrals: DLMF §36.8
@@ -91,6 +92,7 @@ def q2t_lower (K : ℕ) (x : Fin K → ℝ) (t : ℂ) : ℂ :=
 def q2t_lowerDeriv (K : ℕ) (x : Fin K → ℝ) (t : ℂ) : ℂ :=
   ∑ m : Fin K, (((m : ℕ) : ℂ) + 1) * ((x m : ℝ) : ℂ) * t ^ (m : ℕ)
 
+/-- The lower-order part `∑ₘ xₘ t^{m+1}` has derivative `∑ₘ (m+1) xₘ tᵐ`. -/
 lemma q2t_hasDerivAt_lower (K : ℕ) (x : Fin K → ℝ) (t : ℂ) :
     HasDerivAt (q2t_lower K x) (q2t_lowerDeriv K x t) t := by
   have h := HasDerivAt.fun_sum (u := Finset.univ) (fun (m : Fin K) _ =>
@@ -100,6 +102,7 @@ lemma q2t_hasDerivAt_lower (K : ℕ) (x : Fin K → ℝ) (t : ℂ) :
   refine Finset.sum_congr rfl fun m _ => ?_
   push_cast; ring
 
+/-- Derivative of `exp(i ∑ₘ xₘ t^{m+1})`. -/
 lemma q2t_deriv_exp_lower (K : ℕ) (x : Fin K → ℝ) :
     deriv (fun t => exp (I * q2t_lower K x t)) =
       (fun t => I * q2t_lowerDeriv K x t) * fun t => exp (I * q2t_lower K x t) := by
@@ -107,14 +110,18 @@ lemma q2t_deriv_exp_lower (K : ℕ) (x : Fin K → ℝ) :
   rw [(((q2t_hasDerivAt_lower K x t).const_mul I).cexp).deriv]
   simp only [Pi.mul_apply]; ring
 
+/-- `i ∑ₘ (m+1) xₘ tᵐ` is smooth in `t`. -/
 lemma q2t_contDiff_lowerDeriv (K : ℕ) (x : Fin K → ℝ) {n : ℕ∞} :
     ContDiff ℂ n fun t => I * q2t_lowerDeriv K x t := by
   unfold q2t_lowerDeriv; fun_prop
 
+/-- `exp(i ∑ₘ xₘ t^{m+1})` is smooth in `t`. -/
 lemma q2t_contDiff_exp_lower (K : ℕ) (x : Fin K → ℝ) {n : ℕ∞} :
     ContDiff ℂ n fun t => exp (I * q2t_lower K x t) := by
   unfold q2t_lower; fun_prop
 
+/-- The `i`-th derivative at `0` of `i ∑ₘ (m+1) xₘ tᵐ` is `i (i+1) x_i i!` for `i < K` and `0`
+otherwise. -/
 lemma q2t_iteratedDeriv_lowerDeriv (K : ℕ) (x : Fin K → ℝ) (i : ℕ) :
     iteratedDeriv i (fun t => I * q2t_lowerDeriv K x t) 0 =
       if h : i < K then I * (((i : ℂ) + 1) * ((x ⟨i, h⟩ : ℝ) : ℂ) * (i ! : ℂ)) else 0 := by
@@ -134,6 +141,8 @@ lemma q2t_iteratedDeriv_lowerDeriv (K : ℕ) (x : Fin K → ℝ) (i : ℕ) :
     have : i ≠ (m : ℕ) := fun e => h (e ▸ m.isLt)
     simp [this]
 
+/-- Rewrites the recurrence sum over `Fin (min (n+1) K)` as a sum over `range (n+1)` with a guard `i
+< K`. -/
 lemma q2t_sum_fin_min (K n : ℕ) (F : ℕ → ℂ) (x : Fin K → ℝ) :
     ∑ p : Fin (min (n + 1) K), (((p : ℕ) : ℂ) + 1) *
         ((x ⟨p, lt_of_lt_of_le p.isLt (min_le_right _ _)⟩ : ℝ) : ℂ) * F (n - p) =
@@ -188,6 +197,7 @@ lemma q2t_coeff_eq_taylor (K : ℕ) (x : Fin K → ℝ) (n : ℕ) :
     rw [Nat.factorial_succ]; push_cast
     field_simp
 
+/-- `exp(i ∑ₘ xₘ t^{m+1})` is entire. -/
 lemma q2t_differentiable_exp_lower (K : ℕ) (x : Fin K → ℝ) :
     Differentiable ℂ fun t => exp (I * q2t_lower K x t) :=
   (q2t_contDiff_exp_lower K x (n := 1)).differentiable one_ne_zero
@@ -201,6 +211,7 @@ lemma q2t_hasSum_exp_lower (K : ℕ) (x : Fin K → ℝ) (t : ℂ) :
   rw [q2t_coeff_eq_taylor, sub_zero, smul_eq_mul, smul_eq_mul]
   field_simp
 
+/-- `‖∑ₘ xₘ t^{m+1}‖ ≤ ∑ₘ |xₘ| ‖t‖^{m+1}`. -/
 lemma q2t_norm_lower_le (K : ℕ) (x : Fin K → ℝ) (t : ℂ) :
     ‖q2t_lower K x t‖ ≤ ∑ m : Fin K, |x m| * ‖t‖ ^ ((m : ℕ) + 1) := by
   unfold q2t_lower
@@ -249,6 +260,7 @@ lemma q2t_summable_norm_coeff (K : ℕ) (x : Fin K → ℝ) {ρ : ℝ} (hρ : 0 
   rw [tsum_mul_left, tsum_geometric_of_lt_one (by norm_num) (by norm_num)]
   ring
 
+/-- `(2a + 1)^K ≤ 3^K (1 + a^K)` for `a ≥ 0`. -/
 lemma q2t_pow_two_mul_add_one_le (K : ℕ) {a : ℝ} (ha : 0 ≤ a) :
     (2 * a + 1) ^ K ≤ 3 ^ K * (1 + a ^ K) := by
   rcases le_total a 1 with h | h
@@ -277,6 +289,7 @@ lemma q2t_majorant_exponent_le (K : ℕ) (x : Fin K → ℝ) {a : ℝ} (ha : 0 �
     have := mul_le_mul_of_nonneg_left h2 hS; nlinarith
   nlinarith
 
+/-- The majorant `2 exp(∑ₘ |xₘ| (2|r| + 1)^{m+1}) exp(-|r|^{K+2})` is integrable on `ℝ`. -/
 lemma q2t_integrable_majorant (K : ℕ) (x : Fin K → ℝ) :
     Integrable fun r : ℝ => 2 * Real.exp (∑ m : Fin K, |x m| * (2 * |r| + 1) ^ ((m : ℕ) + 1)) *
       Real.exp (-|r| ^ (K + 2)) := by
@@ -291,6 +304,8 @@ lemma q2t_integrable_majorant (K : ℕ) (x : Fin K → ℝ) :
   rw [sq_abs, ← hS] at this
   rw [hc]; linarith
 
+/-- On the rotated contour the leading factor has modulus `‖exp(i t(r)^{K+2})‖ = exp(-|r|^{K+2})`.
+-/
 lemma q2t_norm_exp_top (K : ℕ) (r : ℝ) :
     ‖exp (I * cuspoidContour K r ^ (K + 2))‖ = Real.exp (-|r| ^ (K + 2)) := by
   rw [norm_exp, cuspoidContour_pow, ← mul_assoc, I_mul_I]
@@ -386,6 +401,7 @@ lemma q2t_cuspoidMoment_zero (K n : ℕ) :
     rw [hf, s36a_dir_neg (neg_neg_of_pos hr), abs_neg, abs_of_pos hr]; push_cast; ring
   rw [hL, hR]; ring
 
+/-- `e^{i(n+1)θ} + (-1)ⁿ e^{-i(n+1)θ} = 2 iⁿ cos(nπ/2 - (n+1)θ)`. -/
 lemma q2t_exp_pow_add (θ : ℝ) (n : ℕ) :
     exp ((θ : ℂ) * I) ^ (n + 1) + (-1) ^ n * exp (-(θ : ℂ) * I) ^ (n + 1) =
       2 * I ^ n * (Real.cos (n * π / 2 - (n + 1) * θ) : ℂ) := by
@@ -419,6 +435,7 @@ of products of fold moments (`q2t_hasSum_hyperbolicUmbilicIntegral`). -/
 def q2t_airyN (n : ℕ) (w : ℂ) : ℂ :=
   (umbilicSeriesC n).eval w * Airy.airyAi w + (umbilicSeriesD n).eval w * Airy.airyAiDeriv w
 
+/-- `Ai^{(n)}` in the form `cₙ Ai + dₙ Ai'` has derivative `Ai^{(n+1)}`. -/
 lemma q2t_hasDerivAt_airyN (n : ℕ) (w : ℂ) :
     HasDerivAt (q2t_airyN n) (q2t_airyN (n + 1) w) w := by
   unfold q2t_airyN
@@ -465,10 +482,12 @@ lemma q2t_cuspoidMoment_one (X : ℝ) (n : ℕ) :
 /-- The fold factor `exp(i(s³ + Xs))` on the cubic V-contour. -/
 def q2t_foldExp (X σ : ℝ) : ℂ := exp (I * cuspoidPotential 1 (cuspoidContour 1 σ) ![X])
 
+/-- The fold factor on the cubic V-contour is measurable. -/
 lemma q2t_measurable_foldExp (X : ℝ) : Measurable (q2t_foldExp X) :=
   measurable_exp.comp (measurable_const.mul
     ((continuous_cuspoidPotential 1 ![X]).measurable.comp (measurable_cuspoidContour 1)))
 
+/-- The fold factor is bounded by `exp(-|σ|³ + |X|(1 + |σ|))`. -/
 lemma q2t_norm_foldExp_le (X σ : ℝ) :
     ‖q2t_foldExp X σ‖ ≤ Real.exp (-|σ| ^ 3 + |X| * (1 + |σ|)) := by
   rw [q2t_foldExp, norm_exp]
@@ -480,6 +499,8 @@ lemma q2t_norm_foldExp_le (X σ : ℝ) :
       -(cuspoidPotential 1 (cuspoidContour 1 σ) ![X]).im := by simp [mul_re]
   rw [this]; linarith
 
+/-- On the product of V-contours the hyperbolic umbilic phase factor splits as fold factor in `x`,
+fold factor in `y`, and `exp(i z s t)`. -/
 lemma q2t_hyperbolic_split (σ τ x y z : ℝ) :
     exp (I * hyperbolicUmbilicPotential (cuspoidContour 1 σ) (cuspoidContour 1 τ) x y z) =
       q2t_foldExp x σ * q2t_foldExp y τ *
@@ -528,12 +549,6 @@ lemma q2t_integrable_hyperbolic_majorant (x y z : ℝ) :
         linarith
     _ = _ := by rw [Real.exp_add, Real.exp_add]; simp [Real.exp_add]
 
-lemma q2t_hasSum_exp (w : ℂ) : HasSum (fun n : ℕ => w ^ n / (n ! : ℂ)) (exp w) := by
-  rw [Complex.exp_eq_exp_ℂ]; exact NormedSpace.expSeries_div_hasSum_exp w
-
-lemma q2t_hasSum_rexp (w : ℝ) : HasSum (fun n : ℕ => w ^ n / (n ! : ℝ)) (Real.exp w) := by
-  rw [Real.exp_eq_exp_ℝ]; exact NormedSpace.expSeries_div_hasSum_exp w
-
 /-- Termwise integration of `exp(izst) = ∑ (izst)ⁿ/n!`:
 `Ψ^{(H)}(x, y, z) = ∑ₙ (iz)ⁿ/n! (∫ sⁿ e^{i(s³+xs)} ds)(∫ tⁿ e^{i(t³+yt)} dt)`. -/
 lemma q2t_hasSum_hyperbolicUmbilicIntegral (x y z : ℝ) :
@@ -562,7 +577,7 @@ lemma q2t_hasSum_hyperbolicUmbilicIntegral (x y z : ℝ) :
   have htsum : (fun p : ℝ × ℝ => ∑' n, ‖q2t_foldExp x p.1‖ * ‖q2t_foldExp y p.2‖ *
       ((|z| * |p.1| * |p.2|) ^ n / (n ! : ℝ))) = fun p => ‖q2t_foldExp x p.1‖ *
         ‖q2t_foldExp y p.2‖ * Real.exp (|z| * |p.1| * |p.2|) := by
-    funext p; rw [tsum_mul_left, (q2t_hasSum_rexp _).tsum_eq]
+    funext p; rw [tsum_mul_left, (Real.hasSum_pow_div_factorial _).tsum_eq]
   have hmeas : ∀ n, Measurable (F n) := by
     intro n
     have h1 := ((measurable_cuspoidContourDir 1).mul
@@ -578,7 +593,8 @@ lemma q2t_hasSum_hyperbolicUmbilicIntegral (x y z : ℝ) :
     (ae_of_all _ fun p => (Real.summable_pow_div_factorial _).mul_left _) ?_
     (ae_of_all _ fun p => ?_)
   · rw [htsum]; exact q2t_integrable_hyperbolic_majorant x y z
-  · have h := (q2t_hasSum_exp (I * z * cuspoidContour 1 p.1 * cuspoidContour 1 p.2)).mul_left
+  · have h := (Complex.hasSum_pow_div_factorial (I * z * cuspoidContour 1 p.1 * cuspoidContour 1
+      p.2)).mul_left
       (cuspoidContourDir 1 p.1 * q2t_foldExp x p.1 * (cuspoidContourDir 1 p.2 * q2t_foldExp y p.2))
     rw [q2t_hyperbolic_split]
     convert h using 1

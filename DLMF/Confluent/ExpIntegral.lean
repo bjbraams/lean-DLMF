@@ -145,6 +145,7 @@ theorem genExpIntE_one_eq_integral {x : ℝ} (hx : 0 < x) :
 def Real.expIntEin (x : ℝ) : ℝ :=
   ∫ t in (0 : ℝ)..x, (1 - Real.exp (-t)) / t
 
+/-- `(1 - e^{-t})/t` is interval integrable between nonnegative endpoints. -/
 theorem intervalIntegrable_einIntegrand {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) :
     IntervalIntegrable (fun t : ℝ => (1 - Real.exp (-t)) / t) volume a b := by
   refine (intervalIntegrable_const (c := (1 : ℝ))).mono_fun'
@@ -160,6 +161,7 @@ theorem intervalIntegrable_einIntegrand {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b
   rw [abs_of_pos (by linarith)]
   linarith
 
+/-- `e^{-t}/t` is integrable on `(a, ∞)` for `a > 0`. -/
 theorem integrableOn_exp_neg_div {a : ℝ} (ha : 0 < a) :
     IntegrableOn (fun t : ℝ => Real.exp (-t) / t) (Ioi a) := by
   refine ((exp_neg_integrableOn_Ioi a one_pos).const_mul a⁻¹).mono'
@@ -281,6 +283,7 @@ theorem genExpIntE_one_eq_Ein {x : ℝ} (hx : 0 < x) :
   rw [hE, hfg, hsub, hEin, hlog, hγ]
   ring
 
+/-- For `t ≠ 0`, `(1 - e^{-t})/t = ∑_k (-1)^k t^k/(k+1)!`. -/
 theorem hasSum_einIntegrand {t : ℝ} (ht : t ≠ 0) :
     HasSum (fun k : ℕ => (-1) ^ k * t ^ k / (k + 1)!) ((1 - Real.exp (-t)) / t) := by
   have h := NormedSpace.expSeries_div_hasSum_exp (-t)
@@ -349,6 +352,7 @@ theorem genExpIntE_one_eq_tsum {x : ℝ} (hx : 0 < x) :
 def Real.sinInt (x : ℝ) : ℝ :=
   ∫ t in (0 : ℝ)..x, Real.sinc t
 
+/-- `Si'(x) = sinc x`. -/
 theorem Real.hasDerivAt_sinInt (x : ℝ) : HasDerivAt Real.sinInt (Real.sinc x) x :=
   intervalIntegral.integral_hasDerivAt_right (Real.continuous_sinc.intervalIntegrable _ _)
     (Real.continuous_sinc.stronglyMeasurableAtFilter _ _) Real.continuous_sinc.continuousAt

@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Hypergeometric.EulerIntegral
+public import ComplexAnalysis.Pow
 
 /-!
 # Linear and quadratic transformations (AAR §2.2 and §3.1)
@@ -25,14 +26,8 @@ namespace DLMF.Hypergeometric
 
 /-- Powers multiply without a branch correction when both factors have positive real part. -/
 theorem mul_cpow_of_re_pos {u v : ℂ} (hu : 0 < u.re) (hv : 0 < v.re) (a : ℂ) :
-    (u * v) ^ a = u ^ a * v ^ a := by
-  have hu0 : u ≠ 0 := by intro h; simp [h] at hu
-  have hv0 : v ≠ 0 := by intro h; simp [h] at hv
-  have hau := abs_lt.mp (abs_arg_lt_pi_div_two_iff.mpr (Or.inl hu))
-  have hav := abs_lt.mp (abs_arg_lt_pi_div_two_iff.mpr (Or.inl hv))
-  rw [cpow_def_of_ne_zero (mul_ne_zero hu0 hv0),
-    log_mul hu0 hv0 ⟨by linarith, by linarith⟩, add_mul, exp_add,
-    cpow_def_of_ne_zero hu0, cpow_def_of_ne_zero hv0]
+    (u * v) ^ a = u ^ a * v ^ a :=
+  Complex.mul_cpow_of_re_pos hu hv a
 
 /-- The factors in Pfaff's change of variable stay in the right half-plane. -/
 theorem re_one_sub_mul_pos {z : ℂ} (hz : ‖z‖ < 1) {t : ℝ} (ht : t ∈ Set.Icc 0 1) :

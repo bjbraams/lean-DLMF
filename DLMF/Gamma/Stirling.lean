@@ -32,13 +32,16 @@ namespace Real
 def stirlingGamma (x : ℝ) : ℝ :=
   sqrt (2 * π / x) * (x / exp 1) ^ x
 
+/-- `stirlingGamma x = √(2π/x) (x/e)^x` is positive for `x > 0`. -/
 theorem stirlingGamma_pos {x : ℝ} (hx : 0 < x) : 0 < stirlingGamma x :=
   mul_pos (sqrt_pos_of_pos (div_pos (mul_pos two_pos pi_pos) hx))
     (rpow_pos_of_pos (div_pos hx (exp_pos _)) _)
 
+/-- `stirlingGamma x ≠ 0` for `x > 0`. -/
 theorem stirlingGamma_ne_zero {x : ℝ} (hx : 0 < x) : stirlingGamma x ≠ 0 :=
   (stirlingGamma_pos hx).ne'
 
+/-- `log(√(2π/x)(x/e)^x) = (1/2) log(2π) - (1/2) log x + x log x - x` for `x > 0`. -/
 theorem log_stirlingGamma {x : ℝ} (hx : 0 < x) :
     log (stirlingGamma x) =
       (1 / 2) * log (2 * π) - (1 / 2) * log x + x * log x - x := by
@@ -58,6 +61,7 @@ theorem Gamma_nat_succ_isEquivalent_stirling :
   · exact Gamma_nat_eq_factorial n
   · ring
 
+/-- `(n/(n + 1))ⁿ → e⁻¹`. -/
 theorem tendsto_n_div_succ_pow :
     Tendsto (fun n : ℕ => ((n : ℝ) / (n + 1)) ^ n) atTop (𝓝 (exp (-1))) := by
   have h : Tendsto (fun n : ℕ => (1 + (1 : ℝ) / n) ^ n) atTop (𝓝 (exp 1)) :=
@@ -72,6 +76,7 @@ theorem tendsto_n_div_succ_pow :
     rw [this]
   simpa [exp_neg] using hinv
 
+/-- `√(2πn)(n/e)ⁿ / stirlingGamma(n + 1) = e √(n/(n+1)) (n/(n+1))ⁿ` for `n > 0`. -/
 theorem sqrt_two_pi_n_div_stirlingGamma_succ (n : ℕ) (hn : 0 < n) :
     sqrt (2 * π * n) * (n / exp 1) ^ n / stirlingGamma (n + 1 : ℝ) =
       exp 1 * sqrt ((n : ℝ) / (n + 1)) * ((n : ℝ) / (n + 1)) ^ n := by
@@ -100,6 +105,7 @@ theorem sqrt_two_pi_n_div_stirlingGamma_succ (n : ℕ) (hn : 0 < n) :
     log_div hn0.ne' hn1.ne']
   ring
 
+/-- `√(2πn)(n/e)ⁿ / stirlingGamma(n + 1) → 1`. -/
 theorem tendsto_stirling_n_div_stirlingGamma_succ :
     Tendsto (fun n : ℕ =>
       (sqrt (2 * π * n) * (n / exp 1) ^ n) / stirlingGamma (n + 1 : ℝ)) atTop (𝓝 1) := by
@@ -120,6 +126,7 @@ theorem Gamma_nat_succ_isEquivalent_stirlingGamma :
   Gamma_nat_succ_isEquivalent_stirling.trans <|
     isEquivalent_of_tendsto_one tendsto_stirling_n_div_stirlingGamma_succ
 
+/-- `Γ(n + 1) / stirlingGamma(n + 1) → 1` (Stirling's formula at the integers). -/
 theorem tendsto_Gamma_nat_succ_div_stirlingGamma :
     Tendsto (fun n : ℕ => Gamma (n + 1 : ℝ) / stirlingGamma (n + 1 : ℝ)) atTop (𝓝 1) := by
   have hne : ∀ᶠ n : ℕ in atTop, stirlingGamma (n + 1 : ℝ) ≠ 0 := by
@@ -127,6 +134,7 @@ theorem tendsto_Gamma_nat_succ_div_stirlingGamma :
     exact stirlingGamma_ne_zero (by positivity : (0 : ℝ) < n + 1)
   exact (isEquivalent_iff_tendsto_one hne).mp Gamma_nat_succ_isEquivalent_stirlingGamma
 
+/-- `Γ(n) / stirlingGamma(n) → 1`. -/
 theorem tendsto_Gamma_nat_div_stirlingGamma :
     Tendsto (fun n : ℕ => Gamma (n : ℝ) / stirlingGamma n) atTop (𝓝 1) :=
   (tendsto_add_atTop_iff_nat (f := fun n : ℕ => Gamma (n : ℝ) / stirlingGamma n) 1).mp <| by
@@ -134,11 +142,13 @@ theorem tendsto_Gamma_nat_div_stirlingGamma :
     ext n
     simp [Nat.cast_succ]
 
+/-- `log Γ(y + 1) = log Γ(y) + log y` for `y > 0`. -/
 theorem log_Gamma_add_one {y : ℝ} (hy : 0 < y) :
     (log ∘ Gamma) (y + 1) = (log ∘ Gamma) y + log y := by
   simp [Function.comp_apply, Gamma_add_one hy.ne',
     log_mul hy.ne' (Gamma_pos_of_pos hy).ne', add_comm]
 
+/-- `Γ(n + t) ≤ Γ(n) n^t` for `n ≥ 1` and `0 < t ≤ 1` (log-convexity). -/
 theorem Gamma_add_le_mul_rpow {n : ℕ} (hn : n ≠ 0) {t : ℝ} (ht0 : 0 < t) (ht1 : t ≤ 1) :
     Gamma (n + t) ≤ Gamma n * (n : ℝ) ^ t := by
   have hn0 : (0 : ℝ) < n := Nat.cast_pos.mpr (Nat.pos_of_ne_zero hn)
@@ -151,6 +161,7 @@ theorem Gamma_add_le_mul_rpow {n : ℕ} (hn : n ≠ 0) {t : ℝ} (ht0 : 0 < t) (
       log_rpow hn0] using hlog
   exact (log_le_log_iff (Gamma_pos_of_pos (add_pos hn0 ht0)) hpos).mp this
 
+/-- `Γ(n) (n - 1)^t ≤ Γ(n + t)` for `n ≥ 2` and `t > 0` (log-convexity). -/
 theorem mul_rpow_le_Gamma_add {n : ℕ} (hn : 2 ≤ n) {t : ℝ} (ht0 : 0 < t) :
     Gamma n * ((n : ℝ) - 1) ^ t ≤ Gamma (n + t) := by
   have hn0 : (0 : ℝ) < n := Nat.cast_pos.mpr (lt_of_lt_of_le zero_lt_two hn)
@@ -166,6 +177,8 @@ theorem mul_rpow_le_Gamma_add {n : ℕ} (hn : 2 ≤ n) {t : ℝ} (ht0 : 0 < t) :
       log_rpow hn1] using hlog
   exact (log_le_log_iff hpos (Gamma_pos_of_pos (add_pos hn0 ht0))).mp this
 
+/-- `log(stirlingGamma n · n^(x-n) / stirlingGamma x) = (x - n) + (1/2 - x) log(x/n)` for `0 < n ≤
+x`. -/
 theorem log_stirlingGamma_mul_rpow_div {n : ℕ} (hn : 0 < n) {x : ℝ} (hx : (n : ℝ) ≤ x) :
     log (stirlingGamma n * (n : ℝ) ^ (x - n) / stirlingGamma x) =
       (x - n) + (1 / 2 - x) * log (x / n) := by
@@ -178,6 +191,7 @@ theorem log_stirlingGamma_mul_rpow_div {n : ℕ} (hn : 0 < n) {x : ℝ} (hx : (n
     log_stirlingGamma hn0, log_stirlingGamma hx0, log_rpow hn0, log_div hx0.ne' hn0.ne']
   ring
 
+/-- `n log(1 + t/n) → t`. -/
 theorem tendsto_nat_mul_log_one_add_div (t : ℝ) :
     Tendsto (fun n : ℕ => (n : ℝ) * log (1 + t / n)) atTop (𝓝 t) :=
   tendsto_nat_mul_log_one_add_of_tendsto (g := fun n : ℕ => t / n) <| by
@@ -185,11 +199,13 @@ theorem tendsto_nat_mul_log_one_add_div (t : ℝ) :
     filter_upwards [eventually_ne_atTop 0] with n hn
     exact (mul_div_cancel₀ t (Nat.cast_ne_zero.mpr hn)).symm
 
+/-- `1 + t/n → 1`. -/
 theorem tendsto_one_add_div (t : ℝ) :
     Tendsto (fun n : ℕ => (1 : ℝ) + t / n) atTop (𝓝 1) := by
   simpa using tendsto_const_nhds (x := (1 : ℝ)) |>.add
     ((tendsto_const_nhds (x := t)).div_atTop tendsto_natCast_atTop_atTop)
 
+/-- `stirlingGamma n · n^t / stirlingGamma(n + t) → 1` for `t ≥ 0`. -/
 theorem tendsto_stirlingGamma_mul_rpow_div {t : ℝ} (ht : 0 ≤ t) :
     Tendsto (fun n : ℕ =>
       stirlingGamma n * (n : ℝ) ^ t / stirlingGamma (n + t)) atTop (𝓝 1) := by
@@ -223,6 +239,7 @@ theorem tendsto_stirlingGamma_mul_rpow_div {t : ℝ} (ht : 0 ≤ t) :
   filter_upwards [hpos] with n hn
   exact Real.exp_log hn
 
+/-- `stirlingGamma n · (n - 1)^t / stirlingGamma(n + t) → 1` for `t ≥ 0`. -/
 theorem tendsto_stirlingGamma_mul_pred_rpow_div {t : ℝ} (ht : 0 ≤ t) :
     Tendsto (fun n : ℕ =>
       stirlingGamma n * ((n : ℝ) - 1) ^ t / stirlingGamma (n + t)) atTop (𝓝 1) := by

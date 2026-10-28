@@ -36,6 +36,7 @@ namespace DLMF.Gamma
 def qFactorial (q : ℂ) (n : ℕ) : ℂ :=
   qPochhammer q q n * (1 - q) ^ (-(n : ℂ))
 
+/-- DLMF 5.18.6: `[n]_q! = Γ_q(n + 1)` for `|q| < 1`. -/
 @[dlmf 5.18.E6]
 theorem qFactorial_eq_qGamma (q : ℂ) (n : ℕ) (hq : ‖q‖ < 1) (hq0 : q ≠ 1) :
     qFactorial q n = qGamma q (n + 1) := by
@@ -64,6 +65,7 @@ theorem qFactorial_eq_qGamma (q : ℂ) (n : ℕ) (hq : ‖q‖ < 1) (hq0 : q ≠
   rw [hsplit, hpow, hexp]
   field [hinf, hb]
 
+/-- DLMF 5.18.5 at `x = 2`: `Γ_q(2) = 1`. -/
 @[dlmf 5.18.E5]
 theorem qGamma_two {q : ℂ} (hq : ‖q‖ < 1) : qGamma q 2 = 1 := by
   by_cases hq0 : q = 0
@@ -117,15 +119,18 @@ def qNum (q t : ℝ) : ℝ := (1 - q ^ t) / (1 - q)
 
 variable {q x : ℝ}
 
+/-- `1 - q^t > 0` for `0 < q < 1` and `t > 0`. -/
 theorem one_sub_rpow_pos (hq0 : 0 < q) (hq1 : q < 1) {t : ℝ} (ht : 0 < t) :
     0 < 1 - q ^ t := by
   have := Real.rpow_lt_one hq0.le hq1 ht
   linarith
 
+/-- `g q t = log(1 - q^t) ≤ 0` for `0 < q < 1` and `t > 0`. -/
 theorem g_nonpos (hq0 : 0 < q) (hq1 : q < 1) {t : ℝ} (ht : 0 < t) : g q t ≤ 0 := by
   have := Real.rpow_pos_of_pos hq0 t
   exact Real.log_nonpos (one_sub_rpow_pos hq0 hq1 ht).le (by linarith)
 
+/-- `log(1 - q^t) = log [t]_q + log(1 - q)`, where `[t]_q = (1 - q^t)/(1 - q)`. -/
 theorem g_eq (hq0 : 0 < q) (hq1 : q < 1) {t : ℝ} (ht : 0 < t) :
     g q t = Real.log (qNum q t) + Real.log (1 - q) := by
   unfold g qNum
@@ -152,6 +157,8 @@ theorem concaveOn_g (hq0 : 0 < q) (hq1 : q < 1) : ConcaveOn ℝ (Ioi 0) (g q) :=
         linear_combination hab
       linarith
 
+/-- Concavity of `t ↦ log(1 - q^t)` between `t` and `t + 1`: `(1 - x) g(t) + x g(t + 1) ≤ g(t + x)`
+for `0 ≤ x ≤ 1`. -/
 theorem g_concave_one (hq0 : 0 < q) (hq1 : q < 1) {t : ℝ} (ht : 0 < t) (hx0 : 0 ≤ x)
     (hx1 : x ≤ 1) : (1 - x) * g q t + x * g q (t + 1) ≤ g q (t + x) := by
   have h := (concaveOn_g hq0 hq1).2 (mem_Ioi.2 ht) (mem_Ioi.2 (by linarith : (0 : ℝ) < t + 1))
@@ -160,6 +167,8 @@ theorem g_concave_one (hq0 : 0 < q) (hq1 : q < 1) {t : ℝ} (ht : 0 < t) (hx0 : 
   convert h using 2
   ring
 
+/-- Concavity of `t ↦ log(1 - q^t)`: `g(t + x) - g(t) ≤ x (g(t) - g(t - 1))` for `t > 1`, `x ≥ 0`.
+-/
 theorem g_concave_two (hq0 : 0 < q) (hq1 : q < 1) {t : ℝ} (ht : 1 < t) (hx0 : 0 ≤ x) :
     g q (t + x) - g q t ≤ x * (g q t - g q (t - 1)) := by
   have h1 : (0 : ℝ) < 1 + x := by linarith
@@ -186,17 +195,20 @@ def D (q x : ℝ) (N : ℕ) : ℝ :=
 def K (q x : ℝ) (n : ℕ) : ℝ :=
   ∑ k ∈ range n, g q ((k : ℝ) + 1) - ∑ k ∈ range (n + 1), g q (x + k)
 
+/-- Recurrence for the partial log-sums: `D(N + 1) = D(N) + g(N + 1) - g(x + N)`. -/
 theorem D_succ (q x : ℝ) (N : ℕ) :
     D q x (N + 1) = D q x N + g q ((N : ℝ) + 1) - g q (x + N) := by
   unfold D
   rw [sum_range_succ, sum_range_succ]
   ring
 
+/-- `D(n + 1) = K(n) + g(n + 1)`. -/
 theorem D_base (q x : ℝ) (n : ℕ) : D q x (n + 1) = K q x n + g q ((n : ℝ) + 1) := by
   unfold D K
   rw [sum_range_succ (fun k : ℕ => g q ((k : ℝ) + 1))]
   ring
 
+/-- Lower bound for the partial log-sums `D(N)`, `N ≥ n + 1`, from concavity of `g`. -/
 theorem D_lower (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 ≤ x) {n : ℕ} (hn : 1 ≤ n) :
     ∀ N, n + 1 ≤ N →
       K q x n + g q N + x * g q n - x * g q ((N : ℝ) - 1) ≤ D q x N := by
@@ -218,6 +230,8 @@ theorem D_lower (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 ≤ x) {n : ℕ} (hn : 1 �
     simp only [add_sub_cancel_right]
     linarith
 
+/-- Upper bound for the partial log-sums `D(N)`, `N ≥ n + 1`, from concavity of `g`, for `0 ≤ x ≤
+1`. -/
 theorem D_upper (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 ≤ x) (hx1 : x ≤ 1) (n : ℕ) :
     ∀ N, n + 1 ≤ N →
       D q x N ≤ K q x n + x * g q ((n : ℝ) + 1) + (1 - x) * g q N := by
@@ -242,6 +256,7 @@ def r (q x : ℝ) (N : ℕ) : ℝ :=
   (∏ k ∈ range N, (1 - q ^ (k + 1))) / (∏ k ∈ range N, (1 - q ^ (x + k))) *
     (1 - q) ^ (1 - x)
 
+/-- `log r(N) = D(N) + (1 - x) log(1 - q)` for the truncations `r` of `Γ_q(x)`. -/
 theorem log_r (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (N : ℕ) :
     Real.log (r q x N) = D q x N + (1 - x) * Real.log (1 - q) := by
   have hA : ∀ k ∈ range N, (1 - q ^ (k + 1) : ℝ) ≠ 0 := fun k _ =>
@@ -258,6 +273,7 @@ theorem log_r (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (N : ℕ) :
     sum_congr rfl fun k _ => by norm_cast
   rw [e]
 
+/-- The truncations `r q x N` of `Γ_q(x)` are positive. -/
 theorem r_pos (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (N : ℕ) : 0 < r q x N := by
   unfold r
   refine mul_pos (div_pos (prod_pos fun k _ => ?_) (prod_pos fun k _ => ?_))
@@ -265,6 +281,7 @@ theorem r_pos (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (N : ℕ) : 0 < r q x N 
   · exact sub_pos.2 (pow_lt_one₀ hq0.le hq1 (Nat.succ_ne_zero k))
   · exact one_sub_rpow_pos hq0 hq1 (add_pos_of_pos_of_nonneg hx0 k.cast_nonneg)
 
+/-- Two-sided exponential bounds for the truncations `r q x N` of `Γ_q(x)`, `0 < x ≤ 1`. -/
 theorem r_bounds (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (hx1 : x ≤ 1) {n : ℕ}
     (hn : 1 ≤ n) {N : ℕ} (hN : n + 1 ≤ N) :
     Real.exp (K q x n + x * g q n + (1 - x) * Real.log (1 - q) + g q N) ≤ r q x N ∧
@@ -282,6 +299,7 @@ theorem r_bounds (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (hx1 : x ≤ 1) {n : 
     (g_nonpos hq0 hq1 hN0)
   constructor <;> refine Real.exp_le_exp.2 ?_ <;> linarith
 
+/-- `log(1 - q^N) → 0` as `N → ∞`. -/
 theorem tendsto_g_nat (hq0 : 0 < q) (hq1 : q < 1) :
     Tendsto (fun N : ℕ => g q N) atTop (𝓝 0) := by
   have h : Tendsto (fun N : ℕ => q ^ (N : ℝ)) atTop (𝓝 0) := by
@@ -290,10 +308,12 @@ theorem tendsto_g_nat (hq0 : 0 < q) (hq1 : q < 1) :
     simpa using (tendsto_const_nhds (x := (1 : ℝ))).sub h
   simpa [g] using h2.log one_ne_zero
 
+/-- `‖(q : ℂ)‖ < 1` for real `0 < q < 1`. -/
 theorem norm_ofReal_lt_one (hq0 : 0 < q) (hq1 : q < 1) : ‖(q : ℂ)‖ < 1 := by
   rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos hq0]
   exact hq1
 
+/-- The real truncations `r q x N` converge to `Γ_q(x)`. -/
 theorem tendsto_r_complex (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) :
     Tendsto (fun N => (r q x N : ℂ)) atTop (𝓝 (qGamma q x)) := by
   have hq := norm_ofReal_lt_one hq0 hq1
@@ -332,6 +352,8 @@ def L (q x : ℝ) (n : ℕ) (t : ℝ) : ℝ :=
   ∑ k ∈ range n, Real.log (qNum q ((k : ℝ) + 1)) -
     ∑ k ∈ range (n + 1), Real.log (qNum q (x + k)) + x * Real.log (qNum q t)
 
+/-- Rewriting the bound exponent through `q`-numbers: `K(n) + x g(t) + (1 - x) log(1 - q) = L(n,
+t)`. -/
 theorem K_add_eq (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (n : ℕ) {t : ℝ} (ht : 0 < t) :
     K q x n + x * g q t + (1 - x) * Real.log (1 - q) = L q x n t := by
   have e1 : ∑ k ∈ range n, g q ((k : ℝ) + 1) =
@@ -346,6 +368,7 @@ theorem K_add_eq (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (n : ℕ) {t : ℝ} (
   push_cast
   ring
 
+/-- `[t]_q → t` as `q → 1⁻`. -/
 theorem tendsto_qNum (t : ℝ) : Tendsto (fun q : ℝ => qNum q t) (𝓝[<] 1) (𝓝 t) := by
   have hd : HasDerivAt (fun q : ℝ => q ^ t) (t * (1 : ℝ) ^ (t - 1)) 1 :=
     Real.hasDerivAt_rpow_const (Or.inl one_ne_zero)
@@ -360,6 +383,7 @@ theorem tendsto_qNum (t : ℝ) : Tendsto (fun q : ℝ => qNum q t) (𝓝[<] 1) (
   field_simp
   ring
 
+/-- As `q → 1⁻`, `L q x n t → ∑_{k<n} log(k + 1) - ∑_{k≤n} log(x + k) + x log t`. -/
 theorem tendsto_L (hx0 : 0 < x) (n : ℕ) {t : ℝ} (ht : 0 < t) :
     Tendsto (fun q => L q x n t) (𝓝[<] 1)
       (𝓝 (∑ k ∈ range n, Real.log ((k : ℝ) + 1) - ∑ k ∈ range (n + 1), Real.log (x + k) +
@@ -371,6 +395,7 @@ theorem tendsto_L (hx0 : 0 < x) (n : ℕ) {t : ℝ} (ht : 0 < t) :
   · positivity
   · exact (add_pos_of_pos_of_nonneg hx0 k.cast_nonneg).ne'
 
+/-- `exp(∑_{k<n} log(k + 1) - ∑_{k≤n} log(x + k) + x log n) = Γₙ(x)`, the Gauss approximant. -/
 theorem exp_lim (hx0 : 0 < x) {n : ℕ} (hn : 1 ≤ n) :
     Real.exp (∑ k ∈ range n, Real.log ((k : ℝ) + 1) - ∑ k ∈ range (n + 1), Real.log (x + k) +
       x * Real.log n) = Real.GammaSeq x n := by
@@ -388,6 +413,7 @@ theorem exp_lim (hx0 : 0 < x) {n : ℕ} (hn : 1 ≤ n) :
     Real.GammaSeq, hfac]
   ring
 
+/-- For `0 < x ≤ 1`, `Γ_q(x)` is real and squeezed between `exp(L(n, n))` and `exp(L(n, n + 1))`. -/
 theorem key (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (hx1 : x ≤ 1) :
     qGamma q x = ((qGamma q x).re : ℂ) ∧ ∀ n : ℕ, 1 ≤ n →
       Real.exp (L q x n n) ≤ (qGamma q x).re ∧
@@ -415,6 +441,7 @@ theorem key (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (hx1 : x ≤ 1) :
     filter_upwards [eventually_ge_atTop (n + 1)] with N hN
     exact (r_bounds hq0 hq1 hx0 hx1 hn hN).2
 
+/-- `Γ_q(x) → Γ(x)` as `q → 1⁻`, for `0 < x ≤ 1`. -/
 theorem tendsto_base (hx0 : 0 < x) (hx1 : x ≤ 1) :
     Tendsto (fun q : ℝ => qGamma q x) (𝓝[<] (1 : ℝ)) (𝓝 (Real.Gamma x : ℂ)) := by
   have hev : ∀ᶠ q in 𝓝[<] (1 : ℝ), 0 < q ∧ q < 1 := by
@@ -451,6 +478,7 @@ theorem tendsto_base (hx0 : 0 < x) (hx1 : x ≤ 1) :
   refine ((Complex.continuous_ofReal.tendsto _).comp hre).congr' ?_
   filter_upwards [hev] with q hq using ((key hq.1 hq.2 hx0 hx1).1).symm
 
+/-- If `Γ_q(x) → Γ(x)` as `q → 1⁻`, then also `Γ_q(x + 1) → Γ(x + 1)`. -/
 theorem tendsto_step (hx0 : 0 < x)
     (h : Tendsto (fun q : ℝ => qGamma q x) (𝓝[<] (1 : ℝ)) (𝓝 (Real.Gamma x : ℂ))) :
     Tendsto (fun q : ℝ => qGamma q (x + 1 : ℝ)) (𝓝[<] (1 : ℝ))
@@ -476,6 +504,7 @@ theorem tendsto_step (hx0 : 0 < x)
 
 end QGammaLimit
 
+/-- DLMF 5.18.10: `Γ_q(x) → Γ(x)` as `q → 1⁻`, for `x > 0`. -/
 @[dlmf 5.18.E10]
 theorem tendsto_qGamma_one {x : ℝ} (hx : 0 < x) :
     Tendsto (fun q : ℝ => qGamma q x) (𝓝[<] (1 : ℝ)) (𝓝 (Real.Gamma x : ℂ)) := by
@@ -527,6 +556,7 @@ theorem mul_sinh_lt {y Y : ℝ} (hy : 0 < y) (hyY : y < Y) :
   have := mul_lt_mul_of_pos_left h hY
   rwa [← mul_assoc, mul_div_cancel₀ _ hY.ne'] at this
 
+/-- `e^u/(e^u - 1)² = 1/(2 sinh(u/2))²` for `u > 0`. -/
 theorem exp_div_sq_eq {u : ℝ} (hu : 0 < u) :
     Real.exp u / (Real.exp u - 1) ^ 2 = 1 / (2 * Real.sinh (u / 2)) ^ 2 := by
   have hE : Real.exp u = Real.exp (u / 2) ^ 2 := by
@@ -539,6 +569,8 @@ theorem exp_div_sq_eq {u : ℝ} (hu : 0 < u) :
   rw [Real.sinh_eq, Real.exp_neg, hE]
   field_simp
 
+/-- For `0 < b < a` and `t > 0`: `a² e^(at)/(e^(at) - 1)² < b² e^(bt)/(e^(bt) - 1)²` (since `sinh y
+/ y` increases). -/
 theorem sq_mul_exp_div_lt {b a t : ℝ} (hb : 0 < b) (hba : b < a) (ht : 0 < t) :
     a ^ 2 * (Real.exp (a * t) / (Real.exp (a * t) - 1) ^ 2) <
       b ^ 2 * (Real.exp (b * t) / (Real.exp (b * t) - 1) ^ 2) := by
@@ -561,6 +593,7 @@ theorem sq_mul_exp_div_lt {b a t : ℝ} (hb : 0 < b) (hba : b < a) (ht : 0 < t) 
 /-- `log (1 - e^{-ct})`. -/
 def ell (c t : ℝ) : ℝ := Real.log (1 - Real.exp (-(c * t)))
 
+/-- `t ↦ log(1 - e^(-ct))` has derivative `c/(e^(ct) - 1)` for `c, t > 0`. -/
 theorem hasDerivAt_ell {c t : ℝ} (hc : 0 < c) (ht : 0 < t) :
     HasDerivAt (ell c) (c / (Real.exp (c * t) - 1)) t := by
   have hE : 1 < Real.exp (c * t) := Real.one_lt_exp_iff.2 (by positivity)
@@ -578,6 +611,7 @@ theorem hasDerivAt_ell {c t : ℝ} (hc : 0 < c) (ht : 0 < t) :
   have h2 : Real.exp (c * t) - 1 ≠ 0 := by linarith
   field_simp
 
+/-- `t ↦ c/(e^(ct) - 1)` has derivative `-c² e^(ct)/(e^(ct) - 1)²` for `c, t > 0`. -/
 theorem hasDerivAt_phi {c t : ℝ} (hc : 0 < c) (ht : 0 < t) :
     HasDerivAt (fun t => c / (Real.exp (c * t) - 1))
       (-(c ^ 2 * (Real.exp (c * t) / (Real.exp (c * t) - 1) ^ 2))) t := by
@@ -590,6 +624,7 @@ theorem hasDerivAt_phi {c t : ℝ} (hc : 0 < c) (ht : 0 < t) :
   field_simp
   ring
 
+/-- For `0 < b < a`, `t ↦ log(1 - e^(-bt)) - log(1 - e^(-at))` is strictly concave on `(0, ∞)`. -/
 theorem strictConcaveOn_ell_sub {b a : ℝ} (hb : 0 < b) (hba : b < a) :
     StrictConcaveOn ℝ (Ioi 0) (fun t => ell b t - ell a t) := by
   have ha : 0 < a := hb.trans hba
@@ -617,18 +652,21 @@ theorem strictConcaveOn_ell_sub {b a : ℝ} (hb : 0 < b) (hba : b < a) :
 
 variable {q p x : ℝ}
 
+/-- `t ↦ log(1 - q^t)` is monotone on `(0, ∞)` for `0 < q < 1`. -/
 theorem g_mono (hq0 : 0 < q) (hq1 : q < 1) {s t : ℝ} (hs : 0 < s) (hst : s ≤ t) :
     g q s ≤ g q t := by
   unfold g
   refine Real.log_le_log (one_sub_rpow_pos hq0 hq1 hs) ?_
   linarith [Real.rpow_le_rpow_of_exponent_ge hq0 hq1.le hst]
 
+/-- `g q 1 = log(1 - q)`. -/
 theorem g_one (q : ℝ) : g q 1 = Real.log (1 - q) := by
   simp [g]
 
 /-- The difference of the logarithmic factors for the bases `p` and `q`. -/
 def G (q p t : ℝ) : ℝ := g p t - g q t
 
+/-- For `0 < q < p < 1`, `G(t) = log(1 - p^t) - log(1 - q^t)` is strictly concave on `(0, ∞)`. -/
 theorem strictConcaveOn_G (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) :
     StrictConcaveOn ℝ (Ioi 0) (G q p) := by
   have hp0 : 0 < p := hq0.trans hqp
@@ -640,6 +678,7 @@ theorem strictConcaveOn_G (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) :
   rw [e]
   exact strictConcaveOn_ell_sub hb hba
 
+/-- Strict-concavity step for `0 < x < 1`: `G(x + s) + (1 - x) G(s + 2) < (2 - x) G(s + 1)`. -/
 theorem G_step_left (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx0 : 0 < x) (hx1 : x < 1)
     {s : ℝ} (hs : 0 ≤ s) :
     G q p (x + s) + (1 - x) * G q p (s + 2) < (2 - x) * G q p (s + 1) := by
@@ -660,6 +699,7 @@ theorem G_step_left (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx0 : 0 < x) (hx1
     field_simp
   linarith
 
+/-- Strict-concavity step for `1 < x < 2`: `(2 - x) G(s + 1) + (x - 1) G(s + 2) < G(x + s)`. -/
 theorem G_step_right (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx : 1 < x) (hx2 : x < 2)
     {s : ℝ} (hs : 0 ≤ s) :
     (2 - x) * G q p (s + 1) + (x - 1) * G q p (s + 2) < G q p (x + s) := by
@@ -674,16 +714,19 @@ theorem G_step_right (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx : 1 < x) (hx2
 def T (q p x : ℝ) (N : ℕ) : ℝ :=
   ∑ k ∈ range N, (G q p ((k : ℝ) + 1) - G q p (x + k)) + (1 - x) * G q p 1
 
+/-- Recurrence `T(N + 1) = T(N) + G(N + 1) - G(x + N)`. -/
 theorem T_succ (q p x : ℝ) (N : ℕ) :
     T q p x (N + 1) = T q p x N + G q p ((N : ℝ) + 1) - G q p (x + N) := by
   unfold T
   rw [sum_range_succ]
   ring
 
+/-- `T(1) = (2 - x) G(1) - G(x)`. -/
 theorem T_one (q p x : ℝ) : T q p x 1 = (2 - x) * G q p 1 - G q p x := by
   simp [T]
   ring
 
+/-- `r p x N = r q x N · exp(T q p x N)`. -/
 theorem r_eq (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx0 : 0 < x) (N : ℕ) :
     r p x N = r q x N * Real.exp (T q p x N) := by
   have hp0 : 0 < p := hq0.trans hqp
@@ -696,6 +739,7 @@ theorem r_eq (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx0 : 0 < x) (N : ℕ) :
     Real.exp_log (r_pos hq0 hq1 hx0 N)]
   field_simp [(r_pos hq0 hq1 hx0 N).ne']
 
+/-- `G(N + 1) → 0` as `N → ∞`. -/
 theorem tendsto_G (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) :
     Tendsto (fun N : ℕ => G q p ((N : ℝ) + 1)) atTop (𝓝 0) := by
   have hp0 : 0 < p := hq0.trans hqp
@@ -706,11 +750,13 @@ theorem tendsto_G (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) :
   refine h.congr fun N => ?_
   simp [G]
 
+/-- The truncations `r q x N` converge to `Re Γ_q(x)`. -/
 theorem tendsto_r_re (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) :
     Tendsto (r q x) atTop (𝓝 (qGamma q x).re) :=
   ((Complex.continuous_re.tendsto _).comp (tendsto_r_complex hq0 hq1 hx0)).congr
     fun N => by simp
 
+/-- `D(N) ≥ g(1) - g(N + 1)` for `0 < x ≤ 2`. -/
 theorem D_ge (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (hx2 : x ≤ 2) (N : ℕ) :
     g q 1 - g q ((N : ℝ) + 1) ≤ D q x N := by
   induction N with
@@ -721,6 +767,7 @@ theorem D_ge (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (hx2 : x ≤ 2) (N : ℕ)
     push_cast
     linarith
 
+/-- `Re Γ_q(x) > 0` for `0 < q < 1`, `0 < x ≤ 2`. -/
 theorem qGamma_re_pos (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (hx2 : x ≤ 2) :
     0 < (qGamma q x).re := by
   have hlow : ∀ N, Real.exp (g q 1 + (1 - x) * Real.log (1 - q)) ≤ r q x N := by
@@ -730,6 +777,7 @@ theorem qGamma_re_pos (hq0 : 0 < q) (hq1 : q < 1) (hx0 : 0 < x) (hx2 : x ≤ 2) 
     linarith [D_ge hq0 hq1 hx0 hx2 N, g_nonpos hq0 hq1 (by positivity : (0 : ℝ) < N + 1)]
   exact (Real.exp_pos _).trans_le (ge_of_tendsto' (tendsto_r_re hq0 hq1 hx0) hlow)
 
+/-- For `0 < x < 1`, `T(N) - (1 - x) G(N + 1)` is bounded below by its value at `N = 1`. -/
 theorem T_lower (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx0 : 0 < x) (hx1 : x < 1) :
     ∀ N, 1 ≤ N →
       T q p x 1 - (1 - x) * G q p 2 ≤ T q p x N - (1 - x) * G q p ((N : ℝ) + 1) := by
@@ -743,6 +791,7 @@ theorem T_lower (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx0 : 0 < x) (hx1 : x
     rw [show (N : ℝ) + 1 + 1 = N + 2 by ring]
     linarith
 
+/-- For `1 < x < 2`, `T(N) + (x - 1) G(N + 1)` is bounded above by its value at `N = 1`. -/
 theorem T_upper (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx : 1 < x) (hx2 : x < 2) :
     ∀ N, 1 ≤ N →
       T q p x N + (x - 1) * G q p ((N : ℝ) + 1) ≤ T q p x 1 + (x - 1) * G q p 2 := by
@@ -756,69 +805,66 @@ theorem T_upper (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx : 1 < x) (hx2 : x 
     rw [show (N : ℝ) + 1 + 1 = N + 2 by ring]
     linarith
 
-theorem mono_left (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx0 : 0 < x) (hx1 : x < 1) :
-    (qGamma q x).re < (qGamma p x).re := by
-  have hp0 : 0 < p := hq0.trans hqp
-  have hq1 : q < 1 := hqp.trans hp1
-  set c := T q p x 1 - (1 - x) * G q p 2 with hc_def
-  have hc : 0 < c := by
-    have h := G_step_left hq0 hqp hp1 hx0 hx1 (le_refl (0 : ℝ))
-    rw [hc_def, T_one]
-    simp only [add_zero, zero_add] at h
-    linarith
-  have hlo : Tendsto (fun N => r q x N * Real.exp (c + (1 - x) * G q p ((N : ℝ) + 1)))
-      atTop (𝓝 ((qGamma q x).re * Real.exp (c + (1 - x) * 0))) :=
-    (tendsto_r_re hq0 hq1 hx0).mul
-      (((tendsto_G hq0 hqp hp1).const_mul (1 - x)).const_add c).rexp
-  rw [mul_zero, add_zero] at hlo
-  have hle : (qGamma q x).re * Real.exp c ≤ (qGamma p x).re := by
-    refine le_of_tendsto_of_tendsto hlo (tendsto_r_re hp0 hp1 hx0) ?_
-    filter_upwards [eventually_ge_atTop 1] with N hN
-    rw [r_eq hq0 hqp hp1 hx0 N]
-    refine mul_le_mul_of_nonneg_left (Real.exp_le_exp.2 ?_) (r_pos hq0 hq1 hx0 N).le
-    linarith [T_lower hq0 hqp hp1 hx0 hx1 N hN]
-  exact (lt_mul_of_one_lt_right (qGamma_re_pos hq0 hq1 hx0 (by linarith))
-    (Real.one_lt_exp_iff.2 hc)).trans_le hle
-
-theorem mono_right (hq0 : 0 < q) (hqp : q < p) (hp1 : p < 1) (hx : 1 < x) (hx2 : x < 2) :
-    (qGamma p x).re < (qGamma q x).re := by
-  have hp0 : 0 < p := hq0.trans hqp
-  have hq1 : q < 1 := hqp.trans hp1
-  have hx0 : 0 < x := by linarith
-  set c := T q p x 1 + (x - 1) * G q p 2 with hc_def
-  have hc : c < 0 := by
-    have h := G_step_right hq0 hqp hp1 hx hx2 (le_refl (0 : ℝ))
-    rw [hc_def, T_one]
-    simp only [add_zero, zero_add] at h
-    linarith
-  have hup : Tendsto (fun N => r q x N * Real.exp (c - (x - 1) * G q p ((N : ℝ) + 1)))
-      atTop (𝓝 ((qGamma q x).re * Real.exp (c - (x - 1) * 0))) :=
-    (tendsto_r_re hq0 hq1 hx0).mul
-      (((tendsto_G hq0 hqp hp1).const_mul (x - 1)).const_sub c).rexp
-  rw [mul_zero, sub_zero] at hup
-  have hle : (qGamma p x).re ≤ (qGamma q x).re * Real.exp c := by
-    refine le_of_tendsto_of_tendsto (tendsto_r_re hp0 hp1 hx0) hup ?_
-    filter_upwards [eventually_ge_atTop 1] with N hN
-    rw [r_eq hq0 hqp hp1 hx0 N]
-    refine mul_le_mul_of_nonneg_left (Real.exp_le_exp.2 ?_) (r_pos hq0 hq1 hx0 N).le
-    linarith [T_upper hq0 hqp hp1 hx hx2 N hN]
-  exact hle.trans_lt (mul_lt_of_lt_one_right (qGamma_re_pos hq0 hq1 hx0 hx2.le)
-    (Real.exp_lt_one_iff.2 hc))
-
 end QGammaMono
 
+/-- DLMF 5.18.8: `Γ_q(x) < Γ_r(x)` for `0 < q < r < 1` and `0 < x < 1`. -/
 @[dlmf 5.18.E8]
 theorem qGamma_mono_left {q r x : ℝ} (hq0 : 0 < q) (hqr : q < r) (hr1 : r < 1)
     (hx0 : 0 < x) (hx1 : x < 1) :
-    (qGamma q x).re < (qGamma r x).re :=
-  QGammaMono.mono_left hq0 hqr hr1 hx0 hx1
+    (qGamma q x).re < (qGamma r x).re := by
+  open QGammaMono QGammaLimit in
+  have hp0 : 0 < r := hq0.trans hqr
+  have hq1 : q < 1 := hqr.trans hr1
+  set c := T q r x 1 - (1 - x) * G q r 2 with hc_def
+  have hc : 0 < c := by
+    have h := G_step_left hq0 hqr hr1 hx0 hx1 (le_refl (0 : ℝ))
+    rw [hc_def, T_one]
+    simp only [add_zero, zero_add] at h
+    linarith
+  have hlo : Tendsto
+      (fun N => QGammaLimit.r q x N * Real.exp (c + (1 - x) * G q r ((N : ℝ) + 1)))
+      atTop (𝓝 ((qGamma q x).re * Real.exp (c + (1 - x) * 0))) :=
+    (tendsto_r_re hq0 hq1 hx0).mul
+      (((tendsto_G hq0 hqr hr1).const_mul (1 - x)).const_add c).rexp
+  rw [mul_zero, add_zero] at hlo
+  have hle : (qGamma q x).re * Real.exp c ≤ (qGamma r x).re := by
+    refine le_of_tendsto_of_tendsto hlo (tendsto_r_re hp0 hr1 hx0) ?_
+    filter_upwards [eventually_ge_atTop 1] with N hN
+    rw [r_eq hq0 hqr hr1 hx0 N]
+    refine mul_le_mul_of_nonneg_left (Real.exp_le_exp.2 ?_) (r_pos hq0 hq1 hx0 N).le
+    linarith [T_lower hq0 hqr hr1 hx0 hx1 N hN]
+  exact (lt_mul_of_one_lt_right (qGamma_re_pos hq0 hq1 hx0 (by linarith))
+    (Real.one_lt_exp_iff.2 hc)).trans_le hle
 
 /-- Strict decrease of the q-Gamma function in its base when `1 < x < 2`.
 At `x = 2` the function is constant, so the upper restriction is essential. -/
 @[dlmf 5.18.E9]
 theorem qGamma_mono_right {q r x : ℝ} (hq0 : 0 < q) (hqr : q < r) (hr1 : r < 1)
     (hx : 1 < x) (hx2 : x < 2) :
-    (qGamma r x).re < (qGamma q x).re :=
-  QGammaMono.mono_right hq0 hqr hr1 hx hx2
+    (qGamma r x).re < (qGamma q x).re := by
+  open QGammaMono QGammaLimit in
+  have hp0 : 0 < r := hq0.trans hqr
+  have hq1 : q < 1 := hqr.trans hr1
+  have hx0 : 0 < x := by linarith
+  set c := T q r x 1 + (x - 1) * G q r 2 with hc_def
+  have hc : c < 0 := by
+    have h := G_step_right hq0 hqr hr1 hx hx2 (le_refl (0 : ℝ))
+    rw [hc_def, T_one]
+    simp only [add_zero, zero_add] at h
+    linarith
+  have hup : Tendsto
+      (fun N => QGammaLimit.r q x N * Real.exp (c - (x - 1) * G q r ((N : ℝ) + 1)))
+      atTop (𝓝 ((qGamma q x).re * Real.exp (c - (x - 1) * 0))) :=
+    (tendsto_r_re hq0 hq1 hx0).mul
+      (((tendsto_G hq0 hqr hr1).const_mul (x - 1)).const_sub c).rexp
+  rw [mul_zero, sub_zero] at hup
+  have hle : (qGamma r x).re ≤ (qGamma q x).re * Real.exp c := by
+    refine le_of_tendsto_of_tendsto (tendsto_r_re hp0 hr1 hx0) hup ?_
+    filter_upwards [eventually_ge_atTop 1] with N hN
+    rw [r_eq hq0 hqr hr1 hx0 N]
+    refine mul_le_mul_of_nonneg_left (Real.exp_le_exp.2 ?_) (r_pos hq0 hq1 hx0 N).le
+    linarith [T_upper hq0 hqr hr1 hx hx2 N hN]
+  exact hle.trans_lt (mul_lt_of_lt_one_right (qGamma_re_pos hq0 hq1 hx0 hx2.le)
+    (Real.exp_lt_one_iff.2 hc))
 
 end DLMF.Gamma

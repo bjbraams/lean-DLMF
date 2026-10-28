@@ -62,10 +62,6 @@ theorem hasAsymptoticExpansion_regularizedHGFun_neg (a b : ℂ) :
   · simp only [smul_eq_mul]
     rw [regularizedConfluent_kummer_transform a b (-(t : ℂ)), neg_neg]
 
-theorem kumDec_norm_cpow_ofReal {t : ℝ} (ht : 0 < t) (c : ℂ) :
-    ‖(t : ℂ) ^ c‖ = t ^ c.re := by
-  rw [norm_cpow_eq_rpow_re_of_pos ht]
-
 /-- `t^s ≤ 2^{|s|} (1+t)^s` for `t ≥ 1` and every real `s`. -/
 theorem kumDec_rpow_le_one_add {t : ℝ} (ht : 1 ≤ t) (s : ℝ) :
     t ^ s ≤ 2 ^ |s| * (1 + t) ^ s := by
@@ -89,7 +85,7 @@ theorem isBigO_regularizedHGFun_neg (a b : ℂ) :
   have hp : ∀ c : ℂ, (fun t : ℝ => (t : ℂ) ^ c) =O[atTop] fun t => t ^ c.re := fun c =>
     IsBigO.of_bound 1 (by
       filter_upwards [eventually_gt_atTop 0] with t ht
-      rw [kumDec_norm_cpow_ofReal ht, Real.norm_of_nonneg (by positivity), one_mul])
+      rw [norm_cpow_eq_rpow_re_of_pos ht, Real.norm_of_nonneg (by positivity), one_mul])
   have h2 : (fun t : ℝ => (t : ℂ) ^ (-a - 1)) =O[atTop] fun t => t ^ (-a.re) := by
     refine (hp _).trans (IsBigO.of_bound 1 ?_)
     filter_upwards [eventually_ge_atTop 1] with t ht
@@ -149,6 +145,7 @@ theorem kumDec_exists_bound_of_isBigO {f : ℝ → ℂ} {g : ℝ → ℝ} (hf : 
     rw [Real.norm_of_nonneg hg0.le] at h1
     exact h1.trans (mul_le_mul_of_nonneg_right (le_max_left _ _) hg0.le)
 
+/-- `t ↦ M̃(a,b,-t)` is continuous on the real line. -/
 theorem kumDec_continuous_neg (a b : ℂ) :
     Continuous fun t : ℝ => regularizedHGFun {a} {b} (-(t : ℂ)) :=
   continuous_regularizedConfluent.comp (by fun_prop :
@@ -173,6 +170,8 @@ theorem exists_norm_regularizedHGFun_neg_le (a b : ℂ) :
 def kumDec_eulerKernel (a b : ℂ) (t s : ℝ) : ℂ :=
   exp (-(t : ℂ) * s) * (s : ℂ) ^ (a - 1) * (1 - (s : ℂ)) ^ (b - a - 1)
 
+/-- For `Re a > 0` and `Re(b-a) > 0`, the Euler kernel `e^{-ts} s^{a-1} (1-s)^{b-a-1}` is integrable
+on `[0,1]`. -/
 theorem kumDec_intervalIntegrable_eulerKernel {a b : ℂ} (ha : 0 < a.re) (hba : 0 < (b - a).re)
     (t : ℝ) : IntervalIntegrable (kumDec_eulerKernel a b t) volume 0 1 := by
   have h := (Complex.betaIntegral_convergent (u := a) (v := b - a) ha hba).continuousOn_mul
@@ -181,14 +180,17 @@ theorem kumDec_intervalIntegrable_eulerKernel {a b : ℂ} (ha : 0 < a.re) (hba :
   simp only [kumDec_eulerKernel]
   ring
 
+/-- The modulus of the Euler kernel on `(0,1)` is `e^{-ts} s^{Re a - 1} (1-s)^{Re(b-a) - 1}`. -/
 theorem kumDec_norm_eulerKernel (a b : ℂ) {t s : ℝ} (hs : s ∈ Ioo (0 : ℝ) 1) :
     ‖kumDec_eulerKernel a b t s‖ =
       Real.exp (-(t * s)) * s ^ (a.re - 1) * (1 - s) ^ ((b - a).re - 1) := by
   have h1 : (1 - (s : ℂ)) = ((1 - s : ℝ) : ℂ) := by push_cast; ring
   simp only [kumDec_eulerKernel, norm_mul, Complex.norm_exp]
-  rw [kumDec_norm_cpow_ofReal hs.1, h1, kumDec_norm_cpow_ofReal (by linarith [hs.2])]
+  rw [norm_cpow_eq_rpow_re_of_pos hs.1, h1, norm_cpow_eq_rpow_re_of_pos (by linarith [hs.2])]
   simp
 
+/-- Euler's integral (DLMF 13.4.1) at negative real argument: `M̃(a,b,-t) = (Γ(a)Γ(b-a))⁻¹ ∫₀¹
+e^{-ts} s^{a-1} (1-s)^{b-a-1} ds`. -/
 theorem kumDec_regularizedHGFun_neg_eq {a b : ℂ} (ha : 0 < a.re) (hba : 0 < (b - a).re) (t : ℝ) :
     regularizedHGFun {a} {b} (-(t : ℂ)) =
       1 / (Gamma a * Gamma (b - a)) * ∫ s : ℝ in (0 : ℝ)..1, kumDec_eulerKernel a b t s := by
@@ -299,6 +301,7 @@ def kumDec_Bnd (α₀ β₀ : ℂ) : Prop :=
   ∀ ε : ℝ, 0 < ε → ∃ C, ∀ᶠ p : ℂ × ℂ in 𝓝 (α₀, β₀), ∀ t : ℝ, 0 ≤ t →
     ‖regularizedHGFun {p.1} {p.2} (-(t : ℂ))‖ ≤ C * (1 + t) ^ (-α₀.re + ε)
 
+/-- For `t ≥ 0`, `t (1+t)^{e-1} ≤ (1+t)^e`. -/
 theorem kumDec_t_mul_rpow_le {t : ℝ} (ht : 0 ≤ t) (e : ℝ) :
     t * (1 + t) ^ (e - 1) ≤ (1 + t) ^ e := by
   have h : (1 + t) ^ e = (1 + t) ^ (e - 1) * (1 + t) := by
@@ -306,16 +309,20 @@ theorem kumDec_t_mul_rpow_le {t : ℝ} (ht : 0 ≤ t) (e : ℝ) :
   rw [h, mul_comm t]
   exact mul_le_mul_of_nonneg_left (by linarith) (by positivity)
 
+/-- For `t ≥ 0`, `(1+t)^{e-1} ≤ (1+t)^e`. -/
 theorem kumDec_rpow_sub_one_le {t : ℝ} (ht : 0 ≤ t) (e : ℝ) :
     (1 + t) ^ (e - 1) ≤ (1 + t) ^ e :=
   Real.rpow_le_rpow_of_exponent_le (by linarith) (by linarith)
 
+/-- A property eventually true near `(α₀+u, β₀+v)` holds eventually near `(α₀, β₀)` for the shifted
+pair. -/
 theorem kumDec_eventually_shift {P : ℂ × ℂ → Prop} (α₀ β₀ u v : ℂ)
     (h : ∀ᶠ p : ℂ × ℂ in 𝓝 (α₀ + u, β₀ + v), P p) :
     ∀ᶠ p : ℂ × ℂ in 𝓝 (α₀, β₀), P (p.1 + u, p.2 + v) := by
   have hc : Continuous fun p : ℂ × ℂ => (p.1 + u, p.2 + v) := by fun_prop
   exact hc.continuousAt.eventually h
 
+/-- Near `(α₀, β₀)`, both coordinates are bounded by `|α₀| + 1` and `|β₀| + 1`. -/
 theorem kumDec_eventually_norm_le (α₀ β₀ : ℂ) :
     ∀ᶠ p : ℂ × ℂ in 𝓝 (α₀, β₀), ‖p.1‖ ≤ ‖α₀‖ + 1 ∧ ‖p.2‖ ≤ ‖β₀‖ + 1 := by
   have c1 : Continuous fun p : ℂ × ℂ => ‖p.1‖ := by fun_prop
@@ -411,6 +418,8 @@ theorem kumDec_bnd_step_a {α₀ β₀ : ℂ} (h1 : kumDec_Bnd (α₀ + 1) β₀
           (mul_le_mul_of_nonneg_left (kumDec_t_mul_rpow_le ht e) (abs_nonneg _))
     _ = _ := by ring
 
+/-- The locally uniform decay bound `|M̃(α,β,-t)| ≤ C (1+t)^{-Re α₀ + ε}` holds at every `(α₀, β₀)`,
+by induction on the shifts needed to reach `Re α > 0`, `Re(β-α) > 0`. -/
 theorem kumDec_bnd_all : ∀ (m k : ℕ) (α₀ β₀ : ℂ), -(m : ℝ) < α₀.re → -(k : ℝ) < (β₀ - α₀).re →
     kumDec_Bnd α₀ β₀ := by
   intro m
@@ -469,7 +478,7 @@ theorem integrableOn_cpow_mul_regularizedHGFun_neg_mul {a b c : ℂ} {h : ℝ �
   have h2 := hbd t ht0
   have hp : (1 + t) ^ (-a.re) * (1 + t) ^ (-r) = (1 + t) ^ (-(a.re + r)) := by
     rw [← Real.rpow_add (by linarith)]; ring_nf
-  rw [norm_mul, norm_mul, kumDec_norm_cpow_ofReal ht0, sub_re, one_re]
+  rw [norm_mul, norm_mul, norm_cpow_eq_rpow_re_of_pos ht0, sub_re, one_re]
   calc t ^ (c.re - 1) * ‖regularizedHGFun {a} {b} (-(t : ℂ))‖ * ‖h t‖
       ≤ t ^ (c.re - 1) * (|C| * (1 + t) ^ (-a.re)) * (|K| * (1 + t) ^ (-r)) := by
         gcongr

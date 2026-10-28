@@ -36,6 +36,7 @@ theorem doubleFactorial_even (n : ℕ) :
       (2 : ℂ) ^ n * Complex.Gamma (n + 1) := by
   simp [Nat.doubleFactorial_two_mul, Complex.Gamma_nat_eq_factorial]
 
+/-- DLMF 5.4.2: `(2n + 1)!! = π^(-1/2) 2^(n+1) Γ(n + 3/2)`. -/
 @[dlmf 5.4.E2]
 theorem doubleFactorial_odd (n : ℕ) :
     ((2 * n + 1).doubleFactorial : ℂ) =
@@ -60,6 +61,7 @@ theorem Gamma_mul_Gamma_conj (z : ℂ) :
     Complex.Gamma z * Complex.Gamma (conj z) = (‖Complex.Gamma z‖ : ℂ) ^ 2 := by
   rw [Complex.Gamma_conj, mul_conj, Complex.normSq_eq_norm_sq, ofReal_pow]
 
+/-- DLMF 5.4.3: `|Γ(iy)| = (π/(y sinh(πy)))^(1/2)` for real `y ≠ 0`. -/
 @[dlmf 5.4.E3]
 theorem norm_Gamma_mul_I (y : ℝ) (hy : y ≠ 0) :
     ‖Complex.Gamma (I * y)‖ = Real.sqrt (π / (y * Real.sinh (π * y))) := by
@@ -88,6 +90,7 @@ theorem norm_Gamma_mul_I (y : ℝ) (hy : y ≠ 0) :
   have hsq' : ‖Complex.Gamma (I * y)‖ ^ 2 = π / (y * Real.sinh (π * y)) := by exact_mod_cast hsq
   rw [← hsq', Real.sqrt_sq (norm_nonneg _)]
 
+/-- DLMF 5.4.4: `Γ(1/2 + iy) Γ(1/2 - iy) = |Γ(1/2 + iy)|² = π/cosh(πy)`. -/
 @[dlmf 5.4.E4]
 theorem Gamma_half_add_mul_I (y : ℝ) :
     Complex.Gamma (1 / 2 + I * y) * Complex.Gamma (1 / 2 - I * y) =
@@ -122,6 +125,7 @@ theorem Gamma_half_add_mul_I (y : ℝ) :
       _ = π / Real.cosh (π * y) := by rw [hsin]
   exact_mod_cast hℂ
 
+/-- DLMF 5.4.5: `Γ(1/4 + iy) Γ(3/4 - iy) = π√2/(cosh(πy) + i sinh(πy))`. -/
 @[dlmf 5.4.E5]
 theorem Gamma_quarter_mul_I (y : ℝ) :
     Complex.Gamma (1 / 4 + I * y) * Complex.Gamma (3 / 4 - I * y) =
@@ -153,10 +157,12 @@ theorem Gamma_quarter_mul_I (y : ℝ) :
   rw [div_eq_div_iff hden' hden]
   linear_combination (-((π : ℂ) * (Real.cosh (π * y) + I * Real.sinh (π * y)) / 2)) * hsq
 
+/-- DLMF 5.4.11: `Γ'(1) = -γ`. -/
 @[dlmf 5.4.E11]
 theorem deriv_Gamma_one : deriv Complex.Gamma 1 = -Real.eulerMascheroniConstant := by
   exact Complex.hasDerivAt_Gamma_one.deriv
 
+/-- DLMF 5.4.12: `ψ'(1) = π²/6`. -/
 @[dlmf 5.4.E12]
 theorem trigamma_one : Real.trigamma 1 = π ^ 2 / 6 := by
   rw [Real.trigamma_eq_tsum (by positivity : (0 : ℝ) < 1)]
@@ -167,6 +173,7 @@ theorem trigamma_one : Real.trigamma 1 = π ^ 2 / 6 := by
   refine (tsum_congr fun n => ?_).trans hshift.tsum_eq
   simp [inv_pow, add_comm]
 
+/-- DLMF 5.4.13: `ψ'(1/2) = π²/2`. -/
 @[dlmf 5.4.E13]
 theorem trigamma_one_div_two : Real.trigamma (1 / 2) = π ^ 2 / 2 := by
   rw [Real.trigamma_eq_tsum (by positivity : (0 : ℝ) < 1 / 2)]
@@ -197,6 +204,7 @@ theorem trigamma_one_div_two : Real.trigamma (1 / 2) = π ^ 2 / 2 := by
   rw [tsum_mul_left, hodd]
   ring
 
+/-- DLMF 5.4.15: `ψ(n + 1/2) = -γ - 2 ln 2 + 2 ∑_{k<n} 1/(2k + 1)`. -/
 @[dlmf 5.4.E15]
 theorem digamma_nat_add_half (n : ℕ) (hn : 0 < n) :
     Real.digamma (n + 1 / 2) =
@@ -222,9 +230,11 @@ theorem digamma_conj (s : ℂ) : Complex.digamma (conj s) = conj (Complex.digamm
     rw [h, Complex.conj_conj]
   simp only [Complex.digamma_def, logDeriv_apply, hderiv, Complex.Gamma_conj, map_div₀]
 
+/-- `Im(-i r) = -r` for real `r`. -/
 theorem neg_I_mul_ofReal_im (r : ℝ) : (-I * (r : ℂ)).im = -r := by
   simp
 
+/-- `cot(π i y) = -i cosh(πy)/sinh(πy)` for real `y ≠ 0`. -/
 theorem cot_pi_mul_I (y : ℝ) (hy : y ≠ 0) :
     cot ((π : ℂ) * (I * y)) = -I * (Real.cosh (π * y) / Real.sinh (π * y)) := by
   have hsplit : (π : ℂ) * (I * y) = (0 : ℂ) + ((π * y : ℝ) : ℂ) * I := by push_cast; ring
@@ -242,6 +252,7 @@ theorem cot_pi_mul_I (y : ℝ) (hy : y ≠ 0) :
   field_simp
   linear_combination (Real.cosh (π * y) : ℂ) * I_sq
 
+/-- DLMF 5.4.16: `Im ψ(iy) = 1/(2y) + (π/2) coth(πy)` for real `y ≠ 0`. -/
 @[dlmf 5.4.E16]
 theorem digamma_mul_I_im (y : ℝ) (hy : y ≠ 0) :
     (Complex.digamma (I * y)).im =
@@ -275,6 +286,7 @@ theorem digamma_mul_I_im (y : ℝ) (hy : y ≠ 0) :
   field_simp
   ring
 
+/-- DLMF 5.4.17: `Im ψ(1/2 + iy) = (π/2) tanh(πy)`. -/
 @[dlmf 5.4.E17]
 theorem digamma_half_add_mul_I_im (y : ℝ) :
     (Complex.digamma (1 / 2 + I * y)).im = π / 2 * Real.tanh (π * y) := by
@@ -310,6 +322,7 @@ theorem digamma_half_add_mul_I_im (y : ℝ) :
   rw [Complex.sub_im, Complex.conj_im, neg_I_mul_ofReal_im] at him
   linarith
 
+/-- DLMF 5.4.18: `Im ψ(1 + iy) = -1/(2y) + (π/2) coth(πy)` for real `y ≠ 0`. -/
 @[dlmf 5.4.E18]
 theorem digamma_one_add_mul_I_im (y : ℝ) (hy : y ≠ 0) :
     (Complex.digamma (1 + I * y)).im =
@@ -336,9 +349,11 @@ open Filter Topology Finset
 /-- The primitive `q`-th root of unity `e^{2πi/q}`. -/
 noncomputable def gaussRoot (q : ℕ) : ℂ := Complex.exp (2 * π * I / q)
 
+/-- `gaussRoot q = e^(2πi/q)` is a primitive `q`-th root of unity. -/
 theorem isPrimitiveRoot_gaussRoot {q : ℕ} (hq : q ≠ 0) : IsPrimitiveRoot (gaussRoot q) q :=
   Complex.isPrimitiveRoot_exp q hq
 
+/-- Powers of `gaussRoot q` have modulus `1`. -/
 theorem norm_gaussRoot_pow (q k : ℕ) : ‖gaussRoot q ^ k‖ = 1 := by
   rw [norm_pow, gaussRoot, Complex.norm_exp]
   have : (2 * π * I / q : ℂ).re = 0 := by
@@ -346,6 +361,7 @@ theorem norm_gaussRoot_pow (q k : ℕ) : ‖gaussRoot q ^ k‖ = 1 := by
     simp
   simp [this]
 
+/-- `(e^(2πi/q))^k ≠ 1` for `0 < k < q`. -/
 theorem gaussRoot_pow_ne_one {q k : ℕ} (hk0 : 0 < k) (hkq : k < q) : gaussRoot q ^ k ≠ 1 := by
   rw [Ne, (isPrimitiveRoot_gaussRoot (by omega)).pow_eq_one_iff_dvd]
   exact Nat.not_dvd_of_pos_of_lt hk0 hkq
@@ -424,6 +440,7 @@ theorem sum_gaussRoot_filtered_eq {q p : ℕ} (hp : 0 < p) (hpq : p < q) (N : �
   refine sum_congr rfl fun k _ => sum_congr rfl fun m _ => ?_
   rw [← pow_mul, show k * (m + 1 + (q - p)) = k * (q - p) + k * (m + 1) by ring, pow_add]
   ring
+/-- A complex number of modulus `1` other than `1` has real part less than `1`. -/
 theorem re_lt_one_of_norm_eq_one {z : ℂ} (hz : ‖z‖ = 1) (hz1 : z ≠ 1) : z.re < 1 := by
   rcases (Complex.re_le_norm z).lt_or_eq with h | h
   · linarith
@@ -584,6 +601,7 @@ theorem digamma_rat_complex (p q : ℕ) (hp : 0 < p) (hpq : p < q) :
   push_cast
   simp only [mul_neg, sum_neg_distrib, sub_neg_eq_add]
 
+/-- `(e^(2πi/q))ⁿ = exp((2πn/q) i)`, with the angle written as a real number. -/
 theorem gaussRoot_pow_eq (q n : ℕ) :
     gaussRoot q ^ n = Complex.exp (((2 * π * n / q : ℝ) : ℂ) * I) := by
   rw [gaussRoot, ← Complex.exp_nat_mul]
@@ -591,6 +609,7 @@ theorem gaussRoot_pow_eq (q n : ℕ) :
   push_cast
   ring
 
+/-- `ω^(k(q-p)) + ω^(kp) = 2 cos(2πkp/q)` for `ω = e^(2πi/q)` and `p ≤ q`. -/
 theorem gaussRoot_pow_add_pow {p q : ℕ} (hq : 0 < q) (hpq : p ≤ q) (k : ℕ) :
     gaussRoot q ^ (k * (q - p)) + gaussRoot q ^ (k * p) =
       ((2 * Real.cos (2 * π * k * p / q) : ℝ) : ℂ) := by
@@ -613,6 +632,7 @@ theorem gaussRoot_pow_add_pow {p q : ℕ} (hq : 0 < q) (hpq : p ≤ q) (k : ℕ)
   push_cast
   ring
 
+/-- `Re log(1 - ω^k) = (1/2) log(2 - 2 cos(2πk/q))` for `ω = e^(2πi/q)`. -/
 theorem log_one_sub_gaussRoot_pow_re (q k : ℕ) :
     (Complex.log (1 - gaussRoot q ^ k)).re =
       (1 / 2) * Real.log (2 - 2 * Real.cos (2 * π * k / q)) := by
@@ -627,6 +647,8 @@ theorem log_one_sub_gaussRoot_pow_re (q k : ℕ) :
   push_cast
   ring
 
+/-- DLMF 5.4.19, Gauss's digamma theorem: `ψ(p/q) = -γ - ln q - (π/2) cot(πp/q) + (1/2)
+∑_{k=1}^{q-1} cos(2πkp/q) ln(2 - 2 cos(2πk/q))` for `0 < p < q`. -/
 @[dlmf 5.4.E19]
 theorem digamma_rat (p q : ℕ) (hp : 0 < p) (hpq : p < q) :
     Real.digamma (p / q) =

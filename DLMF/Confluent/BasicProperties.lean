@@ -106,15 +106,20 @@ def tricomiD (a c z : ℂ) : ℂ :=
   regularizedHGFun {a} {c} z * (Gamma (a - c + 1))⁻¹ -
     z ^ (1 - c) * regularizedHGFun {a - c + 1} {2 - c} z * (Gamma a)⁻¹
 
+/-- A noninteger complex number is not a nonpositive integer. -/
 theorem not_neg_nat_of_mem_integerComplement {c : ℂ} (hc : c ∈ integerComplement) :
     ∀ k : ℕ, c ≠ -(k : ℂ) := fun k h => hc ⟨-k, by rw [h]; push_cast; ring⟩
 
+/-- A complex number different from every integer lies in `ℂ \ ℤ`. -/
 theorem mem_integerComplement_of_forall {c : ℂ} (hc : ∀ k : ℤ, c ≠ k) : c ∈ integerComplement :=
   fun ⟨k, hk⟩ => hc k hk.symm
 
+/-- A point of `ℂ \ ℤ` differs from every integer. -/
 theorem forall_of_mem_integerComplement {c : ℂ} (hc : c ∈ integerComplement) : ∀ k : ℤ, c ≠ k :=
   fun k hk => hc ⟨k, hk.symm⟩
 
+/-- For noninteger `c`, the connection formula equals `π / sin(πc)` times the regularized
+combination `tricomiD a c z` (DLMF 13.2.42 with the reflection formula). -/
 theorem kummerUConnection_eq_tricomiD {a c z : ℂ} (hc : c ∈ integerComplement) :
     kummerUConnection a c z = π / sin (π * c) * tricomiD a c z := by
   have hc0 := not_neg_nat_of_mem_integerComplement hc
@@ -196,11 +201,13 @@ theorem differentiable_tricomiD (a : ℂ) {z : ℂ} (hz : z ≠ 0) :
     ((differentiableAt_const (1 : ℂ)).sub differentiableAt_id).const_cpow (Or.inl hz)
   exact (h1.mul h3).sub ((h4.mul h2).mul_const _)
 
+/-- Every complex `b` is an accumulation point of `ℂ \ ℤ`. -/
 theorem integerComplement_nhdsWithin_neBot (b : ℂ) : (𝓝[integerComplement] b).NeBot := by
   have hd : Dense integerComplement :=
     (Set.countable_range (fun k : ℤ => (k : ℂ))).dense_compl ℂ
   exact mem_closure_iff_nhdsWithin_neBot.mp (hd b)
 
+/-- `sin(πc) ≠ 0` for noninteger `c`. -/
 theorem sin_pi_mul_ne_zero_of_mem {c : ℂ} (hc : c ∈ integerComplement) : sin (π * c) ≠ 0 := by
   rw [Complex.sin_ne_zero_iff]
   intro k hk
@@ -295,11 +302,6 @@ theorem tendsto_kummerU (a b : ℂ) {z : ℂ} (hz : z ≠ 0) :
     Tendsto (fun c => kummerU a c z) (𝓝[integerComplement] b) (𝓝 (kummerU a b z)) := by
   simpa using tendsto_kummerU_add_intCast a b 0 hz
 
-/-- `1/Γ(x) = x / Γ(x + 1)` for every `x`. -/
-theorem recip_Gamma_eq_mul_recip_Gamma_add_one (x : ℂ) : (Gamma x)⁻¹ = x * (Gamma (x + 1))⁻¹ := by
-  have h := DLMF.Hypergeometric.recip_Gamma_eq_poch_mul 0 x
-  simpa [poch_one] using h
-
 /-! ### Joint continuity of Tricomi's function -/
 
 section TricomiContinuity
@@ -377,6 +379,8 @@ theorem continuousOn_dslope_param {X : Type*} [TopologicalSpace X] {f : X → �
     · exact Continuous.div (hfc.sub hfn) (by fun_prop) hne2
   exact ((hcont.congr heq).continuousAt (hTo.mem_nhds hmem)).continuousWithinAt
 
+/-- The regularized connection combination `tricomiD a c z` is jointly continuous in `(a, c, z)` for
+`z` in the slit plane. -/
 theorem continuousAt_tricomiD {a c z : ℂ} (hz : z ∈ slitPlane) :
     ContinuousAt (fun q : ℂ × ℂ × ℂ => tricomiD q.1 q.2.1 q.2.2) (a, c, z) := by
   have hM := continuous_regularizedConfluent
@@ -396,6 +400,7 @@ theorem continuousAt_tricomiD {a c z : ℂ} (hz : z ∈ slitPlane) :
   unfold tricomiD
   exact (h1.continuousAt.mul h3.continuousAt).sub ((h5.mul h2.continuousAt).mul h4.continuousAt)
 
+/-- A point within distance `1` of an integer `n`, other than `n`, is not an integer. -/
 theorem mem_integerComplement_of_norm_sub_lt_one {n : ℤ} {c : ℂ} (hc : ‖c - n‖ < 1)
     (hcn : c ≠ n) : c ∈ integerComplement := by
   rintro ⟨k, rfl⟩
@@ -671,15 +676,6 @@ theorem kummerU_kummer_transform_all (a b : ℂ) {z : ℂ} (hz0 : z ≠ 0) :
 
 /- The punctured parameter-limit theorem is proved in `DLMF.Confluent.Continuation`. -/
 
-/-- Polynomial specialization of Tricomi U, expressed using ordinary Kummer M. -/
-theorem poch_one_sub_sub_nat (c : ℂ) (m : ℕ) : poch (1 - c - m) m = (-1) ^ m * poch c m := by
-  induction m with
-  | zero => simp [poch_zero]
-  | succ m ih =>
-    rw [poch_succ_left, show 1 - c - ((m + 1 : ℕ) : ℂ) + 1 = 1 - c - m by push_cast; ring, ih,
-      poch_succ]
-    push_cast; ring
-
 /-- The polynomial `(-1)^m ∑ C(m,s) (b+s)_{m-s} (-z)^s` equals `(-1)^m (b)_m M(-m,b,z)`. -/
 theorem neg_nat_sum_eq (m : ℕ) {b : ℂ} (hb : ∀ k : ℕ, b ≠ -(k : ℂ)) (z : ℂ) :
     (-1 : ℂ) ^ m * ∑ s ∈ Finset.range (m + 1), (m.choose s : ℂ) * poch (b + s) (m - s) * (-z) ^ s =
@@ -709,10 +705,12 @@ theorem kummerUConnection_neg_nat (m : ℕ) {c : ℂ} (hc : c ∈ integerComplem
     exact hc ⟨1 + k - m, by push_cast; linear_combination hk⟩
   have hG := Gamma_add_nat_div_Gamma_eq (n := m) (1 - c - m) h1
   rw [show 1 - c - (m : ℂ) + m = 1 - c by ring] at hG
-  rw [show -(m : ℂ) - c + 1 = 1 - c - m by ring, ← poch_one_sub_sub_nat, poch, ← hG]
+  rw [show -(m : ℂ) - c + 1 = 1 - c - m by ring, ← DLMF.Hypergeometric.poch_reflect, poch, ← hG]
 
-/-- DLMF 13.2.7 in polynomial form, for every second parameter. -/
-lemma kummerU_neg_nat_sum_aux (m : ℕ) (b z : ℂ) :
+/-- DLMF 13.2.7 in polynomial form, valid for every second parameter `b`:
+`U(-m, b, z) = (-1)^m ∑_s C(m,s) (b+s)_{m-s} (-z)^s`. -/
+@[dlmf 13.2.E7]
+theorem kummerU_neg_nat_sum (m : ℕ) (b z : ℂ) :
     kummerU (-(m : ℂ)) b z =
       (-1 : ℂ) ^ m * ∑ s ∈ Finset.range (m + 1),
         (m.choose s : ℂ) * poch (b + s) (m - s) * (-z) ^ s := by
@@ -737,14 +735,7 @@ lemma kummerU_neg_nat_sum_aux (m : ℕ) (b z : ℂ) :
 theorem kummerU_neg_nat (m : ℕ) (b z : ℂ) (hb : ∀ k : ℕ, b ≠ -k) :
     kummerU (-(m : ℂ)) b z =
       (-1 : ℂ) ^ m * poch b m * kummerM (-(m : ℂ)) b z := by
-  rw [kummerU_neg_nat_sum_aux, neg_nat_sum_eq m hb]
-
-@[dlmf 13.2.E7]
-theorem kummerU_neg_nat_sum (m : ℕ) (b z : ℂ) :
-    kummerU (-(m : ℂ)) b z =
-      (-1 : ℂ) ^ m * ∑ s ∈ Finset.range (m + 1),
-        (m.choose s : ℂ) * poch (b + s) (m - s) * (-z) ^ s := by
-  exact kummerU_neg_nat_sum_aux m b z
+  rw [kummerU_neg_nat_sum, neg_nat_sum_eq m hb]
 
 /-- Kummer's transformation at `b = a + n + 1`. -/
 lemma kummerU_shift_nat_aux (a : ℂ) (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane) :
@@ -776,7 +767,7 @@ theorem kummerU_shift_nat_sum (a : ℂ) (n : ℕ) {z : ℂ} (hz : z ∈ slitPlan
   have hs' : s ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hs)
   rw [show n + 1 - 1 - s = n - s by omega, Nat.choose_symm hs', Nat.sub_sub_self hs',
     show (1 : ℂ) - a - n + ((n - s : ℕ) : ℂ) = 1 - a - ((s : ℕ) : ℂ) by
-      push_cast [Nat.cast_sub hs']; ring, poch_one_sub_sub_nat a s]
+      push_cast [Nat.cast_sub hs']; ring, DLMF.Hypergeometric.poch_reflect a s]
   have e1 : z ^ (-a - n) = z ^ (-a) * (z ^ n)⁻¹ := by
     rw [sub_eq_add_neg, cpow_add _ _ hz0, cpow_neg z (n : ℂ), cpow_natCast]
   have e2 : z ^ (-(s : ℂ)) = (z ^ s)⁻¹ := by rw [cpow_neg, cpow_natCast]
@@ -834,7 +825,7 @@ theorem tricomi_finite_sum_eq (a : ℂ) (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
       rw [Nat.cast_sub hjn]; ring
     have hp : poch (a - n) j = (-1 : ℂ) ^ j * poch (1 - a + ((n - j : ℕ) : ℂ)) j := by
       rw [show a - (n : ℂ) = 1 - (1 - a + ((n - j : ℕ) : ℂ)) - j by
-        rw [Nat.cast_sub hjn]; ring, poch_one_sub_sub_nat]
+        rw [Nat.cast_sub hjn]; ring, DLMF.Hypergeometric.poch_reflect]
     have hsign : (-1 : ℂ) ^ (n + 1) * (-1 : ℂ) ^ j * (-1 : ℂ) ^ (n - 1 - j) = 1 := by
       rw [← pow_add, ← pow_add, show n + 1 + j + (n - 1 - j) = 2 * n by
         have := Finset.mem_range.mp hj; omega, pow_mul]
@@ -1064,6 +1055,7 @@ theorem kummerU_analytic_continuation (a b z : ℂ) (m : ℤ) {w : ℂ}
           Gamma (b - 1) / Gamma a * z ^ (1 - b) * kummerM (a - b + 1) (2 - b) z) := by ring
     _ = _ := by rw [hc, ht]; ring
 
+/-- For `c = -n`, the totalized Kummer series `M(a,-n,z)` reduces to its terms of index `≤ n`. -/
 theorem kummerM_eq_sum_neg_nat_denom (n : ℕ) (a z : ℂ) :
     kummerM a (-(n : ℂ)) z =
       ∑ k ∈ Finset.range (n + 1),
@@ -1075,6 +1067,7 @@ theorem kummerM_eq_sum_neg_nat_denom (n : ℕ) (a z : ℂ) :
     exact Nat.lt_of_succ_le hk
   rw [poch_neg_nat_eq_zero hkn, zero_mul, div_zero, zero_mul]
 
+/-- The totalized Kummer function `M(a,b,·)` is complex differentiable at `0`. -/
 theorem differentiableAt_kummerM (a b : ℂ) :
     DifferentiableAt ℂ (kummerM a b) 0 := by
   by_cases hb : ∀ k : ℕ, b ≠ -k
@@ -1605,6 +1598,7 @@ theorem isBigO_kummerU_at_zero_re_nonpos (a b : ℂ) (hb : b.re ≤ 0) (hb0 : b 
 
 /-! ### Wronskians -/
 
+/-- For `b` not a nonpositive integer, `M(a,b,·)` is entire. -/
 theorem analyticOnNhd_kummerM {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) :
     AnalyticOnNhd ℂ (kummerM a b) Set.univ := fun z _ =>
   (hasFPowerSeriesOnBall_kummerM (a := a) hb).analyticAt_of_mem (by simp)
@@ -1775,6 +1769,7 @@ theorem tendsto_deriv_kummerU (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     eventually_nhdsWithin_of_forall fun c hc => differentiableOn_kummerU_of_mem a hc
   exact ((tendstoLocallyUniformlyOn_kummerU a b).deriv hd isOpen_slitPlane).tendsto_at hz
 
+/-- A nonzero base has nonzero complex powers. -/
 private lemma cpow_ne_zero_of_ne_zero' {z : ℂ} (hz : z ≠ 0) (s : ℂ) : z ^ s ≠ 0 := by
   rw [cpow_def_of_ne_zero hz]; exact exp_ne_zero _
 
@@ -1807,6 +1802,8 @@ theorem hasDerivAt_kummerU_connection (a : ℂ) {c z : ℂ} (hc : c ∈ integerC
   rw [hfun]
   exact (hu.hasDerivAt.const_mul _).add (hy.hasDerivAt.const_mul _)
 
+/-- For noninteger `c`, the Wronskian of `M̃(a,c,z) = ₁F̃₁(a;c;z)` and `U(a,c,z)` is `-z^{-c} eᶻ /
+Γ(a)` (DLMF 13.2.34). -/
 theorem wronskian_regularized_kummerU_of_mem (a : ℂ) {c z : ℂ} (hc : c ∈ integerComplement)
     (hz : z ∈ slitPlane) :
     regularizedHGFun {a} {c} z * deriv (kummerU a c) z -
@@ -1842,6 +1839,8 @@ theorem wronskian_regularized_kummerU_of_mem (a : ℂ) {c z : ℂ} (hc : c ∈ i
       field_simp
       ring
 
+/-- For noninteger `c`, the Wronskian of `z^{1-c} M̃(a-c+1,2-c,z)` and `U(a,c,z)` is `-z^{-c} eᶻ /
+Γ(a-c+1)` (DLMF 13.2.35). -/
 theorem wronskian_shifted_kummerU_of_mem (a : ℂ) {c z : ℂ} (hc : c ∈ integerComplement)
     (hz : z ∈ slitPlane) :
     z ^ (1 - c) * regularizedHGFun {a - c + 1} {2 - c} z * deriv (kummerU a c) z -
@@ -1882,6 +1881,8 @@ theorem wronskian_shifted_kummerU_of_mem (a : ℂ) {c z : ℂ} (hc : c ∈ integ
       rw [hW]
       field_simp
 
+/-- The regularized `₁F̃₁(A(c); B(c); z)` is continuous in a parameter `c` entering through
+continuous `A` and `B`. -/
 theorem tendsto_regularizedConfluent_param (A B : ℂ → ℂ) (hA : Continuous A) (hB : Continuous B)
     (b z : ℂ) (l : Filter ℂ) (hl : l ≤ 𝓝 b) :
     Tendsto (fun c => regularizedHGFun {A c} {B c} z) l (𝓝 (regularizedHGFun {A b} {B b} z)) := by

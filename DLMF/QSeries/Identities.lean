@@ -39,15 +39,19 @@ open scoped Topology
 /-- The exponent `n(n-1)/2` as an integer. -/
 def tri (n : ℤ) : ℤ := n * (n - 1) / 2
 
+/-- `2 tri n = n (n - 1)`: the integer division in `tri` is exact. -/
 theorem tri_mul_two (n : ℤ) : tri n * 2 = n * (n - 1) :=
   Int.ediv_mul_cancel (even_iff_two_dvd.mp (Int.even_mul_pred_self n))
 
+/-- `q^{n(n-1)/2}` as a complex power equals the integer power `q^{tri n}`. -/
 theorem cpow_tri (q : ℂ) (n : ℤ) :
     q ^ ((n : ℂ) * ((n : ℂ) - 1) / 2) = q ^ tri n := by
   have h : ((tri n : ℤ) : ℂ) = (n : ℂ) * ((n : ℂ) - 1) / 2 := by
     rw [eq_div_iff two_ne_zero]; exact_mod_cast tri_mul_two n
   rw [← h, cpow_intCast]
 
+/-- `(z q^{-m};q)_m q^{C(m+1,2)} = (-z)^m (q/z;q)_m`: reversing a finite `q`-shifted
+factorial. -/
 theorem qPochhammer_shift_down {q z : ℂ} (hq : q ≠ 0) (hz : z ≠ 0) (m : ℕ) :
     qPochhammer (z / q ^ m) q m * q ^ (m + 1).choose 2 = (-z) ^ m * qPochhammer (q / z) q m := by
   induction m with
@@ -63,6 +67,7 @@ theorem qPochhammer_shift_down {q z : ℂ} (hq : q ≠ 0) (hz : z ≠ 0) (m : �
 /-- The summand `(-1)^n q^{n(n-1)/2} z^n` of the triple product. -/
 def term (q z : ℂ) (n : ℤ) : ℂ := (-1 : ℂ) ^ n * q ^ tri n * z ^ n
 
+/-- `C(k,2) + C(m+1,2) - m k = tri (k - m)`. -/
 theorem tri_sub_cast (k m : ℕ) :
     ((k.choose 2 : ℕ) : ℤ) + ((m + 1).choose 2 : ℕ) - (m : ℤ) * k = tri ((k : ℤ) - m) := by
   apply Int.cast_injective (α := ℚ)
@@ -74,6 +79,8 @@ theorem tri_sub_cast (k m : ℕ) :
   push_cast
   ring
 
+/-- Shifting the summation index by `m` in the finite triple product turns the `q`-binomial
+summand into `(-z)^m` times the triple-product term at `k - m`. -/
 theorem term_shift {q z : ℂ} (hq : q ≠ 0) (hz : z ≠ 0) (k m : ℕ) :
     (-1 : ℂ) ^ k * q ^ k.choose 2 * (z / q ^ m) ^ k * q ^ (m + 1).choose 2 =
       (-z) ^ m * term q z ((k : ℤ) - m) := by
@@ -90,6 +97,8 @@ theorem term_shift {q z : ℂ} (hq : q ≠ 0) (hz : z ≠ 0) (k m : ℕ) :
         rw [div_pow, pow_mul]; field_simp
     _ = _ := by rw [← h1, ← h2]; ring
 
+/-- The finite Jacobi triple product: `(q/z;q)_m (z;q)_m = ∑_{|n| ≤ m} [2m, m+n]_q (-1)ⁿ
+q^{n(n-1)/2} zⁿ`. -/
 theorem finite_jtp {q z : ℂ} (hq : q ≠ 0) (hz : z ≠ 0) (m : ℕ) :
     qPochhammer (q / z) q m * qPochhammer z q m =
       ∑ n ∈ Icc (-(m : ℤ)) m, qBinom q (2 * m) ((m : ℤ) + n).toNat * term q z n := by
@@ -122,12 +131,15 @@ theorem finite_jtp {q z : ℂ} (hq : q ≠ 0) (hz : z ≠ 0) (m : ℕ) :
 /-- `∏_{j<k} (1 - r^{j+1})⁻¹`, a bound for `‖[n k]_q‖` with `r = ‖q‖`. -/
 def dprod (r : ℝ) (k : ℕ) : ℝ := ∏ j ∈ range k, (1 - r ^ (j + 1))⁻¹
 
+/-- `0 < 1 - r^{j+1}` for `0 ≤ r < 1`. -/
 theorem one_sub_pow_succ_pos {r : ℝ} (h0 : 0 ≤ r) (h1 : r < 1) (j : ℕ) : 0 < 1 - r ^ (j + 1) :=
   sub_pos.mpr (pow_lt_one₀ h0 h1 (Nat.succ_ne_zero j))
 
+/-- `dprod r k ≥ 0` for `0 ≤ r < 1`. -/
 theorem dprod_nonneg {r : ℝ} (h0 : 0 ≤ r) (h1 : r < 1) (k : ℕ) : 0 ≤ dprod r k :=
   prod_nonneg fun j _ => (inv_pos.mpr (one_sub_pow_succ_pos h0 h1 j)).le
 
+/-- For `|q| < 1`, `‖[n k]_q‖ ≤ ∏_{j<k} (1 - |q|^{j+1})⁻¹`, uniformly in `n`. -/
 theorem norm_qBinom_le {q : ℂ} (hq : ‖q‖ < 1) (n k : ℕ) : ‖qBinom q n k‖ ≤ dprod ‖q‖ k := by
   have h0 := norm_nonneg q
   induction n generalizing k with
@@ -149,6 +161,7 @@ theorem norm_qBinom_le {q : ℂ} (hq : ‖q‖ < 1) (n k : ℕ) : ‖qBinom q n 
             add_le_add (ih k) (mul_le_mul_of_nonneg_left (ih (k + 1)) (by positivity))
         _ = dprod ‖q‖ (k + 1) := by rw [hd]; field_simp; ring
 
+/-- For `0 ≤ r < 1`, `dprod r k ≤ exp(r/(1-r)²)`, uniformly in `k`. -/
 theorem dprod_le {r : ℝ} (h0 : 0 ≤ r) (h1 : r < 1) (k : ℕ) :
     dprod r k ≤ Real.exp (r / (1 - r) ^ 2) := by
   have hr1 : 0 < 1 - r := sub_pos.mpr h1
@@ -174,6 +187,7 @@ theorem dprod_le {r : ℝ} (h0 : 0 ≤ r) (h1 : r < 1) (k : ℕ) :
         _ ≤ r / (1 - r) * (1 - r)⁻¹ := by gcongr
         _ = r / (1 - r) ^ 2 := by field_simp
 
+/-- For `|q| < 1`, the central `q`-binomial `[2m, m+n]_q` tends to `1/(q;q)_∞` as `m → ∞`. -/
 theorem tendsto_qBinom_center {q : ℂ} (hq : ‖q‖ < 1) (n : ℤ) :
     Tendsto (fun m : ℕ => qBinom q (2 * m) ((m : ℤ) + n).toNat) atTop
       (𝓝 (qPochhammerInf q q)⁻¹) := by
@@ -197,6 +211,8 @@ theorem tendsto_qBinom_center {q : ℂ} (hq : ‖q‖ < 1) (n : ℤ) :
   rw [← h]
   field_simp [qPochhammer_self_ne_zero hq]
 
+/-- The norm of the triple-product term equals the norm of the corresponding
+`jacobiTheta₂_term` at the matching `z` and `τ`. -/
 theorem norm_term_eq {q z : ℂ} (hq : q ≠ 0) (hz : z ≠ 0) (n : ℤ) :
     ‖term q z n‖ = ‖jacobiTheta₂_term n
       (((-(Real.log ‖z‖ - Real.log ‖q‖ / 2) / (2 * π) : ℝ) : ℂ) * I)
@@ -213,6 +229,7 @@ theorem norm_term_eq {q z : ℂ} (hq : q ≠ 0) (hz : z ≠ 0) (n : ℤ) :
   field_simp
   ring
 
+/-- For `0 < |q| < 1` and `z ≠ 0` the triple-product terms are absolutely summable over `ℤ`. -/
 theorem summable_norm_term {q z : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0) (hz : z ≠ 0) :
     Summable fun n : ℤ => ‖term q z n‖ := by
   have hr : 0 < ‖q‖ := norm_pos_iff.mpr hq0
@@ -223,6 +240,8 @@ theorem summable_norm_term {q z : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0) (hz : 
   have : 0 < 2 * π := by positivity
   exact div_pos (neg_pos.mpr hL) this
 
+/-- The Jacobi triple product for `0 < |q| < 1`, `z ≠ 0`:
+`(q/z;q)_∞ (z;q)_∞ = (q;q)_∞⁻¹ ∑_{n ∈ ℤ} (-1)ⁿ q^{n(n-1)/2} zⁿ`. -/
 theorem jtp_ne_zero {q z : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0) (hz : z ≠ 0) :
     qPochhammerInf (q / z) q * qPochhammerInf z q =
       (qPochhammerInf q q)⁻¹ * ∑' n : ℤ, term q z n := by
@@ -253,10 +272,12 @@ theorem jtp_ne_zero {q z : ℂ} (hq : ‖q‖ < 1) (hq0 : q ≠ 0) (hz : z ≠ 0
         ((norm_qBinom_le hq _ _).trans (dprod_le (norm_nonneg q) hq _)) (norm_nonneg _)
     · simp only [norm_zero]; positivity
 
+/-- `(a;0)_∞ = 1 - a`. -/
 theorem qPochhammerInf_zero_right (a : ℂ) : qPochhammerInf a 0 = 1 - a := by
   rw [qPochhammerInf, tprod_eq_mulSingle 0 fun k hk => by simp [zero_pow hk]]
   simp
 
+/-- `tri n ≠ 0` unless `n = 0` or `n = 1`. -/
 theorem tri_ne_zero {n : ℤ} (h0 : n ≠ 0) (h1 : n ≠ 1) : tri n ≠ 0 := by
   intro h
   have := tri_mul_two n
@@ -265,6 +286,7 @@ theorem tri_ne_zero {n : ℤ} (h0 : n ≠ 0) (h1 : n ≠ 1) : tri n ≠ 0 := by
   · exact h0 h
   · exact h1 (by linarith)
 
+/-- At `q = 0` the triple-product series reduces to `1 - z`. -/
 theorem jtp_zero {z : ℂ} : ∑' n : ℤ, term 0 z n = 1 - z := by
   rw [tsum_eq_sum (s := {0, 1})]
   · rw [sum_pair (by norm_num)]
@@ -329,9 +351,11 @@ def qPochhammerInt (a q : ℂ) : ℤ → ℂ
   | .ofNat n => qPochhammer a q n
   | .negSucc n => (qPochhammer (a * q ^ (-(n + 1 : ℤ))) q (n + 1))⁻¹
 
+/-- At a natural index `qPochhammerInt` is the ordinary `q`-shifted factorial. -/
 @[simp] theorem qPochhammerInt_natCast (a q : ℂ) (n : ℕ) :
     qPochhammerInt a q n = qPochhammer a q n := rfl
 
+/-- At the index `-(n+1)`, `(a;q)_{-(n+1)} = 1/(a q^{-(n+1)};q)_{n+1}` (AAR (10.5.2)). -/
 @[simp] theorem qPochhammerInt_negSucc (a q : ℂ) (n : ℕ) :
     qPochhammerInt a q (Int.negSucc n) =
       (qPochhammer (a * q ^ (-(n + 1 : ℤ))) q (n + 1))⁻¹ := rfl
@@ -456,6 +480,7 @@ def qGegenbauer (beta q : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
     qPochhammer beta q k * qPochhammer beta q (n - k) /
         (qPochhammer q q k * qPochhammer q q (n - k)) * x ^ ((n : ℤ) - 2 * k)
 
+/-- The degree-zero `q`-ultraspherical polynomial is `1`. -/
 theorem qGegenbauer_zero (beta q x : ℂ) : qGegenbauer beta q 0 x = 1 := by
   simp [qGegenbauer]
 

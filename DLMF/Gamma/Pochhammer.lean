@@ -25,8 +25,11 @@ noncomputable section
 
 namespace DLMF.Gamma
 
+/-- `(a)_{n+1} = a (a + 1)_n`. -/
 theorem poch_succ_left (a : ℂ) (n : ℕ) : poch a (n + 1) = a * poch (a + 1) n :=
   DLMF.Hypergeometric.poch_succ_left a n
+
+/-- DLMF 5.2.6: `(-a)_n = (-1)^n (a - n + 1)_n`. -/
 @[dlmf 5.2.E6]
 theorem poch_neg_eq (a : ℂ) (n : ℕ) :
     poch (-a) n = (-1 : ℂ) ^ n * poch (a - n + 1) n := by
@@ -39,6 +42,7 @@ theorem poch_neg_eq (a : ℂ) (n : ℕ) :
     rw [poch_succ, ih, pow_succ, harg, poch_succ_left]
     ring
 
+/-- DLMF 5.2.7: `(-m)_n = (-1)^n m!/(m - n)!` for `n ≤ m`, and `(-m)_n = 0` for `n > m`. -/
 @[dlmf 5.2.E7]
 theorem poch_neg_nat_eq (m n : ℕ) :
     poch (-(m : ℂ)) n =

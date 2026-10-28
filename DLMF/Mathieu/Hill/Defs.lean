@@ -87,7 +87,9 @@ namespace DLMF.Mathieu
 complex-valued potential `Q` and complex `λ`, with genuine derivatives. -/
 @[dlmf 28.29.E1]
 structure IsHillSolution (Q : ℝ → ℂ) (lam : ℂ) (w : ℝ → ℂ) : Prop where
+  /-- `w` is differentiable on `ℝ`. -/
   differentiable : Differentiable ℝ w
+  /-- `w'` has derivative `-(λ + Q(x)) w(x)` at every `x`. -/
   hasDerivAt_deriv : ∀ x : ℝ, HasDerivAt (deriv w) (-(lam + Q x) * w x) x
 
 /-- The hypotheses on the potential of Hill's equation (DLMF 28.29.2, 28.29.3): `Q` is
@@ -95,8 +97,11 @@ continuous, `π`-periodic and has mean zero over a period. DLMF also says that `
 minimum period; that is not required here. -/
 @[dlmf 28.29.E2, dlmf 28.29.E3, dlmf 28.29.i]
 structure IsHillPotential (Q : ℝ → ℂ) : Prop where
+  /-- `Q` is continuous. -/
   continuous : Continuous Q
+  /-- `Q` has period `π` (DLMF 28.29.2). -/
   periodic : Function.Periodic Q Real.pi
+  /-- `Q` has mean zero over a period (DLMF 28.29.3). -/
   integral_eq_zero : ∫ x in (0 : ℝ)..Real.pi, Q x = 0
 
 /-! ### §28.29(ii) Basic solutions and Floquet solutions -/

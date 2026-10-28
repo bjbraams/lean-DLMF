@@ -128,6 +128,7 @@ theorem binetPath_m_nonneg {θ : ℝ} (h0 : 0 ≤ θ) (hπ : θ ≤ π) :
     have hs : 0 ≤ Real.sin θ := Real.sin_nonneg_of_nonneg_of_le_pi h0 hπ
     nlinarith
 
+/-- `x ↦ sin x - x cos x` has derivative `θ sin θ` at `θ`. -/
 theorem binetPath_hasDerivAt_m (θ : ℝ) :
     HasDerivAt (fun x : ℝ => Real.sin x - x * Real.cos x) (θ * Real.sin θ) θ := by
   have := (Real.hasDerivAt_sin θ).sub ((hasDerivAt_id' θ).mul (Real.hasDerivAt_cos θ))
@@ -244,6 +245,8 @@ theorem binetPath_mul_cot_le {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
     nlinarith [mul_le_mul_of_nonneg_left hcot (by positivity : (0:ℝ) ≤ 2 * π / 3)]
 
 
+/-- Where `sin θ ≠ 0`, `φ(θ) = (sin θ - θ cos θ)/sin θ + log(θ/sin θ)` for the Binet phase `φ(θ) = 1
+- θ cot θ + log(θ/sin θ)`. -/
 theorem binetPhi_eq {θ : ℝ} (hs : Real.sin θ ≠ 0) :
     binetPhi θ = (Real.sin θ - θ * Real.cos θ) / Real.sin θ + Real.log (θ / Real.sin θ) := by
   rw [binetPhi, Real.cot_eq_cos_div_sin]
@@ -339,15 +342,14 @@ def binetPathLogDeriv (θ : ℝ) : ℂ := ((1 / θ - Real.cot θ : ℝ) : ℂ) +
 def binetPathTerm (b c θ : ℝ) : ℂ :=
   exp (c * exp (binetPathLog θ) + b * binetPathLog θ) * binetPathLogDeriv θ
 
-theorem binetPath_sin_pos {θ : ℝ} (hθ : θ ∈ Ioo 0 π) : 0 < Real.sin θ :=
-  Real.sin_pos_of_pos_of_lt_pi hθ.1 hθ.2
-
+/-- `θ/sin θ ≥ 1` for `0 < θ < π`. -/
 theorem binetPath_one_le_div_sin {θ : ℝ} (hθ : θ ∈ Ioo 0 π) : 1 ≤ θ / Real.sin θ := by
-  rw [le_div_iff₀ (binetPath_sin_pos hθ), one_mul]; exact Real.sin_le hθ.1.le
+  rw [le_div_iff₀ (Real.sin_pos_of_mem_Ioo hθ), one_mul]; exact Real.sin_le hθ.1.le
 
+/-- On `(0, π)`, the path coordinate `log(θ/sin θ) + iθ` has derivative `1/θ - cot θ + i`. -/
 theorem hasDerivAt_binetPathLog {θ : ℝ} (hθ : θ ∈ Ioo 0 π) :
     HasDerivAt binetPathLog (binetPathLogDeriv θ) θ := by
-  have hs := binetPath_sin_pos hθ
+  have hs := Real.sin_pos_of_mem_Ioo hθ
   have hr : 0 < θ / Real.sin θ := div_pos hθ.1 hs
   have hd : HasDerivAt (fun x => x / Real.sin x)
       ((1 * Real.sin θ - θ * Real.cos θ) / Real.sin θ ^ 2) θ :=
@@ -362,9 +364,10 @@ theorem hasDerivAt_binetPathLog {θ : ℝ} (hθ : θ ∈ Ioo 0 π) :
   rw [Real.cot_eq_cos_div_sin]
   field_simp
 
+/-- `exp(log(θ/sin θ) + iθ) = θ cot θ + iθ` on `(0, π)`. -/
 theorem exp_binetPathLog {θ : ℝ} (hθ : θ ∈ Ioo 0 π) :
     exp (binetPathLog θ) = ((θ * Real.cot θ : ℝ) : ℂ) + θ * I := by
-  have hs := binetPath_sin_pos hθ
+  have hs := Real.sin_pos_of_mem_Ioo hθ
   have hr : 0 < θ / Real.sin θ := div_pos hθ.1 hs
   rw [binetPathLog, Complex.exp_add, ← ofReal_exp, Real.exp_log hr,
     Complex.exp_mul_I, ← ofReal_cos, ← ofReal_sin, Real.cot_eq_cos_div_sin]
@@ -373,6 +376,7 @@ theorem exp_binetPathLog {θ : ℝ} (hθ : θ ∈ Ioo 0 π) :
       Complex.ofReal_im, Complex.I_re, Complex.I_im] <;>
     field_simp <;> ring
 
+/-- Real part of the exponent along the path: `Re(c w + b log w) = c θ cot θ + b log(θ/sin θ)`. -/
 theorem re_binetPath_exponent (b c : ℝ) {θ : ℝ} (hθ : θ ∈ Ioo 0 π) :
     ((c : ℂ) * exp (binetPathLog θ) + b * binetPathLog θ).re =
       c * (θ * Real.cot θ) + b * Real.log (θ / Real.sin θ) := by
@@ -428,9 +432,10 @@ theorem binetPath_exp_le {b c c₁ c₂ θ : ℝ} (hc₁ : 0 < c₁) (hc : c₁ 
     _ = _ := by
       rw [Real.exp_add, Real.exp_add, Real.exp_nat_mul, Real.exp_log hCpos]
 
+/-- `|1/θ - cot θ + i| ≤ 3 (π²/2)/(π - θ)` on `(0, π)`. -/
 theorem norm_binetPathLogDeriv_le {θ : ℝ} (hθ : θ ∈ Ioo 0 π) :
     ‖binetPathLogDeriv θ‖ ≤ 3 * (π ^ 2 / 2 * (π - θ)⁻¹) := by
-  have hs := binetPath_sin_pos hθ
+  have hs := Real.sin_pos_of_mem_Ioo hθ
   have ht : 0 < π - θ := by linarith [hθ.2]
   have hθ0 : θ ≠ 0 := hθ.1.ne'
   have hq : 1 / θ - Real.cot θ = (Real.sin θ - θ * Real.cos θ) / (θ * Real.sin θ) := by
@@ -461,6 +466,7 @@ def binetPathBound (b c₁ c₂ : ℝ) : ℝ :=
   3 * Real.exp (2 * c₂) * (π ^ 2 / 2) ^ (⌈|b|⌉₊ + 1) * (⌈|b|⌉₊ + 1).factorial /
     (c₁ * π / 3) ^ (⌈|b|⌉₊ + 1)
 
+/-- Uniform bound for the path integrand `e^(cw) w^b d(log w)` over `c ∈ [c₁, c₂]`, `c₁ > 0`. -/
 theorem norm_binetPathTerm_le {b c c₁ c₂ θ : ℝ} (hc₁ : 0 < c₁) (hc : c₁ ≤ c) (hc₂ : c ≤ c₂)
     (hθ : θ ∈ Ioo 0 π) : ‖binetPathTerm b c θ‖ ≤ binetPathBound b c₁ c₂ := by
   have ht : 0 < π - θ := by linarith [hθ.2]
@@ -483,12 +489,14 @@ theorem norm_binetPathTerm_le {b c c₁ c₂ θ : ℝ} (hc₁ : 0 < c₁) (hc : 
     _ = binetPathBound b c₁ c₂ := by rw [binetPathBound]; ring
 
 
+/-- The path coordinate `log(θ/sin θ) + iθ` is continuous on `(0, π)`. -/
 theorem continuousOn_binetPathLog : ContinuousOn binetPathLog (Ioo 0 π) :=
   fun _ hθ => (hasDerivAt_binetPathLog hθ).continuousAt.continuousWithinAt
 
+/-- Its derivative `1/θ - cot θ + i` is continuous on `(0, π)`. -/
 theorem continuousOn_binetPathLogDeriv : ContinuousOn binetPathLogDeriv (Ioo 0 π) := by
   intro θ hθ
-  have hs := binetPath_sin_pos hθ
+  have hs := Real.sin_pos_of_mem_Ioo hθ
   have h : ContinuousAt (fun x : ℝ => 1 / x - Real.cos x / Real.sin x) θ :=
     (continuousAt_const.div continuousAt_id hθ.1.ne').sub
       (Real.continuous_cos.continuousAt.div Real.continuous_sin.continuousAt hs.ne')
@@ -496,11 +504,13 @@ theorem continuousOn_binetPathLogDeriv : ContinuousOn binetPathLogDeriv (Ioo 0 �
     simpa only [Real.cot_eq_cos_div_sin] using h
   exact ((continuous_ofReal.continuousAt.comp h').add continuousAt_const).continuousWithinAt
 
+/-- The path integrand is continuous on `(0, π)`. -/
 theorem continuousOn_binetPathTerm (b c : ℝ) : ContinuousOn (binetPathTerm b c) (Ioo 0 π) := by
   have hl := continuousOn_binetPathLog
   exact (((continuousOn_const.mul hl.cexp).add (continuousOn_const.mul hl)).cexp).mul
     continuousOn_binetPathLogDeriv
 
+/-- For `c > 0` the path integrand is integrable on `(0, π)`. -/
 theorem integrableOn_binetPathTerm (b : ℝ) {c : ℝ} (hc : 0 < c) :
     IntegrableOn (binetPathTerm b c) (Ioo 0 π) :=
   Integrable.of_bound ((continuousOn_binetPathTerm b c).aestronglyMeasurable measurableSet_Ioo)
@@ -510,6 +520,7 @@ theorem integrableOn_binetPathTerm (b : ℝ) {c : ℝ} (hc : 0 < c) :
 /-- The antiderivative `e^{c w} w^{b}` along the path. -/
 def binetPathF (b c θ : ℝ) : ℂ := exp (c * exp (binetPathLog θ) + b * binetPathLog θ)
 
+/-- The path integrand with `b + 1` is `F(b, c) · w · d(log w)/dθ`, where `F = e^(cw) w^b`. -/
 theorem binetPathTerm_add_one (b c θ : ℝ) :
     binetPathTerm (b + 1) c θ = binetPathF b c θ * exp (binetPathLog θ) * binetPathLogDeriv θ := by
   rw [binetPathTerm, binetPathF, ← Complex.exp_add]
@@ -517,6 +528,7 @@ theorem binetPathTerm_add_one (b c θ : ℝ) :
   push_cast
   ring
 
+/-- `dF/dθ = c · term(b + 1) + b · term(b)` along the path, for `F = e^(cw) w^b`. -/
 theorem hasDerivAt_binetPathF (b c : ℝ) {θ : ℝ} (hθ : θ ∈ Ioo 0 π) :
     HasDerivAt (binetPathF b c) (c * binetPathTerm (b + 1) c θ + b * binetPathTerm b c θ) θ := by
   have hl := hasDerivAt_binetPathLog hθ
@@ -526,6 +538,7 @@ theorem hasDerivAt_binetPathF (b c : ℝ) {θ : ℝ} (hθ : θ ∈ Ioo 0 π) :
   simp only [Pi.add_apply]
   ring
 
+/-- The path coordinate tends to `0` as `θ → 0⁺`. -/
 theorem tendsto_binetPathLog_zero : Tendsto binetPathLog (𝓝[>] 0) (𝓝 0) := by
   have hs : Tendsto Real.sinc (𝓝[>] 0) (𝓝 1) := by
     have := Real.continuous_sinc.tendsto 0
@@ -548,6 +561,7 @@ theorem tendsto_binetPathLog_zero : Tendsto binetPathLog (𝓝[>] 0) (𝓝 0) :=
   simp only [ofReal_zero, add_zero, Function.comp_def] at h3
   exact h3
 
+/-- `F(b, c) → e^c` as `θ → 0⁺`. -/
 theorem tendsto_binetPathF_zero (b c : ℝ) :
     Tendsto (binetPathF b c) (𝓝[>] 0) (𝓝 (exp c)) := by
   have hG : Continuous fun z : ℂ => exp (c * exp z + b * z) := by fun_prop
@@ -555,6 +569,7 @@ theorem tendsto_binetPathF_zero (b c : ℝ) :
   simp only [Function.comp_def, Complex.exp_zero, mul_one, mul_zero, add_zero] at this
   exact this
 
+/-- `F(b, c) → 0` as `θ → π⁻`, for `c > 0`. -/
 theorem tendsto_binetPathF_pi (b : ℝ) {c : ℝ} (hc : 0 < c) :
     Tendsto (binetPathF b c) (𝓝[<] π) (𝓝 0) := by
   set n := ⌈|b|⌉₊
@@ -603,6 +618,8 @@ theorem binetPathInt_rec (b : ℝ) {c : ℝ} (hc : 0 < c) :
     MeasureTheory.integral_const_mul, MeasureTheory.integral_const_mul, zero_sub] at h
   exact h
 
+/-- The derivative in `c` of the path integrand with exponent `b` is the integrand with exponent `b
++ 1`. -/
 theorem hasDerivAt_binetPathTerm_param (b c θ : ℝ) :
     HasDerivAt (fun c : ℝ => binetPathTerm b c θ) (binetPathTerm (b + 1) c θ) c := by
   have h1 : HasDerivAt (fun c : ℝ => (c : ℂ) * exp (binetPathLog θ) + b * binetPathLog θ)
@@ -633,6 +650,7 @@ theorem hasDerivAt_binetPathInt (b : ℝ) {c₀ : ℝ} (hc₀ : 0 < c₀) :
 /-- The imaginary part of the path integral. -/
 def binetPathIm (b c : ℝ) : ℝ := (binetPathInt b c).im
 
+/-- Recurrence for the imaginary parts of the path integrals: `c P(b + 1, c) + b P(b, c) = 0`. -/
 theorem binetPathIm_rec (b : ℝ) {c : ℝ} (hc : 0 < c) :
     c * binetPathIm (b + 1) c + b * binetPathIm b c = 0 := by
   have h := congrArg Complex.im (binetPathInt_rec b hc)
@@ -658,6 +676,7 @@ theorem binetPathIm_scale (b : ℝ) {c : ℝ} (hc : 0 < c) :
     (fun x hx => (hd x hx).deriv) hc (show (1 : ℝ) ∈ Ioi 0 from mem_Ioi.mpr one_pos)
   simpa using this
 
+/-- `Im term(1 - a, a, θ) = e^a e^(-a φ(θ))` on `(0, π)`. -/
 theorem im_binetPathTerm {a θ : ℝ} (hθ : θ ∈ Ioo 0 π) :
     (binetPathTerm (1 - a) a θ).im = Real.exp a * Real.exp (-a * binetPhi θ) := by
   have he := exp_binetPathLog hθ
@@ -682,6 +701,7 @@ theorem im_binetPathTerm {a θ : ℝ} (hθ : θ ∈ Ioo 0 π) :
   congr 1
   ring
 
+/-- `Im P(1 - a, a) = e^a ∫₀^π e^(-a φ(θ)) dθ`. -/
 theorem binetPathIm_eq (a : ℝ) {c : ℝ} (hc : 0 < c) (hca : c = a) :
     binetPathIm (1 - a) c = Real.exp a * ∫ θ in Ioo 0 π, Real.exp (-a * binetPhi θ) := by
   subst hca
@@ -692,12 +712,14 @@ theorem binetPathIm_eq (a : ℝ) {c : ℝ} (hc : 0 < c) (hca : c = a) :
   exact im_binetPathTerm hθ
 
 
+/-- The Binet phase `φ` is measurable. -/
 theorem measurable_binetPhi : Measurable binetPhi := by
   have : binetPhi = fun t => 1 - t * (Real.cos t / Real.sin t) + Real.log (t / Real.sin t) := by
     funext t; rw [binetPhi, Real.cot_eq_cos_div_sin]
   rw [this]
   fun_prop
 
+/-- The Binet phase `φ` is even. -/
 theorem binetPhi_neg (θ : ℝ) : binetPhi (-θ) = binetPhi θ := by
   rw [binetPhi, binetPhi, Real.cot_eq_cos_div_sin, Real.cot_eq_cos_div_sin, Real.cos_neg,
     Real.sin_neg, neg_div_neg_eq]
@@ -707,6 +729,7 @@ theorem binetPhi_neg (θ : ℝ) : binetPhi (-θ) = binetPhi θ := by
 /-- The Laplace integral of `binetPhi` over `(0, π)`. -/
 def binetLaplace (x : ℝ) : ℝ := ∫ θ in Ioo 0 π, Real.exp (-x * binetPhi θ)
 
+/-- `x φ(s/√x) → s²/2` as `x → ∞`, for `s > 0`. -/
 theorem tendsto_binetPhi_scaled {s : ℝ} (hs : 0 < s) :
     Tendsto (fun x : ℝ => x * binetPhi (s / √x)) atTop (𝓝 (s ^ 2 / 2)) := by
   rw [tendsto_iff_norm_sub_tendsto_zero]
@@ -733,6 +756,7 @@ theorem tendsto_binetPhi_scaled {s : ℝ} (hs : 0 < s) :
     _ ≤ x * (θ ^ 4 / 2) := by gcongr
     _ = s ^ 4 / 2 / x := by rw [show x * (θ ^ 4 / 2) = x * θ ^ 4 / 2 by ring, h4]; ring
 
+/-- `√x ∫₀^π e^(-x φ(θ)) dθ` as an integral over `(0, π√x)` after the substitution `θ = s/√x`. -/
 theorem sqrt_mul_binetLaplace {x : ℝ} (hx : 0 < x) :
     √x * binetLaplace x = ∫ s in Ioi 0,
       (Ioo 0 (π * √x)).indicator (fun s => Real.exp (-x * binetPhi (s / √x))) s := by
@@ -744,6 +768,7 @@ theorem sqrt_mul_binetLaplace {x : ℝ} (hx : 0 < x) :
     intervalIntegral.integral_comp_div (fun θ => Real.exp (-x * binetPhi θ)) hsx.ne',
     zero_div, mul_div_assoc, div_self hsx.ne', mul_one, smul_eq_mul]
 
+/-- `√x ∫₀^π e^(-x φ(θ)) dθ → √(2π)/2` as `x → ∞` (Laplace's method). -/
 theorem tendsto_sqrt_mul_binetLaplace :
     Tendsto (fun x => √x * binetLaplace x) atTop (𝓝 (√(π / (1 / 2)) / 2)) := by
   rw [← integral_gaussian_Ioi]
@@ -792,6 +817,7 @@ theorem tendsto_sqrt_mul_binetLaplace :
     exact this
 
 
+/-- `∫_{-π}^{π} e^(-x φ(t)) dt = 2 ∫₀^π e^(-x φ(t)) dt` for `x ≥ 0`. -/
 theorem integral_binetPhi_symm {x : ℝ} (hx : 0 ≤ x) :
     ∫ t in (-π)..π, Real.exp (-x * binetPhi t) = 2 * binetLaplace x := by
   have hmeas : Measurable fun t => Real.exp (-x * binetPhi t) :=
@@ -823,20 +849,24 @@ theorem integral_binetPhi_symm {x : ℝ} (hx : 0 ≤ x) :
 /-- The normalized path integral `W(a) = Im ∫ e^{w} w^{-a} dw`, which equals `π/Γ(a)`. -/
 def binetW (a : ℝ) : ℝ := binetPathIm (1 - a) 1
 
+/-- `W(a) = a^(1-a) e^a ∫₀^π e^(-a φ)` for `a > 0`. -/
 theorem binetW_eq {a : ℝ} (ha : 0 < a) :
     binetW a = a ^ (1 - a) * (Real.exp a * binetLaplace a) := by
   rw [binetW, ← binetPathIm_scale (1 - a) ha, binetPathIm_eq a ha rfl, binetLaplace]
 
+/-- `W(a) = a W(a + 1)`. -/
 theorem binetW_rec (a : ℝ) : binetW a = a * binetW (a + 1) := by
   have h := binetPathIm_rec (-a) one_pos
   rw [binetW, binetW, show 1 - (a + 1) = -a by ring, show 1 - a = -a + 1 by ring]
   linarith
 
+/-- `W(a + 1) Γ(a + 1) = W(a) Γ(a)` for `a > 0`. -/
 theorem binetW_mul_Gamma_add_one {a : ℝ} (ha : 0 < a) :
     binetW (a + 1) * Real.Gamma (a + 1) = binetW a * Real.Gamma a := by
   rw [Real.Gamma_add_one ha.ne', binetW_rec a]
   ring
 
+/-- `W(n + t) Γ(n + t) = W(t) Γ(t)` for `t > 0`. -/
 theorem binetW_mul_Gamma_nat_add {t : ℝ} (ht : 0 < t) (n : ℕ) :
     binetW (n + t) * Real.Gamma (n + t) = binetW t * Real.Gamma t := by
   induction n with
@@ -845,6 +875,7 @@ theorem binetW_mul_Gamma_nat_add {t : ℝ} (ht : 0 < t) (n : ℕ) :
     rw [Nat.cast_succ, show (n : ℝ) + 1 + t = n + t + 1 by ring,
       binetW_mul_Gamma_add_one (by positivity), ih]
 
+/-- `W(x) Γ(x) = (Γ(x)/stirlingGamma(x)) √(2π) (√x ∫₀^π e^(-x φ))` for `x > 0`. -/
 theorem binetW_mul_Gamma_eq_stirling {x : ℝ} (hx : 0 < x) :
     binetW x * Real.Gamma x =
       Real.Gamma x / Real.stirlingGamma x * √(2 * π) * (√x * binetLaplace x) := by
@@ -859,6 +890,7 @@ theorem binetW_mul_Gamma_eq_stirling {x : ℝ} (hx : 0 < x) :
   rw [Real.sq_sqrt hx.le]
   ring
 
+/-- `W(t) Γ(t) = π` for `0 < t ≤ 1`. -/
 theorem binetW_mul_Gamma_of_le_one {t : ℝ} (ht : 0 < t) (ht1 : t ≤ 1) :
     binetW t * Real.Gamma t = π := by
   have hnat : Tendsto (fun n : ℕ => (n : ℝ) + t) atTop atTop :=
@@ -882,6 +914,7 @@ theorem binetW_mul_Gamma_of_le_one {t : ℝ} (ht : 0 < t) (ht1 : t ≤ 1) :
   simp only [binetW_mul_Gamma_nat_add ht] at h
   exact tendsto_nhds_unique tendsto_const_nhds h
 
+/-- `W(a) Γ(a) = π` for every `a > 0`. -/
 theorem binetW_mul_Gamma {a : ℝ} (ha : 0 < a) : binetW a * Real.Gamma a = π := by
   have hc : 1 ≤ ⌈a⌉₊ := Nat.one_le_iff_ne_zero.mpr (Nat.ceil_pos.mpr ha).ne'
   set m := ⌈a⌉₊ - 1
@@ -894,6 +927,8 @@ theorem binetW_mul_Gamma {a : ℝ} (ha : 0 < a) : binetW a * Real.Gamma a = π :
 
 end BinetLoop
 
+/-- DLMF 5.9.2 (second form): `1/Γ(x) = e^x x^(1-x)/(2π) ∫_{-π}^{π} e^(-x φ(t)) dt`, `φ(t) = 1 - t
+cot t + ln(t/sin t)`, for `x > 0`. -/
 @[dlmf 5.9.E2_5]
 theorem recip_Gamma_binet {x : ℝ} (hx : 0 < x) :
     (Real.Gamma x)⁻¹ =
@@ -935,6 +970,7 @@ theorem integral_comp_abs_complex {f : ℝ → ℂ} :
       exact hf.integrableOn
     rw [← eq, integral_undef hf, integral_undef this, mul_zero]
 
+/-- DLMF 5.9.3: `c^(-z) Γ(z) = ∫_{-∞}^{∞} |t|^(2z-1) e^(-c t²) dt` for `Re c, Re z > 0`. -/
 @[dlmf 5.9.E3]
 theorem Gamma_gaussian {c z : ℂ} (hc : 0 < c.re) (hz : 0 < z.re) :
     c ^ (-z) * Complex.Gamma z =
@@ -975,6 +1011,7 @@ def prymSeries (z : ℂ) : ℂ := ∑' k : ℕ, (-1 : ℂ) ^ k / ((z + k) * k.fa
 /-- The upper incomplete Euler integral `∫₁^∞ t^{z-1} e^{-t} dt`. -/
 def prymIntegral (z : ℂ) : ℂ := ∫ t : ℝ in Ioi 1, (t : ℂ) ^ (z - 1) * Complex.exp (-(t : ℂ))
 
+/-- Prym's series `∑ₖ (-1)^k/((z + k) k!)` converges. -/
 theorem summable_prym (z : ℂ) :
     Summable fun k : ℕ => (-1 : ℂ) ^ k / ((z + k) * k.factorial) := by
   refine Summable.of_norm_bounded_eventually_nat (g := fun k => 1 ^ k / (k.factorial : ℝ))
@@ -994,9 +1031,7 @@ theorem summable_prym (z : ℂ) :
     div_le_div_iff₀ (by positivity) hf]
   nlinarith
 
-theorem norm_ofReal_cpow_Ioi {t : ℝ} (ht : 0 < t) (w : ℂ) : ‖(t : ℂ) ^ w‖ = t ^ w.re :=
-  norm_cpow_eq_rpow_re_of_pos ht w
-
+/-- `t^(z-1) e^(-t)` is integrable on `(1, ∞)`. -/
 theorem integrableOn_prymIntegral (z : ℂ) :
     IntegrableOn (fun t : ℝ => (t : ℂ) ^ (z - 1) * Complex.exp (-(t : ℂ))) (Ioi 1) := by
   set s := max z.re 1 with hs
@@ -1011,8 +1046,8 @@ theorem integrableOn_prymIntegral (z : ℂ) :
   · refine (ae_restrict_iff' measurableSet_Ioi).mpr (Eventually.of_forall fun t ht => ?_)
     have ht' : (1 : ℝ) < t := ht
     have ht0 : (0 : ℝ) < t := zero_lt_one.trans ht'
-    rw [norm_mul, norm_ofReal_cpow_Ioi ht0, Complex.norm_exp, neg_re, ofReal_re, sub_re, one_re,
-      mul_comm]
+    rw [norm_mul, norm_cpow_eq_rpow_re_of_pos ht0, Complex.norm_exp, neg_re, ofReal_re, sub_re,
+      one_re, mul_comm]
     gcongr
     · exact ht'.le
     · simp [hs]
@@ -1046,7 +1081,7 @@ theorem prymIntegral_add_one (z : ℂ) :
     rw [tendsto_zero_iff_norm_tendsto_zero]
     refine (tendsto_rpow_mul_exp_neg_mul_atTop_nhds_zero z.re 1 one_pos).congr' ?_
     filter_upwards [eventually_gt_atTop 0] with t ht
-    rw [norm_mul, norm_neg, norm_ofReal_cpow_Ioi ht, Complex.norm_exp]
+    rw [norm_mul, norm_neg, norm_cpow_eq_rpow_re_of_pos ht, Complex.norm_exp]
     simp
   have h := integral_Ioi_mul_deriv_eq_deriv_mul hu hv huv' hu'v hzero hinfty
   simp only [prymIntegral, add_sub_cancel_right]
@@ -1100,6 +1135,7 @@ theorem mul_prymSeries {z : ℂ} (hz : ∀ k : ℕ, z ≠ -k) :
 /-- The `k`-th term `(-1)ᵏ t^{z+k-1}/k!` of `t^{z-1} e^{-t}`. -/
 def prymTerm (z : ℂ) (k : ℕ) (t : ℝ) : ℂ := (-1 : ℂ) ^ k / k.factorial * (t : ℂ) ^ (z + k - 1)
 
+/-- For `Re(z + k) > 0`, the `k`-th term `(-1)^k t^(z+k-1)/k!` is integrable on `(0, 1]`. -/
 theorem integrableOn_prymTerm {z : ℂ} {k : ℕ} (hk : 0 < (z + k).re) :
     IntegrableOn (prymTerm z k) (Ioc 0 1) := by
   have hre : -1 < (z + k - 1).re := by simp at hk ⊢; linarith
@@ -1108,6 +1144,7 @@ theorem integrableOn_prymTerm {z : ℂ} {k : ℕ} (hk : 0 < (z + k).re) :
   rw [intervalIntegrable_iff_integrableOn_Ioc_of_le zero_le_one] at this
   exact this
 
+/-- `∫₀¹ (-1)^k t^(z+k-1)/k! dt = (-1)^k/((z + k) k!)` for `Re(z + k) > 0`. -/
 theorem integral_prymTerm {z : ℂ} {k : ℕ} (hk : 0 < (z + k).re) :
     ∫ t in Ioc (0 : ℝ) 1, prymTerm z k t = (-1 : ℂ) ^ k / ((z + k) * k.factorial) := by
   have hre : -1 < (z + k - 1).re := by simp at hk ⊢; linarith
@@ -1119,6 +1156,7 @@ theorem integral_prymTerm {z : ℂ} {k : ℕ} (hk : 0 < (z + k).re) :
   have hf : (k.factorial : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
   field_simp
 
+/-- `∫₀¹ |(-1)^k t^(z+k-1)/k!| dt = 1/(k! Re(z + k))` for `Re(z + k) > 0`. -/
 theorem integral_norm_prymTerm {z : ℂ} {k : ℕ} (hk : 0 < (z + k).re) :
     ∫ t in Ioc (0 : ℝ) 1, ‖prymTerm z k t‖ = 1 / (k.factorial * (z + k).re) := by
   have hk' : 0 < z.re + k := by simpa using hk
@@ -1128,7 +1166,7 @@ theorem integral_norm_prymTerm {z : ℂ} {k : ℕ} (hk : 0 < (z + k).re) :
     intro t ht
     simp only [prymTerm]
     rw [norm_mul, norm_div, norm_pow, norm_neg, norm_one, one_pow, Complex.norm_natCast,
-      norm_ofReal_cpow_Ioi ht.1]
+      norm_cpow_eq_rpow_re_of_pos ht.1]
     simp
   rw [setIntegral_congr_fun measurableSet_Ioc heq, MeasureTheory.integral_const_mul,
     ← intervalIntegral.integral_of_le zero_le_one, integral_rpow (Or.inl hre)]
@@ -1214,6 +1252,8 @@ theorem Gamma_eq_prym {z : ℂ} (hz : ∀ k : ℕ, z ≠ -k) :
     rw [h1, hP] at hG
     exact (mul_left_cancel₀ hz0 hG).symm
 
+/-- DLMF 5.9.4, Prym's decomposition: `Γ(z) = ∫₁^∞ t^(z-1) e^(-t) dt + ∑ₖ (-1)^k/((z + k) k!)` for
+`z` not a nonpositive integer. -/
 @[dlmf 5.9.E4]
 theorem Gamma_incomplete_sum {z : ℂ} (hz : ∀ k : ℕ, z ≠ -k) :
     Complex.Gamma z =
@@ -1308,7 +1348,7 @@ theorem Gamma_truncated_exp {z : ℂ} {n : ℕ}
       have hb := Real.exp_bound (x := -t) (by rw [abs_neg, abs_of_pos ht0]; exact ht.2)
         (n := n + 1) (Nat.succ_pos n)
       rw [abs_neg, abs_of_pos ht0] at hb
-      rw [norm_mul, norm_ofReal_cpow_Ioi ht0, hreal, Complex.norm_real, Real.norm_eq_abs]
+      rw [norm_mul, norm_cpow_eq_rpow_re_of_pos ht0, hreal, Complex.norm_real, Real.norm_eq_abs]
       have hpow' : t ^ (n + 1) = t * t ^ (n : ℝ) := by
         rw [Real.rpow_natCast]; ring
       calc t ^ (z - 1).re * |Real.exp (-t) - ∑ k ∈ Finset.range (n + 1), (-t) ^ k / k.factorial|
@@ -1452,6 +1492,7 @@ theorem rpow_eq_recip_Gamma_mul_integral {x t : ℝ} (hx : x < 1) (ht : 0 < t) :
   have := (Real.Gamma_pos_of_pos (by linarith : 0 < 1 - x)).ne'
   field_simp
 
+/-- `s^(-x) e^(-ts)` is integrable on `(0, ∞)` for `x < 1`, `t > 0`. -/
 theorem integrableOn_rpow_neg_mul_exp {x t : ℝ} (hx : x < 1) (ht : 0 < t) :
     IntegrableOn (fun s : ℝ => s ^ (-x) * Real.exp (-(t * s))) (Ioi 0) := by
   have := integrableOn_rpow_mul_exp_neg_mul_rpow (p := 1) (s := -x) (b := t) (by linarith)
@@ -2196,9 +2237,11 @@ open Set
 /-- Binet's function `β(t) = 1/(eᵗ - 1) - 1/t + 1/2` (Temme (3.12)). -/
 def binetBeta (t : ℝ) : ℝ := 1 / (Real.exp t - 1) - 1 / t + 1 / 2
 
+/-- `e^t - 1 > 0` for `t > 0`. -/
 theorem exp_sub_one_pos {t : ℝ} (ht : 0 < t) : 0 < Real.exp t - 1 := by
   have := Real.add_one_lt_exp ht.ne'; linarith
 
+/-- `1/(1 - e^(-t)) - 1/t = β(t) + 1/2`, with `β(t) = 1/(e^t - 1) - 1/t + 1/2`. -/
 theorem binetKernel_eq_binetBeta {t : ℝ} (ht : 0 < t) : binetKernel t = binetBeta t + 1 / 2 := by
   have h1 := (exp_sub_one_pos ht).ne'
   have h0 : Real.exp t ≠ 0 := Real.exp_ne_zero t
@@ -2260,6 +2303,7 @@ theorem binetBeta_le_half {t : ℝ} (ht : 0 < t) : binetBeta t ≤ 1 / 2 := by
   rw [binetKernel_eq_binetBeta ht] at this
   linarith
 
+/-- `β(t) = 1/(e^t - 1) - 1/t + 1/2` is continuous on `(0, ∞)`. -/
 theorem continuousOn_binetBeta : ContinuousOn binetBeta (Ioi 0) := by
   intro t ht
   have h1 := (exp_sub_one_pos ht).ne'
@@ -2387,6 +2431,8 @@ theorem eq_of_hasDerivAt_zero_Ioi {G : ℝ → ℝ} (hG : ∀ y, 0 < y → HasDe
   · rw [h]
   · exact (key b a hb h).symm
 
+/-- DLMF 5.9.10 (exponential form): `ln Γ(x) = (x - 1/2) ln x - x + (1/2) ln 2π + ∫₀^∞ e^(-xt)
+(1/(e^t - 1) - 1/t + 1/2) dt/t` for `x > 0`. -/
 @[dlmf 5.9.E10_2]
 theorem log_Gamma_binet_exp {x : ℝ} (hx : 0 < x) :
     Real.log (Real.Gamma x) =
@@ -2411,7 +2457,7 @@ theorem log_Gamma_binet_exp {x : ℝ} (hx : 0 < x) :
     have hinv : Tendsto (fun y : ℝ => 1 / (12 * y)) atTop (𝓝 0) := by
       refine (tendsto_inv_atTop_zero.comp
         (tendsto_id.const_mul_atTop (by norm_num : (0 : ℝ) < 12))).congr fun y => ?_
-      simp [Function.comp_def, one_div]
+      simp [one_div]
     have h2 : Tendsto binetIntegral atTop (𝓝 0) := by
       refine tendsto_of_tendsto_of_tendsto_of_le_of_le' tendsto_const_nhds hinv ?_ ?_
       · filter_upwards [eventually_gt_atTop 0] with y hy
@@ -2514,6 +2560,8 @@ theorem binetIntegral_pos_lt {x : ℝ} (hx : 0 < x) :
     unfold binetIntegral
     linarith
 
+/-- `ln Γ(x) = (x - 1/2) ln x - x + (1/2) ln 2π + Φ(x)` with Binet's integral `Φ(x) = ∫₀^∞ e^(-xt)
+β(t)/t dt`. -/
 theorem log_Gamma_eq_add_binetIntegral {x : ℝ} (hx : 0 < x) :
     Real.log (Real.Gamma x) =
       (x - 1 / 2) * Real.log x - x + (1 / 2) * Real.log (2 * π) + binetIntegral x := by
@@ -2749,6 +2797,7 @@ theorem integral_exp_mul_div_sq_add_sq_symm {x a : ℝ} (hx : 0 < x) (ha : 0 < a
     at hswap
   exact hswap
 
+/-- `e^(-xs)/(s² + a²)` is integrable on `(0, ∞)` for `x, a > 0`. -/
 theorem integrableOn_exp_div_sq_add_sq {x a : ℝ} (hx : 0 < x) (ha : 0 < a) :
     IntegrableOn (fun s => Real.exp (-x * s) / (s ^ 2 + a ^ 2)) (Ioi 0) := by
   refine Integrable.mono' ((integrableOn_exp_mul_Ioi (by linarith : -x < 0) 0).const_mul
@@ -2777,6 +2826,7 @@ theorem integral_exp_div_sq_add_sq_le {x a : ℝ} (hx : 0 < x) (ha : 0 < a) :
   simp only [mul_zero, Real.exp_zero]
   field_simp
 
+/-- `∫₀^∞ e^(-xs)/(s² + a²) ds ≥ 0`. -/
 theorem integral_exp_div_sq_add_sq_nonneg {x a : ℝ} :
     0 ≤ ∫ s in Ioi (0 : ℝ), Real.exp (-x * s) / (s ^ 2 + a ^ 2) :=
   setIntegral_nonneg measurableSet_Ioi fun s _ => by positivity
@@ -2878,6 +2928,8 @@ theorem integral_arctan_mul_exp_eq {x a : ℝ} (hx : 0 < x) (ha : 0 < a) :
   rw [integral_arctan_mul_exp hx ha, div_mul_eq_mul_div, ← integral_exp_div_sq_add_sq_symm hx ha]
   field_simp
 
+/-- DLMF 5.9.10, Binet's second formula: `ln Γ(x) = (x - 1/2) ln x - x + (1/2) ln 2π + 2 ∫₀^∞
+arctan(t/x)/(e^(2πt) - 1) dt` for `x > 0`. -/
 @[dlmf 5.9.E10]
 theorem log_Gamma_binet_arctan {x : ℝ} (hx : 0 < x) :
     Real.log (Real.Gamma x) =
@@ -2918,6 +2970,8 @@ theorem log_Gamma_binet_arctan {x : ℝ} (hx : 0 < x) :
   rw [tsum_mul_left, (hasSum_recip_exp_two_pi_sub_one ht).tsum_eq]
   ring
 
+/-- DLMF 5.9.10 (logarithmic form): `ln Γ(x) = (x - 1/2) ln x - x + (1/2) ln 2π - (x/π) ∫₀^∞ ln(1 -
+e^(-2πt))/(t² + x²) dt` for `x > 0`. -/
 @[dlmf 5.9.E10_1]
 theorem log_Gamma_binet_log {x : ℝ} (hx : 0 < x) :
     Real.log (Real.Gamma x) =
@@ -2979,6 +3033,7 @@ theorem log_Gamma_binet_log {x : ℝ} (hx : 0 < x) :
 end Binet
 
 open Set in
+/-- DLMF 5.9.12, Gauss: `ψ(x) = ∫₀^∞ (e^(-t)/t - e^(-xt)/(1 - e^(-t))) dt` for `x > 0`. -/
 @[dlmf 5.9.E12]
 theorem digamma_gauss {x : ℝ} (hx : 0 < x) :
     Real.digamma x =
@@ -3001,6 +3056,7 @@ theorem digamma_gauss {x : ℝ} (hx : 0 < x) :
   ring
 
 open Set in
+/-- DLMF 5.9.13: `ψ(x) = ln x + ∫₀^∞ (1/t - 1/(1 - e^(-t))) e^(-tx) dt` for `x > 0`. -/
 @[dlmf 5.9.E13]
 theorem digamma_binet {x : ℝ} (hx : 0 < x) :
     Real.digamma x =
@@ -3050,6 +3106,7 @@ theorem eulerIntegrand_mem {t : ℝ} (ht : 0 < t) :
     nlinarith [mul_le_mul_of_nonneg_left hNk (by positivity : (0 : ℝ) ≤ 1 + t),
       mul_nonneg hN0 ht.le]
 
+/-- `(1/(1 + t) - e^(-t))/t` is continuous on `(0, ∞)`. -/
 theorem continuousOn_eulerIntegrand :
     ContinuousOn (fun t : ℝ => (1 / (1 + t) - Real.exp (-t)) / t) (Ioi 0) := by
   intro t ht
@@ -3058,6 +3115,7 @@ theorem continuousOn_eulerIntegrand :
   have h2 : t ≠ 0 := ht'.ne'
   exact ContinuousAt.continuousWithinAt (by fun_prop (disch := assumption))
 
+/-- `(1/(1 + t) - e^(-t))/t` is integrable on `(0, ∞)`. -/
 theorem integrableOn_eulerIntegrand :
     IntegrableOn (fun t : ℝ => (1 / (1 + t) - Real.exp (-t)) / t) (Ioi 0) := by
   refine Integrable.mono' ((integrable_inv_one_add_sq.const_mul 2).integrableOn)
@@ -3269,6 +3327,7 @@ theorem integral_rpow_sub_rpow_div_eq {x : ℝ} (hx : 0 < x) :
     rw [h]
     exact setIntegral_congr_fun measurableSet_Ioi hcomp
 
+/-- DLMF 5.9.14: `ψ(x) = ∫₀^∞ (e^(-t) - (1 + t)^(-x)) dt/t` for `x > 0`. -/
 @[dlmf 5.9.E14]
 theorem digamma_frullani {x : ℝ} (hx : 0 < x) :
     Real.digamma x =
@@ -3285,6 +3344,7 @@ theorem digamma_frullani {x : ℝ} (hx : 0 < x) :
 end Frullani
 
 open Set in
+/-- `t e^(-xt)` is integrable on `(0, ∞)` for `x > 0`. -/
 theorem integrableOn_mul_exp_neg_mul {x : ℝ} (hx : 0 < x) :
     IntegrableOn (fun t => t * Real.exp (-x * t)) (Ioi 0) := by
   have := integrableOn_rpow_mul_exp_neg_mul_rpow (p := 1) (s := 1) (b := x) (by norm_num)
@@ -3293,6 +3353,7 @@ theorem integrableOn_mul_exp_neg_mul {x : ℝ} (hx : 0 < x) :
   simp [Real.rpow_one]
 
 open Set in
+/-- `∫₀^∞ t e^(-xt) dt = 1/x²` for `x > 0`. -/
 theorem integral_mul_exp_neg_mul {x : ℝ} (hx : 0 < x) :
     ∫ t in Ioi (0 : ℝ), t * Real.exp (-x * t) = 1 / x ^ 2 := by
   have h := Real.integral_rpow_mul_exp_neg_mul_Ioi (a := 2) (r := x) two_pos hx
@@ -3302,6 +3363,7 @@ theorem integral_mul_exp_neg_mul {x : ℝ} (hx : 0 < x) :
   simp only [neg_mul]
 
 open Set in
+/-- DLMF 5.9.15: `ψ(x) = ln x - 1/(2x) - 2 ∫₀^∞ t dt/((t² + x²)(e^(2πt) - 1))` for `x > 0`. -/
 @[dlmf 5.9.E15]
 theorem digamma_coth {x : ℝ} (hx : 0 < x) :
     Real.digamma x =
@@ -3390,6 +3452,8 @@ theorem digamma_coth {x : ℝ} (hx : 0 < x) :
   rw [h1, h2, ← keyF, ← keyG]
   simp_rw [hFG]
 
+/-- DLMF 5.9.16: `ψ(x) + γ = ∫₀^∞ (e^(-t) - e^(-xt))/(1 - e^(-t)) dt = ∫₀¹ (1 - t^(x-1))/(1 - t) dt`
+for `x > 0`. -/
 @[dlmf 5.9.E16]
 theorem digamma_add_euler {x : ℝ} (hx : 0 < x) :
     Real.digamma x + Real.eulerMascheroniConstant =
@@ -3401,6 +3465,7 @@ theorem digamma_add_euler {x : ℝ} (hx : 0 < x) :
   rw [intervalIntegral.integral_of_le zero_le_one, integral_Ioc_eq_integral_Ioo]
   exact digamma_add_euler_Ioo hx
 
+/-- DLMF 5.9.18: `γ = -∫₀^∞ e^(-t) ln t dt = ∫₀^∞ (1/(1 + t) - e^(-t)) dt/t`. -/
 @[dlmf 5.9.E18]
 theorem eulerMascheroni_integrals :
     Real.eulerMascheroniConstant =
@@ -3440,6 +3505,7 @@ theorem abs_log_pow_le {t ε : ℝ} (ht : 0 < t) (hε : 0 < ε) (k : ℕ) :
       _ = t ^ (-(k * ε)) / ε ^ k := by rw [hpow (-ε)]; ring_nf
       _ ≤ _ := by gcongr; exact le_add_of_nonneg_left (by positivity)
 
+/-- `|log t|^k e^(-t) t^(s-1)` is continuous on `(0, ∞)`. -/
 theorem continuousOn_abs_log_pow_mul_Gamma (k : ℕ) (s : ℝ) :
     ContinuousOn (fun t => |Real.log t| ^ k * Real.exp (-t) * t ^ (s - 1)) (Ioi 0) := by
   intro t ht
@@ -3448,6 +3514,7 @@ theorem continuousOn_abs_log_pow_mul_Gamma (k : ℕ) (s : ℝ) :
     (Real.continuous_exp.comp continuous_neg).continuousAt).mul
     (Real.continuousAt_rpow_const t (s - 1) (Or.inl ht')) |>.continuousWithinAt
 
+/-- `(log t)^k e^(-t) t^(s-1)` is continuous on `(0, ∞)`. -/
 theorem continuousOn_log_pow_mul_Gamma (k : ℕ) (s : ℝ) :
     ContinuousOn (fun t => Real.log t ^ k * Real.exp (-t) * t ^ (s - 1)) (Ioi 0) := by
   intro t ht
@@ -3487,6 +3554,7 @@ theorem integrableOn_abs_log_pow_mul_Gamma {s : ℝ} (hs : 0 < s) (k : ℕ) :
         mul_le_mul_of_nonneg_right hb hp
     _ = _ := by ring
 
+/-- `(log t)^k e^(-t) t^(s-1)` is integrable on `(0, ∞)` for `s > 0`. -/
 theorem integrableOn_log_pow_mul_Gamma {s : ℝ} (hs : 0 < s) (k : ℕ) :
     IntegrableOn (fun t => Real.log t ^ k * Real.exp (-t) * t ^ (s - 1)) (Ioi 0) := by
   refine (integrableOn_abs_log_pow_mul_Gamma hs k).mono'
@@ -3507,6 +3575,7 @@ theorem rpow_le_rpow_add_rpow {t a b y : ℝ} (ht : 0 < t) (hay : a ≤ y) (hyb 
     have := Real.rpow_pos_of_pos ht (b - 1)
     linarith
 
+/-- `y ↦ t^(y-1)` has derivative `t^(y-1) log t` for `t > 0`. -/
 theorem hasDerivAt_rpow_sub_one {t : ℝ} (ht : 0 < t) (y : ℝ) :
     HasDerivAt (fun y => t ^ (y - 1)) (t ^ (y - 1) * Real.log t) y := by
   have h := (Real.hasStrictDerivAt_const_rpow ht (y - 1)).hasDerivAt.comp y
@@ -3518,6 +3587,8 @@ theorem hasDerivAt_rpow_sub_one {t : ℝ} (ht : 0 < t) (y : ℝ) :
 def gammaLogMoment (n : ℕ) (x : ℝ) : ℝ :=
   ∫ t in Ioi (0 : ℝ), Real.log t ^ n * Real.exp (-t) * t ^ (x - 1)
 
+/-- The log-moments `∫₀^∞ (log t)ⁿ e^(-t) t^(x-1) dt` satisfy `d/dx Mₙ(x) = M_{n+1}(x)` for `x > 0`.
+-/
 theorem hasDerivAt_gammaLogMoment (n : ℕ) {x : ℝ} (hx : 0 < x) :
     HasDerivAt (gammaLogMoment n) (gammaLogMoment (n + 1) x) x := by
   have hball : Metric.ball x (x / 2) ∈ 𝓝 x := Metric.ball_mem_nhds _ (by positivity)
@@ -3553,6 +3624,7 @@ theorem hasDerivAt_gammaLogMoment (n : ℕ) {x : ℝ} (hx : 0 < x) :
     have := (hasDerivAt_rpow_sub_one ht' y).const_mul (Real.log t ^ n * Real.exp (-t))
     exact this.congr_deriv (by deriv_simp)
 
+/-- DLMF 5.9.19: `Γ^(n)(x) = ∫₀^∞ (ln t)ⁿ e^(-t) t^(x-1) dt` for `x > 0`. -/
 @[dlmf 5.9.E19]
 theorem iteratedDeriv_Gamma {n : ℕ} {x : ℝ} (hx : 0 < x) :
     iteratedDeriv n Real.Gamma x =
@@ -3601,6 +3673,7 @@ theorem abs_rpow_sub_rpow_div_log_le {t a b : ℝ} (ht : 0 < t) :
       abs_of_pos (Real.rpow_pos_of_pos ht _), abs_sub_comm]
     exact mul_le_mul_of_nonneg_left (rpow_le_rpow_add_rpow ht hc.1.le hc.2.le) (abs_nonneg _)
 
+/-- `(t^(a-1) - t^(b-1)) e^(-t)/log t` is continuous on `(0, ∞) \ {1}`. -/
 theorem continuousOn_rpow_sub_rpow_div_log (a b : ℝ) :
     ContinuousOn (fun t => (t ^ (a - 1) - t ^ (b - 1)) / Real.log t * Real.exp (-t))
       (Ioi 0 \ {1}) := by
@@ -3612,6 +3685,7 @@ theorem continuousOn_rpow_sub_rpow_div_log (a b : ℝ) :
     (Real.continuousAt_rpow_const t (b - 1) (Or.inl ht0))).div (Real.continuousAt_log ht0)
     hlog).mul (Real.continuous_exp.comp continuous_neg).continuousAt).continuousWithinAt
 
+/-- `(t^(a-1) - t^(b-1)) e^(-t)/log t` is integrable on `(0, ∞)` for `a, b > 0`. -/
 theorem integrableOn_rpow_sub_rpow_div_log {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
     IntegrableOn (fun t => (t ^ (a - 1) - t ^ (b - 1)) / Real.log t * Real.exp (-t)) (Ioi 0) := by
   have hm : 0 < min a b := lt_min ha hb
@@ -3635,6 +3709,7 @@ theorem integrableOn_rpow_sub_rpow_div_log {a b : ℝ} (ha : 0 < a) (hb : 0 < b)
         mul_le_mul_of_nonneg_right this (Real.exp_pos _).le
     _ = _ := by ring
 
+/-- DLMF 5.9.20: `∫_c^x Γ(t) dt = ∫₀^∞ (t^(x-1) - t^(c-1)) e^(-t)/ln t dt` for `c, x > 0`. -/
 @[dlmf 5.9.E20]
 theorem integral_Gamma {c x : ℝ} (hc : 0 < c) (hx : 0 < x) :
     ∫ t : ℝ in c..x, Real.Gamma t =

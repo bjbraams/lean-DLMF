@@ -72,10 +72,6 @@ private noncomputable def gegAdd_coef (lam : ℝ) (n j : ℕ) : ℂ :=
     Gamma (j + (lam : ℂ)) ^ 2 * (2 * j + 2 * (lam : ℂ) - 1) /
       (Gamma (lam : ℂ) ^ 2 * Gamma (j + n + 2 * (lam : ℂ)))
 
-/-- `Γ(s) ≠ 0` for `Re s > 0`. -/
-private lemma gegAdd_Gamma_ne {s : ℂ} (hs : 0 < s.re) : Gamma s ≠ 0 :=
-  Complex.Gamma_ne_zero_of_re_pos hs
-
 /-- Raising the degree and the order together scales the coefficient by `2λ/(2λ-1)`. -/
 private lemma gegAdd_coef_succ {lam : ℝ} (hlam : 1 / 2 < lam) (n i : ℕ) :
     gegAdd_coef lam (n + 1) (i + 1) * (2 * lam - 1) = 2 * lam * gegAdd_coef (lam + 1) n i := by
@@ -96,9 +92,9 @@ private lemma gegAdd_coef_succ {lam : ℝ} (hlam : 1 / 2 < lam) (n i : ℕ) :
       Gamma ((i : ℂ) + n + 2 * ((lam + 1 : ℝ) : ℂ)) := by
     congr 1; push_cast; ring
   rw [h1, h2, h3, h4, show n + 1 - (i + 1) = n - i by omega]
-  have hG : Gamma (lam : ℂ) ≠ 0 := gegAdd_Gamma_ne (by simp; linarith)
+  have hG : Gamma (lam : ℂ) ≠ 0 := Complex.Gamma_ne_zero_of_re_pos (by simp; linarith)
   have hG2 : Gamma ((i : ℂ) + n + 2 * ((lam + 1 : ℝ) : ℂ)) ≠ 0 :=
-    gegAdd_Gamma_ne (by simp; positivity)
+    Complex.Gamma_ne_zero_of_re_pos (by simp; positivity)
   have hl : (lam : ℂ) ≠ 0 := by exact_mod_cast (by linarith : lam ≠ 0)
   field_simp
   push_cast
@@ -126,8 +122,8 @@ private lemma gegAdd_coef_zero {lam : ℝ} (hlam : 1 / 2 < lam) (n : ℕ) :
     show (2 * (lam : ℂ)) = (2 * lam - 1) + 1 by ring, Complex.Gamma_add_one _ (by
       intro h; have := congrArg Complex.re h; simp at this; linarith)]
   rw [show (2 * (lam : ℂ) - 1) + 1 = 2 * lam by ring]
-  have hG : Gamma (lam : ℂ) ≠ 0 := gegAdd_Gamma_ne (by simp; linarith)
-  have hG1 : Gamma (2 * (lam : ℂ) - 1) ≠ 0 := gegAdd_Gamma_ne (by simp; linarith)
+  have hG : Gamma (lam : ℂ) ≠ 0 := Complex.Gamma_ne_zero_of_re_pos (by simp; linarith)
+  have hG1 : Gamma (2 * (lam : ℂ) - 1) ≠ 0 := Complex.Gamma_ne_zero_of_re_pos (by simp; linarith)
   have hP : DLMF.Hypergeometric.poch (2 * (lam : ℂ)) n ≠ 0 :=
     poch_ne_zero_of_re_pos (by simp; linarith) n
   have hl : (2 * lam - 1 : ℂ) ≠ 0 := by
@@ -205,6 +201,8 @@ private noncomputable def gegAdd_term (lam : ℝ) (n j : ℕ) (θ φ : ℝ) : �
   gegAdd_coef lam n j * (Real.sin θ : ℂ) ^ j * ultrasphPoly (j + (lam : ℂ)) (n - j) (Real.cos θ) *
     (Real.sin φ : ℂ) ^ j * ultrasphPoly (j + (lam : ℂ)) (n - j) (Real.cos φ)
 
+/-- For `λ > 1/2`, the Gegenbauer addition-theorem terms satisfy `T_λ(n+1, i+1) (2λ - 1) = 2λ sin θ
+sin φ T_{λ+1}(n, i)`. -/
 private lemma gegAdd_term_succ {lam : ℝ} (hlam : 1 / 2 < lam) (n i : ℕ) (θ φ : ℝ) :
     gegAdd_term lam (n + 1) (i + 1) θ φ * (2 * lam - 1) =
       2 * lam * ((Real.sin θ * Real.sin φ : ℝ) : ℂ) * gegAdd_term (lam + 1) n i θ φ := by
@@ -215,6 +213,60 @@ private lemma gegAdd_term_succ {lam : ℝ} (hlam : 1 / 2 < lam) (n i : ℕ) (θ 
   linear_combination (Real.sin θ : ℂ) ^ i * (Real.sin θ : ℂ) *
     ultrasphPoly ((i : ℂ) + ((lam + 1 : ℝ) : ℂ)) (n - i) (Real.cos θ) * (Real.sin φ : ℂ) ^ i *
     (Real.sin φ : ℂ) * ultrasphPoly ((i : ℂ) + ((lam + 1 : ℝ) : ℂ)) (n - i) (Real.cos φ) * hc
+
+/-- The constant `∫₀^π sin^{2λ-1} s ds = √π Γ(λ)/Γ(λ+1/2)` is nonzero for `λ > 0`. -/
+private lemma gegAdd_weight_ne_zero {lam : ℝ} (hlam0 : 0 < lam) :
+    ((Real.sqrt π * Real.Gamma lam / Real.Gamma (lam + 1 / 2) : ℝ) : ℂ) ≠ 0 := by
+  have hG1 : 0 < Real.Gamma (lam + 1 / 2) := Real.Gamma_pos_of_pos (by linarith)
+  have hG2 : 0 < Real.Gamma lam := Real.Gamma_pos_of_pos hlam0
+  have hsq : 0 < Real.sqrt π := Real.sqrt_pos.mpr Real.pi_pos
+  exact_mod_cast (by positivity : Real.sqrt π * Real.Gamma lam / Real.Gamma (lam + 1 / 2) ≠ 0)
+
+/-- Product formula in integrated form: for `λ > 1/2`,
+`∫₀^π C^λ_m(cos θ cos φ + sin θ sin φ cos s) sin^{2λ-1} s ds =
+√π Γ(λ)/Γ(λ+1/2) · C^λ_m(cos θ) C^λ_m(cos φ) / C^λ_m(1)` (from DLMF 18.17.5). -/
+private lemma gegAdd_integral_L {lam : ℝ} (hlam : 1 / 2 < lam) (m : ℕ) (θ φ : ℝ) :
+    ∫ s : ℝ in (0 : ℝ)..π,
+      ultrasphPoly lam m ((Real.cos θ * Real.cos φ + Real.sin θ * Real.sin φ * Real.cos s : ℝ)) *
+        ((Real.sin s ^ (2 * lam - 1) : ℝ) : ℂ) =
+      ((Real.sqrt π * Real.Gamma lam / Real.Gamma (lam + 1 / 2) : ℝ) : ℂ) *
+        ultrasphPoly lam m (Real.cos θ) * ultrasphPoly lam m (Real.cos φ) /
+        ultrasphPoly lam m 1 := by
+  have hlam0 : 0 < lam := by linarith
+  have hlre : -1 / 2 < (lam : ℂ).re := by simp; linarith
+  set A : ℝ := Real.cos θ * Real.cos φ with hA
+  set B : ℝ := Real.sin θ * Real.sin φ with hB
+  set L : ℝ → ℂ := fun t => ultrasphPoly lam m ((A + B * t : ℝ)) with hL
+  set ρ : ℝ → ℂ := fun s => ((Real.sin s ^ (2 * lam - 1) : ℝ) : ℂ) with hρ
+  set mC : ℂ := ((Real.sqrt π * Real.Gamma lam / Real.Gamma (lam + 1 / 2) : ℝ) : ℂ) with hmC
+  show ∫ s : ℝ in (0 : ℝ)..π, L (Real.cos s) * ρ s = _
+  have hG1 : 0 < Real.Gamma (lam + 1 / 2) := Real.Gamma_pos_of_pos (by linarith)
+  have hG2 : 0 < Real.Gamma lam := Real.Gamma_pos_of_pos hlam0
+  have hsq : 0 < Real.sqrt π := Real.sqrt_pos.mpr Real.pi_pos
+  have hGG : Gamma (lam + 1 / 2 : ℂ) / (Real.sqrt Real.pi * Gamma (lam : ℂ)) = mC⁻¹ := by
+    rw [hmC, show (lam + 1 / 2 : ℂ) = ((lam + 1 / 2 : ℝ) : ℂ) by push_cast; ring,
+      Complex.Gamma_ofReal, Complex.Gamma_ofReal]
+    push_cast
+    field_simp
+  have h1 : ultrasphPoly lam m 1 ≠ 0 := by
+    rw [ultrasphPoly_at_one hlre]
+    exact div_ne_zero (poch_ne_zero_of_re_pos (by simp; linarith) _)
+      (by exact_mod_cast m.factorial_ne_zero)
+  have hPF := ultrasphPoly_product_integral hlam0 m θ φ
+  have hint : (∫ phi : ℝ in (0 : ℝ)..Real.pi, ultrasphPoly lam m
+        (Real.cos θ * Real.cos φ + Real.sin θ * Real.sin φ * Real.cos phi) /
+          ultrasphPoly lam m 1 * (Real.rpow (Real.sin phi) (2 * lam - 1) : ℂ)) =
+      (ultrasphPoly lam m 1)⁻¹ * ∫ s : ℝ in (0 : ℝ)..π, L (Real.cos s) * ρ s := by
+    rw [← intervalIntegral.integral_const_mul]
+    refine intervalIntegral.integral_congr fun s _ => ?_
+    simp only [hL, hρ, hA, hB, Real.rpow_eq_pow]
+    push_cast
+    ring
+  rw [hGG, hint] at hPF
+  have hm0 : mC ≠ 0 := gegAdd_weight_ne_zero hlam0
+  rw [eq_div_iff h1]
+  field_simp at hPF
+  linear_combination -hPF
 
 /-- Gegenbauer's addition theorem with `cos ψ` replaced by an arbitrary real `t`. -/
 private lemma gegAdd_main (n : ℕ) : ∀ lam : ℝ, 1 / 2 < lam → ∀ θ φ t : ℝ,
@@ -289,38 +341,14 @@ private lemma gegAdd_main (n : ℕ) : ∀ lam : ℝ, 1 / 2 < lam → ∀ θ φ t
     ((Real.continuous_rpow_const (by linarith)).comp Real.continuous_sin)
   have hmρ : ∫ s : ℝ in (0 : ℝ)..π, ρ s = mC := by
     rw [intervalIntegral.integral_ofReal, (integral_sin_rpow_aux hlam0).2]
-  have hG1 : 0 < Real.Gamma (lam + 1 / 2) := Real.Gamma_pos_of_pos (by linarith)
-  have hG2 : 0 < Real.Gamma lam := Real.Gamma_pos_of_pos hlam0
-  have hsq : 0 < Real.sqrt π := Real.sqrt_pos.mpr Real.pi_pos
-  have hm0 : mC ≠ 0 := by
-    rw [hmC]
-    exact_mod_cast (by positivity : Real.sqrt π * Real.Gamma lam / Real.Gamma (lam + 1 / 2) ≠ 0)
-  have hGG : Gamma (lam + 1 / 2 : ℂ) / (Real.sqrt Real.pi * Gamma (lam : ℂ)) = mC⁻¹ := by
-    rw [hmC, show (lam + 1 / 2 : ℂ) = ((lam + 1 / 2 : ℝ) : ℂ) by push_cast; ring,
-      Complex.Gamma_ofReal, Complex.Gamma_ofReal]
-    push_cast
-    field_simp
   have h1 : ultrasphPoly lam (n + 1) 1 ≠ 0 := by
     rw [ultrasphPoly_at_one hlre]
     exact div_ne_zero (poch_ne_zero_of_re_pos (by simp; linarith) _)
       (by exact_mod_cast (n + 1).factorial_ne_zero)
-  have hPF := ultrasphPoly_product_integral hlam0 (n + 1) θ φ
-  have hint : (∫ phi : ℝ in (0 : ℝ)..Real.pi, ultrasphPoly lam (n + 1)
-        (Real.cos θ * Real.cos φ + Real.sin θ * Real.sin φ * Real.cos phi) /
-          ultrasphPoly lam (n + 1) 1 * (Real.rpow (Real.sin phi) (2 * lam - 1) : ℂ)) =
-      (ultrasphPoly lam (n + 1) 1)⁻¹ * ∫ s : ℝ in (0 : ℝ)..π, L (Real.cos s) * ρ s := by
-    rw [← intervalIntegral.integral_const_mul]
-    refine intervalIntegral.integral_congr fun s _ => ?_
-    simp only [hL, hρ, hA, hB, Real.rpow_eq_pow]
-    push_cast
-    ring
-  rw [hGG, hint] at hPF
+  have hm0 : mC ≠ 0 := gegAdd_weight_ne_zero hlam0
   have hLint : ∫ s : ℝ in (0 : ℝ)..π, L (Real.cos s) * ρ s =
       mC * ultrasphPoly lam (n + 1) (Real.cos θ) * ultrasphPoly lam (n + 1) (Real.cos φ) /
-        ultrasphPoly lam (n + 1) 1 := by
-    rw [eq_div_iff h1]
-    field_simp at hPF
-    linear_combination -hPF
+        ultrasphPoly lam (n + 1) 1 := gegAdd_integral_L hlam (n + 1) θ φ
   have hRint : ∫ s : ℝ in (0 : ℝ)..π, R (Real.cos s) * ρ s = gegAdd_term lam (n + 1) 0 θ φ * mC := by
     simp only [hR, Finset.sum_mul]
     rw [intervalIntegral.integral_finsetSum (f := fun j s => gegAdd_term lam (n + 1) j θ φ *

@@ -88,7 +88,7 @@ theorem binomSeries_mul (lam μ : ℂ) :
     binomSeries lam * binomSeries μ = binomSeries (lam + μ) := by
   ext n
   rw [coeff_mul, Finset.Nat.sum_antidiagonal_eq_sum_range_succ_mk, coeff_binomSeries,
-    ← poch_add_binomial, Finset.sum_div]
+    ← poch_add_binomial_sum, Finset.sum_div]
   refine Finset.sum_congr rfl fun k hk => ?_
   have hkn : k ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
   simp only [coeff_binomSeries]

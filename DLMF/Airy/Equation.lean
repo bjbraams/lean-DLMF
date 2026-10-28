@@ -7,6 +7,7 @@ module
 
 public import DLMF.Airy.Framework
 public import DLMF.Airy.ErrorBoundTools
+public import DLMFMathlib.Analysis.SpecialFunctions.Gamma.Values
 
 /-!
 # Airy equations, connection formulas and explicit Maclaurin series
@@ -20,7 +21,8 @@ open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF.Confl
 open scoped Real Topology Nat
 namespace DLMF.Airy
 
-/-- isAirySol rotated (DLMF 9.2.2). -/
+/-- For a cube root of unity `ω`, `z ↦ Ai(ωz)` solves Airy's equation, with derivative
+`ω Ai'(ωz)` (DLMF 9.2.2). -/
 @[dlmf 9.2.E2]
 theorem isAirySol_rotated {ω : ℂ} (hω : ω ^ 3 = 1) :
     IsAirySol (fun z => airyAi (ω * z)) (fun z => ω * airyAiDeriv (ω * z)) := by
@@ -71,7 +73,7 @@ theorem airyAi_zero_mul_airyAiDeriv_zero :
   field_simp at hW ⊢
   linear_combination -hW
 
-/-- wronskian airyAi rotated (DLMF 9.2.8). -/
+/-- `𝒲{Ai(z), Ai(z e^{∓2πi/3})} = e^{±πi/6}/(2π)` (DLMF 9.2.8). -/
 @[dlmf 9.2.E8]
 theorem wronskian_airyAi_rotated (z : ℂ) {ε : ℝ} (hε : ε = 1 ∨ ε = -1) :
     airyAi z * (-ε * (2 * π * I / 3) |>.exp) * airyAiDeriv (z * exp (-ε * (2 * π * I / 3))) -
@@ -104,7 +106,7 @@ theorem wronskian_airyAi_rotated (z : ℂ) {ε : ℝ} (hε : ε = 1 ∨ ε = -1)
       have hs : (Real.sqrt 3 : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr (by norm_num : (0 : ℝ) < 3)).ne'
       field_simp
 
-/-- wronskian airyAi rotations (DLMF 9.2.9). -/
+/-- `𝒲{Ai(z e^{-2πi/3}), Ai(z e^{2πi/3})} = 1/(2πi)` (DLMF 9.2.9). -/
 @[dlmf 9.2.E9]
 theorem wronskian_airyAi_rotations (z : ℂ) :
     airyAi (z * exp (-2 * π * I / 3)) * exp (2 * π * I / 3) *
@@ -129,39 +131,27 @@ theorem wronskian_airyAi_rotations (z : ℂ) :
       field_simp
       norm_num [I_sq]
 
-/-- airyAi neg connection (DLMF 9.2.14). -/
+/-- `Ai(-z) = e^{πi/3} Ai(z e^{πi/3}) + e^{-πi/3} Ai(z e^{-πi/3})` (DLMF 9.2.14). -/
 @[dlmf 9.2.E14]
 theorem airyAi_neg_connection (z : ℂ) :
     airyAi (-z) = exp (π * I / 3) * airyAi (z * exp (π * I / 3)) +
       exp (-π * I / 3) * airyAi (z * exp (-π * I / 3)) := by
   exact airyRot_neg_connection_ai z
 
-/-- airyBi neg connection (DLMF 9.2.15). -/
+/-- `Bi(-z) = e^{-πi/6} Ai(z e^{πi/3}) + e^{πi/6} Ai(z e^{-πi/3})` (DLMF 9.2.15). -/
 @[dlmf 9.2.E15]
 theorem airyBi_neg_connection (z : ℂ) :
     airyBi (-z) = exp (-π * I / 6) * airyAi (z * exp (π * I / 3)) +
       exp (π * I / 6) * airyAi (z * exp (-π * I / 3)) := by
   exact airyRot_neg_connection_bi z
 
-/-- airy log derivative riccati (DLMF 9.2.16). -/
+/-- If `w` solves Airy's equation and `w(z) ≠ 0`, the logarithmic derivative `W = w'/w`
+satisfies the Riccati equation `W' = z - W²` at `z` (DLMF 9.2.16). -/
 @[dlmf 9.2.E16]
 theorem airy_log_derivative_riccati {w w' : ℂ → ℂ} (hw : IsAirySol w w') {z : ℂ} (hz : w z ≠ 0) :
     HasDerivAt (fun t => w' t / w t) (z - (w' z / w z) ^ 2) z := by
   have h := (hw z).2.div (hw z).1 hz
   exact h.congr_deriv (by field_simp)
-
-/-- The regularized `₀F₁` series as a `HasSum`. -/
-theorem hasSum_reg0F1 (c w : ℂ) :
-    HasSum (fun k : ℕ => w ^ k / (k ! * Gamma (c + k))) (regularizedHGFun ∅ {c} w) := by
-  have hr : (regularizedHGFunSeries (∅ : Multiset ℂ) {c}).radius = ⊤ :=
-    radius_regularizedHGFunSeries_eq_top (by simp)
-  have hp : HasFPowerSeriesOnBall (regularizedHGFun ∅ {c})
-      (regularizedHGFunSeries (∅ : Multiset ℂ) {c}) 0 ⊤ := by
-    rw [← hr]
-    exact (regularizedHGFunSeries (∅ : Multiset ℂ) {c}).hasFPowerSeriesOnBall (by rw [hr]; simp)
-  refine (hp.hasSum_mul_pow (by simp)).congr_fun fun k => ?_
-  simp only [DLMF.Bessel.regularizedHGFunCoeff_empty]
-  ring
 
 /-- Triplication: `(3k)! = 27^k k! (1/3)_k (2/3)_k`. -/
 theorem factorial_three_mul (k : ℕ) :
@@ -205,29 +195,14 @@ theorem factorial_three_mul_add_two (k : ℕ) :
     push_cast
     ring
 
-/-- `(c)_k ≠ 0` for `0 < re c`. -/
-theorem poch_ne_zero_of_re_pos {c : ℂ} (hc : 0 < c.re) (k : ℕ) : poch c k ≠ 0 := by
-  intro h
-  have h2 := DLMF.Gamma.Gamma_add_nat_eq_poch_mul_Gamma hc k
-  rw [h, zero_mul] at h2
-  exact Gamma_ne_zero_of_re_pos (by simp; linarith [k.cast_nonneg (α := ℝ)]) h2
-
-/-- `Γ(4/3) = Γ(1/3)/3`. -/
-theorem Gamma_four_thirds : Gamma (4 / 3) = 1 / 3 * Gamma (1 / 3) := by
-  rw [show (4 / 3 : ℂ) = 1 / 3 + 1 by norm_num, Complex.Gamma_add_one _ (by norm_num)]
-
-/-- `Γ(5/3) = (2/3) Γ(2/3)`. -/
-theorem Gamma_five_thirds : Gamma (5 / 3) = 2 / 3 * Gamma (2 / 3) := by
-  rw [show (5 / 3 : ℂ) = 2 / 3 + 1 by norm_num, Complex.Gamma_add_one _ (by norm_num)]
-
 /-- Maclaurin series of `airyF`. -/
 theorem hasSum_airyF_maclaurin (z : ℂ) :
     HasSum (fun k : ℕ => (Gamma (2 / 3))⁻¹ * (3 : ℂ) ^ k * poch (1 / 3) k / (3 * k)! *
       z ^ (3 * k)) (airyF z) := by
-  refine (hasSum_reg0F1 (2 / 3) (z ^ 3 / 9)).congr_fun fun k => ?_
+  refine (Complex.hasSum_regularizedHGFun_empty_singleton (2 / 3) (z ^ 3 / 9)).congr_fun fun k => ?_
   rw [factorial_three_mul, DLMF.Gamma.Gamma_add_nat_eq_poch_mul_Gamma (by norm_num)]
-  have h1 := poch_ne_zero_of_re_pos (c := 1 / 3) (by norm_num) k
-  have h2 := poch_ne_zero_of_re_pos (c := 2 / 3) (by norm_num) k
+  have h1 := OrthogonalPolynomials.poch_ne_zero_of_re_pos (z := 1 / 3) (by norm_num) k
+  have h2 := OrthogonalPolynomials.poch_ne_zero_of_re_pos (z := 2 / 3) (by norm_num) k
   have h3 : Gamma (2 / 3) ≠ 0 := Gamma_ne_zero_of_re_pos (by norm_num)
   have hk : (k ! : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
   rw [pow_mul, show (27 : ℂ) = 3 * 9 by norm_num, mul_pow, div_pow]
@@ -237,10 +212,11 @@ theorem hasSum_airyF_maclaurin (z : ℂ) :
 theorem hasSum_airyG_maclaurin (z : ℂ) :
     HasSum (fun k : ℕ => (Gamma (4 / 3))⁻¹ * (3 : ℂ) ^ k * poch (2 / 3) k / (3 * k + 1)! *
       z ^ (3 * k + 1)) (airyG z) := by
-  refine ((hasSum_reg0F1 (4 / 3) (z ^ 3 / 9)).mul_left z).congr_fun fun k => ?_
+  refine ((Complex.hasSum_regularizedHGFun_empty_singleton (4 / 3) (z ^ 3 / 9)).mul_left
+      z).congr_fun fun k => ?_
   rw [factorial_three_mul_add_one, DLMF.Gamma.Gamma_add_nat_eq_poch_mul_Gamma (by norm_num)]
-  have h1 := poch_ne_zero_of_re_pos (c := 4 / 3) (by norm_num) k
-  have h2 := poch_ne_zero_of_re_pos (c := 2 / 3) (by norm_num) k
+  have h1 := OrthogonalPolynomials.poch_ne_zero_of_re_pos (z := 4 / 3) (by norm_num) k
+  have h2 := OrthogonalPolynomials.poch_ne_zero_of_re_pos (z := 2 / 3) (by norm_num) k
   have h3 : Gamma (4 / 3) ≠ 0 := Gamma_ne_zero_of_re_pos (by norm_num)
   have hk : (k ! : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
   rw [pow_succ, pow_mul, show (27 : ℂ) = 3 * 9 by norm_num, mul_pow, div_pow]
@@ -250,10 +226,11 @@ theorem hasSum_airyG_maclaurin (z : ℂ) :
 theorem hasSum_airyFDeriv_maclaurin (z : ℂ) :
     HasSum (fun k : ℕ => (Gamma (2 / 3))⁻¹ * (3 : ℂ) ^ k * poch (4 / 3) k / (3 * k + 2)! *
       z ^ (3 * k + 2)) (airyFDeriv z) := by
-  refine ((hasSum_reg0F1 (5 / 3) (z ^ 3 / 9)).mul_left (z ^ 2 / 3)).congr_fun fun k => ?_
+  refine ((Complex.hasSum_regularizedHGFun_empty_singleton (5 / 3) (z ^ 3 / 9)).mul_left (z ^ 2 /
+      3)).congr_fun fun k => ?_
   rw [factorial_three_mul_add_two, DLMF.Gamma.Gamma_add_nat_eq_poch_mul_Gamma (by norm_num), Gamma_five_thirds]
-  have h1 := poch_ne_zero_of_re_pos (c := 4 / 3) (by norm_num) k
-  have h2 := poch_ne_zero_of_re_pos (c := 5 / 3) (by norm_num) k
+  have h1 := OrthogonalPolynomials.poch_ne_zero_of_re_pos (z := 4 / 3) (by norm_num) k
+  have h2 := OrthogonalPolynomials.poch_ne_zero_of_re_pos (z := 5 / 3) (by norm_num) k
   have h3 : Gamma (2 / 3) ≠ 0 := Gamma_ne_zero_of_re_pos (by norm_num)
   have hk : (k ! : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
   rw [pow_add, pow_mul, show (27 : ℂ) = 3 * 9 by norm_num, mul_pow, div_pow]
@@ -271,10 +248,11 @@ theorem hasSum_airyGDeriv_maclaurin (z : ℂ) :
     HasSum (fun k : ℕ => (Gamma (4 / 3))⁻¹ * (3 : ℂ) ^ k * poch (2 / 3) k / (3 * k)! *
       z ^ (3 * k)) (airyGDeriv z) := by
   rw [airyGDeriv_eq]
-  refine ((hasSum_reg0F1 (1 / 3) (z ^ 3 / 9)).mul_left 3).congr_fun fun k => ?_
+  refine ((Complex.hasSum_regularizedHGFun_empty_singleton (1 / 3) (z ^ 3 / 9)).mul_left
+      3).congr_fun fun k => ?_
   rw [factorial_three_mul, DLMF.Gamma.Gamma_add_nat_eq_poch_mul_Gamma (by norm_num), Gamma_four_thirds]
-  have h1 := poch_ne_zero_of_re_pos (c := 1 / 3) (by norm_num) k
-  have h2 := poch_ne_zero_of_re_pos (c := 2 / 3) (by norm_num) k
+  have h1 := OrthogonalPolynomials.poch_ne_zero_of_re_pos (z := 1 / 3) (by norm_num) k
+  have h2 := OrthogonalPolynomials.poch_ne_zero_of_re_pos (z := 2 / 3) (by norm_num) k
   have h3 : Gamma (1 / 3) ≠ 0 := Gamma_ne_zero_of_re_pos (by norm_num)
   have hk : (k ! : ℂ) ≠ 0 := by exact_mod_cast k.factorial_ne_zero
   rw [pow_mul, show (27 : ℂ) = 3 * 9 by norm_num, mul_pow, div_pow]
@@ -286,7 +264,8 @@ theorem airyGDeriv_zero' : airyGDeriv 0 = (Gamma (4 / 3))⁻¹ := by
   have h3 : Gamma (1 / 3) ≠ 0 := Gamma_ne_zero_of_re_pos (by norm_num)
   field_simp
 
-/-- hasSum airyAi maclaurin (DLMF 9.4.1). -/
+/-- The Maclaurin series `Ai(z) = Ai(0) Σ 3^k (1/3)_k z^{3k}/(3k)! + Ai'(0) Σ 3^k (2/3)_k
+z^{3k+1}/(3k+1)!` (DLMF 9.4.1). -/
 @[dlmf 9.4.E1]
 theorem hasSum_airyAi_maclaurin (z : ℂ) :
     HasSum (fun k : ℕ => airyAi 0 * (3 : ℂ) ^ k * poch (1 / 3) k / (3 * k).factorial * z ^ (3 * k) +
@@ -299,7 +278,8 @@ theorem hasSum_airyAi_maclaurin (z : ℂ) :
     ring
   · simp only [airyAi]; ring
 
-/-- hasSum airyAiDeriv maclaurin (DLMF 9.4.2). -/
+/-- The Maclaurin series `Ai'(z) = Ai'(0) Σ 3^k (2/3)_k z^{3k}/(3k)! + Ai(0) Σ 3^k (4/3)_k
+z^{3k+2}/(3k+2)!` (DLMF 9.4.2). -/
 @[dlmf 9.4.E2]
 theorem hasSum_airyAiDeriv_maclaurin (z : ℂ) :
     HasSum (fun k : ℕ => airyAiDeriv 0 * (3 : ℂ) ^ k * poch (2 / 3) k / (3 * k).factorial * z ^ (3 * k) +
@@ -312,7 +292,8 @@ theorem hasSum_airyAiDeriv_maclaurin (z : ℂ) :
     ring
   · simp only [airyAiDeriv]; ring
 
-/-- hasSum airyBi maclaurin (DLMF 9.4.3). -/
+/-- The Maclaurin series of `Bi`, the same as 9.4.1 with `Bi(0)`, `Bi'(0)` in place of
+`Ai(0)`, `Ai'(0)` (DLMF 9.4.3). -/
 @[dlmf 9.4.E3]
 theorem hasSum_airyBi_maclaurin (z : ℂ) :
     HasSum (fun k : ℕ => airyBi 0 * (3 : ℂ) ^ k * poch (1 / 3) k / (3 * k).factorial * z ^ (3 * k) +
@@ -327,7 +308,8 @@ theorem hasSum_airyBi_maclaurin (z : ℂ) :
     ring
   · simp only [airyBi]; ring
 
-/-- hasSum airyBiDeriv maclaurin (DLMF 9.4.4). -/
+/-- The Maclaurin series of `Bi'`, the same as 9.4.2 with `Bi(0)`, `Bi'(0)` in place of
+`Ai(0)`, `Ai'(0)` (DLMF 9.4.4). -/
 @[dlmf 9.4.E4]
 theorem hasSum_airyBiDeriv_maclaurin (z : ℂ) :
     HasSum (fun k : ℕ => airyBiDeriv 0 * (3 : ℂ) ^ k * poch (2 / 3) k / (3 * k).factorial * z ^ (3 * k) +
@@ -342,17 +324,24 @@ theorem hasSum_airyBiDeriv_maclaurin (z : ℂ) :
     ring
   · simp only [airyBiDeriv]; ring
 
+/-- `Ai'` is continuous. -/
+private lemma continuous_deriv_airyAi : Continuous (deriv airyAi) := by
+  rw [deriv_airyAi]
+  exact Differentiable.continuous (𝕜 := ℂ) fun z => (hasDerivAt_airyAiDeriv z).differentiableAt
+
+/-- `Bi'` is continuous. -/
+private lemma continuous_deriv_airyBi : Continuous (deriv airyBi) := by
+  rw [deriv_airyBi]
+  exact Differentiable.continuous (𝕜 := ℂ) fun z => (hasDerivAt_airyBiDeriv z).differentiableAt
+
 /-- The real-axis pair in DLMF Table 9.2.1 is numerically independent. -/
 theorem airy_pair_wellConditioned_real  :
     IsWellConditionedPairOn airyAi airyBi {z : ℂ | z.im = 0} := by
   obtain ⟨R, B, h⟩ := airyErr_far_real
   have hπ : (1 / π : ℂ) ≠ 0 := one_div_ne_zero (ofReal_ne_zero.mpr Real.pi_ne_zero)
   refine airyErr_wellConditioned_of_far differentiable_airyAi.continuous
-    differentiable_airyBi.continuous ?_ ?_ hπ ?_ (R := R) (B := B) ?_
-  · rw [deriv_airyAi]
-    exact Differentiable.continuous (𝕜 := ℂ) fun z => (hasDerivAt_airyAiDeriv z).differentiableAt
-  · rw [deriv_airyBi]
-    exact Differentiable.continuous (𝕜 := ℂ) fun z => (hasDerivAt_airyBiDeriv z).differentiableAt
+    differentiable_airyBi.continuous continuous_deriv_airyAi continuous_deriv_airyBi hπ ?_
+    (R := R) (B := B) ?_
   · intro z; rw [deriv_airyAi, deriv_airyBi]; exact wronskian_airyAi_airyBi z
   · intro z hz hR
     rw [deriv_airyAi, deriv_airyBi]
@@ -365,11 +354,8 @@ theorem airy_pair_wellConditioned_sector  :
   obtain ⟨R', B', h'⟩ := airyErr_far_sector
   have hπ : (1 / π : ℂ) ≠ 0 := one_div_ne_zero (ofReal_ne_zero.mpr Real.pi_ne_zero)
   refine airyErr_wellConditioned_of_far differentiable_airyAi.continuous
-    differentiable_airyBi.continuous ?_ ?_ hπ ?_ (R := max (max R R') 1) (B := max B B') ?_
-  · rw [deriv_airyAi]
-    exact Differentiable.continuous (𝕜 := ℂ) fun z => (hasDerivAt_airyAiDeriv z).differentiableAt
-  · rw [deriv_airyBi]
-    exact Differentiable.continuous (𝕜 := ℂ) fun z => (hasDerivAt_airyBiDeriv z).differentiableAt
+    differentiable_airyBi.continuous continuous_deriv_airyAi continuous_deriv_airyBi hπ ?_
+    (R := max (max R R') 1) (B := max B B') ?_
   · intro z; rw [deriv_airyAi, deriv_airyBi]; exact wronskian_airyAi_airyBi z
   · intro z hz hR
     rw [deriv_airyAi, deriv_airyBi]
@@ -381,6 +367,42 @@ theorem airy_pair_wellConditioned_sector  :
     · exact (h z hz.1 ((le_max_left _ _).trans ((le_max_left _ _).trans hR))).trans
         (le_max_left _ _)
 
+/-- On the sector `-π/3 ≤ ε ph z ≤ π`, `ℜζ(z) + ℜζ(z e^{-2επi/3}) ≥ 0`, where
+`ζ = (2/3) z^{3/2}`. -/
+private lemma airy_rotated_pair_re_nonneg {ε : ℝ} (hε : ε = 1 ∨ ε = -1) {z : ℂ} (hz0 : z ≠ 0)
+    (hz : -π / 3 ≤ ε * arg z ∧ ε * arg z ≤ π) :
+    0 ≤ (airyZetaComplex z).re + (airyZetaComplex (z * exp (-ε * (2 * π * I / 3)))).re := by
+  have hπ := Real.pi_pos
+  set c := exp (-ε * (2 * π * I / 3))
+  have hlt := Complex.neg_pi_lt_arg z
+  have hle := Complex.arg_le_pi z
+  obtain ⟨hz1, hz2⟩ := hz
+  rcases hε with rfl | rfl
+  · simp only [one_mul] at hz1 hz2
+    rcases eq_or_lt_of_le hz1 with h | h
+    · have hcc : c = exp (((4 * π / 3 : ℝ) : ℂ) * I) := by
+        simp only [c]
+        rw [show (((4 * π / 3 : ℝ) : ℂ) * I) = -((1 : ℝ) : ℂ) * (2 * π * I / 3) + 2 * π * I by
+          push_cast; ring, exp_add, exp_two_pi_mul_I, mul_one]
+      rw [hcc, airyErr_zeta_rot hz0 (α := 4 * π / 3) (by linarith) (by linarith)
+        (κ := 1) (by rw [show (((4 * π / 3 : ℝ) : ℂ) * I * (3 / 2)) = 2 * π * I by push_cast; ring,
+          exp_two_pi_mul_I]), mul_one]
+      have := airyErr_re_zeta_nonneg hz0 (abs_le.mpr ⟨by linarith, by linarith⟩)
+      linarith
+    · have hcc : c = exp (((-(2 * π / 3)) : ℝ) * I) := by
+        simp only [c]; congr 1; push_cast; ring
+      rw [hcc, airyErr_zeta_rot hz0 (α := -(2 * π / 3)) (by linarith) (by linarith)
+        (κ := -1) (by rw [show ((((-(2 * π / 3)) : ℝ) : ℂ) * I * (3 / 2)) = -(π * I) by
+          push_cast; ring, exp_neg, exp_pi_mul_I]; norm_num)]
+      simp
+  · have hcc : c = exp (((2 * π / 3 : ℝ)) * I) := by
+      simp only [c]; congr 1; push_cast; ring
+    have : arg z ≤ π / 3 := by linarith
+    rw [hcc, airyErr_zeta_rot hz0 (α := 2 * π / 3) (by linarith) (by linarith)
+      (κ := -1) (by rw [show (((2 * π / 3 : ℝ) : ℂ) * I * (3 / 2)) = π * I by
+        push_cast; ring, exp_pi_mul_I])]
+    simp
+
 /-- The mixed pairs in DLMF Table 9.2.1. -/
 theorem airy_rotated_pair_wellConditioned {ε : ℝ} (hε : ε = 1 ∨ ε = -1) :
     IsWellConditionedPairOn airyAi (fun z => airyAi (z * exp (-ε * (2 * π * I / 3))))
@@ -390,13 +412,12 @@ theorem airy_rotated_pair_wellConditioned {ε : ℝ} (hε : ε = 1 ∨ ε = -1) 
   set c := exp (-ε * (2 * π * I / 3))
   have hc : ‖c‖ = 1 := by
     rw [show c = exp (((-ε * (2 * π / 3) : ℝ) : ℂ) * I) by simp only [c]; congr 1; push_cast; ring]
-    exact airyErr_norm_exp_I _
+    exact Complex.norm_exp_ofReal_mul_I _
   have hW := wronskian_airyAi_rotated (z := 0) hε
   have hW0 : exp (ε * (π * I / 6)) / (2 * π) ≠ 0 :=
     div_ne_zero (exp_ne_zero _) (mul_ne_zero two_ne_zero (ofReal_ne_zero.mpr Real.pi_ne_zero))
   refine airyErr_wellConditioned_of_far differentiable_airyAi.continuous (airyErr_continuous_rot c)
-    (by rw [deriv_airyAi]
-        exact Differentiable.continuous (𝕜 := ℂ) fun z => (hasDerivAt_airyAiDeriv z).differentiableAt)
+    continuous_deriv_airyAi
     (by rw [airyErr_deriv_rot]; exact airyErr_continuous_deriv_rot c) hW0
     (fun z => by rw [deriv_airyAi, airyErr_deriv_rot]
                  have := wronskian_airyAi_rotated z hε
@@ -408,42 +429,43 @@ theorem airy_rotated_pair_wellConditioned {ε : ℝ} (hε : ε = 1 ∨ ε = -1) 
   have hRz : R ≤ ‖z‖ := (le_max_left _ _).trans hR
   have hzc0 : z * c ≠ 0 := mul_ne_zero hz0 (exp_ne_zero _)
   have hzcn : ‖z‖ = ‖z * c‖ := by rw [norm_mul, hc, mul_one]
-  have hlt := Complex.neg_pi_lt_arg z
-  have hle := Complex.arg_le_pi z
-  -- the key real-part inequality
-  have hre : 0 ≤ (airyZetaComplex z).re + (airyZetaComplex (z * c)).re := by
-    obtain ⟨hz1, hz2⟩ := hz
-    rcases hε with rfl | rfl
-    · simp only [one_mul] at hz1 hz2
-      rcases eq_or_lt_of_le hz1 with h | h
-      · have hcc : c = exp (((4 * π / 3 : ℝ) : ℂ) * I) := by
-          simp only [c]
-          rw [show (((4 * π / 3 : ℝ) : ℂ) * I) = -((1 : ℝ) : ℂ) * (2 * π * I / 3) + 2 * π * I by
-            push_cast; ring, exp_add, exp_two_pi_mul_I, mul_one]
-        rw [hcc, airyErr_zeta_rot hz0 (α := 4 * π / 3) (by linarith) (by linarith)
-          (κ := 1) (by rw [show (((4 * π / 3 : ℝ) : ℂ) * I * (3 / 2)) = 2 * π * I by push_cast; ring,
-            exp_two_pi_mul_I]), mul_one]
-        have := airyErr_re_zeta_nonneg hz0 (abs_le.mpr ⟨by linarith, by linarith⟩)
-        linarith
-      · have hcc : c = exp (((-(2 * π / 3)) : ℝ) * I) := by
-          simp only [c]; congr 1; push_cast; ring
-        rw [hcc, airyErr_zeta_rot hz0 (α := -(2 * π / 3)) (by linarith) (by linarith)
-          (κ := -1) (by rw [show ((((-(2 * π / 3)) : ℝ) : ℂ) * I * (3 / 2)) = -(π * I) by
-            push_cast; ring, exp_neg, exp_pi_mul_I]; norm_num)]
-        simp
-    · have hcc : c = exp (((2 * π / 3 : ℝ)) * I) := by
-        simp only [c]; congr 1; push_cast; ring
-      have : arg z ≤ π / 3 := by linarith
-      rw [hcc, airyErr_zeta_rot hz0 (α := 2 * π / 3) (by linarith) (by linarith)
-        (κ := -1) (by rw [show (((2 * π / 3 : ℝ) : ℂ) * I * (3 / 2)) = π * I by
-          push_cast; ring, exp_pi_mul_I])]
-      simp
+  have hre := airy_rotated_pair_re_nonneg hε hz0 hz
   rw [deriv_airyAi, airyErr_deriv_rot]
   simp only
   rw [norm_mul, hc, mul_one]
   have k1 := airyErr_cross_le hC hU hz0 hzc0 hzcn hRz hre
   have k2 := airyErr_cross_le hC hU hzc0 hz0 hzcn.symm (hzcn ▸ hRz) (by linarith)
   linarith [mul_comm ‖airyAiDeriv z‖ ‖airyAi (z * c)‖]
+
+/-- For `|ph u| ≤ 2π/3`, `ℜζ(u e^{πi/3}) + ℜζ(u e^{-πi/3}) ≥ 0`, where `ζ = (2/3) z^{3/2}`. -/
+private lemma airy_two_rotations_re_nonneg {u : ℂ} (hu0 : u ≠ 0) (hz' : |arg u| ≤ 2 * π / 3) :
+    0 ≤ (airyZetaComplex (u * exp (((π / 3 : ℝ) : ℂ) * I))).re +
+      (airyZetaComplex (u * exp (((-(π / 3)) : ℝ) * I))).re := by
+  have hπ := Real.pi_pos
+  have hlt := Complex.neg_pi_lt_arg u
+  have hb := abs_le.mp hz'
+  have hζ₁ : airyZetaComplex (u * exp (((π / 3 : ℝ) : ℂ) * I)) = airyZetaComplex u * I := by
+    rw [airyErr_zeta_rot hu0 (by linarith) (by linarith)
+      (by rw [show (((π / 3 : ℝ) : ℂ) * I * (3 / 2)) = π / 2 * I by push_cast; ring,
+        exp_pi_div_two_mul_I])]
+  rw [hζ₁]
+  rcases eq_or_lt_of_le hb.1 with h | h
+  · -- boundary ray `arg u = -2π/3`: rotate by `5π/3` instead
+    have e₂' : u * exp (((-(π / 3)) : ℝ) * I) = u * exp (((5 * π / 3 : ℝ) : ℂ) * I) := by
+      rw [show (((5 * π / 3 : ℝ) : ℂ) * I) = (((-(π / 3)) : ℝ) : ℂ) * I + 2 * π * I by
+        push_cast; ring, exp_add, exp_two_pi_mul_I, mul_one]
+    rw [e₂', airyErr_zeta_rot hu0 (α := 5 * π / 3) (by linarith) (by linarith) (κ := I)
+      (by rw [show (((5 * π / 3 : ℝ) : ℂ) * I * (3 / 2)) = π / 2 * I + 2 * π * I by
+        push_cast; ring, exp_add, exp_two_pi_mul_I, mul_one, exp_pi_div_two_mul_I])]
+    have him := airyErr_im_two_zeta hu0
+    rw [← h, show 3 / 2 * (-(2 * π / 3)) = -π by ring, Real.sin_neg, Real.sin_pi, neg_zero,
+      mul_zero] at him
+    have : (airyZetaComplex u).im = 0 := by simpa using him
+    simp [this]
+  · rw [airyErr_zeta_rot hu0 (α := -(π / 3)) (by linarith) (by linarith) (κ := -I)
+      (by rw [show ((((-(π / 3)) : ℝ) : ℂ) * I * (3 / 2)) = -(π / 2 * I) by push_cast; ring,
+        exp_neg, exp_pi_div_two_mul_I, inv_I])]
+    simp
 
 /-- The two rotated solutions in DLMF Table 9.2.1. -/
 theorem airy_two_rotations_wellConditioned  :
@@ -461,8 +483,8 @@ theorem airy_two_rotations_wellConditioned  :
     simp only [c₂]
     rw [show (2 * π * I / 3 : ℂ) = (((-(π / 3)) : ℝ) : ℂ) * I + π * I by push_cast; ring,
       exp_add, exp_pi_mul_I]; ring
-  have hn₁ : ‖c₁‖ = 1 := by rw [hc₁, norm_neg]; exact airyErr_norm_exp_I _
-  have hn₂ : ‖c₂‖ = 1 := by rw [hc₂, norm_neg]; exact airyErr_norm_exp_I _
+  have hn₁ : ‖c₁‖ = 1 := by rw [hc₁, norm_neg]; exact Complex.norm_exp_ofReal_mul_I _
+  have hn₂ : ‖c₂‖ = 1 := by rw [hc₂, norm_neg]; exact Complex.norm_exp_ofReal_mul_I _
   have hW0 : (1 / (2 * π * I) : ℂ) ≠ 0 := one_div_ne_zero (mul_ne_zero (mul_ne_zero two_ne_zero
     (ofReal_ne_zero.mpr Real.pi_ne_zero)) I_ne_zero)
   refine airyErr_wellConditioned_of_far (airyErr_continuous_rot c₁) (airyErr_continuous_rot c₂)
@@ -478,38 +500,14 @@ theorem airy_two_rotations_wellConditioned  :
   have hRz : R ≤ ‖z‖ := (le_max_left _ _).trans hR
   set u := -z
   have hu0 : u ≠ 0 := neg_ne_zero.mpr hz0
-  have hz' : |arg u| ≤ 2 * π / 3 := hz
-  have hlt := Complex.neg_pi_lt_arg u
-  have hb := abs_le.mp hz'
   have e₁ : z * c₁ = u * exp (((π / 3 : ℝ) : ℂ) * I) := by rw [hc₁]; simp only [u]; ring
   have e₂ : z * c₂ = u * exp (((-(π / 3)) : ℝ) * I) := by rw [hc₂]; simp only [u]; ring
   have h₁0 : z * c₁ ≠ 0 := mul_ne_zero hz0 (exp_ne_zero _)
   have h₂0 : z * c₂ ≠ 0 := mul_ne_zero hz0 (exp_ne_zero _)
   have hn : ‖z * c₁‖ = ‖z * c₂‖ := by rw [norm_mul, norm_mul, hn₁, hn₂]
   have hR₁ : R ≤ ‖z * c₁‖ := by rw [norm_mul, hn₁, mul_one]; exact hRz
-  have hζ₁ : airyZetaComplex (z * c₁) = airyZetaComplex u * I := by
-    rw [e₁, airyErr_zeta_rot hu0 (by linarith) (by linarith)
-      (by rw [show (((π / 3 : ℝ) : ℂ) * I * (3 / 2)) = π / 2 * I by push_cast; ring,
-        exp_pi_div_two_mul_I])]
   have hre : 0 ≤ (airyZetaComplex (z * c₁)).re + (airyZetaComplex (z * c₂)).re := by
-    rw [hζ₁]
-    rcases eq_or_lt_of_le hb.1 with h | h
-    · -- boundary ray `arg u = -2π/3`: rotate by `5π/3` instead
-      have e₂' : z * c₂ = u * exp (((5 * π / 3 : ℝ) : ℂ) * I) := by
-        rw [e₂, show (((5 * π / 3 : ℝ) : ℂ) * I) = (((-(π / 3)) : ℝ) : ℂ) * I + 2 * π * I by
-          push_cast; ring, exp_add, exp_two_pi_mul_I, mul_one]
-      rw [e₂', airyErr_zeta_rot hu0 (α := 5 * π / 3) (by linarith) (by linarith) (κ := I)
-        (by rw [show (((5 * π / 3 : ℝ) : ℂ) * I * (3 / 2)) = π / 2 * I + 2 * π * I by
-          push_cast; ring, exp_add, exp_two_pi_mul_I, mul_one, exp_pi_div_two_mul_I])]
-      have him := airyErr_im_two_zeta hu0
-      rw [← h, show 3 / 2 * (-(2 * π / 3)) = -π by ring, Real.sin_neg, Real.sin_pi, neg_zero,
-        mul_zero] at him
-      have : (airyZetaComplex u).im = 0 := by simpa using him
-      simp [this]
-    · rw [e₂, airyErr_zeta_rot hu0 (α := -(π / 3)) (by linarith) (by linarith) (κ := -I)
-        (by rw [show ((((-(π / 3)) : ℝ) : ℂ) * I * (3 / 2)) = -(π / 2 * I) by push_cast; ring,
-          exp_neg, exp_pi_div_two_mul_I, inv_I])]
-      simp
+    rw [e₁, e₂]; exact airy_two_rotations_re_nonneg hu0 hz
   rw [airyErr_deriv_rot, airyErr_deriv_rot]
   simp only
   rw [norm_mul, norm_mul, hn₁, hn₂, mul_one, mul_one]

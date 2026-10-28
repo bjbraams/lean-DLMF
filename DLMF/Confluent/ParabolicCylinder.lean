@@ -66,9 +66,11 @@ def pcfEven (a z : ℂ) : ℂ :=
 def pcfOdd (a z : ℂ) : ℂ :=
   z * exp (-z ^ 2 / 4) * kummerM (a / 2 + 3 / 4) (3 / 2) (z ^ 2 / 2)
 
+/-- `5/2` is not a nonpositive integer. -/
 theorem five_halves_ne_neg_nat : ∀ k : ℕ, (5 / 2 : ℂ) ≠ -k := fun k h => by
   have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
 
+/-- Derivative of `z ↦ M(α, b, z²/2)`: it is `z (α/b) M(α+1, b+1, z²/2)`. -/
 theorem hasDerivAt_kummerM_half_sq {α b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) :
     HasDerivAt (fun z : ℂ => kummerM α b (z ^ 2 / 2))
       (z * (α / b * kummerM (α + 1) (b + 1) (z ^ 2 / 2))) z := by
@@ -76,6 +78,7 @@ theorem hasDerivAt_kummerM_half_sq {α b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z 
     (((hasDerivAt_pow 2 z).div_const 2))
   exact h.congr_deriv (by push_cast; ring)
 
+/-- `d/dz e^{-z²/4} = -(z/2) e^{-z²/4}`. -/
 theorem hasDerivAt_exp_neg_sq_div_four (z : ℂ) :
     HasDerivAt (fun z : ℂ => exp (-z ^ 2 / 4)) (-z / 2 * exp (-z ^ 2 / 4)) z := by
   have h := (((hasDerivAt_pow 2 z).neg).div_const 4).cexp
@@ -86,11 +89,14 @@ def pcfEvenDeriv (a z : ℂ) : ℂ :=
   z * exp (-z ^ 2 / 4) * (-(1 / 2) * kummerM (a / 2 + 1 / 4) (1 / 2) (z ^ 2 / 2) +
     (a + 1 / 2) * kummerM (a / 2 + 1 / 4 + 1) (1 / 2 + 1) (z ^ 2 / 2))
 
+/-- The even Weber solution `pcfEven a` has derivative `pcfEvenDeriv a`. -/
 theorem hasDerivAt_pcfEven (a z : ℂ) : HasDerivAt (pcfEven a) (pcfEvenDeriv a z) z := by
   have h := (hasDerivAt_exp_neg_sq_div_four z).mul
     (hasDerivAt_kummerM_half_sq (α := a / 2 + 1 / 4) half_ne_neg_nat z)
   exact h.congr_deriv (by unfold pcfEvenDeriv; ring)
 
+/-- `(pcfEvenDeriv a)' = (z²/4 + a) pcfEven a`, i.e. `pcfEven a` solves Weber's equation `w'' =
+(z²/4 + a) w` (DLMF 12.2.2). -/
 theorem hasDerivAt_pcfEvenDeriv (a z : ℂ) :
     HasDerivAt (pcfEvenDeriv a) ((z ^ 2 / 4 + a) * pcfEven a z) z := by
   have hb1 : ∀ k : ℕ, (1 / 2 + 1 : ℂ) ≠ -k := by
@@ -113,11 +119,13 @@ def pcfOddDeriv (a z : ℂ) : ℂ :=
   exp (-z ^ 2 / 4) * ((1 - z ^ 2 / 2) * kummerM (a / 2 + 3 / 4) (3 / 2) (z ^ 2 / 2) +
     (a + 3 / 2) / 3 * z ^ 2 * kummerM (a / 2 + 3 / 4 + 1) (3 / 2 + 1) (z ^ 2 / 2))
 
+/-- The odd Weber solution `pcfOdd a` has derivative `pcfOddDeriv a`. -/
 theorem hasDerivAt_pcfOdd (a z : ℂ) : HasDerivAt (pcfOdd a) (pcfOddDeriv a z) z := by
   have h := ((hasDerivAt_id z).mul (hasDerivAt_exp_neg_sq_div_four z)).mul
     (hasDerivAt_kummerM_half_sq (α := a / 2 + 3 / 4) three_half_ne_neg_nat z)
   exact h.congr_deriv (by unfold pcfOddDeriv; simp only [id, Pi.mul_apply]; ring)
 
+/-- `(pcfOddDeriv a)' = (z²/4 + a) pcfOdd a`, i.e. `pcfOdd a` solves Weber's equation. -/
 theorem hasDerivAt_pcfOddDeriv (a z : ℂ) :
     HasDerivAt (pcfOddDeriv a) ((z ^ 2 / 4 + a) * pcfOdd a z) z := by
   have hb1 : ∀ k : ℕ, (3 / 2 + 1 : ℂ) ≠ -k := by
@@ -154,6 +162,7 @@ def pcfUDeriv (a z : ℂ) : ℂ :=
 @[dlmf 12.2.E5]
 def pcfD (ν z : ℂ) : ℂ := pcfU (-ν - 1 / 2) z
 
+/-- `U(a,·)` has derivative `pcfUDeriv a`. -/
 theorem hasDerivAt_pcfU (a z : ℂ) : HasDerivAt (pcfU a) (pcfUDeriv a z) z :=
   ((hasDerivAt_pcfEven a z).const_mul _).sub ((hasDerivAt_pcfOdd a z).const_mul _)
 
@@ -202,6 +211,7 @@ theorem pcfU_neg_half (z : ℂ) : pcfU (-1 / 2) z = exp (-z ^ 2 / 4) := by
   field_simp
   ring
 
+/-- `2^{1/2} = √2` as complex numbers. -/
 theorem two_cpow_half : (2 : ℂ) ^ (1 / 2 : ℂ) = (Real.sqrt 2 : ℂ) := by
   rw [Real.sqrt_eq_rpow, Complex.ofReal_cpow (by norm_num)]
   norm_num
@@ -311,15 +321,19 @@ theorem hasAsymptoticExpansion_pcfU (a : ℂ) :
 
 /-! ### Uniqueness for Weber's equation -/
 
+/-- The even Weber solution takes the value `1` at `0`. -/
 theorem pcfEven_zero (a : ℂ) : pcfEven a 0 = 1 := by
   simp [pcfEven, kummerM_zero]
 
+/-- The derivative of the even Weber solution vanishes at `0`. -/
 theorem pcfEvenDeriv_zero (a : ℂ) : pcfEvenDeriv a 0 = 0 := by
   simp [pcfEvenDeriv]
 
+/-- The odd Weber solution vanishes at `0`. -/
 theorem pcfOdd_zero (a : ℂ) : pcfOdd a 0 = 0 := by
   simp [pcfOdd]
 
+/-- The derivative of the odd Weber solution is `1` at `0`. -/
 theorem pcfOddDeriv_zero (a : ℂ) : pcfOddDeriv a 0 = 1 := by
   simp [pcfOddDeriv, kummerM_zero]
 
@@ -327,12 +341,15 @@ theorem pcfOddDeriv_zero (a : ℂ) : pcfOddDeriv a 0 = 1 := by
 def IsWeberSol (a : ℂ) (f f' : ℂ → ℂ) : Prop :=
   ∀ z, HasDerivAt f (f' z) z ∧ HasDerivAt f' ((z ^ 2 / 4 + a) * f z) z
 
+/-- The even Weber solution solves Weber's equation, with derivative `pcfEvenDeriv a`. -/
 theorem isWeberSol_pcfEven (a : ℂ) : IsWeberSol a (pcfEven a) (pcfEvenDeriv a) :=
   fun z => ⟨hasDerivAt_pcfEven a z, hasDerivAt_pcfEvenDeriv a z⟩
 
+/-- The odd Weber solution solves Weber's equation, with derivative `pcfOddDeriv a`. -/
 theorem isWeberSol_pcfOdd (a : ℂ) : IsWeberSol a (pcfOdd a) (pcfOddDeriv a) :=
   fun z => ⟨hasDerivAt_pcfOdd a z, hasDerivAt_pcfOddDeriv a z⟩
 
+/-- `U(a,z)` solves Weber's equation, with derivative `pcfUDeriv a`. -/
 theorem isWeberSol_pcfU (a : ℂ) : IsWeberSol a (pcfU a) (pcfUDeriv a) :=
   fun z => ⟨hasDerivAt_pcfU a z, hasDerivAt_pcfUDeriv a z⟩
 
@@ -363,10 +380,12 @@ theorem IsWeberSol.eq_of_initial {a : ℂ} {f f' g g' : ℂ → ℂ} (hf : IsWeb
 
 /-! ### Recurrences (DLMF 12.8) -/
 
+/-- `U(a,0) = √π 2^{-(a/2+1/4)} / Γ(3/4 + a/2)` (DLMF 12.2.6). -/
 theorem pcfU_zero' (a : ℂ) :
     pcfU a 0 = (Real.sqrt π : ℂ) * (2 : ℂ) ^ (-(a / 2 + 1 / 4)) * (Gamma (3 / 4 + a / 2))⁻¹ := by
   simp [pcfU, pcfEven_zero, pcfOdd_zero]
 
+/-- `U'(a,0) = -√π 2^{-(a/2-1/4)} / Γ(1/4 + a/2)` (DLMF 12.2.7). -/
 theorem pcfUDeriv_zero' (a : ℂ) :
     pcfUDeriv a 0 =
       -((Real.sqrt π : ℂ) * (2 : ℂ) ^ (-(a / 2 - 1 / 4)) * (Gamma (1 / 4 + a / 2))⁻¹) := by
@@ -381,9 +400,11 @@ theorem mul_recip_Gamma_add_one' (s : ℂ) : s * (Gamma (s + 1))⁻¹ = (Gamma s
   · simp [hg]
   · field_simp
 
+/-- `2^{x-1} = 2^x/2`. -/
 theorem two_cpow_sub_one (x : ℂ) : (2 : ℂ) ^ (x - 1) = (2 : ℂ) ^ x / 2 := by
   rw [Complex.cpow_sub _ _ two_ne_zero, Complex.cpow_one]
 
+/-- `deriv (U(a,·)) = pcfUDeriv a`. -/
 theorem deriv_pcfU (a : ℂ) : deriv (pcfU a) = pcfUDeriv a :=
   funext fun z => (hasDerivAt_pcfU a z).deriv
 
@@ -474,6 +495,7 @@ section Hermite
 
 open Polynomial
 
+/-- `U'(-1/2, z) = -(z/2) e^{-z²/4}`. -/
 theorem pcfUDeriv_neg_half (z : ℂ) : pcfUDeriv (-1 / 2) z = -z / 2 * exp (-z ^ 2 / 4) := by
   have h : pcfU (-1 / 2) = fun z => exp (-z ^ 2 / 4) := funext pcfU_neg_half
   have hd := hasDerivAt_pcfU (-1 / 2) z
@@ -525,9 +547,11 @@ end Hermite
 def pcfMoment (c z : ℂ) : ℂ :=
   ∫ t in Ioi (0 : ℝ), (t : ℂ) ^ c * exp (-(t : ℂ) ^ 2 / 2 - z * t)
 
+/-- `-t²/2 - xt ≤ -t²/4 + x²`. -/
 theorem pcf_exponent_le (t x : ℝ) : -t ^ 2 / 2 - x * t ≤ -t ^ 2 / 4 + x ^ 2 := by
   nlinarith [sq_nonneg (t / 2 + x)]
 
+/-- For `t > 0`, `|t^c e^{-t²/2 - zt}| = t^{Re c} e^{-t²/2 - (Re z) t}`. -/
 theorem norm_pcfIntegrand (c z : ℂ) {t : ℝ} (ht : 0 < t) :
     ‖(t : ℂ) ^ c * exp (-(t : ℂ) ^ 2 / 2 - z * t)‖ =
       t ^ c.re * Real.exp (-t ^ 2 / 2 - z.re * t) := by
@@ -535,6 +559,7 @@ theorem norm_pcfIntegrand (c z : ℂ) {t : ℝ} (ht : 0 < t) :
   congr 2
   simp [Complex.sub_re, Complex.mul_re, sq]
 
+/-- For `|Re z| ≤ R` and `t > 0`, `|t^c e^{-t²/2 - zt}| ≤ e^{R²} t^{Re c} e^{-t²/4}`. -/
 theorem norm_pcfIntegrand_le (c z : ℂ) {R : ℝ} (hR : |z.re| ≤ R) {t : ℝ} (ht : 0 < t) :
     ‖(t : ℂ) ^ c * exp (-(t : ℂ) ^ 2 / 2 - z * t)‖ ≤
       Real.exp (R ^ 2) * (t ^ c.re * Real.exp (-t ^ 2 / 4)) := by
@@ -550,6 +575,7 @@ theorem norm_pcfIntegrand_le (c z : ℂ) {R : ℝ} (hR : |z.re| ≤ R) {t : ℝ}
         mul_le_mul_of_nonneg_left he (Real.rpow_nonneg ht.le _)
     _ = _ := by ring
 
+/-- For `p > -1`, `t^p e^{-t²/4}` is integrable on `(0, ∞)`. -/
 theorem integrableOn_rpow_mul_exp_neg_sq_div_four {p : ℝ} (hp : -1 < p) :
     IntegrableOn (fun t : ℝ => t ^ p * Real.exp (-t ^ 2 / 4)) (Ioi 0) := by
   have h := integrableOn_rpow_mul_exp_neg_mul_rpow (s := p) (p := 2) (b := 1 / 4) hp
@@ -559,11 +585,13 @@ theorem integrableOn_rpow_mul_exp_neg_sq_div_four {p : ℝ} (hp : -1 < p) :
   rw [show (t ^ (2 : ℝ)) = t ^ 2 from Real.rpow_two t]
   ring_nf
 
+/-- The integrand `t^c e^{-t²/2 - zt}` is continuous on `(0, ∞)`. -/
 theorem continuousOn_pcfIntegrand (c z : ℂ) :
     ContinuousOn (fun t : ℝ => (t : ℂ) ^ c * exp (-(t : ℂ) ^ 2 / 2 - z * t)) (Ioi 0) := by
   refine ContinuousOn.mul (fun t ht => ?_) (by fun_prop)
   exact (Complex.continuousAt_ofReal_cpow_const t c (Or.inr (ne_of_gt ht))).continuousWithinAt
 
+/-- For `Re c > -1`, the integrand `t^c e^{-t²/2 - zt}` is integrable on `(0, ∞)`. -/
 theorem integrableOn_pcfIntegrand {c : ℂ} (hc : -1 < c.re) (z : ℂ) :
     IntegrableOn (fun t : ℝ => (t : ℂ) ^ c * exp (-(t : ℂ) ^ 2 / 2 - z * t)) (Ioi 0) := by
   refine Integrable.mono' ((integrableOn_rpow_mul_exp_neg_sq_div_four hc).const_mul
@@ -762,27 +790,32 @@ theorem pcfU_eq_integral {a : ℂ} (ha : -1 / 2 < a.re) (z : ℂ) :
 
 /-! ### Wronskians (DLMF 12.2) -/
 
+/-- The derivative of `w ↦ U(a,-w)` is `-U'(a,-z)`. -/
 theorem hasDerivAt_pcfU_neg (a z : ℂ) :
     HasDerivAt (fun w => pcfU a (-w)) (-pcfUDeriv a (-z)) z := by
   have h := (hasDerivAt_pcfU a (-z)).comp z (hasDerivAt_neg z)
   exact h.congr_deriv (by ring)
 
+/-- The derivative of `w ↦ U(b, iw)` is `i U'(b, iz)`. -/
 theorem hasDerivAt_pcfU_mul_I (b z : ℂ) :
     HasDerivAt (fun w => pcfU b (I * w)) (I * pcfUDeriv b (I * z)) z := by
   have h := (hasDerivAt_pcfU b (I * z)).comp z ((hasDerivAt_id z).const_mul I)
   exact h.congr_deriv (by ring)
 
+/-- The derivative of `w ↦ U(b, -iw)` is `-i U'(b, -iz)`. -/
 theorem hasDerivAt_pcfU_mul_neg_I (b z : ℂ) :
     HasDerivAt (fun w => pcfU b (-I * w)) (-I * pcfUDeriv b (-I * z)) z := by
   have h := (hasDerivAt_pcfU b (-I * z)).comp z ((hasDerivAt_id z).const_mul (-I))
   exact h.congr_deriv (by ring)
 
+/-- `U(a,-z)` solves Weber's equation `w'' = (z²/4 + a) w`. -/
 theorem isWeberSol_pcfU_neg (a : ℂ) :
     IsWeberSol a (fun w => pcfU a (-w)) (fun w => -pcfUDeriv a (-w)) := fun z => by
   refine ⟨hasDerivAt_pcfU_neg a z, ?_⟩
   have h := ((hasDerivAt_pcfUDeriv a (-z)).comp z (hasDerivAt_neg z)).neg
   exact h.congr_deriv (by ring)
 
+/-- `U(-a, iz)` solves Weber's equation `w'' = (z²/4 + a) w`. -/
 theorem isWeberSol_pcfU_mul_I (a : ℂ) :
     IsWeberSol a (fun w => pcfU (-a) (I * w)) (fun w => I * pcfUDeriv (-a) (I * w)) :=
   fun z => by
@@ -796,6 +829,7 @@ theorem isWeberSol_pcfU_mul_I (a : ℂ) :
   simp only [hI4, Complex.I_sq]
   ring
 
+/-- `U(-a, -iz)` solves Weber's equation `w'' = (z²/4 + a) w`. -/
 theorem isWeberSol_pcfU_mul_neg_I (a : ℂ) :
     IsWeberSol a (fun w => pcfU (-a) (-I * w)) (fun w => -I * pcfUDeriv (-a) (-I * w)) :=
   fun z => by
@@ -944,6 +978,7 @@ theorem pcfU_wronskian_mul_neg_I (a z : ℂ) :
 
 /-! ### Connection formula 12.2.17 -/
 
+/-- Linear combinations of solutions of Weber's equation are solutions. -/
 theorem IsWeberSol.lincomb {a : ℂ} {f f' g g' : ℂ → ℂ} (hf : IsWeberSol a f f')
     (hg : IsWeberSol a g g') (c₁ c₂ : ℂ) :
     IsWeberSol a (fun w => c₁ * f w + c₂ * g w) (fun w => c₁ * f' w + c₂ * g' w) := fun z =>
@@ -1065,6 +1100,7 @@ def pcfV (a z : ℂ) : ℂ := pcfVZero a * pcfEven a z + pcfVDerivZero a * pcfOd
 /-- The derivative `V'(a,z)`. -/
 def pcfVDeriv (a z : ℂ) : ℂ := pcfVZero a * pcfEvenDeriv a z + pcfVDerivZero a * pcfOddDeriv a z
 
+/-- `V(a,·)` has derivative `pcfVDeriv a`. -/
 theorem hasDerivAt_pcfV (a z : ℂ) : HasDerivAt (pcfV a) (pcfVDeriv a z) z :=
   ((hasDerivAt_pcfEven a z).const_mul _).add ((hasDerivAt_pcfOdd a z).const_mul _)
 
@@ -1077,15 +1113,19 @@ theorem hasDerivAt_pcfVDeriv (a z : ℂ) :
   rw [pcfV]
   ring
 
+/-- `V(a,z)` solves Weber's equation, with derivative `pcfVDeriv a`. -/
 theorem isWeberSol_pcfV (a : ℂ) : IsWeberSol a (pcfV a) (pcfVDeriv a) :=
   fun z => ⟨hasDerivAt_pcfV a z, hasDerivAt_pcfVDeriv a z⟩
 
+/-- `deriv (V(a,·)) = pcfVDeriv a`. -/
 theorem deriv_pcfV (a : ℂ) : deriv (pcfV a) = pcfVDeriv a :=
   funext fun z => (hasDerivAt_pcfV a z).deriv
 
+/-- The value `V(a,0)` is `pcfVZero a` (DLMF 12.2.8). -/
 theorem pcfV_zero' (a : ℂ) : pcfV a 0 = pcfVZero a := by
   simp [pcfV, pcfEven_zero, pcfOdd_zero]
 
+/-- The value `V'(a,0)` is `pcfVDerivZero a` (DLMF 12.2.9). -/
 theorem pcfVDeriv_zero' (a : ℂ) : pcfVDeriv a 0 = pcfVDerivZero a := by
   simp [pcfVDeriv, pcfEvenDeriv_zero, pcfOddDeriv_zero]
 
@@ -1107,11 +1147,13 @@ theorem pcfVDeriv_zero (a : ℂ) :
   simp only [div_eq_mul_inv, mul_inv, inv_pow]
   ring
 
+/-- The derivative of `w ↦ V(a,-w)` is `-V'(a,-z)`. -/
 theorem hasDerivAt_pcfV_neg (a z : ℂ) :
     HasDerivAt (fun w => pcfV a (-w)) (-pcfVDeriv a (-z)) z := by
   have h := (hasDerivAt_pcfV a (-z)).comp z (hasDerivAt_neg z)
   exact h.congr_deriv (by ring)
 
+/-- `V(a,-z)` solves Weber's equation. -/
 theorem isWeberSol_pcfV_neg (a : ℂ) :
     IsWeberSol a (fun w => pcfV a (-w)) (fun w => -pcfVDeriv a (-w)) := fun z => by
   refine ⟨hasDerivAt_pcfV_neg a z, ?_⟩
@@ -1133,10 +1175,12 @@ theorem recip_Gamma_half_add (a : ℂ) :
   rw [← mul_inv, hd, mul_inv, mul_inv]
   field_simp
 
+/-- `sin(π(1/4 - a/2)) = cos(π(1/4 + a/2))`. -/
 theorem sin_pi_quarter_sub (a : ℂ) :
     Complex.sin (π * (1 / 4 - a / 2)) = Complex.cos (π * (1 / 4 + a / 2)) := by
   rw [← Complex.sin_pi_div_two_sub]; ring_nf
 
+/-- `sin(πa) = sin²(π(1/4 + a/2)) - cos²(π(1/4 + a/2))`. -/
 theorem sin_pi_mul_eq_sq (a : ℂ) :
     Complex.sin (π * a) =
       Complex.sin (π * (1 / 4 + a / 2)) ^ 2 - Complex.cos (π * (1 / 4 + a / 2)) ^ 2 := by
@@ -1144,6 +1188,7 @@ theorem sin_pi_mul_eq_sq (a : ℂ) :
     Complex.sin_sub_pi_div_two, Complex.cos_two_mul]
   linear_combination (-1 : ℂ) * Complex.sin_sq_add_cos_sq (π * (1 / 4 + a / 2))
 
+/-- `cos(πa) = 2 sin(π(1/4 + a/2)) cos(π(1/4 + a/2))`. -/
 theorem cos_pi_mul_eq_mul (a : ℂ) :
     Complex.cos (π * a) =
       2 * Complex.sin (π * (1 / 4 + a / 2)) * Complex.cos (π * (1 / 4 + a / 2)) := by
@@ -1186,6 +1231,7 @@ theorem pcfV_wronskian (a z : ℂ) :
     + (r * t * (π * (g1m * g3p) + c)) * q1 + (r * t * (π * (g1p * g3m) + s)) * q2
     + (r * t) * htr + R * hππ - r * hR
 
+/-- Duplication formula: `1/Γ(1/2 - a) = 2^{1/2+a} √π / (Γ(1/4 - a/2) Γ(3/4 - a/2))`. -/
 theorem recip_Gamma_half_sub (a : ℂ) :
     (Gamma (1 / 2 - a))⁻¹ = (Gamma (1 / 4 - a / 2))⁻¹ * (Gamma (3 / 4 - a / 2))⁻¹ *
       (2 : ℂ) ^ (1 / 2 + a) * (Real.sqrt π : ℂ) := by
@@ -1194,6 +1240,7 @@ theorem recip_Gamma_half_sub (a : ℂ) :
     show (3 / 4 + -a / 2 : ℂ) = 3 / 4 - a / 2 by ring,
     show (1 / 2 - -a : ℂ) = 1 / 2 + a by ring] at h
 
+/-- `2^x 2^y = 2^z` when `x + y = z`. -/
 theorem two_cpow_mul_two_cpow (x y z : ℂ) (h : x + y = z) :
     (2 : ℂ) ^ x * 2 ^ y = 2 ^ z := by
   rw [← Complex.cpow_add _ _ two_ne_zero, h]
@@ -1300,6 +1347,7 @@ theorem pcfV_neg_eq (a z : ℂ) :
       (2 * s * c * π * g1m * g3m * g1p) * pw + (2 * s * c * B * g1m) * q2 +
       (-(B * g1m * (1 + s ^ 2 - c ^ 2))) * q1 + (c * B * g1m) * htr
 
+/-- `cos(nπ) = (-1)^n` for natural `n`. -/
 theorem cos_nat_mul_pi' (n : ℕ) : Complex.cos (n * π) = (-1) ^ n := by
   rw [← Complex.ofReal_natCast, ← Complex.ofReal_mul, ← Complex.ofReal_cos,
     Real.cos_nat_mul_pi]
@@ -1337,6 +1385,7 @@ theorem pcfV_eq {a : ℂ} (ha : ∀ n : ℕ, 1 / 2 + a ≠ -n) (z : ℂ) :
       π / Gamma (1 / 2 + a) * pcfV a z by ring, ← mul_assoc, div_mul_div_comm,
     mul_comm (Gamma (1 / 2 + a)) (π : ℂ), div_self (mul_ne_zero hπ0 hΓ), one_mul]
 
+/-- `exp(-iπ(a/2 - 1/4)) = sin(π(1/4 + a/2)) + i cos(π(1/4 + a/2))`. -/
 theorem exp_neg_I_pi_quarter (a : ℂ) :
     exp (-I * π * (a / 2 - 1 / 4)) =
       Complex.sin (π * (1 / 4 + a / 2)) + Complex.cos (π * (1 / 4 + a / 2)) * I := by
@@ -1345,6 +1394,7 @@ theorem exp_neg_I_pi_quarter (a : ℂ) :
     Complex.sin_sub_pi_div_two]
   ring
 
+/-- `exp(iπ(a/2 - 1/4)) = sin(π(1/4 + a/2)) - i cos(π(1/4 + a/2))`. -/
 theorem exp_I_pi_quarter (a : ℂ) :
     exp (I * π * (a / 2 - 1 / 4)) =
       Complex.sin (π * (1 / 4 + a / 2)) - Complex.cos (π * (1 / 4 + a / 2)) * I := by

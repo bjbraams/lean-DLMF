@@ -166,7 +166,8 @@ theorem associated_gauge_shifts (μ : ℂ) {z : ℂ} (hz : z-1∈slitPlane) :
         (μ+1)/2*(log (z+1)-log (z-1))=μ/2*(log (z+1)-log (z-1))+log (z+1) by ring,
         Complex.exp_add,Complex.exp_log hp]
 
-/-- ferrersP recurrence 1. -/
+/-- DLMF 14.10.1: for `-1 < x < 1`, `𝖯^{μ+2}_ν(x) + 2(μ+1) x (1-x²)^{-1/2} 𝖯^{μ+1}_ν(x) +
+(ν-μ)(ν+μ+1) 𝖯^μ_ν(x) = 0`. -/
 @[dlmf 14.10.E1]
 theorem ferrersP_recurrence_1 (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersP ν (μ+2) x+2*(μ+1)*x*(1-x^2:ℂ)^(-1/2:ℂ)*ferrersP ν (μ+1) x+(ν-μ)*(ν+μ+1)*ferrersP ν μ x=0 := by
@@ -185,7 +186,8 @@ theorem ferrersP_recurrence_1 (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1
     2*(μ+1)*x*regularizedGaussHG (ν+1) (-ν) (1-μ-1) ((1-(x:ℂ))/2)*hg.2.1+
     ((((1+x)/(1-x):ℝ):ℂ)^(μ/2))*regularizedGaussHG (ν+1) (-ν) (1-μ-2) ((1-(x:ℂ))/2)*hr
 
-/-- ferrersP recurrence 2. -/
+/-- DLMF 14.10.2: for `-1 < x < 1`, `(1-x²)^{1/2} 𝖯^{μ+1}_ν(x) - (ν-μ+1) 𝖯^μ_{ν+1}(x) + (ν+μ+1) x
+𝖯^μ_ν(x) = 0`. -/
 @[dlmf 14.10.E2]
 theorem ferrersP_recurrence_2 (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     (1-x^2:ℂ)^(1/2:ℂ)*ferrersP ν (μ+1) x-(ν-μ+1)*ferrersP (ν+1) μ x+(ν+μ+1)*x*ferrersP ν μ x=0 := by
@@ -200,7 +202,8 @@ theorem ferrersP_recurrence_2 (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1
   linear_combination ((((1+x)/(1-x):ℝ):ℂ)^(μ/2))*he+
     regularizedGaussHG (ν+1) (-ν) (1-μ-1) ((1-(x:ℂ))/2)*hg.1
 
-/-- ferrersP recurrence 3. -/
+/-- DLMF 14.10.3: for `-1 < x < 1`, `(ν-μ+2) 𝖯^μ_{ν+2}(x) - (2ν+3) x 𝖯^μ_{ν+1}(x) + (ν+μ+1) 𝖯^μ_ν(x)
+= 0`. -/
 @[dlmf 14.10.E3]
 theorem ferrersP_recurrence_3 (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     (ν-μ+2)*ferrersP (ν+2) μ x-(2*ν+3)*x*ferrersP (ν+1) μ x+(ν+μ+1)*ferrersP ν μ x=0 := by
@@ -215,7 +218,7 @@ theorem ferrersP_recurrence_3 (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1
     show -ν= -(ν+1)+1 by ring,show ν+1+1=ν+2 by ring] at *
   linear_combination ((((1+x)/(1-x):ℝ):ℂ)^(μ/2))*he
 
-/-- ferrersP recurrence 5. -/
+/-- DLMF 14.10.5: for `-1 < x < 1`, `(1-x²) d𝖯^μ_ν(x)/dx = (ν+μ) 𝖯^μ_{ν-1}(x) - ν x 𝖯^μ_ν(x)`. -/
 @[dlmf 14.10.E5]
 theorem ferrersP_recurrence_5 (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     (1-x^2:ℂ)*deriv (ferrersP ν μ) x=(ν+μ)*ferrersP (ν-1) μ x-ν*x*ferrersP ν μ x := by
@@ -237,7 +240,8 @@ theorem ferrersP_recurrence_5 (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1
   generalize (((1+x)/(1-x):ℝ):ℂ)^(μ/2)=A
   field_simp [hn]
   linear_combination (2*A)*he
-/-- ferrersP recurrence 4. -/
+/-- DLMF 14.10.4: for `-1 < x < 1`, `(1-x²) d𝖯^μ_ν(x)/dx = (μ-ν-1) 𝖯^μ_{ν+1}(x) + (ν+1) x
+𝖯^μ_ν(x)`. -/
 @[dlmf 14.10.E4]
 theorem ferrersP_recurrence_4 (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     (1-x^2:ℂ)*deriv (ferrersP ν μ) x=(μ-ν-1)*ferrersP (ν+1) μ x+(ν+1)*x*ferrersP ν μ x := by
@@ -392,7 +396,8 @@ theorem ferrersQ_reflection_deriv {ν μ : ℂ} (h : LegendreQRegular ν μ) {x 
   rw [← deriv_const_mul_field, hev.deriv_eq, hR.deriv]
 
 
-/-- ferrersQ recurrence 1. -/
+/-- DLMF 14.10.1 for `𝖰`: when `ν+μ ∉ {-1,-2,…}` and for `-1 < x < 1`, `𝖰^{μ+2}_ν(x) + 2(μ+1) x
+(1-x²)^{-1/2} 𝖰^{μ+1}_ν(x) + (ν-μ)(ν+μ+1) 𝖰^μ_ν(x) = 0`. -/
 @[dlmf 14.10.E1]
 theorem ferrersQ_recurrence_1 (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersQ ν (μ+2) x+2*(μ+1)*x*(1-x^2:ℂ)^(-1/2:ℂ)*ferrersQ ν (μ+1) x+(ν-μ)*(ν+μ+1)*ferrersQ ν μ x=0 := by
@@ -421,7 +426,8 @@ theorem ferrersQ_recurrence_1 (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : �
   linear_combination r2 - 2*(μ+1)*x*(1-x^2:ℂ)^(-1/2:ℂ)*r1 + (ν-μ)*(ν+μ+1)*r0 +
     cos ((ν+μ)*π)*pa - pb
 
-/-- ferrersQ recurrence 2. -/
+/-- DLMF 14.10.2 for `𝖰`: when `ν+μ ∉ {-1,-2,…}` and for `-1 < x < 1`, `(1-x²)^{1/2} 𝖰^{μ+1}_ν(x) -
+(ν-μ+1) 𝖰^μ_{ν+1}(x) + (ν+μ+1) x 𝖰^μ_ν(x) = 0`. -/
 @[dlmf 14.10.E2]
 theorem ferrersQ_recurrence_2 (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     (1-x^2:ℂ)^(1/2:ℂ)*ferrersQ ν (μ+1) x-(ν-μ+1)*ferrersQ (ν+1) μ x+(ν+μ+1)*x*ferrersQ ν μ x=0 := by
@@ -450,7 +456,8 @@ theorem ferrersQ_recurrence_2 (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : �
   refine (mul_eq_zero.mp (?_ : (2/π*sin ((ν+μ)*π))*_ = 0)).resolve_left hk
   linear_combination -(1-x^2:ℂ)^(1/2:ℂ)*ra + (ν-μ+1)*rb + (ν+μ+1)*x*r0 + cos ((ν+μ)*π)*pa + pb
 
-/-- ferrersQ recurrence 3. -/
+/-- DLMF 14.10.3 for `𝖰`: when `ν+μ ∉ {-1,-2,…}` and for `-1 < x < 1`, `(ν-μ+2) 𝖰^μ_{ν+2}(x) -
+(2ν+3) x 𝖰^μ_{ν+1}(x) + (ν+μ+1) 𝖰^μ_ν(x) = 0`. -/
 @[dlmf 14.10.E3]
 theorem ferrersQ_recurrence_3 (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     (ν-μ+2)*ferrersQ (ν+2) μ x-(2*ν+3)*x*ferrersQ (ν+1) μ x+(ν+μ+1)*ferrersQ ν μ x=0 := by
@@ -480,7 +487,8 @@ theorem ferrersQ_recurrence_3 (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : �
   refine (mul_eq_zero.mp (?_ : (2/π*sin ((ν+μ)*π))*_ = 0)).resolve_left hk
   linear_combination (ν-μ+2)*r2 + (2*ν+3)*x*r1 + (ν+μ+1)*r0 + cos ((ν+μ)*π)*pa - pb
 
-/-- ferrersQ recurrence 4. -/
+/-- DLMF 14.10.4 for `𝖰`: when `ν+μ ∉ {-1,-2,…}` and for `-1 < x < 1`, `(1-x²) d𝖰^μ_ν(x)/dx =
+(μ-ν-1) 𝖰^μ_{ν+1}(x) + (ν+1) x 𝖰^μ_ν(x)`. -/
 @[dlmf 14.10.E4]
 theorem ferrersQ_recurrence_4 (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     (1-x^2:ℂ)*deriv (ferrersQ ν μ) x=(μ-ν-1)*ferrersQ (ν+1) μ x+(ν+1)*x*ferrersQ ν μ x := by
@@ -509,7 +517,8 @@ theorem ferrersQ_recurrence_4 (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : �
   refine (mul_eq_zero.mp (?_ : (2/π*sin ((ν+μ)*π))*_ = 0)).resolve_left hk
   linear_combination (1-x^2:ℂ)*rd + (μ-ν-1)*r1 - (ν+1)*x*r0 + cos ((ν+μ)*π)*pa + pb
 
-/-- ferrersQ recurrence 5. -/
+/-- DLMF 14.10.5 for `𝖰`: when `ν-1+μ ∉ {-1,-2,…}` and for `-1 < x < 1`, `(1-x²) d𝖰^μ_ν(x)/dx =
+(ν+μ) 𝖰^μ_{ν-1}(x) - ν x 𝖰^μ_ν(x)`. -/
 @[dlmf 14.10.E5]
 theorem ferrersQ_recurrence_5 (ν μ : ℂ) (h : LegendreQRegular (ν-1) μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     (1-x^2:ℂ)*deriv (ferrersQ ν μ) x=(ν+μ)*ferrersQ (ν-1) μ x-ν*x*ferrersQ ν μ x := by
@@ -558,7 +567,8 @@ theorem ferrers_wronskian_5_generic (ν μ : ℂ) (h : LegendreQRegular ν μ) (
     rw [div_div, mul_comm], ← key]
   field_simp
 
-/-- ferrers wronskian 5. -/
+/-- DLMF 14.2.5: when `ν+μ ∉ {-1,-2,…}` and for `-1 < x < 1`, `𝖯^μ_{ν+1}(x) 𝖰^μ_ν(x) - 𝖯^μ_ν(x)
+𝖰^μ_{ν+1}(x) = Γ(ν+μ+1)/Γ(ν-μ+2)`. -/
 @[dlmf 14.2.E5]
 theorem ferrers_wronskian_5 (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersP (ν+1) μ x*ferrersQ ν μ x-ferrersP ν μ x*ferrersQ (ν+1) μ x=Gamma (ν+μ+1)/Gamma (ν-μ+2) := by
@@ -599,7 +609,9 @@ theorem ferrers_wronskian_5 (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : ℝ}
   rw [div_eq_mul_inv]
   linear_combination h0
 
-/-- associatedP recurrence 6. -/
+/-- DLMF 14.10.6: for `z-1` in the slit plane (`z ∉ (-∞, 1]`), `P^{μ+2}_ν(z) + 2(μ+1) z
+(z²-1)^{-1/2} P^{μ+1}_ν(z) - (ν-μ)(ν+μ+1) P^μ_ν(z) = 0`, with `(z²-1)^{-1/2}` continued from `z >
+1`. -/
 @[dlmf 14.10.E6]
 theorem associatedP_recurrence_6 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     associatedP ν (μ+2) z+2*(μ+1)*z*legendreBranchPower (-1) z*associatedP ν (μ+1) z-(ν-μ)*(ν+μ+1)*associatedP ν μ z=0 := by
@@ -615,7 +627,8 @@ theorem associatedP_recurrence_6 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane
     ((exp (μ/2*(log (z+1)-log (z-1))))/(z-1))*he+
     2*(μ+1)*z*regularizedGaussHG (ν+1) (-ν) (1-μ-1) ((1-z)/2)*hg.2.1
 
-/-- associatedP recurrence 7. -/
+/-- DLMF 14.10.7: for `z-1` in the slit plane (`z ∉ (-∞, 1]`), `(z²-1)^{1/2} P^{μ+1}_ν(z) - (ν-μ+1)
+P^μ_{ν+1}(z) + (ν+μ+1) z P^μ_ν(z) = 0`, with `(z²-1)^{1/2}` continued from `z > 1`. -/
 @[dlmf 14.10.E7]
 theorem associatedP_recurrence_7 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     legendreBranchPower 1 z*associatedP ν (μ+1) z-(ν-μ+1)*associatedP (ν+1) μ z+(ν+μ+1)*z*associatedP ν μ z=0 := by
@@ -629,7 +642,8 @@ theorem associatedP_recurrence_7 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane
   linear_combination (exp (μ/2*(log (z+1)-log (z-1))))*he+
     regularizedGaussHG (ν+1) (-ν) (1-μ-1) ((1-z)/2)*hg.2.2
 
-/-- associatedP recurrence 3. -/
+/-- DLMF 14.10.3 for `P` (§14.10(ii)): for `z-1` in the slit plane (`z ∉ (-∞, 1]`), `(ν-μ+2)
+P^μ_{ν+2}(z) - (2ν+3) z P^μ_{ν+1}(z) + (ν+μ+1) P^μ_ν(z) = 0`. -/
 @[dlmf 14.10.E3]
 theorem associatedP_recurrence_3 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     (ν-μ+2)*associatedP (ν+2) μ z-(2*ν+3)*z*associatedP (ν+1) μ z+(ν+μ+1)*associatedP ν μ z=0 := by
@@ -643,7 +657,8 @@ theorem associatedP_recurrence_3 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane
     show -ν= -(ν+1)+1 by ring,show ν+1+1=ν+2 by ring] at *
   linear_combination (exp (μ/2*(log (z+1)-log (z-1))))*he
 
-/-- associatedP recurrence 5. -/
+/-- DLMF 14.10.5 for `P` (§14.10(ii)): for `z-1` in the slit plane (`z ∉ (-∞, 1]`), `(1-z²)
+dP^μ_ν(z)/dz = (ν+μ) P^μ_{ν-1}(z) - ν z P^μ_ν(z)`. -/
 @[dlmf 14.10.E5]
 theorem associatedP_recurrence_5 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     (1-z^2:ℂ)*deriv (associatedP ν μ) z=(ν+μ)*associatedP (ν-1) μ z-ν*z*associatedP ν μ z := by
@@ -665,7 +680,8 @@ theorem associatedP_recurrence_5 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane
   generalize exp (μ/2*(log (z+1)-log (z-1)))=A
   field_simp [hn]
   linear_combination (2*A)*he
-/-- associatedP recurrence 4. -/
+/-- DLMF 14.10.4 for `P` (§14.10(ii)): for `z-1` in the slit plane (`z ∉ (-∞, 1]`), `(1-z²)
+dP^μ_ν(z)/dz = (μ-ν-1) P^μ_{ν+1}(z) + (ν+1) z P^μ_ν(z)`. -/
 @[dlmf 14.10.E4]
 theorem associatedP_recurrence_4 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     (1-z^2:ℂ)*deriv (associatedP ν μ) z=(μ-ν-1)*associatedP (ν+1) μ z+(ν+1)*z*associatedP ν μ z := by
@@ -675,26 +691,26 @@ theorem associatedP_recurrence_4 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane
   linear_combination hd+hr
 
 
-/-- `1/Γ(s) = s/Γ(s+1)`, also at the poles of `Γ`. -/
-theorem legendre_recip_Gamma_succ (s : ℂ) : (Gamma s)⁻¹ = s*(Gamma (s+1))⁻¹ := by
-  by_cases h : s = 0
-  · simp [h, Complex.Gamma_zero]
-  · rw [Complex.Gamma_add_one s h, mul_inv, ← mul_assoc, mul_inv_cancel₀ h, one_mul]
-
+/-- For non-integer `μ` and `z - 1` in the slit plane, `𝑸^μ_ν(z) = π/(2 sin(μπ)) (P^μ_ν(z)/Γ(ν+μ+1)
+- P^{-μ}_ν(z)/Γ(ν-μ+1))`. -/
 theorem olverQ_eq_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     olverQ ν μ z = π/(2*sin (μ*π))*(associatedP ν μ z*(Gamma (ν+μ+1))⁻¹-
       associatedP ν (-μ) z*(Gamma (ν-μ+1))⁻¹) :=
   (olverQ_eventuallyEq_nonint ν μ hμ hz).eq_of_nhds
 
+/-- If `μ` is not an integer, then neither is `μ + 1`. -/
 theorem legendre_nonint_add_one {μ : ℂ} (hμ : ∀ n : ℤ, μ ≠ n) : ∀ n : ℤ, μ+1 ≠ n :=
   fun n hn => hμ (n-1) (by push_cast; linear_combination hn)
 
+/-- `sin ((μ+1)π) = -sin (μπ)` for complex `μ`. -/
 theorem legendre_sin_add_one_mul_pi (μ : ℂ) : sin ((μ+1)*π) = -sin (μ*π) := by
   rw [show (μ+1)*(π:ℂ) = μ*π+π by ring, sin_add_pi]
 
+/-- `exp ((μ+1)πi) = -exp (μπi)` for complex `μ`. -/
 theorem legendre_exp_add_one_mul_pi_I (μ : ℂ) : exp ((μ+1)*π*I) = -exp (μ*π*I) := by
   rw [show (μ+1)*(π:ℂ)*I = μ*π*I+π*I by ring, exp_add, exp_pi_mul_I]; ring
 
+/-- `(z²-1)^{1/2} (z²-1)^{-1/2} = 1` for the branch `legendreBranchPower`, for every complex `z`. -/
 theorem legendreBranchPower_one_mul_neg_one (z : ℂ) :
     legendreBranchPower 1 z*legendreBranchPower (-1) z = 1 := by
   unfold legendreBranchPower
@@ -710,13 +726,17 @@ theorem olverQ_recurrence_3_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n) {
   rw [olverQ_eq_nonint (ν+2) μ hμ hz, olverQ_eq_nonint (ν+1) μ hμ hz, olverQ_eq_nonint ν μ hμ hz]
   rw [show ν+2+μ+1 = ν+μ+3 by ring, show ν+1+μ+1 = ν+μ+2 by ring, show ν+2-μ+1 = ν-μ+3 by ring,
     show ν+1-μ+1 = ν-μ+2 by ring]
-  rw [legendre_recip_Gamma_succ (ν+μ+1), show ν+μ+1+1 = ν+μ+2 by ring, legendre_recip_Gamma_succ (ν+μ+2),
-    show ν+μ+2+1 = ν+μ+3 by ring, legendre_recip_Gamma_succ (ν-μ+1), show ν-μ+1+1 = ν-μ+2 by ring,
-    legendre_recip_Gamma_succ (ν-μ+2), show ν-μ+2+1 = ν-μ+3 by ring]
+  rw [Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (ν+μ+1),
+      show ν+μ+1+1 = ν+μ+2 by ring, Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (ν+μ+2),
+    show ν+μ+2+1 = ν+μ+3 by ring, Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (ν-μ+1),
+        show ν-μ+1+1 = ν-μ+2 by ring,
+    Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (ν-μ+2), show ν-μ+2+1 = ν-μ+3 by ring]
   generalize (Gamma (ν+μ+3))⁻¹ = a0
   generalize (Gamma (ν-μ+3))⁻¹ = b0
   linear_combination (π/(2*sin (μ*π))*a0*(ν+μ+2))*R1 - (π/(2*sin (μ*π))*b0*(ν-μ+2))*R2
 
+/-- For `z - 1` in the slit plane, `(ν+μ+2)(ν-μ+2) 𝑸^μ_{ν+2}(z) - (2ν+3) z 𝑸^μ_{ν+1}(z) + 𝑸^μ_ν(z) =
+0`, the form of the degree recurrence DLMF 14.10.3 for Olver's `𝑸`, valid for all `ν, μ`. -/
 theorem olverQ_recurrence_3 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     (ν+μ+2)*(ν-μ+2)*olverQ (ν+2) μ z-(2*ν+3)*z*olverQ (ν+1) μ z+olverQ ν μ z=0 := by
   have h0 := (olverQ_entire_order ν z hz).continuous
@@ -725,7 +745,8 @@ theorem olverQ_recurrence_3 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
   exact legendre_eq_of_continuous_nonint (g := fun _ => 0) (by fun_prop) continuous_const
     (fun μ hμ => olverQ_recurrence_3_nonint ν μ hμ hz) μ
 
-/-- associatedQ recurrence 3. -/
+/-- DLMF 14.10.3 for `Q` (§14.10(ii)): when `ν+μ ∉ {-1,-2,…}` and for `z-1` in the slit plane (`z ∉
+(-∞, 1]`), `(ν-μ+2) Q^μ_{ν+2}(z) - (2ν+3) z Q^μ_{ν+1}(z) + (ν+μ+1) Q^μ_ν(z) = 0`. -/
 @[dlmf 14.10.E3]
 theorem associatedQ_recurrence_3 (ν μ : ℂ) (h : LegendreQRegular ν μ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     (ν-μ+2)*associatedQ (ν+2) μ z-(2*ν+3)*z*associatedQ (ν+1) μ z+(ν+μ+1)*associatedQ ν μ z=0 := by
@@ -751,14 +772,19 @@ theorem olverQ_recurrence_6_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n) {
   rw [olverQ_eq_nonint ν (μ+2) hμ2 hz, olverQ_eq_nonint ν (μ+1) hμ1 hz, olverQ_eq_nonint ν μ hμ hz]
   rw [show (μ+2)*(π:ℂ) = μ*π+2*π by ring, sin_add_two_pi, legendre_sin_add_one_mul_pi]
   rw [show ν+(μ+2)+1 = ν+μ+3 by ring, show ν+(μ+1)+1 = ν+μ+2 by ring,
-    legendre_recip_Gamma_succ (ν+μ+1), show ν+μ+1+1 = ν+μ+2 by ring, legendre_recip_Gamma_succ (ν+μ+2),
+    Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (ν+μ+1), show ν+μ+1+1 = ν+μ+2 by ring,
+        Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (ν+μ+2),
     show ν+μ+2+1 = ν+μ+3 by ring]
-  rw [show ν-(μ+2)+1 = ν-μ-1 by ring, legendre_recip_Gamma_succ (ν-μ-1), show ν-μ-1+1 = ν-μ by ring,
-    show ν-(μ+1)+1 = ν-μ by ring, legendre_recip_Gamma_succ (ν-μ)]
+  rw [show ν-(μ+2)+1 = ν-μ-1 by ring,
+      Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (ν-μ-1), show ν-μ-1+1 = ν-μ by ring,
+    show ν-(μ+1)+1 = ν-μ by ring, Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (ν-μ)]
   generalize (Gamma (ν+μ+3))⁻¹ = a0
   generalize (Gamma (ν-μ+1))⁻¹ = b0
   linear_combination (π/(2*sin (μ*π))*a0*(ν+μ+2))*R1 + (π/(2*sin (μ*π))*b0*(ν-μ))*R2
 
+/-- For `z - 1` in the slit plane, `(ν+μ+2) 𝑸^{μ+2}_ν(z) - 2(μ+1) z (z²-1)^{-1/2} 𝑸^{μ+1}_ν(z) -
+(ν-μ) 𝑸^μ_ν(z) = 0`, the form of the order recurrence DLMF 14.10.6 for Olver's `𝑸`, valid for all
+`ν, μ`. -/
 theorem olverQ_recurrence_6 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     (ν+μ+2)*olverQ ν (μ+2) z-2*(μ+1)*z*legendreBranchPower (-1) z*olverQ ν (μ+1) z-(ν-μ)*olverQ ν μ z=0 := by
   have h0 := (olverQ_entire_order ν z hz).continuous
@@ -767,7 +793,8 @@ theorem olverQ_recurrence_6 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
   exact legendre_eq_of_continuous_nonint (g := fun _ => 0) (by fun_prop) continuous_const
     (fun μ hμ => olverQ_recurrence_6_nonint ν μ hμ hz) μ
 
-/-- associatedQ recurrence 6. -/
+/-- DLMF 14.10.6 for `Q`: when `ν+μ ∉ {-1,-2,…}` and for `z-1` in the slit plane (`z ∉ (-∞, 1]`),
+`Q^{μ+2}_ν(z) + 2(μ+1) z (z²-1)^{-1/2} Q^{μ+1}_ν(z) - (ν-μ)(ν+μ+1) Q^μ_ν(z) = 0`. -/
 @[dlmf 14.10.E6]
 theorem associatedQ_recurrence_6 (ν μ : ℂ) (h : LegendreQRegular ν μ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     associatedQ ν (μ+2) z+2*(μ+1)*z*legendreBranchPower (-1) z*associatedQ ν (μ+1) z-(ν-μ)*(ν+μ+1)*associatedQ ν μ z=0 := by
@@ -813,13 +840,16 @@ theorem olverQ_recurrence_7_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n) {
   rw [olverQ_eq_nonint ν (μ+1) hμ1 hz, olverQ_eq_nonint (ν+1) μ hμ hz, olverQ_eq_nonint ν μ hμ hz]
   rw [legendre_sin_add_one_mul_pi]
   rw [show ν+(μ+1)+1 = ν+μ+2 by ring, show ν+1+μ+1 = ν+μ+2 by ring,
-    legendre_recip_Gamma_succ (ν+μ+1), show ν+μ+1+1 = ν+μ+2 by ring]
-  rw [show ν-(μ+1)+1 = ν-μ by ring, show ν+1-μ+1 = ν-μ+2 by ring, legendre_recip_Gamma_succ (ν-μ),
-    legendre_recip_Gamma_succ (ν-μ+1), show ν-μ+1+1 = ν-μ+2 by ring]
+    Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (ν+μ+1), show ν+μ+1+1 = ν+μ+2 by ring]
+  rw [show ν-(μ+1)+1 = ν-μ by ring, show ν+1-μ+1 = ν-μ+2 by ring,
+      Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (ν-μ),
+    Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (ν-μ+1), show ν-μ+1+1 = ν-μ+2 by ring]
   generalize (Gamma (ν+μ+2))⁻¹ = a0
   generalize (Gamma (ν-μ+2))⁻¹ = b0
   linear_combination (π/(2*sin (μ*π))*a0)*R1 + (π/(2*sin (μ*π))*b0*(ν-μ+1))*R2
 
+/-- For `z - 1` in the slit plane, `-(z²-1)^{1/2} 𝑸^{μ+1}_ν(z) - (ν-μ+1) 𝑸^μ_{ν+1}(z) + z 𝑸^μ_ν(z) =
+0`, the form of DLMF 14.10.7 for Olver's `𝑸`, valid for all `ν, μ`. -/
 theorem olverQ_recurrence_7 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     -legendreBranchPower 1 z*olverQ ν (μ+1) z-(ν-μ+1)*olverQ (ν+1) μ z+z*olverQ ν μ z=0 := by
   have h0 := (olverQ_entire_order ν z hz).continuous
@@ -828,7 +858,8 @@ theorem olverQ_recurrence_7 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
   exact legendre_eq_of_continuous_nonint (g := fun _ => 0) (by fun_prop) continuous_const
     (fun μ hμ => olverQ_recurrence_7_nonint ν μ hμ hz) μ
 
-/-- associatedQ recurrence 7. -/
+/-- DLMF 14.10.7 for `Q`: when `ν+μ ∉ {-1,-2,…}` and for `z-1` in the slit plane (`z ∉ (-∞, 1]`),
+`(z²-1)^{1/2} Q^{μ+1}_ν(z) - (ν-μ+1) Q^μ_{ν+1}(z) + (ν+μ+1) z Q^μ_ν(z) = 0`. -/
 @[dlmf 14.10.E7]
 theorem associatedQ_recurrence_7 (ν μ : ℂ) (h : LegendreQRegular ν μ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     legendreBranchPower 1 z*associatedQ ν (μ+1) z-(ν-μ+1)*associatedQ (ν+1) μ z+(ν+μ+1)*z*associatedQ ν μ z=0 := by
@@ -842,22 +873,27 @@ theorem associatedQ_recurrence_7 (ν μ : ℂ) (h : LegendreQRegular ν μ) {z :
   rw [e1, e1', legendre_exp_add_one_mul_pi_I]
   linear_combination (exp (μ*π*I)*Gamma (ν+μ+1)*(ν+μ+1))*R
 
+/-- For `z - 1` in the slit plane, `(Q^μ_ν)'(z) = e^{μπi} Γ(ν+μ+1) (𝑸^μ_ν)'(z)`. -/
 theorem deriv_associatedQ (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     deriv (associatedQ ν μ) z = exp (μ*π*I)*Gamma (ν+μ+1)*deriv (olverQ ν μ) z :=
   deriv_const_mul _ (olverQ_analytic ν μ z hz).differentiableAt
 
+/-- For non-integer `μ` and `z - 1` in the slit plane, `(1-z²) (𝑸^μ_ν)'(z) = (μ-ν-1)(ν+μ+1)
+𝑸^μ_{ν+1}(z) + (ν+1) z 𝑸^μ_ν(z)`. -/
 theorem olverQ_recurrence_4_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     (1-z^2)*deriv (olverQ ν μ) z=(μ-ν-1)*(ν+μ+1)*olverQ (ν+1) μ z+(ν+1)*z*olverQ ν μ z := by
   have R1 := associatedP_recurrence_4 ν μ hz
   have R2 := associatedP_recurrence_4 ν (-μ) hz
   rw [deriv_olverQ_nonint ν μ hμ hz, olverQ_eq_nonint (ν+1) μ hμ hz, olverQ_eq_nonint ν μ hμ hz]
   rw [show ν+1+μ+1 = ν+μ+2 by ring, show ν+1-μ+1 = ν-μ+2 by ring,
-    legendre_recip_Gamma_succ (ν+μ+1), show ν+μ+1+1 = ν+μ+2 by ring,
-    legendre_recip_Gamma_succ (ν-μ+1), show ν-μ+1+1 = ν-μ+2 by ring]
+    Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (ν+μ+1), show ν+μ+1+1 = ν+μ+2 by ring,
+    Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (ν-μ+1), show ν-μ+1+1 = ν-μ+2 by ring]
   generalize (Gamma (ν+μ+2))⁻¹ = a0
   generalize (Gamma (ν-μ+2))⁻¹ = b0
   linear_combination (π/(2*sin (μ*π))*(ν+μ+1)*a0)*R1 - (π/(2*sin (μ*π))*(ν-μ+1)*b0)*R2
 
+/-- For `z - 1` in the slit plane, `(1-z²) (𝑸^μ_ν)'(z) = (μ-ν-1)(ν+μ+1) 𝑸^μ_{ν+1}(z) + (ν+1) z
+𝑸^μ_ν(z)`, the form of DLMF 14.10.4 for Olver's `𝑸`, valid for all `ν, μ`. -/
 theorem olverQ_recurrence_4 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     (1-z^2)*deriv (olverQ ν μ) z=(μ-ν-1)*(ν+μ+1)*olverQ (ν+1) μ z+(ν+1)*z*olverQ ν μ z := by
   have h0 := (olverQ_entire_order ν z hz).continuous
@@ -866,7 +902,8 @@ theorem olverQ_recurrence_4 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
   exact legendre_eq_of_continuous_nonint (by fun_prop) (by fun_prop)
     (fun μ hμ => olverQ_recurrence_4_nonint ν μ hμ hz) μ
 
-/-- associatedQ recurrence 4. -/
+/-- DLMF 14.10.4 for `Q` (§14.10(ii)): when `ν+μ ∉ {-1,-2,…}` and for `z-1` in the slit plane (`z ∉
+(-∞, 1]`), `(1-z²) dQ^μ_ν(z)/dz = (μ-ν-1) Q^μ_{ν+1}(z) + (ν+1) z Q^μ_ν(z)`. -/
 @[dlmf 14.10.E4]
 theorem associatedQ_recurrence_4 (ν μ : ℂ) (h : LegendreQRegular ν μ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     (1-z^2:ℂ)*deriv (associatedQ ν μ) z=(μ-ν-1)*associatedQ (ν+1) μ z+(ν+1)*z*associatedQ ν μ z := by
@@ -879,17 +916,22 @@ theorem associatedQ_recurrence_4 (ν μ : ℂ) (h : LegendreQRegular ν μ) {z :
   rw [e1']
   linear_combination (exp (μ*π*I)*Gamma (ν+μ+1))*R
 
+/-- For non-integer `μ` and `z - 1` in the slit plane, `(1-z²) (𝑸^μ_ν)'(z) = 𝑸^μ_{ν-1}(z) - ν z
+𝑸^μ_ν(z)`. -/
 theorem olverQ_recurrence_5_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     (1-z^2)*deriv (olverQ ν μ) z=olverQ (ν-1) μ z-ν*z*olverQ ν μ z := by
   have R1 := associatedP_recurrence_5 ν μ hz
   have R2 := associatedP_recurrence_5 ν (-μ) hz
   rw [deriv_olverQ_nonint ν μ hμ hz, olverQ_eq_nonint (ν-1) μ hμ hz, olverQ_eq_nonint ν μ hμ hz]
   rw [show ν-1+μ+1 = ν+μ by ring, show ν-1-μ+1 = ν-μ by ring,
-    legendre_recip_Gamma_succ (ν+μ), legendre_recip_Gamma_succ (ν-μ)]
+    Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (ν+μ),
+        Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (ν-μ)]
   generalize (Gamma (ν+μ+1))⁻¹ = a0
   generalize (Gamma (ν-μ+1))⁻¹ = b0
   linear_combination (π/(2*sin (μ*π))*a0)*R1 - (π/(2*sin (μ*π))*b0)*R2
 
+/-- For `z - 1` in the slit plane, `(1-z²) (𝑸^μ_ν)'(z) = 𝑸^μ_{ν-1}(z) - ν z 𝑸^μ_ν(z)`, the form of
+DLMF 14.10.5 for Olver's `𝑸`, valid for all `ν, μ`. -/
 theorem olverQ_recurrence_5 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     (1-z^2)*deriv (olverQ ν μ) z=olverQ (ν-1) μ z-ν*z*olverQ ν μ z := by
   have h0 := (olverQ_entire_order ν z hz).continuous
@@ -898,7 +940,8 @@ theorem olverQ_recurrence_5 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
   exact legendre_eq_of_continuous_nonint (by fun_prop) (by fun_prop)
     (fun μ hμ => olverQ_recurrence_5_nonint ν μ hμ hz) μ
 
-/-- associatedQ recurrence 5. -/
+/-- DLMF 14.10.5 for `Q` (§14.10(ii)): when `ν-1+μ ∉ {-1,-2,…}` and for `z-1` in the slit plane (`z
+∉ (-∞, 1]`), `(1-z²) dQ^μ_ν(z)/dz = (ν+μ) Q^μ_{ν-1}(z) - ν z Q^μ_ν(z)`. -/
 @[dlmf 14.10.E5]
 theorem associatedQ_recurrence_5 (ν μ : ℂ) (h : LegendreQRegular (ν-1) μ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     (1-z^2:ℂ)*deriv (associatedQ ν μ) z=(ν+μ)*associatedQ (ν-1) μ z-ν*z*associatedQ ν μ z := by
@@ -919,8 +962,8 @@ theorem olverQ_casoratian_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n) {z 
   have R2 := associatedP_recurrence_4 ν (-μ) hz
   rw [olverQ_eq_nonint (ν+1) μ hμ hz, olverQ_eq_nonint ν μ hμ hz]
   rw [show ν+1+μ+1 = ν+μ+2 by ring, show ν+1-μ+1 = ν-μ+2 by ring,
-    legendre_recip_Gamma_succ (ν+μ+1), show ν+μ+1+1 = ν+μ+2 by ring,
-    legendre_recip_Gamma_succ (ν-μ+1), show ν-μ+1+1 = ν-μ+2 by ring]
+    Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (ν+μ+1), show ν+μ+1+1 = ν+μ+2 by ring,
+    Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (ν-μ+1), show ν-μ+1+1 = ν-μ+2 by ring]
   generalize (Gamma (ν+μ+2))⁻¹ = a0
   generalize (Gamma (ν-μ+2))⁻¹ = b0
   have hs := legendre_sin_ne_zero hμ
@@ -933,6 +976,8 @@ theorem olverQ_casoratian_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n) {z 
   field_simp
   ring
 
+/-- For `z - 1` in the slit plane, the Casoratian `P^μ_{ν+1}(z) 𝑸^μ_ν(z) - (ν+μ+1) P^μ_ν(z)
+𝑸^μ_{ν+1}(z) = 1/Γ(ν-μ+2)`. -/
 theorem olverQ_casoratian (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     associatedP (ν+1) μ z*olverQ ν μ z-(ν+μ+1)*associatedP ν μ z*olverQ (ν+1) μ z=(Gamma (ν-μ+2))⁻¹ := by
   have h0 := (olverQ_entire_order ν z hz).continuous
@@ -943,7 +988,8 @@ theorem olverQ_casoratian (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
   exact legendre_eq_of_continuous_nonint (by fun_prop) g
     (fun μ hμ => olverQ_casoratian_nonint ν μ hμ hz) μ
 
-/-- associated wronskian 11. -/
+/-- DLMF 14.2.11: when `ν+μ ∉ {-1,-2,…}` and for `z-1` in the slit plane (`z ∉ (-∞, 1]`),
+`P^μ_{ν+1}(z) Q^μ_ν(z) - P^μ_ν(z) Q^μ_{ν+1}(z) = e^{μπi} Γ(ν+μ+1)/Γ(ν-μ+2)`. -/
 @[dlmf 14.2.E11]
 theorem associated_wronskian_11 (ν μ : ℂ) (h : LegendreQRegular ν μ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     associatedP (ν+1) μ z*associatedQ ν μ z-associatedP ν μ z*associatedQ (ν+1) μ z=exp (μ*π*I)*Gamma (ν+μ+1)/Gamma (ν-μ+2) := by
@@ -990,7 +1036,8 @@ theorem hasDerivAt_one_sub_sq_sqrt {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
   ring
 
 
-/-- ferrersQ nat order derivative. -/
+/-- DLMF 14.6.2 / 14.7.9: for `m ∈ ℕ`, `ν ∉ {-1,-2,…}` and for `-1 < x < 1`, `𝖰^m_ν(x) = (-1)^m
+(1-x²)^{m/2} d^m 𝖰_ν(x)/dx^m`. -/
 @[dlmf 14.6.E2, dlmf 14.7.E9]
 theorem ferrersQ_nat_order_derivative (ν : ℂ) (m : ℕ) (h : LegendreQRegular ν 0) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersQ ν m x=(-1)^m*(1-x^2:ℂ)^((m:ℂ)/2)*iteratedDeriv m (ferrersQ ν 0) x := by
@@ -1043,7 +1090,8 @@ theorem ferrersQ_nat_order_derivative (ν : ℂ) (m : ℕ) (h : LegendreQRegular
         linear_combination U^2*U^(j*2)*hr + U^2*U^(j*2)*(((j:ℂ)+1)*y*B + U^2*D)*hs
   rw [key m x hx, show (m:ℂ)/2 = m*(1/2) by ring, cpow_nat_mul]
 
-/-- associatedP nat order derivative. -/
+/-- DLMF 14.6.3 / 14.7.11: for `m ∈ ℕ` and for `z-1` in the slit plane (`z ∉ (-∞, 1]`), `P^m_ν(z) =
+(z²-1)^{m/2} d^m P_ν(z)/dz^m`. -/
 @[dlmf 14.6.E3, dlmf 14.7.E11]
 theorem associatedP_nat_order_derivative (ν : ℂ) (m : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     associatedP ν m z=legendreBranchPower m z*iteratedDeriv m (associatedP ν 0) z := by
@@ -1068,6 +1116,8 @@ theorem associatedP_nat_order_derivative (ν : ℂ) (m : ℕ) {z : ℂ} (hz : z-
   linear_combination (poch (ν+1) (k+1) * poch (-ν) (k+1) * G) * ((-1)^(k+1) * hg -
     E * ((1-z)/2)^(k+1) * hsq)
 
+/-- For `z - 1` in the slit plane, `(z²-1)^{c/2}` (as `legendreBranchPower c`) has derivative `c
+z/(z²-1) (z²-1)^{c/2}` at `z`. -/
 theorem hasDerivAt_legendreBranchPower (c : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     HasDerivAt (legendreBranchPower c) (c*z/(z^2-1)*legendreBranchPower c z) z := by
   have hp' : z+1 ∈ slitPlane := by simpa [add_comm] using one_add_mem_slitPlane_of_sub_one hz
@@ -1082,11 +1132,14 @@ theorem hasDerivAt_legendreBranchPower (c : ℂ) {z : ℂ} (hz : z-1 ∈ slitPla
   field_simp
   ring
 
+/-- `legendreBranchPower a z * legendreBranchPower b z = legendreBranchPower (a+b) z`, i.e.
+`(z²-1)^{a/2} (z²-1)^{b/2} = (z²-1)^{(a+b)/2}` for this branch. -/
 theorem legendreBranchPower_mul (a b z : ℂ) :
     legendreBranchPower a z*legendreBranchPower b z = legendreBranchPower (a+b) z := by
   unfold legendreBranchPower
   rw [← exp_add]; congr 1; ring
 
+/-- For `z - 1` in the slit plane, `legendreBranchPower 2 z = z² - 1`. -/
 theorem legendreBranchPower_two {z : ℂ} (hz : z-1 ∈ slitPlane) : legendreBranchPower 2 z = z^2-1 := by
   have hp' : z+1 ∈ slitPlane := by simpa [add_comm] using one_add_mem_slitPlane_of_sub_one hz
   unfold legendreBranchPower
@@ -1094,7 +1147,8 @@ theorem legendreBranchPower_two {z : ℂ} (hz : z-1 ∈ slitPlane) : legendreBra
     exp_log (slitPlane_ne_zero hz), exp_log (slitPlane_ne_zero hp')]
   ring
 
-/-- olverQ nat order derivative. -/
+/-- DLMF 14.6.5: for `m ∈ ℕ` and for `z-1` in the slit plane (`z ∉ (-∞, 1]`), `(ν+1)_m 𝑸^m_ν(z) =
+(-1)^m (z²-1)^{m/2} d^m 𝑸_ν(z)/dz^m`. -/
 @[dlmf 14.6.E5]
 theorem olverQ_nat_order_derivative (ν : ℂ) (m : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     poch (ν+1) m*olverQ ν m z=(-1)^m*legendreBranchPower m z*iteratedDeriv m (olverQ ν 0) z := by
@@ -1149,7 +1203,8 @@ theorem olverQ_nat_order_derivative (ν : ℂ) (m : ℕ) {z : ℂ} (hz : z-1 ∈
         (Dp-k*w*Rk/(w^2-1))*e1 + (B1/(w^2-1))*hr - (Rk1/(w^2-1))*e2
   exact key m z hz
 
-/-- associatedQ nat order derivative. -/
+/-- DLMF 14.6.4 / 14.7.12: for `m ∈ ℕ`, `ν ∉ {-1,-2,…}` and for `z-1` in the slit plane (`z ∉ (-∞,
+1]`), `Q^m_ν(z) = (z²-1)^{m/2} d^m Q_ν(z)/dz^m`. -/
 @[dlmf 14.6.E4, dlmf 14.7.E12]
 theorem associatedQ_nat_order_derivative (ν : ℂ) (m : ℕ) (h : LegendreQRegular ν 0) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     associatedQ ν m z=legendreBranchPower m z*iteratedDeriv m (associatedQ ν 0) z := by

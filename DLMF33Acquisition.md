@@ -114,21 +114,21 @@ declarations:
 ## [§33.2 Definitions and Basic Properties](https://dlmf.nist.gov/33.2)
 
 - [33.2.i](https://dlmf.nist.gov/33.2.i): [`DLMF.Coulomb.coulomb_indicial`](DLMF/Coulomb/RhoEtaProperties.lean#L73) (proved)
-- [33.2.ii](https://dlmf.nist.gov/33.2.ii): [`DLMF.Coulomb.coulombC_pos`](DLMF/Coulomb/RhoEtaProperties.lean#L113) (proved); [`DLMF.Coulomb.analytic_coulombF`](DLMF/Coulomb/RhoEtaProperties.lean#L245) (admitted)
-- [33.2.iii](https://dlmf.nist.gov/33.2.iii): [`DLMF.Coulomb.coulombHMinus_eq_conj_coulombHPlus`](DLMF/Coulomb/RhoEtaProperties.lean#L521) (proved); [`DLMF.Coulomb.analytic_coulombH`](DLMF/Coulomb/RhoEtaProperties.lean#L527) (admitted)
-- [33.2.E1](https://dlmf.nist.gov/33.2.E1): [`DLMF.Coulomb.coulombF_deriv_deriv`](DLMF/Coulomb/RhoEtaProperties.lean#L51) (proved); [`DLMF.Coulomb.coulombG_deriv_deriv`](DLMF/Coulomb/RhoEtaProperties.lean#L808) (proved); [`DLMF.Confluent.hasDerivAt_coulombWaveDeriv`](DLMF/Confluent/Coulomb.lean#L77) (proved). The existing `hasDerivAt_coulombWaveDeriv` (unnormalized regular solution, multiplied form) and the equation for `F_ℓ` and `G_ℓ` in `deriv` form.
+- [33.2.ii](https://dlmf.nist.gov/33.2.ii): [`DLMF.Coulomb.coulombC_pos`](DLMF/Coulomb/RhoEtaProperties.lean#L114) (proved); [`DLMF.Coulomb.analytic_coulombF`](DLMF/Coulomb/RhoEtaProperties.lean#L248) (admitted)
+- [33.2.iii](https://dlmf.nist.gov/33.2.iii): [`DLMF.Coulomb.coulombHMinus_eq_conj_coulombHPlus`](DLMF/Coulomb/RhoEtaProperties.lean#L524) (proved); [`DLMF.Coulomb.analytic_coulombH`](DLMF/Coulomb/RhoEtaProperties.lean#L530) (admitted)
+- [33.2.E1](https://dlmf.nist.gov/33.2.E1): [`DLMF.Coulomb.coulombF_deriv_deriv`](DLMF/Coulomb/RhoEtaProperties.lean#L51) (proved); [`DLMF.Coulomb.coulombG_deriv_deriv`](DLMF/Coulomb/RhoEtaProperties.lean#L815) (proved); [`DLMF.Confluent.hasDerivAt_coulombWaveDeriv`](DLMF/Confluent/Coulomb.lean#L85) (proved). The existing `hasDerivAt_coulombWaveDeriv` (unnormalized regular solution, multiplied form) and the equation for `F_ℓ` and `G_ℓ` in `deriv` form.
 - [33.2.E2](https://dlmf.nist.gov/33.2.E2): [`DLMF.Coulomb.turningPoint`](DLMF/Coulomb/Basic.lean#L101) (definition); [`DLMF.Coulomb.turningPoint_isRoot`](DLMF/Coulomb/RhoEtaProperties.lean#L81) (proved); [`DLMF.Coulomb.coulomb_coeff_turningPoint`](DLMF/Coulomb/RhoEtaProperties.lean#L96) (proved). Root of `ρ² - 2ηρ - ℓ(ℓ+1)` and largest root; zero of the coefficient of 33.2.1.
-- [33.2.E3](https://dlmf.nist.gov/33.2.E3): [`DLMF.Coulomb.ofReal_coulombF_eq_whittakerM`](DLMF/Coulomb/RhoEtaProperties.lean#L120) (proved); [`DLMF.Coulomb.ofReal_coulombF_eq_whittakerM_neg`](DLMF/Coulomb/RhoEtaProperties.lean#L141) (proved). Both sign choices; `M_{κ,μ}` is `DLMF.Confluent.whittakerM`.
-- [33.2.E4](https://dlmf.nist.gov/33.2.E4): [`DLMF.Confluent.coulombF`](DLMF/Coulomb/Basic.lean#L61) (definition); [`DLMF.Confluent.coulombWave_eq_conj_form`](DLMF/Confluent/Coulomb.lean#L142) (proved). Definition (upper signs) and the lower-sign form by Kummer’s transformation (existing).
+- [33.2.E3](https://dlmf.nist.gov/33.2.E3): [`DLMF.Coulomb.ofReal_coulombF_eq_whittakerM`](DLMF/Coulomb/RhoEtaProperties.lean#L121) (proved); [`DLMF.Coulomb.ofReal_coulombF_eq_whittakerM_neg`](DLMF/Coulomb/RhoEtaProperties.lean#L142) (proved). Both sign choices; `M_{κ,μ}` is `DLMF.Confluent.whittakerM`.
+- [33.2.E4](https://dlmf.nist.gov/33.2.E4): [`DLMF.Confluent.coulombF`](DLMF/Coulomb/Basic.lean#L61) (definition); [`DLMF.Confluent.coulombWave_eq_conj_form`](DLMF/Confluent/Coulomb.lean#L150) (proved). Definition (upper signs) and the lower-sign form by Kummer’s transformation (existing).
 - [33.2.E5](https://dlmf.nist.gov/33.2.E5): [`DLMF.Confluent.coulombC`](DLMF/Coulomb/Basic.lean#L55) (definition)
-- [33.2.E6](https://dlmf.nist.gov/33.2.E6): [`DLMF.Coulomb.coulombC_sq_eq_prod`](DLMF/Coulomb/RhoEtaProperties.lean#L196) (proved); [`DLMF.Coulomb.coulombC_eq_sqrt_prod`](DLMF/Coulomb/RhoEtaProperties.lean#L222) (proved). Proved for `η ≠ 0` (squared and printed forms); at `η = 0` the factor is read as its limit, see 33.5.6.
-- [33.2.E7](https://dlmf.nist.gov/33.2.E7): [`DLMF.Coulomb.coulombHPlus_eq_whittakerW`](DLMF/Coulomb/RhoEtaProperties.lean#L255) (proved); [`DLMF.Coulomb.coulombHMinus_eq_whittakerW`](DLMF/Coulomb/RhoEtaProperties.lean#L279) (proved). `W_{κ,μ}` is `DLMF.Confluent.whittakerW`; `ρ > 0`.
+- [33.2.E6](https://dlmf.nist.gov/33.2.E6): [`DLMF.Coulomb.coulombC_sq_eq_prod`](DLMF/Coulomb/RhoEtaProperties.lean#L199) (proved); [`DLMF.Coulomb.coulombC_eq_sqrt_prod`](DLMF/Coulomb/RhoEtaProperties.lean#L225) (proved). Proved for `η ≠ 0` (squared and printed forms); at `η = 0` the factor is read as its limit, see 33.5.6.
+- [33.2.E7](https://dlmf.nist.gov/33.2.E7): [`DLMF.Coulomb.coulombHPlus_eq_whittakerW`](DLMF/Coulomb/RhoEtaProperties.lean#L258) (proved); [`DLMF.Coulomb.coulombHMinus_eq_whittakerW`](DLMF/Coulomb/RhoEtaProperties.lean#L282) (proved). `W_{κ,μ}` is `DLMF.Confluent.whittakerW`; `ρ > 0`.
 - [33.2.E8](https://dlmf.nist.gov/33.2.E8): [`DLMF.Confluent.coulombHPlus`](DLMF/Coulomb/Basic.lean#L75) (definition); [`DLMF.Confluent.coulombHMinus`](DLMF/Coulomb/Basic.lean#L82) (definition)
 - [33.2.E9](https://dlmf.nist.gov/33.2.E9): [`DLMF.Confluent.coulombTheta`](DLMF/Coulomb/Basic.lean#L71) (definition)
-- [33.2.E10](https://dlmf.nist.gov/33.2.E10): [`DLMF.Confluent.coulombSigma`](DLMF/Coulomb/Basic.lean#L67) (definition); [`DLMF.Coulomb.phaseShift`](DLMF/Coulomb/Defs.lean#L58) (definition); [`DLMF.Coulomb.phaseShift_spec`](DLMF/Coulomb/RhoEtaProperties.lean#L480) (proved). `coulombSigma` is the principal phase (existing; it fixes `e^{iσ}` and hence `H^±`); `phaseShift` is DLMF’s continuous branch with zero at `η = 0`, used in 33.5.7, 33.10.6, 33.10.10. `phaseShift_spec` (admitted) states that it is a phase of `Γ(ℓ+1+iη)`, vanishes at 0 and is continuous.
-- [33.2.E11](https://dlmf.nist.gov/33.2.E11): [`DLMF.Confluent.coulombG`](DLMF/Coulomb/Basic.lean#L93) (definition); [`DLMF.Confluent.coulombH_eq_G_add_I_mul_F`](DLMF/Confluent/CoulombIrregular.lean#L217) (proved)
-- [33.2.E12](https://dlmf.nist.gov/33.2.E12): [`DLMF.Confluent.coulomb_wronskian`](DLMF/Confluent/CoulombIrregular.lean#L368) (proved); [`DLMF.Confluent.coulomb_wronskian_HPlus`](DLMF/Confluent/CoulombIrregular.lean#L375) (proved); [`DLMF.Confluent.coulomb_wronskian_HMinus`](DLMF/Confluent/CoulombIrregular.lean#L386) (proved)
-- [33.2.E13](https://dlmf.nist.gov/33.2.E13): [`DLMF.Coulomb.coulombF_mul_coulombG_sub`](DLMF/Coulomb/RhoEtaProperties.lean#L960) (proved). Proved from the Wronskian 33.2.12 and the admitted 33.4.3.
+- [33.2.E10](https://dlmf.nist.gov/33.2.E10): [`DLMF.Confluent.coulombSigma`](DLMF/Coulomb/Basic.lean#L67) (definition); [`DLMF.Coulomb.phaseShift`](DLMF/Coulomb/Defs.lean#L58) (definition); [`DLMF.Coulomb.phaseShift_spec`](DLMF/Coulomb/RhoEtaProperties.lean#L483) (proved). `coulombSigma` is the principal phase (existing; it fixes `e^{iσ}` and hence `H^±`); `phaseShift` is DLMF’s continuous branch with zero at `η = 0`, used in 33.5.7, 33.10.6, 33.10.10. `phaseShift_spec` (admitted) states that it is a phase of `Γ(ℓ+1+iη)`, vanishes at 0 and is continuous.
+- [33.2.E11](https://dlmf.nist.gov/33.2.E11): [`DLMF.Confluent.coulombG`](DLMF/Coulomb/Basic.lean#L93) (definition); [`DLMF.Confluent.coulombH_eq_G_add_I_mul_F`](DLMF/Confluent/CoulombIrregular.lean#L222) (proved)
+- [33.2.E12](https://dlmf.nist.gov/33.2.E12): [`DLMF.Confluent.coulomb_wronskian`](DLMF/Confluent/CoulombIrregular.lean#L376) (proved); [`DLMF.Confluent.coulomb_wronskian_HPlus`](DLMF/Confluent/CoulombIrregular.lean#L383) (proved); [`DLMF.Confluent.coulomb_wronskian_HMinus`](DLMF/Confluent/CoulombIrregular.lean#L394) (proved)
+- [33.2.E13](https://dlmf.nist.gov/33.2.E13): [`DLMF.Coulomb.coulombF_mul_coulombG_sub`](DLMF/Coulomb/RhoEtaProperties.lean#L947) (proved). Proved from the Wronskian 33.2.12 and the admitted 33.4.3.
 
 ## [§33.3 Graphics](https://dlmf.nist.gov/33.3)
 
@@ -137,29 +137,29 @@ declarations:
 ## [§33.4 Recurrence Relations and Derivatives](https://dlmf.nist.gov/33.4)
 
 - [33.4.E1](https://dlmf.nist.gov/33.4.E1): [`DLMF.Coulomb.recurrenceR`](DLMF/Coulomb/Defs.lean#L46) (definition); [`DLMF.Coulomb.recurrenceS`](DLMF/Coulomb/Defs.lean#L50) (definition); [`DLMF.Coulomb.recurrenceT`](DLMF/Coulomb/Defs.lean#L54) (definition). Definitions for `ℓ ≥ 1`.
-- [33.4.E2](https://dlmf.nist.gov/33.4.E2): [`DLMF.Coulomb.coulombF_recurrence`](DLMF/Coulomb/RhoEtaProperties.lean#L846) (proved); [`DLMF.Coulomb.coulombG_recurrence`](DLMF/Coulomb/RhoEtaProperties.lean#L857) (proved); [`DLMF.Coulomb.coulombHPlus_recurrence`](DLMF/Coulomb/RhoEtaProperties.lean#L928) (proved); [`DLMF.Coulomb.coulombHMinus_recurrence`](DLMF/Coulomb/RhoEtaProperties.lean#L943) (proved). For `X = F, G, H^+, H^-`, stated at `ℓ+1`; proved from 33.4.3–33.4.4.
-- [33.4.E3](https://dlmf.nist.gov/33.4.E3): [`DLMF.Coulomb.deriv_coulombF_lower`](DLMF/Coulomb/RhoEtaProperties.lean#L778) (proved); [`DLMF.Coulomb.deriv_coulombG_lower`](DLMF/Coulomb/RhoEtaProperties.lean#L794) (proved); [`DLMF.Coulomb.deriv_coulombHPlus_lower`](DLMF/Coulomb/RhoEtaProperties.lean#L884) (proved); [`DLMF.Coulomb.deriv_coulombHMinus_lower`](DLMF/Coulomb/RhoEtaProperties.lean#L895) (proved). For `X = F, G` admitted, for `X = H^±` proved from them; stated at `ℓ+1`, `ρ > 0`.
-- [33.4.E4](https://dlmf.nist.gov/33.4.E4): [`DLMF.Coulomb.deriv_coulombF_upper`](DLMF/Coulomb/RhoEtaProperties.lean#L786) (proved); [`DLMF.Coulomb.deriv_coulombG_upper`](DLMF/Coulomb/RhoEtaProperties.lean#L801) (proved); [`DLMF.Coulomb.deriv_coulombHPlus_upper`](DLMF/Coulomb/RhoEtaProperties.lean#L906) (proved); [`DLMF.Coulomb.deriv_coulombHMinus_upper`](DLMF/Coulomb/RhoEtaProperties.lean#L917) (proved). As 33.4.3, `ℓ ≥ 0`.
+- [33.4.E2](https://dlmf.nist.gov/33.4.E2): [`DLMF.Coulomb.coulombF_recurrence`](DLMF/Coulomb/RhoEtaProperties.lean#L853) (proved); [`DLMF.Coulomb.coulombG_recurrence`](DLMF/Coulomb/RhoEtaProperties.lean#L864) (proved); [`DLMF.Coulomb.coulombHPlus_recurrence`](DLMF/Coulomb/RhoEtaProperties.lean#L915) (proved); [`DLMF.Coulomb.coulombHMinus_recurrence`](DLMF/Coulomb/RhoEtaProperties.lean#L930) (proved). For `X = F, G, H^+, H^-`, stated at `ℓ+1`; proved from 33.4.3–33.4.4.
+- [33.4.E3](https://dlmf.nist.gov/33.4.E3): [`DLMF.Coulomb.deriv_coulombF_lower`](DLMF/Coulomb/RhoEtaProperties.lean#L785) (proved); [`DLMF.Coulomb.deriv_coulombG_lower`](DLMF/Coulomb/RhoEtaProperties.lean#L801) (proved); [`DLMF.Coulomb.deriv_coulombHPlus_lower`](DLMF/Coulomb/RhoEtaProperties.lean#L711) (proved); [`DLMF.Coulomb.deriv_coulombHMinus_lower`](DLMF/Coulomb/RhoEtaProperties.lean#L893) (proved). For `X = F, G` admitted, for `X = H^±` proved from them; stated at `ℓ+1`, `ρ > 0`.
+- [33.4.E4](https://dlmf.nist.gov/33.4.E4): [`DLMF.Coulomb.deriv_coulombF_upper`](DLMF/Coulomb/RhoEtaProperties.lean#L793) (proved); [`DLMF.Coulomb.deriv_coulombG_upper`](DLMF/Coulomb/RhoEtaProperties.lean#L808) (proved); [`DLMF.Coulomb.deriv_coulombHPlus_upper`](DLMF/Coulomb/RhoEtaProperties.lean#L677) (proved); [`DLMF.Coulomb.deriv_coulombHMinus_upper`](DLMF/Coulomb/RhoEtaProperties.lean#L904) (proved). As 33.4.3, `ℓ ≥ 0`.
 
 ## [§33.5 Limiting Forms for Small ρ, Small |η|, or Large ℓ](https://dlmf.nist.gov/33.5)
 
-- [33.5.E1](https://dlmf.nist.gov/33.5.E1): [`DLMF.Coulomb.coulombF_isEquivalent_zero`](DLMF/Coulomb/RhoEtaLimits.lean#L63) (proved)
-- [33.5.E2](https://dlmf.nist.gov/33.5.E2): [`DLMF.Coulomb.coulombG_isEquivalent_zero`](DLMF/Coulomb/RhoEtaLimits.lean#L310) (proved). The derivative part for `ℓ ≥ 1` as printed.
-- [33.5.E3](https://dlmf.nist.gov/33.5.E3): [`DLMF.Coulomb.coulombF_zero_eq_sphericalJ`](DLMF/Coulomb/RhoEtaLimits.lean#L387) (proved); [`DLMF.Coulomb.coulombG_zero_eq_sphericalY`](DLMF/Coulomb/RhoEtaLimits.lean#L523) (proved). `j_ℓ` is `DLMF.sphericalJ`; `y_ℓ` is written out by 10.47.3.
-- [33.5.E4](https://dlmf.nist.gov/33.5.E4): [`DLMF.Coulomb.coulombFG_zero_eq_bessel`](DLMF/Coulomb/RhoEtaLimits.lean#L537) (proved)
-- [33.5.E5](https://dlmf.nist.gov/33.5.E5): [`DLMF.Coulomb.coulomb_zero_zero`](DLMF/Coulomb/RhoEtaLimits.lean#L548) (proved)
-- [33.5.E6](https://dlmf.nist.gov/33.5.E6): [`DLMF.Coulomb.coulombC_zero`](DLMF/Coulomb/RhoEtaLimits.lean#L369) (proved)
-- [33.5.E7](https://dlmf.nist.gov/33.5.E7): [`DLMF.Coulomb.phaseShift_zero_isEquivalent`](DLMF/Coulomb/RhoEtaLimits.lean#L661) (proved). Continuous branch `phaseShift`.
-- [33.5.E8](https://dlmf.nist.gov/33.5.E8): [`DLMF.Coulomb.coulomb_isEquivalent_large_ell`](DLMF/Coulomb/RhoEtaLimits.lean#L812) (proved)
-- [33.5.E9](https://dlmf.nist.gov/33.5.E9): [`DLMF.Coulomb.coulombC_isEquivalent_large_ell`](DLMF/Coulomb/RhoEtaLimits.lean#L1010) (proved)
+- [33.5.E1](https://dlmf.nist.gov/33.5.E1): [`DLMF.Coulomb.coulombF_isEquivalent_zero`](DLMF/Coulomb/RhoEtaLimits.lean#L59) (proved)
+- [33.5.E2](https://dlmf.nist.gov/33.5.E2): [`DLMF.Coulomb.coulombG_isEquivalent_zero`](DLMF/Coulomb/RhoEtaLimits.lean#L306) (proved). The derivative part for `ℓ ≥ 1` as printed.
+- [33.5.E3](https://dlmf.nist.gov/33.5.E3): [`DLMF.Coulomb.coulombF_zero_eq_sphericalJ`](DLMF/Coulomb/RhoEtaLimits.lean#L383) (proved); [`DLMF.Coulomb.coulombG_zero_eq_sphericalY`](DLMF/Coulomb/RhoEtaLimits.lean#L519) (proved). `j_ℓ` is `DLMF.sphericalJ`; `y_ℓ` is written out by 10.47.3.
+- [33.5.E4](https://dlmf.nist.gov/33.5.E4): [`DLMF.Coulomb.coulombFG_zero_eq_bessel`](DLMF/Coulomb/RhoEtaLimits.lean#L533) (proved)
+- [33.5.E5](https://dlmf.nist.gov/33.5.E5): [`DLMF.Coulomb.coulomb_zero_zero`](DLMF/Coulomb/RhoEtaLimits.lean#L544) (proved)
+- [33.5.E6](https://dlmf.nist.gov/33.5.E6): [`DLMF.Coulomb.coulombC_zero`](DLMF/Coulomb/RhoEtaLimits.lean#L365) (proved)
+- [33.5.E7](https://dlmf.nist.gov/33.5.E7): [`DLMF.Coulomb.phaseShift_zero_isEquivalent`](DLMF/Coulomb/RhoEtaLimits.lean#L644) (proved). Continuous branch `phaseShift`.
+- [33.5.E8](https://dlmf.nist.gov/33.5.E8): [`DLMF.Coulomb.coulomb_isEquivalent_large_ell`](DLMF/Coulomb/RhoEtaLimits.lean#L795) (proved)
+- [33.5.E9](https://dlmf.nist.gov/33.5.E9): [`DLMF.Coulomb.coulombC_isEquivalent_large_ell`](DLMF/Coulomb/RhoEtaLimits.lean#L993) (proved)
 
 ## [§33.6 Power-Series Expansions in ρ](https://dlmf.nist.gov/33.6)
 
-- [33.6.E1](https://dlmf.nist.gov/33.6.E1): [`DLMF.Coulomb.hasSum_coulombF`](DLMF/Coulomb/RhoEtaSeries.lean#L275) (proved)
-- [33.6.E2](https://dlmf.nist.gov/33.6.E2): [`DLMF.Coulomb.hasSum_deriv_coulombF`](DLMF/Coulomb/RhoEtaSeries.lean#L286) (proved)
-- [33.6.E3](https://dlmf.nist.gov/33.6.E3): [`DLMF.Coulomb.powerSeriesCoeff`](DLMF/Coulomb/Defs.lean#L75) (definition); [`DLMF.Coulomb.powerSeriesCoeff_initial`](DLMF/Coulomb/RhoEtaSeries.lean#L47) (proved); [`DLMF.Coulomb.powerSeriesCoeff_recurrence`](DLMF/Coulomb/RhoEtaSeries.lean#L56) (proved). `powerSeriesCoeff` is defined by the recurrence with the initial values `A_{ℓ+1} = 1`, `A_{ℓ+2} = η/(ℓ+1)`; the recurrence itself is proved.
-- [33.6.E4](https://dlmf.nist.gov/33.6.E4): [`DLMF.Coulomb.powerSeriesCoeff_eq_hyp2F1`](DLMF/Coulomb/RhoEtaSeries.lean#L329) (proved). The terminating `₂F₁` at `z = 2` written as its finite sum.
-- [33.6.E5](https://dlmf.nist.gov/33.6.E5): [`DLMF.Coulomb.hasSum_coulombHPlus_log`](DLMF/Coulomb/RhoEtaSeries.lean#L384) (admitted); [`DLMF.Coulomb.hasSum_coulombHMinus_log`](DLMF/Coulomb/RhoEtaSeries.lean#L400) (admitted). Both signs; the infinite series is stated with `HasSum`, `ρ > 0`.
+- [33.6.E1](https://dlmf.nist.gov/33.6.E1): [`DLMF.Coulomb.hasSum_coulombF`](DLMF/Coulomb/RhoEtaSeries.lean#L276) (proved)
+- [33.6.E2](https://dlmf.nist.gov/33.6.E2): [`DLMF.Coulomb.hasSum_deriv_coulombF`](DLMF/Coulomb/RhoEtaSeries.lean#L287) (proved)
+- [33.6.E3](https://dlmf.nist.gov/33.6.E3): [`DLMF.Coulomb.powerSeriesCoeff`](DLMF/Coulomb/Defs.lean#L75) (definition); [`DLMF.Coulomb.powerSeriesCoeff_initial`](DLMF/Coulomb/RhoEtaSeries.lean#L48) (proved); [`DLMF.Coulomb.powerSeriesCoeff_recurrence`](DLMF/Coulomb/RhoEtaSeries.lean#L57) (proved). `powerSeriesCoeff` is defined by the recurrence with the initial values `A_{ℓ+1} = 1`, `A_{ℓ+2} = η/(ℓ+1)`; the recurrence itself is proved.
+- [33.6.E4](https://dlmf.nist.gov/33.6.E4): [`DLMF.Coulomb.powerSeriesCoeff_eq_hyp2F1`](DLMF/Coulomb/RhoEtaSeries.lean#L330) (proved). The terminating `₂F₁` at `z = 2` written as its finite sum.
+- [33.6.E5](https://dlmf.nist.gov/33.6.E5): [`DLMF.Coulomb.hasSum_coulombHPlus_log`](DLMF/Coulomb/RhoEtaSeries.lean#L385) (admitted); [`DLMF.Coulomb.hasSum_coulombHMinus_log`](DLMF/Coulomb/RhoEtaSeries.lean#L401) (admitted). Both signs; the infinite series is stated with `HasSum`, `ρ > 0`.
 
 ## [§33.7 Integral Representations](https://dlmf.nist.gov/33.7)
 
@@ -178,55 +178,55 @@ declarations:
 
 ## [§33.9 Expansions in Series of Bessel Functions](https://dlmf.nist.gov/33.9)
 
-- [33.9.E1](https://dlmf.nist.gov/33.9.E1): [`DLMF.Coulomb.hasSum_coulombF_sphericalJ`](DLMF/Coulomb/RhoEtaSeries.lean#L444) (admitted)
-- [33.9.E2](https://dlmf.nist.gov/33.9.E2): [`DLMF.Coulomb.besselSeriesCoeffA`](DLMF/Coulomb/Defs.lean#L81) (definition); [`DLMF.Coulomb.besselSeriesCoeffA_initial`](DLMF/Coulomb/RhoEtaSeries.lean#L416) (proved); [`DLMF.Coulomb.besselSeriesCoeffA_recurrence`](DLMF/Coulomb/RhoEtaSeries.lean#L430) (proved)
-- [33.9.E3](https://dlmf.nist.gov/33.9.E3): [`DLMF.Coulomb.coulombF_eq_besselI_series`](DLMF/Coulomb/RhoEtaSeries.lean#L477) (admitted)
-- [33.9.E4](https://dlmf.nist.gov/33.9.E4): [`DLMF.Coulomb.coulombF_eq_besselJ_series`](DLMF/Coulomb/RhoEtaSeries.lean#L488) (admitted). **Corrected**: the printed formula lacks the factor `(-1)^{k+1}` (see "Domains, conventions and source corrections").
-- [33.9.E5](https://dlmf.nist.gov/33.9.E5): [`DLMF.Coulomb.besselSeriesCoeffB`](DLMF/Coulomb/Defs.lean#L102) (definition); [`DLMF.Coulomb.besselSeriesCoeffB_initial`](DLMF/Coulomb/RhoEtaSeries.lean#L454) (proved); [`DLMF.Coulomb.besselSeriesCoeffB_recurrence`](DLMF/Coulomb/RhoEtaSeries.lean#L461) (proved)
-- [33.9.E6](https://dlmf.nist.gov/33.9.E6): [`DLMF.Coulomb.coulombG_isEquivalent_besselK`](DLMF/Coulomb/RhoEtaSeries.lean#L501) (admitted). Ratio form with `N + 1` terms of both asymptotic series, for every `N`.
-- [33.9.E7](https://dlmf.nist.gov/33.9.E7): [`DLMF.Coulomb.coulombG_isEquivalent_besselK`](DLMF/Coulomb/RhoEtaSeries.lean#L501) (admitted). With 33.9.6.
+- [33.9.E1](https://dlmf.nist.gov/33.9.E1): [`DLMF.Coulomb.hasSum_coulombF_sphericalJ`](DLMF/Coulomb/RhoEtaSeries.lean#L445) (admitted)
+- [33.9.E2](https://dlmf.nist.gov/33.9.E2): [`DLMF.Coulomb.besselSeriesCoeffA`](DLMF/Coulomb/Defs.lean#L81) (definition); [`DLMF.Coulomb.besselSeriesCoeffA_initial`](DLMF/Coulomb/RhoEtaSeries.lean#L417) (proved); [`DLMF.Coulomb.besselSeriesCoeffA_recurrence`](DLMF/Coulomb/RhoEtaSeries.lean#L431) (proved)
+- [33.9.E3](https://dlmf.nist.gov/33.9.E3): [`DLMF.Coulomb.coulombF_eq_besselI_series`](DLMF/Coulomb/RhoEtaSeries.lean#L478) (admitted)
+- [33.9.E4](https://dlmf.nist.gov/33.9.E4): [`DLMF.Coulomb.coulombF_eq_besselJ_series`](DLMF/Coulomb/RhoEtaSeries.lean#L489) (admitted). **Corrected**: the printed formula lacks the factor `(-1)^{k+1}` (see "Domains, conventions and source corrections").
+- [33.9.E5](https://dlmf.nist.gov/33.9.E5): [`DLMF.Coulomb.besselSeriesCoeffB`](DLMF/Coulomb/Defs.lean#L102) (definition); [`DLMF.Coulomb.besselSeriesCoeffB_initial`](DLMF/Coulomb/RhoEtaSeries.lean#L455) (proved); [`DLMF.Coulomb.besselSeriesCoeffB_recurrence`](DLMF/Coulomb/RhoEtaSeries.lean#L462) (proved)
+- [33.9.E6](https://dlmf.nist.gov/33.9.E6): [`DLMF.Coulomb.coulombG_isEquivalent_besselK`](DLMF/Coulomb/RhoEtaSeries.lean#L502) (admitted). Ratio form with `N + 1` terms of both asymptotic series, for every `N`.
+- [33.9.E7](https://dlmf.nist.gov/33.9.E7): [`DLMF.Coulomb.coulombG_isEquivalent_besselK`](DLMF/Coulomb/RhoEtaSeries.lean#L502) (admitted). With 33.9.6.
 
 ## [§33.10 Limiting Forms for Large ρ or Large |η|](https://dlmf.nist.gov/33.10)
 
-- [33.10.E1](https://dlmf.nist.gov/33.10.E1): [`DLMF.Confluent.tendsto_coulombF_sub_sin_and_coulombG_sub_cos`](DLMF/Confluent/CoulombIrregular.lean#L423) (proved). Existing.
-- [33.10.E2](https://dlmf.nist.gov/33.10.E2): [`DLMF.Coulomb.tendsto_coulombHMinus_sub_exp`](DLMF/Coulomb/RhoEtaLimits.lean#L1268) (proved); [`DLMF.Confluent.tendsto_coulombHPlus_sub_exp`](DLMF/Confluent/CoulombIrregular.lean#L402) (proved). Existing (upper sign); lower sign added by conjugation.
-- [33.10.E3](https://dlmf.nist.gov/33.10.E3): [`DLMF.Coulomb.coulomb_isEquivalent_eta_atTop`](DLMF/Coulomb/RhoEtaLimits.lean#L1283) (admitted)
-- [33.10.E4](https://dlmf.nist.gov/33.10.E4): [`DLMF.Coulomb.coulomb_zero_isEquivalent_eta_atTop`](DLMF/Coulomb/RhoEtaLimits.lean#L1296) (admitted)
-- [33.10.E5](https://dlmf.nist.gov/33.10.E5): [`DLMF.Coulomb.coulomb_zero_deriv_isEquivalent_eta_atTop`](DLMF/Coulomb/RhoEtaLimits.lean#L1308) (admitted)
-- [33.10.E6](https://dlmf.nist.gov/33.10.E6): [`DLMF.Coulomb.phaseShift_coulombC_eta_atTop`](DLMF/Coulomb/RhoEtaLimits.lean#L1321) (proved). Continuous branch `phaseShift`; the principal branch fails.
-- [33.10.E7](https://dlmf.nist.gov/33.10.E7): [`DLMF.Coulomb.coulomb_eta_atBot`](DLMF/Coulomb/RhoEtaLimits.lean#L1331) (admitted). As printed (the `o(|η|^{1/4})` error is weak but true).
-- [33.10.E8](https://dlmf.nist.gov/33.10.E8): [`DLMF.Coulomb.coulomb_zero_eta_atBot`](DLMF/Coulomb/RhoEtaLimits.lean#L1347) (admitted)
-- [33.10.E9](https://dlmf.nist.gov/33.10.E9): [`DLMF.Coulomb.coulomb_zero_deriv_eta_atBot`](DLMF/Coulomb/RhoEtaLimits.lean#L1360) (admitted)
-- [33.10.E10](https://dlmf.nist.gov/33.10.E10): [`DLMF.Coulomb.phaseShift_coulombC_eta_atBot`](DLMF/Coulomb/RhoEtaLimits.lean#L1373) (proved). Continuous branch `phaseShift`.
+- [33.10.E1](https://dlmf.nist.gov/33.10.E1): [`DLMF.Confluent.tendsto_coulombF_sub_sin_and_coulombG_sub_cos`](DLMF/Confluent/CoulombIrregular.lean#L431) (proved). Existing.
+- [33.10.E2](https://dlmf.nist.gov/33.10.E2): [`DLMF.Coulomb.tendsto_coulombHMinus_sub_exp`](DLMF/Coulomb/RhoEtaLimits.lean#L1251) (proved); [`DLMF.Confluent.tendsto_coulombHPlus_sub_exp`](DLMF/Confluent/CoulombIrregular.lean#L410) (proved). Existing (upper sign); lower sign added by conjugation.
+- [33.10.E3](https://dlmf.nist.gov/33.10.E3): [`DLMF.Coulomb.coulomb_isEquivalent_eta_atTop`](DLMF/Coulomb/RhoEtaLimits.lean#L1266) (admitted)
+- [33.10.E4](https://dlmf.nist.gov/33.10.E4): [`DLMF.Coulomb.coulomb_zero_isEquivalent_eta_atTop`](DLMF/Coulomb/RhoEtaLimits.lean#L1279) (admitted)
+- [33.10.E5](https://dlmf.nist.gov/33.10.E5): [`DLMF.Coulomb.coulomb_zero_deriv_isEquivalent_eta_atTop`](DLMF/Coulomb/RhoEtaLimits.lean#L1291) (admitted)
+- [33.10.E6](https://dlmf.nist.gov/33.10.E6): [`DLMF.Coulomb.phaseShift_coulombC_eta_atTop`](DLMF/Coulomb/RhoEtaLimits.lean#L1304) (proved). Continuous branch `phaseShift`; the principal branch fails.
+- [33.10.E7](https://dlmf.nist.gov/33.10.E7): [`DLMF.Coulomb.coulomb_eta_atBot`](DLMF/Coulomb/RhoEtaLimits.lean#L1314) (admitted). As printed (the `o(|η|^{1/4})` error is weak but true).
+- [33.10.E8](https://dlmf.nist.gov/33.10.E8): [`DLMF.Coulomb.coulomb_zero_eta_atBot`](DLMF/Coulomb/RhoEtaLimits.lean#L1330) (admitted)
+- [33.10.E9](https://dlmf.nist.gov/33.10.E9): [`DLMF.Coulomb.coulomb_zero_deriv_eta_atBot`](DLMF/Coulomb/RhoEtaLimits.lean#L1343) (admitted)
+- [33.10.E10](https://dlmf.nist.gov/33.10.E10): [`DLMF.Coulomb.phaseShift_coulombC_eta_atBot`](DLMF/Coulomb/RhoEtaLimits.lean#L1356) (proved). Continuous branch `phaseShift`.
 
 ## [§33.11 Asymptotic Expansions for Large ρ](https://dlmf.nist.gov/33.11)
 
-- [33.11.E1](https://dlmf.nist.gov/33.11.E1): [`DLMF.Confluent.hasAsymptoticExpansion_coulombHPlus`](DLMF/Confluent/CoulombAsymptotics.lean#L88) (proved); [`DLMF.Confluent.hasAsymptoticExpansion_coulombHMinus`](DLMF/Confluent/CoulombAsymptotics.lean#L118) (proved). Existing (`DLMF.Confluent.CoulombAsymptotics`).
-- [33.11.E2](https://dlmf.nist.gov/33.11.E2): [`DLMF.Coulomb.largeRhoF`](DLMF/Coulomb/Defs.lean#L107) (definition); [`DLMF.Coulomb.largeRhoG`](DLMF/Coulomb/Defs.lean#L113) (definition); [`DLMF.Coulomb.coulombFG_eq_largeRho`](DLMF/Coulomb/RhoEtaAsymptotics.lean#L51) (proved). `f`, `g` are defined by 33.11.2 (rotation by `θ_ℓ`).
-- [33.11.E3](https://dlmf.nist.gov/33.11.E3): [`DLMF.Coulomb.largeRhoFHat`](DLMF/Coulomb/Defs.lean#L118) (definition); [`DLMF.Coulomb.largeRhoGHat`](DLMF/Coulomb/Defs.lean#L125) (definition); [`DLMF.Coulomb.deriv_coulombFG_eq_largeRho`](DLMF/Coulomb/RhoEtaAsymptotics.lean#L64) (proved). `f̂`, `ĝ` are defined by 33.11.3.
-- [33.11.E4](https://dlmf.nist.gov/33.11.E4): [`DLMF.Coulomb.coulombH_eq_largeRho`](DLMF/Coulomb/RhoEtaAsymptotics.lean#L77) (proved)
-- [33.11.E5](https://dlmf.nist.gov/33.11.E5): [`DLMF.Coulomb.largeRhoFG_isBigO`](DLMF/Coulomb/RhoEtaAsymptotics.lean#L123) (proved). Poincaré form: remainder after `k ≤ K` is `O(ρ^{-K-1})`.
-- [33.11.E6](https://dlmf.nist.gov/33.11.E6): [`DLMF.Coulomb.largeRhoFGHat_isBigO`](DLMF/Coulomb/RhoEtaAsymptotics.lean#L293) (proved). Poincaré form.
-- [33.11.E7](https://dlmf.nist.gov/33.11.E7): [`DLMF.Coulomb.largeRho_wronskian`](DLMF/Coulomb/RhoEtaAsymptotics.lean#L386) (proved). **Corrected** sign: `f ĝ - g f̂ = 1` (DLMF prints `g f̂ - f ĝ = 1`).
-- [33.11.E8](https://dlmf.nist.gov/33.11.E8): [`DLMF.Coulomb.largeRhoTerm`](DLMF/Coulomb/Defs.lean#L131) (definition); [`DLMF.Coulomb.largeRhoTerm_spec`](DLMF/Coulomb/RhoEtaAsymptotics.lean#L397) (proved)
-- [33.11.E9](https://dlmf.nist.gov/33.11.E9): [`DLMF.Coulomb.largeRhoTerm_spec`](DLMF/Coulomb/RhoEtaAsymptotics.lean#L397) (proved)
+- [33.11.E1](https://dlmf.nist.gov/33.11.E1): [`DLMF.Confluent.hasAsymptoticExpansion_coulombHPlus`](DLMF/Confluent/CoulombAsymptotics.lean#L89) (proved); [`DLMF.Confluent.hasAsymptoticExpansion_coulombHMinus`](DLMF/Confluent/CoulombAsymptotics.lean#L119) (proved). Existing (`DLMF.Confluent.CoulombAsymptotics`).
+- [33.11.E2](https://dlmf.nist.gov/33.11.E2): [`DLMF.Coulomb.largeRhoF`](DLMF/Coulomb/Defs.lean#L107) (definition); [`DLMF.Coulomb.largeRhoG`](DLMF/Coulomb/Defs.lean#L113) (definition); [`DLMF.Coulomb.coulombFG_eq_largeRho`](DLMF/Coulomb/RhoEtaAsymptotics.lean#L50) (proved). `f`, `g` are defined by 33.11.2 (rotation by `θ_ℓ`).
+- [33.11.E3](https://dlmf.nist.gov/33.11.E3): [`DLMF.Coulomb.largeRhoFHat`](DLMF/Coulomb/Defs.lean#L118) (definition); [`DLMF.Coulomb.largeRhoGHat`](DLMF/Coulomb/Defs.lean#L125) (definition); [`DLMF.Coulomb.deriv_coulombFG_eq_largeRho`](DLMF/Coulomb/RhoEtaAsymptotics.lean#L63) (proved). `f̂`, `ĝ` are defined by 33.11.3.
+- [33.11.E4](https://dlmf.nist.gov/33.11.E4): [`DLMF.Coulomb.coulombH_eq_largeRho`](DLMF/Coulomb/RhoEtaAsymptotics.lean#L76) (proved)
+- [33.11.E5](https://dlmf.nist.gov/33.11.E5): [`DLMF.Coulomb.largeRhoFG_isBigO`](DLMF/Coulomb/RhoEtaAsymptotics.lean#L122) (proved). Poincaré form: remainder after `k ≤ K` is `O(ρ^{-K-1})`.
+- [33.11.E6](https://dlmf.nist.gov/33.11.E6): [`DLMF.Coulomb.largeRhoFGHat_isBigO`](DLMF/Coulomb/RhoEtaAsymptotics.lean#L292) (proved). Poincaré form.
+- [33.11.E7](https://dlmf.nist.gov/33.11.E7): [`DLMF.Coulomb.largeRho_wronskian`](DLMF/Coulomb/RhoEtaAsymptotics.lean#L385) (proved). **Corrected** sign: `f ĝ - g f̂ = 1` (DLMF prints `g f̂ - f ĝ = 1`).
+- [33.11.E8](https://dlmf.nist.gov/33.11.E8): [`DLMF.Coulomb.largeRhoTerm`](DLMF/Coulomb/Defs.lean#L131) (definition); [`DLMF.Coulomb.largeRhoTerm_spec`](DLMF/Coulomb/RhoEtaAsymptotics.lean#L396) (proved)
+- [33.11.E9](https://dlmf.nist.gov/33.11.E9): [`DLMF.Coulomb.largeRhoTerm_spec`](DLMF/Coulomb/RhoEtaAsymptotics.lean#L396) (proved)
 
 ## [§33.12 Asymptotic Expansions for Large η](https://dlmf.nist.gov/33.12)
 
 - [33.12.E1](https://dlmf.nist.gov/33.12.E1): [`DLMF.Coulomb.transitionX`](DLMF/Coulomb/Defs.lean#L150) (definition); [`DLMF.Coulomb.transitionMu`](DLMF/Coulomb/Defs.lean#L154) (definition)
-- [33.12.E2](https://dlmf.nist.gov/33.12.E2): [`DLMF.Coulomb.coulomb_zero_transition`](DLMF/Coulomb/RhoEtaAsymptotics.lean#L416) (admitted). Three printed terms, remainder `O((2η)^{1/6} μ^{-4})` uniformly for `|x| ≤ X`.
-- [33.12.E3](https://dlmf.nist.gov/33.12.E3): [`DLMF.Coulomb.coulomb_zero_deriv_transition`](DLMF/Coulomb/RhoEtaAsymptotics.lean#L438) (admitted). **Corrected**: the factor of `Ai'(x)`, `Bi'(x)` begins with `1`; remainder `O((2η)^{-1/6} μ^{-4})`.
+- [33.12.E2](https://dlmf.nist.gov/33.12.E2): [`DLMF.Coulomb.coulomb_zero_transition`](DLMF/Coulomb/RhoEtaAsymptotics.lean#L415) (admitted). Three printed terms, remainder `O((2η)^{1/6} μ^{-4})` uniformly for `|x| ≤ X`.
+- [33.12.E3](https://dlmf.nist.gov/33.12.E3): [`DLMF.Coulomb.coulomb_zero_deriv_transition`](DLMF/Coulomb/RhoEtaAsymptotics.lean#L437) (admitted). **Corrected**: the factor of `Ai'(x)`, `Bi'(x)` begins with `1`; remainder `O((2η)^{-1/6} μ^{-4})`.
 - [33.12.E4](https://dlmf.nist.gov/33.12.E4): [`DLMF.Coulomb.transitionA`](DLMF/Coulomb/Defs.lean#L158) (definition)
 - [33.12.E5](https://dlmf.nist.gov/33.12.E5): [`DLMF.Coulomb.transitionB`](DLMF/Coulomb/Defs.lean#L167) (definition)
-- [33.12.E6](https://dlmf.nist.gov/33.12.E6): [`DLMF.Coulomb.coulomb_zero_turningPoint`](DLMF/Coulomb/RhoEtaAsymptotics.lean#L464) (admitted). Remainder `o(ω^{1/2-10})`.
-- [33.12.E7](https://dlmf.nist.gov/33.12.E7): [`DLMF.Coulomb.coulomb_zero_deriv_turningPoint`](DLMF/Coulomb/RhoEtaAsymptotics.lean#L486) (admitted). Remainder `o(ω^{-1/2-8})`.
-- [33.12.E8](https://dlmf.nist.gov/33.12.E8): [`DLMF.Coulomb.coulomb_scaled_equation`](DLMF/Coulomb/RhoEtaAsymptotics.lean#L508) (proved). For any twice differentiable solution of 33.2.1.
+- [33.12.E6](https://dlmf.nist.gov/33.12.E6): [`DLMF.Coulomb.coulomb_zero_turningPoint`](DLMF/Coulomb/RhoEtaAsymptotics.lean#L463) (admitted). Remainder `o(ω^{1/2-10})`.
+- [33.12.E7](https://dlmf.nist.gov/33.12.E7): [`DLMF.Coulomb.coulomb_zero_deriv_turningPoint`](DLMF/Coulomb/RhoEtaAsymptotics.lean#L485) (admitted). Remainder `o(ω^{-1/2-8})`.
+- [33.12.E8](https://dlmf.nist.gov/33.12.E8): [`DLMF.Coulomb.coulomb_scaled_equation`](DLMF/Coulomb/RhoEtaAsymptotics.lean#L507) (proved). For any twice differentiable solution of 33.2.1.
 
 ## [§33.13 Complex Variable and Parameters](https://dlmf.nist.gov/33.13)
 
-- [33.13](https://dlmf.nist.gov/33.13): [`DLMF.Coulomb.coulombWaveComplex_ode`](DLMF/Coulomb/RhoEtaProperties.lean#L1065) (proved)
-- [33.13.E1](https://dlmf.nist.gov/33.13.E1): [`DLMF.Coulomb.coulombC_eq_exp_sigma_mul_Gamma`](DLMF/Coulomb/RhoEtaProperties.lean#L980) (proved). For `ℓ ∈ ℕ`, real `η` (principal `σ_ℓ`; any branch gives the same `e^{iσ_ℓ}`).
-- [33.13.E2](https://dlmf.nist.gov/33.13.E2): [`DLMF.Coulomb.recurrenceR_eq_coulombC_div`](DLMF/Coulomb/RhoEtaProperties.lean#L1011) (proved). For `ℓ ∈ ℕ`, real `η`, stated at `ℓ+1`.
+- [33.13](https://dlmf.nist.gov/33.13): [`DLMF.Coulomb.coulombWaveComplex_ode`](DLMF/Coulomb/RhoEtaProperties.lean#L1052) (proved)
+- [33.13.E1](https://dlmf.nist.gov/33.13.E1): [`DLMF.Coulomb.coulombC_eq_exp_sigma_mul_Gamma`](DLMF/Coulomb/RhoEtaProperties.lean#L967) (proved). For `ℓ ∈ ℕ`, real `η` (principal `σ_ℓ`; any branch gives the same `e^{iσ_ℓ}`).
+- [33.13.E2](https://dlmf.nist.gov/33.13.E2): [`DLMF.Coulomb.recurrenceR_eq_coulombC_div`](DLMF/Coulomb/RhoEtaProperties.lean#L998) (proved). For `ℓ ∈ ℕ`, real `η`, stated at `ℓ+1`.
 
 ## Prose, informal and excluded items (part A)
 
@@ -382,69 +382,69 @@ declarations:
 ### Numbered formulas and prose items (part B)
 
 ## [§33.14 Definitions and Basic Properties](https://dlmf.nist.gov/33.14)
-- [33.14.i](https://dlmf.nist.gov/33.14.i): [`DLMF.Coulomb.coulombf_coulombh_isEquivalent_zero`](DLMF/Coulomb/Energy/Properties.lean#L174) (admitted)
-- [33.14.ii](https://dlmf.nist.gov/33.14.ii): [`DLMF.Coulomb.coulombfKummer_neg`](DLMF/Coulomb/Energy/Q2eRegular.lean#L91) (proved); [`DLMF.Coulomb.analyticAt_coulombf`](DLMF/Coulomb/Energy/Properties.lean#L96) (admitted)
-- [33.14.iii](https://dlmf.nist.gov/33.14.iii): [`DLMF.Coulomb.coulombhKappa_neg`](DLMF/Coulomb/Energy/Properties.lean#L196) (admitted); [`DLMF.Coulomb.analyticAt_coulombh`](DLMF/Coulomb/Energy/Properties.lean#L204) (admitted)
-- [33.14.iv](https://dlmf.nist.gov/33.14.iv): [`DLMF.Coulomb.coulombs_re_eq_zero_of_neg`](DLMF/Coulomb/Energy/Properties.lean#L275) (proved); [`DLMF.Coulomb.hydrogenRadial_eq_laguerre`](DLMF/Coulomb/Energy/Properties.lean#L391) (proved); [`DLMF.Coulomb.hydrogenRadial_not_complete`](DLMF/Coulomb/Energy/Properties.lean#L470) (admitted)
-- [33.14.E1](https://dlmf.nist.gov/33.14.E1): [`DLMF.Coulomb.coulombf_ode`](DLMF/Coulomb/Energy/Properties.lean#L105) (proved); [`DLMF.Coulomb.coulombh_ode`](DLMF/Coulomb/Energy/Properties.lean#L128) (admitted)
-- [33.14.E2](https://dlmf.nist.gov/33.14.E2): [`DLMF.Coulomb.coulomb_potential_substitution`](DLMF/Coulomb/Energy/Properties.lean#L136) (proved)
-- [33.14.E3](https://dlmf.nist.gov/33.14.E3): [`DLMF.Coulomb.turningPointR`](DLMF/Coulomb/Energy/Defs.lean#L147) (definition); [`DLMF.Coulomb.turningPointR_spec`](DLMF/Coulomb/Energy/Properties.lean#L146) (proved); [`DLMF.Coulomb.turningPointR_pos`](DLMF/Coulomb/Energy/Properties.lean#L162) (proved)
-- [33.14.E4](https://dlmf.nist.gov/33.14.E4): [`DLMF.Coulomb.coulombf_eq_whittakerM`](DLMF/Coulomb/Energy/Properties.lean#L81) (proved)
-- [33.14.E5](https://dlmf.nist.gov/33.14.E5): [`DLMF.Coulomb.coulombf`](DLMF/Coulomb/Energy/Defs.lean#L76) (definition); [`DLMF.Coulomb.ofReal_coulombf`](DLMF/Coulomb/Energy/Properties.lean#L73) (proved)
+- [33.14.i](https://dlmf.nist.gov/33.14.i): [`DLMF.Coulomb.coulombf_coulombh_isEquivalent_zero`](DLMF/Coulomb/Energy/Properties.lean#L173) (admitted)
+- [33.14.ii](https://dlmf.nist.gov/33.14.ii): [`DLMF.Coulomb.coulombfKummer_neg`](DLMF/Coulomb/Energy/Q2eRegular.lean#L92) (proved); [`DLMF.Coulomb.analyticAt_coulombf`](DLMF/Coulomb/Energy/Properties.lean#L95) (admitted)
+- [33.14.iii](https://dlmf.nist.gov/33.14.iii): [`DLMF.Coulomb.coulombhKappa_neg`](DLMF/Coulomb/Energy/Properties.lean#L195) (admitted); [`DLMF.Coulomb.analyticAt_coulombh`](DLMF/Coulomb/Energy/Properties.lean#L203) (admitted)
+- [33.14.iv](https://dlmf.nist.gov/33.14.iv): [`DLMF.Coulomb.coulombs_re_eq_zero_of_neg`](DLMF/Coulomb/Energy/Properties.lean#L276) (proved); [`DLMF.Coulomb.hydrogenRadial_eq_laguerre`](DLMF/Coulomb/Energy/Properties.lean#L393) (proved); [`DLMF.Coulomb.hydrogenRadial_not_complete`](DLMF/Coulomb/Energy/Properties.lean#L472) (admitted)
+- [33.14.E1](https://dlmf.nist.gov/33.14.E1): [`DLMF.Coulomb.coulombf_ode`](DLMF/Coulomb/Energy/Properties.lean#L104) (proved); [`DLMF.Coulomb.coulombh_ode`](DLMF/Coulomb/Energy/Properties.lean#L127) (admitted)
+- [33.14.E2](https://dlmf.nist.gov/33.14.E2): [`DLMF.Coulomb.coulomb_potential_substitution`](DLMF/Coulomb/Energy/Properties.lean#L135) (proved)
+- [33.14.E3](https://dlmf.nist.gov/33.14.E3): [`DLMF.Coulomb.turningPointR`](DLMF/Coulomb/Energy/Defs.lean#L147) (definition); [`DLMF.Coulomb.turningPointR_spec`](DLMF/Coulomb/Energy/Properties.lean#L145) (proved); [`DLMF.Coulomb.turningPointR_pos`](DLMF/Coulomb/Energy/Properties.lean#L161) (proved)
+- [33.14.E4](https://dlmf.nist.gov/33.14.E4): [`DLMF.Coulomb.coulombf_eq_whittakerM`](DLMF/Coulomb/Energy/Properties.lean#L80) (proved)
+- [33.14.E5](https://dlmf.nist.gov/33.14.E5): [`DLMF.Coulomb.coulombf`](DLMF/Coulomb/Energy/Defs.lean#L76) (definition); [`DLMF.Coulomb.ofReal_coulombf`](DLMF/Coulomb/Energy/Properties.lean#L72) (proved)
 - [33.14.E6](https://dlmf.nist.gov/33.14.E6): [`DLMF.Coulomb.coulombKappa`](DLMF/Coulomb/Energy/Defs.lean#L61) (definition) — upper sign `+i ε^{-1/2}` for `ε > 0`; `r = 0` with `ε < 0` takes the `r < 0` branch
-- [33.14.E7](https://dlmf.nist.gov/33.14.E7): [`DLMF.Coulomb.coulombh`](DLMF/Coulomb/Energy/Defs.lean#L111) (definition); [`DLMF.Coulomb.ofReal_coulombh`](DLMF/Coulomb/Energy/Properties.lean#L184) (admitted) — `coulombh` is the limit in `ε` at `ε = 0` and at the poles of `Γ(ℓ+1-κ)` (`ε = -1/n²`, `n ≥ ℓ+1`, `r > 0`)
+- [33.14.E7](https://dlmf.nist.gov/33.14.E7): [`DLMF.Coulomb.coulombh`](DLMF/Coulomb/Energy/Defs.lean#L111) (definition); [`DLMF.Coulomb.ofReal_coulombh`](DLMF/Coulomb/Energy/Properties.lean#L183) (admitted) — `coulombh` is the limit in `ε` at `ε = 0` and at the poles of `Γ(ℓ+1-κ)` (`ε = -1/n²`, `n ≥ ℓ+1`, `r > 0`)
 - [33.14.E8](https://dlmf.nist.gov/33.14.E8): [`DLMF.Coulomb.coulombSFactor`](DLMF/Coulomb/Energy/Defs.lean#L86) (definition)
 - [33.14.E9](https://dlmf.nist.gov/33.14.E9): [`DLMF.Coulomb.coulombs`](DLMF/Coulomb/Energy/Defs.lean#L134) (definition); [`DLMF.Coulomb.coulombc`](DLMF/Coulomb/Energy/Defs.lean#L141) (definition) — complex valued with principal powers, imaginary when `B < 0`
 - [33.14.E10](https://dlmf.nist.gov/33.14.E10): [`DLMF.Coulomb.coulombBFactor`](DLMF/Coulomb/Energy/Defs.lean#L127) (definition)
 - [33.14.E11](https://dlmf.nist.gov/33.14.E11): [`DLMF.Coulomb.coulombAProd`](DLMF/Coulomb/Energy/Defs.lean#L123) (definition)
-- [33.14.E12](https://dlmf.nist.gov/33.14.E12): [`DLMF.Coulomb.coulombAProd_eq_Gamma`](DLMF/Coulomb/Energy/Properties.lean#L244) (proved)
-- [33.14.E13](https://dlmf.nist.gov/33.14.E13): [`DLMF.Coulomb.coulombs_orthogonality_dirac`](DLMF/Coulomb/Energy/Properties.lean#L296) (admitted) — Dirac delta in the distributional sense (test functions in `C_c^∞(0,∞)`, cut-off `∫₀^R`)
-- [33.14.E14](https://dlmf.nist.gov/33.14.E14): [`DLMF.Coulomb.hydrogenRadial`](DLMF/Coulomb/Energy/Defs.lean#L152) (definition); [`DLMF.Coulomb.hydrogenRadial_eq_coulombs`](DLMF/Coulomb/Energy/Properties.lean#L324) (proved); [`DLMF.Coulomb.hydrogenRadial_eq_laguerre`](DLMF/Coulomb/Energy/Properties.lean#L391) (proved) — `n ≥ ℓ+1`
-- [33.14.E15](https://dlmf.nist.gov/33.14.E15): [`DLMF.Coulomb.hydrogenRadial_orthonormal`](DLMF/Coulomb/Energy/Properties.lean#L464) (admitted) — `m, n ≥ ℓ+1`
-- [33.14.E16](https://dlmf.nist.gov/33.14.E16): [`DLMF.Coulomb.coulomb_wronskian_hf`](DLMF/Coulomb/Energy/Properties.lean#L480) (admitted); [`DLMF.Coulomb.coulomb_wronskian_cs`](DLMF/Coulomb/Energy/Properties.lean#L487) (admitted)
+- [33.14.E12](https://dlmf.nist.gov/33.14.E12): [`DLMF.Coulomb.coulombAProd_eq_Gamma`](DLMF/Coulomb/Energy/Properties.lean#L245) (proved)
+- [33.14.E13](https://dlmf.nist.gov/33.14.E13): [`DLMF.Coulomb.coulombs_orthogonality_dirac`](DLMF/Coulomb/Energy/Properties.lean#L297) (admitted) — Dirac delta in the distributional sense (test functions in `C_c^∞(0,∞)`, cut-off `∫₀^R`)
+- [33.14.E14](https://dlmf.nist.gov/33.14.E14): [`DLMF.Coulomb.hydrogenRadial`](DLMF/Coulomb/Energy/Defs.lean#L152) (definition); [`DLMF.Coulomb.hydrogenRadial_eq_coulombs`](DLMF/Coulomb/Energy/Properties.lean#L326) (proved); [`DLMF.Coulomb.hydrogenRadial_eq_laguerre`](DLMF/Coulomb/Energy/Properties.lean#L393) (proved) — `n ≥ ℓ+1`
+- [33.14.E15](https://dlmf.nist.gov/33.14.E15): [`DLMF.Coulomb.hydrogenRadial_orthonormal`](DLMF/Coulomb/Energy/Properties.lean#L466) (admitted) — `m, n ≥ ℓ+1`
+- [33.14.E16](https://dlmf.nist.gov/33.14.E16): [`DLMF.Coulomb.coulomb_wronskian_hf`](DLMF/Coulomb/Energy/Properties.lean#L482) (admitted); [`DLMF.Coulomb.coulomb_wronskian_cs`](DLMF/Coulomb/Energy/Properties.lean#L489) (admitted)
 - [33.14.v](https://dlmf.nist.gov/33.14.v): no prose statement beyond 33.14.E16.
 
 ## [§33.15 Graphics](https://dlmf.nist.gov/33.15)
 - [33.15](https://dlmf.nist.gov/33.15): excluded: graphics.
 
 ## [§33.16 Connection Formulas](https://dlmf.nist.gov/33.16)
-- [33.16.E1](https://dlmf.nist.gov/33.16.E1): [`DLMF.Coulomb.coulombF_eq_coulombf`](DLMF/Coulomb/Energy/Connection.lean#L69) (proved)
-- [33.16.E2](https://dlmf.nist.gov/33.16.E2): [`DLMF.Coulomb.coulombG_eq_coulombh`](DLMF/Coulomb/Energy/Connection.lean#L89) (admitted)
-- [33.16.E3](https://dlmf.nist.gov/33.16.E3): [`DLMF.Coulomb.coulombf_eq_coulombF_pos`](DLMF/Coulomb/Energy/Connection.lean#L144) (proved) — notation `τ = ε^{1/2}`, written inline as `Real.sqrt ε`
-- [33.16.E4](https://dlmf.nist.gov/33.16.E4): [`DLMF.Coulomb.coulombf_eq_coulombF_pos`](DLMF/Coulomb/Energy/Connection.lean#L144) (proved)
-- [33.16.E5](https://dlmf.nist.gov/33.16.E5): [`DLMF.Coulomb.coulombh_eq_coulombG_pos`](DLMF/Coulomb/Energy/Connection.lean#L185) (admitted)
-- [33.16.E6](https://dlmf.nist.gov/33.16.E6): [`DLMF.Coulomb.coulombf_eq_coulombF_neg`](DLMF/Coulomb/Energy/Connection.lean#L194) (proved)
-- [33.16.E7](https://dlmf.nist.gov/33.16.E7): [`DLMF.Coulomb.coulombh_eq_coulombG_neg`](DLMF/Coulomb/Energy/Connection.lean#L241) (admitted)
-- [33.16.E8](https://dlmf.nist.gov/33.16.E8): [`DLMF.Coulomb.coulombf_eq_whittaker_pos`](DLMF/Coulomb/Energy/Connection.lean#L432) (proved) — notation `ν = (-ε)^{-1/2}`, written inline as a `let`
+- [33.16.E1](https://dlmf.nist.gov/33.16.E1): [`DLMF.Coulomb.coulombF_eq_coulombf`](DLMF/Coulomb/Energy/Connection.lean#L71) (proved)
+- [33.16.E2](https://dlmf.nist.gov/33.16.E2): [`DLMF.Coulomb.coulombG_eq_coulombh`](DLMF/Coulomb/Energy/Connection.lean#L91) (admitted)
+- [33.16.E3](https://dlmf.nist.gov/33.16.E3): [`DLMF.Coulomb.coulombf_eq_coulombF_pos`](DLMF/Coulomb/Energy/Connection.lean#L151) (proved) — notation `τ = ε^{1/2}`, written inline as `Real.sqrt ε`
+- [33.16.E4](https://dlmf.nist.gov/33.16.E4): [`DLMF.Coulomb.coulombf_eq_coulombF_pos`](DLMF/Coulomb/Energy/Connection.lean#L151) (proved)
+- [33.16.E5](https://dlmf.nist.gov/33.16.E5): [`DLMF.Coulomb.coulombh_eq_coulombG_pos`](DLMF/Coulomb/Energy/Connection.lean#L192) (admitted)
+- [33.16.E6](https://dlmf.nist.gov/33.16.E6): [`DLMF.Coulomb.coulombf_eq_coulombF_neg`](DLMF/Coulomb/Energy/Connection.lean#L201) (proved)
+- [33.16.E7](https://dlmf.nist.gov/33.16.E7): [`DLMF.Coulomb.coulombh_eq_coulombG_neg`](DLMF/Coulomb/Energy/Connection.lean#L248) (admitted)
+- [33.16.E8](https://dlmf.nist.gov/33.16.E8): [`DLMF.Coulomb.coulombf_eq_whittaker_pos`](DLMF/Coulomb/Energy/Connection.lean#L439) (proved) — notation `ν = (-ε)^{-1/2}`, written inline as a `let`
 - [33.16.E9](https://dlmf.nist.gov/33.16.E9): [`DLMF.Coulomb.coulombZeta`](DLMF/Coulomb/Energy/Defs.lean#L161) (definition); [`DLMF.Coulomb.coulombXi`](DLMF/Coulomb/Energy/Defs.lean#L168) (definition)
-- [33.16.E10](https://dlmf.nist.gov/33.16.E10): [`DLMF.Coulomb.coulombf_eq_whittaker_pos`](DLMF/Coulomb/Energy/Connection.lean#L432) (proved)
-- [33.16.E11](https://dlmf.nist.gov/33.16.E11): [`DLMF.Coulomb.coulombh_eq_whittaker_pos`](DLMF/Coulomb/Energy/Connection.lean#L525) (admitted)
-- [33.16.E12](https://dlmf.nist.gov/33.16.E12): [`DLMF.Coulomb.coulombf_eq_whittaker_neg`](DLMF/Coulomb/Energy/Connection.lean#L536) (proved)
-- [33.16.E13](https://dlmf.nist.gov/33.16.E13): [`DLMF.Coulomb.coulombh_eq_whittaker_neg`](DLMF/Coulomb/Energy/Connection.lean#L638) (proved)
-- [33.16.E14](https://dlmf.nist.gov/33.16.E14): [`DLMF.Coulomb.coulombs_coulombc_eq_pos`](DLMF/Coulomb/Energy/Connection.lean#L250) (proved from admissions)
-- [33.16.E15](https://dlmf.nist.gov/33.16.E15): [`DLMF.Coulomb.coulombs_coulombc_eq_neg`](DLMF/Coulomb/Energy/Connection.lean#L277) (proved from admissions) — corrected: DLMF omits the factors `(-1)^{ℓ+1}e^{π/τ}` (for `s`) and `(-1)^ℓ e^{-π/τ}` (for `c`); the corrected form is proved from 33.16.6–33.16.7 and the definitions
+- [33.16.E10](https://dlmf.nist.gov/33.16.E10): [`DLMF.Coulomb.coulombf_eq_whittaker_pos`](DLMF/Coulomb/Energy/Connection.lean#L439) (proved)
+- [33.16.E11](https://dlmf.nist.gov/33.16.E11): [`DLMF.Coulomb.coulombh_eq_whittaker_pos`](DLMF/Coulomb/Energy/Connection.lean#L532) (admitted)
+- [33.16.E12](https://dlmf.nist.gov/33.16.E12): [`DLMF.Coulomb.coulombf_eq_whittaker_neg`](DLMF/Coulomb/Energy/Connection.lean#L543) (proved)
+- [33.16.E13](https://dlmf.nist.gov/33.16.E13): [`DLMF.Coulomb.coulombh_eq_whittaker_neg`](DLMF/Coulomb/Energy/Connection.lean#L645) (proved)
+- [33.16.E14](https://dlmf.nist.gov/33.16.E14): [`DLMF.Coulomb.coulombs_coulombc_eq_pos`](DLMF/Coulomb/Energy/Connection.lean#L257) (proved from admissions)
+- [33.16.E15](https://dlmf.nist.gov/33.16.E15): [`DLMF.Coulomb.coulombs_coulombc_eq_neg`](DLMF/Coulomb/Energy/Connection.lean#L284) (proved from admissions) — corrected: DLMF omits the factors `(-1)^{ℓ+1}e^{π/τ}` (for `s`) and `(-1)^ℓ e^{-π/τ}` (for `c`); the corrected form is proved from 33.16.6–33.16.7 and the definitions
 - [33.16.E16](https://dlmf.nist.gov/33.16.E16): [`DLMF.Coulomb.coulombKNorm`](DLMF/Coulomb/Energy/Defs.lean#L178) (definition)
-- [33.16.E17](https://dlmf.nist.gov/33.16.E17): [`DLMF.Coulomb.coulombs_coulombc_eq_whittaker_pos`](DLMF/Coulomb/Energy/Connection.lean#L693) (admitted) — corrected: prefactor `(-1)^ℓ/(2ν)^{1/2}`, not `(-1)^ℓ/(2ν^{1/2})`; hypothesis `A(ε,ℓ) > 0`
-- [33.16.E18](https://dlmf.nist.gov/33.16.E18): [`DLMF.Coulomb.coulombs_coulombc_eq_whittaker_neg`](DLMF/Coulomb/Energy/Connection.lean#L711) (proved) — corrected: `K(ν,ℓ)` and `1/K(ν,ℓ)` interchanged in DLMF; hypothesis `A(ε,ℓ) > 0`
+- [33.16.E17](https://dlmf.nist.gov/33.16.E17): [`DLMF.Coulomb.coulombs_coulombc_eq_whittaker_pos`](DLMF/Coulomb/Energy/Connection.lean#L700) (admitted) — corrected: prefactor `(-1)^ℓ/(2ν)^{1/2}`, not `(-1)^ℓ/(2ν^{1/2})`; hypothesis `A(ε,ℓ) > 0`
+- [33.16.E18](https://dlmf.nist.gov/33.16.E18): [`DLMF.Coulomb.coulombs_coulombc_eq_whittaker_neg`](DLMF/Coulomb/Energy/Connection.lean#L718) (proved) — corrected: `K(ν,ℓ)` and `1/K(ν,ℓ)` interchanged in DLMF; hypothesis `A(ε,ℓ) > 0`
 - [33.16](https://dlmf.nist.gov/33.16): the prose only introduces the notation `τ`, `ν`; no further statement.
 
 ## [§33.17 Recurrence Relations and Derivatives](https://dlmf.nist.gov/33.17)
-- [33.17.E1](https://dlmf.nist.gov/33.17.E1): [`DLMF.Coulomb.coulombf_recurrence`](DLMF/Coulomb/Energy/Recurrence.lean#L29) (proved) — `ℓ ≥ 1`
-- [33.17.E2](https://dlmf.nist.gov/33.17.E2): [`DLMF.Coulomb.coulombh_recurrence`](DLMF/Coulomb/Energy/Recurrence.lean#L45) (admitted) — `ℓ ≥ 1`, `r ≠ 0`
-- [33.17.E3](https://dlmf.nist.gov/33.17.E3): [`DLMF.Coulomb.coulombf_deriv`](DLMF/Coulomb/Energy/Recurrence.lean#L53) (proved)
-- [33.17.E4](https://dlmf.nist.gov/33.17.E4): [`DLMF.Coulomb.coulombh_deriv`](DLMF/Coulomb/Energy/Recurrence.lean#L69) (admitted)
+- [33.17.E1](https://dlmf.nist.gov/33.17.E1): [`DLMF.Coulomb.coulombf_recurrence`](DLMF/Coulomb/Energy/Recurrence.lean#L28) (proved) — `ℓ ≥ 1`
+- [33.17.E2](https://dlmf.nist.gov/33.17.E2): [`DLMF.Coulomb.coulombh_recurrence`](DLMF/Coulomb/Energy/Recurrence.lean#L44) (admitted) — `ℓ ≥ 1`, `r ≠ 0`
+- [33.17.E3](https://dlmf.nist.gov/33.17.E3): [`DLMF.Coulomb.coulombf_deriv`](DLMF/Coulomb/Energy/Recurrence.lean#L52) (proved)
+- [33.17.E4](https://dlmf.nist.gov/33.17.E4): [`DLMF.Coulomb.coulombh_deriv`](DLMF/Coulomb/Energy/Recurrence.lean#L68) (admitted)
 
 ## [§33.18 Limiting Forms for Large ℓ](https://dlmf.nist.gov/33.18)
-- [33.18.E1](https://dlmf.nist.gov/33.18.E1): [`DLMF.Coulomb.coulombf_coulombh_isEquivalent_atTop`](DLMF/Coulomb/Energy/Recurrence.lean#L77) (admitted)
+- [33.18.E1](https://dlmf.nist.gov/33.18.E1): [`DLMF.Coulomb.coulombf_coulombh_isEquivalent_atTop`](DLMF/Coulomb/Energy/Recurrence.lean#L76) (admitted)
 
 ## [§33.19 Power-Series Expansions in r](https://dlmf.nist.gov/33.19)
-- [33.19.E1](https://dlmf.nist.gov/33.19.E1): [`DLMF.Coulomb.coulombf_hasSum`](DLMF/Coulomb/Energy/Series.lean#L142) (proved)
-- [33.19.E2](https://dlmf.nist.gov/33.19.E2): [`DLMF.Coulomb.coulombAlpha`](DLMF/Coulomb/Energy/Defs.lean#L184) (definition); [`DLMF.Coulomb.coulombAlpha_zero_one`](DLMF/Coulomb/Energy/Series.lean#L49) (proved); [`DLMF.Coulomb.coulombAlpha_recurrence`](DLMF/Coulomb/Energy/Series.lean#L56) (proved)
-- [33.19.E3](https://dlmf.nist.gov/33.19.E3): [`DLMF.Coulomb.coulombh_hasSum`](DLMF/Coulomb/Energy/Series.lean#L153) (admitted) — corrected: the finite sum is doubled, and for `ε < 0` the digamma terms use `κ = +(-ε)^{-1/2}` for both signs of `r`; hypotheses `ε ≠ 0`, `r ≠ 0`, `A(ε,ℓ) ≠ 0`
-- [33.19.E4](https://dlmf.nist.gov/33.19.E4): [`DLMF.Coulomb.coulombGammaCoeff`](DLMF/Coulomb/Energy/Defs.lean#L194) (definition); [`DLMF.Coulomb.coulombGammaCoeff_recurrence`](DLMF/Coulomb/Energy/Series.lean#L69) (proved)
-- [33.19.E5](https://dlmf.nist.gov/33.19.E5): [`DLMF.Coulomb.coulombDeltaCoeff`](DLMF/Coulomb/Energy/Defs.lean#L213) (definition); [`DLMF.Coulomb.coulombDeltaCoeff_zero_one`](DLMF/Coulomb/Energy/Series.lean#L108) (proved)
-- [33.19.E6](https://dlmf.nist.gov/33.19.E6): [`DLMF.Coulomb.coulombDeltaCoeff_recurrence`](DLMF/Coulomb/Energy/Series.lean#L93) (proved)
-- [33.19.E7](https://dlmf.nist.gov/33.19.E7): [`DLMF.Coulomb.coulombBetaCoeff`](DLMF/Coulomb/Energy/Defs.lean#L203) (definition); [`DLMF.Coulomb.coulombBetaCoeff_recurrence`](DLMF/Coulomb/Energy/Series.lean#L81) (proved)
+- [33.19.E1](https://dlmf.nist.gov/33.19.E1): [`DLMF.Coulomb.coulombf_hasSum`](DLMF/Coulomb/Energy/Series.lean#L140) (proved)
+- [33.19.E2](https://dlmf.nist.gov/33.19.E2): [`DLMF.Coulomb.coulombAlpha`](DLMF/Coulomb/Energy/Defs.lean#L184) (definition); [`DLMF.Coulomb.coulombAlpha_zero_one`](DLMF/Coulomb/Energy/Series.lean#L47) (proved); [`DLMF.Coulomb.coulombAlpha_recurrence`](DLMF/Coulomb/Energy/Series.lean#L54) (proved)
+- [33.19.E3](https://dlmf.nist.gov/33.19.E3): [`DLMF.Coulomb.coulombh_hasSum`](DLMF/Coulomb/Energy/Series.lean#L151) (admitted) — corrected: the finite sum is doubled, and for `ε < 0` the digamma terms use `κ = +(-ε)^{-1/2}` for both signs of `r`; hypotheses `ε ≠ 0`, `r ≠ 0`, `A(ε,ℓ) ≠ 0`
+- [33.19.E4](https://dlmf.nist.gov/33.19.E4): [`DLMF.Coulomb.coulombGammaCoeff`](DLMF/Coulomb/Energy/Defs.lean#L194) (definition); [`DLMF.Coulomb.coulombGammaCoeff_recurrence`](DLMF/Coulomb/Energy/Series.lean#L67) (proved)
+- [33.19.E5](https://dlmf.nist.gov/33.19.E5): [`DLMF.Coulomb.coulombDeltaCoeff`](DLMF/Coulomb/Energy/Defs.lean#L213) (definition); [`DLMF.Coulomb.coulombDeltaCoeff_zero_one`](DLMF/Coulomb/Energy/Series.lean#L106) (proved)
+- [33.19.E6](https://dlmf.nist.gov/33.19.E6): [`DLMF.Coulomb.coulombDeltaCoeff_recurrence`](DLMF/Coulomb/Energy/Series.lean#L91) (proved)
+- [33.19.E7](https://dlmf.nist.gov/33.19.E7): [`DLMF.Coulomb.coulombBetaCoeff`](DLMF/Coulomb/Energy/Defs.lean#L203) (definition); [`DLMF.Coulomb.coulombBetaCoeff_recurrence`](DLMF/Coulomb/Energy/Series.lean#L79) (proved)
 - [33.19](https://dlmf.nist.gov/33.19): the convergence statement (all finite `r`, except `r = 0` for 33.19.3) is part of the `HasSum` statements of 33.19.E1 and 33.19.E3.
 
 ## [§33.20 Expansions for Small |ε|](https://dlmf.nist.gov/33.20)
@@ -453,7 +453,7 @@ declarations:
 - [33.20.E3](https://dlmf.nist.gov/33.20.E3): [`DLMF.Coulomb.coulombf_hasSum_eps_pos`](DLMF/Coulomb/Energy/Series.lean#L246) (admitted); [`DLMF.Coulomb.coulombf_hasSum_eps_neg`](DLMF/Coulomb/Energy/Series.lean#L257) (admitted)
 - [33.20.E4](https://dlmf.nist.gov/33.20.E4): [`DLMF.Coulomb.coulombf_hasSum_eps_pos`](DLMF/Coulomb/Energy/Series.lean#L246) (admitted)
 - [33.20.E5](https://dlmf.nist.gov/33.20.E5): [`DLMF.Coulomb.coulombf_hasSum_eps_neg`](DLMF/Coulomb/Energy/Series.lean#L257) (admitted)
-- [33.20.E6](https://dlmf.nist.gov/33.20.E6): [`DLMF.Coulomb.coulombCkp`](DLMF/Coulomb/Energy/Defs.lean#L226) (definition); [`DLMF.Coulomb.coulombCkp_eq_zero`](DLMF/Coulomb/Energy/Series.lean#L118) (proved); [`DLMF.Coulomb.coulombCkp_recurrence`](DLMF/Coulomb/Energy/Series.lean#L129) (proved)
+- [33.20.E6](https://dlmf.nist.gov/33.20.E6): [`DLMF.Coulomb.coulombCkp`](DLMF/Coulomb/Energy/Defs.lean#L226) (definition); [`DLMF.Coulomb.coulombCkp_eq_zero`](DLMF/Coulomb/Energy/Series.lean#L116) (proved); [`DLMF.Coulomb.coulombCkp_recurrence`](DLMF/Coulomb/Energy/Series.lean#L127) (proved)
 - [33.20.E7](https://dlmf.nist.gov/33.20.E7): [`DLMF.Coulomb.coulombh_asymptotic_eps_pos`](DLMF/Coulomb/Energy/Series.lean#L268) (admitted); [`DLMF.Coulomb.coulombh_asymptotic_eps_neg`](DLMF/Coulomb/Energy/Series.lean#L280) (admitted)
 - [33.20.E8](https://dlmf.nist.gov/33.20.E8): [`DLMF.Coulomb.coulombh_asymptotic_eps_pos`](DLMF/Coulomb/Energy/Series.lean#L268) (admitted)
 - [33.20.E9](https://dlmf.nist.gov/33.20.E9): [`DLMF.Coulomb.coulombh_asymptotic_eps_neg`](DLMF/Coulomb/Energy/Series.lean#L280) (admitted)
@@ -461,8 +461,8 @@ declarations:
 - [33.20.iv](https://dlmf.nist.gov/33.20.iv): no statement (references only: Curtis 1964a, §7).
 
 ## [§33.21 Asymptotic Approximations for Large |r|](https://dlmf.nist.gov/33.21)
-- [33.21.E1](https://dlmf.nist.gov/33.21.E1): [`DLMF.Coulomb.coulombZeta_coulombXi_isEquivalent_atTop`](DLMF/Coulomb/Energy/Asymptotics.lean#L31) (admitted)
-- [33.21.E2](https://dlmf.nist.gov/33.21.E2): [`DLMF.Coulomb.coulombZeta_coulombXi_isEquivalent_atBot`](DLMF/Coulomb/Energy/Asymptotics.lean#L41) (admitted)
+- [33.21.E1](https://dlmf.nist.gov/33.21.E1): [`DLMF.Coulomb.coulombZeta_coulombXi_isEquivalent_atTop`](DLMF/Coulomb/Energy/Asymptotics.lean#L30) (admitted)
+- [33.21.E2](https://dlmf.nist.gov/33.21.E2): [`DLMF.Coulomb.coulombZeta_coulombXi_isEquivalent_atBot`](DLMF/Coulomb/Energy/Asymptotics.lean#L40) (admitted)
 - [33.21.i](https://dlmf.nist.gov/33.21.i): methods (combine §33.16 with 33.10.1, 33.21.1–33.21.2 or §§10.7(ii), 10.30(ii)); no separate statement.
 - [33.21.ii](https://dlmf.nist.gov/33.21.ii): no statement (references only: Curtis 1964a, §6).
 

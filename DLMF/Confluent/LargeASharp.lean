@@ -60,6 +60,7 @@ namespace DLMF.Confluent
 
 /-! ### A quantitative Tannery estimate -/
 
+/-- For `x ≥ 1`, `(x)_n ≥ 1`. -/
 theorem one_le_ascPochhammer_eval {x : ℝ} (hx : 1 ≤ x) (n : ℕ) :
     1 ≤ (ascPochhammer ℝ n).eval x := by
   induction n with
@@ -230,12 +231,14 @@ theorem isBigO_mul_sub_mul {f g : ℝ → ℂ} {f₀ g₀ : ℂ}
   have h2 := hg.const_mul_left f₀
   exact (h1.add h2).congr_left fun κ => by ring
 
+/-- If `f - f₀` and `g - g₀` are `O(1/κ)`, so is `f + g - (f₀ + g₀)`. -/
 theorem isBigO_add_sub_add {f g : ℝ → ℂ} {f₀ g₀ : ℂ}
     (hf : (fun κ => f κ - f₀) =O[atTop] (fun κ : ℝ => κ⁻¹))
     (hg : (fun κ => g κ - g₀) =O[atTop] (fun κ : ℝ => κ⁻¹)) :
     (fun κ => f κ + g κ - (f₀ + g₀)) =O[atTop] (fun κ : ℝ => κ⁻¹) :=
   (hf.add hg).congr_left fun κ => by ring
 
+/-- `M̃(c/2-κ, c, s²/(4κ)) - ₀F̃₁(;c;-s²/4) = O(1/κ)` as `κ → ∞`. -/
 theorem largeAW_sub_isBigO (c s : ℝ) :
     (fun κ : ℝ => largeAW c κ s - largeAV c s) =O[atTop] (fun κ : ℝ => κ⁻¹) := by
   have h := isBigO_regularizedConfluent_sub_div (c / 2) (c : ℂ) ((s ^ 2 / 4 : ℝ) : ℂ)
@@ -253,6 +256,7 @@ theorem largeAW_sub_isBigO (c s : ℝ) :
   push_cast
   field_simp
 
+/-- `largeAW1 - largeAV1 = O(1/κ)` as `κ → ∞`. -/
 lemma largeAW1_sub_isBigO (c s : ℝ) :
     (fun κ : ℝ => largeAW1 c κ s - largeAV1 c s) =O[atTop] (fun κ : ℝ => κ⁻¹) := by
   have hX := isBigO_regularizedConfluent_sub_div (c / 2 + 1) ((c : ℂ) + 1) ((s ^ 2 / 4 : ℝ) : ℂ)
@@ -284,6 +288,7 @@ lemma largeAW1_sub_isBigO (c s : ℝ) :
   push_cast
   field_simp
 
+/-- The gauge factor satisfies `s^{c-1/2} e^{-s²/(8κ)} - s^{c-1/2} = O(1/κ)` as `κ → ∞`. -/
 theorem largeAP_sub_isBigO (c s : ℝ) :
     (fun κ : ℝ => ((largeAP c κ s : ℝ) : ℂ) - ((largeAQ c s : ℝ) : ℂ)) =O[atTop]
       (fun κ : ℝ => κ⁻¹) := by
@@ -303,6 +308,7 @@ theorem largeAP_sub_isBigO (c s : ℝ) :
       ≤ |s ^ (c - 1 / 2)| * (s ^ 2 / (8 * κ)) := by gcongr
     _ = |s ^ (c - 1 / 2)| * (s ^ 2 / 8) * κ⁻¹ := by field_simp
 
+/-- `largeAH - largeAH0 = -s/(4κ) = O(1/κ)` as `κ → ∞`. -/
 theorem largeAH_sub_isBigO (c s : ℝ) :
     (fun κ : ℝ => ((largeAH c κ s : ℝ) : ℂ) - ((largeAH0 c s : ℝ) : ℂ)) =O[atTop]
       (fun κ : ℝ => κ⁻¹) := by
@@ -320,6 +326,7 @@ theorem largeAU_sub_largeAU0_isBigO_const (c s : ℝ) :
     (fun κ : ℝ => largeAU c κ s - largeAU0 c s) =O[atTop] (fun κ : ℝ => κ⁻¹) :=
   isBigO_mul_sub_mul (largeAP_sub_isBigO c s) (largeAW_sub_isBigO c s)
 
+/-- `u' - u₀' = O(1/κ)` as `κ → ∞`, at fixed `s`. -/
 theorem largeAU'_sub_largeAU0'_isBigO_const (c s : ℝ) :
     (fun κ : ℝ => largeAU' c κ s - largeAU0' c s) =O[atTop] (fun κ : ℝ => κ⁻¹) :=
   isBigO_mul_sub_mul (largeAP_sub_isBigO c s)
@@ -328,6 +335,7 @@ theorem largeAU'_sub_largeAU0'_isBigO_const (c s : ℝ) :
 
 /-! ### The comparison estimate -/
 
+/-- `g - g₀ = t²/(16κ²)`. -/
 theorem largeAG_sub_largeAG0 (c κ t : ℝ) : largeAG c κ t - largeAG0 c t = t ^ 2 / (16 * κ ^ 2) := by
   simp only [largeAG, largeAG0]
   ring
@@ -492,6 +500,7 @@ theorem norm_largeAU_sub_largeAU0_le_sharp (c : ℝ) {κ s₀ S : ℝ} (hκ : 0 
 
 /-! ### The rate along `S = 2√(κx)` -/
 
+/-- For `x, κ > 0`, `(2√(κx))³/(16κ²) = x√x/(2√κ)`. -/
 theorem cube_div_eq (x : ℝ) (hx : 0 < x) {κ : ℝ} (hκ : 0 < κ) :
     (2 * Real.sqrt (κ * x)) ^ 3 / (16 * κ ^ 2) = x * Real.sqrt x / (2 * Real.sqrt κ) := by
   have hsk : 0 < Real.sqrt κ := Real.sqrt_pos.mpr hκ
@@ -633,6 +642,7 @@ theorem largeA_besselJ_identity (c : ℝ) {κ x : ℝ} (hκ : 0 < κ) (hx : 0 < 
     (Real.sqrt (2 * Real.sqrt (κ * x)) : ℂ) *
       besselJ ((c - 1 : ℝ) : ℂ) (((2 : ℝ) : ℂ) * (Real.sqrt (κ * x) : ℂ)) * h3c
 
+/-- `c/2 - a → +∞` as `a → -∞`. -/
 theorem tendsto_half_sub_atBot (c : ℝ) : Tendsto (fun a : ℝ => c / 2 - a) atBot atTop :=
   (tendsto_neg_atBot_atTop.atTop_add (tendsto_const_nhds (x := c / 2))).congr fun a => by ring
 
@@ -1142,6 +1152,7 @@ theorem kummerU_large_a_eq_half (c : ℝ) (hc : ∀ k : ℤ, c ≠ k) {a x : ℝ
   field_simp
   ring
 
+/-- For `x > 0`, `√(2x(c - 2a)) → +∞` as `a → -∞`. -/
 theorem tendsto_sqrt_two_mul_atBot (c : ℝ) {x : ℝ} (hx : 0 < x) :
     Tendsto (fun a : ℝ => Real.sqrt (2 * x * (c - 2 * a))) atBot atTop := by
   have h1 : Tendsto (fun a : ℝ => 4 * x * -a + 2 * x * c) atBot atTop :=

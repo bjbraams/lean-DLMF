@@ -124,7 +124,9 @@ theorem associatedP_gegenbauer (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) 
   have g1' : Gamma (1 - m*2) ≠ 0 := by rw [mul_comm]; exact g1
   field_simp
 
-/-- associatedP jacobi. -/
+/-- DLMF 14.3.23: for `x > 1`, `P^μ_ν(x)` is the limit as `m → μ` (`m ≠ μ`) of `(1/Γ(1-m))
+((x+1)/(x-1))^{m/2} φ^{(-m,m)}_{-i(2ν+1)}(arcsinh(((x-1)/2)^{1/2}))`, with `φ` the Jacobi function;
+the limit removes the poles of `1/Γ(1-m)` at positive integers. -/
 @[dlmf 14.3.E23]
 theorem associatedP_jacobi (ν μ : ℂ) {x : ℝ} (hx : 1 < x) :
     Tendsto (fun m : ℂ => 1/Gamma (1-m)*((x+1)/(x-1):ℂ)^(m/2)*jacobiFunction (-m) m (-I*(2*ν+1)) (Real.arsinh (Real.sqrt (x/2-1/2)))) (𝓝[≠] μ) (𝓝 (associatedP ν μ x)) := by
@@ -166,7 +168,9 @@ theorem associatedP_jacobi (ν μ : ℂ) {x : ℝ} (hx : 1 < x) :
 def associatedDegreeA (ν μ z : ℂ) : ℂ :=
   sin (ν*π)*exp (μ/2*(log (z+1)-log (z-1)))*∑' k : ℕ, ((1-z)/2)^k*Gamma (k-ν)*Gamma (k+ν+1)/((k.factorial:ℂ)*Gamma (k-μ+1))*(digamma (k+ν+1)-digamma (k-ν))
 
-/-- associatedP degree deriv. -/
+/-- DLMF 14.11.1 (associated case): for non-integer `ν`, `z ∉ (-∞, 1]` and `|1-z| < 2`,
+`∂P^μ_ν(z)/∂ν = π cot(νπ) P^μ_ν(z) - (1/π) A^μ_ν(z)`, with `A^μ_ν` the series 14.11.3 continued to
+complex `z`. -/
 @[dlmf 14.11.E1]
 theorem associatedP_degree_deriv {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (hdisk : ‖1-z‖ < 2) :
     HasDerivAt (fun ν => associatedP ν μ z) (π*cos (ν*π)/sin (ν*π)*associatedP ν μ z-associatedDegreeA ν μ z/π) ν := by
@@ -187,7 +191,7 @@ theorem associatedP_degree_deriv {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (μ : 
   have hR := legHyp_hasSum_A_complex hν μ hw
   unfold associatedDegreeA
   rw [hR.tsum_eq, hP ν, mul_comm (ν:ℂ) π]
-  have hs := legHyp_sin_ne hν
+  have hs := DLMF.Hypergeometric.sin_pi_mul_ne_zero_of_not_int hν
   have hπ : (π:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
   dsimp only [pref, F]
   generalize sin (π*ν) = s at hs ⊢

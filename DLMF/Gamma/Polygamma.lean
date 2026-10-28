@@ -47,6 +47,7 @@ theorem trigamma_add_one {x : ℝ} (hx : 0 < x) :
   simp only [h, Nat.cast_zero, add_zero]
   ring
 
+/-- DLMF 5.15.4: `ψ'(n - 1/2) = π²/2 - 4 ∑_{k=1}^{n-1} 1/(2k - 1)²` for `n ≥ 1`. -/
 @[dlmf 5.15.E4]
 theorem trigamma_nat_sub_half (n : ℕ) (hn : 1 ≤ n) :
     Real.trigamma (n - 1 / 2) =
@@ -333,6 +334,7 @@ theorem riemannZeta_nat_eq_tsum_succ {p : ℕ} (hp : 1 < p) :
   rw [zeta_nat_eq_tsum_of_gt_one hp, (summable_one_div_nat_pow_complex hp).tsum_eq_zero_add]
   simp [Nat.cast_add_one, zero_pow (by omega : p ≠ 0)]
 
+/-- DLMF 5.15.2: `ψ^(n)(1) = (-1)^(n+1) n! ζ(n + 1)` for `n ≥ 1`. -/
 @[dlmf 5.15.E2]
 theorem polygamma_one (n : ℕ) (hn : 0 < n) :
     polygamma n 1 = (-1 : ℂ) ^ (n + 1) * n.factorial * riemannZeta (n + 1) := by
@@ -343,6 +345,7 @@ theorem polygamma_one (n : ℕ) (hn : 0 < n) :
   funext k
   rw [zpow_neg_one_sub_nat_eq, add_comm]
 
+/-- DLMF 5.15.3: `ψ^(n)(1/2) = (-1)^(n+1) n! (2^(n+1) - 1) ζ(n + 1)` for `n ≥ 1`. -/
 @[dlmf 5.15.E3]
 theorem polygamma_one_div_two (n : ℕ) (hn : 0 < n) :
     polygamma n (1 / 2) =
@@ -385,6 +388,7 @@ theorem polygamma_one_div_two (n : ℕ) (hn : 0 < n) :
   rw [this]; ring
 
 
+/-- DLMF 5.15.5: `ψ^(n)(z + 1) = ψ^(n)(z) + (-1)^n n! z^(-n-1)` away from the poles. -/
 @[dlmf 5.15.E5]
 theorem polygamma_add_one (n : ℕ) {z : ℂ} (hz : ∀ k : ℕ, z ≠ -k) :
     polygamma n (z + 1) = polygamma n z + (-1 : ℂ) ^ n * n.factorial * z ^ (-(n + 1 : ℕ) : ℂ) := by
@@ -429,6 +433,8 @@ theorem contDiffAt_cot_pi_mul {n : ℕ} {z : ℂ} (hz : ∀ k : ℤ, z ≠ (k : 
   refine (hc.div hs hsin).congr_of_eventuallyEq (Filter.Eventually.of_forall fun w => ?_)
   simp [Complex.cot_eq_cos_div_sin]
 
+/-- DLMF 5.15.6: the reflection formula `ψ^(n)(1 - z) + (-1)^(n-1) ψ^(n)(z) = (-1)^n π dⁿ/dzⁿ cot(π
+z)` for non-integer `z`. -/
 @[dlmf 5.15.E6]
 theorem polygamma_reflection (n : ℕ) {z : ℂ} (hz : ∀ k : ℤ, z ≠ k) :
     polygamma n (1 - z) + (-1 : ℂ) ^ (n - 1 : ℤ) * polygamma n z =
@@ -505,6 +511,7 @@ from `Asymptotics.lean` then gives the series with an explicit remainder. -/
 
 open MeasureTheory Set
 
+/-- `∑ₖ 1/(z + k)^(n+1)` converges for `n ≥ 1` and `z > 0`. -/
 theorem summable_recip_add_pow {n : ℕ} (hn : 1 ≤ n) {z : ℝ} (hz : 0 < z) :
     Summable fun k : ℕ => ((z + k) ^ (n + 1))⁻¹ := by
   refine Summable.of_norm_bounded_eventually_nat (g := fun k : ℕ => 1 / (k : ℝ) ^ 2)
@@ -517,6 +524,7 @@ theorem summable_recip_add_pow {n : ℕ} (hn : 1 ≤ n) {z : ℝ} (hz : 0 < z) :
   calc (k : ℝ) ^ 2 ≤ (z + k) ^ 2 := by gcongr
     _ ≤ (z + k) ^ (n + 1) := pow_le_pow_right₀ (by linarith) (by omega)
 
+/-- For `z > 0`, `e^(-z t) tⁿ β(t)` is integrable on `(0, ∞)`, where `β` is Binet's kernel. -/
 theorem integrableOn_exp_mul_pow_mul_binetBeta {z : ℝ} (hz : 0 < z) (n : ℕ) :
     IntegrableOn (fun t => Real.exp (-z * t) * (t ^ n * binetBeta t)) (Ioi 0) := by
   refine Integrable.mono' ((integrableOn_exp_mul_pow hz n).const_mul (1 / 2)) ?_ ?_
@@ -631,6 +639,7 @@ theorem abs_factorial_mul_tsum_sub_le {n : ℕ} (hn : 1 ≤ n) (m : ℕ) {z : �
   rw [hsum, show ∀ A B C D : ℝ, A + B + C - (A + B + D) = C - D from fun A B C D => by ring, hI]
   exact abs_integral_exp_mul_pow_mul_rem_le hz m (n + 1)
 
+/-- `C/(t + x)^N = O(t^(-N))` as `t → ∞`, for `x > 0`. -/
 theorem isBigO_recip_add_pow {x : ℝ} (hx : 0 < x) (N : ℕ) (C : ℝ) :
     Asymptotics.IsBigO atTop (fun t : ℝ => C / (t + x) ^ N) (fun t : ℝ => t ^ (-(N : ℝ))) := by
   refine Asymptotics.IsBigO.of_bound |C| ?_
@@ -641,6 +650,8 @@ theorem isBigO_recip_add_pow {x : ℝ} (hx : 0 < x) (N : ℕ) (C : ℝ) :
   exact div_le_div_of_nonneg_left (abs_nonneg C) (by positivity)
     (pow_le_pow_left₀ ht.le (by linarith) N)
 
+/-- DLMF 5.15.8: the asymptotic expansion `ψ'(z) ~ 1/z + 1/(2z²) + ∑ B₂ₖ/z^(2k+1)`, with remainder
+`O(t^(-2n-3))` along `z = t + x`. -/
 @[dlmf 5.15.E8]
 theorem trigamma_asymptotic (n : ℕ) {x : ℝ} (hx : 1 < x) :
     Asymptotics.IsBigO atTop
@@ -674,6 +685,8 @@ theorem trigamma_asymptotic (n : ℕ) {x : ℝ} (hx : 1 < x) :
       (2 * n + 2).factorial / (t + x) ^ (2 * n + 3)), mul_div_assoc]
   exact hb
 
+/-- DLMF 5.15.9: the asymptotic expansion of `ψ^(n)(z)` for `n ≥ 1`, with remainder `O(t^(-2m-n-2))`
+along `z = t + x`, `x > 1`. -/
 @[dlmf 5.15.E9]
 theorem polygamma_asymptotic (n m : ℕ) (hn : 0 < n) {x : ℝ} (hx : 1 < x) :
     Asymptotics.IsBigO atTop

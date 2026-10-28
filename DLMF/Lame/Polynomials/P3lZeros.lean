@@ -151,33 +151,19 @@ lemma p3l_count_anti {f : ℕ → ℕ} {n : ℕ} (hlt : ∀ i j, i < j → j ≤
 
 variable {k : ℝ}
 
-/-- The complementary modulus of a real modulus `0 < k < 1`. -/
-lemma p3l_comodulus (hk0 : 0 < k) (hk1 : k < 1) :
-    jacobiComodulusk (k : ℂ) = (Real.sqrt (1 - k ^ 2) : ℂ) := by
-  rw [jacobiComodulusk, Real.sqrt_eq_rpow, Complex.ofReal_cpow (by nlinarith)]
-  push_cast
-  rfl
-
-/-- `k' = √(1 - k²)` lies in `(0, 1)` and `k'² = 1 - k²`. -/
-lemma p3l_kp (hk0 : 0 < k) (hk1 : k < 1) :
-    0 < Real.sqrt (1 - k ^ 2) ∧ Real.sqrt (1 - k ^ 2) < 1 ∧
-      Real.sqrt (1 - k ^ 2) ^ 2 = 1 - k ^ 2 := by
-  refine ⟨Real.sqrt_pos.2 (by nlinarith), ?_, Real.sq_sqrt (by nlinarith)⟩
-  exact (Real.sqrt_lt' one_pos).2 (by nlinarith)
-
 /-- **`sn` on the vertical side**: `sn(K + iy, k) = 1/dn(y, k')` (DLMF 22.4.3 and Jacobi's
 imaginary transformation 22.6.1). -/
 lemma p3l_sn_vert (hk0 : 0 < k) (hk1 : k < 1) (y : ℝ) :
     jacobiSnk ((Real.compEllIntKm (k ^ 2) : ℂ) + I * y) k =
       ((Real.jacobiDnm y (1 - k ^ 2))⁻¹ : ℝ) := by
-  obtain ⟨h0, h1, h2⟩ := p3l_kp hk0 hk1
+  obtain ⟨h0, h1, h2⟩ := l29_comodulus hk0 hk1
   have hkD := p22R1_ofReal_mem hk0 hk1
   have hK : compEllIntKk (k : ℂ) = Real.compEllIntKm (k ^ 2) :=
     compEllIntKk_ofReal (by nlinarith)
   have e1 := (jacobiSnk_shift hkD (I * y)).1
   rw [hK, add_comm] at e1
   have e2 := (jacobi_imaginary_transformation hkD (y : ℂ)).2.2.2.1
-  rw [e1, e2, p3l_comodulus hk0 hk1, jacobiNdk, jacobiPQk_eq_one_div, ← jacobiDnk,
+  rw [e1, e2, p22R1_comodulus_ofReal hk0 hk1, jacobiNdk, jacobiPQk_eq_one_div, ← jacobiDnk,
     jacobiDnk_ofReal h0 h1, h2]
   push_cast
   ring
@@ -198,7 +184,7 @@ lemma p3l_dn_bounds (hk0 : 0 < k) (hk1 : k < 1) (y : ℝ) :
 lemma p3l_dn_strict (hk0 : 0 < k) (hk1 : k < 1) {y : ℝ}
     (hy : y ∈ Ioo 0 (Real.compEllIntKm (1 - k ^ 2))) :
     k ^ 2 < Real.jacobiDnm y (1 - k ^ 2) ^ 2 ∧ Real.jacobiDnm y (1 - k ^ 2) ^ 2 < 1 := by
-  obtain ⟨h0, h1, h2⟩ := p3l_kp hk0 hk1
+  obtain ⟨h0, h1, h2⟩ := l29_comodulus hk0 hk1
   have hy' : y ∈ Ioo 0 (Real.compEllIntKm (Real.sqrt (1 - k ^ 2) ^ 2)) := by rwa [h2]
   have hs := p2p_sn_pos h0 h1 hy'
   have hc := p2p_cn_pos h0 h1 hy'
@@ -214,7 +200,7 @@ lemma p3l_dn_strict (hk0 : 0 < k) (hk1 : k < 1) {y : ℝ}
 /-- `dn(·, k')²` is injective on `(0, K')`. -/
 lemma p3l_dn_sq_injOn (hk0 : 0 < k) (hk1 : k < 1) :
     InjOn (fun y => Real.jacobiDnm y (1 - k ^ 2) ^ 2) (Ioo 0 (Real.compEllIntKm (1 - k ^ 2))) := by
-  obtain ⟨h0, h1, h2⟩ := p3l_kp hk0 hk1
+  obtain ⟨h0, h1, h2⟩ := l29_comodulus hk0 hk1
   have hinj := p2p_sn_sq_injOn h0 h1
   rw [h2] at hinj
   intro x hx y hy hxy

@@ -49,7 +49,7 @@ theorem pow_mul_factorial_le_poch {c : ℝ} (hc : 1 ≤ c) {m k : ℕ} (hk : m �
       | succ j ih =>
         rw [ascPochhammer_succ_eval, pow_succ]
         exact mul_le_mul ih (by linarith [(Nat.cast_nonneg j : (0 : ℝ) ≤ j)]) (by positivity)
-          (ascPochhammer_eval_nonneg (by linarith) j)
+          (poch_eval_nonneg (by linarith) j)
     have hf : (0 : ℝ) < m.factorial := by positivity
     nlinarith
   | succ k hk ih =>
@@ -60,7 +60,7 @@ theorem pow_mul_factorial_le_poch {c : ℝ} (hc : 1 ≤ c) {m k : ℕ} (hk : m �
           ring
       _ ≤ (m.factorial * (ascPochhammer ℝ k).eval c) * (c + k) :=
           mul_le_mul ih hk1 (by positivity) (by
-            have := ascPochhammer_eval_nonneg (show (0 : ℝ) ≤ c by linarith) k
+            have := poch_eval_nonneg (show (0 : ℝ) ≤ c by linarith) k
             positivity)
       _ = _ := by ring
 
@@ -90,7 +90,7 @@ theorem large_denominator_expansion (a b : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (m 
     have hpos := pow_mul_factorial_le_poch hc (Nat.le_add_left m k)
     have hpc : ‖poch (c : ℂ) (k + m)‖ = (ascPochhammer ℝ (k + m)).eval c := by
       rw [poch, ascPochhammer_eval_ofReal, Complex.norm_real, Real.norm_eq_abs,
-        abs_of_nonneg (ascPochhammer_eval_nonneg hc0.le _)]
+        abs_of_nonneg (poch_eval_nonneg hc0.le _)]
     have h1 : ‖poch (1 : ℂ) (k + m)‖ = (k + m).factorial := by
       rw [poch_nat_one, Complex.norm_natCast]
     have ha := norm_ascPochhammer_eval_le (le_refl ‖a‖) (k + m)
@@ -202,11 +202,12 @@ section ShiftExpansion
 open MeasureTheory Set Asymptotics
 open scoped Nat
 
+/-- `(eᵗ)^w = e^{t w}` for real `t`. -/
 theorem hcub_ofReal_cpow_exp (t : ℝ) (w : ℂ) :
-    ((Real.exp t : ℝ) : ℂ) ^ w = exp (t * w) := by
-  rw [cpow_def_of_ne_zero (by exact_mod_cast (Real.exp_pos t).ne'), ← ofReal_log (Real.exp_pos t).le,
-    Real.log_exp]
+    ((Real.exp t : ℝ) : ℂ) ^ w = exp (t * w) :=
+  TauCeti.ofReal_exp_cpow t w
 
+/-- The map `t ↦ 1 - e^{-t}` sends `(0, ∞)` onto `(0, 1)`. -/
 theorem hcub_image : (fun t : ℝ => 1 - Real.exp (-t)) '' Ioi 0 = Ioo 0 1 := by
   ext s
   simp only [mem_image, mem_Ioi, mem_Ioo]
@@ -221,18 +222,21 @@ theorem hcub_image : (fun t : ℝ => 1 - Real.exp (-t)) '' Ioi 0 = Ioo 0 1 := by
       linarith
     · rw [neg_neg, Real.exp_log (by linarith)]; ring
 
+/-- The derivative of `t ↦ 1 - e^{-t}` is `e^{-t}`. -/
 theorem hcub_hasDerivWithinAt (t : ℝ) :
     HasDerivWithinAt (fun t : ℝ => 1 - Real.exp (-t)) (Real.exp (-t)) (Ioi 0) t := by
   have h := ((Real.hasDerivAt_exp (-t)).comp t (hasDerivAt_neg t)).const_sub 1
   refine (h.congr_deriv ?_).hasDerivWithinAt
   simp
 
+/-- The map `t ↦ 1 - e^{-t}` is injective on `(0, ∞)`. -/
 theorem hcub_injOn : InjOn (fun t : ℝ => 1 - Real.exp (-t)) (Ioi 0) := by
   intro x _ y _ h
   have : Real.exp (-x) = Real.exp (-y) := by simp only at h; linarith
   have := Real.exp_injective this
   linarith
 
+/-- For `b > 0`, `b^a b^{-(s + a)} = (1/b)^s`. -/
 theorem hcub_cpow_mul_cpow_neg {b : ℝ} (hb : 0 < b) (a : ℂ) (s : ℕ) :
     (b : ℂ) ^ a * (b : ℂ) ^ (-((s : ℂ) + a)) = ((b : ℂ)⁻¹) ^ s := by
   have hb0 : (b : ℂ) ≠ 0 := by exact_mod_cast hb.ne'
@@ -273,10 +277,12 @@ theorem hcub_isAsymptoticScale :
   have := h0.mul_isBigO (isBigO_refl (fun b : ℝ => ((b : ℂ)⁻¹) ^ n) atTop)
   simpa [pow_succ, mul_comm] using this
 
+/-- The powers `(1/b)ⁿ` are frequently nonzero as `b → ∞`. -/
 theorem hcub_frequently_ne (n : ℕ) : ∃ᶠ b : ℝ in atTop, ((b : ℂ)⁻¹) ^ n ≠ 0 := by
   refine (eventually_gt_atTop (0 : ℝ)).mono (fun b hb => ?_) |>.frequently
   exact pow_ne_zero _ (inv_ne_zero (by exact_mod_cast hb.ne'))
 
+/-- The Stirling-ratio coefficient `stirlingRatioG x c k` is entire in `x`. -/
 theorem hcub_differentiable_stirlingRatioG (c : ℂ) (k : ℕ) :
     Differentiable ℂ (fun x => DLMF.Gamma.stirlingRatioG x c k) := by
   induction k using Nat.strong_induction_on with
@@ -296,6 +302,7 @@ theorem hcub_differentiable_stirlingRatioG (c : ℂ) (k : ℕ) :
       exact (((differentiable_const _).mul ((Polynomial.differentiable_aeval _).sub
         (differentiable_const _))).div_const _).mul (ih _ (by omega))
 
+/-- For `‖t‖ ≤ 1/2`, `(eᵗ - 1)/t` has positive real part. -/
 theorem hcub_expSubOneDiv_re_pos {t : ℂ} (ht : ‖t‖ ≤ 1 / 2) : 0 < (expSubOneDiv t).re := by
   rcases eq_or_ne t 0 with rfl | ht0
   · simp [expSubOneDiv]
@@ -311,6 +318,7 @@ theorem hcub_expSubOneDiv_re_pos {t : ℂ} (ht : ‖t‖ ≤ 1 / 2) : 0 < (expSu
   have h2 := abs_le.mp (h1.trans hn)
   linarith [h2.1]
 
+/-- For `‖t‖ ≤ 1/2`, `(eᵗ - 1)/t` lies in the slit plane. -/
 theorem hcub_expSubOneDiv_mem_slitPlane {t : ℂ} (ht : ‖t‖ ≤ 1 / 2) : expSubOneDiv t ∈ slitPlane :=
   mem_slitPlane_iff.mpr (Or.inl (hcub_expSubOneDiv_re_pos ht))
 
@@ -320,21 +328,10 @@ theorem hcub_differentiable_iteratedDeriv {G : ℂ → ℂ → ℂ} {r : ℝ} (h
     (hcont : ∀ a : ℂ, ∀ t : ℂ, ‖t‖ = r → ContinuousAt (fun p : ℂ × ℂ => G p.1 p.2) (a, t))
     (hdt : ∀ a : ℂ, DifferentiableOn ℂ (G a) (Metric.closedBall 0 r))
     (hda : ∀ t : ℂ, ‖t‖ = r → Differentiable ℂ (fun a => G a t)) (N : ℕ) :
-    Differentiable ℂ (fun a => iteratedDeriv N (G a) 0) := by
-  exact Complex.differentiable_iteratedDeriv_param hr hcont hdt hda N
+    Differentiable ℂ (fun a => iteratedDeriv N (G a) 0) :=
+  Complex.differentiable_iteratedDeriv_param hr hcont hdt hda N
 
-
-/-- `(re C)_n ≤ ‖(C)_n‖` when `re C ≥ 0`. -/
-theorem hcub_poch_re_le_norm {C : ℂ} (hC : 0 ≤ C.re) (n : ℕ) :
-    (ascPochhammer ℝ n).eval C.re ≤ ‖poch C n‖ := by
-  induction n with
-  | zero => simp [poch]
-  | succ n ih =>
-    rw [ascPochhammer_succ_eval, poch, ascPochhammer_succ_eval, norm_mul]
-    have h1 : C.re + n ≤ ‖C + n‖ := by
-      have := Complex.re_le_norm (C + n); simpa using this
-    exact mul_le_mul ih h1 (by linarith [(Nat.cast_nonneg n : (0 : ℝ) ≤ n)]) (norm_nonneg _)
-
+/-- An elementary bound `A/(P F) ≤ M R⁻¹ (A'/F²)` used in the error estimates. -/
 lemma hcub_div_le_aux {A A' P F M R : ℝ} (hA : 0 ≤ A) (hAA' : A ≤ A') (hP : 0 < P) (hF : 0 < F)
     (hR : 0 < R) (hRF : R * F ≤ M * P) : A / (P * F) ≤ M * R⁻¹ * (A' / (F * F)) := by
   have hA' : 0 ≤ A' := hA.trans hAA'
@@ -373,7 +370,7 @@ theorem hcub_large_denominator_shift (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) 
   have hbd : ∀ k, ‖f (k + m)‖ ≤ m.factorial * (ρ ^ m)⁻¹ * g (k + m) := by
     intro k
     have hpos := pow_mul_factorial_le_poch hρ1 (Nat.le_add_left m k)
-    have hpc := hcub_poch_re_le_norm (C := C) (by rw [hCre]; linarith) (k + m)
+    have hpc := poch_eval_re_le_norm_poch (z := C) (by rw [hCre]; linarith) (k + m)
     rw [hCre] at hpc
     have ha := norm_ascPochhammer_eval_le (le_refl ‖a‖) (k + m)
     have hb := norm_ascPochhammer_eval_le (le_refl ‖b‖) (k + m)
@@ -413,6 +410,8 @@ theorem hcub_large_denominator_shift (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) 
     _ = _ := by ring
 
 
+/-- Taylor's theorem for the generating function: the remainder after `N` terms is `O(‖t‖^N)` at
+  `0`. -/
 theorem hcub_largeDen_taylor (a b c z : ℂ) (N : ℕ) :
     (fun t => largeDenominatorGenerating a b c z t -
       ∑ n ∈ Finset.range N, largeDenominatorCoeff a b c z n * t ^ n) =O[𝓝 0] fun t => ‖t‖ ^ N := by
@@ -460,6 +459,8 @@ theorem hcub_subst₂ (a b c z : ℂ) (l : ℝ) {t : ℝ} (ht : 0 < t) :
   congr 2
   ring
 
+/-- Euler's integral with denominator `c + l`, rewritten under `s = 1 - e^{-t}` as a Laplace
+  integral of the generating function. -/
 theorem hcub_euler_eq_laplace₂ (a b c z : ℂ) (l : ℝ) :
     ∫ s : ℝ in (0 : ℝ)..1, (s : ℂ) ^ (b - 1) * (1 - (s : ℂ)) ^ (c + l - b - 1) *
       (1 - z * s) ^ (-a) =
@@ -471,6 +472,7 @@ theorem hcub_euler_eq_laplace₂ (a b c z : ℂ) (l : ℝ) :
   refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
   exact hcub_subst₂ a b c z l ht
 
+/-- For `‖z‖ < 1` and `s ∈ [0, 1]`, `1 - z s` lies in the slit plane. -/
 theorem hcub_one_sub_mul_mem_slitPlane {z : ℂ} (hz : ‖z‖ < 1) {s : ℝ} (hs : s ∈ Icc (0 : ℝ) 1) :
     1 - z * s ∈ slitPlane := by
   refine mem_slitPlane_iff.mpr (Or.inl ?_)
@@ -481,6 +483,8 @@ theorem hcub_one_sub_mul_mem_slitPlane {z : ℂ} (hz : ‖z‖ < 1) {s : ℝ} (h
   simp only [sub_re, one_re]
   linarith
 
+/-- The Laplace integrand `e^{-l t} t^{b-1} G(t)` is integrable on `(0, ∞)` when `Re b > 0` and `l >
+  Re (b - c)`. -/
 theorem hcub_integrableOn₂ (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (hb : 0 < b.re) {l : ℝ}
     (hl : (b - c).re < l) :
     IntegrableOn (fun t : ℝ => Real.exp (-l * t) •
@@ -646,6 +650,7 @@ theorem hcub_largeDenMix_eq_of_re_pos (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1)
       simp only [smul_eq_mul]; congr 1; exact Finset.sum_congr rfl fun _ _ => mul_comm _ _)
   exact congrFun h N
 
+/-- The finite mixed sum `hcub_largeDenMix a b c z N` is entire in `b`. -/
 theorem hcub_differentiable_largeDenMix (a c z : ℂ) (N : ℕ) :
     Differentiable ℂ (fun b => hcub_largeDenMix a b c z N) := by
   unfold hcub_largeDenMix
@@ -654,6 +659,7 @@ theorem hcub_differentiable_largeDenMix (a c z : ℂ) (N : ℕ) :
     (differentiable_const _)).div_const _).mul
     ((hcub_differentiable_stirlingRatioG _ _).comp ((differentiable_const _).sub differentiable_id))
 
+/-- For `‖z‖ < 1` and `‖t‖ ≤ 1/2`, `1 - z + z e^{-t}` lies in the slit plane. -/
 theorem hcub_one_sub_exp_mem_slitPlane {z : ℂ} (hz : ‖z‖ < 1) {t : ℂ} (ht : ‖t‖ ≤ 1 / 2) :
     1 - z + z * exp (-t) ∈ slitPlane := by
   refine mem_slitPlane_iff.mpr (Or.inl ?_)
@@ -667,6 +673,7 @@ theorem hcub_one_sub_exp_mem_slitPlane {z : ℂ} (hz : ‖z‖ < 1) {t : ℂ} (h
   rw [this, add_re, one_re]
   linarith [h3.1]
 
+/-- The large-denominator coefficients are entire functions of `b`. -/
 theorem hcub_differentiable_largeDenominatorCoeff (a c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (N : ℕ) :
     Differentiable ℂ (fun b => largeDenominatorCoeff a b c z N) := by
   have hE : ∀ t : ℂ, DifferentiableAt ℂ expSubOneDiv t := fun t =>

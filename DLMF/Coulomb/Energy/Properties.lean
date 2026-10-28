@@ -213,6 +213,7 @@ theorem analyticAt_coulombh (ℓ : ℕ) :
 
 /-! ### `A(ε,ℓ)`, `s` and `c` -/
 
+/-- For `z` not a nonpositive integer, `Γ(z+n) = Γ(z) ∏_{j<n} (z+j)`. -/
 lemma c33b_Gamma_add_nat {z : ℂ} (hz : ∀ m : ℕ, z ≠ -(m : ℂ)) (n : ℕ) :
     Gamma (z + n) = Gamma z * ∏ j ∈ Finset.range n, (z + j) := by
   induction n with
@@ -224,6 +225,7 @@ lemma c33b_Gamma_add_nat {z : ℂ} (hz : ∀ m : ℕ, z ≠ -(m : ℂ)) (n : ℕ
     rw [Nat.cast_succ, ← add_assoc, Complex.Gamma_add_one _ hzn, ih, Finset.prod_range_succ]
     ring
 
+/-- `∏_{j=0}^{2ℓ} (κ - ℓ + j) = κ ∏_{k<ℓ} (κ² - (k+1)²)`. -/
 lemma c33b_prod_sym (κ : ℂ) (ℓ : ℕ) :
     ∏ j ∈ Finset.range (2 * ℓ + 1), (κ - ℓ + j) =
       κ * ∏ k ∈ Finset.range ℓ, (κ ^ 2 - ((k : ℂ) + 1) ^ 2) := by
@@ -305,6 +307,7 @@ theorem coulombs_orthogonality_dirac (ℓ : ℕ) {ε₂ : ℝ} (hε₂ : 0 < ε�
 
 /-! ### Hydrogenic functions -/
 
+/-- For `ℓ + 1 ≤ n`, `A(-1/n², ℓ) ≥ 0`. -/
 lemma c33b_coulombAProd_nonneg {n ℓ : ℕ} (hn : ℓ + 1 ≤ n) :
     0 ≤ coulombAProd (-1 / (n : ℝ) ^ 2) ℓ := by
   unfold coulombAProd

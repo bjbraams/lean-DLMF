@@ -49,6 +49,8 @@ namespace DLMF.Legendre
 def legAdd_coeff (f : ℝ → ℂ) (n : ℤ) : ℂ :=
   1 / (2 * π) * ∫ t in (-π)..π, exp (-(n * t * I)) * f t
 
+/-- For an integer `n`, `exp (-(n π i)) = exp (-(n (-π) i))`, i.e. the Fourier kernel takes equal
+values at `t = π` and `t = -π`. -/
 theorem legAdd_exp_pi (n : ℤ) : exp (-(n * (π:ℝ) * I)) = exp (-(n * ((-π : ℝ):ℂ) * I)) := by
   rw [show -((n:ℂ) * ((-π:ℝ):ℂ) * I) = -(n * (π:ℝ) * I) + n * (2 * π * I) by push_cast; ring,
     exp_add, exp_int_mul_two_pi_mul_I, mul_one]
@@ -363,11 +365,6 @@ theorem legAdd_norm_poch_le (ν : ℂ) (m : ℕ) :
     _ = _ := by ring
 
 
-/-- The order-zero function in hypergeometric form, for every argument. -/
-theorem legAdd_associatedP_zero_eq (ν z : ℂ) :
-    associatedP ν 0 z = regularizedGaussHG (ν + 1) (-ν) 1 ((1 - z) / 2) := by
-  simp [associatedP]
-
 /-- A real number below `1` lies in the cut plane. -/
 theorem legAdd_ofReal_mem_cutPlane {r : ℝ} (hr : r < 1) : (r : ℂ) ∈ cutPlane := by
   rw [mem_cutPlane]; left; simp; linarith
@@ -376,6 +373,7 @@ theorem legAdd_ofReal_mem_cutPlane {r : ℝ} (hr : r < 1) : (r : ℂ) ∈ cutPla
 def legAdd_hX (ξ₁ ξ₂ t : ℝ) : ℝ :=
   Real.cosh ξ₁ * Real.cosh ξ₂ - Real.sinh ξ₁ * Real.sinh ξ₂ * Real.cos t
 
+/-- For `ξ₁, ξ₂ ≥ 0` and real `t`, `1 ≤ legAdd_hX ξ₁ ξ₂ t ≤ cosh (ξ₁ + ξ₂)`. -/
 theorem legAdd_hX_mem {ξ₁ ξ₂ : ℝ} (h1 : 0 ≤ ξ₁) (h2 : 0 ≤ ξ₂) (t : ℝ) :
     1 ≤ legAdd_hX ξ₁ ξ₂ t ∧ legAdd_hX ξ₁ ξ₂ t ≤ Real.cosh (ξ₁ + ξ₂) := by
   have hs : 0 ≤ Real.sinh ξ₁ * Real.sinh ξ₂ :=
@@ -404,7 +402,7 @@ theorem legAdd_hX_contDiff (ν : ℂ) {ξ₁ ξ₂ : ℝ} (h1 : 0 ≤ ξ₁) (h2
     legAdd_ofReal_mem_cutPlane (by linarith [(legAdd_hX_mem h1 h2 t).1])
   convert this using 1
   funext t
-  simp only [Function.comp, legAdd_associatedP_zero_eq]
+  simp only [Function.comp, legExt_associatedP_eq]
   congr 1; push_cast; ring
 
 
@@ -441,7 +439,7 @@ theorem legAdd_hyp_coeff_bound (ν : ℂ) {ξ₁ ξ₂ : ℝ} (h1 : 0 ≤ ξ₁)
 /-- The order-zero function at a fixed argument in the cut plane is entire in the degree. -/
 theorem legAdd_differentiable_associatedP_zero {z : ℂ} (hz : (1 - z) / 2 ∈ cutPlane) :
     Differentiable ℂ (fun ν : ℂ => associatedP ν 0 z) := by
-  simp only [legAdd_associatedP_zero_eq]
+  simp only [legExt_associatedP_eq]
   exact differentiable_regularizedGaussHG_comp (A := fun ν : ℂ => ν + 1) (B := fun ν : ℂ => -ν)
     (C := fun _ => 1) (by fun_prop) (by fun_prop) (by fun_prop) hz
 
@@ -991,6 +989,7 @@ theorem legAdd_norm_ferrersP_zero_le_of_mem (ν : ℂ) {Θ x : ℝ} (h0 : 0 ≤ 
 def legAdd_fY (θ₁ θ₂ t : ℝ) : ℝ :=
   Real.cos θ₁ * Real.cos θ₂ + Real.sin θ₁ * Real.sin θ₂ * Real.cos t
 
+/-- For `θ₁, θ₂ ≥ 0` with `θ₁ + θ₂ < π` and real `t`, `cos (θ₁ + θ₂) ≤ legAdd_fY θ₁ θ₂ t ≤ 1`. -/
 theorem legAdd_fY_mem {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2 : 0 ≤ θ₂) (hs : θ₁ + θ₂ < π) (t : ℝ) :
     Real.cos (θ₁ + θ₂) ≤ legAdd_fY θ₁ θ₂ t ∧ legAdd_fY θ₁ θ₂ t ≤ 1 := by
   have hs1 : 0 ≤ Real.sin θ₁ := Real.sin_nonneg_of_nonneg_of_le_pi h1 (by linarith)
@@ -1003,11 +1002,6 @@ theorem legAdd_fY_mem {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2 : 0 ≤ θ₂) 
   rw [Real.cos_add]
   unfold legAdd_fY
   constructor <;> nlinarith
-
-/-- The Ferrers function in hypergeometric form at order zero. -/
-theorem legAdd_ferrersP_zero_eq (ν : ℂ) (x : ℝ) :
-    ferrersP ν 0 x = regularizedGaussHG (ν + 1) (-ν) 1 ((1 - x) / 2) := by
-  simp [ferrersP]
 
 /-- The order-zero Ferrers function along `legAdd_fY` is `C²` in the angle. -/
 theorem legAdd_fY_contDiff (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2 : 0 ≤ θ₂) (hs : θ₁ + θ₂ < π) :
@@ -1027,7 +1021,7 @@ theorem legAdd_fY_contDiff (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2
     legAdd_ofReal_mem_cutPlane (by linarith [(legAdd_fY_mem h1 h2 hs t).1])
   convert this using 1
   funext t
-  simp only [Function.comp, legAdd_ferrersP_zero_eq]
+  simp only [Function.comp, legPI_ferrersP_zero]
   congr 1; push_cast; ring
 
 /-- `-1 < cos (θ₁ + θ₂)`. -/

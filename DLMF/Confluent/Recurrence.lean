@@ -49,16 +49,19 @@ theorem hasSum_kummerM {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) :
     HasSum (fun n => kummerMCoeff a b n * z ^ n) (kummerM a b z) :=
   (hasFPowerSeriesOnBall_kummerM (a := a) hb).hasSum_mul_pow (by simp)
 
+/-- Termwise differentiation of Kummer's series: `M'(a,b,z) = ∑ (n+1) c_{n+1} zⁿ`. -/
 theorem hasSum_deriv_kummerM {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) :
     HasSum (fun n : ℕ => (n + 1 : ℂ) * kummerMCoeff a b (n + 1) * z ^ n)
       (deriv (kummerM a b) z) :=
   (hasFPowerSeriesOnBall_kummerM (a := a) hb).deriv_ofScalars.hasSum_mul_pow (by simp)
 
+/-- `z M'(a,b,z) = ∑ n c_n zⁿ`, with `c_n` the Kummer coefficients. -/
 theorem hasSum_z_mul_deriv_kummerM {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) :
     HasSum (fun n : ℕ => (n : ℂ) * kummerMCoeff a b n * z ^ n)
       (z * deriv (kummerM a b) z) :=
   (hasFPowerSeriesOnBall_kummerM (a := a) hb).hasSum_z_mul_deriv (by simp)
 
+/-- `z M(a,b,z) = ∑_{n ≥ 1} c_{n-1} zⁿ`. -/
 theorem hasSum_z_mul_kummerM {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) :
     HasSum (fun n : ℕ => (if n = 0 then 0 else kummerMCoeff a b (n - 1)) * z ^ n)
       (z * kummerM a b z) := by
@@ -66,6 +69,7 @@ theorem hasSum_z_mul_kummerM {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) 
     ?_ (by simp)
   simpa using hasSum_kummerM hb z
 
+/-- Coefficient identity `n c_n(a,b) = a c_n(a+1,b) - a c_n(a,b)`. -/
 theorem kummerMCoeff_shift_a (a b : ℂ) (n : ℕ) :
     (n : ℂ) * kummerMCoeff a b n =
       a * kummerMCoeff (a + 1) b n - a * kummerMCoeff a b n := by
@@ -79,6 +83,7 @@ theorem kummerMCoeff_shift_a (a b : ℂ) (n : ℕ) :
     push_cast
     ring
 
+/-- Coefficient identity `n c_n(a,b) = (b-1) c_n(a,b-1) - (b-1) c_n(a,b)`. -/
 theorem kummerMCoeff_shift_b_pred {a b : ℂ} (hb1 : ∀ k : ℕ, b - 1 ≠ -k) (n : ℕ) :
     (n : ℂ) * kummerMCoeff a b n =
       (b - 1) * kummerMCoeff a (b - 1) n - (b - 1) * kummerMCoeff a b n := by
@@ -96,6 +101,8 @@ theorem kummerMCoeff_shift_b_pred {a b : ℂ} (hb1 : ∀ k : ℕ, b - 1 ≠ -k) 
     field_simp
     ring
 
+/-- Coefficient identity `n c_n(a,b) = (b-a) c_n(a-1,b) + (a-b) c_n(a,b) + c_{n-1}(a,b)`, behind
+DLMF 13.3.1. -/
 theorem kummerMCoeff_shift_a_pred {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (n : ℕ) :
     (n : ℂ) * kummerMCoeff a b n =
       (b - a) * kummerMCoeff (a - 1) b n + (a - b) * kummerMCoeff a b n +
@@ -113,6 +120,8 @@ theorem kummerMCoeff_shift_a_pred {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (n : 
     field_simp
     ring
 
+/-- Coefficient identity `b (n+1) c_{n+1}(a,b) = (a-b) c_n(a,b+1) + b c_n(a,b)`.
+-/
 theorem kummerMCoeff_shift_b_succ {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (n : ℕ) :
     b * ((n + 1 : ℂ) * kummerMCoeff a b (n + 1)) =
       (a - b) * kummerMCoeff a (b + 1) n + b * kummerMCoeff a b n := by
@@ -129,6 +138,7 @@ theorem kummerMCoeff_shift_b_succ {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (n : 
   field_simp
   ring
 
+/-- Coefficient form of `b M(a,b,z) - b M(a-1,b,z) - z M(a,b+1,z) = 0` (DLMF 13.3.4). -/
 theorem kummerMCoeff_contiguous_shift_a {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (n : ℕ) :
     b * kummerMCoeff a b n - b * kummerMCoeff (a - 1) b n -
       (if n = 0 then 0 else kummerMCoeff a (b + 1) (n - 1)) = 0 := by
@@ -149,6 +159,8 @@ theorem kummerMCoeff_contiguous_shift_a {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k)
     field_simp
     ring
 
+/-- Coefficient identity combining the Kummer equation with contiguous relations in `(a,b) →
+(a+1,b+1) → (a+2,b+2)`. -/
 theorem kummerMCoeff_ode_contiguous {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (n : ℕ) :
     (a + 1) * (if n = 0 then 0 else kummerMCoeff (a + 2) (b + 2) (n - 1)) +
       (b + 1) * b * kummerMCoeff (a + 1) (b + 1) n -
@@ -385,6 +397,7 @@ relations, and then transferred to integer parameters through
 `tendsto_kummerU_add_intCast`. The transfer needs `z ≠ 0`: at `z = 0` and integer `b`
 the totalized `kummerU` has no continued value. -/
 
+/-- If `f` vanishes on `ℂ \ ℤ` and tends to `L` along `ℂ \ ℤ` at `b`, then `L = 0`. -/
 theorem eq_zero_of_tendsto_integerComplement {f : ℂ → ℂ} {b L : ℂ}
     (hf : Tendsto f (𝓝[integerComplement] b) (𝓝 L))
     (h0 : ∀ c ∈ integerComplement, f c = 0) : L = 0 := by
@@ -392,10 +405,12 @@ theorem eq_zero_of_tendsto_integerComplement {f : ℂ → ℂ} {b L : ℂ}
   exact tendsto_nhds_unique hf (tendsto_const_nhds.congr'
     (eventually_nhdsWithin_of_forall fun c hc => (h0 c hc).symm))
 
+/-- The identity tends to `b` along `ℂ \ ℤ` at `b`. -/
 theorem tendsto_id_integerComplement (b : ℂ) :
     Tendsto (fun c : ℂ => c) (𝓝[integerComplement] b) (𝓝 b) :=
   (continuous_id.tendsto b).mono_left nhdsWithin_le_nhds
 
+/-- For `z ≠ 0`, `U(a, c-1, z) → U(a, b-1, z)` as `c → b` through `ℂ \ ℤ`. -/
 theorem tendsto_kummerU_sub_one (a b : ℂ) {z : ℂ} (hz : z ≠ 0) :
     Tendsto (fun c => kummerU a (c - 1) z) (𝓝[integerComplement] b)
       (𝓝 (kummerU a (b - 1) z)) := by
@@ -403,44 +418,47 @@ theorem tendsto_kummerU_sub_one (a b : ℂ) {z : ℂ} (hz : z ≠ 0) :
   push_cast at h
   simpa [sub_eq_add_neg] using h
 
+/-- For `z ≠ 0`, `U(a, c+1, z) → U(a, b+1, z)` as `c → b` through `ℂ \ ℤ`. -/
 theorem tendsto_kummerU_add_one (a b : ℂ) {z : ℂ} (hz : z ≠ 0) :
     Tendsto (fun c => kummerU a (c + 1) z) (𝓝[integerComplement] b)
       (𝓝 (kummerU a (b + 1) z)) := by
   simpa using tendsto_kummerU_add_intCast a b 1 hz
 
+/-- For `z ≠ 0`, `U(a, c+2, z) → U(a, b+2, z)` as `c → b` through `ℂ \ ℤ`. -/
 theorem tendsto_kummerU_add_two (a b : ℂ) {z : ℂ} (hz : z ≠ 0) :
     Tendsto (fun c => kummerU a (c + 2) z) (𝓝[integerComplement] b)
       (𝓝 (kummerU a (b + 2) z)) := by
   simpa using tendsto_kummerU_add_intCast a b 2 hz
 
+/-- `ℂ \ ℤ` is invariant under integer translations. -/
 theorem intCompl_add_int {c : ℂ} (hc : c ∈ integerComplement) (k : ℤ) :
     c + (k : ℂ) ∈ integerComplement := (add_intCast_mem_integerComplement k).mpr hc
 
+/-- If `c ∉ ℤ` then `c - 1 ∉ ℤ`. -/
 theorem intCompl_sub_one {c : ℂ} (hc : c ∈ integerComplement) : c - 1 ∈ integerComplement := by
   simpa [sub_eq_add_neg] using intCompl_add_int hc (-1)
 
+/-- If `c ∉ ℤ` then `c + 1 ∉ ℤ`. -/
 theorem intCompl_add_one {c : ℂ} (hc : c ∈ integerComplement) : c + 1 ∈ integerComplement := by
   simpa using intCompl_add_int hc 1
 
+/-- If `c ∉ ℤ` then `-c ∉ ℤ`. -/
 theorem intCompl_neg {c : ℂ} (hc : c ∈ integerComplement) : -c ∈ integerComplement :=
   fun ⟨k, hk⟩ => hc ⟨-k, by push_cast; rw [hk]; ring⟩
 
+/-- If `c ∉ ℤ` then `k - c ∉ ℤ` for integer `k`. -/
 theorem intCompl_int_sub {c : ℂ} (hc : c ∈ integerComplement) (k : ℤ) :
     (k : ℂ) - c ∈ integerComplement := by
   simpa [sub_eq_add_neg, add_comm] using intCompl_add_int (intCompl_neg hc) k
 
+/-- If `c ∉ ℤ` then `c - k ∉ ℤ` for integer `k`. -/
 theorem intCompl_sub_int {c : ℂ} (hc : c ∈ integerComplement) (k : ℤ) :
     c - (k : ℂ) ∈ integerComplement := by
   have := intCompl_add_int hc (-k)
   push_cast at this
   simpa [sub_eq_add_neg] using this
 
-theorem ne_zero_of_intCompl {c : ℂ} (hc : c ∈ integerComplement) : c ≠ 0 :=
-  integerComplement.ne_zero hc
-
-theorem nonpole_of_intCompl {c : ℂ} (hc : c ∈ integerComplement) : ∀ k : ℕ, c ≠ -(k : ℂ) :=
-  not_neg_nat_of_mem_integerComplement hc
-
+/-- For noninteger `c` and `z ≠ 0`, `U(a,c,z) - a U(a+1,c,z) - U(a,c-1,z) = 0` (DLMF 13.3.9). -/
 theorem kummerU_contiguous_a_b_of_mem {a c z : ℂ} (hc : c ∈ integerComplement) (hz : z ≠ 0) :
     kummerU a c z - a * kummerU (a + 1) c z - kummerU a (c - 1) z = 0 := by
   have hc1 := intCompl_sub_one hc
@@ -450,14 +468,15 @@ theorem kummerU_contiguous_a_b_of_mem {a c z : ℂ} (hc : c ∈ integerComplemen
   unfold kummerUConnection
   have h2c : (2 : ℂ) - c ∈ integerComplement := by simpa using intCompl_int_sub hc 2
   have E3 := kummerM_contiguous_a_b (a := a) (b := c) (z := z)
-    (nonpole_of_intCompl hc1)
+    (not_neg_nat_of_mem_integerComplement hc1)
   have E4 := kummerM_contiguous_shift_a (a := a - c + 2) (b := 2 - c) (z := z)
-    (nonpole_of_intCompl h2c)
-  have hR := recip_Gamma_eq_mul_recip_Gamma_add_one (a - c + 1)
-  have hS := recip_Gamma_eq_mul_recip_Gamma_add_one a
-  have hG1 := Gamma_add_one (1 - c) (ne_zero_of_intCompl (by simpa using intCompl_int_sub hc 1))
+    (not_neg_nat_of_mem_integerComplement h2c)
+  have hR := one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (a - c + 1)
+  have hS := one_div_Gamma_eq_self_mul_one_div_Gamma_add_one a
+  have hG1 := Gamma_add_one (1 - c)
+      (integerComplement.ne_zero (by simpa using intCompl_int_sub hc 1))
   have hc2 : c - 2 ∈ integerComplement := by simpa using intCompl_sub_int hc 2
-  have hG2 := Gamma_add_one (c - 2) (ne_zero_of_intCompl hc2)
+  have hG2 := Gamma_add_one (c - 2) (integerComplement.ne_zero hc2)
   have hzc : z ^ (2 - c) = z * z ^ (1 - c) := by
     rw [show 2 - c = (1 - c) + 1 by ring, cpow_add _ _ hz, cpow_one, mul_comm]
   rw [show a - c + 2 - 1 = a - c + 1 by ring, show 2 - c + 1 = 3 - c by ring] at E4
@@ -472,6 +491,8 @@ theorem kummerU_contiguous_a_b_of_mem {a c z : ℂ} (hc : c ∈ integerComplemen
   linear_combination Gamma (1 - c) * (Gamma (a - c + 2))⁻¹ * E3 +
     Gamma (c - 2) * a * (Gamma (a + 1))⁻¹ * z ^ (1 - c) * E4
 
+/-- For noninteger `c` and `z ≠ 0`, `(c-a) U(a,c,z) + U(a-1,c,z) - z U(a,c+1,z) = 0` (DLMF 13.3.10).
+-/
 theorem kummerU_contiguous_shift_a_of_mem {a c z : ℂ} (hc : c ∈ integerComplement)
     (hz : z ≠ 0) :
     (c - a) * kummerU a c z + kummerU (a - 1) c z - z * kummerU a (c + 1) z = 0 := by
@@ -482,17 +503,18 @@ theorem kummerU_contiguous_shift_a_of_mem {a c z : ℂ} (hc : c ∈ integerCompl
   unfold kummerUConnection
   have h2c : (2 : ℂ) - c ∈ integerComplement := by simpa using intCompl_int_sub hc 2
   have h1c : (1 : ℂ) - c ∈ integerComplement := by simpa using intCompl_int_sub hc 1
-  have E4 := kummerM_contiguous_shift_a (a := a) (b := c) (z := z) (nonpole_of_intCompl hc)
+  have E4 := kummerM_contiguous_shift_a (a := a) (b := c) (z := z)
+      (not_neg_nat_of_mem_integerComplement hc)
   have E3 := kummerM_contiguous_a_b (a := a - c) (b := 2 - c) (z := z)
-    (by simpa [show (2 : ℂ) - c - 1 = 1 - c by ring] using nonpole_of_intCompl h1c)
+    (by simpa [show (2 : ℂ) - c - 1 = 1 - c by ring] using not_neg_nat_of_mem_integerComplement h1c)
   rw [show a - c - (2 - c) + 1 = a - 1 by ring, show a - c + 1 = a - c + 1 by ring,
     show (2 : ℂ) - c - 1 = 1 - c by ring] at E3
-  have hR := recip_Gamma_eq_mul_recip_Gamma_add_one (a - c)
-  have hS := recip_Gamma_eq_mul_recip_Gamma_add_one (a - 1)
+  have hR := one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (a - c)
+  have hS := one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (a - 1)
   rw [show a - 1 + 1 = a by ring] at hS
-  have hG0 := Gamma_add_one (-c) (ne_zero_of_intCompl (intCompl_neg hc))
+  have hG0 := Gamma_add_one (-c) (integerComplement.ne_zero (intCompl_neg hc))
   rw [show -c + 1 = 1 - c by ring] at hG0
-  have hG1 := Gamma_add_one (c - 1) (ne_zero_of_intCompl (intCompl_sub_one hc))
+  have hG1 := Gamma_add_one (c - 1) (integerComplement.ne_zero (intCompl_sub_one hc))
   rw [show c - 1 + 1 = c by ring] at hG1
   have hzc : z ^ (1 - c) = z * z ^ (-c) := by
     rw [show 1 - c = -c + 1 by ring, cpow_add _ _ hz, cpow_one, mul_comm]
@@ -503,6 +525,7 @@ theorem kummerU_contiguous_shift_a_of_mem {a c z : ℂ} (hc : c ∈ integerCompl
   linear_combination Gamma (-c) * (Gamma (a - c + 1))⁻¹ * (a - c) * E4 +
     Gamma (c - 1) * (Gamma a)⁻¹ * z ^ (-c) * z * E3
 
+/-- For noninteger `c`, `U(a-1,c,z) + (c-2a-z) U(a,c,z) + a(a-c+1) U(a+1,c,z) = 0` (DLMF 13.3.7). -/
 theorem kummerU_contiguous_a_of_mem {a c z : ℂ} (hc : c ∈ integerComplement) :
     kummerU (a - 1) c z + (c - 2 * a - z) * kummerU a c z +
       a * (a - c + 1) * kummerU (a + 1) c z = 0 := by
@@ -511,14 +534,15 @@ theorem kummerU_contiguous_a_of_mem {a c z : ℂ} (hc : c ∈ integerComplement)
     kummerU_eq_connection _ _ _ (forall_of_mem_integerComplement hc)]
   unfold kummerUConnection
   have h2c : (2 : ℂ) - c ∈ integerComplement := by simpa using intCompl_int_sub hc 2
-  have E1 := kummerM_contiguous_a (a := a) (b := c) (z := z) (nonpole_of_intCompl hc)
+  have E1 := kummerM_contiguous_a (a := a) (b := c) (z := z)
+      (not_neg_nat_of_mem_integerComplement hc)
   have E1' := kummerM_contiguous_a (a := a - c + 1) (b := 2 - c) (z := z)
-    (nonpole_of_intCompl h2c)
+    (not_neg_nat_of_mem_integerComplement h2c)
   rw [show a - c + 1 - 1 = a - c by ring, show a - c + 1 + 1 = a - c + 2 by ring] at E1'
-  have hR := recip_Gamma_eq_mul_recip_Gamma_add_one (a - c)
-  have hR' := recip_Gamma_eq_mul_recip_Gamma_add_one (a - c + 1)
-  have hS := recip_Gamma_eq_mul_recip_Gamma_add_one (a - 1)
-  have hS' := recip_Gamma_eq_mul_recip_Gamma_add_one a
+  have hR := one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (a - c)
+  have hR' := one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (a - c + 1)
+  have hS := one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (a - 1)
+  have hS' := one_div_Gamma_eq_self_mul_one_div_Gamma_add_one a
   rw [show a - c + 1 + 1 = a - c + 2 by ring] at hR'
   rw [show a - 1 + 1 = a by ring] at hS
   rw [show a - 1 - c + 1 = a - c by ring, show a + 1 - c + 1 = a - c + 2 by ring]
@@ -528,6 +552,8 @@ theorem kummerU_contiguous_a_of_mem {a c z : ℂ} (hc : c ∈ integerComplement)
   linear_combination (-(Gamma (1 - c) * (Gamma (a - c + 2))⁻¹ * (a - c + 1))) * E1 -
     Gamma (c - 1) * (Gamma (a + 1))⁻¹ * z ^ (1 - c) * a * E1'
 
+/-- For noninteger `c` and `z ≠ 0`, `(c-a-1) U(a,c-1,z) + (1-c-z) U(a,c,z) + z U(a,c+1,z) = 0` (DLMF
+13.3.8). -/
 theorem kummerU_contiguous_b_of_mem {a c z : ℂ} (hc : c ∈ integerComplement) (hz : z ≠ 0) :
     (c - a - 1) * kummerU a (c - 1) z + (1 - c - z) * kummerU a c z +
       z * kummerU a (c + 1) z = 0 := by
@@ -538,22 +564,23 @@ theorem kummerU_contiguous_b_of_mem {a c z : ℂ} (hc : c ∈ integerComplement)
     kummerU_eq_connection _ _ _ (forall_of_mem_integerComplement hcp)]
   unfold kummerUConnection
   have h1c : (1 : ℂ) - c ∈ integerComplement := by simpa using intCompl_int_sub hc 1
-  have E2 := kummerM_contiguous_b (a := a) (b := c) (z := z) (nonpole_of_intCompl hcm)
+  have E2 := kummerM_contiguous_b (a := a) (b := c) (z := z)
+      (not_neg_nat_of_mem_integerComplement hcm)
   have E13 := kummerM_ode_contiguous (a := a - c) (b := 1 - c) (z := z)
-    (nonpole_of_intCompl h1c)
+    (not_neg_nat_of_mem_integerComplement h1c)
   rw [show a - c + 2 = a - c + 2 by ring, show 1 - c + 2 = 3 - c by ring,
     show a - c + 1 = a - c + 1 by ring, show 1 - c + 1 = 2 - c by ring] at E13
-  have hR := recip_Gamma_eq_mul_recip_Gamma_add_one (a - c)
-  have hR' := recip_Gamma_eq_mul_recip_Gamma_add_one (a - c + 1)
+  have hR := one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (a - c)
+  have hR' := one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (a - c + 1)
   rw [show a - c + 1 + 1 = a - c + 2 by ring] at hR'
-  have hG0 := Gamma_add_one (-c) (ne_zero_of_intCompl (intCompl_neg hc))
+  have hG0 := Gamma_add_one (-c) (integerComplement.ne_zero (intCompl_neg hc))
   rw [show -c + 1 = 1 - c by ring] at hG0
-  have hG0' := Gamma_add_one (1 - c) (ne_zero_of_intCompl h1c)
+  have hG0' := Gamma_add_one (1 - c) (integerComplement.ne_zero h1c)
   rw [show 1 - c + 1 = 2 - c by ring] at hG0'
   have hc2 : c - 2 ∈ integerComplement := by simpa using intCompl_sub_int hc 2
-  have hG2 := Gamma_add_one (c - 2) (ne_zero_of_intCompl hc2)
+  have hG2 := Gamma_add_one (c - 2) (integerComplement.ne_zero hc2)
   rw [show c - 2 + 1 = c - 1 by ring] at hG2
-  have hG1 := Gamma_add_one (c - 1) (ne_zero_of_intCompl hcm)
+  have hG1 := Gamma_add_one (c - 1) (integerComplement.ne_zero hcm)
   rw [show c - 1 + 1 = c by ring] at hG1
   have hz1 : z ^ (1 - c) = z * z ^ (-c) := by
     rw [show 1 - c = -c + 1 by ring, cpow_add _ _ hz, cpow_one, mul_comm]
@@ -568,6 +595,8 @@ theorem kummerU_contiguous_b_of_mem {a c z : ℂ} (hc : c ∈ integerComplement)
   linear_combination (-(Gamma (-c) * (Gamma (a - c + 2))⁻¹ * (a - c + 1))) * E2 -
     Gamma (c - 2) * (Gamma a)⁻¹ * z ^ (-c) * z * E13
 
+/-- For noninteger `c` and `z ≠ 0`, `(a+z) U(a,c,z) - z U(a,c+1,z) + a(c-a-1) U(a+1,c,z) = 0` (DLMF
+13.3.11). -/
 theorem kummerU_contiguous_mixed_of_mem {a c z : ℂ} (hc : c ∈ integerComplement)
     (hz : z ≠ 0) :
     (a + z) * kummerU a c z - z * kummerU a (c + 1) z +
@@ -579,21 +608,22 @@ theorem kummerU_contiguous_mixed_of_mem {a c z : ℂ} (hc : c ∈ integerComplem
   unfold kummerUConnection
   have h1c : (1 : ℂ) - c ∈ integerComplement := by simpa using intCompl_int_sub hc 1
   have h2c : (2 : ℂ) - c ∈ integerComplement := by simpa using intCompl_int_sub hc 2
-  have E5 := kummerM_contiguous_mixed (a := a) (b := c) (z := z) (nonpole_of_intCompl hc)
+  have E5 := kummerM_contiguous_mixed (a := a) (b := c) (z := z)
+      (not_neg_nat_of_mem_integerComplement hc)
   have E3 := kummerM_contiguous_a_b (a := a - c + 1) (b := 2 - c) (z := z)
-    (by simpa [show (2 : ℂ) - c - 1 = 1 - c by ring] using nonpole_of_intCompl h1c)
+    (by simpa [show (2 : ℂ) - c - 1 = 1 - c by ring] using not_neg_nat_of_mem_integerComplement h1c)
   have E4 := kummerM_contiguous_shift_a (a := a - c + 1) (b := 1 - c) (z := z)
-    (nonpole_of_intCompl h1c)
+    (not_neg_nat_of_mem_integerComplement h1c)
   rw [show a - c + 1 - (2 - c) + 1 = a by ring, show a - c + 1 + 1 = a - c + 2 by ring,
     show (2 : ℂ) - c - 1 = 1 - c by ring] at E3
   rw [show a - c + 1 - 1 = a - c by ring, show 1 - c + 1 = 2 - c by ring] at E4
-  have hR := recip_Gamma_eq_mul_recip_Gamma_add_one (a - c)
-  have hR' := recip_Gamma_eq_mul_recip_Gamma_add_one (a - c + 1)
+  have hR := one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (a - c)
+  have hR' := one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (a - c + 1)
   rw [show a - c + 1 + 1 = a - c + 2 by ring] at hR'
-  have hS := recip_Gamma_eq_mul_recip_Gamma_add_one a
-  have hG0 := Gamma_add_one (-c) (ne_zero_of_intCompl (intCompl_neg hc))
+  have hS := one_div_Gamma_eq_self_mul_one_div_Gamma_add_one a
+  have hG0 := Gamma_add_one (-c) (integerComplement.ne_zero (intCompl_neg hc))
   rw [show -c + 1 = 1 - c by ring] at hG0
-  have hG1 := Gamma_add_one (c - 1) (ne_zero_of_intCompl (intCompl_sub_one hc))
+  have hG1 := Gamma_add_one (c - 1) (integerComplement.ne_zero (intCompl_sub_one hc))
   rw [show c - 1 + 1 = c by ring] at hG1
   have hz1 : z ^ (1 - c) = z * z ^ (-c) := by
     rw [show 1 - c = -c + 1 by ring, cpow_add _ _ hz, cpow_one, mul_comm]
@@ -605,6 +635,8 @@ theorem kummerU_contiguous_mixed_of_mem {a c z : ℂ} (hc : c ∈ integerComplem
   linear_combination (-(Gamma (-c) * (Gamma (a - c + 2))⁻¹ * (a - c + 1))) * E5 +
     Gamma (c - 1) * (Gamma (a + 1))⁻¹ * z ^ (-c) * z * a * (E3 - E4)
 
+/-- For noninteger `c` and `z ≠ 0`, `(a-1+z) U(a,c,z) - U(a-1,c,z) + (a-c+1) U(a,c-1,z) = 0` (DLMF
+13.3.12). -/
 theorem kummerU_contiguous_down_of_mem {a c z : ℂ} (hc : c ∈ integerComplement)
     (hz : z ≠ 0) :
     (a - 1 + z) * kummerU a c z - kummerU (a - 1) c z +
@@ -616,23 +648,24 @@ theorem kummerU_contiguous_down_of_mem {a c z : ℂ} (hc : c ∈ integerCompleme
   unfold kummerUConnection
   have h1c : (1 : ℂ) - c ∈ integerComplement := by simpa using intCompl_int_sub hc 1
   have h2c : (2 : ℂ) - c ∈ integerComplement := by simpa using intCompl_int_sub hc 2
-  have E6 := kummerM_contiguous_down (a := a) (b := c) (z := z) (nonpole_of_intCompl hcm)
+  have E6 := kummerM_contiguous_down (a := a) (b := c) (z := z)
+      (not_neg_nat_of_mem_integerComplement hcm)
   have E4 := kummerM_contiguous_shift_a (a := a - c + 1) (b := 2 - c) (z := z)
-    (nonpole_of_intCompl h2c)
+    (not_neg_nat_of_mem_integerComplement h2c)
   have SBS := kummerM_contiguous_shift_b_succ (a := a - c + 1) (b := 2 - c) (z := z)
-    (nonpole_of_intCompl h2c)
+    (not_neg_nat_of_mem_integerComplement h2c)
   rw [show a - c + 1 - 1 = a - c by ring, show 2 - c + 1 = 3 - c by ring] at E4
   rw [show a - c + 1 + 1 = a - c + 2 by ring, show 2 - c + 1 = 3 - c by ring,
     show a - c + 1 - (2 - c) = a - 1 by ring] at SBS
-  have hR := recip_Gamma_eq_mul_recip_Gamma_add_one (a - c)
-  have hR' := recip_Gamma_eq_mul_recip_Gamma_add_one (a - c + 1)
+  have hR := one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (a - c)
+  have hR' := one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (a - c + 1)
   rw [show a - c + 1 + 1 = a - c + 2 by ring] at hR'
-  have hS := recip_Gamma_eq_mul_recip_Gamma_add_one (a - 1)
+  have hS := one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (a - 1)
   rw [show a - 1 + 1 = a by ring] at hS
-  have hG0' := Gamma_add_one (1 - c) (ne_zero_of_intCompl h1c)
+  have hG0' := Gamma_add_one (1 - c) (integerComplement.ne_zero h1c)
   rw [show 1 - c + 1 = 2 - c by ring] at hG0'
   have hc2 : c - 2 ∈ integerComplement := by simpa using intCompl_sub_int hc 2
-  have hG2 := Gamma_add_one (c - 2) (ne_zero_of_intCompl hc2)
+  have hG2 := Gamma_add_one (c - 2) (integerComplement.ne_zero hc2)
   rw [show c - 2 + 1 = c - 1 by ring] at hG2
   have hz2 : z ^ (2 - c) = z * z ^ (1 - c) := by
     rw [show 2 - c = (1 - c) + 1 by ring, cpow_add _ _ hz, cpow_one, mul_comm]
@@ -644,6 +677,8 @@ theorem kummerU_contiguous_down_of_mem {a c z : ℂ} (hc : c ∈ integerCompleme
   linear_combination Gamma (1 - c) * (Gamma (a - c + 2))⁻¹ * (a - c + 1) * E6 +
     Gamma (c - 2) * (Gamma a)⁻¹ * z ^ (1 - c) * (z * SBS - (a - 1) * E4)
 
+/-- For noninteger `c` and `z ≠ 0`, `(a+1) z U(a+2,c+2,z) + (z-c) U(a+1,c+1,z) - U(a,c,z) = 0`, the
+Kummer equation in contiguous form. -/
 theorem kummerU_ode_contiguous_of_mem {a c z : ℂ} (hc : c ∈ integerComplement) (hz : z ≠ 0) :
     (a + 1) * z * kummerU (a + 2) (c + 2) z + (z - c) * kummerU (a + 1) (c + 1) z -
       kummerU a c z = 0 := by
@@ -654,20 +689,21 @@ theorem kummerU_ode_contiguous_of_mem {a c z : ℂ} (hc : c ∈ integerComplemen
     kummerU_eq_connection _ _ _ (forall_of_mem_integerComplement hc)]
   unfold kummerUConnection
   have hnc : -c ∈ integerComplement := intCompl_neg hc
-  have E13 := kummerM_ode_contiguous (a := a) (b := c) (z := z) (nonpole_of_intCompl hc)
+  have E13 := kummerM_ode_contiguous (a := a) (b := c) (z := z)
+      (not_neg_nat_of_mem_integerComplement hc)
   have E2 := kummerM_contiguous_b (a := a - c + 1) (b := 1 - c) (z := z)
-    (by simpa [show (1 : ℂ) - c - 1 = -c by ring] using nonpole_of_intCompl hnc)
+    (by simpa [show (1 : ℂ) - c - 1 = -c by ring] using not_neg_nat_of_mem_integerComplement hnc)
   rw [show (1 : ℂ) - c - 1 = -c by ring, show 1 - c + 1 = 2 - c by ring] at E2
-  have hG0 := Gamma_add_one (-c) (ne_zero_of_intCompl hnc)
+  have hG0 := Gamma_add_one (-c) (integerComplement.ne_zero hnc)
   rw [show -c + 1 = 1 - c by ring] at hG0
   have hm1 : -1 - c ∈ integerComplement := by simpa [sub_eq_add_neg, add_comm] using intCompl_add_int hnc (-1)
-  have hGm := Gamma_add_one (-1 - c) (ne_zero_of_intCompl hm1)
+  have hGm := Gamma_add_one (-1 - c) (integerComplement.ne_zero hm1)
   rw [show -1 - c + 1 = -c by ring] at hGm
-  have hG1 := Gamma_add_one (c - 1) (ne_zero_of_intCompl (intCompl_sub_one hc))
+  have hG1 := Gamma_add_one (c - 1) (integerComplement.ne_zero (intCompl_sub_one hc))
   rw [show c - 1 + 1 = c by ring] at hG1
-  have hGc := Gamma_add_one c (ne_zero_of_intCompl hc)
-  have hS := recip_Gamma_eq_mul_recip_Gamma_add_one a
-  have hS' := recip_Gamma_eq_mul_recip_Gamma_add_one (a + 1)
+  have hGc := Gamma_add_one c (integerComplement.ne_zero hc)
+  have hS := one_div_Gamma_eq_self_mul_one_div_Gamma_add_one a
+  have hS' := one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (a + 1)
   rw [show a + 1 + 1 = a + 2 by ring] at hS'
   have hz1 : z ^ (-c) = z * z ^ (-1 - c) := by
     rw [show -c = (-1 - c) + 1 by ring, cpow_add _ _ hz, cpow_one, mul_comm]
@@ -778,6 +814,7 @@ theorem iteratedDeriv_kummerM {a b : ℂ} (n : ℕ) (hb : ∀ k : ℕ, b ≠ -k)
     simp only [poch_succ, Nat.cast_add, Nat.cast_one, div_eq_mul_inv, mul_inv_rev]
     ring
 
+/-- `z z^{s-1} = z^s` for `z ≠ 0`. -/
 private lemma mul_cpow_pred' {z : ℂ} (hz : z ≠ 0) (s : ℂ) : z * z ^ (s - 1) = z ^ s := by
   calc
     z * z ^ (s - 1) = z ^ (1 : ℂ) * z ^ (s - 1) := by rw [cpow_one]
@@ -790,6 +827,7 @@ private lemma hasDerivAt_kummerM {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : �
   have h := (hasFPowerSeriesOnBall_kummerM (a := a) hb).analyticAt_of_mem (y := z) (by simp)
   exact h.differentiableAt.hasDerivAt
 
+/-- Product rule for `w^s M(a,b,w)` on the slit plane. -/
 private lemma deriv_cpow_mul_kummerM {a b : ℂ} (s : ℂ) (hb : ∀ k : ℕ, b ≠ -k) {z : ℂ}
     (hz : z ∈ slitPlane) :
     deriv (fun w => w ^ s * kummerM a b w) z =
@@ -800,6 +838,7 @@ private lemma deriv_cpow_mul_kummerM {a b : ℂ} (s : ℂ) (hb : ∀ k : ℕ, b 
   simp only [id_eq, Pi.mul_def, mul_one] at h
   rw [h]
 
+/-- Product rule for `e^{-w} M(a,b,w)`. -/
 private lemma deriv_exp_neg_mul_kummerM {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) :
     deriv (fun w => exp (-w) * kummerM a b w) z =
       -(exp (-z) * kummerM a b z) + exp (-z) * deriv (kummerM a b) z := by
@@ -810,6 +849,7 @@ private lemma deriv_exp_neg_mul_kummerM {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k)
   rw [h]
   ring
 
+/-- Product rule for `w^s e^{-w} M(a,b,w)` on the slit plane. -/
 private lemma deriv_cpow_mul_exp_neg_mul_kummerM {a b : ℂ} (s : ℂ) (hb : ∀ k : ℕ, b ≠ -k)
     {z : ℂ} (hz : z ∈ slitPlane) :
     deriv (fun w => w ^ s * exp (-w) * kummerM a b w) z =
@@ -1075,6 +1115,7 @@ theorem deriv_kummerU (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     deriv (kummerU a b) z = -a * kummerU (a + 1) (b + 1) z :=
   (hasDerivAt_kummerU a b hz).deriv
 
+/-- Product rule for `w^s U(a,b,w)` on the slit plane, with `U' = -a U(a+1,b+1,·)`. -/
 private lemma deriv_cpow_mul_kummerU (a b s : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     deriv (fun w => w ^ s * kummerU a b w) z =
       s * z ^ (s - 1) * kummerU a b z + z ^ s * (-a * kummerU (a + 1) (b + 1) z) := by
@@ -1084,6 +1125,7 @@ private lemma deriv_cpow_mul_kummerU (a b s : ℂ) {z : ℂ} (hz : z ∈ slitPla
   simp only [id_eq, Pi.mul_def, mul_one] at h
   rw [h]
 
+/-- Product rule for `e^{-w} U(a,b,w)` on the slit plane. -/
 private lemma deriv_exp_neg_mul_kummerU (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     deriv (fun w => exp (-w) * kummerU a b w) z =
       -(exp (-z) * kummerU a b z) + exp (-z) * (-a * kummerU (a + 1) (b + 1) z) := by
@@ -1094,6 +1136,7 @@ private lemma deriv_exp_neg_mul_kummerU (a b : ℂ) {z : ℂ} (hz : z ∈ slitPl
   rw [h]
   ring
 
+/-- Product rule for `w^s e^{-w} U(a,b,w)` on the slit plane. -/
 private lemma deriv_cpow_mul_exp_neg_mul_kummerU (a b s : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     deriv (fun w => w ^ s * exp (-w) * kummerU a b w) z =
       s * z ^ (s - 1) * exp (-z) * kummerU a b z - z ^ s * exp (-z) * kummerU a b z +
@@ -1531,12 +1574,15 @@ private lemma iterate_mulDerivMul_congr {U : Set ℂ} (hU : IsOpen U) {f g : ℂ
     filter_upwards [hU.mem_nhds hw] with t ht
     rw [ih t ht]
 
+/-- `e^{w/2} e^{-w/2} = 1`. -/
 private lemma exp_half_mul_exp_neg_half (w : ℂ) : exp (w / 2) * exp (-w / 2) = 1 := by
   rw [← Complex.exp_add, show w / 2 + -w / 2 = (0 : ℂ) by ring, Complex.exp_zero]
 
+/-- `e^{-w/2} e^{-w/2} = e^{-w}`. -/
 private lemma exp_neg_half_mul_self (w : ℂ) : exp (-w / 2) * exp (-w / 2) = exp (-w) := by
   rw [← Complex.exp_add]; congr 1; ring
 
+/-- `w^s w^t = w^u` for `w ≠ 0` and `s + t = u`. -/
 private lemma cpow_mul_cpow_eq {w : ℂ} (hw : w ≠ 0) {s t u : ℂ} (h : s + t = u) :
     w ^ s * w ^ t = w ^ u := by
   rw [← cpow_add _ _ hw, h]
@@ -1563,7 +1609,7 @@ theorem iteratedDeriv_exp_mul_whittakerM {κ μ : ℂ} (n : ℕ) {z : ℂ}
   unfold whittakerM
   rw [show μ - (n : ℂ) / 2 - (κ - n / 2) + 1 / 2 = μ - κ + 1 / 2 by ring,
     show 1 + 2 * (μ - (n : ℂ) / 2) = 1 + 2 * μ - n by ring,
-    show (-2 * μ : ℂ) = 1 - (1 + 2 * μ - n) - n by ring, poch_one_sub_sub_nat]
+    show (-2 * μ : ℂ) = 1 - (1 + 2 * μ - n) - n by ring, DLMF.Hypergeometric.poch_reflect]
   have h2 := cpow_mul_cpow_eq hz0 (s := μ - (n + 1) / 2) (t := μ - n / 2 + 1 / 2)
       (u := 1 + 2 * μ - n - 1) (by ring)
   have hs : ((-1 : ℂ) ^ n) * (-1) ^ n = 1 := by rw [← mul_pow]; simp
@@ -1662,7 +1708,7 @@ theorem iteratedDeriv_exp_neg_whittakerM {κ μ : ℂ} (n : ℕ) {z : ℂ}
   unfold whittakerM
   rw [show μ - (n : ℂ) / 2 - (κ + n / 2) + 1 / 2 = μ - κ + 1 / 2 - n by ring,
     show 1 + 2 * (μ - (n : ℂ) / 2) = 1 + 2 * μ - n by ring,
-    show (-2 * μ : ℂ) = 1 - (1 + 2 * μ - n) - n by ring, poch_one_sub_sub_nat]
+    show (-2 * μ : ℂ) = 1 - (1 + 2 * μ - n) - n by ring, DLMF.Hypergeometric.poch_reflect]
   have h2 := cpow_mul_cpow_eq hz0 (s := μ - (n + 1) / 2) (t := μ - n / 2 + 1 / 2)
       (u := 1 + 2 * μ - n - 1) (by ring)
   have hs : ((-1 : ℂ) ^ n) * (-1) ^ n = 1 := by rw [← mul_pow]; simp

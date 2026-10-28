@@ -26,9 +26,13 @@ namespace DLMF.Hypergeometric
 
 /-- Ordered upper/lower parameter blocks and the two numerator Gamma counts. -/
 structure MeijerGParameters where
+  /-- The upper parameters `a₁, …, a_p`. -/
   a : List ℂ
+  /-- The lower parameters `b₁, …, b_q`. -/
   b : List ℂ
+  /-- The number `m` of lower parameters with a Gamma factor `Γ(bⱼ - s)` in the numerator. -/
   m : ℕ
+  /-- The number `n` of upper parameters with a Gamma factor `Γ(1 - aⱼ + s)` in the numerator. -/
   n : ℕ
   deriving Inhabited
 
@@ -57,8 +61,11 @@ inductive MeijerContourKind | vertical | rightLoop | leftLoop
 
 /-- A smooth parameterized contour, before imposing pole and tail geometry. -/
 structure MeijerGContour where
+  /-- The parameterization `ℝ → ℂ` of the contour. -/
   path : ℝ→ℂ
+  /-- The parameterization is continuously differentiable. -/
   smooth : ContDiff ℝ 1 path
+  /-- Which of the three DLMF contour geometries the path follows. -/
   kind : MeijerContourKind
 
 /-- The exact affine tails capture the three integration paths, rather than arbitrary

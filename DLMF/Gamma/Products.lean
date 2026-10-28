@@ -192,6 +192,8 @@ theorem summable_balanced_factor_sub_one {m : ℕ} (a b : Fin m → ℂ)
     _ = 2 * K * (1 / (n : ℝ) ^ 2) := by ring
 
 open Finset in
+/-- DLMF 5.8.5: if `∑ aₖ = ∑ bₖ` and no `bₖ` is a nonpositive integer, then `∏_{n≥0} ∏ₖ (aₖ + n)/(bₖ
++ n) = ∏ₖ Γ(bₖ) / ∏ₖ Γ(aₖ)`. -/
 @[dlmf 5.8.E5]
 theorem Gamma_balanced_product {m : ℕ} (hm : 0 < m) (a b : Fin m → ℂ)
     (hsum : ∑ k : Fin m, a k = ∑ k : Fin m, b k)

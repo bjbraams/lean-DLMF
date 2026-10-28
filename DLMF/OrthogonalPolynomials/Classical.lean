@@ -39,9 +39,11 @@ def hermitePolyH : ℕ → ℤ[X]
   | 0 => 1
   | n + 1 => 2 * X * hermitePolyH n - derivative (hermitePolyH n)
 
+/-- `H_0 = 1` (DLMF 18.5.18). -/
 @[simp, dlmf 18.5.E18]
 theorem hermitePolyH_zero : hermitePolyH 0 = 1 := rfl
 
+/-- The recursion `H_{n+1} = 2x H_n - H_n'` defining the Hermite polynomials. -/
 @[simp]
 theorem hermitePolyH_succ (n : ℕ) :
     hermitePolyH (n + 1) = 2 * X * hermitePolyH n - derivative (hermitePolyH n) :=
@@ -201,6 +203,7 @@ for `α + 1` not a nonpositive integer:
 def laguerrePolyL (α : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
   poch (α + 1) n / n ! * kummerM (-n : ℂ) (α + 1) x
 
+/-- `L_0^{(α)}(x) = 1` (DLMF 18.5.17). -/
 @[simp, dlmf 18.5.E17, dlmf 18.5.E17_5]
 theorem laguerrePolyL_zero (α x : ℂ) : laguerrePolyL α 0 x = 1 := by
   simp [laguerrePolyL, poch_zero, kummerM_of_zero_param]
@@ -250,6 +253,7 @@ theorem laguerrePolyL_mul_monomial_eq_sum (α : ℂ) (n k : ℕ) (x : ℝ) :
   rw [pow_add]
   ring
 
+/-- For `α > -1`, `L_n^{(α)}(x) xᵏ x^α e^{-x}` is integrable on `(0, ∞)`. -/
 theorem integrable_laguerrePolyL_mul_monomial {α : ℝ} (hα : -1 < α) (n k : ℕ) :
     Integrable (fun x : ℝ => laguerrePolyL α n x * (x : ℂ) ^ k *
       (x : ℂ) ^ (α : ℂ) * exp (-(x : ℂ))) (volume.restrict (Set.Ioi 0)) := by
@@ -477,6 +481,7 @@ for `α + 1` not a nonpositive integer:
 def jacobiPolyP (α β : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
   poch (α + 1) n / n ! * ₂F₁ (-n : ℂ) (n + α + β + 1) (α + 1) ((1 - x) / 2)
 
+/-- `P_0^{(α,β)}(x) = 1`. -/
 @[simp]
 theorem jacobiPolyP_zero (α β x : ℂ) : jacobiPolyP α β 0 x = 1 := by
   simp [jacobiPolyP, poch_zero, ordinaryHypergeometric_zero_left]
@@ -694,6 +699,7 @@ for `λ + 1/2` not a nonpositive integer:
 def ultrasphPoly (lam : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
   poch (2 * lam) n / n ! * ₂F₁ (-n : ℂ) (n + 2 * lam) (lam + 1 / 2) ((1 - x) / 2)
 
+/-- `C_0^{(λ)}(x) = 1`. -/
 @[simp]
 theorem ultrasphPoly_zero (lam x : ℂ) : ultrasphPoly lam 0 x = 1 := by
   simp [ultrasphPoly, poch_zero, ordinaryHypergeometric_zero_left]
@@ -917,14 +923,5 @@ theorem ultrasphPoly_eq_jacobiPolyP {lam : ℂ} (n : ℕ) (x : ℂ)
 def jacobiMeasure (α β : ℝ) : Measure ℝ :=
   (volume.restrict (Set.Ioo (-1 : ℝ) 1)).withDensity
     (fun x => ENNReal.ofReal ((1 - x) ^ α * (1 + x) ^ β))
-
-/-- Reflection of a Pochhammer symbol: `(1 - y - m)_m = (-1)^m (y)_m`. -/
-theorem poch_one_sub_sub_self (y : ℂ) (m : ℕ) : poch (1 - y - m) m = (-1 : ℂ) ^ m * poch y m := by
-  exact DLMF.Hypergeometric.poch_reflect y m
-
-/-- The binomial theorem for rising factorials (Chu–Vandermonde). -/
-theorem poch_add_binomial (u v : ℂ) (n : ℕ) :
-    ∑ j ∈ Finset.range (n + 1), (n.choose j : ℂ) * poch u j * poch v (n - j) = poch (u + v) n := by
-  exact DLMF.Hypergeometric.poch_add_binomial_sum u v n
 
 end DLMF.OrthogonalPolynomials

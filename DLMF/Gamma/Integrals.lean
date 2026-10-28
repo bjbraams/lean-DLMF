@@ -29,6 +29,8 @@ noncomputable section
 
 namespace DLMF.Gamma
 
+/-- DLMF 5.13.1, Barnes's beta integral: `(1/2π) ∫ Γ(s + a) Γ(b - s) x^(-s) dt = Γ(a + b) x^a / (1 +
+x)^(a+b)` along `s = σ + it` with `-Re a < σ < Re b`. -/
 @[dlmf 5.13.E1]
 theorem mellin_barnes_beta {a b : ℂ} {x σ : ℝ}
     (hx : 0 < x) (hab : 0 < (a + b).re) (hσa : -a.re < σ) (hσb : σ < b.re) :
@@ -74,6 +76,7 @@ holomorphic for `re v > 0`, and 5.13.2 is the value at `v = e^{i(π/2 - b)}`. -/
 def normSqHalfB (α : ℝ) (s : ℝ) : ℂ :=
   Complex.Gamma (α + I * ((s : ℂ) / 2)) * Complex.Gamma (α - I * ((s : ℂ) / 2))
 
+/-- `s ↦ Γ(α + is/2) Γ(α - is/2)` is continuous for `α > 0`. -/
 theorem continuous_normSqHalfB {α : ℝ} (hα : 0 < α) : Continuous (normSqHalfB α) := by
   refine continuous_iff_continuousAt.2 fun s => ?_
   have h1 : ContinuousAt Complex.Gamma ((α : ℂ) + I * ((s : ℂ) / 2)) :=
@@ -83,6 +86,7 @@ theorem continuous_normSqHalfB {α : ℝ} (hα : 0 < α) : Continuous (normSqHal
   exact (h1.comp (f := fun s : ℝ => (α : ℂ) + I * ((s : ℂ) / 2)) (by fun_prop)).mul
     (h2.comp (f := fun s : ℝ => (α : ℂ) - I * ((s : ℂ) / 2)) (by fun_prop))
 
+/-- `Γ(α + is/2) Γ(α - is/2)` is bounded by `C(1 + |s|)^K e^(-π|s|/2)` for `α > 0`. -/
 theorem exists_norm_normSqHalfB_le {α : ℝ} (hα : 0 < α) :
     ∃ C : ℝ, ∃ K : ℕ, ∀ s : ℝ,
       ‖normSqHalfB α s‖ ≤ C * (1 + |s|) ^ K * Real.exp (-(π * |s|) / 2) := by
@@ -200,6 +204,8 @@ theorem integral_normSqHalfB {α : ℝ} (hα : 0 < α) {v : ℂ} (hv : 0 < v.re)
       simpa using hx
   exact ht.frequently hev.frequently
 
+/-- DLMF 5.13.2: `(1/2π) ∫ |Γ(a + it)|² e^((2b - π)t) dt = Γ(2a)/(2 sin b)^(2a)` for `a > 0`, `0 < b
+< π/2`. -/
 @[dlmf 5.13.E2]
 theorem mellin_barnes_norm_sq {a b : ℝ} (ha : 0 < a) (hb : 0 < b) (hbπ : b < π / 2) :
     (1 / (2 * π)) * ∫ t : ℝ,
@@ -313,6 +319,8 @@ theorem integral_Gamma_mul_Gamma_mul_cpow {a c : ℂ} (ha : 0 < a.re) (hc : 0 < 
   exact h.symm
 
 open Set in
+/-- DLMF 5.13.3, Barnes's first lemma: `(1/2π) ∫ Γ(a + it) Γ(b + it) Γ(c - it) Γ(d - it) dt = Γ(a +
+c) Γ(a + d) Γ(b + c) Γ(b + d) / Γ(a + b + c + d)` for positive real parts. -/
 @[dlmf 5.13.E3]
 theorem mellin_barnes_four {a b c d : ℂ}
     (ha : 0 < a.re) (hb : 0 < b.re) (hc : 0 < c.re) (hd : 0 < d.re) :
@@ -432,6 +440,7 @@ theorem norm_Gamma_le_Gamma_re {z : ℂ} (hz : 0 < z.re) : ‖Complex.Gamma z‖
     rw [h]; exact div_le_self (by positivity) hP
   exact (pow_le_pow_iff_left₀ (norm_nonneg _) hG.le two_ne_zero).1 h2
 
+/-- `∏ₖ (1 + y²/(x + k)²)` is monotone in `|y|`: it is at most its value at `Y ≥ |y|`. -/
 theorem gammaVertProd_le_of_abs_le {x y Y : ℝ} (hx : 0 < x) (hy : |y| ≤ Y) :
     gammaVertProd x y ≤ gammaVertProd x Y := by
   refine le_of_tendsto_of_tendsto' (tendsto_prod_gammaVertProd x y)
@@ -505,6 +514,7 @@ def GammaShiftBound (w : ℝ) : Prop :=
   ∃ c C T : ℝ, 0 < c ∧ 0 < T ∧ ∀ t : ℝ, T ≤ t →
     c * t ^ w * Real.Gamma t ≤ Real.Gamma (t + w) ∧ Real.Gamma (t + w) ≤ C * t ^ w * Real.Gamma t
 
+/-- For `0 ≤ s ≤ 1`, `Γ(t + s)` is comparable to `t^s Γ(t)` for large `t`. -/
 theorem gammaShiftBound_of_mem_Icc {s : ℝ} (hs0 : 0 ≤ s) (hs1 : s ≤ 1) : GammaShiftBound s := by
   refine ⟨1 / 2, 1, 1, by norm_num, one_pos, fun x hx => ?_⟩
   have hx0 : 0 < x := by linarith
@@ -558,6 +568,7 @@ theorem gammaShiftBound_of_mem_Icc {s : ℝ} (hs0 : 0 ≤ s) (hs1 : s ≤ 1) : G
   · simp only [Real.rpow_zero, add_zero]
     constructor <;> nlinarith
 
+/-- If `Γ(t + w) ≍ t^w Γ(t)` for large `t`, then the same holds for `w + 1`. -/
 theorem GammaShiftBound.add_one {w : ℝ} (h : GammaShiftBound w) : GammaShiftBound (w + 1) := by
   obtain ⟨c, C, T, hc, hT, hb⟩ := h
   refine ⟨c / 2, 2 * C, max T (2 * |w| + 1), by positivity, by positivity, fun t ht => ?_⟩
@@ -578,6 +589,7 @@ theorem GammaShiftBound.add_one {w : ℝ} (h : GammaShiftBound w) : GammaShiftBo
           · nlinarith [Real.Gamma_pos_of_pos (show 0 < t + w by linarith)]
       _ = 2 * C * (t ^ w * t) * Real.Gamma t := by ring
 
+/-- If `Γ(t + w) ≍ t^w Γ(t)` for large `t`, then the same holds for `w - 1`. -/
 theorem GammaShiftBound.sub_one {w : ℝ} (h : GammaShiftBound w) : GammaShiftBound (w - 1) := by
   obtain ⟨c, C, T, hc, hT, hb⟩ := h
   refine ⟨c / 2, 2 * C, max T (2 * |w| + 4), by positivity, by positivity, fun t ht => ?_⟩
@@ -600,6 +612,7 @@ theorem GammaShiftBound.sub_one {w : ℝ} (h : GammaShiftBound w) : GammaShiftBo
   · nlinarith [Real.rpow_pos_of_pos ht0 (w - 1)]
   · nlinarith [Real.rpow_pos_of_pos ht0 (w - 1)]
 
+/-- For every real `w`, `Γ(t + w)` is comparable to `t^w Γ(t)` for large `t`. -/
 theorem gammaShiftBound (w : ℝ) : GammaShiftBound w := by
   have hb := gammaShiftBound_of_mem_Icc (Int.fract_nonneg w) (Int.fract_lt_one w).le
   have key : ∀ n : ℤ, GammaShiftBound (Int.fract w + n) := by
@@ -722,6 +735,7 @@ theorem exists_norm_Gamma_ratio_le (u v : ℂ) : ∃ K T : ℝ, 0 ≤ K ∧ 0 < 
           ‖Complex.Gamma (t + v)‖) := by gcongr
     _ = _ := by ring
 
+/-- If `x ≤ k y` with `k, y ≥ 0`, then `x / y ≤ k`. -/
 theorem mul_recip_le_of_le_mul {x y k : ℝ} (hk : 0 ≤ k) (hy : 0 ≤ y) (h : x ≤ k * y) :
     x * y⁻¹ ≤ k := by
   rcases hy.lt_or_eq with hy | rfl
@@ -733,21 +747,27 @@ def ramanujanIntegrand (a b c d : ℂ) (t : ℝ) : ℂ :=
   1 / (Complex.Gamma (a + t) * Complex.Gamma (b + t) * Complex.Gamma (c - t) *
     Complex.Gamma (d - t))
 
+/-- The modulus of Ramanujan's integrand is the product of the moduli of the four reciprocal Gamma
+factors. -/
 theorem norm_ramanujanIntegrand (a b c d : ℂ) (t : ℝ) :
     ‖ramanujanIntegrand a b c d t‖ = ‖(Complex.Gamma (a + t))⁻¹‖ *
       ‖(Complex.Gamma (b + t))⁻¹‖ * ‖(Complex.Gamma (c - t))⁻¹‖ *
       ‖(Complex.Gamma (d - t))⁻¹‖ := by
   rw [ramanujanIntegrand, one_div, mul_inv, mul_inv, mul_inv, norm_mul, norm_mul, norm_mul]
 
+/-- Reflecting `t ↦ -t` in Ramanujan's integrand swaps the pairs `(a, b)` and `(c, d)`. -/
 theorem ramanujanIntegrand_neg (a b c d : ℂ) (u : ℝ) :
     ramanujanIntegrand a b c d (-u) = ramanujanIntegrand c d a b u := by
   simp only [ramanujanIntegrand, ofReal_neg, ← sub_eq_add_neg, sub_neg_eq_add]
   ring_nf
 
+/-- Ramanujan's integrand is symmetric in `a` and `b`. -/
 theorem ramanujanIntegrand_swap (a b c d : ℂ) (t : ℝ) :
     ramanujanIntegrand a b c d t = ramanujanIntegrand b a c d t := by
   simp only [ramanujanIntegrand]; ring_nf
 
+/-- A point of the closed ball of radius `ρ` about `a₀` has real part within `ρ` of `Re a₀` and `|Im
+a| ≤ |Im a₀| + ρ`. -/
 theorem re_im_of_mem_closedBall {a a₀ : ℂ} {ρ : ℝ} (ha : a ∈ Metric.closedBall a₀ ρ) :
     a₀.re - ρ ≤ a.re ∧ a.re ≤ a₀.re + ρ ∧ |a.im| ≤ |a₀.im| + ρ := by
   rw [Metric.mem_closedBall, dist_eq_norm] at ha
@@ -912,6 +932,7 @@ theorem left_tail (a₀ b c d : ℂ) (ρ : ℝ) : ∃ K T : ℝ, 0 ≤ K ∧ 0 <
     _ = Pc * Ea * Eb / π ^ 2 * K3 * K4 * u ^ (2 - (a₀.re - ρ) - (b + c + d).re) := by
         rw [← hexp]; ring
 
+/-- Ramanujan's integrand is jointly continuous in `(a, t)`. -/
 theorem continuous_ramanujanIntegrand_uncurry (b c d : ℂ) :
     Continuous fun p : ℂ × ℝ => ramanujanIntegrand p.1 b c d p.2 := by
   have hg : Continuous fun s : ℂ => (Complex.Gamma s)⁻¹ := differentiable_recip_Gamma.continuous
@@ -926,6 +947,8 @@ theorem continuous_ramanujanIntegrand_uncurry (b c d : ℂ) :
   have h4 := hg.comp (by fun_prop : Continuous fun p : ℂ × ℝ => d - (p.2 : ℂ))
   exact ((h1.mul h2).mul h3).mul h4
 
+/-- Ramanujan's integrand factors as `1/Γ(a + t)` times the reciprocal of the remaining three Gamma
+factors. -/
 theorem ramanujanIntegrand_eq_mul (a b c d : ℂ) (t : ℝ) :
     ramanujanIntegrand a b c d t = (Complex.Gamma (a + t))⁻¹ *
       (1 / (Complex.Gamma (b + t) * Complex.Gamma (c - t) * Complex.Gamma (d - t))) := by
@@ -1213,6 +1236,8 @@ theorem integrable_recip_Gamma_mul_recip_Gamma {b d : ℂ} (h : 2 < (b + d).re) 
 def kern (p ζ : ℝ) : ℝ → ℂ := (Ioc (-(π / 2)) (π / 2)).indicator fun φ =>
   ((Real.cos φ ^ p : ℝ) : ℂ) * Complex.exp ((ζ : ℂ) * φ * I)
 
+/-- The Fourier transform of the kernel `cos^p φ e^(iζφ)` on `(-π/2, π/2]` is the corresponding
+cosine-power integral. -/
 theorem fourier_kern_eq (p ζ w : ℝ) :
     𝓕 (kern p ζ) w = ∫ x in (-(π / 2))..(π / 2),
       ((Real.cos x ^ p : ℝ) : ℂ) * Complex.exp (((ζ : ℂ) - 2 * π * w) * x * I) := by
@@ -1226,12 +1251,15 @@ theorem fourier_kern_eq (p ζ w : ℝ) :
     congr 2; push_cast; ring
   · rw [indicator_of_notMem hv, indicator_of_notMem hv, mul_zero]
 
+/-- For `p > -1`, the Fourier transform of `cos^p φ e^(iζφ)` on `(-π/2, π/2]` is `π Γ(p + 1) 2^(-p)
+/ (Γ(1 + p/2 + u/2) Γ(1 + p/2 - u/2))` with `u = ζ - 2πw`. -/
 theorem fourier_kern {p : ℝ} (hp : -1 < p) (ζ w : ℝ) :
     𝓕 (kern p ζ) w = ((π * Real.Gamma (p + 1) / 2 ^ p : ℝ) : ℂ) *
       ((Complex.Gamma (1 + p / 2 + ((ζ : ℂ) - 2 * π * w) / 2))⁻¹ *
         (Complex.Gamma (1 + p / 2 - ((ζ : ℂ) - 2 * π * w) / 2))⁻¹) := by
   rw [fourier_kern_eq]; exact integral_cos_rpow_mul_cexp hp _
 
+/-- For `p > -1` the kernel `cos^p φ e^(iζφ)` on `(-π/2, π/2]` is integrable. -/
 theorem integrable_kern {p : ℝ} (hp : -1 < p) (ζ : ℝ) : Integrable (kern p ζ) := by
   rw [kern, integrable_indicator_iff measurableSet_Ioc]
   have hle : -(π / 2) ≤ π / 2 := by linarith [Real.pi_pos]
@@ -1241,6 +1269,7 @@ theorem integrable_kern {p : ℝ} (hp : -1 < p) (ζ : ℝ) : Integrable (kern p 
       (by fun_prop : Continuous fun x : ℝ => Complex.exp ((ζ : ℂ) * x * I)).continuousOn
   exact (intervalIntegrable_iff_integrableOn_Ioc_of_le hle).1 hii
 
+/-- The kernel `cos^p φ e^(iζφ)` is continuous on `(-π/2, π/2)`. -/
 theorem continuousAt_kern (p ζ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-(π / 2)) (π / 2)) :
     ContinuousAt (kern p ζ) x := by
   have hcos : 0 < Real.cos x := Real.cos_pos_of_mem_Ioo hx
@@ -1254,15 +1283,18 @@ theorem continuousAt_kern (p ζ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-(π / 2)) (π
   filter_upwards [isOpen_Ioo.mem_nhds hx] with y hy
   simp [kern, indicator_of_mem (Ioo_subset_Ioc_self hy)]
 
+/-- The Fourier transform is linear in scalar multiples. -/
 theorem fourier_const_mul (C : ℂ) (F : ℝ → ℂ) (x : ℝ) :
     𝓕 (fun ξ => C * F ξ) x = C * 𝓕 F x := by
   rw [Real.fourier_real_eq_integral_exp_smul, Real.fourier_real_eq_integral_exp_smul,
     ← integral_const_mul]
   congr 1; funext v; simp only [smul_eq_mul]; ring
 
+/-- The Fourier transform at `0` is the integral. -/
 theorem fourier_zero_eq_integral (F : ℝ → ℂ) : 𝓕 F 0 = ∫ v, F v := by
   rw [Real.fourier_real_eq_integral_exp_smul]; simp
 
+/-- Fourier inversion for the cosine-power kernel at interior points. -/
 theorem fourier_fourier_kern {p : ℝ} (hp : -1 < p) (ζ : ℝ) (h𝓕 : Integrable (𝓕 (kern p ζ)))
     {x : ℝ} (hx : -x ∈ Ioo (-(π / 2)) (π / 2)) :
     𝓕 (𝓕 (kern p ζ)) x = kern p ζ (-x) := by
@@ -1398,20 +1430,25 @@ def ramanujanR (a b c d : ℂ) : ℂ :=
     (Complex.Gamma (a + c - 1) * Complex.Gamma (a + d - 1) *
       Complex.Gamma (b + c - 1) * Complex.Gamma (b + d - 1))
 
+/-- The right-hand side of 5.13.4 is symmetric in `a` and `b`. -/
 theorem ramanujanR_swap (a b c d : ℂ) : ramanujanR a b c d = ramanujanR b a c d := by
   simp only [ramanujanR]; ring_nf
 
+/-- The right-hand side of 5.13.4 is invariant under swapping `(a, b)` with `(c, d)`. -/
 theorem ramanujanR_neg (a b c d : ℂ) : ramanujanR a b c d = ramanujanR c d a b := by
   simp only [ramanujanR]; ring_nf
 
+/-- The integral of Ramanujan's integrand is symmetric in `a` and `b`. -/
 theorem integral_ramanujanIntegrand_swap (a b c d : ℂ) :
     ∫ t : ℝ, ramanujanIntegrand a b c d t = ∫ t : ℝ, ramanujanIntegrand b a c d t := by
   simp_rw [ramanujanIntegrand_swap a b c d]
 
+/-- The integral of Ramanujan's integrand is invariant under swapping `(a, b)` with `(c, d)`. -/
 theorem integral_ramanujanIntegrand_neg (a b c d : ℂ) :
     ∫ t : ℝ, ramanujanIntegrand a b c d t = ∫ t : ℝ, ramanujanIntegrand c d a b t := by
   rw [← integral_neg_eq_self]; simp_rw [ramanujanIntegrand_neg]
 
+/-- The right-hand side of 5.13.4 is holomorphic in `a` on `Re(a + b + c + d) > 3`. -/
 theorem differentiableOn_ramanujanR (b c d : ℂ) :
     DifferentiableOn ℂ (fun a : ℂ => ramanujanR a b c d) {a | 3 < (a + b + c + d).re} := by
   intro a ha
@@ -1449,6 +1486,7 @@ theorem eqOn_of_real_halfline {f g : ℂ → ℂ} {s : ℝ}
       hx (Complex.ofReal_injective h)
   exact ht.frequently hev.frequently
 
+/-- `{a | 3 < Re(a + k)} = {a | 3 - Re k < Re a}`. -/
 theorem halfplane_eq (k : ℂ) : {a : ℂ | 3 < (a + k).re} = {a : ℂ | 3 - k.re < a.re} := by
   ext a
   change 3 < (a + k).re ↔ 3 - k.re < a.re
@@ -1473,6 +1511,8 @@ end RamanujanAux
 
 open RamanujanAux
 
+/-- DLMF 5.13.4, Ramanujan's integral: `∫ dt / (Γ(a + t) Γ(b + t) Γ(c - t) Γ(d - t)) = Γ(a + b + c +
+d - 3) / (Γ(a + c - 1) Γ(a + d - 1) Γ(b + c - 1) Γ(b + d - 1))` for `Re(a + b + c + d) > 3`. -/
 @[dlmf 5.13.E4]
 theorem mellin_barnes_recip_four {a b c d : ℂ}
     (h : 3 < (a + b + c + d).re) :
@@ -1523,6 +1563,8 @@ theorem mellin_barnes_recip_four {a b c d : ℂ}
 
 end Ramanujan
 
+/-- DLMF 5.13.5, de Branges–Wilson integral: `(1/4π) ∫ ∏ₖ Γ(aₖ ± it) / Γ(±2it) dt = ∏_{j<k} Γ(aⱼ +
+aₖ) / Γ(a₁ + a₂ + a₃ + a₄)` for positive real parts. -/
 @[dlmf 5.13.E5]
 theorem mellin_barnes_selberg {a : Fin 4 → ℂ} (ha : ∀ k, 0 < (a k).re) :
     (1 / (4 * π)) * ∫ t : ℝ,
@@ -1557,7 +1599,8 @@ theorem hasSum_one_div_odd_sq :
   simp only [hf]; push_cast; ring
 
 /-- Tail of the trigamma series. -/
-theorem tendsto_trigamma_nat_add_one : Tendsto (fun k : ℕ => Real.trigamma (k + 1)) atTop (𝓝 0) := by
+theorem tendsto_trigamma_nat_add_one :
+    Tendsto (fun k : ℕ => Real.trigamma (k + 1)) atTop (𝓝 0) := by
   have hs : Summable fun n : ℕ => ((n : ℝ) + 1)⁻¹ ^ 2 := by
     have := (summable_nat_add_iff 1).mpr (Real.summable_one_div_nat_pow.mpr one_lt_two)
     simpa [one_div] using this
@@ -1653,6 +1696,81 @@ theorem trigamma_add_two_le (k : ℕ) : Real.trigamma (k + 2) ≤ 1 / (k + 1) :=
   have : (0 : ℝ) ≤ ((k : ℝ) + 1 + N)⁻¹ := by positivity
   linarith
 
+/-- Row sums of the double series for 5.16.2: `∑_q 1/((p+1)(p+q+2)²) = ψ'(p+2)/(p+1)`. -/
+private lemma sumTrigamma_row (p : ℕ) :
+    ∑' q : ℕ, ENNReal.ofReal (1 / ((p + 1 : ℝ) * ((p : ℝ) + q + 2) ^ 2)) =
+      ENNReal.ofReal ((1 / (p + 1 : ℝ)) * Real.trigamma (p + 2)) := by
+  have hS := Real.summable_trigamma (by positivity : (0 : ℝ) < p + 2)
+  rw [show (fun q : ℕ => ENNReal.ofReal (1 / ((p + 1 : ℝ) * ((p : ℝ) + q + 2) ^ 2))) =
+      fun q : ℕ => ENNReal.ofReal (1 / (p + 1 : ℝ)) *
+      ENNReal.ofReal (((p : ℝ) + 2 + q)⁻¹ ^ 2) by
+    funext q; rw [← ENNReal.ofReal_mul (by positivity)]; congr 1
+    field_simp; ring_nf,
+    ENNReal.tsum_mul_left, ← ENNReal.ofReal_tsum_of_nonneg (fun n => by positivity) hS,
+    ← ENNReal.ofReal_mul (by positivity), ← Real.trigamma_eq_tsum (by positivity)]
+
+/-- Column sums of the double series for 5.16.2:
+`∑_q 1/((p+1)(q+1)(p+q+2)) = ∑_{j≤p} 1/((j+1)(p+1)²)`. -/
+private lemma sumTrigamma_col (p : ℕ) :
+    ∑' q : ℕ, ENNReal.ofReal (1 / ((p + 1 : ℝ) * (q + 1) * ((p : ℝ) + q + 2))) =
+      ∑ j ∈ range (p + 1), ENNReal.ofReal (1 / ((j + 1 : ℝ) * (p + 1) ^ 2)) := by
+  have hx : (0 : ℝ) < p + 2 := by positivity
+  have hT : ∑' n, Real.digammaSeriesTerm ((p : ℝ) + 2) n =
+      ∑ j ∈ range (p + 1), 1 / (j + 1 : ℝ) := by
+    have h1 := Real.digamma_eq_tsum hx
+    have h2 := Real.digamma_nat_add_one (p + 1)
+    rw [show ((p + 1 : ℕ) : ℝ) + 1 = (p : ℝ) + 2 by push_cast; ring, h1] at h2
+    rw [show ∑ j ∈ range (p + 1), 1 / (j + 1 : ℝ) = (harmonic (p + 1) : ℝ) by
+      simp [harmonic]]
+    linarith
+  have hD0 : ∀ n, 0 ≤ Real.digammaSeriesTerm ((p : ℝ) + 2) n := fun n => by
+    simp only [Real.digammaSeriesTerm]
+    rw [sub_nonneg]
+    exact inv_anti₀ (by positivity) (by linarith)
+  rw [show (fun q : ℕ => ENNReal.ofReal (1 / ((p + 1 : ℝ) * (q + 1) * ((p : ℝ) + q + 2)))) =
+      fun q : ℕ => ENNReal.ofReal (1 / (p + 1 : ℝ) ^ 2) *
+      ENNReal.ofReal (Real.digammaSeriesTerm ((p : ℝ) + 2) q) by
+    funext q; rw [← ENNReal.ofReal_mul (by positivity)]; congr 1
+    simp only [Real.digammaSeriesTerm]
+    field_simp; ring,
+    ENNReal.tsum_mul_left, ← ENNReal.ofReal_tsum_of_nonneg hD0
+      (Real.summable_digammaSeriesTerm hx), hT, ← ENNReal.ofReal_mul (by positivity),
+    mul_sum, ENNReal.ofReal_sum_of_nonneg (fun j _ => by positivity)]
+  refine sum_congr rfl fun j _ => ?_
+  congr 1; field_simp
+
+/-- After the triangular interchange: `∑_{p≥j} 1/((j+1)(p+1)²) = 1/(j+1)³ + ψ'(j+2)/(j+1)`. -/
+private lemma sumTrigamma_tri (j : ℕ) :
+    ∑' p : ℕ, (if j ≤ p then ENNReal.ofReal (1 / ((j + 1 : ℝ) * (p + 1) ^ 2)) else 0) =
+      ENNReal.ofReal (1 / ((j : ℝ) + 1) ^ 3) +
+        ENNReal.ofReal ((1 / (j + 1 : ℝ)) * Real.trigamma (j + 2)) := by
+  have ha0 : 0 ≤ (1 / (j + 1 : ℝ)) * Real.trigamma (j + 2) := by
+    rw [Real.trigamma_eq_tsum (by positivity)]; positivity
+  rw [← Summable.sum_add_tsum_nat_add' (f := fun p : ℕ =>
+    if j ≤ p then ENNReal.ofReal (1 / ((j + 1 : ℝ) * (p + 1) ^ 2)) else 0) (k := j)
+    ENNReal.summable, sum_eq_zero fun i hi => by simp [show ¬ j ≤ i by simpa using hi],
+    zero_add]
+  simp only [le_add_iff_nonneg_left, zero_le, ite_true]
+  rw [show (fun i : ℕ => ENNReal.ofReal (1 / ((j + 1 : ℝ) * (((i + j : ℕ) : ℝ) + 1) ^ 2))) =
+      fun i : ℕ => ENNReal.ofReal (1 / (j + 1 : ℝ)) *
+      ENNReal.ofReal (((j : ℝ) + 1 + i)⁻¹ ^ 2) by
+    funext i; rw [← ENNReal.ofReal_mul (by positivity)]; congr 1; push_cast
+    field_simp; ring,
+    ENNReal.tsum_mul_left, tsum_eq_zero_add' ENNReal.summable]
+  have hS := Real.summable_trigamma (by positivity : (0 : ℝ) < j + 2)
+  rw [show (fun i : ℕ => ENNReal.ofReal (((j : ℝ) + 1 + ((i + 1 : ℕ) : ℝ))⁻¹ ^ 2)) =
+      fun i : ℕ => ENNReal.ofReal (((j : ℝ) + 2 + i)⁻¹ ^ 2) by
+    funext i; push_cast; ring_nf,
+    ← ENNReal.ofReal_tsum_of_nonneg (fun n => by positivity) hS,
+    ← Real.trigamma_eq_tsum (by positivity), ← ENNReal.ofReal_add (by positivity)
+      (by rw [Real.trigamma_eq_tsum (by positivity)]; positivity),
+    ← ENNReal.ofReal_mul (by positivity), ← ENNReal.ofReal_add (by positivity) ha0]
+  congr 1
+  push_cast
+  field_simp
+  ring
+
+/-- DLMF 5.16.2: `∑_{k≥1} ψ'(k + 1)/k = ζ(3)`. -/
 @[dlmf 5.16.E2]
 theorem sum_trigamma_div :
     ∑' k : ℕ, (1 / (k + 1 : ℝ)) * Real.trigamma (k + 2) = (riemannZeta 3).re := by
@@ -1691,15 +1809,8 @@ theorem sum_trigamma_div :
     field_simp
     ring
   -- symmetry: the double sum is `2 L`
-  have hrow : ∀ p : ℕ, ∑' q, ENNReal.ofReal (g p q) = ENNReal.ofReal (a p) := by
-    intro p
-    have hS := Real.summable_trigamma (by positivity : (0 : ℝ) < p + 2)
-    rw [show (fun q => ENNReal.ofReal (g p q)) = fun q : ℕ => ENNReal.ofReal (1 / (p + 1 : ℝ)) *
-        ENNReal.ofReal (((p : ℝ) + 2 + q)⁻¹ ^ 2) by
-      funext q; rw [← ENNReal.ofReal_mul (by positivity)]; congr 1; simp only [hg]
-      field_simp; ring_nf,
-      ENNReal.tsum_mul_left, ← ENNReal.ofReal_tsum_of_nonneg (fun n => by positivity) hS,
-      ← ENNReal.ofReal_mul (by positivity), ← Real.trigamma_eq_tsum (by positivity)]
+  have hrow : ∀ p : ℕ, ∑' q, ENNReal.ofReal (g p q) = ENNReal.ofReal (a p) :=
+    sumTrigamma_row
   have hsym : ∑' p, ∑' q, ENNReal.ofReal (f p q) = 2 * L := by
     simp_rw [hfg, ENNReal.tsum_add]
     rw [ENNReal.tsum_comm (f := fun p q => ENNReal.ofReal (g q p))]
@@ -1707,57 +1818,12 @@ theorem sum_trigamma_div :
     rw [hL, two_mul]
   -- summing over `q` first gives harmonic numbers
   set c : ℕ → ℕ → ℝ≥0∞ := fun j p => ENNReal.ofReal (1 / ((j + 1 : ℝ) * (p + 1) ^ 2)) with hc
-  have hcol : ∀ p : ℕ, ∑' q, ENNReal.ofReal (f p q) = ∑ j ∈ range (p + 1), c j p := by
-    intro p
-    have hx : (0 : ℝ) < p + 2 := by positivity
-    have hT : ∑' n, Real.digammaSeriesTerm ((p : ℝ) + 2) n =
-        ∑ j ∈ range (p + 1), 1 / (j + 1 : ℝ) := by
-      have h1 := Real.digamma_eq_tsum hx
-      have h2 := Real.digamma_nat_add_one (p + 1)
-      rw [show ((p + 1 : ℕ) : ℝ) + 1 = (p : ℝ) + 2 by push_cast; ring, h1] at h2
-      rw [show ∑ j ∈ range (p + 1), 1 / (j + 1 : ℝ) = (harmonic (p + 1) : ℝ) by
-        simp [harmonic]]
-      linarith
-    have hD0 : ∀ n, 0 ≤ Real.digammaSeriesTerm ((p : ℝ) + 2) n := fun n => by
-      simp only [Real.digammaSeriesTerm]
-      rw [sub_nonneg]
-      exact inv_anti₀ (by positivity) (by linarith)
-    rw [show (fun q => ENNReal.ofReal (f p q)) = fun q => ENNReal.ofReal (1 / (p + 1 : ℝ) ^ 2) *
-        ENNReal.ofReal (Real.digammaSeriesTerm ((p : ℝ) + 2) q) by
-      funext q; rw [← ENNReal.ofReal_mul (by positivity)]; congr 1
-      simp only [hf, Real.digammaSeriesTerm]
-      field_simp; ring,
-      ENNReal.tsum_mul_left, ← ENNReal.ofReal_tsum_of_nonneg hD0
-        (Real.summable_digammaSeriesTerm hx), hT, ← ENNReal.ofReal_mul (by positivity),
-      mul_sum, ENNReal.ofReal_sum_of_nonneg (fun j _ => by positivity)]
-    refine sum_congr rfl fun j _ => ?_
-    simp only [hc]; congr 1; field_simp
+  have hcol : ∀ p : ℕ, ∑' q, ENNReal.ofReal (f p q) = ∑ j ∈ range (p + 1), c j p :=
+    sumTrigamma_col
   -- the triangular interchange gives `ζ(3) + L`
   have hrow2 : ∀ j : ℕ, ∑' p, (if j ≤ p then c j p else 0) =
-      ENNReal.ofReal (z j) + ENNReal.ofReal (a j) := by
-    intro j
-    rw [← Summable.sum_add_tsum_nat_add' (f := fun p => if j ≤ p then c j p else 0) (k := j)
-      ENNReal.summable, sum_eq_zero fun i hi => by simp [show ¬ j ≤ i by simpa using hi],
-      zero_add]
-    simp only [le_add_iff_nonneg_left, zero_le, ite_true]
-    rw [show (fun i => c j (i + j)) = fun i : ℕ => ENNReal.ofReal (1 / (j + 1 : ℝ)) *
-        ENNReal.ofReal (((j : ℝ) + 1 + i)⁻¹ ^ 2) by
-      funext i; simp only [hc]; rw [← ENNReal.ofReal_mul (by positivity)]; congr 1; push_cast
-      field_simp; ring,
-      ENNReal.tsum_mul_left, tsum_eq_zero_add' ENNReal.summable]
-    have hS := Real.summable_trigamma (by positivity : (0 : ℝ) < j + 2)
-    rw [show (fun i : ℕ => ENNReal.ofReal (((j : ℝ) + 1 + ((i + 1 : ℕ) : ℝ))⁻¹ ^ 2)) =
-        fun i : ℕ => ENNReal.ofReal (((j : ℝ) + 2 + i)⁻¹ ^ 2) by
-      funext i; push_cast; ring_nf,
-      ← ENNReal.ofReal_tsum_of_nonneg (fun n => by positivity) hS,
-      ← Real.trigamma_eq_tsum (by positivity), ← ENNReal.ofReal_add (by positivity)
-        (by rw [Real.trigamma_eq_tsum (by positivity)]; positivity),
-      ← ENNReal.ofReal_mul (by positivity), ← ENNReal.ofReal_add (by positivity) (ha0 j)]
-    congr 1
-    simp only [hz, ha]
-    push_cast
-    field_simp
-    ring
+      ENNReal.ofReal (z j) + ENNReal.ofReal (a j) :=
+    sumTrigamma_tri
   have htri : ∑' p, ∑' q, ENNReal.ofReal (f p q) = ENNReal.ofReal (∑' j, z j) + L := by
     have h1 : ∀ p, ∑ j ∈ range (p + 1), c j p = ∑' j, (if j ≤ p then c j p else 0) := by
       intro p

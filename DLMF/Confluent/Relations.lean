@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import ComplexAnalysis.HalfPlane
 public import DLMF.Confluent.Continuation
 public import DLMF.OrthogonalPolynomials.Hahn
 
@@ -56,27 +57,8 @@ theorem neg_one_pow_add_mul_pow (s t : ℕ) : ((-1 : ℂ) ^ (s + t) * (-1) ^ s) 
   simp
 
 /-- On the right half-plane, `(z²)^w = z^{2w}`. -/
-theorem sq_cpow_of_re_pos {z : ℂ} (hre : 0 < z.re) (w : ℂ) : (z ^ 2) ^ w = z ^ (2 * w) := by
-  have harg : |z.arg| < π / 2 := Complex.abs_arg_lt_pi_div_two_iff.mpr (Or.inl hre)
-  have him : (log z * 2).im = 2 * z.arg := by
-    simp [Complex.log_im, mul_comm]
-  rw [← cpow_ofNat, ← cpow_mul _ (by rw [him]; linarith [abs_lt.mp harg])
-    (by rw [him]; linarith [abs_lt.mp harg])]
-
-/-- Squares of right half-plane points lie in the slit plane. -/
-theorem sq_mem_slitPlane_of_re_pos {z : ℂ} (hre : 0 < z.re) : z ^ 2 ∈ slitPlane := by
-  rw [mem_slitPlane_iff]
-  by_cases him : z.im = 0
-  · left
-    simp [sq, him]
-    positivity
-  · right
-    simp only [sq, mul_im]
-    intro h
-    have : 2 * z.re * z.im = 0 := by linarith
-    rcases mul_eq_zero.mp this with h1 | h1
-    · linarith
-    · exact him h1
+theorem sq_cpow_of_re_pos {z : ℂ} (hre : 0 < z.re) (w : ℂ) : (z ^ 2) ^ w = z ^ (2 * w) :=
+  DLMF.Hypergeometric.sq_cpow hre w
 
 /-- `(r x)^w = r^w x^w` for positive real `r`. -/
 theorem ofReal_mul_cpow_of_pos {r : ℝ} (hr : 0 < r) {x : ℂ} (hx : x ≠ 0) (w : ℂ) :
@@ -213,6 +195,7 @@ theorem kummerM_besselI (ν z : ℂ) (hz : z ∈ slitPlane) (hν : ∀ k : ℕ, 
   linear_combination (-(Gamma (ν + 1) * exp z *
     regularizedHGFun (∅ : Multiset ℂ) {ν + 1} (z ^ 2 / 4))) * hp
 
+/-- For real `r > 0` and `w ≠ 0`, `(r w)^s = r^s w^s`. -/
 theorem ofReal_mul_cpow' {r : ℝ} (hr : 0 < r) {w : ℂ} (hw : w ≠ 0) (s : ℂ) :
     ((r : ℂ) * w) ^ s = (r : ℂ) ^ s * w ^ s := by
   rw [cpow_def_of_ne_zero (mul_ne_zero (by exact_mod_cast hr.ne') hw), log_ofReal_mul hr hw,
@@ -611,12 +594,15 @@ theorem hermitePolyHEval_eq_aeval (n : ℕ) (z : ℂ) :
     hermitePolyHEval n z = Polynomial.aeval z (hermitePolyH n) := by
   rw [hermitePolyHEval, Polynomial.eval_map, Polynomial.aeval_def, algebraMap_int_eq]
 
+/-- `H₀(z) = 1`. -/
 theorem hermitePolyHEval_zero (z : ℂ) : hermitePolyHEval 0 z = 1 := by
   simp [hermitePolyHEval]
 
+/-- `H₁(z) = 2z`. -/
 theorem hermitePolyHEval_one (z : ℂ) : hermitePolyHEval 1 z = 2 * z := by
   simp [hermitePolyHEval, hermitePolyH_one]
 
+/-- `H₂(z) = 4z² - 2`. -/
 theorem hermitePolyHEval_two (z : ℂ) : hermitePolyHEval 2 z = 4 * z ^ 2 - 2 := by
   simp [hermitePolyHEval]
   ring
@@ -634,6 +620,7 @@ theorem hermitePolyHEval_succ_succ (k : ℕ) (z : ℂ) :
   push_cast
   ring
 
+/-- `H₃(z) = 8z³ - 12z`. -/
 theorem hermitePolyHEval_three (z : ℂ) : hermitePolyHEval 3 z = 8 * z ^ 3 - 12 * z := by
   rw [show (3 : ℕ) = 1 + 2 from rfl, hermitePolyHEval_succ_succ, hermitePolyHEval_two,
     hermitePolyHEval_one]
@@ -653,15 +640,15 @@ theorem hermitePolyHEval_two_step (k : ℕ) (z : ℂ) :
   push_cast at r1 r2 r3
   linear_combination r1 + 2 * z * r2 + 2 * ((k : ℂ) + 2) * r3
 
+/-- `1/2` is not a nonpositive integer. -/
 theorem half_ne_neg_nat : ∀ k : ℕ, (1 / 2 : ℂ) ≠ -(k : ℂ) := fun k hk => by
   have := congrArg Complex.re hk
   simp at this
   linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
 
-theorem three_half_ne_neg_nat : ∀ k : ℕ, (3 / 2 : ℂ) ≠ -(k : ℂ) := fun k hk => by
-  have := congrArg Complex.re hk
-  simp at this
-  linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
+/-- `3/2` is not a nonpositive integer. -/
+theorem three_half_ne_neg_nat : ∀ k : ℕ, (3 / 2 : ℂ) ≠ -(k : ℂ) :=
+  DLMF.Hypergeometric.three_halves_not_neg_nat
 
 /-- 13.6.16 in division-free form: `H_{2n}(z) · n! = (-1)^n (2n)! M(-n, 1/2, z²)`. -/
 theorem hermitePolyHEval_even_mul (n : ℕ) (z : ℂ) :
@@ -804,7 +791,8 @@ theorem kummerU_hermite (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane) (hre : 0 < z.
   have hf : ∀ k : ℕ, (k.factorial : ℂ) ≠ 0 := fun k => Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _)
   have hsq : ∀ m : ℕ, ((-1 : ℂ) ^ m) * (-1) ^ m = 1 := fun m => by rw [← mul_pow]; simp
   obtain ⟨m, rfl | rfl⟩ := Nat.even_or_odd' n
-  · rw [kummerU_kummer_transform_all _ _ (slitPlane_ne_zero (sq_mem_slitPlane_of_re_pos hre)),
+  · rw [kummerU_kummer_transform_all _ _
+      (slitPlane_ne_zero (Complex.sq_mem_slitPlane_of_re_pos hre)),
       show (1 : ℂ) / 2 - ((2 * m : ℕ) : ℂ) / 2 - 3 / 2 + 1 = -(m : ℂ) by push_cast; ring,
       show (2 : ℂ) - 3 / 2 = 1 / 2 by ring, show (1 : ℂ) - 3 / 2 = -1 / 2 by ring,
       sq_cpow_of_re_pos hre, show (2 : ℂ) * (-1 / 2) = -1 by ring, cpow_neg_one,
@@ -843,7 +831,7 @@ theorem kummerU_charlier (n : ℕ) (z a : ℂ) (ha : a ≠ 0)
       kummerU (-(n : ℂ)) (z - n + 1) a = a ^ n * DLMF.OrthogonalPolynomials.charlier a n z := by
   refine ⟨?_, ?_⟩
   · rw [kummerU_neg_nat n _ a hz]
-    have hp := poch_one_sub_sub_nat (-z) n
+    have hp := DLMF.Hypergeometric.poch_reflect (-z) n
     rw [show 1 - -z - (n : ℂ) = z - n + 1 by ring] at hp
     have h1 : ((-1 : ℂ) ^ n) * (-1) ^ n = 1 := by rw [← mul_pow]; simp
     rw [hp]
@@ -857,7 +845,7 @@ theorem kummerU_charlier (n : ℕ) (z a : ℂ) (ha : a ≠ 0)
     have hc := poch_neg_nat_sub_div n s hs'
     obtain ⟨t, rfl⟩ : ∃ t, n = s + t := ⟨n - s, by omega⟩
     rw [Nat.add_sub_cancel_left] at hc ⊢
-    have hp := poch_one_sub_sub_nat (-z) t
+    have hp := DLMF.Hypergeometric.poch_reflect (-z) t
     rw [show 1 - -z - (t : ℂ) = z - ((s + t : ℕ) : ℂ) + 1 + s by push_cast; ring] at hp
     have hapow : a ^ (s + t) * (-a⁻¹) ^ t = (-1) ^ t * a ^ s := by
       rw [neg_pow, pow_add, inv_pow]
@@ -899,7 +887,7 @@ theorem kummerU_eq_twoFzero (n : ℕ) (b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
   have hs' : s ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hs)
   rw [show n + 1 - 1 - s = n - s by omega]
   have hc := poch_neg_nat_sub_div n s hs'
-  have hp := poch_one_sub_sub_nat (b + s) (n - s)
+  have hp := DLMF.Hypergeometric.poch_reflect (b + s) (n - s)
   rw [show (1 : ℂ) - (b + s) - ((n - s : ℕ) : ℂ) = -(n : ℂ) - b + 1 by
     push_cast [Nat.cast_sub hs']; ring] at hp
   obtain ⟨t, rfl⟩ : ∃ t, n = s + t := ⟨n - s, by omega⟩
@@ -1027,7 +1015,7 @@ theorem whittakerW_erfc {z : ℂ} (hz : z ∈ slitPlane) (hre : 0 < z.re) :
     whittakerW (-1 / 4) (1 / 4) (z ^ 2) =
       exp (z ^ 2 / 2) * (Real.sqrt π : ℂ) * z ^ (1 / 2 : ℂ) * erfc z := by
   have hz0 := slitPlane_ne_zero hz
-  have hz2 := slitPlane_ne_zero (sq_mem_slitPlane_of_re_pos hre)
+  have hz2 := slitPlane_ne_zero (Complex.sq_mem_slitPlane_of_re_pos hre)
   unfold whittakerW
   rw [show (1 / 2 : ℂ) + 1 / 4 - -1 / 4 = 1 by ring, show (1 : ℂ) + 2 * (1 / 4) = 3 / 2 by ring,
     kummerU_kummer_transform_all 1 (3 / 2) hz2, show (1 : ℂ) - 3 / 2 + 1 = 1 / 2 by ring,

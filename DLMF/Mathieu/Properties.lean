@@ -365,15 +365,6 @@ theorem comp_pi_sub (h : IsMathieuSolution a q w) :
         Complex.cos_neg])
   simpa [neg_mul, one_mul, neg_add_eq_sub] using this
 
-/-- Derivative of `z ↦ w(σz + c)`. -/
-lemma m28a_deriv_comp_affine (h : IsMathieuSolution a q w) (σ c z : ℂ) :
-    deriv (fun z => w (σ * z + c)) z = σ * deriv w (σ * z + c) := by
-  have hl : HasDerivAt (fun z => σ * z + c) σ z := by
-    simpa using ((hasDerivAt_id z).const_mul σ).add_const c
-  have e : HasDerivAt (fun z => w (σ * z + c)) (deriv w (σ * z + c) * σ) z :=
-    (h.differentiable _).hasDerivAt.comp z hl
-  rw [e.deriv, mul_comm]
-
 end IsMathieuSolution
 
 /-- Derivative of a linear combination `c f + d g`. -/
@@ -497,17 +488,6 @@ lemma m28a_mathieuWII_pi_sub (z : ℂ) :
   have := congrFun key z
   linear_combination this
 
-/-- Derivative of the reflection identity for `w_I` at `z = 0`. -/
-lemma m28a_deriv_mathieuWI_pi :
-    deriv wI π = 2 * wI (π / 2) * deriv wI (π / 2) := by
-  obtain ⟨h1, -, h11⟩ := mathieuWI_spec a q
-  obtain ⟨h2, -, h21⟩ := mathieuWII_spec a q
-  have e := congrArg (fun f => deriv f 0) (funext (m28a_mathieuWI_pi_sub a q))
-  rw [deriv_comp_const_sub, m28a_deriv_lincomb_sub (h1.differentiable _) (h2.differentiable _),
-    h11, h21] at e
-  simp only [sub_zero] at e
-  linear_combination -e
-
 /-- Derivative of the reflection identity for `w_II` at `z = 0`. -/
 theorem m28a_deriv_mathieuWII_pi :
     deriv wII π = wI (π / 2) * deriv wII (π / 2) + deriv wI (π / 2) * wII (π / 2) := by
@@ -543,8 +523,14 @@ theorem mathieuWI_pi_add_one : wI π + 1 = 2 * wI (π / 2) * deriv wII (π / 2) 
 
 /-- **DLMF 28.2.12**: `w_I'(π) = 2 w_I(π/2) w_I'(π/2)`. -/
 @[dlmf 28.2.E12]
-theorem deriv_mathieuWI_pi : deriv wI π = 2 * wI (π / 2) * deriv wI (π / 2) :=
-  m28a_deriv_mathieuWI_pi a q
+theorem deriv_mathieuWI_pi : deriv wI π = 2 * wI (π / 2) * deriv wI (π / 2) := by
+  obtain ⟨h1, -, h11⟩ := mathieuWI_spec a q
+  obtain ⟨h2, -, h21⟩ := mathieuWII_spec a q
+  have e := congrArg (fun f => deriv f 0) (funext (m28a_mathieuWI_pi_sub a q))
+  rw [deriv_comp_const_sub, m28a_deriv_lincomb_sub (h1.differentiable _) (h2.differentiable _),
+    h11, h21] at e
+  simp only [sub_zero] at e
+  linear_combination -e
 
 /-- **DLMF 28.2.13**: `w_II(π) = 2 w_II(π/2) w_II'(π/2)`. -/
 @[dlmf 28.2.E13]
@@ -735,18 +721,21 @@ theorem p1a1_mathieuWII_neg_q (a q z : ℂ) :
   have := congrFun key z
   rw [this]; ring
 
+/-- `w_I(π/2; a, -q) = w_II'(π/2; a, q)`: the value at `π/2` under `q ↦ -q`. -/
 theorem p1a1_mathieuWI_half_pi_neg_q (a q : ℂ) :
     mathieuWI a (-q) (π / 2) = deriv (mathieuWII a q) (π / 2) := by
   rw [p1a1_mathieuWI_neg_q, show (π : ℂ) / 2 + π / 2 = π by ring, mathieuWII_pi,
     m28a_mathieuWI_pi]
   linear_combination deriv (mathieuWII a q) (π / 2) * mathieuWI_wronskian a q (π / 2)
 
+/-- `w_II(π/2; a, -q) = w_II(π/2; a, q)`: the value at `π/2` under `q ↦ -q`. -/
 theorem p1a1_mathieuWII_half_pi_neg_q (a q : ℂ) :
     mathieuWII a (-q) (π / 2) = mathieuWII a q (π / 2) := by
   rw [p1a1_mathieuWII_neg_q, show (π : ℂ) / 2 + π / 2 = π by ring, mathieuWII_pi,
     m28a_mathieuWI_pi]
   linear_combination mathieuWII a q (π / 2) * mathieuWI_wronskian a q (π / 2)
 
+/-- `w_I'(π/2; a, -q) = w_I'(π/2; a, q)`: the derivative at `π/2` under `q ↦ -q`. -/
 theorem p1a1_deriv_mathieuWI_half_pi_neg_q (a q : ℂ) :
     deriv (mathieuWI a (-q)) (π / 2) = deriv (mathieuWI a q) (π / 2) := by
   have e : mathieuWI a (-q) = fun z => deriv (mathieuWII a q) (π / 2) *
@@ -757,6 +746,7 @@ theorem p1a1_deriv_mathieuWI_half_pi_neg_q (a q : ℂ) :
     show (π : ℂ) / 2 + π / 2 = π by ring, deriv_mathieuWI_pi, m28a_deriv_mathieuWII_pi]
   linear_combination deriv (mathieuWI a q) (π / 2) * mathieuWI_wronskian a q (π / 2)
 
+/-- `w_II'(π/2; a, -q) = w_I(π/2; a, q)`: the derivative at `π/2` under `q ↦ -q`. -/
 theorem p1a1_deriv_mathieuWII_half_pi_neg_q (a q : ℂ) :
     deriv (mathieuWII a (-q)) (π / 2) = mathieuWI a q (π / 2) := by
   have e : mathieuWII a (-q) = fun z => mathieuWI a q (π / 2) * mathieuWII a q (z + π / 2) -
@@ -2952,8 +2942,11 @@ lemma p1a1_integral_mathieuCe_mul_mathieuSe_zero_ne :
     nlinarith
   exact this.ne'
 
-/-- DLMF 28.2.33 for `n ≥ 1`: `∫₀^{2π} ce_m se_n = 0`, by parity and periodicity. -/
-lemma p1a1_integral_mathieuCe_mul_mathieuSe {m n : ℕ} (hn : n ≠ 0) (q : ℝ) :
+/-- **Orthogonality** (DLMF 28.2.33): `∫₀^{2π} ce_m se_n = 0` for `n ≥ 1`. The hypothesis
+`n ≠ 0` was added on 2026-10-26: DLMF does not define `se_0`, and for the junk value `n = 0`
+the statement fails (`p1a1_integral_mathieuCe_mul_mathieuSe_zero_ne`). -/
+@[dlmf 28.2.E33]
+theorem integral_mathieuCe_mul_mathieuSe (m n : ℕ) (hn : n ≠ 0) (q : ℝ) :
     ∫ x in (0 : ℝ)..2 * π, mathieuCe m x q * mathieuSe n x q = 0 := by
   set f : ℝ → ℂ := fun x => mathieuCe m x q * mathieuSe n x q
   have hp : Function.Periodic f (2 * π) := fun x => by
@@ -2973,14 +2966,6 @@ lemma p1a1_integral_mathieuCe_mul_mathieuSe {m n : ℕ} (hn : n ≠ 0) (q : ℝ)
   show ∫ x in (0 : ℝ)..2 * π, f x = 0
   rw [h1]
   linear_combination h2 / 2
-
-/-- **Orthogonality** (DLMF 28.2.33): `∫₀^{2π} ce_m se_n = 0` for `n ≥ 1`. The hypothesis
-`n ≠ 0` was added on 2026-10-26: DLMF does not define `se_0`, and for the junk value `n = 0`
-the statement fails (`p1a1_integral_mathieuCe_mul_mathieuSe_zero_ne`). -/
-@[dlmf 28.2.E33]
-theorem integral_mathieuCe_mul_mathieuSe (m n : ℕ) (hn : n ≠ 0) (q : ℝ) :
-    ∫ x in (0 : ℝ)..2 * π, mathieuCe m x q * mathieuSe n x q = 0 :=
-  p1a1_integral_mathieuCe_mul_mathieuSe hn q
 
 /-- The normalization step of 28.2.34–28.2.37: if `G(z) = c F(π/2 - z)` with `F` continuous and
 `2π`-periodic and `(-1)ⁿ c > 0`, then the normalized `G` is `(-1)ⁿ` times the normalized

@@ -49,10 +49,12 @@ variable {h ν k : ℝ} {w : ℝ → ℝ}
 /-- The Lamé potential `ν(ν+1) k² sn²(x, k)`. -/
 def p2lPot (ν k : ℝ) (x : ℝ) : ℝ := ν * (ν + 1) * k ^ 2 * Real.jacobiSnm x (k ^ 2) ^ 2
 
+/-- For `k² < 1` the Lamé potential `ν(ν+1) k² sn²(x, k)` is continuous in `x`. -/
 theorem p2lPot_continuous (hk : k ^ 2 < 1) : Continuous (p2lPot ν k) :=
   continuous_const.mul
     ((continuous_iff_continuousAt.2 fun x => (Real.hasDerivAt_jacobiSnm hk x).continuousAt).pow 2)
 
+/-- The Lamé potential is bounded: `|ν(ν+1) k² sn²(x, k)| ≤ |ν(ν+1)| k²`. -/
 theorem p2lPot_abs_le (x : ℝ) : |p2lPot ν k x| ≤ |ν * (ν + 1)| * k ^ 2 := by
   have h1 : Real.jacobiSnm x (k ^ 2) ^ 2 ≤ 1 := by
     have := Real.jacobiSnm_sq_add_jacobiCnm_sq x (k ^ 2)
@@ -65,9 +67,12 @@ theorem p2lPot_abs_le (x : ℝ) : |p2lPot ν k x| ≤ |ν * (ν + 1)| * k ^ 2 :=
         gcongr
     _ = _ := mul_one _
 
+/-- For `k² < 1` the Lamé potential is even in `x`. -/
 lemma p2lPot_neg (hk : k ^ 2 < 1) (x : ℝ) : p2lPot ν k (-x) = p2lPot ν k x := by
   simp only [p2lPot, (jacobi_neg hk x).1, neg_sq]
 
+/-- `w` solves the real Lamé equation 29.2.1 iff it solves the Hill-type equation
+`w'' + (h - V(x)) w = 0` with the Lamé potential `V = p2lPot ν k`. -/
 theorem p2l_isLameSolution_iff {h : ℝ} {w : ℝ → ℝ} :
     Real.IsLameSolution h ν k w ↔ ODE.p2lIsSol (p2lPot ν k) h w := by
   constructor
@@ -77,6 +82,8 @@ theorem p2l_isLameSolution_iff {h : ℝ} {w : ℝ → ℝ} :
   · intro hw
     exact ⟨hw.1, fun x => (hw.2 x).congr_deriv (by simp only [p2lPot]; ring)⟩
 
+/-- The Lamé spectrum of boundary type `(odd0, oddK)` equals the Sturm–Liouville spectrum on
+`[0, K]` of the Lamé potential with the same boundary conditions. -/
 theorem p2l_lameSpectrum_eq (odd0 oddK : Bool) :
     Real.lameSpectrum ν k odd0 oddK =
       ODE.p2lSpec (p2lPot ν k) (Real.compEllIntKm (k ^ 2)) odd0 oddK := by
@@ -250,8 +257,19 @@ theorem Real.isNormalizedLameEigenfunction_lameEigenfunction (hν : -1 / 2 ≤ �
 
 /-! ### Helper lemmas: continuity, reflection, Green's identity -/
 
+/-- For `0 < k < 1`, `k² < 1`. -/
 theorem l29_sq_lt_one (hk0 : 0 < k) (hk1 : k < 1) : k ^ 2 < 1 := by nlinarith
 
+/-- For `0 < k < 1`, the complementary modulus `k' = √(1 - k²)` again lies in `(0, 1)`, and
+`k'² = 1 - k²`. -/
+theorem l29_comodulus (hk0 : 0 < k) (hk1 : k < 1) :
+    0 < Real.sqrt (1 - k ^ 2) ∧ Real.sqrt (1 - k ^ 2) < 1 ∧
+      Real.sqrt (1 - k ^ 2) ^ 2 = 1 - k ^ 2 := by
+  have h1 : 0 < 1 - k ^ 2 := by nlinarith
+  refine ⟨Real.sqrt_pos.2 h1, ?_, Real.sq_sqrt h1.le⟩
+  rw [Real.sqrt_lt' one_pos]; nlinarith
+
+/-- For `k² < 1`, `x ↦ sn(x, k)` is continuous on `ℝ`. -/
 theorem l29_continuous_sn (hk : k ^ 2 < 1) : Continuous fun x => Real.jacobiSnm x (k ^ 2) :=
   continuous_iff_continuousAt.2 fun x => (Real.hasDerivAt_jacobiSnm hk x).continuousAt
 
@@ -428,10 +446,12 @@ theorem Real.IsLameEigenfunction.parity {odd0 oddK : Bool} (hk0 : 0 < k) (hk1 : 
     rw [show 2 * K - -x = x + 2 * K by ring, P0 x] at e1
     rw [e1]; ring
 
+/-- `(if m is odd then -1 else 1) = (-1)^m`. -/
 lemma l29_ite_bodd (m : ℕ) : (if m.bodd then (-1 : ℝ) else 1) = (-1) ^ m := by
   obtain ⟨j, rfl | rfl⟩ := Nat.even_or_odd' m <;>
     simp [Nat.bodd_mul, pow_succ, pow_mul]
 
+/-- `(if m is even then -1 else 1) = (-1)^(m+1)`. -/
 lemma l29_ite_not_bodd (m : ℕ) : (if (!m.bodd) then (-1 : ℝ) else 1) = (-1) ^ (m + 1) := by
   rw [← l29_ite_bodd (m + 1), Nat.bodd_succ]
 
@@ -498,6 +518,7 @@ lemma p2l_eigenfunction_zeros (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1)
   rw [ODE.p2s_oscillation_of_sol (p2lPot_continuous hk) p2lPot_abs_le hK odd0 oddK hw hbc hne,
     ← p2l_lameSpectrum_eq, ← hN.2.1.cast_ncard_eq, hN.2.2]
 
+/-- A set of reals with extended cardinality `n` is finite with `ncard = n`. -/
 lemma p2l_finite_ncard_of_encard {s : Set ℝ} {n : ℕ} (h : s.encard = n) :
     s.Finite ∧ s.ncard = n := by
   have hf : s.Finite := Set.finite_of_encard_eq_coe h

@@ -121,12 +121,6 @@ theorem heine_transformation_three {a b c q z : ℂ} (hq : ‖q‖ < 1) (hz : �
   rw [show b * z / (a * b * z / c) = c / a by field, show b * (c / b) = c by field]
   field
 
-/-- `(q^{-n};q)_k = 0` for `k > n`. -/
-theorem qPochhammer_recip_pow_eq_zero {q : ℂ} (hq0 : q ≠ 0) {n k : ℕ} (hk : n < k) :
-    qPochhammer (q ^ n)⁻¹ q k = 0 := by
-  rw [qPochhammer_eq_prod]
-  exact prod_eq_zero (mem_range.mpr hk) (by field)
-
 /-- **`q`-Chu–Vandermonde** (Duverney (10.54)): for `|b| < 1`, `|c qⁿ/b| < 1` and `c ≠ q^{-m}`,
 `∑_{k ≤ n} (q^{-n};q)_k (b;q)_k / ((c;q)_k (q;q)_k) (c qⁿ/b)^k = (c/b;q)_n / (c;q)_n`. -/
 @[dlmf 17.6.E2 "partial: additionally bounds the other upper parameter by1 and excludes later lower poles; finite full-domain statement acquired separately"]

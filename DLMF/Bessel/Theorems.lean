@@ -18,7 +18,6 @@ These are the remaining named identities of AAR Chapter 4 that are absent from M
 
 open Complex intervalIntegral
 open scoped Real Nat Topology
-open DLMF.OrthogonalPolynomials
 open DLMF.Hypergeometric
 open DLMF.Confluent
 

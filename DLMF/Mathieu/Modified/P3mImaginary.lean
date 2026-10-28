@@ -133,22 +133,23 @@ lemma p3m_mathieuCylExp_three_I_mul (μ : ℂ) {h : ℝ} (hh : 0 < h) {z : ℂ} 
     field_simp
     ring
 
+/-- `i^{a-b} = i^a (i^b)⁻¹` for natural `a, b`. -/
 lemma p3m_I_zpow_sub (a b : ℕ) : I ^ ((a : ℤ) - b) = I ^ a * (I ^ b)⁻¹ := by
   rw [zpow_sub₀ I_ne_zero, zpow_natCast, zpow_natCast, div_eq_mul_inv]
 
+/-- `i^{a+b} = i^a i^b` for natural `a, b`. -/
 lemma p3m_I_zpow_add (a b : ℕ) : I ^ ((a : ℤ) + b) = I ^ a * I ^ b := by
   rw [zpow_add₀ I_ne_zero, zpow_natCast, zpow_natCast]
 
+/-- `i^{-2m} = ((-1)^m)⁻¹`. -/
 lemma p3m_I_zpow_neg_two_mul (m : ℕ) : I ^ (-((2 * m : ℕ) : ℤ)) = ((-1 : ℂ) ^ m)⁻¹ := by
   rw [zpow_neg, zpow_natCast, pow_mul, I_sq]
 
-lemma p3m_negOnePow_sub_nat (a b : ℕ) :
-    (-1 : ℂ) ^ ((a : ℤ) - b) = (-1 : ℂ) ^ a * (-1 : ℂ) ^ b := by
-  rw [p2m_negOnePow_sub, zpow_natCast, zpow_natCast]
-
+/-- `(i^a)² = (-1)^a`. -/
 lemma p3m_I_pow_sq (a : ℕ) : (I ^ a) ^ 2 = (-1 : ℂ) ^ a := by
   rw [← pow_mul, mul_comm, pow_mul, I_sq]
 
+/-- `((-1)^a)² = 1`. -/
 lemma p3m_negOnePow_sq (a : ℕ) : ((-1 : ℂ) ^ a) ^ 2 = 1 := by
   rw [← pow_mul, mul_comm, pow_mul]; simp
 
@@ -176,8 +177,8 @@ theorem p3m_hasSum_modMathieuIe_even (m s : ℕ) {h : ℝ} (hh : 0 < h)
     rw [show ((ℓ + s : ℕ) : ℂ) = (((ℓ : ℤ) + s : ℤ) : ℂ) by push_cast; ring,
       p3m_besselJExp_I_mul_intCast, p3m_besselJExp_I_mul_intCast, p3m_besselJExp_I_mul_intCast,
       p3m_besselJExp_I_mul_intCast, mathieuFourierA_even_neg_q, mathieuFourierA_even_neg_q,
-      p3m_I_zpow_sub, p3m_I_zpow_add, p3m_I_zpow_neg_two_mul, p3m_negOnePow_sub_nat,
-      p3m_negOnePow_sub_nat]
+      p3m_I_zpow_sub, p3m_I_zpow_add, p3m_I_zpow_neg_two_mul, p1a2_neg_one_zpow_sub,
+      p1a2_neg_one_zpow_sub]
     have h1 := p3m_I_pow_sq ℓ
     have h2 := p3m_I_pow_sq s
     have h3 := p3m_negOnePow_sq ℓ
@@ -195,12 +196,15 @@ theorem p3m_hasSum_modMathieuIe_even (m s : ℕ) {h : ℝ} (hh : 0 < h)
           besselI (((ℓ : ℤ) - s : ℤ) : ℂ) (h * Complex.exp z)))) * h3
   · simp only [modMathieuIe, radialMathieuMc]; push_cast; ring
 
+/-- `i^{-n} = (i^n)⁻¹`. -/
 lemma p3m_I_zpow_neg_nat (n : ℕ) : I ^ (-(n : ℤ)) = (I ^ n)⁻¹ := by
   rw [zpow_neg, zpow_natCast]
 
+/-- `i^{2m+1} = (-1)^m i`. -/
 lemma p3m_I_pow_two_mul_add_one (m : ℕ) : I ^ (2 * m + 1) = (-1 : ℂ) ^ m * I := by
   rw [pow_succ, pow_mul, I_sq]
 
+/-- `i^{2m+2} = -(-1)^m`. -/
 lemma p3m_I_pow_two_mul_add_two (m : ℕ) : I ^ (2 * m + 2) = -(-1 : ℂ) ^ m := by
   rw [show 2 * m + 2 = 2 * (m + 1) by ring, pow_mul, I_sq, pow_succ]; ring
 
@@ -230,7 +234,7 @@ theorem p3m_hasSum_modMathieuIo_even (m s : ℕ) {h : ℝ} (hh : 0 < h)
       p3m_besselJExp_I_mul_intCast, p3m_besselJExp_I_mul_intCast, p3m_besselJExp_I_mul_intCast,
       p3m_besselJExp_I_mul_intCast, mathieuFourierB_even_neg_q, mathieuFourierB_even_neg_q,
       p3m_I_zpow_sub, zpow_natCast, p3m_I_zpow_neg_nat, p3m_I_pow_two_mul_add_two,
-      p3m_negOnePow_sub_nat, p3m_negOnePow_sub_nat, pow_add, pow_add, I_sq]
+      p1a2_neg_one_zpow_sub, p1a2_neg_one_zpow_sub, pow_add, pow_add, I_sq]
     have h1 := p3m_I_pow_sq ℓ
     have h2 := p3m_I_pow_sq s
     have h3 := p3m_negOnePow_sq ℓ
@@ -270,7 +274,7 @@ theorem p3m_hasSum_modMathieuIe_odd (m s : ℕ) {h : ℝ} (hh : 0 < h)
       p3m_besselJExp_I_mul_intCast, p3m_besselJExp_I_mul_intCast, p3m_besselJExp_I_mul_intCast,
       p3m_besselJExp_I_mul_intCast, mathieuFourierA_odd_neg_q, mathieuFourierA_odd_neg_q,
       p3m_I_zpow_sub, zpow_natCast, p3m_I_zpow_neg_nat, p3m_I_pow_two_mul_add_one,
-      p3m_negOnePow_sub_nat, p3m_negOnePow_sub_nat, pow_add, pow_add, pow_one]
+      p1a2_neg_one_zpow_sub, p1a2_neg_one_zpow_sub, pow_add, pow_add, pow_one]
     have h1 := p3m_I_pow_sq ℓ
     have h2 := p3m_I_pow_sq s
     have h3 := p3m_negOnePow_sq ℓ
@@ -310,7 +314,7 @@ theorem p3m_hasSum_modMathieuIo_odd (m s : ℕ) {h : ℝ} (hh : 0 < h)
       p3m_besselJExp_I_mul_intCast, p3m_besselJExp_I_mul_intCast, p3m_besselJExp_I_mul_intCast,
       p3m_besselJExp_I_mul_intCast, mathieuFourierB_odd_neg_q, mathieuFourierB_odd_neg_q,
       p3m_I_zpow_sub, zpow_natCast, p3m_I_zpow_neg_nat, p3m_I_pow_two_mul_add_one,
-      p3m_negOnePow_sub_nat, p3m_negOnePow_sub_nat, pow_add, pow_add, pow_one]
+      p1a2_neg_one_zpow_sub, p1a2_neg_one_zpow_sub, pow_add, pow_add, pow_one]
     have h1 := p3m_I_pow_sq ℓ
     have h2 := p3m_I_pow_sq s
     have h3 := p3m_negOnePow_sq ℓ
@@ -336,23 +340,29 @@ lemma p3m_mathieuCylExp_three_I_mul_intCast (k : ℤ) {h : ℝ} (hh : 0 < h) {z 
     Real.cos_pi_div_two, Real.sin_pi_div_two]
   simp
 
+/-- `i^{2s} = (-1)^s` (integer exponent). -/
 lemma p3m_I_zpow_two_mul (s : ℕ) : I ^ (2 * (s : ℤ)) = (-1 : ℂ) ^ s := by
   rw [zpow_mul, show I ^ (2 : ℤ) = -1 by rw [zpow_two, I_mul_I], zpow_natCast]
 
+/-- `i^{-2s} = (-1)^s` (integer exponent). -/
 lemma p3m_I_zpow_neg_two_mul' (s : ℕ) : I ^ (-(2 * (s : ℤ))) = (-1 : ℂ) ^ s := by
   rw [zpow_neg, p3m_I_zpow_two_mul, inv_eq_of_mul_eq_one_right]
   rw [← mul_pow]; simp
 
+/-- `i^{2s+1} = (-1)^s i` (integer exponent). -/
 lemma p3m_I_zpow_two_mul_add_one (s : ℕ) : I ^ (2 * (s : ℤ) + 1) = (-1 : ℂ) ^ s * I := by
   rw [zpow_add₀ I_ne_zero, p3m_I_zpow_two_mul, zpow_one]
 
+/-- `i^{-(2s+1)} = -(-1)^s i` (integer exponent). -/
 lemma p3m_I_zpow_neg_two_mul_add_one (s : ℕ) :
     I ^ (-(2 * (s : ℤ) + 1)) = -((-1 : ℂ) ^ s * I) := by
   rw [neg_add, zpow_add₀ I_ne_zero, p3m_I_zpow_neg_two_mul', zpow_neg, zpow_one, inv_I]; ring
 
+/-- `i^{2s+2} = -(-1)^s` (integer exponent). -/
 lemma p3m_I_zpow_two_mul_add_two (s : ℕ) : I ^ (2 * (s : ℤ) + 2) = -(-1 : ℂ) ^ s := by
   rw [zpow_add₀ I_ne_zero, p3m_I_zpow_two_mul, zpow_two, I_mul_I]; ring
 
+/-- `i^{-(2s+2)} = -(-1)^s` (integer exponent). -/
 lemma p3m_I_zpow_neg_two_mul_add_two (s : ℕ) :
     I ^ (-(2 * (s : ℤ) + 2)) = -(-1 : ℂ) ^ s := by
   rw [neg_add, zpow_add₀ I_ne_zero, p3m_I_zpow_neg_two_mul', zpow_neg, zpow_two, I_mul_I]
@@ -395,8 +405,8 @@ theorem p3m_hasSum_modMathieuKe_even (m s : ℕ) {h : ℝ} (hh : 0 < h)
       show (ℓ : ℤ) - s - ((ℓ + s : ℕ) : ℤ) = -(2 * (s : ℤ)) by push_cast; ring,
       show ((ℓ + s : ℕ) : ℤ) - ((ℓ : ℤ) - s) = 2 * (s : ℤ) by push_cast; ring,
       p3m_I_zpow_neg_two_mul', p3m_I_zpow_two_mul,
-      mathieuFourierA_even_neg_q, mathieuFourierA_even_neg_q, p3m_negOnePow_sub_nat,
-      p3m_negOnePow_sub_nat]
+      mathieuFourierA_even_neg_q, mathieuFourierA_even_neg_q, p1a2_neg_one_zpow_sub,
+      p1a2_neg_one_zpow_sub]
     have h1 := p3m_I_pow_sq ℓ
     have h2 := p3m_I_pow_sq s
     have h3 := p3m_negOnePow_sq ℓ
@@ -440,8 +450,8 @@ theorem p3m_hasSum_modMathieuKo_even (m s : ℕ) {h : ℝ} (hh : 0 < h)
       show (ℓ : ℤ) - s - ((ℓ + s + 2 : ℕ) : ℤ) = -(2 * (s : ℤ) + 2) by push_cast; ring,
       show ((ℓ + s + 2 : ℕ) : ℤ) - ((ℓ : ℤ) - s) = 2 * (s : ℤ) + 2 by push_cast; ring,
       p3m_I_zpow_neg_two_mul_add_two, p3m_I_zpow_two_mul_add_two,
-      mathieuFourierB_even_neg_q, mathieuFourierB_even_neg_q, p3m_negOnePow_sub_nat,
-      p3m_negOnePow_sub_nat]
+      mathieuFourierB_even_neg_q, mathieuFourierB_even_neg_q, p1a2_neg_one_zpow_sub,
+      p1a2_neg_one_zpow_sub]
     have h1 := p3m_I_pow_sq ℓ
     have h2 := p3m_I_pow_sq s
     have h3 := p3m_negOnePow_sq ℓ
@@ -486,8 +496,8 @@ theorem p3m_hasSum_modMathieuKe_odd (m s : ℕ) {h : ℝ} (hh : 0 < h)
       show (ℓ : ℤ) - s - ((ℓ + s + 1 : ℕ) : ℤ) = -(2 * (s : ℤ) + 1) by push_cast; ring,
       show ((ℓ + s + 1 : ℕ) : ℤ) - ((ℓ : ℤ) - s) = 2 * (s : ℤ) + 1 by push_cast; ring,
       p3m_I_zpow_neg_two_mul_add_one, p3m_I_zpow_two_mul_add_one,
-      mathieuFourierA_odd_neg_q, mathieuFourierA_odd_neg_q, p3m_negOnePow_sub_nat,
-      p3m_negOnePow_sub_nat]
+      mathieuFourierA_odd_neg_q, mathieuFourierA_odd_neg_q, p1a2_neg_one_zpow_sub,
+      p1a2_neg_one_zpow_sub]
     have h1 := p3m_I_pow_sq ℓ
     have h2 := p3m_I_pow_sq s
     have h3 := p3m_negOnePow_sq ℓ
@@ -531,8 +541,8 @@ theorem p3m_hasSum_modMathieuKo_odd (m s : ℕ) {h : ℝ} (hh : 0 < h)
       show (ℓ : ℤ) - s - ((ℓ + s + 1 : ℕ) : ℤ) = -(2 * (s : ℤ) + 1) by push_cast; ring,
       show ((ℓ + s + 1 : ℕ) : ℤ) - ((ℓ : ℤ) - s) = 2 * (s : ℤ) + 1 by push_cast; ring,
       p3m_I_zpow_neg_two_mul_add_one, p3m_I_zpow_two_mul_add_one,
-      mathieuFourierB_odd_neg_q, mathieuFourierB_odd_neg_q, p3m_negOnePow_sub_nat,
-      p3m_negOnePow_sub_nat]
+      mathieuFourierB_odd_neg_q, mathieuFourierB_odd_neg_q, p1a2_neg_one_zpow_sub,
+      p1a2_neg_one_zpow_sub]
     have h1 := p3m_I_pow_sq ℓ
     have h2 := p3m_I_pow_sq s
     have h3 := p3m_negOnePow_sq ℓ

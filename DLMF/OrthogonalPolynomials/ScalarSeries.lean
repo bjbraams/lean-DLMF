@@ -10,8 +10,9 @@ public import DLMFMathlib.Analysis.Complex.ScalarSeries
 /-!
 # Scalar power series helpers
 
-Mathlib's uniqueness of formal multilinear series identifies scalar coefficients
-from their sums on a disk. Its shifted-series API supplies multiplication by monomials.
+Multiplication of a scalar power series by a monomial. Uniqueness of scalar coefficients
+from their sums on the unit disk is `Complex.powerSeries_coefficients_unique`, imported from
+`DLMFMathlib.Analysis.Complex.ScalarSeries`.
 -/
 
 @[expose] public section
@@ -19,12 +20,6 @@ open Complex Filter
 open scoped Nat Topology
 noncomputable section
 namespace DLMF.OrthogonalPolynomials
-
-/-- Recover a scalar power series from its sums on the unit disk. -/
-theorem scalarSeries_unique {c d : ℕ → ℂ} {f : ℂ → ℂ}
-    (hc : ∀ z : ℂ, ‖z‖ < 1 → HasSum (fun n => c n * z ^ n) (f z))
-    (hd : ∀ z : ℂ, ‖z‖ < 1 → HasSum (fun n => d n * z ^ n) (f z)) : c = d := by
-  exact Complex.powerSeries_coefficients_unique hc hd
 
 /-- Multiplication of a power series by a monomial inserts a zero prefix. -/
 theorem hasSum_scalar_shift {c : ℕ → ℂ} {z u : ℂ}

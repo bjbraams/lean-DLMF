@@ -78,6 +78,8 @@ theorem hasFPowerSeriesOnBall_eulerTheta {f : ℂ → ℂ} {c : ℕ → ℂ} {r 
     · funext n; simp; ring
     · simp [DLMF.Hypergeometric.eulerTheta]
 
+/-- Applying the Euler operator `θ = z d/dz` `k` times multiplies the power-series coefficients by
+  `n^k`. -/
 theorem hasFPowerSeriesOnBall_eulerTheta_iterate {f : ℂ → ℂ} {c : ℕ → ℂ} {r : ℝ≥0∞}
     (h : HasFPowerSeriesOnBall f (ofScalars ℂ c) 0 r) (k : ℕ) :
     HasFPowerSeriesOnBall (DLMF.Hypergeometric.eulerTheta^[k] f)
@@ -104,10 +106,8 @@ theorem hasSum_thetaPoly {f : ℂ → ℂ} {c : ℕ → ℂ} {r : ℝ≥0∞}
   ring
 
 /-- `1/Γ(z) = z/Γ(z+1)` for every `z`, with the totalized `Γ`. -/
-theorem recip_Gamma_eq_mul_recip_Gamma_add_one (z : ℂ) : (Gamma z)⁻¹ = z * (Gamma (z + 1))⁻¹ := by
-  by_cases hz : z = 0
-  · subst hz; simp
-  · rw [Complex.Gamma_add_one z hz, mul_inv, ← mul_assoc, mul_inv_cancel₀ hz, one_mul]
+theorem recip_Gamma_eq_mul_recip_Gamma_add_one (z : ℂ) : (Gamma z)⁻¹ = z * (Gamma (z + 1))⁻¹ :=
+  Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one z
 
 /-- The coefficient recurrence behind DLMF 16.8.3, for all parameters. -/
 theorem regularizedHGFunCoeff_succ_mul (a b : Multiset ℂ) (n : ℕ) :

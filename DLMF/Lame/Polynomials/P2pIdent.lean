@@ -455,7 +455,7 @@ lemma p2p_norm_dn {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (N : ℕ) (b : ℕ → �
     have h1 := Real.mul_jacobiSnm_sq_add_jacobiDnm_sq hk x
     rw [hw]
     beta_reduce
-    rw [p1l_cos_phi, mul_pow,
+    rw [p2l_lamePhi_cos, mul_pow,
       show Real.jacobiDnm x (k ^ 2) ^ 2 = 1 - k ^ 2 * Real.jacobiSnm x (k ^ 2) ^ 2 by linarith]
   simp_rw [e]
   rw [p2p_integral_dn_comp hk0 hk1

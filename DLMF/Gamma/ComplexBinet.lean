@@ -39,28 +39,34 @@ namespace DLMF.Gamma
 /-- Stieltjes' periodic weight `P(t) = ({t} - {t}²)/2`. -/
 def binetWeight (t : ℝ) : ℝ := (Int.fract t - Int.fract t ^ 2) / 2
 
+/-- The periodic Binet weight `({t} - {t}²)/2` is nonnegative. -/
 theorem binetWeight_nonneg (t : ℝ) : 0 ≤ binetWeight t := by
   unfold binetWeight
   have h0 := Int.fract_nonneg t
   have h1 := Int.fract_lt_one t
   nlinarith
 
+/-- The periodic Binet weight is at most `1/8`. -/
 theorem binetWeight_le (t : ℝ) : binetWeight t ≤ 1 / 8 := by
   unfold binetWeight
   nlinarith [sq_nonneg (Int.fract t - 1 / 2)]
 
+/-- The Binet weight has period `1`. -/
 theorem binetWeight_add_one (t : ℝ) : binetWeight (t + 1) = binetWeight t := by
   simp [binetWeight, Int.fract_add_one]
 
+/-- The Binet weight is measurable. -/
 theorem measurable_binetWeight : Measurable binetWeight :=
   ((measurable_fract.sub (measurable_fract.pow_const 2)).div_const 2)
 
+/-- On `[0, 1)` the Binet weight is `(t - t²)/2`. -/
 theorem binetWeight_of_mem_Ico {t : ℝ} (ht : t ∈ Ico (0 : ℝ) 1) :
     binetWeight t = (t - t ^ 2) / 2 := by
   simp [binetWeight, Int.fract_eq_self.2 ht]
 
 /-! ### An integrable majorant -/
 
+/-- `1/(1 + t)²` is integrable on `(0, ∞)`. -/
 theorem integrableOn_recip_one_add_sq :
     IntegrableOn (fun t : ℝ => ((1 + t) ^ 2)⁻¹) (Ioi 0) := by
   have h := (integrable_one_add_norm (E := ℝ) (μ := volume) (r := 2) (by simp)).integrableOn
@@ -110,6 +116,8 @@ def binetMu (z : ℂ) : ℂ := ∫ t in Ioi (0 : ℝ), (binetWeight t : ℂ) / (
 /-- The real form of `binetMu`. -/
 def binetMuReal (x : ℝ) : ℝ := ∫ t in Ioi (0 : ℝ), binetWeight t / (x + t) ^ 2
 
+/-- If `c(1 + t) ≤ |z + t|`, then `|w(t)/(z + t)^(n+2)| ≤ (1/8) c^(-(n+2)) (1 + t)^(-2)` for the
+Binet weight `w`. -/
 theorem norm_binetWeight_div_le {z : ℂ} {c t : ℝ} (hc : 0 < c) (ht : 0 ≤ t)
     (hzt : c * (1 + t) ≤ ‖z + t‖) (n : ℕ) :
     ‖(binetWeight t : ℂ) / (z + t) ^ (n + 2)‖ ≤ (1 / 8) / c ^ (n + 2) * ((1 + t) ^ 2)⁻¹ := by
@@ -127,6 +135,7 @@ theorem norm_binetWeight_div_le {z : ℂ} {c t : ℝ} (hc : 0 < c) (ht : 0 ≤ t
     _ = (1 / 8) / c ^ (n + 2) * ((1 + t) ^ 2)⁻¹ := by
         rw [div_mul_eq_div_div, div_eq_mul_inv _ ((1 + t) ^ 2)]
 
+/-- For `z` in the slit plane, `w(t)/(z + t)²` is integrable on `(0, ∞)`. -/
 theorem integrableOn_binetMu_integrand {z : ℂ} (hz : z ∈ slitPlane) :
     IntegrableOn (fun t : ℝ => (binetWeight t : ℂ) / (z + t) ^ 2) (Ioi 0) := by
   obtain ⟨c, hc, h⟩ := exists_mul_one_add_le_norm_add hz
@@ -138,6 +147,7 @@ theorem integrableOn_binetMu_integrand {z : ℂ} (hz : z ∈ slitPlane) :
     have ht' : (0 : ℝ) ≤ t := le_of_lt ht
     simpa using norm_binetWeight_div_le hc ht' (h t ht') 0
 
+/-- If `z + t ≠ 0`, the derivative in `z` of `w(t)/(z + t)²` is `-2 w(t)/(z + t)³`. -/
 theorem hasDerivAt_binetMu_integrand {z : ℂ} {t : ℝ} (hzt : z + t ≠ 0) :
     HasDerivAt (fun w : ℂ => (binetWeight t : ℂ) / (w + t) ^ 2)
       (-2 * (binetWeight t : ℂ) / (z + t) ^ 3) z := by
@@ -149,6 +159,7 @@ theorem hasDerivAt_binetMu_integrand {z : ℂ} {t : ℝ} (hzt : z + t ≠ 0) :
     simp
     ring
 
+/-- `μ(z) = ∫₀^∞ w(t)/(z + t)² dt` has derivative `∫₀^∞ -2 w(t)/(z + t)³ dt` on the slit plane. -/
 theorem hasDerivAt_binetMu {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt binetMu
       (∫ t in Ioi (0 : ℝ), -2 * (binetWeight t : ℂ) / (z + t) ^ 3) z := by
@@ -177,11 +188,13 @@ theorem hasDerivAt_binetMu {z : ℂ} (hz : z ∈ slitPlane) :
   · filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht w hw
     exact hasDerivAt_binetMu_integrand (hne w hw t (le_of_lt ht))
 
+/-- Binet's function `μ` is holomorphic on the slit plane. -/
 theorem differentiableOn_binetMu : DifferentiableOn ℂ binetMu slitPlane := fun _ hz =>
   (hasDerivAt_binetMu hz).differentiableAt.differentiableWithinAt
 
 /-! ### Agreement with the Laplace form on the positive reals -/
 
+/-- At real arguments `binetMu` agrees with its real form `binetMuReal`. -/
 theorem binetMu_ofReal (x : ℝ) : binetMu x = binetMuReal x := by
   unfold binetMu binetMuReal
   rw [← integral_complex_ofReal]
@@ -190,6 +203,7 @@ theorem binetMu_ofReal (x : ℝ) : binetMu x = binetMuReal x := by
   push_cast
   rfl
 
+/-- For `x > 0`, `w(t)/(x + t)²` is integrable on `(0, ∞)`. -/
 theorem integrableOn_binetMuReal_integrand {x : ℝ} (hx : 0 < x) :
     IntegrableOn (fun t : ℝ => binetWeight t / (x + t) ^ 2) (Ioi 0) := by
   have hz : (x : ℂ) ∈ slitPlane := ofReal_mem_slitPlane.2 hx
@@ -199,6 +213,7 @@ theorem integrableOn_binetMuReal_integrand {x : ℝ} (hx : 0 < x) :
   rw [show (x : ℂ) + t = ((x + t : ℝ) : ℂ) by push_cast; ring, ← ofReal_pow, ← ofReal_div,
     Complex.norm_real, Real.norm_of_nonneg (div_nonneg (binetWeight_nonneg t) (by positivity))]
 
+/-- `∫_{(1,∞)} f = ∫_{(0,∞)} f(s + 1) ds`. -/
 theorem setIntegral_Ioi_one_eq (f : ℝ → ℝ) :
     ∫ t in Ioi (1 : ℝ), f t = ∫ s in Ioi (0 : ℝ), f (s + 1) := by
   rw [← integral_indicator measurableSet_Ioi, ← integral_indicator measurableSet_Ioi,
@@ -244,6 +259,7 @@ theorem integral_binetWeight_div_zero_one {x : ℝ} (hx : 0 < x) :
       field_simp
       ring
 
+/-- `μ(x) - μ(x + 1) = (x + 1/2)(ln(x + 1) - ln x) - 1` for `x > 0`. -/
 theorem binetMuReal_sub_add_one {x : ℝ} (hx : 0 < x) :
     binetMuReal x - binetMuReal (x + 1) =
       (x + 1 / 2) * (Real.log (x + 1) - Real.log x) - 1 := by
@@ -257,6 +273,8 @@ theorem binetMuReal_sub_add_one {x : ℝ} (hx : 0 < x) :
   simp only [this]
   ring
 
+/-- Binet's integral `Φ` satisfies `Φ(x) - Φ(x + 1) = (x + 1/2)(ln(x + 1) - ln x) - 1` for `x > 0`.
+-/
 theorem binetIntegral_sub_add_one {x : ℝ} (hx : 0 < x) :
     binetIntegral x - binetIntegral (x + 1) =
       (x + 1 / 2) * (Real.log (x + 1) - Real.log x) - 1 := by
@@ -265,6 +283,7 @@ theorem binetIntegral_sub_add_one {x : ℝ} (hx : 0 < x) :
   rw [Real.Gamma_add_one hx.ne', Real.log_mul hx.ne' (Real.Gamma_pos_of_pos hx).ne'] at h1
   linarith
 
+/-- `∫₀^∞ dt/(y + t)² = 1/y` for `y > 0`. -/
 theorem integral_recip_add_sq {y : ℝ} (hy : 0 < y) :
     ∫ t in Ioi (0 : ℝ), 1 / (y + t) ^ 2 = 1 / y := by
   have h := integral_Ioi_of_hasDerivAt_of_nonneg' (a := 0) (l := 0)
@@ -279,9 +298,11 @@ theorem integral_recip_add_sq {y : ℝ} (hy : 0 < y) :
   · have : Tendsto (fun t : ℝ => y + t) atTop atTop := tendsto_atTop_add_const_left _ _ tendsto_id
     simpa using this.inv_tendsto_atTop.neg
 
+/-- The real Binet function `μ(x)` is nonnegative. -/
 theorem binetMuReal_nonneg (x : ℝ) : 0 ≤ binetMuReal x :=
   setIntegral_nonneg measurableSet_Ioi fun t _ => div_nonneg (binetWeight_nonneg t) (sq_nonneg _)
 
+/-- `μ(x) ≤ 1/(8x)` for `x > 0`. -/
 theorem binetMuReal_le {x : ℝ} (hx : 0 < x) : binetMuReal x ≤ 1 / (8 * x) := by
   have hI : IntegrableOn (fun t : ℝ => 1 / (x + t) ^ 2) (Ioi 0) := by
     refine integrableOn_Ioi_deriv_of_nonneg' (g := fun t : ℝ => -(x + t)⁻¹) (l := 0)
@@ -303,6 +324,7 @@ theorem binetMuReal_le {x : ℝ} (hx : 0 < x) : binetMuReal x ≤ 1 / (8 * x) :=
         rw [integral_const_mul, integral_recip_add_sq hx]
         field_simp
 
+/-- For `x > 0` the two Binet representations agree: `μ(x) = Φ(x)`. -/
 theorem binetMuReal_eq_binetIntegral {x : ℝ} (hx : 0 < x) : binetMuReal x = binetIntegral x := by
   set D : ℝ → ℝ := fun y => binetMuReal y - binetIntegral y with hD
   have hper : ∀ n : ℕ, D x = D (x + n) := by
@@ -344,6 +366,7 @@ theorem binetMuReal_eq_binetIntegral {x : ℝ} (hx : 0 < x) : binetMuReal x = bi
 def binetExponent (z : ℂ) : ℂ :=
   (z - 1 / 2) * log z - z + (1 / 2) * log (2 * π) + binetMu z
 
+/-- The exponent `(z - 1/2) log z - z + (1/2) log(2π) + μ(z)` is holomorphic on the slit plane. -/
 theorem differentiableOn_binetExponent : DifferentiableOn ℂ binetExponent slitPlane := by
   intro z hz
   have hlog : DifferentiableAt ℂ log z := differentiableAt_log hz
@@ -354,6 +377,7 @@ theorem differentiableOn_binetExponent : DifferentiableOn ℂ binetExponent slit
     ((((differentiableAt_id.sub_const _).mul hlog).sub differentiableAt_id).add_const _).add hmu
   exact h.differentiableWithinAt
 
+/-- At `x > 0`, the Binet exponent equals `log Γ(x)`. -/
 theorem binetExponent_ofReal {x : ℝ} (hx : 0 < x) :
     binetExponent x = (Real.log (Real.Gamma x) : ℂ) := by
   rw [log_Gamma_eq_add_binetIntegral hx, binetExponent, binetMu_ofReal,
@@ -390,6 +414,7 @@ theorem Gamma_eq_exp_binetExponent {z : ℂ} (hz : z ∈ slitPlane) :
 
 /-! ### Stieltjes' bound -/
 
+/-- For `z ≠ 0` and real `t`: `(|z| + Re z)(|z| + t)² ≤ 2|z| |z + t|²`. -/
 theorem norm_add_sq_ge {z : ℂ} (hz : z ≠ 0) (t : ℝ) :
     (‖z‖ + z.re) * (‖z‖ + t) ^ 2 ≤ 2 * ‖z‖ * ‖z + t‖ ^ 2 := by
   have hr : 0 < ‖z‖ := norm_pos_iff.2 hz
@@ -457,6 +482,8 @@ theorem norm_binetMu_le_of_re_nonneg {z : ℂ} (hz : z ≠ 0) (hre : 0 ≤ z.re)
 
 /-! ### Consequences for `|Γ|` -/
 
+/-- The real part of the Binet exponent: `(Re z - 1/2) ln|z| - Im z arg z - Re z + (1/2) ln(2π) + Re
+μ(z)`. -/
 theorem re_binetExponent (z : ℂ) :
     (binetExponent z).re = (z.re - 1 / 2) * Real.log ‖z‖ - z.im * arg z - z.re +
       (1 / 2) * Real.log (2 * π) + (binetMu z).re := by
@@ -475,6 +502,7 @@ theorem norm_Gamma_eq_binet {z : ℂ} (hz : z ∈ slitPlane) :
   congr 1
   ring
 
+/-- `ψ cos ψ ≤ sin ψ` for `0 ≤ ψ ≤ π/2`. -/
 theorem mul_cos_le_sin {ψ : ℝ} (h0 : 0 ≤ ψ) (h1 : ψ ≤ π / 2) : ψ * Real.cos ψ ≤ Real.sin ψ := by
   rcases h1.lt_or_eq with h | h
   · have hc : 0 < Real.cos ψ := Real.cos_pos_of_mem_Ioo ⟨by linarith, h⟩
@@ -483,6 +511,7 @@ theorem mul_cos_le_sin {ψ : ℝ} (h0 : 0 ≤ ψ) (h1 : ψ ≤ π / 2) : ψ * Re
     exact ht
   · rw [h, Real.cos_pi_div_two, Real.sin_pi_div_two]; norm_num
 
+/-- `(π/2)|sin θ| ≤ cos θ + θ sin θ` for `|θ| ≤ π/2`. -/
 theorem pi_div_two_mul_abs_sin_le {θ : ℝ} (hθ : |θ| ≤ π / 2) :
     π / 2 * |Real.sin θ| ≤ Real.cos θ + θ * Real.sin θ := by
   have key : ∀ φ : ℝ, 0 ≤ φ → φ ≤ π / 2 →

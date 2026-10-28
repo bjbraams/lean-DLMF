@@ -35,6 +35,7 @@ namespace DLMF.Partitions
 abbrev partitionFunction (n : ℕ) : ℕ :=
   Fintype.card (Partition n)
 
+/-- `p(0) = 1`. -/
 @[dlmf 27.14.E3]
 theorem partitionFunction_zero : partitionFunction 0 = 1 := by
   rw [Fintype.card_eq_one_iff]

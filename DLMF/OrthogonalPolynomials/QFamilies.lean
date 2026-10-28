@@ -47,37 +47,47 @@ def terminatingBasicHG (n : ℕ) (a b : List ℂ) (q z : ℂ) : ℂ :=
       ((b.map (fun t => qPochhammer t q k)).prod * qPochhammer q q k) *
       ((-1 : ℂ) ^ k * q ^ (k * (k - 1) / 2)) ^ (1 + (b.length : ℤ) - a.length) * z ^ k
 
+/-- The `q`-Hahn polynomial `Q_n(x; a, b, N; q)` as a terminating `₃φ₂` (DLMF 18.27.3). -/
 @[dlmf 18.27.E3]
 def qHahn (a b q : ℂ) (N n : ℕ) (x : ℂ) : ℂ :=
   terminatingBasicHG n [q⁻¹ ^ n, a * b * q ^ (n + 1), x] [a * q, q⁻¹ ^ N] q q
 
+/-- The big `q`-Jacobi polynomial `P_n(x; a, b, c; q)` as a terminating `₃φ₂` (DLMF 18.27.5). -/
 @[dlmf 18.27.E5]
 def bigQJacobi (a b c q : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
   terminatingBasicHG n [q⁻¹ ^ n, a * b * q ^ (n + 1), x] [a * q, c * q] q q
 
+/-- The little `q`-Jacobi polynomial `p_n(x; a, b; q)` as a terminating `₂φ₁` (DLMF 18.27.13). -/
 @[dlmf 18.27.E13]
 def littleQJacobi (a b q : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
   terminatingBasicHG n [q⁻¹ ^ n, a * b * q ^ (n + 1)] [a * q] q (q * x)
 
+/-- The little `q`-Laguerre (Wall) polynomial, the little `q`-Jacobi polynomial with `b = 0`
+(DLMF 18.27.14_5). -/
 @[dlmf 18.27.E14_5]
 def littleQLaguerre (a q : ℂ) (n : ℕ) (x : ℂ) : ℂ := littleQJacobi a 0 q n x
 
+/-- The `q`-Laguerre polynomial `L_n^{(α)}(x; q)` as a terminating `₁φ₁` (DLMF 18.27.15). -/
 @[dlmf 18.27.E15]
 def qLaguerre (α q : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
   qPochhammer (q ^ (α + 1)) q n / qPochhammer q q n *
     terminatingBasicHG n [q⁻¹ ^ n] [q ^ (α + 1)] q (-x * q ^ (n + α + 1))
 
+/-- The Stieltjes–Wigert polynomial `S_n(x; q)` as an explicit finite sum (DLMF 18.27.18). -/
 @[dlmf 18.27.E18]
 def stieltjesWigert (q : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
   ∑ k ∈ Finset.range (n + 1), q ^ (k ^ 2) * (-x) ^ k /
     (qPochhammer q q k * qPochhammer q q (n - k))
 
+/-- The discrete `q`-Hermite I polynomial `h_n(x; q)` as an explicit finite sum (DLMF 18.27.21). -/
 @[dlmf 18.27.E21]
 def discreteQHermiteI (q : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
   qPochhammer q q n * ∑ k ∈ Finset.range (n / 2 + 1),
     (-1 : ℂ) ^ k * q ^ (k * (k - 1)) * x ^ (n - 2 * k) /
       (qPochhammer (q ^ 2) (q ^ 2) k * qPochhammer q q (n - 2 * k))
 
+/-- The discrete `q`-Hermite II polynomial `h̃_n(x; q)` as an explicit finite sum
+(DLMF 18.27.23). -/
 @[dlmf 18.27.E23]
 def discreteQHermiteII (q : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
   qPochhammer q q n * ∑ k ∈ Finset.range (n / 2 + 1),
@@ -94,11 +104,15 @@ def askeyWilson (a b c d q : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
     qPochhammer (a * b * c * d * q ^ ((n : ℤ) - 1)) q k / qPochhammer q q k *
     ∏ j ∈ Finset.range k, (1 - 2 * a * q ^ j * x + a ^ 2 * q ^ (2 * j))
 
+/-- The Askey–Wilson polynomial in the Laurent variable `z`, `x = (z + z⁻¹)/2`, as a
+terminating `₄φ₃` (DLMF 18.28.1_5). -/
 @[dlmf 18.28.E1_5]
 def askeyWilsonLaurent (a b c d q : ℂ) (n : ℕ) (z : ℂ) : ℂ :=
   terminatingBasicHG n [q⁻¹ ^ n, a * b * c * d * q ^ ((n : ℤ) - 1), a * z, a / z]
     [a * b, a * c, a * d] q q
 
+/-- The Al-Salam–Chihara polynomials, the Askey–Wilson polynomials with `c = d = 0`
+(DLMF 18.28.7). -/
 @[dlmf 18.28.E7]
 def alSalamChihara (a b q : ℂ) (n : ℕ) (x : ℂ) : ℂ := askeyWilson a b 0 0 q n x
 
@@ -107,6 +121,7 @@ def alSalamChihara (a b q : ℂ) (n : ℕ) (x : ℂ) : ℂ := askeyWilson a b 0 
 def continuousQHermiteLaurent (q : ℂ) (n : ℕ) (z : ℂ) : ℂ :=
   qPochhammer q q n * qGegenbauer 0 q n z
 
+/-- The `q`-Racah polynomial `R_n(x; α, β, γ, δ | q)` as a terminating `₄φ₃` (DLMF 18.28.19). -/
 @[dlmf 18.28.E19]
 def qRacah (a b c d q : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
   ∑ k ∈ Finset.range (n + 1), q ^ k * qPochhammer (q⁻¹ ^ n) q k *
@@ -733,9 +748,7 @@ theorem continuousQHermite_orthogonality {q : ℝ} (hq : 0 < q) (hq1 : q < 1) (m
 /-- The factor with index `m` makes `(q⁻ᵐ;q)_k` vanish for `m < k`. -/
 theorem qPochhammer_recip_pow_eq_zero {q : ℂ} (hq : q ≠ 0) {m k : ℕ} (hmk : m < k) :
     qPochhammer (q⁻¹ ^ m) q k = 0 := by
-  rw [qPochhammer_eq_prod]
-  apply Finset.prod_eq_zero (Finset.mem_range.mpr hmk)
-  simp [inv_pow, pow_ne_zero _ hq]
+  rw [inv_pow]; exact DLMF.QSeries.qPochhammer_recip_pow_eq_zero hq hmk
 
 /-- Factoring the quadratic kernel on the q-Racah lattice. -/
 theorem qRacah_lattice_kernel {q : ℂ} (hq : q ≠ 0) (c d : ℂ) (y k : ℕ) :
@@ -792,6 +805,7 @@ theorem tendsto_one_sub_rpow_div (t : ℝ) :
   field_simp
   ring
 
+/-- Eventually `0 < q` as `q → 1⁻`. -/
 theorem eventually_pos_nhdsWithin_lt_one : ∀ᶠ q : ℝ in 𝓝[<] 1, 0 < q :=
   nhdsWithin_le_nhds (lt_mem_nhds one_pos)
 
@@ -817,13 +831,16 @@ theorem tendsto_qPochhammer_rpow_div (t : ℝ) (k : ℕ) :
     push_cast
     field_simp
 
+/-- `q^a q^b = q^{a+b}` for real `q > 0`, after casting to `ℂ`. -/
 lemma ofReal_rpow_eq_cpow_aux {q : ℝ} (hq : 0 < q) (a b : ℝ) :
     ((q ^ a : ℝ) : ℂ) * ((q ^ b : ℝ) : ℂ) = ((q ^ (a + b) : ℝ) : ℂ) := by
   rw [Real.rpow_add hq]; push_cast; ring
 
+/-- A natural power of a real number, cast to `ℂ`, as a real power. -/
 theorem ofReal_pow_eq_rpow {q : ℝ} (m : ℕ) : (q : ℂ) ^ m = ((q ^ (m : ℝ) : ℝ) : ℂ) := by
   rw [Real.rpow_natCast]; push_cast; ring
 
+/-- `(1/q)^m = q^{-m}` for real `q > 0`, cast to `ℂ`. -/
 theorem ofReal_recip_pow_eq_rpow {q : ℝ} (hq : 0 < q) (m : ℕ) :
     (q : ℂ)⁻¹ ^ m = ((q ^ (-(m : ℝ)) : ℝ) : ℂ) := by
   rw [Real.rpow_neg hq.le, Real.rpow_natCast]; push_cast; ring
@@ -845,19 +862,23 @@ theorem tendsto_qPoch_two_two (t₁ t₂ s₁ s₂ : ℝ) (k : ℕ) (hs₁ : poc
   simp only [Pi.div_apply]
   field_simp
 
+/-- The cast `q ↦ (q : ℂ)` tends to `1` as `q → 1⁻`. -/
 theorem tendsto_ofReal_nhdsWithin_lt_one :
     Tendsto (fun q : ℝ => (q : ℂ)) (𝓝[<] 1) (𝓝 1) := by
   simpa using (continuous_ofReal.tendsto (1 : ℝ)).mono_left
     (nhdsWithin_le_nhds (s := Set.Iio (1 : ℝ)))
 
+/-- `(1 - q)^k ≠ 0` for real `q < 1`. -/
 theorem one_sub_ofReal_pow_ne_zero {q : ℝ} (hq1 : q < 1) (k : ℕ) : ((1 : ℂ) - q) ^ k ≠ 0 :=
   pow_ne_zero _ (by
     rw [← ofReal_one, ← ofReal_sub]; exact ofReal_ne_zero.mpr (sub_ne_zero.mpr (ne_of_gt hq1)))
 
+/-- `q^{α+1}` as a complex power of a real `q > 0` equals the real power, cast. -/
 theorem ofReal_cpow_add_one {q : ℝ} (hq : 0 < q) (α : ℝ) :
     (q : ℂ) ^ ((α : ℂ) + 1) = ((q ^ (α + 1) : ℝ) : ℂ) := by
   rw [ofReal_cpow hq.le]; push_cast; ring_nf
 
+/-- `q^t → 1` as `q → 1⁻`, for every real `t`. -/
 theorem tendsto_rpow_nhdsWithin_lt_one (t : ℝ) :
     Tendsto (fun q : ℝ => ((q ^ t : ℝ) : ℂ)) (𝓝[<] 1) (𝓝 1) := by
   have h : Tendsto (fun q : ℝ => q ^ t) (𝓝 1) (𝓝 ((1 : ℝ) ^ t)) :=
@@ -896,6 +917,8 @@ theorem tendsto_askeyWilson_prod (a : ℝ) (x : ℂ) (k : ℕ) :
   refine h.congr' (Eventually.of_forall fun q => ?_)
   rw [Finset.prod_div_distrib, Finset.prod_const, Finset.card_range]
 
+/-- The Wilson polynomial as a sum with the normalising Pochhammer products shifted into
+the summand, valid when no `(a+b)_k`, `(a+c)_k`, `(a+d)_k` vanishes. -/
 theorem wilson_eq_sum_shifted {a b c d : ℂ} (hab : ∀ k : ℕ, poch (a + b) k ≠ 0)
     (hac : ∀ k : ℕ, poch (a + c) k ≠ 0) (had : ∀ k : ℕ, poch (a + d) k ≠ 0) (n : ℕ) (x : ℂ) :
     wilson a b c d n x = ∑ k ∈ Finset.range (n + 1),
@@ -913,6 +936,7 @@ theorem wilson_eq_sum_shifted {a b c d : ℂ} (hab : ∀ k : ℕ, poch (a + b) k
   have := hab k; have := hac k; have := had k
   field_simp
 
+/-- Field algebra used to rescale the Askey–Wilson summand. -/
 theorem aw_algebra (A Q u F1 F2 F3 G1 G2 G3 P : ℂ) (n m k : ℕ) (h1 : u ≠ 0) :
     A⁻¹ ^ n * Q ^ k * (F1 / u ^ m) * (F2 / u ^ m) * (F3 / u ^ m) * (G1 / u ^ k) * (G2 / u ^ k) /
         (G3 / u ^ k) * (P / (u ^ 2) ^ k) =
@@ -920,6 +944,7 @@ theorem aw_algebra (A Q u F1 F2 F3 G1 G2 G3 P : ℂ) (n m k : ℕ) (h1 : u ≠ 0
   field_simp
   ring
 
+/-- `q² → 1⁻` as `q → 1⁻`. -/
 theorem tendsto_sq_nhdsWithin_lt_one :
     Tendsto (fun q : ℝ => q ^ 2) (𝓝[<] 1) (𝓝[<] 1) := by
   refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
@@ -941,6 +966,7 @@ theorem tendsto_qPochhammer_self_div (k : ℕ) :
   refine h.congr' (Eventually.of_forall fun q => ?_)
   simp [Real.rpow_one]
 
+/-- `(q²;q²)_k / (1 - q²)^k → k!` as `q → 1⁻`. -/
 theorem tendsto_qPochhammer_sq_div (k : ℕ) :
     Tendsto (fun q : ℝ => qPochhammer ((q : ℂ) ^ 2) ((q : ℂ) ^ 2) k / (1 - (q : ℂ) ^ 2) ^ k)
       (𝓝[<] 1) (𝓝 (k ! : ℂ)) := by
@@ -948,6 +974,7 @@ theorem tendsto_qPochhammer_sq_div (k : ℕ) :
   refine h.congr' (Eventually.of_forall fun q => ?_)
   simp
 
+/-- Field algebra used to rescale the discrete `q`-Hermite summand. -/
 theorem dqh_algebra (Pn Pm Gk A x u v s : ℂ) (m k : ℕ) (hu : u ≠ 0) (hv : v ≠ 0) (hs : s ≠ 0)
     (hs2 : s ^ 2 = u * v) :
     Pn * (A * (s * x) ^ m / (Gk * Pm)) / s ^ (m + 2 * k) =
@@ -1226,7 +1253,7 @@ theorem qGegenbauer_limit_ultrasphPoly {lam : ℝ} (hlam : -1 / 2 < lam) (n : �
     rw [hwi, ofReal_cos]
     dsimp [w]
     rw [Complex.cos]
-    congr 1 <;> ring
+    congr 1; ring
   rw [← hcos, ultrasphPoly_eq_coeff_gegenbauerSeries (by simpa using hlam) hw,
     coeff_gegenbauerSeries]
   unfold qGegenbauer

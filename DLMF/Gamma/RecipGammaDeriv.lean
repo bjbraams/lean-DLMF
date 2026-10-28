@@ -44,15 +44,18 @@ theorem differentiable_recip_Gamma : Differentiable ℂ fun z : ℂ => (Gamma z)
 def recipGammaDeriv (n : ℕ) (z : ℂ) : ℂ :=
   iteratedDeriv n (fun w : ℂ => (Gamma w)⁻¹) z
 
+/-- The zeroth derivative of `1/Γ` is `1/Γ`. -/
 @[simp]
 theorem recipGammaDeriv_zero (z : ℂ) : recipGammaDeriv 0 z = (Gamma z)⁻¹ := by
   simp [recipGammaDeriv]
 
+/-- The `(n+1)`-st derivative of `1/Γ` is the derivative of the `n`-th. -/
 theorem recipGammaDeriv_succ (n : ℕ) : recipGammaDeriv (n + 1) = deriv (recipGammaDeriv n) := by
   funext z
   simp only [recipGammaDeriv, iteratedDeriv_succ]
   rfl
 
+/-- The first derivative of `1/Γ` is `deriv (fun w => (Γ w)⁻¹)`. -/
 theorem recipGammaDeriv_one_eq_deriv (z : ℂ) :
     recipGammaDeriv 1 z = deriv (fun w : ℂ => (Gamma w)⁻¹) z := by
   simp [recipGammaDeriv]
@@ -63,14 +66,17 @@ theorem differentiable_recipGammaDeriv (n : ℕ) : Differentiable ℂ (recipGamm
     (by exact_mod_cast WithTop.coe_lt_top _)
   exact h
 
+/-- The `n`-th derivative of `1/Γ` has derivative the `(n+1)`-st derivative at every point. -/
 theorem hasDerivAt_recipGammaDeriv (n : ℕ) (z : ℂ) :
     HasDerivAt (recipGammaDeriv n) (recipGammaDeriv (n + 1) z) z := by
   rw [recipGammaDeriv_succ]
   exact (differentiable_recipGammaDeriv n z).hasDerivAt
 
+/-- Every derivative of `1/Γ` is continuous. -/
 theorem continuous_recipGammaDeriv (n : ℕ) : Continuous (recipGammaDeriv n) :=
   (differentiable_recipGammaDeriv n).continuous
 
+/-- `1/Γ` has derivative `recipGammaDeriv 1 z` at every `z`. -/
 theorem hasDerivAt_recip_Gamma' (z : ℂ) :
     HasDerivAt (fun w : ℂ => (Gamma w)⁻¹) (recipGammaDeriv 1 z) z := by
   have h := hasDerivAt_recipGammaDeriv 0 z
@@ -93,6 +99,7 @@ theorem isOpen_setOf_Gamma_ne_zero : IsOpen {z : ℂ | Gamma z ≠ 0} := by
   rw [this]
   exact isOpen_compl_singleton.preimage differentiable_recip_Gamma.continuous
 
+/-- `Γ(z) ≠ 0` if and only if `z` is not a nonpositive integer. -/
 theorem Gamma_ne_zero_iff {z : ℂ} : Gamma z ≠ 0 ↔ ∀ m : ℕ, z ≠ -(m : ℂ) := by
   rw [Ne, Gamma_eq_zero_iff]
   push Not

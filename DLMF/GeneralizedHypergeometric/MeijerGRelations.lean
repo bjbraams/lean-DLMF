@@ -407,6 +407,85 @@ lemma ghbR4_regular_zero (P : MeijerGParameters) (hpq : P.p ≤ P.q) (hq : 0 < P
         linear_combination (-(meijerParity P * u * c₁ - c₂)) * this
 
 
+/-- For `p < q`, the dual Meijer G equation (the inversion `z ↦ 1/z`) has an irregular
+singularity at zero, i.e. the original equation is irregular at infinity. -/
+private lemma ghbR4_dual_irregular_zero {P : MeijerGParameters} (hpq : P.p ≤ P.q)
+    (hq : 0 < P.q) (hlt : P.p < P.q) : MeijerIrregularSingularAt P.dual 0 := by
+  have hdp : P.dual.p = P.q := by
+    simp [MeijerGParameters.dual, MeijerGParameters.p, MeijerGParameters.q]
+  have hdq : P.dual.q = P.p := by
+    simp [MeijerGParameters.dual, MeijerGParameters.p, MeijerGParameters.q]
+  have hN : max P.dual.p P.dual.q = P.q := by rw [hdp, hdq]; exact max_eq_left hpq
+  obtain ⟨-, hordd⟩ := meijerG_equation_order P.dual
+  have hpard := ghbR4_meijerParity_ne_zero P.dual
+  refine ⟨?_, ?_⟩
+  · obtain ⟨c₁, c₂, h⟩ := ghbR4_meijerODECoeff_form P.dual (max P.dual.p P.dual.q)
+    rw [h, hN]; simp [zero_pow hq.ne']
+  · rintro ⟨-, -, hk⟩
+    obtain ⟨f, hf, hfeq⟩ := hk P.p (by rw [hN]; exact hlt)
+    obtain ⟨c, hc⟩ := ghbR4_meijerThetaCoeff_monomial (P.dual.a.map (·-1)) P.p
+    have hb : meijerThetaCoeff P.dual.b P.p = X ^ P.p := by
+      have := ghbR4_meijerThetaCoeff_length P.dual.b
+      simpa [MeijerGParameters.dual, MeijerGParameters.p] using this
+    have hcN : meijerODECoeff P.dual (max P.dual.p P.dual.q) =
+        C (meijerParity P.dual) * X ^ (P.q + 1) := by
+      rw [hordd]
+      split_ifs <;> first | omega | rw [hdp]
+    rw [hcN] at hfeq
+    have hev : ∀ᶠ u in 𝓝[≠] (0:ℂ), u⁻¹ = meijerParity P.dual * (c - f u) := by
+      filter_upwards [hfeq, self_mem_nhdsWithin] with u hu hu0
+      have hu0 : u ≠ 0 := hu0
+      rw [hu]
+      simp only [meijerODECoeff, hc, hb, sub_zero, eval_mul, eval_sub, eval_C, eval_X,
+        eval_pow, hN]
+      have hpow : u ^ (P.q - P.p) * u ^ P.p = u ^ P.q := by
+        rw [← pow_add]; congr 1; omega
+      have hd2 : meijerParity P.dual ^ 2 = 1 := ghbR4_meijerParity_sq P.dual
+      field_simp
+      linear_combination (u * c * meijerParity P.dual - 1) * u * hpow
+    have ht : Tendsto (fun u : ℂ => ‖meijerParity P.dual * (c - f u)‖) (𝓝[≠] 0)
+        (𝓝 ‖meijerParity P.dual * (c - f 0)‖) :=
+      ((hf.continuousAt.tendsto.mono_left nhdsWithin_le_nhds).const_sub c
+        |>.const_mul _).norm
+    have hinf := tendsto_norm_inv_nhdsNE_zero_atTop (α := ℂ)
+    have := hinf.congr' (hev.mono fun u hu => by rw [hu])
+    exact not_tendsto_atTop_of_tendsto_nhds ht this
+
+/-- For `p = q`, the Meijer G equation has a regular singularity at the parity point
+`(-1)^{p-m-n}`. -/
+private lemma ghbR4_regular_parity {P : MeijerGParameters} (hpq : P.p ≤ P.q)
+    (hq : 0 < P.q) (heq : P.p = P.q) : MeijerRegularSingularAt P (meijerParity P) := by
+  have hpar := ghbR4_meijerParity_ne_zero P
+  have hsq := ghbR4_meijerParity_sq P
+  obtain ⟨-, hord⟩ := meijerG_equation_order P
+  have hN : max P.p P.q = P.q := max_eq_right hpq
+  have hcN : ∀ u, (meijerODECoeff P (max P.p P.q)).eval u =
+      meijerParity P * (u - meijerParity P) * u ^ P.q := by
+    intro u
+    rw [hord]
+    split_ifs <;> try omega
+    rw [heq]
+    simp only [eval_mul, eval_sub, eval_C, eval_X, eval_one, eval_pow]
+    linear_combination u ^ P.q * hsq
+  refine ⟨by omega, by rw [hcN]; ring, ?_⟩
+  intro k hk
+  rw [hN] at hk
+  refine ⟨fun u => (u - meijerParity P) ^ (P.q - k - 1) * (meijerODECoeff P k).eval u /
+    (meijerParity P * u ^ P.q), AnalyticAt.div ((by fun_prop : AnalyticAt ℂ
+      (fun u : ℂ => (u - meijerParity P) ^ (P.q - k - 1)) _).mul
+        ((meijerODECoeff P k).differentiable.analyticAt _)) (by fun_prop)
+      (mul_ne_zero hpar (pow_ne_zero _ hpar)), ?_⟩
+  have hne : ∀ᶠ u in 𝓝[≠] (meijerParity P), u ≠ 0 :=
+    nhdsWithin_le_nhds (isOpen_ne.mem_nhds hpar)
+  filter_upwards [hne, self_mem_nhdsWithin] with u hu0 hu1
+  have hu1 : u - meijerParity P ≠ 0 := sub_ne_zero.mpr hu1
+  rw [hcN, hN]
+  have hpow : (u - meijerParity P) ^ (P.q - k) =
+      (u - meijerParity P) ^ (P.q - k - 1) * (u - meijerParity P) := by
+    rw [← pow_succ]; congr 1; omega
+  rw [hpow]
+  field_simp
+
 /-- Inversion represents infinity; the two source singularity regimes are retained. -/
 @[dlmf 16.21]
 theorem meijerG_singularities {P : MeijerGParameters} (hP : P.Valid) (hpq : P.p≤P.q) (hq : 0<P.q) :
@@ -415,76 +494,15 @@ theorem meijerG_singularities {P : MeijerGParameters} (hP : P.Valid) (hpq : P.p�
     (P.p=P.q→MeijerRegularSingularAt P (meijerParity P) ∧ MeijerRegularSingularAt P.dual 0) ∧
     (∀ z : ℂ,z≠0→(P.p=P.q→z≠meijerParity P)→
       (meijerODECoeff P (max P.p P.q)).eval z≠0) := by
-  have hdp : P.dual.p = P.q := by simp [MeijerGParameters.dual, MeijerGParameters.p, MeijerGParameters.q]
-  have hdq : P.dual.q = P.p := by simp [MeijerGParameters.dual, MeijerGParameters.p, MeijerGParameters.q]
-  have hpar := ghbR4_meijerParity_ne_zero P
+  have hdp : P.dual.p = P.q := by
+    simp [MeijerGParameters.dual, MeijerGParameters.p, MeijerGParameters.q]
+  have hdq : P.dual.q = P.p := by
+    simp [MeijerGParameters.dual, MeijerGParameters.p, MeijerGParameters.q]
   have hsq := ghbR4_meijerParity_sq P
   obtain ⟨-, hord⟩ := meijerG_equation_order P
   refine ⟨ghbR4_regular_zero P hpq hq, fun hlt => ?_, fun heq => ⟨?_, ?_⟩, ?_⟩
-  · -- irregular singularity of the dual at zero
-    have hN : max P.dual.p P.dual.q = P.q := by rw [hdp, hdq]; exact max_eq_left hpq
-    obtain ⟨-, hordd⟩ := meijerG_equation_order P.dual
-    have hpard := ghbR4_meijerParity_ne_zero P.dual
-    refine ⟨?_, ?_⟩
-    · obtain ⟨c₁, c₂, h⟩ := ghbR4_meijerODECoeff_form P.dual (max P.dual.p P.dual.q)
-      rw [h, hN]; simp [zero_pow hq.ne']
-    · rintro ⟨-, -, hk⟩
-      obtain ⟨f, hf, hfeq⟩ := hk P.p (by rw [hN]; exact hlt)
-      obtain ⟨c, hc⟩ := ghbR4_meijerThetaCoeff_monomial (P.dual.a.map (·-1)) P.p
-      have hb : meijerThetaCoeff P.dual.b P.p = X ^ P.p := by
-        have := ghbR4_meijerThetaCoeff_length P.dual.b
-        simpa [MeijerGParameters.dual, MeijerGParameters.p] using this
-      have hcN : meijerODECoeff P.dual (max P.dual.p P.dual.q) =
-          C (meijerParity P.dual) * X ^ (P.q + 1) := by
-        rw [hordd]
-        split_ifs <;> first | omega | rw [hdp]
-      rw [hcN] at hfeq
-      have hev : ∀ᶠ u in 𝓝[≠] (0:ℂ), u⁻¹ = meijerParity P.dual * (c - f u) := by
-        filter_upwards [hfeq, self_mem_nhdsWithin] with u hu hu0
-        have hu0 : u ≠ 0 := hu0
-        rw [hu]
-        simp only [meijerODECoeff, hc, hb, sub_zero, eval_mul, eval_sub, eval_C, eval_X,
-          eval_pow, hN]
-        have hpow : u ^ (P.q - P.p) * u ^ P.p = u ^ P.q := by
-          rw [← pow_add]; congr 1; omega
-        have hd2 : meijerParity P.dual ^ 2 = 1 := ghbR4_meijerParity_sq P.dual
-        field_simp
-        linear_combination (u * c * meijerParity P.dual - 1) * u * hpow
-      have ht : Tendsto (fun u : ℂ => ‖meijerParity P.dual * (c - f u)‖) (𝓝[≠] 0)
-          (𝓝 ‖meijerParity P.dual * (c - f 0)‖) :=
-        ((hf.continuousAt.tendsto.mono_left nhdsWithin_le_nhds).const_sub c
-          |>.const_mul _).norm
-      have hinf := tendsto_norm_inv_nhdsNE_zero_atTop (α := ℂ)
-      have := hinf.congr' (hev.mono fun u hu => by rw [hu])
-      exact not_tendsto_atTop_of_tendsto_nhds ht this
-  · -- regular singularity at the parity point
-    have hN : max P.p P.q = P.q := max_eq_right hpq
-    have hcN : ∀ u, (meijerODECoeff P (max P.p P.q)).eval u =
-        meijerParity P * (u - meijerParity P) * u ^ P.q := by
-      intro u
-      rw [hord]
-      split_ifs <;> try omega
-      rw [heq]
-      simp only [eval_mul, eval_sub, eval_C, eval_X, eval_one, eval_pow]
-      linear_combination u ^ P.q * hsq
-    refine ⟨by omega, by rw [hcN]; ring, ?_⟩
-    intro k hk
-    rw [hN] at hk
-    refine ⟨fun u => (u - meijerParity P) ^ (P.q - k - 1) * (meijerODECoeff P k).eval u /
-      (meijerParity P * u ^ P.q), AnalyticAt.div ((by fun_prop : AnalyticAt ℂ
-        (fun u : ℂ => (u - meijerParity P) ^ (P.q - k - 1)) _).mul
-          ((meijerODECoeff P k).differentiable.analyticAt _)) (by fun_prop)
-        (mul_ne_zero hpar (pow_ne_zero _ hpar)), ?_⟩
-    have hne : ∀ᶠ u in 𝓝[≠] (meijerParity P), u ≠ 0 :=
-      nhdsWithin_le_nhds (isOpen_ne.mem_nhds hpar)
-    filter_upwards [hne, self_mem_nhdsWithin] with u hu0 hu1
-    have hu1 : u - meijerParity P ≠ 0 := sub_ne_zero.mpr hu1
-    rw [hcN, hN]
-    have hpow : (u - meijerParity P) ^ (P.q - k) =
-        (u - meijerParity P) ^ (P.q - k - 1) * (u - meijerParity P) := by
-      rw [← pow_succ]; congr 1; omega
-    rw [hpow]
-    field_simp
+  · exact ghbR4_dual_irregular_zero hpq hq hlt
+  · exact ghbR4_regular_parity hpq hq heq
   · exact ghbR4_regular_zero P.dual (by omega) (by omega)
   · intro z hz hzp
     rcases lt_or_eq_of_le hpq with hlt | heq
@@ -554,7 +572,7 @@ theorem askey_gasper_degree_zero (α x : ℝ) : askeyGasperPolynomial 0 α x=1 :
 /-- Inversion of the ordered parameter blocks is an involution. -/
 theorem meijer_parameter_dual_involutive (P : MeijerGParameters) : P.dual.dual=P := by
   cases P
-  simp [MeijerGParameters.dual,List.map_map,Function.comp_def]
+  simp [MeijerGParameters.dual,List.map_map]
 
 /-- Relative contamination by a dominating mode diverges in either integration direction.
 This is the analytical instability behind the intermediate-solution warning in DLMF16.25. -/

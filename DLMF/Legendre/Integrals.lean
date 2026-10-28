@@ -25,13 +25,15 @@ open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
 namespace DLMF.Legendre
 
-/-- ferrers barnes integral. -/
+/-- DLMF 14.17.5: for `Re σ > -1` and `Re μ > -1`, `∫₀¹ x^σ (1-x²)^{μ/2} 𝖯^{-μ}_ν(x) dx = Γ((σ+1)/2)
+Γ(σ/2+1)/(2^{μ+1} Γ((σ-ν+μ)/2+1) Γ((σ+ν+μ+3)/2))`. -/
 @[dlmf 14.17.E5]
 theorem ferrers_barnes_integral {σ μ : ℂ} (hσ : -1 < σ.re) (hμ : -1 < μ.re) (ν : ℂ) :
     (∫ x : ℝ in 0..1, (x:ℂ)^σ*(1-x^2:ℂ)^(μ/2)*ferrersP ν (-μ) x)=Gamma ((σ+1)/2)*Gamma (σ/2+1)/(2^(μ+1)*Gamma ((σ-ν+μ)/2+1)*Gamma ((σ+ν+μ+3)/2)) := by
   sorry
 
-/-- ferrers orthogonality 6. -/
+/-- DLMF 14.17.6: for natural numbers `m ≤ l` and `m ≤ n`, `∫_{-1}^{1} 𝖯^m_l(x) 𝖯^m_n(x) dx =
+(n+m)!/((n-m)! (n+1/2)) δ_{l,n}`. -/
 @[dlmf 14.17.E6]
 theorem ferrers_orthogonality_6 (l m n : ℕ) (hl : m ≤ l) (hn : m ≤ n) :
     ∫ x : ℝ in -1..1, 1*ferrersP l (m) x*ferrersP n (m) x=if l=n then ((n+m).factorial:ℂ)/((n-m).factorial*(n+1/2:ℂ)) else 0 := by
@@ -52,7 +54,8 @@ theorem ferrers_orthogonality_6 (l m n : ℕ) (hl : m ≤ l) (hn : m ≤ n) :
     field_simp
   · simp
 
-/-- ferrers orthogonality 7. -/
+/-- For natural numbers `m ≤ l` and `m ≤ n`, `∫_{-1}^{1} 𝖯^m_l(x) 𝖯^{-m}_n(x) dx = (-1)^m/(l+1/2)
+δ_{l,n}`. -/
 @[dlmf 14.17.E7]
 theorem ferrers_orthogonality_7 (l m n : ℕ) (hl : m ≤ l) (hn : m ≤ n) :
     ∫ x : ℝ in -1..1, 1*ferrersP l (m) x*ferrersP n (-m) x=if l=n then (-1)^m/(l+1/2:ℂ) else 0 := by
@@ -148,18 +151,21 @@ theorem legPI_continuousAt_ferrersP (α : ℂ) {x : ℝ} (hx : -1 < x) :
   exact ContinuousAt.comp (g := regularizedGaussHG (α+1) (-α) 1)
     (differentiableAt_regularizedGaussHG _ _ _ hw).continuousAt (by fun_prop)
 
+/-- The Ferrers function satisfies `ferrersP α 0 1 = 1` for every complex degree `α`. -/
 theorem legPI_ferrersP_one (α : ℂ) : ferrersP α 0 1 = 1 := by
   rw [legPI_ferrersP_zero]
   have h1 : ∀ k : ℕ, (1:ℂ) ≠ -(k:ℂ) := fun k h => by
     have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)]
   simpa using regularizedGaussHG_zero_of_regular (a := α+1) (b := -α) h1
 
+/-- `ferrersP α 0 x → 1` as `x → 1⁻`. -/
 theorem legPI_tendsto_ferrersP_one (α : ℂ) :
     Tendsto (ferrersP α 0) (𝓝[<] (1:ℝ)) (𝓝 1) := by
   have := (legPI_continuousAt_ferrersP α (show (-1:ℝ) < 1 by norm_num)).tendsto
   rw [legPI_ferrersP_one] at this
   exact this.mono_left nhdsWithin_le_nhds
 
+/-- The map `x ↦ (1+x)/2` sends `x → -1⁺` to `τ → 0⁺`. -/
 theorem legPI_tendsto_half :
     Tendsto (fun x : ℝ => (1+x)/2) (𝓝[>] (-1:ℝ)) (𝓝[>] 0) := by
   refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
@@ -186,13 +192,16 @@ theorem legPI_ferrersP_neg_one_isBigO (α : ℂ) :
 /-- The weight `(1-x²)^{-1/4}` used to dominate Ferrers functions on `(-1,1)`. -/
 def legPIw (x : ℝ) : ℝ := ((1-x^2)/4)^(-(1/4:ℝ))
 
+/-- On `(-1,1)` the weight satisfies `1 ≤ legPIw x`. -/
 theorem legPIw_one_le {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) : 1 ≤ legPIw x :=
   Real.one_le_rpow_of_pos_of_le_one_of_nonpos (by nlinarith [hx.1, hx.2]) (by nlinarith)
     (by norm_num)
 
+/-- On `(-1,1)` the weight `legPIw x` is positive. -/
 theorem legPIw_pos {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) : 0 < legPIw x :=
   lt_of_lt_of_le one_pos (legPIw_one_le hx)
 
+/-- On `(-1,1)`, `legPIw x = ((1+x)/2)^(-1/4) * ((1-x)/2)^(-1/4)`. -/
 theorem legPIw_eq {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     legPIw x = ((1+x)/2)^(-(1/4:ℝ)) * ((1-x)/2)^(-(1/4:ℝ)) := by
   rw [legPIw, ← Real.mul_rpow (by linarith [hx.1]) (by linarith [hx.2])]
@@ -207,6 +216,7 @@ theorem legPI_abs_log_le {y : ℝ} (hy0 : 0 < y) (hy1 : y ≤ 1) :
   rw [Real.rpow_neg hy0.le, ← div_eq_mul_inv, le_div_iff₀ hp]
   exact h.le
 
+/-- For `0 < y ≤ 1`, `1 ≤ y^(-1/4)`. -/
 theorem legPI_rpow_ge_one {y : ℝ} (hy0 : 0 < y) (hy1 : y ≤ 1) : 1 ≤ y^(-(1/4:ℝ)) :=
   Real.one_le_rpow_of_pos_of_le_one_of_nonpos hy0 hy1 (by norm_num)
 
@@ -240,12 +250,14 @@ theorem legPI_log_isBigO_right :
       gcongr
       exact le_mul_of_one_le_left (Real.rpow_nonneg hs0.le _) (legPI_rpow_ge_one ht0 ht1)
 
+/-- The constant `1` is `O(legPIw)` as `x → -1⁺`. -/
 theorem legPI_one_isBigO_left : (fun _ : ℝ => (1:ℝ)) =O[𝓝[>] (-1:ℝ)] legPIw := by
   refine Asymptotics.IsBigO.of_bound 1 ?_
   filter_upwards [Ioo_mem_nhdsGT (show (-1:ℝ) < 1 by norm_num)] with x hx
   rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_pos (legPIw_pos hx), abs_one, one_mul]
   exact legPIw_one_le hx
 
+/-- The constant `1` is `O(legPIw)` as `x → 1⁻`. -/
 theorem legPI_one_isBigO_right : (fun _ : ℝ => (1:ℝ)) =O[𝓝[<] (1:ℝ)] legPIw := by
   refine Asymptotics.IsBigO.of_bound 1 ?_
   filter_upwards [Ioo_mem_nhdsLT (show (-1:ℝ) < 1 by norm_num)] with x hx
@@ -330,6 +342,7 @@ theorem legPI_ferrersP_isBigO_left (α : ℂ) : ferrersP α 0 =O[𝓝[>] (-1:ℝ
 theorem legPI_ferrersP_isBigO_right (α : ℂ) : ferrersP α 0 =O[𝓝[<] (1:ℝ)] legPIw :=
   ((legPI_tendsto_ferrersP_one α).isBigO_one ℝ).trans legPI_one_isBigO_right
 
+/-- `ferrersP α 0` is continuous on `(-1,1)`. -/
 theorem legPI_continuousOn_ferrersP (α : ℂ) : ContinuousOn (ferrersP α 0) (Ioo (-1) 1) :=
   fun _ hx => (legPI_continuousAt_ferrersP α hx.1).continuousWithinAt
 
@@ -347,17 +360,11 @@ theorem legPI_intervalIntegrable_PP (ν lam : ℂ) :
 section Constants
 open DLMF.Gamma
 
-/-- `Γ(s)⁻¹ = s Γ(s+1)⁻¹` for all `s`. -/
-theorem legPI_recip_Gamma_eq (s : ℂ) : (Gamma s)⁻¹ = s * (Gamma (s+1))⁻¹ := by
-  have := poch_mul_recip_Gamma_add_nat s 1
-  rw [poch_one] at this
-  simpa using this.symm
-
 /-- Derivative of `Γ(s)⁻¹ = s Γ(s+1)⁻¹`: `(1/Γ)'(s) = 1/Γ(s+1) + s (1/Γ)'(s+1)`. -/
 theorem legPI_recipGammaDeriv_rec (s : ℂ) :
     recipGammaDeriv 1 s = (Gamma (s+1))⁻¹ + s * recipGammaDeriv 1 (s+1) := by
   have hfun : (fun w : ℂ => (Gamma w)⁻¹) = fun w => w * (Gamma (w+1))⁻¹ :=
-    funext legPI_recip_Gamma_eq
+    funext Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one
   have h1 := hasDerivAt_recip_Gamma' s
   rw [hfun] at h1
   have h2 : HasDerivAt (fun w : ℂ => w * (Gamma (w+1))⁻¹)
@@ -368,7 +375,8 @@ theorem legPI_recipGammaDeriv_rec (s : ℂ) :
 /-- `K_{α+1} = -K_α` for the constant `K_α = 1/(Γ(α+1)Γ(-α))`. -/
 theorem legPI_K_succ (α : ℂ) : legBdK (α+1+1) (-(α+1)) = -legBdK (α+1) (-α) := by
   unfold legBdK
-  rw [legPI_recip_Gamma_eq (α+1), legPI_recip_Gamma_eq (-(α+1)), show -(α+1)+1 = -α by ring]
+  rw [Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (α+1),
+      Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (-(α+1)), show -(α+1)+1 = -α by ring]
   ring
 
 /-- `(α+1)(K'_{α+1} + K'_α) = 2K_α`. -/
@@ -377,8 +385,8 @@ theorem legPI_K'_succ (α : ℂ) :
   unfold legBdK' legBdK
   have r1 := legPI_recipGammaDeriv_rec (-(α+1))
   have r2 := legPI_recipGammaDeriv_rec (α+1)
-  have r3 := legPI_recip_Gamma_eq (α+1)
-  have r4 := legPI_recip_Gamma_eq (-(α+1))
+  have r3 := Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (α+1)
+  have r4 := Complex.one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (-(α+1))
   rw [show -(α+1)+1 = -α by ring] at r1 r4
   linear_combination (α+1)*(Gamma (α+1+1))⁻¹ * r1 + (α+1)*recipGammaDeriv 1 (α+1+1) * r4 +
     ((α+1)*recipGammaDeriv 1 (-α) - 2*(Gamma (-α))⁻¹) * r3 + (α+1)*(Gamma (-α))⁻¹ * r2
@@ -454,6 +462,7 @@ def legPIR (Kn Kl Cn Cl rn rl n l : ℂ) (v : Fin 11 → ℂ) : ℂ :=
     (-Cn*l - Cn)*v 5 +
     (Cl*n + Cl)*v 6
 
+/-- The boundary-form remainder `legPIR Kn Kl Cn Cl rn rl n l` is continuous in `v`. -/
 theorem legPI_continuous_R (Kn Kl Cn Cl rn rl n l : ℂ) : Continuous (legPIR Kn Kl Cn Cl rn rl n l) := by
   unfold legPIR; fun_prop
 
@@ -479,6 +488,7 @@ def legPIRp (kf kg cf cg rf rg n l : ℂ) (v : Fin 11 → ℂ) : ℂ :=
     (-cf*l - cf)*v 5 +
     (cg*n + cg)*v 6
 
+/-- The boundary-form remainder `legPIRp kf kg cf cg rf rg n l` is continuous in `v`. -/
 theorem legPI_continuous_Rp (kf kg cf cg rf rg n l : ℂ) : Continuous (legPIRp kf kg cf cg rf rg n l) := by
   unfold legPIRp; fun_prop
 
@@ -635,10 +645,13 @@ theorem legPI_ferrersQ_isFerrersSolution (α : ℂ) : IsFerrersSolution α 0 (fe
   ((ferrersEven_isFerrersSolution α 0).add_smul (ferrersOdd_isFerrersSolution α 0) _ _).congr
     (ferrersQ_eqOn_even_odd α 0).symm
 
+/-- Any solution `f` of the Ferrers (Legendre, `μ = 0`) equation on `(-1,1)` is continuous on
+`(-1,1)`. -/
 theorem legPI_continuousOn_of_solution {α : ℂ} {f : ℝ → ℂ} (hf : IsFerrersSolution α 0 f) :
     ContinuousOn f (Ioo (-1) 1) :=
   fun y hy => (hf y hy).1.continuousAt.continuousWithinAt
 
+/-- The map `x ↦ (1-x)/2` sends `x → 1⁻` to `τ → 0⁺`. -/
 theorem legPI_tendsto_half_right :
     Tendsto (fun x : ℝ => (1-x)/2) (𝓝[<] (1:ℝ)) (𝓝[>] 0) := by
   refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
@@ -682,6 +695,7 @@ theorem legPI_ferrersQ_pos_isBigO {α : ℂ} (h : LegendreQRegular α 0) :
     push_cast; ring
   rw [hl]; ring
 
+/-- Negation sends `x → -1⁺` to `x → 1⁻`. -/
 theorem legPI_tendsto_neg_left : Tendsto (fun x : ℝ => -x) (𝓝[>] (-1:ℝ)) (𝓝[<] 1) := by
   refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
   · have h : Tendsto (fun x : ℝ => -x) (𝓝 (-1)) (𝓝 (-(-1))) := tendsto_id.neg
@@ -763,22 +777,25 @@ def legPIcpos (α : ℂ) : ℂ := -Real.eulerMascheroniConstant - digamma (α+1)
 /-- Constant term of `𝖰_α` at `-1` (in the variable `τ = (1+x)/2`). -/
 def legPIcneg (α : ℂ) : ℂ := -cos (α*π)*legPIcpos α - π/2*sin (α*π)
 
+/-- If `LegendreQRegular α 0` (that is, `α ≠ -1, -2, …`), then also `LegendreQRegular (α+1) 0`. -/
 theorem legPI_regular_succ {α : ℂ} (h : LegendreQRegular α 0) : LegendreQRegular (α+1) 0 :=
   fun n hn => h (n+1) (by push_cast; linear_combination hn)
 
+/-- If `LegendreQRegular α 0`, then `α + 1 ≠ 0`. -/
 theorem legPI_regular_ne {α : ℂ} (h : LegendreQRegular α 0) : α + 1 ≠ 0 :=
   fun h' => h 0 (by push_cast; linear_combination h')
 
-theorem legPI_regular_arg {α : ℂ} (h : LegendreQRegular α 0) : ∀ m : ℕ, α+1 ≠ -(m:ℂ) :=
-  fun m hm => h m (by linear_combination hm)
-
+/-- For `LegendreQRegular α 0`, the constant terms at `+1` satisfy `(α+1)(legPIcpos (α+1) -
+legPIcpos α) = -1` (from `ψ(α+2) = ψ(α+1) + 1/(α+1)`). -/
 theorem legPI_cpos_succ {α : ℂ} (h : LegendreQRegular α 0) :
     (α+1)*(legPIcpos (α+1) - legPIcpos α) = -1 := by
   unfold legPIcpos
-  rw [Complex.digamma_apply_add_one (α+1) (legPI_regular_arg h)]
+  rw [Complex.digamma_apply_add_one (α+1) (legHyp_nu h)]
   have := legPI_regular_ne h
   field_simp; ring
 
+/-- For `LegendreQRegular α 0`, the constant terms at `-1` satisfy `(α+1)(legPIcneg (α+1) +
+legPIcneg α) = -cos(απ)`. -/
 theorem legPI_cneg_succ {α : ℂ} (h : LegendreQRegular α 0) :
     (α+1)*(legPIcneg (α+1) + legPIcneg α) = -cos (α*π) := by
   have hc := legPI_cpos_succ h
@@ -816,9 +833,11 @@ theorem legPI_integral_green {f g f1 g1 : ℝ → ℂ} {ν lam Bm Bp : ℂ}
   rw [intervalIntegral.integral_const_mul] at hI
   rw [eq_div_iff hc, ← hI]; ring
 
+/-- The identity `x = -1 + 2·((1+x)/2)` (as complex numbers), stated eventually as `x → -1⁺`. -/
 theorem legPI_hx_neg : ∀ᶠ x : ℝ in 𝓝[>] (-1:ℝ), (x:ℂ) = -1 + 2*(((1+x)/2 : ℝ) : ℂ) :=
   Eventually.of_forall fun x => by push_cast; ring
 
+/-- The identity `x = 1 - 2·((1-x)/2)` (as complex numbers), stated eventually as `x → 1⁻`. -/
 theorem legPI_hx_pos : ∀ᶠ x : ℝ in 𝓝[<] (1:ℝ), (x:ℂ) = 1 - 2*(((1-x)/2 : ℝ) : ℂ) :=
   Eventually.of_forall fun x => by push_cast; ring
 
@@ -840,16 +859,22 @@ theorem legPI_ferrersQ_pos_isBigO_succ {α : ℂ} (h : LegendreQRegular α 0) :
   refine (legPI_ferrersQ_pos_isBigO (legPI_regular_succ h)).congr_left fun x => ?_
   unfold legPIcpos; ring
 
+/-- For `LegendreQRegular α 0` and `x ∈ (-1,1)`, `(1-x²) 𝖰_α'(x) = (α+1)(x 𝖰_α(x) - 𝖰_{α+1}(x))` (`μ
+= 0` case of DLMF 14.10.5). -/
 theorem legPI_ferrersQ_rec {α : ℂ} (h : LegendreQRegular α 0) :
     ∀ x ∈ Ioo (-1:ℝ) 1, (1-(x:ℂ)^2)*deriv (ferrersQ α 0) x =
       (α+1)*(x*ferrersQ α 0 x - ferrersQ (α+1) 0 x) := fun x hx => by
   rw [ferrersQ_recurrence_4 α 0 h hx]; ring
 
+/-- For `x ∈ (-1,1)`, `(1-x²) 𝖯_α'(x) = (α+1)(x 𝖯_α(x) - 𝖯_{α+1}(x))` (`μ = 0` case of DLMF
+14.10.5). -/
 theorem legPI_ferrersP_rec (α : ℂ) :
     ∀ x ∈ Ioo (-1:ℝ) 1, (1-(x:ℂ)^2)*deriv (ferrersP α 0) x =
       (α+1)*(x*ferrersP α 0 x - ferrersP (α+1) 0 x) := fun x hx => by
   rw [ferrersP_recurrence_4 α 0 hx]; ring
 
+/-- For `ν`, `λ` with `LegendreQRegular ν 0` and `LegendreQRegular λ 0`, the product `𝖰_ν(x) 𝖰_λ(x)`
+is interval integrable on `[-1,1]`. -/
 theorem legPI_intervalIntegrable_QQ {ν lam : ℂ} (hν : LegendreQRegular ν 0)
     (hlam : LegendreQRegular lam 0) :
     IntervalIntegrable (fun x => ferrersQ ν 0 x * ferrersQ lam 0 x) volume (-1) 1 := by
@@ -860,6 +885,8 @@ theorem legPI_intervalIntegrable_QQ {ν lam : ℂ} (hν : LegendreQRegular ν 0)
     (legPI_ferrersQ_isBigO_right hlam)
   exact legPI_intervalIntegrable_mul c1 c2 hM hN
 
+/-- For any `ν` and `λ` with `LegendreQRegular λ 0`, the product `𝖯_ν(x) 𝖰_λ(x)` is interval
+integrable on `[-1,1]`. -/
 theorem legPI_intervalIntegrable_PQ {lam : ℂ} (ν : ℂ) (hlam : LegendreQRegular lam 0) :
     IntervalIntegrable (fun x => ferrersP ν 0 x * ferrersQ lam 0 x) volume (-1) 1 := by
   have c2 := legPI_continuousOn_of_solution (legPI_ferrersQ_isFerrersSolution lam)
@@ -926,6 +953,7 @@ theorem legPI_integral_PQ {ν lam : ℂ} (hlam : LegendreQRegular lam 0)
     · rw [legPI_cpos_succ hlam]; ring
     · ring
 
+/-- If `0 < re α`, then `LegendreQRegular α 0`. -/
 theorem legPI_regular_of_re_pos {α : ℂ} (h : 0 < α.re) : LegendreQRegular α 0 := by
   intro n hn
   have := congrArg Complex.re hn
@@ -1454,7 +1482,8 @@ theorem legPIU_tendsto_int {F : ℂ → ℝ → ℂ} {f : ℝ → ℂ} {ν : ℂ
     rw [Set.uIoc_of_le (by norm_num)] at hx
     exact tendsto_const_nhds.mul (hlim x ⟨hx.1, lt_of_le_of_ne hx.2 hx1⟩).tendsto
 
-/-- ferrers product integral 10. -/
+/-- DLMF 14.17.10: for `λ ≠ ν`, `λ ≠ -ν-1` and `ν, λ ∉ {-1,-2,…}`, `∫_{-1}^{1} 𝖯_ν(x) 𝖯_λ(x) dx =
+2(2 sin(νπ) sin(λπ)(ψ(ν+1) - ψ(λ+1)) + π sin((λ-ν)π))/(π² (λ-ν)(λ+ν+1))`. -/
 @[dlmf 14.17.E10]
 theorem ferrers_product_integral_10 (ν : ℂ) (lam : ℂ) (h0 : lam ≠ ν) (h1 : lam ≠ -ν-1) (hν : LegendreQRegular ν 0) (hlam : LegendreQRegular lam 0) :
     (∫ x : ℝ in -1..1, ferrersP ν 0 x*ferrersP lam 0 x)=2*(2*sin (ν*π)*sin (lam*π)*(digamma (ν+1)-digamma (lam+1))+π*sin ((lam-ν)*π))/(π^2*(lam-ν)*(lam+ν+1)) := by
@@ -1471,7 +1500,8 @@ theorem ferrers_product_integral_10 (ν : ℂ) (lam : ℂ) (h0 : lam ≠ ν) (h1
   field_simp
   ring
 
-/-- ferrers product integral 11. -/
+/-- DLMF 14.17.11: for `ν ≠ -1/2`, `ν ∉ {-1,-2,…}`, `∫_{-1}^{1} (𝖯_ν(x))² dx = (π² - 2 sin²(νπ)
+ψ'(ν+1))/(π² (ν+1/2))`. -/
 @[dlmf 14.17.E11]
 theorem ferrers_product_integral_11 (ν : ℂ) (hν : ν ≠ -1/2) (hr : LegendreQRegular ν 0) :
     (∫ x : ℝ in -1..1, (ferrersP ν 0 x)^2)=(π^2-2*(sin (ν*π))^2*deriv digamma (ν+1))/(π^2*(ν+1/2)) := by
@@ -1527,7 +1557,8 @@ theorem ferrers_product_integral_11 (ν : ℂ) (hν : ν ≠ -1/2) (hr : Legendr
   field_simp
   ring
 
-/-- ferrers product integral 12. -/
+/-- DLMF 14.17.12: for `λ ≠ ν`, `λ ≠ -ν-1` and `ν, λ ∉ {-1,-2,…}`, `∫_{-1}^{1} 𝖰_ν(x) 𝖰_λ(x) dx =
+((ψ(ν+1) - ψ(λ+1))(1 + cos(νπ) cos(λπ)) + (π/2) sin((λ-ν)π))/((λ-ν)(λ+ν+1))`. -/
 @[dlmf 14.17.E12]
 theorem ferrers_product_integral_12 (ν : ℂ) (lam : ℂ) (h0 : lam ≠ ν) (h1 : lam ≠ -ν-1) (hν : LegendreQRegular ν 0) (hlam : LegendreQRegular lam 0) :
     (∫ x : ℝ in -1..1, ferrersQ ν 0 x*ferrersQ lam 0 x)=((digamma (ν+1)-digamma (lam+1))*(1+cos (ν*π)*cos (lam*π))+π/2*sin ((lam-ν)*π))/((lam-ν)*(lam+ν+1)) := by
@@ -1542,7 +1573,8 @@ theorem ferrers_product_integral_12 (ν : ℂ) (lam : ℂ) (h0 : lam ≠ ν) (h1
   field_simp
   ring
 
-/-- ferrers product integral 13. -/
+/-- DLMF 14.17.13: for `ν ≠ -1/2`, `ν ∉ {-1,-2,…}`, `∫_{-1}^{1} (𝖰_ν(x))² dx = (π²/2 - (1 +
+cos²(νπ)) ψ'(ν+1))/(2ν+1)`. -/
 @[dlmf 14.17.E13]
 theorem ferrers_product_integral_13 (ν : ℂ) (hν : ν ≠ -1/2) (hr : LegendreQRegular ν 0) :
     (∫ x : ℝ in -1..1, (ferrersQ ν 0 x)^2)=(π^2-2*(1+(cos (ν*π))^2)*deriv digamma (ν+1))/(2*(2*ν+1)) := by
@@ -1601,7 +1633,8 @@ theorem ferrers_product_integral_13 (ν : ℂ) (hν : ν ≠ -1/2) (hr : Legendr
   field_simp
   ring
 
-/-- ferrers product integral 14. -/
+/-- DLMF 14.17.14: for `Re ν > 0`, `Re λ > 0` and `λ ≠ ν`, `∫_{-1}^{1} 𝖯_ν(x) 𝖰_λ(x) dx = (2 sin(νπ)
+cos(λπ)(ψ(ν+1) - ψ(λ+1)) + π cos((λ-ν)π) - π)/(π (λ-ν)(λ+ν+1))`. -/
 @[dlmf 14.17.E14]
 theorem ferrers_product_integral_14 (ν : ℂ) (lam : ℂ) (hν : 0 < ν.re) (hlam : 0 < lam.re) (hne : lam ≠ ν) :
     (∫ x : ℝ in -1..1, ferrersP ν 0 x*ferrersQ lam 0 x)=(2*sin (ν*π)*cos (lam*π)*(digamma (ν+1)-digamma (lam+1))+π*cos ((lam-ν)*π)-π)/(π*(lam-ν)*(lam+ν+1)) := by
@@ -1619,11 +1652,11 @@ theorem ferrers_product_integral_14 (ν : ℂ) (lam : ℂ) (hν : 0 < ν.re) (hl
   rw [legPI_integral_PQ hrl hc, show ν*(ν+1) - lam*(lam+1) = -((lam-ν)*(lam+ν+1)) by ring,
     show (lam-ν)*π = lam*π - ν*π by ring, cos_sub]
   unfold legPIcneg legPIcpos legPIC legPIK
-  rw [legPI_K'_eq (legPI_regular_arg hrν), hK, show (π:ℂ)*ν = ν*π by ring]
+  rw [legPI_K'_eq (legHyp_nu hrν), hK, show (π:ℂ)*ν = ν*π by ring]
   field_simp
   ring
 
-/-- ferrers product integral 15. -/
+/-- DLMF 14.17.15: for `Re ν > 0`, `∫_{-1}^{1} 𝖯_ν(x) 𝖰_ν(x) dx = -sin(2νπ) ψ'(ν+1)/(π (2ν+1))`. -/
 @[dlmf 14.17.E15]
 theorem ferrers_product_integral_15 (ν : ℂ) (hν : 0 < ν.re) :
     (∫ x : ℝ in -1..1, ferrersP ν 0 x*ferrersQ ν 0 x)=-sin (2*ν*π)*deriv digamma (ν+1)/(π*(2*ν+1)) := by
@@ -1715,16 +1748,6 @@ theorem legPI_integral_green_B {f g B : ℝ → ℂ} {ν lam μ Bm Bp : ℂ}
   have hI := intervalIntegral.integral_eq_sub_of_hasDerivAt_of_tendsto (by norm_num) hd hint' ha hb
   rw [intervalIntegral.integral_const_mul] at hI
   rw [eq_div_iff hc, ← hI]; ring
-
-/-- `𝖯^μ_α` solves the associated Legendre equation on `(-1,1)`. -/
-theorem legPI_ferrersP_isFerrersSolution_mu (α μ : ℂ) : IsFerrersSolution α μ (ferrersP α μ) :=
-  ((ferrersEven_isFerrersSolution α μ).add_smul (ferrersOdd_isFerrersSolution α μ) _ _).congr
-    (ferrersP_eqOn_even_odd α μ).symm
-
-/-- `𝖰^μ_α` solves the associated Legendre equation on `(-1,1)`. -/
-theorem legPI_ferrersQ_isFerrersSolution_mu (α μ : ℂ) : IsFerrersSolution α μ (ferrersQ α μ) :=
-  ((ferrersEven_isFerrersSolution α μ).add_smul (ferrersOdd_isFerrersSolution α μ) _ _).congr
-    (ferrersQ_eqOn_even_odd α μ).symm
 
 /-- A solution of the associated Legendre equation is continuous on `(-1,1)`. -/
 theorem legPI_continuousOn_of_solution' {α μ : ℂ} {f : ℝ → ℂ} (hf : IsFerrersSolution α μ f) :
@@ -1870,15 +1893,15 @@ theorem legPI_PQ_nat_pos (l m n : ℕ) (hm : 0 < m) (h : l ≠ n) (hl : m ≤ l)
     ((tendsto_const_nhds (x := (m-l-1:ℂ))).mul q3)).sub
     (((tendsto_const_nhds (x := (l+1:ℂ))).mul hxm).mul q2)
   have hcont : ContinuousOn (fun x => ferrersP l m x * ferrersQ n m x) (Ioo (-1) 1) :=
-    (legPI_continuousOn_of_solution' (legPI_ferrersP_isFerrersSolution_mu _ _)).mul
-      (legPI_continuousOn_of_solution' (legPI_ferrersQ_isFerrersSolution_mu _ _))
+    (legPI_continuousOn_of_solution' (ferrersP_isFerrersSolution _ _)).mul
+      (legPI_continuousOn_of_solution' (ferrersQ_isFerrersSolution _ _))
   have hint := legPI_intervalIntegrable_of_tendsto hcont q2 p2
   have hc : (l:ℂ)*(l+1) - n*(n+1) ≠ 0 := by
     rw [show (l:ℂ)*(l+1) - n*(n+1) = ((l:ℂ)-n)*(l+n+1) by ring]
     refine mul_ne_zero (sub_ne_zero.mpr (by exact_mod_cast h)) ?_
     exact_mod_cast (Nat.succ_ne_zero (l+n))
-  rw [legPI_integral_green_B (legPI_ferrersP_isFerrersSolution_mu _ _)
-    (legPI_ferrersQ_isFerrersSolution_mu _ _) hBeq hint hq hp hc]
+  rw [legPI_integral_green_B (ferrersP_isFerrersSolution _ _)
+    (ferrersQ_isFerrersSolution _ _) hBeq hint hq hp hc]
   have e1 : ((-1:ℂ))^(l+(n+1)+1) = (-1)^(l+n) := by
     rw [show l+(n+1)+1 = (l+n)+2 by ring, pow_add]; norm_num
   have e2 : (-1:ℂ)^(l+n+1) = -(-1)^(l+n) := by rw [pow_succ]; ring
@@ -1901,7 +1924,8 @@ theorem legPI_PQ_nat_pos (l m n : ℕ) (hm : 0 < m) (h : l ≠ n) (hl : m ≤ l)
   field_simp
   ring
 
-/-- ferrersPQ nat integral. -/
+/-- DLMF 14.17.16: for natural numbers `l ≠ n` and `m ≤ l`, `∫_{-1}^{1} 𝖯^m_l(x) 𝖰^m_n(x) dx = (1 -
+(-1)^{l+n}) (l+m)!/((l-n)(l+n+1)(l-m)!)`. -/
 @[dlmf 14.17.E16]
 theorem ferrersPQ_nat_integral (l m n : ℕ) (h : l ≠ n) (hl : m ≤ l) :
     (∫ x : ℝ in -1..1, ferrersP l m x*ferrersQ n m x)=(1-(-1)^(l+n))*((l+m).factorial:ℂ)/(((l:ℂ)-n)*(l+n+1:ℂ)*(l-m).factorial) := by
@@ -1934,7 +1958,8 @@ theorem ferrersPQ_nat_integral (l m n : ℕ) (h : l ≠ n) (hl : m ≤ l) :
     ring
   · exact legPI_PQ_nat_pos l m n hm h hl
 
-/-- ferrers triple integral. -/
+/-- DLMF 14.17.17: for positive integers `l, m, n` such that either `|m-n| < l < m+n` or `l+m+n` is
+even, `∫₀^π 𝖰_l(cos θ) 𝖯_m(cos θ) 𝖯_n(cos θ) sin θ dθ = 0`. -/
 @[dlmf 14.17.E17]
 theorem ferrers_triple_integral (l m n : ℕ) (hl : 0 < l) (hm : 0 < m) (hn : 0 < n) (htri : (|((m:ℤ)-n)| < l ∧ l < m+n) ∨ Even (l+m+n)) :
     (∫ θ : ℝ in 0..π, ferrersQ l 0 (Real.cos θ)*ferrersP m 0 (Real.cos θ)*ferrersP n 0 (Real.cos θ)*Real.sin θ)=0 := by
@@ -1972,8 +1997,10 @@ theorem legExt_green {ν lam : ℂ} {f g : ℂ → ℂ} {U : Set ℂ} (hU : IsOp
 /-- The domain `{z | z - 1 ∈ slitPlane}` of the Legendre functions `P_ν, 𝑸_ν`. -/
 def legExtU : Set ℂ := {z : ℂ | z-1 ∈ slitPlane}
 
+/-- The domain `legExtU = {z | z - 1 ∈ slitPlane}` is open. -/
 theorem legExt_isOpen_U : IsOpen legExtU := isOpen_sub_one_mem_slitPlane
 
+/-- Every real `x > 1` lies in `legExtU`. -/
 theorem legExt_mem_U {x : ℝ} (hx : 1 < x) : (x:ℂ) ∈ legExtU := by
   show (x:ℂ) - 1 ∈ slitPlane
   exact Or.inl (by simp; linarith)
@@ -2129,6 +2156,7 @@ def legExtR (kf kg cf cg rf rg n l : ℂ) (v : Fin 11 → ℂ) : ℂ :=
     (-cf*l - cf)*v 5 +
     (cg*n + cg)*v 6
 
+/-- The boundary-form remainder `legExtR kf kg cf cg rf rg n l` is continuous in `v`. -/
 theorem legExt_continuous_R (kf kg cf cg rf rg n l : ℂ) : Continuous (legExtR kf kg cf cg rf rg n l) := by
   unfold legExtR; fun_prop
 
@@ -2181,6 +2209,7 @@ theorem legExt_bdry {l : Filter ℝ} {τ : ℝ → ℝ} (hτ : Tendsto τ l (�
   linear_combination (cf - kf*U x) * hrg - (cg - kg*U x) * hrf
 
 
+/-- The map `x ↦ (x-1)/2` sends `x → 1⁺` to `τ → 0⁺`. -/
 theorem legExt_tendsto_half :
     Tendsto (fun x : ℝ => (x-1)/2) (𝓝[>] (1:ℝ)) (𝓝[>] 0) := by
   refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
@@ -2190,6 +2219,7 @@ theorem legExt_tendsto_half :
   · filter_upwards [self_mem_nhdsWithin] with x (hx : 1 < x)
     simp only [mem_Ioi]; linarith
 
+/-- The identity `x = 1 + 2·((x-1)/2)` (as complex numbers), stated eventually as `x → 1⁺`. -/
 theorem legExt_hx : ∀ᶠ x : ℝ in 𝓝[>] (1:ℝ), (x:ℂ) = 1 + 2*(((x-1)/2 : ℝ) : ℂ) :=
   Eventually.of_forall fun x => by push_cast; ring
 
@@ -2245,7 +2275,7 @@ theorem legExt_P_isBigO (α : ℂ) :
 theorem legExt_Q_isBigO {α : ℂ} (h : LegendreQRegular α 0) :
     (fun x : ℝ => associatedQ α 0 x + (1/2:ℂ) * Real.log ((x-1)/2) - legPIcpos α)
       =O[𝓝[>] (1:ℝ)] (fun x => (x-1)/2 * Real.log ((x-1)/2)) := by
-  have hp := legPI_regular_arg h
+  have hp := legHyp_nu h
   have hG : Gamma (α+1) ≠ 0 := Gamma_ne_zero hp
   refine (((legBd_olverQ_log_isBigO α).const_mul_left (Gamma (α+1))).trans
     legExt_sub_one_log_isBigO).congr' ?_ (EventuallyEq.refl _ _)
@@ -2357,17 +2387,23 @@ theorem legExt_associatedQ_eq (α : ℂ) :
     associatedQ α 0 = fun z => Gamma (α+1) * olverQ α 0 z := by
   funext z; simp [associatedQ]
 
+/-- The Legendre function `associatedP α 0` is complex differentiable on `legExtU`. -/
 theorem legExt_differentiableOn_P (α : ℂ) : DifferentiableOn ℂ (associatedP α 0) legExtU :=
   (associatedP_analytic α 0).differentiableOn
 
+/-- The Legendre function `associatedQ α 0` is complex differentiable on `legExtU`. -/
 theorem legExt_differentiableOn_Q (α : ℂ) : DifferentiableOn ℂ (associatedQ α 0) legExtU := by
   rw [legExt_associatedQ_eq]
   exact (olverQ_analytic α 0).differentiableOn.const_mul _
 
+/-- On `legExtU`, `P_α = associatedP α 0` satisfies Legendre's equation `(1-z²)w'' - 2z w' + α(α+1)
+w = 0`. -/
 theorem legExt_ode_P (α : ℂ) : ∀ z ∈ legExtU, (1-z^2)*iteratedDeriv 2 (associatedP α 0) z -
     2*z*deriv (associatedP α 0) z + (α*(α+1)-0^2/(1-z^2))*associatedP α 0 z = 0 :=
   fun _ hz => associatedP_ode α 0 hz
 
+/-- On `legExtU`, `Q_α = associatedQ α 0` satisfies Legendre's equation `(1-z²)w'' - 2z w' + α(α+1)
+w = 0`. -/
 theorem legExt_ode_Q (α : ℂ) : ∀ z ∈ legExtU, (1-z^2)*iteratedDeriv 2 (associatedQ α 0) z -
     2*z*deriv (associatedQ α 0) z + (α*(α+1)-0^2/(1-z^2))*associatedQ α 0 z = 0 := by
   intro z hz
@@ -2375,14 +2411,19 @@ theorem legExt_ode_Q (α : ℂ) : ∀ z ∈ legExtU, (1-z^2)*iteratedDeriv 2 (as
   rw [legExt_associatedQ_eq, iteratedDeriv_const_mul_field, deriv_const_mul_field]
   linear_combination Gamma (α+1) * e
 
+/-- For real `x > 1`, `(1-x²) P_α'(x) = (α+1)(x P_α(x) - P_{α+1}(x))` (`μ = 0` case of DLMF
+14.10.5). -/
 theorem legExt_rec_P (α : ℂ) : ∀ x : ℝ, 1 < x →
     (1-(x:ℂ)^2)*deriv (associatedP α 0) x = (α+1)*(x*associatedP α 0 x - associatedP (α+1) 0 x) :=
   fun x hx => by rw [associatedP_recurrence_4 α 0 (legExt_mem_U hx)]; ring
 
+/-- For `LegendreQRegular α 0` and real `x > 1`, `(1-x²) Q_α'(x) = (α+1)(x Q_α(x) - Q_{α+1}(x))` (`μ
+= 0` case of DLMF 14.10.5). -/
 theorem legExt_rec_Q {α : ℂ} (h : LegendreQRegular α 0) : ∀ x : ℝ, 1 < x →
     (1-(x:ℂ)^2)*deriv (associatedQ α 0) x = (α+1)*(x*associatedQ α 0 x - associatedQ (α+1) 0 x) :=
   fun x hx => by rw [associatedQ_recurrence_4 α 0 h (legExt_mem_U hx)]; ring
 
+/-- If `f` is complex differentiable on `legExtU`, then `x ↦ f x` is continuous on `(1, ∞)`. -/
 theorem legExt_continuousOn {f : ℂ → ℂ} (hf : DifferentiableOn ℂ f legExtU) :
     ContinuousOn (fun x : ℝ => f x) (Ioi 1) := fun _ hx =>
   ((hf _ (legExt_mem_U hx)).differentiableAt (legExt_isOpen_U.mem_nhds (legExt_mem_U hx))
@@ -2578,7 +2619,8 @@ theorem legPIU_integrableOn_weight {p : ℝ} (hp : p < -1/2) :
       calc _ ≤ (x/2)^(-(1/2:ℝ)) * x^p := mul_le_mul_of_nonneg_right h1 (by positivity)
         _ = _ := h2
 
-/-- legendre product integral 18. -/
+/-- DLMF 14.17.18: for `Re λ > Re ν > 0`, the improper integral `∫₁^∞ P_ν(x) Q_λ(x) dx` converges
+and equals `1/((λ-ν)(ν+λ+1))`. -/
 @[dlmf 14.17.E18]
 theorem legendre_product_integral_18 (ν : ℂ) (lam : ℂ) (hν : 0 < ν.re) (hlam : ν.re < lam.re) :
     HasIntegralAtTop (fun x : ℝ => associatedP ν 0 x*associatedQ lam 0 x) 1 (1/((lam-ν)*(ν+lam+1))) := by
@@ -2612,7 +2654,8 @@ theorem legendre_product_integral_18 (ν : ℂ) (lam : ℂ) (hν : 0 < ν.re) (h
   field_simp
   ring
 
-/-- legendre product integral 19. -/
+/-- DLMF 14.17.19: for `Re(λ+ν) > -1`, `λ ≠ ν` and `ν, λ ∉ {-1,-2,…}`, the improper integral `∫₁^∞
+Q_ν(x) Q_λ(x) dx` converges and equals `(ψ(λ+1) - ψ(ν+1))/((λ-ν)(λ+ν+1))`. -/
 @[dlmf 14.17.E19]
 theorem legendre_product_integral_19 (ν : ℂ) (lam : ℂ) (h : -1 < (lam+ν).re) (hne : lam ≠ ν) (hν : LegendreQRegular ν 0) (hlam : LegendreQRegular lam 0) :
     HasIntegralAtTop (fun x : ℝ => associatedQ ν 0 x*associatedQ lam 0 x) 1 ((digamma (lam+1)-digamma (ν+1))/((lam-ν)*(lam+ν+1))) := by
@@ -2643,7 +2686,8 @@ theorem legendre_product_integral_19 (ν : ℂ) (lam : ℂ) (h : -1 < (lam+ν).r
   field_simp
   ring
 
-/-- legendre product integral 20. -/
+/-- DLMF 14.17.20: for `Re ν > -1/2`, the improper integral `∫₁^∞ (Q_ν(x))² dx` converges and equals
+`ψ'(ν+1)/(2ν+1)`. -/
 @[dlmf 14.17.E20]
 theorem legendre_product_integral_20 (ν : ℂ) (hν : -1/2 < ν.re) :
     HasIntegralAtTop (fun x : ℝ => (associatedQ ν 0 x)^2) 1 (deriv digamma (ν+1)/(2*ν+1)) := by

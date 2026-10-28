@@ -138,7 +138,7 @@ theorem exists_coefficients (x y : ℂ) :
     simp only [d, c, sub_zero, smul_eq_mul, ← iteratedDeriv_succ', Nat.factorial_succ,
       Nat.cast_mul, Nat.cast_add, Nat.cast_one]
     field_simp
-  have heq := scalarSeries_unique
+  have heq := Complex.powerSeries_coefficients_unique
     (c := fun n => d n - 2 * (if 2 ≤ n then d (n - 2) else 0) +
       (if 4 ≤ n then d (n - 4) else 0))
     (d := fun n => 2 * x * y * c n + (1 - 2 * (x ^ 2 + y ^ 2)) *

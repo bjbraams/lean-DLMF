@@ -36,6 +36,7 @@ namespace Real
 
 local notation "γ" => eulerMascheroniConstant
 
+/-- For `s > 0`, the derivative of `y ↦ log Γ(y + k/m)` at `s` is `ψ(s + k/m)`. -/
 theorem hasDerivAt_log_Gamma_add_div {m : ℕ} {s : ℝ} (hs : 0 < s) (k : ℕ) :
     HasDerivAt (fun y : ℝ => log (Gamma (y + k / m))) (digamma (s + k / m)) s := by
   have hpos : 0 < s + k / m :=
@@ -47,11 +48,13 @@ theorem hasDerivAt_log_Gamma_add_div {m : ℕ} {s : ℝ} (hs : 0 < s) (k : ℕ) 
   have hlog := hG.hasDerivAt.log (Gamma_pos_of_pos hpos).ne'
   simpa [digamma, Function.comp_def] using hlog.comp s hshift
 
+/-- For `s > 0`, the derivative of `y ↦ ∑_{k<m} log Γ(y + k/m)` at `s` is `∑_{k<m} ψ(s + k/m)`. -/
 theorem hasDerivAt_sum_log_Gamma_add_div {m : ℕ} {s : ℝ} (hs : 0 < s) :
     HasDerivAt (fun y : ℝ => ∑ k ∈ range m, log (Gamma (y + k / m)))
       (∑ k ∈ range m, digamma (s + k / m)) s :=
   HasDerivAt.fun_sum fun k _ => hasDerivAt_log_Gamma_add_div hs k
 
+/-- For `m > 0` and `s > 0`, the derivative of `y ↦ log Γ(m y)` at `s` is `m ψ(m s)`. -/
 theorem hasDerivAt_log_Gamma_mul {m : ℕ} (hm : 0 < m) {s : ℝ} (hs : 0 < s) :
     HasDerivAt (fun y : ℝ => log (Gamma (m * y))) (m * digamma (m * s)) s := by
   have hm0 : (0 : ℝ) < m := Nat.cast_pos.mpr hm
@@ -150,14 +153,16 @@ theorem digamma_one_div_two : digamma (1 / 2) = -γ - 2 * log 2 := by
   rw [digamma_eq_re_digamma (by norm_num)]
   push_cast
   rw [Complex.digamma_one_half]
-  simp only [Complex.sub_re, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im, hlog]
+  simp only [Complex.sub_re, Complex.mul_re, Complex.ofReal_re, hlog]
   norm_num
   ring
 
+/-- `cot(π/3) = 1/√3`. -/
 theorem cot_pi_div_three : cot (π / 3) = 1 / sqrt 3 := by
   rw [cot_eq_cos_div_sin, cos_pi_div_three, sin_pi_div_three, div_div_eq_mul_div]
   ring
 
+/-- `cot(π/4) = 1`. -/
 theorem cot_pi_div_four : cot (π / 4) = 1 := by
   rw [cot_eq_cos_div_sin, cos_pi_div_four, sin_pi_div_four]
   have hne : sqrt 2 ≠ 0 := by positivity

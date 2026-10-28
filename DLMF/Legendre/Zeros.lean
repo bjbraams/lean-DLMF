@@ -26,17 +26,19 @@ namespace DLMF.Legendre
 
 attribute [local instance] Classical.propDecidable
 
-/-- legendreIntegerPart. -/
+/-- DLMF 14.16.1: the integer part `⌊μ⌋` of the order `μ`, so that `μ = ⌊μ⌋ + δ_μ` with `0 ≤ δ_μ <
+1`. -/
 @[dlmf 14.16.E1]
 def legendreIntegerPart (μ : ℝ) : ℤ :=
   ⌊μ⌋
 
-/-- legendreFractionalPart. -/
+/-- DLMF 14.16.1: the fractional part `δ_μ = μ - ⌊μ⌋`. -/
 @[dlmf 14.16.E1]
 def legendreFractionalPart (μ : ℝ) : ℝ :=
   μ-⌊μ⌋
 
-/-- ferrersZeroSet. -/
+/-- The set of zeros in `(-1, 1)` of `𝖰^μ_ν` (if `second`) or of `𝖯^μ_ν` (otherwise), for real `ν,
+μ`. -/
 def ferrersZeroSet (second : Bool) (ν μ : ℝ) : Set ℝ :=
   {x : ℝ | x ∈ Ioo (-1:ℝ) 1 ∧ (if second then ferrersQ ν μ x else ferrersP ν μ x)=0}
 
@@ -63,20 +65,6 @@ theorem ferrersP_nonpositive_order_zero_count {ν μ : ℝ} (hν : -1/2 ≤ ν) 
   rw [lzero_zeroSet_P, abs_of_nonpos hμ, sub_neg_eq_add]
   rw [sub_neg_eq_add] at h
   exact h
-
-/-- `𝖯^m_j ≡ 0` on `(-1, 1)` for integers `0 ≤ j < m`. -/
-theorem lzero_ferrersP_nat_lt {j m : ℕ} (hjm : j < m) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ferrersP (j : ℂ) (m : ℂ) x = 0 := by
-  have htn : ‖((1:ℂ) - x) / 2‖ < 1 := by
-    rw [show ((1:ℂ) - x) / 2 = (((1 - x) / 2 : ℝ) : ℂ) by push_cast; ring, norm_real,
-      Real.norm_eq_abs, abs_lt]
-    constructor <;> linarith [hx.1, hx.2]
-  obtain ⟨N, rfl⟩ := Nat.exists_eq_add_of_lt hjm
-  unfold ferrersP
-  rw [regularizedGaussHG_eq_regularizedGaussHGFun _ _ _ htn,
-    show (1:ℂ) - ((j + N + 1 : ℕ) : ℂ) = -((j + N : ℕ) : ℂ) by push_cast; ring,
-    regularized_at_neg_nat _ _ _ htn, poch_neg_nat_eq_zero (by omega)]
-  simp
 
 
 /-- The integral-order zero count, reduced to the order `-m` by DLMF 14.9.3. -/
@@ -112,7 +100,7 @@ theorem lzero_posInt_zero_count {ν : ℝ} (hν : -1/2 ≤ ν) (m : ℕ) (hnonde
       rw [hre]; push_cast [Nat.cast_sub (show n ≤ m - 1 by omega), Nat.cast_sub (show 1 ≤ m by omega)]
       ring
     rw [hj]
-    exact lzero_ferrersP_nat_lt (by omega) hx
+    exact ferrersP_order_gt_degree _ _ (by omega) hx
 
 
 
@@ -347,14 +335,6 @@ derivative at least `1/(2(1∓x))` because `|𝖯_n| ≤ 1`, so it is unbounded 
 produces one zero next to each end.
 -/
 
-theorem lzero_isSol_P (ν μ : ℂ) : IsFerrersSolution ν μ (ferrersP ν μ) :=
-  ((ferrersEven_isFerrersSolution ν μ).add_smul (ferrersOdd_isFerrersSolution ν μ) _ _).congr
-    (ferrersP_eqOn_even_odd ν μ).symm
-
-theorem lzero_isSol_Q (ν μ : ℂ) : IsFerrersSolution ν μ (ferrersQ ν μ) :=
-  ((ferrersEven_isFerrersSolution ν μ).add_smul (ferrersOdd_isFerrersSolution ν μ) _ _).congr
-    (ferrersQ_eqOn_even_odd ν μ).symm
-
 /-- A real-valued function `f : ℝ → ℂ` on an open set has real derivative there. -/
 theorem lzero_hasDerivAt_re {f : ℝ → ℂ} {x : ℝ} (hd : DifferentiableAt ℝ f x)
     (hreal : ∀ᶠ y in 𝓝 x, (f y).im = 0) :
@@ -383,20 +363,26 @@ def lzero_q (ν μ : ℝ) (x : ℝ) : ℝ := (ferrersQ ν μ x).re
 /-- The real part of the derivative of `𝖰^μ_ν`. -/
 def lzero_q' (ν μ : ℝ) (x : ℝ) : ℝ := (deriv (ferrersQ ν μ) x).re
 
+/-- Every point of `(-1, 1)` has a neighbourhood contained in `(-1, 1)`. -/
 theorem lzero_evIoo {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) : ∀ᶠ y in 𝓝 x, y ∈ Ioo (-1:ℝ) 1 :=
   Ioo_mem_nhds hx.1 hx.2
 
+/-- For real `ν, μ` and `x ∈ (-1, 1)`, `ferrersP ν μ` and its derivative at `x` are the real numbers
+`lzero_p ν μ x` and `lzero_p' ν μ x`, and `lzero_p ν μ` has derivative `lzero_p' ν μ x` at `x`. -/
 theorem lzero_P_data (ν μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt (lzero_p ν μ) (lzero_p' ν μ x) x ∧
       ferrersP ν μ x = (lzero_p ν μ x : ℂ) ∧ deriv (ferrersP ν μ) x = (lzero_p' ν μ x : ℂ) := by
-  obtain ⟨h1, -, h3, h4⟩ := lzero_hasDerivAt_re ((lzero_isSol_P ν μ x hx).1)
+  obtain ⟨h1, -, h3, h4⟩ := lzero_hasDerivAt_re ((ferrersP_isFerrersSolution ν μ x hx).1)
     ((lzero_evIoo hx).mono fun y hy => ferrersP_real ν μ hy)
   exact ⟨h1, h3, h4⟩
 
+/-- For real `ν, μ` with `LegendreQRegular ν μ` and `x ∈ (-1, 1)`, `ferrersQ ν μ` and its derivative
+at `x` are the real numbers `lzero_q ν μ x` and `lzero_q' ν μ x`, and `lzero_q ν μ` has derivative
+`lzero_q' ν μ x` at `x`. -/
 theorem lzero_Q_data {ν μ : ℝ} (hr : LegendreQRegular ν μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt (lzero_q ν μ) (lzero_q' ν μ x) x ∧
       ferrersQ ν μ x = (lzero_q ν μ x : ℂ) ∧ deriv (ferrersQ ν μ) x = (lzero_q' ν μ x : ℂ) := by
-  obtain ⟨h1, -, h3, h4⟩ := lzero_hasDerivAt_re ((lzero_isSol_Q ν μ x hx).1)
+  obtain ⟨h1, -, h3, h4⟩ := lzero_hasDerivAt_re ((ferrersQ_isFerrersSolution ν μ x hx).1)
     ((lzero_evIoo hx).mono fun y hy => ferrersQ_real ν μ hy hr)
   exact ⟨h1, h3, h4⟩
 
@@ -419,6 +405,7 @@ section NatDegree
 
 variable (n : ℕ)
 
+/-- A natural degree `n` with order `0` satisfies `LegendreQRegular n 0`. -/
 theorem lzero_nat_regular : LegendreQRegular ((n : ℝ) : ℂ) ((0 : ℝ) : ℂ) := fun k h => by
   have := congrArg re h
   simp at this
@@ -430,11 +417,14 @@ theorem lzero_nat_wronskian {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
   rw [lzero_wronskian (lzero_nat_regular n) hx, add_zero, sub_zero,
     div_self (Real.Gamma_pos_of_pos (by positivity)).ne']
 
+/-- On `(-1, 1)`, the real part `lzero_p n 0 t` of `𝖯_n(t)` equals the Legendre polynomial
+`legendrePolyP n t`. -/
 theorem lzero_nat_p_eq {t : ℝ} (ht : t ∈ Ioo (-1:ℝ) 1) :
     (lzero_p n 0 t : ℂ) = DLMF.OrthogonalPolynomials.legendrePolyP n t := by
   rw [← (lzero_P_data n 0 ht).2.1, ← ferrersP_nat_polynomial n ht]
   push_cast; rfl
 
+/-- On `(-1, 1)`, `|𝖯_n(t)| ≤ 1` for the Legendre polynomial `𝖯_n = lzero_p n 0`. -/
 theorem lzero_nat_p_abs_le {t : ℝ} (ht : t ∈ Ioo (-1:ℝ) 1) : |lzero_p n 0 t| ≤ 1 := by
   have h := DLMF.OrthogonalPolynomials.norm_legendrePolyP_le_one n
     (x := t) (abs_le.mpr ⟨ht.1.le, ht.2.le⟩)
@@ -468,6 +458,8 @@ theorem lzero_nat_ratio {y : ℝ} (hy : y ∈ Ioo (-1:ℝ) 1) (hp : lzero_p n 0 
   · rw [div_le_div_iff₀ (by positivity) (by positivity)]
     nlinarith
 
+/-- If `𝖯_n` has no zero on `(c, 1)` with `c ∈ (-1, 1)`, then `𝖰_n(y)/𝖯_n(y) > 0` for some `y ∈ (c,
+1)`. -/
 theorem lzero_nat_pos_right {c : ℝ} (hc : c ∈ Ioo (-1:ℝ) 1)
     (hne : ∀ t ∈ Ioo c 1, lzero_p n 0 t ≠ 0) :
     ∃ y ∈ Ioo c 1, 0 < lzero_q n 0 y / lzero_p n 0 y := by
@@ -481,6 +473,8 @@ theorem lzero_nat_pos_right {c : ℝ} (hc : c ∈ Ioo (-1:ℝ) 1)
     (fun y hy => (lzero_nat_ratio n (hsub' y hy) (hne y (hsub y hy))).2.1)
   exact ⟨y, ⟨by linarith [hy.1, hc.2], hy.2⟩, hy0⟩
 
+/-- If `𝖯_n` has no zero on `(-1, d)` with `d ∈ (-1, 1)`, then `𝖰_n(y)/𝖯_n(y) < 0` for some `y ∈
+(-1, d)`. -/
 theorem lzero_nat_neg_left {d : ℝ} (hd : d ∈ Ioo (-1:ℝ) 1)
     (hne : ∀ t ∈ Ioo (-1) d, lzero_p n 0 t ≠ 0) :
     ∃ y ∈ Ioo (-1) d, lzero_q n 0 y / lzero_p n 0 y < 0 := by
@@ -831,6 +825,7 @@ theorem lzero_regularizedGaussHG_ne_zero {a b c w : ℝ} (ha : 0 < a) (hb : 0 < 
       Nat.cast_one, div_one, one_mul, Nat.cast_zero, add_zero]
     positivity
 
+/-- For `ν > -1`, `μ ≥ 0` and `x > 1`, Olver's function `olverQ ν μ x` does not vanish. -/
 theorem lzero_olverQ_ne_zero_of_nonneg {ν μ : ℝ} (hν : -1 < ν) (hμ : 0 ≤ μ) {x : ℝ} (hx : 1 < x) :
     olverQ ν μ x ≠ 0 := by
   have hx0 : (x : ℂ) ≠ 0 := by exact_mod_cast (show x ≠ 0 by linarith)
@@ -899,6 +894,7 @@ theorem lzero_nonpos_of_ode {g g' g'' : ℝ → ℝ} {a b : ℝ} (hab : a < b)
     have := (div_pos_iff_of_pos_right (sub_pos.mpr hx1)).mp hgξ; linarith
   exact absurd (hmax ⟨by linarith, hx3.le⟩) (not_le.mpr this)
 
+/-- Every real `x > 1` lies in the domain `{z | z - 1 ∈ slitPlane}`. -/
 theorem lzero_mem {x : ℝ} (hx : 1 < x) : (x : ℂ) ∈ {z : ℂ | z - 1 ∈ slitPlane} := by
   show (x : ℂ) - 1 ∈ slitPlane
   rw [show (x : ℂ) - 1 = ((x - 1 : ℝ) : ℂ) by push_cast; ring]
@@ -1492,6 +1488,172 @@ theorem lzero_assocP_near_one (ν : ℝ) {m : ℝ} (hm : 0 ≤ m) :
           (by positivity) (by positivity)
     _ = ((1 + u) / 2 + 1) * M ^ 2 * (x - 1) := by ring
 
+/-- The Wronskian of the real parts of `𝑸^μ_ν` and `P^μ_ν` on `(1,∞)`: for real `ν, μ` and
+`x > 1`, `(x²-1)(q f' - f q') = 1/Γ(ν-μ+1)` with `f = Re P^μ_ν`, `q = Re 𝑸^μ_ν`. -/
+private lemma lzero_assocP_wronskian_re {ν μ x : ℝ} (hx : 1 < x) :
+    (x ^ 2 - 1) * ((olverQ (ν : ℂ) (μ : ℂ) x).re * (deriv (associatedP (ν : ℂ) (μ : ℂ)) x).re -
+      (associatedP (ν : ℂ) (μ : ℂ) x).re * (deriv (olverQ (ν : ℂ) (μ : ℂ)) x).re) =
+      (Real.Gamma (ν - μ + 1))⁻¹ := by
+  set P : ℂ → ℂ := associatedP (ν : ℂ) (μ : ℂ) with hP
+  set Qc : ℂ → ℂ := olverQ (ν : ℂ) (μ : ℂ) with hQc
+  set cA : ℝ := (Real.Gamma (ν - μ + 1))⁻¹ with hcA
+  have h := olverQ_wronskian_pos (ν : ℂ) μ (z := x) (lzero_mem hx)
+  have h2 : LegendreWronskian Qc P x = (cA : ℂ) / ((x : ℂ) ^ 2 - 1) := by
+    rw [show LegendreWronskian Qc P x = -LegendreWronskian P Qc x by
+      simp only [LegendreWronskian]; ring, h,
+      show (ν : ℂ) - μ + 1 = ((ν - μ + 1 : ℝ) : ℂ) by push_cast; ring, Complex.Gamma_ofReal,
+      hcA]
+    push_cast; ring
+  exact lzero_ext_wr hx (olverQ_real ν μ hx) (associatedP_real ν μ hx) h2
+
+/-- Sign of `Re P^μ_ν` near `x = 1⁺`: some multiple `σ₁ Re P^μ_ν` is positive on an interval
+`(1, t₁)`, and `σ₁/Γ(ν-μ+1) < 0` exactly when `P^μ_ν` has one zero in `(1,∞)`. -/
+private lemma lzero_assocP_sign_near_one {ν μ : ℝ} (hν : -1/2 ≤ ν)
+    (hA : (Real.Gamma (ν - μ + 1))⁻¹ ≠ 0) :
+    ∃ σ₁ t₁ : ℝ, 1 < t₁ ∧ (∀ x ∈ Ioo 1 t₁, 0 < σ₁ * (associatedP (ν : ℂ) (μ : ℂ) x).re) ∧
+      (σ₁ * (Real.Gamma (ν - μ + 1))⁻¹ < 0 ↔ associatedPOneZero ν μ) := by
+  set P : ℂ → ℂ := associatedP (ν : ℂ) (μ : ℂ) with hP
+  set Qc : ℂ → ℂ := olverQ (ν : ℂ) (μ : ℂ) with hQc
+  set f : ℝ → ℝ := fun x => (P x).re with hf
+  set f' : ℝ → ℝ := fun x => (deriv P x).re with hf'
+  set q : ℝ → ℝ := fun x => (Qc x).re with hq
+  set q' : ℝ → ℝ := fun x => (deriv Qc x).re with hq'
+  have hfd : ∀ x, 1 < x → HasDerivAt f (f' x) x := fun x hx =>
+    (associatedP_analytic (ν : ℂ) μ x (lzero_mem hx)).differentiableAt.hasDerivAt.real_of_complex
+  set cA : ℝ := (Real.Gamma (ν - μ + 1))⁻¹ with hcA
+  have hWA : ∀ x, 1 < x → (x ^ 2 - 1) * (q x * f' x - f x * q' x) = cA := fun x hx =>
+    lzero_assocP_wronskian_re hx
+  have hcA2 : 0 < cA ^ 2 := by positivity
+  show ∃ σ₁ t₁ : ℝ, 1 < t₁ ∧ (∀ x ∈ Ioo 1 t₁, 0 < σ₁ * f x) ∧
+    (σ₁ * cA < 0 ↔ associatedPOneZero ν μ)
+  rcases le_or_gt μ 0 with hμ | hμ
+  · obtain ⟨s, hs, K1, hK1, hv⟩ := lzero_assocP_near_one ν (m := -μ) (by linarith)
+    have hcA0 : 0 < cA := inv_pos.mpr (Real.Gamma_pos_of_pos (by linarith))
+    refine ⟨1, s, hs, fun x hx => ?_, ?_⟩
+    · have := (hv x (Ioo_subset_Ioc_self hx)).1
+      simp only [neg_neg] at this
+      simpa [hf, hP] using this
+    · rw [lzero_oneZero_iff]
+      constructor
+      · intro h; linarith
+      · intro h; exact absurd h.1 (not_lt.mpr hμ)
+  · obtain ⟨s, hs, K1, hK1, hv⟩ := lzero_assocP_near_one ν (m := μ) hμ.le
+    set V : ℂ → ℂ := associatedP (ν : ℂ) (-(μ : ℂ)) with hV
+    set v : ℝ → ℝ := fun x => (V x).re with hv_def
+    set v' : ℝ → ℝ := fun x => (deriv V x).re with hv'_def
+    have hvd : ∀ x, 1 < x → HasDerivAt v (v' x) x := fun x hx =>
+      (associatedP_analytic (ν : ℂ) (-(μ : ℂ)) x
+        (lzero_mem hx)).differentiableAt.hasDerivAt.real_of_complex
+    have hVreal : ∀ x : ℝ, 1 < x → (V x).im = 0 := fun x hx => by
+      have := associatedP_real ν (-μ) hx
+      simpa [hV] using this
+    have hv1 : ∀ x ∈ Ioc 1 s, 0 < v x ∧ (x ^ 2 - 1) * v x ^ 2 ≤ K1 * (x - 1) := by
+      intro x hx
+      have := hv x hx
+      simpa [hv_def, hV] using this
+    set cB : ℝ := -2 * Real.sin (μ * π) / π with hcB
+    have hWB : ∀ x, 1 < x → (x ^ 2 - 1) * (v x * f' x - f x * v' x) = cB := by
+      intro x hx
+      have h := associated_wronskian_7 (ν : ℂ) μ (z := x) (lzero_mem hx)
+      have h2 : LegendreWronskian V P x = (cB : ℂ) / ((x : ℂ) ^ 2 - 1) := by
+        rw [h, hcB, show (μ : ℂ) * π = ((μ * π : ℝ) : ℂ) by push_cast; ring, ← ofReal_sin]
+        have hp : (x : ℂ) ^ 2 - 1 ≠ 0 := by
+          rw [show (x : ℂ) ^ 2 - 1 = ((x ^ 2 - 1 : ℝ) : ℂ) by push_cast; ring]
+          exact ofReal_ne_zero.mpr (by nlinarith)
+        have hp' : (1 : ℂ) - (x : ℂ) ^ 2 ≠ 0 := by
+          rw [show (1 : ℂ) - (x : ℂ) ^ 2 = -((x : ℂ) ^ 2 - 1) by ring]; exact neg_ne_zero.mpr hp
+        have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_pos.ne'
+        push_cast
+        field_simp
+        ring
+      exact lzero_ext_wr hx (hVreal x hx) (associatedP_real ν μ hx) h2
+    by_cases hint : ∀ n : ℤ, μ ≠ n
+    · -- nonintegral `μ`
+      have hsin : Real.sin (μ * π) ≠ 0 := by
+        have := lzero_sin_sign hint
+        intro h; rw [h, mul_zero] at this; exact lt_irrefl _ this
+      have hcB0 : cB ≠ 0 := by
+        rw [hcB]; exact div_ne_zero (by simpa using hsin) Real.pi_pos.ne'
+      obtain ⟨t, ht, hneg⟩ := lzero_ext_neg_near_one (f := fun x => cB * f x)
+        (f' := fun x => cB * f' x) (v := v) (v' := v') (s := s) (K := K1) (c := cB ^ 2) hs hK1
+        (by positivity) (fun x hx => (hfd x hx.1).const_mul cB) (fun x hx => hvd x hx.1)
+        (fun x hx => (hv1 x hx).1) (fun x hx => (hv1 x hx).2)
+        (fun x hx => by linear_combination cB * hWB x hx.1)
+      refine ⟨-cB, t, ht.1, fun x hx => by have : cB * f x < 0 := hneg x hx; linarith, ?_⟩
+      rw [lzero_oneZero_iff, hcB, ← hcA]
+      have hπ := Real.pi_pos
+      constructor
+      · intro h
+        refine ⟨hμ, hint, ?_⟩
+        have : -(-2 * Real.sin (μ * π) / π) * cA = (2 / π) * (Real.sin (μ * π) * cA) := by ring
+        rw [this] at h
+        rcases mul_neg_iff.mp h with h | h
+        · exact h.2
+        · exact absurd h.1 (not_lt.mpr (by positivity))
+      · rintro ⟨-, -, h⟩
+        have : -(-2 * Real.sin (μ * π) / π) * cA = (2 / π) * (Real.sin (μ * π) * cA) := by ring
+        rw [this]
+        exact mul_neg_of_pos_of_neg (by positivity) h
+    · -- integral `μ`: `P` is a multiple of `P^{-μ}` near `1`
+      push Not at hint
+      obtain ⟨n, hn⟩ := hint
+      have hcB0 : cB = 0 := by
+        rw [hcB, hn, Real.sin_int_mul_pi, mul_zero, zero_div]
+      set cC : ℝ := (Real.Gamma (ν + μ + 1))⁻¹ with hcC
+      have hcC0 : 0 < cC := inv_pos.mpr (Real.Gamma_pos_of_pos (by linarith))
+      have hWC : ∀ x, 1 < x → (x ^ 2 - 1) * (q x * v' x - v x * q' x) = cC := by
+        intro x hx
+        have h := associated_wronskian_8 (ν : ℂ) μ (z := x) (lzero_mem hx)
+        have h2 : LegendreWronskian Qc V x = (cC : ℂ) / ((x : ℂ) ^ 2 - 1) := by
+          rw [show LegendreWronskian Qc V x = -LegendreWronskian V Qc x by
+            simp only [LegendreWronskian]; ring, h,
+            show (ν : ℂ) + μ + 1 = ((ν + μ + 1 : ℝ) : ℂ) by push_cast; ring,
+            Complex.Gamma_ofReal, hcC]
+          push_cast
+          simp only [div_eq_mul_inv, mul_inv]
+          ring
+        exact lzero_ext_wr hx (olverQ_real ν μ hx) (hVreal x hx) h2
+      set s' : ℝ := (1 + s) / 2 with hs'
+      have hs'1 : 1 < s' := by linarith
+      have hs's : s' < s := by linarith
+      have hlam : ∀ x ∈ Ioo 1 s, f x / v x = f s' / v s' := by
+        intro x hx
+        refine lzero_const_of_deriv_zero (s := Ioo 1 s) ordConnected_Ioo
+          (fun y hy => (hfd y hy.1).div (hvd y hy.1) (hv1 y (Ioo_subset_Ioc_self hy)).1.ne')
+          (fun y hy => ?_) hx ⟨hs'1, hs's⟩
+        have h := hWB y hy.1
+        rw [hcB0] at h
+        have hp : y ^ 2 - 1 ≠ 0 := by nlinarith [hy.1]
+        have h' : v y * f' y - f y * v' y = 0 := by
+          rcases mul_eq_zero.mp h with h | h
+          · exact absurd h hp
+          · exact h
+        rw [show f' y * v y - f y * v' y = 0 by linarith, zero_div]
+      set lam : ℝ := f s' / v s' with hlam_def
+      have hfeq : ∀ x ∈ Ioo 1 s, f x = lam * v x := fun x hx => by
+        have := hlam x hx
+        have hv0 := (hv1 x (Ioo_subset_Ioc_self hx)).1
+        rw [← this]; field_simp
+      -- compare Wronskians at `s'`
+      have hderiv : f' s' = lam * v' s' := by
+        have h1 : HasDerivAt f (lam * v' s') s' := by
+          refine ((hvd s' hs'1).const_mul lam).congr_of_eventuallyEq ?_
+          filter_upwards [Ioo_mem_nhds hs'1 hs's] with y hy using hfeq y hy
+        exact (hfd s' hs'1).unique h1
+      have hrel : cA = lam * cC := by
+        rw [← hWA s' hs'1, ← hWC s' hs'1, hderiv, hfeq s' ⟨hs'1, hs's⟩]; ring
+      have hpos : 0 < cA * lam := by
+        have h : cA * lam * cC = cA ^ 2 := by rw [hrel]; ring
+        have : 0 < cA * lam * cC := by rw [h]; exact hcA2
+        exact pos_of_mul_pos_left this hcC0.le
+      refine ⟨cA, s, hs, fun x hx => ?_, ?_⟩
+      · rw [hfeq x hx, ← mul_assoc]
+        exact mul_pos hpos (hv1 x (Ioo_subset_Ioc_self hx)).1
+      · rw [lzero_oneZero_iff]
+        constructor
+        · intro h; nlinarith
+        · rintro ⟨-, h, -⟩; exact absurd hn (h n)
+
 /-- Exactly one or no exterior zeros, excluding an identically zero solution. -/
 theorem associatedP_zero_count {ν μ : ℝ} (hν : -1/2 ≤ ν) (hnondeg : ∃ x : ℝ, 1 < x ∧ associatedP ν μ x ≠ 0) :
     Set.Finite {x : ℝ | 1 < x ∧ associatedP ν μ x=0} ∧ ({x : ℝ | 1 < x ∧ associatedP ν μ x=0}:Set ℝ).ncard=if associatedPOneZero ν μ then 1 else 0 := by
@@ -1507,16 +1669,8 @@ theorem associatedP_zero_count {ν μ : ℝ} (hν : -1/2 ≤ ν) (hnondeg : ∃ 
     (olverQ_analytic (ν : ℂ) μ x (lzero_mem hx)).differentiableAt.hasDerivAt.real_of_complex
   obtain ⟨hQpos, K, hK, hQb⟩ := lzero_olverQ_pos_bound hν μ
   set cA : ℝ := (Real.Gamma (ν - μ + 1))⁻¹ with hcA
-  have hWA : ∀ x, 1 < x → (x ^ 2 - 1) * (q x * f' x - f x * q' x) = cA := by
-    intro x hx
-    have h := olverQ_wronskian_pos (ν : ℂ) μ (z := x) (lzero_mem hx)
-    have h2 : LegendreWronskian Qc P x = (cA : ℂ) / ((x : ℂ) ^ 2 - 1) := by
-      rw [show LegendreWronskian Qc P x = -LegendreWronskian P Qc x by
-        simp only [LegendreWronskian]; ring, h,
-        show (ν : ℂ) - μ + 1 = ((ν - μ + 1 : ℝ) : ℂ) by push_cast; ring, Complex.Gamma_ofReal,
-        hcA]
-      push_cast; ring
-    exact lzero_ext_wr hx (olverQ_real ν μ hx) (associatedP_real ν μ hx) h2
+  have hWA : ∀ x, 1 < x → (x ^ 2 - 1) * (q x * f' x - f x * q' x) = cA := fun x hx =>
+    lzero_assocP_wronskian_re hx
   have hset : {x : ℝ | 1 < x ∧ associatedP ν μ x = 0} = {x | 1 < x ∧ f x = 0} := by
     ext x
     simp only [mem_ofPred_eq]
@@ -1569,135 +1723,7 @@ theorem associatedP_zero_count {ν μ : ℝ} (hν : -1/2 ≤ ν) (hnondeg : ∃ 
       have h := hWA x (by have : (2:ℝ) ≤ x := hx; linarith)
       linear_combination cA * h)
   -- sign near one
-  have hnear : ∃ σ₁ t₁ : ℝ, 1 < t₁ ∧ (∀ x ∈ Ioo 1 t₁, 0 < σ₁ * f x) ∧
-      (σ₁ * cA < 0 ↔ associatedPOneZero ν μ) := by
-    rcases le_or_gt μ 0 with hμ | hμ
-    · obtain ⟨s, hs, K1, hK1, hv⟩ := lzero_assocP_near_one ν (m := -μ) (by linarith)
-      have hcA0 : 0 < cA := inv_pos.mpr (Real.Gamma_pos_of_pos (by linarith))
-      refine ⟨1, s, hs, fun x hx => ?_, ?_⟩
-      · have := (hv x (Ioo_subset_Ioc_self hx)).1
-        simp only [neg_neg] at this
-        simpa [hf, hP] using this
-      · rw [lzero_oneZero_iff]
-        constructor
-        · intro h; linarith
-        · intro h; exact absurd h.1 (not_lt.mpr hμ)
-    · obtain ⟨s, hs, K1, hK1, hv⟩ := lzero_assocP_near_one ν (m := μ) hμ.le
-      set V : ℂ → ℂ := associatedP (ν : ℂ) (-(μ : ℂ)) with hV
-      set v : ℝ → ℝ := fun x => (V x).re with hv_def
-      set v' : ℝ → ℝ := fun x => (deriv V x).re with hv'_def
-      have hvd : ∀ x, 1 < x → HasDerivAt v (v' x) x := fun x hx =>
-        (associatedP_analytic (ν : ℂ) (-(μ : ℂ)) x
-          (lzero_mem hx)).differentiableAt.hasDerivAt.real_of_complex
-      have hVreal : ∀ x : ℝ, 1 < x → (V x).im = 0 := fun x hx => by
-        have := associatedP_real ν (-μ) hx
-        simpa [hV] using this
-      have hv1 : ∀ x ∈ Ioc 1 s, 0 < v x ∧ (x ^ 2 - 1) * v x ^ 2 ≤ K1 * (x - 1) := by
-        intro x hx
-        have := hv x hx
-        simpa [hv_def, hV] using this
-      set cB : ℝ := -2 * Real.sin (μ * π) / π with hcB
-      have hWB : ∀ x, 1 < x → (x ^ 2 - 1) * (v x * f' x - f x * v' x) = cB := by
-        intro x hx
-        have h := associated_wronskian_7 (ν : ℂ) μ (z := x) (lzero_mem hx)
-        have h2 : LegendreWronskian V P x = (cB : ℂ) / ((x : ℂ) ^ 2 - 1) := by
-          rw [h, hcB, show (μ : ℂ) * π = ((μ * π : ℝ) : ℂ) by push_cast; ring, ← ofReal_sin]
-          have hp : (x : ℂ) ^ 2 - 1 ≠ 0 := by
-            rw [show (x : ℂ) ^ 2 - 1 = ((x ^ 2 - 1 : ℝ) : ℂ) by push_cast; ring]
-            exact ofReal_ne_zero.mpr (by nlinarith)
-          have hp' : (1 : ℂ) - (x : ℂ) ^ 2 ≠ 0 := by
-            rw [show (1 : ℂ) - (x : ℂ) ^ 2 = -((x : ℂ) ^ 2 - 1) by ring]; exact neg_ne_zero.mpr hp
-          have hπ : (π : ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_pos.ne'
-          push_cast
-          field_simp
-          ring
-        exact lzero_ext_wr hx (hVreal x hx) (associatedP_real ν μ hx) h2
-      by_cases hint : ∀ n : ℤ, μ ≠ n
-      · -- nonintegral `μ`
-        have hsin : Real.sin (μ * π) ≠ 0 := by
-          have := lzero_sin_sign hint
-          intro h; rw [h, mul_zero] at this; exact lt_irrefl _ this
-        have hcB0 : cB ≠ 0 := by
-          rw [hcB]; exact div_ne_zero (by simpa using hsin) Real.pi_pos.ne'
-        obtain ⟨t, ht, hneg⟩ := lzero_ext_neg_near_one (f := fun x => cB * f x)
-          (f' := fun x => cB * f' x) (v := v) (v' := v') (s := s) (K := K1) (c := cB ^ 2) hs hK1
-          (by positivity) (fun x hx => (hfd x hx.1).const_mul cB) (fun x hx => hvd x hx.1)
-          (fun x hx => (hv1 x hx).1) (fun x hx => (hv1 x hx).2)
-          (fun x hx => by linear_combination cB * hWB x hx.1)
-        refine ⟨-cB, t, ht.1, fun x hx => by have : cB * f x < 0 := hneg x hx; linarith, ?_⟩
-        rw [lzero_oneZero_iff, hcB, ← hcA]
-        have hπ := Real.pi_pos
-        constructor
-        · intro h
-          refine ⟨hμ, hint, ?_⟩
-          have : -(-2 * Real.sin (μ * π) / π) * cA = (2 / π) * (Real.sin (μ * π) * cA) := by ring
-          rw [this] at h
-          rcases mul_neg_iff.mp h with h | h
-          · exact h.2
-          · exact absurd h.1 (not_lt.mpr (by positivity))
-        · rintro ⟨-, -, h⟩
-          have : -(-2 * Real.sin (μ * π) / π) * cA = (2 / π) * (Real.sin (μ * π) * cA) := by ring
-          rw [this]
-          exact mul_neg_of_pos_of_neg (by positivity) h
-      · -- integral `μ`: `P` is a multiple of `P^{-μ}` near `1`
-        push Not at hint
-        obtain ⟨n, hn⟩ := hint
-        have hcB0 : cB = 0 := by
-          rw [hcB, hn, Real.sin_int_mul_pi, mul_zero, zero_div]
-        set cC : ℝ := (Real.Gamma (ν + μ + 1))⁻¹ with hcC
-        have hcC0 : 0 < cC := inv_pos.mpr (Real.Gamma_pos_of_pos (by linarith))
-        have hWC : ∀ x, 1 < x → (x ^ 2 - 1) * (q x * v' x - v x * q' x) = cC := by
-          intro x hx
-          have h := associated_wronskian_8 (ν : ℂ) μ (z := x) (lzero_mem hx)
-          have h2 : LegendreWronskian Qc V x = (cC : ℂ) / ((x : ℂ) ^ 2 - 1) := by
-            rw [show LegendreWronskian Qc V x = -LegendreWronskian V Qc x by
-              simp only [LegendreWronskian]; ring, h,
-              show (ν : ℂ) + μ + 1 = ((ν + μ + 1 : ℝ) : ℂ) by push_cast; ring,
-              Complex.Gamma_ofReal, hcC]
-            push_cast
-            simp only [div_eq_mul_inv, mul_inv]
-            ring
-          exact lzero_ext_wr hx (olverQ_real ν μ hx) (hVreal x hx) h2
-        set s' : ℝ := (1 + s) / 2 with hs'
-        have hs'1 : 1 < s' := by linarith
-        have hs's : s' < s := by linarith
-        have hlam : ∀ x ∈ Ioo 1 s, f x / v x = f s' / v s' := by
-          intro x hx
-          refine lzero_const_of_deriv_zero (s := Ioo 1 s) ordConnected_Ioo
-            (fun y hy => (hfd y hy.1).div (hvd y hy.1) (hv1 y (Ioo_subset_Ioc_self hy)).1.ne')
-            (fun y hy => ?_) hx ⟨hs'1, hs's⟩
-          have h := hWB y hy.1
-          rw [hcB0] at h
-          have hp : y ^ 2 - 1 ≠ 0 := by nlinarith [hy.1]
-          have h' : v y * f' y - f y * v' y = 0 := by
-            rcases mul_eq_zero.mp h with h | h
-            · exact absurd h hp
-            · exact h
-          rw [show f' y * v y - f y * v' y = 0 by linarith, zero_div]
-        set lam : ℝ := f s' / v s' with hlam_def
-        have hfeq : ∀ x ∈ Ioo 1 s, f x = lam * v x := fun x hx => by
-          have := hlam x hx
-          have hv0 := (hv1 x (Ioo_subset_Ioc_self hx)).1
-          rw [← this]; field_simp
-        -- compare Wronskians at `s'`
-        have hderiv : f' s' = lam * v' s' := by
-          have h1 : HasDerivAt f (lam * v' s') s' := by
-            refine ((hvd s' hs'1).const_mul lam).congr_of_eventuallyEq ?_
-            filter_upwards [Ioo_mem_nhds hs'1 hs's] with y hy using hfeq y hy
-          exact (hfd s' hs'1).unique h1
-        have hrel : cA = lam * cC := by
-          rw [← hWA s' hs'1, ← hWC s' hs'1, hderiv, hfeq s' ⟨hs'1, hs's⟩]; ring
-        have hpos : 0 < cA * lam := by
-          have h : cA * lam * cC = cA ^ 2 := by rw [hrel]; ring
-          have : 0 < cA * lam * cC := by rw [h]; exact hcA2
-          exact pos_of_mul_pos_left this hcC0.le
-        refine ⟨cA, s, hs, fun x hx => ?_, ?_⟩
-        · rw [hfeq x hx, ← mul_assoc]
-          exact mul_pos hpos (hv1 x (Ioo_subset_Ioc_self hx)).1
-        · rw [lzero_oneZero_iff]
-          constructor
-          · intro h; nlinarith
-          · rintro ⟨-, h, -⟩; exact absurd hn (h n)
+  have hnear := lzero_assocP_sign_near_one hν hA
   obtain ⟨σ₁, t₁, ht₁, hl, hiff⟩ := hnear
   have hcount := lzero_ext_count (σ₂ := cA) ht₁ hfd hqd hQpos hA hWA hl
     (fun x hx => hT x hx)

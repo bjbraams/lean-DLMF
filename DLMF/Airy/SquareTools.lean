@@ -7,6 +7,7 @@ module
 
 public import DLMF.Airy.Integrals
 public import DLMFMathlib.Analysis.ODE.SymmetricSquare
+public import DLMFMathlib.Analysis.SpecialFunctions.Pow.ComplexReal
 
 /-!
 # Ai² as a Gaussian average of Ai
@@ -114,21 +115,25 @@ theorem airySq_Decay.ext {h : ℝ → ℝ} (hd : airySq_Decay h) (hc : Continuou
       rw [mul_assoc]; exact le_mul_of_one_le_right (le_max_right _ _) he
     nlinarith [le_max_left M 0]
 
+/-- A bound `|h u| ≤ 2 u² e^{-2u/3}` for `u ≥ 1` implies the decay class `|h u| ≤ K e^{-u/2}`. -/
 theorem airySq_decay_of_le {h : ℝ → ℝ} (hb : ∀ u, 1 ≤ u → |h u| ≤ 2 * (u ^ 2 * Real.exp (-(2 / 3) * u))) :
     airySq_Decay h :=
   ⟨144, fun u hu => (hb u hu).trans (by nlinarith [airySq_sq_mul_exp_le (u := u) (by linarith)])⟩
 
+/-- `Ai` restricted to the reals lies in the exponential decay class. -/
 theorem airySq_decay_ai : airySq_Decay airyAiReal := by
   refine airySq_decay_of_le fun u hu => (airySq_ai_le hu).trans ?_
   have := Real.exp_pos (-(2 / 3) * u)
   nlinarith [one_le_pow₀ (n := 2) hu]
 
+/-- `Ai'` restricted to the reals lies in the exponential decay class. -/
 theorem airySq_decay_aiDeriv : airySq_Decay airyAiDerivReal := by
   refine airySq_decay_of_le fun u hu => (airySq_aiDeriv_le hu).trans ?_
   have := Real.exp_pos (-(2 / 3) * u)
   have : u ≤ u ^ 2 := by nlinarith
   nlinarith
 
+/-- `u ↦ u Ai(u)` lies in the exponential decay class. -/
 theorem airySq_decay_mul_ai : airySq_Decay fun u => u * airyAiReal u := by
   refine airySq_decay_of_le fun u hu => ?_
   have h := airySq_ai_le hu
@@ -139,6 +144,7 @@ theorem airySq_decay_mul_ai : airySq_Decay fun u => u * airyAiReal u := by
     mul_le_mul_of_nonneg_left h (by linarith)
   nlinarith
 
+/-- `u ↦ Ai(u) + u Ai'(u)` lies in the exponential decay class. -/
 theorem airySq_decay_ai_add : airySq_Decay fun u => airyAiReal u + u * airyAiDerivReal u := by
   refine airySq_decay_of_le fun u hu => ?_
   have h := airySq_ai_le hu
@@ -164,6 +170,7 @@ theorem airySq_bound {h : ℝ → ℝ} (hd : airySq_Decay h) (hc : Continuous h)
   rw [← Real.exp_add]
   exact Real.exp_le_exp.mpr (by nlinarith [sq_nonneg t])
 
+/-- For `h` continuous in the decay class and `c > 0`, `t ↦ h(c(x+t²))` is integrable on `ℝ`. -/
 theorem airySq_integrable {h : ℝ → ℝ} (hd : airySq_Decay h) (hc : Continuous h) {c : ℝ}
     (hc0 : 0 < c) (x : ℝ) : Integrable (fun t : ℝ => h (c * (x + t ^ 2))) := by
   obtain ⟨K, -, hK⟩ := airySq_bound hd hc hc0 x
@@ -201,8 +208,10 @@ theorem airySq_hasDerivAt {h h' : ℝ → ℝ} (hd : airySq_Decay h) (hc : Conti
 /-- The scale `c = 2^{2/3}` of the Ai² representation. -/
 def airySq_c : ℝ := (2 : ℝ) ^ (2 / 3 : ℝ)
 
+/-- The scale `c = 2^{2/3}` is positive. -/
 theorem airySq_c_pos : 0 < airySq_c := by unfold airySq_c; positivity
 
+/-- The scale satisfies `c³ = 4`. -/
 theorem airySq_c_cube : airySq_c ^ 3 = 4 := by
   unfold airySq_c
   rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]; norm_num
@@ -217,19 +226,24 @@ def airySq_F2 (x : ℝ) : ℝ := ∫ t in Ioi 0, (fun u => u * airyAiReal u) (ai
 def airySq_F3 (x : ℝ) : ℝ :=
   ∫ t in Ioi 0, (fun u => airyAiReal u + u * airyAiDerivReal u) (airySq_c * (x + t ^ 2))
 
+/-- `Ai` is continuous on the reals. -/
 theorem airySq_cont_ai : Continuous airyAiReal :=
   continuous_iff_continuousAt.mpr fun x => (hasDerivAt_airyAiReal x).continuousAt
+/-- `Ai'` is continuous on the reals. -/
 theorem airySq_cont_aiDeriv : Continuous airyAiDerivReal :=
   continuous_iff_continuousAt.mpr fun x => (hasDerivAt_airyAiDerivReal x).continuousAt
 
+/-- `F' = c F₁`, where `F(x) = ∫₀^∞ Ai(c(x+t²)) dt` and `F₁` is the same integral of `Ai'`. -/
 theorem airySq_hasDerivAt_F (x : ℝ) : HasDerivAt airySq_F (airySq_c * airySq_F1 x) x :=
   airySq_hasDerivAt airySq_decay_ai airySq_cont_ai airySq_decay_aiDeriv airySq_cont_aiDeriv
     hasDerivAt_airyAiReal airySq_c_pos x
 
+/-- `F₁' = c F₂`, where `F₂(x) = ∫₀^∞ u Ai(u) dt` with `u = c(x+t²)`. -/
 theorem airySq_hasDerivAt_F1 (x : ℝ) : HasDerivAt airySq_F1 (airySq_c * airySq_F2 x) x :=
   airySq_hasDerivAt airySq_decay_aiDeriv airySq_cont_aiDeriv airySq_decay_mul_ai
     (by have := airySq_cont_ai; fun_prop) hasDerivAt_airyAiDerivReal airySq_c_pos x
 
+/-- `F₂' = c F₃`, where `F₃(x) = ∫₀^∞ (Ai(u) + u Ai'(u)) dt` with `u = c(x+t²)`. -/
 theorem airySq_hasDerivAt_F2 (x : ℝ) : HasDerivAt airySq_F2 (airySq_c * airySq_F3 x) x :=
   airySq_hasDerivAt airySq_decay_mul_ai (by have := airySq_cont_ai; fun_prop) airySq_decay_ai_add
     (by have := airySq_cont_ai; have := airySq_cont_aiDeriv; fun_prop)
@@ -323,19 +337,6 @@ def airySq_IsProdSol (y y1 y2 : ℝ → ℝ) : Prop :=
 def airySq_det (y y1 y2 u u1 u2 v v1 v2 : ℝ → ℝ) (x : ℝ) : ℝ :=
   y x * (u1 x * v2 x - v1 x * u2 x) - u x * (y1 x * v2 x - v1 x * y2 x) +
     v x * (y1 x * u2 x - u1 x * y2 x)
-
-/-- The Wronskian of three solutions of the product equation is constant (no `y''` term). -/
-theorem airySq_det_const {y y1 y2 u u1 u2 v v1 v2 : ℝ → ℝ} (hy : airySq_IsProdSol y y1 y2)
-    (hu : airySq_IsProdSol u u1 u2) (hv : airySq_IsProdSol v v1 v2) (x : ℝ) :
-    airySq_det y y1 y2 u u1 u2 v v1 v2 x = airySq_det y y1 y2 u u1 u2 v v1 v2 0 :=
-  ODE.thirdOrderWronskian_const (p := fun x => 4*x) (q := fun _ => 2) hy hu hv x 0
-
-/-- Cramer's rule for the first component of three-vectors. -/
-theorem airySq_cramer (y y1 y2 u u1 u2 v v1 v2 w w1 w2 : ℝ → ℝ) (x : ℝ) :
-    airySq_det u u1 u2 v v1 v2 w w1 w2 x * y x =
-      airySq_det y y1 y2 v v1 v2 w w1 w2 x * u x + airySq_det u u1 u2 y y1 y2 w w1 w2 x * v x +
-        airySq_det u u1 u2 v v1 v2 y y1 y2 x * w x :=
-  ODE.thirdOrder_cramer y y1 y2 u u1 u2 v v1 v2 w w1 w2 x
 
 /-- Decomposition along a fundamental system with constant nonzero Wronskian. -/
 theorem airySq_decomp_gen {y y1 y2 u u1 u2 v v1 v2 w w1 w2 : ℝ → ℝ} (hy : airySq_IsProdSol y y1 y2)
@@ -724,6 +725,8 @@ theorem airySq_mellin_pt (α : ℂ) (x : ℝ) :
 def airySq_kr (x v : ℝ) : ℝ :=
   (Ioi x).indicator (fun v => (v - x) ^ (-(1 / 2) : ℝ) * airyAiReal (airySq_c * v)) v
 
+/-- The kernel `Φ(α; x, v)` factors as `x^{α-1}` times the real kernel
+`1_{v > x}(v-x)^{-1/2} Ai(cv)`. -/
 theorem airySq_Φ_eq (α : ℂ) (x v : ℝ) :
     airySq_Φ α x v = (x : ℂ) ^ (α - 1) * ((airySq_kr x v : ℝ) : ℂ) := by
   by_cases hv : x < v
@@ -733,6 +736,7 @@ theorem airySq_Φ_eq (α : ℂ) (x v : ℝ) :
   · simp only [airySq_Φ, airySq_kr, hv, ↓reduceIte]
     rw [indicator_of_notMem (by simpa using hv), ofReal_zero, mul_zero]
 
+/-- The real kernel at `x` is the shift by `x` of `s ↦ 1_{s > 0} s^{-1/2} Ai(c(x+s))`. -/
 theorem airySq_kr_shift (x : ℝ) : (fun v => airySq_kr x v) = fun v =>
     (Ioi 0).indicator (fun s => s ^ (-(1 / 2) : ℝ) / 2 * airyAiReal (airySq_c * (x + s)) * 2) (v - x) := by
   funext v
@@ -743,11 +747,13 @@ theorem airySq_kr_shift (x : ℝ) : (fun v => airySq_kr x v) = fun v =>
   · rw [airySq_kr, indicator_of_notMem (by simpa using hv),
       indicator_of_notMem (by simpa using hv)]
 
+/-- The real kernel `v ↦ 1_{v > x}(v-x)^{-1/2} Ai(cv)` is integrable. -/
 theorem airySq_kr_integrable (x : ℝ) : Integrable (fun v => airySq_kr x v) := by
   rw [airySq_kr_shift]
   have h := IntegrableOn.integrable_indicator ((airySq_integrableOn_half x).mul_const 2) measurableSet_Ioi
   exact h.comp_sub_right x
 
+/-- `∫ 1_{v > x}(v-x)^{-1/2} Ai(cv) dv = 2 F(x)`. -/
 theorem airySq_kr_integral (x : ℝ) : ∫ v, airySq_kr x v = 2 * airySq_F x := by
   have e : (fun v => airySq_kr x v) = fun v => (Ioi x).indicator (fun v =>
       (fun s => s ^ (-(1 / 2) : ℝ) / 2 * airyAiReal (airySq_c * (x + s)) * 2) (v - x)) v := by
@@ -758,6 +764,7 @@ theorem airySq_kr_integral (x : ℝ) : ∫ v, airySq_kr x v = 2 * airySq_F x := 
     integral_mul_const, airySq_F_eq_half]
   ring
 
+/-- For `x ≥ 0` the real kernel is nonnegative, since `Ai > 0` on `[0, ∞)`. -/
 theorem airySq_kr_nonneg {x : ℝ} (hx : 0 ≤ x) (v : ℝ) : 0 ≤ airySq_kr x v := by
   rw [airySq_kr]
   refine indicator_nonneg (fun v hv => ?_) v
@@ -765,12 +772,14 @@ theorem airySq_kr_nonneg {x : ℝ} (hx : 0 ≤ x) (v : ℝ) : 0 ≤ airySq_kr x 
   exact mul_nonneg (Real.rpow_nonneg (by linarith) _)
     (airyAiReal_pos (mul_nonneg airySq_c_pos.le (by linarith))).le
 
+/-- The kernel `(x, v) ↦ Φ(α; x, v)` is measurable. -/
 theorem airySq_Φ_measurable (α : ℂ) : Measurable fun p : ℝ × ℝ => airySq_Φ α p.1 p.2 := by
   unfold airySq_Φ
   refine Measurable.ite (measurableSet_lt measurable_fst measurable_snd) ?_ measurable_const
   have := airySq_cont_ai
   fun_prop
 
+/-- For `Re α > 0`, the kernel `Φ(α; x, v)` is integrable on `(0, ∞) × ℝ`. -/
 theorem airySq_Φ_integrable {α : ℂ} (hα : 0 < α.re) :
     Integrable (fun p : ℝ × ℝ => airySq_Φ α p.1 p.2) ((volume.restrict (Ioi 0)).prod volume) := by
   rw [integrable_prod_iff (airySq_Φ_measurable α).aestronglyMeasurable]
@@ -822,10 +831,6 @@ theorem airySq_double {α : ℂ} (hα : 0 < α.re) :
   simp_rw [airySq_inner]
   rw [integral_indicator measurableSet_Ioi, integral_const_mul]
 
-/-- Complex powers of a positive real as exponentials. -/
-theorem airySq_cpow_eq {b : ℝ} (hb : 0 < b) (z : ℂ) : ((b : ℝ) : ℂ) ^ z = exp ((Real.log b : ℂ) * z) := by
-  rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr hb.ne'), ← ofReal_log hb.le]
-
 /-- The scaled Mellin transform `∫₀^∞ v^{w-1} Ai(cv) dv = c^{-w} M_Ai(w)` (DLMF 9.10.17). -/
 theorem airySq_scaled_mellin {w : ℂ} (hw : 0 < w.re) :
     ∫ v : ℝ in Ioi 0, (v : ℂ) ^ (w - 1) * ((airyAiReal (airySq_c * v) : ℝ) : ℂ) =
@@ -843,7 +848,8 @@ theorem airySq_scaled_mellin {w : ℂ} (hw : 0 < w.re) :
   have e2 : ∀ s ∈ Ioi (0 : ℝ), ((s / airySq_c : ℝ) : ℂ) ^ (w - 1) * ((airyAiReal s : ℝ) : ℂ) =
       exp (-(Real.log airySq_c : ℂ) * (w - 1)) * ((s : ℂ) ^ (w - 1) * airyAi s) := fun s hs => by
     have hs' : (0 : ℝ) < s := hs
-    rw [airySq_cpow_eq (div_pos hs' hc0), airySq_cpow_eq hs', Real.log_div hs'.ne' hc0.ne',
+    rw [Complex.ofReal_cpow_eq_exp_log_mul (div_pos hs' hc0), Complex.ofReal_cpow_eq_exp_log_mul
+        hs', Real.log_div hs'.ne' hc0.ne',
       airyAi_ofReal_eq, ← mul_assoc, ← Complex.exp_add]
     push_cast; ring_nf
   rw [setIntegral_congr_fun measurableSet_Ioi e2, integral_const_mul, (airyAi_mellin hw).2,

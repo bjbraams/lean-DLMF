@@ -61,6 +61,7 @@ def airyGDeriv (z : ℂ) : ℂ :=
   regularizedHGFun (∅ : Multiset ℂ) {4 / 3} (z ^ 3 / 9) +
     z ^ 3 / 3 * regularizedHGFun (∅ : Multiset ℂ) {7 / 3} (z ^ 3 / 9)
 
+/-- The chain rule for `z ↦ ₀F̃₁(;c;z³/9)`: its derivative is `(z²/3) ₀F̃₁(;c+1;z³/9)`. -/
 theorem hasDerivAt_reg0F1_cube {c c' : ℂ} (hc : c + 1 = c') (z : ℂ) :
     HasDerivAt (fun z : ℂ => regularizedHGFun (∅ : Multiset ℂ) {c} (z ^ 3 / 9))
       (z ^ 2 / 3 * regularizedHGFun (∅ : Multiset ℂ) {c'} (z ^ 3 / 9)) z := by
@@ -70,15 +71,19 @@ theorem hasDerivAt_reg0F1_cube {c c' : ℂ} (hc : c + 1 = c') (z : ℂ) :
   norm_num
   ring
 
+/-- The contiguous relation `₀F̃₁(;c;w) = c ₀F̃₁(;c+1;w) + w ₀F̃₁(;c+2;w)`, with the shifted
+parameters given as equations. -/
 theorem reg0F1_contiguous' {c c₁ c₂ : ℂ} (h₁ : c + 1 = c₁) (h₂ : c + 1 + 1 = c₂) (w : ℂ) :
     regularizedHGFun (∅ : Multiset ℂ) {c} w =
       c * regularizedHGFun ∅ {c₁} w + w * regularizedHGFun ∅ {c₂} w := by
   subst h₁ h₂
   exact regularized0F1_contiguous c w
 
+/-- `airyF` has derivative `airyFDeriv`. -/
 theorem hasDerivAt_airyF (z : ℂ) : HasDerivAt airyF (airyFDeriv z) z :=
   hasDerivAt_reg0F1_cube (by norm_num) z
 
+/-- `airyFDeriv` has derivative `z · airyF z`, so `f'' = z f`. -/
 theorem hasDerivAt_airyFDeriv (z : ℂ) : HasDerivAt airyFDeriv (z * airyF z) z := by
   have h := ((hasDerivAt_pow 2 z).div_const 3).mul (hasDerivAt_reg0F1_cube
     (c := 5 / 3) (c' := 8 / 3) (by norm_num) z)
@@ -89,6 +94,7 @@ theorem hasDerivAt_airyFDeriv (z : ℂ) : HasDerivAt airyFDeriv (z * airyF z) z 
   norm_num
   ring
 
+/-- `airyG` has derivative `airyGDeriv`. -/
 theorem hasDerivAt_airyG (z : ℂ) : HasDerivAt airyG (airyGDeriv z) z := by
   have h := (hasDerivAt_id z).mul (hasDerivAt_reg0F1_cube (c := 4 / 3) (c' := 7 / 3)
     (by norm_num) z)
@@ -96,6 +102,7 @@ theorem hasDerivAt_airyG (z : ℂ) : HasDerivAt airyG (airyGDeriv z) z := by
   simp only [airyGDeriv, id]
   ring
 
+/-- `airyGDeriv` has derivative `z · airyG z`, so `g'' = z g`. -/
 theorem hasDerivAt_airyGDeriv (z : ℂ) : HasDerivAt airyGDeriv (z * airyG z) z := by
   have h := (hasDerivAt_reg0F1_cube (c := 4 / 3) (c' := 7 / 3) (by norm_num) z).add
     (((hasDerivAt_pow 3 z).div_const 3).mul (hasDerivAt_reg0F1_cube
@@ -107,17 +114,22 @@ theorem hasDerivAt_airyGDeriv (z : ℂ) : HasDerivAt airyGDeriv (z * airyG z) z 
   norm_num
   ring
 
+/-- The regularized `₀F̃₁(;c;·)` takes the value `1/Γ(c)` at the origin. -/
 theorem reg0F1_zero (c : ℂ) : regularizedHGFun (∅ : Multiset ℂ) {c} 0 = (Gamma c)⁻¹ := by
   rw [regularizedHGFun_zero]
   exact (regularizedHGFunCoeff_empty c 0).trans (by simp)
 
+/-- `f(0) = 1/Γ(2/3)`. -/
 theorem airyF_zero : airyF 0 = (Gamma (2 / 3))⁻¹ := by
   rw [airyF, show (0 : ℂ) ^ 3 / 9 = 0 by norm_num, reg0F1_zero]
 
+/-- `g(0) = 0`. -/
 theorem airyG_zero : airyG 0 = 0 := by simp [airyG]
 
+/-- `f'(0) = 0`. -/
 theorem airyFDeriv_zero : airyFDeriv 0 = 0 := by simp [airyFDeriv]
 
+/-- `g'(0) = 3/Γ(1/3)`, i.e. `1/Γ(4/3)`. -/
 theorem airyGDeriv_zero : airyGDeriv 0 = 3 * (Gamma (1 / 3))⁻¹ := by
   have h : Gamma (4 / 3) = 1 / 3 * Gamma (1 / 3) := by
     rw [show (4 / 3 : ℂ) = 1 / 3 + 1 by norm_num, Complex.Gamma_add_one _ (by norm_num)]
@@ -151,30 +163,38 @@ def airyBiDeriv (z : ℂ) : ℂ :=
     ((((3 : ℝ) ^ (-(2 / 3 : ℝ)) : ℝ) : ℂ) * airyFDeriv z +
       (((3 : ℝ) ^ (-(4 / 3 : ℝ)) : ℝ) : ℂ) * airyGDeriv z)
 
+/-- `Ai` has derivative `Ai'` (`airyAiDeriv`) at every point. -/
 theorem hasDerivAt_airyAi (z : ℂ) : HasDerivAt airyAi (airyAiDeriv z) z :=
   ((hasDerivAt_airyF z).const_mul _).sub ((hasDerivAt_airyG z).const_mul _)
 
+/-- `Ai'` has derivative `z Ai(z)` (Airy's equation). -/
 theorem hasDerivAt_airyAiDeriv (z : ℂ) : HasDerivAt airyAiDeriv (z * airyAi z) z :=
   (((hasDerivAt_airyFDeriv z).const_mul _).sub
     ((hasDerivAt_airyGDeriv z).const_mul _)).congr_deriv (by simp only [airyAi]; ring)
 
+/-- `Bi` has derivative `Bi'` (`airyBiDeriv`) at every point. -/
 theorem hasDerivAt_airyBi (z : ℂ) : HasDerivAt airyBi (airyBiDeriv z) z :=
   (((hasDerivAt_airyF z).const_mul _).add ((hasDerivAt_airyG z).const_mul _)).const_mul _
 
+/-- `Bi'` has derivative `z Bi(z)` (Airy's equation). -/
 theorem hasDerivAt_airyBiDeriv (z : ℂ) : HasDerivAt airyBiDeriv (z * airyBi z) z :=
   ((((hasDerivAt_airyFDeriv z).const_mul _).add
     ((hasDerivAt_airyGDeriv z).const_mul _)).const_mul _).congr_deriv
       (by simp only [airyBi]; ring)
 
+/-- `Ai` is entire. -/
 theorem differentiable_airyAi : Differentiable ℂ airyAi :=
   fun z => (hasDerivAt_airyAi z).differentiableAt
 
+/-- `Bi` is entire. -/
 theorem differentiable_airyBi : Differentiable ℂ airyBi :=
   fun z => (hasDerivAt_airyBi z).differentiableAt
 
+/-- The derivative of `Ai` is `airyAiDeriv`. -/
 theorem deriv_airyAi : deriv airyAi = airyAiDeriv :=
   funext fun z => (hasDerivAt_airyAi z).deriv
 
+/-- The derivative of `Bi` is `airyBiDeriv`. -/
 theorem deriv_airyBi : deriv airyBi = airyBiDeriv :=
   funext fun z => (hasDerivAt_airyBi z).deriv
 
@@ -190,20 +210,25 @@ theorem airyBi_ode (z : ℂ) : deriv (deriv airyBi) z = z * airyBi z := by
 
 /-! ### Values at the origin -/
 
+/-- `3^a 3^b = 3^{a+b}` for real exponents. -/
 theorem three_rpow_add (a b : ℝ) : (3 : ℝ) ^ a * (3 : ℝ) ^ b = (3 : ℝ) ^ (a + b) :=
   (Real.rpow_add (by norm_num) a b).symm
 
+/-- `√3 = 3^{1/2}`. -/
 theorem sqrt_three_eq_rpow : Real.sqrt 3 = (3 : ℝ) ^ (1 / 2 : ℝ) := Real.sqrt_eq_rpow 3
 
+/-- `3^{-a} = (3^a)⁻¹` for real `a`. -/
 theorem three_rpow_neg (a : ℝ) : (3 : ℝ) ^ (-a) = ((3 : ℝ) ^ a)⁻¹ :=
   Real.rpow_neg (by norm_num) a
 
+/-- `Ai(0) = 1/(3^{2/3} Γ(2/3))` (DLMF 9.2.3). -/
 @[dlmf 9.2.E3]
 theorem airyAi_zero : airyAi 0 = 1 / (((3 : ℝ) ^ (2 / 3 : ℝ) : ℝ) * Gamma (2 / 3)) := by
   rw [airyAi, airyF_zero, airyG_zero, mul_zero, sub_zero, three_rpow_neg]
   push_cast
   ring
 
+/-- `Ai'(0) = -1/(3^{1/3} Γ(1/3))` (DLMF 9.2.4). -/
 @[dlmf 9.2.E4]
 theorem airyAiDeriv_zero :
     airyAiDeriv 0 = -1 / (((3 : ℝ) ^ (1 / 3 : ℝ) : ℝ) * Gamma (1 / 3)) := by
@@ -218,6 +243,7 @@ theorem airyAiDeriv_zero :
   rw [mul_zero, zero_sub, ← mul_assoc, h']
   ring
 
+/-- `Bi(0) = 1/(3^{1/6} Γ(2/3))` (DLMF 9.2.5). -/
 @[dlmf 9.2.E5]
 theorem airyBi_zero : airyBi 0 = 1 / (((3 : ℝ) ^ (1 / 6 : ℝ) : ℝ) * Gamma (2 / 3)) := by
   rw [airyBi, airyF_zero, airyG_zero]
@@ -230,6 +256,7 @@ theorem airyBi_zero : airyBi 0 = 1 / (((3 : ℝ) ^ (1 / 6 : ℝ) : ℝ) * Gamma 
   rw [mul_zero, add_zero, ← mul_assoc, h']
   ring
 
+/-- `Bi'(0) = 3^{1/6}/Γ(1/3)` (DLMF 9.2.6). -/
 @[dlmf 9.2.E6]
 theorem airyBiDeriv_zero :
     airyBiDeriv 0 = ((3 : ℝ) ^ (1 / 6 : ℝ) : ℝ) / Gamma (1 / 3) := by
@@ -249,9 +276,11 @@ theorem airyBiDeriv_zero :
 /-- `w, w'` solve Airy's equation `w'' = z w` on all of `ℂ`. -/
 def IsAirySol (w w' : ℂ → ℂ) : Prop := ∀ z, HasDerivAt w (w' z) z ∧ HasDerivAt w' (z * w z) z
 
+/-- `(Ai, Ai')` solves Airy's equation. -/
 theorem isAirySol_airyAi : IsAirySol airyAi airyAiDeriv :=
   fun z => ⟨hasDerivAt_airyAi z, hasDerivAt_airyAiDeriv z⟩
 
+/-- `(Bi, Bi')` solves Airy's equation. -/
 theorem isAirySol_airyBi : IsAirySol airyBi airyBiDeriv :=
   fun z => ⟨hasDerivAt_airyBi z, hasDerivAt_airyBiDeriv z⟩
 
@@ -263,6 +292,7 @@ theorem IsAirySol.wronskian_eq {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') (
   exact is_const_of_deriv_eq_zero (fun w => (hd w).differentiableAt)
     (fun w => (hd w).deriv) z 0
 
+/-- `Γ(1/3) Γ(2/3) = 2π/√3` (reflection formula at `1/3`). -/
 theorem Gamma_one_third_mul_Gamma_two_thirds :
     Gamma (1 / 3) * Gamma (2 / 3) = 2 * π / Real.sqrt 3 := by
   have h := Complex.Gamma_mul_Gamma_one_sub (1 / 3)
@@ -343,6 +373,7 @@ theorem IsAirySol.eq_of_initial {f f' g g' : ℂ → ℂ} (hf : IsAirySol f f') 
 
 /-! ### Rotations by cube roots of unity (DLMF 9.2(iv)) -/
 
+/-- `e^{2πi/3} = -1/2 + (√3/2) i`. -/
 theorem exp_two_pi_I_div_three :
     exp (2 * π * I / 3) = -1 / 2 + (Real.sqrt 3 / 2 : ℝ) * I := by
   have h : (2 * π * I / 3 : ℂ) = ((2 * π / 3 : ℝ) : ℂ) * I := by push_cast; ring
@@ -352,31 +383,30 @@ theorem exp_two_pi_I_div_three :
   push_cast
   ring
 
+/-- `ω = e^{2πi/3}` is a cube root of unity: `ω³ = 1`. -/
 theorem omega_cube : exp (2 * π * I / 3) ^ 3 = 1 := by
   rw [← Complex.exp_nat_mul, show ((3 : ℕ) : ℂ) * (2 * π * I / 3) = 2 * π * I by push_cast; ring,
     exp_two_pi_mul_I]
 
-theorem one_add_omega_add_sq : 1 + exp (2 * π * I / 3) + exp (2 * π * I / 3) ^ 2 = 0 := by
-  rw [exp_two_pi_I_div_three]
-  have h3 : ((Real.sqrt 3 : ℝ) : ℂ) ^ 2 = 3 := by
-    rw [← ofReal_pow, Real.sq_sqrt (by norm_num)]; push_cast; ring
-  push_cast at h3 ⊢
-  linear_combination (I ^ 2 / 4) * h3 + (3 / 4 : ℂ) * I_sq
-
+/-- `₀F̃₁(;c;(ωz)³/9) = ₀F̃₁(;c;z³/9)` when `ω³ = 1`. -/
 lemma reg0F1_cube_mul {c ω : ℂ} (hω : ω ^ 3 = 1) (z : ℂ) :
     regularizedHGFun (∅ : Multiset ℂ) {c} ((ω * z) ^ 3 / 9) =
       regularizedHGFun (∅ : Multiset ℂ) {c} (z ^ 3 / 9) := by
   rw [mul_pow, hω, one_mul]
 
+/-- `f(ωz) = f(z)` when `ω³ = 1`. -/
 theorem airyF_mul {ω : ℂ} (hω : ω ^ 3 = 1) (z : ℂ) : airyF (ω * z) = airyF z :=
   reg0F1_cube_mul hω z
 
+/-- `g(ωz) = ω g(z)` when `ω³ = 1`. -/
 theorem airyG_mul {ω : ℂ} (hω : ω ^ 3 = 1) (z : ℂ) : airyG (ω * z) = ω * airyG z := by
   simp only [airyG, reg0F1_cube_mul hω z]; ring
 
+/-- `(√3)² = 3` in `ℂ`. -/
 theorem sqrt_three_sq : ((Real.sqrt 3 : ℝ) : ℂ) ^ 2 = 3 := by
   rw [← ofReal_pow, Real.sq_sqrt (by norm_num)]; push_cast; ring
 
+/-- `e^{-2πi/3} = -1/2 - (√3/2) i`. -/
 theorem exp_neg_two_pi_I_div_three :
     exp (-(2 * π * I / 3)) = -1 / 2 - (Real.sqrt 3 / 2 : ℝ) * I := by
   have h : (-(2 * π * I / 3) : ℂ) = ((-(2 * π / 3) : ℝ) : ℂ) * I := by push_cast; ring
@@ -386,12 +416,14 @@ theorem exp_neg_two_pi_I_div_three :
   push_cast
   ring
 
+/-- `e^{πi/6} = √3/2 + i/2`. -/
 theorem exp_pi_I_div_six : exp (π * I / 6) = (Real.sqrt 3 / 2 : ℝ) + (1 / 2 : ℂ) * I := by
   have h : (π * I / 6 : ℂ) = ((π / 6 : ℝ) : ℂ) * I := by push_cast; ring
   rw [h, exp_mul_I, ← ofReal_cos, ← ofReal_sin, Real.cos_pi_div_six, Real.sin_pi_div_six]
   push_cast
   ring
 
+/-- `e^{-πi/6} = √3/2 - i/2`. -/
 theorem exp_neg_pi_I_div_six : exp (-(π * I / 6)) = (Real.sqrt 3 / 2 : ℝ) - (1 / 2 : ℂ) * I := by
   have h : (-(π * I / 6) : ℂ) = ((-(π / 6) : ℝ) : ℂ) * I := by push_cast; ring
   rw [h, exp_mul_I, ← ofReal_cos, ← ofReal_sin, Real.cos_neg, Real.sin_neg, Real.cos_pi_div_six,
@@ -399,12 +431,14 @@ theorem exp_neg_pi_I_div_six : exp (-(π * I / 6)) = (Real.sqrt 3 / 2 : ℝ) - (
   push_cast
   ring
 
+/-- `e^{πi/3} = 1/2 + (√3/2) i`. -/
 theorem exp_pi_I_div_three : exp (π * I / 3) = (1 / 2 : ℂ) + (Real.sqrt 3 / 2 : ℝ) * I := by
   have h : (π * I / 3 : ℂ) = ((π / 3 : ℝ) : ℂ) * I := by push_cast; ring
   rw [h, exp_mul_I, ← ofReal_cos, ← ofReal_sin, Real.cos_pi_div_three, Real.sin_pi_div_three]
   push_cast
   ring
 
+/-- `e^{-πi/3} = 1/2 - (√3/2) i`. -/
 theorem exp_neg_pi_I_div_three :
     exp (-(π * I / 3)) = (1 / 2 : ℂ) - (Real.sqrt 3 / 2 : ℝ) * I := by
   have h : (-(π * I / 3) : ℂ) = ((-(π / 3) : ℝ) : ℂ) * I := by push_cast; ring
@@ -413,6 +447,7 @@ theorem exp_neg_pi_I_div_three :
   push_cast
   ring
 
+/-- `(e^{-2πi/3})³ = 1`. -/
 theorem omega_recip_cube : exp (-(2 * π * I / 3)) ^ 3 = 1 := by
   rw [← Complex.exp_nat_mul, show ((3 : ℕ) : ℂ) * (-(2 * π * I / 3)) = -(2 * π * I) by
     push_cast; ring, exp_neg, exp_two_pi_mul_I, inv_one]
@@ -485,16 +520,19 @@ theorem airyBi_add_omega (z : ℂ) :
 
 /-! ### Real values on the real line -/
 
+/-- For real `c`, `₀F̃₁(;c;(z̄)³/9)` is the conjugate of `₀F̃₁(;c;z³/9)`. -/
 lemma reg0F1_conj_rat (c : ℝ) (z : ℂ) :
     regularizedHGFun (∅ : Multiset ℂ) {(c : ℂ)} (conj z ^ 3 / 9) =
       conj (regularizedHGFun (∅ : Multiset ℂ) {(c : ℂ)} (z ^ 3 / 9)) := by
   rw [← regularized0F1_conj, map_div₀, map_pow, map_ofNat]
 
+/-- `f(z̄) = conj (f z)`. -/
 theorem airyF_conj (z : ℂ) : airyF (conj z) = conj (airyF z) := by
   have h := reg0F1_conj_rat (2 / 3) z
   push_cast at h
   exact h
 
+/-- `g(z̄) = conj (g z)`. -/
 theorem airyG_conj (z : ℂ) : airyG (conj z) = conj (airyG z) := by
   have h := reg0F1_conj_rat (4 / 3) z
   push_cast at h
@@ -508,11 +546,13 @@ theorem airyAi_conj (z : ℂ) : airyAi (conj z) = conj (airyAi z) := by
 theorem airyBi_conj (z : ℂ) : airyBi (conj z) = conj (airyBi z) := by
   simp only [airyBi, airyF_conj, airyG_conj, map_add, map_mul, conj_ofReal]
 
+/-- `Ai(x)` is real for real `x`. -/
 theorem airyAi_ofReal_im (x : ℝ) : (airyAi x).im = 0 := by
   have h := airyAi_conj (x : ℂ)
   rw [conj_ofReal] at h
   exact conj_eq_iff_im.mp h.symm
 
+/-- `Bi(x)` is real for real `x`. -/
 theorem airyBi_ofReal_im (x : ℝ) : (airyBi x).im = 0 := by
   have h := airyBi_conj (x : ℂ)
   rw [conj_ofReal] at h

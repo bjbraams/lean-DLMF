@@ -288,25 +288,11 @@ theorem mathieuFe_ge_zero_eq_joinG (m : ℕ) {h : ℝ} (hh : 0 < h) :
     field_simp at hW
     linear_combination hW / 2 - mathieuGe m 0 (h ^ 2) * hP
 
-/-- Mathieu's equation is invariant under `t ↦ -t`. -/
-lemma p1c_isMathieuSolution_neg {a q : ℂ} {w : ℂ → ℂ} (hw : IsMathieuSolution a q w) :
-    IsMathieuSolution a q (fun t => w (-t)) := by
-  have hd : ∀ t, HasDerivAt (fun t => w (-t)) (-deriv w (-t)) t := fun t => by
-    have := ((hw.differentiable (-t)).hasDerivAt).comp t (hasDerivAt_neg t)
-    convert this using 1 <;> first | rfl | ring
-  refine ⟨fun t => (hd t).differentiableAt, fun t => ?_⟩
-  have he : deriv (fun t => w (-t)) = fun t => -deriv w (-t) := funext fun t => (hd t).deriv
-  rw [he]
-  have h2 := (((hw.hasDerivAt_deriv (-t)).comp t (hasDerivAt_neg t))).neg
-  convert h2 using 1
-  · funext t; rfl
-  rw [show 2 * -t = -(2 * t) by ring, Complex.cos_neg]; ring
-
 /-- A Floquet solution with multiplier `ρ`, `ρ² ≠ 1`, vanishing at `0` is identically zero. -/
 lemma p1c_floquet_eq_zero {a q ρ : ℂ} {w : ℂ → ℂ} (hw : IsMathieuSolution a q w)
     (h0 : w 0 = 0) (hρ : ∀ t, w (t + π) = ρ * w t) (hρ0 : ρ ≠ 0) (hρ1 : ρ ^ 2 ≠ 1) :
     w = 0 := by
-  have hneg := p1c_isMathieuSolution_neg hw
+  have hneg := hw.comp_neg
   have hm := hw.const_mul (-1)
   have hd : deriv (fun t => w (-t)) 0 = deriv (fun t => -1 * w t) 0 := by
     have h1 : HasDerivAt (fun t => w (-t)) (-deriv w (-0)) 0 := by

@@ -573,13 +573,6 @@ theorem airyInt_quarter_rpow {x : ℝ} (hx : 0 < x) :
   · rw [← Real.rpow_add hx, ← Real.rpow_add hx]; norm_num
 
 
-/-- Norm of the prefactor of `Bi(x)` on the positive axis. -/
-theorem airyInt_norm_prefactor_bi {x : ℝ} (hx : 0 < x) :
-    ‖airyPrefactor .bi x‖ = Real.exp (airyZeta x) / (Real.sqrt π * x ^ (1 / 4 : ℝ)) := by
-  rw [airyPrefactor, norm_div, norm_mul, airyInt_norm_cpow_quarter hx, Complex.norm_exp,
-    airyReal_zeta_ofReal hx, ofReal_re, Complex.norm_real,
-    Real.norm_of_nonneg (Real.sqrt_nonneg _)]
-
 /-- Norm of the prefactor of `Bi'(x)` on the positive axis. -/
 theorem airyInt_norm_prefactor_biDeriv {x : ℝ} (hx : 0 < x) :
     ‖airyPrefactor .biDeriv x‖ = x ^ (1 / 4 : ℝ) * Real.exp (airyZeta x) / Real.sqrt π := by

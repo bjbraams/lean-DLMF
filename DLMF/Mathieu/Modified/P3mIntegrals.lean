@@ -588,13 +588,6 @@ theorem p3m_integral_exp_mathieuCe (n : ℕ) (h : ℝ) (z α : ℂ) :
 lemma p3m_continuous_se (n : ℕ) (q : ℝ) : Continuous fun t : ℝ => mathieuSe n t q :=
   (isMathieuSolution_mathieuSe n q).differentiable.continuous.comp continuous_ofReal
 
-/-- `se_n` is `2π`-periodic, `n ≥ 1`. -/
-lemma p3m_mathieuSe_add_two_pi {n : ℕ} (hn : n ≠ 0) (w : ℂ) (q : ℝ) :
-    mathieuSe n (w + (2 * π : ℂ)) q = mathieuSe n w q := by
-  rw [show w + (2 * π : ℂ) = w + π + π by ring, p2m_mathieuSe_add_pi hn,
-    p2m_mathieuSe_add_pi hn, ← mul_assoc, ← mul_pow]
-  simp
-
 /-- The kernel integral against `se_n` is `G'(0)/se_n'(0) · se_n(α)`, with
 `G'(0) = ∫₀^{2π} 2ih sinh z sin t e^{2ih cosh z cos t} se_n(t) dt`. -/
 lemma p3m_kernelW_se {n : ℕ} (hn : n ≠ 0) (h : ℝ) (z α : ℂ) :
@@ -604,13 +597,13 @@ lemma p3m_kernelW_se {n : ℕ} (hn : n ≠ 0) (h : ℝ) (z α : ℂ) :
         Complex.exp (2 * I * h * (Complex.cosh z * Complex.cos t)) * mathieuSe n t (h ^ 2)) /
         deriv (fun w => mathieuSe n w (h ^ 2)) 0 * mathieuSe n α (h ^ 2) := by
   have hper : ∀ t : ℝ, mathieuSe n ((t + 2 * π : ℝ) : ℂ) (h ^ 2) = mathieuSe n t (h ^ 2) := by
-    intro t; push_cast; exact p3m_mathieuSe_add_two_pi hn _ _
+    intro t; push_cast; exact p1a1_mathieuSe_add_two_pi hn _ _
   have hdper : ∀ t : ℝ, deriv (fun z => mathieuSe n z (h ^ 2)) ((t + 2 * π : ℝ) : ℂ) =
       deriv (fun z => mathieuSe n z (h ^ 2)) t := by
     intro t
     have e : (fun z => mathieuSe n z (h ^ 2)) =
         fun z => mathieuSe n (z + (2 * π : ℂ)) (h ^ 2) :=
-      funext fun w => (p3m_mathieuSe_add_two_pi hn w _).symm
+      funext fun w => (p1a1_mathieuSe_add_two_pi hn w _).symm
     push_cast
     conv_rhs => rw [e]
     have := deriv_comp_add_const (f := fun w => mathieuSe n w (h ^ 2)) (a := (2 * π : ℂ))

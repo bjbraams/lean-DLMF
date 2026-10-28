@@ -135,22 +135,8 @@ theorem regularized_connection_one_sub_recip
   ring
 
 /-- Reflection of Pochhammer symbols: `(1-y-n)_n = (-1)^n (y)_n`. -/
-theorem poch_one_sub_sub (y : ℂ) (n : ℕ) : poch (1 - y - n) n = (-1 : ℂ) ^ n * poch y n := by
-  induction n with
-  | zero => simp [poch_zero]
-  | succ n ih =>
-    rw [poch_succ_left, show 1 - y - ((n + 1 : ℕ) : ℂ) + 1 = 1 - y - n by push_cast; ring, ih,
-      poch_succ]
-    push_cast
-    ring
-
-/-- `(1-x-m)_{m-j} = (-1)^{m-j} (x)_m / (x)_j` in multiplied-out form. -/
-theorem poch_one_sub_sub_mul {x : ℂ} {m j : ℕ} (hj : j ≤ m) :
-    poch x j * poch (1 - x - m) (m - j) = (-1 : ℂ) ^ (m - j) * poch x m := by
-  have h := poch_one_sub_sub (x + j) (m - j)
-  rw [show 1 - (x + j) - ((m - j : ℕ) : ℂ) = 1 - x - m by push_cast [hj]; ring] at h
-  rw [h, show poch x m = poch x (j + (m - j)) by rw [Nat.add_sub_cancel' hj], poch_add]
-  ring
+theorem poch_one_sub_sub (y : ℂ) (n : ℕ) : poch (1 - y - n) n = (-1 : ℂ) ^ n * poch y n :=
+  poch_reflect y n
 
 @[dlmf 15.8.E6]
 theorem terminating_reciprocal
@@ -321,20 +307,6 @@ theorem terminating_one_sub
 
 /-! ### Uniqueness at the origin and Gauss's quadratic transformation -/
 
-/-- The Gauss operator annihilates `₂F₁` on the whole unit disk, including the origin. -/
-theorem gaussOperator_ordinaryHypergeometric {a b c w : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
-    (hw : ‖w‖ < 1) : gaussOperator a b c (₂F₁ a b c) w = 0 := by
-  by_cases h0 : w = 0
-  · subst h0
-    have hc0 : c ≠ 0 := by simpa using hc 0
-    simp only [gaussOperator, zero_mul, zero_add, mul_zero, sub_zero]
-    rw [deriv_ordinaryHypergeometric hc (by simp), ordinaryHypergeometric_zero,
-      ordinaryHypergeometric_zero]
-    field_simp
-    ring
-  · have := ordinaryHypergeometric_ode (a := a) (b := b) hc hw h0 (by rintro rfl; simp at hw)
-    simpa [gaussOperator] using this
-
 /-- An analytic solution of the Gauss equation near the origin with value `1` there is
 `₂F₁(a,b;c;·)`, when `c` is not a nonpositive integer. -/
 theorem eq_ordinaryHypergeometric_of_gaussOperator {a b c : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
@@ -398,6 +370,7 @@ theorem re_cpow_half_pos {y : ℂ} (hy : 0 < y.re) : 0 < (y ^ (1 / 2 : ℂ)).re 
   have h2 := (abs_lt.mp harg).2
   constructor <;> norm_num <;> nlinarith [Real.pi_pos]
 
+/-- `(y^{1/2})² = y` for `y ≠ 0`. -/
 theorem cpow_half_sq {y : ℂ} (hy : y ≠ 0) : (y ^ (1 / 2 : ℂ)) ^ 2 = y := by
   rw [sq, ← cpow_add _ _ hy]
   norm_num
@@ -577,6 +550,7 @@ theorem deriv_affine_cpow {α β s z : ℂ} (h : α + β * z ∈ slitPlane) :
   rw [cpow_sub _ _ h0, cpow_one]
   ring
 
+/-- Second derivative of `(α + βw)^s` on the slit plane: `s(s - 1)β²(α + βz)^s/(α + βz)²`. -/
 theorem deriv_deriv_affine_cpow {α β s z : ℂ} (h : α + β * z ∈ slitPlane) :
     deriv (deriv (fun w => (α + β * w) ^ s)) z =
       s * (s - 1) * β ^ 2 * (α + β * z) ^ s / (α + β * z) ^ 2 := by
@@ -714,12 +688,6 @@ theorem quadratic_double_denominator
   simp only [hP, hφdef, hH] at this
   rw [← this, show (1 : ℂ) - z / 2 = 1 + -1 / 2 * z by ring]
 
-/-- A principal power computed from any logarithm in the principal strip. -/
-theorem cpow_eq_exp_of_exp_eq' {x L : ℂ} (hx : exp L = x) (h1 : -Real.pi < L.im)
-    (h2 : L.im ≤ Real.pi) (y : ℂ) : x ^ y = exp (L * y) := by
-  have hx0 : x ≠ 0 := by rw [← hx]; exact exp_ne_zero L
-  rw [cpow_def_of_ne_zero hx0, ← hx, log_exp h1 h2]
-
 /-- Sign bookkeeping for `arg`: if `0 < re w` then `|arg w| < π/2`, and the sign of `arg`
 follows the sign of the imaginary part. -/
 theorem arg_le_zero_of_im_nonpos {w : ℂ} (hre : 0 < w.re) (him : w.im ≤ 0) : w.arg ≤ 0 := by
@@ -727,6 +695,7 @@ theorem arg_le_zero_of_im_nonpos {w : ℂ} (hre : 0 < w.re) (him : w.im ≤ 0) :
   · exact (arg_neg_iff.mpr h).le
   · exact (arg_eq_zero_iff.mpr ⟨hre.le, h⟩).le
 
+/-- For `‖z‖ < 1`, `(1 - z/2)^{-a} (1 - (z/(2 - z))²)^{-a/2} = (1 - z)^{-a/2}`. -/
 theorem phase_double_denominator {a z : ℂ} (hz : ‖z‖ < 1) :
     (1 - z / 2) ^ (-a) * (1 - (z / (2 - z)) ^ 2) ^ (-(a / 2)) = (1 - z) ^ (-a / 2) := by
   have hre1 : 0 < (1 - z).re := by
@@ -760,7 +729,7 @@ theorem phase_double_denominator {a z : ℂ} (hz : ‖z‖ < 1) :
     simp [log_im]
   have hb := abs_lt.mp harg1
   have hc := abs_lt.mp harg2
-  rw [cpow_eq_exp_of_exp_eq' hexp (by rw [him]; rcases hsame with h | h <;> nlinarith)
+  rw [cpow_eq_exp_of_exp_eq hexp (by rw [him]; rcases hsame with h | h <;> nlinarith)
       (by rw [him]; rcases hsame with h | h <;> nlinarith),
     cpow_def_of_ne_zero hv, cpow_def_of_ne_zero hu, ← exp_add]
   congr 1
@@ -1353,7 +1322,7 @@ theorem phase_quadratic_sqrt {a z : ℂ} (hz : ‖z‖ < 1) (hs : z ∈ slitPlan
       exp_nat_mul, exp_log h1, exp_log h2]
   have him : (log (1 + z) - 2 * log (1 + t)).im = (1 + z).arg - 2 * (1 + t).arg := by
     simp [log_im]
-  rw [cpow_eq_exp_of_exp_eq' hexp (by rw [him]; rcases hsame with h | h <;> nlinarith)
+  rw [cpow_eq_exp_of_exp_eq hexp (by rw [him]; rcases hsame with h | h <;> nlinarith)
       (by rw [him]; rcases hsame with h | h <;> nlinarith),
     cpow_def_of_ne_zero h2, cpow_def_of_ne_zero h1, ← exp_add]
   congr 1
@@ -1810,6 +1779,7 @@ theorem re_cpow_third_pos {x : ℂ} (hx : x ≠ 0) : 0 < (x ^ (1 / 3 : ℂ)).re 
     simp [log_im]
     nlinarith [Real.pi_pos]
 
+/-- `(x^{1/3})³ = x`. -/
 theorem cpow_third_cube (x : ℂ) : (x ^ (1 / 3 : ℂ)) ^ 3 = x := by
   rw [← cpow_nat_mul]; norm_num
 

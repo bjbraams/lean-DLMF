@@ -45,6 +45,7 @@ open DLMF.Confluent
 
 /-! ### `F_ℓ` and `G_ℓ` in terms of `f` and `h` -/
 
+/-- For `η ≠ 0`, `κ(1/η², r) = i|η|`. -/
 lemma c33b_kappa_inv_sq {η : ℝ} (hη : η ≠ 0) (r : ℝ) :
     coulombKappa (1 / η ^ 2) r = I * |η| := by
   have hpos : 0 < 1 / η ^ 2 := by positivity
@@ -53,6 +54,8 @@ lemma c33b_kappa_inv_sq {η : ℝ} (hη : η ≠ 0) (r : ℝ) :
   rw [Real.rpow_neg hpos.le, ← Real.sqrt_eq_rpow, one_div, Real.sqrt_inv, inv_inv,
     Real.sqrt_sq_eq_abs]
 
+/-- At `κ = iη`, the Kummer form of `f(ε,ℓ;r)` at `r = -ηρ` is `(-2η)^{ℓ+1}/(2ℓ+1)!` times the
+Kummer form of the Coulomb wave. -/
 lemma c33b_coulombfKummer_I (η ρ : ℝ) (hη : η ≠ 0) (ℓ : ℕ) :
     coulombfKummer (I * η) ℓ (-η * ρ) = (-2 * η) ^ (ℓ + 1) * coulombWave ℓ η ρ / (2 * ℓ + 1)! := by
   unfold coulombfKummer coulombWave
@@ -95,21 +98,26 @@ theorem coulombG_eq_coulombh (ℓ : ℕ) {η : ℝ} (hη : η ≠ 0) {ρ : ℝ} 
 
 /-! ### `ε > 0`: `f`, `h`, `s`, `c` in terms of `F_ℓ` and `G_ℓ` (`τ = ε^{1/2}`) -/
 
+/-- For real `x ≥ 0`, `x^{1/2} = √x` as complex numbers. -/
 lemma c33b_cpow_half {x : ℝ} (hx : 0 ≤ x) : ((x : ℝ) : ℂ) ^ (1 / 2 : ℂ) = (Real.sqrt x : ℂ) := by
   rw [Real.sqrt_eq_rpow, Complex.ofReal_cpow hx]; push_cast; ring_nf
 
+/-- For real `x ≥ 0`, `x^{-1/2} = 1/√x` as complex numbers. -/
 lemma c33b_cpow_neg_half {x : ℝ} (hx : 0 ≤ x) :
     ((x : ℝ) : ℂ) ^ (-(1 / 2) : ℂ) = ((Real.sqrt x)⁻¹ : ℝ) := by
   rw [Real.sqrt_eq_rpow, ← Real.rpow_neg hx, Complex.ofReal_cpow hx]; push_cast; ring_nf
 
+/-- For `ε ≥ 0`, the product `A(ε,ℓ) = ∏ (1 + εk²)` is positive. -/
 lemma c33b_coulombAProd_pos {ε : ℝ} (hε : 0 ≤ ε) (ℓ : ℕ) : 0 < coulombAProd ε ℓ :=
   Finset.prod_pos fun k _ => by positivity
 
+/-- For `ε > 0`, `1 - e^{-2π/√ε} > 0`. -/
 lemma c33b_one_sub_exp_pos {ε : ℝ} (hε : 0 < ε) : 0 < 1 - Real.exp (-(2 * π / Real.sqrt ε)) := by
   have : 0 < 2 * π / Real.sqrt ε := by have := Real.sqrt_pos.mpr hε; positivity
   have := Real.exp_lt_one_iff.mpr (neg_neg_of_pos this)
   linarith
 
+/-- For `ε > 0`, `B(ε,ℓ) = A(ε,ℓ)/(1 - e^{-2π/√ε})` (DLMF 33.14.10). -/
 lemma c33b_coulombBFactor_pos {ε : ℝ} (hε : 0 < ε) (ℓ : ℕ) :
     coulombBFactor ε ℓ = coulombAProd ε ℓ / (1 - Real.exp (-(2 * π / Real.sqrt ε))) := by
   simp only [coulombBFactor, hε, ↓reduceIte]

@@ -44,6 +44,7 @@ namespace DLMF.Bailey
 
 /-! ### The limiting form of Bailey's lemma (`ρ₁, ρ₂ → ∞`) -/
 
+/-- `m (m - 1) + m = m²` in `ℕ` (truncated subtraction). -/
 private lemma mul_pred_add (m : ℕ) : m * (m - 1) + m = m * m := by
   rcases m with _ | m
   · simp
@@ -53,10 +54,13 @@ private lemma mul_pred_add (m : ℕ) : m * (m - 1) + m = m * m := by
 private def limTerm (q A : ℂ) (N m : ℕ) : ℂ :=
   qBinom q N m * q ^ (m * (m - 1)) * A ^ m * qPochhammer (A * q ^ m) q (N - m)
 
+/-- The telescoping certificate for `lim_step`: `0` at `k = 0`, then minus the shifted summand. -/
 private def limCert (q A : ℂ) (N : ℕ) : ℕ → ℂ
   | 0 => 0
   | k + 1 => -(A ^ (k + 1) * q ^ (k * k + N) * qBinom q N k * qPochhammer (A * q ^ k) q (N - k))
 
+/-- One step of the recursion in `N` for the limiting Saalschütz sum, as a telescoping
+difference. -/
 private lemma lim_step (q A : ℂ) (N m : ℕ) (hm : m ≤ N + 1) :
     limTerm q A (N + 1) m - limTerm q A N m = limCert q A N (m + 1) - limCert q A N m := by
   rcases m with _ | k
@@ -357,6 +361,7 @@ theorem bailey_lemma {a q rho1 rho2 : ℂ} {α β : ℕ → ℂ} (h : IsBaileyPa
 
 /-! ### Helpers for Watson's transformation -/
 
+/-- `C(n+1, 2) = C(n, 2) + n`. -/
 private lemma choose_two_succ (n : ℕ) : (n + 1).choose 2 = n.choose 2 + n := by
   rw [Nat.choose_succ_succ, Nat.choose_one_right, add_comm]
 
@@ -460,11 +465,14 @@ theorem unit_pair (a q : ℂ) (n : ℕ) (hqq : ∀ m ≤ n, qPochhammer q q m �
   rw [← hB, hS, unitAlpha]
   field_simp
 
+/-- `2 C(k, 2) + k = k²`. -/
 private lemma two_choose_add (k : ℕ) : k.choose 2 + k.choose 2 + k = k * k := by
   induction k with
   | zero => simp
   | succ k ih => rw [choose_two_succ]; nlinarith
 
+/-- `(a;q)_k (1 - a q^{2k}) = (1 - a) unitD a q k`: the very-well-poised factor in
+terms of `unitD`. -/
 theorem qPochhammer_mul_one_sub_pow (a q : ℂ) (k : ℕ) :
     qPochhammer a q k * (1 - a * q ^ (2 * k)) = (1 - a) * unitD a q k := by
   rcases k with _ | k
@@ -472,6 +480,7 @@ theorem qPochhammer_mul_one_sub_pow (a q : ℂ) (k : ℕ) :
   · simp only [unitD, qPochhammer_succ']
     ring
 
+/-- If `x qᵏ ≠ 1` for all `k ≤ n`, then `(x;q)_m ≠ 0` for every `m ≤ n + 1`. -/
 theorem qPochhammer_ne_zero_of_forall {x q : ℂ} {n : ℕ} (h : ∀ k ≤ n, x * q ^ k ≠ 1) :
     ∀ m ≤ n + 1, qPochhammer x q m ≠ 0 := by
   intro m hm
@@ -479,6 +488,7 @@ theorem qPochhammer_ne_zero_of_forall {x q : ℂ} {n : ℕ} (h : ∀ k ≤ n, x 
   intro i hi
   exact sub_ne_zero.mpr (h i (by simp at hi; omega)).symm
 
+/-- `(qⁿ)ᵏ = q^{C(k,2)} q^{C(k,2)} qᵏ q^{(n-k)k}` for `k ≤ n`. -/
 private lemma pow_aux (q : ℂ) {n k : ℕ} (hkn : k ≤ n) :
     (q ^ n) ^ k = q ^ k.choose 2 * q ^ k.choose 2 * q ^ k * q ^ ((n - k) * k) := by
   rw [← pow_mul, ← pow_add, ← pow_add, ← pow_add, two_choose_add]
@@ -628,11 +638,13 @@ theorem watsonR_of_ne {a b c d e q : ℂ} (n : ℕ) (ha : a ≠ 0) (hb : b ≠ 0
   rw [sum_congr rfl h8, ← mul_sum, ← step2, mul_sum, mul_sum]
   exact (sum_congr rfl h4).symm
 
+/-- `t ↦ (f(t);q)_k` is continuous when `f` is. -/
 theorem continuous_qPochhammer_comp {f : ℂ → ℂ} (hf : Continuous f) (q : ℂ) (k : ℕ) :
     Continuous fun t => qPochhammer (f t) q k := by
   simp only [qPochhammer_eq_prod]
   exact continuous_finsetProd _ fun i _ => continuous_const.sub (hf.mul continuous_const)
 
+/-- `t ↦ unitD t q k` is continuous. -/
 theorem continuous_unitD (q : ℂ) (k : ℕ) : Continuous fun t => unitD t q k := by
   rcases k with _ | k
   · simp only [unitD]; exact continuous_const
@@ -640,11 +652,13 @@ theorem continuous_unitD (q : ℂ) (k : ℕ) : Continuous fun t => unitD t q k :
     exact (continuous_qPochhammer_comp (continuous_id.mul continuous_const) q k).mul
       (continuous_const.sub (continuous_id.mul continuous_const))
 
+/-- In a punctured neighbourhood of `a`, eventually `t ≠ c`. -/
 private lemma eventually_ne_punctured (a c : ℂ) : ∀ᶠ t in 𝓝[≠] a, t ≠ c := by
   by_cases h : a = c
   · subst h; exact eventually_nhdsWithin_iff.mpr (Filter.Eventually.of_forall fun t ht => ht)
   · exact (continuousAt_id.eventually_ne h).filter_mono nhdsWithin_le_nhds
 
+/-- For `q ≠ 0`, eventually in a punctured neighbourhood of `a`, `(tq;q)_m ≠ 0`. -/
 private lemma eventually_qPochhammer_ne_zero (a q : ℂ) (hq : q ≠ 0) (m : ℕ) :
     ∀ᶠ t in 𝓝[≠] a, qPochhammer (t * q) q m ≠ 0 := by
   have h : ∀ᶠ t in 𝓝[≠] a, ∀ i ∈ range m, t ≠ (q * q ^ i)⁻¹ :=
@@ -758,11 +772,6 @@ theorem watsonR {a b c d e q : ℂ} (n : ℕ) (ha : a ≠ 0) (hb : b ≠ 0) (hc 
     tendsto_const_nhds.congr' (hev.mono fun t ht => ht.symm)
   exact tendsto_nhds_unique h1 h2
 
-private lemma qPochhammer_recip_pow_zero {q : ℂ} (hq : q ≠ 0) {n k : ℕ} (hk : n < k) :
-    qPochhammer (q⁻¹ ^ n) q k = 0 := by
-  rw [qPochhammer_eq_prod]
-  exact prod_eq_zero (mem_range.mpr hk) (by rw [inv_pow]; field_simp; ring)
-
 /-- Watson's transformation of a terminating very-well-poised `₈φ₇` into a balanced `₄φ₃`
 (AAR §12.3), with `f = q⁻ⁿ`. The listed denominator parameters must not produce vanishing
 factors in the finite sums. -/
@@ -805,7 +814,7 @@ theorem watson_transformation {a b c d e q : ℂ} (n : ℕ) (ha : a ≠ 0) (hb :
   have hW := watsonR n ha hb hc hd he hq (fun m hm => HQ m (by omega)) (HB n (by omega))
     (HC n (by omega)) (HD n (by omega)) (HE n (by omega)) (HY n (by omega)) (HN n (by omega))
   have hzero : ∀ k, n < k → qPochhammer (q⁻¹ ^ n) q k = 0 :=
-    fun k hk => qPochhammer_recip_pow_zero hq hk
+    fun k hk => by rw [inv_pow]; exact qPochhammer_recip_pow_eq_zero hq hk
   unfold basicHG
   rw [tsum_eq_sum (s := range (n + 1)), tsum_eq_sum (s := range (n + 1))]
   rotate_left
@@ -856,11 +865,13 @@ theorem watson_transformation {a b c d e q : ℂ} (n : ℕ) (ha : a ≠ 0) (hb :
 
 /-! ### Letting `n → ∞` -/
 
+/-- A convergent sequence is bounded in norm. -/
 private lemma exists_norm_le_of_tendsto {u : ℕ → ℂ} {L : ℂ} (hu : Tendsto u atTop (𝓝 L)) :
     ∃ C, ∀ n, ‖u n‖ ≤ C := by
   obtain ⟨C, hC⟩ := isBounded_iff_forall_norm_le.mp (Metric.isBounded_range_of_tendsto u hu)
   exact ⟨C, fun n => hC _ ⟨n, rfl⟩⟩
 
+/-- `(x;q)_m ≠ 0` when `|x| < 1` and `|q| < 1`. -/
 private lemma qPochhammer_ne_zero_of_norm {x q : ℂ} (hx : ‖x‖ < 1) (hq : ‖q‖ < 1) (m : ℕ) :
     qPochhammer x q m ≠ 0 := by
   rw [qPochhammer_eq_prod, prod_ne_zero_iff]
@@ -1032,16 +1043,19 @@ theorem qPochhammerInf_mod_five {q : ℂ} (hq : ‖q‖ < 1) :
   refine hR.congr fun M => ?_
   simp only [Function.comp_apply, qPochhammer_five_mul]
 
+/-- `2 C(m, 2) = m (m - 1)` in `ℤ`. -/
 private lemma choose_two_cast (m : ℕ) : ((m.choose 2 : ℕ) : ℤ) * 2 = (m : ℤ) * ((m : ℤ) - 1) := by
   have h := two_choose_add m
   zify at h
   linear_combination h
 
+/-- The triangular exponent `tri m = m(m-1)/2` equals `C(m, 2)` at a natural `m`. -/
 private lemma tri_natCast (m : ℕ) : DLMF.QSeries.TripleProduct.tri (m : ℤ) = (m.choose 2 : ℕ) := by
   have h1 := DLMF.QSeries.TripleProduct.tri_mul_two (m : ℤ)
   have h2 := choose_two_cast m
   omega
 
+/-- The triangular exponent at `-(m+1)` equals `C(m+2, 2)`. -/
 private lemma tri_neg_succ (m : ℕ) :
     DLMF.QSeries.TripleProduct.tri (-((m : ℤ) + 1)) = ((m + 1 + 1).choose 2 : ℕ) := by
   have h1 := DLMF.QSeries.TripleProduct.tri_mul_two (-((m : ℤ) + 1))
@@ -1059,6 +1073,7 @@ private lemma jtp5_nat (q z : ℂ) (j m : ℕ) (hz : z = q ^ j) :
     hz, ← pow_mul, ← pow_mul, pow_add, mul_comm j m]
   ring
 
+/-- The Jacobi triple product summand at base `q⁵` and `z = qʲ`, at the negative index `-(m+1)`. -/
 private lemma jtp5_neg (q z : ℂ) (hq : q ≠ 0) (j m E : ℕ) (hz : z = q ^ j)
     (hE : 5 * (m + 1 + 1).choose 2 = E + j * (m + 1)) :
     (-1 : ℂ) ^ (-((m : ℤ) + 1)) *

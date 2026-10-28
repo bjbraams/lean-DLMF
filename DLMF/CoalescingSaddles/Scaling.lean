@@ -31,21 +31,25 @@ namespace DLMF.CoalescingSaddles
 
 /-! ### Scaling of contours and potentials -/
 
+/-- The contour direction is invariant under positive rescaling of the parameter. -/
 lemma s36a_dir_smul (K : ℕ) {c : ℝ} (hc : 0 < c) (r : ℝ) :
     cuspoidContourDir K (c * r) = cuspoidContourDir K r := by
   unfold cuspoidContourDir
   simp only [mul_nonneg_iff_of_pos_left hc]
 
+/-- The cuspoid contour is homogeneous: `t(c r) = c t(r)` for `c > 0`. -/
 lemma s36a_contour_smul (K : ℕ) {c : ℝ} (hc : 0 < c) (r : ℝ) :
     cuspoidContour K (c * r) = (c : ℂ) * cuspoidContour K r := by
   unfold cuspoidContour
   rw [s36a_dir_smul K hc]; push_cast; ring
 
+/-- `(k^{1/n})ⁿ = k` for `k > 0`, `n > 0`. -/
 lemma s36a_rpow_root_pow {k : ℝ} (hk : 0 < k) (n : ℕ) (hn : 0 < n) :
     (k ^ (1 / (n : ℝ))) ^ n = k := by
   rw [← Real.rpow_natCast, ← Real.rpow_mul hk.le, one_div_mul_cancel (by exact_mod_cast hn.ne'),
     Real.rpow_one]
 
+/-- `(k^{1/n})^m k^{1 - m/n} = k` for `k > 0`, `n > 0`. -/
 lemma s36a_rpow_root_pow_mul {k : ℝ} (hk : 0 < k) (n m : ℕ) (hn : 0 < n) :
     (k ^ (1 / (n : ℝ))) ^ m * k ^ (1 - (m : ℝ) / n) = k := by
   rw [← Real.rpow_natCast, ← Real.rpow_mul hk.le, ← Real.rpow_add hk]
@@ -102,6 +106,8 @@ theorem cuspoidDiffraction_eq_scale (K : ℕ) (x : Fin K → ℝ) {k : ℝ} (hk 
   congr 1
   field_simp; ring
 
+/-- The exponent identities `(k^{1/3})³ = k`, `k^{1/3} k^{2/3} = k` and `(k^{1/3})² k^{1/3} = k`
+behind the umbilic scaling. -/
 lemma s36a_umbilic_coeffs {k : ℝ} (hk : 0 < k) :
     (k ^ (1 / (3 : ℝ))) ^ 3 = k ∧ k ^ (1 / (3 : ℝ)) * k ^ ((2 : ℝ) / 3) = k ∧
       (k ^ (1 / (3 : ℝ))) ^ 2 * k ^ ((1 : ℝ) / 3) = k := by
@@ -148,9 +154,11 @@ lemma s36a_elliptic_potential_scale (x y z : ℝ) {k : ℝ} (hk : 0 < k) (s t : 
   linear_combination (s ^ 3 - 3 * s * t ^ 2) * e1 + (y * t + x * s) * e2 +
     (z * (s ^ 2 + t ^ 2)) * e3
 
+/-- `ℝ × ℝ` has real dimension `2`. -/
 lemma s36a_finrank_prod : Module.finrank ℝ (ℝ × ℝ) = 2 := by
   rw [Module.finrank_prod, Module.finrank_self]
 
+/-- `k (k^{1/3})^{-2} = k^{β^{(U)}}` with the umbilic singularity index `β^{(U)} = 1/3`. -/
 lemma s36a_umbilic_prefactor {k : ℝ} (hk : 0 < k) :
     k * ((k ^ (1 / (3 : ℝ))) ^ 2)⁻¹ = k ^ umbilicSingularityIndex := by
   have h : ((k ^ (1 / (3 : ℝ))) ^ 2)⁻¹ = k ^ (-(2 / 3 : ℝ)) := by
@@ -158,6 +166,8 @@ lemma s36a_umbilic_prefactor {k : ℝ} (hk : 0 < k) :
   rw [h, umbilicSingularityIndex, show (1 / 3 : ℝ) = 1 + -(2 / 3) by norm_num,
     Real.rpow_add hk, Real.rpow_one]
 
+/-- Lebesgue measure on `ℝ × ℝ` is an additive Haar measure (as in Mathlib's
+`Mathlib.Analysis.SpecialFunctions.PolarCoord`, which this file does not import). -/
 instance s36a_isAddHaar_prod : (volume : Measure (ℝ × ℝ)).IsAddHaarMeasure := by
   rw [Measure.volume_eq_prod]; infer_instance
 
@@ -189,6 +199,7 @@ theorem hyperbolicUmbilicDiffraction_eq_scale (x y z : ℝ) {k : ℝ} (hk : 0 < 
     abs_of_pos (inv_pos.2 (pow_pos hcpos 2)), real_smul, ← mul_assoc, ← ofReal_mul,
     s36a_umbilic_prefactor hk]
 
+/-- Positive dilations preserve the open positive quadrant. -/
 lemma s36a_smul_quadrant {c : ℝ} (hc : 0 < c) :
     c • (Ioi (0 : ℝ) ×ˢ Ioi (0 : ℝ)) = Ioi 0 ×ˢ Ioi 0 := by
   ext p
@@ -201,6 +212,7 @@ lemma s36a_smul_quadrant {c : ℝ} (hc : 0 < c) :
   · rintro ⟨h1, h2⟩
     exact ⟨mul_pos (inv_pos.2 hc) h1, mul_pos (inv_pos.2 hc) h2⟩
 
+/-- Scaling law for one quadrant integral of the elliptic umbilic diffraction catastrophe. -/
 lemma s36a_quadrant_scale (x y z : ℝ) {k : ℝ} (hk : 0 < k) (j l : Fin 3) :
     ellipticUmbilicQuadrant k x y z j l =
       (((k ^ (1 / (3 : ℝ))) ^ 2)⁻¹ : ℝ) * ellipticUmbilicQuadrant 1
@@ -246,6 +258,7 @@ theorem ellipticUmbilicDiffraction_eq_scale (x y z : ℝ) {k : ℝ} (hk : 0 < k)
 
 /-! ### Scaling exponents (36.6.3–36.6.5, Table 36.6.1) -/
 
+/-- `∑_{m=1}^K m = K(K+1)/2` in `ℝ`. -/
 lemma s36a_sum_Icc_cast (K : ℕ) : ∑ m ∈ Finset.Icc 1 K, (m : ℝ) = K * (K + 1) / 2 := by
   induction K with
   | zero => simp

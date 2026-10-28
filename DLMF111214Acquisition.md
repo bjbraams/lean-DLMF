@@ -219,10 +219,10 @@ and remaining admissions. The additional names list theorem statements without a
 numbered-equation index; these include prose assertions, auxiliary specifications
 and source checks. They are acquired statements unless listed as proved above.
 
-- [DLMF/Legendre/Associated.lean](DLMF/Legendre/Associated.lean): 14 definitions, 146 statements, 146 proved, 0 admitted.
+- [DLMF/Legendre/Associated.lean](DLMF/Legendre/Associated.lean): 14 definitions, 148 statements, 148 proved, 0 admitted.
   Additional assertions: [`DLMF.Legendre.associatedP_zero_order`](DLMF/Legendre/Associated.lean#L91), [`DLMF.Legendre.associatedQ_zero_order`](DLMF/Legendre/Associated.lean#L102), [`DLMF.Legendre.associatedP_analytic`](DLMF/Legendre/Associated.lean#L109), [`DLMF.Legendre.associatedP_entire_degree`](DLMF/Legendre/Associated.lean#L114), [`DLMF.Legendre.associatedP_entire_order`](DLMF/Legendre/Associated.lean#L119), [`DLMF.Legendre.associatedP_real`](DLMF/Legendre/Associated.lean#L130), [`DLMF.Legendre.olverQ_analytic`](DLMF/Legendre/Associated.lean#L135), [`DLMF.Legendre.olverQ_entire_degree`](DLMF/Legendre/Associated.lean#L140), [`DLMF.Legendre.olverQ_entire_order`](DLMF/Legendre/Associated.lean#L145), [`DLMF.Legendre.olverQ_real`](DLMF/Legendre/Associated.lean#L156), [`DLMF.Legendre.ferrersP_real`](DLMF/Legendre/Associated.lean#L167), [`DLMF.Legendre.ferrersQ_real`](DLMF/Legendre/Associated.lean#L172), [`DLMF.Legendre.ferrersP_conical_real`](DLMF/Legendre/Associated.lean#L177).
 
-- [DLMF/Legendre/AssociatedRecurrences.lean](DLMF/Legendre/AssociatedRecurrences.lean): 0 definitions, 70 statements, 70 proved, 0 admitted.
+- [DLMF/Legendre/AssociatedRecurrences.lean](DLMF/Legendre/AssociatedRecurrences.lean): 0 definitions, 69 statements, 69 proved, 0 admitted.
 
 - [DLMF/Legendre/Conical.lean](DLMF/Legendre/Conical.lean): 4 definitions, 18 statements, 15 proved, 3 admitted.
   Additional assertions: [`DLMF.Legendre.conical_positive`](DLMF/Legendre/Conical.lean#L89).
@@ -238,15 +238,15 @@ and source checks. They are acquired statements unless listed as proved above.
 - [DLMF/Legendre/Harmonics.lean](DLMF/Legendre/Harmonics.lean): 9 definitions, 40 statements, 40 proved, 0 admitted.
   Additional assertions: [`DLMF.Legendre.herglotz_generating`](DLMF/Legendre/Harmonics.lean#L105), [`DLMF.Legendre.scaledOblate_real`](DLMF/Legendre/Harmonics.lean#L118).
 
-- [DLMF/Legendre/Hypergeometric.lean](DLMF/Legendre/Hypergeometric.lean): 3 definitions, 39 statements, 37 proved, 2 admitted.
+- [DLMF/Legendre/Hypergeometric.lean](DLMF/Legendre/Hypergeometric.lean): 3 definitions, 37 statements, 35 proved, 2 admitted.
 
 - [DLMF/Legendre/IntegerTheory.lean](DLMF/Legendre/IntegerTheory.lean): 1 definitions, 20 statements, 20 proved, 0 admitted.
 
-- [DLMF/Legendre/IntegralRepresentations.lean](DLMF/Legendre/IntegralRepresentations.lean): 7 definitions, 62 statements, 62 proved, 0 admitted.
+- [DLMF/Legendre/IntegralRepresentations.lean](DLMF/Legendre/IntegralRepresentations.lean): 7 definitions, 58 statements, 58 proved, 0 admitted.
 
-- [DLMF/Legendre/Integrals.lean](DLMF/Legendre/Integrals.lean): 9 definitions, 144 statements, 142 proved, 2 admitted.
+- [DLMF/Legendre/Integrals.lean](DLMF/Legendre/Integrals.lean): 9 definitions, 140 statements, 138 proved, 2 admitted.
 
-- [DLMF/Legendre/LocalTheory.lean](DLMF/Legendre/LocalTheory.lean): 2 definitions, 6 statements, 6 proved, 0 admitted.
+- [DLMF/Legendre/LocalTheory.lean](DLMF/Legendre/LocalTheory.lean): 2 definitions, 5 statements, 5 proved, 0 admitted.
   Additional assertions: [`DLMF.Legendre.legendre_finite_singular_exponents_1`](DLMF/Legendre/LocalTheory.lean#L34), [`DLMF.Legendre.legendre_finite_singular_exponents_2`](DLMF/Legendre/LocalTheory.lean#L39), [`DLMF.Legendre.legendre_infinite_singular_exponents`](DLMF/Legendre/LocalTheory.lean#L44), [`DLMF.Legendre.ferrersP_reflected_dependence`](DLMF/Legendre/LocalTheory.lean#L59), [`DLMF.Legendre.associatedPQ_independent`](DLMF/Legendre/LocalTheory.lean#L64), [`DLMF.Legendre.ferrersP_positive_integer_order_zero_count`](DLMF/Legendre/LocalTheory.lean#L69).
 
 - [DLMF/Legendre/ParameterLimits.lean](DLMF/Legendre/ParameterLimits.lean): 2 definitions, 13 statements, 13 proved, 0 admitted.
@@ -256,17 +256,17 @@ and source checks. They are acquired statements unless listed as proved above.
 
 - [DLMF/Legendre/RelatedFunctions.lean](DLMF/Legendre/RelatedFunctions.lean): 3 definitions, 4 statements, 4 proved, 0 admitted.
 
-- [DLMF/Legendre/Series.lean](DLMF/Legendre/Series.lean): 8 definitions, 61 statements, 61 proved, 0 admitted.
+- [DLMF/Legendre/Series.lean](DLMF/Legendre/Series.lean): 8 definitions, 60 statements, 60 proved, 0 admitted.
   Additional assertions: [`DLMF.Legendre.ferrersP_fourier_absolute`](DLMF/Legendre/Series.lean#L32), [`DLMF.Legendre.ferrersQ_fourier_absolute`](DLMF/Legendre/Series.lean#L49), [`DLMF.Legendre.ferrersP_fourier_not_absolute`](DLMF/Legendre/Series.lean#L167), [`DLMF.Legendre.ferrersQ_fourier_not_absolute`](DLMF/Legendre/Series.lean#L175), [`DLMF.Legendre.ferrersPQ_fourier_hypergeometric`](DLMF/Legendre/Series.lean#L183).
 
-- [DLMF/Legendre/Singularities.lean](DLMF/Legendre/Singularities.lean): 0 definitions, 24 statements, 24 proved, 0 admitted.
+- [DLMF/Legendre/Singularities.lean](DLMF/Legendre/Singularities.lean): 0 definitions, 22 statements, 22 proved, 0 admitted.
 
 - [DLMF/Legendre/SourceChecks.lean](DLMF/Legendre/SourceChecks.lean): 0 definitions, 2 statements, 2 proved, 0 admitted.
   Additional assertions: [`DLMF.Legendre.associatedP_one_neg_half`](DLMF/Legendre/SourceChecks.lean#L25), [`DLMF.Legendre.dlmf_14_27_no_boundary_zero`](DLMF/Legendre/SourceChecks.lean#L56).
 
-- [DLMF/Legendre/SpecialValues.lean](DLMF/Legendre/SpecialValues.lean): 0 definitions, 44 statements, 44 proved, 0 admitted.
+- [DLMF/Legendre/SpecialValues.lean](DLMF/Legendre/SpecialValues.lean): 0 definitions, 43 statements, 43 proved, 0 admitted.
 
-- [DLMF/Legendre/Sums.lean](DLMF/Legendre/Sums.lean): 2 definitions, 31 statements, 28 proved, 3 admitted.
+- [DLMF/Legendre/Sums.lean](DLMF/Legendre/Sums.lean): 2 definitions, 29 statements, 26 proved, 3 admitted.
 
 - [DLMF/Legendre/Toroidal.lean](DLMF/Legendre/Toroidal.lean): 5 definitions, 27 statements, 27 proved, 0 admitted.
 
@@ -275,7 +275,7 @@ and source checks. They are acquired statements unless listed as proved above.
 - [DLMF/Legendre/UniformCoordinates.lean](DLMF/Legendre/UniformCoordinates.lean): 31 definitions, 92 statements, 91 proved, 1 admitted.
   Additional assertions: [`DLMF.Legendre.legendreOrderEta_bijective`](DLMF/Legendre/UniformCoordinates.lean#L62), [`DLMF.Legendre.legendreDegreeY_monotone`](DLMF/Legendre/UniformCoordinates.lean#L92), [`DLMF.Legendre.besselEnvelopeCross_spec`](DLMF/Legendre/UniformCoordinates.lean#L152).
 
-- [DLMF/Legendre/Zeros.lean](DLMF/Legendre/Zeros.lean): 10 definitions, 46 statements, 46 proved, 0 admitted.
+- [DLMF/Legendre/Zeros.lean](DLMF/Legendre/Zeros.lean): 10 definitions, 45 statements, 45 proved, 0 admitted.
   Additional assertions: [`DLMF.Legendre.ferrersP_zero_count`](DLMF/Legendre/Zeros.lean#L46), [`DLMF.Legendre.ferrersP_nonpositive_order_zero_count`](DLMF/Legendre/Zeros.lean#L51), [`DLMF.Legendre.ferrersP_nat_degree_zero_count`](DLMF/Legendre/Zeros.lean#L56), [`DLMF.Legendre.ferrersQ_nat_zero_count`](DLMF/Legendre/Zeros.lean#L61), [`DLMF.Legendre.ferrersPQ_interlace`](DLMF/Legendre/Zeros.lean#L70), [`DLMF.Legendre.ferrersQ_zero_count_range`](DLMF/Legendre/Zeros.lean#L75), [`DLMF.Legendre.associatedP_zero_count`](DLMF/Legendre/Zeros.lean#L84), [`DLMF.Legendre.olverQ_no_exterior_zero`](DLMF/Legendre/Zeros.lean#L89), [`DLMF.Legendre.olverQ_at_most_one_exterior_zero`](DLMF/Legendre/Zeros.lean#L94).
 
 - [DLMF/ParabolicCylinder/AsymptoticsZeros.lean](DLMF/ParabolicCylinder/AsymptoticsZeros.lean): 5 definitions, 30 statements, 29 proved, 1 admitted.
@@ -345,102 +345,102 @@ No selected numbered equations. Mathematical prose is recorded in the module inv
 
 ### [§11.2 Definitions](https://dlmf.nist.gov/11.2)
 
-- [11.2.E1](https://dlmf.nist.gov/11.2.E1): [`DLMF.Struve.struveH`](DLMF/Struve/Basic.lean#L179) (defined); [`DLMF.Struve.hasSum_struveHCore`](DLMF/Struve/Basic.lean#L208) (proved).
-- [11.2.E2](https://dlmf.nist.gov/11.2.E2): [`DLMF.Struve.struveL`](DLMF/Struve/Basic.lean#L321) (defined); [`DLMF.Struve.hasSum_struveLCore`](DLMF/Struve/Basic.lean#L339) (proved).
-- [11.2.E3](https://dlmf.nist.gov/11.2.E3): [`DLMF.Struve.struveH_zero_order_series`](DLMF/Struve/Basic.lean#L875) (proved).
-- [11.2.E4](https://dlmf.nist.gov/11.2.E4): [`DLMF.Struve.struveL_zero_order_series`](DLMF/Struve/Basic.lean#L893) (proved).
-- [11.2.E5](https://dlmf.nist.gov/11.2.E5): [`DLMF.Struve.struveK`](DLMF/Struve/Basic.lean#L494) (defined).
-- [11.2.E6](https://dlmf.nist.gov/11.2.E6): [`DLMF.Struve.struveM`](DLMF/Struve/Basic.lean#L499) (defined).
-- [11.2.E7](https://dlmf.nist.gov/11.2.E7): [`DLMF.Struve.struveEquation`](DLMF/Struve/Basic.lean#L504) (defined).
-- [11.2.E8](https://dlmf.nist.gov/11.2.E8): [`DLMF.Struve.struveH_ode`](DLMF/Struve/Basic.lean#L546) (proved); [`DLMF.Struve.struveK_ode`](DLMF/Struve/Basic.lean#L559) (proved).
-- [11.2.E9](https://dlmf.nist.gov/11.2.E9): [`DLMF.Struve.struveEquation`](DLMF/Struve/Basic.lean#L504) (defined).
-- [11.2.E10](https://dlmf.nist.gov/11.2.E10): [`DLMF.Struve.struveL_ode`](DLMF/Struve/Basic.lean#L580) (proved); [`DLMF.Struve.struveM_ode`](DLMF/Struve/Basic.lean#L593) (proved).
-- [11.2.E11](https://dlmf.nist.gov/11.2.E11): [`DLMF.Struve.struve_general_solution_11`](DLMF/Struve/Basic.lean#L618) (proved).
-- [11.2.E12](https://dlmf.nist.gov/11.2.E12): [`DLMF.Struve.struve_general_solution_12`](DLMF/Struve/Basic.lean#L640) (proved).
-- [11.2.E13](https://dlmf.nist.gov/11.2.E13): [`DLMF.Struve.struve_general_solution_13`](DLMF/Struve/Basic.lean#L657) (proved).
-- [11.2.E14](https://dlmf.nist.gov/11.2.E14): [`DLMF.Struve.struve_general_solution_14`](DLMF/Struve/Basic.lean#L676) (proved).
-- [11.2.E15](https://dlmf.nist.gov/11.2.E15): [`DLMF.Struve.struve_general_solution_15`](DLMF/Struve/Basic.lean#L695) (proved).
-- [11.2.E16](https://dlmf.nist.gov/11.2.E16): [`DLMF.Struve.struve_general_solution_16`](DLMF/Struve/Basic.lean#L800) (proved).
-- [11.2.E17](https://dlmf.nist.gov/11.2.E17): [`DLMF.Struve.struve_general_solution_17`](DLMF/Struve/Basic.lean#L822) (proved).
+- [11.2.E1](https://dlmf.nist.gov/11.2.E1): [`DLMF.Struve.struveH`](DLMF/Struve/Basic.lean#L177) (defined); [`DLMF.Struve.hasSum_struveHCore`](DLMF/Struve/Basic.lean#L206) (proved).
+- [11.2.E2](https://dlmf.nist.gov/11.2.E2): [`DLMF.Struve.struveL`](DLMF/Struve/Basic.lean#L319) (defined); [`DLMF.Struve.hasSum_struveLCore`](DLMF/Struve/Basic.lean#L337) (proved).
+- [11.2.E3](https://dlmf.nist.gov/11.2.E3): [`DLMF.Struve.struveH_zero_order_series`](DLMF/Struve/Basic.lean#L873) (proved).
+- [11.2.E4](https://dlmf.nist.gov/11.2.E4): [`DLMF.Struve.struveL_zero_order_series`](DLMF/Struve/Basic.lean#L891) (proved).
+- [11.2.E5](https://dlmf.nist.gov/11.2.E5): [`DLMF.Struve.struveK`](DLMF/Struve/Basic.lean#L492) (defined).
+- [11.2.E6](https://dlmf.nist.gov/11.2.E6): [`DLMF.Struve.struveM`](DLMF/Struve/Basic.lean#L497) (defined).
+- [11.2.E7](https://dlmf.nist.gov/11.2.E7): [`DLMF.Struve.struveEquation`](DLMF/Struve/Basic.lean#L502) (defined).
+- [11.2.E8](https://dlmf.nist.gov/11.2.E8): [`DLMF.Struve.struveH_ode`](DLMF/Struve/Basic.lean#L544) (proved); [`DLMF.Struve.struveK_ode`](DLMF/Struve/Basic.lean#L557) (proved).
+- [11.2.E9](https://dlmf.nist.gov/11.2.E9): [`DLMF.Struve.struveEquation`](DLMF/Struve/Basic.lean#L502) (defined).
+- [11.2.E10](https://dlmf.nist.gov/11.2.E10): [`DLMF.Struve.struveL_ode`](DLMF/Struve/Basic.lean#L578) (proved); [`DLMF.Struve.struveM_ode`](DLMF/Struve/Basic.lean#L591) (proved).
+- [11.2.E11](https://dlmf.nist.gov/11.2.E11): [`DLMF.Struve.struve_general_solution_11`](DLMF/Struve/Basic.lean#L616) (proved).
+- [11.2.E12](https://dlmf.nist.gov/11.2.E12): [`DLMF.Struve.struve_general_solution_12`](DLMF/Struve/Basic.lean#L638) (proved).
+- [11.2.E13](https://dlmf.nist.gov/11.2.E13): [`DLMF.Struve.struve_general_solution_13`](DLMF/Struve/Basic.lean#L655) (proved).
+- [11.2.E14](https://dlmf.nist.gov/11.2.E14): [`DLMF.Struve.struve_general_solution_14`](DLMF/Struve/Basic.lean#L674) (proved).
+- [11.2.E15](https://dlmf.nist.gov/11.2.E15): [`DLMF.Struve.struve_general_solution_15`](DLMF/Struve/Basic.lean#L693) (proved).
+- [11.2.E16](https://dlmf.nist.gov/11.2.E16): [`DLMF.Struve.struve_general_solution_16`](DLMF/Struve/Basic.lean#L798) (proved).
+- [11.2.E17](https://dlmf.nist.gov/11.2.E17): [`DLMF.Struve.struve_general_solution_17`](DLMF/Struve/Basic.lean#L820) (proved).
 
 ### [§11.4 Basic Properties](https://dlmf.nist.gov/11.4)
 
-- [11.4.E1](https://dlmf.nist.gov/11.4.E1): [`DLMF.Struve.struveK_nat_add_half`](DLMF/Struve/Properties.lean#L334) (proved).
-- [11.4.E2](https://dlmf.nist.gov/11.4.E2): [`DLMF.Struve.struveL_nat_add_half`](DLMF/Struve/Properties.lean#L366) (proved).
-- [11.4.E3](https://dlmf.nist.gov/11.4.E3): [`DLMF.Struve.struveH_neg_nat_sub_half`](DLMF/Struve/Properties.lean#L33) (proved).
-- [11.4.E4](https://dlmf.nist.gov/11.4.E4): [`DLMF.Struve.struveL_neg_nat_sub_half`](DLMF/Struve/Properties.lean#L59) (proved).
-- [11.4.E5](https://dlmf.nist.gov/11.4.E5): [`DLMF.Struve.struve_special_5`](DLMF/Struve/Properties.lean#L152) (proved).
-- [11.4.E6](https://dlmf.nist.gov/11.4.E6): [`DLMF.Struve.struve_special_6`](DLMF/Struve/Properties.lean#L131) (proved).
-- [11.4.E7](https://dlmf.nist.gov/11.4.E7): [`DLMF.Struve.struve_special_7`](DLMF/Struve/Properties.lean#L185) (proved).
-- [11.4.E8](https://dlmf.nist.gov/11.4.E8): [`DLMF.Struve.struve_special_8`](DLMF/Struve/Properties.lean#L164) (proved).
-- [11.4.E9](https://dlmf.nist.gov/11.4.E9): [`DLMF.Struve.struve_special_9`](DLMF/Struve/Properties.lean#L197) (proved).
-- [11.4.E10](https://dlmf.nist.gov/11.4.E10): [`DLMF.Struve.struve_special_10`](DLMF/Struve/Properties.lean#L140) (proved).
-- [11.4.E11](https://dlmf.nist.gov/11.4.E11): [`DLMF.Struve.struve_special_11`](DLMF/Struve/Properties.lean#L210) (proved).
-- [11.4.E12](https://dlmf.nist.gov/11.4.E12): [`DLMF.Struve.struve_special_12`](DLMF/Struve/Properties.lean#L173) (proved).
-- [11.4.E13](https://dlmf.nist.gov/11.4.E13): [`DLMF.Struve.struveH_nonneg`](DLMF/Struve/Properties.lean#L451) (proved).
-- [11.4.E14](https://dlmf.nist.gov/11.4.E14): [`DLMF.Struve.struveH_relative_bound`](DLMF/Struve/Properties.lean#L475) (admitted).
-- [11.4.E15](https://dlmf.nist.gov/11.4.E15): [`DLMF.Struve.struveH_relative_bound`](DLMF/Struve/Properties.lean#L475) (admitted).
-- [11.4.E16](https://dlmf.nist.gov/11.4.E16): [`DLMF.Struve.struveHOnLog_shift`](DLMF/Struve/Basic.lean#L306) (proved).
-- [11.4.E17](https://dlmf.nist.gov/11.4.E17): [`DLMF.Struve.struveLOnLog_shift`](DLMF/Struve/Basic.lean#L375) (proved).
-- [11.4.E18](https://dlmf.nist.gov/11.4.E18): [`DLMF.Struve.struveH_bessel_series_18`](DLMF/Struve/Properties.lean#L485) (proved).
-- [11.4.E19](https://dlmf.nist.gov/11.4.E19): [`DLMF.Struve.struveH_bessel_series_19`](DLMF/Struve/Properties.lean#L538) (proved).
-- [11.4.E20](https://dlmf.nist.gov/11.4.E20): [`DLMF.Struve.struveH_bessel_series_20`](DLMF/Struve/Properties.lean#L597) (proved).
-- [11.4.E21](https://dlmf.nist.gov/11.4.E21): [`DLMF.Struve.struveH_zero_odd`](DLMF/Struve/Properties.lean#L655) (proved); [`DLMF.Struve.struveH_zero_products`](DLMF/Struve/Properties.lean#L676) (proved).
-- [11.4.E22](https://dlmf.nist.gov/11.4.E22): [`DLMF.Struve.struveH_one_even`](DLMF/Struve/Properties.lean#L794) (proved); [`DLMF.Struve.struveH_one_products`](DLMF/Struve/Properties.lean#L879) (proved).
-- [11.4.E23](https://dlmf.nist.gov/11.4.E23): [`DLMF.Struve.struveH_recurrence`](DLMF/Struve/Properties.lean#L1039) (proved).
-- [11.4.E24](https://dlmf.nist.gov/11.4.E24): [`DLMF.Struve.struveH_derivative`](DLMF/Struve/Properties.lean#L1046) (proved).
-- [11.4.E25](https://dlmf.nist.gov/11.4.E25): [`DLMF.Struve.struveL_recurrence`](DLMF/Struve/Properties.lean#L1118) (proved).
-- [11.4.E26](https://dlmf.nist.gov/11.4.E26): [`DLMF.Struve.struveL_derivative`](DLMF/Struve/Properties.lean#L1125) (proved).
-- [11.4.E27](https://dlmf.nist.gov/11.4.E27): [`DLMF.Struve.struveH_weighted_deriv_27`](DLMF/Struve/Properties.lean#L1057) (proved).
-- [11.4.E28](https://dlmf.nist.gov/11.4.E28): [`DLMF.Struve.struveH_weighted_deriv_28`](DLMF/Struve/Properties.lean#L1064) (proved).
-- [11.4.E29](https://dlmf.nist.gov/11.4.E29): [`DLMF.Struve.struveL_weighted_deriv_29`](DLMF/Struve/Properties.lean#L1136) (proved).
-- [11.4.E30](https://dlmf.nist.gov/11.4.E30): [`DLMF.Struve.struveL_weighted_deriv_30`](DLMF/Struve/Properties.lean#L1143) (proved).
-- [11.4.E31](https://dlmf.nist.gov/11.4.E31): [`DLMF.Struve.struveH_iterated_weighted_deriv`](DLMF/Struve/Properties.lean#L1071) (proved); [`DLMF.Struve.struveL_iterated_weighted_deriv`](DLMF/Struve/Properties.lean#L1150) (proved).
-- [11.4.E32](https://dlmf.nist.gov/11.4.E32): [`DLMF.Struve.struveH_zero_deriv`](DLMF/Struve/Properties.lean#L1078) (proved); [`DLMF.Struve.struveH_one_weighted_deriv`](DLMF/Struve/Properties.lean#L1102) (proved).
-- [11.4.E33](https://dlmf.nist.gov/11.4.E33): [`DLMF.Struve.struveL_zero_deriv`](DLMF/Struve/Properties.lean#L1157) (proved); [`DLMF.Struve.struveL_one_weighted_deriv`](DLMF/Struve/Properties.lean#L1181) (proved).
+- [11.4.E1](https://dlmf.nist.gov/11.4.E1): [`DLMF.Struve.struveK_nat_add_half`](DLMF/Struve/Properties.lean#L333) (proved).
+- [11.4.E2](https://dlmf.nist.gov/11.4.E2): [`DLMF.Struve.struveL_nat_add_half`](DLMF/Struve/Properties.lean#L365) (proved).
+- [11.4.E3](https://dlmf.nist.gov/11.4.E3): [`DLMF.Struve.struveH_neg_nat_sub_half`](DLMF/Struve/Properties.lean#L32) (proved).
+- [11.4.E4](https://dlmf.nist.gov/11.4.E4): [`DLMF.Struve.struveL_neg_nat_sub_half`](DLMF/Struve/Properties.lean#L58) (proved).
+- [11.4.E5](https://dlmf.nist.gov/11.4.E5): [`DLMF.Struve.struve_special_5`](DLMF/Struve/Properties.lean#L151) (proved).
+- [11.4.E6](https://dlmf.nist.gov/11.4.E6): [`DLMF.Struve.struve_special_6`](DLMF/Struve/Properties.lean#L130) (proved).
+- [11.4.E7](https://dlmf.nist.gov/11.4.E7): [`DLMF.Struve.struve_special_7`](DLMF/Struve/Properties.lean#L184) (proved).
+- [11.4.E8](https://dlmf.nist.gov/11.4.E8): [`DLMF.Struve.struve_special_8`](DLMF/Struve/Properties.lean#L163) (proved).
+- [11.4.E9](https://dlmf.nist.gov/11.4.E9): [`DLMF.Struve.struve_special_9`](DLMF/Struve/Properties.lean#L196) (proved).
+- [11.4.E10](https://dlmf.nist.gov/11.4.E10): [`DLMF.Struve.struve_special_10`](DLMF/Struve/Properties.lean#L139) (proved).
+- [11.4.E11](https://dlmf.nist.gov/11.4.E11): [`DLMF.Struve.struve_special_11`](DLMF/Struve/Properties.lean#L209) (proved).
+- [11.4.E12](https://dlmf.nist.gov/11.4.E12): [`DLMF.Struve.struve_special_12`](DLMF/Struve/Properties.lean#L172) (proved).
+- [11.4.E13](https://dlmf.nist.gov/11.4.E13): [`DLMF.Struve.struveH_nonneg`](DLMF/Struve/Properties.lean#L450) (proved).
+- [11.4.E14](https://dlmf.nist.gov/11.4.E14): [`DLMF.Struve.struveH_relative_bound`](DLMF/Struve/Properties.lean#L474) (admitted).
+- [11.4.E15](https://dlmf.nist.gov/11.4.E15): [`DLMF.Struve.struveH_relative_bound`](DLMF/Struve/Properties.lean#L474) (admitted).
+- [11.4.E16](https://dlmf.nist.gov/11.4.E16): [`DLMF.Struve.struveHOnLog_shift`](DLMF/Struve/Basic.lean#L304) (proved).
+- [11.4.E17](https://dlmf.nist.gov/11.4.E17): [`DLMF.Struve.struveLOnLog_shift`](DLMF/Struve/Basic.lean#L373) (proved).
+- [11.4.E18](https://dlmf.nist.gov/11.4.E18): [`DLMF.Struve.struveH_bessel_series_18`](DLMF/Struve/Properties.lean#L484) (proved).
+- [11.4.E19](https://dlmf.nist.gov/11.4.E19): [`DLMF.Struve.struveH_bessel_series_19`](DLMF/Struve/Properties.lean#L537) (proved).
+- [11.4.E20](https://dlmf.nist.gov/11.4.E20): [`DLMF.Struve.struveH_bessel_series_20`](DLMF/Struve/Properties.lean#L596) (proved).
+- [11.4.E21](https://dlmf.nist.gov/11.4.E21): [`DLMF.Struve.struveH_zero_odd`](DLMF/Struve/Properties.lean#L654) (proved); [`DLMF.Struve.struveH_zero_products`](DLMF/Struve/Properties.lean#L675) (proved).
+- [11.4.E22](https://dlmf.nist.gov/11.4.E22): [`DLMF.Struve.struveH_one_even`](DLMF/Struve/Properties.lean#L793) (proved); [`DLMF.Struve.struveH_one_products`](DLMF/Struve/Properties.lean#L878) (proved).
+- [11.4.E23](https://dlmf.nist.gov/11.4.E23): [`DLMF.Struve.struveH_recurrence`](DLMF/Struve/Properties.lean#L1038) (proved).
+- [11.4.E24](https://dlmf.nist.gov/11.4.E24): [`DLMF.Struve.struveH_derivative`](DLMF/Struve/Properties.lean#L1045) (proved).
+- [11.4.E25](https://dlmf.nist.gov/11.4.E25): [`DLMF.Struve.struveL_recurrence`](DLMF/Struve/Properties.lean#L1117) (proved).
+- [11.4.E26](https://dlmf.nist.gov/11.4.E26): [`DLMF.Struve.struveL_derivative`](DLMF/Struve/Properties.lean#L1124) (proved).
+- [11.4.E27](https://dlmf.nist.gov/11.4.E27): [`DLMF.Struve.struveH_weighted_deriv_27`](DLMF/Struve/Properties.lean#L1056) (proved).
+- [11.4.E28](https://dlmf.nist.gov/11.4.E28): [`DLMF.Struve.struveH_weighted_deriv_28`](DLMF/Struve/Properties.lean#L1063) (proved).
+- [11.4.E29](https://dlmf.nist.gov/11.4.E29): [`DLMF.Struve.struveL_weighted_deriv_29`](DLMF/Struve/Properties.lean#L1135) (proved).
+- [11.4.E30](https://dlmf.nist.gov/11.4.E30): [`DLMF.Struve.struveL_weighted_deriv_30`](DLMF/Struve/Properties.lean#L1142) (proved).
+- [11.4.E31](https://dlmf.nist.gov/11.4.E31): [`DLMF.Struve.struveH_iterated_weighted_deriv`](DLMF/Struve/Properties.lean#L1070) (proved); [`DLMF.Struve.struveL_iterated_weighted_deriv`](DLMF/Struve/Properties.lean#L1149) (proved).
+- [11.4.E32](https://dlmf.nist.gov/11.4.E32): [`DLMF.Struve.struveH_zero_deriv`](DLMF/Struve/Properties.lean#L1077) (proved); [`DLMF.Struve.struveH_one_weighted_deriv`](DLMF/Struve/Properties.lean#L1101) (proved).
+- [11.4.E33](https://dlmf.nist.gov/11.4.E33): [`DLMF.Struve.struveL_zero_deriv`](DLMF/Struve/Properties.lean#L1156) (proved); [`DLMF.Struve.struveL_one_weighted_deriv`](DLMF/Struve/Properties.lean#L1180) (proved).
 
 ### [§11.5 Integral Representations](https://dlmf.nist.gov/11.5)
 
-- [11.5.E1](https://dlmf.nist.gov/11.5.E1): [`DLMF.Struve.struveH_trig_integral`](DLMF/Struve/Representations.lean#L33) (proved); [`DLMF.Struve.struveH_integral`](DLMF/Struve/Representations.lean#L47) (proved).
-- [11.5.E2](https://dlmf.nist.gov/11.5.E2): [`DLMF.Struve.struveK_laplace`](DLMF/Struve/Representations.lean#L53) (proved).
-- [11.5.E3](https://dlmf.nist.gov/11.5.E3): [`DLMF.Struve.struveK_zero_laplace`](DLMF/Struve/Representations.lean#L72) (proved).
-- [11.5.E4](https://dlmf.nist.gov/11.5.E4): [`DLMF.Struve.struveM_integral`](DLMF/Struve/Representations.lean#L105) (proved).
-- [11.5.E5](https://dlmf.nist.gov/11.5.E5): [`DLMF.Struve.struveM_zero_integral`](DLMF/Struve/Representations.lean#L141) (proved).
-- [11.5.E6](https://dlmf.nist.gov/11.5.E6): [`DLMF.Struve.struveL_trig_integral`](DLMF/Struve/Representations.lean#L40) (proved).
-- [11.5.E7](https://dlmf.nist.gov/11.5.E7): [`DLMF.Struve.struveL_fourier`](DLMF/Struve/Representations.lean#L482) (proved).
-- [11.5.E8](https://dlmf.nist.gov/11.5.E8): [`DLMF.Struve.struveH_barnes`](DLMF/Struve/Representations.lean#L1362) (proved).
-- [11.5.E9](https://dlmf.nist.gov/11.5.E9): [`DLMF.Struve.struveL_barnes_loop`](DLMF/Struve/Representations.lean#L1130) (proved).
+- [11.5.E1](https://dlmf.nist.gov/11.5.E1): [`DLMF.Struve.struveH_trig_integral`](DLMF/Struve/Representations.lean#L29) (proved); [`DLMF.Struve.struveH_integral`](DLMF/Struve/Representations.lean#L43) (proved).
+- [11.5.E2](https://dlmf.nist.gov/11.5.E2): [`DLMF.Struve.struveK_laplace`](DLMF/Struve/Representations.lean#L49) (proved).
+- [11.5.E3](https://dlmf.nist.gov/11.5.E3): [`DLMF.Struve.struveK_zero_laplace`](DLMF/Struve/Representations.lean#L68) (proved).
+- [11.5.E4](https://dlmf.nist.gov/11.5.E4): [`DLMF.Struve.struveM_integral`](DLMF/Struve/Representations.lean#L101) (proved).
+- [11.5.E5](https://dlmf.nist.gov/11.5.E5): [`DLMF.Struve.struveM_zero_integral`](DLMF/Struve/Representations.lean#L137) (proved).
+- [11.5.E6](https://dlmf.nist.gov/11.5.E6): [`DLMF.Struve.struveL_trig_integral`](DLMF/Struve/Representations.lean#L36) (proved).
+- [11.5.E7](https://dlmf.nist.gov/11.5.E7): [`DLMF.Struve.struveL_fourier`](DLMF/Struve/Representations.lean#L478) (proved).
+- [11.5.E8](https://dlmf.nist.gov/11.5.E8): [`DLMF.Struve.struveH_barnes`](DLMF/Struve/Representations.lean#L1358) (proved).
+- [11.5.E9](https://dlmf.nist.gov/11.5.E9): [`DLMF.Struve.struveL_barnes_loop`](DLMF/Struve/Representations.lean#L1126) (proved).
 
 ### [§11.6 Asymptotic Expansions](https://dlmf.nist.gov/11.6)
 
-- [11.6.E1](https://dlmf.nist.gov/11.6.E1): [`DLMF.Struve.struveK_asymptotic`](DLMF/Struve/Asymptotics.lean#L864) (proved).
-- [11.6.E2](https://dlmf.nist.gov/11.6.E2): [`DLMF.Struve.struveM_asymptotic`](DLMF/Struve/Asymptotics.lean#L874) (proved).
-- [11.6.E3](https://dlmf.nist.gov/11.6.E3): [`DLMF.Struve.struveK_primitive_asymptotic`](DLMF/Struve/Asymptotics.lean#L1700) (proved).
-- [11.6.E4](https://dlmf.nist.gov/11.6.E4): [`DLMF.Struve.struveM_primitive_asymptotic`](DLMF/Struve/Asymptotics.lean#L2136) (proved).
-- [11.6.E5](https://dlmf.nist.gov/11.6.E5): [`DLMF.Struve.struveH_large_order`](DLMF/Struve/Asymptotics.lean#L2636) (proved); [`DLMF.Struve.struveL_large_order`](DLMF/Struve/Asymptotics.lean#L2644) (proved).
-- [11.6.E6](https://dlmf.nist.gov/11.6.E6): [`DLMF.Struve.struveK_scaled_asymptotic`](DLMF/Struve/Asymptotics.lean#L2839) (proved).
-- [11.6.E7](https://dlmf.nist.gov/11.6.E7): [`DLMF.Struve.struveM_scaled_asymptotic`](DLMF/Struve/Asymptotics.lean#L2929) (proved).
-- [11.6.E8](https://dlmf.nist.gov/11.6.E8): [`DLMF.Struve.struveScaledCoeff_initial`](DLMF/Struve/Asymptotics.lean#L3044) (proved).
-- [11.6.E9](https://dlmf.nist.gov/11.6.E9): [`DLMF.Struve.struveL_scaled_equiv`](DLMF/Struve/Asymptotics.lean#L3055) (admitted).
+- [11.6.E1](https://dlmf.nist.gov/11.6.E1): [`DLMF.Struve.struveK_asymptotic`](DLMF/Struve/Asymptotics.lean#L863) (proved).
+- [11.6.E2](https://dlmf.nist.gov/11.6.E2): [`DLMF.Struve.struveM_asymptotic`](DLMF/Struve/Asymptotics.lean#L873) (proved).
+- [11.6.E3](https://dlmf.nist.gov/11.6.E3): [`DLMF.Struve.struveK_primitive_asymptotic`](DLMF/Struve/Asymptotics.lean#L1699) (proved).
+- [11.6.E4](https://dlmf.nist.gov/11.6.E4): [`DLMF.Struve.struveM_primitive_asymptotic`](DLMF/Struve/Asymptotics.lean#L2135) (proved).
+- [11.6.E5](https://dlmf.nist.gov/11.6.E5): [`DLMF.Struve.struveH_large_order`](DLMF/Struve/Asymptotics.lean#L2635) (proved); [`DLMF.Struve.struveL_large_order`](DLMF/Struve/Asymptotics.lean#L2643) (proved).
+- [11.6.E6](https://dlmf.nist.gov/11.6.E6): [`DLMF.Struve.struveK_scaled_asymptotic`](DLMF/Struve/Asymptotics.lean#L2838) (proved).
+- [11.6.E7](https://dlmf.nist.gov/11.6.E7): [`DLMF.Struve.struveM_scaled_asymptotic`](DLMF/Struve/Asymptotics.lean#L2928) (proved).
+- [11.6.E8](https://dlmf.nist.gov/11.6.E8): [`DLMF.Struve.struveScaledCoeff_initial`](DLMF/Struve/Asymptotics.lean#L3043) (proved).
+- [11.6.E9](https://dlmf.nist.gov/11.6.E9): [`DLMF.Struve.struveL_scaled_equiv`](DLMF/Struve/Asymptotics.lean#L3054) (admitted).
 
 ### [§11.7 Integrals and Sums](https://dlmf.nist.gov/11.7)
 
-- [11.7.E1](https://dlmf.nist.gov/11.7.E1): [`DLMF.Struve.struveH_weighted_deriv_27`](DLMF/Struve/Properties.lean#L1057) (proved).
-- [11.7.E2](https://dlmf.nist.gov/11.7.E2): [`DLMF.Struve.struveH_weighted_deriv_28`](DLMF/Struve/Properties.lean#L1064) (proved).
-- [11.7.E3](https://dlmf.nist.gov/11.7.E3): [`DLMF.Struve.struveL_weighted_deriv_29`](DLMF/Struve/Properties.lean#L1136) (proved).
-- [11.7.E4](https://dlmf.nist.gov/11.7.E4): [`DLMF.Struve.struveL_weighted_deriv_30`](DLMF/Struve/Properties.lean#L1143) (proved).
-- [11.7.E5](https://dlmf.nist.gov/11.7.E5): [`DLMF.Struve.struveHPrimitive`](DLMF/Struve/Representations.lean#L1415) (defined).
-- [11.7.E6](https://dlmf.nist.gov/11.7.E6): [`DLMF.Struve.struveHPrimitive_recurrence`](DLMF/Struve/Representations.lean#L1465) (proved).
-- [11.7.E7](https://dlmf.nist.gov/11.7.E7): [`DLMF.Struve.struveH_sonine`](DLMF/Struve/Representations.lean#L1629) (proved).
-- [11.7.E8](https://dlmf.nist.gov/11.7.E8): [`DLMF.Struve.struveH_integral_zero_div`](DLMF/Struve/Representations.lean#L1862) (proved); [`DLMF.Struve.struveH_integral_one_div_sq`](DLMF/Struve/Representations.lean#L1896) (proved).
-- [11.7.E9](https://dlmf.nist.gov/11.7.E9): [`DLMF.Struve.struveH_integral_plain`](DLMF/Struve/Representations.lean#L2546) (proved).
-- [11.7.E10](https://dlmf.nist.gov/11.7.E10): [`DLMF.Struve.struveH_integral_mellin_zero`](DLMF/Struve/Representations.lean#L2582) (proved).
-- [11.7.E11](https://dlmf.nist.gov/11.7.E11): [`DLMF.Struve.struveH_integral_mellin`](DLMF/Struve/Representations.lean#L2590) (proved).
-- [11.7.E12](https://dlmf.nist.gov/11.7.E12): [`DLMF.Struve.struveH_integral_product`](DLMF/Struve/Representations.lean#L2597) (admitted).
-- [11.7.E13](https://dlmf.nist.gov/11.7.E13): [`DLMF.Struve.struve_laplace_13`](DLMF/Struve/Representations.lean#L3198) (proved).
-- [11.7.E14](https://dlmf.nist.gov/11.7.E14): [`DLMF.Struve.struve_laplace_14`](DLMF/Struve/Representations.lean#L3237) (proved).
-- [11.7.E15](https://dlmf.nist.gov/11.7.E15): [`DLMF.Struve.struve_laplace_15`](DLMF/Struve/Representations.lean#L3310) (proved).
-- [11.7.E16](https://dlmf.nist.gov/11.7.E16): [`DLMF.Struve.struve_laplace_16`](DLMF/Struve/Representations.lean#L3319) (proved).
+- [11.7.E1](https://dlmf.nist.gov/11.7.E1): [`DLMF.Struve.struveH_weighted_deriv_27`](DLMF/Struve/Properties.lean#L1056) (proved).
+- [11.7.E2](https://dlmf.nist.gov/11.7.E2): [`DLMF.Struve.struveH_weighted_deriv_28`](DLMF/Struve/Properties.lean#L1063) (proved).
+- [11.7.E3](https://dlmf.nist.gov/11.7.E3): [`DLMF.Struve.struveL_weighted_deriv_29`](DLMF/Struve/Properties.lean#L1135) (proved).
+- [11.7.E4](https://dlmf.nist.gov/11.7.E4): [`DLMF.Struve.struveL_weighted_deriv_30`](DLMF/Struve/Properties.lean#L1142) (proved).
+- [11.7.E5](https://dlmf.nist.gov/11.7.E5): [`DLMF.Struve.struveHPrimitive`](DLMF/Struve/Representations.lean#L1411) (defined).
+- [11.7.E6](https://dlmf.nist.gov/11.7.E6): [`DLMF.Struve.struveHPrimitive_recurrence`](DLMF/Struve/Representations.lean#L1461) (proved).
+- [11.7.E7](https://dlmf.nist.gov/11.7.E7): [`DLMF.Struve.struveH_sonine`](DLMF/Struve/Representations.lean#L1625) (proved).
+- [11.7.E8](https://dlmf.nist.gov/11.7.E8): [`DLMF.Struve.struveH_integral_zero_div`](DLMF/Struve/Representations.lean#L1858) (proved); [`DLMF.Struve.struveH_integral_one_div_sq`](DLMF/Struve/Representations.lean#L1892) (proved).
+- [11.7.E9](https://dlmf.nist.gov/11.7.E9): [`DLMF.Struve.struveH_integral_plain`](DLMF/Struve/Representations.lean#L2542) (proved).
+- [11.7.E10](https://dlmf.nist.gov/11.7.E10): [`DLMF.Struve.struveH_integral_mellin_zero`](DLMF/Struve/Representations.lean#L2578) (proved).
+- [11.7.E11](https://dlmf.nist.gov/11.7.E11): [`DLMF.Struve.struveH_integral_mellin`](DLMF/Struve/Representations.lean#L2586) (proved).
+- [11.7.E12](https://dlmf.nist.gov/11.7.E12): [`DLMF.Struve.struveH_integral_product`](DLMF/Struve/Representations.lean#L2593) (admitted).
+- [11.7.E13](https://dlmf.nist.gov/11.7.E13): [`DLMF.Struve.struve_laplace_13`](DLMF/Struve/Representations.lean#L3194) (proved).
+- [11.7.E14](https://dlmf.nist.gov/11.7.E14): [`DLMF.Struve.struve_laplace_14`](DLMF/Struve/Representations.lean#L3233) (proved).
+- [11.7.E15](https://dlmf.nist.gov/11.7.E15): [`DLMF.Struve.struve_laplace_15`](DLMF/Struve/Representations.lean#L3306) (proved).
+- [11.7.E16](https://dlmf.nist.gov/11.7.E16): [`DLMF.Struve.struve_laplace_16`](DLMF/Struve/Representations.lean#L3315) (proved).
 
 ### [§11.8 Analogs to Kelvin Functions](https://dlmf.nist.gov/11.8)
 
@@ -448,77 +448,77 @@ No selected numbered equations. Mathematical prose is recorded in the module inv
 
 ### [§11.9 Lommel Functions](https://dlmf.nist.gov/11.9)
 
-- [11.9.E1](https://dlmf.nist.gov/11.9.E1): [`DLMF.Struve.lommelS_ode`](DLMF/Struve/Lommel.lean#L350) (proved); [`DLMF.Struve.lommelCapital_ode`](DLMF/Struve/Lommel.lean#L371) (admitted).
-- [11.9.E2](https://dlmf.nist.gov/11.9.E2): [`DLMF.Struve.lommel_general_solution`](DLMF/Struve/Lommel.lean#L384) (proved).
-- [11.9.E3](https://dlmf.nist.gov/11.9.E3): [`DLMF.Struve.lommelS`](DLMF/Struve/Lommel.lean#L44) (defined); [`DLMF.Struve.hasSum_lommelS`](DLMF/Struve/Lommel.lean#L284) (proved).
-- [11.9.E4](https://dlmf.nist.gov/11.9.E4): [`DLMF.Struve.lommelA`](DLMF/Struve/Lommel.lean#L35) (defined); [`DLMF.Struve.lommelA_poch`](DLMF/Struve/Lommel.lean#L226) (proved).
-- [11.9.E5](https://dlmf.nist.gov/11.9.E5): [`DLMF.Struve.lommelCapitalRegular`](DLMF/Struve/Lommel.lean#L49) (defined); [`DLMF.Struve.lommelCapital_regular`](DLMF/Struve/Lommel.lean#L214) (proved).
-- [11.9.E6](https://dlmf.nist.gov/11.9.E6): [`DLMF.Struve.lommelS_neg_order`](DLMF/Struve/Lommel.lean#L364) (proved); [`DLMF.Struve.lommelCapital_neg_order`](DLMF/Struve/Lommel.lean#L377) (proved).
-- [11.9.E7](https://dlmf.nist.gov/11.9.E7): [`DLMF.Struve.lommelS_bessel_series_7`](DLMF/Struve/Lommel.lean#L408) (proved).
-- [11.9.E8](https://dlmf.nist.gov/11.9.E8): [`DLMF.Struve.lommelS_bessel_series_8`](DLMF/Struve/Lommel.lean#L451) (proved).
-- [11.9.E9](https://dlmf.nist.gov/11.9.E9): [`DLMF.Struve.lommelCapital_asymptotic`](DLMF/Struve/Lommel.lean#L529) (admitted); [`DLMF.Struve.lommelCapital_terminates`](DLMF/Struve/Lommel.lean#L535) (admitted).
+- [11.9.E1](https://dlmf.nist.gov/11.9.E1): [`DLMF.Struve.lommelS_ode`](DLMF/Struve/Lommel.lean#L348) (proved); [`DLMF.Struve.lommelCapital_ode`](DLMF/Struve/Lommel.lean#L369) (admitted).
+- [11.9.E2](https://dlmf.nist.gov/11.9.E2): [`DLMF.Struve.lommel_general_solution`](DLMF/Struve/Lommel.lean#L382) (proved).
+- [11.9.E3](https://dlmf.nist.gov/11.9.E3): [`DLMF.Struve.lommelS`](DLMF/Struve/Lommel.lean#L42) (defined); [`DLMF.Struve.hasSum_lommelS`](DLMF/Struve/Lommel.lean#L282) (proved).
+- [11.9.E4](https://dlmf.nist.gov/11.9.E4): [`DLMF.Struve.lommelA`](DLMF/Struve/Lommel.lean#L33) (defined); [`DLMF.Struve.lommelA_poch`](DLMF/Struve/Lommel.lean#L224) (proved).
+- [11.9.E5](https://dlmf.nist.gov/11.9.E5): [`DLMF.Struve.lommelCapitalRegular`](DLMF/Struve/Lommel.lean#L47) (defined); [`DLMF.Struve.lommelCapital_regular`](DLMF/Struve/Lommel.lean#L212) (proved).
+- [11.9.E6](https://dlmf.nist.gov/11.9.E6): [`DLMF.Struve.lommelS_neg_order`](DLMF/Struve/Lommel.lean#L362) (proved); [`DLMF.Struve.lommelCapital_neg_order`](DLMF/Struve/Lommel.lean#L375) (proved).
+- [11.9.E7](https://dlmf.nist.gov/11.9.E7): [`DLMF.Struve.lommelS_bessel_series_7`](DLMF/Struve/Lommel.lean#L406) (proved).
+- [11.9.E8](https://dlmf.nist.gov/11.9.E8): [`DLMF.Struve.lommelS_bessel_series_8`](DLMF/Struve/Lommel.lean#L449) (proved).
+- [11.9.E9](https://dlmf.nist.gov/11.9.E9): [`DLMF.Struve.lommelCapital_asymptotic`](DLMF/Struve/Lommel.lean#L527) (admitted); [`DLMF.Struve.lommelCapital_terminates`](DLMF/Struve/Lommel.lean#L533) (admitted).
 
 ### [§11.10 Anger–Weber Functions](https://dlmf.nist.gov/11.10)
 
-- [11.10.E1](https://dlmf.nist.gov/11.10.E1): [`DLMF.Struve.angerJ`](DLMF/Struve/AngerWeber.lean#L32) (defined).
-- [11.10.E2](https://dlmf.nist.gov/11.10.E2): [`DLMF.Struve.weberE`](DLMF/Struve/AngerWeber.lean#L88) (defined).
-- [11.10.E3](https://dlmf.nist.gov/11.10.E3): [`DLMF.Struve.angerJ_double_integral`](DLMF/Struve/AngerWeber.lean#L425) (proved).
-- [11.10.E4](https://dlmf.nist.gov/11.10.E4): [`DLMF.Struve.angerA`](DLMF/Struve/AngerWeber.lean#L279) (defined); [`DLMF.Struve.angerA_integral`](DLMF/Struve/AngerWeber.lean#L364) (proved).
-- [11.10.E5](https://dlmf.nist.gov/11.10.E5): [`DLMF.Struve.angerJ_ode`](DLMF/Struve/AngerWeber.lean#L448) (proved); [`DLMF.Struve.weberE_ode`](DLMF/Struve/AngerWeber.lean#L470) (proved).
-- [11.10.E6](https://dlmf.nist.gov/11.10.E6): [`DLMF.Struve.angerJ_ode`](DLMF/Struve/AngerWeber.lean#L448) (proved).
-- [11.10.E7](https://dlmf.nist.gov/11.10.E7): [`DLMF.Struve.weberE_ode`](DLMF/Struve/AngerWeber.lean#L470) (proved).
-- [11.10.E8](https://dlmf.nist.gov/11.10.E8): [`DLMF.Struve.angerJ_series`](DLMF/Struve/AngerWeber.lean#L897) (proved).
-- [11.10.E9](https://dlmf.nist.gov/11.10.E9): [`DLMF.Struve.weberE_series`](DLMF/Struve/AngerWeber.lean#L913) (proved).
-- [11.10.E10](https://dlmf.nist.gov/11.10.E10): [`DLMF.Struve.angerS1`](DLMF/Struve/AngerWeber.lean#L520) (defined); [`DLMF.Struve.hasSum_angerS1`](DLMF/Struve/AngerWeber.lean#L525) (proved).
-- [11.10.E11](https://dlmf.nist.gov/11.10.E11): [`DLMF.Struve.angerS2`](DLMF/Struve/AngerWeber.lean#L533) (defined); [`DLMF.Struve.hasSum_angerS2`](DLMF/Struve/AngerWeber.lean#L538) (proved).
-- [11.10.E12](https://dlmf.nist.gov/11.10.E12): [`DLMF.Struve.angerJ_neg`](DLMF/Struve/AngerWeber.lean#L929) (proved); [`DLMF.Struve.weberE_neg`](DLMF/Struve/AngerWeber.lean#L940) (proved).
-- [11.10.E13](https://dlmf.nist.gov/11.10.E13): [`DLMF.Struve.anger_weber`](DLMF/Struve/AngerWeber.lean#L952) (proved).
-- [11.10.E14](https://dlmf.nist.gov/11.10.E14): [`DLMF.Struve.weber_anger`](DLMF/Struve/AngerWeber.lean#L973) (proved).
-- [11.10.E15](https://dlmf.nist.gov/11.10.E15): [`DLMF.Struve.anger_bessel`](DLMF/Struve/AngerWeber.lean#L994) (proved).
-- [11.10.E16](https://dlmf.nist.gov/11.10.E16): [`DLMF.Struve.weber_bessel`](DLMF/Struve/AngerWeber.lean#L1006) (proved).
-- [11.10.E17](https://dlmf.nist.gov/11.10.E17): [`DLMF.Struve.angerJ_lommel`](DLMF/Struve/AngerWeber.lean#L1091) (proved).
-- [11.10.E18](https://dlmf.nist.gov/11.10.E18): [`DLMF.Struve.weberE_lommel`](DLMF/Struve/AngerWeber.lean#L1108) (proved).
-- [11.10.E19](https://dlmf.nist.gov/11.10.E19): [`DLMF.Struve.angerJ_half_19`](DLMF/Struve/AngerWeber.lean#L1421) (proved); [`DLMF.Struve.anger_weber_half`](DLMF/Struve/AngerWeber.lean#L1462) (proved).
-- [11.10.E20](https://dlmf.nist.gov/11.10.E20): [`DLMF.Struve.angerJ_half_20`](DLMF/Struve/AngerWeber.lean#L1441) (proved); [`DLMF.Struve.anger_weber_half`](DLMF/Struve/AngerWeber.lean#L1462) (proved).
-- [11.10.E21](https://dlmf.nist.gov/11.10.E21): [`DLMF.Struve.angerFresnelPlus`](DLMF/Struve/AngerWeber.lean#L1127) (defined); [`DLMF.Struve.angerFresnelMinus`](DLMF/Struve/AngerWeber.lean#L1132) (defined).
-- [11.10.E22](https://dlmf.nist.gov/11.10.E22): [`DLMF.Struve.weberE_nat`](DLMF/Struve/AngerWeber.lean#L1738) (proved).
-- [11.10.E23](https://dlmf.nist.gov/11.10.E23): [`DLMF.Struve.weberE_neg_nat`](DLMF/Struve/AngerWeber.lean#L1748) (proved).
-- [11.10.E24](https://dlmf.nist.gov/11.10.E24): [`DLMF.Struve.weberM1`](DLMF/Struve/AngerWeber.lean#L1478) (defined); [`DLMF.Struve.weberM2`](DLMF/Struve/AngerWeber.lean#L1484) (defined).
-- [11.10.E25](https://dlmf.nist.gov/11.10.E25): [`DLMF.Struve.angerJ_zero`](DLMF/Struve/AngerWeber.lean#L1758) (proved); [`DLMF.Struve.weberE_zero`](DLMF/Struve/AngerWeber.lean#L1773) (proved).
-- [11.10.E26](https://dlmf.nist.gov/11.10.E26): [`DLMF.Struve.weberE_zero_order`](DLMF/Struve/AngerWeber.lean#L1796) (proved); [`DLMF.Struve.weberE_one_order`](DLMF/Struve/AngerWeber.lean#L1818) (proved).
-- [11.10.E27](https://dlmf.nist.gov/11.10.E27): [`DLMF.Struve.angerJ_order_deriv_zero`](DLMF/Struve/AngerWeber.lean#L1849) (proved).
-- [11.10.E28](https://dlmf.nist.gov/11.10.E28): [`DLMF.Struve.weberE_order_deriv_zero`](DLMF/Struve/AngerWeber.lean#L1880) (proved).
-- [11.10.E29](https://dlmf.nist.gov/11.10.E29): [`DLMF.Struve.angerJ_int`](DLMF/Struve/AngerWeber.lean#L1906) (proved).
-- [11.10.E30](https://dlmf.nist.gov/11.10.E30): [`DLMF.Struve.angerJ_bessel_products`](DLMF/Struve/AngerWeber.lean#L1956) (proved).
-- [11.10.E31](https://dlmf.nist.gov/11.10.E31): [`DLMF.Struve.weberE_bessel_products`](DLMF/Struve/AngerWeber.lean#L1967) (proved).
-- [11.10.E32](https://dlmf.nist.gov/11.10.E32): [`DLMF.Struve.angerJ_recurrence`](DLMF/Struve/AngerWeber.lean#L1978) (proved).
-- [11.10.E33](https://dlmf.nist.gov/11.10.E33): [`DLMF.Struve.weberE_recurrence`](DLMF/Struve/AngerWeber.lean#L2022) (proved).
-- [11.10.E34](https://dlmf.nist.gov/11.10.E34): [`DLMF.Struve.angerJ_deriv`](DLMF/Struve/AngerWeber.lean#L1984) (proved).
-- [11.10.E35](https://dlmf.nist.gov/11.10.E35): [`DLMF.Struve.weberE_deriv`](DLMF/Struve/AngerWeber.lean#L2028) (proved).
-- [11.10.E36](https://dlmf.nist.gov/11.10.E36): [`DLMF.Struve.angerJ_weighted_deriv_add`](DLMF/Struve/AngerWeber.lean#L1990) (proved); [`DLMF.Struve.angerJ_weighted_deriv_sub`](DLMF/Struve/AngerWeber.lean#L2006) (proved).
-- [11.10.E37](https://dlmf.nist.gov/11.10.E37): [`DLMF.Struve.weberE_weighted_deriv_add`](DLMF/Struve/AngerWeber.lean#L2034) (proved); [`DLMF.Struve.weberE_weighted_deriv_sub`](DLMF/Struve/AngerWeber.lean#L2050) (proved).
+- [11.10.E1](https://dlmf.nist.gov/11.10.E1): [`DLMF.Struve.angerJ`](DLMF/Struve/AngerWeber.lean#L30) (defined).
+- [11.10.E2](https://dlmf.nist.gov/11.10.E2): [`DLMF.Struve.weberE`](DLMF/Struve/AngerWeber.lean#L86) (defined).
+- [11.10.E3](https://dlmf.nist.gov/11.10.E3): [`DLMF.Struve.angerJ_double_integral`](DLMF/Struve/AngerWeber.lean#L423) (proved).
+- [11.10.E4](https://dlmf.nist.gov/11.10.E4): [`DLMF.Struve.angerA`](DLMF/Struve/AngerWeber.lean#L277) (defined); [`DLMF.Struve.angerA_integral`](DLMF/Struve/AngerWeber.lean#L362) (proved).
+- [11.10.E5](https://dlmf.nist.gov/11.10.E5): [`DLMF.Struve.angerJ_ode`](DLMF/Struve/AngerWeber.lean#L446) (proved); [`DLMF.Struve.weberE_ode`](DLMF/Struve/AngerWeber.lean#L468) (proved).
+- [11.10.E6](https://dlmf.nist.gov/11.10.E6): [`DLMF.Struve.angerJ_ode`](DLMF/Struve/AngerWeber.lean#L446) (proved).
+- [11.10.E7](https://dlmf.nist.gov/11.10.E7): [`DLMF.Struve.weberE_ode`](DLMF/Struve/AngerWeber.lean#L468) (proved).
+- [11.10.E8](https://dlmf.nist.gov/11.10.E8): [`DLMF.Struve.angerJ_series`](DLMF/Struve/AngerWeber.lean#L895) (proved).
+- [11.10.E9](https://dlmf.nist.gov/11.10.E9): [`DLMF.Struve.weberE_series`](DLMF/Struve/AngerWeber.lean#L911) (proved).
+- [11.10.E10](https://dlmf.nist.gov/11.10.E10): [`DLMF.Struve.angerS1`](DLMF/Struve/AngerWeber.lean#L518) (defined); [`DLMF.Struve.hasSum_angerS1`](DLMF/Struve/AngerWeber.lean#L523) (proved).
+- [11.10.E11](https://dlmf.nist.gov/11.10.E11): [`DLMF.Struve.angerS2`](DLMF/Struve/AngerWeber.lean#L531) (defined); [`DLMF.Struve.hasSum_angerS2`](DLMF/Struve/AngerWeber.lean#L536) (proved).
+- [11.10.E12](https://dlmf.nist.gov/11.10.E12): [`DLMF.Struve.angerJ_neg`](DLMF/Struve/AngerWeber.lean#L927) (proved); [`DLMF.Struve.weberE_neg`](DLMF/Struve/AngerWeber.lean#L938) (proved).
+- [11.10.E13](https://dlmf.nist.gov/11.10.E13): [`DLMF.Struve.anger_weber`](DLMF/Struve/AngerWeber.lean#L950) (proved).
+- [11.10.E14](https://dlmf.nist.gov/11.10.E14): [`DLMF.Struve.weber_anger`](DLMF/Struve/AngerWeber.lean#L971) (proved).
+- [11.10.E15](https://dlmf.nist.gov/11.10.E15): [`DLMF.Struve.anger_bessel`](DLMF/Struve/AngerWeber.lean#L992) (proved).
+- [11.10.E16](https://dlmf.nist.gov/11.10.E16): [`DLMF.Struve.weber_bessel`](DLMF/Struve/AngerWeber.lean#L1004) (proved).
+- [11.10.E17](https://dlmf.nist.gov/11.10.E17): [`DLMF.Struve.angerJ_lommel`](DLMF/Struve/AngerWeber.lean#L1089) (proved).
+- [11.10.E18](https://dlmf.nist.gov/11.10.E18): [`DLMF.Struve.weberE_lommel`](DLMF/Struve/AngerWeber.lean#L1106) (proved).
+- [11.10.E19](https://dlmf.nist.gov/11.10.E19): [`DLMF.Struve.angerJ_half_19`](DLMF/Struve/AngerWeber.lean#L1419) (proved); [`DLMF.Struve.anger_weber_half`](DLMF/Struve/AngerWeber.lean#L1460) (proved).
+- [11.10.E20](https://dlmf.nist.gov/11.10.E20): [`DLMF.Struve.angerJ_half_20`](DLMF/Struve/AngerWeber.lean#L1439) (proved); [`DLMF.Struve.anger_weber_half`](DLMF/Struve/AngerWeber.lean#L1460) (proved).
+- [11.10.E21](https://dlmf.nist.gov/11.10.E21): [`DLMF.Struve.angerFresnelPlus`](DLMF/Struve/AngerWeber.lean#L1125) (defined); [`DLMF.Struve.angerFresnelMinus`](DLMF/Struve/AngerWeber.lean#L1130) (defined).
+- [11.10.E22](https://dlmf.nist.gov/11.10.E22): [`DLMF.Struve.weberE_nat`](DLMF/Struve/AngerWeber.lean#L1736) (proved).
+- [11.10.E23](https://dlmf.nist.gov/11.10.E23): [`DLMF.Struve.weberE_neg_nat`](DLMF/Struve/AngerWeber.lean#L1746) (proved).
+- [11.10.E24](https://dlmf.nist.gov/11.10.E24): [`DLMF.Struve.weberM1`](DLMF/Struve/AngerWeber.lean#L1476) (defined); [`DLMF.Struve.weberM2`](DLMF/Struve/AngerWeber.lean#L1482) (defined).
+- [11.10.E25](https://dlmf.nist.gov/11.10.E25): [`DLMF.Struve.angerJ_zero`](DLMF/Struve/AngerWeber.lean#L1756) (proved); [`DLMF.Struve.weberE_zero`](DLMF/Struve/AngerWeber.lean#L1771) (proved).
+- [11.10.E26](https://dlmf.nist.gov/11.10.E26): [`DLMF.Struve.weberE_zero_order`](DLMF/Struve/AngerWeber.lean#L1794) (proved); [`DLMF.Struve.weberE_one_order`](DLMF/Struve/AngerWeber.lean#L1816) (proved).
+- [11.10.E27](https://dlmf.nist.gov/11.10.E27): [`DLMF.Struve.angerJ_order_deriv_zero`](DLMF/Struve/AngerWeber.lean#L1847) (proved).
+- [11.10.E28](https://dlmf.nist.gov/11.10.E28): [`DLMF.Struve.weberE_order_deriv_zero`](DLMF/Struve/AngerWeber.lean#L1878) (proved).
+- [11.10.E29](https://dlmf.nist.gov/11.10.E29): [`DLMF.Struve.angerJ_int`](DLMF/Struve/AngerWeber.lean#L1904) (proved).
+- [11.10.E30](https://dlmf.nist.gov/11.10.E30): [`DLMF.Struve.angerJ_bessel_products`](DLMF/Struve/AngerWeber.lean#L1954) (proved).
+- [11.10.E31](https://dlmf.nist.gov/11.10.E31): [`DLMF.Struve.weberE_bessel_products`](DLMF/Struve/AngerWeber.lean#L1965) (proved).
+- [11.10.E32](https://dlmf.nist.gov/11.10.E32): [`DLMF.Struve.angerJ_recurrence`](DLMF/Struve/AngerWeber.lean#L1976) (proved).
+- [11.10.E33](https://dlmf.nist.gov/11.10.E33): [`DLMF.Struve.weberE_recurrence`](DLMF/Struve/AngerWeber.lean#L2020) (proved).
+- [11.10.E34](https://dlmf.nist.gov/11.10.E34): [`DLMF.Struve.angerJ_deriv`](DLMF/Struve/AngerWeber.lean#L1982) (proved).
+- [11.10.E35](https://dlmf.nist.gov/11.10.E35): [`DLMF.Struve.weberE_deriv`](DLMF/Struve/AngerWeber.lean#L2026) (proved).
+- [11.10.E36](https://dlmf.nist.gov/11.10.E36): [`DLMF.Struve.angerJ_weighted_deriv_add`](DLMF/Struve/AngerWeber.lean#L1988) (proved); [`DLMF.Struve.angerJ_weighted_deriv_sub`](DLMF/Struve/AngerWeber.lean#L2004) (proved).
+- [11.10.E37](https://dlmf.nist.gov/11.10.E37): [`DLMF.Struve.weberE_weighted_deriv_add`](DLMF/Struve/AngerWeber.lean#L2032) (proved); [`DLMF.Struve.weberE_weighted_deriv_sub`](DLMF/Struve/AngerWeber.lean#L2048) (proved).
 
 ### [§11.11 Asymptotic Expansions of Anger–Weber Functions](https://dlmf.nist.gov/11.11)
 
-- [11.11.E1](https://dlmf.nist.gov/11.11.E1): [`DLMF.Struve.angerF`](DLMF/Struve/Asymptotics.lean#L3294) (defined); [`DLMF.Struve.angerG`](DLMF/Struve/Asymptotics.lean#L3299) (defined); [`DLMF.Struve.angerFG_poch`](DLMF/Struve/Asymptotics.lean#L3304) (proved).
-- [11.11.E2](https://dlmf.nist.gov/11.11.E2): [`DLMF.Struve.angerJ_large_argument`](DLMF/Struve/Asymptotics.lean#L3387) (proved).
-- [11.11.E3](https://dlmf.nist.gov/11.11.E3): [`DLMF.Struve.weberE_large_argument`](DLMF/Struve/Asymptotics.lean#L3401) (proved).
-- [11.11.E4](https://dlmf.nist.gov/11.11.E4): [`DLMF.Struve.angerA_large_argument`](DLMF/Struve/Asymptotics.lean#L3427) (proved).
-- [11.11.E5](https://dlmf.nist.gov/11.11.E5): [`DLMF.Struve.angerJ_large_order`](DLMF/Struve/Asymptotics.lean#L3743) (proved).
-- [11.11.E6](https://dlmf.nist.gov/11.11.E6): [`DLMF.Struve.weberE_large_order`](DLMF/Struve/Asymptotics.lean#L3855) (proved). Error term corrected to e^{π|Im ν|}ν⁻² for complex ν (DLMF erratum; REVIEW.md, round 6).
-- [11.11.E7](https://dlmf.nist.gov/11.11.E7): [`DLMF.Struve.weberE_large_integer_0`](DLMF/Struve/Asymptotics.lean#L4210) (proved); [`DLMF.Struve.weberE_large_integer_1`](DLMF/Struve/Asymptotics.lean#L4292) (proved).
-- [11.11.E8](https://dlmf.nist.gov/11.11.E8): [`DLMF.Struve.angerA_scaled_8`](DLMF/Struve/Asymptotics.lean#L4430) (admitted).
-- [11.11.E9](https://dlmf.nist.gov/11.11.E9): [`DLMF.Struve.angerScaledA_initial`](DLMF/Struve/Asymptotics.lean#L4385) (proved).
-- [11.11.E10](https://dlmf.nist.gov/11.11.E10): [`DLMF.Struve.angerA_scaled_10`](DLMF/Struve/Asymptotics.lean#L4436) (admitted).
-- [11.11.E11](https://dlmf.nist.gov/11.11.E11): [`DLMF.Struve.angerA_scaled_saddle`](DLMF/Struve/Asymptotics.lean#L4451) (admitted).
-- [11.11.E12](https://dlmf.nist.gov/11.11.E12): [`DLMF.Struve.angerMu`](DLMF/Struve/Asymptotics.lean#L4442) (defined).
-- [11.11.E13](https://dlmf.nist.gov/11.11.E13): [`DLMF.Struve.angerScaledB_initial`](DLMF/Struve/Asymptotics.lean#L4457) (admitted).
-- [11.11.E14](https://dlmf.nist.gov/11.11.E14): [`DLMF.Struve.angerA_scaled_outer_equiv`](DLMF/Struve/Asymptotics.lean#L6447) (proved).
-- [11.11.E15](https://dlmf.nist.gov/11.11.E15): [`DLMF.Struve.angerA_scaled_inner_equiv`](DLMF/Struve/Asymptotics.lean#L6519) (proved).
-- [11.11.E16](https://dlmf.nist.gov/11.11.E16): [`DLMF.Struve.angerA_turning_equiv`](DLMF/Struve/Asymptotics.lean#L6616) (proved).
-- [11.11.E17](https://dlmf.nist.gov/11.11.E17): [`DLMF.Struve.angerA_turning_uniform`](DLMF/Struve/Asymptotics.lean#L6768) (proved).
-- [11.11.E18](https://dlmf.nist.gov/11.11.E18): [`DLMF.Struve.angerJ_turning_equiv`](DLMF/Struve/Asymptotics.lean#L6713) (proved). Stated for real ν → +∞; the complex sector of DLMF 1.1.2 fails (DLMF erratum; REVIEW.md, round 6).
-- [11.11.E19](https://dlmf.nist.gov/11.11.E19): [`DLMF.Struve.weberE_turning_equiv`](DLMF/Struve/Asymptotics.lean#L6741) (proved). Stated for real ν → +∞; the complex sector of DLMF 1.1.2 fails (DLMF erratum; REVIEW.md, round 6).
+- [11.11.E1](https://dlmf.nist.gov/11.11.E1): [`DLMF.Struve.angerF`](DLMF/Struve/Asymptotics.lean#L3293) (defined); [`DLMF.Struve.angerG`](DLMF/Struve/Asymptotics.lean#L3298) (defined); [`DLMF.Struve.angerFG_poch`](DLMF/Struve/Asymptotics.lean#L3303) (proved).
+- [11.11.E2](https://dlmf.nist.gov/11.11.E2): [`DLMF.Struve.angerJ_large_argument`](DLMF/Struve/Asymptotics.lean#L3386) (proved).
+- [11.11.E3](https://dlmf.nist.gov/11.11.E3): [`DLMF.Struve.weberE_large_argument`](DLMF/Struve/Asymptotics.lean#L3400) (proved).
+- [11.11.E4](https://dlmf.nist.gov/11.11.E4): [`DLMF.Struve.angerA_large_argument`](DLMF/Struve/Asymptotics.lean#L3426) (proved).
+- [11.11.E5](https://dlmf.nist.gov/11.11.E5): [`DLMF.Struve.angerJ_large_order`](DLMF/Struve/Asymptotics.lean#L3742) (proved).
+- [11.11.E6](https://dlmf.nist.gov/11.11.E6): [`DLMF.Struve.weberE_large_order`](DLMF/Struve/Asymptotics.lean#L3854) (proved). Error term corrected to e^{π|Im ν|}ν⁻² for complex ν (DLMF erratum; REVIEW.md, round 6).
+- [11.11.E7](https://dlmf.nist.gov/11.11.E7): [`DLMF.Struve.weberE_large_integer_0`](DLMF/Struve/Asymptotics.lean#L4209) (proved); [`DLMF.Struve.weberE_large_integer_1`](DLMF/Struve/Asymptotics.lean#L4291) (proved).
+- [11.11.E8](https://dlmf.nist.gov/11.11.E8): [`DLMF.Struve.angerA_scaled_8`](DLMF/Struve/Asymptotics.lean#L4429) (admitted).
+- [11.11.E9](https://dlmf.nist.gov/11.11.E9): [`DLMF.Struve.angerScaledA_initial`](DLMF/Struve/Asymptotics.lean#L4384) (proved).
+- [11.11.E10](https://dlmf.nist.gov/11.11.E10): [`DLMF.Struve.angerA_scaled_10`](DLMF/Struve/Asymptotics.lean#L4435) (admitted).
+- [11.11.E11](https://dlmf.nist.gov/11.11.E11): [`DLMF.Struve.angerA_scaled_saddle`](DLMF/Struve/Asymptotics.lean#L4450) (admitted).
+- [11.11.E12](https://dlmf.nist.gov/11.11.E12): [`DLMF.Struve.angerMu`](DLMF/Struve/Asymptotics.lean#L4441) (defined).
+- [11.11.E13](https://dlmf.nist.gov/11.11.E13): [`DLMF.Struve.angerScaledB_initial`](DLMF/Struve/Asymptotics.lean#L4456) (admitted).
+- [11.11.E14](https://dlmf.nist.gov/11.11.E14): [`DLMF.Struve.angerA_scaled_outer_equiv`](DLMF/Struve/Asymptotics.lean#L6446) (proved).
+- [11.11.E15](https://dlmf.nist.gov/11.11.E15): [`DLMF.Struve.angerA_scaled_inner_equiv`](DLMF/Struve/Asymptotics.lean#L6518) (proved).
+- [11.11.E16](https://dlmf.nist.gov/11.11.E16): [`DLMF.Struve.angerA_turning_equiv`](DLMF/Struve/Asymptotics.lean#L6615) (proved).
+- [11.11.E17](https://dlmf.nist.gov/11.11.E17): [`DLMF.Struve.angerA_turning_uniform`](DLMF/Struve/Asymptotics.lean#L6767) (proved).
+- [11.11.E18](https://dlmf.nist.gov/11.11.E18): [`DLMF.Struve.angerJ_turning_equiv`](DLMF/Struve/Asymptotics.lean#L6712) (proved). Stated for real ν → +∞; the complex sector of DLMF 1.1.2 fails (DLMF erratum; REVIEW.md, round 6).
+- [11.11.E19](https://dlmf.nist.gov/11.11.E19): [`DLMF.Struve.weberE_turning_equiv`](DLMF/Struve/Asymptotics.lean#L6740) (proved). Stated for real ν → +∞; the complex sector of DLMF 1.1.2 fails (DLMF erratum; REVIEW.md, round 6).
 
 ### [§11.13 Methods of Computation](https://dlmf.nist.gov/11.13)
 
@@ -543,50 +543,50 @@ No selected numbered equations. Mathematical prose is recorded in the module inv
 
 ### [§12.2 Differential Equations](https://dlmf.nist.gov/12.2)
 
-- [12.2.E1](https://dlmf.nist.gov/12.2.E1): [`DLMF.Confluent.IsQuadraticCylinderSolution`](DLMF/ParabolicCylinder/Basic.lean#L28) (defined); [`DLMF.Confluent.quadraticCylinder_transform`](DLMF/ParabolicCylinder/Basic.lean#L38) (proved).
-- [12.2.E2](https://dlmf.nist.gov/12.2.E2): [`DLMF.Confluent.hasDerivAt_pcfUDeriv`](DLMF/Confluent/ParabolicCylinder.lean#L159) (proved); [`DLMF.Confluent.hasDerivAt_pcfVDeriv`](DLMF/Confluent/ParabolicCylinder.lean#L1070) (proved).
-- [12.2.E3](https://dlmf.nist.gov/12.2.E3): [`DLMF.Confluent.IsOscillatoryCylinderSolution`](DLMF/ParabolicCylinder/Basic.lean#L33) (defined); [`DLMF.Confluent.pcfW_ode`](DLMF/ParabolicCylinder/Weber.lean#L153) (proved).
-- [12.2.E4](https://dlmf.nist.gov/12.2.E4): [`DLMF.Confluent.pcfD_ode`](DLMF/ParabolicCylinder/Basic.lean#L70) (proved).
-- [12.2.E5](https://dlmf.nist.gov/12.2.E5): [`DLMF.Confluent.pcfD`](DLMF/Confluent/ParabolicCylinder.lean#L152) (defined).
-- [12.2.E6](https://dlmf.nist.gov/12.2.E6): [`DLMF.Confluent.pcfU_zero`](DLMF/Confluent/ParabolicCylinder.lean#L174) (proved).
-- [12.2.E7](https://dlmf.nist.gov/12.2.E7): [`DLMF.Confluent.pcfUDeriv_zero`](DLMF/Confluent/ParabolicCylinder.lean#L182) (proved).
-- [12.2.E8](https://dlmf.nist.gov/12.2.E8): [`DLMF.Confluent.pcfV_zero`](DLMF/Confluent/ParabolicCylinder.lean#L1091) (proved).
-- [12.2.E9](https://dlmf.nist.gov/12.2.E9): [`DLMF.Confluent.pcfVDeriv_zero`](DLMF/Confluent/ParabolicCylinder.lean#L1100) (proved).
-- [12.2.E10](https://dlmf.nist.gov/12.2.E10): [`DLMF.Confluent.pcfV_wronskian`](DLMF/Confluent/ParabolicCylinder.lean#L1152) (proved).
-- [12.2.E11](https://dlmf.nist.gov/12.2.E11): [`DLMF.Confluent.pcfU_wronskian_neg`](DLMF/Confluent/ParabolicCylinder.lean#L811) (proved).
-- [12.2.E12](https://dlmf.nist.gov/12.2.E12): [`DLMF.Confluent.pcfU_wronskian_mul_I`](DLMF/Confluent/ParabolicCylinder.lean#L866) (proved); [`DLMF.Confluent.pcfU_wronskian_mul_neg_I`](DLMF/Confluent/ParabolicCylinder.lean#L904) (proved).
-- [12.2.E13](https://dlmf.nist.gov/12.2.E13): [`DLMF.Confluent.pcfU_neg_nat_sub_half_neg`](DLMF/Confluent/ParabolicCylinder.lean#L1307) (proved).
-- [12.2.E14](https://dlmf.nist.gov/12.2.E14): [`DLMF.Confluent.pcfV_nat_add_half_neg`](DLMF/Confluent/ParabolicCylinder.lean#L1318) (proved).
-- [12.2.E15](https://dlmf.nist.gov/12.2.E15): [`DLMF.Confluent.pcfU_neg_eq`](DLMF/Confluent/ParabolicCylinder.lean#L1200) (proved).
-- [12.2.E16](https://dlmf.nist.gov/12.2.E16): [`DLMF.Confluent.pcfV_neg_eq`](DLMF/Confluent/ParabolicCylinder.lean#L1249) (proved).
-- [12.2.E17](https://dlmf.nist.gov/12.2.E17): [`DLMF.Confluent.pcfU_connection_mul_I`](DLMF/Confluent/ParabolicCylinder.lean#L952) (proved); [`DLMF.Confluent.pcfU_connection_mul_neg_I`](DLMF/Confluent/ParabolicCylinder.lean#L1039) (proved).
-- [12.2.E18](https://dlmf.nist.gov/12.2.E18): [`DLMF.Confluent.pcfU_rotated_connection_pos`](DLMF/ParabolicCylinder/Basic.lean#L271) (proved); [`DLMF.Confluent.pcfU_rotated_connection_neg`](DLMF/ParabolicCylinder/Basic.lean#L315) (proved).
-- [12.2.E19](https://dlmf.nist.gov/12.2.E19): [`DLMF.Confluent.pcfU_rotated_connection_entire_pos`](DLMF/ParabolicCylinder/Basic.lean#L282) (proved); [`DLMF.Confluent.pcfU_rotated_connection_entire_neg`](DLMF/ParabolicCylinder/Basic.lean#L326) (proved).
-- [12.2.E20](https://dlmf.nist.gov/12.2.E20): [`DLMF.Confluent.pcfV_eq_mul_I`](DLMF/Confluent/ParabolicCylinder.lean#L1354) (proved); [`DLMF.Confluent.pcfV_eq_mul_neg_I`](DLMF/Confluent/ParabolicCylinder.lean#L1416) (proved).
-- [12.2.E21](https://dlmf.nist.gov/12.2.E21): [`DLMF.Confluent.pcfUBar`](DLMF/ParabolicCylinder/Basic.lean#L169) (defined).
-- [12.2.E22](https://dlmf.nist.gov/12.2.E22): [`DLMF.Confluent.pcfF`](DLMF/ParabolicCylinder/Basic.lean#L178) (defined); [`DLMF.Confluent.pcfTheta`](DLMF/ParabolicCylinder/Basic.lean#L183) (defined); [`DLMF.Confluent.pcfF_phase`](DLMF/ParabolicCylinder/Basic.lean#L221) (proved).
-- [12.2.E23](https://dlmf.nist.gov/12.2.E23): [`DLMF.Confluent.pcfG`](DLMF/ParabolicCylinder/Basic.lean#L241) (defined); [`DLMF.Confluent.pcfPsi`](DLMF/ParabolicCylinder/Basic.lean#L246) (defined); [`DLMF.Confluent.pcfG_phase`](DLMF/ParabolicCylinder/Basic.lean#L251) (proved).
+- [12.2.E1](https://dlmf.nist.gov/12.2.E1): [`DLMF.Confluent.IsQuadraticCylinderSolution`](DLMF/ParabolicCylinder/Basic.lean#L25) (defined); [`DLMF.Confluent.quadraticCylinder_transform`](DLMF/ParabolicCylinder/Basic.lean#L35) (proved).
+- [12.2.E2](https://dlmf.nist.gov/12.2.E2): [`DLMF.Confluent.hasDerivAt_pcfUDeriv`](DLMF/Confluent/ParabolicCylinder.lean#L169) (proved); [`DLMF.Confluent.hasDerivAt_pcfVDeriv`](DLMF/Confluent/ParabolicCylinder.lean#L1107) (proved).
+- [12.2.E3](https://dlmf.nist.gov/12.2.E3): [`DLMF.Confluent.IsOscillatoryCylinderSolution`](DLMF/ParabolicCylinder/Basic.lean#L30) (defined); [`DLMF.Confluent.pcfW_ode`](DLMF/ParabolicCylinder/Weber.lean#L152) (proved).
+- [12.2.E4](https://dlmf.nist.gov/12.2.E4): [`DLMF.Confluent.pcfD_ode`](DLMF/ParabolicCylinder/Basic.lean#L67) (proved).
+- [12.2.E5](https://dlmf.nist.gov/12.2.E5): [`DLMF.Confluent.pcfD`](DLMF/Confluent/ParabolicCylinder.lean#L161) (defined).
+- [12.2.E6](https://dlmf.nist.gov/12.2.E6): [`DLMF.Confluent.pcfU_zero`](DLMF/Confluent/ParabolicCylinder.lean#L184) (proved).
+- [12.2.E7](https://dlmf.nist.gov/12.2.E7): [`DLMF.Confluent.pcfUDeriv_zero`](DLMF/Confluent/ParabolicCylinder.lean#L192) (proved).
+- [12.2.E8](https://dlmf.nist.gov/12.2.E8): [`DLMF.Confluent.pcfV_zero`](DLMF/Confluent/ParabolicCylinder.lean#L1132) (proved).
+- [12.2.E9](https://dlmf.nist.gov/12.2.E9): [`DLMF.Confluent.pcfVDeriv_zero`](DLMF/Confluent/ParabolicCylinder.lean#L1141) (proved).
+- [12.2.E10](https://dlmf.nist.gov/12.2.E10): [`DLMF.Confluent.pcfV_wronskian`](DLMF/Confluent/ParabolicCylinder.lean#L1198) (proved).
+- [12.2.E11](https://dlmf.nist.gov/12.2.E11): [`DLMF.Confluent.pcfU_wronskian_neg`](DLMF/Confluent/ParabolicCylinder.lean#L846) (proved).
+- [12.2.E12](https://dlmf.nist.gov/12.2.E12): [`DLMF.Confluent.pcfU_wronskian_mul_I`](DLMF/Confluent/ParabolicCylinder.lean#L901) (proved); [`DLMF.Confluent.pcfU_wronskian_mul_neg_I`](DLMF/Confluent/ParabolicCylinder.lean#L939) (proved).
+- [12.2.E13](https://dlmf.nist.gov/12.2.E13): [`DLMF.Confluent.pcfU_neg_nat_sub_half_neg`](DLMF/Confluent/ParabolicCylinder.lean#L1356) (proved).
+- [12.2.E14](https://dlmf.nist.gov/12.2.E14): [`DLMF.Confluent.pcfV_nat_add_half_neg`](DLMF/Confluent/ParabolicCylinder.lean#L1367) (proved).
+- [12.2.E15](https://dlmf.nist.gov/12.2.E15): [`DLMF.Confluent.pcfU_neg_eq`](DLMF/Confluent/ParabolicCylinder.lean#L1248) (proved).
+- [12.2.E16](https://dlmf.nist.gov/12.2.E16): [`DLMF.Confluent.pcfV_neg_eq`](DLMF/Confluent/ParabolicCylinder.lean#L1297) (proved).
+- [12.2.E17](https://dlmf.nist.gov/12.2.E17): [`DLMF.Confluent.pcfU_connection_mul_I`](DLMF/Confluent/ParabolicCylinder.lean#L988) (proved); [`DLMF.Confluent.pcfU_connection_mul_neg_I`](DLMF/Confluent/ParabolicCylinder.lean#L1075) (proved).
+- [12.2.E18](https://dlmf.nist.gov/12.2.E18): [`DLMF.Confluent.pcfU_rotated_connection_pos`](DLMF/ParabolicCylinder/Basic.lean#L268) (proved); [`DLMF.Confluent.pcfU_rotated_connection_neg`](DLMF/ParabolicCylinder/Basic.lean#L312) (proved).
+- [12.2.E19](https://dlmf.nist.gov/12.2.E19): [`DLMF.Confluent.pcfU_rotated_connection_entire_pos`](DLMF/ParabolicCylinder/Basic.lean#L279) (proved); [`DLMF.Confluent.pcfU_rotated_connection_entire_neg`](DLMF/ParabolicCylinder/Basic.lean#L323) (proved).
+- [12.2.E20](https://dlmf.nist.gov/12.2.E20): [`DLMF.Confluent.pcfV_eq_mul_I`](DLMF/Confluent/ParabolicCylinder.lean#L1405) (proved); [`DLMF.Confluent.pcfV_eq_mul_neg_I`](DLMF/Confluent/ParabolicCylinder.lean#L1467) (proved).
+- [12.2.E21](https://dlmf.nist.gov/12.2.E21): [`DLMF.Confluent.pcfUBar`](DLMF/ParabolicCylinder/Basic.lean#L166) (defined).
+- [12.2.E22](https://dlmf.nist.gov/12.2.E22): [`DLMF.Confluent.pcfF`](DLMF/ParabolicCylinder/Basic.lean#L175) (defined); [`DLMF.Confluent.pcfTheta`](DLMF/ParabolicCylinder/Basic.lean#L180) (defined); [`DLMF.Confluent.pcfF_phase`](DLMF/ParabolicCylinder/Basic.lean#L218) (proved).
+- [12.2.E23](https://dlmf.nist.gov/12.2.E23): [`DLMF.Confluent.pcfG`](DLMF/ParabolicCylinder/Basic.lean#L238) (defined); [`DLMF.Confluent.pcfPsi`](DLMF/ParabolicCylinder/Basic.lean#L243) (defined); [`DLMF.Confluent.pcfG_phase`](DLMF/ParabolicCylinder/Basic.lean#L248) (proved).
 
 ### [§12.4 Power-Series Expansions](https://dlmf.nist.gov/12.4)
 
-- [12.4.E1](https://dlmf.nist.gov/12.4.E1): [`DLMF.Confluent.pcfU`](DLMF/Confluent/ParabolicCylinder.lean#L137) (defined).
-- [12.4.E2](https://dlmf.nist.gov/12.4.E2): [`DLMF.Confluent.pcfV`](DLMF/Confluent/ParabolicCylinder.lean#L1059) (defined).
-- [12.4.E3](https://dlmf.nist.gov/12.4.E3): [`DLMF.Confluent.pcfEven_series_3`](DLMF/ParabolicCylinder/Basic.lean#L407) (proved).
-- [12.4.E4](https://dlmf.nist.gov/12.4.E4): [`DLMF.Confluent.pcfOdd_series_4`](DLMF/ParabolicCylinder/Basic.lean#L433) (proved).
-- [12.4.E5](https://dlmf.nist.gov/12.4.E5): [`DLMF.Confluent.pcfEven_series_5`](DLMF/ParabolicCylinder/Basic.lean#L420) (proved).
-- [12.4.E6](https://dlmf.nist.gov/12.4.E6): [`DLMF.Confluent.pcfOdd_series_6`](DLMF/ParabolicCylinder/Basic.lean#L446) (proved).
+- [12.4.E1](https://dlmf.nist.gov/12.4.E1): [`DLMF.Confluent.pcfU`](DLMF/Confluent/ParabolicCylinder.lean#L146) (defined).
+- [12.4.E2](https://dlmf.nist.gov/12.4.E2): [`DLMF.Confluent.pcfV`](DLMF/Confluent/ParabolicCylinder.lean#L1095) (defined).
+- [12.4.E3](https://dlmf.nist.gov/12.4.E3): [`DLMF.Confluent.pcfEven_series_3`](DLMF/ParabolicCylinder/Basic.lean#L404) (proved).
+- [12.4.E4](https://dlmf.nist.gov/12.4.E4): [`DLMF.Confluent.pcfOdd_series_4`](DLMF/ParabolicCylinder/Basic.lean#L430) (proved).
+- [12.4.E5](https://dlmf.nist.gov/12.4.E5): [`DLMF.Confluent.pcfEven_series_5`](DLMF/ParabolicCylinder/Basic.lean#L417) (proved).
+- [12.4.E6](https://dlmf.nist.gov/12.4.E6): [`DLMF.Confluent.pcfOdd_series_6`](DLMF/ParabolicCylinder/Basic.lean#L443) (proved).
 
 ### [§12.5 Integral Representations](https://dlmf.nist.gov/12.5)
 
-- [12.5.E1](https://dlmf.nist.gov/12.5.E1): [`DLMF.Confluent.pcfU_eq_integral`](DLMF/Confluent/ParabolicCylinder.lean#L691) (proved).
-- [12.5.E2](https://dlmf.nist.gov/12.5.E2): [`DLMF.Confluent.pcfU_integral_2`](DLMF/ParabolicCylinder/Integrals.lean#L34) (proved).
-- [12.5.E3](https://dlmf.nist.gov/12.5.E3): [`DLMF.Confluent.pcfU_integral_3`](DLMF/ParabolicCylinder/Integrals.lean#L55) (proved).
-- [12.5.E4](https://dlmf.nist.gov/12.5.E4): [`DLMF.Confluent.pcfU_integral_4`](DLMF/ParabolicCylinder/Integrals.lean#L76) (proved).
-- [12.5.E5](https://dlmf.nist.gov/12.5.E5): [`DLMF.Confluent.pcfU_hankel_integral`](DLMF/ParabolicCylinder/Integrals.lean#L194) (proved).
-- [12.5.E6](https://dlmf.nist.gov/12.5.E6): [`DLMF.Confluent.pcfU_vertical_integral`](DLMF/ParabolicCylinder/Integrals.lean#L132) (proved).
-- [12.5.E7](https://dlmf.nist.gov/12.5.E7): [`DLMF.Confluent.pcfV_horizontal_integral`](DLMF/ParabolicCylinder/Integrals.lean#L152) (proved).
-- [12.5.E8](https://dlmf.nist.gov/12.5.E8): [`DLMF.Confluent.pcfU_barnes_integral`](DLMF/ParabolicCylinder/Integrals.lean#L218) (proved); [`DLMF.Confluent.pcfU_barnes_continued`](DLMF/ParabolicCylinder/BarnesContinuation.lean#L765) (proved).
-- [12.5.E9](https://dlmf.nist.gov/12.5.E9): [`DLMF.Confluent.pcfV_barnes_integral`](DLMF/ParabolicCylinder/Integrals.lean#L256) (proved); [`DLMF.Confluent.pcfV_barnes_continued`](DLMF/ParabolicCylinder/BarnesContinuation.lean#L777) (proved).
+- [12.5.E1](https://dlmf.nist.gov/12.5.E1): [`DLMF.Confluent.pcfU_eq_integral`](DLMF/Confluent/ParabolicCylinder.lean#L720) (proved).
+- [12.5.E2](https://dlmf.nist.gov/12.5.E2): [`DLMF.Confluent.pcfU_integral_2`](DLMF/ParabolicCylinder/Integrals.lean#L32) (proved).
+- [12.5.E3](https://dlmf.nist.gov/12.5.E3): [`DLMF.Confluent.pcfU_integral_3`](DLMF/ParabolicCylinder/Integrals.lean#L53) (proved).
+- [12.5.E4](https://dlmf.nist.gov/12.5.E4): [`DLMF.Confluent.pcfU_integral_4`](DLMF/ParabolicCylinder/Integrals.lean#L74) (proved).
+- [12.5.E5](https://dlmf.nist.gov/12.5.E5): [`DLMF.Confluent.pcfU_hankel_integral`](DLMF/ParabolicCylinder/Integrals.lean#L192) (proved).
+- [12.5.E6](https://dlmf.nist.gov/12.5.E6): [`DLMF.Confluent.pcfU_vertical_integral`](DLMF/ParabolicCylinder/Integrals.lean#L130) (proved).
+- [12.5.E7](https://dlmf.nist.gov/12.5.E7): [`DLMF.Confluent.pcfV_horizontal_integral`](DLMF/ParabolicCylinder/Integrals.lean#L150) (proved).
+- [12.5.E8](https://dlmf.nist.gov/12.5.E8): [`DLMF.Confluent.pcfU_barnes_integral`](DLMF/ParabolicCylinder/Integrals.lean#L216) (proved); [`DLMF.Confluent.pcfU_barnes_continued`](DLMF/ParabolicCylinder/BarnesContinuation.lean#L764) (proved).
+- [12.5.E9](https://dlmf.nist.gov/12.5.E9): [`DLMF.Confluent.pcfV_barnes_integral`](DLMF/ParabolicCylinder/Integrals.lean#L254) (proved); [`DLMF.Confluent.pcfV_barnes_continued`](DLMF/ParabolicCylinder/BarnesContinuation.lean#L776) (proved).
 
 ### [§12.6 Continued Fraction](https://dlmf.nist.gov/12.6)
 
@@ -594,97 +594,97 @@ No selected numbered equations. Mathematical prose is recorded in the module inv
 
 ### [§12.7 Relations to Other Functions](https://dlmf.nist.gov/12.7)
 
-- [12.7.E1](https://dlmf.nist.gov/12.7.E1): [`DLMF.Confluent.pcfU_neg_half`](DLMF/Confluent/ParabolicCylinder.lean#L191) (proved).
-- [12.7.E2](https://dlmf.nist.gov/12.7.E2): [`DLMF.Confluent.pcfU_physicists_hermite`](DLMF/ParabolicCylinder/Hermite.lean#L52) (proved); [`DLMF.Confluent.pcfD_nat`](DLMF/Confluent/ParabolicCylinder.lean#L491) (proved).
-- [12.7.E3](https://dlmf.nist.gov/12.7.E3): [`DLMF.Confluent.pcfV_nat_add_half`](DLMF/ParabolicCylinder/Relations.lean#L29) (proved); [`DLMF.Confluent.pcfV_physicists_hermite`](DLMF/ParabolicCylinder/Hermite.lean#L62) (proved).
-- [12.7.E4](https://dlmf.nist.gov/12.7.E4): [`DLMF.Confluent.pcfV_neg_half`](DLMF/ParabolicCylinder/Relations.lean#L47) (proved).
-- [12.7.E5](https://dlmf.nist.gov/12.7.E5): [`DLMF.Confluent.pcfU_half`](DLMF/ParabolicCylinder/Basic.lean#L459) (proved).
-- [12.7.E6](https://dlmf.nist.gov/12.7.E6): [`DLMF.Confluent.pcfU_nat_add_half_deriv`](DLMF/ParabolicCylinder/Relations.lean#L65) (proved).
-- [12.7.E7](https://dlmf.nist.gov/12.7.E7): [`DLMF.Confluent.hhFunction`](DLMF/ParabolicCylinder/Relations.lean#L93) (defined); [`DLMF.Confluent.pcfU_hh`](DLMF/ParabolicCylinder/Relations.lean#L98) (proved).
-- [12.7.E8](https://dlmf.nist.gov/12.7.E8): [`DLMF.Confluent.pcfU_bessel_8`](DLMF/ParabolicCylinder/Relations.lean#L228) (proved).
-- [12.7.E9](https://dlmf.nist.gov/12.7.E9): [`DLMF.Confluent.pcfU_bessel_9`](DLMF/ParabolicCylinder/Relations.lean#L246) (proved).
-- [12.7.E10](https://dlmf.nist.gov/12.7.E10): [`DLMF.Confluent.pcfU_bessel_10`](DLMF/ParabolicCylinder/Relations.lean#L259) (proved).
-- [12.7.E11](https://dlmf.nist.gov/12.7.E11): [`DLMF.Confluent.pcfU_bessel_11`](DLMF/ParabolicCylinder/Relations.lean#L266) (proved).
-- [12.7.E12](https://dlmf.nist.gov/12.7.E12): [`DLMF.Confluent.pcfEven_kummer_alternative`](DLMF/ParabolicCylinder/Basic.lean#L358) (proved); [`DLMF.Confluent.pcfEven`](DLMF/Confluent/ParabolicCylinder.lean#L58) (defined).
-- [12.7.E13](https://dlmf.nist.gov/12.7.E13): [`DLMF.Confluent.pcfOdd_kummer_alternative`](DLMF/ParabolicCylinder/Basic.lean#L370) (proved); [`DLMF.Confluent.pcfOdd`](DLMF/Confluent/ParabolicCylinder.lean#L63) (defined).
-- [12.7.E14](https://dlmf.nist.gov/12.7.E14): [`DLMF.Confluent.pcfU_kummerU_odd`](DLMF/ParabolicCylinder/Relations.lean#L279) (proved); [`DLMF.Confluent.pcfU_whittaker`](DLMF/ParabolicCylinder/Relations.lean#L292) (proved); [`DLMF.Confluent.pcfU_eq_kummerU`](DLMF/Confluent/ParabolicCylinder.lean#L208) (proved).
+- [12.7.E1](https://dlmf.nist.gov/12.7.E1): [`DLMF.Confluent.pcfU_neg_half`](DLMF/Confluent/ParabolicCylinder.lean#L201) (proved).
+- [12.7.E2](https://dlmf.nist.gov/12.7.E2): [`DLMF.Confluent.pcfU_physicists_hermite`](DLMF/ParabolicCylinder/Hermite.lean#L52) (proved); [`DLMF.Confluent.pcfD_nat`](DLMF/Confluent/ParabolicCylinder.lean#L514) (proved).
+- [12.7.E3](https://dlmf.nist.gov/12.7.E3): [`DLMF.Confluent.pcfV_nat_add_half`](DLMF/ParabolicCylinder/Relations.lean#L26) (proved); [`DLMF.Confluent.pcfV_physicists_hermite`](DLMF/ParabolicCylinder/Hermite.lean#L62) (proved).
+- [12.7.E4](https://dlmf.nist.gov/12.7.E4): [`DLMF.Confluent.pcfV_neg_half`](DLMF/ParabolicCylinder/Relations.lean#L44) (proved).
+- [12.7.E5](https://dlmf.nist.gov/12.7.E5): [`DLMF.Confluent.pcfU_half`](DLMF/ParabolicCylinder/Basic.lean#L456) (proved).
+- [12.7.E6](https://dlmf.nist.gov/12.7.E6): [`DLMF.Confluent.pcfU_nat_add_half_deriv`](DLMF/ParabolicCylinder/Relations.lean#L62) (proved).
+- [12.7.E7](https://dlmf.nist.gov/12.7.E7): [`DLMF.Confluent.hhFunction`](DLMF/ParabolicCylinder/Relations.lean#L90) (defined); [`DLMF.Confluent.pcfU_hh`](DLMF/ParabolicCylinder/Relations.lean#L95) (proved).
+- [12.7.E8](https://dlmf.nist.gov/12.7.E8): [`DLMF.Confluent.pcfU_bessel_8`](DLMF/ParabolicCylinder/Relations.lean#L225) (proved).
+- [12.7.E9](https://dlmf.nist.gov/12.7.E9): [`DLMF.Confluent.pcfU_bessel_9`](DLMF/ParabolicCylinder/Relations.lean#L243) (proved).
+- [12.7.E10](https://dlmf.nist.gov/12.7.E10): [`DLMF.Confluent.pcfU_bessel_10`](DLMF/ParabolicCylinder/Relations.lean#L256) (proved).
+- [12.7.E11](https://dlmf.nist.gov/12.7.E11): [`DLMF.Confluent.pcfU_bessel_11`](DLMF/ParabolicCylinder/Relations.lean#L263) (proved).
+- [12.7.E12](https://dlmf.nist.gov/12.7.E12): [`DLMF.Confluent.pcfEven_kummer_alternative`](DLMF/ParabolicCylinder/Basic.lean#L355) (proved); [`DLMF.Confluent.pcfEven`](DLMF/Confluent/ParabolicCylinder.lean#L59) (defined).
+- [12.7.E13](https://dlmf.nist.gov/12.7.E13): [`DLMF.Confluent.pcfOdd_kummer_alternative`](DLMF/ParabolicCylinder/Basic.lean#L367) (proved); [`DLMF.Confluent.pcfOdd`](DLMF/Confluent/ParabolicCylinder.lean#L64) (defined).
+- [12.7.E14](https://dlmf.nist.gov/12.7.E14): [`DLMF.Confluent.pcfU_kummerU_odd`](DLMF/ParabolicCylinder/Relations.lean#L276) (proved); [`DLMF.Confluent.pcfU_whittaker`](DLMF/ParabolicCylinder/Relations.lean#L289) (proved); [`DLMF.Confluent.pcfU_eq_kummerU`](DLMF/Confluent/ParabolicCylinder.lean#L219) (proved).
 
 ### [§12.8 Recurrence Relations and Derivatives](https://dlmf.nist.gov/12.8)
 
-- [12.8.E1](https://dlmf.nist.gov/12.8.E1): [`DLMF.Confluent.pcfU_three_term`](DLMF/Confluent/ParabolicCylinder.lean#L458) (proved).
-- [12.8.E2](https://dlmf.nist.gov/12.8.E2): [`DLMF.Confluent.pcfU_recurrence_add`](DLMF/Confluent/ParabolicCylinder.lean#L423) (proved).
-- [12.8.E3](https://dlmf.nist.gov/12.8.E3): [`DLMF.Confluent.pcfU_recurrence_sub`](DLMF/Confluent/ParabolicCylinder.lean#L389) (proved).
-- [12.8.E4](https://dlmf.nist.gov/12.8.E4): [`DLMF.Confluent.pcfU_deriv_recurrence`](DLMF/Confluent/ParabolicCylinder.lean#L464) (proved).
-- [12.8.E5](https://dlmf.nist.gov/12.8.E5): [`DLMF.Confluent.pcfV_three_term`](DLMF/Confluent/ParabolicCylinder.lean#L1560) (proved).
-- [12.8.E6](https://dlmf.nist.gov/12.8.E6): [`DLMF.Confluent.pcfV_recurrence_sub`](DLMF/Confluent/ParabolicCylinder.lean#L1518) (proved).
-- [12.8.E7](https://dlmf.nist.gov/12.8.E7): [`DLMF.Confluent.pcfV_recurrence_add`](DLMF/Confluent/ParabolicCylinder.lean#L1478) (proved).
-- [12.8.E8](https://dlmf.nist.gov/12.8.E8): [`DLMF.Confluent.pcfV_deriv_recurrence`](DLMF/Confluent/ParabolicCylinder.lean#L1566) (proved).
-- [12.8.E9](https://dlmf.nist.gov/12.8.E9): [`DLMF.Confluent.pcfU_iterated_deriv_9`](DLMF/ParabolicCylinder/Basic.lean#L491) (proved).
-- [12.8.E10](https://dlmf.nist.gov/12.8.E10): [`DLMF.Confluent.pcfU_iterated_deriv_10`](DLMF/ParabolicCylinder/Basic.lean#L514) (proved).
-- [12.8.E11](https://dlmf.nist.gov/12.8.E11): [`DLMF.Confluent.pcfV_iterated_deriv_11`](DLMF/ParabolicCylinder/Basic.lean#L537) (proved).
-- [12.8.E12](https://dlmf.nist.gov/12.8.E12): [`DLMF.Confluent.pcfV_iterated_deriv_12`](DLMF/ParabolicCylinder/Basic.lean#L560) (proved).
+- [12.8.E1](https://dlmf.nist.gov/12.8.E1): [`DLMF.Confluent.pcfU_three_term`](DLMF/Confluent/ParabolicCylinder.lean#L480) (proved).
+- [12.8.E2](https://dlmf.nist.gov/12.8.E2): [`DLMF.Confluent.pcfU_recurrence_add`](DLMF/Confluent/ParabolicCylinder.lean#L445) (proved).
+- [12.8.E3](https://dlmf.nist.gov/12.8.E3): [`DLMF.Confluent.pcfU_recurrence_sub`](DLMF/Confluent/ParabolicCylinder.lean#L411) (proved).
+- [12.8.E4](https://dlmf.nist.gov/12.8.E4): [`DLMF.Confluent.pcfU_deriv_recurrence`](DLMF/Confluent/ParabolicCylinder.lean#L486) (proved).
+- [12.8.E5](https://dlmf.nist.gov/12.8.E5): [`DLMF.Confluent.pcfV_three_term`](DLMF/Confluent/ParabolicCylinder.lean#L1611) (proved).
+- [12.8.E6](https://dlmf.nist.gov/12.8.E6): [`DLMF.Confluent.pcfV_recurrence_sub`](DLMF/Confluent/ParabolicCylinder.lean#L1569) (proved).
+- [12.8.E7](https://dlmf.nist.gov/12.8.E7): [`DLMF.Confluent.pcfV_recurrence_add`](DLMF/Confluent/ParabolicCylinder.lean#L1529) (proved).
+- [12.8.E8](https://dlmf.nist.gov/12.8.E8): [`DLMF.Confluent.pcfV_deriv_recurrence`](DLMF/Confluent/ParabolicCylinder.lean#L1617) (proved).
+- [12.8.E9](https://dlmf.nist.gov/12.8.E9): [`DLMF.Confluent.pcfU_iterated_deriv_9`](DLMF/ParabolicCylinder/Basic.lean#L488) (proved).
+- [12.8.E10](https://dlmf.nist.gov/12.8.E10): [`DLMF.Confluent.pcfU_iterated_deriv_10`](DLMF/ParabolicCylinder/Basic.lean#L511) (proved).
+- [12.8.E11](https://dlmf.nist.gov/12.8.E11): [`DLMF.Confluent.pcfV_iterated_deriv_11`](DLMF/ParabolicCylinder/Basic.lean#L534) (proved).
+- [12.8.E12](https://dlmf.nist.gov/12.8.E12): [`DLMF.Confluent.pcfV_iterated_deriv_12`](DLMF/ParabolicCylinder/Basic.lean#L557) (proved).
 
 ### [§12.9 Asymptotic Expansions for Large Variable](https://dlmf.nist.gov/12.9)
 
-- [12.9.E1](https://dlmf.nist.gov/12.9.E1): [`DLMF.Confluent.pcfU_sector_asymptotic`](DLMF/ParabolicCylinder/AsymptoticsZeros.lean#L35) (proved); [`DLMF.Confluent.hasAsymptoticExpansion_pcfU`](DLMF/Confluent/ParabolicCylinder.lean#L263) (proved).
-- [12.9.E2](https://dlmf.nist.gov/12.9.E2): [`DLMF.Confluent.pcfV_sector_asymptotic`](DLMF/ParabolicCylinder/AsymptoticsZeros.lean#L41) (proved).
-- [12.9.E3](https://dlmf.nist.gov/12.9.E3): [`DLMF.Confluent.pcfU_adjacent_asymptotic_pos`](DLMF/ParabolicCylinder/AsymptoticsZeros.lean#L51) (proved); [`DLMF.Confluent.pcfU_adjacent_asymptotic_neg`](DLMF/ParabolicCylinder/AsymptoticsZeros.lean#L120) (proved).
-- [12.9.E4](https://dlmf.nist.gov/12.9.E4): [`DLMF.Confluent.pcfV_adjacent_asymptotic_pos`](DLMF/ParabolicCylinder/AsymptoticsZeros.lean#L189) (proved); [`DLMF.Confluent.pcfV_adjacent_asymptotic_neg`](DLMF/ParabolicCylinder/AsymptoticsZeros.lean#L243) (proved).
+- [12.9.E1](https://dlmf.nist.gov/12.9.E1): [`DLMF.Confluent.pcfU_sector_asymptotic`](DLMF/ParabolicCylinder/AsymptoticsZeros.lean#L33) (proved); [`DLMF.Confluent.hasAsymptoticExpansion_pcfU`](DLMF/Confluent/ParabolicCylinder.lean#L274) (proved).
+- [12.9.E2](https://dlmf.nist.gov/12.9.E2): [`DLMF.Confluent.pcfV_sector_asymptotic`](DLMF/ParabolicCylinder/AsymptoticsZeros.lean#L39) (proved).
+- [12.9.E3](https://dlmf.nist.gov/12.9.E3): [`DLMF.Confluent.pcfU_adjacent_asymptotic_pos`](DLMF/ParabolicCylinder/AsymptoticsZeros.lean#L49) (proved); [`DLMF.Confluent.pcfU_adjacent_asymptotic_neg`](DLMF/ParabolicCylinder/AsymptoticsZeros.lean#L118) (proved).
+- [12.9.E4](https://dlmf.nist.gov/12.9.E4): [`DLMF.Confluent.pcfV_adjacent_asymptotic_pos`](DLMF/ParabolicCylinder/AsymptoticsZeros.lean#L187) (proved); [`DLMF.Confluent.pcfV_adjacent_asymptotic_neg`](DLMF/ParabolicCylinder/AsymptoticsZeros.lean#L241) (proved).
 
 ### [§12.10 Uniform Asymptotic Expansions for Large Parameter](https://dlmf.nist.gov/12.10)
 
 - [12.10.E1](https://dlmf.nist.gov/12.10.E1): [`DLMF.Confluent.pcf_parameter_scaling`](DLMF/ParabolicCylinder/TurningPoint.lean#L41) (proved).
 - [12.10.E2](https://dlmf.nist.gov/12.10.E2): [`DLMF.Confluent.pcf_parameter_scaling`](DLMF/ParabolicCylinder/TurningPoint.lean#L41) (proved).
-- [12.10.E3](https://dlmf.nist.gov/12.10.E3): [`DLMF.Confluent.pcf_negative_parameter_uniform`](DLMF/ParabolicCylinder/Uniform.lean#L730) (admitted); [`DLMF.Confluent.pcf_negative_parameter_uniform_U`](DLMF/ParabolicCylinder/UniformLG.lean#L1056) (proved); [`DLMF.Confluent.pcf_negative_parameter_uniform_U_normalizer`](DLMF/ParabolicCylinder/UniformLG2.lean#L2057) (proved); [`DLMF.Confluent.pcf_negative_parameter_uniform_U_UDeriv`](DLMF/ParabolicCylinder/UniformLG2.lean#L2984) (proved).
-- [12.10.E4](https://dlmf.nist.gov/12.10.E4): [`DLMF.Confluent.pcf_negative_parameter_uniform`](DLMF/ParabolicCylinder/Uniform.lean#L730) (admitted); [`DLMF.Confluent.pcf_negative_parameter_uniform_U_UDeriv`](DLMF/ParabolicCylinder/UniformLG2.lean#L2984) (proved).
-- [12.10.E5](https://dlmf.nist.gov/12.10.E5): [`DLMF.Confluent.pcf_negative_parameter_uniform`](DLMF/ParabolicCylinder/Uniform.lean#L730) (admitted).
-- [12.10.E6](https://dlmf.nist.gov/12.10.E6): [`DLMF.Confluent.pcf_negative_parameter_uniform`](DLMF/ParabolicCylinder/Uniform.lean#L730) (admitted).
-- [12.10.E7](https://dlmf.nist.gov/12.10.E7): [`DLMF.Confluent.pcfXi`](DLMF/ParabolicCylinder/Uniform.lean#L29) (defined).
-- [12.10.E8](https://dlmf.nist.gov/12.10.E8): [`DLMF.Confluent.pcfOlverA`](DLMF/ParabolicCylinder/Uniform.lean#L687) (defined); [`DLMF.Confluent.pcfOlverB`](DLMF/ParabolicCylinder/Uniform.lean#L702) (defined).
-- [12.10.E9](https://dlmf.nist.gov/12.10.E9): [`DLMF.Confluent.pcfOlverUV_initial`](DLMF/ParabolicCylinder/Uniform.lean#L673) (proved).
-- [12.10.E10](https://dlmf.nist.gov/12.10.E10): [`DLMF.Confluent.pcfOlverUV_initial`](DLMF/ParabolicCylinder/Uniform.lean#L673) (proved).
-- [12.10.E11](https://dlmf.nist.gov/12.10.E11): [`DLMF.Confluent.pcfOlverU`](DLMF/ParabolicCylinder/Uniform.lean#L231) (defined); [`DLMF.Confluent.pcfOlverU_spec`](DLMF/ParabolicCylinder/Uniform.lean#L623) (proved).
-- [12.10.E12](https://dlmf.nist.gov/12.10.E12): [`DLMF.Confluent.pcfOlverR`](DLMF/ParabolicCylinder/Uniform.lean#L236) (defined).
-- [12.10.E13](https://dlmf.nist.gov/12.10.E13): [`DLMF.Confluent.pcfOlverV`](DLMF/ParabolicCylinder/Uniform.lean#L241) (defined).
-- [12.10.E14](https://dlmf.nist.gov/12.10.E14): [`DLMF.Confluent.IsCylinderGNormalizer`](DLMF/ParabolicCylinder/Uniform.lean#L725) (defined); [`DLMF.Confluent.pcf_negative_parameter_uniform`](DLMF/ParabolicCylinder/Uniform.lean#L730) (admitted); [`DLMF.Confluent.pcf_negative_parameter_uniform_U_normalizer`](DLMF/ParabolicCylinder/UniformLG2.lean#L2057) (proved); [`DLMF.Confluent.pcf_negative_parameter_uniform_U_UDeriv`](DLMF/ParabolicCylinder/UniformLG2.lean#L2984) (proved).
-- [12.10.E15](https://dlmf.nist.gov/12.10.E15): [`DLMF.Confluent.pcfH`](DLMF/ParabolicCylinder/Uniform.lean#L44) (defined).
-- [12.10.E16](https://dlmf.nist.gov/12.10.E16): [`DLMF.Confluent.pcfGammaCoeff`](DLMF/ParabolicCylinder/Uniform.lean#L49) (defined); [`DLMF.Confluent.pcfGammaCoeff_expansion`](DLMF/ParabolicCylinder/Uniform.lean#L206) (proved).
-- [12.10.E17](https://dlmf.nist.gov/12.10.E17): [`DLMF.Confluent.pcfGammaCoeff_initial`](DLMF/ParabolicCylinder/Uniform.lean#L212) (proved).
-- [12.10.E18](https://dlmf.nist.gov/12.10.E18): [`DLMF.Confluent.pcf_oscillatory_parameter_uniform`](DLMF/ParabolicCylinder/Uniform.lean#L746) (admitted).
-- [12.10.E19](https://dlmf.nist.gov/12.10.E19): [`DLMF.Confluent.pcf_oscillatory_parameter_uniform`](DLMF/ParabolicCylinder/Uniform.lean#L746) (admitted).
-- [12.10.E20](https://dlmf.nist.gov/12.10.E20): [`DLMF.Confluent.pcf_oscillatory_parameter_uniform`](DLMF/ParabolicCylinder/Uniform.lean#L746) (admitted).
-- [12.10.E21](https://dlmf.nist.gov/12.10.E21): [`DLMF.Confluent.pcf_oscillatory_parameter_uniform`](DLMF/ParabolicCylinder/Uniform.lean#L746) (admitted).
-- [12.10.E22](https://dlmf.nist.gov/12.10.E22): [`DLMF.Confluent.pcfKappa`](DLMF/ParabolicCylinder/Uniform.lean#L736) (defined); [`DLMF.Confluent.pcfChi`](DLMF/ParabolicCylinder/Uniform.lean#L741) (defined).
-- [12.10.E23](https://dlmf.nist.gov/12.10.E23): [`DLMF.Confluent.pcfEta`](DLMF/ParabolicCylinder/Uniform.lean#L34) (defined).
-- [12.10.E24](https://dlmf.nist.gov/12.10.E24): [`DLMF.Confluent.pcfOlverATilde`](DLMF/ParabolicCylinder/Uniform.lean#L692) (defined); [`DLMF.Confluent.pcfOlverBTilde`](DLMF/ParabolicCylinder/Uniform.lean#L707) (defined).
-- [12.10.E25](https://dlmf.nist.gov/12.10.E25): [`DLMF.Confluent.pcf_positive_parameter_uniform`](DLMF/ParabolicCylinder/UniformLG2.lean#L2295) (proved).
-- [12.10.E26](https://dlmf.nist.gov/12.10.E26): [`DLMF.Confluent.pcfXiBar`](DLMF/ParabolicCylinder/Uniform.lean#L39) (defined).
-- [12.10.E27](https://dlmf.nist.gov/12.10.E27): [`DLMF.Confluent.pcfOlverUBar`](DLMF/ParabolicCylinder/Uniform.lean#L697) (defined).
-- [12.10.E28](https://dlmf.nist.gov/12.10.E28): [`DLMF.Confluent.IsCylinderGBarNormalizer`](DLMF/ParabolicCylinder/Uniform.lean#L752) (defined).
-- [12.10.E29](https://dlmf.nist.gov/12.10.E29): [`DLMF.Confluent.pcf_positive_parameter_uniform`](DLMF/ParabolicCylinder/UniformLG2.lean#L2295) (proved).
-- [12.10.E30](https://dlmf.nist.gov/12.10.E30): [`DLMF.Confluent.pcfOlverVBar`](DLMF/ParabolicCylinder/Uniform.lean#L712) (defined).
-- [12.10.E31](https://dlmf.nist.gov/12.10.E31): [`DLMF.Confluent.pcfU_temme_uniform`](DLMF/ParabolicCylinder/UniformLG2.lean#L533) (proved).
-- [12.10.E32](https://dlmf.nist.gov/12.10.E32): [`DLMF.Confluent.pcfTau`](DLMF/ParabolicCylinder/Uniform.lean#L760) (defined).
-- [12.10.E33](https://dlmf.nist.gov/12.10.E33): [`DLMF.Confluent.pcfTemmePoly_recurrence`](DLMF/ParabolicCylinder/Uniform.lean#L832) (proved).
-- [12.10.E34](https://dlmf.nist.gov/12.10.E34): [`DLMF.Confluent.pcfTemmePoly_initial`](DLMF/ParabolicCylinder/Uniform.lean#L816) (proved).
+- [12.10.E3](https://dlmf.nist.gov/12.10.E3): [`DLMF.Confluent.pcf_negative_parameter_uniform`](DLMF/ParabolicCylinder/Uniform.lean#L731) (admitted); [`DLMF.Confluent.pcf_negative_parameter_uniform_U`](DLMF/ParabolicCylinder/UniformLG.lean#L1057) (proved); [`DLMF.Confluent.pcf_negative_parameter_uniform_U_normalizer`](DLMF/ParabolicCylinder/UniformLG2.lean#L2056) (proved); [`DLMF.Confluent.pcf_negative_parameter_uniform_U_UDeriv`](DLMF/ParabolicCylinder/UniformLG2.lean#L2983) (proved).
+- [12.10.E4](https://dlmf.nist.gov/12.10.E4): [`DLMF.Confluent.pcf_negative_parameter_uniform`](DLMF/ParabolicCylinder/Uniform.lean#L731) (admitted); [`DLMF.Confluent.pcf_negative_parameter_uniform_U_UDeriv`](DLMF/ParabolicCylinder/UniformLG2.lean#L2983) (proved).
+- [12.10.E5](https://dlmf.nist.gov/12.10.E5): [`DLMF.Confluent.pcf_negative_parameter_uniform`](DLMF/ParabolicCylinder/Uniform.lean#L731) (admitted).
+- [12.10.E6](https://dlmf.nist.gov/12.10.E6): [`DLMF.Confluent.pcf_negative_parameter_uniform`](DLMF/ParabolicCylinder/Uniform.lean#L731) (admitted).
+- [12.10.E7](https://dlmf.nist.gov/12.10.E7): [`DLMF.Confluent.pcfXi`](DLMF/ParabolicCylinder/Uniform.lean#L30) (defined).
+- [12.10.E8](https://dlmf.nist.gov/12.10.E8): [`DLMF.Confluent.pcfOlverA`](DLMF/ParabolicCylinder/Uniform.lean#L688) (defined); [`DLMF.Confluent.pcfOlverB`](DLMF/ParabolicCylinder/Uniform.lean#L703) (defined).
+- [12.10.E9](https://dlmf.nist.gov/12.10.E9): [`DLMF.Confluent.pcfOlverUV_initial`](DLMF/ParabolicCylinder/Uniform.lean#L674) (proved).
+- [12.10.E10](https://dlmf.nist.gov/12.10.E10): [`DLMF.Confluent.pcfOlverUV_initial`](DLMF/ParabolicCylinder/Uniform.lean#L674) (proved).
+- [12.10.E11](https://dlmf.nist.gov/12.10.E11): [`DLMF.Confluent.pcfOlverU`](DLMF/ParabolicCylinder/Uniform.lean#L232) (defined); [`DLMF.Confluent.pcfOlverU_spec`](DLMF/ParabolicCylinder/Uniform.lean#L624) (proved).
+- [12.10.E12](https://dlmf.nist.gov/12.10.E12): [`DLMF.Confluent.pcfOlverR`](DLMF/ParabolicCylinder/Uniform.lean#L237) (defined).
+- [12.10.E13](https://dlmf.nist.gov/12.10.E13): [`DLMF.Confluent.pcfOlverV`](DLMF/ParabolicCylinder/Uniform.lean#L242) (defined).
+- [12.10.E14](https://dlmf.nist.gov/12.10.E14): [`DLMF.Confluent.IsCylinderGNormalizer`](DLMF/ParabolicCylinder/Uniform.lean#L726) (defined); [`DLMF.Confluent.pcf_negative_parameter_uniform`](DLMF/ParabolicCylinder/Uniform.lean#L731) (admitted); [`DLMF.Confluent.pcf_negative_parameter_uniform_U_normalizer`](DLMF/ParabolicCylinder/UniformLG2.lean#L2056) (proved); [`DLMF.Confluent.pcf_negative_parameter_uniform_U_UDeriv`](DLMF/ParabolicCylinder/UniformLG2.lean#L2983) (proved).
+- [12.10.E15](https://dlmf.nist.gov/12.10.E15): [`DLMF.Confluent.pcfH`](DLMF/ParabolicCylinder/Uniform.lean#L45) (defined).
+- [12.10.E16](https://dlmf.nist.gov/12.10.E16): [`DLMF.Confluent.pcfGammaCoeff`](DLMF/ParabolicCylinder/Uniform.lean#L50) (defined); [`DLMF.Confluent.pcfGammaCoeff_expansion`](DLMF/ParabolicCylinder/Uniform.lean#L207) (proved).
+- [12.10.E17](https://dlmf.nist.gov/12.10.E17): [`DLMF.Confluent.pcfGammaCoeff_initial`](DLMF/ParabolicCylinder/Uniform.lean#L213) (proved).
+- [12.10.E18](https://dlmf.nist.gov/12.10.E18): [`DLMF.Confluent.pcf_oscillatory_parameter_uniform`](DLMF/ParabolicCylinder/Uniform.lean#L747) (admitted).
+- [12.10.E19](https://dlmf.nist.gov/12.10.E19): [`DLMF.Confluent.pcf_oscillatory_parameter_uniform`](DLMF/ParabolicCylinder/Uniform.lean#L747) (admitted).
+- [12.10.E20](https://dlmf.nist.gov/12.10.E20): [`DLMF.Confluent.pcf_oscillatory_parameter_uniform`](DLMF/ParabolicCylinder/Uniform.lean#L747) (admitted).
+- [12.10.E21](https://dlmf.nist.gov/12.10.E21): [`DLMF.Confluent.pcf_oscillatory_parameter_uniform`](DLMF/ParabolicCylinder/Uniform.lean#L747) (admitted).
+- [12.10.E22](https://dlmf.nist.gov/12.10.E22): [`DLMF.Confluent.pcfKappa`](DLMF/ParabolicCylinder/Uniform.lean#L737) (defined); [`DLMF.Confluent.pcfChi`](DLMF/ParabolicCylinder/Uniform.lean#L742) (defined).
+- [12.10.E23](https://dlmf.nist.gov/12.10.E23): [`DLMF.Confluent.pcfEta`](DLMF/ParabolicCylinder/Uniform.lean#L35) (defined).
+- [12.10.E24](https://dlmf.nist.gov/12.10.E24): [`DLMF.Confluent.pcfOlverATilde`](DLMF/ParabolicCylinder/Uniform.lean#L693) (defined); [`DLMF.Confluent.pcfOlverBTilde`](DLMF/ParabolicCylinder/Uniform.lean#L708) (defined).
+- [12.10.E25](https://dlmf.nist.gov/12.10.E25): [`DLMF.Confluent.pcf_positive_parameter_uniform`](DLMF/ParabolicCylinder/UniformLG2.lean#L2294) (proved).
+- [12.10.E26](https://dlmf.nist.gov/12.10.E26): [`DLMF.Confluent.pcfXiBar`](DLMF/ParabolicCylinder/Uniform.lean#L40) (defined).
+- [12.10.E27](https://dlmf.nist.gov/12.10.E27): [`DLMF.Confluent.pcfOlverUBar`](DLMF/ParabolicCylinder/Uniform.lean#L698) (defined).
+- [12.10.E28](https://dlmf.nist.gov/12.10.E28): [`DLMF.Confluent.IsCylinderGBarNormalizer`](DLMF/ParabolicCylinder/Uniform.lean#L753) (defined).
+- [12.10.E29](https://dlmf.nist.gov/12.10.E29): [`DLMF.Confluent.pcf_positive_parameter_uniform`](DLMF/ParabolicCylinder/UniformLG2.lean#L2294) (proved).
+- [12.10.E30](https://dlmf.nist.gov/12.10.E30): [`DLMF.Confluent.pcfOlverVBar`](DLMF/ParabolicCylinder/Uniform.lean#L713) (defined).
+- [12.10.E31](https://dlmf.nist.gov/12.10.E31): [`DLMF.Confluent.pcfU_temme_uniform`](DLMF/ParabolicCylinder/UniformLG2.lean#L532) (proved).
+- [12.10.E32](https://dlmf.nist.gov/12.10.E32): [`DLMF.Confluent.pcfTau`](DLMF/ParabolicCylinder/Uniform.lean#L761) (defined).
+- [12.10.E33](https://dlmf.nist.gov/12.10.E33): [`DLMF.Confluent.pcfTemmePoly_recurrence`](DLMF/ParabolicCylinder/Uniform.lean#L833) (proved).
+- [12.10.E34](https://dlmf.nist.gov/12.10.E34): [`DLMF.Confluent.pcfTemmePoly_initial`](DLMF/ParabolicCylinder/Uniform.lean#L817) (proved).
 - [12.10.E35](https://dlmf.nist.gov/12.10.E35): [`DLMF.Confluent.pcf_airy_uniform`](DLMF/ParabolicCylinder/TurningPoint.lean#L61) (admitted).
 - [12.10.E36](https://dlmf.nist.gov/12.10.E36): [`DLMF.Confluent.pcf_airy_uniform`](DLMF/ParabolicCylinder/TurningPoint.lean#L61) (admitted).
 - [12.10.E37](https://dlmf.nist.gov/12.10.E37): [`DLMF.Confluent.pcf_airy_uniform`](DLMF/ParabolicCylinder/TurningPoint.lean#L61) (admitted).
 - [12.10.E38](https://dlmf.nist.gov/12.10.E38): [`DLMF.Confluent.pcf_airy_uniform`](DLMF/ParabolicCylinder/TurningPoint.lean#L61) (admitted).
-- [12.10.E39](https://dlmf.nist.gov/12.10.E39): [`DLMF.Confluent.pcfZeta`](DLMF/ParabolicCylinder/Uniform.lean#L849) (defined); [`DLMF.Confluent.pcfInverseZeta_spec`](DLMF/ParabolicCylinder/Uniform.lean#L1067) (proved).
-- [12.10.E40](https://dlmf.nist.gov/12.10.E40): [`DLMF.Confluent.pcfPhi`](DLMF/ParabolicCylinder/Uniform.lean#L1132) (defined).
-- [12.10.E41](https://dlmf.nist.gov/12.10.E41): [`DLMF.Confluent.pcfInverseZeta_taylor`](DLMF/ParabolicCylinder/Uniform.lean#L1333) (proved).
-- [12.10.E42](https://dlmf.nist.gov/12.10.E42): [`DLMF.Confluent.pcfAiryA`](DLMF/ParabolicCylinder/Uniform.lean#L1411) (defined); [`DLMF.Confluent.pcfAiryA_limit`](DLMF/ParabolicCylinder/Uniform.lean#L1416) (admitted); [`DLMF.Confluent.pcfAiryB`](DLMF/ParabolicCylinder/Uniform.lean#L1422) (defined); [`DLMF.Confluent.pcfAiryB_limit`](DLMF/ParabolicCylinder/Uniform.lean#L1427) (admitted).
-- [12.10.E43](https://dlmf.nist.gov/12.10.E43): [`DLMF.Confluent.pcfAiryAlpha`](DLMF/ParabolicCylinder/Uniform.lean#L1401) (defined); [`DLMF.Confluent.pcfAiryBeta`](DLMF/ParabolicCylinder/Uniform.lean#L1406) (defined).
-- [12.10.E44](https://dlmf.nist.gov/12.10.E44): [`DLMF.Confluent.pcfAiryCD_derivative`](DLMF/ParabolicCylinder/Uniform.lean#L1493) (admitted).
-- [12.10.E45](https://dlmf.nist.gov/12.10.E45): [`DLMF.Confluent.pcfAiryChi`](DLMF/ParabolicCylinder/Uniform.lean#L1455) (defined); [`DLMF.Confluent.pcfAiryChi_formula`](DLMF/ParabolicCylinder/Uniform.lean#L1460) (proved).
-- [12.10.E46](https://dlmf.nist.gov/12.10.E46): [`DLMF.Confluent.pcfAiryC`](DLMF/ParabolicCylinder/Uniform.lean#L1433) (defined); [`DLMF.Confluent.pcfAiryC_limit`](DLMF/ParabolicCylinder/Uniform.lean#L1438) (admitted); [`DLMF.Confluent.pcfAiryD`](DLMF/ParabolicCylinder/Uniform.lean#L1444) (defined); [`DLMF.Confluent.pcfAiryD_limit`](DLMF/ParabolicCylinder/Uniform.lean#L1449) (admitted).
+- [12.10.E39](https://dlmf.nist.gov/12.10.E39): [`DLMF.Confluent.pcfZeta`](DLMF/ParabolicCylinder/Uniform.lean#L850) (defined); [`DLMF.Confluent.pcfInverseZeta_spec`](DLMF/ParabolicCylinder/Uniform.lean#L1068) (proved).
+- [12.10.E40](https://dlmf.nist.gov/12.10.E40): [`DLMF.Confluent.pcfPhi`](DLMF/ParabolicCylinder/Uniform.lean#L1133) (defined).
+- [12.10.E41](https://dlmf.nist.gov/12.10.E41): [`DLMF.Confluent.pcfInverseZeta_taylor`](DLMF/ParabolicCylinder/Uniform.lean#L1334) (proved).
+- [12.10.E42](https://dlmf.nist.gov/12.10.E42): [`DLMF.Confluent.pcfAiryA`](DLMF/ParabolicCylinder/Uniform.lean#L1412) (defined); [`DLMF.Confluent.pcfAiryA_limit`](DLMF/ParabolicCylinder/Uniform.lean#L1417) (admitted); [`DLMF.Confluent.pcfAiryB`](DLMF/ParabolicCylinder/Uniform.lean#L1423) (defined); [`DLMF.Confluent.pcfAiryB_limit`](DLMF/ParabolicCylinder/Uniform.lean#L1428) (admitted).
+- [12.10.E43](https://dlmf.nist.gov/12.10.E43): [`DLMF.Confluent.pcfAiryAlpha`](DLMF/ParabolicCylinder/Uniform.lean#L1402) (defined); [`DLMF.Confluent.pcfAiryBeta`](DLMF/ParabolicCylinder/Uniform.lean#L1407) (defined).
+- [12.10.E44](https://dlmf.nist.gov/12.10.E44): [`DLMF.Confluent.pcfAiryCD_derivative`](DLMF/ParabolicCylinder/Uniform.lean#L1494) (admitted).
+- [12.10.E45](https://dlmf.nist.gov/12.10.E45): [`DLMF.Confluent.pcfAiryChi`](DLMF/ParabolicCylinder/Uniform.lean#L1456) (defined); [`DLMF.Confluent.pcfAiryChi_formula`](DLMF/ParabolicCylinder/Uniform.lean#L1461) (proved).
+- [12.10.E46](https://dlmf.nist.gov/12.10.E46): [`DLMF.Confluent.pcfAiryC`](DLMF/ParabolicCylinder/Uniform.lean#L1434) (defined); [`DLMF.Confluent.pcfAiryC_limit`](DLMF/ParabolicCylinder/Uniform.lean#L1439) (admitted); [`DLMF.Confluent.pcfAiryD`](DLMF/ParabolicCylinder/Uniform.lean#L1445) (defined); [`DLMF.Confluent.pcfAiryD_limit`](DLMF/ParabolicCylinder/Uniform.lean#L1450) (admitted).
 
 ### [§12.11 Zeros](https://dlmf.nist.gov/12.11)
 
-- [12.11.E1](https://dlmf.nist.gov/12.11.E1): [`DLMF.Confluent.pcfU_complex_zero_strings`](DLMF/ParabolicCylinder/AsymptoticsZeros.lean#L769) (admitted).
-- [12.11.E2](https://dlmf.nist.gov/12.11.E2): [`DLMF.Confluent.pcfZeroTau`](DLMF/ParabolicCylinder/AsymptoticsZeros.lean#L759) (defined).
-- [12.11.E3](https://dlmf.nist.gov/12.11.E3): [`DLMF.Confluent.pcfZeroLambda`](DLMF/ParabolicCylinder/AsymptoticsZeros.lean#L764) (defined).
+- [12.11.E1](https://dlmf.nist.gov/12.11.E1): [`DLMF.Confluent.pcfU_complex_zero_strings`](DLMF/ParabolicCylinder/AsymptoticsZeros.lean#L767) (admitted).
+- [12.11.E2](https://dlmf.nist.gov/12.11.E2): [`DLMF.Confluent.pcfZeroTau`](DLMF/ParabolicCylinder/AsymptoticsZeros.lean#L757) (defined).
+- [12.11.E3](https://dlmf.nist.gov/12.11.E3): [`DLMF.Confluent.pcfZeroLambda`](DLMF/ParabolicCylinder/AsymptoticsZeros.lean#L762) (defined).
 - [12.11.E4](https://dlmf.nist.gov/12.11.E4): [`DLMF.Confluent.pcf_real_zero_expansion_4`](DLMF/ParabolicCylinder/TurningPoint.lean#L87) (admitted).
 - [12.11.E5](https://dlmf.nist.gov/12.11.E5): [`DLMF.Confluent.pcf_real_zero_expansion_4`](DLMF/ParabolicCylinder/TurningPoint.lean#L87) (admitted).
 - [12.11.E6](https://dlmf.nist.gov/12.11.E6): [`DLMF.Confluent.pcfZeroP1`](DLMF/ParabolicCylinder/TurningPoint.lean#L76) (defined); [`DLMF.Confluent.pcfZeroP1_limit`](DLMF/ParabolicCylinder/TurningPoint.lean#L81) (admitted).
@@ -694,64 +694,64 @@ No selected numbered equations. Mathematical prose is recorded in the module inv
 
 ### [§12.12 Integrals](https://dlmf.nist.gov/12.12)
 
-- [12.12.E1](https://dlmf.nist.gov/12.12.E1): [`DLMF.Confluent.pcf_integral_1`](DLMF/ParabolicCylinder/Integrals.lean#L304) (proved).
-- [12.12.E2](https://dlmf.nist.gov/12.12.E2): [`DLMF.Confluent.pcf_integral_2`](DLMF/ParabolicCylinder/Integrals.lean#L334) (proved).
-- [12.12.E3](https://dlmf.nist.gov/12.12.E3): [`DLMF.Confluent.pcf_integral_3`](DLMF/ParabolicCylinder/Integrals.lean#L627) (proved).
-- [12.12.E4](https://dlmf.nist.gov/12.12.E4): [`DLMF.Confluent.pcf_integral_4`](DLMF/ParabolicCylinder/Integrals.lean#L1324) (proved).
+- [12.12.E1](https://dlmf.nist.gov/12.12.E1): [`DLMF.Confluent.pcf_integral_1`](DLMF/ParabolicCylinder/Integrals.lean#L302) (proved).
+- [12.12.E2](https://dlmf.nist.gov/12.12.E2): [`DLMF.Confluent.pcf_integral_2`](DLMF/ParabolicCylinder/Integrals.lean#L332) (proved).
+- [12.12.E3](https://dlmf.nist.gov/12.12.E3): [`DLMF.Confluent.pcf_integral_3`](DLMF/ParabolicCylinder/Integrals.lean#L625) (proved).
+- [12.12.E4](https://dlmf.nist.gov/12.12.E4): [`DLMF.Confluent.pcf_integral_4`](DLMF/ParabolicCylinder/Integrals.lean#L1322) (proved).
 
 ### [§12.13 Sums](https://dlmf.nist.gov/12.13)
 
-- [12.13.E1](https://dlmf.nist.gov/12.13.E1): [`DLMF.Confluent.pcfU_addition_1`](DLMF/ParabolicCylinder/Relations.lean#L312) (proved).
-- [12.13.E2](https://dlmf.nist.gov/12.13.E2): [`DLMF.Confluent.pcfU_addition_2`](DLMF/ParabolicCylinder/Relations.lean#L327) (proved).
-- [12.13.E3](https://dlmf.nist.gov/12.13.E3): [`DLMF.Confluent.pcfV_addition_3`](DLMF/ParabolicCylinder/Relations.lean#L342) (proved).
-- [12.13.E4](https://dlmf.nist.gov/12.13.E4): [`DLMF.Confluent.pcfV_addition_4`](DLMF/ParabolicCylinder/Relations.lean#L357) (proved).
-- [12.13.E5](https://dlmf.nist.gov/12.13.E5): [`DLMF.Confluent.pcfU_rotational_addition`](DLMF/ParabolicCylinder/Relations.lean#L372) (admitted).
+- [12.13.E1](https://dlmf.nist.gov/12.13.E1): [`DLMF.Confluent.pcfU_addition_1`](DLMF/ParabolicCylinder/Relations.lean#L309) (proved).
+- [12.13.E2](https://dlmf.nist.gov/12.13.E2): [`DLMF.Confluent.pcfU_addition_2`](DLMF/ParabolicCylinder/Relations.lean#L324) (proved).
+- [12.13.E3](https://dlmf.nist.gov/12.13.E3): [`DLMF.Confluent.pcfV_addition_3`](DLMF/ParabolicCylinder/Relations.lean#L339) (proved).
+- [12.13.E4](https://dlmf.nist.gov/12.13.E4): [`DLMF.Confluent.pcfV_addition_4`](DLMF/ParabolicCylinder/Relations.lean#L354) (proved).
+- [12.13.E5](https://dlmf.nist.gov/12.13.E5): [`DLMF.Confluent.pcfU_rotational_addition`](DLMF/ParabolicCylinder/Relations.lean#L369) (admitted).
 - [12.13.E6](https://dlmf.nist.gov/12.13.E6): refuted; see the proved [counterexample](DLMF/ParabolicCylinder/SourceChecks.lean).
 
 ### [§12.14 The Function 𝑊(𝑎,𝑥)](https://dlmf.nist.gov/12.14)
 
-- [12.14.E1](https://dlmf.nist.gov/12.14.E1): [`DLMF.Confluent.pcfWZero`](DLMF/ParabolicCylinder/Weber.lean#L28) (defined); [`DLMF.Confluent.pcfW_initial`](DLMF/ParabolicCylinder/Weber.lean#L53) (proved).
-- [12.14.E2](https://dlmf.nist.gov/12.14.E2): [`DLMF.Confluent.pcfWDerivZero`](DLMF/ParabolicCylinder/Weber.lean#L33) (defined); [`DLMF.Confluent.pcfW_initial`](DLMF/ParabolicCylinder/Weber.lean#L53) (proved).
-- [12.14.E3](https://dlmf.nist.gov/12.14.E3): [`DLMF.Confluent.pcfW_wronskian`](DLMF/ParabolicCylinder/Weber.lean#L217) (proved).
-- [12.14.E4](https://dlmf.nist.gov/12.14.E4): [`DLMF.Confluent.pcfW_connection`](DLMF/ParabolicCylinder/Weber.lean#L860) (proved).
-- [12.14.E5](https://dlmf.nist.gov/12.14.E5): [`DLMF.Confluent.pcfWK`](DLMF/ParabolicCylinder/Weber.lean#L226) (defined); [`DLMF.Confluent.pcfWK_recip`](DLMF/ParabolicCylinder/Weber.lean#L231) (proved).
-- [12.14.E6](https://dlmf.nist.gov/12.14.E6): [`DLMF.Confluent.pcfWRho`](DLMF/ParabolicCylinder/Weber.lean#L330) (defined).
-- [12.14.E7](https://dlmf.nist.gov/12.14.E7): [`DLMF.Confluent.pcfGammaPhase`](DLMF/ParabolicCylinder/Weber.lean#L245) (defined); [`DLMF.Confluent.pcfGammaPhase_spec`](DLMF/ParabolicCylinder/Weber.lean#L267) (proved).
-- [12.14.E8](https://dlmf.nist.gov/12.14.E8): [`DLMF.Confluent.pcfW`](DLMF/ParabolicCylinder/Weber.lean#L48) (defined).
-- [12.14.E9](https://dlmf.nist.gov/12.14.E9): [`DLMF.Confluent.pcfWEven_series`](DLMF/ParabolicCylinder/Weber.lean#L1058) (proved).
-- [12.14.E10](https://dlmf.nist.gov/12.14.E10): [`DLMF.Confluent.pcfWOdd_series`](DLMF/ParabolicCylinder/Weber.lean#L1077) (proved).
-- [12.14.E11](https://dlmf.nist.gov/12.14.E11): [`DLMF.Confluent.pcfWEven_series`](DLMF/ParabolicCylinder/Weber.lean#L1058) (proved); [`DLMF.Confluent.pcfWOdd_series`](DLMF/ParabolicCylinder/Weber.lean#L1077) (proved).
-- [12.14.E12](https://dlmf.nist.gov/12.14.E12): [`DLMF.Confluent.pcfWEven_series`](DLMF/ParabolicCylinder/Weber.lean#L1058) (proved); [`DLMF.Confluent.pcfWOdd_series`](DLMF/ParabolicCylinder/Weber.lean#L1077) (proved).
-- [12.14.E13](https://dlmf.nist.gov/12.14.E13): [`DLMF.Confluent.pcfW_zero_bessel_1`](DLMF/ParabolicCylinder/Weber.lean#L1278) (proved); [`DLMF.Confluent.pcfW_zero_bessel_2`](DLMF/ParabolicCylinder/Weber.lean#L1294) (proved).
-- [12.14.E14](https://dlmf.nist.gov/12.14.E14): [`DLMF.Confluent.pcfW_zero_bessel_deriv_1`](DLMF/ParabolicCylinder/Weber.lean#L1286) (proved); [`DLMF.Confluent.pcfW_zero_bessel_deriv_2`](DLMF/ParabolicCylinder/Weber.lean#L1303) (proved).
-- [12.14.E15](https://dlmf.nist.gov/12.14.E15): [`DLMF.Confluent.pcfWEven`](DLMF/ParabolicCylinder/Weber.lean#L38) (defined); [`DLMF.Confluent.pcfWEven_kummer`](DLMF/ParabolicCylinder/Weber.lean#L87) (proved).
-- [12.14.E16](https://dlmf.nist.gov/12.14.E16): [`DLMF.Confluent.pcfWOdd`](DLMF/ParabolicCylinder/Weber.lean#L43) (defined); [`DLMF.Confluent.pcfWOdd_kummer`](DLMF/ParabolicCylinder/Weber.lean#L97) (proved).
-- [12.14.E17](https://dlmf.nist.gov/12.14.E17): [`DLMF.Confluent.pcfWS`](DLMF/ParabolicCylinder/Weber.lean#L1338) (defined); [`DLMF.Confluent.pcfW_amplitude`](DLMF/ParabolicCylinder/Weber.lean#L1343) (proved).
-- [12.14.E18](https://dlmf.nist.gov/12.14.E18): [`DLMF.Confluent.pcfWS`](DLMF/ParabolicCylinder/Weber.lean#L1338) (defined); [`DLMF.Confluent.pcfW_amplitude`](DLMF/ParabolicCylinder/Weber.lean#L1343) (proved).
-- [12.14.E19](https://dlmf.nist.gov/12.14.E19): [`DLMF.Confluent.pcfWOmega`](DLMF/ParabolicCylinder/Weber.lean#L1311) (defined).
-- [12.14.E20](https://dlmf.nist.gov/12.14.E20): [`DLMF.Confluent.pcfWS_asymptotic`](DLMF/ParabolicCylinder/Weber.lean#L1446) (proved).
-- [12.14.E21](https://dlmf.nist.gov/12.14.E21): [`DLMF.Confluent.pcfWS_asymptotic`](DLMF/ParabolicCylinder/Weber.lean#L1446) (proved).
-- [12.14.E22](https://dlmf.nist.gov/12.14.E22): [`DLMF.Confluent.pcfWCoeff`](DLMF/ParabolicCylinder/Weber.lean#L1378) (defined); Gamma/Pochhammer identity: Mathlib `Complex.Gamma_add_nat_div_Gamma_eq` (recorded with `dlmf_upstream`).
-- [12.14.E23](https://dlmf.nist.gov/12.14.E23): [`DLMF.Confluent.pcfWS_asymptotic`](DLMF/ParabolicCylinder/Weber.lean#L1446) (proved).
-- [12.14.E24](https://dlmf.nist.gov/12.14.E24): [`DLMF.Confluent.pcfW_parameter_scaling`](DLMF/ParabolicCylinder/WeberUniform.lean#L24) (proved).
-- [12.14.E25](https://dlmf.nist.gov/12.14.E25): [`DLMF.Confluent.pcfW_elementary_uniform`](DLMF/ParabolicCylinder/WeberUniform.lean#L60) (admitted).
-- [12.14.E26](https://dlmf.nist.gov/12.14.E26): [`DLMF.Confluent.pcfW_elementary_uniform`](DLMF/ParabolicCylinder/WeberUniform.lean#L60) (admitted).
-- [12.14.E27](https://dlmf.nist.gov/12.14.E27): [`DLMF.Confluent.pcfWSigma`](DLMF/ParabolicCylinder/WeberUniform.lean#L40) (defined).
-- [12.14.E28](https://dlmf.nist.gov/12.14.E28): [`DLMF.Confluent.pcfWOlverL`](DLMF/ParabolicCylinder/WeberUniform.lean#L50) (defined).
-- [12.14.E29](https://dlmf.nist.gov/12.14.E29): [`DLMF.Confluent.IsCylinderLNormalizer`](DLMF/ParabolicCylinder/WeberUniform.lean#L55) (defined).
-- [12.14.E30](https://dlmf.nist.gov/12.14.E30): [`DLMF.Confluent.IsCylinderLNormalizer`](DLMF/ParabolicCylinder/WeberUniform.lean#L55) (defined).
-- [12.14.E31](https://dlmf.nist.gov/12.14.E31): [`DLMF.Confluent.pcfW_elementary_uniform`](DLMF/ParabolicCylinder/WeberUniform.lean#L60) (admitted).
-- [12.14.E32](https://dlmf.nist.gov/12.14.E32): [`DLMF.Confluent.pcfW_airy_uniform`](DLMF/ParabolicCylinder/WeberUniform.lean#L68) (admitted).
-- [12.14.E33](https://dlmf.nist.gov/12.14.E33): [`DLMF.Confluent.pcfW_airy_uniform`](DLMF/ParabolicCylinder/WeberUniform.lean#L68) (admitted).
-- [12.14.E34](https://dlmf.nist.gov/12.14.E34): [`DLMF.Confluent.pcfW_elementary_uniform`](DLMF/ParabolicCylinder/WeberUniform.lean#L60) (admitted).
-- [12.14.E35](https://dlmf.nist.gov/12.14.E35): [`DLMF.Confluent.pcfW_elementary_uniform`](DLMF/ParabolicCylinder/WeberUniform.lean#L60) (admitted).
-- [12.14.E36](https://dlmf.nist.gov/12.14.E36): [`DLMF.Confluent.pcfWSigmaBar`](DLMF/ParabolicCylinder/WeberUniform.lean#L45) (defined).
-- [12.14.E37](https://dlmf.nist.gov/12.14.E37): [`DLMF.Confluent.pcfWF`](DLMF/ParabolicCylinder/Weber.lean#L1481) (defined); [`DLMF.Confluent.pcfWTheta`](DLMF/ParabolicCylinder/Weber.lean#L1486) (defined); [`DLMF.Confluent.pcfWF_phase`](DLMF/ParabolicCylinder/Weber.lean#L1491) (proved).
-- [12.14.E38](https://dlmf.nist.gov/12.14.E38): [`DLMF.Confluent.pcfWG`](DLMF/ParabolicCylinder/Weber.lean#L1510) (defined); [`DLMF.Confluent.pcfWPsi`](DLMF/ParabolicCylinder/Weber.lean#L1515) (defined); [`DLMF.Confluent.pcfWG_phase`](DLMF/ParabolicCylinder/Weber.lean#L1520) (proved).
+- [12.14.E1](https://dlmf.nist.gov/12.14.E1): [`DLMF.Confluent.pcfWZero`](DLMF/ParabolicCylinder/Weber.lean#L27) (defined); [`DLMF.Confluent.pcfW_initial`](DLMF/ParabolicCylinder/Weber.lean#L52) (proved).
+- [12.14.E2](https://dlmf.nist.gov/12.14.E2): [`DLMF.Confluent.pcfWDerivZero`](DLMF/ParabolicCylinder/Weber.lean#L32) (defined); [`DLMF.Confluent.pcfW_initial`](DLMF/ParabolicCylinder/Weber.lean#L52) (proved).
+- [12.14.E3](https://dlmf.nist.gov/12.14.E3): [`DLMF.Confluent.pcfW_wronskian`](DLMF/ParabolicCylinder/Weber.lean#L216) (proved).
+- [12.14.E4](https://dlmf.nist.gov/12.14.E4): [`DLMF.Confluent.pcfW_connection`](DLMF/ParabolicCylinder/Weber.lean#L859) (proved).
+- [12.14.E5](https://dlmf.nist.gov/12.14.E5): [`DLMF.Confluent.pcfWK`](DLMF/ParabolicCylinder/Weber.lean#L225) (defined); [`DLMF.Confluent.pcfWK_recip`](DLMF/ParabolicCylinder/Weber.lean#L230) (proved).
+- [12.14.E6](https://dlmf.nist.gov/12.14.E6): [`DLMF.Confluent.pcfWRho`](DLMF/ParabolicCylinder/Weber.lean#L329) (defined).
+- [12.14.E7](https://dlmf.nist.gov/12.14.E7): [`DLMF.Confluent.pcfGammaPhase`](DLMF/ParabolicCylinder/Weber.lean#L244) (defined); [`DLMF.Confluent.pcfGammaPhase_spec`](DLMF/ParabolicCylinder/Weber.lean#L266) (proved).
+- [12.14.E8](https://dlmf.nist.gov/12.14.E8): [`DLMF.Confluent.pcfW`](DLMF/ParabolicCylinder/Weber.lean#L47) (defined).
+- [12.14.E9](https://dlmf.nist.gov/12.14.E9): [`DLMF.Confluent.pcfWEven_series`](DLMF/ParabolicCylinder/Weber.lean#L1057) (proved).
+- [12.14.E10](https://dlmf.nist.gov/12.14.E10): [`DLMF.Confluent.pcfWOdd_series`](DLMF/ParabolicCylinder/Weber.lean#L1076) (proved).
+- [12.14.E11](https://dlmf.nist.gov/12.14.E11): [`DLMF.Confluent.pcfWEven_series`](DLMF/ParabolicCylinder/Weber.lean#L1057) (proved); [`DLMF.Confluent.pcfWOdd_series`](DLMF/ParabolicCylinder/Weber.lean#L1076) (proved).
+- [12.14.E12](https://dlmf.nist.gov/12.14.E12): [`DLMF.Confluent.pcfWEven_series`](DLMF/ParabolicCylinder/Weber.lean#L1057) (proved); [`DLMF.Confluent.pcfWOdd_series`](DLMF/ParabolicCylinder/Weber.lean#L1076) (proved).
+- [12.14.E13](https://dlmf.nist.gov/12.14.E13): [`DLMF.Confluent.pcfW_zero_bessel_1`](DLMF/ParabolicCylinder/Weber.lean#L1277) (proved); [`DLMF.Confluent.pcfW_zero_bessel_2`](DLMF/ParabolicCylinder/Weber.lean#L1293) (proved).
+- [12.14.E14](https://dlmf.nist.gov/12.14.E14): [`DLMF.Confluent.pcfW_zero_bessel_deriv_1`](DLMF/ParabolicCylinder/Weber.lean#L1285) (proved); [`DLMF.Confluent.pcfW_zero_bessel_deriv_2`](DLMF/ParabolicCylinder/Weber.lean#L1302) (proved).
+- [12.14.E15](https://dlmf.nist.gov/12.14.E15): [`DLMF.Confluent.pcfWEven`](DLMF/ParabolicCylinder/Weber.lean#L37) (defined); [`DLMF.Confluent.pcfWEven_kummer`](DLMF/ParabolicCylinder/Weber.lean#L86) (proved).
+- [12.14.E16](https://dlmf.nist.gov/12.14.E16): [`DLMF.Confluent.pcfWOdd`](DLMF/ParabolicCylinder/Weber.lean#L42) (defined); [`DLMF.Confluent.pcfWOdd_kummer`](DLMF/ParabolicCylinder/Weber.lean#L96) (proved).
+- [12.14.E17](https://dlmf.nist.gov/12.14.E17): [`DLMF.Confluent.pcfWS`](DLMF/ParabolicCylinder/Weber.lean#L1337) (defined); [`DLMF.Confluent.pcfW_amplitude`](DLMF/ParabolicCylinder/Weber.lean#L1342) (proved).
+- [12.14.E18](https://dlmf.nist.gov/12.14.E18): [`DLMF.Confluent.pcfWS`](DLMF/ParabolicCylinder/Weber.lean#L1337) (defined); [`DLMF.Confluent.pcfW_amplitude`](DLMF/ParabolicCylinder/Weber.lean#L1342) (proved).
+- [12.14.E19](https://dlmf.nist.gov/12.14.E19): [`DLMF.Confluent.pcfWOmega`](DLMF/ParabolicCylinder/Weber.lean#L1310) (defined).
+- [12.14.E20](https://dlmf.nist.gov/12.14.E20): [`DLMF.Confluent.pcfWS_asymptotic`](DLMF/ParabolicCylinder/Weber.lean#L1445) (proved).
+- [12.14.E21](https://dlmf.nist.gov/12.14.E21): [`DLMF.Confluent.pcfWS_asymptotic`](DLMF/ParabolicCylinder/Weber.lean#L1445) (proved).
+- [12.14.E22](https://dlmf.nist.gov/12.14.E22): [`DLMF.Confluent.pcfWCoeff`](DLMF/ParabolicCylinder/Weber.lean#L1377) (defined); Gamma/Pochhammer identity: Mathlib `Complex.Gamma_add_nat_div_Gamma_eq` (recorded with `dlmf_upstream`).
+- [12.14.E23](https://dlmf.nist.gov/12.14.E23): [`DLMF.Confluent.pcfWS_asymptotic`](DLMF/ParabolicCylinder/Weber.lean#L1445) (proved).
+- [12.14.E24](https://dlmf.nist.gov/12.14.E24): [`DLMF.Confluent.pcfW_parameter_scaling`](DLMF/ParabolicCylinder/WeberUniform.lean#L25) (proved).
+- [12.14.E25](https://dlmf.nist.gov/12.14.E25): [`DLMF.Confluent.pcfW_elementary_uniform`](DLMF/ParabolicCylinder/WeberUniform.lean#L61) (admitted).
+- [12.14.E26](https://dlmf.nist.gov/12.14.E26): [`DLMF.Confluent.pcfW_elementary_uniform`](DLMF/ParabolicCylinder/WeberUniform.lean#L61) (admitted).
+- [12.14.E27](https://dlmf.nist.gov/12.14.E27): [`DLMF.Confluent.pcfWSigma`](DLMF/ParabolicCylinder/WeberUniform.lean#L41) (defined).
+- [12.14.E28](https://dlmf.nist.gov/12.14.E28): [`DLMF.Confluent.pcfWOlverL`](DLMF/ParabolicCylinder/WeberUniform.lean#L51) (defined).
+- [12.14.E29](https://dlmf.nist.gov/12.14.E29): [`DLMF.Confluent.IsCylinderLNormalizer`](DLMF/ParabolicCylinder/WeberUniform.lean#L56) (defined).
+- [12.14.E30](https://dlmf.nist.gov/12.14.E30): [`DLMF.Confluent.IsCylinderLNormalizer`](DLMF/ParabolicCylinder/WeberUniform.lean#L56) (defined).
+- [12.14.E31](https://dlmf.nist.gov/12.14.E31): [`DLMF.Confluent.pcfW_elementary_uniform`](DLMF/ParabolicCylinder/WeberUniform.lean#L61) (admitted).
+- [12.14.E32](https://dlmf.nist.gov/12.14.E32): [`DLMF.Confluent.pcfW_airy_uniform`](DLMF/ParabolicCylinder/WeberUniform.lean#L69) (admitted).
+- [12.14.E33](https://dlmf.nist.gov/12.14.E33): [`DLMF.Confluent.pcfW_airy_uniform`](DLMF/ParabolicCylinder/WeberUniform.lean#L69) (admitted).
+- [12.14.E34](https://dlmf.nist.gov/12.14.E34): [`DLMF.Confluent.pcfW_elementary_uniform`](DLMF/ParabolicCylinder/WeberUniform.lean#L61) (admitted).
+- [12.14.E35](https://dlmf.nist.gov/12.14.E35): [`DLMF.Confluent.pcfW_elementary_uniform`](DLMF/ParabolicCylinder/WeberUniform.lean#L61) (admitted).
+- [12.14.E36](https://dlmf.nist.gov/12.14.E36): [`DLMF.Confluent.pcfWSigmaBar`](DLMF/ParabolicCylinder/WeberUniform.lean#L46) (defined).
+- [12.14.E37](https://dlmf.nist.gov/12.14.E37): [`DLMF.Confluent.pcfWF`](DLMF/ParabolicCylinder/Weber.lean#L1480) (defined); [`DLMF.Confluent.pcfWTheta`](DLMF/ParabolicCylinder/Weber.lean#L1485) (defined); [`DLMF.Confluent.pcfWF_phase`](DLMF/ParabolicCylinder/Weber.lean#L1490) (proved).
+- [12.14.E38](https://dlmf.nist.gov/12.14.E38): [`DLMF.Confluent.pcfWG`](DLMF/ParabolicCylinder/Weber.lean#L1509) (defined); [`DLMF.Confluent.pcfWPsi`](DLMF/ParabolicCylinder/Weber.lean#L1514) (defined); [`DLMF.Confluent.pcfWG_phase`](DLMF/ParabolicCylinder/Weber.lean#L1519) (proved).
 
 ### [§12.15 Generalized Parabolic Cylinder Functions](https://dlmf.nist.gov/12.15)
 
-- [12.15.E1](https://dlmf.nist.gov/12.15.E1): [`DLMF.Confluent.IsGeneralizedCylinderSolution`](DLMF/ParabolicCylinder/Basic.lean#L604) (defined).
+- [12.15.E1](https://dlmf.nist.gov/12.15.E1): [`DLMF.Confluent.IsGeneralizedCylinderSolution`](DLMF/ParabolicCylinder/Basic.lean#L601) (defined).
 
 ### [§12.18 Methods of Computation](https://dlmf.nist.gov/12.18)
 
@@ -776,336 +776,336 @@ No selected numbered equations. Mathematical prose is recorded in the module inv
 ### [§14.2 Differential Equations](https://dlmf.nist.gov/14.2)
 
 - [14.2.E1](https://dlmf.nist.gov/14.2.E1): [`ferrersP_ode`](DLMF/Legendre/Ferrers.lean#L134) (proved).
-- [14.2.E2](https://dlmf.nist.gov/14.2.E2): [`legendreP_ode`](DLMF/Legendre/Basic.lean#L122) (proved); [`DLMF.Legendre.legendreQ_ode`](DLMF/Legendre/SecondKind.lean#L113) (proved); [`DLMF.Legendre.associatedP_ode`](DLMF/Legendre/Associated.lean#L819) (proved); [`DLMF.Legendre.olverQ_ode`](DLMF/Legendre/Associated.lean#L936) (proved); [`DLMF.Legendre.ferrersQ_ode`](DLMF/Legendre/Associated.lean#L1091) (proved).
-- [14.2.E3](https://dlmf.nist.gov/14.2.E3): [`DLMF.Legendre.ferrers_wronskian_3`](DLMF/Legendre/Associated.lean#L1408) (proved).
-- [14.2.E4](https://dlmf.nist.gov/14.2.E4): [`DLMF.Legendre.ferrers_wronskian_4`](DLMF/Legendre/Associated.lean#L1426) (proved).
-- [14.2.E5](https://dlmf.nist.gov/14.2.E5): [`DLMF.Legendre.ferrers_wronskian_5`](DLMF/Legendre/AssociatedRecurrences.lean#L561) (proved).
-- [14.2.E6](https://dlmf.nist.gov/14.2.E6): [`DLMF.Legendre.ferrers_wronskian_6`](DLMF/Legendre/Associated.lean#L1440) (proved).
-- [14.2.E7](https://dlmf.nist.gov/14.2.E7): [`DLMF.Legendre.ferrers_wronskian_7`](DLMF/Legendre/Associated.lean#L1474) (proved); [`DLMF.Legendre.associated_wronskian_7`](DLMF/Legendre/Associated.lean#L1746) (proved).
-- [14.2.E8](https://dlmf.nist.gov/14.2.E8): [`DLMF.Legendre.associated_wronskian_8`](DLMF/Legendre/Associated.lean#L1989) (proved).
-- [14.2.E9](https://dlmf.nist.gov/14.2.E9): [`DLMF.Legendre.associated_wronskian_9`](DLMF/Legendre/Associated.lean#L2070) (proved).
-- [14.2.E10](https://dlmf.nist.gov/14.2.E10): [`DLMF.Legendre.associated_wronskian_10`](DLMF/Legendre/Associated.lean#L2014) (proved).
-- [14.2.E11](https://dlmf.nist.gov/14.2.E11): [`DLMF.Legendre.associated_wronskian_11`](DLMF/Legendre/AssociatedRecurrences.lean#L946) (proved).
+- [14.2.E2](https://dlmf.nist.gov/14.2.E2): [`legendreP_ode`](DLMF/Legendre/Basic.lean#L121) (proved); [`DLMF.Legendre.legendreQ_ode`](DLMF/Legendre/SecondKind.lean#L113) (proved); [`DLMF.Legendre.associatedP_ode`](DLMF/Legendre/Associated.lean#L831) (proved); [`DLMF.Legendre.olverQ_ode`](DLMF/Legendre/Associated.lean#L950) (proved); [`DLMF.Legendre.ferrersQ_ode`](DLMF/Legendre/Associated.lean#L1106) (proved).
+- [14.2.E3](https://dlmf.nist.gov/14.2.E3): [`DLMF.Legendre.ferrers_wronskian_3`](DLMF/Legendre/Associated.lean#L1436) (proved).
+- [14.2.E4](https://dlmf.nist.gov/14.2.E4): [`DLMF.Legendre.ferrers_wronskian_4`](DLMF/Legendre/Associated.lean#L1455) (proved).
+- [14.2.E5](https://dlmf.nist.gov/14.2.E5): [`DLMF.Legendre.ferrers_wronskian_5`](DLMF/Legendre/AssociatedRecurrences.lean#L570) (proved).
+- [14.2.E6](https://dlmf.nist.gov/14.2.E6): [`DLMF.Legendre.ferrers_wronskian_6`](DLMF/Legendre/Associated.lean#L1470) (proved).
+- [14.2.E7](https://dlmf.nist.gov/14.2.E7): [`DLMF.Legendre.ferrers_wronskian_7`](DLMF/Legendre/Associated.lean#L1505) (proved); [`DLMF.Legendre.associated_wronskian_7`](DLMF/Legendre/Associated.lean#L1778) (proved).
+- [14.2.E8](https://dlmf.nist.gov/14.2.E8): [`DLMF.Legendre.associated_wronskian_8`](DLMF/Legendre/Associated.lean#L2036) (proved).
+- [14.2.E9](https://dlmf.nist.gov/14.2.E9): [`DLMF.Legendre.associated_wronskian_9`](DLMF/Legendre/Associated.lean#L2125) (proved).
+- [14.2.E10](https://dlmf.nist.gov/14.2.E10): [`DLMF.Legendre.associated_wronskian_10`](DLMF/Legendre/Associated.lean#L2064) (proved).
+- [14.2.E11](https://dlmf.nist.gov/14.2.E11): [`DLMF.Legendre.associated_wronskian_11`](DLMF/Legendre/AssociatedRecurrences.lean#L991) (proved).
 
 ### [§14.3 Definitions and Hypergeometric Representations](https://dlmf.nist.gov/14.3)
 
-- [14.3.E1](https://dlmf.nist.gov/14.3.E1): [`ferrersP`](DLMF/Legendre/Basic.lean#L53) (defined).
-- [14.3.E2](https://dlmf.nist.gov/14.3.E2): [`DLMF.Legendre.ferrersQ_hypergeometric`](DLMF/Legendre/Associated.lean#L532) (proved); [`DLMF.Legendre.ferrersQ_order_limit`](DLMF/Legendre/Associated.lean#L632) (proved).
-- [14.3.E3](https://dlmf.nist.gov/14.3.E3): [`DLMF.Legendre.legendreGaussF`](DLMF/Legendre/Hypergeometric.lean#L27) (defined); [`DLMF.Legendre.legendreGaussF_normalization`](DLMF/Legendre/Hypergeometric.lean#L33) (proved).
-- [14.3.E4](https://dlmf.nist.gov/14.3.E4): [`DLMF.Legendre.ferrersP_integer_hypergeometric_4`](DLMF/Legendre/Hypergeometric.lean#L41) (proved).
-- [14.3.E5](https://dlmf.nist.gov/14.3.E5): [`DLMF.Legendre.ferrersP_integer_hypergeometric_5`](DLMF/Legendre/Hypergeometric.lean#L57) (proved).
-- [14.3.E6](https://dlmf.nist.gov/14.3.E6): [`legendreP`](DLMF/Legendre/Basic.lean#L48) (defined); [`DLMF.Legendre.associatedP`](DLMF/Legendre/Associated.lean#L32) (defined).
-- [14.3.E7](https://dlmf.nist.gov/14.3.E7): [`DLMF.Legendre.legendreQ`](DLMF/Legendre/SecondKind.lean#L105) (defined); [`DLMF.Legendre.associatedQ`](DLMF/Legendre/Associated.lean#L42) (defined).
-- [14.3.E8](https://dlmf.nist.gov/14.3.E8): [`DLMF.Legendre.associatedP_integer_hypergeometric_8`](DLMF/Legendre/Hypergeometric.lean#L71) (proved).
-- [14.3.E9](https://dlmf.nist.gov/14.3.E9): [`DLMF.Legendre.associated_hypergeometric_9`](DLMF/Legendre/Hypergeometric.lean#L87) (proved).
-- [14.3.E10](https://dlmf.nist.gov/14.3.E10): [`DLMF.Legendre.olverQ`](DLMF/Legendre/Associated.lean#L37) (defined); [`DLMF.Legendre.olverQ_normalization`](DLMF/Legendre/Associated.lean#L740) (proved).
-- [14.3.E11](https://dlmf.nist.gov/14.3.E11): [`DLMF.Legendre.ferrersP_w1_w2`](DLMF/Legendre/Associated.lean#L133) (proved).
-- [14.3.E12](https://dlmf.nist.gov/14.3.E12): [`DLMF.Legendre.ferrersQ`](DLMF/Legendre/Associated.lean#L61) (defined).
+- [14.3.E1](https://dlmf.nist.gov/14.3.E1): [`ferrersP`](DLMF/Legendre/Basic.lean#L52) (defined).
+- [14.3.E2](https://dlmf.nist.gov/14.3.E2): [`DLMF.Legendre.ferrersQ_hypergeometric`](DLMF/Legendre/Associated.lean#L531) (proved); [`DLMF.Legendre.ferrersQ_order_limit`](DLMF/Legendre/Associated.lean#L632) (proved).
+- [14.3.E3](https://dlmf.nist.gov/14.3.E3): [`DLMF.Legendre.legendreGaussF`](DLMF/Legendre/Hypergeometric.lean#L26) (defined); [`DLMF.Legendre.legendreGaussF_normalization`](DLMF/Legendre/Hypergeometric.lean#L32) (proved).
+- [14.3.E4](https://dlmf.nist.gov/14.3.E4): [`DLMF.Legendre.ferrersP_integer_hypergeometric_4`](DLMF/Legendre/Hypergeometric.lean#L40) (proved).
+- [14.3.E5](https://dlmf.nist.gov/14.3.E5): [`DLMF.Legendre.ferrersP_integer_hypergeometric_5`](DLMF/Legendre/Hypergeometric.lean#L56) (proved).
+- [14.3.E6](https://dlmf.nist.gov/14.3.E6): [`legendreP`](DLMF/Legendre/Basic.lean#L47) (defined); [`DLMF.Legendre.associatedP`](DLMF/Legendre/Associated.lean#L29) (defined).
+- [14.3.E7](https://dlmf.nist.gov/14.3.E7): [`DLMF.Legendre.legendreQ`](DLMF/Legendre/SecondKind.lean#L105) (defined); [`DLMF.Legendre.associatedQ`](DLMF/Legendre/Associated.lean#L41) (defined).
+- [14.3.E8](https://dlmf.nist.gov/14.3.E8): [`DLMF.Legendre.associatedP_integer_hypergeometric_8`](DLMF/Legendre/Hypergeometric.lean#L70) (proved).
+- [14.3.E9](https://dlmf.nist.gov/14.3.E9): [`DLMF.Legendre.associated_hypergeometric_9`](DLMF/Legendre/Hypergeometric.lean#L86) (proved).
+- [14.3.E10](https://dlmf.nist.gov/14.3.E10): [`DLMF.Legendre.olverQ`](DLMF/Legendre/Associated.lean#L36) (defined); [`DLMF.Legendre.olverQ_normalization`](DLMF/Legendre/Associated.lean#L742) (proved).
+- [14.3.E11](https://dlmf.nist.gov/14.3.E11): [`DLMF.Legendre.ferrersP_w1_w2`](DLMF/Legendre/Associated.lean#L131) (proved).
+- [14.3.E12](https://dlmf.nist.gov/14.3.E12): [`DLMF.Legendre.ferrersQ`](DLMF/Legendre/Associated.lean#L63) (defined).
 - [14.3.E13](https://dlmf.nist.gov/14.3.E13): [`DLMF.Legendre.ferrersW1`](DLMF/Legendre/Associated.lean#L51) (defined).
-- [14.3.E14](https://dlmf.nist.gov/14.3.E14): [`DLMF.Legendre.ferrersW2`](DLMF/Legendre/Associated.lean#L56) (defined).
+- [14.3.E14](https://dlmf.nist.gov/14.3.E14): [`DLMF.Legendre.ferrersW2`](DLMF/Legendre/Associated.lean#L57) (defined).
 - [14.3.E15](https://dlmf.nist.gov/14.3.E15): [`DLMF.Legendre.associated_hypergeometric_15`](DLMF/Legendre/Hypergeometric.lean#L95) (proved).
-- [14.3.E16](https://dlmf.nist.gov/14.3.E16): [`DLMF.Legendre.associated_hypergeometric_16`](DLMF/Legendre/Hypergeometric.lean#L101) (proved).
-- [14.3.E17](https://dlmf.nist.gov/14.3.E17): [`DLMF.Legendre.associatedP_square_hypergeometric`](DLMF/Legendre/Hypergeometric.lean#L229) (admitted).
-- [14.3.E18](https://dlmf.nist.gov/14.3.E18): [`DLMF.Legendre.associated_hypergeometric_18`](DLMF/Legendre/Hypergeometric.lean#L217) (proved).
-- [14.3.E19](https://dlmf.nist.gov/14.3.E19): [`DLMF.Legendre.olverQ_linear_hypergeometric`](DLMF/Legendre/Hypergeometric.lean#L235) (admitted).
-- [14.3.E20](https://dlmf.nist.gov/14.3.E20): [`DLMF.Legendre.associated_hypergeometric_20`](DLMF/Legendre/Hypergeometric.lean#L223) (proved).
+- [14.3.E16](https://dlmf.nist.gov/14.3.E16): [`DLMF.Legendre.associated_hypergeometric_16`](DLMF/Legendre/Hypergeometric.lean#L102) (proved).
+- [14.3.E17](https://dlmf.nist.gov/14.3.E17): [`DLMF.Legendre.associatedP_square_hypergeometric`](DLMF/Legendre/Hypergeometric.lean#L234) (admitted).
+- [14.3.E18](https://dlmf.nist.gov/14.3.E18): [`DLMF.Legendre.associated_hypergeometric_18`](DLMF/Legendre/Hypergeometric.lean#L220) (proved).
+- [14.3.E19](https://dlmf.nist.gov/14.3.E19): [`DLMF.Legendre.olverQ_linear_hypergeometric`](DLMF/Legendre/Hypergeometric.lean#L240) (admitted).
+- [14.3.E20](https://dlmf.nist.gov/14.3.E20): [`DLMF.Legendre.associated_hypergeometric_20`](DLMF/Legendre/Hypergeometric.lean#L227) (proved).
 - [14.3.E21](https://dlmf.nist.gov/14.3.E21): [`DLMF.Legendre.ferrersP_gegenbauer`](DLMF/Legendre/RelatedFunctions.lean#L33) (proved).
 - [14.3.E22](https://dlmf.nist.gov/14.3.E22): [`DLMF.Legendre.associatedP_gegenbauer`](DLMF/Legendre/RelatedFunctions.lean#L79) (proved).
 - [14.3.E23](https://dlmf.nist.gov/14.3.E23): [`DLMF.Legendre.associatedP_jacobi`](DLMF/Legendre/RelatedFunctions.lean#L127) (proved).
 
 ### [§14.5 Special Values](https://dlmf.nist.gov/14.5)
 
-- [14.5.E1](https://dlmf.nist.gov/14.5.E1): [`DLMF.Legendre.legendreP_zero_arg`](DLMF/Legendre/Recurrences.lean#L86) (proved); [`DLMF.Legendre.ferrersP_zero_1`](DLMF/Legendre/SpecialValues.lean#L30) (proved).
-- [14.5.E2](https://dlmf.nist.gov/14.5.E2): [`DLMF.Legendre.ferrersP_zero_2`](DLMF/Legendre/SpecialValues.lean#L51) (proved).
-- [14.5.E3](https://dlmf.nist.gov/14.5.E3): [`DLMF.Legendre.ferrersQ_zero_3`](DLMF/Legendre/SpecialValues.lean#L75) (proved).
-- [14.5.E4](https://dlmf.nist.gov/14.5.E4): [`DLMF.Legendre.ferrersQ_zero_4`](DLMF/Legendre/SpecialValues.lean#L90) (proved).
-- [14.5.E5](https://dlmf.nist.gov/14.5.E5): [`DLMF.Legendre.ferrersP_degree_0`](DLMF/Legendre/SpecialValues.lean#L117) (proved); [`DLMF.Legendre.associatedP_degree_0`](DLMF/Legendre/SpecialValues.lean#L153) (proved).
-- [14.5.E6](https://dlmf.nist.gov/14.5.E6): [`DLMF.Legendre.ferrersP_degree_1`](DLMF/Legendre/SpecialValues.lean#L128) (proved); [`DLMF.Legendre.associatedP_degree_1`](DLMF/Legendre/SpecialValues.lean#L164) (proved).
-- [14.5.E7](https://dlmf.nist.gov/14.5.E7): [`DLMF.Legendre.ferrersQ_degree_0`](DLMF/Legendre/SpecialValues.lean#L234) (proved).
-- [14.5.E8](https://dlmf.nist.gov/14.5.E8): [`DLMF.Legendre.ferrersQ_degree_1`](DLMF/Legendre/SpecialValues.lean#L246) (proved).
-- [14.5.E9](https://dlmf.nist.gov/14.5.E9): [`DLMF.Legendre.olverQ_degree_0`](DLMF/Legendre/SpecialValues.lean#L282) (proved).
-- [14.5.E10](https://dlmf.nist.gov/14.5.E10): [`DLMF.Legendre.olverQ_degree_1`](DLMF/Legendre/SpecialValues.lean#L290) (proved).
+- [14.5.E1](https://dlmf.nist.gov/14.5.E1): [`DLMF.Legendre.legendreP_zero_arg`](DLMF/Legendre/Recurrences.lean#L86) (proved); [`DLMF.Legendre.ferrersP_zero_1`](DLMF/Legendre/SpecialValues.lean#L29) (proved).
+- [14.5.E2](https://dlmf.nist.gov/14.5.E2): [`DLMF.Legendre.ferrersP_zero_2`](DLMF/Legendre/SpecialValues.lean#L50) (proved).
+- [14.5.E3](https://dlmf.nist.gov/14.5.E3): [`DLMF.Legendre.ferrersQ_zero_3`](DLMF/Legendre/SpecialValues.lean#L76) (proved).
+- [14.5.E4](https://dlmf.nist.gov/14.5.E4): [`DLMF.Legendre.ferrersQ_zero_4`](DLMF/Legendre/SpecialValues.lean#L92) (proved).
+- [14.5.E5](https://dlmf.nist.gov/14.5.E5): [`DLMF.Legendre.ferrersP_degree_0`](DLMF/Legendre/SpecialValues.lean#L121) (proved); [`DLMF.Legendre.associatedP_degree_0`](DLMF/Legendre/SpecialValues.lean#L157) (proved).
+- [14.5.E6](https://dlmf.nist.gov/14.5.E6): [`DLMF.Legendre.ferrersP_degree_1`](DLMF/Legendre/SpecialValues.lean#L132) (proved); [`DLMF.Legendre.associatedP_degree_1`](DLMF/Legendre/SpecialValues.lean#L168) (proved).
+- [14.5.E7](https://dlmf.nist.gov/14.5.E7): [`DLMF.Legendre.ferrersQ_degree_0`](DLMF/Legendre/SpecialValues.lean#L231) (proved).
+- [14.5.E8](https://dlmf.nist.gov/14.5.E8): [`DLMF.Legendre.ferrersQ_degree_1`](DLMF/Legendre/SpecialValues.lean#L243) (proved).
+- [14.5.E9](https://dlmf.nist.gov/14.5.E9): [`DLMF.Legendre.olverQ_degree_0`](DLMF/Legendre/SpecialValues.lean#L279) (proved).
+- [14.5.E10](https://dlmf.nist.gov/14.5.E10): [`DLMF.Legendre.olverQ_degree_1`](DLMF/Legendre/SpecialValues.lean#L288) (proved).
 - [14.5.E11](https://dlmf.nist.gov/14.5.E11): [`DLMF.Legendre.ferrersP_half_order_11`](DLMF/Legendre/SpecialValues.lean#L311) (proved).
 - [14.5.E12](https://dlmf.nist.gov/14.5.E12): [`DLMF.Legendre.ferrersP_half_order_12`](DLMF/Legendre/SpecialValues.lean#L354) (proved).
-- [14.5.E13](https://dlmf.nist.gov/14.5.E13): [`DLMF.Legendre.ferrersQ_half_order_13`](DLMF/Legendre/SpecialValues.lean#L434) (proved).
-- [14.5.E14](https://dlmf.nist.gov/14.5.E14): [`DLMF.Legendre.ferrersQ_half_order_14`](DLMF/Legendre/SpecialValues.lean#L516) (proved).
-- [14.5.E15](https://dlmf.nist.gov/14.5.E15): [`DLMF.Legendre.associatedP_half_order_15`](DLMF/Legendre/SpecialValues.lean#L612) (proved).
-- [14.5.E16](https://dlmf.nist.gov/14.5.E16): [`DLMF.Legendre.associatedP_half_order_16`](DLMF/Legendre/SpecialValues.lean#L689) (proved).
-- [14.5.E17](https://dlmf.nist.gov/14.5.E17): [`DLMF.Legendre.olverQ_half_order_1`](DLMF/Legendre/SpecialValues.lean#L783) (proved); [`DLMF.Legendre.olverQ_half_order_2`](DLMF/Legendre/SpecialValues.lean#L853) (proved).
-- [14.5.E18](https://dlmf.nist.gov/14.5.E18): [`DLMF.Legendre.ferrersP_negative_degree_order`](DLMF/Legendre/SpecialValues.lean#L923) (proved).
-- [14.5.E19](https://dlmf.nist.gov/14.5.E19): [`DLMF.Legendre.associatedP_negative_degree_order`](DLMF/Legendre/SpecialValues.lean#L980) (proved).
-- [14.5.E20](https://dlmf.nist.gov/14.5.E20): [`DLMF.Legendre.legendre_elliptic_20`](DLMF/Legendre/SpecialValues.lean#L1030) (proved).
-- [14.5.E21](https://dlmf.nist.gov/14.5.E21): [`DLMF.Legendre.legendre_elliptic_21`](DLMF/Legendre/SpecialValues.lean#L1047) (proved).
-- [14.5.E22](https://dlmf.nist.gov/14.5.E22): [`DLMF.Legendre.legendre_elliptic_22`](DLMF/Legendre/SpecialValues.lean#L1077) (proved).
-- [14.5.E23](https://dlmf.nist.gov/14.5.E23): [`DLMF.Legendre.legendre_elliptic_23`](DLMF/Legendre/SpecialValues.lean#L1096) (proved).
-- [14.5.E24](https://dlmf.nist.gov/14.5.E24): [`DLMF.Legendre.legendre_elliptic_24`](DLMF/Legendre/SpecialValues.lean#L1115) (proved).
-- [14.5.E25](https://dlmf.nist.gov/14.5.E25): [`DLMF.Legendre.legendre_elliptic_25`](DLMF/Legendre/SpecialValues.lean#L1152) (proved).
-- [14.5.E26](https://dlmf.nist.gov/14.5.E26): [`DLMF.Legendre.legendre_elliptic_26`](DLMF/Legendre/SpecialValues.lean#L1217) (proved).
-- [14.5.E27](https://dlmf.nist.gov/14.5.E27): [`DLMF.Legendre.legendre_elliptic_27`](DLMF/Legendre/SpecialValues.lean#L1302) (proved).
-- [14.5.E28](https://dlmf.nist.gov/14.5.E28): [`DLMF.Legendre.ferrersP_degree_2`](DLMF/Legendre/SpecialValues.lean#L139) (proved); [`DLMF.Legendre.associatedP_degree_2`](DLMF/Legendre/SpecialValues.lean#L175) (proved).
-- [14.5.E29](https://dlmf.nist.gov/14.5.E29): [`DLMF.Legendre.ferrersQ_degree_2`](DLMF/Legendre/SpecialValues.lean#L262) (proved).
-- [14.5.E30](https://dlmf.nist.gov/14.5.E30): [`DLMF.Legendre.olverQ_degree_2`](DLMF/Legendre/SpecialValues.lean#L299) (proved).
+- [14.5.E13](https://dlmf.nist.gov/14.5.E13): [`DLMF.Legendre.ferrersQ_half_order_13`](DLMF/Legendre/SpecialValues.lean#L435) (proved).
+- [14.5.E14](https://dlmf.nist.gov/14.5.E14): [`DLMF.Legendre.ferrersQ_half_order_14`](DLMF/Legendre/SpecialValues.lean#L518) (proved).
+- [14.5.E15](https://dlmf.nist.gov/14.5.E15): [`DLMF.Legendre.associatedP_half_order_15`](DLMF/Legendre/SpecialValues.lean#L615) (proved).
+- [14.5.E16](https://dlmf.nist.gov/14.5.E16): [`DLMF.Legendre.associatedP_half_order_16`](DLMF/Legendre/SpecialValues.lean#L692) (proved).
+- [14.5.E17](https://dlmf.nist.gov/14.5.E17): [`DLMF.Legendre.olverQ_half_order_1`](DLMF/Legendre/SpecialValues.lean#L787) (proved); [`DLMF.Legendre.olverQ_half_order_2`](DLMF/Legendre/SpecialValues.lean#L858) (proved).
+- [14.5.E18](https://dlmf.nist.gov/14.5.E18): [`DLMF.Legendre.ferrersP_negative_degree_order`](DLMF/Legendre/SpecialValues.lean#L929) (proved).
+- [14.5.E19](https://dlmf.nist.gov/14.5.E19): [`DLMF.Legendre.associatedP_negative_degree_order`](DLMF/Legendre/SpecialValues.lean#L986) (proved).
+- [14.5.E20](https://dlmf.nist.gov/14.5.E20): [`DLMF.Legendre.legendre_elliptic_20`](DLMF/Legendre/SpecialValues.lean#L1036) (proved).
+- [14.5.E21](https://dlmf.nist.gov/14.5.E21): [`DLMF.Legendre.legendre_elliptic_21`](DLMF/Legendre/SpecialValues.lean#L1053) (proved).
+- [14.5.E22](https://dlmf.nist.gov/14.5.E22): [`DLMF.Legendre.legendre_elliptic_22`](DLMF/Legendre/SpecialValues.lean#L1083) (proved).
+- [14.5.E23](https://dlmf.nist.gov/14.5.E23): [`DLMF.Legendre.legendre_elliptic_23`](DLMF/Legendre/SpecialValues.lean#L1102) (proved).
+- [14.5.E24](https://dlmf.nist.gov/14.5.E24): [`DLMF.Legendre.legendre_elliptic_24`](DLMF/Legendre/SpecialValues.lean#L1121) (proved).
+- [14.5.E25](https://dlmf.nist.gov/14.5.E25): [`DLMF.Legendre.legendre_elliptic_25`](DLMF/Legendre/SpecialValues.lean#L1158) (proved).
+- [14.5.E26](https://dlmf.nist.gov/14.5.E26): [`DLMF.Legendre.legendre_elliptic_26`](DLMF/Legendre/SpecialValues.lean#L1223) (proved).
+- [14.5.E27](https://dlmf.nist.gov/14.5.E27): [`DLMF.Legendre.legendre_elliptic_27`](DLMF/Legendre/SpecialValues.lean#L1308) (proved).
+- [14.5.E28](https://dlmf.nist.gov/14.5.E28): [`DLMF.Legendre.ferrersP_degree_2`](DLMF/Legendre/SpecialValues.lean#L143) (proved); [`DLMF.Legendre.associatedP_degree_2`](DLMF/Legendre/SpecialValues.lean#L179) (proved).
+- [14.5.E29](https://dlmf.nist.gov/14.5.E29): [`DLMF.Legendre.ferrersQ_degree_2`](DLMF/Legendre/SpecialValues.lean#L259) (proved).
+- [14.5.E30](https://dlmf.nist.gov/14.5.E30): [`DLMF.Legendre.olverQ_degree_2`](DLMF/Legendre/SpecialValues.lean#L298) (proved).
 
 ### [§14.6 Integer Order](https://dlmf.nist.gov/14.6)
 
 - [14.6.E1](https://dlmf.nist.gov/14.6.E1): [`ferrersP_nat`](DLMF/Legendre/Ferrers.lean#L58) (proved).
-- [14.6.E2](https://dlmf.nist.gov/14.6.E2): [`DLMF.Legendre.ferrersQ_nat_order_derivative`](DLMF/Legendre/AssociatedRecurrences.lean#L993) (proved).
-- [14.6.E3](https://dlmf.nist.gov/14.6.E3): [`DLMF.Legendre.associatedP_nat_order_derivative`](DLMF/Legendre/AssociatedRecurrences.lean#L1046) (proved).
-- [14.6.E4](https://dlmf.nist.gov/14.6.E4): [`DLMF.Legendre.associatedQ_nat_order_derivative`](DLMF/Legendre/AssociatedRecurrences.lean#L1152) (proved).
-- [14.6.E5](https://dlmf.nist.gov/14.6.E5): [`DLMF.Legendre.olverQ_nat_order_derivative`](DLMF/Legendre/AssociatedRecurrences.lean#L1097) (proved).
-- [14.6.E6](https://dlmf.nist.gov/14.6.E6): [`DLMF.Legendre.ferrersP_negative_order_integral`](DLMF/Legendre/IntegralRepresentations.lean#L1652) (proved).
-- [14.6.E7](https://dlmf.nist.gov/14.6.E7): [`DLMF.Legendre.associatedP_negative_order_integral`](DLMF/Legendre/IntegralRepresentations.lean#L1671) (proved); [`DLMF.Legendre.associatedP_negative_order_integral_complex`](DLMF/Legendre/IntegralRepresentations.lean#L1692) (proved).
-- [14.6.E8](https://dlmf.nist.gov/14.6.E8): [`DLMF.Legendre.associatedQ_negative_order_integral`](DLMF/Legendre/IntegralRepresentations.lean#L1679) (proved); [`DLMF.Legendre.associatedQ_negative_order_integral_complex`](DLMF/Legendre/IntegralRepresentations.lean#L1700) (proved).
+- [14.6.E2](https://dlmf.nist.gov/14.6.E2): [`DLMF.Legendre.ferrersQ_nat_order_derivative`](DLMF/Legendre/AssociatedRecurrences.lean#L1039) (proved).
+- [14.6.E3](https://dlmf.nist.gov/14.6.E3): [`DLMF.Legendre.associatedP_nat_order_derivative`](DLMF/Legendre/AssociatedRecurrences.lean#L1093) (proved).
+- [14.6.E4](https://dlmf.nist.gov/14.6.E4): [`DLMF.Legendre.associatedQ_nat_order_derivative`](DLMF/Legendre/AssociatedRecurrences.lean#L1206) (proved).
+- [14.6.E5](https://dlmf.nist.gov/14.6.E5): [`DLMF.Legendre.olverQ_nat_order_derivative`](DLMF/Legendre/AssociatedRecurrences.lean#L1150) (proved).
+- [14.6.E6](https://dlmf.nist.gov/14.6.E6): [`DLMF.Legendre.ferrersP_negative_order_integral`](DLMF/Legendre/IntegralRepresentations.lean#L1636) (proved).
+- [14.6.E7](https://dlmf.nist.gov/14.6.E7): [`DLMF.Legendre.associatedP_negative_order_integral`](DLMF/Legendre/IntegralRepresentations.lean#L1656) (proved); [`DLMF.Legendre.associatedP_negative_order_integral_complex`](DLMF/Legendre/IntegralRepresentations.lean#L1679) (proved).
+- [14.6.E8](https://dlmf.nist.gov/14.6.E8): [`DLMF.Legendre.associatedQ_negative_order_integral`](DLMF/Legendre/IntegralRepresentations.lean#L1665) (proved); [`DLMF.Legendre.associatedQ_negative_order_integral_complex`](DLMF/Legendre/IntegralRepresentations.lean#L1687) (proved).
 
 ### [§14.7 Integer Degree and Order](https://dlmf.nist.gov/14.7)
 
-- [14.7.E1](https://dlmf.nist.gov/14.7.E1): [`DLMF.Legendre.ferrersP_nat_polynomial`](DLMF/Legendre/IntegerTheory.lean#L32) (proved).
-- [14.7.E2](https://dlmf.nist.gov/14.7.E2): [`DLMF.Legendre.ferrersQ_nat_logarithm`](DLMF/Legendre/Series.lean#L702) (proved).
-- [14.7.E3](https://dlmf.nist.gov/14.7.E3): [`DLMF.Legendre.legendreQPoly_explicit`](DLMF/Legendre/Series.lean#L675) (proved).
-- [14.7.E4](https://dlmf.nist.gov/14.7.E4): [`DLMF.Legendre.legendreQPoly_convolution`](DLMF/Legendre/Series.lean#L665) (proved).
-- [14.7.E5](https://dlmf.nist.gov/14.7.E5): [`DLMF.Legendre.legendreQPoly_initial`](DLMF/Legendre/Series.lean#L687) (proved).
-- [14.7.E6](https://dlmf.nist.gov/14.7.E6): [`DLMF.Legendre.olverQ_nat_normalization`](DLMF/Legendre/Series.lean#L732) (proved).
-- [14.7.E7](https://dlmf.nist.gov/14.7.E7): [`DLMF.Legendre.associatedQ_nat_logarithm`](DLMF/Legendre/Series.lean#L738) (proved).
-- [14.7.E8](https://dlmf.nist.gov/14.7.E8): [`DLMF.Legendre.ferrersP_nat_order_rodrigues`](DLMF/Legendre/IntegerTheory.lean#L124) (proved); [`DLMF.Legendre.ferrersPNat_eq`](DLMF/Legendre/Harmonics.lean#L33) (proved).
-- [14.7.E9](https://dlmf.nist.gov/14.7.E9): [`DLMF.Legendre.ferrersQ_nat_order_derivative`](DLMF/Legendre/AssociatedRecurrences.lean#L993) (proved).
-- [14.7.E10](https://dlmf.nist.gov/14.7.E10): [`DLMF.Legendre.ferrersP_nat_order_rodrigues`](DLMF/Legendre/IntegerTheory.lean#L124) (proved).
-- [14.7.E11](https://dlmf.nist.gov/14.7.E11): [`DLMF.Legendre.associatedP_nat_order_derivative`](DLMF/Legendre/AssociatedRecurrences.lean#L1046) (proved).
-- [14.7.E12](https://dlmf.nist.gov/14.7.E12): [`DLMF.Legendre.associatedQ_nat_order_derivative`](DLMF/Legendre/AssociatedRecurrences.lean#L1152) (proved).
+- [14.7.E1](https://dlmf.nist.gov/14.7.E1): [`DLMF.Legendre.ferrersP_nat_polynomial`](DLMF/Legendre/IntegerTheory.lean#L30) (proved).
+- [14.7.E2](https://dlmf.nist.gov/14.7.E2): [`DLMF.Legendre.ferrersQ_nat_logarithm`](DLMF/Legendre/Series.lean#L711) (proved).
+- [14.7.E3](https://dlmf.nist.gov/14.7.E3): [`DLMF.Legendre.legendreQPoly_explicit`](DLMF/Legendre/Series.lean#L682) (proved).
+- [14.7.E4](https://dlmf.nist.gov/14.7.E4): [`DLMF.Legendre.legendreQPoly_convolution`](DLMF/Legendre/Series.lean#L671) (proved).
+- [14.7.E5](https://dlmf.nist.gov/14.7.E5): [`DLMF.Legendre.legendreQPoly_initial`](DLMF/Legendre/Series.lean#L695) (proved).
+- [14.7.E6](https://dlmf.nist.gov/14.7.E6): [`DLMF.Legendre.olverQ_nat_normalization`](DLMF/Legendre/Series.lean#L741) (proved).
+- [14.7.E7](https://dlmf.nist.gov/14.7.E7): [`DLMF.Legendre.associatedQ_nat_logarithm`](DLMF/Legendre/Series.lean#L747) (proved).
+- [14.7.E8](https://dlmf.nist.gov/14.7.E8): [`DLMF.Legendre.ferrersP_nat_order_rodrigues`](DLMF/Legendre/IntegerTheory.lean#L122) (proved); [`DLMF.Legendre.ferrersPNat_eq`](DLMF/Legendre/Harmonics.lean#L33) (proved).
+- [14.7.E9](https://dlmf.nist.gov/14.7.E9): [`DLMF.Legendre.ferrersQ_nat_order_derivative`](DLMF/Legendre/AssociatedRecurrences.lean#L1039) (proved).
+- [14.7.E10](https://dlmf.nist.gov/14.7.E10): [`DLMF.Legendre.ferrersP_nat_order_rodrigues`](DLMF/Legendre/IntegerTheory.lean#L122) (proved).
+- [14.7.E11](https://dlmf.nist.gov/14.7.E11): [`DLMF.Legendre.associatedP_nat_order_derivative`](DLMF/Legendre/AssociatedRecurrences.lean#L1093) (proved).
+- [14.7.E12](https://dlmf.nist.gov/14.7.E12): [`DLMF.Legendre.associatedQ_nat_order_derivative`](DLMF/Legendre/AssociatedRecurrences.lean#L1206) (proved).
 - [14.7.E13](https://dlmf.nist.gov/14.7.E13): Mathlib `Polynomial.factorial_mul_shiftedLegendre_eq`; see the [upstream pointer](DLMF/Legendre/IntegerTheory.lean) (recorded with `dlmf_upstream`).
-- [14.7.E14](https://dlmf.nist.gov/14.7.E14): [`DLMF.Legendre.associatedP_nat_order_rodrigues`](DLMF/Legendre/IntegerTheory.lean#L156) (proved).
+- [14.7.E14](https://dlmf.nist.gov/14.7.E14): [`DLMF.Legendre.associatedP_nat_order_rodrigues`](DLMF/Legendre/IntegerTheory.lean#L155) (proved).
 - [14.7.E15](https://dlmf.nist.gov/14.7.E15): [`DLMF.Legendre.associatedP_equal_nat_order`](DLMF/Legendre/IntegerTheory.lean#L168) (proved).
 - [14.7.E16](https://dlmf.nist.gov/14.7.E16): [`DLMF.Legendre.ferrersP_order_gt_degree`](DLMF/Legendre/IntegerTheory.lean#L191) (proved); [`DLMF.Legendre.associatedP_order_gt_degree`](DLMF/Legendre/IntegerTheory.lean#L203) (proved).
 - [14.7.E17](https://dlmf.nist.gov/14.7.E17): [`DLMF.Legendre.ferrersP_nat_reflection`](DLMF/Legendre/IntegerTheory.lean#L254) (proved).
 - [14.7.E18](https://dlmf.nist.gov/14.7.E18): [`DLMF.Legendre.ferrersQ_nat_reflection_1`](DLMF/Legendre/IntegerTheory.lean#L260) (proved); [`DLMF.Legendre.ferrersQ_nat_reflection_2`](DLMF/Legendre/IntegerTheory.lean#L266) (proved).
-- [14.7.E19](https://dlmf.nist.gov/14.7.E19): [`DLMF.Legendre.ferrersP_generating`](DLMF/Legendre/Series.lean#L746) (proved); [`DLMF.Legendre.associatedP_generating_complex`](DLMF/Legendre/Series.lean#L869) (proved).
-- [14.7.E20](https://dlmf.nist.gov/14.7.E20): [`DLMF.Legendre.ferrersQ_generating`](DLMF/Legendre/Series.lean#L756) (proved).
-- [14.7.E21](https://dlmf.nist.gov/14.7.E21): [`DLMF.Legendre.associatedP_exterior_generating`](DLMF/Legendre/Series.lean#L895) (proved).
-- [14.7.E22](https://dlmf.nist.gov/14.7.E22): [`DLMF.Legendre.associatedQ_generating`](DLMF/Legendre/Series.lean#L811) (proved).
+- [14.7.E19](https://dlmf.nist.gov/14.7.E19): [`DLMF.Legendre.ferrersP_generating`](DLMF/Legendre/Series.lean#L756) (proved); [`DLMF.Legendre.associatedP_generating_complex`](DLMF/Legendre/Series.lean#L882) (proved).
+- [14.7.E20](https://dlmf.nist.gov/14.7.E20): [`DLMF.Legendre.ferrersQ_generating`](DLMF/Legendre/Series.lean#L767) (proved).
+- [14.7.E21](https://dlmf.nist.gov/14.7.E21): [`DLMF.Legendre.associatedP_exterior_generating`](DLMF/Legendre/Series.lean#L909) (proved).
+- [14.7.E22](https://dlmf.nist.gov/14.7.E22): [`DLMF.Legendre.associatedQ_generating`](DLMF/Legendre/Series.lean#L823) (proved).
 
 ### [§14.8 Behavior at Singularities](https://dlmf.nist.gov/14.8)
 
-- [14.8.E1](https://dlmf.nist.gov/14.8.E1): [`DLMF.Legendre.legendre_singular_1`](DLMF/Legendre/Singularities.lean#L93) (proved).
-- [14.8.E2](https://dlmf.nist.gov/14.8.E2): [`DLMF.Legendre.legendre_singular_2`](DLMF/Legendre/Singularities.lean#L111) (proved).
-- [14.8.E3](https://dlmf.nist.gov/14.8.E3): [`DLMF.Legendre.ferrersQ_log_singular`](DLMF/Legendre/Singularities.lean#L450) (proved).
-- [14.8.E4](https://dlmf.nist.gov/14.8.E4): [`DLMF.Legendre.legendre_singular_4`](DLMF/Legendre/Singularities.lean#L129) (proved).
+- [14.8.E1](https://dlmf.nist.gov/14.8.E1): [`DLMF.Legendre.legendre_singular_1`](DLMF/Legendre/Singularities.lean#L88) (proved).
+- [14.8.E2](https://dlmf.nist.gov/14.8.E2): [`DLMF.Legendre.legendre_singular_2`](DLMF/Legendre/Singularities.lean#L108) (proved).
+- [14.8.E3](https://dlmf.nist.gov/14.8.E3): [`DLMF.Legendre.ferrersQ_log_singular`](DLMF/Legendre/Singularities.lean#L456) (proved).
+- [14.8.E4](https://dlmf.nist.gov/14.8.E4): [`DLMF.Legendre.legendre_singular_4`](DLMF/Legendre/Singularities.lean#L128) (proved).
 - [14.8.E5](https://dlmf.nist.gov/14.8.E5): [`DLMF.Legendre.legendre_singular_5`](DLMF/Legendre/Singularities.lean#L145) (proved).
-- [14.8.E6](https://dlmf.nist.gov/14.8.E6): [`DLMF.Legendre.legendre_singular_6`](DLMF/Legendre/Singularities.lean#L189) (proved).
-- [14.8.E7](https://dlmf.nist.gov/14.8.E7): [`DLMF.Legendre.legendre_singular_7`](DLMF/Legendre/Singularities.lean#L207) (proved).
-- [14.8.E8](https://dlmf.nist.gov/14.8.E8): [`DLMF.Legendre.legendre_singular_8`](DLMF/Legendre/Singularities.lean#L235) (proved).
-- [14.8.E9](https://dlmf.nist.gov/14.8.E9): [`DLMF.Legendre.olverQ_log_singular`](DLMF/Legendre/Singularities.lean#L463) (proved), derived from [`DLMF.Legendre.olverQ_log_singular_recipGamma`](DLMF/Legendre/Singularities.lean#L456) (proved), valid for all ν (stronger than DLMF).
-- [14.8.E10](https://dlmf.nist.gov/14.8.E10): [`DLMF.Legendre.olverQ_negative_degree_singular`](DLMF/Legendre/Singularities.lean#L472) (proved).
-- [14.8.E11](https://dlmf.nist.gov/14.8.E11): [`DLMF.Legendre.legendre_singular_11`](DLMF/Legendre/Singularities.lean#L259) (proved).
-- [14.8.E12](https://dlmf.nist.gov/14.8.E12): [`DLMF.Legendre.legendre_singular_12`](DLMF/Legendre/Singularities.lean#L276) (proved).
-- [14.8.E13](https://dlmf.nist.gov/14.8.E13): [`DLMF.Legendre.legendre_singular_13`](DLMF/Legendre/Singularities.lean#L299) (proved).
-- [14.8.E14](https://dlmf.nist.gov/14.8.E14): [`DLMF.Legendre.legendre_singular_14`](DLMF/Legendre/Singularities.lean#L312) (proved).
-- [14.8.E15](https://dlmf.nist.gov/14.8.E15): [`DLMF.Legendre.legendre_singular_15`](DLMF/Legendre/Singularities.lean#L353) (proved).
-- [14.8.E16](https://dlmf.nist.gov/14.8.E16): [`DLMF.Legendre.legendre_singular_16`](DLMF/Legendre/Singularities.lean#L388) (proved).
+- [14.8.E6](https://dlmf.nist.gov/14.8.E6): [`DLMF.Legendre.legendre_singular_6`](DLMF/Legendre/Singularities.lean#L190) (proved).
+- [14.8.E7](https://dlmf.nist.gov/14.8.E7): [`DLMF.Legendre.legendre_singular_7`](DLMF/Legendre/Singularities.lean#L209) (proved).
+- [14.8.E8](https://dlmf.nist.gov/14.8.E8): [`DLMF.Legendre.legendre_singular_8`](DLMF/Legendre/Singularities.lean#L238) (proved).
+- [14.8.E9](https://dlmf.nist.gov/14.8.E9): [`DLMF.Legendre.olverQ_log_singular`](DLMF/Legendre/Singularities.lean#L470) (proved), derived from [`DLMF.Legendre.olverQ_log_singular_recipGamma`](DLMF/Legendre/Singularities.lean#L463) (proved), valid for all ν (stronger than DLMF).
+- [14.8.E10](https://dlmf.nist.gov/14.8.E10): [`DLMF.Legendre.olverQ_negative_degree_singular`](DLMF/Legendre/Singularities.lean#L480) (proved).
+- [14.8.E11](https://dlmf.nist.gov/14.8.E11): [`DLMF.Legendre.legendre_singular_11`](DLMF/Legendre/Singularities.lean#L264) (proved).
+- [14.8.E12](https://dlmf.nist.gov/14.8.E12): [`DLMF.Legendre.legendre_singular_12`](DLMF/Legendre/Singularities.lean#L282) (proved).
+- [14.8.E13](https://dlmf.nist.gov/14.8.E13): [`DLMF.Legendre.legendre_singular_13`](DLMF/Legendre/Singularities.lean#L306) (proved).
+- [14.8.E14](https://dlmf.nist.gov/14.8.E14): [`DLMF.Legendre.legendre_singular_14`](DLMF/Legendre/Singularities.lean#L320) (proved).
+- [14.8.E15](https://dlmf.nist.gov/14.8.E15): [`DLMF.Legendre.legendre_singular_15`](DLMF/Legendre/Singularities.lean#L357) (proved).
+- [14.8.E16](https://dlmf.nist.gov/14.8.E16): [`DLMF.Legendre.legendre_singular_16`](DLMF/Legendre/Singularities.lean#L393) (proved).
 
 ### [§14.9 Connection Formulas](https://dlmf.nist.gov/14.9)
 
-- [14.9.E1](https://dlmf.nist.gov/14.9.E1): [`DLMF.Legendre.ferrers_connection_1`](DLMF/Legendre/Connections.lean#L24) (proved).
-- [14.9.E2](https://dlmf.nist.gov/14.9.E2): [`DLMF.Legendre.ferrers_connection_2`](DLMF/Legendre/Connections.lean#L57) (proved).
-- [14.9.E3](https://dlmf.nist.gov/14.9.E3): [`DLMF.Legendre.ferrersP_negative_order_parameter_limit`](DLMF/Legendre/ParameterLimits.lean#L177) (proved); [`DLMF.Legendre.ferrersP_negative_integer_order`](DLMF/Legendre/Connections.lean#L255) (proved).
-- [14.9.E4](https://dlmf.nist.gov/14.9.E4): [`DLMF.Legendre.ferrersQ_negative_integer_order`](DLMF/Legendre/Connections.lean#L276) (proved).
-- [14.9.E5](https://dlmf.nist.gov/14.9.E5): [`legendreP_neg_sub_one`](DLMF/Legendre/Basic.lean#L74) (proved); [`DLMF.Legendre.ferrers_connection_5`](DLMF/Legendre/Connections.lean#L89) (proved).
-- [14.9.E6](https://dlmf.nist.gov/14.9.E6): [`DLMF.Legendre.ferrers_connection_6`](DLMF/Legendre/Connections.lean#L98) (proved).
-- [14.9.E7](https://dlmf.nist.gov/14.9.E7): [`DLMF.Legendre.ferrers_connection_7`](DLMF/Legendre/Connections.lean#L136) (proved).
-- [14.9.E8](https://dlmf.nist.gov/14.9.E8): [`DLMF.Legendre.ferrers_connection_8`](DLMF/Legendre/Connections.lean#L169) (proved).
-- [14.9.E9](https://dlmf.nist.gov/14.9.E9): [`DLMF.Legendre.ferrers_connection_9`](DLMF/Legendre/Connections.lean#L194) (proved).
-- [14.9.E10](https://dlmf.nist.gov/14.9.E10): [`DLMF.Legendre.ferrers_connection_10`](DLMF/Legendre/Connections.lean#L230) (proved).
-- [14.9.E11](https://dlmf.nist.gov/14.9.E11): [`DLMF.Legendre.associated_connection_11`](DLMF/Legendre/Connections.lean#L302) (proved).
-- [14.9.E12](https://dlmf.nist.gov/14.9.E12): [`DLMF.Legendre.associated_connection_12`](DLMF/Legendre/Connections.lean#L329) (proved).
-- [14.9.E13](https://dlmf.nist.gov/14.9.E13): [`DLMF.Legendre.associatedP_negative_order_parameter_limit`](DLMF/Legendre/ParameterLimits.lean#L192) (proved); [`DLMF.Legendre.associatedP_negative_integer_order`](DLMF/Legendre/Connections.lean#L842) (proved).
-- [14.9.E14](https://dlmf.nist.gov/14.9.E14): [`DLMF.Legendre.associated_connection_14`](DLMF/Legendre/Connections.lean#L310) (proved).
-- [14.9.E15](https://dlmf.nist.gov/14.9.E15): [`DLMF.Legendre.associated_connection_15`](DLMF/Legendre/Connections.lean#L365) (proved).
-- [14.9.E16](https://dlmf.nist.gov/14.9.E16): [`DLMF.Legendre.associated_connection_16`](DLMF/Legendre/Connections.lean#L794) (proved).
-- [14.9.E17](https://dlmf.nist.gov/14.9.E17): [`DLMF.Legendre.associated_connection_17`](DLMF/Legendre/Connections.lean#L817) (proved).
+- [14.9.E1](https://dlmf.nist.gov/14.9.E1): [`DLMF.Legendre.ferrers_connection_1`](DLMF/Legendre/Connections.lean#L25) (proved).
+- [14.9.E2](https://dlmf.nist.gov/14.9.E2): [`DLMF.Legendre.ferrers_connection_2`](DLMF/Legendre/Connections.lean#L59) (proved).
+- [14.9.E3](https://dlmf.nist.gov/14.9.E3): [`DLMF.Legendre.ferrersP_negative_order_parameter_limit`](DLMF/Legendre/ParameterLimits.lean#L181) (proved); [`DLMF.Legendre.ferrersP_negative_integer_order`](DLMF/Legendre/Connections.lean#L264) (proved).
+- [14.9.E4](https://dlmf.nist.gov/14.9.E4): [`DLMF.Legendre.ferrersQ_negative_integer_order`](DLMF/Legendre/Connections.lean#L286) (proved).
+- [14.9.E5](https://dlmf.nist.gov/14.9.E5): [`legendreP_neg_sub_one`](DLMF/Legendre/Basic.lean#L73) (proved); [`DLMF.Legendre.ferrers_connection_5`](DLMF/Legendre/Connections.lean#L92) (proved).
+- [14.9.E6](https://dlmf.nist.gov/14.9.E6): [`DLMF.Legendre.ferrers_connection_6`](DLMF/Legendre/Connections.lean#L102) (proved).
+- [14.9.E7](https://dlmf.nist.gov/14.9.E7): [`DLMF.Legendre.ferrers_connection_7`](DLMF/Legendre/Connections.lean#L141) (proved).
+- [14.9.E8](https://dlmf.nist.gov/14.9.E8): [`DLMF.Legendre.ferrers_connection_8`](DLMF/Legendre/Connections.lean#L175) (proved).
+- [14.9.E9](https://dlmf.nist.gov/14.9.E9): [`DLMF.Legendre.ferrers_connection_9`](DLMF/Legendre/Connections.lean#L201) (proved).
+- [14.9.E10](https://dlmf.nist.gov/14.9.E10): [`DLMF.Legendre.ferrers_connection_10`](DLMF/Legendre/Connections.lean#L238) (proved).
+- [14.9.E11](https://dlmf.nist.gov/14.9.E11): [`DLMF.Legendre.associated_connection_11`](DLMF/Legendre/Connections.lean#L313) (proved).
+- [14.9.E12](https://dlmf.nist.gov/14.9.E12): [`DLMF.Legendre.associated_connection_12`](DLMF/Legendre/Connections.lean#L342) (proved).
+- [14.9.E13](https://dlmf.nist.gov/14.9.E13): [`DLMF.Legendre.associatedP_negative_order_parameter_limit`](DLMF/Legendre/ParameterLimits.lean#L197) (proved); [`DLMF.Legendre.associatedP_negative_integer_order`](DLMF/Legendre/Connections.lean#L857) (proved).
+- [14.9.E14](https://dlmf.nist.gov/14.9.E14): [`DLMF.Legendre.associated_connection_14`](DLMF/Legendre/Connections.lean#L322) (proved).
+- [14.9.E15](https://dlmf.nist.gov/14.9.E15): [`DLMF.Legendre.associated_connection_15`](DLMF/Legendre/Connections.lean#L379) (proved).
+- [14.9.E16](https://dlmf.nist.gov/14.9.E16): [`DLMF.Legendre.associated_connection_16`](DLMF/Legendre/Connections.lean#L809) (proved).
+- [14.9.E17](https://dlmf.nist.gov/14.9.E17): [`DLMF.Legendre.associated_connection_17`](DLMF/Legendre/Connections.lean#L832) (proved).
 
 ### [§14.10 Recurrence Relations and Derivatives](https://dlmf.nist.gov/14.10)
 
-- [14.10.E1](https://dlmf.nist.gov/14.10.E1): [`DLMF.Legendre.ferrersP_recurrence_1`](DLMF/Legendre/AssociatedRecurrences.lean#L169) (proved); [`DLMF.Legendre.ferrersQ_recurrence_1`](DLMF/Legendre/AssociatedRecurrences.lean#L395) (proved).
-- [14.10.E2](https://dlmf.nist.gov/14.10.E2): [`DLMF.Legendre.ferrersP_recurrence_2`](DLMF/Legendre/AssociatedRecurrences.lean#L188) (proved); [`DLMF.Legendre.ferrersQ_recurrence_2`](DLMF/Legendre/AssociatedRecurrences.lean#L424) (proved).
-- [14.10.E3](https://dlmf.nist.gov/14.10.E3): [`DLMF.Legendre.legendreP_recurrence`](DLMF/Legendre/Recurrences.lean#L28) (proved); [`DLMF.Legendre.ferrersP_recurrence_3`](DLMF/Legendre/AssociatedRecurrences.lean#L203) (proved); [`DLMF.Legendre.ferrersQ_recurrence_3`](DLMF/Legendre/AssociatedRecurrences.lean#L453) (proved); [`DLMF.Legendre.associatedP_recurrence_3`](DLMF/Legendre/AssociatedRecurrences.lean#L632) (proved); [`DLMF.Legendre.associatedQ_recurrence_3`](DLMF/Legendre/AssociatedRecurrences.lean#L728) (proved).
-- [14.10.E4](https://dlmf.nist.gov/14.10.E4): [`DLMF.Legendre.ferrersP_recurrence_4`](DLMF/Legendre/AssociatedRecurrences.lean#L240) (proved); [`DLMF.Legendre.ferrersQ_recurrence_4`](DLMF/Legendre/AssociatedRecurrences.lean#L483) (proved); [`DLMF.Legendre.associatedP_recurrence_4`](DLMF/Legendre/AssociatedRecurrences.lean#L668) (proved); [`DLMF.Legendre.associatedQ_recurrence_4`](DLMF/Legendre/AssociatedRecurrences.lean#L869) (proved).
-- [14.10.E5](https://dlmf.nist.gov/14.10.E5): [`DLMF.Legendre.ferrersP_recurrence_5`](DLMF/Legendre/AssociatedRecurrences.lean#L218) (proved); [`DLMF.Legendre.ferrersQ_recurrence_5`](DLMF/Legendre/AssociatedRecurrences.lean#L512) (proved); [`DLMF.Legendre.associatedP_recurrence_5`](DLMF/Legendre/AssociatedRecurrences.lean#L646) (proved); [`DLMF.Legendre.associatedQ_recurrence_5`](DLMF/Legendre/AssociatedRecurrences.lean#L901) (proved).
-- [14.10.E6](https://dlmf.nist.gov/14.10.E6): [`DLMF.Legendre.associatedP_recurrence_6`](DLMF/Legendre/AssociatedRecurrences.lean#L602) (proved); [`DLMF.Legendre.associatedQ_recurrence_6`](DLMF/Legendre/AssociatedRecurrences.lean#L770) (proved).
-- [14.10.E7](https://dlmf.nist.gov/14.10.E7): [`DLMF.Legendre.associatedP_recurrence_7`](DLMF/Legendre/AssociatedRecurrences.lean#L618) (proved); [`DLMF.Legendre.associatedQ_recurrence_7`](DLMF/Legendre/AssociatedRecurrences.lean#L831) (proved).
+- [14.10.E1](https://dlmf.nist.gov/14.10.E1): [`DLMF.Legendre.ferrersP_recurrence_1`](DLMF/Legendre/AssociatedRecurrences.lean#L169) (proved); [`DLMF.Legendre.ferrersQ_recurrence_1`](DLMF/Legendre/AssociatedRecurrences.lean#L399) (proved).
+- [14.10.E2](https://dlmf.nist.gov/14.10.E2): [`DLMF.Legendre.ferrersP_recurrence_2`](DLMF/Legendre/AssociatedRecurrences.lean#L189) (proved); [`DLMF.Legendre.ferrersQ_recurrence_2`](DLMF/Legendre/AssociatedRecurrences.lean#L429) (proved).
+- [14.10.E3](https://dlmf.nist.gov/14.10.E3): [`DLMF.Legendre.legendreP_recurrence`](DLMF/Legendre/Recurrences.lean#L28) (proved); [`DLMF.Legendre.ferrersP_recurrence_3`](DLMF/Legendre/AssociatedRecurrences.lean#L205) (proved); [`DLMF.Legendre.ferrersQ_recurrence_3`](DLMF/Legendre/AssociatedRecurrences.lean#L459) (proved); [`DLMF.Legendre.associatedP_recurrence_3`](DLMF/Legendre/AssociatedRecurrences.lean#L645) (proved); [`DLMF.Legendre.associatedQ_recurrence_3`](DLMF/Legendre/AssociatedRecurrences.lean#L748) (proved).
+- [14.10.E4](https://dlmf.nist.gov/14.10.E4): [`DLMF.Legendre.ferrersP_recurrence_4`](DLMF/Legendre/AssociatedRecurrences.lean#L243) (proved); [`DLMF.Legendre.ferrersQ_recurrence_4`](DLMF/Legendre/AssociatedRecurrences.lean#L490) (proved); [`DLMF.Legendre.associatedP_recurrence_4`](DLMF/Legendre/AssociatedRecurrences.lean#L683) (proved); [`DLMF.Legendre.associatedQ_recurrence_4`](DLMF/Legendre/AssociatedRecurrences.lean#L905) (proved).
+- [14.10.E5](https://dlmf.nist.gov/14.10.E5): [`DLMF.Legendre.ferrersP_recurrence_5`](DLMF/Legendre/AssociatedRecurrences.lean#L221) (proved); [`DLMF.Legendre.ferrersQ_recurrence_5`](DLMF/Legendre/AssociatedRecurrences.lean#L520) (proved); [`DLMF.Legendre.associatedP_recurrence_5`](DLMF/Legendre/AssociatedRecurrences.lean#L660) (proved); [`DLMF.Legendre.associatedQ_recurrence_5`](DLMF/Legendre/AssociatedRecurrences.lean#L943) (proved).
+- [14.10.E6](https://dlmf.nist.gov/14.10.E6): [`DLMF.Legendre.associatedP_recurrence_6`](DLMF/Legendre/AssociatedRecurrences.lean#L612) (proved); [`DLMF.Legendre.associatedQ_recurrence_6`](DLMF/Legendre/AssociatedRecurrences.lean#L796) (proved).
+- [14.10.E7](https://dlmf.nist.gov/14.10.E7): [`DLMF.Legendre.associatedP_recurrence_7`](DLMF/Legendre/AssociatedRecurrences.lean#L630) (proved); [`DLMF.Legendre.associatedQ_recurrence_7`](DLMF/Legendre/AssociatedRecurrences.lean#L861) (proved).
 
 ### [§14.11 Derivatives with Respect to Degree or Order](https://dlmf.nist.gov/14.11)
 
-- [14.11.E1](https://dlmf.nist.gov/14.11.E1): [`DLMF.Legendre.ferrersP_degree_deriv`](DLMF/Legendre/Hypergeometric.lean#L589) (proved); [`DLMF.Legendre.associatedP_degree_deriv`](DLMF/Legendre/RelatedFunctions.lean#L169) (proved).
-- [14.11.E2](https://dlmf.nist.gov/14.11.E2): [`DLMF.Legendre.ferrersQ_degree_deriv`](DLMF/Legendre/Hypergeometric.lean#L617) (proved).
-- [14.11.E3](https://dlmf.nist.gov/14.11.E3): [`DLMF.Legendre.legendreDegreeA`](DLMF/Legendre/Hypergeometric.lean#L574) (defined); [`DLMF.Legendre.legendreDegreeA_hasSum`](DLMF/Legendre/Hypergeometric.lean#L579) (proved).
-- [14.11.E4](https://dlmf.nist.gov/14.11.E4): [`DLMF.Legendre.ferrersP_order_deriv_zero`](DLMF/Legendre/Hypergeometric.lean#L661) (proved); [`DLMF.Legendre.associatedP_order_deriv_zero`](DLMF/Legendre/Hypergeometric.lean#L724) (proved).
-- [14.11.E5](https://dlmf.nist.gov/14.11.E5): [`DLMF.Legendre.ferrersQ_order_deriv_zero`](DLMF/Legendre/Hypergeometric.lean#L690) (proved).
+- [14.11.E1](https://dlmf.nist.gov/14.11.E1): [`DLMF.Legendre.ferrersP_degree_deriv`](DLMF/Legendre/Hypergeometric.lean#L587) (proved); [`DLMF.Legendre.associatedP_degree_deriv`](DLMF/Legendre/RelatedFunctions.lean#L171) (proved).
+- [14.11.E2](https://dlmf.nist.gov/14.11.E2): [`DLMF.Legendre.ferrersQ_degree_deriv`](DLMF/Legendre/Hypergeometric.lean#L616) (proved).
+- [14.11.E3](https://dlmf.nist.gov/14.11.E3): [`DLMF.Legendre.legendreDegreeA`](DLMF/Legendre/Hypergeometric.lean#L569) (defined); [`DLMF.Legendre.legendreDegreeA_hasSum`](DLMF/Legendre/Hypergeometric.lean#L576) (proved).
+- [14.11.E4](https://dlmf.nist.gov/14.11.E4): [`DLMF.Legendre.ferrersP_order_deriv_zero`](DLMF/Legendre/Hypergeometric.lean#L663) (proved); [`DLMF.Legendre.associatedP_order_deriv_zero`](DLMF/Legendre/Hypergeometric.lean#L728) (proved).
+- [14.11.E5](https://dlmf.nist.gov/14.11.E5): [`DLMF.Legendre.ferrersQ_order_deriv_zero`](DLMF/Legendre/Hypergeometric.lean#L693) (proved).
 
 ### [§14.12 Integral Representations](https://dlmf.nist.gov/14.12)
 
-- [14.12.E1](https://dlmf.nist.gov/14.12.E1): [`DLMF.Legendre.ferrersP_mehler_dirichlet`](DLMF/Legendre/IntegralRepresentations.lean#L1072) (proved).
-- [14.12.E2](https://dlmf.nist.gov/14.12.E2): [`DLMF.Legendre.ferrersP_fractional_integral`](DLMF/Legendre/IntegralRepresentations.lean#L1111) (proved).
-- [14.12.E3](https://dlmf.nist.gov/14.12.E3): [`DLMF.Legendre.ferrersQ_complex_integral`](DLMF/Legendre/FourierTools.lean#L709) (proved).
-- [14.12.E4](https://dlmf.nist.gov/14.12.E4): [`DLMF.Legendre.associatedP_cosh_integral`](DLMF/Legendre/IntegralRepresentations.lean#L1219) (proved).
-- [14.12.E5](https://dlmf.nist.gov/14.12.E5): [`DLMF.Legendre.associatedP_fractional_integral`](DLMF/Legendre/IntegralRepresentations.lean#L1171) (proved).
-- [14.12.E6](https://dlmf.nist.gov/14.12.E6): [`DLMF.Legendre.olverQ_real_integral`](DLMF/Legendre/IntegralRepresentations.lean#L1225) (proved).
-- [14.12.E7](https://dlmf.nist.gov/14.12.E7): [`DLMF.Legendre.associatedP_fourier_integral`](DLMF/Legendre/IntegralRepresentations.lean#L1239) (proved).
-- [14.12.E8](https://dlmf.nist.gov/14.12.E8): [`DLMF.Legendre.associatedP_nat_integral`](DLMF/Legendre/IntegralRepresentations.lean#L1294) (proved).
-- [14.12.E9](https://dlmf.nist.gov/14.12.E9): [`DLMF.Legendre.olverQ_nat_finite_integral`](DLMF/Legendre/IntegralRepresentations.lean#L1320) (proved).
-- [14.12.E10](https://dlmf.nist.gov/14.12.E10): [`DLMF.Legendre.legendreUCoordinate`](DLMF/Legendre/IntegralRepresentations.lean#L1315) (defined).
-- [14.12.E11](https://dlmf.nist.gov/14.12.E11): [`DLMF.Legendre.olverQ_nat_interval_integral`](DLMF/Legendre/IntegralRepresentations.lean#L1376) (proved).
-- [14.12.E12](https://dlmf.nist.gov/14.12.E12): [`DLMF.Legendre.olverQ_nat_reduction_integral`](DLMF/Legendre/IntegralRepresentations.lean#L1541) (proved).
-- [14.12.E13](https://dlmf.nist.gov/14.12.E13): [`DLMF.Legendre.olverQ_nat_neumann`](DLMF/Legendre/IntegralRepresentations.lean#L1609) (proved).
-- [14.12.E14](https://dlmf.nist.gov/14.12.E14): [`DLMF.Legendre.olverQ_nat_heine`](DLMF/Legendre/IntegralRepresentations.lean#L1629) (proved).
+- [14.12.E1](https://dlmf.nist.gov/14.12.E1): [`DLMF.Legendre.ferrersP_mehler_dirichlet`](DLMF/Legendre/IntegralRepresentations.lean#L1061) (proved).
+- [14.12.E2](https://dlmf.nist.gov/14.12.E2): [`DLMF.Legendre.ferrersP_fractional_integral`](DLMF/Legendre/IntegralRepresentations.lean#L1100) (proved).
+- [14.12.E3](https://dlmf.nist.gov/14.12.E3): [`DLMF.Legendre.ferrersQ_complex_integral`](DLMF/Legendre/FourierTools.lean#L697) (proved).
+- [14.12.E4](https://dlmf.nist.gov/14.12.E4): [`DLMF.Legendre.associatedP_cosh_integral`](DLMF/Legendre/IntegralRepresentations.lean#L1210) (proved).
+- [14.12.E5](https://dlmf.nist.gov/14.12.E5): [`DLMF.Legendre.associatedP_fractional_integral`](DLMF/Legendre/IntegralRepresentations.lean#L1161) (proved).
+- [14.12.E6](https://dlmf.nist.gov/14.12.E6): [`DLMF.Legendre.olverQ_real_integral`](DLMF/Legendre/IntegralRepresentations.lean#L1216) (proved).
+- [14.12.E7](https://dlmf.nist.gov/14.12.E7): [`DLMF.Legendre.associatedP_fourier_integral`](DLMF/Legendre/IntegralRepresentations.lean#L1232) (proved).
+- [14.12.E8](https://dlmf.nist.gov/14.12.E8): [`DLMF.Legendre.associatedP_nat_integral`](DLMF/Legendre/IntegralRepresentations.lean#L1288) (proved).
+- [14.12.E9](https://dlmf.nist.gov/14.12.E9): [`DLMF.Legendre.olverQ_nat_finite_integral`](DLMF/Legendre/IntegralRepresentations.lean#L1316) (proved).
+- [14.12.E10](https://dlmf.nist.gov/14.12.E10): [`DLMF.Legendre.legendreUCoordinate`](DLMF/Legendre/IntegralRepresentations.lean#L1310) (defined).
+- [14.12.E11](https://dlmf.nist.gov/14.12.E11): [`DLMF.Legendre.olverQ_nat_interval_integral`](DLMF/Legendre/IntegralRepresentations.lean#L1373) (proved).
+- [14.12.E12](https://dlmf.nist.gov/14.12.E12): [`DLMF.Legendre.olverQ_nat_reduction_integral`](DLMF/Legendre/IntegralRepresentations.lean#L1534) (proved).
+- [14.12.E13](https://dlmf.nist.gov/14.12.E13): [`DLMF.Legendre.olverQ_nat_neumann`](DLMF/Legendre/IntegralRepresentations.lean#L1603) (proved).
+- [14.12.E14](https://dlmf.nist.gov/14.12.E14): [`DLMF.Legendre.olverQ_nat_heine`](DLMF/Legendre/IntegralRepresentations.lean#L1624) (proved).
 
 ### [§14.13 Trigonometric Expansions](https://dlmf.nist.gov/14.13)
 
-- [14.13.E1](https://dlmf.nist.gov/14.13.E1): [`DLMF.Legendre.ferrersP_fourier_series`](DLMF/Legendre/Series.lean#L498) (proved).
-- [14.13.E2](https://dlmf.nist.gov/14.13.E2): [`DLMF.Legendre.ferrersQ_fourier_series`](DLMF/Legendre/Series.lean#L563) (proved).
-- [14.13.E3](https://dlmf.nist.gov/14.13.E3): [`DLMF.Legendre.ferrersP_nat_fourier`](DLMF/Legendre/Series.lean#L549) (proved).
-- [14.13.E4](https://dlmf.nist.gov/14.13.E4): [`DLMF.Legendre.ferrersQ_nat_fourier`](DLMF/Legendre/Series.lean#L641) (proved).
+- [14.13.E1](https://dlmf.nist.gov/14.13.E1): [`DLMF.Legendre.ferrersP_fourier_series`](DLMF/Legendre/Series.lean#L493) (proved).
+- [14.13.E2](https://dlmf.nist.gov/14.13.E2): [`DLMF.Legendre.ferrersQ_fourier_series`](DLMF/Legendre/Series.lean#L562) (proved).
+- [14.13.E3](https://dlmf.nist.gov/14.13.E3): [`DLMF.Legendre.ferrersP_nat_fourier`](DLMF/Legendre/Series.lean#L546) (proved).
+- [14.13.E4](https://dlmf.nist.gov/14.13.E4): [`DLMF.Legendre.ferrersQ_nat_fourier`](DLMF/Legendre/Series.lean#L646) (proved).
 
 ### [§14.14 Continued Fractions](https://dlmf.nist.gov/14.14)
 
-- [14.14.E1](https://dlmf.nist.gov/14.14.E1): [`DLMF.Legendre.associatedP_continued_fraction`](DLMF/Legendre/Series.lean#L1262) (proved). Corrected: the limit is ½(x²−1)^{1/2}(ν+μ)(ν−μ+1)P^{−μ}_ν/P^{1−μ}_ν, the minimal-solution ratio (DLMF erratum; REVIEW.md, round 7).
-- [14.14.E2](https://dlmf.nist.gov/14.14.E2): [`DLMF.Legendre.legendrePCFNum`](DLMF/Legendre/Series.lean#L926) (defined); [`DLMF.Legendre.legendrePCFDen`](DLMF/Legendre/Series.lean#L931) (defined).
-- [14.14.E3](https://dlmf.nist.gov/14.14.E3): [`DLMF.Legendre.associatedQ_continued_fraction`](DLMF/Legendre/Series.lean#L1301) (proved).
-- [14.14.E4](https://dlmf.nist.gov/14.14.E4): [`DLMF.Legendre.legendreQCFNum`](DLMF/Legendre/Series.lean#L936) (defined); [`DLMF.Legendre.legendreQCFDen`](DLMF/Legendre/Series.lean#L941) (defined).
+- [14.14.E1](https://dlmf.nist.gov/14.14.E1): [`DLMF.Legendre.associatedP_continued_fraction`](DLMF/Legendre/Series.lean#L1275) (proved). Corrected: the limit is ½(x²−1)^{1/2}(ν+μ)(ν−μ+1)P^{−μ}_ν/P^{1−μ}_ν, the minimal-solution ratio (DLMF erratum; REVIEW.md, round 7).
+- [14.14.E2](https://dlmf.nist.gov/14.14.E2): [`DLMF.Legendre.legendrePCFNum`](DLMF/Legendre/Series.lean#L940) (defined); [`DLMF.Legendre.legendrePCFDen`](DLMF/Legendre/Series.lean#L946) (defined).
+- [14.14.E3](https://dlmf.nist.gov/14.14.E3): [`DLMF.Legendre.associatedQ_continued_fraction`](DLMF/Legendre/Series.lean#L1314) (proved).
+- [14.14.E4](https://dlmf.nist.gov/14.14.E4): [`DLMF.Legendre.legendreQCFNum`](DLMF/Legendre/Series.lean#L952) (defined); [`DLMF.Legendre.legendreQCFDen`](DLMF/Legendre/Series.lean#L958) (defined).
 
 ### [§14.15 Uniform Asymptotic Approximations](https://dlmf.nist.gov/14.15)
 
-- [14.15.E1](https://dlmf.nist.gov/14.15.E1): [`DLMF.Legendre.ferrersP_large_order_uniform`](DLMF/Legendre/Uniform.lean#L26) (admitted).
-- [14.15.E2](https://dlmf.nist.gov/14.15.E2): [`DLMF.Legendre.associatedP_large_order_uniform`](DLMF/Legendre/Uniform.lean#L32) (admitted).
-- [14.15.E3](https://dlmf.nist.gov/14.15.E3): [`DLMF.Legendre.olverQ_large_order_uniform`](DLMF/Legendre/Uniform.lean#L38) (admitted).
-- [14.15.E4](https://dlmf.nist.gov/14.15.E4): [`DLMF.Legendre.ferrersP_two_large_parameters`](DLMF/Legendre/Uniform.lean#L48) (admitted).
-- [14.15.E5](https://dlmf.nist.gov/14.15.E5): [`DLMF.Legendre.legendreOrderAlpha`](DLMF/Legendre/UniformCoordinates.lean#L31) (defined).
-- [14.15.E6](https://dlmf.nist.gov/14.15.E6): [`DLMF.Legendre.legendreOrderP`](DLMF/Legendre/UniformCoordinates.lean#L36) (defined).
-- [14.15.E7](https://dlmf.nist.gov/14.15.E7): [`DLMF.Legendre.legendreOrderRho`](DLMF/Legendre/UniformCoordinates.lean#L41) (defined).
-- [14.15.E8](https://dlmf.nist.gov/14.15.E8): [`DLMF.Legendre.associatedP_two_large_order_uniform`](DLMF/Legendre/Uniform.lean#L54) (admitted).
-- [14.15.E9](https://dlmf.nist.gov/14.15.E9): [`DLMF.Legendre.olverQ_two_large_order_uniform`](DLMF/Legendre/Uniform.lean#L60) (admitted).
-- [14.15.E10](https://dlmf.nist.gov/14.15.E10): [`DLMF.Legendre.LegendreEtaRelation`](DLMF/Legendre/UniformCoordinates.lean#L46) (defined); [`DLMF.Legendre.legendreOrderEta`](DLMF/Legendre/UniformCoordinates.lean#L51) (defined); [`DLMF.Legendre.legendreOrderEta_spec`](DLMF/Legendre/UniformCoordinates.lean#L124) (proved).
-- [14.15.E11](https://dlmf.nist.gov/14.15.E11): [`DLMF.Legendre.ferrersP_large_degree_uniform`](DLMF/Legendre/Uniform.lean#L66) (admitted).
-- [14.15.E12](https://dlmf.nist.gov/14.15.E12): [`DLMF.Legendre.ferrersQ_large_degree_uniform`](DLMF/Legendre/Uniform.lean#L72) (admitted).
-- [14.15.E13](https://dlmf.nist.gov/14.15.E13): [`DLMF.Legendre.associatedP_large_degree_uniform`](DLMF/Legendre/Uniform.lean#L78) (admitted).
-- [14.15.E14](https://dlmf.nist.gov/14.15.E14): [`DLMF.Legendre.olverQ_large_degree_uniform`](DLMF/Legendre/Uniform.lean#L84) (admitted).
-- [14.15.E15](https://dlmf.nist.gov/14.15.E15): [`DLMF.Legendre.ferrersP_two_large_degree_uniform`](DLMF/Legendre/Uniform.lean#L90) (admitted).
-- [14.15.E16](https://dlmf.nist.gov/14.15.E16): [`DLMF.Legendre.ferrersQ_two_large_degree_uniform`](DLMF/Legendre/Uniform.lean#L96) (admitted).
-- [14.15.E17](https://dlmf.nist.gov/14.15.E17): [`DLMF.Legendre.associatedP_two_large_degree_modified`](DLMF/Legendre/Uniform.lean#L102) (admitted).
-- [14.15.E18](https://dlmf.nist.gov/14.15.E18): [`DLMF.Legendre.olverQ_two_large_degree_modified`](DLMF/Legendre/Uniform.lean#L108) (admitted).
-- [14.15.E19](https://dlmf.nist.gov/14.15.E19): [`DLMF.Legendre.legendreDegreeAlpha`](DLMF/Legendre/UniformCoordinates.lean#L391) (defined).
-- [14.15.E20](https://dlmf.nist.gov/14.15.E20): [`DLMF.Legendre.legendreDegreeBeta`](DLMF/Legendre/UniformCoordinates.lean#L396) (defined).
-- [14.15.E21](https://dlmf.nist.gov/14.15.E21): [`DLMF.Legendre.LegendreYRelation`](DLMF/Legendre/UniformCoordinates.lean#L401) (defined); [`DLMF.Legendre.legendreDegreeY_spec`](DLMF/Legendre/UniformCoordinates.lean#L1023) (proved).
-- [14.15.E22](https://dlmf.nist.gov/14.15.E22): [`DLMF.Legendre.LegendreYRelation`](DLMF/Legendre/UniformCoordinates.lean#L401) (defined); [`DLMF.Legendre.legendreDegreeY_spec`](DLMF/Legendre/UniformCoordinates.lean#L1023) (proved).
-- [14.15.E23](https://dlmf.nist.gov/14.15.E23): [`DLMF.Legendre.cylinderEnvelopeCross`](DLMF/Legendre/UniformCoordinates.lean#L1189) (defined); [`DLMF.Legendre.legendreCylinderEnvelope`](DLMF/Legendre/UniformCoordinates.lean#L1194) (defined); [`DLMF.Legendre.cylinderEnvelopeCross_spec`](DLMF/Legendre/UniformCoordinates.lean#L1977) (admitted).
-- [14.15.E24](https://dlmf.nist.gov/14.15.E24): [`DLMF.Legendre.ferrersP_cylinder_uniform`](DLMF/Legendre/Uniform.lean#L114) (admitted).
-- [14.15.E25](https://dlmf.nist.gov/14.15.E25): [`DLMF.Legendre.ferrersQ_cylinder_uniform`](DLMF/Legendre/Uniform.lean#L120) (admitted).
-- [14.15.E26](https://dlmf.nist.gov/14.15.E26): [`DLMF.Legendre.legendreCylinderA`](DLMF/Legendre/UniformCoordinates.lean#L1199) (defined); [`DLMF.Legendre.legendreCylinderAlpha`](DLMF/Legendre/UniformCoordinates.lean#L1204) (defined).
-- [14.15.E27](https://dlmf.nist.gov/14.15.E27): [`DLMF.Legendre.LegendreCylinderRelation`](DLMF/Legendre/UniformCoordinates.lean#L1209) (defined); [`DLMF.Legendre.legendreCylinderZeta_spec`](DLMF/Legendre/UniformCoordinates.lean#L1655) (proved).
-- [14.15.E28](https://dlmf.nist.gov/14.15.E28): [`DLMF.Legendre.LegendreCylinderRelation`](DLMF/Legendre/UniformCoordinates.lean#L1209) (defined); [`DLMF.Legendre.legendreCylinderZeta_spec`](DLMF/Legendre/UniformCoordinates.lean#L1655) (proved).
-- [14.15.E29](https://dlmf.nist.gov/14.15.E29): [`DLMF.Legendre.LegendreCylinderRelation`](DLMF/Legendre/UniformCoordinates.lean#L1209) (defined); [`DLMF.Legendre.legendreCylinderZeta_spec`](DLMF/Legendre/UniformCoordinates.lean#L1655) (proved).
-- [14.15.E30](https://dlmf.nist.gov/14.15.E30): [`DLMF.Legendre.ferrersP_cylinder_exponential_uniform`](DLMF/Legendre/Uniform.lean#L126) (admitted).
-- [14.15.E31](https://dlmf.nist.gov/14.15.E31): [`DLMF.Legendre.LegendreCylinderRelation`](DLMF/Legendre/UniformCoordinates.lean#L1209) (defined); [`DLMF.Legendre.legendreCylinderZeta_spec`](DLMF/Legendre/UniformCoordinates.lean#L1655) (proved).
+- [14.15.E1](https://dlmf.nist.gov/14.15.E1): [`DLMF.Legendre.ferrersP_large_order_uniform`](DLMF/Legendre/Uniform.lean#L27) (admitted).
+- [14.15.E2](https://dlmf.nist.gov/14.15.E2): [`DLMF.Legendre.associatedP_large_order_uniform`](DLMF/Legendre/Uniform.lean#L34) (admitted).
+- [14.15.E3](https://dlmf.nist.gov/14.15.E3): [`DLMF.Legendre.olverQ_large_order_uniform`](DLMF/Legendre/Uniform.lean#L41) (admitted).
+- [14.15.E4](https://dlmf.nist.gov/14.15.E4): [`DLMF.Legendre.ferrersP_two_large_parameters`](DLMF/Legendre/Uniform.lean#L53) (admitted).
+- [14.15.E5](https://dlmf.nist.gov/14.15.E5): [`DLMF.Legendre.legendreOrderAlpha`](DLMF/Legendre/UniformCoordinates.lean#L32) (defined).
+- [14.15.E6](https://dlmf.nist.gov/14.15.E6): [`DLMF.Legendre.legendreOrderP`](DLMF/Legendre/UniformCoordinates.lean#L38) (defined).
+- [14.15.E7](https://dlmf.nist.gov/14.15.E7): [`DLMF.Legendre.legendreOrderRho`](DLMF/Legendre/UniformCoordinates.lean#L44) (defined).
+- [14.15.E8](https://dlmf.nist.gov/14.15.E8): [`DLMF.Legendre.associatedP_two_large_order_uniform`](DLMF/Legendre/Uniform.lean#L60) (admitted).
+- [14.15.E9](https://dlmf.nist.gov/14.15.E9): [`DLMF.Legendre.olverQ_two_large_order_uniform`](DLMF/Legendre/Uniform.lean#L69) (admitted).
+- [14.15.E10](https://dlmf.nist.gov/14.15.E10): [`DLMF.Legendre.LegendreEtaRelation`](DLMF/Legendre/UniformCoordinates.lean#L50) (defined); [`DLMF.Legendre.legendreOrderEta`](DLMF/Legendre/UniformCoordinates.lean#L57) (defined); [`DLMF.Legendre.legendreOrderEta_spec`](DLMF/Legendre/UniformCoordinates.lean#L131) (proved).
+- [14.15.E11](https://dlmf.nist.gov/14.15.E11): [`DLMF.Legendre.ferrersP_large_degree_uniform`](DLMF/Legendre/Uniform.lean#L77) (admitted).
+- [14.15.E12](https://dlmf.nist.gov/14.15.E12): [`DLMF.Legendre.ferrersQ_large_degree_uniform`](DLMF/Legendre/Uniform.lean#L84) (admitted).
+- [14.15.E13](https://dlmf.nist.gov/14.15.E13): [`DLMF.Legendre.associatedP_large_degree_uniform`](DLMF/Legendre/Uniform.lean#L91) (admitted).
+- [14.15.E14](https://dlmf.nist.gov/14.15.E14): [`DLMF.Legendre.olverQ_large_degree_uniform`](DLMF/Legendre/Uniform.lean#L98) (admitted).
+- [14.15.E15](https://dlmf.nist.gov/14.15.E15): [`DLMF.Legendre.ferrersP_two_large_degree_uniform`](DLMF/Legendre/Uniform.lean#L105) (admitted).
+- [14.15.E16](https://dlmf.nist.gov/14.15.E16): [`DLMF.Legendre.ferrersQ_two_large_degree_uniform`](DLMF/Legendre/Uniform.lean#L113) (admitted).
+- [14.15.E17](https://dlmf.nist.gov/14.15.E17): [`DLMF.Legendre.associatedP_two_large_degree_modified`](DLMF/Legendre/Uniform.lean#L121) (admitted).
+- [14.15.E18](https://dlmf.nist.gov/14.15.E18): [`DLMF.Legendre.olverQ_two_large_degree_modified`](DLMF/Legendre/Uniform.lean#L129) (admitted).
+- [14.15.E19](https://dlmf.nist.gov/14.15.E19): [`DLMF.Legendre.legendreDegreeAlpha`](DLMF/Legendre/UniformCoordinates.lean#L399) (defined).
+- [14.15.E20](https://dlmf.nist.gov/14.15.E20): [`DLMF.Legendre.legendreDegreeBeta`](DLMF/Legendre/UniformCoordinates.lean#L405) (defined).
+- [14.15.E21](https://dlmf.nist.gov/14.15.E21): [`DLMF.Legendre.LegendreYRelation`](DLMF/Legendre/UniformCoordinates.lean#L411) (defined); [`DLMF.Legendre.legendreDegreeY_spec`](DLMF/Legendre/UniformCoordinates.lean#L1034) (proved).
+- [14.15.E22](https://dlmf.nist.gov/14.15.E22): [`DLMF.Legendre.LegendreYRelation`](DLMF/Legendre/UniformCoordinates.lean#L411) (defined); [`DLMF.Legendre.legendreDegreeY_spec`](DLMF/Legendre/UniformCoordinates.lean#L1034) (proved).
+- [14.15.E23](https://dlmf.nist.gov/14.15.E23): [`DLMF.Legendre.cylinderEnvelopeCross`](DLMF/Legendre/UniformCoordinates.lean#L1229) (defined); [`DLMF.Legendre.legendreCylinderEnvelope`](DLMF/Legendre/UniformCoordinates.lean#L1235) (defined); [`DLMF.Legendre.cylinderEnvelopeCross_spec`](DLMF/Legendre/UniformCoordinates.lean#L2025) (admitted).
+- [14.15.E24](https://dlmf.nist.gov/14.15.E24): [`DLMF.Legendre.ferrersP_cylinder_uniform`](DLMF/Legendre/Uniform.lean#L137) (admitted).
+- [14.15.E25](https://dlmf.nist.gov/14.15.E25): [`DLMF.Legendre.ferrersQ_cylinder_uniform`](DLMF/Legendre/Uniform.lean#L147) (admitted).
+- [14.15.E26](https://dlmf.nist.gov/14.15.E26): [`DLMF.Legendre.legendreCylinderA`](DLMF/Legendre/UniformCoordinates.lean#L1242) (defined); [`DLMF.Legendre.legendreCylinderAlpha`](DLMF/Legendre/UniformCoordinates.lean#L1248) (defined).
+- [14.15.E27](https://dlmf.nist.gov/14.15.E27): [`DLMF.Legendre.LegendreCylinderRelation`](DLMF/Legendre/UniformCoordinates.lean#L1254) (defined); [`DLMF.Legendre.legendreCylinderZeta_spec`](DLMF/Legendre/UniformCoordinates.lean#L1699) (proved).
+- [14.15.E28](https://dlmf.nist.gov/14.15.E28): [`DLMF.Legendre.LegendreCylinderRelation`](DLMF/Legendre/UniformCoordinates.lean#L1254) (defined); [`DLMF.Legendre.legendreCylinderZeta_spec`](DLMF/Legendre/UniformCoordinates.lean#L1699) (proved).
+- [14.15.E29](https://dlmf.nist.gov/14.15.E29): [`DLMF.Legendre.LegendreCylinderRelation`](DLMF/Legendre/UniformCoordinates.lean#L1254) (defined); [`DLMF.Legendre.legendreCylinderZeta_spec`](DLMF/Legendre/UniformCoordinates.lean#L1699) (proved).
+- [14.15.E30](https://dlmf.nist.gov/14.15.E30): [`DLMF.Legendre.ferrersP_cylinder_exponential_uniform`](DLMF/Legendre/Uniform.lean#L156) (admitted).
+- [14.15.E31](https://dlmf.nist.gov/14.15.E31): [`DLMF.Legendre.LegendreCylinderRelation`](DLMF/Legendre/UniformCoordinates.lean#L1254) (defined); [`DLMF.Legendre.legendreCylinderZeta_spec`](DLMF/Legendre/UniformCoordinates.lean#L1699) (proved).
 
 ### [§14.16 Zeros](https://dlmf.nist.gov/14.16)
 
-- [14.16.E1](https://dlmf.nist.gov/14.16.E1): [`DLMF.Legendre.legendreIntegerPart`](DLMF/Legendre/Zeros.lean#L33) (defined); [`DLMF.Legendre.legendreFractionalPart`](DLMF/Legendre/Zeros.lean#L38) (defined).
+- [14.16.E1](https://dlmf.nist.gov/14.16.E1): [`DLMF.Legendre.legendreIntegerPart`](DLMF/Legendre/Zeros.lean#L29) (defined); [`DLMF.Legendre.legendreFractionalPart`](DLMF/Legendre/Zeros.lean#L35) (defined).
 
 ### [§14.17 Integrals](https://dlmf.nist.gov/14.17)
 
 - [14.17.E1](https://dlmf.nist.gov/14.17.E1): [`DLMF.Legendre.ferrers_primitive_1`](DLMF/Legendre/Primitives.lean#L77) (proved).
-- [14.17.E2](https://dlmf.nist.gov/14.17.E2): [`DLMF.Legendre.ferrers_primitive_2`](DLMF/Legendre/Primitives.lean#L97) (proved).
-- [14.17.E3](https://dlmf.nist.gov/14.17.E3): [`DLMF.Legendre.ferrersProductPrimitive`](DLMF/Legendre/Primitives.lean#L127) (defined); [`DLMF.Legendre.ferrers_product_primitive_3`](DLMF/Legendre/Primitives.lean#L152) (proved).
-- [14.17.E4](https://dlmf.nist.gov/14.17.E4): [`DLMF.Legendre.ferrersProductPrimitive`](DLMF/Legendre/Primitives.lean#L127) (defined); [`DLMF.Legendre.ferrers_product_primitive_4`](DLMF/Legendre/Primitives.lean#L190) (proved).
+- [14.17.E2](https://dlmf.nist.gov/14.17.E2): [`DLMF.Legendre.ferrers_primitive_2`](DLMF/Legendre/Primitives.lean#L99) (proved).
+- [14.17.E3](https://dlmf.nist.gov/14.17.E3): [`DLMF.Legendre.ferrersProductPrimitive`](DLMF/Legendre/Primitives.lean#L131) (defined); [`DLMF.Legendre.ferrers_product_primitive_3`](DLMF/Legendre/Primitives.lean#L158) (proved).
+- [14.17.E4](https://dlmf.nist.gov/14.17.E4): [`DLMF.Legendre.ferrersProductPrimitive`](DLMF/Legendre/Primitives.lean#L131) (defined); [`DLMF.Legendre.ferrers_product_primitive_4`](DLMF/Legendre/Primitives.lean#L198) (proved).
 - [14.17.E5](https://dlmf.nist.gov/14.17.E5): [`DLMF.Legendre.ferrers_barnes_integral`](DLMF/Legendre/Integrals.lean#L28) (admitted).
-- [14.17.E6](https://dlmf.nist.gov/14.17.E6): [`DLMF.Legendre.ferrers_orthogonality_6`](DLMF/Legendre/Integrals.lean#L34) (proved).
-- [14.17.E7](https://dlmf.nist.gov/14.17.E7): [`DLMF.Legendre.ferrers_orthogonality_7`](DLMF/Legendre/Integrals.lean#L55) (proved).
-- [14.17.E8](https://dlmf.nist.gov/14.17.E8): [`DLMF.Legendre.ferrers_orthogonality_8`](DLMF/Legendre/Integrals.lean#L83) (proved).
-- [14.17.E9](https://dlmf.nist.gov/14.17.E9): [`DLMF.Legendre.ferrers_orthogonality_9`](DLMF/Legendre/Integrals.lean#L100) (proved).
-- [14.17.E10](https://dlmf.nist.gov/14.17.E10): [`DLMF.Legendre.ferrers_product_integral_10`](DLMF/Legendre/Integrals.lean#L1457) (proved); [`DLMF.Legendre.ferrersPP_integral_all_degrees`](DLMF/Legendre/ParameterLimits.lean#L139) (proved).
-- [14.17.E11](https://dlmf.nist.gov/14.17.E11): [`DLMF.Legendre.ferrers_product_integral_11`](DLMF/Legendre/Integrals.lean#L1474) (proved); [`DLMF.Legendre.ferrersP_sq_integral_all_degrees`](DLMF/Legendre/ParameterLimits.lean#L157) (proved).
-- [14.17.E12](https://dlmf.nist.gov/14.17.E12): [`DLMF.Legendre.ferrers_product_integral_12`](DLMF/Legendre/Integrals.lean#L1530) (proved).
-- [14.17.E13](https://dlmf.nist.gov/14.17.E13): [`DLMF.Legendre.ferrers_product_integral_13`](DLMF/Legendre/Integrals.lean#L1545) (proved).
-- [14.17.E14](https://dlmf.nist.gov/14.17.E14): [`DLMF.Legendre.ferrers_product_integral_14`](DLMF/Legendre/Integrals.lean#L1604) (proved).
-- [14.17.E15](https://dlmf.nist.gov/14.17.E15): [`DLMF.Legendre.ferrers_product_integral_15`](DLMF/Legendre/Integrals.lean#L1626) (proved).
-- [14.17.E16](https://dlmf.nist.gov/14.17.E16): [`DLMF.Legendre.ferrersPQ_nat_integral`](DLMF/Legendre/Integrals.lean#L1904) (proved).
-- [14.17.E17](https://dlmf.nist.gov/14.17.E17): [`DLMF.Legendre.ferrers_triple_integral`](DLMF/Legendre/Integrals.lean#L1937) (admitted).
-- [14.17.E18](https://dlmf.nist.gov/14.17.E18): [`DLMF.Legendre.legendre_product_integral_18`](DLMF/Legendre/Integrals.lean#L2581) (proved).
-- [14.17.E19](https://dlmf.nist.gov/14.17.E19): [`DLMF.Legendre.legendre_product_integral_19`](DLMF/Legendre/Integrals.lean#L2615) (proved).
-- [14.17.E20](https://dlmf.nist.gov/14.17.E20): [`DLMF.Legendre.legendre_product_integral_20`](DLMF/Legendre/Integrals.lean#L2646) (proved).
+- [14.17.E6](https://dlmf.nist.gov/14.17.E6): [`DLMF.Legendre.ferrers_orthogonality_6`](DLMF/Legendre/Integrals.lean#L35) (proved).
+- [14.17.E7](https://dlmf.nist.gov/14.17.E7): [`DLMF.Legendre.ferrers_orthogonality_7`](DLMF/Legendre/Integrals.lean#L57) (proved).
+- [14.17.E8](https://dlmf.nist.gov/14.17.E8): [`DLMF.Legendre.ferrers_orthogonality_8`](DLMF/Legendre/Integrals.lean#L86) (proved).
+- [14.17.E9](https://dlmf.nist.gov/14.17.E9): [`DLMF.Legendre.ferrers_orthogonality_9`](DLMF/Legendre/Integrals.lean#L103) (proved).
+- [14.17.E10](https://dlmf.nist.gov/14.17.E10): [`DLMF.Legendre.ferrers_product_integral_10`](DLMF/Legendre/Integrals.lean#L1485) (proved); [`DLMF.Legendre.ferrersPP_integral_all_degrees`](DLMF/Legendre/ParameterLimits.lean#L140) (proved).
+- [14.17.E11](https://dlmf.nist.gov/14.17.E11): [`DLMF.Legendre.ferrers_product_integral_11`](DLMF/Legendre/Integrals.lean#L1503) (proved); [`DLMF.Legendre.ferrersP_sq_integral_all_degrees`](DLMF/Legendre/ParameterLimits.lean#L160) (proved).
+- [14.17.E12](https://dlmf.nist.gov/14.17.E12): [`DLMF.Legendre.ferrers_product_integral_12`](DLMF/Legendre/Integrals.lean#L1560) (proved).
+- [14.17.E13](https://dlmf.nist.gov/14.17.E13): [`DLMF.Legendre.ferrers_product_integral_13`](DLMF/Legendre/Integrals.lean#L1576) (proved).
+- [14.17.E14](https://dlmf.nist.gov/14.17.E14): [`DLMF.Legendre.ferrers_product_integral_14`](DLMF/Legendre/Integrals.lean#L1636) (proved).
+- [14.17.E15](https://dlmf.nist.gov/14.17.E15): [`DLMF.Legendre.ferrers_product_integral_15`](DLMF/Legendre/Integrals.lean#L1659) (proved).
+- [14.17.E16](https://dlmf.nist.gov/14.17.E16): [`DLMF.Legendre.ferrersPQ_nat_integral`](DLMF/Legendre/Integrals.lean#L1927) (proved).
+- [14.17.E17](https://dlmf.nist.gov/14.17.E17): [`DLMF.Legendre.ferrers_triple_integral`](DLMF/Legendre/Integrals.lean#L1961) (admitted).
+- [14.17.E18](https://dlmf.nist.gov/14.17.E18): [`DLMF.Legendre.legendre_product_integral_18`](DLMF/Legendre/Integrals.lean#L2622) (proved).
+- [14.17.E19](https://dlmf.nist.gov/14.17.E19): [`DLMF.Legendre.legendre_product_integral_19`](DLMF/Legendre/Integrals.lean#L2657) (proved).
+- [14.17.E20](https://dlmf.nist.gov/14.17.E20): [`DLMF.Legendre.legendre_product_integral_20`](DLMF/Legendre/Integrals.lean#L2689) (proved).
 
 ### [§14.18 Sums](https://dlmf.nist.gov/14.18)
 
-- [14.18.E1](https://dlmf.nist.gov/14.18.E1): [`DLMF.Legendre.ferrersP_addition`](DLMF/Legendre/Sums.lean#L29) (proved).
-- [14.18.E2](https://dlmf.nist.gov/14.18.E2): [`DLMF.Legendre.ferrersP_nat_addition`](DLMF/Legendre/Sums.lean#L55) (proved).
-- [14.18.E3](https://dlmf.nist.gov/14.18.E3): [`DLMF.Legendre.ferrersQ_addition`](DLMF/Legendre/Sums.lean#L37) (proved).
-- [14.18.E4](https://dlmf.nist.gov/14.18.E4): [`DLMF.Legendre.associatedP_addition`](DLMF/Legendre/Sums.lean#L124) (proved).
-- [14.18.E5](https://dlmf.nist.gov/14.18.E5): [`DLMF.Legendre.associatedQ_addition`](DLMF/Legendre/Sums.lean#L131) (admitted).
-- [14.18.E6](https://dlmf.nist.gov/14.18.E6): [`DLMF.Legendre.legendre_christoffel_6`](DLMF/Legendre/Sums.lean#L137) (proved).
-- [14.18.E7](https://dlmf.nist.gov/14.18.E7): [`DLMF.Legendre.legendre_christoffel_7`](DLMF/Legendre/Sums.lean#L167) (proved).
-- [14.18.E8](https://dlmf.nist.gov/14.18.E8): [`DLMF.Legendre.ferrersP_zonal_series`](DLMF/Legendre/Sums.lean#L189) (admitted).
-- [14.18.E9](https://dlmf.nist.gov/14.18.E9): [`DLMF.Legendre.ferrersP_dougall_series`](DLMF/Legendre/Sums.lean#L195) (admitted).
+- [14.18.E1](https://dlmf.nist.gov/14.18.E1): [`DLMF.Legendre.ferrersP_addition`](DLMF/Legendre/Sums.lean#L25) (proved).
+- [14.18.E2](https://dlmf.nist.gov/14.18.E2): [`DLMF.Legendre.ferrersP_nat_addition`](DLMF/Legendre/Sums.lean#L45) (proved).
+- [14.18.E3](https://dlmf.nist.gov/14.18.E3): [`DLMF.Legendre.ferrersQ_addition`](DLMF/Legendre/Sums.lean#L35) (proved).
+- [14.18.E4](https://dlmf.nist.gov/14.18.E4): [`DLMF.Legendre.associatedP_addition`](DLMF/Legendre/Sums.lean#L116) (proved).
+- [14.18.E5](https://dlmf.nist.gov/14.18.E5): [`DLMF.Legendre.associatedQ_addition`](DLMF/Legendre/Sums.lean#L123) (admitted).
+- [14.18.E6](https://dlmf.nist.gov/14.18.E6): [`DLMF.Legendre.legendre_christoffel_6`](DLMF/Legendre/Sums.lean#L131) (proved).
+- [14.18.E7](https://dlmf.nist.gov/14.18.E7): [`DLMF.Legendre.legendre_christoffel_7`](DLMF/Legendre/Sums.lean#L162) (proved).
+- [14.18.E8](https://dlmf.nist.gov/14.18.E8): [`DLMF.Legendre.ferrersP_zonal_series`](DLMF/Legendre/Sums.lean#L185) (admitted).
+- [14.18.E9](https://dlmf.nist.gov/14.18.E9): [`DLMF.Legendre.ferrersP_dougall_series`](DLMF/Legendre/Sums.lean#L192) (admitted).
 
 ### [§14.19 Toroidal (or Ring) Functions](https://dlmf.nist.gov/14.19)
 
-- [14.19.E1](https://dlmf.nist.gov/14.19.E1): [`DLMF.Legendre.toroidalCoordinates`](DLMF/Legendre/Toroidal.lean#L26) (defined).
-- [14.19.E2](https://dlmf.nist.gov/14.19.E2): [`DLMF.Legendre.toroidalP_hypergeometric`](DLMF/Legendre/Toroidal.lean#L306) (proved).
+- [14.19.E1](https://dlmf.nist.gov/14.19.E1): [`DLMF.Legendre.toroidalCoordinates`](DLMF/Legendre/Toroidal.lean#L24) (defined).
+- [14.19.E2](https://dlmf.nist.gov/14.19.E2): [`DLMF.Legendre.toroidalP_hypergeometric`](DLMF/Legendre/Toroidal.lean#L305) (proved).
 - [14.19.E3](https://dlmf.nist.gov/14.19.E3): [`DLMF.Legendre.toroidalQ_hypergeometric`](DLMF/Legendre/Toroidal.lean#L351) (proved).
-- [14.19.E4](https://dlmf.nist.gov/14.19.E4): [`DLMF.Legendre.toroidalP_integral`](DLMF/Legendre/Toroidal.lean#L521) (proved).
-- [14.19.E5](https://dlmf.nist.gov/14.19.E5): [`DLMF.Legendre.toroidalQ_integral`](DLMF/Legendre/Toroidal.lean#L604) (proved).
-- [14.19.E6](https://dlmf.nist.gov/14.19.E6): [`DLMF.Legendre.toroidalQ_fourier`](DLMF/Legendre/Toroidal.lean#L898) (proved).
-- [14.19.E7](https://dlmf.nist.gov/14.19.E7): [`DLMF.Legendre.toroidal_whipple_P`](DLMF/Legendre/Toroidal.lean#L927) (proved).
-- [14.19.E8](https://dlmf.nist.gov/14.19.E8): [`DLMF.Legendre.toroidal_whipple_Q`](DLMF/Legendre/Toroidal.lean#L973) (proved).
+- [14.19.E4](https://dlmf.nist.gov/14.19.E4): [`DLMF.Legendre.toroidalP_integral`](DLMF/Legendre/Toroidal.lean#L522) (proved).
+- [14.19.E5](https://dlmf.nist.gov/14.19.E5): [`DLMF.Legendre.toroidalQ_integral`](DLMF/Legendre/Toroidal.lean#L605) (proved).
+- [14.19.E6](https://dlmf.nist.gov/14.19.E6): [`DLMF.Legendre.toroidalQ_fourier`](DLMF/Legendre/Toroidal.lean#L899) (proved).
+- [14.19.E7](https://dlmf.nist.gov/14.19.E7): [`DLMF.Legendre.toroidal_whipple_P`](DLMF/Legendre/Toroidal.lean#L930) (proved).
+- [14.19.E8](https://dlmf.nist.gov/14.19.E8): [`DLMF.Legendre.toroidal_whipple_Q`](DLMF/Legendre/Toroidal.lean#L977) (proved).
 
 ### [§14.20 Conical (or Mehler) Functions](https://dlmf.nist.gov/14.20)
 
 - [14.20.E1](https://dlmf.nist.gov/14.20.E1): [`DLMF.Legendre.conical_ode`](DLMF/Legendre/Conical.lean#L34) (proved).
 - [14.20.E2](https://dlmf.nist.gov/14.20.E2): [`DLMF.Legendre.conicalQHat`](DLMF/Legendre/Conical.lean#L29) (defined).
-- [14.20.E3](https://dlmf.nist.gov/14.20.E3): [`DLMF.Legendre.conicalQHat_connection`](DLMF/Legendre/Conical.lean#L63) (proved).
-- [14.20.E4](https://dlmf.nist.gov/14.20.E4): [`DLMF.Legendre.conical_wronskian`](DLMF/Legendre/Conical.lean#L157) (proved).
-- [14.20.E5](https://dlmf.nist.gov/14.20.E5): [`DLMF.Legendre.conicalQHat_wronskian`](DLMF/Legendre/Conical.lean#L170) (proved).
-- [14.20.E6](https://dlmf.nist.gov/14.20.E6): [`DLMF.Legendre.conical_associated_connection`](DLMF/Legendre/Conical.lean#L201) (proved).
-- [14.20.E7](https://dlmf.nist.gov/14.20.E7): [`DLMF.Legendre.conical_singular_7`](DLMF/Legendre/Conical.lean#L318) (proved).
-- [14.20.E8](https://dlmf.nist.gov/14.20.E8): [`DLMF.Legendre.conical_singular_8`](DLMF/Legendre/Conical.lean#L385) (proved).
-- [14.20.E9](https://dlmf.nist.gov/14.20.E9): [`DLMF.Legendre.conical_mehler_integral`](DLMF/Legendre/Conical.lean#L475) (admitted).
-- [14.20.E10](https://dlmf.nist.gov/14.20.E10): [`DLMF.Legendre.conical_power_series`](DLMF/Legendre/Conical.lean#L494) (proved).
-- [14.20.E11](https://dlmf.nist.gov/14.20.E11): [`DLMF.Legendre.mehlerFockTransform`](DLMF/Legendre/Conical.lean#L544) (defined).
-- [14.20.E12](https://dlmf.nist.gov/14.20.E12): [`DLMF.Legendre.mehlerFockInverse`](DLMF/Legendre/Conical.lean#L549) (defined).
-- [14.20.E13](https://dlmf.nist.gov/14.20.E13): [`DLMF.Legendre.conical_stieltjes_integral`](DLMF/Legendre/Conical.lean#L554) (admitted).
-- [14.20.E14](https://dlmf.nist.gov/14.20.E14): [`DLMF.Legendre.conical_product_transform`](DLMF/Legendre/Conical.lean#L560) (admitted).
+- [14.20.E3](https://dlmf.nist.gov/14.20.E3): [`DLMF.Legendre.conicalQHat_connection`](DLMF/Legendre/Conical.lean#L64) (proved).
+- [14.20.E4](https://dlmf.nist.gov/14.20.E4): [`DLMF.Legendre.conical_wronskian`](DLMF/Legendre/Conical.lean#L160) (proved).
+- [14.20.E5](https://dlmf.nist.gov/14.20.E5): [`DLMF.Legendre.conicalQHat_wronskian`](DLMF/Legendre/Conical.lean#L174) (proved).
+- [14.20.E6](https://dlmf.nist.gov/14.20.E6): [`DLMF.Legendre.conical_associated_connection`](DLMF/Legendre/Conical.lean#L207) (proved).
+- [14.20.E7](https://dlmf.nist.gov/14.20.E7): [`DLMF.Legendre.conical_singular_7`](DLMF/Legendre/Conical.lean#L325) (proved).
+- [14.20.E8](https://dlmf.nist.gov/14.20.E8): [`DLMF.Legendre.conical_singular_8`](DLMF/Legendre/Conical.lean#L393) (proved).
+- [14.20.E9](https://dlmf.nist.gov/14.20.E9): [`DLMF.Legendre.conical_mehler_integral`](DLMF/Legendre/Conical.lean#L485) (admitted).
+- [14.20.E10](https://dlmf.nist.gov/14.20.E10): [`DLMF.Legendre.conical_power_series`](DLMF/Legendre/Conical.lean#L505) (proved).
+- [14.20.E11](https://dlmf.nist.gov/14.20.E11): [`DLMF.Legendre.mehlerFockTransform`](DLMF/Legendre/Conical.lean#L555) (defined).
+- [14.20.E12](https://dlmf.nist.gov/14.20.E12): [`DLMF.Legendre.mehlerFockInverse`](DLMF/Legendre/Conical.lean#L561) (defined).
+- [14.20.E13](https://dlmf.nist.gov/14.20.E13): [`DLMF.Legendre.conical_stieltjes_integral`](DLMF/Legendre/Conical.lean#L567) (admitted).
+- [14.20.E14](https://dlmf.nist.gov/14.20.E14): [`DLMF.Legendre.conical_product_transform`](DLMF/Legendre/Conical.lean#L574) (admitted).
 - [14.20.E15](https://dlmf.nist.gov/14.20.E15): [`DLMF.Legendre.conicalP_large_tau_uniform`](DLMF/Legendre/ConicalAsymptotics.lean#L27) (admitted).
-- [14.20.E16](https://dlmf.nist.gov/14.20.E16): [`DLMF.Legendre.conicalQHat_large_tau_uniform`](DLMF/Legendre/ConicalAsymptotics.lean#L33) (admitted).
-- [14.20.E17](https://dlmf.nist.gov/14.20.E17): [`DLMF.Legendre.conicalP_two_large_tau_uniform`](DLMF/Legendre/ConicalAsymptotics.lean#L341) (admitted).
-- [14.20.E18](https://dlmf.nist.gov/14.20.E18): [`DLMF.Legendre.conicalQHat_two_large_tau_uniform`](DLMF/Legendre/ConicalAsymptotics.lean#L347) (admitted).
-- [14.20.E19](https://dlmf.nist.gov/14.20.E19): [`DLMF.Legendre.conicalAlpha`](DLMF/Legendre/ConicalAsymptotics.lean#L39) (defined).
-- [14.20.E20](https://dlmf.nist.gov/14.20.E20): [`DLMF.Legendre.conicalSigma`](DLMF/Legendre/ConicalAsymptotics.lean#L44) (defined).
-- [14.20.E21](https://dlmf.nist.gov/14.20.E21): [`DLMF.Legendre.ConicalEtaRelation`](DLMF/Legendre/ConicalAsymptotics.lean#L49) (defined); [`DLMF.Legendre.conicalEta`](DLMF/Legendre/ConicalAsymptotics.lean#L54) (defined); [`DLMF.Legendre.conicalEta_spec`](DLMF/Legendre/ConicalAsymptotics.lean#L128) (proved).
-- [14.20.E22](https://dlmf.nist.gov/14.20.E22): [`DLMF.Legendre.conicalP_two_large_mu_uniform`](DLMF/Legendre/ConicalAsymptotics.lean#L532) (admitted).
-- [14.20.E23](https://dlmf.nist.gov/14.20.E23): [`DLMF.Legendre.conicalBeta`](DLMF/Legendre/ConicalAsymptotics.lean#L353) (defined).
-- [14.20.E24](https://dlmf.nist.gov/14.20.E24): [`DLMF.Legendre.conicalRho`](DLMF/Legendre/ConicalAsymptotics.lean#L358) (defined).
+- [14.20.E16](https://dlmf.nist.gov/14.20.E16): [`DLMF.Legendre.conicalQHat_large_tau_uniform`](DLMF/Legendre/ConicalAsymptotics.lean#L34) (admitted).
+- [14.20.E17](https://dlmf.nist.gov/14.20.E17): [`DLMF.Legendre.conicalP_two_large_tau_uniform`](DLMF/Legendre/ConicalAsymptotics.lean#L349) (admitted).
+- [14.20.E18](https://dlmf.nist.gov/14.20.E18): [`DLMF.Legendre.conicalQHat_two_large_tau_uniform`](DLMF/Legendre/ConicalAsymptotics.lean#L357) (admitted).
+- [14.20.E19](https://dlmf.nist.gov/14.20.E19): [`DLMF.Legendre.conicalAlpha`](DLMF/Legendre/ConicalAsymptotics.lean#L41) (defined).
+- [14.20.E20](https://dlmf.nist.gov/14.20.E20): [`DLMF.Legendre.conicalSigma`](DLMF/Legendre/ConicalAsymptotics.lean#L47) (defined).
+- [14.20.E21](https://dlmf.nist.gov/14.20.E21): [`DLMF.Legendre.ConicalEtaRelation`](DLMF/Legendre/ConicalAsymptotics.lean#L53) (defined); [`DLMF.Legendre.conicalEta`](DLMF/Legendre/ConicalAsymptotics.lean#L60) (defined); [`DLMF.Legendre.conicalEta_spec`](DLMF/Legendre/ConicalAsymptotics.lean#L135) (proved).
+- [14.20.E22](https://dlmf.nist.gov/14.20.E22): [`DLMF.Legendre.conicalP_two_large_mu_uniform`](DLMF/Legendre/ConicalAsymptotics.lean#L546) (admitted).
+- [14.20.E23](https://dlmf.nist.gov/14.20.E23): [`DLMF.Legendre.conicalBeta`](DLMF/Legendre/ConicalAsymptotics.lean#L365) (defined).
+- [14.20.E24](https://dlmf.nist.gov/14.20.E24): [`DLMF.Legendre.conicalRho`](DLMF/Legendre/ConicalAsymptotics.lean#L371) (defined).
 
 ### [§14.21 Definitions and Basic Properties](https://dlmf.nist.gov/14.21)
 
-- [14.21.E1](https://dlmf.nist.gov/14.21.E1): [`DLMF.Legendre.associatedP_ode`](DLMF/Legendre/Associated.lean#L819) (proved); [`DLMF.Legendre.olverQ_ode`](DLMF/Legendre/Associated.lean#L936) (proved).
+- [14.21.E1](https://dlmf.nist.gov/14.21.E1): [`DLMF.Legendre.associatedP_ode`](DLMF/Legendre/Associated.lean#L831) (proved); [`DLMF.Legendre.olverQ_ode`](DLMF/Legendre/Associated.lean#L950) (proved).
 
 ### [§14.23 Values on the Cut](https://dlmf.nist.gov/14.23)
 
-- [14.23.E1](https://dlmf.nist.gov/14.23.E1): [`DLMF.Legendre.associatedP_boundary_upper`](DLMF/Legendre/Continuation.lean#L95) (proved); [`DLMF.Legendre.associatedP_boundary_lower`](DLMF/Legendre/Continuation.lean#L519) (proved).
-- [14.23.E2](https://dlmf.nist.gov/14.23.E2): [`DLMF.Legendre.olverQ_boundary_upper`](DLMF/Legendre/Continuation.lean#L482) (proved); [`DLMF.Legendre.olverQ_boundary_lower`](DLMF/Legendre/Continuation.lean#L526) (proved).
-- [14.23.E3](https://dlmf.nist.gov/14.23.E3): [`DLMF.Legendre.olverQ_boundary_hypergeometric_upper`](DLMF/Legendre/Continuation.lean#L511) (proved); [`DLMF.Legendre.olverQ_boundary_hypergeometric_lower`](DLMF/Legendre/Continuation.lean#L555) (proved).
-- [14.23.E4](https://dlmf.nist.gov/14.23.E4): [`DLMF.Legendre.ferrersP_boundary_inverse_upper`](DLMF/Legendre/Continuation.lean#L488) (proved); [`DLMF.Legendre.ferrersP_boundary_inverse_lower`](DLMF/Legendre/Continuation.lean#L532) (proved).
-- [14.23.E5](https://dlmf.nist.gov/14.23.E5): [`DLMF.Legendre.ferrersQ_boundary_average`](DLMF/Legendre/Continuation.lean#L563) (proved).
-- [14.23.E6](https://dlmf.nist.gov/14.23.E6): [`DLMF.Legendre.ferrersQ_boundary_inverse_upper`](DLMF/Legendre/Continuation.lean#L496) (proved); [`DLMF.Legendre.ferrersQ_boundary_inverse_lower`](DLMF/Legendre/Continuation.lean#L540) (proved).
+- [14.23.E1](https://dlmf.nist.gov/14.23.E1): [`DLMF.Legendre.associatedP_boundary_upper`](DLMF/Legendre/Continuation.lean#L95) (proved); [`DLMF.Legendre.associatedP_boundary_lower`](DLMF/Legendre/Continuation.lean#L554) (proved).
+- [14.23.E2](https://dlmf.nist.gov/14.23.E2): [`DLMF.Legendre.olverQ_boundary_upper`](DLMF/Legendre/Continuation.lean#L512) (proved); [`DLMF.Legendre.olverQ_boundary_lower`](DLMF/Legendre/Continuation.lean#L562) (proved).
+- [14.23.E3](https://dlmf.nist.gov/14.23.E3): [`DLMF.Legendre.olverQ_boundary_hypergeometric_upper`](DLMF/Legendre/Continuation.lean#L544) (proved); [`DLMF.Legendre.olverQ_boundary_hypergeometric_lower`](DLMF/Legendre/Continuation.lean#L594) (proved).
+- [14.23.E4](https://dlmf.nist.gov/14.23.E4): [`DLMF.Legendre.ferrersP_boundary_inverse_upper`](DLMF/Legendre/Continuation.lean#L519) (proved); [`DLMF.Legendre.ferrersP_boundary_inverse_lower`](DLMF/Legendre/Continuation.lean#L569) (proved).
+- [14.23.E5](https://dlmf.nist.gov/14.23.E5): [`DLMF.Legendre.ferrersQ_boundary_average`](DLMF/Legendre/Continuation.lean#L604) (proved).
+- [14.23.E6](https://dlmf.nist.gov/14.23.E6): [`DLMF.Legendre.ferrersQ_boundary_inverse_upper`](DLMF/Legendre/Continuation.lean#L528) (proved); [`DLMF.Legendre.ferrersQ_boundary_inverse_lower`](DLMF/Legendre/Continuation.lean#L578) (proved).
 - [14.23.E7](https://dlmf.nist.gov/14.23.E7): [`DLMF.Legendre.conicalQHat_boundary`](DLMF/Legendre/Continuation.lean) (proved; corrected, DLMF prints e^{-3μπi/2} where e^{μπi/2} is required).
 
 ### [§14.24 Analytic Continuation](https://dlmf.nist.gov/14.24)
 
-- [14.24.E1](https://dlmf.nist.gov/14.24.E1): [`DLMF.Legendre.associatedP_ellipse_continuation`](DLMF/Legendre/Continuation.lean#L1989) (proved).
-- [14.24.E2](https://dlmf.nist.gov/14.24.E2): [`DLMF.Legendre.olverQ_ellipse_continuation`](DLMF/Legendre/Continuation.lean#L1131) (proved).
-- [14.24.E3](https://dlmf.nist.gov/14.24.E3): [`DLMF.Legendre.associatedP_one_continuation`](DLMF/Legendre/Continuation.lean#L1647) (proved).
-- [14.24.E4](https://dlmf.nist.gov/14.24.E4): [`DLMF.Legendre.olverQ_one_continuation`](DLMF/Legendre/Continuation.lean#L2022) (proved).
+- [14.24.E1](https://dlmf.nist.gov/14.24.E1): [`DLMF.Legendre.associatedP_ellipse_continuation`](DLMF/Legendre/Continuation.lean#L2034) (proved).
+- [14.24.E2](https://dlmf.nist.gov/14.24.E2): [`DLMF.Legendre.olverQ_ellipse_continuation`](DLMF/Legendre/Continuation.lean#L1174) (proved).
+- [14.24.E3](https://dlmf.nist.gov/14.24.E3): [`DLMF.Legendre.associatedP_one_continuation`](DLMF/Legendre/Continuation.lean#L1692) (proved).
+- [14.24.E4](https://dlmf.nist.gov/14.24.E4): [`DLMF.Legendre.olverQ_one_continuation`](DLMF/Legendre/Continuation.lean#L2067) (proved).
 
 ### [§14.25 Integral Representations](https://dlmf.nist.gov/14.25)
 
-- [14.25.E1](https://dlmf.nist.gov/14.25.E1): [`DLMF.Legendre.associatedP_complex_integral`](DLMF/Legendre/IntegralRepresentations.lean#L1640) (proved).
-- [14.25.E2](https://dlmf.nist.gov/14.25.E2): [`DLMF.Legendre.olverQ_complex_integral`](DLMF/Legendre/IntegralRepresentations.lean#L1646) (proved).
+- [14.25.E1](https://dlmf.nist.gov/14.25.E1): [`DLMF.Legendre.associatedP_complex_integral`](DLMF/Legendre/IntegralRepresentations.lean#L244) (proved).
+- [14.25.E2](https://dlmf.nist.gov/14.25.E2): [`DLMF.Legendre.olverQ_complex_integral`](DLMF/Legendre/IntegralRepresentations.lean#L616) (proved).
 
 ### [§14.26 Uniform Asymptotic Expansions](https://dlmf.nist.gov/14.26)
 
@@ -1117,24 +1117,24 @@ No selected numbered equations. Mathematical prose is recorded in the module inv
 
 ### [§14.28 Sums](https://dlmf.nist.gov/14.28)
 
-- [14.28.E1](https://dlmf.nist.gov/14.28.E1): [`DLMF.Legendre.associatedP_complex_addition`](DLMF/Legendre/Sums.lean#L855) (proved).
-- [14.28.E2](https://dlmf.nist.gov/14.28.E2): [`DLMF.Legendre.legendre_heine_series`](DLMF/Legendre/Sums.lean#L738) (proved); [`DLMF.Legendre.legendre_heine_uniform`](DLMF/Legendre/Sums.lean#L788) (proved).
+- [14.28.E1](https://dlmf.nist.gov/14.28.E1): [`DLMF.Legendre.associatedP_complex_addition`](DLMF/Legendre/Sums.lean#L857) (proved).
+- [14.28.E2](https://dlmf.nist.gov/14.28.E2): [`DLMF.Legendre.legendre_heine_series`](DLMF/Legendre/Sums.lean#L737) (proved); [`DLMF.Legendre.legendre_heine_uniform`](DLMF/Legendre/Sums.lean#L788) (proved).
 
 ### [§14.29 Generalizations](https://dlmf.nist.gov/14.29)
 
-- [14.29.E1](https://dlmf.nist.gov/14.29.E1): [`DLMF.Legendre.IsGeneralizedLegendreSolution`](DLMF/Legendre/Associated.lean#L2088) (defined); [`DLMF.Legendre.generalizedLegendre_equal_orders`](DLMF/Legendre/Associated.lean#L2093) (proved).
+- [14.29.E1](https://dlmf.nist.gov/14.29.E1): [`DLMF.Legendre.IsGeneralizedLegendreSolution`](DLMF/Legendre/Associated.lean#L2144) (defined); [`DLMF.Legendre.generalizedLegendre_equal_orders`](DLMF/Legendre/Associated.lean#L2150) (proved).
 
 ### [§14.30 Spherical and Spheroidal Harmonics](https://dlmf.nist.gov/14.30)
 
-- [14.30.E1](https://dlmf.nist.gov/14.30.E1): [`DLMF.Legendre.sphericalHarmonicNonneg`](DLMF/Legendre/Harmonics.lean#L47) (defined); [`DLMF.Legendre.sphericalHarmonic`](DLMF/Legendre/Harmonics.lean#L52) (defined); [`DLMF.Legendre.sphericalHarmonic_ferrers`](DLMF/Legendre/Harmonics.lean#L71) (proved).
-- [14.30.E2](https://dlmf.nist.gov/14.30.E2): [`DLMF.Legendre.surfaceHarmonic`](DLMF/Legendre/Harmonics.lean#L118) (defined).
-- [14.30.E3](https://dlmf.nist.gov/14.30.E3): [`DLMF.Legendre.sphericalHarmonic_rodrigues`](DLMF/Legendre/Harmonics.lean#L223) (proved).
-- [14.30.E4](https://dlmf.nist.gov/14.30.E4): [`DLMF.Legendre.sphericalHarmonic_north`](DLMF/Legendre/Harmonics.lean#L290) (proved).
-- [14.30.E5](https://dlmf.nist.gov/14.30.E5): [`DLMF.Legendre.sphericalHarmonic_equator`](DLMF/Legendre/Harmonics.lean#L322) (proved).
-- [14.30.E6](https://dlmf.nist.gov/14.30.E6): [`DLMF.Legendre.sphericalHarmonic_negative_order`](DLMF/Legendre/Harmonics.lean#L388) (proved).
-- [14.30.E7](https://dlmf.nist.gov/14.30.E7): [`DLMF.Legendre.sphericalHarmonic_parity`](DLMF/Legendre/Harmonics.lean#L426) (proved).
-- [14.30.E8](https://dlmf.nist.gov/14.30.E8): [`DLMF.Legendre.sphericalHarmonic_orthonormal`](DLMF/Legendre/Harmonics.lean#L521) (proved).
-- [14.30.E9](https://dlmf.nist.gov/14.30.E9): [`DLMF.Legendre.sphericalHarmonic_addition`](DLMF/Legendre/Harmonics.lean#L609) (proved).
+- [14.30.E1](https://dlmf.nist.gov/14.30.E1): [`DLMF.Legendre.sphericalHarmonicNonneg`](DLMF/Legendre/Harmonics.lean#L48) (defined); [`DLMF.Legendre.sphericalHarmonic`](DLMF/Legendre/Harmonics.lean#L54) (defined); [`DLMF.Legendre.sphericalHarmonic_ferrers`](DLMF/Legendre/Harmonics.lean#L75) (proved).
+- [14.30.E2](https://dlmf.nist.gov/14.30.E2): [`DLMF.Legendre.surfaceHarmonic`](DLMF/Legendre/Harmonics.lean#L123) (defined).
+- [14.30.E3](https://dlmf.nist.gov/14.30.E3): [`DLMF.Legendre.sphericalHarmonic_rodrigues`](DLMF/Legendre/Harmonics.lean#L229) (proved).
+- [14.30.E4](https://dlmf.nist.gov/14.30.E4): [`DLMF.Legendre.sphericalHarmonic_north`](DLMF/Legendre/Harmonics.lean#L297) (proved).
+- [14.30.E5](https://dlmf.nist.gov/14.30.E5): [`DLMF.Legendre.sphericalHarmonic_equator`](DLMF/Legendre/Harmonics.lean#L330) (proved).
+- [14.30.E6](https://dlmf.nist.gov/14.30.E6): [`DLMF.Legendre.sphericalHarmonic_negative_order`](DLMF/Legendre/Harmonics.lean#L397) (proved).
+- [14.30.E7](https://dlmf.nist.gov/14.30.E7): [`DLMF.Legendre.sphericalHarmonic_parity`](DLMF/Legendre/Harmonics.lean#L435) (proved).
+- [14.30.E8](https://dlmf.nist.gov/14.30.E8): [`DLMF.Legendre.sphericalHarmonic_orthonormal`](DLMF/Legendre/Harmonics.lean#L530) (proved).
+- [14.30.E9](https://dlmf.nist.gov/14.30.E9): [`DLMF.Legendre.sphericalHarmonic_addition`](DLMF/Legendre/Harmonics.lean#L620) (proved).
 
 ### [§14.32 Methods of Computation](https://dlmf.nist.gov/14.32)
 

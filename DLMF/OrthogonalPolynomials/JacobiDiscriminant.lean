@@ -13,9 +13,8 @@ public import Mathlib.LinearAlgebra.Lagrange
 # The discriminant of a Jacobi polynomial (AAR Theorem 8.5.3, DLMF 18.16.19)
 
 The product of squared differences of the zeros of `P_n^{(α,β)}`, by Schur's resultant route.
-`jacobiPolyP_prod_sq_sub` gives it for the monic normalization; AAR 8.5.3
-(`DLMF.Selberg.jacobiPolyP_discriminant`) and DLMF 18.16.19
-(`jacobi_discriminant` in `BoundsZeros.lean`) are restatements.
+`jacobiPolyP_prod_sq_sub` gives it for the monic normalization (this is AAR 8.5.3); DLMF
+18.16.19 (`jacobi_discriminant` in `BoundsZeros.lean`) is a restatement.
 -/
 
 @[expose] public section
@@ -50,6 +49,7 @@ def coef (a b : ℂ) (n k : ℕ) : ℂ :=
 def jacPoly (a b : ℂ) (n : ℕ) : ℂ[X] :=
   ∑ k ∈ Finset.range (n + 1), C (coef a b n k) * (C (1 / 2 : ℂ) * (X - C 1)) ^ k
 
+/-- For `Re a > -1`, `jacPoly a b n` evaluates to `P_n^{(a,b)}`. -/
 theorem eval_jacPoly {a : ℂ} (hα : -1 < a.re) (b : ℂ) (n : ℕ) (x : ℂ) :
     (jacPoly a b n).eval x = jacobiPolyP a b n x := by
   rw [jacobi_finite_sum hα]
@@ -57,21 +57,25 @@ theorem eval_jacPoly {a : ℂ} (hα : -1 < a.re) (b : ℂ) (n : ℕ) (x : ℂ) :
   refine Finset.sum_congr rfl fun k _ => ?_
   ring
 
+/-- `deg (c p) ≤ deg p`. -/
 theorem degree_C_mul_le' (c : ℂ) (p : ℂ[X]) : (C c * p).degree ≤ p.degree := by
   rw [← smul_eq_C_mul]
   exact degree_smul_le c p
 
+/-- `deg (c ((X - 1)/2)ᵏ) ≤ k`. -/
 theorem degree_term_le (c : ℂ) (k : ℕ) :
     (C c * (C (1 / 2 : ℂ) * (X - C 1)) ^ k).degree ≤ (k : WithBot ℕ) := by
   refine (degree_C_mul_le' _ _).trans ?_
   rw [degree_pow, degree_C_mul (by norm_num), degree_X_sub_C]
   simp
 
+/-- Splitting off the top term of `jacPoly a b n`. -/
 theorem jacPoly_eq (a b : ℂ) (n : ℕ) :
     jacPoly a b n = (∑ k ∈ Finset.range n, C (coef a b n k) * (C (1 / 2 : ℂ) * (X - C 1)) ^ k) +
       C (coef a b n n * (1 / 2) ^ n) * (X - C 1) ^ n := by
   rw [jacPoly, Finset.sum_range_succ, mul_pow, ← C_pow, ← mul_assoc, ← C_mul]
 
+/-- The terms of `jacPoly a b n` below the top one have degree `< n`. -/
 theorem lower_degree_lt (a b : ℂ) (n : ℕ) :
     (∑ k ∈ Finset.range n, C (coef a b n k) * (C (1 / 2 : ℂ) * (X - C 1)) ^ k).degree <
       (n : WithBot ℕ) := by
@@ -79,11 +83,14 @@ theorem lower_degree_lt (a b : ℂ) (n : ℕ) :
   exact (Finset.sup_lt_iff (WithBot.bot_lt_coe n)).2 fun k hk =>
     lt_of_le_of_lt (degree_term_le _ k) (WithBot.coe_lt_coe.mpr (Finset.mem_range.mp hk))
 
+/-- `deg (c (X - 1)ⁿ) = n` for `c ≠ 0`. -/
 theorem degree_top (c : ℂ) (hc : c ≠ 0) (n : ℕ) :
     (C c * (X - C (1 : ℂ)) ^ n).degree = (n : WithBot ℕ) := by
   rw [degree_C_mul hc, degree_pow, degree_X_sub_C]
   simp
 
+/-- If the top coefficient is nonzero, `jacPoly a b n` has degree `n` and leading coefficient
+`coef a b n n / 2ⁿ`. -/
 theorem jacPoly_natDegree_lc (a b : ℂ) (n : ℕ) (hc : coef a b n n ≠ 0) :
     (jacPoly a b n).natDegree = n ∧
       (jacPoly a b n).leadingCoeff = coef a b n n * (1 / 2) ^ n := by
@@ -103,6 +110,7 @@ theorem jacPoly_natDegree_lc (a b : ℂ) (n : ℕ) (hc : coef a b n n ≠ 0) :
 
 
 
+/-- A complex polynomial is its leading coefficient times `∏ (x - r)` over its roots. -/
 theorem eval_eq_lc_mul_prod_roots (p : ℂ[X]) (x : ℂ) :
     p.eval x = p.leadingCoeff * (p.roots.map fun r => x - r).prod := by
   conv_lhs => rw [← C_leadingCoeff_mul_prod_multiset_X_sub_C
@@ -110,6 +118,7 @@ theorem eval_eq_lc_mul_prod_roots (p : ℂ[X]) (x : ℂ) :
   rw [eval_mul, eval_C, eval_multiset_prod, Multiset.map_map]
   simp
 
+/-- `∏_{x ∈ s} c f(x) = c^{|s|} ∏_{x ∈ s} f(x)` for a multiset `s`. -/
 theorem prod_map_const_mul {s : Multiset ℂ} (c : ℂ) (f : ℂ → ℂ) :
     (s.map fun x => c * f x).prod = c ^ Multiset.card s * (s.map f).prod := by
   rw [Multiset.prod_map_mul, Multiset.map_const', Multiset.prod_replicate]
@@ -142,6 +151,7 @@ theorem lc_pow_mul_prod_roots_eval (p q : ℂ[X]) :
 
 
 
+/-- `∏_{i,j<N, i<j} c = c^{C(N,2)}`. -/
 theorem prod_range_prod_range_ite_lt (c : ℂ) (N : ℕ) :
     ∏ i ∈ range N, ∏ j ∈ range N, (if i < j then c else 1) = c ^ N.choose 2 := by
   induction N with
@@ -226,14 +236,14 @@ section Jacobi
 
 variable {α β : ℝ}
 
-theorem ne_zero_of_re_pos {z : ℂ} (h : 0 < z.re) : z ≠ 0 := fun h0 => by simp [h0] at h
-
 /-- The leading coefficient of `P_n^{(α,β)}`. -/
 def kk (a b : ℂ) (n : ℕ) : ℂ := coef a b n n * (1 / 2) ^ n
 
+/-- The top coefficient `coef a b n n = (n+a+b+1)_n / n!`. -/
 theorem coef_diag (a b : ℂ) (n : ℕ) : coef a b n n = poch (n + a + b + 1) n / n ! := by
   simp [coef, poch_zero]
 
+/-- For `α, β > -1` the leading coefficient of `P_n^{(α,β)}` is nonzero. -/
 theorem kk_ne_zero (hα : -1 < α) (hβ : -1 < β) (n : ℕ) : kk α β n ≠ 0 := by
   refine mul_ne_zero ?_ (by norm_num)
   rw [coef_diag]
@@ -245,23 +255,28 @@ theorem kk_ne_zero (hα : -1 < α) (hβ : -1 < β) (n : ℕ) : kk α β n ≠ 0 
   push_cast
   linarith
 
+/-- For `α, β > -1`, `coef α β n n ≠ 0`. -/
 theorem coef_diag_ne_zero (hα : -1 < α) (hβ : -1 < β) (n : ℕ) : coef α β n n ≠ 0 :=
   left_ne_zero_of_mul (kk_ne_zero hα hβ n)
 
+/-- For `α, β > -1`, `P_n^{(α,β)}` has degree `n`. -/
 theorem natDegree_jacPoly (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
     (jacPoly α β n).natDegree = n :=
   (jacPoly_natDegree_lc α β n (coef_diag_ne_zero hα hβ n)).1
 
+/-- For `α, β > -1`, the leading coefficient of `P_n^{(α,β)}` is `kk α β n`. -/
 theorem leadingCoeff_jacPoly (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
     (jacPoly α β n).leadingCoeff = kk α β n :=
   (jacPoly_natDegree_lc α β n (coef_diag_ne_zero hα hβ n)).2
 
+/-- For `α, β > -1`, `P_n^{(α,β)} ≠ 0`. -/
 theorem jacPoly_ne_zero (hα : -1 < α) (hβ : -1 < β) (n : ℕ) : jacPoly α β n ≠ 0 := by
   intro h
   have := leadingCoeff_jacPoly hα hβ n
   rw [h, leadingCoeff_zero] at this
   exact kk_ne_zero hα hβ n this.symm
 
+/-- The ratio of consecutive leading coefficients of the Jacobi polynomials. -/
 theorem kk_succ (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
     kk α β (n + 2) = kk α β (n + 1) *
       ((2 * n + α + β + 3) * (2 * ((n + 1 : ℕ) : ℂ) + α + β + 2) /
@@ -296,6 +311,7 @@ def recA (a b : ℂ) (n : ℕ) : ℂ :=
   ((n : ℂ) + a + 1) * ((n : ℂ) + b + 1) * (2 * ((n + 1 : ℕ) : ℂ) + a + b + 2) /
     (((n + 1 + 1 : ℕ) : ℂ) * ((n : ℂ) + a + b + 2) * (2 * (n : ℂ) + a + b + 2))
 
+/-- At a zero of `P_{n+1}^{(α,β)}` the recurrence gives `P_{n+2} = -recA P_n`. -/
 theorem eval_jacPoly_two_of_root (hα : -1 < α) (hβ : -1 < β) (n : ℕ) {y : ℂ}
     (hy : (jacPoly α β (n + 1)).eval y = 0) :
     (jacPoly α β (n + 2)).eval y = -recA α β n * (jacPoly α β n).eval y := by
@@ -326,11 +342,13 @@ theorem eval_jacPoly_two_of_root (hα : -1 < α) (hβ : -1 < β) (n : ℕ) {y : 
 def SS (a b : ℂ) (n : ℕ) : ℂ :=
   ((jacPoly a b (n + 1)).roots.map fun x => (jacPoly a b n).eval x).prod
 
+/-- `SS a b 0 = 1`. -/
 theorem SS_zero (a b : ℂ) : SS a b 0 = 1 := by
   have : ∀ x, (jacPoly a b 0).eval x = 1 := by
     intro x; simp [jacPoly, coef, poch_zero]
   simp [SS, this]
 
+/-- The recursion for the product of `P_n` over the zeros of `P_{n+1}`. -/
 theorem SS_succ (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
     kk α β (n + 2) ^ (n + 1) * SS α β (n + 1) =
       kk α β (n + 1) ^ (n + 2) * ((-1) ^ (n + 1) * recA α β n ^ (n + 1)) * SS α β n := by
@@ -368,6 +386,7 @@ def ratioR (a b : ℂ) (n : ℕ) : ℂ :=
     (((n + 1 : ℕ) : ℂ) + b + 1) ^ (n + 1) * ((n : ℂ) + a + b + 2) ^ n /
     ((2 * (n : ℂ) + a + b + 3) ^ (2 * n + 1) * (2 * ((n + 1 : ℕ) : ℂ) + a + b + 2) ^ (2 * n + 2))
 
+/-- The closed form `Fr` satisfies `Fr (n+2) = Fr (n+1) · ratioR n`. -/
 theorem Fr_succ (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
     Fr α β (n + 2) = Fr α β (n + 1) * ratioR α β n := by
   have hn : (0 : ℝ) ≤ n := Nat.cast_nonneg n
@@ -424,6 +443,7 @@ def EE (a b : ℂ) (n : ℕ) : ℂ :=
     ((2 * (n : ℂ) + a + b + 2) ^ (n + 1) * poch (a + 1) (n + 1) * poch (b + 1) (n + 1) *
       kk a b (n + 1) ^ (n + 1))
 
+/-- `EE` satisfies the same recursion as `Fr`. -/
 theorem EE_succ (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
     EE α β (n + 1) = EE α β n * ratioR α β n := by
   have hn : (0 : ℝ) ≤ n := Nat.cast_nonneg n
@@ -457,6 +477,7 @@ theorem EE_succ (hα : -1 < α) (hβ : -1 < β) (n : ℕ) :
   rw [hσ, hpa, hpb, hf]
   exact h
 
+/-- `EE α β 0 = 1`. -/
 theorem EE_zero (hα : -1 < α) (hβ : -1 < β) : EE α β 0 = 1 := by
   have hk : kk α β 1 = ((α : ℂ) + β + 2) / 2 := by
     simp [kk, coef_diag, poch_one]; ring
@@ -467,6 +488,7 @@ theorem EE_zero (hα : -1 < α) (hβ : -1 < β) : EE α β 0 = 1 := by
   norm_num [poch_one]
   field_simp
 
+/-- `EE α β n = Fr α β (n + 1)`, by induction. -/
 theorem EE_eq_Fr (hα : -1 < α) (hβ : -1 < β) (n : ℕ) : EE α β n = Fr α β (n + 1) := by
   induction n with
   | zero => rw [EE_zero hα hβ]; simp [Fr]
@@ -477,6 +499,7 @@ section Main
 
 variable {α β : ℝ}
 
+/-- If `x` lists `n` distinct real zeros of `P_n^{(α,β)}`, they are all its complex roots. -/
 theorem roots_jacPoly_eq (hα : -1 < α) (hβ : -1 < β) {n : ℕ} (x : Fin n → ℝ)
     (hroot : ∀ i, jacobiPolyP α β n (x i) = 0) (hinj : Function.Injective x) :
     (jacPoly α β n).roots = (univ.val.map fun i => (x i : ℂ)) := by
@@ -494,6 +517,7 @@ theorem roots_jacPoly_eq (hα : -1 < α) (hβ : -1 < β) {n : ℕ} (x : Fin n �
   rw [IsAlgClosed.card_roots_eq_natDegree, natDegree_jacPoly hα hβ, Multiset.card_map,
     card_val, card_univ, Fintype.card_fin]
 
+/-- `P_n^{(α,β)} = kk ∏ (X - xᵢ)` over its `n` distinct real zeros. -/
 theorem jacPoly_eq_nodal (hα : -1 < α) (hβ : -1 < β) {n : ℕ} (x : Fin n → ℝ)
     (hroot : ∀ i, jacobiPolyP α β n (x i) = 0) (hinj : Function.Injective x) :
     jacPoly α β n = C (kk α β n) * Lagrange.nodal univ fun i => (x i : ℂ) := by
@@ -502,6 +526,7 @@ theorem jacPoly_eq_nodal (hα : -1 < α) (hβ : -1 < β) {n : ℕ} (x : Fin n �
   rw [leadingCoeff_jacPoly hα hβ, roots_jacPoly_eq hα hβ x hroot hinj, Multiset.map_map]
   rfl
 
+/-- The Jacobi discriminant equals `EE`. -/
 theorem disc_eq_EE (hα : -1 < α) (hβ : -1 < β) (m : ℕ) (x : Fin (m + 1) → ℝ)
     (hroot : ∀ i, jacobiPolyP α β (m + 1) (x i) = 0) (hinj : Function.Injective x) :
     (∏ i : Fin (m + 1), ∏ j : Fin (m + 1),

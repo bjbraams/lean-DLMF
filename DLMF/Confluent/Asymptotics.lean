@@ -98,7 +98,7 @@ theorem hasAsymptoticExpansion_kummerU_of_re_pos {a b : ℂ} (ha : 0 < a.re) :
       refine IsBigO.of_bound 1 ?_
       filter_upwards [self_mem_nhdsWithin] with t ht
       have ht : (0 : ℝ) < t := ht
-      rw [Complex.norm_cpow_eq_rpow_re_of_pos ht, Real.norm_eq_abs,
+      rw [norm_cpow_eq_rpow_re_of_pos ht, Real.norm_eq_abs,
         abs_of_pos (Real.rpow_pos_of_pos ht _)]
       simp
     refine ((h1.mul (one_add_cpow_sub_sum_isBigO (b - a - 1) N)).congr' ?_ ?_)
@@ -155,13 +155,14 @@ theorem tricomiCoeff_sub_one_succ (a b : ℂ) (n : ℕ) :
   field_simp
   ring
 
+/-- The leading coefficient of the Tricomi expansion is `1`. -/
 theorem tricomiCoeff_zero (a b : ℂ) : tricomiCoeff a b 0 = 1 := by
   simp [tricomiCoeff, poch_zero]
 
 /-- The norm of the Tricomi scale on the positive axis. -/
 theorem norm_ofReal_cpow_neg_add {x : ℝ} (hx : 0 < x) (n : ℕ) (a : ℂ) :
     ‖(x : ℂ) ^ (-((n : ℂ) + a))‖ = x ^ (-((n : ℝ) + a.re)) := by
-  rw [Complex.norm_cpow_eq_rpow_re_of_pos hx]
+  rw [norm_cpow_eq_rpow_re_of_pos hx]
   simp
 
 /-- The downward step in the first parameter, from DLMF 13.3.10:
@@ -189,7 +190,7 @@ theorem hasAsymptoticExpansion_kummerU_sub_one {a b : ℂ}
     refine IsBigO.of_bound 1 ?_
     filter_upwards [eventually_ge_atTop 1] with x hx
     have hx0 : 0 < x := by linarith
-    rw [norm_ofReal_cpow_neg_add hx0, one_mul, Complex.norm_cpow_eq_rpow_re_of_pos hx0]
+    rw [norm_ofReal_cpow_neg_add hx0, one_mul, norm_cpow_eq_rpow_re_of_pos hx0]
     refine Real.rpow_le_rpow_of_exponent_le hx ?_
     simp only [Complex.neg_re, Complex.add_re, Complex.natCast_re, Complex.sub_re,
       Complex.one_re]
@@ -312,6 +313,7 @@ theorem hasAsymptoticExpansion_kummerU_sub_one_of_filter {l : Filter ℂ}
     rw [hsum]
     linear_combination -hU
 
+/-- Eventually along a sector filter at infinity, `1 ≤ |z|`. -/
 theorem one_le_norm_sectorAtTop (δ : ℝ) : ∀ᶠ z in sectorAtTop δ, 1 ≤ ‖z‖ :=
   eventually_sectorAtTop (R := 1) fun _ hz _ => hz
 
@@ -336,7 +338,7 @@ theorem hasAsymptoticExpansion_kummerU_sector_of_re_pos {a b : ℂ} (ha : 0 < a.
       refine IsBigO.of_bound 1 ?_
       filter_upwards [self_mem_nhdsWithin] with t ht
       have ht : (0 : ℝ) < t := ht
-      rw [Complex.norm_cpow_eq_rpow_re_of_pos ht, Real.norm_eq_abs,
+      rw [norm_cpow_eq_rpow_re_of_pos ht, Real.norm_eq_abs,
         abs_of_pos (Real.rpow_pos_of_pos ht _)]
       simp
     refine ((h1.mul (one_add_cpow_sub_sum_isBigO (b - a - 1) N)).congr' ?_ ?_)
@@ -455,7 +457,7 @@ theorem hasAsymptoticExpansion_regularizedConfluent_of_re_pos {a b : ℂ} (ha : 
       refine IsBigO.of_bound 1 ?_
       filter_upwards [self_mem_nhdsWithin] with t ht
       have ht : (0 : ℝ) < t := ht
-      rw [Complex.norm_cpow_eq_rpow_re_of_pos ht, Real.norm_eq_abs,
+      rw [norm_cpow_eq_rpow_re_of_pos ht, Real.norm_eq_abs,
         abs_of_pos (Real.rpow_pos_of_pos ht _)]
       simp
     refine ((h1.mul (one_sub_cpow_sub_sum_isBigO (a - 1) N)).congr' ?_ ?_)
@@ -529,6 +531,7 @@ theorem hasAsymptoticExpansion_regularizedConfluent_of_re_pos {a b : ℂ} (ha : 
     have h1 : ((-1 : ℂ) ^ n) ^ 2 = 1 := by rw [← pow_mul, mul_comm, pow_mul]; simp
     rw [h1, mul_one]
 
+/-- The leading Kummer expansion coefficient is `1/Γ(a)`. -/
 theorem kummerCoeff_zero (a b : ℂ) : kummerCoeff a b 0 = (Gamma a)⁻¹ := by
   simp [kummerCoeff, poch_zero]
 
@@ -536,7 +539,7 @@ theorem kummerCoeff_zero (a b : ℂ) : kummerCoeff a b 0 = (Gamma a)⁻¹ := by
 theorem kummerCoeff_sub_one (a b : ℂ) (m : ℕ) :
     kummerCoeff (a - 1) b m = kummerCoeff a b (m + 1) - kummerCoeff a (b + 1) (m + 1) := by
   simp only [kummerCoeff]
-  rw [recip_Gamma_eq_mul_recip_Gamma_add_one (a - 1), sub_add_cancel,
+  rw [one_div_Gamma_eq_self_mul_one_div_Gamma_add_one (a - 1), sub_add_cancel,
     show 1 - (a - 1) = 2 - a by ring, show b - (a - 1) = b - a + 1 by ring,
     show b + 1 - a = b - a + 1 by ring, poch_succ_left (1 - a),
     show 1 - a + 1 = 2 - a by ring, poch_succ_left (b - a), poch_succ (b - a + 1),
@@ -571,10 +574,11 @@ theorem isBigO_exp_mul_cpow {c d : ℂ} (h : c.re ≤ d.re) :
   refine IsBigO.of_bound 1 ?_
   filter_upwards [eventually_ge_atTop 1] with x hx
   have hx0 : 0 < x := by linarith
-  rw [one_mul, norm_mul, norm_mul, Complex.norm_cpow_eq_rpow_re_of_pos hx0,
-    Complex.norm_cpow_eq_rpow_re_of_pos hx0]
+  rw [one_mul, norm_mul, norm_mul, norm_cpow_eq_rpow_re_of_pos hx0,
+    norm_cpow_eq_rpow_re_of_pos hx0]
   exact mul_le_mul_of_nonneg_left (Real.rpow_le_rpow_of_exponent_le hx h) (norm_nonneg _)
 
+/-- For real `x > 0`, `x · (eˣ x^c) = eˣ x^{c+1}`. -/
 theorem ofReal_mul_exp_mul_cpow {x : ℝ} (hx : 0 < x) (c : ℂ) :
     (x : ℂ) * (exp (x : ℂ) * (x : ℂ) ^ c) = exp (x : ℂ) * (x : ℂ) ^ (c + 1) := by
   have hx0 : (x : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hx.ne'
@@ -762,11 +766,13 @@ theorem regularizedConfluent_sum_eq {x : ℝ} (hx : 0 < x) (a b : ℂ) (n : ℕ)
 def binomRem (r : ℝ) (n : ℕ) (t : ℝ) : ℝ :=
   (1 + t) ^ (-r) - ∑ k ∈ Finset.range n, (-1) ^ k * (ascPochhammer ℝ k).eval r / k ! * t ^ k
 
+/-- The Pochhammer recursion `(r)_{n+1} = r (r+1)_n` over the reals. -/
 theorem ascPochhammer_eval_succ_left' (r : ℝ) (n : ℕ) :
     (ascPochhammer ℝ (n + 1)).eval r = r * (ascPochhammer ℝ n).eval (r + 1) := by
   rw [ascPochhammer_succ_left]
   simp [Polynomial.eval_comp]
 
+/-- The binomial remainder satisfies `d/dt R_{n+1}(r; t) = -r R_n(r+1; t)` for `t > -1`. -/
 theorem hasDerivAt_binomRem (r : ℝ) (n : ℕ) {t : ℝ} (ht : -1 < t) :
     HasDerivAt (binomRem r (n + 1)) (-r * binomRem (r + 1) n t) t := by
   have h1 : HasDerivAt (fun t : ℝ => (1 + t) ^ (-r)) (-r * (1 + t) ^ (-(r + 1))) t := by
@@ -825,17 +831,12 @@ theorem abs_binomRem_le {r : ℝ} (hr : 0 ≤ r) (n : ℕ) {t : ℝ} (ht : 0 ≤
             mul_le_mul_of_nonneg_left this hr
         _ = _ := by push_cast; field_simp
 
+/-- The real Pochhammer symbol `(r)_k`, cast to `ℂ`, is the complex Pochhammer symbol at `r`. -/
 theorem ofReal_ascPochhammer_eval (r : ℝ) (k : ℕ) :
     (((ascPochhammer ℝ k).eval r : ℝ) : ℂ) = (ascPochhammer ℂ k).eval (r : ℂ) := by
   induction k with
   | zero => simp
   | succ k ih => rw [ascPochhammer_succ_eval, ascPochhammer_succ_eval]; push_cast; rw [ih]
-
-/-- Real Pochhammer symbols at a nonnegative argument are nonnegative. -/
-theorem ascPochhammer_eval_nonneg {r : ℝ} (hr : 0 ≤ r) (k : ℕ) : 0 ≤ (ascPochhammer ℝ k).eval r := by
-  induction k with
-  | zero => simp
-  | succ k ih => rw [ascPochhammer_succ_eval]; positivity
 
 @[dlmf 13.7.E1]
 theorem regularizedHGFun_poincare_real (a b : ℂ) (n : ℕ) (_ha : ∀ k : ℕ, a ≠ -k) :
@@ -949,7 +950,7 @@ theorem kummerU_poincare_finite {a b x : ℝ} (ha : 0 < a) (hb : b ≤ a + 1)
   have hGpos : 0 < Real.Gamma a := Real.Gamma_pos_of_pos ha
   have hGa' : Gamma (a : ℂ) = (Real.Gamma a : ℂ) := Complex.Gamma_ofReal a
   set K : ℝ := (ascPochhammer ℝ n).eval r / n ! with hK
-  have hK0 : 0 ≤ K := div_nonneg (ascPochhammer_eval_nonneg hr0 n) (by positivity)
+  have hK0 : 0 ≤ K := div_nonneg (DLMF.Hypergeometric.poch_eval_nonneg hr0 n) (by positivity)
   have hmaj : IntegrableOn (fun t : ℝ => K * (Real.exp (-x * t) * t ^ ((a + n) - 1)))
       (Set.Ioi 0) := (integrableOn_exp_neg_mul_mul_rpow_sub_one (by positivity) hx).const_mul K
   have hInt : ‖∫ t in Set.Ioi (0 : ℝ), Real.exp (-x * t) •
@@ -961,7 +962,7 @@ theorem kummerU_poincare_finite {a b x : ℝ} (ha : 0 < a) (hb : b ≤ a + 1)
     · exact (IntegrableOn.congr_fun (hFint.sub hPint) hdiff measurableSet_Ioi).norm
     · have ht : (0 : ℝ) < t := ht
       rw [norm_smul, norm_mul, Real.norm_eq_abs, Real.abs_exp,
-        Complex.norm_cpow_eq_rpow_re_of_pos ht, Complex.norm_real, Real.norm_eq_abs]
+        norm_cpow_eq_rpow_re_of_pos ht, Complex.norm_real, Real.norm_eq_abs]
       have hb := abs_binomRem_le hr0 n ht.le
       simp only [Complex.sub_re, Complex.ofReal_re, Complex.one_re]
       rw [show (a + n) - 1 = (a - 1) + n by ring, Real.rpow_add ht, Real.rpow_natCast]
@@ -985,7 +986,7 @@ theorem kummerU_poincare_finite {a b x : ℝ} (ha : 0 < a) (hb : b ≤ a + 1)
           ((x ^ (-(a + n)) * (Real.Gamma (n + a) / Real.Gamma a) *
             (ascPochhammer ℝ n).eval r / n.factorial : ℝ) : ℂ) by push_cast; ring,
           Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (by
-            have := ascPochhammer_eval_nonneg hr0 n
+            have := DLMF.Hypergeometric.poch_eval_nonneg hr0 n
             have := Real.Gamma_pos_of_pos (show 0 < (n : ℝ) + a by positivity)
             positivity), hK, add_comm (n : ℝ) a]
         field_simp
@@ -1105,10 +1106,12 @@ The former product of singular powers assigned zero at the removable point. -/
 def largeBGenerating (a z t : ℂ) : ℂ :=
   DLMF.Hypergeometric.expSubOneDiv t ^ (a - 1) * exp (t + z * (1 - exp (-t)))
 
+/-- The `s`-th Taylor coefficient at `0` of `largeBGenerating a z`. -/
 @[dlmf 13.8.E3]
 def largeBCoeff (a z : ℂ) (s : ℕ) : ℂ :=
   iteratedDeriv s (largeBGenerating a z) 0 / s.factorial
 
+/-- The zeroth large-`b` coefficient is `1`. -/
 @[simp]
 theorem largeBCoeff_zero (a z : ℂ) : largeBCoeff a z 0 = 1 := by
   simp [largeBCoeff, largeBGenerating, DLMF.Hypergeometric.expSubOneDiv]
@@ -1129,12 +1132,15 @@ section LargeBPoincare
 
 open Set
 
+/-- The large-`b` generating function is analytic at `t = 0`. -/
 theorem hcub_analyticAt_largeBGenerating (a z : ℂ) : AnalyticAt ℂ (largeBGenerating a z) 0 := by
   have h1 : expSubOneDiv 0 ∈ slitPlane := by simp [expSubOneDiv]
   have h2 : AnalyticAt ℂ (fun t : ℂ => exp (t + z * (1 - exp (-t)))) 0 :=
     (analyticAt_id.add (analyticAt_const.mul (analyticAt_const.sub analyticAt_id.neg.cexp))).cexp
   exact ((analyticAt_expSubOneDiv 0).cpow analyticAt_const h1).mul h2
 
+/-- The Taylor remainder of the large-`b` generating function after `N` terms is `O(|t|^N)` as `t →
+0`. -/
 theorem hcub_largeB_taylor (a z : ℂ) (N : ℕ) :
     (fun t => largeBGenerating a z t - ∑ n ∈ Finset.range N, largeBCoeff a z n * t ^ n)
       =O[𝓝 0] fun t => ‖t‖ ^ N := by
@@ -1143,6 +1149,8 @@ theorem hcub_largeB_taylor (a z : ℂ) (N : ℕ) :
   simp only [zero_add, FormalMultilinearSeries.partialSum,
     FormalMultilinearSeries.ofScalars_apply_eq, smul_eq_mul, largeBCoeff]
 
+/-- The substitution `s = 1 - e^{-t}` transforms the Euler integrand of `M(a,b,z)` into `e^{-bt}
+t^{a-1} G(a,z,t)`, with `G` the large-`b` generating function. -/
 theorem hcub_subst (a z : ℂ) (b : ℝ) {t : ℝ} (ht : 0 < t) :
     |Real.exp (-t)| • (((1 - Real.exp (-t) : ℝ) : ℂ) ^ (a - 1) *
       (1 - ((1 - Real.exp (-t) : ℝ) : ℂ)) ^ ((b : ℂ) - a - 1) *
@@ -1179,6 +1187,8 @@ theorem hcub_subst (a z : ℂ) (b : ℝ) {t : ℝ} (ht : 0 < t) :
   congr 2
   ring
 
+/-- The Euler integral `∫₀¹ s^{a-1}(1-s)^{b-a-1} e^{zs} ds` equals the Laplace integral `∫₀^∞
+e^{-bt} t^{a-1} G(a,z,t) dt`. -/
 theorem hcub_euler_eq_laplace (a z : ℂ) (b : ℝ) :
     ∫ s : ℝ in (0 : ℝ)..1, (s : ℂ) ^ (a - 1) * (1 - (s : ℂ)) ^ ((b : ℂ) - a - 1) * exp (z * s) =
       ∫ t in Ioi (0 : ℝ), Real.exp (-b * t) • ((t : ℂ) ^ (a - 1) * largeBGenerating a z t) := by
@@ -1188,6 +1198,8 @@ theorem hcub_euler_eq_laplace (a z : ℂ) (b : ℝ) :
   refine setIntegral_congr_fun measurableSet_Ioi fun t ht => ?_
   exact hcub_subst a z b ht
 
+/-- For `0 < Re a < b`, the Laplace integrand `e^{-bt} t^{a-1} G(a,z,t)` is integrable on `(0, ∞)`.
+-/
 theorem hcub_integrableOn (a z : ℂ) (ha : 0 < a.re) {b : ℝ} (hb : a.re < b) :
     IntegrableOn (fun t : ℝ => Real.exp (-b * t) • ((t : ℂ) ^ (a - 1) * largeBGenerating a z t))
       (Ioi 0) := by
@@ -1232,7 +1244,7 @@ theorem hcub_largeB_base (a z : ℂ) (ha : 0 < a.re) (n : ℕ) :
       ring
     · filter_upwards [self_mem_nhdsWithin] with t ht
       have ht' : (0 : ℝ) < t := ht
-      rw [norm_mul, norm_pow, Complex.norm_cpow_eq_rpow_re_of_pos ht', Complex.norm_real,
+      rw [norm_mul, norm_pow, norm_cpow_eq_rpow_re_of_pos ht', Complex.norm_real,
         Real.norm_eq_abs, abs_of_pos ht', Real.norm_eq_abs,
         abs_of_pos (Real.rpow_pos_of_pos ht' _), one_mul,
         show (N : ℝ) + a.re - 1 = (a - 1).re + N by simp; ring, Real.rpow_add ht',
@@ -1357,6 +1369,7 @@ theorem hcub_largeBMix_eq_of_re_pos (a z : ℂ) (ha : 0 < a.re) (N : ℕ) :
       simp only [smul_eq_mul]; congr 1; exact Finset.sum_congr rfl fun _ _ => mul_comm _ _)
   exact congrFun h N
 
+/-- The explicit large-`b` coefficient sum is entire in `a`. -/
 theorem hcub_differentiable_largeBMix (z : ℂ) (N : ℕ) :
     Differentiable ℂ (fun a => hcub_largeBMix a z N) := by
   unfold hcub_largeBMix
@@ -1364,6 +1377,7 @@ theorem hcub_differentiable_largeBMix (z : ℂ) (N : ℕ) :
   exact (((Polynomial.differentiable _).mul (differentiable_const _)).div_const _).mul
     ((hcub_differentiable_stirlingRatioG _ _).comp differentiable_neg)
 
+/-- The large-`b` generating function is complex differentiable in `t` for `|t| ≤ 1/2`. -/
 theorem hcub_differentiableAt_largeBGenerating (a z : ℂ) {t : ℂ} (ht : ‖t‖ ≤ 1 / 2) :
     DifferentiableAt ℂ (largeBGenerating a z) t := by
   have hE : DifferentiableAt ℂ expSubOneDiv t := (analyticAt_expSubOneDiv t).differentiableAt
@@ -1371,6 +1385,7 @@ theorem hcub_differentiableAt_largeBGenerating (a z : ℂ) {t : ℂ} (ht : ‖t�
   exact (hE.cpow (differentiableAt_const _) (hcub_expSubOneDiv_mem_slitPlane ht)).mul
     (by fun_prop)
 
+/-- Each large-`b` coefficient is an entire function of `a`. -/
 theorem hcub_differentiable_largeBCoeff (z : ℂ) (N : ℕ) :
     Differentiable ℂ (fun a => largeBCoeff a z N) := by
   have hE : ∀ t : ℂ, DifferentiableAt ℂ expSubOneDiv t := fun t =>

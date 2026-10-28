@@ -148,9 +148,11 @@ def chebyshevCircleFun {f : ℝ → ℝ} (hf : ContinuousOn f (Icc (-1) 1)) :
     C(AddCircle (2 * π), ℂ) :=
   Polynomial.Chebyshev.complexCircleFun (Complex.continuous_ofReal.comp_continuousOn hf)
 
+/-- `chebyshevCircleFun hf` at the class of `θ` is `f(cos θ)`. -/
 theorem chebyshevCircleFun_coe {f : ℝ → ℝ} (hf : ContinuousOn f (Icc (-1) 1)) (θ : ℝ) :
     chebyshevCircleFun hf (θ : AddCircle (2 * π)) = f (Real.cos θ) := rfl
 
+/-- `0 < 2π`, needed for the Fourier API on `AddCircle (2π)`. -/
 local instance instTwoPiPos : Fact (0 < 2 * π) := ⟨Real.two_pi_pos⟩
 
 /-- The full-period integral `∫₀^{2π} e^{-inθ} f(cos θ) dθ = π c_{|n|}`. -/

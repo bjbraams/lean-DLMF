@@ -42,6 +42,7 @@ namespace DLMF.Lame
 def p2p_Sol (h : ℝ) (w : ℝ → ℝ) : Prop :=
   Differentiable ℝ w ∧ ∀ x, HasDerivAt (deriv w) (-h * w x) x
 
+/-- At `k = 0` Lamé's equation is `w'' + h w = 0`. -/
 lemma p2p_isLameSolution_zero_iff {h ν : ℝ} {w : ℝ → ℝ} :
     Real.IsLameSolution h ν 0 w ↔ p2p_Sol h w := by
   constructor
@@ -68,6 +69,8 @@ lemma p2p_sol_init_ne {h : ℝ} {w : ℝ → ℝ} (hw : p2p_Sol h w) (hne : w �
   · exact hasDerivAt_const t (0 : ℝ)
   · simp
 
+/-- For `h > 0` a solution of `w'' = -h w` is
+`w(x) = w(0) cos(√h x) + w'(0)/√h · sin(√h x)`, together with the formula for `w'`. -/
 lemma p2p_sol_pos {h : ℝ} {w : ℝ → ℝ} (hh : 0 < h) (hw : p2p_Sol h w) (x : ℝ) :
     w x = w 0 * Real.cos (√h * x) + deriv w 0 / √h * Real.sin (√h * x) ∧
       deriv w x = -(w 0 * √h * Real.sin (√h * x)) + deriv w 0 * Real.cos (√h * x) := by
@@ -87,6 +90,7 @@ lemma p2p_sol_pos {h : ℝ} {w : ℝ → ℝ} (hh : 0 < h) (hw : p2p_Sol h w) (x
     (by simp) (by simp)
   exact ⟨congrFun this.1 x, congrFun this.2 x⟩
 
+/-- For `h = 0` a solution of `w'' = 0` is `w(x) = w(0) + w'(0) x`, with `w' ≡ w'(0)`. -/
 lemma p2p_sol_zero {w : ℝ → ℝ} (hw : p2p_Sol 0 w) (x : ℝ) :
     w x = w 0 + deriv w 0 * x ∧ deriv w x = deriv w 0 := by
   have := p2p_sol_unique hw (g := fun t => w 0 + deriv w 0 * t) (g' := fun _ => deriv w 0)
@@ -94,6 +98,8 @@ lemma p2p_sol_zero {w : ℝ → ℝ} (hw : p2p_Sol 0 w) (x : ℝ) :
       by simpa using hasDerivAt_const t (deriv w 0)⟩) (by simp) (by simp)
   exact ⟨congrFun this.1 x, congrFun this.2 x⟩
 
+/-- For `h < 0` a solution of `w'' = -h w` is
+`w(x) = w(0) cosh(√(-h) x) + w'(0)/√(-h) · sinh(√(-h) x)`, together with the formula for `w'`. -/
 lemma p2p_sol_neg {h : ℝ} {w : ℝ → ℝ} (hh : h < 0) (hw : p2p_Sol h w) (x : ℝ) :
     w x = w 0 * Real.cosh (√(-h) * x) + deriv w 0 / √(-h) * Real.sinh (√(-h) * x) ∧
       deriv w x = w 0 * √(-h) * Real.sinh (√(-h) * x) + deriv w 0 * Real.cosh (√(-h) * x) := by
@@ -113,6 +119,7 @@ lemma p2p_sol_neg {h : ℝ} {w : ℝ → ℝ} (hh : h < 0) (hw : p2p_Sol h w) (x
     (by simp) (by simp)
   exact ⟨congrFun this.1 x, congrFun this.2 x⟩
 
+/-- If `s > 0` and `sin(sπ/2) = 0`, then `s = 2n` for some natural `n > 0`. -/
 lemma p2p_sin_zero {s : ℝ} (hs : 0 < s) (h : Real.sin (s * (π / 2)) = 0) :
     ∃ n : ℕ, 0 < n ∧ s = 2 * n := by
   obtain ⟨n, hn⟩ := Real.sin_eq_zero_iff.mp h
@@ -130,6 +137,7 @@ lemma p2p_sin_zero {s : ℝ} (hs : 0 < s) (h : Real.sin (s * (π / 2)) = 0) :
     exact_mod_cast this
   rw [this]
 
+/-- If `s > 0` and `cos(sπ/2) = 0`, then `s = 2n + 1` for some natural `n`. -/
 lemma p2p_cos_zero {s : ℝ} (hs : 0 < s) (h : Real.cos (s * (π / 2)) = 0) :
     ∃ n : ℕ, s = 2 * n + 1 := by
   obtain ⟨n, hn⟩ := Real.cos_eq_zero_iff.mp h
@@ -156,6 +164,7 @@ def p2p_phi (N : ℕ) (oddK : Bool) (x : ℝ) : ℝ :=
 def p2p_dphi (N : ℕ) (oddK : Bool) (x : ℝ) : ℝ :=
   if oddK then -(N * Real.cos (N * (π / 2 - x))) else N * Real.sin (N * (π / 2 - x))
 
+/-- `p2p_phi N oddK` has derivative `p2p_dphi N oddK`, whose derivative is `-N² p2p_phi`. -/
 lemma p2p_phi_hasDerivAt (N : ℕ) (oddK : Bool) (x : ℝ) :
     HasDerivAt (p2p_phi N oddK) (p2p_dphi N oddK x) x ∧
       HasDerivAt (p2p_dphi N oddK) (-(N : ℝ) ^ 2 * p2p_phi N oddK x) x := by
@@ -175,21 +184,26 @@ lemma p2p_phi_hasDerivAt (N : ℕ) (oddK : Bool) (x : ℝ) :
     · simp only [p2p_phi, ite_true]
       exact (hc.const_mul (N : ℝ)).neg.congr_deriv (by ring)
 
+/-- The derivative of `p2p_phi N oddK` is `p2p_dphi N oddK`. -/
 lemma p2p_deriv_phi (N : ℕ) (oddK : Bool) : deriv (p2p_phi N oddK) = p2p_dphi N oddK :=
   funext fun x => (p2p_phi_hasDerivAt N oddK x).1.deriv
 
+/-- `p2p_phi N oddK` solves `w'' + N² w = 0`. -/
 lemma p2p_phi_sol (N : ℕ) (oddK : Bool) : p2p_Sol ((N : ℝ) ^ 2) (p2p_phi N oddK) :=
   ⟨fun x => (p2p_phi_hasDerivAt N oddK x).1.differentiableAt, fun x => by
     rw [p2p_deriv_phi]; exact (p2p_phi_hasDerivAt N oddK x).2.congr_deriv (by ring)⟩
 
+/-- `sin(2q · π/2) = 0`. -/
 lemma p2p_sin_even (q : ℕ) : Real.sin (((2 * q : ℕ) : ℝ) * (π / 2)) = 0 := by
   rw [show ((2 * q : ℕ) : ℝ) * (π / 2) = q * π by push_cast; ring]
   exact Real.sin_nat_mul_pi q
 
+/-- `cos((2q + 1) · π/2) = 0`. -/
 lemma p2p_cos_odd (q : ℕ) : Real.cos (((2 * q + 1 : ℕ) : ℝ) * (π / 2)) = 0 := by
   rw [show ((2 * q + 1 : ℕ) : ℝ) * (π / 2) = q * π + π / 2 by push_cast; ring,
     Real.cos_add_pi_div_two, Real.sin_nat_mul_pi, neg_zero]
 
+/-- At `k = 0` the complete elliptic integral is `K(0) = π/2`. -/
 lemma p2p_K_zero : Real.compEllIntKm ((0 : ℝ) ^ 2) = π / 2 := by
   simp [Real.compEllIntKm_zero]
 
@@ -296,6 +310,7 @@ lemma p2p_lameSpectrum_zero (ν : ℝ) (odd0 oddK : Bool) :
       p2p_isLameSolution_zero_iff] at this
     exact ⟨_, this⟩
 
+/-- For strictly increasing `f : ℕ → ℝ`, `range f ∩ (-∞, f a) = f '' {b < a}`. -/
 lemma p2p_range_inter_Iio {f : ℕ → ℝ} (hf : StrictMono f) (a : ℕ) :
     range f ∩ Iio (f a) = f '' Iio a := by
   ext x
@@ -305,6 +320,7 @@ lemma p2p_range_inter_Iio {f : ℕ → ℝ} (hf : StrictMono f) (a : ℕ) :
   · rintro ⟨b, hb, rfl⟩
     exact ⟨⟨b, rfl⟩, hf hb⟩
 
+/-- For strictly increasing `f : ℕ → ℝ`, `range f ∩ (-∞, f a)` is finite with `a` elements. -/
 lemma p2p_ncard_range_inter_Iio {f : ℕ → ℝ} (hf : StrictMono f) (a : ℕ) :
     (range f ∩ Iio (f a)).Finite ∧ (range f ∩ Iio (f a)).ncard = a := by
   rw [p2p_range_inter_Iio hf]
@@ -358,6 +374,7 @@ lemma p2p_eq_smul {h : ℝ} {odd0 : Bool} {w ψ : ℝ → ℝ} (hw : p2p_Sol h w
     · rw [hbw, hbψ, mul_zero]
     · field_simp
 
+/-- At `k = 0`, `dn(x, 0) = 1`. -/
 lemma p2p_dn_zero (x : ℝ) : Real.jacobiDnm x ((0 : ℝ) ^ 2) = 1 := by
   rw [show ((0 : ℝ) ^ 2) = 0 by norm_num]
   exact (jacobi_zero_param x).2.2
@@ -395,6 +412,7 @@ lemma p2p_lameEigenfunction_eq {ν : ℝ} {odd0 oddK : Bool} {j : ℕ} {ψ : ℝ
   rw [Real.lameEigenfunction, dite_eq_left hex]
   exact key _ hex.exists.choose_spec
 
+/-- For `N ≠ 0`, `∫₀^{π/2} p2p_phi N oddK (x)² dx = π/4`. -/
 lemma p2p_integral_phi_sq {N : ℕ} (hN : N ≠ 0) (oddK : Bool) :
     ∫ x in (0 : ℝ)..π / 2, p2p_phi N oddK x ^ 2 = π / 4 := by
   have hN' : (N : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hN
@@ -421,11 +439,14 @@ lemma p2p_integral_phi_sq {N : ℕ} (hN : N ≠ 0) (oddK : Bool) :
     field_simp
     linear_combination (-8) * hsc'
 
+/-- `2 ⌊m/2⌋ + [m odd] = m`. -/
 lemma p2p_two_div_add_bodd (m : ℕ) : 2 * (m / 2) + m.bodd.toNat = m := by
   rcases Nat.even_or_odd' m with ⟨q, rfl | rfl⟩
   · simp [Nat.bodd_mul]
   · simp [Nat.bodd_mul]; omega
 
+/-- At `k = 0`, for `N = 2j + [odd0] + [oddK] ≠ 0`, `p2p_phi N oddK` is the `j`th normalized
+Lamé eigenfunction of boundary type `(odd0, oddK)`. -/
 lemma p2p_normalized_phi (ν : ℝ) (odd0 oddK : Bool) (j : ℕ)
     (hN : 2 * j + odd0.toNat + oddK.toNat ≠ 0) :
     Real.IsNormalizedLameEigenfunction ν 0 odd0 oddK j
@@ -441,6 +462,8 @@ lemma p2p_normalized_phi (ν : ℝ) (odd0 oddK : Bool) (j : ℕ)
     · simp [p2p_phi]
     · simp [p2p_dphi]; linarith
 
+/-- At `k = 0` the constant `1/√2` is the normalized Lamé eigenfunction `j = 0` of type
+`(even, even)`. -/
 lemma p2p_normalized_const (ν : ℝ) :
     Real.IsNormalizedLameEigenfunction ν 0 false false 0 (fun _ => 1 / √2) := by
   have h2 : (0 : ℝ) < √2 := by positivity

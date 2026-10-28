@@ -47,6 +47,7 @@ def Real.fresnelCosInt (x : ℝ) : ℝ := ∫ t in (0 : ℝ)..x, Real.cos (π * 
 @[dlmf 7.2.E8]
 def Real.fresnelSinInt (x : ℝ) : ℝ := ∫ t in (0 : ℝ)..x, Real.sin (π * t ^ 2 / 2)
 
+/-- `C'(x) = cos(πx²/2)` for the Fresnel integral `C`. -/
 theorem Real.hasDerivAt_fresnelCosInt (x : ℝ) : HasDerivAt Real.fresnelCosInt
     (Real.cos (π * x ^ 2 / 2)) x :=
   intervalIntegral.integral_hasDerivAt_right ((by fun_prop : Continuous fun t : ℝ =>
@@ -54,6 +55,7 @@ theorem Real.hasDerivAt_fresnelCosInt (x : ℝ) : HasDerivAt Real.fresnelCosInt
     ((by fun_prop : Continuous fun t : ℝ => Real.cos (π * t ^ 2 / 2)
       ).stronglyMeasurableAtFilter _ _) (by fun_prop)
 
+/-- `S'(x) = sin(πx²/2)` for the Fresnel integral `S`. -/
 theorem Real.hasDerivAt_fresnelSinInt (x : ℝ) : HasDerivAt Real.fresnelSinInt
     (Real.sin (π * x ^ 2 / 2)) x :=
   intervalIntegral.integral_hasDerivAt_right ((by fun_prop : Continuous fun t : ℝ =>

@@ -215,9 +215,4 @@ theorem associatedPQ_independent {ν μ : ℂ} (hν : -1/2 ≤ ν.re) (hμ : 0 �
       linear_combination associatedP ν (-μ) ((2:ℝ):ℂ) * e1 - deriv (associatedP ν (-μ)) ((2:ℝ):ℂ) * e0
     exact (mul_eq_zero.mp this).resolve_left hB
 
-/-- Integral-order completion of the interior zero count in DLMF 14.16(ii). -/
-theorem ferrersP_positive_integer_order_zero_count {ν : ℝ} (hν : -1/2 ≤ ν) (m : ℕ) (hnondeg : ∃ x ∈ Ioo (-1:ℝ) 1, ferrersP ν m x ≠ 0) :
-    Set.Finite (ferrersZeroSet false ν m) ∧ (ferrersZeroSet false ν m).ncard=(max (⌈ν-m⌉:ℤ) 0).toNat := by
-  exact lzero_posInt_zero_count hν m hnondeg
-
 end DLMF.Legendre

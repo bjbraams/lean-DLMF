@@ -57,7 +57,8 @@ theorem continuousOn_trilogKernel_Icc : ContinuousOn trilogKernel (Icc (-1) 1) :
 def Real.trilog (x : ℝ) : ℝ := ∫ t in (0 : ℝ)..x, trilogKernel t
 
 /-- `Li₃' = Li₂(x)/x` on `(-∞, 1)`. -/
-theorem Real.hasDerivAt_trilog {x : ℝ} (hx : x < 1) : HasDerivAt Real.trilog (trilogKernel x) x := by
+theorem Real.hasDerivAt_trilog {x : ℝ} (hx : x < 1) :
+    HasDerivAt Real.trilog (trilogKernel x) x := by
   have hint : IntervalIntegrable trilogKernel MeasureTheory.volume 0 x :=
     (continuousOn_trilogKernel_Iio.mono fun t ht => by
       rw [mem_uIcc] at ht; rcases ht with ⟨_, h⟩ | ⟨_, h⟩ <;> simp only [mem_Iio] <;>
@@ -125,6 +126,42 @@ theorem Real.trilog_neg_one : (Real.trilog (-1) : ℂ) = -(3 / 4) * riemannZeta 
   rw [← polylogSeries_three_ofReal_eq_trilog (by norm_num), ofReal_neg, ofReal_one]
   exact polylogSeries_three_one_neg_one.2
 
+/-- The Landen combination for `Li₃` has derivative zero on `(0, 1)`. -/
+private lemma hasDerivAt_trilog_landen {y : ℝ} (hy : y ∈ Ioo (0 : ℝ) 1) :
+    HasDerivAt (fun x => Real.trilog x + Real.trilog (1 - x) + Real.trilog (1 - x⁻¹) -
+      Real.log x ^ 3 / 6 - π ^ 2 / 6 * Real.log x + Real.log x ^ 2 * Real.log (1 - x) / 2)
+      0 y := by
+  obtain ⟨hy0, hy1⟩ := hy
+  have hyinv : 1 < y⁻¹ := one_lt_inv₀ hy0 |>.mpr hy1
+  have hz : 1 - y⁻¹ < 0 := by linarith
+  have h1 := Real.hasDerivAt_trilog hy1
+  have h2 := (Real.hasDerivAt_trilog (show 1 - y < 1 by linarith)).comp y
+    ((hasDerivAt_id y).const_sub 1)
+  have h3 := (Real.hasDerivAt_trilog (show 1 - y⁻¹ < 1 by linarith)).comp y
+    ((hasDerivAt_inv hy0.ne').const_sub 1)
+  have hl := Real.hasDerivAt_log hy0.ne'
+  have hl1 := ((hasDerivAt_id y).const_sub 1).log (show 1 - id y ≠ 0 by simp; linarith)
+  have h := ((((h1.add h2).add h3).sub ((hl.pow 3).div_const 6)).sub
+    (hl.const_mul (π ^ 2 / 6))).add (((hl.pow 2).mul hl1).div_const 2)
+  refine h.congr_deriv ?_
+  -- dilogarithm identities at the three points
+  have R := Real.dilog_add_dilog_one_sub (x := y) ⟨hy0, hy1⟩
+  have I := Real.dilog_add_dilog_recip hz
+  have La := Real.dilog_add_dilog_div_sub_one hy1
+  rw [show (1 - y⁻¹)⁻¹ = y / (y - 1) by field_simp,
+    show -(1 - y⁻¹) = (1 - y) / y by field_simp; ring,
+    Real.log_div (by linarith) hy0.ne'] at I
+  rw [trilogKernel_of_ne hy0.ne', trilogKernel_of_ne (show 1 - y ≠ 0 by linarith),
+    trilogKernel_of_ne hz.ne]
+  simp only [id, Pi.pow_apply]
+  have h1y : 1 - y ≠ 0 := by linarith
+  have hy1' : y - 1 ≠ 0 := by linarith
+  have hz' : 1 - y⁻¹ ≠ 0 := hz.ne
+  linear_combination (norm := skip) (-1 / (1 - y)) * R + (1 / (y * (y - 1))) * I +
+    (-1 / (y * (y - 1))) * La
+  field_simp
+  ring
+
 /-- **Landen's identity for `Li₃`** on `(0, 1)` (Duverney (8.33)):
 `Li₃(x) + Li₃(1-x) + Li₃(1-1/x) = ζ(3) + ln³x/6 + (π²/6) ln x - ½ ln²x ln(1-x)`. -/
 theorem Real.trilog_landen {x : ℝ} (hx : x ∈ Ioo (0 : ℝ) 1) :
@@ -133,37 +170,7 @@ theorem Real.trilog_landen {x : ℝ} (hx : x ∈ Ioo (0 : ℝ) 1) :
         Real.log x ^ 2 * Real.log (1 - x) / 2 := by
   set T : ℝ → ℝ := fun x => Real.trilog x + Real.trilog (1 - x) + Real.trilog (1 - x⁻¹) -
     Real.log x ^ 3 / 6 - π ^ 2 / 6 * Real.log x + Real.log x ^ 2 * Real.log (1 - x) / 2
-  have hd (y : ℝ) (hy : y ∈ Ioo (0 : ℝ) 1) : HasDerivAt T 0 y := by
-    obtain ⟨hy0, hy1⟩ := hy
-    have hyinv : 1 < y⁻¹ := one_lt_inv₀ hy0 |>.mpr hy1
-    have hz : 1 - y⁻¹ < 0 := by linarith
-    have h1 := Real.hasDerivAt_trilog hy1
-    have h2 := (Real.hasDerivAt_trilog (show 1 - y < 1 by linarith)).comp y
-      ((hasDerivAt_id y).const_sub 1)
-    have h3 := (Real.hasDerivAt_trilog (show 1 - y⁻¹ < 1 by linarith)).comp y
-      ((hasDerivAt_inv hy0.ne').const_sub 1)
-    have hl := Real.hasDerivAt_log hy0.ne'
-    have hl1 := ((hasDerivAt_id y).const_sub 1).log (show 1 - id y ≠ 0 by simp; linarith)
-    have h := ((((h1.add h2).add h3).sub ((hl.pow 3).div_const 6)).sub
-      (hl.const_mul (π ^ 2 / 6))).add (((hl.pow 2).mul hl1).div_const 2)
-    refine h.congr_deriv ?_
-    -- dilogarithm identities at the three points
-    have R := Real.dilog_add_dilog_one_sub (x := y) ⟨hy0, hy1⟩
-    have I := Real.dilog_add_dilog_recip hz
-    have La := Real.dilog_add_dilog_div_sub_one hy1
-    rw [show (1 - y⁻¹)⁻¹ = y / (y - 1) by field_simp,
-      show -(1 - y⁻¹) = (1 - y) / y by field_simp; ring,
-      Real.log_div (by linarith) hy0.ne'] at I
-    rw [trilogKernel_of_ne hy0.ne', trilogKernel_of_ne (show 1 - y ≠ 0 by linarith),
-      trilogKernel_of_ne hz.ne]
-    simp only [id, Pi.pow_apply]
-    have h1y : 1 - y ≠ 0 := by linarith
-    have hy1' : y - 1 ≠ 0 := by linarith
-    have hz' : 1 - y⁻¹ ≠ 0 := hz.ne
-    linear_combination (norm := skip) (-1 / (1 - y)) * R + (1 / (y * (y - 1))) * I +
-      (-1 / (y * (y - 1))) * La
-    field_simp
-    ring
+  have hd (y : ℝ) (hy : y ∈ Ioo (0 : ℝ) 1) : HasDerivAt T 0 y := hasDerivAt_trilog_landen hy
   have hc : ∀ y ∈ Ioo (0 : ℝ) 1, T y = T (1 / 2) := fun y hy =>
     isOpen_Ioo.is_const_of_deriv_eq_zero (convex_Ioo (0 : ℝ) 1).isPreconnected
       (fun t ht => (hd t ht).differentiableAt.differentiableWithinAt)

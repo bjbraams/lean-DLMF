@@ -24,6 +24,8 @@ open scoped Topology Real
 
 namespace DLMF.Mathieu
 
+/-- DLMF 28.6.21: `√2 ce₀(z, q) = 1 - (q/2) cos 2z + (q²/32)(cos 4z - 2)
+- (q³/128)((1/9) cos 6z - 11 cos 2z) + O(q⁴)`. -/
 theorem p3q_ce0 (z : ℂ) :
     (fun q : ℝ => (Real.sqrt 2 : ℂ) * mathieuCe 0 z q - (1 - q / 2 * Complex.cos (2 * z) +
       q ^ 2 / 32 * (Complex.cos (4 * z) - 2) -
@@ -95,6 +97,7 @@ theorem p3q_ce0 (z : ℂ) :
       (by fun_prop)
   exact (h.add h2).congr_left fun q => by ring
 
+/-- DLMF 28.6.22: the expansion of `ce₁(z, q)` to `O(q⁴)`. -/
 theorem p3q_ce1 (z : ℂ) :
     (fun q : ℝ => mathieuCe 1 z q - (Complex.cos z - q / 8 * Complex.cos (3 * z) +
       q ^ 2 / 128 * (2 / 3 * Complex.cos (5 * z) - 2 * Complex.cos (3 * z) - Complex.cos z) -
@@ -179,6 +182,7 @@ theorem p3q_ce1 (z : ℂ) :
       (by fun_prop)
   exact (h.add h2).congr_left fun q => by ring
 
+/-- DLMF 28.6.23: the expansion of `se₁(z, q)` to `O(q⁴)`. -/
 theorem p3q_se1 (z : ℂ) :
     (fun q : ℝ => mathieuSe 1 z q - (Complex.sin z - q / 8 * Complex.sin (3 * z) +
       q ^ 2 / 128 * (2 / 3 * Complex.sin (5 * z) + 2 * Complex.sin (3 * z) - Complex.sin z) -
@@ -263,6 +267,7 @@ theorem p3q_se1 (z : ℂ) :
       (by fun_prop)
   exact (h.add h2).congr_left fun q => by ring
 
+/-- DLMF 28.6.24: the expansion of `ce₂(z, q)` to `O(q³)`. -/
 theorem p3q_ce2 (z : ℂ) :
     (fun q : ℝ => mathieuCe 2 z q - (Complex.cos (2 * z) -
       q / 4 * (1 / 3 * Complex.cos (4 * z) - 1) +
@@ -333,6 +338,7 @@ theorem p3q_ce2 (z : ℂ) :
       (by fun_prop)
   exact (h.add h2).congr_left fun q => by ring
 
+/-- DLMF 28.6.25: the expansion of `se₂(z, q)` to `O(q³)`. -/
 theorem p3q_se2 (z : ℂ) :
     (fun q : ℝ => mathieuSe 2 z q - (Complex.sin (2 * z) - q / 12 * Complex.sin (4 * z) +
       q ^ 2 / 128 * (1 / 3 * Complex.sin (6 * z) - 4 / 9 * Complex.sin (2 * z)))) =O[𝓝 0]
@@ -393,6 +399,7 @@ theorem p3q_se2 (z : ℂ) :
       (by fun_prop)
   exact (h.add h2).congr_left fun q => by ring
 
+/-- DLMF 28.6.26 for `m = 3`: the expansion of `ce₃(z, q)` to `O(q³)`. -/
 theorem p3q_ce3 {m : ℕ} (hm : m = 3) (z : ℂ) :
     (fun q : ℝ => mathieuCe m z q - (Complex.cos (m * z) -
       q / 4 * (Complex.cos ((m + 2) * z) / (m + 1) - Complex.cos ((m - 2) * z) / (m - 1)) +
@@ -471,6 +478,7 @@ theorem p3q_ce3 {m : ℕ} (hm : m = 3) (z : ℂ) :
   subst hm
   exact (h.add h2).congr_left fun q => by ring
 
+/-- DLMF 28.6.27 for `m = 3`: the expansion of `se₃(z, q)` to `O(q³)`. -/
 theorem p3q_se3 {m : ℕ} (hm : m = 3) (z : ℂ) :
     (fun q : ℝ => mathieuSe m z q - (Complex.sin (m * z) -
       q / 4 * (Complex.sin ((m + 2) * z) / (m + 1) - Complex.sin ((m - 2) * z) / (m - 1)) +
@@ -549,6 +557,7 @@ theorem p3q_se3 {m : ℕ} (hm : m = 3) (z : ℂ) :
   subst hm
   exact (h.add h2).congr_left fun q => by ring
 
+/-- DLMF 28.6.26 for `m = 4`: the expansion of `ce₄(z, q)` to `O(q³)`. -/
 theorem p3q_ce4 {m : ℕ} (hm : m = 4) (z : ℂ) :
     (fun q : ℝ => mathieuCe m z q - (Complex.cos (m * z) -
       q / 4 * (Complex.cos ((m + 2) * z) / (m + 1) - Complex.cos ((m - 2) * z) / (m - 1)) +
@@ -631,6 +640,7 @@ theorem p3q_ce4 {m : ℕ} (hm : m = 4) (z : ℂ) :
   subst hm
   exact (h.add h2).congr_left fun q => by ring
 
+/-- DLMF 28.6.27 for `m = 4`: the expansion of `se₄(z, q)` to `O(q³)`. -/
 theorem p3q_se4 {m : ℕ} (hm : m = 4) (z : ℂ) :
     (fun q : ℝ => mathieuSe m z q - (Complex.sin (m * z) -
       q / 4 * (Complex.sin ((m + 2) * z) / (m + 1) - Complex.sin ((m - 2) * z) / (m - 1)) +
@@ -707,6 +717,7 @@ theorem p3q_se4 {m : ℕ} (hm : m = 4) (z : ℂ) :
   subst hm
   exact (h.add h2).congr_left fun q => by ring
 
+/-- DLMF 28.6.26 for `m = 5`: the expansion of `ce₅(z, q)` to `O(q³)`. -/
 theorem p3q_ce5 {m : ℕ} (hm : m = 5) (z : ℂ) :
     (fun q : ℝ => mathieuCe m z q - (Complex.cos (m * z) -
       q / 4 * (Complex.cos ((m + 2) * z) / (m + 1) - Complex.cos ((m - 2) * z) / (m - 1)) +
@@ -788,6 +799,7 @@ theorem p3q_ce5 {m : ℕ} (hm : m = 5) (z : ℂ) :
   subst hm
   exact (h.add h2).congr_left fun q => by ring
 
+/-- DLMF 28.6.27 for `m = 5`: the expansion of `se₅(z, q)` to `O(q³)`. -/
 theorem p3q_se5 {m : ℕ} (hm : m = 5) (z : ℂ) :
     (fun q : ℝ => mathieuSe m z q - (Complex.sin (m * z) -
       q / 4 * (Complex.sin ((m + 2) * z) / (m + 1) - Complex.sin ((m - 2) * z) / (m - 1)) +

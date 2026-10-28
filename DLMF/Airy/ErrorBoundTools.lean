@@ -203,7 +203,7 @@ theorem airyErr_far_neg : ∃ R B : ℝ, ∀ x : ℝ, R ≤ x →
   have h3 := airy_bi_oscillatory_expansion (δ := π / 3) (by positivity) (by linarith) 0 0
   have h4 := airy_biDeriv_oscillatory_expansion (δ := π / 3) (by positivity) (by linarith) 0 0
   simp only [airyOscApprox, airyOscSum, Finset.range_zero, Finset.sum_empty, mul_zero,
-    add_zero, sub_zero, neg_mul, neg_zero, airyFunction] at h1 h2 h3 h4
+    add_zero, sub_zero, airyFunction] at h1 h2 h3 h4
   obtain ⟨C1, R1, hC1, hb1⟩ := airyErr_bound_of_isBigO h1
   obtain ⟨C2, R2, hC2, hb2⟩ := airyErr_bound_of_isBigO h2
   obtain ⟨C3, R3, hC3, hb3⟩ := airyErr_bound_of_isBigO h3
@@ -324,23 +324,53 @@ theorem airyErr_bi_le_of_rot {a b c : ℂ} (ha : ‖a‖ = 1 / 2) (hb : ‖b‖ 
     rw [norm_div, norm_mul, ha, hc]
     linarith [show 1 * ‖airyAiDeriv (z * c)‖ / (1 / 2) = 2 * ‖airyAiDeriv (z * c)‖ by ring]
 
-/-- `|e^{iθ}| = 1`. -/
-theorem airyErr_norm_exp_I (θ : ℝ) : ‖exp ((θ : ℂ) * I)‖ = 1 := norm_exp_ofReal_mul_I θ
-
 /-- The rotation identities 9.2.11 in the form `Ai(z c) = a (Ai z + b Bi z)`. -/
 theorem airyErr_rot_identity {ε : ℝ} (hε : ε = 1 ∨ ε = -1) :
     ∃ a b : ℂ, ‖a‖ = 1 / 2 ∧ ‖b‖ = 1 ∧ ∀ w, airyAi (w * exp (((ε * (2 * π / 3)) : ℝ) * I)) =
       a * (airyAi w + b * airyBi w) := by
   rcases hε with rfl | rfl
   · refine ⟨1 / 2 * exp (((π / 3 : ℝ) : ℂ) * I), -I, ?_, by simp, fun w => ?_⟩
-    · rw [norm_mul, airyErr_norm_exp_I]; norm_num
+    · rw [norm_mul, Complex.norm_exp_ofReal_mul_I]; norm_num
     · rw [show (((1 * (2 * π / 3)) : ℝ) : ℂ) * I = 2 * π * I / 3 by push_cast; ring,
         airyAi_mul_omega, show (((π / 3 : ℝ) : ℂ) * I) = π * I / 3 by push_cast; ring]
       ring
   · refine ⟨1 / 2 * exp (((-(π / 3) : ℝ) : ℂ) * I), I, ?_, by simp, fun w => ?_⟩
-    · rw [norm_mul, airyErr_norm_exp_I]; norm_num
+    · rw [norm_mul, Complex.norm_exp_ofReal_mul_I]; norm_num
     · rw [show ((((-1) * (2 * π / 3)) : ℝ) : ℂ) * I = -(2 * π * I / 3) by push_cast; ring,
         airyAi_mul_omega_recip, show ((((-(π / 3)) : ℝ) : ℂ) * I) = -(π * I / 3) by push_cast; ring]
+
+/-- If `|ph z| ≤ π/3`, `|w| = |z|` and `ζ(w) = -ζ(z)`, the prefactor products satisfy
+`|P_Ai(z) P_Ai'(w)| = |P_Ai'(z) P_Ai(w)| = 1/(4π)` and `|P_Ai(z) P_Ai'(z)| ≤ 1/(4π)`. -/
+private lemma airyErr_pref_products {z w : ℂ} (hz0 : z ≠ 0) (harg : |arg z| ≤ π / 3)
+    (hzeta : airyZetaComplex w = -airyZetaComplex z) (hn : ‖w‖ = ‖z‖) :
+    ‖airyPrefactor .ai z‖ * ‖airyPrefactor .aiDeriv w‖ = 1 / (4 * π) ∧
+      ‖airyPrefactor .aiDeriv z‖ * ‖airyPrefactor .ai w‖ = 1 / (4 * π) ∧
+      ‖airyPrefactor .ai z‖ * ‖airyPrefactor .aiDeriv z‖ ≤ 1 / (4 * π) := by
+  have hπ := Real.pi_pos
+  set E := ‖exp (-airyZetaComplex z)‖
+  set F := ‖exp (airyZetaComplex z)‖
+  set q := ‖z‖ ^ (1 / 4 : ℝ)
+  set sπ := Real.sqrt π
+  have hEF : E * F = 1 := by
+    simp only [E, F]; rw [← norm_mul, ← exp_add, neg_add_cancel, exp_zero, norm_one]
+  have hE1 : E ≤ 1 := airyErr_norm_exp_neg_zeta_le hz0 harg
+  have hE0 : 0 ≤ E := norm_nonneg _
+  have hq : 0 < q := Real.rpow_pos_of_pos (norm_pos_iff.mpr hz0) _
+  have hs : 0 < sπ := Real.sqrt_pos.mpr hπ
+  have hs2 : sπ ^ 2 = π := Real.sq_sqrt hπ.le
+  have pa : ‖airyPrefactor .ai z‖ = E / (2 * sπ * q) := airyErr_norm_pref_ai z
+  have pd : ‖airyPrefactor .aiDeriv z‖ = q * E / (2 * sπ) := airyErr_norm_pref_aiDeriv z
+  have pa' : ‖airyPrefactor .ai w‖ = F / (2 * sπ * q) := by
+    rw [airyErr_norm_pref_ai, hzeta, neg_neg, hn]
+  have pd' : ‖airyPrefactor .aiDeriv w‖ = q * F / (2 * sπ) := by
+    rw [airyErr_norm_pref_aiDeriv, hzeta, neg_neg, hn]
+  refine ⟨?_, ?_, ?_⟩
+  · rw [pa, pd', ← hs2]; field_simp; linear_combination 4 * hEF
+  · rw [pd, pa', ← hs2]; field_simp; linear_combination 4 * hEF
+  · rw [pa, pd, ← hs2, show E / (2 * sπ * q) * (q * E / (2 * sπ)) = E * E / (4 * sπ ^ 2) by
+      field_simp; ring]
+    gcongr
+    nlinarith
 
 /-- The products `|Ai Bi'| + |Ai' Bi|` stay bounded in the closed sector `|arg z| ≤ π/3`. -/
 theorem airyErr_far_sector : ∃ R B : ℝ, ∀ z : ℂ, R ≤ ‖z‖ → z ≠ 0 → |arg z| ≤ π / 3 →
@@ -363,11 +393,12 @@ theorem airyErr_far_sector : ∃ R B : ℝ, ∀ z : ℂ, R ≤ ‖z‖ → z ≠
     · exact ⟨1, Or.inl rfl, by linarith, by linarith, abs_le.mpr ⟨by linarith, by linarith⟩⟩
   set c := exp (((ε * (2 * π / 3)) : ℝ) * I)
   obtain ⟨a, b, ha, hb, hrot⟩ := airyErr_rot_identity hε
-  have hc : ‖c‖ = 1 := airyErr_norm_exp_I _
+  have hc : ‖c‖ = 1 := Complex.norm_exp_ofReal_mul_I _
   obtain ⟨hBi, hBi'⟩ := airyErr_bi_le_of_rot ha hb hc hrot z
   have hzc0 : z * c ≠ 0 := mul_ne_zero hz0 (exp_ne_zero _)
   have hzcn : ‖z * c‖ = ‖z‖ := by rw [norm_mul, hc, mul_one]
-  have hzca : |arg (z * c)| ≤ π - π / 3 := by rw [airyRot_arg_mul_exp hz0 hlo hhi]; exact hsec
+  have hzca : |arg (z * c)| ≤ π - π / 3 := by
+    rw [Complex.arg_mul_exp_ofReal_mul_I hz0 hlo hhi]; exact hsec
   have hzeta : airyZetaComplex (z * c) = -airyZetaComplex z := by
     rw [airyRot_zeta_mul_exp hz0 hlo hhi, airyRot_exp_rot_three_halves hε, mul_neg_one]
   have ha1 : |arg z| ≤ π - π / 3 := harg.trans (by linarith)
@@ -375,33 +406,7 @@ theorem airyErr_far_sector : ∃ R B : ℝ, ∀ z : ℂ, R ≤ ‖z‖ → z ≠
   have e2 := hb2 z hR2 hz0 ha1
   have e3 := hb1 (z * c) (by rw [hzcn]; exact hR1) hzc0 hzca
   have e4 := hb2 (z * c) (by rw [hzcn]; exact hR2) hzc0 hzca
-  -- explicit prefactor products
-  set E := ‖exp (-airyZetaComplex z)‖
-  set F := ‖exp (airyZetaComplex z)‖
-  set q := ‖z‖ ^ (1 / 4 : ℝ)
-  set sπ := Real.sqrt π
-  have hEF : E * F = 1 := by
-    simp only [E, F]; rw [← norm_mul, ← exp_add, neg_add_cancel, exp_zero, norm_one]
-  have hE1 : E ≤ 1 := airyErr_norm_exp_neg_zeta_le hz0 harg
-  have hE0 : 0 ≤ E := norm_nonneg _
-  have hq : 0 < q := Real.rpow_pos_of_pos (norm_pos_iff.mpr hz0) _
-  have hs : 0 < sπ := Real.sqrt_pos.mpr hπ
-  have hs2 : sπ ^ 2 = π := Real.sq_sqrt hπ.le
-  have pa : ‖airyPrefactor .ai z‖ = E / (2 * sπ * q) := airyErr_norm_pref_ai z
-  have pd : ‖airyPrefactor .aiDeriv z‖ = q * E / (2 * sπ) := airyErr_norm_pref_aiDeriv z
-  have pa' : ‖airyPrefactor .ai (z * c)‖ = F / (2 * sπ * q) := by
-    rw [airyErr_norm_pref_ai, hzeta, neg_neg, hzcn]
-  have pd' : ‖airyPrefactor .aiDeriv (z * c)‖ = q * F / (2 * sπ) := by
-    rw [airyErr_norm_pref_aiDeriv, hzeta, neg_neg, hzcn]
-  have k1 : ‖airyPrefactor .ai z‖ * ‖airyPrefactor .aiDeriv (z * c)‖ = 1 / (4 * π) := by
-    rw [pa, pd', ← hs2]; field_simp; linear_combination 4 * hEF
-  have k2 : ‖airyPrefactor .aiDeriv z‖ * ‖airyPrefactor .ai (z * c)‖ = 1 / (4 * π) := by
-    rw [pd, pa', ← hs2]; field_simp; linear_combination 4 * hEF
-  have k3 : ‖airyPrefactor .ai z‖ * ‖airyPrefactor .aiDeriv z‖ ≤ 1 / (4 * π) := by
-    rw [pa, pd, ← hs2, show E / (2 * sπ * q) * (q * E / (2 * sπ)) = E * E / (4 * sπ ^ 2) by
-      field_simp; ring]
-    gcongr
-    nlinarith
+  obtain ⟨k1, k2, k3⟩ := airyErr_pref_products hz0 harg hzeta hzcn
   calc ‖airyAi z‖ * ‖airyBiDeriv z‖ + ‖airyAiDeriv z‖ * ‖airyBi z‖
       ≤ ‖airyAi z‖ * (2 * ‖airyAiDeriv (z * c)‖ + ‖airyAiDeriv z‖) +
         ‖airyAiDeriv z‖ * (2 * ‖airyAi (z * c)‖ + ‖airyAi z‖) := by gcongr
@@ -467,6 +472,60 @@ theorem airyErr_norm_oscPref_aiDeriv (u : ℂ) :
   rw [airyOscPrefactor, norm_div, airyErr_norm_quarter, Complex.norm_real,
     Real.norm_of_nonneg (Real.sqrt_nonneg _)]
 
+/-- Helper for `airyErr_negative_axis`: if `-w = w e^{iα}` with `α = ±π` and `|ph w + α| ≤ π/6`,
+then `|ph(-w)| ≤ π/6` and `|e^{-ζ(w)}| = e^{|ℑζ(-w)|}`. -/
+private lemma airyErr_negative_axis_rot {w : ℂ} (hw : w ≠ 0) (α : ℝ) (hα : α = π ∨ α = -π)
+    (h1 : -π < arg w + α) (h2 : arg w + α ≤ π) (h3 : |arg w + α| ≤ π / 6)
+    (hsgn : (α = π → 0 ≤ arg w + α) ∧ (α = -π → arg w + α ≤ 0)) :
+    |arg (-w)| ≤ 2 * π / 3 - π / 2 ∧
+      ‖exp (-airyZetaComplex w)‖ = Real.exp |(airyZetaComplex (-w)).im| := by
+  have hπ := Real.pi_pos
+  have hneg : -w = w * exp (α * I) := by
+    rcases hα with rfl | rfl
+    · rw [exp_pi_mul_I]; ring
+    · rw [ofReal_neg, neg_mul, exp_neg, exp_pi_mul_I]; ring
+  have ha : arg (-w) = arg w + α := by rw [hneg]; exact Complex.arg_mul_exp_ofReal_mul_I hw h1 h2
+  refine ⟨by rw [ha]; linarith [abs_le.mp h3], ?_⟩
+  -- w = (-w) * exp (-α I)
+  have hw' : w = -w * exp (((-α : ℝ) : ℂ) * I) := by
+    rw [hneg, mul_assoc, ← exp_add, ofReal_neg, neg_mul, add_neg_cancel, exp_zero, mul_one]
+  have hz := airyRot_zeta_mul_exp (neg_ne_zero.mpr hw) (α := -α)
+    (by rw [ha]; linarith [neg_pi_lt_arg w]) (by rw [ha]; linarith [arg_le_pi w])
+  rw [← hw'] at hz
+  have him := airyErr_im_two_zeta (neg_ne_zero.mpr hw)
+  rw [ha] at him
+  rcases hα with rfl | rfl
+  · -- arg (-w) ≥ 0, im ζ(-w) ≥ 0, ζ(w) = i ζ(-w)
+    have he : exp (((-π : ℝ) : ℂ) * I * (3 / 2)) = I := by
+      rw [show (((-π : ℝ) : ℂ) * I * (3 / 2)) = -(π * I) + -(π / 2 * I) by push_cast; ring,
+        exp_add, exp_neg, exp_neg, exp_pi_mul_I, exp_pi_div_two_mul_I]
+      field_simp; norm_num [I_sq]
+    rw [hz, he, Complex.norm_exp]
+    have hs : 0 ≤ (airyZetaComplex (-w)).im := by
+      have h0 : 0 ≤ arg w + π := hsgn.1 rfl
+      have : 0 ≤ Real.sin (3 / 2 * (arg w + π)) :=
+        Real.sin_nonneg_of_nonneg_of_le_pi (by linarith) (by linarith [abs_le.mp h3])
+      have : 0 ≤ (2 * airyZetaComplex (-w)).im := by rw [him]; positivity
+      simpa using this
+    rw [abs_of_nonneg hs]
+    congr 1
+    simp
+  · have he : exp (((-(-π) : ℝ) : ℂ) * I * (3 / 2)) = -I := by
+      rw [show (((-(-π) : ℝ) : ℂ) * I * (3 / 2)) = π * I + π / 2 * I by push_cast; ring,
+        exp_add, exp_pi_mul_I, exp_pi_div_two_mul_I]
+      ring
+    rw [hz, he, Complex.norm_exp]
+    have hs : (airyZetaComplex (-w)).im ≤ 0 := by
+      have h0 : arg w + -π ≤ 0 := hsgn.2 rfl
+      have : Real.sin (3 / 2 * (arg w + -π)) ≤ 0 :=
+        Real.sin_nonpos_of_nonpos_of_neg_pi_le (by linarith) (by linarith [abs_le.mp h3])
+      have : (2 * airyZetaComplex (-w)).im ≤ 0 := by
+        rw [him]; exact mul_nonpos_of_nonneg_of_nonpos (Real.exp_pos _).le this
+      simp at this; linarith
+    rw [abs_of_nonpos hs]
+    congr 1
+    simp
+
 /-- Near the negative axis, `|e^{-ζ(w)}| = e^{|im ζ(-w)|}`. -/
 theorem airyErr_negative_axis {w : ℂ} (hw : w ≠ 0) (harg : 5 * π / 6 < |arg w|) :
     ‖-w‖ = ‖w‖ ∧ -w ≠ 0 ∧ |arg (-w)| ≤ 2 * π / 3 - π / 2 ∧
@@ -475,56 +534,7 @@ theorem airyErr_negative_axis {w : ℂ} (hw : w ≠ 0) (harg : 5 * π / 6 < |arg
   have hb := abs_le.mp (abs_arg_le_pi w)
   have hlt := Complex.neg_pi_lt_arg w
   refine ⟨norm_neg w, neg_ne_zero.mpr hw, ?_⟩
-  have key : ∀ α : ℝ, (α = π ∨ α = -π) → -π < arg w + α → arg w + α ≤ π →
-      |arg w + α| ≤ π / 6 → ((α = π → 0 ≤ arg w + α) ∧ (α = -π → arg w + α ≤ 0)) →
-      |arg (-w)| ≤ 2 * π / 3 - π / 2 ∧
-        ‖exp (-airyZetaComplex w)‖ = Real.exp |(airyZetaComplex (-w)).im| := by
-    intro α hα h1 h2 h3 hsgn
-    have hneg : -w = w * exp (α * I) := by
-      rcases hα with rfl | rfl
-      · rw [exp_pi_mul_I]; ring
-      · rw [ofReal_neg, neg_mul, exp_neg, exp_pi_mul_I]; ring
-    have ha : arg (-w) = arg w + α := by rw [hneg]; exact airyRot_arg_mul_exp hw h1 h2
-    refine ⟨by rw [ha]; linarith [abs_le.mp h3], ?_⟩
-    -- w = (-w) * exp (-α I)
-    have hw' : w = -w * exp (((-α : ℝ) : ℂ) * I) := by
-      rw [hneg, mul_assoc, ← exp_add, ofReal_neg, neg_mul, add_neg_cancel, exp_zero, mul_one]
-    have hz := airyRot_zeta_mul_exp (neg_ne_zero.mpr hw) (α := -α) (by rw [ha]; linarith)
-      (by rw [ha]; linarith)
-    rw [← hw'] at hz
-    have him := airyErr_im_two_zeta (neg_ne_zero.mpr hw)
-    rw [ha] at him
-    rcases hα with rfl | rfl
-    · -- arg (-w) ≥ 0, im ζ(-w) ≥ 0, ζ(w) = i ζ(-w)
-      have he : exp (((-π : ℝ) : ℂ) * I * (3 / 2)) = I := by
-        rw [show (((-π : ℝ) : ℂ) * I * (3 / 2)) = -(π * I) + -(π / 2 * I) by push_cast; ring,
-          exp_add, exp_neg, exp_neg, exp_pi_mul_I, exp_pi_div_two_mul_I]
-        field_simp; norm_num [I_sq]
-      rw [hz, he, Complex.norm_exp]
-      have hs : 0 ≤ (airyZetaComplex (-w)).im := by
-        have h0 : 0 ≤ arg w + π := hsgn.1 rfl
-        have : 0 ≤ Real.sin (3 / 2 * (arg w + π)) :=
-          Real.sin_nonneg_of_nonneg_of_le_pi (by linarith) (by linarith [abs_le.mp h3])
-        have : 0 ≤ (2 * airyZetaComplex (-w)).im := by rw [him]; positivity
-        simpa using this
-      rw [abs_of_nonneg hs]
-      congr 1
-      simp
-    · have he : exp (((-(-π) : ℝ) : ℂ) * I * (3 / 2)) = -I := by
-        rw [show (((-(-π) : ℝ) : ℂ) * I * (3 / 2)) = π * I + π / 2 * I by push_cast; ring,
-          exp_add, exp_pi_mul_I, exp_pi_div_two_mul_I]
-        ring
-      rw [hz, he, Complex.norm_exp]
-      have hs : (airyZetaComplex (-w)).im ≤ 0 := by
-        have h0 : arg w + -π ≤ 0 := hsgn.2 rfl
-        have : Real.sin (3 / 2 * (arg w + -π)) ≤ 0 :=
-          Real.sin_nonpos_of_nonpos_of_neg_pi_le (by linarith) (by linarith [abs_le.mp h3])
-        have : (2 * airyZetaComplex (-w)).im ≤ 0 := by
-          rw [him]; exact mul_nonpos_of_nonneg_of_nonpos (Real.exp_pos _).le this
-        simp at this; linarith
-      rw [abs_of_nonpos hs]
-      congr 1
-      simp
+  have key := airyErr_negative_axis_rot hw
   rcases le_or_gt 0 (arg w) with h | h
   · rw [abs_of_nonneg h] at harg
     exact key (-π) (Or.inr rfl) (by linarith) (by linarith)

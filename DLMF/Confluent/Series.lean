@@ -312,9 +312,11 @@ def besselExpansionTerm (a b : ℂ) (m r : ℕ) : ℂ :=
 def besselExpansionB (a b : ℂ) (N : ℕ) : ℂ :=
   ∑ m ∈ range (N + 1), besselExpansionTerm a b m (N - m)
 
+/-- The zeroth coefficient of the Bessel-type expansion is `1`. -/
 theorem besselExpansionB_zero (a b : ℂ) : besselExpansionB a b 0 = 1 := by
   simp [besselExpansionB, besselExpansionTerm, poch_zero]
 
+/-- The first coefficient of the Bessel-type expansion is `(2a - b)` times the zeroth. -/
 theorem besselExpansionB_one (a b : ℂ) :
     besselExpansionB a b 1 = (2 * a - b) * besselExpansionB a b 0 := by
   simp [besselExpansionB, besselExpansionTerm, sum_range_succ, poch_zero, poch_one]
@@ -790,6 +792,8 @@ def whittakerBesselGenerating (μ z t : ℂ) : ℂ :=
   if t = 0 then 1
   else exp (-z / 2 * (cosh t / sinh t - t⁻¹)) * (t / sinh t) ^ (1 - 2 * μ)
 
+/-- The coefficient `p_s^{(μ)}(z) (-z)^s` of the Bessel expansion of Whittaker's `M` (DLMF 13.24.3),
+the `s`-th Taylor coefficient at `0` of the generating function times `(-z)^s`. -/
 @[dlmf 13.24.E3]
 def whittakerBesselCoeff (μ z : ℂ) (s : ℕ) : ℂ :=
   iteratedDeriv s (whittakerBesselGenerating μ z) 0 / s.factorial * (-z) ^ s
@@ -826,10 +830,11 @@ theorem real_sinh_one_lt_two : Real.sinh 1 < 2 := by
   have h2 := Real.exp_pos (-1)
   linarith
 
-/-- whittakerBesselBase; support for the Buchholz coefficient transformation. -/
+/-- The function `t/sinh t`, extended by `1` at `t = 0`. -/
 private noncomputable def whittakerBesselBase (t : ℂ) : ℂ := if t=0 then 1 else t/sinh t
 
-/-- whittakerBessel core analytic; support for the Buchholz coefficient transformation. -/
+/-- On the unit disc, `coth t - 1/t` and `t/sinh t` are holomorphic and `t/sinh t` lies in the slit
+plane. -/
 private lemma whittakerBessel_core_analytic :
     DifferentiableOn ℂ (fun t : ℂ => cosh t/sinh t-t⁻¹) (Metric.ball 0 1) ∧
     DifferentiableOn ℂ whittakerBesselBase (Metric.ball 0 1) ∧
@@ -921,7 +926,7 @@ private lemma whittakerBessel_core_analytic :
   rw [hBeq (by simpa using ht)]
   exact hslit t ht
 
-/-- whittakerBesselGenerating eq core; support for the Buchholz coefficient transformation. -/
+/-- The generating function of DLMF 13.24.3 is `exp(-(z/2)(coth t - 1/t)) (t/sinh t)^{1-2μ}`. -/
 private lemma whittakerBesselGenerating_eq_core (μ z t : ℂ) :
     whittakerBesselGenerating μ z t=
       exp (-z/2*(cosh t/sinh t-t⁻¹))*whittakerBesselBase t^(1-2*μ) := by
@@ -929,7 +934,7 @@ private lemma whittakerBesselGenerating_eq_core (μ z t : ℂ) :
   · simp [whittakerBesselGenerating,whittakerBesselBase,ht]
   · simp [whittakerBesselGenerating,whittakerBesselBase,ht]
 
-/-- whittakerBesselGenerating differentiableOn; support for the Buchholz coefficient transformation. -/
+/-- The generating function of DLMF 13.24.3 is holomorphic in `t` on the unit disc. -/
 theorem whittakerBesselGenerating_differentiableOn (μ z : ℂ) :
     DifferentiableOn ℂ (whittakerBesselGenerating μ z) (Metric.ball 0 1) := by
   have h := whittakerBessel_core_analytic
@@ -942,7 +947,7 @@ theorem whittakerBesselGenerating_differentiableOn (μ z : ℂ) :
       (h.2.2 t (by simpa using ht)))).differentiableWithinAt
   exact hf.congr fun t _ => whittakerBesselGenerating_eq_core μ z t
 
-/-- whittakerBesselGenerating joint continuousAt; support for the Buchholz coefficient transformation. -/
+/-- The generating function of DLMF 13.24.3 is jointly continuous in `(z, t)` for `|t| < 1`. -/
 theorem whittakerBesselGenerating_joint_continuousAt (μ : ℂ) {z t : ℂ} (ht : ‖t‖ < 1) :
     ContinuousAt (fun p : ℂ × ℂ => whittakerBesselGenerating μ p.1 p.2) (z,t) := by
   have ht' : t ∈ Metric.ball (0:ℂ) 1 := by simpa using ht
@@ -959,7 +964,7 @@ theorem whittakerBesselGenerating_joint_continuousAt (μ : ℂ) {z t : ℂ} (ht 
       (hB.cpow continuousAt_const (h.2.2 t ht))
   exact hf.congr (Eventually.of_forall fun p => (whittakerBesselGenerating_eq_core μ p.1 p.2).symm)
 
-/-- whittakerBessel base mem slit; support for the Buchholz coefficient transformation. -/
+/-- For `0 < |t| < 1`, `t/sinh t` lies in the slit plane. -/
 private lemma whittakerBessel_base_mem_slit {t : ℂ} (ht : t ≠ 0) (hsmall : ‖t‖ < 1) :
     t/sinh t ∈ slitPlane := by
   have hbd := (norm_dslope_sinh_sub_one_le hsmall.le).trans_lt
@@ -974,7 +979,7 @@ private lemma whittakerBessel_base_mem_slit {t : ℂ} (ht : t ≠ 0) (hsmall : �
   rw [hBase,mem_slitPlane_iff,inv_re]
   exact Or.inl (div_pos hS (normSq_pos.mpr hSn))
 
-/-- whittakerBessel hasDerivAt z; support for the Buchholz coefficient transformation. -/
+/-- The `z`-derivative of the generating function is `-(coth t - 1/t)/2` times the function. -/
 theorem whittakerBesselGenerating_hasDerivAt_z (μ z t : ℂ) :
     HasDerivAt (fun w => whittakerBesselGenerating μ w t)
       (-(cosh t/sinh t-t⁻¹)/2*whittakerBesselGenerating μ z t) z := by
@@ -992,13 +997,13 @@ theorem whittakerBesselGenerating_hasDerivAt_z (μ z t : ℂ) :
       rw [he]
       ring
 
-/-- whittakerBessel deriv z; support for the Buchholz coefficient transformation. -/
+/-- `∂_z G(μ,z,t) = -(coth t - 1/t)/2 · G(μ,z,t)`. -/
 theorem whittakerBesselGenerating_deriv_z (μ z t : ℂ) :
     deriv (fun w => whittakerBesselGenerating μ w t) z =
       -(cosh t/sinh t-t⁻¹)/2*whittakerBesselGenerating μ z t :=
   (whittakerBesselGenerating_hasDerivAt_z μ z t).deriv
 
-/-- whittakerBessel iteratedDeriv two z; support for the Buchholz coefficient transformation. -/
+/-- `∂_z² G(μ,z,t) = (coth t - 1/t)²/4 · G(μ,z,t)`. -/
 theorem whittakerBesselGenerating_iteratedDeriv_two_z (μ z t : ℂ) :
     iteratedDeriv 2 (fun w => whittakerBesselGenerating μ w t) z =
       (cosh t/sinh t-t⁻¹)^2/4*whittakerBesselGenerating μ z t := by
@@ -1010,7 +1015,8 @@ theorem whittakerBesselGenerating_iteratedDeriv_two_z (μ z t : ℂ) :
     (-(cosh t/sinh t-t⁻¹)/2)).deriv]
   ring
 
-/-- whittakerBessel hasDerivAt t; support for the Buchholz coefficient transformation. -/
+/-- For `0 < |t| < 1`, the `t`-derivative of the generating function satisfies a first-order PDE
+linking it to its `z`-derivatives. -/
 theorem whittakerBesselGenerating_hasDerivAt_t {μ z t : ℂ} (ht : t ≠ 0) (hsmall : ‖t‖ < 1) :
     HasDerivAt (whittakerBesselGenerating μ z)
       (2*z*iteratedDeriv 2 (fun w => whittakerBesselGenerating μ w t) z -
@@ -1039,21 +1045,23 @@ theorem whittakerBesselGenerating_hasDerivAt_t {μ z t : ℂ} (ht : t ≠ 0) (hs
   ring_nf
 
 
-/-- whittakerGenD; support for the Buchholz coefficient transformation. -/
+/-- The `j`-th `z`-derivative `(-(coth t - 1/t)/2)^j G(μ,z,t)` of the generating function. -/
 private noncomputable def whittakerGenD (μ : ℂ) (j : ℕ) (z t : ℂ) : ℂ :=
   (-(cosh t/sinh t-t⁻¹)/2)^j*whittakerBesselGenerating μ z t
 
-/-- whittakerTaylorD; support for the Buchholz coefficient transformation. -/
+/-- The `s`-th Taylor coefficient at `t = 0` of the `j`-th `z`-derivative of the generating
+function. -/
 private noncomputable def whittakerTaylorD (μ : ℂ) (j : ℕ) (z : ℂ) (s : ℕ) : ℂ :=
   iteratedDeriv s (whittakerGenD μ j z) 0/s.factorial
 
-/-- whittakerGenD t diff; support for the Buchholz coefficient transformation. -/
+/-- Each `z`-derivative of the generating function is holomorphic in `t` on the unit disc. -/
 private lemma whittakerGenD_t_diff (μ : ℂ) (j : ℕ) (z : ℂ) :
     DifferentiableOn ℂ (whittakerGenD μ j z) (Metric.ball 0 1) := by
   exact ((((whittakerBessel_core_analytic.1.neg).div_const 2).pow j).mul
     (whittakerBesselGenerating_differentiableOn μ z))
 
-/-- whittakerGenD joint cont; support for the Buchholz coefficient transformation. -/
+/-- Each `z`-derivative of the generating function is jointly continuous in `(z, t)` for `|t| < 1`.
+-/
 private lemma whittakerGenD_joint_cont (μ : ℂ) (j : ℕ) {z t : ℂ} (ht : ‖t‖ < 1) :
     ContinuousAt (fun p : ℂ × ℂ => whittakerGenD μ j p.1 p.2) (z,t) := by
   have ht' : t ∈ Metric.ball (0:ℂ) 1 := by simpa using ht
@@ -1062,7 +1070,7 @@ private lemma whittakerGenD_joint_cont (μ : ℂ) (j : ℕ) {z t : ℂ} (ht : �
       (Metric.isOpen_ball.mem_nhds ht')).continuousAt.comp (x:=(z,t)) continuousAt_snd
   exact (((hA.neg.div_const 2).pow j).mul (whittakerBesselGenerating_joint_continuousAt μ ht))
 
-/-- whittakerGenD z deriv; support for the Buchholz coefficient transformation. -/
+/-- Differentiating `whittakerGenD μ j` in `z` gives `whittakerGenD μ (j+1)`. -/
 private lemma whittakerGenD_z_deriv (μ : ℂ) (j : ℕ) (z t : ℂ) :
     HasDerivAt (fun w => whittakerGenD μ j w t) (whittakerGenD μ (j+1) z t) z := by
   convert (whittakerBesselGenerating_hasDerivAt_z μ z t).const_mul
@@ -1071,7 +1079,7 @@ private lemma whittakerGenD_z_deriv (μ : ℂ) (j : ℕ) (z t : ℂ) :
   · simp only [whittakerGenD,pow_succ]
     ring
 
-/-- whittakerTaylorD hasDerivAt; support for the Buchholz coefficient transformation. -/
+/-- The Taylor coefficients commute with `z`-differentiation: `∂_z D_j(s) = D_{j+1}(s)`. -/
 private lemma whittakerTaylorD_hasDerivAt (μ : ℂ) (j s : ℕ) (z : ℂ) :
     HasDerivAt (fun w => whittakerTaylorD μ j w s) (whittakerTaylorD μ (j+1) z s) z := by
   have hdt (j : ℕ) (z : ℂ) : DifferentiableOn ℂ (whittakerGenD μ j z)
@@ -1087,7 +1095,7 @@ private lemma whittakerTaylorD_hasDerivAt (μ : ℂ) (j s : ℕ) (z : ℂ) :
     (hdt j) (hdt (j+1)) (fun z t _ => whittakerGenD_z_deriv μ j z t) s z
   exact h.div_const _
 
-/-- whittakerTaylorD uniform bound; support for the Buchholz coefficient transformation. -/
+/-- On a closed disc in `z`, the Taylor coefficients `D_j(s)` grow at most like `M 2^s`. -/
 private lemma whittakerTaylorD_uniform_bound (μ : ℂ) (j : ℕ) (R : ℝ) :
     ∃ M : ℝ,0 ≤ M ∧ ∀ z ∈ Metric.closedBall (0:ℂ) R,∀ s : ℕ,
       ‖whittakerTaylorD μ j z s‖ ≤ M*2^s := by
@@ -1105,24 +1113,25 @@ private lemma whittakerTaylorD_uniform_bound (μ : ℂ) (j : ℕ) (R : ℝ) :
   simpa only [whittakerTaylorD,one_div,inv_pow,div_inv_eq_mul] using h
 
 
-/-- whittakerGenD analyticAt; support for the Buchholz coefficient transformation. -/
+/-- Each `z`-derivative of the generating function is analytic in `t` for `|t| < 1`. -/
 private lemma whittakerGenD_analyticAt (μ : ℂ) (j : ℕ) (z : ℂ) {t : ℂ} (ht : ‖t‖ < 1) :
     AnalyticAt ℂ (whittakerGenD μ j z) t :=
   (whittakerGenD_t_diff μ j z).analyticOnNhd Metric.isOpen_ball t (by simpa using ht)
 
-/-- whittakerGenD zero; support for the Buchholz coefficient transformation. -/
+/-- The zeroth `z`-derivative is the generating function itself. -/
 private lemma whittakerGenD_zero (μ z : ℂ) : whittakerGenD μ 0 z=whittakerBesselGenerating μ z := by
   funext t
   simp [whittakerGenD]
 
-/-- buchholz iteratedDeriv id mul zero; support for the Buchholz coefficient transformation. -/
+/-- `(t f)^{(n+1)}(0) = (n+1) f^{(n)}(0)` for `f` analytic at `0`. -/
 private lemma buchholz_iteratedDeriv_id_mul_zero {f : ℂ → ℂ} (hf : AnalyticAt ℂ f 0) (n : ℕ) :
     iteratedDeriv (n+1) (fun t : ℂ => t*f t) 0 = (n+1)*iteratedDeriv n f 0 := by
   rw [iteratedDeriv_fun_mul (f:=fun t:ℂ=>t) (g:=f) contDiffAt_id hf.contDiffAt]
   simp only [iteratedDeriv_fun_id_zero,mul_ite,mul_one,mul_zero,ite_mul,zero_mul]
   simp [show 1 < n+1+1 by omega]
 
-/-- whittakerBesselGenerating pde; support for the Buchholz coefficient transformation. -/
+/-- The PDE of the generating function in the form `t ∂_t G + 2z D₁ = 2z t D₂ - 2(2μ-1) t D₁ - (z/2)
+t D₀`. -/
 private lemma whittakerBesselGenerating_pde {μ z t : ℂ} (ht : ‖t‖ < 1) :
     t*deriv (whittakerBesselGenerating μ z) t+2*z*whittakerGenD μ 1 z t =
       2*z*(t*whittakerGenD μ 2 z t)-2*(2*μ-1)*(t*whittakerGenD μ 1 z t)-
@@ -1136,7 +1145,8 @@ private lemma whittakerBesselGenerating_pde {μ z t : ℂ} (ht : ‖t‖ < 1) :
     field_simp
     ring
 
-/-- whittakerTaylorD recurrence; support for the Buchholz coefficient transformation. -/
+/-- The recurrence for the Taylor coefficients `D_j(s)` obtained from the generating-function PDE.
+-/
 private lemma whittakerTaylorD_recurrence (μ z : ℂ) (s : ℕ) :
     (s+1)*whittakerTaylorD μ 0 z (s+1)+2*z*whittakerTaylorD μ 1 z (s+1) =
       2*z*whittakerTaylorD μ 2 z s-2*(2*μ-1)*whittakerTaylorD μ 1 z s-
@@ -1186,20 +1196,20 @@ private lemma whittakerTaylorD_recurrence (μ z : ℂ) (s : ℕ) :
   linear_combination 2*h
 
 
-/-- buchholzC; support for the Buchholz coefficient transformation. -/
+/-- The Buchholz coefficient `(-1/2)^s z^s D₀(s)`. -/
 private noncomputable def buchholzC (μ : ℂ) (s : ℕ) (z : ℂ) : ℂ :=
   (-1/2:ℂ)^s*z^s*whittakerTaylorD μ 0 z s
 
-/-- buchholzC1; support for the Buchholz coefficient transformation. -/
+/-- The `z`-derivative of the Buchholz coefficient `buchholzC`. -/
 private noncomputable def buchholzC1 (μ : ℂ) (s : ℕ) (z : ℂ) : ℂ :=
   (-1/2:ℂ)^s*((s:ℂ)*z^(s-1)*whittakerTaylorD μ 0 z s+z^s*whittakerTaylorD μ 1 z s)
 
-/-- buchholzC2; support for the Buchholz coefficient transformation. -/
+/-- The second `z`-derivative of the Buchholz coefficient `buchholzC`. -/
 private noncomputable def buchholzC2 (μ : ℂ) (s : ℕ) (z : ℂ) : ℂ :=
   (-1/2:ℂ)^s*((s:ℂ)*(s-1:ℕ)*z^(s-2)*whittakerTaylorD μ 0 z s+
     2*s*z^(s-1)*whittakerTaylorD μ 1 z s+z^s*whittakerTaylorD μ 2 z s)
 
-/-- buchholzC hasDerivAt; support for the Buchholz coefficient transformation. -/
+/-- `buchholzC μ s` has `z`-derivative `buchholzC1 μ s`. -/
 private lemma buchholzC_hasDerivAt (μ : ℂ) (s : ℕ) (z : ℂ) :
     HasDerivAt (buchholzC μ s) (buchholzC1 μ s z) z := by
   convert (((hasDerivAt_id' z).pow s).mul (whittakerTaylorD_hasDerivAt μ 0 s z)).const_mul
@@ -1209,7 +1219,7 @@ private lemma buchholzC_hasDerivAt (μ : ℂ) (s : ℕ) (z : ℂ) :
     ring
   · simp only [buchholzC1,Pi.pow_apply,Nat.zero_add,mul_one]
 
-/-- buchholzC1 hasDerivAt; support for the Buchholz coefficient transformation. -/
+/-- `buchholzC1 μ s` has `z`-derivative `buchholzC2 μ s`. -/
 private lemma buchholzC1_hasDerivAt (μ : ℂ) (s : ℕ) (z : ℂ) :
     HasDerivAt (buchholzC1 μ s) (buchholzC2 μ s z) z := by
   have h := (((((hasDerivAt_id' z).pow (s-1)).const_mul (s:ℂ)).mul
@@ -1221,7 +1231,7 @@ private lemma buchholzC1_hasDerivAt (μ : ℂ) (s : ℕ) (z : ℂ) :
   · simp only [buchholzC2,Nat.sub_sub,Pi.pow_apply,Nat.zero_add,Nat.reduceAdd,mul_one]
     ring
 
-/-- buchholzC weighted deriv; support for the Buchholz coefficient transformation. -/
+/-- `z C'_s(z) = (-1/2)^s z^s (s D₀(s) + z D₁(s))`. -/
 private lemma buchholzC_weighted_deriv (μ : ℂ) (s : ℕ) (z : ℂ) :
     z*buchholzC1 μ s z=(-1/2:ℂ)^s*z^s*((s:ℂ)*whittakerTaylorD μ 0 z s+
       z*whittakerTaylorD μ 1 z s) := by
@@ -1229,7 +1239,7 @@ private lemma buchholzC_weighted_deriv (μ : ℂ) (s : ℕ) (z : ℂ) :
   | zero => simp [buchholzC1]
   | succ s => simp only [buchholzC1,Nat.add_sub_cancel,pow_succ];ring
 
-/-- buchholzC weighted second; support for the Buchholz coefficient transformation. -/
+/-- `z² C''_s(z) = (-1/2)^s z^s (s(s-1) D₀(s) + 2sz D₁(s) + z² D₂(s))`. -/
 private lemma buchholzC_weighted_second (μ : ℂ) (s : ℕ) (z : ℂ) :
     z^2*buchholzC2 μ s z=(-1/2:ℂ)^s*z^s*((s:ℂ)*(s-1)*whittakerTaylorD μ 0 z s+
       2*s*z*whittakerTaylorD μ 1 z s+z^2*whittakerTaylorD μ 2 z s) := by
@@ -1242,18 +1252,19 @@ private lemma buchholzC_weighted_second (μ : ℂ) (s : ℕ) (z : ℂ) :
         Nat.cast_add,Nat.cast_one,pow_succ]
       ring
 
-/-- buchholzA; support for the Buchholz coefficient transformation. -/
+/-- The auxiliary combination `(-1/2)^s z^s (s D₀(s) + 2z D₁(s))`. -/
 private noncomputable def buchholzA (μ : ℂ) (s : ℕ) (z : ℂ) : ℂ :=
   (-1/2:ℂ)^s*z^s*((s:ℂ)*whittakerTaylorD μ 0 z s+2*z*whittakerTaylorD μ 1 z s)
 
-/-- buchholzA eq; support for the Buchholz coefficient transformation. -/
+/-- `A_s = 2z C'_s - s C_s`. -/
 private lemma buchholzA_eq (μ : ℂ) (s : ℕ) (z : ℂ) :
     buchholzA μ s z=2*z*buchholzC1 μ s z-(s:ℂ)*buchholzC μ s z := by
   rw [show 2*z*buchholzC1 μ s z=2*(z*buchholzC1 μ s z) by ring,buchholzC_weighted_deriv]
   simp only [buchholzA,buchholzC]
   ring
 
-/-- buchholzC recurrence; support for the Buchholz coefficient transformation. -/
+/-- The differential recurrence `A_{s+1} = -z² C''_s + (2s+2μ-1) z C'_s - s(s+2μ) C_s + (z²/4) C_s`
+for the Buchholz coefficients. -/
 private lemma buchholzC_recurrence (μ : ℂ) (s : ℕ) (z : ℂ) :
     buchholzA μ (s+1) z = -z^2*buchholzC2 μ s z+(2*s+2*μ-1)*z*buchholzC1 μ s z-
       (s:ℂ)*(s+2*μ)*buchholzC μ s z+z^2/4*buchholzC μ s z := by

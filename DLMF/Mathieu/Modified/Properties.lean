@@ -541,10 +541,6 @@ theorem modMathieuM_add_pi_div_two (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4)
     h2, inv_mul_cancel₀ hc]
   ring
 
-/-- `(-1)^n (-1)^n = 1` for `n ∈ ℤ`. -/
-lemma p1c_neg_one_zpow_mul_self (n : ℤ) : (-1 : ℂ) ^ n * (-1 : ℂ) ^ n = 1 := by
-  rw [← zpow_add₀ (by norm_num), ← two_mul, zpow_mul]; simp
-
 /-- The integer-order coefficients as Fourier integrals. -/
 lemma p1c_mathieuMeCoeff_intCast (k ℓ : ℤ) (q : ℂ) :
     mathieuMeCoeff k q ℓ = (1 / π : ℂ) * ∫ x in (0 : ℝ)..π,
@@ -574,7 +570,7 @@ lemma p1c_mathieuMeCoeff_shift {k k' ℓ ℓ' : ℤ} (hkl : k' + 2 * ℓ' = k + 
       -(I * (k + 2 * ℓ) * y) + -(I * ((k' + 2 * ℓ' : ℤ) : ℂ) * π) by push_cast; rw [hN]; ring,
       Complex.exp_add, p1c_exp_neg_I_int_mul_pi]
     have : (-1 : ℂ) ^ k' * (-1 : ℂ) ^ (k' + 2 * ℓ') = 1 := by
-      rw [zpow_add₀ (by norm_num), zpow_mul]; simp [p1c_neg_one_zpow_mul_self]
+      rw [zpow_add₀ (by norm_num), zpow_mul]; simp [m28b_negOnePow_mul_self]
     linear_combination mathieuMe k' y q * Complex.exp (-(I * (k + 2 * ℓ) * y)) * this
   rw [p1c_mathieuMeCoeff_intCast, p1c_mathieuMeCoeff_intCast]
   have e1 : (fun x : ℝ => mathieuMe k x q' * Complex.exp (-(I * (k + 2 * ℓ) * x))) =
@@ -628,7 +624,7 @@ lemma p1c_coeff_even_neg (n : ℕ) (Q : ℝ) (ℓ : ℤ) :
     (ε := (-1 : ℂ) ^ n)]
   · rw [show ((((2 * n : ℕ) : ℤ) : ℂ) + 2 * ℓ) = 2 * ((n + ℓ : ℤ) : ℂ) by push_cast; ring,
       p1c_exp_half_even, zpow_add₀ (by norm_num), zpow_natCast]
-    have := p1c_neg_one_zpow_mul_self n
+    have := m28b_negOnePow_mul_self n
     simp only [zpow_natCast] at this
     linear_combination (-1 : ℂ) ^ ℓ * mathieuMeCoeff (((2 * n : ℕ) : ℤ) : ℂ) (Q : ℂ) ℓ * this
   · intro x
@@ -644,11 +640,6 @@ lemma p1c_coeff_even_neg (n : ℕ) (Q : ℝ) (ℓ : ℤ) :
 lemma p1c_neg_one_pow_mul_self (n : ℕ) : (-1 : ℂ) ^ n * (-1 : ℂ) ^ n = 1 := by
   rw [← pow_add, ← two_mul, pow_mul]; simp
 
-/-- `(-1)^{a-b} = (-1)^a (-1)^b`. -/
-lemma p1c_neg_one_zpow_sub (a b : ℤ) : (-1 : ℂ) ^ (a - b) = (-1 : ℂ) ^ a * (-1 : ℂ) ^ b := by
-  rw [zpow_sub₀ (by norm_num), div_eq_mul_inv,
-    inv_eq_of_mul_eq_one_right (p1c_neg_one_zpow_mul_self b)]
-
 /-- `c^{-(2n+2)}_{2ℓ}(-Q) = (-1)^ℓ c^{-(2n+2)}_{2ℓ}(Q)` (from 28.2.37). -/
 lemma p1c_coeff_negEven_neg (n : ℕ) (Q : ℝ) (ℓ : ℤ) :
     mathieuMeCoeff ((-((2 * n + 2 : ℕ) : ℤ) : ℤ) : ℂ) ((-Q : ℝ) : ℂ) ℓ =
@@ -657,7 +648,7 @@ lemma p1c_coeff_negEven_neg (n : ℕ) (Q : ℝ) (ℓ : ℤ) :
   rw [p1c_mathieuMeCoeff_shift (k := -((2 * n + 2 : ℕ) : ℤ)) (k' := -((2 * n + 2 : ℕ) : ℤ))
     (ℓ' := ℓ) rfl (ε := -(-1 : ℂ) ^ n)]
   · rw [show (((-((2 * n + 2 : ℕ) : ℤ) : ℤ) : ℂ) + 2 * ℓ) = 2 * ((ℓ - n - 1 : ℤ) : ℂ) by
-      push_cast; ring, p1c_exp_half_even, p1c_neg_one_zpow_sub, p1c_neg_one_zpow_sub]
+      push_cast; ring, p1c_exp_half_even, p2m_negOnePow_sub, p2m_negOnePow_sub]
     have := p1c_neg_one_pow_mul_self n
     simp only [zpow_natCast, zpow_one]
     linear_combination (-1 : ℂ) ^ ℓ * mathieuMeCoeff ((-((2 * n + 2 : ℕ) : ℤ) : ℤ) : ℂ) (Q : ℂ) ℓ *
@@ -708,7 +699,7 @@ lemma p1c_coeff_negOdd_neg (n : ℕ) (Q : ℝ) (ℓ : ℤ) :
   rw [p1c_mathieuMeCoeff_shift (k := -((2 * n + 1 : ℕ) : ℤ)) (k' := ((2 * n + 1 : ℕ) : ℤ))
     (ℓ' := ℓ + -((2 * n + 1 : ℕ) : ℤ)) (by ring) (ε := -I * (-1 : ℂ) ^ n)]
   · rw [show (((-((2 * n + 1 : ℕ) : ℤ) : ℤ) : ℂ) + 2 * ℓ) = 2 * ((ℓ - n - 1 : ℤ) : ℂ) + 1 by
-      push_cast; ring, p1c_exp_half_odd, p1c_neg_one_zpow_sub, p1c_neg_one_zpow_sub]
+      push_cast; ring, p1c_exp_half_odd, p2m_negOnePow_sub, p2m_negOnePow_sub]
     have := p1c_neg_one_pow_mul_self n
     simp only [zpow_natCast, zpow_one]
     linear_combination (-1 : ℂ) ^ ℓ *
@@ -780,9 +771,9 @@ lemma p1c_modMathieuM_add_pi_div_two_gen (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j 
           rw [hν]; simp only [k]; push_cast; ring]
       have h1 : (-1 : ℂ) ^ (ℓ - n0) = (-1 : ℂ) ^ ℓ * (-1 : ℂ) ^ n0 := by
         rw [zpow_sub₀ (by norm_num), div_eq_mul_inv,
-          inv_eq_of_mul_eq_one_right (p1c_neg_one_zpow_mul_self n0)]
-      have h2 := p1c_neg_one_zpow_mul_self (ℓ + -d)
-      have h3 := p1c_neg_one_zpow_mul_self ℓ
+          inv_eq_of_mul_eq_one_right (m28b_negOnePow_mul_self n0)]
+      have h2 := m28b_negOnePow_mul_self (ℓ + -d)
+      have h3 := m28b_negOnePow_mul_self ℓ
       have hκ' : κ⁻¹ * κ = 1 := inv_mul_cancel₀ hκ
       rw [h1]
       linear_combination (-1 : ℂ) ^ n0 * mathieuMeCoeff ν₀ ((h : ℂ) ^ 2) ℓ *
@@ -796,7 +787,7 @@ lemma p1c_modMathieuM_add_pi_div_two_gen (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j 
     have hk : (-1 : ℂ) ^ k = (-1 : ℂ) ^ n0 * (-1 : ℂ) ^ d := by
       simp only [k]
       rw [zpow_sub₀ (by norm_num), div_eq_mul_inv,
-        inv_eq_of_mul_eq_one_right (p1c_neg_one_zpow_mul_self d)]
+        inv_eq_of_mul_eq_one_right (m28b_negOnePow_mul_self d)]
     have hκ' : κ⁻¹ * κ = 1 := inv_mul_cancel₀ hκ
     have h0' : (mathieuMeCoeff ν₀ ((h : ℂ) ^ 2) n0)⁻¹ * mathieuMeCoeff ν₀ ((h : ℂ) ^ 2) n0 = 1 :=
       inv_mul_cancel₀ h0
@@ -804,7 +795,7 @@ lemma p1c_modMathieuM_add_pi_div_two_gen (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j 
     linear_combination (-1 : ℂ) ^ d * modMathieuM j ν₁ z (σ * I * h) *
       ((-1 : ℂ) ^ n0 * (-1 : ℂ) ^ n0 * (mathieuMeCoeff ν₀ ((h : ℂ) ^ 2) n0)⁻¹ *
         mathieuMeCoeff ν₀ ((h : ℂ) ^ 2) n0 * hκ' +
-        (-1 : ℂ) ^ n0 * (-1 : ℂ) ^ n0 * h0' + p1c_neg_one_zpow_mul_self n0)
+        (-1 : ℂ) ^ n0 * (-1 : ℂ) ^ n0 * h0' + m28b_negOnePow_mul_self n0)
 
 
 /-- `(±ih)² = -h²`. -/

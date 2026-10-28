@@ -26,15 +26,20 @@ open scoped Topology Real
 
 namespace DLMF.Mathieu
 
+/-- The Mathieu potential `x ↦ 2q cos 2x` is continuous. -/
 theorem p2s_hV (q : ℝ) : Continuous fun x : ℝ => 2 * q * Real.cos (2 * x) := by fun_prop
 
+/-- The Mathieu potential is bounded: `|2q cos 2x| ≤ 2|q|`. -/
 theorem p2s_hB (q : ℝ) (x : ℝ) : |2 * q * Real.cos (2 * x)| ≤ 2 * |q| := by
   rw [abs_mul, abs_mul, abs_two]
   have := Real.abs_cos_le_one (2 * x)
   nlinarith [abs_nonneg q]
 
+/-- Cast identity `((π/2 : ℝ) : ℂ) = π/2`. -/
 theorem p2s_hpi : ((π / 2 : ℝ) : ℂ) = (π : ℂ) / 2 := by push_cast; ring
 
+/-- The real part of `w_I(x; a, q)` (real `a, q`) is the Sturm–Liouville solution `p2lY`
+with initial data `(1, 0)`. -/
 lemma p2s_WI_re (a q : ℝ) : (fun x : ℝ => (mathieuWI a q x).re) =
     ODE.p2lY (fun x : ℝ => 2 * q * Real.cos (2 * x)) false a := by
   obtain ⟨-, hd, hd', -⟩ := p2s_family q (w := fun a => mathieuWI a q)
@@ -50,6 +55,8 @@ lemma p2s_WI_re (a q : ℝ) : (fun x : ℝ => (mathieuWI a q x).re) =
   · rw [y0]; simp [(mathieuWI_spec a q).2.1, ODE.p2lD0]
   · rw [hdw, y1]; simp [(mathieuWI_spec a q).2.2, ODE.p2lD1]
 
+/-- The real part of `w_II(x; a, q)` (real `a, q`) is the Sturm–Liouville solution `p2lY`
+with initial data `(0, 1)`. -/
 lemma p2s_WII_re (a q : ℝ) : (fun x : ℝ => (mathieuWII a q x).re) =
     ODE.p2lY (fun x : ℝ => 2 * q * Real.cos (2 * x)) true a := by
   obtain ⟨-, hd, hd', -⟩ := p2s_family q (w := fun a => mathieuWII a q)
@@ -66,6 +73,8 @@ lemma p2s_WII_re (a q : ℝ) : (fun x : ℝ => (mathieuWII a q x).re) =
   · rw [y0]; simp [(mathieuWII_spec a q).2.1, ODE.p2lD0]
   · rw [hdw, y1]; simp [(mathieuWII_spec a q).2.2, ODE.p2lD1]
 
+/-- For real `a, q, x`, `w_I(x; a, q)` and its derivative are the real values of the
+Sturm–Liouville solution `p2lY … false a` and its derivative. -/
 theorem p2s_WI_eq (a q x : ℝ) : mathieuWI a q x =
     (ODE.p2lY (fun x : ℝ => 2 * q * Real.cos (2 * x)) false a x : ℂ) ∧
     deriv (mathieuWI a q) x =
@@ -76,6 +85,8 @@ theorem p2s_WI_eq (a q x : ℝ) : mathieuWI a q x =
   rw [← p2s_WI_re, (hd a x).deriv]
   exact hre a x
 
+/-- For real `a, q, x`, `w_II(x; a, q)` and its derivative are the real values of the
+Sturm–Liouville solution `p2lY … true a` and its derivative. -/
 theorem p2s_WII_eq (a q x : ℝ) : mathieuWII a q x =
     (ODE.p2lY (fun x : ℝ => 2 * q * Real.cos (2 * x)) true a x : ℂ) ∧
     deriv (mathieuWII a q) x =
@@ -98,6 +109,7 @@ theorem p2s_specA (n : ℕ) (q : ℝ) : mathieuSpecA n q =
   · rw [ODE.p2s_spec_eq_dir (p2s_hV q)]
     ext a; simp only [mem_ofPred_eq]; rw [← p2s_hpi, (p2s_WI_eq a q _).1, ofReal_eq_zero]
 
+/-- The `b_n` spectra of Table 28.2.1 as separated Sturm–Liouville spectra on `[0, π/2]`. -/
 theorem p2s_specB (n : ℕ) (q : ℝ) : mathieuSpecB n q =
     ODE.p2lSpec (fun x : ℝ => 2 * q * Real.cos (2 * x)) (π / 2) true
       (if Even n then true else false) := by
@@ -133,6 +145,7 @@ theorem p2s_zeros_B {n : ℕ} (hn : n ≠ 0) (q : ℝ) :
   simp only [mem_ofPred_eq]
   rw [(p2s_WII_eq _ q x).1, ofReal_eq_zero]
 
+/-- A set of extended cardinality `k` has `ncard` equal to `k`. -/
 theorem p2s_ncard_of_encard {S : Set ℝ} {k : ℕ} (h : S.encard = k) : S.ncard = k := by
   rw [Set.ncard_def, h]; rfl
 

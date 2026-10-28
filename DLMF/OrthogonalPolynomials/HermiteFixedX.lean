@@ -44,15 +44,19 @@ def u' (n : ℕ) (x : ℝ) : ℝ :=
 /-- The frequency `√(2n+1)`. -/
 def freq (n : ℕ) : ℝ := √(2 * n + 1)
 
+/-- `√(2n+1) > 0`. -/
 theorem freq_pos (n : ℕ) : 0 < freq n := Real.sqrt_pos.2 (by positivity)
 
+/-- `√(2n+1) ≥ 1`. -/
 theorem one_le_freq (n : ℕ) : 1 ≤ freq n := by
   rw [freq, Real.one_le_sqrt]
   have : (0 : ℝ) ≤ n := n.cast_nonneg
   linarith
 
+/-- `(√(2n+1))² = 2n+1`. -/
 theorem freq_sq (n : ℕ) : freq n ^ 2 = 2 * n + 1 := Real.sq_sqrt (by positivity)
 
+/-- Hermite's equation `H_n'' - 2x H_n' + 2n H_n = 0`. -/
 theorem hermitePolyHR_ode (n : ℕ) (x : ℝ) :
     (hermitePolyHR n).derivative.derivative.eval x -
         2 * x * (hermitePolyHR n).derivative.eval x + 2 * n * (hermitePolyHR n).eval x = 0 := by
@@ -60,6 +64,7 @@ theorem hermitePolyHR_ode (n : ℕ) (x : ℝ) :
     (hermitePolyH_differential_equation n)
   simpa [Polynomial.derivative_map, hermitePolyHR] using h
 
+/-- The derivative of `e^{-x²/2}` is `-x e^{-x²/2}`. -/
 theorem hasDerivAt_exp_neg_sq_half (x : ℝ) :
     HasDerivAt (fun x => exp (-x ^ 2 / 2)) (exp (-x ^ 2 / 2) * -x) x := by
   have h := ((hasDerivAt_pow 2 x).neg.div_const 2).exp
@@ -68,12 +73,14 @@ theorem hasDerivAt_exp_neg_sq_half (x : ℝ) :
   push_cast
   ring
 
+/-- The derivative of the Hermite function `u n` is `u' n`. -/
 theorem hasDerivAt_u (n : ℕ) (x : ℝ) : HasDerivAt (u n) (u' n x) x := by
   have h := (hasDerivAt_exp_neg_sq_half x).mul (Polynomial.hasDerivAt (hermitePolyHR n) x)
   refine h.congr_deriv ?_
   simp only [u']
   ring
 
+/-- The Hermite function satisfies `u'' = (x² - (2n+1)) u`. -/
 theorem hasDerivAt_u' (n : ℕ) (x : ℝ) :
     HasDerivAt (u' n) ((x ^ 2 - freq n ^ 2) * u n x) x := by
   have h := (hasDerivAt_exp_neg_sq_half x).mul
@@ -132,6 +139,7 @@ theorem abs_u_sub_oscFree_le (n : ℕ) (x : ℝ) :
 
 /-! ### The data at `0` -/
 
+/-- `H_{2m+1}(0) = 0`. -/
 theorem hermitePolyH_odd_at_zero (m : ℕ) : (hermitePolyH (2 * m + 1)).eval 0 = 0 := by
   induction m with
   | zero => simp
@@ -141,16 +149,19 @@ theorem hermitePolyH_odd_at_zero (m : ℕ) : (hermitePolyH (2 * m + 1)).eval 0 =
     simp only [eval_sub, eval_mul, eval_ofNat, eval_X, eval_C, ih, mul_zero, zero_mul,
       sub_zero]
 
+/-- The real Hermite polynomial at `0` is the cast of the integer value. -/
 theorem hermitePolyHR_eval_zero (n : ℕ) :
     (hermitePolyHR n).eval 0 = ((hermitePolyH n).eval 0 : ℤ) :=
   eval_zero_map _ _
 
+/-- `H_{k+1}'(0) = 2(k+1) H_k(0)`. -/
 theorem hermitePolyHR_derivative_eval_zero (k : ℕ) :
     (hermitePolyHR (k + 1)).derivative.eval 0 = 2 * (k + 1) * (hermitePolyHR k).eval 0 := by
   rw [hermitePolyHR, Polynomial.derivative_map, hermitePolyH_derivative, Polynomial.map_mul,
     Polynomial.map_C, eval_mul, eval_C]
   simp [hermitePolyHR]
 
+/-- `H_{2m}(0) = (-1)^m (2m)!/m!`. -/
 theorem hermitePolyHR_even_eval_zero (m : ℕ) :
     (hermitePolyHR (2 * m)).eval 0 =
       (-1) ^ m * ((2 * m).factorial / m.factorial : ℝ) := by
@@ -158,8 +169,10 @@ theorem hermitePolyHR_even_eval_zero (m : ℕ) :
     Int.cast_neg, Int.cast_one, Int.cast_natCast,
     Nat.cast_div (Nat.factorial_dvd_factorial (by omega)) (by positivity)]
 
+/-- `u n 0 = H_n(0)`. -/
 theorem u_zero (n : ℕ) : u n 0 = (hermitePolyHR n).eval 0 := by simp [u]
 
+/-- `u' n 0 = H_n'(0)`. -/
 theorem u'_zero (n : ℕ) : u' n 0 = (hermitePolyHR n).derivative.eval 0 := by simp [u']
 
 end HermiteFixedX
@@ -174,12 +187,14 @@ def hermiteLambda (n : ℕ) : ℝ :=
 
 namespace HermiteFixedX
 
+/-- `λ_{2m} = (2m)!/m!`. -/
 theorem hermiteLambda_even (m : ℕ) :
     hermiteLambda (2 * m) = ((2 * m).factorial / m.factorial : ℝ) := by
   simp only [hermiteLambda, even_two_mul m, ↓reduceIte]
   rw [show (((2 * m : ℕ) : ℝ) / 2 + 1) = (m : ℝ) + 1 by push_cast; ring,
     Real.Gamma_nat_eq_factorial, Real.Gamma_nat_eq_factorial]
 
+/-- `λ_{2m+1} = (2m+2)!/((m+1)! √(4m+3))`. -/
 theorem hermiteLambda_odd (m : ℕ) :
     hermiteLambda (2 * m + 1) =
       ((2 * m + 2).factorial / (m + 1).factorial : ℝ) / freq (2 * m + 1) := by
@@ -247,6 +262,7 @@ theorem oscFree_eq (n : ℕ) (x : ℝ) :
   rw [ODE.oscFree, h0, h1, Real.cos_sub, sub_zero, smul_eq_mul, smul_eq_mul]
   field_simp [(freq_pos n).ne']
 
+/-- `e^y - 1 ≤ y e^y` for real `y`. -/
 theorem exp_sub_one_le (y : ℝ) : Real.exp y - 1 ≤ y * Real.exp y := by
   have h := Real.add_one_le_exp (-y)
   have he : Real.exp (-y) * Real.exp y = 1 := by rw [← Real.exp_add, neg_add_cancel, exp_zero]
@@ -309,6 +325,7 @@ namespace HermiteFixedX
 /-- Szegő's normalizing constant `Γ(n+1)/Γ(n/2+1)`. -/
 def szegoConst (n : ℕ) : ℝ := Real.Gamma (n + 1) / Real.Gamma (n / 2 + 1)
 
+/-- Szegő's normalizing constant is positive. -/
 theorem szegoConst_pos (n : ℕ) : 0 < szegoConst n :=
   div_pos (Real.Gamma_pos_of_pos (by positivity)) (Real.Gamma_pos_of_pos (by positivity))
 

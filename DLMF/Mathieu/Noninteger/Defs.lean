@@ -78,10 +78,16 @@ def IsMeCoeffSeq (ν q a : ℂ) (c : ℤ → ℂ) : Prop :=
 `t ↦ t q`, `t ∈ [0, 1]` (DLMF §28.12(i): "determined by analytic continuation"; §28.14:
 signs "resolved by (28.14.9) when `q = 0`, and by continuity for other values of `q`"). -/
 structure IsMathieuLambdaPath (ν q : ℂ) (Λ : ℝ → ℂ) (c : ℝ → ℤ → ℂ) : Prop where
+  /-- `t ↦ Λ(t)` is continuous on `[0, 1]`. -/
   continuousOn_lambda : ContinuousOn Λ (Icc 0 1)
+  /-- Each coefficient `t ↦ c_t(m)` is continuous on `[0, 1]`. -/
   continuousOn_coeff : ∀ m : ℤ, ContinuousOn (fun t => c t m) (Icc 0 1)
+  /-- The path starts at `λ_ν(0) = ν²`. -/
   lambda_zero : Λ 0 = ν ^ 2
+  /-- At `t = 0` the central coefficient is `c_0 = 1` (DLMF 28.14.9). -/
   coeff_zero : c 0 0 = 1
+  /-- For each `t ∈ [0, 1]`, `(Λ(t), c_t)` solves the recurrence 28.14.4 with `q` replaced by
+  `t q`. -/
   isMeCoeffSeq : ∀ t ∈ Icc (0 : ℝ) 1, IsMeCoeffSeq ν (t * q) (Λ t) (c t)
 
 /-- `q` is **normal along the segment** `[0, q]` with respect to `ν`: the continuation of

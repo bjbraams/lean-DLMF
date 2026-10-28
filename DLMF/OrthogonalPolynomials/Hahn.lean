@@ -59,6 +59,7 @@ theorem poch_half_sub (w : ℂ) (k : ℕ) :
   rw [poch_succ_left (w - 1 / 2), poch_succ (w + 1 / 2), show w - 1 / 2 + 1 = w + 1 / 2 by ring]
   ring
 
+/-- `e^{iφ} (1 - e^{-2iφ}) = 2 i sin φ`. -/
 theorem exp_mul_one_sub_exp (phi : ℂ) :
     exp (I * phi) * (1 - exp (-2 * I * phi)) = 2 * I * sin phi := by
   have h1 : exp (I * phi) * exp (-2 * I * phi) = exp (-phi * I) := by
@@ -108,18 +109,22 @@ theorem hahn_basis_succ (α β N u : ℂ) (n k : ℕ) :
   rw [poch_succ_left (u - 1), show u - 1 + 1 = u by ring, poch_succ u k, poch_succ (u + 1) k]
   linear_combination (-((k + u + 1) * (N + β + u + 1))) * hrel
 
+/-- The Hahn polynomial `Q_n(x; α, β, N) = ₃F₂(-n, n+α+β+1, -x; α+1, -N; 1)` (DLMF 18.20.5). -/
 @[dlmf 18.20.E5]
 def hahn (α β : ℂ) (N n : ℕ) (x : ℂ) : ℂ :=
   terminatingHG n [-(n : ℂ), n + α + β + 1, -x] [α + 1, -(N : ℂ)] 1
 
+/-- The Krawtchouk polynomial `K_n(x; p, N) = ₂F₁(-n, -x; -N; 1/p)` (DLMF 18.20.6). -/
 @[dlmf 18.20.E6]
 def krawtchouk (p : ℂ) (N n : ℕ) (x : ℂ) : ℂ :=
   terminatingHG n [-(n : ℂ), -x] [-(N : ℂ)] p⁻¹
 
+/-- The Meixner polynomial `M_n(x; β, c) = ₂F₁(-n, -x; β; 1 - 1/c)` (DLMF 18.20.7). -/
 @[dlmf 18.20.E7]
 def meixner (β c : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
   terminatingHG n [-(n : ℂ), -x] [β] (1 - c⁻¹)
 
+/-- The Charlier polynomial `C_n(x; a) = ₂F₀(-n, -x; ; -1/a)` (DLMF 18.20.8). -/
 @[dlmf 18.20.E8]
 def charlier (a : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
   terminatingHG n [-(n : ℂ), -x] [] (-a⁻¹)
@@ -131,15 +136,19 @@ def continuousHahn (a b c d : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
   I ^ n * poch (a + c) n * poch (a + d) n / n.factorial *
     terminatingHG n [-(n : ℂ), n + a + b + c + d - 1, a + I * x] [a + c, a + d] 1
 
+/-- The Meixner–Pollaczek polynomial
+`P_n^{(λ)}(x; φ) = (2λ)_n/n! e^{inφ} ₂F₁(-n, λ+ix; 2λ; 1 - e^{-2iφ})` (DLMF 18.20.10). -/
 @[dlmf 18.20.E10]
 def meixnerPollaczek (lam phi : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
   poch (2 * lam) n / n.factorial * exp (I * n * phi) *
     terminatingHG n [-(n : ℂ), lam + I * x] [2 * lam] (1 - exp (-2 * I * phi))
 
+/-- The continuous Hahn weight `Γ(a+ix) Γ(b+ix) Γ(ā-ix) Γ(b̄-ix)` (DLMF 18.19.2). -/
 @[dlmf 18.19.E2]
 def continuousHahnWeight (a b : ℂ) (x : ℂ) : ℂ :=
   Gamma (a + I * x) * Gamma (b + I * x) * Gamma (star a - I * x) * Gamma (star b - I * x)
 
+/-- The Meixner–Pollaczek weight `Γ(λ+ix) Γ(λ-ix) e^{(2φ-π)x}` (DLMF 18.19.7). -/
 @[dlmf 18.19.E7]
 def meixnerPollaczekWeight (lam phi : ℂ) (x : ℂ) : ℂ :=
   Gamma (lam + I * x) * Gamma (lam - I * x) * exp ((2 * phi - Real.pi) * x)
@@ -483,6 +492,7 @@ theorem poch_neg_succ_sub (x : ℂ) (k : ℕ) :
   rw [poch_succ_left, poch_succ, show -(x + 1) + 1 = -x by ring]
   ring
 
+/-- `∏ (t)_{j+1} = (∏ t) ∏ (t+1)_j` over a list of parameters. -/
 theorem prod_map_poch_succ (L : List ℂ) (j : ℕ) :
     (L.map (fun t => poch t (j + 1))).prod =
       L.prod * ((L.map (fun t => t + 1)).map (fun t => poch t j)).prod := by
@@ -1122,11 +1132,6 @@ theorem eval_charlierPoly (a : ℂ) (n : ℕ) (x : ℂ) : (charlierPoly a n).eva
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [poch]; ring
 
-/-- Self-duality of the Charlier polynomials at integer points. -/
-theorem charlier_swap (a : ℂ) (n m : ℕ) : charlier a n m = charlier a m n := by
-  simp only [charlier]
-  exact terminatingHG_two_neg_nat_swap n m [] _
-
 /-- The three-term recurrence of the Charlier polynomials in the degree. -/
 theorem charlier_recurrence {a : ℂ} (ha : a ≠ 0) (n : ℕ) (x : ℂ) :
     a * charlier a (n + 2) x =
@@ -1138,7 +1143,7 @@ theorem charlier_recurrence {a : ℂ} (ha : a ≠ 0) (n : ℕ) (x : ℂ) :
     have h := charlier_difference_equation ha m ((n + 1 : ℕ) : ℂ)
     rw [show ((n + 1 : ℕ) : ℂ) + 1 = ((n + 2 : ℕ) : ℂ) by push_cast; ring,
       show ((n + 1 : ℕ) : ℂ) - 1 = ((n : ℕ) : ℂ) by push_cast; ring,
-      charlier_swap a m (n + 2), charlier_swap a m (n + 1), charlier_swap a m n] at h
+      charlier_duality a m (n + 2), charlier_duality a m (n + 1), charlier_duality a m n] at h
     push_cast at h
     linear_combination h
   -- polynomial identity
@@ -1782,6 +1787,7 @@ theorem summable_of_ratio_pos {u : ℕ → ℝ} (hu : ∀ n, 0 < u n) {l : ℝ} 
   refine summable_of_ratio_test_tendsto_lt_one hl (Eventually.of_forall fun n => (hu n).ne') ?_
   simpa only [Real.norm_eq_abs, abs_of_pos (hu _)] using h
 
+/-- `((n+2)/(n+1))^K → 1` as `n → ∞`. -/
 theorem tendsto_succ_div_pow (K : ℕ) :
     Tendsto (fun n : ℕ => (((n : ℝ) + 1 + 1) / ((n : ℝ) + 1)) ^ K) atTop (𝓝 1) := by
   have h : Tendsto (fun n : ℕ => 1 + 1 / ((n : ℝ) + 1)) atTop (𝓝 (1 + 0)) :=
@@ -1820,6 +1826,7 @@ theorem hasSum_orthogonal_poly {w : ℕ → ℂ}
   rw [← h0]
   exact hs.hasSum
 
+/-- For `a > 0` the Charlier weight `aˣ/x!` has finite moments of every order `K`. -/
 theorem summable_charlierWeight {a : ℝ} (ha : 0 < a) (K : ℕ) :
     Summable fun x : ℕ => ‖(a : ℂ) ^ x / (x ! : ℂ)‖ * ((x : ℝ) + 1) ^ K := by
   have hu : ∀ n : ℕ, 0 < a ^ n / n ! * ((n : ℝ) + 1) ^ K := fun n => by positivity
@@ -1841,9 +1848,11 @@ theorem summable_charlierWeight {a : ℝ} (ha : 0 < a) (K : ℕ) :
   have := ((tendsto_one_div_add_atTop_nhds_zero_nat.const_mul a).mul (tendsto_succ_div_pow K))
   simpa using this
 
+/-- `C_0(x; a) = 1`. -/
 theorem charlier_zero (a x : ℂ) : charlier a 0 x = 1 := by
   simp [charlier, terminatingHG, poch_zero]
 
+/-- `C_1(x; a) = 1 - x/a`. -/
 theorem charlier_one {a : ℂ} (ha : a ≠ 0) (x : ℂ) : charlier a 1 x = 1 - x / a := by
   simp [charlier, terminatingHG, Finset.sum_range_succ, poch_zero, poch_one]
   field_simp
@@ -1864,7 +1873,116 @@ theorem charlier_mul_x {a : ℂ} (ha : a ≠ 0) (n : ℕ) (x : ℂ) :
     push_cast
     linear_combination h
 
-lemma charlier_orthogonality_aux {a : ℝ} (ha : 0 < a) (m n : ℕ) :
+/-- A two-numerator terminating sum `₂F_q(-n, -x; b; z)` as a polynomial in `x`. -/
+def hgPoly (n : ℕ) (b : List ℂ) (z : ℂ) : ℂ[X] :=
+  ∑ k ∈ Finset.range (n + 1), C (poch (-(n : ℂ)) k / (b.map (fun t => poch t k)).prod *
+    z ^ k / k.factorial) * (ascPochhammer ℂ k).comp (-X)
+
+/-- Evaluating `hgPoly n b z` at `x` gives the terminating sum `F(-n, -x; b; z)`. -/
+theorem eval_hgPoly (n : ℕ) (b : List ℂ) (z x : ℂ) :
+    (hgPoly n b z).eval x = terminatingHG n [-(n : ℂ), -x] b z := by
+  simp only [hgPoly, terminatingHG, eval_finsetSum, eval_mul, eval_C, eval_comp, eval_neg, eval_X,
+    List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one]
+  refine Finset.sum_congr rfl fun k _ => ?_
+  rw [poch]; ring
+
+/-- The Meixner polynomial is the evaluation of `hgPoly n [β] (1 - 1/c)`. -/
+theorem eval_hgPoly_meixner (β c : ℂ) (n : ℕ) (x : ℂ) :
+    (hgPoly n [β] (1 - c⁻¹)).eval x = meixner β c n x := eval_hgPoly _ _ _ _
+
+/-- For `β > 0` and `0 < c < 1` the Meixner weight `(β)_x cˣ/x!` has finite moments of
+every order. -/
+theorem summable_meixnerWeight {β c : ℝ} (hβ : 0 < β) (hc : 0 < c) (hc1 : c < 1) (K : ℕ) :
+    Summable fun x : ℕ => ‖poch (β : ℂ) x * (c : ℂ) ^ x / (x ! : ℂ)‖ * ((x : ℝ) + 1) ^ K := by
+  have hp : ∀ n : ℕ, poch (β : ℂ) n ≠ 0 := poch_ne_zero_of_re_pos (by simpa using hβ)
+  have hu : ∀ n : ℕ, 0 < ‖poch (β : ℂ) n‖ * c ^ n / n ! * ((n : ℝ) + 1) ^ K := fun n => by
+    have := norm_pos_iff.mpr (hp n); positivity
+  have h := summable_of_ratio_pos hu (l := c) hc1 ?_
+  · refine h.congr fun x => ?_
+    rw [norm_div, norm_mul, norm_pow, Complex.norm_real, Complex.norm_natCast, Real.norm_eq_abs,
+      abs_of_pos hc]
+  have hb : ∀ n : ℕ, ‖(β : ℂ) + n‖ = β + n := fun n => by
+    rw [show (β : ℂ) + n = ((β + n : ℝ) : ℂ) by push_cast; ring, Complex.norm_real,
+      Real.norm_eq_abs, abs_of_pos (by positivity)]
+  have e : ∀ n : ℕ, ‖poch (β : ℂ) (n + 1)‖ * c ^ (n + 1) / (n + 1)! *
+      (((n + 1 : ℕ) : ℝ) + 1) ^ K / (‖poch (β : ℂ) n‖ * c ^ n / n ! * ((n : ℝ) + 1) ^ K) =
+      (1 + (β - 1) * (1 / ((n : ℝ) + 1))) * c *
+        (((n : ℝ) + 1 + 1) / ((n : ℝ) + 1)) ^ K := by
+    intro n
+    have h1 : (n ! : ℝ) ≠ 0 := by positivity
+    have h2 : (n : ℝ) + 1 ≠ 0 := by positivity
+    have h3 : ‖poch (β : ℂ) n‖ ≠ 0 := norm_ne_zero_iff.mpr (hp n)
+    rw [poch_succ, norm_mul, hb, Nat.factorial_succ, div_pow]
+    push_cast
+    field_simp
+    ring
+  simp_rw [e]
+  have := (((tendsto_one_div_add_atTop_nhds_zero_nat.const_mul (β - 1)).const_add 1).mul_const
+    c).mul (tendsto_succ_div_pow K)
+  simpa using this
+
+/-- `M_0(x; β, c) = 1`. -/
+theorem meixner_zero (β c x : ℂ) : meixner β c 0 x = 1 := by
+  simp [meixner, terminatingHG, poch_zero]
+
+end DiscreteOrtho
+
+open DiscreteOrtho in
+/-- The Meixner recurrence in the degree (DLMF 18.22.2 with Table 18.22.1). -/
+@[dlmf 18.22.E2]
+theorem meixner_recurrence {β c : ℂ} (hβ : 0 < β.re) (hc : c ≠ 0) (n : ℕ) (x : ℂ) :
+    (c - 1) * x * meixner β c (n + 1) x =
+      c * (n + 1 + β) * meixner β c (n + 2) x -
+        (n + 1 + (n + 1 + β) * c) * meixner β c (n + 1) x + (n + 1) * meixner β c n x := by
+  have hint : ∀ m : ℕ, (c - 1) * m * meixner β c (n + 1) m =
+      c * (n + 1 + β) * meixner β c (n + 2) m -
+        (n + 1 + (n + 1 + β) * c) * meixner β c (n + 1) m + (n + 1) * meixner β c n m := by
+    intro m
+    have h := meixner_difference_equation hβ hc m ((n + 1 : ℕ) : ℂ)
+    rw [show ((n + 1 : ℕ) : ℂ) + 1 = ((n + 2 : ℕ) : ℂ) by push_cast; ring,
+      show ((n + 1 : ℕ) : ℂ) - 1 = ((n : ℕ) : ℂ) by push_cast; ring,
+      meixner_duality β c m (n + 2), meixner_duality β c m (n + 1),
+      meixner_duality β c m n] at h
+    push_cast at h
+    linear_combination -h
+  have hpoly : C (c - 1) * X * hgPoly (n + 1) [β] (1 - c⁻¹) =
+      C (c * (n + 1 + β)) * hgPoly (n + 2) [β] (1 - c⁻¹) -
+        C (n + 1 + (n + 1 + β) * c) * hgPoly (n + 1) [β] (1 - c⁻¹) +
+          C ((n : ℂ) + 1) * hgPoly n [β] (1 - c⁻¹) := by
+    apply Polynomial.eq_of_infinite_eval_eq
+    refine Set.infinite_of_injective_forall_mem (f := fun m : ℕ => (m : ℂ))
+      Nat.cast_injective fun m => ?_
+    simp only [Set.mem_ofPred_eq, eval_mul, eval_sub, eval_add, eval_C, eval_X,
+      eval_hgPoly_meixner]
+    rw [hint m]
+  have := congrArg (eval x) hpoly
+  simp only [eval_mul, eval_sub, eval_add, eval_C, eval_X, eval_hgPoly_meixner] at this
+  rw [this]
+
+namespace DiscreteOrtho
+
+/-- The Meixner recurrence written as `(c - 1) x M_n = …` for all `n`. -/
+theorem meixner_mul_x {β c : ℂ} (hβ : 0 < β.re) (hc : c ≠ 0) (n : ℕ) (x : ℂ) :
+    (c - 1) * x * meixner β c n x = c * (n + β) * meixner β c (n + 1) x -
+      (n + (n + β) * c) * meixner β c n x + n * meixner β c (n - 1) x := by
+  cases n with
+  | zero =>
+    have hβ0 : β ≠ 0 := fun h => by simp [h] at hβ
+    simp only [meixner_zero, Nat.cast_zero, zero_add, zero_mul, add_zero, mul_one]
+    simp [meixner, terminatingHG, Finset.sum_range_succ, poch_zero, poch_one]
+    field_simp
+    ring
+  | succ k =>
+    have h := meixner_recurrence hβ hc k x
+    simp only [Nat.add_sub_cancel]
+    push_cast
+    linear_combination h
+
+end DiscreteOrtho
+
+open DiscreteOrtho in
+@[dlmf 18.19.T1]
+theorem charlier_orthogonality {a : ℝ} (ha : 0 < a) (m n : ℕ) :
     HasSum (fun x : ℕ => charlier a m x * charlier a n x * (a : ℂ) ^ x / x.factorial)
       (if m = n then (a : ℂ)⁻¹ ^ n * exp a * n.factorial else 0) := by
   have ha' : (a : ℂ) ≠ 0 := by exact_mod_cast ha.ne'
@@ -1943,107 +2061,9 @@ lemma charlier_orthogonality_aux {a : ℝ} (ha : 0 < a) (m n : ℕ) :
     simpa only [hwdef, mul_div_assoc] using hN m
   · simpa only [hwdef, mul_div_assoc] using hO m n hmn
 
-/-- A two-numerator terminating sum `₂F_q(-n, -x; b; z)` as a polynomial in `x`. -/
-def hgPoly (n : ℕ) (b : List ℂ) (z : ℂ) : ℂ[X] :=
-  ∑ k ∈ Finset.range (n + 1), C (poch (-(n : ℂ)) k / (b.map (fun t => poch t k)).prod *
-    z ^ k / k.factorial) * (ascPochhammer ℂ k).comp (-X)
-
-theorem eval_hgPoly (n : ℕ) (b : List ℂ) (z x : ℂ) :
-    (hgPoly n b z).eval x = terminatingHG n [-(n : ℂ), -x] b z := by
-  simp only [hgPoly, terminatingHG, eval_finsetSum, eval_mul, eval_C, eval_comp, eval_neg, eval_X,
-    List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one]
-  refine Finset.sum_congr rfl fun k _ => ?_
-  rw [poch]; ring
-
-theorem eval_hgPoly_meixner (β c : ℂ) (n : ℕ) (x : ℂ) :
-    (hgPoly n [β] (1 - c⁻¹)).eval x = meixner β c n x := eval_hgPoly _ _ _ _
-
-theorem summable_meixnerWeight {β c : ℝ} (hβ : 0 < β) (hc : 0 < c) (hc1 : c < 1) (K : ℕ) :
-    Summable fun x : ℕ => ‖poch (β : ℂ) x * (c : ℂ) ^ x / (x ! : ℂ)‖ * ((x : ℝ) + 1) ^ K := by
-  have hp : ∀ n : ℕ, poch (β : ℂ) n ≠ 0 := poch_ne_zero_of_re_pos (by simpa using hβ)
-  have hu : ∀ n : ℕ, 0 < ‖poch (β : ℂ) n‖ * c ^ n / n ! * ((n : ℝ) + 1) ^ K := fun n => by
-    have := norm_pos_iff.mpr (hp n); positivity
-  have h := summable_of_ratio_pos hu (l := c) hc1 ?_
-  · refine h.congr fun x => ?_
-    rw [norm_div, norm_mul, norm_pow, Complex.norm_real, Complex.norm_natCast, Real.norm_eq_abs,
-      abs_of_pos hc]
-  have hb : ∀ n : ℕ, ‖(β : ℂ) + n‖ = β + n := fun n => by
-    rw [show (β : ℂ) + n = ((β + n : ℝ) : ℂ) by push_cast; ring, Complex.norm_real,
-      Real.norm_eq_abs, abs_of_pos (by positivity)]
-  have e : ∀ n : ℕ, ‖poch (β : ℂ) (n + 1)‖ * c ^ (n + 1) / (n + 1)! *
-      (((n + 1 : ℕ) : ℝ) + 1) ^ K / (‖poch (β : ℂ) n‖ * c ^ n / n ! * ((n : ℝ) + 1) ^ K) =
-      (1 + (β - 1) * (1 / ((n : ℝ) + 1))) * c *
-        (((n : ℝ) + 1 + 1) / ((n : ℝ) + 1)) ^ K := by
-    intro n
-    have h1 : (n ! : ℝ) ≠ 0 := by positivity
-    have h2 : (n : ℝ) + 1 ≠ 0 := by positivity
-    have h3 : ‖poch (β : ℂ) n‖ ≠ 0 := norm_ne_zero_iff.mpr (hp n)
-    rw [poch_succ, norm_mul, hb, Nat.factorial_succ, div_pow]
-    push_cast
-    field_simp
-    ring
-  simp_rw [e]
-  have := (((tendsto_one_div_add_atTop_nhds_zero_nat.const_mul (β - 1)).const_add 1).mul_const
-    c).mul (tendsto_succ_div_pow K)
-  simpa using this
-
-theorem meixner_zero (β c x : ℂ) : meixner β c 0 x = 1 := by
-  simp [meixner, terminatingHG, poch_zero]
-
-end DiscreteOrtho
-
 open DiscreteOrtho in
-/-- The Meixner recurrence in the degree (DLMF 18.22.2 with Table 18.22.1). -/
-@[dlmf 18.22.E2]
-theorem meixner_recurrence {β c : ℂ} (hβ : 0 < β.re) (hc : c ≠ 0) (n : ℕ) (x : ℂ) :
-    (c - 1) * x * meixner β c (n + 1) x =
-      c * (n + 1 + β) * meixner β c (n + 2) x -
-        (n + 1 + (n + 1 + β) * c) * meixner β c (n + 1) x + (n + 1) * meixner β c n x := by
-  have hint : ∀ m : ℕ, (c - 1) * m * meixner β c (n + 1) m =
-      c * (n + 1 + β) * meixner β c (n + 2) m -
-        (n + 1 + (n + 1 + β) * c) * meixner β c (n + 1) m + (n + 1) * meixner β c n m := by
-    intro m
-    have h := meixner_difference_equation hβ hc m ((n + 1 : ℕ) : ℂ)
-    rw [show ((n + 1 : ℕ) : ℂ) + 1 = ((n + 2 : ℕ) : ℂ) by push_cast; ring,
-      show ((n + 1 : ℕ) : ℂ) - 1 = ((n : ℕ) : ℂ) by push_cast; ring,
-      meixner_duality β c m (n + 2), meixner_duality β c m (n + 1),
-      meixner_duality β c m n] at h
-    push_cast at h
-    linear_combination -h
-  have hpoly : C (c - 1) * X * hgPoly (n + 1) [β] (1 - c⁻¹) =
-      C (c * (n + 1 + β)) * hgPoly (n + 2) [β] (1 - c⁻¹) -
-        C (n + 1 + (n + 1 + β) * c) * hgPoly (n + 1) [β] (1 - c⁻¹) +
-          C ((n : ℂ) + 1) * hgPoly n [β] (1 - c⁻¹) := by
-    apply Polynomial.eq_of_infinite_eval_eq
-    refine Set.infinite_of_injective_forall_mem (f := fun m : ℕ => (m : ℂ))
-      Nat.cast_injective fun m => ?_
-    simp only [Set.mem_ofPred_eq, eval_mul, eval_sub, eval_add, eval_C, eval_X,
-      eval_hgPoly_meixner]
-    rw [hint m]
-  have := congrArg (eval x) hpoly
-  simp only [eval_mul, eval_sub, eval_add, eval_C, eval_X, eval_hgPoly_meixner] at this
-  rw [this]
-
-namespace DiscreteOrtho
-
-/-- The Meixner recurrence written as `(c - 1) x M_n = …` for all `n`. -/
-theorem meixner_mul_x {β c : ℂ} (hβ : 0 < β.re) (hc : c ≠ 0) (n : ℕ) (x : ℂ) :
-    (c - 1) * x * meixner β c n x = c * (n + β) * meixner β c (n + 1) x -
-      (n + (n + β) * c) * meixner β c n x + n * meixner β c (n - 1) x := by
-  cases n with
-  | zero =>
-    have hβ0 : β ≠ 0 := fun h => by simp [h] at hβ
-    simp only [meixner_zero, Nat.cast_zero, zero_add, zero_mul, add_zero, mul_one]
-    simp [meixner, terminatingHG, Finset.sum_range_succ, poch_zero, poch_one]
-    field_simp
-    ring
-  | succ k =>
-    have h := meixner_recurrence hβ hc k x
-    simp only [Nat.add_sub_cancel]
-    push_cast
-    linear_combination h
-
-lemma meixner_orthogonality_aux {β c : ℝ} (hβ : 0 < β) (hc : 0 < c) (hc1 : c < 1) (m n : ℕ) :
+@[dlmf 18.19.T1]
+theorem meixner_orthogonality {β c : ℝ} (hβ : 0 < β) (hc : 0 < c) (hc1 : c < 1) (m n : ℕ) :
     HasSum (fun x : ℕ => meixner β c m x * meixner β c n x * poch β x *
       (c : ℂ) ^ x / x.factorial)
       (if m = n then (c : ℂ)⁻¹ ^ n * n.factorial / (poch β n * (1 - c : ℂ) ^ (β : ℂ)) else 0) := by
@@ -2145,21 +2165,7 @@ lemma meixner_orthogonality_aux {β c : ℝ} (hβ : 0 < β) (hc : 0 < c) (hc1 : 
     simpa only [hwdef, mul_div_assoc, mul_assoc] using hN m
   · simpa only [hwdef, mul_div_assoc, mul_assoc] using hO m n hmn
 
-end DiscreteOrtho
-
-@[dlmf 18.19.T1]
-theorem charlier_orthogonality {a : ℝ} (ha : 0 < a) (m n : ℕ) :
-    HasSum (fun x : ℕ => charlier a m x * charlier a n x * (a : ℂ) ^ x / x.factorial)
-      (if m = n then (a : ℂ)⁻¹ ^ n * exp a * n.factorial else 0) := by
-  exact DiscreteOrtho.charlier_orthogonality_aux ha m n
-
-@[dlmf 18.19.T1]
-theorem meixner_orthogonality {β c : ℝ} (hβ : 0 < β) (hc : 0 < c) (hc1 : c < 1) (m n : ℕ) :
-    HasSum (fun x : ℕ => meixner β c m x * meixner β c n x * poch β x *
-      (c : ℂ) ^ x / x.factorial)
-      (if m = n then (c : ℂ)⁻¹ ^ n * n.factorial / (poch β n * (1 - c : ℂ) ^ (β : ℂ)) else 0) := by
-  exact DiscreteOrtho.meixner_orthogonality_aux hβ hc hc1 m n
-
+/-- `K_0(x; p, N) = 1`. -/
 theorem krawtchouk_zero (p : ℂ) (N : ℕ) (x : ℂ) : krawtchouk p N 0 x = 1 := by
   simp [krawtchouk, terminatingHG, poch_zero]
 
@@ -2351,6 +2357,7 @@ theorem hahn_orthogonal {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) {N m n : �
   simp only [hwdef]
   ring
 
+/-- `hgPoly n b z` has degree at most `n`. -/
 theorem natDegree_hgPoly_le (n : ℕ) (b : List ℂ) (z : ℂ) :
     (DiscreteOrtho.hgPoly n b z).natDegree ≤ n := by
   unfold DiscreteOrtho.hgPoly
@@ -2359,6 +2366,7 @@ theorem natDegree_hgPoly_le (n : ℕ) (b : List ℂ) (z : ℂ) :
   rw [natDegree_comp, ascPochhammer_natDegree, natDegree_neg, natDegree_X, mul_one]
   exact Nat.lt_succ_iff.mp (Finset.mem_range.mp hk)
 
+/-- The Krawtchouk polynomial is the evaluation of `hgPoly n [-N] (1/p)`. -/
 theorem eval_hgPoly_krawtchouk (p : ℂ) (N n : ℕ) (x : ℂ) :
     (DiscreteOrtho.hgPoly n [-(N : ℂ)] p⁻¹).eval x = krawtchouk p N n x :=
   DiscreteOrtho.eval_hgPoly _ _ _ _
@@ -2465,6 +2473,8 @@ theorem op_phi_succ (α β N n : ℂ) (j : ℕ) :
 /-- The coefficient `1 / ((α+1)_k (-N)_k k!)`. -/
 def dcoef (α : ℂ) (N : ℕ) (k : ℕ) : ℂ := (poch (α + 1) k * poch (-(N : ℂ)) k * k.factorial)⁻¹
 
+/-- The Hahn polynomial as a sum over `k ≤ K` (any `K ≥ m`) of
+`dcoef α N k (-x)_k (-m)_k (m+α+β+1)_k`. -/
 theorem hahn_eq_sum (α β : ℂ) (N m K : ℕ) (hm : m ≤ K) (x : ℂ) :
     hahn α β N m x = ∑ k ∈ Finset.range (K + 1),
       dcoef α N k * poch (-x) k * phi (α + β + 1) m k := by
@@ -2481,6 +2491,7 @@ theorem hahn_eq_sum (α β : ℂ) (N m K : ℕ) (hm : m ≤ K) (x : ℂ) :
     have : m < k := by simp at hk; omega
     simp [phi, poch_neg_nat_eq_zero this]
 
+/-- The ratio of consecutive coefficients `dcoef α N j`. -/
 theorem dcoef_succ {α : ℂ} (hα : -1 < α.re) {N j : ℕ} (hj : j + 1 ≤ N) :
     dcoef α N (j + 1) * ((α + j + 1) * (j - N) * (j + 1)) = dcoef α N j := by
   have h1 : poch (α + 1) j ≠ 0 := poch_ne_zero_of_re_pos (by simp; linarith) j

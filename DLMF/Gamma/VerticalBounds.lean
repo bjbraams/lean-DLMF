@@ -33,11 +33,13 @@ namespace DLMF.Gamma
 /-- The product `P(x,y) = ∏ₖ (1 + y²/(x+k)²)` of DLMF 5.8.3. -/
 def gammaVertProd (x y : ℝ) : ℝ := ∏' k : ℕ, (1 + y ^ 2 / (x + k) ^ 2)
 
+/-- The partial products `∏_{k<n} (1 + y²/(x + k)²)` tend to `gammaVertProd x y`. -/
 theorem tendsto_prod_gammaVertProd (x y : ℝ) :
     Tendsto (fun n : ℕ => ∏ k ∈ Finset.range n, (1 + y ^ 2 / (x + k) ^ 2)) atTop
       (𝓝 (gammaVertProd x y)) :=
   (multipliable_one_add_sq_div_add_sq x y).hasProd.tendsto_prod_nat
 
+/-- `gammaVertProd x y ≥ 1`. -/
 theorem one_le_gammaVertProd (x y : ℝ) : 1 ≤ gammaVertProd x y :=
   ge_of_tendsto' (tendsto_prod_gammaVertProd x y) fun n =>
     Finset.one_le_prod₀ fun k _ => le_add_of_nonneg_right (by positivity)
@@ -51,6 +53,7 @@ theorem gammaVertProd_anti {x x' : ℝ} (hx : 0 < x) (hxx : x ≤ x') (y : ℝ) 
   have h1 : 0 < x + k := by positivity
   gcongr
 
+/-- For `x > 0`, `|Γ(x + iy)|² = Γ(x)² / ∏ₖ (1 + y²/(x + k)²)`. -/
 theorem norm_Gamma_sq_eq {x : ℝ} (hx : 0 < x) (y : ℝ) :
     ‖Complex.Gamma (x + I * y)‖ ^ 2 = Real.Gamma x ^ 2 / gammaVertProd x y := by
   have hxk : ∀ k : ℕ, (x : ℂ) ≠ -k := fun k h => by
@@ -62,6 +65,7 @@ theorem norm_Gamma_sq_eq {x : ℝ} (hx : 0 < x) (y : ℝ) :
   have : ‖Complex.Gamma (x + I * y)‖ ≠ 0 := norm_ne_zero_iff.mpr hne
   field_simp
 
+/-- `∏ₖ (1 + y²/(1 + k)²) = sinh(π y)/(π y)` for `y ≠ 0`. -/
 theorem gammaVertProd_one {y : ℝ} (hy : y ≠ 0) :
     gammaVertProd 1 y = Real.sinh (π * y) / (π * y) := by
   have h := norm_Gamma_sq_eq one_pos y
@@ -87,6 +91,7 @@ theorem gammaVertProd_one {y : ℝ} (hy : y ≠ 0) :
         (Real.sinh_neg_iff.mpr (mul_neg_of_pos_of_neg Real.pi_pos h')))).le
     · exact (div_pos Real.pi_pos (mul_pos h' (Real.sinh_pos_iff.mpr (by positivity)))).le
 
+/-- `∏ₖ (1 + y²/(1/2 + k)²) = cosh(π y)`. -/
 theorem gammaVertProd_half (y : ℝ) : gammaVertProd (1 / 2) y = Real.cosh (π * y) := by
   have h := norm_Gamma_sq_eq (one_half_pos) y
   rw [show (((1 / 2 : ℝ)) : ℂ) = 1 / 2 by push_cast; ring, (Gamma_half_add_mul_I y).2,
@@ -96,9 +101,11 @@ theorem gammaVertProd_half (y : ℝ) : gammaVertProd (1 / 2) y = Real.cosh (π *
     field_simp at h
     nlinarith [h]
 
+/-- `gammaVertProd x 0 = 1`. -/
 theorem gammaVertProd_zero (x : ℝ) : gammaVertProd x 0 = 1 := by
   simp [gammaVertProd]
 
+/-- `gammaVertProd x y` is even in `y`. -/
 theorem gammaVertProd_neg (x y : ℝ) : gammaVertProd x (-y) = gammaVertProd x y := by
   simp [gammaVertProd]
 
@@ -126,6 +133,7 @@ theorem recip_gammaVertProd_one_le (y : ℝ) :
     rw [← mul_pow, mul_comm, he, one_pow]
   nlinarith [k1, k2, he]
 
+/-- For `0 < x ≤ 1`, `|Γ(x + iy)|² ≤ Γ(x)² · 2(1 + π|y|) e^(-π|y|)`. -/
 theorem norm_Gamma_sq_le_of_le_one {x : ℝ} (hx : 0 < x) (hx1 : x ≤ 1) (y : ℝ) :
     ‖Complex.Gamma (x + I * y)‖ ^ 2 ≤
       Real.Gamma x ^ 2 * (2 * (1 + π * |y|) * Real.exp (-(π * |y|))) := by
@@ -190,6 +198,7 @@ theorem exists_norm_Gamma_le {x : ℝ} (hx : 0 < x) :
           mul_le_mul hn1 h2 (norm_nonneg _) (by nlinarith [abs_nonneg y])
       _ = _ := by ring
 
+/-- `cosh t ≤ e^|t|`. -/
 theorem cosh_le_exp_abs (t : ℝ) : Real.cosh t ≤ Real.exp |t| := by
   rw [Real.cosh_eq]
   have h1 := Real.exp_le_exp.mpr (le_abs_self t)
@@ -296,6 +305,7 @@ theorem exists_norm_recip_Gamma_le (X : ℝ) :
   refine (step n x ⟨by linarith [hx.1], hx.2.trans (le_max_left _ _)⟩ y).trans (le_of_eq ?_)
   ring
 
+/-- `e^(-b|y|)` is integrable on `ℝ` for `b > 0`. -/
 theorem integrable_exp_neg_mul_abs {b : ℝ} (hb : 0 < b) :
     Integrable (fun y : ℝ => Real.exp (-(b * |y|))) := by
   have h1 : IntegrableOn (fun y : ℝ => Real.exp (-(b * |y|))) (Ioi 0) :=

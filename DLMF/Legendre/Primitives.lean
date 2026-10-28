@@ -74,7 +74,9 @@ theorem hasDerivAt_one_sub_sq_cpow (c : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 
   refine h.congr_deriv ?_
   push_cast; ring
 
-/-- ferrers primitive 1. -/
+/-- DLMF 14.17.1: for `-1 < x < 1` and `w = 𝖯` or `𝖰` (for `𝖰`, with `ν + μ + k` not a negative
+integer for `k = -1, 0, 1`), `-(1-x²)^{-(μ-1)/2} w^{μ-1}_ν(x)` is an antiderivative of
+`(1-x²)^{-μ/2} w^μ_ν(x)`. -/
 @[dlmf 14.17.E1]
 theorem ferrers_primitive_1 (second : Bool) (ν μ : ℂ) (hr : second=true → ∀ k ∈ Finset.Icc (-1:ℤ) 1, LegendreQRegular ν (μ+k))  {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt (fun x : ℝ => -(1-x^2:ℂ)^(-(μ-1)/2)*ferrersSolution second ν (μ-1) x) ((1-x^2:ℂ)^(-μ/2)*ferrersSolution second ν μ x) x := by
@@ -94,7 +96,9 @@ theorem ferrers_primitive_1 (second : Bool) (ν μ : ℂ) (hr : second=true → 
   rw [e1, e2]
   linear_combination -(1-(x:ℂ)^2)^(-(μ-1)/2-1)*hraise
 
-/-- ferrers primitive 2. -/
+/-- DLMF 14.17.2: for `μ ≠ ν`, `μ ≠ -ν-1`, `-1 < x < 1` and `w = 𝖯` or `𝖰` (for `𝖰`, with `ν + μ +
+k` not a negative integer for `k = -1, 0, 1`), `(1-x²)^{(μ+1)/2} w^{μ+1}_ν(x)/((ν-μ)(ν+μ+1))` is an
+antiderivative of `(1-x²)^{μ/2} w^μ_ν(x)`. -/
 @[dlmf 14.17.E2]
 theorem ferrers_primitive_2 (second : Bool) (ν μ : ℂ) (hr : second=true → ∀ k ∈ Finset.Icc (-1:ℤ) 1, LegendreQRegular ν (μ+k)) (h0 : μ ≠ ν) (h1 : μ ≠ -ν-1) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt (fun x : ℝ => (1-x^2:ℂ)^((μ+1)/2)/((ν-μ)*(ν+μ+1))*ferrersSolution second ν (μ+1) x) ((1-x^2:ℂ)^(μ/2)*ferrersSolution second ν μ x) x := by
@@ -124,7 +128,9 @@ theorem ferrers_primitive_2 (second : Bool) (ν μ : ℂ) (hr : second=true → 
   linear_combination ((1-(x:ℂ)^2)^((μ+1)/2-1)*((ν-μ)*(ν+μ+1))⁻¹)*key
     + (1-(x:ℂ)^2)^((μ+1)/2-1)*(1-(x:ℂ)^2)^(1/2:ℂ)*ferrersSolution second ν μ x*hdd
 
-/-- ferrersProductPrimitive. -/
+/-- DLMF 14.17.3 and 14.17.4: the closed-form primitive built from `F, G` at degrees `ν` and `ν+1`;
+for Ferrers solutions it is an antiderivative of `x F G` (`singular = false`, requires `ν ≠ 0, -1`)
+or of `x (1-x²)^{-3/2} F G` (`singular = true`). -/
 @[dlmf 14.17.E3, dlmf 14.17.E4]
 def ferrersProductPrimitive (singular : Bool) (F G : ℂ → ℂ → ℝ → ℂ) (ν μ : ℂ) (x : ℝ) : ℂ :=
   if singular then ((1-2*μ^2+2*ν*(ν+1))*F ν μ x*G ν μ x+(2*ν+1)*(μ-ν-1)*x*(F ν μ x*G (ν+1) μ x+F (ν+1) μ x*G ν μ x)+2*(μ-ν-1)^2*F (ν+1) μ x*G (ν+1) μ x)/((1-4*μ^2)*(1-x^2:ℂ)^(1/2:ℂ)) else ((μ^2-(ν+1)*(ν+x^2))*F ν μ x*G ν μ x+(ν+1)*(ν-μ+1)*x*(F ν μ x*G (ν+1) μ x+F (ν+1) μ x*G ν μ x)-(ν-μ+1)^2*F (ν+1) μ x*G (ν+1) μ x)/(2*ν*(ν+1))
@@ -149,7 +155,9 @@ theorem ferrersSolution_deriv_degree_succ (second : Bool) (ν μ : ℂ) (h : sec
   · have := ferrersQ_recurrence_5 (ν+1) μ (by rw [add_sub_cancel_right]; exact h rfl) hx
     rwa [add_sub_cancel_right] at this
 
-/-- ferrers product primitive 3. -/
+/-- DLMF 14.17.3: for `ν ≠ 0, -1`, `-1 < x < 1` and Ferrers solutions `v, w ∈ {𝖯, 𝖰}` (with `ν + μ`
+not a negative integer when a `𝖰` occurs), the closed form `ferrersProductPrimitive false` is an
+antiderivative of `x v^μ_ν(x) w^μ_ν(x)`. -/
 @[dlmf 14.17.E3]
 theorem ferrers_product_primitive_3 (second₁ second₂ : Bool) (ν μ : ℂ) (hr : (second₁=true ∨ second₂=true) → LegendreQRegular ν μ) (hν0 : ν ≠ 0) (hν1 : ν ≠ -1) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt (ferrersProductPrimitive false (ferrersSolution second₁) (ferrersSolution second₂) ν μ) (x*ferrersSolution second₁ ν μ x*ferrersSolution second₂ ν μ x) x := by
@@ -187,7 +195,9 @@ theorem ferrers_product_primitive_3 (second₁ second₂ : Bool) (ν μ : ℂ) (
     + ((ν+1)*(ν-μ+1)*x*ferrersSolution second₂ ν μ x - (ν-μ+1)^2*ferrersSolution second₂ (ν+1) μ x)*eF1
     + ((ν+1)*(ν-μ+1)*x*ferrersSolution second₁ ν μ x - (ν-μ+1)^2*ferrersSolution second₁ (ν+1) μ x)*eG1
 
-/-- ferrers product primitive 4. -/
+/-- DLMF 14.17.4: for `μ ≠ ±1/2`, `-1 < x < 1` and Ferrers solutions `v, w ∈ {𝖯, 𝖰}` (with `ν + μ`
+not a negative integer when a `𝖰` occurs), the closed form `ferrersProductPrimitive true` is an
+antiderivative of `x (1-x²)^{-3/2} v^μ_ν(x) w^μ_ν(x)`. -/
 @[dlmf 14.17.E4]
 theorem ferrers_product_primitive_4 (second₁ second₂ : Bool) (ν μ : ℂ) (hr : (second₁=true ∨ second₂=true) → LegendreQRegular ν μ) (hμ : μ ≠ 1/2) (hmμ : μ ≠ -1/2) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt (ferrersProductPrimitive true (ferrersSolution second₁) (ferrersSolution second₂) ν μ) (x/(1-x^2:ℂ)^(3/2:ℂ)*ferrersSolution second₁ ν μ x*ferrersSolution second₂ ν μ x) x := by

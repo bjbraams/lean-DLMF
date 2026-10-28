@@ -312,13 +312,11 @@ attribution in the affected module headers and at the point of use.
 
 ## Dirichlet simplex integrals ported from lean-codes (2026-10-16)
 
-The modules `DLMF/Gamma/Simplex/{PiSnoc,ProdSlices,Hyperplane,PochhammerIdentities,
-GammaPochhammer,BetaIntegral,MvBeta,MvBetaIntegral}.lean` are ports of the companion project
-`lean-codes` modules `StdSimplexMeasure/{PiSnoc,ProdSlices,FiniteDimensionalHyperplane}`,
-`Pochhammer/{Identities,Gamma,BetaIntegral}` and `Dirichlet/Beta/Complex/{Basic,Integral}`
-(same author). The proofs are unchanged; the declarations were moved from the Mathlib namespaces
-`Complex`, `Real`, `MeasureTheory` and `MeasurableEquiv` (and the root namespace) into
-`DLMF.Gamma.Simplex`, with explicit `_root_` opens. DLMF 5.14.1–5.14.2 (`dirichlet_simplex`,
+The Dirichlet simplex integrals were first ported from the companion project `lean-codes`
+(same author) into `DLMF/Gamma/Simplex/`. Since lean-codes became a Lake dependency
+(2026-10-25) the ports have been removed (2026-10-28) and the project imports the lean-codes
+modules `StdSimplexMeasure/*`, `Pochhammer/*` and `Dirichlet/Beta/Complex/*` directly.
+DLMF 5.14.1–5.14.2 (`dirichlet_simplex`,
 `dirichlet_simplex_full`) are derived from `mvBetaIntegralOne_eq_mvBeta` and
 `mvBetaIntegral_eq_mvBeta`. The Glaisher–Kinkelin closed form 5.17.7 differentiates the Mathlib
 contributors' `riemannZeta_one_sub` and uses `Complex.hasDerivAt_Gamma_nat`

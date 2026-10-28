@@ -41,26 +41,35 @@ def associated (A B C : ℝ → ℂ) (c : ℝ) : ℕ → ℂ → ℂ
   | n + 2, x => (A (n + 1 + c) * x + B (n + 1 + c)) * associated A B C c (n + 1) x -
       C (n + 1 + c) * associated A B C c n x
 
+/-- The associated Laguerre polynomials `L_n^{(λ)}(x; c)`, defined by the shifted Laguerre
+recurrence (DLMF 18.30.9). -/
 @[dlmf 18.30.E9]
 def associatedLaguerre (lam : ℂ) (c : ℝ) : ℕ → ℂ → ℂ :=
   associated (fun t => -(t + 1 : ℂ)⁻¹)
     (fun t => (2 * t + lam + 1) / (t + 1)) (fun t => (t + lam) / (t + 1)) c
 
+/-- The associated Hermite polynomials `H_n(x; c)`, defined by the shifted Hermite recurrence
+(DLMF 18.30.13). -/
 @[dlmf 18.30.E13]
 def associatedHermite (c : ℝ) : ℕ → ℂ → ℂ :=
   associated (fun _ => 2) (fun _ => 0) (fun t => 2 * t) c
 
+/-- The associated Meixner–Pollaczek polynomials `P_n^{(λ)}(x; φ, c)`, defined by the
+shifted recurrence (DLMF 18.30.16). -/
 @[dlmf 18.30.E16]
 def associatedMeixnerPollaczek (lam phi : ℂ) (c : ℝ) : ℕ → ℂ → ℂ :=
   associated (fun t => 2 * sin phi / (t + 1))
     (fun t => 2 * (t + lam) * cos phi / (t + 1))
     (fun t => (t + 2 * lam - 1) / (t + 1)) c
 
+/-- The (associated) Pollaczek polynomials `P_n^{(λ)}(x; a, b, c)`, defined by their
+three-term recurrence (DLMF 18.35.2). -/
 @[dlmf 18.35.E2]
 def pollaczek (lam a b : ℂ) (c : ℝ) : ℕ → ℂ → ℂ :=
   associated (fun t => 2 * (t + lam + a) / (t + 1))
     (fun t => 2 * b / (t + 1)) (fun t => (t + 2 * lam - 1) / (t + 1)) c
 
+/-- The Bessel polynomial `y_n(x; a) = ₂F₀(-n, n+a-1; ; -x/2)` (DLMF 18.34.1). -/
 @[dlmf 18.34.E1]
 def besselPolynomial (a : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
   terminatingHG n [-(n : ℂ), n + a - 1] [] (-x / 2)
@@ -71,6 +80,7 @@ def reverseBesselPolynomial (n : ℕ) (x : ℂ) : ℂ :=
   ∑ k ∈ Finset.range (n + 1), poch (-(n : ℂ)) k * poch (n + 1) k *
     (-1 / 2 : ℂ) ^ k * x ^ (n - k) / k.factorial
 
+/-- The Freud weight `|x|^α e^{-Q(x)}` (DLMF 18.32.2). -/
 @[dlmf 18.32.E2]
 def freudWeight (α : ℝ) (Q : ℝ → ℝ) (x : ℝ) : ℝ :=
   |x| ^ α * Real.exp (-Q x)
@@ -80,6 +90,7 @@ def freudWeight (α : ℝ) (Q : ℝ → ℝ) (x : ℝ) : ℝ :=
 def exceptionalLaguerre (k : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
   -(x + k + 1) * laguerrePolyL k n x + if n = 0 then 0 else laguerrePolyL k (n - 1) x
 
+/-- The exceptional Laguerre weight `x^k e^{-x}/(x+k)²` (DLMF 18.36.3). -/
 @[dlmf 18.36.E3]
 def exceptionalLaguerreWeight (k x : ℝ) : ℝ := x ^ k * Real.exp (-x) / (x + k) ^ 2
 
@@ -207,13 +218,6 @@ theorem poch_nat_succ_mul_factorial (a b : ℕ) :
   rw [Nat.add_sub_cancel_left] at h
   have h' : ((a + b).choose a : ℂ) * a ! * b ! = (a + b)! := by exact_mod_cast h
   linear_combination h'
-
-/-- Reflection of a Pochhammer symbol: `(1 - r - k)_k = (-1)^k (r)_k`. -/
-theorem poch_reflect (r : ℂ) (k : ℕ) : poch (1 - r - k) k = (-1) ^ k * poch r k := by
-  rw [poch, show (1 - r - k : ℂ) = -(r + k - 1) by ring, ascPochhammer_eval_neg_eq_descPochhammer,
-    descPochhammer_eval_eq_ascPochhammer]
-  congr 2
-  ring
 
 @[dlmf 18.34.E1]
 theorem besselPolynomial_eq_laguerrePolyL (a : ℂ) (n : ℕ) {x : ℂ} (hx : x ≠ 0) :
@@ -932,6 +936,7 @@ theorem laguerrePolyL_negative_integer_parameter {n k : ℕ} (hk : k ≤ n) (x :
   rw [q1, q2, pow_add, show (-x) ^ k = (-1) ^ k * x ^ k by ring]
   field_simp
 
+/-- The Laguerre polynomial `L_n^{(α)}` is analytic at every point. -/
 theorem analyticAt_laguerrePolyL {α : ℂ} (hα : -1 < α.re) (n : ℕ) (x : ℂ) :
     AnalyticAt ℂ (laguerrePolyL α n) x := by
   have hc : ∀ k : ℕ, α + 1 ≠ -(k : ℂ) := not_neg_nat_of_re_pos (by
@@ -948,7 +953,7 @@ theorem laguerrePolyL_deriv_succ_sub {α : ℂ} (hα : -1 < α.re) (m : ℕ) (x 
   rcases m with _ | j
   · have h0 : laguerrePolyL α 0 = fun _ => 1 := funext fun x => laguerrePolyL_zero α x
     rw [laguerrePolyL_derivative hα 0, h0, deriv_const, laguerrePolyL_zero]
-    simp [laguerrePolyL_zero]
+    simp
   · have hα1 : -1 < (α + 1).re := by simp; linarith
     rw [laguerrePolyL_derivative hα (j + 1), laguerrePolyL_derivative hα j,
         laguerrePolyL_raise_parameter hα j]
@@ -1028,6 +1033,7 @@ theorem exceptionalHermite_orthonormal (m n : Option ℕ) :
   sorry
 
 
+/-- The auxiliary function `τ(θ) = (a cos θ + b)/sin θ` of the Pollaczek weight (DLMF 18.35.3). -/
 @[dlmf 18.35.E3]
 def pollaczekTau (a b θ : ℝ) : ℝ := (a * Real.cos θ + b) / Real.sin θ
 

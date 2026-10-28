@@ -84,9 +84,12 @@ def q2t_pearceyScaled (y u : ℝ) : ℂ :=
   exp (((π / 8 : ℝ) : ℂ) * I) *
     exp (-((u ^ 4 / y ^ 2 : ℝ) : ℂ) + I * exp (((π / 4 : ℝ) : ℂ) * I) * (u : ℂ) ^ 2)
 
+/-- The Pearcey contour angle is `π/8`. -/
 lemma q2t_cuspoidAngle_two : cuspoidAngle 2 = π / 8 := by
   unfold cuspoidAngle; norm_num
 
+/-- On the symmetry line `x = 0` the Pearcey contour integrand is `e^{iπ/8} exp(-r⁴ + i e^{iπ/4} y
+r²)`. -/
 lemma q2t_pearcey_integrand (y r : ℝ) :
     cuspoidContourDir 2 r * exp (I * cuspoidPotential 2 (cuspoidContour 2 r) ![0, y]) =
       exp (((π / 8 : ℝ) : ℂ) * I) * exp (-((r ^ 4 : ℝ) : ℂ) +
@@ -104,6 +107,8 @@ lemma q2t_pearcey_integrand (y r : ℝ) :
   push_cast
   linear_combination ((r : ℂ) ^ 4) * I_sq
 
+/-- For `y > 0`, the substitution `t = u/√y` gives `Ψ₂(0, y) = y^{-1/2} ∫ q2t_pearceyScaled y u du`.
+-/
 lemma q2t_pearcey_scale {y : ℝ} (hy : 0 < y) :
     cuspoidIntegral 2 ![0, y] =
       ((1 / Real.sqrt y : ℝ) : ℂ) * ∫ u : ℝ, q2t_pearceyScaled y u := by
@@ -126,6 +131,7 @@ lemma q2t_pearcey_scale {y : ℝ} (hy : 0 < y) :
   rw [h1, h2, Measure.integral_comp_div, abs_of_pos hs, Complex.real_smul, ← mul_assoc,
     ← ofReal_mul, one_div_mul_cancel hs.ne', ofReal_one, one_mul]
 
+/-- The scaled Pearcey integrand is bounded by the Gaussian `exp(-(√2/2) u²)`. -/
 lemma q2t_norm_pearceyScaled_le (y u : ℝ) :
     ‖q2t_pearceyScaled y u‖ ≤ Real.exp (-(Real.sqrt 2 / 2) * u ^ 2) := by
   rw [q2t_pearceyScaled, norm_mul, norm_exp_ofReal_mul_I, one_mul, norm_exp]
@@ -141,6 +147,8 @@ lemma q2t_norm_pearceyScaled_le (y u : ℝ) :
   have : 0 ≤ u ^ 4 / y ^ 2 := by positivity
   linarith
 
+/-- As `y → ∞` the scaled Pearcey integral tends to the Gaussian integral `∫ e^{iπ/8} exp(i e^{iπ/4}
+u²) du` (dominated convergence). -/
 lemma q2t_tendsto_pearceyScaled :
     Tendsto (fun y : ℝ => ∫ u : ℝ, q2t_pearceyScaled y u) atTop
       (𝓝 (∫ u : ℝ, exp (((π / 8 : ℝ) : ℂ) * I) *
@@ -196,6 +204,7 @@ def q2t_cubicRayDeriv (θ r : ℝ) : ℂ :=
   I * exp ((θ : ℂ) * I) * exp (I * ((r : ℂ) * exp ((θ : ℂ) * I)) ^ 3) *
     (1 + 3 * I * ((r : ℂ) * exp ((θ : ℂ) * I)) ^ 3)
 
+/-- The cubic ray integrand has `θ`-derivative `q2t_cubicRayDeriv θ r`. -/
 lemma q2t_hasDerivAt_cubicRay (θ r : ℝ) :
     HasDerivAt (fun θ => q2t_cubicRay θ r) (q2t_cubicRayDeriv θ r) θ := by
   have hE : HasDerivAt (fun θ : ℝ => exp ((θ : ℂ) * I)) (exp ((θ : ℂ) * I) * I) θ := by
@@ -207,6 +216,7 @@ lemma q2t_hasDerivAt_cubicRay (θ r : ℝ) :
   convert h using 1
   simp only [Pi.pow_apply]; push_cast; ring
 
+/-- `Re (i (r e^{iθ})³) = -r³ sin 3θ`. -/
 lemma q2t_cubicRay_re (θ r : ℝ) :
     (I * ((r : ℂ) * exp ((θ : ℂ) * I)) ^ 3).re = -(r ^ 3 * Real.sin (3 * θ)) := by
   have : ((r : ℂ) * exp ((θ : ℂ) * I)) ^ 3 = ((r ^ 3 : ℝ) : ℂ) * exp (((3 * θ : ℝ) : ℂ) * I) := by
@@ -215,12 +225,14 @@ lemma q2t_cubicRay_re (θ r : ℝ) :
   simp only [mul_re, mul_im, add_re, add_im, I_re, I_im, ofReal_re, ofReal_im]
   ring
 
+/-- For `π/12 ≤ θ ≤ π/4`, `sin 3θ ≥ √2/2`. -/
 lemma q2t_sin_three_ge {θ : ℝ} (h1 : π / 12 ≤ θ) (h2 : θ ≤ π / 4) :
     Real.sqrt 2 / 2 ≤ Real.sin (3 * θ) := by
   rw [← Real.cos_pi_div_four, ← Real.cos_sub_pi_div_two, ← Real.cos_abs (3 * θ - π / 2)]
   apply Real.cos_le_cos_of_nonneg_of_le_pi (abs_nonneg _) (by linarith [Real.pi_pos])
   rw [abs_le]; constructor <;> linarith
 
+/-- For `π/12 ≤ θ ≤ π/4` and `r ≥ 0`, `‖exp(i (r e^{iθ})³)‖ ≤ exp(-(√2/2) r³)`. -/
 lemma q2t_norm_exp_cubic_le {θ r : ℝ} (h1 : π / 12 ≤ θ) (h2 : θ ≤ π / 4) (hr : 0 ≤ r) :
     ‖exp (I * ((r : ℂ) * exp ((θ : ℂ) * I)) ^ 3)‖ ≤ Real.exp (-(Real.sqrt 2 / 2) * r ^ 3) := by
   rw [norm_exp, q2t_cubicRay_re]
@@ -229,10 +241,13 @@ lemma q2t_norm_exp_cubic_le {θ r : ℝ} (h1 : π / 12 ≤ θ) (h2 : θ ≤ π /
   have := pow_nonneg hr 3
   nlinarith
 
+/-- `‖(r e^{iθ})³‖ = r³` for `r ≥ 0`. -/
 lemma q2t_norm_cube (θ r : ℝ) (hr : 0 ≤ r) : ‖((r : ℂ) * exp ((θ : ℂ) * I)) ^ 3‖ = r ^ 3 := by
   rw [norm_pow, norm_mul, norm_exp_ofReal_mul_I, mul_one, Complex.norm_real, Real.norm_eq_abs,
     abs_of_nonneg hr]
 
+/-- Uniform bound `(1 + 3r³) exp(-(√2/2) r³)` on the `θ`-derivative of the cubic ray integrand for
+`π/12 ≤ θ ≤ π/4`. -/
 lemma q2t_norm_cubicRayDeriv_le {θ r : ℝ} (h1 : π / 12 ≤ θ) (h2 : θ ≤ π / 4) (hr : 0 ≤ r) :
     ‖q2t_cubicRayDeriv θ r‖ ≤ (1 + 3 * r ^ 3) * Real.exp (-(Real.sqrt 2 / 2) * r ^ 3) := by
   unfold q2t_cubicRayDeriv
@@ -241,6 +256,7 @@ lemma q2t_norm_cubicRayDeriv_le {θ r : ℝ} (h1 : π / 12 ≤ θ) (h2 : θ ≤ 
   refine (norm_add_le _ _).trans ?_
   rw [norm_one, norm_mul, norm_mul, norm_I, q2t_norm_cube θ r hr]; simp
 
+/-- The dominating function `(1 + 3r³) exp(-(√2/2) r³)` is integrable on `(0, ∞)`. -/
 lemma q2t_integrableOn_cubic_bound :
     IntegrableOn (fun r : ℝ => (1 + 3 * r ^ 3) * Real.exp (-(Real.sqrt 2 / 2) * r ^ 3))
       (Ioi 0) := by
@@ -307,6 +323,7 @@ lemma q2t_integral_cubicRayDeriv {θ : ℝ} (h1 : π / 12 ≤ θ) (h2 : θ ≤ �
   simp only [← mul_assoc, mul_neg, I_mul_I, neg_neg, one_mul, mul_zero] at this
   exact this
 
+/-- Uniform bound `(1 + 3r³) exp(-(√2/2) r³)` on the cubic ray integrand for `π/12 ≤ θ ≤ π/4`. -/
 lemma q2t_norm_cubicRay_le {θ r : ℝ} (h1 : π / 12 ≤ θ) (h2 : θ ≤ π / 4) (hr : 0 ≤ r) :
     ‖q2t_cubicRay θ r‖ ≤ (1 + 3 * r ^ 3) * Real.exp (-(Real.sqrt 2 / 2) * r ^ 3) := by
   unfold q2t_cubicRay
@@ -318,6 +335,8 @@ lemma q2t_norm_cubicRay_le {θ r : ℝ} (h1 : π / 12 ≤ θ) (h2 : θ ≤ π / 
 /-- The cubic ray integral `G(θ) = ∫_0^∞ e^{iθ} exp(i(re^{iθ})³) dr`. -/
 def q2t_cubicG (θ : ℝ) : ℂ := ∫ r in Ioi (0 : ℝ), q2t_cubicRay θ r
 
+/-- The cubic ray integral `G(θ)` has derivative `0` for `π/10 ≤ θ ≤ π/6` (Cauchy's theorem in
+differential form). -/
 lemma q2t_hasDerivAt_cubicG {θ₀ : ℝ} (h1 : π / 10 ≤ θ₀) (h2 : θ₀ ≤ π / 6) :
     HasDerivAt q2t_cubicG 0 θ₀ := by
   have hpi := Real.pi_pos
@@ -348,6 +367,7 @@ lemma q2t_hasDerivAt_cubicG {θ₀ : ℝ} (h1 : π / 10 ≤ θ₀) (h2 : θ₀ �
   rw [q2t_integral_cubicRayDeriv h0.1 h0.2] at h2'
   exact h2'
 
+/-- The cubic ray integral `G(θ)` is constant on `[π/10, π/6]`. -/
 lemma q2t_cubicG_eq {θ : ℝ} (h1 : π / 10 ≤ θ) (h2 : θ ≤ π / 6) :
     q2t_cubicG θ = q2t_cubicG (π / 10) := by
   have hle : π / 10 ≤ π / 6 := by linarith [Real.pi_pos]
@@ -355,6 +375,7 @@ lemma q2t_cubicG_eq {θ : ℝ} (h1 : π / 10 ≤ θ) (h2 : θ ≤ π / 6) :
     (fun x hx => (q2t_hasDerivAt_cubicG hx.1 hx.2).continuousAt.continuousWithinAt)
     (fun x hx => (q2t_hasDerivAt_cubicG hx.1 hx.2.le).hasDerivWithinAt) θ ⟨h1, h2⟩
 
+/-- On the ray `θ = π/6`, `G(π/6) = e^{iπ/6} Γ(4/3)`. -/
 lemma q2t_cubicG_pi_div_six :
     q2t_cubicG (π / 6) = exp (((π / 6 : ℝ) : ℂ) * I) * (Real.Gamma (1 / 3 + 1) : ℂ) := by
   have hE : exp (((π / 6 : ℝ) : ℂ) * I) ^ 3 = I := by
@@ -375,9 +396,11 @@ lemma q2t_cubicG_pi_div_six :
   rw [integral_const_mul, integral_complex_ofReal, s36a_integral_exp_neg_pow 3 (by norm_num)]
   push_cast; ring_nf
 
+/-- The swallowtail contour angle is `π/10`. -/
 lemma q2t_cuspoidAngle_three : cuspoidAngle 3 = π / 10 := by
   unfold cuspoidAngle; norm_num
 
+/-- The swallowtail potential on the `z`-axis is `t⁵ + z t³`. -/
 lemma q2t_swallow_pot (z : ℝ) (t : ℂ) :
     cuspoidPotential 3 t ![0, 0, z] = t ^ 5 + (z : ℂ) * t ^ 3 := by
   simp [cuspoidPotential, Fin.sum_univ_three]
@@ -386,6 +409,8 @@ lemma q2t_swallow_pot (z : ℝ) (t : ℂ) :
 def q2t_swF (z r : ℝ) : ℂ :=
   cuspoidContourDir 3 r * exp (I * cuspoidPotential 3 (cuspoidContour 3 r) ![0, 0, z])
 
+/-- For `r ≥ 0` the swallowtail integrand on the `z`-axis is `e^{iπ/10} exp(i((r e^{iπ/10})⁵ + z (r
+e^{iπ/10})³))`. -/
 lemma q2t_swF_nonneg (z : ℝ) {r : ℝ} (hr : 0 ≤ r) :
     q2t_swF z r = exp (((π / 10 : ℝ) : ℂ) * I) * exp (I * (((r : ℂ) *
       exp (((π / 10 : ℝ) : ℂ) * I)) ^ 5 + (z : ℂ) *
@@ -393,6 +418,8 @@ lemma q2t_swF_nonneg (z : ℝ) {r : ℝ} (hr : 0 ≤ r) :
   unfold q2t_swF cuspoidContour
   rw [s36a_dir_of_nonneg 3 hr, q2t_cuspoidAngle_three, q2t_swallow_pot]
 
+/-- On the negative half line the swallowtail integrand is the complex conjugate of its mirror
+value. -/
 lemma q2t_swF_neg (z : ℝ) {s : ℝ} (hs : 0 < s) :
     q2t_swF z (-s) = (starRingEnd ℂ) (q2t_swF z s) := by
   have hn : ¬ Even 3 := by decide
@@ -405,6 +432,7 @@ lemma q2t_swF_neg (z : ℝ) {s : ℝ} (hs : 0 < s) :
     push_cast
     ring_nf
 
+/-- On the `z`-axis, `Ψ₃(0, 0, z) = 2 Re ∫_0^∞ q2t_swF z r dr`. -/
 lemma q2t_swallow_split (z : ℝ) :
     cuspoidIntegral 3 ![0, 0, z] =
       (((2 * (∫ r in Ioi (0 : ℝ), q2t_swF z r).re : ℝ)) : ℂ) := by
@@ -425,12 +453,15 @@ def q2t_swScaled (s u : ℝ) : ℂ :=
   exp (((π / 10 : ℝ) : ℂ) * I) *
     exp (-((u ^ 5 / s ^ 5 : ℝ) : ℂ) + I * ((u : ℂ) * exp (((π / 10 : ℝ) : ℂ) * I)) ^ 3)
 
+/-- `(e^{iπ/10})⁵ = i`. -/
 lemma q2t_exp_pi_div_ten_pow_five : exp (((π / 10 : ℝ) : ℂ) * I) ^ 5 = I := by
   rw [← exp_nat_mul, show ((5 : ℕ) : ℂ) * (((π / 10 : ℝ) : ℂ) * I) = ((π / 2 : ℝ) : ℂ) * I by
     push_cast; ring, exp_mul_I, ← ofReal_cos, ← ofReal_sin, Real.cos_pi_div_two,
     Real.sin_pi_div_two]
   simp
 
+/-- Under `r = u/s` and `z = s³` the swallowtail integrand becomes the scaled integrand
+`q2t_swScaled s u`. -/
 lemma q2t_swF_scale {s u : ℝ} (hs : 0 < s) (hu : 0 ≤ u) :
     q2t_swF (s ^ 3) (s⁻¹ * u) = q2t_swScaled s u := by
   rw [q2t_swF_nonneg _ (by positivity)]
@@ -445,6 +476,7 @@ lemma q2t_swF_scale {s u : ℝ} (hs : 0 < s) (hu : 0 ≤ u) :
   rw [mul_add, h5, h3]
   linear_combination ((u ^ 5 / s ^ 5 : ℝ) : ℂ) * I_sq
 
+/-- The scaled swallowtail integrand is bounded by `(1 + 3u³) exp(-(√2/2) u³)` for `u ≥ 0`. -/
 lemma q2t_norm_swScaled_le {s u : ℝ} (hs : 0 < s) (hu : 0 ≤ u) :
     ‖q2t_swScaled s u‖ ≤ (1 + 3 * u ^ 3) * Real.exp (-(Real.sqrt 2 / 2) * u ^ 3) := by
   have hpi := Real.pi_pos
@@ -460,6 +492,7 @@ lemma q2t_norm_swScaled_le {s u : ℝ} (hs : 0 < s) (hu : 0 ≤ u) :
       ≤ Real.exp (-(Real.sqrt 2 / 2) * u ^ 3) := Real.exp_le_exp.mpr (by nlinarith)
     _ ≤ _ := le_mul_of_one_le_left (by positivity) (by linarith)
 
+/-- As `s → ∞` the scaled swallowtail integral tends to the cubic ray integral `G(π/10)`. -/
 lemma q2t_tendsto_swScaled :
     Tendsto (fun s : ℝ => ∫ u in Ioi (0 : ℝ), q2t_swScaled s u) atTop
       (𝓝 (q2t_cubicG (π / 10))) := by
@@ -480,6 +513,7 @@ lemma q2t_tendsto_swScaled :
         (tendsto_const_nhds (x := I * ((u : ℂ) * exp (((π / 10 : ℝ) : ℂ) * I)) ^ 3))).cexp
     simpa [q2t_swScaled, q2t_cubicRay, Function.comp_def] using h1
 
+/-- `Re G(π/10) = Γ(1/3)/(2√3)`. -/
 lemma q2t_re_cubicG : (q2t_cubicG (π / 10)).re = Real.Gamma (1 / 3) / (2 * Real.sqrt 3) := by
   have hpi := Real.pi_pos
   rw [← q2t_cubicG_eq (θ := π / 6) (by linarith) le_rfl, q2t_cubicG_pi_div_six,

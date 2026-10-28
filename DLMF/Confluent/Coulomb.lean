@@ -44,6 +44,7 @@ noncomputable section
 
 namespace DLMF.Confluent
 
+/-- Complex conjugation commutes with the Pochhammer symbol: `conj((a)_n) = (conj a)_n`. -/
 theorem conj_poch (a : ℂ) (n : ℕ) : conj (poch a n) = poch (conj a) n := by
   induction n with
   | zero => simp [poch_zero]
@@ -57,11 +58,13 @@ theorem conj_kummerM (a c z : ℂ) :
   funext n
   simp [conj_poch, map_div₀, map_mul, map_pow]
 
+/-- `2ℓ + 2` is not a nonpositive integer. -/
 theorem two_mul_nat_add_two_ne_neg_nat (ℓ : ℕ) : ∀ k : ℕ, (2 * (ℓ : ℂ) + 2) ≠ -k := fun k h => by
   have := congrArg Complex.re h
   simp at this
   linarith [(Nat.cast_nonneg ℓ : (0 : ℝ) ≤ ℓ), (Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
 
+/-- Derivative of `z ↦ M(α, b, 2iz)`: it is `2i (α/b) M(α+1, b+1, 2iz)`. -/
 theorem hasDerivAt_kummerM_two_I_mul {α b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (z : ℂ) :
     HasDerivAt (fun z : ℂ => kummerM α b (2 * I * z))
       (2 * I * (α / b * kummerM (α + 1) (b + 1) (2 * I * z))) z := by
@@ -69,6 +72,7 @@ theorem hasDerivAt_kummerM_two_I_mul {α b : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (
     ((hasDerivAt_id z).const_mul (2 * I))
   exact h.congr_deriv (by simp only [mul_one]; ring)
 
+/-- The Kummer-function form of the Coulomb wave has derivative `coulombWaveDeriv ℓ η z`. -/
 theorem hasDerivAt_coulombWave (ℓ : ℕ) (η z : ℂ) :
     HasDerivAt (coulombWave ℓ η) (coulombWaveDeriv ℓ η z) z := by
   have hE : HasDerivAt (fun z : ℂ => exp (-I * z)) (-I * exp (-I * z)) z := by
@@ -165,6 +169,7 @@ theorem conj_coulombWave (ℓ : ℕ) (η ρ : ℝ) :
     Complex.conj_I, Complex.conj_ofReal]
   ring_nf
 
+/-- The regular Coulomb function is `F_ℓ(η,ρ) = C_ℓ(η) · coulombWave ℓ η ρ` (DLMF 33.2.4). -/
 theorem ofReal_coulombF (ℓ : ℕ) (η ρ : ℝ) :
     (coulombF ℓ η ρ : ℂ) = coulombC ℓ η * coulombWave ℓ η ρ := by
   have h := conj_coulombWave ℓ η ρ

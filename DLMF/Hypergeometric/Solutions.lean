@@ -31,6 +31,20 @@ noncomputable section
 
 namespace DLMF.Hypergeometric
 
+/-- `(1-x-m)_{m-j} = (-1)^{m-j} (x)_m / (x)_j` in multiplied-out form. -/
+theorem poch_one_sub_sub_mul {x : ℂ} {m j : ℕ} (hj : j ≤ m) :
+    poch x j * poch (1 - x - m) (m - j) = (-1 : ℂ) ^ (m - j) * poch x m := by
+  have h := poch_reflect (x + j) (m - j)
+  rw [show 1 - (x + j) - ((m - j : ℕ) : ℂ) = 1 - x - m by push_cast [hj]; ring] at h
+  rw [h, show poch x m = poch x (j + (m - j)) by rw [Nat.add_sub_cancel' hj], poch_add]
+  ring
+
+/-- A principal power computed from any logarithm in the principal strip. -/
+theorem cpow_eq_exp_of_exp_eq {x L : ℂ} (hx : exp L = x) (h1 : -Real.pi < L.im)
+    (h2 : L.im ≤ Real.pi) (y : ℂ) : x ^ y = exp (L * y) := by
+  have hx0 : x ≠ 0 := by rw [← hx]; exact exp_ne_zero L
+  rw [cpow_def_of_ne_zero hx0, ← hx, log_exp h1 h2]
+
 /-- The Gauss differential operator, without division at its singular points. -/
 @[dlmf 15.10.E1]
 def gaussOperator (a b c : ℂ) (f : ℂ → ℂ) (z : ℂ) : ℂ :=
@@ -110,13 +124,13 @@ theorem zero_second_ode
   field_simp
   linear_combination (z * P) * hode
 
-/-- The coefficient recurrence also gives the equation at the regular point zero. -/
-private lemma gaussOperator_hg {a b c z : ℂ}
-    (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hz : ‖z‖ < 1) :
-    gaussOperator a b c (₂F₁ a b c) z = 0 := by
+/-- The Gauss operator annihilates `₂F₁` on the whole unit disk, including the origin; the
+coefficient recurrence also gives the equation at the regular point zero. -/
+theorem gaussOperator_ordinaryHypergeometric {a b c w : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
+    (hw : ‖w‖ < 1) : gaussOperator a b c (₂F₁ a b c) w = 0 := by
   have h := (hasFPowerSeriesOnBall_ordinaryHypergeometric a b c).ode_of_recurrence
     (A := 1) (B := a + b + 1) (C := a * b) (D := c) (fun n => ?_)
-    (mem_eball_one_of_norm_lt_one hz)
+    (mem_eball_one_of_norm_lt_one hw)
   · simpa [gaussOperator, iteratedDeriv_succ, iteratedDeriv_zero] using h
   · rw [gaussHGCoeff_recurrence hc]
     ring
@@ -138,7 +152,7 @@ theorem one_first_ode {a b c z : ℂ} (hc : ∀ k : ℕ, a + b - c + 1 ≠ -(k :
       (f := (₂F₁ a b (a + b - c + 1) : ℂ → ℂ)) (s := 1)) z
     rw [he]
     simpa using h
-  have h := gaussOperator_hg (a := a) (b := b) hc hz
+  have h := gaussOperator_ordinaryHypergeometric (a := a) (b := b) hc hz
   rw [gaussOperator, hd, hdd, oneFirst]
   unfold gaussOperator at h
   linear_combination h
@@ -281,8 +295,8 @@ theorem zero_wronskian
       (F w * deriv G w - deriv F w * G w) +
       w * (F w * iteratedDeriv 2 G w - iteratedDeriv 2 F w * G w)) = k * B w := by
     intro w hw
-    have hoF := gaussOperator_hg (a := a) (b := b) hc hw
-    have hoG := gaussOperator_hg (a := a - c + 1) (b := b - c + 1) hd hw
+    have hoF := gaussOperator_ordinaryHypergeometric (a := a) (b := b) hc hw
+    have hoG := gaussOperator_ordinaryHypergeometric (a := a - c + 1) (b := b - c + 1) hd hw
     simp only [gaussOperator] at hoF hoG
     simp only [hB, hk]
     linear_combination F w * hoG - G w * hoF
@@ -680,6 +694,7 @@ theorem gaussOperator_mul_log {a b c : ℂ} {F : ℂ → ℂ} {z : ℂ} (hF : An
   field_simp
   ring
 
+/-- For `v ≠ 0`, the derivative of `w ↦ w⁻ᵖ` at `v` is `-p v^{-(p+1)}`. -/
 theorem hasDerivAt_recip_pow (p : ℕ) {v : ℂ} (hv : v ≠ 0) :
     HasDerivAt (fun w : ℂ => w⁻¹ ^ p) (-(p : ℂ) * v⁻¹ ^ (p + 1)) v := by
   have h := (hasDerivAt_inv hv).pow p
@@ -697,12 +712,14 @@ def logSing (a b : ℂ) (n : ℕ) (z : ℂ) : ℂ :=
     ((n - 1).factorial : ℂ) * (j.factorial : ℂ) /
       (((n - j - 2).factorial : ℂ) * poch (1 - a) (j + 1) * poch (1 - b) (j + 1)) * ((-z)⁻¹) ^ (j + 1)
 
+/-- If `(x)_N ≠ 0` then `(x)_k ≠ 0` for every `k ≤ N`. -/
 theorem poch_ne_zero_of_le {x : ℂ} {N k : ℕ} (hk : k ≤ N) (h : poch x N ≠ 0) : poch x k ≠ 0 := by
   intro h0
   apply h
   obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le hk
   rw [poch_add, h0, zero_mul]
 
+/-- For `c = n ≥ 1`, the Gauss operator maps the pole part `logSing` to `(n - 1)/z`. -/
 theorem gaussOperator_logSing {a b : ℂ} {n : ℕ} (hn : 0 < n)
     (ha : poch (1 - a) (n - 1) ≠ 0) (hb : poch (1 - b) (n - 1) ≠ 0) {z : ℂ} (hz : z ≠ 0) :
     gaussOperator a b n (logSing a b n) z = (n - 1) / z := by
@@ -813,6 +830,7 @@ theorem gaussOperator_logSing {a b : ℂ} {n : ℕ} (hn : 0 < n)
     field_simp
     ring
 
+/-- The pole part `logSing` is analytic away from `0`. -/
 theorem analyticAt_logSing (a b : ℂ) (n : ℕ) {z : ℂ} (hz : z ≠ 0) : AnalyticAt ℂ (logSing a b n) z := by
   unfold logSing
   have h : ∀ j ∈ Finset.range (n - 1), AnalyticAt ℂ (fun v : ℂ => ((n - 1).factorial : ℂ) *
@@ -884,6 +902,7 @@ def logSingCoeff (a b : ℂ) (n j : ℕ) : ℂ :=
   ((n - 1).factorial : ℂ) * (j.factorial : ℂ) /
     (((n - j - 2).factorial : ℂ) * poch (1 - a) (j + 1) * poch (1 - b) (j + 1)) * (-1) ^ (j + 1)
 
+/-- The pole part `logSing` written with the signed coefficients `logSingCoeff`. -/
 theorem logSing_eq (a b : ℂ) (n : ℕ) (v : ℂ) :
     logSing a b n v = ∑ j ∈ Finset.range (n - 1), logSingCoeff a b n j * v⁻¹ ^ (j + 1) := by
   simp only [logSing, logSingCoeff]
@@ -891,6 +910,7 @@ theorem logSing_eq (a b : ℂ) (n : ℕ) (v : ℂ) :
   rw [inv_neg, neg_eq_neg_one_mul, mul_pow, inv_pow]
   ring
 
+/-- Termwise derivative of the pole part `logSing` away from `0`. -/
 theorem hasDerivAt_logSing (a b : ℂ) (n : ℕ) {v : ℂ} (hv : v ≠ 0) :
     HasDerivAt (logSing a b n)
       (∑ j ∈ Finset.range (n - 1), logSingCoeff a b n j * (-((j + 1 : ℕ) : ℂ) * v⁻¹ ^ (j + 2))) v := by
@@ -907,12 +927,14 @@ def logSingPoly0 (a b : ℂ) (n : ℕ) (v : ℂ) : ℂ :=
 def logSingPoly1 (a b : ℂ) (n : ℕ) (v : ℂ) : ℂ :=
   ∑ j ∈ Finset.range (n - 1), logSingCoeff a b n j * (-((j + 1 : ℕ) : ℂ) * v ^ (n - j - 2))
 
+/-- For `v ≠ 0` and `k ≤ n`, `vⁿ v⁻ᵏ = v^{n-k}`. -/
 theorem pow_mul_recip_pow {v : ℂ} (hv : v ≠ 0) {n k : ℕ} (hk : k ≤ n) :
     v ^ n * v⁻¹ ^ k = v ^ (n - k) := by
   obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le hk
   rw [Nat.add_sub_cancel_left, pow_add, inv_pow]
   field_simp
 
+/-- `zⁿ` times the pole part is the polynomial `logSingPoly0`. -/
 theorem pow_mul_logSing (a b : ℂ) (n : ℕ) {v : ℂ} (hv : v ≠ 0) :
     v ^ n * logSing a b n v = logSingPoly0 a b n v := by
   rw [logSing_eq, logSingPoly0, Finset.mul_sum]
@@ -920,6 +942,7 @@ theorem pow_mul_logSing (a b : ℂ) (n : ℕ) {v : ℂ} (hv : v ≠ 0) :
   rw [Finset.mem_range] at hj
   rw [mul_left_comm, pow_mul_recip_pow hv (by omega), show n - (j + 1) = n - j - 1 by omega]
 
+/-- `zⁿ` times the derivative of the pole part is the polynomial `logSingPoly1`. -/
 theorem pow_mul_deriv_logSing (a b : ℂ) (n : ℕ) {v : ℂ} (hv : v ≠ 0) :
     v ^ n * deriv (logSing a b n) v = logSingPoly1 a b n v := by
   rw [(hasDerivAt_logSing a b n hv).deriv, logSingPoly1, Finset.mul_sum]
@@ -929,14 +952,18 @@ theorem pow_mul_deriv_logSing (a b : ℂ) (n : ℕ) {v : ℂ} (hv : v ≠ 0) :
       logSingCoeff a b n j * (-((j + 1 : ℕ) : ℂ) * (v ^ n * v⁻¹ ^ (j + 2))) by ring,
     pow_mul_recip_pow hv (by omega), show n - (j + 2) = n - j - 2 by omega]
 
+/-- The polynomial `logSingPoly0` is entire. -/
 theorem differentiable_logSingPoly0 (a b : ℂ) (n : ℕ) : Differentiable ℂ (logSingPoly0 a b n) := by
   unfold logSingPoly0
   fun_prop
 
+/-- The polynomial `logSingPoly1` is entire. -/
 theorem differentiable_logSingPoly1 (a b : ℂ) (n : ℕ) : Differentiable ℂ (logSingPoly1 a b n) := by
   unfold logSingPoly1
   fun_prop
 
+/-- The leading coefficient of the pole part is nonzero when `n ≥ 2` and the Pochhammer factors do
+  not vanish. -/
 theorem logSingCoeff_ne_zero {a b : ℂ} {n : ℕ} (hn : 2 ≤ n)
     (ha : poch (1 - a) (n - 1) ≠ 0) (hb : poch (1 - b) (n - 1) ≠ 0) :
     logSingCoeff a b n (n - 2) ≠ 0 := by
@@ -1114,11 +1141,13 @@ theorem wronskian_logSolution_ne_zero {a b : ℂ} {n : ℕ} (hn : 0 < n)
   rw [hKc, hK0] at this
   exact hG0 this
 
+/-- The Gauss operator at `z` depends only on the germ of the function at `z`. -/
 theorem gaussOperator_congr {a b c : ℂ} {f g : ℂ → ℂ} {z : ℂ} (h : f =ᶠ[𝓝 z] g) :
     gaussOperator a b c f z = gaussOperator a b c g z := by
   simp only [gaussOperator, iteratedDeriv_succ, iteratedDeriv_zero]
   rw [h.deriv.deriv_eq, h.deriv_eq, h.eq_of_nhds]
 
+/-- The Wronskian at `z` depends only on the germ of the second function at `z`. -/
 theorem solutionWronskian_congr {f g₁ g₂ : ℂ → ℂ} {z : ℂ} (h : g₁ =ᶠ[𝓝 z] g₂) :
     solutionWronskian f g₁ z = solutionWronskian f g₂ z := by
   simp only [solutionWronskian]
@@ -1218,9 +1247,12 @@ theorem exists_norm_digamma_add_nat_le {x : ℂ} (hx : ∀ m : ℕ, x ≠ -(m : 
         have hk : (0 : ℝ) ≤ k := Nat.cast_nonneg k
         nlinarith
 
-theorem not_neg_nat_of_not_int' {x : ℂ} (hx : ∀ k : ℤ, x ≠ (k : ℂ)) : ∀ m : ℕ, x ≠ -(m : ℂ) :=
-  fun m h => hx (-m) (by rw [h]; push_cast; ring)
+/-- A complex number that is not an integer is not a nonpositive integer. -/
+theorem not_neg_nat_of_not_int {c : ℂ} (hc : ∀ k : ℤ, c ≠ (k : ℂ)) : ∀ k : ℕ, c ≠ -(k : ℂ) := by
+  intro k h
+  exact hc (-(k : ℤ)) (by rw [h]; push_cast; ring)
 
+/-- A positive natural number is not a nonpositive integer. -/
 theorem natCast_not_neg_nat {n : ℕ} (hn : 0 < n) : ∀ k : ℕ, (n : ℂ) ≠ -(k : ℂ) := by
   intro k hk
   have := congrArg re hk
@@ -1246,8 +1278,8 @@ theorem logarithmic_second_fundamental
     (hs : z ∈ slitPlane) :
     gaussOperator a b n (logarithmicSecond a b n) z = 0 ∧
       solutionWronskian (₂F₁ a b (n : ℂ)) (logarithmicSecond a b n) z ≠ 0 := by
-  have ha' := not_neg_nat_of_not_int' ha
-  have hb' := not_neg_nat_of_not_int' hb
+  have ha' := not_neg_nat_of_not_int ha
+  have hb' := not_neg_nat_of_not_int hb
   have hnc := natCast_not_neg_nat hn
   have h1c : ∀ m : ℕ, (1 : ℂ) ≠ -(m : ℂ) := fun m => by
     simpa using natCast_not_neg_nat (n := 1) one_pos m
@@ -1322,6 +1354,7 @@ theorem logarithmic_second_fundamental
   · rw [solutionWronskian_congr hev]
     exact wronskian_logSolution_ne_zero hn hpa hpb hH hrec hz hs
 
+/-- For a positive integer `n`, `k! ≤ ‖(n)ₖ‖`. -/
 theorem factorial_le_norm_poch_natCast {n : ℕ} (hn : 0 < n) (k : ℕ) :
     (k.factorial : ℝ) ≤ ‖poch (n : ℂ) k‖ :=
   factorial_le_norm_ascPochhammer_eval (by simp; exact_mod_cast hn) k
@@ -1338,7 +1371,7 @@ theorem logarithmic_second_terminating_fundamental
     (hs : z ∈ slitPlane) :
     gaussOperator (-m) b n (logarithmicSecondTerminating b m n) z = 0 ∧
       solutionWronskian (₂F₁ (-m : ℂ) b (n : ℂ)) (logarithmicSecondTerminating b m n) z ≠ 0 := by
-  have hb' := not_neg_nat_of_not_int' hb
+  have hb' := not_neg_nat_of_not_int hb
   have hnc := natCast_not_neg_nat hn
   have h1c : ∀ m : ℕ, (1 : ℂ) ≠ -(m : ℂ) := fun m => by
     simpa using natCast_not_neg_nat (n := 1) one_pos m
@@ -1638,41 +1671,51 @@ end LogSolutions
 /-- The overlap of the series disks at `0` and at `1`. -/
 def connLens : Set ℂ := {z | ‖z‖ < 1 ∧ ‖1 - z‖ < 1}
 
+/-- The lens is the intersection of the unit disks about `0` and `1`. -/
 theorem connLens_eq : connLens = Metric.ball 0 1 ∩ Metric.ball 1 1 := by
   ext z
   simp only [connLens, Set.mem_ofPred_eq, Set.mem_inter_iff, Metric.mem_ball, dist_eq_norm,
     sub_zero, norm_sub_rev z 1]
 
+/-- The lens is open. -/
 theorem isOpen_connLens : IsOpen connLens := by
   rw [connLens_eq]
   exact Metric.isOpen_ball.inter Metric.isOpen_ball
 
+/-- The lens is preconnected (it is convex). -/
 theorem isPreconnected_connLens : IsPreconnected connLens := by
   rw [connLens_eq]
   exact ((convex_ball _ _).inter (convex_ball _ _)).isPreconnected
 
+/-- On the lens, `1 - z` lies in the slit plane. -/
 theorem one_sub_mem_slitPlane_of_mem_connLens {z : ℂ} (hz : z ∈ connLens) : 1 - z ∈ slitPlane := by
   refine mem_slitPlane_iff.mpr (Or.inl ?_)
   have := (re_le_norm z).trans_lt hz.1
   simp only [sub_re, one_re]
   linarith
 
+/-- The lens does not contain `0`. -/
 theorem ne_zero_of_mem_connLens {z : ℂ} (hz : z ∈ connLens) : z ≠ 0 := by
   rintro rfl
   simp [connLens] at hz
 
+/-- The lens does not contain `1`. -/
 theorem ne_one_of_mem_connLens {z : ℂ} (hz : z ∈ connLens) : z ≠ 1 := by
   rintro rfl
   simp [connLens] at hz
 
+/-- `₂F₁(a, b; c; ·)` is analytic on the open unit disk. -/
 theorem analyticAt_ordinaryHypergeometric {a b c z : ℂ} (hz : ‖z‖ < 1) :
     AnalyticAt ℂ (₂F₁ a b c) z :=
   (hasFPowerSeriesOnBall_ordinaryHypergeometric a b c).analyticAt_of_mem
     (mem_eball_one_of_norm_lt_one hz)
 
+/-- The first local solution at `1` is analytic on the disk `‖1 - z‖ < 1`. -/
 theorem analyticAt_oneFirst {a b c z : ℂ} (hz : ‖1 - z‖ < 1) : AnalyticAt ℂ (oneFirst a b c) z :=
   (analyticAt_ordinaryHypergeometric hz).comp (analyticAt_const.sub analyticAt_id)
 
+/-- The second local solution at `1` is analytic on the disk `‖1 - z‖ < 1` inside the slit-plane
+  condition. -/
 theorem analyticAt_oneSecond {a b c z : ℂ} (hz : ‖1 - z‖ < 1) (hs : 1 - z ∈ slitPlane) :
     AnalyticAt ℂ (oneSecond a b c) z :=
   ((analyticAt_const.sub analyticAt_id).cpow analyticAt_const hs).mul
@@ -1813,11 +1856,7 @@ theorem tendsto_ordinaryHypergeometric_left_one {a b c : ℂ} (h : 0 < (c - a - 
   funext n
   simp [gaussHGCoeff, poch, div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm]
 
-/-- Helper for the connection formulas: a complex number off `ℤ` is off `-ℕ`. -/
-theorem not_neg_nat_of_not_int {c : ℂ} (hc : ∀ k : ℤ, c ≠ (k : ℂ)) : ∀ k : ℕ, c ≠ -(k : ℂ) := by
-  intro k h
-  exact hc (-(k : ℤ)) (by rw [h]; push_cast; ring)
-
+/-- `sin(πx) ≠ 0` when `x` is not an integer. -/
 theorem sin_pi_mul_ne_zero_of_not_int {x : ℂ} (hx : ∀ k : ℤ, x ≠ (k : ℂ)) :
     Complex.sin (π * x) ≠ 0 := by
   rw [Ne, Complex.sin_eq_zero_iff]
@@ -2020,6 +2059,8 @@ def connRhs (a b c z : ℂ) : ℂ :=
     (1 - z) ^ (c - a - b) * regularizedGaussHGFun (c - a) (c - b) (c - a - b + 1) (1 - z) *
       (Gamma a)⁻¹ * (Gamma b)⁻¹)
 
+/-- For parameters depending holomorphically on `w`, both sides of the connection formula are entire
+  in `w` at each point of the lens. -/
 theorem differentiable_connLhs_connRhs {A B C : ℂ → ℂ} (hA : Differentiable ℂ A)
     (hB : Differentiable ℂ B) (hC : Differentiable ℂ C) {z : ℂ} (hz : z ∈ connLens) :
     Differentiable ℂ (fun w => connLhs (A w) (B w) (C w) z) ∧
@@ -2085,6 +2126,7 @@ theorem connLhs_eq_connRhs_base {a b c : ℂ} (ha : ∀ k : ℤ, a ≠ (k : ℂ)
   field_simp
   ring
 
+/-- A complex number with positive imaginary part is not an integer. -/
 theorem not_int_of_im_pos {x : ℂ} (h : 0 < x.im) : ∀ k : ℤ, x ≠ (k : ℂ) := by
   intro k hk
   rw [hk] at h

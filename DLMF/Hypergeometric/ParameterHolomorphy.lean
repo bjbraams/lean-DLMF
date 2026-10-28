@@ -262,10 +262,6 @@ theorem regularizedGaussHGShift_eq (p q : ℕ) {a b c z : ℂ} (hb : 0 < b.re + 
       ih hb (by simp only [sub_re, add_re, one_re] at hc ⊢; linarith),
       regularizedGaussHGFun_contiguous_c a b c hz]
 
-/-- The base case of the `b`-shift recursion. -/
-theorem regularizedGaussHGShiftB_zero (a b c z : ℂ) :
-    regularizedGaussHGShiftB 0 a b c z = regularizedGaussHGIntegral a b c z := rfl
-
 /-- The step of the `b`-shift recursion. -/
 theorem regularizedGaussHGShiftB_succ (p : ℕ) (a b c z : ℂ) :
     regularizedGaussHGShiftB (p + 1) a b c z = regularizedGaussHGShiftB p a (b + 1) c z -
@@ -292,7 +288,7 @@ theorem differentiableOn_regularizedGaussHGShiftB (p : ℕ) {A B C Z : E → ℂ
     have hg : DifferentiableOn ℂ (fun w => ((A w, B w, C w, Z w) : ℂ × ℂ × ℂ × ℂ)) W :=
       (hA.prodMk (hB.prodMk (hC.prodMk hZ))).differentiableOn
     have hc := differentiableOn_regularizedGaussHGIntegral_eulerRegion.comp hg hmap
-    simp only [regularizedGaussHGShiftB_zero]
+    simp only [regularizedGaussHGShiftB]
     exact hc
   | succ p ih =>
     have h1 := ih hA (hB.add_const 1) hC (fun w hw => by

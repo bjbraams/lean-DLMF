@@ -24,34 +24,41 @@ namespace DLMF.Legendre
 
 open DLMF.Bessel
 
-/-- conicalP large tau uniform. -/
+/-- DLMF 14.20.15: for fixed `μ ≥ 0` and `0 < δ < π`, `𝖯^{-μ}_{-1/2+iτ}(cos θ) = τ^{-μ} (θ/sin
+θ)^{1/2} I_μ(τθ) (1 + O(1/τ))` as `τ → ∞`, uniformly for `θ ∈ (0, π-δ]`. -/
 @[dlmf 14.20.E15]
 theorem conicalP_large_tau_uniform {μ : ℝ} (hμ : 0 ≤ μ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) :
     (fun p : ℝ × ℝ => conicalP p.1 μ (Real.cos p.2)/((p.1:ℂ)^(-(μ:ℂ))*(p.2/Real.sin p.2:ℂ)^(1/2:ℂ)*besselI μ (p.1*p.2))-1) =O[comap Prod.fst atTop ⊓ 𝓟 {p : ℝ × ℝ | 0 < p.2 ∧ p.2 ≤ π-δ}] (fun p : ℝ × ℝ => (p.1:ℂ)⁻¹) := by
   sorry
 
-/-- conicalQHat large tau uniform. -/
+/-- DLMF 14.20.16: for fixed `μ ≥ 0` and `0 < δ < π`, `𝖰̂^{-μ}_{-1/2+iτ}(cos θ) = τ^{-μ} (θ/sin
+θ)^{1/2} K_μ(τθ) (1 + O(1/τ))` as `τ → ∞`, uniformly for `θ ∈ (0, π-δ]`. -/
 @[dlmf 14.20.E16]
 theorem conicalQHat_large_tau_uniform {μ : ℝ} (hμ : 0 ≤ μ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) :
     (fun p : ℝ × ℝ => conicalQHat p.1 μ (Real.cos p.2)/((p.1:ℂ)^(-(μ:ℂ))*(p.2/Real.sin p.2:ℂ)^(1/2:ℂ)*besselK μ (p.1*p.2))-1) =O[comap Prod.fst atTop ⊓ 𝓟 {p : ℝ × ℝ | 0 < p.2 ∧ p.2 ≤ π-δ}] (fun p : ℝ × ℝ => (p.1:ℂ)⁻¹) := by
   sorry
 
-/-- conicalAlpha. -/
+/-- DLMF 14.20.19: the ratio `α = μ/τ` used in the uniform large-`τ` asymptotics of conical
+functions. -/
 @[dlmf 14.20.E19]
 def conicalAlpha (μ τ : ℝ) : ℝ :=
   μ/τ
 
-/-- conicalSigma. -/
+/-- DLMF 14.20.20: the normalizing factor `σ(μ, τ) = exp(μ - τ arctan(μ/τ))/(μ²+τ²)^{μ/2}` of the
+uniform large-`τ` conical-function asymptotics. -/
 @[dlmf 14.20.E20]
 def conicalSigma (μ τ : ℝ) : ℝ :=
   Real.exp (μ-τ*Real.arctan (conicalAlpha μ τ))/(μ^2+τ^2)^(μ/2)
 
-/-- ConicalEtaRelation. -/
+/-- DLMF 14.20.21: the relation `√(α²+η) + (α/2) ln η - α ln(√(α²+η) + α) = arccos(x/√(1+α²)) +
+(α/2) ln((1+α²+(α²-1)x² - 2αx√(1+α²-x²))/((1+α²)(1-x²)))` defining the variable `η` of the uniform
+conical-function asymptotics. -/
 @[dlmf 14.20.E21]
 def ConicalEtaRelation (α x η : ℝ) : Prop :=
   Real.sqrt (α^2+η)+α/2*Real.log η-α*Real.log (Real.sqrt (α^2+η)+α)=Real.arccos (x/Real.sqrt (1+α^2))+α/2*Real.log ((1+α^2+(α^2-1)*x^2-2*α*x*Real.sqrt (1+α^2-x^2))/((1+α^2)*(1-x^2)))
 
-/-- conicalEta. -/
+/-- DLMF 14.20.21: the variable `η(α, x)`, chosen as a positive solution of the relation
+`ConicalEtaRelation α x η` (and characterized as the unique one by `conicalEta_spec`). -/
 @[dlmf 14.20.E21]
 def conicalEta (α x : ℝ) : ℝ :=
   Classical.epsilon (fun η : ℝ => 0 < η ∧ ConicalEtaRelation α x η)
@@ -125,7 +132,8 @@ theorem conE_tendsto_atTop {α : ℝ} (hα : 0 ≤ α) : Tendsto (conE_L α) atT
   exact tendsto_atTop_mono' _ hb
     (tendsto_atTop_add_const_right _ _ Real.tendsto_sqrt_atTop)
 
-/-- conicalEta spec. -/
+/-- DLMF 14.20.21: for `α ≥ 0` and `-1 < x < 1`, `η = conicalEta α x` is positive, satisfies the
+defining relation 14.20.21, and is the unique positive solution of that relation. -/
 @[dlmf 14.20.E21]
 theorem conicalEta_spec {α x : ℝ} (hα : 0 ≤ α) (hx : x ∈ Ioo (-1:ℝ) 1) :
     0 < conicalEta α x ∧ ConicalEtaRelation α x (conicalEta α x) ∧ ∀ η : ℝ, 0 < η → ConicalEtaRelation α x η → η=conicalEta α x := by
@@ -338,24 +346,30 @@ theorem conicalEta_mapping {α : ℝ} (hα : 0 < α) :
       rw [← (hE x hxI).2] at hx
       exact (hL.lt_iff_lt (hE x hxI).1 hb).1 hx
 
-/-- conicalP two large tau uniform. -/
+/-- DLMF 14.20.17: for `A > 0` and `0 < δ < 2`, with `α = μ/τ` and `η = η(α, x)`,
+`𝖯^{-μ}_{-1/2+iτ}(x) = σ(μ,τ) ((α²+η)/(1+α²-x²))^{1/4} I_μ(τ√η) (1 + O(1/τ))` as `τ → ∞`, uniformly
+for `x ∈ [-1+δ, 1)` and `0 ≤ μ ≤ Aτ`. -/
 @[dlmf 14.20.E17]
 theorem conicalP_two_large_tau_uniform {A δ : ℝ} (hA : 0 < A) (hδ : 0 < δ) (hδ2 : δ < 2) :
     (fun p : ℝ × ℝ × ℝ => let τ:=p.1; let μ:=p.2.1; let x:=p.2.2; let α:=conicalAlpha μ τ; let η:=conicalEta α x; conicalP τ μ x/(conicalSigma μ τ*((α^2+η)/(1+α^2-x^2):ℂ)^(1/4:ℂ)*besselI μ (τ*Real.sqrt η))-1) =O[legendreUniformFilter {p : ℝ × ℝ × ℝ | p.2.2 ∈ Ico (-1+δ) 1 ∧ 0 ≤ p.2.1 ∧ p.2.1 ≤ A*p.1}] (fun p : ℝ × ℝ × ℝ => (p.1:ℂ)⁻¹) := by
   sorry
 
-/-- conicalQHat two large tau uniform. -/
+/-- DLMF 14.20.18: for `A > 0` and `0 < δ < 2`, with `α = μ/τ` and `η = η(α, x)`,
+`𝖰̂^{-μ}_{-1/2+iτ}(x) = σ(μ,τ) ((α²+η)/(1+α²-x²))^{1/4} K_μ(τ√η) (1 + O(1/τ))` as `τ → ∞`, uniformly
+for `x ∈ [-1+δ, 1)` and `0 ≤ μ ≤ Aτ`. -/
 @[dlmf 14.20.E18]
 theorem conicalQHat_two_large_tau_uniform {A δ : ℝ} (hA : 0 < A) (hδ : 0 < δ) (hδ2 : δ < 2) :
     (fun p : ℝ × ℝ × ℝ => let τ:=p.1; let μ:=p.2.1; let x:=p.2.2; let α:=conicalAlpha μ τ; let η:=conicalEta α x; conicalQHat τ μ x/(conicalSigma μ τ*((α^2+η)/(1+α^2-x^2):ℂ)^(1/4:ℂ)*besselK μ (τ*Real.sqrt η))-1) =O[legendreUniformFilter {p : ℝ × ℝ × ℝ | p.2.2 ∈ Ico (-1+δ) 1 ∧ 0 ≤ p.2.1 ∧ p.2.1 ≤ A*p.1}] (fun p : ℝ × ℝ × ℝ => (p.1:ℂ)⁻¹) := by
   sorry
 
-/-- conicalBeta. -/
+/-- DLMF 14.20.23: the ratio `β = τ/μ` used in the uniform large-`μ` asymptotics of conical
+functions. -/
 @[dlmf 14.20.E23]
 def conicalBeta (μ τ : ℝ) : ℝ :=
   τ/μ
 
-/-- conicalRho. -/
+/-- DLMF 14.20.24: the variable `ρ(β, x) = (1/2) ln(((1-β²)x² + 1 + β² + 2x√(1+β²-β²x²))/(1-x²)) + β
+arctan(βx/√(1+β²-β²x²)) - (1/2) ln(1+β²)` of the uniform conical-function asymptotics. -/
 @[dlmf 14.20.E24]
 def conicalRho (β x : ℝ) : ℝ :=
   Real.log (((1-β^2)*x^2+1+β^2+2*x*Real.sqrt (1+β^2-β^2*x^2))/(1-x^2))/2+β*Real.arctan (β*x/Real.sqrt (1+β^2-β^2*x^2))-Real.log (1+β^2)/2
@@ -529,7 +543,9 @@ theorem conicalRho_mapping (β : ℝ) :
   obtain ⟨c, hc, hcy⟩ := intermediate_value_Icc hab (hcont.mono hsub) ⟨ha.le, hb.le⟩
   exact ⟨c, hsub hc, hcy⟩
 
-/-- conicalP two large mu uniform. -/
+/-- DLMF 14.20.22: for `A > 0`, with `β = τ/μ`, `𝖯^{-μ}_{-1/2+iτ}(x) = (exp(μβ arctan
+β)/(Γ(μ+1)(1+β²)^{μ/2})) exp(-μ ρ(β,x)) (1+β²-β²x²)^{-1/4} (1 + O(1/μ))` as `μ → ∞`, uniformly for
+`x ∈ (-1, 1)` and `0 ≤ τ ≤ Aμ`. -/
 @[dlmf 14.20.E22]
 theorem conicalP_two_large_mu_uniform {A : ℝ} (hA : 0 < A) :
     (fun p : ℝ × ℝ × ℝ => let μ:=p.1; let τ:=p.2.1; let x:=p.2.2; let β:=conicalBeta μ τ; conicalP τ μ x/(exp (μ*β*Real.arctan β)/(Gamma (μ+1)*(1+β^2:ℂ)^((μ:ℂ)/2))*exp (-μ*conicalRho β x)/(1+β^2-x^2*β^2:ℂ)^(1/4:ℂ))-1) =O[legendreUniformFilter {p : ℝ × ℝ × ℝ | p.2.2 ∈ Ioo (-1:ℝ) 1 ∧ 0 ≤ p.2.1 ∧ p.2.1 ≤ A*p.1}] (fun p : ℝ × ℝ × ℝ => (p.1:ℂ)⁻¹) := by

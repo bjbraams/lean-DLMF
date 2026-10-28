@@ -22,7 +22,8 @@ open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
 namespace DLMF.Legendre
 
-/-- ferrers connection 1. -/
+/-- DLMF 14.9.1: for `-1 < x < 1` and `ν ± μ ∉ {−1, −2, …}`, `π sin(μπ)/(2Γ(ν−μ+1)) 𝖯^{−μ}_ν(x) =
+−𝖰^μ_ν(x)/Γ(ν+μ+1) + cos(μπ)/Γ(ν−μ+1) 𝖰^{−μ}_ν(x)`. -/
 @[dlmf 14.9.E1]
 theorem ferrers_connection_1 (ν μ : ℂ) (hplus : LegendreQRegular ν μ) (hminus : LegendreQRegular ν (-μ)) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     π*sin (μ*π)/(2*Gamma (ν-μ+1))*ferrersP ν (-μ) x=-ferrersQ ν μ x/Gamma (ν+μ+1)+cos (μ*π)/Gamma (ν-μ+1)*ferrersQ ν (-μ) x := by
@@ -55,7 +56,8 @@ theorem ferrers_connection_1 (ν μ : ℂ) (hplus : LegendreQRegular ν μ) (hmi
   field_simp
   linear_combination (sb*h1*E*g1-cb*h2*g2*O)*pytha
 
-/-- ferrers connection 2. -/
+/-- DLMF 14.9.2: for `-1 < x < 1` and `ν ± μ ∉ {−1, −2, …}`, `2 sin(μπ)/(π Γ(ν−μ+1)) 𝖰^{−μ}_ν(x) =
+𝖯^μ_ν(x)/Γ(ν+μ+1) − cos(μπ)/Γ(ν−μ+1) 𝖯^{−μ}_ν(x)`. -/
 @[dlmf 14.9.E2]
 theorem ferrers_connection_2 (ν μ : ℂ) (hplus : LegendreQRegular ν μ) (hminus : LegendreQRegular ν (-μ)) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     2*sin (μ*π)/(π*Gamma (ν-μ+1))*ferrersQ ν (-μ) x=ferrersP ν μ x/Gamma (ν+μ+1)-cos (μ*π)/Gamma (ν-μ+1)*ferrersP ν (-μ) x := by
@@ -87,7 +89,8 @@ theorem ferrers_connection_2 (ν μ : ℂ) (hplus : LegendreQRegular ν μ) (hmi
   field_simp
   linear_combination (sb*h2*g2*O + cb*h1*E*g1)*pytha
 
-/-- ferrers connection 5. -/
+/-- DLMF 14.9.5: the Ferrers function of the first kind is invariant under `ν ↦ −ν−1`:
+`𝖯^μ_{−ν−1}(x) = 𝖯^μ_ν(x)` for `-1 < x < 1`. -/
 @[dlmf 14.9.E5]
 theorem ferrers_connection_5 (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersP (-ν-1) μ x=ferrersP ν μ x := by
@@ -96,7 +99,8 @@ theorem ferrers_connection_5 (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1)
   rw [show -(-ν-1)=ν+1 by ring, show -ν-1+1 = -ν by ring,
     regularizedGaussHG_symm _ _ _ (mem_cutPlane_of_one_add hp)]
 
-/-- ferrers connection 6. -/
+/-- DLMF 14.9.6: for `-1 < x < 1`, with `ν ± μ ∉ {−1, −2, …}` and `−ν−1+μ ∉ {−1, −2, …}`, `π cos(νπ)
+cos(μπ) 𝖯^μ_ν(x) = sin((ν+μ)π) 𝖰^μ_ν(x) − sin((ν−μ)π) 𝖰^μ_{−ν−1}(x)`. -/
 @[dlmf 14.9.E6]
 theorem ferrers_connection_6 (ν μ : ℂ) (hplus : LegendreQRegular ν μ) (hminus : LegendreQRegular ν (-μ)) (hother : LegendreQRegular (-ν-1) μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     π*cos (ν*π)*cos (μ*π)*ferrersP ν μ x=sin ((ν+μ)*π)*ferrersQ ν μ x-sin ((ν-μ)*π)*ferrersQ (-ν-1) μ x := by
@@ -134,7 +138,8 @@ theorem ferrers_connection_6 (ν μ : ℂ) (hplus : LegendreQRegular ν μ) (hmi
   linear_combination (cb*ca^2*g1*E*h1)*o2' - (sb*sa^2*h2*g2*O)*e2' +
     P*g1*E*h1*cb*(ca^2*pyth - sb^2*pytha) + P*h2*g2*O*sb*(cb^2*pytha - sa^2*pyth)
 
-/-- ferrers connection 7. -/
+/-- DLMF 14.9.7: for `-1 < x < 1` and `ν ± μ ∉ {−1, −2, …}`, `sin((ν−μ)π)/Γ(ν+μ+1) 𝖯^μ_ν(x) =
+sin(νπ)/Γ(ν−μ+1) 𝖯^{−μ}_ν(x) − sin(μπ)/Γ(ν−μ+1) 𝖯^{−μ}_ν(−x)`. -/
 @[dlmf 14.9.E7]
 theorem ferrers_connection_7 (ν μ : ℂ) (hplus : LegendreQRegular ν μ) (hminus : LegendreQRegular ν (-μ)) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     sin ((ν-μ)*π)/Gamma (ν+μ+1)*ferrersP ν μ x=sin (ν*π)/Gamma (ν-μ+1)*ferrersP ν (-μ) x-sin (μ*π)/Gamma (ν-μ+1)*ferrersP ν (-μ) (-x) := by
@@ -167,7 +172,8 @@ theorem ferrers_connection_7 (ν μ : ℂ) (hplus : LegendreQRegular ν μ) (hmi
   field_simp
   linear_combination (0:ℂ)*pyth
 
-/-- ferrers connection 8. -/
+/-- DLMF 14.9.8: for `-1 < x < 1` and `ν ± μ ∉ {−1, −2, …}`, `(π/2) sin((ν−μ)π) 𝖯^{−μ}_ν(x) =
+−cos((ν−μ)π) 𝖰^{−μ}_ν(x) − 𝖰^{−μ}_ν(−x)`. -/
 @[dlmf 14.9.E8]
 theorem ferrers_connection_8 (ν μ : ℂ) (hplus : LegendreQRegular ν μ) (hminus : LegendreQRegular ν (-μ)) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     π/2*sin ((ν-μ)*π)*ferrersP ν (-μ) x=-cos ((ν-μ)*π)*ferrersQ ν (-μ) x-ferrersQ ν (-μ) (-x) := by
@@ -192,7 +198,8 @@ theorem ferrers_connection_8 (ν μ : ℂ) (hplus : LegendreQRegular ν μ) (hmi
   field_simp
   linear_combination (2*ca*g2*h2*O)*pytha
 
-/-- ferrers connection 9. -/
+/-- DLMF 14.9.9: for `-1 < x < 1` and `ν ± μ ∉ {−1, −2, …}`, `2/(Γ(ν+μ+1) Γ(μ−ν)) 𝖰^μ_ν(x) =
+−cos(νπ) 𝖯^{−μ}_ν(x) + cos(μπ) 𝖯^{−μ}_ν(−x)`. -/
 @[dlmf 14.9.E9]
 theorem ferrers_connection_9 (ν μ : ℂ) (hplus : LegendreQRegular ν μ) (hminus : LegendreQRegular ν (-μ)) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     2/(Gamma (ν+μ+1)*Gamma (μ-ν))*ferrersQ ν μ x=-cos (ν*π)*ferrersP ν (-μ) x+cos (μ*π)*ferrersP ν (-μ) (-x) := by
@@ -228,7 +235,8 @@ theorem ferrers_connection_9 (ν μ : ℂ) (hplus : LegendreQRegular ν μ) (hmi
   field_simp
   linear_combination (0:ℂ)*pyth
 
-/-- ferrers connection 10. -/
+/-- DLMF 14.9.10: for `-1 < x < 1` and `ν ± μ ∉ {−1, −2, …}`, `(2/π) sin((ν−μ)π) 𝖰^{−μ}_ν(x) =
+cos((ν−μ)π) 𝖯^{−μ}_ν(x) − 𝖯^{−μ}_ν(−x)`. -/
 @[dlmf 14.9.E10]
 theorem ferrers_connection_10 (ν μ : ℂ) (hplus : LegendreQRegular ν μ) (hminus : LegendreQRegular ν (-μ)) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     2/π*sin ((ν-μ)*π)*ferrersQ ν (-μ) x=cos ((ν-μ)*π)*ferrersP ν (-μ) x-ferrersP ν (-μ) (-x) := by
@@ -253,7 +261,8 @@ theorem ferrers_connection_10 (ν μ : ℂ) (hplus : LegendreQRegular ν μ) (hm
   field_simp
   linear_combination (-(2*ca*h1*E*g1))*pytha
 
-/-- ferrersP negative integer order. -/
+/-- DLMF 14.9.3: for `m ∈ ℕ`, `ν − m + 1 ∉ {0, −1, −2, …}` and `-1 < x < 1`, `𝖯^{−m}_ν(x) = (−1)^m
+Γ(ν−m+1)/Γ(ν+m+1) 𝖯^m_ν(x)`. -/
 @[dlmf 14.9.E3]
 theorem ferrersP_negative_integer_order (ν : ℂ) (m : ℕ) (h : ∀ n : ℕ, ν-m+1 ≠ -n) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersP ν (-m) x=(-1)^m*Gamma (ν-m+1)/Gamma (ν+m+1)*ferrersP ν m x := by
@@ -274,7 +283,8 @@ theorem ferrersP_negative_integer_order (ν : ℂ) (m : ℕ) (h : ∀ n : ℕ, �
     ((1-(1-(x:ℂ))/2)^(k+1))⁻¹ * regularizedGaussHG (ν+1) (-ν) ((k+1:ℕ)+1) ((1-x)/2) with hA
   linear_combination (-A) * hsq + (-1:ℂ)^(k+1) * A * hm1
 
-/-- ferrersQ negative integer order. -/
+/-- DLMF 14.9.4: for `m ∈ ℕ`, `ν − m + 1 ∉ {0, −1, −2, …}` and `-1 < x < 1`, `𝖰^{−m}_ν(x) = (−1)^m
+Γ(ν−m+1)/Γ(ν+m+1) 𝖰^m_ν(x)`. -/
 @[dlmf 14.9.E4]
 theorem ferrersQ_negative_integer_order (ν : ℂ) (m : ℕ) (h : ∀ n : ℕ, ν-m+1 ≠ -n) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersQ ν (-m) x=(-1)^m*Gamma (ν-m+1)/Gamma (ν+m+1)*ferrersQ ν m x := by
@@ -300,7 +310,8 @@ theorem ferrersQ_negative_integer_order (ν : ℂ) (m : ℕ) (h : ∀ n : ℕ, �
   generalize (Real.sqrt π:ℂ) = S at hs
   field_simp
 
-/-- associated connection 11. -/
+/-- DLMF 14.9.11: the associated Legendre function of the first kind is invariant under `ν ↦ −ν−1`:
+`P^μ_{−ν−1}(z) = P^μ_ν(z)` for `z ∉ (−∞, 1]`. -/
 @[dlmf 14.9.E11]
 theorem associated_connection_11 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     associatedP (-ν-1) μ z=associatedP ν μ z := by
@@ -308,7 +319,8 @@ theorem associated_connection_11 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane
   rw [show -(-ν-1)=ν+1 by ring, show -ν-1+1 = -ν by ring,
     regularizedGaussHG_symm _ _ _ (mem_cutPlane_of_one_add (one_add_mem_slitPlane_of_sub_one hz))]
 
-/-- associated connection 14. -/
+/-- DLMF 14.9.14: Olver's function is even in the order: `𝑸^{−μ}_ν(z) = 𝑸^μ_ν(z)` for `z ∉ (−∞,
+1]`. -/
 @[dlmf 14.9.E14]
 theorem associated_connection_14 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     olverQ ν (-μ) z=olverQ ν μ z := by
@@ -327,7 +339,8 @@ theorem associated_connection_14 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane
   · exact absurd h (div_ne_zero (mul_ne_zero two_ne_zero hs) hpi)
   · linear_combination -h
 
-/-- associated connection 12. -/
+/-- DLMF 14.9.12: for `z ∉ (−∞, 1]`, `cos(νπ) P^{−μ}_ν(z) = −𝑸^μ_ν(z)/Γ(μ−ν) +
+𝑸^μ_{−ν−1}(z)/Γ(ν+μ+1)`. -/
 @[dlmf 14.9.E12]
 theorem associated_connection_12 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     cos (ν*π)*associatedP ν (-μ) z=-olverQ ν μ z/Gamma (μ-ν)+olverQ (-ν-1) μ z/Gamma (ν+μ+1) := by
@@ -363,7 +376,8 @@ theorem associated_connection_12 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane
 
 
 
-/-- associated connection 15. -/
+/-- DLMF 14.9.15: for `z ∉ (−∞, 1]`, `(2/π) sin(μπ) 𝑸^μ_ν(z) = P^μ_ν(z)/Γ(ν+μ+1) −
+P^{−μ}_ν(z)/Γ(ν−μ+1)`. -/
 @[dlmf 14.9.E15]
 theorem associated_connection_15 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     2*sin (μ*π)/π*olverQ ν μ z=associatedP ν μ z/Gamma (ν+μ+1)-associatedP ν (-μ) z/Gamma (ν-μ+1) := by
@@ -467,7 +481,7 @@ theorem associatedP_neg_eq_quadratic (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitP
       mem_cutPlane_of_one_add (Or.inl (by simp; linarith)), ?_⟩
     show 1 - (1 - 1/w^2) ∈ slitPlane
     rw [sub_sub_cancel, one_div]
-    exact recip_mem_slitPlane' (sq_mem_slitPlane h1)
+    exact recip_mem_slitPlane' (Complex.sq_mem_slitPlane_of_re_pos h1)
   have hf : AnalyticOnNhd ℂ (associatedP ν (-μ)) D := by
     refine DifferentiableOn.analyticOnNhd (fun w hw => ?_) hDo
     obtain ⟨h1, h2, -, h4, -⟩ := hmem w hw
@@ -840,7 +854,8 @@ theorem associated_connection_17 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane
     apply DifferentiableAt.differentiableWithinAt
     fun_prop (disch := first | assumption | simpa [div_eq_mul_inv] using h9)
 
-/-- associatedP negative integer order. -/
+/-- DLMF 14.9.13: for `m ∈ ℕ`, `ν − m + 1 ∉ {0, −1, −2, …}` and `z ∉ (−∞, 1]`, `P^{−m}_ν(z) =
+Γ(ν−m+1)/Γ(ν+m+1) P^m_ν(z)`. -/
 @[dlmf 14.9.E13]
 theorem associatedP_negative_integer_order (ν : ℂ) (m : ℕ) (h : ∀ n : ℕ, ν-m+1 ≠ -n) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     associatedP ν (-m) z=Gamma (ν-m+1)/Gamma (ν+m+1)*associatedP ν m z := by

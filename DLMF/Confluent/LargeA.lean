@@ -148,6 +148,7 @@ theorem hasDerivAt_comp_ofReal_real {F : ℂ → ℂ} {F' : ℂ} {m : ℝ → �
   rw [real_smul, mul_comm] at this
   exact this
 
+/-- `d/ds (s²/(4κ)) = s/(2κ)`. -/
 theorem hasDerivAt_sq_div (κ s : ℝ) :
     HasDerivAt (fun t : ℝ => t ^ 2 / (4 * κ)) (s / (2 * κ)) s := by
   convert (hasDerivAt_pow 2 s).div_const (4 * κ) using 1
@@ -195,9 +196,11 @@ def largeAU' (c κ s : ℝ) : ℂ :=
 /-- The potential: `u'' + u = g u` with `g = ((c-1)² - 1/4)/s² + s²/(16κ²)`. -/
 def largeAG (c κ s : ℝ) : ℝ := ((c - 1) ^ 2 - 1 / 4) / s ^ 2 + s ^ 2 / (16 * κ ^ 2)
 
+/-- The derivative of `W(s) = M̃(c/2-κ, c, s²/(4κ))` is `largeAW1`. -/
 theorem hasDerivAt_largeAW (c κ s : ℝ) : HasDerivAt (largeAW c κ) (largeAW1 c κ s) s :=
   hasDerivAt_regularizedConfluent_sq_div _ _ κ s
 
+/-- The derivative of `largeAW1`, by the chain rule and the derivative formula for `M̃`. -/
 theorem hasDerivAt_largeAW1 (c κ s : ℝ) :
     HasDerivAt (largeAW1 c κ)
       (largeAParam c κ * ((largeAParam c κ + 1) *
@@ -217,6 +220,8 @@ theorem hasDerivAt_largeAW1 (c κ s : ℝ) :
     simp only [largeAW1, Pi.mul_apply]
     ring
 
+/-- For `s > 0`, the gauge factor `P = s^{c-1/2} e^{-s²/(8κ)}` satisfies `P' = P H` with `H =
+largeAH`. -/
 theorem hasDerivAt_largeAP (c κ : ℝ) {s : ℝ} (hs : 0 < s) :
     HasDerivAt (largeAP c κ) (largeAP c κ s * largeAH c κ s) s := by
   have h1 := Real.hasDerivAt_rpow_const (x := s) (p := c - 1 / 2) (Or.inl hs.ne')
@@ -231,6 +236,7 @@ theorem hasDerivAt_largeAP (c κ : ℝ) {s : ℝ} (hs : 0 < s) :
   field_simp
   ring
 
+/-- For `s > 0`, the Liouville form `u = P W` has derivative `largeAU'`. -/
 theorem hasDerivAt_largeAU (c κ : ℝ) {s : ℝ} (hs : 0 < s) :
     HasDerivAt (largeAU c κ) (largeAU' c κ s) s := by
   have hP := (hasDerivAt_largeAP c κ hs).ofReal_comp
@@ -239,6 +245,7 @@ theorem hasDerivAt_largeAU (c κ : ℝ) {s : ℝ} (hs : 0 < s) :
   push_cast
   ring
 
+/-- For `s > 0`, `H'(s) = -(c-1/2)/s² - 1/(4κ)`. -/
 theorem hasDerivAt_largeAH (c κ : ℝ) {s : ℝ} (hs : 0 < s) :
     HasDerivAt (largeAH c κ) (-(c - 1 / 2) / s ^ 2 - 1 / (4 * κ)) s := by
   have h1 : HasDerivAt (fun t : ℝ => (c - 1 / 2) / t) ((c - 1 / 2) * -(s ^ 2)⁻¹) s := by
@@ -315,16 +322,19 @@ def largeAU0' (c s : ℝ) : ℂ :=
 /-- The limit potential `((c-1)² - 1/4)/s²`. -/
 def largeAG0 (c s : ℝ) : ℝ := ((c - 1) ^ 2 - 1 / 4) / s ^ 2
 
+/-- `d/ds (-s²/4) = -s/2`. -/
 theorem hasDerivAt_neg_sq_div_four (s : ℝ) :
     HasDerivAt (fun t : ℝ => -(t ^ 2 / 4)) (-(s / 2)) s := by
   convert ((hasDerivAt_pow 2 s).div_const 4).neg using 1
   norm_num
   ring
 
+/-- The derivative of `V(s) = ₀F̃₁(;c;-s²/4)` is `largeAV1`. -/
 theorem hasDerivAt_largeAV (c s : ℝ) : HasDerivAt (largeAV c) (largeAV1 c s) s :=
   hasDerivAt_comp_ofReal_real (m := fun t : ℝ => -(t ^ 2 / 4))
     (DLMF.Bessel.hasDerivAt_regularized0F1 _ _) (hasDerivAt_neg_sq_div_four s)
 
+/-- The derivative of `largeAV1`, by the chain rule for `₀F̃₁`. -/
 theorem hasDerivAt_largeAV1 (c s : ℝ) :
     HasDerivAt (largeAV1 c)
       (regularizedHGFun (∅ : Multiset ℂ) {(c : ℂ) + 1 + 1} ((-(s ^ 2 / 4) : ℝ) : ℂ) *
@@ -338,6 +348,7 @@ theorem hasDerivAt_largeAV1 (c s : ℝ) :
     simpa using this
   exact h1.mul h2
 
+/-- For `s > 0`, `Q = s^{c-1/2}` satisfies `Q' = Q H₀` with `H₀ = (c-1/2)/s`. -/
 theorem hasDerivAt_largeAQ (c : ℝ) {s : ℝ} (hs : 0 < s) :
     HasDerivAt (largeAQ c) (largeAQ c s * largeAH0 c s) s := by
   refine (Real.hasDerivAt_rpow_const (x := s) (p := c - 1 / 2) (Or.inl hs.ne')).congr_deriv ?_
@@ -345,6 +356,7 @@ theorem hasDerivAt_largeAQ (c : ℝ) {s : ℝ} (hs : 0 < s) :
   rw [Real.rpow_sub_one hs.ne']
   field_simp
 
+/-- For `s > 0`, the limit Liouville form `u₀ = Q V` has derivative `largeAU0'`. -/
 theorem hasDerivAt_largeAU0 (c : ℝ) {s : ℝ} (hs : 0 < s) :
     HasDerivAt (largeAU0 c) (largeAU0' c s) s := by
   have hP := (hasDerivAt_largeAQ c hs).ofReal_comp
@@ -353,6 +365,7 @@ theorem hasDerivAt_largeAU0 (c : ℝ) {s : ℝ} (hs : 0 < s) :
   push_cast
   ring
 
+/-- For `s > 0`, `H₀'(s) = -(c-1/2)/s²`. -/
 theorem hasDerivAt_largeAH0 (c : ℝ) {s : ℝ} (hs : 0 < s) :
     HasDerivAt (largeAH0 c) (-(c - 1 / 2) / s ^ 2) s := by
   have h1 : HasDerivAt (fun t : ℝ => (c - 1 / 2) / t) ((c - 1 / 2) * -(s ^ 2)⁻¹) s := by
@@ -398,9 +411,11 @@ theorem hasDerivAt_largeAU0' (c : ℝ) {s : ℝ} (hs : 0 < s) :
 
 /-! ### Convergence of the data at a fixed point -/
 
+/-- `b/κ → 0` as `κ → ∞`. -/
 theorem tendsto_div_atTop_zero (b : ℝ) : Tendsto (fun κ : ℝ => b / κ) atTop (𝓝 0) :=
   tendsto_const_nhds.div_atTop tendsto_id
 
+/-- As `κ → ∞`, `M̃(c/2-κ, c, s²/(4κ)) → ₀F̃₁(;c;-s²/4)`. -/
 theorem tendsto_largeAW (c s : ℝ) :
     Tendsto (fun κ : ℝ => largeAW c κ s) atTop (𝓝 (largeAV c s)) := by
   have h := tendsto_regularizedConfluent_sub_div (c / 2) (c : ℂ) ((s ^ 2 / 4 : ℝ) : ℂ)
@@ -417,6 +432,7 @@ theorem tendsto_largeAW (c s : ℝ) :
   push_cast
   field_simp
 
+/-- As `κ → ∞`, the derivative `largeAW1` tends to `largeAV1`. -/
 theorem tendsto_largeAW1 (c s : ℝ) :
     Tendsto (fun κ : ℝ => largeAW1 c κ s) atTop (𝓝 (largeAV1 c s)) := by
   have h := tendsto_regularizedConfluent_sub_div (c / 2 + 1) ((c : ℂ) + 1) ((s ^ 2 / 4 : ℝ) : ℂ)
@@ -442,6 +458,7 @@ theorem tendsto_largeAW1 (c s : ℝ) :
   push_cast
   field_simp
 
+/-- As `κ → ∞`, the gauge factor `s^{c-1/2} e^{-s²/(8κ)}` tends to `s^{c-1/2}`. -/
 theorem tendsto_largeAP (c s : ℝ) :
     Tendsto (fun κ : ℝ => largeAP c κ s) atTop (𝓝 (largeAQ c s)) := by
   have h : Tendsto (fun κ : ℝ => Real.exp (-(s ^ 2 / 8 / κ))) atTop (𝓝 (Real.exp (-0))) :=
@@ -455,6 +472,7 @@ theorem tendsto_largeAP (c s : ℝ) :
   congr 3
   ring
 
+/-- As `κ → ∞`, `largeAH` tends to `largeAH0`. -/
 theorem tendsto_largeAH (c s : ℝ) :
     Tendsto (fun κ : ℝ => largeAH c κ s) atTop (𝓝 (largeAH0 c s)) := by
   have := (tendsto_div_atTop_zero (s / 4)).const_sub ((c - 1 / 2) / s)
@@ -464,10 +482,12 @@ theorem tendsto_largeAH (c s : ℝ) :
   simp only [largeAH]
   ring
 
+/-- As `κ → ∞`, the Liouville form `u` tends to `u₀`. -/
 theorem tendsto_largeAU (c s : ℝ) :
     Tendsto (fun κ : ℝ => largeAU c κ s) atTop (𝓝 (largeAU0 c s)) :=
   ((continuous_ofReal.tendsto _).comp (tendsto_largeAP c s)).mul (tendsto_largeAW c s)
 
+/-- As `κ → ∞`, the derivative `u'` tends to `u₀'`. -/
 theorem tendsto_largeAU' (c s : ℝ) :
     Tendsto (fun κ : ℝ => largeAU' c κ s) atTop (𝓝 (largeAU0' c s)) :=
   ((continuous_ofReal.tendsto _).comp (tendsto_largeAP c s)).mul
@@ -484,6 +504,7 @@ theorem besselJ_ofReal_eq (μ : ℝ) {s : ℝ} (hs : 0 < s) :
   push_cast
   ring_nf
 
+/-- For `s > 0`, `2^{c-1} √s (s/2)^{c-1} = s^{c-1/2}`. -/
 theorem rpow_identity {c s : ℝ} (hs : 0 < s) :
     (2 : ℝ) ^ (c - 1) * Real.sqrt s * (s / 2) ^ (c - 1) = s ^ (c - 1 / 2) := by
   have h2 : (0 : ℝ) < 2 ^ (c - 1) := by positivity
@@ -491,6 +512,7 @@ theorem rpow_identity {c s : ℝ} (hs : 0 < s) :
     show c - 1 / 2 = 1 / 2 + (c - 1) by ring, Real.rpow_add hs]
   field_simp
 
+/-- For `s > 0`, `2^{c-1} √s (s/2)^c = s^{c-1/2} (s/2)`. -/
 theorem rpow_identity' {c s : ℝ} (hs : 0 < s) :
     (2 : ℝ) ^ (c - 1) * Real.sqrt s * (s / 2) ^ c = s ^ (c - 1 / 2) * (s / 2) := by
   have h := rpow_identity (c := c) hs
@@ -567,6 +589,7 @@ theorem sqrt_mul_besselJ_isBigO (μ : ℝ) :
 
 /-! ### Matching on `[s₀, S]` -/
 
+/-- `∫_a^b A/t² dt = A/a - A/b` for `0 < a ≤ b`. -/
 theorem integral_recip_sq_eq (A : ℝ) {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) :
     ∫ t in a..b, A / t ^ 2 = A / a - A / b := by
   have hderiv : ∀ t ∈ uIcc a b, HasDerivAt (fun t : ℝ => -(A / t)) (A / t ^ 2) t := by
@@ -585,17 +608,20 @@ theorem integral_recip_sq_eq (A : ℝ) {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) 
   rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv (hcont.intervalIntegrable)]
   ring
 
+/-- The potential `g = ((c-1)² - 1/4)/s² + s²/(16κ²)` is continuous on `[a, b]` for `a > 0`. -/
 theorem continuousOn_largeAG (c κ : ℝ) {a b : ℝ} (ha : 0 < a) :
     ContinuousOn (largeAG c κ) (Icc a b) := by
   refine ContinuousOn.add (continuousOn_const.div (continuousOn_pow 2) fun t ht => ?_)
     (by fun_prop)
   exact pow_ne_zero 2 (lt_of_lt_of_le ha ht.1).ne'
 
+/-- The limit potential `((c-1)² - 1/4)/s²` is continuous on `[a, b]` for `a > 0`. -/
 theorem continuousOn_largeAG0 (c : ℝ) {a b : ℝ} (ha : 0 < a) :
     ContinuousOn (largeAG0 c) (Icc a b) :=
   continuousOn_const.div (continuousOn_pow 2) fun _t ht =>
     pow_ne_zero 2 (lt_of_lt_of_le ha ht.1).ne'
 
+/-- For `κ > 0` and `0 < a ≤ b`, `∫_a^b |g| ≤ |(c-1)² - 1/4|/a + b³/(16κ²)`. -/
 theorem integral_abs_largeAG_le (c : ℝ) {κ a b : ℝ} (hκ : 0 < κ) (ha : 0 < a) (hab : a ≤ b) :
     ∫ t in a..b, |largeAG c κ t| ≤ |(c - 1) ^ 2 - 1 / 4| / a + b ^ 3 / (16 * κ ^ 2) := by
   set A := |(c - 1) ^ 2 - 1 / 4|
@@ -630,6 +656,7 @@ theorem integral_abs_largeAG_le (c : ℝ) {κ a b : ℝ} (hκ : 0 < κ) (ha : 0 
     exact mul_le_mul_of_nonneg_right (by linarith) (by positivity)
   linarith
 
+/-- For `0 < a ≤ b`, `∫_a^b |g₀| ≤ |(c-1)² - 1/4|/a`. -/
 theorem integral_abs_largeAG0_le (c : ℝ) {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) :
     ∫ t in a..b, |largeAG0 c t| ≤ |(c - 1) ^ 2 - 1 / 4| / a := by
   have heq : ∀ t ∈ Icc a b, |largeAG0 c t| = |(c - 1) ^ 2 - 1 / 4| / t ^ 2 := by
@@ -642,6 +669,8 @@ theorem integral_abs_largeAG0_le (c : ℝ) {a b : ℝ} (ha : 0 < a) (hab : a ≤
   have : 0 ≤ |(c - 1) ^ 2 - 1 / 4| / b := by positivity
   linarith
 
+/-- The free oscillator solution is linear in its coefficients: `oscFree(c,d) - oscFree(c',d') =
+oscFree(c-c', d-d')`. -/
 theorem oscFree_sub (ω a : ℝ) (c d c' d' : ℂ) (x : ℝ) :
     ODE.oscFree ω a c d x - ODE.oscFree ω a c' d' x = ODE.oscFree ω a (c - c') (d - d') x := by
   simp only [ODE.oscFree, smul_sub]
@@ -697,12 +726,14 @@ theorem norm_largeAU_sub_largeAU0_le (c : ℝ) {κ s₀ S : ℝ} (hκ : 0 < κ) 
 
 /-! ### The limit -/
 
+/-- The limit Liouville form `u₀(s) = 2^{c-1} √s J_{c-1}(s)` is bounded as `s → ∞`. -/
 lemma largeAU0_isBigO (c : ℝ) : largeAU0 c =O[atTop] (fun _ => (1 : ℝ)) := by
   refine ((sqrt_mul_besselJ_isBigO (c - 1)).const_mul_left
     (((2 : ℝ) ^ (c - 1) : ℝ) : ℂ)).congr' ?_ EventuallyEq.rfl
   filter_upwards [eventually_gt_atTop (0 : ℝ)] with s hs
   exact (largeAU0_eq c hs).symm
 
+/-- The derivative `u₀'` of the limit Liouville form is bounded as `s → ∞`. -/
 lemma largeAU0'_isBigO (c : ℝ) : largeAU0' c =O[atTop] (fun _ => (1 : ℝ)) := by
   have hr : Tendsto (fun s : ℝ => ((((c - 1 / 2) / s : ℝ)) : ℂ)) atTop (𝓝 0) := by
     have := (continuous_ofReal.tendsto 0).comp (tendsto_div_atTop_zero (c - 1 / 2))
@@ -715,6 +746,7 @@ lemma largeAU0'_isBigO (c : ℝ) : largeAU0' c =O[atTop] (fun _ => (1 : ℝ)) :=
   filter_upwards [eventually_gt_atTop (0 : ℝ)] with s hs
   exact (largeAU0'_eq c hs).symm
 
+/-- There is `B ≥ 0` with `|u₀(s)| + |u₀'(s)| ≤ B` for all large `s`. -/
 theorem exists_bound_largeAU0 (c : ℝ) :
     ∃ B : ℝ, 0 ≤ B ∧ ∀ᶠ s in atTop, ‖largeAU0 c s‖ + ‖largeAU0' c s‖ ≤ B := by
   obtain ⟨C0, hC0⟩ := (largeAU0_isBigO c).bound
@@ -724,10 +756,12 @@ theorem exists_bound_largeAU0 (c : ℝ) :
   simp only [norm_one, mul_one] at h0 h1
   linarith [le_abs_self C0, le_abs_self C1]
 
+/-- For `x > 0`, `2√(κx) → ∞` as `κ → ∞`. -/
 theorem tendsto_two_sqrt_mul (x : ℝ) (hx : 0 < x) :
     Tendsto (fun κ : ℝ => 2 * Real.sqrt (κ * x)) atTop atTop :=
   (Real.tendsto_sqrt_atTop.comp (tendsto_id.atTop_mul_const hx)).const_mul_atTop two_pos
 
+/-- For `x > 0`, `(2√(κx))³/(16κ²) → 0` as `κ → ∞`. -/
 theorem tendsto_cube_div (x : ℝ) (hx : 0 < x) :
     Tendsto (fun κ : ℝ => (2 * Real.sqrt (κ * x)) ^ 3 / (16 * κ ^ 2)) atTop (𝓝 0) := by
   have h : Tendsto (fun κ : ℝ => x * Real.sqrt x / (2 * Real.sqrt κ)) atTop (𝓝 0) :=
@@ -868,6 +902,7 @@ theorem tendsto_largeAU_sub_cos (c : ℝ) {x : ℝ} (hx : 0 < x) :
   simp only [Function.comp_apply]
   ring
 
+/-- For `y ≥ 0`, `2^{1/2-c} (2√y)^{c-1/2} = y^{c/2-1/4}`. -/
 theorem two_rpow_mul_two_sqrt_rpow {y : ℝ} (hy : 0 ≤ y) (c : ℝ) :
     (2 : ℝ) ^ (1 / 2 - c) * (2 * Real.sqrt y) ^ (c - 1 / 2) = y ^ (c / 2 - 1 / 4) := by
   rw [Real.mul_rpow (by norm_num) (Real.sqrt_nonneg _), Real.sqrt_eq_rpow, ← Real.rpow_mul hy,
@@ -876,6 +911,7 @@ theorem two_rpow_mul_two_sqrt_rpow {y : ℝ} (hy : 0 ≤ y) (c : ℝ) :
   congr 1
   ring
 
+/-- `2^{1/2-c} √π · 2^{c-1} √(2/π) = 1`. -/
 theorem two_rpow_sqrt_pi_mul (c : ℝ) :
     (2 : ℝ) ^ (1 / 2 - c) * Real.sqrt π * ((2 : ℝ) ^ (c - 1) * Real.sqrt (2 / π)) = 1 := by
   have h1 : Real.sqrt π * Real.sqrt (2 / π) = Real.sqrt 2 := by
@@ -1020,6 +1056,7 @@ theorem sin_mul_cos_sub_sin_mul_cos (A C t : ℝ) :
   simp only [Real.sin_sub, Real.cos_add]
   ring
 
+/-- For real `x > 0` and real `y`, the complex power `x^y` is the cast of the real power. -/
 theorem ofReal_cpow_eq {x : ℝ} (hx : 0 < x) (y : ℝ) : (x : ℂ) ^ (y : ℂ) = ((x ^ y : ℝ) : ℂ) :=
   (ofReal_cpow hx.le y).symm
 
@@ -1123,6 +1160,8 @@ theorem kummerU_large_a_eq (c : ℝ) (hc : ∀ k : ℤ, c ≠ k) {a x : ℝ} (hx
   field_simp
   ring
 
+/-- An algebraic rearrangement used in the large-`a` error estimate: given `S₁C₁ - S₂C₂ = s C₀`, the
+error `(G₁S₁A₁ - G₂S₂A₂)/s - C₀` splits into terms with factors `Gᵢ - 1` and `Aᵢ - Cᵢ`. -/
 theorem large_a_algebra {s S1 S2 G1 G2 A1 A2 C1 C2 C0 : ℂ} (hs : s ≠ 0)
     (htc : S1 * C1 - S2 * C2 = s * C0) :
     (G1 * S1 * A1 - G2 * S2 * A2) / s - C0 =
@@ -1254,6 +1293,7 @@ theorem tendsto_kummerU_atBot (c : ℝ) (hc : ∀ k : ℤ, c ≠ k) {x : ℝ} (h
 
 /-! ### Fejér's formula for Laguerre polynomials -/
 
+/-- For `d ≥ 0`, `√(t+d) - √t → 0` as `t → ∞`. -/
 theorem tendsto_sqrt_add_sub_sqrt {d : ℝ} (hd : 0 ≤ d) :
     Tendsto (fun t : ℝ => Real.sqrt (t + d) - Real.sqrt t) atTop (𝓝 0) := by
   have hup : Tendsto (fun t : ℝ => d / Real.sqrt t) atTop (𝓝 0) :=

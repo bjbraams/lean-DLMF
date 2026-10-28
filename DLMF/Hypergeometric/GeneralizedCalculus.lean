@@ -172,7 +172,7 @@ theorem regularized1F2_one_coeff (b c : ℂ) (n : ℕ) :
     regularizedHGFunCoeff {1} {b,c} n=1/(Gamma (b+n)*Gamma (c+n)) := by
   simp only [regularizedHGFunCoeff, Multiset.map_singleton, Multiset.prod_singleton,
     Multiset.insert_eq_cons, Multiset.map_cons, Multiset.prod_cons]
-  rw [show (ascPochhammer ℂ n).eval 1=(n.factorial:ℂ) by simp [poch],
+  rw [show (ascPochhammer ℂ n).eval 1=(n.factorial:ℂ) by simp,
     div_mul_eq_div_div, div_self (Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero n))]
 
 /-- Lower-parameter contiguity of regularized `₁F₂`, including reciprocal-Gamma zeros. -/
