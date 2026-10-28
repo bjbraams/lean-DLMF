@@ -78,12 +78,15 @@ theorem tendsto_agmSeq (a₀ g₀ : ℝ≥0) :
   · rw [← Filter.tendsto_add_atTop_iff_nat 1]
     exact NNReal.tendsto_agmSequences_fst_agm
 
+/-- Estimate under the stated parameter and domain assumptions: `agmSeqG a₀ g₀ n ≤ agmSeqA a₀ g₀
+n`. -/
 lemma ei19a_agmSeqG_le_agmSeqA {a₀ g₀ : ℝ≥0} (h : g₀ ≤ a₀) (n : ℕ) :
     agmSeqG a₀ g₀ n ≤ agmSeqA a₀ g₀ n := by
   cases n with
   | zero => exact h
   | succ n => exact NNReal.agmSequences_fst_le_snd n n
 
+/-- Estimate under the stated parameter and domain assumptions: `0 < agmSeqA a₀ g₀ n`. -/
 lemma ei19a_agmSeqA_pos {a₀ g₀ : ℝ≥0} (h : 0 < a₀) (n : ℕ) : 0 < agmSeqA a₀ g₀ n := by
   induction n with
   | zero => exact h
@@ -181,6 +184,8 @@ lemma p19lR1_agmSeq_eq (a₀ g₀ : ℝ≥0) (n : ℕ) :
     rw [Carlson.agmSeq_succ, ih, (agmSeq_succ a₀ g₀ n).1, (agmSeq_succ a₀ g₀ n).2]
     simp [Carlson.agmStep, Real.coe_sqrt]
 
+/-- Identity under the stated parameter and domain assumptions: `agmSeqC a₀ g₀ (n + 1) ^ 2 =
+(agmSeqA a₀ g₀ (n + 1) : ℝ) ^ 2 - (agmSeqG a₀ g₀ (n + 1) : ℝ) ^ 2`. -/
 lemma p19lR1_agmSeqC_sq_succ (a₀ g₀ : ℝ≥0) (n : ℕ) :
     agmSeqC a₀ g₀ (n + 1) ^ 2 =
       (agmSeqA a₀ g₀ (n + 1) : ℝ) ^ 2 - (agmSeqG a₀ g₀ (n + 1) : ℝ) ^ 2 := by

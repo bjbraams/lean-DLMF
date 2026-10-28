@@ -146,9 +146,11 @@ theorem incG_gammaEtaFactor_differentiable : Differentiable ℂ gammaEtaFactor :
 /-- The strip `|Im w| < 2π`. -/
 def incG_strip : Set ℂ := {w : ℂ | |w.im| < 2*π}
 
+/-- The indicated domain is open: `IsOpen incG_strip`. -/
 theorem incG_strip_isOpen : IsOpen incG_strip :=
   isOpen_lt (continuous_abs.comp continuous_im) continuous_const
 
+/-- The stated relation follows from the given hypotheses: `Convex ℝ incG_strip`. -/
 theorem incG_strip_convex : Convex ℝ incG_strip := by
   intro u hu v hv a b ha hb hab
   simp only [incG_strip, Set.mem_ofPred_eq] at *
@@ -165,8 +167,10 @@ theorem incG_strip_convex : Convex ℝ incG_strip := by
           have hs : a*(2*π)+b*(2*π) = 2*π := by rw [← add_mul, hab, one_mul]
           linarith
 
+/-- Formula under the stated hypotheses: `(0:ℂ) ∈ incG_strip`. -/
 theorem incG_zero_mem_strip : (0:ℂ) ∈ incG_strip := by simp [incG_strip, Real.pi_pos]
 
+/-- Nonvanishing under the stated hypotheses: `gammaEtaFactor w ≠ 0`. -/
 theorem incG_gammaEtaFactor_ne_zero {w : ℂ} (hw : w ∈ incG_strip) : gammaEtaFactor w ≠ 0 := by
   by_cases h0 : w = 0
   · simp [gammaEtaFactor, h0]
@@ -218,6 +222,8 @@ theorem incG_exp_etaPrimitive {w : ℂ} (hw : w ∈ incG_strip) :
     _ = f w * (exp (P w) * exp (-P w)) := by ring
     _ = f w := by rw [this, mul_one]
 
+/-- Identity under the stated parameter and domain assumptions: `gammaUniformEtaOnLog w^2/2=exp
+w-1-w`. -/
 theorem incG_gammaUniformEta_sq {w : ℂ} (hw : |w.im| < 2*π) :
     gammaUniformEtaOnLog w^2/2=exp w-1-w := by
   have he := incG_exp_etaPrimitive (w := w) hw
@@ -228,6 +234,8 @@ theorem incG_gammaUniformEta_sq {w : ℂ} (hw : |w.im| < 2*π) :
   · simp only [gammaEtaFactor, h0, ↓reduceIte]
     field_simp
 
+/-- Derivative formula at the specified argument: `HasDerivAt gammaUniformEtaOnLog 1 0 ∧
+gammaUniformEtaOnLog 0=0`. -/
 theorem incG_gammaUniformEta_normalization :
     HasDerivAt gammaUniformEtaOnLog 1 0 ∧ gammaUniformEtaOnLog 0=0 := by
   refine ⟨?_, by simp [gammaUniformEtaOnLog]⟩
@@ -238,6 +246,8 @@ theorem incG_gammaUniformEta_normalization :
   convert h using 1
   simp
 
+/-- At `w`, the function `gammaUniformEtaOnLog` has derivative `((exp w-1)/gammaUniformEtaOnLog
+w)`. -/
 theorem incG_gammaUniformEta_derivative {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠ 0) :
     HasDerivAt gammaUniformEtaOnLog ((exp w-1)/gammaUniformEtaOnLog w) w := by
   have hws : w ∈ incG_strip := hw
@@ -268,19 +278,22 @@ theorem incG_gammaUniformEta_derivative {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w 
     linear_combination huniq/2
   rw [← this]; exact hη
 
-/-- gammaUniformEta equation. -/
+/-- Identity under the stated parameter and domain assumptions: `gammaUniformEtaOnLog w^2/2=exp
+w-1-w`. -/
 @[dlmf 8.12.E2]
 theorem gammaUniformEta_equation {w : ℂ} (hw : |w.im| < 2*π) :
     gammaUniformEtaOnLog w^2/2=exp w-1-w :=
   incG_gammaUniformEta_sq hw
 
-/-- gammaUniformEta derivative. -/
+/-- At `w`, the function `gammaUniformEtaOnLog` has derivative `((exp w-1)/gammaUniformEtaOnLog
+w)`. -/
 @[dlmf 8.12.E2]
 theorem gammaUniformEta_derivative {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠ 0) :
     HasDerivAt gammaUniformEtaOnLog ((exp w-1)/gammaUniformEtaOnLog w) w :=
   incG_gammaUniformEta_derivative hw hw0
 
-/-- gammaUniformEta normalization. -/
+/-- Derivative formula at the specified argument: `HasDerivAt gammaUniformEtaOnLog 1 0 ∧
+gammaUniformEtaOnLog 0=0`. -/
 @[dlmf 8.12.E1]
 theorem gammaUniformEta_normalization  :
     HasDerivAt gammaUniformEtaOnLog 1 0 ∧ gammaUniformEtaOnLog 0=0 :=
@@ -295,7 +308,8 @@ def gammaUniformS (a w : ℂ) : ℂ :=
 def gammaUniformT (a w : ℂ) : ℂ :=
   I*(-exp (π*I*a)*Gamma (a+1)/(2*π*I)*upperIncGammaOnLog (-a) (log a+w+π*I)-erfc (I*gammaUniformEtaOnLog w*(a/2)^(1/2 : ℂ))/2)
 
-/-- gammaUniformP identity. -/
+/-- Identity under the stated parameter and domain assumptions: `normIncGammaPOnLog a (log
+a+w)=erfc (-gammaUniformEtaOnLog w*(a/2)^(1/2 : ℂ))/2-gammaUniformS a w`. -/
 @[dlmf 8.12.E3]
 theorem gammaUniformP_identity (a w : ℂ) :
     normIncGammaPOnLog a (log a+w)=erfc (-gammaUniformEtaOnLog w*(a/2)^(1/2 : ℂ))/2-gammaUniformS a w := by
@@ -339,7 +353,9 @@ theorem gammaUniformQ_negative_identity {a : ℂ} (ha : a ∈ slitPlane) {w : �
     linear_combination hj + π*I*h2
       - Gamma (1+a)*exp (π*I*a)*upperIncGammaOnLog (-a) (π*I+log a+w)*I_sq
 
-/-- gammaUniform scIncGamma identity. -/
+/-- Identity under the stated parameter and domain assumptions: `exp (-a*(log a+w))*scIncGamma
+(-a) (-a*exp w)=cos (π*a)-2*sin (π*a)*(exp (a*gammaUniformEtaOnLog w^2/2)/Real.sqrt π*dawsonF
+(gammaUniformEtaOnLog w*(a/2)^(1/2 : ℂ))+gammaUniformT a w)`. -/
 @[dlmf 8.12.E6]
 theorem gammaUniform_scIncGamma_identity {a : ℂ} (ha : a ∈ slitPlane) {w : ℂ} (hw : |w.im| < 2*π) :
     exp (-a*(log a+w))*scIncGamma (-a) (-a*exp w)=cos (π*a)-2*sin (π*a)*(exp (a*gammaUniformEtaOnLog w^2/2)/Real.sqrt π*dawsonF (gammaUniformEtaOnLog w*(a/2)^(1/2 : ℂ))+gammaUniformT a w) := by
@@ -439,6 +455,7 @@ theorem incG_gammaScaled_ofReal {t : ℝ} (ht : 0 < t) :
     exact_mod_cast hpos.ne'
   field_simp
 
+/-- The map `DLMF.Gamma.binetIntegral` tends to `(𝓝 0)` along `atTop`. -/
 theorem incG_tendsto_binetIntegral :
     Tendsto DLMF.Gamma.binetIntegral atTop (𝓝 0) := by
   have hu : Tendsto (fun t : ℝ => 1/(12*t)) atTop (𝓝 0) := by
@@ -447,6 +464,7 @@ theorem incG_tendsto_binetIntegral :
   · filter_upwards [eventually_gt_atTop 0] with t ht using (DLMF.Gamma.binetIntegral_mem ht).1
   · filter_upwards [eventually_gt_atTop 0] with t ht using (DLMF.Gamma.binetIntegral_mem ht).2
 
+/-- The map `(fun t : ℝ => t * DLMF.Gamma.binetIntegral t)` tends to `(𝓝 (1/12))` along `atTop`. -/
 theorem incG_tendsto_mul_binetIntegral :
     Tendsto (fun t : ℝ => t * DLMF.Gamma.binetIntegral t) atTop (𝓝 (1/12)) := by
   have h := DLMF.Gamma.hasAsymptoticExpansion_binetIntegral 1
@@ -471,6 +489,8 @@ theorem incG_tendsto_mul_binetIntegral :
   filter_upwards [eventually_gt_atTop 0] with t ht
   rw [Real.rpow_neg_one]; field_simp; ring
 
+/-- The map `(fun t : ℝ => t * (Real.exp (DLMF.Gamma.binetIntegral t) - 1))` tends to `(𝓝 (1/12))`
+along `atTop`. -/
 theorem incG_tendsto_mul_exp_binet_sub_one :
     Tendsto (fun t : ℝ => t * (Real.exp (DLMF.Gamma.binetIntegral t) - 1)) atTop (𝓝 (1/12)) := by
   have hr : Tendsto (fun t : ℝ => t * (Real.exp (DLMF.Gamma.binetIntegral t) - 1 -
@@ -542,6 +562,9 @@ theorem incG_gammaUniformEta_ne_zero {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠
   rw [h0] at this
   exact incG_exp_sub_one_sub_ne_zero hw hw0 (by rw [← this]; ring)
 
+/-- Identity under the stated parameter and domain assumptions: `gammaUniformC 0 w=1/(exp
+w-1)-1/gammaUniformEtaOnLog w ∧ gammaUniformC 1 w=1/gammaUniformEtaOnLog w^3-1/(exp
+w-1)^3-1/(exp w-1)^2-1/(12*(exp w-1))`. -/
 theorem incG_gammaUniformC_first {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠ 0) :
     gammaUniformC 0 w=1/(exp w-1)-1/gammaUniformEtaOnLog w ∧ gammaUniformC 1 w=1/gammaUniformEtaOnLog w^3-1/(exp w-1)^3-1/(exp w-1)^2-1/(12*(exp w-1)) := by
   have h0 : ∀ v : ℂ, v ≠ 0 → gammaUniformC 0 v = 1/(exp v-1)-1/gammaUniformEtaOnLog v := by
@@ -568,7 +591,9 @@ theorem incG_gammaUniformC_first {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠ 0) 
   field_simp
   ring
 
-/-- gammaUniformC first. -/
+/-- Identity under the stated parameter and domain assumptions: `gammaUniformC 0 w=1/(exp
+w-1)-1/gammaUniformEtaOnLog w ∧ gammaUniformC 1 w=1/gammaUniformEtaOnLog w^3-1/(exp
+w-1)^3-1/(exp w-1)^2-1/(12*(exp w-1))`. -/
 @[dlmf 8.12.E9]
 theorem gammaUniformC_first {w : ℂ} (hw : |w.im| < 2*π) (hw0 : w ≠ 0) :
     gammaUniformC 0 w=1/(exp w-1)-1/gammaUniformEtaOnLog w ∧ gammaUniformC 1 w=1/gammaUniformEtaOnLog w^3-1/(exp w-1)^3-1/(exp w-1)^2-1/(12*(exp w-1)) :=
@@ -616,13 +641,19 @@ theorem incG_gammaUniformEta_exists_local_inverse :
 def gammaUniformFilter (α β : ℝ) : Filter (ℂ × ℂ) :=
   comap (fun p : ℂ × ℂ => Real.exp p.1.re) atTop ⊓ 𝓟 {p : ℂ × ℂ | |p.1.im| ≤ α ∧ |p.2.im| ≤ β}
 
-/-- gammaUniformS uniform expansion. -/
+/-- Formula under the stated hypotheses: `IsBigO (gammaUniformFilter (π-δ) (2*π-ε)) (fun p =>
+Real.sqrt (2*π)*exp (p.1/2)*exp (exp p.1*gammaUniformEtaOnLog p.2^2/2)*gammaUniformS (exp p.1)
+p.2-∑ k ∈ Finset.range N, gammaUniformC k p.2*exp (-(k : ℂ)*p.1)) (fun p => exp (-(N :
+ℂ)*p.1))`. -/
 @[dlmf 8.12.E7]
 theorem gammaUniformS_uniform_expansion {δ ε : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) (hε : 0 < ε) (hε1 : ε < 2*π) (N : ℕ) :
     IsBigO (gammaUniformFilter (π-δ) (2*π-ε)) (fun p => Real.sqrt (2*π)*exp (p.1/2)*exp (exp p.1*gammaUniformEtaOnLog p.2^2/2)*gammaUniformS (exp p.1) p.2-∑ k ∈ Finset.range N, gammaUniformC k p.2*exp (-(k : ℂ)*p.1)) (fun p => exp (-(N : ℂ)*p.1)) := by
   sorry
 
-/-- gammaUniformT uniform expansion. -/
+/-- Formula under the stated hypotheses: `IsBigO (gammaUniformFilter (π-δ) (2*π-ε)) (fun p =>
+Real.sqrt (2*π)*exp (p.1/2)*exp (-exp p.1*gammaUniformEtaOnLog p.2^2/2)*gammaUniformT (exp
+p.1) p.2-∑ k ∈ Finset.range N, (-1 : ℂ)^k*gammaUniformC k p.2*exp (-(k : ℂ)*p.1)) (fun p =>
+exp (-(N : ℂ)*p.1))`. -/
 @[dlmf 8.12.E8]
 theorem gammaUniformT_uniform_expansion {δ ε : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) (hε : 0 < ε) (hε1 : ε < 2*π) (N : ℕ) :
     IsBigO (gammaUniformFilter (π-δ) (2*π-ε)) (fun p => Real.sqrt (2*π)*exp (p.1/2)*exp (-exp p.1*gammaUniformEtaOnLog p.2^2/2)*gammaUniformT (exp p.1) p.2-∑ k ∈ Finset.range N, (-1 : ℂ)^k*gammaUniformC k p.2*exp (-(k : ℂ)*p.1)) (fun p => exp (-(N : ℂ)*p.1)) := by
@@ -809,26 +840,32 @@ theorem gammaInv_exists_global : ∃ f : ℂ → ℂ,
     have hη' : η ∈ D := by simpa [D] using hη
     exact ⟨(hderiv η hη').hasDerivAt.differentiableAt, hspec η hη'⟩
 
-
-/-- gammaUniformInverseLog spec. -/
+/-- Estimate under the stated parameter and domain assumptions: `gammaUniformInverseLog 0=0 ∧
+deriv gammaUniformInverseLog 0=1 ∧ ∀ η : ℂ, ‖η‖ < 2*Real.sqrt π → DifferentiableAt ℂ
+gammaUniformInverseLog η ∧ |(gammaUniformInverseLog η).im| < 2*π ∧ gammaUniformEtaOnLog
+(gammaUniformInverseLog η)=η`. -/
 @[dlmf 8.12.E13]
 theorem gammaUniformInverseLog_spec  :
     gammaUniformInverseLog 0=0 ∧ deriv gammaUniformInverseLog 0=1 ∧ ∀ η : ℂ, ‖η‖ < 2*Real.sqrt π → DifferentiableAt ℂ gammaUniformInverseLog η ∧ |(gammaUniformInverseLog η).im| < 2*π ∧ gammaUniformEtaOnLog (gammaUniformInverseLog η)=η := by
   exact Classical.epsilon_spec gammaInv_exists_global
 
-/-- gammaUniformC maclaurin. -/
+/-- The series with terms `(fun n : ℕ => gammaUniformD k n*η^n)` converges to `(gammaUniformC k
+(gammaUniformInverseLog η))`. -/
 @[dlmf 8.12.E11]
 theorem gammaUniformC_maclaurin (k : ℕ) {η : ℂ} (hη : ‖η‖ < 2*Real.sqrt π) :
     HasSum (fun n : ℕ => gammaUniformD k n*η^n) (gammaUniformC k (gammaUniformInverseLog η)) := by
   sorry
 
-/-- gammaUniformD recurrence. -/
+/-- Estimate under the stated parameter and domain assumptions: `gammaUniformD 0 0 = -1/3 ∧ (1 ≤ n
+→ gammaUniformD 0 n=(n+2)*gammaUniformAlpha (n+2)) ∧ gammaUniformD (k+1) n=(-1 :
+ℂ)^(k+1)*gammaStirlingCoeff (k+1)*gammaUniformD 0 n+(n+2)*gammaUniformD k (n+2)`. -/
 @[dlmf 8.12.E12]
 theorem gammaUniformD_recurrence (k n : ℕ) :
     gammaUniformD 0 0 = -1/3 ∧ (1 ≤ n → gammaUniformD 0 n=(n+2)*gammaUniformAlpha (n+2)) ∧ gammaUniformD (k+1) n=(-1 : ℂ)^(k+1)*gammaStirlingCoeff (k+1)*gammaUniformD 0 n+(n+2)*gammaUniformD k (n+2) := by
   sorry
 
-/-- gammaUniformAlpha hasSum. -/
+/-- The series with terms `(fun n : ℕ => gammaUniformAlpha n*η^n)` converges to `(exp
+(gammaUniformInverseLog η))`. -/
 @[dlmf 8.12.E13]
 theorem gammaUniformAlpha_hasSum {η : ℂ} (hη : ‖η‖ < 2*Real.sqrt π) :
     HasSum (fun n : ℕ => gammaUniformAlpha n*η^n) (exp (gammaUniformInverseLog η)) := by
@@ -843,7 +880,8 @@ theorem gammaUniformAlpha_hasSum {η : ℂ} (hη : ‖η‖ < 2*Real.sqrt π) :
   simp only [gammaUniformAlpha, sub_zero, smul_eq_mul, div_eq_mul_inv]
   ring
 
-/-- gammaUniformAlpha printed. -/
+/-- Estimate under the stated parameter and domain assumptions: `∀ n < 6, gammaUniformAlpha
+(n+3)=([1/36,-1/270,1/4320,1/17010,-139/5443200,1/204120] : List ℂ)[n]!`. -/
 @[dlmf 8.12.E14]
 theorem gammaUniformAlpha_printed  :
     ∀ n < 6, gammaUniformAlpha (n+3)=([1/36,-1/270,1/4320,1/17010,-139/5443200,1/204120] : List ℂ)[n]! := by
@@ -921,19 +959,25 @@ theorem gammaUniformAlpha_printed  :
   intro n hn
   interval_cases n <;> norm_num [gammaUniformAlpha, h3, h4, h5, h6, h7, h8, Nat.factorial]
 
-/-- gammaUniformC at zero printed. -/
+/-- Estimate under the stated parameter and domain assumptions: `∀ n < 6, gammaUniformC n
+0=([-1/3,-1/540,25/6048,101/155520,-3184811/3695155200,-2745493/8151736320] : List ℂ)[n]!`. -/
 @[dlmf 8.12.E17]
 theorem gammaUniformC_at_zero_printed  :
     ∀ n < 6, gammaUniformC n 0=([-1/3,-1/540,25/6048,101/155520,-3184811/3695155200,-2745493/8151736320] : List ℂ)[n]! := by
   sorry
 
-/-- normIncGammaQ diagonal uniform asymptotic. -/
+/-- Identity under the stated parameter and domain assumptions: `HasAsymptoticExpansion (logSector
+(π-δ)) (fun k w => exp (-((k : ℂ)+1/2)*w)/Real.sqrt (2*π)) (fun k => gammaUniformC k 0) (fun w
+=> normIncGammaQOnLog (exp w) w-1/2)`. -/
 @[dlmf 8.12.E15]
 theorem normIncGammaQ_diagonal_uniform_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) :
     HasAsymptoticExpansion (logSector (π-δ)) (fun k w => exp (-((k : ℂ)+1/2)*w)/Real.sqrt (2*π)) (fun k => gammaUniformC k 0) (fun w => normIncGammaQOnLog (exp w) w-1/2) := by
   sorry
 
-/-- normIncGammaQ negative diagonal asymptotic. -/
+/-- Identity under the stated parameter and domain assumptions: `HasAsymptoticExpansion (logSector
+(π-δ)) (fun k w => exp (-((k : ℂ)+1/2)*w)/Real.sqrt (2*π)) (fun k => -I*(-1 :
+ℂ)^k*gammaUniformC k 0) (fun w => -exp (ε*π*I*exp w)*Gamma (exp
+w+1)/(2*π*I)*upperIncGammaOnLog (-exp w) (w+ε*π*I)-ε/2)`. -/
 @[dlmf 8.12.E16]
 theorem normIncGammaQ_negative_diagonal_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
     HasAsymptoticExpansion (logSector (π-δ)) (fun k w => exp (-((k : ℂ)+1/2)*w)/Real.sqrt (2*π)) (fun k => -I*(-1 : ℂ)^k*gammaUniformC k 0) (fun w => -exp (ε*π*I*exp w)*Gamma (exp w+1)/(2*π*I)*upperIncGammaOnLog (-exp w) (w+ε*π*I)-ε/2) := by
@@ -956,7 +1000,8 @@ def gammaParisA (k : ℕ) (χ : ℂ) : ℂ :=
 def gammaParisB (k : ℕ) (χ : ℂ) : ℂ :=
   gammaParisD χ*gammaParisA k χ-gammaParisRawCoeff true χ k
 
-/-- gammaParis printed. -/
+/-- Identity under the stated parameter and domain assumptions: `gammaParisA 0 χ=1 ∧ gammaParisB 0
+χ=0 ∧ gammaParisA 1 χ=χ/2+χ^3/6 ∧ gammaParisB 1 χ=1/3+χ^2/6`. -/
 @[dlmf 8.12.E20]
 theorem gammaParis_printed (χ : ℂ) :
     gammaParisA 0 χ=1 ∧ gammaParisB 0 χ=0 ∧ gammaParisA 1 χ=χ/2+χ^3/6 ∧ gammaParisB 1 χ=1/3+χ^2/6 := by
@@ -1008,7 +1053,9 @@ theorem incG_exists_normIncGammaQ_eq {a : ℝ} (ha : 0 < a) {q : ℝ} (hq : 0 < 
   change 1 - f x = q
   rw [hfx]; ring
 
-/-- gammaQInverse spec. -/
+/-- Identity under the stated parameter and domain assumptions: `(if gammaQInverse a q=∞ then 0
+else (normIncGammaQContinued a (gammaQInverse a q).toReal).re)=q ∧ (q ≠ 0 → gammaQInverse a q
+≠ ∞)`. -/
 @[dlmf 8.12.E21]
 theorem gammaQInverse_spec {a q : ℝ} (ha : 0 < a) (hq : 0 ≤ q) (hq1 : q ≤ 1) :
     (if gammaQInverse a q=∞ then 0 else (normIncGammaQContinued a (gammaQInverse a q).toReal).re)=q ∧ (q ≠ 0 → gammaQInverse a q ≠ ∞) := by
@@ -1028,8 +1075,9 @@ theorem gammaQInverse_spec {a q : ℝ} (ha : 0 < a) (hq : 0 ≤ q) (hq1 : q ≤ 
   simp only [ENNReal.ofReal_ne_top, ite_false, ENNReal.toReal_ofReal hs.1]
   exact ⟨hs.2, fun _ => ENNReal.ofReal_ne_top⟩
 
-
-/-- gammaQInverse median asymptotic. -/
+/-- Estimate under the stated parameter and domain assumptions: `∃ c : ℕ → ℝ, (∀ n < 5, c
+n=([1,-1/3,8/405,184/25515,2248/3444525] : List ℝ)[n]!) ∧ HasAsymptoticExpansion atTop (fun n
+(a : ℝ) => a^((1 : ℤ)-n)) c (fun a => (gammaQInverse a (1/2)).toReal)`. -/
 @[dlmf 8.12.E22]
 theorem gammaQInverse_median_asymptotic  :
     ∃ c : ℕ → ℝ, (∀ n < 5, c n=([1,-1/3,8/405,184/25515,2248/3444525] : List ℝ)[n]!) ∧ HasAsymptoticExpansion atTop (fun n (a : ℝ) => a^((1 : ℤ)-n)) c (fun a => (gammaQInverse a (1/2)).toReal) := by

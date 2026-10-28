@@ -214,9 +214,11 @@ theorem divisorCountK_two (n : ℕ) : divisorCountK 2 n = σ 0 n := by
 def powC (α : ℂ) : ArithmeticFunction ℂ :=
   ⟨fun n ↦ if n = 0 then 0 else (n : ℂ) ^ α, by simp⟩
 
+/-- Identity under the stated parameter and domain assumptions: `powC α n = (n : ℂ) ^ α`. -/
 theorem powC_apply {α : ℂ} {n : ℕ} (hn : n ≠ 0) : powC α n = (n : ℂ) ^ α := by
   simp [powC, hn]
 
+/-- The stated relation follows from the given hypotheses: `IsMultiplicative (powC α)`. -/
 theorem isMultiplicative_powC (α : ℂ) : IsMultiplicative (powC α) := by
   refine ⟨by simp [powC], fun {m n} _ ↦ ?_⟩
   by_cases hm : m = 0
@@ -523,7 +525,6 @@ theorem q27_sum_divisors_jordanTotient (k : ℕ) {n : ℕ} (hn : 0 < n) :
     rw [mem_coe, Nat.mem_divisors]
     exact ⟨Nat.div_dvd_of_dvd (Nat.gcd_dvd_right _ _), hn.ne'⟩
 
-
 /-- `J_k(0) = 0`. -/
 lemma q27_jordanTotient_zero_right (k : ℕ) : jordanTotient k 0 = 0 := by
   rcases k with _ | k
@@ -648,7 +649,6 @@ theorem jordanTotient_eq_mul_prod (k n : ℕ) (hk : 0 < k) (hn : 0 < n) :
   rw [mul_sub, mul_one, ← pow_mul, mul_comm (e+1) k, mul_comm e k, mul_add, mul_one, pow_add]
   field_simp
 
-
 /-- DLMF 27.3.5: `d(n) = ∏_r (1 + a_r)`. -/
 @[dlmf 27.3.E5]
 theorem sigma_zero_eq_prod {n : ℕ} (hn : n ≠ 0) :
@@ -721,7 +721,6 @@ lemma s27_geom_hecke {R : Type*} [CommRing R] (x : R) (a t : ℕ) :
     rw [h3, h1, h2, show a + t + 1 + 1 = a + 1 + t + 1 by ring, h2]
     ring
 
-
 /-- `(p^i)^α = (p^α)^i`. -/
 lemma s27_natPow_cpow (p i : ℕ) (α : ℂ) : (((p ^ i : ℕ) : ℂ)) ^ α = ((p : ℂ) ^ α) ^ i := by
   induction i with
@@ -749,7 +748,6 @@ lemma s27_sigmaC_hecke_prime_pow (α : ℂ) {p : ℕ} (hp : p.Prime) (a b : ℕ)
   congr 3
   omega
 
-
 /-- `gcd(p^a m', p^b n') = p^{min(a,b)} gcd(m', n')` for `m', n'` coprime to `p`. -/
 theorem s27_gcd_split {p a b m' n' : ℕ} (hm : p.Coprime m') (hn : p.Coprime n') :
     (p ^ a * m').gcd (p ^ b * n') = p ^ min a b * m'.gcd n' := by
@@ -762,7 +760,6 @@ theorem s27_gcd_split {p a b m' n' : ℕ} (hm : p.Coprime m') (hn : p.Coprime n'
   rcases le_total a b with h | h
   · rw [min_eq_left h]; exact Nat.gcd_eq_left (Nat.pow_dvd_pow p h)
   · rw [min_eq_right h]; exact Nat.gcd_eq_right (Nat.pow_dvd_pow p h)
-
 
 /-- Splitting off the `p`-part of the right side of 27.3.7. -/
 lemma s27_hecke_split (α : ℂ) {p a b m' n' : ℕ} (hm : p.Coprime m')
@@ -795,7 +792,6 @@ lemma s27_hecke_split (α : ℂ) {p a b m' n' : ℕ} (hm : p.Coprime m')
   rw [hnum, (isMultiplicative_sigmaC α).map_mul_of_coprime hc, Nat.cast_mul,
     Complex.natCast_mul_natCast_cpow]
   ring
-
 
 /-- DLMF 27.3.7 (proof). -/
 lemma s27_sigmaC_mul_sigmaC (α : ℂ) {m n : ℕ} (hm : 0 < m) (hn : 0 < n) :

@@ -153,18 +153,24 @@ def symEllIntR {ι : Type*} [Fintype ι] (a : ℂ) (b z : ι → ℂ) : ℂ := b
 
 /-! ### Elementary facts -/
 
+/-- Identity under the stated parameter and domain assumptions: `(w ^ (1 / 2 : ℂ))⁻¹ = w ^ (-1 / 2
+: ℂ)`. -/
 theorem ei19c_inv_cpow_half (w : ℂ) : (w ^ (1 / 2 : ℂ))⁻¹ = w ^ (-1 / 2 : ℂ) := by
   rw [show (-1 / 2 : ℂ) = -(1 / 2) by ring, cpow_neg]
 
+/-- Identity under the stated parameter and domain assumptions: `w ^ (1 / 2 : ℂ) * w ^ (1 / 2 : ℂ)
+= w`. -/
 theorem ei19c_cpow_half_sq (w : ℂ) : w ^ (1 / 2 : ℂ) * w ^ (1 / 2 : ℂ) = w := by
   rw [← sq, show (1 / 2 : ℂ) = ((2 : ℕ) : ℂ)⁻¹ by norm_num, cpow_nat_inv_pow _ two_ne_zero]
 
+/-- The stated relation follows from the given hypotheses: `¬ IsNegReal p`. -/
 theorem ei19c_not_isNegReal_of_mem_slitPlane {p : ℂ} (hp : p ∈ slitPlane) : ¬ IsNegReal p := by
   rintro ⟨h1, h2⟩
   rcases mem_slitPlane_iff.mp hp with h | h
   · linarith
   · exact h h1
 
+/-- Formula under the stated hypotheses: `(t : ℂ) + z ∈ slitPlane`. -/
 lemma ei19c_add_mem_slitPlane {t : ℝ} (ht : 0 < t) {z : ℂ} (hz : symEllIntArg z) :
     (t : ℂ) + z ∈ slitPlane := by
   rcases hz with hz | rfl
@@ -173,25 +179,36 @@ lemma ei19c_add_mem_slitPlane {t : ℝ} (ht : 0 < t) {z : ℂ} (hz : symEllIntAr
     · exact mem_slitPlane_iff.mpr (Or.inr (by simpa using h))
   · simpa using ofReal_mem_slitPlane.mpr ht
 
+/-- Identity under the stated parameter and domain assumptions: `symEllIntR a b z =
+Carlson.carlsonR (-a) b z`. -/
 theorem symEllIntR_of_mem {ι : Type*} [Fintype ι] (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
     (hz : z ∈ Carlson.carlsonRSlitDomain) : symEllIntR a b z = Carlson.carlsonR (-a) b z := by
   simp [symEllIntR, hz]
 
+/-- Identity under the stated parameter and domain assumptions: `(betaIntegral a a')⁻¹ = Gamma (a
++ a') / (Gamma a * Gamma a')`. -/
 theorem ei19c_betaIntegral_inv {a a' : ℂ} (ha : 0 < a.re) (ha' : 0 < a'.re) :
     (betaIntegral a a')⁻¹ = Gamma (a + a') / (Gamma a * Gamma a') := by
   have h := Complex.Gamma_mul_Gamma_eq_betaIntegral ha ha'
   have h1 : Gamma (a + a') ≠ 0 := Complex.Gamma_ne_zero_of_re_pos (by simp; linarith)
   rw [h]; field_simp
 
+/-- Identity under the stated parameter and domain assumptions: `Gamma (3 / 2 : ℂ) = (1 / 2) *
+Gamma (1 / 2)`. -/
 theorem ei19c_Gamma_three_halves : Gamma (3 / 2 : ℂ) = (1 / 2) * Gamma (1 / 2) := by
   rw [show (3 / 2 : ℂ) = 1 / 2 + 1 by norm_num, Complex.Gamma_add_one _ (by norm_num)]
 
+/-- Identity under the stated parameter and domain assumptions: `Gamma (5 / 2 : ℂ) = (3 / 2) *
+Gamma (3 / 2)`. -/
 lemma ei19c_Gamma_five_halves : Gamma (5 / 2 : ℂ) = (3 / 2) * Gamma (3 / 2) := by
   rw [show (5 / 2 : ℂ) = 3 / 2 + 1 by norm_num, Complex.Gamma_add_one _ (by norm_num)]
 
+/-- Nonvanishing under the stated hypotheses: `Gamma (1 / 2 : ℂ) ≠ 0`. -/
 theorem ei19c_Gamma_half_ne : Gamma (1 / 2 : ℂ) ≠ 0 :=
   Complex.Gamma_ne_zero_of_re_pos (by norm_num)
 
+/-- Identity under the stated parameter and domain assumptions: `Gamma (1 / 2 : ℂ) * Gamma (1 / 2)
+= π`. -/
 lemma ei19c_Gamma_half_sq : Gamma (1 / 2 : ℂ) * Gamma (1 / 2) = π := by
   rw [Complex.Gamma_one_half_eq, ei19c_cpow_half_sq]
 
@@ -225,14 +242,18 @@ def symEllIntRConj {ι : Type*} [Fintype ι] (a : ℂ) (b : ι → ℂ) : ℂ :=
 
 /-! ### The named integrals as `R`-functions (19.16.14–19.16.18) -/
 
+/-- Formula under the stated hypotheses: `(![x, y, z] : Fin 3 → ℂ) ∈ Carlson.carlsonRSlitDomain`. -/
 theorem ei19c_slit3 {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
     (![x, y, z] : Fin 3 → ℂ) ∈ Carlson.carlsonRSlitDomain := by
   intro i; fin_cases i <;> assumption
 
+/-- Formula under the stated hypotheses: `(![x, y] : Fin 2 → ℂ) ∈ Carlson.carlsonRSlitDomain`. -/
 theorem ei19c_slit2 {x y : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane) :
     (![x, y] : Fin 2 → ℂ) ∈ Carlson.carlsonRSlitDomain := by
   intro i; fin_cases i <;> assumption
 
+/-- Formula under the stated hypotheses: `(![x, y, z, p] : Fin 4 → ℂ) ∈
+Carlson.carlsonRSlitDomain`. -/
 theorem ei19c_slit4 {x y z p : ℂ} (hx : x ∈ slitPlane) (hy : y ∈ slitPlane)
     (hz : z ∈ slitPlane) (hp : p ∈ slitPlane) :
     (![x, y, z, p] : Fin 4 → ℂ) ∈ Carlson.carlsonRSlitDomain := by
@@ -261,14 +282,18 @@ theorem symEllIntRF_eq_carlsonRF {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y �
     Carlson.carlsonRF]
   congr 1; ring
 
+/-- Identity under the stated parameter and domain assumptions: `Gamma (2 : ℂ) = 1`. -/
 lemma ei19c_Gamma_two : Gamma (2 : ℂ) = 1 := by
   rw [show (2 : ℂ) = 1 + 1 by norm_num, Complex.Gamma_add_one _ one_ne_zero, Complex.Gamma_one]
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `w ^ (-(3 / 2) : ℂ) = w ^ (-(1 /
+2) : ℂ) * w⁻¹`. -/
 theorem ei19c_cpow_neg_three_halves {w : ℂ} (hw : w ≠ 0) :
     w ^ (-(3 / 2) : ℂ) = w ^ (-(1 / 2) : ℂ) * w⁻¹ := by
   rw [show -(3 / 2 : ℂ) = -(1 / 2) + -1 by norm_num, cpow_add _ _ hw, cpow_neg_one]
 
+/-- Nonvanishing under the stated hypotheses: `(t : ℂ) + z ≠ 0`. -/
 theorem ei19c_add_ne_zero {t : ℝ} (ht : 0 < t) {z : ℂ} (hz : symEllIntArg z) :
     (t : ℂ) + z ≠ 0 := slitPlane_ne_zero (ei19c_add_mem_slitPlane ht hz)
 

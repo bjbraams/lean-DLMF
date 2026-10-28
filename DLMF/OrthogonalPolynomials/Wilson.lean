@@ -91,6 +91,9 @@ theorem poch_quadratic_pair (v y : ℂ) (k : ℕ) :
   intro j _
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `wilson a b c d n (y ^ 2) = poch
+(a + b) n * poch (a + c) n * poch (a + d) n * terminatingHG n [-(n : ℂ), n + a + b + c + d -
+1, a + I * y, a - I * y] [a + b, a + c, a + d] 1`. -/
 @[dlmf 18.26.E1]
 theorem wilson_hypergeometric (a b c d : ℂ) (n : ℕ) (y : ℂ) :
     wilson a b c d n (y ^ 2) = poch (a + b) n * poch (a + c) n * poch (a + d) n *
@@ -103,6 +106,9 @@ theorem wilson_hypergeometric (a b c d : ℂ) (n : ℕ) (y : ℂ) :
   rw [poch_conjugate_pair]
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `continuousDualHahn a b c n (y ^
+2) = poch (a + b) n * poch (a + c) n * terminatingHG n [-(n : ℂ), a + I * y, a - I * y] [a +
+b, a + c] 1`. -/
 @[dlmf 18.26.E2]
 theorem continuousDualHahn_hypergeometric (a b c : ℂ) (n : ℕ) (y : ℂ) :
     continuousDualHahn a b c n (y ^ 2) = poch (a + b) n * poch (a + c) n *
@@ -115,6 +121,9 @@ theorem continuousDualHahn_hypergeometric (a b c : ℂ) (n : ℕ) (y : ℂ) :
   rw [poch_conjugate_pair]
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `racah α β γ δ n (y * (y + γ + δ +
+1)) = terminatingHG n [-(n : ℂ), n + α + β + 1, -y, y + γ + δ + 1] [α + 1, β + δ + 1, γ + 1]
+1`. -/
 @[dlmf 18.26.E3]
 theorem racah_hypergeometric (α β γ δ : ℂ) (n : ℕ) (y : ℂ) :
     racah α β γ δ n (y * (y + γ + δ + 1)) =
@@ -129,6 +138,8 @@ theorem racah_hypergeometric (α β γ δ : ℂ) (n : ℕ) (y : ℂ) :
   rw [hp]
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `dualHahn γ δ N n (y * (y + γ + δ
++ 1)) = terminatingHG n [-(n : ℂ), -y, y + γ + δ + 1] [γ + 1, -(N : ℂ)] 1`. -/
 @[dlmf 18.26.E4]
 theorem dualHahn_hypergeometric (γ δ : ℂ) (N n : ℕ) (y : ℂ) :
     dualHahn γ δ N n (y * (y + γ + δ + 1)) =
@@ -143,6 +154,8 @@ theorem dualHahn_hypergeometric (γ δ : ℂ) (N n : ℕ) (y : ℂ) :
   rw [hp]
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `dualHahn γ δ N n ((y : ℂ) * (y +
+γ + δ + 1)) = hahn γ δ N y n`. -/
 @[dlmf 18.26.E4_1]
 theorem dualHahn_hahn_duality (γ δ : ℂ) {N n y : ℕ} (hn : n ≤ N) (hy : y ≤ N) :
     dualHahn γ δ N n ((y : ℂ) * (y + γ + δ + 1)) = hahn γ δ N y n := by
@@ -155,6 +168,8 @@ theorem dualHahn_hahn_duality (γ δ : ℂ) {N n y : ℕ} (hn : n ≤ N) (hy : y
   simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one]
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `racah α β γ δ n ((y : ℂ) * (y + γ
++ δ + 1)) = racah γ δ α β y ((n : ℂ) * (n + α + β + 1))`. -/
 @[dlmf 18.26.E4_2]
 theorem racah_duality (α β γ δ : ℂ) (n y : ℕ) :
     racah α β γ δ n ((y : ℂ) * (y + γ + δ + 1)) = racah γ δ α β y ((n : ℂ) * (n + α + β + 1)) := by
@@ -170,12 +185,20 @@ theorem racah_duality (α β γ δ : ℂ) (n y : ℕ) :
   rw [show δ + β + 1 = β + δ + 1 by ring]
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `∫ y : ℝ in Set.Ioi 0, wilson a b
+c d m ((y : ℂ) ^ 2) * wilson a b c d n ((y : ℂ) ^ 2) * (‖Gamma (a + I * y) * Gamma (b + I * y)
+* Gamma (c + I * y) * Gamma (d + I * y) / Gamma (2 * I * y)‖ ^ 2 : ℝ) = 0`. -/
 @[dlmf 18.25.E2]
 theorem wilson_orthogonal {a b c d : ℝ} (ha : 0 < a) (hb : 0 < b) (hc : 0 < c) (hd : 0 < d) {m n : ℕ} (hmn : m ≠ n) :
     ∫ y : ℝ in Set.Ioi 0, wilson a b c d m ((y : ℂ) ^ 2) * wilson a b c d n ((y : ℂ) ^ 2) *
       (‖Gamma (a + I * y) * Gamma (b + I * y) * Gamma (c + I * y) * Gamma (d + I * y) / Gamma (2 * I * y)‖ ^ 2 : ℝ) = 0 := by
   sorry
 
+/-- Identity under the stated parameter and domain assumptions: `∫ y : ℝ in Set.Ioi 0,
+continuousDualHahn a b c m ((y : ℂ) ^ 2) * continuousDualHahn a b c n ((y : ℂ) ^ 2) * (‖Gamma
+(a + I * y) * Gamma (b + I * y) * Gamma (c + I * y) / Gamma (2 * I * y)‖ ^ 2 : ℝ) = if m = n
+then n.factorial * 2 * Real.pi * Gamma (n + (a : ℂ) + b) * Gamma (n + (a : ℂ) + c) * Gamma (n
++ (b : ℂ) + c) else 0`. -/
 @[dlmf 18.25.E8]
 theorem continuousDualHahn_orthogonality {a b c : ℝ} (ha : 0 < a) (hb : 0 < b) (hc : 0 < c) (m n : ℕ) :
     ∫ y : ℝ in Set.Ioi 0, continuousDualHahn a b c m ((y : ℂ) ^ 2) * continuousDualHahn a b c n ((y : ℂ) ^ 2) *
@@ -201,6 +224,8 @@ theorem eventually_poch_add_ne_zero (u : ℂ) (k : ℕ) :
   filter_upwards [(tendsto_poch_add_div_pow u k).eventually_ne one_ne_zero] with d hd h
   exact hd (by rw [h, zero_div])
 
+/-- The map `(fun d : ℝ => wilson a b c d n x / poch (a + d) n)` tends to `(𝓝 (continuousDualHahn
+a b c n x))` along `atTop`. -/
 @[dlmf 18.26.E5]
 theorem wilson_limit_continuousDualHahn {a b c : ℂ} (hab : 0 < (a + b).re) (hac : 0 < (a + c).re) (n : ℕ) (x : ℂ) :
     Tendsto (fun d : ℝ => wilson a b c d n x / poch (a + d) n) atTop (𝓝 (continuousDualHahn a b c n x)) := by
@@ -227,6 +252,8 @@ theorem wilson_limit_continuousDualHahn {a b c : ℂ} (hab : 0 < (a + b).re) (ha
   · simp [hk]
   · field_simp
 
+/-- The map `(fun b : ℝ => racah (-(N : ℂ) - 1) b γ δ n x)` tends to `(𝓝 (dualHahn γ δ N n x))`
+along `atTop`. -/
 @[dlmf 18.26.E9]
 theorem racah_limit_dualHahn {γ δ : ℂ} (hγ : -1 < γ.re) {N n : ℕ} (hn : n ≤ N) (x : ℂ) :
     Tendsto (fun b : ℝ => racah (-(N : ℂ) - 1) b γ δ n x) atTop (𝓝 (dualHahn γ δ N n x)) := by
@@ -244,6 +271,8 @@ theorem racah_limit_dualHahn {γ δ : ℂ} (hγ : -1 < γ.re) {N n : ℕ} (hn : 
   · simp [hk]
   · field_simp
 
+/-- The map `(fun d : ℝ => racah α β (-(N : ℂ) - 1) d n (x * (x - N + d)))` tends to `(𝓝 (hahn α β
+N n x))` along `atTop`. -/
 @[dlmf 18.26.E10]
 theorem racah_limit_hahn {α β : ℂ} (hα : -1 < α.re) {N n : ℕ} (hn : n ≤ N) (x : ℂ) :
     Tendsto (fun d : ℝ => racah α β (-(N : ℂ) - 1) d n (x * (x - N + d))) atTop (𝓝 (hahn α β N n x)) := by
@@ -284,6 +313,9 @@ theorem poch_pair_sub (u v : ℂ) (k : ℕ) :
     show v - 1 / 2 + 1 = v + 1 / 2 by ring]
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `wilson a b c d (n + 1) ((y + I /
+2) ^ 2) - wilson a b c d (n + 1) ((y - I / 2) ^ 2) = -2 * I * y * (n + 1) * (n + a + b + c +
+d) * wilson (a + 1 / 2) (b + 1 / 2) (c + 1 / 2) (d + 1 / 2) n (y ^ 2)`. -/
 @[dlmf 18.26.E14]
 theorem wilson_central_difference {a b c d : ℂ}
     (hab : 0 < (a + b).re) (hac : 0 < (a + c).re) (had : 0 < (a + d).re) (n : ℕ) (y : ℂ) :
@@ -333,6 +365,9 @@ theorem wilson_central_difference {a b c d : ℂ}
   field_simp
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `continuousDualHahn a b c (n + 1)
+((y + I / 2) ^ 2) - continuousDualHahn a b c (n + 1) ((y - I / 2) ^ 2) = -2 * I * y * (n + 1)
+* continuousDualHahn (a + 1 / 2) (b + 1 / 2) (c + 1 / 2) n (y ^ 2)`. -/
 @[dlmf 18.26.E15]
 theorem continuousDualHahn_central_difference {a b c : ℂ}
     (hab : 0 < (a + b).re) (hac : 0 < (a + c).re) (n : ℕ) (y : ℂ) :
@@ -441,6 +476,9 @@ theorem wilson_coeff_convolution {a b c d : ℂ}
   simp only [hsign, one_mul]
 
 
+/-- The series with terms `(fun n : ℕ => wilson a b c d n (y ^ 2) / (poch (a + d) n * poch (b + c)
+n * n.factorial) * z ^ n)` converges to `(₂F₁ (a + I * y) (d + I * y) (a + d) z * ₂F₁ (b - I *
+y) (c - I * y) (b + c) z)`. -/
 @[dlmf 18.26.E18]
 theorem wilson_generating_function {a b c d : ℂ}
     (hab : 0 < (a + b).re) (hac : 0 < (a + c).re) (had : 0 < (a + d).re)
@@ -496,6 +534,9 @@ theorem dualHahn_coeff_convolution {a b c : ℂ}
   linear_combination (poch (a + I * y) k * poch (b + I * y) k * poch (c - I * y) (n-k)) * hf
 
 
+/-- The series with terms `(fun n : ℕ => continuousDualHahn a b c n (y ^ 2) / (poch (a + b) n *
+n.factorial) * z ^ n)` converges to `((1 - z) ^ (-c + I * y) * ₂F₁ (a + I * y) (b + I * y) (a
++ b) z)`. -/
 @[dlmf 18.26.E19]
 theorem continuousDualHahn_generating_function {a b c : ℂ}
     (hab : 0 < (a + b).re) (hac : 0 < (a + c).re) (y : ℂ) {z : ℂ} (hz : ‖z‖ < 1) :

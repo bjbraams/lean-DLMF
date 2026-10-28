@@ -68,10 +68,14 @@ lemma b24a_eq_zero_of_real {f : ℂ → ℂ} (F : ℂ[X]) (hF : ∀ z, F.eval z 
     simp [Polynomial.IsRoot, hF, hreal]
   rw [← hF, hF0, Polynomial.eval_zero]
 
+/-- Identity under the stated parameter and domain assumptions: `aeval z ((Polynomial.bernoulli
+n).comp p) = bernoulliPolyB n (aeval z p)`. -/
 lemma b24a_bernoulliPolyB_comp (n : ℕ) (p : ℚ[X]) (z : ℂ) :
     aeval z ((Polynomial.bernoulli n).comp p) = bernoulliPolyB n (aeval z p) := by
   rw [Polynomial.aeval_comp]; rfl
 
+/-- Identity under the stated parameter and domain assumptions: `aeval z ((Polynomial.euler
+n).comp p) = eulerPolyE n (aeval z p)`. -/
 lemma b24a_eulerPolyE_comp (n : ℕ) (p : ℚ[X]) (z : ℂ) :
     aeval z ((Polynomial.euler n).comp p) = eulerPolyE n (aeval z p) := by
   rw [Polynomial.aeval_comp]; rfl
@@ -1054,7 +1058,6 @@ lemma q24a_eulerNumber_two_mul_sum (n : ℕ) :
   push_cast at h1 hn ⊢
   linear_combination h1 + S * h3
 
-
 /-- Splitting `range (2n+2)` when the odd terms beyond the first vanish. -/
 lemma q24a_sum_range_even_split (g : ℕ → ℂ) (n : ℕ) (hg : ∀ j, 1 ≤ j → g (2 * j + 1) = 0) :
     ∑ k ∈ range (2 * n + 2), g k = g 0 + g 1 + ∑ j ∈ range n, g (2 * (j + 1)) := by
@@ -1231,20 +1234,28 @@ theorem eulerNumber_two_mul_eq_one_sub_sum_bernoulli (n : ℕ) :
 /-- Generic umbral functional `yⁱ ↦ F i`. -/
 def b24a_umbral (F : ℕ → ℂ) (P : ℂ[X]) : ℂ := P.sum fun i a => a * F i
 
+/-- Identity under the stated parameter and domain assumptions: `b24a_umbral F (p + q) =
+b24a_umbral F p + b24a_umbral F q`. -/
 lemma b24a_umbral_add (F : ℕ → ℂ) (p q : ℂ[X]) :
     b24a_umbral F (p + q) = b24a_umbral F p + b24a_umbral F q :=
   Polynomial.sum_add_index p q _ (fun i => by simp) (fun i a b => by ring)
 
+/-- Identity under the stated parameter and domain assumptions: `b24a_umbral F
+(Polynomial.monomial n a) = a * F n`. -/
 lemma b24a_umbral_monomial (F : ℕ → ℂ) (n : ℕ) (a : ℂ) :
     b24a_umbral F (Polynomial.monomial n a) = a * F n :=
   Polynomial.sum_monomial_index _ _ (by simp)
 
+/-- Formula under the stated hypotheses: `b24a_umbral F (∑ i ∈ s, p i) = ∑ i ∈ s, b24a_umbral F (p
+i)`. -/
 lemma b24a_umbral_sum (F : ℕ → ℂ) (s : Finset ℕ) (p : ℕ → ℂ[X]) :
     b24a_umbral F (∑ i ∈ s, p i) = ∑ i ∈ s, b24a_umbral F (p i) := by
   induction s using Finset.induction_on with
   | empty => simp [b24a_umbral]
   | insert a s ha ih => rw [sum_insert ha, sum_insert ha, b24a_umbral_add, ih]
 
+/-- Formula under the stated hypotheses: `b24a_umbral F (C a * (X + C h) ^ n) = a * ∑ k ∈ range (n
++ 1), (n.choose k : ℂ) * F k * h ^ (n - k)`. -/
 lemma b24a_umbral_C_mul_X_add_C_pow (F : ℕ → ℂ) (n : ℕ) (a h : ℂ) :
     b24a_umbral F (C a * (X + C h) ^ n) =
       a * ∑ k ∈ range (n + 1), (n.choose k : ℂ) * F k * h ^ (n - k) := by

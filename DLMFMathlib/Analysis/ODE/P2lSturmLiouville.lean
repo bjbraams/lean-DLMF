@@ -60,6 +60,8 @@ def p2lD0 (odd0 : Bool) : ℝ := if odd0 then 0 else 1
 /-- Initial slope at `0` of the basic solution. -/
 def p2lD1 (odd0 : Bool) : ℝ := if odd0 then 1 else 0
 
+/-- Identity under the stated parameter and domain assumptions: `∃ f : ℝ → ℝ, f 0 = p2lD0 odd0 ∧
+deriv f 0 = p2lD1 odd0 ∧ p2lIsSol V h f`. -/
 lemma p2l_exists (hV : Continuous V) (h : ℝ) (odd0 : Bool) :
     ∃ f : ℝ → ℝ, f 0 = p2lD0 odd0 ∧ deriv f 0 = p2lD1 odd0 ∧ p2lIsSol V h f := by
   obtain ⟨f, f', h0, h1, hf⟩ := exists_linear_ode (𝕜 := ℝ) (E := ℝ) (p := fun _ => 0)
@@ -74,18 +76,23 @@ def p2lY (V : ℝ → ℝ) (odd0 : Bool) (h : ℝ) : ℝ → ℝ :=
   open Classical in
   if hV : Continuous V then (p2l_exists hV h odd0).choose else 0
 
+/-- Identity under the stated parameter and domain assumptions: `p2lY V odd0 h 0 = p2lD0 odd0 ∧
+deriv (p2lY V odd0 h) 0 = p2lD1 odd0 ∧ p2lIsSol V h (p2lY V odd0 h)`. -/
 theorem p2lY_spec (hV : Continuous V) (odd0 : Bool) (h : ℝ) :
     p2lY V odd0 h 0 = p2lD0 odd0 ∧ deriv (p2lY V odd0 h) 0 = p2lD1 odd0 ∧
       p2lIsSol V h (p2lY V odd0 h) := by
   rw [p2lY, dite_eq_left hV]
   exact (p2l_exists hV h odd0).choose_spec
 
+/-- At `x`, the function `w` has derivative `(deriv w x)`. -/
 theorem p2lIsSol.hasDerivAt {w : ℝ → ℝ} (hw : p2lIsSol V h w) (x : ℝ) :
     HasDerivAt w (deriv w x) x := (hw.1 x).hasDerivAt
 
+/-- The function `w` is continuous. -/
 theorem p2lIsSol.continuous {w : ℝ → ℝ} (hw : p2lIsSol V h w) : Continuous w :=
   hw.1.continuous
 
+/-- The function `(deriv w)` is continuous. -/
 theorem p2lIsSol.continuous_deriv {w : ℝ → ℝ} (hw : p2lIsSol V h w) : Continuous (deriv w) :=
   continuous_iff_continuousAt.2 fun x => (hw.2 x).continuousAt
 
@@ -100,6 +107,7 @@ theorem p2l_sol_eq (hV : Continuous V) {w₁ w₂ : ℝ → ℝ} (h₁ : p2lIsSo
     (fun t => ⟨h₂.hasDerivAt t, (h₂.2 t).congr_deriv (by simp)⟩) e₀ e₁
   exact this.1
 
+/-- Identity under the stated parameter and domain assumptions: `p2lIsSol V h (fun x => c * w x)`. -/
 theorem p2lIsSol.const_mul {w : ℝ → ℝ} (hw : p2lIsSol V h w) (c : ℝ) :
     p2lIsSol V h (fun x => c * w x) := by
   have hd : deriv (fun x => c * w x) = fun x => c * deriv w x :=
@@ -128,6 +136,7 @@ theorem p2l_eq_mul_p2lY (hV : Continuous V) {odd0 : Bool} {w : ℝ → ℝ} (hw 
   · cases odd0 <;> simp_all [p2lD0]
   · rw [hd]; cases odd0 <;> simp_all [p2lD1]
 
+/-- Nonvanishing under the stated hypotheses: `p2lY V odd0 h ≠ 0`. -/
 theorem p2lY_ne_zero (hV : Continuous V) (odd0 : Bool) (h : ℝ) : p2lY V odd0 h ≠ 0 := by
   intro h0
   obtain ⟨y0, y1, -⟩ := p2lY_spec hV odd0 h
@@ -200,6 +209,9 @@ lemma p2l_spec_lower (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (hL : 0 < L)
 
 /-! ### The complex family and discreteness of the spectrum -/
 
+/-- Identity under the stated parameter and domain assumptions: `∃ F F' : ℝ → ℂ, F 0 = (p2lD0 odd0
+: ℂ) ∧ F' 0 = (p2lD1 odd0 : ℂ) ∧ ∀ t, HasDerivAt F (F' t) t ∧ HasDerivAt F' (((fun _ => (0 :
+ℂ)) t + μ * (fun _ => (0 : ℂ)) t) * F' t + ((V t : ℂ) + μ * (fun _ => (-1 : ℂ)) t) * F t) t`. -/
 lemma p2l_exists_complex (hV : Continuous V) (odd0 : Bool) (μ : ℂ) :
     ∃ F F' : ℝ → ℂ, F 0 = (p2lD0 odd0 : ℂ) ∧ F' 0 = (p2lD1 odd0 : ℂ) ∧ ∀ t,
       HasDerivAt F (F' t) t ∧
@@ -221,6 +233,10 @@ def p2lF' (V : ℝ → ℝ) (odd0 : Bool) (t : ℝ) (μ : ℂ) : ℂ :=
   open Classical in
   if hV : Continuous V then (p2l_exists_complex hV odd0 μ).choose_spec.choose t else 0
 
+/-- Identity under the stated parameter and domain assumptions: `p2lF V odd0 0 μ = (p2lD0 odd0 :
+ℂ) ∧ p2lF' V odd0 0 μ = (p2lD1 odd0 : ℂ) ∧ ∀ t, HasDerivAt (fun t => p2lF V odd0 t μ) (p2lF' V
+odd0 t μ) t ∧ HasDerivAt (fun t => p2lF' V odd0 t μ) (((fun _ => (0 : ℂ)) t + μ * (fun _ => (0
+: ℂ)) t) * p2lF' V odd0 t μ + ((V t : ℂ) + μ * (fun _ => (-1 : ℂ)) t) * p2lF V odd0 t μ) t`. -/
 lemma p2lF_spec (hV : Continuous V) (odd0 : Bool) (μ : ℂ) :
     p2lF V odd0 0 μ = (p2lD0 odd0 : ℂ) ∧ p2lF' V odd0 0 μ = (p2lD1 odd0 : ℂ) ∧ ∀ t,
       HasDerivAt (fun t => p2lF V odd0 t μ) (p2lF' V odd0 t μ) t ∧
@@ -230,6 +246,8 @@ lemma p2lF_spec (hV : Continuous V) (odd0 : Bool) (μ : ℂ) :
   simp only [p2lF, p2lF', dite_eq_left hV]
   exact (p2l_exists_complex hV odd0 μ).choose_spec.choose_spec
 
+/-- Differentiability of the indicated parameterized function: `Differentiable ℂ (p2lF V odd0 t) ∧
+Differentiable ℂ (p2lF' V odd0 t)`. -/
 lemma p2lF_entire (hV : Continuous V) (odd0 : Bool) (t : ℝ) :
     Differentiable ℂ (p2lF V odd0 t) ∧ Differentiable ℂ (p2lF' V odd0 t) :=
   differentiable_param_of_linear_ode continuous_const continuous_const
@@ -254,6 +272,8 @@ lemma p2lF_ofReal (hV : Continuous V) (odd0 : Bool) (h t : ℝ) :
     (by rw [F0, y0]) (by rw [F1, y1])
   exact ⟨congrFun this.1 t, congrFun this.2 t⟩
 
+/-- Continuity of the indicated function: `Continuous (fun h => p2lY V odd0 h t) ∧ Continuous (fun
+h => deriv (p2lY V odd0 h) t)`. -/
 theorem p2lY_continuous_param (hV : Continuous V) (odd0 : Bool) (t : ℝ) :
     Continuous (fun h => p2lY V odd0 h t) ∧ Continuous (fun h => deriv (p2lY V odd0 h) t) := by
   have e : ∀ h, p2lY V odd0 h t = (p2lF V odd0 t h).re ∧
@@ -396,6 +416,7 @@ lemma p2lY_energy (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (odd0 : Bool) (h
       _ ≤ 1 * Real.exp (C * -x) := by gcongr
       _ = _ := one_mul _
 
+/-- Estimate under the stated parameter and domain assumptions: `|a| ≤ 1 + a ^ 2`. -/
 lemma p2l_abs_le_one_add_sq (a : ℝ) : |a| ≤ 1 + a ^ 2 := by
   rcases le_total 0 a with h | h
   · rw [abs_of_nonneg h]; nlinarith [sq_nonneg (a - 1)]
@@ -461,6 +482,8 @@ lemma p2l_continuous_uncurry {f f' : ℝ → ℝ → ℝ} (hc : ∀ x, Continuou
     _ ≤ |f h x - f h x₀| + |f h x₀ - f h₀ x₀| := abs_add_le _ _
     _ < ε := by linarith
 
+/-- Continuity of the indicated function: `Continuous (Function.uncurry (p2lY V odd0)) ∧
+Continuous (Function.uncurry fun h x => deriv (p2lY V odd0 h) x)`. -/
 theorem p2lY_continuous (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (odd0 : Bool) :
     Continuous (Function.uncurry (p2lY V odd0)) ∧
       Continuous (Function.uncurry fun h x => deriv (p2lY V odd0 h) x) := by
@@ -545,6 +568,7 @@ theorem p2l_zeros_finite (hV : Continuous V) {w : ℝ → ℝ} (hw : p2lIsSol V 
     (a b : ℝ) : {x | x ∈ Icc a b ∧ w x = 0}.Finite :=
   sturmDef_finite (fun x _ => hw.hasDerivAt x) fun _ _ h0 h1 => hne (p2l_eq_zero hV hw h0 h1)
 
+/-- Estimate under the stated parameter and domain assumptions: `n ≤ {x | P x}.ncard`. -/
 theorem p2l_le_ncard_of_strictMono {P : ℝ → Prop} {n : ℕ} {z : Fin n → ℝ} (hz : StrictMono z)
     (hP : ∀ j, P (z j)) (hfin : {x | P x}.Finite) : n ≤ {x | P x}.ncard := by
   have := Set.ncard_le_ncard (s := range z) (t := {x | P x}) (by
@@ -643,11 +667,14 @@ section Enum
 
 variable {S : Set ℝ}
 
+/-- Estimate under the stated parameter and domain assumptions: `(S ∩ Iio s).ncard < (S ∩ Iio
+t).ncard`. -/
 lemma p2l_ncard_lt (hfin : ∀ c, (S ∩ Iio c).Finite) {s t : ℝ} (hs : s ∈ S) (hst : s < t) :
     (S ∩ Iio s).ncard < (S ∩ Iio t).ncard :=
   Set.ncard_lt_ncard ⟨fun _ hx => ⟨hx.1, hx.2.trans hst⟩,
     fun h => (lt_irrefl s) (h ⟨hs, hst⟩).2⟩ (hfin t)
 
+/-- Identity under the stated parameter and domain assumptions: `s = t`. -/
 lemma p2l_eq_of_ncard_eq (hfin : ∀ c, (S ∩ Iio c).Finite) {s t : ℝ} (hs : s ∈ S) (ht : t ∈ S)
     (he : (S ∩ Iio s).ncard = (S ∩ Iio t).ncard) : s = t := by
   rcases lt_trichotomy s t with h | h | h
@@ -655,6 +682,8 @@ lemma p2l_eq_of_ncard_eq (hfin : ∀ c, (S ∩ Iio c).Finite) {s t : ℝ} (hs : 
   · exact h
   · exact absurd he (p2l_ncard_lt hfin ht h).ne'
 
+/-- Every natural index occurs as the number of spectral values strictly below some value in the
+discrete ordered spectrum. -/
 lemma p2l_exists_ncard (hinf : ¬BddAbove S) (hfin : ∀ c, (S ∩ Iio c).Finite) (j : ℕ) :
     ∃ s ∈ S, (S ∩ Iio s).ncard = j := by
   -- the least element of `S ∩ Ioi c ∩ Iic t`

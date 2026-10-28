@@ -21,7 +21,8 @@ open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat Interval
 namespace DLMF.Confluent
 
-/-- genExpIntE exact remainder. -/
+/-- Formula under the stated hypotheses: `genExpIntE p z=exp (-z)/z*(∑ k ∈ Finset.range N, (-1 :
+ℂ)^k*poch p k/z^k)+(-1 : ℂ)^N*poch p N/z^N*genExpIntE (N+p) z`. -/
 @[dlmf 8.20.E1]
 theorem genExpIntE_exact_remainder (p : ℂ) {z : ℂ} (hz : z ≠ 0) (N : ℕ) :
     genExpIntE p z=exp (-z)/z*(∑ k ∈ Finset.range N, (-1 : ℂ)^k*poch p k/z^k)+(-1 : ℂ)^N*poch p N/z^N*genExpIntE (N+p) z := by
@@ -239,7 +240,6 @@ theorem genExpIntEOnLog_eq_integral_rotate (p : ℂ) {θ : ℝ} (hθ : |θ| < π
   exact (hL.differentiableOn.analyticOnNhd hUo).eqOn_of_preconnected_of_eventuallyEq
     (hR.analyticOnNhd hUo) hUc.isPreconnected hw₀U hev hw
 
-
 /-- The strip filter `re w → ∞` with `|im w + θ| ≤ π/2 - δ`. -/
 noncomputable def logStripAtTop (θ δ : ℝ) : Filter ℂ :=
   comap (fun w : ℂ => Real.exp w.re) atTop ⊓ 𝓟 {w : ℂ | |w.im + θ| ≤ π / 2 - δ}
@@ -334,7 +334,6 @@ theorem genExpIntEOnLog_strip_asymptotic (p : ℂ) {θ δ : ℝ} (hθ : |θ| < �
     simp only [smul_eq_mul, hG, ring_choose_neg_eq_poch, mul_neg, Complex.exp_neg]
     field_simp
 
-
 /-- Three strips `|im w + θ| ≤ π/2 - d/4`, `θ ∈ {π - d/2, 0, -(π - d/2)}`, cover the closed
 logarithmic sector `|im w| ≤ 3π/2 - δ`, where `d = min δ 1`. -/
 theorem logSector_le_sup_logStripAtTop {δ : ℝ} (hδ : 0 < δ) :
@@ -371,8 +370,9 @@ theorem logSector_le_sup_logStripAtTop {δ : ℝ} (hδ : 0 < δ) :
         rw [← sup_principal, ← sup_principal, inf_sup_left, inf_sup_left]
         rfl
 
-
-/-- genExpIntE log sector asymptotic. -/
+/-- Identity under the stated parameter and domain assumptions: `HasAsymptoticExpansion (logSector
+(3*π/2-δ)) (fun k w => exp (-exp w-(k+1 : ℂ)*w)) (fun k => (-1 : ℂ)^k*poch p k)
+(genExpIntEOnLog p)`. -/
 @[dlmf 8.20.E2]
 theorem genExpIntE_log_sector_asymptotic (p : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 3*π/2) :
     HasAsymptoticExpansion (logSector (3*π/2-δ)) (fun k w => exp (-exp w-(k+1 : ℂ)*w)) (fun k => (-1 : ℂ)^k*poch p k) (genExpIntEOnLog p) := by
@@ -445,7 +445,10 @@ theorem genExpIntEOnLog_sub_connection (p w : ℂ) {m : ℤ} (hm : m = 1 ∨ m =
       rw [Complex.exp_add, hsign, hG, h, hper]
       ring
 
-/-- genExpIntE extended sector asymptotic. -/
+/-- Estimate under the stated parameter and domain assumptions: `HasAsymptoticExpansion (comap
+(fun w : ℂ => Real.exp w.re) atTop ⊓ 𝓟 {w : ℂ | π/2+δ ≤ ε*w.im ∧ ε*w.im ≤ 7*π/2-δ}) (fun k w
+=> exp (-exp w-(k+1 : ℂ)*w)) (fun k => (-1 : ℂ)^k*poch p k) (fun w => genExpIntEOnLog p
+w-ε*2*π*I/Gamma p*exp (-ε*p*π*I+(p-1)*w))`. -/
 @[dlmf 8.20.E3]
 theorem genExpIntE_extended_sector_asymptotic (p : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 3*π/2) :
     HasAsymptoticExpansion (comap (fun w : ℂ => Real.exp w.re) atTop ⊓ 𝓟 {w : ℂ | π/2+δ ≤ ε*w.im ∧ ε*w.im ≤ 7*π/2-δ}) (fun k w => exp (-exp w-(k+1 : ℂ)*w)) (fun k => (-1 : ℂ)^k*poch p k) (fun w => genExpIntEOnLog p w-ε*2*π*I/Gamma p*exp (-ε*p*π*I+(p-1)*w)) := by
@@ -497,7 +500,9 @@ def expIntLargeOrderPolynomial : ℕ → Polynomial ℂ
   | k+1 => (1-Polynomial.C (2*(k : ℂ))*Polynomial.X)*expIntLargeOrderPolynomial k+
       Polynomial.X*(Polynomial.X+1)*(expIntLargeOrderPolynomial k).derivative
 
-/-- expIntLargeOrderPolynomial initial. -/
+/-- Identity under the stated parameter and domain assumptions: `expIntLargeOrderPolynomial 1=1 ∧
+expIntLargeOrderPolynomial 2=1-2*Polynomial.X ∧ expIntLargeOrderPolynomial
+3=1-8*Polynomial.X+6*Polynomial.X^2`. -/
 @[dlmf 8.20.E5]
 theorem expIntLargeOrderPolynomial_initial  :
     expIntLargeOrderPolynomial 1=1 ∧ expIntLargeOrderPolynomial 2=1-2*Polynomial.X ∧ expIntLargeOrderPolynomial 3=1-8*Polynomial.X+6*Polynomial.X^2 := by
@@ -561,7 +566,10 @@ theorem expIntLargeOrderPolynomial_degree {k : ℕ} (hk : 1 ≤ k) :
   rw [hc]
   exact mul_ne_zero (pow_ne_zero _ (by norm_num)) (Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _))
 
-/-- genExpIntE large order uniform. -/
+/-- Estimate under the stated parameter and domain assumptions: `IsBigO (comap Prod.fst atTop ⊓ 𝓟
+{p : ℝ × ℝ | 1 < p.1 ∧ 0 ≤ p.2}) (fun p => exp (p.1*p.2 : ℂ)*(p.2+1)*p.1*genExpIntEExtended
+p.1 (p.2*p.1)-∑ k ∈ Finset.range N, (expIntLargeOrderPolynomial k).eval (p.2 : ℂ)/(((p.2+1 :
+ℂ)^(2*k))*(p.1 : ℂ)^k)) (fun p => p.1^(-(N : ℤ)))`. -/
 @[dlmf 8.20.E6]
 theorem genExpIntE_large_order_uniform (N : ℕ) :
     IsBigO (comap Prod.fst atTop ⊓ 𝓟 {p : ℝ × ℝ | 1 < p.1 ∧ 0 ≤ p.2}) (fun p => exp (p.1*p.2 : ℂ)*(p.2+1)*p.1*genExpIntEExtended p.1 (p.2*p.1)-∑ k ∈ Finset.range N, (expIntLargeOrderPolynomial k).eval (p.2 : ℂ)/(((p.2+1 : ℂ)^(2*k))*(p.1 : ℂ)^k)) (fun p => p.1^(-(N : ℤ))) := by

@@ -59,6 +59,8 @@ namespace DLMF.AlgebraicAnalytic
 
 /-! ## §1.9(i) Complex numbers -/
 
+/-- Identity under the stated parameter and domain assumptions: `arg z = Real.arctan (z.im /
+z.re)`. -/
 private lemma g1c_arg_of_re_pos {z : ℂ} (hz : 0 < z.re) :
     arg z = Real.arctan (z.im / z.re) := by
   have h := abs_lt.mp (abs_arg_lt_pi_div_two_iff.mpr (Or.inl hz))
@@ -407,6 +409,8 @@ theorem hasDerivAt_mobius (a b c d : ℂ) {z : ℂ} (hz : c * z + d ≠ 0) :
     (a * d - b * c) / (c * z + d) ^ 2 by ring] at h
   exact h
 
+/-- Identity under the stated parameter and domain assumptions: `Function.update (fun z => mobius
+a b c d z⁻¹) 0 (a / c) = fun z => (a + b * z) / (c + d * z)`. -/
 private lemma g1c_mobius_inv_eq (a b c d : ℂ) :
     Function.update (fun z => mobius a b c d z⁻¹) 0 (a / c) =
       fun z => (a + b * z) / (c + d * z) := by

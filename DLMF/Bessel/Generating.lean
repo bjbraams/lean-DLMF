@@ -26,6 +26,8 @@ open scoped Nat
 theorem besselJ_neg_int (n : ℤ) (z : ℂ) : besselJ (-n) z = (-1) ^ n * besselJ n z :=
   Complex.besselJ_neg_int n z
 
+/-- Reindex the integer diagonal `p.1 - p.2 = n` of the Bessel Cauchy product by a single natural
+index. -/
 private def besselDiagonalEquiv (n : ℤ) :
     ℕ ≃ {p : ℕ × ℕ // (p.1 : ℤ) - p.2 = n} where
   toFun k := ⟨(k + n.toNat, k + (-n).toNat), by omega⟩

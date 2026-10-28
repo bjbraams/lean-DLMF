@@ -223,6 +223,8 @@ theorem whittakerW_eq_kummerU {κ μ z : ℂ} (hz : z ∈ slitPlane) :
       exp (-z / 2) * z ^ (1 / 2 + μ) * kummerU (1 / 2 + μ - κ) (1 + 2 * μ) z := by
   rfl
 
+/-- Identity under the stated parameter and domain assumptions: `kummerM a b z = exp (z / 2) * z ^
+(-b / 2) * whittakerM (b / 2 - a) (b / 2 - 1 / 2) z`. -/
 @[dlmf 13.14.E4]
 theorem kummerM_eq_whittakerM {a b z : ℂ} (hz : z ∈ slitPlane)
     (hb : ∀ k : ℕ, b ≠ -k) :
@@ -249,6 +251,8 @@ theorem kummerM_eq_whittakerM {a b z : ℂ} (hz : z ∈ slitPlane)
     _ = exp (z / 2) * z ^ (-b / 2) *
           (exp (-z / 2) * z ^ (b / 2) * kummerM a b z) := by ring
 
+/-- Identity under the stated parameter and domain assumptions: `kummerU a b z = exp (z / 2) * z ^
+(-b / 2) * whittakerW (b / 2 - a) (b / 2 - 1 / 2) z`. -/
 @[dlmf 13.14.E5]
 theorem kummerU_eq_whittakerW {a b z : ℂ} (hz : z ∈ slitPlane) :
     kummerU a b z =
@@ -411,6 +415,8 @@ theorem whittakerW_continuation {κ μ z : ℂ} (m : ℤ) (hz : z ∈ slitPlane)
     exp (-2 * m * μ * π * I) by linear_combination ht]
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `Asymptotics.IsBigO (𝓝[≠] (0 : ℂ))
+(fun z => whittakerM κ μ z - z ^ (μ + 1 / 2)) (fun z => z ^ (μ + 3 / 2))`. -/
 @[dlmf 13.14.E14]
 theorem isBigO_whittakerM_at_zero {κ μ : ℂ} (hμ : ∀ k : ℕ, 2 * μ ≠ -k - 1) :
     Asymptotics.IsBigO (𝓝[≠] (0 : ℂ))
@@ -469,6 +475,8 @@ theorem differentiableAt_kummerU (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     DifferentiableAt ℂ (kummerU a b) z :=
   (differentiableOn_kummerU a b).differentiableAt (isOpen_slitPlane.mem_nhds hz)
 
+/-- Identity under the stated parameter and domain assumptions: `wronskian (whittakerM κ μ)
+(whittakerM κ (-μ)) z = -2 * μ`. -/
 @[dlmf 13.14.E25]
 theorem wronskian_whittakerM {κ μ z : ℂ} (hz : z ∈ slitPlane)
     (hμ : ∀ k : ℕ, 1 + 2 * μ ≠ -k) (hμ' : ∀ k : ℕ, 1 - 2 * μ ≠ -k) :
@@ -508,6 +516,8 @@ theorem wronskian_whittakerM {κ μ z : ℂ} (hz : z ∈ slitPlane)
   simp only [b] at hp ⊢
   linear_combination (-2 * μ) * (exp (-z) * exp z) * hp + (-2 * μ) * he
 
+/-- Identity under the stated parameter and domain assumptions: `wronskian (whittakerM κ μ)
+(whittakerW κ μ) z = -Gamma (1 + 2 * μ) / Gamma (1 / 2 + μ - κ)`. -/
 @[dlmf 13.14.E26]
 theorem wronskian_whittakerM_W {κ μ z : ℂ} (hz : z ∈ slitPlane)
     (hμ : ∀ k : ℕ, 1 + 2 * μ ≠ -k) :
@@ -542,6 +552,8 @@ theorem wronskian_whittakerM_W {κ μ z : ℂ} (hz : z ∈ slitPlane)
   linear_combination (-Gamma (1 + 2 * μ) / Gamma (1 / 2 + μ - κ)) * (exp (-z) * exp z) * hp +
     (-Gamma (1 + 2 * μ) / Gamma (1 / 2 + μ - κ)) * he
 
+/-- Identity under the stated parameter and domain assumptions: `wronskian (whittakerM κ (-μ))
+(whittakerW κ μ) z = -Gamma (1 - 2 * μ) / Gamma (1 / 2 - μ - κ)`. -/
 @[dlmf 13.14.E28]
 theorem wronskian_whittakerM_neg_W {κ μ z : ℂ} (hz : z ∈ slitPlane)
     (hμ : ∀ k : ℕ, 1 - 2 * μ ≠ -k) :

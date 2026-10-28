@@ -33,6 +33,9 @@ noncomputable section
 
 namespace DLMF.Hypergeometric
 
+/-- Identity under the stated parameter and domain assumptions: `regularizedGaussHGFun a b c z =
+(1 / (Gamma b * Gamma (c - b))) * ∫ t : ℝ in Set.Ioi 0, (t : ℂ) ^ (b - 1) * (t + 1 : ℂ) ^ (a -
+c) / ((t : ℂ) - z * t + 1) ^ a`. -/
 @[dlmf 15.6.E2_5]
 theorem integral_Ioi {a b c z : ℂ} (hb : 0 < b.re) (hcb : 0 < (c - b).re) (hz : ‖z‖ < 1) :
     regularizedGaussHGFun a b c z =
@@ -140,6 +143,10 @@ theorem hypSV_real_Gamma_add_nat {x : ℝ} (hx : 0 < x) (n : ℕ) :
 
 open MeasureTheory in
 open scoped Nat in
+/-- Identity under the stated parameter and domain assumptions: `regularizedGaussHGFun a b c z =
+(1 / (2 * Real.pi * Gamma a * Gamma b * Gamma (c - a) * Gamma (c - b))) * ∫ y : ℝ, Gamma (a +
+σ + I * y) * Gamma (b + σ + I * y) * Gamma (c - a - b - σ - I * y)* Gamma (-((σ : ℂ) + I * y))
+* (1 - z) ^ ((σ : ℂ) + I * y)`. -/
 @[dlmf 15.6.E7]
 theorem barnes_integral_one_sub {a b c z : ℂ} {σ : ℝ} (hz : ‖z‖ < 1)
     (ha : 0 < a.re + σ) (hb : 0 < b.re + σ) (hσ : σ < 0)
@@ -292,6 +299,9 @@ theorem summable_norm_regularizedGaussHGFun_term (a b c : ℂ) {z : ℂ} (hz : �
   congr 1
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `regularizedGaussHGFun a b c z =
+(1 / Gamma (c - d)) * ∫ t : ℝ in (0 : ℝ)..1, regularizedGaussHGFun a b d (z * t) * (t : ℂ) ^
+(d - 1) * (1 - (t : ℂ)) ^ (c - d - 1)`. -/
 @[dlmf 15.6.E8]
 theorem fractional_integral {a b c d z : ℂ} (hd : 0 < d.re) (hcd : 0 < (c - d).re) (hz : ‖z‖ < 1) :
     regularizedGaussHGFun a b c z =
@@ -726,6 +736,10 @@ theorem hypSV_product_inner_term {α c d K : ℂ} {x : ℝ} (m n : ℕ) (hd : 0 
         (1 - (x : ℂ) * t) ^ (-(α + n))) = J
   field_simp
 
+/-- Identity under the stated parameter and domain assumptions: `regularizedGaussHGFun a b c (x :
+ℂ) = ∫ t : ℝ in (0 : ℝ)..1, (t : ℂ) ^ (d - 1) * (1 - (t : ℂ)) ^ (c - d - 1) / (1 - (x : ℂ) *
+t) ^ (a + b - l) * regularizedGaussHGFun (l - a) (l - b) d ((x : ℂ) * t) *
+regularizedGaussHGFun (a + b - l) (l - d) (c - d) ((1 - (t : ℂ)) * x / (1 - (x : ℂ) * t))`. -/
 @[dlmf 15.6.E9]
 theorem product_integral {a b c d : ℂ} (l : ℂ) {x : ℝ}
     (hd : 0 < d.re) (hcd : 0 < (c - d).re) (hx0 : 0 ≤ x) (hx1 : x < 1) :

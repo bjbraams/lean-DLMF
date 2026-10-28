@@ -44,6 +44,11 @@ theorem half_not_int : ∀ k : ℤ, (1 / 2 : ℂ) ≠ (k : ℂ) := by
   have : (1 : ℤ) = 2 * k := by exact_mod_cast h2
   omega
 
+/-- Identity under the stated parameter and domain assumptions: `₂F₁ a b (a - b + 1) z = (1 - z) ^
+(-a) * Gamma (a - b + 1) * Gamma (1 / 2) / (Gamma ((a + 1) / 2) * Gamma (a / 2 - b + 1)) * ₂F₁
+(a / 2) (a / 2 - b + 1 / 2) (1 / 2) (((z + 1) / (z - 1)) ^ 2) + (1 + z) * (1 - z) ^ (-a - 1) *
+Gamma (a - b + 1) * Gamma (-1 / 2) / (Gamma (a / 2) * Gamma (a / 2 - b + 1 / 2)) * ₂F₁ ((a +
+1) / 2) (a / 2 - b + 1) (3 / 2) (((z + 1) / (z - 1)) ^ 2)`. -/
 @[dlmf 15.8.E24]
 theorem quadratic_connection_well_poised
     {a b z : ℂ}
@@ -194,6 +199,11 @@ theorem quadratic_connection_well_poised
     exact hloc z hz
   exact hLan.eqOn_of_preconnected_of_eventuallyEq hRan hDc.isPreconnected h0 hev ⟨hz, hw⟩
 
+/-- Identity under the stated parameter and domain assumptions: `₂F₁ a b ((a + b + 1) / 2) z =
+Gamma ((a + b + 1) / 2) * Gamma (1 / 2) / (Gamma ((a + 1) / 2) * Gamma ((b + 1) / 2)) * ₂F₁ (a
+/ 2) (b / 2) (1 / 2) ((1 - 2 * z) ^ 2) + (1 - 2 * z) * Gamma ((a + b + 1) / 2) * Gamma (-1 /
+2) / (Gamma (a / 2) * Gamma (b / 2)) * ₂F₁ ((a + 1) / 2) ((b + 1) / 2) (3 / 2) ((1 - 2 * z) ^
+2)`. -/
 @[dlmf 15.8.E25]
 theorem quadratic_connection_half_sum
     {a b z : ℂ}
@@ -301,6 +311,11 @@ theorem quadratic_connection_half_sum
     exact hloc z hz
   exact hLan.eqOn_of_preconnected_of_eventuallyEq hRan hDc.isPreconnected h14 hev ⟨hz, hw⟩
 
+/-- Identity under the stated parameter and domain assumptions: `₂F₁ a (1 - a) c z = (1 - z) ^ (c
+- 1) * Gamma c * Gamma (1 / 2) / (Gamma ((c - a + 1) / 2) * Gamma ((c + a) / 2)) * ₂F₁ ((c -
+a) / 2) ((c + a - 1) / 2) (1 / 2) ((1 - 2 * z) ^ 2) + (1 - 2 * z) * (1 - z) ^ (c - 1) * Gamma
+c * Gamma (-1 / 2) / (Gamma ((c - a) / 2) * Gamma ((c + a - 1) / 2)) * ₂F₁ ((c - a + 1) / 2)
+((c + a) / 2) (3 / 2) ((1 - 2 * z) ^ 2)`. -/
 @[dlmf 15.8.E26]
 theorem quadratic_connection_complementary
     {a c z : ℂ}
@@ -390,6 +405,10 @@ theorem regularized_quadratic_connection_complementary (a c : ℂ) {z : ℂ}
     have hGt := Gamma_ne_zero hthree
     field_simp [hGc, hGh, hGt]
 
+/-- Identity under the stated parameter and domain assumptions: `2 * Gamma (1 / 2) * Gamma (a + b
++ 1 / 2) / (Gamma (a + 1 / 2) * Gamma (b + 1 / 2)) * ₂F₁ a b (1 / 2) (x : ℂ) = ₂F₁ (2 * a) (2
+* b) (a + b + 1 / 2) ((1 - Real.sqrt x) / 2 : ℂ) + ₂F₁ (2 * a) (2 * b) (a + b + 1 / 2) ((1 +
+Real.sqrt x) / 2 : ℂ)`. -/
 @[dlmf 15.8.E27]
 theorem quadratic_even_connection
     {a b : ℂ}
@@ -432,6 +451,10 @@ theorem quadratic_even_connection
   rw [h1, h2]
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `2 * (Real.sqrt x : ℂ) * Gamma (-1
+/ 2) * Gamma (a + b - 1 / 2) / (Gamma (a - 1 / 2) * Gamma (b - 1 / 2)) * ₂F₁ a b (3 / 2) (x :
+ℂ) = ₂F₁ (2 * a - 1) (2 * b - 1) (a + b - 1 / 2) ((1 - Real.sqrt x) / 2 : ℂ) - ₂F₁ (2 * a - 1)
+(2 * b - 1) (a + b - 1 / 2) ((1 + Real.sqrt x) / 2 : ℂ)`. -/
 @[dlmf 15.8.E28]
 theorem quadratic_odd_connection
     {a b : ℂ}
@@ -643,6 +666,11 @@ theorem hasDerivAt_sin_mul_regularizedGaussHGFun_c {a b z : ℂ} (hz : ‖z‖ <
     add_zero, mul_one, mul_div_cancel_right₀ _ hπ] at hL
   exact hL
 
+/-- Formula under the stated hypotheses: `regularizedGaussHGFun a b (a + b + m) z = (1 / (Gamma (a
++ m) * Gamma (b + m))) * (∑ k ∈ Finset.range m, poch a k * poch b k * ((m - k - 1).factorial :
+ℂ)/ (k.factorial : ℂ) * (z - 1) ^ k) - (z - 1) ^ m / (Gamma a * Gamma b) * ∑' k : ℕ, poch (a +
+m) k * poch (b + m) k / ((k.factorial : ℂ) * ((k + m).factorial : ℂ)) * (1 - z) ^ k * (log (1
+- z) - digamma (k + 1) - digamma (k + m + 1)+ digamma (a + k + m) + digamma (b + k + m))`. -/
 @[dlmf 15.8.E10]
 theorem logarithmic_connection_one_sub {a b z : ℂ} (m : ℕ)
     (ha : ∀ k : ℕ, a ≠ -(k : ℂ)) (hb : ∀ k : ℕ, b ≠ -(k : ℂ))
@@ -891,6 +919,12 @@ theorem logarithmic_connection_one_sub {a b z : ℂ} (m : ℕ)
     ((Gamma (b + m))⁻¹ * (Gamma (a + m))⁻¹) * hFin + ((Gamma a * Gamma b)⁻¹ * SE) * hzw +
     (-regularizedGaussHGFun a b c₀ z) * hσ
 
+/-- Formula under the stated hypotheses: `regularizedGaussHGFun a (a + m) c z = (1 - z) ^ (-a) /
+(Gamma (a + m) * Gamma (c - a)) * (∑ k ∈ Finset.range m, poch a k * poch (c - a - m) k * ((m -
+k - 1).factorial : ℂ)/ (k.factorial : ℂ) * ((z - 1)⁻¹) ^ k) + (-1 : ℂ) ^ m * (1 - z) ^ (-a -
+m) / (Gamma a * Gamma (c - a - m)) * ∑' k : ℕ, poch (a + m) k * poch (c - a) k / ((k.factorial
+: ℂ) * ((k + m).factorial : ℂ)) * ((1 - z)⁻¹) ^ k * (log (1 - z) + digamma (k + 1) + digamma
+(k + m + 1) - digamma (a + k + m) - digamma (c - a + k))`. -/
 @[dlmf 15.8.E9]
 theorem logarithmic_connection_one_div_one_sub {a c z : ℂ} (m : ℕ)
     (ha : ∀ k : ℤ, a ≠ (k : ℂ)) (hca : ∀ k : ℤ, c - a ≠ (k : ℂ))
@@ -1056,6 +1090,12 @@ theorem digamma_one_sub_add_nat {x : ℂ} (hx : ∀ k : ℤ, x ≠ (k : ℂ)) (n
     rw [e1]
     linear_combination ih + e2 + e3
 
+/-- Formula under the stated hypotheses: `regularizedGaussHGFun a b (a + b + m) z = z ^ (-a) /
+Gamma (a + m) * (∑ k ∈ Finset.range m, poch a k * ((m - k - 1).factorial : ℂ)/ ((k.factorial :
+ℂ) * Gamma (b + m - k)) * (1 - 1 / z) ^ k) - z ^ (-a) / Gamma a * ∑' k : ℕ, poch (a + m) k /
+((k.factorial : ℂ) * ((k + m).factorial : ℂ) * Gamma (b - k)) * (-1 : ℂ) ^ k * (1 - 1 / z) ^
+(k + m) * (log ((1 - z) / z) - digamma (k + 1) - digamma (k + m + 1)+ digamma (a + k + m) +
+digamma (b - k))`. -/
 @[dlmf 15.8.E11]
 theorem logarithmic_connection_one_sub_recip {a b z : ℂ} (m : ℕ)
     (ha : ∀ k : ℕ, a ≠ -(k : ℂ)) (hb : ∀ k : ℤ, b ≠ (k : ℂ))

@@ -37,10 +37,13 @@ section LargeOrder
 /-- The ratio `Γ(ν+1)/Γ(ν+1+n) = 1/(ν+1)_n`. -/
 def gammaShiftRatio (ν : ℝ) (n : ℕ) : ℝ := Real.Gamma (ν + 1) / Real.Gamma (ν + 1 + n)
 
+/-- Identity under the stated parameter and domain assumptions: `gammaShiftRatio ν 0 = 1`. -/
 theorem gammaShiftRatio_zero (ν : ℝ) (hν : -1 < ν) : gammaShiftRatio ν 0 = 1 := by
   have h : Real.Gamma (ν + 1) ≠ 0 := (Real.Gamma_pos_of_pos (by linarith)).ne'
   simp [gammaShiftRatio, h]
 
+/-- Identity under the stated parameter and domain assumptions: `gammaShiftRatio ν (n + 1) =
+gammaShiftRatio ν n / (ν + 1 + n)`. -/
 theorem gammaShiftRatio_succ {ν : ℝ} (hν : -1 < ν) (n : ℕ) :
     gammaShiftRatio ν (n + 1) = gammaShiftRatio ν n / (ν + 1 + n) := by
   have h1 : 0 < ν + 1 := by linarith
@@ -51,10 +54,12 @@ theorem gammaShiftRatio_succ {ν : ℝ} (hν : -1 < ν) (n : ℕ) :
     Real.Gamma_add_one h.ne']
   field_simp
 
+/-- Estimate under the stated parameter and domain assumptions: `0 ≤ gammaShiftRatio ν n`. -/
 theorem gammaShiftRatio_nonneg {ν : ℝ} (hν : -1 < ν) (n : ℕ) : 0 ≤ gammaShiftRatio ν n := by
   have h1 : 0 < ν + 1 := by linarith
   exact div_nonneg (Real.Gamma_pos_of_pos h1).le (Real.Gamma_pos_of_pos (by positivity)).le
 
+/-- Estimate under the stated parameter and domain assumptions: `gammaShiftRatio ν n ≤ 1`. -/
 theorem gammaShiftRatio_le_one {ν : ℝ} (hν : 0 ≤ ν) (n : ℕ) : gammaShiftRatio ν n ≤ 1 := by
   induction n with
   | zero => rw [gammaShiftRatio_zero ν (by linarith)]
@@ -63,6 +68,7 @@ theorem gammaShiftRatio_le_one {ν : ℝ} (hν : 0 ≤ ν) (n : ℕ) : gammaShif
     have h1 : 1 ≤ ν + 1 + n := by have := (Nat.cast_nonneg n : (0 : ℝ) ≤ n); linarith
     exact (div_le_self (gammaShiftRatio_nonneg (by linarith) n) h1).trans ih
 
+/-- Estimate under the stated parameter and domain assumptions: `gammaShiftRatio ν n * ν ^ n ≤ 1`. -/
 theorem gammaShiftRatio_mul_pow_le_one {ν : ℝ} (hν : 0 < ν) (n : ℕ) :
     gammaShiftRatio ν n * ν ^ n ≤ 1 := by
   induction n with
@@ -78,6 +84,7 @@ theorem gammaShiftRatio_mul_pow_le_one {ν : ℝ} (hν : 0 < ν) (n : ℕ) :
     calc _ ≤ 1 * 1 := mul_le_mul ih h2 (div_nonneg hν.le h1.le) zero_le_one
       _ = 1 := one_mul 1
 
+/-- The map `(fun ν : ℝ => ν / (ν + c))` tends to `(𝓝 1)` along `atTop`. -/
 theorem tendsto_div_add_const (c : ℝ) :
     Tendsto (fun ν : ℝ => ν / (ν + c)) atTop (𝓝 1) := by
   have h : Tendsto (fun ν : ℝ => (1 + c * ν⁻¹)⁻¹) atTop (𝓝 ((1 + c * 0)⁻¹)) :=
@@ -87,6 +94,7 @@ theorem tendsto_div_add_const (c : ℝ) :
   filter_upwards [eventually_gt_atTop (0 : ℝ)] with ν hν
   field_simp
 
+/-- The map `(fun ν : ℝ => gammaShiftRatio ν n * ν ^ n)` tends to `(𝓝 1)` along `atTop`. -/
 theorem tendsto_gammaShiftRatio_mul_pow (n : ℕ) :
     Tendsto (fun ν : ℝ => gammaShiftRatio ν n * ν ^ n) atTop (𝓝 1) := by
   induction n with
@@ -103,6 +111,7 @@ theorem tendsto_gammaShiftRatio_mul_pow (n : ℕ) :
     rw [gammaShiftRatio_succ (by linarith), pow_succ, ← add_assoc]
     field_simp
 
+/-- The map `(fun ν : ℝ => gammaShiftRatio ν (n + 1))` tends to `(𝓝 0)` along `atTop`. -/
 theorem tendsto_gammaShiftRatio_succ (n : ℕ) :
     Tendsto (fun ν : ℝ => gammaShiftRatio ν (n + 1)) atTop (𝓝 0) := by
   have hb : Tendsto (fun ν : ℝ => 1 / (ν + 1 + n)) atTop (𝓝 0) :=
@@ -230,6 +239,8 @@ theorem tendsto_Gamma_mul_besselI_sqrt_mul {x : ℂ} (hx : x ≠ 0) :
     ring
   rw [besselI, hsq, mul_div_assoc, mul_div_cancel_left₀ _ hp]
 
+/-- Estimate under the stated parameter and domain assumptions: `‖Complex.Gamma ((ν : ℂ) + 1) *
+regularizedHGFun (∅ : Multiset ℂ) {(ν : ℂ) + 1} v‖ ≤ Real.exp ‖v‖`. -/
 theorem norm_Gamma_mul_regularized0F1_le {ν : ℝ} (hν : 0 ≤ ν) (v : ℂ) :
     ‖Complex.Gamma ((ν : ℂ) + 1) * regularizedHGFun (∅ : Multiset ℂ) {(ν : ℂ) + 1} v‖ ≤
       Real.exp ‖v‖ := by
@@ -272,6 +283,8 @@ theorem Gamma_add_one_eq_stirling {ν : ℝ} (hν : 0 < ν) :
   congr 1
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `(w * a) ^ s = w ^ s * (a : ℂ) ^
+s`. -/
 theorem mul_ofReal_cpow {w : ℂ} (hw : w ≠ 0) {a : ℝ} (ha : 0 < a) (s : ℂ) :
     (w * a) ^ s = w ^ s * (a : ℂ) ^ s := by
   have ha' : (a : ℂ) ≠ 0 := by exact_mod_cast ha.ne'
@@ -288,6 +301,7 @@ def besselLargeOrderCorr (z : ℂ) (ν : ℝ) : ℂ :=
   cexp (-(DLMF.Gamma.binetIntegral ν : ℂ)) * (Complex.Gamma ((ν : ℂ) + 1) *
     regularizedHGFun (∅ : Multiset ℂ) {(ν : ℂ) + 1} (-(z ^ 2 / 4)))
 
+/-- The map `(besselLargeOrderCorr z)` tends to `(𝓝 1)` along `atTop`. -/
 theorem tendsto_besselLargeOrderCorr (z : ℂ) :
     Tendsto (besselLargeOrderCorr z) atTop (𝓝 1) := by
   have hβ0 : Tendsto (fun ν : ℝ => DLMF.Gamma.binetIntegral ν) atTop (𝓝 0) := by
@@ -306,6 +320,8 @@ theorem tendsto_besselLargeOrderCorr (z : ℂ) :
   rw [one_mul] at h
   exact h
 
+/-- Identity under the stated parameter and domain assumptions: `besselJ ν z =
+besselLargeOrderMain z ν * besselLargeOrderCorr z ν`. -/
 theorem besselJ_eq_main_mul_corr {z : ℂ} (hz : z ≠ 0) {ν : ℝ} (hν : 0 < ν) :
     besselJ ν z = besselLargeOrderMain z ν * besselLargeOrderCorr z ν := by
   have hz2 : z / 2 ≠ 0 := div_ne_zero hz two_ne_zero

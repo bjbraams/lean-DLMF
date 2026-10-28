@@ -63,6 +63,8 @@ theorem integrableOn_ray_of_bounds (hσ : 0 < σ) (hκ : 0 < κ) {y : ℝ}
     exact (ae_restrict_iff' measurableSet_Ioi).mpr
       (Eventually.of_forall fun r hr => hinf r (le_of_lt hr))
 
+/-- Identity under the stated parameter and domain assumptions: `exp ((x : ℂ) + y * I) = (Real.exp
+x : ℂ) * exp (y * I)`. -/
 theorem exp_ofReal_add_mul_I (x y : ℝ) : exp ((x : ℂ) + y * I) = (Real.exp x : ℂ) * exp (y * I) := by
   rw [exp_add, ofReal_exp]
 

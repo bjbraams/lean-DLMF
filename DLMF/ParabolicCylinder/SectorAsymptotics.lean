@@ -736,6 +736,8 @@ theorem pcfSect_arg_I_mul {z : ℂ} (hz : z ≠ 0) (h : |arg z| ≤ π / 2) :
   rw [this, pcfSect_arg_exp, him] <;> rw [him] <;>
     linarith [(abs_le.mp h).1, (abs_le.mp h).2, Real.pi_pos]
 
+/-- The map `(fun z : ℂ => I * z)` tends to `(sector (3 * π / 4 - δ))` along `(sector (π / 4 -
+δ))`. -/
 theorem pcfSect_tendsto_I_mul {δ : ℝ} (hδ : 0 < δ) :
     Tendsto (fun z : ℂ => I * z) (sector (π / 4 - δ)) (sector (3 * π / 4 - δ)) := by
   refine tendsto_inf.mpr ⟨tendsto_comap_iff.mpr ?_, tendsto_principal.mpr ?_⟩

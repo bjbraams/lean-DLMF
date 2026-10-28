@@ -29,7 +29,8 @@ namespace DLMF.Struve
 
 open DLMF.Bessel
 
-/-- struveH neg nat sub half. -/
+/-- Identity under the stated parameter and domain assumptions: `struveH (-n-1/2) z =
+(-1)^n*besselJ (n+1/2) z`. -/
 @[dlmf 11.4.E3]
 theorem struveH_neg_nat_sub_half (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane) :
     struveH (-n-1/2) z = (-1)^n*besselJ (n+1/2) z := by
@@ -55,7 +56,8 @@ theorem struveH_neg_nat_sub_half (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane) :
     rw [pow_succ]
     linear_combination -he
 
-/-- struveL neg nat sub half. -/
+/-- Identity under the stated parameter and domain assumptions: `struveL (-n-1/2) z = besselI
+(n+1/2) z`. -/
 @[dlmf 11.4.E4]
 theorem struveL_neg_nat_sub_half (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane) :
     struveL (-n-1/2) z = besselI (n+1/2) z := by
@@ -127,7 +129,8 @@ theorem besselI_elementary_halves {z : ℂ} (hz : z∈slitPlane) :
   · rw [besselI,show -(1/2:ℂ)+1=1/2 by ring,hc,DLMF.Confluent.Gamma_one_half_eq_sqrt]
     linear_combination cosh z*(struve_half_prefactor hz)
 
-/-- struve special 6. -/
+/-- Identity under the stated parameter and domain assumptions: `struveH (-1/2) z =
+(2/(π*z))^(1/2:ℂ)*sin z`. -/
 @[dlmf 11.4.E6]
 theorem struve_special_6 {z : ℂ} (hz : z ∈ slitPlane) :
     struveH (-1/2) z = (2/(π*z))^(1/2:ℂ)*sin z := by
@@ -136,7 +139,8 @@ theorem struve_special_6 {z : ℂ} (hz : z ∈ slitPlane) :
     simpa only [Nat.cast_zero,neg_zero,zero_sub,pow_zero,one_mul,zero_add] using struveH_neg_nat_sub_half 0 hz
   exact h.trans (besselJ_half z hz)
 
-/-- struve special 10. -/
+/-- Identity under the stated parameter and domain assumptions: `struveH (-3/2) z =
+(2/(π*z))^(1/2:ℂ)*(cos z-sin z/z)`. -/
 @[dlmf 11.4.E10]
 theorem struve_special_10 {z : ℂ} (hz : z ∈ slitPlane) :
     struveH (-3/2) z = (2/(π*z))^(1/2:ℂ)*(cos z-sin z/z) := by
@@ -148,7 +152,8 @@ theorem struve_special_10 {z : ℂ} (hz : z ∈ slitPlane) :
     besselJ_half z hz,besselJ_neg_half z hz] at hr
   linear_combination hr
 
-/-- struve special 5. -/
+/-- Identity under the stated parameter and domain assumptions: `struveH (1/2) z =
+(2/(π*z))^(1/2:ℂ)*(1-cos z)`. -/
 @[dlmf 11.4.E5]
 theorem struve_special_5 {z : ℂ} (hz : z ∈ slitPlane) :
     struveH (1/2) z = (2/(π*z))^(1/2:ℂ)*(1-cos z) := by
@@ -160,7 +165,8 @@ theorem struve_special_5 {z : ℂ} (hz : z ∈ slitPlane) :
   rw [show (-1:ℂ)/2= -(1/2) by ring,struve_half_prefactor hz] at hr
   linear_combination (norm := (field_simp [slitPlane_ne_zero hz]; ring)) hr
 
-/-- struve special 8. -/
+/-- Identity under the stated parameter and domain assumptions: `struveL (-1/2) z =
+(2/(π*z))^(1/2:ℂ)*sinh z`. -/
 @[dlmf 11.4.E8]
 theorem struve_special_8 {z : ℂ} (hz : z ∈ slitPlane) :
     struveL (-1/2) z = (2/(π*z))^(1/2:ℂ)*sinh z := by
@@ -169,7 +175,8 @@ theorem struve_special_8 {z : ℂ} (hz : z ∈ slitPlane) :
   rw [show (-1:ℂ)/2= -(1/2) by ring]
   exact he.trans (besselI_elementary_halves hz).1
 
-/-- struve special 12. -/
+/-- Identity under the stated parameter and domain assumptions: `struveL (-3/2) z =
+(2/(π*z))^(1/2:ℂ)*(cosh z-sinh z/z)`. -/
 @[dlmf 11.4.E12]
 theorem struve_special_12 {z : ℂ} (hz : z ∈ slitPlane) :
     struveL (-3/2) z = (2/(π*z))^(1/2:ℂ)*(cosh z-sinh z/z) := by
@@ -181,7 +188,8 @@ theorem struve_special_12 {z : ℂ} (hz : z ∈ slitPlane) :
     (besselI_elementary_halves hz).1,(besselI_elementary_halves hz).2] at hr
   linear_combination hr
 
-/-- struve special 7. -/
+/-- Identity under the stated parameter and domain assumptions: `struveL (1/2) z =
+(2/(π*z))^(1/2:ℂ)*(cosh z-1)`. -/
 @[dlmf 11.4.E7]
 theorem struve_special_7 {z : ℂ} (hz : z ∈ slitPlane) :
     struveL (1/2) z = (2/(π*z))^(1/2:ℂ)*(cosh z-1) := by
@@ -193,7 +201,8 @@ theorem struve_special_7 {z : ℂ} (hz : z ∈ slitPlane) :
   rw [show (-1:ℂ)/2= -(1/2) by ring,struve_half_prefactor hz] at hr
   linear_combination (norm := (field_simp [slitPlane_ne_zero hz]; ring)) -hr
 
-/-- struve special 9. -/
+/-- Identity under the stated parameter and domain assumptions: `struveH (3/2) z =
+(z/(2*π))^(1/2:ℂ)*(1+2/z^2)-(2/(π*z))^(1/2:ℂ)*(sin z+cos z/z)`. -/
 @[dlmf 11.4.E9]
 theorem struve_special_9 {z : ℂ} (hz : z ∈ slitPlane) :
     struveH (3/2) z = (z/(2*π))^(1/2:ℂ)*(1+2/z^2)-(2/(π*z))^(1/2:ℂ)*(sin z+cos z/z) := by
@@ -206,7 +215,8 @@ theorem struve_special_9 {z : ℂ} (hz : z ∈ slitPlane) :
   rw [(struve_positive_half_prefactor hz).2] at hr
   linear_combination (norm := (field_simp [slitPlane_ne_zero hz]; ring)) hr
 
-/-- struve special 11. -/
+/-- Identity under the stated parameter and domain assumptions: `struveL (3/2) z =
+-(z/(2*π))^(1/2:ℂ)*(1-2/z^2)+(2/(π*z))^(1/2:ℂ)*(sinh z-cosh z/z)`. -/
 @[dlmf 11.4.E11]
 theorem struve_special_11 {z : ℂ} (hz : z ∈ slitPlane) :
     struveL (3/2) z = -(z/(2*π))^(1/2:ℂ)*(1-2/z^2)+(2/(π*z))^(1/2:ℂ)*(sinh z-cosh z/z) := by
@@ -330,7 +340,9 @@ theorem hasDerivAt_struve_raise (ν σ : ℂ) {z : ℂ} (hz : z∈slitPlane) :
   refine (hasDerivAt_struveQuadratic ν σ hz).congr_deriv ?_
   linear_combination struveQuadratic_recurrence ν σ hz
 
-/-- struveK nat add half. -/
+/-- Formula under the stated hypotheses: `struveK (n+1/2) z = (2/(π*z))^(1/2:ℂ) * ∑ m ∈
+Finset.range (n+1), ((2*m).factorial :
+ℂ)*2^(-(2*m:ℤ))/((m.factorial:ℂ)*(n-m).factorial)*(z/2)^((n:ℤ)-2*m)`. -/
 @[dlmf 11.4.E1]
 theorem struveK_nat_add_half (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane) :
     struveK (n+1/2) z = (2/(π*z))^(1/2:ℂ) * ∑ m ∈ Finset.range (n+1), ((2*m).factorial : ℂ)*2^(-(2*m:ℤ))/((m.factorial:ℂ)*(n-m).factorial)*(z/2)^((n:ℤ)-2*m) := by
@@ -362,7 +374,9 @@ theorem struveK_nat_add_half (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane) :
     rw [show (n:ℂ)+1+1/2=(n:ℂ)+1/2+1 by ring]
     linear_combination he+((n:ℂ)+1/2)/z*hi
 
-/-- struveL nat add half. -/
+/-- Formula under the stated hypotheses: `struveL (n+1/2) z = besselI (-n-1/2) z -
+(2/(π*z))^(1/2:ℂ) * ∑ m ∈ Finset.range (n+1), (-1)^m*((2*m).factorial :
+ℂ)*2^(-(2*m:ℤ))/((m.factorial:ℂ)*(n-m).factorial)*(z/2)^((n:ℤ)-2*m)`. -/
 @[dlmf 11.4.E2]
 theorem struveL_nat_add_half (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane) :
     struveL (n+1/2) z = besselI (-n-1/2) z - (2/(π*z))^(1/2:ℂ) * ∑ m ∈ Finset.range (n+1), (-1)^m*((2*m).factorial : ℂ)*2^(-(2*m:ℤ))/((m.factorial:ℂ)*(n-m).factorial)*(z/2)^((n:ℤ)-2*m) := by
@@ -534,7 +548,8 @@ theorem struveH_bessel_series_18 (ν : ℂ) (hν : ∀ n : ℕ, ν ≠ -(n+1))
     rw [hp1, hp2]
     field_simp
 
-/-- struveH bessel series 19. -/
+/-- The series with terms `(fun k : ℕ => (z/(2*π))^(1/2:ℂ) *
+((z/2)^k/((k.factorial:ℂ)*(k+1/2))*besselJ (k+ν+1/2) z))` converges to `(struveH ν z)`. -/
 @[dlmf 11.4.E19]
 theorem struveH_bessel_series_19 (ν : ℂ)  {z : ℂ} (hz : z ∈ slitPlane) :
     HasSum (fun k : ℕ => (z/(2*π))^(1/2:ℂ) * ((z/2)^k/((k.factorial:ℂ)*(k+1/2))*besselJ (k+ν+1/2) z)) (struveH ν z) := by
@@ -593,7 +608,8 @@ theorem struveH_bessel_series_19 (ν : ℂ)  {z : ℂ} (hz : z ∈ slitPlane) :
         (ofReal_ne_zero.mpr hπ.ne')
     field_simp
 
-/-- struveH bessel series 20. -/
+/-- The series with terms `(fun k : ℕ => (z/2)^(ν+1/2)/Gamma (ν+1/2) *
+((z/2)^k/((k.factorial:ℂ)*(k+ν+1/2))*besselJ (k+1/2) z))` converges to `(struveH ν z)`. -/
 @[dlmf 11.4.E20]
 theorem struveH_bessel_series_20 (ν : ℂ) (hν : ∀ n : ℕ, ν+1/2 ≠ -n) {z : ℂ} (hz : z ∈ slitPlane) :
     HasSum (fun k : ℕ => (z/2)^(ν+1/2)/Gamma (ν+1/2) * ((z/2)^k/((k.factorial:ℂ)*(k+ν+1/2))*besselJ (k+1/2) z)) (struveH ν z) := by
@@ -651,7 +667,8 @@ theorem struveH_bessel_series_20 (ν : ℂ) (hν : ∀ n : ℕ, ν+1/2 ≠ -n) {
       show (j : ℂ) + 3 / 2 = 1 / 2 + j + 1 by ring, pow_mul]
     field_simp
 
-/-- struveH zero odd. -/
+/-- The series with terms `(fun k : ℕ => 4/π*besselJ (2*k+1) z/(2*k+1))` converges to `(struveH 0
+z)`. -/
 @[dlmf 11.4.E21]
 theorem struveH_zero_odd {z : ℂ} (hz : z ∈ slitPlane) :
     HasSum (fun k : ℕ => 4/π*besselJ (2*k+1) z/(2*k+1)) (struveH 0 z) := by
@@ -672,7 +689,8 @@ theorem struveH_zero_odd {z : ℂ} (hz : z ∈ slitPlane) :
   rw [hhalf, show (k : ℂ) + 1 = k + 1 by rfl, Complex.Gamma_nat_eq_factorial, ← hpi]
   field_simp
 
-/-- struveH zero products. -/
+/-- The series with terms `(fun k : ℕ => 2*(-1)^k*(besselJ (k+1/2) (z/2))^2)` converges to
+`(struveH 0 z)`. -/
 @[dlmf 11.4.E21]
 theorem struveH_zero_products {z : ℂ} (hz : z ∈ slitPlane) :
     HasSum (fun k : ℕ => 2*(-1)^k*(besselJ (k+1/2) (z/2))^2) (struveH 0 z) := by
@@ -790,7 +808,8 @@ theorem struveH_zero_products {z : ℂ} (hz : z ∈ slitPlane) :
   rw [struveH, show ((0 : ℂ) + 1) = ((1 : ℕ) : ℂ) by simp, cpow_natCast, pow_one, ← heq]
   exact h1
 
-/-- struveH one even. -/
+/-- The series with terms `(fun k : ℕ => 4/π*besselJ (2*(k+1)) z/(4*(k+1:ℂ)^2-1))` converges to
+`(struveH 1 z-2/π*(1-besselJ 0 z))`. -/
 @[dlmf 11.4.E22]
 theorem struveH_one_even {z : ℂ} (hz : z ∈ slitPlane) :
     HasSum (fun k : ℕ => 4/π*besselJ (2*(k+1)) z/(4*(k+1:ℂ)^2-1)) (struveH 1 z-2/π*(1-besselJ 0 z)) := by
@@ -875,7 +894,8 @@ theorem sum_range_even_choose_eq_four_pow (j : ℕ) : ∑ a ∈ Finset.range (j 
   rw [Finset.mem_range] at hb
   rw [show j + 1 - 1 - b = j - b by omega, show j - (j - b) = b by omega]
 
-/-- struveH one products. -/
+/-- The series with terms `(fun k : ℕ => 4*besselJ (2*k+1/2) (z/2)*besselJ (2*k+3/2) (z/2))`
+converges to `(struveH 1 z)`. -/
 @[dlmf 11.4.E22]
 theorem struveH_one_products {z : ℂ} (hz : z ∈ slitPlane) :
     HasSum (fun k : ℕ => 4*besselJ (2*k+1/2) (z/2)*besselJ (2*k+3/2) (z/2)) (struveH 1 z) := by
@@ -1035,14 +1055,16 @@ theorem struveH_one_products {z : ℂ} (hz : z ∈ slitPlane) :
   rw [struveH, show ((1 : ℂ) + 1) = ((2 : ℕ) : ℂ) by norm_num, cpow_natCast, ← heq]
   exact h1
 
-/-- struveH recurrence. -/
+/-- Identity under the stated parameter and domain assumptions: `struveH (ν-1) z + struveH (ν+1) z
+= 2*ν/z*struveH ν z+(z/2)^ν/(Real.sqrt π*Gamma (ν+3/2))`. -/
 @[dlmf 11.4.E23]
 theorem struveH_recurrence (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     struveH (ν-1) z + struveH (ν+1) z = 2*ν/z*struveH ν z+(z/2)^ν/(Real.sqrt π*Gamma (ν+3/2)) := by
   have h := struveQuadratic_recurrence ν (-1) hz
   simpa only [struveQuadratic_H, neg_one_mul, sub_neg_eq_add, one_mul] using h
 
-/-- struveH derivative. -/
+/-- At `z`, the function `(struveH ν)` has derivative `((struveH (ν-1) z - struveH (ν+1)
+z+(z/2)^ν/(Real.sqrt π*Gamma (ν+3/2)))/2)`. -/
 @[dlmf 11.4.E24]
 theorem struveH_derivative (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (struveH ν) ((struveH (ν-1) z - struveH (ν+1) z+(z/2)^ν/(Real.sqrt π*Gamma (ν+3/2)))/2) z := by
@@ -1053,28 +1075,31 @@ theorem struveH_derivative (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
   have hr := struveH_recurrence ν hz
   linear_combination hr/2
 
-/-- struveH weighted deriv 27. -/
+/-- At `z`, the function `(fun z : ℂ => z^(1*ν)*struveH ν z)` has derivative `(z^ν*struveH (ν-1)
+z)`. -/
 @[dlmf 11.4.E27, dlmf 11.7.E1]
 theorem struveH_weighted_deriv_27 (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (fun z : ℂ => z^(1*ν)*struveH ν z) (z^ν*struveH (ν-1) z) z := by
   have hd := hasDerivAt_weighted_struveQuadratic ν (-1) hz
   simpa only [struveQuadratic_H, one_mul, neg_one_mul, neg_mul, ← sub_eq_add_neg] using hd
 
-/-- struveH weighted deriv 28. -/
+/-- At `z`, the function `(fun z : ℂ => z^(-1*ν)*struveH ν z)` has derivative `(2^(-ν)/(Real.sqrt
+π*Gamma (ν+3/2)) - z^(-ν)*struveH (ν+1) z)`. -/
 @[dlmf 11.4.E28, dlmf 11.7.E2]
 theorem struveH_weighted_deriv_28 (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (fun z : ℂ => z^(-1*ν)*struveH ν z) (2^(-ν)/(Real.sqrt π*Gamma (ν+3/2)) - z^(-ν)*struveH (ν+1) z) z := by
   have hd := hasDerivAt_reciprocal_weighted_struveQuadratic ν (-1) hz
   simpa only [struveQuadratic_H, one_mul, neg_one_mul, neg_mul, ← sub_eq_add_neg] using hd
 
-/-- struveH iterated weighted deriv. -/
+/-- Identity under the stated parameter and domain assumptions: `((fun f : ℂ → ℂ => fun z => deriv
+f z/z)^[m]) (fun z => z^ν*struveH ν z) z = z^(ν-m)*struveH (ν-m) z`. -/
 @[dlmf 11.4.E31]
 theorem struveH_iterated_weighted_deriv (ν : ℂ) (m : ℕ) {z : ℂ} (hz : z ∈ slitPlane) :
     ((fun f : ℂ → ℂ => fun z => deriv f z/z)^[m]) (fun z => z^ν*struveH ν z) z = z^(ν-m)*struveH (ν-m) z := by
   have he := iterated_weighted_struveQuadratic ν (-1) m hz
   simpa only [struveQuadratic_H] using he
 
-/-- struveH zero deriv. -/
+/-- At `z`, the function `(struveH 0)` has derivative `(2/π - struveH 1 z)`. -/
 @[dlmf 11.4.E32]
 theorem struveH_zero_deriv (z : ℂ) :
     HasDerivAt (struveH 0) (2/π - struveH 1 z) z := by
@@ -1098,7 +1123,7 @@ theorem struveH_zero_deriv (z : ℂ) :
       field_simp
   exact (hf z).hasDerivAt.congr_deriv (congrFun he z)
 
-/-- struveH one weighted deriv. -/
+/-- At `z`, the function `(fun z => z*struveH 1 z)` has derivative `(z*struveH 0 z)`. -/
 @[dlmf 11.4.E32]
 theorem struveH_one_weighted_deriv (z : ℂ) :
     HasDerivAt (fun z => z*struveH 1 z) (z*struveH 0 z) z := by
@@ -1114,14 +1139,16 @@ theorem struveH_one_weighted_deriv (z : ℂ) :
       simpa using (struveH_weighted_deriv_27 1 hz).deriv
   exact (hf z).hasDerivAt.congr_deriv (congrFun he z)
 
-/-- struveL recurrence. -/
+/-- Identity under the stated parameter and domain assumptions: `struveL (ν-1) z - struveL (ν+1) z
+= 2*ν/z*struveL ν z+(z/2)^ν/(Real.sqrt π*Gamma (ν+3/2))`. -/
 @[dlmf 11.4.E25]
 theorem struveL_recurrence (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     struveL (ν-1) z - struveL (ν+1) z = 2*ν/z*struveL ν z+(z/2)^ν/(Real.sqrt π*Gamma (ν+3/2)) := by
   have h := struveQuadratic_recurrence ν (1) hz
   simpa only [struveQuadratic_L, neg_one_mul, sub_neg_eq_add, one_mul] using h
 
-/-- struveL derivative. -/
+/-- At `z`, the function `(struveL ν)` has derivative `((struveL (ν-1) z + struveL (ν+1)
+z+(z/2)^ν/(Real.sqrt π*Gamma (ν+3/2)))/2)`. -/
 @[dlmf 11.4.E26]
 theorem struveL_derivative (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (struveL ν) ((struveL (ν-1) z + struveL (ν+1) z+(z/2)^ν/(Real.sqrt π*Gamma (ν+3/2)))/2) z := by
@@ -1132,28 +1159,31 @@ theorem struveL_derivative (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
   have hr := struveL_recurrence ν hz
   linear_combination hr/2
 
-/-- struveL weighted deriv 29. -/
+/-- At `z`, the function `(fun z : ℂ => z^(1*ν)*struveL ν z)` has derivative `(z^ν*struveL (ν-1)
+z)`. -/
 @[dlmf 11.4.E29, dlmf 11.7.E3]
 theorem struveL_weighted_deriv_29 (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (fun z : ℂ => z^(1*ν)*struveL ν z) (z^ν*struveL (ν-1) z) z := by
   have hd := hasDerivAt_weighted_struveQuadratic ν (1) hz
   simpa only [struveQuadratic_L, one_mul, neg_one_mul, neg_mul, ← sub_eq_add_neg] using hd
 
-/-- struveL weighted deriv 30. -/
+/-- At `z`, the function `(fun z : ℂ => z^(-1*ν)*struveL ν z)` has derivative `(2^(-ν)/(Real.sqrt
+π*Gamma (ν+3/2)) + z^(-ν)*struveL (ν+1) z)`. -/
 @[dlmf 11.4.E30, dlmf 11.7.E4]
 theorem struveL_weighted_deriv_30 (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (fun z : ℂ => z^(-1*ν)*struveL ν z) (2^(-ν)/(Real.sqrt π*Gamma (ν+3/2)) + z^(-ν)*struveL (ν+1) z) z := by
   have hd := hasDerivAt_reciprocal_weighted_struveQuadratic ν (1) hz
   simpa only [struveQuadratic_L, one_mul, neg_one_mul, neg_mul, ← sub_eq_add_neg] using hd
 
-/-- struveL iterated weighted deriv. -/
+/-- Identity under the stated parameter and domain assumptions: `((fun f : ℂ → ℂ => fun z => deriv
+f z/z)^[m]) (fun z => z^ν*struveL ν z) z = z^(ν-m)*struveL (ν-m) z`. -/
 @[dlmf 11.4.E31]
 theorem struveL_iterated_weighted_deriv (ν : ℂ) (m : ℕ) {z : ℂ} (hz : z ∈ slitPlane) :
     ((fun f : ℂ → ℂ => fun z => deriv f z/z)^[m]) (fun z => z^ν*struveL ν z) z = z^(ν-m)*struveL (ν-m) z := by
   have he := iterated_weighted_struveQuadratic ν (1) m hz
   simpa only [struveQuadratic_L] using he
 
-/-- struveL zero deriv. -/
+/-- At `z`, the function `(struveL 0)` has derivative `(2/π + struveL 1 z)`. -/
 @[dlmf 11.4.E33]
 theorem struveL_zero_deriv (z : ℂ) :
     HasDerivAt (struveL 0) (2/π + struveL 1 z) z := by
@@ -1177,7 +1207,7 @@ theorem struveL_zero_deriv (z : ℂ) :
       field_simp
   exact (hf z).hasDerivAt.congr_deriv (congrFun he z)
 
-/-- struveL one weighted deriv. -/
+/-- At `z`, the function `(fun z => z*struveL 1 z)` has derivative `(z*struveL 0 z)`. -/
 @[dlmf 11.4.E33]
 theorem struveL_one_weighted_deriv (z : ℂ) :
     HasDerivAt (fun z => z*struveL 1 z) (z*struveL 0 z) z := by

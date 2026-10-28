@@ -43,6 +43,8 @@ variable {p q q₁ q₂ u u' v v' y y' : ℝ → ℝ} {a b : ℝ}
 def sturmWronskian (p u u' v v' : ℝ → ℝ) (x : ℝ) : ℝ :=
   p x * (u' x * v x - u x * v' x)
 
+/-- At `x`, the function `(sturmWronskian p u u' v v')` has derivative `((q₂ x - q₁ x) * u x * v
+x)`. -/
 theorem hasDerivAt_sturmWronskian {x : ℝ}
     (hu : HasDerivAt u (u' x) x) (hpu : HasDerivAt (fun t => p t * u' t) (-(q₁ x * u x)) x)
     (hv : HasDerivAt v (v' x) x) (hpv : HasDerivAt (fun t => p t * v' t) (-(q₂ x * v x)) x) :
@@ -103,12 +105,16 @@ theorem neg_solution (hu : ∀ x ∈ Icc a b, HasDerivAt u (u' x) x)
     ring
   · ring
 
+/-- Identity under the stated parameter and domain assumptions: `sturmWronskian p (fun t => -u t)
+(fun t => -u' t) v v' x = -sturmWronskian p u u' v v' x`. -/
 theorem sturmWronskian_neg_left (x : ℝ) :
     sturmWronskian p (fun t => -u t) (fun t => -u' t) v v' x =
       -sturmWronskian p u u' v v' x := by
   simp only [sturmWronskian]
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `sturmWronskian p u u' (fun t =>
+-v t) (fun t => -v' t) x = -sturmWronskian p u u' v v' x`. -/
 theorem sturmWronskian_neg_right (x : ℝ) :
     sturmWronskian p u u' (fun t => -v t) (fun t => -v' t) x =
       -sturmWronskian p u u' v v' x := by

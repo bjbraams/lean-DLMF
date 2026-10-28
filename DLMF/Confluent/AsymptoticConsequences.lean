@@ -36,6 +36,7 @@ theorem tendsto_ofReal_recip_atTop : Tendsto (fun x : ℝ => ((x : ℂ))⁻¹) a
   have := (tendsto_inv_atTop_zero (𝕜 := ℝ)).ofReal
   simpa using this
 
+/-- The map `(fun x : ℝ => kummerU a b x * (x : ℂ) ^ a)` tends to `(𝓝 1)` along `atTop`. -/
 @[dlmf 13.2.E6]
 theorem tendsto_kummerU_mul_cpow_atTop (a b : ℂ) :
     Tendsto (fun x : ℝ => kummerU a b x * (x : ℂ) ^ a) atTop (𝓝 1) := by
@@ -52,6 +53,8 @@ theorem tendsto_kummerU_mul_cpow_atTop (a b : ℂ) :
   simp only [zero_add] at this
   exact this.congr fun x => by ring
 
+/-- The map `(fun x : ℝ => regularizedHGFun {a} {b} x * Gamma a / (exp x * (x : ℂ) ^ (a - b)))`
+tends to `(𝓝 1)` along `atTop`. -/
 @[dlmf 13.2.E23]
 theorem tendsto_regularizedHGFun_mul_exp_neg_atTop (a b : ℂ) (ha : ∀ k : ℕ, a ≠ -k) :
     Tendsto (fun x : ℝ => regularizedHGFun {a} {b} x * Gamma a /
@@ -81,6 +84,8 @@ theorem tendsto_regularizedHGFun_mul_exp_neg_atTop (a b : ℂ) (ha : ∀ k : ℕ
   field_simp
   ring
 
+/-- The map `(fun x : ℝ => whittakerM κ μ x * Gamma (1 / 2 + μ - κ) / (Gamma (1 + 2 * μ) * exp (x
+/ 2) * (x : ℂ) ^ (-κ)))` tends to `(𝓝 1)` along `atTop`. -/
 @[dlmf 13.14.E20]
 theorem tendsto_whittakerM_atTop {κ μ : ℂ} (hμ : ∀ k : ℕ, 1 + 2 * μ ≠ -k)
     (hκ : ∀ k : ℕ, 1 / 2 + μ - κ ≠ -k) :
@@ -111,6 +116,8 @@ theorem tendsto_whittakerM_atTop {κ μ : ℂ} (hμ : ∀ k : ℕ, 1 + 2 * μ �
   generalize Gamma (1 + 2 * μ) = G' at *
   field_simp
 
+/-- The map `(fun x : ℝ => whittakerW κ μ x / (exp (-x / 2) * (x : ℂ) ^ κ))` tends to `(𝓝 1)`
+along `atTop`. -/
 @[dlmf 13.14.E21]
 theorem tendsto_whittakerW_atTop (κ μ : ℂ) :
     Tendsto (fun x : ℝ => whittakerW κ μ x / (exp (-x / 2) * (x : ℂ) ^ κ)) atTop (𝓝 1) := by

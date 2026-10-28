@@ -22,27 +22,34 @@ open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
 namespace DLMF.Confluent
 
-/-- pcfUTerm. -/
+/-- The order-`s` term `(-1)^s (a+1/2)_{2s}/(s! (2z²)^s)` in the large-argument expansion of the
+cylinder function U. -/
 def pcfUTerm (a z : ℂ) (s : ℕ) : ℂ :=
   (-1)^s*poch (1/2+a) (2*s)/((s.factorial:ℂ)*(2*z^2)^s)
 
-/-- pcfVTerm. -/
+/-- The order-`s` term `(1/2-a)_{2s}/(s! (2z²)^s)` in the large-argument expansion of the cylinder
+function V. -/
 def pcfVTerm (a z : ℂ) (s : ℕ) : ℂ :=
   poch (1/2-a) (2*s)/((s.factorial:ℂ)*(2*z^2)^s)
 
-/-- pcfU sector asymptotic. -/
+/-- Asymptotic bound with the indicated comparison function: `(fun z : ℂ => exp
+(z^2/4)*z^(a+1/2)*pcfU a z-∑ s ∈ Finset.range N, pcfUTerm a z s) =O[sector (3*π/4-δ)] (fun z :
+ℂ => z^(-(2*N:ℤ)))`. -/
 @[dlmf 12.9.E1]
 theorem pcfU_sector_asymptotic (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < 3*π/4) (N : ℕ) :
     (fun z : ℂ => exp (z^2/4)*z^(a+1/2)*pcfU a z-∑ s ∈ Finset.range N, pcfUTerm a z s) =O[sector (3*π/4-δ)] (fun z : ℂ => z^(-(2*N:ℤ))) := by
   exact pcfSect_U_sector a hδ N
 
-/-- pcfV sector asymptotic. -/
+/-- Asymptotic bound with the indicated comparison function: `(fun z : ℂ => (Real.sqrt
+(π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2)*pcfV a z-∑ s ∈ Finset.range N, pcfVTerm a z s) =O[sector
+(π/4-δ)] (fun z : ℂ => z^(-(2*N:ℤ)))`. -/
 @[dlmf 12.9.E2]
 theorem pcfV_sector_asymptotic (a : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π/4) (N : ℕ) :
     (fun z : ℂ => (Real.sqrt (π/2):ℂ)*exp (-z^2/4)*z^(-a+1/2)*pcfV a z-∑ s ∈ Finset.range N, pcfVTerm a z s) =O[sector (π/4-δ)] (fun z : ℂ => z^(-(2*N:ℤ))) := by
   exact pcfSect_V_sector a hδ hδπ N
 
-/-- pcfLogWedge. -/
+/-- Approach to infinity in logarithmic coordinates with imaginary part between `lo` and `hi`; the
+inherited argument is not reduced modulo `2π`. -/
 def pcfLogWedge (lo hi : ℝ) : Filter ℂ :=
   comap (fun w : ℂ => Real.exp w.re) atTop ⊓ 𝓟 {w : ℂ | lo ≤ w.im ∧ w.im ≤ hi}
 
@@ -754,17 +761,23 @@ theorem pcfV_integer_zero (n : ℤ) :
     rw [show (3/4:ℂ) - (3/2 - 2*((-(m:ℤ):ℤ):ℂ))/2 = -(m:ℂ) by push_cast; ring, Complex.Gamma_neg_nat_eq_zero]
     simp
 
-/-- pcfZeroTau. -/
+/-- The leading complex phase coordinate for the `s`th large cylinder zero, including the
+logarithm of its Gamma connection coefficient. -/
 @[dlmf 12.11.E2]
 def pcfZeroTau (a : ℝ) (s : ℕ) : ℂ :=
   (2*s+1/2-a:ℂ)*π+I*log ((π:ℂ)^(-1/2:ℂ)*2^(-a-1/2:ℂ)*Gamma (1/2+a))
 
-/-- pcfZeroLambda. -/
+/-- The logarithmic correction `log (pcfZeroTau a s) - πi/2` in the expansion of the large
+cylinder zeros. -/
 @[dlmf 12.11.E3]
 def pcfZeroLambda (a : ℝ) (s : ℕ) : ℂ :=
   log (pcfZeroTau a s)-π*I/2
 
-/-- pcfU complex zero strings. -/
+/-- Asymptotic bound with the indicated comparison function: `∃ Z : ℕ → ℂ, (∀ᶠ s in atTop, pcfU a
+(Z s)=0 ∧ pcfU a (star (Z s))=0 ∧ 0 < (Z s).im) ∧ (fun s => Z s/(exp (3*π*I/4)*(2*pcfZeroTau a
+s)^(1/2:ℂ))-1+I*a*pcfZeroLambda a s/(2*pcfZeroTau a s)-(2*a^2*(pcfZeroLambda a
+s)^2-8*a^2*pcfZeroLambda a s+4*a^2+3)/(16*(pcfZeroTau a s)^2)) =O[atTop] (fun s =>
+(pcfZeroLambda a s)^3/(pcfZeroTau a s)^3)`. -/
 @[dlmf 12.11.E1]
 theorem pcfU_complex_zero_strings {a : ℝ} (ha : -1/2 < a) :
     ∃ Z : ℕ → ℂ, (∀ᶠ s in atTop, pcfU a (Z s)=0 ∧ pcfU a (star (Z s))=0 ∧ 0 < (Z s).im) ∧ (fun s => Z s/(exp (3*π*I/4)*(2*pcfZeroTau a s)^(1/2:ℂ))-1+I*a*pcfZeroLambda a s/(2*pcfZeroTau a s)-(2*a^2*(pcfZeroLambda a s)^2-8*a^2*pcfZeroLambda a s+4*a^2+3)/(16*(pcfZeroTau a s)^2)) =O[atTop] (fun s => (pcfZeroLambda a s)^3/(pcfZeroTau a s)^3) := by

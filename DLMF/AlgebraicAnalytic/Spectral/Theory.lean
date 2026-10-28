@@ -183,6 +183,8 @@ end PointSpectrum
 
 /-! ### Example 1: `q = 0` on `[0, π]` -/
 
+/-- Identity under the stated parameter and domain assumptions: `deriv (fun x : ℝ => cexp (c * x))
+= fun x : ℝ => c * cexp (c * x)`. -/
 private lemma g1f_deriv_cexp_mul (c : ℂ) :
     deriv (fun x : ℝ => cexp (c * x)) = fun x : ℝ => c * cexp (c * x) := by
   ext x
@@ -191,6 +193,8 @@ private lemma g1f_deriv_cexp_mul (c : ℂ) :
   have := h.cexp
   rw [this.deriv]; ring
 
+/-- Identity under the stated parameter and domain assumptions: `deriv (fun x : ℝ => Complex.sin
+(c * x)) = fun x : ℝ => c * Complex.cos (c * x)`. -/
 private lemma g1f_deriv_csin_mul (c : ℂ) :
     deriv (fun x : ℝ => Complex.sin (c * x)) = fun x : ℝ => c * Complex.cos (c * x) := by
   ext x
@@ -200,6 +204,8 @@ private lemma g1f_deriv_csin_mul (c : ℂ) :
     from rfl, ((Complex.hasDerivAt_sin (c * x)).comp x h).deriv]
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `deriv (fun x : ℝ => Complex.cos
+(c * x)) = fun x : ℝ => -(c * Complex.sin (c * x))`. -/
 private lemma g1f_deriv_ccos_mul (c : ℂ) :
     deriv (fun x : ℝ => Complex.cos (c * x)) = fun x : ℝ => -(c * Complex.sin (c * x)) := by
   ext x

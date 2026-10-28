@@ -47,6 +47,17 @@ variable {𝕜 : Type*} [RCLike 𝕜]
 noncomputable def approxResidual (k : 𝕜) (A A' A'' g P P' P'' : ℝ → 𝕜) (t : ℝ) : 𝕜 :=
   A t ^ 2 * P'' t + 2 * (A t * A' t - k) * P' t + (A t * A'' t - g t * A t ^ 2) * P t
 
+/-- The transformed ODE residual is continuous whenever the approximant, amplitude and
+their displayed derivatives are continuous. This regularity step is shared by the finite-
+endpoint and infinite-endpoint Liouville-Green constructions. -/
+lemma continuousOn_approxResidual {S : Set ℝ} {k : 𝕜} {A A' A'' g P P' P'' : ℝ → 𝕜}
+    (hA : ContinuousOn A S) (hA' : ContinuousOn A' S) (hA'' : ContinuousOn A'' S)
+    (hg : ContinuousOn g S) (hP : ContinuousOn P S) (hP' : ContinuousOn P' S)
+    (hP'' : ContinuousOn P'' S) : ContinuousOn (approxResidual k A A' A'' g P P' P'') S :=
+  (((hA.pow 2).mul hP'').add
+    ((continuousOn_const.mul ((hA.mul hA').sub continuousOn_const)).mul hP')).add
+      (((hA.mul hA'').sub (hg.mul (hA.pow 2))).mul hP)
+
 /-- **Liouville–Green approximation with an arbitrary approximant.** In the setting of
 `exists_solution_of_kernel_bound`, let `P` be twice differentiable on `(a, ∞)` and let
 `r = A² P'' + 2 (A A' - k) P' + (A A'' - g A²) P` be its residual, with `‖r‖` integrable at
@@ -94,8 +105,8 @@ theorem exists_solution_of_approx {a κ : ℝ} {k : 𝕜} {A A' A'' E g P P' P''
     (hE x hx).continuousAt.continuousWithinAt
   have hF'c : ContinuousOn F' (Ioi a) := (hAc.mul hA''c).sub (hgc.mul (hAc.pow 2))
   have hrc : ContinuousOn r (Ioi a) :=
-    (((hAc.pow 2).mul hP''c).add ((continuousOn_const.mul ((hAc.mul hA'c).sub
-      continuousOn_const)).mul hP'c)).add (hF'c.mul hPc)
+    continuousOn_approxResidual hAc hA'c hA''c hgc hPc hP'c hP''c
+
   have hint_of : ∀ {f : ℝ → 𝕜}, ContinuousOn f (Ioi a) →
       (∀ c, a < c → IntegrableOn (fun t => ‖f t‖) (Ioi c)) →
       ∀ c, a < c → IntegrableOn f (Ioi c) := fun {f} hfc hfi c hc =>

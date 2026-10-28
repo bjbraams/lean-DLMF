@@ -568,12 +568,18 @@ theorem p22R1_comodulus_mem {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   · exact absurd rfl hm
   · nlinarith
 
+/-- Identity under the stated parameter and domain assumptions: `compEllIntKk (jacobiComodulusk k)
+= compEllIntKpk k`. -/
 theorem p22R1_K_comodulus (k : ℂ) : compEllIntKk (jacobiComodulusk k) = compEllIntKpk k := by
   rw [compEllIntKk, compEllIntKpk, jacobiComodulusk_sq]
 
+/-- Identity under the stated parameter and domain assumptions: `compEllIntKpk (jacobiComodulusk
+k) = compEllIntKk k`. -/
 lemma p22R1_Kp_comodulus (k : ℂ) : compEllIntKpk (jacobiComodulusk k) = compEllIntKk k := by
   rw [compEllIntKk, compEllIntKpk, jacobiComodulusk_sq]; ring_nf
 
+/-- Identity under the stated parameter and domain assumptions: `jacobiTauk (jacobiComodulusk k) =
+-1 / jacobiTauk k`. -/
 lemma p22R1_tau_comodulus {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
     jacobiTauk (jacobiComodulusk k) = -1 / jacobiTauk k := by
   have h1 := compEllIntKk_ne_zero hk

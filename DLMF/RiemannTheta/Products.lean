@@ -39,6 +39,8 @@ variable {ι κ : Type*} [Fintype ι] [Fintype κ]
 /-- A real matrix with integer entries. -/
 def rth21_IsInt {m n : Type*} (A : Matrix m n ℝ) : Prop := ∃ M : Matrix m n ℤ, A = M.map Int.cast
 
+/-- Identity under the stated parameter and domain assumptions: `Equivalence fun (A A' : Matrix m
+n ℝ) => rth21_IsInt (A - A')`. -/
 lemma rth21_isInt_setoid {m n : Type*} :
     Equivalence fun (A A' : Matrix m n ℝ) => rth21_IsInt (A - A') where
   refl A := ⟨0, by ext; simp⟩
@@ -153,10 +155,9 @@ theorem riemannTExample_rat (j k : Fin 4) : ∃ q : ℚ, riemannTExample j k = q
 /-- The half-integer vector `a/2` for `a ∈ {0,1}^g`, a representative of `½ℤ^g/ℤ^g`. -/
 abbrev rth21_half (a : ι → Fin 2) : ι → ℝ := fun i => ((a i : ℕ) : ℝ) / 2
 
-
-
 /-! ## Addition formula (DLMF 21.6.8) -/
 
+/-- Formula under the stated hypotheses: `(2 • Ω) ∈ siegelUpperHalfSpace ι`. -/
 lemma rth21_two_smul_mem {Ω : Matrix ι ι ℂ} (hΩ : Ω ∈ siegelUpperHalfSpace ι) :
     (2 • Ω) ∈ siegelUpperHalfSpace ι := by
   refine ⟨by rw [transpose_smul, hΩ.1], ?_⟩
@@ -169,10 +170,14 @@ lemma rth21_two_smul_mem {Ω : Matrix ι ι ℂ} (hΩ : Ω ∈ siegelUpperHalfSp
 def rth21_toFin2 (t : ℤ) : Fin 2 :=
   ⟨(t % 2).toNat, by omega⟩
 
+/-- Identity under the stated parameter and domain assumptions: `(((rth21_toFin2 t : ℕ)) : ℤ) = t
+% 2`. -/
 lemma rth21_toFin2_coe (t : ℤ) : (((rth21_toFin2 t : ℕ)) : ℤ) = t % 2 := by
   simp only [rth21_toFin2]
   omega
 
+/-- Identity under the stated parameter and domain assumptions: `rth21_toFin2 (2 * l + (ν : ℕ)) =
+ν`. -/
 lemma rth21_toFin2_add (l : ℤ) (ν : Fin 2) : rth21_toFin2 (2 * l + (ν : ℕ)) = ν := by
   ext
   simp only [rth21_toFin2]
@@ -205,6 +210,11 @@ def rth21_addEquiv (ι : Type*) :
       have := rth21_toFin2_coe (n i - m i)
       omega
 
+/-- Identity under the stated parameter and domain assumptions: `riemannThetaCharTerm ((1 / 2 : ℝ)
+• (α + β + fun i => ((ν i : ℕ) : ℝ))) (γ + δ) (z₁ + z₂) (2 • Ω) k * riemannThetaCharTerm ((1 /
+2 : ℝ) • (α - β + fun i => ((ν i : ℕ) : ℝ))) (γ - δ) (z₁ - z₂) (2 • Ω) l =
+riemannThetaCharTerm α γ z₁ Ω (rth21_addEquiv ι (ν, k, l)).1 * riemannThetaCharTerm β δ z₂ Ω
+(rth21_addEquiv ι (ν, k, l)).2`. -/
 lemma rth21_addition_term (α β γ δ : ι → ℝ) (z₁ z₂ : ι → ℂ) (Ω : Matrix ι ι ℂ)
     (ν : ι → Fin 2) (k l : ι → ℤ) :
     riemannThetaCharTerm ((1 / 2 : ℝ) • (α + β + fun i => ((ν i : ℕ) : ℝ))) (γ + δ)
@@ -266,12 +276,14 @@ theorem riemannThetaChar_mul_addition [DecidableEq ι] {Ω : Matrix ι ι ℂ}
       (summable_norm_riemannThetaCharTerm _ _ _ h2Ω)]
   exact tsum_congr fun c => (rth21_addition_term α β γ δ z₁ z₂ Ω ν c.1 c.2).symm
 
-
 /-! ## Proof of the example 21.6.6 from the addition formula -/
 
 /-- The characteristic vector `(a + ν)/2`. -/
 abbrev rth21_halfSum (a ν : ι → Fin 2) : ι → ℝ := fun i => (((a i : ℕ) + (ν i : ℕ) : ℕ) : ℝ) / 2
 
+/-- Identity under the stated parameter and domain assumptions: `riemannTheta w₁ Ω * riemannTheta
+w₂ Ω = ∑ ν : ι → Fin 2, riemannThetaChar (rth21_half ν) 0 (w₁ + w₂) (2 • Ω) * riemannThetaChar
+(rth21_half ν) 0 (w₁ - w₂) (2 • Ω)`. -/
 lemma rth21_pair_zero [DecidableEq ι] {Ω : Matrix ι ι ℂ}
     (hΩ : Ω ∈ siegelUpperHalfSpace ι)
     (w₁ w₂ : ι → ℂ) :
@@ -287,6 +299,8 @@ lemma rth21_pair_zero [DecidableEq ι] {Ω : Matrix ι ι ℂ}
     funext i; simp [rth21_half]; ring
   rw [h1, h2, add_zero, sub_zero]
 
+/-- Identity under the stated parameter and domain assumptions: `riemannThetaChar (c + fun i => (m
+i : ℝ)) 0 z Ω = riemannThetaChar c 0 z Ω`. -/
 lemma rth21_charShift_nat (c : ι → ℝ) (m : ι → ℕ) (z : ι → ℂ) (Ω : Matrix ι ι ℂ) :
     riemannThetaChar (c + fun i => (m i : ℝ)) 0 z Ω = riemannThetaChar c 0 z Ω := by
   have h := riemannThetaChar_add_int c 0 z Ω (fun i => (m i : ℤ)) 0
@@ -298,6 +312,9 @@ lemma rth21_charShift_nat (c : ι → ℝ) (m : ι → ℕ) (z : ι → ℂ) (Ω
   rw [h]
   simp [dotProduct]
 
+/-- Identity under the stated parameter and domain assumptions: `riemannThetaChar c (fun i => ((b
+i : ℕ) : ℝ)) z Ω = cexp (2 * π * I * ((fun i => (c i : ℂ)) ⬝ᵥ fun i => ((b i : ℕ) : ℂ))) *
+riemannThetaChar c 0 z Ω`. -/
 lemma rth21_charShift_int (c : ι → ℝ) (b : ι → Fin 2) (z : ι → ℂ) (Ω : Matrix ι ι ℂ) :
     riemannThetaChar c (fun i => ((b i : ℕ) : ℝ)) z Ω =
       cexp (2 * π * I * ((fun i => (c i : ℂ)) ⬝ᵥ fun i => ((b i : ℕ) : ℂ))) *
@@ -310,6 +327,11 @@ lemma rth21_charShift_int (c : ι → ℝ) (b : ι → Fin 2) (z : ι → ℂ) (
   rw [h]
   congr 3
 
+/-- Identity under the stated parameter and domain assumptions: `riemannThetaChar (rth21_half a)
+(rth21_half b) x Ω * riemannThetaChar (rth21_half a) (rth21_half b) y Ω = ∑ ν : ι → Fin 2,
+cexp (2 * π * I * ((fun i => (rth21_halfSum a ν i : ℂ)) ⬝ᵥ fun i => ((b i : ℕ) : ℂ))) *
+(riemannThetaChar (rth21_halfSum a ν) 0 (x + y) (2 • Ω) * riemannThetaChar (rth21_half ν) 0 (x
+- y) (2 • Ω))`. -/
 lemma rth21_pair_char [DecidableEq ι] {Ω : Matrix ι ι ℂ}
     (hΩ : Ω ∈ siegelUpperHalfSpace ι)
     (a b : ι → Fin 2) (x y : ι → ℂ) :
@@ -331,6 +353,10 @@ lemma rth21_pair_char [DecidableEq ι] {Ω : Matrix ι ι ℂ}
     funext i; simp [rth21_half]
   rw [h1, h2, h3, sub_self, rth21_charShift_int, mul_assoc]
 
+/-- Identity under the stated parameter and domain assumptions: `∑ b : ι → Fin 2, cexp (2 * π * I
+* ((fun i => (rth21_halfSum a ν i : ℂ)) ⬝ᵥ fun i => ((b i : ℕ) : ℂ))) * cexp (2 * π * I *
+((fun i => (rth21_halfSum a μ i : ℂ)) ⬝ᵥ fun i => ((b i : ℕ) : ℂ))) = if ν = μ then (2 : ℂ) ^
+Fintype.card ι else 0`. -/
 lemma rth21_char_sum [DecidableEq ι] (a ν μ : ι → Fin 2) :
     ∑ b : ι → Fin 2,
       cexp (2 * π * I * ((fun i => (rth21_halfSum a ν i : ℂ)) ⬝ᵥ fun i => ((b i : ℕ) : ℂ))) *
@@ -386,6 +412,8 @@ lemma rth21_char_sum [DecidableEq ι] (a ν μ : ι → Fin 2) :
       exact h (funext hc)
     exact Finset.prod_eq_zero (Finset.mem_univ i) (by simp [hi])
 
+/-- Identity under the stated parameter and domain assumptions: `∑ a : ι → Fin 2, F (rth21_halfSum
+a ν) = ∑ a : ι → Fin 2, F (rth21_half a)`. -/
 lemma rth21_shift_sum [DecidableEq ι] (ν : ι → Fin 2) (F : (ι → ℝ) → ℂ)
     (hF : ∀ (c : ι → ℝ) (m : ι → ℕ), F (c + fun i => (m i : ℝ)) = F c) :
     ∑ a : ι → Fin 2, F (rth21_halfSum a ν) = ∑ a : ι → Fin 2, F (rth21_half a) := by
@@ -403,6 +431,8 @@ lemma rth21_shift_sum [DecidableEq ι] (ν : ι → Fin 2) (F : (ι → ℝ) →
     ring
   rw [hsplit, hF, Equiv.coe_addRight]
 
+/-- Identity under the stated parameter and domain assumptions: `∑ b : ι → Fin 2, (∑ ν, e ν b * U
+ν) * (∑ μ, e μ b * V μ) = ∑ ν, K * (U ν * V ν)`. -/
 lemma rth21_sum_collapse [DecidableEq ι] {K : ℂ} (e : (ι → Fin 2) → (ι → Fin 2) → ℂ)
     (U V : (ι → Fin 2) → ℂ)
     (hchar : ∀ ν μ, ∑ b : ι → Fin 2, e ν b * e μ b = if ν = μ then K else 0) :
@@ -418,6 +448,8 @@ lemma rth21_sum_collapse [DecidableEq ι] {K : ℂ} (e : (ι → Fin 2) → (ι 
     exact Finset.sum_congr rfl fun b _ => by ring
   simp_rw [this, ite_mul, zero_mul, Finset.sum_ite_eq, Finset.mem_univ, ite_true]
 
+/-- The four-theta summand transforms under the binary half-characteristic shift by the displayed
+quadratic phase factor. -/
 lemma rth21_four_summand [DecidableEq ι] {Ω : Matrix ι ι ℂ} (hΩ : Ωᵀ = Ω) (a b : ι → Fin 2)
     (x y u v : ι → ℂ) :
     cexp (2 * π * I * (2 * ((fun i => (rth21_half a i : ℂ)) ⬝ᵥ
@@ -513,9 +545,10 @@ theorem riemannTheta_four_product [DecidableEq ι] {Ω : Matrix ι ι ℂ}
             riemannThetaChar (rth21_half ν) 0 (u - v) (2 • Ω)) := by rw [hF]
     _ = _ := by rw [Finset.sum_mul]
 
-
 /-! ## Proof of 21.6.7 from the addition formula -/
 
+/-- Identity under the stated parameter and domain assumptions: `riemannThetaChar (c + fun i => (m
+i : ℝ)) q z Ω = riemannThetaChar c q z Ω`. -/
 lemma rth21_charShift_nat' (c q : ι → ℝ) (m : ι → ℕ) (z : ι → ℂ) (Ω : Matrix ι ι ℂ) :
     riemannThetaChar (c + fun i => (m i : ℝ)) q z Ω = riemannThetaChar c q z Ω := by
   have h := riemannThetaChar_add_int c q z Ω (fun i => (m i : ℤ)) 0
@@ -527,6 +560,9 @@ lemma rth21_charShift_nat' (c q : ι → ℝ) (m : ι → ℕ) (z : ι → ℂ) 
   rw [h]
   simp [dotProduct]
 
+/-- Identity under the stated parameter and domain assumptions: `riemannThetaChar c (q + fun i =>
+((b i : ℕ) : ℝ)) z Ω = cexp (2 * π * I * ((fun i => (c i : ℂ)) ⬝ᵥ fun i => ((b i : ℕ) : ℂ))) *
+riemannThetaChar c q z Ω`. -/
 lemma rth21_charShift_int' (c q : ι → ℝ) (b : ι → Fin 2) (z : ι → ℂ) (Ω : Matrix ι ι ℂ) :
     riemannThetaChar c (q + fun i => ((b i : ℕ) : ℝ)) z Ω =
       cexp (2 * π * I * ((fun i => (c i : ℂ)) ⬝ᵥ fun i => ((b i : ℕ) : ℂ))) *
@@ -539,6 +575,8 @@ lemma rth21_charShift_int' (c q : ι → ℝ) (b : ι → Fin 2) (z : ι → ℂ
   rw [h]
   congr 3
 
+/-- The product of two theta functions with half-characteristics is the finite sum of
+doubled-period theta products with the indicated shifted characteristics. -/
 lemma rth21_pair_char' [DecidableEq ι] {Ω : Matrix ι ι ℂ}
     (hΩ : Ω ∈ siegelUpperHalfSpace ι)
     (c₁ c₂ d₁ d₂ : ι → ℝ) (a b : ι → Fin 2) (x y : ι → ℂ) :
@@ -565,6 +603,8 @@ lemma rth21_pair_char' [DecidableEq ι] {Ω : Matrix ι ι ℂ}
     funext i; simp
   rw [h1, h2, h3, h4, rth21_charShift_int', mul_assoc]
 
+/-- Identity under the stated parameter and domain assumptions: `∑ b : ι → Fin 2, k b * ((∑ ν, e ν
+b * U ν) * (∑ μ, e' μ b * V μ)) = ∑ ν, K * (U ν * V ν)`. -/
 lemma rth21_sum_collapse' [DecidableEq ι] {K : ℂ} (k : (ι → Fin 2) → ℂ)
     (e e' : (ι → Fin 2) → (ι → Fin 2) → ℂ) (U V : (ι → Fin 2) → ℂ)
     (hchar : ∀ ν μ, ∑ b : ι → Fin 2, k b * e ν b * e' μ b = if ν = μ then K else 0) :
@@ -581,6 +621,11 @@ lemma rth21_sum_collapse' [DecidableEq ι] {K : ℂ} (k : (ι → Fin 2) → ℂ
     exact Finset.sum_congr rfl fun b _ => by ring
   simp_rw [this, ite_mul, zero_mul, Finset.sum_ite_eq, Finset.mem_univ, ite_true]
 
+/-- Identity under the stated parameter and domain assumptions: `∑ b : ι → Fin 2, cexp (-2 * π * I
+* ((fun i => (rth21_half b i : ℂ)) ⬝ᵥ fun i => ((s₁ + s₂) i : ℂ))) * cexp (2 * π * I * ((fun i
+=> (((1 / 2 : ℝ) • s₁ + rth21_halfSum a ν) i : ℂ)) ⬝ᵥ fun i => ((b i : ℕ) : ℂ))) * cexp (2 * π
+* I * ((fun i => (((1 / 2 : ℝ) • s₂ + rth21_halfSum a μ) i : ℂ)) ⬝ᵥ fun i => ((b i : ℕ) : ℂ)))
+= if ν = μ then (2 : ℂ) ^ Fintype.card ι else 0`. -/
 lemma rth21_char_sum' [DecidableEq ι] (a ν μ : ι → Fin 2) (s₁ s₂ : ι → ℝ) :
     ∑ b : ι → Fin 2,
       cexp (-2 * π * I * ((fun i => (rth21_half b i : ℂ)) ⬝ᵥ fun i => ((s₁ + s₂) i : ℂ))) *

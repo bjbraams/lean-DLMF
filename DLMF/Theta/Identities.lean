@@ -65,10 +65,13 @@ def p20R1_parityEquiv : (ℤ × ℤ) ⊕ (ℤ × ℤ) ≃ ℤ × ℤ where
     · simp only [Sum.elim_inl, Prod.mk.injEq]; omega
     · simp only [Sum.elim_inr, Prod.mk.injEq]; omega
 
+/-- The series with terms `(fun n : ℤ => ‖jacobiTheta₂_term n z τ‖)` is summable. -/
 lemma p20R1_summable_norm_term (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
     Summable (fun n : ℤ => ‖jacobiTheta₂_term n z τ‖) :=
   summable_norm_iff.mpr ((summable_jacobiTheta₂_term_iff z τ).mpr hτ)
 
+/-- The series with terms `(fun p : ℤ × ℤ => jacobiTheta₂_term p.1 u τ * jacobiTheta₂_term p.2 v
+σ)` converges to `(jacobiTheta₂ u τ * jacobiTheta₂ v σ)`. -/
 lemma p20R1_hasSum_prod {u v τ σ : ℂ} (hτ : 0 < τ.im) (hσ : 0 < σ.im) :
     HasSum (fun p : ℤ × ℤ => jacobiTheta₂_term p.1 u τ * jacobiTheta₂_term p.2 v σ)
       (jacobiTheta₂ u τ * jacobiTheta₂ v σ) := by
@@ -108,7 +111,6 @@ lemma p20R1_jacobiTheta₂_mul (u v τ : ℂ) (hτ : 0 < τ.im) :
       jacobiTheta₂_term, ← exp_add]
     congr 1; push_cast; ring
   exact hP.unique (hA.sum hB)
-
 
 /-- Watson's formula 20.7.14 in lattice form (helper). -/
 theorem p20R1_W3 (z w τ : ℂ) (hτ : 0 < τ.im) :
@@ -172,7 +174,6 @@ lemma p20R1_W1 (z w τ : ℂ) (hτ : 0 < τ.im) :
     show w - π / 2 + π / 2 = w by ring, jacobiThetaOneTau_add_pi] at h
   linear_combination -h
 
-
 /-- `θ₁(0|τ) = 0` (helper). -/
 lemma p20R1_one_zero (τ : ℂ) : jacobiThetaOneTau 0 τ = 0 := by
   have := jacobiThetaOneTau_neg 0 τ
@@ -225,8 +226,6 @@ lemma p20R1_quartic (z w τ : ℂ) (hτ : 0 < τ.im) :
     (jacobiThetaOneTau z τ * jacobiThetaOneTau w τ +
       (jacobiThetaThreeTau (z + w) (2 * τ) * jacobiThetaTwoTau (z - w) (2 * τ) -
         jacobiThetaTwoTau (z + w) (2 * τ) * jacobiThetaThreeTau (z - w) (2 * τ))) * h1
-
-
 
 /-- Algebraic step for the addition formulas 20.7.6–20.7.9 (helper). -/
 lemma p20R1_alg {n p₁ p₂ u v r t X Y a b c d : ℂ} (hP : p₁ * p₂ = X) (hN : n * n = Y)
@@ -1094,7 +1093,6 @@ lemma p20R1_two_null_half_eta {τ : ℂ} (hτ : 0 < τ.im) :
     simp only [← exp_add]; congr 1; ring
   linear_combination (2 * (B * (O * Bp)) * B) * hx
 
-
 /-- The common value `θ₂(0|τ+½)/(2e^{iπ/4})` of the two quotients in 20.7.34 (helper). -/
 lemma p20R1_iq_ratio (z τ : ℂ) (hτ : 0 < τ.im) :
     (jacobiThetaOneTau z (τ + 1 / 2) ≠ 0 →
@@ -1212,7 +1210,6 @@ lemma p20R1_eta_imag {s : ℝ} (hs : 0 < s) :
   rw [← hPdef, Function.Periodic.qParam]
   push_cast
   rw [← hPr]; congr 1; congr 1; ring_nf; rw [I_sq]; ring
-
 
 /-- The principal root in 20.7.34 is the eta quotient on the imaginary axis (helper). -/
 lemma p20R1_rect_root {t : ℝ} (ht : 0 < t) :

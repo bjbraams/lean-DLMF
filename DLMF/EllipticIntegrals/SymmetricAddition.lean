@@ -60,10 +60,13 @@ def ei19d_posDomain (x y z : ℝ) : Prop :=
 
 /-! ### §19.26(i) General formulas -/
 
+/-- Identity under the stated parameter and domain assumptions: `√(a * b * c) = √a * √b * √c`. -/
 lemma ei19d_sqrt_mul3 {a b c : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) (_hc : 0 ≤ c) :
     √(a * b * c) = √a * √b * √c := by
   rw [Real.sqrt_mul (mul_nonneg ha hb), Real.sqrt_mul ha]
 
+/-- Identity under the stated parameter and domain assumptions: `(b ^ 2 + m) * l ^ 2 = (B * a * c
++ b * A * C) ^ 2 ∧ (c ^ 2 + m) * l ^ 2 = (C * a * b + c * A * B) ^ 2`. -/
 lemma ei19d_perm_alg {a b c A B C l m : ℝ} (hA : A ^ 2 = a ^ 2 + l) (hB : B ^ 2 = b ^ 2 + l)
     (hC : C ^ 2 = c ^ 2 + l) (h : (a ^ 2 + m) * l ^ 2 = (A * b * c + a * B * C) ^ 2) :
     (b ^ 2 + m) * l ^ 2 = (B * a * c + b * A * C) ^ 2 ∧
@@ -145,6 +148,9 @@ theorem symEllIntRF_addition_zero {y z l m : ℝ} (hy : 0 < y) (hz : 0 < z) (hl 
     symEllIntRF_eq_carlsonRF (hs _ (by linarith)) (hs _ (by linarith)) (hs m hm), ← H]
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `l * (l * m - (x * y + x * z + y *
+z)) = 2 * √(x * y * z) * (√(x * y * z) + √((x + l) * (y + l) * (z + l))) ∧ l ^ 2 * (l + m + x
++ y + z) = (√(x * y * z) + √((x + l) * (y + l) * (z + l))) ^ 2`. -/
 lemma ei19d_addition_core {x y z l m : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) (hz : 0 ≤ z) (hl : 0 < l)
     (h5 : m = (√(x * y * z) + √((x + l) * (y + l) * (z + l))) ^ 2 / l ^ 2 - l - x - y - z) :
     l * (l * m - (x * y + x * z + y * z)) =
@@ -212,6 +218,9 @@ theorem symEllInt_addition_quadratic {x y z l m : ℝ} (h : ei19d_posDomain x y 
       (√(x * y * z) + √((x + l) * (y + l) * (z + l)))) * h1 +
     4 * (√(x * y * z) + √((x + l) * (y + l) * (z + l))) ^ 2 * hP - 4 * (x * y * z) * h2
 
+/-- Identity under the stated parameter and domain assumptions: `symEllIntRF ((x + l : ℝ) : ℂ) ((y
++ l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) + symEllIntRF ((x + m : ℝ) : ℂ) ((y + m : ℝ) : ℂ) ((z + m : ℝ)
+: ℂ) = symEllIntRF x y z`. -/
 lemma ei19d_addition_pos {x y z l m : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z) (hl : 0 < l)
     (hm : 0 < m)
     (h5 : m = (√(x * y * z) + √((x + l) * (y + l) * (z + l))) ^ 2 / l ^ 2 - l - x - y - z) :
@@ -234,6 +243,9 @@ lemma ei19d_addition_pos {x y z l m : ℝ} (hx : 0 < x) (hy : 0 < y) (hz : 0 < z
     symEllIntRF_eq_carlsonRF (hs x hx) (hs y hy) (hs z hz)]
   exact Carlson.carlsonRF_add_carlsonRF hx hy hz hl hm h13
 
+/-- Identity under the stated parameter and domain assumptions: `symEllIntRF ((x + l : ℝ) : ℂ) ((y
++ l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) + symEllIntRF ((x + m : ℝ) : ℂ) ((y + m : ℝ) : ℂ) ((z + m : ℝ)
+: ℂ) = symEllIntRF x y z`. -/
 lemma ei19d_addition_of_first {x y z l m : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (hz : 0 < z)
     (hl : 0 < l) (hm : 0 < m)
     (h5 : m = (√(x * y * z) + √((x + l) * (y + l) * (z + l))) ^ 2 / l ^ 2 - l - x - y - z) :
@@ -287,7 +299,6 @@ theorem symEllIntRF_add_symEllIntRF {x y z l m : ℝ} (h : ei19d_posDomain x y z
     rw [hrot ((z + l : ℝ) : ℂ), hrot ((z + m : ℝ) : ℂ), hrot (z : ℂ)] at H
     exact H
   · exact ei19d_addition_of_first hx hy' hz' hl hm h5
-
 
 /-- DLMF 19.26.7: `R_D(x + λ, y + λ, z + λ) + R_D(x + μ, y + μ, z + μ)
 = R_D(x, y, z) - 3/√(z (z + λ)(z + μ))`, with `λ, μ` as in (19.26.1)–(19.26.2) and `z > 0`
@@ -484,12 +495,15 @@ theorem symEllIntRF_duplication_zero {y z : ℂ} (hy : y ∈ slitPlane) (hz : z 
     ei19d_symEllIntRF_zero_eq_carlsonRK hy hz,
     symEllIntRF_eq_carlsonRF (hadd y z hy hz) hz' hm, Carlson.carlsonRK_duplication hy hz]
 
+/-- Formula under the stated hypotheses: `a / 4 ∈ slitPlane`. -/
 lemma ei19d_div_four_mem {a : ℂ} (ha : a ∈ slitPlane) : a / 4 ∈ slitPlane := by
   rw [mem_slitPlane_iff] at ha ⊢
   rcases ha with h | h
   · left; simp only [div_re]; norm_num; positivity
   · right; simp only [div_im]; norm_num; exact h
 
+/-- Identity under the stated parameter and domain assumptions: `((1 / 4 : ℝ) : ℂ) ^ (-1 / 2 : ℂ)
+= 2`. -/
 lemma ei19d_quarter_cpow : ((1 / 4 : ℝ) : ℂ) ^ (-1 / 2 : ℂ) = 2 := by
   rw [show (-1 / 2 : ℂ) = ((-1 / 2 : ℝ) : ℂ) by push_cast; ring,
     ← ofReal_cpow (by norm_num : (0 : ℝ) ≤ 1 / 4)]

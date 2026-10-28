@@ -33,17 +33,21 @@ open scoped Real Topology
 
 namespace DLMF.EllipticIntegrals
 
+/-- Formula under the stated hypotheses: `(l : ℂ) * x ∈ slitPlane`. -/
 lemma ei19c_smul_mem_slitPlane {l : ℝ} (hl : 0 < l) {x : ℂ} (hx : x ∈ slitPlane) :
     (l : ℂ) * x ∈ slitPlane := by
   rcases mem_slitPlane_iff.mp hx with h | h
   · exact mem_slitPlane_iff.mpr (Or.inl (by simp; positivity))
   · exact mem_slitPlane_iff.mpr (Or.inr (by simp [hl.ne', h]))
 
+/-- Formula under the stated hypotheses: `arg (l : ℂ) + arg x ∈ Ioo (-π) π`. -/
 lemma ei19c_arg_ofReal_add {l : ℝ} (hl : 0 < l) {x : ℂ} (hx : x ∈ slitPlane) :
     arg (l : ℂ) + arg x ∈ Ioo (-π) π := by
   rw [arg_ofReal_of_nonneg hl.le, zero_add]
   exact ⟨neg_pi_lt_arg _, lt_of_le_of_ne (arg_le_pi _) (mem_slitPlane_iff_arg.mp hx).1⟩
 
+/-- Identity under the stated parameter and domain assumptions: `symEllIntR a b (fun i => (l : ℂ)
+* z i) = (l : ℂ) ^ (-a) * symEllIntR a b z`. -/
 lemma ei19c_symEllIntR_smul {ι : Type*} [Fintype ι] (a : ℂ) (b : ι → ℂ) {l : ℝ} (hl : 0 < l)
     {z : ι → ℂ} (hz : z ∈ Carlson.carlsonRSlitDomain) :
     symEllIntR a b (fun i => (l : ℂ) * z i) = (l : ℂ) ^ (-a) * symEllIntR a b z :=

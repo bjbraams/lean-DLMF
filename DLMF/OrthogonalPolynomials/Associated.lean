@@ -102,10 +102,13 @@ def exceptionalHermite : Option ℕ → ℝ → ℝ
       8 * x * aeval x (hermitePolyH n)) /
       (Real.pi ^ (1 / 4 : ℝ) * Real.sqrt (2 ^ (n + 1) * (n + 3) * n.factorial))
 
+/-- Identity under the stated parameter and domain assumptions: `associated A B C c 0 x = 1`. -/
 @[dlmf 18.30.E2]
 theorem associated_zero (A B C : ℝ → ℂ) (c : ℝ) (x : ℂ) : associated A B C c 0 x = 1 := by
   rfl
 
+/-- The map `(fun phi : ℝ => associatedMeixnerPollaczek ((lam + 1) / 2) phi c n (-x / (2 * sin
+(phi : ℂ))))` tends to `(𝓝 (associatedLaguerre lam c n x))` along `(𝓝[>] 0)`. -/
 @[dlmf 18.30.E19]
 theorem associatedPollaczek_limit_laguerrePolyL (lam : ℂ) {c : ℝ} (hc : 0 ≤ c) (n : ℕ) (x : ℂ) :
     Tendsto (fun phi : ℝ => associatedMeixnerPollaczek ((lam + 1) / 2) phi c n (-x / (2 * sin (phi : ℂ))))
@@ -164,6 +167,9 @@ theorem associatedPollaczek_limit_laguerrePolyL (lam : ℂ) {c : ℝ} (hc : 0 �
     field_simp
     ring
 
+/-- The map `(fun lam : ℝ => poch (c + 1) n * (Real.sqrt lam : ℂ)⁻¹ ^ n *
+associatedMeixnerPollaczek lam (Real.pi / 2) c n (x * Real.sqrt lam))` tends to `(𝓝
+(associatedHermite c n x))` along `atTop`. -/
 @[dlmf 18.30.E20]
 theorem associatedPollaczek_limit_hermite {c : ℝ} (hc : 0 ≤ c) (n : ℕ) (x : ℂ) :
     Tendsto (fun lam : ℝ => poch (c + 1) n * (Real.sqrt lam : ℂ)⁻¹ ^ n *
@@ -219,6 +225,8 @@ theorem poch_nat_succ_mul_factorial (a b : ℕ) :
   have h' : ((a + b).choose a : ℂ) * a ! * b ! = (a + b)! := by exact_mod_cast h
   linear_combination h'
 
+/-- Identity under the stated parameter and domain assumptions: `besselPolynomial a n x =
+(n.factorial : ℂ) * (-x / 2) ^ n * laguerreExtended (1 - a - 2 * n) n (2 / x)`. -/
 @[dlmf 18.34.E1]
 theorem besselPolynomial_eq_laguerrePolyL (a : ℂ) (n : ℕ) {x : ℂ} (hx : x ≠ 0) :
     besselPolynomial a n x = (n.factorial : ℂ) * (-x / 2) ^ n * laguerreExtended (1 - a - 2 * n) n (2 / x) := by
@@ -244,6 +252,8 @@ theorem besselPolynomial_eq_laguerrePolyL (a : ℂ) (n : ℕ) {x : ℂ} (hx : x 
   rw [q1]
   linear_combination (-(n ! : ℂ) * ((-1) ^ k * poch (n + a - 1) k / ((k ! : ℂ) * (n - k) !))) * hpow
 
+/-- Identity under the stated parameter and domain assumptions: `reverseBesselPolynomial n x = x ^
+n * besselPolynomial 2 n x⁻¹`. -/
 @[dlmf 18.34.E2]
 theorem reverseBesselPolynomial_eq (n : ℕ) {x : ℂ} (hx : x ≠ 0) :
     reverseBesselPolynomial n x = x ^ n * besselPolynomial 2 n x⁻¹ := by
@@ -330,6 +340,10 @@ theorem besselCoeff_zero (a : ℂ) (m : ℕ) : besselCoeff a m 0 = 1 := by
 theorem besselCoeff_eq_zero (a : ℂ) {m k : ℕ} (hk : m < k) : besselCoeff a m k = 0 := by
   simp [besselCoeff, poch_neg_nat_eq_zero hk]
 
+/-- Identity under the stated parameter and domain assumptions: `2 * (n + a) * (2 * n + a) *
+besselPolynomial a (n + 2) x = ((2 * n + a + 2) * (2 * n + a + 1) * (2 * n + a) * x + 2 * (a -
+2) * (2 * n + a + 1)) * besselPolynomial a (n + 1) x + 2 * (n + 1) * (2 * n + a + 2) *
+besselPolynomial a n x`. -/
 @[dlmf 18.34.E4]
 theorem besselPolynomial_recurrence (a : ℂ) (n : ℕ) (x : ℂ) :
     2 * (n + a) * (2 * n + a) * besselPolynomial a (n + 2) x =
@@ -370,6 +384,9 @@ theorem besselPolynomial_recurrence (a : ℂ) (n : ℕ) (x : ℂ) :
     Finset.sum_add_distrib, ← Finset.mul_sum, ← Finset.mul_sum, ← Finset.mul_sum, ← Finset.mul_sum]
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `x ^ 2 * deriv (deriv
+(besselPolynomial a n)) x + (a * x + 2) * deriv (besselPolynomial a n) x - n * (n + a - 1) *
+besselPolynomial a n x = 0`. -/
 @[dlmf 18.34.E7]
 theorem besselPolynomial_differential_equation (a : ℂ) (n : ℕ) (x : ℂ) :
     x ^ 2 * deriv (deriv (besselPolynomial a n)) x + (a * x + 2) * deriv (besselPolynomial a n) x -
@@ -657,6 +674,10 @@ theorem bessel_norm_gamma {s : ℝ} (hs : 0 < s) (n : ℕ) :
   field_simp
   simpa only [mul_comm] using bessel_norm_pochhammer (s : ℂ) n
 
+/-- Identity under the stated parameter and domain assumptions: `(2 : ℂ) ^ (1 - (a : ℂ)) / Gamma
+(1 - (a : ℂ)) * (∫ x : ℝ in Set.Ioi 0, besselPolynomial a m x * besselPolynomial a n x *
+(Real.rpow x (a - 2) * Real.exp (-2 / x) : ℝ)) = if m = n then (1 - a) / (1 - a - 2 * (n : ℂ))
+* n.factorial / poch (2 - a - n) n else 0`. -/
 @[dlmf 18.34.E5_5]
 theorem besselPolynomial_finite_orthogonality {a : ℝ} (m n : ℕ) (ha : a < 1 - 2 * max m n) :
     (2 : ℂ) ^ (1 - (a : ℂ)) / Gamma (1 - (a : ℂ)) *
@@ -705,6 +726,8 @@ theorem besselPolynomial_finite_orthogonality {a : ℝ} (m n : ℕ) (ha : a < 1 
 
 end FiniteBesselOrthogonality
 
+/-- The map `(fun α : ℝ => jacobiPolyP α (a - α - 2) n (1 + α * x) / jacobiPolyP α (a - α - 2) n
+1)` tends to `(𝓝 (besselPolynomial a n x))` along `atTop`. -/
 @[dlmf 18.34.E8]
 theorem jacobi_limit_besselPolynomial (a : ℂ) (n : ℕ) (x : ℂ) :
     Tendsto (fun α : ℝ => jacobiPolyP α (a - α - 2) n (1 + α * x) / jacobiPolyP α (a - α - 2) n 1)
@@ -742,6 +765,8 @@ theorem jacobi_limit_besselPolynomial (a : ℂ) (n : ℕ) (x : ℂ) :
   · simp only [List.map_cons, List.map_nil, List.prod_cons, List.prod_nil, mul_one, div_one]
     rfl
 
+/-- Identity under the stated parameter and domain assumptions: `pollaczek lam a b c n (-x) = (-1
+: ℂ) ^ n * pollaczek lam a (-b) c n x`. -/
 @[dlmf 18.35.E2_5]
 theorem pollaczek_reflection (lam a b : ℂ) (c : ℝ) (n : ℕ) (x : ℂ) :
     pollaczek lam a b c n (-x) = (-1 : ℂ) ^ n * pollaczek lam a (-b) c n x := by
@@ -800,6 +825,9 @@ theorem pollaczek_eq_coeff_binomProductSeries (lam a b : ℂ) {θ : ℂ} (hθ : 
     linear_combination (-(n + 1 + lam : ℂ) * P) * hcos + (I * Φ * P) * hsin +
       (2 * Φ * sin θ * P) * I_sq - (2 * P) * hΦs
 
+/-- Formula under the stated hypotheses: `pollaczek lam a b 0 n (cos θ) = ∑ k ∈ Finset.range (n +
+1), poch (lam + I * (a * cos θ + b) / sin θ) k / k.factorial * (poch (lam - I * (a * cos θ +
+b) / sin θ) (n - k) / (n - k).factorial) * exp (I * ((n : ℂ) - 2 * k) * θ)`. -/
 @[dlmf 18.35.E4]
 theorem pollaczek_finite_sum (lam a b : ℂ) (n : ℕ) {θ : ℂ} (hθ : sin θ ≠ 0) :
     pollaczek lam a b 0 n (cos θ) = ∑ k ∈ Finset.range (n + 1),
@@ -820,6 +848,9 @@ theorem pollaczek_finite_sum (lam a b : ℂ) (n : ℕ) {θ : ℂ} (hθ : sin θ 
   rw [mul_div_assoc, mul_div_assoc]
   field_simp
 
+/-- The series with terms `(fun n : ℕ => pollaczek lam a b 0 n (Real.cos θ) * z ^ n)` converges to
+`((1 - z * exp (I * θ)) ^ (-lam + I * (a * Real.cos θ + b) / Real.sin θ) * (1 - z * exp (-I *
+θ)) ^ (-lam - I * (a * Real.cos θ + b) / Real.sin θ))`. -/
 @[dlmf 18.35.E7]
 theorem pollaczek_generating_function (lam a b : ℂ) (θ : ℝ) (hθ : Real.sin θ ≠ 0) {z : ℂ} (hz : ‖z‖ < 1) :
     HasSum (fun n : ℕ => pollaczek lam a b 0 n (Real.cos θ) * z ^ n)
@@ -840,6 +871,8 @@ theorem pollaczek_generating_function (lam a b : ℂ) (θ : ℝ) (hθ : Real.sin
   · rw [mul_comm z, mul_comm z]
     congr 2 <;> ring
 
+/-- Identity under the stated parameter and domain assumptions: `pollaczek lam 0 0 0 n x =
+ultrasphPoly lam n x`. -/
 @[dlmf 18.35.E8]
 theorem pollaczek_eq_ultrasphPoly {lam : ℂ} (hlam : -1 / 2 < lam.re) (n : ℕ) (x : ℂ) :
     pollaczek lam 0 0 0 n x = ultrasphPoly lam n x := by
@@ -858,6 +891,8 @@ theorem pollaczek_eq_ultrasphPoly {lam : ℂ} (hlam : -1 / 2 < lam.re) (n : ℕ)
     linear_combination -hr
 
 
+/-- Identity under the stated parameter and domain assumptions: `pollaczek lam 0 (x * sin phi) 0 n
+(cos phi) = meixnerPollaczek lam phi n x`. -/
 @[dlmf 18.35.E9]
 theorem pollaczek_eq_meixnerPollaczek {lam : ℂ} (hlam : 0 < lam.re) (phi x : ℂ) (n : ℕ) :
     pollaczek lam 0 (x * sin phi) 0 n (cos phi) = meixnerPollaczek lam phi n x := by
@@ -878,6 +913,8 @@ theorem pollaczek_eq_meixnerPollaczek {lam : ℂ} (hlam : 0 < lam.re) (phi x : �
     field_simp
     linear_combination -hr
 
+/-- Identity under the stated parameter and domain assumptions: `pollaczek lam 0 (x * sin phi) c n
+(cos phi) = associatedMeixnerPollaczek lam phi c n x`. -/
 @[dlmf 18.35.E10]
 theorem pollaczek_eq_associatedMeixnerPollaczek (lam phi x : ℂ) (c : ℝ) (n : ℕ) :
     pollaczek lam 0 (x * sin phi) c n (cos phi) = associatedMeixnerPollaczek lam phi c n x := by
@@ -892,6 +929,8 @@ theorem pollaczek_eq_associatedMeixnerPollaczek (lam phi x : ℂ) (c : ℝ) (n :
     simp only [associatedMeixnerPollaczek, associated]
     ring
 
+/-- Identity under the stated parameter and domain assumptions: `laguerreExtended (-(k : ℂ)) n x =
+(-1 : ℂ) ^ k * (n - k).factorial / n.factorial * x ^ k * laguerrePolyL k (n - k) x`. -/
 @[dlmf 18.36.E2]
 theorem laguerrePolyL_negative_integer_parameter {n k : ℕ} (hk : k ≤ n) (x : ℂ) :
     laguerreExtended (-(k : ℂ)) n x = (-1 : ℂ) ^ k * (n - k).factorial / n.factorial * x ^ k
@@ -959,12 +998,18 @@ theorem laguerrePolyL_deriv_succ_sub {α : ℂ} (hα : -1 < α.re) (m : ℕ) (x 
         laguerrePolyL_raise_parameter hα j]
     ring
 
+/-- Identity under the stated parameter and domain assumptions: `∫ x : ℝ in Set.Ioi 0,
+exceptionalLaguerre k m x * exceptionalLaguerre k n x * exceptionalLaguerreWeight k x = if m =
+n then (n + 1 + (k : ℂ)) * Gamma (n + (k : ℂ)) / n.factorial else 0`. -/
 @[dlmf 18.36.E6]
 theorem exceptionalLaguerre_orthogonality {k : ℝ} (hk : 0 < k) (m n : ℕ) :
     ∫ x : ℝ in Set.Ioi 0, exceptionalLaguerre k m x * exceptionalLaguerre k n x * exceptionalLaguerreWeight k x =
       if m = n then (n + 1 + (k : ℂ)) * Gamma (n + (k : ℂ)) / n.factorial else 0 := by
   sorry
 
+/-- Identity under the stated parameter and domain assumptions: `-x * deriv (deriv
+(exceptionalLaguerre k n)) x + (x - k) / (x + k) * ((x + k + 1) * deriv (exceptionalLaguerre k
+n) x - exceptionalLaguerre k n x) = n * exceptionalLaguerre k n x`. -/
 @[dlmf 18.36.E7]
 theorem exceptionalLaguerre_differential_equation {k : ℝ} (hk : 0 < k) (n : ℕ) {x : ℂ} (hx : x + k ≠ 0) :
     -x * deriv (deriv (exceptionalLaguerre k n)) x + (x - k) / (x + k) *
@@ -1026,6 +1071,9 @@ theorem exceptionalLaguerre_differential_equation {k : ℝ} (hk : 0 < k) (n : �
     push_cast at E1 E2 ⊢
     linear_combination (x + k) * (x + k + 1) * E1 - (x + k) * E2 - 2 * x * R2
 
+/-- Identity under the stated parameter and domain assumptions: `∫ x : ℝ, exceptionalHermite m x *
+exceptionalHermite n x * (Real.exp (-(x ^ 2)) / (4 * x ^ 2 + 2) ^ 2) = if m = n then 1 else
+0`. -/
 @[dlmf 18.36.E10]
 theorem exceptionalHermite_orthonormal (m n : Option ℕ) :
     ∫ x : ℝ, exceptionalHermite m x * exceptionalHermite n x *
@@ -1043,6 +1091,10 @@ def pollaczekAngularWeight (lam a b θ : ℝ) : ℝ :=
   Real.pi⁻¹ * Real.exp ((2 * θ - Real.pi) * pollaczekTau a b θ) *
     (2 * Real.sin θ) ^ (2 * lam - 1) * ‖Gamma (lam + I * pollaczekTau a b θ)‖ ^ 2 * Real.sin θ
 
+/-- Identity under the stated parameter and domain assumptions: `∫ θ : ℝ in (0 : ℝ)..Real.pi,
+pollaczek lam a b 0 m (Real.cos θ) * pollaczek lam a b 0 n (Real.cos θ) *
+pollaczekAngularWeight lam a b θ = if m = n then Gamma (2 * (lam : ℂ) + n) / (n.factorial *
+(lam + a + n)) else 0`. -/
 @[dlmf 18.35.E5]
 theorem pollaczek_orthogonality {lam a b : ℝ} (hlam : 0 < lam) (hab : |b| ≤ a) (m n : ℕ) :
     ∫ θ : ℝ in (0 : ℝ)..Real.pi, pollaczek lam a b 0 m (Real.cos θ) *
@@ -1068,6 +1120,9 @@ theorem exists_besselPolynomial_eq_eval (a : ℂ) (n : ℕ) :
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [show -x / 2 = (-1 / 2) * x by ring, mul_pow]; ring
 
+/-- Identity under the stated parameter and domain assumptions: `deriv (deriv
+(morsePolynomialFunction lam n)) x - (lam ^ 2 * (Real.exp (-2 * x) - 2 * Real.exp (-x)) + (lam
+- (n + 1 / 2)) ^ 2 : ℝ) * morsePolynomialFunction lam n x = 0`. -/
 @[dlmf 18.34.E7_2]
 theorem morsePolynomialFunction_ode {lam : ℝ} (hlam : 0 < lam) (n : ℕ) (x : ℝ) :
     deriv (deriv (morsePolynomialFunction lam n)) x -
@@ -1254,6 +1309,9 @@ theorem morse_product_integral {lam : ℝ} (hlam : 0 < lam) (m n : ℕ) :
   change _ = (2 : ℂ) ^ (2 * lam - 1 : ℂ) / ((m ! : ℂ) * n !) * ∫ u : ℝ in Ioi 0, H u
   field_simp [hlam0]
 
+/-- Identity under the stated parameter and domain assumptions: `∫ x : ℝ, morsePolynomialFunction
+lam m x * morsePolynomialFunction lam n x = if m = n then Gamma (2 * (lam : ℂ) - n) / ((2 *
+lam - 2 * n - 1) * n.factorial) else 0`. -/
 @[dlmf 18.34.E7_3]
 theorem morsePolynomialFunction_orthogonality {lam : ℝ} (m n : ℕ) (hm : (m : ℝ) < lam - 1 / 2) (hn : (n : ℝ) < lam - 1 / 2) :
     ∫ x : ℝ, morsePolynomialFunction lam m x * morsePolynomialFunction lam n x =

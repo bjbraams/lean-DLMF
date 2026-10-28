@@ -91,7 +91,7 @@ public import DLMFMathlib.NumberTheory.LSeries.ZetaValues
 # Supporting results for Mathlib
 
 General results used by the special-function library but not specific to it, written in
-the namespaces of the Mathlib APIs they extend. These modules import Mathlib only.
+the namespaces of the Mathlib APIs they extend. These modules use Mathlib, TauCeti and lean-codes, without importing `DLMF`.
 
 * `DLMFMathlib.Analysis.Complex.SegmentPrimitive`: straight-segment primitives and their derivatives.
 * `DLMFMathlib.Analysis.Complex.StarPrimitive`: primitives of holomorphic functions on star-convex
@@ -138,7 +138,7 @@ the namespaces of the Mathlib APIs they extend. These modules import Mathlib onl
 * `DLMFMathlib.Analysis.Asymptotics.WatsonRotated`: rotation of Laplace rays, Watson's lemma along
   rotated rays, and gluing of asymptotic expansions on overlapping sectors.
 * `ToMathlib.Analysis.Integral.Laplace`: quantitative Laplace asymptotics with a quadratic
-  phase (a copy of the `lean-codes` module of the same path).
+  phase (imported from the `lean-codes` dependency).
 * `DLMFMathlib.Analysis.ODE.SturmComparison`: Sturm's comparison and separation theorems for
   `(p y')' + q y = 0`.
 * `DLMFMathlib.Analysis.ODE.PowerSeriesUniqueness`: uniqueness for second-order linear ODEs

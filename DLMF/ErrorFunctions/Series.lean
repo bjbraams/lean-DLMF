@@ -21,7 +21,8 @@ open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
 namespace DLMF.Confluent
 
-/-- hasSum erf complex. -/
+/-- The series with terms `(fun n : ℕ => 2/Real.sqrt π*(-1 : ℂ)^n*z^(2*n+1)/((n.factorial :
+ℂ)*(2*n+1)))` converges to `(erf z)`. -/
 @[dlmf 7.6.E1]
 theorem hasSum_erf_complex (z : ℂ) :
     HasSum (fun n : ℕ => 2/Real.sqrt π*(-1 : ℂ)^n*z^(2*n+1)/((n.factorial : ℂ)*(2*n+1))) (erf z) := by
@@ -53,7 +54,8 @@ theorem poch_three_half_mul_two_pow (n : ℕ) : poch (3/2) n*(2:ℂ)^n = oddProd
     push_cast
     ring
 
-/-- hasSum erf scaled. -/
+/-- The series with terms `(fun n : ℕ => 2/Real.sqrt π*exp (-z^2)*(2 : ℂ)^n*z^(2*n+1)/oddProduct
+n)` converges to `(erf z)`. -/
 @[dlmf 7.6.E2]
 theorem hasSum_erf_scaled (z : ℂ) :
     HasSum (fun n : ℕ => 2/Real.sqrt π*exp (-z^2)*(2 : ℂ)^n*z^(2*n+1)/oddProduct n) (erf z) := by
@@ -95,7 +97,8 @@ theorem Gamma_nat_add_three_half_mul_two_pow (m : ℕ) :
     push_cast
     ring
 
-/-- hasSum faddeevaW. -/
+/-- The series with terms `(fun n : ℕ => (I*z)^n/Gamma ((n : ℂ)/2+1))` converges to `(faddeevaW
+z)`. -/
 @[dlmf 7.6.E3]
 theorem hasSum_faddeevaW (z : ℂ) :
     HasSum (fun n : ℕ => (I*z)^n/Gamma ((n : ℂ)/2+1)) (faddeevaW z) := by
@@ -129,8 +132,6 @@ theorem hasSum_faddeevaW (z : ℂ) :
     show erf (-u) = -erf u by simp [erf]]
   ring
 
-
-
 /-- Convergent auxiliary series of DLMF 7.6.5 and 7.6.7. -/
 def fresnelAlternateSeries (odd : Bool) (z : ℂ) : ℂ :=
   ∑' n : ℕ, (-1 : ℂ)^n*π^(2*n+if odd then 1 else 0)*z^(4*n+if odd then 3 else 1)/oddProduct (2*n+if odd then 1 else 0)
@@ -147,7 +148,8 @@ theorem factorial_le_norm_oddProduct (k : ℕ) : (k ! : ℝ) ≤ ‖oddProduct k
       _ ≤ _ := Nat.le_mul_of_pos_right _ (by omega)
   exact_mod_cast h
 
-/-- fresnelAlternateSeries summable. -/
+/-- The series with terms `(fun n : ℕ => (-1 : ℂ)^n*π^(2*n+if odd then 1 else 0)*z^(4*n+if odd
+then 3 else 1)/oddProduct (2*n+if odd then 1 else 0))` is summable. -/
 theorem fresnelAlternateSeries_summable (odd : Bool) (z : ℂ) :
     Summable (fun n : ℕ => (-1 : ℂ)^n*π^(2*n+if odd then 1 else 0)*z^(4*n+if odd then 3 else 1)/oddProduct (2*n+if odd then 1 else 0)) := by
   set e : ℕ := if odd then 1 else 0 with he
@@ -225,7 +227,8 @@ theorem fresnel_signed_alternate (z : ℂ) {ε : ℝ} (hε : ε = 1 ∨ ε = -1)
   simp only [hK]
   linear_combination (-((1+ε*I)/2*erf ζ))*hK0
 
-/-- fresnelCosInt alternate series. -/
+/-- Identity under the stated parameter and domain assumptions: `fresnelCosInt z=cos
+(π*z^2/2)*fresnelAlternateSeries false z+sin (π*z^2/2)*fresnelAlternateSeries true z`. -/
 @[dlmf 7.6.E5]
 theorem fresnelCosInt_alternate_series (z : ℂ) :
     fresnelCosInt z=cos (π*z^2/2)*fresnelAlternateSeries false z+sin (π*z^2/2)*fresnelAlternateSeries true z := by
@@ -237,7 +240,8 @@ theorem fresnelCosInt_alternate_series (z : ℂ) :
   rw [show (1:ℂ)*I*(π*z^2/2) = (π:ℂ)*z^2/2*I by ring] at h1
   linear_combination h1/2 + h2/2
 
-/-- fresnelSinInt alternate series. -/
+/-- Identity under the stated parameter and domain assumptions: `fresnelSinInt z = -cos
+(π*z^2/2)*fresnelAlternateSeries true z+sin (π*z^2/2)*fresnelAlternateSeries false z`. -/
 @[dlmf 7.6.E7]
 theorem fresnelSinInt_alternate_series (z : ℂ) :
     fresnelSinInt z = -cos (π*z^2/2)*fresnelAlternateSeries true z+sin (π*z^2/2)*fresnelAlternateSeries false z := by
@@ -250,7 +254,8 @@ theorem fresnelSinInt_alternate_series (z : ℂ) :
   linear_combination (-I/2)*h1 + (I/2)*h2 + (fresnelSinInt z + (exp ((π:ℂ)*z^2/2*I) +
     exp (-((π:ℂ)*z^2/2)*I))*fresnelAlternateSeries true z/2)*I_sq
 
-/-- erf spherical series. -/
+/-- The series with terms `(fun n : ℕ => 2*z/Real.sqrt π*(-1 : ℂ)^n*(sphericalI (2*n)
+(z^2)-sphericalI (2*n+1) (z^2)))` converges to `(erf z)`. -/
 @[dlmf 7.6.E8]
 theorem erf_spherical_series (z : ℂ) :
     HasSum (fun n : ℕ => 2*z/Real.sqrt π*(-1 : ℂ)^n*(sphericalI (2*n) (z^2)-sphericalI (2*n+1) (z^2))) (erf z) := by
@@ -544,7 +549,9 @@ theorem erfCheb_hasSum (z b : ℂ) :
     simp only [h0, mul_zero, zero_mul, erf_zero]
     exact hasSum_zero
 
-/-- erf chebyshev spherical series. -/
+/-- The series with terms `(fun n : ℕ => 2*z/Real.sqrt π*exp ((1/2-(a :
+ℂ)^2)*z^2)*(Polynomial.Chebyshev.T ℝ (2*n+1 : ℤ)).eval a*sphericalI n (z^2/2))` converges to
+`(erf (a*z))`. -/
 @[dlmf 7.6.E9]
 theorem erf_chebyshev_spherical_series {a : ℝ} (ha : -1 ≤ a) (ha1 : a ≤ 1) (z : ℂ) :
     HasSum (fun n : ℕ => 2*z/Real.sqrt π*exp ((1/2-(a : ℂ)^2)*z^2)*(Polynomial.Chebyshev.T ℝ (2*n+1 : ℤ)).eval a*sphericalI n (z^2/2)) (erf (a*z)) := by
@@ -556,7 +563,8 @@ theorem erf_chebyshev_spherical_series {a : ℝ} (ha : -1 ≤ a) (ha1 : a ≤ 1)
     rfl
   simpa only [hT] using erfCheb_hasSum z a
 
-/-- fresnelCosInt spherical series. -/
+/-- The series with terms `(fun n : ℕ => z*sphericalJ (2*n+0) (π*z^2/2))` converges to
+`(fresnelCosInt z)`. -/
 @[dlmf 7.6.E10]
 theorem fresnelCosInt_spherical_series (z : ℂ) :
     HasSum (fun n : ℕ => z*sphericalJ (2*n+0) (π*z^2/2)) (fresnelCosInt z) := by
@@ -590,7 +598,8 @@ theorem fresnelCosInt_spherical_series (z : ℂ) :
   convert key using 3 with n
   · rw [hp]; congr 1; ring
 
-/-- fresnelSinInt spherical series. -/
+/-- The series with terms `(fun n : ℕ => z*sphericalJ (2*n+1) (π*z^2/2))` converges to
+`(fresnelSinInt z)`. -/
 @[dlmf 7.6.E11]
 theorem fresnelSinInt_spherical_series (z : ℂ) :
     HasSum (fun n : ℕ => z*sphericalJ (2*n+1) (π*z^2/2)) (fresnelSinInt z) := by

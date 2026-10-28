@@ -223,27 +223,34 @@ variable {V : ℝ → ℝ} {B L : ℝ} {odd0 : Bool}
 noncomputable def p2sN (V : ℝ → ℝ) (odd0 : Bool) (h X : ℝ) : ℕ :=
   {x | x ∈ Ioc 0 X ∧ p2lY V odd0 h x = 0}.ncard
 
+/-- At `x`, the function `(p2lY V odd0 h)` has derivative `(deriv (p2lY V odd0 h) x)`. -/
 lemma p2s_Y_hasDerivAt (hV : Continuous V) (h x : ℝ) :
     HasDerivAt (p2lY V odd0 h) (deriv (p2lY V odd0 h) x) x :=
   (p2lY_spec hV odd0 h).2.2.hasDerivAt x
 
+/-- At `x`, the function `(deriv (p2lY V odd0 h))` has derivative `((V x - h) * p2lY V odd0 h x)`. -/
 lemma p2s_Y'_hasDerivAt (hV : Continuous V) (h x : ℝ) :
     HasDerivAt (deriv (p2lY V odd0 h)) ((V x - h) * p2lY V odd0 h x) x :=
   (p2lY_spec hV odd0 h).2.2.2 x
 
+/-- Nonvanishing under the stated hypotheses: `deriv (p2lY V odd0 h) x ≠ 0`. -/
 lemma p2s_simple (hV : Continuous V) {h x : ℝ} (h0 : p2lY V odd0 h x = 0) :
     deriv (p2lY V odd0 h) x ≠ 0 := fun h1 =>
   p2lY_ne_zero hV odd0 h (p2l_eq_zero hV (p2lY_spec hV odd0 h).2.2 h0 h1)
 
+/-- Formula under the stated hypotheses: `{x | x ∈ Ioc a b ∧ p2lY V odd0 h x = 0}.Finite`. -/
 lemma p2s_finite_Ioc (hV : Continuous V) (h a b : ℝ) :
     {x | x ∈ Ioc a b ∧ p2lY V odd0 h x = 0}.Finite :=
   (p2l_zeros_finite hV (p2lY_spec hV odd0 h).2.2 (p2lY_ne_zero hV odd0 h) a b).subset
     fun _ hx => ⟨Ioc_subset_Icc_self hx.1, hx.2⟩
 
+/-- Formula under the stated hypotheses: `{x | x ∈ Ioo a b ∧ p2lY V odd0 h x = 0}.Finite`. -/
 lemma p2s_finite_Ioo (hV : Continuous V) (h a b : ℝ) :
     {x | x ∈ Ioo a b ∧ p2lY V odd0 h x = 0}.Finite :=
   (p2s_finite_Ioc hV h a b).subset fun _ hx => ⟨Ioo_subset_Ioc_self hx.1, hx.2⟩
 
+/-- Identity under the stated parameter and domain assumptions: `deriv (p2lY V odd0 h) 0 * p2lY V
+odd0 h' 0 - p2lY V odd0 h 0 * deriv (p2lY V odd0 h') 0 = 0`. -/
 lemma p2s_W0 (hV : Continuous V) (h h' : ℝ) :
     deriv (p2lY V odd0 h) 0 * p2lY V odd0 h' 0 - p2lY V odd0 h 0 * deriv (p2lY V odd0 h') 0
       = 0 := by
@@ -356,6 +363,7 @@ lemma p2s_isolated {S : Set ℝ} (hfin : ∀ c, (S ∩ Iio c).Finite) (h₀ : �
   exact hball (show dist h h₀ < ε by
     rw [Real.dist_eq]; exact hh.trans_le (min_le_left _ _)) ⟨⟨hS, hlt⟩, hne⟩
 
+/-- Identity under the stated parameter and domain assumptions: `S ∩ Iic h = S ∩ Iio h₀`. -/
 lemma p2s_Iic_left {S : Set ℝ} {ε h₀ h : ℝ} (hiso : ∀ t ∈ S, |t - h₀| < ε → t = h₀)
     (hh : h ∈ Ioo (h₀ - ε) h₀) : S ∩ Iic h = S ∩ Iio h₀ := by
   ext t
@@ -368,6 +376,7 @@ lemma p2s_Iic_left {S : Set ℝ} {ε h₀ h : ℝ} (hiso : ∀ t ∈ S, |t - h�
     have := hiso t hS (abs_lt.2 ⟨by linarith [hh.1], by linarith [hh.1, hh.2]⟩)
     linarith
 
+/-- Identity under the stated parameter and domain assumptions: `S ∩ Iic h = S ∩ Iic h₀`. -/
 lemma p2s_Iic_right {S : Set ℝ} {ε h₀ h : ℝ} (hiso : ∀ t ∈ S, |t - h₀| < ε → t = h₀)
     (hh : h ∈ Ico h₀ (h₀ + ε)) : S ∩ Iic h = S ∩ Iic h₀ := by
   ext t
@@ -380,6 +389,8 @@ lemma p2s_Iic_right {S : Set ℝ} {ε h₀ h : ℝ} (hiso : ∀ t ∈ S, |t - h�
     linarith
   · rintro ⟨hS, ht⟩; exact ⟨hS, ht.trans hh.1⟩
 
+/-- Identity under the stated parameter and domain assumptions: `S ∩ Iic h₀ = insert h₀ (S ∩ Iio
+h₀)`. -/
 lemma p2s_Iic_eq_insert {S : Set ℝ} {h₀ : ℝ} (hS : h₀ ∈ S) :
     S ∩ Iic h₀ = insert h₀ (S ∩ Iio h₀) := by
   ext t
@@ -393,6 +404,8 @@ lemma p2s_Iic_eq_insert {S : Set ℝ} {h₀ : ℝ} (hS : h₀ ∈ S) :
     · exact ⟨hS, le_rfl⟩
     · exact ⟨h1, h2.le⟩
 
+/-- Identity under the stated parameter and domain assumptions: `(S ∩ Iic h₀).ncard = (S ∩ Iio
+h₀).ncard + 1`. -/
 lemma p2s_ncard_Iic {S : Set ℝ} (hfin : ∀ c, (S ∩ Iio c).Finite) {h₀ : ℝ} (hS : h₀ ∈ S) :
     (S ∩ Iic h₀).ncard = (S ∩ Iio h₀).ncard + 1 := by
   rw [p2s_Iic_eq_insert hS, Set.ncard_insert_of_notMem (by simp) (hfin _)]
@@ -491,6 +504,8 @@ lemma p2s_box (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) {e X : ℝ} (hX : 0 
     simp only [p2sN]
     rw [heq]
 
+/-- Estimate under the stated parameter and domain assumptions: `p2sN V odd0 h X ≤ p2sN V odd0 h
+X'`. -/
 lemma p2sN_mono (hV : Continuous V) (h : ℝ) {X X' : ℝ} (hXX : X ≤ X') :
     p2sN V odd0 h X ≤ p2sN V odd0 h X' :=
   Set.ncard_le_ncard (fun _ hx => ⟨⟨hx.1.1, hx.1.2.trans hXX⟩, hx.2⟩) (p2s_finite_Ioc hV h 0 X')
@@ -514,6 +529,8 @@ lemma p2sN_eq_Ioo_add_one (hV : Continuous V) {h X : ℝ} (hX : 0 < X)
   simp only [p2sN]
   rw [heq, Set.ncard_insert_of_notMem (by simp) (p2s_finite_Ioo hV h 0 X)]
 
+/-- Formula under the stated hypotheses: `p2sN V odd0 h X = {x | x ∈ Ioo 0 X ∧ p2lY V odd0 h x =
+0}.ncard`. -/
 lemma p2sN_eq_Ioo {h X : ℝ} (he : p2lY V odd0 h X ≠ 0) :
     p2sN V odd0 h X = {x | x ∈ Ioo 0 X ∧ p2lY V odd0 h x = 0}.ncard := by
   simp only [p2sN]
@@ -613,6 +630,7 @@ theorem p2s_dirichlet_count (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (hL : 
   simp only [g] at this
   omega
 
+/-- Nonvanishing under the stated hypotheses: `p2lY V odd0 h X ≠ 0`. -/
 theorem p2s_ne_of_deriv (hV : Continuous V) {h X : ℝ} (h1 : deriv (p2lY V odd0 h) X = 0) :
     p2lY V odd0 h X ≠ 0 := fun h0 => p2s_simple hV h0 h1
 
@@ -753,10 +771,14 @@ theorem p2s_neumann_count (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (hL : 0 
       (Finset.finite_toSet _)
     rwa [Set.ncard_coe_finset, Finset.card_range] at this
 
+/-- Identity under the stated parameter and domain assumptions: `p2lSpec V L odd0 true = {e | p2lY
+V odd0 e L = 0}`. -/
 theorem p2s_spec_eq_dir (hV : Continuous V) (odd0 : Bool) :
     p2lSpec V L odd0 true = {e | p2lY V odd0 e L = 0} := by
   ext e; rw [p2l_mem_spec_iff hV]; simp [p2lG]
 
+/-- Identity under the stated parameter and domain assumptions: `p2lSpec V L odd0 false = {e |
+deriv (p2lY V odd0 e) L = 0}`. -/
 theorem p2s_spec_eq_neu (hV : Continuous V) (odd0 : Bool) :
     p2lSpec V L odd0 false = {e | deriv (p2lY V odd0 e) L = 0} := by
   ext e; rw [p2l_mem_spec_iff hV]; simp [p2lG]

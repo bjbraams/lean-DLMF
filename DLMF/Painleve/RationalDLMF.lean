@@ -105,6 +105,7 @@ private lemma b32_Q_step {n : ℕ} {R : ℂ[X]} (hn : yablonskiiVorobievQ n ≠ 
     yablonskiiVorobievQ (n + 2) = R := by
   rw [yablonskiiVorobievQ, h, mul_div_cancel_right₀ _ hn]
 
+/-- Identity under the stated parameter and domain assumptions: `(C 4 : ℂ[X]) = 4`. -/
 private lemma b32_C4 : (C 4 : ℂ[X]) = 4 := rfl
 
 /-- DLMF 32.8.7: `Q₂(z) = z³ + 4`. -/
@@ -124,21 +125,26 @@ theorem yablonskiiVorobievQ_three : yablonskiiVorobievQ 3 = X ^ 6 + 20 * X ^ 3 -
   simp only [yablonskiiVorobievQ]
   ring
 
+/-- Nonvanishing under the stated hypotheses: `(X ^ 3 + 4 : ℂ[X]) ≠ 0`. -/
 private lemma b32_Q2_ne : (X ^ 3 + 4 : ℂ[X]) ≠ 0 := by
   intro h
   have := congrArg (eval 0) h
   simp at this
 
+/-- Nonvanishing under the stated hypotheses: `(X ^ 6 + 20 * X ^ 3 - 80 : ℂ[X]) ≠ 0`. -/
 private lemma b32_Q3_ne : (X ^ 6 + 20 * X ^ 3 - 80 : ℂ[X]) ≠ 0 := by
   intro h
   have := congrArg (eval 0) h
   norm_num at this
 
+/-- Nonvanishing under the stated hypotheses: `(X ^ 10 + 60 * X ^ 7 + 11200 * X : ℂ[X]) ≠ 0`. -/
 private lemma b32_Q4_ne : (X ^ 10 + 60 * X ^ 7 + 11200 * X : ℂ[X]) ≠ 0 := by
   intro h
   have := congrArg (eval 1) h
   norm_num at this
 
+/-- Nonvanishing under the stated hypotheses: `(X ^ 15 + 140 * X ^ 12 + 2800 * X ^ 9 + 78400 * X ^
+6 - 3136000 * X ^ 3 - 6272000 : ℂ[X]) ≠ 0`. -/
 private lemma b32_Q5_ne : (X ^ 15 + 140 * X ^ 12 + 2800 * X ^ 9 + 78400 * X ^ 6 - 3136000 * X ^ 3 -
     6272000 : ℂ[X]) ≠ 0 := by
   intro h
@@ -227,6 +233,7 @@ private lemma b32_isPainleveIIOn_logDeriv {A B A1 A2 A3 B1 B2 B3 : ℂ[X]} {α :
   simp only [rationalFn, hp, q, eval_sub, eval_mul]
   field_simp
 
+/-- The indicated domain is open: `IsOpen {z : ℂ | P.eval z ≠ 0}`. -/
 private lemma b32_isOpen_ne_poly (P : ℂ[X]) : IsOpen {z : ℂ | P.eval z ≠ 0} :=
   isOpen_ne_fun P.continuous continuous_const
 
@@ -652,7 +659,6 @@ theorem hasSum_yablonskiiVorobievP (z l : ℂ) :
     simp only [b, hl, mul_pow]
     field_simp
   · congr 1; ring
-
 
 /-- DLMF 32.8.9–32.8.10: for `n ≥ 2` (in fact `n ≥ 1`) the Wronskians `τ_n` of
 `p₁, p₃, …, p_{2n-1}` give `w(z; n) = d/dz ln(τ_{n-1}(z)/τ_n(z))`, a solution of `PII` with

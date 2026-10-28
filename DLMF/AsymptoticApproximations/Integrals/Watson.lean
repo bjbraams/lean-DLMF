@@ -82,6 +82,8 @@ theorem hasAsymptoticExpansion_integral_exp_smul_rpow_seq {F : ℝ → E} {a : �
   simp_rw [smul_smul]
   rw [integral_smul_const, integral_exp_neg_mul_mul_rpow_sub_one (he n) hz0, mul_comm]
 
+/-- Identity under the stated parameter and domain assumptions: `(s + lam - mu) / mu = (s + lam) /
+mu - 1`. -/
 private lemma g2a_exp_eq {lam mu : ℝ} (hmu : 0 < mu) (s : ℝ) :
     (s + lam - mu) / mu = (s + lam) / mu - 1 := by
   field_simp

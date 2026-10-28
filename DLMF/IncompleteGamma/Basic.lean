@@ -50,7 +50,8 @@ def normIncGammaPOnLog (a w : ℂ) : ℂ :=
 def normIncGammaQOnLog (a w : ℂ) : ℂ :=
   1-normIncGammaPOnLog a w
 
-/-- normIncGammaPContinued eq. -/
+/-- Away from nonpositive integral parameters, the analytically continued lower regularization
+agrees with the totalized quotient `γ(a,z)/Γ(a)`. -/
 @[dlmf 8.2.E4]
 theorem normIncGammaPContinued_eq {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (z : ℂ) :
     normIncGammaPContinued a z=normIncGammaP a z := by
@@ -59,7 +60,8 @@ theorem normIncGammaPContinued_eq {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (z : �
   rw [normIncGammaPContinued, normIncGammaP, lowerIncGamma_eq_regularized ha, h, scIncGamma]
   field_simp [Gamma_ne_zero ha]
 
-/-- normIncGammaQContinued eq. -/
+/-- Away from nonpositive integral parameters and at nonzero arguments, the continued upper
+regularization agrees with the totalized quotient `Γ(a,z)/Γ(a)`. -/
 @[dlmf 8.2.E4]
 theorem normIncGammaQContinued_eq {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {z : ℂ} (hz : z ≠ 0) :
     normIncGammaQContinued a z=normIncGammaQ a z := by
@@ -67,7 +69,8 @@ theorem normIncGammaQContinued_eq {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {z : �
   rw [normIncGammaQContinued, normIncGammaPContinued_eq ha]
   linear_combination -h
 
-/-- scIncGamma hasSum exponential. -/
+/-- The series with terms `(fun k : ℕ => exp (-z)*z^k/Gamma (a+k+1))` converges to `(scIncGamma a
+z)`. -/
 @[dlmf 8.7.E1]
 theorem scIncGamma_hasSum_exponential (a z : ℂ) :
     HasSum (fun k : ℕ => exp (-z)*z^k/Gamma (a+k+1)) (scIncGamma a z) := by
@@ -80,7 +83,8 @@ theorem scIncGamma_hasSum_exponential (a z : ℂ) :
   rw [show a+1+k=a+k+1 by ring]
   ring
 
-/-- scIncGamma recurrence. -/
+/-- Identity under the stated parameter and domain assumptions: `z*scIncGamma (a+1) z=scIncGamma a
+z-exp (-z)/Gamma (a+1)`. -/
 @[dlmf 8.8.E4]
 theorem scIncGamma_recurrence (a z : ℂ) :
     z*scIncGamma (a+1) z=scIncGamma a z-exp (-z)/Gamma (a+1) := by
@@ -96,7 +100,8 @@ theorem scIncGamma_recurrence (a z : ℂ) :
     ht.congr_fun fun k => hg k
   exact ht'.unique htail
 
-/-- normIncGammaPContinued shift up. -/
+/-- Formula under the stated hypotheses: `normIncGammaPContinued (a+n) z=normIncGammaPContinued a
+z - z^a*exp (-z)*(∑ k ∈ Finset.range n, z^k/Gamma (a+k+1))`. -/
 @[dlmf 8.8.E11]
 theorem normIncGammaPContinued_shift_up (n : ℕ) (a : ℂ) {z : ℂ} (hz : z ≠ 0) :
     normIncGammaPContinued (a+n) z=normIncGammaPContinued a z - z^a*exp (-z)*(∑ k ∈ Finset.range n, z^k/Gamma (a+k+1)) := by
@@ -112,14 +117,16 @@ theorem normIncGammaPContinued_shift_up (n : ℕ) (a : ℂ) {z : ℂ} (hz : z �
     rw [cpow_add _ _ hz, cpow_natCast]
     ring
 
-/-- normIncGammaQContinued shift up. -/
+/-- Formula under the stated hypotheses: `normIncGammaQContinued (a+n) z=normIncGammaQContinued a
+z + z^a*exp (-z)*(∑ k ∈ Finset.range n, z^k/Gamma (a+k+1))`. -/
 @[dlmf 8.8.E12]
 theorem normIncGammaQContinued_shift_up (n : ℕ) (a : ℂ) {z : ℂ} (hz : z ≠ 0) :
     normIncGammaQContinued (a+n) z=normIncGammaQContinued a z + z^a*exp (-z)*(∑ k ∈ Finset.range n, z^k/Gamma (a+k+1)) := by
   rw [normIncGammaQContinued, normIncGammaQContinued, normIncGammaPContinued_shift_up n a hz]
   ring
 
-/-- scIncGamma integral. -/
+/-- Identity under the stated parameter and domain assumptions: `scIncGamma a z=1/Gamma a*(∫ t : ℝ
+in 0..1, (t : ℂ)^(a-1)*exp (-z*t))`. -/
 @[dlmf 8.2.E7]
 theorem scIncGamma_integral {a : ℂ} (ha : 0 < a.re) (z : ℂ) :
     scIncGamma a z=1/Gamma a*(∫ t : ℝ in 0..1, (t : ℂ)^(a-1)*exp (-z*t)) := by
@@ -133,7 +140,8 @@ theorem scIncGamma_integral {a : ℂ} (ha : 0 < a.re) (z : ℂ) :
   simp only [cpow_zero, mul_one]
   ring_nf
 
-/-- lowerIncGamma segment integral. -/
+/-- Identity under the stated parameter and domain assumptions: `lowerIncGamma a z=primitive (fun
+t => t^(a-1)*exp (-t)) z`. -/
 @[dlmf 8.2.E1]
 theorem lowerIncGamma_segment_integral {a : ℂ} (ha : 0 < a.re) {z : ℂ} (hz : z ∈ slitPlane) :
     lowerIncGamma a z=primitive (fun t => t^(a-1)*exp (-t)) z := by
@@ -164,7 +172,8 @@ theorem lowerIncGamma_segment_integral {a : ℂ} (ha : 0 < a.re) {z : ℂ} (hz :
   rw [hza]
   field_simp [Complex.Gamma_ne_zero ha']
 
-/-- normIncGammaContinued complement. -/
+/-- Identity under the stated parameter and domain assumptions: `normIncGammaPContinued a
+z+normIncGammaQContinued a z=1`. -/
 @[dlmf 8.2.E5]
 theorem normIncGammaContinued_complement (a z : ℂ) :
     normIncGammaPContinued a z+normIncGammaQContinued a z=1 := by
@@ -273,6 +282,7 @@ theorem regularizedConfluent_self_succ_neg (a z : ℂ) :
   rw [regularizedConfluent_kummer_transform a (a+1) (-z), show a+1-a=1 by ring, neg_neg,
     scIncGamma]
 
+/-- Continuity of the indicated function: `Continuous fun a => scIncGamma a z`. -/
 theorem continuous_scIncGamma_param (z : ℂ) : Continuous fun a => scIncGamma a z := by
   have h : Continuous fun c : ℂ => regularizedHGFun {1} {c+1} z :=
     continuous_regularizedConfluent.comp (f := fun c : ℂ => ((1:ℂ), c + 1, z)) (by fun_prop)
@@ -469,7 +479,8 @@ theorem exp_eps_pi_I {ε : ℝ} (hε : ε=1 ∨ ε = -1) : exp (ε*π*I) = -1 :=
   · simp
   · simp [neg_mul]
 
-/-- lowerIncGammaOnLog monodromy. -/
+/-- Identity under the stated parameter and domain assumptions: `lowerIncGammaOnLog a
+(w+2*π*m*I)=exp (2*π*m*I*a)*lowerIncGammaOnLog a w`. -/
 @[dlmf 8.2.E8]
 theorem lowerIncGammaOnLog_monodromy (w : ℂ) (m : ℤ) {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) :
     lowerIncGammaOnLog a (w+2*π*m*I)=exp (2*π*m*I*a)*lowerIncGammaOnLog a w := by
@@ -479,7 +490,8 @@ theorem lowerIncGammaOnLog_monodromy (w : ℂ) (m : ℤ) {a : ℂ} (ha : ∀ n :
   rw [show a*(w+2*π*m*I)=2*π*m*I*a+a*w by ring, exp_add]
   ring
 
-/-- upperIncGammaOnLog monodromy. -/
+/-- Identity under the stated parameter and domain assumptions: `upperIncGammaOnLog a
+(w+2*π*m*I)=exp (2*π*m*I*a)*upperIncGammaOnLog a w+(1-exp (2*π*m*I*a))*Gamma a`. -/
 @[dlmf 8.2.E9]
 theorem upperIncGammaOnLog_monodromy (w : ℂ) (m : ℤ) {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) :
     upperIncGammaOnLog a (w+2*π*m*I)=exp (2*π*m*I*a)*upperIncGammaOnLog a w+(1-exp (2*π*m*I*a))*Gamma a := by
@@ -490,7 +502,8 @@ theorem upperIncGammaOnLog_monodromy (w : ℂ) (m : ℤ) {a : ℂ} (ha : ∀ n :
     show a*(w+2*π*m*I)=2*π*m*I*a+a*w by ring, Complex.exp_add]
   ring
 
-/-- upperIncGammaOnLog monodromy limit. -/
+/-- The map `(fun a : ℂ => exp (2*π*m*I*a)*upperIncGammaOnLog a w+(1-exp (2*π*m*I*a))*Gamma a)`
+tends to `(𝓝 (upperIncGammaOnLog (-n) (w+2*π*m*I)))` along `(𝓝[≠] (-(n : ℂ)))`. -/
 @[dlmf 8.2.E9]
 theorem upperIncGammaOnLog_monodromy_limit (w : ℂ) (m : ℤ) (n : ℕ) :
     Tendsto (fun a : ℂ => exp (2*π*m*I*a)*upperIncGammaOnLog a w+(1-exp (2*π*m*I*a))*Gamma a) (𝓝[≠] (-(n : ℂ))) (𝓝 (upperIncGammaOnLog (-n) (w+2*π*m*I))) := by
@@ -498,14 +511,16 @@ theorem upperIncGammaOnLog_monodromy_limit (w : ℂ) (m : ℤ) (n : ℕ) :
   filter_upwards [eventually_nhdsNE_neg_nat_ne n] with a ha
   exact upperIncGammaOnLog_monodromy w m ha
 
-/-- upperIncGammaOnLog halfTurn. -/
+/-- Identity under the stated parameter and domain assumptions: `upperIncGammaOnLog a
+(w+ε*π*I)=Gamma a*(1-exp (a*w+ε*π*I*a)*scIncGamma a (-exp w))`. -/
 @[dlmf 8.2.E11]
 theorem upperIncGammaOnLog_halfTurn (w : ℂ) {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
     upperIncGammaOnLog a (w+ε*π*I)=Gamma a*(1-exp (a*w+ε*π*I*a)*scIncGamma a (-exp w)) := by
   rw [upperIncGammaOnLog_eq_Gamma_sub ha, lowerIncGammaOnLog, Complex.exp_add w, exp_eps_pi_I hε]
   ring_nf
 
-/-- upperIncGammaOnLog jump. -/
+/-- Identity under the stated parameter and domain assumptions: `exp (-π*I*a)*upperIncGammaOnLog a
+(w+π*I)-exp (π*I*a)*upperIncGammaOnLog a (w-π*I) = -2*π*I/Gamma (1-a)`. -/
 @[dlmf 8.2.E10]
 theorem upperIncGammaOnLog_jump (a w : ℂ) :
     exp (-π*I*a)*upperIncGammaOnLog a (w+π*I)-exp (π*I*a)*upperIncGammaOnLog a (w-π*I) = -2*π*I/Gamma (1-a) := by
@@ -561,7 +576,8 @@ theorem hasDerivAt_upperIncGamma_complex (a : ℂ) {z : ℂ} (hz : z ∈ slitPla
   simp only [show (1:ℂ)-a+1=2-a by ring]
   linear_combination exp (-z)*hr
 
-/-- upperIncGamma horizontal integral. -/
+/-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => (z+t)^(a-1)*exp
+(-(z+t))) 0 (upperIncGamma a z)`. -/
 @[dlmf 8.2.E2]
 theorem upperIncGamma_horizontal_integral (a : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     HasIntegralAtTop (fun t : ℝ => (z+t)^(a-1)*exp (-(z+t))) 0 (upperIncGamma a z) := by
@@ -578,7 +594,8 @@ theorem upperIncGamma_horizontal_integral (a : ℂ) {z : ℂ} (hz : z ∈ slitPl
   have h := hasIntegralAtTop_of_hasDerivAt_of_tendsto hd hc (tendsto_upperIncGamma_add_ofReal a z).neg
   simpa using h
 
-/-- hasDerivAt incompleteGamma. -/
+/-- Derivative formula at the specified argument: `HasDerivAt (lowerIncGamma a) (z^(a-1)*exp (-z))
+z ∧ HasDerivAt (upperIncGamma a) (-z^(a-1)*exp (-z)) z`. -/
 @[dlmf 8.8.E13]
 theorem hasDerivAt_incompleteGamma {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (lowerIncGamma a) (z^(a-1)*exp (-z)) z ∧ HasDerivAt (upperIncGamma a) (-z^(a-1)*exp (-z)) z := by
@@ -589,7 +606,8 @@ theorem hasDerivAt_incompleteGamma {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {z : �
     linear_combination lowerIncGamma_add_upperIncGamma ha (slitPlane_ne_zero hw)
   simpa only [neg_mul, neg_neg] using (hu.const_sub (Gamma a)).congr_of_eventuallyEq he
 
-/-- lower upperIncGamma ode. -/
+/-- Formula under the stated hypotheses: `(∀ f ∈ ({lowerIncGamma a,upperIncGamma a} : Set (ℂ →
+ℂ)), deriv (deriv f) z+(1+(1-a)/z)*deriv f z=0)`. -/
 @[dlmf 8.2.E12]
 theorem lower_upperIncGamma_ode {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {z : ℂ} (hz : z ∈ slitPlane) :
     (∀ f ∈ ({lowerIncGamma a,upperIncGamma a} : Set (ℂ → ℂ)), deriv (deriv f) z+(1+(1-a)/z)*deriv f z=0) := by
@@ -623,7 +641,7 @@ theorem lower_upperIncGamma_ode {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {z : ℂ}
     field_simp
     ring
 
-/-- upperIncGamma scaled ode. -/
+/-- The stated relation follows from the given hypotheses: `let w`. -/
 @[dlmf 8.2.E13]
 theorem upperIncGamma_scaled_ode (a : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     let w := fun t => exp t*t^(1-a)*upperIncGamma a t; deriv (deriv w) z-(1+(1-a)/z)*deriv w z+(1-a)/z^2*w z=0 := by
@@ -656,7 +674,8 @@ theorem upperIncGamma_scaled_ode (a : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
   field_simp
   ring
 
-/-- scIncGamma ode. -/
+/-- Identity under the stated parameter and domain assumptions: `z*deriv (deriv (scIncGamma a))
+z+(a+1+z)*deriv (scIncGamma a) z+a*scIncGamma a z=0`. -/
 @[dlmf 8.2.E14]
 theorem scIncGamma_ode (a z : ℂ) :
     z*deriv (deriv (scIncGamma a)) z+(a+1+z)*deriv (scIncGamma a) z+a*scIncGamma a z=0 := by

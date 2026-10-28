@@ -38,21 +38,29 @@ def s26a_Good (k s : ℕ) : List ℕ → Prop
   | [] => True
   | a :: t => k * t.length + s ≤ a ∧ s26a_Good k s t
 
+/-- Identity under the stated parameter and domain assumptions: `(s26a_sub k s l).length =
+l.length`. -/
 @[simp] lemma s26a_length_sub (k s : ℕ) (l : List ℕ) : (s26a_sub k s l).length = l.length := by
   induction l with
   | nil => rfl
   | cons a t ih => simp [s26a_sub, ih]
 
+/-- Identity under the stated parameter and domain assumptions: `(s26a_add k s l).length =
+l.length`. -/
 @[simp] lemma s26a_length_add (k s : ℕ) (l : List ℕ) : (s26a_add k s l).length = l.length := by
   induction l with
   | nil => rfl
   | cons a t ih => simp [s26a_add, ih]
 
+/-- Identity under the stated parameter and domain assumptions: `s26a_sub k s (s26a_add k s l) =
+l`. -/
 lemma s26a_sub_add (k s : ℕ) (l : List ℕ) : s26a_sub k s (s26a_add k s l) = l := by
   induction l with
   | nil => rfl
   | cons a t ih => simp [s26a_sub, s26a_add, ih]
 
+/-- Identity under the stated parameter and domain assumptions: `s26a_add k s (s26a_sub k s l) =
+l`. -/
 lemma s26a_add_sub (k s : ℕ) {l : List ℕ} (h : s26a_Good k s l) :
     s26a_add k s (s26a_sub k s l) = l := by
   induction l with
@@ -62,6 +70,8 @@ lemma s26a_add_sub (k s : ℕ) {l : List ℕ} (h : s26a_Good k s l) :
     simp only [s26a_sub, s26a_add, s26a_length_sub, ih h.2, List.cons.injEq, and_true]
     omega
 
+/-- Identity under the stated parameter and domain assumptions: `(s26a_add k s l).sum = l.sum + (k
+* l.length.choose 2 + s * l.length)`. -/
 lemma s26a_sum_add (k s : ℕ) (l : List ℕ) :
     (s26a_add k s l).sum = l.sum + (k * l.length.choose 2 + s * l.length) := by
   induction l with
@@ -71,17 +81,21 @@ lemma s26a_sum_add (k s : ℕ) (l : List ℕ) :
       Nat.choose_one_right]
     ring
 
+/-- Identity under the stated parameter and domain assumptions: `(s26a_sub k s l).sum + (k *
+l.length.choose 2 + s * l.length) = l.sum`. -/
 lemma s26a_sum_sub (k s : ℕ) {l : List ℕ} (h : s26a_Good k s l) :
     (s26a_sub k s l).sum + (k * l.length.choose 2 + s * l.length) = l.sum := by
   have := s26a_sum_add k s (s26a_sub k s l)
   rw [s26a_add_sub k s h, s26a_length_sub] at this
   exact this.symm
 
+/-- The stated relation follows from the given hypotheses: `s26a_Good k s (s26a_add k s l)`. -/
 lemma s26a_good_add (k s : ℕ) (l : List ℕ) : s26a_Good k s (s26a_add k s l) := by
   induction l with
   | nil => trivial
   | cons a t ih => exact ⟨by simp, ih⟩
 
+/-- The stated relation follows from the given hypotheses: `s26a_Good k s l`. -/
 lemma s26a_good_of_chain (k s : ℕ) {l : List ℕ} (hc : l.IsChain (fun a b => b + k ≤ a))
     (hs : ∀ x ∈ l, s ≤ x) : s26a_Good k s l := by
   induction l with
@@ -95,6 +109,7 @@ lemma s26a_good_of_chain (k s : ℕ) {l : List ℕ} (hc : l.IsChain (fun a b => 
       simp only [List.length_cons]
       nlinarith
 
+/-- The selected subsets form a chain under reverse inclusion. -/
 lemma s26a_chain_sub (k s : ℕ) {l : List ℕ} (hc : l.IsChain (fun a b => b + k ≤ a)) :
     (s26a_sub k s l).IsChain (fun a b => b ≤ a) := by
   induction l with
@@ -108,6 +123,8 @@ lemma s26a_chain_sub (k s : ℕ) {l : List ℕ} (hc : l.IsChain (fun a b => b + 
       have : k * (t'.length + 1) = k * t'.length + k := by ring
       omega
 
+/-- Estimate under the stated parameter and domain assumptions: `(s26a_add k s l).IsChain (fun a b
+=> b + k ≤ a)`. -/
 lemma s26a_chain_add (k s : ℕ) {l : List ℕ} (hc : l.IsChain (fun a b => b ≤ a)) :
     (s26a_add k s l).IsChain (fun a b => b + k ≤ a) := by
   induction l with
@@ -121,6 +138,8 @@ lemma s26a_chain_add (k s : ℕ) {l : List ℕ} (hc : l.IsChain (fun a b => b �
       have : k * (t'.length + 1) = k * t'.length + k := by ring
       omega
 
+/-- Estimate under the stated parameter and domain assumptions: `l.Pairwise (fun a b => b + k ≤
+a)`. -/
 lemma s26a_pairwise_of_pda (k : ℕ) {l : List ℕ} (hsort : l.Pairwise (· ≥ ·))
     (h : ∀ a ∈ l, ∀ b ∈ l.erase a, a + k ≤ b ∨ b + k ≤ a) :
     l.Pairwise (fun a b => b + k ≤ a) := by
@@ -135,6 +154,8 @@ lemma s26a_pairwise_of_pda (k : ℕ) {l : List ℕ} (hsort : l.Pairwise (· ≥ 
     · exact h a (List.mem_cons_of_mem c ha) b
         (((List.sublist_cons_self c t).erase a).subset hb)
 
+/-- Estimate under the stated parameter and domain assumptions: `∀ a ∈ l, ∀ b ∈ l.erase a, a + k ≤
+b ∨ b + k ≤ a`. -/
 lemma s26a_pda_of_pairwise (k : ℕ) {l : List ℕ} (h : l.Pairwise (fun a b => b + k ≤ a)) :
     ∀ a ∈ l, ∀ b ∈ l.erase a, a + k ≤ b ∨ b + k ≤ a := by
   induction l with
@@ -155,6 +176,8 @@ lemma s26a_pda_of_pairwise (k : ℕ) {l : List ℕ} (h : l.Pairwise (fun a b => 
       · exact Or.inl (h.1 a ha')
       · exact ih h.2 a ha' b hb
 
+/-- Estimate under the stated parameter and domain assumptions: `L.filter (fun x => 0 < x) ++
+List.replicate (L.length - (L.filter (fun x => 0 < x)).length) 0 = L`. -/
 lemma s26a_filter_pad {L : List ℕ} (hL : L.Pairwise (· ≥ ·)) :
     L.filter (fun x => 0 < x) ++
       List.replicate (L.length - (L.filter (fun x => 0 < x)).length) 0 = L := by
@@ -175,6 +198,8 @@ lemma s26a_filter_pad {L : List ℕ} (hL : L.Pairwise (· ≥ ·)) :
       rw [hf, List.nil_append, List.length_nil, Nat.sub_zero]
       exact (List.eq_replicate_iff.mpr ⟨rfl, h0⟩).symm
 
+/-- Estimate under the stated parameter and domain assumptions: `(L.filter (fun x => 0 < x)).sum =
+L.sum`. -/
 lemma s26a_sum_filter_pos (L : List ℕ) : (L.filter (fun x => 0 < x)).sum = L.sum := by
   induction L with
   | nil => rfl
@@ -186,22 +211,30 @@ lemma s26a_sum_filter_pos (L : List ℕ) : (L.filter (fun x => 0 < x)).sum = L.s
 /-- The list of parts of a partition in decreasing order. -/
 def s26a_sortDesc {n : ℕ} (p : n.Partition) : List ℕ := p.parts.sort (· ≥ ·)
 
+/-- The stated relation follows from the given hypotheses: `(s26a_sortDesc p).Pairwise (· ≥ ·)`. -/
 lemma s26a_sortDesc_pairwise {n : ℕ} (p : n.Partition) : (s26a_sortDesc p).Pairwise (· ≥ ·) :=
   Multiset.pairwise_sort _ _
 
+/-- Identity under the stated parameter and domain assumptions: `(↑(s26a_sortDesc p) : Multiset ℕ)
+= p.parts`. -/
 lemma s26a_sortDesc_coe {n : ℕ} (p : n.Partition) : (↑(s26a_sortDesc p) : Multiset ℕ) = p.parts :=
   Multiset.sort_eq _ _
 
+/-- Identity under the stated parameter and domain assumptions: `(↑L : Multiset ℕ).sort (· ≥ ·) =
+L`. -/
 lemma s26a_sort_coe_of_pairwise {L : List ℕ} (hL : L.Pairwise (· ≥ ·)) :
     (↑L : Multiset ℕ).sort (· ≥ ·) = L := by
   rw [Multiset.coe_sort]; exact List.mergeSort_eq_self _ hL
 
+/-- Estimate under the stated parameter and domain assumptions: `l.Pairwise (fun a b => b + k ≤
+a)`. -/
 lemma s26a_pairwise_of_chain_gap (k : ℕ) {l : List ℕ}
     (h : l.IsChain (fun a b => b + k ≤ a)) : l.Pairwise (fun a b => b + k ≤ a) := by
   have : Trans (fun a b : ℕ => b + k ≤ a) (fun a b : ℕ => b + k ≤ a)
       (fun a b : ℕ => b + k ≤ a) := ⟨fun h1 h2 => by omega⟩
   exact h.pairwise
 
+/-- Estimate under the stated parameter and domain assumptions: `s ≤ x`. -/
 lemma s26a_le_of_mem_add (k s : ℕ) {L : List ℕ} {x : ℕ} (hx : x ∈ s26a_add k s L) : s ≤ x := by
   induction L with
   | nil => simp [s26a_add] at hx

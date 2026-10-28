@@ -40,6 +40,8 @@ def laguerreExtended (α : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
   ∑ k ∈ Finset.range (n + 1), poch (α + k + 1) (n - k) /
     ((k.factorial : ℂ) * (n - k).factorial) * (-x) ^ k
 
+/-- Identity under the stated parameter and domain assumptions: `laguerreExtended α n x =
+laguerrePolyL α n x`. -/
 @[dlmf 18.5.E12]
 theorem laguerreExtended_eq {α : ℂ} (hα : ∀ k : ℕ, α + 1 ≠ -(k : ℂ)) (n : ℕ) (x : ℂ) :
     laguerreExtended α n x = laguerrePolyL α n x := by
@@ -59,6 +61,9 @@ def chebyshevV (n : ℕ) (x : ℂ) : ℂ :=
 def chebyshevW (n : ℕ) (x : ℂ) : ℂ :=
   (2 * n + 1) * jacobiPolyP (1 / 2) (-1 / 2) n x / jacobiPolyP (1 / 2) (-1 / 2) n 1
 
+/-- Formula under the stated hypotheses: `jacobiPolyP α β n x = ∑ k ∈ Finset.range (n + 1), poch
+(n + α + β + 1) k * poch (α + k + 1) (n - k) / ((k.factorial : ℂ) * (n - k).factorial) * ((x -
+1) / 2) ^ k`. -/
 @[dlmf 18.5.E7]
 theorem jacobi_finite_sum {α β : ℂ} (hα : -1 < α.re) (n : ℕ) (x : ℂ) :
     jacobiPolyP α β n x = ∑ k ∈ Finset.range (n + 1),
@@ -148,6 +153,9 @@ lemma jacobi_binomial_sum_aux {α β : ℂ} (hα : -1 < α.re) (n : ℕ) {x : �
   field_simp
   rw [hsq, mul_one]
 
+/-- Formula under the stated hypotheses: `jacobiPolyP α β n x = ((2 : ℂ) ^ n)⁻¹ * ∑ k ∈
+Finset.range (n + 1), (poch (α + n - k + 1) k / k.factorial) * (poch (β + k + 1) (n - k) / (n
+- k).factorial) * (x - 1) ^ (n - k) * (x + 1) ^ k`. -/
 @[dlmf 18.5.E8]
 theorem jacobi_binomial_sum {α β : ℂ} (hα : -1 < α.re) (n : ℕ) (x : ℂ) :
     jacobiPolyP α β n x = ((2 : ℂ) ^ n)⁻¹ * ∑ k ∈ Finset.range (n + 1),
@@ -229,6 +237,9 @@ theorem hermitePolyH_odd_sum (m : ℕ) (x : ℂ) :
   rw [e4]
   linear_combination (((2 * (j + i) + 1) ! : ℂ) * (-1) ^ i * 2 * x * 2 ^ (2 * j) * x ^ (2 * j)) * e
 
+/-- Formula under the stated hypotheses: `aeval x (hermitePolyH n) = (n.factorial : ℂ) * ∑ k ∈
+Finset.range (n / 2 + 1), (-1 : ℂ) ^ k * (2 * x) ^ (n - 2 * k) / ((k.factorial : ℂ) * (n - 2 *
+k).factorial)`. -/
 @[dlmf 18.5.E13]
 theorem hermitePolyH_finite_sum (n : ℕ) (x : ℂ) :
     aeval x (hermitePolyH n) = (n.factorial : ℂ) * ∑ k ∈ Finset.range (n / 2 + 1),
@@ -250,11 +261,15 @@ theorem laguerrePolyL_eq_Gamma_mul_regularized {α : ℂ}
   rw [show (n : ℂ) + α + 1 = (α + 1) + n by ring, poch, ← hG]
   field_simp [Gamma_ne_zero hα]
 
+/-- Identity under the stated parameter and domain assumptions: `laguerrePolyL α n 0 = poch (α +
+1) n / n.factorial`. -/
 @[dlmf 18.6.E1]
 theorem laguerrePolyL_at_zero (α : ℂ) (n : ℕ) : laguerrePolyL α n 0 = poch (α + 1) n
     / n.factorial := by
   simp [laguerrePolyL]
 
+/-- Identity under the stated parameter and domain assumptions: `jacobiPolyP α β n 1 = poch (α +
+1) n / n.factorial`. -/
 @[dlmf 18.6.T1]
 theorem jacobi_at_one {α β : ℂ} (hα : -1 < α.re) (n : ℕ) :
     jacobiPolyP α β n 1 = poch (α + 1) n / n.factorial := by
@@ -267,11 +282,15 @@ theorem jacobiPolyP_one_ne_zero {α β : ℂ} (hα : -1 < α.re) (n : ℕ) : jac
     simp only [Complex.add_re, Complex.one_re]
     linarith)) n) (Nat.cast_ne_zero.mpr n.factorial_ne_zero)
 
+/-- Identity under the stated parameter and domain assumptions: `ultrasphPoly lam n 1 = poch (2 *
+lam) n / n.factorial`. -/
 @[dlmf 18.6.T1]
 theorem ultrasphPoly_at_one {lam : ℂ} (hlam : -1 / 2 < lam.re) (n : ℕ) :
     ultrasphPoly lam n 1 = poch (2 * lam) n / n.factorial := by
   simp [ultrasphPoly]
 
+/-- Identity under the stated parameter and domain assumptions: `aeval (-x) (hermitePolyH n) = (-1
+: ℂ) ^ n * aeval x (hermitePolyH n)`. -/
 @[dlmf 18.6.T1]
 theorem hermitePolyH_reflection (n : ℕ) (x : ℂ) :
     aeval (-x) (hermitePolyH n) = (-1 : ℂ) ^ n * aeval x (hermitePolyH n) := by
@@ -290,6 +309,8 @@ theorem hermitePolyH_reflection (n : ℕ) (x : ℂ) :
   have he := congrArg (aeval x : ℤ[X] → ℂ) (hp n)
   simpa [aeval_comp] using he
 
+/-- Identity under the stated parameter and domain assumptions: `(hermitePolyH (2 * n)).eval 0 =
+(-1 : ℤ) ^ n * ((2 * n).factorial / n.factorial : ℕ)`. -/
 @[dlmf 18.6.T1]
 theorem hermitePolyH_even_at_zero (n : ℕ) :
     (hermitePolyH (2 * n)).eval 0 = (-1 : ℤ) ^ n * ((2 * n).factorial / n.factorial : ℕ) := by
@@ -315,15 +336,19 @@ theorem hermitePolyH_even_at_zero (n : ℕ) :
     push_cast
     ring
 
+/-- Identity under the stated parameter and domain assumptions: `chebyshevV n 1 = 1`. -/
 @[dlmf 18.6.T1]
 theorem chebyshevV_at_one (n : ℕ) : chebyshevV n 1 = 1 := by
   exact div_self (jacobiPolyP_one_ne_zero (by norm_num) n)
 
+/-- Identity under the stated parameter and domain assumptions: `chebyshevW n 1 = 2 * n + 1`. -/
 @[dlmf 18.6.T1]
 theorem chebyshevW_at_one (n : ℕ) : chebyshevW n 1 = 2 * n + 1 := by
   unfold chebyshevW
   exact mul_div_cancel_right₀ _ (jacobiPolyP_one_ne_zero (by norm_num) n)
 
+/-- Identity under the stated parameter and domain assumptions: `legendrePolyP n x = ultrasphPoly
+(1 / 2) n x`. -/
 @[dlmf 18.7.E9]
 theorem legendre_eq_ultrasphPoly (n : ℕ) (x : ℂ) : legendrePolyP n x
     = ultrasphPoly (1 / 2) n x := by
@@ -351,6 +376,8 @@ theorem two_pow_mul_poch_three_half (n : ℕ) :
     push_cast
     linear_combination (4 * (3 / 2 + (n : ℂ)) * ((n : ℂ) + 1)) * ih
 
+/-- Identity under the stated parameter and domain assumptions: `aeval x (hermitePolyH (2 * n)) =
+(-1 : ℂ) ^ n * 2 ^ (2 * n) * n.factorial * laguerrePolyL (-1 / 2) n (x ^ 2)`. -/
 @[dlmf 18.7.E19]
 theorem hermitePolyH_even_eq_laguerrePolyL (n : ℕ) (x : ℂ) :
     aeval x (hermitePolyH (2 * n)) = (-1 : ℂ) ^ n * 2 ^ (2 * n) * n.factorial
@@ -368,6 +395,8 @@ theorem hermitePolyH_even_eq_laguerrePolyL (n : ℕ) (x : ℂ) :
   linear_combination h - ((-1 : ℂ) ^ n * 2 ^ (2 * n) * n.factorial) * hL -
     ((-1 : ℂ) ^ n * kummerM (-(n : ℂ)) (1 / 2) (x ^ 2)) * hp
 
+/-- Identity under the stated parameter and domain assumptions: `aeval x (hermitePolyH (2 * n +
+1)) = (-1 : ℂ) ^ n * 2 ^ (2 * n + 1) * n.factorial * x * laguerrePolyL (1 / 2) n (x ^ 2)`. -/
 @[dlmf 18.7.E20]
 theorem hermitePolyH_odd_eq_laguerrePolyL (n : ℕ) (x : ℂ) :
     aeval x (hermitePolyH (2 * n + 1)) = (-1 : ℂ) ^ n * 2 ^ (2 * n + 1) * n.factorial * x
@@ -421,6 +450,9 @@ theorem sum_cos_chebyshevGauss_eq_zero {M : ℕ} {k : ℤ} (hk : ¬ (2 * M : ℤ
     simp [Real.sin_int_mul_pi]
   exact (mul_eq_zero.mp hsum).resolve_left (mul_ne_zero two_ne_zero hs)
 
+/-- Identity under the stated parameter and domain assumptions: `∑ i : Fin (N + 1), (Chebyshev.T ℝ
+m).eval (Real.cos ((i.val + 1 / 2) * Real.pi / (N + 1))) * (Chebyshev.T ℝ n).eval (Real.cos
+((i.val + 1 / 2) * Real.pi / (N + 1))) = 0`. -/
 @[dlmf 18.3.E1]
 theorem chebyshevT_discrete_orthogonality {N m n : ℕ} (hm : m ≤ N) (hn : n ≤ N)
     (hmn : m ≠ n) :
@@ -489,6 +521,9 @@ theorem chebyshevU_eval_eq_sum_antidiagonal (n : ℕ) (x : ℂ) :
     refine Finset.sum_congr rfl fun p _ => ?_
     ring
 
+/-- Formula under the stated hypotheses: `(Chebyshev.U ℂ n).eval x = ∑ k ∈ Finset.range (n / 2 +
+1), (-1 : ℂ) ^ k * (n - k).factorial / ((k.factorial : ℂ) * (n - 2 * k).factorial) * (2 * x) ^
+(n - 2 * k)`. -/
 @[dlmf 18.5.E11_3]
 theorem chebyshevU_finite_sum (n : ℕ) (x : ℂ) :
     (Chebyshev.U ℂ n).eval x = ∑ k ∈ Finset.range (n / 2 + 1),
@@ -509,6 +544,9 @@ theorem chebyshevU_finite_sum (n : ℕ) (x : ℂ) :
     rw [Nat.choose_eq_zero_of_lt (by omega : n - k < k)]
     simp
 
+/-- Formula under the stated hypotheses: `(Chebyshev.T ℂ n).eval x = (n : ℂ) / 2 * ∑ k ∈
+Finset.range (n / 2 + 1), (-1 : ℂ) ^ k * (n - k - 1).factorial / ((k.factorial : ℂ) * (n - 2 *
+k).factorial) * (2 * x) ^ (n - 2 * k)`. -/
 @[dlmf 18.5.E11_1]
 theorem chebyshevT_finite_sum {n : ℕ} (hn : 0 < n) (x : ℂ) :
     (Chebyshev.T ℂ n).eval x = (n : ℂ) / 2 * ∑ k ∈ Finset.range (n / 2 + 1),

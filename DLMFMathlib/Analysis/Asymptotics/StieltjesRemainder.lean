@@ -66,6 +66,7 @@ theorem stRem_norm_one_add_div {S : ℂ} (hS : S ≠ 0) (τ : ℝ) :
     ‖1 + (τ : ℂ) / S‖ = ‖S + τ‖ / ‖S‖ := by
   rw [show 1 + (τ : ℂ) / S = (S + τ) / S by field_simp, norm_div]
 
+/-- Estimate under the stated parameter and domain assumptions: `0 < stRem_c S`. -/
 theorem stRem_c_pos {S : ℂ} (hS : S ∈ slitPlane) : 0 < stRem_c S := by
   unfold stRem_c
   split_ifs with h
@@ -78,6 +79,7 @@ theorem stRem_c_pos {S : ℂ} (hS : S ∈ slitPlane) : 0 < stRem_c S := by
     have : 0 < ‖S‖ := norm_pos_iff.mpr (slitPlane_ne_zero hS)
     exact abs_pos.mpr (div_ne_zero him this.ne')
 
+/-- Estimate under the stated parameter and domain assumptions: `stRem_c S ≤ 1`. -/
 theorem stRem_c_le_one (S : ℂ) : stRem_c S ≤ 1 := by
   unfold stRem_c
   split_ifs
@@ -102,6 +104,7 @@ theorem stRem_c_le_norm {S : ℂ} (hS : S ∈ slitPlane) {τ : ℝ} (hτ : 0 ≤
     calc |S.im| = |(S + τ).im| := by simp
       _ ≤ ‖S + τ‖ := Complex.abs_im_le_norm _
 
+/-- Nonvanishing under the stated hypotheses: `1 + (τ : ℂ) / S ≠ 0`. -/
 theorem stRem_one_add_ne_zero {S : ℂ} (hS : S ∈ slitPlane) {τ : ℝ} (hτ : 0 ≤ τ) :
     1 + (τ : ℂ) / S ≠ 0 := by
   intro h
@@ -402,6 +405,8 @@ is bounded by `Γ(m+1) ∫₀^∞ (W² + ρ²)^{-(m+1)/2} dρ = Γ(m) χ(m) W^{-
 `θ + β = ±π/2` with `|β| < π/2`, i.e. for `π/2 ≤ |θ| < π`.
 -/
 
+/-- Identity under the stated parameter and domain assumptions: `1 / c = ∫ ρ in Ioi (0 : ℝ),
+Complex.exp (-(c * ρ))`. -/
 theorem stRem_recip_eq_integral {c : ℂ} (hc : 0 < c.re) :
     1 / c = ∫ ρ in Ioi (0 : ℝ), Complex.exp (-(c * ρ)) := by
   have h := integral_exp_mul_complex_Ioi (a := -c) (by simp; linarith) 0
@@ -410,6 +415,8 @@ theorem stRem_recip_eq_integral {c : ℂ} (hc : 0 < c.re) :
     funext x; ring_nf, h]
   rw [neg_div, div_neg, neg_neg]
 
+/-- Identity under the stated parameter and domain assumptions: `‖(W : ℂ) + ρ * exp (σ * I)‖ =
+Real.sqrt (W ^ 2 + ρ ^ 2)`. -/
 theorem stRem_norm_add_exp {W ρ σ : ℝ} (hσ : Real.cos σ = 0) :
     ‖(W : ℂ) + ρ * exp (σ * I)‖ = Real.sqrt (W ^ 2 + ρ ^ 2) := by
   rw [norm_eq_sqrt_sq_add_sq]

@@ -31,19 +31,26 @@ namespace DLMF.RiemannTheta
 variable {ι : Type*} [Fintype ι]
 
 omit [Fintype ι] in
+/-- Identity under the stated parameter and domain assumptions: `(fun i => (((-n) i : ℤ) : ℂ)) =
+-fun i => (n i : ℂ)`. -/
 lemma rth21_cast_neg (n : ι → ℤ) :
     (fun i => (((-n) i : ℤ) : ℂ)) = -fun i => (n i : ℂ) := by
   funext i; simp
 
 omit [Fintype ι] in
+/-- Identity under the stated parameter and domain assumptions: `(fun i => (((n - m) i : ℤ) : ℂ))
+= (fun i => (n i : ℂ)) - fun i => (m i : ℂ)`. -/
 lemma rth21_cast_sub (n m : ι → ℤ) :
     (fun i => (((n - m) i : ℤ) : ℂ)) = (fun i => (n i : ℂ)) - fun i => (m i : ℂ) := by
   funext i; simp
 
+/-- Identity under the stated parameter and domain assumptions: `(fun i => (n i : ℂ)) ⬝ᵥ (fun i =>
+(m i : ℂ)) = ((n ⬝ᵥ m : ℤ) : ℂ)`. -/
 lemma rth21_intDot (n m : ι → ℤ) :
     (fun i => (n i : ℂ)) ⬝ᵥ (fun i => (m i : ℂ)) = ((n ⬝ᵥ m : ℤ) : ℂ) := by
   simp [dotProduct]
 
+/-- Identity under the stated parameter and domain assumptions: `cexp (2 * π * I * k) = 1`. -/
 theorem rth21_exp_int (k : ℤ) : cexp (2 * π * I * k) = 1 := by
   rw [show 2 * π * I * (k : ℂ) = k * (2 * π * I) by ring]
   exact Complex.exp_int_mul_two_pi_mul_I k

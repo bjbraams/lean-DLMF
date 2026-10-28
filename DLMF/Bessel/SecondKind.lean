@@ -5,7 +5,6 @@ Authors: Bastiaan J Braams
 -/
 module
 
-
 public import DLMF.Bessel.Theorems
 public import DLMF.Confluent.BasicProperties
 public import DLMF.Bessel.Modified
@@ -32,12 +31,15 @@ namespace DLMF.Bessel
 
 /-! ### The `₀F₁` series in the parameter -/
 
+/-- Identity under the stated parameter and domain assumptions: `regularizedHGFun (∅ : Multiset ℂ)
+{c} w = ∑' n : ℕ, w ^ n / n ! * (Gamma (c + n))⁻¹`. -/
 theorem regularized0F1_eq_tsum (c w : ℂ) :
     regularizedHGFun (∅ : Multiset ℂ) {c} w = ∑' n : ℕ, w ^ n / n ! * (Gamma (c + n))⁻¹ := by
   rw [regularizedHGFun_eq_tsum]
   congr 1; funext n
   rw [regularizedHGFunCoeff_empty]; field_simp
 
+/-- Summability of the indicated series: `Summable fun n : ℕ => w ^ n / n ! * (Gamma (c + n))⁻¹`. -/
 theorem summable_regularized0F1_term (c w : ℂ) :
     Summable fun n : ℕ => w ^ n / n ! * (Gamma (c + n))⁻¹ := by
   have h := (hasFPowerSeriesOnBall_regularized0F1 c).hasSum_mul_pow
@@ -131,34 +133,43 @@ theorem differentiable_besselJ_order {z : ℂ} (hz : z ≠ 0) :
 /-- The numerator `D_ν(z) = J_ν(z) cos νπ - J_{-ν}(z)` of `Y_ν`. -/
 def besselD (ν z : ℂ) : ℂ := besselJ ν z * cos (ν * π) - besselJ (-ν) z
 
+/-- Identity under the stated parameter and domain assumptions: `cos ((n : ℂ) * π) = (-1) ^ n`. -/
 theorem cos_int_mul_pi_complex (n : ℤ) : cos ((n : ℂ) * π) = (-1) ^ n := by
   rw [show ((n : ℂ) * π) = ((n * π : ℝ) : ℂ) by push_cast; ring, ← ofReal_cos,
     Real.cos_int_mul_pi]; push_cast; rfl
 
+/-- Identity under the stated parameter and domain assumptions: `sin ((n : ℂ) * π) = 0`. -/
 theorem sin_int_mul_pi_complex (n : ℤ) : sin ((n : ℂ) * π) = 0 := by
   rw [show ((n : ℂ) * π) = ((n * π : ℝ) : ℂ) by push_cast; ring, ← ofReal_sin,
     Real.sin_int_mul_pi]; simp
 
+/-- Identity under the stated parameter and domain assumptions: `besselD n z = 0`. -/
 theorem besselD_int (n : ℤ) (z : ℂ) : besselD n z = 0 := by
   rw [besselD, besselJ_neg_int, cos_int_mul_pi_complex]; ring
 
+/-- Nonvanishing under the stated hypotheses: `sin (ν * π) ≠ 0`. -/
 theorem sin_mul_pi_ne_zero {ν : ℂ} (hν : ∀ k : ℤ, ν ≠ k) : sin (ν * π) ≠ 0 := by
   rw [Complex.sin_ne_zero_iff]
   intro k hk
   have hπ : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
   exact hν k (mul_right_cancel₀ hπ hk)
 
+/-- Identity under the stated parameter and domain assumptions: `besselY ν z = besselD ν z / sin
+(ν * π)`. -/
 theorem besselY_eq_of_not_int {ν : ℂ} (hν : ∀ k : ℤ, ν ≠ k) (z : ℂ) :
     besselY ν z = besselD ν z / sin (ν * π) := by
   have : ¬ ∃ k : ℤ, ν = k := fun ⟨k, hk⟩ => hν k hk
   simp [besselY, this, besselD]
 
+/-- Differentiability of the indicated parameterized function: `Differentiable ℂ fun ν : ℂ =>
+besselD ν z`. -/
 theorem differentiable_besselD {z : ℂ} (hz : z ≠ 0) :
     Differentiable ℂ fun ν : ℂ => besselD ν z := by
   unfold besselD
   exact ((differentiable_besselJ_order hz).mul (by fun_prop)).sub
     ((differentiable_besselJ_order hz).comp differentiable_neg)
 
+/-- The function `(fun p : ℂ × ℂ => besselD p.2 p.1)` is continuous on `(slitPlane ×ˢ univ)`. -/
 theorem continuousOn_besselD :
     ContinuousOn (fun p : ℂ × ℂ => besselD p.2 p.1) (slitPlane ×ˢ univ) := by
   rintro ⟨z, ν⟩ ⟨hz, -⟩
@@ -171,6 +182,7 @@ theorem continuousOn_besselD :
   unfold besselD
   exact ((hJ _ continuous_snd).mul (by fun_prop)).sub (hJ _ continuous_snd.neg)
 
+/-- Nonvanishing under the stated hypotheses: `∀ k : ℤ, μ ≠ k`. -/
 theorem not_int_of_mem_ball {n : ℤ} {μ : ℂ} (hμ : μ ∈ Metric.ball (n : ℂ) (1 / 2)) (hne : μ ≠ n) :
     ∀ k : ℤ, μ ≠ k := by
   intro k hk
@@ -183,6 +195,8 @@ theorem not_int_of_mem_ball {n : ℤ} {μ : ℂ} (hμ : μ ∈ Metric.ball (n : 
     push_cast at this hμ; linarith
   exact hne (by rw [show k = n by omega])
 
+/-- Identity under the stated parameter and domain assumptions: `dslope (fun ν : ℂ => sin (ν * π))
+n μ ≠ 0`. -/
 theorem dslope_sin_ne_zero (n : ℤ) {μ : ℂ} (hμ : μ ∈ Metric.ball (n : ℂ) (1 / 2)) :
     dslope (fun ν : ℂ => sin (ν * π)) n μ ≠ 0 := by
   by_cases hne : μ = n
@@ -271,20 +285,31 @@ theorem hasDerivAt_besselJ' {ν z : ℂ} (hz : z ∈ slitPlane) :
   field_simp at hr ⊢
   linear_combination -hr
 
+/-- Identity under the stated parameter and domain assumptions: `cos ((ν + 1) * π) = -cos (ν *
+π)`. -/
 theorem cos_add_one_mul_pi (ν : ℂ) : cos ((ν + 1) * π) = -cos (ν * π) := by
   rw [add_mul, one_mul, cos_add_pi]
+/-- Identity under the stated parameter and domain assumptions: `sin ((ν + 1) * π) = -sin (ν *
+π)`. -/
 theorem sin_add_one_mul_pi (ν : ℂ) : sin ((ν + 1) * π) = -sin (ν * π) := by
   rw [add_mul, one_mul, sin_add_pi]
+/-- Identity under the stated parameter and domain assumptions: `cos ((ν - 1) * π) = -cos (ν *
+π)`. -/
 theorem cos_sub_one_mul_pi (ν : ℂ) : cos ((ν - 1) * π) = -cos (ν * π) := by
   rw [sub_mul, one_mul, cos_sub_pi]
+/-- Identity under the stated parameter and domain assumptions: `sin ((ν - 1) * π) = -sin (ν *
+π)`. -/
 theorem sin_sub_one_mul_pi (ν : ℂ) : sin ((ν - 1) * π) = -sin (ν * π) := by
   rw [sub_mul, one_mul, sin_sub_pi]
 
+/-- Nonvanishing under the stated hypotheses: `∀ k : ℤ, ν + 1 ≠ k`. -/
 theorem not_int_add_one {ν : ℂ} (hν : ∀ k : ℤ, ν ≠ k) : ∀ k : ℤ, ν + 1 ≠ k := fun k h =>
   hν (k - 1) (by push_cast; linear_combination h)
+/-- Nonvanishing under the stated hypotheses: `∀ k : ℤ, ν - 1 ≠ k`. -/
 theorem not_int_sub_one {ν : ℂ} (hν : ∀ k : ℤ, ν ≠ k) : ∀ k : ℤ, ν - 1 ≠ k := fun k h =>
   hν (k + 1) (by push_cast; linear_combination h)
 
+/-- The function `(fun μ => besselY (f μ) z)` is continuous at `ν`. -/
 theorem continuousAt_besselY_order (f : ℂ → ℂ) (hf : Continuous f) (ν : ℂ) {z : ℂ}
     (hz : z ∈ slitPlane) : ContinuousAt (fun μ => besselY (f μ) z) ν :=
   ContinuousAt.comp (g := fun p : ℂ × ℂ => besselY p.1 p.2) (f := fun μ => (f μ, z))
@@ -312,6 +337,8 @@ theorem besselY_add_sub (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
   rw [div_neg, div_neg]
   linear_combination (cos (c * π) / sin (c * π)) * h1 + (1 / sin (c * π)) * h2
 
+/-- At `z`, the function `(besselY ν)` has derivative `((ν / z) * besselY ν z - besselY (ν + 1)
+z)`. -/
 theorem hasDerivAt_besselY_of_not_int {ν : ℂ} (hν : ∀ k : ℤ, ν ≠ k) {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (besselY ν) ((ν / z) * besselY ν z - besselY (ν + 1) z) z := by
   have hs := sin_mul_pi_ne_zero hν
@@ -390,6 +417,8 @@ def besselWronskianSeries (ν w : ℂ) : ℂ :=
   regularizedHGFun (∅ : Multiset ℂ) {ν + 1} w * regularizedHGFun ∅ {-ν} w -
     w * (regularizedHGFun ∅ {ν + 2} w * regularizedHGFun ∅ {1 - ν} w)
 
+/-- Identity under the stated parameter and domain assumptions: `besselWronskianSeries ν w = -(sin
+(π * ν) / π)`. -/
 theorem besselWronskianSeries_eq (ν w : ℂ) :
     besselWronskianSeries ν w = -(sin (π * ν) / π) := by
   have hd : ∀ c w : ℂ, HasDerivAt (regularizedHGFun (∅ : Multiset ℂ) {c})
@@ -446,6 +475,7 @@ theorem wronskian_besselJ_neg (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     (regularizedHGFun (∅ : Multiset ℂ) {ν + 2} (-(z ^ 2 / 4)) *
       regularizedHGFun ∅ {1 - ν} (-(z ^ 2 / 4))) * hz'
 
+/-- The function `(fun μ => besselJ (f μ) z)` is continuous at `ν`. -/
 theorem continuousAt_besselJ_order (f : ℂ → ℂ) (hf : Continuous f) (ν : ℂ) {z : ℂ}
     (hz : z ∈ slitPlane) : ContinuousAt (fun μ => besselJ (f μ) z) ν :=
   ContinuousAt.comp (g := fun p : ℂ × ℂ => besselJ p.1 p.2) (f := fun μ => (f μ, z))
@@ -489,6 +519,8 @@ def hankelH1 (ν z : ℂ) : ℂ := besselJ ν z + I * besselY ν z
 @[dlmf 10.4.E3]
 def hankelH2 (ν z : ℂ) : ℂ := besselJ ν z - I * besselY ν z
 
+/-- At `z`, the function `(hankelH1 ν)` has derivative `((ν / z) * hankelH1 ν z - hankelH1 (ν + 1)
+z)`. -/
 theorem hasDerivAt_hankelH1 (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (hankelH1 ν) ((ν / z) * hankelH1 ν z - hankelH1 (ν + 1) z) z := by
   have h := (hasDerivAt_besselJ (ν := ν) hz).add ((hasDerivAt_besselY ν hz).const_mul I)
@@ -496,6 +528,8 @@ theorem hasDerivAt_hankelH1 (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
   · funext w; simp [hankelH1]
   · simp only [hankelH1]; ring
 
+/-- At `z`, the function `(hankelH2 ν)` has derivative `((ν / z) * hankelH2 ν z - hankelH2 (ν + 1)
+z)`. -/
 theorem hasDerivAt_hankelH2 (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (hankelH2 ν) ((ν / z) * hankelH2 ν z - hankelH2 (ν + 1) z) z := by
   have h := (hasDerivAt_besselJ (ν := ν) hz).sub ((hasDerivAt_besselY ν hz).const_mul I)
@@ -574,6 +608,7 @@ theorem besselI_neg_int (n : ℤ) (z : ℂ) : besselI (-n) z = besselI n z := by
   rw [show z ^ 2 / 4 = (z / 2) ^ 2 by ring]
   ring
 
+/-- The function `(fun p : ℂ × ℂ => besselI p.1 p.2)` is continuous on `(univ ×ˢ slitPlane)`. -/
 theorem continuousOn_besselI :
     ContinuousOn (fun p : ℂ × ℂ => besselI p.1 p.2) (univ ×ˢ slitPlane) := by
   rintro ⟨ν, z⟩ ⟨-, hz⟩
@@ -584,6 +619,8 @@ theorem continuousOn_besselI :
   · exact (continuous_regularized0F1.comp (by fun_prop :
       Continuous fun p : ℂ × ℂ => (p.1 + 1, p.2 ^ 2 / 4))).continuousAt
 
+/-- Differentiability of the indicated parameterized function: `Differentiable ℂ fun ν : ℂ =>
+besselI ν z`. -/
 theorem differentiable_besselI_order {z : ℂ} (hz : z ≠ 0) :
     Differentiable ℂ fun ν : ℂ => besselI ν z := by
   have hz2 : z / 2 ≠ 0 := div_ne_zero hz two_ne_zero
@@ -594,20 +631,26 @@ theorem differentiable_besselI_order {z : ℂ} (hz : z ≠ 0) :
 /-- The numerator `E_ν(z) = I_{-ν}(z) - I_ν(z)` of `K_ν`. -/
 def besselE (ν z : ℂ) : ℂ := besselI (-ν) z - besselI ν z
 
+/-- Identity under the stated parameter and domain assumptions: `besselE n z = 0`. -/
 theorem besselE_int (n : ℤ) (z : ℂ) : besselE n z = 0 := by
   rw [besselE, besselI_neg_int, sub_self]
 
+/-- Identity under the stated parameter and domain assumptions: `besselK ν z = π / 2 * besselE ν z
+/ sin (ν * π)`. -/
 theorem besselK_eq_of_not_int {ν : ℂ} (hν : ∀ k : ℤ, ν ≠ k) (z : ℂ) :
     besselK ν z = π / 2 * besselE ν z / sin (ν * π) := by
   have : ¬ ∃ k : ℤ, ν = k := fun ⟨k, hk⟩ => hν k hk
   simp [besselK, this, besselE]
 
+/-- Differentiability of the indicated parameterized function: `Differentiable ℂ fun ν : ℂ =>
+besselE ν z`. -/
 theorem differentiable_besselE {z : ℂ} (hz : z ≠ 0) :
     Differentiable ℂ fun ν : ℂ => besselE ν z := by
   unfold besselE
   exact ((differentiable_besselI_order hz).comp differentiable_neg).sub
     (differentiable_besselI_order hz)
 
+/-- The function `(fun p : ℂ × ℂ => besselE p.2 p.1)` is continuous on `(slitPlane ×ˢ univ)`. -/
 theorem continuousOn_besselE :
     ContinuousOn (fun p : ℂ × ℂ => besselE p.2 p.1) (slitPlane ×ˢ univ) := by
   rintro ⟨z, ν⟩ ⟨hz, -⟩
@@ -620,6 +663,8 @@ theorem continuousOn_besselE :
   unfold besselE
   exact (hI _ continuous_snd.neg).sub (hI _ continuous_snd)
 
+/-- Identity under the stated parameter and domain assumptions: `besselK μ z = π / 2 * dslope (fun
+ν => besselE ν z) n μ / dslope (fun ν : ℂ => sin (ν * π)) n μ`. -/
 theorem besselK_eq_dslope (n : ℤ) {μ z : ℂ} (hμ : μ ∈ Metric.ball (n : ℂ) (1 / 2))
     (hz : z ∈ slitPlane) :
     besselK μ z = π / 2 * dslope (fun ν => besselE ν z) n μ /
@@ -686,11 +731,13 @@ theorem continuousAt_besselK (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     have hp' : ∀ k : ℤ, p.1 ≠ k := fun k hk => hp.1 (by rw [hk]; exact sin_int_mul_pi_complex k)
     exact (besselK_eq_of_not_int hp' p.2).symm
 
+/-- The function `(fun μ => besselK (f μ) z)` is continuous at `ν`. -/
 theorem continuousAt_besselK_order (f : ℂ → ℂ) (hf : Continuous f) (ν : ℂ) {z : ℂ}
     (hz : z ∈ slitPlane) : ContinuousAt (fun μ => besselK (f μ) z) ν :=
   ContinuousAt.comp (g := fun p : ℂ × ℂ => besselK p.1 p.2) (f := fun μ => (f μ, z))
     (continuousAt_besselK (f ν) hz) (by fun_prop)
 
+/-- The function `(fun μ => besselI (f μ) z)` is continuous at `ν`. -/
 theorem continuousAt_besselI_order (f : ℂ → ℂ) (hf : Continuous f) (ν : ℂ) {z : ℂ}
     (hz : z ∈ slitPlane) : ContinuousAt (fun μ => besselI (f μ) z) ν :=
   ContinuousAt.comp (g := fun p : ℂ × ℂ => besselI p.1 p.2) (f := fun μ => (f μ, z))
@@ -721,6 +768,8 @@ theorem besselK_add_sub (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
   rw [div_neg, div_neg]
   linear_combination (-(π / 2 / sin (c * π))) * h1 - (π / 2 / sin (c * π)) * h2
 
+/-- At `z`, the function `(besselK ν)` has derivative `((ν / z) * besselK ν z - besselK (ν + 1)
+z)`. -/
 theorem hasDerivAt_besselK_of_not_int {ν : ℂ} (hν : ∀ k : ℤ, ν ≠ k) {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (besselK ν) ((ν / z) * besselK ν z - besselK (ν + 1) z) z := by
   have hs := sin_mul_pi_ne_zero hν
@@ -821,6 +870,8 @@ theorem wronskian_besselI_neg (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     (regularizedHGFun (∅ : Multiset ℂ) {ν + 2} (z ^ 2 / 4) *
       regularizedHGFun ∅ {1 - ν} (z ^ 2 / 4)) * hz'
 
+/-- Identity under the stated parameter and domain assumptions: `besselK ν z * besselI (ν + 1) z +
+besselK (ν + 1) z * besselI ν z = 1 / z`. -/
 theorem besselK_mul_besselI_succ_add (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     besselK ν z * besselI (ν + 1) z + besselK (ν + 1) z * besselI ν z = 1 / z := by
   have hz0 := slitPlane_ne_zero hz

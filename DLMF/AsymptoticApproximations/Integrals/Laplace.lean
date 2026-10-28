@@ -106,12 +106,17 @@ section Coefficients
 
 variable {L₀ : ℂ} {p q : ℕ → ℂ} {lam mu : ℂ}
 
+/-- Identity under the stated parameter and domain assumptions: `binomSeriesCoeff p β 0 = 1`. -/
 theorem binomSeriesCoeff_zero (β : ℂ) : binomSeriesCoeff p β 0 = 1 := by
   simp [binomSeriesCoeff, cbinom]
 
+/-- Identity under the stated parameter and domain assumptions: `binomSeriesCoeff p β 1 = β * (p 1
+/ p 0)`. -/
 theorem binomSeriesCoeff_one (β : ℂ) : binomSeriesCoeff p β 1 = β * (p 1 / p 0) := by
   simp [binomSeriesCoeff, cbinom, sum_range_succ, PowerSeries.coeff_one]
 
+/-- Identity under the stated parameter and domain assumptions: `binomSeriesCoeff p β 2 = β * (p 2
+/ p 0) + β * (β - 1) / 2 * (p 1 / p 0) ^ 2`. -/
 theorem binomSeriesCoeff_two (β : ℂ) :
     binomSeriesCoeff p β 2 = β * (p 2 / p 0) + β * (β - 1) / 2 * (p 1 / p 0) ^ 2 := by
   simp only [binomSeriesCoeff, cbinom, sum_range_succ, range_zero, sum_empty, pow_zero,

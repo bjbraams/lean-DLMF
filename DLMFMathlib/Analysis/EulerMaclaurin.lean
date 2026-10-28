@@ -47,14 +47,19 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E
 /-- The periodic Bernoulli function `B̃ₚ(x) = Bₚ(x - ⌊x⌋)`. -/
 def periodicBernoulli (p : ℕ) (x : ℝ) : ℝ := bernoulliFun p (Int.fract x)
 
+/-- Identity under the stated parameter and domain assumptions: `periodicBernoulli p (x + m) =
+periodicBernoulli p x`. -/
 theorem periodicBernoulli_add_intCast (p : ℕ) (x : ℝ) (m : ℤ) :
     periodicBernoulli p (x + m) = periodicBernoulli p x := by
   simp [periodicBernoulli]
 
+/-- Identity under the stated parameter and domain assumptions: `periodicBernoulli p x =
+bernoulliFun p (x - m)`. -/
 theorem periodicBernoulli_eq_of_mem_Ico {p : ℕ} {x : ℝ} {m : ℤ} (hx : x ∈ Ico (m : ℝ) (m + 1)) :
     periodicBernoulli p x = bernoulliFun p (x - m) := by
   rw [periodicBernoulli, Int.fract, Int.floor_eq_iff.mpr ⟨hx.1, hx.2⟩]
 
+/-- Measurability of the indicated function: `Measurable (periodicBernoulli p)`. -/
 theorem measurable_periodicBernoulli (p : ℕ) : Measurable (periodicBernoulli p) :=
   (continuous_bernoulliFun p).measurable.comp measurable_fract
 

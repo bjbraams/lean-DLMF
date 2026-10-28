@@ -228,14 +228,18 @@ section Poincare
 
 variable {𝕜 E : Type*} [NormedField 𝕜] [NormedAddCommGroup E] [NormedSpace 𝕜 E]
 
+/-- Nonvanishing under the stated hypotheses: `∀ᶠ x in cobounded 𝕜 ⊓ 𝓟 X, x ≠ 0`. -/
 private lemma g2a_eventually_ne_zero (X : Set 𝕜) :
     ∀ᶠ x in cobounded 𝕜 ⊓ 𝓟 X, x ≠ 0 :=
   (eventually_ne_cobounded (0 : 𝕜)).filter_mono inf_le_left
 
+/-- Identity under the stated parameter and domain assumptions: `PowerSeries.mk (fun n =>
+PowerSeries.coeff n P) = P`. -/
 private lemma g2a_mk_coeff (P : PowerSeries 𝕜) :
     PowerSeries.mk (fun n => PowerSeries.coeff n P) = P :=
   PowerSeries.ext fun n => by simp
 
+/-- The map `(fun x : 𝕜 => x⁻¹)` tends to `(𝓝 0)` along `(cobounded 𝕜 ⊓ 𝓟 X)`. -/
 private lemma g2a_tendsto_inv (X : Set 𝕜) :
     Tendsto (fun x : 𝕜 => x⁻¹) (cobounded 𝕜 ⊓ 𝓟 X) (𝓝 0) :=
   tendsto_inv₀_cobounded.mono_left inf_le_left

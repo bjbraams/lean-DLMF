@@ -42,9 +42,11 @@ def struveAs_dom : Set ℂ := {s : ℂ | 1 + s ^ 2 ∈ slitPlane}
 def struveAs_kernel (ν s : ℂ) : ℂ :=
   (s + (1 + s ^ 2) ^ (1 / 2 : ℂ)) ^ (-ν) * (1 + s ^ 2) ^ (-(1 / 2 : ℂ))
 
+/-- The indicated domain is open: `IsOpen struveAs_dom`. -/
 theorem struveAs_isOpen_dom : IsOpen struveAs_dom :=
   isOpen_slitPlane.preimage (by fun_prop)
 
+/-- Estimate under the stated parameter and domain assumptions: `0 < (x ^ (1 / 2 : ℂ)).re`. -/
 theorem struveAs_re_cpow_half_pos {x : ℂ} (hx : x ∈ slitPlane) : 0 < (x ^ (1 / 2 : ℂ)).re := by
   have hx0 := slitPlane_ne_zero hx
   rw [cpow_def_of_ne_zero hx0, exp_re]
@@ -56,9 +58,11 @@ theorem struveAs_re_cpow_half_pos {x : ℂ} (hx : x ∈ slitPlane) : 0 < (x ^ (1
     have : (log x * (1 / 2)).im = arg x / 2 := by simp [log_im, div_eq_mul_inv]
     rw [this]; linarith [Real.pi_pos]
 
+/-- Identity under the stated parameter and domain assumptions: `(x ^ (1 / 2 : ℂ)) ^ 2 = x`. -/
 theorem struveAs_cpow_half_sq (x : ℂ) : (x ^ (1 / 2 : ℂ)) ^ 2 = x := by
   rw [one_div]; exact_mod_cast cpow_ofNat_inv_pow x 2
 
+/-- Formula under the stated hypotheses: `s + (1 + s ^ 2) ^ (1 / 2 : ℂ) ∈ slitPlane`. -/
 theorem struveAs_add_sqrt_mem {s : ℂ} (hs : s ∈ struveAs_dom) :
     s + (1 + s ^ 2) ^ (1 / 2 : ℂ) ∈ slitPlane := by
   set w := (1 + s ^ 2) ^ (1 / 2 : ℂ) with hw
@@ -83,10 +87,12 @@ theorem struveAs_add_sqrt_mem {s : ℂ} (hs : s ∈ struveAs_dom) :
   have : 2 * a * w.re ≤ 0 := by nlinarith
   nlinarith [sq_nonneg a]
 
-
+/-- Nonvanishing under the stated hypotheses: `1 + s ^ 2 ≠ 0`. -/
 theorem struveAs_one_add_sq_ne_zero {s : ℂ} (hs : s ∈ struveAs_dom) : 1 + s ^ 2 ≠ 0 :=
   slitPlane_ne_zero hs
 
+/-- At `s`, the function `(fun s : ℂ => (1 + s ^ 2) ^ c)` has derivative `(c * (1 + s ^ 2) ^ (c -
+1) * (2 * s))`. -/
 theorem struveAs_hasDerivAt_cpow (c : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) :
     HasDerivAt (fun s : ℂ => (1 + s ^ 2) ^ c) (c * (1 + s ^ 2) ^ (c - 1) * (2 * s)) s := by
   have h : HasDerivAt (fun s : ℂ => 1 + s ^ 2) (2 * s) s := by
@@ -98,16 +104,21 @@ abbrev struveAs_q (s : ℂ) : ℂ := (1 + s ^ 2) ^ (-(1 / 2 : ℂ))
 /-- The factor `h(s) = (s+√(1+s²))^{-ν}`. -/
 abbrev struveAs_h (ν s : ℂ) : ℂ := (s + (1 + s ^ 2) ^ (1 / 2 : ℂ)) ^ (-ν)
 
+/-- Identity under the stated parameter and domain assumptions: `(1 + s ^ 2) ^ (1 / 2 : ℂ) *
+struveAs_q s = 1`. -/
 theorem struveAs_sqrt_mul_q {s : ℂ} (hs : s ∈ struveAs_dom) :
     (1 + s ^ 2) ^ (1 / 2 : ℂ) * struveAs_q s = 1 := by
   rw [struveAs_q, ← cpow_add _ _ (struveAs_one_add_sq_ne_zero hs)]; simp
 
+/-- Identity under the stated parameter and domain assumptions: `struveAs_q s * struveAs_q s * (1
++ s ^ 2) = 1`. -/
 theorem struveAs_q_mul_q {s : ℂ} (hs : s ∈ struveAs_dom) :
     struveAs_q s * struveAs_q s * (1 + s ^ 2) = 1 := by
   have hu := struveAs_one_add_sq_ne_zero hs
   rw [struveAs_q, ← cpow_add _ _ hu, show -(1 / 2 : ℂ) + -(1 / 2) = -1 by norm_num, cpow_neg_one,
     inv_mul_cancel₀ hu]
 
+/-- At `s`, the function `struveAs_q` has derivative `(-s * struveAs_q s * (1 + s ^ 2)⁻¹)`. -/
 theorem struveAs_hasDerivAt_q {s : ℂ} (hs : s ∈ struveAs_dom) :
     HasDerivAt struveAs_q (-s * struveAs_q s * (1 + s ^ 2)⁻¹) s := by
   have hu := struveAs_one_add_sq_ne_zero hs
@@ -115,6 +126,7 @@ theorem struveAs_hasDerivAt_q {s : ℂ} (hs : s ∈ struveAs_dom) :
   rw [cpow_sub _ _ hu, cpow_one, struveAs_q]
   field_simp
 
+/-- At `s`, the function `(struveAs_h ν)` has derivative `(-ν * struveAs_h ν s * struveAs_q s)`. -/
 theorem struveAs_hasDerivAt_h (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) :
     HasDerivAt (struveAs_h ν) (-ν * struveAs_h ν s * struveAs_q s) s := by
   have hu := struveAs_one_add_sq_ne_zero hs
@@ -135,9 +147,12 @@ abbrev struveAs_G1 (ν s : ℂ) : ℂ :=
   -ν * struveAs_h ν s * struveAs_q s * struveAs_q s -
     s * struveAs_h ν s * struveAs_q s * (1 + s ^ 2)⁻¹
 
+/-- Identity under the stated parameter and domain assumptions: `struveAs_kernel ν = fun s =>
+struveAs_h ν s * struveAs_q s`. -/
 theorem struveAs_kernel_eq (ν : ℂ) : struveAs_kernel ν = fun s => struveAs_h ν s * struveAs_q s :=
   rfl
 
+/-- At `s`, the function `(struveAs_kernel ν)` has derivative `(struveAs_G1 ν s)`. -/
 theorem struveAs_hasDerivAt_kernel (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) :
     HasDerivAt (struveAs_kernel ν) (struveAs_G1 ν s) s := by
   rw [struveAs_kernel_eq]
@@ -149,6 +164,7 @@ abbrev struveAs_G2 (ν s : ℂ) : ℂ :=
   let h := struveAs_h ν s; let q := struveAs_q s; let i := (1 + s ^ 2)⁻¹
   ν ^ 2 * h * q ^ 3 + 3 * ν * s * h * q ^ 2 * i - h * q * i + 3 * s ^ 2 * h * q * i ^ 2
 
+/-- At `s`, the function `(struveAs_G1 ν)` has derivative `(struveAs_G2 ν s)`. -/
 theorem struveAs_hasDerivAt_G1 (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) :
     HasDerivAt (struveAs_G1 ν) (struveAs_G2 ν s) s := by
   have hu := struveAs_one_add_sq_ne_zero hs
@@ -164,6 +180,8 @@ theorem struveAs_hasDerivAt_G1 (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) :
   field_simp
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `(1 + s ^ 2) * struveAs_G2 ν s + 3
+* s * struveAs_G1 ν s + (1 - ν ^ 2) * struveAs_kernel ν s = 0`. -/
 theorem struveAs_ode (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) :
     (1 + s ^ 2) * struveAs_G2 ν s + 3 * s * struveAs_G1 ν s + (1 - ν ^ 2) * struveAs_kernel ν s
       = 0 := by
@@ -175,33 +193,42 @@ theorem struveAs_ode (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) :
     (3 * ν * s * struveAs_h ν s * struveAs_q s ^ 2 - struveAs_h ν s * struveAs_q s +
       3 * s ^ 2 * struveAs_h ν s * struveAs_q s * (1 + s ^ 2)⁻¹) * hui
 
-
 /-- Taylor data `dₙ = n! cₙ` of the kernel: `d₀ = 1`, `d₁ = -ν`, `d_{n+2} = (ν² - (n+1)²) dₙ`. -/
 def struveAs_coeffD (ν : ℂ) : ℕ → ℂ
   | 0 => 1
   | 1 => -ν
   | n + 2 => (ν ^ 2 - ((n : ℂ) + 1) ^ 2) * struveAs_coeffD ν n
 
+/-- Formula under the stated hypotheses: `(0 : ℂ) ∈ struveAs_dom`. -/
 theorem struveAs_zero_mem : (0 : ℂ) ∈ struveAs_dom := by simp [struveAs_dom]
 
+/-- Differentiability throughout the specified domain: `DifferentiableOn ℂ (struveAs_kernel ν)
+struveAs_dom`. -/
 theorem struveAs_differentiableOn_kernel (ν : ℂ) :
     DifferentiableOn ℂ (struveAs_kernel ν) struveAs_dom :=
   fun _ hs => (struveAs_hasDerivAt_kernel ν hs).differentiableAt.differentiableWithinAt
 
+/-- The function `(struveAs_kernel ν)` is analytic over `ℂ` at `s`. -/
 theorem struveAs_analyticAt_kernel (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) :
     AnalyticAt ℂ (struveAs_kernel ν) s :=
   (struveAs_differentiableOn_kernel ν).analyticAt (struveAs_isOpen_dom.mem_nhds hs)
 
+/-- Identity under the stated parameter and domain assumptions: `deriv (struveAs_kernel ν) =ᶠ[𝓝 s]
+struveAs_G1 ν`. -/
 theorem struveAs_deriv_kernel_eventually (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) :
     deriv (struveAs_kernel ν) =ᶠ[𝓝 s] struveAs_G1 ν := by
   filter_upwards [struveAs_isOpen_dom.mem_nhds hs] with x hx
   exact (struveAs_hasDerivAt_kernel ν hx).deriv
 
+/-- Identity under the stated parameter and domain assumptions: `deriv (deriv (struveAs_kernel ν))
+s = struveAs_G2 ν s`. -/
 theorem struveAs_deriv2_kernel (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) :
     deriv (deriv (struveAs_kernel ν)) s = struveAs_G2 ν s := by
   rw [(struveAs_deriv_kernel_eventually ν hs).deriv_eq]
   exact (struveAs_hasDerivAt_G1 ν hs).deriv
 
+/-- Identity under the stated parameter and domain assumptions: `iteratedDeriv (n + 2)
+(struveAs_kernel ν) 0 = (ν ^ 2 - ((n : ℂ) + 1) ^ 2) * iteratedDeriv n (struveAs_kernel ν) 0`. -/
 theorem struveAs_iteratedDeriv_add_two (ν : ℂ) (n : ℕ) :
     iteratedDeriv (n + 2) (struveAs_kernel ν) 0 =
       (ν ^ 2 - ((n : ℂ) + 1) ^ 2) * iteratedDeriv n (struveAs_kernel ν) 0 := by
@@ -239,9 +266,11 @@ theorem struveAs_iteratedDeriv_add_two (ν : ℂ) (n : ℕ) :
     push_cast at h ⊢
     linear_combination h
 
-
+/-- Identity under the stated parameter and domain assumptions: `struveAs_kernel ν 0 = 1`. -/
 theorem struveAs_kernel_zero (ν : ℂ) : struveAs_kernel ν 0 = 1 := by simp [struveAs_kernel]
 
+/-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (struveAs_kernel
+ν) 0 = struveAs_coeffD ν n`. -/
 theorem struveAs_iteratedDeriv_kernel (ν : ℂ) (n : ℕ) :
     iteratedDeriv n (struveAs_kernel ν) 0 = struveAs_coeffD ν n := by
   induction n using Nat.strong_induction_on with
@@ -312,7 +341,6 @@ theorem struveAs_norm_kernel_le (ν : ℂ) {s : ℂ} (hs : s ∈ struveAs_dom) {
       ≤ ((1 + 2 * ‖s‖) ^ |ν.re| * Real.exp (π * |ν.im|)) * c ^ (-(1 / 2 : ℝ)) :=
         mul_le_mul h1 h2 (norm_nonneg _) (by positivity)
     _ = _ := by ring
-
 
 /-- Points `r e^{iy}`, `|y| < π/2`, lie in the domain. -/
 theorem struveAs_ray_mem {r y : ℝ} (hy : |y| < π / 2) : (r : ℂ) * exp (y * I) ∈ struveAs_dom := by
@@ -398,7 +426,6 @@ theorem struveAs_integral_sinh (ν z : ℂ) :
     struveAs_kernel_sinh, ← exp_add]
   ring_nf
 
-
 /-- Exponential damping of a polynomially bounded continuous function is integrable. -/
 theorem struveAs_integrableOn {G : ℝ → ℂ} {c C a : ℝ} (hc : 0 < c) (hC : 0 ≤ C) (ha : 0 ≤ a)
     (hG : ContinuousOn G (Ioi 0)) (hb : ∀ r : ℝ, 0 < r → ‖G r‖ ≤ C * (1 + 2 * r) ^ a) :
@@ -424,6 +451,8 @@ theorem struveAs_continuous_ray (ν : ℂ) {θ : ℝ} (hθ : |θ| < π / 2) :
         (struveAs_ray_mem hθ))).continuousAt
       (by fun_prop : Continuous fun r : ℝ => (r : ℂ) * exp (θ * I)).continuousAt
 
+/-- Estimate under the stated parameter and domain assumptions: `∃ C, 0 ≤ C ∧ ∀ r : ℝ, 0 ≤ r → ∀ y
+: ℝ, |y| ≤ |θ| → ‖struveAs_kernel ν ((r : ℂ) * exp (y * I))‖ ≤ C * (1 + 2 * r) ^ |ν.re|`. -/
 theorem struveAs_ray_bound' (ν : ℂ) {θ : ℝ} (hθ : |θ| < π / 2) :
     ∃ C, 0 ≤ C ∧ ∀ r : ℝ, 0 ≤ r → ∀ y : ℝ, |y| ≤ |θ| →
       ‖struveAs_kernel ν ((r : ℂ) * exp (y * I))‖ ≤ C * (1 + 2 * r) ^ |ν.re| := by
@@ -466,7 +495,6 @@ theorem struveAs_angerA_eq_integral (ν : ℂ) {z : ℂ} (hz : 0 < z.re) :
   rw [DLMF.HasIntegralAtTop] at hA
   rw [tendsto_nhds_unique hA hlim, struveAs_integral_sinh, integral_div]
   ring
-
 
 /-- The Laplace integral of the kernel along the ray `arg s = θ`. -/
 def struveAs_rotInt (ν : ℂ) (θ : ℝ) (z : ℂ) : ℂ :=
@@ -561,6 +589,8 @@ theorem struveAs_continuousAt_rotInt_order {θ : ℝ} (hθ : |θ| < π / 2) {z :
     refine ContinuousAt.mul ?_ continuousAt_const
     exact (continuous_neg.const_cpow (Or.inl hv)).continuousAt
 
+/-- Estimate under the stated parameter and domain assumptions: `{z : ℂ | 0 < (z * exp (θ *
+I)).re} ⊆ slitPlane`. -/
 theorem struveAs_halfPlane_subset {θ : ℝ} (hθ : |θ| < π / 2) :
     {z : ℂ | 0 < (z * exp (θ * I)).re} ⊆ slitPlane := by
   intro w hw
@@ -573,7 +603,6 @@ theorem struveAs_halfPlane_subset {θ : ℝ} (hθ : |θ| < π / 2) :
   have hw' : w = (w.re : ℂ) := Complex.ext (by simp) (by simp [h.2])
   rw [hw', re_ofReal_mul, exp_ofReal_mul_I_re] at hw
   nlinarith [h.1]
-
 
 /-- The rotated representation of `A_ν`, at nonintegral order. -/
 theorem struveAs_angerA_eq_rot_of_not_int {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) {θ : ℝ}
@@ -634,7 +663,6 @@ theorem struveAs_angerA_eq_rot (ν : ℂ) {θ : ℝ} (hθ : |θ| < π / 2) {z : 
     (continuousAt_const.mul (continuousAt_const.mul
       (struveAs_continuousAt_rotInt_order hθ hz ν))) fun c hc => ?_
   exact struveAs_angerA_eq_rot_of_not_int (DLMF.Confluent.forall_of_mem_integerComplement hc) hθ hz
-
 
 /-- Taylor remainder of the kernel along a ray, in the form required by Watson's lemma. -/
 theorem struveAs_kernel_ray_isBigO (ν : ℂ) (θ : ℝ) (N : ℕ) :

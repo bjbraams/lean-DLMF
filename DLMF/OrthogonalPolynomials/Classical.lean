@@ -49,15 +49,19 @@ theorem hermitePolyH_succ (n : ℕ) :
     hermitePolyH (n + 1) = 2 * X * hermitePolyH n - derivative (hermitePolyH n) :=
   rfl
 
+/-- Identity under the stated parameter and domain assumptions: `hermitePolyH 1 = 2 * X`. -/
 @[dlmf 18.5.E18]
 theorem hermitePolyH_one : hermitePolyH 1 = 2 * X := by
   simp [hermitePolyH_succ, hermitePolyH_zero]
 
+/-- Identity under the stated parameter and domain assumptions: `hermitePolyH 2 = 4 * X ^ 2 - 2`. -/
 @[dlmf 18.5.E18]
 theorem hermitePolyH_two : hermitePolyH 2 = 4 * X ^ 2 - 2 := by
   simp [hermitePolyH_succ, pow_two]
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `derivative (hermitePolyH (n + 1))
+= C (2 * (n + 1) : ℤ) * hermitePolyH n`. -/
 @[dlmf 18.9.E25]
 theorem hermitePolyH_derivative (n : ℕ) :
     derivative (hermitePolyH (n + 1)) = C (2 * (n + 1) : ℤ) * hermitePolyH n := by
@@ -491,6 +495,7 @@ theorem jacobiPolyP_zero (α β x : ℂ) : jacobiPolyP α β 0 x = 1 := by
 def legendrePolyP (n : ℕ) (x : ℂ) : ℂ :=
   jacobiPolyP 0 0 n x
 
+/-- Identity under the stated parameter and domain assumptions: `legendrePolyP 0 x = 1`. -/
 @[dlmf 18.5.E16]
 theorem legendrePolyP_zero (x : ℂ) : legendrePolyP 0 x = 1 := by simp [legendrePolyP]
 

@@ -59,7 +59,9 @@ namespace DLMF.Painleve
 be `F(z, w(z), w'(z))`. Intended for open `U` (the statements take `IsOpen U`). -/
 @[dlmf 32.2.E7]
 structure IsODE2SolutionOn (F : ℂ → ℂ → ℂ → ℂ) (w : ℂ → ℂ) (U : Set ℂ) : Prop where
+  /-- The solution is differentiable at every point of the domain. -/
   differentiableAt : ∀ z ∈ U, DifferentiableAt ℂ w z
+  /-- The first derivative has the derivative prescribed by the differential equation. -/
   hasDerivAt_deriv : ∀ z ∈ U, HasDerivAt (deriv w) (F z (w z) (deriv w z)) z
 
 namespace IsODE2SolutionOn
@@ -151,34 +153,49 @@ def IsPainleveIIOn (α : ℂ) (w : ℂ → ℂ) (U : Set ℂ) : Prop :=
 of `w`. -/
 @[dlmf 32.2.E3]
 structure IsPainleveIIIOn (α β γ δ : ℂ) (w : ℂ → ℂ) (U : Set ℂ) : Prop where
+  /-- The solution satisfies the differential equation throughout the domain. -/
   ode : IsODE2SolutionOn (painleveIIIRhs α β γ δ) w U
+  /-- The independent variable avoids zero throughout the domain. -/
   ne_zero : ∀ z ∈ U, z ≠ 0
+  /-- The solution avoids zero, so the rational terms in the equation are defined. -/
   w_ne_zero : ∀ z ∈ U, w z ≠ 0
 
 /-- DLMF 32.2.4: `w` is a solution of `PIV` on `U`, which avoids the zeros of `w`. -/
 @[dlmf 32.2.E4]
 structure IsPainleveIVOn (α β : ℂ) (w : ℂ → ℂ) (U : Set ℂ) : Prop where
+  /-- The solution satisfies the differential equation throughout the domain. -/
   ode : IsODE2SolutionOn (painleveIVRhs α β) w U
+  /-- The solution avoids zero, so the rational terms in the equation are defined. -/
   w_ne_zero : ∀ z ∈ U, w z ≠ 0
 
 /-- DLMF 32.2.5: `w` is a solution of `PV` on `U`, which avoids `z = 0` and the points where
 `w ∈ {0, 1}`. -/
 @[dlmf 32.2.E5]
 structure IsPainleveVOn (α β γ δ : ℂ) (w : ℂ → ℂ) (U : Set ℂ) : Prop where
+  /-- The solution satisfies the differential equation throughout the domain. -/
   ode : IsODE2SolutionOn (painleveVRhs α β γ δ) w U
+  /-- The independent variable avoids zero throughout the domain. -/
   ne_zero : ∀ z ∈ U, z ≠ 0
+  /-- The solution avoids zero, so the rational terms in the equation are defined. -/
   w_ne_zero : ∀ z ∈ U, w z ≠ 0
+  /-- The solution avoids one, so the rational terms in the equation are defined. -/
   w_ne_one : ∀ z ∈ U, w z ≠ 1
 
 /-- DLMF 32.2.6: `w` is a solution of `PVI` on `U`, which avoids `z ∈ {0, 1}` and the points
 where `w ∈ {0, 1, z}`. -/
 @[dlmf 32.2.E6]
 structure IsPainleveVIOn (α β γ δ : ℂ) (w : ℂ → ℂ) (U : Set ℂ) : Prop where
+  /-- The solution satisfies the differential equation throughout the domain. -/
   ode : IsODE2SolutionOn (painleveVIRhs α β γ δ) w U
+  /-- The independent variable avoids zero throughout the domain. -/
   ne_zero : ∀ z ∈ U, z ≠ 0
+  /-- The independent variable avoids one throughout the domain. -/
   ne_one : ∀ z ∈ U, z ≠ 1
+  /-- The solution avoids zero, so the rational terms in the equation are defined. -/
   w_ne_zero : ∀ z ∈ U, w z ≠ 0
+  /-- The solution avoids one, so the rational terms in the equation are defined. -/
   w_ne_one : ∀ z ∈ U, w z ≠ 1
+  /-- The solution differs from the independent variable throughout the domain. -/
   w_ne_self : ∀ z ∈ U, w z ≠ z
 
 /-- The right-hand side of DLMF 32.2.9 (`P'III`):
@@ -191,8 +208,11 @@ def painleveIIIPrimeRhs (α β γ δ : ℂ) (ζ u v : ℂ) : ℂ :=
 of `u`. -/
 @[dlmf 32.2.E9]
 structure IsPainleveIIIPrimeOn (α β γ δ : ℂ) (u : ℂ → ℂ) (U : Set ℂ) : Prop where
+  /-- The solution satisfies the differential equation throughout the domain. -/
   ode : IsODE2SolutionOn (painleveIIIPrimeRhs α β γ δ) u U
+  /-- The independent variable avoids zero throughout the domain. -/
   ne_zero : ∀ z ∈ U, z ≠ 0
+  /-- The solution avoids zero, so the rational terms in the equation are defined. -/
   w_ne_zero : ∀ z ∈ U, u z ≠ 0
 
 /-! ## Hamiltonian structure (§32.6) -/
@@ -202,7 +222,11 @@ structure IsPainleveIIIPrimeOn (α β γ δ : ℂ) (u : ℂ → ℂ) (U : Set �
 `H(q, p, z)` (in the theorems `H` is a polynomial, or rational with poles off `U`). -/
 @[dlmf 32.6.E1]
 structure IsHamiltonianSystemOn (H : ℂ → ℂ → ℂ → ℂ) (q p : ℂ → ℂ) (U : Set ℂ) : Prop where
+  /-- The derivative of the position variable is the momentum partial derivative of the
+  Hamiltonian. -/
   hasDerivAt_q : ∀ z ∈ U, HasDerivAt q (deriv (fun p' => H (q z) p' z) (p z)) z
+  /-- The derivative of the momentum variable is minus the position partial derivative of the
+  Hamiltonian. -/
   hasDerivAt_p : ∀ z ∈ U, HasDerivAt p (-deriv (fun q' => H q' (p z) z) (q z)) z
 
 /-- DLMF 32.6.2: the Hamiltonian `H_I(q, p, z) = p²/2 - 2q³ - zq` of `PI`. -/

@@ -153,11 +153,13 @@ namespace Asymptotics
 def sectorAtTop (δ : ℝ) : Filter ℂ :=
   comap (fun z : ℂ => ‖z‖) atTop ⊓ 𝓟 {z : ℂ | δ * ‖z‖ ≤ z.re}
 
+/-- The stated relation follows from the given hypotheses: `∀ᶠ z in sectorAtTop δ, p z`. -/
 theorem eventually_sectorAtTop {δ : ℝ} {p : ℂ → Prop} {R : ℝ}
     (h : ∀ z : ℂ, R ≤ ‖z‖ → δ * ‖z‖ ≤ z.re → p z) : ∀ᶠ z in sectorAtTop δ, p z := by
   rw [sectorAtTop, eventually_inf_principal]
   exact (tendsto_comap.eventually (eventually_ge_atTop R)).mono fun z hz hzs => h z hz hzs
 
+/-- The map `(fun z : ℂ => ‖z‖)` tends to `atTop` along `(sectorAtTop δ)`. -/
 theorem tendsto_norm_sectorAtTop (δ : ℝ) : Tendsto (fun z : ℂ => ‖z‖) (sectorAtTop δ) atTop :=
   tendsto_comap.mono_left inf_le_left
 

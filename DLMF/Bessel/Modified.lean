@@ -38,10 +38,12 @@ def besselK (ν z : ℂ) : ℂ := by
       π / 2 * (besselI (-μ) z - besselI μ z) / sin (μ * π))
   else π / 2 * (besselI (-ν) z - besselI ν z) / sin (ν * π)
 
+/-- Identity under the stated parameter and domain assumptions: `besselI ν 0 = 0`. -/
 theorem besselI_apply_zero {ν : ℂ} (hν : ν ≠ 0) : besselI ν 0 = 0 := by
   unfold besselI
   rw [zero_div, zero_cpow hν, zero_mul]
 
+/-- Identity under the stated parameter and domain assumptions: `besselI 0 0 = 1`. -/
 theorem besselI_zero_zero : besselI 0 0 = 1 := by
   unfold besselI
   rw [zero_div, cpow_zero, one_mul]
@@ -92,6 +94,8 @@ theorem analyticAt_besselI (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
       besselI ν := by funext w; simp only [besselI, one_mul]
   rwa [hf] at he
 
+/-- Identity under the stated parameter and domain assumptions: `z ^ 2 * iteratedDeriv 2 (besselK
+ν) z + z * deriv (besselK ν) z - (z ^ 2 + ν ^ 2) * besselK ν z = 0`. -/
 @[dlmf 10.25.E1]
 theorem besselK_ode {ν z : ℂ} (hz : z ∈ slitPlane) (hν : ∀ k : ℤ, ν ≠ k) :
     z ^ 2 * iteratedDeriv 2 (besselK ν) z + z * deriv (besselK ν) z -

@@ -223,11 +223,19 @@ def rankOneScale (lam μ c : ℂ) (s : ℕ) (ζ : ℂ) : ℂ :=
 /-- The rank-one data: `f(z) = ∑ f_s z^{-s}`, `g(z) = ∑ g_s z^{-s}` converge for `|z| > a`
 (DLMF 2.7.7), and `λ₁ ≠ λ₂` are the roots of `λ² + f₀λ + g₀ = 0` (2.7.9). -/
 structure IsRankOneAtInfinity (f g : ℂ → ℂ) (fs gs : ℕ → ℂ) (a : ℝ) (l₁ l₂ : ℂ) : Prop where
+  /-- The radius of the exterior convergence region is nonnegative. -/
   a_nonneg : 0 ≤ a
+  /-- The reciprocal-power series with coefficients fs converges to f outside the prescribed
+  circle. -/
   hasSum_f : ∀ z : ℂ, a < ‖z‖ → HasSum (fun s => fs s * z⁻¹ ^ s) (f z)
+  /-- The reciprocal-power series with coefficients gs converges to g outside the prescribed
+  circle. -/
   hasSum_g : ∀ z : ℂ, a < ‖z‖ → HasSum (fun s => gs s * z⁻¹ ^ s) (g z)
+  /-- The characteristic roots have sum `-f₀`. -/
   sum_roots : l₁ + l₂ = -fs 0
+  /-- The characteristic roots have product `g₀`. -/
   prod_roots : l₁ * l₂ = gs 0
+  /-- The characteristic roots are distinct. -/
   roots_ne : l₁ ≠ l₂
 
 /-- The region `|z| > a` on the logarithmic plane. -/
@@ -250,11 +258,17 @@ def IsLGSolOn (f g w : ℝ → ℝ) (S : Set ℝ) : Prop :=
 /-- The regularity hypotheses of the Liouville–Green theorem on `S`: `f > 0` with derivatives
 `f'`, `f''`, `f''` and `g` continuous, and `ξ' = f^{1/2}` (`ξ = ∫ f^{1/2} dx`). -/
 structure IsLGData (f f' f'' g ξ : ℝ → ℝ) (S : Set ℝ) : Prop where
+  /-- The leading Liouville-Green coefficient f is strictly positive on S. -/
   pos : ∀ x ∈ S, 0 < f x
+  /-- The displayed function f-prime is the derivative of f on S. -/
   hasDerivAt_f : ∀ x ∈ S, HasDerivAt f (f' x) x
+  /-- The displayed function f-double-prime is the derivative of f-prime on S. -/
   hasDerivAt_f' : ∀ x ∈ S, HasDerivAt f' (f'' x) x
+  /-- The second derivative of the leading coefficient is continuous on S. -/
   continuousOn_f'' : ContinuousOn f'' S
+  /-- The lower-order coefficient g is continuous on S. -/
   continuousOn_g : ContinuousOn g S
+  /-- The phase derivative is `ξ′ = √f` on S. -/
   hasDerivAt_ξ : ∀ x ∈ S, HasDerivAt ξ (√(f x)) x
 
 end
@@ -269,15 +283,24 @@ for `ξ < 0`), and `A_{s+1}' = -½ B_s'' + ½ ψ B_s` (2.8.18 differentiated; th
 integration are arbitrary). `Ad s`, `Ad2 s` and `Bd s`, `Bd2 s` are the first two derivatives of
 `A s` and `B s`. -/
 structure IsAiryCoeffs (ψ : ℝ → ℝ) (α₁ α₂ : ℝ) (A Ad Ad2 B Bd Bd2 : ℕ → ℝ → ℝ) : Prop where
+  /-- The leading Airy coefficient A is identically one. -/
   A_zero : ∀ ξ, A 0 ξ = 1
+  /-- Ad is the first derivative of each A coefficient on the coefficient interval. -/
   hasDerivAt_A : ∀ s, ∀ ξ ∈ Ioo α₁ α₂, HasDerivAt (A s) (Ad s ξ) ξ
+  /-- Ad2 is the second derivative of each A coefficient on the coefficient interval. -/
   hasDerivAt_Ad : ∀ s, ∀ ξ ∈ Ioo α₁ α₂, HasDerivAt (Ad s) (Ad2 s ξ) ξ
+  /-- Bd is the first derivative of each B coefficient on the coefficient interval. -/
   hasDerivAt_B : ∀ s, ∀ ξ ∈ Ioo α₁ α₂, HasDerivAt (B s) (Bd s ξ) ξ
+  /-- Bd2 is the second derivative of each B coefficient on the coefficient interval. -/
   hasDerivAt_Bd : ∀ s, ∀ ξ ∈ Ioo α₁ α₂, HasDerivAt (Bd s) (Bd2 s ξ) ξ
+  /-- On the positive side of the turning point, the weighted integral of `ψ A_s - A_s″` defines
+  B_s. -/
   B_pos : ∀ s, ∀ ξ ∈ Ioo α₁ α₂, 0 < ξ →
     B s ξ = (2 * √ξ)⁻¹ * ∫ v in (0 : ℝ)..ξ, (ψ v * A s v - Ad2 s v) / √v
+  /-- On the negative side of the turning point, the reflected weighted integral defines B_s. -/
   B_neg : ∀ s, ∀ ξ ∈ Ioo α₁ α₂, ξ < 0 →
     B s ξ = (2 * √(-ξ))⁻¹ * ∫ v in ξ..0, (ψ v * A s v - Ad2 s v) / √(-v)
+  /-- The next A coefficient satisfies `A_(s+1)′ = -B_s″/2 + ψ B_s/2`. -/
   A_succ : ∀ s, ∀ ξ ∈ Ioo α₁ α₂, Ad (s + 1) ξ = -(1 / 2) * Bd2 s ξ + 1 / 2 * ψ ξ * B s ξ
 
 /-- The coefficient relations of DLMF 2.8.27–2.8.28 and 2.8.31 (Case III): `A_0 = 1`,
@@ -285,14 +308,21 @@ structure IsAiryCoeffs (ψ : ℝ → ℝ) (α₁ α₂ : ℝ) (A Ad Ad2 B Bd Bd2
 `ξ > 0`, 2.8.27; from `ξ` to `0` for `ξ < 0`, 2.8.31), and
 `A_{s+1}' = ν B_s' - (ξ B_s')' + ψ B_s` (2.8.28 differentiated). -/
 structure IsBesselCoeffs (ψ : ℝ → ℝ) (ν α₁ α₂ : ℝ) (A Ad B Bd Bd2 : ℕ → ℝ → ℝ) : Prop where
+  /-- The leading Bessel coefficient A is identically one. -/
   A_zero : ∀ ξ, A 0 ξ = 1
+  /-- Ad is the derivative of each A coefficient on the coefficient interval. -/
   hasDerivAt_A : ∀ s, ∀ ξ ∈ Ioo α₁ α₂, HasDerivAt (A s) (Ad s ξ) ξ
+  /-- Bd is the derivative of each B coefficient on the coefficient interval. -/
   hasDerivAt_B : ∀ s, ∀ ξ ∈ Ioo α₁ α₂, HasDerivAt (B s) (Bd s ξ) ξ
+  /-- Bd2 is the second derivative of each B coefficient on the coefficient interval. -/
   hasDerivAt_Bd : ∀ s, ∀ ξ ∈ Ioo α₁ α₂, HasDerivAt (Bd s) (Bd2 s ξ) ξ
+  /-- The positive-side weighted integral recurrence determines B_s from A_s and its derivative. -/
   B_pos : ∀ s, ∀ ξ ∈ Ioo α₁ α₂, 0 < ξ → B s ξ = -Ad s ξ +
     (√ξ)⁻¹ * ∫ v in (0 : ℝ)..ξ, (ψ v * A s v - (ν + 1 / 2) * Ad s v) / √v
+  /-- The reflected negative-side integral recurrence determines B_s from A_s and its derivative. -/
   B_neg : ∀ s, ∀ ξ ∈ Ioo α₁ α₂, ξ < 0 → B s ξ = -Ad s ξ +
     (√(-ξ))⁻¹ * ∫ v in ξ..0, (ψ v * A s v - (ν + 1 / 2) * Ad s v) / √(-v)
+  /-- The next A coefficient satisfies `A_(s+1)′ = ν B_s′ - (ξ B_s′)′ + ψ B_s`. -/
   A_succ : ∀ s, ∀ ξ ∈ Ioo α₁ α₂,
     Ad (s + 1) ξ = ν * Bd s ξ - (Bd s ξ + ξ * Bd2 s ξ) + ψ ξ * B s ξ
 

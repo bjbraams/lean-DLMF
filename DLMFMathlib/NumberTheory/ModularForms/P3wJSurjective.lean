@@ -32,6 +32,7 @@ namespace ModularForm
 /-- The modular invariant `J = E₄³/(E₄³ - E₆²)` (`j/1728`). -/
 def p3wJ (τ : ℍ) : ℂ := E₄ τ ^ 3 / (E₄ τ ^ 3 - E₆ τ ^ 2)
 
+/-- Nonvanishing under the stated hypotheses: `E₄ τ ^ 3 - E₆ τ ^ 2 ≠ 0`. -/
 theorem p3w_E₄_cube_sub_E₆_sq_ne_zero (τ : ℍ) : E₄ τ ^ 3 - E₆ τ ^ 2 ≠ 0 := by
   have h := discriminant_ne_zero τ
   rw [discriminant_eq_E₄_cube_sub_E₆_sq] at h
@@ -39,6 +40,7 @@ theorem p3w_E₄_cube_sub_E₆_sq_ne_zero (τ : ℍ) : E₄ τ ^ 3 - E₆ τ ^ 2
   rw [h'] at h
   simp at h
 
+/-- Identity under the stated parameter and domain assumptions: `p3wJ (g • τ) = p3wJ τ`. -/
 theorem p3wJ_smul (g : SL(2, ℤ)) (τ : ℍ) : p3wJ (g • τ) = p3wJ τ := by
   have hg : (Matrix.SpecialLinearGroup.mapGL ℝ g : GL (Fin 2) ℝ) ∈ 𝒮ℒ :=
     MonoidHom.mem_range.mpr ⟨g, rfl⟩

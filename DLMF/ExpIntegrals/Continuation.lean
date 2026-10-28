@@ -42,13 +42,15 @@ def expIntAuxFOnLog (w : ℂ) : ℂ :=
 def expIntAuxGOnLog (w : ℂ) : ℂ :=
   -cosIntOnLog w * cos (exp w) - sinIntTail (exp w) * sin (exp w)
 
-/-- expIntE1OnLog principal. -/
+/-- Identity under the stated parameter and domain assumptions: `expIntE1OnLog (log z) =
+genExpIntE 1 z`. -/
 @[dlmf 6.4.E1]
 theorem expIntE1OnLog_principal {z : ℂ} (hz : z ≠ 0) :
     expIntE1OnLog (log z) = genExpIntE 1 z := by
   rw [expIntE1OnLog, Complex.exp_log hz, expIntE1_eq_Ein_complex hz]
 
-/-- expIntE1OnLog monodromy. -/
+/-- Identity under the stated parameter and domain assumptions: `expIntE1OnLog (w+2*m*π*I) =
+expIntE1OnLog w - 2*m*π*I`. -/
 @[dlmf 6.4.E2]
 theorem expIntE1OnLog_monodromy (w : ℂ) (m : ℤ) :
     expIntE1OnLog (w+2*m*π*I) = expIntE1OnLog w - 2*m*π*I := by
@@ -58,7 +60,8 @@ theorem expIntE1OnLog_monodromy (w : ℂ) (m : ℤ) :
   simp only [expIntE1OnLog, he]
   ring
 
-/-- expIntE1OnLog halfTurn. -/
+/-- Identity under the stated parameter and domain assumptions: `expIntE1OnLog (w+ε*π*I) =
+expIntEin (-exp w)-w-Real.eulerMascheroniConstant-ε*π*I`. -/
 @[dlmf 6.4.E3]
 theorem expIntE1OnLog_halfTurn (w : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
     expIntE1OnLog (w+ε*π*I) = expIntEin (-exp w)-w-Real.eulerMascheroniConstant-ε*π*I := by
@@ -68,7 +71,8 @@ theorem expIntE1OnLog_halfTurn (w : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
   simp only [expIntE1OnLog, he]
   ring
 
-/-- cosIntOnLog halfTurn. -/
+/-- Identity under the stated parameter and domain assumptions: `cosIntOnLog (w+ε*π*I) =
+cosIntOnLog w + ε*π*I`. -/
 @[dlmf 6.4.E4]
 theorem cosIntOnLog_halfTurn (w : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
     cosIntOnLog (w+ε*π*I) = cosIntOnLog w + ε*π*I := by
@@ -78,7 +82,8 @@ theorem cosIntOnLog_halfTurn (w : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
   simp only [cosIntOnLog, he, cosIntCin_even]
   ring
 
-/-- coshIntOnLog halfTurn. -/
+/-- Identity under the stated parameter and domain assumptions: `coshIntOnLog (w+ε*π*I) =
+coshIntOnLog w + ε*π*I`. -/
 @[dlmf 6.4.E5]
 theorem coshIntOnLog_halfTurn (w : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
     coshIntOnLog (w+ε*π*I) = coshIntOnLog w + ε*π*I := by
@@ -94,7 +99,8 @@ theorem coshIntOnLog_halfTurn (w : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
   simp only [coshIntOnLog, coshInt, he, hpar]
   ring
 
-/-- expIntAuxFOnLog halfTurn. -/
+/-- Identity under the stated parameter and domain assumptions: `expIntAuxFOnLog (w+ε*π*I) = π*exp
+(-ε*I*exp w) - expIntAuxFOnLog w`. -/
 @[dlmf 6.4.E6]
 theorem expIntAuxFOnLog_halfTurn (w : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
     expIntAuxFOnLog (w+ε*π*I) = π*exp (-ε*I*exp w) - expIntAuxFOnLog w := by
@@ -110,7 +116,8 @@ theorem expIntAuxFOnLog_halfTurn (w : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
   rw [hexp]
   rcases hε with rfl | rfl <;> norm_num <;> ring_nf <;> simp [I_sq] <;> ring
 
-/-- expIntAuxGOnLog halfTurn. -/
+/-- Identity under the stated parameter and domain assumptions: `expIntAuxGOnLog (w+ε*π*I) =
+-ε*π*I*exp (-ε*I*exp w)+expIntAuxGOnLog w`. -/
 @[dlmf 6.4.E7]
 theorem expIntAuxGOnLog_halfTurn (w : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
     expIntAuxGOnLog (w+ε*π*I) = -ε*π*I*exp (-ε*I*exp w)+expIntAuxGOnLog w := by
@@ -126,7 +133,8 @@ theorem expIntAuxGOnLog_halfTurn (w : ℂ) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
   rw [hexp]
   rcases hε with rfl | rfl <;> norm_num <;> ring_nf <;> simp [I_sq] <;> ring
 
-/-- expIntE1 negative boundary. -/
+/-- The map `(fun y : ℝ => genExpIntE 1 (-x+ε*y*I))` tends to `(𝓝 (-(Real.expIntEi x : ℂ)-ε*π*I))`
+along `(𝓝[>] 0)`. -/
 @[dlmf 6.5.E1]
 theorem expIntE1_negative_boundary {x : ℝ} (hx : 0 < x) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
     Tendsto (fun y : ℝ => genExpIntE 1 (-x+ε*y*I)) (𝓝[>] 0) (𝓝 (-(Real.expIntEi x : ℂ)-ε*π*I)) := by
@@ -174,7 +182,8 @@ theorem expIntE1_negative_boundary {x : ℝ} (hx : 0 < x) {ε : ℝ} (hε : ε=1
   simp [Complex.mul_re,Complex.mul_im] at hr
   linarith
 
-/-- expIntEi boundary average. -/
+/-- Identity under the stated parameter and domain assumptions: `(Real.expIntEi x : ℂ) =
+-(expIntE1OnLog (Real.log x+π*I)+expIntE1OnLog (Real.log x-π*I))/2`. -/
 @[dlmf 6.5.E2]
 theorem expIntEi_boundary_average {x : ℝ} (hx : 0 < x) :
     (Real.expIntEi x : ℂ) = -(expIntE1OnLog (Real.log x+π*I)+expIntE1OnLog (Real.log x-π*I))/2 := by
@@ -216,7 +225,8 @@ theorem expIntEi_eq_Ein {x : ℝ} (hx : 0<x) :
   push_cast
   ring
 
-/-- sinhInt eq Ei. -/
+/-- Identity under the stated parameter and domain assumptions: `((Real.expIntEi x : ℂ)+genExpIntE
+1 x)/2 = sinhInt x ∧ sinhInt x = -I*sinInt (I*x)`. -/
 @[dlmf 6.5.E3]
 theorem sinhInt_eq_Ei {x : ℝ} (hx : 0 < x) :
     ((Real.expIntEi x : ℂ)+genExpIntE 1 x)/2 = sinhInt x ∧ sinhInt x = -I*sinInt (I*x) := by
@@ -230,7 +240,8 @@ theorem sinhInt_eq_Ei {x : ℝ} (hx : 0 < x) :
     ring_nf
     simp [I_sq]
 
-/-- coshInt eq Ei. -/
+/-- Identity under the stated parameter and domain assumptions: `((Real.expIntEi x : ℂ)-genExpIntE
+1 x)/2 = coshInt x ∧ coshInt x = cosInt (I*x)-π*I/2`. -/
 @[dlmf 6.5.E4]
 theorem coshInt_eq_Ei {x : ℝ} (hx : 0 < x) :
     ((Real.expIntEi x : ℂ)-genExpIntE 1 x)/2 = coshInt x ∧ coshInt x = cosInt (I*x)-π*I/2 := by
@@ -340,7 +351,6 @@ theorem hasIntegralAtTop_exp_neg_mul_div_sub {z : ℂ} (hz0 : z ≠ 0) (hz : 0 �
       constructor <;> linarith [abs_le.mp harg, Real.pi_pos]), expIntE1OnLog_principal (mul_ne_zero hz0 hne)]
   have h := hasIntegralAtTop_of_hasDerivAt_of_tendsto hd hcont hl
   simpa using h
-
 
 /-- Laplace representations of the auxiliary functions `f` and `g` on the closed right
 half-plane minus the origin, as improper integrals. -/

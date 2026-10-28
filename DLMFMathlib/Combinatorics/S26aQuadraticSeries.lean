@@ -33,6 +33,8 @@ noncomputable section
 /-- The Catalan generating series `∑ C(n) Xⁿ` over `ℚ`. -/
 noncomputable def s26a_catSeries : ℚ⟦X⟧ := mk fun n => (catalan n : ℚ)
 
+/-- Identity under the stated parameter and domain assumptions: `s26a_catSeries = 1 + X *
+s26a_catSeries ^ 2`. -/
 lemma s26a_catSeries_eq : s26a_catSeries = 1 + X * s26a_catSeries ^ 2 := by
   ext n
   rcases n with _ | n
@@ -43,20 +45,25 @@ lemma s26a_catSeries_eq : s26a_catSeries = 1 + X * s26a_catSeries ^ 2 := by
 /-- The geometric series `∑ aⁿ Xⁿ = 1/(1 - aX)`. -/
 noncomputable def s26a_geom (a : ℚ) : ℚ⟦X⟧ := rescale a (mk 1)
 
+/-- Identity under the stated parameter and domain assumptions: `s26a_geom a * (1 - C a * X) = 1`. -/
 lemma s26a_geom_mul (a : ℚ) : s26a_geom a * (1 - C a * X) = 1 := by
   have := congrArg (rescale a) (mk_one_mul_one_sub_eq_one (S := ℚ))
   rwa [map_mul, map_sub, map_one, rescale_X] at this
 
+/-- Identity under the stated parameter and domain assumptions: `coeff n (s26a_geom a ^ (d + 1)) =
+a ^ n * (d + n).choose d`. -/
 lemma s26a_coeff_geom_pow (a : ℚ) (d n : ℕ) :
     coeff n (s26a_geom a ^ (d + 1)) = a ^ n * (d + n).choose d := by
   rw [s26a_geom, ← map_pow, mk_one_pow_eq_mk_choose_add, rescale_mk, coeff_mk]
 
+/-- Identity under the stated parameter and domain assumptions: `constantCoeff (s26a_geom a) = 1`. -/
 lemma s26a_constantCoeff_geom (a : ℚ) : constantCoeff (s26a_geom a) = 1 := by
   rw [← coeff_zero_eq_constantCoeff_apply, s26a_geom, rescale_mk, coeff_mk]; simp
 
 /-- The substituted argument `q = X^e (1 - aX)^{-2}`. -/
 noncomputable def s26a_arg (a : ℚ) (e : ℕ) : ℚ⟦X⟧ := X ^ e * s26a_geom a ^ 2
 
+/-- The stated relation follows from the given hypotheses: `HasSubst (s26a_arg a e)`. -/
 lemma s26a_hasSubst_arg (a : ℚ) {e : ℕ} (he : 1 ≤ e) : HasSubst (s26a_arg a e) :=
   HasSubst.of_constantCoeff_zero' (by
     simp [s26a_arg, zero_pow (by omega : e ≠ 0)])
@@ -65,6 +72,8 @@ lemma s26a_hasSubst_arg (a : ℚ) {e : ℕ} (he : 1 ≤ e) : HasSubst (s26a_arg 
 noncomputable def s26a_quadSeries (a : ℚ) (e : ℕ) : ℚ⟦X⟧ :=
   s26a_geom a * subst (s26a_arg a e) s26a_catSeries
 
+/-- Identity under the stated parameter and domain assumptions: `s26a_quadSeries a e = 1 + C a * X
+* s26a_quadSeries a e + X ^ e * s26a_quadSeries a e ^ 2`. -/
 theorem s26a_quadSeries_eq (a : ℚ) {e : ℕ} (he : 1 ≤ e) :
     s26a_quadSeries a e =
       1 + C a * X * s26a_quadSeries a e + X ^ e * s26a_quadSeries a e ^ 2 := by
@@ -89,6 +98,8 @@ theorem s26a_quad_unique (a : ℚ) {e : ℕ} (he : 1 ≤ e) {F G : ℚ⟦X⟧}
     have := congrArg constantCoeff h
     simp [zero_pow (by omega : e ≠ 0)] at this
 
+/-- Formula under the stated hypotheses: `coeff n (subst q f) = ∑ k ∈ range N, coeff k f * coeff n
+(q ^ k)`. -/
 lemma s26a_coeff_subst (q : ℚ⟦X⟧) (hq : constantCoeff q = 0) (f : ℚ⟦X⟧) {n N : ℕ}
     (hN : n < N) : coeff n (subst q f) = ∑ k ∈ range N, coeff k f * coeff n (q ^ k) := by
   rw [coeff_subst' (HasSubst.of_constantCoeff_zero' hq)]
@@ -117,6 +128,9 @@ lemma s26a_coeff_mul_subst (g q : ℚ⟦X⟧) (hq : constantCoeff q = 0) (f : �
   refine sum_congr rfl fun k _ => ?_
   rw [mul_left_comm, coeff_C_mul]
 
+/-- Estimate under the stated parameter and domain assumptions: `coeff n (s26a_quadSeries a e) = ∑
+k ∈ range (n + 1), (catalan k : ℚ) * if e * k ≤ n then a ^ (n - e * k) * (2 * k + (n - e *
+k)).choose (2 * k) else 0`. -/
 lemma s26a_coeff_quadSeries (a : ℚ) {e : ℕ} (he : 1 ≤ e) (n : ℕ) :
     coeff n (s26a_quadSeries a e) = ∑ k ∈ range (n + 1), (catalan k : ℚ) *
       if e * k ≤ n then a ^ (n - e * k) * (2 * k + (n - e * k)).choose (2 * k) else 0 := by
@@ -189,7 +203,6 @@ theorem s26a_largeSchroder_eq_sum (n : ℕ) :
   have h := congrArg (coeff n) this
   rw [s26a_coeff_quadSeries_one, coeff_mk] at h
   simpa using h
-
 
 /-- Splitting a sum over `range (m + d + 1)` at `m`, the lower part vanishing. -/
 lemma s26a_sum_range_split {M : Type*} [AddCommMonoid M] (f : ℕ → M) (m d : ℕ)

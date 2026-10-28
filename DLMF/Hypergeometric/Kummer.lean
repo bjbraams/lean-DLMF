@@ -225,6 +225,10 @@ theorem zero_second_connection_left_gen {a b c z φ : ℂ} (hc : ∀ k : ℤ, c 
     (Gamma (2 - c) * Gamma (a - b) / (Gamma (a - c + 1) * Gamma (1 - b)) *
       ₂F₁ b (c - a) (b - a + 1) (1 / (1 - z))) * e2
 
+/-- Identity under the stated parameter and domain assumptions: `zeroSecond a b c z = z ^ (1 - c)
+* (1 - z) ^ (c - a - b) * ₂F₁ (1 - a) (1 - b) (2 - c) z ∧ zeroSecond a b c z = z ^ (1 - c) *
+(1 - z) ^ (c - a - 1) * ₂F₁ (a - c + 1) (1 - b) (2 - c) (z / (z - 1)) ∧ zeroSecond a b c z = z
+^ (1 - c) * (1 - z) ^ (c - b - 1) * ₂F₁ (1 - a) (b - c + 1) (2 - c) (z / (z - 1))`. -/
 @[dlmf 15.10.E12]
 theorem zero_second_representations
     {a b c z : ℂ}
@@ -255,6 +259,10 @@ theorem zero_second_representations
       ordinaryHypergeometric_symm _ _ _]
     ring
 
+/-- Identity under the stated parameter and domain assumptions: `oneFirst a b c z = z ^ (1 - c) *
+₂F₁ (a - c + 1) (b - c + 1) (a + b - c + 1) (1 - z) ∧ oneFirst a b c z = z ^ (-a) * ₂F₁ a (a -
+c + 1) (a + b - c + 1) (1 - 1 / z) ∧ oneFirst a b c z = z ^ (-b) * ₂F₁ b (b - c + 1) (a + b -
+c + 1) (1 - 1 / z)`. -/
 @[dlmf 15.10.E13]
 theorem one_first_representations
     {a b c z : ℂ}
@@ -287,6 +295,11 @@ theorem one_first_representations
       ordinaryHypergeometric_symm _ _ _, pfaff_transformation_of_ne_neg_nat hc hz hw',
       sub_sub_cancel, hmap, show a + b - c + 1 - a = b - c + 1 by ring]
 
+/-- Identity under the stated parameter and domain assumptions: `oneSecond a b c z = z ^ (1 - c) *
+(1 - z) ^ (c - a - b) * ₂F₁ (1 - a) (1 - b) (c - a - b + 1) (1 - z) ∧ oneSecond a b c z = z ^
+(a - c) * (1 - z) ^ (c - a - b) * ₂F₁ (1 - a) (c - a) (c - a - b + 1) (1 - 1 / z) ∧ oneSecond
+a b c z = z ^ (b - c) * (1 - z) ^ (c - a - b) * ₂F₁ (1 - b) (c - b) (c - a - b + 1) (1 - 1 /
+z)`. -/
 @[dlmf 15.10.E14]
 theorem one_second_representations
     {a b c z : ℂ}
@@ -330,6 +343,10 @@ theorem one_second_representations
         ordinaryHypergeometric_symm _ _ _]
     ring
 
+/-- Identity under the stated parameter and domain assumptions: `kummerFive a b c z = exp ((c - b)
+* Real.pi * I) * z ^ (b - c) * (1 - z) ^ (c - a - b) * ₂F₁ (1 - b) (c - b) (a - b + 1) (1 / z)
+∧ kummerFive a b c z = kummerFiveLeft a b c z ∧ kummerFive a b c z = exp ((c - 1) * Real.pi *
+I) * z ^ (1 - c) * (1 - z) ^ (c - a - 1) * ₂F₁ (1 - b) (a - c + 1) (a - b + 1) (1 / (1 - z))`. -/
 @[dlmf 15.10.E15]
 theorem kummer_five_representations
     {a b c z : ℂ}
@@ -389,6 +406,10 @@ theorem kummer_five_representations
       ring_nf
     linear_combination (₂F₁ (1 - b) (a - c + 1) (a - b + 1) (1 / (1 - z))) * e
 
+/-- Identity under the stated parameter and domain assumptions: `kummerSix a b c z = exp ((c - a)
+* Real.pi * I) * z ^ (a - c) * (1 - z) ^ (c - a - b) * ₂F₁ (1 - a) (c - a) (b - a + 1) (1 / z)
+∧ kummerSix a b c z = kummerSixLeft a b c z ∧ kummerSix a b c z = exp ((c - 1) * Real.pi * I)
+* z ^ (1 - c) * (1 - z) ^ (c - b - 1) * ₂F₁ (1 - a) (b - c + 1) (b - a + 1) (1 / (1 - z))`. -/
 @[dlmf 15.10.E16]
 theorem kummer_six_representations
     {a b c z : ℂ}
@@ -406,6 +427,10 @@ theorem kummer_six_representations
   rw [show c - a - b = c - b - a by ring]
   exact h1
 
+/-- Identity under the stated parameter and domain assumptions: `kummerFiveLeft a b c z = Gamma (1
+- c) * Gamma (a - b + 1) / (Gamma (a - c + 1) * Gamma (1 - b)) * ₂F₁ a b c z + exp ((c - 1) *
+Real.pi * I) * Gamma (c - 1) * Gamma (a - b + 1) / (Gamma a * Gamma (c - b)) * zeroSecond a b
+c z`. -/
 @[dlmf 15.10.E19]
 theorem kummer_five_left_connection_zero {a b c z : ℂ} (hc : ∀ k : ℤ, c ≠ (k : ℂ))
     (_he : ∀ k : ℤ, c - a - b ≠ (k : ℂ)) (hab : ∀ k : ℤ, a - b ≠ (k : ℂ))
@@ -449,6 +474,10 @@ theorem kummer_five_left_connection_zero {a b c z : ℂ} (hc : ∀ k : ℤ, c �
   linear_combination (Gamma (c - 1) * Gamma (a - b + 1) / (Gamma a * Gamma (c - b)) *
     ₂F₁ (a - c + 1) (1 - b) (2 - c) (z / (z - 1))) * e
 
+/-- Identity under the stated parameter and domain assumptions: `kummerSixLeft a b c z = Gamma (1
+- c) * Gamma (b - a + 1) / (Gamma (b - c + 1) * Gamma (1 - a)) * ₂F₁ a b c z + exp ((c - 1) *
+Real.pi * I) * Gamma (c - 1) * Gamma (b - a + 1) / (Gamma b * Gamma (c - a)) * zeroSecond a b
+c z`. -/
 @[dlmf 15.10.E20]
 theorem kummer_six_left_connection_zero {a b c z : ℂ} (hc : ∀ k : ℤ, c ≠ (k : ℂ))
     (_he : ∀ k : ℤ, c - a - b ≠ (k : ℂ)) (hab : ∀ k : ℤ, a - b ≠ (k : ℂ))
@@ -466,6 +495,9 @@ theorem kummer_six_left_connection_zero {a b c z : ℂ} (hc : ∀ k : ℤ, c ≠
     rw [ordinaryHypergeometric_symm]
   rw [kummerSixLeft, ← kummerFiveLeft, h, ordinaryHypergeometric_symm b a, hz2]
 
+/-- Identity under the stated parameter and domain assumptions: `₂F₁ a b c z = Gamma c * Gamma (b
+- a) / (Gamma b * Gamma (c - a)) * kummerFiveLeft a b c z + Gamma c * Gamma (a - b) / (Gamma a
+* Gamma (c - b)) * kummerSixLeft a b c z`. -/
 @[dlmf 15.10.E25]
 theorem zero_first_connection_left {a b c z : ℂ} (hc : ∀ k : ℤ, c ≠ (k : ℂ))
     (_he : ∀ k : ℤ, c - a - b ≠ (k : ℂ)) (hab : ∀ k : ℤ, a - b ≠ (k : ℂ))
@@ -475,6 +507,10 @@ theorem zero_first_connection_left {a b c z : ℂ} (hc : ∀ k : ℤ, c ≠ (k :
         / (Gamma a * Gamma (c - b)) * kummerSixLeft a b c z := by
   exact zero_first_connection_left_gen hc hab hz hw
 
+/-- Identity under the stated parameter and domain assumptions: `zeroSecond a b c z = exp ((1 - c)
+* Real.pi * I) * Gamma (2 - c) * Gamma (b - a) / (Gamma (1 - a) * Gamma (b - c + 1)) *
+kummerFiveLeft a b c z + exp ((1 - c) * Real.pi * I) * Gamma (2 - c) * Gamma (a - b) / (Gamma
+(1 - b) * Gamma (a - c + 1)) * kummerSixLeft a b c z`. -/
 @[dlmf 15.10.E26]
 theorem zero_second_connection_left {a b c z : ℂ} (hc : ∀ k : ℤ, c ≠ (k : ℂ))
     (_he : ∀ k : ℤ, c - a - b ≠ (k : ℂ)) (hab : ∀ k : ℤ, a - b ≠ (k : ℂ))
@@ -488,6 +524,10 @@ theorem zero_second_connection_left {a b c z : ℂ} (hc : ∀ k : ℤ, c ≠ (k 
   rw [show -(↑Real.pi * I) * (c - 1) = (1 - c) * ↑Real.pi * I by ring] at h
   exact h
 
+/-- Identity under the stated parameter and domain assumptions: `kummerFive a b c z = exp (a *
+Real.pi * I) * Gamma (a - b + 1) * Gamma (c - a - b) / (Gamma (1 - b) * Gamma (c - b)) *
+oneFirst a b c z + exp ((c - b) * Real.pi * I) * Gamma (a - b + 1) * Gamma (a + b - c) /
+(Gamma a * Gamma (a - c + 1)) * oneSecond a b c z`. -/
 @[dlmf 15.10.E23]
 theorem kummer_five_connection_one {a b c z : ℂ} (_hc : ∀ k : ℤ, c ≠ (k : ℂ))
     (he : ∀ k : ℤ, c - a - b ≠ (k : ℂ)) (hab : ∀ k : ℤ, a - b ≠ (k : ℂ))
@@ -535,6 +575,10 @@ theorem kummer_five_connection_one {a b c z : ℂ} (_hc : ∀ k : ℤ, c ≠ (k 
   linear_combination (Gamma (a - b + 1) * Gamma (a + b - c) / (Gamma a * Gamma (a - c + 1)) *
     ₂F₁ (1 - b) (c - b) (c - a - b + 1) (1 - 1 / z)) * e
 
+/-- Identity under the stated parameter and domain assumptions: `kummerSix a b c z = exp (b *
+Real.pi * I) * Gamma (b - a + 1) * Gamma (c - a - b) / (Gamma (1 - a) * Gamma (c - a)) *
+oneFirst a b c z + exp ((c - a) * Real.pi * I) * Gamma (b - a + 1) * Gamma (a + b - c) /
+(Gamma b * Gamma (b - c + 1)) * oneSecond a b c z`. -/
 @[dlmf 15.10.E24]
 theorem kummer_six_connection_one {a b c z : ℂ} (_hc : ∀ k : ℤ, c ≠ (k : ℂ))
     (he : ∀ k : ℤ, c - a - b ≠ (k : ℂ)) (hab : ∀ k : ℤ, a - b ≠ (k : ℂ))
@@ -556,6 +600,10 @@ theorem kummer_six_connection_one {a b c z : ℂ} (_hc : ∀ k : ℤ, c ≠ (k :
   rw [kummerSix, ← kummerFive, h, h1, h2, show c - b - a = c - a - b by ring,
     show b + a - c = a + b - c by ring]
 
+/-- Identity under the stated parameter and domain assumptions: `oneFirst a b c z = exp (-a *
+Real.pi * I) * Gamma (a + b - c + 1) * Gamma (b - a) / (Gamma b * Gamma (b - c + 1)) *
+kummerFive a b c z + exp (-b * Real.pi * I) * Gamma (a + b - c + 1) * Gamma (a - b) / (Gamma a
+* Gamma (a - c + 1)) * kummerSix a b c z`. -/
 @[dlmf 15.10.E27]
 theorem one_first_connection_infinity {a b c z : ℂ} (_hc : ∀ k : ℤ, c ≠ (k : ℂ))
     (he : ∀ k : ℤ, c - a - b ≠ (k : ℂ)) (hab : ∀ k : ℤ, a - b ≠ (k : ℂ))
@@ -582,6 +630,10 @@ theorem one_first_connection_infinity {a b c z : ℂ} (_hc : ∀ k : ℤ, c ≠ 
     show a + b - c + 1 - b = a - c + 1 by ring]
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `oneSecond a b c z = exp ((b - c)
+* Real.pi * I) * Gamma (c - a - b + 1) * Gamma (b - a) / (Gamma (1 - a) * Gamma (c - a)) *
+kummerFive a b c z + exp ((a - c) * Real.pi * I) * Gamma (c - a - b + 1) * Gamma (a - b) /
+(Gamma (1 - b) * Gamma (c - b)) * kummerSix a b c z`. -/
 @[dlmf 15.10.E28]
 theorem one_second_connection_infinity {a b c z : ℂ} (_hc : ∀ k : ℤ, c ≠ (k : ℂ))
     (he : ∀ k : ℤ, c - a - b ≠ (k : ℂ)) (hab : ∀ k : ℤ, a - b ≠ (k : ℂ))

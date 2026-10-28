@@ -134,6 +134,9 @@ abbrev p19sR1_linDeriv (t u v w x y z α β : ℂ) : ℂ :=
       (-((u / (2 * (t + x)) * v + u * (v / (2 * (t + y)))) * w + u * v * (w / (2 * (t + z)))) /
         (u * v * w) ^ 2)
 
+/-- Identity under the stated parameter and domain assumptions: `(3 / 2) * (x * (u * v * w * (t +
+x))⁻¹ + y * (u * v * w * (t + y))⁻¹ + z * (u * v * w * (t + z))⁻¹ - (u * v * w)⁻¹) =
+p19sR1_linDeriv t u v w x y z 3 0`. -/
 lemma p19sR1_alg9 (t u v w x y z : ℂ) (hu : u ^ 2 = t + x) (hv : v ^ 2 = t + y)
     (hw : w ^ 2 = t + z) (hu0 : u ≠ 0) (hv0 : v ≠ 0) (hw0 : w ≠ 0) :
     (3 / 2) * (x * (u * v * w * (t + x))⁻¹ + y * (u * v * w * (t + y))⁻¹ +
@@ -145,6 +148,9 @@ lemma p19sR1_alg9 (t u v w x y z : ℂ) (hu : u ^ 2 = t + x) (hv : v ^ 2 = t + y
   field_simp
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `(3 / 2) * ((u * v * w * (t +
+x))⁻¹ + (u * v * w * (t + y))⁻¹ + (u * v * w * (t + z))⁻¹) = p19sR1_linDeriv t u v w x y z 0
+(-3)`. -/
 lemma p19sR1_alg8 (t u v w x y z : ℂ) (hu : u ^ 2 = t + x) (hv : v ^ 2 = t + y)
     (hw : w ^ 2 = t + z) (hu0 : u ≠ 0) (hv0 : v ≠ 0) (hw0 : w ≠ 0) :
     (3 / 2) * ((u * v * w * (t + x))⁻¹ + (u * v * w * (t + y))⁻¹ +
@@ -156,6 +162,9 @@ lemma p19sR1_alg8 (t u v w x y z : ℂ) (hu : u ^ 2 = t + x) (hv : v ^ 2 = t + y
   field_simp
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `(3 / 2) * ((x - y) * (u * v * w *
+(t + x))⁻¹ + (z - y) * (u * v * w * (t + z))⁻¹ - (u * v * w)⁻¹) = p19sR1_linDeriv t u v w x y
+z 3 (3 * y)`. -/
 lemma p19sR1_alg7 (t u v w x y z : ℂ) (hu : u ^ 2 = t + x) (hv : v ^ 2 = t + y)
     (hw : w ^ 2 = t + z) (hu0 : u ≠ 0) (hv0 : v ≠ 0) (hw0 : w ≠ 0) :
     (3 / 2) * ((x - y) * (u * v * w * (t + x))⁻¹ + (z - y) * (u * v * w * (t + z))⁻¹ -

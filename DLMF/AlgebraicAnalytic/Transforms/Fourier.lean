@@ -42,6 +42,7 @@ private lemma g1e_inv_sqrt_mul_self :
       ((2 * Real.pi : ℝ) : ℂ)⁻¹ := by
   rw [← mul_inv, ← ofReal_mul, Real.mul_self_sqrt (by positivity)]
 
+/-- Nonvanishing under the stated hypotheses: `((Real.sqrt (2 * Real.pi))⁻¹ : ℂ) ≠ 0`. -/
 private lemma g1e_inv_sqrt_ne_zero : ((Real.sqrt (2 * Real.pi))⁻¹ : ℂ) ≠ 0 := by
   refine inv_ne_zero (ofReal_ne_zero.mpr ?_)
   exact (Real.sqrt_pos.mpr (by positivity)).ne'

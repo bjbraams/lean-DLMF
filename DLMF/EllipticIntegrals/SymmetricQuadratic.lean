@@ -40,6 +40,7 @@ open scoped Real Topology NNReal
 
 namespace DLMF.EllipticIntegrals
 
+/-- Formula under the stated hypotheses: `x ^ 2 ∈ slitPlane`. -/
 lemma ei19c_sq_mem_slitPlane {x : ℂ} (hx : 0 < x.re) : x ^ 2 ∈ slitPlane := by
   rw [mem_slitPlane_iff]
   by_cases h : x.im = 0
@@ -51,6 +52,7 @@ lemma ei19c_sq_mem_slitPlane {x : ℂ} (hx : 0 < x.re) : x ^ 2 ∈ slitPlane := 
     · linarith
     · exact h h1
 
+/-- Formula under the stated hypotheses: `x * y ∈ slitPlane`. -/
 lemma ei19c_mul_mem_slitPlane {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) : x * y ∈ slitPlane := by
   rw [mem_slitPlane_iff]
   by_cases h : (x * y).im = 0
@@ -63,6 +65,7 @@ lemma ei19c_mul_mem_slitPlane {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) : x * 
     nlinarith
   · exact Or.inr h
 
+/-- Estimate under the stated parameter and domain assumptions: `0 < ((x + y) / 2).re`. -/
 lemma ei19c_half_add_re_pos {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) : 0 < ((x + y) / 2).re := by
   simp; linarith
 
@@ -83,7 +86,6 @@ theorem symEllIntRF_zero_sq {x y : ℂ} (hx : 0 < x.re) (hy : 0 < y.re) :
   unfold Carlson.TwoVariable.carlsonRK Carlson.TwoVariable.pair at h
   rw [show (-(1 / 2) : ℂ) = -1 / 2 by ring, h]
 
-
 /-- Round-1 helper: `R_G(0, y, z) = (π/4) R_E(y, z)` on the slit plane. -/
 theorem p19sR1_symEllIntRG_zero_eq_carlsonRE {y z : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
     symEllIntRG 0 y z = (π / 4) * Carlson.carlsonRE y z := by
@@ -98,6 +100,8 @@ theorem p19sR1_symEllIntRF_zero_eq_carlsonRK {y z : ℂ} (hy : y ∈ slitPlane) 
     Carlson.TwoVariable.carlsonRK]
   congr 2; norm_num
 
+/-- Identity under the stated parameter and domain assumptions: `Carlson.carlsonRE y z =
+Carlson.carlsonRE z y`. -/
 theorem p19sR1_carlsonRE_comm {y z : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ slitPlane) :
     Carlson.carlsonRE y z = Carlson.carlsonRE z y := by
   unfold Carlson.carlsonRE Carlson.carlsonR
@@ -248,6 +252,8 @@ def agmG (a₀ g₀ : ℝ≥0) : ℕ → ℝ
   | 0 => g₀
   | n + 1 => ((NNReal.agmSequences a₀ g₀ n).1 : ℝ)
 
+/-- Identity under the stated parameter and domain assumptions: `agmA a₀ g₀ (n + 1) = (agmA a₀ g₀
+n + agmG a₀ g₀ n) / 2`. -/
 lemma p19sR1_agmA_succ (a₀ g₀ : ℝ≥0) (n : ℕ) :
     agmA a₀ g₀ (n + 1) = (agmA a₀ g₀ n + agmG a₀ g₀ n) / 2 := by
   cases n with
@@ -257,6 +263,8 @@ lemma p19sR1_agmA_succ (a₀ g₀ : ℝ≥0) (n : ℕ) :
     rw [NNReal.agmSequences_succ' (n := k)]
     push_cast; ring
 
+/-- Identity under the stated parameter and domain assumptions: `agmG a₀ g₀ (n + 1) = Real.sqrt
+(agmA a₀ g₀ n * agmG a₀ g₀ n)`. -/
 lemma p19sR1_agmG_succ (a₀ g₀ : ℝ≥0) (n : ℕ) :
     agmG a₀ g₀ (n + 1) = Real.sqrt (agmA a₀ g₀ n * agmG a₀ g₀ n) := by
   cases n with

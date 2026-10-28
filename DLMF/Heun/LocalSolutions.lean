@@ -50,8 +50,12 @@ variable {a q α β γ δ ε : ℂ}
 
 /-! ### The recurrence -/
 
+/-- Identity under the stated parameter and domain assumptions: `heunLocalCoeff a q α β γ δ 0 =
+1`. -/
 @[simp] theorem heunLocalCoeff_zero : heunLocalCoeff a q α β γ δ 0 = 1 := rfl
 
+/-- Identity under the stated parameter and domain assumptions: `heunLocalCoeff a q α β γ δ 1 = q
+/ (a * γ)`. -/
 @[simp] theorem heunLocalCoeff_one : heunLocalCoeff a q α β γ δ 1 = q / (a * γ) := rfl
 
 /-- DLMF 31.3.2: `aγc₁ - qc₀ = 0` (for `aγ ≠ 0`). -/
@@ -147,6 +151,7 @@ lemma p1h_coeff_add_two (a q α β γ δ : ℂ) (n : ℕ) :
         -heunRecP α β (n + 1) / heunRecR a γ (n + 1) * heunLocalCoeff a q α β γ δ n := by
   rw [heunLocalCoeff]; ring
 
+/-- Nonvanishing under the stated hypotheses: `∀ᶠ n : ℕ in atTop, heunRecR a γ (n + 1) ≠ 0`. -/
 lemma p1h_eventually_R_ne (a γ : ℂ) (ha : a ≠ 0) :
     ∀ᶠ n : ℕ in atTop, heunRecR a γ (n + 1) ≠ 0 := by
   obtain ⟨N, hN⟩ := exists_nat_gt ‖γ‖
@@ -158,6 +163,8 @@ lemma p1h_eventually_R_ne (a γ : ℂ) (ha : a ≠ 0) :
   have : (N : ℝ) ≤ n := by exact_mod_cast hn
   linarith
 
+/-- The map `(fun n : ℕ => (heunRecQ a α β γ δ (n + 1) + q) / heunRecR a γ (n + 1) + -heunRecP α β
+(n + 1) / heunRecR a γ (n + 1) - 1)` tends to `(𝓝 0)` along `atTop`. -/
 lemma p1h_tendsto_A_add_B (a q α β γ δ : ℂ) (ha : a ≠ 0) :
     Tendsto (fun n : ℕ => (heunRecQ a α β γ δ (n + 1) + q) / heunRecR a γ (n + 1) +
       -heunRecP α β (n + 1) / heunRecR a γ (n + 1) - 1) atTop (𝓝 0) := by
@@ -171,6 +178,8 @@ lemma p1h_tendsto_A_add_B (a q α β γ δ : ℂ) (ha : a ≠ 0) :
   push_cast
   ring_nf
 
+/-- The map `(fun n : ℕ => -heunRecP α β (n + 1) / heunRecR a γ (n + 1) + 1 / a)` tends to `(𝓝 0)`
+along `atTop`. -/
 lemma p1h_tendsto_B (a α β γ : ℂ) (ha : a ≠ 0) :
     Tendsto (fun n : ℕ => -heunRecP α β (n + 1) / heunRecR a γ (n + 1) + 1 / a) atTop
       (𝓝 0) := by
@@ -185,7 +194,7 @@ lemma p1h_tendsto_B (a α β γ : ℂ) (ha : a ≠ 0) :
   push_cast
   ring
 
-
+/-- Estimate under the stated parameter and domain assumptions: `0 < heunLocalRadius a`. -/
 theorem p1h_radius_pos {a : ℂ} (ha : a ≠ 0) : 0 < heunLocalRadius a :=
   lt_min one_pos (norm_pos_iff.2 ha)
 
@@ -245,7 +254,6 @@ lemma p1h_summable_norm {a q α β γ δ : ℂ} (ha : a ≠ 0) {t : ℝ} (ht0 : 
       _ ≤ t / η * (max (η * ‖c (n + 1)‖) ‖c (n + 1) - c n‖ * t ^ n) := by gcongr
   exact (summable_nat_add_iff 1).1 h1
 
-
 /-- The power series of `Hl` converges on the disk `|z| < min(1, |a|)`. -/
 theorem p1h_hasFPowerSeriesOnBall {a q α β γ δ : ℂ} (ha : a ≠ 0) :
     HasFPowerSeriesOnBall (heunLocal a q α β γ δ) (ofScalars ℂ (heunLocalCoeff a q α β γ δ)) 0
@@ -272,6 +280,7 @@ def p1hSh (u : ℕ → ℂ) : ℕ → ℂ
   | 0 => 0
   | n + 1 => u n
 
+/-- The series with terms `(fun n => p1hSh u n * z ^ n)` converges to `(z * S)`. -/
 lemma p1h_hasSum_sh {u : ℕ → ℂ} {S z : ℂ} (h : HasSum (fun n => u n * z ^ n) S) :
     HasSum (fun n => p1hSh u n * z ^ n) (z * S) :=
   HasSum.mul_pow_shift (c := p1hSh u) h rfl
@@ -284,15 +293,21 @@ def p1hE (a q α β γ δ : ℂ) (b : ℕ → ℂ) (n : ℕ) : ℂ :=
     (γ * (1 + a) + δ * a + heunEps α β γ δ) * p1hSh (fun n => (n : ℂ) * b n) n +
     γ * a * ((n : ℂ) * b n) + α * β * p1hSh (p1hSh b) n - q * p1hSh b n
 
+/-- Identity under the stated parameter and domain assumptions: `p1hE a q α β γ δ b 0 = 0`. -/
 theorem p1hE_zero (a q α β γ δ : ℂ) (b : ℕ → ℂ) : p1hE a q α β γ δ b 0 = 0 := by
   simp [p1hE, p1hSh]
 
+/-- Identity under the stated parameter and domain assumptions: `p1hE a q α β γ δ b 1 = a * γ * b
+1 - q * b 0`. -/
 theorem p1hE_one (a q α β γ δ : ℂ) (b : ℕ → ℂ) :
     p1hE a q α β γ δ b 1 = a * γ * b 1 - q * b 0 := by
   simp only [p1hE, p1hSh]
   push_cast
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `p1hE a q α β γ δ b (k + 2) =
+heunRecR a γ (k + 1) * b (k + 2) - (heunRecQ a α β γ δ (k + 1) + q) * b (k + 1) + heunRecP α β
+(k + 1) * b k`. -/
 theorem p1hE_add_two (a q α β γ δ : ℂ) (b : ℕ → ℂ) (k : ℕ) :
     p1hE a q α β γ δ b (k + 2) = heunRecR a γ (k + 1) * b (k + 2) -
       (heunRecQ a α β γ δ (k + 1) + q) * b (k + 1) + heunRecP α β (k + 1) * b k := by

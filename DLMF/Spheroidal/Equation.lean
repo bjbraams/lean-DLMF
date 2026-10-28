@@ -32,12 +32,16 @@ namespace DLMF.Spheroidal
 
 /-! ### Calculus helpers (proof round P1, agent S30) -/
 
+/-- Identity under the stated parameter and domain assumptions: `z * ((n : ℂ) * z ^ (n - 1)) = n *
+z ^ n`. -/
 private lemma p1s_pow_deriv_aux (n : ℕ) (z : ℂ) :
     z * ((n : ℂ) * z ^ (n - 1)) = n * z ^ n := by
   rcases n with _ | n
   · simp
   · simp [pow_succ]; ring
 
+/-- Identity under the stated parameter and domain assumptions: `z ^ 2 * ((n : ℂ) * (((n - 1 : ℕ)
+: ℂ) * z ^ (n - 1 - 1))) = n * (n - 1) * z ^ n`. -/
 private lemma p1s_pow_deriv2_aux (n : ℕ) (z : ℂ) :
     z ^ 2 * ((n : ℂ) * (((n - 1 : ℕ) : ℂ) * z ^ (n - 1 - 1))) = n * (n - 1) * z ^ n := by
   rcases n with _ | _ | n
@@ -112,6 +116,8 @@ theorem p1s_eq_zero_of_Ioo {F : ℂ → ℂ} (hF : Differentiable ℂ F)
   exact hA.eqOn_zero_of_preconnected_of_frequently_eq_zero isPreconnected_univ (mem_univ 0) hfr
     (mem_univ z)
 
+/-- Identity under the stated parameter and domain assumptions: `IsSpheroidalSolutionOn lam γ2 m U
+(fun z => h z * g z)`. -/
 theorem p1s_isSpheroidalSolutionOn_mul_factor {m : ℕ} {γ2 lam : ℝ} {g : ℂ → ℂ}
     (hF : IsSpheroidalFactor m γ2 lam g) {U : Set ℂ} (hU : IsOpen U)
     (hU1 : ∀ z ∈ U, 1 - z ^ 2 ≠ 0) {h : ℂ → ℂ}

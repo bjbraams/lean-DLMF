@@ -285,7 +285,9 @@ theorem hasDerivAt_voigt (x : ℝ) {t : ℝ} (ht : 0 < t) :
   · rw [hV]
     exact (Complex.imCLM.hasFDerivAt.comp_hasDerivAt x hd).congr_deriv (by simp)
 
-/-- voigt erfc. -/
+/-- Identity under the stated parameter and domain assumptions: `(Real.voigtU x t :
+ℂ)+I*Real.voigtV x t=(π/(4*t : ℂ))^(1/2 : ℂ)*exp (((1-I*x)/(2*Real.sqrt t))^2)*erfc
+((1-I*x)/(2*Real.sqrt t))`. -/
 @[dlmf 7.19.E3]
 theorem voigt_erfc (x : ℝ) {t : ℝ} (ht : 0 < t) :
     (Real.voigtU x t : ℂ)+I*Real.voigtV x t=(π/(4*t : ℂ))^(1/2 : ℂ)*exp (((1-I*x)/(2*Real.sqrt t))^2)*erfc ((1-I*x)/(2*Real.sqrt t)) := by
@@ -312,7 +314,8 @@ theorem voigt_erfc (x : ℝ) {t : ℝ} (ht : 0 < t) :
   · congr 1; simp only [mul_zero, sub_zero]; rw [div_pow (1-I*(x:ℂ)) (2*_), mul_pow, hss]; field_simp
   · rw [ofReal_zero, mul_zero, zero_add, div_div]
 
-/-- Real.voigtH eq voigtU. -/
+/-- Identity under the stated parameter and domain assumptions: `Real.voigtH a u=Real.voigtU (u/a)
+(1/(4*a^2))/(a*Real.sqrt π)`. -/
 @[dlmf 7.19.E4]
 theorem Real.voigtH_eq_voigtU {a : ℝ} (ha : 0 < a) (u : ℝ) :
     Real.voigtH a u=Real.voigtU (u/a) (1/(4*a^2))/(a*Real.sqrt π) := by
@@ -339,7 +342,8 @@ theorem Real.voigtH_eq_voigtU {a : ℝ} (ha : 0 < a) (u : ℝ) :
   rw [Real.sq_sqrt Real.pi_pos.le]
   ring
 
-/-- Real.voigt limits. -/
+/-- Limit formula in the specified filter: `Tendsto (Real.voigtU x) (𝓝[>] 0) (𝓝 (1/(1+x^2))) ∧
+Tendsto (Real.voigtV x) (𝓝[>] 0) (𝓝 (x/(1+x^2)))`. -/
 @[dlmf 7.19.E5]
 theorem Real.voigt_limits (x : ℝ) :
     Tendsto (Real.voigtU x) (𝓝[>] 0) (𝓝 (1/(1+x^2))) ∧ Tendsto (Real.voigtV x) (𝓝[>] 0) (𝓝 (x/(1+x^2))) := by
@@ -382,7 +386,8 @@ theorem Real.voigt_limits (x : ℝ) :
       one_mul, mul_zero, zero_add] at this
     exact this
 
-/-- Real.voigt symmetry. -/
+/-- Identity under the stated parameter and domain assumptions: `Real.voigtU (-x) t=Real.voigtU x
+t ∧ Real.voigtV (-x) t = -Real.voigtV x t`. -/
 @[dlmf 7.19.E6]
 theorem Real.voigt_symmetry (x : ℝ) {t : ℝ} (ht : 0 < t) :
     Real.voigtU (-x) t=Real.voigtU x t ∧ Real.voigtV (-x) t = -Real.voigtV x t := by
@@ -395,7 +400,8 @@ theorem Real.voigt_symmetry (x : ℝ) {t : ℝ} (ht : 0 < t) :
     rw [show -(-x - -y)^2 = -(x-y)^2 by ring, neg_sq]
     ring
 
-/-- Real.voigt bounds. -/
+/-- Estimate under the stated parameter and domain assumptions: `0 < Real.voigtU x t ∧ Real.voigtU
+x t ≤ 1 ∧ -1 ≤ Real.voigtV x t ∧ Real.voigtV x t ≤ 1`. -/
 @[dlmf 7.19.E7]
 theorem Real.voigt_bounds (x : ℝ) {t : ℝ} (ht : 0 < t) :
     0 < Real.voigtU x t ∧ Real.voigtU x t ≤ 1 ∧ -1 ≤ Real.voigtV x t ∧ Real.voigtV x t ≤ 1 := by
@@ -436,7 +442,8 @@ theorem Real.voigt_bounds (x : ℝ) {t : ℝ} (ht : 0 < t) :
     rw [div_le_iff₀ (hy1 y)]
     nlinarith [Real.exp_pos (-(x-y)^2/(4*t)), sq_nonneg (y-1)]
 
-/-- Real.voigtV derivative relation. -/
+/-- Identity under the stated parameter and domain assumptions: `Real.voigtV x t=x*Real.voigtU x
+t+2*t*deriv (fun u => Real.voigtU u t) x`. -/
 @[dlmf 7.19.E8]
 theorem Real.voigtV_derivative_relation (x : ℝ) {t : ℝ} (ht : 0 < t) :
     Real.voigtV x t=x*Real.voigtU x t+2*t*deriv (fun u => Real.voigtU u t) x := by
@@ -447,7 +454,8 @@ theorem Real.voigtV_derivative_relation (x : ℝ) {t : ℝ} (ht : 0 < t) :
   simp at h
   linarith
 
-/-- Real.voigtU derivative relation. -/
+/-- Identity under the stated parameter and domain assumptions: `Real.voigtU x t=1-x*Real.voigtV x
+t-2*t*deriv (fun u => Real.voigtV u t) x`. -/
 @[dlmf 7.19.E9]
 theorem Real.voigtU_derivative_relation (x : ℝ) {t : ℝ} (ht : 0 < t) :
     Real.voigtU x t=1-x*Real.voigtV x t-2*t*deriv (fun u => Real.voigtV u t) x := by
@@ -458,7 +466,8 @@ theorem Real.voigtU_derivative_relation (x : ℝ) {t : ℝ} (ht : 0 < t) :
   simp at h
   linarith
 
-/-- Real.voigtU fourier laplace. -/
+/-- Identity under the stated parameter and domain assumptions: `Real.voigtU (u/a)
+(1/(4*a^2))=a*(∫ t : ℝ in Ioi 0, Real.exp (-a*t-t^2/4)*Real.cos (u*t))`. -/
 @[dlmf 7.19.E10]
 theorem Real.voigtU_fourier_laplace {a : ℝ} (ha : 0 < a) (u : ℝ) :
     Real.voigtU (u/a) (1/(4*a^2))=a*(∫ t : ℝ in Ioi 0, Real.exp (-a*t-t^2/4)*Real.cos (u*t)) := by
@@ -471,7 +480,8 @@ theorem Real.voigtU_fourier_laplace {a : ℝ} (ha : 0 < a) (u : ℝ) :
   rw [RCLike.re_to_complex, Complex.exp_re]
   simp [-ofReal_pow]
 
-/-- Real.voigtV fourier laplace. -/
+/-- Identity under the stated parameter and domain assumptions: `Real.voigtV (u/a)
+(1/(4*a^2))=a*(∫ t : ℝ in Ioi 0, Real.exp (-a*t-t^2/4)*Real.sin (u*t))`. -/
 @[dlmf 7.19.E11]
 theorem Real.voigtV_fourier_laplace {a : ℝ} (ha : 0 < a) (u : ℝ) :
     Real.voigtV (u/a) (1/(4*a^2))=a*(∫ t : ℝ in Ioi 0, Real.exp (-a*t-t^2/4)*Real.sin (u*t)) := by

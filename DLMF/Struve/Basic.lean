@@ -489,17 +489,18 @@ theorem iterated_weighted_struveQuadratic (ν σ : ℂ) (m : ℕ) {z : ℂ} (hz 
     rw [show ν-(m+1)=ν-m-1 by ring,cpow_sub (ν-m) 1 (slitPlane_ne_zero hz),cpow_one]
     ring
 
-/-- struveK. -/
+/-- The auxiliary ordinary Struve function `H_ν(z) - Y_ν(z)`. -/
 @[dlmf 11.2.E5]
 def struveK (ν z : ℂ) : ℂ :=
   struveH ν z - besselY ν z
 
-/-- struveM. -/
+/-- The auxiliary modified Struve function `L_ν(z) - I_ν(z)`. -/
 @[dlmf 11.2.E6]
 def struveM (ν z : ℂ) : ℂ :=
   struveL ν z - besselI ν z
 
-/-- struveEquation. -/
+/-- The ordinary or modified inhomogeneous Bessel equation defining a Struve solution, with the
+DLMF reciprocal-Gamma forcing term. -/
 @[dlmf 11.2.E7, dlmf 11.2.E9]
 def struveEquation (ν : ℂ) (modified : Bool) (f : ℂ → ℂ) (z : ℂ) : Prop :=
   iteratedDeriv 2 f z + deriv f z/z + ((if modified then -1 else 1)-ν^2/z^2)*f z = (z/2)^(ν-1)/(Real.sqrt π*Gamma (ν+1/2))
@@ -541,7 +542,7 @@ theorem struve_series_ode (ν σ : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
   generalize iteratedDeriv 2 f z=A, deriv f z=B, f z=C at h ⊢
   linear_combination (norm := (field_simp [slitPlane_ne_zero hz]; ring)) h/z^2
 
-/-- struveH ode. -/
+/-- The stated relation follows from the given hypotheses: `struveEquation ν false (struveH ν) z`. -/
 @[dlmf 11.2.E8]
 theorem struveH_ode (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     struveEquation ν false (struveH ν) z := by
@@ -554,7 +555,8 @@ theorem struveH_ode (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
   rw [he] at h
   simpa only [struveEquation, Bool.false_eq_true, ↓reduceIte, neg_neg, neg_one_mul, one_mul, struveH, struveHCore_eq_regularized, struveL, struveLCore_eq_regularized] using h
 
-/-- struveK ode. -/
+/-- The auxiliary ordinary Struve function satisfies the inhomogeneous Bessel equation with the
+ordinary Struve forcing term. -/
 @[dlmf 11.2.E8]
 theorem struveK_ode (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     struveEquation ν false (struveK ν) z := by
@@ -575,7 +577,8 @@ theorem struveK_ode (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     deriv (fun w => struveH ν w-besselY ν w) z=F at hl ho he ⊢
   linear_combination (norm := (field_simp [slitPlane_ne_zero hz]; ring)) hl/z^2+he-ho/z^2
 
-/-- struveL ode. -/
+/-- The modified Struve function satisfies the inhomogeneous modified Bessel equation with the
+prescribed Gamma-normalized forcing term. -/
 @[dlmf 11.2.E10]
 theorem struveL_ode (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     struveEquation ν true (struveL ν) z := by
@@ -588,7 +591,7 @@ theorem struveL_ode (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
   rw [he] at h
   simpa only [struveEquation, Bool.false_eq_true, ↓reduceIte, neg_neg, neg_one_mul, one_mul, struveH, struveHCore_eq_regularized, struveL, struveLCore_eq_regularized] using h
 
-/-- struveM ode. -/
+/-- The stated relation follows from the given hypotheses: `struveEquation ν true (struveM ν) z`. -/
 @[dlmf 11.2.E10]
 theorem struveM_ode (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     struveEquation ν true (struveM ν) z := by
@@ -609,7 +612,8 @@ theorem struveM_ode (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     deriv (fun w => struveL ν w-besselI ν w) z=F at hl ho he ⊢
   linear_combination (norm := (field_simp [slitPlane_ne_zero hz]; ring)) hl/z^2+he-ho/z^2
 
-/-- IsStruveSolutionOn. -/
+/-- An analytic function on S satisfying the ordinary or modified Struve differential equation at
+each point of S. -/
 def IsStruveSolutionOn (ν : ℂ) (modified : Bool) (f : ℂ → ℂ) (S : Set ℂ) : Prop :=
   AnalyticOnNhd ℂ f S ∧ ∀ z ∈ S, struveEquation ν modified f z
 
@@ -870,7 +874,8 @@ theorem struveL_nat_entire (n : ℕ) : Differentiable ℂ (struveL n) := by
   have hc := entire_struveLCore (n:ℂ)
   fun_prop
 
-/-- struveH zero order series. -/
+/-- The series with terms `(fun n : ℕ => 2/π * (-1)^n * z^(2*n+1)/(oddProduct n)^2)` converges to
+`(struveH 0 z)`. -/
 @[dlmf 11.2.E3]
 theorem struveH_zero_order_series (z : ℂ) :
     HasSum (fun n : ℕ => 2/π * (-1)^n * z^(2*n+1)/(oddProduct n)^2) (struveH 0 z) := by
@@ -888,7 +893,8 @@ theorem struveH_zero_order_series (z : ℂ) :
   ring_nf
   rw [hp]
 
-/-- struveL zero order series. -/
+/-- The series with terms `(fun n : ℕ => 2/π * 1 * z^(2*n+1)/(oddProduct n)^2)` converges to
+`(struveL 0 z)`. -/
 @[dlmf 11.2.E4]
 theorem struveL_zero_order_series (z : ℂ) :
     HasSum (fun n : ℕ => 2/π * 1 * z^(2*n+1)/(oddProduct n)^2) (struveL 0 z) := by

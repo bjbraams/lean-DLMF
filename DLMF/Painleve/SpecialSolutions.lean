@@ -53,6 +53,7 @@ private lemma b32_hasDerivAt_logDeriv {φ φ1 P Q : ℂ → ℂ} {z : ℂ} (hφ 
     HasDerivAt (fun z => φ1 z / φ z) (P z * (φ1 z / φ z) + Q z - (φ1 z / φ z) ^ 2) z :=
   (hφ1.div hφ h0).congr_deriv (by field_simp)
 
+/-- Identity under the stated parameter and domain assumptions: `ε ^ 2 = 1`. -/
 private lemma b32_sq_eq_one {ε : ℂ} (hε : ε = 1 ∨ ε = -1) : ε ^ 2 = 1 := by
   rcases hε with h | h <;> simp [h]
 
@@ -306,6 +307,7 @@ theorem painleveIII_of_riccati {ε₁ ε₂ α β : ℂ} (h₁ : ε₁ = 1 ∨ �
     | (have hβ : β = α + 2 := by linear_combination hαβ)
   all_goals (subst hβ; field_simp; ring)
 
+/-- At `z`, the function `(fun z : ℂ => z ^ a)` has derivative `(a * z ^ a / z)`. -/
 private lemma p3b_hasDerivAt_cpow {a z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (fun z : ℂ => z ^ a) (a * z ^ a / z) z := by
   have hz0 : z ≠ 0 := slitPlane_ne_zero hz
@@ -909,6 +911,7 @@ lemma p3b_deriv_eq_zero_of_im_eq_zero {r : ℂ → ℂ} {d z₀ : ℂ} (hr : Has
   simp at h1 h2
   exact Complex.ext h2 h1
 
+/-- The stated relation follows from the given hypotheses: `False`. -/
 lemma p3b_ratio_not_real {ψ₁ ψ₂ : ℂ → ℂ} {z₀ : ℂ} (h₁ : DifferentiableAt ℂ ψ₁ z₀)
     (h₂ : DifferentiableAt ℂ ψ₂ z₀) (hne : ψ₂ z₀ ≠ 0)
     (hW : ψ₁ z₀ * deriv ψ₂ z₀ - ψ₂ z₀ * deriv ψ₁ z₀ ≠ 0)

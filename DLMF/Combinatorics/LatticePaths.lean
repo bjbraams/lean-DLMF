@@ -46,8 +46,10 @@ def delannoy : ℕ → ℕ → ℕ
   | _ + 1, 0 => 1
   | m + 1, n + 1 => delannoy m (n + 1) + delannoy (m + 1) n + delannoy m n
 
+/-- Identity under the stated parameter and domain assumptions: `delannoy 0 n = 1`. -/
 @[simp] theorem delannoy_zero_left (n : ℕ) : delannoy 0 n = 1 := by cases n <;> simp [delannoy]
 
+/-- Identity under the stated parameter and domain assumptions: `delannoy m 0 = 1`. -/
 @[simp] theorem delannoy_zero_right (m : ℕ) : delannoy m 0 = 1 := by cases m <;> simp [delannoy]
 
 /-- DLMF 26.6.10: `D(m, n) = D(m, n-1) + D(m-1, n) + D(m-1, n-1)`, `m, n ≥ 1` (written with
@@ -191,7 +193,6 @@ theorem card_latticePaths_above_eq_largeSchroder (n : ℕ) :
   sorry
 
 /-! ### Helpers (agent p26a) -/
-
 
 /-- A function satisfying the Delannoy boundary values and recurrence is `delannoy`. -/
 lemma q26a_eq_delannoy (f : ℕ → ℕ → ℕ) (h0 : ∀ n, f 0 n = 1) (h1 : ∀ m, f m 0 = 1)
@@ -406,7 +407,6 @@ lemma s26a_motzkin_eq_sum_even (m : ℕ) :
     rw [ite_eq_left (even_two_mul k), ite_eq_right h1, Nat.mul_div_cancel_left k two_pos]; ring
   · intro j _ hj
     rw [Nat.choose_eq_zero_of_lt (by simp at hj; omega)]; simp
-
 
 /-- DLMF 26.6.13 (helper): `M(n) = ∑_k (-1)^k C(n, k) C(n+1-k)`, by binomial inversion. -/
 lemma s26a_motzkin_eq_sum_catalan (n : ℕ) :
@@ -764,7 +764,6 @@ condition, but at `n = 0` the sum is empty while `C(0) = 1`
 theorem catalan_eq_sum_narayana {n : ℕ} (hn : 1 ≤ n) :
     catalan n = ∑ k ∈ Icc 1 n, narayana n k :=
   q26a_catalan_eq_sum_narayana hn
-
 
 /-- DLMF 26.6.13: `M(n) = ∑_{k=0}^{n} (-1)^k C(n, k) C(n+1-k)`. -/
 @[dlmf 26.6.E13]

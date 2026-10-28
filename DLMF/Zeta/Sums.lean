@@ -135,13 +135,14 @@ lemma s25a_norm_pochhammer_le (s : ℂ) (k : ℕ) :
       simp
     · exact s25a_pochhammer_nonneg (norm_nonneg s) k
 
-
 /-- The domain `ℂ ∖ {1, 0, -1, -2, …}`. -/
 def s25a_U : Set ℂ := (Set.range fun n : ℕ => (1 : ℂ) - n)ᶜ
 
+/-- Formula under the stated hypotheses: `s ∈ s25a_U ↔ ∀ n : ℕ, s ≠ 1 - n`. -/
 lemma s25a_mem_U {s : ℂ} : s ∈ s25a_U ↔ ∀ n : ℕ, s ≠ 1 - n := by
   simp [s25a_U, eq_comm]
 
+/-- The indicated domain is open: `IsOpen s25a_U`. -/
 lemma s25a_isOpen_U : IsOpen s25a_U := by
   have : (Set.range fun n : ℕ => (1 : ℂ) - n) =
       Set.range ((↑) : ℤ → ℂ) ∩ {z : ℂ | z.re ≤ 1} := by
@@ -161,10 +162,12 @@ lemma s25a_isOpen_U : IsOpen s25a_U := by
   rw [s25a_U, this, isOpen_compl_iff]
   exact Complex.isClosed_range_intCast.inter (isClosed_le continuous_re continuous_const)
 
+/-- The stated relation follows from the given hypotheses: `IsPreconnected s25a_U`. -/
 lemma s25a_isPreconnected_U : IsPreconnected s25a_U :=
   ((Set.countable_range _).isConnected_compl_of_one_lt_rank
     (by rw [Complex.rank_real_complex]; norm_num)).isPreconnected
 
+/-- Estimate under the stated parameter and domain assumptions: `{s : ℂ | 1 < s.re} ⊆ s25a_U`. -/
 lemma s25a_re_gt_subset_U : {s : ℂ | 1 < s.re} ⊆ s25a_U := by
   intro s hs
   have hs' : 1 < s.re := hs
@@ -233,7 +236,6 @@ lemma s25a_summable_pochhammer_real (t : ℝ) {x : ℝ} (hx0 : 0 ≤ x) (hx : x 
     push_cast; ring
   simp_rw [e] at h
   exact Complex.summable_ofReal.mp h
-
 
 /-- DLMF 25.8.3 for `Re s > 1`. -/
 lemma s25a_hasSum_838_re {s : ℂ} (hs : 1 < s.re) :
@@ -333,7 +335,6 @@ lemma s25a_hasSum_838_re {s : ℂ} (hs : 1 < s.re) :
   rw [(((Equiv.prodComm ℕ ℕ).hasSum_iff.mpr hsum.hasSum).prod_fiberwise hm).tsum_eq]
   exact this
 
-
 /-- Analytic continuation of a series identity from `Re s > 1` to `ℂ ∖ {1, 0, -1, …}`. -/
 lemma s25a_continuation (T : ℕ → ℂ → ℂ) (g : ℂ → ℂ)
     (hT : ∀ k, DifferentiableOn ℂ (T k) s25a_U) (hg : DifferentiableOn ℂ g s25a_U)
@@ -369,7 +370,6 @@ lemma s25a_pochhammer_mono {t u : ℝ} (ht : 0 ≤ t) (htu : t ≤ u) (k : ℕ) 
     rw [ascPochhammer_succ_eval, ascPochhammer_succ_eval]
     exact mul_le_mul ih (by linarith) (by positivity)
       (s25a_pochhammer_nonneg (ht.trans htu) k)
-
 
 /-- Local data for the dominations: near `x`, `‖y‖ ≤ R` and, for `n ≥ N`, `Re(y+n) ≥ 2` and
 `‖2^{-(y+n)}‖ ≤ 2^R 2^{-n}`. -/
@@ -553,7 +553,6 @@ lemma s25a_hasSum_822_re {s : ℂ} (hs : 1 < s.re) :
   rw [← hval]
   exact hA
 
-
 /-- The terms of the 25.8.2 core series are holomorphic on `ℂ ∖ {1, 0, -1, …}`. -/
 lemma s25a_differentiableOn_T2 (k : ℕ) : DifferentiableOn ℂ (fun s : ℂ =>
     (ascPochhammer ℂ k).eval s / (k + 1) ! * (riemannZeta (s + k) - 1)) s25a_U := by
@@ -723,7 +722,6 @@ lemma s25a_sum_roots {n : ℕ} (hn : 2 ≤ n) :
     field_simp
   rw [sum_congr rfl this, ← sum_mul, h, zero_mul]
 
-
 /-- `∏_{j<n} x^{a_j} = x^{∑ a_j}` for `x ≠ 0`. -/
 lemma s25a_prod_cpow {x : ℂ} (hx : x ≠ 0) (a : ℕ → ℂ) (n : ℕ) :
     ∏ j ∈ range n, x ^ a j = x ^ (∑ j ∈ range n, a j) := by
@@ -747,7 +745,6 @@ lemma s25a_prod_GammaSeq {n : ℕ} (hn : 2 ≤ n) {N : ℕ} (hN : 1 ≤ N) :
     rw [← s25a_prod_sub_roots (by omega)]
     refine prod_congr rfl fun j _ => ?_
     ring
-
 
 /-- The double series behind DLMF 25.8.4. -/
 lemma s25a_hasSum_log_prod {n : ℕ} (hn : 2 ≤ n) :
@@ -817,7 +814,6 @@ lemma s25a_hasSum_log_prod {n : ℕ} (hn : 2 ≤ n) :
   have hswap : HasSum (f ∘ Prod.swap) (∑' p, f p) :=
     (Equiv.prodComm ℕ ℕ).hasSum_iff.mpr hsum.hasSum
   exact hswap.prod_fiberwise fun m => hm m
-
 
 /-- `∏_{k≤N} (k+2) = (N+2)!`. -/
 lemma s25a_prod_add_two (N : ℕ) : ∏ k ∈ range (N + 1), ((k : ℝ) + 2) = ((N + 2) ! : ℝ) := by
@@ -904,7 +900,6 @@ theorem hasSum_neg_one_pow_riemannZeta_mul_sub_one {n : ℕ} (hn : 2 ≤ n) :
   rw [tendsto_nhds_unique hG hlim, ← Real.exp_neg, neg_neg, ← ofReal_log (Real.exp_pos _).le,
     Real.log_exp, ← hT]
   exact h1
-
 
 /-- DLMF 25.8.5: `∑_{k≥2} ζ(k) z^k = -γz - zψ(1-z)` for `|z| < 1`. Proved from the Taylor
 series of `ψ(1+z)` (DLMF 5.7.4). -/
@@ -1049,7 +1044,6 @@ lemma s25a_hasSum_neg_log_prod {z : ℂ} (hz : ‖z‖ < 1) :
     (Equiv.prodComm ℕ ℕ).hasSum_iff.mpr hsum.hasSum
   exact hswap.prod_fiberwise fun m => hm m
 
-
 /-- `‖z²/(m+1)²‖ < 1/(m+1)²` for `‖z‖ < 1`. -/
 lemma s25a_norm_w_le {z : ℂ} (hz : ‖z‖ < 1) (m : ℕ) :
     ‖z ^ 2 / ((m : ℂ) + 1) ^ 2‖ ≤ 1 / ((m : ℝ) + 1) ^ 2 := by
@@ -1176,7 +1170,6 @@ theorem hasSum_riemannZeta_two_mul_div_mul_pow {z : ℂ} (hz : ‖z‖ < 1) :
   rw [← s25a_exp_eq hz hz0 h2, Complex.log_exp (by linarith [(abs_lt.mp him).1])
     (by linarith [(abs_lt.mp him).2])]
   exact h1
-
 
 /-- `0 ≤ πx cot(πx) ≤ 1` for `0 ≤ x ≤ 1/2`. -/
 lemma r25a_pi_mul_cot_bound {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x ≤ 1 / 2) :

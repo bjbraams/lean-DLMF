@@ -23,7 +23,8 @@ namespace DLMF.Confluent
 
 open DLMF.Bessel
 
-/-- pcfV nat add half. -/
+/-- Identity under the stated parameter and domain assumptions: `pcfV (n+1/2) z=(Real.sqrt
+(2/π):ℂ)*exp (z^2/4)*(-I)^n*Polynomial.aeval (I*z) (Polynomial.hermite n)`. -/
 @[dlmf 12.7.E3]
 theorem pcfV_nat_add_half (n : ℕ) (z : ℂ) :
     pcfV (n+1/2) z=(Real.sqrt (2/π):ℂ)*exp (z^2/4)*(-I)^n*Polynomial.aeval (I*z) (Polynomial.hermite n) := by
@@ -41,7 +42,8 @@ theorem pcfV_nat_add_half (n : ℕ) (z : ℂ) :
   rw [hz]
   ring
 
-/-- pcfV neg half. -/
+/-- Identity under the stated parameter and domain assumptions: `pcfV (-1/2) z=2/Real.sqrt π*exp
+(z^2/4)*dawsonF (z/Real.sqrt 2)`. -/
 @[dlmf 12.7.E4]
 theorem pcfV_neg_half (z : ℂ) :
     pcfV (-1/2) z=2/Real.sqrt π*exp (z^2/4)*dawsonF (z/Real.sqrt 2) := by
@@ -59,7 +61,9 @@ theorem pcfV_neg_half (z : ℂ) :
   field_simp
   rw [hs]; ring
 
-/-- pcfU nat add half deriv. -/
+/-- Identity under the stated parameter and domain assumptions: `pcfU (n+1/2) z=(Real.sqrt
+(π/2):ℂ)*(-1)^n/(n.factorial:ℂ)*exp (-z^2/4)*iteratedDeriv n (fun z : ℂ => exp (z^2/2)*erfc
+(z/Real.sqrt 2)) z`. -/
 @[dlmf 12.7.E6]
 theorem pcfU_nat_add_half_deriv (n : ℕ) (z : ℂ) :
     pcfU (n+1/2) z=(Real.sqrt (π/2):ℂ)*(-1)^n/(n.factorial:ℂ)*exp (-z^2/4)*iteratedDeriv n (fun z : ℂ => exp (z^2/2)*erfc (z/Real.sqrt 2)) z := by
@@ -87,12 +91,15 @@ theorem pcfU_nat_add_half_deriv (n : ℕ) (z : ℂ) :
       ring
     _ = _ := by rw [←h]; ring
 
-/-- hhFunction. -/
+/-- The repeated Gaussian tail integral `∫₀∞ tⁿ/n! exp (-(z+t)²/2) dt`; the index `-1` denotes the
+Gaussian itself. -/
 @[dlmf 12.7.E7]
 def hhFunction (n : ℤ) (z : ℂ) : ℂ :=
   if n = -1 then exp (-z^2/2) else (∫ t : ℝ in Ioi 0, (t:ℂ)^n.toNat/(n.toNat.factorial:ℂ)*exp (-(z+t)^2/2))
 
-/-- pcfU hh. -/
+/-- Identity under the stated parameter and domain assumptions: `pcfU (n+1/2) z=exp
+(z^2/4)*hhFunction n z ∧ pcfU (n+1/2) z=Real.sqrt π*2^(((n:ℂ)-1)/2)*exp (z^2/4)*iteratedErfc n
+(z/Real.sqrt 2)`. -/
 @[dlmf 12.7.E7]
 theorem pcfU_hh (n : ℤ) (hn : -1 ≤ n) (z : ℂ) :
     pcfU (n+1/2) z=exp (z^2/4)*hhFunction n z ∧ pcfU (n+1/2) z=Real.sqrt π*2^(((n:ℂ)-1)/2)*exp (z^2/4)*iteratedErfc n (z/Real.sqrt 2) := by
@@ -273,7 +280,8 @@ theorem pcfU_bessel_11 {z : ℂ} (hz : 0 < z.re) :
   field_simp at h ⊢
   linear_combination h
 
-/-- pcfU kummerU odd. -/
+/-- Identity under the stated parameter and domain assumptions: `pcfU a z=2^(-3/4-a/2)*z*exp
+(-z^2/4)*kummerU (a/2+3/4) (3/2) (z^2/2)`. -/
 @[dlmf 12.7.E14]
 theorem pcfU_kummerU_odd (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
     pcfU a z=2^(-3/4-a/2)*z*exp (-z^2/4)*kummerU (a/2+3/4) (3/2) (z^2/2) := by
@@ -286,7 +294,9 @@ theorem pcfU_kummerU_odd (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
     show a/2+1/4-1/2+1 = a/2+3/4 by ring, show (2:ℂ)-1/2 = 3/2 by norm_num]
   linear_combination (exp (-z^2/4) * kummerU (a/2+3/4) (3/2) (z^2/2)) * key
 
-/-- pcfU whittaker. -/
+/-- Identity under the stated parameter and domain assumptions: `pcfU a
+z=2^(-a/2)*z^(-1/2:ℂ)*whittakerW (-a/2) (1/4) (z^2/2) ∧ pcfU a
+z=2^(-a/2)*z^(-1/2:ℂ)*whittakerW (-a/2) (-1/4) (z^2/2)`. -/
 @[dlmf 12.7.E14]
 theorem pcfU_whittaker (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
     pcfU a z=2^(-a/2)*z^(-1/2:ℂ)*whittakerW (-a/2) (1/4) (z^2/2) ∧ pcfU a z=2^(-a/2)*z^(-1/2:ℂ)*whittakerW (-a/2) (-1/4) (z^2/2) := by
@@ -306,7 +316,8 @@ theorem pcfU_whittaker (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
       show (1:ℂ) + 2*(-1/4) = 1/2 by ring, show -(z^2/2)/2 = -z^2/4 by ring]
     linear_combination (-(exp (-z^2/4) * kummerU (a/2+1/4) (1/2) (z^2/2))) * key2
 
-/-- pcfU addition 1. -/
+/-- The series with terms `(fun m : ℕ => exp (1*(x*y/2+y^2/4))*((-y)^m/(m.factorial:ℂ))*pcfU (a-m)
+x)` converges to `(pcfU a (x+y))`. -/
 @[dlmf 12.13.E1]
 theorem pcfU_addition_1 (a x y : ℂ) :
     HasSum (fun m : ℕ => exp (1*(x*y/2+y^2/4))*((-y)^m/(m.factorial:ℂ))*pcfU (a-m) x) (pcfU a (x+y)) := by
@@ -321,7 +332,8 @@ theorem pcfU_addition_1 (a x y : ℂ) :
   · funext m; rw [he2, neg_pow]; ring
   · rw [← mul_assoc, he, one_mul]
 
-/-- pcfU addition 2. -/
+/-- The series with terms `(fun m : ℕ => exp (-1*(x*y/2+y^2/4))*((-1)^m*poch (a+1/2)
+m*y^m/(m.factorial:ℂ))*pcfU (a+m) x)` converges to `(pcfU a (x+y))`. -/
 @[dlmf 12.13.E2]
 theorem pcfU_addition_2 (a x y : ℂ) :
     HasSum (fun m : ℕ => exp (-1*(x*y/2+y^2/4))*((-1)^m*poch (a+1/2) m*y^m/(m.factorial:ℂ))*pcfU (a+m) x) (pcfU a (x+y)) := by
@@ -336,7 +348,8 @@ theorem pcfU_addition_2 (a x y : ℂ) :
   · funext m; rw [he2, show (1/2:ℂ)+a = a+1/2 by ring]; ring
   · rw [← mul_assoc, he, one_mul]
 
-/-- pcfV addition 3. -/
+/-- The series with terms `(fun m : ℕ => exp (1*(x*y/2+y^2/4))*((-1)^m*poch (1/2-a)
+m*y^m/(m.factorial:ℂ))*pcfV (a-m) x)` converges to `(pcfV a (x+y))`. -/
 @[dlmf 12.13.E3]
 theorem pcfV_addition_3 (a x y : ℂ) :
     HasSum (fun m : ℕ => exp (1*(x*y/2+y^2/4))*((-1)^m*poch (1/2-a) m*y^m/(m.factorial:ℂ))*pcfV (a-m) x) (pcfV a (x+y)) := by
@@ -351,7 +364,8 @@ theorem pcfV_addition_3 (a x y : ℂ) :
   · funext m; rw [he2]; ring
   · rw [← mul_assoc, he, one_mul]
 
-/-- pcfV addition 4. -/
+/-- The series with terms `(fun m : ℕ => exp (-1*(x*y/2+y^2/4))*(y^m/(m.factorial:ℂ))*pcfV (a+m)
+x)` converges to `(pcfV a (x+y))`. -/
 @[dlmf 12.13.E4]
 theorem pcfV_addition_4 (a x y : ℂ) :
     HasSum (fun m : ℕ => exp (-1*(x*y/2+y^2/4))*(y^m/(m.factorial:ℂ))*pcfV (a+m) x) (pcfV a (x+y)) := by
@@ -366,7 +380,9 @@ theorem pcfV_addition_4 (a x y : ℂ) :
   · funext m; rw [he2]; ring
   · rw [← mul_assoc, he, one_mul]
 
-/-- pcfU rotational addition. -/
+/-- The series with terms `(fun m : ℕ => exp ((x*Real.sin t-y*Real.cos t)^2/4)*(-1)^m*poch (a+1/2)
+m/(m.factorial:ℂ)*(Real.tan t:ℂ)^m*pcfU (m+a) x*pcfU (-m-1/2) y)` converges to `(pcfU a
+(x*Real.cos t+y*Real.sin t))`. -/
 @[dlmf 12.13.E5]
 theorem pcfU_rotational_addition {a : ℂ} (ha : a.re ≤ -1/2) (x y : ℂ) {t : ℝ} (ht : 0 ≤ t) (htπ : t ≤ π/4) (hend : t = π/4 → |y.im| ≤ x.re) :
     HasSum (fun m : ℕ => exp ((x*Real.sin t-y*Real.cos t)^2/4)*(-1)^m*poch (a+1/2) m/(m.factorial:ℂ)*(Real.tan t:ℂ)^m*pcfU (m+a) x*pcfU (-m-1/2) y) (pcfU a (x*Real.cos t+y*Real.sin t)) := by

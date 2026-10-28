@@ -73,6 +73,8 @@ theorem tendsto_jacobiSeries_div_pow {α : ℂ} (n : ℕ) (u : ℂ) :
     rw [show (n : ℂ) + α + b + 1 = n + α + 1 + b by ring]
     field_simp
 
+/-- The map `(fun a : ℝ => jacobiPolyP a β n x / jacobiPolyP a β n 1)` tends to `(𝓝 (((1 + x) / 2)
+^ n))` along `atTop`. -/
 @[dlmf 18.6.E2]
 theorem jacobi_limit_alpha {β : ℂ} (n : ℕ) (x : ℂ) :
     Tendsto (fun a : ℝ => jacobiPolyP a β n x / jacobiPolyP a β n 1) atTop
@@ -108,6 +110,8 @@ theorem jacobi_limit_alpha {β : ℂ} (n : ℕ) (x : ℂ) :
   rw [add_comm (1 : ℂ) (a : ℂ), show (n : ℂ) + a + β + 1 = n + β + 1 + a by ring]
   field_simp
 
+/-- The map `(fun b : ℝ => jacobiPolyP α b n x / jacobiPolyP α b n (-1))` tends to `(𝓝 (((1 - x) /
+2) ^ n))` along `atTop`. -/
 @[dlmf 18.6.E3]
 theorem jacobi_limit_beta {α : ℂ} (hα : -1 < α.re) (n : ℕ) (x : ℂ) :
     Tendsto (fun b : ℝ => jacobiPolyP α b n x / jacobiPolyP α b n (-1)) atTop
@@ -130,6 +134,8 @@ theorem jacobi_limit_beta {α : ℂ} (hα : -1 < α.re) (n : ℕ) (x : ℂ) :
   rw [Pi.div_apply, show (1 - (-1 : ℂ)) / 2 = 1 by norm_num, ordinaryHypergeometric_eq_sum_neg_nat,
     ordinaryHypergeometric_eq_sum_neg_nat, mul_div_mul_left _ _ hp, div_div_div_cancel_right₀ hb']
 
+/-- The map `(fun a : ℝ => ultrasphPoly a n x / ultrasphPoly a n 1)` tends to `(𝓝 (x ^ n))` along
+`atTop`. -/
 @[dlmf 18.6.E4]
 theorem ultrasphPoly_limit_monomial (n : ℕ) (x : ℂ) :
     Tendsto (fun a : ℝ => ultrasphPoly a n x / ultrasphPoly a n 1) atTop (𝓝 (x ^ n)) := by
@@ -168,6 +174,8 @@ theorem ultrasphPoly_limit_monomial (n : ℕ) (x : ℂ) :
   field_simp
   ring
 
+/-- The map `(fun a : ℝ => laguerrePolyL a n (a * x) / laguerrePolyL a n 0)` tends to `(𝓝 ((1 - x)
+^ n))` along `atTop`. -/
 @[dlmf 18.6.E5]
 theorem laguerrePolyL_limit_monomial (n : ℕ) (x : ℂ) :
     Tendsto (fun a : ℝ => laguerrePolyL a n (a * x) / laguerrePolyL a n 0) atTop
@@ -195,6 +203,8 @@ theorem laguerrePolyL_limit_monomial (n : ℕ) (x : ℂ) :
   field_simp
   ring
 
+/-- The map `(fun b : ℝ => jacobiPolyP α b n (1 - 2 * x / b))` tends to `(𝓝 (laguerrePolyL α n
+x))` along `atTop`. -/
 @[dlmf 18.7.E21]
 theorem jacobi_limit_laguerrePolyL {α : ℂ} (n : ℕ) (x : ℂ) :
     Tendsto (fun b : ℝ => jacobiPolyP α b n (1 - 2 * x / b)) atTop (𝓝 (laguerrePolyL α n x)) := by
@@ -221,6 +231,8 @@ theorem jacobi_limit_laguerrePolyL {α : ℂ} (n : ℕ) (x : ℂ) :
     show (n : ℂ) + α + b + 1 = n + α + 1 + b by ring, div_pow]
   field_simp
 
+/-- The map `(fun a : ℝ => jacobiPolyP a β n (2 * x / a - 1))` tends to `(𝓝 ((-1 : ℂ) ^ n *
+laguerrePolyL β n x))` along `atTop`. -/
 @[dlmf 18.7.E22]
 theorem jacobi_limit_laguerrePolyL_reflected {β : ℂ} (hβ : -1 < β.re) (n : ℕ) (x : ℂ) :
     Tendsto (fun a : ℝ => jacobiPolyP a β n (2 * x / a - 1)) atTop
@@ -230,6 +242,8 @@ theorem jacobi_limit_laguerrePolyL_reflected {β : ℂ} (hβ : -1 < β.re) (n : 
   rw [show 2 * x / (a : ℂ) - 1 = -(1 - 2 * x / a) by ring,
     jacobi_reflection (by simp; linarith) hβ]
 
+/-- The map `(fun a : ℝ => (Real.sqrt a : ℂ)⁻¹ ^ n * jacobiPolyP a a n (x / Real.sqrt a))` tends
+to `(𝓝 (aeval x (hermitePolyH n) / ((2 : ℂ) ^ n * n.factorial)))` along `atTop`. -/
 @[dlmf 18.7.E23]
 theorem jacobi_limit_hermite (n : ℕ) (x : ℂ) :
     Tendsto (fun a : ℝ => (Real.sqrt a : ℂ)⁻¹ ^ n * jacobiPolyP a a n (x / Real.sqrt a)) atTop
@@ -292,6 +306,8 @@ theorem jacobi_limit_hermite (n : ℕ) (x : ℂ) :
     field_simp
     ring
 
+/-- The map `(fun a : ℝ => (Real.sqrt a : ℂ)⁻¹ ^ n * ultrasphPoly a n (x / Real.sqrt a))` tends to
+`(𝓝 (aeval x (hermitePolyH n) / (n.factorial : ℂ)))` along `atTop`. -/
 @[dlmf 18.7.E24]
 theorem ultrasphPoly_limit_hermite (n : ℕ) (x : ℂ) :
     Tendsto (fun a : ℝ => (Real.sqrt a : ℂ)⁻¹ ^ n * ultrasphPoly a n (x / Real.sqrt a)) atTop
@@ -343,6 +359,8 @@ theorem ultrasphPoly_limit_hermite (n : ℕ) (x : ℂ) :
     field_simp
     ring
 
+/-- The map `(fun a : ℂ => (n + a) / a * ultrasphPoly a n x)` tends to `(𝓝 (if n = 0 then 1 else 2
+* (Chebyshev.T ℂ n).eval x))` along `(𝓝[≠] 0)`. -/
 @[dlmf 18.7.E25]
 theorem ultrasphPoly_limit_chebyshev (n : ℕ) (x : ℂ) :
     Tendsto (fun a : ℂ => (n + a) / a * ultrasphPoly a n x) (𝓝[≠] 0)
@@ -433,6 +451,9 @@ theorem ultrasphPoly_limit_chebyshev (n : ℕ) (x : ℂ) :
       simp
       ring
 
+/-- The map `(fun a : ℝ => (Real.sqrt (2 / a) : ℂ) ^ n * laguerrePolyL a n ((Real.sqrt (2 * a) :
+ℂ) * x + a))` tends to `(𝓝 ((-1 : ℂ) ^ n / n.factorial * aeval x (hermitePolyH n)))` along
+`atTop`. -/
 @[dlmf 18.7.E26]
 theorem laguerrePolyL_limit_hermite (n : ℕ) (x : ℂ) :
     Tendsto (fun a : ℝ => (Real.sqrt (2 / a) : ℂ) ^ n
@@ -742,6 +763,8 @@ theorem laguerrePolyL_mehler_heine_regularized {α : ℝ} (hα : -1 < α) (z : �
     show (n : ℂ) + ((α : ℂ) + 1) = n + α + 1 by ring]
   ring
 
+/-- The map `(fun n : ℕ => (Real.rpow (n : ℝ) (-α) : ℂ) * laguerrePolyL α n ((z : ℂ) / n))` tends
+to `(𝓝 ((Real.rpow z (-α / 2) : ℂ) * besselJ α (2 * Real.sqrt z)))` along `atTop`. -/
 @[dlmf 18.11.E6]
 theorem laguerrePolyL_mehler_heine {α : ℝ} (hα : -1 < α) {z : ℝ} (hz : 0 < z) :
     Tendsto (fun n : ℕ => (Real.rpow (n : ℝ) (-α) : ℂ) * laguerrePolyL α n ((z : ℂ) / n)) atTop
@@ -765,6 +788,9 @@ theorem laguerrePolyL_mehler_heine {α : ℝ} (hα : -1 < α) {z : ℝ} (hz : 0 
     regularizedHGFun ∅ {(α : ℂ) + 1} (-z)) = _
   rw [hp, ofReal_one, one_mul]
 
+/-- The map `(fun n : ℕ => (-1 : ℂ) ^ n * Real.sqrt n / (2 ^ (2 * n) * (n.factorial : ℂ)) * aeval
+(z / (2 * (Real.sqrt n : ℂ))) (hermitePolyH (2 * n)))` tends to `(𝓝 (cos z / (Real.sqrt
+Real.pi : ℂ)))` along `atTop`. -/
 @[dlmf 18.11.E7]
 theorem hermite_even_mehler_heine (z : ℂ) :
     Tendsto (fun n : ℕ => (-1 : ℂ) ^ n * Real.sqrt n / (2 ^ (2 * n) * (n.factorial : ℂ)) *
@@ -797,6 +823,9 @@ theorem hermite_even_mehler_heine (z : ℂ) :
   ring_nf
   simp only [hsgn2, mul_one]
 
+/-- The map `(fun n : ℕ => (-1 : ℂ) ^ n / (2 ^ (2 * n) * (n.factorial : ℂ)) * aeval (z / (2 *
+(Real.sqrt n : ℂ))) (hermitePolyH (2 * n + 1)))` tends to `(𝓝 (2 * sin z / (Real.sqrt Real.pi
+: ℂ)))` along `atTop`. -/
 @[dlmf 18.11.E8]
 theorem hermite_odd_mehler_heine (z : ℂ) :
     Tendsto (fun n : ℕ => (-1 : ℂ) ^ n / (2 ^ (2 * n) * (n.factorial : ℂ)) *

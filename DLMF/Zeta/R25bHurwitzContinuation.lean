@@ -58,8 +58,6 @@ namespace DLMF.Zeta
 
 open DLMF.Hypergeometric (poch poch_succ poch_zero)
 
-
-
 /-- The project's `hurwitzZetaComplex` is the Euler–Maclaurin limit for any admissible `M`. -/
 lemma r25b_hurwitzZetaComplex_eq_limUnder {M : ℕ} {s z : ℂ} (hs : s ≠ 1)
     (hM : 0 < s.re + 2 * M) :
@@ -85,10 +83,13 @@ theorem r25b_differentiableAt_hurwitzZetaComplex {s₀ z : ℂ} (hs₀ : s₀ �
     DifferentiableAt ℂ (fun s => DLMF.Confluent.hurwitzZetaComplex s z) s₀ :=
   s25b_differentiableAt_hzc hs₀ hz
 
+/-- At `w`, the function `(fun x => (x + n) ^ c)` has derivative `(c * (w + n) ^ (c - 1))`. -/
 lemma r25b_hasDerivAt_cpow_add {w c : ℂ} (n : ℂ) (h : w + n ∈ slitPlane) :
     HasDerivAt (fun x => (x + n) ^ c) (c * (w + n) ^ (c - 1)) w := by
   simpa using ((hasDerivAt_id w).add_const n).cpow_const (c := c) h
 
+/-- Identity under the stated parameter and domain assumptions: `r25b_emC s k * (-s - (2 * k + 1))
+= -s * r25b_emC (s + 1) k`. -/
 lemma r25b_emC_succ_mul (s : ℂ) (k : ℕ) :
     r25b_emC s k * (-s - (2 * k + 1)) = -s * r25b_emC (s + 1) k := by
   have h : poch s (2 * k + 1 + 1) = s * poch (s + 1) (2 * k + 1) := by
@@ -129,7 +130,6 @@ lemma r25b_hasDerivAt_emSeq_z (M : ℕ) {s w : ℂ} (hs : s ≠ 0) (hs1' : s ≠
     rw [show -(s + 1) - (2 * (k : ℂ) + 1) = -s - (2 * k + 1) - 1 by ring,
       ← mul_assoc (r25b_emC s k), r25b_emC_succ_mul]
     ring
-
 
 /-- Each term of the Euler–Maclaurin sequence is holomorphic in `z` on `Re z > 0`. -/
 lemma r25b_differentiableAt_emSeq_z (M : ℕ) (s : ℂ) {w : ℂ} (hw : 0 < w.re) (N : ℕ) :
@@ -173,6 +173,7 @@ lemma r25b_tendstoUniformlyOn_param {s : ℂ} (a₀ : ℂ) (hs : s ≠ 1) :
   rw [hpre] at hU
   exact hU
 
+/-- Estimate under the stated parameter and domain assumptions: `0 < a.re`. -/
 lemma r25b_ball_re_pos {a₀ a : ℂ} (ha₀ : 0 < a₀.re) (ha : a ∈ Metric.ball a₀ (a₀.re / 2)) :
     0 < a.re := by
   rw [Metric.mem_ball, dist_eq_norm] at ha
@@ -243,6 +244,8 @@ def r25b_emG (M : ℕ) (s a : ℂ) (N : ℕ) : ℂ :=
   (s - 1) * ((∑ n ∈ Finset.range N, (a + n) ^ (-s)) + (a + N) ^ (-s) / 2 +
     ∑ k ∈ Finset.range M, r25b_emC s k * (a + N) ^ (-s - (2 * k + 1))) + (a + N) ^ (1 - s)
 
+/-- Identity under the stated parameter and domain assumptions: `r25b_emG M s a N = (s - 1) *
+r25b_emSeq M s a N`. -/
 lemma r25b_emG_eq {M : ℕ} {s : ℂ} (hs : s ≠ 1) (a : ℂ) (N : ℕ) :
     r25b_emG M s a N = (s - 1) * r25b_emSeq M s a N := by
   have hs1 : s - 1 ≠ 0 := sub_ne_zero.mpr hs
@@ -250,6 +253,8 @@ lemma r25b_emG_eq {M : ℕ} {s : ℂ} (hs : s ≠ 1) (a : ℂ) (N : ℕ) :
   field_simp
   ring
 
+/-- Formula under the stated hypotheses: `r25b_emG M s a (N₀ + N) = r25b_emG M s a N₀ + ∑ n ∈
+Finset.range N, (s - 1) * r25b_emD M s (a + (N₀ + n : ℕ))`. -/
 lemma r25b_emG_add (M : ℕ) (s a : ℂ) (N₀ N : ℕ) :
     r25b_emG M s a (N₀ + N) =
       r25b_emG M s a N₀ + ∑ n ∈ Finset.range N, (s - 1) * r25b_emD M s (a + (N₀ + n : ℕ)) := by
@@ -257,6 +262,7 @@ lemma r25b_emG_add (M : ℕ) (s a : ℂ) (N₀ N : ℕ) :
   · simp [r25b_emG]
   · rw [r25b_emG_eq hs, r25b_emG_eq hs, r25b_emSeq_add, mul_add, Finset.mul_sum]
 
+/-- Continuity of the indicated function: `Continuous fun s => r25b_emG M s a N`. -/
 lemma r25b_continuous_emG (M : ℕ) {a : ℂ} (ha : ∀ n : ℕ, a + n ≠ 0) (N : ℕ) :
     Continuous fun s => r25b_emG M s a N := by
   refine continuous_iff_continuousAt.mpr fun s => DifferentiableAt.continuousAt (𝕜 := ℂ) ?_

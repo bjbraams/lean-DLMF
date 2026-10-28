@@ -93,18 +93,20 @@ theorem r25b_integral_eq_sum_bernoulliFun (f : ℕ → ℝ → ℂ)
     field_simp
     ring
 
-
+/-- At `t`, the function `(fun y : ℝ => (w + y) ^ c)` has derivative `(c * (w + t) ^ (c - 1))`. -/
 theorem r25b_hasDerivAt_cpow_shift {w c : ℂ} {t : ℝ} (h : w + t ∈ slitPlane) :
     HasDerivAt (fun y : ℝ => (w + y) ^ c) (c * (w + t) ^ (c - 1)) t := by
   have := ((hasDerivAt_id (t : ℂ)).const_add w).cpow_const (c := c) h
   simpa using this.comp_ofReal
 
+/-- Formula under the stated hypotheses: `w + t ∈ slitPlane`. -/
 theorem r25b_mem_slitPlane {w : ℂ} (hw : 0 < w.re) {t : ℝ} (ht : 0 ≤ t) : w + t ∈ slitPlane :=
   Complex.mem_slitPlane_iff.mpr (Or.inl (by simp; linarith))
 
 /-- The derivative family of `t ↦ (w+t)^{-s}`. -/
 def r25b_fam (s w : ℂ) (j : ℕ) (t : ℝ) : ℂ := (-1) ^ j * poch s j * (w + t) ^ (-s - j)
 
+/-- At `t`, the function `(r25b_fam s w j)` has derivative `(r25b_fam s w (j + 1) t)`. -/
 theorem r25b_hasDerivAt_fam {s w : ℂ} (hw : 0 < w.re) (j : ℕ) {t : ℝ} (ht : 0 ≤ t) :
     HasDerivAt (r25b_fam s w j) (r25b_fam s w (j + 1) t) t := by
   have h := (r25b_hasDerivAt_cpow_shift (c := -s - j) (r25b_mem_slitPlane hw ht)).const_mul
@@ -123,6 +125,8 @@ def r25b_emF (M : ℕ) (s w : ℂ) : ℂ :=
   w ^ (1 - s) / (s - 1) + w ^ (-s) / 2 +
     ∑ k ∈ Finset.range M, r25b_emC s k * w ^ (-s - (2 * k + 1))
 
+/-- Formula under the stated hypotheses: `∑ j ∈ Finset.range (2 * M), T j = ∑ k ∈ Finset.range M,
+(T (2 * k) + T (2 * k + 1))`. -/
 lemma r25b_sum_range_two_mul (T : ℕ → ℂ) (M : ℕ) :
     ∑ j ∈ Finset.range (2 * M), T j = ∑ k ∈ Finset.range M, (T (2 * k) + T (2 * k + 1)) := by
   induction M with
@@ -260,6 +264,8 @@ def r25b_emSeq (M : ℕ) (s z : ℂ) (N : ℕ) : ℂ :=
 def r25b_emD (M : ℕ) (s w : ℂ) : ℂ :=
   w ^ (-s) + r25b_emF M s (w + 1) - r25b_emF M s w
 
+/-- Formula under the stated hypotheses: `r25b_emSeq M s z (N₀ + N) = r25b_emSeq M s z N₀ + ∑ n ∈
+Finset.range N, r25b_emD M s (z + (N₀ + n : ℕ))`. -/
 theorem r25b_emSeq_add (M : ℕ) (s z : ℂ) (N₀ N : ℕ) :
     r25b_emSeq M s z (N₀ + N) =
       r25b_emSeq M s z N₀ + ∑ n ∈ Finset.range N, r25b_emD M s (z + (N₀ + n : ℕ)) := by
@@ -271,6 +277,7 @@ theorem r25b_emSeq_add (M : ℕ) (s z : ℂ) (N₀ N : ℕ) :
     push_cast
     ring_nf
 
+/-- Estimate under the stated parameter and domain assumptions: `‖poch s n‖ ≤ (R + n) ^ n`. -/
 lemma r25b_norm_poch_le {s : ℂ} {R : ℝ} (hR : 0 ≤ R) (hs : ‖s‖ ≤ R) (n : ℕ) :
     ‖poch s n‖ ≤ (R + n) ^ n := by
   induction n with
@@ -388,6 +395,8 @@ theorem r25b_tendsto_cpow_nat (z : ℂ) {w : ℂ} (hw : w.re < 0) :
         rw [← abs_mul]; exact neg_le_abs _
     _ ≤ π * |w.im| := by gcongr
 
+/-- Identity under the stated parameter and domain assumptions: `r25b_emSeq (M + 1) s z N =
+r25b_emSeq M s z N + r25b_emC s M * (z + N) ^ (-s - (2 * M + 1))`. -/
 theorem r25b_emSeq_succ_M (M : ℕ) (s z : ℂ) (N : ℕ) :
     r25b_emSeq (M + 1) s z N =
       r25b_emSeq M s z N + r25b_emC s M * (z + N) ^ (-s - (2 * M + 1)) := by
@@ -469,6 +478,7 @@ theorem s25b_tendstoUniformlyOn_hzc {M : ℕ} {K : Set (ℂ × ℂ)} {R σ : ℝ
   have h2 := (s25b_tendsto_hzc (z := q.2) hq1 hM).comp hT
   exact tendsto_nhds_unique h1 h2
 
+/-- Differentiability at the specified argument: `DifferentiableAt ℂ (fun t => poch t k) s`. -/
 theorem r25b_differentiableAt_poch (k : ℕ) (s : ℂ) :
     DifferentiableAt ℂ (fun t => poch t k) s :=
   (ascPochhammer ℂ k).differentiableAt

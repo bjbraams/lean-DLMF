@@ -37,8 +37,10 @@ open DLMF.JacobiElliptic
 
 /-! ### §19.6(i) Complete elliptic integrals -/
 
+/-- Identity under the stated parameter and domain assumptions: `jacobiComodulusk 0 = 1`. -/
 lemma ei19a_jacobiComodulusk_zero : jacobiComodulusk 0 = 1 := by simp [jacobiComodulusk]
 
+/-- Identity under the stated parameter and domain assumptions: `jacobiComodulusk 1 = 0`. -/
 lemma ei19a_jacobiComodulusk_one : jacobiComodulusk 1 = 0 := by simp [jacobiComodulusk]
 
 /-- `segmentIntegral f φ / φ → f 0` as `φ → 0` when `f` is continuous near `0`. -/
@@ -329,6 +331,10 @@ theorem compEllIntPik_sq_self {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
     p19lR1_incEllIntPik_ofReal hδ (fun t _ => h _), p19lR1_integral_cube hk, compEllIntEk]
   simp
 
+/-- Identity under the stated parameter and domain assumptions: `incEllIntPik φ (k ^ 2) k =
+(incEllIntEk φ k - k ^ 2 * Real.sin φ * Real.cos φ / (1 - k ^ 2 * (Real.sin φ : ℂ) ^ 2) ^ (1 /
+2 : ℂ)) / (1 - k ^ 2) ∧ incEllIntPik φ 1 k = incEllIntFk φ k - (incEllIntEk φ k - (1 - k ^ 2 *
+(Real.sin φ : ℂ) ^ 2) ^ (1 / 2 : ℂ) * Real.tan φ) / (1 - k ^ 2)`. -/
 theorem incEllIntPik_special_k' {φ : ℝ} (hφ : |φ| < π / 2) {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) :
     incEllIntPik φ (k ^ 2) k = (incEllIntEk φ k - k ^ 2 * Real.sin φ * Real.cos φ /
         (1 - k ^ 2 * (Real.sin φ : ℂ) ^ 2) ^ (1 / 2 : ℂ)) / (1 - k ^ 2) ∧

@@ -30,7 +30,7 @@ namespace DLMF.Struve
 
 open DLMF.Bessel
 
-/-- lommelA. -/
+/-- The finite product of the first `k` factors `(μ+2j+1)²-ν²` in the Lommel series denominator. -/
 @[dlmf 11.9.E4]
 def lommelA (μ ν : ℂ) (k : ℕ) : ℂ :=
   ∏ j ∈ Finset.range k, ((μ+2*j+1)^2-ν^2)
@@ -39,12 +39,14 @@ def lommelA (μ ν : ℂ) (k : ℕ) : ℂ :=
 def LommelRegular (μ ν : ℂ) : Prop :=
   ∀ n : ℕ, μ-ν ≠ -(2*n+1) ∧ μ+ν ≠ -(2*n+1)
 
-/-- lommelS. -/
+/-- The totalized Lommel series `z^(μ+1) Σ (-1)^k z^(2k)/A(μ,ν,k+1)` on the principal power
+branch. -/
 @[dlmf 11.9.E3]
 def lommelS (μ ν z : ℂ) : ℂ :=
   z^(μ+1) * ∑' k : ℕ, (-1)^k*z^(2*k)/lommelA μ ν (k+1)
 
-/-- lommelCapitalRegular. -/
+/-- The regular-parameter capital Lommel solution obtained by adding the prescribed Gamma-weighted
+J and Y connection terms to the Lommel series. -/
 @[dlmf 11.9.E5]
 def lommelCapitalRegular (μ ν z : ℂ) : ℂ :=
   lommelS μ ν z + 2^(μ-1)*Gamma ((μ+ν+1)/2)*Gamma ((μ-ν+1)/2)*(sin ((μ-ν)*π/2)*besselJ ν z-cos ((μ-ν)*π/2)*besselY ν z)
@@ -132,6 +134,8 @@ theorem lommelA_factor_bound {μ ν : ℂ} (h : LommelRegular μ ν) :
     rwa [← sub_eq_add_neg] at this
   · exact key ν (by linarith [norm_nonneg (μ-ν)]) (fun j hj => (hle j hj).trans (min_le_right _ _))
 
+/-- Estimate under the stated parameter and domain assumptions: `η^(2*k) * ((k ! : ℝ))^2 ≤
+‖lommelA m ν k‖`. -/
 theorem norm_lommelA_ge {m ν : ℂ} {η : ℝ} (hη : 0 < η)
     (hb : ∀ j : ℕ, η*(j+1) ≤ ‖m+2*j+1-ν‖ ∧ η*(j+1) ≤ ‖m+2*j+1+ν‖) (k : ℕ) :
     η^(2*k) * ((k ! : ℝ))^2 ≤ ‖lommelA m ν k‖ := by
@@ -209,7 +213,8 @@ theorem continuousAt_lommelCapitalRegular {μ ν : ℂ} (h : LommelRegular μ ν
   unfold lommelCapitalRegular
   exact hS.add (((h2.mul hG1).mul hG2).mul (by fun_prop))
 
-/-- lommelCapital regular. -/
+/-- Identity under the stated parameter and domain assumptions: `lommelCapital μ ν z =
+lommelCapitalRegular μ ν z`. -/
 @[dlmf 11.9.E5]
 theorem lommelCapital_regular {μ ν z : ℂ} (h : LommelRegular μ ν) (hz : z ∈ slitPlane) :
     lommelCapital μ ν z = lommelCapitalRegular μ ν z :=
@@ -221,7 +226,8 @@ theorem lommelCapital_parameter_limit (μ ν : ℂ) {z : ℂ} (hz : z ∈ slitPl
     Tendsto (fun m => lommelCapitalRegular m ν z) (𝓝[≠] μ) (𝓝 (lommelCapital μ ν z)) := by
   sorry
 
-/-- lommelA poch. -/
+/-- Identity under the stated parameter and domain assumptions: `lommelA μ ν k = 4^k*poch
+((μ-ν+1)/2) k*poch ((μ+ν+1)/2) k`. -/
 @[dlmf 11.9.E4]
 theorem lommelA_poch (μ ν : ℂ) (k : ℕ) :
     lommelA μ ν k = 4^k*poch ((μ-ν+1)/2) k*poch ((μ+ν+1)/2) k := by
@@ -279,7 +285,8 @@ theorem lommelS_eq_regularized {μ ν : ℂ} (h : LommelRegular μ ν) (z : ℂ)
   have hc := lommelCoeff_eq_regularized h k
   linear_combination -(-1:ℂ)^k*z^(2*k)*hc
 
-/-- hasSum lommelS. -/
+/-- The series with terms `(fun k : ℕ => z^(μ+1)*(-1)^k*z^(2*k)/lommelA μ ν (k+1))` converges to
+`(lommelS μ ν z)`. -/
 @[dlmf 11.9.E3]
 theorem hasSum_lommelS {μ ν : ℂ} (h : LommelRegular μ ν) {z : ℂ} (hz : z ∈ slitPlane) :
     HasSum (fun k : ℕ => z^(μ+1)*(-1)^k*z^(2*k)/lommelA μ ν (k+1)) (lommelS μ ν z) := by
@@ -345,7 +352,8 @@ theorem lommelS_residual {μ ν : ℂ} (h : LommelRegular μ ν) {z : ℂ} (hz :
   convert he using 1
   field_simp
 
-/-- lommelS ode. -/
+/-- Identity under the stated parameter and domain assumptions: `iteratedDeriv 2 (lommelS μ ν)
+z+deriv (lommelS μ ν) z/z+(1-ν^2/z^2)*lommelS μ ν z = z^(μ-1)`. -/
 @[dlmf 11.9.E1]
 theorem lommelS_ode {μ ν : ℂ} (h : LommelRegular μ ν) {z : ℂ} (hz : z ∈ slitPlane) :
     iteratedDeriv 2 (lommelS μ ν) z+deriv (lommelS μ ν) z/z+(1-ν^2/z^2)*lommelS μ ν z = z^(μ-1) := by
@@ -359,27 +367,32 @@ theorem lommelS_ode {μ ν : ℂ} (h : LommelRegular μ ν) {z : ℂ} (hz : z �
     lommelS μ ν z=C at he ⊢
   linear_combination (norm := (field_simp [slitPlane_ne_zero hz]; ring)) he/z^2
 
-/-- lommelS neg order. -/
+/-- Identity under the stated parameter and domain assumptions: `lommelS μ (-ν) z = lommelS μ ν
+z`. -/
 @[dlmf 11.9.E6]
 theorem lommelS_neg_order {μ ν : ℂ} (h : LommelRegular μ ν) {z : ℂ} (hz : z ∈ slitPlane) :
     lommelS μ (-ν) z = lommelS μ ν z := by
   have h (k : ℕ) : lommelA μ (-ν) k=lommelA μ ν k := by simp [lommelA]
   simp only [lommelS, h]
 
-/-- lommelCapital ode. -/
+/-- Identity under the stated parameter and domain assumptions: `iteratedDeriv 2 (lommelCapital μ
+ν) z+deriv (lommelCapital μ ν) z/z+(1-ν^2/z^2)*lommelCapital μ ν z = z^(μ-1)`. -/
 @[dlmf 11.9.E1]
 theorem lommelCapital_ode (μ ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     iteratedDeriv 2 (lommelCapital μ ν) z+deriv (lommelCapital μ ν) z/z+(1-ν^2/z^2)*lommelCapital μ ν z = z^(μ-1) := by
   sorry
 
-/-- lommelCapital neg order. -/
+/-- Identity under the stated parameter and domain assumptions: `lommelCapital μ (-ν) z =
+lommelCapital μ ν z`. -/
 @[dlmf 11.9.E6]
 theorem lommelCapital_neg_order (μ ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     lommelCapital μ (-ν) z = lommelCapital μ ν z := by
   unfold lommelCapital
   simp only [lommelCapitalRegular_neg_order _ ν hz]
 
-/-- lommel general solution. -/
+/-- Formula under the stated hypotheses: `(AnalyticOnNhd ℂ f slitPlane ∧ ∀ z ∈ slitPlane,
+iteratedDeriv 2 f z+deriv f z/z+(1-ν^2/z^2)*f z=z^(μ-1)) ↔ ∃ A B : ℂ, ∀ z ∈ slitPlane, f
+z=lommelS μ ν z+A*besselJ ν z+B*besselY ν z`. -/
 @[dlmf 11.9.E2]
 theorem lommel_general_solution {μ ν : ℂ} (h : LommelRegular μ ν) (f : ℂ → ℂ) :
     (AnalyticOnNhd ℂ f slitPlane ∧ ∀ z ∈ slitPlane, iteratedDeriv 2 f z+deriv f z/z+(1-ν^2/z^2)*f z=z^(μ-1)) ↔ ∃ A B : ℂ, ∀ z ∈ slitPlane, f z=lommelS μ ν z+A*besselJ ν z+B*besselY ν z := by
@@ -403,7 +416,9 @@ theorem lommel_general_solution {μ ν : ℂ} (h : LommelRegular μ ν) (f : ℂ
   · intro hf
     linear_combination (norm := (field_simp [slitPlane_ne_zero hz]; ring)) hf/z^2
 
-/-- lommelS bessel series 7. -/
+/-- The series with terms `(fun k : ℕ => 2^(μ+1)*(2*k+μ+1)*Gamma
+(k+μ+1)/((k.factorial:ℂ)*(2*k+μ-ν+1)*(2*k+μ+ν+1))*besselJ (2*k+μ+1) z)` converges to `(lommelS
+μ ν z)`. -/
 @[dlmf 11.9.E7]
 theorem lommelS_bessel_series_7 {μ ν : ℂ} (h : ∀ n : ℕ, μ-ν ≠ -(n+1) ∧ μ+ν ≠ -(n+1)) (hm : ∀ n : ℕ, μ ≠ -(n+1)) {z : ℂ} (hz : z ∈ slitPlane) :
     HasSum (fun k : ℕ => 2^(μ+1)*(2*k+μ+1)*Gamma (k+μ+1)/((k.factorial:ℂ)*(2*k+μ-ν+1)*(2*k+μ+ν+1))*besselJ (2*k+μ+1) z) (lommelS μ ν z) := by
@@ -446,7 +461,9 @@ theorem lommelS_bessel_series_7 {μ ν : ℂ} (h : ∀ n : ℕ, μ-ν ≠ -(n+1)
     field_simp
     ring
 
-/-- lommelS bessel series 8. -/
+/-- The series with terms `(fun k : ℕ => 2^((μ+ν-1)/2)*Gamma
+((μ+ν+1)/2)*z^((μ+1-ν)/2)*(z/2)^k/((k.factorial:ℂ)*(2*k+μ-ν+1))*besselJ (k+(μ+ν+1)/2) z)`
+converges to `(lommelS μ ν z)`. -/
 @[dlmf 11.9.E8]
 theorem lommelS_bessel_series_8 {μ ν : ℂ} (h : ∀ n : ℕ, μ-ν ≠ -(n+1) ∧ μ+ν ≠ -(n+1)) (hm : ∀ n : ℕ, μ ≠ -(n+1)) {z : ℂ} (hz : z ∈ slitPlane) :
     HasSum (fun k : ℕ => 2^((μ+ν-1)/2)*Gamma ((μ+ν+1)/2)*z^((μ+1-ν)/2)*(z/2)^k/((k.factorial:ℂ)*(2*k+μ-ν+1))*besselJ (k+(μ+ν+1)/2) z) (lommelS μ ν z) := by
@@ -524,13 +541,16 @@ theorem lommelS_bessel_series_8 {μ ν : ℂ} (h : ∀ n : ℕ, μ-ν ≠ -(n+1)
     field_simp
     ring
 
-/-- lommelCapital asymptotic. -/
+/-- Asymptotic bound with the indicated comparison function: `(fun z : ℂ => lommelCapital μ ν
+z-z^(μ-1)*∑ k ∈ Finset.range N, (-1)^k*lommelA (-μ) ν k*z^(-(2*k:ℤ))) =O[sector (π-δ)] (fun z
+: ℂ => z^(μ-1-2*N))`. -/
 @[dlmf 11.9.E9]
 theorem lommelCapital_asymptotic (μ ν : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ < π) (N : ℕ) :
     (fun z : ℂ => lommelCapital μ ν z-z^(μ-1)*∑ k ∈ Finset.range N, (-1)^k*lommelA (-μ) ν k*z^(-(2*k:ℤ))) =O[sector (π-δ)] (fun z : ℂ => z^(μ-1-2*N)) := by
   sorry
 
-/-- lommelCapital terminates. -/
+/-- Formula under the stated hypotheses: `lommelCapital μ ν z = z^(μ-1)*∑ k ∈ Finset.range (n+1),
+(-1)^k*lommelA (-μ) ν k*z^(-(2*k:ℤ))`. -/
 @[dlmf 11.9.E9]
 theorem lommelCapital_terminates {μ ν : ℂ} (n : ℕ) (h : μ+ν=2*n+1 ∨ μ-ν=2*n+1) {z : ℂ} (hz : z ∈ slitPlane) :
     lommelCapital μ ν z = z^(μ-1)*∑ k ∈ Finset.range (n+1), (-1)^k*lommelA (-μ) ν k*z^(-(2*k:ℤ)) := by
@@ -608,7 +628,6 @@ theorem lommelCapital_analytic_ode_of_regular {μ ν : ℂ} (h : LommelRegular �
   simp only [lommelCapitalRegular, C]
   ring
 
-
 /-- The Bessel correction obeys the same degree recurrence as the small
 Lommel solution, so their sum does as well. -/
 theorem lommelCapitalRegular_add_two {μ ν : ℂ} (h : LommelRegular μ ν)
@@ -641,7 +660,6 @@ theorem lommelCapital_add_two_of_regular {μ ν : ℂ} (h : LommelRegular μ ν)
   exact lommelCapitalRegular_add_two h hz
 
 end DLMF.Struve
-
 
 /-! ## Holomorphic lower-parameter support for exceptional continuation
 

@@ -85,11 +85,15 @@ end Deriv
 
 /-! ## §1.16(iv): the Heaviside function -/
 
+/-- Identity under the stated parameter and domain assumptions: `(fun x => heaviside (x - x₀)) =
+(Ioi x₀).indicator (fun _ => (1 : ℝ))`. -/
 lemma g1f_heaviside_shift_eq_indicator (x₀ : ℝ) :
     (fun x => heaviside (x - x₀)) = (Ioi x₀).indicator (fun _ => (1 : ℝ)) := by
   ext x
   simp [heaviside, Set.indicator, sub_pos]
 
+/-- Identity under the stated parameter and domain assumptions: `LocallyIntegrable (fun x =>
+heaviside (x - x₀)) volume`. -/
 lemma g1f_locallyIntegrable_heaviside_shift (x₀ : ℝ) :
     LocallyIntegrable (fun x => heaviside (x - x₀)) volume := by
   rw [g1f_heaviside_shift_eq_indicator]

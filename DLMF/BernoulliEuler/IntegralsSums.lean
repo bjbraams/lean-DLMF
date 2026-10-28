@@ -55,14 +55,20 @@ namespace DLMF.BernoulliEuler
 
 /-! ### Helper lemmas -/
 
+/-- Identity under the stated parameter and domain assumptions: `bernoulliFun n x = aeval x
+(Polynomial.bernoulli n)`. -/
 lemma b24b_bernoulliFun_eq_aeval (n : ℕ) (x : ℝ) :
     bernoulliFun n x = aeval x (Polynomial.bernoulli n) := by
   simp [bernoulliFun, eval_map_algebraMap]
 
+/-- Identity under the stated parameter and domain assumptions: `eulerFun n x = aeval x
+(Polynomial.euler n)`. -/
 lemma b24b_eulerFun_eq_aeval (n : ℕ) (x : ℝ) :
     eulerFun n x = aeval x (Polynomial.euler n) := by
   simp [eulerFun, eval_map_algebraMap]
 
+/-- Identity under the stated parameter and domain assumptions: `bernoulliFun (n + 1) (x + 1) =
+bernoulliFun (n + 1) x + (n + 1) * x ^ n`. -/
 lemma b24b_bernoulliFun_succ_add_one (n : ℕ) (x : ℝ) :
     bernoulliFun (n + 1) (x + 1) = bernoulliFun (n + 1) x + (n + 1) * x ^ n := by
   have h := congrArg (aeval x) (bernoulli_comp_one_add_X (n + 1))
@@ -71,18 +77,24 @@ lemma b24b_bernoulliFun_succ_add_one (n : ℕ) (x : ℝ) :
   rw [b24b_bernoulliFun_eq_aeval, b24b_bernoulliFun_eq_aeval, add_comm x, h, nsmul_eq_mul]
   push_cast; ring
 
+/-- Identity under the stated parameter and domain assumptions: `∫ t in a..b, bernoulliFun n t =
+(bernoulliFun (n + 1) b - bernoulliFun (n + 1) a) / (n + 1)`. -/
 lemma b24b_integral_bernoulliFun (n : ℕ) (a b : ℝ) :
     ∫ t in a..b, bernoulliFun n t =
       (bernoulliFun (n + 1) b - bernoulliFun (n + 1) a) / (n + 1) := by
   rw [integral_eq_sub_of_hasDerivAt (fun x _ => antideriv_bernoulliFun n x)
     (intervalIntegrable_bernoulliFun n _ _), sub_div]
 
+/-- At `x`, the function `(fun x => eulerFun (n + 1) x / (n + 1))` has derivative `(eulerFun n
+x)`. -/
 lemma b24b_antideriv_eulerFun (n : ℕ) (x : ℝ) :
     HasDerivAt (fun x => eulerFun (n + 1) x / (n + 1)) (eulerFun n x) x := by
   convert (hasDerivAt_eulerFun (n + 1) x).div_const ((n : ℝ) + 1) using 1
   have : (n : ℝ) + 1 ≠ 0 := Nat.cast_add_one_ne_zero n
   push_cast; field_simp
 
+/-- Identity under the stated parameter and domain assumptions: `∫ t in a..b, eulerFun n t =
+(eulerFun (n + 1) b - eulerFun (n + 1) a) / (n + 1)`. -/
 lemma b24b_integral_eulerFun (n : ℕ) (a b : ℝ) :
     ∫ t in a..b, eulerFun n t = (eulerFun (n + 1) b - eulerFun (n + 1) a) / (n + 1) := by
   rw [integral_eq_sub_of_hasDerivAt (fun x _ => b24b_antideriv_eulerFun n x)
@@ -109,11 +121,15 @@ lemma b24b_eulerFun_zero (n : ℕ) :
   field_simp
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `eulerFun (n + 1) 1 = -eulerFun (n
++ 1) 0`. -/
 lemma b24b_eulerFun_one (n : ℕ) : eulerFun (n + 1) 1 = -eulerFun (n + 1) 0 := by
   have h := eulerFun_add_one_add (n + 1) 0
   rw [zero_add, zero_pow (Nat.succ_ne_zero n), mul_zero] at h
   linarith
 
+/-- Identity under the stated parameter and domain assumptions: `eulerFun n (1 / 2) = eulerNumber
+n / 2 ^ n`. -/
 lemma b24b_eulerFun_half (n : ℕ) : eulerFun n (1 / 2) = eulerNumber n / 2 ^ n := by
   have : (1 / 2 : ℝ) = algebraMap ℚ ℝ (1 / 2) := by simp
   rw [eulerFun, this, eval_map, eval₂_at_apply]

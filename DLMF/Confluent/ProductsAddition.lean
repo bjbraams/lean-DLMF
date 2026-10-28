@@ -190,6 +190,9 @@ theorem cpow_first_parameter_prefactor_recip {x y : ℂ} (hx : 0 < x.re)
     show x / (x + y) = ((x + y) / x)⁻¹ from (inv_div _ _).symm,
     inv_cpow _ _ harg, ← cpow_neg, neg_sub]
 
+/-- Identity under the stated parameter and domain assumptions: `kummerM a b z * kummerM (-a) (-b)
+(-z) + a * (a - b) * z ^ 2 / (b ^ 2 * (1 - b ^ 2)) * kummerM (1 + a) (2 + b) z * kummerM (1 -
+a) (2 - b) (-z) = 1`. -/
 @[dlmf 13.12.E1]
 theorem kummerM_product {a b z : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (hb1 : ∀ k : ℕ, 1 - b ≠ -k)
     (hb0 : b ≠ 0) (hb2 : b ≠ 1) (hb3 : b ≠ -1) :
@@ -296,6 +299,8 @@ theorem kummerM_product {a b z : ℂ} (hb : ∀ k : ℕ, b ≠ -k) (hb1 : ∀ k 
   simpa [F, U, V, P, Q, c, show (1 : ℂ) + a = a + 1 by ring,
     show (2 : ℂ) + b = b + 2 by ring, div_mul_eq_mul_div, mul_assoc] using he
 
+/-- Identity under the stated parameter and domain assumptions: `kummerM a b (x + y) = ∑' n : ℕ,
+poch a n * y ^ n / (poch b n * n.factorial) * kummerM (a + n) (b + n) x`. -/
 @[dlmf 13.13.E1]
 theorem kummerM_addition {a b x y : ℂ} (hb : ∀ k : ℕ, b ≠ -k) :
     kummerM a b (x + y) =
@@ -333,6 +338,8 @@ theorem kummerM_addition_shift_b {a b x y : ℂ} (hx : x ∈ slitPlane)
   field_simp
   rw [neg_pow y]; ring
 
+/-- Identity under the stated parameter and domain assumptions: `kummerM a b (x + y) = (x / (x +
+y)) ^ a * ∑' n : ℕ, poch a n * y ^ n / (n.factorial * (x + y) ^ n) * kummerM (a + n) b x`. -/
 @[dlmf 13.13.E3]
 theorem kummerM_addition_shift_a {a b x y : ℂ} (hx : x ∈ slitPlane)
     (hxy : x + y ∈ slitPlane) (hy : -1 / 2 < (y / x).re) (hb : ∀ k : ℕ, b ≠ -k) :
@@ -345,6 +352,8 @@ theorem kummerM_addition_shift_a {a b x y : ℂ} (hx : x ∈ slitPlane)
   simpa only [Nat.cast_zero, add_zero] using
     (of_mobius_taylor (F := fun n => kummerM (a + n) b) hx0 hxy0 (by simpa using ht))
 
+/-- Identity under the stated parameter and domain assumptions: `kummerM a b (x + y) = exp y * ∑'
+n : ℕ, poch (b - a) n * (-y) ^ n / (poch b n * n.factorial) * kummerM a (b + n) x`. -/
 @[dlmf 13.13.E4]
 theorem kummerM_addition_exp {a b x y : ℂ} (hb : ∀ k : ℕ, b ≠ -k) :
     kummerM a b (x + y) =
@@ -367,6 +376,9 @@ theorem kummerM_addition_exp {a b x y : ℂ} (hb : ∀ k : ℕ, b ≠ -k) :
   rw [neg_pow y]
   field_simp
 
+/-- Identity under the stated parameter and domain assumptions: `kummerM a b (x + y) = exp y * (x
+/ (x + y)) ^ (b - a) * ∑' n : ℕ, poch (b - a) n * y ^ n / (n.factorial * (x + y) ^ n) *
+kummerM (a - n) b x`. -/
 @[dlmf 13.13.E5]
 theorem kummerM_addition_exp_shift_a {a b x y : ℂ} (hx : x ∈ slitPlane)
     (hxy : x + y ∈ slitPlane) (hy : 1 / 2 < ((y + x) / x).re) (hb : ∀ k : ℕ, b ≠ -k) :
@@ -465,6 +477,9 @@ theorem kummerU_addition_shift_b {a b x y : ℂ} (hx : 0 < x.re)
   rw [div_pow, show (1 : ℂ) + a - b = a - b + 1 by ring]
   linear_combination (poch (a - b + 1) n * (-y) ^ n / n.factorial * kummerU a (b - n) x) * hp
 
+/-- Identity under the stated parameter and domain assumptions: `kummerU a b (x + y) = (x / (x +
+y)) ^ a * ∑' n : ℕ, poch a n * poch (1 + a - b) n * y ^ n / (n.factorial * (x + y) ^ n) *
+kummerU (a + n) b x`. -/
 @[dlmf 13.13.E9]
 theorem kummerU_addition_shift_a {a b x y : ℂ} (hx : 0 < x.re)
     (hxy : x + y ∈ slitPlane) (hy : -1 / 2 < (y / x).re) :
@@ -500,6 +515,9 @@ theorem kummerU_addition_exp (a b : ℂ) {x y : ℂ} (hx : 0 < x.re) (hxy : x + 
   rw [hf, iteratedDeriv_exp_neg_kummerU a b n hx', add_sub_cancel_left, exp_add, exp_neg, neg_pow y]
   field_simp
 
+/-- Identity under the stated parameter and domain assumptions: `kummerU a b (x + y) = exp y * (x
+/ (x + y)) ^ (b - a) * ∑' n : ℕ, (-y) ^ n / (n.factorial * (x + y) ^ n) * kummerU (a - n) b
+x`. -/
 @[dlmf 13.13.E11]
 theorem kummerU_addition_exp_shift_a {a b x y : ℂ} (hx : 0 < x.re)
     (hxy : x + y ∈ slitPlane) (hy : -1 / 2 < (y / x).re) :
@@ -669,6 +687,9 @@ theorem whittakerM_addition_shift_mu {κ μ x y : ℂ} (hx : 0 < x.re)
     show -(x + y) / 2 = -y / 2 + -x / 2 by ring, exp_add]
   field_simp
 
+/-- Identity under the stated parameter and domain assumptions: `whittakerM κ μ (x + y) = exp (-y
+/ 2) * ((x + y) / x) ^ κ * ∑' n : ℕ, poch (1 / 2 + μ - κ) n * y ^ n / (n.factorial * (x + y) ^
+n) * whittakerM (κ - n) μ x`. -/
 @[dlmf 13.26.E3]
 theorem whittakerM_addition_shift_kappa {κ μ x y : ℂ} (hx : 0 < x.re)
     (hxy : x + y ∈ slitPlane) (hy : -1 / 2 < (y / x).re)
@@ -743,6 +764,9 @@ theorem whittakerM_addition_exp_shift_mu {κ μ x y : ℂ} (hx : 0 < x.re)
     show -(x + y) / 2 = -(y / 2) + -x / 2 by ring, exp_add, exp_neg (y / 2), hey]
   field_simp
 
+/-- Identity under the stated parameter and domain assumptions: `whittakerM κ μ (x + y) = exp (y /
+2) * (x / (x + y)) ^ κ * ∑' n : ℕ, poch (1 / 2 + μ + κ) n * y ^ n / (n.factorial * (x + y) ^
+n) * whittakerM (κ + n) μ x`. -/
 @[dlmf 13.26.E6]
 theorem whittakerM_addition_exp_shift_kappa {κ μ x y : ℂ} (hx : 0 < x.re)
     (hxy : x + y ∈ slitPlane) (hy : 1 / 2 < ((y + x) / x).re)
@@ -822,6 +846,9 @@ theorem whittakerW_addition_shift_mu {κ μ x y : ℂ} (hx : 0 < x.re)
     show -(x + y) / 2 = -y / 2 + -x / 2 by ring, exp_add]
   field_simp
 
+/-- Identity under the stated parameter and domain assumptions: `whittakerW κ μ (x + y) = exp (-y
+/ 2) * ((x + y) / x) ^ κ * ∑' n : ℕ, poch (1 / 2 + μ - κ) n * poch (1 / 2 - μ - κ) n /
+n.factorial * (y / (x + y)) ^ n * whittakerW (κ - n) μ x`. -/
 @[dlmf 13.26.E9]
 theorem whittakerW_addition_shift_kappa {κ μ x y : ℂ} (hx : 0 < x.re)
     (hxy : x + y ∈ slitPlane) (hy : -1 / 2 < (y / x).re) :
@@ -895,6 +922,9 @@ theorem whittakerW_addition_exp_shift_mu {κ μ x y : ℂ} (hx : 0 < x.re)
     show -(x + y) / 2 = -(y / 2) + -x / 2 by ring, exp_add, exp_neg (y / 2), hey]
   field_simp
 
+/-- Identity under the stated parameter and domain assumptions: `whittakerW κ μ (x + y) = exp (y /
+2) * (x / (x + y)) ^ κ * ∑' n : ℕ, (1 / n.factorial) * (-y / (x + y)) ^ n * whittakerW (κ + n)
+μ x`. -/
 @[dlmf 13.26.E12]
 theorem whittakerW_addition_exp_shift_kappa {κ μ x y : ℂ} (hx : 0 < x.re)
     (hxy : x + y ∈ slitPlane) (hy : -1 / 2 < (y / x).re) :

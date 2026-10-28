@@ -236,15 +236,25 @@ by its normal being outwards". -/
 @[dlmf 1.6.v]
 structure HasPiecewiseSmoothBoundary (V : Set (Fin 3 → ℝ)) (ι : Type*) [Fintype ι]
     (Φ : ι → ℝ × ℝ → Fin 3 → ℝ) (D : ι → Set (ℝ × ℝ)) : Prop where
+  /-- The region enclosed by the boundary patches is compact. -/
   compact : IsCompact V
+  /-- Each boundary patch has an open parameter domain. -/
   isOpen : ∀ i, IsOpen (D i)
+  /-- Each boundary patch has a bounded parameter domain. -/
   bounded : ∀ i, Bornology.IsBounded (D i)
+  /-- The frontier of each patch parameter domain has zero planar volume. -/
   null_frontier : ∀ i, volume (frontier (D i)) = 0
+  /-- Each boundary parametrization is continuously differentiable. -/
   contDiff : ∀ i, ContDiff ℝ 1 (Φ i)
+  /-- Each boundary parametrization is injective on its parameter domain. -/
   injOn : ∀ i, InjOn (Φ i) (D i)
+  /-- The boundary arcs satisfy the stated smoothness condition. -/
   smooth : ∀ i, ∀ p ∈ D i, IsSmoothSurfaceAt (Φ i) p
+  /-- Distinct boundary arcs have disjoint interiors. -/
   disjoint : Pairwise fun i j => Disjoint (Φ i '' D i) (Φ j '' D j)
+  /-- The boundary arcs cover the frontier. -/
   cover : frontier V = ⋃ i, Φ i '' closure (D i)
+  /-- The chosen normal points outward along the boundary. -/
   outward : ∀ i, ∀ p ∈ D i, ∀ᶠ t in 𝓝[>] (0 : ℝ),
     Φ i p + t • (tangentU (Φ i) p ⨯₃ tangentV (Φ i) p) ∉ V ∧
       Φ i p - t • (tangentU (Φ i) p ⨯₃ tangentV (Φ i) p) ∈ interior V

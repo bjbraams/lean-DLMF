@@ -272,6 +272,8 @@ lemma p19sR1_mem_slitPlane_sin {φ θ : ℝ} (h1 : φ ≤ π / 2) {w : ℂ}
   field_simp
   ring
 
+/-- The function `(fun θ : ℝ => (1 - w * (Real.sin θ : ℂ) ^ 2) ^ s)` is continuous on `(uIcc 0
+φ)`. -/
 lemma p19sR1_continuousOn_A {φ : ℝ} (h0 : 0 ≤ φ) (h1 : φ ≤ π / 2) {w : ℂ}
     (hk : 1 - w * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane) (s : ℂ) :
     ContinuousOn (fun θ : ℝ => (1 - w * (Real.sin θ : ℂ) ^ 2) ^ s) (uIcc 0 φ) := by
@@ -326,6 +328,7 @@ lemma p19sR1_incEllIntPik_eq_integral {φ : ℝ} (h0 : 0 ≤ φ) (h1 : φ ≤ π
     simp only [hg] at this
     simpa [← Complex.ofReal_sin, ← Complex.ofReal_mul] using this
 
+/-- The function `(fun θ : ℝ => (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹)` is continuous on `(uIcc 0 φ)`. -/
 lemma p19sR1_continuousOn_inv_A {φ : ℝ} (h0 : 0 ≤ φ) (h1 : φ ≤ π / 2) {α2 : ℂ}
     (hα : 1 - α2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane) :
     ContinuousOn (fun θ : ℝ => (1 - α2 * (Real.sin θ : ℂ) ^ 2)⁻¹) (uIcc 0 φ) := by
@@ -362,6 +365,7 @@ lemma p19sR1_one_le_csc_sq {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π / 2) :
   rw [le_div_iff₀ (by positivity), one_mul]
   nlinarith [Real.sin_le_one φ]
 
+/-- Estimate under the stated parameter and domain assumptions: `1 < 1 / Real.sin φ ^ 2`. -/
 lemma p19sR1_one_lt_csc_sq {φ : ℝ} (h0 : 0 < φ) (h1 : φ < π / 2) :
     1 < 1 / Real.sin φ ^ 2 := by
   have hs : 0 < Real.sin φ := Real.sin_pos_of_pos_of_lt_pi h0 (by linarith [Real.pi_pos])
@@ -371,10 +375,13 @@ lemma p19sR1_one_lt_csc_sq {φ : ℝ} (h0 : 0 < φ) (h1 : φ < π / 2) :
   rw [lt_div_iff₀ (by positivity), one_mul]
   nlinarith
 
+/-- Formula under the stated hypotheses: `((1 / Real.sin φ ^ 2 : ℝ) : ℂ) ∈ slitPlane`. -/
 theorem p19sR1_csc_sq_mem {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π / 2) :
     ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) ∈ slitPlane :=
   ofReal_mem_slitPlane.mpr (lt_of_lt_of_le one_pos (p19sR1_one_le_csc_sq h0 h1))
 
+/-- The stated relation follows from the given hypotheses: `symEllIntArg (((1 / Real.sin φ ^ 2 :
+ℝ) : ℂ) - 1)`. -/
 theorem p19sR1_csc_sq_sub_one_arg {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π / 2) :
     symEllIntArg (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1) := by
   rcases eq_or_lt_of_le (p19sR1_one_le_csc_sq h0 h1) with h | h
@@ -384,6 +391,7 @@ theorem p19sR1_csc_sq_sub_one_arg {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π / 2) 
       push_cast; ring]
     exact ofReal_mem_slitPlane.mpr (by linarith)
 
+/-- Formula under the stated hypotheses: `((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1 ∈ slitPlane`. -/
 theorem p19sR1_csc_sq_sub_one_mem {φ : ℝ} (h0 : 0 < φ) (h1 : φ < π / 2) :
     ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1 ∈ slitPlane := by
   rw [show ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1 = ((1 / Real.sin φ ^ 2 - 1 : ℝ) : ℂ) by
@@ -407,6 +415,8 @@ theorem p19sR1_csc_sq_sub_mem {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π / 2) {w :
   · exact mem_slitPlane_iff.mpr (Or.inl (by simpa using mul_pos hr h))
   · exact mem_slitPlane_iff.mpr (Or.inr (by simpa using And.intro hr.ne' h))
 
+/-- Identity under the stated parameter and domain assumptions: `((1 / Real.sin (π / 2) ^ 2 : ℝ) :
+ℂ) = 1`. -/
 theorem p19sR1_csc_sq_pi_div_two : ((1 / Real.sin (π / 2) ^ 2 : ℝ) : ℂ) = 1 := by
   simp [Real.sin_pi_div_two]
 
@@ -576,12 +586,16 @@ theorem p19sR1_compEllIntPik_eq_symEllIntR {k α2 : ℂ} (hk : 1 - k ^ 2 ∈ sli
 
 /-! ### Homogeneity for all arguments (positive real scale) -/
 
+/-- Identity under the stated parameter and domain assumptions: `∫ t in Ioi (0 : ℝ), g t = (l : ℂ)
+* ∫ s in Ioi (0 : ℝ), g (l * s)`. -/
 lemma p19sR1_integral_Ioi_scale (g : ℝ → ℂ) {l : ℝ} (hl : 0 < l) :
     ∫ t in Ioi (0 : ℝ), g t = (l : ℂ) * ∫ s in Ioi (0 : ℝ), g (l * s) := by
   have h := integral_comp_mul_left_Ioi' g 0 hl
   rw [mul_zero] at h
   rw [← h, Complex.real_smul]
 
+/-- Identity under the stated parameter and domain assumptions: `symEllIntS ((l : ℂ) * x) ((l : ℂ)
+* y) ((l : ℂ) * z) (l * s) = ((l : ℂ) ^ (1 / 2 : ℂ)) ^ 3 * symEllIntS x y z s`. -/
 lemma p19sR1_symEllIntS_scale {l : ℝ} (hl : 0 < l) (x y z : ℂ) (s : ℝ) :
     symEllIntS ((l : ℂ) * x) ((l : ℂ) * y) ((l : ℂ) * z) (l * s) =
       ((l : ℂ) ^ (1 / 2 : ℂ)) ^ 3 * symEllIntS x y z s := by
@@ -591,9 +605,11 @@ lemma p19sR1_symEllIntS_scale {l : ℝ} (hl : 0 < l) (x y z : ℂ) (s : ℝ) :
   rw [e, e, e, p19sR1_ofReal_mul_cpow hl, p19sR1_ofReal_mul_cpow hl, p19sR1_ofReal_mul_cpow hl]
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `((l : ℂ) ^ (1 / 2 : ℂ)) ^ 2 = l`. -/
 theorem p19sR1_half_pow_sq {l : ℝ} (_hl : 0 < l) : ((l : ℂ) ^ (1 / 2 : ℂ)) ^ 2 = l := by
   rw [sq, ei19c_cpow_half_sq]
 
+/-- Nonvanishing under the stated hypotheses: `(l : ℂ) ^ (1 / 2 : ℂ) ≠ 0`. -/
 theorem p19sR1_half_pow_ne {l : ℝ} (hl : 0 < l) : (l : ℂ) ^ (1 / 2 : ℂ) ≠ 0 := by
   rw [Ne, cpow_eq_zero_iff]; push Not; intro h; exact absurd h (ofReal_ne_zero.mpr hl.ne')
 
@@ -678,6 +694,8 @@ theorem p19sR1_symEllIntRG_scale {l : ℝ} (hl : 0 < l) (x y z : ℂ) :
 
 /-! ### §19.25(iii): the parametrization `sin² φ = (z - x)/z`, `k² = (z - y)/(z - x)` -/
 
+/-- Estimate under the stated parameter and domain assumptions: `0 < Real.arccos √(x / z) ∧
+Real.arccos √(x / z) ≤ π / 2 ∧ 1 / Real.sin (Real.arccos √(x / z)) ^ 2 = z / (z - x)`. -/
 lemma p19sR1_arccos_setup {x z : ℝ} (hx : 0 ≤ x) (hxz : x < z) :
     0 < Real.arccos √(x / z) ∧ Real.arccos √(x / z) ≤ π / 2 ∧
       1 / Real.sin (Real.arccos √(x / z)) ^ 2 = z / (z - x) := by
@@ -691,6 +709,8 @@ lemma p19sR1_arccos_setup {x z : ℝ} (hx : 0 ≤ x) (hxz : x < z) :
     have : z - x ≠ 0 := by linarith
     field_simp
 
+/-- Identity under the stated parameter and domain assumptions: `(w : ℂ) = ((z - x : ℝ) : ℂ) * ((c
+: ℂ) - (((z - w) / (z - x) : ℝ) : ℂ))`. -/
 theorem p19sR1_real_scale_eq {x z w : ℝ} (hxz : x < z) (c : ℝ) (hc : c = z / (z - x)) :
     (w : ℂ) = ((z - x : ℝ) : ℂ) * ((c : ℂ) - (((z - w) / (z - x) : ℝ) : ℂ)) := by
   have : (z - x : ℝ) ≠ 0 := by linarith
@@ -700,9 +720,12 @@ theorem p19sR1_real_scale_eq {x z w : ℝ} (hxz : x < z) (c : ℝ) (hc : c = z /
   field_simp
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `((√r : ℝ) : ℂ) ^ 2 = (r : ℂ)`. -/
 theorem p19sR1_sqrt_sq_cast {r : ℝ} (hr : 0 ≤ r) : ((√r : ℝ) : ℂ) ^ 2 = (r : ℂ) := by
   rw [← ofReal_pow, Real.sq_sqrt hr]
 
+/-- Identity under the stated parameter and domain assumptions: `((√r : ℝ) : ℂ) = (r : ℂ) ^ (1 / 2
+: ℂ)`. -/
 theorem p19sR1_sqrt_cast_eq_cpow {r : ℝ} (hr : 0 ≤ r) : ((√r : ℝ) : ℂ) = (r : ℂ) ^ (1 / 2 : ℂ) := by
   rw [Real.sqrt_eq_rpow, ofReal_cpow hr]; push_cast; ring_nf
 
@@ -740,12 +763,16 @@ theorem p19sR1_iii_setup {x y z : ℝ} (hx : 0 ≤ x) (hyz : y ≤ z) (hxz : x <
     field_simp
     ring
 
+/-- Identity under the stated parameter and domain assumptions: `(((l ^ (3 / 2 : ℝ) : ℝ)) : ℂ) =
+((l : ℂ) ^ (1 / 2 : ℂ)) ^ 3`. -/
 theorem p19sR1_rpow_three_halves {l : ℝ} (hl : 0 < l) :
     (((l ^ (3 / 2 : ℝ) : ℝ)) : ℂ) = ((l : ℂ) ^ (1 / 2 : ℂ)) ^ 3 := by
   rw [← p19sR1_sqrt_cast_eq_cpow hl.le, ← ofReal_pow, Real.sqrt_eq_rpow, ← Real.rpow_natCast,
     ← Real.rpow_mul hl.le]
   norm_num
 
+/-- Identity under the stated parameter and domain assumptions: `(((l ^ (-1 / 2 : ℝ) : ℝ)) : ℂ) =
+((l : ℂ) ^ (1 / 2 : ℂ))⁻¹`. -/
 theorem p19sR1_rpow_neg_half {l : ℝ} (hl : 0 < l) :
     (((l ^ (-1 / 2 : ℝ) : ℝ)) : ℂ) = ((l : ℂ) ^ (1 / 2 : ℂ))⁻¹ := by
   rw [← p19sR1_sqrt_cast_eq_cpow hl.le, show (-1 / 2 : ℝ) = -(1 / 2) by norm_num,
@@ -771,6 +798,8 @@ theorem p19sR1_cot_sqrt_eq {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π / 2) {κ : �
 
 /-! ### §19.25(ii): Bulirsch's `el1`, `el2` -/
 
+/-- Estimate under the stated parameter and domain assumptions: `0 < Real.arctan x ∧ Real.arctan x
+< π / 2 ∧ 1 / Real.sin (Real.arctan x) ^ 2 = 1 / x ^ 2 + 1`. -/
 lemma p19sR1_arctan_setup {x : ℝ} (hx : 0 < x) :
     0 < Real.arctan x ∧ Real.arctan x < π / 2 ∧
       1 / Real.sin (Real.arctan x) ^ 2 = 1 / x ^ 2 + 1 := by
@@ -786,6 +815,8 @@ lemma p19sR1_cos_sq_add (θ : ℝ) (kc : ℂ) :
     Complex.cos_sq']
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `bulirschEl1 x kc = symEllIntRF
+((1 / x ^ 2 : ℝ) : ℂ) (((1 / x ^ 2 : ℝ) : ℂ) + kc ^ 2) (((1 / x ^ 2 : ℝ) : ℂ) + 1)`. -/
 theorem p19sR1_bulirschEl1_eq {x : ℝ} (hx : 0 < x) (kc : ℂ) :
     bulirschEl1 x kc = symEllIntRF ((1 / x ^ 2 : ℝ) : ℂ) (((1 / x ^ 2 : ℝ) : ℂ) + kc ^ 2)
       (((1 / x ^ 2 : ℝ) : ℂ) + 1) := by
@@ -797,6 +828,8 @@ theorem p19sR1_bulirschEl1_eq {x : ℝ} (hx : 0 < x) (kc : ℂ) :
   push_cast
   ring_nf
 
+/-- Formula under the stated hypotheses: `1 - ((1 - kc ^ 2) ^ (1 / 2 : ℂ)) ^ 2 * (Real.sin φ : ℂ)
+^ 2 ∈ slitPlane`. -/
 lemma p19sR1_bulirsch_mem {φ : ℝ} {kc : ℂ} (hkc : kc ^ 2 ∈ slitPlane) :
     1 - ((1 - kc ^ 2) ^ (1 / 2 : ℂ)) ^ 2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane := by
   rw [sq ((1 - kc ^ 2) ^ (1 / 2 : ℂ)), ei19c_cpow_half_sq]
@@ -805,6 +838,11 @@ lemma p19sR1_bulirsch_mem {φ : ℝ} {kc : ℂ} (hkc : kc ^ 2 ∈ slitPlane) :
   convert h using 1
   rw [Complex.real_smul]; push_cast; ring
 
+/-- Identity under the stated parameter and domain assumptions: `((a : ℂ) + (b : ℂ) * Complex.tan
+(θ : ℂ) ^ 2) * ((1 + Complex.tan (θ : ℂ) ^ 2) * (1 + kc ^ 2 * Complex.tan (θ : ℂ) ^ 2)) ^ (-(1
+/ 2 : ℂ)) = (a : ℂ) * (1 - ((1 - kc ^ 2) ^ (1 / 2 : ℂ)) ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2
+: ℂ)) + ((b - a : ℝ) : ℂ) * ((Real.sin θ : ℂ) ^ 2 * (1 - ((1 - kc ^ 2) ^ (1 / 2 : ℂ)) ^ 2 *
+(Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)))`. -/
 lemma p19sR1_bulirschEl2_pointwise {θ : ℝ} (hc : 0 < Real.cos θ) (kc : ℂ) (a b : ℝ) :
     ((a : ℂ) + (b : ℂ) * Complex.tan (θ : ℂ) ^ 2) *
         ((1 + Complex.tan (θ : ℂ) ^ 2) * (1 + kc ^ 2 * Complex.tan (θ : ℂ) ^ 2)) ^ (-(1 / 2 : ℂ)) =
@@ -834,12 +872,18 @@ lemma p19sR1_bulirschEl2_pointwise {θ : ℝ} (hc : 0 < Real.cos θ) (kc : ℂ) 
   field_simp
   linear_combination (a : ℂ) * V * hsc
 
+/-- Identity under the stated parameter and domain assumptions: `bulirschEl1 x kc = ∫ θ in (0 :
+ℝ)..Real.arctan x, (1 - ((1 - kc ^ 2) ^ (1 / 2 : ℂ)) ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 :
+ℂ))`. -/
 lemma p19sR1_bulirschEl1_eq_integral {x : ℝ} (kc : ℂ) :
     bulirschEl1 x kc = ∫ θ in (0 : ℝ)..Real.arctan x,
       (1 - ((1 - kc ^ 2) ^ (1 / 2 : ℂ)) ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(1 / 2 : ℂ)) := by
   rw [bulirschEl1, ← ofReal_arctan, ei19a_segmentIntegral_ofReal]
   simp_rw [p19sR1_cos_sq_add]
 
+/-- Identity under the stated parameter and domain assumptions: `bulirschEl2 x kc a b = a *
+bulirschEl1 x kc + (1 / 3) * ((b - a : ℝ) : ℂ) * symEllIntRD ((1 / x ^ 2 : ℝ) : ℂ) (((1 / x ^
+2 : ℝ) : ℂ) + kc ^ 2) (((1 / x ^ 2 : ℝ) : ℂ) + 1)`. -/
 theorem p19sR1_bulirschEl2_eq {x : ℝ} (hx : 0 < x) {kc : ℂ} (hkc : kc ^ 2 ∈ slitPlane) (a b : ℝ) :
     bulirschEl2 x kc a b = a * bulirschEl1 x kc + (1 / 3) * ((b - a : ℝ) : ℂ) *
       symEllIntRD ((1 / x ^ 2 : ℝ) : ℂ) (((1 / x ^ 2 : ℝ) : ℂ) + kc ^ 2)

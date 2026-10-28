@@ -64,6 +64,8 @@ theorem pow_mul_factorial_le_poch {c : ℝ} (hc : 1 ≤ c) {m k : ℕ} (hk : m �
             positivity)
       _ = _ := by ring
 
+/-- Formula under the stated hypotheses: `Asymptotics.IsBigO atTop (fun c : ℝ => ₂F₁ a b (c : ℂ) z
+- ∑ k ∈ Finset.range m, gaussHGCoeff a b c k * z ^ k) (fun c : ℝ => (c : ℂ)⁻¹ ^ m)`. -/
 @[dlmf 15.12.E2]
 theorem large_denominator_expansion (a b : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (m : ℕ) :
     Asymptotics.IsBigO atTop
@@ -170,6 +172,9 @@ theorem analyticAt_largeDenominatorGenerating (a b c z : ℂ) :
     (((analyticAt_const.sub analyticAt_const).add
       (analyticAt_const.mul (analyticAt_id.neg.cexp))).cpow analyticAt_const h2)
 
+/-- Estimate under the stated parameter and domain assumptions: `∃ r : ℝ, 0 < r ∧ ∀ t : ℂ, ‖t‖ < r
+→ HasSum (fun n : ℕ => largeDenominatorCoeff a b c z n * t ^ n) (largeDenominatorGenerating a
+b c z t)`. -/
 @[dlmf 15.12.E4]
 theorem large_denominator_generating_hasSum (a b c z : ℂ) :
     ∃ r : ℝ, 0 < r ∧ ∀ t : ℂ, ‖t‖ < r →
@@ -732,6 +737,9 @@ theorem hcub_largeDenMix_eq (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (N : ℕ)
 
 end ShiftExpansion
 
+/-- Formula under the stated hypotheses: `Asymptotics.IsBigO atTop (fun l : ℝ => Gamma (c - b + l)
+/ Gamma (c + l) * (l : ℂ) ^ b * ₂F₁ a b (c + l) z - ∑ k ∈ Finset.range m,
+largeDenominatorCoeff a b c z k * poch b k / (l : ℂ) ^ k) (fun l : ℝ => (l : ℂ)⁻¹ ^ m)`. -/
 @[dlmf 15.12.E3]
 theorem large_denominator_shift_expansion (a b c : ℂ) {z : ℂ} (hz : ‖z‖ < 1) (m : ℕ) :
     Asymptotics.IsBigO atTop
@@ -745,6 +753,7 @@ theorem large_denominator_shift_expansion (a b c : ℂ) {z : ℂ} (hz : ‖z‖ 
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [inv_pow]; ring
 
+/-- The stated relation follows from the given hypotheses: `let ζ : ℂ`. -/
 @[dlmf 15.12.E5]
 theorem large_opposite_parameters_bessel (a b c : ℝ) {x : ℝ} (hx : 1 < x) (hx3 : x < 3) :
     let ζ : ℂ := Real.arcosh x

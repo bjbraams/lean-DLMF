@@ -29,7 +29,8 @@ open DLMF.Statistical
 def expPartialSum (n : ℕ) (z : ℂ) : ℂ :=
   ∑ k ∈ Finset.range (n+1), z^k/(k.factorial : ℂ)
 
-/-- lowerIncGamma half square. -/
+/-- Identity under the stated parameter and domain assumptions: `lowerIncGamma (1/2)
+(z^2)=2*primitive (fun t => exp (-t^2)) z ∧ lowerIncGamma (1/2) (z^2)=Real.sqrt π*erf z`. -/
 @[dlmf 8.4.E1]
 theorem lowerIncGamma_half_square {z : ℂ} (hz : 0 < z.re) :
     lowerIncGamma (1/2) (z^2)=2*primitive (fun t => exp (-t^2)) z ∧ lowerIncGamma (1/2) (z^2)=Real.sqrt π*erf z := by
@@ -44,13 +45,14 @@ theorem lowerIncGamma_half_square {z : ℂ} (hz : 0 < z.re) :
   rw [he,erf_complex_segment_integral]
   field_simp
 
-/-- scIncGamma zero. -/
+/-- Identity under the stated parameter and domain assumptions: `scIncGamma a 0=1/Gamma (a+1)`. -/
 @[dlmf 8.4.E2]
 theorem scIncGamma_zero (a : ℂ) :
     scIncGamma a 0=1/Gamma (a+1) := by
   simp [scIncGamma, Complex.regularizedHGFun_zero, regularizedHGFunCoeff]
 
-/-- scIncGamma half negative square. -/
+/-- Identity under the stated parameter and domain assumptions: `scIncGamma (1/2) (-z^2)=2*exp
+(z^2)/(z*Real.sqrt π)*dawsonF z`. -/
 @[dlmf 8.4.E3]
 theorem scIncGamma_half_negative_square {z : ℂ} (hz : z ≠ 0) :
     scIncGamma (1/2) (-z^2)=2*exp (z^2)/(z*Real.sqrt π)*dawsonF z := by
@@ -60,13 +62,15 @@ theorem scIncGamma_half_negative_square {z : ℂ} (hz : z ≠ 0) :
   rw [DLMF.Bessel.Gamma_three_halves,Gamma_one_half_eq_sqrt]
   field_simp [hz]
 
-/-- upperIncGamma zero E1. -/
+/-- Identity under the stated parameter and domain assumptions: `upperIncGamma 0 z=genExpIntE 1
+z`. -/
 @[dlmf 8.4.E4]
 theorem upperIncGamma_zero_E1 {z : ℂ} (hz : z ≠ 0) :
     upperIncGamma 0 z=genExpIntE 1 z := by
   simp [genExpIntE]
 
-/-- upperIncGamma half square. -/
+/-- Identity under the stated parameter and domain assumptions: `upperIncGamma (1/2)
+(z^2)=Real.sqrt π*erfc z`. -/
 @[dlmf 8.4.E6]
 theorem upperIncGamma_half_square {z : ℂ} (hz : 0 < z.re) :
     upperIncGamma (1/2) (z^2)=Real.sqrt π*erfc z := by
@@ -75,7 +79,8 @@ theorem upperIncGamma_half_square {z : ℂ} (hz : 0 < z.re) :
   have he : exp (-z^2)*exp (z^2)=1 := by rw [← Complex.exp_add]; simp
   linear_combination (Real.sqrt π:ℂ)*erfc z*he
 
-/-- lowerIncGamma nat succ expPartialSum. -/
+/-- Identity under the stated parameter and domain assumptions: `lowerIncGamma (n+1)
+z=(n.factorial : ℂ)*(1-exp (-z)*expPartialSum n z)`. -/
 @[dlmf 8.4.E7]
 theorem lowerIncGamma_nat_succ_expPartialSum (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
     lowerIncGamma (n+1) z=(n.factorial : ℂ)*(1-exp (-z)*expPartialSum n z) := by
@@ -85,7 +90,8 @@ theorem lowerIncGamma_nat_succ_expPartialSum (n : ℕ) {z : ℂ} (hz : z ≠ 0) 
   apply (div_eq_iff hn).mp at h
   simpa [expPartialSum, mul_comm] using h
 
-/-- upperIncGamma nat succ expPartialSum. -/
+/-- Identity under the stated parameter and domain assumptions: `upperIncGamma (n+1)
+z=(n.factorial : ℂ)*exp (-z)*expPartialSum n z`. -/
 @[dlmf 8.4.E8]
 theorem upperIncGamma_nat_succ_expPartialSum (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
     upperIncGamma (n+1) z=(n.factorial : ℂ)*exp (-z)*expPartialSum n z := by
@@ -95,28 +101,32 @@ theorem upperIncGamma_nat_succ_expPartialSum (n : ℕ) {z : ℂ} (hz : z ≠ 0) 
   apply (div_eq_iff hn).mp at h
   simpa [expPartialSum, mul_assoc, mul_comm, mul_left_comm] using h
 
-/-- normIncGammaPContinued nat succ expPartialSum. -/
+/-- Identity under the stated parameter and domain assumptions: `normIncGammaPContinued (n+1)
+z=1-exp (-z)*expPartialSum n z`. -/
 @[dlmf 8.4.E9]
 theorem normIncGammaPContinued_nat_succ_expPartialSum (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
     normIncGammaPContinued (n+1) z=1-exp (-z)*expPartialSum n z := by
   rw [normIncGammaPContinued_eq (natCast_add_one_ne_neg_nat n), normIncGammaP_nat_succ n hz]
   rfl
 
-/-- normIncGammaQContinued nat succ expPartialSum. -/
+/-- Identity under the stated parameter and domain assumptions: `normIncGammaQContinued (n+1)
+z=exp (-z)*expPartialSum n z`. -/
 @[dlmf 8.4.E10]
 theorem normIncGammaQContinued_nat_succ_expPartialSum (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
     normIncGammaQContinued (n+1) z=exp (-z)*expPartialSum n z := by
   rw [normIncGammaQContinued_eq (natCast_add_one_ne_neg_nat n) hz, normIncGammaQ_nat_succ n hz]
   rfl
 
-/-- upperIncGamma one minus nat. -/
+/-- Identity under the stated parameter and domain assumptions: `upperIncGamma (1-n) z=z^(1-(n :
+ℂ))*genExpIntE n z`. -/
 @[dlmf 8.4.E13]
 theorem upperIncGamma_one_minus_nat (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
     upperIncGamma (1-n) z=z^(1-(n : ℂ))*genExpIntE n z := by
   rw [genExpIntE, ← mul_assoc, ← cpow_add _ _ hz]
   simp
 
-/-- normIncGammaQ half nat. -/
+/-- Formula under the stated hypotheses: `normIncGammaQContinued (n+1/2) (z^2)=erfc z+exp
+(-z^2)/Real.sqrt π*(∑ k ∈ Finset.range n, z^(2*k+1)/poch (1/2) (k+1))`. -/
 @[dlmf 8.4.E14]
 theorem normIncGammaQ_half_nat (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
     normIncGammaQContinued (n+1/2) (z^2)=erfc z+exp (-z^2)/Real.sqrt π*(∑ k ∈ Finset.range n, z^(2*k+1)/poch (1/2) (k+1)) := by
@@ -143,7 +153,8 @@ theorem normIncGammaQ_half_nat (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
   rw [← pow_mul,pow_succ]
   ring
 
-/-- upperIncGamma neg nat finite. -/
+/-- Formula under the stated hypotheses: `upperIncGamma (-n) z=(-1 : ℂ)^n/n.factorial*(genExpIntE
+1 z-exp (-z)*∑ k ∈ Finset.range n, (-1 : ℂ)^k*(k.factorial : ℂ)/z^(k+1))`. -/
 @[dlmf 8.4.E15]
 theorem upperIncGamma_neg_nat_finite (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
     upperIncGamma (-n) z=(-1 : ℂ)^n/n.factorial*(genExpIntE 1 z-exp (-z)*∑ k ∈ Finset.range n, (-1 : ℂ)^k*(k.factorial : ℂ)/z^(k+1)) := by
@@ -164,7 +175,9 @@ theorem upperIncGamma_neg_nat_finite (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
     rw [hs]
     ring
 
-/-- upperIncGamma neg nat hasSum. -/
+/-- The series with terms `(fun k : ℕ => if k=n then 0 else (-z)^k/((k.factorial : ℂ)*((k :
+ℂ)-n)))` converges to `(z^(n : ℤ)*((-1 : ℂ)^n/n.factorial*(digamma (n+1)-log z)-upperIncGamma
+(-n) z))`. -/
 @[dlmf 8.4.E15]
 theorem upperIncGamma_neg_nat_hasSum (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
     HasSum (fun k : ℕ => if k=n then 0 else (-z)^k/((k.factorial : ℂ)*((k : ℂ)-n))) (z^(n : ℤ)*((-1 : ℂ)^n/n.factorial*(digamma (n+1)-log z)-upperIncGamma (-n) z)) := by
@@ -222,7 +235,8 @@ theorem upperIncGamma_neg_nat_hasSum (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
       field_simp
       ring
 
-/-- lowerIncGamma kummerM pair. -/
+/-- Identity under the stated parameter and domain assumptions: `lowerIncGamma a z=z^a/a*exp
+(-z)*kummerM 1 (1+a) z ∧ lowerIncGamma a z=z^a/a*kummerM a (1+a) (-z)`. -/
 @[dlmf 8.5.E1]
 theorem lowerIncGamma_kummerM_pair {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (z : ℂ) :
     lowerIncGamma a z=z^a/a*exp (-z)*kummerM 1 (1+a) z ∧ lowerIncGamma a z=z^a/a*kummerM a (1+a) (-z) := by
@@ -234,7 +248,8 @@ theorem lowerIncGamma_kummerM_pair {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (z : �
     ring
   · simp [lowerIncGamma, add_comm, mul_div_assoc]
 
-/-- scIncGamma regularized pair. -/
+/-- Identity under the stated parameter and domain assumptions: `scIncGamma a z=exp
+(-z)*regularizedHGFun {1} {1+a} z ∧ scIncGamma a z=regularizedHGFun {a} {1+a} (-z)`. -/
 @[dlmf 8.5.E2]
 theorem scIncGamma_regularized_pair (a z : ℂ) :
     scIncGamma a z=exp (-z)*regularizedHGFun {1} {1+a} z ∧ scIncGamma a z=regularizedHGFun {a} {1+a} (-z) := by
@@ -243,7 +258,8 @@ theorem scIncGamma_regularized_pair (a z : ℂ) :
   · have h := regularizedConfluent_kummer_transform a (1+a) (-z)
     simpa [scIncGamma, show (1:ℂ)+a-a=1 by ring, add_comm] using h.symm
 
-/-- upperIncGamma kummerU pair. -/
+/-- Identity under the stated parameter and domain assumptions: `upperIncGamma a z=exp
+(-z)*kummerU (1-a) (1-a) z ∧ upperIncGamma a z=z^a*exp (-z)*kummerU 1 (1+a) z`. -/
 @[dlmf 8.5.E3]
 theorem upperIncGamma_kummerU_pair (a : ℂ) {z : ℂ} (hz : z ≠ 0) :
     upperIncGamma a z=exp (-z)*kummerU (1-a) (1-a) z ∧ upperIncGamma a z=z^a*exp (-z)*kummerU 1 (1+a) z := by
@@ -251,7 +267,8 @@ theorem upperIncGamma_kummerU_pair (a : ℂ) {z : ℂ} (hz : z ≠ 0) :
   · rfl
   · simpa [add_comm] using upperIncGamma_eq_cpow_mul_kummerU a hz
 
-/-- lowerIncGamma whittakerM. -/
+/-- Identity under the stated parameter and domain assumptions: `lowerIncGamma a z=z^(a/2-1/2)*exp
+(-z/2)/a*whittakerM (a/2-1/2) (a/2) z`. -/
 @[dlmf 8.5.E4]
 theorem lowerIncGamma_whittakerM {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {z : ℂ} (hz : z ≠ 0) :
     lowerIncGamma a z=z^(a/2-1/2)*exp (-z/2)/a*whittakerM (a/2-1/2) (a/2) z := by
@@ -266,7 +283,8 @@ theorem lowerIncGamma_whittakerM {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) {z : ℂ
         (exp (-z/2)*exp (-z/2))*(z^(a/2-1/2)*z^(a/2+1/2))/a*kummerM 1 (1+a) z := by rw [hp,he]; ring
     _ = _ := by ring
 
-/-- upperIncGamma whittakerW. -/
+/-- Identity under the stated parameter and domain assumptions: `upperIncGamma a z=exp
+(-z/2)*z^(a/2-1/2)*whittakerW (a/2-1/2) (a/2) z`. -/
 @[dlmf 8.5.E5]
 theorem upperIncGamma_whittakerW (a : ℂ) {z : ℂ} (hz : z ≠ 0) :
     upperIncGamma a z=exp (-z/2)*z^(a/2-1/2)*whittakerW (a/2-1/2) (a/2) z := by
@@ -332,7 +350,8 @@ theorem erf_lowerIncGammaOnLog_square {z : ℂ} (hz : z ≠ 0) :
   have hp : (Real.sqrt π:ℂ)≠0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   field_simp
 
-/-- erfc upperIncGammaOnLog square. -/
+/-- Identity under the stated parameter and domain assumptions: `erfc z=upperIncGammaOnLog (1/2)
+(2*log z)/Real.sqrt π`. -/
 @[dlmf 7.11.E2, dlmf 8.4.E6]
 theorem erfc_upperIncGammaOnLog_square {z : ℂ} (hz : z ≠ 0) :
     erfc z=upperIncGammaOnLog (1/2) (2*log z)/Real.sqrt π := by
@@ -340,7 +359,9 @@ theorem erfc_upperIncGammaOnLog_square {z : ℂ} (hz : z ≠ 0) :
   have hp : (Real.sqrt π:ℂ)≠0 := by exact_mod_cast (Real.sqrt_pos.mpr Real.pi_pos).ne'
   field_simp
 
-/-- erfc kummerUOnLog square. -/
+/-- Identity under the stated parameter and domain assumptions: `erfc z=exp (-z^2)/Real.sqrt
+π*kummerUOnLog (1/2) (1/2) (2*log z) ∧ erfc z=z/Real.sqrt π*exp (-z^2)*kummerUOnLog 1 (3/2)
+(2*log z)`. -/
 @[dlmf 7.11.E5]
 theorem erfc_kummerUOnLog_square {z : ℂ} (hz : z ≠ 0) :
     erfc z=exp (-z^2)/Real.sqrt π*kummerUOnLog (1/2) (1/2) (2*log z) ∧ erfc z=z/Real.sqrt π*exp (-z^2)*kummerUOnLog 1 (3/2) (2*log z) := by

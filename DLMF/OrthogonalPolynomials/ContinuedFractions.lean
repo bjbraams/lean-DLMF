@@ -47,6 +47,8 @@ theorem polynomialFraction_dens_step (a b : ℕ → ℂ) (n : ℕ) :
   GenContFract.dens_recurrence (g := polynomialFraction a b) (n := n)
     (gp := ⟨a (n + 1), b (n + 1)⟩) (by rfl) rfl rfl
 
+/-- Identity under the stated parameter and domain assumptions: `(polynomialFraction (fun _ => -1)
+(fun k => if k = 0 then x else 2 * x)).dens n = (Chebyshev.T ℂ n).eval x`. -/
 @[dlmf 18.13.E1]
 theorem chebyshevT_continued_fraction (n : ℕ) (x : ℂ) :
     (polynomialFraction (fun _ => -1) (fun k => if k = 0 then x else 2 * x)).dens n =
@@ -62,6 +64,8 @@ theorem chebyshevT_continued_fraction (n : ℕ) (x : ℂ) :
     simp only [Polynomial.eval_sub, Polynomial.eval_mul, Polynomial.eval_ofNat, Polynomial.eval_X]
     ring
 
+/-- Identity under the stated parameter and domain assumptions: `(polynomialFraction (fun _ => -1)
+(fun _ => 2 * x)).dens n = (Chebyshev.U ℂ n).eval x`. -/
 @[dlmf 18.13.E2]
 theorem chebyshevU_continued_fraction (n : ℕ) (x : ℂ) :
     (polynomialFraction (fun _ => -1) (fun _ => 2 * x)).dens n = (Chebyshev.U ℂ n).eval x := by
@@ -75,6 +79,9 @@ theorem chebyshevU_continued_fraction (n : ℕ) (x : ℂ) :
     simp only [Polynomial.eval_sub, Polynomial.eval_mul, Polynomial.eval_ofNat, Polynomial.eval_X]
     ring
 
+/-- Identity under the stated parameter and domain assumptions: `(polynomialFraction (fun k => if
+k = 0 then a else -(k : ℂ) / (k + 1)) (fun k => (2 * k + 1 : ℂ) / (k + 1) * x)).dens n =
+legendrePolyP n x`. -/
 @[dlmf 18.13.E3]
 theorem legendre_continued_fraction (a : ℂ) (n : ℕ) (x : ℂ) :
     (polynomialFraction (fun k => if k = 0 then a else -(k : ℂ) / (k + 1))
@@ -92,6 +99,9 @@ theorem legendre_continued_fraction (a : ℂ) (n : ℕ) (x : ℂ) :
           := by ring
       _ = _ := (div_eq_iff hn).mpr (by linear_combination -(legendrePolyP_recurrence n x))
 
+/-- Identity under the stated parameter and domain assumptions: `(polynomialFraction (fun k => if
+k = 0 then a else -(k : ℂ) / (k + 1)) (fun k => (2 * k + 1 - x) / (k + 1))).dens n =
+laguerrePolyL 0 n x`. -/
 @[dlmf 18.13.E4]
 theorem laguerrePolyL_continued_fraction (a : ℂ) (n : ℕ) (x : ℂ) :
     (polynomialFraction (fun k => if k = 0 then a else -(k : ℂ) / (k + 1))
@@ -117,6 +127,8 @@ theorem laguerrePolyL_continued_fraction (a : ℂ) (n : ℕ) (x : ℂ) :
           := by ring
       _ = _ := (div_eq_iff hn).mpr (by linear_combination -hrec)
 
+/-- Identity under the stated parameter and domain assumptions: `(polynomialFraction (fun k => if
+k = 0 then 1 else -2 * (k : ℂ)) (fun _ => 2 * x)).dens n = aeval x (hermitePolyH n)`. -/
 @[dlmf 18.13.E5]
 theorem hermitePolyH_continued_fraction (n : ℕ) (x : ℂ) :
     (polynomialFraction (fun k => if k = 0 then 1 else -2 * (k : ℂ))

@@ -56,7 +56,9 @@ namespace DLMF.Heun
 has derivative `-(p w' + r w)` there. Genuine differentiability is required, so totalized
 derivatives cannot make a nonsolution satisfy the equation. -/
 structure IsLinearODE2On (p r : ℂ → ℂ) (w : ℂ → ℂ) (s : Set ℂ) : Prop where
+  /-- The solution is differentiable at every point of the domain. -/
   differentiableAt : ∀ z ∈ s, DifferentiableAt ℂ w z
+  /-- The first derivative has the derivative prescribed by the differential equation. -/
   hasDerivAt_deriv : ∀ z ∈ s, HasDerivAt (deriv w) (-(p z * deriv w z) - r z * w z) z
 
 /-! ### Heun's equation (§31.2) -/

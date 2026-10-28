@@ -53,6 +53,7 @@ namespace Complex
 structure MBSeriesData (F : ℂ → ℂ) (c : ℕ → ℝ) (p : ℕ → ℂ) (φ : ℕ → ℂ → ℂ) : Prop where
   /-- the pole `p n` lies strictly inside the strip `c (n+1) < Re s < c n`. -/
   lt_re : ∀ n, c (n + 1) < (p n).re
+  /-- Each pole lies strictly to the left of the right boundary of its strip. -/
   re_lt : ∀ n, (p n).re < c n
   /-- the numerator is holomorphic on the closed strip. -/
   differentiableOn : ∀ n, DifferentiableOn ℂ (φ n) (re ⁻¹' Icc (c (n + 1)) (c n))

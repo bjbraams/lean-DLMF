@@ -45,12 +45,15 @@ namespace DLMF.MatrixArgument
 
 /-! ## The Haar measure on `O(m)` -/
 
+/-- The real orthogonal group inherits second countability from its finite-dimensional matrix
+space. -/
 instance m35_secondCountableTopology_orthogonalGroup (m : ℕ) :
     SecondCountableTopology (Matrix.orthogonalGroup (Fin m) ℝ) :=
   haveI : SecondCountableTopology (Matrix (Fin m) (Fin m) ℝ) :=
     inferInstanceAs (SecondCountableTopology (Fin m → Fin m → ℝ))
   TopologicalSpace.Subtype.secondCountableTopology _
 
+/-- The normalized Haar measure on the compact orthogonal group has total mass one. -/
 instance isProbabilityMeasure_orthogonalHaar (m : ℕ) :
     IsProbabilityMeasure (orthogonalHaar m) :=
   ⟨by
@@ -59,6 +62,7 @@ instance isProbabilityMeasure_orthogonalHaar (m : ℕ) :
     rw [TopologicalSpace.PositiveCompacts.coe_top] at h
     exact h⟩
 
+/-- The normalized measure on the orthogonal group is a Haar measure. -/
 instance isHaarMeasure_orthogonalHaar (m : ℕ) : (orthogonalHaar m).IsHaarMeasure :=
   Measure.isHaarMeasure_haarMeasure _
 
@@ -92,6 +96,8 @@ private lemma m35_det_conj {m : ℕ} (H : Matrix.orthogonalGroup (Fin m) ℝ)
 
 /-! ## 35.4.1: the partitional shifted factorial as a ratio of gamma functions -/
 
+/-- Identity under the stated parameter and domain assumptions: `Complex.Gamma (z + n) =
+(ascPochhammer ℂ n).eval z * Complex.Gamma z`. -/
 private lemma m35_Gamma_add_nat {z : ℂ} (hz : Complex.Gamma z ≠ 0) (n : ℕ) :
     Complex.Gamma (z + n) = (ascPochhammer ℂ n).eval z * Complex.Gamma z := by
   induction n with
@@ -241,6 +247,8 @@ theorem zonalPolynomial_conj {m : ℕ} (κ : Fin m → ℕ) (H₀ : Matrix.ortho
 
 /-! ## 35.4(ii): polynomiality -/
 
+/-- Formula under the stated hypotheses: `∑ n ∈ Finset.range N, (n + 1) * (K n - K (n + 1)) + N *
+K N = ∑ n ∈ Finset.range N, K n`. -/
 private lemma m35_sum_mul_sub (K : ℕ → ℕ) (hK : Antitone K) (N : ℕ) :
     ∑ n ∈ Finset.range N, (n + 1) * (K n - K (n + 1)) + N * K N =
       ∑ n ∈ Finset.range N, K n := by
@@ -284,9 +292,12 @@ def q2m_CoeffCont {G σ : Type*} [TopologicalSpace G] (F : G → MvPolynomial σ
 section CoeffCont
 variable {G σ : Type*} [TopologicalSpace G]
 
+/-- Identity under the stated parameter and domain assumptions: `q2m_CoeffCont (fun _ : G => p)`. -/
 theorem q2m_CoeffCont.const (p : MvPolynomial σ ℝ) : q2m_CoeffCont (fun _ : G => p) :=
   fun _ => continuous_const
 
+/-- Identity under the stated parameter and domain assumptions: `q2m_CoeffCont (fun g =>
+(MvPolynomial.C (f g) : MvPolynomial σ ℝ))`. -/
 theorem q2m_CoeffCont.C {f : G → ℝ} (hf : Continuous f) :
     q2m_CoeffCont (fun g => (MvPolynomial.C (f g) : MvPolynomial σ ℝ)) := by
   intro α
@@ -296,23 +307,29 @@ theorem q2m_CoeffCont.C {f : G → ℝ} (hf : Continuous f) :
   · exact hf
   · exact continuous_const
 
+/-- Identity under the stated parameter and domain assumptions: `q2m_CoeffCont (fun g => F₁ g + F₂
+g)`. -/
 theorem q2m_CoeffCont.add {F₁ F₂ : G → MvPolynomial σ ℝ} (h₁ : q2m_CoeffCont F₁)
     (h₂ : q2m_CoeffCont F₂) : q2m_CoeffCont (fun g => F₁ g + F₂ g) := fun α => by
   have : ∀ g, (F₁ g + F₂ g).coeff α = (F₁ g).coeff α + (F₂ g).coeff α :=
     fun g => (MvPolynomial.lcoeff ℝ α).map_add _ _
   simp only [this]; exact (h₁ α).add (h₂ α)
 
+/-- Identity under the stated parameter and domain assumptions: `q2m_CoeffCont (fun g => F₁ g * F₂
+g)`. -/
 theorem q2m_CoeffCont.mul {F₁ F₂ : G → MvPolynomial σ ℝ} (h₁ : q2m_CoeffCont F₁)
     (h₂ : q2m_CoeffCont F₂) : q2m_CoeffCont (fun g => F₁ g * F₂ g) := fun α => by
   classical
   simp only [MvPolynomial.coeff_mul]
   exact continuous_finsetSum _ fun x _ => (h₁ x.1).mul (h₂ x.2)
 
+/-- Formula under the stated hypotheses: `q2m_CoeffCont (fun g => ∑ i ∈ s, F i g)`. -/
 theorem q2m_CoeffCont.sum {ι : Type*} (s : Finset ι) {F : ι → G → MvPolynomial σ ℝ}
     (h : ∀ i ∈ s, q2m_CoeffCont (F i)) : q2m_CoeffCont (fun g => ∑ i ∈ s, F i g) := fun α => by
   simp only [MvPolynomial.coeff_sum]
   exact continuous_finsetSum _ fun i hi => h i hi α
 
+/-- Formula under the stated hypotheses: `q2m_CoeffCont (fun g => ∏ i ∈ s, F i g)`. -/
 theorem q2m_CoeffCont.prod {ι : Type*} (s : Finset ι) {F : ι → G → MvPolynomial σ ℝ}
     (h : ∀ i ∈ s, q2m_CoeffCont (F i)) : q2m_CoeffCont (fun g => ∏ i ∈ s, F i g) := by
   classical
@@ -323,11 +340,15 @@ theorem q2m_CoeffCont.prod {ι : Type*} (s : Finset ι) {F : ι → G → MvPoly
     exact (h a (Finset.mem_insert_self a s)).mul
       (ih fun i hi => h i (Finset.mem_insert_of_mem hi))
 
+/-- Identity under the stated parameter and domain assumptions: `q2m_CoeffCont (fun g => F g ^
+n)`. -/
 theorem q2m_CoeffCont.pow {F : G → MvPolynomial σ ℝ} (h : q2m_CoeffCont F) (n : ℕ) :
     q2m_CoeffCont (fun g => F g ^ n) := by
   have := q2m_CoeffCont.prod (Finset.range n) (F := fun _ => F) (fun _ _ => h)
   simpa using this
 
+/-- Identity under the stated parameter and domain assumptions: `q2m_CoeffCont (fun g => (M
+g).det)`. -/
 theorem q2m_CoeffCont.det {n : Type*} [Fintype n] [DecidableEq n]
     {M : G → Matrix n n (MvPolynomial σ ℝ)} (h : ∀ a b, q2m_CoeffCont fun g => M g a b) :
     q2m_CoeffCont (fun g => (M g).det) := by
@@ -335,6 +356,8 @@ theorem q2m_CoeffCont.det {n : Type*} [Fintype n] [DecidableEq n]
   exact q2m_CoeffCont.sum _ fun σ' _ => (q2m_CoeffCont.const _).mul
     (q2m_CoeffCont.prod _ fun i _ => h _ _)
 
+/-- Identity under the stated parameter and domain assumptions: `q2m_CoeffCont fun g => (A g * B
+g) a b`. -/
 theorem q2m_CoeffCont.matMul {n : Type*} [Fintype n]
     {A B : G → Matrix n n (MvPolynomial σ ℝ)} (hA : ∀ a b, q2m_CoeffCont fun g => A g a b)
     (hB : ∀ a b, q2m_CoeffCont fun g => B g a b) (a b : n) :
@@ -359,14 +382,12 @@ lemma q2m_isHomogeneous_det {σ n : Type*} [Fintype n] [DecidableEq n]
     (fun i _ => h _ _)
   simpa using this
 
+/-- The stated relation follows from the given hypotheses: `((A * B) a b).IsHomogeneous (p + q)`. -/
 lemma q2m_isHomogeneous_matMul {σ n : Type*} [Fintype n]
     {A B : Matrix n n (MvPolynomial σ ℝ)} {p q : ℕ} (hA : ∀ a b, (A a b).IsHomogeneous p)
     (hB : ∀ a b, (B a b).IsHomogeneous q) (a b : n) : ((A * B) a b).IsHomogeneous (p + q) := by
   simp only [Matrix.mul_apply]
   exact IsHomogeneous.sum _ _ _ fun k _ => (hA a k).mul (hB k b)
-
-
-
 
 /-- The polynomial matrix `H diag(X₁, …, X_m) Hᵀ`. -/
 def q2m_polyConj {m : ℕ} (H : Matrix (Fin m) (Fin m) ℝ) :
@@ -378,6 +399,8 @@ def q2m_zonalPoly {m : ℕ} (κ : Fin m → ℕ) (H : Matrix (Fin m) (Fin m) ℝ
     MvPolynomial (Fin m) ℝ :=
   ∏ j : Fin m, leadingMinor (q2m_polyConj H) (j.1 + 1) ^ (κ j - nextPart κ j)
 
+/-- Identity under the stated parameter and domain assumptions: `f (leadingMinor M j) =
+leadingMinor (M.map f) j`. -/
 lemma q2m_map_leadingMinor {R S : Type*} [CommRing R] [CommRing S] (f : R →+* S) {m : ℕ}
     (M : Matrix (Fin m) (Fin m) R) (j : ℕ) : f (leadingMinor M j) = leadingMinor (M.map f) j := by
   unfold leadingMinor
@@ -385,6 +408,8 @@ lemma q2m_map_leadingMinor {R S : Type*} [CommRing R] [CommRing S] (f : R →+* 
   · rw [RingHom.map_det]; rfl
   · exact map_zero f
 
+/-- Identity under the stated parameter and domain assumptions: `eval t (q2m_zonalPoly κ H) = ∏ j
+: Fin m, leadingMinor (H * diagonal t * Hᵀ) (j.1 + 1) ^ (κ j - nextPart κ j)`. -/
 lemma q2m_eval_zonalPoly {m : ℕ} (κ : Fin m → ℕ) (H : Matrix (Fin m) (Fin m) ℝ)
     (t : Fin m → ℝ) : eval t (q2m_zonalPoly κ H) =
       ∏ j : Fin m, leadingMinor (H * diagonal t * Hᵀ) (j.1 + 1) ^ (κ j - nextPart κ j) := by
@@ -399,6 +424,8 @@ lemma q2m_eval_zonalPoly {m : ℕ} (κ : Fin m → ℕ) (H : Matrix (Fin m) (Fin
     Matrix.diagonal_map (map_zero _)]
   simp
 
+/-- Identity under the stated parameter and domain assumptions: `q2m_CoeffCont (fun H :
+Matrix.orthogonalGroup (Fin m) ℝ => q2m_zonalPoly κ (H : Matrix (Fin m) (Fin m) ℝ))`. -/
 lemma q2m_coeffCont_zonalPoly {m : ℕ} (κ : Fin m → ℕ) :
     q2m_CoeffCont (fun H : Matrix.orthogonalGroup (Fin m) ℝ =>
       q2m_zonalPoly κ (H : Matrix (Fin m) (Fin m) ℝ)) := by
@@ -426,9 +453,8 @@ lemma q2m_coeffCont_zonalPoly {m : ℕ} (κ : Fin m → ℕ) :
   simp only [hj, dite_true]
   exact q2m_CoeffCont.det fun a b => hent _ _
 
-
-
-
+/-- The stated relation follows from the given hypotheses: `(q2m_zonalPoly κ H).IsHomogeneous (∑
+j, κ j)`. -/
 lemma q2m_isHomogeneous_zonalPoly {m : ℕ} (κ : Fin m → ℕ) (hκ : Antitone κ)
     (H : Matrix (Fin m) (Fin m) ℝ) : (q2m_zonalPoly κ H).IsHomogeneous (∑ j, κ j) := by
   have hC : ∀ a b, ((H.map (MvPolynomial.C : ℝ →+* MvPolynomial (Fin m) ℝ)) a b).IsHomogeneous 0 :=
@@ -503,9 +529,6 @@ lemma q2m_zonalPolynomial_diagonal {m : ℕ} (κ : Fin m → ℕ) (hκ : Antiton
     refine Finset.sum_congr rfl fun α _ => ?_
     rw [integral_mul_const]
 
-
-
-
 /-- `Z_κ(diag(t ∘ σ)) = Z_κ(diag t)` for a permutation `σ`. -/
 lemma q2m_zonalPolynomial_diagonal_perm {m : ℕ} (κ : Fin m → ℕ) (σ : Equiv.Perm (Fin m))
     (t : Fin m → ℝ) : zonalPolynomial κ (diagonal (t ∘ σ)) = zonalPolynomial κ (diagonal t) := by
@@ -561,7 +584,6 @@ theorem zonalPolynomial_exists_symmetric {m : ℕ} (κ : Fin m → ℕ) (hκ : A
     rw [MvPolynomial.eval_rename, ← heval, ← heval, q2m_zonalPolynomial_diagonal_perm]
   · rw [q2m_zonalPolynomial_eq_diagonal κ hT, heval]
 
-
 /-- DLMF 35.4.6: `∑_{|κ|=k} Z_κ(T) = (tr T)^k` for `T ∈ 𝓢`. -/
 @[dlmf 35.4.E6]
 theorem sum_zonalPolynomial {m : ℕ} (k : ℕ) (T : Matrix (Fin m) (Fin m) ℝ)
@@ -591,16 +613,22 @@ section q2mLaplace
 
 open scoped ENNReal
 
+/-- Identity under the stated parameter and domain assumptions: `(H : Matrix (Fin m) (Fin m) ℝ) *
+(H : Matrix (Fin m) (Fin m) ℝ)ᵀ = 1`. -/
 lemma q2m_orth_mul_transpose {m : ℕ} (H : Matrix.orthogonalGroup (Fin m) ℝ) :
     (H : Matrix (Fin m) (Fin m) ℝ) * (H : Matrix (Fin m) (Fin m) ℝ)ᵀ = 1 := by
   have := (Matrix.mem_orthogonalGroup_iff (Fin m) ℝ).mp H.2
   exact this
 
+/-- Identity under the stated parameter and domain assumptions: `(H : Matrix (Fin m) (Fin m) ℝ)ᵀ *
+(H : Matrix (Fin m) (Fin m) ℝ) = 1`. -/
 lemma q2m_orth_transpose_mul {m : ℕ} (H : Matrix.orthogonalGroup (Fin m) ℝ) :
     (H : Matrix (Fin m) (Fin m) ℝ)ᵀ * (H : Matrix (Fin m) (Fin m) ℝ) = 1 := by
   have := (Matrix.mem_orthogonalGroup_iff' (Fin m) ℝ).mp H.2
   exact this
 
+/-- The stated relation follows from the given hypotheses: `((H : Matrix (Fin m) (Fin m) ℝ) * X *
+(H : Matrix (Fin m) (Fin m) ℝ)ᵀ).PosDef`. -/
 lemma q2m_posDef_orth_conj {m : ℕ} (H : Matrix.orthogonalGroup (Fin m) ℝ)
     {X : Matrix (Fin m) (Fin m) ℝ} (hX : X.PosDef) :
     ((H : Matrix (Fin m) (Fin m) ℝ) * X * (H : Matrix (Fin m) (Fin m) ℝ)ᵀ).PosDef := by
@@ -611,6 +639,8 @@ lemma q2m_posDef_orth_conj {m : ℕ} (H : Matrix.orthogonalGroup (Fin m) ℝ)
   have := hX.conjTranspose_mul_mul_same hinj
   rwa [Matrix.conjTranspose_eq_transpose_of_trivial, Matrix.transpose_transpose] at this
 
+/-- Measurability of the indicated function: `Measurable fun X : SymMatrix m => (etr (-(T * (X :
+Matrix (Fin m) (Fin m) ℝ))) : ℂ) * (((X : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ p)`. -/
 lemma q2m_measurable_lap {m : ℕ} (T : Matrix (Fin m) (Fin m) ℝ) (p : ℂ) :
     Measurable fun X : SymMatrix m => (etr (-(T * (X : Matrix (Fin m) (Fin m) ℝ))) : ℂ) *
       (((X : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ p) := by

@@ -46,12 +46,18 @@ namespace DLMF.MatrixArgument
 
 /-! ### Helpers: the Laplace kernel and absolute convergence -/
 
+/-- Identity under the stated parameter and domain assumptions: `(Z * X.map (fun x : ℝ => (x :
+ℂ))).trace.re = (Z.map Complex.re * X).trace`. -/
 lemma q2m_re_trace_mul_map {m : ℕ} (Z : Matrix (Fin m) (Fin m) ℂ)
     (X : Matrix (Fin m) (Fin m) ℝ) :
     (Z * X.map (fun x : ℝ => (x : ℂ))).trace.re = (Z.map Complex.re * X).trace := by
   simp only [Matrix.trace, Matrix.diag, Matrix.mul_apply, Matrix.map_apply, Complex.re_sum,
     Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im, mul_zero, sub_zero]
 
+/-- Identity under the stated parameter and domain assumptions: `Complex.exp (-(Z * ((X + Y :
+SymMatrix m) : Matrix (Fin m) (Fin m) ℝ).map (fun x : ℝ => (x : ℂ))).trace) = Complex.exp (-(Z
+* (X : Matrix (Fin m) (Fin m) ℝ).map (fun x : ℝ => (x : ℂ))).trace) * Complex.exp (-(Z * (Y :
+Matrix (Fin m) (Fin m) ℝ).map (fun x : ℝ => (x : ℂ))).trace)`. -/
 lemma q2m_lapKernel_add {m : ℕ} (Z : Matrix (Fin m) (Fin m) ℂ) (X Y : SymMatrix m) :
     Complex.exp (-(Z * ((X + Y : SymMatrix m) : Matrix (Fin m) (Fin m) ℝ).map
         (fun x : ℝ => (x : ℂ))).trace) =
@@ -61,12 +67,17 @@ lemma q2m_lapKernel_add {m : ℕ} (Z : Matrix (Fin m) (Fin m) ℂ) (X Y : SymMat
     Matrix.map_add (fun x : ℝ => (x : ℂ)) Complex.ofReal_add, Matrix.mul_add, Matrix.trace_add,
     neg_add]
 
+/-- Identity under the stated parameter and domain assumptions: `‖Complex.exp (-(Z * (X : Matrix
+(Fin m) (Fin m) ℝ).map (fun x : ℝ => (x : ℂ))).trace)‖ = etr (-(Z.map Complex.re * (X : Matrix
+(Fin m) (Fin m) ℝ)))`. -/
 lemma q2m_norm_lapKernel {m : ℕ} (Z : Matrix (Fin m) (Fin m) ℂ) (X : SymMatrix m) :
     ‖Complex.exp (-(Z * (X : Matrix (Fin m) (Fin m) ℝ).map (fun x : ℝ => (x : ℂ))).trace)‖ =
       etr (-(Z.map Complex.re * (X : Matrix (Fin m) (Fin m) ℝ))) := by
   unfold etr
   rw [Complex.norm_exp, Complex.neg_re, q2m_re_trace_mul_map, Matrix.trace_neg]
 
+/-- Continuity of the indicated function: `Continuous fun X : SymMatrix m => Complex.exp (-(Z * (X
+: Matrix (Fin m) (Fin m) ℝ).map (fun x : ℝ => (x : ℂ))).trace)`. -/
 lemma q2m_continuous_lapKernel {m : ℕ} (Z : Matrix (Fin m) (Fin m) ℂ) :
     Continuous fun X : SymMatrix m =>
       Complex.exp (-(Z * (X : Matrix (Fin m) (Fin m) ℝ).map (fun x : ℝ => (x : ℂ))).trace) := by
@@ -327,12 +338,14 @@ lemma q2m_leadingMinor_gram {m : ℕ} (x : TauCeti.lowerTriangle m → ℝ) (j :
   refine Finset.prod_congr rfl fun a _ => ?_
   simp [TauCeti.lowerTriangleMatrix_apply_of_le]
 
-
-
+/-- The positive-diagonal factor in Cholesky coordinates: the Jacobian `2t` times the Gamma
+density in `t²`, extended by zero to `t ≤ 0`. -/
 def q2m_diagFactor (c : ℂ) (t : ℝ) : ℂ :=
   (Ioi (0 : ℝ)).indicator
     (fun t : ℝ => ((2 * t : ℝ) : ℂ) * ((Real.exp (-t ^ 2) : ℂ) * ((t ^ 2 : ℝ) : ℂ) ^ (c - 1))) t
 
+/-- Integrability of the indicated kernel: `Integrable (q2m_diagFactor c) ∧ ∫ t, q2m_diagFactor c
+t = Complex.Gamma c`. -/
 lemma q2m_diagFactor_integral {c : ℂ} (hc : 0 < c.re) :
     Integrable (q2m_diagFactor c) ∧ ∫ t, q2m_diagFactor c t = Complex.Gamma c := by
   have hcongr : EqOn (fun t : ℝ => ((2 * t : ℝ) : ℂ) * ((Real.exp (-t ^ 2) : ℂ) *
@@ -364,7 +377,8 @@ lemma q2m_offFactor_integral :
   simp only [neg_mul, one_mul, div_one] at h1 h2
   exact ⟨h1.ofReal, by rw [integral_complex_ofReal, h2]⟩
 
-
+/-- Estimate under the stated parameter and domain assumptions: `∑ j : Fin m, (if i ≤ j then s j -
+(if h : j.1 + 1 < m then s ⟨j.1 + 1, h⟩ else p) else 0) = s i - p`. -/
 lemma q2m_telescope {m : ℕ} (s : Fin m → ℂ) (p : ℂ) (i : Fin m) :
     ∑ j : Fin m, (if i ≤ j then s j - (if h : j.1 + 1 < m then s ⟨j.1 + 1, h⟩ else p) else 0)
       = s i - p := by
@@ -388,6 +402,8 @@ lemma q2m_telescope {m : ℕ} (s : Fin m → ℂ) (p : ℂ) (i : Fin m) :
   rw [key m i.2.le]
   simp [hS, i.2]
 
+/-- Identity under the stated parameter and domain assumptions: `((r : ℝ) : ℂ) ^ e = Complex.exp
+((Real.log r : ℂ) * e)`. -/
 lemma q2m_cpow_eq_exp {r : ℝ} (hr : 0 < r) (e : ℂ) :
     ((r : ℝ) : ℂ) ^ e = Complex.exp ((Real.log r : ℂ) * e) := by
   rw [Complex.cpow_def_of_ne_zero (Complex.ofReal_ne_zero.mpr hr.ne'),
@@ -406,6 +422,9 @@ def q2m_gFactor {m : ℕ} (s : Fin m → ℂ) (ij : TauCeti.lowerTriangle m) (t 
   if ij.1.1 = ij.1.2 then q2m_diagFactor (s ij.1.1 - (ij.1.1 : ℂ) / 2) t
   else ((Real.exp (-t ^ 2) : ℝ) : ℂ)
 
+/-- Identity under the stated parameter and domain assumptions: `(TauCeti.posDiagLowerRegion
+m).indicator (fun x => ((q2m_jac x : ℝ) : ℂ) * q2m_gIntegrand s (TauCeti.lowerTriangleMatrix m
+x * (TauCeti.lowerTriangleMatrix m x)ᵀ)) x = ∏ ij, q2m_gFactor s ij (x ij)`. -/
 lemma q2m_indicator_eq_prod {m : ℕ} (s : Fin m → ℂ) (x : TauCeti.lowerTriangle m → ℝ) :
     (TauCeti.posDiagLowerRegion m).indicator (fun x => ((q2m_jac x : ℝ) : ℂ) *
       q2m_gIntegrand s (TauCeti.lowerTriangleMatrix m x * (TauCeti.lowerTriangleMatrix m x)ᵀ)) x
@@ -492,9 +511,8 @@ lemma q2m_indicator_eq_prod {m : ℕ} (s : Fin m → ℂ) (x : TauCeti.lowerTria
     exact Set.indicator_of_notMem (show
       x (⟨(i, i), le_rfl⟩ : TauCeti.lowerTriangle m) ∉ Set.Ioi 0 by simpa using hi) _
 
-
-
-
+/-- Identity under the stated parameter and domain assumptions: `∏ i : Fin m, ((Real.sqrt Real.pi
+: ℝ) : ℂ) ^ (i : ℕ) = (Real.pi : ℂ) ^ (((m : ℂ) * ((m : ℂ) - 1)) / 4)`. -/
 lemma q2m_prod_sqrt_pi (m : ℕ) :
     ∏ i : Fin m, ((Real.sqrt Real.pi : ℝ) : ℂ) ^ (i : ℕ) =
       (Real.pi : ℂ) ^ (((m : ℂ) * ((m : ℂ) - 1)) / 4) := by
@@ -517,6 +535,8 @@ lemma q2m_prod_sqrt_pi (m : ℕ) :
   push_cast
   rfl
 
+/-- The stated relation follows from the given hypotheses: `HasIntegralOn (posDefCone m)
+(q2m_gIntegrand s) (multivariateGammaVec m s)`. -/
 lemma q2m_multivariateGammaVec_eq_integral {m : ℕ} {s : Fin m → ℂ}
     (hs : ∀ j : Fin m, (j : ℝ) / 2 < (s j).re) :
     HasIntegralOn (posDefCone m) (q2m_gIntegrand s) (multivariateGammaVec m s) := by
@@ -625,6 +645,7 @@ product `φ_κ` (used for 35.4.8), and the case `κ = 0` gives
 
 section q2mLaplace
 
+/-- The stated relation follows from the given hypotheses: `HasIntegralOn (posDefCone m) g I`. -/
 theorem q2m_hasIntegralOn_congr {m : ℕ} {f g : Matrix (Fin m) (Fin m) ℝ → ℂ} {I : ℂ}
     (h : HasIntegralOn (posDefCone m) f I) (hfg : ∀ X : SymMatrix m, X ∈ posDefCone m →
       f X = g X) : HasIntegralOn (posDefCone m) g I := by
@@ -633,6 +654,8 @@ theorem q2m_hasIntegralOn_congr {m : ℕ} {f g : Matrix (Fin m) (Fin m) ℝ → 
   rw [← h.2]
   exact (setIntegral_congr_fun hmc fun X hX => hfg X hX).symm
 
+/-- Identity under the stated parameter and domain assumptions: `HasIntegralOn (posDefCone m) (fun
+X => c * f X) (c * I)`. -/
 theorem q2m_hasIntegralOn_const_mul {m : ℕ} {f : Matrix (Fin m) (Fin m) ℝ → ℂ} {I : ℂ}
     (h : HasIntegralOn (posDefCone m) f I) (c : ℂ) :
     HasIntegralOn (posDefCone m) (fun X => c * f X) (c * I) :=
@@ -677,19 +700,18 @@ theorem q2m_hasIntegralOn_of_congruence {m : ℕ} (C : Matrix.GeneralLinearGroup
     rw [← h2, Complex.real_smul, ← mul_assoc, ← Complex.ofReal_mul, mul_inv_cancel₀ hJ.ne',
       Complex.ofReal_one, one_mul]
 
-
-
-
 /-- The product `∏_j |(Y)_j|^{k_j - k_{j+1}}` of leading minors in 35.4.3. -/
 def q2m_phi {m : ℕ} (κ : Fin m → ℕ) (Y : Matrix (Fin m) (Fin m) ℝ) : ℝ :=
   ∏ j : Fin m, leadingMinor Y (j.1 + 1) ^ (κ j - nextPart κ j)
 
+/-- Estimate under the stated parameter and domain assumptions: `0 < leadingMinor X (j.1 + 1)`. -/
 lemma q2m_leadingMinor_pos {m : ℕ} {X : Matrix (Fin m) (Fin m) ℝ} (hX : X.PosDef) (j : Fin m) :
     0 < leadingMinor X (j.1 + 1) := by
   have hj : j.1 + 1 ≤ m := j.2
   rw [leadingMinor, dite_eq_left hj]
   exact (hX.submatrix (Fin.castLE_injective hj)).det_pos
 
+/-- Estimate under the stated parameter and domain assumptions: `0 < q2m_phi κ X`. -/
 theorem q2m_phi_pos {m : ℕ} (κ : Fin m → ℕ) {X : Matrix (Fin m) (Fin m) ℝ} (hX : X.PosDef) :
     0 < q2m_phi κ X :=
   Finset.prod_pos fun j _ => pow_pos (q2m_leadingMinor_pos hX j) _
@@ -752,9 +774,8 @@ lemma q2m_hasIntegralOn_phi_one {m : ℕ} (κ : Fin m → ℕ) (hκ : Antitone �
       · rintro rfl; simp; omega
     rw [hfilt, Finset.prod_singleton]
 
-
-
-
+/-- Estimate under the stated parameter and domain assumptions: `leadingMinor (L * Lᵀ) (j.1 + 1) =
+∏ i ∈ Finset.univ.filter (· ≤ j), L i i ^ 2`. -/
 lemma q2m_leadingMinor_lower {m : ℕ} {L : Matrix (Fin m) (Fin m) ℝ} (hL : L.IsLowerTriangular)
     (j : Fin m) : leadingMinor (L * Lᵀ) (j.1 + 1) =
       ∏ i ∈ Finset.univ.filter (· ≤ j), L i i ^ 2 := by
@@ -783,9 +804,8 @@ lemma q2m_phi_lower_conj {m : ℕ} (κ : Fin m → ℕ) {L : Matrix (Fin m) (Fin
   refine Finset.prod_congr rfl fun i _ => ?_
   rw [Matrix.mul_apply_diag_of_isLowerTriangular hL hM, mul_pow]
 
-
-
-
+/-- Continuity of the indicated function: `Continuous fun Y : Matrix (Fin m) (Fin m) ℝ => q2m_phi
+κ Y`. -/
 theorem q2m_continuous_phi {m : ℕ} (κ : Fin m → ℕ) :
     Continuous fun Y : Matrix (Fin m) (Fin m) ℝ => q2m_phi κ Y := by
   unfold q2m_phi
@@ -875,6 +895,9 @@ theorem q2m_hasIntegralOn_phi {m : ℕ} (κ : Fin m → ℕ) (hκ : Antitone κ)
   rw [← hpow]
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `HasIntegralOn (posDefCone m) (fun
+Y => (etr (-(S * Y)) : ℂ) * ((Y.det : ℂ) ^ (a - ((m : ℂ) + 1) / 2))) (multivariateGamma m a *
+(S.det : ℂ) ^ (-a))`. -/
 theorem q2m_hasIntegralOn_gamma_scaled {m : ℕ} {S : Matrix (Fin m) (Fin m) ℝ} (hS : S.PosDef)
     {a : ℂ} (ha : ((m : ℝ) - 1) / 2 < a.re) :
     HasIntegralOn (posDefCone m) (fun Y => (etr (-(S * Y)) : ℂ) *
@@ -884,6 +907,7 @@ theorem q2m_hasIntegralOn_gamma_scaled {m : ℕ} {S : Matrix (Fin m) (Fin m) ℝ
   simp only [h1, Complex.ofReal_one, mul_one, Nat.cast_zero, add_zero] at h
   exact h
 
+/-- Nonvanishing under the stated hypotheses: `multivariateGamma m a ≠ 0`. -/
 lemma q2m_multivariateGamma_ne_zero {m : ℕ} {a : ℂ} (ha : ((m : ℝ) - 1) / 2 < a.re) :
     multivariateGamma m a ≠ 0 := by
   unfold multivariateGamma
@@ -896,6 +920,8 @@ lemma q2m_multivariateGamma_ne_zero {m : ℕ} {a : ℂ} (ha : ((m : ℝ) - 1) / 
     norm_num
     linarith
 
+/-- Measurability of the indicated function: `Measurable fun X : SymMatrix m => (((X : Matrix (Fin
+m) (Fin m) ℝ).det : ℂ) ^ q)`. -/
 theorem q2m_measurable_detcpow {m : ℕ} (q : ℂ) :
     Measurable fun X : SymMatrix m => (((X : Matrix (Fin m) (Fin m) ℝ).det : ℂ) ^ q) :=
   (Complex.measurable_ofReal.comp continuous_subtype_val.matrix_det.measurable).pow_const _
@@ -1069,6 +1095,9 @@ Congruence by a Cholesky factor of `T` scales the beta integrand on `0 < X < T` 
 `0 < X < I`; Fubini applied to `∫∫ etr(-X)|X|^{a-(m+1)/2} etr(-Y)|Y|^{b-(m+1)/2}` with the
 translation `T = X + Y` then gives `Γ_m(a) Γ_m(b) = Γ_m(a + b) B_m(a, b)`. -/
 
+/-- Integrability of the indicated kernel: `Integrable (fun A => f
+(Matrix.GeneralLinearGroup.symmetricCongruence C A)) (TauCeti.symmetricLebesgue m) ↔
+Integrable f (TauCeti.symmetricLebesgue m)`. -/
 lemma q2m_integrable_congruence_iff {m : ℕ} (C : Matrix.GeneralLinearGroup (Fin m) ℝ)
     (f : SymMatrix m → ℂ) :
     Integrable (fun A => f (Matrix.GeneralLinearGroup.symmetricCongruence C A))
@@ -1084,6 +1113,10 @@ lemma q2m_integrable_congruence_iff {m : ℕ} (C : Matrix.GeneralLinearGroup (Fi
   · exact ENNReal.inv_ne_zero.mpr (ENNReal.pow_ne_top ENNReal.ofReal_ne_top)
   · exact ENNReal.inv_ne_top.mpr (pow_ne_zero _ (ENNReal.ofReal_pos.mpr hC).ne')
 
+/-- Identity under the stated parameter and domain assumptions: `∫ A, f
+(Matrix.GeneralLinearGroup.symmetricCongruence C A) ∂TauCeti.symmetricLebesgue m =
+(|Matrix.det (C : Matrix (Fin m) (Fin m) ℝ)| ^ (m + 1))⁻¹ • ∫ A, f A
+∂TauCeti.symmetricLebesgue m`. -/
 lemma q2m_integral_congruence {m : ℕ} (C : Matrix.GeneralLinearGroup (Fin m) ℝ)
     (f : SymMatrix m → ℂ) :
     ∫ A, f (Matrix.GeneralLinearGroup.symmetricCongruence C A) ∂TauCeti.symmetricLebesgue m =
@@ -1098,6 +1131,8 @@ lemma q2m_integral_congruence {m : ℕ} (C : Matrix.GeneralLinearGroup (Fin m) �
     integral_smul_measure, ENNReal.toReal_inv, ← ENNReal.ofReal_pow (abs_nonneg _),
     ENNReal.toReal_ofReal hJ.le]
 
+/-- The stated relation follows from the given hypotheses: `((C : Matrix (Fin m) (Fin m) ℝ) * M *
+(C : Matrix (Fin m) (Fin m) ℝ)ᵀ).PosDef ↔ M.PosDef`. -/
 lemma q2m_posDef_conj_iff {m : ℕ} (C : Matrix.GeneralLinearGroup (Fin m) ℝ)
     (M : Matrix (Fin m) (Fin m) ℝ) :
     ((C : Matrix (Fin m) (Fin m) ℝ) * M * (C : Matrix (Fin m) (Fin m) ℝ)ᵀ).PosDef ↔ M.PosDef := by
@@ -1207,14 +1242,19 @@ lemma q2m_beta_scale {m : ℕ} {T : Matrix (Fin m) (Fin m) ℝ} (hT : T.PosDef) 
     congr 1
     simp only [P]; push_cast; ring
 
+/-- The stated relation follows from the given hypotheses: `M.PosDef`. -/
 lemma q2m_posDef_fin_zero (M : Matrix (Fin 0) (Fin 0) ℝ) : M.PosDef :=
   Matrix.PosDef.of_dotProduct_mulVec_pos (by ext i; exact i.elim0)
     (fun x hx => absurd (Subsingleton.elim x 0) hx)
 
+/-- Formula under the stated hypotheses: `X ∈ matrixInterval 0 T ↔ X ∈ posDefCone m ∧ (T - (X :
+Matrix (Fin m) (Fin m) ℝ)).PosDef`. -/
 lemma q2m_mem_matrixInterval {m : ℕ} (T : Matrix (Fin m) (Fin m) ℝ) (X : SymMatrix m) :
     X ∈ matrixInterval 0 T ↔ X ∈ posDefCone m ∧ (T - (X : Matrix (Fin m) (Fin m) ℝ)).PosDef := by
   simp [matrixInterval, posDefCone]
 
+/-- The stated relation follows from the given hypotheses: `MeasurableSet (matrixInterval 0 (T :
+Matrix (Fin m) (Fin m) ℝ))`. -/
 lemma q2m_measurableSet_matrixInterval {m : ℕ} (T : SymMatrix m) :
     MeasurableSet (matrixInterval 0 (T : Matrix (Fin m) (Fin m) ℝ)) := by
   have hmc : MeasurableSet (posDefCone m) := TauCeti.measurableSet_posDefMatrix m
@@ -1224,6 +1264,7 @@ lemma q2m_measurableSet_matrixInterval {m : ℕ} (T : SymMatrix m) :
   rw [this]
   exact hmc.inter (hmc.preimage (measurable_const.sub measurable_id))
 
+/-- Identity under the stated parameter and domain assumptions: `matrixInterval (m := m) 0 T = ∅`. -/
 lemma q2m_matrixInterval_eq_empty {m : ℕ} {T : Matrix (Fin m) (Fin m) ℝ} (hT : ¬ T.PosDef) :
     matrixInterval (m := m) 0 T = ∅ := by
   ext X

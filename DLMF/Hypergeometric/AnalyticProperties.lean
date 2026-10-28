@@ -34,6 +34,9 @@ noncomputable section
 
 namespace DLMF.Hypergeometric
 
+/-- Identity under the stated parameter and domain assumptions: `regularizedGaussHGFun a b (-n) z
+= poch a (n + 1) * poch b (n + 1) / ((n + 1).factorial : ℂ) * z ^ (n + 1) * ₂F₁ (a + n + 1) (b
++ n + 1) (n + 2) z`. -/
 @[dlmf 15.2.E3_5]
 theorem regularized_at_neg_nat (a b : ℂ) (n : ℕ) {z : ℂ} (hz : ‖z‖ < 1) :
     regularizedGaussHGFun a b (-n) z =
@@ -85,6 +88,8 @@ theorem regularized_at_neg_nat (a b : ℂ) (n : ℕ) {z : ℂ} (hz : ‖z‖ < 1
     (ascPochhammer ℂ (n + 1)).eval b * (ascPochhammer ℂ j).eval (b + n + 1) *
     z ^ (n + 1) * z ^ j)) * hΓ
 
+/-- Differentiability of the indicated parameterized function: `Differentiable ℂ (fun p : ℂ × ℂ ×
+ℂ => regularizedGaussHGFun p.1 p.2.1 p.2.2 z)`. -/
 @[dlmf 15.2.ii]
 theorem entire_regularized_parameters {z : ℂ} (hz : ‖z‖ < 1) :
     Differentiable ℂ (fun p : ℂ × ℂ × ℂ =>
@@ -92,6 +97,8 @@ theorem entire_regularized_parameters {z : ℂ} (hz : ‖z‖ < 1) :
   differentiable_regularizedGaussHGFun_of_differentiable differentiable_fst
     (differentiable_fst.comp differentiable_snd) (differentiable_snd.comp differentiable_snd) hz
 
+/-- The map `(fun c : ℂ => ₂F₁ a b c z / Gamma c)` tends to `(𝓝 (regularizedGaussHGFun a b (-n)
+z))` along `(𝓝[≠] (-(n : ℂ)))`. -/
 @[dlmf 15.2.E3_5]
 theorem tendsto_regularized_at_neg_nat (a b : ℂ) (n : ℕ) {z : ℂ} (hz : ‖z‖ < 1) :
     Tendsto (fun c : ℂ => ₂F₁ a b c z / Gamma c) (𝓝[≠] (-(n : ℂ)))
@@ -131,6 +138,9 @@ theorem exists_tendsto_sum_mul_of_bdd_variation {f g : ℕ → ℂ} {B : ℝ}
     exact mul_le_mul_of_nonneg_left (hB n) (norm_nonneg _)
   · exact hhs.hasSum.tendsto_sum_nat.comp (tendsto_sub_atTop_nat 1)
 
+/-- Formula under the stated hypotheses: `(∃ s : ℂ, Tendsto (fun n : ℕ => ∑ k ∈ Finset.range n,
+gaussHGCoeff a b c k * z ^ k) atTop (𝓝 s)) ∧ ¬ Summable (fun k : ℕ => ‖gaussHGCoeff a b c k *
+z ^ k‖)`. -/
 @[dlmf 15.2.i]
 theorem conditional_convergence_on_circle
     {a b c z : ℂ}
@@ -261,6 +271,8 @@ theorem conditional_convergence_on_circle
       _ = 2 / ‖L‖ * (‖L‖ / 2 * (k : ℝ) ^ σ) := by field_simp
       _ ≤ 2 / ‖L‖ * ‖gaussHGCoeff a b c k‖ := by gcongr; exact hk.1
 
+/-- Formula under the stated hypotheses: `¬ ∃ s : ℂ, Tendsto (fun n : ℕ => ∑ k ∈ Finset.range n,
+gaussHGCoeff a b c k * z ^ k) atTop (𝓝 s)`. -/
 @[dlmf 15.2.i]
 theorem divergence_on_circle
     {a b c z : ℂ}
@@ -337,6 +349,8 @@ theorem tendsto_recip_neg_log_one_sub_left :
   have h4 := (continuous_ofReal.tendsto 0).comp h3
   simpa [Function.comp_def] using h4
 
+/-- The map `(fun x : ℝ => ₂F₁ a b (a + b) (x : ℂ) / (-Real.log (1 - x) : ℂ))` tends to `(𝓝 (Gamma
+(a + b) / (Gamma a * Gamma b)))` along `(𝓝[<] 1)`. -/
 @[dlmf 15.4.E21]
 theorem zero_balanced_limit {a b : ℂ} (hc : ∀ k : ℕ, a + b ≠ -(k : ℂ)) :
     Tendsto (fun x : ℝ => ₂F₁ a b (a + b) (x : ℂ) / (-Real.log (1 - x) : ℂ))
@@ -453,6 +467,9 @@ theorem zero_balanced_limit {a b : ℂ} (hc : ∀ k : ℕ, a + b ≠ -(k : ℂ))
     rw [mul_zero] at this
     exact this.congr fun x => by rw [div_eq_mul_inv, ofReal_neg]
 
+/-- The map `(fun x : ℝ => (1 - (x : ℂ)) ^ (a + b - c) * (₂F₁ a b c (x : ℂ) - Gamma c * Gamma (c -
+a - b) / (Gamma (c - a) * Gamma (c - b))))` tends to `(𝓝 (Gamma c * Gamma (a + b - c) / (Gamma
+a * Gamma b)))` along `(𝓝[<] 1)`. -/
 @[dlmf 15.4.E22]
 theorem imaginary_excess_limit
     {a b c : ℂ}
@@ -550,6 +567,8 @@ theorem imaginary_excess_limit
   filter_upwards [hev] with x hx
   exact (key x hx.1 hx.2).symm
 
+/-- The map `(fun c : ℂ => Filter.limUnder (𝓝[≠] (-(m : ℂ))) (fun a => ₂F₁ a b c z))` tends to `(𝓝
+(₂F₁ (-m : ℂ) b (-(m : ℂ) - l) z))` along `(𝓝[≠] (-(m : ℂ) - l))`. -/
 @[dlmf 15.2.E5]
 theorem terminating_iterated_parameter_limit (b : ℂ) (m l : ℕ) {z : ℂ} (hz : ‖z‖ < 1) :
     Tendsto (fun c : ℂ => Filter.limUnder (𝓝[≠] (-(m : ℂ))) (fun a => ₂F₁ a b c z))

@@ -39,16 +39,20 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E
 /-- The antiperiodic Euler function `Ẽₖ(x) = (-1)^{⌊x⌋} Eₖ(x - ⌊x⌋)`. -/
 def antiperiodicEuler (k : ℕ) (x : ℝ) : ℝ := (-1 : ℝ) ^ ⌊x⌋ * eulerFun k (Int.fract x)
 
+/-- Measurability of the indicated function: `Measurable (antiperiodicEuler k)`. -/
 theorem measurable_antiperiodicEuler (k : ℕ) : Measurable (antiperiodicEuler k) := by
   unfold antiperiodicEuler
   have h1 : Measurable fun x : ℝ => (-1 : ℝ) ^ ⌊x⌋ :=
     (measurable_from_top (f := fun m : ℤ => (-1 : ℝ) ^ m)).comp Int.measurable_floor
   exact h1.mul ((continuous_eulerFun k).measurable.comp measurable_fract)
 
+/-- Identity under the stated parameter and domain assumptions: `antiperiodicEuler k x = (-1 : ℝ)
+^ m * eulerFun k (x - m)`. -/
 theorem antiperiodicEuler_eq_of_mem_Ico {k : ℕ} {x : ℝ} {m : ℤ} (hx : x ∈ Ico (m : ℝ) (m + 1)) :
     antiperiodicEuler k x = (-1 : ℝ) ^ m * eulerFun k (x - m) := by
   rw [antiperiodicEuler, Int.fract, Int.floor_eq_iff.mpr ⟨hx.1, hx.2⟩]
 
+/-- Identity under the stated parameter and domain assumptions: `eulerFun k 1 = -eulerFun k 0`. -/
 theorem eulerFun_one_eq_neg {k : ℕ} (hk : k ≠ 0) : eulerFun k 1 = -eulerFun k 0 := by
   have h := euler_eval_one_add_eval_zero k
   rw [zero_pow hk, mul_zero] at h

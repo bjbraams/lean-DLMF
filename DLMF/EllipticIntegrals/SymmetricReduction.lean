@@ -133,6 +133,8 @@ def EllRedPerm (α β γ δ : Fin 5) : Prop :=
 
 /-! ### Algebraic identities (19.29.5), (19.29.9) -/
 
+/-- Identity under the stated parameter and domain assumptions: `ellRedRoot a b x α ^ 2 = a α + b
+α * x`. -/
 lemma ei19e_root_sq {ι : Type*} (a b : ι → ℂ) (x : ℝ) (α : ι) :
     ellRedRoot a b x α ^ 2 = a α + b α * x := by
   rw [sq, ellRedRoot, ei19c_cpow_half_sq]
@@ -331,6 +333,8 @@ theorem ellRed_example_GR3142 {a b u c : ℝ} (hab : b < a) (hbu : u < b) (huc :
 
 /-! ### Real positive factors: (19.29.4) from `lean-codes` -/
 
+/-- Identity under the stated parameter and domain assumptions: `(r : ℂ) ^ (1 / 2 : ℂ) = ((√r : ℝ)
+: ℂ)`. -/
 lemma ei19e_cpow_half_ofReal {r : ℝ} (hr : 0 ≤ r) : (r : ℂ) ^ (1 / 2 : ℂ) = ((√r : ℝ) : ℂ) := by
   rw [Real.sqrt_eq_rpow, Complex.ofReal_cpow hr]
   push_cast; rfl
@@ -463,11 +467,15 @@ theorem ellRedI_reduction {h n : ℕ} (hh : h = 3 ∨ h = 4) (hn : h ≤ n) {a b
             (a α + b α * y) ^ (1 / 2 : ℂ)) * P.eval (y : ℂ) / Q.eval (y : ℂ)) := by
   sorry
 
+/-- Identity under the stated parameter and domain assumptions: `∏ k, f k ^ ((Pi.single j q : Fin
+n → ℤ) k) = f j ^ q`. -/
 lemma ei19e_prod_single {n : ℕ} (f : Fin n → ℂ) (j : Fin n) (q : ℤ) :
     ∏ k, f k ^ ((Pi.single j q : Fin n → ℤ) k) = f j ^ q := by
   rw [Finset.prod_eq_single j (fun k _ hk => by simp [hk]) (by simp)]
   simp
 
+/-- Identity under the stated parameter and domain assumptions: `∏ k, f k ^ ((ellRedE l - ellRedE
+j) k) = f l * (f j)⁻¹`. -/
 lemma ei19e_prod_sub {n : ℕ} (f : Fin n → ℂ) {l j : Fin n} (hlj : l ≠ j) :
     ∏ k, f k ^ ((ellRedE l - ellRedE j) k) = f l * (f j)⁻¹ := by
   rw [← Finset.prod_subset (Finset.subset_univ {l, j}) (fun k _ hk => by
@@ -850,6 +858,7 @@ theorem ellRed_two_quadratics {f₁ g₁ h₁ f₂ g₂ h₂ x y : ℝ} (hxy : y
         (ellRedQuadD f₂ g₂ h₂ f₂ g₂ h₂) x y := by
   sorry
 
+/-- Estimate under the stated parameter and domain assumptions: `0 ≤ c + d * x ∧ 0 ≤ c + d * y`. -/
 lemma ei19e_endpoints_nonneg {c d x y : ℝ} (hxy : y < x) (h : ∀ t ∈ Ioo y x, 0 < c + d * t) :
     0 ≤ c + d * x ∧ 0 ≤ c + d * y := by
   have hc : IsClosed {t : ℝ | 0 ≤ c + d * t} :=

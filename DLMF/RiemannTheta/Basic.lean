@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Elliptic.Theta
+public import DLMF.Elliptic.Theta.Defs
 public import Mathlib.Analysis.Complex.LocallyUniformLimit
 public import Mathlib.Algebra.Order.Chebyshev
 public import Mathlib.Algebra.Order.Star.Real
@@ -89,16 +89,22 @@ def riemannThetaBig (φ : ι → ℂ) (B : Matrix ι ι ℂ) : ℂ :=
 
 /-! ## The modulus of a term -/
 
+/-- Identity under the stated parameter and domain assumptions: `((fun i => (x i : ℂ)) ⬝ᵥ z).im =
+x ⬝ᵥ fun i => (z i).im`. -/
 lemma rth21_im_dotProduct_ofReal (x : ι → ℝ) (z : ι → ℂ) :
     ((fun i => (x i : ℂ)) ⬝ᵥ z).im = x ⬝ᵥ fun i => (z i).im := by
   simp [dotProduct, Complex.im_sum]
 
+/-- Identity under the stated parameter and domain assumptions: `((fun i => (x i : ℂ)) ⬝ᵥ (Ω *ᵥ
+fun i => (x i : ℂ))).im = x ⬝ᵥ (Ω.map Complex.im *ᵥ x)`. -/
 theorem rth21_im_quad_ofReal (x : ι → ℝ) (Ω : Matrix ι ι ℂ) :
     ((fun i => (x i : ℂ)) ⬝ᵥ (Ω *ᵥ fun i => (x i : ℂ))).im =
       x ⬝ᵥ (Ω.map Complex.im *ᵥ x) := by
   simp [dotProduct, mulVec, Complex.im_sum, Finset.mul_sum]
 
 omit [Fintype ι] in
+/-- Identity under the stated parameter and domain assumptions: `(fun i => (n i : ℂ)) = fun i =>
+(((n i : ℝ)) : ℂ)`. -/
 lemma rth21_intVec (n : ι → ℤ) : (fun i => (n i : ℂ)) = fun i => (((n i : ℝ)) : ℂ) := by
   simp
 
@@ -121,10 +127,14 @@ holds on the Siegel upper half-space and does not require `Ω` to be symmetric. 
 def rth21_PosIm (Ω : Matrix ι ι ℂ) : Prop :=
   ∀ x : ι → ℝ, x ≠ 0 → 0 < x ⬝ᵥ (Ω.map Complex.im *ᵥ x)
 
+/-- Membership in Siegel upper half-space implies the positive-definiteness condition used to
+control the theta summands. -/
 theorem rth21_posIm_of_mem {Ω : Matrix ι ι ℂ} (h : Ω ∈ siegelUpperHalfSpace ι) :
     rth21_PosIm Ω := fun x hx => by
   simpa using h.2.dotProduct_mulVec_pos hx
 
+/-- Estimate under the stated parameter and domain assumptions: `∃ c > 0, ∀ x : ι → ℝ, c * ∑ i, x
+i ^ 2 ≤ x ⬝ᵥ (Y *ᵥ x)`. -/
 lemma rth21_exists_lower {Y : Matrix ι ι ℝ} (hY : ∀ x : ι → ℝ, x ≠ 0 → 0 < x ⬝ᵥ (Y *ᵥ x)) :
     ∃ c > 0, ∀ x : ι → ℝ, c * ∑ i, x i ^ 2 ≤ x ⬝ᵥ (Y *ᵥ x) := by
   classical
@@ -166,6 +176,8 @@ lemma rth21_exists_lower {Y : Matrix ι ι ℝ} (hY : ∀ x : ι → ℝ, x ≠ 
     _ = u ⬝ᵥ (Y *ᵥ u) * ‖x‖ ^ 2 := by field_simp
     _ ≤ _ := h4
 
+/-- Estimate under the stated parameter and domain assumptions: `x ⬝ᵥ (Y *ᵥ x) - δ * Fintype.card
+ι * ∑ i, x i ^ 2 ≤ x ⬝ᵥ (Y' *ᵥ x)`. -/
 lemma rth21_quad_perturb {Y Y' : Matrix ι ι ℝ} {δ : ℝ} (hδ : ∀ i j, |Y' i j - Y i j| ≤ δ)
     (x : ι → ℝ) :
     x ⬝ᵥ (Y *ᵥ x) - δ * Fintype.card ι * ∑ i, x i ^ 2 ≤ x ⬝ᵥ (Y' *ᵥ x) := by
@@ -218,6 +230,7 @@ lemma rth21_norm_term_le {z : ι → ℂ} {Ω : Matrix ι ι ℂ} {T S : ℝ}
   nlinarith [mul_le_mul_of_nonneg_left h1 Real.pi_pos.le,
     mul_le_mul_of_nonneg_left h2 Real.pi_pos.le]
 
+/-- Summability of the indicated series: `Summable fun n : ι → ℤ => ∏ i, f (n i)`. -/
 lemma rth21_summable_prod {f : ℤ → ℝ} (hf0 : ∀ k, 0 ≤ f k) (hf : Summable f) :
     Summable fun n : ι → ℤ => ∏ i, f (n i) := by
   classical
@@ -233,6 +246,7 @@ lemma rth21_summable_prod {f : ℤ → ℝ} (hf0 : ∀ k, 0 ≤ f k) (hf : Summa
         Finset.prod_le_prod₀ (fun i _ => Finset.sum_nonneg fun k _ => hf0 k)
           (fun i _ => hf.sum_le_tsum _ (fun k _ => hf0 k))
 
+/-- Estimate under the stated parameter and domain assumptions: `∀ᶠ x in 𝓝 x0, |f x - f x0| < ε`. -/
 lemma rth21_eventually_abs_lt {X : Type*} [TopologicalSpace X] {f : X → ℝ} (hf : Continuous f)
     (x0 : X) {ε : ℝ} (hε : 0 < ε) : ∀ᶠ x in 𝓝 x0, |f x - f x0| < ε := by
   have := (hf.tendsto x0).eventually (Metric.ball_mem_nhds (f x0) hε)
@@ -320,6 +334,8 @@ theorem tendstoUniformlyOn_riemannTheta {K : Set ((ι → ℂ) × Matrix ι ι �
   rw [← tendstoLocallyUniformlyOn_iff_tendstoUniformlyOn_of_compact hK]
   exact tendstoLocallyUniformlyOn_riemannTheta.mono fun p hp => rth21_posIm_of_mem (hKS p hp)
 
+/-- Continuity of the indicated function: `Continuous fun p : (ι → ℂ) × Matrix ι ι ℂ =>
+riemannThetaTerm p.1 p.2 n`. -/
 lemma rth21_continuous_term (n : ι → ℤ) :
     Continuous fun p : (ι → ℂ) × Matrix ι ι ℂ => riemannThetaTerm p.1 p.2 n := by
   simp only [riemannThetaTerm, dotProduct, mulVec]
@@ -335,6 +351,8 @@ theorem continuousOn_riemannTheta :
     (Frequently.of_forall fun s =>
       (continuous_finsetSum _ fun n _ => rth21_continuous_term n).continuousOn)
 
+/-- Differentiability at the specified argument: `DifferentiableAt ℂ (fun w => riemannTheta (L
+w).1 (L w).2) w0`. -/
 lemma rth21_differentiableAt_comp {L : ℂ → (ι → ℂ) × Matrix ι ι ℂ} {w0 : ℂ}
     (hL : Continuous L) (h0 : rth21_PosIm (L w0).2)
     (hd : ∀ n, Differentiable ℂ fun w => riemannThetaTerm (L w).1 (L w).2 n) :
@@ -381,6 +399,8 @@ theorem differentiableAt_riemannTheta_entry [DecidableEq ι] (z : ι → ℂ) {�
 
 /-! ## The scaled theta function (DLMF 21.2.2) -/
 
+/-- Summability of the indicated series: `Summable (fun n : ι → ℤ => ∏ i, f i (n i)) ∧ ∑' n : ι →
+ℤ, ∏ i, f i (n i) ≤ M ^ Fintype.card ι`. -/
 lemma rth21_prod_sum_le {f : ι → ℤ → ℝ} {M : ℝ} (hf0 : ∀ i k, 0 ≤ f i k)
     (hf : ∀ i, Summable (f i)) (hM : ∀ i, ∑' k, f i k ≤ M) :
     Summable (fun n : ι → ℤ => ∏ i, f i (n i)) ∧
@@ -401,6 +421,9 @@ lemma rth21_prod_sum_le {f : ι → ℤ → ℝ} {M : ℝ} (hf0 : ∀ i k, 0 ≤
   have h0 : ∀ n : ι → ℤ, 0 ≤ ∏ i, f i (n i) := fun n => Finset.prod_nonneg fun i _ => hf0 _ _
   exact ⟨summable_of_sum_le h0 hbound, Real.tsum_le_of_sum_le h0 hbound⟩
 
+/-- Estimate under the stated parameter and domain assumptions: `∃ M : ℝ, ∀ t : ℝ, Summable (fun k
+: ℤ => Real.exp (-π * c * ((k : ℝ) + t) ^ 2)) ∧ ∑' k : ℤ, Real.exp (-π * c * ((k : ℝ) + t) ^
+2) ≤ M`. -/
 lemma rth21_gauss_shift_bound {c : ℝ} (hc : 0 < c) :
     ∃ M : ℝ, ∀ t : ℝ, Summable (fun k : ℤ => Real.exp (-π * c * ((k : ℝ) + t) ^ 2)) ∧
       ∑' k : ℤ, Real.exp (-π * c * ((k : ℝ) + t) ^ 2) ≤ M := by
@@ -687,6 +710,8 @@ def riemannMatrixExample : Matrix (Fin 2) (Fin 2) ℂ := !![I, -1 / 2; -1 / 2, I
 theorem riemannMatrixExample_eq_omegaOne :
     riemannMatrixExample = !![I, -1 / 2; -1 / 2, I] := rfl
 
+/-- Identity under the stated parameter and domain assumptions: `riemannMatrixExample.map
+Complex.im = 1`. -/
 theorem riemannMatrixExample_map_im : riemannMatrixExample.map Complex.im = 1 := by
   ext i j
   fin_cases i <;> fin_cases j <;> simp [riemannMatrixExample]
@@ -700,6 +725,9 @@ theorem riemannMatrixExample_mem : riemannMatrixExample ∈ siegelUpperHalfSpace
   · rw [riemannMatrixExample_map_im]
     exact Matrix.PosDef.one
 
+/-- Identity under the stated parameter and domain assumptions: `riemannThetaTerm z
+riemannMatrixExample n = cexp (-π * ((n 0 : ℂ) ^ 2 + (n 1 : ℂ) ^ 2)) * cexp (-I * π * (n 0 * n
+1 : ℂ)) * cexp (2 * π * I * (n 0 * z 0 + n 1 * z 1))`. -/
 lemma rth21_example_term (z : Fin 2 → ℂ) (n : Fin 2 → ℤ) :
     riemannThetaTerm z riemannMatrixExample n =
       cexp (-π * ((n 0 : ℂ) ^ 2 + (n 1 : ℂ) ^ 2)) * cexp (-I * π * (n 0 * n 1 : ℂ)) *
@@ -781,6 +809,7 @@ theorem riemannMatrixOmegaTwo_mem : riemannMatrixOmegaTwo ∈ siegelUpperHalfSpa
 
 /-! ## Characteristics (DLMF §21.2(ii)) -/
 
+/-- Identity under the stated parameter and domain assumptions: `a ⬝ᵥ (Ω *ᵥ b) = b ⬝ᵥ (Ω *ᵥ a)`. -/
 theorem rth21_dot_mulVec_comm {Ω : Matrix ι ι ℂ} (hΩ : Ωᵀ = Ω) (a b : ι → ℂ) :
     a ⬝ᵥ (Ω *ᵥ b) = b ⬝ᵥ (Ω *ᵥ a) := by
   rw [dotProduct_mulVec, ← mulVec_transpose, hΩ, dotProduct_comm]
@@ -876,6 +905,8 @@ theorem ncard_halfPeriodCharacteristics [DecidableEq ι] :
 
 open DLMF.Elliptic
 
+/-- Identity under the stated parameter and domain assumptions: `∑' n, f n = ∑' k : ℤ, f fun _ =>
+k`. -/
 lemma rth21_tsum_fin_one (f : (Fin 1 → ℤ) → ℂ) : ∑' n, f n = ∑' k : ℤ, f fun _ => k := by
   rw [← (Equiv.funUnique (Fin 1) ℤ).symm.tsum_eq]
   rfl

@@ -31,12 +31,15 @@ namespace DLMF.Hypergeometric
 abbrev poch (a : ℂ) (n : ℕ) : ℂ :=
   (ascPochhammer ℂ n).eval a
 
+/-- Identity under the stated parameter and domain assumptions: `poch a 0 = 1`. -/
 @[dlmf 5.2.E4]
 theorem poch_zero (a : ℂ) : poch a 0 = 1 := by simp [poch]
 
 /-- `(a)₁ = a`. -/
 theorem poch_one (a : ℂ) : poch a 1 = a := by simp [poch]
 
+/-- Identity under the stated parameter and domain assumptions: `poch a (n + 1) = poch a n * (a +
+n)`. -/
 @[dlmf 5.2.E4]
 theorem poch_succ (a : ℂ) (n : ℕ) : poch a (n + 1) = poch a n * (a + n) :=
   ascPochhammer_succ_eval n a

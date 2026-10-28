@@ -202,7 +202,8 @@ def invErfSeriesCoeff : ℕ → ℝ
       invErfSeriesCoeff (m-n)*invErfSeriesCoeff (m-(m-n)))/(2*m+3)
 termination_by m => m
 
-/-- invErfSeriesCoeff initial. -/
+/-- Estimate under the stated parameter and domain assumptions: `∀ n < 4, invErfSeriesCoeff
+n=([1,1/3,7/30,127/630] : List ℝ)[n]!`. -/
 @[dlmf 7.17.E2]
 theorem invErfSeriesCoeff_initial  :
     ∀ n < 4, invErfSeriesCoeff n=([1,1/3,7/30,127/630] : List ℝ)[n]! := by

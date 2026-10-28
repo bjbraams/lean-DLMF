@@ -102,7 +102,9 @@ theorem summable_fresnel_coeff (ε : ℕ) (R : ℝ) :
   rw [pow_mul R 2 (2*n+ε)]
   ring
 
-/-- fresnelCosInt hasSum. -/
+/-- The series with terms `(fun n : ℕ => (-1 :
+ℂ)^n*(π/2)^(2*n+0)*z^(4*n+1)/((2*n+0).factorial*(4*n+1 : ℂ)))` converges to `(fresnelCosInt
+z)`. -/
 @[dlmf 7.6.E4]
 theorem fresnelCosInt_hasSum (z : ℂ) :
     HasSum (fun n : ℕ => (-1 : ℂ)^n*(π/2)^(2*n+0)*z^(4*n+1)/((2*n+0).factorial*(4*n+1 : ℂ))) (fresnelCosInt z) := by
@@ -123,8 +125,9 @@ theorem fresnelCosInt_hasSum (z : ℂ) :
   simp only [div_eq_mul_inv,mul_inv_rev]
   ring
 
-
-/-- fresnelSinInt hasSum. -/
+/-- The series with terms `(fun n : ℕ => (-1 :
+ℂ)^n*(π/2)^(2*n+1)*z^(4*n+3)/((2*n+1).factorial*(4*n+3 : ℂ)))` converges to `(fresnelSinInt
+z)`. -/
 @[dlmf 7.6.E6]
 theorem fresnelSinInt_hasSum (z : ℂ) :
     HasSum (fun n : ℕ => (-1 : ℂ)^n*(π/2)^(2*n+1)*z^(4*n+3)/((2*n+1).factorial*(4*n+3 : ℂ))) (fresnelSinInt z) := by
@@ -144,7 +147,6 @@ theorem fresnelSinInt_hasSum (z : ℂ) :
   push_cast
   simp only [div_eq_mul_inv,mul_inv_rev]
   ring
-
 
 /-- Dawson differentiation uses only the entire Gaussian primitive. -/
 theorem hasDerivAt_dawsonF_complex (z : ℂ) :
@@ -245,7 +247,8 @@ theorem dawsonF_eq_kummerM (z : ℂ) : dawsonF z=z*kummerM 1 (3/2) (-z^2) := by
     (fun x hx => by rw [dawsonF_ofReal, Real.dawsonF_eq_kummerM])
   exact congrFun he z
 
-/-- erf complex segment integral. -/
+/-- Identity under the stated parameter and domain assumptions: `erf z = 2/Real.sqrt π*primitive
+(fun t => exp (-t^2)) z`. -/
 @[dlmf 7.2.E1]
 theorem erf_complex_segment_integral (z : ℂ) :
     erf z = 2/Real.sqrt π*primitive (fun t => exp (-t^2)) z := by
@@ -326,7 +329,8 @@ theorem tendsto_erf_add_ofReal_atTop (z : ℂ) :
     exact tendsto_atBot_add_const_left _ _ (tendsto_neg_atTop_atBot.comp this)
   simpa using (Real.tendsto_exp_atBot.comp ht).const_mul a
 
-/-- erfc horizontal integral. -/
+/-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => exp (-(z+t)^2)) 0
+(Real.sqrt π/2*erfc z)`. -/
 @[dlmf 7.2.E2]
 theorem erfc_horizontal_integral (z : ℂ) :
     HasIntegralAtTop (fun t : ℝ => exp (-(z+t)^2)) 0 (Real.sqrt π/2*erfc z) := by
@@ -348,7 +352,8 @@ theorem erfc_horizontal_integral (z : ℂ) :
   convert h using 2
   simp [erfc]; ring
 
-/-- faddeevaW integral. -/
+/-- Identity under the stated parameter and domain assumptions: `faddeevaW z = exp
+(-z^2)*(1+2*I/Real.sqrt π*primitive (fun t => exp (t^2)) z)`. -/
 @[dlmf 7.2.E3]
 theorem faddeevaW_integral (z : ℂ) :
     faddeevaW z = exp (-z^2)*(1+2*I/Real.sqrt π*primitive (fun t => exp (t^2)) z) := by
@@ -512,7 +517,8 @@ theorem re_pos_of_abs_arg_lt {z : ℂ} (hz : z ≠ 0) (h : |arg z| < π/2) : 0 <
   exact mul_pos (norm_pos_iff.mpr hz) (Real.cos_pos_of_mem_Ioo ⟨by linarith [neg_abs_le (arg z)],
     by linarith [le_abs_self (arg z)]⟩)
 
-/-- erf sector limit. -/
+/-- Limit formula in the specified filter: `Tendsto erf (sector (π/4-δ)) (𝓝 1) ∧ Tendsto erfc
+(sector (π/4-δ)) (𝓝 0)`. -/
 @[dlmf 7.2.E4]
 theorem erf_sector_limit {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π/4) :
     Tendsto erf (sector (π/4-δ)) (𝓝 1) ∧ Tendsto erfc (sector (π/4-δ)) (𝓝 0) := by
@@ -546,7 +552,8 @@ theorem erf_sector_limit {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π/4) :
   refine this.congr fun z => ?_
   simp [erfc]
 
-/-- fresnelTail horizontal integral. -/
+/-- The map `(fun R : ℝ => segmentIntegral (fun t => exp (π*I*t^2/2)) z R)` tends to `(𝓝
+(fresnelTail z))` along `atTop`. -/
 @[dlmf 7.2.E6]
 theorem fresnelTail_horizontal_integral (z : ℂ) :
     Tendsto (fun R : ℝ => segmentIntegral (fun t => exp (π*I*t^2/2)) z R) atTop (𝓝 (fresnelTail z)) := by
@@ -568,7 +575,7 @@ theorem fresnelTail_horizontal_integral (z : ℂ) :
   · simp
   · simp only [fresnelTail]; push_cast; ring
 
-/-- goodwinStatonG integrable. -/
+/-- The kernel `(fun t : ℝ => exp (-(t : ℂ)^2)/(t+z))` is integrable on `(Ioi 0)`. -/
 @[dlmf 7.2.E12]
 theorem goodwinStatonG_integrable {z : ℂ} (hz : z ∈ slitPlane) :
     IntegrableOn (fun t : ℝ => exp (-(t : ℂ)^2)/(t+z)) (Ioi 0) := by

@@ -345,6 +345,8 @@ theorem hasSum_besselI_cos (z : ℂ) (θ : ℝ) :
 
 /-! ### Positivity of `I_ν` and `K_ν` on the positive axis -/
 
+/-- Identity under the stated parameter and domain assumptions: `Complex.Gamma ((ν : ℂ) + 1 + n) =
+((Real.Gamma (ν + 1 + n) : ℝ) : ℂ)`. -/
 theorem Gamma_ofReal_add_one_add (ν : ℝ) (n : ℕ) :
     Complex.Gamma ((ν : ℂ) + 1 + n) = ((Real.Gamma (ν + 1 + n) : ℝ) : ℂ) := by
   rw [← Complex.Gamma_ofReal]
@@ -382,6 +384,8 @@ theorem besselI_ofReal_pos {ν x : ℝ} (hν : -1 < ν) (hx : 0 < x) :
   exact mul_pos (Real.rpow_pos_of_pos (by positivity) _) (hsum.tsum_pos (fun n => (hpos n).le) 0
     (hpos 0))
 
+/-- Estimate under the stated parameter and domain assumptions: `∃ r : ℝ, 0 < r ∧ besselK ν x =
+r`. -/
 theorem besselK_ofReal_pos_of_gt {ν x : ℝ} (hν : -1 / 2 < ν) (hx : 0 < x) :
     ∃ r : ℝ, 0 < r ∧ besselK ν x = r := by
   have hνc : -1 / 2 < (ν : ℂ).re := by simpa using hν

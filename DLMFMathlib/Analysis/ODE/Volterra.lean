@@ -108,9 +108,12 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 noncomputable def oscFree (ω a : ℝ) (c d : E) (x : ℝ) : E :=
   Real.cos (ω * (x - a)) • c + (Real.sin (ω * (x - a)) / ω) • d
 
+/-- Identity under the stated parameter and domain assumptions: `oscFree ω a c d a = c`. -/
 theorem oscFree_self (ω a : ℝ) (c d : E) : oscFree ω a c d a = c := by
   simp [oscFree]
 
+/-- Estimate under the stated parameter and domain assumptions: `‖oscFree ω a c d x‖ ≤ ‖c‖ + ‖d‖ /
+|ω|`. -/
 theorem norm_oscFree_le (ω a : ℝ) (c d : E) (x : ℝ) :
     ‖oscFree ω a c d x‖ ≤ ‖c‖ + ‖d‖ / |ω| := by
   unfold oscFree

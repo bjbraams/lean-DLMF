@@ -33,7 +33,8 @@ def genExpIntEOnLog (p w : ℂ) : ℂ :=
 def genExpIntEExtended (p z : ℂ) : ℂ :=
   if z=0 then 1/(p-1) else genExpIntE p z
 
-/-- genExpIntE horizontal integral. -/
+/-- Horizontal-ray integral representation of the generalized exponential integral on the
+principal slit plane. -/
 @[dlmf 8.19.E2]
 theorem genExpIntE_horizontal_integral (p : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     HasIntegralAtTop (fun t : ℝ => (z+t)^(-p)*exp (-(z+t))) 0 (z^(1-p)*genExpIntE p z) := by
@@ -43,7 +44,8 @@ theorem genExpIntE_horizontal_integral (p : ℂ) {z : ℂ} (hz : z ∈ slitPlane
   rw [genExpIntE, ← mul_assoc, ← cpow_add _ _ (slitPlane_ne_zero hz)]
   simp
 
-/-- genExpIntE laplace complex. -/
+/-- Laplace integral representation of the generalized exponential integral for arguments with
+positive real part. -/
 @[dlmf 8.19.E3]
 theorem genExpIntE_laplace_complex (p : ℂ) {z : ℂ} (hz : 0 < z.re) :
     genExpIntE p z=∫ t : ℝ in Ioi 1, exp (-z*t)*(t : ℂ)^(-p) := by
@@ -63,7 +65,8 @@ theorem genExpIntE_laplace_complex (p : ℂ) {z : ℂ} (hz : 0 < z.re) :
   rw [add_comm (1:ℂ) t]
   ring
 
-/-- genExpIntE stieltjes. -/
+/-- Stieltjes-type representation of the generalized exponential integral when both the order and
+argument have positive real part. -/
 @[dlmf 8.19.E4]
 theorem genExpIntE_stieltjes {p z : ℂ} (hp : 0 < p.re) (hz : 0 < z.re) :
     genExpIntE p z=z^(p-1)*exp (-z)/Gamma p*(∫ t : ℝ in Ioi 0, (t : ℂ)^(p-1)*exp (-z*t)/(1+t)) := by
@@ -95,7 +98,8 @@ theorem tendsto_mul_log_nhdsNE_zero :
         exact abs_arg_le_pi z
     _ = _ := by rw [abs_mul, abs_norm]; ring
 
-/-- genExpIntEExtended zero. -/
+/-- For orders with real part greater than one, the generalized exponential integral extends
+continuously to zero with value `1/(p-1)`. -/
 @[dlmf 8.19.E6]
 theorem genExpIntEExtended_zero {p : ℂ} (hp : 1 < p.re) :
     genExpIntEExtended p 0=1/(p-1) ∧ ContinuousAt (genExpIntEExtended p) 0 := by
@@ -137,7 +141,8 @@ theorem genExpIntEExtended_zero {p : ℂ} (hp : 1 < p.re) :
   rw [← continuousWithinAt_compl_self, ContinuousWithinAt, hval]
   exact hE
 
-/-- genExpIntE nat finite. -/
+/-- At integral orders at least two, express the generalized exponential integral using `E₁` and a
+finite factorial sum. -/
 @[dlmf 8.19.E7]
 theorem genExpIntE_nat_finite {n : ℕ} (hn : 2 ≤ n) {z : ℂ} (hz : z ≠ 0) :
     genExpIntE n z=(-z)^(n-1)/(n-1).factorial*genExpIntE 1 z+exp (-z)/(n-1).factorial*(∑ k ∈ Finset.range (n-1), ((n-k-2).factorial : ℂ)*(-z)^k) := by
@@ -182,7 +187,8 @@ theorem genExpIntE_nat_finite {n : ℕ} (hn : 2 ≤ n) {z : ℂ} (hz : z ≠ 0) 
   rw [hsum, neg_pow z]
   linear_combination -hS
 
-/-- genExpIntE nat hasSum. -/
+/-- At positive integral order, the logarithmic digamma term and the omitted-index exponential
+series give the generalized exponential integral. -/
 @[dlmf 8.19.E8]
 theorem genExpIntE_nat_hasSum {n : ℕ} (hn : 1 ≤ n) {z : ℂ} (hz : z ≠ 0) :
     HasSum (fun k : ℕ => if k=n-1 then 0 else (-z)^k/((k.factorial : ℂ)*(1-(n : ℂ)+k))) ((-z)^(n-1)/(n-1).factorial*(digamma n-log z)-genExpIntE n z) := by
@@ -237,7 +243,6 @@ theorem incG_sum_choose_harmonic (n : ℕ) :
       rw [Finset.sum_congr rfl hc, ← Finset.sum_div, incG_alt_choose_succ]
     rw [hB]; push_cast; ring
 
-
 /-- The `E₁` part of DLMF 6.6.2 as a power series in `z`, with constant term `-γ`. -/
 theorem incG_hasSum_E1_add_log {z : ℂ} (hz : z ≠ 0) :
     HasSum (fun k : ℕ => if k = 0 then -(Real.eulerMascheroniConstant : ℂ)
@@ -250,6 +255,9 @@ theorem incG_hasSum_E1_add_log {z : ℂ} (hz : z ≠ 0) :
   · funext k; push_cast; rw [neg_pow z, pow_succ (-1:ℂ)]; ring
   · ring
 
+/-- Identity under the stated parameter and domain assumptions: `(-(-z)^(j+1)/(((j+1).factorial :
+ℂ)*((j+1:ℕ):ℂ))) * (z^(n-(j+1))/((n-(j+1)).factorial : ℂ)) = z^n/(n.factorial : ℂ) *
+((n.choose (j+1) : ℂ) * (-1)^j / ((j:ℂ)+1))`. -/
 theorem incG_digamma_conv_term {n j : ℕ} (hj : j < n) (z : ℂ) :
     (-(-z)^(j+1)/(((j+1).factorial : ℂ)*((j+1:ℕ):ℂ))) * (z^(n-(j+1))/((n-(j+1)).factorial : ℂ)) =
       z^n/(n.factorial : ℂ) * ((n.choose (j+1) : ℂ) * (-1)^j / ((j:ℂ)+1)) := by
@@ -345,6 +353,8 @@ theorem incG_genExpIntE_succ_digamma (m : ℕ) {z : ℂ} (hz : z ≠ 0) :
     field_simp
     ring
 
+/-- The digamma-series representation of the generalized exponential integral at positive integral
+order and nonzero argument. -/
 theorem incG_genExpIntE_nat_digamma_series {n : ℕ} (hn : 1 ≤ n) {z : ℂ} (hz : z ≠ 0) :
     genExpIntE n z=(-1 : ℂ)^n*z^(n-1)/(n-1).factorial*log z+exp (-z)/(n-1).factorial*(∑ k ∈ Finset.range (n-1), (-z)^k*Gamma (n-(k+1)))+exp (-z)*(-z)^(n-1)/(n-1).factorial*(∑' k : ℕ, z^k/(k.factorial : ℂ)*digamma (k+1)) := by
   obtain ⟨m, rfl⟩ : ∃ m, n = m+1 := ⟨n-1, by omega⟩
@@ -358,7 +368,8 @@ theorem incG_genExpIntE_nat_digamma_series {n : ℕ} (hn : 1 ≤ n) {z : ℂ} (h
   rw [Finset.sum_congr rfl hG, show ((m+1:ℕ):ℂ) = (m:ℂ)+1 by push_cast; rfl,
     incG_genExpIntE_succ_digamma m hz]
 
-/-- genExpIntE nat digamma series. -/
+/-- The digamma-series representation of the generalized exponential integral at positive integral
+order and nonzero argument. -/
 @[dlmf 8.19.E9]
 theorem genExpIntE_nat_digamma_series {n : ℕ} (hn : 1 ≤ n) {z : ℂ} (hz : z ≠ 0) :
     genExpIntE n z=(-1 : ℂ)^n*z^(n-1)/(n-1).factorial*log z+exp (-z)/(n-1).factorial*(∑ k ∈ Finset.range (n-1), (-z)^k*Gamma (n-(k+1)))+exp (-z)*(-z)^(n-1)/(n-1).factorial*(∑' k : ℕ, z^k/(k.factorial : ℂ)*digamma (k+1)) :=
@@ -368,7 +379,8 @@ theorem genExpIntE_nat_digamma_series {n : ℕ} (hn : 1 ≤ n) {z : ℂ} (hz : z
 theorem one_sub_ne_neg_nat {p : ℂ} (hp : ∀ n : ℕ, p ≠ n+1) : ∀ n : ℕ, 1-p ≠ -n :=
   fun n h => hp n (by linear_combination -h)
 
-/-- genExpIntE hasSum noninteger. -/
+/-- Power-series representation away from positive integral orders, with the singular power
+term separated using Gamma. -/
 @[dlmf 8.19.E10]
 theorem genExpIntE_hasSum_noninteger {p : ℂ} (hp : ∀ n : ℕ, p ≠ n+1) {z : ℂ} (hz : z ≠ 0) :
     HasSum (fun k : ℕ => (-z)^k/((k.factorial : ℂ)*(1-p+k))) (z^(p-1)*Gamma (1-p)-genExpIntE p z) := by
@@ -379,7 +391,8 @@ theorem genExpIntE_hasSum_noninteger {p : ℂ} (hp : ∀ n : ℕ, p ≠ n+1) {z 
   have hp1 : z^(p-1)*z^(1-p) = 1 := by rw [← cpow_add _ _ hz]; simp
   linear_combination -(-1:ℂ)^k*z^k/((k.factorial : ℂ)*(1-p+k)) * hp1
 
-/-- genExpIntE hasSum exponential. -/
+/-- Reciprocal-Gamma exponential series for the generalized exponential integral, away from
+positive integral order parameters. -/
 @[dlmf 8.19.E11]
 theorem genExpIntE_hasSum_exponential {p : ℂ} (hp : ∀ n : ℕ, p ≠ n+1) {z : ℂ} (hz : z ≠ 0) :
     HasSum (fun k : ℕ => exp (-z)*z^k/Gamma (2-p+k)) (z^(p-1)-genExpIntE p z/Gamma (1-p)) := by
@@ -420,7 +433,8 @@ theorem genExpIntE_series_integer_limits {n : ℕ} (hn : 1 ≤ n) {z : ℂ} (hz 
   rw [(genExpIntE_hasSum_noninteger hp' hz).tsum_eq]
   ring
 
-/-- genExpIntE scaled derivative. -/
+/-- First-order differential equation for the exponentially scaled generalized exponential
+integral on the principal slit plane. -/
 @[dlmf 8.19.E14]
 theorem genExpIntE_scaled_derivative (p : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt (fun t => exp t*genExpIntE p t) (exp z*genExpIntE p z*(1+(p-1)/z)-1/z) z := by
@@ -462,6 +476,8 @@ theorem incG_norm_paramIntegrand_le (j : ℕ) (q z : ℂ) {t : ℝ} (ht : 1 ≤ 
   have : Real.log t ^ j ≤ t^j := pow_le_pow_left₀ hl0 hlt j
   gcongr
 
+/-- The function `(fun t : ℝ => (Real.log t : ℂ)^j*(t : ℂ)^(-q)*exp (-z*t))` is continuous on
+`(Ioi 0)`. -/
 theorem incG_paramIntegrand_continuousOn (j : ℕ) (q z : ℂ) :
     ContinuousOn (fun t : ℝ => (Real.log t : ℂ)^j*(t : ℂ)^(-q)*exp (-z*t)) (Ioi 0) := by
   intro t ht
@@ -471,6 +487,8 @@ theorem incG_paramIntegrand_continuousOn (j : ℕ) (q z : ℂ) :
   · exact (continuousAt_ofReal_cpow_const _ _ (Or.inr ht0.ne'))
   · exact (Complex.continuous_exp.comp (continuous_const.mul continuous_ofReal)).continuousAt
 
+/-- The kernel `(fun t : ℝ => (Real.log t : ℂ)^j*(t : ℂ)^(-q)*exp (-z*t))` is integrable on `(Ioi
+1)`. -/
 theorem incG_paramIntegrand_integrableOn (j : ℕ) (q : ℂ) {z : ℂ} (hz : 0 < z.re) :
     IntegrableOn (fun t : ℝ => (Real.log t : ℂ)^j*(t : ℂ)^(-q)*exp (-z*t)) (Ioi 1) := by
   refine Integrable.mono' (incG_integrableOn_rpow_mul_exp_neg (s := (j:ℝ) - q.re) hz) ?_ ?_
@@ -479,6 +497,8 @@ theorem incG_paramIntegrand_integrableOn (j : ℕ) (q : ℂ) {z : ℂ} (hz : 0 <
   · filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
     exact incG_norm_paramIntegrand_le j q z (le_of_lt ht)
 
+/-- At `q`, the function `(fun q => (Real.log t : ℂ)^j*(t : ℂ)^(-q)*exp (-z*t))` has derivative
+`(-((Real.log t : ℂ)^(j+1)*(t : ℂ)^(-q)*exp (-z*t)))`. -/
 theorem incG_hasDerivAt_paramIntegrand (j : ℕ) (q z : ℂ) {t : ℝ} (ht : 0 < t) :
     HasDerivAt (fun q => (Real.log t : ℂ)^j*(t : ℂ)^(-q)*exp (-z*t))
       (-((Real.log t : ℂ)^(j+1)*(t : ℂ)^(-q)*exp (-z*t))) q := by
@@ -514,6 +534,8 @@ theorem incG_hasDerivAt_paramIntegral (j : ℕ) (q : ℂ) {z : ℂ} (hz : 0 < z.
   · filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht q' _
     exact incG_hasDerivAt_paramIntegrand j q' z (zero_lt_one.trans ht)
 
+/-- Differentiating with respect to the order inserts powers of the logarithm into the Laplace
+integral, with sign `(-1)^j`. -/
 theorem incG_genExpIntE_parameter_derivatives (j : ℕ) (p : ℂ) {z : ℂ} (hz : 0 < z.re) :
     iteratedDeriv j (fun q => genExpIntE q z) p=(-1 : ℂ)^j*(∫ t : ℝ in Ioi 1, (Real.log t : ℂ)^j*(t : ℂ)^(-p)*exp (-z*t)) := by
   have h0 : (fun q => genExpIntE q z) = fun q => ∫ t : ℝ in Ioi 1, (Real.log t : ℂ)^0*(t : ℂ)^(-q)*exp (-z*t) := by
@@ -530,19 +552,22 @@ theorem incG_genExpIntE_parameter_derivatives (j : ℕ) (p : ℂ) {z : ℂ} (hz 
     rw [((incG_hasDerivAt_paramIntegral j p hz).const_mul ((-1:ℂ)^j)).deriv]
     ring
 
-/-- genExpIntE parameter derivatives. -/
+/-- Differentiating with respect to the order inserts powers of the logarithm into the Laplace
+integral, with sign `(-1)^j`. -/
 @[dlmf 8.19.E15]
 theorem genExpIntE_parameter_derivatives (j : ℕ) (p : ℂ) {z : ℂ} (hz : 0 < z.re) :
     iteratedDeriv j (fun q => genExpIntE q z) p=(-1 : ℂ)^j*(∫ t : ℝ in Ioi 1, (Real.log t : ℂ)^j*(t : ℂ)^(-p)*exp (-z*t)) :=
   incG_genExpIntE_parameter_derivatives j p hz
 
-/-- genExpIntE continuedFraction. -/
+/-- Continued-fraction representation of the generalized exponential integral on the principal
+slit plane, with alternating order and argument coefficients. -/
 @[dlmf 8.19.E17]
 theorem genExpIntE_continuedFraction (p : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     HasContinuedFraction (fun k => if k=0 then exp (-z) else if Odd k then p+((k-1)/2 : ℕ) else ((k/2 : ℕ) : ℂ)) (fun k => if Even k then z else 1) (genExpIntE p z) := by
   sorry
 
-/-- genExpIntEOnLog monodromy. -/
+/-- Monodromy of the generalized exponential integral at nonintegral order under an integral
+number of turns in the logarithmic argument. -/
 @[dlmf 8.19.E18]
 theorem genExpIntEOnLog_monodromy {p : ℂ} (hp : ∀ n : ℤ, p ≠ n) (w : ℂ) (m : ℤ) :
     genExpIntEOnLog p (w+2*m*π*I)=2*π*I*exp (m*p*π*I)/Gamma p*sin (m*p*π)/sin (p*π)*exp ((p-1)*w)+genExpIntEOnLog p w := by
@@ -576,7 +601,8 @@ theorem genExpIntEOnLog_monodromy {p : ℂ} (hp : ∀ n : ℤ, p ≠ n) (w : ℂ
   rw [e2]
   linear_combination exp (m*p*π*I)*exp ((p-1)*w)*π*(Complex.sin (p*π)*Gamma p)⁻¹*(-e3-hsin)
 
-/-- genExpIntEOnLog nat monodromy. -/
+/-- At positive integral order, a full turn in the logarithmic argument adds the explicit
+exponential monodromy term. -/
 @[dlmf 8.19.E18]
 theorem genExpIntEOnLog_nat_monodromy {n : ℕ} (hn : 1 ≤ n) (w : ℂ) (m : ℤ) :
     genExpIntEOnLog n (w+2*m*π*I)=genExpIntEOnLog n w+2*π*I*m*(-1 : ℂ)^n/(n-1).factorial*exp (((n : ℂ)-1)*w) := by
@@ -590,7 +616,8 @@ theorem genExpIntEOnLog_nat_monodromy {n : ℕ} (hn : 1 ≤ n) (w : ℂ) (m : �
     show k+1-1=k by omega, pow_succ]
   ring
 
-/-- genExpIntEOnLog nonpos nat monodromy. -/
+/-- At nonpositive integral order, the generalized exponential integral is unchanged by full turns
+in the logarithmic argument. -/
 @[dlmf 8.19.E18]
 theorem genExpIntEOnLog_nonpos_nat_monodromy (n : ℕ) (w : ℂ) (m : ℤ) :
     genExpIntEOnLog (-n) (w+2*m*π*I)=genExpIntEOnLog (-n) w := by
@@ -863,31 +890,36 @@ theorem incG_genExpIntE_ratio_derivative {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx 
       show (((n:ℝ)-1:ℝ) : ℂ) = (n:ℂ)-1 by push_cast; ring] at h
     nlinarith
 
-/-- genExpIntE nat order bounds. -/
+/-- At positive real arguments, successive positive integral orders are strictly decreasing, with
+the lower ratio bounded by `(n-1)/n`. -/
 @[dlmf 8.19.E19]
 theorem genExpIntE_nat_order_bounds {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx : 0 < x) :
     ((n : ℝ)-1)/n*(genExpIntE n x).re < (genExpIntE (n+1) x).re ∧ (genExpIntE (n+1) x).re < (genExpIntE n x).re :=
   incG_genExpIntE_order_bounds hn hx
 
-/-- genExpIntE nat logconvex. -/
+/-- Strict discrete log-convexity of the generalized exponential integral in its positive integral
+order. -/
 @[dlmf 8.19.E20]
 theorem genExpIntE_nat_logconvex {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx : 0 < x) :
     (genExpIntE n x).re^2 < (genExpIntE (n-1 : ℕ) x).re*(genExpIntE (n+1) x).re :=
   incG_genExpIntE_logconvex hn hx
 
-/-- genExpIntE nat rational bounds. -/
+/-- Bound the exponentially scaled generalized exponential integral between the reciprocal shifts
+`1/(x+n)` and `1/(x+n-1)`. -/
 @[dlmf 8.19.E21]
 theorem genExpIntE_nat_rational_bounds {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx : 0 < x) :
     1/(x+n) < Real.exp x*(genExpIntE n x).re ∧ Real.exp x*(genExpIntE n x).re ≤ 1/(x+n-1) :=
   incG_genExpIntE_rational_bounds hn hx
 
-/-- genExpIntE nat ratio derivative. -/
+/-- The ratio of successive positive integral orders has strictly positive derivative on the
+positive real axis. -/
 @[dlmf 8.19.E22]
 theorem genExpIntE_nat_ratio_derivative {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx : 0 < x) :
     0 < deriv (fun y : ℝ => (genExpIntE n y).re/(genExpIntE (n-1 : ℕ) y).re) x :=
   incG_genExpIntE_ratio_derivative hn hx
 
-/-- genExpIntE tail integral. -/
+/-- Integrating the preceding-order generalized exponential integral along a horizontal ray gives
+the current-order function. -/
 @[dlmf 8.19.E23]
 theorem genExpIntE_tail_integral (p : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     HasIntegralAtTop (fun t : ℝ => genExpIntE (p-1) (z+t)) 0 (genExpIntE p z) := by
@@ -949,6 +981,7 @@ theorem genExpIntE_mellin_laplace {a b p : ℂ} (ha : -1 < a.re) (hb : 0 < b.re)
   rw [hG, hc, show b+p-1 = p+b-1 by ring]
   field_simp
 
+/-- Estimate under the stated parameter and domain assumptions: `0 < (1 + a*u).re`. -/
 theorem incG_one_add_mul_re_pos {a : ℂ} (ha : -1 < a.re) {u : ℝ} (hu : u ∈ Set.uIcc (0:ℝ) 1) :
     0 < (1 + a*u).re := by
   rw [Set.uIcc_of_le zero_le_one] at hu
@@ -957,6 +990,7 @@ theorem incG_one_add_mul_re_pos {a : ℂ} (ha : -1 < a.re) {u : ℝ} (hu : u ∈
   · nlinarith [hu.1]
   · nlinarith [hu.1, hu.2]
 
+/-- The function `(fun u : ℝ => (u:ℂ)^m/(1+a*u))` is continuous on `(Set.uIcc 0 1)`. -/
 theorem incG_continuousOn_powDiv {a : ℂ} (ha : -1 < a.re) (m : ℕ) :
     ContinuousOn (fun u : ℝ => (u:ℂ)^m/(1+a*u)) (Set.uIcc 0 1) := by
   refine ContinuousOn.div (by fun_prop) (by fun_prop) fun u hu h0 => ?_
@@ -980,6 +1014,8 @@ theorem incG_laplaceJ_recurrence {a : ℂ} (ha : -1 < a.re) (m : ℕ) :
   field_simp
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `(∫ u in (0:ℝ)..1,
+(u:ℂ)^0/(1+a*u)) = log (1+a)/a`. -/
 theorem incG_laplaceJ_one {a : ℂ} (ha : -1 < a.re) (ha0 : a ≠ 0) :
     (∫ u in (0:ℝ)..1, (u:ℂ)^0/(1+a*u)) = log (1+a)/a := by
   have hd : ∀ u ∈ Set.uIcc (0:ℝ) 1, HasDerivAt (fun u : ℝ => log (1+a*u)/a) ((u:ℂ)^0/(1+a*u)) u := by
@@ -992,6 +1028,8 @@ theorem incG_laplaceJ_one {a : ℂ} (ha : -1 < a.re) (ha0 : a ≠ 0) :
     ((incG_continuousOn_powDiv ha 0).intervalIntegrable)]
   simp
 
+/-- Formula under the stated hypotheses: `(∫ u in (0:ℝ)..1, (u:ℂ)^m/(1+a*u)) = (-1 :
+ℂ)^m/a^(m+1)*(log (1+a)+∑ k ∈ Finset.range m, (-1 : ℂ)^(k+1)*a^(k+1)/(k+1))`. -/
 theorem incG_laplaceJ_closed {a : ℂ} (ha : -1 < a.re) (ha0 : a ≠ 0) (m : ℕ) :
     (∫ u in (0:ℝ)..1, (u:ℂ)^m/(1+a*u)) = (-1 : ℂ)^m/a^(m+1)*(log (1+a)+∑ k ∈ Finset.range m, (-1 : ℂ)^(k+1)*a^(k+1)/(k+1)) := by
   induction m with
@@ -1008,6 +1046,8 @@ theorem incG_laplaceJ_closed {a : ℂ} (ha : -1 < a.re) (ha0 : a ≠ 0) (m : ℕ
     have hpow2 : (-1:ℂ)^(m*2) = 1 := by rw [mul_comm, pow_mul]; simp
     linear_combination (-(a^3*a^(m*2))) * hpow2
 
+/-- Identity under the stated parameter and domain assumptions: `(∫ u in (0:ℝ)..1,
+(u:ℂ)^m/(1+0*u)) = 1/(m+1)`. -/
 theorem incG_laplaceJ_zero (m : ℕ) :
     (∫ u in (0:ℝ)..1, (u:ℂ)^m/(1+0*u)) = 1/(m+1) := by
   have : (∫ u in (0:ℝ)..1, (u:ℂ)^m) = ((∫ u in (0:ℝ)..1, u^m : ℝ) : ℂ) := by
@@ -1061,7 +1101,8 @@ theorem incG_genExpIntE_laplace_eq {n : ℕ} (hn : 1 ≤ n) {a : ℂ} (ha : -1 <
   rw [Gamma_one, cpow_neg_one, add_sub_cancel_right, hG, Complex.Gamma_nat_eq_factorial, hf]
   field_simp
 
-
+/-- Laplace transform of the generalized exponential integral at positive integral order,
+including the removable value at zero. -/
 theorem incG_genExpIntE_nat_laplace {n : ℕ} (hn : 1 ≤ n) {a : ℂ} (ha : -1 < a.re) :
     (∫ t : ℝ in Ioi 0, exp (-a*t)*genExpIntE n t)=if a=0 then 1/(n : ℂ) else (-1 : ℂ)^(n-1)/a^n*(log (1+a)+∑ k ∈ Finset.range (n-1), (-1 : ℂ)^(k+1)*a^(k+1)/(k+1)) := by
   rw [incG_genExpIntE_laplace_eq hn ha]
@@ -1071,7 +1112,8 @@ theorem incG_genExpIntE_nat_laplace {n : ℕ} (hn : 1 ≤ n) {a : ℂ} (ha : -1 
   · subst ha0; rw [incG_laplaceJ_zero]; push_cast; rfl
   · exact incG_laplaceJ_closed ha ha0 m
 
-/-- genExpIntE nat laplace. -/
+/-- Laplace transform of the generalized exponential integral at positive integral order,
+including the removable value at zero. -/
 @[dlmf 8.19.E24]
 theorem genExpIntE_nat_laplace {n : ℕ} (hn : 1 ≤ n) {a : ℂ} (ha : -1 < a.re) :
     (∫ t : ℝ in Ioi 0, exp (-a*t)*genExpIntE n t)=if a=0 then 1/(n : ℂ) else (-1 : ℂ)^(n-1)/a^n*(log (1+a)+∑ k ∈ Finset.range (n-1), (-1 : ℂ)^(k+1)*a^(k+1)/(k+1)) :=
@@ -1082,7 +1124,8 @@ theorem genExpIntE_nat_laplace {n : ℕ} (hn : 1 ≤ n) {a : ℂ} (ha : -1 < a.r
 def genExpIntL (p : ℝ) : ℂ :=
   ∫ t : ℝ in Ioi 0, exp (-t : ℂ)*genExpIntE p t
 
-/-- genExpIntL hypergeometric. -/
+/-- Express the exponentially weighted integral of the generalized exponential integral as a
+regularized Gauss hypergeometric value at one half. -/
 @[dlmf 8.19.E27]
 theorem genExpIntL_hypergeometric {p : ℝ} (hp : 0 < p) :
     genExpIntL p=Gamma (1+(p : ℂ))/(2*p)*DLMF.Hypergeometric.regularizedGaussHG 1 1 (1+p) (1/2) := by
@@ -1163,11 +1206,11 @@ theorem incGP_integrableOn {σ : ℝ} (hσ : -1 < σ) (C : ℝ) :
     IntegrableOn (fun t : ℝ => C * (t ^ σ * Real.exp (-2 * t ^ (1 : ℝ)))) (Ioi 0) :=
   (integrableOn_rpow_mul_exp_neg_mul_rpow hσ one_pos two_pos).const_mul C
 
-/-- genExpIntE product integral. -/
-@[dlmf 8.19.E26]
-theorem genExpIntE_product_integral {p q : ℝ} (hp : 0 < p) (hq : 0 < q) (hpq : 1 < p+q) :
-    (∫ t : ℝ in Ioi 0, genExpIntE p t*genExpIntE q t)=(genExpIntL p+genExpIntL q)/(p+q-1) := by
-  -- auxiliary exponents `0 < s ≤ p`, `0 < s' ≤ q`, `s, s' < 1`, `s + s' > 1`
+/-- Choose smaller integrable exponents below `p` and `q` whose sum still exceeds one.
+This isolates the endpoint integrability conditions in the product Laplace integral. -/
+private lemma exists_auxiliary_exponents_for_product_integral {p q : ℝ}
+    (hp : 0 < p) (hq : 0 < q) (hpq : 1 < p + q) :
+    ∃ s s' : ℝ, 0 < s ∧ s < 1 ∧ s ≤ p ∧ 0 < s' ∧ s' < 1 ∧ s' ≤ q ∧ 1 < s + s' := by
   set m := max (max (1 / 2 : ℝ) (1 - p)) (1 - q) with hm
   have hm1 : m < 1 := max_lt (max_lt (by norm_num) (by linarith)) (by linarith)
   have hm2 : 1 / 2 ≤ m := le_trans (le_max_left _ _) (le_max_left _ _)
@@ -1185,6 +1228,16 @@ theorem genExpIntE_product_integral {p q : ℝ} (hp : 0 < p) (hq : 0 < q) (hpq :
   have hss : 1 < s + s' := by
     simp only [s, s', min_def]
     split_ifs <;> linarith
+  exact ⟨s, s', hs0, hs1, hsp, hs0', hs1', hsq, hss⟩
+
+/-- The integral of the product `E_p E_q` is the sum of their exponentially weighted integrals
+divided by `p+q-1`; positivity and `p+q>1` ensure integrability. -/
+@[dlmf 8.19.E26]
+theorem genExpIntE_product_integral {p q : ℝ} (hp : 0 < p) (hq : 0 < q) (hpq : 1 < p+q) :
+    (∫ t : ℝ in Ioi 0, genExpIntE p t*genExpIntE q t)=(genExpIntL p+genExpIntL q)/(p+q-1) := by
+  obtain ⟨s, s', hs0, hs1, hsp, hs0', hs1', hsq, hss⟩ :=
+    exists_auxiliary_exponents_for_product_integral hp hq hpq
+
   set e : ℝ → ℝ → ℝ := fun r t => (genExpIntE (r : ℂ) (t : ℂ)).re with he
   set Cp := Real.Gamma (1 - s)
   set Cq := Real.Gamma (1 - s')

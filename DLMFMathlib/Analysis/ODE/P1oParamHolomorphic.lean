@@ -44,6 +44,7 @@ def p1oRetract (R : ℝ) (hR : 0 < R) : ℂ →ᵇ ℂ :=
       calc ‖z‖ = R * (‖z‖ / R) := by field_simp
         _ ≤ R * max 1 (‖z‖ / R) := by gcongr)
 
+/-- Identity under the stated parameter and domain assumptions: `p1oRetract R hR z = z`. -/
 lemma p1oRetract_apply_of_mem {R : ℝ} (hR : 0 < R) {z : ℂ} (hz : z ∈ closedBall (0 : ℂ) R) :
     p1oRetract R hR z = z := by
   have : ‖z‖ / R ≤ 1 := by
@@ -65,22 +66,27 @@ def p1oHolBall (R : ℝ) : Submodule ℂ (ℂ →ᵇ ℂ) where
     simp only [mem_ofPred_eq, coe_smul] at *
     exact hf.const_smul c
 
+/-- Formula under the stated hypotheses: `f * g ∈ p1oHolBall R`. -/
 lemma p1oHolBall_mul {R : ℝ} {f g : ℂ →ᵇ ℂ} (hf : f ∈ p1oHolBall R) (hg : g ∈ p1oHolBall R) :
     f * g ∈ p1oHolBall R := by
   change DifferentiableOn ℂ (⇑(f * g)) _
   rw [coe_mul]
   exact DifferentiableOn.mul hf hg
 
+/-- Formula under the stated hypotheses: `(1 : ℂ →ᵇ ℂ) ∈ p1oHolBall R`. -/
 lemma p1oHolBall_one (R : ℝ) : (1 : ℂ →ᵇ ℂ) ∈ p1oHolBall R := by
   change DifferentiableOn ℂ (⇑(1 : ℂ →ᵇ ℂ)) _
   rw [coe_one]
   exact differentiableOn_const 1
 
+/-- Formula under the stated hypotheses: `p1oRetract R hR ∈ p1oHolBall R`. -/
 lemma p1oRetract_mem {R : ℝ} (hR : 0 < R) : p1oRetract R hR ∈ p1oHolBall R := by
   change DifferentiableOn ℂ (⇑(p1oRetract R hR)) _
   exact differentiableOn_id.congr fun z hz =>
     p1oRetract_apply_of_mem hR (ball_subset_closedBall hz)
 
+/-- The stated relation follows from the given hypotheses: `IsClosed (p1oHolBall R : Set (ℂ →ᵇ
+ℂ))`. -/
 lemma p1oHolBall_isClosed (R : ℝ) : IsClosed (p1oHolBall R : Set (ℂ →ᵇ ℂ)) := by
   refine isClosed_of_closure_subset fun f hf => ?_
   have hne := mem_closure_iff_nhdsWithin_neBot.mp hf
@@ -90,8 +96,11 @@ lemma p1oHolBall_isClosed (R : ℝ) : IsClosed (p1oHolBall R : Set (ℂ →ᵇ �
   exact hu.tendstoLocallyUniformlyOn.differentiableOn
     (eventually_mem_nhdsWithin.mono fun g hg => hg) isOpen_ball
 
+/-- The bounded holomorphic-function subspace is closed in the space of bounded continuous
+functions. -/
 instance (R : ℝ) : IsClosed (p1oHolBall R : Set (ℂ →ᵇ ℂ)) := p1oHolBall_isClosed R
 
+/-- The bounded holomorphic-function subspace is complete in the supremum norm. -/
 instance (R : ℝ) : CompleteSpace (p1oHolBall R) :=
   IsClosed.completeSpace_coe (s := (p1oHolBall R : Set (ℂ →ᵇ ℂ)))
 
@@ -107,6 +116,9 @@ def p1oField (R : ℝ) (hR : 0 < R) (p₀ p₁ q₀ q₁ : ℝ → ℂ) (t : ℝ
     add_mem (p1oHolBall_mul (p1oCoef R hR _ _).2 y.2.2)
       (p1oHolBall_mul (p1oCoef R hR _ _).2 y.1.2)⟩)
 
+/-- The stated relation follows from the given hypotheses: `LipschitzWith ⟨1 + ‖(p1oCoef R hR (p₀
+t) (p₁ t) : ℂ →ᵇ ℂ)‖ + ‖(p1oCoef R hR (q₀ t) (q₁ t) : ℂ →ᵇ ℂ)‖, by positivity⟩ (p1oField R hR
+p₀ p₁ q₀ q₁ t)`. -/
 lemma p1oField_lipschitz (R : ℝ) (hR : 0 < R) (p₀ p₁ q₀ q₁ : ℝ → ℂ) (t : ℝ) :
     LipschitzWith ⟨1 + ‖(p1oCoef R hR (p₀ t) (p₁ t) : ℂ →ᵇ ℂ)‖ +
         ‖(p1oCoef R hR (q₀ t) (q₁ t) : ℂ →ᵇ ℂ)‖, by positivity⟩
@@ -136,6 +148,7 @@ lemma p1oField_lipschitz (R : ℝ) (hR : 0 < R) (p₀ p₁ q₀ q₁ : ℝ → �
 
 variable {p₀ p₁ q₀ q₁ : ℝ → ℂ}
 
+/-- The function `(fun t => (p1oCoef R hR (c₀ t) (c₁ t) : ℂ →ᵇ ℂ))` is continuous on `s`. -/
 lemma p1oCoef_continuousOn {R : ℝ} (hR : 0 < R) {s : Set ℝ} {c₀ c₁ : ℝ → ℂ}
     (h₀ : ContinuousOn c₀ s) (h₁ : ContinuousOn c₁ s) :
     ContinuousOn (fun t => (p1oCoef R hR (c₀ t) (c₁ t) : ℂ →ᵇ ℂ)) s :=

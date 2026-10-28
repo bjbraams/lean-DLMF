@@ -476,6 +476,8 @@ theorem kummerM_continued_fraction_tendsto {a b z : ℂ} (hb : ∀ k : ℕ, b �
   rw [← hval]
   exact key
 
+/-- The map `(kummerMContinuedFraction a b x).convs` tends to `(𝓝 (kummerM a b x / kummerM (a + 1)
+(b + 1) x))` along `atTop`. -/
 @[dlmf 13.5.E1]
 theorem kummerM_continued_fraction_limit {a b x : ℝ} (ha : 0 < a) (hb : 0 < b)
     (hba : a < b) (hx : 0 < x) (hx1 : x < 1) :
@@ -573,6 +575,8 @@ theorem kumCF_UW_rec (a b : ℂ) {z : ℂ} (hz : z ≠ 0) (k : ℕ) :
     rw [key]
     linear_combination (z ^ (n + 1)) * h
 
+/-- The map `(kummerUContinuedFraction a b x).convs` tends to `(𝓝 (kummerU a b x / kummerU a (b -
+1) x))` along `atTop`. -/
 @[dlmf 13.5.E3]
 theorem kummerU_continued_fraction_limit {a b x : ℝ} (ha : 0 < a) (hb : 1 < b)
     (hx : 0 < x) :

@@ -15,31 +15,69 @@ umbrella module `DLMF/<Area>.lean` describes what Mathlib already provides and w
 area adds. Statements taken from the DLMF record their equation numbers with Mathlib's
 `@[dlmf]` cross-reference attribute.
 
-| Area | AAR chapters | DLMF chapters | Submodules |
-| --- | --- | --- | --- |
-| `Gamma` | 1 | 5 | 23 |
-| `Hypergeometric` | 2–3 | 15 | 20 |
-| `Confluent` | 4.1–4.4 | 13 | 17 |
-| `Bessel` | 4.5–4.15 | 10 | 14 |
-| `Airy` | (Beals–Wong 9.9) | 9 | 17 |
-| `Legendre` | (Temme 8) | 14 | 31 |
-| `Statistical` | (Temme 11) | 7–8 | 3 |
-| `Elliptic` | (Temme 12) | 19, 20, 22 | 4 |
-| `WaveEquation` | (Temme 10) | | 1 |
-| `Polylog` | (Duverney 8) | 25 | 3 |
-| `Constants` | (Duverney 2, 8) | 25 | 3 |
-| `OrthogonalPolynomials` | 5–7 | 18 | 18 |
-| `Selberg` | 8 | | 2 |
-| `SphericalHarmonics` | 9 | | 2 |
-| `QSeries` | 10 | | 2 |
-| `Partitions` | 11 | | single file |
-| `Bailey` | 12 | | single file |
+`DLMF.lean` imports all areas. The current source tree has 1,086 library files,
+including the two root entry points and 79 general supporting modules. Large topic modules
+are split into mathematical subtopics; the former file remains as a small import umbrella.
+For example, `Gamma/IntegralRepresentations.lean` now imports the Hankel, Prym, Binet and
+moment modules below `Gamma/IntegralRepresentations/`. Existing import paths still work.
+Every Lean source file is at most 1,500 lines; run `python3 scripts/check_file_lengths.py`
+to enforce this limit. The complete split map and current structural inventory are in
+[CodeReviewInventory.json](CodeReviewInventory.json), with the mathematical review in
+[REVIEW.md](REVIEW.md).
 
-`DLMF.lean` imports all areas.
+Source files below each area directory, including nested topic modules and compatibility
+umbrellas (2026-10-28):
 
-The additional DLMF chapter entry points include `Struve` (eight submodules) and
-`ParabolicCylinder` (twelve submodules), extending the original cylinder API in
-`Confluent`. Their acquisition status is recorded below.
+- [Airy](DLMF/Airy.lean): 40 files.
+- [AlgebraicAnalytic](DLMF/AlgebraicAnalytic.lean): 52 files.
+- [AsymptoticApproximations](DLMF/AsymptoticApproximations.lean): 29 files.
+- [BernoulliEuler](DLMF/BernoulliEuler.lean): 21 files.
+- [Bessel](DLMF/Bessel.lean): 28 files.
+- [CoalescingSaddles](DLMF/CoalescingSaddles.lean): 16 files.
+- [Combinatorics](DLMF/Combinatorics.lean): 30 files.
+- [Confluent](DLMF/Confluent.lean): 55 files.
+- [Constants](DLMF/Constants.lean): 3 files.
+- `Core`: 5 files.
+- [Coulomb](DLMF/Coulomb.lean): 14 files.
+- [Elementary](DLMF/Elementary.lean): 22 files.
+- [Elliptic](DLMF/Elliptic.lean): 10 files.
+- [EllipticIntegrals](DLMF/EllipticIntegrals.lean): 32 files.
+- [ErrorFunctions](DLMF/ErrorFunctions.lean): 18 files.
+- [ExpIntegrals](DLMF/ExpIntegrals.lean): 9 files.
+- [Gamma](DLMF/Gamma.lean): 49 files.
+- [GeneralizedHypergeometric](DLMF/GeneralizedHypergeometric.lean): 16 files.
+- [Heun](DLMF/Heun.lean): 9 files.
+- [Hypergeometric](DLMF/Hypergeometric.lean): 48 files.
+- [IncompleteGamma](DLMF/IncompleteGamma.lean): 23 files.
+- [JacobiElliptic](DLMF/JacobiElliptic.lean): 34 files.
+- [Lame](DLMF/Lame.lean): 20 files.
+- [Legendre](DLMF/Legendre.lean): 58 files.
+- [Mathieu](DLMF/Mathieu.lean): 46 files.
+- [MatrixArgument](DLMF/MatrixArgument.lean): 9 files.
+- [NumberTheory](DLMF/NumberTheory.lean): 13 files.
+- [OrthogonalPolynomials](DLMF/OrthogonalPolynomials.lean): 59 files.
+- [Painleve](DLMF/Painleve.lean): 23 files.
+- [ParabolicCylinder](DLMF/ParabolicCylinder.lean): 27 files.
+- [Polylog](DLMF/Polylog.lean): 3 files.
+- [QHypergeometric](DLMF/QHypergeometric.lean): 13 files.
+- [QSeries](DLMF/QSeries.lean): 7 files.
+- [RiemannTheta](DLMF/RiemannTheta.lean): 5 files.
+- [Selberg](DLMF/Selberg.lean): 5 files.
+- [SphericalHarmonics](DLMF/SphericalHarmonics.lean): 5 files.
+- [Spheroidal](DLMF/Spheroidal.lean): 15 files.
+- [Statistical](DLMF/Statistical.lean): 4 files.
+- [Struve](DLMF/Struve.lean): 28 files.
+- [Theta](DLMF/Theta.lean): 11 files.
+- [WaveEquation](DLMF/WaveEquation.lean): 1 file.
+- [Weierstrass](DLMF/Weierstrass.lean): 15 files.
+- [WignerSymbols](DLMF/WignerSymbols.lean): 7 files.
+- [Zeta](DLMF/Zeta.lean): 23 files.
+
+The single-file areas [Bailey](DLMF/Bailey.lean) and [Partitions](DLMF/Partitions.lean)
+retain their entry modules. Supporting-source areas include `Constants`, `Polylog`,
+`Statistical`, `Elliptic`, `WaveEquation`, `Selberg` and `SphericalHarmonics`; their module
+headers record the relevant AAR, Temme, Beals–Wong or Duverney sources. The DLMF chapter
+entry points and acquisition ledgers are described below.
 
 The new chapter entry points are [Elementary](DLMF/Elementary.lean) (Chapter 4),
 [GeneralizedHypergeometric](DLMF/GeneralizedHypergeometric.lean) (Chapter 16,
@@ -175,29 +213,27 @@ theory, and the real connection formulas remain open; see the
   `polylogSeries_two_ofReal_eq_dilog`. Bridges to an upstream series use the upstream name, as in
   `regularizedGaussHG_eq_regularizedGaussHGFun` (Mathlib's `regularizedGaussHGFun` is the series).
 
-| Function (DLMF) | Lean name | Miller macro |
-| --- | --- | --- |
-| Kummer `M(a,b,z)`, `U(a,b,z)` (13.2) | `kummerM`, `kummerU` | `KummerconfhyperM`, `KummerconfhyperU` |
-| Whittaker `M_{κ,μ}`, `W_{κ,μ}` (13.14) | `whittakerM`, `whittakerW` | `WhittakerconfhyperM`, `…W` |
-| Hankel `H^{(1)}_ν`, `H^{(2)}_ν` (10.4) | `hankelH1`, `hankelH2` | `HankelH1`, `HankelH2` |
-| Modified Bessel `I_ν`, `K_ν` (10.25) | `besselI`, `besselK` | `modBesselI`, `modBesselK` |
-| Legendre `P_ν`, `Q_ν` (14.3) | `legendreP`, `legendreQ` | `assLegendreP`, `assLegendreQ` |
-| Ferrers `𝖯_ν^μ` (14.3) | `ferrersP` | `FerrersP` |
-| Classical OPs (18.3) | `jacobiPolyP`, `ultrasphPoly`, `legendrePolyP`, `laguerrePolyL`, `hermitePolyH` | `JacobipolyP`, …, `HermitepolyH` |
-| `γ(a,z)`, `Γ(a,z)` (8.2) | `lowerIncGamma`, `upperIncGamma` | `incgamma`, `incGamma` |
-| `P(a,z)`, `Q(a,z)`, `γ*(a,z)` (8.2) | `normIncGammaP`, `normIncGammaQ`, `scIncGamma` | `normincGammaP`, `…Q`, `scincgamma` |
-| `B_x(a,b)`, `I_x(a,b)` (8.17) | `Real.incBeta`, `Real.normIncBetaI` | `incBeta`, `normincBetaI` |
-| `erf`, `erfc`, Dawson `F` (7.2) | `erf`, `erfc`, `Real.dawsonF` | `erf`, `erfc`, `DawsonintF` |
-| Fresnel `C`, `S` (7.2) | `Real.fresnelCosInt`, `Real.fresnelSinInt` | `Fresnelcosint`, `Fresnelsinint` |
-| `Si`, `Ci`, `Cin`, `Ein`, `E_p` (6.2, 8.19) | `Real.sinInt`, `Real.cosInt`, `Real.cosIntCin`, `Real.expIntEin`, `genExpIntE` | `sinint`, `cosint`, `cosintCin`, `expintEin`, `genexpintE` |
-| `Li_s`, `Li₂`, `Li₃` (25.12) | `polylogSeries`, `Real.dilog`, `Real.trilog` | `polylog`, `dilog` |
-| Barnes `G`, `ψ^{(n)}`, `Γ_q`, `B_q`, `[n k]_q` | `barnesG`, `polygamma`, `qGamma`, `qBeta`, `qBinom` | `BarnesG`, `polygamma`, `qGamma`, `qBeta`, `qbinom` |
-| `K`, `E`, `Π`, `D` complete (19.2.8) | `compEllIntKk`/`…Km`, `compEllIntEk`/`…Em`, `compEllIntPik`/`…Pim`, `compEllIntDk`/`…Dm`; now `compEllIntKkSeries`, `Real.compEllIntKm`, `Real.compEllIntEm`, `Real.compEllIntPim` | `compellintKk`, `compellintEk`, `compellintPik`, `compellintDk` |
-| `F(φ,k)`, `E(φ,k)`, `Π(φ,α²,k)` (19.2.4–7) | `incEllIntFk`/`…Fm`, `incEllIntEk`/`…Em`, `incEllIntPik`/`…Pim`; now `Real.incEllIntFm`, `Real.incEllIntEm`, `Real.incEllIntPim` | `incellintFk`, `incellintEk`, `incellintPik` |
-| `K′`, `E′` (19.2.9) | `ccompEllIntKk`, `ccompEllIntEk` (planned) | `ccompellintKk`, `ccompellintEk` |
-| `am`, `sn`, `cn`, `dn`, `arcsn` (22.2, 22.15, 22.16) | complex `DLMF.JacobiElliptic.jacobiSnk`, … (all twelve) and `jacobiSnTau`, …; real `Real.jacobiAmm`, `Real.jacobiSnm`, `Real.jacobiCnm`, `Real.jacobiDnm`, `Real.jacobiArcsnm` | `Jacobiamk`, `Jacobiellsnk`, …, `aJacobiellsnk` |
-| `θ_j(z\|τ)`, `θ_j(z,q)`, `θ_j(q)` (20.2) | `jacobiThetaOneTau`, …, `jacobiThetaFourTau`; `DLMF.Theta.jacobiThetaOneQ`, …; `Real.jacobiThetaThreeNullQ`, `Real.jacobiThetaFourNullQ` | `Jacobithetatau`, `Jacobithetaq` |
-| Carlson `R_F`, `R_D`, `R_C`, `R_J`, `R_G` (19.16) | `carlsonRF`, … (planned) | `CarsonsymellintRF`, … (sic) |
+- Kummer `M(a,b,z)`, `U(a,b,z)` (13.2): `kummerM`, `kummerU` (Miller: `KummerconfhyperM`, `KummerconfhyperU`).
+- Whittaker `M_{κ,μ}`, `W_{κ,μ}` (13.14): `whittakerM`, `whittakerW` (Miller: `WhittakerconfhyperM`, `…W`).
+- Hankel `H^{(1)}_ν`, `H^{(2)}_ν` (10.4): `hankelH1`, `hankelH2` (Miller: `HankelH1`, `HankelH2`).
+- Modified Bessel `I_ν`, `K_ν` (10.25): `besselI`, `besselK` (Miller: `modBesselI`, `modBesselK`).
+- Legendre `P_ν`, `Q_ν` (14.3): `legendreP`, `legendreQ` (Miller: `assLegendreP`, `assLegendreQ`).
+- Ferrers `𝖯_ν^μ` (14.3): `ferrersP` (Miller: `FerrersP`).
+- Classical OPs (18.3): `jacobiPolyP`, `ultrasphPoly`, `legendrePolyP`, `laguerrePolyL`, `hermitePolyH` (Miller: `JacobipolyP`, …, `HermitepolyH`).
+- `γ(a,z)`, `Γ(a,z)` (8.2): `lowerIncGamma`, `upperIncGamma` (Miller: `incgamma`, `incGamma`).
+- `P(a,z)`, `Q(a,z)`, `γ*(a,z)` (8.2): `normIncGammaP`, `normIncGammaQ`, `scIncGamma` (Miller: `normincGammaP`, `…Q`, `scincgamma`).
+- `B_x(a,b)`, `I_x(a,b)` (8.17): `Real.incBeta`, `Real.normIncBetaI` (Miller: `incBeta`, `normincBetaI`).
+- `erf`, `erfc`, Dawson `F` (7.2): `erf`, `erfc`, `Real.dawsonF` (Miller: `erf`, `erfc`, `DawsonintF`).
+- Fresnel `C`, `S` (7.2): `Real.fresnelCosInt`, `Real.fresnelSinInt` (Miller: `Fresnelcosint`, `Fresnelsinint`).
+- `Si`, `Ci`, `Cin`, `Ein`, `E_p` (6.2, 8.19): `Real.sinInt`, `Real.cosInt`, `Real.cosIntCin`, `Real.expIntEin`, `genExpIntE` (Miller: `sinint`, `cosint`, `cosintCin`, `expintEin`, `genexpintE`).
+- `Li_s`, `Li₂`, `Li₃` (25.12): `polylogSeries`, `Real.dilog`, `Real.trilog` (Miller: `polylog`, `dilog`).
+- Barnes `G`, `ψ^{(n)}`, `Γ_q`, `B_q`, `[n k]_q`: `barnesG`, `polygamma`, `qGamma`, `qBeta`, `qBinom` (Miller: `BarnesG`, `polygamma`, `qGamma`, `qBeta`, `qbinom`).
+- `K`, `E`, `Π`, `D` complete (19.2.8): `compEllIntKk`/`…Km`, `compEllIntEk`/`…Em`, `compEllIntPik`/`…Pim`, `compEllIntDk`/`…Dm`; now `compEllIntKkSeries`, `Real.compEllIntKm`, `Real.compEllIntEm`, `Real.compEllIntPim` (Miller: `compellintKk`, `compellintEk`, `compellintPik`, `compellintDk`).
+- `F(φ,k)`, `E(φ,k)`, `Π(φ,α²,k)` (19.2.4–7): `incEllIntFk`/`…Fm`, `incEllIntEk`/`…Em`, `incEllIntPik`/`…Pim`; now `Real.incEllIntFm`, `Real.incEllIntEm`, `Real.incEllIntPim` (Miller: `incellintFk`, `incellintEk`, `incellintPik`).
+- `K′`, `E′` (19.2.9): `ccompEllIntKk`, `ccompEllIntEk` (planned) (Miller: `ccompellintKk`, `ccompellintEk`).
+- `am`, `sn`, `cn`, `dn`, `arcsn` (22.2, 22.15, 22.16): complex `DLMF.JacobiElliptic.jacobiSnk`, … (all twelve) and `jacobiSnTau`, …; real `Real.jacobiAmm`, `Real.jacobiSnm`, `Real.jacobiCnm`, `Real.jacobiDnm`, `Real.jacobiArcsnm` (Miller: `Jacobiamk`, `Jacobiellsnk`, …, `aJacobiellsnk`).
+- `θ_j(z\|τ)`, `θ_j(z,q)`, `θ_j(q)` (20.2): `jacobiThetaOneTau`, …, `jacobiThetaFourTau`; `DLMF.Theta.jacobiThetaOneQ`, …; `Real.jacobiThetaThreeNullQ`, `Real.jacobiThetaFourNullQ` (Miller: `Jacobithetatau`, `Jacobithetaq`).
+- Carlson `R_F`, `R_D`, `R_C`, `R_J`, `R_G` (19.16): `carlsonRF`, … (planned) (Miller: `CarsonsymellintRF`, … (sic)).
 
 The real digamma function is still `Real.digamma`, defined in Mathlib's `Real` namespace beside
 Mathlib's `Complex.digamma`; moving it into `DLMF.Gamma.Real` is left for a later pass.
@@ -212,8 +248,8 @@ Theta 13, RiemannTheta 7, JacobiElliptic 35, Weierstrass 40, BernoulliEuler 25, 
 Combinatorics 37, NumberTheory 36, Mathieu 140, Lame 41, Spheroidal 33, Heun 26, Painleve 42,
 Coulomb 49, WignerSymbols 34, MatrixArgument 36, CoalescingSaddles 35, AlgebraicAnalytic 304,
 AsymptoticApproximations 136, and 188 in the older areas.
-The compiled audit finds **24,494 project theorems**, with **1,884 depending transitively on
-`sorryAx`**, and no other nonstandard axiom.
+The compiled audit of 2026-10-27 recorded **24,494 project theorems**, with **1,884 depending
+transitively on `sorryAx`**, and no other nonstandard axiom.
 Counts in the dated development history describe their earlier scope.
 
 The [parallel priority round](REVIEW.md#priority-proof-implementation-with-parallel-ownership-2026-10-24)
@@ -249,7 +285,7 @@ as they are reviewed.
 
 The project uses Lean `v4.36.0-rc1`, Mathlib revision
 `911003dd6dea5df215dff57f2717be762e11a6ca`, and TauCeti revision
-`5cdecf40e99d5a5ad0833afff31f5b007d68a149`, matching the companion projects.
+`a049b4264d2cf4dbf4720796f844a3a3764914a5`.
 
 The 18 October 2026 upgrade uses Mathlib's development head. TauCeti's own
 Mathlib pin is 65 commits earlier; [TauCeti-4.36.patch](TauCeti-4.36.patch)

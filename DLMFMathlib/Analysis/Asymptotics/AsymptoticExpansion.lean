@@ -108,20 +108,26 @@ theorem comp_tendsto {β : Type*} {l' : Filter β} {g : β → α} (hf : HasAsym
     (hg : Tendsto g l' l) : HasAsymptoticExpansion l' (fun n x => φ n (g x)) a (f ∘ g) :=
   fun N => (hf N).comp_tendsto hg
 
+/-- Adding two expansions in the same asymptotic scale adds their coefficients term by term. -/
 theorem add (hf : HasAsymptoticExpansion l φ a f) (hg : HasAsymptoticExpansion l φ b g) :
     HasAsymptoticExpansion l φ (a + b) (f + g) := fun N =>
   ((hf N).add (hg N)).congr_left fun x => by
     simp only [Pi.add_apply, smul_add, sum_add_distrib]; abel
 
+/-- Asymptotic expansion with the displayed scale and coefficient sequence:
+`HasAsymptoticExpansion l φ (c • a) (c • f)`. -/
 theorem const_smul (hf : HasAsymptoticExpansion l φ a f) (c : 𝕜) :
     HasAsymptoticExpansion l φ (c • a) (c • f) := fun N =>
   ((hf N).const_smul_left c).congr_left fun x => by
     simp only [Pi.smul_apply, smul_sub, smul_sum, smul_comm c (φ _ x)]
 
+/-- Negating an asymptotic expansion negates all its coefficients. -/
 theorem neg (hf : HasAsymptoticExpansion l φ a f) :
     HasAsymptoticExpansion l φ (-a) (-f) := by
   simpa using hf.const_smul (-1 : 𝕜)
 
+/-- Subtracting two expansions in the same asymptotic scale subtracts their coefficients term by
+term. -/
 theorem sub (hf : HasAsymptoticExpansion l φ a f) (hg : HasAsymptoticExpansion l φ b g) :
     HasAsymptoticExpansion l φ (a - b) (f - g) := by
   simpa [sub_eq_add_neg] using hf.add hg.neg

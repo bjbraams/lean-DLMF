@@ -235,6 +235,9 @@ theorem tsum_kummerBesselISeriesCoeff_besselI {a b z : ℂ} (hz : z ≠ 0) (σ :
   simp_rw [h, tsum_mul_left, ← mul_assoc, cpow_neg]
   rw [inv_mul_cancel₀ (by rw [cpow_def_of_ne_zero hw]; exact exp_ne_zero _), one_mul]
 
+/-- Identity under the stated parameter and domain assumptions: `kummerM a b z = Gamma (a - 1 / 2)
+* exp (z / 2) * (z / 4) ^ (1 / 2 - a) * ∑' s : ℕ, poch (2 * a - 1) s * poch (2 * a - b) s /
+(poch b s * s.factorial) * (a - 1 / 2 + s) * besselI (a - 1 / 2 + s) (z / 2)`. -/
 @[dlmf 13.11.E1]
 theorem kummerM_besselI_series {a b z : ℂ}
     (ha : ∀ k : ℕ, a + 1 / 2 ≠ -k) (ha0 : a ≠ 1 / 2) (hb : ∀ k : ℕ, b ≠ -k) (hz : z ∈ slitPlane) :
@@ -256,6 +259,10 @@ theorem kummerM_besselI_series {a b z : ℂ}
   simp only [kummerBesselISeriesCoeff]
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `kummerM a b z = Gamma (b - a - 1
+/ 2) * exp (z / 2) * (z / 4) ^ (a - b + 1 / 2) * ∑' s : ℕ, (-1 : ℂ) ^ s * poch (2 * b - 2 * a
+- 1) s * poch (b - 2 * a) s * (b - a - 1 / 2 + s) / (poch b s * s.factorial) * besselI (b - a
+- 1 / 2 + s) (z / 2)`. -/
 @[dlmf 13.11.E2]
 theorem kummerM_besselI_series_complement {a b z : ℂ}
     (hab : ∀ k : ℕ, b - a + 1 / 2 ≠ -k) (hab0 : b - a ≠ 1 / 2) (hb : ∀ k : ℕ, b ≠ -k)
@@ -742,6 +749,10 @@ theorem regularizedHGFun_besselJ_series {a b z : ℂ} (hz : z ≠ 0) (hba0 : b -
 
 end BesselExpansion
 
+/-- Identity under the stated parameter and domain assumptions: `whittakerM κ μ z = Gamma (κ + μ)
+* (2 : ℂ) ^ (2 * κ + 2 * μ) * z ^ (1 / 2 - κ) * ∑' s : ℕ, (-1 : ℂ) ^ s * poch (2 * κ + 2 * μ)
+s * poch (2 * κ) s / (poch (1 + 2 * μ) s * s.factorial) * (κ + μ + s) * besselI (κ + μ + s) (z
+/ 2)`. -/
 @[dlmf 13.24.E1]
 theorem whittakerM_besselI_series {κ μ z : ℂ}
     (hμ : ∀ k : ℕ, 2 * μ ≠ -k - 1) (hκ : ∀ k : ℕ, κ + μ ≠ -k - 1) (hκμ : κ + μ ≠ 0)
@@ -1278,6 +1289,8 @@ private lemma buchholzC_recurrence (μ : ℂ) (s : ℕ) (z : ℂ) :
 
 
 
+/-- The series with terms `(fun s : ℕ => whittakerBesselCoeff μ z s * (-t / z) ^ s)` converges to
+`(exp (-z / 2 * (cosh t / sinh t - 1 / t)) * (t / sinh t) ^ (1 - 2 * μ))`. -/
 @[dlmf 13.24.E3]
 theorem whittakerBesselCoeff_hasSum {μ z t : ℂ} (ht : t ≠ 0) (hz : z ≠ 0)
     (hsmall : ‖t‖ < 1) :
@@ -1379,6 +1392,9 @@ theorem summable_whittakerM_besselJ_series {κ z : ℂ} (hκ : κ ≠ 0) (hz : z
 /- The Buchholz transform identifying this convergent series with Whittaker M
 remains to be proved. Convergence and cancellation of the principal powers are
 established above using the existing Neumann-series estimates. -/
+/-- Identity under the stated parameter and domain assumptions: `whittakerM κ μ z / Gamma (1 + 2 *
+μ) = (2 : ℂ) ^ (2 * μ) * z ^ (μ + 1 / 2) * ∑' s : ℕ, whittakerBesselCoeff μ z s * (2 * (κ * z)
+^ (1 / 2 : ℂ)) ^ (-(2 * μ + s)) * besselJ (2 * μ + s) (2 * (κ * z) ^ (1 / 2 : ℂ))`. -/
 @[dlmf 13.24.E2]
 theorem whittakerM_besselJ_series {κ μ z : ℂ} (hz : z ∈ slitPlane)
     (hκ : 0 < κ.re) (hμ : ∀ k : ℕ, 1 + 2 * μ ≠ -k) :

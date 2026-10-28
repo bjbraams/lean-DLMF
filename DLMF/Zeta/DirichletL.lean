@@ -45,6 +45,7 @@ namespace DLMF.Zeta
 variable {N : ℕ} [NeZero N]
 
 omit [NeZero N] in
+/-- Identity under the stated parameter and domain assumptions: `χ 0 = 0`. -/
 lemma z25b_map_zero {χ : DirichletCharacter ℂ N} (hN : N ≠ 1) : χ 0 = 0 := by
   have := ZMod.nontrivial_iff.mpr hN
   exact MulChar.map_zero χ
@@ -299,7 +300,6 @@ theorem LFunction_one_sub_conj_eq_zero {χ : DirichletCharacter ℂ N} (hχ : χ
   rw [LFunction_one_sub_of_isPrimitive hχ hs (Or.inl hN), r25b_LFunction_star_conj hχ1, hρ,
     map_zero, mul_zero]
 
-
 /-- **Evidence that `LFunction_one_sub_conj_eq_zero` needs `ρ ≠ 0`** (DLMF's closed-strip
 wording is too broad): for an even character
 `χ ≠ χ₁ (mod k)`, `k ≥ 2` (e.g. a primitive even character such as the quadratic character
@@ -340,7 +340,6 @@ theorem LFunction_zero_of_ne_one {χ : DirichletCharacter ℂ N} (hχ : χ ≠ 1
   rw [Finset.sum_congr rfl hterm, Finset.sum_sub_distrib, ← Finset.mul_sum, ← Finset.mul_sum,
     hsum]
   ring
-
 
 /-- **`L(0, χ₁) = 0`** (DLMF 25.15.10), principal case, for `k ≥ 2` (implicit condition; for
 `k = 1`, `L(0, χ₁) = ζ(0) = -1/2`). -/

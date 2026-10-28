@@ -377,6 +377,8 @@ theorem ultrasphPoly_finite_sum {lam : ℂ} (hlam : -1 / 2 < lam.re) (n : ℕ) (
 
 /-! ### Quadratic transformations DLMF 18.7.13–18.7.16 -/
 
+/-- Identity under the stated parameter and domain assumptions: `ultrasphPoly lam (2 * n) x = poch
+lam n / poch (1 / 2) n * jacobiPolyP (lam - 1 / 2) (-1 / 2) n (2 * x ^ 2 - 1)`. -/
 @[dlmf 18.7.E15]
 theorem ultrasphPoly_quadratic_even {lam : ℂ} (hlam : -1 / 2 < lam.re) (n : ℕ) (x : ℂ) :
     ultrasphPoly lam (2 * n) x = poch lam n / poch (1 / 2) n
@@ -412,6 +414,9 @@ theorem ultrasphPoly_quadratic_even {lam : ℂ} (hlam : -1 / 2 < lam.re) (n : �
   rw [← pow_mul, show (-1 : ℂ) ^ (k * 2) = 1 from Even.neg_one_pow ⟨k, by ring⟩]
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `ultrasphPoly lam (2 * n + 1) x =
+poch lam (n + 1) / poch (1 / 2) (n + 1) * x * jacobiPolyP (lam - 1 / 2) (1 / 2) n (2 * x ^ 2 -
+1)`. -/
 @[dlmf 18.7.E16]
 theorem ultrasphPoly_quadratic_odd {lam : ℂ} (hlam : -1 / 2 < lam.re) (n : ℕ) (x : ℂ) :
     ultrasphPoly lam (2 * n + 1) x = poch lam (n + 1) / poch (1 / 2) (n + 1) * x *
@@ -488,6 +493,9 @@ theorem eq_at_neg_half {F G : ℂ → ℂ} (hF : ContinuousAt F (-1 / 2)) (hG : 
   exact tendsto_nhds_unique (hF.tendsto.mono_left nhdsWithin_le_nhds)
     ((hG.tendsto.mono_left nhdsWithin_le_nhds).congr' hev.symm)
 
+/-- Identity under the stated parameter and domain assumptions: `jacobiPolyP α α (2 * n) x /
+jacobiPolyP α α (2 * n) 1 = jacobiPolyP α (-1 / 2) n (2 * x ^ 2 - 1) / jacobiPolyP α (-1 / 2)
+n 1`. -/
 @[dlmf 18.7.E13]
 theorem jacobi_quadratic_even {α : ℂ} (hα : -1 < α.re) (n : ℕ) (x : ℂ) :
     jacobiPolyP α α (2 * n) x / jacobiPolyP α α (2 * n) 1 =
@@ -533,6 +541,9 @@ theorem jacobi_quadratic_even {α : ℂ} (hα : -1 < α.re) (n : ℕ) (x : ℂ) 
         (jacobiPolyP_one_ne_zero (by norm_num) _)
   · exact generic α hα hα2
 
+/-- Identity under the stated parameter and domain assumptions: `jacobiPolyP α α (2 * n + 1) x /
+jacobiPolyP α α (2 * n + 1) 1 = x * jacobiPolyP α (1 / 2) n (2 * x ^ 2 - 1) / jacobiPolyP α (1
+/ 2) n 1`. -/
 @[dlmf 18.7.E14]
 theorem jacobi_quadratic_odd {α : ℂ} (hα : -1 < α.re) (n : ℕ) (x : ℂ) :
     jacobiPolyP α α (2 * n + 1) x / jacobiPolyP α α (2 * n + 1) 1 =

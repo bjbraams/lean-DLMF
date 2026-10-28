@@ -222,6 +222,7 @@ def cfConv_T (a w : ℕ → K) (N i : ℕ) : K :=
   (-1) ^ (N + i) * (∏ k ∈ range (N + i + 1), a k) * w 0 /
     (cfConv_G a w (N + i) * cfConv_G a w (N + i + 1))
 
+/-- Nonvanishing under the stated hypotheses: `cfConv_G a w n ≠ 0`. -/
 theorem cfConv_G_ne_zero {w : ℕ → K} (ha : ∀ k, a k ≠ 0) {n : ℕ} (hw : w (n + 1) ≠ 0) :
     cfConv_G a w n ≠ 0 :=
   mul_ne_zero (mul_ne_zero (pow_ne_zero _ (neg_ne_zero.mpr one_ne_zero))
@@ -264,6 +265,7 @@ theorem cfConv_T_succ {w : ℕ → K} (ha : ∀ k, a k ≠ 0) {N : ℕ} (hwN : �
   rw [pow_succ, pow_succ, pow_succ]
   field_simp
 
+/-- Nonvanishing under the stated hypotheses: `cfConv_T a w N i ≠ 0`. -/
 theorem cfConv_T_ne_zero {w : ℕ → K} (hw0 : w 0 ≠ 0) (ha : ∀ k, a k ≠ 0) {N : ℕ}
     (hwN : ∀ k ≥ N, w k ≠ 0) (i : ℕ) : cfConv_T a w N i ≠ 0 :=
   div_ne_zero (mul_ne_zero (mul_ne_zero (pow_ne_zero _ (neg_ne_zero.mpr one_ne_zero))
@@ -408,7 +410,6 @@ theorem cfConv_tendsto_of_ratio (hw : ∀ k, w k = b k * w (k + 1) + a (k + 1) *
   rw [le_div_iff₀ hpos]
   simpa [show N + i + 1 + 1 = N + i + 2 by ring, show N + i + 1 + 2 = N + i + 3 by ring]
     using hrat (N + i + 1) (by omega)
-
 
 /-- Under the hypotheses of the ratio criterion `cfConv_tendsto_of_ratio`, the denominators
 `B_m` are eventually nonzero. -/
@@ -671,7 +672,6 @@ theorem cfConv_lt_convs_of_pos (ha : ∀ k, 0 < a k) (hb : ∀ k, 0 < b k) (hwpo
   rw [hsgn, neg_one_mul, neg_mul, neg_div] at he
   linarith
 
-
 /-- **Convergence of a positive S-fraction with linearly bounded elements.** Let `b_k = 1`,
 `a_k > 0` with `a_k ≤ C (k + 1)`, and let `w` be a positive backward solution. Then the
 convergents of `h + a₀/(1 + a₁/(1 + ⋯))` tend to `h + a₀ w₁ / w₀`. (The differences of
@@ -841,12 +841,16 @@ def cfConv_back (a b : ℕ → K) (N : ℕ) : ℕ → K × K
 def cfConv_backW (a b : ℕ → K) (N k : ℕ) : K :=
   if k ≤ N + 1 then (cfConv_back a b N (N + 1 - k)).1 else 0
 
+/-- Identity under the stated parameter and domain assumptions: `cfConv_backW a b N (N + 1) = 1`. -/
 theorem cfConv_backW_succ (N : ℕ) : cfConv_backW a b N (N + 1) = 1 := by
   simp [cfConv_backW, cfConv_back]
 
+/-- Identity under the stated parameter and domain assumptions: `cfConv_backW a b N (N + 2) = 0`. -/
 theorem cfConv_backW_succ_succ (N : ℕ) : cfConv_backW a b N (N + 2) = 0 := by
   simp [cfConv_backW]
 
+/-- Estimate under the stated parameter and domain assumptions: `∀ k ≤ N, cfConv_backW a b N k = b
+k * cfConv_backW a b N (k + 1) + a (k + 1) * cfConv_backW a b N (k + 2)`. -/
 theorem cfConv_backW_rec (N : ℕ) :
     ∀ k ≤ N, cfConv_backW a b N k =
       b k * cfConv_backW a b N (k + 1) + a (k + 1) * cfConv_backW a b N (k + 2) := by
@@ -922,6 +926,7 @@ section Stieltjes
 
 variable {h : ℂ} {a b : ℕ → ℂ}
 
+/-- Estimate under the stated parameter and domain assumptions: `0 < (u⁻¹).re`. -/
 theorem cfConv_re_recip_pos {u : ℂ} (hu : 0 < u.re) : 0 < (u⁻¹).re := by
   rw [Complex.inv_re]
   have : u ≠ 0 := fun h0 => by rw [h0, Complex.zero_re] at hu; exact lt_irrefl _ hu
@@ -1131,7 +1136,6 @@ theorem cfConv_sfrac_const_ne_zero {z : ℂ} (hz : 0 < z.re) {a : ℕ → ℂ} {
   have := ge_of_tendsto hn (Eventually.of_forall hlow)
   linarith
 
-
 /-- **Convergence from the tail.** If the convergents of the tail `a₁/(b₁ + a₂/(b₂ + ⋯))`
 tend to `t`, its denominators are eventually nonzero, and `b₀ + t ≠ 0`, then the convergents
 of `a₀/(b₀ + a₁/(b₁ + ⋯))` tend to `a₀/(b₀ + t)`, and its denominators are eventually nonzero. -/
@@ -1207,7 +1211,6 @@ theorem cfConv_tendsto_of_tail {K : Type*} [NormedField K] {a b w : ℕ → K}
       rw [hw j]; field_simp [hw0 (j + 1)]
     rw [e]
     field_simp [hw0 j, hw0 (j + 1)]
-
 
 /-- **Composition with a tail.** The continuants of `h + a₀/(b₀ + ⋯)` at index `J + 1 + n`
 are combinations of those at `J + 1` and `J` with the continuants of the tail

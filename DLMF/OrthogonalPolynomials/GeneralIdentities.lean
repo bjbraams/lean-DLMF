@@ -58,6 +58,8 @@ def recurrenceDiagonal {μ : Measure ℝ} {p : ℕ → ℝ[X]}
     (h : IsOrthogonalPolynomials μ p) (n : ℕ) : ℝ :=
   h.basis.repr (X * p n) n
 
+/-- Identity under the stated parameter and domain assumptions: `∫ x, (p m).eval x * (p n).eval x
+∂μ = if m = n then squaredNorm μ p n else 0`. -/
 @[dlmf 18.2.E5_5]
 theorem integral_product {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOrthogonalPolynomials μ p) (m n : ℕ) :
     ∫ x, (p m).eval x * (p n).eval x ∂μ = if m = n then squaredNorm μ p n else 0 := by
@@ -66,6 +68,8 @@ theorem integral_product {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOrthogon
     simp [squaredNorm, pow_two]
   · simp [hmn, h.2.2.2 m n hmn]
 
+/-- Identity under the stated parameter and domain assumptions: `recurrenceDiagonal h n = (∫ x, x
+* (p n).eval x ^ 2 ∂μ) / squaredNorm μ p n`. -/
 @[dlmf 18.2.E11]
 theorem recurrenceDiagonal_eq_integral {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOrthogonalPolynomials μ p) (n : ℕ) :
     recurrenceDiagonal h n = (∫ x, x * (p n).eval x ^ 2 ∂μ) / squaredNorm μ p n := by
@@ -133,6 +137,8 @@ theorem integral_mul_kernel {μ : Measure ℝ} {p : ℕ → ℝ[X]}
   · intro k _
     exact (hf.integrable_mul (h.memLp_eval (p k))).const_mul _
 
+/-- Identity under the stated parameter and domain assumptions: `∫ y, f.eval y *
+christoffelDarbouxKernel μ p n x y ∂μ = f.eval x`. -/
 @[dlmf 18.2.E12_5]
 theorem kernel_reproduces {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOrthogonalPolynomials μ p)
     (n : ℕ) (f : ℝ[X]) (hf : f.degree ≤ n) (x : ℝ) :
@@ -148,6 +154,9 @@ theorem kernel_reproduces {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOrthogo
   dsimp [squaredNorm]
   field_simp [ne_of_gt (h.2.2.1 k)]
 
+/-- Identity under the stated parameter and domain assumptions: `christoffelDarbouxKernel μ p n x
+x = (p n).leadingCoeff / (squaredNorm μ p n * (p (n + 1)).leadingCoeff) * ((derivative (p (n +
+1))).eval x * (p n).eval x - (derivative (p n)).eval x * (p (n + 1)).eval x)`. -/
 @[dlmf 18.2.E13]
 theorem christoffel_darboux_diagonal {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOrthogonalPolynomials μ p) (n : ℕ) (x : ℝ) :
     christoffelDarbouxKernel μ p n x x = (p n).leadingCoeff /
@@ -181,6 +190,9 @@ theorem christoffel_darboux_diagonal {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h 
   rw [hK] at hd
   simpa [A, mul_comm, mul_left_comm, mul_assoc] using hd
 
+/-- Identity under the stated parameter and domain assumptions: `christoffelDarbouxKernel μ p (n +
+1) x y - christoffelDarbouxKernel μ p n x y = (p (n + 1)).eval x * (p (n + 1)).eval y /
+squaredNorm μ p (n + 1)`. -/
 @[dlmf 18.2.E16]
 theorem kernel_difference (μ : Measure ℝ) (p : ℕ → ℝ[X]) (n : ℕ) (x y : ℝ) :
     christoffelDarbouxKernel μ p (n + 1) x y - christoffelDarbouxKernel μ p n x y =
@@ -188,6 +200,7 @@ theorem kernel_difference (μ : Measure ℝ) (p : ℕ → ℝ[X]) (n : ℕ) (x y
   simp only [christoffelDarbouxKernel, Finset.sum_range_succ]
   ring
 
+/-- Estimate under the stated parameter and domain assumptions: `0 < hankelDeterminant μ n`. -/
 @[dlmf 18.2.E27]
 theorem hankelDeterminant_pos {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOrthogonalPolynomials μ p) (n : ℕ) :
     0 < hankelDeterminant μ n := by
@@ -232,6 +245,8 @@ theorem hankelDeterminant_pos {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOrt
     simpa using this
   exact h.integral_eval_sq_pos hq0 hdeg
 
+/-- Identity under the stated parameter and domain assumptions: `h.basis.repr (X * p (n + 1)) n =
+squaredNorm μ p (n + 1) / squaredNorm μ p n`. -/
 @[dlmf 18.2.E11_4]
 theorem monic_squaredNorm_ratio {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOrthogonalPolynomials μ p)
     (hmonic : ∀ n, (p n).Monic) (n : ℕ) :
@@ -292,6 +307,9 @@ private lemma exists_eval_eq_zero_of_mul_neg {f : ℝ[X]} {a b : ℝ} (hab : a �
   · exact intermediate_value_Ioo' hab hcont ⟨hb, ha⟩
   · exact intermediate_value_Ioo hab hcont ⟨ha, hb⟩
 
+/-- Estimate under the stated parameter and domain assumptions: `∃ x : Fin n → ℝ, ∃ y : Fin (n +
+1) → ℝ, StrictMono x ∧ StrictMono y ∧ (∀ i, (p n).eval (x i) = 0) ∧ (∀ i, (p (n + 1)).eval (y
+i) = 0) ∧ ∀ i : Fin n, y i.castSucc < x i ∧ x i < y i.succ`. -/
 @[dlmf 18.2.vi]
 theorem zeros_interlace {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOrthogonalPolynomials μ p) (n : ℕ) :
     ∃ x : Fin n → ℝ, ∃ y : Fin (n + 1) → ℝ, StrictMono x ∧ StrictMono y ∧
@@ -367,6 +385,8 @@ theorem zeros_interlace {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOrthogona
     hymono.monotone (by simp [Fin.le_def]; omega)
   exact ((hxI i).2.trans_le hle).trans (hxI j).1
 
+/-- Identity under the stated parameter and domain assumptions: `(p n).eval (-x) = (-1 : ℝ) ^ n *
+(p n).eval x`. -/
 @[dlmf 18.2.E21]
 theorem symmetric_measure_parity {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOrthogonalPolynomials μ p)
     (hμ : Measure.map (fun x : ℝ => -x) μ = μ) (n : ℕ) (x : ℝ) :
@@ -449,6 +469,8 @@ def IsSzegoWeight (w : ℝ → ℝ) : Prop :=
 def IsNevaiClass (a b : ℝ) (α β : ℕ → ℝ) : Prop :=
   Tendsto (fun n => Real.sqrt (β n)) atTop (𝓝 (a / 2)) ∧ Tendsto α atTop (𝓝 b)
 
+/-- Identity under the stated parameter and domain assumptions: `∫ y, f y *
+christoffelDarbouxKernel μ p n x y ∂μ = 0`. -/
 @[dlmf 18.2.E12_5]
 theorem kernel_annihilates {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOrthogonalPolynomials μ p)
     {f : ℝ → ℝ} (hf : MemLp f 2 μ) (n : ℕ) (horth : ∀ k ≤ n, ∫ y, f y * (p k).eval y ∂μ = 0) (x : ℝ) :
@@ -458,6 +480,8 @@ theorem kernel_annihilates {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOrthog
   intro k hk
   rw [horth k (Nat.le_of_lt_succ (Finset.mem_range.mp hk)), mul_zero]
 
+/-- Identity under the stated parameter and domain assumptions: `∫ x, christoffelDarbouxKernel μ p
+n x y * christoffelDarbouxKernel μ p m x y * |y - x| ∂μ = 0`. -/
 @[dlmf 18.2.E15]
 theorem kernel_polynomials_orthogonal {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOrthogonalPolynomials μ p)
     {a b y : ℝ} (hsupp : μ (Set.Icc a b)ᶜ = 0) (hy : y < a ∨ b < y) {m n : ℕ} (hmn : m ≠ n) :
@@ -554,6 +578,9 @@ theorem moment_coeff_sum {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOrthogon
     exact (show Integrable (fun t : ℝ => t ^ (i + j)) μ by
       simpa using h.integrable_mul (X ^ (i + j)) 1).const_mul _
 
+/-- Identity under the stated parameter and domain assumptions: `(p n).eval x = Matrix.det (fun i
+j : Fin (n + 1) => if i.val = n then x ^ j.val else moment μ (i.val + j.val)) /
+hankelDeterminant μ n`. -/
 @[dlmf 18.2.E29]
 theorem monic_moment_determinant {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOrthogonalPolynomials μ p)
     (hmonic : ∀ n, (p n).Monic) (n : ℕ) (x : ℝ) :
@@ -649,6 +676,8 @@ theorem hankelDeterminant_succ_eq_squaredNorm_mul {μ : Measure ℝ} {p : ℕ �
   rw [hdet, hlast, hminor] at hh
   exact hh
 
+/-- Identity under the stated parameter and domain assumptions: `h.basis.repr (X * p (n + 1)) n =
+hankelDeterminant μ (n + 2) * hankelDeterminant μ n / hankelDeterminant μ (n + 1) ^ 2`. -/
 @[dlmf 18.2.E30]
 theorem monic_offdiagonal_moment_determinant {μ : Measure ℝ} {p : ℕ → ℝ[X]}
     (h : IsOrthogonalPolynomials μ p) (hmonic : ∀ n, (p n).Monic) (n : ℕ) :
@@ -701,6 +730,9 @@ theorem monic_subleading_coeff_moment_determinant {μ : Measure ℝ} {p : ℕ �
   rw [hcol, Matrix.det_updateCol_smul, hshift] at hh
   exact (eq_div_iff (hankelDeterminant_pos h (n + 1)).ne').mpr (by simpa only [A, hankelDeterminant, neg_one_mul] using hh.symm)
 
+/-- Identity under the stated parameter and domain assumptions: `recurrenceDiagonal h n =
+shiftedHankelDeterminant μ (n + 1) / hankelDeterminant μ (n + 1) - shiftedHankelDeterminant μ
+n / hankelDeterminant μ n`. -/
 @[dlmf 18.2.E30]
 theorem monic_diagonal_moment_determinant {μ : Measure ℝ} {p : ℕ → ℝ[X]}
     (h : IsOrthogonalPolynomials μ p) (hmonic : ∀ n, (p n).Monic) (n : ℕ) :
@@ -718,6 +750,8 @@ theorem monic_diagonal_moment_determinant {μ : Measure ℝ} {p : ℕ → ℝ[X]
     rw [Finset.sum_range_succ, hs n] at hh
     linarith
 
+/-- The map `(fun N : ℕ => ∫ x, (f x - ∑ n ∈ Finset.range N, ((∫ t, f t * (p n).eval t ∂μ) /
+squaredNorm μ p n) * (p n).eval x) ^ 2 ∂μ)` tends to `(𝓝 0)` along `atTop`. -/
 @[dlmf 18.2.E25]
 theorem compact_support_L2_expansion {μ : Measure ℝ} {p : ℕ → ℝ[X]} (h : IsOrthogonalPolynomials μ p)
     {a b : ℝ} (hsupp : μ (Set.Icc a b)ᶜ = 0) {f : ℝ → ℝ} (hf : MemLp f 2 μ) :

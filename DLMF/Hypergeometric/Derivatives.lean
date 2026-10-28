@@ -39,6 +39,8 @@ def mulDerivMul (f : ℂ → ℂ) (z : ℂ) : ℂ := z * deriv (fun w => w * f w
 def oneSubMulDerivMul (f : ℂ → ℂ) (z : ℂ) : ℂ :=
   (1 - z) * deriv (fun w => (1 - w) * f w) z
 
+/-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (₂F₁ a b c) z =
+poch a n * poch b n / poch c n * ₂F₁ (a + n) (b + n) (c + n) z`. -/
 @[dlmf 15.5.E2]
 theorem iteratedDeriv_hypergeometric
     {a b c z : ℂ}
@@ -104,6 +106,8 @@ private lemma deriv_cpow_mul_hg_lower {a b c z : ℂ}
   simp only [sub_add_cancel] at hd
   linear_combination z ^ (c - 1 - 1) * ha - z ^ (c - 1 - 1) * hd
 
+/-- Identity under the stated parameter and domain assumptions: `(mulDerivMul^[n]) (fun w => w ^
+(a - 1) * ₂F₁ a b c w) z = poch a n * z ^ (a + n - 1) * ₂F₁ (a + n) b c z`. -/
 @[dlmf 15.5.E3]
 theorem iterate_mulDerivMul
     {a b c z : ℂ}
@@ -132,6 +136,8 @@ theorem iterate_mulDerivMul
         simp only [poch_succ, Nat.cast_add, Nat.cast_one]
         ring
 
+/-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (fun w => w ^ (c
+- 1) * ₂F₁ a b c w) z = poch (c - n) n * z ^ (c - n - 1) * ₂F₁ a b (c - n) z`. -/
 @[dlmf 15.5.E4]
 theorem iteratedDeriv_mul_cpow
     {a b c z : ℂ}
@@ -228,6 +234,8 @@ theorem iterate_mulDerivMul_eq (n : ℕ) {f : ℂ → ℂ} (hf : ContDiff ℂ �
       _ = z ^ (n + 1) * iteratedDeriv (n + 1) (fun w => w ^ (n + 1) * f w) z := by
         rw [hleib]; ring
 
+/-- Identity under the stated parameter and domain assumptions: `(b - a) * ₂F₁ a b c z + a * ₂F₁
+(a + 1) b c z - b * ₂F₁ a (b + 1) c z = 0`. -/
 @[dlmf 15.5.E12]
 theorem contiguous_ab {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hz : ‖z‖ < 1)  :
     (b - a) * ₂F₁ a b c z + a * ₂F₁ (a + 1) b c z - b * ₂F₁ a (b + 1) c z = 0 := by
@@ -236,6 +244,8 @@ theorem contiguous_ab {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hz :
   simp only [ordinaryHypergeometric_symm b a c, ordinaryHypergeometric_symm (b + 1) a c] at hb
   linear_combination hb - ha
 
+/-- Identity under the stated parameter and domain assumptions: `(c - a - b) * ₂F₁ a b c z + a *
+(1 - z) * ₂F₁ (a + 1) b c z - (c - b) * ₂F₁ a (b - 1) c z = 0`. -/
 @[dlmf 15.5.E13]
 theorem contiguous_a_b_pred {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hz : ‖z‖ < 1)  :
     (c - a - b) * ₂F₁ a b c z + a * (1 - z) * ₂F₁ (a + 1) b c z - (c - b) * ₂F₁ a (b - 1) c z = 0 := by
@@ -286,6 +296,8 @@ theorem contiguous_antidiagonal {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : �
     (2 * (a - b + 1) * (a - b + 2) * (a - b + 3) * (a - c + 2)) * h3 +
     (2 * a * (a - b + 1) * (a - c + 2) * (b - c - 1)) * h4
 
+/-- Identity under the stated parameter and domain assumptions: `c * (1 - z) * deriv (₂F₁ a b c) z
+= (c - a) * (c - b) * ₂F₁ a b (c + 1) z + c * (a + b - c) * ₂F₁ a b c z`. -/
 @[dlmf 15.5.E21]
 theorem deriv_contiguous_c_succ {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hz : ‖z‖ < 1) :
     c * (1 - z) * deriv (₂F₁ a b c) z =
@@ -337,6 +349,8 @@ theorem contiguous_c_succ_shift {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : �
     field_simp
   linear_combination h - (1 - z) * hd
 
+/-- Identity under the stated parameter and domain assumptions: `c * (a + (b - c) * z) * ₂F₁ a b c
+z - a * c * (1 - z) * ₂F₁ (a + 1) b c z + (c - a) * (c - b) * z * ₂F₁ a b (c + 1) z = 0`. -/
 @[dlmf 15.5.E14]
 theorem contiguous_a_c_succ {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hz : ‖z‖ < 1)  :
     c * (a + (b - c) * z) * ₂F₁ a b c z - a * c * (1 - z) * ₂F₁ (a + 1) b c z + (c - a) * (c - b) * z * ₂F₁
@@ -345,6 +359,8 @@ theorem contiguous_a_c_succ {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
   have hd := deriv_contiguous_c_succ (a := a) (b := b) hc hz
   linear_combination c * (1 - z) * ha - z * hd
 
+/-- Identity under the stated parameter and domain assumptions: `(c - a - 1) * ₂F₁ a b c z + a *
+₂F₁ (a + 1) b c z - (c - 1) * ₂F₁ a b (c - 1) z = 0`. -/
 @[dlmf 15.5.E15]
 theorem contiguous_a_succ_c_pred
     {a b c z : ℂ}
@@ -356,6 +372,8 @@ theorem contiguous_a_succ_c_pred
   simp only [sub_add_cancel] at h
   linear_combination -h
 
+/-- Identity under the stated parameter and domain assumptions: `c * (1 - z) * ₂F₁ a b c z - c *
+₂F₁ (a - 1) b c z + (c - b) * z * ₂F₁ a b (c + 1) z = 0`. -/
 @[dlmf 15.5.E16]
 theorem contiguous_a_pred_c_succ {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hz : ‖z‖ < 1)  :
     c * (1 - z) * ₂F₁ a b c z - c * ₂F₁ (a - 1) b c z + (c - b) * z * ₂F₁ a b (c + 1) z = 0 := by
@@ -367,6 +385,8 @@ theorem contiguous_a_pred_c_succ {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : 
       ordinaryHypergeometric_symm (b + 1) a (c + 1)] at hc'
   linear_combination -hs - z * hc'
 
+/-- Identity under the stated parameter and domain assumptions: `(a - 1 + (b + 1 - c) * z) * ₂F₁ a
+b c z + (c - a) * ₂F₁ (a - 1) b c z - (c - 1) * (1 - z) * ₂F₁ a b (c - 1) z = 0`. -/
 @[dlmf 15.5.E17]
 theorem contiguous_a_pred_c_pred
     {a b c z : ℂ}
@@ -379,6 +399,9 @@ theorem contiguous_a_pred_c_pred
   have h₂ := contiguous_a_succ_c_pred (a := a) (b := b) hc hz hcm
   linear_combination h₁ + (1 - z) * h₂
 
+/-- Identity under the stated parameter and domain assumptions: `c * (c - 1) * (z - 1) * ₂F₁ a b
+(c - 1) z + c * (c - 1 - (2 * c - a - b - 1) * z) * ₂F₁ a b c z + (c - a) * (c - b) * z * ₂F₁
+a b (c + 1) z = 0`. -/
 @[dlmf 15.5.E18]
 theorem contiguous_c_three
     {a b c z : ℂ}
@@ -392,6 +415,9 @@ theorem contiguous_c_three
   have h₃ := contiguous_a_pred_c_pred (a := a) (b := b) hc hz hcm
   linear_combination h₁ - c * h₂ + c * h₃
 
+/-- Identity under the stated parameter and domain assumptions: `z * (1 - z) * (a + 1) * (b + 1) *
+₂F₁ (a + 2) (b + 2) (c + 2) z + (c - (a + b + 1) * z) * (c + 1) * ₂F₁ (a + 1) (b + 1) (c + 1)
+z - c * (c + 1) * ₂F₁ a b c z = 0`. -/
 @[dlmf 15.5.E19]
 theorem contiguous_diagonal {a b c z : ℂ} (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hz : ‖z‖ < 1)  :
     z * (1 - z) * (a + 1) * (b + 1) * ₂F₁ (a + 2) (b + 2) (c + 2) z + (c - (a + b + 1) * z) * (c + 1) * ₂F₁
@@ -448,6 +474,9 @@ private lemma deriv_cpow_mul_one_sub_cpow_mul_hg {a b c z : ℂ} (s t : ℂ)
   rw [h, hF.deriv]
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `(mulDerivMul^[n]) (fun w => w ^
+(c - a - 1) * (1 - w) ^ (a + b - c) * ₂F₁ a b c w) z = poch (c - a) n * z ^ (c - a + n - 1) *
+(1 - z) ^ (a - n + b - c) * ₂F₁ (a - n) b c z`. -/
 @[dlmf 15.5.E5]
 theorem iterate_mulDerivMul_euler
     {a b c z : ℂ}
@@ -485,6 +514,9 @@ theorem iterate_mulDerivMul_euler
     linear_combination
       (poch (c - a) n * z * z ^ (c - a + n - 1) * (1 - z) ^ (a - n + b - c - 1)) * hd
 
+/-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (fun w => (1 - w)
+^ (a + b - c) * ₂F₁ a b c w) z = poch (c - a) n * poch (c - b) n / poch c n * (1 - z) ^ (a + b
+- c - n) * ₂F₁ a b (c + n) z`. -/
 @[dlmf 15.5.E6]
 theorem iteratedDeriv_euler {a b c z : ℂ} (n : ℕ) (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hz : ‖z‖ < 1)  :
     iteratedDeriv n (fun w => (1 - w) ^ (a + b - c) * ₂F₁ a b c w) z =
@@ -560,6 +592,9 @@ private lemma mul_one_sub_deriv_eq_shift_down_two {a b c z : ℂ}
   apply mul_left_cancel₀ hc0
   linear_combination c * h1 - c * h2 - (c - a) * h3 - (a - 1) * h4 - (a - 1) * z * h5
 
+/-- Identity under the stated parameter and domain assumptions: `(oneSubMulDerivMul^[n]) (fun w =>
+(1 - w) ^ (a - 1) * ₂F₁ a b c w) z = (-1 : ℂ) ^ n * poch a n * poch (c - b) n / poch c n * (1
+- z) ^ (a + n - 1) * ₂F₁ (a + n) b (c + n) z`. -/
 @[dlmf 15.5.E7]
 theorem iterate_oneSubMulDerivMul
     {a b c z : ℂ}
@@ -596,6 +631,9 @@ theorem iterate_oneSubMulDerivMul
     field_simp
     linear_combination (poch a n * poch (c - b) n * (1 - z) ^ (a + n - 1)) * hd
 
+/-- Identity under the stated parameter and domain assumptions: `(oneSubMulDerivMul^[n]) (fun w =>
+w ^ (c - 1) * (1 - w) ^ (b - c) * ₂F₁ a b c w) z = poch (c - n) n * z ^ (c - n - 1) * (1 - z)
+^ (b - c + n) * ₂F₁ (a - n) b (c - n) z`. -/
 @[dlmf 15.5.E8]
 theorem iterate_oneSubMulDerivMul_cpow
     {a b c z : ℂ}
@@ -653,6 +691,9 @@ theorem iterate_oneSubMulDerivMul_cpow
     linear_combination (poch (c - n) n * z ^ (c - n - 1 - 1) *
       (1 - z) ^ (b - c + n + 1 - 1) * (1 - z)) * hd
 
+/-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (fun w => w ^ (c
+- 1) * (1 - w) ^ (a + b - c) * ₂F₁ a b c w) z = poch (c - n) n * z ^ (c - n - 1) * (1 - z) ^
+(a + b - c - n) * ₂F₁ (a - n) (b - n) (c - n) z`. -/
 @[dlmf 15.5.E9]
 theorem iteratedDeriv_two_cpow
     {a b c z : ℂ}

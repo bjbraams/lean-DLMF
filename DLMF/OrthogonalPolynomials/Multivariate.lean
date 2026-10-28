@@ -122,6 +122,10 @@ theorem diskPolynomial_swap (α : ℂ) (m n : ℕ) (z : ℂ) :
   ring
 
 
+/-- Identity under the stated parameter and domain assumptions: `diskPolynomial α m n ((r : ℂ) *
+exp (I * θ)) = exp (I * ((m : ℂ) - n) * θ) * (r : ℂ) ^ (Int.natAbs ((m : ℤ) - n)) *
+jacobiPolyP α (Int.natAbs ((m : ℤ) - n)) (min m n) (2 * (r : ℂ) ^ 2 - 1) / jacobiPolyP α
+(Int.natAbs ((m : ℤ) - n)) (min m n) 1`. -/
 @[dlmf 18.37.E1]
 theorem diskPolynomial_polar {α : ℝ} (hα : -1 < α) (m n : ℕ) (r θ : ℝ) (_hr : 0 ≤ r) :
     diskPolynomial α m n ((r : ℂ) * exp (I * θ)) =
@@ -159,6 +163,7 @@ theorem diskPolynomial_polar {α : ℝ} (hα : -1 < α) (m n : ℕ) (r θ : ℝ)
     rw [he]
     ring
 
+/-- Identity under the stated parameter and domain assumptions: `diskPolynomial α m n 1 = 1`. -/
 @[dlmf 18.37.E5]
 theorem diskPolynomial_at_one {α : ℂ} (hα : -1 < α.re) (m n : ℕ) : diskPolynomial α m n 1 = 1 := by
   have hnp : ∀ k : ℕ, α + 1 ≠ -(k : ℂ) := fun k h => by

@@ -161,6 +161,8 @@ theorem Real.jacobiArcdnm_mem_Icc (hm : m < 1) (x : ℝ) :
     rw [Real.incEllIntFm_pi_div_two] at this
     exact this
 
+/-- Identity under the stated parameter and domain assumptions: `Real.incEllIntFm (φ + n * π) m =
+Real.incEllIntFm φ m + 2 * n * Real.compEllIntKm m`. -/
 lemma p22R1_F_add_int_pi {m : ℝ} (hm : m < 1) (φ : ℝ) (n : ℤ) :
     Real.incEllIntFm (φ + n * π) m = Real.incEllIntFm φ m + 2 * n * Real.compEllIntKm m := by
   induction n using Int.induction_on with
@@ -174,18 +176,24 @@ lemma p22R1_F_add_int_pi {m : ℝ} (hm : m < 1) (φ : ℝ) (n : ℤ) :
     rw [show φ + (-(n : ℝ) - 1) * π + π = φ + -(n : ℝ) * π by ring, ih] at h
     linarith
 
+/-- Identity under the stated parameter and domain assumptions: `ξ = Real.incEllIntFm B m ↔
+Real.jacobiAmm ξ m = B`. -/
 lemma p22R1_eq_F_iff {m : ℝ} (hm : m < 1) (ξ B : ℝ) :
     ξ = Real.incEllIntFm B m ↔ Real.jacobiAmm ξ m = B := by
   constructor
   · rintro rfl; exact Real.jacobiAmm_incEllIntFm hm B
   · rintro rfl; exact (Real.incEllIntFm_jacobiAmm hm ξ).symm
 
+/-- Identity under the stated parameter and domain assumptions: `Real.incEllIntFm ((-1) ^ n * a) m
+= (-1) ^ n * Real.incEllIntFm a m`. -/
 lemma p22R1_neg_one_zpow_F {m : ℝ} (n : ℤ) (a : ℝ) :
     Real.incEllIntFm ((-1) ^ n * a) m = (-1) ^ n * Real.incEllIntFm a m := by
   rcases Int.even_or_odd n with h | h
   · simp [h.neg_one_zpow]
   · simp [h.neg_one_zpow, Real.incEllIntFm_neg]
 
+/-- Identity under the stated parameter and domain assumptions: `sin A = sin a ↔ ∃ n : ℤ, A = (-1)
+^ n * a + n * π`. -/
 lemma p22R1_sin_eq_iff (A a : ℝ) :
     sin A = sin a ↔ ∃ n : ℤ, A = (-1) ^ n * a + n * π := by
   rw [eq_comm, Real.sin_eq_sin_iff]
@@ -749,9 +757,6 @@ theorem Real.jacobiDsm_jacobiArcdsm (hm0 : 0 < m) (hm : m < 1) {x : ℝ} (hx : �
   rw [key, ← one_div_div, h]
   field_simp
 
-
-
-
 /-- DLMF 22.15.20: `arcsc` inverts `sc` on `ℝ` (substitution `t = tan θ`). -/
 @[dlmf 22.15.E20 "special case: real parameter 0 ≤ m = k² < 1"]
 theorem Real.jacobiScm_jacobiArcscm (hm0 : 0 ≤ m) (hm : m < 1) (x : ℝ) :
@@ -780,8 +785,6 @@ theorem Real.jacobiScm_jacobiArcscm (hm0 : 0 ≤ m) (hm : m < 1) (x : ℝ) :
     rw [e, Real.sqrt_sq (by positivity), Real.rpow_neg hp.le, ← Real.sqrt_eq_rpow]
     have := Real.sqrt_pos.mpr hp
     field_simp
-
-
 
 open Set MeasureTheory in
 /-- DLMF 22.15.23: `arccs` inverts `cs` on `ℝ`. -/
@@ -854,7 +857,6 @@ theorem Real.jacobiCsm_jacobiArccsm (hm0 : 0 ≤ m) (hm : m < 1) (x : ℝ) :
     have := Real.sqrt_pos.mpr hp
     field_simp
   rw [hF, Real.jacobiCnm, Real.jacobiSnm, Real.jacobiAmm_incEllIntFm hm, hφ0, hcot]
-
 
 end Integrals
 

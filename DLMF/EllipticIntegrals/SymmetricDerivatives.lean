@@ -34,6 +34,8 @@ namespace DLMF.EllipticIntegrals
 
 variable {ι : Type*} [Fintype ι]
 
+/-- Identity under the stated parameter and domain assumptions: `symEllIntR a b =ᶠ[𝓝 z]
+Carlson.carlsonR (-a) b`. -/
 lemma ei19c_eventuallyEq (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
     (hz : z ∈ Carlson.carlsonRSlitDomain) :
     symEllIntR a b =ᶠ[𝓝 z] Carlson.carlsonR (-a) b := by
@@ -41,6 +43,9 @@ lemma ei19c_eventuallyEq (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
   exact symEllIntR_of_mem _ _ hw
 
 open scoped Classical in
+/-- At `(z j)`, the function `(fun w => symEllIntR a b (Function.update z j w))` has derivative
+`(Gamma (∑ i, b i) * (-a * b j * Carlson.regCarlsonR (-a - 1) (Dirichlet.addDirichletUnit b j)
+z))`. -/
 lemma ei19c_hasDerivAt_update (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
     (hz : z ∈ Carlson.carlsonRSlitDomain) (j : ι) :
     HasDerivAt (fun w => symEllIntR a b (Function.update z j w))
@@ -84,6 +89,9 @@ theorem hasDerivAt_symEllIntR_translate (a : ℂ) (b z : ι → ℂ) {x : ℂ}
   rw [show -a - 1 = -(a + 1) by ring]
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `Dirichlet.carlsonPartialDeriv j
+(symEllIntR a b) z = Gamma (∑ i, b i) * (-a * b j * Carlson.regCarlsonR (-a - 1)
+(Dirichlet.addDirichletUnit b j) z)`. -/
 lemma ei19c_deriv_update (a : ℂ) (b : ι → ℂ) {z : ι → ℂ}
     (hz : z ∈ Carlson.carlsonRSlitDomain) (j : ι) :
     Dirichlet.carlsonPartialDeriv j (symEllIntR a b) z =
@@ -127,11 +135,16 @@ theorem mul_partialDeriv_add_symEllIntR (a : ℂ) (b : ι → ℂ) {z : ι → �
   linear_combination Gamma (∑ i, b i) * h1
 
 open scoped Classical in
+/-- Identity under the stated parameter and domain assumptions: `Dirichlet.carlsonPartialDeriv j F
+z = Dirichlet.carlsonPartialDeriv j G z`. -/
 lemma ei19c_partialDeriv_congr {F G : (ι → ℂ) → ℂ} {z : ι → ℂ} (h : F =ᶠ[𝓝 z] G) (j : ι) :
     Dirichlet.carlsonPartialDeriv j F z = Dirichlet.carlsonPartialDeriv j G z :=
   SeveralComplexVariables.partialDeriv_congr h j
 
 open scoped Classical in
+/-- Identity under the stated parameter and domain assumptions:
+`Dirichlet.carlsonEulerPoissonOperator i j b z F = Dirichlet.carlsonEulerPoissonOperator i j b
+z G`. -/
 lemma ei19c_eulerPoisson_congr {F G : (ι → ℂ) → ℂ} {z : ι → ℂ} (h : F =ᶠ[𝓝 z] G)
     (i j : ι) (b : ι → ℂ) :
     Dirichlet.carlsonEulerPoissonOperator i j b z F =
@@ -200,14 +213,20 @@ def symEllIntRFVec (v : Fin 3 → ℂ) : ℂ := symEllIntRF (v 0) (v 1) (v 2)
 /-- `R_G` as a function on `ℂ³ = Fin 3 → ℂ`. -/
 def symEllIntRGVec (v : Fin 3 → ℂ) : ℂ := symEllIntRG (v 0) (v 1) (v 2)
 
+/-- Identity under the stated parameter and domain assumptions: `(![v 0, v 1, v 2] : Fin 3 → ℂ) =
+v`. -/
 lemma ei19c_vec3 (v : Fin 3 → ℂ) : (![v 0, v 1, v 2] : Fin 3 → ℂ) = v := by
   funext i; fin_cases i <;> rfl
 
+/-- Identity under the stated parameter and domain assumptions: `symEllIntRFVec =ᶠ[𝓝 v] symEllIntR
+(1 / 2) (fun _ : Fin 3 => 1 / 2)`. -/
 lemma ei19c_RFVec_eventuallyEq {v : Fin 3 → ℂ} (hv : v ∈ Carlson.carlsonRSlitDomain) :
     symEllIntRFVec =ᶠ[𝓝 v] symEllIntR (1 / 2) (fun _ : Fin 3 => 1 / 2) := by
   filter_upwards [Carlson.isOpen_carlsonRSlitDomain.mem_nhds hv] with w hw
   rw [symEllIntRFVec, symEllIntRF_eq_symEllIntR (hw 0) (hw 1) (hw 2), ei19c_vec3]
 
+/-- Identity under the stated parameter and domain assumptions: `symEllIntRGVec =ᶠ[𝓝 v] symEllIntR
+(-1 / 2) (fun _ : Fin 3 => 1 / 2)`. -/
 lemma ei19c_RGVec_eventuallyEq {v : Fin 3 → ℂ} (hv : v ∈ Carlson.carlsonRSlitDomain) :
     symEllIntRGVec =ᶠ[𝓝 v] symEllIntR (-1 / 2) (fun _ : Fin 3 => 1 / 2) := by
   filter_upwards [Carlson.isOpen_carlsonRSlitDomain.mem_nhds hv] with w hw
@@ -322,6 +341,7 @@ theorem eulerPoisson_symEllIntRF {v : Fin 3 → ℂ} (hv : v ∈ Carlson.carlson
 
 /-! ### Real line derivatives of holomorphic functions of several variables (helpers) -/
 
+/-- At `r`, the function `(fun t : ℝ => c + (t : ℂ) • d)` has derivative `d`. -/
 lemma p19sR1_hasDerivAt_path (c d : ι → ℂ) (r : ℝ) :
     HasDerivAt (fun t : ℝ => c + (t : ℂ) • d) d r := by
   have h := ((hasDerivAt_id r).ofReal_comp.smul_const d).const_add c

@@ -36,7 +36,8 @@ def errorFunctionZero (complement : Bool) (k : ℕ) : ℂ :=
 def fresnelFunctionZero (sine : Bool) (k : ℕ) : ℂ :=
   orderedZero (if sine then fresnelSinInt else fresnelCosInt) {z : ℂ | 0 < arg z ∧ arg z < π/4} k
 
-/-- erf zero simple. -/
+/-- Identity under the stated parameter and domain assumptions: `erf 0=0 ∧ deriv erf 0=2/Real.sqrt
+π`. -/
 theorem erf_zero_simple  :
     erf 0=0 ∧ deriv erf 0=2/Real.sqrt π := by
   refine ⟨erf_zero, ?_⟩
@@ -68,7 +69,7 @@ theorem fresnel_zero_orders  :
   · rw [hS2]; simp
   · rw [iteratedDeriv_succ, hS2, hd3.deriv]; simp
 
-/-- errorFunctionZero spec. -/
+/-- The stated relation follows from the given hypotheses: `let f`. -/
 theorem errorFunctionZero_spec (complement : Bool) {k : ℕ} (hk : 1 ≤ k) :
     let f := if complement then erfc else erf; let S := if complement then {z : ℂ | π/2 < arg z ∧ arg z < 3*π/4} else {z : ℂ | 0 < z.re ∧ 0 < z.im}; errorFunctionZero complement k ∈ S ∧ f (errorFunctionZero complement k)=0 ∧ ({z : ℂ | z ∈ S ∧ f z=0 ∧ ‖z‖ < ‖errorFunctionZero complement k‖} : Set ℂ).ncard=k-1 := by
   sorry
@@ -88,7 +89,8 @@ theorem errorFunctionZero_spec_iff (complement : Bool) :
   · exact zcnt_orderedZero_spec_iff
       (zcnt_finite_zeros_lt zcnt_differentiable_erfc (x := 0) (by simp [erfc, erf_zero]) _)
 
-/-- errorFunctionZero ordered. -/
+/-- Identity under the stated parameter and domain assumptions: `StrictMonoOn (fun k =>
+‖errorFunctionZero complement k‖) (Ici 1)`. -/
 theorem errorFunctionZero_ordered (complement : Bool) :
     StrictMonoOn (fun k => ‖errorFunctionZero complement k‖) (Ici 1) := by
   cases complement
@@ -99,7 +101,8 @@ theorem errorFunctionZero_ordered (complement : Bool) :
       (zcnt_finite_zeros_lt zcnt_differentiable_erfc (x := 0) (by simp [erfc, erf_zero]) _)
       (fun k hk => errorFunctionZero_spec true hk)
 
-/-- erf zero classification. -/
+/-- Estimate under the stated parameter and domain assumptions: `erf z=0 ↔ z=0 ∨ ∃ k : ℕ, 1 ≤ k ∧
+let u`. -/
 theorem erf_zero_classification (z : ℂ) :
     erf z=0 ↔ z=0 ∨ ∃ k : ℕ, 1 ≤ k ∧ let u := errorFunctionZero false k; z=u ∨ z = -u ∨ z=star u ∨ z = -star u := by
   set Q : Set ℂ := {z : ℂ | 0 < z.re ∧ 0 < z.im}
@@ -147,7 +150,8 @@ theorem erf_zero_classification (z : ℂ) :
     · rw [hconj, hu0, star_zero]
     · rw [erf_negative, hconj, hu0, star_zero, neg_zero]
 
-/-- erfc zero classification. -/
+/-- Estimate under the stated parameter and domain assumptions: `erfc z=0 ↔ ∃ k : ℕ, 1 ≤ k ∧
+(z=errorFunctionZero true k ∨ z=star (errorFunctionZero true k))`. -/
 theorem erfc_zero_classification (z : ℂ) :
     erfc z=0 ↔ ∃ k : ℕ, 1 ≤ k ∧ (z=errorFunctionZero true k ∨ z=star (errorFunctionZero true k)) := by
   set S : Set ℂ := {z : ℂ | π/2 < arg z ∧ arg z < 3*π/4}
@@ -170,7 +174,8 @@ theorem erfc_zero_classification (z : ℂ) :
     · rw [h, hconj]
       exact (congrArg star (hspec k hk).2.1).trans (star_zero _)
 
-/-- faddeevaW zero classification. -/
+/-- Estimate under the stated parameter and domain assumptions: `faddeevaW z=0 ↔ ∃ k : ℕ, 1 ≤ k ∧
+(z=I*errorFunctionZero true k ∨ z=I*star (errorFunctionZero true k))`. -/
 theorem faddeevaW_zero_classification (z : ℂ) :
     faddeevaW z=0 ↔ ∃ k : ℕ, 1 ≤ k ∧ (z=I*errorFunctionZero true k ∨ z=I*star (errorFunctionZero true k)) := by
   have hI : ∀ w : ℂ, -I * z = w ↔ z = I * w := fun w => by
@@ -181,12 +186,13 @@ theorem faddeevaW_zero_classification (z : ℂ) :
     erfc_zero_classification]
   simp only [hI]
 
-/-- fresnelFunctionZero spec. -/
+/-- The stated relation follows from the given hypotheses: `let f`. -/
 theorem fresnelFunctionZero_spec (sine : Bool) {k : ℕ} (hk : 1 ≤ k) :
     let f := if sine then fresnelSinInt else fresnelCosInt; 0 < arg (fresnelFunctionZero sine k) ∧ arg (fresnelFunctionZero sine k) < π/4 ∧ f (fresnelFunctionZero sine k)=0 ∧ ({z : ℂ | 0 < arg z ∧ arg z < π/4 ∧ f z=0 ∧ ‖z‖ < ‖fresnelFunctionZero sine k‖} : Set ℂ).ncard=k-1 := by
   sorry
 
-/-- fresnelFunctionZero ordered. -/
+/-- Identity under the stated parameter and domain assumptions: `StrictMonoOn (fun k =>
+‖fresnelFunctionZero sine k‖) (Ici 1)`. -/
 theorem fresnelFunctionZero_ordered (sine : Bool) :
     StrictMonoOn (fun k => ‖fresnelFunctionZero sine k‖) (Ici 1) := by
   obtain ⟨-, hC1, -, -, -, hS3⟩ := fresnel_zero_orders
@@ -223,7 +229,8 @@ theorem fresnelFunctionZero_ordered (sine : Bool) :
       (zcnt_finite_zeros_lt (fun z => (hasDerivAt_fresnelSinInt_complex z).differentiableAt) hx _)
       (fun k hk => hconv true k hk)
 
-/-- fresnel zero classification. -/
+/-- Estimate under the stated parameter and domain assumptions: `(if sine then fresnelSinInt z
+else fresnelCosInt z)=0 ↔ z=0 ∨ ∃ k : ℕ, 1 ≤ k ∧ let u`. -/
 theorem fresnel_zero_classification (sine : Bool) (z : ℂ) :
     (if sine then fresnelSinInt z else fresnelCosInt z)=0 ↔ z=0 ∨ ∃ k : ℕ, 1 ≤ k ∧ let u := fresnelFunctionZero sine k; z=u ∨ z = -u ∨ z=star u ∨ z = -star u ∨ z=I*u ∨ z = -I*u ∨ z=I*star u ∨ z = -I*star u := by
   obtain ⟨hC0, hC1, hS0, -, -, hS3⟩ := fresnel_zero_orders

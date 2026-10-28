@@ -55,4 +55,4 @@ public import DLMF.AsymptoticApproximations
 public import DLMF.Core.UpstreamElementary
 public import DLMF.Core.ZeroCounting
 
-/-! # Special Functions following Andrews, Askey, and Roy (1999) -/
+/-! # Special Functions following the NIST Digital Library of Mathematical Functions -/

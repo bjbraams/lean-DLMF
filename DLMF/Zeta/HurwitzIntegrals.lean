@@ -136,11 +136,12 @@ lemma s25b_norm_binet_integrand_le {s a : ℂ} {x σ₁ σ₂ : ℝ} (hx : 0 < x
       Real.rpow_le_rpow_of_exponent_le hx1.le (by linarith)
     nlinarith
 
-
 /-- The 25.11.27 integrand. -/
 noncomputable def s25b_binetIntegrand (a s : ℂ) (x : ℝ) : ℂ :=
   ((DLMF.Gamma.binetBeta x : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) * cexp (-(a * x))
 
+/-- The stated relation follows from the given hypotheses: `AEStronglyMeasurable
+(s25b_binetIntegrand a s) (volume.restrict (Ioi 0))`. -/
 lemma s25b_aestronglyMeasurable_binetIntegrand (a s : ℂ) :
     AEStronglyMeasurable (s25b_binetIntegrand a s) (volume.restrict (Ioi 0)) := by
   have hb : AEStronglyMeasurable (fun x : ℝ => ((DLMF.Gamma.binetBeta x : ℝ) : ℂ))
@@ -196,7 +197,6 @@ lemma s25b_differentiableOn_binetIntegral {a : ℂ} (ha : 0 < a.re) :
       exact s25b_norm_binet_integrand_le hx (by linarith [neg_abs_le (s.re - s₀.re)])
         (by linarith [le_abs_self (s.re - s₀.re)])
 
-
 /-- 25.11.27 for `Re s > 1`, from 25.11.25 and two Gamma integrals. -/
 lemma s25b_binetIntegral_of_one_lt_re {a s : ℂ} (ha : 0 < a.re) (hs : 1 < s.re) :
     ∫ x in Ioi (0 : ℝ), s25b_binetIntegrand a s x =
@@ -248,7 +248,6 @@ lemma s25b_binetIntegral_of_one_lt_re {a s : ℂ} (ha : 0 < a.re) (hs : 1 < s.re
   rw [show -(s - 1) = 1 - s by ring]
   field_simp
   ring
-
 
 /-- **Integral with the Bernoulli generating function** (DLMF 25.11.27): for `Re s > -1`, `s ≠ 1`,
 `Re a > 0`, `ζ(s,a) = a^{-s}/2 + a^{1-s}/(s-1) + (1/Γ(s)) ∫_0^∞ (1/(e^x-1) - 1/x + 1/2) x^{s-1}
@@ -435,7 +434,6 @@ lemma s25b_altIntegral_eq {s a : ℂ} (hs0 : 0 < s.re) (hs1 : s ≠ 1) (ha : 0 <
     push_cast; ring_nf
   · rw [hsplit k _ ha3, show (-1 : ℂ) ^ (2 * k + 1) = -1 by rw [pow_succ, pow_mul]; norm_num]
     push_cast; ring_nf
-
 
 /-- **`cosh` integral** (DLMF 25.11.31): for `Re s > 0`, `Re a > -1` (and `s ≠ 1`, where the
 difference on the right has a removable singularity),
@@ -705,7 +703,6 @@ theorem hurwitzZetaComplex_add_one_isBigO {s : ℂ} (hs0 : s ≠ 0) (hs1 : s ≠
   have := (isBigO_refl (fun a : ℂ => a ^ 2) (𝓝 0)).mul hO
   simp only [mul_one] at this
   exact this.congr_left fun a => (key a).symm
-
 
 /-- **Large imaginary part** (DLMF 25.11.42): for `Re s > 1`, `ζ(s, α + iβ) → 0` as `β → ±∞`,
 uniformly for `α` in bounded subsets of `[0, ∞)`. -/

@@ -22,17 +22,20 @@ open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat ComplexConjugate
 namespace DLMF.Confluent
 
-/-- IsQuadraticCylinderSolution. -/
+/-- The scalar quadratic-potential equation `f″(z) + (az²+bz+c)f(z) = 0`, written using totalized
+iterated derivatives. -/
 @[dlmf 12.2.E1]
 def IsQuadraticCylinderSolution (a b c : ℂ) (f : ℂ → ℂ) : Prop :=
   ∀ z, iteratedDeriv 2 f z+(a*z^2+b*z+c)*f z=0
 
-/-- IsOscillatoryCylinderSolution. -/
+/-- The oscillatory Weber equation `f″(z) + (z²/4-a)f(z) = 0`, written using totalized iterated
+derivatives. -/
 @[dlmf 12.2.E3]
 def IsOscillatoryCylinderSolution (a : ℂ) (f : ℂ → ℂ) : Prop :=
   ∀ z, iteratedDeriv 2 f z+(z^2/4-a)*f z=0
 
-/-- quadraticCylinder transform. -/
+/-- Identity under the stated parameter and domain assumptions: `IsQuadraticCylinderSolution a b c
+(fun z => f (s*(z+b/(2*a))))`. -/
 @[dlmf 12.2.E1]
 theorem quadraticCylinder_transform {a b c s : ℂ} (ha : a ≠ 0) (hs : s^4 = -4*a) (f : ℂ → ℂ) (hf : Differentiable ℂ f) (hf2 : Differentiable ℂ (deriv f)) (hode : ∀ z, iteratedDeriv 2 f z-(z^2/4+(b^2/(4*a)-c)/s^2)*f z=0) :
     IsQuadraticCylinderSolution a b c (fun z => f (s*(z+b/(2*a)))) := by
@@ -64,7 +67,8 @@ theorem quadraticCylinder_transform {a b c s : ℂ} (ha : a ≠ 0) (hs : s^4 = -
   rw [hb]
   linear_combination (z+t)^2*F/4 * hs + F * hq'
 
-/-- pcfD ode. -/
+/-- Identity under the stated parameter and domain assumptions: `iteratedDeriv 2 (pcfD ν)
+z+(ν+1/2-z^2/4)*pcfD ν z=0`. -/
 @[dlmf 12.2.E4]
 theorem pcfD_ode (ν z : ℂ) :
     iteratedDeriv 2 (pcfD ν) z+(ν+1/2-z^2/4)*pcfD ν z=0 := by
@@ -168,11 +172,11 @@ theorem pcfV_real (a x : ℝ) :
 def pcfUBar (a z : ℂ) : ℂ :=
   Gamma (1/2-a)*pcfV a z
 
-/-- pcfUBarDeriv. -/
+/-- The derivative of the Gamma-normalized second cylinder solution: `Γ(1/2-a) V′(a,z)`. -/
 def pcfUBarDeriv (a z : ℂ) : ℂ :=
   Gamma (1/2-a)*pcfVDeriv a z
 
-/-- pcfF. -/
+/-- The modulus of the complex pair `U(a,x) + i UBar(a,x)` on the real axis. -/
 @[dlmf 12.2.E22]
 def pcfF (a x : ℝ) : ℝ :=
   ‖pcfU a x+I*pcfUBar a x‖
@@ -215,7 +219,8 @@ theorem add_I_mul_ne_zero_of_real {u v : ℂ} (hu : conj u = u) (hv : conj v = v
 theorem conj_Gamma_half_sub_ofReal (a : ℝ) : conj (Gamma (1/2 - a)) = Gamma (1/2 - a) := by
   rw [← Complex.Gamma_conj]; simp [map_ofNat]
 
-/-- pcfF phase. -/
+/-- Estimate under the stated parameter and domain assumptions: `0 < pcfF a x ∧ pcfU a x+I*pcfUBar
+a x=(pcfF a x*exp (I*pcfTheta a x))`. -/
 @[dlmf 12.2.E22]
 theorem pcfF_phase {a : ℝ} (ha : ∀ n : ℕ, a ≠ n+1/2) (x : ℝ) :
     0 < pcfF a x ∧ pcfU a x+I*pcfUBar a x=(pcfF a x*exp (I*pcfTheta a x)) := by
@@ -235,7 +240,7 @@ theorem pcfF_phase {a : ℝ} (ha : ∀ n : ℕ, a ≠ n+1/2) (x : ℝ) :
   rw [mul_comm ((arg _ : ℝ) : ℂ) I] at h
   exact h.symm
 
-/-- pcfG. -/
+/-- The modulus of the derivative pair `U′(a,x) + i UBar′(a,x)` on the real axis. -/
 @[dlmf 12.2.E23]
 def pcfG (a x : ℝ) : ℝ :=
   ‖pcfUDeriv a x+I*pcfUBarDeriv a x‖
@@ -245,7 +250,8 @@ def pcfG (a x : ℝ) : ℝ :=
 def pcfPsi (a x : ℝ) : ℝ :=
   arg (-(pcfUDeriv a x+I*pcfUBarDeriv a x))
 
-/-- pcfG phase. -/
+/-- Estimate under the stated parameter and domain assumptions: `0 < pcfG a x ∧ pcfUDeriv a
+x+I*pcfUBarDeriv a x=-(pcfG a x*exp (I*pcfPsi a x))`. -/
 @[dlmf 12.2.E23]
 theorem pcfG_phase {a : ℝ} (ha : ∀ n : ℕ, a ≠ n+1/2) (x : ℝ) :
     0 < pcfG a x ∧ pcfUDeriv a x+I*pcfUBarDeriv a x=-(pcfG a x*exp (I*pcfPsi a x)) := by
@@ -265,7 +271,9 @@ theorem pcfG_phase {a : ℝ} (ha : ∀ n : ℕ, a ≠ n+1/2) (x : ℝ) :
   rw [mul_comm ((arg _ : ℝ) : ℂ) I, norm_neg] at h
   rw [pcfG, pcfPsi, h, neg_neg]
 
-/-- pcfU rotated connection pos. -/
+/-- Identity under the stated parameter and domain assumptions: `(Real.sqrt (2*π):ℂ)*pcfU a
+z=Gamma (1/2-a)*(exp (-(1:ℂ)*I*π*(a/2+1/4))*pcfU (-a) ((1:ℂ)*I*z)+exp
+((1:ℂ)*I*π*(a/2+1/4))*pcfU (-a) (-(1:ℂ)*I*z))`. -/
 @[dlmf 12.2.E18]
 theorem pcfU_rotated_connection_pos {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1/2) (z : ℂ) :
     (Real.sqrt (2*π):ℂ)*pcfU a z=Gamma (1/2-a)*(exp (-(1:ℂ)*I*π*(a/2+1/4))*pcfU (-a) ((1:ℂ)*I*z)+exp ((1:ℂ)*I*π*(a/2+1/4))*pcfU (-a) (-(1:ℂ)*I*z)) := by
@@ -276,7 +284,9 @@ theorem pcfU_rotated_connection_pos {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1/2) (z
     show -(-I*z) = (1:ℂ)*I*z by ring, show -I*z = -(1:ℂ)*I*z by ring] at h
   rw [h, add_comm]
 
-/-- pcfU rotated connection entire pos. -/
+/-- Identity under the stated parameter and domain assumptions: `pcfU a z=(1:ℂ)*I*exp
+((1:ℂ)*I*π*a)*pcfU a (-z)+(Real.sqrt (2*π):ℂ)/Gamma (1/2+a)*exp ((1:ℂ)*I*π*(a/2-1/4))*pcfU
+(-a) ((1:ℂ)*I*z)`. -/
 @[dlmf 12.2.E19]
 theorem pcfU_rotated_connection_entire_pos (a z : ℂ) :
     pcfU a z=(1:ℂ)*I*exp ((1:ℂ)*I*π*a)*pcfU a (-z)+(Real.sqrt (2*π):ℂ)/Gamma (1/2+a)*exp ((1:ℂ)*I*π*(a/2-1/4))*pcfU (-a) ((1:ℂ)*I*z) := by
@@ -309,7 +319,9 @@ theorem pcfU_rotated_connection_entire_pos (a z : ℂ) :
     rw [hk]
     linear_combination (-(pcfU a (-z))) * h2 - pcfU a z * h3
 
-/-- pcfU rotated connection neg. -/
+/-- Identity under the stated parameter and domain assumptions: `(Real.sqrt (2*π):ℂ)*pcfU a
+z=Gamma (1/2-a)*(exp (-(-1:ℂ)*I*π*(a/2+1/4))*pcfU (-a) ((-1:ℂ)*I*z)+exp
+((-1:ℂ)*I*π*(a/2+1/4))*pcfU (-a) (-(-1:ℂ)*I*z))`. -/
 @[dlmf 12.2.E18]
 theorem pcfU_rotated_connection_neg {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1/2) (z : ℂ) :
     (Real.sqrt (2*π):ℂ)*pcfU a z=Gamma (1/2-a)*(exp (-(-1:ℂ)*I*π*(a/2+1/4))*pcfU (-a) ((-1:ℂ)*I*z)+exp ((-1:ℂ)*I*π*(a/2+1/4))*pcfU (-a) (-(-1:ℂ)*I*z)) := by
@@ -320,7 +332,9 @@ theorem pcfU_rotated_connection_neg {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1/2) (z
     show -(-I*z) = -(-1:ℂ)*I*z by ring, show -I*z = (-1:ℂ)*I*z by ring] at h
   exact h
 
-/-- pcfU rotated connection entire neg. -/
+/-- Identity under the stated parameter and domain assumptions: `pcfU a z=(-1:ℂ)*I*exp
+((-1:ℂ)*I*π*a)*pcfU a (-z)+(Real.sqrt (2*π):ℂ)/Gamma (1/2+a)*exp ((-1:ℂ)*I*π*(a/2-1/4))*pcfU
+(-a) ((-1:ℂ)*I*z)`. -/
 @[dlmf 12.2.E19]
 theorem pcfU_rotated_connection_entire_neg (a z : ℂ) :
     pcfU a z=(-1:ℂ)*I*exp ((-1:ℂ)*I*π*a)*pcfU a (-z)+(Real.sqrt (2*π):ℂ)/Gamma (1/2+a)*exp ((-1:ℂ)*I*π*(a/2-1/4))*pcfU (-a) ((-1:ℂ)*I*z) := by
@@ -352,7 +366,8 @@ theorem pcfU_rotated_connection_entire_neg (a z : ℂ) :
     rw [hk]
     linear_combination (-(pcfU a (-z))) * h2 - pcfU a z * h3
 
-/-- pcfEven kummer alternative. -/
+/-- Identity under the stated parameter and domain assumptions: `pcfEven a z = exp (z^2/4)*kummerM
+(-a/2+1/4) (1/2) (-z^2/2)`. -/
 @[dlmf 12.7.E12]
 theorem pcfEven_kummer_alternative (a z : ℂ) :
     pcfEven a z = exp (z^2/4)*kummerM (-a/2+1/4) (1/2) (-z^2/2) := by
@@ -364,7 +379,8 @@ theorem pcfEven_kummer_alternative (a z : ℂ) :
   rw [pcfEven, kummerM_kummer_transform hb, ← mul_assoc, ← Complex.exp_add]
   congr 2 <;> ring
 
-/-- pcfOdd kummer alternative. -/
+/-- Identity under the stated parameter and domain assumptions: `pcfOdd a z = z*exp
+(z^2/4)*kummerM (-a/2+3/4) (3/2) (-z^2/2)`. -/
 @[dlmf 12.7.E13]
 theorem pcfOdd_kummer_alternative (a z : ℂ) :
     pcfOdd a z = z*exp (z^2/4)*kummerM (-a/2+3/4) (3/2) (-z^2/2) := by
@@ -401,7 +417,8 @@ theorem factorial_two_mul_add_one_eq_poch (k : ℕ) :
     poch_nat_two, poch_nat_one] at h
   rw [h]
 
-/-- pcfEven series 3. -/
+/-- The series with terms `(fun k : ℕ => exp (-1*z^2/4)*(∏ r ∈ Finset.range k,
+(a+1/2+2*r))*z^(2*k)/((2*k).factorial:ℂ))` converges to `(pcfEven a z)`. -/
 @[dlmf 12.4.E3]
 theorem pcfEven_series_3 (a z : ℂ) :
     HasSum (fun k : ℕ => exp (-1*z^2/4)*(∏ r ∈ Finset.range k, (a+1/2+2*r))*z^(2*k)/((2*k).factorial:ℂ)) (pcfEven a z) := by
@@ -414,7 +431,8 @@ theorem pcfEven_series_3 (a z : ℂ) :
     show (4:ℂ)^k = 2^k*2^k by rw [← mul_pow]; norm_num]
   field_simp
 
-/-- pcfEven series 5. -/
+/-- The series with terms `(fun k : ℕ => exp (1*z^2/4)*(∏ r ∈ Finset.range k,
+(a-1/2-2*r))*z^(2*k)/((2*k).factorial:ℂ))` converges to `(pcfEven a z)`. -/
 @[dlmf 12.4.E5]
 theorem pcfEven_series_5 (a z : ℂ) :
     HasSum (fun k : ℕ => exp (1*z^2/4)*(∏ r ∈ Finset.range k, (a-1/2-2*r))*z^(2*k)/((2*k).factorial:ℂ)) (pcfEven a z) := by
@@ -427,7 +445,8 @@ theorem pcfEven_series_5 (a z : ℂ) :
     show (4:ℂ)^k = 2^k*2^k by rw [← mul_pow]; norm_num, neg_pow (2:ℂ)]
   field_simp
 
-/-- pcfOdd series 4. -/
+/-- The series with terms `(fun k : ℕ => exp (-1*z^2/4)*(∏ r ∈ Finset.range k,
+(a+3/2+2*r))*z^(2*k+1)/((2*k+1).factorial:ℂ))` converges to `(pcfOdd a z)`. -/
 @[dlmf 12.4.E4]
 theorem pcfOdd_series_4 (a z : ℂ) :
     HasSum (fun k : ℕ => exp (-1*z^2/4)*(∏ r ∈ Finset.range k, (a+3/2+2*r))*z^(2*k+1)/((2*k+1).factorial:ℂ)) (pcfOdd a z) := by
@@ -440,7 +459,8 @@ theorem pcfOdd_series_4 (a z : ℂ) :
     show (4:ℂ)^k = 2^k*2^k by rw [← mul_pow]; norm_num]
   field_simp
 
-/-- pcfOdd series 6. -/
+/-- The series with terms `(fun k : ℕ => exp (1*z^2/4)*(∏ r ∈ Finset.range k,
+(a-3/2-2*r))*z^(2*k+1)/((2*k+1).factorial:ℂ))` converges to `(pcfOdd a z)`. -/
 @[dlmf 12.4.E6]
 theorem pcfOdd_series_6 (a z : ℂ) :
     HasSum (fun k : ℕ => exp (1*z^2/4)*(∏ r ∈ Finset.range k, (a-3/2-2*r))*z^(2*k+1)/((2*k+1).factorial:ℂ)) (pcfOdd a z) := by
@@ -453,7 +473,8 @@ theorem pcfOdd_series_6 (a z : ℂ) :
     show (4:ℂ)^k = 2^k*2^k by rw [← mul_pow]; norm_num, neg_pow (2:ℂ)]
   field_simp
 
-/-- pcfU half. -/
+/-- Identity under the stated parameter and domain assumptions: `pcfU (1/2) z=(Real.sqrt
+(π/2):ℂ)*exp (z^2/4)*erfc (z/Real.sqrt 2)`. -/
 @[dlmf 12.7.E5]
 theorem pcfU_half (z : ℂ) :
     pcfU (1/2) z=(Real.sqrt (π/2):ℂ)*exp (z^2/4)*erfc (z/Real.sqrt 2) := by
@@ -485,7 +506,8 @@ theorem pcfU_half (z : ℂ) :
   simp only [hs]
   ring
 
-/-- pcfU iterated deriv 9. -/
+/-- Identity under the stated parameter and domain assumptions: `iteratedDeriv m (fun z : ℂ => exp
+(1*z^2/4)*pcfU a z) z = (-1)^m*poch (1/2+a) m*exp (1*z^2/4)*pcfU (a+m) z`. -/
 @[dlmf 12.8.E9]
 theorem pcfU_iterated_deriv_9 (a z : ℂ) (m : ℕ) :
     iteratedDeriv m (fun z : ℂ => exp (1*z^2/4)*pcfU a z) z = (-1)^m*poch (1/2+a) m*exp (1*z^2/4)*pcfU (a+m) z := by
@@ -508,7 +530,8 @@ theorem pcfU_iterated_deriv_9 (a z : ℂ) (m : ℕ) :
     rw [show (1/2:ℂ)+(a+1)=(1/2+a)+1 by ring, show a+1+m=a+(m+1) by ring]
     ring
 
-/-- pcfU iterated deriv 10. -/
+/-- Identity under the stated parameter and domain assumptions: `iteratedDeriv m (fun z : ℂ => exp
+(-1*z^2/4)*pcfU a z) z = (-1)^m*exp (-1*z^2/4)*pcfU (a-m) z`. -/
 @[dlmf 12.8.E10]
 theorem pcfU_iterated_deriv_10 (a z : ℂ) (m : ℕ) :
     iteratedDeriv m (fun z : ℂ => exp (-1*z^2/4)*pcfU a z) z = (-1)^m*exp (-1*z^2/4)*pcfU (a-m) z := by
@@ -531,7 +554,8 @@ theorem pcfU_iterated_deriv_10 (a z : ℂ) (m : ℕ) :
     rw [show a + (-1:ℂ) - m = a - (m+1) by ring]
     ring
 
-/-- pcfV iterated deriv 11. -/
+/-- Identity under the stated parameter and domain assumptions: `iteratedDeriv m (fun z : ℂ => exp
+(1*z^2/4)*pcfV a z) z = 1*exp (1*z^2/4)*pcfV (a+m) z`. -/
 @[dlmf 12.8.E11]
 theorem pcfV_iterated_deriv_11 (a z : ℂ) (m : ℕ) :
     iteratedDeriv m (fun z : ℂ => exp (1*z^2/4)*pcfV a z) z = 1*exp (1*z^2/4)*pcfV (a+m) z := by
@@ -554,7 +578,8 @@ theorem pcfV_iterated_deriv_11 (a z : ℂ) (m : ℕ) :
     rw [show a + (1:ℂ) + m = a + (m+1) by ring]
     ring
 
-/-- pcfV iterated deriv 12. -/
+/-- Identity under the stated parameter and domain assumptions: `iteratedDeriv m (fun z : ℂ => exp
+(-1*z^2/4)*pcfV a z) z = (-1)^m*poch (1/2-a) m*exp (-1*z^2/4)*pcfV (a-m) z`. -/
 @[dlmf 12.8.E12]
 theorem pcfV_iterated_deriv_12 (a z : ℂ) (m : ℕ) :
     iteratedDeriv m (fun z : ℂ => exp (-1*z^2/4)*pcfV a z) z = (-1)^m*poch (1/2-a) m*exp (-1*z^2/4)*pcfV (a-m) z := by
@@ -598,7 +623,8 @@ theorem pcfUBar_recurrences {a : ℂ} (ha : ∀ n : ℤ, a ≠ n+1/2) (z : ℂ) 
   · linear_combination Gamma (1/2-a) * r3
   · linear_combination Gamma (1/2-a) * (r2 + r3) + pcfV (a+1) z * gA
 
-/-- IsGeneralizedCylinderSolution. -/
+/-- The generalized cylinder equation with nonzero exponent parameter `lam`, evaluated at the
+specified argument. -/
 @[dlmf 12.15.E1]
 def IsGeneralizedCylinderSolution (ν lam : ℂ) (f : ℂ → ℂ) (z : ℂ) : Prop :=
   lam ≠ 0 ∧ iteratedDeriv 2 f z+(ν+1/lam-z^lam/lam^2)*f z=0

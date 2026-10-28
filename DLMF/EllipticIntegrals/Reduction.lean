@@ -141,12 +141,19 @@ def ei19b_redU (a₁ b₁ a₂ b₂ x y : ℝ) : ℝ :=
 /-- The hypotheses of DLMF 19.14.4: `0 ≤ y < x`, both quadratics positive on `(y, x)`, and
 `α ≤ β ≤ γ` the ordered permutation of `0, a₁b₂, a₂b₁`, not all zero. -/
 structure ei19b_RedHyp (a₁ b₁ a₂ b₂ x y α β γ : ℝ) : Prop where
+  /-- The lower integration endpoint is nonnegative. -/
   y_nonneg : 0 ≤ y
+  /-- The lower integration endpoint is strictly less than the upper endpoint. -/
   y_lt_x : y < x
+  /-- Both quadratic factors are strictly positive in the open integration interval. -/
   pos : ∀ t ∈ Ioo y x, 0 < a₁ + b₁ * t ^ 2 ∧ 0 < a₂ + b₂ * t ^ 2
+  /-- The three reduction parameters form the multiset `0, a₁b₂, a₂b₁`. -/
   perm : ({α, β, γ} : Multiset ℝ) = {0, a₁ * b₂, a₂ * b₁}
+  /-- The smallest reduction parameter is at most the middle parameter. -/
   le₁ : α ≤ β
+  /-- The middle reduction parameter is at most the largest parameter. -/
   le₂ : β ≤ γ
+  /-- The two cross-coefficient products do not vanish simultaneously. -/
   not_all_zero : ¬ (a₁ * b₂ = 0 ∧ a₂ * b₁ = 0)
 
 /-- DLMF 19.14.4–19.14.6:

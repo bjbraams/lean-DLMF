@@ -46,6 +46,8 @@ def r26a_ofFun {k : ℕ} (f : α → Fin k) : Finpartition (univ : Finset α) :=
       have : x ∈ r26a_fiber f (f x) := by simp [r26a_fiber]
       rw [hx] at this; simp at this)
 
+/-- Identity under the stated parameter and domain assumptions: `(r26a_ofFun f).parts = univ.image
+fun x => r26a_fiber f (f x)`. -/
 lemma r26a_ofFun_parts {k : ℕ} (f : α → Fin k) :
     (r26a_ofFun f).parts = univ.image fun x => r26a_fiber f (f x) := rfl
 
@@ -55,6 +57,7 @@ lemma r26a_part_ofFun {k : ℕ} (f : α → Fin k) (x : α) :
   (r26a_ofFun f).part_eq_of_mem (by rw [r26a_ofFun_parts]; exact mem_image_of_mem _ (mem_univ x))
     (by simp [r26a_fiber])
 
+/-- Identity under the stated parameter and domain assumptions: `P = Q`. -/
 lemma r26a_parts_eq_of_part_eq {P Q : Finpartition (univ : Finset α)}
     (h : ∀ x, P.part x = Q.part x) : P = Q := by
   ext t
@@ -66,6 +69,8 @@ lemma r26a_parts_eq_of_part_eq {P Q : Finpartition (univ : Finset α)}
     obtain ⟨x, hx⟩ := Q.nonempty_of_mem_parts ht
     rw [← Q.part_eq_of_mem ht hx, ← h]; simp
 
+/-- Identity under the stated parameter and domain assumptions: `(r26a_ofFun f).parts = univ.image
+(r26a_fiber f)`. -/
 lemma r26a_parts_ofFun {k : ℕ} {f : α → Fin k} (hf : Surjective f) :
     (r26a_ofFun f).parts = univ.image (r26a_fiber f) := by
   ext t
@@ -75,6 +80,7 @@ lemma r26a_parts_ofFun {k : ℕ} {f : α → Fin k} (hf : Surjective f) :
   · rintro ⟨j, rfl⟩; obtain ⟨x, rfl⟩ := hf j; exact ⟨x, rfl⟩
 
 omit [DecidableEq α] in
+/-- The stated relation follows from the given hypotheses: `Injective (r26a_fiber f)`. -/
 lemma r26a_fiber_injective {k : ℕ} {f : α → Fin k} (hf : Surjective f) :
     Injective (r26a_fiber f) := by
   intro i j hij
@@ -83,11 +89,14 @@ lemma r26a_fiber_injective {k : ℕ} {f : α → Fin k} (hf : Surjective f) :
   rw [hij] at this
   simpa [r26a_fiber] using this
 
+/-- Identity under the stated parameter and domain assumptions: `#(r26a_ofFun f).parts = k`. -/
 lemma r26a_card_parts_ofFun {k : ℕ} {f : α → Fin k} (hf : Surjective f) :
     #(r26a_ofFun f).parts = k := by
   rw [r26a_parts_ofFun hf, card_image_of_injective _ (r26a_fiber_injective hf), card_univ,
     Fintype.card_fin]
 
+/-- Identity under the stated parameter and domain assumptions: `(r26a_ofFun f).parts.val.map card
+= univ.val.map fun j => #(r26a_fiber f j)`. -/
 lemma r26a_map_card_parts_ofFun {k : ℕ} {f : α → Fin k} (hf : Surjective f) :
     (r26a_ofFun f).parts.val.map card = univ.val.map fun j => #(r26a_fiber f j) := by
   rw [r26a_parts_ofFun hf, image_val_of_injOn (r26a_fiber_injective hf).injOn, Multiset.map_map]

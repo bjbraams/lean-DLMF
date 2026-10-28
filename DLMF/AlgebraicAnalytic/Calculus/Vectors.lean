@@ -192,16 +192,22 @@ lemma g1b_hasDerivAt_sec (i : Fin n) (hf : DifferentiableAt ℝ f x) :
   rw [partialDeriv_eq_fderiv i hf]
   exact hasDerivAt_partialDeriv i hf
 
+/-- Identity under the stated parameter and domain assumptions: `partialDeriv i (fun y => f y + g
+y) x = partialDeriv i f x + partialDeriv i g x`. -/
 lemma g1b_partialDeriv_add (i : Fin n) (hf : DifferentiableAt ℝ f x)
     (hg : DifferentiableAt ℝ g x) :
     partialDeriv i (fun y => f y + g y) x = partialDeriv i f x + partialDeriv i g x :=
   ((g1b_hasDerivAt_sec i hf).add (g1b_hasDerivAt_sec i hg)).deriv
 
+/-- Identity under the stated parameter and domain assumptions: `partialDeriv i (fun y => f y - g
+y) x = partialDeriv i f x - partialDeriv i g x`. -/
 lemma g1b_partialDeriv_sub (i : Fin n) (hf : DifferentiableAt ℝ f x)
     (hg : DifferentiableAt ℝ g x) :
     partialDeriv i (fun y => f y - g y) x = partialDeriv i f x - partialDeriv i g x :=
   ((g1b_hasDerivAt_sec i hf).sub (g1b_hasDerivAt_sec i hg)).deriv
 
+/-- Identity under the stated parameter and domain assumptions: `partialDeriv i (fun y => f y * g
+y) x = partialDeriv i f x * g x + f x * partialDeriv i g x`. -/
 lemma g1b_partialDeriv_mul (i : Fin n) (hf : DifferentiableAt ℝ f x)
     (hg : DifferentiableAt ℝ g x) :
     partialDeriv i (fun y => f y * g y) x =
@@ -210,6 +216,8 @@ lemma g1b_partialDeriv_mul (i : Fin n) (hf : DifferentiableAt ℝ f x)
   rw [Function.update_eq_self] at h
   exact h.deriv
 
+/-- Identity under the stated parameter and domain assumptions: `partialDeriv i (fun y => f y / g
+y) x = (partialDeriv i f x * g x - f x * partialDeriv i g x) / g x ^ 2`. -/
 lemma g1b_partialDeriv_div (i : Fin n) (hf : DifferentiableAt ℝ f x)
     (hg : DifferentiableAt ℝ g x) (hx : g x ≠ 0) :
     partialDeriv i (fun y => f y / g y) x =

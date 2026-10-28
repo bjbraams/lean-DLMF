@@ -320,24 +320,31 @@ theorem Real.jacobiEpsilonk_add_two_compEllIntKm (hm : k ^ 2 < 1) (x : ℝ) :
   rw [← Real.incEllIntEm_jacobiAmm hm, ← Real.incEllIntEm_jacobiAmm hm,
     Real.jacobiAmm_add_two_compEllIntKm hm, Real.incEllIntEm_add_pi hm]
 
+/-- At `x`, the function `(fun x => Real.jacobiEpsilonk x k)` has derivative `(Real.jacobiDnm x (k
+^ 2) ^ 2)`. -/
 lemma p22R1_hasDerivAt_eps {k : ℝ} (hm : k ^ 2 < 1) (x : ℝ) :
     HasDerivAt (fun x => Real.jacobiEpsilonk x k) (Real.jacobiDnm x (k ^ 2) ^ 2) x :=
   (((je22b_continuous_jacobiDnm hm).pow 2).integral_hasStrictDerivAt 0 x).hasDerivAt
 
+/-- Continuity of the indicated function: `Continuous fun u => Real.jacobiSnm u m`. -/
 lemma p22R1_cont_sn {m : ℝ} (hm : m < 1) : Continuous fun u => Real.jacobiSnm u m :=
   continuous_iff_continuousAt.mpr fun u => (Real.hasDerivAt_jacobiSnm hm u).continuousAt
 
+/-- Continuity of the indicated function: `Continuous fun u => Real.jacobiCnm u m`. -/
 lemma p22R1_cont_cn {m : ℝ} (hm : m < 1) : Continuous fun u => Real.jacobiCnm u m :=
   continuous_iff_continuousAt.mpr fun u => (Real.hasDerivAt_jacobiCnm hm u).continuousAt
 
+/-- Identity under the stated parameter and domain assumptions: `∫ t in (0 : ℝ)..x, f t = F x - F
+0`. -/
 lemma p22R1_ftc {F f : ℝ → ℝ} (hF : ∀ t, HasDerivAt F (f t) t) (hf : Continuous f) (x : ℝ) :
     ∫ t in (0 : ℝ)..x, f t = F x - F 0 :=
   intervalIntegral.integral_eq_sub_of_hasDerivAt (fun t _ => hF t) (hf.intervalIntegrable _ _)
 
+/-- Identity under the stated parameter and domain assumptions: `Real.jacobiSnm 0 m = 0`. -/
 lemma p22R1_sn_zero {m : ℝ} (hm : m < 1) : Real.jacobiSnm 0 m = 0 := by
   simp [Real.jacobiSnm, Real.jacobiAmm_zero hm]
 
-
+/-- Estimate under the stated parameter and domain assumptions: `0 < Real.jacobiCnm t m`. -/
 lemma p22R1_cn_pos {m : ℝ} (hm : m < 1) {t : ℝ} (h0 : -Real.compEllIntKm m < t)
     (h1 : t < Real.compEllIntKm m) : 0 < Real.jacobiCnm t m := by
   have a0 := je22b_jacobiAmm_strictMono hm h0
@@ -345,11 +352,12 @@ lemma p22R1_cn_pos {m : ℝ} (hm : m < 1) {t : ℝ} (h0 : -Real.compEllIntKm m <
   simp only [Real.jacobiAmm_neg hm, Real.jacobiAmm_compEllIntKm hm] at a0 a1
   exact Real.cos_pos_of_mem_Ioo ⟨a0, a1⟩
 
+/-- Identity under the stated parameter and domain assumptions: `∫ t in (0 : ℝ)..x, f t = F x - F
+0`. -/
 lemma p22R1_ftc_on {F f : ℝ → ℝ} {x : ℝ} (hF : ∀ t ∈ Set.uIcc 0 x, HasDerivAt F (f t) t)
     (hf : ContinuousOn f (Set.uIcc 0 x)) :
     ∫ t in (0 : ℝ)..x, f t = F x - F 0 :=
   intervalIntegral.integral_eq_sub_of_hasDerivAt hF hf.intervalIntegrable
-
 
 /-- DLMF 22.16.18: `ℰ(x,k) = -k² ∫₀ˣ cd²(t,k) dt + x + k² sn(x,k) cd(x,k)`. -/
 @[dlmf 22.16.E18 "special case: real modulus 0 < k < 1"]

@@ -414,8 +414,8 @@ lemma lg2_exists_solution_of_approx {S : Set ℝ} {a₁ κ : ℝ} {k : 𝕜}
   have hEc : ContinuousOn E S := fun x hx => (hE x hx).continuousAt.continuousWithinAt
   have hF'c : ContinuousOn F' S := (hAc.mul hA''c).sub (hgc.mul (hAc.pow 2))
   have hrc : ContinuousOn r S :=
-    (((hAc.pow 2).mul hP''c).add ((continuousOn_const.mul ((hAc.mul hA'c).sub
-      continuousOn_const)).mul hP'c)).add (hF'c.mul hPc)
+    continuousOn_approxResidual hAc hA'c hA''c hgc hPc hP'c hP''c
+
   have hp₂c : ContinuousOn (fun x => -(2 * k)⁻¹ * (E x ^ 2)⁻¹) S :=
     continuousOn_const.mul ((hEc.pow 2).inv₀ fun x hx => pow_ne_zero 2 (hE0 x hx))
   have hKψ : ∀ {ψ : ℝ → 𝕜}, ∀ x ∈ S, ∀ t, a₁ < t → t ≤ x →

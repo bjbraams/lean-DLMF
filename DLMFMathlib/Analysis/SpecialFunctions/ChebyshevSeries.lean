@@ -39,9 +39,12 @@ def complexCircleFun {f : ℝ → ℂ} (hf : ContinuousOn f (Icc (-1) 1)) :
         ⟨Real.neg_one_le_cos θ, Real.cos_le_one θ⟩
     exact hc
 
+/-- Identity under the stated parameter and domain assumptions: `complexCircleFun hf (θ :
+AddCircle (2 * π)) = f (Real.cos θ)`. -/
 theorem complexCircleFun_coe {f : ℝ → ℂ} (hf : ContinuousOn f (Icc (-1) 1)) (θ : ℝ) :
     complexCircleFun hf (θ : AddCircle (2 * π)) = f (Real.cos θ) := rfl
 
+/-- The circle period `2π` is strictly positive. -/
 local instance instTwoPiPos : Fact (0 < 2 * π) := ⟨Real.two_pi_pos⟩
 
 /-- The full-period integral `∫₀^{2π} e^{-inθ} f(cos θ) dθ = π c_{|n|}`. -/
@@ -157,7 +160,6 @@ theorem hasSum_complexCoeff_mul_T {f : ℝ → ℂ} (hf : ContinuousOn f (Icc (-
   split_ifs with hn
   · subst hn; simp [Chebyshev.T_zero]; ring
   · simp
-
 
 /-- **Geometric decay of Chebyshev coefficients** (Temme §6.9.2; Rivlin): if `f` extends to a
 function `F` analytic on the closed Bernstein ellipse `E_ρ = cos({|Im w| ≤ s})`, `ρ = e^s`, with

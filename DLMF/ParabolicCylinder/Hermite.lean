@@ -48,8 +48,8 @@ theorem two_cpow_neg_half_mul_sqrt_two_pow (n : ℕ) :
   rw [← two_cpow_half, ← Complex.cpow_nat_mul, ← Complex.cpow_add _ _ two_ne_zero]
   ring_nf; simp
 
-
-/-- pcfU physicists hermite. -/
+/-- Identity under the stated parameter and domain assumptions: `pcfU (-n-1/2) z=2^(-(n:ℂ)/2)*exp
+(-z^2/4)*Polynomial.aeval (z/Real.sqrt 2) (DLMF.OrthogonalPolynomials.hermitePolyH n)`. -/
 @[dlmf 12.7.E2]
 theorem pcfU_physicists_hermite (n : ℕ) (z : ℂ) :
     pcfU (-n-1/2) z=2^(-(n:ℂ)/2)*exp (-z^2/4)*Polynomial.aeval (z/Real.sqrt 2) (DLMF.OrthogonalPolynomials.hermitePolyH n) := by
@@ -59,7 +59,9 @@ theorem pcfU_physicists_hermite (n : ℕ) (z : ℂ) :
   rw [h, aeval_hermitePolyH_eq_hermite_complex, mul_div_cancel₀ _ hs0]
   linear_combination (-(exp (-z^2/4) * aeval z (hermite n))) * two_cpow_neg_half_mul_sqrt_two_pow n
 
-/-- pcfV physicists hermite. -/
+/-- Identity under the stated parameter and domain assumptions: `pcfV (n+1/2) z=(Real.sqrt
+(2/π):ℂ)*exp (z^2/4)*(-I)^n*2^(-(n:ℂ)/2)*Polynomial.aeval (I*z/Real.sqrt 2)
+(DLMF.OrthogonalPolynomials.hermitePolyH n)`. -/
 @[dlmf 12.7.E3]
 theorem pcfV_physicists_hermite (n : ℕ) (z : ℂ) :
     pcfV (n+1/2) z=(Real.sqrt (2/π):ℂ)*exp (z^2/4)*(-I)^n*2^(-(n:ℂ)/2)*Polynomial.aeval (I*z/Real.sqrt 2) (DLMF.OrthogonalPolynomials.hermitePolyH n) := by

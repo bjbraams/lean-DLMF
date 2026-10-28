@@ -1,8 +1,183 @@
 # Mathematical review of the lean-DLMF project (formerly lean-AAR)
 
+**Cleanup, 2026-10-28:** see the [completed structural cleanup and remaining issues](#file-proof-and-documentation-cleanup-2026-10-28) and the [current inventory](CodeReviewInventory.json). The [earlier review](#code-and-organization-review-2026-10-28) records the pre-cleanup snapshot. Admissions are unchanged.
+
+## File, proof and documentation cleanup (2026-10-28)
+
+The library now has no Lean file above the project's hard 1,500-line limit. All 76
+originally oversized files were split, together with four files that crossed the limit
+when their documentation was completed. The 80 original modules now serve as small
+compatibility import umbrellas over 227 mathematical topic modules. A further definitions
+module, `DLMF/Elliptic/Theta/Defs.lean`, contains the four theta functions and their minimal
+series helpers. The source tree has 1,086 library files; the largest is
+`DLMF/MatrixArgument/GammaBeta.lean`, at 1,454 lines.
+
+The complete old-to-new module map, original source ranges and current file sizes are
+in [CodeReviewInventory.json](CodeReviewInventory.json). For example:
+
+- [Gamma integral representations](DLMF/Gamma/IntegralRepresentations.lean) separates
+  Hankel/Gaussian, Prym/oscillatory, digamma/Binet, and Frullani/moment representations.
+- [Airy asymptotics](DLMF/Airy/Asymptotics.lean) separates Laplace sectors, oscillatory
+  forms, rotated Bi, real remainders, sector remainders, oscillatory remainders and
+  derivative remainders.
+- [Orthogonal-polynomial integrals](DLMF/OrthogonalPolynomials/Integrals.lean) separates
+  orthogonality/norms, angular representations, Hermite transforms, Laguerre transforms
+  and double Laplace integrals.
+- [Jacobi definitions](DLMF/JacobiElliptic/Basic/Definitions.lean) precedes the
+  quarter-period proofs; it imports the new theta definitions layer instead of theta
+  identities and AGM theory.
+
+Old import paths, declaration names, namespaces and mathematical statements are retained.
+Twenty-seven existing private helpers became shared declarations because later parts use
+them. This expands the exported helper API; the split map records every such helper.
+There are no copied function definitions or copied mathematical proofs introduced by the
+splits. Reopened local notation and local tactic macros retain the original elaboration
+context. DLMF cross-reference attributes were moved with their owning declarations.
+
+### Proof changes
+
+Three extractions expose mathematical steps rather than impose a proof-length cutoff:
+
+- [ExponentialIntegral](DLMF/IncompleteGamma/ExponentialIntegral.lean): the private
+  `exists_auxiliary_exponents_for_product_integral` chooses exponents below `p` and `q`
+  whose sum exceeds one. The product-integral proof can then concentrate on domination,
+  Fubini and the final integral calculation.
+- [UniformExpansions](DLMF/ParabolicCylinder/UniformLG2/UniformExpansions.lean): the
+  private `borel_sum_bounds_near_one` packages eventual bounds between one half and two
+  for a Borel normalizer with leading coefficient one. The positive-parameter expansion
+  uses those bounds without repeating their derivation inside its main proof.
+- [LiouvilleGreenExpansion](DLMFMathlib/Analysis/ODE/LiouvilleGreenExpansion.lean):
+  `LiouvilleGreen.continuousOn_approxResidual` supplies the common residual-continuity
+  calculation for both the finite-endpoint and infinite-endpoint constructions. Their
+  different endpoint conditions remain explicit in their original theorems.
+
+The longer hypergeometric connection proofs and Jacobi polynomial certificates were left
+intact. Their useful decomposition requires sharing the underlying connection theory or
+identifying algebraic subidentities; merely moving blocks into single-use lemmas would
+make those arguments harder to follow. Their current locations are in the inventory.
+
+### Documentation
+
+The source audit now finds an attached explanatory docstring for every explicit named
+library declaration, including private helpers and named instances. Anonymous instances
+and the 205 structure fields are audited separately. Documentation was added for missing
+statements and fields, and 855 docstrings that only repeated a declaration name were
+replaced. Definition documentation explains coefficients, normalizations, branches and
+filters; theorem documentation gives the mathematical property, formula or limiting
+regime. Trivial helper documentation remains short.
+
+The compiled-documentation audit alone had missed 574 statements whose `@[dlmf]`
+attribute generated only a reference link. Those declarations now have source docstrings
+as well. In total, the cleanup adds 1,846 source documentation comments, including the
+three new helpers. Generated constructors, recursors and equation lemmas are outside the
+explicit-declaration requirement.
+
+The README now lists the actual area modules and explains the compatibility umbrellas.
+The root library headers describe DLMF and the actual supporting dependencies. The script
+[scripts/check_file_lengths.py](scripts/check_file_lengths.py) enforces the hard file limit
+without changing the Lake options or rebuilding third-party dependencies.
+
+### Remaining issues, reviewed after the moves
+
+The earlier structural review below is a pre-cleanup snapshot. Its oversized-file and
+missing-documentation findings have been addressed above. These substantial findings
+remain and should guide the next structural cleanup:
+
+1. **Consolidate repeated definitions and general infrastructure.** The Airy improper-
+   integral and segment-primitive predicates still duplicate `DLMF.Core.Framework`.
+   The cylinder coefficients and logarithmic filters in
+   [AsymptoticsZeros](DLMF/ParabolicCylinder/AsymptoticsZeros.lean) still duplicate
+   [SectorAsymptotics](DLMF/ParabolicCylinder/SectorAsymptotics.lean). The Legendre
+   square-root branch in
+   [IntegralRepresentations/Exterior](DLMF/Legendre/IntegralRepresentations/Exterior.lean)
+   still duplicates `legQAdd_sq` in [QAdditionTools](DLMF/Legendre/QAdditionTools.lean).
+   Preserve the exact branch when consolidating these definitions.
+2. **Reuse the newer shared proof APIs.** Gamma strip bounds in
+   [Representations/UpperBarnes](DLMF/IncompleteGamma/Representations/UpperBarnes.lean)
+   still repeat [BarnesContinuation](DLMF/ParabolicCylinder/BarnesContinuation.lean).
+   Power-series uniqueness, derivative-sign arguments, trigonometric norm bounds,
+   finite-sum bookkeeping and Bailey dominated-limit arguments retain the copies
+   identified in the earlier review. The two `incEllIntPik_special_k` proofs remain
+   identical in [SpecialCases](DLMF/EllipticIntegrals/SpecialCases.lean).
+3. **Adopt the checked upstream results.** The direct replacements by
+   `_root_.riemannZeta_four`, `Complex.sin_int_mul_pi`, `sin_pi_mul_ne_zero`,
+   `Real.pow_div_factorial_le_exp`, `TauCeti.ofReal_exp_cpow`,
+   `TauCeti.ofReal_pow_cpow` and `TauCeti.ofReal_mul_cpow` remain valid targets.
+   The exponential-power adapter now lives in
+   [Representations/LowerBarnes](DLMF/IncompleteGamma/Representations/LowerBarnes.lean).
+   The previous compiled probes establish the relevant interfaces; these replacements
+   have not been applied in this cleanup. Keep useful adapters small, record DLMF
+   upstream pointers, and add adoption credits when changing them.
+4. **Complete the definitions layers.** The import survey now reports 20 cross-area
+   definitions-name imports of theorem files, down from 24 in the original review.
+   The Coulomb import in the cylinder foundation also remains necessary for
+   `conj_poch` and `conj_kummerM`; move these general conjugation lemmas down unchanged
+   before removing that import. The seven pre-existing baseline-new edges remain: ErrorFunctions to Fresnel
+   asymptotics; ExpIntegrals to the older exponential integral; GeneralizedHypergeometric
+   to solution and argument-continuation theory; IncompleteGamma to Statistical's real
+   incomplete Gamma; Lamé to Jacobi theory; and Struve to confluent relations.
+   Several of these files received documentation edits here; the documentation does not
+   resolve their structural obligations under AGENTS.md. Their next structural change
+   should extract definitions and minimal prerequisite lemmas, with cross-function
+   identities in bridge modules. The survey is based on names, so its reduced count is
+   not proof that every remaining definitions layer is clean; the split Selberg
+   foundation also retains mixed definitions and theorem material.
+5. **Improve the public naming surface.** The work-round prefixes on roughly 4,400
+   exported declarations remain, as do 54 round-named files. Predicates such as
+   `genDenRegular` and `qDenominatorRegular` still need proposition-style names.
+   Root-level `stRem_*` and `r27_*` families deserve coherent mathematical namespaces.
+   Rename reusable helpers by content and reduce visibility for file-local ones;
+   include the 27 newly shared helpers in that API review. Preserve the deliberately
+   inherited `DLMF.Confluent` ownership of several newer chapter functions until an
+   explicit compatibility migration is planned.
+6. **Finish proof readability and style cleanup.** The logarithmic Gauss connection
+   proofs should share the pole-free reciprocal-Gamma development. The 270-line
+   `jacobi_cyclic_scdd_three` proof is now in
+   [MixedTripleProducts](DLMF/JacobiElliptic/Cyclic/MixedTripleProducts.lean); its enormous
+   polynomial certificates remain candidates for mathematical factoring. The existing
+   non-admission linter warnings and long source lines remain recorded in the inventory.
+   There are still 894 tactic bodies above 60 lines, including 108 above 120; the build
+   reports 1,443 non-admission warnings, and 4,272 source lines exceed 100 characters.
+   Remove unused simp arguments, dead tactics and obsolete syntax as those proofs are
+   consolidated; do not remove hypotheses merely to silence warnings.
+
+The import survey still has 14 two-way area pairs. The three pairs new relative to the
+unchanged baseline remain `Confluent`/`Coulomb`, `Confluent`/`ErrorFunctions` and
+`JacobiElliptic`/`Weierstrass`. They are allowed by the area policy and do not create a
+Lean file cycle. The survey exits 1 for these three pairs and the seven existing edges;
+this is reported debt, not a successful baseline check. No new cross-area pair or
+baseline-new definitions-to-theorem edge was introduced by the cleanup.
+
+### Validation
+
+- `lake build > /tmp/DLMF-build.log 2>&1` passed, 14,604 jobs.
+- Direct checks with `lake env lean -DautoImplicit=false -DrelaxedAutoImplicit=false`
+  passed for every one of the 473 changed/new Lean files and for `Main.lean`: 474 files
+  in total. Imports were rebuilt before checking their dependents.
+- Compiled metadata covers 25,782 explicit declarations, including 14 anonymous instances,
+  and all 205 structure fields. Missing, name-only and reference-link-only documentation
+  counts are all zero. A source check also confirms attached documentation on every named
+  declaration; generated DLMF links were not treated as explanatory docstrings.
+- All original public named declarations retain their names and compiled type hashes.
+  The fourteen original anonymous instance names and type hashes are also unchanged.
+  The source comparison checks all 25,765 original named statement headers and definition
+  values, with no removal or change. No mathematical assumption was changed.
+- Source admissions are unchanged at 1,771. No `axiom` or `admit` command was introduced.
+  The three new helper lemmas depend only on `propext`, `Classical.choice` and `Quot.sound`.
+- The cross-reference dumper checked 10,703 entries: 8,506 have standard axiom dependencies,
+  2,197 depend on existing admissions, and none uses a nonstandard axiom. The source
+  multiset of 8,741 DLMF attribute commands is unchanged.
+- `python3 scripts/check_file_lengths.py` passed for all 1,088 Lean source files.
+  `git diff --check`, JSON validation and the local links in the updated documentation
+  passed. No scratch source remains in the project.
+- `python3 scripts/import_survey.py --baseline scripts/import_baseline.json` still exits 1
+  for the ten pre-existing baseline differences described above. The baseline was not
+  rewritten. Dependency pins, toolchain, Lake options, build directory and the shared
+  `.lake` link were preserved.
+
 ## Scope and degree of completion
 
-**Current status, 2026-10-25:** 890 explicit source admissions after the acquisition
+**Historical status, 2026-10-25:** 890 explicit source admissions after the acquisition
 of DLMF Chapters 20–23 (theta, Riemann theta, Jacobian elliptic, Weierstrass and modular
 functions), which adds 418: Theta 70, RiemannTheta 10, JacobiElliptic 215 and
 Weierstrass 123. Chapters 4/16/17 retain 283 and the older areas 189. The compiled
@@ -7770,3 +7945,507 @@ fixed.
 Validation: full build 14,336 jobs; audit 24,662 theorems, 1,884 depending on `sorryAx`, no other
 nonstandard axiom; project source admissions 1,331 → 1,771; ledgers regenerated (idempotent on
 the third run); import survey: nothing new from Chapters 1–2.
+
+## Code and organization review (2026-10-28)
+
+The main maintenance issues are repeated definitions and proofs, oversized chapter files,
+definitions layers that import theorem files, and unfinished API naming and documentation.
+The division into mathematical areas and a separate `DLMFMathlib` layer remains useful.
+There is no reason to reorganize the whole library by its historical book sources or to
+impose a hierarchy between mathematical areas.
+
+This review covers all 858 library files: 777 under `DLMF/`, 79 under `DLMFMathlib/`, and the
+two library umbrellas, totaling 511,344 physical lines. It matches all 25,724 explicit
+library declarations against compiled declaration ranges and documentation. `Main.lean`
+and the cross-reference dumper were also inspected. Whole-library structural scans were
+combined with targeted reading of repeated and long proofs and searches in the pinned
+Mathlib and TauCeti sources. This is not an exhaustive semantic-equivalence check of half
+a million lines of mathematics. Admissions and their removal are outside this review.
+
+The detailed [inventory](CodeReviewInventory.json) records every library file, all 76 files
+over 1,500 lines, all 894 recorded long tactic proofs, every missing declaration and field
+docstring, build warnings, and further duplication candidates. Its type-hash candidates
+need inspection; identical hashes alone are not a proof that two results are interchangeable.
+The confirmed examples below have been inspected separately.
+
+### Repeated definitions and general infrastructure
+
+These are the clearest consolidation targets. They should be addressed before large file
+moves, so the moves do not preserve several copies of the same foundation.
+
+- **Improper integrals and segment primitives:**
+  [Airy/Framework](DLMF/Airy/Framework.lean), lines 35–56, redeclares
+  `HasIntegralAtTop`, `HasIntegralAtBot`, `HasIntegralWholeLine`, `improperAtTop`,
+  `lineIntegral` and `primitive`, already represented in
+  [Core/Framework](DLMF/Core/Framework.lean), lines 33–54. Lean accepts `rfl` for all six
+  comparisons, including `Airy.lineIntegral = DLMF.segmentIntegral`. Use one implementation
+  in the common layer and update users; a compatibility abbreviation can retain an old name.
+  The Airy and core principal-value predicates have different arguments and assumptions and
+  must remain distinct unless an explicit equivalence with those assumptions is proved.
+- **Parabolic-cylinder coefficients and filters:**
+  [AsymptoticsZeros](DLMF/ParabolicCylinder/AsymptoticsZeros.lean), lines 26, 30 and 46,
+  repeats `pcfSect_uTerm`, `pcfSect_vTerm` and `pcfSect_logWedge` from
+  [SectorAsymptotics](DLMF/ParabolicCylinder/SectorAsymptotics.lean), lines 334, 642 and 554,
+  as `pcfUTerm`, `pcfVTerm` and `pcfLogWedge`. All three equality checks close with `rfl`.
+  The former file already imports the latter. Move the canonical definitions below the
+  theorem layers and retain one set of mathematical names. Several adjacent theorem
+  adapters already use the stronger sector results correctly.
+- **Legendre square-root branch:** `legInt_root` in
+  [IntegralRepresentations](DLMF/Legendre/IntegralRepresentations.lean), line 302, and
+  `legQAdd_sq` in [QAdditionTools](DLMF/Legendre/QAdditionTools.lean), line 429, are
+  definitionally equal at every complex argument. Both are
+  `exp ((log (z - 1) + log (z + 1)) / 2)`. Put that exact branch definition in a shared
+  lower file, with the more general square identity alongside it. Do not replace it by
+  an unqualified `sqrt (z^2 - 1)`, whose principal-branch behavior can differ.
+- **Power-series uniqueness:**
+  [GeneralizedCalculus](DLMF/Hypergeometric/GeneralizedCalculus.lean), line 294,
+  and [TrigR4SeriesExtension](DLMFMathlib/Analysis/Complex/TrigR4SeriesExtension.lean),
+  line 27, contain the same 23-line proof. The newer
+  `Complex.eq_of_hasSum_mul_pow_ball` in
+  [OfScalarsUnique](DLMFMathlib/Analysis/Analytic/OfScalarsUnique.lean), line 59, has
+  exactly the required interface and a four-line proof using its zero-series theorem.
+  Likewise, the zero-coefficient helpers in `Heun/LocalSolutions.lean:564` and
+  `Spheroidal/P3lSpectrum.lean:228` match `Complex.eq_zero_of_hasSum_mul_pow_ball`.
+- **Elementary sign lemmas:** the groups beginning at
+  [Confluent/ZeroTools](DLMF/Confluent/ZeroTools.lean), line 99, and
+  [Legendre/ZeroTools](DLMF/Legendre/ZeroTools.lean), line 81, repeat the derivative-sign,
+  endpoint-nonnegativity and constant-sign proofs now available in
+  [Calculus/Deriv/Sign](DLMFMathlib/Analysis/Calculus/Deriv/Sign.lean), lines 30–72.
+  Replace these copies with the `HasDerivAt`, `ContinuousAt` and `ContinuousOn` APIs.
+- **Trigonometric bounds:** use `Complex.norm_sin_le_exp_abs_im` and
+  `Complex.norm_cos_le_exp_abs_im` from
+  [Trigonometric/Bounds](DLMFMathlib/Analysis/SpecialFunctions/Trigonometric/Bounds.lean),
+  lines 36 and 42. Their exact statements recur in Gamma, Confluent, Hypergeometric,
+  Legendre, Mathieu, JacobiElliptic, Theta, Struve and ParabolicCylinder files. For example,
+  `Gamma/Integrals.lean:498` and `Hypergeometric/Identities.lean:266` reprove the sine
+  estimate; `Confluent/Integrals.lean:744` and `Legendre/Series.lean:76` share a copied
+  cosine proof. The general cosine-sign lemma in the same support file also repeats in
+  `Confluent/TricomiRotated.lean:55` and `WatsonRotated.lean:266`.
+- **Gamma strip bounds:** `incRep_Gamma_bound`, `incRep_Gamma_bound_pt` and
+  `incRep_norm_Gamma_le` in
+  [IncompleteGamma/Representations](DLMF/IncompleteGamma/Representations.lean), lines
+  921, 977 and 729, are repeated as `pcfBC_Gamma_bound`, `pcfBC_Gamma_bound_pt` and
+  `pcfBC_norm_Gamma_le_ratio` in
+  [BarnesContinuation](DLMF/ParabolicCylinder/BarnesContinuation.lean), lines 40, 96 and
+  113. The strip-bound proof alone is 51 lines in each file. Put the common results in
+  the Gamma bounds layer; they currently depend on `DLMF.Gamma` results, so they cannot
+  simply be moved to `DLMFMathlib` with those imports unchanged.
+- **Elementary improper integrals:** `struvePrim_integral_log` in
+  [Struve/Asymptotics](DLMF/Struve/Asymptotics.lean), line 1150, repeats the result now
+  in [ImproperIntegralsExtra](DLMFMathlib/Analysis/SpecialFunctions/ImproperIntegralsExtra.lean),
+  line 43. The two Euler-constant integral proofs at
+  `Airy/ScorerAsymptotics.lean:253` and `Struve/Asymptotics.lean:1212` are also copied.
+  The latter depend on Gamma integral lemmas; share them at a layer that can import those
+  lemmas, or first move the general prerequisites down.
+- **Finite-sum bookkeeping:** `BernoulliEuler/Properties.lean:1018` repeats the proof of
+  `Finset.sum_range_two_mul` in
+  [Algebra/BigOperators](DLMFMathlib/Algebra/BigOperators.lean), line 25. The more
+  specialized copies in `Gamma/RationalSeries.lean:102` and
+  `Zeta/S25bHurwitzCore.lean:126` can use that general interface. The even-sum helpers
+  in `BernoulliEuler/IntegralsSums.lean:812` and `RelatedNumbers.lean:480` are another pair.
+- **Bailey limits:** the private boundedness and Tannery helpers in
+  [Bailey](DLMF/Bailey.lean), lines 869 and 881, were copied into
+  [QHypergeometric/BaileyPairs](DLMF/QHypergeometric/BaileyPairs.lean), lines 96 and 102.
+  The latter file already documents the copying. Extract the finite-sum dominated-limit
+  lemma into general series infrastructure instead of retaining two 19-line proofs.
+- **Copies within one area or file:**
+  `incEllIntPik_special_k'` and `incEllIntPik_special_k` in
+  [EllipticIntegrals/SpecialCases](DLMF/EllipticIntegrals/SpecialCases.lean), lines 332
+  and 635, have identical statements and 20-line bodies. Keep the documented DLMF theorem
+  and update callers of the undocumented prime version. The Jacobi identities
+  `Addition.lean:1138` and `ElementaryIdentities.lean:49` repeat the same 23-line
+  `sn² + cn²` / `k² sn² + dn²` proof: move one theorem below both users.
+  `Zeta/IntegerArguments.lean:47` also repeats the five-line `riemannZeta_six` proof
+  now in `DLMFMathlib/NumberTheory/LSeries/ZetaValues.lean:26`.
+
+Do not count every matching statement as a duplicated proof. Many DLMF-facing theorems are
+already useful one-line adapters to implementation lemmas; examples include the Mathieu
+`BesselSeries`/`P2mRadial` interfaces and the spherical-harmonic theorems over `ZonalTools`.
+Real and complex Chebyshev coefficients also have different target types and an existing
+comparison theorem. Their similar formulas are not a reason to delete the real interface.
+
+### Direct Mathlib and TauCeti reuse
+
+The following replacements were checked by compiling examples with the existing hypotheses
+and conclusions. The referenced upstream results have only `propext`, `Classical.choice`
+and `Quot.sound` among their axiom dependencies.
+
+- [Zeta/IntegerArguments](DLMF/Zeta/IntegerArguments.lean), line 39:
+  `DLMF.Zeta.riemannZeta_four` repeats `_root_.riemannZeta_four`, already in
+  `Mathlib.NumberTheory.LSeries.HurwitzZetaValues`, line 232. Record the DLMF reference
+  with an upstream pointer and update callers, as the acquisition policy requests.
+- [Bessel/SecondKind](DLMF/Bessel/SecondKind.lean), line 138:
+  `sin_int_mul_pi_complex` repeats `Complex.sin_int_mul_pi`.
+- [Confluent/BasicProperties](DLMF/Confluent/BasicProperties.lean), line 211:
+  `sin_pi_mul_ne_zero_of_mem` repeats Mathlib's root `sin_pi_mul_ne_zero`, in
+  `Mathlib.Analysis.SpecialFunctions.Trigonometric.Cotangent`, line 140.
+- [Struve/LargeOrderTools](DLMF/Struve/LargeOrderTools.lean), line 490:
+  `struveLO_pow_div_factorial_le_exp` can directly use
+  `Real.pow_div_factorial_le_exp x hx m`, in `Mathlib.Analysis.Complex.Exponential`,
+  line 258, rather than proving the term bound from a partial sum again.
+- [IncompleteGamma/Representations](DLMF/IncompleteGamma/Representations.lean), line 275:
+  `ofReal_exp_cpow_eq_exp_mul` repeats `TauCeti.ofReal_exp_cpow` from
+  `TauCeti.Analysis.SpecialFunctions.Pow.Complex`, line 87. The hypergeometric
+  `hcub_ofReal_cpow_exp` already uses that upstream result as an adapter.
+- [Pow/ComplexReal](DLMFMathlib/Analysis/SpecialFunctions/Pow/ComplexReal.lean), lines
+  38 and 54: `ofReal_sq_cpow` and `mul_ofReal_cpow_of_ne_zero` follow directly from
+  `TauCeti.ofReal_pow_cpow` and `TauCeti.ofReal_mul_cpow`, with a cast normalization or
+  commutativity rewrite. TauCeti's second result even permits a zero complex factor;
+  the existing interface can be preserved without repeating the branch argument.
+
+Existing reuse of TauCeti's real incomplete Gamma, Hermite orthogonality/Fourier theory
+and Rouché theorem is already visible in `Statistical/IncompleteGamma`,
+`OrthogonalPolynomials/Integrals` and `Core/ZeroCounting`. These are substantial useful
+bridges. Their real domains and normalizations do not provide blanket replacements for
+the project's complex functions or logarithmic-plane continuation.
+
+### Definitions layers and import organization
+
+`DLMFMathlib` has no imports of `DLMF`, and the separate top-level prefix avoids collision
+with lean-codes' `ToMathlib`. Preserve this arrangement. All 79 support files are below
+1,500 lines; the largest has 1,339 lines.
+
+The import survey reports 46 areas, 734 non-umbrella area modules, and 14 two-way area
+pairs. Three pairs are new relative to `scripts/import_baseline.json`:
+
+- `Confluent <-> Coulomb`;
+- `Confluent <-> ErrorFunctions`;
+- `JacobiElliptic <-> Weierstrass`.
+
+Two-way area pairs are allowed and do not imply a Lean module cycle. They should be reported,
+not removed merely to force a chapter order.
+
+The survey also finds 24 definitions-file imports of other areas' theorem files. Seven are
+new relative to the baseline and require attention under the project's current rule:
+
+- `ErrorFunctions.Basic -> Confluent.FresnelAsymptotics`;
+- `ExpIntegrals.Basic -> Confluent.ExpIntegral`;
+- `GeneralizedHypergeometric.Basic -> Hypergeometric.Solutions`;
+- `GeneralizedHypergeometric.Basic -> Hypergeometric.ArgumentContinuation`;
+- `IncompleteGamma.Basic -> Statistical.IncompleteGamma`;
+- `Lame.Basic -> Elliptic.Jacobi`;
+- `Struve.Basic -> Confluent.Relations`.
+
+Move needed definitions and their minimal supporting lemmas down unchanged, and move
+cross-function identities to bridge files. For example, the generalized-hypergeometric
+`Basic` file currently combines parameter definitions, continuation objects and uniqueness
+proofs, while importing Gaussian solution and continuation theory. Splitting a small
+definitions layer from the continuation/bridge layer would make this dependency explicit.
+The old `Confluent`, `Statistical` and new `IncompleteGamma` layers need the same treatment.
+Do not resolve these dependencies by copying their definitions into the newer area.
+
+The remaining 17 cross-area definitions-file edges are recognized by the baseline, but
+that grandfathering lasts only until those files are edited under the local instructions.
+The survey exits 1 because of the ten new items above; the baseline was not changed.
+
+### Long proofs and useful decomposition
+
+There are 894 theorem/lemma tactic bodies longer than 60 physical lines and 108 longer
+than 120, excluding bodies containing a direct `sorry`. This measures source length,
+not transitive proof completeness. The inventory gives every name and location.
+The most valuable decompositions expose mathematical steps or remove a second derivation;
+arbitrary 60-line cuts would add little value.
+
+- **Logarithmic hypergeometric connections:**
+  [ConnectionFormulas](DLMF/Hypergeometric/ConnectionFormulas.lean), lines 647 and 1060,
+  has 236- and 268-line digamma proofs; the stronger reciprocal-Gamma versions in
+  [LogConnectionsRecipGamma](DLMF/Hypergeometric/LogConnectionsRecipGamma.lean), lines
+  93 and 413, have 239- and 266-line proofs. The newer file explicitly says that it repeats
+  parameter differentiation. Extract the nonlogarithmic connections and derivative tools
+  into a lower module, prove the pole-free formulas once, and obtain the restricted
+  digamma forms by specialization. The present import from the newer file to the older
+  one must be reorganized before reversing this reuse. Within each core proof, coefficient
+  derivatives, low-index/pole terms, shifted tails, and the final `HasSum` assembly are
+  useful separate lemmas. Preserve the exceptional-parameter distinction.
+- **Jacobi cyclic identities:**
+  [Cyclic](DLMF/JacobiElliptic/Cyclic.lean), lines 401, 1442 and 1727, has 260-, 270-
+  and 257-line proofs. Much of the length is enormous polynomial certificates, rather
+  than a readable mathematical argument. Extract the algebraic identity over variables
+  satisfying the two quadratic relations and the third-period relations, then apply it
+  to the Jacobi values. Keep addition-value extraction and denominator nonvanishing
+  separate. The line at 1553 alone has 10,367 characters; wrapping it is necessary,
+  but factoring the certificate is the substantive improvement.
+- **Positive-parameter cylinder expansion:**
+  [UniformLG2](DLMF/ParabolicCylinder/UniformLG2.lean), line 2301, has a 264-line proof of
+  `pcf_positive_parameter_uniform`. Its existing internal blocks already separate
+  eventual bounds for the Borel normalizer, the normalizer expansion, the normalized
+  function expansion and the derivative expansion. Promote those blocks to lemmas,
+  sharing the eventual nonvanishing estimates and quotient-remainder bound.
+- **Liouville–Green existence:**
+  [LiouvilleGreenExpansion](DLMFMathlib/Analysis/ODE/LiouvilleGreenExpansion.lean),
+  line 60, and [LiouvilleGreenFinite](DLMFMathlib/Analysis/ODE/LiouvilleGreenFinite.lean),
+  line 387, have 208- and 211-line approximate-solution proofs. The finite-endpoint and
+  infinite-endpoint theorems have genuinely different hypotheses. Share continuity and
+  residual algebra, and split Volterra construction, differentiability of the resulting
+  correction, and final ODE/error verification. Do not identify the endpoint conditions.
+- **Painlevé transformations:**
+  [BacklundDLMF](DLMF/Painleve/BacklundDLMF.lean), lines 1869 and 2186, has 197- and
+  260-line transformation proofs. Extract formulas for the transformed first and second
+  derivatives and the rational residual identity. Keep denominator/domain conditions
+  visible; several algebraic steps already require a locally raised recursion bound.
+- **Integral proofs:**
+  [IncompleteGamma/ExponentialIntegral](DLMF/IncompleteGamma/ExponentialIntegral.lean),
+  line 1168, has a 159-line `genExpIntE_product_integral`. The choice of auxiliary
+  exponents, double-integral integrability, Fubini calculation and final real/complex
+  bridge are reusable units. Similar local domination and remainder-bound blocks account
+  for much of the longer Airy, Struve and error-function proofs.
+
+### Oversized files and proposed splits
+
+Seventy-six files exceed the requested hard 1,500-line limit. All are in `DLMF/`.
+The first five account for 27,673 lines:
+
+- [Struve/Asymptotics](DLMF/Struve/Asymptotics.lean), 6,953 lines:
+  split fixed-order Watson expansions, integrated Struve functions (section begins at
+  880), large-order expansions (2222), scaled large-order/binomial estimates (2659/3060),
+  and turning-point/scaled expansions (4462). Some of these blocks themselves need more
+  than one file to respect the limit. Move duplicated Gamma/integral helpers first.
+- [Airy/Asymptotics](DLMF/Airy/Asymptotics.lean), 5,819 lines:
+  split rotated-sector expansions, negative-axis oscillatory expansions (1105/1308),
+  real-axis remainders (2275), Stieltjes/sector bounds (2755/3248), and oscillatory
+  remainder bounds (4156). The existing `StieltjesForm`, `ErrorBoundTools` and
+  `ModulusTools` modules provide natural lower layers; check their dependencies before
+  adding another family of helpers.
+- [OrthogonalPolynomials/Integrals](DLMF/OrthogonalPolynomials/Integrals.lean), 5,680
+  lines: separate Rodrigues/orthogonality and norms, Gegenbauer/Legendre angular
+  representations, Hermite integral and Fourier transforms, Laguerre fractional/product
+  transforms, and double Laplace integrals. Keep these under their existing area.
+- [Elementary/Hyperbolic](DLMF/Elementary/Hyperbolic.lean), 4,772 lines:
+  extract function/domain definitions, direct hyperbolic identities and series,
+  principal inverse functions, and branch/cut-side inverse identities. The adjacent
+  3,865-line `Trigonometric` file needs an analogous split.
+- [Confluent/Integrals](DLMF/Confluent/Integrals.lean), 4,449 lines:
+  separate Hankel-kernel transforms (524), large-parameter Bessel transforms (1591),
+  Gauss/Stieltjes representations (3222), and Gauss transforms (3958), retaining a
+  compatibility import file where that helps callers.
+
+`Selberg/Basic.lean` (2,602), `Weierstrass/Basic.lean` (1,778) and
+`JacobiElliptic/Basic.lean` (1,540) also need splits; a file called `Basic` does not
+need to carry its entire area's foundational theorem development.
+
+The pinned Mathlib linter calls 1,500 a soft default and supports per-file exceptions.
+For this project, this review applies the user's hard limit. The downstream default of
+`linter.style.longFile` is currently zero, and `lakefile.toml` does not enable it, explaining
+why the ordinary build does not flag these files. Enable that check with a 1,500-line
+bound after planning the migration, together with a source-size check that enforces the
+project's hard limit.
+
+### Names, namespaces and file names
+
+The [Mathlib naming guide](https://leanprover-community.github.io/contribute/naming.html)
+uses `UpperCamelCase` for propositions/types and file names, `lowerCamelCase` for data
+definitions, and `snake_case` for proofs, with existing mathematical names retained
+inside theorem names. Most central names such as `kummerM`, `besselY` and
+`regularizedGaussHG` fit this scheme. The largest naming problem is the helper API.
+
+- The scan finds 4,400 non-private declarations with work-round prefixes such as `p22R1_`,
+  `q27_` and `s26a_` under its recorded prefix pattern. Many are implementation lemmas
+  exported by a blanket `public section`. Rename reusable results by their content,
+  and make genuinely file-local helpers private. Keep DLMF equation identifiers in
+  attributes and docstrings, rather than encoding a proof round in an API name.
+- Predicates such as `genDenRegular`, `genTerminates`, `genSeriesConvergesTo` and
+  `genSeriesAbsolutelyConverges` in
+  [GeneralizedHypergeometric/Basic](DLMF/GeneralizedHypergeometric/Basic.lean), lines
+  53–70, should use proposition-style capitalization, for example `GenDenRegular`,
+  `GenTerminates` and `HasGenSeriesSum`, after choosing clear mathematical terminology.
+  `qDenominatorRegular`, `qBalanced` and `qWellPoised` have the same issue in
+  `QHypergeometric/Basic.lean`. Likewise, `kzt_IsSol`, `lzt_IsSol` and `airySq_IsProdSol`
+  combine an implementation prefix with a predicate name instead of exposing an ODE API.
+- The lower-case predicates in
+  [SeparatingContour](DLMFMathlib/Analysis/Complex/SeparatingContour.lean), lines 26–45,
+  and [ODE/Singularities](DLMFMathlib/Analysis/ODE/Singularities.lean), lines 33–67,
+  need the same capitalization review. This is a naming issue, independent of their proofs.
+- Most `DLMFMathlib` extensions correctly use namespaces such as `Complex`, `Polynomial`,
+  `ODE`, `MeasureTheory` and `Asymptotics`. However,
+  [StieltjesRemainder](DLMFMathlib/Analysis/Asymptotics/StieltjesRemainder.lean), line 46,
+  exports a family of `stRem_*` declarations at the root, and
+  [R27PowerSeriesEval](DLMFMathlib/RingTheory/R27PowerSeriesEval.lean), line 30, does the
+  same with `r27_*`. A named Stieltjes-transform API and a predicate such as
+  `PowerSeries.HasAbsEval`, with methods `.unique`, `.mul`, `.add`, would be easier
+  to discover. Root-level general facts are legitimate; the concern is these coherent
+  families hidden behind temporary prefixes.
+- The inherited placement of incomplete Gamma and parabolic-cylinder declarations in
+  `DLMF.Confluent` is a discoverability issue, not a Lean namespace error. Likewise,
+  `DLMF.Elliptic.Real` is an intentional project namespace. Document these ownership
+  choices and preserve interfaces during any migration; do not automatically relocate
+  every declaration to the namespace spelled by its file path.
+- Fifty-four modules retain work-round names. Examples with straightforward descriptive
+  replacements are `P1oEntireLinear` → `LinearEntire`, `P1oParamHolomorphic` →
+  `LinearParameterHolomorphy`, `T27aPrimeNumberTheorem` → `PrimeNumberTheorem`,
+  `P3wJSurjective` → `JInvariantSurjective`, and `R27PowerSeriesEval` →
+  `PowerSeries/AbsoluteEvaluation`. The prefixes happen to satisfy UpperCamelCase but
+  describe development history rather than mathematical contents.
+- `Gamma/IntegralRep.lean` specifically contains integrals of digamma and log Gamma,
+  whereas `IntegralRepresentations.lean` covers DLMF §5.9. Rename the former to
+  `DigammaIntegrals` or similar; `IntegralRep` beside `IntegralRepresentations` and
+  `Integrals` makes the distinctions hard to find. Prefer consistent descriptive forms
+  such as `DifferentialEquations` over mixing that with `DiffEq`.
+
+### Documentation coverage and quality
+
+Not every declaration has a docstring. `Lean.findDocString?`, including inherited
+documentation, finds 1,149 undocumented explicit library declarations:
+
+- 1,101 non-private declarations: 584 theorems, 513 lemmas, one definition and three
+  named instances, in 118 files;
+- 48 private declarations;
+- separately, 91 of 205 structure fields have no docstring.
+
+Generated constructors, recursors and equation lemmas are excluded from these totals.
+All 858 library files contain a module doc comment. Mathlib does not require a separate
+prose explanation for every trivial helper; the project's shared instruction for new
+declarations and the user's requested coverage set the expectation here.
+
+The largest non-private documentation gaps are `EllipticIntegrals/Connection` (59),
+`Struve/Asymptotics` (55), `JacobiElliptic/SpecialValues` (50), `Bessel/SecondKind` (34),
+and `JacobiElliptic/Basic` (34). The sole undocumented definition is
+`q2m_diagFactor` in [MatrixArgument/GammaBeta](DLMF/MatrixArgument/GammaBeta.lean),
+line 332. The undocumented instances are in `MatrixArgument/Zonal.lean`, lines 48–62.
+Undocumented fields include the Painlevé equation/domain hypotheses, the coefficients
+and error-control structures in `AsymptoticApproximations/ODE/Defs`, and the boundary
+conditions in `AlgebraicAnalytic/Calculus/Defs`. Document the meaning of each assumption,
+including why it is needed, rather than only restating its type.
+
+Docstring presence is not the same as adequate documentation. Examples such as
+`/-- pcfUTerm. -/`, `/-- pcfLogWedge. -/` and
+`/-- normIncGammaPContinued eq. -/` give little help beyond the declaration name.
+Replace these with the coefficient formula's role and normalization, the logarithmic
+sector's geometry, or the domain on which the two normalizations agree. Function and
+continuation definitions deserve explicit branch conventions and exceptional values;
+several existing module headers already explain these distinctions well.
+
+The current top-level README inventory is historical: for example it lists 23 Gamma
+submodules and 14 Bessel submodules, while these directories now contain 33 and 28 Lean
+files. The opening status of this review also predates several acquisitions.
+Keep historical round reports dated, and add a current structural index generated from
+the source tree. `DLMF.lean` still has an AAR-only module title, and `DLMFMathlib.lean`
+says its modules import Mathlib only despite its lean-codes imports; refresh those headers.
+
+### Formatting and current linter output
+
+The [Mathlib style guide](https://leanprover-community.github.io/contribute/style.html)
+recommends 100-character lines, spaces around infix operators and declaration punctuation,
+and module documentation immediately after imports. The source scan finds 4,238 lines
+longer than 100 characters under the library directories. Some large algebraic certificates
+have thousands of characters on a single line. Dense forms such as `z^2*...` and
+`f z=g z-g 0` also recur, especially in acquired chapters. Reformat those as the affected
+files are split and reviewed.
+
+The successful ordinary build replays 1,443 non-admission warnings in 125 project library
+files, including 605 unused simp arguments, 271 unused/unreferenced-variable warnings,
+155 tactic-sequencing warnings and 131 unreachable-tactic warnings, plus ineffective
+tactics and deprecated syntax. These are concrete existing Mathlib-linter findings, not
+only aesthetic suggestions. Remove dead tactics and obsolete simp arguments; use the
+diagnostics to determine whether a hypothesis is redundant or only referenced implicitly.
+Do not indiscriminately remove mathematical hypotheses or silence the linters.
+
+Several recently acquired files also have very broad collections of tactic imports,
+for example `Zeta/Polylog`. Audit them after extracting the lower layers, using the
+project's import-minimization tooling where available. Their appearance alone is not
+evidence that every listed import can be deleted.
+
+### Suggested cleanup order and validation
+
+1. Consolidate the confirmed repeated definitions and general helper proofs, repairing
+   the seven new definitions-to-theorem imports while doing so.
+2. Use the checked Mathlib/TauCeti replacements, and reorganize logarithmic connection
+   proofs around their pole-free versions. Preserve branches, totalization and existing
+   theorem interfaces; record new upstream adoption in `CREDITS.md` when implemented.
+3. Split all 76 oversized files along mathematical boundaries. Promote reusable proof
+   steps in the longest analytic proofs and isolate algebraic certificates.
+4. Rename work-round modules and reusable declarations, make local helpers private,
+   complete documentation, and clear the existing linter warnings. Regenerate the
+   structural README inventory and enable the relevant style checks.
+
+Review validation at source commit `0ae4729`:
+
+- `lake build > /tmp/DLMF-build.log 2>&1` passed, 14,148 jobs.
+- Compiled metadata covered all 25,724 explicit library declarations; the separate
+  structure-field audit covered 205 fields.
+- The thirteen checked replacement statements and ten definitional equalities compiled in
+  temporary Lean probes using `-DautoImplicit=false -DrelaxedAutoImplicit=false`.
+- Axiom checks of the twelve named upstream/general results used in those probes found
+  only the three standard axioms. No project-wide admission audit was performed.
+- `python3 scripts/import_survey.py --baseline scripts/import_baseline.json` reported the
+  ten baseline differences described above. No baseline was rewritten.
+- No Lean library file, theorem statement, dependency pin or build setting was changed.
+  The repository changes are this review and its JSON inventory.
+
+### Complete list of files over 1,500 lines
+
+- `DLMF/Struve/Asymptotics.lean` — 6,953 lines.
+- `DLMF/Airy/Asymptotics.lean` — 5,819 lines.
+- `DLMF/OrthogonalPolynomials/Integrals.lean` — 5,680 lines.
+- `DLMF/Elementary/Hyperbolic.lean` — 4,772 lines.
+- `DLMF/Confluent/Integrals.lean` — 4,449 lines.
+- `DLMF/Elementary/Trigonometric.lean` — 3,865 lines.
+- `DLMF/Gamma/IntegralRepresentations.lean` — 3,772 lines.
+- `DLMF/Airy/ModulusPhase.lean` — 3,497 lines.
+- `DLMF/Struve/Representations.lean` — 3,388 lines.
+- `DLMF/ErrorFunctions/Integrals.lean` — 3,302 lines.
+- `DLMF/Mathieu/Properties.lean` — 3,108 lines.
+- `DLMF/ParabolicCylinder/UniformLG2.lean` — 3,052 lines.
+- `DLMF/JacobiElliptic/SpecialValues.lean` — 2,997 lines.
+- `DLMF/IncompleteGamma/Asymptotics.lean` — 2,991 lines.
+- `DLMF/Legendre/Integrals.lean` — 2,774 lines.
+- `DLMF/OrthogonalPolynomials/Series.lean` — 2,735 lines.
+- `DLMF/Combinatorics/Permutations.lean` — 2,702 lines.
+- `DLMF/OrthogonalPolynomials/Hahn.lean` — 2,683 lines.
+- `DLMF/Selberg/Basic.lean` — 2,602 lines.
+- `DLMF/ErrorFunctions/BoundsAsymptotics.lean` — 2,498 lines.
+- `DLMF/Painleve/BacklundDLMF.lean` — 2,458 lines.
+- `DLMF/Hypergeometric/Identities.lean` — 2,344 lines.
+- `DLMF/Confluent/BasicProperties.lean` — 2,336 lines.
+- `DLMF/Hypergeometric/Solutions.lean` — 2,322 lines.
+- `DLMF/Legendre/Associated.lean` — 2,273 lines.
+- `DLMF/Airy/Integrals.lean` — 2,208 lines.
+- `DLMF/Confluent/IntegralRepresentations.lean` — 2,163 lines.
+- `DLMF/Gamma/Multidimensional.lean` — 2,116 lines.
+- `DLMF/BernoulliEuler/Zeros.lean` — 2,108 lines.
+- `DLMF/Legendre/Continuation.lean` — 2,101 lines.
+- `DLMF/Struve/AngerWeber.lean` — 2,064 lines.
+- `DLMF/Airy/Scorer.lean` — 2,054 lines.
+- `DLMF/Legendre/UniformCoordinates.lean` — 2,036 lines.
+- `DLMF/Hypergeometric/FurtherTransformations.lean` — 2,002 lines.
+- `DLMF/JacobiElliptic/Cyclic.lean` — 1,993 lines.
+- `DLMF/CoalescingSaddles/DifferentialEquations.lean` — 1,985 lines.
+- `DLMF/Gamma/Asymptotics.lean` — 1,980 lines.
+- `DLMF/Airy/Relations.lean` — 1,956 lines.
+- `DLMF/Confluent/Recurrence.lean` — 1,953 lines.
+- `DLMF/Lame/FourierSeries.lean` — 1,946 lines.
+- `DLMF/IncompleteGamma/SineCosine.lean` — 1,910 lines.
+- `DLMF/Legendre/IntegralTools.lean` — 1,902 lines.
+- `DLMF/Combinatorics/Stirling.lean` — 1,897 lines.
+- `DLMF/BernoulliEuler/Generalizations.lean` — 1,884 lines.
+- `DLMF/Combinatorics/PlanePartitions.lean` — 1,866 lines.
+- `DLMF/NumberTheory/Asymptotics.lean` — 1,866 lines.
+- `DLMF/Gamma/Integrals.lean` — 1,852 lines.
+- `DLMF/CoalescingSaddles/CanonicalIntegrals.lean` — 1,845 lines.
+- `DLMF/OrthogonalPolynomials/Differential.lean` — 1,838 lines.
+- `DLMF/Combinatorics/PartitionIdentities.lean` — 1,837 lines.
+- `DLMF/GeneralizedHypergeometric/Appell.lean` — 1,828 lines.
+- `DLMF/Elementary/LambertW.lean` — 1,821 lines.
+- `DLMF/ExpIntegrals/TransformTools.lean` — 1,815 lines.
+- `DLMF/Weierstrass/Basic.lean` — 1,778 lines.
+- `DLMF/Mathieu/Modified/P2mConnection.lean` — 1,764 lines.
+- `DLMF/IncompleteGamma/Representations.lean` — 1,747 lines.
+- `DLMF/Legendre/Zeros.lean` — 1,734 lines.
+- `DLMF/OrthogonalPolynomials/BoundsZeros.lean` — 1,729 lines.
+- `DLMF/Hypergeometric/Elementary.lean` — 1,702 lines.
+- `DLMF/Legendre/IntegralRepresentations.lean` — 1,700 lines.
+- `DLMF/Spheroidal/FerrersSeries.lean` — 1,679 lines.
+- `DLMF/Gamma/BetaFunction.lean` — 1,676 lines.
+- `DLMF/Theta/Products.lean` — 1,654 lines.
+- `DLMF/Zeta/Hurwitz.lean` — 1,640 lines.
+- `DLMF/Confluent/Zeros.lean` — 1,633 lines.
+- `DLMF/Confluent/ParabolicCylinder.lean` — 1,623 lines.
+- `DLMF/Airy/Zeros.lean` — 1,608 lines.
+- `DLMF/Confluent/Asymptotics.lean` — 1,587 lines.
+- `DLMF/OrthogonalPolynomials/QFamilies.lean` — 1,585 lines.
+- `DLMF/Gamma/BarnesG.lean` — 1,580 lines.
+- `DLMF/Zeta/IntegralReps.lean` — 1,575 lines.
+- `DLMF/Mathieu/Modified/P2mRadial.lean` — 1,558 lines.
+- `DLMF/Spheroidal/P3lSpectrum.lean` — 1,558 lines.
+- `DLMF/JacobiElliptic/Basic.lean` — 1,540 lines.
+- `DLMF/ParabolicCylinder/Weber.lean` — 1,538 lines.
+- `DLMF/Weierstrass/Relations.lean` — 1,503 lines.

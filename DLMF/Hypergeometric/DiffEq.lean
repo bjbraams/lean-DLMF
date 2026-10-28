@@ -73,6 +73,8 @@ theorem hasDerivAt_ordinaryHypergeometric {a b c z : ℂ}
   rw [← hd.unique hs]
   exact (hf.analyticAt_of_mem hz').differentiableAt.hasDerivAt
 
+/-- Identity under the stated parameter and domain assumptions: `deriv (₂F₁ a b c) z = a * b / c *
+₂F₁ (a + 1) (b + 1) (c + 1) z`. -/
 @[dlmf 15.5.E1]
 theorem deriv_ordinaryHypergeometric {a b c z : ℂ}
     (hc : ∀ k : ℕ, c ≠ -k) (hz : ‖z‖ < 1) :

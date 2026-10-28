@@ -31,7 +31,8 @@ def incBeta (a b z : ℂ) : ℂ :=
 def normIncBetaI (a b z : ℂ) : ℂ :=
   if z=1 then 1 else Gamma (a+b)/Gamma b*z^a*DLMF.Hypergeometric.regularizedGaussHG a (1-b) (a+1) z
 
-/-- incBeta ofReal. -/
+/-- Identity under the stated parameter and domain assumptions: `incBeta a b x=Real.incBeta a b
+x`. -/
 @[dlmf 8.17.E1]
 theorem incBeta_ofReal {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) {x : ℝ} (hx : x ∈ Icc (0 : ℝ) 1) :
     incBeta a b x=Real.incBeta a b x := by
@@ -54,7 +55,8 @@ theorem incBeta_ofReal {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) {x : ℝ} (hx
     regularizedGaussHGFun_eq_div_Gamma ha1, Gamma_add_one a ha0]
   field_simp [Gamma_ne_zero_of_re_pos ha]
 
-/-- normIncBetaI ofReal. -/
+/-- Identity under the stated parameter and domain assumptions: `normIncBetaI a b
+x=Real.normIncBetaI a b x`. -/
 @[dlmf 8.17.E2]
 theorem normIncBetaI_ofReal {a b : ℂ} (ha : 0 < a.re) (hb : 0 < b.re) {x : ℝ} (hx : x ∈ Icc (0 : ℝ) 1) :
     normIncBetaI a b x=Real.normIncBetaI a b x := by
@@ -138,7 +140,8 @@ theorem integral_beta_quadratic_subst {a : ℝ} (ha : 0 < a) {x : ℝ} (hx : 0 �
     rw [← uIcc_of_le hx] at h
     exact Integrable.congr h (by filter_upwards [hae] with t ht using ht.symm)
 
-/-- normIncBetaI quadratic. -/
+/-- Identity under the stated parameter and domain assumptions: `normIncBetaI a a x=normIncBetaI a
+(1/2) (4*x*(1-x))/2`. -/
 @[dlmf 8.17.E6]
 theorem normIncBetaI_quadratic {a : ℝ} (ha : 0 < a) {x : ℝ} (hx : 0 ≤ x) (hx1 : x ≤ 1/2) :
     normIncBetaI a a x=normIncBetaI a (1/2) (4*x*(1-x))/2 := by
@@ -171,7 +174,8 @@ theorem normIncBetaI_quadratic {a : ℝ} (ha : 0 < a) {x : ℝ} (hx : 0 ≤ x) (
   push_cast
   field_simp
 
-/-- incBeta hypergeometric euler. -/
+/-- Identity under the stated parameter and domain assumptions: `incBeta a b x=(x : ℂ)^(a :
+ℂ)*(1-x : ℂ)^(b : ℂ)/a*Gamma (a+1)*DLMF.Hypergeometric.regularizedGaussHG (a+b) 1 (a+1) x`. -/
 @[dlmf 8.17.E8]
 theorem incBeta_hypergeometric_euler {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
     incBeta a b x=(x : ℂ)^(a : ℂ)*(1-x : ℂ)^(b : ℂ)/a*Gamma (a+1)*DLMF.Hypergeometric.regularizedGaussHG (a+b) 1 (a+1) x := by
@@ -189,7 +193,9 @@ theorem incBeta_hypergeometric_euler {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : 
     regularizedGaussHG_symm 1 (a+b) (a+1) hc, Gamma_add_one a ha0]
   field_simp
 
-/-- incBeta hypergeometric pfaff. -/
+/-- Identity under the stated parameter and domain assumptions: `incBeta a b x=(x : ℂ)^(a :
+ℂ)*(1-x : ℂ)^((b : ℂ)-1)/a*Gamma (a+1)*DLMF.Hypergeometric.regularizedGaussHG 1 (1-b) (a+1)
+(x/(x-1))`. -/
 @[dlmf 8.17.E9]
 theorem incBeta_hypergeometric_pfaff {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
     incBeta a b x=(x : ℂ)^(a : ℂ)*(1-x : ℂ)^((b : ℂ)-1)/a*Gamma (a+1)*DLMF.Hypergeometric.regularizedGaussHG 1 (1-b) (a+1) (x/(x-1)) := by
@@ -207,7 +213,9 @@ theorem incBeta_hypergeometric_pfaff {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : 
     regularizedGaussHG_symm (1-b) 1 (a+1) (div_sub_one_mem_cutPlane hc), Gamma_add_one a ha0]
   field_simp
 
-/-- normIncBetaI mellinBarnes. -/
+/-- Identity under the stated parameter and domain assumptions: `HasIntegralWholeLine (fun y : ℝ
+=> let s : ℂ := c+y*I; s^(-(a : ℂ))*(1-s)^(-(b : ℂ))/(s-x)) (2*π*normIncBetaI a b x/((x :
+ℂ)^(a : ℂ)*(1-x : ℂ)^(b : ℂ)))`. -/
 @[dlmf 8.17.E10]
 theorem normIncBetaI_mellinBarnes {a b x c : ℝ} (ha : 0 < a) (hb : 0 < b) (hx : 0 < x) (hxc : x < c) (hc1 : c < 1) :
     HasIntegralWholeLine (fun y : ℝ => let s : ℂ := c+y*I; s^(-(a : ℂ))*(1-s)^(-(b : ℂ))/(s-x)) (2*π*normIncBetaI a b x/((x : ℂ)^(a : ℂ)*(1-x : ℂ)^(b : ℂ))) := by
@@ -386,7 +394,8 @@ theorem normIncBetaI_contiguous_complex {a b z : ℂ} (ha : 0<a.re) (hb : 0<b.re
   · rw [hu.1,hd.1]; field_simp; ring
   · rw [hu.2.1,hd.2]; field_simp; ring
 
-/-- normIncBetaI contiguous 12. -/
+/-- Identity under the stated parameter and domain assumptions: `normIncBetaI (a) (b) x=(x :
+ℂ)*normIncBetaI (a-1) (b) x+(1-x : ℂ)*normIncBetaI (a) (b-1) x`. -/
 @[dlmf 8.17.E12]
 theorem normIncBetaI_contiguous_12 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x) (hx1 : x < 1) (hab : a+b ≠ 1) :
     normIncBetaI (a) (b) x=(x : ℂ)*normIncBetaI (a-1) (b) x+(1-x : ℂ)*normIncBetaI (a) (b-1) x := by
@@ -396,7 +405,8 @@ theorem normIncBetaI_contiguous_12 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : �
   push_cast at h ⊢
   exact h
 
-/-- normIncBetaI contiguous 13. -/
+/-- Identity under the stated parameter and domain assumptions: `((a+b : ℝ) : ℂ)*normIncBetaI (a)
+(b) x=(a : ℂ)*normIncBetaI (a+1) (b) x+(b : ℂ)*normIncBetaI (a) (b+1) x`. -/
 @[dlmf 8.17.E13]
 theorem normIncBetaI_contiguous_13 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
     ((a+b : ℝ) : ℂ)*normIncBetaI (a) (b) x=(a : ℂ)*normIncBetaI (a+1) (b) x+(b : ℂ)*normIncBetaI (a) (b+1) x := by
@@ -414,7 +424,8 @@ theorem normIncBetaI_contiguous_13 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : �
     betaIntegral_ne_zero ha' hb']
   ring
 
-/-- normIncBetaI contiguous 14. -/
+/-- Identity under the stated parameter and domain assumptions: `((a+b*x : ℝ) : ℂ)*normIncBetaI
+(a) (b) x=(x : ℂ)*b*normIncBetaI (a-1) (b+1) x+(a : ℂ)*normIncBetaI (a+1) (b) x`. -/
 @[dlmf 8.17.E14]
 theorem normIncBetaI_contiguous_14 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
     ((a+b*x : ℝ) : ℂ)*normIncBetaI (a) (b) x=(x : ℂ)*b*normIncBetaI (a-1) (b+1) x+(a : ℂ)*normIncBetaI (a+1) (b) x := by
@@ -427,7 +438,9 @@ theorem normIncBetaI_contiguous_14 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : �
   field_simp [Complex.ofReal_ne_zero.mpr ha.ne', Complex.ofReal_ne_zero.mpr hb.ne', Complex.ofReal_ne_zero.mpr hx.ne']
   ring
 
-/-- normIncBetaI contiguous 15. -/
+/-- Identity under the stated parameter and domain assumptions: `((b+a*(1-x) : ℝ) :
+ℂ)*normIncBetaI (a) (b) x=(a : ℂ)*(1-x)*normIncBetaI (a+1) (b-1) x+(b : ℂ)*normIncBetaI (a)
+(b+1) x`. -/
 @[dlmf 8.17.E15]
 theorem normIncBetaI_contiguous_15 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
     ((b+a*(1-x) : ℝ) : ℂ)*normIncBetaI (a) (b) x=(a : ℂ)*(1-x)*normIncBetaI (a+1) (b-1) x+(b : ℂ)*normIncBetaI (a) (b+1) x := by
@@ -440,7 +453,8 @@ theorem normIncBetaI_contiguous_15 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : �
   field_simp [Complex.ofReal_ne_zero.mpr ha.ne', Complex.ofReal_ne_zero.mpr hb.ne', show (1:ℂ)-x≠0 by exact_mod_cast (sub_pos.mpr hx1).ne']
   ring
 
-/-- normIncBetaI contiguous 16. -/
+/-- Identity under the stated parameter and domain assumptions: `(a : ℂ)*normIncBetaI (a+1) (b)
+x=((a : ℂ)+(a+b-1)*x)*normIncBetaI (a) (b) x-((a+b-1 : ℝ) : ℂ)*x*normIncBetaI (a-1) (b) x`. -/
 @[dlmf 8.17.E16]
 theorem normIncBetaI_contiguous_16 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x) (hx1 : x < 1) (hab : a+b ≠ 1) :
     (a : ℂ)*normIncBetaI (a+1) (b) x=((a : ℂ)+(a+b-1)*x)*normIncBetaI (a) (b) x-((a+b-1 : ℝ) : ℂ)*x*normIncBetaI (a-1) (b) x := by
@@ -450,7 +464,9 @@ theorem normIncBetaI_contiguous_16 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : �
   push_cast at h ⊢
   exact h
 
-/-- normIncBetaI contiguous 17. -/
+/-- Identity under the stated parameter and domain assumptions: `(b : ℂ)*normIncBetaI (a) (b+1)
+x=((b : ℂ)+(a+b-1)*(1-x))*normIncBetaI (a) (b) x-((a+b-1 : ℝ) : ℂ)*(1-x)*normIncBetaI (a)
+(b-1) x`. -/
 @[dlmf 8.17.E17]
 theorem normIncBetaI_contiguous_17 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x) (hx1 : x < 1) (hab : a+b ≠ 1) :
     (b : ℂ)*normIncBetaI (a) (b+1) x=((b : ℂ)+(a+b-1)*(1-x))*normIncBetaI (a) (b) x-((a+b-1 : ℝ) : ℂ)*(1-x)*normIncBetaI (a) (b-1) x := by
@@ -460,7 +476,8 @@ theorem normIncBetaI_contiguous_17 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : �
   push_cast at h ⊢
   exact h
 
-/-- normIncBetaI contiguous 18. -/
+/-- Identity under the stated parameter and domain assumptions: `normIncBetaI (a) (b)
+x=normIncBetaI (a+1) (b-1) x+(x : ℂ)^(a : ℂ)*(1-x : ℂ)^((b : ℂ)-1)/(a*betaIntegral a b)`. -/
 @[dlmf 8.17.E18]
 theorem normIncBetaI_contiguous_18 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
     normIncBetaI (a) (b) x=normIncBetaI (a+1) (b-1) x+(x : ℂ)^(a : ℂ)*(1-x : ℂ)^((b : ℂ)-1)/(a*betaIntegral a b) := by
@@ -472,7 +489,8 @@ theorem normIncBetaI_contiguous_18 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : �
   field_simp
   ring
 
-/-- normIncBetaI contiguous 19. -/
+/-- Identity under the stated parameter and domain assumptions: `normIncBetaI (a) (b)
+x=normIncBetaI (a-1) (b+1) x-(x : ℂ)^((a : ℂ)-1)*(1-x : ℂ)^(b : ℂ)/(b*betaIntegral a b)`. -/
 @[dlmf 8.17.E19]
 theorem normIncBetaI_contiguous_19 {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
     normIncBetaI (a) (b) x=normIncBetaI (a-1) (b+1) x-(x : ℂ)^((a : ℂ)-1)*(1-x : ℂ)^(b : ℂ)/(b*betaIntegral a b) := by
@@ -587,13 +605,13 @@ def incBetaFractionD (a b x : ℝ) (k : ℕ) : ℂ :=
 def incBetaFractionConvergent (a b x : ℝ) (N : ℕ) : ℂ :=
   (x : ℂ)^(a : ℂ)*(1-x : ℂ)^(b : ℂ)/(a*betaIntegral a b)*cfTail (fun k => if k=0 then 1 else incBetaFractionD a b x k) (fun _ => 1) 0 N
 
-/-- incBeta continuedFraction. -/
+/-- The map `(incBetaFractionConvergent a b x)` tends to `(𝓝 (normIncBetaI a b x))` along `atTop`. -/
 @[dlmf 8.17.E22]
 theorem incBeta_continuedFraction {a b x : ℝ} (ha : 0 < a) (hb : 0 < b) (hx : 0 ≤ x) (hx1 : x < 1) :
     Tendsto (incBetaFractionConvergent a b x) atTop (𝓝 (normIncBetaI a b x)) := by
   sorry
 
-/-- incBeta continuedFraction endpoint limit. -/
+/-- The map `(fun x : ℝ => normIncBetaI a b x)` tends to `(𝓝 1)` along `(𝓝[<] 1)`. -/
 @[dlmf 8.17.E22]
 theorem incBeta_continuedFraction_endpoint_limit {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
     Tendsto (fun x : ℝ => normIncBetaI a b x) (𝓝[<] 1) (𝓝 1) := by
@@ -644,7 +662,8 @@ theorem incBeta_cf_second_counterexample_value  :
   push_cast
   ring
 
-/-- normIncBetaI negative binomial sum. -/
+/-- The series with terms `(fun j : ℕ => if m ≤ j then (1-x : ℂ)^n*((n+j-1).choose j : ℂ)*(x :
+ℂ)^j else 0)` converges to `(normIncBetaI m n x)`. -/
 @[dlmf 8.17.E24]
 theorem normIncBetaI_negative_binomial_sum {m n : ℕ} (hm : 1 ≤ m) (hn : 1 ≤ n) {x : ℝ} (hx : 0 ≤ x) (hx1 : x < 1) :
     HasSum (fun j : ℕ => if m ≤ j then (1-x : ℂ)^n*((n+j-1).choose j : ℂ)*(x : ℂ)^j else 0) (normIncBetaI m n x) := by

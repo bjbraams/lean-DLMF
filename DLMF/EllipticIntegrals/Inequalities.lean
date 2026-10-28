@@ -484,6 +484,7 @@ theorem incEllIntFk_eq_log_sub_bounds {φ k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (
 
 /-! ### Helpers for 19.9.17–19.9.18 -/
 
+/-- At `x`, the function `Real.artanh` has derivative `(1 / (1 - x ^ 2))`. -/
 lemma p19lR1_hasDerivAt_artanh {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
     HasDerivAt Real.artanh (1 / (1 - x ^ 2)) x := by
   have h1 : 0 < 1 + x := by linarith [hx.1]
@@ -501,6 +502,8 @@ lemma p19lR1_hasDerivAt_artanh {x : ℝ} (hx : x ∈ Ioo (-1 : ℝ) 1) :
   field_simp
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `∫ θ in (0 : ℝ)..φ, Real.cos θ /
+(1 - q ^ 2 * Real.sin θ ^ 2) = q⁻¹ * Real.artanh (q * Real.sin φ)`. -/
 lemma p19lR1_integral_cos_div {q φ : ℝ} (hq : 0 < q) (hφ0 : 0 ≤ φ) (hφ1 : φ < π / 2)
     (hqs : q * Real.sin φ < 1) :
     ∫ θ in (0 : ℝ)..φ, Real.cos θ / (1 - q ^ 2 * Real.sin θ ^ 2) =
@@ -565,6 +568,8 @@ lemma p19lR1_cauchy_schwarz {f g : ℝ → ℝ} {a b : ℝ} (hab : a ≤ b) (hf 
   rw [discrim] at this
   nlinarith
 
+/-- Estimate under the stated parameter and domain assumptions: `c / ((a + b) / 2) ≤ c * (a⁻¹ +
+b⁻¹) / 2`. -/
 lemma p19lR1_hm_am {a b c : ℝ} (ha : 0 < a) (hb : 0 < b) (hc : 0 ≤ c) :
     c / ((a + b) / 2) ≤ c * (a⁻¹ + b⁻¹) / 2 := by
   rw [div_le_iff₀ (by positivity)]
@@ -575,6 +580,8 @@ lemma p19lR1_hm_am {a b c : ℝ} (ha : 0 < a) (hb : 0 < b) (hc : 0 ≤ c) :
     rw [le_div_iff₀ (by positivity)]; nlinarith [sq_nonneg (a - b)]
   nlinarith
 
+/-- Estimate under the stated parameter and domain assumptions: `c / ((c ^ 2 + b) / 2) ≤
+(Real.sqrt b)⁻¹`. -/
 lemma p19lR1_gm_am {b c : ℝ} (hb : 0 < b) (hc : 0 < c) :
     c / ((c ^ 2 + b) / 2) ≤ (Real.sqrt b)⁻¹ := by
   have hsb := Real.sq_sqrt hb.le
@@ -582,6 +589,8 @@ lemma p19lR1_gm_am {b c : ℝ} (hb : 0 < b) (hc : 0 < c) :
   rw [div_le_iff₀ (by positivity), inv_mul_eq_div, le_div_iff₀ hsb0]
   nlinarith [sq_nonneg (c - Real.sqrt b)]
 
+/-- Identity under the stated parameter and domain assumptions: `Real.sqrt (c * ((c ^ 2)⁻¹ + b⁻¹)
+/ 2) * Real.sqrt (c / ((c ^ 2 + b) / 2)) = (Real.sqrt b)⁻¹`. -/
 lemma p19lR1_sqrt_AG {b c : ℝ} (hc : 0 < c) (hb : 0 < b) :
     Real.sqrt (c * ((c ^ 2)⁻¹ + b⁻¹) / 2) * Real.sqrt (c / ((c ^ 2 + b) / 2)) =
       (Real.sqrt b)⁻¹ := by

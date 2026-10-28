@@ -99,9 +99,11 @@ theorem eulerPolyE_half (n : ℕ) : eulerPolyE n (1 / 2) = (eulerNumber n : ℂ)
   push_cast
   field_simp
 
+/-- Identity under the stated parameter and domain assumptions: `bernoulliPolyB 0 x = 1`. -/
 @[simp]
 theorem bernoulliPolyB_zero (x : ℂ) : bernoulliPolyB 0 x = 1 := by simp [bernoulliPolyB]
 
+/-- Identity under the stated parameter and domain assumptions: `eulerPolyE 0 x = 1`. -/
 @[simp]
 theorem eulerPolyE_zero (x : ℂ) : eulerPolyE 0 x = 1 := by simp [eulerPolyE]
 

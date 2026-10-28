@@ -62,7 +62,6 @@ lemma q24a_hasSum_integral_pow_mul {a p : ℕ → ℝ} {F : ℝ → ℝ} (m : �
   rw [Complex.cpow_natCast, Nat.cast_add, Nat.cast_one, Complex.Gamma_nat_eq_factorial]
   push_cast; ring
 
-
 /-- `ζ(2n) = ∑_{k ≥ 0} 1/(k+1)^{2n}` in Bernoulli form. -/
 lemma q24a_hasSum_zeta_succ {n : ℕ} (hn : n ≠ 0) :
     HasSum (fun k : ℕ => 1 / ((k : ℝ) + 1) ^ (2 * n))
@@ -95,7 +94,8 @@ lemma q24a_hasSum_eta {s : ℕ} {Z : ℝ} (hZ : HasSum (fun k : ℕ => 1 / ((k :
   rw [show (1 - 2 / 2 ^ s) * Z = Z - Z / 2 ^ s + -(Z / 2 ^ s) by ring]
   exact this
 
-
+/-- Summability of the indicated series: `Summable fun i : ℕ => (1 : ℝ) / (c * ((i : ℝ) + 1)) ^ (m
++ 2)`. -/
 lemma q24a_summable_pow_succ (m : ℕ) {c : ℝ} (hc : 0 < c) :
     Summable fun i : ℕ => (1 : ℝ) / (c * ((i : ℝ) + 1)) ^ (m + 2) := by
   have h := (summable_nat_add_iff 1).mpr (Real.summable_one_div_nat_pow.mpr (by omega : 1 < m + 2))
@@ -154,7 +154,6 @@ lemma q24a_hasSum_integral_exp_add_one (m : ℕ) {c : ℝ} (hc : 0 < c) :
   · refine (q24a_summable_pow_succ m hc).congr fun i => ?_
     simp
 
-
 /-- The Bose integral `∫₀^∞ t^{2m+1}/(e^{2πt} - 1) dt = (-1)^m B_{2m+2}/(4(m+1))`. -/
 lemma q24a_integral_exp_sub_one_bernoulli (m : ℕ) :
     ∫ t in Ioi (0 : ℝ), t ^ (2 * m + 1) / (rexp (2 * π * t) - 1) =
@@ -176,7 +175,6 @@ lemma q24a_integral_exp_sub_one_bernoulli (m : ℕ) :
   field_simp
   ring
 
-
 /-- `∫₀^∞ t^{2m+1}/(e^{2πt} + 1) dt = (1 - 2^{-(2m+1)}) (-1)^m B_{2m+2}/(4(m+1))`. -/
 lemma q24a_integral_exp_add_one_bernoulli (m : ℕ) :
     ∫ t in Ioi (0 : ℝ), t ^ (2 * m + 1) / (rexp (2 * π * t) + 1) =
@@ -195,6 +193,8 @@ lemma q24a_integral_exp_add_one_bernoulli (m : ℕ) :
   rw [heq, ← hb, heq']
   ring
 
+/-- At `t`, the function `(fun t => 2 / π * arctan (rexp (π * t)))` has derivative `(1 / cosh (π *
+t))`. -/
 lemma q24a_hasDerivAt_arctan_exp (t : ℝ) :
     HasDerivAt (fun t => 2 / π * arctan (rexp (π * t))) (1 / cosh (π * t)) t := by
   have h1 : HasDerivAt (fun t => rexp (π * t)) (rexp (π * t) * π) t := by
@@ -209,6 +209,8 @@ lemma q24a_hasDerivAt_arctan_exp (t : ℝ) :
   field_simp
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `∫ t in Ioi (0 : ℝ), 1 / cosh (π *
+t) = 1 / 2`. -/
 lemma q24a_integral_sech : ∫ t in Ioi (0 : ℝ), 1 / cosh (π * t) = 1 / 2 := by
   have hlim : Tendsto (fun t => 2 / π * arctan (rexp (π * t))) atTop (𝓝 (2 / π * (π / 2))) := by
     refine Tendsto.const_mul _ ?_
@@ -341,7 +343,6 @@ lemma r24a_hasSum_csch_sq {t : ℝ} (ht : 0 < t) :
   rw [show -(2 * π * ((i : ℝ) + 1)) * t = ((i + 1 : ℕ) : ℝ) * (-(2 * π * t)) by push_cast; ring,
     exp_nat_mul, mul_assoc]
 
-
 /-- `sech²(πt) = ∑_{i≥0} 4(-1)ⁱ(i+1) e^{-2π(i+1)t}` for `t > 0`. -/
 lemma r24a_hasSum_sech_sq {t : ℝ} (ht : 0 < t) :
     HasSum (fun i : ℕ => (4 * (-1) ^ i * ((i : ℝ) + 1)) * rexp (-(2 * π * ((i : ℝ) + 1)) * t))
@@ -374,7 +375,6 @@ lemma r24a_hasSum_sech_sq {t : ℝ} (ht : 0 < t) :
   show _ = -4 * (((i : ℝ) + 1) * (-rexp (-(2 * π * t))) ^ (i + 1))
   rw [neg_pow (rexp _), pow_succ (-1 : ℝ) i]
   ring
-
 
 /-- `log(1 - e^{-2πt}) = ∑_{i≥0} (-1/(i+1)) e^{-2π(i+1)t}` for `t > 0`. -/
 lemma r24a_hasSum_log_one_sub_exp {t : ℝ} (ht : 0 < t) :

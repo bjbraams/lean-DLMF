@@ -70,6 +70,9 @@ theorem analyticAt_of_contDiffAt_two {f : ℂ → ℂ} {z : ℂ} (hf : ContDiffA
   exact DifferentiableOn.analyticAt (fun y hy => ((hU y hy).differentiableAt (by norm_num)).differentiableWithinAt)
     (hUo.mem_nhds hzU)
 
+/-- Identity under the stated parameter and domain assumptions: `riemannOperator α β γ a₁ a₂ b₁ b₂
+c₁ c₂ (fun w => ((w - α) / (w - γ)) ^ a₁ * ((w - β) / (w - γ)) ^ b₁ * ₂F₁ (a₁ + b₁ + c₁) (a₁ +
+b₁ + c₂) (1 + a₁ - a₂) ((w - α) * (β - γ) / ((w - γ) * (β - α)))) z = 0`. -/
 @[dlmf 15.11.E7]
 theorem riemann_hypergeometric_solution {α β γ a₁ a₂ b₁ b₂ c₁ c₂ z : ℂ}
     (hαβ : α ≠ β) (hαγ : α ≠ γ) (hβγ : β ≠ γ) (hzγ : z ≠ γ)
@@ -206,6 +209,9 @@ theorem riemann_hypergeometric_solution {α β γ a₁ a₂ b₁ b₂ c₁ c₂ 
   field_simp
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `riemannNormalOperator (a₁ + l)
+(a₂ + l) (b₁ + m) (b₂ + m) (c₁ - l - m) (c₂ - l - m) (fun w => w ^ l * (1 - w) ^ m * f w) z =
+0`. -/
 @[dlmf 15.11.E8]
 theorem riemann_gauge_shift {a₁ a₂ b₁ b₂ c₁ c₂ l m z : ℂ} {f : ℂ → ℂ}
     (hfuchs : a₁ + a₂ + b₁ + b₂ + c₁ + c₂ = 1) (hf : ContDiffAt ℂ 2 f z)
@@ -270,6 +276,8 @@ theorem riemann_gauge_shift {a₁ a₂ b₁ b₂ c₁ c₂ l m z : ℂ} {f : ℂ
   field_simp at hode ⊢
   linear_combination P * hode
 
+/-- Identity under the stated parameter and domain assumptions: `riemannOperator α β γ a₁ a₂ b₁ b₂
+c₁ c₂ (fun w => f ((κ * w + l) / (μ * w + ν))) z = 0`. -/
 @[dlmf 15.11.E5, dlmf 15.11.E6]
 theorem riemann_mobius_covariance {α β γ a₁ a₂ b₁ b₂ c₁ c₂ κ l μ ν z : ℂ} {f : ℂ → ℂ}
     (hdet : κ * ν - l * μ = 1) (hfuchs : a₁ + a₂ + b₁ + b₂ + c₁ + c₂ = 1)

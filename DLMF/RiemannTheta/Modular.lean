@@ -71,6 +71,7 @@ def IsSymplecticBlocks (A B C D : Matrix ι ι ℤ) : Prop :=
   IsSymplectic (Matrix.fromBlocks A B C D)
 
 omit [Fintype ι] in
+/-- Identity under the stated parameter and domain assumptions: `symplecticJ ι R = -Matrix.J ι R`. -/
 theorem symplecticJ_eq_neg {R : Type*} [CommRing R] : symplecticJ ι R = -Matrix.J ι R := by
   simp [symplecticJ, Matrix.J, Matrix.fromBlocks_neg]
 
@@ -135,7 +136,6 @@ lemma p3t_sub_conjTranspose {Ω : Matrix ι ι ℂ} (hΩ : Ωᵀ = Ω) :
   apply Complex.ext
   · simp
   · simp; ring
-
 
 omit [Fintype ι] [DecidableEq ι] in
 /-- Integer matrices are fixed by `ᴴ` up to transposition. -/
@@ -380,6 +380,8 @@ theorem riemannTheta_unimodular {A : Matrix ι ι ℤ} (hA : IsUnit A) (z : ι �
   · rw [← mulVec_mulVec, ← mulVec_mulVec, dotProduct_mulVec, ← mulVec_transpose]
   · rw [dotProduct_mulVec, ← mulVec_transpose]
 
+/-- Identity under the stated parameter and domain assumptions: `((n ⬝ᵥ (B *ᵥ n) : ℤ) : ZMod 2) =
+((∑ i, B i i * n i : ℤ) : ZMod 2)`. -/
 lemma rth21_quad_mod_two (B : Matrix ι ι ℤ) (hB : Bᵀ = B) (n : ι → ℤ) :
     ((n ⬝ᵥ (B *ᵥ n) : ℤ) : ZMod 2) = ((∑ i, B i i * n i : ℤ) : ZMod 2) := by
   simp only [dotProduct, mulVec, Finset.mul_sum]
@@ -484,12 +486,16 @@ theorem riemannTheta_inversion_principal (hg : Fintype.card ι ≤ 2) {Ω : Matr
       (-I • Ω).det ^ (1 / 2 : ℂ) * cexp (π * I * (z ⬝ᵥ (Ω⁻¹ *ᵥ z))) * riemannTheta z Ω := by
   sorry
 
+/-- Identity under the stated parameter and domain assumptions: `(!![τ] : Matrix (Fin 1) (Fin 1)
+ℂ)⁻¹ = !![τ⁻¹]`. -/
 lemma rth21_inv_fin_one {τ : ℂ} (hτ : τ ≠ 0) : (!![τ] : Matrix (Fin 1) (Fin 1) ℂ)⁻¹ = !![τ⁻¹] := by
   refine Matrix.inv_eq_right_inv ?_
   ext i j
   fin_cases i; fin_cases j
   simp [hτ]
 
+/-- Identity under the stated parameter and domain assumptions: `riemannTheta ![w] !![σ] =
+jacobiTheta₂ w σ`. -/
 lemma rth21_riemannTheta_fin_one' (w σ : ℂ) : riemannTheta ![w] !![σ] = jacobiTheta₂ w σ := by
   rw [riemannTheta_fin_one, DLMF.Elliptic.jacobiThetaThreeTau,
     mul_div_cancel_left₀ _ DLMF.Elliptic.pi_ne_zero']

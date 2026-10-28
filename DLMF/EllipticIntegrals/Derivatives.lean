@@ -48,6 +48,7 @@ theorem legendrePathOK_ofReal {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) (φ : ℝ
 /-- The principal domain of `K` and `E` as a differentiable function: `k ≠ 0`, `k² ∉ [1, ∞)`. -/
 def compEllIntDomain : Set ℂ := {k | k ≠ 0 ∧ 1 - k ^ 2 ∈ slitPlane}
 
+/-- The indicated domain is open: `IsOpen compEllIntDomain`. -/
 theorem isOpen_compEllIntDomain : IsOpen compEllIntDomain := by
   exact (isOpen_ne (x := (0 : ℂ))).inter
     (Complex.isOpen_slitPlane.preimage (by fun_prop : Continuous fun k : ℂ => 1 - k ^ 2))
@@ -137,7 +138,6 @@ theorem p19lR1_exists_norm_lower_gen {a : ℂ} (ha : 1 - a ∈ slitPlane) :
   have := hmin (show Real.sin θ ^ 2 ∈ Icc (0 : ℝ) 1 from ⟨sq_nonneg _, Real.sin_sq_le_one θ⟩)
   simpa using this
 
-
 /-- DLMF 19.4.1 (first relation): `dK/dk = (E - k'²K)/(k k'²)` on the principal
 domain. -/
 @[dlmf 19.4.E1]
@@ -193,6 +193,7 @@ theorem hasDerivAt_compEllIntEk {k : ℂ} (hk : k ∈ compEllIntDomain) :
   field_simp
   ring
 
+/-- Nonvanishing under the stated hypotheses: `1 - k ^ 2 ≠ 0`. -/
 lemma ei19a_one_sub_sq_ne_zero {k : ℂ} (hk : k ∈ compEllIntDomain) : 1 - k ^ 2 ≠ 0 :=
   slitPlane_ne_zero hk.2
 

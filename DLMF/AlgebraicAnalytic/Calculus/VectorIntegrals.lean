@@ -48,6 +48,7 @@ lemma g1b_deriv_comp_path {c : ℝ → Fin 3 → ℝ} {h : ℝ → ℝ} (hc : Co
   ((hc.differentiable one_ne_zero (h t)).hasDerivAt.scomp t
     (hh.differentiable one_ne_zero t).hasDerivAt).deriv
 
+/-- Continuity of the indicated function: `Continuous fun s => F (c s) ⬝ᵥ deriv c s`. -/
 lemma g1b_continuous_dot {F : (Fin 3 → ℝ) → Fin 3 → ℝ} {c : ℝ → Fin 3 → ℝ}
     (hF : Continuous F) (hc : ContDiff ℝ 1 c) :
     Continuous fun s => F (c s) ⬝ᵥ deriv c s := by
@@ -150,11 +151,15 @@ theorem tangent_dotProduct_cross (Φ : ℝ × ℝ → Fin 3 → ℝ) (p : ℝ ×
       tangentV Φ p ⬝ᵥ (tangentU Φ p ⨯₃ tangentV Φ p) = 0 := by
   exact ⟨dot_self_cross _ _, dot_cross_self _ _⟩
 
+/-- Identity under the stated parameter and domain assumptions: `tangentU Φ p i = deriv (fun u =>
+Φ (u, p.2) i) p.1`. -/
 lemma g1b_tangentU_apply {Φ : ℝ × ℝ → Fin 3 → ℝ} {p : ℝ × ℝ}
     (hu : DifferentiableAt ℝ (fun u => Φ (u, p.2)) p.1) (i : Fin 3) :
     tangentU Φ p i = deriv (fun u => Φ (u, p.2) i) p.1 :=
   ((hasDerivAt_pi.mp hu.hasDerivAt) i).deriv.symm
 
+/-- Identity under the stated parameter and domain assumptions: `tangentV Φ p i = deriv (fun v =>
+Φ (p.1, v) i) p.2`. -/
 lemma g1b_tangentV_apply {Φ : ℝ × ℝ → Fin 3 → ℝ} {p : ℝ × ℝ}
     (hv : DifferentiableAt ℝ (fun v => Φ (p.1, v)) p.2) (i : Fin 3) :
     tangentV Φ p i = deriv (fun v => Φ (p.1, v) i) p.2 :=

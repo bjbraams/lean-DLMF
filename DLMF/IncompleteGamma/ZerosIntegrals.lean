@@ -44,7 +44,7 @@ theorem ne_zero_of_hasSum_ofReal_nonneg {f : ℕ → ℝ} {S : ℂ} (h : HasSum 
   rw [hS]
   exact ofReal_ne_zero.mpr (lt_of_lt_of_le h0 (le_hasSum hr 0 fun j _ => hf j)).ne'
 
-/-- scIncGamma nonnegative parameter no real zeros. -/
+/-- Nonvanishing under the stated hypotheses: `scIncGamma a x ≠ 0`. -/
 theorem scIncGamma_nonnegative_parameter_no_real_zeros {a : ℝ} (ha : 0 ≤ a) (x : ℝ) :
     scIncGamma a x ≠ 0 := by
   rcases ha.eq_or_lt with h0 | hpos
@@ -92,6 +92,8 @@ theorem gzero_hasSum_U (a z : ℂ) :
   refine h.congr_fun fun k => ?_
   rw [← mul_div_assoc, ← mul_assoc, he, one_mul]
 
+/-- The series with terms `(fun k : ℕ => (k + 1) * z ^ k / Gamma (a + k + 2))` converges to
+`(regularizedHGFun {2} {a + 2} z)`. -/
 theorem gzero_hasSum_U' (a z : ℂ) :
     HasSum (fun k : ℕ => (k + 1) * z ^ k / Gamma (a + k + 2)) (regularizedHGFun {2} {a + 2} z) := by
   have hs := (hasFPowerSeriesOnBall_regularizedConfluent 2 (a + 2)).hasSum_mul_pow
@@ -142,6 +144,8 @@ theorem gzero_ode {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (z : ℂ) :
 /-- The real function `U(x) = e^x γ*(a,x)`. -/
 noncomputable def gzero_U (a x : ℝ) : ℝ := (regularizedHGFun {1} {(a : ℂ) + 1} x).re
 
+/-- Convergent series representation: `HasSum (fun k : ℕ => x ^ k / Real.Gamma (a + k + 1))
+(gzero_U a x) ∧ regularizedHGFun {1} {(a : ℂ) + 1} x = (gzero_U a x : ℂ)`. -/
 theorem gzero_hasSum_real (a x : ℝ) :
     HasSum (fun k : ℕ => x ^ k / Real.Gamma (a + k + 1)) (gzero_U a x) ∧
       regularizedHGFun {1} {(a : ℂ) + 1} x = (gzero_U a x : ℂ) := by
@@ -158,6 +162,8 @@ theorem gzero_hasSum_real (a x : ℝ) :
   refine ⟨hre, ?_⟩
   exact hr.unique (Complex.hasSum_ofReal.mpr hre)
 
+/-- Identity under the stated parameter and domain assumptions: `gzero_U a 0 = (Real.Gamma (a +
+1))⁻¹`. -/
 theorem gzero_U_zero (a : ℝ) : gzero_U a 0 = (Real.Gamma (a + 1))⁻¹ := by
   have h := (gzero_hasSum_real a 0).1
   rw [← hasSum_nat_add_iff' 1] at h
@@ -166,12 +172,18 @@ theorem gzero_U_zero (a : ℝ) : gzero_U a 0 = (Real.Gamma (a + 1))⁻¹ := by
     simp
   linarith [h0.unique h]
 
+/-- Identity under the stated parameter and domain assumptions: `scIncGamma a x = exp (-(x : ℂ)) *
+(gzero_U a x : ℂ)`. -/
 theorem gzero_scIncGamma (a x : ℝ) : scIncGamma a x = exp (-(x : ℂ)) * (gzero_U a x : ℂ) := by
   rw [scIncGamma, (gzero_hasSum_real a x).2]
 
+/-- Identity under the stated parameter and domain assumptions: `scIncGamma a x = 0 ↔ gzero_U a x
+= 0`. -/
 theorem gzero_scIncGamma_eq_zero (a x : ℝ) : scIncGamma a x = 0 ↔ gzero_U a x = 0 := by
   rw [gzero_scIncGamma, mul_eq_zero, ofReal_eq_zero]; simp [exp_ne_zero]
 
+/-- Identity under the stated parameter and domain assumptions: `∃ d : ℝ, HasDerivAt (gzero_U a) d
+x ∧ x * d = (x - a) * gzero_U a x + (Real.Gamma a)⁻¹`. -/
 theorem gzero_deriv {a : ℝ} (ha : ∀ n : ℕ, (a : ℂ) ≠ -n) (x : ℝ) :
     ∃ d : ℝ, HasDerivAt (gzero_U a) d x ∧ x * d = (x - a) * gzero_U a x + (Real.Gamma a)⁻¹ := by
   refine ⟨(deriv (regularizedHGFun {1} {(a : ℂ) + 1}) x).re,
@@ -181,6 +193,7 @@ theorem gzero_deriv {a : ℝ} (ha : ∀ n : ℕ, (a : ℂ) ≠ -n) (x : ℝ) :
     Complex.Gamma_ofReal, ← ofReal_inv] at h
   simpa only [re_ofReal_mul, add_re, ofReal_re] using h
 
+/-- The function `(gzero_U a)` is continuous. -/
 theorem gzero_continuous {a : ℝ} (ha : ∀ n : ℕ, (a : ℂ) ≠ -n) : Continuous (gzero_U a) :=
   continuous_iff_continuousAt.mpr fun x => (gzero_deriv ha x).choose_spec.1.continuousAt
 
@@ -239,10 +252,12 @@ theorem gzero_eventually_pos {c : ℕ → ℝ} {S : ℝ → ℝ} (m : ℕ) (hc :
   have := neg_abs_le (∑ k ∈ Finset.range m, c k * y ^ k)
   linarith
 
+/-- Nonvanishing under the stated hypotheses: `∀ n : ℕ, (a : ℂ) ≠ -n`. -/
 theorem gzero_nonint {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) : ∀ n : ℕ, (a : ℂ) ≠ -n := by
   intro n h
   exact ha (-n) (by exact_mod_cast congrArg re h |>.trans (by simp))
 
+/-- Estimate under the stated parameter and domain assumptions: `∀ᶠ y in atTop, 0 < gzero_U a y`. -/
 theorem gzero_U_atTop (a : ℝ) : ∀ᶠ y in atTop, 0 < gzero_U a y := by
   refine gzero_eventually_pos (c := fun k => (Real.Gamma (a + k + 1))⁻¹) (⌈|a|⌉₊)
     (fun k hk => inv_nonneg.mpr (Real.Gamma_nonneg_of_nonneg ?_)) ?_ fun y _ =>
@@ -254,6 +269,8 @@ theorem gzero_U_atTop (a : ℝ) : ∀ᶠ y in atTop, 0 < gzero_U a y := by
     have := Nat.le_ceil |a|
     linarith [neg_abs_le a]
 
+/-- The series with terms `(fun k : ℕ => ((k ! : ℝ) * (a + k))⁻¹ * y ^ k)` converges to
+`(Real.Gamma a * Real.exp y * gzero_U a (-y))`. -/
 theorem gzero_hasSum_alt {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) (y : ℝ) :
     HasSum (fun k : ℕ => ((k ! : ℝ) * (a + k))⁻¹ * y ^ k)
       (Real.Gamma a * Real.exp y * gzero_U a (-y)) := by
@@ -273,6 +290,8 @@ theorem gzero_hasSum_alt {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) (y : ℝ) :
   · funext k; field_simp
   · simp only [neg_neg]; ring
 
+/-- Estimate under the stated parameter and domain assumptions: `∀ᶠ x in atBot, 0 < Real.Gamma a *
+gzero_U a x`. -/
 theorem gzero_U_atBot {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) :
     ∀ᶠ x in atBot, 0 < Real.Gamma a * gzero_U a x := by
   have ha' := gzero_nonint ha
@@ -324,6 +343,8 @@ theorem gzero_mono_pos {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) :
     exact mul_pos (Real.rpow_pos_of_pos ht _) (Real.exp_pos _)
   exact hm
 
+/-- Identity under the stated parameter and domain assumptions: `StrictAntiOn (fun t : ℝ =>
+Real.Gamma a * ((-t) ^ a * Real.exp (-t) * gzero_U a t)) (Iio 0)`. -/
 theorem gzero_mono_neg {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) :
     StrictAntiOn (fun t : ℝ => Real.Gamma a * ((-t) ^ a * Real.exp (-t) * gzero_U a t)) (Iio 0) := by
   have ha' := gzero_nonint ha
@@ -354,14 +375,17 @@ theorem gzero_mono_neg {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) :
     exact mul_pos (Real.rpow_pos_of_pos (by simpa using ht) _) (Real.exp_pos _)
   exact hm
 
+/-- Identity under the stated parameter and domain assumptions: `x = y`. -/
 theorem gzero_unique_pos {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) {x y : ℝ} (hx : 0 < x) (hy : 0 < y)
     (hUx : gzero_U a x = 0) (hUy : gzero_U a y = 0) : x = y :=
   (gzero_mono_pos ha).injOn hx hy (by simp only [hUx, hUy, mul_zero])
 
+/-- Identity under the stated parameter and domain assumptions: `x = y`. -/
 theorem gzero_unique_neg {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) {x y : ℝ} (hx : x < 0) (hy : y < 0)
     (hUx : gzero_U a x = 0) (hUy : gzero_U a y = 0) : x = y :=
   (gzero_mono_neg ha).injOn hx hy (by simp only [hUx, hUy, mul_zero])
 
+/-- Nonvanishing under the stated hypotheses: `∀ n : ℤ, a ≠ n`. -/
 theorem gzero_nonint_of_Ioo {a : ℝ} {m : ℤ} (h1 : (m : ℝ) < a) (h2 : a < m + 1) :
     ∀ n : ℤ, a ≠ n := by
   intro n hn
@@ -395,12 +419,12 @@ theorem gzero_neg_exists {a : ℝ} (ha : ∀ n : ℤ, a ≠ n) (hs : 0 < Real.Ga
     obtain ⟨x, hx, hx0⟩ := intermediate_value_Ioo' hX0.le hc ⟨hU0, hUX⟩
     exact ⟨x, hx.2, hx0⟩
 
-
-
+/-- The series with terms `(fun k : ℕ => y ^ k / (k ! : ℝ))` converges to `(Real.exp y)`. -/
 theorem gzero_exp_series (y : ℝ) : HasSum (fun k : ℕ => y ^ k / (k ! : ℝ)) (Real.exp y) := by
   rw [Real.exp_eq_exp_ℝ]; exact NormedSpace.expSeries_div_hasSum_exp y
 
-/-- scIncGamma one negative zero. -/
+/-- Estimate under the stated parameter and domain assumptions: `Real.scIncGammaNegativeZero a < 0
+∧ ∀ x : ℝ, scIncGamma a x=0 ↔ x=Real.scIncGammaNegativeZero a`. -/
 theorem scIncGamma_one_negative_zero {n : ℕ} (hn : 1 ≤ n) {a : ℝ} (ha0 : 1-2*(n : ℝ) < a) (ha1 : a < 2-2*(n : ℝ)) :
     Real.scIncGammaNegativeZero a < 0 ∧ ∀ x : ℝ, scIncGamma a x=0 ↔ x=Real.scIncGammaNegativeZero a := by
   have ha : ∀ m : ℤ, a ≠ m := gzero_nonint_of_Ioo (m := 1 - 2 * n) (by push_cast; linarith)
@@ -440,7 +464,9 @@ theorem scIncGamma_one_negative_zero {n : ℕ} (hn : 1 ≤ n) {a : ℝ} (ha0 : 1
   rw [he]
   exact ⟨hx0, fun x => (gzero_scIncGamma_eq_zero a x).trans (hzero x)⟩
 
-/-- scIncGamma two real zeros. -/
+/-- Estimate under the stated parameter and domain assumptions: `Real.scIncGammaNegativeZero a < 0
+∧ 0 < Real.scIncGammaPositiveZero a ∧ ∀ x : ℝ, scIncGamma a x=0 ↔
+x=Real.scIncGammaNegativeZero a ∨ x=Real.scIncGammaPositiveZero a`. -/
 theorem scIncGamma_two_real_zeros {n : ℕ} (hn : 1 ≤ n) {a : ℝ} (ha0 : -2*(n : ℝ) < a) (ha1 : a < 1-2*(n : ℝ)) :
     Real.scIncGammaNegativeZero a < 0 ∧ 0 < Real.scIncGammaPositiveZero a ∧ ∀ x : ℝ, scIncGamma a x=0 ↔ x=Real.scIncGammaNegativeZero a ∨ x=Real.scIncGammaPositiveZero a := by
   have ha : ∀ m : ℤ, a ≠ m := gzero_nonint_of_Ioo (m := -2 * n) (by push_cast; linarith)
@@ -482,7 +508,8 @@ theorem scIncGamma_two_real_zeros {n : ℕ} (hn : 1 ≤ n) {a : ℝ} (ha0 : -2*(
   rw [he1, he2]
   exact ⟨hx0, hy0.1, fun x => (gzero_scIncGamma_eq_zero a x).trans (hzero x)⟩
 
-/-- Real.scIncGammaNegativeZero strictAnti. -/
+/-- The stated relation follows from the given hypotheses: `StrictAntiOn
+Real.scIncGammaNegativeZero (Ioo (-1) 0)`. -/
 theorem Real.scIncGammaNegativeZero_strictAnti  :
     StrictAntiOn Real.scIncGammaNegativeZero (Ioo (-1) 0) := by
   intro a1 ha1 a2 ha2 h12
@@ -536,7 +563,8 @@ theorem Real.scIncGammaNegativeZero_strictAnti  :
       mul_one]
     exact (inv_lt_inv_of_neg ha2.2 ha1.2).mpr h12
 
-/-- Real.scIncGammaNegativeZero bounds. -/
+/-- Estimate under the stated parameter and domain assumptions: `1+1/a <
+Real.scIncGammaNegativeZero a ∧ Real.scIncGammaNegativeZero a < Real.log |a|`. -/
 @[dlmf 8.13.E1]
 theorem Real.scIncGammaNegativeZero_bounds {a : ℝ} (ha0 : -1 < a) (ha1 : a < 0) :
     1+1/a < Real.scIncGammaNegativeZero a ∧ Real.scIncGammaNegativeZero a < Real.log |a| := by
@@ -642,12 +670,14 @@ theorem Real.scIncGammaNegativeZero_bounds {a : ℝ} (ha0 : -1 < a) (ha1 : a < 0
 def scIncGammaDoubleZero (n : ℕ) : ℝ × ℝ :=
   Classical.epsilon (fun p : ℝ × ℝ => -2*(n : ℝ) < p.1 ∧ p.1 < 1-2*(n : ℝ) ∧ 0 < p.2 ∧ scIncGamma p.1 p.2=0 ∧ deriv (fun a : ℂ => scIncGamma a p.2) p.1=0)
 
-/-- scIncGamma two parameter zeros negative x. -/
+/-- Estimate under the stated parameter and domain assumptions: `({a : ℝ | -2*(n : ℝ) < a ∧ a <
+2-2*(n : ℝ) ∧ scIncGamma a x=0} : Set ℝ).ncard=2`. -/
 theorem scIncGamma_two_parameter_zeros_negative_x {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx : x < 0) :
     ({a : ℝ | -2*(n : ℝ) < a ∧ a < 2-2*(n : ℝ) ∧ scIncGamma a x=0} : Set ℝ).ncard=2 := by
   sorry
 
-/-- scIncGamma two parameter zeros positive x. -/
+/-- Estimate under the stated parameter and domain assumptions: `({a : ℝ | -2*(n : ℝ) < a ∧ a <
+1-2*(n : ℝ) ∧ scIncGamma a x=0} : Set ℝ).ncard=2`. -/
 theorem scIncGamma_two_parameter_zeros_positive_x {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx : 0 < x) (hx1 : x < (scIncGammaDoubleZero n).2) :
     ({a : ℝ | -2*(n : ℝ) < a ∧ a < 1-2*(n : ℝ) ∧ scIncGamma a x=0} : Set ℝ).ncard=2 := by
   sorry
@@ -657,7 +687,8 @@ theorem scIncGamma_double_parameter_zero {n : ℕ} (hn : 1 ≤ n) :
     let p := scIncGammaDoubleZero n; -2*(n : ℝ) < p.1 ∧ p.1 < 1-2*(n : ℝ) ∧ 0 < p.2 ∧ scIncGamma p.1 p.2=0 ∧ deriv (fun a : ℂ => scIncGamma a p.2) p.1=0 ∧ iteratedDeriv 2 (fun a : ℂ => scIncGamma a p.2) p.1 ≠ 0 ∧ ({a : ℝ | -2*(n : ℝ) < a ∧ a < 1-2*(n : ℝ) ∧ scIncGamma a p.2=0} : Set ℝ).ncard=1 := by
   sorry
 
-/-- scIncGamma parameter zeros at x zero. -/
+/-- Estimate under the stated parameter and domain assumptions: `scIncGamma a 0=0 ↔ ∃ n : ℕ, 1 ≤ n
+∧ a = -(n : ℝ)`. -/
 theorem scIncGamma_parameter_zeros_at_x_zero (a : ℝ) :
     scIncGamma a 0=0 ↔ ∃ n : ℕ, 1 ≤ n ∧ a = -(n : ℝ) := by
   have h := scIncGamma_hasSum_exponential (a:ℂ) 0
@@ -677,7 +708,11 @@ theorem scIncGamma_parameter_zeros_at_x_zero (a : ℝ) :
     refine ⟨n-1, ?_⟩
     rw [Nat.cast_sub hn]; push_cast; ring
 
-/-- scIncGamma conjugate zero trajectories. -/
+/-- Estimate under the stated parameter and domain assumptions: `∃ δ : ℝ, 0 < δ ∧ ∃ f : ℝ → ℂ,
+ContinuousOn f (Icc (scIncGammaDoubleZero n).2 ((scIncGammaDoubleZero n).2+δ)) ∧ f
+(scIncGammaDoubleZero n).2=(scIncGammaDoubleZero n).1 ∧ ∀ x ∈ Ioo (scIncGammaDoubleZero n).2
+((scIncGammaDoubleZero n).2+δ), 0 < (f x).im ∧ scIncGamma (f x) x=0 ∧ scIncGamma (star (f x))
+x=0`. -/
 theorem scIncGamma_conjugate_zero_trajectories {n : ℕ} (hn : 1 ≤ n) :
     ∃ δ : ℝ, 0 < δ ∧ ∃ f : ℝ → ℂ, ContinuousOn f (Icc (scIncGammaDoubleZero n).2 ((scIncGammaDoubleZero n).2+δ)) ∧ f (scIncGammaDoubleZero n).2=(scIncGammaDoubleZero n).1 ∧ ∀ x ∈ Ioo (scIncGammaDoubleZero n).2 ((scIncGammaDoubleZero n).2+δ), 0 < (f x).im ∧ scIncGamma (f x) x=0 ∧ scIncGamma (star (f x)) x=0 := by
   sorry
@@ -690,7 +725,8 @@ theorem lowerIncGamma_eq_exp_regularized {b : ℂ} (hb : ∀ k : ℕ, b≠-k) (x
   simp only [show b+1-b=1 by ring, neg_neg]
   ring
 
-/-- normIncGammaP laplace. -/
+/-- Identity under the stated parameter and domain assumptions: `(∫ x : ℝ in Ioi 0, exp
+(-a*x)*normIncGammaPContinued b x)=(1+a)^(-b)/a`. -/
 @[dlmf 8.14.E1]
 theorem normIncGammaP_laplace {a b : ℂ} (ha : 0 < a.re) (hb : -1 < b.re) :
     (∫ x : ℝ in Ioi 0, exp (-a*x)*normIncGammaPContinued b x)=(1+a)^(-b)/a := by
@@ -709,7 +745,9 @@ theorem normIncGammaP_laplace {a b : ℂ} (ha : 0 < a.re) (hb : -1 < b.re) :
   field_simp [ha0]
   ring
 
-/-- upperIncGamma laplace. -/
+/-- Identity under the stated parameter and domain assumptions: `(∫ x : ℝ in Ioi 0, exp
+(-a*x)*upperIncGamma b x)=if a=0 then Gamma (b+1) else if b=0 then log (1+a)/a else Gamma
+b*(1-(1+a)^(-b))/a`. -/
 @[dlmf 8.14.E2]
 theorem upperIncGamma_laplace {a b : ℂ} (ha : -1 < a.re) (hb : -1 < b.re) :
     (∫ x : ℝ in Ioi 0, exp (-a*x)*upperIncGamma b x)=if a=0 then Gamma (b+1) else if b=0 then log (1+a)/a else Gamma b*(1-(1+a)^(-b))/a := by
@@ -776,7 +814,8 @@ theorem upperIncGamma_laplace {a b : ℂ} (ha : -1 < a.re) (hb : -1 < b.re) :
   field_simp
   ring
 
-/-- lowerIncGamma mellin. -/
+/-- Identity under the stated parameter and domain assumptions: `(∫ x : ℝ in Ioi 0, (x :
+ℂ)^(a-1)*lowerIncGamma b x) = -Gamma (a+b)/a`. -/
 @[dlmf 8.14.E3]
 theorem lowerIncGamma_mellin {a b : ℂ} (ha : a.re < 0) (hab : 0 < (a+b).re) :
     (∫ x : ℝ in Ioi 0, (x : ℂ)^(a-1)*lowerIncGamma b x) = -Gamma (a+b)/a := by
@@ -799,7 +838,8 @@ theorem lowerIncGamma_mellin {a b : ℂ} (ha : a.re < 0) (hab : 0 < (a+b).re) :
   have hga := Gamma_ne_zero_of_re_pos (show 0<(-a).re by simpa)
   field_simp
 
-/-- upperIncGamma mellin. -/
+/-- Identity under the stated parameter and domain assumptions: `(∫ x : ℝ in Ioi 0, (x :
+ℂ)^(a-1)*upperIncGamma b x)=Gamma (a+b)/a`. -/
 @[dlmf 8.14.E4]
 theorem upperIncGamma_mellin {a b : ℂ} (ha : 0 < a.re) (hab : 0 < (a+b).re) :
     (∫ x : ℝ in Ioi 0, (x : ℂ)^(a-1)*upperIncGamma b x)=Gamma (a+b)/a := by
@@ -821,7 +861,9 @@ theorem upperIncGamma_mellin {a b : ℂ} (ha : 0 < a.re) (hab : 0 < (a+b).re) :
   rw [Gamma_add_one a (ne_zero_of_re_pos ha)]
   field_simp [Gamma_ne_zero_of_re_pos ha]
 
-/-- lowerIncGamma mellin laplace. -/
+/-- Identity under the stated parameter and domain assumptions: `(∫ x : ℝ in Ioi 0, (x :
+ℂ)^(a-1)*exp (-s*x)*lowerIncGamma b x)=Gamma (a+b)/(b*(1+s)^(a+b))*Gamma
+(1+b)*DLMF.Hypergeometric.regularizedGaussHG 1 (a+b) (1+b) (1/(1+s))`. -/
 @[dlmf 8.14.E5]
 theorem lowerIncGamma_mellin_laplace {a b s : ℂ} (hs : 0 < s.re) (hab : 0 < (a+b).re) (hb : ∀ n : ℕ, b ≠ -n) :
     (∫ x : ℝ in Ioi 0, (x : ℂ)^(a-1)*exp (-s*x)*lowerIncGamma b x)=Gamma (a+b)/(b*(1+s)^(a+b))*Gamma (1+b)*DLMF.Hypergeometric.regularizedGaussHG 1 (a+b) (1+b) (1/(1+s)) := by
@@ -844,7 +886,9 @@ theorem lowerIncGamma_mellin_laplace {a b s : ℂ} (hs : 0 < s.re) (hab : 0 < (a
   rw [hi,hm,show (1:ℂ)+b=b+1 by ring, Gamma_add_one b (by simpa using hb 0), cpow_neg]
   field_simp [show b≠0 by simpa using hb 0]
 
-/-- upperIncGamma mellin laplace. -/
+/-- Identity under the stated parameter and domain assumptions: `(∫ x : ℝ in Ioi 0, (x :
+ℂ)^(a-1)*exp (-s*x)*upperIncGamma b x)=Gamma (a+b)/(a*(1+s)^(a+b))*Gamma
+(1+a)*DLMF.Hypergeometric.regularizedGaussHG 1 (a+b) (1+a) (s/(1+s))`. -/
 @[dlmf 8.14.E6]
 theorem upperIncGamma_mellin_laplace {a b s : ℂ} (hs : -1 < s.re) (hab : 0 < (a+b).re) (ha : 0 < a.re) :
     (∫ x : ℝ in Ioi 0, (x : ℂ)^(a-1)*exp (-s*x)*upperIncGamma b x)=Gamma (a+b)/(a*(1+s)^(a+b))*Gamma (1+a)*DLMF.Hypergeometric.regularizedGaussHG 1 (a+b) (1+a) (s/(1+s)) := by
@@ -876,7 +920,8 @@ theorem upperIncGamma_mellin_laplace {a b s : ℂ} (hs : -1 < s.re) (hab : 0 < (
   rw [show (1:ℂ)+a=a+1 by ring,Gamma_add_one a (ne_zero_of_re_pos ha),cpow_neg]
   field_simp [ne_zero_of_re_pos ha]
 
-/-- lowerIncGamma multiplication hasSum. -/
+/-- The series with terms `(fun k : ℕ => exp (a*v)*lowerIncGammaOnLog (a+k) u*(1-exp
+v)^k/(k.factorial : ℂ))` converges to `(lowerIncGammaOnLog a (u+v))`. -/
 @[dlmf 8.15.E1]
 theorem lowerIncGamma_multiplication_hasSum {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (u v : ℂ) :
     HasSum (fun k : ℕ => exp (a*v)*lowerIncGammaOnLog (a+k) u*(1-exp v)^k/(k.factorial : ℂ)) (lowerIncGammaOnLog a (u+v)) := by

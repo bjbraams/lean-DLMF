@@ -61,6 +61,8 @@ def stepLists (steps : Finset (ℕ × ℕ)) : ℕ → Finset (List (ℕ × ℕ))
   | 0 => {[]}
   | L + 1 => (steps ×ˢ stepLists steps L).image fun p => p.1 :: p.2
 
+/-- Formula under the stated hypotheses: `l ∈ stepLists steps L ↔ l.length = L ∧ ∀ s ∈ l, s ∈
+steps`. -/
 theorem mem_stepLists {steps : Finset (ℕ × ℕ)} {L : ℕ} {l : List (ℕ × ℕ)} :
     l ∈ stepLists steps L ↔ l.length = L ∧ ∀ s ∈ l, s ∈ steps := by
   induction L generalizing l with
@@ -115,6 +117,7 @@ theorem mem_latticePaths {steps : Finset (ℕ × ℕ)} (h0 : (0, 0) ∉ steps) {
 def StaysWeaklyAboveDiagonal (l : List (ℕ × ℕ)) : Prop :=
   ∀ i ∈ range (l.length + 1), ((l.take i).sum).1 ≤ ((l.take i).sum).2
 
+/-- The weak diagonal condition on a finite lattice path is decidable. -/
 instance (l : List (ℕ × ℕ)) : Decidable (StaysWeaklyAboveDiagonal l) := by
   unfold StaysWeaklyAboveDiagonal; infer_instance
 
@@ -131,7 +134,6 @@ def latticePathsFin {k : ℕ} (n : Fin k → ℕ) : Finset (List (Fin k)) :=
     ∀ i, l.count i = n i
 
 /-! ### Lattice path counting by the first step -/
-
 
 /-- Decomposition of the lattice paths to `(m, n) ≠ (0, 0)` by their first step. -/
 lemma q26a_latticePaths_eq_biUnion {steps : Finset (ℕ × ℕ)} (h0 : (0, 0) ∉ steps) {m n : ℕ}

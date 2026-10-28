@@ -51,11 +51,15 @@ namespace DLMF.EllipticIntegrals
 
 /-! ### Reality on nonnegative arguments -/
 
+/-- Identity under the stated parameter and domain assumptions: `((t : ℂ) + (r : ℂ)) ^ (1 / 2 : ℂ)
+= ((√(t + r) : ℝ) : ℂ)`. -/
 lemma ei19d_ofReal_add_cpow_half {t r : ℝ} (h : 0 ≤ t + r) :
     ((t : ℂ) + (r : ℂ)) ^ (1 / 2 : ℂ) = ((√(t + r) : ℝ) : ℂ) := by
   rw [← ofReal_add, show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring,
     ← ofReal_cpow h, Real.sqrt_eq_rpow]
 
+/-- Identity under the stated parameter and domain assumptions: `symEllIntS (x : ℂ) (y : ℂ) (z :
+ℂ) t = ((√(t + x) * √(t + y) * √(t + z) : ℝ) : ℂ)`. -/
 lemma ei19d_symEllIntS_ofReal {x y z t : ℝ} (hx : 0 ≤ t + x) (hy : 0 ≤ t + y)
     (hz : 0 ≤ t + z) :
     symEllIntS (x : ℂ) (y : ℂ) (z : ℂ) t = ((√(t + x) * √(t + y) * √(t + z) : ℝ) : ℂ) := by

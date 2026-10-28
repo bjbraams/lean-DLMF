@@ -61,6 +61,8 @@ theorem fourierExpCoeff_eq_fourierCoeffOn (f : ℝ → ℂ) (n : ℤ) :
     push_cast
     field_simp [pi_ne_zero]
 
+/-- Identity under the stated parameter and domain assumptions: `Complex.exp (-(Complex.I * n *
+x)) = (Real.cos (n * x) : ℂ) - Complex.I * (Real.sin (n * x) : ℂ)`. -/
 private lemma g1c_exp_neg_eq (n : ℤ) (x : ℝ) :
     Complex.exp (-(Complex.I * n * x)) =
       (Real.cos (n * x) : ℂ) - Complex.I * (Real.sin (n * x) : ℂ) := by
@@ -70,6 +72,9 @@ private lemma g1c_exp_neg_eq (n : ℤ) (x : ℝ) :
   rw [Complex.cos_neg, Complex.sin_neg]
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `∫ x in (-π)..π, f x * Complex.exp
+(-(Complex.I * n * x)) = (∫ x in (-π)..π, f x * (Real.cos (n * x) : ℂ)) - Complex.I * ∫ x in
+(-π)..π, f x * (Real.sin (n * x) : ℂ)`. -/
 private lemma g1c_integral_split {f : ℝ → ℂ} (hf : IntervalIntegrable f volume (-π) π)
     (n : ℤ) :
     ∫ x in (-π)..π, f x * Complex.exp (-(Complex.I * n * x)) =
@@ -119,6 +124,7 @@ theorem fourierExpCoeff_zero {f : ℝ → ℂ} (hf : IntervalIntegrable f volume
   rw [h, fourierSinCoeff]
   simp
 
+/-- Identity under the stated parameter and domain assumptions: `∫ x in (-π)..π, g x = 0`. -/
 private lemma g1c_integral_odd {g : ℝ → ℂ} (hg : ∀ x, g (-x) = -g x) :
     ∫ x in (-π)..π, g x = 0 := by
   have h := intervalIntegral.integral_comp_neg (a := -π) (b := π) g
@@ -230,6 +236,7 @@ theorem hasSum_norm_sq_fourierExpCoeff {f : ℝ → ℂ}
   convert h using 2
   ring
 
+/-- Integrability between the indicated endpoints: `IntervalIntegrable f volume (-π) π`. -/
 private lemma g1c_intervalIntegrable_of_memLp {f : ℝ → ℂ}
     (hf : MemLp f 2 (volume.restrict (Ioc (-π) π))) : IntervalIntegrable f volume (-π) π := by
   rw [intervalIntegrable_iff_integrableOn_Ioc_of_le (by linarith [pi_pos])]

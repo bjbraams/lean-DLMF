@@ -501,6 +501,8 @@ theorem gaussCF_uR_le {a b c x : ℝ} (ha : 0 < a) (hca : a < c) (hcb : b < c)
         gcongr
     _ = _ := by field_simp
 
+/-- The map `(gaussContinuedFraction a b c x).convs` tends to `(𝓝 (regularizedGaussHGFun a b c (x
+: ℂ) / regularizedGaussHGFun a (b + 1) (c + 1) (x : ℂ)))` along `atTop`. -/
 @[dlmf 15.7.E1]
 theorem gauss_continued_fraction_limit {a b c x : ℝ} (ha : 0 < a) (hb : 0 < b)
     (hca : a < c) (hcb : b < c) (hx : 0 < x) (hx1 : x < 1 / 2) :
@@ -558,6 +560,8 @@ theorem gauss_continued_fraction_limit {a b c x : ℝ} (ha : 0 < a) (hb : 0 < b)
   rw [hval]
   exact (Complex.continuous_ofReal.tendsto _).comp key
 
+/-- The map `(contiguousContinuedFraction a b c x).convs` tends to `(𝓝 (regularizedGaussHGFun a b
+c (x : ℂ) / regularizedGaussHGFun a (b + 1) (c + 1) (x : ℂ)))` along `atTop`. -/
 @[dlmf 15.7.E3]
 theorem contiguous_continued_fraction_limit {a b c x : ℝ} (ha : 0 < a) (hb : 0 < b)
     (hca : a < c) (hcb : b < c) (hx : 0 < x) (hx1 : x < 1 / 2) :
@@ -642,6 +646,8 @@ theorem contiguous_continued_fraction_limit {a b c x : ℝ} (ha : 0 < a) (hb : 0
   rw [hval]
   exact (Complex.continuous_ofReal.tendsto _).comp key
 
+/-- The map `(derivativeContinuedFraction a b c x).convs` tends to `(𝓝 (regularizedGaussHGFun a b
+c (x : ℂ) / regularizedGaussHGFun (a + 1) (b + 1) (c + 1) (x : ℂ)))` along `atTop`. -/
 @[dlmf 15.7.E5]
 theorem derivative_continued_fraction_limit {a b c x : ℝ} (ha : 0 < a) (hb : 0 < b)
     (hca : a < c) (hcb : b < c) (hx : 0 < x) (hx1 : x < 1 / 2) :

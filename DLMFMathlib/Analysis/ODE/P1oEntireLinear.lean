@@ -39,6 +39,9 @@ def p1oTaylorSeq (P Q : ℕ → ℂ) (a b : ℂ) : ℕ → ℂ
   | n + 2 => ∑ i : Fin (n + 1), (n.choose i : ℂ) *
       (P i * p1oTaylorSeq P Q a b (n - i + 1) + Q i * p1oTaylorSeq P Q a b (n - i))
 
+/-- Formula under the stated hypotheses: `p1oTaylorSeq P Q a b (n + 2) = ∑ i ∈ Finset.range (n +
+1), (n.choose i : ℂ) * (P i * p1oTaylorSeq P Q a b (n - i + 1) + Q i * p1oTaylorSeq P Q a b (n
+- i))`. -/
 lemma p1oTaylorSeq_add_two (P Q : ℕ → ℂ) (a b : ℂ) (n : ℕ) :
     p1oTaylorSeq P Q a b (n + 2) = ∑ i ∈ Finset.range (n + 1), (n.choose i : ℂ) *
       (P i * p1oTaylorSeq P Q a b (n - i + 1) + Q i * p1oTaylorSeq P Q a b (n - i)) := by

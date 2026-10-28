@@ -95,9 +95,11 @@ def polylog (s z : ℂ) : ℂ :=
 
 /-! ### Basic properties -/
 
+/-- Formula under the stated hypotheses: `z ∈ z25b_slitOne`. -/
 theorem z25b_mem_slitOne_of_norm_lt_one {z : ℂ} (hz : ‖z‖ < 1) : z ∈ z25b_slitOne :=
   Or.inr (lt_of_le_of_lt (re_le_norm z) hz)
 
+/-- The indicated domain is open: `IsOpen z25b_slitOne`. -/
 theorem z25b_isOpen_slitOne : IsOpen z25b_slitOne :=
   (isOpen_ne_fun continuous_im continuous_const).union
     (isOpen_lt continuous_re continuous_const)
@@ -146,6 +148,9 @@ theorem exists_polylog_continuation (s : ℂ) :
   exact ⟨fun z => z * F z, analyticOnNhd_id.mul hF.1, fun z hz =>
     (q25b_hasSum_polylogSeriesC (hF.2 z hz)).tsum_eq.symm⟩
 
+/-- Analyticity on a neighborhood of the specified domain: `AnalyticOnNhd ℂ (z25b_slitContinuation
+(polylogSeriesC s)) z25b_slitOne ∧ ∀ z, ‖z‖ < 1 → z25b_slitContinuation (polylogSeriesC s) z =
+polylogSeriesC s z`. -/
 lemma z25b_polylog_spec (s : ℂ) :
     AnalyticOnNhd ℂ (z25b_slitContinuation (polylogSeriesC s)) z25b_slitOne ∧
       ∀ z, ‖z‖ < 1 → z25b_slitContinuation (polylogSeriesC s) z = polylogSeriesC s z := by
@@ -334,6 +339,7 @@ lemma q25b_frequently_ofReal {P : ℂ → Prop} {x₀ : ℝ} (h : ∀ᶠ x : ℝ
       eventually_nhdsWithin_of_forall fun x hx => ofReal_injective.ne hx⟩
   exact ht.frequently (h.filter_mono nhdsWithin_le_nhds).frequently
 
+/-- The function `(fun w => polylog 2 (f w))` is analytic over `ℂ` at `z`. -/
 lemma q25b_analyticAt_polylog_two_comp {f : ℂ → ℂ} {z : ℂ} (hf : AnalyticAt ℂ f z)
     (hz : f z ∈ z25b_slitOne) : AnalyticAt ℂ (fun w => polylog 2 (f w)) z :=
   (analyticOnNhd_polylog 2 _ hz).comp hf

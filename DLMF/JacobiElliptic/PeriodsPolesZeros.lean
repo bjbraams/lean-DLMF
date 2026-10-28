@@ -42,9 +42,11 @@ def JacobiLetter.swapKp : JacobiLetter → JacobiLetter
   | .d => .c
   | .n => .s
 
+/-- Injectivity of the indicated map: `Function.Injective JacobiLetter.swapK`. -/
 theorem JacobiLetter.swapK_injective : Function.Injective JacobiLetter.swapK := by
   intro a b h; cases a <;> cases b <;> simp_all [JacobiLetter.swapK]
 
+/-- Injectivity of the indicated map: `Function.Injective JacobiLetter.swapKp`. -/
 theorem JacobiLetter.swapKp_injective : Function.Injective JacobiLetter.swapKp := by
   intro a b h; cases a <;> cases b <;> simp_all [JacobiLetter.swapKp]
 
@@ -68,24 +70,32 @@ def je22a_betaKp (τ : ℂ) : JacobiLetter → ℂ
   | .d => je22a_r τ
   | .n => I * je22a_r τ
 
+/-- Nonvanishing under the stated hypotheses: `je22a_r τ ≠ 0`. -/
 lemma je22a_r_ne_zero {τ : ℂ} (hτ : 0 < τ.im) : je22a_r τ ≠ 0 :=
   div_ne_zero (je22a_thetaTwo_zero_ne_zero hτ) (je22a_thetaThree_zero_ne_zero hτ)
 
+/-- Nonvanishing under the stated hypotheses: `je22a_rp τ ≠ 0`. -/
 lemma je22a_rp_ne_zero {τ : ℂ} (hτ : 0 < τ.im) : je22a_rp τ ≠ 0 :=
   div_ne_zero (je22a_thetaFour_zero_ne_zero hτ) (je22a_thetaThree_zero_ne_zero hτ)
 
+/-- Nonvanishing under the stated hypotheses: `je22a_betaK τ p ≠ 0`. -/
 theorem je22a_betaK_ne_zero {τ : ℂ} (hτ : 0 < τ.im) (p : JacobiLetter) : je22a_betaK τ p ≠ 0 := by
   have := je22a_rp_ne_zero hτ
   cases p <;> simp [je22a_betaK, this]
 
+/-- Nonvanishing under the stated hypotheses: `je22a_betaKp τ p ≠ 0`. -/
 lemma je22a_betaKp_ne_zero {τ : ℂ} (hτ : 0 < τ.im) (p : JacobiLetter) :
     je22a_betaKp τ p ≠ 0 := by
   have := je22a_r_ne_zero hτ
   cases p <;> simp [je22a_betaKp, this, I_ne_zero]
 
+/-- Identity under the stated parameter and domain assumptions: `jacobiModulusTau τ = je22a_r τ ^
+2`. -/
 lemma je22a_modulusTau_eq (τ : ℂ) : jacobiModulusTau τ = je22a_r τ ^ 2 := by
   rw [jacobiModulusTau, je22a_r, div_pow]
 
+/-- Identity under the stated parameter and domain assumptions: `jacobiComodulusTau τ = je22a_rp τ
+^ 2`. -/
 lemma je22a_comodulusTau_eq (τ : ℂ) : jacobiComodulusTau τ = je22a_rp τ ^ 2 := by
   rw [jacobiComodulusTau, je22a_rp, div_pow]
 
@@ -135,16 +145,21 @@ lemma je22a_glaisher_add_half_tau {τ : ℂ} (hτ : 0 < τ.im) (p q : JacobiLett
     rw [je22a_letterTheta_add_half_tau hτ, je22a_letterTheta_add_half_tau hτ, mul_assoc,
       mul_assoc, mul_div_mul_left _ _ (je22a_shiftFactor_ne_zero ζ τ), mul_div_mul_comm]
 
+/-- Nonvanishing under the stated hypotheses: `compEllIntKTau τ ≠ 0`. -/
 lemma je22a_compEllIntKTau_ne_zero {τ : ℂ} (hτ : 0 < τ.im) : compEllIntKTau τ ≠ 0 := by
   rw [compEllIntKTau]
   exact mul_ne_zero (div_ne_zero (ofReal_ne_zero.mpr Real.pi_ne_zero) two_ne_zero)
     (pow_ne_zero _ (je22a_thetaThree_zero_ne_zero hτ))
 
+/-- Identity under the stated parameter and domain assumptions: `jacobiZetaTau (z + compEllIntKTau
+τ) τ = jacobiZetaTau z τ + π / 2`. -/
 lemma je22a_zetaTau_add_K {τ : ℂ} (hτ : 0 < τ.im) (z : ℂ) :
     jacobiZetaTau (z + compEllIntKTau τ) τ = jacobiZetaTau z τ + π / 2 := by
   have := je22a_compEllIntKTau_ne_zero hτ
   rw [jacobiZetaTau, jacobiZetaTau]; field_simp
 
+/-- Identity under the stated parameter and domain assumptions: `jacobiZetaTau (z + I *
+compEllIntKpTau τ) τ = jacobiZetaTau z τ + π * τ / 2`. -/
 lemma je22a_zetaTau_add_iKp {τ : ℂ} (hτ : 0 < τ.im) (z : ℂ) :
     jacobiZetaTau (z + I * compEllIntKpTau τ) τ = jacobiZetaTau z τ + π * τ / 2 := by
   have := je22a_compEllIntKTau_ne_zero hτ
@@ -617,7 +632,6 @@ macro "je22a_to_k " hk:term:max h:ident : tactic => `(tactic| (
   simp only [h1, h2, h3, hKp] at $h:ident
   exact $h))
 
-
 /-- Table 22.4.3, row `sn`: the shifts of `sn(z, k)` by `K`, `K + iK'`, `iK'`, `2K`,
 `2K + 2iK'`, `2iK'`, for `k` in `jacobiModulusDomain` (from the admitted inversion 22.2.2). -/
 @[dlmf 22.4.T3]
@@ -846,7 +860,6 @@ theorem jacobiCsk_shift {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ) :
   have h := jacobiCsTau_shift (jacobiTauk_im_pos hk) z
   je22a_to_k hk h
 
-
 /-! ### Tables 22.4.1–22.4.2: periods, poles and zeros -/
 
 /-- The corner of the fundamental unit cell labelled by a Glaisher letter (DLMF §22.4(ii),
@@ -889,6 +902,8 @@ def p3j_amp (p : JacobiLetter) (ζ τ : ℂ) : ℂ :=
   | .d => I * je22a_shiftFactor (ζ - π / 2 - π * τ / 2) τ / jacobiThetaThreeTau 0 τ
   | .n => I * je22a_shiftFactor (ζ - π * τ / 2) τ / jacobiThetaFourTau 0 τ
 
+/-- Identity under the stated parameter and domain assumptions: `jacobiLetterTheta p ζ τ = p3j_amp
+p ζ τ * jacobiThetaOneTau (ζ - p3j_shift p τ) τ`. -/
 theorem p3j_letter_eq (p : JacobiLetter) (ζ τ : ℂ) :
     jacobiLetterTheta p ζ τ = p3j_amp p ζ τ * jacobiThetaOneTau (ζ - p3j_shift p τ) τ := by
   cases p
@@ -913,12 +928,15 @@ theorem p3j_letter_eq (p : JacobiLetter) (ζ τ : ℂ) :
     rw [show ζ - (0 + 1 / 2 * τ) * π = ζ - π * τ / 2 by ring, h2]
     ring
 
+/-- Nonvanishing under the stated hypotheses: `p3j_amp p ζ τ ≠ 0`. -/
 theorem p3j_amp_ne {τ : ℂ} (hτ : 0 < τ.im) (p : JacobiLetter) (ζ : ℂ) : p3j_amp p ζ τ ≠ 0 := by
   have h2 := je22a_thetaTwo_zero_ne_zero hτ
   have h3 := je22a_thetaThree_zero_ne_zero hτ
   have h4 := je22a_thetaFour_zero_ne_zero hτ
   cases p <;> simp [p3j_amp, h2, h3, h4, je22a_shiftFactor_ne_zero]
 
+/-- Differentiability of the indicated parameterized function: `Differentiable ℂ (fun ζ => p3j_amp
+p ζ τ)`. -/
 lemma p3j_amp_differentiable (p : JacobiLetter) (τ : ℂ) :
     Differentiable ℂ (fun ζ => p3j_amp p ζ τ) := by
   cases p <;> simp only [p3j_amp, je22a_shiftFactor] <;> fun_prop
@@ -957,6 +975,8 @@ lemma p3j_hasDerivAt_thetaOne {τ : ℂ} (hτ : 0 < τ.im) {y : ℂ}
     exact mul_ne_zero (mul_ne_zero a b) c
   simpa [hc0] using h1
 
+/-- Identity under the stated parameter and domain assumptions: `jacobiLetterPointk p k = 2 *
+p3j_alpha p * compEllIntKk k + 2 * p3j_beta p * (I * compEllIntKpk k)`. -/
 lemma p3j_point_eq (p : JacobiLetter) (k : ℂ) :
     jacobiLetterPointk p k = 2 * p3j_alpha p * compEllIntKk k +
       2 * p3j_beta p * (I * compEllIntKpk k) := by
@@ -988,6 +1008,8 @@ lemma p3j_F_eq {k : ℂ} (p : JacobiLetter) :
           fun w => jacobiZetak w k - p3j_shift p (jacobiTauk k)) := by
   funext w; simp [p3j_letter_eq]
 
+/-- Differentiability of the indicated parameterized function: `Differentiable ℂ (fun w =>
+jacobiLetterTheta p (jacobiZetak w k) (jacobiTauk k))`. -/
 theorem p3j_F_differentiable {k : ℂ} (hk : k ∈ jacobiModulusDomain) (p : JacobiLetter) :
     Differentiable ℂ (fun w => jacobiLetterTheta p (jacobiZetak w k) (jacobiTauk k)) := by
   rw [p3j_F_eq]
@@ -1032,6 +1054,7 @@ lemma p3j_order_F {k : ℂ} (hk : k ∈ jacobiModulusDomain) (p : JacobiLetter) 
   · rw [hgd.deriv]
     exact div_ne_zero (by exact_mod_cast Real.pi_ne_zero) (mul_ne_zero two_ne_zero hK)
 
+/-- Nonvanishing under the stated hypotheses: `(1 / 2 : ℝ) - j ≠ 0`. -/
 lemma p3j_half_sub_int_ne (j : ℤ) : (1 / 2 : ℝ) - j ≠ 0 := by
   intro h
   have : (2 * j : ℝ) = 1 := by linarith
@@ -1215,6 +1238,5 @@ theorem jacobiCsk_periodic {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ) 
     rw [show z + 4 * (I * compEllIntKpk k) =
         z + 2 * (I * compEllIntKpk k) + 2 * (I * compEllIntKpk k) by ring,
       (jacobiCsk_shift hk _).2.2.2.2.2, (jacobiCsk_shift hk z).2.2.2.2.2, neg_neg]⟩
-
 
 end DLMF.JacobiElliptic

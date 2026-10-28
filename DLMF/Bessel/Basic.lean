@@ -51,6 +51,8 @@ def besselY (ν z : ℂ) : ℂ := by
       (besselJ μ z * cos (μ * π) - besselJ (-μ) z) / sin (μ * π))
   else (besselJ ν z * cos (ν * π) - besselJ (-ν) z) / sin (ν * π)
 
+/-- Identity under the stated parameter and domain assumptions: `regularizedHGFunCoeff (∅ :
+Multiset ℂ) {c} n = 1 / (n ! * Gamma (c + n))`. -/
 theorem regularizedHGFunCoeff_empty (c : ℂ) (n : ℕ) :
     regularizedHGFunCoeff (∅ : Multiset ℂ) {c} n = 1 / (n ! * Gamma (c + n)) := by
   simp [regularizedHGFunCoeff]
@@ -66,6 +68,7 @@ theorem hasFPowerSeriesOnBall_regularized0F1 (c : ℂ) :
   simpa only [hr] using (regularizedHGFunSeries ∅ {c}).hasFPowerSeriesOnBall
     (by rw [hr]; simp)
 
+/-- The function `(regularizedHGFun (∅ : Multiset ℂ) {c})` is analytic over `ℂ` at `z`. -/
 theorem analyticAt_regularized0F1 (c z : ℂ) :
     AnalyticAt ℂ (regularizedHGFun (∅ : Multiset ℂ) {c}) z :=
   (hasFPowerSeriesOnBall_regularized0F1 c).analyticAt_of_mem (by simp)
@@ -103,6 +106,8 @@ theorem deriv_regularized0F1 (c w : ℂ) :
   simp_rw [he] at hd
   exact hd.unique ((hasFPowerSeriesOnBall_regularized0F1 (c + 1)).hasSum_mul_pow (by simp))
 
+/-- At `w`, the function `(regularizedHGFun (∅ : Multiset ℂ) {c})` has derivative
+`(regularizedHGFun ∅ {c + 1} w)`. -/
 theorem hasDerivAt_regularized0F1 (c w : ℂ) :
     HasDerivAt (regularizedHGFun (∅ : Multiset ℂ) {c}) (regularizedHGFun ∅ {c + 1} w) w := by
   rw [← deriv_regularized0F1]
@@ -130,6 +135,7 @@ theorem regularized0F1_contiguous (c w : ℂ) :
   rw [deriv_regularized0F1] at ht
   exact ((hasFPowerSeriesOnBall_regularized0F1 c).hasSum_mul_pow (by simp)).unique ht
 
+/-- Formula under the stated hypotheses: `z / 2 ∈ slitPlane`. -/
 theorem div_two_mem_slitPlane {z : ℂ} (hz : z ∈ slitPlane) : z / 2 ∈ slitPlane := by
   simpa [mem_slitPlane_iff, div_re, div_im] using hz
 
@@ -236,6 +242,8 @@ theorem hasDerivAt_besselJ {ν z : ℂ} (hz : z ∈ slitPlane) :
   rw [cpow_add _ _ (div_ne_zero (slitPlane_ne_zero hz) (by norm_num)), cpow_one]
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `z ^ 2 * iteratedDeriv 2 (besselY
+ν) z + z * deriv (besselY ν) z + (z ^ 2 - ν ^ 2) * besselY ν z = 0`. -/
 @[dlmf 10.2.E1]
 theorem besselY_ode {ν z : ℂ} (hz : z ∈ slitPlane) (hν : ∀ k : ℤ, ν ≠ k) :
     z ^ 2 * iteratedDeriv 2 (besselY ν) z + z * deriv (besselY ν) z +
@@ -265,6 +273,8 @@ theorem Gamma_three_halves : Gamma (3 / 2 : ℂ) = Gamma (1 / 2) / 2 := by
   rw [h]
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `Gamma ((3 / 2 : ℂ) + n) = ((2 * n
++ 1).factorial : ℂ) / (4 ^ n * n.factorial * 2) * Gamma (1 / 2)`. -/
 theorem Gamma_nat_add_three_halves (n : ℕ) :
     Gamma ((3 / 2 : ℂ) + n) =
       ((2 * n + 1).factorial : ℂ) / (4 ^ n * n.factorial * 2) * Gamma (1 / 2) := by
@@ -286,6 +296,8 @@ theorem Gamma_nat_add_three_halves (n : ℕ) :
   push_cast
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `Gamma ((1 / 2 : ℂ) + n) = ((2 *
+n).factorial : ℂ) / (4 ^ n * n.factorial) * Gamma (1 / 2)`. -/
 theorem Gamma_nat_add_half (n : ℕ) :
     Gamma ((1 / 2 : ℂ) + n) =
       ((2 * n).factorial : ℂ) / (4 ^ n * n.factorial) * Gamma (1 / 2) := by
@@ -308,16 +320,20 @@ theorem Gamma_nat_add_half (n : ℕ) :
   push_cast
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `log (2 : ℂ) = Real.log 2`. -/
 theorem log_two : log (2 : ℂ) = Real.log 2 := by
   rw [← ofReal_ofNat 2, ofReal_log (by norm_num)]
 
+/-- Identity under the stated parameter and domain assumptions: `log (π : ℂ) = Real.log π`. -/
 theorem log_pi : log (π : ℂ) = Real.log π :=
   (ofReal_log Real.pi_pos.le).symm
 
+/-- Nonvanishing under the stated hypotheses: `(π : ℂ).arg ≠ π`. -/
 theorem arg_pi_ne_pi : (π : ℂ).arg ≠ π := by
   rw [arg_ofReal_of_nonneg Real.pi_pos.le]
   exact ne_of_lt Real.pi_pos
 
+/-- Identity under the stated parameter and domain assumptions: `log (z / 2) = log z - log 2`. -/
 theorem log_div_ofNat_two {z : ℂ} (hz : z ∈ slitPlane) :
     log (z / 2) = log z - log 2 := by
   have hz0 := slitPlane_ne_zero hz
@@ -327,6 +343,8 @@ theorem log_div_ofNat_two {z : ℂ} (hz : z ∈ slitPlane) :
     ofReal_neg, log_two]
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `(z / 2) ^ (1 / 2 : ℂ) = z ^ (1 /
+2 : ℂ) / (2 : ℂ) ^ (1 / 2 : ℂ)`. -/
 theorem cpow_half_div_two {z : ℂ} (hz : z ∈ slitPlane) :
     (z / 2) ^ (1 / 2 : ℂ) = z ^ (1 / 2 : ℂ) / (2 : ℂ) ^ (1 / 2 : ℂ) := by
   have hz0 := slitPlane_ne_zero hz
@@ -334,10 +352,14 @@ theorem cpow_half_div_two {z : ℂ} (hz : z ∈ slitPlane) :
   rw [cpow_def_of_ne_zero (div_ne_zero hz0 h2), log_div_ofNat_two hz, sub_mul, exp_sub,
     ← cpow_def_of_ne_zero hz0, ← cpow_def_of_ne_zero h2]
 
+/-- Identity under the stated parameter and domain assumptions: `(z / 2) ^ (-(1 / 2 : ℂ)) = (2 :
+ℂ) ^ (1 / 2 : ℂ) / z ^ (1 / 2 : ℂ)`. -/
 theorem cpow_half_recip_div_two {z : ℂ} (hz : z ∈ slitPlane) :
     (z / 2) ^ (-(1 / 2 : ℂ)) = (2 : ℂ) ^ (1 / 2 : ℂ) / z ^ (1 / 2 : ℂ) := by
   rw [cpow_neg, cpow_half_div_two hz, inv_div]
 
+/-- Identity under the stated parameter and domain assumptions: `((2 : ℂ) / π) ^ (1 / 2 : ℂ) = (2
+: ℂ) ^ (1 / 2 : ℂ) / (π : ℂ) ^ (1 / 2 : ℂ)`. -/
 theorem cpow_half_div_pi :
     ((2 : ℂ) / π) ^ (1 / 2 : ℂ) =
       (2 : ℂ) ^ (1 / 2 : ℂ) / (π : ℂ) ^ (1 / 2 : ℂ) := by
@@ -351,6 +373,8 @@ theorem cpow_half_div_pi :
   rw [cpow_def_of_ne_zero (div_ne_zero h2 hπ), hlog, sub_mul, exp_sub,
     ← cpow_def_of_ne_zero h2, ← cpow_def_of_ne_zero hπ]
 
+/-- Identity under the stated parameter and domain assumptions: `(2 / (π * z)) ^ (1 / 2 : ℂ) = ((2
+: ℂ) / π) ^ (1 / 2 : ℂ) / z ^ (1 / 2 : ℂ)`. -/
 theorem cpow_half_two_div_pi_z {z : ℂ} (hz : z ∈ slitPlane) :
     (2 / (π * z)) ^ (1 / 2 : ℂ) =
       ((2 : ℂ) / π) ^ (1 / 2 : ℂ) / z ^ (1 / 2 : ℂ) := by
@@ -369,6 +393,8 @@ theorem cpow_half_two_div_pi_z {z : ℂ} (hz : z ∈ slitPlane) :
   rw [cpow_def_of_ne_zero (div_ne_zero h2 (mul_ne_zero hπ hz0)), hlog, sub_mul, exp_sub,
     ← cpow_def_of_ne_zero (div_ne_zero h2 hπ), ← cpow_def_of_ne_zero hz0]
 
+/-- Identity under the stated parameter and domain assumptions: `w = w ^ (1 / 2 : ℂ) * w ^ (1 / 2
+: ℂ)`. -/
 theorem cpow_half_sq {w : ℂ} (hw : w ≠ 0) :
     w = w ^ (1 / 2 : ℂ) * w ^ (1 / 2 : ℂ) := by
   have hadd := cpow_add (x := w) (1 / 2 : ℂ) (1 / 2 : ℂ) hw
@@ -406,6 +432,8 @@ theorem bessel_half_prefactor {z : ℂ} (hz : z ∈ slitPlane) :
     field [h2h, hzh, hπh]
   rw [hform, hsimp]
 
+/-- Identity under the stated parameter and domain assumptions: `regularizedHGFun (∅ : Multiset ℂ)
+{3 / 2} (-(z ^ 2 / 4)) = 2 * sin z / (z * Gamma (1 / 2 : ℂ))`. -/
 theorem regularized0F1_three_halves_eq_sinc {z : ℂ} (hz : z ≠ 0) :
     regularizedHGFun (∅ : Multiset ℂ) {3 / 2} (-(z ^ 2 / 4)) =
       2 * sin z / (z * Gamma (1 / 2 : ℂ)) := by
@@ -443,6 +471,8 @@ theorem regularized0F1_three_halves_eq_sinc {z : ℂ} (hz : z ≠ 0) :
     field [hz, hg]
   exact hs.unique (hval ▸ hsin0.mul_left (2 / Gamma (1 / 2 : ℂ)))
 
+/-- Identity under the stated parameter and domain assumptions: `regularizedHGFun (∅ : Multiset ℂ)
+{1 / 2} (-(z ^ 2 / 4)) = cos z / Gamma (1 / 2 : ℂ)`. -/
 theorem regularized0F1_half_eq_cos {z : ℂ} :
     regularizedHGFun (∅ : Multiset ℂ) {1 / 2} (-(z ^ 2 / 4)) =
       cos z / Gamma (1 / 2 : ℂ) := by

@@ -41,13 +41,16 @@ namespace DLMF.Zeta
 /-- The cut plane `ℂ \ [1, ∞)` (the same set as `DLMF.Zeta.z25b_slitOne`). -/
 def q25b_slit : Set ℂ := {z | z.im ≠ 0 ∨ z.re < 1}
 
+/-- The indicated domain is open: `IsOpen q25b_slit`. -/
 lemma q25b_isOpen_slit : IsOpen q25b_slit :=
   (isOpen_ne_fun continuous_im continuous_const).union
     (isOpen_lt continuous_re continuous_const)
 
+/-- Formula under the stated hypotheses: `z ∈ q25b_slit`. -/
 lemma q25b_mem_slit_of_norm_lt_one {z : ℂ} (hz : ‖z‖ < 1) : z ∈ q25b_slit :=
   Or.inr (lt_of_le_of_lt (re_le_norm z) hz)
 
+/-- The stated relation follows from the given hypotheses: `ball (0 : ℂ) 1 ⊆ q25b_slit`. -/
 lemma q25b_ball_subset_slit : ball (0 : ℂ) 1 ⊆ q25b_slit := fun z hz =>
   q25b_mem_slit_of_norm_lt_one (by simpa using hz)
 
@@ -68,6 +71,7 @@ theorem q25b_starConvex_slit : StarConvex ℝ 0 q25b_slit := by
     · nlinarith
     · nlinarith
 
+/-- The stated relation follows from the given hypotheses: `IsPreconnected q25b_slit`. -/
 theorem q25b_isPreconnected_slit : IsPreconnected q25b_slit :=
   (q25b_starConvex_slit.isPathConnected (Or.inr (by simp))).isConnected.isPreconnected
 
@@ -121,20 +125,27 @@ lemma q25b_exists_lower_bound {z₀ : ℂ} (hz₀ : z₀ ∈ q25b_slit) :
 def q25b_lerchInt (s a z : ℂ) : ℂ :=
   ∫ x in Ioi (0 : ℝ), (x : ℂ) ^ (s - 1) * cexp (-(a * x)) / (1 - z * cexp (-(x : ℂ)))
 
+/-- Identity under the stated parameter and domain assumptions: `cexp (-(x : ℂ)) = ((Real.exp (-x)
+: ℝ) : ℂ)`. -/
 lemma q25b_cexp_neg_ofReal (x : ℝ) : cexp (-(x : ℂ)) = ((Real.exp (-x) : ℝ) : ℂ) := by
   rw [ofReal_exp, ofReal_neg]
 
+/-- Identity under the stated parameter and domain assumptions: `‖(x : ℂ) ^ (s - 1) * cexp (-(b *
+x))‖ = x ^ (s.re - 1) * Real.exp (-(b.re * x))`. -/
 theorem q25b_norm_cpow_mul_cexp {s b : ℂ} {x : ℝ} (hx : 0 < x) :
     ‖(x : ℂ) ^ (s - 1) * cexp (-(b * x))‖ = x ^ (s.re - 1) * Real.exp (-(b.re * x)) := by
   rw [norm_mul, norm_cpow_eq_rpow_re_of_pos hx, norm_exp]
   simp
 
+/-- The kernel `(fun x : ℝ => x ^ (σ - 1) * Real.exp (-(β * x)))` is integrable on `(Ioi 0)`. -/
 theorem q25b_integrableOn_rpow_mul_exp {σ β : ℝ} (hσ : 0 < σ) (hβ : 0 < β) :
     IntegrableOn (fun x : ℝ => x ^ (σ - 1) * Real.exp (-(β * x))) (Ioi 0) := by
   refine Integrable.of_integral_ne_zero ?_
   rw [Real.integral_rpow_mul_exp_neg_mul_Ioi hσ hβ]
   exact mul_ne_zero (by positivity) (Real.Gamma_pos_of_pos hσ).ne'
 
+/-- Identity under the stated parameter and domain assumptions: `AEStronglyMeasurable (fun x : ℝ
+=> (x : ℂ) ^ (s - 1) * cexp (-(b * x))) (volume.restrict (Ioi 0))`. -/
 theorem q25b_aestronglyMeasurable_cpow_mul_cexp (s b : ℂ) :
     AEStronglyMeasurable (fun x : ℝ => (x : ℂ) ^ (s - 1) * cexp (-(b * x)))
       (volume.restrict (Ioi 0)) := by
@@ -144,6 +155,7 @@ theorem q25b_aestronglyMeasurable_cpow_mul_cexp (s b : ℂ) :
   refine ContinuousAt.mul ?_ (by fun_prop)
   exact (continuousAt_ofReal_cpow_const _ _ (Or.inr (ne_of_gt hx)))
 
+/-- The kernel `(fun x : ℝ => (x : ℂ) ^ (s - 1) * cexp (-(b * x)))` is integrable on `(Ioi 0)`. -/
 theorem q25b_integrableOn_cpow_mul_cexp {s b : ℂ} (hs : 0 < s.re) (hb : 0 < b.re) :
     IntegrableOn (fun x : ℝ => (x : ℂ) ^ (s - 1) * cexp (-(b * x))) (Ioi 0) := by
   refine (q25b_integrableOn_rpow_mul_exp hs hb).mono'

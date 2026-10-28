@@ -58,6 +58,7 @@ def genocchiNumber (n : ℕ) : ℚ := 2 * (1 - 2 ^ n) * bernoulli n
 @[dlmf 24.15.E2]
 theorem genocchiNumber_eq (n : ℕ) : genocchiNumber n = 2 * (1 - 2 ^ n) * bernoulli n := rfl
 
+/-- Nonvanishing under the stated hypotheses: `Complex.exp w ≠ 1`. -/
 lemma b24b_exp_ne_one {w : ℂ} (hw : ‖w‖ < 2 * π) (hw0 : w ≠ 0) : Complex.exp w ≠ 1 := by
   intro h
   obtain ⟨n, hn⟩ := Complex.exp_eq_one_iff.mp h
@@ -166,6 +167,9 @@ theorem hasSum_tangentNumber {t : ℂ} (ht : ‖t‖ < π / 2) :
 
 /-! ### Table 24.15.1 -/
 
+/-- Identity under the stated parameter and domain assumptions: `bernoulli 0 = 1 ∧ bernoulli 1 =
+-1 / 2 ∧ bernoulli 2 = 1 / 6 ∧ bernoulli 3 = 0 ∧ bernoulli 4 = -1 / 30 ∧ bernoulli 5 = 0 ∧
+bernoulli 6 = 1 / 42 ∧ bernoulli 7 = 0 ∧ bernoulli 8 = -1 / 30 ∧ bernoulli 9 = 0`. -/
 lemma b24b_bernoulli_values :
     bernoulli 0 = 1 ∧ bernoulli 1 = -1 / 2 ∧ bernoulli 2 = 1 / 6 ∧ bernoulli 3 = 0 ∧
       bernoulli 4 = -1 / 30 ∧ bernoulli 5 = 0 ∧ bernoulli 6 = 1 / 42 ∧ bernoulli 7 = 0 ∧
@@ -547,7 +551,6 @@ lemma q24b_sum_euler_shift (n : ℕ) (y : ℂ) :
     rw [← pow_add, Nat.add_sub_cancel' hjn], div_pow, div_pow]
   have := q24b_s_ne_zero
   field_simp
-
 
 /-- `Bₙ(x+1) = Bₙ(x) + n x^{n-1}` for complex `x`. -/
 lemma q24b_bernoulliPolyB_add_one (n : ℕ) (x : ℂ) :

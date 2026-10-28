@@ -135,9 +135,13 @@ the asymptotic expansion `f(t) ∼ ∑ a_s t^{-s-α}` as `t → +∞` (DLMF 2.6.
 exponent satisfies `0 < α ≤ 1`. -/
 @[dlmf 2.6.E9, dlmf 2.6.E10]
 structure IsStieltjesExpansion (f : ℝ → ℂ) (α : ℝ) (a : ℕ → ℂ) : Prop where
+  /-- The Stieltjes exponent is strictly positive. -/
   alpha_pos : 0 < α
+  /-- The Stieltjes exponent is at most one. -/
   alpha_le_one : α ≤ 1
+  /-- The remainder kernel is locally integrable on its prescribed domain. -/
   locallyIntegrable : ∀ R : ℝ, 0 < R → IntegrableOn f (Ioc 0 R)
+  /-- At positive infinity, the remainder after n terms is `O(t^(-n-α))`. -/
   expansion : ∀ n : ℕ, (fun t : ℝ => f t - ∑ s ∈ Finset.range n, a s * ((t ^ (-(s + α)) : ℝ) : ℂ))
     =O[Filter.atTop] (fun t : ℝ => t ^ (-(n + α)))
 

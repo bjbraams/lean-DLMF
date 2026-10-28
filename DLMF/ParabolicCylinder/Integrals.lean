@@ -29,7 +29,8 @@ open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
 namespace DLMF.Confluent
 
-/-- pcfU integral 2. -/
+/-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => z*exp (-z^2/4)/Gamma
+(a/2+1/4)*((t:ℂ)^(a/2-3/4)*exp (-t)*(z^2+2*t)^(-a/2-3/4))) 0 (pcfU a z)`. -/
 @[dlmf 12.5.E2]
 theorem pcfU_integral_2 {a z : ℂ} (ha : -1/2 < a.re) (hz : 0 < z.re) :
     HasIntegralAtTop (fun t : ℝ => z*exp (-z^2/4)/Gamma (a/2+1/4)*((t:ℂ)^(a/2-3/4)*exp (-t)*(z^2+2*t)^(-a/2-3/4))) 0 (pcfU a z) := by
@@ -50,7 +51,8 @@ theorem pcfU_integral_2 {a z : ℂ} (ha : -1/2 < a.re) (hz : 0 < z.re) :
   rw [show a/2+1/4-1 = a/2-3/4 by ring]
   exact T
 
-/-- pcfU integral 3. -/
+/-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => exp (-z^2/4)/Gamma
+(a/2+3/4)*((t:ℂ)^(a/2-1/4)*exp (-t)*(z^2+2*t)^(-a/2-1/4))) 0 (pcfU a z)`. -/
 @[dlmf 12.5.E3]
 theorem pcfU_integral_3 {a z : ℂ} (ha : -3/2 < a.re) (hz : 0 < z.re) :
     HasIntegralAtTop (fun t : ℝ => exp (-z^2/4)/Gamma (a/2+3/4)*((t:ℂ)^(a/2-1/4)*exp (-t)*(z^2+2*t)^(-a/2-1/4))) 0 (pcfU a z) := by
@@ -71,7 +73,8 @@ theorem pcfU_integral_3 {a z : ℂ} (ha : -3/2 < a.re) (hz : 0 < z.re) :
   rw [show a/2+3/4-1 = a/2-1/4 by ring]
   exact T
 
-/-- pcfU integral 4. -/
+/-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => (Real.sqrt
+(2/π):ℂ)*exp (z^2/4)*((t:ℂ)^(-a-1/2)*exp (-t^2/2)*cos (z*t+(a/2+1/4)*π))) 0 (pcfU a z)`. -/
 @[dlmf 12.5.E4]
 theorem pcfU_integral_4 {a : ℂ} (ha : a.re < 1/2) (z : ℂ) :
     HasIntegralAtTop (fun t : ℝ => (Real.sqrt (2/π):ℂ)*exp (z^2/4)*((t:ℂ)^(-a-1/2)*exp (-t^2/2)*cos (z*t+(a/2+1/4)*π))) 0 (pcfU a z) := by
@@ -127,7 +130,8 @@ theorem pcfU_integral_4 {a : ℂ} (ha : a.re < 1/2) (z : ℂ) :
   rw [q1, q2, show (1:ℂ)*I*z = I*z by ring, show (-1:ℂ)*I*z = -I*z by ring] at *
   linear_combination (Real.sqrt (2/π):ℂ)/2 * (Gamma (1/2-a) * (exp (1*I*π*(a/2+1/4)) * pcfU (-a) (-I*z) + exp (-1*I*π*(a/2+1/4)) * pcfU (-a) (I*z))) * he2 - (Real.sqrt (2/π):ℂ)/2 * hconn + pcfU a z / 2 * hs
 
-/-- pcfU vertical integral. -/
+/-- Identity under the stated parameter and domain assumptions: `HasIntegralWholeLine (fun y : ℝ
+=> let t : ℂ := c+y*I; exp (z^2/4)/Real.sqrt (2*π)*exp (-z*t+t^2/2)*t^(-a-1/2)) (pcfU a z)`. -/
 @[dlmf 12.5.E6]
 theorem pcfU_vertical_integral (a z : ℂ) {c : ℝ} (hc : 0 < c) :
     HasIntegralWholeLine (fun y : ℝ => let t : ℂ := c+y*I; exp (z^2/4)/Real.sqrt (2*π)*exp (-z*t+t^2/2)*t^(-a-1/2)) (pcfU a z) := by
@@ -147,7 +151,10 @@ theorem pcfU_vertical_integral (a z : ℂ) {c : ℝ} (hc : 0 < c) :
     simp only [K]; ring, he, div_self hs]
   ring
 
-/-- pcfV horizontal integral. -/
+/-- Identity under the stated parameter and domain assumptions: `∃ u v : ℂ, HasIntegralWholeLine
+(fun x : ℝ => let t : ℂ := x-c*I; exp (-z^2/4)/(2*π)*exp (z*t-t^2/2)*t^(a-1/2)) u ∧
+HasIntegralWholeLine (fun x : ℝ => let t : ℂ := x+c*I; exp (-z^2/4)/(2*π)*exp
+(z*t-t^2/2)*t^(a-1/2)) v ∧ u+v=pcfV a z`. -/
 @[dlmf 12.5.E7]
 theorem pcfV_horizontal_integral (a z : ℂ) {c : ℝ} (hc : 0 < c) :
     ∃ u v : ℂ, HasIntegralWholeLine (fun x : ℝ => let t : ℂ := x-c*I; exp (-z^2/4)/(2*π)*exp (z*t-t^2/2)*t^(a-1/2)) u ∧ HasIntegralWholeLine (fun x : ℝ => let t : ℂ := x+c*I; exp (-z^2/4)/(2*π)*exp (z*t-t^2/2)*t^(a-1/2)) v ∧ u+v=pcfV a z := by
@@ -189,7 +196,8 @@ theorem pcfV_horizontal_integral (a z : ℂ) {c : ℝ} (hc : 0 < c) :
 def pcfNegativeLoop (a z : ℂ) (r R : ℝ) : ℂ :=
   (∫ t : ℝ in r..R, exp (-z*t-t^2/2)*exp ((a-1/2)*(Real.log t-π*I))) + (∫ θ : ℝ in -π..π, let t := r*exp (I*θ); exp (z*t-t^2/2)*exp ((a-1/2)*(Real.log r+I*θ))*I*t) - (∫ t : ℝ in r..R, exp (-z*t-t^2/2)*exp ((a-1/2)*(Real.log t+π*I)))
 
-/-- pcfU hankel integral. -/
+/-- The map `(fun R => Gamma (1/2-a)/(2*π*I)*exp (-z^2/4)*pcfNegativeLoop a z r R)` tends to `(𝓝
+(pcfU a z))` along `atTop`. -/
 @[dlmf 12.5.E5]
 theorem pcfU_hankel_integral {a : ℂ} (ha : ∀ n : ℕ, a ≠ n+1/2) (z : ℂ) {r : ℝ} (hr : 0 < r) :
     Tendsto (fun R => Gamma (1/2-a)/(2*π*I)*exp (-z^2/4)*pcfNegativeLoop a z r R) atTop (𝓝 (pcfU a z)) := by
@@ -299,7 +307,8 @@ theorem pcfV_barnes_integral {a z : ℂ} (ha : ∀ n : ℕ, -1*a ≠ -n-1/2) (hz
     (π * Gamma (1/2+-1*a) * exp (-z^2/4) * z^(-a+1/2) * (exp (-I*π*(a/2-1/4)) * pcfU (-a) (I*z) +
       exp (I*π*(a/2-1/4)) * pcfU (-a) (-I*z))) * hs
 
-/-- pcf integral 1. -/
+/-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => exp
+(-t^2/4)*(t:ℂ)^(μ-1)*pcfU a t) 0 (Real.sqrt π*2^(-(μ+a+1/2)/2)*Gamma μ/Gamma ((μ+a+3/2)/2))`. -/
 @[dlmf 12.12.E1]
 theorem pcf_integral_1 {μ : ℂ} (hμ : 0 < μ.re) (a : ℂ) :
     HasIntegralAtTop (fun t : ℝ => exp (-t^2/4)*(t:ℂ)^(μ-1)*pcfU a t) 0 (Real.sqrt π*2^(-(μ+a+1/2)/2)*Gamma μ/Gamma ((μ+a+3/2)/2)) := by
@@ -329,7 +338,8 @@ theorem pcf_integral_1 {μ : ℂ} (hμ : 0 < μ.re) (a : ℂ) :
   rw [hval] at T
   exact T
 
-/-- pcf integral 2. -/
+/-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => exp
+(-3*t^2/4)*(t:ℂ)^(-a-3/2)*pcfU a t) 0 (2^(1/4+a/2)*Gamma (-a-1/2)*cos ((a/4+1/8)*π))`. -/
 @[dlmf 12.12.E2]
 theorem pcf_integral_2 {a : ℂ} (ha : a.re < -1/2) :
     HasIntegralAtTop (fun t : ℝ => exp (-3*t^2/4)*(t:ℂ)^(-a-3/2)*pcfU a t) 0 (2^(1/4+a/2)*Gamma (-a-1/2)*cos ((a/4+1/8)*π)) := by
@@ -412,7 +422,6 @@ theorem pcfCt_U_cos {a : ℂ} (ha : a.re < 1/2) (t : ℝ) :
   linear_combination ((Real.sqrt (2/π):ℂ) * ∫ s in Ioi (0:ℝ), (s:ℂ)^(-a-1/2) * exp (-(s:ℂ)^2/2) *
     cos (t*s + (a/2+1/4)*π)) * he
 
-
 /-- DLMF 12.12.3 on the strip `-1/2 < re a < 1/2`, as a Lebesgue integral (Fubini against
 12.5.4 and the kernel `pcfCt_kernel`). -/
 theorem pcfCt_integral_3_strip {a : ℂ} (ha1 : -1/2 < a.re) (ha2 : a.re < 1/2) {x : ℝ} (hx : 0 < x) :
@@ -492,7 +501,6 @@ theorem pcfCt_integral_3_strip {a : ℂ} (ha1 : -1/2 < a.re) (ha2 : a.re < 1/2) 
   have hG' : G * G⁻¹ = 1 := mul_inv_cancel₀ hΓ
   set K : ℂ := (Real.sqrt (2/π):ℂ) * (π/2) * (x:ℂ)^(-a-3/2) * J
   linear_combination (-K) * he + (-K * exp ((x:ℂ)^2/4) * exp (-(x:ℂ)^2/4)) * hG'
-
 
 /-- Elementary: `t^r ≤ t^{q₁} + t^{q₂}` for `t > 0` and `q₁ ≤ r ≤ q₂`. -/
 theorem pcfCt_rpow_le_add {t q1 q2 r : ℝ} (ht : 0 < t) (h1 : q1 ≤ r) (h2 : r ≤ q2) :
@@ -622,7 +630,9 @@ theorem pcfCt_integral_3_all {a : ℂ} (ha : a.re < 1/2) {x : ℝ} (hx : 0 < x) 
   exact (hΛ.analyticOnNhd hΩo).eqOn_of_preconnected_of_eventuallyEq (hR.analyticOnNhd hΩo)
     (convex_halfSpace_re_lt (1/2)).isPreconnected h0 hev ha
 
-/-- pcf integral 3. -/
+/-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => exp
+(-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t) 0 ((Real.sqrt (π/2):ℂ)*Gamma
+(1/2-a)*(x:ℂ)^(-a-3/2)*exp (x^2/4)*pcfU (-a) x)`. -/
 @[dlmf 12.12.E3]
 theorem pcf_integral_3 {a : ℂ} (ha : a.re < 1/2) {x : ℝ} (hx : 0 < x) :
     HasIntegralAtTop (fun t : ℝ => exp (-t^2/4)*(t:ℂ)^(-a-1/2)/(x^2+t^2:ℂ)*pcfU a t) 0 ((Real.sqrt (π/2):ℂ)*Gamma (1/2-a)*(x:ℂ)^(-a-3/2)*exp (x^2/4)*pcfU (-a) x) := by
@@ -697,7 +707,6 @@ lemma pcfIntegral4_weight_integrable {b : ℝ} (hb : b < 1) :
   rw [← hU]
   exact hnear.union hfar
 
-
 /-- Uniform-in-`z` majorant for the cylinder square-integral kernel. -/
 lemma pcfIntegral4_kernel_norm_le (a z : ℂ) {t : ℝ} (_ht : 0 < t) :
     ‖exp (2*a*t + z^2/2*Real.tanh t) / (Real.sqrt (Real.sinh (2*t)) : ℂ)‖ ≤
@@ -749,7 +758,6 @@ theorem pcf_integral_4_integrable {a : ℂ} (ha : a.re < 1/2) (z : ℂ) :
       exp (2*a*t+z^2/2*Real.tanh t)/(Real.sqrt (Real.sinh (2*t)):ℂ)) (Ioi 0) := by
   simpa only [mul_div_assoc, IntegrableOn] using
     (pcfIntegral4_kernel_integrable ha z).const_mul ((2:ℂ)^(3/2:ℂ)/π*Gamma (1/2-a))
-
 
 /-- Products of Weber solutions obey the common symmetric-square equation.
 This is the ODE needed to identify the convergent integral in DLMF 12.12.4. -/
@@ -843,7 +851,6 @@ lemma pcfIntegral4_hasDerivAt_moment {a : ℂ} (ha : a.re < 1/2) (n : ℕ) (z : 
         refine (pcfIntegral4_kernel_norm_le a w ht).trans ?_
         gcongr
 
-
 /-- The hyperbolic derivative in the cylinder kernel. -/
 lemma pcfIntegral4_tanh_hasDerivAt (t : ℝ) :
     HasDerivAt Real.tanh (1 - Real.tanh t ^ 2) t := by
@@ -897,8 +904,6 @@ lemma pcfIntegral4_hasDerivAt_tanh_kernel (a z : ℂ) {t : ℝ} (ht : 0 < t) :
   refine (hr.mul (pcfIntegral4_hasDerivAt_kernel_time a z ht)).congr_deriv ?_
   linear_combination -pcfIntegral4Kernel a z t * hrat
 
-
-
 /-- The moment kernels vanish at the infinite endpoint. -/
 lemma pcfIntegral4_moment_tendsto_zero {a : ℂ} (ha : a.re < 1/2) (n : ℕ) (z : ℂ) :
     Tendsto (fun t : ℝ => (Real.tanh t : ℂ)^n * pcfIntegral4Kernel a z t) atTop (𝓝 0) := by
@@ -947,7 +952,6 @@ lemma pcfIntegral4_tanh_kernel_continuous_zero (a z : ℂ) :
     intro t
     exact mul_ne_zero two_ne_zero (pow_ne_zero _ (Complex.ofReal_ne_zero.mpr (Real.cosh_pos t).ne'))
   exact hc.continuousWithinAt.congr (fun t ht => heq t ht) (heq 0 le_rfl)
-
 
 /-- Integration by parts gives the four-moment relation. -/
 lemma pcfIntegral4_moment_relation {a : ℂ} (ha : a.re < 1/2) (z : ℂ) :
@@ -1003,7 +1007,6 @@ lemma pcfIntegral4_isThirdOrderSolution {a : ℂ} (ha : a.re < 1/2) :
     simp only [Pi.pow_apply, id_eq, Nat.cast_ofNat, Nat.reduceSub, pow_one, mul_one]
     linear_combination -z * pcfIntegral4_moment_relation ha z
 
-
 /-- The convergent integral in DLMF 12.12.4 is entire in the argument.
 This is the zeroth case of the common moment derivative theorem. -/
 lemma pcfIntegral4_kernel_differentiable {a : ℂ} (ha : a.re < 1/2) :
@@ -1013,11 +1016,6 @@ lemma pcfIntegral4_kernel_differentiable {a : ℂ} (ha : a.re < 1/2) :
   convert (pcfIntegral4_hasDerivAt_moment ha 0 z).differentiableAt using 1
   funext w
   simp only [pcfIntegral4Moment, pcfIntegral4Kernel, pow_zero, one_mul]
-
-
-
-
-
 
 /-- A pole-safe sine/cosine factorization of the two cylinder solutions at the origin. -/
 theorem pcfProduct_zero_pair_v {v : ℂ} (hv : 0 < v.re) :
@@ -1129,7 +1127,6 @@ lemma pcfIntegral4_product_isThirdOrderSolution (a : ℂ) :
   have hV := ODE.product_isThirdOrderSolution hB hB hq
   convert hU.add hV using 1 <;> funext z <;> ring
 
-
 /-- Lowering the parameter identifies both initial derivatives, including
 negative half-integral parameters of the barred solution. -/
 lemma pcfIntegral4_deriv_zero_shift {a : ℂ} (ha : a.re < 1/2) :
@@ -1150,7 +1147,6 @@ lemma pcfIntegral4_deriv_zero_shift {a : ℂ} (ha : a.re < 1/2) :
     simp only [pcfUBarDeriv, pcfUBar]
     rw [show (1/2:ℂ)-(a-1)=(1/2-a)+1 by ring, Gamma_add_one _ hg]
     linear_combination Gamma (1/2-a)*h
-
 
 /-- Initial values determine solutions of the Weber product equation. -/
 theorem pcfProduct_eq_of_initial {a : ℂ} {y y1 y2 z z1 z2 : ℂ → ℂ}
@@ -1188,9 +1184,6 @@ lemma pcfIntegral4_initial_deriv {a : ℂ} (ha : a.re < 1/2) :
   rw [(pcfIntegral4_deriv_zero_shift ha).1, (pcfIntegral4_deriv_zero_shift ha).2,
     hU, hB, hU', hB']
   ring
-
-
-
 
 /-- An exponential factor converts the singular kernel into the continuous tanh-weighted kernel. -/
 lemma pcfIntegral4_exp_tanh (t : ℝ) :

@@ -117,7 +117,6 @@ lemma expIntAux_remainder_integral_general (aux : Bool) {z : ℂ} (hz : 0 < z.re
     rw [this, pow_succ]
     ring
 
-
 /-- A uniform lower bound for `|t² + 1|` on the sector `|arg t| ≤ |θ| < π/2`. -/
 theorem exists_pos_le_norm_ofReal_mul_exp_sq_add_one {θ : ℝ} (hθ : |θ| < π / 2) :
     ∃ c > 0, ∀ r y : ℝ, |y| ≤ |θ| → c ≤ ‖((r : ℂ) * exp (y * I)) ^ 2 + 1‖ := by
@@ -145,7 +144,6 @@ lemma differentiableOn_expIntAux (aux : Bool) :
   · simp only [ite_true]
     unfold expIntAuxG
     exact ((hc.neg.mul differentiableAt_cos).sub (hs.mul differentiableAt_sin)).differentiableWithinAt
-
 
 /-- Coefficients of `tᵐ/(1+t²) = ∑ aₙ tⁿ`. -/
 noncomputable def expIntAuxCoeff (m n : ℕ) : ℂ :=
@@ -233,7 +231,6 @@ lemma expIntAux_kernel_sub_sum_isBigO (m : ℕ) {θ : ℝ} (hθ : |θ| < π / 2)
     _ ≤ 1 / c * r ^ N * ‖t ^ 2 + 1‖ := by
       rw [show 1 / c * r ^ N * ‖t ^ 2 + 1‖ = r ^ N * (‖t ^ 2 + 1‖ / c) by ring]
       exact le_mul_of_one_le_right (by positivity) ((one_le_div hc0).mpr hden)
-
 
 /-- Bounds for the kernel `tᵐ/(t²+1)` on the sector `|arg t| ≤ |θ| < π/2`. -/
 lemma norm_expIntAux_kernel_le {θ c : ℝ} (hc0 : 0 < c)
@@ -349,7 +346,6 @@ lemma expIntAux_eq_integral_rotate (aux : Bool) {θ : ℝ} (hθ : |θ| < π / 2)
   exact (hL.analyticOnNhd hUo).eqOn_of_preconnected_of_eventuallyEq (hR.analyticOnNhd hUo)
     hUc.isPreconnected hz₀U hev hz
 
-
 /-- Watson's expansion of `f` and `g` in a rotated sector. -/
 lemma expIntAux_rotSector_asymptotic (aux : Bool) {θ δ : ℝ} (hθ : |θ| < π / 2) (hδ : 0 < δ) :
     HasAsymptoticExpansion (comap (fun z : ℂ => z * exp (θ * I)) (sectorAtTop δ))
@@ -407,7 +403,9 @@ lemma expIntE1OnLog_eq_genExpIntEOnLog_one (w : ℂ) :
   simp only [genExpIntEOnLog, sub_self, zero_mul, Complex.exp_zero, one_mul,
     upperIncGammaOnLog_zero, expIntE1OnLog]
 
-/-- expIntE1 logSector asymptotic. -/
+/-- Identity under the stated parameter and domain assumptions: `HasAsymptoticExpansion (logSector
+(3*π/2-δ)) (fun n w => exp (-exp w-(n+1 : ℂ)*w)) (fun n => (-1 : ℂ)^n*n.factorial)
+expIntE1OnLog`. -/
 @[dlmf 6.12.E1]
 theorem expIntE1_logSector_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 3*π/2) :
     HasAsymptoticExpansion (logSector (3*π/2-δ)) (fun n w => exp (-exp w-(n+1 : ℂ)*w)) (fun n => (-1 : ℂ)^n*n.factorial) expIntE1OnLog := by
@@ -427,7 +425,8 @@ theorem exp_neg_exp_sub_mul_log_add_pi_I {x : ℝ} (hx : 0 < x) (n : ℕ) :
     show -((n+1 : ℂ)*((Real.log x : ℂ) + π*I)) = -(((n+1 : ℕ) : ℂ)*((Real.log x : ℂ) + π*I)) by
       push_cast; ring, Complex.exp_neg, Complex.exp_nat_mul, hw, div_eq_mul_inv]
 
-/-- expIntEi asymptotic. -/
+/-- Identity under the stated parameter and domain assumptions: `HasAsymptoticExpansion atTop (fun
+n (x : ℝ) => Real.exp x / x^(n+1)) (fun n => (n.factorial : ℝ)) Real.expIntEi`. -/
 @[dlmf 6.12.E2]
 theorem expIntEi_asymptotic  :
     HasAsymptoticExpansion atTop (fun n (x : ℝ) => Real.exp x / x^(n+1)) (fun n => (n.factorial : ℝ)) Real.expIntEi := by
@@ -479,7 +478,9 @@ theorem expIntEi_asymptotic  :
   rw [exp_neg_exp_sub_mul_log_add_pi_I hx, norm_div, norm_pow, norm_neg, Complex.norm_real,
     Complex.norm_real, norm_div, norm_pow]
 
-/-- expIntAuxF sector asymptotic. -/
+/-- Identity under the stated parameter and domain assumptions: `HasAsymptoticExpansion (sector
+(π-δ)) (fun n z => z^(-(2*(n : ℂ)+1))) (fun n => (-1 : ℂ)^n*((2*n+0).factorial : ℂ))
+expIntAuxF`. -/
 @[dlmf 6.12.E3]
 theorem expIntAuxF_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) :
     HasAsymptoticExpansion (sector (π-δ)) (fun n z => z^(-(2*(n : ℂ)+1))) (fun n => (-1 : ℂ)^n*((2*n+0).factorial : ℂ)) expIntAuxF := by
@@ -497,13 +498,16 @@ theorem expIntAuxF_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) 
     rw [Complex.Gamma_nat_eq_factorial]
     ring
 
-/-- expIntAuxF remainder integral. -/
+/-- Identity under the stated parameter and domain assumptions: `expIntAsymptoticRemainder false N
+z = (-1 : ℂ)^N * ∫ t : ℝ in Ioi 0, exp (-z*t)*(t : ℂ)^(2*N+0)/((t : ℂ)^2+1)`. -/
 @[dlmf 6.12.E7]
 theorem expIntAuxF_remainder_integral {z : ℂ} (hz : 0 < z.re) (N : ℕ) :
     expIntAsymptoticRemainder false N z = (-1 : ℂ)^N * ∫ t : ℝ in Ioi 0, exp (-z*t)*(t : ℂ)^(2*N+0)/((t : ℂ)^2+1) := by
   simpa using expIntAux_remainder_integral_general false hz N
 
-/-- expIntAuxG sector asymptotic. -/
+/-- Identity under the stated parameter and domain assumptions: `HasAsymptoticExpansion (sector
+(π-δ)) (fun n z => z^(-(2*(n : ℂ)+2))) (fun n => (-1 : ℂ)^n*((2*n+1).factorial : ℂ))
+expIntAuxG`. -/
 @[dlmf 6.12.E4]
 theorem expIntAuxG_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) :
     HasAsymptoticExpansion (sector (π-δ)) (fun n z => z^(-(2*(n : ℂ)+2))) (fun n => (-1 : ℂ)^n*((2*n+1).factorial : ℂ)) expIntAuxG := by
@@ -525,7 +529,8 @@ theorem expIntAuxG_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) 
     rw [Complex.Gamma_nat_eq_factorial]
     ring
 
-/-- expIntAuxG remainder integral. -/
+/-- Identity under the stated parameter and domain assumptions: `expIntAsymptoticRemainder true N
+z = (-1 : ℂ)^N * ∫ t : ℝ in Ioi 0, exp (-z*t)*(t : ℂ)^(2*N+1)/((t : ℂ)^2+1)`. -/
 @[dlmf 6.12.E8]
 theorem expIntAuxG_remainder_integral {z : ℂ} (hz : 0 < z.re) (N : ℕ) :
     expIntAsymptoticRemainder true N z = (-1 : ℂ)^N * ∫ t : ℝ in Ioi 0, exp (-z*t)*(t : ℂ)^(2*N+1)/((t : ℂ)^2+1) := by
@@ -884,7 +889,6 @@ lemma expIntAux_remainder_bound (aux : Bool) {z : ℂ} (hz0 : z ≠ 0) (hz : |ar
   refine hnorm.trans (le_of_eq ?_)
   rw [hL]
   split_ifs <;> field_simp
-
 
 /-- Signed real auxiliary-function remainder. -/
 lemma expIntAux_remainder_sign (aux : Bool) {x : ℝ} (hx : 0 < x) (N : ℕ) :

@@ -62,6 +62,8 @@ def euler (n : ℕ) : ℚ[X] :=
   X ^ n - C (1 / 2) * ∑ k : Fin n, ((n.choose k : ℚ) • euler k)
 decreasing_by exact k.2
 
+/-- Formula under the stated hypotheses: `euler n = X ^ n - C (1 / 2) * ∑ k ∈ range n, ((n.choose
+k : ℚ) • euler k)`. -/
 theorem euler_def (n : ℕ) :
     euler n = X ^ n - C (1 / 2) * ∑ k ∈ range n, ((n.choose k : ℚ) • euler k) := by
   rw [euler, Fin.sum_univ_eq_sum_range (fun k => ((n.choose k : ℚ) • euler k))]
@@ -73,14 +75,18 @@ theorem sum_range_choose_smul_euler (n : ℕ) :
   have h : (2 : ℚ[X]) * C (1 / 2) = 1 := by rw [← C_ofNat, ← C_mul]; norm_num
   linear_combination (-(∑ k ∈ range n, ((n.choose k : ℚ) • euler k))) * h
 
+/-- Identity under the stated parameter and domain assumptions: `euler 0 = 1`. -/
 @[simp]
 theorem euler_zero : euler 0 = 1 := by rw [euler_def]; simp
 
+/-- Identity under the stated parameter and domain assumptions: `euler 1 = X - C (1 / 2)`. -/
 theorem euler_one : euler 1 = X - C (1 / 2) := by
   rw [euler_def, sum_range_one, euler_zero]; simp
 
 /-! ### Derivatives and the values at `0` and `1` -/
 
+/-- Identity under the stated parameter and domain assumptions: `derivative (euler (n + 1)) = (n +
+1 : ℚ[X]) * euler n`. -/
 theorem derivative_euler_succ (n : ℕ) :
     derivative (euler (n + 1)) = (n + 1 : ℚ[X]) * euler n := by
   induction n using Nat.strong_induction_on with
@@ -106,6 +112,8 @@ theorem derivative_euler_succ (n : ℕ) :
   simp only [map_add, map_one, map_natCast, Nat.cast_add, Nat.cast_one, Nat.add_sub_cancel]
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `derivative (euler n) = (n : ℚ[X])
+* euler (n - 1)`. -/
 @[dlmf 24.4.E35]
 theorem derivative_euler (n : ℕ) : derivative (euler n) = (n : ℚ[X]) * euler (n - 1) := by
   cases n with
@@ -202,6 +210,8 @@ theorem euler_comp_X_add_one_add (n : ℕ) :
     rw [h0, C_0] at hconst
     exact sub_eq_zero.mp hconst
 
+/-- Identity under the stated parameter and domain assumptions: `(euler n).eval (x + 1) + (euler
+n).eval x = 2 * x ^ n`. -/
 theorem euler_eval_add_one_add (n : ℕ) (x : ℚ) :
     (euler n).eval (x + 1) + (euler n).eval x = 2 * x ^ n := by
   simpa using congrArg (eval x) (euler_comp_X_add_one_add n)
@@ -237,6 +247,8 @@ theorem euler_comp_X_add_C (n : ℕ) (h : ℚ) :
   refine sum_congr rfl fun k _ => ?_
   rw [mul_comp, C_comp, comp_assoc, hX, comp_X]
 
+/-- Formula under the stated hypotheses: `(euler n).eval (x + h) = ∑ k ∈ range (n + 1), (n.choose
+k : ℚ) * h ^ (n - k) * (euler k).eval x`. -/
 theorem euler_eval_add (n : ℕ) (x h : ℚ) :
     (euler n).eval (x + h) = ∑ k ∈ range (n + 1), (n.choose k : ℚ) * h ^ (n - k) *
       (euler k).eval x := by
@@ -267,6 +279,8 @@ theorem euler_comp_one_sub_X (n : ℕ) :
         rw [hc]; simp
     _ = C ((-1) ^ n) * euler n := by rw [C_mul, mul_assoc, hP]
 
+/-- Identity under the stated parameter and domain assumptions: `(euler n).eval (1 - x) = (-1) ^ n
+* (euler n).eval x`. -/
 theorem euler_eval_one_sub (n : ℕ) (x : ℚ) :
     (euler n).eval (1 - x) = (-1) ^ n * (euler n).eval x := by
   simpa using congrArg (eval x) (euler_comp_one_sub_X n)
@@ -297,6 +311,7 @@ open Polynomial
 @[dlmf 24.2.E9]
 def eulerNumber (n : ℕ) : ℚ := 2 ^ n * (euler n).eval (1 / 2)
 
+/-- Identity under the stated parameter and domain assumptions: `eulerNumber 0 = 1`. -/
 @[simp]
 theorem eulerNumber_zero : eulerNumber 0 = 1 := by simp [eulerNumber]
 
@@ -336,20 +351,26 @@ theorem sum_choose_mul_eulerNumber (n : ℕ) :
 @[dlmf 24.2.ii]
 def eulerFun (n : ℕ) (x : ℝ) : ℝ := ((euler n).map (algebraMap ℚ ℝ)).eval x
 
+/-- Identity under the stated parameter and domain assumptions: `eulerFun n (x + 1) + eulerFun n x
+= 2 * x ^ n`. -/
 theorem eulerFun_add_one_add (n : ℕ) (x : ℝ) :
     eulerFun n (x + 1) + eulerFun n x = 2 * x ^ n := by
   have h := congrArg (fun p => (p.map (algebraMap ℚ ℝ)).eval x) (euler_comp_X_add_one_add n)
   simpa [eulerFun, Polynomial.map_comp, eval_comp] using h
 
+/-- Identity under the stated parameter and domain assumptions: `eulerFun n (1 - x) = (-1) ^ n *
+eulerFun n x`. -/
 theorem eulerFun_one_sub (n : ℕ) (x : ℝ) : eulerFun n (1 - x) = (-1) ^ n * eulerFun n x := by
   have h := congrArg (fun p => (p.map (algebraMap ℚ ℝ)).eval x) (euler_comp_one_sub_X n)
   simpa [eulerFun, Polynomial.map_comp, eval_comp] using h
 
+/-- At `x`, the function `(eulerFun n)` has derivative `(n * eulerFun (n - 1) x)`. -/
 theorem hasDerivAt_eulerFun (n : ℕ) (x : ℝ) :
     HasDerivAt (eulerFun n) (n * eulerFun (n - 1) x) x := by
   convert! ((euler n).map (algebraMap ℚ ℝ)).hasDerivAt x using 1
   simp only [eulerFun, Polynomial.derivative_map, derivative_euler, Polynomial.map_mul,
     Polynomial.map_natCast, Polynomial.eval_mul, Polynomial.eval_natCast]
 
+/-- The function `(eulerFun n)` is continuous. -/
 theorem continuous_eulerFun (n : ℕ) : Continuous (eulerFun n) :=
   continuous_iff_continuousAt.mpr fun x => (hasDerivAt_eulerFun n x).continuousAt

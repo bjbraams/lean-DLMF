@@ -22,7 +22,8 @@ open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
 namespace DLMF.Confluent
 
-/-- Real.hasSum expIntEi. -/
+/-- The series with terms `(fun k : ℕ => x^(k+1)/((k+1).factorial*(k+1 : ℝ)))` converges to
+`(Real.expIntEi x - Real.eulerMascheroniConstant - Real.log x)`. -/
 @[dlmf 6.6.E1]
 theorem Real.hasSum_expIntEi {x : ℝ} (hx : 0 < x) :
     HasSum (fun k : ℕ => x^(k+1)/((k+1).factorial*(k+1 : ℝ))) (Real.expIntEi x - Real.eulerMascheroniConstant - Real.log x) := by
@@ -39,13 +40,15 @@ theorem Real.hasSum_expIntEi {x : ℝ} (hx : 0 < x) :
   rw [ht]
   ring
 
-/-- expIntE1 digamma series. -/
+/-- The series with terms `(fun k : ℕ => z^k/(k.factorial : ℂ)*digamma (k+1))` converges to `(exp
+z*(genExpIntE 1 z+log z))`. -/
 @[dlmf 6.6.E3]
 theorem expIntE1_digamma_series {z : ℂ} (hz : z ≠ 0) :
     HasSum (fun k : ℕ => z^k/(k.factorial : ℂ)*digamma (k+1)) (exp z*(genExpIntE 1 z+log z)) :=
   incG_expIntE1_digamma_series hz
 
-/-- expIntE1 hasSum. -/
+/-- The series with terms `(fun k : ℕ => (-z)^(k+1)/((k+1).factorial*(k+1 : ℂ)))` converges to
+`(-genExpIntE 1 z - Real.eulerMascheroniConstant - log z)`. -/
 @[dlmf 6.6.E2]
 theorem expIntE1_hasSum {z : ℂ} (hz : z ≠ 0) :
     HasSum (fun k : ℕ => (-z)^(k+1)/((k+1).factorial*(k+1 : ℂ))) (-genExpIntE 1 z - Real.eulerMascheroniConstant - log z) := by
@@ -57,7 +60,8 @@ theorem expIntE1_hasSum {z : ℂ} (hz : z ≠ 0) :
     ring
   · ring
 
-/-- hasSum Ci complex. -/
+/-- The series with terms `(fun k : ℕ => (-1 : ℂ)^(k+1)*z^(2*k+2)/((2*k+2).factorial*(2*k+2 :
+ℂ)))` converges to `(cosInt z-Real.eulerMascheroniConstant-log z)`. -/
 @[dlmf 6.6.E6]
 theorem hasSum_Ci_complex (z : ℂ) :
     HasSum (fun k : ℕ => (-1 : ℂ)^(k+1)*z^(2*k+2)/((2*k+2).factorial*(2*k+2 : ℂ))) (cosInt z-Real.eulerMascheroniConstant-log z) := by
@@ -79,7 +83,8 @@ def expIntReciprocalFactorialCoeff : ℕ → ℂ
   | k+1 => -∑ j ∈ Finset.range (k+1), expIntReciprocalFactorialCoeff (k-j) / (j+1 : ℂ)
 termination_by k => k
 
-/-- expIntReciprocalFactorialCoeff initial. -/
+/-- Estimate under the stated parameter and domain assumptions: `∀ k < 5,
+expIntReciprocalFactorialCoeff k = ([1,-1,1/2,-1/3,1/6] : List ℂ)[k]!`. -/
 @[dlmf 6.10.E2]
 theorem expIntReciprocalFactorialCoeff_initial  :
     ∀ k < 5, expIntReciprocalFactorialCoeff k = ([1,-1,1/2,-1/3,1/6] : List ℂ)[k]! := by
@@ -89,19 +94,26 @@ theorem expIntReciprocalFactorialCoeff_initial  :
 /-- The normalised falling polynomial `(-t)_k / k!`. -/
 noncomputable def recipFac_g (k : ℕ) (t : ℝ) : ℝ := ∏ i ∈ Finset.range k, ((i:ℝ) - t) / ((i:ℝ) + 1)
 
+/-- Identity under the stated parameter and domain assumptions: `recipFac_g 0 t = 1`. -/
 theorem recipFac_g_zero (t : ℝ) : recipFac_g 0 t = 1 := by simp [recipFac_g]
 
+/-- Identity under the stated parameter and domain assumptions: `recipFac_g (k+1) t = recipFac_g k
+t * (((k:ℝ) - t) / ((k:ℝ) + 1))`. -/
 theorem recipFac_g_succ (k : ℕ) (t : ℝ) :
     recipFac_g (k+1) t = recipFac_g k t * (((k:ℝ) - t) / ((k:ℝ) + 1)) := by
   simp only [recipFac_g, Finset.prod_range_succ]
 
+/-- Identity under the stated parameter and domain assumptions: `recipFac_g (k+1) 0 = 0`. -/
 theorem recipFac_g_at_zero (k : ℕ) : recipFac_g (k+1) 0 = 0 := by
   rw [recipFac_g, Finset.prod_eq_zero (i := 0) (by simp) (by simp)]
 
+/-- The function `(recipFac_g k)` is continuous. -/
 theorem recipFac_g_continuous (k : ℕ) : Continuous (recipFac_g k) := by
   unfold recipFac_g
   fun_prop
 
+/-- At `t`, the function `(recipFac_g k)` has derivative `(-∑ i ∈ Finset.range k, recipFac_g i t /
+((k:ℝ) - i))`. -/
 theorem recipFac_hasDerivAt_g (k : ℕ) (t : ℝ) :
     HasDerivAt (recipFac_g k) (-∑ i ∈ Finset.range k, recipFac_g i t / ((k:ℝ) - i)) t := by
   induction k with
@@ -156,6 +168,8 @@ theorem recipFac_hasDerivAt_g (k : ℕ) (t : ℝ) :
     field_simp
     linear_combination -E
 
+/-- Estimate under the stated parameter and domain assumptions: `∀ k ≤ ⌈t⌉₊, |recipFac_g k t| ≤
+(⌈t⌉₊.choose k : ℝ)`. -/
 theorem recipFac_abs_g_le_choose {t : ℝ} :
     ∀ k ≤ ⌈t⌉₊, |recipFac_g k t| ≤ (⌈t⌉₊.choose k : ℝ) := by
   intro k
@@ -179,6 +193,8 @@ theorem recipFac_abs_g_le_choose {t : ℝ} :
     exact mul_le_mul (ih hk'.le) (div_le_div_of_nonneg_right (by linarith) hpos.le)
       (div_nonneg (by linarith) hpos.le) (Nat.cast_nonneg _)
 
+/-- Estimate under the stated parameter and domain assumptions: `((k:ℝ)+1) * |recipFac_g (k+1) t|
+≤ k * |recipFac_g k t|`. -/
 theorem recipFac_mul_abs_g_succ_le {t : ℝ} (ht : 0 ≤ t) {k : ℕ} (hk : t ≤ k) :
     ((k:ℝ)+1) * |recipFac_g (k+1) t| ≤ k * |recipFac_g k t| := by
   rw [recipFac_g_succ, abs_mul, abs_div, abs_of_nonneg (by linarith : (0:ℝ) ≤ k - t),
@@ -188,6 +204,8 @@ theorem recipFac_mul_abs_g_succ_le {t : ℝ} (ht : 0 ≤ t) {k : ℕ} (hk : t �
   have := abs_nonneg (recipFac_g k t)
   nlinarith
 
+/-- Estimate under the stated parameter and domain assumptions: `∀ k, ⌈t⌉₊ ≤ k → (k:ℝ) *
+|recipFac_g k t| ≤ ⌈t⌉₊`. -/
 theorem recipFac_mul_abs_g_le_of_ceil_le {t : ℝ} (ht : 0 ≤ t) :
     ∀ k, ⌈t⌉₊ ≤ k → (k:ℝ) * |recipFac_g k t| ≤ ⌈t⌉₊ := by
   intro k hk
@@ -206,6 +224,8 @@ theorem recipFac_mul_abs_g_le_of_ceil_le {t : ℝ} (ht : 0 ≤ t) :
 /-- The bound `(t+1) 2^(t+1)` controlling `k |(−t)_k/k!|`. -/
 noncomputable def recipFac_B (t : ℝ) : ℝ := (t + 1) * Real.exp ((t + 1) * Real.log 2)
 
+/-- Estimate under the stated parameter and domain assumptions: `(k:ℝ) * |recipFac_g k t| ≤
+recipFac_B t`. -/
 theorem recipFac_mul_abs_g_le {t : ℝ} (ht : 0 ≤ t) (k : ℕ) :
     (k:ℝ) * |recipFac_g k t| ≤ recipFac_B t := by
   have hm : (⌈t⌉₊ : ℝ) ≤ t + 1 := (Nat.ceil_lt_add_one ht).le
@@ -227,6 +247,7 @@ theorem recipFac_mul_abs_g_le {t : ℝ} (ht : 0 ≤ t) (k : ℕ) :
   · have h := recipFac_mul_abs_g_le_of_ceil_le ht k hk.le
     nlinarith
 
+/-- Estimate under the stated parameter and domain assumptions: `|recipFac_g k t| ≤ recipFac_B t`. -/
 theorem recipFac_abs_g_le {t : ℝ} (ht : 0 ≤ t) (k : ℕ) : |recipFac_g k t| ≤ recipFac_B t := by
   rcases k with _ | k
   · rw [recipFac_g_zero, abs_one]
@@ -239,9 +260,12 @@ theorem recipFac_abs_g_le {t : ℝ} (ht : 0 ≤ t) (k : ℕ) : |recipFac_g k t| 
     have := abs_nonneg (recipFac_g (k+1) t)
     nlinarith
 
+/-- Estimate under the stated parameter and domain assumptions: `0 < 1 - Real.log 2`. -/
 theorem recipFac_b_pos : 0 < 1 - Real.log 2 := by
   have := Real.log_two_lt_d9; linarith
 
+/-- Identity under the stated parameter and domain assumptions: `Real.exp (-t) * recipFac_B t = 2
+* (t * Real.exp (-(1 - Real.log 2) * t) + Real.exp (-(1 - Real.log 2) * t))`. -/
 theorem recipFac_exp_mul_B (t : ℝ) :
     Real.exp (-t) * recipFac_B t =
       2 * (t * Real.exp (-(1 - Real.log 2) * t) + Real.exp (-(1 - Real.log 2) * t)) := by
@@ -252,6 +276,7 @@ theorem recipFac_exp_mul_B (t : ℝ) :
       ring, Real.exp_add, Real.exp_log (by norm_num)]
   linear_combination (t + 1) * this
 
+/-- The kernel `(fun t => Real.exp (-t) * recipFac_B t)` is integrable on `(Ioi 0)`. -/
 theorem recipFac_integrable_B : IntegrableOn (fun t => Real.exp (-t) * recipFac_B t) (Ioi 0) := by
   have hb := recipFac_b_pos
   have h1 : IntegrableOn (fun t : ℝ => t * Real.exp (-(1 - Real.log 2) * t)) (Ioi 0) := by
@@ -264,6 +289,7 @@ theorem recipFac_integrable_B : IntegrableOn (fun t => Real.exp (-t) * recipFac_
   refine h3.congr_fun (fun t _ => ?_) measurableSet_Ioi
   simp only [recipFac_exp_mul_B]
 
+/-- The map `(fun t => Real.exp (-t) * recipFac_B t)` tends to `(𝓝 0)` along `atTop`. -/
 theorem recipFac_tendsto_B : Tendsto (fun t => Real.exp (-t) * recipFac_B t) atTop (𝓝 0) := by
   have hb := recipFac_b_pos
   have h1 := tendsto_rpow_mul_exp_neg_mul_atTop_nhds_zero 1 _ hb
@@ -273,6 +299,7 @@ theorem recipFac_tendsto_B : Tendsto (fun t => Real.exp (-t) * recipFac_B t) atT
   refine this.congr fun t => ?_
   rw [recipFac_exp_mul_B]
 
+/-- The kernel `(fun t => Real.exp (-t) * recipFac_g k t)` is integrable on `(Ioi 0)`. -/
 theorem recipFac_integrable_g (k : ℕ) :
     IntegrableOn (fun t => Real.exp (-t) * recipFac_g k t) (Ioi 0) := by
   refine recipFac_integrable_B.mono' ?_ ?_
@@ -286,6 +313,8 @@ theorem recipFac_integrable_g (k : ℕ) :
 /-- The moments `∫₀^∞ e^{-t} (−t)_k/k! dt`. -/
 noncomputable def recipFac_d (k : ℕ) : ℝ := ∫ t in Ioi 0, Real.exp (-t) * recipFac_g k t
 
+/-- Formula under the stated hypotheses: `recipFac_d (k+1) = -∑ i ∈ Finset.range (k+1), recipFac_d
+i / ((k:ℝ) + 1 - i)`. -/
 theorem recipFac_d_succ (k : ℕ) :
     recipFac_d (k+1) = -∑ i ∈ Finset.range (k+1), recipFac_d i / ((k:ℝ) + 1 - i) := by
   set f : ℝ → ℝ := fun t => -(Real.exp (-t) * recipFac_g (k+1) t)
@@ -324,6 +353,8 @@ theorem recipFac_d_succ (k : ℕ) :
   unfold recipFac_d
   linarith
 
+/-- Identity under the stated parameter and domain assumptions: `expIntReciprocalFactorialCoeff k
+= (recipFac_d k : ℂ)`. -/
 theorem recipFac_coeff_eq_d (k : ℕ) : expIntReciprocalFactorialCoeff k = (recipFac_d k : ℂ) := by
   induction k using Nat.strong_induction_on with
   | _ k ih =>
@@ -340,6 +371,8 @@ theorem recipFac_coeff_eq_d (k : ℕ) : expIntReciprocalFactorialCoeff k = (reci
         Nat.cast_sub hj']
       ring
 
+/-- Estimate under the stated parameter and domain assumptions: `∏ j ∈ Finset.range n, (z.re + j)
+≤ ‖poch z n‖`. -/
 theorem recipFac_norm_poch_ge {z : ℂ} (hz : 0 < z.re) (n : ℕ) :
     ∏ j ∈ Finset.range n, (z.re + j) ≤ ‖poch z n‖ := by
   induction n with
@@ -350,12 +383,15 @@ theorem recipFac_norm_poch_ge {z : ℂ} (hz : 0 < z.re) (n : ℕ) :
       have := Complex.re_le_norm (z + n); simpa using this
     exact mul_le_mul ih h1 (by positivity) (norm_nonneg _)
 
+/-- Nonvanishing under the stated hypotheses: `poch z n ≠ 0`. -/
 theorem recipFac_poch_ne_zero {z : ℂ} (hz : 0 < z.re) (n : ℕ) : poch z n ≠ 0 := by
   have h := recipFac_norm_poch_ge hz n
   have : 0 < ∏ j ∈ Finset.range n, (z.re + j) :=
     Finset.prod_pos fun j _ => by positivity
   exact norm_pos_iff.1 (this.trans_le h)
 
+/-- Estimate under the stated parameter and domain assumptions: `∃ C : ℝ, 0 ≤ C ∧ ∀ k : ℕ,
+‖(((k+1).factorial : ℕ) : ℂ) / poch z (k+2)‖ ≤ C * ((k:ℝ)+1) ^ (-z.re)`. -/
 theorem recipFac_poch_bound {z : ℂ} (hz : 0 < z.re) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ k : ℕ,
       ‖(((k+1).factorial : ℕ) : ℂ) / poch z (k+2)‖ ≤ C * ((k:ℝ)+1) ^ (-z.re) := by
@@ -381,6 +417,8 @@ theorem recipFac_poch_bound {z : ℂ} (hz : 0 < z.re) :
 noncomputable def recipFac_F (z : ℂ) (k : ℕ) (t : ℝ) : ℂ :=
   ((Real.exp (-t) * recipFac_g k t : ℝ) : ℂ) * ((k.factorial : ℂ) / poch z (k+1))
 
+/-- Estimate under the stated parameter and domain assumptions: `‖recipFac_F z (k+1) t‖ ≤ Real.exp
+(-t) * recipFac_B t * (C * ((k:ℝ)+1) ^ (-z.re - 1))`. -/
 theorem recipFac_norm_F_succ_le {z : ℂ} {C : ℝ}
     (hC : ∀ k : ℕ, ‖(((k+1).factorial : ℕ) : ℂ) / poch z (k+2)‖ ≤ C * ((k:ℝ)+1) ^ (-z.re))
     {t : ℝ} (ht : 0 ≤ t) (k : ℕ) :
@@ -398,11 +436,14 @@ theorem recipFac_norm_F_succ_le {z : ℂ} {C : ℝ}
           (by positivity)
     _ = _ := by ring
 
+/-- The series with terms `(fun k : ℕ => C * ((k:ℝ)+1) ^ (-z.re - 1))` is summable. -/
 theorem recipFac_summable_u {z : ℂ} (hz : 0 < z.re) (C : ℝ) :
     Summable (fun k : ℕ => C * ((k:ℝ)+1) ^ (-z.re - 1)) := by
   have h := (summable_nat_add_iff 1).2 (Real.summable_nat_rpow.2 (by linarith : -z.re - 1 < -1))
   exact (h.mul_left C).congr fun k => by push_cast; rfl
 
+/-- The series with terms `(fun k => recipFac_F z k t)` converges to `(Complex.exp (-(t:ℂ)) /
+((t:ℂ) + z))`. -/
 theorem recipFac_hasSum_F {z : ℂ} (hz : 0 < z.re) {t : ℝ} (ht : 0 ≤ t) :
     HasSum (fun k => recipFac_F z k t) (Complex.exp (-(t:ℂ)) / ((t:ℂ) + z)) := by
   obtain ⟨C, hC0, hC⟩ := recipFac_poch_bound hz
@@ -463,7 +504,8 @@ theorem recipFac_hasSum_F {z : ℂ} (hz : 0 < z.re) {t : ℝ} (ht : 0 ≤ t) :
   convert this using 2
   rw [sub_zero, Complex.ofReal_exp, Complex.ofReal_neg]; ring
 
-/-- expIntE1 reciprocal factorial series. -/
+/-- The series with terms `(fun k : ℕ => (k.factorial : ℂ)*expIntReciprocalFactorialCoeff k / poch
+z (k+1))` converges to `(exp z*genExpIntE 1 z)`. -/
 @[dlmf 6.10.E1]
 theorem expIntE1_reciprocal_factorial_series {z : ℂ} (hz : 0 < z.re) :
     HasSum (fun k : ℕ => (k.factorial : ℂ)*expIntReciprocalFactorialCoeff k / poch z (k+1)) (exp z*genExpIntE 1 z) := by
@@ -498,7 +540,7 @@ theorem expIntE1_reciprocal_factorial_series {z : ℂ} (hz : 0 < z.re) :
 def expIntSphericalCoeff (n : ℕ) : ℂ :=
   (2*n+1 : ℂ)*(1-(-1 : ℂ)^n+digamma (n+1)-digamma 1)
 
-/-- sinInt spherical series. -/
+/-- The series with terms `(fun n : ℕ => z*sphericalJ n (z/2)^2)` converges to `(sinInt z)`. -/
 @[dlmf 6.10.E4]
 theorem sinInt_spherical_series (z : ℂ) :
     HasSum (fun n : ℕ => z*sphericalJ n (z/2)^2) (sinInt z) := by
@@ -551,28 +593,36 @@ theorem cinSph_hasSum_by_parts {c q : ℕ → ℂ} {L : ℂ} (hq0 : q 0 = 0)
 /-- The harmonic-number form of the coefficients of DLMF 6.10.5. -/
 def cinSphB (n : ℕ) : ℂ := 1 - (-1:ℂ)^n + (harmonic n : ℂ)
 
+/-- Identity under the stated parameter and domain assumptions: `expIntSphericalCoeff n = (2*n+1)
+* cinSphB n`. -/
 theorem cinSph_coeff (n : ℕ) : expIntSphericalCoeff n = (2*n+1) * cinSphB n := by
   rw [expIntSphericalCoeff, cinSphB, digamma_nat_add_one, digamma_one]
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `cinSphB (n+1) - cinSphB n =
+2*(-1:ℂ)^n + 1/((n:ℂ)+1)`. -/
 theorem cinSph_b_succ (n : ℕ) : cinSphB (n+1) - cinSphB n = 2*(-1:ℂ)^n + 1/((n:ℂ)+1) := by
   simp only [cinSphB, harmonic_succ]
   push_cast
   ring
 
+/-- Estimate under the stated parameter and domain assumptions: `‖((n:ℂ)+1)‖ ≤ 2^n`. -/
 theorem cinSph_norm_natCast_le (n : ℕ) : ‖((n:ℂ)+1)‖ ≤ 2^n := by
   rw [show ((n:ℂ)+1) = ((n+1:ℕ):ℂ) by push_cast; ring, Complex.norm_natCast]
   exact_mod_cast Nat.lt_two_pow_self (n := n)
 
+/-- Estimate under the stated parameter and domain assumptions: `‖(n:ℂ)‖ ≤ 2^n`. -/
 theorem cinSph_norm_natCast_le' (n : ℕ) : ‖(n:ℂ)‖ ≤ 2^n := by
   rw [Complex.norm_natCast]
   exact_mod_cast (Nat.lt_two_pow_self (n := n)).le
 
+/-- Estimate under the stated parameter and domain assumptions: `‖(2*(n:ℂ)+1)‖ ≤ 2*2^n`. -/
 theorem cinSph_norm_two_mul_add_one_le (n : ℕ) : ‖(2*(n:ℂ)+1)‖ ≤ 2*2^n := by
   rw [show (2*(n:ℂ)+1) = ((2*n+1 : ℝ) : ℂ) by push_cast; ring, Complex.norm_real,
     Real.norm_of_nonneg (by positivity)]
   exact sphProd_two_mul_add_one_le n
 
+/-- Estimate under the stated parameter and domain assumptions: `‖(harmonic n : ℂ)‖ ≤ n`. -/
 theorem cinSph_norm_harmonic_le (n : ℕ) : ‖(harmonic n : ℂ)‖ ≤ n := by
   induction n with
   | zero => simp
@@ -585,6 +635,7 @@ theorem cinSph_norm_harmonic_le (n : ℕ) : ‖(harmonic n : ℂ)‖ ≤ n := by
       exact inv_le_one_of_one_le₀ (by exact_mod_cast Nat.succ_pos n)
     linarith
 
+/-- Estimate under the stated parameter and domain assumptions: `‖cinSphB n‖ ≤ 3*2^n`. -/
 theorem cinSph_norm_b_le (n : ℕ) : ‖cinSphB n‖ ≤ 3*2^n := by
   rw [cinSphB]
   have h1 := cinSph_norm_harmonic_le n
@@ -595,6 +646,8 @@ theorem cinSph_norm_b_le (n : ℕ) : ‖cinSphB n‖ ≤ 3*2^n := by
     _ ≤ 1 + 1 + n := by rw [norm_one, norm_pow, norm_neg, norm_one, one_pow]; linarith
     _ ≤ 3*2^n := by linarith
 
+/-- Estimate under the stated parameter and domain assumptions: `‖expIntSphericalCoeff n‖ ≤
+6*4^n`. -/
 theorem cinSph_norm_coeff_le (n : ℕ) : ‖expIntSphericalCoeff n‖ ≤ 6*4^n := by
   rw [cinSph_coeff, norm_mul]
   calc ‖(2*(n:ℂ)+1)‖ * ‖cinSphB n‖ ≤ (2*2^n) * (3*2^n) :=
@@ -815,7 +868,8 @@ theorem cinSph_hasSum (x : ℂ) :
   rw [← this]
   exact hs.hasSum
 
-/-- cosIntCin spherical series. -/
+/-- The series with terms `(fun n : ℕ => expIntSphericalCoeff (n+1)*sphericalJ (n+1) (z/2)^2)`
+converges to `(cosIntCin z)`. -/
 @[dlmf 6.10.E5]
 theorem cosIntCin_spherical_series (z : ℂ) :
     HasSum (fun n : ℕ => expIntSphericalCoeff (n+1)*sphericalJ (n+1) (z/2)^2) (cosIntCin z) := by
@@ -823,7 +877,8 @@ theorem cosIntCin_spherical_series (z : ℂ) :
   rw [show 2*(z/2) = z by ring, ← hasSum_nat_add_iff' 1] at h
   simpa [expIntSphericalCoeff] using h
 
-/-- expIntEi spherical series. -/
+/-- The series with terms `(fun n : ℕ => (-1 : ℂ)^n*((x : ℂ)-expIntSphericalCoeff n)*sphericalI n
+(x/2)^2)` converges to `((Real.expIntEi x : ℂ)-Real.eulerMascheroniConstant-Real.log |x|)`. -/
 @[dlmf 6.10.E6]
 theorem expIntEi_spherical_series {x : ℝ} (hx : x ≠ 0) :
     HasSum (fun n : ℕ => (-1 : ℂ)^n*((x : ℂ)-expIntSphericalCoeff n)*sphericalI n (x/2)^2) ((Real.expIntEi x : ℂ)-Real.eulerMascheroniConstant-Real.log |x|) := by
@@ -851,7 +906,8 @@ theorem expIntEi_spherical_series {x : ℝ} (hx : x ≠ 0) :
       (sphericalJ n (I*x/2)^2) * hI + (2*(x:ℂ)*sphericalJ n (I*x/2)^2) * I_sq
   · ring
 
-/-- Ein spherical series. -/
+/-- The series with terms `(fun n : ℕ => z*exp (-z/2)*(2*(n+1)+1 : ℂ)/((n+1 : ℂ)*(n+2))*sphericalI
+(n+1) (z/2))` converges to `(expIntEin z-z*exp (-z/2)*sphericalI 0 (z/2))`. -/
 @[dlmf 6.10.E8]
 theorem Ein_spherical_series (z : ℂ) :
     HasSum (fun n : ℕ => z*exp (-z/2)*(2*(n+1)+1 : ℂ)/((n+1 : ℂ)*(n+2))*sphericalI (n+1) (z/2)) (expIntEin z-z*exp (-z/2)*sphericalI 0 (z/2)) := by
@@ -943,19 +999,22 @@ theorem Ein_spherical_series (z : ℂ) :
     ring
   · simp [expIntEin]
 
-/-- expIntE1 eq upperIncGamma. -/
+/-- Identity under the stated parameter and domain assumptions: `genExpIntE 1 z = upperIncGamma 0
+z`. -/
 @[dlmf 6.11.E1]
 theorem expIntE1_eq_upperIncGamma {z : ℂ} (hz : z ≠ 0) :
     genExpIntE 1 z = upperIncGamma 0 z := by
   simp [genExpIntE]
 
-/-- expIntE1 eq kummerU. -/
+/-- Identity under the stated parameter and domain assumptions: `genExpIntE 1 z = exp (-z)*kummerU
+1 1 z`. -/
 @[dlmf 6.11.E2]
 theorem expIntE1_eq_kummerU {z : ℂ} (hz : z ≠ 0) :
     genExpIntE 1 z = exp (-z)*kummerU 1 1 z := by
   simpa only [show (2 : ℂ)-1=1 by norm_num] using genExpIntE_eq_exp_mul_kummerU 1 hz
 
-/-- expIntAux eq kummerU. -/
+/-- Identity under the stated parameter and domain assumptions: `expIntAuxG z+I*expIntAuxF z =
+kummerU 1 1 (-I*z)`. -/
 @[dlmf 6.11.E3]
 theorem expIntAux_eq_kummerU {z : ℂ} (hz : 0 < z.re) :
     expIntAuxG z+I*expIntAuxF z = kummerU 1 1 (-I*z) := by

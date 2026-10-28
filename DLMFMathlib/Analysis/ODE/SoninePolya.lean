@@ -43,6 +43,8 @@ variable {k φ y y' d : ℝ → ℝ} {a b : ℝ}
 noncomputable def sonineFunction (k φ y y' : ℝ → ℝ) (x : ℝ) : ℝ :=
   y x ^ 2 + (k x * y' x) ^ 2 / (k x * φ x)
 
+/-- At `x`, the function `(sonineFunction k φ y y')` has derivative `(-((k x * y' x) ^ 2 * dx / (k
+x * φ x) ^ 2))`. -/
 theorem hasDerivAt_sonineFunction {x dx : ℝ} (hk : k x ≠ 0) (hφ : φ x ≠ 0)
     (hy : HasDerivAt y (y' x) x) (hky : HasDerivAt (fun t => k t * y' t) (-(φ x * y x)) x)
     (hkφ : HasDerivAt (fun t => k t * φ t) dx x) :
@@ -98,10 +100,14 @@ theorem monotoneOn_sonineFunction
     exact neg_nonpos.mpr
       (div_nonneg (mul_nonneg (sq_nonneg _) (neg_nonneg.mpr (hd x hx))) (sq_nonneg _))
 
+/-- Estimate under the stated parameter and domain assumptions: `y x ^ 2 ≤ sonineFunction k φ y y'
+x`. -/
 theorem sq_le_sonineFunction {x : ℝ} (hk : 0 < k x) (hφ : 0 < φ x) :
     y x ^ 2 ≤ sonineFunction k φ y y' x :=
   le_add_of_nonneg_right (div_nonneg (sq_nonneg _) (mul_pos hk hφ).le)
 
+/-- Identity under the stated parameter and domain assumptions: `sonineFunction k φ y y' x = y x ^
+2`. -/
 theorem sonineFunction_of_deriv_eq_zero {x : ℝ} (h : y' x = 0) :
     sonineFunction k φ y y' x = y x ^ 2 := by
   simp [sonineFunction, h]

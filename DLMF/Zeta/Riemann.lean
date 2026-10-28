@@ -354,7 +354,6 @@ lemma s25a_abs_c_le (n : ℕ) {σ : ℝ} (hσ1 : 1 ≤ σ) (hσ2 : σ ≤ 2) (k 
   rw [show |a + 1 - a| = 1 by norm_num, mul_one] at this
   exact this
 
-
 /-- The bound of `s25a_abs_c_le` is summable. -/
 lemma s25a_summable_bound (n : ℕ) :
     Summable fun k : ℕ => (n + 2) * (4 ^ n * n !) * ((k : ℝ) + 1) ^ (-(7 / 4 : ℝ)) := by
@@ -416,7 +415,6 @@ lemma s25a_hasSum_c_one (n : ℕ) : HasSum (s25a_c n 1) (stieltjesConstant n) :=
       ((tendsto_natCast_atTop_atTop (R := ℝ)).atTop_add (tendsto_const_nhds (x := (1 : ℝ))))
     simpa [Function.comp_def] using this
   simpa using h1.sub h2
-
 
 /-- `∫₁^∞ (ln x)ⁿ x^{-σ} dx = n!/(σ-1)^{n+1}` for `σ > 1`. -/
 lemma s25a_integral_g (n : ℕ) {σ : ℝ} (hσ : 1 < σ) :
@@ -483,7 +481,6 @@ lemma s25a_hasSum_c (n : ℕ) {σ : ℝ} (hσ1 : 1 < σ) (hσ2 : σ ≤ 2) {S : 
       ((tendsto_natCast_atTop_atTop (R := ℝ)).atTop_add (tendsto_const_nhds (x := (1 : ℝ))))
   exact h1.sub h2
 
-
 /-- The regular part `ζ(s) - 1/(s-1)` of `ζ` at `s = 1`, extended by `γ` at `s = 1`. -/
 noncomputable def s25a_zetaReg : ℂ → ℂ :=
   Function.update (fun s : ℂ => riemannZeta s - 1 / (s - 1)) 1 (Real.eulerMascheroniConstant : ℂ)
@@ -531,7 +528,6 @@ lemma s25a_iteratedDeriv_inv_sub_one (n : ℕ) (s : ℂ) :
   have := congrFun (iteratedDeriv_comp_sub_const (n := n) (f := fun z : ℂ => z⁻¹) (s := 1)) s
   simp only [one_div]
   rw [this, iteratedDeriv_eq_iterate, iter_deriv_inv]
-
 
 /-- The Taylor coefficients of the regular part at `1`: `G^{(n)}(1) = (-1)ⁿ γₙ`. -/
 lemma s25a_iteratedDeriv_zetaReg_one (n : ℕ) :
@@ -588,7 +584,6 @@ theorem hasSum_riemannZeta_laurent {s : ℂ} (hs : s ≠ 1) :
   refine h.congr_fun fun n => ?_
   rw [← s25a_zetaReg, s25a_iteratedDeriv_zetaReg_one, smul_eq_mul, smul_eq_mul]
   ring
-
 
 /-! ### §25.2(iii) Representations by the Euler–Maclaurin formula -/
 
@@ -964,6 +959,8 @@ noncomputable def q25a_emRHS (N n : ℕ) (s : ℂ) : ℂ :=
     z25a_gbinom (s + 2 * n) (2 * n + 1) *
       ∫ x in Ioi (N : ℝ), (periodicBernoulliB (2 * n + 1) x : ℂ) / (x : ℂ) ^ (s + 2 * n + 1)
 
+/-- Identity under the stated parameter and domain assumptions: `q25a_emRHS N (n + 1) s =
+q25a_emRHS N n s`. -/
 lemma q25a_emRHS_succ {s : ℂ} {n N : ℕ} (hN : 1 ≤ N) (hs : -(2 * n : ℝ) < s.re) :
     q25a_emRHS N (n + 1) s = q25a_emRHS N n s := by
   have h := q25a_double_step hN hs
@@ -978,9 +975,12 @@ lemma q25a_emRHS_succ {s : ℂ} {n N : ℕ} (hN : 1 ≤ N) (hs : -(2 * n : ℝ) 
   rw [e1, e3, e2, e4, e5]
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `z25a_gbinom z 1 = z`. -/
 theorem q25a_gbinom_one (z : ℂ) : z25a_gbinom z 1 = z := by
   simp [z25a_gbinom]
 
+/-- Identity under the stated parameter and domain assumptions: `riemannZeta s = q25a_emRHS N n
+s`. -/
 lemma q25a_zeta_eq_emRHS_of_one_lt {s : ℂ} (hs : 1 < s.re) {N : ℕ} (hN : 1 ≤ N) (n : ℕ) :
     riemannZeta s = q25a_emRHS N n s := by
   induction n with

@@ -73,6 +73,8 @@ theorem Gamma_one_half_eq_sqrt : Gamma (1 / 2 : ℂ) = (Real.sqrt π : ℂ) := b
   rw [Complex.Gamma_one_half_eq, Real.sqrt_eq_rpow, Complex.ofReal_cpow Real.pi_pos.le]
   norm_num
 
+/-- Identity under the stated parameter and domain assumptions: `kummerM 1 2 (2 * z) = exp z *
+sinh z / z`. -/
 @[dlmf 13.6.E2]
 theorem kummerM_one_two (z : ℂ) (hz : z ≠ 0) :
     kummerM 1 2 (2 * z) = exp z * sinh z / z := by
@@ -137,6 +139,8 @@ theorem kummerU_upperIncGamma (a : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
     convert exp_zero using 2
     ring
 
+/-- Identity under the stated parameter and domain assumptions: `kummerM (1 / 2) (3 / 2) (-(z ^
+2)) = (Real.sqrt π : ℂ) / (2 * z) * erf z`. -/
 @[dlmf 13.6.E7]
 theorem kummerM_erf {z : ℂ} (hz : z ≠ 0) :
     kummerM (1 / 2) (3 / 2) (-(z ^ 2)) = (Real.sqrt π : ℂ) / (2 * z) * erf z := by
@@ -179,6 +183,8 @@ theorem kummerU_erfc {z : ℂ} (hz : z ∈ slitPlane) (hre : 0 < z.re) :
   field_simp
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `kummerM (ν + 1 / 2) (2 * ν + 1)
+(2 * z) = Gamma (1 + ν) * exp z * (z / 2) ^ (-ν) * besselI ν z`. -/
 @[dlmf 13.6.E9]
 theorem kummerM_besselI (ν z : ℂ) (hz : z ∈ slitPlane) (hν : ∀ k : ℕ, 1 + 2 * ν ≠ -k) :
     kummerM (ν + 1 / 2) (2 * ν + 1) (2 * z) =
@@ -293,6 +299,8 @@ theorem kummerU_besselK_of_not_int (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
   field_simp at r1 r2 ⊢
   linear_combination Iν * r1 + Im * r2
 
+/-- Identity under the stated parameter and domain assumptions: `kummerU (ν + 1 / 2) (2 * ν + 1)
+(2 * z) = 1 / (Real.sqrt π : ℂ) * exp z * (2 * z) ^ (-ν) * besselK ν z`. -/
 @[dlmf 13.6.E10]
 theorem kummerU_besselK (ν z : ℂ) (hz : z ∈ slitPlane) :
     kummerU (ν + 1 / 2) (2 * ν + 1) (2 * z) =
@@ -743,6 +751,8 @@ theorem hermitePolyHEval_odd_mul (n : ℕ) (z : ℂ) :
       (4 * (-1 : ℂ) ^ n * ((2 * n + 1).factorial : ℂ) * (2 * z) * (2 * n + 3) * (n + 2) *
         (2 * n + 2)) * K
 
+/-- Identity under the stated parameter and domain assumptions: `kummerM (-(n : ℂ)) (1 / 2) (z ^
+2) = (-1 : ℂ) ^ n * n.factorial / (2 * n).factorial * hermitePolyHEval (2 * n) z`. -/
 @[dlmf 13.6.E16]
 theorem kummerM_hermite_even (n : ℕ) (z : ℂ) :
     kummerM (-(n : ℂ)) (1 / 2) (z ^ 2) =
@@ -759,6 +769,9 @@ theorem kummerM_hermite_even (n : ℕ) (z : ℂ) :
   rw [eq_comm, div_mul_eq_mul_div, div_eq_iff hf]
   linear_combination -this
 
+/-- Identity under the stated parameter and domain assumptions: `kummerM (-(n : ℂ)) (3 / 2) (z ^
+2) = (-1 : ℂ) ^ n * n.factorial / ((2 * n + 1).factorial * 2 * z) * hermitePolyHEval (2 * n +
+1) z`. -/
 @[dlmf 13.6.E17]
 theorem kummerM_hermite_odd (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
     kummerM (-(n : ℂ)) (3 / 2) (z ^ 2) =
@@ -907,6 +920,8 @@ theorem kummerU_eq_twoFzero (n : ℕ) (b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
       linear_combination (-(poch (-((s + t : ℕ) : ℂ)) t * (-1) ^ t * poch (b + s) t /
         t.factorial)) * hzpow
 
+/-- Identity under the stated parameter and domain assumptions: `whittakerM 0 (1 / 2) (2 * z) = 2
+* sinh z`. -/
 @[dlmf 13.18.E1]
 theorem whittakerM_sinh {z : ℂ} (hz : z ∈ slitPlane) :
     whittakerM 0 (1 / 2) (2 * z) = 2 * sinh z := by
@@ -923,6 +938,9 @@ theorem whittakerM_sinh {z : ℂ} (hz : z ∈ slitPlane) :
   field_simp [hz0]
   rw [← exp_add, neg_add_cancel, exp_zero, one_mul]
 
+/-- Identity under the stated parameter and domain assumptions: `whittakerM κ (κ - 1 / 2) z = exp
+(-z / 2) * z ^ κ ∧ whittakerW κ (κ - 1 / 2) z = exp (-z / 2) * z ^ κ ∧ whittakerW κ (-κ + 1 /
+2) z = exp (-z / 2) * z ^ κ`. -/
 @[dlmf 13.18.E2]
 theorem whittakerM_exp (κ : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     whittakerM κ (κ - 1 / 2) z = exp (-z / 2) * z ^ κ ∧
@@ -974,6 +992,8 @@ theorem whittakerM_lowerIncGamma (μ : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
   rw [← hp, ← he]
   field_simp
 
+/-- Identity under the stated parameter and domain assumptions: `whittakerW (μ - 1 / 2) μ z = exp
+(z / 2) * z ^ (1 / 2 - μ) * upperIncGamma (2 * μ) z`. -/
 @[dlmf 13.18.E5]
 theorem whittakerW_upperIncGamma (μ : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     whittakerW (μ - 1 / 2) μ z =
@@ -1027,6 +1047,8 @@ theorem whittakerW_erfc {z : ℂ} (hz : z ∈ slitPlane) (hre : 0 < z.re) :
   rw [← he]
   field_simp
 
+/-- Identity under the stated parameter and domain assumptions: `whittakerM 0 ν (2 * z) = (2 : ℂ)
+^ (2 * ν + 1 / 2) * Gamma (1 + ν) * z ^ (1 / 2 : ℂ) * besselI ν z`. -/
 @[dlmf 13.18.E8]
 theorem whittakerM_besselI (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
     (hν : ∀ k : ℕ, 1 + 2 * ν ≠ -k) :
@@ -1059,6 +1081,8 @@ theorem whittakerM_besselI (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
   linear_combination (2 : ℂ) ^ (ν + 1 / 2) * 2 ^ ν * z ^ (ν + 1 / 2) * z ^ (-ν) *
     Gamma (1 + ν) * besselI ν z * he
 
+/-- Identity under the stated parameter and domain assumptions: `whittakerW 0 ν (2 * z) = ((2 * z)
+/ π) ^ (1 / 2 : ℂ) * besselK ν z`. -/
 @[dlmf 13.18.E9]
 theorem whittakerW_besselK (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     whittakerW 0 ν (2 * z) =

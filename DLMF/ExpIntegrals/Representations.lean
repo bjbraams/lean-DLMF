@@ -76,7 +76,6 @@ theorem hasIntegralAtTop_exp_neg_div_sub (c : ℂ) (x : ℝ)
   have h := hasIntegralAtTop_of_hasDerivAt_of_tendsto hd hcont hl
   simpa using h
 
-
 /-- Real points avoid `±ia` for `a > 0`. -/
 theorem ofReal_sub_I_mul_ne_zero {a : ℝ} (ha : 0 < a) (t : ℝ) :
     (t:ℂ)-I*a ≠ 0 ∧ (t:ℂ)-(-I*a) ≠ 0 := by
@@ -96,7 +95,6 @@ lemma expIntE1_rational_split {a : ℝ} (ha : 0 < a) (t : ℝ) (F : ℂ) :
   constructor
   · field_simp; ring
   · field_simp; ring
-
 
 /-- The rotated arguments `-i(t∓ia)` lie in the slit plane for `t ≥ x > 0`. -/
 lemma expIntE1_rational_slit_I {a x : ℝ} (ha : 0 < a) (hx : 0 < x) :
@@ -118,7 +116,9 @@ lemma expIntE1_rational_intervalIntegrable (a x : ℝ) (ha : 0 < a) (G : ℝ →
   · exact (hG.div (by fun_prop) fun t => (ofReal_sub_I_mul_ne_zero ha t).1).intervalIntegrable _ _
   · exact (hG.div (by fun_prop) fun t => (ofReal_sub_I_mul_ne_zero ha t).2).intervalIntegrable _ _
 
-/-- expIntE1 scaled integrals. -/
+/-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => exp (-a*t : ℂ)/(t+b))
+0 (exp (a*b : ℂ)*genExpIntE 1 (a*b)) ∧ HasIntegralAtTop (fun t : ℝ => exp (I*a*t)/(t+I*b)) 0
+(exp (a*b : ℂ)*genExpIntE 1 (a*b))`. -/
 @[dlmf 6.7.E1]
 theorem expIntE1_scaled_integrals {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
     HasIntegralAtTop (fun t : ℝ => exp (-a*t : ℂ)/(t+b)) 0 (exp (a*b : ℂ)*genExpIntE 1 (a*b)) ∧ HasIntegralAtTop (fun t : ℝ => exp (I*a*t)/(t+I*b)) 0 (exp (a*b : ℂ)*genExpIntE 1 (a*b)) := by
@@ -208,7 +208,8 @@ theorem Real.hasDerivAt_expIntEi {u : ℝ} (hu : 0 < u) :
   field_simp
   ring
 
-/-- expIntEi finite integral. -/
+/-- Identity under the stated parameter and domain assumptions: `Real.exp x * (∫ t in (0 : ℝ)..α,
+Real.exp (-x*t)/(1-t)) = Real.expIntEi x - Real.expIntEi ((1-α)*x)`. -/
 @[dlmf 6.7.E2]
 theorem expIntEi_finite_integral {x α : ℝ} (hx : 0 < x) (hα : 0 ≤ α) (hα1 : α < 1) :
     Real.exp x * (∫ t in (0 : ℝ)..α, Real.exp (-x*t)/(1-t)) = Real.expIntEi x - Real.expIntEi ((1-α)*x) := by
@@ -231,7 +232,8 @@ theorem expIntEi_finite_integral {x α : ℝ} (hx : 0 < x) (hα : 0 ≤ α) (hα
   simp
   ring
 
-/-- expIntE1 rational fourier 0. -/
+/-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => exp (I*t)/(a^2+(t :
+ℂ)^2)) x (I/(2*a)*(exp a*genExpIntE 1 (a-I*x)-exp (-a)*genExpIntE 1 (-a-I*x)))`. -/
 @[dlmf 6.7.E3]
 theorem expIntE1_rational_fourier_0 {a x : ℝ} (ha : 0 < a) (hx : 0 < x) :
     HasIntegralAtTop (fun t : ℝ => exp (I*t)/(a^2+(t : ℂ)^2)) x (I/(2*a)*(exp a*genExpIntE 1 (a-I*x)-exp (-a)*genExpIntE 1 (-a-I*x))) := by
@@ -249,7 +251,8 @@ theorem expIntE1_rational_fourier_0 {a x : ℝ} (ha : 0 < a) (hx : 0 < x) :
   field_simp
   ring_nf; rw [I_sq]; ring
 
-/-- expIntE1 rational laplace 0. -/
+/-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => exp (-t : ℂ)/(a^2+(t :
+ℂ)^2)) x (-1/(2*a*I)*(exp (I*a)*genExpIntE 1 (x+I*a)-exp (-I*a)*genExpIntE 1 (x-I*a)))`. -/
 @[dlmf 6.7.E5]
 theorem expIntE1_rational_laplace_0 {a : ℝ} (ha : 0 < a) (x : ℝ) :
     HasIntegralAtTop (fun t : ℝ => exp (-t : ℂ)/(a^2+(t : ℂ)^2)) x (-1/(2*a*I)*(exp (I*a)*genExpIntE 1 (x+I*a)-exp (-I*a)*genExpIntE 1 (x-I*a))) := by
@@ -265,7 +268,8 @@ theorem expIntE1_rational_laplace_0 {a : ℝ} (ha : 0 < a) (x : ℝ) :
   field_simp
   ring_nf
 
-/-- expIntE1 rational fourier 1. -/
+/-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => (t : ℂ)*exp
+(I*t)/(a^2+(t : ℂ)^2)) x ((exp a*genExpIntE 1 (a-I*x)+exp (-a)*genExpIntE 1 (-a-I*x))/2)`. -/
 @[dlmf 6.7.E4]
 theorem expIntE1_rational_fourier_1 {a x : ℝ} (ha : 0 < a) (hx : 0 < x) :
     HasIntegralAtTop (fun t : ℝ => (t : ℂ)*exp (I*t)/(a^2+(t : ℂ)^2)) x ((exp a*genExpIntE 1 (a-I*x)+exp (-a)*genExpIntE 1 (-a-I*x))/2) := by
@@ -281,7 +285,8 @@ theorem expIntE1_rational_fourier_1 {a x : ℝ} (ha : 0 < a) (hx : 0 < x) :
     show -I*((x:ℂ)-(-I*a)) = a-I*x by ring_nf; rw [I_sq]; ring]
   ring
 
-/-- expIntE1 rational laplace 1. -/
+/-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => (t : ℂ)*exp (-t :
+ℂ)/(a^2+(t : ℂ)^2)) x ((exp (I*a)*genExpIntE 1 (x+I*a)+exp (-I*a)*genExpIntE 1 (x-I*a))/2)`. -/
 @[dlmf 6.7.E6]
 theorem expIntE1_rational_laplace_1 {a : ℝ} (ha : 0 < a) (x : ℝ) :
     HasIntegralAtTop (fun t : ℝ => (t : ℂ)*exp (-t : ℂ)/(a^2+(t : ℂ)^2)) x ((exp (I*a)*genExpIntE 1 (x+I*a)+exp (-I*a)*genExpIntE 1 (x-I*a))/2) := by
@@ -323,7 +328,8 @@ theorem primitive_div_self_eq_integral {F : ℂ → ℂ} (hF : Differentiable �
     filter_upwards [hne] with s hs _
     exact (hae s hs).symm
 
-/-- expIntEin real integral 7. -/
+/-- Identity under the stated parameter and domain assumptions: `(∫ t in (0 : ℝ)..1, Real.exp
+(-a*t)*Real.sin (b*t)/t) = (expIntEin (a+I*b)).im`. -/
 @[dlmf 6.7.E7]
 theorem expIntEin_real_integral_7 (a b : ℝ) :
     (∫ t in (0 : ℝ)..1, Real.exp (-a*t)*Real.sin (b*t)/t) = (expIntEin (a+I*b)).im := by
@@ -336,7 +342,8 @@ theorem expIntEin_real_integral_7 (a b : ℝ) :
   rw [Complex.div_ofReal_im]
   simp [Complex.exp_im, mul_comm]
 
-/-- expIntEin real integral 8. -/
+/-- Identity under the stated parameter and domain assumptions: `(∫ t in (0 : ℝ)..1, Real.exp
+(-a*t)*(1-Real.cos (b*t))/t) = (expIntEin (a+I*b)).re-(expIntEin a).re`. -/
 @[dlmf 6.7.E8]
 theorem expIntEin_real_integral_8 (a b : ℝ) :
     (∫ t in (0 : ℝ)..1, Real.exp (-a*t)*(1-Real.cos (b*t))/t) = (expIntEin (a+I*b)).re-(expIntEin a).re := by
@@ -353,7 +360,8 @@ theorem expIntEin_real_integral_8 (a b : ℝ) :
   simp [Complex.exp_re, mul_comm]
   ring
 
-/-- expIntEin real integral 11. -/
+/-- Identity under the stated parameter and domain assumptions: `(∫ t in (0 : ℝ)..1, (1-Real.exp
+(-a*t))*Real.cos (b*t)/t) = (expIntEin (a+I*b)).re-(cosIntCin b).re`. -/
 @[dlmf 6.7.E11]
 theorem expIntEin_real_integral_11 (a b : ℝ) :
     (∫ t in (0 : ℝ)..1, (1-Real.exp (-a*t))*Real.cos (b*t)/t) = (expIntEin (a+I*b)).re-(cosIntCin b).re := by
@@ -431,7 +439,8 @@ theorem eiIn_Ein_neg_I (z : ℂ) : expIntEin (I*(-1)*z) = cosIntCin z - I*sinInt
 
 end AngularTools
 
-/-- sinIntTail angular integral. -/
+/-- Identity under the stated parameter and domain assumptions: `sinIntTail z = -∫ t : ℝ in
+0..(π/2), exp (-z*Real.cos t)*cos (z*Real.sin t)`. -/
 @[dlmf 6.7.E9]
 theorem sinIntTail_angular_integral (z : ℂ) :
     sinIntTail z = -∫ t : ℝ in 0..(π/2), exp (-z*Real.cos t)*cos (z*Real.sin t) := by
@@ -449,7 +458,8 @@ theorem sinIntTail_angular_integral (z : ℂ) :
   field_simp
   ring_nf
 
-/-- Ein sub Cin angular integral. -/
+/-- Identity under the stated parameter and domain assumptions: `expIntEin z - cosIntCin z = ∫ t :
+ℝ in 0..(π/2), exp (-z*Real.cos t)*sin (z*Real.sin t)`. -/
 @[dlmf 6.7.E10]
 theorem Ein_sub_Cin_angular_integral (z : ℂ) :
     expIntEin z - cosIntCin z = ∫ t : ℝ in 0..(π/2), exp (-z*Real.cos t)*sin (z*Real.sin t) := by
@@ -467,7 +477,8 @@ theorem Ein_sub_Cin_angular_integral (z : ℂ) :
   field_simp
   ring_nf
 
-/-- expIntAux horizontal integral. -/
+/-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => exp (I*(z+t))/(z+t)) 0
+(exp (I*z)*(expIntAuxG z+I*expIntAuxF z))`. -/
 @[dlmf 6.7.E12]
 theorem expIntAux_horizontal_integral {z : ℂ} (hz : z ∈ slitPlane) :
     HasIntegralAtTop (fun t : ℝ => exp (I*(z+t))/(z+t)) 0 (exp (I*z)*(expIntAuxG z+I*expIntAuxF z)) := by
@@ -499,7 +510,8 @@ theorem expIntAux_horizontal_integral {z : ℂ} (hz : z ∈ slitPlane) :
   have h := hasIntegralAtTop_of_hasDerivAt_of_tendsto hd hc hl
   simpa using h
 
-/-- expIntAuxF oscillatory integral. -/
+/-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => (sin (t : ℂ))/(t+z)) 0
+(expIntAuxF z)`. -/
 @[dlmf 6.7.E13]
 theorem expIntAuxF_oscillatory_integral {z : ℂ} (hz : z ∈ slitPlane) :
     HasIntegralAtTop (fun t : ℝ => (sin (t : ℂ))/(t+z)) 0 (expIntAuxF z) := by
@@ -526,7 +538,8 @@ theorem expIntAuxF_oscillatory_integral {z : ℂ} (hz : z ∈ slitPlane) :
   convert h using 1
   simp [expIntAuxF]; ring
 
-/-- expIntAuxF laplace integral. -/
+/-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => (t : ℂ)^0*exp
+(-z*t)/((t : ℂ)^2+1)) 0 (expIntAuxF z)`. -/
 @[dlmf 6.7.E13]
 theorem expIntAuxF_laplace_integral {z : ℂ} (hz : 0 ≤ z.re) :
     HasIntegralAtTop (fun t : ℝ => (t : ℂ)^0*exp (-z*t)/((t : ℂ)^2+1)) 0 (expIntAuxF z) := by
@@ -617,7 +630,6 @@ theorem integral_exp_neg_mul_sin {c : ℝ} (hc : 0 < c) :
   ring_nf
   rw [I_sq]
   ring
-
 
 /-- Schläfli's integral for `2 K₀(2√(xt))` with the `t`-dependence isolated. -/
 theorem two_mul_besselK_zero_eq_integral {x t : ℝ} (hx : 0 < x) (ht : 0 < t) :
@@ -930,7 +942,8 @@ theorem eqOn_slitPlane_of_ofReal_besselK_zero {f : ℂ → ℂ} (hf : Differenti
 
 end BesselKZeroIntegrals
 
-/-- expIntAuxF besselK integral. -/
+/-- Identity under the stated parameter and domain assumptions: `expIntAuxF z = 2*∫ t : ℝ in Ioi
+0, DLMF.Bessel.besselK 0 (2*(z*t)^(1/2 : ℂ))*cos t`. -/
 @[dlmf 6.7.E15]
 theorem expIntAuxF_besselK_integral {z : ℂ} (hz : z ∈ slitPlane) :
     expIntAuxF z = 2*∫ t : ℝ in Ioi 0, DLMF.Bessel.besselK 0 (2*(z*t)^(1/2 : ℂ))*cos t :=
@@ -938,7 +951,8 @@ theorem expIntAuxF_besselK_integral {z : ℂ} (hz : z ∈ slitPlane) :
     |>.differentiableWithinAt) (by fun_prop) norm_cos_ofReal_le_one
     (fun x hx => expIntAuxF_ofReal_eq_integral_besselK hx) hz
 
-/-- expIntAuxG oscillatory integral. -/
+/-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => (cos (t : ℂ))/(t+z)) 0
+(expIntAuxG z)`. -/
 @[dlmf 6.7.E14]
 theorem expIntAuxG_oscillatory_integral {z : ℂ} (hz : z ∈ slitPlane) :
     HasIntegralAtTop (fun t : ℝ => (cos (t : ℂ))/(t+z)) 0 (expIntAuxG z) := by
@@ -965,13 +979,15 @@ theorem expIntAuxG_oscillatory_integral {z : ℂ} (hz : z ∈ slitPlane) :
   convert h using 1
   simp [expIntAuxG]; ring
 
-/-- expIntAuxG laplace integral. -/
+/-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => (t : ℂ)^1*exp
+(-z*t)/((t : ℂ)^2+1)) 0 (expIntAuxG z)`. -/
 @[dlmf 6.7.E14]
 theorem expIntAuxG_laplace_integral {z : ℂ} (hz : 0 ≤ z.re) (hz0 : z ≠ 0) :
     HasIntegralAtTop (fun t : ℝ => (t : ℂ)^1*exp (-z*t)/((t : ℂ)^2+1)) 0 (expIntAuxG z) :=
   (expIntAux_laplace_hasIntegralAtTop hz0 hz).2.congr fun t _ => by simp
 
-/-- expIntAuxG besselK integral. -/
+/-- Identity under the stated parameter and domain assumptions: `expIntAuxG z = 2*∫ t : ℝ in Ioi
+0, DLMF.Bessel.besselK 0 (2*(z*t)^(1/2 : ℂ))*sin t`. -/
 @[dlmf 6.7.E16]
 theorem expIntAuxG_besselK_integral {z : ℂ} (hz : z ∈ slitPlane) :
     expIntAuxG z = 2*∫ t : ℝ in Ioi 0, DLMF.Bessel.besselK 0 (2*(z*t)^(1/2 : ℂ))*sin t :=
@@ -1056,7 +1072,6 @@ theorem eiIn_gt_of_sub_pos {R R' : ℝ → ℝ} {x : ℝ} (hx : 0 < x)
   rw [mul_sub, ← mul_assoc, ← Real.exp_add, add_neg_cancel, Real.exp_zero, one_mul] at this
   linarith
 
-
 /-- `ln y < (y - 1/y)/2` for `y > 1`. -/
 theorem eiIn_log_lt_half_sub_recip {y : ℝ} (hy : 1 < y) : Real.log y < (y - 1/y)/2 := by
   let h : ℝ → ℝ := fun s => (s - 1/s)/2 - Real.log s
@@ -1092,7 +1107,8 @@ theorem eiIn_tendsto_rat {F : ℝ → ℝ} {R : ℝ → ℝ} (hF : ContinuousAt 
 
 end InequalityTools
 
-/-- expIntE1 inequality 1. -/
+/-- Estimate under the stated parameter and domain assumptions: `Real.log (1+2/x)/2 < Real.exp
+x*(genExpIntE 1 x).re ∧ Real.exp x*(genExpIntE 1 x).re < Real.log (1+1/x)`. -/
 @[dlmf 6.8.E1]
 theorem expIntE1_inequality_1 {x : ℝ} (hx : 0 < x) :
     Real.log (1+2/x)/2 < Real.exp x*(genExpIntE 1 x).re ∧ Real.exp x*(genExpIntE 1 x).re < Real.log (1+1/x) := by
@@ -1139,7 +1155,8 @@ theorem expIntE1_inequality_1 {x : ℝ} (hx : 0 < x) :
         simp [div_eq_mul_inv]
       exact (Real.continuousAt_log (by norm_num)).comp (by fun_prop)
 
-/-- expIntE1 inequality 2. -/
+/-- Estimate under the stated parameter and domain assumptions: `x/(x+1) < x*Real.exp
+x*(genExpIntE 1 x).re ∧ x*Real.exp x*(genExpIntE 1 x).re < (x+1)/(x+2)`. -/
 @[dlmf 6.8.E2]
 theorem expIntE1_inequality_2 {x : ℝ} (hx : 0 < x) :
     x/(x+1) < x*Real.exp x*(genExpIntE 1 x).re ∧ x*Real.exp x*(genExpIntE 1 x).re < (x+1)/(x+2) := by
@@ -1177,7 +1194,8 @@ theorem expIntE1_inequality_2 {x : ℝ} (hx : 0 < x) :
   · have := mul_lt_mul_of_pos_left hhi hx
     rw [mul_assoc]; convert this using 1; field_simp
 
-/-- expIntE1 inequality 3. -/
+/-- Estimate under the stated parameter and domain assumptions: `x*(x+3)/(x^2+4*x+2) < x*Real.exp
+x*(genExpIntE 1 x).re ∧ x*Real.exp x*(genExpIntE 1 x).re < (x^2+5*x+2)/(x^2+6*x+6)`. -/
 @[dlmf 6.8.E3]
 theorem expIntE1_inequality_3 {x : ℝ} (hx : 0 < x) :
     x*(x+3)/(x^2+4*x+2) < x*Real.exp x*(genExpIntE 1 x).re ∧ x*Real.exp x*(genExpIntE 1 x).re < (x^2+5*x+2)/(x^2+6*x+6) := by
@@ -1221,7 +1239,8 @@ theorem expIntE1_inequality_3 {x : ℝ} (hx : 0 < x) :
   · have := mul_lt_mul_of_pos_left hhi hx
     rw [mul_assoc]; convert this using 1; field_simp
 
-/-- expIntE1 continuedFraction. -/
+/-- Continued-fraction representation: `HasContinuedFraction (fun k => if k=0 then exp (-z) else
+((k+1)/2 : ℕ)) (fun k => if Even k then z else 1) (genExpIntE 1 z)`. -/
 @[dlmf 6.9.E1]
 theorem expIntE1_continuedFraction {z : ℂ} (hz : z ∈ slitPlane) :
     HasContinuedFraction (fun k => if k=0 then exp (-z) else ((k+1)/2 : ℕ)) (fun k => if Even k then z else 1) (genExpIntE 1 z) := by

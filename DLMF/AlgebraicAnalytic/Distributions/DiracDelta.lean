@@ -49,12 +49,15 @@ theorem delta_apply_eq_zero_of_notMem_tsupport {Ω : TopologicalSpace.Opens ℝ}
   rw [Distribution.delta_apply]
   exact image_eq_zero_of_notMem_tsupport h
 
+/-- Identity under the stated parameter and domain assumptions: `∫ x, normalizedGaussian x = 1`. -/
 lemma g1f_integral_gauss : ∫ x, normalizedGaussian x = 1 := by
   have h := integral_gaussian 1
   simp only [neg_mul, one_mul, div_one] at h
   simp only [normalizedGaussian, integral_div, h]
   exact div_self (by positivity)
 
+/-- The map `(fun x : ℝ => ‖x‖ ^ Module.finrank ℝ ℝ * normalizedGaussian x)` tends to `(𝓝 0)`
+along `(Bornology.cobounded ℝ)`. -/
 lemma g1f_tendsto_gauss :
     Tendsto (fun x : ℝ => ‖x‖ ^ Module.finrank ℝ ℝ * normalizedGaussian x) (Bornology.cobounded ℝ)
       (𝓝 0) := by

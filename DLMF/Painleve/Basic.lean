@@ -52,7 +52,9 @@ variable {𝕜 : Type*} [RCLike 𝕜]
 /-- A twice differentiable solution of Beals–Wong's `PII(c)` on a specified set.
 The parameter is the negative of the common `α` convention for Painlevé II. -/
 structure IsPIIOn (c : 𝕜) (u : 𝕜 → 𝕜) (s : Set 𝕜) : Prop where
+  /-- The solution is differentiable at every point of the domain. -/
   differentiableAt : ∀ x ∈ s, DifferentiableAt 𝕜 u x
+  /-- The first derivative has the derivative prescribed by the differential equation. -/
   hasDerivAt_deriv : ∀ x ∈ s, HasDerivAt (deriv u) (2 * u x ^ 3 + x * u x - c) x
 
 namespace IsPIIOn

@@ -79,7 +79,8 @@ def expIntAuxF (z : ℂ) : ℂ :=
 def expIntAuxG (z : ℂ) : ℂ :=
   -cosInt z * cos z - sinIntTail z * sin z
 
-/-- hasSum Ein complex. -/
+/-- The series with terms `(fun k : ℕ => (-1 : ℂ)^k*z^(k+1)/((k+1).factorial*(k+1 : ℂ)))`
+converges to `(expIntEin z)`. -/
 @[dlmf 6.6.E4]
 theorem hasSum_Ein_complex (z : ℂ) :
     HasSum (fun k : ℕ => (-1 : ℂ)^k*z^(k+1)/((k+1).factorial*(k+1 : ℂ))) (expIntEin z) := by
@@ -88,7 +89,8 @@ theorem hasSum_Ein_complex (z : ℂ) :
     (d := fun k => k+1) (by intro k; simp)
     (by intro i j hij; dsimp at hij; omega) (by intro k; omega) z).hasSum
 
-/-- hasSum Si complex. -/
+/-- The series with terms `(fun k : ℕ => (-1 : ℂ)^k*z^(2*k+1)/((2*k+1).factorial*(2*k+1 : ℂ)))`
+converges to `(sinInt z)`. -/
 @[dlmf 6.6.E5]
 theorem hasSum_Si_complex (z : ℂ) :
     HasSum (fun k : ℕ => (-1 : ℂ)^k*z^(2*k+1)/((2*k+1).factorial*(2*k+1 : ℂ))) (sinInt z) := by
@@ -163,14 +165,14 @@ theorem cosIntCin_ofReal (x : ℝ) :
   push_cast
   ring
 
-/-- cosInt ofReal. -/
+/-- Identity under the stated parameter and domain assumptions: `cosInt x = (Real.cosInt x : ℂ)`. -/
 theorem cosInt_ofReal {x : ℝ} (hx : 0 < x) :
     cosInt x = (Real.cosInt x : ℂ) := by
   rw [cosInt, cosIntCin_ofReal, ← Complex.ofReal_log hx.le, Real.cosInt]
   push_cast
   ring
 
-/-- sinInt odd. -/
+/-- Identity under the stated parameter and domain assumptions: `sinInt (-z) = -sinInt z`. -/
 theorem sinInt_odd (z : ℂ) :
     sinInt (-z) = -sinInt z := by
   unfold sinInt
@@ -180,7 +182,7 @@ theorem sinInt_odd (z : ℂ) :
   rw [neg_pow z, show (-1:ℂ)^(2*k+1) = -1 by simp [pow_add, pow_mul]]
   ring
 
-/-- cosIntCin even. -/
+/-- Identity under the stated parameter and domain assumptions: `cosIntCin (-z) = cosIntCin z`. -/
 theorem cosIntCin_even (z : ℂ) :
     cosIntCin (-z) = cosIntCin z := by
   unfold cosIntCin
@@ -243,7 +245,8 @@ theorem cosIntCin_mul_I (z : ℂ) :
     _ = ((-1:ℂ)^k*(-1:ℂ)^k)*(-z^(2*k+2)/((2*k+2).factorial*(2*k+2:ℂ))) := by ring
     _ = _ := by rw [hs]; ring
 
-/-- expIntEin segment integral. -/
+/-- Identity under the stated parameter and domain assumptions: `expIntEin z = primitive (fun t =>
+(1-exp (-t))/t) z`. -/
 @[dlmf 6.2.E3]
 theorem expIntEin_segment_integral (z : ℂ) :
     expIntEin z = primitive (fun t => (1-exp (-t))/t) z := by
@@ -261,7 +264,8 @@ theorem expIntEin_segment_integral (z : ℂ) :
     simp
   rw [he,primitive_dslope_zero hF0]
 
-/-- sinInt segment integral. -/
+/-- Identity under the stated parameter and domain assumptions: `sinInt z = primitive (fun t =>
+sin t/t) z`. -/
 @[dlmf 6.2.E9]
 theorem sinInt_segment_integral (z : ℂ) :
     sinInt z = primitive (fun t => sin t/t) z := by
@@ -279,7 +283,8 @@ theorem sinInt_segment_integral (z : ℂ) :
     rw [Real.sinc_of_ne_zero (ne_of_gt ht.1)]; push_cast; rfl
   rw [he,primitive_dslope_zero hF0]
 
-/-- cosIntCin segment integral. -/
+/-- Identity under the stated parameter and domain assumptions: `cosIntCin z = primitive (fun t =>
+(1-cos t)/t) z`. -/
 @[dlmf 6.2.E12]
 theorem cosIntCin_segment_integral (z : ℂ) :
     cosIntCin z = primitive (fun t => (1-cos t)/t) z := by
@@ -297,7 +302,8 @@ theorem cosIntCin_segment_integral (z : ℂ) :
     simp
   rw [he,primitive_dslope_zero hF0]
 
-/-- sinhInt segment integral. -/
+/-- Identity under the stated parameter and domain assumptions: `sinhInt z = primitive (fun t =>
+sinh t/t) z`. -/
 @[dlmf 6.2.E15]
 theorem sinhInt_segment_integral (z : ℂ) :
     sinhInt z = primitive (fun t => sinh t/t) z := by
@@ -315,7 +321,8 @@ theorem sinhInt_segment_integral (z : ℂ) :
   rw [he] at h
   exact (mul_left_cancel₀ I_ne_zero h).symm
 
-/-- coshInt segment integral. -/
+/-- Identity under the stated parameter and domain assumptions: `coshInt z =
+Real.eulerMascheroniConstant + log z + primitive (fun t => (cosh t-1)/t) z`. -/
 @[dlmf 6.2.E16]
 theorem coshInt_segment_integral {z : ℂ} (hz : z ∈ slitPlane) :
     coshInt z = Real.eulerMascheroniConstant + log z + primitive (fun t => (cosh t-1)/t) z := by
@@ -372,8 +379,8 @@ theorem hasDerivAt_cosInt_complex {z : ℂ} (hz : z ∈ slitPlane) :
   field_simp
   ring
 
-
-/-- expIntE1 stieltjes. -/
+/-- Identity under the stated parameter and domain assumptions: `genExpIntE 1 z = exp (-z) * ∫ t :
+ℝ in Ioi 0, exp (-t : ℂ)/(t+z)`. -/
 @[dlmf 6.2.E2]
 theorem expIntE1_stieltjes {z : ℂ} (hz : z ∈ slitPlane) :
     genExpIntE 1 z = exp (-z) * ∫ t : ℝ in Ioi 0, exp (-t : ℂ)/(t+z) := by
@@ -456,7 +463,8 @@ theorem hasDerivAt_regularizedConfluent_Ein (z : ℂ) :
   refine hd.congr_deriv ?_
   linear_combination heq
 
-/-- expIntE1 eq Ein complex. -/
+/-- Identity under the stated parameter and domain assumptions: `genExpIntE 1 z = expIntEin z -
+log z - Real.eulerMascheroniConstant`. -/
 @[dlmf 6.2.E4]
 theorem expIntE1_eq_Ein_complex {z : ℂ} (hz : z ≠ 0) :
     genExpIntE 1 z = expIntEin z - log z - Real.eulerMascheroniConstant := by
@@ -516,7 +524,8 @@ theorem hasIntegralAtTop_exp_neg_div {ε : ℝ} (hε : 0 < ε) :
   rw [genExpIntE_one_eq_integral hε, ← integral_complex_ofReal, he]
   exact h
 
-/-- Real.expIntEi principalValue. -/
+/-- Identity under the stated parameter and domain assumptions: `HasPrincipalValueIoi (fun t : ℝ
+=> exp (-t : ℂ)/(t : ℂ)) (-x) 0 (-Real.expIntEi x)`. -/
 @[dlmf 6.2.E5]
 theorem Real.expIntEi_principalValue {x : ℝ} (hx : 0 < x) :
     HasPrincipalValueIoi (fun t : ℝ => exp (-t : ℂ)/(t : ℂ)) (-x) 0 (-Real.expIntEi x) := by
@@ -572,7 +581,8 @@ theorem Real.expIntEi_principalValue {x : ℝ} (hx : 0 < x) :
   simp only [Complex.ofReal_re]
   ring
 
-/-- Real.expIntEi negative. -/
+/-- Identity under the stated parameter and domain assumptions: `(Real.expIntEi (-x) : ℂ) =
+-genExpIntE 1 x`. -/
 @[dlmf 6.2.E6]
 theorem Real.expIntEi_negative {x : ℝ} (hx : 0 < x) :
     (Real.expIntEi (-x) : ℂ) = -genExpIntE 1 x := by
@@ -583,7 +593,8 @@ theorem Real.expIntEi_negative {x : ℝ} (hx : 0 < x) :
   push_cast
   ring
 
-/-- Real.expIntEi Ein. -/
+/-- Identity under the stated parameter and domain assumptions: `(Real.expIntEi (ε*x) : ℂ) =
+-expIntEin (-ε*x) + Real.log x + Real.eulerMascheroniConstant`. -/
 @[dlmf 6.2.E7]
 theorem Real.expIntEi_Ein {x : ℝ} (hx : 0 < x) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
     (Real.expIntEi (ε*x) : ℂ) = -expIntEin (-ε*x) + Real.log x + Real.eulerMascheroniConstant := by
@@ -728,7 +739,8 @@ theorem liPV_tendsto_sub :
   refine Tendsto.congr' (EventuallyEq.symm hev) ?_
   simpa using hL.sub hE
 
-/-- Real.logIntLi principalValue. -/
+/-- The map `(fun ε : ℝ => (∫ t in (0 : ℝ)..(1-ε), 1/Real.log t) + ∫ t in (1+ε)..x, 1/Real.log t)`
+tends to `(𝓝 (Real.logIntLi x))` along `(𝓝[>] (0 : ℝ))`. -/
 @[dlmf 6.2.E8, dlmf 4.10.E7]
 theorem Real.logIntLi_principalValue {x : ℝ} (hx : 1 < x) :
     Tendsto (fun ε : ℝ => (∫ t in (0 : ℝ)..(1-ε), 1/Real.log t) + ∫ t in (1+ε)..x, 1/Real.log t) (𝓝[>] (0 : ℝ)) (𝓝 (Real.logIntLi x)) := by
@@ -779,10 +791,8 @@ theorem Real.logIntLi_principalValue {x : ℝ} (hx : 1 < x) :
   refine Tendsto.congr' (EventuallyEq.symm hev) ?_
   simpa using (tendsto_const_nhds (x := Real.logIntLi x)).add liPV_tendsto_sub
 
-
-
-
-/-- sinInt eq aux. -/
+/-- Identity under the stated parameter and domain assumptions: `sinInt z = π/2 - expIntAuxF z *
+cos z - expIntAuxG z * sin z`. -/
 @[dlmf 6.2.E19]
 theorem sinInt_eq_aux (z : ℂ) :
     sinInt z = π/2 - expIntAuxF z * cos z - expIntAuxG z * sin z := by
@@ -790,7 +800,8 @@ theorem sinInt_eq_aux (z : ℂ) :
   unfold expIntAuxF expIntAuxG sinIntTail
   linear_combination -(sinInt z-π/2)*h
 
-/-- cosInt eq aux. -/
+/-- Identity under the stated parameter and domain assumptions: `cosInt z = expIntAuxF z * sin z -
+expIntAuxG z * cos z`. -/
 @[dlmf 6.2.E20]
 theorem cosInt_eq_aux (z : ℂ) :
     cosInt z = expIntAuxF z * sin z - expIntAuxG z * cos z := by
@@ -798,7 +809,7 @@ theorem cosInt_eq_aux (z : ℂ) :
   unfold expIntAuxF expIntAuxG
   linear_combination -(cosInt z)*h
 
-/-- hasDerivAt expIntAuxF. -/
+/-- At `z`, the function `expIntAuxF` has derivative `(-expIntAuxG z)`. -/
 @[dlmf 6.2.E21]
 theorem hasDerivAt_expIntAuxF {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt expIntAuxF (-expIntAuxG z) z := by
@@ -813,7 +824,7 @@ theorem hasDerivAt_expIntAuxF {z : ℂ} (hz : z ∈ slitPlane) :
   field_simp
   ring
 
-/-- hasDerivAt expIntAuxG. -/
+/-- At `z`, the function `expIntAuxG` has derivative `(expIntAuxF z - 1/z)`. -/
 @[dlmf 6.2.E21]
 theorem hasDerivAt_expIntAuxG {z : ℂ} (hz : z ∈ slitPlane) :
     HasDerivAt expIntAuxG (expIntAuxF z - 1/z) z := by
@@ -841,7 +852,8 @@ theorem log_quarter_turn {z : ℂ} (hz : 0 < z.re) :
   · rw [Complex.log_mul (neg_ne_zero.mpr I_ne_zero) hz0 (by simp only [arg_neg_I, Set.mem_Ioc]; constructor <;> linarith [Real.pi_pos]), log_neg_I]
     ring
 
-/-- sinInt eq E1. -/
+/-- Identity under the stated parameter and domain assumptions: `sinInt z = I/2*(genExpIntE 1
+(-I*z)-genExpIntE 1 (I*z))+π/2`. -/
 @[dlmf 6.5.E5]
 theorem sinInt_eq_E1 {z : ℂ} (hz : 0 < z.re) :
     sinInt z = I/2*(genExpIntE 1 (-I*z)-genExpIntE 1 (I*z))+π/2 := by
@@ -854,7 +866,8 @@ theorem sinInt_eq_E1 {z : ℂ} (hz : 0 < z.re) :
   rw [show I*(-z)=-I*z by ring, hlog.2] at hm
   linear_combination (norm := ring_nf) -I/2*(hm-hp) <;> simp [I_sq] <;> ring
 
-/-- cosInt eq E1. -/
+/-- Identity under the stated parameter and domain assumptions: `cosInt z = -(genExpIntE 1
+(I*z)+genExpIntE 1 (-I*z))/2`. -/
 @[dlmf 6.5.E6]
 theorem cosInt_eq_E1 {z : ℂ} (hz : 0 < z.re) :
     cosInt z = -(genExpIntE 1 (I*z)+genExpIntE 1 (-I*z))/2 := by
@@ -868,7 +881,8 @@ theorem cosInt_eq_E1 {z : ℂ} (hz : 0 < z.re) :
   unfold cosInt
   linear_combination (hp+hm)/2
 
-/-- expIntAux eq E1. -/
+/-- Identity under the stated parameter and domain assumptions: `expIntAuxG z + ε*I*expIntAuxF z =
+genExpIntE 1 (-ε*I*z)*exp (-ε*I*z)`. -/
 @[dlmf 6.5.E7]
 theorem expIntAux_eq_E1 {z : ℂ} (hz : 0 < z.re) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
     expIntAuxG z + ε*I*expIntAuxF z = genExpIntE 1 (-ε*I*z)*exp (-ε*I*z) := by
@@ -1011,7 +1025,6 @@ theorem tendsto_exp_neg_mul_kummerU_sectorAtTop (a b : ℂ) {δ : ℝ} (hδ : 0 
         mul_le_mul h2 h1 (norm_nonneg _) (Real.exp_pos _).le
     _ = _ := by simp; ring
 
-
 /-- The horizontal ray `z + t` enters the sector `|ζ|/2 ≤ re ζ`. -/
 theorem tendsto_add_ofReal_sectorAtTop (z : ℂ) :
     Tendsto (fun t : ℝ => z+t) atTop (sectorAtTop (1/2)) := by
@@ -1124,7 +1137,8 @@ theorem hasDerivAt_comp_add_ofReal {g : ℂ → ℂ} {g' z : ℂ} {t : ℝ} (h :
 theorem genExpIntE_zero_eq (z : ℂ) : genExpIntE 0 z = exp (-z)/z := by
   rw [genExpIntE, sub_zero, upperIncGamma_one, zero_sub, cpow_neg_one]; ring
 
-/-- expIntE1 horizontal integral. -/
+/-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => exp (-(z+t))/(z+t)) 0
+(genExpIntE 1 z)`. -/
 @[dlmf 6.2.E1]
 theorem expIntE1_horizontal_integral {z : ℂ} (hz : z ∈ slitPlane) :
     HasIntegralAtTop (fun t : ℝ => exp (-(z+t))/(z+t)) 0 (genExpIntE 1 z) := by
@@ -1138,7 +1152,8 @@ theorem expIntE1_horizontal_integral {z : ℂ} (hz : z ∈ slitPlane) :
   have h := hasIntegralAtTop_of_hasDerivAt_of_tendsto hd hc (tendsto_expIntE1_add_ofReal z).neg
   simpa using h
 
-/-- sinIntTail horizontal integral. -/
+/-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => sin (z+t)/(z+t)) 0
+(-sinIntTail z)`. -/
 @[dlmf 6.2.E10]
 theorem sinIntTail_horizontal_integral {z : ℂ} (hz : z ∈ slitPlane) :
     HasIntegralAtTop (fun t : ℝ => sin (z+t)/(z+t)) 0 (-sinIntTail z) := by
@@ -1150,7 +1165,8 @@ theorem sinIntTail_horizontal_integral {z : ℂ} (hz : z ∈ slitPlane) :
   have h := hasIntegralAtTop_of_hasDerivAt_of_tendsto hd hc (tendsto_sinIntTail_add_ofReal z)
   simpa using h
 
-/-- cosInt horizontal integral. -/
+/-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => cos (z+t)/(z+t)) 0
+(-cosInt z)`. -/
 @[dlmf 6.2.E11]
 theorem cosInt_horizontal_integral {z : ℂ} (hz : z ∈ slitPlane) :
     HasIntegralAtTop (fun t : ℝ => cos (z+t)/(z+t)) 0 (-cosInt z) := by
@@ -1161,7 +1177,7 @@ theorem cosInt_horizontal_integral {z : ℂ} (hz : z ∈ slitPlane) :
   have h := hasIntegralAtTop_of_hasDerivAt_of_tendsto hd hc (tendsto_cosInt_add_ofReal z)
   simpa using h
 
-/-- cosInt tendsto atTop. -/
+/-- The map `(fun x : ℝ => cosInt x)` tends to `(𝓝 0)` along `atTop`. -/
 @[dlmf 6.2.E14]
 theorem cosInt_tendsto_atTop  :
     Tendsto (fun x : ℝ => cosInt x) atTop (𝓝 0) := by

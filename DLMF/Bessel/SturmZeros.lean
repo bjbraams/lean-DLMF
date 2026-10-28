@@ -366,6 +366,8 @@ def besselNormalDeriv (y y' : ℝ → ℝ) (x : ℝ) : ℝ := y x / (2 * Real.sq
 /-- The coefficient `1 - (ν² - 1/4)/x²` of the normal form `u'' + q u = 0`. -/
 def besselNormalCoeff (ν x : ℝ) : ℝ := 1 - (ν ^ 2 - 1 / 4) / x ^ 2
 
+/-- At `x`, the function `(fun t => Real.sqrt t * y t)` has derivative `(besselNormalDeriv y y'
+x)`. -/
 theorem IsRealBesselSolution.hasDerivAt_normal (hy : IsRealBesselSolution ν y y' y'') {x : ℝ}
     (hx : 0 < x) :
     HasDerivAt (fun t => Real.sqrt t * y t) (besselNormalDeriv y y' x) x := by
@@ -397,6 +399,7 @@ theorem IsRealBesselSolution.hasDerivAt_normalDeriv (hy : IsRealBesselSolution �
   field_simp
   ring
 
+/-- Identity under the stated parameter and domain assumptions: `y x = 0`. -/
 theorem eq_zero_of_sqrt_mul_eq_zero {x : ℝ} (hx : 0 < x) (h : Real.sqrt x * y x = 0) : y x = 0 :=
   (mul_eq_zero.mp h).resolve_left (Real.sqrt_pos.mpr hx).ne'
 
@@ -514,6 +517,8 @@ theorem isRealBesselSolution_besselJ (ν : ℝ) :
     show ((x ^ 2 : ℝ) : ℂ) - (ν : ℂ) ^ 2 = ((x ^ 2 - ν ^ 2 : ℝ) : ℂ) by push_cast; ring] at h
   simpa only [add_re, re_ofReal_mul, zero_re] using h
 
+/-- Identity under the stated parameter and domain assumptions: `besselJ ν x = 0 ↔ (besselJ ν
+x).re = 0`. -/
 theorem besselJ_eq_zero_iff_re {ν x : ℝ} (hx : 0 < x) :
     besselJ ν x = 0 ↔ (besselJ ν x).re = 0 := by
   constructor

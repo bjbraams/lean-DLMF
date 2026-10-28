@@ -152,7 +152,6 @@ theorem integrableOn_kummerPsi {m : ℕ} {a : ℂ} (b : ℂ) (ha : ((m : ℝ) - 
             (mul_nonneg (Real.rpow_nonneg hX.det_pos.le _) (Real.exp_pos _).le)
       _ = _ := by ring
 
-
 /-- DLMF 35.6.4: for `ℜa, ℜ(b - a) > (m-1)/2` and `T ∈ 𝓢`,
 `₁F₁(a; b; T) = B_m(a, b - a)⁻¹ ∫_{0<X<I} etr(TX) |X|^{a-(m+1)/2} |I - X|^{b-a-(m+1)/2} dX`,
 stated as: the integral converges and equals `B_m(a, b - a) ₁F₁(a; b; T)`. -/
@@ -200,6 +199,8 @@ theorem hyp1F1_kummer {m : ℕ} (a : ℂ) {b : ℂ} (hb : multivariateGamma m b 
     hyp1F1 a b T = (etr T : ℂ) * hyp1F1 (b - a) b (-T) := by
   sorry
 
+/-- Identity under the stated parameter and domain assumptions: `(((‖(x : ℂ) ^ q‖ : ℝ)) : ℂ) = (x
+: ℂ) ^ ((q.re : ℝ) : ℂ)`. -/
 lemma q2m_cpow_norm_ofReal {x : ℝ} (hx : 0 < x) (q : ℂ) :
     (((‖(x : ℂ) ^ q‖ : ℝ)) : ℂ) = (x : ℂ) ^ ((q.re : ℝ) : ℂ) := by
   rw [Complex.norm_cpow_eq_rpow_re_of_pos hx, Complex.ofReal_cpow hx.le]

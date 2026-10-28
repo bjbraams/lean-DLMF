@@ -121,7 +121,9 @@ def IsAlgebraicOn (w : ℂ → ℂ) (U : Set ℂ) : Prop :=
 /-- A real solution of `w'' = F(x, w, w')` on `s ⊆ ℝ`, with genuine differentiability of `w`
 and of `w'` on `s` (the real analogue of `IsODE2SolutionOn`). -/
 structure IsRealODE2SolutionOn (F : ℝ → ℝ → ℝ → ℝ) (w : ℝ → ℝ) (s : Set ℝ) : Prop where
+  /-- The solution is differentiable at every point of the domain. -/
   differentiableAt : ∀ x ∈ s, DifferentiableAt ℝ w x
+  /-- The first derivative has the derivative prescribed by the differential equation. -/
   hasDerivAt_deriv : ∀ x ∈ s, HasDerivAt (deriv w) (F x (w x) (deriv w x)) x
 
 /-- The right-hand side `6w² + x` of real `PI` (32.2.1 on the real line). -/
@@ -154,8 +156,12 @@ sections to be differentiable to the orders used, at every point of `U`. -/
 `U ⊆ ℂ × ℂ`. -/
 @[dlmf 32.13.E1]
 structure IsMKdVOn (v : ℂ → ℂ → ℂ) (U : Set (ℂ × ℂ)) : Prop where
+  /-- The solution has three continuous complex derivatives in the spatial variable. -/
   contDiffAt_x : ∀ p ∈ U, ContDiffAt ℂ 3 (fun x => v x p.2) p.1
+  /-- The solution is complex differentiable in time. -/
   differentiableAt_t : ∀ p ∈ U, DifferentiableAt ℂ (fun t => v p.1 t) p.2
+  /-- The modified Korteweg-de Vries equation `v_t - 6v²v_x + v_xxx = 0` holds throughout the
+  domain. -/
   eq : ∀ p ∈ U, deriv (fun t => v p.1 t) p.2 -
       6 * v p.1 p.2 ^ 2 * deriv (fun x => v x p.2) p.1 +
         iteratedDeriv 3 (fun x => v x p.2) p.1 = 0
@@ -163,8 +169,11 @@ structure IsMKdVOn (v : ℂ → ℂ → ℂ) (U : Set (ℂ × ℂ)) : Prop where
 /-- DLMF 32.13.3: the Korteweg–de Vries equation `u_t + 6uu_x + u_xxx = 0` on `U`. -/
 @[dlmf 32.13.E3]
 structure IsKdVOn (u : ℂ → ℂ → ℂ) (U : Set (ℂ × ℂ)) : Prop where
+  /-- The solution has three continuous complex derivatives in the spatial variable. -/
   contDiffAt_x : ∀ p ∈ U, ContDiffAt ℂ 3 (fun x => u x p.2) p.1
+  /-- The solution is complex differentiable in time. -/
   differentiableAt_t : ∀ p ∈ U, DifferentiableAt ℂ (fun t => u p.1 t) p.2
+  /-- The Korteweg-de Vries equation `u_t + 6uu_x + u_xxx = 0` holds throughout the domain. -/
   eq : ∀ p ∈ U, deriv (fun t => u p.1 t) p.2 +
       6 * u p.1 p.2 * deriv (fun x => u x p.2) p.1 +
         iteratedDeriv 3 (fun x => u x p.2) p.1 = 0
@@ -173,15 +182,22 @@ structure IsKdVOn (u : ℂ → ℂ → ℂ) (U : Set (ℂ × ℂ)) : Prop where
 `t`-derivative of `u_x`. -/
 @[dlmf 32.13.E6]
 structure IsSineGordonOn (u : ℂ → ℂ → ℂ) (U : Set (ℂ × ℂ)) : Prop where
+  /-- The solution is complex differentiable in the spatial variable. -/
   differentiableAt_x : ∀ p ∈ U, DifferentiableAt ℂ (fun x => u x p.2) p.1
+  /-- The spatial derivative is complex differentiable in time. -/
   differentiableAt_xt : ∀ p ∈ U, DifferentiableAt ℂ (fun t => deriv (fun x => u x t) p.1) p.2
+  /-- The sine-Gordon equation `u_xt = sin u` holds throughout the domain. -/
   eq : ∀ p ∈ U, deriv (fun t => deriv (fun x => u x t) p.1) p.2 = Complex.sin (u p.1 p.2)
 
 /-- DLMF 32.13.8: the Boussinesq equation `u_tt = u_xx - 6(u²)_xx + u_xxxx` on `U`. -/
 @[dlmf 32.13.E8]
 structure IsBoussinesqOn (u : ℂ → ℂ → ℂ) (U : Set (ℂ × ℂ)) : Prop where
+  /-- The solution has four continuous complex derivatives in the spatial variable at every point
+  of the domain. -/
   contDiffAt_x : ∀ p ∈ U, ContDiffAt ℂ 4 (fun x => u x p.2) p.1
+  /-- The solution has two continuous complex derivatives in time at every point of the domain. -/
   contDiffAt_t : ∀ p ∈ U, ContDiffAt ℂ 2 (fun t => u p.1 t) p.2
+  /-- The Boussinesq equation `u_tt = u_xx - 6(u²)_xx + u_xxxx` holds throughout the domain. -/
   eq : ∀ p ∈ U, iteratedDeriv 2 (fun t => u p.1 t) p.2 =
       iteratedDeriv 2 (fun x => u x p.2) p.1 -
         6 * iteratedDeriv 2 (fun x => u x p.2 ^ 2) p.1 +

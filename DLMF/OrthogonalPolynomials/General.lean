@@ -849,6 +849,8 @@ theorem integral_eval_U_mul_of_ne {n m : ℕ} (h : n ≠ m) :
   · exact Continuous.intervalIntegrable (by fun_prop) _ _
   · exact Continuous.intervalIntegrable (by fun_prop) _ _
 
+/-- Identity under the stated parameter and domain assumptions: `∫ x : ℝ in (-1 : ℝ)..1,
+(Polynomial.Chebyshev.U ℝ n).eval x ^ 2 * Real.sqrt (1 - x ^ 2) = π / 2`. -/
 @[dlmf 18.3.T1]
 theorem integral_eval_U_mul_self {n : ℕ} :
     ∫ x : ℝ in (-1 : ℝ)..1,

@@ -199,9 +199,13 @@ theorem sphSeries_tendsto_sphericalI (z : ℂ) :
 
 /-! ### Recurrences and derivatives, DLMF 10.51.1–10.51.2 -/
 
+/-- Identity under the stated parameter and domain assumptions: `((n+1 : ℕ) : ℂ) + 3/2 = (n : ℂ) +
+3/2 + 1`. -/
 private lemma sphSeries_param_succ (n : ℕ) :
     ((n+1 : ℕ) : ℂ) + 3/2 = (n : ℂ) + 3/2 + 1 := by push_cast; ring
 
+/-- Identity under the stated parameter and domain assumptions: `((n+2 : ℕ) : ℂ) + 3/2 = (n : ℂ) +
+3/2 + 1 + 1`. -/
 private lemma sphSeries_param_succ_succ (n : ℕ) :
     ((n+2 : ℕ) : ℂ) + 3/2 = (n : ℂ) + 3/2 + 1 + 1 := by push_cast; ring
 
@@ -719,7 +723,6 @@ theorem sphSeries_eventually_norm_add_le (α β : ℂ) :
     simp only [Complex.norm_natCast, norm_neg, sub_neg_eq_add] at this
     rw [add_comm] at this; linarith
   linarith
-
 
 /-- The bounding sequence of `sphSeries_norm_sphericalI_le` gains a factor `R/(2(n+3/2))`
 when the order rises by one. -/

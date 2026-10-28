@@ -50,6 +50,7 @@ namespace DLMF.MatrixArgument
 
 /-! ## Partitions -/
 
+/-- Formula under the stated hypotheses: `κ ∈ partitions m k ↔ Antitone κ ∧ ∑ j, κ j = k`. -/
 theorem mem_partitions {m k : ℕ} {κ : Fin m → ℕ} :
     κ ∈ partitions m k ↔ Antitone κ ∧ ∑ j, κ j = k := by
   unfold partitions
@@ -62,6 +63,7 @@ theorem mem_partitions {m k : ℕ} {κ : Fin m → ℕ} :
     have := Finset.single_le_sum (fun i _ => Nat.zero_le (κ i)) (Finset.mem_univ j)
     omega
 
+/-- Identity under the stated parameter and domain assumptions: `partitions m 0 = {0}`. -/
 theorem partitions_zero (m : ℕ) : partitions m 0 = {0} := by
   ext κ
   rw [mem_partitions, Finset.mem_singleton]
@@ -72,6 +74,7 @@ theorem partitions_zero (m : ℕ) : partitions m 0 = {0} := by
   · rintro rfl
     exact ⟨fun _ _ _ => le_rfl, by simp⟩
 
+/-- Identity under the stated parameter and domain assumptions: `partitions 1 k = {fun _ => k}`. -/
 theorem partitions_fin_one (k : ℕ) : partitions 1 k = {fun _ => k} := by
   ext κ
   rw [mem_partitions, Finset.mem_singleton]
@@ -83,6 +86,8 @@ theorem partitions_fin_one (k : ℕ) : partitions 1 k = {fun _ => k} := by
   · rintro rfl
     exact ⟨fun _ _ _ => le_rfl, by simp⟩
 
+/-- Identity under the stated parameter and domain assumptions: `partitionalShiftedFactorial a (0
+: Fin m → ℕ) = 1`. -/
 theorem partitionalShiftedFactorial_zero {𝕜 : Type*} [Field 𝕜] {m : ℕ} (a : 𝕜) :
     partitionalShiftedFactorial a (0 : Fin m → ℕ) = 1 := by
   simp [partitionalShiftedFactorial]

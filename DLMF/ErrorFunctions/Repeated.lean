@@ -120,7 +120,8 @@ theorem iteratedErfc_normalization (n : ℕ) :
   push_cast
   rfl
 
-/-- iteratedErfc initial. -/
+/-- Identity under the stated parameter and domain assumptions: `iteratedErfc (-1) z=2/Real.sqrt
+π*exp (-z^2) ∧ iteratedErfc 0 z=erfc z`. -/
 @[dlmf 7.18.E1]
 theorem iteratedErfc_initial (z : ℂ) :
     iteratedErfc (-1) z=2/Real.sqrt π*exp (-z^2) ∧ iteratedErfc 0 z=erfc z := by
@@ -163,7 +164,7 @@ theorem differentiable_iteratedErfc (n : ℕ) : Differentiable ℂ (iteratedErfc
   have hU : Differentiable ℂ (pcfU ((n:ℂ)+1/2)) := fun z => (hasDerivAt_pcfU _ z).differentiableAt
   fun_prop
 
-/-- hasDerivAt iteratedErfc. -/
+/-- At `z`, the function `(iteratedErfc n)` has derivative `(-iteratedErfc ((n : ℤ)-1) z)`. -/
 @[dlmf 7.18.E3]
 theorem hasDerivAt_iteratedErfc (n : ℕ) (z : ℂ) :
     HasDerivAt (iteratedErfc n) (-iteratedErfc ((n : ℤ)-1) z) z := by
@@ -248,7 +249,8 @@ theorem tendsto_iteratedErfc_add_atTop (n : ℕ) (z : ℂ) :
     exact tendsto_neg_atTop_atBot.comp ((tendsto_pow_atTop two_ne_zero).comp h1)
   simpa using (Real.tendsto_exp_atBot.comp this).const_mul (2/Real.sqrt π*(Real.exp (z.im^2)*M))
 
-/-- iteratedErfc tail. -/
+/-- Horizontal-ray integral representation: `HasIntegralAtTop (fun t : ℝ => iteratedErfc ((n :
+ℤ)-1) (z+t)) 0 (iteratedErfc n z)`. -/
 @[dlmf 7.18.E2]
 theorem iteratedErfc_tail (n : ℕ) (z : ℂ) :
     HasIntegralAtTop (fun t : ℝ => iteratedErfc ((n : ℤ)-1) (z+t)) 0 (iteratedErfc n z) := by
@@ -278,7 +280,8 @@ theorem iteratedErfc_tail (n : ℕ) (z : ℂ) :
   simp_rw [hR]
   simpa using (tendsto_iteratedErfc_add_atTop n z).const_sub (iteratedErfc n z)
 
-/-- iteratedErfc recurrence. -/
+/-- Identity under the stated parameter and domain assumptions: `iteratedErfc n z =
+-z/n*iteratedErfc ((n : ℤ)-1) z+1/(2*n)*iteratedErfc ((n : ℤ)-2) z`. -/
 @[dlmf 7.18.E7]
 theorem iteratedErfc_recurrence {n : ℕ} (hn : 1 ≤ n) (z : ℂ) :
     iteratedErfc n z = -z/n*iteratedErfc ((n : ℤ)-1) z+1/(2*n)*iteratedErfc ((n : ℤ)-2) z := by
@@ -323,7 +326,8 @@ theorem hasDerivAt_exp_mul_iteratedErfc (n : ℕ) (z : ℂ) :
   simp only [Nat.cast_ofNat, Nat.reduceSub, pow_one, Int.natCast_add, Int.natCast_one]
   linear_combination exp (z^2)*hr
 
-/-- iteratedDeriv scaled erfc. -/
+/-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (fun t => exp
+(t^2)*erfc t) z=(-1 : ℂ)^n*2^n*n.factorial*exp (z^2)*iteratedErfc n z`. -/
 @[dlmf 7.18.E4]
 theorem iteratedDeriv_scaled_erfc (n : ℕ) (z : ℂ) :
     iteratedDeriv n (fun t => exp (t^2)*erfc t) z=(-1 : ℂ)^n*2^n*n.factorial*exp (z^2)*iteratedErfc n z := by
@@ -371,7 +375,7 @@ theorem hasDerivAt_deriv_iteratedErfc (n : ℕ) (z : ℂ) :
     simp only [Nat.cast_succ,Int.natCast_add,Int.natCast_one]
     linear_combination -hr
 
-/-- iteratedErfc ode. -/
+/-- The stated relation follows from the given hypotheses: `let W`. -/
 @[dlmf 7.18.E5]
 theorem iteratedErfc_ode (n : ℕ) (A B z : ℂ) :
     let W := fun t => A*iteratedErfc n t+B*iteratedErfc n (-t); deriv (deriv W) z+2*z*deriv W z-2*n*W z=0 := by
@@ -424,7 +428,8 @@ theorem iteratedErfc_ne_zero_at_zero (k : ℤ) (hk : -1≤k) : iteratedErfc k 0�
   · exact mul_ne_zero (mul_ne_zero hπ0 (cpow_ne_zero_iff.mpr (Or.inl (by norm_num))))
       (inv_ne_zero (Gamma_ne_zero_of_re_pos hg))
 
-/-- iteratedErfc general solution. -/
+/-- Identity under the stated parameter and domain assumptions: `∃ A B : ℂ, ∀ z, W
+z=A*iteratedErfc n z+B*iteratedErfc n (-z)`. -/
 @[dlmf 7.18.E5]
 theorem iteratedErfc_general_solution (n : ℕ) {W : ℂ → ℂ} (hW : Differentiable ℂ W) (hW2 : Differentiable ℂ (deriv W)) (hode : ∀ z, deriv (deriv W) z+2*z*deriv W z-2*n*W z=0) :
     ∃ A B : ℂ, ∀ z, W z=A*iteratedErfc n z+B*iteratedErfc n (-z) := by
@@ -510,7 +515,8 @@ theorem iteratedDeriv_iteratedErfc_zero (n k : ℕ) :
   simp only [div_eq_mul_inv,mul_inv_rev] at hc ⊢
   linear_combination ((-1:ℂ)^k*G⁻¹)*hc
 
-/-- iteratedErfc hasSum. -/
+/-- The series with terms `(fun k : ℕ => (-1 : ℂ)^k*z^k/((2 : ℂ)^((n : ℤ)-k)*(k.factorial :
+ℂ)*Gamma (1+((n : ℂ)-k)/2)))` converges to `(iteratedErfc n z)`. -/
 @[dlmf 7.18.E6]
 theorem iteratedErfc_hasSum (n : ℕ) (z : ℂ) :
     HasSum (fun k : ℕ => (-1 : ℂ)^k*z^k/((2 : ℂ)^((n : ℤ)-k)*(k.factorial : ℂ)*Gamma (1+((n : ℂ)-k)/2))) (iteratedErfc n z) := by
@@ -520,7 +526,9 @@ theorem iteratedErfc_hasSum (n : ℕ) (z : ℂ) :
   simp only [sub_zero,smul_eq_mul,div_eq_mul_inv,mul_inv_rev]
   ring
 
-/-- iteratedErfc hermite. -/
+/-- Identity under the stated parameter and domain assumptions: `(-1 : ℂ)^n*iteratedErfc n
+z+iteratedErfc n (-z)=I^(-(n : ℤ))/((2 : ℂ)^((n : ℤ)-1)*(n.factorial : ℂ))*hermitePolyHEval n
+(I*z)`. -/
 @[dlmf 7.18.E8]
 theorem iteratedErfc_hermite (n : ℕ) (z : ℂ) :
     (-1 : ℂ)^n*iteratedErfc n z+iteratedErfc n (-z)=I^(-(n : ℤ))/((2 : ℂ)^((n : ℤ)-1)*(n.factorial : ℂ))*hermitePolyHEval n (I*z) := by
@@ -569,7 +577,9 @@ theorem iteratedErfc_hermite (n : ℕ) (z : ℂ) :
   field_simp [hn0]
   linear_combination h
 
-/-- iteratedErfc kummerM. -/
+/-- Identity under the stated parameter and domain assumptions: `iteratedErfc n z=exp
+(-z^2)*(kummerM ((n : ℂ)/2+1/2) (1/2) (z^2)/((2 : ℂ)^n*Gamma ((n : ℂ)/2+1))-z*kummerM ((n :
+ℂ)/2+1) (3/2) (z^2)/((2 : ℂ)^((n : ℤ)-1)*Gamma ((n : ℂ)/2+1/2)))`. -/
 @[dlmf 7.18.E9]
 theorem iteratedErfc_kummerM (n : ℕ) (z : ℂ) :
     iteratedErfc n z=exp (-z^2)*(kummerM ((n : ℂ)/2+1/2) (1/2) (z^2)/((2 : ℂ)^n*Gamma ((n : ℂ)/2+1))-z*kummerM ((n : ℂ)/2+1) (3/2) (z^2)/((2 : ℂ)^((n : ℤ)-1)*Gamma ((n : ℂ)/2+1/2))) := by
@@ -615,7 +625,8 @@ theorem iteratedErfc_kummerM (n : ℕ) (z : ℂ) :
       ring
     _ = _ := by rw [he,hA,hB]; ring
 
-/-- iteratedErfc kummerU. -/
+/-- Identity under the stated parameter and domain assumptions: `iteratedErfc n z=exp (-z^2)/((2 :
+ℂ)^n*Real.sqrt π)*kummerU ((n : ℂ)/2+1/2) (1/2) (z^2)`. -/
 @[dlmf 7.18.E10]
 theorem iteratedErfc_kummerU (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
     iteratedErfc n z=exp (-z^2)/((2 : ℂ)^n*Real.sqrt π)*kummerU ((n : ℂ)/2+1/2) (1/2) (z^2) := by
@@ -644,7 +655,8 @@ theorem iteratedErfc_kummerU (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
         (exp (-z^2/2)*exp (-(2*z^2)/4))*kummerU ((n:ℂ)/2+1/2) (1/2) (z^2) := by ring
     _ = _ := by rw [hscale,he]; ring
 
-/-- iteratedErfc kummerUOnLog. -/
+/-- Identity under the stated parameter and domain assumptions: `iteratedErfc n z=exp (-z^2)/((2 :
+ℂ)^n*Real.sqrt π)*kummerUOnLog ((n : ℂ)/2+1/2) (1/2) (2*log z)`. -/
 @[dlmf 7.18.E10]
 theorem iteratedErfc_kummerUOnLog (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
     iteratedErfc n z=exp (-z^2)/((2 : ℂ)^n*Real.sqrt π)*kummerUOnLog ((n : ℂ)/2+1/2) (1/2) (2*log z) := by
@@ -663,14 +675,16 @@ theorem iteratedErfc_kummerUOnLog (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
   field_simp [hp0]
   ring
 
-/-- iteratedErfc pcfU. -/
+/-- Identity under the stated parameter and domain assumptions: `iteratedErfc n z=exp (-z^2/2)/((2
+: ℂ)^((n : ℤ)-1)*π)^(1/2 : ℂ)*pcfU (n+1/2) (z*Real.sqrt 2)`. -/
 @[dlmf 7.18.E11]
 theorem iteratedErfc_pcfU (n : ℕ) (z : ℂ) :
     iteratedErfc n z=exp (-z^2/2)/((2 : ℂ)^((n : ℤ)-1)*π)^(1/2 : ℂ)*pcfU (n+1/2) (z*Real.sqrt 2) := by
   rw [iteratedErfc_normalization, iteratedErfc_eq_pcfU_nat, mul_comm z (Real.sqrt 2:ℂ)]
   ring
 
-/-- iteratedErfc probability. -/
+/-- Identity under the stated parameter and domain assumptions: `iteratedErfc n
+z=gaussianProbabilityHh n (Real.sqrt 2*z)/((2 : ℂ)^((n : ℤ)-1)*π)^(1/2 : ℂ)`. -/
 @[dlmf 7.18.E12]
 theorem iteratedErfc_probability (n : ℕ) (z : ℂ) :
     iteratedErfc n z=gaussianProbabilityHh n (Real.sqrt 2*z)/((2 : ℂ)^((n : ℤ)-1)*π)^(1/2 : ℂ) := by
@@ -680,7 +694,8 @@ theorem iteratedErfc_probability (n : ℕ) (z : ℂ) :
   have hs0 : (Real.sqrt 2:ℂ)≠0 := by exact_mod_cast (Real.sqrt_pos.mpr (by norm_num : (0:ℝ)<2)).ne'
   field_simp [hs0]
 
-/-- iteratedErfc continuedFraction. -/
+/-- Continued-fraction representation: `HasContinuedFraction (fun k => if k=0 then 1/2 else (n+k :
+ℂ)/2) (fun _ => z) (iteratedErfc n z/iteratedErfc ((n : ℤ)-1) z)`. -/
 @[dlmf 7.18.E13]
 theorem iteratedErfc_continuedFraction (n : ℕ) {z : ℂ} (hz : 0 < z.re) :
     HasContinuedFraction (fun k => if k=0 then 1/2 else (n+k : ℂ)/2) (fun _ => z) (iteratedErfc n z/iteratedErfc ((n : ℤ)-1) z) := by
@@ -993,7 +1008,9 @@ theorem erfRecip_iteratedErfc_rotSector (n : ℕ) {θ δ : ℝ} (hθ : |θ| < π
     norm_num
     field_simp
 
-/-- iteratedErfc asymptotic. -/
+/-- Identity under the stated parameter and domain assumptions: `HasAsymptoticExpansion (sector
+(3*π/4-δ)) (fun m z => 2/Real.sqrt π*exp (-z^2)/(2*z)^(n+1+2*m)) (fun m => (-1 :
+ℂ)^m*(2*m+n).factorial/((n.factorial : ℂ)*m.factorial)) (iteratedErfc n)`. -/
 @[dlmf 7.18.E14]
 theorem iteratedErfc_asymptotic (n : ℕ) {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 3*π/4) :
     HasAsymptoticExpansion (sector (3*π/4-δ)) (fun m z => 2/Real.sqrt π*exp (-z^2)/(2*z)^(n+1+2*m)) (fun m => (-1 : ℂ)^m*(2*m+n).factorial/((n.factorial : ℂ)*m.factorial)) (iteratedErfc n) := by

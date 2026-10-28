@@ -346,6 +346,7 @@ theorem iteratedDeriv_two_riemannZeta_zero :
       1 / 2 * (Real.eulerMascheroniConstant : ℂ) ^ 2 - π ^ 2 / 24 + stieltjesConstant 1 := by
   sorry
 
+/-- Identity under the stated parameter and domain assumptions: `cos (n * π) = (-1) ^ n`. -/
 private lemma z25a_cos_nat_mul_pi (n : ℕ) : cos (n * π) = (-1) ^ n := by
   rw [← ofReal_natCast, ← ofReal_mul, ← ofReal_cos, Real.cos_nat_mul_pi]
   push_cast; rfl
@@ -543,7 +544,6 @@ lemma q25a_zeta_mul_zeta {n k : ℕ} (hk : 1 ≤ k) (hkn : k < n) :
   rw [show ∀ a b c d f g h i j l : ℂ, a * b * c * d / f * (g * h * i * j / l) =
       (a * g) * (b * h) * (c * i) * (d * j) / (f * l) by intros; ring, p1, p2, p3, ← hc']
   field_simp
-
 
 /-- DLMF 25.6.16: `(n + ½) ζ(2n) = ∑_{k=1}^{n-1} ζ(2k) ζ(2n-2k)` for `n ≥ 2`. -/
 @[dlmf 25.6.E16]

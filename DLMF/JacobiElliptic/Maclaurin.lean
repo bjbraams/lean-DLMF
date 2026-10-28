@@ -100,6 +100,7 @@ lemma p3j_bootstrap {s c d S C D S' C' D' : ℂ → ℂ} {κ : ℂ}
   exact ⟨p3j_isBigO_of_deriv hes z0s
     (((hrs.add (p3j_mul_one h3 bC)).add (p3j_mul_one h2 bD)).add (p3j_mul_one h3 bec)), h2, h3⟩
 
+/-- Asymptotic bound with the indicated comparison function: `R =O[𝓝 0] fun z => z ^ n`. -/
 lemma p3j_isBigO_of_eq {R Q : ℂ → ℂ} {n : ℕ} (hQ : Continuous Q)
     (h : ∀ z, R z = z ^ n * Q z) : R =O[𝓝 0] fun z => z ^ n := by
   rw [show R = fun z => Q z * z ^ n from funext fun z => by rw [h, mul_comm]]
@@ -224,7 +225,6 @@ lemma p3j_reg_ball {κ : ℝ} (hk0 : 0 < κ) (hk1 : κ < 1) {z : ℂ}
       exact_mod_cast this
     nlinarith
   linarith [abs_im_le_norm z]
-
 
 /-- DLMF 22.10.1: `sn(z,k) = z - (1 + k²) z³/3! + (1 + 14k² + k⁴) z⁵/5!
 - (1 + 135k² + 135k⁴ + k⁶) z⁷/7! + O(z⁹)`. -/

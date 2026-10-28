@@ -58,6 +58,7 @@ def lerchPhi (z s a : ℂ) : ℂ :=
 def z25b_lerchParamOK (s a : ℂ) : Prop :=
   ((∀ n : ℤ, s ≠ n) → a ∈ slitPlane) ∧ ((∃ n : ℕ, s = n + 1) → ∀ m : ℕ, a ≠ -m)
 
+/-- The stated relation follows from the given hypotheses: `z25b_lerchParamOK s (a + m)`. -/
 lemma z25b_lerchParamOK_add_nat {s a : ℂ} (h : z25b_lerchParamOK s a) (m : ℕ) :
     z25b_lerchParamOK s (a + m) := by
   refine ⟨fun hs => ?_, fun hs j hj => h.2 hs (j + m) (by push_cast; linear_combination hj)⟩
@@ -74,6 +75,9 @@ theorem exists_lerchPhi_continuation {s a : ℂ} (h : z25b_lerchParamOK s a) :
   have _ := h
   exact q25b_exists_isLerchCont s a
 
+/-- Analyticity on a neighborhood of the specified domain: `AnalyticOnNhd ℂ (z25b_slitContinuation
+(fun w => lerchPhiSeries w s a)) z25b_slitOne ∧ ∀ z, ‖z‖ < 1 → HasSum (fun n : ℕ => z ^ n / (a
++ n) ^ s) (z25b_slitContinuation (fun w => lerchPhiSeries w s a) z)`. -/
 lemma z25b_lerchPhi_spec {s a : ℂ} (h : z25b_lerchParamOK s a) :
     AnalyticOnNhd ℂ (z25b_slitContinuation (fun w => lerchPhiSeries w s a)) z25b_slitOne ∧
       ∀ z, ‖z‖ < 1 → HasSum (fun n : ℕ => z ^ n / (a + n) ^ s)
@@ -140,6 +144,7 @@ theorem analyticOnNhd_lerchPhi {s a : ℂ} (h : z25b_lerchParamOK s a) :
   refine (z25b_lerchPhi_spec h).1.congr z25b_isOpen_slitOne fun z hz => ?_
   simp only [lerchPhi, hz, ↓reduceIte]
 
+/-- The series with terms `(fun n : ℕ => z ^ n / (a + n) ^ s)` converges to `(lerchPhi z s a)`. -/
 lemma z25b_hasSum_lerchPhi_of_cond {z s a : ℂ} (h : z25b_lerchParamOK s a)
     (hz : ‖z‖ < 1 ∨ (‖z‖ = 1 ∧ 1 < s.re)) :
     HasSum (fun n : ℕ => z ^ n / (a + n) ^ s) (lerchPhi z s a) := by

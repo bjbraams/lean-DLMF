@@ -153,6 +153,8 @@ theorem pcfBC_Gamma_bound_strip {c₁ c₂ : ℝ} (hc : 0 < c₁) :
 /-- The Barnes integrand `Γ(t) Γ(A-2t) 2^t z^{2t}` of DLMF 12.5.8 with `A = a + 1/2`. -/
 def pcfBC_F (A z t : ℂ) : ℂ := Gamma t * Gamma (A - 2*t) * 2^t * z^(2*t)
 
+/-- Identity under the stated parameter and domain assumptions: `pcfBC_F (1/2+1*a) z (c + y*I) =
+pcfInt_B a z c y`. -/
 theorem pcfBC_F_eq_B (a z : ℂ) (c y : ℝ) : pcfBC_F (1/2+1*a) z (c + y*I) = pcfInt_B a z c y := by
   unfold pcfBC_F pcfInt_B; ring_nf
 
@@ -196,6 +198,7 @@ theorem pcfBC_norm_F_le {A z : ℂ} (hz : z ≠ 0) (x y : ℝ) {C1 C2 : ℝ} {K1
     _ = _ := by
         rw [← Real.exp_add, ← Real.exp_add]; ring_nf
 
+/-- Differentiability at the specified argument: `DifferentiableAt ℂ (pcfBC_F A z) t`. -/
 theorem pcfBC_F_differentiableAt {A z t : ℂ} (hz : z ≠ 0) (ht : 0 < t.re)
     (hA : ∀ m : ℕ, A - 2*t ≠ -m) : DifferentiableAt ℂ (pcfBC_F A z) t := by
   have ht' : ∀ m : ℕ, t ≠ -m := fun m h => by
@@ -205,16 +208,19 @@ theorem pcfBC_F_differentiableAt {A z t : ℂ} (hz : z ≠ 0) (ht : 0 < t.re)
     (by fun_prop))).mul (differentiableAt_id.const_cpow (Or.inl two_ne_zero))).mul
     ((differentiableAt_id.const_mul 2).const_cpow (Or.inl hz))
 
+/-- Differentiability at the specified argument: `DifferentiableAt ℂ (fun A => pcfBC_F A z t) A`. -/
 theorem pcfBC_F_differentiableAt_param {A z t : ℂ} (hA : ∀ m : ℕ, A - 2*t ≠ -m) :
     DifferentiableAt ℂ (fun A => pcfBC_F A z t) A := by
   unfold pcfBC_F
   exact (((differentiableAt_const _).mul ((differentiableAt_Gamma _ hA).comp A
     (by fun_prop))).mul (differentiableAt_const _)).mul (differentiableAt_const _)
 
+/-- Nonvanishing under the stated hypotheses: `∀ m : ℕ, A - 2*((x:ℂ)+y*I) ≠ -m`. -/
 theorem pcfBC_ne_pole {A : ℂ} {x : ℝ} (hav : ∀ n : ℕ, 2*x ≠ A.re + n) (y : ℝ) :
     ∀ m : ℕ, A - 2*((x:ℂ)+y*I) ≠ -m := fun m h => by
   have := congrArg re h; simp at this; exact hav m (by linarith)
 
+/-- Continuity of the indicated function: `Continuous fun y : ℝ => pcfBC_F A z (c + y*I)`. -/
 theorem pcfBC_F_continuous {A z : ℂ} (hz : z ≠ 0) {c : ℝ} (hc : 0 < c)
     (hav : ∀ n : ℕ, 2*c ≠ A.re + n) : Continuous fun y : ℝ => pcfBC_F A z (c + y*I) :=
   continuous_iff_continuousAt.mpr fun y => by
@@ -314,6 +320,8 @@ def pcfBC_phi (A z : ℂ) (n : ℕ) (t : ℂ) : ℂ :=
   -(1/2) * Gamma t * Gamma (A - 2*t + n + 1) / (∏ j ∈ Finset.range n, (A - 2*t + j)) *
     2^t * z^(2*t)
 
+/-- Identity under the stated parameter and domain assumptions: `pcfBC_phi A z n ((A+n)/2) =
+pcfBC_res A z n`. -/
 theorem pcfBC_phi_pole (A z : ℂ) (n : ℕ) : pcfBC_phi A z n ((A+n)/2) = pcfBC_res A z n := by
   unfold pcfBC_phi pcfBC_res
   have h1 : A - 2*((A+n)/2) + n + 1 = 1 := by ring
@@ -345,6 +353,7 @@ theorem pcfBC_phi_div {A z t : ℂ} {n : ℕ} (ht : t ≠ (A+n)/2)
   have hd' : 2*t - (A+n) ≠ 0 := fun h => hd (by linear_combination h/2)
   field_simp
 
+/-- Differentiability at the specified argument: `DifferentiableAt ℂ (pcfBC_phi A z n) t`. -/
 theorem pcfBC_phi_differentiableAt {A z t : ℂ} {n : ℕ} (hz : z ≠ 0) (ht : 0 < t.re)
     (hA : ∀ m : ℕ, A - 2*t + n + 1 ≠ -m) (hj : ∀ j : ℕ, j < n → A - 2*t + j ≠ 0) :
     DifferentiableAt ℂ (pcfBC_phi A z n) t := by
@@ -424,12 +433,15 @@ theorem pcfBC_shift_one {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c�
 /-- The number of poles `t = (A+n)/2` to the left of the line `Re t = c`. -/
 def pcfBC_N (A : ℂ) (c : ℝ) : ℕ := (⌈2*c - A.re⌉).toNat
 
+/-- Estimate under the stated parameter and domain assumptions: `n < pcfBC_N A c ↔ (A.re + n)/2 <
+c`. -/
 theorem pcfBC_lt_N {A : ℂ} {c : ℝ} {n : ℕ} : n < pcfBC_N A c ↔ (A.re + n)/2 < c := by
   unfold pcfBC_N
   rw [Int.lt_toNat, Int.lt_ceil]
   push_cast
   constructor <;> intro h <;> linarith
 
+/-- Estimate under the stated parameter and domain assumptions: `pcfBC_N A c₁ ≤ pcfBC_N A c₂`. -/
 theorem pcfBC_N_mono {A : ℂ} {c₁ c₂ : ℝ} (h : c₁ ≤ c₂) : pcfBC_N A c₁ ≤ pcfBC_N A c₂ := by
   unfold pcfBC_N
   exact Int.toNat_le_toNat (Int.ceil_mono (by linarith))
@@ -533,6 +545,7 @@ theorem pcfBC_U_pos {a z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c : ℝ
 def pcfBC_J (A z : ℂ) (c : ℝ) : ℂ :=
   (∫ y : ℝ, pcfBC_F A z (c + y*I)) - 2*π*∑ n ∈ Finset.range (pcfBC_N A c), pcfBC_res A z n
 
+/-- Identity under the stated parameter and domain assumptions: `pcfBC_J A z c₁ = pcfBC_J A z c₂`. -/
 theorem pcfBC_J_eq {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c₁ c₂ : ℝ}
     (hc₁ : 0 < c₁) (hc₂ : 0 < c₂) (hav₁ : ∀ n : ℕ, 2*c₁ ≠ A.re + n)
     (hav₂ : ∀ n : ℕ, 2*c₂ ≠ A.re + n) : pcfBC_J A z c₁ = pcfBC_J A z c₂ := by
@@ -543,9 +556,12 @@ theorem pcfBC_J_eq {A z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {c₁ c�
 /-- A canonical admissible line, at distance `1/4` from the poles (in `2 Re t`). -/
 def pcfBC_cg (A : ℂ) : ℝ := (Int.fract A.re + 1/2)/2
 
+/-- Estimate under the stated parameter and domain assumptions: `0 < pcfBC_cg A`. -/
 theorem pcfBC_cg_pos (A : ℂ) : 0 < pcfBC_cg A := by
   unfold pcfBC_cg; linarith [Int.fract_nonneg A.re]
 
+/-- Identity under the stated parameter and domain assumptions: `2*pcfBC_cg A - A.re = 1/2 -
+⌊A.re⌋`. -/
 theorem pcfBC_two_cg (A : ℂ) : 2*pcfBC_cg A - A.re = 1/2 - ⌊A.re⌋ := by
   unfold pcfBC_cg; rw [← Int.self_sub_floor]; ring
 
@@ -560,6 +576,7 @@ theorem pcfBC_not_int {m : ℤ} {h : ℝ} (h1 : 1/4 - (m:ℝ) < h) (h2 : h < 3/4
   · have : (1:ℝ) ≤ ((n + m : ℤ) : ℝ) := by exact_mod_cast h3
     push_cast at this; linarith
 
+/-- Nonvanishing under the stated hypotheses: `2*pcfBC_cg A₀ ≠ A.re + n`. -/
 theorem pcfBC_avoid_near {A₀ A : ℂ} (hA : |A.re - A₀.re| < 1/4) (n : ℕ) :
     2*pcfBC_cg A₀ ≠ A.re + n := by
   have h0 := pcfBC_two_cg A₀
@@ -568,6 +585,8 @@ theorem pcfBC_avoid_near {A₀ A : ℂ} (hA : |A.re - A₀.re| < 1/4) (n : ℕ) 
   exact pcfBC_not_int (m := ⌊A₀.re⌋) (h := 2*pcfBC_cg A₀ - A.re) (by linarith) (by linarith) n
     (by push_cast; linarith)
 
+/-- Identity under the stated parameter and domain assumptions: `pcfBC_N A (pcfBC_cg A₀) = pcfBC_N
+A₀ (pcfBC_cg A₀)`. -/
 theorem pcfBC_N_near {A₀ A : ℂ} (hA : |A.re - A₀.re| < 1/4) :
     pcfBC_N A (pcfBC_cg A₀) = pcfBC_N A₀ (pcfBC_cg A₀) := by
   have h0 := pcfBC_two_cg A₀
@@ -657,6 +676,8 @@ theorem pcfBC_integral_differentiableOn {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| 
       (DLMF.Gamma.integrable_one_add_abs_pow_mul_exp_neg hb _).const_mul _,
       Eventually.of_forall fun y A' hA' => hbound A' hA' y⟩)
 
+/-- Differentiability at the specified argument: `DifferentiableAt ℂ (fun a => pcfBC_res (1/2+1*a)
+z n) a₀`. -/
 theorem pcfBC_res_differentiableAt {z : ℂ} (hz0 : z ≠ 0) {a₀ : ℂ}
     (ha : ∀ n : ℕ, a₀ ≠ -1/2 - n) (n : ℕ) :
     DifferentiableAt ℂ (fun a => pcfBC_res (1/2+1*a) z n) a₀ := by
@@ -671,10 +692,13 @@ theorem pcfBC_res_differentiableAt {z : ℂ} (hz0 : z ≠ 0) {a₀ : ℂ}
 /-- The canonical-line value `G(a)` of the residue-corrected Barnes integral. -/
 def pcfBC_G (z a : ℂ) : ℂ := pcfBC_J (1/2+1*a) z (pcfBC_cg (1/2+1*a))
 
+/-- Identity under the stated parameter and domain assumptions: `pcfBC_J (1/2+1*a) z c = pcfBC_G z
+a`. -/
 theorem pcfBC_G_eq_J {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) (a : ℂ) {c : ℝ} (hc : 0 < c)
     (hav : ∀ n : ℕ, 2*c ≠ (1/2+1*a).re + n) : pcfBC_J (1/2+1*a) z c = pcfBC_G z a :=
   pcfBC_J_eq hz0 hz hc (pcfBC_cg_pos _) hav (pcfBC_avoid_near (by simp))
 
+/-- Differentiability at the specified argument: `DifferentiableAt ℂ (pcfBC_G z) a₀`. -/
 theorem pcfBC_G_differentiableAt {z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < 3*π/4) {a₀ : ℂ}
     (ha : ∀ n : ℕ, a₀ ≠ -1/2 - n) : DifferentiableAt ℂ (pcfBC_G z) a₀ := by
   set A₀ : ℂ := 1/2+1*a₀
@@ -740,17 +764,23 @@ theorem pcfBC_U_integral {a z : ℂ} (ha : ∀ n : ℕ, a ≠ -1/2 - n) (hz0 : z
   simp only [W] at hJ
   linear_combination hJ
 
+/-- Formula under the stated hypotheses: `pcfBarnesResidueSum false a z c = ∑ n ∈ Finset.range
+(pcfBC_N (1/2+1*a) c), pcfBC_res (1/2+1*a) z n`. -/
 theorem pcfBC_sum_false (a z : ℂ) (c : ℝ) : pcfBarnesResidueSum false a z c =
     ∑ n ∈ Finset.range (pcfBC_N (1/2+1*a) c), pcfBC_res (1/2+1*a) z n := by
   simp only [pcfBarnesResidueSum, pcfBarnesResidue, pcfBC_N, pcfBC_res, Bool.false_eq_true,
     ite_false, mul_one]
   rw [show (1/2:ℂ)+1*a = a+1/2 by ring]
 
+/-- Formula under the stated hypotheses: `pcfBarnesResidueSum true a z c = ∑ n ∈ Finset.range
+(pcfBC_N (1/2+1*(-a)) c), pcfBarnesResidue true a z n`. -/
 theorem pcfBC_sum_true (a z : ℂ) (c : ℝ) : pcfBarnesResidueSum true a z c =
     ∑ n ∈ Finset.range (pcfBC_N (1/2+1*(-a)) c), pcfBarnesResidue true a z n := by
   simp only [pcfBarnesResidueSum, pcfBC_N, ite_true]
   rw [show (1/2:ℂ)+1*(-a) = 1/2-a by ring]
 
+/-- Identity under the stated parameter and domain assumptions: `pcfBC_res (1/2+1*(-a)) (I*z) n +
+pcfBC_res (1/2+1*(-a)) (-I*z) n = 2 * pcfBarnesResidue true a z n`. -/
 theorem pcfBC_res_true {a z : ℂ} (hz0 : z ≠ 0) (hz : |arg z| < π/2) (n : ℕ) :
     pcfBC_res (1/2+1*(-a)) (I*z) n + pcfBC_res (1/2+1*(-a)) (-I*z) n =
       2 * pcfBarnesResidue true a z n := by
