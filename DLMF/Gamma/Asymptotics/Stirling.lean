@@ -109,9 +109,12 @@ theorem binetPoly_eq_range (n : ℕ) (t : ℝ) : binetPoly n t =
     rw [Finset.sum_Icc_succ_top (by omega), ih, Finset.sum_range_succ,
       show 2 * (n + 1) - 2 = 2 * n by omega]
 
-/-- `|β(t)/t - Pₙ(t)| ≤ 2 Sₙ t^{2n}` (Temme (3.26)). -/
-theorem abs_binetBeta_div_sub_binetPoly_le (n : ℕ) {t : ℝ} (ht : 0 < t) :
-    |binetBeta t / t - binetPoly n t| ≤ 2 * binetRemConst n * t ^ (2 * n) := by
+/-- The remainder of the Bernoulli expansion of Binet's kernel is an absolutely
+convergent partial-fraction series with alternating sign. -/
+theorem hasSum_binetBeta_div_sub_binetPoly (n : ℕ) {t : ℝ} (ht : 0 < t) :
+    HasSum (fun m : ℕ => 2 * (-1 : ℝ) ^ n * t ^ (2 * n) /
+      ((2 * π * (m + 1)) ^ (2 * n) * (t ^ 2 + (2 * π * (m + 1)) ^ 2)))
+      (binetBeta t / t - binetPoly n t) := by
   have ha : ∀ m : ℕ, 0 < 2 * π * (m + 1) := fun m => by positivity
   -- termwise: `2/(t² + a²) = ∑_{j<n} 2(-1)ʲ t^{2j}/a^{2j+2} + 2(-1)ⁿ t^{2n}/(a^{2n}(t²+a²))`
   have hterm : ∀ a : ℝ, 0 < a → 2 / (t ^ 2 + a ^ 2) =
@@ -156,6 +159,13 @@ theorem abs_binetBeta_div_sub_binetPoly_le (n : ℕ) {t : ℝ} (ht : 0 < t) :
       rw [hterm _ (ha m)]
       ring
     · rw [binetPoly_eq_range]
+  exact hRem
+
+/-- `|β(t)/t - Pₙ(t)| ≤ 2 Sₙ t^{2n}` (Temme (3.26)). -/
+theorem abs_binetBeta_div_sub_binetPoly_le (n : ℕ) {t : ℝ} (ht : 0 < t) :
+    |binetBeta t / t - binetPoly n t| ≤ 2 * binetRemConst n * t ^ (2 * n) := by
+  have ha : ∀ m : ℕ, 0 < 2 * π * (m + 1) := fun m => by positivity
+  have hRem := hasSum_binetBeta_div_sub_binetPoly n ht
   -- bound the remainder
   have hbound : ∀ m : ℕ, ‖2 * (-1 : ℝ) ^ n * t ^ (2 * n) /
       ((2 * π * (m + 1)) ^ (2 * n) * (t ^ 2 + (2 * π * (m + 1)) ^ 2))‖ ≤
@@ -186,6 +196,20 @@ theorem abs_binetBeta_div_sub_binetPoly_le (n : ℕ) {t : ℝ} (ht : 0 < t) :
         hnorm.tsum_le_tsum hbound (hsumS.mul_left _)
     _ = 2 * binetRemConst n * t ^ (2 * n) := by
         rw [tsum_mul_left, binetRemConst]; ring
+
+/-- The Bernoulli remainder of Binet's kernel has sign `(-1)^n` on the positive axis. -/
+theorem binetBeta_div_sub_binetPoly_sign (n : ℕ) {t : ℝ} (ht : 0 < t) :
+    0 ≤ (-1 : ℝ) ^ n * (binetBeta t / t - binetPoly n t) := by
+  rw [← (hasSum_binetBeta_div_sub_binetPoly n ht).tsum_eq, ← tsum_mul_left]
+  apply tsum_nonneg
+  intro m
+  have hp : (-1 : ℝ) ^ n * (-1) ^ n = 1 := by rw [← mul_pow]; norm_num
+  rw [show (-1 : ℝ) ^ n * (2 * (-1) ^ n * t ^ (2 * n) /
+      ((2 * π * (m + 1)) ^ (2 * n) * (t ^ 2 + (2 * π * (m + 1)) ^ 2))) =
+      2 * ((-1) ^ n * (-1) ^ n) * t ^ (2 * n) /
+        ((2 * π * (m + 1)) ^ (2 * n) * (t ^ 2 + (2 * π * (m + 1)) ^ 2)) by ring,
+    hp]
+  positivity
 
 /-- `e^(-zs) s^j binetPoly n s` is integrable on `(0, ∞)` for `z > 0`. -/
 theorem integrableOn_exp_mul_pow_mul_binetPoly {z : ℝ} (hz : 0 < z) (n j : ℕ) :
@@ -324,19 +348,13 @@ theorem log_Gamma_stirling (n : ℕ) {x : ℝ} (hx : 1 < x) :
     (pow_le_pow_left₀ ht.le (by linarith) _)) (by positivity)
 
 open Set in
-/-- DLMF 5.11.2: `ψ(z) = ln z - 1/(2z) - ∑_{k=1}^n B₂ₖ/(2k z^(2k)) + O(z^(-2n-2))` along `z = t +
-x`, `t → ∞`. -/
-@[dlmf 5.11.E2]
-theorem digamma_stirling (n : ℕ) {x : ℝ} (hx : 1 < x) :
-    Asymptotics.IsBigO atTop
-      (fun t : ℝ => Real.digamma (t + x) -
-        (Real.log (t + x) - 1 / (2 * (t + x)) -
-          ∑ k ∈ Finset.Icc 1 n, bernoulli (2 * k) / ((2 * k) * (t + x) ^ (2 * k))))
-      (fun t : ℝ => (t : ℝ) ^ (-(2 * n : ℝ) - 2)) := by
-  refine Asymptotics.IsBigO.of_bound (2 * binetRemConst n * (2 * n + 1).factorial) ?_
-  filter_upwards [eventually_gt_atTop 0] with t ht
-  set z := t + x with hz
-  have hz0 : 0 < z := by linarith
+/-- The remainder in the digamma expansion is the negative Laplace integral of
+Binet's Bernoulli remainder; this identity holds at every positive real argument. -/
+theorem digamma_sub_stirling_eq_integral (n : ℕ) {z : ℝ} (hz0 : 0 < z) :
+    Real.digamma z - (Real.log z - 1 / (2 * z) -
+      ∑ k ∈ Finset.Icc 1 n, (bernoulli (2 * k) : ℝ) / ((2 * k) * z ^ (2 * k))) =
+      -∫ s in Ioi (0 : ℝ), Real.exp (-z * s) *
+        (s ^ 1 * (binetBeta s / s - binetPoly n s)) := by
   have hsum : ∑ k ∈ Finset.Icc 1 n, (bernoulli (2 * k) : ℝ) / ((2 * k) * z ^ (2 * k)) =
       ∫ s in Ioi (0 : ℝ), Real.exp (-z * s) * (s ^ 1 * binetPoly n s) := by
     rw [integral_exp_mul_pow_mul_binetPoly hz0]
@@ -359,6 +377,23 @@ theorem digamma_stirling (n : ℕ) {x : ℝ} (hx : 1 < x) :
       field_simp
     rw [digamma_eq_log_sub_binetBeta hz0, hsum, hI]
     ring
+  exact hdiff
+
+open Set in
+/-- DLMF 5.11.2: `ψ(z) = ln z - 1/(2z) - ∑_{k=1}^n B₂ₖ/(2k z^(2k)) + O(z^(-2n-2))` along `z = t +
+x`, `t → ∞`. -/
+@[dlmf 5.11.E2]
+theorem digamma_stirling (n : ℕ) {x : ℝ} (hx : 1 < x) :
+    Asymptotics.IsBigO atTop
+      (fun t : ℝ => Real.digamma (t + x) -
+        (Real.log (t + x) - 1 / (2 * (t + x)) -
+          ∑ k ∈ Finset.Icc 1 n, bernoulli (2 * k) / ((2 * k) * (t + x) ^ (2 * k))))
+      (fun t : ℝ => (t : ℝ) ^ (-(2 * n : ℝ) - 2)) := by
+  refine Asymptotics.IsBigO.of_bound (2 * binetRemConst n * (2 * n + 1).factorial) ?_
+  filter_upwards [eventually_gt_atTop 0] with t ht
+  set z := t + x with hz
+  have hz0 : 0 < z := by linarith
+  have hdiff := digamma_sub_stirling_eq_integral n hz0
   have hb := abs_integral_exp_mul_pow_mul_rem_le hz0 n 1
   rw [← abs_neg, ← hdiff] at hb
   rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_pos (Real.rpow_pos_of_pos ht _)]

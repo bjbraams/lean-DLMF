@@ -1302,3 +1302,186 @@ and natural-density Chebotarev theorem to ℚ:
 (`NumberField.Chebotarev.tendsto_primeCount_primesCongruent`), with Mathlib's
 `Rat.HeightOneSpectrum.primesEquiv`, `natGenerator`, `prime_natGenerator` and
 `Chebyshev.isBigO_psi_sub_theta_sqrt` (ψ(x) ~ x from θ(x) ~ x). No external proof body was copied.
+
+## DLMF Chapters 1–2 admission proofs (2026-10-28)
+
+The integral mean-value theorems in `DLMF.AlgebraicAnalytic.Calculus.OneVariable`
+use Mathlib’s `exists_eq_const_mul_intervalIntegral_of_nonneg` and
+`exists_eq_const_mul_intervalIntegral_of_nonneg_of_monotoneOn`. The logarithmic-derivative
+limit in `DLMF.AlgebraicAnalytic.Complex.Functions` uses
+`TendstoLocallyUniformlyOn.deriv` and `logDeriv_fun_prod`.
+
+The elementary Laplace-transform entries use the project’s complex Gamma integral and
+Mathlib’s factorial values of `Complex.Gamma`. Analyticity uses the project’s
+`Complex.differentiableOn_integral_Ioi_of_locally_dominated`; differentiation under the
+integral uses Mathlib’s `hasDerivAt_integral_of_dominated_loc_of_deriv_le`. The root
+asymptotics in DLMF §2.2 use Mathlib’s `Asymptotics.IsEquivalent.rpow` and
+`Real.isLittleO_log_id_atTop`.
+
+The exponential Fourier cosine and sine entries specialize the proved Laplace entries in
+`DLMF.AlgebraicAnalytic.Transforms.LaplaceTable`. The Mellin transform of `1/(1+x)`
+specializes `DLMF.Gamma.mellin_one_add_cpow_neg` and Mathlib’s
+`Complex.Gamma_mul_Gamma_one_sub`.
+
+The Laplace transform of a derivative uses Mathlib’s improper-integral fundamental theorem
+`MeasureTheory.integral_Ioi_of_hasDerivAt_of_tendsto`. Higher derivatives follow by induction;
+the periodic and antiperiodic rules use Mathlib’s
+`intervalIntegral.integral_interval_add_Ioi` and translation invariance.
+
+The holomorphy of improper parameter integrals uses the project’s
+`Complex.differentiableOn_intervalIntegral_of_locally_dominated` and Mathlib’s
+`TendstoLocallyUniformlyOn.differentiableOn`. The uniform integral M-test uses
+`MeasureTheory.tendsto_integral_Ioi_zero` and
+`intervalIntegral.integral_interval_add_Ioi`.
+
+The general differentiation-under-the-integral API in
+`DLMFMathlib.Analysis.Complex.ParametricHolomorphy` now exposes the Fréchet derivative and
+commutes every complex derivative with integration, using Mathlib’s
+`Complex.norm_iteratedDeriv_le_of_forall_mem_sphere_norm_le`. The finite-interval parameter
+theorem in DLMF §1.10 uses this API. The Liouville, Schwarzian and product-solution
+identities in DLMF §1.13 use Mathlib’s chain rules and `iteratedDeriv_fun_mul`. The Laplace
+convolution theorem uses `MeasureTheory.integral_convolution`.
+
+`DLMFMathlib.Analysis.MellinConvolution` adapts the logarithmic change of variables in
+Mathlib’s `mellinInv_mellin_eq`, reuses `mellin_eq_fourier`, and applies
+`MeasureTheory.integral_convolution` and `Integrable.integrable_convolution`. Both DLMF
+Mellin-convolution conventions reuse this common proof; the reciprocal convention uses
+Mathlib’s `MellinConvergent.comp_rpow`, `MellinConvergent.cpow_smul` and `mellin_comp_inv`.
+
+## DLMF Chapters 1–2 follow-up proofs (2026-10-29)
+
+The real Cauchy–Schwarz equality criterion in
+`DLMFMathlib.Analysis.InnerProductSpace.CauchySchwarz` specializes Mathlib's
+`norm_inner_eq_norm_tfae`. Its integral adapter uses `MeasureTheory.L2.inner_def`.
+Integral Minkowski uses `MeasureTheory.eLpNorm_add_le`; strict integral
+arithmetic–geometric mean uses `StrictConvexOn.ae_eq_const_or_map_average_lt`
+with `strictConvexOn_exp`. The spectral identities reuse `HilbertBasis.hasSum_repr`,
+the unitary-equivalence API and Mathlib's `L²` integral and norm formulas.
+
+The Cauchy–Riemann converse uses Mathlib's
+`differentiableAt_complex_iff_differentiableAt_real`. The contour-series theorem
+uses pinned TauCeti's piecewise-`C¹` curve integrability API together with Mathlib's
+`intervalIntegral.tendsto_integral_filter_of_dominated_convergence`.
+
+The exact Fourier transform of the two-sided exponential specializes
+`TauCeti.integral_exp_mul_I_mul_exp_neg_mul_abs` from
+`TauCeti.Analysis.Fourier.ExpNegAbs`. The improper sine-transform entry specializes
+`TauCeti.Contour.tendsto_integral_sin_mul_div_atTop` from
+`TauCeti.Analysis.Contour.WorkedExamples.HalfDisc.SineIntegral`.
+The pinned TauCeti revision is `a049b4264d2cf4dbf4720796f844a3a3764914a5`.
+The interval-indicator entries use Mathlib's exact elementary trigonometric integrals.
+
+The new Mathlib-only `DLMFMathlib.Analysis.Asymptotics.IntegralComparison` integrates
+little-o error bounds and reuses Mathlib's improper power integrals and power/logarithm
+limits. Haar decay uses Mathlib's Riemann–Lebesgue theorem through the project's
+Fourier-normalization adapter, and
+`TendstoUniformlyOnFilter.tendsto_of_eventually_tendsto`. The Mellin coefficient
+identity differentiates the existing Gamma-product definition using Mathlib's
+`Complex.differentiableAt_Gamma`, `Complex.Gamma_ne_zero` and `Complex.digamma_def`.
+
+
+## DLMF Chapters 1–2, items 1–6 (2026-10-29)
+
+The Fourier `L²` bridge in `DLMFMathlib.Analysis.Fourier.L2Compatibility` tests against
+Schwartz functions and uses Mathlib's `Lp.fourier_toTemperedDistribution_eq`,
+`ae_eq_of_integral_contDiff_smul_eq`, `VectorFourier.integral_bilin_fourierIntegral_eq_flip`
+and `Lp.inner_fourier_eq`. The DLMF normalization and even/odd extensions give the project
+pairings and convolution inversion. The half-line support module extends the indicator
+and reflection APIs of Mathlib's `MemLp` theory.
+
+Mellin and Stieltjes holomorphy reuse the project's locally dominated holomorphic-integral
+API. Slit-plane domination specializes
+`TauCeti.exists_pos_forall_mem_ball_mul_one_add_le_norm_add` from
+`TauCeti.Analysis.Complex.SlitPlane`. Weighted exponential integrability uses
+`TauCeti.integrableOn_pow_mul_exp_neg_mul_Ioi` from
+`TauCeti.MeasureTheory.Integral.ExpDecay` and
+`TauCeti.MeasureTheory.integrable_comp_abs` from
+`TauCeti.MeasureTheory.Integral.Bochner.Basic`. The pinned TauCeti revision remains
+`a049b4264d2cf4dbf4720796f844a3a3764914a5`.
+
+The Gaussian entries use Mathlib's `fourierIntegral_gaussian`,
+`integrable_cexp_neg_mul_sq`, `integrable_mul_cexp_neg_mul_sq` and the improper fundamental
+theorem of calculus. Principal-power normalization reuses the existing local
+`Complex.mul_ofReal_cpow_of_ne_zero`. Logarithmic Mellin entries reuse the logarithmic
+coordinate adapter and the proved Laplace moments.
+
+Repeated integration by parts uses Mathlib's
+`intervalIntegral.integral_deriv_mul_eq_sub_of_hasDerivWithinAt`. The Laplace remainder
+then reuses `DLMF.AlgebraicAnalytic.laplaceTransform_iteratedDeriv` and
+`norm_laplaceTransform_le`; exponential bounds for primitives use Mathlib's fundamental
+theorem of calculus. Sector geometry uses compactness and metric thickenings, followed by
+`Complex.norm_deriv_le_of_forall_mem_sphere_norm_le` for the Ritt estimates.
+
+The harmonic-number results reuse the existing Gamma Binet and digamma proofs. Their
+partial-fraction remainder and its sign are exposed for reuse, without copying the
+Gamma expansion. Power-sum estimates use Mathlib's integral-comparison and p-series APIs;
+the oscillatory recurrence uses the project's existing summation-by-parts identity.
+
+## Chapter 1–2 Fourier, Mellin and logarithmic Watson proofs (2026-10-29)
+
+The Fourier-series pairings use Mathlib's `HilbertBasis.hasSum_inner_mul_inner`, Fourier
+basis representation and interval-to-circle adapters. Smooth coefficient decay uses
+Mathlib's `fourierCoeffOn_of_hasDerivAt` and TauCeti's `Function.Periodic.deriv` from
+`TauCeti.Analysis.Calculus.PeriodicDeriv`. The complex Gaussian Poisson identity adapts
+Mathlib's `Complex.tsum_exp_neg_quadratic` and Gaussian decay estimates.
+
+Almost-everywhere Fourier inversion is proved by testing against smooth compactly supported
+functions, using Mathlib's `ae_eq_of_integral_contDiff_smul_eq`, Schwartz inversion and
+`VectorFourier.integral_bilin_fourierIntegral_eq_flip`. The Mellin pairings retain the
+weighted `L¹` hypotheses via Mathlib's logarithmic-coordinate identity `mellin_eq_fourier`.
+The logarithmic Watson proof uses Mathlib's Mellin differentiation criterion and
+`Real.hasDerivAt_Gamma_of_pos` together with the project's existing Watson remainder bound.
+
+The complex Frullani integral uses Mathlib's interval fundamental theorem of calculus,
+Fubini theorem and complex exponential integral. Its Laplace-table applications reuse
+TauCeti's `div_mem_slitPlane_of_re_pos` from `TauCeti.Analysis.Complex.SlitPlane`.
+The fractional-kernel integrability criterion is transported from TauCeti's
+`integrableOn_rpow_mul_one_sub_rpow_iff` in `TauCeti.Analysis.SpecialFunctions.Beta`.
+Upstream proofs are imported directly; the new proof round introduces no copied upstream
+proof or additional axiom.
+
+## Chapter 1–2 kernel, power-sum and Laplace-ray proofs (2026-10-29)
+
+The general-kernel Watson proof uses Mathlib's `integral_comp_rpow_Ioi_of_pos` and
+`integrableOn_Ioi_comp_rpow_iff` for a positive power substitution, Mellin convergence
+criteria and real-power asymptotics. It extends the project's proved Laplace remainder
+estimate to stretched exponentials, then controls the original kernel by domination.
+
+The power-sum expansion reuses the proved `DLMF.Zeta.riemannZeta_eq_eulerMaclaurin` and
+the boundedness of periodic Bernoulli polynomials. Its coefficient adapters use Mathlib's
+`Ring.choose_neg`, `Ring.choose_smul_choose`, Pochhammer evaluation identities and
+`Complex.ofReal_choose`. A duplicate local real-to-complex binomial adapter was removed
+in favor of that last upstream lemma. No admitted Hurwitz-zeta asymptotic is used.
+
+The horizontal Laplace-ray formula uses Mathlib's `integrable_prod_iff`,
+`integral_integral_swap`, `integral_exp_mul_complex_Ioi` and `integral_exp_mul_Ioi`.
+Mathlib's Mellin convergence criterion proves integrability of the exponentially weighted
+quotient from the existing endpoint limit and exponential-growth hypotheses.
+No upstream proofs are copied and no new axiom is introduced.
+
+## Later-chapter identities and series (2026-10-29)
+
+The full-domain q-Gauss proof interpolates the already proved terminating q-Chu values
+and applies Mathlib's `AnalyticOnNhd.eqOn_of_preconnected_of_frequently_eq`.
+The new geometric Newton-series module uses Mathlib's geometric-series estimates,
+`Real.add_one_le_exp`, and locally dominated holomorphic-series API. The coefficientwise
+classical limits use Mathlib's derivative of complex powers and finite-product limits.
+The root-of-unity factorial identity evaluates Mathlib's `X_pow_sub_C_eq_prod` and uses
+`Complex.isPrimitiveRoot_exp`; no polynomial factorization is reproved here.
+
+The Whittaker–Buchholz proof reuses the existing regularized hypergeometric and Bessel
+series, then uses Mathlib's locally uniform derivative convergence and analytic Taylor
+uniqueness. The Lommel parameter limit combines the existing entire regularized-₁F₂
+numerator with Mathlib's analytic divided differences and finite-shift Gamma recurrence;
+vanishing on both polar hyperplanes supplies the double-pole cancellation.
+The Carlson RC duplication formula specializes the existing RF duplication
+formulas. The Weierstrass Fourier and sigma-product proofs reuse the proved local theta
+logarithmic derivatives and products; differentiating the Fourier series uses Mathlib's
+`Complex.hasSum_deriv_of_summable_norm` and the existing compact-uniform theta bounds.
+
+The Narayana generating function uses Mathlib's Vandermonde identity and the project's
+proved Catalan series transform. The Bernoulli Mellin–Barnes representation uses
+lean-codes' `Complex.integral_vertical_eq_of_tail_bound` from
+`ToMathlib.Analysis.MellinBarnes` and `Complex.abs_sin_mul_cosh_le_norm_sin_pi` from
+`ToMathlib.Analysis.SpecialFunctions.RamanujanMaster`, together with the already proved
+Bernoulli moments of the hyperbolic secant kernel. Shared proofs are imported directly.

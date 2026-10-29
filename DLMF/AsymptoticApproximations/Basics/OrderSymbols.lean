@@ -9,6 +9,8 @@ public import DLMF.AsymptoticApproximations.Basics.Defs
 public import DLMFMathlib.Analysis.Asymptotics.AsymptoticInversion
 public import DLMFMathlib.Analysis.Asymptotics.WatsonSector
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import DLMFMathlib.Analysis.Asymptotics.IntegralComparison
+public import DLMFMathlib.Analysis.Complex.Sector
 
 /-!
 # Order symbols and asymptotic expansions (DLMF §2.1)
@@ -173,7 +175,7 @@ theorem integral_Ioi_isEquivalent_of_isEquivalent_cpow {f : ℝ → ℂ} {ν : �
     (hx₀ : 0 < x₀) (hf : ContinuousOn f (Set.Ici x₀)) (hν : ν.re < -1)
     (hfν : f ~[atTop] fun x => (x : ℂ) ^ ν) :
     (fun x => ∫ t in Set.Ioi x, f t) ~[atTop] fun x => -(x : ℂ) ^ (ν + 1) / (ν + 1) := by
-  sorry
+  exact hfν.integral_Ioi_cpow hx₀ hf hν
 
 /-- DLMF 2.1.12, case `ℜν < -1`: under the hypotheses of 2.1.11 the integral `∫_{x₀}^x f`
 tends to a constant (DLMF: `∫ f(x) dx ∼` a constant). -/
@@ -182,7 +184,9 @@ theorem exists_tendsto_intervalIntegral_of_isEquivalent_cpow {f : ℝ → ℂ} {
     (hx₀ : 0 < x₀) (hf : ContinuousOn f (Set.Ici x₀)) (hν : ν.re < -1)
     (hfν : f ~[atTop] fun x => (x : ℂ) ^ ν) :
     ∃ C : ℂ, Tendsto (fun x => ∫ t in x₀..x, f t) atTop (𝓝 C) := by
-  sorry
+  have hi := hf.integrableOn_Ici_of_isBigO_cpow hx₀ hν hfν.isBigO
+  exact ⟨_, MeasureTheory.intervalIntegral_tendsto_integral_Ioi x₀
+    (hi.mono_set Set.Ioi_subset_Ici_self) tendsto_id⟩
 
 /-- DLMF 2.1.12, case `ν = -1`: if `f` is continuous and `f(x) ∼ x⁻¹`, then
 `∫_{x₀}^x f(t) dt ∼ ln x`. -/
@@ -190,7 +194,7 @@ theorem exists_tendsto_intervalIntegral_of_isEquivalent_cpow {f : ℝ → ℂ} {
 theorem intervalIntegral_isEquivalent_log {f : ℝ → ℂ} {x₀ : ℝ} (hx₀ : 0 < x₀)
     (hf : ContinuousOn f (Set.Ici x₀)) (hfν : f ~[atTop] fun x => (x : ℂ)⁻¹) :
     (fun x => ∫ t in x₀..x, f t) ~[atTop] fun x => (Real.log x : ℂ) := by
-  sorry
+  exact hfν.intervalIntegral_inv hx₀ hf
 
 /-- DLMF 2.1.12, case `ℜν > -1`: if `f` is continuous and `f(x) ∼ x^ν`, then
 `∫_{x₀}^x f(t) dt ∼ x^{ν+1}/(ν+1)`. -/
@@ -199,7 +203,39 @@ theorem intervalIntegral_isEquivalent_cpow {f : ℝ → ℂ} {ν : ℂ} {x₀ : 
     (hf : ContinuousOn f (Set.Ici x₀)) (hν : -1 < ν.re)
     (hfν : f ~[atTop] fun x => (x : ℂ) ^ ν) :
     (fun x => ∫ t in x₀..x, f t) ~[atTop] fun x => (x : ℂ) ^ (ν + 1) / (ν + 1) := by
-  sorry
+  exact hfν.intervalIntegral_cpow hx₀ hf hν
+
+/-- Eventual assertions in a sector can be stated using one radial cutoff. -/
+private lemma eventually_norm_sector_iff (S : Set ℂ) (P : ℂ → Prop) :
+    (∀ᶠ z in comap (fun z : ℂ => ‖z‖) atTop ⊓ 𝓟 S, P z) ↔
+      ∃ A : ℝ, ∀ z, A ≤ ‖z‖ → z ∈ S → P z := by
+  rw [((atTop_basis.comap (fun z : ℂ => ‖z‖)).inf_principal S).eventually_iff]
+  simp only [true_and, Set.mem_inter_iff, Set.mem_preimage, Set.mem_Ici]
+  constructor
+  · rintro ⟨A, hA⟩
+    exact ⟨A, fun z hz hs => hA ⟨hz, hs⟩⟩
+  · rintro ⟨A, hA⟩
+    exact ⟨A, fun z hz => hA z hz.1 hz.2⟩
+
+/-- The Cauchy estimate has a constant independent of the size of the eventual power
+bound, so the same estimate handles both big-O and little-o. -/
+private lemma ritt_derivative_bound {f : ℂ → ℂ} {θ ω ω' R ν : ℝ}
+    (hω : ω ≤ π) (hω' : 0 ≤ ω') (hωω' : ω' < ω)
+    (hf : DifferentiableOn ℂ f (rittSector θ ω R)) :
+    ∃ K > 0, ∀ B : ℝ, 0 ≤ B →
+      (∀ᶠ z in comap (fun z : ℂ => ‖z‖) atTop ⊓ 𝓟 (rittSector θ ω R),
+        ‖f z‖ ≤ B * ‖z‖ ^ ν) →
+      ∀ᶠ z in comap (fun z : ℂ => ‖z‖) atTop ⊓ 𝓟 (rittClosedSector θ ω'),
+        ‖deriv f z‖ ≤ K * B * ‖z‖ ^ (ν - 1) := by
+  obtain ⟨K, hK, hder⟩ := Complex.exists_pos_norm_deriv_le_of_sector_bound hω hω' hωω' θ ν
+  refine ⟨K, hK, fun B hB hbound => ?_⟩
+  obtain ⟨A, hA⟩ := (eventually_norm_sector_iff _ _).mp hbound
+  refine (eventually_norm_sector_iff _ _).mpr ⟨2 * max (max A R) 0 + 1, fun z hz harg => ?_⟩
+  have hfn : DifferentiableOn ℂ f
+      {w | max A R < ‖w‖ ∧ |(w * exp (-(θ * I))).arg| < ω} := hf.mono fun w hw =>
+    ⟨(le_max_right A R).trans_lt hw.1, hw.2⟩
+  refine hder f (max A R) B hB hfn (fun w hw hwa => ?_) z (by linarith) harg
+  exact hA w ((le_max_left A R).trans_lt hw).le ⟨(le_max_right A R).trans_lt hw, hwa⟩
 
 /-- DLMF §2.1(ii), **Ritt's theorem**: if `f` is analytic in the sector
 `𝐒 = {R < |z|, |ph(z e^{-iθ})| < ω}` and `f(z) = O(z^ν)` as `z → ∞` in `𝐒` (`ν` real, so
@@ -211,7 +247,14 @@ theorem ritt_isBigO {f : ℂ → ℂ} {θ ω ω' R ν : ℝ} (hω : ω ≤ π) (
     (hfν : f =O[comap (fun z : ℂ => ‖z‖) atTop ⊓ 𝓟 (rittSector θ ω R)] fun z => ‖z‖ ^ ν) :
     deriv f =O[comap (fun z : ℂ => ‖z‖) atTop ⊓ 𝓟 (rittClosedSector θ ω')]
       fun z => ‖z‖ ^ (ν - 1) := by
-  sorry
+  obtain ⟨K, hK, hb⟩ := ritt_derivative_bound (ν := ν) hω hω' hωω' hf
+  obtain ⟨C, hC, hbound⟩ := hfν.exists_pos
+  refine IsBigO.of_bound (K * C) ?_
+  have h := hb C hC.le (by
+    filter_upwards [hbound.bound] with z hz
+    simpa only [Real.norm_of_nonneg (Real.rpow_nonneg (norm_nonneg z) ν)] using hz)
+  filter_upwards [h] with z hz
+  simpa only [Real.norm_of_nonneg (Real.rpow_nonneg (norm_nonneg z) (ν - 1))] using hz
 
 /-- DLMF §2.1(ii): Ritt's theorem with both `O`'s replaced by `o`'s. -/
 @[dlmf 2.1.ii]
@@ -220,7 +263,15 @@ theorem ritt_isLittleO {f : ℂ → ℂ} {θ ω ω' R ν : ℝ} (hω : ω ≤ π
     (hfν : f =o[comap (fun z : ℂ => ‖z‖) atTop ⊓ 𝓟 (rittSector θ ω R)] fun z => ‖z‖ ^ ν) :
     deriv f =o[comap (fun z : ℂ => ‖z‖) atTop ⊓ 𝓟 (rittClosedSector θ ω')]
       fun z => ‖z‖ ^ (ν - 1) := by
-  sorry
+  obtain ⟨K, hK, hb⟩ := ritt_derivative_bound (ν := ν) hω hω' hωω' hf
+  refine IsLittleO.of_bound fun ε hε => ?_
+  have he : 0 < ε / K := div_pos hε hK
+  have h := hb (ε / K) he.le (by
+    filter_upwards [hfν.bound he] with z hz
+    simpa only [Real.norm_of_nonneg (Real.rpow_nonneg (norm_nonneg z) ν)] using hz)
+  filter_upwards [h] with z hz
+  rw [show K * (ε / K) = ε by field_simp] at hz
+  simpa only [Real.norm_of_nonneg (Real.rpow_nonneg (norm_nonneg z) (ν - 1))] using hz
 
 /-! ### §2.1(iii): Poincaré asymptotic expansions -/
 
@@ -438,7 +489,40 @@ the sector `δ |z| ≤ ℜz`. -/
 theorem hasPoincareExpansion_cexp_neg_sqrt {δ : ℝ} (hδ : 0 < δ) :
     HasPoincareExpansion (𝕜 := ℂ) {z : ℂ | δ * ‖z‖ ≤ z.re} (fun _ => (0 : ℂ))
       fun z => Complex.exp (-z ^ (1 / 2 : ℂ)) := by
-  sorry
+  intro n
+  simp only [smul_zero, sum_const_zero, sub_zero]
+  let l := cobounded ℂ ⊓ 𝓟 {z : ℂ | δ * ‖z‖ ≤ z.re}
+  let g : ℂ → ℂ := fun z => z ^ (2⁻¹ : ℂ)
+  have hg_norm (z : ℂ) : ‖g z‖ = Real.sqrt ‖z‖ := by
+    change ‖z ^ (2⁻¹ : ℂ)‖ = Real.sqrt ‖z‖
+    rw [show (2⁻¹ : ℂ) = ((1 / 2 : ℝ) : ℂ) by norm_num,
+      Complex.norm_cpow_real, Real.sqrt_eq_rpow]
+  have hnorm : Tendsto (fun z : ℂ => ‖z‖) l atTop :=
+    tendsto_norm_cobounded_atTop.mono_left inf_le_left
+  have hg : Tendsto g l
+      (cobounded ℂ ⊓ 𝓟 {w : ℂ | (1 / 2 : ℝ) * ‖w‖ ≤ w.re}) := by
+    refine tendsto_inf.mpr ⟨?_, tendsto_principal.mpr ?_⟩
+    · exact tendsto_norm_atTop_iff_cobounded.mp ((Real.tendsto_sqrt_atTop.comp hnorm).congr
+        (fun z => (hg_norm z).symm))
+    · filter_upwards [show ∀ᶠ z in l, δ * ‖z‖ ≤ z.re from
+        eventually_inf_principal.mpr (Eventually.of_forall fun z hz => hz)] with z hz
+      have hre : 0 ≤ z.re := (mul_nonneg hδ.le (norm_nonneg z)).trans hz
+      change (1 / 2 : ℝ) * ‖g z‖ ≤ (g z).re
+      rw [hg_norm, show (g z).re = Real.sqrt ((‖z‖ + z.re) / 2) from
+        Complex.cpow_inv_two_re z]
+      have hs := Real.sqrt_le_sqrt (show ‖z‖ / 4 ≤ (‖z‖ + z.re) / 2 by nlinarith [norm_nonneg z])
+      rw [Real.sqrt_div (norm_nonneg z),
+        show Real.sqrt (4 : ℝ) = 2 by norm_num [Real.sqrt_eq_iff_eq_sq]] at hs
+      linarith
+  have h := (hasPoincareExpansion_cexp_neg (δ := 1 / 2) (by norm_num)) (2 * n)
+  simp only [smul_zero, sum_const_zero, sub_zero] at h
+  have hc := h.comp_tendsto hg
+  have hb : (fun z => (g z)⁻¹ ^ (2 * n)) =O[l] fun z => z⁻¹ ^ n := by
+    refine IsBigO.of_bound 1 (Eventually.of_forall fun z => ?_)
+    have hs : ‖g z‖ ^ 2 = ‖z‖ := by rw [hg_norm, Real.sq_sqrt (norm_nonneg z)]
+    simp only [one_mul, norm_pow, norm_inv]
+    rw [inv_pow, pow_mul, hs, ← inv_pow]
+  simpa only [Function.comp_def, g, one_div, l] using hc.trans hb
 
 /-- DLMF §2.1(iii): for any coefficients `aₛ` and any open sector `|ph z| < θ` (`0 < θ ≤ π`)
 there is a function analytic in `{|z| > 1, |ph z| < θ}` with the Poincaré expansion `∑ aₛ z⁻ˢ`
@@ -460,7 +544,37 @@ theorem hasUniformPoincareExpansion_iff {ι 𝕜 E : Type*} [NontriviallyNormedF
     {f : ι → 𝕜 → E} :
     HasUniformPoincareExpansion U X a f ↔ ∀ n : ℕ, ∃ C R : ℝ, ∀ u ∈ U, ∀ x ∈ X, R ≤ ‖x‖ →
       ‖x ^ n • (f u x - ∑ s ∈ range n, x⁻¹ ^ s • a s u)‖ ≤ C := by
-  sorry
+  let l := 𝓟 U ×ˢ (cobounded 𝕜 ⊓ 𝓟 X)
+  have hb := (hasBasis_principal U).prod ((hasBasis_cobounded_norm (E := 𝕜)).inf_principal X)
+  have hev (P : ι × 𝕜 → Prop) : (∀ᶠ p in l, P p) ↔
+      ∃ R : ℝ, ∀ u ∈ U, ∀ x ∈ X, R ≤ ‖x‖ → P (u, x) := by
+    rw [hb.eventually_iff]
+    simp only [and_true, true_and]
+    constructor
+    · rintro ⟨⟨_, R⟩, h⟩
+      exact ⟨R, fun u hu x hx hRx => h ⟨hu, hRx, hx⟩⟩
+    · rintro ⟨R, h⟩
+      exact ⟨((), R), fun p hp => h p.1 hp.1 p.2 hp.2.2 hp.2.1⟩
+  constructor
+  · intro h n
+    obtain ⟨C, hC⟩ := (h n).bound
+    obtain ⟨R, hR⟩ := (hev _).mp hC
+    refine ⟨C, max R 1, fun u hu x hx hRx => ?_⟩
+    have hn : x ≠ 0 := norm_pos_iff.mp (lt_of_lt_of_le zero_lt_one ((le_max_right R 1).trans hRx))
+    have he := hR u hu x hx ((le_max_left R 1).trans hRx)
+    rw [norm_smul, norm_pow]
+    calc ‖x‖ ^ n * ‖f u x - ∑ s ∈ range n, x⁻¹ ^ s • a s u‖ ≤
+        ‖x‖ ^ n * (C * ‖x⁻¹ ^ n‖) := mul_le_mul_of_nonneg_left he (by positivity)
+      _ = C := by rw [norm_pow, norm_inv, inv_pow]; field_simp [norm_ne_zero_iff.mpr hn]
+  · intro h n
+    obtain ⟨C, R, hR⟩ := h n
+    apply isBigO_iff.mpr
+    refine ⟨C, (hev _).mpr ⟨max R 1, fun u hu x hx hRx => ?_⟩⟩
+    have hx0 : 0 < ‖x‖ := lt_of_lt_of_le zero_lt_one ((le_max_right R 1).trans hRx)
+    have he := hR u hu x hx ((le_max_left R 1).trans hRx)
+    rw [norm_smul, norm_pow] at he
+    rw [norm_pow, norm_inv, inv_pow, ← div_eq_mul_inv, le_div_iff₀ (pow_pos hx0 n)]
+    simpa only [mul_comm] using he
 
 /-! ### §2.1(v): generalized asymptotic expansions -/
 

@@ -8,6 +8,7 @@ module
 public import DLMF.AsymptoticApproximations.Distributional.Defs
 public import DLMF.Gamma.BetaFunction
 public import Mathlib.Analysis.Distribution.SchwartzSpace.Basic
+public import Mathlib.Analysis.SpecialFunctions.NonIntegrable
 
 /-!
 # Divergent integrals and the Stieltjes transform (DLMF §2.6(i)–(ii))
@@ -67,7 +68,21 @@ theorem one_add_rpow_neg_third_hasSum {t : ℝ} (ht : 1 < t) :
 @[dlmf 2.6.E3]
 theorem not_integrableOn_rpow_div_add {x : ℝ} (hx : 0 < x) {s : ℕ} (hs : 1 ≤ s) :
     ¬ IntegrableOn (fun t : ℝ => t ^ (-(s : ℝ) - 1 / 3) / (x + t)) (Ioi 0) := by
-  sorry
+  intro h
+  have hi : IntervalIntegrable (fun t : ℝ => t ^ (-(s : ℝ) - 1 / 3) / (x + t))
+      volume 0 1 :=
+    (intervalIntegrable_iff_integrableOn_Ioo_of_le zero_le_one).mpr
+      (h.mono_set Ioo_subset_Ioi_self)
+  have hp := hi.mul_continuousOn
+    ((continuous_const.add continuous_id : Continuous (fun t : ℝ => x + t)).continuousOn)
+  have hpow : IntervalIntegrable (fun t : ℝ => t ^ (-(s : ℝ) - 1 / 3)) volume 0 1 := by
+    refine hp.congr_uIoo fun t ht => ?_
+    rw [uIoo_of_le zero_le_one] at ht
+    exact div_mul_cancel₀ _ (by linarith [ht.1] : x + t ≠ 0)
+  have hcrit := (intervalIntegral.integrableOn_Ioo_rpow_iff zero_lt_one).mp
+    ((intervalIntegrable_iff_integrableOn_Ioo_of_le zero_le_one).mp hpow)
+  have hs' : (1 : ℝ) ≤ s := by exact_mod_cast hs
+  linarith
 
 /-- DLMF 2.6.4: `∫₀^∞ t^{α-1}/(x+t)^{α+β} dt = Γ(α)Γ(β)/Γ(α+β) · x^{-β}` for `x > 0`,
 `ℜα > 0`, `ℜβ > 0` (principal powers). -/

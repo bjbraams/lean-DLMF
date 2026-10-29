@@ -1,0 +1,818 @@
+{
+  "format": 1,
+  "date": "2026-10-29",
+  "round": "chapter-1-2-watson-kernel-power-sums-laplace-ray",
+  "baseCommit": "b7d2826c0f07c98ce4f1a459b74e0dcf55e8dea3",
+  "baseline": {
+    "previousRound": "ProofRound20261029c.json",
+    "directAdmissions": 1667
+  },
+  "admissions": {
+    "before": 1667,
+    "after": 1664,
+    "removed": 3,
+    "chapter1": {
+      "before": 230,
+      "after": 229
+    },
+    "chapter2": {
+      "before": 106,
+      "after": 104
+    },
+    "filesWithAdmissions": 299
+  },
+  "completed": [
+    {
+      "name": "DLMF.AlgebraicAnalytic.integral_laplaceTransform_ray",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Laplace.lean",
+      "line": 354,
+      "proofLines": 4,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.14.24: if moreover `lim_{t→0+} f(t)/t` exists, then\n`∫_s^∞ 𝓛(f)(u) du = 𝓛(f_{-1})(s)` with `f_{-1}(t) = f(t)/t`, the integral along the horizontal ray\n`u = s + v`, `v ≥ 0`."
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.watson_lemma_kernel",
+      "file": "DLMF/AsymptoticApproximations/Integrals/Watson.lean",
+      "line": 158,
+      "proofLines": 5,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 2.3.10–2.3.12: Watson's lemma for a general kernel. Let `q` satisfy 2.3.7 with\n`λ, μ > 0`, be locally integrable on `(0, ∞)` (DLMF: piecewise continuous) and satisfy\n`q(t) = O(exp(b t^κ))` as `t → +∞` (2.3.11); let `f` be measurable with\n`|f(t)| ≤ A exp(-a t^κ)` for `t ≥ 0` (2.3.10), `A, a, b, κ > 0`. Then\n`∫₀^∞ f(xt) q(t) dt ∼ ∑ 𝓜f((s+λ)/μ) aₛ x^{-(s+λ)/μ}` as `x → +∞` (2.3.12), with Mathlib's Mellin\ntransform `mellin f`."
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.powerSum_asymptotic",
+      "file": "DLMF/AsymptoticApproximations/Sums/PowerSums.lean",
+      "line": 210,
+      "proofLines": 23,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 2.10.7: for real `α ≠ -1`, as `n → ∞`,\n`∑_{j=1}^{n-1} j^α ∼ ζ(-α) + n^{α+1}/(α+1) ∑_{s ≥ 0} (α+1 choose s) B_s n^{-s}`."
+    }
+  ],
+  "downstreamFreedFromAdmissions": [],
+  "newHelpers": [
+    {
+      "name": "DLMF.AlgebraicAnalytic.integrableOn_laplace_quotient",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Laplace.lean",
+      "line": 305,
+      "proofLines": 42,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A finite limit of `f(t)/t` at zero supplies the extra convergence needed\nwhen integrating the Laplace transform along a horizontal ray."
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.zeta_binomial_eq_choose",
+      "file": "DLMF/AsymptoticApproximations/Sums/PowerSums.lean",
+      "line": 32,
+      "proofLines": 0,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The legacy zeta binomial coefficient is Mathlib's generalized binomial coefficient."
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.powerSum_evenCoeff",
+      "file": "DLMF/AsymptoticApproximations/Sums/PowerSums.lean",
+      "line": 38,
+      "proofLines": 10,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The even power-sum coefficient agrees with the falling-factorial coefficient\nin the zeta Euler–Maclaurin expansion."
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.powerSum_partialSum_even",
+      "file": "DLMF/AsymptoticApproximations/Sums/PowerSums.lean",
+      "line": 53,
+      "proofLines": 18,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Group the full Bernoulli truncation into its constant, half-endpoint and even\nterms; all the remaining odd Bernoulli numbers vanish."
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.powerSum_em_integral",
+      "file": "DLMF/AsymptoticApproximations/Sums/PowerSums.lean",
+      "line": 76,
+      "proofLines": 11,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Rewrite the real-axis periodic-Bernoulli remainder without complex powers."
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.powerSum_em_term",
+      "file": "DLMF/AsymptoticApproximations/Sums/PowerSums.lean",
+      "line": 95,
+      "proofLines": 8,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Each finite zeta correction is the negative of the corresponding real\npower-sum Bernoulli term."
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.powerSum_eq_truncation_add_remainder",
+      "file": "DLMF/AsymptoticApproximations/Sums/PowerSums.lean",
+      "line": 110,
+      "proofLines": 44,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Euler–Maclaurin gives an exact remainder formula for real power sums, with\nthe zeta value as the constant term."
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.powerSum_integral_isBigO",
+      "file": "DLMF/AsymptoticApproximations/Sums/PowerSums.lean",
+      "line": 163,
+      "proofLines": 11,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Bound the real periodic-Bernoulli tail by integrating its bounded coefficient\nagainst the decaying real power."
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.powerSum_remainder_isBigO",
+      "file": "DLMF/AsymptoticApproximations/Sums/PowerSums.lean",
+      "line": 180,
+      "proofLines": 12,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The exact zeta remainder gives a power bound for every sufficiently long\neven Bernoulli truncation."
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.powerSum_scale_isBigO",
+      "file": "DLMF/AsymptoticApproximations/Sums/PowerSums.lean",
+      "line": 198,
+      "proofLines": 8,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Later terms of the power-sum scale are bounded by earlier terms at infinity."
+    },
+    {
+      "name": "isBigO_integral_Ioi_bdd_mul_rpow",
+      "file": "DLMFMathlib/Analysis/Asymptotics/IntegralComparison.lean",
+      "line": 202,
+      "proofLines": 14,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The tail integral of a bounded function times an integrable real power has\nthe order of the tail integral of that power. No regularity of the bounded\nrepresentative is needed for the bound on the totalized integral."
+    },
+    {
+      "name": "isLittleO_rpow_exp_mul_rpow_atTop",
+      "file": "DLMFMathlib/Analysis/Asymptotics/WatsonKernel.lean",
+      "line": 26,
+      "proofLines": 6,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Every real power grows more slowly than a stretched exponential with positive\ncoefficient and positive stretching exponent."
+    },
+    {
+      "name": "isLittleO_exp_neg_mul_rpow_rpow_atTop",
+      "file": "DLMFMathlib/Analysis/Asymptotics/WatsonKernel.lean",
+      "line": 35,
+      "proofLines": 7,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Stretched exponential decay is smaller than every real power at infinity."
+    },
+    {
+      "name": "integrableOn_exp_neg_mul_rpow_mul_of_isBigO",
+      "file": "DLMFMathlib/Analysis/Asymptotics/WatsonKernel.lean",
+      "line": 46,
+      "proofLines": 28,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A locally integrable function with an integrable power bound at zero and\nstretched-exponential growth at infinity becomes integrable after stronger decay."
+    },
+    {
+      "name": "integral_exp_neg_mul_rpow_mul_eq",
+      "file": "DLMFMathlib/Analysis/Asymptotics/WatsonKernel.lean",
+      "line": 82,
+      "proofLines": 7,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A positive power substitution expresses a stretched Laplace integral as an\nordinary Laplace integral, including the Jacobian."
+    },
+    {
+      "name": "integrableOn_exp_neg_mul_rpow_mul_iff",
+      "file": "DLMFMathlib/Analysis/Asymptotics/WatsonKernel.lean",
+      "line": 95,
+      "proofLines": 9,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The power substitution for a stretched Laplace integral preserves absolute\nintegrability, with its Jacobian included."
+    },
+    {
+      "name": "MeasureTheory.IntegrableOn.exp_neg_mul_rpow_mul_of_le",
+      "file": "DLMFMathlib/Analysis/Asymptotics/WatsonKernel.lean",
+      "line": 110,
+      "proofLines": 6,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Increasing the coefficient of stretched exponential decay preserves absolute\nintegrability on the positive half-line."
+    },
+    {
+      "name": "isBigO_rpow_jacobian_comp",
+      "file": "DLMFMathlib/Analysis/Asymptotics/WatsonKernel.lean",
+      "line": 122,
+      "proofLines": 17,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A power-law bound at zero is transformed with the Jacobian under a positive\npower substitution."
+    },
+    {
+      "name": "isBigO_integral_exp_neg_mul_rpow_mul",
+      "file": "DLMFMathlib/Analysis/Asymptotics/WatsonKernel.lean",
+      "line": 145,
+      "proofLines": 7,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The Laplace remainder estimate for stretched exponentials follows by a power\nsubstitution from the ordinary Watson remainder estimate."
+    },
+    {
+      "name": "mellinConvergent_of_norm_le_exp_rpow",
+      "file": "DLMFMathlib/Analysis/Asymptotics/WatsonKernel.lean",
+      "line": 160,
+      "proofLines": 13,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A measurable stretched-exponentially bounded kernel has absolutely convergent\nMellin moments of every positive real order."
+    },
+    {
+      "name": "norm_kernel_mul_le_exp_rpow",
+      "file": "DLMFMathlib/Analysis/Asymptotics/WatsonKernel.lean",
+      "line": 178,
+      "proofLines": 6,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The pointwise kernel bound transfers to a product after positive dilation."
+    },
+    {
+      "name": "integrableOn_kernel_mul_of_exp_rpow",
+      "file": "DLMFMathlib/Analysis/Asymptotics/WatsonKernel.lean",
+      "line": 190,
+      "proofLines": 10,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A dilated rapidly decreasing kernel times a function with an integrable\nstretched-exponential weight is integrable once its dilation provides enough decay."
+    },
+    {
+      "name": "isBigO_integral_exp_neg_mul_rpow_mul_comp",
+      "file": "DLMFMathlib/Analysis/Asymptotics/WatsonKernel.lean",
+      "line": 209,
+      "proofLines": 11,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The stretched Laplace remainder bound keeps the order `x⁻ˢ` when the decay\nparameter is `a x^κ`."
+    },
+    {
+      "name": "isBigO_integral_kernel_mul",
+      "file": "DLMFMathlib/Analysis/Asymptotics/WatsonKernel.lean",
+      "line": 228,
+      "proofLines": 22,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A kernel with stretched-exponential decay sends a power-law remainder at zero\nto a power-law remainder at infinity."
+    },
+    {
+      "name": "integral_kernel_mul_rpow",
+      "file": "DLMFMathlib/Analysis/Asymptotics/WatsonKernel.lean",
+      "line": 260,
+      "proofLines": 11,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A power-weighted kernel integral after positive dilation is its Mellin\nmoment multiplied by the corresponding inverse power of the dilation."
+    },
+    {
+      "name": "integrableOn_kernel_mul_rpow",
+      "file": "DLMFMathlib/Analysis/Asymptotics/WatsonKernel.lean",
+      "line": 276,
+      "proofLines": 7,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "All positive power moments of a rapidly decreasing measurable kernel are\nintegrable after positive dilation."
+    },
+    {
+      "name": "continuousOn_rpow_expansion",
+      "file": "DLMFMathlib/Analysis/Asymptotics/WatsonKernel.lean",
+      "line": 290,
+      "proofLines": 6,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A finite power expansion is continuous on the positive half-line, including\nnegative and nonintegral exponents."
+    },
+    {
+      "name": "isBigO_rpow_expansion_exp_mul_rpow",
+      "file": "DLMFMathlib/Analysis/Asymptotics/WatsonKernel.lean",
+      "line": 300,
+      "proofLines": 7,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Every finite power expansion is dominated at infinity by a growing stretched\nexponential."
+    },
+    {
+      "name": "integral_kernel_mul_rpow_expansion",
+      "file": "DLMFMathlib/Analysis/Asymptotics/WatsonKernel.lean",
+      "line": 313,
+      "proofLines": 15,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A rapidly decreasing kernel can be integrated against a finite power\nexpansion, giving its Mellin moments term by term."
+    },
+    {
+      "name": "hasAsymptoticExpansion_integral_kernel_mul_rpow_seq",
+      "file": "DLMFMathlib/Analysis/Asymptotics/WatsonKernel.lean",
+      "line": 340,
+      "proofLines": 21,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Watson's lemma for a measurable kernel dominated by a stretched exponential,\nwith any positive sequence of power exponents and Mellin-moment coefficients."
+    },
+    {
+      "name": "Complex.integral_Ioi_cexp_add_mul",
+      "file": "DLMFMathlib/Analysis/Integral/LaplaceRay.lean",
+      "line": 26,
+      "proofLines": 12,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Along a positive horizontal ray the exponential kernel has integral\n`exp(-st)/t`, including its full complex phase."
+    },
+    {
+      "name": "Complex.integral_Ioi_norm_cexp_add_mul",
+      "file": "DLMFMathlib/Analysis/Integral/LaplaceRay.lean",
+      "line": 43,
+      "proofLines": 13,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The integral of the norm along a horizontal ray equals the norm of the\nweighted quotient, since the ray contributes a positive real exponential."
+    },
+    {
+      "name": "Complex.integral_Ioi_integral_cexp_add_mul",
+      "file": "DLMFMathlib/Analysis/Integral/LaplaceRay.lean",
+      "line": 60,
+      "proofLines": 19,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Absolute convergence of the weighted quotient justifies exchanging the\npositive ray and half-line exponential integrals."
+    },
+    {
+      "name": "Ring.choose_eq_descPochhammer_div",
+      "file": "DLMFMathlib/RingTheory/Binomial.lean",
+      "line": 25,
+      "proofLines": 4,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Generalized binomial coefficients are falling-factorial polynomial evaluations\ndivided by the factorial."
+    },
+    {
+      "name": "Ring.choose_neg_add_even_sub_two",
+      "file": "DLMFMathlib/RingTheory/Binomial.lean",
+      "line": 33,
+      "proofLines": 10,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The odd-order shifted binomial coefficient in Euler–Maclaurin has the\nopposite sign to the corresponding falling coefficient."
+    },
+    {
+      "name": "Ring.natCast_mul_choose_succ",
+      "file": "DLMFMathlib/RingTheory/Binomial.lean",
+      "line": 48,
+      "proofLines": 4,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Consecutive generalized binomial coefficients satisfy the falling-factorial\nrecursion, with no restriction on the upper argument."
+    }
+  ],
+  "movedPublicDeclarations": [
+    {
+      "name": "DLMF.AsymptoticApproximations.powerSum_asymptotic",
+      "oldFile": "DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean",
+      "newFile": "DLMF/AsymptoticApproximations/Sums/PowerSums.lean"
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.powerSum_remainder_bound",
+      "oldFile": "DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean",
+      "newFile": "DLMF/AsymptoticApproximations/Sums/PowerSums.lean"
+    }
+  ],
+  "validation": {
+    "fullBuild": "lake build > /tmp/DLMF-build.log 2>&1",
+    "buildJobs": 14660,
+    "strictChecks": [
+      {
+        "file": "DLMF.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMF.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMF_AlgebraicAnalytic_Calculus_Inequalities.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Calculus/OneVariable.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMF_AlgebraicAnalytic_Calculus_OneVariable.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Complex/Calculus.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMF_AlgebraicAnalytic_Complex_Calculus.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Complex/Functions.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMF_AlgebraicAnalytic_Complex_Functions.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Fourier/Series.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMF_AlgebraicAnalytic_Fourier_Series.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/ODE/Transformations.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMF_AlgebraicAnalytic_ODE_Transformations.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Spectral/Theory.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMF_AlgebraicAnalytic_Spectral_Theory.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Transforms/Fourier.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMF_AlgebraicAnalytic_Transforms_Fourier.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Transforms/Laplace.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMF_AlgebraicAnalytic_Transforms_Laplace.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Transforms/LaplaceTable.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMF_AlgebraicAnalytic_Transforms_LaplaceTable.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Transforms/MellinHilbertStieltjes.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMF_AlgebraicAnalytic_Transforms_MellinHilbertStieltjes.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMF_AlgebraicAnalytic_Transforms_Tables.lean.log"
+      },
+      {
+        "file": "DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMF_AsymptoticApproximations_Basics_OrderSymbols.lean.log"
+      },
+      {
+        "file": "DLMF/AsymptoticApproximations/Basics/Transcendental.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMF_AsymptoticApproximations_Basics_Transcendental.lean.log"
+      },
+      {
+        "file": "DLMF/AsymptoticApproximations/Distributional/FractionalIntegrals.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMF_AsymptoticApproximations_Distributional_FractionalIntegrals.lean.log"
+      },
+      {
+        "file": "DLMF/AsymptoticApproximations/Distributional/Stieltjes.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMF_AsymptoticApproximations_Distributional_Stieltjes.lean.log"
+      },
+      {
+        "file": "DLMF/AsymptoticApproximations/Integrals/Parts.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMF_AsymptoticApproximations_Integrals_Parts.lean.log"
+      },
+      {
+        "file": "DLMF/AsymptoticApproximations/Integrals/Watson.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMF_AsymptoticApproximations_Integrals_Watson.lean.log"
+      },
+      {
+        "file": "DLMF/AsymptoticApproximations/Mellin/BesselExample.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMF_AsymptoticApproximations_Mellin_BesselExample.lean.log"
+      },
+      {
+        "file": "DLMF/AsymptoticApproximations/Mellin/Transforms.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMF_AsymptoticApproximations_Mellin_Transforms.lean.log"
+      },
+      {
+        "file": "DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMF_AsymptoticApproximations_ODE_LiouvilleGreen.lean.log"
+      },
+      {
+        "file": "DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMF_AsymptoticApproximations_Sums_EulerMaclaurin.lean.log"
+      },
+      {
+        "file": "DLMF/AsymptoticApproximations/Sums/PowerSums.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMF_AsymptoticApproximations_Sums_PowerSums.lean.log"
+      },
+      {
+        "file": "DLMF/Gamma/Asymptotics/Stirling.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMF_Gamma_Asymptotics_Stirling.lean.log"
+      },
+      {
+        "file": "DLMFMathlib.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMFMathlib.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Asymptotics/ExponentialGrowth.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMFMathlib_Analysis_Asymptotics_ExponentialGrowth.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Asymptotics/IntegralComparison.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMFMathlib_Analysis_Asymptotics_IntegralComparison.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Asymptotics/PowerSums.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMFMathlib_Analysis_Asymptotics_PowerSums.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Asymptotics/WatsonKernel.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMFMathlib_Analysis_Asymptotics_WatsonKernel.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Asymptotics/WatsonLog.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMFMathlib_Analysis_Asymptotics_WatsonLog.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Complex/ParametricHolomorphy.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMFMathlib_Analysis_Complex_ParametricHolomorphy.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Complex/Sector.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMFMathlib_Analysis_Complex_Sector.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Fourier/AddCircle.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMFMathlib_Analysis_Fourier_AddCircle.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Fourier/GaussianSeries.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMFMathlib_Analysis_Fourier_GaussianSeries.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Fourier/L1Inversion.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMFMathlib_Analysis_Fourier_L1Inversion.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Fourier/L2Compatibility.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMFMathlib_Analysis_Fourier_L2Compatibility.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Fourier/Pairing.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMFMathlib_Analysis_Fourier_Pairing.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/InnerProductSpace/CauchySchwarz.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMFMathlib_Analysis_InnerProductSpace_CauchySchwarz.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Integral/Frullani.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMFMathlib_Analysis_Integral_Frullani.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Integral/LaplaceRay.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMFMathlib_Analysis_Integral_LaplaceRay.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Integral/RepeatedIntegrationByParts.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMFMathlib_Analysis_Integral_RepeatedIntegrationByParts.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/MellinConvolution.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMFMathlib_Analysis_MellinConvolution.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/MellinParseval.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMFMathlib_Analysis_MellinParseval.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/SpecificLimits/Oscillation.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMFMathlib_Analysis_SpecificLimits_Oscillation.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/MeasureTheory/Function/L2Space.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMFMathlib_MeasureTheory_Function_L2Space.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/MeasureTheory/Integral/HalfLine.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMFMathlib_MeasureTheory_Integral_HalfLine.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/RingTheory/Binomial.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-DLMFMathlib_RingTheory_Binomial.lean.log"
+      },
+      {
+        "file": "Main.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029d/strict-Main.lean.log"
+      }
+    ],
+    "globalAxioms": {
+      "dependingOnAdmissions": 1769,
+      "nonstandard": [],
+      "theorems": 55718
+    },
+    "tagSummary": {
+      "proved": 8640,
+      "pointers": 1028,
+      "nonstandard": 0,
+      "entries": 10703,
+      "admitted": 2063
+    },
+    "sourceStatementChanges": [],
+    "renamedUnusedBinders": [],
+    "sourceDefinitionChanges": [],
+    "compiledPublicTypeChanges": [],
+    "maxChangedProofLines": 44,
+    "maxLibraryFileLines": 1454,
+    "newTheoremsWithoutDocs": [],
+    "newExactUpstreamMatches": [],
+    "imports": {
+      "newTwoWayPairs": [],
+      "newDefinitionsImports": [],
+      "existingItemsBeyondOldBaseline": 10
+    },
+    "changedLeanFiles": [
+      "DLMFMathlib/Analysis/Asymptotics/WatsonKernel.lean",
+      "DLMFMathlib/RingTheory/Binomial.lean",
+      "DLMFMathlib/Analysis/Integral/LaplaceRay.lean",
+      "DLMFMathlib/Analysis/Asymptotics/IntegralComparison.lean",
+      "DLMF/AsymptoticApproximations/Sums/PowerSums.lean",
+      "DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean",
+      "DLMF/AsymptoticApproximations/Integrals/Watson.lean",
+      "DLMF/AlgebraicAnalytic/Transforms/Laplace.lean",
+      "DLMFMathlib.lean"
+    ],
+    "removedDuplicateHelper": {
+      "localName": "DLMF.AsymptoticApproximations.choose_ofReal",
+      "upstreamReplacement": "Complex.ofReal_choose"
+    },
+    "totalLeanSourceFiles": 1111,
+    "allSourcesWithin1500Lines": true,
+    "diffCheckPassed": true
+  },
+  "statementIssues": {
+    "previousIssuesRetained": [
+      "liouvilleGreen_interval_isEquivalent: finite-endpoint uniqueness is false",
+      "haar_isLittleO_pow: separate derivatives need compatibility",
+      "picard_great: missing positive outer radius",
+      "prod_mtest_log: tail-only bounds do not give global uniform convergence",
+      "hasCesaroSumOfOrder_of_tendsto: negative-order regularity requires review"
+    ],
+    "newIssues": []
+  },
+  "remainingPriorities": [
+    "Signed power-sum remainder enclosure",
+    "Bounded-variation Fourier inversion",
+    "Mellin contour shifting and vertical Gamma estimates"
+  ]
+}

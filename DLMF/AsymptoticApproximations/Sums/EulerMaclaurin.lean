@@ -6,7 +6,11 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.AsymptoticApproximations.Sums.Defs
+public import DLMF.AsymptoticApproximations.Sums.PowerSums
 public import DLMF.Gamma.BarnesG
+public import DLMF.Gamma.Asymptotics.Stirling
+public import Mathlib.Analysis.Calculus.MeanValue
+public import DLMFMathlib.Analysis.Asymptotics.PowerSums
 
 /-!
 # The Euler–Maclaurin formula and summation by parts (DLMF §2.10(i)–(ii))
@@ -21,7 +25,8 @@ public import DLMF.Gamma.BarnesG
   leading behaviour `S(n) - (½n² ln n - ¼n² + ½n ln n + 1/12 ln n) → C` from
   `DLMF.Gamma.BarnesAsymp.tendsto_hseq`.
 * The power sums 2.10.7 and the harmonic numbers 2.10.8, with the remainder bounds of
-  §2.10(i).
+  §2.10(i). The harmonic expansion and its signed first-neglected-term bound reuse
+  the digamma Binet remainder from `DLMF.Gamma.Asymptotics.Stirling`.
 * Summation by parts 2.10.9–2.10.10 and the oscillatory example 2.10.11–2.10.18.
 
 Bernoulli numbers are Mathlib's `bernoulli` (`B₁ = -1/2`, as in DLMF §24.2); `B̃_n` is
@@ -199,33 +204,58 @@ theorem log_glaisherKinkelin_eq :
 
 /-! ### Power sums and harmonic numbers (2.10.7–2.10.8) -/
 
-/-- DLMF 2.10.7: for real `α ≠ -1`, as `n → ∞`,
-`∑_{j=1}^{n-1} j^α ∼ ζ(-α) + n^{α+1}/(α+1) ∑_{s ≥ 0} (α+1 choose s) B_s n^{-s}`. -/
-@[dlmf 2.10.E7]
-theorem powerSum_asymptotic {α : ℝ} (hα : α ≠ -1) :
-    HasAsymptoticExpansion atTop (g2b_powScale α) (g2b_powSumCoeff α)
-      (fun n : ℕ => ∑ j ∈ Ico 1 n, (j : ℝ) ^ α - (riemannZeta (-α)).re) := by
-  sorry
+-- Power-sum asymptotics and their remaining signed-remainder statement are in `Sums.PowerSums`.
 
-/-- DLMF §2.10(i) (remainder of 2.10.7): truncating 2.10.7 after `s = 2m - 1`, where
-`m ≥ (α+1)/2`, leaves a remainder bounded in absolute value by the first neglected term
-(`s = 2m`) and of the same sign, for every `n ≥ 1`. -/
-@[dlmf 2.10.i]
-theorem powerSum_remainder_bound {α : ℝ} (hα : α ≠ -1) {m : ℕ} (hm : 1 ≤ m)
-    (hmα : (α + 1) / 2 ≤ m) {n : ℕ} (hn : 1 ≤ n) :
-    let R := ∑ j ∈ Ico 1 n, (j : ℝ) ^ α - (riemannZeta (-α)).re -
-      ∑ s ∈ range (2 * m), g2b_powScale α s n * g2b_powSumCoeff α s
-    0 ≤ R * (g2b_powScale α (2 * m) n * g2b_powSumCoeff α (2 * m)) ∧
-      |R| ≤ |g2b_powScale α (2 * m) n * g2b_powSumCoeff α (2 * m)| := by
-  sorry
+/-- The harmonic remainder is a Binet integral, using the digamma value at a
+positive integer and the same Bernoulli coefficients as in the Gamma expansion. -/
+private theorem harmonic_remainder_eq_integral (m n : ℕ) (hn : 1 ≤ n) :
+    (harmonic (n - 1) : ℝ) - (Real.log n + Real.eulerMascheroniConstant - 1 / (2 * n) -
+      ∑ s ∈ Ico 1 m, (bernoulli (2 * s) : ℝ) / (2 * s) / (n : ℝ) ^ (2 * s)) =
+      -∫ t in Ioi (0 : ℝ), Real.exp (-(n : ℝ) * t) *
+        (t ^ 1 * (DLMF.Gamma.binetBeta t / t - DLMF.Gamma.binetPoly (m - 1) t)) := by
+  have hd := Real.digamma_nat_add_one (n - 1)
+  rw [← Nat.cast_add_one, Nat.sub_add_cancel hn] at hd
+  have hs : Finset.Ico 1 m = Finset.Icc 1 (m - 1) := by
+    ext k
+    simp only [Finset.mem_Ico, Finset.mem_Icc]
+    omega
+  have h := DLMF.Gamma.digamma_sub_stirling_eq_integral (m - 1)
+    (z := (n : ℝ)) (by exact_mod_cast (by omega : 0 < n))
+  rw [hd, ← hs] at h
+  simp_rw [div_mul_eq_div_div] at h ⊢
+  linarith
 
-/-- DLMF 2.10.8: as `n → ∞`,
-`∑_{j=1}^{n-1} 1/j ∼ ln n + γ - 1/(2n) - ∑_{s ≥ 1} B_{2s}/(2s) n^{-2s}`. -/
-@[dlmf 2.10.E8]
-theorem harmonic_asymptotic :
-    HasAsymptoticExpansion atTop g2b_invScale g2b_harmonicCoeff
-      (fun n : ℕ => (harmonic (n - 1) : ℝ) - Real.log n - Real.eulerMascheroniConstant) := by
-  sorry
+/-- Later inverse-power scales are bounded by earlier ones on the positive integers. -/
+private theorem invScale_isBigO_of_le {N M : ℕ} (hNM : N ≤ M) :
+    g2b_invScale M =O[atTop] g2b_invScale N := by
+  refine IsBigO.of_bound 1 ?_
+  filter_upwards [eventually_ge_atTop (1 : ℕ)] with n hn
+  have hn' : (1 : ℝ) ≤ n := by exact_mod_cast hn
+  simp only [g2b_invScale, Real.norm_eq_abs, abs_inv, abs_pow,
+    abs_of_nonneg (Nat.cast_nonneg n : (0 : ℝ) ≤ n), one_mul]
+  exact inv_anti₀ (by positivity) (pow_le_pow_right₀ hn' hNM)
+
+/-- Pairing consecutive Bernoulli coefficients recovers the customary harmonic
+polynomial with only even powers after the first term. -/
+private theorem sum_harmonicCoeff_even (m n : ℕ) (hm : 1 ≤ m) :
+    ∑ s ∈ range (2 * m), g2b_invScale s n * g2b_harmonicCoeff s =
+      -1 / (2 * n) - ∑ k ∈ Ico 1 m, (bernoulli (2 * k) : ℝ) / (2 * k) /
+        (n : ℝ) ^ (2 * k) := by
+  induction m, hm using Nat.le_induction with
+  | base =>
+    simp [g2b_invScale, g2b_harmonicCoeff, sum_range_succ]
+    ring
+  | succ m hm ih =>
+    have hodd : (bernoulli (2 * m + 1) : ℝ) = 0 := by
+      rw [bernoulli_eq_zero_of_odd ⟨m, by omega⟩ (by omega)]
+      simp
+    rw [show 2 * (m + 1) = (2 * m + 1) + 1 by omega, sum_range_succ,
+      sum_range_succ, ih, sum_Ico_succ_top (by omega : 1 ≤ m)]
+    simp only [g2b_invScale, g2b_harmonicCoeff, show 2 * m ≠ 0 by omega,
+      show 2 * m ≠ 1 by omega, show 2 * m + 1 ≠ 0 by omega,
+      show 2 * m + 1 ≠ 1 by omega, ite_false, hodd, neg_zero, zero_div, mul_zero, add_zero]
+    push_cast
+    ring
 
 /-- DLMF §2.10(i) (remainder of 2.10.8): after the terms `s < m` of `∑ B_{2s}/(2s) n^{-2s}`
 (`m ≥ 1`), the remainder is bounded in absolute value by the first neglected term
@@ -236,7 +266,94 @@ theorem harmonic_remainder_bound {m n : ℕ} (hm : 1 ≤ m) (hn : 1 ≤ n) :
       ∑ s ∈ Ico 1 m, (bernoulli (2 * s) : ℝ) / (2 * s) / (n : ℝ) ^ (2 * s))
     let T := -(bernoulli (2 * m) : ℝ) / (2 * m) / (n : ℝ) ^ (2 * m)
     0 ≤ R * T ∧ |R| ≤ |T| := by
-  sorry
+  dsimp only
+  let R := (harmonic (n - 1) : ℝ) - (Real.log n + Real.eulerMascheroniConstant - 1 / (2 * n) -
+    ∑ s ∈ Ico 1 m, (bernoulli (2 * s) : ℝ) / (2 * s) / (n : ℝ) ^ (2 * s))
+  let A := 2 * DLMF.Gamma.binetRemConst (m - 1) *
+    ((2 * m - 1).factorial / (n : ℝ) ^ (2 * m))
+  have hA : 0 ≤ A := by
+    have hS : 0 ≤ DLMF.Gamma.binetRemConst (m - 1) := tsum_nonneg fun k => by positivity
+    dsimp [A]
+    positivity
+  have hR := harmonic_remainder_eq_integral m n hn
+  have hb := DLMF.Gamma.abs_integral_exp_mul_pow_mul_rem_le
+    (z := (n : ℝ)) (by exact_mod_cast (by omega : 0 < n)) (m - 1) 1
+  rw [← abs_neg, ← hR] at hb
+  have hm1 : 2 * (m - 1) + 1 = 2 * m - 1 := by omega
+  have hm2 : 2 * (m - 1) + 1 + 1 = 2 * m := by omega
+  rw [hm2, hm1] at hb
+  have hsign : 0 ≤ (-1 : ℝ) ^ m * R := by
+    have hp : (-1 : ℝ) ^ m = -((-1) ^ (m - 1)) := by
+      calc (-1 : ℝ) ^ m = (-1) ^ ((m - 1) + 1) := by congr 1; omega
+        _ = -((-1) ^ (m - 1)) := by rw [pow_succ]; ring
+    dsimp only [R]
+    rw [hp, hR, neg_mul_neg, ← MeasureTheory.integral_const_mul]
+    apply MeasureTheory.integral_nonneg_of_ae
+    filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
+    have h := DLMF.Gamma.binetBeta_div_sub_binetPoly_sign (m - 1) ht
+    convert mul_nonneg (mul_nonneg (Real.exp_pos (-(n : ℝ) * t)).le ht.le) h using 1
+    simp only [pow_one]
+    ring
+  have hS := (DLMF.Gamma.hasSum_recip_two_pi_pow (k := m) (by omega)).tsum_eq
+  have he : DLMF.Gamma.binetRemConst (m - 1) =
+      (-1 : ℝ) ^ (m + 1) * (bernoulli (2 * m) : ℝ) / (2 * (2 * m).factorial) := by
+    unfold DLMF.Gamma.binetRemConst
+    simpa only [show 2 * (m - 1) + 2 = 2 * m by omega] using hS
+  have hT : -(bernoulli (2 * m) : ℝ) / (2 * m) / (n : ℝ) ^ (2 * m) = (-1 : ℝ) ^ m * A := by
+    dsimp [A]
+    rw [he, (DLMF.Gamma.factorial_two_mul_sub m hm).2, pow_succ]
+    have hp : (-1 : ℝ) ^ m * (-1) ^ m = 1 := by rw [← mul_pow]; norm_num
+    have hf : ((2 * m - 1).factorial : ℝ) ≠ 0 := by positivity
+    have hm0 : (m : ℝ) ≠ 0 := by exact_mod_cast (by omega : m ≠ 0)
+    field_simp
+    simp only [sq, hp, mul_one]
+  rw [hT]
+  constructor
+  · change 0 ≤ R * ((-1 : ℝ) ^ m * A)
+    nlinarith [mul_nonneg hsign hA]
+  · rw [abs_mul, abs_pow, abs_neg, abs_one, one_pow, one_mul, abs_of_nonneg hA]
+    exact hb
+
+/-- DLMF 2.10.8: as `n → ∞`,
+`∑_{j=1}^{n-1} 1/j ∼ ln n + γ - 1/(2n) - ∑_{s ≥ 1} B_{2s}/(2s) n^{-2s}`. -/
+@[dlmf 2.10.E8]
+theorem harmonic_asymptotic :
+    HasAsymptoticExpansion atTop g2b_invScale g2b_harmonicCoeff
+      (fun n : ℕ => (harmonic (n - 1) : ℝ) - Real.log n - Real.eulerMascheroniConstant) := by
+  have hR (m : ℕ) (hm : 1 ≤ m) :
+      (fun n : ℕ => (harmonic (n - 1) : ℝ) - Real.log n - Real.eulerMascheroniConstant -
+        ∑ s ∈ range (2 * m), g2b_invScale s n * g2b_harmonicCoeff s) =O[atTop]
+        g2b_invScale (2 * m) := by
+    refine IsBigO.of_bound |(bernoulli (2 * m) : ℝ) / (2 * m)| ?_
+    filter_upwards [eventually_ge_atTop (1 : ℕ)] with n hn
+    have hb := (harmonic_remainder_bound hm hn).2
+    calc _ = |(harmonic (n - 1) : ℝ) - (Real.log n + Real.eulerMascheroniConstant -
+          1 / (2 * n) - ∑ k ∈ Ico 1 m, (bernoulli (2 * k) : ℝ) / (2 * k) /
+            (n : ℝ) ^ (2 * k))| := by
+          rw [sum_harmonicCoeff_even m n hm, Real.norm_eq_abs]
+          congr 1
+          ring
+      _ ≤ |-(bernoulli (2 * m) : ℝ) / (2 * m) / (n : ℝ) ^ (2 * m)| := hb
+      _ = _ := by
+          simp only [g2b_invScale, Real.norm_eq_abs, abs_inv, abs_pow,
+            abs_div, abs_neg, abs_of_nonneg (Nat.cast_nonneg n : (0 : ℝ) ≤ n)]
+          ring
+  intro N
+  let M := 2 * (N + 1)
+  have hNM : N ≤ M := by dsimp [M]; omega
+  have hr := (hR (N + 1) (by omega)).trans (invScale_isBigO_of_le hNM)
+  have htail : (fun n => ∑ s ∈ Ico N M, g2b_invScale s n * g2b_harmonicCoeff s) =O[atTop]
+      g2b_invScale N := by
+    have h := IsBigO.sum (s := Ico N M) (A := fun s n => g2b_invScale s n * g2b_harmonicCoeff s)
+      fun s hs => ((invScale_isBigO_of_le (mem_Ico.mp hs).1).const_mul_left
+        (g2b_harmonicCoeff s)).congr_left (fun n => mul_comm _ _)
+    exact h.congr_left fun n => by simp only [Finset.sum_apply]
+  simp only [smul_eq_mul]
+  refine (hr.add htail).congr_left fun n => ?_
+  have hsum := sum_range_add_sum_Ico (fun s => g2b_invScale s n * g2b_harmonicCoeff s) hNM
+  dsimp only [M] at hsum ⊢
+  rw [← hsum]
+  ring
 
 /-! ### §2.10(ii) Summation by parts -/
 
@@ -277,7 +394,11 @@ theorem oscillatorySum_isBigO_trivial (β : ℝ) :
     (∀ α < -1, (fun n => oscillatorySum α β n) =O[atTop] fun _ => (1 : ℝ)) ∧
       ((fun n => oscillatorySum (-1) β n) =O[atTop] fun n => Real.log n) ∧
       ∀ α > -1, (fun n => oscillatorySum α β n) =O[atTop] fun n => (n : ℝ) ^ (α + 1) := by
-  sorry
+  have hb (α : ℝ) : (fun n => oscillatorySum α β n) =O[atTop]
+      fun n => ∑ j ∈ Ico 1 n, (j : ℝ) ^ α := IsBigO.of_norm_le (norm_oscillatorySum_le α β)
+  exact ⟨fun α hα => (hb α).trans (Real.sum_Ico_rpow_isBigO_one hα),
+    (hb (-1)).trans Real.sum_Ico_rpow_neg_one_isBigO_log,
+    fun α hα => (hb α).trans (Real.sum_Ico_rpow_isBigO hα)⟩
 
 /-- DLMF 2.10.13: with `u_j = e^{ijβ}` and `e^{iβ} ≠ 1`,
 `U_j = e^{iβ}(e^{ijβ} - 1)/(e^{iβ} - 1)`. -/
@@ -330,6 +451,19 @@ theorem oscillatorySum_eq {α β : ℝ} (hβ : Complex.exp (Complex.I * β) ≠ 
   simp only [v]
   ring
 
+/-- On a positive unit interval starting at `a ≥ 1`, any real power is bounded
+by its value at `a` times a constant depending only on the exponent. -/
+private lemma rpow_le_mul_on_unit_interval (p : ℝ) {a u : ℝ} (ha : 1 ≤ a)
+    (hu : u ∈ Icc a (a + 1)) : u ^ p ≤ 2 ^ |p| * a ^ p := by
+  have ha0 : 0 < a := zero_lt_one.trans_le ha
+  have h2 : 1 ≤ (2 : ℝ) ^ |p| := Real.one_le_rpow (by norm_num) (abs_nonneg p)
+  rcases le_total p 0 with hp | hp
+  · exact (Real.rpow_le_rpow_of_nonpos ha0 hu.1 hp).trans
+      (le_mul_of_one_le_left (Real.rpow_nonneg ha0.le _) h2)
+  · calc u ^ p ≤ (2 * a) ^ p :=
+          Real.rpow_le_rpow (ha0.le.trans hu.1) (by linarith [hu.2]) hp
+      _ = 2 ^ |p| * a ^ p := by rw [Real.mul_rpow (by norm_num) ha0.le, abs_of_nonneg hp]
+
 /-- DLMF 2.10.15: for every real `α` there is `C` with
 `|j^α - (j+1)^α + α j^{α-1}| ≤ C |α(α-1)| j^{α-2}` for all integers `j ≥ 1`. -/
 @[dlmf 2.10.E15]
@@ -337,7 +471,67 @@ theorem rpow_sub_rpow_succ (α : ℝ) :
     ∃ C : ℝ, ∀ j : ℕ, 1 ≤ j →
       |(j : ℝ) ^ α - ((j : ℝ) + 1) ^ α + α * (j : ℝ) ^ (α - 1)| ≤
         C * |α * (α - 1)| * (j : ℝ) ^ (α - 2) := by
-  sorry
+  refine ⟨2 ^ |α - 2|, fun j hj => ?_⟩
+  let a : ℝ := j
+  have ha : 1 ≤ a := by dsimp [a]; exact_mod_cast hj
+  have ha0 : 0 < a := zero_lt_one.trans_le ha
+  let B := 2 ^ |α - 2| * |α * (α - 1)| * a ^ (α - 2)
+  have hB : 0 ≤ B := by positivity
+  have hD (t : ℝ) (ht : t ∈ Icc a (a + 1)) :
+      HasDerivAt (fun u : ℝ => α * u ^ (α - 1))
+        (α * (α - 1) * t ^ (α - 2)) t := by
+    apply ((Real.hasDerivAt_rpow_const (p := α - 1)
+      (Or.inl (ha0.trans_le ht.1).ne')).const_mul α).congr_deriv
+    rw [show α - 1 - 1 = α - 2 by ring]
+    ring
+  have hDb (t : ℝ) (ht : t ∈ Ico a (a + 1)) :
+      ‖α * (α - 1) * t ^ (α - 2)‖ ≤ B := by
+    rw [norm_mul, Real.norm_eq_abs, Real.norm_of_nonneg (Real.rpow_nonneg (by linarith [ht.1]) _)]
+    simpa [B, mul_assoc, mul_left_comm, mul_comm] using
+      mul_le_mul_of_nonneg_left (rpow_le_mul_on_unit_interval (α - 2) ha
+        (Ico_subset_Icc_self ht)) (abs_nonneg (α * (α - 1)))
+  have hdiff := norm_image_sub_le_of_norm_deriv_le_segment'
+    (fun t ht => (hD t ht).hasDerivWithinAt) hDb
+  have hE (t : ℝ) (ht : t ∈ Icc a (a + 1)) :
+      HasDerivAt (fun u : ℝ => u ^ α - u * (α * a ^ (α - 1)))
+        (α * t ^ (α - 1) - α * a ^ (α - 1)) t := by
+    exact (Real.hasDerivAt_rpow_const (Or.inl (ha0.trans_le ht.1).ne')).sub
+      (hasDerivAt_mul_const _)
+  have hb := norm_image_sub_le_of_norm_deriv_le_segment'
+    (fun t ht => (hE t ht).hasDerivWithinAt)
+    (fun t ht => (hdiff t (Ico_subset_Icc_self ht)).trans
+      (mul_le_of_le_one_right hB (by linarith [ht.2]))) (a + 1) (by constructor <;> linarith)
+  have he : a ^ α - (a + 1) ^ α + α * a ^ (α - 1) =
+      -(((a + 1) ^ α - (a + 1) * (α * a ^ (α - 1))) -
+        (a ^ α - a * (α * a ^ (α - 1)))) := by ring
+  rw [show (j : ℝ) = a from rfl, he, abs_neg, ← Real.norm_eq_abs]
+  simpa only [add_sub_cancel_left, mul_one] using hb
+
+/-- The sum of the Taylor errors of the power weight has the next-order power bound. -/
+private lemma oscillatorySum_remainder_isBigO (α β : ℝ) :
+    (fun n : ℕ => ∑ j ∈ Ico 1 n, Complex.exp (Complex.I * j * β) *
+      (((j : ℝ) ^ α - ((j : ℝ) + 1) ^ α + α * (j : ℝ) ^ (α - 1) : ℝ) : ℂ))
+      =O[atTop] fun n => (n : ℝ) ^ (α - 1) + 1 := by
+  by_cases hα : α = 1
+  · subst α
+    simp only [Real.rpow_one, sub_self, Real.rpow_zero, one_mul]
+    have hz (j : ℕ) : (j : ℝ) - ((j : ℝ) + 1) + 1 = 0 := by ring
+    simp only [hz, Complex.ofReal_zero, mul_zero, sum_const_zero]
+    exact isBigO_zero _ _
+  obtain ⟨C, hC⟩ := rpow_sub_rpow_succ α
+  have hb : (fun n : ℕ => ∑ j ∈ Ico 1 n, Complex.exp (Complex.I * j * β) *
+      (((j : ℝ) ^ α - ((j : ℝ) + 1) ^ α + α * (j : ℝ) ^ (α - 1) : ℝ) : ℂ))
+      =O[atTop] fun n => ∑ j ∈ Ico 1 n, (j : ℝ) ^ (α - 2) := by
+    refine IsBigO.of_bound (C * |α * (α - 1)|) (Eventually.of_forall fun n => ?_)
+    rw [Real.norm_of_nonneg (sum_nonneg fun j _ => Real.rpow_nonneg (Nat.cast_nonneg _) _),
+      Finset.mul_sum]
+    refine (norm_sum_le _ _).trans (sum_le_sum fun j hj => ?_)
+    rw [norm_mul, Complex.norm_exp, Complex.norm_real, Real.norm_eq_abs]
+    have he : (Complex.I * j * β).re = 0 := by simp [Complex.mul_re, Complex.mul_im]
+    rw [he, Real.exp_zero, one_mul]
+    exact hC j (mem_Ico.mp hj).1
+  have hsum := Real.sum_Ico_rpow_isBigO_add_one (p := α - 2) (by intro h; apply hα; linarith)
+  simpa only [show α - 2 + 1 = α - 1 by ring] using hb.trans hsum
 
 /-- DLMF 2.10.16: for `e^{iβ} ≠ 1`, as `n → ∞`,
 `S(α, β, n) = e^{iβ}/(e^{iβ} - 1)(e^{i(n-1)β} n^α - α S(α-1, β, n) + O(n^{α-1}) + O(1))`. -/
@@ -348,13 +542,73 @@ theorem oscillatorySum_recursive {α β : ℝ} (hβ : Complex.exp (Complex.I * �
           (Complex.exp (Complex.I * (n - 1 : ℕ) * β) * ((n : ℝ) ^ α : ℝ) -
             α * oscillatorySum (α - 1) β n)) =O[atTop]
       fun n => (n : ℝ) ^ (α - 1) + 1 := by
-  sorry
+  let E := fun n : ℕ => ∑ j ∈ Ico 1 n, Complex.exp (Complex.I * j * β) *
+    (((j : ℝ) ^ α - ((j : ℝ) + 1) ^ α + α * (j : ℝ) ^ (α - 1) : ℝ) : ℂ)
+  have he (n : ℕ) : E n = (∑ j ∈ Ico 1 n, Complex.exp (Complex.I * j * β) *
+      (((j : ℝ) ^ α : ℝ) - (((j + 1 : ℕ) : ℝ) ^ α : ℝ))) +
+        α * oscillatorySum (α - 1) β n := by
+    simp only [E, oscillatorySum, Finset.mul_sum, ← Finset.sum_add_distrib]
+    refine sum_congr rfl fun j _ => ?_
+    push_cast
+    ring
+  have h1 : (fun _ : ℕ => (1 : ℂ)) =O[atTop] fun n => (n : ℝ) ^ (α - 1) + 1 :=
+    IsBigO.of_norm_le fun n => by
+      rw [norm_one]
+      linarith [Real.rpow_nonneg (Nat.cast_nonneg n : (0 : ℝ) ≤ n) (α - 1)]
+  refine (((oscillatorySum_remainder_isBigO α β).sub h1).const_mul_left
+    (Complex.exp (Complex.I * β) / (Complex.exp (Complex.I * β) - 1))).congr' ?_ EventuallyEq.rfl
+  filter_upwards [eventually_ge_atTop (1 : ℕ)] with n hn
+  have hEn := he n
+  dsimp only [E] at hEn
+  rw [oscillatorySum_eq hβ hn, hEn]
+  ring
 
 /-- DLMF 2.10.17: for `e^{iβ} ≠ 1`, `S(α, β, n) = O(n^α) + O(1)` as `n → ∞`. -/
 @[dlmf 2.10.E17]
 theorem oscillatorySum_isBigO {α β : ℝ} (hβ : Complex.exp (Complex.I * β) ≠ 1) :
     (fun n : ℕ => oscillatorySum α β n) =O[atTop] fun n => (n : ℝ) ^ α + 1 := by
-  sorry
+  have hvar (n : ℕ) (hn : 1 ≤ n) :
+      ∑ j ∈ Ico 1 n, |(j : ℝ) ^ α - ((j + 1 : ℕ) : ℝ) ^ α| ≤ (n : ℝ) ^ α + 1 := by
+    have ht := Finset.sum_Ico_sub (fun j : ℕ => (j : ℝ) ^ α) hn
+    simp only [Nat.cast_one, Real.one_rpow] at ht
+    rcases le_total 0 α with hα | hα
+    · have he : ∑ j ∈ Ico 1 n, |(j : ℝ) ^ α - ((j + 1 : ℕ) : ℝ) ^ α| =
+          (n : ℝ) ^ α - 1 := by
+        rw [← ht]
+        refine sum_congr rfl fun j hj => ?_
+        rw [abs_sub_comm, abs_of_nonneg]
+        exact sub_nonneg.mpr (Real.rpow_le_rpow (Nat.cast_nonneg _) (by norm_cast; omega) hα)
+      rw [he]
+      linarith
+    · have he : ∑ j ∈ Ico 1 n, |(j : ℝ) ^ α - ((j + 1 : ℕ) : ℝ) ^ α| =
+          1 - (n : ℝ) ^ α := by
+        rw [← neg_sub ((n : ℝ) ^ α) 1, ← ht, ← Finset.sum_neg_distrib]
+        refine sum_congr rfl fun j hj => ?_
+        rw [abs_of_nonneg, neg_sub]
+        exact sub_nonneg.mpr (Real.rpow_le_rpow_of_nonpos (by exact_mod_cast (mem_Ico.mp hj).1)
+          (by norm_cast; omega) hα)
+      rw [he]
+      linarith [Real.rpow_nonneg (Nat.cast_nonneg n : (0 : ℝ) ≤ n) α]
+  let K := ‖Complex.exp (Complex.I * β) / (Complex.exp (Complex.I * β) - 1)‖
+  refine IsBigO.of_bound (2 * K) ?_
+  filter_upwards [eventually_ge_atTop (1 : ℕ)] with n hn
+  have hn0 : 0 ≤ (n : ℝ) ^ α := Real.rpow_nonneg (Nat.cast_nonneg n : (0 : ℝ) ≤ n) α
+  have he (j : ℕ) : ‖Complex.exp (Complex.I * j * β)‖ = 1 := by
+    rw [show Complex.I * j * β = ((j * β : ℝ) : ℂ) * Complex.I by push_cast; ring,
+      Complex.norm_exp_ofReal_mul_I]
+  rw [oscillatorySum_eq hβ hn, norm_mul, Real.norm_of_nonneg (by positivity)]
+  have hs : ‖∑ j ∈ Ico 1 n, Complex.exp (Complex.I * j * β) *
+      (((j : ℝ) ^ α : ℝ) - (((j + 1 : ℕ) : ℝ) ^ α : ℝ))‖ ≤ (n : ℝ) ^ α + 1 := by
+    refine (norm_sum_le _ _).trans ((le_of_eq (sum_congr rfl fun j _ => ?_)).trans (hvar n hn))
+    rw [norm_mul, he, one_mul, ← Complex.ofReal_sub, Complex.norm_real, Real.norm_eq_abs]
+  have hfirst : ‖Complex.exp (Complex.I * (n - 1 : ℕ) * β) * ((n : ℝ) ^ α : ℝ) - 1‖ ≤
+      (n : ℝ) ^ α + 1 := by
+    refine (norm_sub_le _ _).trans_eq ?_
+    rw [norm_mul, he, Complex.norm_real, Real.norm_of_nonneg hn0, norm_one, one_mul]
+  have hb := (norm_add_le _ _).trans (add_le_add hfirst hs)
+  calc _ ≤ K * (((n : ℝ) ^ α + 1) + ((n : ℝ) ^ α + 1)) :=
+      mul_le_mul_of_nonneg_left hb (norm_nonneg _)
+    _ = 2 * K * ((n : ℝ) ^ α + 1) := by ring
 
 /-- DLMF 2.10.18: for `e^{iβ} ≠ 1`, as `n → ∞`,
 `S(α, β, n) = e^{inβ}/(e^{iβ} - 1) n^α + O(n^{α-1}) + O(1)`. -/
@@ -363,6 +617,19 @@ theorem oscillatorySum_asymptotic {α β : ℝ} (hβ : Complex.exp (Complex.I * 
     (fun n : ℕ => oscillatorySum α β n -
         Complex.exp (Complex.I * n * β) / (Complex.exp (Complex.I * β) - 1) *
           ((n : ℝ) ^ α : ℝ)) =O[atTop] fun n => (n : ℝ) ^ (α - 1) + 1 := by
-  sorry
+  have hprev := (oscillatorySum_isBigO (α := α - 1) hβ).const_mul_left
+    ((Complex.exp (Complex.I * β) / (Complex.exp (Complex.I * β) - 1)) * α)
+  have hrec := (oscillatorySum_recursive (α := α) hβ).sub hprev
+  refine hrec.congr' ?_ EventuallyEq.rfl
+  filter_upwards [eventually_ge_atTop (1 : ℕ)] with n hn
+  have he : Complex.exp (Complex.I * (n - 1 : ℕ) * β) * Complex.exp (Complex.I * β) =
+      Complex.exp (Complex.I * n * β) := by
+    rw [← Complex.exp_add]
+    congr 1
+    rw [Nat.cast_sub hn]
+    push_cast
+    ring
+  rw [← he]
+  ring
 
 end DLMF.AsymptoticApproximations

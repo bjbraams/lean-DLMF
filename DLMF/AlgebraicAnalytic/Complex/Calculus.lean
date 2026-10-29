@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module -- shake: keep-all
 
 public import DLMF.AlgebraicAnalytic.Complex.Defs
+public import Mathlib.Analysis.Complex.Conformal
 public import Mathlib.Analysis.SpecialFunctions.Complex.Log
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Arctan
 public import Mathlib.Analysis.SpecialFunctions.Pow.Complex
@@ -16,6 +17,8 @@ public import Mathlib.Analysis.InnerProductSpace.Harmonic.Basic
 public import Mathlib.Topology.Compactification.OnePoint.Basic
 public import Mathlib.RingTheory.Polynomial.Pochhammer
 public import TauCeti.Analysis.Contour.Winding.UnboundedComponent
+public import TauCeti.Analysis.Contour.Curve.Integrability
+public import Mathlib.MeasureTheory.Integral.DominatedConvergence
 public import Mathlib.Tactic.CrossRefAttribute
 
 /-!
@@ -249,7 +252,9 @@ complex differentiable at `z`. -/
 theorem differentiableAt_of_cauchyRiemann {f : ℂ → ℂ} {z : ℂ}
     (hf : ContDiffAt ℝ 1 f z) (hcr : fderiv ℝ f z I = I * fderiv ℝ f z 1) :
     DifferentiableAt ℂ f z := by
-  sorry
+  -- Mathlib's Cauchy–Riemann criterion only needs real differentiability.
+  exact differentiableAt_complex_iff_differentiableAt_real.mpr
+    ⟨hf.differentiableAt (by norm_num), by simpa only [smul_eq_mul] using hcr⟩
 
 /-- DLMF 1.9.27 (Laplace's equation in polar coordinates): if `u` is harmonic at
 `z = r e^{iθ}`, `r > 0`, then `U(ρ, φ) = u(ρ e^{iφ})` satisfies
@@ -357,7 +362,19 @@ neighbourhoods of `∞` in the extended plane `OnePoint ℂ`. -/
 theorem hasBasis_nhds_infty :
     (𝓝 (∞ : OnePoint ℂ)).HasBasis (fun r : ℝ => 0 < r)
       (fun r => ((↑) : ℂ → OnePoint ℂ) '' {z | 1 / r < ‖z‖} ∪ {∞}) := by
-  sorry
+  have hb : (Bornology.cobounded ℂ).HasBasis (fun r : ℝ => 0 < r)
+      (fun r => {z : ℂ | 1 / r < ‖z‖}) := by
+    refine (Metric.hasBasis_cobounded_compl_closedBall (0 : ℂ)).to_hasBasis
+      (fun R _ => ?_) (fun r _ => ?_)
+    · refine ⟨1 / (|R| + 1), by positivity, fun z hz => ?_⟩
+      simp only [Set.mem_ofPred_eq, one_div_one_div] at hz
+      simpa only [Set.mem_compl_iff, Metric.mem_closedBall, dist_zero_right, not_le] using
+        (lt_of_le_of_lt (le_abs_self R) (lt_trans (lt_add_one _) hz))
+    · exact ⟨1 / r, trivial, by simp only [Set.compl_ofPred, Metric.closedBall,
+        dist_zero_right, not_le]; exact Set.Subset.rfl⟩
+  rw [OnePoint.nhds_infty_eq, coclosedCompact_eq_cocompact,
+    ← Metric.cobounded_eq_cocompact]
+  exact (hb.map ((↑) : ℂ → OnePoint ℂ)).sup_pure ∞
 
 /-- DLMF 1.9.36: `∞ ± z = ∞`. -/
 @[dlmf 1.9.E36]
@@ -617,7 +634,7 @@ theorem tendsto_iterated_of_tendsto_prod {z : ℕ → ℕ → ℂ} {L : ℂ} {g 
 uniformly on every compact subset of a domain `D`, then `∫_C ∑ fₙ(z) dz = ∑ ∫_C fₙ(z) dz` for
 every contour `C` in `D`, the right-hand side converging as partial sums. -/
 @[dlmf 1.9.E68]
-theorem tendsto_contourIntegral_tsum {D : Set ℂ} (hD : IsOpen D) {f : ℕ → ℂ → ℂ}
+theorem tendsto_contourIntegral_tsum {D : Set ℂ} (_hD : IsOpen D) {f : ℕ → ℂ → ℂ}
     (hf : ∀ n, ContinuousOn (f n) D) {F : ℂ → ℂ}
     (hu : ∀ K ⊆ D, IsCompact K →
       TendstoUniformlyOn (fun N z => ∑ n ∈ Finset.range N, f n z) F atTop K)
@@ -625,6 +642,38 @@ theorem tendsto_contourIntegral_tsum {D : Set ℂ} (hD : IsOpen D) {f : ℕ → 
     (hγD : ∀ t ∈ uIcc a b, γ t ∈ D) :
     Tendsto (fun N => ∑ n ∈ Finset.range N, contourIntegral γ a b (f n)) atTop
       (𝓝 (contourIntegral γ a b F)) := by
-  sorry
+  let K := γ '' uIcc a b
+  have hKD : K ⊆ D := Set.image_subset_iff.mpr hγD
+  have hK : IsCompact K := isCompact_uIcc.image_of_continuousOn hγ.continuousOn
+  let S : ℕ → ℂ → ℂ := fun N z => ∑ n ∈ Finset.range N, f n z
+  have hS (N : ℕ) : ContinuousOn (S N) K :=
+    continuousOn_finsetSum _ fun n _ => (hf n).mono hKD
+  have hU : TendstoUniformlyOn S F atTop K := hu K hKD hK
+  have hF : ContinuousOn F K := hU.continuousOn (Eventually.of_forall hS).frequently
+  obtain ⟨C, hC⟩ := hK.exists_bound_of_continuousOn hF
+  have hB : ∀ᶠ N in atTop, ∀ z ∈ K, ‖S N z‖ ≤ C + 1 := by
+    filter_upwards [Metric.tendstoUniformlyOn_iff.mp hU 1 zero_lt_one] with N hN z hz
+    calc ‖S N z‖ ≤ ‖F z‖ + ‖F z - S N z‖ := norm_le_norm_add_norm_sub _ _
+      _ ≤ C + 1 := add_le_add (hC z hz) (by simpa only [dist_eq_norm] using (hN z hz).le)
+  have hI := intervalIntegral.tendsto_integral_filter_of_dominated_convergence
+      (F := fun (N : ℕ) (t : ℝ) => deriv γ t * S N (γ t))
+      (f := fun t => deriv γ t * F (γ t)) (μ := volume)
+      (fun t => ‖deriv γ t‖ * (C + 1))
+      (Eventually.of_forall fun N => by
+        simpa only [smul_eq_mul] using
+          (hγ.intervalIntegrable_deriv_smul_comp (hS N)).aestronglyMeasurable_restrict_uIoc)
+      (hB.mono fun N hN => Eventually.of_forall fun t ht => by
+        rw [norm_mul]
+        exact mul_le_mul_of_nonneg_left (hN (γ t) ⟨t, uIoc_subset_uIcc ht, rfl⟩)
+          (norm_nonneg _))
+      (hγ.intervalIntegrable_deriv.norm.mul_const (C + 1))
+      (Eventually.of_forall fun t ht =>
+        tendsto_const_nhds.mul (hU.tendsto_at ⟨t, uIoc_subset_uIcc ht, rfl⟩))
+  have hsum (N : ℕ) : (∫ t in a..b, deriv γ t * S N (γ t)) =
+      ∑ n ∈ Finset.range N, contourIntegral γ a b (f n) := by
+    simp only [S, Finset.mul_sum, contourIntegral, smul_eq_mul]
+    exact intervalIntegral.integral_finsetSum fun n _ =>
+      hγ.intervalIntegrable_deriv_smul_comp ((hf n).mono hKD)
+  simpa only [hsum, contourIntegral, smul_eq_mul] using hI
 
 end DLMF.AlgebraicAnalytic

@@ -15,27 +15,29 @@ umbrella module `DLMF/<Area>.lean` describes what Mathlib already provides and w
 area adds. Statements taken from the DLMF record their equation numbers with Mathlib's
 `@[dlmf]` cross-reference attribute.
 
-`DLMF.lean` imports all areas. The current source tree has 1,086 library files,
-including the two root entry points and 79 general supporting modules. Large topic modules
+`DLMF.lean` imports all areas. The current source tree has 1,112 library files,
+including the two root entry points and 101 general supporting modules. Large topic modules
 are split into mathematical subtopics; the former file remains as a small import umbrella.
 For example, `Gamma/IntegralRepresentations.lean` now imports the Hankel, Prym, Binet and
 moment modules below `Gamma/IntegralRepresentations/`. Existing import paths still work.
 Every Lean source file is at most 1,500 lines; run `python3 scripts/check_file_lengths.py`
-to enforce this limit. The complete split map and current structural inventory are in
+to enforce this limit. The complete split map and the structural cleanup snapshot are in
 [CodeReviewInventory.json](CodeReviewInventory.json), with the mathematical review in
-[REVIEW.md](REVIEW.md).
+[REVIEW.md](REVIEW.md). The chapter-by-chapter correspondence between DLMF definitions
+and actual Lean constructions is recorded in [DEFINITIONS.md](DEFINITIONS.md).
+That catalogue also records missing counterparts and differences in domains and branches.
 
 Source files below each area directory, including nested topic modules and compatibility
 umbrellas (2026-10-28):
 
 - [Airy](DLMF/Airy.lean): 40 files.
-- [AlgebraicAnalytic](DLMF/AlgebraicAnalytic.lean): 52 files.
-- [AsymptoticApproximations](DLMF/AsymptoticApproximations.lean): 29 files.
+- [AlgebraicAnalytic](DLMF/AlgebraicAnalytic.lean): 53 files.
+- [AsymptoticApproximations](DLMF/AsymptoticApproximations.lean): 30 files.
 - [BernoulliEuler](DLMF/BernoulliEuler.lean): 21 files.
 - [Bessel](DLMF/Bessel.lean): 28 files.
 - [CoalescingSaddles](DLMF/CoalescingSaddles.lean): 16 files.
 - [Combinatorics](DLMF/Combinatorics.lean): 30 files.
-- [Confluent](DLMF/Confluent.lean): 55 files.
+- [Confluent](DLMF/Confluent.lean): 57 files.
 - [Constants](DLMF/Constants.lean): 3 files.
 - `Core`: 5 files.
 - [Coulomb](DLMF/Coulomb.lean): 14 files.
@@ -148,7 +150,7 @@ convergent integrals along rotated contours). Ledgers: [Chapter 33](DLMF33Acquis
 excluded, as elsewhere.
 
 Chapters 1 and 2, the general methods chapters, were acquired on 2026-10-27 as two new entry
-points, which completes the DLMF coverage (Chapter 3, numerical methods, is out of scope):
+points, completing the set of chapter entry points (Chapter 3, numerical methods, is out of scope):
 [AlgebraicAnalytic](DLMF/AlgebraicAnalytic.lean) (Chapter 1; algebra, calculus, Fourier series,
 complex variables, zeros of polynomials, continued fractions, differential equations, integral
 transforms, summability, distributions and spectral theory) and
@@ -240,16 +242,58 @@ Mathlib's `Complex.digamma`; moving it into `DLMF.Gamma.Real` is left for a late
 
 ## Status
 
-After proof round 3 for Chapters 20–32, the acquisition of Chapters 33–36 (2026-10-26), the
-restatement of Picard's solution 32.10.32–34, proof round 2 for Chapters 33–36 and the
-acquisition of Chapters 1–2 (all 2026-10-27) there are **1,771 explicit source admissions**:
-Elementary 68, GeneralizedHypergeometric 112, QHypergeometric 101, EllipticIntegrals 187,
-Theta 13, RiemannTheta 7, JacobiElliptic 35, Weierstrass 40, BernoulliEuler 25, Zeta 46,
-Combinatorics 37, NumberTheory 36, Mathieu 140, Lame 41, Spheroidal 33, Heun 26, Painleve 42,
-Coulomb 49, WignerSymbols 34, MatrixArgument 36, CoalescingSaddles 35, AlgebraicAnalytic 304,
-AsymptoticApproximations 136, and 188 in the older areas.
-The compiled audit of 2026-10-27 recorded **24,494 project theorems**, with **1,884 depending
-transitively on `sorryAx`**, and no other nonstandard axiom.
+The [later-chapter proof round](REVIEW.md#later-chapter-identities-and-series-2026-10-29)
+removes **15 further admissions**, leaving **1,649**. It proves the full-domain q-Gauss sum,
+classical coefficient limits, the Whittaker–Buchholz expansion, the Lommel parameter limit,
+Carlson RC duplication, Weierstrass Fourier series and sigma products, the Bernoulli
+Mellin–Barnes representation and the Narayana generating function. One sigma-product
+statement was corrected at zeros of its prefactor; all other existing statements and
+all existing definitions are unchanged. [ProofRound20261029e.json](ProofRound20261029e.json)
+records the proofs, compatibility checks and validation.
+
+The [Chapter 1–2 kernel, power-sum and Laplace-ray round](REVIEW.md#chapter-12-kernel-power-sum-and-laplace-ray-round-2026-10-29)
+removes **three further admissions**, leaving **1,664**: **229** in Chapter 1 and **104** in
+Chapter 2. It proves Watson's lemma for general rapidly decreasing kernels, the full
+real-power sum expansion using the proved zeta Euler–Maclaurin formula, and the horizontal-ray
+integral of the Laplace transform. The signed power-sum remainder bound remains admitted.
+[ProofRound20261029d.json](ProofRound20261029d.json) records the proofs and validation.
+
+The [Chapter 1–2 Fourier, Mellin and logarithmic Watson round](REVIEW.md#chapter-12-fourier-mellin-and-logarithmic-watson-round-2026-10-29)
+removes **15 further admissions**, leaving **1,667**: **230** in Chapter 1 and **106** in
+Chapter 2. It proves both Fourier-series Parseval pairings, smooth coefficient decay,
+coefficient uniqueness, the complex Gaussian Poisson identity, the remaining Mellin pairings,
+all four remaining Laplace-table entries, logarithmic Watson's lemma and three exact
+Chapter 2 integrability or remainder results. One existing Mellin corollary also becomes
+independent of admissions. [ProofRound20261029c.json](ProofRound20261029c.json) records the
+proofs and validation; the review consolidates the five earlier statement issues.
+
+The [Chapter 1–2 items 1–6 round](REVIEW.md#chapter-12-items-16-2026-10-29)
+removes **28 admissions**: 16 in Chapter 1 and 12 in Chapter 2, leaving **1,682**.
+It proves oscillatory and harmonic expansions, six exact transform entries, Fourier and
+half-line Parseval identities, Mellin and Stieltjes holomorphy, all four integration-by-parts
+statements and both Ritt estimates. Three existing Fourier corollaries also become
+independent of admissions. [ProofRound20261029b.json](ProofRound20261029b.json) records the
+proofs and validation. The higher-order Haar statement is retained as admitted because
+its separate derivative data need a compatibility hypothesis; the review explains the issue.
+
+The [Chapter 1–2 follow-up of 2026-10-29](REVIEW.md#chapter-12-proof-round-2026-10-29)
+removes **24 further admissions**: 15 in Chapter 1 and nine in Chapter 2, leaving **1,710**.
+It proves inequalities, complex-analysis and spectral identities, exact Fourier transforms,
+integration of asymptotic equivalents, Haar decay, a Mellin coefficient formula and an
+oscillatory-sum bound. Its inventory and validation are in
+[ProofRound20261029.json](ProofRound20261029.json). The
+[preceding round](REVIEW.md#admission-proof-round-2026-10-28) removed 37 admissions and
+freed four existing downstream theorems from admitted dependencies.
+
+Remaining source admissions by area: Elementary 68, GeneralizedHypergeometric 112,
+QHypergeometric 95, EllipticIntegrals 186, Theta 13, RiemannTheta 7, JacobiElliptic 35,
+Weierstrass 36, BernoulliEuler 24, Zeta 46, Combinatorics 36, NumberTheory 36, Mathieu 140,
+Lame 41, Spheroidal 33, Heun 26, Painleve 42, Coulomb 49, WignerSymbols 34, MatrixArgument 36,
+CoalescingSaddles 35, AlgebraicAnalytic 229, AsymptoticApproximations 104, and 186 in the older
+areas. The current axiom audit verifies all newly completed proofs using only the standard
+Lean/Mathlib axioms. The DLMF cross-reference audit records 8,653 proved entries, 2,050 entries
+that depend on admissions, and no nonstandard axiom dependencies. The review also records
+statement qualifications that require attention before further proof work.
 Counts in the dated development history describe their earlier scope.
 
 The [parallel priority round](REVIEW.md#priority-proof-implementation-with-parallel-ownership-2026-10-24)

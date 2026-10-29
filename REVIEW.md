@@ -1,6 +1,689 @@
 # Mathematical review of the lean-DLMF project (formerly lean-AAR)
 
-**Cleanup, 2026-10-28:** see the [completed structural cleanup and remaining issues](#file-proof-and-documentation-cleanup-2026-10-28) and the [current inventory](CodeReviewInventory.json). The [earlier review](#code-and-organization-review-2026-10-28) records the pre-cleanup snapshot. Admissions are unchanged.
+**Later-chapter identities and series, 2026-10-29:** the
+[new proof round](#later-chapter-identities-and-series-2026-10-29) removes 15 admissions,
+leaving 1,649. Fourteen original statements are proved unchanged; the sigma product's
+incorrect quotient-at-zero formulation is corrected and proved. The accompanying
+[definitions catalogue](DEFINITIONS.md) records the live DLMF-to-Lean correspondence.
+
+**Kernel, power-sum and Laplace-ray proofs, 2026-10-29:** the
+[latest proof round](#chapter-12-kernel-power-sum-and-laplace-ray-round-2026-10-29)
+removes three admissions, leaving 1,664. It completes general-kernel Watson, power-sum
+asymptotics and the horizontal Laplace-ray identity without changing their statements.
+
+**Fourier, Mellin and logarithmic Watson, 2026-10-29:** the
+[new proof round](#chapter-12-fourier-mellin-and-logarithmic-watson-round-2026-10-29)
+removes 15 admissions, leaving 1,667, and consolidates the five previously flagged
+Chapter 1–2 statement issues.
+
+**Items 1–6, 2026-10-29:** the [new proof round](#chapter-12-items-16-2026-10-29)
+removes 28 further admissions, leaving 1,682, and identifies a derivative-compatibility
+issue in the higher-order Haar statement.
+
+**Chapter 1–2 proofs, 2026-10-29:** the [follow-up proof round](#chapter-12-proof-round-2026-10-29)
+removes a further 24 admissions, leaving 1,710. The dated scope review below records the
+1,734-admission snapshot before this round.
+
+**Remaining admissions, 2026-10-29:** the [nature and scope review](#nature-of-the-remaining-admissions-2026-10-29)
+distinguishes exact identities, analytic foundations, asymptotics and uniform convergence
+from numerical approximation. It identifies one decimal-bound statement for a scope check.
+
+**Admission proofs, 2026-10-28:** the [proof round](#admission-proof-round-2026-10-28)
+removes 37 admissions and frees four existing downstream theorems from admitted dependencies.
+The [structural cleanup](#file-proof-and-documentation-cleanup-2026-10-28) below describes
+the preceding committed snapshot, recorded in [CodeReviewInventory.json](CodeReviewInventory.json).
+The [earlier review](#code-and-organization-review-2026-10-28) records the pre-cleanup snapshot.
+
+## Later-chapter identities and series (2026-10-29)
+
+This round removes **15 direct admissions**, reducing the total from **1,664 to 1,649**
+across 298 files with admissions. All earlier uncommitted proof rounds are preserved.
+[ProofRound20261029e.json](ProofRound20261029e.json) records every completed statement,
+81 new helper lemmas, declaration moves, axiom dependencies and validation.
+
+- **Chapter 17: six.** The q-Gauss sum now holds on its full stated domain, including
+  base zero and exceptional upper parameters. A normally convergent Newton series in
+  the reciprocal upper parameter interpolates the terminating q-Chu values; Mathlib's
+  identity theorem gives the result. Common zeros of the one-phi-zero continuation
+  are removable. The root-of-unity shifted-factorial ratio follows from Mathlib's
+  polynomial factorization. The unilateral coefficient limit, finite-series limit and
+  bilateral coefficient limit retain their original parameter exclusions and integer
+  phase exponents. No infinite-series classical-limit assertion is inferred from the
+  coefficient limits.
+- **Chapters 11 and 13: two.** The Whittaker–Buchholz expansion follows from normal
+  convergence, a telescoping differential equation, Taylor-coefficient uniqueness and
+  the existing Bessel branch bridge. The capital Lommel parameter limit now exists at
+  every parameter, including simultaneous Gamma poles: the entire numerator vanishes
+  on both polar hyperplanes, giving the required double cancellation. This is a
+  pointwise parameter limit; the exceptional-parameter differential equation still
+  needs control of argument derivatives.
+- **Chapter 19: one.** Carlson RC duplication specializes the existing RF duplication
+  formulas, including the zero boundary case.
+- **Chapter 23: four.** The Weierstrass zeta Fourier series reuses the theta logarithmic
+  derivative, and the elliptic-function Fourier series follows by differentiation with
+  the existing compact-uniform bounds. Both sigma products follow from the theta product.
+- **Chapters 24 and 26: two.** The Bernoulli polynomial Mellin–Barnes representation is
+  proved for all complex polynomial arguments and every permitted vertical line. Contour
+  shifting reduces it to the known hyperbolic-secant moments. The Narayana generating
+  function follows from a finite Catalan transform and Vandermonde's identity; a helper
+  gives the explicit neighbourhood `|x|, |y| < 1/8`.
+
+### Statement correction and definitions review
+
+The previous first conjunct of `weierstrassSigma_prod` asserted that the product equals
+sigma divided by its sine prefactor at every point. At zero every product factor is one,
+whereas the totalized quotient is zero. A Lean counterexample was checked and is preserved
+in the proof-round report. The corrected theorem states `Multipliable` and retains the
+exact all-point product identity. This corrects the Lean transcription, not the DLMF.
+Every other existing statement and every existing definition is unchanged.
+
+[DEFINITIONS.md](DEFINITIONS.md) surveys all 36 chapters in order: 872 section pages,
+102 pages containing 111 matching headings, and 267 grouped correspondence entries.
+It distinguishes actual integral, series, continuation and real-domain constructions
+from aliases and bridge theorems, and records branches, missing counterparts and
+admission-dependent choices. Its 391 local links and 273 referenced DLMF anchors were
+validated. The catalogue also identifies two concrete follow-ups:
+
+- The local Narayana definition gives `N(0,0)=0`, while DLMF Table 26.6.3 gives one for
+  the empty path. The existing path-count theorem assumes `n ≥ 1`, and the generating
+  function uses positive indices; their statements are unaffected. The convention gap
+  is recorded without changing the definition.
+- `periodicBernoulliB` repeats the definition of `periodicBernoulli`, and `periodicEulerE`
+  repeats `antiperiodicEuler`. These are candidates for replacing duplicate definitions
+  by aliases and reusing their existing APIs in a subsequent cleanup.
+
+### Organization and validation
+
+The Buchholz development moved from `Confluent/Series.lean` into
+`Confluent/WhittakerBuchholz.lean`. Its two public definitions live below the proof layer
+in `Confluent/BuchholzDefinitions.lean`; names, values and the existing public import
+interface are preserved. The new general Newton-series estimates are in
+`DLMFMathlib/Analysis/Complex/GeometricNewtonSeries.lean`. The library now has 1,112 files,
+including 101 general supporting modules. All 1,114 Lean source files satisfy the
+1,500-line limit; the longest library file remains 1,454 lines.
+
+The full ordinary build passed with 14,674 jobs, and all 60 strict file checks passed.
+All 15 completed results and all 81 helpers use only `propext`, `Classical.choice` and
+`Quot.sound`. The global audit finds no nonstandard axiom; 1,754 theorems still depend
+on admissions. The tag dump records 8,653 proved entries, 2,050 admission-dependent
+entries and 1,028 checked upstream pointers. Six affected acquisition ledgers were
+refreshed. No new exact upstream statement duplicate was found among the helpers.
+
+The source comparison finds only the sigma statement change. Moving the definitions
+changed instance elaboration in 18 Confluent raw type hashes: the audit reconstructed
+their original types, reproduced all 18 baseline hashes and checked in Lean that each
+old type is definitionally equal to its new type. Sigma is the only mathematical
+public-interface change. The import survey adds no two-way area pair or definitions-file
+import relative to the start of the round; its 10 items beyond the older checked-in
+baseline already existed. New declarations are documented and `git diff --check` passes.
+The one new proof over 60 lines is the 93-line private Lommel pole classification;
+the analytic, simple-pole and double-pole cancellation arguments are separate helpers.
+
+### Remaining priorities
+
+The wider later-chapter programme remains open. The next useful targets are finite
+Dixon/Watson/Dougall identities and full-domain Heine transformations; the de Branges–Wilson
+integral and q-polynomial orthogonality; the all-order incomplete-Gamma coefficient
+cancellation; derivative-specific Airy remainder bounds; locally uniform Lommel continuation
+and exceptional-parameter ODE/termination; remaining Carlson transformations and principal
+values; and the remaining theta, elliptic, Bernoulli/Hurwitz and combinatorial identities.
+Primary Mathieu, Lamé and angular spheroidal existence results already have clean axiom
+audits; the outstanding foundations should be named specifically, such as noninteger
+Mathieu continuation, Lambert branch-family existence and the selected Stieltjes polynomial.
+The [five previously flagged Chapter 1–2 statement issues](#previously-flagged-chapter-12-statement-issues)
+remain unchanged. No numerical approximation result was added.
+
+## Chapter 1–2 kernel, power-sum and Laplace-ray round (2026-10-29)
+
+This round removes **three direct admissions**: **one** in Chapter 1 and **two** in Chapter 2.
+The chapter counts fall from **230 to 229** and **106 to 104**; the project total falls from
+**1,667 to 1,664**. All earlier uncommitted work is preserved.
+[ProofRound20261029d.json](ProofRound20261029d.json) records the completed statements,
+36 new helpers, axiom dependencies and validation.
+
+- **General-kernel Watson lemma**, `watson_lemma_kernel`, now has a proof under its original
+  measurable-kernel, stretched-exponential and local-expansion hypotheses. The substitution
+  `u = t^κ` transports the proved Laplace remainder estimate to stretched exponentials.
+  Domination gives the kernel error bound, and positive dilation identifies the Mellin
+  moments. The reusable work is in `DLMFMathlib/Analysis/Asymptotics/WatsonKernel.lean`;
+  the chapter theorem is a short specialization.
+- **Power-sum asymptotics**, `powerSum_asymptotic`, now follows from the already proved
+  `DLMF.Zeta.riemannZeta_eq_eulerMaclaurin`. Generalized-binomial identities identify the
+  coefficients, bounded periodic Bernoulli polynomials control the exact integral tail,
+  and a sufficiently long even truncation gives every requested truncation. This retains
+  every real exponent `α ≠ -1` and avoids admitted Hurwitz-zeta asymptotics.
+  The theorem and its still admitted companion `powerSum_remainder_bound` moved unchanged
+  in name, namespace and type into `Sums/PowerSums.lean`; `Sums/EulerMaclaurin.lean`
+  imports it, preserving the existing import interface. Moving the companion explains why
+  the number of files containing admissions rises from 298 to 299 despite the three removals.
+- **Horizontal Laplace-ray integral**, `integral_laplaceTransform_ray`, now follows from
+  Fubini after proving integrability of `exp(-st) f(t)/t`. The endpoint limit controls
+  zero and the original exponential-growth hypothesis controls infinity. The general
+  exponential-kernel identity is in `DLMFMathlib/Analysis/Integral/LaplaceRay.lean`.
+
+All existing mathematical statements, definitions and compiled public type hashes are
+unchanged. Every new declaration has an informative docstring; the longest new or rewritten
+proof is 44 lines. Four modules were added, bringing the library to 1,109 files and the
+general support layer to 100 modules. All 1,111 Lean source files satisfy the 1,500-line
+limit, and the longest library file remains 1,454 lines. A duplicate real-to-complex
+binomial adapter found by the compiled comparison was removed in favor of Mathlib's
+`Complex.ofReal_choose`.
+
+### Remaining targets and statement qualifications
+
+The signed first-neglected-term power-sum enclosure remains admitted: an asymptotic
+big-O remainder does not supply that finite-`n` sign and sharp constant. Useful subsequent
+targets are that enclosure, bounded-variation Fourier inversion, and Mellin contour shifts
+with vertical Gamma estimates. No numerical approximation statement was added.
+The [five previously flagged Chapter 1–2 statement issues](#previously-flagged-chapter-12-statement-issues)
+remain admitted and unchanged; this round found no additional statement defect.
+
+### Validation
+
+The full ordinary build passed (14,660 jobs). Strict checks with both implicit-variable
+options disabled passed for 49 files, including every changed Lean file and the entry
+modules; the power-sum module was checked again after replacing its duplicate adapter.
+All three completed theorems and all 36 helpers depend only on the standard axioms
+`propext`, `Classical.choice` and `Quot.sound`. The global audit finds no nonstandard axioms;
+1,769 project theorems still depend on admissions. The compiled DLMF dump records
+8,640 proved entries, 2,063 admission-dependent entries and 1,028 checked upstream pointers.
+Both chapter acquisition ledgers were refreshed from this dump.
+
+The import survey introduces no new two-way area pair and no new definitions-file import
+relative to the beginning of the round. Its 10 items beyond the older checked-in baseline
+were already present. The remaining new helpers have no exact statement matches among
+imported Mathlib or TauCeti declarations. `git diff --check` and the source-length check pass.
+
+## Chapter 1–2 Fourier, Mellin and logarithmic Watson round (2026-10-29)
+
+This round removes **15 direct admissions**: **11** in Chapter 1 and **four** in Chapter 2.
+The chapter counts fall from **241 to 230** and **110 to 106**; the project total falls from
+**1,682 to 1,667**, across 298 files with admissions. All earlier uncommitted work is
+preserved. [ProofRound20261029c.json](ProofRound20261029c.json) records the completed
+statements, 34 new helpers and one relocated helper, axiom dependencies and validation.
+
+- **Fourier series: five.** The two Parseval pairings reuse Mathlib's Fourier Hilbert basis
+  and `HilbertBasis.hasSum_inner_mul_inner`. Uniqueness also uses the basis representation.
+  Repeated integration by parts and TauCeti's `Function.Periodic.deriv` give the smooth
+  coefficient decay. The Gaussian Poisson identity converts Mathlib's
+  `Complex.tsum_exp_neg_quadratic` to the cosine-series form, retaining complex shifts and
+  principal powers.
+- **Mellin pairings: two.** Fourier inversion almost everywhere for integrable functions with
+  integrable transforms gives bilinear Parseval under the original weighted `L¹` hypotheses.
+  Logarithmic coordinates and positive dilation then prove 1.14.36 and the real
+  Mellin–Parseval identity 1.14.38. The existing 1.14.37 corollary consequently becomes
+  independent of admissions. The forward bilinear Fourier pairing was moved unchanged
+  from `L2Compatibility` into a lower `Pairing` module for reuse.
+- **Laplace table: four.** A complex exponential Frullani integral proves absolute
+  convergence and evaluates the logarithmic entries, including the cosine/hyperbolic
+  cosine versions and `sin(at)/t`. Its proof integrates along the segment between two
+  right-half-plane parameters and applies Fubini. Principal branches are retained;
+  TauCeti's `div_mem_slitPlane_of_re_pos` supplies branch-cut avoidance for the ratios.
+  `Transforms/LaplaceTable.lean` is now admission-free.
+- **Logarithmic Watson lemma: one.** Exact logarithmic Gamma moments give the coefficients.
+  One extra input term absorbs the logarithm in the residual power bound, after which
+  the existing Watson remainder theorem applies. No differentiation of an asymptotic
+  error estimate is used. The original nonlogarithmic integrability hypothesis turns
+  out to be redundant and is retained.
+- **Distributional asymptotics: three.** Positive dilation transports TauCeti's sharp beta
+  integrability criterion to the fractional kernel of 2.6.36. The geometric remainder
+  formula of 2.6.49–2.6.50 is proved by induction. The naive Stieltjes term integrals in
+  2.6.3 diverge by the power-integrability criterion at zero. These are exact identities
+  and analytic convergence statements.
+
+All existing mathematical statements and definitions are unchanged, and all existing
+compiled public type hashes are unchanged. Two unused hypothesis binder names were
+prefixed by an underscore. Every new declaration has an informative docstring, and the
+longest new or rewritten proof is 59 lines. The longest library file remains 1,454 lines;
+all 1,107 Lean source files satisfy the 1,500-line limit. Seven general support modules
+were added, bringing the library to 1,105 files and the support layer to 97 modules.
+
+### Previously flagged Chapter 1–2 statement issues
+
+The following interfaces remain admitted and unchanged. The first three items have clear
+counterexamples or a missing domain condition; the last two need qualification or further
+verification before proof work.
+
+1. **Finite-endpoint Liouville–Green uniqueness**, `liouvilleGreen_interval_isEquivalent`,
+   in [LiouvilleGreen](DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean).
+   For `f = 1`, `g = 0`, `ξ(x) = x` on `(0,1)`, both `exp x` and `exp x + sinh x` solve
+   the equation and are equivalent to `exp x` at `0+`. The asserted uniqueness needs an
+   additional endpoint or normalization condition.
+2. **Great Picard**, `picard_great`, in
+   [Complex/Functions](DLMF/AlgebraicAnalytic/Complex/Functions.lean), lacks `0 < r₂`.
+   At radius zero its punctured-disc holomorphy hypothesis is vacuous. The counterexample
+   and the required positive-radius qualification are detailed in the earlier review.
+3. **The logarithmic product M-test**, `prod_mtest_log`, in the same file, claims global
+   uniform convergence from bounds on only the tail logarithms. An unbounded early factor
+   invalidates that conclusion. Use convergence uniformly on compact subsets, or add a
+   global bound on the early product.
+4. **Higher-order Haar**, `haar_isLittleO_pow`, in
+   [Watson](DLMF/AsymptoticApproximations/Integrals/Watson.lean), assumes holomorphy only
+   of `Q-F` while its derivative data use the separate totalized derivatives of `Q` and
+   `F`. These need not be the derivatives of the difference. Individual holomorphy or
+   explicit derivative compatibility would justify integration by parts. This is a
+   missing-compatibility concern, not a complete counterexample to all its hypotheses.
+5. **Negative-order Cesàro regularity**, `hasCesaroSumOfOrder_of_tendsto`, in
+   [Summability/Series](DLMF/AlgebraicAnalytic/Summability/Series.lean), assumes `α > -1`.
+   The negative-order range needs verification; the expected ordinary regularity range
+   is `α ≥ 0`. The earlier review gives the alternating-series counterexample candidate.
+   No correction has been made to the acquired DLMF assertion.
+
+A suspected additional parenthesis issue in the power-sum statements was **disproved**:
+Lean parses the zeta constant and truncated expansion outside the finite sum. Temporary
+Lean checks of the `α = 0`, `m = 1`, `n = 3` case compile with remainder zero and first
+neglected term zero. The temporary module was removed; no power-sum statement was changed.
+
+The next proof targets remain general-kernel Watson, power-sum asymptotics and their signed
+remainders, bounded-variation Fourier inversion, and then Mellin contour shifting with
+uniform vertical Gamma estimates. The general-kernel Watson theorem still needs the
+change-of-variables and domination adapters for stretched-exponential kernels.
+
+### Validation
+
+The full ordinary build passed (14,652 jobs). Strict checks with both implicit-variable
+options disabled passed for 45 files, including all changed Lean files and the entry
+modules. All 15 completed theorems and 35 added or relocated helpers use only `propext`, `Classical.choice`
+and `Quot.sound`. The global audit checks 55,659 theorems, of which 1,772 depend on
+admissions, and finds no nonstandard axioms. The DLMF dump records 8,635 proved entries,
+2,068 admission-dependent entries and 1,028 checked upstream pointers. Both chapter
+acquisition ledgers were refreshed from this compiled dump.
+
+The import survey introduces no new two-way area pair and no new definitions-file import
+relative to the beginning of this round. Its 10 items beyond the older checked-in baseline
+were already present. The new helpers have no exact statement matches among the imported
+Mathlib and TauCeti declarations; the duplicate right-half-plane ratio helper found during
+review was removed in favor of TauCeti's existing theorem.
+
+## Chapter 1–2 items 1–6 (2026-10-29)
+
+This round removes **28 direct admissions**. Chapter 1 falls from **257 to 241**, Chapter 2
+from **122 to 110**, and the project total from **1,710 to 1,682**, across 299 files.
+`DLMFMathlib` remains admission-free. The inventory
+[ProofRound20261029b.json](ProofRound20261029b.json) records every completed theorem,
+its location, documentation and axiom dependencies, and 53 added or newly exposed helpers.
+The earlier uncommitted proof rounds were preserved.
+
+1. **Oscillatory and harmonic sums: six.** Two mean-value estimates control the error in a
+   real-power increment. Power-sum comparison bounds handle the accumulated error in the
+   oscillatory recurrence, including the special exponent `α = 1`. This proves the
+   recursive formula and leading asymptotic of §2.10. The harmonic expansion and its
+   signed first-neglected-term enclosure reuse the Gamma area's Binet integral. Extracting
+   the partial-fraction remainder and the pointwise digamma identity also shortens the
+   existing Stirling proofs; no second derivation of that expansion was introduced.
+2. **Exact transform entries: six.** Mellin transforms of an interval indicator and its
+   logarithmic weight, both weighted two-sided exponential Fourier transforms, and the
+   complex Gaussian cosine and weighted sine transforms. The Gaussian formulas preserve
+   principal powers for complex `a` with `Re a > 0`; all normalizing constants are exact.
+3. **Fourier compatibility and Parseval: five.** For `L¹ ∩ L²`, the classical Fourier
+   integral represents Mathlib's unitary `L²` transform almost everywhere. This gives the
+   conjugate and bilinear pairings and convolution inversion. Even and odd extensions give
+   the cosine and sine pairings. The existing norm-square and two half-line square
+   identities consequently lose their admitted dependencies: three downstream corollaries.
+4. **Mellin and Stieltjes analysis: five.** Mellin holomorphy uses convergence at two nearby
+   real parts. The Stieltjes proofs establish convergence from power decay, holomorphy on
+   the slit plane, every iterated derivative, and the iterated-Laplace identity. Fubini is
+   applied after proving absolute integrability of the double kernel. TauCeti's local
+   denominator estimate supplies the slit-plane domination.
+5. **Integration by parts: four.** All admissions in `Integrals/Parts.lean` are removed.
+   A shared finite boundary-sum identity gives the finite Fourier expansion and variation
+   bound. For the improper integral, convergence at two frequencies forces the boundary
+   phase to vanish; uniform convergence supplies the Riemann–Lebesgue limit. The Laplace
+   error bound derives a common exponential rate for the lower derivatives and then reuses
+   Chapter 1's iterated Laplace derivative identity.
+6. **Ritt differentiation estimates: two.** Uniform discs inside a smaller sector and
+   Mathlib's Cauchy estimate prove both big-O and little-o derivative bounds. The common
+   estimate keeps its geometric constant independent of the size of the original bound,
+   which is necessary for the little-o argument.
+
+### Higher-order Haar hypothesis issue
+
+`haar_isLittleO_pow` is retained as admitted. Its holomorphy hypothesis concerns `Q - F`,
+but its derivative data are `iteratedDeriv j Q - iteratedDeriv j F`. These need not be the
+iterated derivatives of the difference: take `Q z = conj z + z` and `F z = conj z`.
+Both separate first derivatives are Lean's totalized zero, whereas `(Q - F)' = 1`.
+This demonstrates the missing compatibility needed for the proposed integration-by-parts
+argument; it is not asserted to be a full counterexample satisfying every Haar hypothesis.
+Individual holomorphy of `Q` and `F`, or explicit compatibility of the derivative data,
+would justify that step. A qualification was added to the docstring, and the theorem's
+hypotheses and conclusion were preserved.
+
+The current proofs also show two original hypotheses to be redundant: frequency positivity
+in `fourierCosTransform_gaussian`, and nonvanishing at zero in `laplace_error_bound`.
+They were retained to preserve the existing interfaces. No existing declaration statement
+or definition was changed, and all existing compiled public type hashes are unchanged.
+
+### Validation
+
+The ordinary full build passed (14,636 jobs). Strict checks with both implicit-variable
+options disabled passed for 35 files, including the entry modules and every changed Lean
+file. The 28 completed theorems and all 53 helpers use only `propext`, `Classical.choice`
+and `Quot.sound`; the global audit found no nonstandard axioms. The DLMF dump records
+8,618 proved entries and 2,085 admission-dependent entries, with 1,028 upstream pointers.
+Both chapter acquisition ledgers were refreshed from that compiled dump.
+
+The import survey reports no new two-way area pair and no new definitions-file import
+relative to the start of this round. Every added declaration has a meaningful docstring.
+The longest added or rewritten proof is 54 lines; the longest library file remains 1,454
+lines. All 1,100 Lean source files satisfy the 1,500-line limit. Source-statement,
+definition and compiled-type comparisons, the remaining-admission scan and
+`git diff --check` pass. No numerical approximation statements were added.
+
+## Chapter 1–2 proof round (2026-10-29)
+
+This round removes **24 direct admissions**, all in the two requested chapters.
+Chapter 1 (`AlgebraicAnalytic`) falls from **272 to 257**, and Chapter 2
+(`AsymptoticApproximations`) from **131 to 122**. The project total falls from **1,734 to
+1,710**, still spread across 300 files. `DLMFMathlib` remains free of admissions.
+[ProofRound20261029.json](ProofRound20261029.json) lists every completed statement, its
+location and axiom dependencies, together with the 12 new helper declarations.
+
+### Chapter 1: 15 proofs
+
+- **Inequalities (§1.7), four.** The equality cases of finite and integral
+  Cauchy–Schwarz use a shared real inner-product criterion, including zero vectors
+  and the empty finite index type. The integral Minkowski inequality specializes
+  Mathlib's `eLpNorm_add_le`. Strict integral arithmetic–geometric mean follows
+  from Mathlib's strict Jensen theorem for the exponential.
+- **Complex analysis (§1.9), three.** The Cauchy–Riemann converse specializes
+  Mathlib's real-versus-complex differentiability criterion. The neighborhood basis
+  at infinity uses the one-point compactification's cobounded-filter basis. Locally
+  uniform series can be integrated termwise along a piecewise `C¹` curve: compactness
+  of its image gives a common bound, and dominated convergence handles the curve's
+  potentially discontinuous derivative.
+- **Spectral theory (§1.18), four.** The mean-square convergence of orthonormal-basis
+  expansions follows from `HilbertBasis.hasSum_repr`. Norm-square preservation,
+  the inner-product formula for a diagonalized operator, and its resolvent formula
+  follow from the stipulated unitary transform. These proofs respect the reversal
+  between DLMF's and Mathlib's inner-product conventions.
+- **Fourier tables (§1.14), four.** The interval-indicator Fourier and cosine
+  transforms use exact elementary integrals. The two-sided exponential transform
+  and the improper Dirichlet sine integral reuse proved results of pinned TauCeti,
+  with the DLMF normalization restored explicitly.
+
+### Chapter 2: nine proofs
+
+- **Integration of asymptotic equivalents (§2.1), four.** For complex powers with
+  real part below `-1`, continuity and the asymptotic bound imply integrability,
+  convergence of the improper integral, and the expected tail equivalent. For
+  real part above `-1`, the primitive has the expected growing-power equivalent;
+  the borderline comparison with `1/x` gives `log x`. The shared Mathlib-only API
+  proves a more general transfer principle: the integral of a little-o error is
+  negligible when the nonnegative comparison integral diverges. Complex phases
+  and the original strict convergence regions are preserved.
+- **A null sectorial expansion (§2.1), one.** The expansion of `exp(-sqrt z)`
+  follows from exponential decay after composition with the principal square root,
+  retaining the closed-sector condition and all expansion orders.
+- **Haar's method (§2.4), one.** Uniform convergence of the truncated oscillatory
+  integrals transfers their Riemann–Lebesgue limits to the improper integral,
+  giving `q(t) - f(t) = o(exp(c t))`.
+- **Mellin coefficients (§2.5), one.** The odd-index formula for `b_n` in terms of
+  digamma functions follows from a new derivative lemma for the Gamma-product
+  kernel. The original exclusions of Gamma poles remain in force.
+- **Liouville–Green example (§2.7), one.** Rationalizing the square root gives an
+  exact remainder for the expansion of `sqrt(x + log x)`, and hence its stated
+  big-O bound.
+- **Oscillatory sums (§2.10), one.** Summation by parts gives
+  `S(α, β, n) = O(n^α + 1)` when `exp(iβ) ≠ 1`. Monotonicity of the real power
+  telescopes its total variation, for both signs of `α`.
+
+### Statement issue and remaining priorities
+
+`liouvilleGreen_interval_isEquivalent` has a false uniqueness assertion under its
+current finite-endpoint hypotheses. Take `(a₁, a₂) = (0, 1)`, `f = 1`, `f' = f'' = g = 0`,
+and `ξ(x) = x`. These satisfy `IsLGData`, and the error density is identically zero.
+Both `w(x) = exp x` and `v(x) = exp x + sinh x` solve `w'' = w`; both are asymptotic
+to the stated approximant `exp x` as `x → 0+`, but they differ on `(0, 1)`.
+Thus the asserted uniqueness cannot hold for any choice of the claimed solution.
+The declaration is retained as admitted, with a qualification in its docstring;
+its assumptions and conclusion have not been altered. This is a mathematical
+counterexample, not a separately formalized counterexample theorem.
+
+The remaining Chapter 1 work includes transform inversion, contour and residue
+theorems, summability, and differential-operator spectral theory. Chapter 2 still
+needs differentiation in sectors, general kernel and logarithmic Watson lemmas,
+contour-shifting arguments, uniform vertical Gamma estimates, and much of the
+Liouville–Green, turning-point and Stokes theory. In particular, the existing
+pointwise vertical Gamma estimate does not supply the uniform-in-real-part
+estimate required by the Mellin example. No numerical approximations were added.
+
+### Validation
+
+The full `lake build > /tmp/DLMF-build.log 2>&1` passes, as do strict direct checks
+of all 25 selected Lean files, including the changed files and entry modules. All 24 completed
+proofs and all 12 helpers use only `propext`, `Classical.choice` and `Quot.sound`;
+the global compiled-theorem audit finds no nonstandard axioms. All new declarations
+have meaningful docstrings; no new proof exceeds 60 lines, and no file exceeds 1,500.
+`git diff --check` passes.
+
+Existing theorem assumptions, conclusions and definition values are preserved.
+Two unused hypothesis names acquire an underscore prefix. One elaborated theorem
+type selects a different proof of finite dimensionality after an upstream import;
+Lean verifies that the old and new types are definitionally equal. The import survey
+introduces no new two-way area pairs or definitions-to-theorem imports. Its ten
+warnings against the older checked-in baseline were already present before this round;
+the baseline has not been rewritten.
+
+The Chapter 1 and 2 acquisition ledgers are refreshed. The DLMF cross-reference audit
+now records **8,583 proved entries and 2,120 admission-dependent entries**, with no
+nonstandard axioms. These are tagged entries, not counts of source declarations.
+
+## Nature of the remaining admissions (2026-10-29)
+
+A fresh source scan finds **1,734 directly admitted declarations in 300 files**. These are
+declarations whose own proofs contain `sorry`, rather than all theorems depending on an
+admission or all DLMF tags attached to such theorems. There are no direct admissions in
+`DLMFMathlib`. The review checked the inventory of statement signatures and documentation,
+surveyed the remaining mathematical topics, and inspected candidates involving approximation,
+computation, numerical values, uniformity and explicit error bounds. It is a scope review,
+not a verification of the truth of every admitted statement.
+
+### Mathematical content
+
+The remaining work covers the following overlapping groups:
+
+- **Exact identities and representations.** There is a substantial backlog of summation
+  and transformation identities, integral representations, addition and connection formulas,
+  recurrences, and orthogonality. Examples include 39 admissions in
+  [the transform tables](DLMF/AlgebraicAnalytic/Transforms/Tables.lean), 37 in
+  [modified Mathieu integrals](DLMF/Mathieu/Modified/Integrals.lean), 22 in
+  [basic q-hypergeometric summations](DLMF/QHypergeometric/BasicSummations.lean), and 20 in
+  [q-hypergeometric transformations](DLMF/QHypergeometric/Transformations.lean).
+  A transform table here is a table of exact formulas, not numerical function values.
+- **Analytic foundations and qualitative properties.** These include contour integration,
+  residues, transform inversion, distributions, analytic continuation, ODE existence and
+  uniqueness, eigenvalues, completeness and self-adjoint operators. The
+  [spectral-theory file](DLMF/AlgebraicAnalytic/Spectral/Theory.lean) alone has 25 admissions.
+  These results often need substantial shared analysis before their special-function
+  consequences can be proved.
+- **Asymptotics and rigorous remainders.** The Chapter 2 area has 131 admissions, including
+  Laplace and saddle-point methods, stationary phase, Mellin contour shifts, Liouville–Green
+  theory, turning points, difference equations and Stokes phenomena. Other areas contain
+  large-argument, large-order and zero asymptotics. A syntactic search finds 284 admitted
+  signatures mentioning formal asymptotic relations or expansion predicates. This is a
+  search count, not an exhaustive semantic classification: some relations are hypotheses,
+  and other asymptotic assertions use explicit inequalities or custom predicates.
+- **Uniform convergence and uniform asymptotics.** These are distinct topics. The
+  [Abel and Fejer theorems](DLMF/AlgebraicAnalytic/Summability/FourierSeries.lean) and
+  [Mathieu expansions](DLMF/Mathieu/Expansions.lean) assert convergence of approximants to a
+  function, uniformly or locally uniformly. The 17 admissions in
+  [Legendre uniform expansions](DLMF/Legendre/Uniform.lean), together with incomplete-gamma,
+  cylinder and Coulomb transition expansions, instead control asymptotic errors uniformly
+  as other variables range over a specified set. Such an expansion need not be a
+  convergent infinite series. Uniformity can be encoded by a joint-variable filter and
+  `IsBigO`, so searching only for `TendstoUniformly` misses much of this material.
+- **Inequalities, zeros, arithmetic and combinatorics.** These include exact integral
+  inequalities, locations and multiplicities of zeros, polynomial positivity, congruences,
+  partition and plane-partition formulas, and prime-number results. Some are major theorems:
+  the remaining work includes Chen's theorem, Vinogradov's three-prime theorem and
+  Siegel–Walfisz. AAR-only results such as Apery's theorem and the finite-field Selberg
+  integral remain lower priority under the project instructions.
+
+### Numerical approximation and the scope boundary
+
+I found no remaining admission asserting an approximate decimal function value, decimal
+zero or expansion coefficient, or a fixed-precision polynomial or rational fit. In particular:
+
+- [Struve computation](DLMF/Struve/Computation.lean) explicitly records that the polynomial
+  and rational approximations with errors `12 * 10^-9` and `25 * 10^-9` were removed as
+  numerical accuracy claims.
+- [Cylinder zero coefficients](DLMF/ParabolicCylinder/TurningPoint.lean) retain an exact
+  asymptotic expansion and structural coefficient properties, while excluding the printed
+  decimal coefficient values.
+- [Painleve real asymptotics](DLMF/Painleve/RealAsymptotics.lean) retain qualitative threshold
+  and solution behavior and explicitly exclude the decimal threshold brackets.
+
+**One statement deserves a scope decision:**
+`eight_add_sq_mul_compEllIntKk_div_log_bounds` in
+[elliptic-integral inequalities](DLMF/EllipticIntegrals/Inequalities.lean), DLMF 19.9.3,
+includes the upper bound
+`(8 + k^2) * K(k) / log(4 / sqrt(1 - k^2)) < 9.096` for every `0 < k < 1`.
+It is the only direct decimal literal found in the admitted statement signatures. Lean
+treats `9.096` as an exact rational bound; the assertion is a universal analytic inequality,
+not an approximate value of `K`. Retaining analytic bounds is consistent with the present
+policy. If decimal numerical ceilings themselves are to be excluded, separate this
+statement's symbolic lower inequality from the decimal upper bound and omit the latter.
+No statement was changed or removed in this review.
+
+Several names or file locations can otherwise be misleading:
+
+- `pcfU_chebyshev_infinite` in
+  [cylinder computation](DLMF/ParabolicCylinder/Computation.lean) asserts existence of an
+  exact summable Chebyshev expansion on a compactified half-line. It supplies no fitted
+  coefficient table, chosen finite degree or decimal accuracy target. The corresponding
+  compact-interval statements are already proved.
+- `Real.gammaDiDonato_approximation` in
+  [incomplete-gamma zeros and integrals](DLMF/IncompleteGamma/ZerosIntegrals.lean) is an
+  `O(x^-7)` asymptotic theorem, although it comes from a computational section.
+- [Zeta's approximate functional equation](DLMF/Zeta/Asymptotics.lean) is an analytic
+  theorem with a parameter-uniform error bound, not a numerical fit.
+- [Ramanujan's ellipse-perimeter bound](DLMF/EllipticIntegrals/Inequalities.lean) is a
+  symbolic inequality valid for a whole family of ellipses. Exact AGM identities and
+  continued-fraction convergence theorems likewise remain mathematical results even when
+  they support numerical evaluation.
+
+The appropriate distinction is therefore to retain exact convergence, approximation and
+error-bound theorems, including uniform and asymptotic ones, while excluding numerical
+data and fixed numerical fits. Removing the latter does not remove the main proof backlog.
+The [previously recorded statement-qualification issues](#statements-requiring-qualification-before-proof)
+also remain: these need corrections or further checking before proof attempts.
+
+This review changes documentation only; it introduces no Lean changes or new proof claims.
+
+## Admission proof round (2026-10-28)
+
+The source admission count falls from **1,771 to 1,734**: AlgebraicAnalytic falls from 304
+to 272, and AsymptoticApproximations from 136 to 131. The other areas are unchanged.
+All 37 completed proofs and all 34 new helper declarations have meaningful docstrings and
+use only `propext`, `Classical.choice` and `Quot.sound`. Their exact names, locations and
+axiom dependencies are in [ProofRound20261028.json](ProofRound20261028.json).
+
+The proofs concentrate on DLMF Chapters 1–2 and shared analytic foundations:
+
+- **Integral mean-value theorems (§1.4): two admissions.** The first theorem specializes
+  Mathlib. The second removes a monotone weight's constant part, applies Mathlib's
+  nonnegative-weight result, then handles decreasing weights by negation.
+- **Complex parameter integrals and products (§1.10): five admissions.** Finite-interval
+  integrals commute with every complex derivative; locally uniform limits give holomorphy
+  for both forms of improper integral. A common tail bound proves the uniform integral
+  M-test. The logarithmic derivatives of finite products converge by locally uniform
+  convergence of derivatives and the nonvanishing limit.
+- **Changes of variables for ODEs (§1.13): four admissions.** These are the Liouville
+  transformation, the square-root expression for the Schwarzian derivative, Cayley's
+  composition identity, and the product identity for different potentials. Helpers expose
+  the third-order chain rule, the square-root algebra and the Wronskian factorization.
+- **Transforms (§1.14): twenty-one admissions.** These include Laplace analyticity, uniform
+  decay, all orders of parameter differentiation, periodic and antiperiodic functions,
+  transforms of derivatives, and convolution. The table entries cover polynomial moments,
+  the inverse square root, sine, cosine, hyperbolic sine and cosine, and the first sine/cosine
+  moments; three Fourier entries reuse them. The Mellin convolution theorem and the Mellin
+  transform of `1/(1+x)` are also proved.
+- **Asymptotics (§§2.1, 2.2, 2.5): five admissions.** These are the explicit criterion for
+  uniform Poincaré expansions, the three successive root asymptotics for `t² - log t = y`,
+  and the second Mellin convolution convention.
+
+Four existing downstream theorems now have no admitted dependencies:
+
+- `DLMF.AlgebraicAnalytic.laplaceTransform_pow_mul_exp_neg_div_factorial`;
+- `DLMF.AlgebraicAnalytic.schwarzian_inverse`;
+- `DLMF.AsymptoticApproximations.laplace_trunc_eq_mellinInv`;
+- `DLMF.AsymptoticApproximations.mellin_convolution_eq_mellinInv`.
+
+### Shared APIs and organization
+
+[ParametricHolomorphy](DLMFMathlib/Analysis/Complex/ParametricHolomorphy.lean) now exposes
+both the Fréchet derivative of a locally dominated holomorphic integral and its scalar and
+iterated-derivative forms. Cauchy estimates supply integrable bounds for all derivatives;
+measurability is proved rather than assumed for the derivative families. The original
+holomorphy theorem reuses this stronger result.
+
+[MellinConvolution](DLMFMathlib/Analysis/MellinConvolution.lean) expresses the Mellin
+transform in logarithmic coordinates and reduces convolution to Mathlib's ordinary
+convolution theorem. Both DLMF conventions use this common proof. No function definition
+was copied. The elementary Laplace table is in
+[LaplaceTable](DLMF/AlgebraicAnalytic/Transforms/LaplaceTable.lean), imported by the original
+[Tables](DLMF/AlgebraicAnalytic/Transforms/Tables.lean) module so the Fourier entries can
+reuse its theorems. Existing public import paths continue to work.
+
+All original public declaration names and 25,811 recorded compiled type hashes are unchanged.
+The source comparison checks 25,768 original named statement heads and 3,412 definition
+values, with no mathematical change or removal. Four unused hypothesis binder labels were
+prefixed with an underscore; their types and positions are unchanged. Complex branches,
+normalizations, exceptional cases and totalized integrals are retained.
+
+### Statements requiring qualification before proof
+
+These statements remain admitted, with their current interfaces preserved:
+
+- **`picard_great`**, in [Complex/Functions](DLMF/AlgebraicAnalytic/Complex/Functions.lean),
+  lacks `0 < r₂`. For `r₂ = 0`, the punctured-disc holomorphy hypothesis is vacuous.
+  Taking `f(z) = conj z`, `z₀ = 0` and `ε = 1` satisfies the nonmeromorphic hypothesis,
+  but the image of the punctured unit disc omits every value of modulus at least one.
+  A positive radius is needed to express an isolated essential singularity.
+- **`prod_mtest_log`**, in the same file, claims uniform convergence on all of `D` from
+  bounds on only the tail of the logarithms. Unbounded early factors invalidate that
+  conclusion. For example, take `D = ℂ`, `1 + a₁(z) = z`, and
+  `1 + aₙ(z) = exp(2^{-n})` for `n ≥ 2`. The logarithm bounds hold with `N = 2` and a
+  summable geometric majorant, but the finite products are `z` times constants converging
+  to `exp(1/2)`. Their errors are unbounded on `ℂ` at every finite stage. Locally uniform
+  convergence is the appropriate conclusion, or the early factors need a global bound.
+- **`hasCesaroSumOfOrder_of_tendsto`**, in
+  [Summability/Series](DLMF/AlgebraicAnalytic/Summability/Series.lean), needs a range review.
+  It assumes only `-1 < α`, which includes negative Cesàro orders. The ordinary convergent
+  alternating series `aₙ = (-1)ⁿ/(n+1)^{1/4}` is a counterexample candidate at `α = -1/2`:
+  its negative-order means have an alternating term of order `n^{1/4}`. The expected
+  regularity range is `α ≥ 0`. This issue also needs checking against the source:
+  [DLMF §1.15(i)–(ii)](https://dlmf.nist.gov/1.15) defines the method for `α > -1` and then
+  asserts regularity of all the listed methods. No correction to the theorem or source
+  acquisition has been made in this round.
+
+The first two counterexamples are mathematical checks, not new formalized Lean results;
+the negative-order Cesàro issue is flagged for further verification. The remaining
+admissions include substantially deeper results: general contour residue and inversion
+formulas, global ODE existence and spectral theory, and the more advanced asymptotic
+methods. No proof was closed by appealing to another admitted theorem.
+
+### Validation of this proof round
+
+- `lake build > /tmp/DLMF-build.log 2>&1` passed, **14,612 jobs**.
+- Direct checks covered all **13** changed/new Lean files plus `Main.lean` and `DLMF.lean`:
+  **15** files passed with `-DautoImplicit=false -DrelaxedAutoImplicit=false` after their imports
+  were rebuilt.
+- Axiom checks verify all 37 new proofs, all 34 helpers and the four downstream theorems.
+  The whole-environment audit, including generated theorem declarations, records 55,336
+  theorems, 1,843 dependent on existing admissions and none on other nonstandard axioms.
+- The cross-reference dump still has **10,703** entries and the same declaration/reference
+  pairs: **8,553 proved**, **2,150 admission-dependent**, and **zero nonstandard**. There are
+  47 improved entries, representing 41 distinct tagged declarations. The Chapter 1 and 2
+  ledgers have refreshed proof statuses and source links.
+- All **1,090** Lean source files satisfy the 1,500-line limit. The library itself has
+  **1,088** files; its largest file remains `DLMF/MatrixArgument/GammaBeta.lean` at 1,454 lines.
+- The import survey adds no two-way area pair and no definitions-to-theorem violation.
+  It records one new area direction, AlgebraicAnalytic → Gamma, because the Mellin table
+  specializes the existing Gamma/Beta Mellin theorem. Its exit status remains 1 for the
+  same ten pre-existing differences from `scripts/import_baseline.json`; the baseline
+  was not rewritten.
+- Dependency pins, toolchain, Lake options and build directories are unchanged.
 
 ## File, proof and documentation cleanup (2026-10-28)
 
@@ -1318,7 +2001,7 @@ The three copies of `(a;q)_{m+k} = (a;q)_m (aq^m;q)_k` were merged into
 ## Dixon and Dougall via Carlson's theorem (2026-10-16)
 
 Carlson's theorem was copied unchanged from lean-codes to
-[ToMathlib/Analysis/Complex/Carlson.lean](ToMathlib/Analysis/Complex/Carlson.lean).
+[ToMathlib/Analysis/Complex/Carlson.lean](../lean-codes/ToMathlib/Analysis/Complex/Carlson.lean).
 With it, `dixon_sum` and `dougall_bilateral` (15.4.E25) in
 [DLMF/Hypergeometric/Identities.lean](DLMF/Hypergeometric/Identities.lean) are proved
 (218 → 216 admissions). Term-by-term bounds give only type π on vertical lines, so both
@@ -1434,7 +2117,7 @@ noted in the 2026-10-16 assessment.
 A gap review of Beals and Wong, *Special Functions and Orthogonal Polynomials* (2015), was
 followed by its cheapest high-leverage items. Admissions went from 184 to 169.
 
-* New [ToMathlib/Analysis/ODE](ToMathlib/Analysis/ODE): Sturm separation and comparison and the
+* New [ToMathlib/Analysis/ODE](DLMFMathlib/Analysis/ODE): Sturm separation and comparison and the
   at-most-one-zero theorem for `(p y')' + q y = 0` (`SturmComparison.lean`), and the
   Sonine–Pólya theorem with Sonine's function `y² + (k y')²/(k φ)` (`SoninePolya.lean`).
 * [ClassicalInstances.lean](DLMF/OrthogonalPolynomials/ClassicalInstances.lean): Jacobi,

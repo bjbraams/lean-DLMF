@@ -6,9 +6,11 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.AlgebraicAnalytic.Fourier.Defs
-public import Mathlib.Analysis.Fourier.AddCircle
+public import DLMFMathlib.Analysis.Fourier.AddCircle
+public import DLMFMathlib.Analysis.Fourier.GaussianSeries
 public import Mathlib.Analysis.Fourier.RiemannLebesgueLemma
 public import Mathlib.Topology.EMetricSpace.BoundedVariation
+public import TauCeti.Analysis.Calculus.PeriodicDeriv
 
 /-!
 # Fourier series (DLMF §1.8)
@@ -33,13 +35,17 @@ Proved here: the bridge `fourierExpCoeff = fourierCoeffOn` on `[-π, π]`, the r
 (`a_n`) for even (odd) `f`, Parseval's formula 1.8.6 (from Mathlib's
 `hasSum_sq_fourierCoeffOn`) and 1.8.5, and the Riemann–Lebesgue lemma 1.8.10 together with
 its extension to integrable functions on `ℝ` (from Mathlib's
-`Real.tendsto_integral_exp_smul_cocompact`).
+`Real.tendsto_integral_exp_smul_cocompact`). The two-function Parseval pairings use
+`HilbertBasis.hasSum_inner_mul_inner`; coefficient uniqueness uses the Fourier Hilbert basis,
+and smooth coefficient decay uses repeated integration by parts and TauCeti
+`Function.Periodic.deriv`. The Gaussian Poisson identity uses Mathlib
+`Complex.tsum_exp_neg_quadratic`, retaining complex shifts and principal powers.
 -/
 
 @[expose] public noncomputable section
 
-open Real Filter MeasureTheory Set Asymptotics
-open scoped Topology
+open Real Complex Filter MeasureTheory Set Asymptotics
+open scoped Topology FourierTransform
 
 namespace DLMF.AlgebraicAnalytic
 
@@ -153,6 +159,25 @@ theorem fourierCosCoeff_eq_zero_of_odd {f : ℝ → ℂ} (hf : ∀ x, f (-x) = -
   rw [hf, mul_neg, Real.cos_neg]
   ring
 
+/-- The Fourier coefficients of the periodic lift to the circle agree with the
+DLMF exponential coefficients on `[-π, π]`. -/
+theorem fourierCoeff_lift_eq_fourierExpCoeff {f : ℝ → ℂ}
+    (hper : Function.Periodic f (2 * π)) (n : ℤ) :
+    letI : Fact (0 < 2 * π) := ⟨by positivity⟩
+    fourierCoeff hper.lift n = fourierExpCoeff f n := by
+  have : Fact (0 < 2 * π) := ⟨by positivity⟩
+  rw [fourierCoeff_eq_intervalIntegral _ n (-π), fourierExpCoeff,
+    show -π + 2 * π = π by ring, Complex.real_smul]
+  congr 1
+  · push_cast; ring
+  · refine intervalIntegral.integral_congr fun y _ => ?_
+    simp only [Function.Periodic.lift_coe, fourier_coe_apply,
+      smul_eq_mul]
+    rw [mul_comm]
+    congr 2
+    push_cast
+    field_simp [pi_ne_zero]
+
 /-- DLMF 1.8.3: the exponential Fourier series `f(x) = ∑_{n ∈ ℤ} c_n e^{inx}` of a continuous
 `2π`-periodic `f` with summable coefficients `c_n` (1.8.4). This is Mathlib's
 `has_pointwise_sum_fourier_series_of_summable` transported from `AddCircle (2π)` to `ℝ`. -/
@@ -162,19 +187,8 @@ theorem hasSum_fourierExpSeries {f : ℝ → ℂ} (hf : Continuous f)
     HasSum (fun n : ℤ => fourierExpCoeff f n * Complex.exp (Complex.I * n * x)) (f x) := by
   have hT : Fact (0 < 2 * π) := ⟨by positivity⟩
   let F : C(AddCircle (2 * π), ℂ) := ⟨hper.lift, continuous_coinduced_dom.mpr hf⟩
-  have hc : ∀ n, fourierCoeff F n = fourierExpCoeff f n := by
-    intro n
-    rw [fourierCoeff_eq_intervalIntegral _ n (-π), fourierExpCoeff,
-      show -π + 2 * π = π by ring, Complex.real_smul]
-    congr 1
-    · push_cast; ring
-    · refine intervalIntegral.integral_congr fun y _ => ?_
-      simp only [F, ContinuousMap.coe_mk, Function.Periodic.lift_coe, fourier_coe_apply,
-        smul_eq_mul]
-      rw [mul_comm]
-      congr 2
-      push_cast
-      field_simp [pi_ne_zero]
+  have hc : ∀ n, fourierCoeff F n = fourierExpCoeff f n :=
+    fourierCoeff_lift_eq_fourierExpCoeff hper
   have hs' : Summable (fourierCoeff F) := by
     rw [show fourierCoeff F = fourierExpCoeff f from funext hc]; exact hs
   have h := has_pointwise_sum_fourier_series_of_summable hs' (x : AddCircle (2 * π))
@@ -277,6 +291,21 @@ theorem hasSum_norm_sq_fourierCosSinCoeff {f : ℝ → ℂ}
     field_simp
     ring
 
+/-- DLMF 1.8.6_2 (Parseval's formula for two functions, exponential form): for `f`, `g`
+square integrable on `[-π, π]`, `(2π)⁻¹ ∫_{-π}^{π} f(x) ḡ(x) dx = ∑_{n ∈ ℤ} c_n c̄'_n`. -/
+@[dlmf 1.8.E6_2]
+theorem hasSum_fourierExpCoeff_mul_conj {f g : ℝ → ℂ}
+    (hf : MemLp f 2 (volume.restrict (Ioc (-π) π)))
+    (hg : MemLp g 2 (volume.restrict (Ioc (-π) π))) :
+    HasSum (fun n : ℤ => fourierExpCoeff f n * starRingEnd ℂ (fourierExpCoeff g n))
+      ((1 / (2 * π) : ℂ) * ∫ x in (-π)..π, f x * starRingEnd ℂ (g x)) := by
+  have h := hasSum_fourierCoeffOn_mul_conj (by linarith [pi_pos] : -π < π) hf hg
+  simp only [← fourierExpCoeff_eq_fourierCoeffOn, Complex.real_smul] at h
+  convert h using 1
+  congr 1
+  push_cast
+  ring
+
 /-- DLMF 1.8.6_1 (Parseval's formula for two functions, trigonometric form): for `f`, `g`
 square integrable on `[-π, π]`,
 `π⁻¹ ∫_{-π}^{π} f(x) ḡ(x) dx = ½ a_0 ā'_0 + ∑_{n ≥ 1} (a_n ā'_n + b_n b̄'_n)`. -/
@@ -288,17 +317,117 @@ theorem hasSum_fourierCosSinCoeff_mul_conj {f g : ℝ → ℂ}
         fourierSinCoeff f (n + 1) * starRingEnd ℂ (fourierSinCoeff g (n + 1)))
       ((1 / π : ℂ) * (∫ x in (-π)..π, f x * starRingEnd ℂ (g x)) -
         fourierCosCoeff f 0 * starRingEnd ℂ (fourierCosCoeff g 0) / 2) := by
-  sorry
+  have hfi := g1c_intervalIntegrable_of_memLp hf
+  have hgi := g1c_intervalIntegrable_of_memLp hg
+  have h := (hasSum_fourierExpCoeff_mul_conj hf hg).nat_add_neg
+  have h1 := (hasSum_nat_add_iff' 1).mpr h
+  simp only [Finset.range_one, Finset.sum_singleton, Nat.cast_zero, neg_zero] at h1
+  have key (n : ℕ) :
+      fourierCosCoeff f n * starRingEnd ℂ (fourierCosCoeff g n) +
+        fourierSinCoeff f n * starRingEnd ℂ (fourierSinCoeff g n) =
+      2 * (fourierExpCoeff f n * starRingEnd ℂ (fourierExpCoeff g n) +
+        fourierExpCoeff f (-(n : ℤ)) * starRingEnd ℂ (fourierExpCoeff g (-(n : ℤ)))) := by
+    rw [fourierExpCoeff_natCast hfi, fourierExpCoeff_neg_natCast hfi,
+      fourierExpCoeff_natCast hgi, fourierExpCoeff_neg_natCast hgi]
+    simp only [map_div₀, map_sub, map_add, map_mul, Complex.conj_I, map_ofNat]
+    ring_nf
+    rw [Complex.I_sq]
+    ring
+  convert h1.mul_left 2 using 1
+  · ext n
+    rw [key]
+  · rw [fourierExpCoeff_zero hfi, fourierExpCoeff_zero hgi]
+    simp only [map_div₀, map_ofNat]
+    field_simp
+    ring
 
-/-- DLMF 1.8.6_2 (Parseval's formula for two functions, exponential form): for `f`, `g`
-square integrable on `[-π, π]`, `(2π)⁻¹ ∫_{-π}^{π} f(x) ḡ(x) dx = ∑_{n ∈ ℤ} c_n c̄'_n`. -/
-@[dlmf 1.8.E6_2]
-theorem hasSum_fourierExpCoeff_mul_conj {f g : ℝ → ℂ}
-    (hf : MemLp f 2 (volume.restrict (Ioc (-π) π)))
-    (hg : MemLp g 2 (volume.restrict (Ioc (-π) π))) :
-    HasSum (fun n : ℤ => fourierExpCoeff f n * starRingEnd ℂ (fourierExpCoeff g n))
-      ((1 / (2 * π) : ℂ) * ∫ x in (-π)..π, f x * starRingEnd ℂ (g x)) := by
-  sorry
+/-- The exponential Fourier coefficients are the Fourier transform of the function
+restricted to a period, with the frequency and integral normalization rescaled. -/
+lemma fourierExpCoeff_eq_fourier_indicator (f : ℝ → ℂ) (n : ℤ) :
+    fourierExpCoeff f n = (1 / (2 * π) : ℂ) *
+      𝓕 ((Ioc (-π) π).indicator f) ((n : ℝ) / (2 * π)) := by
+  rw [fourierExpCoeff, intervalIntegral.integral_of_le (by linarith [pi_pos]),
+    Real.fourier_eq', ← integral_indicator measurableSet_Ioc]
+  congr 1
+  apply integral_congr_ae (Eventually.of_forall fun x => ?_)
+  by_cases hx : x ∈ Ioc (-π) π
+  · simp only [indicator_of_mem hx, smul_eq_mul, mul_comm]
+    congr 2
+    simp only [RCLike.inner_apply, conj_trivial]
+    push_cast
+    field_simp [pi_ne_zero]
+  · simp [hx]
+
+/-- The exponential Fourier coefficients vanish along any sequence of integer
+frequencies escaping finite sets; no convergence assumption is needed for totalized integrals. -/
+lemma tendsto_fourierExpCoeff_comp {k : ℕ → ℤ} (f : ℝ → ℂ)
+    (hk : Tendsto k atTop cofinite) :
+    Tendsto (fun n => fourierExpCoeff f (k n)) atTop (𝓝 0) := by
+  have hπ : (1 / (2 * π) : ℝ) ≠ 0 := by positivity
+  have ht := (Filter.tendsto_cocompact_mul_left₀ (K := ℝ) hπ).comp
+    (Int.tendsto_coe_cofinite.comp hk)
+  have h := ((Real.zero_at_infty_fourier ((Ioc (-π) π).indicator f)).comp ht).const_mul
+    (1 / (2 * π) : ℂ)
+  simpa only [fourierExpCoeff_eq_fourier_indicator, mul_zero, div_eq_mul_inv,
+    one_div, mul_comm, Function.comp_apply, one_mul, zero_mul] using h
+
+/-- Differentiation of a continuously differentiable periodic function multiplies
+its nonzero Fourier coefficients by `in`. This is Mathlib's integration-by-parts formula. -/
+lemma fourierExpCoeff_deriv {f : ℝ → ℂ} (hf : ContDiff ℝ 1 f)
+    (hper : Function.Periodic f (2 * π)) {n : ℤ} (hn : n ≠ 0) :
+    fourierExpCoeff (deriv f) n = (I * n) * fourierExpCoeff f n := by
+  have h := fourierCoeffOn_of_hasDerivAt (by linarith [pi_pos] : -π < π) hn
+    (fun x _ => (hf.differentiable (by norm_num) x).hasDerivAt)
+    ((contDiff_one_iff_deriv.mp hf).2.intervalIntegrable (-π) π)
+  have hp : f π = f (-π) := by simpa only [show -π + 2 * π = π by ring] using hper (-π)
+  simp only [hp, sub_self, mul_zero, zero_sub, ← fourierExpCoeff_eq_fourierCoeffOn] at h
+  have hn' : (n : ℂ) ≠ 0 := Int.cast_ne_zero.mpr hn
+  field_simp [pi_ne_zero, hn', I_ne_zero] at h
+  apply mul_left_cancel₀ (show (2 * (π : ℂ)) ≠ 0 by exact_mod_cast (by positivity :
+    (2 * π : ℝ) ≠ 0))
+  push_cast at h
+  linear_combination -h
+
+/-- Repeated differentiation multiplies each nonzero Fourier coefficient by `(in)^m`.
+Periodicity of derivatives is supplied by TauCeti's `Function.Periodic.deriv`. -/
+lemma fourierExpCoeff_iteratedDeriv {f : ℝ → ℂ} {m : ℕ} (hf : ContDiff ℝ m f)
+    (hper : Function.Periodic f (2 * π)) {n : ℤ} (hn : n ≠ 0) :
+    fourierExpCoeff (iteratedDeriv m f) n = (I * n) ^ m * fourierExpCoeff f n := by
+  induction m generalizing f with
+  | zero => simp
+  | succ m ih =>
+    rw [iteratedDeriv_succ', ih hf.deriv' hper.deriv,
+      fourierExpCoeff_deriv (hf.of_le (by exact_mod_cast Nat.succ_pos m)) hper hn,
+      pow_succ]
+    ring
+
+/-- Along any nonzero integer multiple of the natural frequencies, a `C^m` periodic
+function has coefficients `o(n⁻ᵐ)`. -/
+lemma fourierExpCoeff_mul_nat_isLittleO {f : ℝ → ℂ} {m : ℕ} (hf : ContDiff ℝ m f)
+    (hper : Function.Periodic f (2 * π)) (k : ℤ) (hk : k ≠ 0) :
+    (fun n : ℕ => fourierExpCoeff f (k * n)) =o[atTop]
+      (fun n : ℕ => ((n : ℝ) ^ m)⁻¹) := by
+  have hk' : (k : ℂ) ≠ 0 := Int.cast_ne_zero.mpr hk
+  have hkc : Tendsto (fun n : ℕ => k * (n : ℤ)) atTop cofinite := by
+    rw [← Nat.cofinite_eq_atTop]
+    have hi : Function.Injective (fun n : ℕ => k * (n : ℤ)) := by
+      intro n m h
+      exact_mod_cast mul_left_cancel₀ hk h
+    exact hi.tendsto_cofinite
+  have ht := (tendsto_fourierExpCoeff_comp (iteratedDeriv m f) hkc).const_mul
+    (((I * (k : ℂ)) ^ m)⁻¹)
+  have he : (fun n : ℕ => fourierExpCoeff f (k * n) / ((n : ℂ) ^ m)⁻¹) =ᶠ[atTop]
+      fun n => ((I * (k : ℂ)) ^ m)⁻¹ * fourierExpCoeff (iteratedDeriv m f) (k * n) := by
+    filter_upwards [eventually_gt_atTop 0] with n hn
+    rw [fourierExpCoeff_iteratedDeriv hf hper (mul_ne_zero hk (by exact_mod_cast hn.ne'))]
+    push_cast
+    field_simp [hk', I_ne_zero]
+    ring
+  have hz : ∀ᶠ n : ℕ in atTop, ((n : ℂ) ^ m)⁻¹ = 0 → fourierExpCoeff f (k * n) = 0 := by
+    filter_upwards [eventually_gt_atTop 0] with n hn hzero
+    exact False.elim ((inv_ne_zero (pow_ne_zero _ (by exact_mod_cast hn.ne'))) hzero)
+  have ho := (isLittleO_iff_tendsto' hz).mpr (by simpa only [mul_zero] using ht.congr' he.symm)
+  simpa only [← ofReal_natCast, ← ofReal_pow, ← ofReal_inv, isLittleO_ofReal_right] using ho
 
 /-- DLMF 1.8.7: if `f` has period `2π` and `f^{(m)}` is piecewise continuous, then
 `a_n, b_n, c_n = o(n^{-m})` as `n → ∞`. Special case: `f` is assumed `C^m` (so `f^{(m)}` is
@@ -309,7 +438,18 @@ theorem fourierCoeff_isLittleO {f : ℝ → ℂ} {m : ℕ} (hf : ContDiff ℝ m 
     (fun n : ℕ => fourierCosCoeff f n) =o[atTop] (fun n : ℕ => ((n : ℝ) ^ m)⁻¹) ∧
     (fun n : ℕ => fourierSinCoeff f n) =o[atTop] (fun n : ℕ => ((n : ℝ) ^ m)⁻¹) ∧
     (fun n : ℕ => fourierExpCoeff f n) =o[atTop] (fun n : ℕ => ((n : ℝ) ^ m)⁻¹) := by
-  sorry
+  have hp := fourierExpCoeff_mul_nat_isLittleO hf hper 1 one_ne_zero
+  have hm := fourierExpCoeff_mul_nat_isLittleO hf hper (-1) (by norm_num)
+  simp only [one_mul, neg_one_mul] at hp hm
+  have hi : IntervalIntegrable f volume (-π) π := hf.continuous.intervalIntegrable (-π) π
+  refine ⟨(hp.add hm).congr_left (fun n => ?_),
+    ((hp.sub hm).const_mul_left I).congr_left (fun n => ?_), hp⟩
+  · rw [fourierExpCoeff_natCast hi, fourierExpCoeff_neg_natCast hi]
+    ring
+  · rw [fourierExpCoeff_natCast hi, fourierExpCoeff_neg_natCast hi]
+    ring_nf
+    rw [I_sq]
+    ring
 
 /-- DLMF §1.8(i) (uniqueness of Fourier series): continuous `2π`-periodic functions with the
 same Fourier coefficients `a_n`, `b_n` are equal. -/
@@ -318,7 +458,27 @@ theorem eq_of_fourierCoeff_eq {f g : ℝ → ℂ} (hf : Continuous f) (hg : Cont
     (hfp : Function.Periodic f (2 * π)) (hgp : Function.Periodic g (2 * π))
     (ha : ∀ n, fourierCosCoeff f n = fourierCosCoeff g n)
     (hb : ∀ n, fourierSinCoeff f n = fourierSinCoeff g n) : f = g := by
-  sorry
+  have : Fact (0 < 2 * π) := ⟨by positivity⟩
+  let F : C(AddCircle (2 * π), ℂ) := ⟨hfp.lift, continuous_coinduced_dom.mpr hf⟩
+  let G : C(AddCircle (2 * π), ℂ) := ⟨hgp.lift, continuous_coinduced_dom.mpr hg⟩
+  have hc (n : ℤ) : fourierExpCoeff f n = fourierExpCoeff g n := by
+    rcases n with n | n
+    · change fourierExpCoeff f (n : ℤ) = fourierExpCoeff g (n : ℤ)
+      rw [fourierExpCoeff_natCast (hf.intervalIntegrable _ _),
+        fourierExpCoeff_natCast (hg.intervalIntegrable _ _), ha, hb]
+    · change fourierExpCoeff f (-((n + 1 : ℕ) : ℤ)) =
+        fourierExpCoeff g (-((n + 1 : ℕ) : ℤ))
+      rw [fourierExpCoeff_neg_natCast (hf.intervalIntegrable _ _),
+        fourierExpCoeff_neg_natCast (hg.intervalIntegrable _ _), ha, hb]
+  have hFG : F = G := by
+    apply ContinuousMap.toLp_injective (𝕜 := ℂ) (p := 2) AddCircle.haarAddCircle
+    apply fourierBasis.repr.injective
+    ext n
+    rw [fourierBasis_repr, fourierBasis_repr, fourierCoeff_toLp, fourierCoeff_toLp]
+    exact (fourierCoeff_lift_eq_fourierExpCoeff hfp n).trans
+      ((hc n).trans (fourierCoeff_lift_eq_fourierExpCoeff hgp n).symm)
+  funext x
+  exact congrArg (fun H : C(AddCircle (2 * π), ℂ) => H (x : AddCircle (2 * π))) hFG
 
 /-- DLMF 1.8.9: the Lebesgue constants satisfy `L_n ∼ (4/π²) ln n` as `n → ∞`. -/
 @[dlmf 1.8.E9]
@@ -448,6 +608,64 @@ theorem hasSum_exp_neg_sq_mul {ω : ℂ} (hω : 0 < ω.re) (x : ℂ) :
       ((π / ω) ^ (1 / 2 : ℂ) * (1 + 2 * ∑' n : ℕ,
         Complex.exp (-(((n + 1 : ℕ) : ℂ) ^ 2 * π ^ 2 / ω)) *
           Complex.cos (2 * ((n + 1 : ℕ) : ℂ) * π * x))) := by
-  sorry
+  have hω0 : ω ≠ 0 := fun h => by simp [h] at hω
+  let a : ℂ := π / ω
+  have ha : 0 < a.re := by
+    dsimp [a]
+    rw [div_eq_mul_inv, re_ofReal_mul, inv_re]
+    exact mul_pos pi_pos (div_pos hω (normSq_pos.mpr hω0))
+  have ha0 : a ≠ 0 := fun h => by simp [h] at ha
+  have hs : Summable (fun n : ℤ => cexp (-π * a * n ^ 2 + 2 * π * (-I * x) * n)) := by
+    have hneg : (-π * a).re < 0 := by
+      rw [neg_mul, neg_re, re_ofReal_mul]
+      exact neg_neg_of_pos (mul_pos pi_pos ha)
+    simpa only [add_zero] using Complex.summable_exp_quadratic hneg (2 * π * (-I * x)) 0
+  have hpair := (hasSum_nat_add_iff' 1).mpr hs.hasSum.nat_add_neg
+  simp only [Finset.range_one, Finset.sum_singleton, Int.cast_zero,
+    pow_two, mul_zero, add_zero, Complex.exp_zero] at hpair
+  have hterm (n : ℕ) :
+      cexp (-π * a * (n : ℂ) ^ 2 + 2 * π * (-I * x) * n) +
+        cexp (-π * a * (-(n : ℂ)) ^ 2 + 2 * π * (-I * x) * (-(n : ℂ))) =
+      2 * (cexp (-((n : ℂ) ^ 2 * π ^ 2 / ω)) * Complex.cos (2 * n * π * x)) := by
+    rw [Complex.exp_add, Complex.exp_add, Complex.cos]
+    dsimp [a]
+    have he₁ : -π * (π / ω) * (n : ℂ) ^ 2 = -((n : ℂ) ^ 2 * π ^ 2 / ω) := by ring
+    have he₂ : -π * (π / ω) * (-(n : ℂ)) ^ 2 = -((n : ℂ) ^ 2 * π ^ 2 / ω) := by ring
+    rw [he₁, he₂]
+    ring
+  have hsum : (∑' n : ℤ, cexp (-π * a * n ^ 2 + 2 * π * (-I * x) * n)) =
+      1 + 2 * ∑' n : ℕ, cexp (-(((n + 1 : ℕ) : ℂ) ^ 2 * π ^ 2 / ω)) *
+        Complex.cos (2 * ((n + 1 : ℕ) : ℂ) * π * x) := by
+    have ht := hpair.tsum_eq
+    simp only [Int.cast_natCast, Int.cast_neg] at ht
+    simp_rw [← pow_two, hterm] at ht
+    rw [tsum_mul_left] at ht
+    norm_num only [Nat.cast_zero, zero_pow (by decide : 2 ≠ 0), zero_mul,
+      zero_div, neg_zero, Complex.exp_zero, Complex.cos_zero, mul_one] at ht
+    linear_combination -ht
+  have he : (∑' n : ℤ, cexp (-π * a * n ^ 2 + 2 * π * (-I * x) * n)) =
+      1 / a ^ (1 / 2 : ℂ) * ∑' n : ℤ, cexp (-((n + x) ^ 2 * ω)) := by
+    convert Complex.tsum_exp_neg_quadratic ha (-I * x) using 1
+    congr 1
+    apply tsum_congr
+    intro n
+    congr 1
+    dsimp [a]
+    field_simp
+    ring_nf
+    simp [I_sq]
+  have hmain : Summable (fun n : ℤ => cexp (-((n + x) ^ 2 * ω))) := by
+    have hneg : (-ω).re < 0 := by simpa using neg_neg_of_pos hω
+    convert Complex.summable_exp_quadratic hneg (-2 * x * ω) (-(x ^ 2 * ω)) using 1
+    ext n
+    congr 1
+    ring
+  rw [← hsum]
+  convert hmain.hasSum using 1
+  rw [he]
+  change a ^ (1 / 2 : ℂ) * (1 / a ^ (1 / 2 : ℂ) * _) = _
+  field_simp [cpow_ne_zero_iff.mpr (Or.inl ha0)]
+  simp only [mul_comm]
+
 
 end DLMF.AlgebraicAnalytic

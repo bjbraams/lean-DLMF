@@ -6,7 +6,11 @@ Authors: Bastiaan J Braams
 module
 
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
+public import Mathlib.Analysis.InnerProductSpace.PiL2
+public import DLMFMathlib.Analysis.InnerProductSpace.CauchySchwarz
 public import Mathlib.Analysis.Convex.Deriv
+public import Mathlib.Analysis.Convex.Integral
+public import Mathlib.Analysis.Convex.SpecificFunctions.Basic
 
 /-!
 # Inequalities (DLMF §1.7)
@@ -45,7 +49,12 @@ all `j`, with constants `A`, `B` not both zero. -/
 theorem sq_sum_mul_eq_iff {n : ℕ} (a b : Fin n → ℝ) :
     (∑ j, a j * b j) ^ 2 = (∑ j, a j ^ 2) * (∑ j, b j ^ 2) ↔
       ∃ A B : ℝ, (A ≠ 0 ∨ B ≠ 0) ∧ ∀ j, A * a j = B * b j := by
-  sorry
+  have h := real_inner_sq_eq_iff_smul_eq (WithLp.toLp 2 a) (WithLp.toLp 2 b)
+  simp only [PiLp.inner_apply, Real.inner_apply, ← sq] at h
+  rw [h]
+  refine exists_congr fun A => exists_congr fun B => and_congr_right fun _ => ?_
+  rw [WithLp.ext_iff]
+  exact funext_iff
 
 /-- DLMF §1.7(i), converse of the Cauchy–Schwarz inequality: if `A, B > 0` and
 `(∑ aⱼbⱼ)² ≤ AB` for all `b` with `∑ bⱼ² ≤ B`, then `∑ aⱼ² ≤ A`. -/
@@ -151,7 +160,16 @@ theorem sq_integral_mul_eq_iff {f g : ℝ → ℝ} {s : Set ℝ} (hf : MemLp f 2
     (hg : MemLp g 2 (volume.restrict s)) :
     (∫ x in s, f x * g x) ^ 2 = (∫ x in s, f x ^ 2) * (∫ x in s, g x ^ 2) ↔
       ∃ A B : ℝ, (A ≠ 0 ∨ B ≠ 0) ∧ ∀ᵐ x ∂(volume.restrict s), A * f x = B * g x := by
-  sorry
+  have h := real_inner_sq_eq_iff_smul_eq (hf.toLp f) (hg.toLp g)
+  rw [hf.real_inner_toLp hg, hf.real_inner_toLp hf, hg.real_inner_toLp hg] at h
+  simp only [← sq] at h
+  rw [h]
+  refine exists_congr fun A => exists_congr fun B => and_congr_right fun _ => ?_
+  rw [Lp.ext_iff]
+  have he := (Lp.coeFn_smul A (hf.toLp f)).trans (hf.coeFn_toLp.const_smul A)
+  have he' := (Lp.coeFn_smul B (hg.toLp g)).trans (hg.coeFn_toLp.const_smul B)
+  exact eventually_congr ((he.and he').mono fun x hx => by
+    simp only [hx.1, hx.2, Pi.smul_apply, smul_eq_mul])
 
 /-- DLMF 1.7.5, equality case: for `p > 1`, `1/p + 1/q = 1` and `f, g ≥ 0` with `fᵖ`, `g^q`
 integrable, equality holds in Hölder's inequality iff `A fᵖ = B g^q` almost everywhere, with
@@ -175,7 +193,20 @@ theorem integral_add_rpow_le {f g : ℝ → ℝ} {s : Set ℝ} {p : ℝ} (hp : 1
     (hg : MemLp g (ENNReal.ofReal p) (volume.restrict s)) :
     (∫ x in s, (f x + g x) ^ p) ^ (1 / p) ≤
       (∫ x in s, f x ^ p) ^ (1 / p) + (∫ x in s, g x ^ p) ^ (1 / p) := by
-  sorry
+  have hp0 : ENNReal.ofReal p ≠ 0 := (ENNReal.ofReal_pos.mpr (by linarith)).ne'
+  have hp1 : 1 ≤ ENNReal.ofReal p := by
+    rw [← ENNReal.ofReal_one]
+    exact ENNReal.ofReal_le_ofReal hp.le
+  have h := eLpNorm_add_le (f := f) (g := g) (μ := volume.restrict s) hp1
+  rw [(hf.add hg).eLpNorm_eq_integral_rpow_norm hp0 ENNReal.ofReal_ne_top,
+    hf.eLpNorm_eq_integral_rpow_norm hp0 ENNReal.ofReal_ne_top,
+    hg.eLpNorm_eq_integral_rpow_norm hp0 ENNReal.ofReal_ne_top,
+    ← ENNReal.ofReal_add (by positivity) (by positivity)] at h
+  have hr := (ENNReal.ofReal_le_ofReal_iff (by positivity)).mp h
+  simp only [ENNReal.toReal_ofReal (by linarith : 0 ≤ p), Pi.add_apply] at hr
+  simp_rw [Real.norm_of_nonneg (hf0 _), Real.norm_of_nonneg (hg0 _),
+    Real.norm_of_nonneg (add_nonneg (hf0 _) (hg0 _))] at hr
+  simpa only [one_div] using hr
 
 /-- DLMF 1.7.6, reversed for `0 < p < 1`: for `f, g ≥ 0` with `fᵖ`, `gᵖ` integrable,
 `(∫ (f + g)ᵖ)^{1/p} ≥ (∫ fᵖ)^{1/p} + (∫ gᵖ)^{1/p}`. -/
@@ -369,6 +400,24 @@ theorem exp_integral_log_lt_integral {f : ℝ → ℝ} (hf0 : ∀ x ∈ Icc (0 :
     (hf : IntegrableOn f (Icc 0 1)) (hlog : IntegrableOn (fun x => Real.log (f x)) (Icc 0 1))
     (hnc : ¬ ∃ c, ∀ᵐ x ∂(volume.restrict (Icc (0 : ℝ) 1)), f x = c) :
     Real.exp (∫ x in (0 : ℝ)..1, Real.log (f x)) < ∫ x in (0 : ℝ)..1, f x := by
-  sorry
+  let μ := volume.restrict (Icc (0 : ℝ) 1)
+  have : IsProbabilityMeasure μ := ⟨by simp [μ]⟩
+  have he : (fun x => Real.exp (Real.log (f x))) =ᵐ[μ] f := by
+    filter_upwards [ae_restrict_mem measurableSet_Icc] with x hx
+    exact Real.exp_log (hf0 x hx)
+  have hei : Integrable (Real.exp ∘ fun x => Real.log (f x)) μ := hf.congr he.symm
+  rcases strictConvexOn_exp.ae_eq_const_or_map_average_lt
+      Real.continuous_exp.continuousOn isClosed_univ
+      (Eventually.of_forall fun _ => Set.mem_univ _) hlog hei with hc | hlt
+  · exfalso
+    apply hnc
+    refine ⟨Real.exp (⨍ x, Real.log (f x) ∂μ), ?_⟩
+    filter_upwards [hc, he] with x hx hex
+    exact hex.symm.trans (congrArg Real.exp hx)
+  · simp only [average_eq_integral] at hlt
+    change Real.exp (∫ x, Real.log (f x) ∂μ) < ∫ x, Real.exp (Real.log (f x)) ∂μ at hlt
+    rw [integral_congr_ae he] at hlt
+    simpa only [μ, intervalIntegral.integral_of_le zero_le_one,
+      ← integral_Icc_eq_integral_Ioc] using hlt
 
 end DLMF.AlgebraicAnalytic

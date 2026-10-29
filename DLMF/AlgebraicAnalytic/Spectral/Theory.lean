@@ -11,6 +11,7 @@ public import Mathlib.Analysis.InnerProductSpace.l2Space
 public import Mathlib.Analysis.SpecialFunctions.Bernstein
 public import Mathlib.Analysis.SpecialFunctions.Bessel
 public import Mathlib.MeasureTheory.Function.L2Space
+public import DLMFMathlib.MeasureTheory.Function.L2Space
 
 /-!
 # Linear second-order differential operators and eigenfunction expansions (DLMF §1.18)
@@ -51,7 +52,30 @@ theorem tendsto_integral_sq_sub_partialSum {X : Set ℝ}
     (hf : MemLp f 2 (volume.restrict X)) :
     Tendsto (fun m : ℕ => ∫ x in X, ‖f x - ∑ n ∈ Finset.range (m + 1),
         (∫ y in X, f y * conj ((b n : ℝ → ℂ) y)) * (b n : ℝ → ℂ) x‖ ^ 2) atTop (𝓝 0) := by
-  sorry
+  let v := hf.toLp f
+  let S : ℕ → Lp ℂ 2 (volume.restrict X) :=
+    fun m => ∑ n ∈ Finset.range (m + 1), b.repr v n • b n
+  have hcoef (n : ℕ) : b.repr v n = ∫ y in X, f y * conj ((b n : ℝ → ℂ) y) := by
+    rw [b.repr_apply_apply, L2.inner_def]
+    apply MeasureTheory.integral_congr_ae
+    filter_upwards [hf.coeFn_toLp] with y hy
+    rw [show v y = f y from hy, RCLike.inner_apply]
+  have hS : Tendsto S atTop (𝓝 v) :=
+    (b.hasSum_repr v).tendsto_sum_nat.comp (tendsto_add_atTop_nat 1)
+  have ht : Tendsto (fun m => ‖v - S m‖ ^ 2) atTop (𝓝 (0 : ℝ)) := by
+    simpa using ((tendsto_const_nhds : Tendsto (fun _ : ℕ => v) atTop (𝓝 v)).sub hS).norm.pow 2
+  convert ht using 1
+  funext m
+  rw [← Lp.integral_norm_sq_eq_norm_sq]
+  apply MeasureTheory.integral_congr_ae
+  have hsum := (Lp.coeFn_finsetSum (Finset.range (m + 1))
+    (fun n => b.repr v n • b n)).trans
+      (eventuallyEq_sum fun n _ => Lp.coeFn_smul (b.repr v n) (b n))
+  filter_upwards [hf.coeFn_toLp, Lp.coeFn_sub v (S m), hsum] with x hfx hsub hsumx
+  have hsx : (S m : ℝ → ℂ) x = ∑ n ∈ Finset.range (m + 1),
+      (∫ y in X, f y * conj ((b n : ℝ → ℂ) y)) * (b n : ℝ → ℂ) x := by
+    simpa only [S, Finset.sum_apply, Pi.smul_apply, smul_eq_mul, hcoef] using hsumx
+  rw [hsub, Pi.sub_apply, show v x = f x from hfx, hsx]
 
 /-! ## §1.18(iii): symmetric operators and integration by parts -/
 
@@ -349,7 +373,11 @@ theorem IsEigenfunctionTransform.integral_norm_sq (hU : IsEigenfunctionTransform
     (f : ℝ → ℂ) (hf : MemLp f 2 (volume.restrict X)) (hc : Continuous f)
     (hcs : HasCompactSupport f) (hX : tsupport f ⊆ X) :
     ∫ x in X, ‖f x‖ ^ 2 = ∫ μ, ‖eigenCoeff X φ f μ‖ ^ 2 ∂ν := by
-  sorry
+  rw [hf.integral_norm_sq_eq_norm_toLp_sq, ← U.norm_map (hf.toLp f),
+    ← Lp.integral_norm_sq_eq_norm_sq (U (hf.toLp f))]
+  apply MeasureTheory.integral_congr_ae
+  filter_upwards [hU f hf hc hcs hX] with t ht
+  rw [ht]
 
 /-- DLMF 1.18.46 and 1.18.64 (eigenfunction expansion):
 `f(x) = ∫_{σ_c} f̂(λ) φ_λ(x) dλ + Σ_{σ_p} f̂(lam) φ_{lam}(x)` for almost every `x ∈ X`, for
@@ -373,7 +401,11 @@ theorem IsDiagonalizedBy.inner_apply
     (hT : IsDiagonalizedBy T U) (f : T.domain) :
     ⟪(f : Lp ℂ 2 (volume.restrict X)), T f⟫_ℂ =
       ∫ μ, (μ : ℂ) * ‖(U f : ℝ → ℂ) μ‖ ^ 2 ∂ν := by
-  sorry
+  rw [← U.inner_map_map, L2.inner_def]
+  apply MeasureTheory.integral_congr_ae
+  filter_upwards [hT f] with t ht
+  rw [ht, ← smul_eq_mul, inner_smul_right, inner_self_eq_norm_sq_to_K]
+  rfl
 
 /-- DLMF 1.18.52 and 1.18.66 (matrix elements of the resolvent): if `U` diagonalizes `T`,
 `z ∉ σ` and `(z - T)u = f`, then `⟨(z - T)⁻¹ f, f⟩ = ⟨u, f⟩ = ∫ |f̂(λ)|² dν(λ)/(z - λ)`, which
@@ -386,7 +418,24 @@ theorem IsDiagonalizedBy.inner_resolvent
     (f : Lp ℂ 2 (volume.restrict X)) (hf : z • (u : Lp ℂ 2 (volume.restrict X)) - T u = f) :
     ⟪f, (u : Lp ℂ 2 (volume.restrict X))⟫_ℂ =
       ∫ μ, ‖(U f : ℝ → ℂ) μ‖ ^ 2 / (z - μ) ∂ν := by
-  sorry
+  have hUf : U f = z • U (u : Lp ℂ 2 (volume.restrict X)) - U (T u) := by
+    rw [← hf]
+    simp only [map_sub, map_smul]
+  rw [← U.inner_map_map, L2.inner_def]
+  apply MeasureTheory.integral_congr_ae
+  filter_upwards [hz, hT u,
+    Lp.coeFn_sub (z • U (u : Lp ℂ 2 (volume.restrict X))) (U (T u)),
+    Lp.coeFn_smul z (U (u : Lp ℂ 2 (volume.restrict X)))] with t hzt hTu hsub hsmul
+  have hval : (U f : ℝ → ℂ) t = (z - t) * (U u : ℝ → ℂ) t := by
+    rw [hUf, hsub, Pi.sub_apply, hsmul, hTu]
+    simp only [Pi.smul_apply, smul_eq_mul]
+    ring
+  have hu : (U u : ℝ → ℂ) t = (U f : ℝ → ℂ) t / (z - t) := by
+    rw [hval]
+    exact (mul_div_cancel_left₀ _ (sub_ne_zero.mpr hzt)).symm
+  rw [hu, div_eq_inv_mul, ← smul_eq_mul, inner_smul_right, inner_self_eq_norm_sq_to_K]
+  rw [mul_comm]
+  rfl
 
 end Transform
 

@@ -9,6 +9,8 @@ public import DLMF.Struve.Basic
 public import DLMF.Bessel.Elementary
 public import DLMF.Bessel.NeumannSeries
 public import DLMF.Gamma.Simplex.GammaPochhammer
+public import Mathlib.Analysis.Complex.RemovableSingularity
+public import Mathlib.Analysis.Calculus.Deriv.Prod
 
 /-!
 # Lommel functions and parameter continuation
@@ -20,7 +22,10 @@ not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation
 
 The small-Lommel equation and general solution reuse the proved regularized
 `₁F₂` forcing and the all-order Bessel fundamental system in `DLMF.Struve.Basic`.
-The parameter-continuation obligations for capital Lommel remain separate.
+The capital-Lommel parameter limit is proved by cancelling the Gamma poles against a jointly
+entire regularized numerator. At intersections of polar hyperplanes, its two vanishing partial
+derivatives supply the double cancellation. The finite-shift identity for reciprocal Gamma
+comes from lean-codes' `Pochhammer.Gamma` through the existing GammaPochhammer import.
 -/
 
 @[expose] public noncomputable section
@@ -220,11 +225,6 @@ theorem lommelCapital_regular {μ ν z : ℂ} (h : LommelRegular μ ν) (hz : z 
     lommelCapital μ ν z = lommelCapitalRegular μ ν z :=
   ((continuousAt_lommelCapitalRegular h (slitPlane_ne_zero hz)).tendsto.mono_left
     nhdsWithin_le_nhds).limUnder_eq
-
-/-- Existence of the limiting definition at exceptional parameters. -/
-theorem lommelCapital_parameter_limit (μ ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
-    Tendsto (fun m => lommelCapitalRegular m ν z) (𝓝[≠] μ) (𝓝 (lommelCapital μ ν z)) := by
-  sorry
 
 /-- Identity under the stated parameter and domain assumptions: `lommelA μ ν k = 4^k*poch
 ((μ-ν+1)/2) k*poch ((μ+ν+1)/2) k`. -/
@@ -665,7 +665,7 @@ end DLMF.Struve
 
 The local uniform reciprocal-Gamma factorial bound and the general series-holomorphy
 API establish joint holomorphy. Exceptional 1F2 tails reduce exactly to 0F1.
-These support lemmas do not yet remove the capital-Lommel continuation admission.
+These support lemmas feed the pole-cancellation proof of the capital-Lommel parameter limit.
 -/
 
 open Complex Filter Set
@@ -788,5 +788,330 @@ theorem lommelNumerator_symm (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
   rw [hc,hs]
   linear_combination (2^(a+b-2)*cos (b*π)*besselJ (a-b) z)*hca +
     (2^(a+b-2)*sin (b*π)*besselY (a-b) z)*hca
+
+
+/-- The regular capital Lommel function is a product of Gamma factors and its entire numerator. -/
+private lemma lommelRegular_eq_numerator {μ ν z : ℂ} (h : LommelRegular μ ν) :
+    lommelCapitalRegular μ ν z=Gamma ((μ+ν+1)/2)*Gamma ((μ-ν+1)/2)*
+      lommelNumerator ((μ+ν+1)/2) ((μ-ν+1)/2) z := by
+  rw [lommelCapitalRegular,lommelS_eq_regularized h]
+  simp only [lommelNumerator]
+  have hp : ((μ+ν+1)/2+(μ-ν+1)/2)=μ+1 := by ring
+  have ha : (μ+ν+1)/2-(μ-ν+1)/2=ν := by ring
+  rw [hp,ha,show μ+1-2=μ-1 by ring,
+    show (μ+ν+1)/2+1=(μ+ν+3)/2 by ring,
+    show (μ-ν+1)/2+1=(μ-ν+3)/2 by ring,
+    show ({(μ+ν+3)/2,(μ-ν+3)/2}:Multiset ℂ) = {(μ-ν+3)/2,(μ+ν+3)/2} by
+      simp only [Multiset.insert_eq_cons]; exact Multiset.cons_swap _ _ _]
+  have hs : sin ((μ-ν)*π/2) = -cos (((μ-ν+1)/2)*π) := by
+    rw [show (μ-ν+1)/2*π=(μ-ν)*π/2+π/2 by ring,cos_add_pi_div_two]
+    ring
+  have hc : cos ((μ-ν)*π/2)=sin (((μ-ν+1)/2)*π) := by
+    rw [show (μ-ν+1)/2*π=(μ-ν)*π/2+π/2 by ring,sin_add_pi_div_two]
+  rw [hs,hc]
+  ring
+
+/-- The first half-parameter hyperplane cancels a Gamma pole in the capital Lommel function. -/
+private lemma lommelNumerator_neg_nat_left (n : ℕ) (b : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
+    lommelNumerator (-(n:ℂ)) b z=0 := by
+  have hz0 := slitPlane_ne_zero hz
+  have hcn : cos ((n:ℂ)*π)=(-1:ℂ)^n := by
+    simpa using cos_int_mul_pi_complex (n:ℤ)
+  have hsn : sin ((n:ℂ)*π)=0 := Complex.sin_nat_mul_pi n
+  have hc : cos ((b+n)*π)=(-1:ℂ)^n*cos (b*π) := by
+    rw [add_mul,cos_add,hcn,hsn];ring
+  have hs : sin ((b+n)*π)=(-1:ℂ)^n*sin (b*π) := by
+    rw [add_mul,sin_add,hcn,hsn];ring
+  have hB : cos (b*π)*besselJ (-(n:ℂ)-b) z+sin (b*π)*besselY (-(n:ℂ)-b) z=
+      (-1:ℂ)^n*besselJ (b+n) z := by
+    rw [show -(n:ℂ)-b= -(b+n) by ring,besselJ_neg_eq _ hz,besselY_neg _ hz,hc,hs]
+    linear_combination ((-1:ℂ)^n*besselJ (b+n) z)*sin_sq_add_cos_sq (b*π)
+  have hp : z^(b-n)/4*(-z^2/4)^n =
+      2^(b-n-2)*(-1:ℂ)^n*(z/2)^(b+n) := by
+    rw [div_two_cpow hz0]
+    have hzp : z^(b+n)=z^(b-n)*z^(2*n) := by
+      rw [← cpow_natCast,← cpow_add _ _ hz0]
+      congr 1
+      push_cast
+      ring
+    have h2p : (2:ℂ)^(b+n)=(2:ℂ)^(b-n-2)*(2:ℂ)^(2*n+2:ℕ) := by
+      rw [← cpow_natCast,← cpow_add _ _ two_ne_zero]
+      congr 1
+      push_cast
+      ring
+    rw [hzp,h2p,neg_div,neg_pow,div_pow,pow_mul]
+    have he : (2:ℂ)^(b-n-2) ≠ 0 := cpow_ne_zero_iff.mpr (Or.inl two_ne_zero)
+    have hn : (2:ℂ)^(2*n+2)=(4:ℂ)^n*4 := by
+      rw [pow_add,pow_mul]
+      norm_num
+    rw [hn]
+    field_simp
+  rw [lommelNumerator,show -(n:ℂ)+b=b-n by ring,
+    show -(n:ℂ)+1=1-(n:ℂ) by ring,regularized1F2_one_neg_nat,hB,
+    besselJ_eq_regularized]
+  rw [neg_div] at hp
+  linear_combination (regularizedHGFun (∅ : Multiset ℂ) {b+n+1} (-(z^2/4)))*hp
+
+/-- The second half-parameter hyperplane cancels a Gamma pole as well. -/
+private lemma lommelNumerator_neg_nat_right (a : ℂ) (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane) :
+    lommelNumerator a (-(n:ℂ)) z=0 := by
+  rw [lommelNumerator_symm a _ hz,lommelNumerator_neg_nat_left n a hz]
+
+/-- The numerator is jointly entire in its two half-parameters. -/
+private lemma lommelNumerator_differentiable {z : ℂ} (hz : z ∈ slitPlane) :
+    Differentiable ℂ (fun p : ℂ × ℂ => lommelNumerator p.1 p.2 z) := by
+  have hJ := differentiable_besselJ_order (slitPlane_ne_zero hz)
+  have hY := differentiable_besselY_order hz
+  have hmap : Differentiable ℂ (fun p : ℂ × ℂ => (p.1+1,p.2+1)) := by fun_prop
+  have hF := (differentiable_regularized1F2_params (-(z^2/4))).comp hmap
+  have hsum : Differentiable ℂ (fun p : ℂ × ℂ => p.1+p.2) := by fun_prop
+  have hp : Differentiable ℂ (fun p : ℂ × ℂ => z^(p.1+p.2)) :=
+    hsum.const_cpow (Or.inl (slitPlane_ne_zero hz))
+  have hp2 : Differentiable ℂ (fun p : ℂ × ℂ => (2:ℂ)^(p.1+p.2-2)) :=
+    (hsum.sub_const 2).const_cpow (Or.inl two_ne_zero)
+  have hc : Differentiable ℂ (fun p : ℂ × ℂ => cos (p.2*π)) := by fun_prop
+  have hs : Differentiable ℂ (fun p : ℂ × ℂ => sin (p.2*π)) := by fun_prop
+  simpa only [lommelNumerator,div_eq_mul_inv,Function.comp_def,Pi.mul_def,Pi.sub_def,Pi.add_def] using
+    (((hp.mul_const ((4:ℂ)⁻¹)).mul hF).sub (hp2.mul
+      ((hc.mul (hJ.comp (differentiable_fst.sub differentiable_snd))).add
+        (hs.mul (hY.comp (differentiable_fst.sub differentiable_snd))))))
+
+/-- The pole-free reciprocal-Gamma shift also gives a totalized backward shift. -/
+private lemma lommel_gamma_backward (s : ℂ) (n : ℕ) :
+    Gamma s=Gamma (s+n+1)/(∏ j ∈ Finset.range (n+1), (s+j)) := by
+  have h := one_div_Gamma_eq_ascPochhammer_mul_one_div_Gamma_add_nat s (n+1)
+  have hi := congrArg Inv.inv h
+  have hp : (ascPochhammer ℂ (n+1)).eval s=∏ j ∈ Finset.range (n+1), (s+j) := by
+    simpa [poch] using poch_mul_pow s (1:ℂ) (n+1)
+  simp only [inv_inv,mul_inv,hp,Nat.cast_add,Nat.cast_one] at hi
+  rw [hi]
+  simp only [div_eq_mul_inv]
+  ring
+
+/-- A Gamma pole in an affine half-parameter has one explicit linear denominator. -/
+private lemma lommel_gamma_affine_pole (c μ : ℂ) (n : ℕ) (ha : (μ+c)/2= -(n:ℂ)) :
+    ∃ U : ℂ → ℂ, ContinuousAt U μ ∧ ∀ᶠ w in 𝓝[≠] μ,
+      Gamma ((w+c)/2)=U w/(w-μ) := by
+  let A : ℂ → ℂ := fun w => (w+c)/2
+  let P : ℂ → ℂ := fun w => ∏ j ∈ Finset.range n, (A w+j)
+  let U : ℂ → ℂ := fun w => 2*Gamma (A w+n+1)/P w
+  have hP0 : P μ ≠ 0 := by
+    apply Finset.prod_ne_zero_iff.mpr
+    intro j hj
+    rw [show A μ= -(n:ℂ) from ha]
+    intro he
+    have hjn : j=n := by exact_mod_cast (show (j:ℂ)=n by linear_combination he)
+    have hj' := Finset.mem_range.mp hj
+    omega
+  have hP : Continuous P := by dsimp only [P,A]; fun_prop
+  have hG : ContinuousAt (fun w => Gamma (A w+n+1)) μ := by
+    have he : A μ+n+1=1 := by rw [show A μ= -(n:ℂ) from ha]; ring
+    have hg : ContinuousAt Gamma (A μ+n+1) := by rw [he]; exact continuousAt_Gamma_one
+    have hA : Continuous A := by dsimp only [A]; fun_prop
+    have hi : ContinuousAt (Gamma ∘ (fun w : ℂ => A w+n+1)) μ :=
+      ContinuousAt.comp (f:=fun w : ℂ => A w+n+1) (x:=μ) hg
+        ((hA.continuousAt.add_const (n:ℂ)).add_const 1)
+    simpa only [Function.comp_def] using hi
+  refine ⟨U,(hG.const_mul 2).div hP.continuousAt hP0,?_⟩
+  have hPn : ∀ᶠ w in 𝓝 μ, P w ≠ 0 :=
+    (isOpen_ne_fun hP continuous_const).mem_nhds hP0
+  filter_upwards [hPn.filter_mono nhdsWithin_le_nhds,self_mem_nhdsWithin] with w hw hwμ
+  have hwm : w-μ ≠ 0 := sub_ne_zero.mpr hwμ
+  have he : A w+n=(w-μ)/2 := by dsimp [A] at *; linear_combination ha
+  change Gamma (A w)=(2*Gamma (A w+n+1)/P w)/(w-μ)
+  rw [lommel_gamma_backward _ n,Finset.prod_range_succ]
+  change Gamma (A w+n+1)/(P w*(A w+n))=(2*Gamma (A w+n+1)/P w)/(w-μ)
+  rw [he]
+  field_simp
+
+/-- Every punctured affine half-parameter neighborhood consists eventually of Gamma-regular
+ points, including when the center itself is a pole. -/
+private lemma lommel_eventually_affine_regular (c μ : ℂ) :
+    ∀ᶠ w in 𝓝[≠] μ, ∀ n : ℕ, (w+c)/2 ≠ -(n:ℂ) := by
+  have ht : Tendsto (fun w : ℂ => (w+c)/2) (𝓝[≠] μ) (𝓝[≠] ((μ+c)/2)) := by
+    apply tendsto_nhdsWithin_iff.mpr
+    refine ⟨(by fun_prop : ContinuousAt (fun w : ℂ => (w+c)/2) μ).tendsto.mono_left
+      nhdsWithin_le_nhds,?_⟩
+    filter_upwards [self_mem_nhdsWithin] with w hw
+    change (w+c)/2 ≠ (μ+c)/2
+    intro he
+    have hw' : w ≠ μ := hw
+    exact hw' (by linear_combination 2*he)
+  by_cases h : ∃ n : ℕ, (μ+c)/2= -(n:ℂ)
+  · obtain ⟨n,hn⟩ := h
+    rw [hn] at ht
+    exact ht.eventually (eventually_nhdsWithin_ne_neg_nat n)
+  · push Not at h
+    exact ((by fun_prop : ContinuousAt (fun w : ℂ => (w+c)/2) μ).tendsto.mono_left
+      nhdsWithin_le_nhds).eventually (isOpen_not_neg_nat.mem_nhds h)
+
+
+/-- At an intersection of the polar hyperplanes, the numerator vanishes to second order along
+ the degree parameter. The two partial derivatives vanish separately. -/
+private lemma lommelNumerator_diagonal_deriv_zero (μ ν : ℂ) (n k : ℕ) {z : ℂ}
+    (hz : z ∈ slitPlane) (ha : (μ+ν+1)/2= -(n:ℂ)) (hb : (μ-ν+1)/2= -(k:ℂ)) :
+    deriv (fun w : ℂ => lommelNumerator ((w+ν+1)/2) ((w-ν+1)/2) z) μ=0 := by
+  let A : ℂ → ℂ := fun w => (w+ν+1)/2
+  let B : ℂ → ℂ := fun w => (w-ν+1)/2
+  let F : ℂ × ℂ → ℂ := fun p => lommelNumerator p.1 p.2 z
+  let L := fderiv ℂ F (A μ,B μ)
+  have hd : HasFDerivAt F L (A μ,B μ) := (lommelNumerator_differentiable hz (A μ,B μ)).hasFDerivAt
+  have hA : HasDerivAt A (1/2) μ := (((hasDerivAt_id' μ).add_const ν).add_const 1).div_const 2
+  have hB : HasDerivAt B (1/2) μ := (((hasDerivAt_id' μ).sub_const ν).add_const 1).div_const 2
+  have hleft := hd.comp_hasDerivAt μ (HasDerivAt.prodMk hA (hasDerivAt_const μ (B μ)))
+  have hright := hd.comp_hasDerivAt μ (HasDerivAt.prodMk (hasDerivAt_const μ (A μ)) hB)
+  have hfull := hd.comp_hasDerivAt μ (HasDerivAt.prodMk hA hB)
+  have hl : (fun w => F (A w,B μ))=fun _ : ℂ => 0 := by
+    funext w
+    change lommelNumerator (A w) ((μ-ν+1)/2) z=0
+    rw [hb]
+    exact lommelNumerator_neg_nat_right (A w) k hz
+  have hr : (fun w => F (A μ,B w))=fun _ : ℂ => 0 := by
+    funext w
+    change lommelNumerator ((μ+ν+1)/2) (B w) z=0
+    rw [ha]
+    exact lommelNumerator_neg_nat_left n (B w) hz
+  simp only [Function.comp_def] at hleft hright hfull
+  rw [hl] at hleft
+  rw [hr] at hright
+  have hl0 : L (1/2,0)=0 := hleft.unique (hasDerivAt_const μ 0)
+  have hr0 : L (0,1/2)=0 := hright.unique (hasDerivAt_const μ 0)
+  have hL : L (1/2,1/2)=0 := by
+    rw [show ((1/2:ℂ),(1/2:ℂ))=(1/2,0)+(0,1/2) by ext <;> simp,map_add,hl0,hr0,add_zero]
+  exact hfull.deriv.trans hL
+
+/-- A simple zero cancels one linear denominator in a punctured limit. -/
+private lemma lommel_tendsto_div_sub {F : ℂ → ℂ} (hF : Differentiable ℂ F) (μ : ℂ)
+    (h0 : F μ=0) :
+    Tendsto (fun w => F w/(w-μ)) (𝓝[≠] μ) (𝓝 (deriv F μ)) := by
+  have hD : Differentiable ℂ (dslope F μ) := by
+    rw [← differentiableOn_univ,Complex.differentiableOn_dslope Filter.univ_mem]
+    exact hF.differentiableOn
+  have ht : Tendsto (dslope F μ) (𝓝[≠] μ) (𝓝 (dslope F μ μ)) :=
+    (hD.continuous.continuousAt.tendsto (x:=μ)).mono_left nhdsWithin_le_nhds
+  rw [dslope_same] at ht
+  apply ht.congr'
+  filter_upwards [self_mem_nhdsWithin] with w hw
+  simp [dslope_of_ne _ (show w ≠ μ from hw),slope_def_field,h0]
+
+/-- A double zero cancels two linear denominators; the second divided difference supplies the
+ finite limiting value. -/
+private lemma lommel_exists_tendsto_div_sub_sq {F : ℂ → ℂ} (hF : Differentiable ℂ F) (μ : ℂ)
+    (h0 : F μ=0) (h1 : deriv F μ=0) :
+    ∃ c : ℂ, Tendsto (fun w => F w/(w-μ)^2) (𝓝[≠] μ) (𝓝 c) := by
+  have hD : Differentiable ℂ (dslope F μ) := by
+    rw [← differentiableOn_univ,Complex.differentiableOn_dslope Filter.univ_mem]
+    exact hF.differentiableOn
+  refine ⟨deriv (dslope F μ) μ,?_⟩
+  have ht := lommel_tendsto_div_sub hD μ (by simpa only [dslope_same] using h1)
+  apply ht.congr'
+  filter_upwards [self_mem_nhdsWithin] with w hw
+  simp only [dslope_of_ne _ (show w ≠ μ from hw),slope_def_field,h0,sub_zero,div_div,pow_two]
+
+
+/-- The one- or two-pole numerator cancellations give a finite parameter limit for every
+ capital Lommel function on the slit plane. -/
+private lemma lommelCapital_exists_parameter_limit (μ ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
+    ∃ c : ℂ, Tendsto (fun w => lommelCapitalRegular w ν z) (𝓝[≠] μ) (𝓝 c) := by
+  let A : ℂ → ℂ := fun w => (w+ν+1)/2
+  let B : ℂ → ℂ := fun w => (w-ν+1)/2
+  let F : ℂ → ℂ := fun w => lommelNumerator (A w) (B w) z
+  have hAcont : Continuous A := by dsimp only [A]; fun_prop
+  have hBcont : Continuous B := by dsimp only [B]; fun_prop
+  have hAB : Differentiable ℂ (fun w => (A w,B w)) := by dsimp only [A,B]; fun_prop
+  have hF : Differentiable ℂ F := by
+    change Differentiable ℂ ((fun p : ℂ × ℂ => lommelNumerator p.1 p.2 z) ∘
+      (fun w : ℂ => (A w,B w)))
+    exact (lommelNumerator_differentiable hz).comp hAB
+  have hevent : ∀ᶠ w in 𝓝[≠] μ,
+      lommelCapitalRegular w ν z=Gamma (A w)*Gamma (B w)*F w := by
+    filter_upwards [lommel_eventually_affine_regular (ν+1) μ,
+      lommel_eventually_affine_regular (-ν+1) μ] with w hwa hwb
+    have hreg : LommelRegular w ν := by
+      intro n
+      constructor
+      · intro he
+        exact hwb n (by linear_combination he/2)
+      · intro he
+        exact hwa n (by linear_combination he/2)
+    exact lommelRegular_eq_numerator hreg
+  by_cases hApole : ∃ n : ℕ, A μ= -(n:ℂ)
+  · obtain ⟨n,hn⟩ := hApole
+    obtain ⟨U,hU,hUeq⟩ := lommel_gamma_affine_pole (ν+1) μ n (by simpa only [A,add_assoc] using hn)
+    have hUeq' : ∀ᶠ w in 𝓝[≠] μ, Gamma (A w)=U w/(w-μ) := by
+      simpa only [A,add_assoc] using hUeq
+    have hF0 : F μ=0 := by
+      change lommelNumerator (A μ) (B μ) z=0
+      rw [hn]
+      exact lommelNumerator_neg_nat_left n (B μ) hz
+    by_cases hBpole : ∃ k : ℕ, B μ= -(k:ℂ)
+    · obtain ⟨k,hk⟩ := hBpole
+      obtain ⟨V,hV,hVeq⟩ := lommel_gamma_affine_pole (-ν+1) μ k
+        (by simpa only [B,sub_eq_add_neg,add_assoc] using hk)
+      have hVeq' : ∀ᶠ w in 𝓝[≠] μ, Gamma (B w)=V w/(w-μ) := by
+        simpa only [B,sub_eq_add_neg,add_assoc] using hVeq
+      have hF1 : deriv F μ=0 := lommelNumerator_diagonal_deriv_zero μ ν n k hz hn hk
+      obtain ⟨c,hc⟩ := lommel_exists_tendsto_div_sub_sq hF μ hF0 hF1
+      have ht : Tendsto (fun w => U w*V w*(F w/(w-μ)^2)) (𝓝[≠] μ) (𝓝 (U μ*V μ*c)) :=
+        ((hU.tendsto.mono_left nhdsWithin_le_nhds).mul
+          (hV.tendsto.mono_left nhdsWithin_le_nhds)).mul hc
+      refine ⟨_,ht.congr' ?_⟩
+      filter_upwards [hevent,hUeq',hVeq'] with w hw hu hv
+      rw [hw,hu,hv]
+      simp only [div_eq_mul_inv,← inv_pow]
+      ring
+    · push Not at hBpole
+      have hG : ContinuousAt (Gamma ∘ B) μ :=
+        (continuousAt_Gamma (B μ) hBpole).comp hBcont.continuousAt
+      have ht : Tendsto (fun w => U w*Gamma (B w)*(F w/(w-μ))) (𝓝[≠] μ)
+          (𝓝 (U μ*Gamma (B μ)*deriv F μ)) :=
+        ((hU.tendsto.mono_left nhdsWithin_le_nhds).mul
+          (hG.tendsto.mono_left nhdsWithin_le_nhds)).mul (lommel_tendsto_div_sub hF μ hF0)
+      refine ⟨_,ht.congr' ?_⟩
+      filter_upwards [hevent,hUeq'] with w hw hu
+      rw [hw,hu]
+      simp only [div_eq_mul_inv]
+      ring
+  · push Not at hApole
+    have hG : ContinuousAt (Gamma ∘ A) μ :=
+      (continuousAt_Gamma (A μ) hApole).comp hAcont.continuousAt
+    by_cases hBpole : ∃ k : ℕ, B μ= -(k:ℂ)
+    · obtain ⟨k,hk⟩ := hBpole
+      obtain ⟨V,hV,hVeq⟩ := lommel_gamma_affine_pole (-ν+1) μ k
+        (by simpa only [B,sub_eq_add_neg,add_assoc] using hk)
+      have hVeq' : ∀ᶠ w in 𝓝[≠] μ, Gamma (B w)=V w/(w-μ) := by
+        simpa only [B,sub_eq_add_neg,add_assoc] using hVeq
+      have hF0 : F μ=0 := by
+        change lommelNumerator (A μ) (B μ) z=0
+        rw [hk]
+        exact lommelNumerator_neg_nat_right (A μ) k hz
+      have ht : Tendsto (fun w => Gamma (A w)*V w*(F w/(w-μ))) (𝓝[≠] μ)
+          (𝓝 (Gamma (A μ)*V μ*deriv F μ)) :=
+        ((hG.tendsto.mono_left nhdsWithin_le_nhds).mul
+          (hV.tendsto.mono_left nhdsWithin_le_nhds)).mul (lommel_tendsto_div_sub hF μ hF0)
+      refine ⟨_,ht.congr' ?_⟩
+      filter_upwards [hevent,hVeq'] with w hw hv
+      rw [hw,hv]
+      simp only [div_eq_mul_inv]
+      ring
+    · push Not at hBpole
+      have hG' : ContinuousAt (Gamma ∘ B) μ :=
+        (continuousAt_Gamma (B μ) hBpole).comp hBcont.continuousAt
+      have ht : Tendsto (fun w => Gamma (A w)*Gamma (B w)*F w) (𝓝[≠] μ)
+          (𝓝 (Gamma (A μ)*Gamma (B μ)*F μ)) :=
+        ((hG.tendsto.mono_left nhdsWithin_le_nhds).mul
+          (hG'.tendsto.mono_left nhdsWithin_le_nhds)).mul
+          (hF.continuous.continuousAt.tendsto.mono_left nhdsWithin_le_nhds)
+      refine ⟨_,ht.congr' ?_⟩
+      filter_upwards [hevent] with w hw
+      exact hw.symm
+
+/-- Existence of the limiting definition at exceptional parameters. -/
+theorem lommelCapital_parameter_limit (μ ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
+    Tendsto (fun m => lommelCapitalRegular m ν z) (𝓝[≠] μ) (𝓝 (lommelCapital μ ν z)) := by
+  obtain ⟨c,hc⟩ := lommelCapital_exists_parameter_limit μ ν hz
+  simpa only [lommelCapital,hc.limUnder_eq] using hc
+
+
 
 end DLMF.Struve

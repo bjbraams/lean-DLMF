@@ -1,0 +1,919 @@
+{
+  "format": "lean-DLMF-admission-proofs/1",
+  "date": "2026-10-28",
+  "baseCommit": "b7d2826c0f07c98ce4f1a459b74e0dcf55e8dea3",
+  "admissions": {
+    "before": 1771,
+    "after": 1734,
+    "removed": 37,
+    "AlgebraicAnalytic": {
+      "before": 304,
+      "after": 272
+    },
+    "AsymptoticApproximations": {
+      "before": 136,
+      "after": 131
+    }
+  },
+  "completed": [
+    {
+      "name": "DLMF.AlgebraicAnalytic.exists_integral_mul_eq_mul_integral",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/OneVariable.lean",
+      "line": 258,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.exists_integral_mul_eq_secondMeanValue",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/OneVariable.lean",
+      "line": 308,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.differentiableOn_intervalIntegral_param",
+      "file": "DLMF/AlgebraicAnalytic/Complex/Functions.lean",
+      "line": 337,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.differentiableOn_improperIntegral_param",
+      "file": "DLMF/AlgebraicAnalytic/Complex/Functions.lean",
+      "line": 375,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.differentiableOn_improperIntegral_param_of_lt",
+      "file": "DLMF/AlgebraicAnalytic/Complex/Functions.lean",
+      "line": 394,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.tendstoUniformlyOn_integral_of_norm_le",
+      "file": "DLMF/AlgebraicAnalytic/Complex/Functions.lean",
+      "line": 414,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.tendsto_logDeriv_prod",
+      "file": "DLMF/AlgebraicAnalytic/Complex/Functions.lean",
+      "line": 510,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.liouville_transformation",
+      "file": "DLMF/AlgebraicAnalytic/ODE/Transformations.lean",
+      "line": 170,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.schwarzian_eq_sqrt",
+      "file": "DLMF/AlgebraicAnalytic/ODE/Transformations.lean",
+      "line": 288,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.schwarzian_comp",
+      "file": "DLMF/AlgebraicAnalytic/ODE/Transformations.lean",
+      "line": 332,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.product_solution_IJ",
+      "file": "DLMF/AlgebraicAnalytic/ODE/Transformations.lean",
+      "line": 463,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.differentiableOn_laplaceTransform",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Laplace.lean",
+      "line": 66,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.tendsto_laplaceTransform_re_atTop",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Laplace.lean",
+      "line": 119,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.iteratedDeriv_laplaceTransform",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Laplace.lean",
+      "line": 277,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.laplaceTransform_of_periodic",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Laplace.lean",
+      "line": 367,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.laplaceTransform_of_antiperiodic",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Laplace.lean",
+      "line": 378,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.laplaceTransform_deriv",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Laplace.lean",
+      "line": 412,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.laplaceTransform_iteratedDeriv",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Laplace.lean",
+      "line": 454,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.laplaceTransform_laplaceConvolution",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Laplace.lean",
+      "line": 530,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.mellin_mellinConvolution",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/MellinHilbertStieltjes.lean",
+      "line": 134,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.fourierCosTransform_exp_neg",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "line": 199,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.fourierSinTransform_exp_neg",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "line": 308,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.fourierSinTransform_mul_exp_neg",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "line": 319,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.laplaceTransform_pow_div_factorial",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/LaplaceTable.lean",
+      "line": 94,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.laplaceTransform_inv_sqrt",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/LaplaceTable.lean",
+      "line": 105,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.laplaceTransform_sin",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/LaplaceTable.lean",
+      "line": 172,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.laplaceTransform_cos",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/LaplaceTable.lean",
+      "line": 222,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.laplaceTransform_sinh",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/LaplaceTable.lean",
+      "line": 257,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.laplaceTransform_cosh",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/LaplaceTable.lean",
+      "line": 289,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.laplaceTransform_mul_sin",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/LaplaceTable.lean",
+      "line": 321,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.laplaceTransform_mul_cos",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/LaplaceTable.lean",
+      "line": 371,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.mellin_inv_one_add",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "line": 397,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.hasUniformPoincareExpansion_iff",
+      "file": "DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean",
+      "line": 454,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.sq_sub_log_root_isEquivalent",
+      "file": "DLMF/AsymptoticApproximations/Basics/Transcendental.lean",
+      "line": 135,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.sq_sub_log_root_sq",
+      "file": "DLMF/AsymptoticApproximations/Basics/Transcendental.lean",
+      "line": 155,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.sq_sub_log_root_second",
+      "file": "DLMF/AsymptoticApproximations/Basics/Transcendental.lean",
+      "line": 179,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.mellin_convolution",
+      "file": "DLMF/AsymptoticApproximations/Mellin/Transforms.lean",
+      "line": 80,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  ],
+  "downstreamFreedFromAdmissions": [
+    "DLMF.AlgebraicAnalytic.laplaceTransform_pow_mul_exp_neg_div_factorial",
+    "DLMF.AlgebraicAnalytic.schwarzian_inverse",
+    "DLMF.AsymptoticApproximations.laplace_trunc_eq_mellinInv",
+    "DLMF.AsymptoticApproximations.mellin_convolution_eq_mellinInv"
+  ],
+  "newHelpers": [
+    {
+      "name": "DLMF.AlgebraicAnalytic.integral_mul_second_mean_value_of_monotone",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/OneVariable.lean",
+      "line": 270,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.hasDerivAt_deriv_comp_of_contDiffAt",
+      "file": "DLMF/AlgebraicAnalytic/ODE/Transformations.lean",
+      "line": 226,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.iteratedDeriv_three_comp",
+      "file": "DLMF/AlgebraicAnalytic/ODE/Transformations.lean",
+      "line": 247,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.schwarzian_sqrt_algebra",
+      "file": "DLMF/AlgebraicAnalytic/ODE/Transformations.lean",
+      "line": 273,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.iteratedDeriv_three_solution",
+      "file": "DLMF/AlgebraicAnalytic/ODE/Transformations.lean",
+      "line": 420,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.product_ode_numerator",
+      "file": "DLMF/AlgebraicAnalytic/ODE/Transformations.lean",
+      "line": 436,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.norm_laplaceTransform_le",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Laplace.lean",
+      "line": 96,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.norm_laplace_moment_le",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Laplace.lean",
+      "line": 207,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.integrableOn_laplace_moment",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Laplace.lean",
+      "line": 225,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.hasDerivAt_laplaceTransform_moment",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Laplace.lean",
+      "line": 239,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.integral_Ioi_eq_integral_shift",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Laplace.lean",
+      "line": 311,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.laplace_tail_of_multiplier",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Laplace.lean",
+      "line": 322,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.laplaceTransform_of_shift_mul",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Laplace.lean",
+      "line": 337,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.laplace_integrand_tendsto_zero",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Laplace.lean",
+      "line": 390,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.convolution_laplace_integrands",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/Laplace.lean",
+      "line": 489,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.exponential_moment",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/LaplaceTable.lean",
+      "line": 35,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.laplace_exponential_combination",
+      "file": "DLMF/AlgebraicAnalytic/Transforms/LaplaceTable.lean",
+      "line": 48,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.sq_sub_log_root_sq_isEquivalent",
+      "file": "DLMF/AsymptoticApproximations/Basics/Transcendental.lean",
+      "line": 120,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.reciprocal_mellinConvergent",
+      "file": "DLMF/AsymptoticApproximations/Mellin/Transforms.lean",
+      "line": 48,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "DLMF.AsymptoticApproximations.reciprocal_mellinConvolution",
+      "file": "DLMF/AsymptoticApproximations/Mellin/Transforms.lean",
+      "line": 61,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Complex.integrable_fderiv_and_hasFDerivAt_integral",
+      "file": "DLMFMathlib/Analysis/Complex/ParametricHolomorphy.lean",
+      "line": 250,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Complex.integrable_fderiv_of_locally_dominated",
+      "file": "DLMFMathlib/Analysis/Complex/ParametricHolomorphy.lean",
+      "line": 290,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Complex.hasFDerivAt_integral_of_locally_dominated",
+      "file": "DLMFMathlib/Analysis/Complex/ParametricHolomorphy.lean",
+      "line": 301,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Complex.hasDerivAt_integral_of_locally_dominated",
+      "file": "DLMFMathlib/Analysis/Complex/ParametricHolomorphy.lean",
+      "line": 326,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Complex.ae_differentiableOn_iteratedDeriv_param",
+      "file": "DLMFMathlib/Analysis/Complex/ParametricHolomorphy.lean",
+      "line": 339,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Complex.aestronglyMeasurable_iteratedDeriv_param",
+      "file": "DLMFMathlib/Analysis/Complex/ParametricHolomorphy.lean",
+      "line": 349,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Complex.locally_dominated_iteratedDeriv",
+      "file": "DLMFMathlib/Analysis/Complex/ParametricHolomorphy.lean",
+      "line": 368,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Complex.iteratedDeriv_integral_of_locally_dominated",
+      "file": "DLMFMathlib/Analysis/Complex/ParametricHolomorphy.lean",
+      "line": 399,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "Complex.iteratedDeriv_intervalIntegral_of_locally_dominated",
+      "file": "DLMFMathlib/Analysis/Complex/ParametricHolomorphy.lean",
+      "line": 455,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "mellinConvergent_iff_integrable_exp_mul",
+      "file": "DLMFMathlib/Analysis/MellinConvolution.lean",
+      "line": 28,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "mellin_eq_integral_exp_mul",
+      "file": "DLMFMathlib/Analysis/MellinConvolution.lean",
+      "line": 57,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "convolution_mellin_log_integrands",
+      "file": "DLMFMathlib/Analysis/MellinConvolution.lean",
+      "line": 73,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "hasMellin_integral_mul_div",
+      "file": "DLMFMathlib/Analysis/MellinConvolution.lean",
+      "line": 107,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    {
+      "name": "MellinConvergent.of_re_eq",
+      "file": "DLMFMathlib/Analysis/MellinConvolution.lean",
+      "line": 123,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  ],
+  "validation": {
+    "fullBuild": {
+      "command": "lake build > /tmp/DLMF-build.log 2>&1",
+      "jobs": 14612,
+      "passed": true
+    },
+    "strictChecks": [
+      {
+        "file": "DLMF.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261028/strict-DLMF.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Calculus/OneVariable.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261028/strict-DLMF_AlgebraicAnalytic_Calculus_OneVariable.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Complex/Functions.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261028/strict-DLMF_AlgebraicAnalytic_Complex_Functions.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/ODE/Transformations.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261028/strict-DLMF_AlgebraicAnalytic_ODE_Transformations.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Transforms/Laplace.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261028/strict-DLMF_AlgebraicAnalytic_Transforms_Laplace.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Transforms/LaplaceTable.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261028/strict-DLMF_AlgebraicAnalytic_Transforms_LaplaceTable.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Transforms/MellinHilbertStieltjes.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261028/strict-DLMF_AlgebraicAnalytic_Transforms_MellinHilbertStieltjes.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261028/strict-DLMF_AlgebraicAnalytic_Transforms_Tables.lean.log"
+      },
+      {
+        "file": "DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261028/strict-DLMF_AsymptoticApproximations_Basics_OrderSymbols.lean.log"
+      },
+      {
+        "file": "DLMF/AsymptoticApproximations/Basics/Transcendental.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261028/strict-DLMF_AsymptoticApproximations_Basics_Transcendental.lean.log"
+      },
+      {
+        "file": "DLMF/AsymptoticApproximations/Mellin/Transforms.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261028/strict-DLMF_AsymptoticApproximations_Mellin_Transforms.lean.log"
+      },
+      {
+        "file": "DLMFMathlib.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261028/strict-DLMFMathlib.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Complex/ParametricHolomorphy.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261028/strict-DLMFMathlib_Analysis_Complex_ParametricHolomorphy.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/MellinConvolution.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261028/strict-DLMFMathlib_Analysis_MellinConvolution.lean.log"
+      },
+      {
+        "file": "Main.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261028/strict-Main.lean.log"
+      }
+    ],
+    "compiledAPI": {
+      "checked": 25811,
+      "missing": [],
+      "changed": []
+    },
+    "statementHeads": {
+      "checked": 25768,
+      "missing": [],
+      "ambiguous": [],
+      "changed": []
+    },
+    "definitionValues": {
+      "checked": 3412,
+      "changed": []
+    },
+    "allTheoremAxiomsIncludingGenerated": {
+      "dependingOnAdmissions": 1843,
+      "nonstandard": [],
+      "theorems": 55336
+    },
+    "tagAudit": {
+      "entries": 10703,
+      "proved": 8553,
+      "admissionDependent": 2150,
+      "nonstandard": 0,
+      "improvedEntries": 47,
+      "improvedDeclarations": 41,
+      "addedPairs": [],
+      "removedPairs": []
+    },
+    "imports": {
+      "newTwoWayPairs": [],
+      "newDefinitionsImports": [],
+      "twoWayPairs": [
+        "BernoulliEuler <-> Combinatorics",
+        "Bessel <-> Confluent",
+        "Bessel <-> Struve",
+        "Confluent <-> Coulomb",
+        "Confluent <-> ErrorFunctions",
+        "Confluent <-> Hypergeometric",
+        "Confluent <-> OrthogonalPolynomials",
+        "ErrorFunctions <-> IncompleteGamma",
+        "ErrorFunctions <-> ParabolicCylinder",
+        "ExpIntegrals <-> IncompleteGamma",
+        "Gamma <-> Hypergeometric",
+        "JacobiElliptic <-> Theta",
+        "JacobiElliptic <-> Weierstrass",
+        "Legendre <-> SphericalHarmonics"
+      ],
+      "definitionsImports": [
+        "DLMF.Airy.Basic -> DLMF.Bessel.SturmZeros",
+        "DLMF.Confluent.Basic -> DLMF.Hypergeometric.EulerIntegral",
+        "DLMF.ErrorFunctions.Basic -> DLMF.Confluent.FresnelAsymptotics",
+        "DLMF.ExpIntegrals.Basic -> DLMF.Confluent.Integrals",
+        "DLMF.ExpIntegrals.Basic -> DLMF.Confluent.ExpIntegral",
+        "DLMF.GeneralizedHypergeometric.Basic -> DLMF.Hypergeometric.GeneralizedCalculus",
+        "DLMF.GeneralizedHypergeometric.Basic -> DLMF.Hypergeometric.Solutions",
+        "DLMF.GeneralizedHypergeometric.Basic -> DLMF.Hypergeometric.ArgumentContinuation",
+        "DLMF.IncompleteGamma.Basic -> DLMF.Statistical.IncompleteGamma",
+        "DLMF.Lame.Basic -> DLMF.Elliptic.Jacobi",
+        "DLMF.Legendre.Basic -> DLMF.Hypergeometric.ArgumentContinuation",
+        "DLMF.Legendre.Basic -> DLMF.OrthogonalPolynomials.Classical",
+        "DLMF.ParabolicCylinder.Basic -> DLMF.Confluent.ParabolicCylinder",
+        "DLMF.ParabolicCylinder.Basic -> DLMF.Confluent.Coulomb",
+        "DLMF.QHypergeometric.Basic -> DLMF.QSeries.Identities",
+        "DLMF.QHypergeometric.Basic -> DLMF.QSeries.QExponential",
+        "DLMF.Struve.Basic -> DLMF.Hypergeometric.GeneralizedCalculus",
+        "DLMF.Struve.Basic -> DLMF.Confluent.Relations",
+        "DLMF.Theta.Basic -> DLMF.Elliptic.Theta",
+        "DLMF.Theta.Basic -> DLMF.QSeries.Identities"
+      ],
+      "newAreaDirections": [
+        "AlgebraicAnalytic -> Gamma"
+      ],
+      "definitionValues": {
+        "checked": 3412,
+        "changed": []
+      }
+    },
+    "sourceFiles": 1088,
+    "largestFile": {
+      "file": "DLMF/MatrixArgument/GammaBeta.lean",
+      "lines": 1454
+    },
+    "missingNewDocstrings": [],
+    "strictCheckLogNote": "Log paths are local verification artifacts; they are not required project inputs.",
+    "documentation": {
+      "jsonValid": true,
+      "localLinksValid": true,
+      "sourceLinkAnchorsInRange": true,
+      "gitDiffCheck": true
+    },
+    "admissionScan": {
+      "remainingInChangedLeanFiles": 106,
+      "newAxiomCommands": 0,
+      "newAdmitCommands": 0
+    }
+  }
+}

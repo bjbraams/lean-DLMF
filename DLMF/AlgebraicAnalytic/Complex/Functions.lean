@@ -6,6 +6,8 @@ Authors: Bastiaan J Braams
 module -- shake: keep-all
 
 public import DLMF.AlgebraicAnalytic.Complex.Defs
+public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
+public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 public import Mathlib.Analysis.Complex.CauchyIntegral
 public import Mathlib.Analysis.Complex.Schwarz
 public import Mathlib.Analysis.Complex.LocallyUniformLimit
@@ -41,7 +43,10 @@ Conventions.
 Proved here: the exponential series 1.10.2 (from Mathlib), Schwarz's inequalities 1.10.11 (from
 Mathlib's Schwarz lemma), the analyticity of a locally uniform limit of products 1.10.23 (from
 Mathlib), the analyticity of the branches of `√z` and `(1 - z)^α (1 + z)^β` in the cut planes of
-§1.10(vi).
+§1.10(vi). The logarithmic-derivative limit 1.10.24 uses Mathlib’s
+`TendstoLocallyUniformlyOn.deriv` and `logDeriv_fun_prod`. The improper-integral
+holomorphy statements and the integral M-test use the project’s dominated-holomorphy theorem,
+Mathlib’s locally uniform limit theorem and `MeasureTheory.tendsto_integral_Ioi_zero`.
 -/
 
 @[expose] public noncomputable section
@@ -339,7 +344,33 @@ theorem differentiableOn_intervalIntegral_param {f : ℂ → ℝ → ℂ} {D : S
     DifferentiableOn ℂ (fun z => ∫ t in a..b, f z t) D ∧
       ∀ n : ℕ, ∀ z ∈ D, iteratedDeriv n (fun z => ∫ t in a..b, f z t) z =
         ∫ t in a..b, iteratedDeriv n (fun z => f z t) z := by
-  sorry
+  have hmeas : ∀ z ∈ D, AEStronglyMeasurable (f z) (volume.restrict (uIoc a b)) := by
+    intro z hz
+    exact ((hc.uncurry_left z hz).aestronglyMeasurable measurableSet_Icc).mono_set
+      (by rw [uIoc_of_le hab]; exact Ioc_subset_Icc_self)
+  have hdiff : ∀ᵐ t ∂(volume.restrict (uIoc a b)),
+      DifferentiableOn ℂ (fun z => f z t) D := by
+    filter_upwards [ae_restrict_mem measurableSet_uIoc] with t ht
+    exact hf t (by simpa only [uIcc_of_le hab] using uIoc_subset_uIcc ht)
+  have hdom : ∀ z ∈ D, ∃ V ∈ 𝓝 z, ∃ g : ℝ → ℝ,
+      Integrable g (volume.restrict (uIoc a b)) ∧
+      ∀ᵐ t ∂(volume.restrict (uIoc a b)), ∀ w ∈ V, ‖f w t‖ ≤ g t := by
+    intro z hz
+    obtain ⟨r, hr, hsub⟩ := Metric.isOpen_iff.mp hD z hz
+    have hr2 : 0 < r / 2 := half_pos hr
+    have hK : IsCompact (closedBall z (r / 2) ×ˢ Icc a b) :=
+      (isCompact_closedBall z (r / 2)).prod isCompact_Icc
+    obtain ⟨C, hC⟩ := hK.exists_bound_of_continuousOn (hc.mono fun p hp =>
+      ⟨hsub (closedBall_subset_ball (by linarith) hp.1), hp.2⟩)
+    refine ⟨ball z (r / 2), ball_mem_nhds z hr2, fun _ => C, (by
+      rw [uIoc_of_le hab]
+      exact (intervalIntegrable_const : IntervalIntegrable (fun _ : ℝ => C) volume a b).1), ?_⟩
+    filter_upwards [ae_restrict_mem measurableSet_uIoc] with t ht w hw
+    refine hC (w, t) ⟨ball_subset_closedBall hw, ?_⟩
+    simpa only [uIcc_of_le hab] using uIoc_subset_uIcc ht
+  exact ⟨Complex.differentiableOn_intervalIntegral_of_locally_dominated hD a b hmeas hdiff hdom,
+    fun n z hz => Complex.iteratedDeriv_intervalIntegral_of_locally_dominated
+      hD a b hmeas hdiff hdom n hz⟩
 
 /-- DLMF §1.10(viii) and 1.10.19 (improper integrals, `b = ∞`): if `f(z, t)` is analytic in
 `z ∈ D` for each `t ≥ a`, continuous in both variables on `D × [a, ∞)`, and
@@ -353,7 +384,12 @@ theorem differentiableOn_improperIntegral_param {f : ℂ → ℝ → ℂ} {D : S
     (hu : ∀ K ⊆ D, IsCompact K →
       TendstoUniformlyOn (fun c z => ∫ t in a..c, f z t) F atTop K) :
     DifferentiableOn ℂ F D := by
-  sorry
+  have hl : TendstoLocallyUniformlyOn (fun c z => ∫ t in a..c, f z t) F atTop D :=
+    (tendstoLocallyUniformlyOn_iff_forall_isCompact hD).mpr hu
+  apply hl.differentiableOn ?_ hD
+  filter_upwards [eventually_ge_atTop a] with c hc'
+  exact (differentiableOn_intervalIntegral_param hD hc'
+    (fun t ht => hf t ht.1) (hc.mono fun p hp => ⟨hp.1, hp.2.1⟩)).1
 
 /-- DLMF §1.10(viii) (improper integrals with a singularity at a finite `b`): if `f(z, t)` is
 analytic in `z ∈ D` for each `t ∈ [a, b)`, continuous in both variables on `D × [a, b)`, and
@@ -367,7 +403,13 @@ theorem differentiableOn_improperIntegral_param_of_lt {f : ℂ → ℝ → ℂ} 
     (hu : ∀ K ⊆ D, IsCompact K →
       TendstoUniformlyOn (fun c z => ∫ t in a..c, f z t) F (𝓝[<] b) K) :
     DifferentiableOn ℂ F D := by
-  sorry
+  have hl : TendstoLocallyUniformlyOn (fun c z => ∫ t in a..c, f z t) F (𝓝[<] b) D :=
+    (tendstoLocallyUniformlyOn_iff_forall_isCompact hD).mpr hu
+  apply hl.differentiableOn ?_ hD
+  filter_upwards [Ioo_mem_nhdsLT hab] with c hc'
+  exact (differentiableOn_intervalIntegral_param hD hc'.1.le
+    (fun t ht => hf t ⟨ht.1, lt_of_le_of_lt ht.2 hc'.2⟩)
+    (hc.mono fun p hp => ⟨hp.1, hp.2.1, lt_of_le_of_lt hp.2.2 hc'.2⟩)).1
 
 /-- DLMF §1.10(viii) (`M`-test for integrals): if `|f(z, t)| ≤ M(t)` for `z ∈ S`, `t ≥ a`, and
 `∫_a^∞ M(t) dt` converges, then `∫_a^∞ f(z, t) dt` converges absolutely and uniformly on `S`. -/
@@ -378,7 +420,24 @@ theorem tendstoUniformlyOn_integral_of_norm_le {f : ℂ → ℝ → ℂ} {S : Se
     (∀ z ∈ S, IntegrableOn (f z) (Ioi a)) ∧
       TendstoUniformlyOn (fun c z => ∫ t in a..c, f z t) (fun z => ∫ t in Ioi a, f z t)
         atTop S := by
-  sorry
+  have hi : ∀ z ∈ S, IntegrableOn (f z) (Ioi a) := by
+    intro z hz
+    apply hM.mono' (hmeas z hz)
+    filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht using hle z hz t ht
+  have hMn : IntegrableOn (fun t => ‖M t‖) (Ioi a) := hM.norm
+  refine ⟨hi, Metric.tendstoUniformlyOn_iff.mpr fun ε hε => ?_⟩
+  have ht : Tendsto (fun c : ℝ => ∫ t in Ioi c, ‖M t‖) atTop (𝓝 0) :=
+    tendsto_integral_Ioi_zero tendsto_id
+  filter_upwards [eventually_ge_atTop a, ht.eventually (gt_mem_nhds hε)] with c hc hεc z hz
+  have hzi := hi z hz
+  have htail : (∫ t in Ioi a, f z t) - (∫ t in a..c, f z t) = ∫ t in Ioi c, f z t := by
+    have he := intervalIntegral.integral_interval_add_Ioi hzi (hzi.mono_set (Ioi_subset_Ioi hc))
+    linear_combination -he
+  rw [dist_eq_norm, htail]
+  refine lt_of_le_of_lt (norm_integral_le_of_norm_le
+    (hMn.mono_set (Ioi_subset_Ioi hc)) ?_) hεc
+  filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
+  exact (hle z hz t (lt_of_le_of_lt hc ht)).trans (le_abs_self _)
 
 /-! ## §1.10(ix) Infinite products -/
 
@@ -459,7 +518,19 @@ theorem tendsto_logDeriv_prod {a : ℕ → ℂ → ℂ} {D : Set ℂ} (hD : IsOp
       TendstoUniformlyOn (fun m z => ∏ n ∈ Finset.range m, a n z) F atTop K)
     (hF : ∀ z ∈ D, F z ≠ 0) {z : ℂ} (hz : z ∈ D) :
     Tendsto (fun m => ∑ n ∈ Finset.range m, logDeriv (a n) z) atTop (𝓝 (logDeriv F z)) := by
-  sorry
+  let P : ℕ → ℂ → ℂ := fun m z => ∏ n ∈ Finset.range m, a n z
+  have hP : ∀ m, DifferentiableOn ℂ (P m) D :=
+    fun _ => DifferentiableOn.fun_finsetProd fun n _ => ha n
+  have hl : TendstoLocallyUniformlyOn P F atTop D :=
+    (tendstoLocallyUniformlyOn_iff_forall_isCompact hD).mpr hu
+  have hd := (hl.deriv (Eventually.of_forall hP) hD).tendsto_at hz
+  have hv := hl.tendsto_at hz
+  have hlim := hd.div hv (hF z hz)
+  change Tendsto (fun m => deriv (P m) z / P m z) atTop (𝓝 (logDeriv F z)) at hlim
+  refine hlim.congr' (Eventually.of_forall fun m => ?_)
+  change logDeriv (fun w => ∏ n ∈ Finset.range m, a n w) z = _
+  exact (logDeriv_fun_prod (fun n _ => ha0 n z hz)
+    (fun n _ => (ha n).differentiableAt (hD.mem_nhds hz)))
 
 /-- DLMF 1.10.25 (Mittag-Leffler expansion): if the `zₙ` are distinct and nonzero, `|zₙ| → ∞`,
 and `∑ |aₙ zₙ⁻²|` converges, then `f(z) = ∑ aₙ (1/(z - zₙ) + 1/zₙ)` is analytic in `ℂ` except

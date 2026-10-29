@@ -4,6 +4,8 @@
   "commit": "0ae47290d9279b4708b9aca4d19bee7bba71e73f",
   "scope": "DLMF and DLMFMathlib library sources, including explicit anonymous instances and structure fields",
   "notes": [
+    "The follow-up proof round is recorded separately in ProofRound20261029.json; it removes 24 further admissions without changing the mathematical statements.",
+    "This is the structural cleanup snapshot preceding the admission proof round; see ProofRound20261028.json for the subsequent proofs and validation.",
     "The commit field identifies the base revision; this inventory describes the uncommitted cleanup working tree.",
     "Generated constructors, recursors and equation lemmas are excluded from declaration totals.",
     "Source inspection supplements compiled docstrings: a generated DLMF reference link alone is not explanatory documentation.",
@@ -42960,5 +42962,19 @@
       "preExistingBaselineDifferences": 10,
       "newDifferencesIntroduced": 0
     }
+  },
+  "proofRound": {
+    "report": "ProofRound20261028.json",
+    "admissionsBefore": 1771,
+    "admissionsAfter": 1734,
+    "admissionsRemoved": 37,
+    "downstreamFreed": 4,
+    "newLibraryFiles": [
+      "DLMF/AlgebraicAnalytic/Transforms/LaplaceTable.lean",
+      "DLMFMathlib/Analysis/MellinConvolution.lean"
+    ],
+    "currentLibraryFiles": 1088,
+    "compiledAPIRemoved": [],
+    "compiledAPIChangedTypes": []
   }
 }

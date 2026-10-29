@@ -7,13 +7,17 @@ module
 
 public import DLMF.QHypergeometric.Calculus
 public import DLMFMathlib.Analysis.Complex.SeparatingContour
+public import DLMFMathlib.Analysis.Complex.GeometricNewtonSeries
+public import Mathlib.Analysis.Analytic.IsolatedZeros
 
 /-!
 # Low-order basic hypergeometric functions (DLMF §§17.5–17.6)
 
 The series retain DLMF's integer phase exponents. Literal product quotients are used only
 where their denominators are nonzero; cancelled product forms and removable-limit statements
-retain exceptional upper parameters. Finite identities require lower-parameter regularity
+retain exceptional upper parameters. The full-domain q-Gauss proof uses a normally
+convergent Newton series and Mathlib’s analytic identity theorem, interpolating the
+terminating q-Chu values without excluding exceptional upper parameters. Finite identities require lower-parameter regularity
 only through the final retained term. Continuation is separate from totalized divergent sums.
 The product-continuation proofs directly reuse Mathlib analytic composition/quotient rules
 and the existing TauCeti `ContinuesInside` germ adapter.
@@ -458,20 +462,79 @@ theorem one_phi_zero_continuation_analytic {a q : ℂ} (hq : ‖q‖<1) :
   unfold qOnePhiZeroContinuation
   simpa only [Pi.div_def] using hn.div hd hz
 
+/-- Removing the vanishing factor of a q-product leaves an analytic unit. -/
+private lemma qPochhammerInf_factor_at_zero {q w : ℂ} (hq0 : q ≠ 0) (hq : ‖q‖ < 1)
+    (hw : qPochhammerInf w q = 0) :
+    ∃ n : ℕ, w * q ^ n = 1 ∧ ∃ G : ℂ → ℂ, AnalyticAt ℂ G w ∧ G w ≠ 0 ∧
+      ∀ z, qPochhammerInf z q = (1 - z * q ^ n) * G z := by
+  obtain ⟨n, hn⟩ : ∃ n : ℕ, w * q ^ n = 1 := by
+    by_contra h
+    apply (qPochhammerInf_ne_zero hq ?_) hw
+    intro n hn
+    exact h ⟨n, (sub_eq_zero.mp hn).symm⟩
+  have hw0 : w ≠ 0 := left_ne_zero_of_mul (hn ▸ one_ne_zero)
+  have hinj : Function.Injective (fun j : ℕ => q ^ j) := by
+    intro i j hij
+    apply (pow_right_strictAnti₀ (norm_pos_iff.mpr hq0) hq).injective
+    simpa only [norm_pow] using congrArg norm hij
+  have huniq (j : ℕ) (hj : w * q ^ j = 1) : j = n :=
+    hinj (mul_left_cancel₀ hw0 (hj.trans hn.symm))
+  let G : ℂ → ℂ := fun z => qPochhammer z q n * qPochhammerInf (z * q ^ (n + 1)) q
+  have hp (m : ℕ) : AnalyticAt ℂ (fun z => qPochhammer z q m) w := by
+    induction m with
+    | zero => simpa only [qPochhammer_zero] using (analyticAt_const (v := (1 : ℂ)))
+    | succ m ih =>
+      simpa only [qPochhammer_succ, Pi.mul_apply, Pi.sub_apply, id_eq] using!
+        ih.mul (analyticAt_const.sub (analyticAt_id.mul analyticAt_const))
+  have hG : AnalyticAt ℂ G w :=
+    (hp n).mul ((qPochhammerInf_analytic hq _ (mem_univ _)).comp
+      (analyticAt_id.mul analyticAt_const))
+  have hGn : G w ≠ 0 := by
+    apply mul_ne_zero
+    · rw [qPochhammer_eq_prod]
+      apply Finset.prod_ne_zero_iff.mpr
+      intro j hj he
+      have heq := huniq j (sub_eq_zero.mp he).symm
+      have hjn := Finset.mem_range.mp hj
+      omega
+    · apply qPochhammerInf_ne_zero hq
+      intro j hj
+      have he := huniq (n + 1 + j) (by
+        simpa only [pow_add, mul_assoc] using (sub_eq_zero.mp hj).symm)
+      omega
+  refine ⟨n, hn, G, hG, hGn, fun z => ?_⟩
+  rw [qPochhammerInf_mul_qPochhammer hq (n + 1), qPochhammer_succ]
+  dsimp [G]
+  ring
+
 /-- Common product zeros have a removable germ, rather than the quotient totalization 0/0. -/
 theorem one_phi_zero_common_zeros_removable {a q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
     (hd : qPochhammerInf z q=0) (hn : qPochhammerInf (a*z) q=0) :
     ∃ U : Set ℂ, IsOpen U ∧ z∈U ∧ ∃ F : ℂ → ℂ, AnalyticOnNhd ℂ F U ∧
       ∀ w∈U, qPochhammerInf w q≠0 → F w=qOnePhiZeroContinuation a q w := by
-  sorry
-
-/-- The q-Gauss sum `2φ1(a,b;c;q,c/(ab)) = (c/a,c/b;q)_∞/(c,c/(ab);q)_∞` for `|c| < |ab|` (DLMF
-17.6.E1). -/
-@[dlmf 17.6.E1]
-theorem q_gauss {a b c q : ℂ} (hq : ‖q‖<1) (hz : ‖c‖<‖a*b‖)
-    (hc : qDenominatorRegular [c] q) :
-    qPhi [a,b] [c] q (c/(a*b))=qPochhammerListInf [c/a,c/b] q/qPochhammerListInf [c,c/(a*b)] q := by
-  sorry
+  obtain ⟨i, hi, G, hG, hG0, heG⟩ := qPochhammerInf_factor_at_zero hq0 hq hd
+  obtain ⟨j, hj, H, hH, hH0, heH⟩ := qPochhammerInf_factor_at_zero hq0 hq hn
+  have hz0 : z ≠ 0 := left_ne_zero_of_mul (hi ▸ one_ne_zero)
+  have he : a * q ^ j = q ^ i := by
+    apply mul_left_cancel₀ hz0
+    calc z * (a * q ^ j) = a * z * q ^ j := by ring
+      _ = 1 := hj
+      _ = z * q ^ i := hi.symm
+  let F : ℂ → ℂ := fun w => H (a * w) / G w
+  have hFa : AnalyticAt ℂ F z :=
+    (hH.comp (analyticAt_const.mul analyticAt_id)).div hG hG0
+  refine ⟨{w | AnalyticAt ℂ F w}, isOpen_analyticAt _ _, hFa, F, fun w hw => hw, ?_⟩
+  intro w _hw hden
+  dsimp [F, qOnePhiZeroContinuation]
+  rw [heH, heG]
+  have hf : 1 - w * q ^ i ≠ 0 := by
+    intro hf
+    apply hden
+    rw [heG, hf, zero_mul]
+  rw [show a * w * q ^ j = w * q ^ i by calc
+    a * w * q ^ j = w * (a * q ^ j) := by ring
+    _ = w * q ^ i := by rw [he]]
+  exact (mul_div_mul_left _ _ hf).symm
 
 /-- The first q-Chu–Vandermonde sum `2φ1(a,q^(-n);c;q,c q^n/a) = (c/a;q)_n/(c;q)_n` (DLMF
 17.6.E2). -/
@@ -557,6 +620,201 @@ theorem q_chu_vandermonde_second {a c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (n
       qPochhammerList])]
     exact this
   exact qaR4_chu_second_ne hq0 hq n hc0 hcn
+
+/-- The phase-free coefficients are bounded because the finite factorials have nonzero limiting denominators. -/
+private lemma qGauss_coefficient_bound {a c q : ℂ} (hq : ‖q‖ < 1)
+    (hc : qDenominatorRegular [c] q) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ n : ℕ,
+      ‖qPochhammer a q n / (qPochhammer c q n * qPochhammer q q n)‖ ≤ C := by
+  have hc0 : qPochhammerInf c q ≠ 0 := qPochhammerInf_ne_zero hq fun n he =>
+    hc c (by simp) n (sub_eq_zero.mp he).symm
+  have hq0 : qPochhammerInf q q ≠ 0 := qPochhammerInf_ne_zero_of_norm_lt_one hq hq
+  have ht := (tendsto_qPochhammer (w := a) hq).div
+    ((tendsto_qPochhammer (w := c) hq).mul (tendsto_qPochhammer (w := q) hq))
+    (mul_ne_zero hc0 hq0)
+  obtain ⟨C, hC⟩ := (Metric.isBounded_range_of_tendsto _ ht).exists_norm_le
+  refine ⟨max C 0, le_max_right _ _, fun n => ?_⟩
+  exact (hC _ ⟨n, rfl⟩).trans (le_max_left _ _)
+
+/-- Reciprocal upper parameters turn the finite shifted factorial into a Newton polynomial. -/
+private lemma qGauss_newton_product {q w : ℂ} (hw : w ≠ 0) (n : ℕ) :
+    (∏ j ∈ range n, (w - q ^ j)) = w ^ n * qPochhammer w⁻¹ q n := by
+  rw [qPochhammer_eq_prod, show w ^ n = ∏ _j ∈ range n, w by simp,
+    ← Finset.prod_mul_distrib]
+  apply Finset.prod_congr rfl
+  intro j _
+  field_simp
+
+/-- The Newton series equals two-phi-one at every nonzero reciprocal upper parameter. -/
+private lemma qGauss_newton_eq_phi {a c q w : ℂ} (hw : w ≠ 0) :
+    (∑' n : ℕ, (qPochhammer a q n / (qPochhammer c q n * qPochhammer q q n) *
+      (c / a) ^ n) * ∏ j ∈ range n, (w - q ^ j)) =
+      qPhi [a, w⁻¹] [c] q (c * w / a) := by
+  unfold qPhi
+  apply tsum_congr
+  intro n
+  rw [qaR4_phi21_term, qGauss_newton_product hw]
+  rw [show c * w / a = c / a * w by ring, mul_pow]
+  ring
+
+/-- The reciprocal-parameter Newton series is analytic throughout its convergence disc. -/
+private lemma qGauss_analytic_newton {a c q : ℂ} (hq : ‖q‖ < 1) (hca : c / a ≠ 0)
+    (hc : qDenominatorRegular [c] q) :
+    AnalyticOnNhd ℂ (fun w => ∑' n : ℕ,
+      (qPochhammer a q n / (qPochhammer c q n * qPochhammer q q n) * (c / a) ^ n) *
+        ∏ j ∈ range n, (w - q ^ j)) (Metric.ball 0 ‖c / a‖⁻¹) := by
+  obtain ⟨C, hC, hbound⟩ := qGauss_coefficient_bound hq hc
+  apply Complex.analyticOnNhd_tsum_geometricNewton hq hC (norm_pos_iff.mpr hca)
+  intro n
+  rw [norm_mul, norm_pow]
+  exact mul_le_mul_of_nonneg_right (hbound n) (by positivity)
+
+/-- The q-Gauss product quotient is analytic on the same reciprocal-parameter disc. -/
+private lemma qGauss_analytic_product {a c q : ℂ} (hq : ‖q‖ < 1)
+    (hc : qDenominatorRegular [c] q) :
+    AnalyticOnNhd ℂ (fun w => qPochhammerInf (c / a) q * qPochhammerInf (c * w) q /
+      (qPochhammerInf c q * qPochhammerInf (c / a * w) q))
+      (Metric.ball 0 ‖c / a‖⁻¹) := by
+  intro w hw
+  have hw' : ‖c / a * w‖ < 1 := by
+    rw [norm_mul]
+    by_cases hca : c / a = 0
+    · simp [hca]
+    have hw' : ‖w‖ < ‖c / a‖⁻¹ := by simpa using hw
+    have h := mul_lt_mul_of_pos_left hw' (norm_pos_iff.mpr hca)
+    rwa [mul_inv_cancel₀ (norm_ne_zero_iff.mpr hca)] at h
+  apply AnalyticAt.div
+    (analyticAt_const.mul ((qPochhammerInf_analytic hq _ (mem_univ _)).comp
+      (analyticAt_const.mul analyticAt_id)))
+    (analyticAt_const.mul ((qPochhammerInf_analytic hq _ (mem_univ _)).comp
+      (analyticAt_const.mul analyticAt_id)))
+  exact mul_ne_zero (qPochhammerInf_ne_zero hq fun n he =>
+    hc c (by simp) n (sub_eq_zero.mp he).symm)
+    (qPochhammerInf_ne_zero_of_norm_lt_one hw' hq)
+
+/-- Terminating q-Chu values accumulate at zero and determine the analytic q-Gauss identity. -/
+private lemma qGauss_nonzero {a b c q : ℂ} (hq0 : q ≠ 0) (hq : ‖q‖ < 1)
+    (ha : a ≠ 0) (hb : b ≠ 0) (hc0 : c ≠ 0) (hz : ‖c‖ < ‖a * b‖)
+    (hc : qDenominatorRegular [c] q) :
+    qPhi [a,b] [c] q (c/(a*b)) =
+      qPochhammerListInf [c/a,c/b] q / qPochhammerListInf [c,c/(a*b)] q := by
+  let F : ℂ → ℂ := fun w => ∑' n : ℕ,
+    (qPochhammer a q n / (qPochhammer c q n * qPochhammer q q n) * (c / a) ^ n) *
+      ∏ j ∈ range n, (w - q ^ j)
+  let G : ℂ → ℂ := fun w => qPochhammerInf (c / a) q * qPochhammerInf (c * w) q /
+    (qPochhammerInf c q * qPochhammerInf (c / a * w) q)
+  have hca : c / a ≠ 0 := div_ne_zero hc0 ha
+  have hR : 0 < ‖c / a‖⁻¹ := inv_pos.mpr (norm_pos_iff.mpr hca)
+  have hF : AnalyticOnNhd ℂ F (Metric.ball 0 ‖c / a‖⁻¹) := qGauss_analytic_newton hq hca hc
+  have hG : AnalyticOnNhd ℂ G (Metric.ball 0 ‖c / a‖⁻¹) := qGauss_analytic_product hq hc
+  have hpow : Tendsto (fun n : ℕ => q ^ n) atTop (𝓝 (0 : ℂ)) :=
+    tendsto_pow_atTop_nhds_zero_of_norm_lt_one hq
+  have hev : ∀ᶠ n : ℕ in atTop, F (q ^ n) = G (q ^ n) := by
+    have hsmall : ∀ᶠ n : ℕ in atTop, ‖c / a * q ^ n‖ < 1 := by
+      have ht' : Tendsto (fun n : ℕ => c / a * q ^ n) atTop (𝓝 (0 : ℂ)) := by
+        simpa using hpow.const_mul (c / a)
+      have he : ∀ᶠ z : ℂ in 𝓝 0, ‖z‖ < 1 := by
+        have he := Metric.ball_mem_nhds (0 : ℂ) (zero_lt_one : (0 : ℝ) < 1)
+        change ∀ᶠ z : ℂ in 𝓝 0, z ∈ Metric.ball 0 1 at he
+        simpa only [Metric.mem_ball, dist_zero_right] using he
+      exact ht'.eventually he
+    filter_upwards [hsmall] with n hn
+    have hcn : qPochhammer c q n ≠ 0 := qaR4_reg_poch_ne hq hc n
+    have htail : qPochhammerInf (c / a * q ^ n) q ≠ 0 :=
+      qPochhammerInf_ne_zero_of_norm_lt_one hn hq
+    have htail' : qPochhammerInf (c * q ^ n / a) q ≠ 0 := by
+      simpa only [show c * q ^ n / a = c / a * q ^ n by ring] using htail
+    have hctail : qPochhammerInf (c * q ^ n) q ≠ 0 :=
+      qPochhammerInf_shift_ne_zero hq (fun k he => hc c (by simp) k
+        (sub_eq_zero.mp he).symm) n
+    dsimp only [F, G]
+    rw [qGauss_newton_eq_phi (pow_ne_zero n hq0)]
+    have hchu := q_chu_vandermonde_first ha hq0 hq n
+      (show qDenominatorRegularThrough [c] q n by
+        simpa only [qDenominatorRegularThrough, qPochhammerList, List.map_singleton,
+          List.prod_singleton] using hcn)
+    rw [zpow_neg, zpow_natCast] at hchu
+    rw [hchu, qPochhammerInf_mul_qPochhammer (a := c / a) hq n,
+      qPochhammerInf_mul_qPochhammer (a := c) hq n]
+    field_simp [htail']
+  have hpunct : Tendsto (fun n : ℕ => q ^ n) atTop (𝓝[≠] (0 : ℂ)) :=
+    tendsto_nhdsWithin_iff.mpr ⟨hpow, Eventually.of_forall fun n => by
+      simpa using pow_ne_zero n hq0⟩
+  have heq := hF.eqOn_of_preconnected_of_frequently_eq hG
+    (convex_ball (0 : ℂ) ‖c / a‖⁻¹).isPreconnected (by simpa using hR)
+    (hpunct.frequently hev.frequently)
+  have hw : b⁻¹ ∈ Metric.ball 0 ‖c / a‖⁻¹ := by
+    simp only [Metric.mem_ball, dist_zero_right, norm_inv, norm_div, norm_mul] at hz ⊢
+    rw [inv_lt_inv₀ (norm_pos_iff.mpr hb) (div_pos (norm_pos_iff.mpr hc0)
+      (norm_pos_iff.mpr ha))]
+    exact (div_lt_iff₀ (norm_pos_iff.mpr ha)).mpr (by simpa [mul_comm] using hz)
+  have h := heq hw
+  dsimp only [F, G] at h
+  rw [qGauss_newton_eq_phi (inv_ne_zero hb), inv_inv] at h
+  simpa only [qPochhammerListInf, List.map_cons, List.map_nil, List.prod_cons,
+    List.prod_nil, mul_one, show c * b⁻¹ = c / b by ring,
+    show c / b / a = c / (a * b) by ring,
+    show c / a * b⁻¹ = c / (a * b) by ring] using h
+
+/-- At base zero, a nonempty finite shifted factorial retains only its first factor. -/
+private lemma qGauss_poch_zero_base (a : ℂ) (n : ℕ) : qPochhammer a 0 (n + 1) = 1 - a := by
+  rw [qPochhammer_eq_prod, prod_range_succ']
+  simp
+
+/-- At base zero, q-Gauss reduces to summing a geometric tail. -/
+private lemma qGauss_zero_base {a b c : ℂ} (ha : a ≠ 0) (hb : b ≠ 0)
+    (hz : ‖c‖ < ‖a * b‖) (hc : qDenominatorRegular [c] 0) :
+    qPhi [a,b] [c] 0 (c/(a*b)) =
+      qPochhammerListInf [c/a,c/b] 0 / qPochhammerListInf [c,c/(a*b)] 0 := by
+  let z := c / (a * b)
+  have hz' : ‖z‖ < 1 := by
+    dsimp [z]
+    rw [norm_div, div_lt_one₀ (norm_pos_iff.mpr (mul_ne_zero ha hb))]
+    exact hz
+  have hc1 : 1 - c ≠ 0 := by
+    intro he
+    exact hc c (by simp) 0 (by simpa using (sub_eq_zero.mp he).symm)
+  have hz1 : 1 - z ≠ 0 := one_sub_ne_zero_of_norm_lt_one hz'
+  let A := (1 - a) * (1 - b) / (1 - c)
+  have htail : HasSum (fun n : ℕ => qPhiTerm [a,b] [c] 0 z (n + 1))
+      (A * z * (1 - z)⁻¹) := by
+    convert (hasSum_geometric_of_norm_lt_one hz').mul_left (A * z) using 1
+    ext n
+    rw [qaR4_phi21_term]
+    simp only [qGauss_poch_zero_base, sub_zero, mul_one, pow_succ]
+    dsimp [A]
+    ring
+  have hsum := htail.zero_add
+  have hzero : qPhiTerm [a,b] [c] 0 z 0 = 1 := by simp [qaR4_phi21_term]
+  rw [hzero] at hsum
+  change (∑' n : ℕ, qPhiTerm [a,b] [c] 0 z n) = _
+  rw [hsum.tsum_eq]
+  simp only [qPochhammerListInf, List.map_cons, List.map_nil, List.prod_cons,
+    List.prod_nil, mul_one, DLMF.QSeries.TripleProduct.qPochhammerInf_zero_right]
+  change 1 + A * z * (1 - z)⁻¹ = (1 - c / a) * (1 - c / b) / ((1 - c) * (1 - z))
+  dsimp only [A]
+  field_simp
+  dsimp only [z]
+  field_simp
+  ring
+
+/-- The q-Gauss sum `2φ1(a,b;c;q,c/(ab)) = (c/a,c/b;q)_∞/(c,c/(ab);q)_∞` for `|c| < |ab|` (DLMF
+17.6.E1). -/
+@[dlmf 17.6.E1]
+theorem q_gauss {a b c q : ℂ} (hq : ‖q‖<1) (hz : ‖c‖<‖a*b‖)
+    (hc : qDenominatorRegular [c] q) :
+    qPhi [a,b] [c] q (c/(a*b))=qPochhammerListInf [c/a,c/b] q/qPochhammerListInf [c,c/(a*b)] q := by
+  have hab : a * b ≠ 0 := norm_pos_iff.mp ((norm_nonneg c).trans_lt hz)
+  have ha := left_ne_zero_of_mul hab
+  have hb := right_ne_zero_of_mul hab
+  by_cases hc0 : c = 0
+  · subst hc0
+    simp [qPhi_zero, qPochhammerListInf]
+  by_cases hq0 : q = 0
+  · subst hq0
+    exact qGauss_zero_base ha hb hz hc
+  exact qGauss_nonzero hq0 hq ha hb hc0 hz hc
+
 
 /-- The cancelled product form retains b=±q^(-m) whenever the left series is regular. -/
 @[dlmf 17.6.E4]

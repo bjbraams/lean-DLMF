@@ -1,0 +1,2004 @@
+{
+  "format": 1,
+  "date": "2026-10-29",
+  "round": "later-chapter-identities-and-series",
+  "baseCommit": "b7d2826c0f07c98ce4f1a459b74e0dcf55e8dea3",
+  "baseline": {
+    "previousRound": "ProofRound20261029d.json",
+    "directAdmissions": 1664
+  },
+  "admissions": {
+    "before": 1664,
+    "after": 1649,
+    "removed": 15,
+    "filesWithAdmissions": 298,
+    "byArea": {
+      "BernoulliEuler": {
+        "before": 25,
+        "after": 24
+      },
+      "Combinatorics": {
+        "before": 37,
+        "after": 36
+      },
+      "Confluent": {
+        "before": 9,
+        "after": 8
+      },
+      "EllipticIntegrals": {
+        "before": 187,
+        "after": 186
+      },
+      "QHypergeometric": {
+        "before": 101,
+        "after": 95
+      },
+      "Struve": {
+        "before": 12,
+        "after": 11
+      },
+      "Weierstrass": {
+        "before": 40,
+        "after": 36
+      }
+    }
+  },
+  "completed": [
+    {
+      "name": "DLMF.BernoulliEuler.bernoulliPolyB_eq_mellinBarnes",
+      "file": "DLMF/BernoulliEuler/Integrals.lean",
+      "line": 914,
+      "proofLines": 13,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "**Mellin–Barnes integral, DLMF 24.7.11**: for `0 < c < 1` and complex `x`,\n`Bₙ(x) = (1/(2πi)) ∫_{-c-i∞}^{-c+i∞} (x+t)ⁿ (π/sin(πt))² dt`, written along `t = -c + is`."
+    },
+    {
+      "name": "DLMF.Combinatorics.hasSum_narayana",
+      "file": "DLMF/Combinatorics/LatticePaths.lean",
+      "line": 975,
+      "proofLines": 4,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 26.6.8: `∑_{n,k=1}^∞ N(n, k) xⁿ y^k = (1 - x - xy - √((1-x-xy)² - 4x²y))/(2x)`, for\nsufficiently small real `x ≠ 0` and `y`."
+    },
+    {
+      "name": "DLMF.Confluent.whittakerM_besselJ_series",
+      "file": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "line": 1019,
+      "proofLines": 15,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The Whittaker–Buchholz expansion of `M_{κ,μ}` in Bessel functions of consecutive orders\n(DLMF 13.24.2). The generating-function recurrence determines the sum through the normalized\nWhittaker equation, and the principal powers cancel term by term."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRC_duplication",
+      "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+      "line": 632,
+      "proofLines": 30,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.26.25: `R_C(x, y) = 2 R_C(x + λ, y + λ)`, `λ = y + 2√x√y`, for `x ≥ 0`, `y > 0`."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qPochhammer_root_ratio",
+      "file": "DLMF/QHypergeometric/Basic.lean",
+      "line": 468,
+      "proofLines": 19,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The `k`-th root analogue of the very-well-poised factor, with `ω` a primitive `k`-th root of\nunity (DLMF 17.2.E23)."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qPhi_coefficient_classical_limit",
+      "file": "DLMF/QHypergeometric/Basic.lean",
+      "line": 1082,
+      "proofLines": 2,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Formal coefficient limit in 17.4.2, with its integer phase/scaling exponent."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qPhi_finite_classical_limit",
+      "file": "DLMF/QHypergeometric/Basic.lean",
+      "line": 1101,
+      "proofLines": 5,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The finite limit retains bottom poles that occur only after the final retained term."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qPsi_coefficient_classical_limit",
+      "file": "DLMF/QHypergeometric/Basic.lean",
+      "line": 1143,
+      "proofLines": 56,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The bilateral limit is formal/coefficientwise; its analytic annulus collapses as q→1."
+    },
+    {
+      "name": "DLMF.QHypergeometric.one_phi_zero_common_zeros_removable",
+      "file": "DLMF/QHypergeometric/BasicSummations.lean",
+      "line": 511,
+      "proofLines": 24,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Common product zeros have a removable germ, rather than the quotient totalization 0/0."
+    },
+    {
+      "name": "DLMF.QHypergeometric.q_gauss",
+      "file": "DLMF/QHypergeometric/BasicSummations.lean",
+      "line": 803,
+      "proofLines": 11,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The q-Gauss sum `2φ1(a,b;c;q,c/(ab)) = (c/a,c/b;q)_∞/(c,c/(ab);q)_∞` for `|c| < |ab|` (DLMF\n17.6.E1)."
+    },
+    {
+      "name": "DLMF.Struve.lommelCapital_parameter_limit",
+      "file": "DLMF/Struve/Lommel.lean",
+      "line": 1110,
+      "proofLines": 3,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Existence of the limiting definition at exceptional parameters."
+    },
+    {
+      "name": "DLMF.Weierstrass.HalfPeriods.weierstrassZeta_fourier",
+      "file": "DLMF/Weierstrass/Series.lean",
+      "line": 51,
+      "proofLines": 17,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 23.8.2 (with the corrected condition `|ℑ(z/ω₁)| < 2ℑτ`), `z ∉ 𝕃`:\n`ζ(z) - η₁z/ω₁ - (π/(2ω₁))cot(πz/(2ω₁)) = (2π/ω₁) ∑_{n≥1} q^{2n}/(1 - q^{2n}) sin(nπz/ω₁)`.\nCorrected from the printed DLMF formula: the absolute value on `ℑ(z/ω₁)` is missing in the\nprinted condition, as in 23.8.1; without it the series diverges."
+    },
+    {
+      "name": "DLMF.Weierstrass.HalfPeriods.weierstrassP_fourier",
+      "file": "DLMF/Weierstrass/Series.lean",
+      "line": 125,
+      "proofLines": 51,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 23.8.1 (with the corrected condition `|ℑ(z/ω₁)| < 2ℑτ`), `q = e^{iπω₃/ω₁}`, `z ∉ 𝕃`:\n`℘(z) + η₁/ω₁ - (π²/(4ω₁²))csc²(πz/(2ω₁)) = -(2π²/ω₁²) ∑_{n≥1} nq^{2n}/(1 - q^{2n}) cos(nπz/ω₁)`.\nCorrected from the printed DLMF formula: the printed condition lacks the absolute value on\n`ℑ(z/ω₁)`; for `ℑ(z/ω₁) ≤ -2ℑτ` the series diverges (terms `10⁵, 10¹¹, 10²¹` at\n`n = 10, 20, 40`)."
+    },
+    {
+      "name": "DLMF.Weierstrass.HalfPeriods.weierstrassSigma_sin_prod",
+      "file": "DLMF/Weierstrass/Series.lean",
+      "line": 217,
+      "proofLines": 21,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 23.8.7: `σ(z) = (2ω₁/π) exp(η₁z²/(2ω₁)) sin(πz/(2ω₁))\n∏_{n≥1} sin(π(2nω₃ + z)/(2ω₁)) sin(π(2nω₃ - z)/(2ω₁))/sin²(πnω₃/ω₁)`, `z ∈ ℂ`."
+    },
+    {
+      "name": "DLMF.Weierstrass.HalfPeriods.weierstrassSigma_prod",
+      "file": "DLMF/Weierstrass/Series.lean",
+      "line": 253,
+      "proofLines": 35,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 23.8.6: `σ(z) = (2ω₁/π) exp(η₁z²/(2ω₁)) sin(πz/(2ω₁))\n∏_{n≥1} (1 - 2q^{2n}cos(πz/ω₁) + q^{4n})/(1 - q^{2n})²`, `z ∈ ℂ`.\nConvergence and the product identity are stated separately so zeros of the sine prefactor\nare retained. Dividing by that prefactor would incorrectly assert product value zero at `z=0`."
+    }
+  ],
+  "downstreamFreedFromAdmissions": [],
+  "newHelpers": [
+    {
+      "name": "DLMF.BernoulliEuler.bernoulli_mellinBarnes_sin_ne_zero",
+      "file": "DLMF/BernoulliEuler/Integrals.lean",
+      "line": 610,
+      "proofLines": 9,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The sine denominator of the Bernoulli Mellin–Barnes kernel has no zeros in the strip\n`-1 < Re z < 0`."
+    },
+    {
+      "name": "DLMF.BernoulliEuler.bernoulli_mellinBarnes_differentiable",
+      "file": "DLMF/BernoulliEuler/Integrals.lean",
+      "line": 622,
+      "proofLines": 3,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The polynomial Mellin–Barnes kernel is holomorphic between its two neighboring pole lines."
+    },
+    {
+      "name": "DLMF.BernoulliEuler.bernoulli_mellinBarnes_sin_strip_lower",
+      "file": "DLMF/BernoulliEuler/Integrals.lean",
+      "line": 629,
+      "proofLines": 7,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The real sine factor stays uniformly away from zero on a closed subinterval of `(-1, 0)`."
+    },
+    {
+      "name": "DLMF.BernoulliEuler.bernoulli_mellinBarnes_tail_bound",
+      "file": "DLMF/BernoulliEuler/Integrals.lean",
+      "line": 642,
+      "proofLines": 51,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "On a closed substrip of `-1 < Re z < 0`, the polynomial Mellin–Barnes kernel has an\nintegrable bound of order `(1 + |Im z|)⁻²`. Exponential sine growth absorbs any polynomial\ndegree."
+    },
+    {
+      "name": "DLMF.BernoulliEuler.integrable_bernoulliPolyB_mellinBarnes",
+      "file": "DLMF/BernoulliEuler/Integrals.lean",
+      "line": 701,
+      "proofLines": 16,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The Bernoulli polynomial Mellin–Barnes integrand is integrable on every line `Re z = -c`\nwith `0 < c < 1`."
+    },
+    {
+      "name": "DLMF.BernoulliEuler.bernoulli_mellinBarnes_line_eq",
+      "file": "DLMF/BernoulliEuler/Integrals.lean",
+      "line": 722,
+      "proofLines": 13,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Moving the vertical line within `-1 < Re z < 0` preserves the polynomial Mellin–Barnes\nintegral, by Cauchy’s theorem and uniform decay at infinity."
+    },
+    {
+      "name": "DLMF.BernoulliEuler.bernoulli_mellinBarnes_central_sin",
+      "file": "DLMF/BernoulliEuler/Integrals.lean",
+      "line": 742,
+      "proofLines": 5,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "On the central line of the strip, the sine denominator becomes the real hyperbolic cosine."
+    },
+    {
+      "name": "DLMF.BernoulliEuler.bernoulli_mellinBarnes_integral_sech_sq",
+      "file": "DLMF/BernoulliEuler/Integrals.lean",
+      "line": 750,
+      "proofLines": 30,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The zeroth half-line moment of `sech²(πt)` follows from the logistic primitive."
+    },
+    {
+      "name": "DLMF.BernoulliEuler.bernoulli_mellinBarnes_integrable_moment",
+      "file": "DLMF/BernoulliEuler/Integrals.lean",
+      "line": 783,
+      "proofLines": 11,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Every polynomial moment of the central `sech²` kernel is integrable."
+    },
+    {
+      "name": "DLMF.BernoulliEuler.bernoulli_mellinBarnes_even_moment",
+      "file": "DLMF/BernoulliEuler/Integrals.lean",
+      "line": 797,
+      "proofLines": 7,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "An even moment of the real `sech²` kernel is twice its integral over the positive half-line."
+    },
+    {
+      "name": "DLMF.BernoulliEuler.bernoulli_mellinBarnes_moment_ofReal",
+      "file": "DLMF/BernoulliEuler/Integrals.lean",
+      "line": 809,
+      "proofLines": 7,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A moment along the imaginary axis is the corresponding real `sech²` moment multiplied by\nthe appropriate power of `I`."
+    },
+    {
+      "name": "DLMF.BernoulliEuler.bernoulli_mellinBarnes_moment_two_mul",
+      "file": "DLMF/BernoulliEuler/Integrals.lean",
+      "line": 821,
+      "proofLines": 41,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The normalized even moments of the central `sech²` kernel evaluate to the Bernoulli\npolynomial values at `1/2`, by the known positive half-line integrals."
+    },
+    {
+      "name": "DLMF.BernoulliEuler.bernoulli_mellinBarnes_moment_two_mul_add_one",
+      "file": "DLMF/BernoulliEuler/Integrals.lean",
+      "line": 867,
+      "proofLines": 9,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Odd moments of the central `sech²` kernel vanish by reflection of the real integration\nvariable."
+    },
+    {
+      "name": "DLMF.BernoulliEuler.bernoulli_mellinBarnes_moment",
+      "file": "DLMF/BernoulliEuler/Integrals.lean",
+      "line": 880,
+      "proofLines": 6,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The normalized moments of the central `sech²` kernel are the Bernoulli polynomial values\nat `1/2`; odd moments vanish by symmetry."
+    },
+    {
+      "name": "DLMF.BernoulliEuler.bernoulli_mellinBarnes_central_polynomial",
+      "file": "DLMF/BernoulliEuler/Integrals.lean",
+      "line": 891,
+      "proofLines": 18,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Expanding a polynomial against the central `sech²` kernel gives the Bernoulli addition\nformula centered at `1/2`."
+    },
+    {
+      "name": "DLMF.Combinatorics.narayana_choose_catalan_term",
+      "file": "DLMF/Combinatorics/LatticePaths.lean",
+      "line": 712,
+      "proofLines": 25,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A Catalan convolution term becomes a product of binomial coefficients after multiplication by\n`k + 1`. This is the termwise identity used in the Vandermonde sum below."
+    },
+    {
+      "name": "DLMF.Combinatorics.narayana_eq_sum_catalan",
+      "file": "DLMF/Combinatorics/LatticePaths.lean",
+      "line": 742,
+      "proofLines": 27,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Narayana numbers are a binomial transform of the Catalan numbers, with an additional binomial\ncoefficient recording the number of peaks."
+    },
+    {
+      "name": "DLMF.Combinatorics.narayana_polynomial_eq_sum_catalan",
+      "file": "DLMF/Combinatorics/LatticePaths.lean",
+      "line": 773,
+      "proofLines": 33,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The Narayana row polynomial is the Catalan transform of the powers of `1 + X`."
+    },
+    {
+      "name": "DLMF.Combinatorics.sum_narayana_mul_pow",
+      "file": "DLMF/Combinatorics/LatticePaths.lean",
+      "line": 811,
+      "proofLines": 9,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The polynomial enumerating a row of the Narayana triangle is a weighted Catalan transform."
+    },
+    {
+      "name": "DLMF.Combinatorics.hasSum_narayana_row",
+      "file": "DLMF/Combinatorics/LatticePaths.lean",
+      "line": 826,
+      "proofLines": 9,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Each row of the bivariate Narayana series has finite support and can be summed by the\nweighted Catalan transform."
+    },
+    {
+      "name": "DLMF.Combinatorics.summable_narayana_mul_pow",
+      "file": "DLMF/Combinatorics/LatticePaths.lean",
+      "line": 841,
+      "proofLines": 21,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The bivariate Narayana series converges absolutely when both real arguments have absolute\nvalue less than `1/8`."
+    },
+    {
+      "name": "DLMF.Combinatorics.narayana_transform_bounds",
+      "file": "DLMF/Combinatorics/LatticePaths.lean",
+      "line": 867,
+      "proofLines": 26,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A small square around the origin maps inside the disk of convergence of the Catalan series,\nboth for the signed argument and for the absolute convergence majorant."
+    },
+    {
+      "name": "DLMF.Combinatorics.narayana_transform_value",
+      "file": "DLMF/Combinatorics/LatticePaths.lean",
+      "line": 899,
+      "proofLines": 18,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The Catalan generating function simplifies to the Narayana radical formula when the\ngeometric denominator is positive."
+    },
+    {
+      "name": "DLMF.Combinatorics.hasSum_narayana_of_abs_lt",
+      "file": "DLMF/Combinatorics/LatticePaths.lean",
+      "line": 924,
+      "proofLines": 45,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The bivariate Narayana generating function on the explicit domain `|x|, |y| < 1/8`, with\n`x ≠ 0`. The square root is the branch continuous from the origin."
+    },
+    {
+      "name": "DLMF.Confluent.buchholzC_eq",
+      "file": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "line": 612,
+      "proofLines": 8,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The normalized Buchholz coefficient is the original coefficient divided by `2^s`."
+    },
+    {
+      "name": "DLMF.Confluent.buchholz_0F1_uniform_bound",
+      "file": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "line": 623,
+      "proofLines": 16,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The shifted regularized `₀F₁` functions have a factorial bound on each closed disc."
+    },
+    {
+      "name": "DLMF.Confluent.buchholzC_uniform_bound",
+      "file": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "line": 643,
+      "proofLines": 9,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The factors `z^s` cancel the Cauchy growth of the Taylor coefficients."
+    },
+    {
+      "name": "DLMF.Confluent.buchholzA_uniform_bound",
+      "file": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "line": 656,
+      "proofLines": 30,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "An exponential bound also absorbs the factor `s` in the telescoping coefficient."
+    },
+    {
+      "name": "DLMF.Confluent.buchholzTerm_differentiable",
+      "file": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "line": 694,
+      "proofLines": 5,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Every Buchholz summand is entire in its argument."
+    },
+    {
+      "name": "DLMF.Confluent.buchholzTerm_uniform_bound",
+      "file": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "line": 702,
+      "proofLines": 12,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "On every disc the Buchholz summands admit a common summable majorant."
+    },
+    {
+      "name": "DLMF.Confluent.buchholz_boundary_tendsto",
+      "file": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "line": 718,
+      "proofLines": 16,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The boundary term of the Buchholz telescoping relation tends to zero."
+    },
+    {
+      "name": "DLMF.Confluent.buchholzTerm_deriv",
+      "file": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "line": 738,
+      "proofLines": 8,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Differentiating a normalized Buchholz summand raises the `₀F₁` order by one."
+    },
+    {
+      "name": "DLMF.Confluent.buchholzTerm_second",
+      "file": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "line": 751,
+      "proofLines": 14,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The second derivative of a Buchholz summand involves only three adjacent `₀F₁` orders."
+    },
+    {
+      "name": "DLMF.Confluent.buchholzTerm_ode",
+      "file": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "line": 772,
+      "proofLines": 13,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Applying the normalized Whittaker operator to one Buchholz term gives a telescoping\ndifference of adjacent orders."
+    },
+    {
+      "name": "DLMF.Confluent.buchholzA_zero",
+      "file": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "line": 791,
+      "proofLines": 2,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The initial coefficient in the Buchholz telescoping difference vanishes."
+    },
+    {
+      "name": "DLMF.Confluent.buchholz_partial_ode",
+      "file": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "line": 795,
+      "proofLines": 15,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The partial sums satisfy the normalized Whittaker equation up to a single boundary term."
+    },
+    {
+      "name": "DLMF.Confluent.buchholz_sum_differentiable",
+      "file": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "line": 816,
+      "proofLines": 7,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The Buchholz series defines an entire function."
+    },
+    {
+      "name": "DLMF.Confluent.buchholz_sum_weighted_ode",
+      "file": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "line": 827,
+      "proofLines": 30,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Uniform convergence on a disc is preserved through two complex differentiations, so the\ntelescoping differential equation passes to the full Buchholz sum."
+    },
+    {
+      "name": "DLMF.Confluent.buchholz_sum_ode",
+      "file": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "line": 862,
+      "proofLines": 11,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The removable equation at the origin follows by continuity from the punctured plane."
+    },
+    {
+      "name": "DLMF.Confluent.buchholz_normalized_ode_jet",
+      "file": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "line": 878,
+      "proofLines": 22,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Taylor coefficients of an entire solution satisfy a two-step recurrence at the origin."
+    },
+    {
+      "name": "DLMF.Confluent.buchholz_normalized_ode_zero",
+      "file": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "line": 907,
+      "proofLines": 20,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "An entire solution of the normalized Whittaker equation vanishes when its initial value\nvanishes and the indicial parameter avoids the nonpositive integers."
+    },
+    {
+      "name": "DLMF.Confluent.buchholz_normalized_confluent_ode",
+      "file": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "line": 932,
+      "proofLines": 35,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Removing the elementary power prefactor from Whittaker M gives the normalized equation."
+    },
+    {
+      "name": "DLMF.Confluent.buchholz_sum_eq_normalized",
+      "file": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "line": 973,
+      "proofLines": 39,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The entire Buchholz sum and normalized Whittaker M have the same initial value and satisfy\nthe same differential equation, so their Taylor series agree."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qPhi_zero",
+      "file": "DLMF/QHypergeometric/Basic.lean",
+      "line": 86,
+      "proofLines": 6,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "At zero, every unilateral basic hypergeometric series consists only of its constant term."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qPochhammer_root_product",
+      "file": "DLMF/QHypergeometric/Basic.lean",
+      "line": 445,
+      "proofLines": 5,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Evaluating Mathlib’s root-of-unity factorization at one gives the finite product."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qPochhammer_prod_roots",
+      "file": "DLMF/QHypergeometric/Basic.lean",
+      "line": 454,
+      "proofLines": 9,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Multiplying shifted factorials over all root-of-unity twists raises both parameter and base."
+    },
+    {
+      "name": "DLMF.QHypergeometric.tendsto_cpow_increment",
+      "file": "DLMF/QHypergeometric/Basic.lean",
+      "line": 937,
+      "proofLines": 15,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The normalized principal-power increment tends to its exponent as the real base approaches one."
+    },
+    {
+      "name": "DLMF.QHypergeometric.tendsto_qPochhammer_normalized",
+      "file": "DLMF/QHypergeometric/Basic.lean",
+      "line": 955,
+      "proofLines": 13,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A normalized finite q-Pochhammer symbol tends to the ordinary rising factorial."
+    },
+    {
+      "name": "DLMF.QHypergeometric.tendsto_qPochhammerList_normalized",
+      "file": "DLMF/QHypergeometric/Basic.lean",
+      "line": 972,
+      "proofLines": 6,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The normalized product limit retains the order and multiplicity of upper or lower parameters."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qPochhammerList_normalized_eq",
+      "file": "DLMF/QHypergeometric/Basic.lean",
+      "line": 983,
+      "proofLines": 7,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Normalizing each shifted factorial divides the product by the corresponding power."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qPhi_scaling_power",
+      "file": "DLMF/QHypergeometric/Basic.lean",
+      "line": 994,
+      "proofLines": 6,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The parameter-count power cancels the singular scaling in a unilateral term."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qPhi_scaling_phase",
+      "file": "DLMF/QHypergeometric/Basic.lean",
+      "line": 1003,
+      "proofLines": 11,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The signs in the phase and classical argument scaling cancel for every integer exponent."
+    },
+    {
+      "name": "DLMF.QHypergeometric.genPoch_list_ne_zero",
+      "file": "DLMF/QHypergeometric/Basic.lean",
+      "line": 1020,
+      "proofLines": 6,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A finite ordinary denominator product is nonzero when its retained factors avoid poles."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qPhiTerm_classical_limit",
+      "file": "DLMF/QHypergeometric/Basic.lean",
+      "line": 1030,
+      "proofLines": 46,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Classical convergence of a single term needs regularity only through that term."
+    },
+    {
+      "name": "DLMF.QHypergeometric.tendsto_qPochhammerList_ratio",
+      "file": "DLMF/QHypergeometric/Basic.lean",
+      "line": 1113,
+      "proofLines": 16,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Equal-length finite products have a classical ratio limit with no residual power of one minus q."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qPochhammerListInt_neg",
+      "file": "DLMF/QHypergeometric/Basic.lean",
+      "line": 1136,
+      "proofLines": 3,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A negative-index product is the reciprocal of the appropriately shifted finite product."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qPochhammerInf_factor_at_zero",
+      "file": "DLMF/QHypergeometric/BasicSummations.lean",
+      "line": 466,
+      "proofLines": 40,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Removing the vanishing factor of a q-product leaves an analytic unit."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qGauss_coefficient_bound",
+      "file": "DLMF/QHypergeometric/BasicSummations.lean",
+      "line": 625,
+      "proofLines": 10,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The phase-free coefficients are bounded because the finite factorials have nonzero limiting denominators."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qGauss_newton_product",
+      "file": "DLMF/QHypergeometric/BasicSummations.lean",
+      "line": 640,
+      "proofLines": 6,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Reciprocal upper parameters turn the finite shifted factorial into a Newton polynomial."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qGauss_newton_eq_phi",
+      "file": "DLMF/QHypergeometric/BasicSummations.lean",
+      "line": 649,
+      "proofLines": 7,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The Newton series equals two-phi-one at every nonzero reciprocal upper parameter."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qGauss_analytic_newton",
+      "file": "DLMF/QHypergeometric/BasicSummations.lean",
+      "line": 661,
+      "proofLines": 6,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The reciprocal-parameter Newton series is analytic throughout its convergence disc."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qGauss_analytic_product",
+      "file": "DLMF/QHypergeometric/BasicSummations.lean",
+      "line": 673,
+      "proofLines": 17,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The q-Gauss product quotient is analytic on the same reciprocal-parameter disc."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qGauss_nonzero",
+      "file": "DLMF/QHypergeometric/BasicSummations.lean",
+      "line": 696,
+      "proofLines": 58,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Terminating q-Chu values accumulate at zero and determine the analytic q-Gauss identity."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qGauss_poch_zero_base",
+      "file": "DLMF/QHypergeometric/BasicSummations.lean",
+      "line": 760,
+      "proofLines": 3,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "At base zero, a nonempty finite shifted factorial retains only its first factor."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qGauss_zero_base",
+      "file": "DLMF/QHypergeometric/BasicSummations.lean",
+      "line": 765,
+      "proofLines": 32,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "At base zero, q-Gauss reduces to summing a geometric tail."
+    },
+    {
+      "name": "DLMF.Struve.lommelRegular_eq_numerator",
+      "file": "DLMF/Struve/Lommel.lean",
+      "line": 794,
+      "proofLines": 17,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The regular capital Lommel function is a product of Gamma factors and its entire numerator."
+    },
+    {
+      "name": "DLMF.Struve.lommelNumerator_neg_nat_left",
+      "file": "DLMF/Struve/Lommel.lean",
+      "line": 815,
+      "proofLines": 38,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The first half-parameter hyperplane cancels a Gamma pole in the capital Lommel function."
+    },
+    {
+      "name": "DLMF.Struve.lommelNumerator_neg_nat_right",
+      "file": "DLMF/Struve/Lommel.lean",
+      "line": 856,
+      "proofLines": 2,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The second half-parameter hyperplane cancels a Gamma pole as well."
+    },
+    {
+      "name": "DLMF.Struve.lommelNumerator_differentiable",
+      "file": "DLMF/Struve/Lommel.lean",
+      "line": 861,
+      "proofLines": 16,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The numerator is jointly entire in its two half-parameters."
+    },
+    {
+      "name": "DLMF.Struve.lommel_gamma_backward",
+      "file": "DLMF/Struve/Lommel.lean",
+      "line": 880,
+      "proofLines": 9,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The pole-free reciprocal-Gamma shift also gives a totalized backward shift."
+    },
+    {
+      "name": "DLMF.Struve.lommel_gamma_affine_pole",
+      "file": "DLMF/Struve/Lommel.lean",
+      "line": 892,
+      "proofLines": 32,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A Gamma pole in an affine half-parameter has one explicit linear denominator."
+    },
+    {
+      "name": "DLMF.Struve.lommel_eventually_affine_regular",
+      "file": "DLMF/Struve/Lommel.lean",
+      "line": 929,
+      "proofLines": 17,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Every punctured affine half-parameter neighborhood consists eventually of Gamma-regular\npoints, including when the center itself is a pole."
+    },
+    {
+      "name": "DLMF.Struve.lommelNumerator_diagonal_deriv_zero",
+      "file": "DLMF/Struve/Lommel.lean",
+      "line": 951,
+      "proofLines": 29,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "At an intersection of the polar hyperplanes, the numerator vanishes to second order along\nthe degree parameter. The two partial derivatives vanish separately."
+    },
+    {
+      "name": "DLMF.Struve.lommel_tendsto_div_sub",
+      "file": "DLMF/Struve/Lommel.lean",
+      "line": 984,
+      "proofLines": 10,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A simple zero cancels one linear denominator in a punctured limit."
+    },
+    {
+      "name": "DLMF.Struve.lommel_exists_tendsto_div_sub_sq",
+      "file": "DLMF/Struve/Lommel.lean",
+      "line": 999,
+      "proofLines": 9,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A double zero cancels two linear denominators; the second divided difference supplies the\nfinite limiting value."
+    },
+    {
+      "name": "DLMF.Struve.lommelCapital_exists_parameter_limit",
+      "file": "DLMF/Struve/Lommel.lean",
+      "line": 1014,
+      "proofLines": 93,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The one- or two-pole numerator cancellations give a finite parameter limit for every\ncapital Lommel function on the slit plane."
+    },
+    {
+      "name": "DLMF.Weierstrass.HalfPeriods.weierstrassZeta_fourier_bound",
+      "file": "DLMF/Weierstrass/Series.lean",
+      "line": 79,
+      "proofLines": 23,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Compact subsets of the convergence strip admit a common summable bound for the zeta Fourier terms."
+    },
+    {
+      "name": "DLMF.Weierstrass.HalfPeriods.sin_fourierArgument_ne_zero",
+      "file": "DLMF/Weierstrass/Series.lean",
+      "line": 108,
+      "proofLines": 10,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A zero of the sine prefactor would lie at a real lattice point."
+    },
+    {
+      "name": "Complex.norm_prod_sub_pow_le",
+      "file": "DLMFMathlib/Analysis/Complex/GeometricNewtonSeries.lean",
+      "line": 30,
+      "proofLines": 21,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A geometric Newton polynomial is bounded on a closed disc by its radius to the\npolynomial degree, times a constant independent of the degree."
+    },
+    {
+      "name": "Complex.summable_geometricNewton",
+      "file": "DLMFMathlib/Analysis/Complex/GeometricNewtonSeries.lean",
+      "line": 57,
+      "proofLines": 16,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Geometrically bounded Newton-series coefficients give a summable series at\nevery point strictly inside the reciprocal growth radius."
+    },
+    {
+      "name": "Complex.analyticOnNhd_tsum_geometricNewton",
+      "file": "DLMFMathlib/Analysis/Complex/GeometricNewtonSeries.lean",
+      "line": 79,
+      "proofLines": 23,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A geometrically bounded series in a geometric Newton basis is analytic on the\nopen disc given by the reciprocal coefficient growth rate."
+    }
+  ],
+  "movedDeclarations": [
+    {
+      "name": "whittakerBesselGenerating",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/BuchholzDefinitions.lean",
+      "private": false
+    },
+    {
+      "name": "whittakerBesselCoeff",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/BuchholzDefinitions.lean",
+      "private": false
+    },
+    {
+      "name": "norm_dslope_sinh_sub_one_le",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": false
+    },
+    {
+      "name": "real_sinh_one_lt_two",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": false
+    },
+    {
+      "name": "whittakerBesselBase",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": true
+    },
+    {
+      "name": "whittakerBessel_core_analytic",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": true
+    },
+    {
+      "name": "whittakerBesselGenerating_eq_core",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": true
+    },
+    {
+      "name": "whittakerBesselGenerating_differentiableOn",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": false
+    },
+    {
+      "name": "whittakerBesselGenerating_joint_continuousAt",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": false
+    },
+    {
+      "name": "whittakerBessel_base_mem_slit",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": true
+    },
+    {
+      "name": "whittakerBesselGenerating_hasDerivAt_z",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": false
+    },
+    {
+      "name": "whittakerBesselGenerating_deriv_z",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": false
+    },
+    {
+      "name": "whittakerBesselGenerating_iteratedDeriv_two_z",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": false
+    },
+    {
+      "name": "whittakerBesselGenerating_hasDerivAt_t",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": false
+    },
+    {
+      "name": "whittakerGenD",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": true
+    },
+    {
+      "name": "whittakerTaylorD",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": true
+    },
+    {
+      "name": "whittakerGenD_t_diff",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": true
+    },
+    {
+      "name": "whittakerGenD_joint_cont",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": true
+    },
+    {
+      "name": "whittakerGenD_z_deriv",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": true
+    },
+    {
+      "name": "whittakerTaylorD_hasDerivAt",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": true
+    },
+    {
+      "name": "whittakerTaylorD_uniform_bound",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": true
+    },
+    {
+      "name": "whittakerGenD_analyticAt",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": true
+    },
+    {
+      "name": "whittakerGenD_zero",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": true
+    },
+    {
+      "name": "buchholz_iteratedDeriv_id_mul_zero",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": true
+    },
+    {
+      "name": "whittakerBesselGenerating_pde",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": true
+    },
+    {
+      "name": "whittakerTaylorD_recurrence",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": true
+    },
+    {
+      "name": "buchholzC",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": true
+    },
+    {
+      "name": "buchholzC1",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": true
+    },
+    {
+      "name": "buchholzC2",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": true
+    },
+    {
+      "name": "buchholzC_hasDerivAt",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": true
+    },
+    {
+      "name": "buchholzC1_hasDerivAt",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": true
+    },
+    {
+      "name": "buchholzC_weighted_deriv",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": true
+    },
+    {
+      "name": "buchholzC_weighted_second",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": true
+    },
+    {
+      "name": "buchholzA",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": true
+    },
+    {
+      "name": "buchholzA_eq",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": true
+    },
+    {
+      "name": "buchholzC_recurrence",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": true
+    },
+    {
+      "name": "whittakerBesselCoeff_hasSum",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": false
+    },
+    {
+      "name": "exists_norm_whittakerBesselCoeff_le",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": false
+    },
+    {
+      "name": "summable_whittakerBessel_regularized",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": false
+    },
+    {
+      "name": "whittakerBessel_term_eq_regularized",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": false
+    },
+    {
+      "name": "whittakerBessel_series_eq_regularized",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": false
+    },
+    {
+      "name": "summable_whittakerM_besselJ_series",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": false
+    },
+    {
+      "name": "whittakerM_besselJ_series",
+      "oldFile": "DLMF/Confluent/Series.lean",
+      "newFile": "DLMF/Confluent/WhittakerBuchholz.lean",
+      "private": false
+    }
+  ],
+  "validation": {
+    "fullBuild": "lake build > /tmp/DLMF-build.log 2>&1",
+    "buildJobs": 14674,
+    "strictChecks": [
+      {
+        "file": "DLMF.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_AlgebraicAnalytic_Calculus_Inequalities.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Calculus/OneVariable.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_AlgebraicAnalytic_Calculus_OneVariable.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Complex/Calculus.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_AlgebraicAnalytic_Complex_Calculus.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Complex/Functions.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_AlgebraicAnalytic_Complex_Functions.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Fourier/Series.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_AlgebraicAnalytic_Fourier_Series.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/ODE/Transformations.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_AlgebraicAnalytic_ODE_Transformations.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Spectral/Theory.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_AlgebraicAnalytic_Spectral_Theory.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Transforms/Fourier.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_AlgebraicAnalytic_Transforms_Fourier.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Transforms/Laplace.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_AlgebraicAnalytic_Transforms_Laplace.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Transforms/LaplaceTable.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_AlgebraicAnalytic_Transforms_LaplaceTable.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Transforms/MellinHilbertStieltjes.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_AlgebraicAnalytic_Transforms_MellinHilbertStieltjes.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_AlgebraicAnalytic_Transforms_Tables.lean.log"
+      },
+      {
+        "file": "DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_AsymptoticApproximations_Basics_OrderSymbols.lean.log"
+      },
+      {
+        "file": "DLMF/AsymptoticApproximations/Basics/Transcendental.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_AsymptoticApproximations_Basics_Transcendental.lean.log"
+      },
+      {
+        "file": "DLMF/AsymptoticApproximations/Distributional/FractionalIntegrals.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_AsymptoticApproximations_Distributional_FractionalIntegrals.lean.log"
+      },
+      {
+        "file": "DLMF/AsymptoticApproximations/Distributional/Stieltjes.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_AsymptoticApproximations_Distributional_Stieltjes.lean.log"
+      },
+      {
+        "file": "DLMF/AsymptoticApproximations/Integrals/Parts.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_AsymptoticApproximations_Integrals_Parts.lean.log"
+      },
+      {
+        "file": "DLMF/AsymptoticApproximations/Integrals/Watson.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_AsymptoticApproximations_Integrals_Watson.lean.log"
+      },
+      {
+        "file": "DLMF/AsymptoticApproximations/Mellin/BesselExample.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_AsymptoticApproximations_Mellin_BesselExample.lean.log"
+      },
+      {
+        "file": "DLMF/AsymptoticApproximations/Mellin/Transforms.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_AsymptoticApproximations_Mellin_Transforms.lean.log"
+      },
+      {
+        "file": "DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_AsymptoticApproximations_ODE_LiouvilleGreen.lean.log"
+      },
+      {
+        "file": "DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_AsymptoticApproximations_Sums_EulerMaclaurin.lean.log"
+      },
+      {
+        "file": "DLMF/AsymptoticApproximations/Sums/PowerSums.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_AsymptoticApproximations_Sums_PowerSums.lean.log"
+      },
+      {
+        "file": "DLMF/BernoulliEuler/Integrals.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_BernoulliEuler_Integrals.lean.log"
+      },
+      {
+        "file": "DLMF/Combinatorics/LatticePaths.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_Combinatorics_LatticePaths.lean.log"
+      },
+      {
+        "file": "DLMF/Confluent/BuchholzDefinitions.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_Confluent_BuchholzDefinitions.lean.log"
+      },
+      {
+        "file": "DLMF/Confluent/Series.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_Confluent_Series.lean.log"
+      },
+      {
+        "file": "DLMF/Confluent/WhittakerBuchholz.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_Confluent_WhittakerBuchholz.lean.log"
+      },
+      {
+        "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_EllipticIntegrals_SymmetricAddition.lean.log"
+      },
+      {
+        "file": "DLMF/Gamma/Asymptotics/Stirling.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_Gamma_Asymptotics_Stirling.lean.log"
+      },
+      {
+        "file": "DLMF/QHypergeometric/Basic.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_QHypergeometric_Basic.lean.log"
+      },
+      {
+        "file": "DLMF/QHypergeometric/BasicSummations.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_QHypergeometric_BasicSummations.lean.log"
+      },
+      {
+        "file": "DLMF/Struve/Lommel.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_Struve_Lommel.lean.log"
+      },
+      {
+        "file": "DLMF/Weierstrass/Series.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMF_Weierstrass_Series.lean.log"
+      },
+      {
+        "file": "DLMFMathlib.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMFMathlib.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Asymptotics/ExponentialGrowth.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMFMathlib_Analysis_Asymptotics_ExponentialGrowth.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Asymptotics/IntegralComparison.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMFMathlib_Analysis_Asymptotics_IntegralComparison.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Asymptotics/PowerSums.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMFMathlib_Analysis_Asymptotics_PowerSums.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Asymptotics/WatsonKernel.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMFMathlib_Analysis_Asymptotics_WatsonKernel.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Asymptotics/WatsonLog.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMFMathlib_Analysis_Asymptotics_WatsonLog.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Complex/GeometricNewtonSeries.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMFMathlib_Analysis_Complex_GeometricNewtonSeries.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Complex/ParametricHolomorphy.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMFMathlib_Analysis_Complex_ParametricHolomorphy.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Complex/Sector.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMFMathlib_Analysis_Complex_Sector.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Fourier/AddCircle.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMFMathlib_Analysis_Fourier_AddCircle.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Fourier/GaussianSeries.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMFMathlib_Analysis_Fourier_GaussianSeries.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Fourier/L1Inversion.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMFMathlib_Analysis_Fourier_L1Inversion.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Fourier/L2Compatibility.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMFMathlib_Analysis_Fourier_L2Compatibility.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Fourier/Pairing.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMFMathlib_Analysis_Fourier_Pairing.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/InnerProductSpace/CauchySchwarz.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMFMathlib_Analysis_InnerProductSpace_CauchySchwarz.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Integral/Frullani.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMFMathlib_Analysis_Integral_Frullani.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Integral/LaplaceRay.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMFMathlib_Analysis_Integral_LaplaceRay.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Integral/RepeatedIntegrationByParts.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMFMathlib_Analysis_Integral_RepeatedIntegrationByParts.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/MellinConvolution.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMFMathlib_Analysis_MellinConvolution.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/MellinParseval.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMFMathlib_Analysis_MellinParseval.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/SpecificLimits/Oscillation.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMFMathlib_Analysis_SpecificLimits_Oscillation.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/MeasureTheory/Function/L2Space.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMFMathlib_MeasureTheory_Function_L2Space.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/MeasureTheory/Integral/HalfLine.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMFMathlib_MeasureTheory_Integral_HalfLine.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/RingTheory/Binomial.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-DLMFMathlib_RingTheory_Binomial.lean.log"
+      },
+      {
+        "file": "Main.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029e/strict-Main.lean.log"
+      }
+    ],
+    "globalAxioms": {
+      "dependingOnAdmissions": 1754,
+      "nonstandard": [],
+      "theorems": 55940
+    },
+    "tagSummary": {
+      "proved": 8653,
+      "pointers": 1028,
+      "nonstandard": 0,
+      "entries": 10703,
+      "admitted": 2050
+    },
+    "sourceStatementChanges": [
+      {
+        "file": "DLMF/Weierstrass/Series.lean",
+        "name": "weierstrassSigma_prod"
+      }
+    ],
+    "sourceDefinitionChanges": [],
+    "compiledPublicTypeChanges": [
+      "DLMF.Weierstrass.HalfPeriods.weierstrassSigma_prod"
+    ],
+    "rawCompiledPublicTypeHashChanges": [
+      "DLMF.Confluent.whittakerBesselGenerating_iteratedDeriv_two_z",
+      "DLMF.Confluent.regularizedHGFun_besselJ_series",
+      "DLMF.Confluent.whittakerM_besselI_series",
+      "DLMF.Confluent.whittakerM_besselJ_series",
+      "DLMF.Confluent.whittakerBesselGenerating_differentiableOn",
+      "DLMF.Confluent.norm_dslope_sinh_sub_one_le",
+      "DLMF.Confluent.tsum_kummerBesselISeriesCoeff_besselI",
+      "DLMF.Confluent.kummerM_besselI_series_complement",
+      "DLMF.Confluent.whittakerBesselGenerating_hasDerivAt_t",
+      "DLMF.Confluent.kummerM_besselI_series",
+      "DLMF.Confluent.kummerM_four_mul_eq_tsum",
+      "DLMF.Confluent.regularizedHGFun_eq_besselExpansion",
+      "DLMF.Confluent.whittakerBesselGenerating_joint_continuousAt",
+      "DLMF.Weierstrass.HalfPeriods.weierstrassSigma_prod",
+      "DLMF.Confluent.whittakerBesselGenerating_deriv_z",
+      "DLMF.Confluent.summable_whittakerBessel_regularized",
+      "DLMF.Confluent.whittakerBesselGenerating_hasDerivAt_z",
+      "DLMF.Confluent.whittakerBessel_series_eq_regularized",
+      "DLMF.Confluent.whittakerBesselCoeff_hasSum"
+    ],
+    "definitionallyEquivalentTypeChanges": [
+      {
+        "definitionallyEqual": true,
+        "name": "DLMF.Confluent.whittakerBesselGenerating_iteratedDeriv_two_z"
+      },
+      {
+        "definitionallyEqual": true,
+        "name": "DLMF.Confluent.regularizedHGFun_besselJ_series"
+      },
+      {
+        "definitionallyEqual": true,
+        "name": "DLMF.Confluent.whittakerM_besselI_series"
+      },
+      {
+        "definitionallyEqual": true,
+        "name": "DLMF.Confluent.whittakerM_besselJ_series"
+      },
+      {
+        "definitionallyEqual": true,
+        "name": "DLMF.Confluent.whittakerBesselGenerating_differentiableOn"
+      },
+      {
+        "definitionallyEqual": true,
+        "name": "DLMF.Confluent.norm_dslope_sinh_sub_one_le"
+      },
+      {
+        "definitionallyEqual": true,
+        "name": "DLMF.Confluent.tsum_kummerBesselISeriesCoeff_besselI"
+      },
+      {
+        "definitionallyEqual": true,
+        "name": "DLMF.Confluent.kummerM_besselI_series_complement"
+      },
+      {
+        "definitionallyEqual": true,
+        "name": "DLMF.Confluent.whittakerBesselGenerating_hasDerivAt_t"
+      },
+      {
+        "definitionallyEqual": true,
+        "name": "DLMF.Confluent.kummerM_besselI_series"
+      },
+      {
+        "definitionallyEqual": true,
+        "name": "DLMF.Confluent.kummerM_four_mul_eq_tsum"
+      },
+      {
+        "definitionallyEqual": true,
+        "name": "DLMF.Confluent.regularizedHGFun_eq_besselExpansion"
+      },
+      {
+        "definitionallyEqual": true,
+        "name": "DLMF.Confluent.whittakerBesselGenerating_joint_continuousAt"
+      },
+      {
+        "definitionallyEqual": true,
+        "name": "DLMF.Confluent.whittakerBesselGenerating_deriv_z"
+      },
+      {
+        "definitionallyEqual": true,
+        "name": "DLMF.Confluent.summable_whittakerBessel_regularized"
+      },
+      {
+        "definitionallyEqual": true,
+        "name": "DLMF.Confluent.whittakerBesselGenerating_hasDerivAt_z"
+      },
+      {
+        "definitionallyEqual": true,
+        "name": "DLMF.Confluent.whittakerBessel_series_eq_regularized"
+      },
+      {
+        "definitionallyEqual": true,
+        "name": "DLMF.Confluent.whittakerBesselCoeff_hasSum"
+      }
+    ],
+    "originalTypeHashesReproduced": 18,
+    "maxChangedProofLines": 93,
+    "maxLibraryFileLines": 1454,
+    "newDeclarationsWithoutDocs": [],
+    "newExactUpstreamMatches": [],
+    "imports": {
+      "newTwoWayPairs": [],
+      "newDefinitionsImports": [],
+      "existingItemsBeyondOldBaseline": 10,
+      "twoWayPairs": 14,
+      "definitionsImports": 20
+    },
+    "changedLeanFiles": [
+      "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+      "DLMF/AlgebraicAnalytic/Calculus/OneVariable.lean",
+      "DLMF/AlgebraicAnalytic/Complex/Calculus.lean",
+      "DLMF/AlgebraicAnalytic/Complex/Functions.lean",
+      "DLMF/AlgebraicAnalytic/Fourier/Series.lean",
+      "DLMF/AlgebraicAnalytic/ODE/Transformations.lean",
+      "DLMF/AlgebraicAnalytic/Spectral/Theory.lean",
+      "DLMF/AlgebraicAnalytic/Transforms/Fourier.lean",
+      "DLMF/AlgebraicAnalytic/Transforms/Laplace.lean",
+      "DLMF/AlgebraicAnalytic/Transforms/LaplaceTable.lean",
+      "DLMF/AlgebraicAnalytic/Transforms/MellinHilbertStieltjes.lean",
+      "DLMF/AlgebraicAnalytic/Transforms/Tables.lean",
+      "DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean",
+      "DLMF/AsymptoticApproximations/Basics/Transcendental.lean",
+      "DLMF/AsymptoticApproximations/Distributional/FractionalIntegrals.lean",
+      "DLMF/AsymptoticApproximations/Distributional/Stieltjes.lean",
+      "DLMF/AsymptoticApproximations/Integrals/Parts.lean",
+      "DLMF/AsymptoticApproximations/Integrals/Watson.lean",
+      "DLMF/AsymptoticApproximations/Mellin/BesselExample.lean",
+      "DLMF/AsymptoticApproximations/Mellin/Transforms.lean",
+      "DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean",
+      "DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean",
+      "DLMF/AsymptoticApproximations/Sums/PowerSums.lean",
+      "DLMF/BernoulliEuler/Integrals.lean",
+      "DLMF/Combinatorics/LatticePaths.lean",
+      "DLMF/Confluent/BuchholzDefinitions.lean",
+      "DLMF/Confluent/Series.lean",
+      "DLMF/Confluent/WhittakerBuchholz.lean",
+      "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+      "DLMF/Gamma/Asymptotics/Stirling.lean",
+      "DLMF/QHypergeometric/Basic.lean",
+      "DLMF/QHypergeometric/BasicSummations.lean",
+      "DLMF/Struve/Lommel.lean",
+      "DLMF/Weierstrass/Series.lean",
+      "DLMFMathlib.lean",
+      "DLMFMathlib/Analysis/Asymptotics/ExponentialGrowth.lean",
+      "DLMFMathlib/Analysis/Asymptotics/IntegralComparison.lean",
+      "DLMFMathlib/Analysis/Asymptotics/PowerSums.lean",
+      "DLMFMathlib/Analysis/Asymptotics/WatsonKernel.lean",
+      "DLMFMathlib/Analysis/Asymptotics/WatsonLog.lean",
+      "DLMFMathlib/Analysis/Complex/GeometricNewtonSeries.lean",
+      "DLMFMathlib/Analysis/Complex/ParametricHolomorphy.lean",
+      "DLMFMathlib/Analysis/Complex/Sector.lean",
+      "DLMFMathlib/Analysis/Fourier/AddCircle.lean",
+      "DLMFMathlib/Analysis/Fourier/GaussianSeries.lean",
+      "DLMFMathlib/Analysis/Fourier/L1Inversion.lean",
+      "DLMFMathlib/Analysis/Fourier/L2Compatibility.lean",
+      "DLMFMathlib/Analysis/Fourier/Pairing.lean",
+      "DLMFMathlib/Analysis/InnerProductSpace/CauchySchwarz.lean",
+      "DLMFMathlib/Analysis/Integral/Frullani.lean",
+      "DLMFMathlib/Analysis/Integral/LaplaceRay.lean",
+      "DLMFMathlib/Analysis/Integral/RepeatedIntegrationByParts.lean",
+      "DLMFMathlib/Analysis/MellinConvolution.lean",
+      "DLMFMathlib/Analysis/MellinParseval.lean",
+      "DLMFMathlib/Analysis/SpecificLimits/Oscillation.lean",
+      "DLMFMathlib/MeasureTheory/Function/L2Space.lean",
+      "DLMFMathlib/MeasureTheory/Integral/HalfLine.lean",
+      "DLMFMathlib/RingTheory/Binomial.lean"
+    ]
+  },
+  "statementCorrections": [
+    {
+      "name": "DLMF.Weierstrass.HalfPeriods.weierstrassSigma_prod",
+      "reason": "At z=0 every normalized product factor is one, but the totalized sigma/prefactor quotient is zero.",
+      "correction": "Replace the HasProd-to-quotient conjunct by Multipliable; retain the all-z product identity.",
+      "sourceErratum": false,
+      "counterexampleValidated": true,
+      "counterexampleLean": "import DLMF.Weierstrass.Series\n\nopen Complex DLMF.Weierstrass\nopen scoped Real\n\n/-- At z = 0 the normalized sigma-product has value one, rather than its totalized quotient. -/\nexample (H : HalfPeriods) :\n    ¬ HasProd (fun n : ℕ =>\n      (1 - 2 * H.nome ^ (2 * (n + 1)) * Complex.cos (π * (0 : ℂ) / H.ω₁) +\n        H.nome ^ (4 * (n + 1))) / (1 - H.nome ^ (2 * (n + 1))) ^ 2)\n      (H.weierstrassSigma 0 /\n        (2 * H.ω₁ / π * cexp (H.eta 1 * (0 : ℂ) ^ 2 / (2 * H.ω₁)) *\n          Complex.sin (π * (0 : ℂ) / (2 * H.ω₁)))) := by\n  intro h\n  have ht (n : ℕ) :\n      (1 - 2 * H.nome ^ (2 * (n + 1)) * Complex.cos (π * (0 : ℂ) / H.ω₁) +\n        H.nome ^ (4 * (n + 1))) / (1 - H.nome ^ (2 * (n + 1))) ^ 2 = 1 := by\n    have hn : 1 - H.nome ^ (2 * (n + 1)) ≠ 0 :=\n      DLMF.QSeries.one_sub_ne_zero_of_norm_lt_one\n        (DLMF.Theta.p20R1_norm_nome_pow_lt_one H.tau_im_pos (by omega))\n    simp only [mul_zero, zero_div, Complex.cos_zero, mul_one]\n    rw [show H.nome ^ (4 * (n + 1)) = (H.nome ^ (2 * (n + 1))) ^ 2 by rw [← pow_mul]; ring_nf]\n    field_simp\n    ring\n  simp only [mul_zero, zero_div, Complex.sin_zero, div_zero] at h\n  have h1 : HasProd (fun _ : ℕ => (1 : ℂ)) 0 := h.congr_fun (fun n => by simpa using (ht n).symm)\n  exact zero_ne_one (h1.unique hasProd_one)\n"
+    }
+  ],
+  "statementIssues": {
+    "previousIssuesRetained": [
+      "liouvilleGreen_interval_isEquivalent: finite-endpoint uniqueness is false",
+      "picard_great: missing positive outer radius",
+      "prod_mtest_log: tail-only bounds do not give global uniform convergence",
+      "haar_isLittleO_pow: separate derivatives need compatibility",
+      "hasCesaroSumOfOrder_of_tendsto: negative-order regularity requires review"
+    ],
+    "definitionConventions": [
+      "narayana 0 0 = 0 locally, whereas DLMF Table 26.6.3 gives 1; the path-count theorem assumes n >= 1 and this round changes no definition."
+    ],
+    "duplicationCandidates": [
+      "periodicBernoulliB versus periodicBernoulli, and periodicEulerE versus antiperiodicEuler"
+    ]
+  },
+  "remainingPriorities": [
+    "Finite Dixon/Watson/Dougall identities and full-domain Heine transformations",
+    "de Branges–Wilson integral and continuous q-Hermite/q-Gegenbauer orthogonality",
+    "Incomplete-Gamma coefficient cancellation and removable values",
+    "Derivative-specific Airy Stieltjes remainder and sharp sector bounds",
+    "Lommel local uniform continuation, differential equation and termination at exceptional parameters",
+    "Remaining Carlson transformations and principal-value bridges",
+    "Theta power series, Jacobi elliptic and remaining Weierstrass series",
+    "Bernoulli polynomial integrals, Hurwitz identities and combinatorial bijections"
+  ],
+  "definitionsCatalogue": {
+    "file": "DEFINITIONS.md",
+    "chapters": 36,
+    "sequentialSectionPages": 872,
+    "matchingPages": 102,
+    "matchingHeadings": 111,
+    "groupedEntries": 267,
+    "validatedLocalLinks": 391,
+    "validatedDLMFAnchors": 273,
+    "numericalApproximationCodeAdded": false
+  }
+}

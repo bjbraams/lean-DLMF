@@ -633,7 +633,35 @@ theorem symEllInt_duplication_inverse {x y z : ℝ} (h : ei19d_posDomain x y z) 
 theorem symEllIntRC_duplication {x y : ℝ} (hx : 0 ≤ x) (hy : 0 < y) :
     let l := y + 2 * √x * √y
     symEllIntRC x y = 2 * symEllIntRC ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) := by
-  sorry
+  let l := y + 2 * √x * √y
+  have hl : 0 < l := by dsimp [l]; positivity
+  have hnn (r : ℝ) (hr : 0 < r) : ¬ IsNegReal (r : ℂ) :=
+    ei19c_not_isNegReal_of_mem_slitPlane (ofReal_mem_slitPlane.mpr hr)
+  have hroot (r : ℝ) (hr : 0 ≤ r) : (r : ℂ) ^ (1 / 2 : ℂ) = (√r : ℂ) := by
+    rw [show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by norm_num,
+      ← Complex.ofReal_cpow hr, ← Real.sqrt_eq_rpow]
+  have hdup : symEllIntDupLambda (x : ℂ) y y = (l : ℂ) := by
+    unfold symEllIntDupLambda
+    rw [hroot x hx, hroot y hy.le]
+    dsimp [l]
+    have hy2 : (√y : ℂ) * √y = (y : ℂ) := by
+      exact_mod_cast Real.mul_self_sqrt hy.le
+    rw [hy2]
+    push_cast
+    ring
+  change symEllIntRC x y = 2 * symEllIntRC ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ)
+  rw [symEllIntRC_eq_symEllIntRF _ (hnn y hy),
+    symEllIntRC_eq_symEllIntRF _ (hnn (y + l) (by linarith))]
+  by_cases hx0 : x = 0
+  · subst x
+    have h := symEllIntRF_duplication_zero (ofReal_mem_slitPlane.mpr hy)
+      (ofReal_mem_slitPlane.mpr hy)
+    change symEllIntDupLambda 0 (y : ℂ) y = (l : ℂ) at hdup
+    rw [hdup] at h
+    simpa only [zero_add, Complex.ofReal_add, ofReal_zero] using h
+  · have h := symEllIntRF_duplication (ofReal_mem_slitPlane.mpr (lt_of_le_of_ne hx (Ne.symm hx0)))
+      (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr hy)
+    simpa only [hdup, ← Complex.ofReal_add] using h
 
 /-- DLMF 19.26.26: `R_C(x², y²) = R_C(a², a y)`, `a = (x + y)/2`, `ℜ x ≥ 0`, `ℜ y > 0`. -/
 @[dlmf 19.26.E26]

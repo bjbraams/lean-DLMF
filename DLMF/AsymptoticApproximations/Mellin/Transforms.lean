@@ -5,6 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMFMathlib.Analysis.MellinConvolution
+public import DLMF.AlgebraicAnalytic.Transforms.Defs
 public import DLMF.AsymptoticApproximations.Mellin.Defs
 public import DLMF.AlgebraicAnalytic.Complex.Defs
 public import DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion
@@ -30,6 +32,8 @@ circle.
 Mellin convergence `MellinConvergent f z` is absolute convergence of `∫₀^∞ t^{z-1} f(t) dt`.
 In the convolution theorems the transforms are required to converge absolutely on the line of
 integration; then the double integral converges absolutely (Tonelli).
+The convolution theorem reuses the logarithmic-coordinate convolution API in
+`DLMFMathlib.Analysis.MellinConvolution`, together with Mathlib’s `mellin_comp_inv`.
 -/
 
 @[expose] public noncomputable section
@@ -41,6 +45,38 @@ namespace DLMF.AsymptoticApproximations
 
 /-! ## §2.5(i) Convolution and Parseval formula -/
 
+/-- The kernel `f(1/y)/y` has Mellin convergence at `s` when `f` converges at `1-s`. -/
+private lemma reciprocal_mellinConvergent {f : ℝ → ℂ} {s : ℂ}
+    (hf : MellinConvergent f (1 - s)) :
+    MellinConvergent (fun y => f y⁻¹ / y) s := by
+  have hi : MellinConvergent (fun y => f y⁻¹) (s - 1) := by
+    have hs : (s - 1) / ((-1 : ℝ) : ℂ) = 1 - s := by push_cast; ring
+    have h := (MellinConvergent.comp_rpow (f := f) (s := s - 1) (a := -1)
+      (by norm_num)).mpr (by simpa only [hs] using hf)
+    simpa only [Real.rpow_neg_one] using h
+  have h := (MellinConvergent.cpow_smul (f := fun y => f y⁻¹) (s := s) (a := -1)).mpr
+    (by simpa only [sub_eq_add_neg] using hi)
+  simpa only [cpow_neg_one, smul_eq_mul, div_eq_mul_inv, mul_comm] using h
+
+/-- Inverting the convolution variable relates the two Mellin convolution conventions. -/
+private lemma reciprocal_mellinConvolution (f h : ℝ → ℂ) (x : ℝ) :
+    DLMF.AlgebraicAnalytic.mellinConvolution (fun y => f y⁻¹ / y) h x =
+      ∫ t in Ioi 0, f t * h (x * t) := by
+  have he := mellin_comp_inv (fun y => f y * h (x * y)) (-1 : ℂ)
+  have hleft : mellin (fun y => f y⁻¹ * h (x * y⁻¹)) (-1) =
+      DLMF.AlgebraicAnalytic.mellinConvolution (fun y => f y⁻¹ / y) h x := by
+    unfold mellin DLMF.AlgebraicAnalytic.mellinConvolution
+    apply setIntegral_congr_fun measurableSet_Ioi
+    intro y hy
+    dsimp only
+    rw [show (-1 : ℂ) - 1 = -(2 : ℂ) by norm_num, cpow_neg, cpow_two]
+    simp only [smul_eq_mul]
+    rw [div_eq_mul_inv x y]
+    field_simp
+  rw [hleft] at he
+  simpa only [neg_neg, mellin, sub_self, cpow_zero, one_smul] using he
+
+
 /-- DLMF 2.5.3–2.5.4: if `𝓜f(1 - z)` and `𝓜h(z)` converge absolutely, then the Mellin
 convolution `I(x) = ∫₀^∞ f(t) h(xt) dt` has Mellin transform `𝓜I(z) = 𝓜f(1 - z) 𝓜h(z)`. -/
 @[dlmf 2.5.E3, dlmf 2.5.E4]
@@ -48,7 +84,22 @@ theorem mellin_convolution {f h : ℝ → ℂ} {z : ℂ} (hf : MellinConvergent 
     (hh : MellinConvergent h z) :
     MellinConvergent (fun x => ∫ t in Ioi 0, f t * h (x * t)) z ∧
       mellin (fun x => ∫ t in Ioi 0, f t * h (x * t)) z = mellin f (1 - z) * mellin h z := by
-  sorry
+  have hfi := reciprocal_mellinConvergent hf
+  have he : HasMellin (DLMF.AlgebraicAnalytic.mellinConvolution (fun y => f y⁻¹ / y) h)
+      z (mellin (fun y => f y⁻¹ / y) z * mellin h z) := hasMellin_integral_mul_div hfi hh
+  change MellinConvergent (DLMF.AlgebraicAnalytic.mellinConvolution (fun y => f y⁻¹ / y) h) z ∧
+    mellin (DLMF.AlgebraicAnalytic.mellinConvolution (fun y => f y⁻¹ / y) h) z =
+      mellin (fun y => f y⁻¹ / y) z * mellin h z at he
+  have hfun := funext (reciprocal_mellinConvolution f h)
+  rw [hfun] at he
+  have hmel : mellin (fun y => f y⁻¹ / y) z = mellin f (1 - z) := by
+    have h := mellin_cpow_smul (fun y => f y⁻¹) z (-1)
+    simp only [cpow_neg_one, smul_eq_mul] at h
+    rw [mellin_comp_inv] at h
+    convert h using 1
+    · congr 1; funext y; ring
+    · congr 1; ring
+  rwa [hmel] at he
 
 /-- DLMF 2.5.5 (Parseval formula; also 2.5.33 and 2.5.40): if `𝓜f(1 - z)` and `𝓜h(z)` converge
 absolutely on the line `ℜz = c`, their product is integrable along that line and `I` is

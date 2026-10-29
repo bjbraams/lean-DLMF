@@ -7,6 +7,10 @@ module
 
 public import DLMF.Weierstrass.Basic
 public import DLMF.Weierstrass.DifferentialEquations
+public import DLMF.Weierstrass.Relations.ThetaIdentities
+public import DLMF.Theta.Products.InfiniteProducts
+public import DLMF.Theta.Products.LogDerivativesAndDoubleProducts
+public import DLMF.Elementary.Trigonometric.DirectIdentities
 
 /-!
 # Fourier series, series of cosecants, products and Laurent series (DLMF §§23.8–23.9)
@@ -27,8 +31,8 @@ well-founded recursion on the weight `2m + 3n`.
 
 @[expose] public section
 
-open Complex PeriodPair Asymptotics
-open scoped Real
+open Complex PeriodPair Asymptotics Filter Set
+open scoped Real Topology
 
 noncomputable section
 
@@ -39,20 +43,6 @@ namespace HalfPeriods
 variable (H : HalfPeriods)
 
 /-! ### Fourier series (§23.8(i)) -/
-
-/-- DLMF 23.8.1 (with the corrected condition `|ℑ(z/ω₁)| < 2ℑτ`), `q = e^{iπω₃/ω₁}`, `z ∉ 𝕃`:
-`℘(z) + η₁/ω₁ - (π²/(4ω₁²))csc²(πz/(2ω₁)) = -(2π²/ω₁²) ∑_{n≥1} nq^{2n}/(1 - q^{2n}) cos(nπz/ω₁)`.
-Corrected from the printed DLMF formula: the printed condition lacks the absolute value on
-`ℑ(z/ω₁)`; for `ℑ(z/ω₁) ≤ -2ℑτ` the series diverges (terms `10⁵, 10¹¹, 10²¹` at
-`n = 10, 20, 40`). -/
-@[dlmf 23.8.E1]
-theorem weierstrassP_fourier {z : ℂ} (hz : z ∉ H.lattice) (hzi : |(z / H.ω₁).im| < 2 * H.tau.im) :
-    HasSum (fun n : ℕ ↦ -(2 * π ^ 2 / H.ω₁ ^ 2) *
-        ((n + 1 : ℂ) * H.nome ^ (2 * (n + 1)) / (1 - H.nome ^ (2 * (n + 1))) *
-          Complex.cos ((n + 1 : ℂ) * π * z / H.ω₁)))
-      (H.weierstrassP z + H.eta 1 / H.ω₁ -
-        π ^ 2 / (4 * H.ω₁ ^ 2) * (1 / Complex.sin (π * z / (2 * H.ω₁)) ^ 2)) := by
-  sorry
 
 /-- DLMF 23.8.2 (with the corrected condition `|ℑ(z/ω₁)| < 2ℑτ`), `z ∉ 𝕃`:
 `ζ(z) - η₁z/ω₁ - (π/(2ω₁))cot(πz/(2ω₁)) = (2π/ω₁) ∑_{n≥1} q^{2n}/(1 - q^{2n}) sin(nπz/ω₁)`.
@@ -66,7 +56,130 @@ theorem weierstrassZeta_fourier {z : ℂ} (hz : z ∉ H.lattice)
           Complex.sin ((n + 1 : ℂ) * π * z / H.ω₁)))
       (H.weierstrassZeta z - H.eta 1 * z / H.ω₁ -
         π / (2 * H.ω₁) * Complex.cot (π * z / (2 * H.ω₁))) := by
-  sorry
+  have hscale : (π * z / (2 * H.ω₁)).im = π / 2 * (z / H.ω₁).im := by
+    rw [show π * z / (2 * H.ω₁) = (↑(π / 2) : ℂ) * (z / H.ω₁) by push_cast; ring]
+    simp
+  have hstrip : |(π * z / (2 * H.ω₁)).im| < π * H.tau.im := by
+    rw [hscale, abs_mul, abs_of_pos (half_pos Real.pi_pos)]
+    nlinarith [Real.pi_pos]
+  have h := (DLMF.Theta.jacobiThetaOneTau_logDeriv H.tau_im_pos hstrip).2.mul_left
+    (π / (2 * H.ω₁))
+  convert h using 1
+  · ext n
+    simp only [HalfPeriods.nome]
+    rw [show 2 * (n + 1 : ℂ) * (π * z / (2 * H.ω₁)) =
+      (n + 1 : ℂ) * π * z / H.ω₁ by ring]
+    ring
+  · rw [H.p23R1_zeta_theta hz]
+    ring
+
+
+
+/-- Compact subsets of the convergence strip admit a common summable bound for the zeta Fourier terms. -/
+private lemma weierstrassZeta_fourier_bound (H : HalfPeriods) {K : Set ℂ} (hK : IsCompact K)
+    (hstrip : ∀ w ∈ K, |(w / H.ω₁).im| < 2 * H.tau.im) :
+    ∃ u : ℕ → ℝ, Summable u ∧ ∀ n : ℕ, ∀ w ∈ K,
+      ‖2 * π / H.ω₁ * (H.nome ^ (2 * (n + 1)) / (1 - H.nome ^ (2 * (n + 1)))) *
+        Complex.sin ((n + 1 : ℂ) * π * w / H.ω₁)‖ ≤ u n := by
+  let f : ℂ → ℂ := fun w => π * w / (2 * H.ω₁)
+  have hf : Continuous f := by dsimp only [f]; fun_prop
+  obtain ⟨u, hu, hbound⟩ := (DLMF.Theta.jacobiTheta_logDeriv_series_uniform H.tau_im_pos
+    (f '' K) (hK.image hf)).1 (by
+      rintro _ ⟨w, hw, rfl⟩
+      have hi : (f w).im = π / 2 * (w / H.ω₁).im := by
+        dsimp only [f]
+        rw [show π * w / (2 * H.ω₁) = (↑(π / 2) : ℂ) * (w / H.ω₁) by push_cast; ring]
+        simp
+      rw [hi, abs_mul, abs_of_pos (half_pos Real.pi_pos)]
+      nlinarith [hstrip w hw, Real.pi_pos])
+  refine ⟨fun n => ‖2 * π / H.ω₁‖ * u n, hu.mul_left _, fun n w hw => ?_⟩
+  have he : 2 * π / H.ω₁ * (H.nome ^ (2 * (n + 1)) / (1 - H.nome ^ (2 * (n + 1)))) *
+      Complex.sin ((n + 1 : ℂ) * π * w / H.ω₁) =
+      (2 * π / H.ω₁) * ((H.nome ^ (2 * (n + 1)) / (1 - H.nome ^ (2 * (n + 1)))) *
+        Complex.sin (2 * (n + 1) * f w)) := by
+    dsimp only [f]
+    rw [show 2 * (n + 1 : ℂ) * (π * w / (2 * H.ω₁)) =
+      (n + 1 : ℂ) * π * w / H.ω₁ by ring]
+    ring
+  rw [he, norm_mul]
+  exact mul_le_mul_of_nonneg_left (hbound n (f w) ⟨w, hw, rfl⟩).1 (norm_nonneg _)
+
+/-- A zero of the sine prefactor would lie at a real lattice point. -/
+private lemma sin_fourierArgument_ne_zero (H : HalfPeriods) {z : ℂ} (hz : z ∉ H.lattice) :
+    Complex.sin (π * z / (2 * H.ω₁)) ≠ 0 := by
+  intro he
+  obtain ⟨m, hm⟩ := Complex.sin_eq_zero_iff.mp he
+  apply hz
+  apply H.mem_lattice_iff.mpr
+  refine ⟨m, 0, ?_⟩
+  have hp : (π : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
+  field_simp at hm
+  simp only [Int.cast_zero, mul_zero, zero_mul, add_zero]
+  exact (div_eq_iff H.ω₁_ne_zero).mp hm
+
+/-- DLMF 23.8.1 (with the corrected condition `|ℑ(z/ω₁)| < 2ℑτ`), `q = e^{iπω₃/ω₁}`, `z ∉ 𝕃`:
+`℘(z) + η₁/ω₁ - (π²/(4ω₁²))csc²(πz/(2ω₁)) = -(2π²/ω₁²) ∑_{n≥1} nq^{2n}/(1 - q^{2n}) cos(nπz/ω₁)`.
+Corrected from the printed DLMF formula: the printed condition lacks the absolute value on
+`ℑ(z/ω₁)`; for `ℑ(z/ω₁) ≤ -2ℑτ` the series diverges (terms `10⁵, 10¹¹, 10²¹` at
+`n = 10, 20, 40`). -/
+@[dlmf 23.8.E1]
+theorem weierstrassP_fourier {z : ℂ} (hz : z ∉ H.lattice) (hzi : |(z / H.ω₁).im| < 2 * H.tau.im) :
+    HasSum (fun n : ℕ ↦ -(2 * π ^ 2 / H.ω₁ ^ 2) *
+        ((n + 1 : ℂ) * H.nome ^ (2 * (n + 1)) / (1 - H.nome ^ (2 * (n + 1))) *
+          Complex.cos ((n + 1 : ℂ) * π * z / H.ω₁)))
+      (H.weierstrassP z + H.eta 1 / H.ω₁ -
+        π ^ 2 / (4 * H.ω₁ ^ 2) * (1 / Complex.sin (π * z / (2 * H.ω₁)) ^ 2)) := by
+  let T : ℕ → ℂ → ℂ := fun n w => 2 * π / H.ω₁ *
+    (H.nome ^ (2 * (n + 1)) / (1 - H.nome ^ (2 * (n + 1)))) *
+      Complex.sin ((n + 1 : ℂ) * π * w / H.ω₁)
+  let S : Set ℂ := {w | w ∉ H.lattice ∧ |(w / H.ω₁).im| < 2 * H.tau.im}
+  have hS : IsOpen S := by
+    have hL : IsOpen {w : ℂ | w ∉ H.lattice} := H.periodPair.isClosed_lattice.isOpen_compl
+    exact hL.inter (isOpen_lt (show Continuous (fun w : ℂ => |(w / H.ω₁).im|) by
+      fun_prop) continuous_const)
+  obtain ⟨ε, hε, hball⟩ := Metric.isOpen_iff.mp hS z ⟨hz, hzi⟩
+  have hε2 : 0 < ε / 2 := half_pos hε
+  have hK (w : ℂ) (hw : w ∈ Metric.closedBall z (ε / 2)) : w ∈ S := by
+    have hw' : dist w z ≤ ε / 2 := hw
+    exact hball (hw'.trans_lt (by linarith : ε / 2 < ε))
+  obtain ⟨u, hu, hbound⟩ := weierstrassZeta_fourier_bound H (isCompact_closedBall z (ε / 2))
+    (fun w hw => (hK w hw).2)
+  have hdiff (n : ℕ) : Differentiable ℂ (T n) := by dsimp only [T]; fun_prop
+  have hD := Complex.hasSum_deriv_of_summable_norm (F := T) (U := Metric.ball z (ε / 2))
+    hu (fun n => (hdiff n).differentiableOn) Metric.isOpen_ball
+    (fun n w hw => hbound n w (Metric.ball_subset_closedBall hw)) (Metric.mem_ball_self hε2)
+  have heq : (fun w => ∑' n : ℕ, T n w) =ᶠ[𝓝 z]
+      fun w => H.weierstrassZeta w - H.eta 1 * w / H.ω₁ -
+        π / (2 * H.ω₁) * Complex.cot (π * w / (2 * H.ω₁)) := by
+    filter_upwards [Metric.ball_mem_nhds z hε2] with w hw
+    simpa only [T, mul_assoc] using (weierstrassZeta_fourier H
+      (hK w (Metric.ball_subset_closedBall hw)).1 (hK w (Metric.ball_subset_closedBall hw)).2).tsum_eq
+  have hsin := sin_fourierArgument_ne_zero H hz
+  have hlin := ((hasDerivAt_id z).const_mul (π : ℂ)).div_const (2 * H.ω₁)
+  have hcot := ((DLMF.Elementary.hasDerivAt_cot hsin).comp z hlin).const_mul
+    (π / (2 * H.ω₁))
+  have hder := ((hasDerivAt_weierstrassZeta H.periodPair hz).sub
+    (((hasDerivAt_id z).const_mul (H.eta 1)).div_const H.ω₁)).sub hcot
+  change HasDerivAt (fun w : ℂ => H.weierstrassZeta w - H.eta 1 * w / H.ω₁ -
+      π / (2 * H.ω₁) * Complex.cot (π * w / (2 * H.ω₁))) _ z at hder
+  have htarget := heq.deriv_eq
+  rw [hder.deriv] at htarget
+  rw [htarget] at hD
+  have hterm (n : ℕ) : deriv (T n) z =
+      (2 * π / H.ω₁ * (H.nome ^ (2 * (n + 1)) / (1 - H.nome ^ (2 * (n + 1))))) *
+        (Complex.cos ((n + 1 : ℂ) * π * z / H.ω₁) * ((n + 1 : ℂ) * π / H.ω₁)) := by
+    have ht := (((hasDerivAt_id z).const_mul ((n + 1 : ℂ) * π)).div_const H.ω₁).csin
+    have ht' := ht.const_mul
+      (2 * π / H.ω₁ * (H.nome ^ (2 * (n + 1)) / (1 - H.nome ^ (2 * (n + 1)))))
+    simpa only [T, id_eq, mul_one] using! ht'.deriv
+  have h := hD.neg
+  convert h using 1
+  · ext n
+    rw [hterm]
+    ring
+  · simp only [HalfPeriods.weierstrassP, DLMF.Elementary.csc] at *
+    ring
+
 
 /-! ### Series of cosecants and cotangents (§23.8(ii)) -/
 
@@ -99,20 +212,6 @@ theorem eta_one_csc_series :
 
 /-! ### Infinite products (§23.8(iii)) -/
 
-/-- DLMF 23.8.6: `σ(z) = (2ω₁/π) exp(η₁z²/(2ω₁)) sin(πz/(2ω₁))
-∏_{n≥1} (1 - 2q^{2n}cos(πz/ω₁) + q^{4n})/(1 - q^{2n})²`, `z ∈ ℂ`. -/
-@[dlmf 23.8.E6]
-theorem weierstrassSigma_prod (z : ℂ) :
-    HasProd (fun n : ℕ ↦ (1 - 2 * H.nome ^ (2 * (n + 1)) * Complex.cos (π * z / H.ω₁) +
-        H.nome ^ (4 * (n + 1))) / (1 - H.nome ^ (2 * (n + 1))) ^ 2)
-      (H.weierstrassSigma z /
-        (2 * H.ω₁ / π * cexp (H.eta 1 * z ^ 2 / (2 * H.ω₁)) * Complex.sin (π * z / (2 * H.ω₁)))) ∧
-    H.weierstrassSigma z = 2 * H.ω₁ / π * cexp (H.eta 1 * z ^ 2 / (2 * H.ω₁)) *
-      Complex.sin (π * z / (2 * H.ω₁)) *
-      ∏' n : ℕ, (1 - 2 * H.nome ^ (2 * (n + 1)) * Complex.cos (π * z / H.ω₁) +
-        H.nome ^ (4 * (n + 1))) / (1 - H.nome ^ (2 * (n + 1))) ^ 2 := by
-  sorry
-
 /-- DLMF 23.8.7: `σ(z) = (2ω₁/π) exp(η₁z²/(2ω₁)) sin(πz/(2ω₁))
 ∏_{n≥1} sin(π(2nω₃ + z)/(2ω₁)) sin(π(2nω₃ - z)/(2ω₁))/sin²(πnω₃/ω₁)`, `z ∈ ℂ`. -/
 @[dlmf 23.8.E7]
@@ -125,7 +224,76 @@ theorem weierstrassSigma_sin_prod (z : ℂ) :
       ∏' n : ℕ, Complex.sin (π * (2 * (n + 1) * H.ω₃ + z) / (2 * H.ω₁)) *
         Complex.sin (π * (2 * (n + 1) * H.ω₃ - z) / (2 * H.ω₁)) /
           Complex.sin (π * (n + 1) * H.ω₃ / H.ω₁) ^ 2 := by
-  sorry
+  obtain ⟨hm, he⟩ := DLMF.Theta.jacobiThetaOneTau_hasProd_sin
+    (π * z / (2 * H.ω₁)) H.tau_im_pos
+  have hω := H.ω₁_ne_zero
+  have hD := H.p23R1_thetaOneDeriv_ne_zero
+  have hterm (n : ℕ) :
+      Complex.sin ((n + 1 : ℂ) * π * H.tau + π * z / (2 * H.ω₁)) *
+        Complex.sin ((n + 1 : ℂ) * π * H.tau - π * z / (2 * H.ω₁)) /
+          Complex.sin ((n + 1 : ℂ) * π * H.tau) ^ 2 =
+      Complex.sin (π * (2 * (n + 1) * H.ω₃ + z) / (2 * H.ω₁)) *
+        Complex.sin (π * (2 * (n + 1) * H.ω₃ - z) / (2 * H.ω₁)) /
+          Complex.sin (π * (n + 1) * H.ω₃ / H.ω₁) ^ 2 := by
+    rw [HalfPeriods.tau]
+    congr 2 <;> field_simp
+  refine ⟨hm.congr hterm, ?_⟩
+  rw [H.weierstrassSigma_eq_theta, he, tprod_congr hterm]
+  field_simp
+  congr 1
+  apply tprod_congr
+  intro n
+  congr 2 <;> ring_nf
+
+
+/-- DLMF 23.8.6: `σ(z) = (2ω₁/π) exp(η₁z²/(2ω₁)) sin(πz/(2ω₁))
+∏_{n≥1} (1 - 2q^{2n}cos(πz/ω₁) + q^{4n})/(1 - q^{2n})²`, `z ∈ ℂ`.
+Convergence and the product identity are stated separately so zeros of the sine prefactor
+are retained. Dividing by that prefactor would incorrectly assert product value zero at `z=0`. -/
+@[dlmf 23.8.E6]
+theorem weierstrassSigma_prod (z : ℂ) :
+    Multipliable (fun n : ℕ ↦ (1 - 2 * H.nome ^ (2 * (n + 1)) * Complex.cos (π * z / H.ω₁) +
+        H.nome ^ (4 * (n + 1))) / (1 - H.nome ^ (2 * (n + 1))) ^ 2)
+      ∧
+    H.weierstrassSigma z = 2 * H.ω₁ / π * cexp (H.eta 1 * z ^ 2 / (2 * H.ω₁)) *
+      Complex.sin (π * z / (2 * H.ω₁)) *
+      ∏' n : ℕ, (1 - 2 * H.nome ^ (2 * (n + 1)) * Complex.cos (π * z / H.ω₁) +
+        H.nome ^ (4 * (n + 1))) / (1 - H.nome ^ (2 * (n + 1))) ^ 2 := by
+  obtain ⟨hm, he⟩ := H.weierstrassSigma_sin_prod z
+  have hω := H.ω₁_ne_zero
+  have hterm (n : ℕ) :
+      Complex.sin (π * (2 * (n + 1) * H.ω₃ + z) / (2 * H.ω₁)) *
+        Complex.sin (π * (2 * (n + 1) * H.ω₃ - z) / (2 * H.ω₁)) /
+          Complex.sin (π * (n + 1) * H.ω₃ / H.ω₁) ^ 2 =
+      (1 - 2 * H.nome ^ (2 * (n + 1)) * Complex.cos (π * z / H.ω₁) +
+        H.nome ^ (4 * (n + 1))) / (1 - H.nome ^ (2 * (n + 1))) ^ 2 := by
+    let a := π * (n + 1) * H.ω₃ / H.ω₁
+    let w := π * z / (2 * H.ω₁)
+    have hexp : cexp (2 * I * a) = H.nome ^ (2 * (n + 1)) := by
+      rw [HalfPeriods.nome, ← Complex.exp_nat_mul]
+      congr 1
+      dsimp [a, HalfPeriods.tau]
+      push_cast
+      ring
+    have hne : 1 - cexp (2 * I * a) ≠ 0 := by
+      rw [hexp]
+      exact DLMF.QSeries.one_sub_ne_zero_of_norm_lt_one
+        (DLMF.Theta.p20R1_norm_nome_pow_lt_one H.tau_im_pos (by omega))
+    have h := DLMF.Theta.p20R1_sin_ratio a w hne
+    have hp : a + w = π * (2 * (n + 1) * H.ω₃ + z) / (2 * H.ω₁) := by
+      dsimp [a, w]
+      field_simp
+    have hn : a - w = π * (2 * (n + 1) * H.ω₃ - z) / (2 * H.ω₁) := by
+      dsimp [a, w]
+      field_simp
+    have hw : 2 * w = π * z / H.ω₁ := by dsimp [w]; field_simp
+    rw [hp, hn, hw, hexp] at h
+    convert h using 1
+    rw [← pow_mul]
+    congr 3
+    ring
+  exact ⟨hm.congr hterm, he.trans (by rw [tprod_congr hterm])⟩
+
 
 end HalfPeriods
 

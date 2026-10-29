@@ -707,13 +707,278 @@ theorem hasSum_motzkin {x : ℝ} (hx0 : x ≠ 0) (hx : |x| < 1 / 3) :
       field_simp; ring, s26a_sqrt_div_sq _ h1x]
     field_simp
 
+/-- A Catalan convolution term becomes a product of binomial coefficients after multiplication by
+`k + 1`. This is the termwise identity used in the Vandermonde sum below. -/
+private lemma narayana_choose_catalan_term {n k j : ℕ} (hk : k ≤ n) (hj : j ≤ k) :
+    (k + 1) * (catalan j * n.choose (2 * j) * (n - 2 * j).choose (k - j)) =
+      n.choose k * (k + 1).choose (j + 1) * (n - k).choose j := by
+  have h1 := Nat.choose_mul (n := n) (k := 2 * j) (s := j) (by omega)
+  have h2 := Nat.choose_mul (n := n - j) (k := k) (s := j) hj
+  have h3 := Nat.choose_mul (n := n - j) (k := k) (s := k - j) (by omega)
+  rw [show 2 * j - j = j by omega] at h1
+  rw [show n - j - j = n - 2 * j by omega] at h2
+  rw [show k - (k - j) = j by omega,
+    show n - j - (k - j) = n - k by omega, Nat.choose_symm hj] at h3
+  have h4 := Nat.choose_mul (n := n) (k := k) (s := j) hj
+  have hA : n.choose (2 * j) * (2 * j).choose j * (n - 2 * j).choose (k - j) =
+      n.choose k * k.choose j * (n - k).choose j := by
+    calc
+      _ = n.choose j * ((n - j).choose j * (n - 2 * j).choose (k - j)) := by rw [h1]; ring
+      _ = n.choose j * ((n - j).choose (k - j) * (n - k).choose j) := by rw [← h2, h3]
+      _ = _ := by rw [← mul_assoc, ← h4]
+  apply Nat.eq_of_mul_eq_mul_left (show 0 < j + 1 by omega)
+  calc
+    _ = (k + 1) * (((j + 1) * catalan j) * n.choose (2 * j) * (n - 2 * j).choose (k - j)) := by ring
+    _ = (k + 1) * (n.choose (2 * j) * (2 * j).choose j * (n - 2 * j).choose (k - j)) := by
+      rw [succ_mul_catalan_eq_centralBinom, Nat.centralBinom_eq_two_mul_choose]; ring
+    _ = (k + 1) * (n.choose k * k.choose j * (n - k).choose j) := by rw [hA]
+    _ = n.choose k * (((k + 1) * k.choose j)) * (n - k).choose j := by ring
+    _ = n.choose k * ((k + 1).choose (j + 1) * (j + 1)) * (n - k).choose j := by
+      rw [Nat.add_one_mul_choose_eq]
+    _ = _ := by ring
+
+/-- Narayana numbers are a binomial transform of the Catalan numbers, with an additional binomial
+coefficient recording the number of peaks. -/
+theorem narayana_eq_sum_catalan {n k : ℕ} (hk : k ≤ n) :
+    narayana (n + 1) (k + 1) =
+      ∑ j ∈ range (k + 1), catalan j * n.choose (2 * j) * (n - 2 * j).choose (k - j) := by
+  apply Nat.eq_of_mul_eq_mul_left (show 0 < (n + 1) * (k + 1) by positivity)
+  have hv := Nat.add_choose_eq (n - k) (k + 1) k
+  rw [Finset.Nat.sum_antidiagonal_eq_sum_range_succ_mk] at hv
+  have hv' : ∑ j ∈ range (k + 1), (k + 1).choose (j + 1) * (n - k).choose j =
+      (n + 1).choose k := by
+    rw [show n + 1 = (n - k) + (k + 1) by omega, hv]
+    refine sum_congr rfl fun j hj => ?_
+    have hj : j ≤ k := by simpa using hj
+    rw [← Nat.choose_symm (n := k + 1) (k := j + 1) (by omega)]
+    simp only [show k + 1 - (j + 1) = k - j by omega]
+    ring
+  calc
+    _ = (k + 1) * ((n + 1) * narayana (n + 1) (k + 1)) := by ring
+    _ = (k + 1) * ((n + 1).choose (k + 1) * (n + 1).choose k) := by rw [narayana_mul]
+    _ = (n + 1) * (n.choose k * (n + 1).choose k) := by
+      calc
+        _ = ((n + 1).choose (k + 1) * (k + 1)) * (n + 1).choose k := by ring
+        _ = _ := by rw [← Nat.add_one_mul_choose_eq]; ring
+    _ = (n + 1) * (n.choose k * ∑ j ∈ range (k + 1),
+        (k + 1).choose (j + 1) * (n - k).choose j) := by rw [hv']
+    _ = (n + 1) * ∑ j ∈ range (k + 1),
+        (k + 1) * (catalan j * n.choose (2 * j) * (n - 2 * j).choose (k - j)) := by
+      rw [mul_sum]; congr 1
+      refine sum_congr rfl fun j hj => ?_
+      rw [narayana_choose_catalan_term hk (by simpa using hj)]; ring
+    _ = _ := by rw [← mul_sum]; ring
+
+/-- The Narayana row polynomial is the Catalan transform of the powers of `1 + X`. -/
+private lemma narayana_polynomial_eq_sum_catalan (n : ℕ) :
+    (∑ k ∈ range (n + 1), Polynomial.C (narayana (n + 1) (k + 1) : ℝ) * Polynomial.X ^ k) =
+      ∑ j ∈ range (n + 1), Polynomial.C ((catalan j : ℝ) * n.choose (2 * j)) *
+        (Polynomial.X ^ j * (Polynomial.X + 1) ^ (n - 2 * j)) := by
+  ext k
+  simp only [Polynomial.finsetSum_coeff, Polynomial.coeff_C_mul,
+    Polynomial.coeff_X_pow_mul', Polynomial.coeff_X_add_one_pow, Polynomial.coeff_X_pow]
+  by_cases hk : k ≤ n
+  · rw [sum_eq_single k]
+    · simp only [ite_true, mul_one]
+      rw [narayana_eq_sum_catalan hk, Nat.cast_sum]
+      have hsum : (∑ j ∈ range (n + 1), ((catalan j : ℝ) * n.choose (2 * j)) *
+          (if j ≤ k then ((n - 2 * j).choose (k - j) : ℝ) else 0)) =
+          ∑ j ∈ range (k + 1), ((catalan j : ℝ) * n.choose (2 * j)) *
+          (if j ≤ k then ((n - 2 * j).choose (k - j) : ℝ) else 0) := by
+        refine (sum_subset (range_subset_range.mpr (by omega)) ?_).symm
+        intro j hj hjk
+        simp only [mem_range, not_lt] at hjk
+        rw [ite_eq_right (by omega), mul_zero]
+      rw [hsum]
+      refine sum_congr rfl fun j hj => ?_
+      rw [ite_eq_left (by simp at hj; omega)]
+      push_cast; ring
+    · intro j hj hjk; rw [ite_eq_right (Ne.symm hjk), mul_zero]
+    · simp [hk]
+  · rw [sum_eq_zero fun j hj => by
+      rw [ite_eq_right (by simp at hj; omega), mul_zero]]
+    symm
+    refine sum_eq_zero fun j hj => ?_
+    by_cases h2j : 2 * j ≤ n
+    · by_cases hjk : j ≤ k
+      · rw [ite_eq_left hjk,
+          Nat.choose_eq_zero_of_lt (n := n - 2 * j) (k := k - j) (by omega),
+          Nat.cast_zero, mul_zero]
+      · rw [ite_eq_right hjk, mul_zero]
+    · rw [Nat.choose_eq_zero_of_lt (by omega), Nat.cast_zero, mul_zero, zero_mul]
+
+/-- The polynomial enumerating a row of the Narayana triangle is a weighted Catalan transform. -/
+theorem sum_narayana_mul_pow (n : ℕ) (y : ℝ) :
+    ∑ k ∈ range (n + 1), (narayana (n + 1) (k + 1) : ℝ) * y ^ k =
+      ∑ j ∈ range (n + 1), (catalan j : ℝ) * y ^ j *
+        (if 2 * j ≤ n then (n.choose (2 * j) : ℝ) * (1 + y) ^ (n - 2 * j) else 0) := by
+  have h := congrArg (Polynomial.eval y) (narayana_polynomial_eq_sum_catalan n)
+  simp only [Polynomial.eval_finsetSum, Polynomial.eval_mul, Polynomial.eval_C,
+    Polynomial.eval_pow, Polynomial.eval_X, Polynomial.eval_add, Polynomial.eval_one] at h
+  rw [h]
+  refine sum_congr rfl fun j hj => ?_
+  by_cases hj : 2 * j ≤ n
+  · rw [ite_eq_left hj]; ring
+  · rw [ite_eq_right hj, Nat.choose_eq_zero_of_lt (by omega), Nat.cast_zero]; ring
+
+/-- Each row of the bivariate Narayana series has finite support and can be summed by the
+weighted Catalan transform. -/
+private lemma hasSum_narayana_row (n : ℕ) (x y : ℝ) :
+    HasSum (fun k => (narayana (n + 1) (k + 1) : ℝ) * x ^ (n + 1) * y ^ (k + 1))
+      (x * y * ((∑ j ∈ range (n + 1), (catalan j : ℝ) * y ^ j *
+        (if 2 * j ≤ n then (n.choose (2 * j) : ℝ) * (1 + y) ^ (n - 2 * j) else 0)) * x ^ n)) := by
+  rw [← sum_narayana_mul_pow, sum_mul, mul_sum]
+  have heq : (fun k => (narayana (n + 1) (k + 1) : ℝ) * x ^ (n + 1) * y ^ (k + 1)) =
+      fun k => x * y * ((narayana (n + 1) (k + 1) : ℝ) * y ^ k * x ^ n) := by
+    ext k; simp only [pow_succ]; ring
+  rw [heq]
+  refine hasSum_sum_of_ne_finset_zero fun k hk => ?_
+  simp only [mem_range, not_lt] at hk
+  simp [narayana, Nat.choose_eq_zero_of_lt (by omega : n + 1 < k + 1)]
+
+/-- The bivariate Narayana series converges absolutely when both real arguments have absolute
+value less than `1/8`. -/
+theorem summable_narayana_mul_pow {x y : ℝ} (hx : |x| < 1 / 8) (hy : |y| < 1 / 8) :
+    Summable (fun p : ℕ × ℕ => (narayana (p.1 + 1) (p.2 + 1) : ℝ) *
+      x ^ (p.1 + 1) * y ^ (p.2 + 1)) := by
+  have hsx : Summable (fun n : ℕ => (4 * |x|) ^ (n + 1)) :=
+    ((summable_geometric_of_abs_lt_one (show |(4 * |x|)| < 1 by
+      rw [abs_mul, abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 4), abs_abs]
+      linarith)).mul_right (4 * |x|)).congr
+        (fun n => (pow_succ _ _).symm)
+  have hsy : Summable (fun n : ℕ => |y| ^ (n + 1)) :=
+    ((summable_geometric_of_abs_lt_one (show |(|y|)| < 1 by
+      rw [abs_abs]; linarith)).mul_right |y|).congr
+      (fun n => (pow_succ _ _).symm)
+  refine Summable.of_norm_bounded (hsx.mul_of_nonneg hsy (fun _ => by positivity)
+    (fun _ => by positivity)) fun p => ?_
+  have hb : narayana (p.1 + 1) (p.2 + 1) ≤ 4 ^ (p.1 + 1) := by
+    calc
+      _ ≤ (p.1 + 1).choose (p.2 + 1) * (p.1 + 1).choose p.2 := Nat.div_le_self _ _
+      _ ≤ 2 ^ (p.1 + 1) * 2 ^ (p.1 + 1) :=
+        Nat.mul_le_mul (Nat.choose_le_two_pow _ _) (Nat.choose_le_two_pow _ _)
+      _ = _ := by rw [← mul_pow]; norm_num
+  simp only [Real.norm_eq_abs, abs_mul, Nat.abs_cast, abs_pow, mul_pow]
+  gcongr
+  exact_mod_cast hb
+
+/-- A small square around the origin maps inside the disk of convergence of the Catalan series,
+both for the signed argument and for the absolute convergence majorant. -/
+private lemma narayana_transform_bounds {x y : ℝ} (hx : |x| < 1 / 8) (hy : |y| < 1 / 8) :
+    |(1 + y) * x| < 1 / 2 ∧
+      |x ^ 2 * y / (1 - (1 + y) * x) ^ 2| < 1 / 4 ∧
+      |(|x| ^ 2 * |y| / (1 - |(1 + y) * x|) ^ 2)| < 1 / 4 := by
+  have ha := abs_nonneg x
+  have hb := abs_nonneg y
+  have hbx : |(1 + y) * x| < 1 / 2 := by
+    rw [abs_mul]
+    have hle : |1 + y| ≤ 1 + |y| := by simpa using abs_add_le (1 : ℝ) y
+    calc
+      _ ≤ (1 + |y|) * |x| := mul_le_mul_of_nonneg_right hle ha
+      _ ≤ (1 + |y|) * (1 / 8) := mul_le_mul_of_nonneg_left hx.le (by positivity)
+      _ < (1 + 1 / 8) * (1 / 8) := mul_lt_mul_of_pos_right (by linarith) (by norm_num)
+      _ < _ := by norm_num
+  have hbase : 1 / 2 < 1 - (1 + y) * x := by
+    have := le_abs_self ((1 + y) * x); linarith
+  have hbasea : 1 / 2 < 1 - |(1 + y) * x| := by linarith
+  have hnum : |x| ^ 2 * |y| < 1 / 16 := by
+    have hsq : |x| ^ 2 < (1 / 8 : ℝ) ^ 2 := by nlinarith
+    calc
+      _ ≤ (1 / 8 : ℝ) ^ 2 * |y| := mul_le_mul_of_nonneg_right hsq.le hb
+      _ < (1 / 8 : ℝ) ^ 2 * (1 / 8) := mul_lt_mul_of_pos_left hy (by norm_num)
+      _ < _ := by norm_num
+  refine ⟨hbx, ?_, ?_⟩
+  · rw [abs_div, abs_mul, abs_pow, abs_pow,
+      abs_of_pos (by linarith : 0 < 1 - (1 + y) * x), div_lt_iff₀ (by positivity)]
+    nlinarith
+  · rw [abs_of_nonneg (by positivity), div_lt_iff₀ (by positivity)]
+    nlinarith
+
+/-- The Catalan generating function simplifies to the Narayana radical formula when the
+geometric denominator is positive. -/
+private lemma narayana_transform_value {x y : ℝ} (hx0 : x ≠ 0) (hy0 : y ≠ 0)
+    (hbase : 0 < 1 - (1 + y) * x) :
+    x * y * ((1 - Real.sqrt (1 - 4 * (x ^ 2 * y / (1 - (1 + y) * x) ^ 2))) /
+      (2 * (x ^ 2 * y / (1 - (1 + y) * x) ^ 2)) / (1 - (1 + y) * x)) =
+    (1 - x - x * y - Real.sqrt ((1 - x - x * y) ^ 2 - 4 * x ^ 2 * y)) / (2 * x) := by
+  have hsqrt : Real.sqrt (1 - 4 * (x ^ 2 * y / (1 - (1 + y) * x) ^ 2)) =
+      Real.sqrt ((1 - x - x * y) ^ 2 - 4 * x ^ 2 * y) / (1 - (1 + y) * x) := by
+    rw [show 1 - 4 * (x ^ 2 * y / (1 - (1 + y) * x) ^ 2) =
+        ((1 - x - x * y) ^ 2 - 4 * x ^ 2 * y) / (1 - (1 + y) * x) ^ 2 by
+      calc
+        _ = ((1 - (1 + y) * x) ^ 2 - 4 * x ^ 2 * y) / (1 - (1 + y) * x) ^ 2 := by
+          rw [sub_div, div_self (pow_ne_zero 2 hbase.ne')]; ring
+        _ = _ := by congr 1; ring,
+      Real.sqrt_div' _ (sq_nonneg _), Real.sqrt_sq hbase.le]
+  rw [hsqrt]
+  have hclosed : ∀ a r : ℝ, a ≠ 0 →
+      x * y * ((1 - r / a) / (2 * (x ^ 2 * y / a ^ 2)) / a) = (a - r) / (2 * x) := by
+    intro a r ha
+    field_simp
+  rw [hclosed _ _ hbase.ne']
+  congr 1
+  ring
+
+/-- The bivariate Narayana generating function on the explicit domain `|x|, |y| < 1/8`, with
+`x ≠ 0`. The square root is the branch continuous from the origin. -/
+theorem hasSum_narayana_of_abs_lt {x y : ℝ} (hx0 : x ≠ 0)
+    (hx : |x| < 1 / 8) (hy : |y| < 1 / 8) :
+    HasSum (fun p : ℕ × ℕ => (narayana (p.1 + 1) (p.2 + 1) : ℝ) * x ^ (p.1 + 1) * y ^ (p.2 + 1))
+      ((1 - x - x * y - Real.sqrt ((1 - x - x * y) ^ 2 - 4 * x ^ 2 * y)) / (2 * x)) := by
+  obtain ⟨hbx, hu, hua⟩ := narayana_transform_bounds hx hy
+  have hbase : 0 < 1 - (1 + y) * x := by
+    have := le_abs_self ((1 + y) * x); linarith
+  have hbasea : 0 < 1 - |(1 + y) * x| := by linarith
+  by_cases hy0 : y = 0
+  · subst y
+    have h1x : 0 ≤ 1 - x := by have := le_abs_self x; linarith
+    simp [Real.sqrt_sq h1x]
+  have hu0 : x ^ 2 * y / (1 - (1 + y) * x) ^ 2 ≠ 0 :=
+    div_ne_zero (mul_ne_zero (pow_ne_zero _ hx0) hy0) (pow_ne_zero _ hbase.ne')
+  have hua0 : |x| ^ 2 * |y| / (1 - |(1 + y) * x|) ^ 2 ≠ 0 :=
+    div_ne_zero (mul_ne_zero (pow_ne_zero _ (abs_ne_zero.mpr hx0)) (abs_ne_zero.mpr hy0))
+      (pow_ne_zero _ hbasea.ne')
+  have hT := s26a_hasSum_transform (fun j => (catalan j : ℝ) * y ^ j)
+    (by norm_num : 1 ≤ 2) (b := 1 + y) (x := x) (by linarith) (by
+      have h := (hasSum_catalan_mul_pow hua0 hua).summable
+      convert h using 1
+      ext j
+      simp only [abs_mul, Nat.abs_cast, abs_pow]
+      rw [mul_assoc, ← mul_pow]
+      congr 2
+      ring) (by
+      have h := hasSum_catalan_mul_pow hu0 hu
+      convert h using 1
+      ext j
+      rw [mul_assoc, ← mul_pow]
+      congr 2
+      ring)
+  have hrows : HasSum (fun n => x * y * ((∑ j ∈ range (n + 1), (catalan j : ℝ) * y ^ j *
+      (if 2 * j ≤ n then (n.choose (2 * j) : ℝ) * (1 + y) ^ (n - 2 * j) else 0)) * x ^ n))
+      ((x * y) * (((1 - Real.sqrt (1 - 4 * (x ^ 2 * y / (1 - (1 + y) * x) ^ 2))) /
+        (2 * (x ^ 2 * y / (1 - (1 + y) * x) ^ 2))) / (1 - (1 + y) * x))) := by
+    convert hT.mul_left (x * y) using 1
+    ext n
+    congr 2
+    refine sum_congr rfl fun j hj => ?_
+    split_ifs with hj
+    · rw [show n - 2 * j + 2 * j = n by omega]
+    · ring
+  have hF := (summable_narayana_mul_pow hx hy).hasSum
+  have hsum := hF.prod_fiberwise (fun n => hasSum_narayana_row n x y)
+  rw [hsum.unique hrows] at hF
+  convert hF using 1
+  exact (narayana_transform_value hx0 hy0 hbase).symm
+
 /-- DLMF 26.6.8: `∑_{n,k=1}^∞ N(n, k) xⁿ y^k = (1 - x - xy - √((1-x-xy)² - 4x²y))/(2x)`, for
 sufficiently small real `x ≠ 0` and `y`. -/
 @[dlmf 26.6.E8]
 theorem hasSum_narayana : ∃ δ > (0 : ℝ), ∀ x y : ℝ, x ≠ 0 → |x| < δ → |y| < δ →
     HasSum (fun p : ℕ × ℕ => (narayana (p.1 + 1) (p.2 + 1) : ℝ) * x ^ (p.1 + 1) * y ^ (p.2 + 1))
       ((1 - x - x * y - Real.sqrt ((1 - x - x * y) ^ 2 - 4 * x ^ 2 * y)) / (2 * x)) := by
-  sorry
+  refine ⟨1 / 8, by norm_num, ?_⟩
+  intro x y hx0 hx hy
+  exact hasSum_narayana_of_abs_lt hx0 hx hy
 
 /-- DLMF 26.6.9: `∑_{n=0}^∞ r(n) xⁿ = (1 - x - √(1 - 6x + x²))/(2x)`, real
 `0 < |x| < 3 - 2√2`. -/

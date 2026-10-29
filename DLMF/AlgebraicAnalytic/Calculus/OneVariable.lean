@@ -9,6 +9,7 @@ public import DLMF.AlgebraicAnalytic.Calculus.Defs
 public import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
 public import Mathlib.Analysis.Convex.Deriv
 public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
+public import Mathlib.MeasureTheory.Integral.IntervalIntegral.MeanValue
 public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 public import Mathlib.Topology.EMetricSpace.BoundedVariation
 
@@ -28,6 +29,10 @@ Most of DLMF §1.4 is in Mathlib; the pointers are in
 * L'Hôpital's rule for `∞/∞` (1.4.14–1.4.15) and Faà di Bruno's formula 1.4.13;
 * extrema on a closed interval (§1.4(vii)) and the derivative criteria for convexity
   (§1.4(viii)).
+
+The integral mean-value formulas use Mathlib’s
+`exists_eq_const_mul_intervalIntegral_of_nonneg` and
+`exists_eq_const_mul_intervalIntegral_of_nonneg_of_monotoneOn`.
 -/
 
 @[expose] public noncomputable section
@@ -257,7 +262,48 @@ theorem exists_integral_mul_eq_mul_integral {f ψ : ℝ → ℝ} {a b : ℝ} (ha
     (hf : ContinuousOn f (Icc a b)) (hψ : ∀ x ∈ Icc a b, 0 ≤ ψ x)
     (hψi : IntervalIntegrable ψ volume a b) :
     ∃ c ∈ Icc a b, ∫ x in a..b, f x * ψ x = f c * ∫ x in a..b, ψ x := by
-  sorry
+  simpa only [uIcc_of_le hab] using
+    exists_eq_const_mul_intervalIntegral_of_nonneg
+      (by simpa only [uIcc_of_le hab] using hf) hψi
+      (fun x hx => hψ x (by simpa only [uIcc_of_le hab] using uIoc_subset_uIcc hx))
+
+/-- The second mean-value formula for an increasing weight, without a sign restriction. -/
+private lemma integral_mul_second_mean_value_of_monotone {f ψ : ℝ → ℝ} {a b : ℝ} (hab : a ≤ b)
+    (hf : MonotoneOn f (Icc a b)) (hψ : IntervalIntegrable ψ volume a b) :
+    ∃ c ∈ Icc a b, ∫ x in a..b, f x * ψ x =
+      f a * (∫ x in a..c, ψ x) + f b * ∫ x in c..b, ψ x := by
+  have hfi : IntervalIntegrable f volume a b := by
+    apply MonotoneOn.intervalIntegrable
+    simpa only [uIcc_of_le hab] using hf
+  have hfg : IntervalIntegrable (fun x => f x * ψ x) volume a b := by
+    rw [intervalIntegrable_iff_integrableOn_Icc_of_le hab]
+    have hψi := (intervalIntegrable_iff_integrableOn_Icc_of_le hab).mp hψ
+    have hfm := ((intervalIntegrable_iff_integrableOn_Icc_of_le hab).mp hfi).aestronglyMeasurable
+    refine hψi.bdd_mul (c := |f a| + |f b|) hfm ?_
+    filter_upwards [ae_restrict_mem measurableSet_Icc] with x hx
+    have hb := hf.mapsTo_Icc hx
+    rcases hb with ⟨hlo, hhi⟩
+    rw [Real.norm_eq_abs, abs_le]
+    exact ⟨by linarith [neg_abs_le (f a), abs_nonneg (f b)],
+      by linarith [le_abs_self (f b), abs_nonneg (f a)]⟩
+  obtain ⟨c, hc, he⟩ :=
+    exists_eq_const_mul_intervalIntegral_of_nonneg_of_monotoneOn
+      (f := fun x => f x - f a) hab (by simp)
+        (fun x hx y hy hxy => sub_le_sub_right (hf hx hy hxy) (f a)) hψ
+  have hi : (∫ x in a..b, (f x - f a) * ψ x) =
+      (∫ x in a..b, f x * ψ x) - f a * ∫ x in a..b, ψ x := by
+    simp_rw [sub_mul]
+    rw [intervalIntegral.integral_sub hfg (hψ.const_mul _), intervalIntegral.integral_const_mul]
+  rw [hi] at he
+  have hleft : IntervalIntegrable ψ volume a c := hψ.mono_set (by
+    rw [uIcc_of_le hc.1, uIcc_of_le hab]; exact Icc_subset_Icc_right hc.2)
+  have hright : IntervalIntegrable ψ volume c b := hψ.mono_set (by
+    rw [uIcc_of_le hc.2, uIcc_of_le hab]; exact Icc_subset_Icc_left hc.1)
+  have hadd := intervalIntegral.integral_add_adjacent_intervals hleft hright
+  refine ⟨c, hc, ?_⟩
+  rw [← hadd] at he
+  linear_combination he
+
 
 /-- DLMF 1.4.30 (second mean value theorem for integrals, Bonnet–du Bois-Reymond): for `f`
 monotonic and `ψ` integrable on `[a, b]` there is `c ∈ [a, b]` with
@@ -268,7 +314,11 @@ theorem exists_integral_mul_eq_secondMeanValue {f ψ : ℝ → ℝ} {a b : ℝ} 
     (hψ : IntervalIntegrable ψ volume a b) :
     ∃ c ∈ Icc a b, ∫ x in a..b, f x * ψ x =
       f a * (∫ x in a..c, ψ x) + f b * ∫ x in c..b, ψ x := by
-  sorry
+  rcases hf with hf | hf
+  · exact integral_mul_second_mean_value_of_monotone hab hf hψ
+  · obtain ⟨c, hc, he⟩ := integral_mul_second_mean_value_of_monotone hab hf.neg hψ
+    refine ⟨c, hc, ?_⟩
+    simpa only [Pi.neg_apply, neg_mul, intervalIntegral.integral_neg, ← neg_add, neg_inj] using he
 
 /-- DLMF 1.4.31 (repeated integrals): applying `g ↦ (x ↦ ∫ₐˣ g)` `n + 1` times to `f` gives
 `(1/n!) ∫ₐᵇ (b - x)ⁿ f(x) dx` at `b`. Stated for `f` continuous (DLMF: continuous or piecewise

@@ -97,6 +97,45 @@ theorem residueAt_besselSq {ν : ℝ} (hν : -1 / 2 < ν) {x : ℝ} (hx : 0 < x)
       -(besselSqMellinA ν n * Real.log x + besselSqMellinB ν n) * ((x : ℂ) ^ n)⁻¹ := by
   sorry
 
+/-- Differentiating the Mellin kernel away from Gamma poles gives its value times
+the sum of the logarithmic derivatives of its five factors. -/
+lemma hasDerivAt_besselSqMellinKernel (ν : ℝ) {z : ℂ}
+    (h₁ : ∀ m : ℕ, (ν + z / 2 : ℂ) ≠ -m)
+    (h₂ : ∀ m : ℕ, (1 - z / 2 : ℂ) ≠ -m)
+    (h₃ : ∀ m : ℕ, (1 + ν - z / 2 : ℂ) ≠ -m)
+    (h₄ : ∀ m : ℕ, z ≠ -m) :
+    HasDerivAt (besselSqMellinKernel ν)
+      (besselSqMellinKernel ν z * ((Real.log 2 : ℂ) + digamma (ν + z / 2) / 2 +
+        digamma (1 - z / 2) + digamma (1 + ν - z / 2) / 2 - digamma z)) z := by
+  have hd := (hasDerivAt_id z).div_const (2 : ℂ)
+  have hG₁ := (Complex.differentiableAt_Gamma _ h₁).hasDerivAt.comp z
+    (hd.const_add (ν : ℂ))
+  have hG₂ := (Complex.differentiableAt_Gamma _ h₂).hasDerivAt.comp z
+    ((hasDerivAt_const z (1 : ℂ)).sub hd)
+  have hG₃ := (Complex.differentiableAt_Gamma _ h₃).hasDerivAt.comp z
+    ((hasDerivAt_const z (1 + ν : ℂ)).sub hd)
+  have hp := ((hasDerivAt_id z).sub_const 1).const_cpow (c := (2 : ℂ))
+    (Or.inl (by norm_num))
+  have hΓ₂ := Complex.Gamma_ne_zero h₂
+  have hΓ₃ := Complex.Gamma_ne_zero h₃
+  have hΓ₄ := Complex.Gamma_ne_zero h₄
+  have hD := (((hp.mul hG₁).mul ((hG₂.inv hΓ₂).pow 2)).mul (hG₃.inv hΓ₃)).mul
+    ((Complex.differentiableAt_Gamma _ h₄).hasDerivAt.inv hΓ₄)
+  apply hD.congr_deriv
+  dsimp only [besselSqMellinKernel, Function.comp_def, id_eq, Pi.mul_apply,
+    Pi.inv_apply, Pi.pow_apply, Pi.sub_apply]
+  simp only [Complex.digamma_def, logDeriv_apply, inv_eq_one_div]
+  rw [show Complex.log 2 = (Real.log 2 : ℂ) from (Complex.ofReal_log (by norm_num)).symm]
+  have hΓ₁ := Complex.Gamma_ne_zero h₁
+  generalize Gamma (ν + z / 2) = A at hΓ₁ ⊢
+  generalize Gamma (1 - z / 2) = B at hΓ₂ ⊢
+  generalize Gamma (1 + ν - z / 2) = C at hΓ₃ ⊢
+  generalize Gamma z = D at hΓ₄ ⊢
+  field_simp
+  ring_nf
+  field_simp
+  ring
+
 /-- DLMF 2.5.13 in DLMF's form: if `n` is odd and `1 + ν - n/2` is not a pole of `Γ`, then
 `bₙ = -aₙ(ln 2 + ½ψ(ν + n/2) + ψ(1 - n/2) + ½ψ(1 + ν - n/2) - ψ(n))`. -/
 @[dlmf 2.5.E13]
@@ -104,7 +143,29 @@ theorem besselSqMellinB_eq_digamma {ν : ℝ} (hν : -1 / 2 < ν) {n : ℕ} (hn 
     (hpole : ∀ m : ℕ, (1 + ν - n / 2 : ℂ) ≠ -m) :
     besselSqMellinB ν n = -besselSqMellinA ν n * (Real.log 2 + digamma (ν + n / 2) / 2 +
       digamma (1 - n / 2) + digamma (1 + ν - n / 2) / 2 - digamma n) := by
-  sorry
+  have hn0 : 0 < (n : ℝ) := by exact_mod_cast hn.pos
+  have hn1 : 1 ≤ (n : ℝ) := by exact_mod_cast hn.pos
+  have hreg (z : ℂ) (hz : 0 < z.re) : ∀ m : ℕ, z ≠ -m := by
+    intro m hm
+    have he := congrArg Complex.re hm
+    simp only [neg_re, natCast_re] at he
+    have hm0 : (0 : ℝ) ≤ m := Nat.cast_nonneg _
+    linarith
+  have h₁ : ∀ m : ℕ, (ν + n / 2 : ℂ) ≠ -m := hreg _ (by
+    norm_num
+    linarith)
+  have h₂ : ∀ m : ℕ, (1 - n / 2 : ℂ) ≠ -m := by
+    intro m hm
+    have he := congrArg Complex.re hm
+    norm_num at he
+    have hn2 : n = 2 + 2 * m := by
+      exact_mod_cast (show (n : ℝ) = 2 + 2 * m by linarith)
+    obtain ⟨k, hk⟩ := hn
+    omega
+  have h₄ : ∀ m : ℕ, (n : ℂ) ≠ -m := hreg _ (by simpa using hn0)
+  rw [besselSqMellinB, (hasDerivAt_besselSqMellinKernel ν h₁ h₂ hpole h₄).deriv,
+    besselSqMellinA]
+  ring
 
 /-- DLMF §2.5(i), after 2.5.15: `aₛ = 0` for even `s` (`1/Γ(1 - s/2) = 0` for even `s ≥ 2` and
 `1/Γ(s) = 0` for `s = 0`). -/

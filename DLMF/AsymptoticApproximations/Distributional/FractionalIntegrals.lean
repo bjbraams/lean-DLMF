@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.AsymptoticApproximations.Distributional.Defs
+public import TauCeti.Analysis.SpecialFunctions.Beta
 
 /-!
 # Fractional integrals and regularization (DLMF §2.6(iii)–(iv))
@@ -16,6 +17,9 @@ public import DLMF.AsymptoticApproximations.Distributional.Defs
   2.6.43–2.6.44), and the example 2.6.48–2.6.53.
 * §2.6(iv): the convolution integral `∫₀^∞ f(t) h(xt) dt` (2.6.54), the product expansion
   2.6.57, the regularization 2.6.59 of `∫₀^∞ t^λ dt`, 2.6.60 and the expansion 2.6.62.
+
+The sharp endpoint integrability criterion reuses TauCeti
+`integrableOn_rpow_mul_one_sub_rpow_iff` after positive dilation.
 
 Elements `Dⁿ f` of `K⁺` are represented by pairs `(n, f)` and act on smooth compactly
 supported test functions through `kPlusPairing n f φ = (-1)ⁿ ∫₀^∞ f φ^{(n)}`; the distributions
@@ -40,10 +44,43 @@ integral `∫₀^x (x-t)^{μ-1} t^{-s-α} dt` exists in the usual (Lebesgue) sen
 `s = 0` and `α < 1`. -/
 @[dlmf 2.6.E36]
 theorem integrableOn_powKernel_mul_rpow_iff {x μ α : ℝ} (hx : 0 < x) (hμ : 0 < μ) (hα : 0 < α)
-    (hα1 : α ≤ 1) (s : ℕ) :
+    (_hα1 : α ≤ 1) (s : ℕ) :
     IntegrableOn (fun t : ℝ => (x - t) ^ (μ - 1) * t ^ (-(s : ℝ) - α)) (Ioo 0 x) ↔
       s = 0 ∧ α < 1 := by
-  sorry
+  let F : ℝ → ℝ := fun t => (x - t) ^ (μ - 1) * t ^ (-(s : ℝ) - α)
+  have hscale : IntegrableOn F (Ioo 0 x) ↔
+      IntegrableOn (fun t => F (x * t)) (Ioo 0 1) := by
+    rw [← intervalIntegrable_iff_integrableOn_Ioo_of_le hx.le,
+      ← IntervalIntegrable.comp_mul_left_iff hx.ne',
+      zero_div, div_self hx.ne', intervalIntegrable_iff_integrableOn_Ioo_of_le zero_le_one]
+  change IntegrableOn F (Ioo 0 x) ↔ _
+  rw [hscale]
+  have heq : EqOn (fun t => F (x * t))
+      (fun t : ℝ => (x ^ (μ - 1) * x ^ (-(s : ℝ) - α)) *
+        (t ^ ((1 - (s : ℝ) - α) - 1) * (1 - t) ^ (μ - 1))) (Ioo 0 1) := by
+    intro t ht
+    have ht1 : t < 1 := ht.2
+    dsimp [F]
+    rw [show x - x * t = x * (1 - t) by ring,
+      Real.mul_rpow hx.le (by linarith : 0 ≤ 1 - t), Real.mul_rpow hx.le ht.1.le]
+    rw [show 1 - (s : ℝ) - α - 1 = -(s : ℝ) - α by ring]
+    ring
+  rw [integrableOn_congr_fun heq measurableSet_Ioo, IntegrableOn,
+    integrable_const_mul_iff (isUnit_iff_ne_zero.mpr
+      (mul_ne_zero (Real.rpow_pos_of_pos hx _).ne'
+        (Real.rpow_pos_of_pos hx _).ne')), ← IntegrableOn,
+    TauCeti.integrableOn_rpow_mul_one_sub_rpow_iff]
+  constructor
+  · rintro ⟨h, _⟩
+    have hs : s = 0 := by
+      by_contra hs
+      have hs' : (1 : ℝ) ≤ s := by exact_mod_cast Nat.one_le_iff_ne_zero.mpr hs
+      linarith
+    refine ⟨hs, ?_⟩
+    simp only [hs, Nat.cast_zero, sub_zero] at h
+    linarith
+  · rintro ⟨rfl, hα'⟩
+    exact ⟨by simpa using hα', hμ⟩
 
 /-- DLMF 2.6.iii: the convolution of `K⁺` is commutative on representatives,
 `f ∗ g = g ∗ f`. -/
@@ -166,7 +203,24 @@ theorem riemannLiouvilleIntegral_eq_of_eq_one {f : ℝ → ℂ} {a : ℕ → ℂ
 theorem g2b_exampleF_eq (α : ℝ) (n : ℕ) {t : ℝ} (ht : 0 < t) :
     stieltjesRemainder (g2b_exampleF α) α (fun s => (-1 : ℂ) ^ s) n t =
       (-1 : ℂ) ^ n * ((t ^ (1 - n - α) / (1 + t) : ℝ) : ℂ) := by
-  sorry
+  induction n with
+  | zero => simp [stieltjesRemainder, g2b_exampleF]
+  | succ n ih =>
+    have he : stieltjesRemainder (g2b_exampleF α) α (fun s => (-1 : ℂ) ^ s) (n + 1) t =
+        stieltjesRemainder (g2b_exampleF α) α (fun s => (-1 : ℂ) ^ s) n t -
+          (-1 : ℂ) ^ n * ((t ^ (-((n : ℝ) + α)) : ℝ) : ℂ) := by
+      simp only [stieltjesRemainder, Finset.sum_range_succ]
+      ring
+    rw [he, ih, pow_succ]
+    have hp : t ^ (1 - (n : ℝ) - α) = t * t ^ (-((n : ℝ) + α)) := by
+      rw [show 1 - (n : ℝ) - α = 1 + (-((n : ℝ) + α)) by ring,
+        Real.rpow_add ht, Real.rpow_one]
+    have he' : (1 - ((n + 1 : ℕ) : ℝ) - α) = -((n : ℝ) + α) := by push_cast; ring
+    rw [he', hp]
+    push_cast
+    have hden : (1 + (t : ℂ)) ≠ 0 := by exact_mod_cast (by linarith : (1 + t : ℝ) ≠ 0)
+    field_simp [hden]
+    ring
 
 /-- DLMF 2.6.51: the Mellin transform of `f(t) = t^{1-α}/(1+t)`, `0 < α < 1`, continues to
 `𝓜f(z) = π/sin(π(z+1-α))`, and at the integers `𝓜f(s) = (-1)^s π/sin(πα)`. -/

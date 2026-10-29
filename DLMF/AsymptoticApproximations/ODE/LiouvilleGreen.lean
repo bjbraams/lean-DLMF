@@ -116,7 +116,12 @@ theorem liouvilleGreen_recessive_isEquivalent {a : ℝ} {f f' f'' g ξ : ℝ →
 
 /-- DLMF 2.7.26–2.7.27 on a finite interval: if moreover `𝒱_{a₁,a₂}(F) < ∞`, then the solutions
 of `liouvilleGreen_interval` satisfy `w₁(x) ∼ f^{-1/4} e^{ξ}` as `x → a₁+` and
-`w₂(x) ∼ f^{-1/4} e^{-ξ}` as `x → a₂-`; solutions with these properties are unique. -/
+`w₂(x) ∼ f^{-1/4} e^{-ξ}` as `x → a₂-`; solutions with these properties are unique.
+
+**Qualification needed:** the uniqueness assertion fails at regular endpoints under the
+present hypotheses. For `f = 1`, `g = 0`, `ξ(x) = x` on `(0, 1)`, both `exp x` and
+`exp x + sinh x` solve the equation and are equivalent to `exp x` at `0+`.
+An endpoint condition is missing; see the proof-round review of 2026-10-29. -/
 @[dlmf 2.7.E26, dlmf 2.7.E27]
 theorem liouvilleGreen_interval_isEquivalent {a₁ a₂ : ℝ} (ha : a₁ < a₂) {f f' f'' g ξ : ℝ → ℝ}
     (hd : IsLGData f f' f'' g ξ (Ioo a₁ a₂))
@@ -152,7 +157,37 @@ theorem liouvilleGreen_dominant {a₁ a₂ : ℝ} (ha : a₁ < a₂) {f f' f'' g
 theorem sqrt_add_log_expansion :
     (fun x : ℝ => √(x + Real.log x) - (√x + Real.log x / (2 * √x)))
       =O[atTop] (fun x : ℝ => x ^ (-(3 / 2) : ℝ) * Real.log x ^ 2) := by
-  sorry
+  refine IsBigO.of_bound 1 ?_
+  filter_upwards [eventually_ge_atTop (1 : ℝ)] with x hx
+  have hx0 : 0 < x := by linarith
+  have hl : 0 ≤ Real.log x := Real.log_nonneg hx
+  let a := Real.sqrt (x + Real.log x)
+  let b := Real.sqrt x
+  have hb : 0 < b := Real.sqrt_pos.mpr hx0
+  have ha : b ≤ a := Real.sqrt_le_sqrt (by linarith)
+  have hb2 : b ^ 2 = x := Real.sq_sqrt hx0.le
+  have ha2 : a ^ 2 = x + Real.log x := Real.sq_sqrt (by linarith)
+  have hsum : a + b ≠ 0 := by linarith
+  have hlog : Real.log x = a ^ 2 - b ^ 2 := by linarith
+  have herr : a - (b + Real.log x / (2 * b)) =
+      -(Real.log x ^ 2 / (2 * b * (a + b) ^ 2)) := by
+    rw [hlog]
+    field_simp
+    ring
+  have hd : 0 < 2 * b * (a + b) ^ 2 := by positivity
+  have hden : x * b ≤ 2 * b * (a + b) ^ 2 := by
+    have hs : x ≤ (a + b) ^ 2 := by nlinarith [sq_nonneg a]
+    nlinarith
+  have hp : x ^ (-(3 / 2) : ℝ) = 1 / (x * b) := by
+    rw [Real.rpow_neg hx0.le, show (3 / 2 : ℝ) = 1 + 1 / 2 by norm_num,
+      Real.rpow_add hx0, Real.rpow_one, ← Real.sqrt_eq_rpow]
+    simp only [one_div, b]
+  change ‖a - (b + Real.log x / (2 * b))‖ ≤ _
+  rw [herr, norm_neg, Real.norm_eq_abs, abs_of_nonneg (by positivity), one_mul,
+    Real.norm_eq_abs, abs_of_nonneg (by positivity), hp]
+  calc Real.log x ^ 2 / (2 * b * (a + b) ^ 2) ≤ Real.log x ^ 2 / (x * b) :=
+      div_le_div_of_nonneg_left (sq_nonneg _) (by positivity) hden
+    _ = 1 / (x * b) * Real.log x ^ 2 := by ring
 
 /-- DLMF 2.7.31, 2.7.33–2.7.34 (example): the equation `w'' = (x + ln x) w` on `(0, ∞)` has a
 recessive solution `w₂(x) ∼ x^{-1/4-√x} exp(2x^{1/2} - (2/3)x^{3/2})` and a dominant solution

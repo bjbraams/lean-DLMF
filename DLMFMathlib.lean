@@ -5,6 +5,20 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMFMathlib.MeasureTheory.Integral.HalfLine
+public import DLMFMathlib.MeasureTheory.Function.L2Space
+public import DLMFMathlib.Analysis.Asymptotics.ExponentialGrowth
+public import DLMFMathlib.Analysis.Asymptotics.IntegralComparison
+public import DLMFMathlib.Analysis.Asymptotics.PowerSums
+public import DLMFMathlib.RingTheory.Binomial
+public import DLMFMathlib.Analysis.Complex.Sector
+public import DLMFMathlib.Analysis.Fourier.AddCircle
+public import DLMFMathlib.Analysis.Fourier.GaussianSeries
+public import DLMFMathlib.Analysis.Fourier.L2Compatibility
+public import DLMFMathlib.Analysis.Integral.Frullani
+public import DLMFMathlib.Analysis.Integral.LaplaceRay
+public import DLMFMathlib.Analysis.Integral.RepeatedIntegrationByParts
+public import DLMFMathlib.Analysis.InnerProductSpace.CauchySchwarz
 public import DLMFMathlib.Analysis.Complex.ScalarSeries
 public import DLMFMathlib.Analysis.SpecialFunctions.ChebyshevSeries
 public import DLMFMathlib.Analysis.SpecialFunctions.Complex.LogBoundary
@@ -17,6 +31,8 @@ public import DLMFMathlib.Analysis.EulerMaclaurin
 public import DLMFMathlib.Analysis.BooleSummation
 public import DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion
 public import DLMFMathlib.Analysis.Asymptotics.Watson
+public import DLMFMathlib.Analysis.Asymptotics.WatsonLog
+public import DLMFMathlib.Analysis.Asymptotics.WatsonKernel
 public import DLMFMathlib.Analysis.Asymptotics.WatsonRotated
 public import DLMFMathlib.Analysis.Asymptotics.AsymptoticInversion
 public import DLMFMathlib.Analysis.Asymptotics.StationaryPhase
@@ -24,13 +40,19 @@ public import ToMathlib.Analysis.Integral.Laplace
 public import DLMFMathlib.Analysis.Integral.Improper
 public import ToMathlib.Analysis.Complex.Carlson
 public import DLMFMathlib.Analysis.Complex.FactorialSeries
+public import DLMFMathlib.Analysis.MellinConvolution
+public import DLMFMathlib.Analysis.MellinParseval
+public import DLMFMathlib.Analysis.Fourier.L1Inversion
+public import DLMFMathlib.Analysis.Fourier.Pairing
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
+public import DLMFMathlib.Analysis.Complex.GeometricNewtonSeries
 public import DLMFMathlib.Analysis.Complex.TaylorParameter
 public import DLMFMathlib.Analysis.Complex.SegmentPrimitive
 public import DLMFMathlib.Analysis.Complex.StarPrimitive
 public import DLMFMathlib.Analysis.Complex.BarnesResidue
 public import DLMFMathlib.Analysis.Complex.ZeroLocalization
 public import DLMFMathlib.Analysis.ContinuedFraction.Convergence
+public import DLMFMathlib.Analysis.SpecificLimits.Oscillation
 public import DLMFMathlib.Analysis.SpecificLimits.Pincherle
 public import DLMFMathlib.Analysis.ODE.SturmComparison
 public import DLMFMathlib.Analysis.ODE.SymmetricSquare
@@ -91,8 +113,26 @@ public import DLMFMathlib.NumberTheory.LSeries.ZetaValues
 # Supporting results for Mathlib
 
 General results used by the special-function library but not specific to it, written in
-the namespaces of the Mathlib APIs they extend. These modules use Mathlib, TauCeti and lean-codes, without importing `DLMF`.
+the namespaces of the Mathlib APIs they extend. These modules do not import `DLMF`.
 
+* `DLMFMathlib.Analysis.Asymptotics.PowerSums`: integral-comparison bounds for real power sums.
+* `DLMFMathlib.Analysis.Asymptotics.ExponentialGrowth`: exponential bounds for primitives.
+* `DLMFMathlib.Analysis.Complex.Sector`: uniform discs inside sectors and Cauchy derivative bounds.
+* `DLMFMathlib.Analysis.Fourier.AddCircle`: complex Parseval pairings on circles and intervals.
+* `DLMFMathlib.Analysis.Fourier.GaussianSeries`: absolute convergence of complex Gaussian sums.
+* `DLMFMathlib.Analysis.Fourier.Pairing`: bilinear pairings of forward and inverse transforms.
+* `DLMFMathlib.Analysis.Fourier.L1Inversion`: almost-everywhere inversion and `L¹` Parseval.
+* `DLMFMathlib.Analysis.Fourier.L2Compatibility`: agreement of integral and unitary `L²` transforms.
+* `DLMFMathlib.Analysis.MellinParseval`: weighted `L¹` Mellin pairings in logarithmic coordinates.
+* `DLMFMathlib.Analysis.Asymptotics.WatsonKernel`: Watson estimates for rapidly decreasing kernels.
+* `DLMFMathlib.Analysis.Asymptotics.WatsonLog`: logarithmic moments and Watson remainder bounds.
+* `DLMFMathlib.Analysis.Integral.Frullani`: exponential Frullani integrals with complex parameters.
+* `DLMFMathlib.Analysis.Integral.LaplaceRay`: Fubini identities for horizontal Laplace rays.
+* `DLMFMathlib.Analysis.Integral.RepeatedIntegrationByParts`: finite boundary sums and
+  exact remainders.
+* `DLMFMathlib.Analysis.SpecificLimits.Oscillation`: a periodic phase excludes a nonzero limit.
+* `DLMFMathlib.MeasureTheory.Integral.HalfLine`: reflection, even extensions and half-line
+  integrals.
 * `DLMFMathlib.Analysis.Complex.SegmentPrimitive`: straight-segment primitives and their derivatives.
 * `DLMFMathlib.Analysis.Complex.StarPrimitive`: primitives of holomorphic functions on star-convex
   open sets.
@@ -156,4 +196,5 @@ the namespaces of the Mathlib APIs they extend. These modules use Mathlib, TauCe
   diagonals; the central binomial series `Σ C(2k, k) y^k = 1/√(1 - 4y)`.
 * `DLMFMathlib.RingTheory.R27PowerSeriesEval`: absolutely convergent evaluation of integer power
   series at a complex point, with its algebra (products, powers, `1 - X^k`, geometric series).
+* `DLMFMathlib.RingTheory.Binomial`: falling-factorial and shifted binomial coefficient identities.
 -/

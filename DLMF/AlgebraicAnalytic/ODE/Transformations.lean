@@ -6,6 +6,9 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.AlgebraicAnalytic.ODE.Defs
+public import Mathlib.Analysis.Calculus.ContDiff.Deriv
+public import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
+public import Mathlib.Analysis.Complex.CauchyIntegral
 public import Mathlib.Analysis.Calculus.Deriv.Inv
 public import Mathlib.Analysis.Calculus.Deriv.Pow
 public import Mathlib.Analysis.InnerProductSpace.Basic
@@ -25,10 +28,13 @@ For `w'' + f(z) w' + g(z) w = 0` on an open set `D ⊆ ℂ` (`IsLinODE2SolOn f g
   primitives `F` of `f` on `D` (hypotheses `HasDerivAt F (f z) z`), so the statements are
   branch-free;
 * the Liouville transformation 1.13.18–1.13.19, stated in the variable `z` with a chosen square
-  root `σ` of `ζ'` (admitted), the Schwarzian derivative 1.13.20 (definition `schwarzian`; the
-  first form is admitted), Cayley's identity 1.13.21 (admitted) and the inversion formula
-  1.13.22 (proved from 1.13.21);
-* the third-order equation 1.13.23 for products of solutions, and 1.13.25 (admitted).
+  root `σ` of `ζ'`, the Schwarzian derivative 1.13.20 (definition `schwarzian` and its
+  square-root form), Cayley's identity 1.13.21 and the inversion formula 1.13.22;
+* the third-order equation 1.13.23 for products of solutions, and the mixed-potential identity
+  1.13.25.
+
+The chain rules and Leibniz expansions use Mathlib’s derivative API,
+`iteratedDeriv_fun_mul` and the analyticity of complex differentiable functions.
 -/
 
 @[expose] public noncomputable section
@@ -173,7 +179,111 @@ theorem liouville_transformation (hD : IsOpen D) {H W ζ σ : ℂ → ℂ}
     (hσ2 : ∀ z ∈ D, σ z ^ 2 = deriv ζ z) (z : ℂ) (hz : z ∈ D) :
     deriv (fun y => deriv (fun x => σ x * W x) y / deriv ζ y) z / deriv ζ z =
       (H z / deriv ζ z ^ 2 + schwarzian ζ z / (2 * deriv ζ z ^ 2)) * (σ z * W z) := by
-  sorry
+  have hσa : AnalyticOnNhd ℂ σ D :=
+    (show DifferentiableOn ℂ σ D from fun y hy => (hσ y hy).differentiableWithinAt).analyticOnNhd hD
+  have hσc : ContDiffAt ℂ 2 σ z := (hσa z hz).contDiffAt
+  have hζc : ContDiffAt ℂ 3 ζ z := hζ.contDiffAt (hD.mem_nhds hz)
+  have hσd := (hσ z hz).hasDerivAt
+  have hσ1d := ((hσc.derivWithin (m := 1) (by norm_num)).differentiableAt (by norm_num)).hasDerivAt
+  have hζ1d := ((hζc.derivWithin (m := 1) (by norm_num)).differentiableAt (by norm_num)).hasDerivAt
+  have hσ0 : σ z ≠ 0 := by
+    intro h
+    have he := hσ2 z hz
+    simp [h] at he
+    exact hζ' z hz he.symm
+  have he1 : deriv (deriv ζ) =ᶠ[𝓝 z] fun y => 2 * σ y * deriv σ y := by
+    filter_upwards [hD.mem_nhds hz] with y hy
+    have he : (σ ^ 2) =ᶠ[𝓝 y] deriv ζ := by
+      filter_upwards [hD.mem_nhds hy] with w hw using hσ2 w hw
+    rw [← he.deriv_eq, ((hσ y hy).hasDerivAt.pow 2).deriv]
+    simp
+  have he2 : deriv (deriv (deriv ζ)) z =
+      2 * deriv σ z ^ 2 + 2 * σ z * deriv (deriv σ) z := by
+    have hd := (hσd.const_mul 2).mul hσ1d
+    rw [he1.deriv_eq]
+    change deriv ((fun y => 2 * σ y) * deriv σ) z = _
+    rw [hd.deriv]
+    ring
+  have hW1 := (hW z hz).1.hasDerivAt
+  have hW2 := (hW z hz).2
+  have hprod : deriv (fun x => σ x * W x) =ᶠ[𝓝 z]
+      fun y => deriv σ y * W y + σ y * deriv W y := by
+    filter_upwards [hD.mem_nhds hz] with y hy
+    exact ((hσ y hy).hasDerivAt.mul (hW y hy).1.hasDerivAt).deriv
+  have hprod2 := (hσ1d.mul hW1).add (hσd.mul hW2)
+  have hprod2' : HasDerivAt (deriv (fun x => σ x * W x))
+      (deriv (deriv σ) z * W z + deriv σ z * deriv W z +
+        (deriv σ z * deriv W z + σ z * (0 - 0 * deriv W z - -H z * W z))) z := by
+    exact hprod2.congr_of_eventuallyEq hprod
+  change deriv ((deriv (fun x => σ x * W x)) / deriv ζ) z / deriv ζ z = _
+  rw [(hprod2'.div hζ1d (hζ' z hz)).deriv, hprod.eq_of_nhds, he1.eq_of_nhds]
+  unfold schwarzian
+  simp only [iteratedDeriv_succ, iteratedDeriv_zero]
+  rw [he2, he1.eq_of_nhds, ← hσ2 z hz]
+  field_simp
+  ring
+
+/-- Differentiate the first-order chain rule under twice continuous differentiability. -/
+private lemma hasDerivAt_deriv_comp_of_contDiffAt {f g : ℂ → ℂ} {x : ℂ}
+    (hf : ContDiffAt ℂ 2 f (g x)) (hg : ContDiffAt ℂ 2 g x) :
+    HasDerivAt (deriv (f ∘ g))
+      (deriv (deriv f) (g x) * deriv g x ^ 2 + deriv f (g x) * deriv (deriv g) x) x := by
+  have hge : ∀ᶠ y in 𝓝 x, DifferentiableAt ℂ g y := by
+    filter_upwards [(hg.of_le (m := 1) (by norm_num)).eventually (by simp)] with y hy
+    exact hy.differentiableAt (by norm_num)
+  have hfe : ∀ᶠ y in 𝓝 x, DifferentiableAt ℂ f (g y) := by
+    have he := (hf.of_le (m := 1) (by norm_num)).eventually (by simp)
+    filter_upwards [hg.continuousAt.tendsto.eventually he] with y hy
+    exact hy.differentiableAt (by norm_num)
+  have heq : deriv (f ∘ g) =ᶠ[𝓝 x] fun y => deriv f (g y) * deriv g y := by
+    filter_upwards [hge, hfe] with y hgy hfy using deriv_comp y hfy hgy
+  have hfd := ((hf.derivWithin (m := 1) (by norm_num)).differentiableAt (by norm_num)).hasDerivAt
+  have hgd := ((hg.derivWithin (m := 1) (by norm_num)).differentiableAt (by norm_num)).hasDerivAt
+  have hd := (hfd.comp x (hg.differentiableAt (by norm_num)).hasDerivAt).mul hgd
+  refine (hd.congr_of_eventuallyEq heq).congr_deriv ?_
+  simp only [Function.comp_apply]
+  ring
+
+/-- The third-order chain rule separates the cubic, mixed and linear terms. -/
+private lemma iteratedDeriv_three_comp {f g : ℂ → ℂ} {x : ℂ}
+    (hf : ContDiffAt ℂ 3 f (g x)) (hg : ContDiffAt ℂ 3 g x) :
+    iteratedDeriv 3 (f ∘ g) x =
+      iteratedDeriv 3 f (g x) * deriv g x ^ 3 +
+      3 * iteratedDeriv 2 f (g x) * deriv g x * iteratedDeriv 2 g x +
+      deriv f (g x) * iteratedDeriv 3 g x := by
+  have hge := (hg.of_le (m := 2) (by norm_num)).eventually (by simp)
+  have hfe := (hf.of_le (m := 2) (by norm_num)).eventually (by simp)
+  have heq : deriv (deriv (f ∘ g)) =ᶠ[𝓝 x] fun y =>
+      deriv (deriv f) (g y) * deriv g y ^ 2 + deriv f (g y) * deriv (deriv g) y := by
+    filter_upwards [hge, hg.continuousAt.tendsto.eventually hfe] with y hgy hfy
+    exact (hasDerivAt_deriv_comp_of_contDiffAt hfy hgy).deriv
+  have hfd := (hf.differentiableAt (by norm_num)).hasDerivAt
+  have hgd := (hg.differentiableAt (by norm_num)).hasDerivAt
+  have hf1 : ContDiffAt ℂ 2 (deriv f) (g x) := hf.derivWithin (by norm_num)
+  have hg1 : ContDiffAt ℂ 2 (deriv g) x := hg.derivWithin (by norm_num)
+  have hf2 := ((hf1.derivWithin (m := 1) (by norm_num)).differentiableAt (by norm_num)).hasDerivAt
+  have hg2 := ((hg1.derivWithin (m := 1) (by norm_num)).differentiableAt (by norm_num)).hasDerivAt
+  have hcomp1 := (hf1.differentiableAt (by norm_num)).hasDerivAt.comp x hgd
+  have hd := (((hf2.comp x hgd).mul ((hg1.differentiableAt (by norm_num)).hasDerivAt.pow 2)).add
+    (hcomp1.mul hg2)).congr_of_eventuallyEq heq
+  simp only [iteratedDeriv_succ, iteratedDeriv_zero] at ⊢
+  rw [hd.deriv]
+  simp only [Function.comp_apply, Pi.pow_apply]
+  ring
+/-- The differentiated square-root constraint implies the rational Schwarzian identity. -/
+private lemma schwarzian_sqrt_algebra {A B C P Q R : ℂ} (hA : A ≠ 0) (hP : P ≠ 0)
+    (h1 : 2 * A * B * P + A ^ 2 * Q = 0)
+    (h2 : (2 * B * B + 2 * A * C) * P + 4 * A * B * Q + A ^ 2 * R = 0) :
+    R / P - 3 / 2 * (Q / P) ^ 2 = -2 * A⁻¹ * C := by
+  have h1' : 2 * B * P + A * Q = 0 := by
+    apply (mul_eq_zero.mp (show A * (2 * B * P + A * Q) = 0 by
+      linear_combination h1)).resolve_left hA
+  have hpoly : 2 * A * P * R - 3 * A * Q ^ 2 + 4 * C * P ^ 2 = 0 := by
+    apply (mul_eq_zero.mp (show A * (2 * A * P * R - 3 * A * Q ^ 2 + 4 * C * P ^ 2) = 0 by
+      linear_combination 2 * P * h2 - (2 * B * P + 3 * A * Q) * h1')).resolve_left hA
+  field_simp
+  linear_combination hpoly
+
 
 /-- DLMF 1.13.20, first form: `{z, ζ} = -2 ż^{1/2} d²(ż^{-1/2})/dζ²`, with `τ` a branch of
 `ż^{-1/2}` near `ζ₀` (`τ² ż = 1`), so that `ż^{1/2} = 1/τ`. -/
@@ -181,7 +291,43 @@ theorem liouville_transformation (hD : IsOpen D) {H W ζ σ : ℂ → ℂ}
 theorem schwarzian_eq_sqrt {z τ : ℂ → ℂ} {ζ₀ : ℂ} (hz : ContDiffAt ℂ 3 z ζ₀)
     (hτ : ContDiffAt ℂ 2 τ ζ₀) (hτz : ∀ᶠ ζ in 𝓝 ζ₀, τ ζ ^ 2 * deriv z ζ = 1) :
     schwarzian z ζ₀ = -2 * (τ ζ₀)⁻¹ * iteratedDeriv 2 τ ζ₀ := by
-  sorry
+  have hz1 : ContDiffAt ℂ 2 (deriv z) ζ₀ := hz.derivWithin (by norm_num)
+  have hz2 : ContDiffAt ℂ 1 (deriv (deriv z)) ζ₀ := hz1.derivWithin (by norm_num)
+  have hτ1 : ContDiffAt ℂ 1 (deriv τ) ζ₀ := hτ.derivWithin (by norm_num)
+  have hτd := (hτ.differentiableAt (by norm_num)).hasDerivAt
+  have hz1d := (hz1.differentiableAt (by norm_num)).hasDerivAt
+  have hz2d := (hz2.differentiableAt (by norm_num)).hasDerivAt
+  have hτ1d := (hτ1.differentiableAt (by norm_num)).hasDerivAt
+  have he0 : (fun y => τ y ^ 2 * deriv z y) =ᶠ[𝓝 ζ₀] fun _ => (1 : ℂ) := hτz
+  have h0 := he0.eq_of_nhds
+  have hτ0 : τ ζ₀ ≠ 0 := by intro h; simp [h] at h0
+  have hz0 : deriv z ζ₀ ≠ 0 := by intro h; simp [h] at h0
+  have heq : (fun y => deriv (fun w => τ w ^ 2 * deriv z w) y) =ᶠ[𝓝 ζ₀]
+      fun y => 2 * τ y * deriv τ y * deriv z y + τ y ^ 2 * deriv (deriv z) y := by
+    have hτe := (hτ.of_le (m := 1) (by norm_num)).eventually (by simp)
+    have hze := (hz1.of_le (m := 1) (by norm_num)).eventually (by simp)
+    filter_upwards [hτe, hze] with y hty hzy
+    have hd := ((hty.differentiableAt (by norm_num)).hasDerivAt.pow 2).mul
+      (hzy.differentiableAt (by norm_num)).hasDerivAt
+    convert hd.deriv using 1
+    simp
+  have h1 : 2 * τ ζ₀ * deriv τ ζ₀ * deriv z ζ₀ + τ ζ₀ ^ 2 * deriv (deriv z) ζ₀ = 0 := by
+    rw [← heq.eq_of_nhds, he0.deriv_eq, deriv_const]
+  have hd := (((hτd.const_mul 2).mul hτ1d).mul hz1d).add ((hτd.pow 2).mul hz2d)
+  have h2 : (2 * deriv τ ζ₀ * deriv τ ζ₀ + 2 * τ ζ₀ * deriv (deriv τ) ζ₀) * deriv z ζ₀ +
+      4 * τ ζ₀ * deriv τ ζ₀ * deriv (deriv z) ζ₀ + τ ζ₀ ^ 2 * deriv (deriv (deriv z)) ζ₀ = 0 := by
+    have he' : deriv (fun y => 2 * τ y * deriv τ y * deriv z y +
+        τ y ^ 2 * deriv (deriv z) y) ζ₀ = 0 := by
+      rw [← heq.deriv_eq, he0.deriv.deriv_eq]
+      simp
+    change deriv ((fun y => 2 * τ y) * deriv τ * deriv z + τ ^ 2 * deriv (deriv z)) ζ₀ = 0 at he'
+    rw [hd.deriv] at he'
+    simp only [Pi.pow_apply] at he'
+    norm_num at he'
+    linear_combination he'
+  unfold schwarzian
+  simp only [iteratedDeriv_succ, iteratedDeriv_zero]
+  exact schwarzian_sqrt_algebra hτ0 hz0 h1 h2
 
 /-- DLMF 1.13.21 (Cayley's identity): for `z = Z(ξ(ζ))`,
 `{z, ζ} = (dξ/dζ)² {z, ξ} + {ξ, ζ}`, when `ξ` and `Z` are three times differentiable with
@@ -190,7 +336,16 @@ nonvanishing first derivatives. -/
 theorem schwarzian_comp {Z ξ : ℂ → ℂ} {ζ : ℂ} (hξ : ContDiffAt ℂ 3 ξ ζ)
     (hZ : ContDiffAt ℂ 3 Z (ξ ζ)) (hξ' : deriv ξ ζ ≠ 0) (hZ' : deriv Z (ξ ζ) ≠ 0) :
     schwarzian (Z ∘ ξ) ζ = deriv ξ ζ ^ 2 * schwarzian Z (ξ ζ) + schwarzian ξ ζ := by
-  sorry
+  have h1 := deriv_comp ζ (hZ.differentiableAt (by norm_num)) (hξ.differentiableAt (by norm_num))
+  have h2 := (hasDerivAt_deriv_comp_of_contDiffAt
+    (hZ.of_le (by norm_num)) (hξ.of_le (by norm_num))).deriv
+  have h3 := iteratedDeriv_three_comp hZ hξ
+  unfold schwarzian
+  rw [h3]
+  simp only [iteratedDeriv_succ, iteratedDeriv_zero]
+  rw [h2, h1]
+  field_simp
+  ring
 
 /-- The Schwarzian derivative of a function equal to the identity near `ζ₀` vanishes. -/
 lemma g1d_schwarzian_of_eventuallyEq_id {u : ℂ → ℂ} {ζ₀ : ℂ} (hu : u =ᶠ[𝓝 ζ₀] id) :
@@ -262,6 +417,49 @@ theorem product_solution_ode3 (hD : IsOpen D) (hf : DifferentiableOn ℂ f D)
   simp only [E1, E2, Pi.zero_apply, Pi.neg_apply, Pi.mul_apply, Pi.sub_apply]
   ring
 
+/-- Differentiating a reduced second-order equation gives the third derivative of its solution. -/
+private lemma iteratedDeriv_three_solution {p u : ℂ → ℂ} {D : Set ℂ}
+    (hD : IsOpen D) (hp : DifferentiableOn ℂ p D) (hu : IsLinODE2SolOn 0 p 0 u D)
+    {z : ℂ} (hz : z ∈ D) :
+    iteratedDeriv 3 u z = -deriv p z * u z - p z * deriv u z := by
+  have he : deriv (deriv u) =ᶠ[𝓝 z] fun y => -p y * u y := by
+    filter_upwards [hD.mem_nhds hz] with y hy
+    simpa using (hu y hy).2.deriv
+  have hd := ((hp.differentiableAt (hD.mem_nhds hz)).hasDerivAt.neg.mul (hu z hz).1.hasDerivAt)
+  simp only [iteratedDeriv_succ, iteratedDeriv_zero]
+  rw [he.deriv_eq]
+  change deriv (-p * u) z = _
+  rw [hd.deriv]
+  simp only [Pi.neg_apply]
+  ring
+
+/-- The numerator in the product equation factors as the potential difference times a Wronskian. -/
+private lemma product_ode_numerator {D : Set ℂ} (hD : IsOpen D) {I J U V : ℂ → ℂ}
+    (hI : DifferentiableOn ℂ I D) (hJ : DifferentiableOn ℂ J D)
+    (hU : IsLinODE2SolOn 0 I 0 U D) (hV : IsLinODE2SolOn 0 J 0 V D) {z : ℂ} (hz : z ∈ D) :
+    iteratedDeriv 3 (fun x => U x * V x) z +
+      2 * (I z + J z) * deriv (fun x => U x * V x) z +
+      (deriv I z + deriv J z) * (U z * V z) =
+      (I z - J z) * (deriv U z * V z - U z * deriv V z) := by
+  have hUd : DifferentiableOn ℂ U D := fun y hy => (hU y hy).1.differentiableWithinAt
+  have hVd : DifferentiableOn ℂ V D := fun y hy => (hV y hy).1.differentiableWithinAt
+  have hUc : ContDiffAt ℂ 3 U z := (hUd.analyticOnNhd hD z hz).contDiffAt
+  have hVc : ContDiffAt ℂ 3 V z := (hVd.analyticOnNhd hD z hz).contDiffAt
+  have he := iteratedDeriv_fun_mul hUc hVc
+  simp only [Finset.sum_range_succ] at he
+  norm_num only [Nat.choose, Nat.choose_zero_right, Nat.choose_self, Nat.cast_ofNat,
+    Nat.reduceSub, Nat.reduceAdd, Finset.sum_range_zero, iteratedDeriv_zero,
+    zero_add, one_mul] at he
+  rw [he, iteratedDeriv_three_solution hD hI hU hz,
+    iteratedDeriv_three_solution hD hJ hV hz,
+    show deriv (fun x => U x * V x) z = deriv U z * V z + U z * deriv V z from
+      (hU z hz).1.hasDerivAt.mul (hV z hz).1.hasDerivAt |>.deriv]
+  simp only [iteratedDeriv_succ, iteratedDeriv_zero]
+  rw [(hU z hz).2.deriv, (hV z hz).2.deriv]
+  simp only [Pi.zero_apply, zero_mul, zero_sub]
+  ring
+
+
 /-- DLMF 1.13.24–1.13.25: if `U'' + I U = 0` and `V'' + J V = 0` on the open set `D` (with `I`,
 `J` analytic in `D` and `I ≠ J` there), then `W = U V` satisfies
 `d/dz ((W''' + 2(I + J) W' + (I' + J') W)/(I - J)) = -(I - J) W`. -/
@@ -273,6 +471,19 @@ theorem product_solution_IJ (hD : IsOpen D) {I J U V : ℂ → ℂ} (hI : Differ
         2 * (I y + J y) * deriv (fun x => U x * V x) y +
         (deriv I y + deriv J y) * (U y * V y)) / (I y - J y)) z =
       -(I z - J z) * (U z * V z) := by
-  sorry
+  have he : (fun y => (iteratedDeriv 3 (fun x => U x * V x) y +
+      2 * (I y + J y) * deriv (fun x => U x * V x) y +
+      (deriv I y + deriv J y) * (U y * V y)) / (I y - J y)) =ᶠ[𝓝 z]
+      fun y => deriv U y * V y - U y * deriv V y := by
+    filter_upwards [hD.mem_nhds hz] with y hy
+    rw [product_ode_numerator hD hI hJ hU hV hy,
+      mul_div_cancel_left₀ _ (sub_ne_zero.mpr (hIJ y hy))]
+  have hd := ((hU z hz).2.mul (hV z hz).1.hasDerivAt).sub
+    ((hU z hz).1.hasDerivAt.mul (hV z hz).2)
+  rw [he.deriv_eq]
+  change deriv (deriv U * V - U * deriv V) z = _
+  rw [hd.deriv]
+  simp only [Pi.zero_apply, zero_mul, zero_sub]
+  ring
 
 end DLMF.AlgebraicAnalytic

@@ -7,6 +7,7 @@ module
 
 public import DLMF.AsymptoticApproximations.Basics.Defs
 public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
+public import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
 
 /-!
 # Transcendental equations (DLMF §2.2)
@@ -18,6 +19,9 @@ public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
   (coefficients `lagrangeReversionCoeff`, checked symbolically against the reversion of the
   series through `F₃`). The project's general asymptotic inversion theorem is
   `Asymptotics.HasAsymptoticPowerSeries.inversion`.
+
+The square-root asymptotics use Mathlib’s `Asymptotics.IsEquivalent.rpow` and
+`Real.isLittleO_log_id_atTop`.
 -/
 
 @[expose] public noncomputable section
@@ -113,13 +117,40 @@ theorem existsUnique_sq_sub_log_eq {y : ℝ} (hy : (1 + Real.log 2) / 2 < y) :
       rw [Real.log_pow]; push_cast; linarith [ht.2]⟩
     rw [← h2, Real.sqrt_sq ht0.le]
 
+/-- Squaring the positive root reduces its leading asymptotics to inverse-function asymptotics. -/
+private lemma sq_sub_log_root_sq_isEquivalent {t : ℝ → ℝ}
+    (ht : ∀ᶠ y in atTop, (Real.sqrt 2)⁻¹ < t y ∧ t y ^ 2 - Real.log (t y) = y) :
+    (fun y => t y ^ 2) ~[atTop] id := by
+  apply root_isEquivalent strictMonoOn_sub_half_log sub_half_log_isEquivalent
+  filter_upwards [ht] with y hy
+  have ht0 : 0 < t y := lt_trans (by positivity) hy.1
+  constructor
+  · have h := pow_lt_pow_left₀ hy.1 (by positivity) two_ne_zero
+    rwa [inv_pow, Real.sq_sqrt (by norm_num), ← one_div] at h
+  · rw [Real.log_pow]
+    push_cast
+    linarith [hy.2]
+
+
 /-- DLMF 2.2.4: a root `t(y) > 2^{-1/2}` of `t² - ln t = y` satisfies
 `t = y^{1/2}(1 + o(1))`, that is, `t(y) ∼ y^{1/2}` as `y → ∞`. -/
 @[dlmf 2.2.E4]
 theorem sq_sub_log_root_isEquivalent {t : ℝ → ℝ}
     (ht : ∀ᶠ y in atTop, (Real.sqrt 2)⁻¹ < t y ∧ t y ^ 2 - Real.log (t y) = y) :
     t ~[atTop] fun y => Real.sqrt y := by
-  sorry
+  have hs := sq_sub_log_root_sq_isEquivalent ht
+  have hy : (fun y : ℝ => max y 0) =ᶠ[atTop] id := by
+    filter_upwards [eventually_ge_atTop (0 : ℝ)] with y hy
+    exact max_eq_left hy
+  have hsq : (fun y => t y ^ 2) ~[atTop] fun y => max y 0 := hs.congr_right hy.symm
+  have hr := hsq.rpow (fun y => le_max_right y 0) (r := (1 / 2 : ℝ))
+  refine hr.congr_left ?_ |>.congr_right ?_
+  · filter_upwards [ht] with y hy
+    change (t y ^ 2) ^ (1 / 2 : ℝ) = t y
+    rw [← Real.sqrt_eq_rpow, Real.sqrt_sq (lt_trans (by positivity) hy.1).le]
+  · filter_upwards [eventually_ge_atTop (0 : ℝ)] with y hy
+    change (max y 0) ^ (1 / 2 : ℝ) = Real.sqrt y
+    rw [max_eq_left hy, ← Real.sqrt_eq_rpow]
 
 /-- DLMF 2.2.5: `t² = y + ln t = y + ½ ln y + o(1)` as `y → ∞`. -/
 @[dlmf 2.2.E5]
@@ -127,7 +158,23 @@ theorem sq_sub_log_root_sq {t : ℝ → ℝ}
     (ht : ∀ᶠ y in atTop, (Real.sqrt 2)⁻¹ < t y ∧ t y ^ 2 - Real.log (t y) = y) :
     (∀ᶠ y in atTop, t y ^ 2 = y + Real.log (t y)) ∧
       (fun y => t y ^ 2 - (y + Real.log y / 2)) =o[atTop] fun _ => (1 : ℝ) := by
-  sorry
+  have hsq : ∀ᶠ y in atTop, t y ^ 2 = y + Real.log (t y) := by
+    filter_upwards [ht] with y hy
+    linarith [hy.2]
+  refine ⟨hsq, ?_⟩
+  have hz : ∀ᶠ y : ℝ in atTop, Real.sqrt y ≠ 0 := by
+    filter_upwards [eventually_gt_atTop (0 : ℝ)] with y hy
+    exact (Real.sqrt_pos.mpr hy).ne'
+  have hratio := (isEquivalent_iff_tendsto_one hz).mp (sq_sub_log_root_isEquivalent ht)
+  have hlog := Real.continuousAt_log (by norm_num : (1 : ℝ) ≠ 0) |>.tendsto.comp hratio
+  rw [Real.log_one] at hlog
+  apply (isLittleO_one_iff ℝ).mpr
+  refine hlog.congr' ?_
+  filter_upwards [ht, hsq, eventually_gt_atTop (0 : ℝ)] with y hy hsq hy0
+  have ht0 : 0 < t y := lt_trans (by positivity) hy.1
+  change Real.log (t y / Real.sqrt y) = t y ^ 2 - (y + Real.log y / 2)
+  rw [Real.log_div ht0.ne' (Real.sqrt_pos.mpr hy0).ne', Real.log_sqrt hy0.le, hsq]
+  ring
 
 /-- DLMF 2.2.6: `t = y^{1/2}(1 + ¼ y⁻¹ ln y + o(y⁻¹))` as `y → ∞`. -/
 @[dlmf 2.2.E6]
@@ -135,7 +182,39 @@ theorem sq_sub_log_root_second {t : ℝ → ℝ}
     (ht : ∀ᶠ y in atTop, (Real.sqrt 2)⁻¹ < t y ∧ t y ^ 2 - Real.log (t y) = y) :
     (fun y => t y - Real.sqrt y * (1 + y⁻¹ * Real.log y / 4)) =o[atTop]
       fun y => Real.sqrt y * y⁻¹ := by
-  sorry
+  have hlead := sq_sub_log_root_isEquivalent ht
+  have htt : Tendsto t atTop atTop := hlead.symm.tendsto_atTop Real.tendsto_sqrt_atTop
+  have htn : ∀ᶠ y in atTop, t y ≠ 0 := by
+    filter_upwards [ht] with y hy using (lt_trans (by positivity) hy.1).ne'
+  have hr := (isEquivalent_iff_tendsto_one htn).mp hlead.symm
+  have hl := Real.isLittleO_log_id_atTop.tendsto_div_nhds_zero.comp htt
+  have hq : Tendsto (fun y => Real.log (t y) / (t y + Real.sqrt y)) atTop (𝓝 0) := by
+    have hh := hl.div (tendsto_const_nhds.add hr) (by norm_num : (1 : ℝ) + 1 ≠ 0)
+    simp only [zero_div] at hh
+    refine hh.congr' ?_
+    filter_upwards [ht, eventually_gt_atTop (0 : ℝ)] with y hy hy0
+    have ht0 : 0 < t y := lt_trans (by positivity) hy.1
+    change (Real.log (t y) / t y) / (1 + Real.sqrt y / t y) = _
+    field_simp
+  have he := (isLittleO_one_iff ℝ).mp (sq_sub_log_root_sq ht).2
+  have hscaled := (he.div_const 2).sub ((hq.pow 2).div_const 2)
+  simp only [zero_div, zero_pow two_ne_zero, sub_zero] at hscaled
+  apply (isLittleO_iff_tendsto' (by
+    filter_upwards [eventually_gt_atTop (0 : ℝ)] with y hy
+    exact fun hz => False.elim ((mul_ne_zero (Real.sqrt_pos.mpr hy).ne'
+      (inv_ne_zero hy.ne')) hz))).mpr
+  refine hscaled.congr' ?_
+  filter_upwards [ht, eventually_gt_atTop (0 : ℝ)] with y hy hy0
+  have ht0 : 0 < t y := lt_trans (by positivity) hy.1
+  have hs0 : 0 < Real.sqrt y := Real.sqrt_pos.mpr hy0
+  have hs : Real.sqrt y ^ 2 = y := Real.sq_sqrt hy0.le
+  change (t y ^ 2 - (y + Real.log y / 2)) / 2 -
+      (Real.log (t y) / (t y + Real.sqrt y)) ^ 2 / 2 = _
+  have heq : Real.log (t y) = (t y - Real.sqrt y) * (t y + Real.sqrt y) := by
+    nlinarith [hy.2]
+  rw [heq, mul_div_cancel_right₀ _ (by positivity : t y + Real.sqrt y ≠ 0)]
+  field_simp
+  nlinarith [hy.2]
 
 /-- DLMF 2.2.7–2.2.8 (Lagrange's formula for the reversion of series): if
 `f(x) ∼ x + f₀ + f₁x⁻¹ + f₂x⁻² + ⋯` as `x → +∞` (2.2.7) and `x(y) → ∞` solves `f(x(y)) = y`

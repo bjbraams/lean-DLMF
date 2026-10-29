@@ -7,7 +7,10 @@ module
 
 public import DLMF.AsymptoticApproximations.Integrals.Defs
 public import DLMF.AlgebraicAnalytic.Transforms.Defs
+public import DLMF.AlgebraicAnalytic.Transforms.Fourier
 public import DLMFMathlib.Analysis.Asymptotics.WatsonSector
+public import DLMFMathlib.Analysis.Asymptotics.WatsonLog
+public import DLMFMathlib.Analysis.Asymptotics.WatsonKernel
 public import Mathlib.Analysis.MellinTransform
 
 /-!
@@ -132,7 +135,7 @@ as `x → +∞`, in the sense that the remainder after `N` terms of both sums is
 `O(x^{-(N+λ)/μ} ln x)`. -/
 @[dlmf 2.3.E9]
 theorem watson_lemma_log {q : ℝ → ℝ} {a : ℕ → ℝ} {lam mu c : ℝ} (hlam : 0 < lam) (hmu : 0 < mu)
-    (hint : IntegrableOn (fun t => Real.exp (-c * t) * q t) (Ioi 0))
+    (_hint : IntegrableOn (fun t => Real.exp (-c * t) * q t) (Ioi 0))
     (hintlog : IntegrableOn (fun t => Real.exp (-c * t) * q t * Real.log t) (Ioi 0))
     (hq : HasAsymptoticExpansion (𝓝[>] 0) (fun (s : ℕ) (t : ℝ) => t ^ (((s : ℝ) + lam - mu) / mu))
       a q) (N : ℕ) :
@@ -140,7 +143,11 @@ theorem watson_lemma_log {q : ℝ → ℝ} {a : ℕ → ℝ} {lam mu c : ℝ} (h
         ∑ s ∈ range N, (deriv Real.Gamma (((s : ℝ) + lam) / mu) -
           Real.log x * Real.Gamma (((s : ℝ) + lam) / mu)) * a s * x ^ (-(((s : ℝ) + lam) / mu)))
       =O[atTop] fun x => x ^ (-(((N : ℝ) + lam) / mu)) * Real.log x := by
-  sorry
+  refine isBigO_integral_exp_mul_log_sub_sum
+    (e := fun n => ((n : ℝ) + lam) / mu) (fun n => by positivity)
+    (fun n => by push_cast; exact div_lt_div_of_pos_right (by linarith) hmu) hintlog
+    (fun M => ?_) N
+  simpa only [g2a_exp_eq hmu, smul_eq_mul] using hq M
 
 /-- DLMF 2.3.10–2.3.12: Watson's lemma for a general kernel. Let `q` satisfy 2.3.7 with
 `λ, μ > 0`, be locally integrable on `(0, ∞)` (DLMF: piecewise continuous) and satisfy
@@ -160,7 +167,10 @@ theorem watson_lemma_kernel {f q : ℝ → ℂ} {a : ℕ → ℂ} {lam mu A a' b
     HasAsymptoticExpansion atTop (fun (s : ℕ) (x : ℝ) => x ^ (-(((s : ℝ) + lam) / mu)))
       (fun s => mellin f ((((s : ℝ) + lam) / mu : ℝ) : ℂ) * a s)
       (fun x => ∫ t in Ioi (0 : ℝ), f (x * t) * q t) := by
-  sorry
+  refine hasAsymptoticExpansion_integral_kernel_mul_rpow_seq
+    (e := fun n => ((n : ℝ) + lam) / mu) (fun n => by positivity)
+    hA.le ha' hb hκ hfm hf hqi hqb (fun N => ?_)
+  simpa only [g2a_exp_eq hmu, Complex.real_smul] using hq N
 
 section Sector
 
@@ -341,16 +351,49 @@ large `t` (and the integrand is locally integrable in `τ`), then, by the Rieman
 `q(t) = f(t) + o(e^{ct})` as `t → +∞`. -/
 @[dlmf 2.4.E8]
 theorem haar_isLittleO {Q F : ℂ → ℂ} {q f : ℝ → ℂ} {c T : ℝ} {L : ℝ → ℂ}
-    (hloc : ∀ η : ℝ, IntervalIntegrable (fun τ : ℝ => Q (c + τ * I) - F (c + τ * I)) volume (-η) η)
+    (_hloc : ∀ η : ℝ, IntervalIntegrable (fun τ : ℝ => Q (c + τ * I) - F (c + τ * I)) volume (-η) η)
     (hunif : TendstoUniformlyOn (fun (η t : ℝ) =>
       ∫ τ in -η..η, Complex.exp (I * t * τ) * (Q (c + τ * I) - F (c + τ * I))) L atTop (Ici T))
     (hqf : ∀ t, T ≤ t → q t - f t = (Real.exp (c * t) / (2 * π) : ℂ) * L t) :
     (fun t => q t - f t) =o[atTop] fun t => Real.exp (c * t) := by
-  sorry
+  have hu := hunif.tendstoUniformlyOnFilter.mono_right
+    (show (atTop : Filter ℝ) ≤ 𝓟 (Ici T) from le_principal_iff.mpr (eventually_ge_atTop T))
+  have hL : Tendsto L atTop (𝓝 0) := by
+    refine hu.tendsto_of_eventually_tendsto ?_ tendsto_const_nhds
+    filter_upwards [eventually_ge_atTop (0 : ℝ)] with η hη
+    let g : ℝ → ℂ := (Ioc (-η) η).indicator (fun τ => Q (c + τ * I) - F (c + τ * I))
+    have h := ((DLMF.AlgebraicAnalytic.tendsto_fourierTransform_cocompact g).mono_left
+      atTop_le_cocompact).const_mul (Real.sqrt (2 * π) : ℂ)
+    simp only [mul_zero] at h
+    refine h.congr fun t => ?_
+    unfold DLMF.AlgebraicAnalytic.fourierTransform
+    have he : (fun τ : ℝ => g τ * cexp (I * t * τ)) =
+        (Ioc (-η) η).indicator (fun τ => cexp (I * t * τ) *
+          (Q (c + τ * I) - F (c + τ * I))) := by
+      ext τ
+      by_cases hτ : τ ∈ Ioc (-η) η <;> simp [g, hτ, mul_comm]
+    rw [he, integral_indicator measurableSet_Ioc,
+      ← intervalIntegral.integral_of_le (by linarith : -η ≤ η), ← mul_assoc,
+      mul_inv_cancel₀ (Complex.ofReal_ne_zero.mpr (Real.sqrt_pos.mpr (by positivity)).ne'),
+      one_mul]
+  have ho : (fun t => ((2 * π : ℝ)⁻¹ : ℂ) * L t) =o[atTop] fun _ => (1 : ℝ) :=
+    ((isLittleO_one_iff ℝ).mpr hL).const_mul_left _
+  have hp := (isBigO_refl (fun t => Real.exp (c * t)) atTop).smul_isLittleO ho
+  refine hp.congr' ?_ (Eventually.of_forall fun _ => mul_one _)
+  filter_upwards [eventually_ge_atTop T] with t ht
+  rw [hqf t ht, Complex.real_smul]
+  push_cast
+  ring
 
 /-- DLMF 2.4.9 (Haar's method): if in addition the integrals with `Q`, `F` replaced by their
 derivatives `Q^{(j)}`, `F^{(j)}`, `j = 1, …, m`, converge uniformly for all sufficiently large
-`t`, then `q(t) = f(t) + o(t^{-m} e^{ct})` as `t → +∞`. -/
+`t`, then `q(t) = f(t) + o(t^{-m} e^{ct})` as `t → +∞`.
+
+**Hypothesis issue:** holomorphy of `Q - F` alone does not identify its derivatives with
+`iteratedDeriv j Q - iteratedDeriv j F`. For example, `Q z = conj z + z` and `F z = conj z`
+have zero totalized first derivatives, although `(Q - F)' = 1`. The higher-order argument
+requires individual holomorphy or explicit compatibility of the derivative data. The
+current statement is retained as admitted pending this mathematical review. -/
 @[dlmf 2.4.E9]
 theorem haar_isLittleO_pow {Q F : ℂ → ℂ} {q f : ℝ → ℂ} {c T : ℝ} {m : ℕ} {L : ℕ → ℝ → ℂ}
     (hd : ∀ j ≤ m, ∀ η : ℝ, IntervalIntegrable

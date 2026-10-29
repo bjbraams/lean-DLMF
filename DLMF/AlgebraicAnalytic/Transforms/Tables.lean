@@ -5,15 +5,24 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AlgebraicAnalytic.Transforms.Laplace
+public import DLMF.AlgebraicAnalytic.Transforms.Fourier
+public import DLMF.AlgebraicAnalytic.Transforms.LaplaceTable
+public import DLMF.Gamma.MellinBarnes
 public import Mathlib.Analysis.SpecialFunctions.Gaussian.FourierTransform
 public import Mathlib.Analysis.SpecialFunctions.Complex.Arctan
 public import Mathlib.Analysis.MellinTransform
+public import TauCeti.MeasureTheory.Integral.Bochner.Basic
+public import TauCeti.Analysis.Fourier.ExpNegAbs
+public import TauCeti.Analysis.Contour.WorkedExamples.HalfDisc.SineIntegral
+public import DLMFMathlib.Analysis.MellinConvolution
+public import DLMFMathlib.Analysis.SpecialFunctions.Pow.ComplexReal
 
 /-!
 # Tables of integral transforms (DLMF §1.14(vii), Tables 1.14.1–1.14.5)
 
-Each row of DLMF Tables 1.14.1 (Fourier transforms, 1.14.1), 1.14.2 (Fourier cosine transforms,
+The Laplace entries live in the imported `DLMF.AlgebraicAnalytic.Transforms.LaplaceTable`;
+the Fourier and Mellin entries are proved here. Each row of DLMF Tables 1.14.1
+(Fourier transforms, 1.14.1), 1.14.2 (Fourier cosine transforms,
 1.14.9), 1.14.3 (Fourier sine transforms, 1.14.10), 1.14.4 (Laplace transforms, 1.14.17) and
 1.14.5 (Mellin transforms, 1.14.32) is a theorem here, tagged with the table ID. All rows were
 checked numerically (mpmath) before acquisition.
@@ -40,9 +49,15 @@ Parameters are complex where DLMF writes `ℜa > 0` or `|ph a| < …`; principal
   (stated so, stronger than DLMF). 1.14.5.7 needs `s ≠ 0` in Lean (`π tan(0)/0` is junk `0`, the
   limit value is `π²/2`).
 
-Proved: 1.14.1.9 (Gaussian, from Mathlib's `fourierIntegral_gaussian`), 1.14.4.2, 1.14.4.5,
-1.14.4.6 (from 1.14.4.3 and the translation rule 1.14.21) and 1.14.4.7. The other rows are
-admitted.
+Proved: the interval-indicator Fourier and cosine transforms (1.14.1.2, 1.14.2.2),
+the two-sided exponential Fourier transform (1.14.1.3, from
+`TauCeti.integral_exp_mul_I_mul_exp_neg_mul_abs`), the Gaussian Fourier transform (1.14.1.9),
+the Gaussian and exponential cosine and sine entries and their first moments, the Dirichlet
+sine integral (1.14.3.2, from `TauCeti.Contour.tendsto_integral_sin_mul_div_atTop`),
+the elementary Laplace entries (in `LaplaceTable`), and the
+Mellin transform of `1/(1+x)` (1.14.5.5). The latter specializes
+`DLMF.Gamma.mellin_one_add_cpow_neg` and Mathlib’s Gamma reflection formula. Weighted
+moment integrability uses TauCeti's `ExpDecay` and even-extension adapter; other rows are admitted.
 -/
 
 @[expose] public noncomputable section
@@ -52,6 +67,40 @@ open scoped Nat
 
 namespace DLMF.AlgebraicAnalytic
 
+/-- The first absolute moment of a two-sided exponential is integrable. -/
+private theorem integrable_abs_mul_exp_neg_abs {a : ℝ} (ha : 0 < a) :
+    Integrable (fun t : ℝ => |t| * Real.exp (-a * |t|)) := by
+  simpa only [pow_one, neg_mul] using TauCeti.MeasureTheory.integrable_comp_abs
+    (TauCeti.integrableOn_pow_mul_exp_neg_mul_Ioi 1 ha)
+
+/-- Converting the Gaussian integral constant to the principal DLMF normalization. -/
+private theorem gaussian_normalization {a : ℂ} (ha : 0 < a.re) :
+    (Real.sqrt (2 * Real.pi) : ℂ)⁻¹ * ((Real.pi : ℂ) / a) ^ (1 / 2 : ℂ) =
+      (2 * a) ^ (-(1 / 2 : ℂ)) := by
+  have ha0 : a ≠ 0 := fun h => by simp [h] at ha
+  have harg : a.arg ≠ Real.pi := (arg_lt_pi_iff.mpr (Or.inl ha.le)).ne
+  rw [div_eq_mul_inv, mul_comm (Real.pi : ℂ) a⁻¹,
+    mul_ofReal_cpow_of_ne_zero (inv_ne_zero ha0) Real.pi_pos,
+    inv_cpow a _ harg, ← cpow_neg,
+    show (2 : ℂ) * a = a * ((2 : ℝ) : ℂ) by norm_num; ring,
+    mul_ofReal_cpow_of_ne_zero ha0 (by norm_num : (0 : ℝ) < 2)]
+  have hp : (Real.pi : ℂ) ^ (1 / 2 : ℂ) = (Real.sqrt Real.pi : ℂ) := by
+    rw [Real.sqrt_eq_rpow, ofReal_cpow Real.pi_pos.le]
+    norm_num
+  have hp2 : (2 : ℂ) ^ (1 / 2 : ℂ) = (Real.sqrt 2 : ℂ) := by
+    rw [Real.sqrt_eq_rpow, ofReal_cpow (by norm_num : (0 : ℝ) ≤ 2)]
+    norm_num
+  have h2 : (2 : ℂ) ^ (-(1 / 2 : ℂ)) = (Real.sqrt 2 : ℂ)⁻¹ := by
+    rw [cpow_neg, hp2]
+  norm_num only [ofReal_ofNat]
+  rw [hp, h2, Real.sqrt_mul (by norm_num : (0 : ℝ) ≤ 2)]
+  push_cast
+  have hpi : (Real.sqrt Real.pi : ℂ) ≠ 0 := ofReal_ne_zero.mpr
+    (Real.sqrt_pos.mpr Real.pi_pos).ne'
+  have hs2 : (Real.sqrt 2 : ℂ) ≠ 0 := ofReal_ne_zero.mpr
+    (Real.sqrt_pos.mpr (by norm_num)).ne'
+  field_simp
+
 /-! ### Table 1.14.1: Fourier transforms `(2π)^{-1/2} ∫ f(t) e^{ixt} dt` -/
 
 /-- DLMF Table 1.14.1, row 2: `f = 1` on `|t| < a`, `0` otherwise: `F(x) = √(2/π) sin(ax)/x`
@@ -60,28 +109,102 @@ namespace DLMF.AlgebraicAnalytic
 theorem fourierTransform_indicator {a : ℝ} (ha : 0 < a) {x : ℝ} (hx : x ≠ 0) :
     fourierTransform (fun t => (Ioo (-a) a).indicator (fun _ => (1 : ℂ)) t) x =
       (Real.sqrt (2 / Real.pi) : ℂ) * Real.sin (a * x) / x := by
-  sorry
+  have hI : (∫ t in -a..a, cexp (I * x * t)) = (2 * Real.sin (a * x) / x : ℝ) := by
+    have he : (fun t : ℝ => cexp (I * x * t)) = fun t => cexp (((t * x : ℝ) : ℂ) * I) := by
+      funext t
+      congr 1
+      push_cast
+      ring
+    rw [he, intervalIntegral.integral_comp_mul_right (fun t : ℝ => cexp (t * I)) hx,
+      neg_mul, integral_exp_mul_I_eq_sin]
+    simp only [Complex.real_smul]
+    push_cast
+    ring
+  unfold fourierTransform
+  have he : (fun t : ℝ => (Ioo (-a) a).indicator (fun _ => (1 : ℂ)) t * cexp (I * x * t)) =
+      (Ioo (-a) a).indicator (fun t => cexp (I * x * t)) := by
+    ext t
+    by_cases ht : t ∈ Ioo (-a) a <;> simp [ht]
+  rw [he, integral_indicator measurableSet_Ioo, ← integral_Ioc_eq_integral_Ioo,
+    ← intervalIntegral.integral_of_le (by linarith : -a ≤ a), hI]
+  push_cast
+  linear_combination (Complex.sin ((a : ℂ) * x) / x) * inv_sqrt_two_pi_mul_two
 
 /-- DLMF Table 1.14.1, row 3: `e^{-a|t|} ↦ √(2/π) a/(a² + x²)`, `a > 0`. -/
 @[dlmf 1.14.T1]
 theorem fourierTransform_exp_neg_abs {a : ℝ} (ha : 0 < a) (x : ℝ) :
     fourierTransform (fun t => (Real.exp (-a * |t|) : ℂ)) x =
       (Real.sqrt (2 / Real.pi) : ℂ) * (a / (a ^ 2 + x ^ 2) : ℝ) := by
-  sorry
+  unfold fourierTransform
+  have hi : (∫ t : ℝ, (Real.exp (-a * |t|) : ℂ) * cexp (I * x * t)) =
+      ((2 * a / (a ^ 2 + x ^ 2) : ℝ) : ℂ) := by
+    convert TauCeti.integral_exp_mul_I_mul_exp_neg_mul_abs ha x using 1
+    congr 1
+    funext t
+    rw [show I * (x : ℂ) * t = (x : ℂ) * t * I by ring, neg_mul]
+    exact mul_comm _ _
+  rw [hi]
+  push_cast
+  rw [show (2 : ℂ) * a / (a ^ 2 + x ^ 2) = 2 * ((a : ℂ) / (a ^ 2 + x ^ 2)) by ring,
+    ← mul_assoc, inv_sqrt_two_pi_mul_two]
 
 /-- DLMF Table 1.14.1, row 4: `t e^{-a|t|} ↦ √(2/π) 2iax/(a² + x²)²`, `a > 0`. -/
 @[dlmf 1.14.T1]
 theorem fourierTransform_mul_exp_neg_abs {a : ℝ} (ha : 0 < a) (x : ℝ) :
     fourierTransform (fun t => (t * Real.exp (-a * |t|) : ℂ)) x =
       (Real.sqrt (2 / Real.pi) : ℂ) * (2 * I * a * x / (a ^ 2 + x ^ 2) ^ 2) := by
-  sorry
+  have hf : Integrable (fun t : ℝ => (t * Real.exp (-a * |t|) : ℂ)) := by
+    refine (integrable_abs_mul_exp_neg_abs ha).mono' (by fun_prop) ?_
+    exact Filter.Eventually.of_forall fun t => by
+      simp [Real.norm_eq_abs, Complex.norm_exp]
+  have hi := integral_eq_integral_Ioi_add_neg (g1e_integrable_mul_cexp hf x)
+  have he (t : ℝ) (ht : 0 < t) :
+      ((t * Real.exp (-a * |t|) : ℂ) * cexp (I * x * t) +
+        ((-t) * Real.exp (-a * |-t|) : ℂ) * cexp (I * x * (-t))) =
+      2 * I * (cexp (-(a : ℂ) * t) * (t * Complex.sin (x * t))) := by
+    rw [abs_neg, abs_of_pos ht]
+    simp only [ofReal_mul, ofReal_neg, ofReal_exp, Complex.sin]
+    rw [show I * (x : ℂ) * t = ↑x * t * I by ring,
+      show I * (x : ℂ) * -t = -(↑x * t * I) by ring]
+    ring_nf
+    simp [I_sq]
+    ring
+  simp only [ofReal_neg] at hi
+  rw [setIntegral_congr_fun measurableSet_Ioi he, integral_const_mul] at hi
+  have hl := laplaceTransform_mul_sin (a := (x : ℂ)) (s := (a : ℂ)) (by simpa using ha)
+  unfold laplaceTransform at hl
+  rw [fourierTransform, hi, hl]
+  rw [show (Real.sqrt (2 * Real.pi) : ℂ)⁻¹ * (2 * I *
+      (2 * ↑x * ↑a / ((↑a : ℂ) ^ 2 + ↑x ^ 2) ^ 2)) =
+      ((Real.sqrt (2 * Real.pi) : ℂ)⁻¹ * 2) *
+        (2 * I * ↑a * ↑x / ((↑a : ℂ) ^ 2 + ↑x ^ 2) ^ 2) by ring,
+    inv_sqrt_two_pi_mul_two]
 
 /-- DLMF Table 1.14.1, row 5: `|t| e^{-a|t|} ↦ √(2/π) (a² - x²)/(a² + x²)²`, `a > 0`. -/
 @[dlmf 1.14.T1]
 theorem fourierTransform_abs_mul_exp_neg_abs {a : ℝ} (ha : 0 < a) (x : ℝ) :
     fourierTransform (fun t => (|t| * Real.exp (-a * |t|) : ℂ)) x =
       (Real.sqrt (2 / Real.pi) : ℂ) * ((a ^ 2 - x ^ 2) / (a ^ 2 + x ^ 2) ^ 2 : ℝ) := by
-  sorry
+  have hf : Integrable (fun t : ℝ => (|t| * Real.exp (-a * |t|) : ℂ)) := by
+    refine (integrable_abs_mul_exp_neg_abs ha).mono' (by fun_prop) ?_
+    exact Filter.Eventually.of_forall fun t => by simp [Complex.norm_exp]
+  have hi := integral_eq_integral_Ioi_add_neg (g1e_integrable_mul_cexp hf x)
+  have he (t : ℝ) (ht : 0 < t) :
+      ((|t| * Real.exp (-a * |t|) : ℂ) * cexp (I * x * t) +
+        (|-t| * Real.exp (-a * |-t|) : ℂ) * cexp (I * x * (-t))) =
+      2 * (cexp (-(a : ℂ) * t) * (t * Complex.cos (x * t))) := by
+    rw [abs_neg, abs_of_pos ht]
+    simp only [ofReal_mul, ofReal_neg, ofReal_exp, Complex.cos]
+    rw [show I * (x : ℂ) * t = ↑x * t * I by ring,
+      show I * (x : ℂ) * -t = -(↑x * t * I) by ring]
+    ring
+  simp only [ofReal_neg] at hi
+  rw [setIntegral_congr_fun measurableSet_Ioi he, integral_const_mul] at hi
+  have hl := laplaceTransform_mul_cos (a := (x : ℂ)) (s := (a : ℂ)) (by simpa using ha)
+  unfold laplaceTransform at hl
+  rw [fourierTransform, hi, hl, ← mul_assoc, inv_sqrt_two_pi_mul_two]
+  push_cast
+  rfl
 
 /-- DLMF Table 1.14.1, row 6: `e^{-a|t|}/|t|^{1/2} ↦ (a + (a² + x²)^{1/2})^{1/2}/(a² + x²)^{1/2}`,
 `a > 0`. -/
@@ -168,7 +291,21 @@ theorem tendsto_fourierTransform_cos_sq {a : ℝ} (ha : 0 < a) (x : ℝ) :
 theorem fourierCosTransform_indicator {a : ℝ} (ha : 0 < a) {x : ℝ} (hx : 0 < x) :
     fourierCosTransform (fun t => (Ioc 0 a).indicator (fun _ => (1 : ℂ)) t) x =
       (Real.sqrt (2 / Real.pi) : ℂ) * Real.sin (a * x) / x := by
-  sorry
+  unfold fourierCosTransform
+  have he : (fun t : ℝ => (Ioc 0 a).indicator (fun _ => (1 : ℂ)) t *
+      (Real.cos (x * t) : ℂ)) = (Ioc 0 a).indicator (fun t => (Real.cos (x * t) : ℂ)) := by
+    ext t
+    by_cases ht : t ∈ Ioc 0 a <;> simp [ht]
+  rw [he, setIntegral_indicator measurableSet_Ioc,
+    inter_eq_right.mpr (Ioc_subset_Ioi_self), ← intervalIntegral.integral_of_le ha.le,
+    intervalIntegral.integral_ofReal]
+  rw [intervalIntegral.integral_comp_mul_left Real.cos hx.ne', integral_cos]
+  simp only [mul_zero, Real.sin_zero, sub_zero]
+  change (Real.sqrt (2 / Real.pi) : ℂ) *
+    ((x⁻¹ * Real.sin (x * a) : ℝ) : ℂ) = _
+  rw [Complex.ofReal_mul, Complex.ofReal_inv, Complex.ofReal_sin, Complex.ofReal_mul]
+  rw [← Complex.ofReal_mul, ← Complex.ofReal_sin, mul_comm x a]
+  ring
 
 /-- DLMF Table 1.14.2, row 3: `1/(a² + t²) ↦ √(π/2) e^{-ax}/a`, `ℜa > 0`. -/
 @[dlmf 1.14.T2]
@@ -193,17 +330,43 @@ theorem fourierCosTransform_quartic {a : ℂ} (ha : 0 < a.re) {x : ℝ} (hx : 0 
 
 /-- DLMF Table 1.14.2, row 6: `e^{-at} ↦ √(2/π) a/(a² + x²)`, `ℜa > 0`. -/
 @[dlmf 1.14.T2]
-theorem fourierCosTransform_exp_neg {a : ℂ} (ha : 0 < a.re) {x : ℝ} (hx : 0 < x) :
+theorem fourierCosTransform_exp_neg {a : ℂ} (ha : 0 < a.re) {x : ℝ} (_hx : 0 < x) :
     fourierCosTransform (fun t => cexp (-a * t)) x =
       (Real.sqrt (2 / Real.pi) : ℂ) * (a / (a ^ 2 + x ^ 2)) := by
-  sorry
+  have h := laplaceTransform_cos (a := x) (s := a) (by simpa using ha)
+  unfold fourierCosTransform
+  congr 1
+  convert h using 1
+  simp only [laplaceTransform, ← ofReal_mul, ← ofReal_cos]
 
 /-- DLMF Table 1.14.2, row 7: `e^{-at²} ↦ (2a)^{-1/2} e^{-x²/(4a)}`, `ℜa > 0`, principal power. -/
 @[dlmf 1.14.T2]
 theorem fourierCosTransform_gaussian {a : ℂ} (ha : 0 < a.re) {x : ℝ} (hx : 0 < x) :
     fourierCosTransform (fun t => cexp (-a * t ^ 2)) x =
       (2 * a) ^ (-(1 / 2 : ℂ)) * cexp (-x ^ 2 / (4 * a)) := by
-  sorry
+  clear hx
+  have hf : Integrable (fun t : ℝ => cexp (-a * t ^ 2)) := by
+    simpa using integrable_cexp_quadratic ha 0 0
+  have hi := integral_eq_integral_Ioi_add_neg (g1e_integrable_mul_cexp hf x)
+  have he (t : ℝ) : cexp (-a * t ^ 2) * cexp (I * x * t) +
+      cexp (-a * (-t) ^ 2) * cexp (I * x * (-t)) =
+      2 * (cexp (-a * t ^ 2) * (Real.cos (x * t) : ℂ)) := by
+    simp only [neg_sq, ofReal_cos, Complex.cos]
+    rw [show I * (x : ℂ) * t = ↑x * t * I by ring,
+      show I * (x : ℂ) * -t = -(↑x * t * I) by ring]
+    push_cast
+    ring
+  simp only [ofReal_neg] at hi
+  rw [setIntegral_congr_fun measurableSet_Ioi (fun t _ => he t), integral_const_mul] at hi
+  have hg := fourierIntegral_gaussian ha (x : ℂ)
+  simp_rw [mul_comm (cexp (I * (x : ℂ) * _))] at hg
+  have h := hi.symm.trans hg
+  unfold fourierCosTransform
+  have hn := gaussian_normalization ha
+  have hc := inv_sqrt_two_pi_mul_two
+  linear_combination (Real.sqrt (2 * Real.pi) : ℂ)⁻¹ * h -
+    (∫ t in Ioi (0 : ℝ), cexp (-a * t ^ 2) * (Real.cos (x * t) : ℂ)) * hc +
+    cexp (-(x : ℂ) ^ 2 / (4 * a)) * hn
 
 /-- DLMF Table 1.14.2, row 8: `sin(at²) ↦ -(2a)^{-1/2} sin(x²/(4a) - π/4)`, `a > 0`
 (conditionally convergent: limit of `∫₀^R`). -/
@@ -249,7 +412,23 @@ theorem tendsto_fourierSinTransform_inv {x : ℝ} (hx : 0 < x) :
     Tendsto (fun R : ℝ => (Real.sqrt (2 / Real.pi) : ℂ) *
         ∫ t in (0 : ℝ)..R, (t⁻¹ * Real.sin (x * t) : ℂ)) atTop
       (𝓝 (Real.sqrt (Real.pi / 2) : ℂ)) := by
-  sorry
+  have h := (Complex.continuous_ofReal.tendsto (Real.pi / 2)).comp
+    (TauCeti.Contour.tendsto_integral_sin_mul_div_atTop hx)
+  have hn : Real.sqrt (2 / Real.pi) * (Real.pi / 2) = Real.sqrt (Real.pi / 2) := by
+    apply (sq_eq_sq₀ (by positivity) (by positivity)).mp
+    rw [mul_pow, Real.sq_sqrt (by positivity), Real.sq_sqrt (by positivity)]
+    field_simp
+  have hlim := h.const_mul (Real.sqrt (2 / Real.pi) : ℂ)
+  rw [← ofReal_mul, hn] at hlim
+  convert hlim using 1
+  funext R
+  dsimp only [Function.comp_def]
+  rw [← intervalIntegral.integral_ofReal]
+  congr 1
+  apply intervalIntegral.integral_congr
+  intro t _
+  push_cast
+  ring
 
 /-- DLMF Table 1.14.3, row 3: `t^{-1/2} ↦ x^{-1/2}` (conditionally convergent). -/
 @[dlmf 1.14.T3]
@@ -298,17 +477,30 @@ theorem fourierSinTransform_exp_neg_div {a : ℂ} (ha : 0 < a.re) {x : ℝ} (hx 
 
 /-- DLMF Table 1.14.3, row 9: `e^{-at} ↦ √(2/π) x/(a² + x²)`, `ℜa > 0`. -/
 @[dlmf 1.14.T3]
-theorem fourierSinTransform_exp_neg {a : ℂ} (ha : 0 < a.re) {x : ℝ} (hx : 0 < x) :
+theorem fourierSinTransform_exp_neg {a : ℂ} (ha : 0 < a.re) {x : ℝ} (_hx : 0 < x) :
     fourierSinTransform (fun t => cexp (-a * t)) x =
       (Real.sqrt (2 / Real.pi) : ℂ) * (x / (a ^ 2 + x ^ 2)) := by
-  sorry
+  have h := laplaceTransform_sin (a := x) (s := a) (by simpa using ha)
+  unfold fourierSinTransform
+  congr 1
+  convert h using 1
+  simp only [laplaceTransform, ← ofReal_mul, ← ofReal_sin]
 
 /-- DLMF Table 1.14.3, row 10: `t e^{-at} ↦ √(2/π) 2ax/(a² + x²)²`, `ℜa > 0`. -/
 @[dlmf 1.14.T3]
-theorem fourierSinTransform_mul_exp_neg {a : ℂ} (ha : 0 < a.re) {x : ℝ} (hx : 0 < x) :
+theorem fourierSinTransform_mul_exp_neg {a : ℂ} (ha : 0 < a.re) {x : ℝ} (_hx : 0 < x) :
     fourierSinTransform (fun t => t * cexp (-a * t)) x =
       (Real.sqrt (2 / Real.pi) : ℂ) * (2 * a * x / (a ^ 2 + x ^ 2) ^ 2) := by
-  sorry
+  have h := laplaceTransform_mul_sin (a := x) (s := a) (by simpa using ha)
+  unfold fourierSinTransform
+  congr 1
+  convert h using 1
+  · unfold laplaceTransform
+    congr 1; funext t
+    simp only [← ofReal_mul, ← ofReal_sin]
+    push_cast
+    ring
+  · ring
 
 /-- DLMF Table 1.14.3, row 11: `t e^{-at²} ↦ (2a)^{-3/2} x e^{-x²/(4a)}`, `|ph a| < ½π`
 (that is, `ℜa > 0`), principal power. -/
@@ -316,7 +508,58 @@ theorem fourierSinTransform_mul_exp_neg {a : ℂ} (ha : 0 < a.re) {x : ℝ} (hx 
 theorem fourierSinTransform_mul_gaussian {a : ℂ} (ha : 0 < a.re) {x : ℝ} (hx : 0 < x) :
     fourierSinTransform (fun t => t * cexp (-a * t ^ 2)) x =
       (2 * a) ^ (-(3 / 2 : ℂ)) * x * cexp (-x ^ 2 / (4 * a)) := by
-  sorry
+  have ha0 : a ≠ 0 := fun h => by simp [h] at ha
+  have hcos (t : ℝ) : ‖Complex.cos ((x : ℂ) * t)‖ ≤ 1 := by
+    rw [← ofReal_mul, ← ofReal_cos, norm_real, Real.norm_eq_abs]
+    exact Real.abs_cos_le_one _
+  have hsin (t : ℝ) : ‖Complex.sin ((x : ℂ) * t)‖ ≤ 1 := by
+    rw [← ofReal_mul, ← ofReal_sin, norm_real, Real.norm_eq_abs]
+    exact Real.abs_sin_le_one _
+  have hC : IntegrableOn (fun t : ℝ => cexp (-a * t ^ 2) * Complex.cos (x * t)) (Ioi 0) := by
+    refine ((integrable_cexp_neg_mul_sq ha).integrableOn (s := Ioi 0) |>.bdd_mul
+      (c := 1) (by fun_prop) (Filter.Eventually.of_forall hcos)).congr ?_
+    exact Filter.Eventually.of_forall fun t => mul_comm _ _
+  have hS : IntegrableOn (fun t : ℝ => t * cexp (-a * t ^ 2) * Complex.sin (x * t)) (Ioi 0) := by
+    refine ((integrable_mul_cexp_neg_mul_sq ha).integrableOn (s := Ioi 0) |>.bdd_mul
+      (c := 1) (by fun_prop) (Filter.Eventually.of_forall hsin)).congr ?_
+    exact Filter.Eventually.of_forall fun t => mul_comm _ _
+  have hd (t : ℝ) : HasDerivAt
+      (fun u : ℝ => cexp (-a * u ^ 2) * Complex.sin (x * u))
+      ((-2 * a) * (t * cexp (-a * t ^ 2) * Complex.sin (x * t)) +
+        x * (cexp (-a * t ^ 2) * Complex.cos (x * t))) t := by
+    convert (((((hasDerivAt_id (t : ℂ)).pow 2).const_mul (-a)).cexp).mul
+      (((hasDerivAt_id (t : ℂ)).const_mul (x : ℂ)).csin)).comp_ofReal using 1 <;> dsimp
+    congr 1 <;> ring
+  have ht : Tendsto (fun t : ℝ => cexp (-a * t ^ 2) * Complex.sin (x * t)) atTop (𝓝 0) := by
+    apply tendsto_zero_iff_norm_tendsto_zero.mpr
+    have he : Tendsto (fun t : ℝ => Real.exp (-a.re * t ^ 2)) atTop (𝓝 0) :=
+      Real.tendsto_exp_atBot.comp ((tendsto_pow_atTop two_ne_zero).const_mul_atTop_of_neg
+        (neg_lt_zero.mpr ha))
+    apply squeeze_zero (fun t => norm_nonneg _) _ he
+    intro t
+    rw [norm_mul, norm_cexp_neg_mul_sq]
+    exact mul_le_of_le_one_right (Real.exp_pos _).le (hsin t)
+  have hi := integral_Ioi_of_hasDerivAt_of_tendsto' (fun t _ => hd t)
+    ((hS.const_mul (-2 * a)).add (hC.const_mul (x : ℂ))) ht
+  rw [integral_add (hS.const_mul _) (hC.const_mul _), integral_const_mul,
+    integral_const_mul] at hi
+  simp only [ofReal_zero, zero_pow, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
+    Complex.exp_zero, mul_zero, Complex.sin_zero, mul_zero, sub_zero] at hi
+  have hc := fourierCosTransform_gaussian ha hx
+  unfold fourierCosTransform at hc
+  simp_rw [← ofReal_mul, ← ofReal_cos, ← ofReal_sin] at hi
+  have hp : (2 * a) ^ (-(3 / 2 : ℂ)) = (2 * a) ^ (-(1 / 2 : ℂ)) / (2 * a) := by
+    rw [show -(3 / 2 : ℂ) = -(1 / 2 : ℂ) + -1 by ring,
+      cpow_add _ _ (mul_ne_zero (by norm_num) ha0), cpow_neg_one]
+    rfl
+  unfold fourierSinTransform
+  dsimp only
+  rw [hp]
+  rw [show (2 * a) ^ (-(1 / 2 : ℂ)) / (2 * a) * x * cexp (-(x : ℂ) ^ 2 / (4 * a)) =
+    ((2 * a) ^ (-(1 / 2 : ℂ)) * x * cexp (-(x : ℂ) ^ 2 / (4 * a))) / (2 * a) by ring]
+  have ha2 : 2 * a ≠ 0 := mul_ne_zero (by norm_num) ha0
+  apply (eq_div_iff ha2).mpr
+  linear_combination -(Real.sqrt (2 / Real.pi) : ℂ) * hi + (x : ℂ) * hc
 
 /-- DLMF Table 1.14.3, row 12: `sin(at)/t ↦ (2π)^{-1/2} ln|(x + a)/(x - a)|`, `a > 0`
 (conditionally convergent; `x ≠ a`). -/
@@ -347,165 +590,23 @@ theorem tendsto_fourierSinTransform_log_abs {a : ℝ} (ha : 0 < a) {x : ℝ} (hx
       (𝓝 (Real.sqrt (2 * Real.pi) * Real.sin (a * x) / x)) := by
   sorry
 
-/-! ### Table 1.14.4: Laplace transforms `∫₀^∞ e^{-st} f(t) dt` -/
-
-/-- DLMF Table 1.14.4, row 5: `e^{-at} ↦ 1/(s + a)`, `ℜ(s + a) > 0`. -/
-@[dlmf 1.14.T4]
-theorem laplaceTransform_exp_neg {a s : ℂ} (hs : 0 < (s + a).re) :
-    laplaceTransform (fun t => cexp (-a * t)) s = 1 / (s + a) := by
-  unfold laplaceTransform
-  have h : (-(s + a)).re < 0 := by simp at hs ⊢; linarith
-  have hne : s + a ≠ 0 := by
-    intro h0; rw [h0] at hs; simp at hs
-  calc (∫ t in Ioi (0 : ℝ), cexp (-s * t) * cexp (-a * t))
-      = ∫ t in Ioi (0 : ℝ), cexp (-(s + a) * t) := by
-        congr 1; funext t; rw [← Complex.exp_add]; congr 1; ring
-    _ = 1 / (s + a) := by
-        rw [integral_exp_mul_complex_Ioi h 0]
-        simp only [ofReal_zero, mul_zero, Complex.exp_zero]
-        field_simp
-
-/-- DLMF Table 1.14.4, row 2: `1 ↦ 1/s`, `ℜs > 0`. -/
-@[dlmf 1.14.T4]
-theorem laplaceTransform_one {s : ℂ} (hs : 0 < s.re) :
-    laplaceTransform (fun _ => 1) s = 1 / s := by
-  have h := laplaceTransform_exp_neg (a := 0) (s := s) (by simpa using hs)
-  simpa using h
-
-/-- DLMF Table 1.14.4, row 3: `tⁿ/n! ↦ 1/s^{n+1}`, `ℜs > 0`. -/
-@[dlmf 1.14.T4]
-theorem laplaceTransform_pow_div_factorial (n : ℕ) {s : ℂ} (hs : 0 < s.re) :
-    laplaceTransform (fun t => (t : ℂ) ^ n / n !) s = 1 / s ^ (n + 1) := by
-  sorry
-
-/-- DLMF Table 1.14.4, row 4: `1/√(πt) ↦ 1/√s`, `ℜs > 0`, principal square root. -/
-@[dlmf 1.14.T4]
-theorem laplaceTransform_inv_sqrt {s : ℂ} (hs : 0 < s.re) :
-    laplaceTransform (fun t => ((Real.sqrt (Real.pi * t))⁻¹ : ℂ)) s = s ^ (-(1 / 2 : ℂ)) := by
-  sorry
-
-/-- DLMF Table 1.14.4, row 6: `tⁿ e^{-at}/n! ↦ 1/(s + a)^{n+1}`, `ℜ(s + a) > 0`. Proved from
-row 3 and the translation rule 1.14.21. -/
-@[dlmf 1.14.T4]
-theorem laplaceTransform_pow_mul_exp_neg_div_factorial (n : ℕ) {a s : ℂ}
-    (hs : 0 < (s + a).re) :
-    laplaceTransform (fun t => (t : ℂ) ^ n * cexp (-a * t) / n !) s = 1 / (s + a) ^ (n + 1) := by
-  have h := laplaceTransform_sub (fun t => (t : ℂ) ^ n / n !) s (-a)
-  rw [sub_neg_eq_add, laplaceTransform_pow_div_factorial n (by simpa using hs)] at h
-  rw [h]
-  congr 1
-  funext t
-  ring
-
-/-- DLMF Table 1.14.4, row 7: `(e^{-at} - e^{-bt})/(b - a) ↦ 1/((s + a)(s + b))`, `a ≠ b`,
-`ℜs > -ℜa`, `ℜs > -ℜb`. Proved from row 5. -/
-@[dlmf 1.14.T4]
-theorem laplaceTransform_exp_neg_sub_exp_neg {a b s : ℂ} (hab : a ≠ b) (ha : -a.re < s.re)
-    (hb : -b.re < s.re) :
-    laplaceTransform (fun t => (cexp (-a * t) - cexp (-b * t)) / (b - a)) s =
-      1 / ((s + a) * (s + b)) := by
-  have ha' : 0 < (s + a).re := by simp; linarith
-  have hb' : 0 < (s + b).re := by simp; linarith
-  have hia : IntegrableOn (fun t : ℝ => cexp (-s * t) * cexp (-a * t)) (Ioi 0) := by
-    have : IntegrableOn (fun t : ℝ => cexp (-(s + a) * t)) (Ioi 0) :=
-      integrableOn_exp_mul_complex_Ioi (by simp at ha' ⊢; linarith) 0
-    refine this.congr_fun (fun t _ => ?_) measurableSet_Ioi
-    simp only; rw [← Complex.exp_add]; congr 1; ring
-  have hib : IntegrableOn (fun t : ℝ => cexp (-s * t) * cexp (-b * t)) (Ioi 0) := by
-    have : IntegrableOn (fun t : ℝ => cexp (-(s + b) * t)) (Ioi 0) :=
-      integrableOn_exp_mul_complex_Ioi (by simp at hb' ⊢; linarith) 0
-    refine this.congr_fun (fun t _ => ?_) measurableSet_Ioi
-    simp only; rw [← Complex.exp_add]; congr 1; ring
-  have ea := laplaceTransform_exp_neg ha'
-  have eb := laplaceTransform_exp_neg hb'
-  unfold laplaceTransform at *
-  have : (fun t : ℝ => cexp (-s * t) * ((cexp (-a * t) - cexp (-b * t)) / (b - a))) =
-      fun t : ℝ => (cexp (-s * t) * cexp (-a * t) - cexp (-s * t) * cexp (-b * t)) / (b - a) := by
-    funext t; ring
-  rw [this, integral_div, integral_sub hia hib, ea, eb]
-  have h1 : s + a ≠ 0 := fun h => by rw [h] at ha'; simp at ha'
-  have h2 : s + b ≠ 0 := fun h => by rw [h] at hb'; simp at hb'
-  have h3 : b - a ≠ 0 := sub_ne_zero.mpr (Ne.symm hab)
-  field_simp
-  ring
-
-/-- DLMF Table 1.14.4, row 8: `sin(at) ↦ a/(s² + a²)`, `ℜs > |ℑa|`. -/
-@[dlmf 1.14.T4]
-theorem laplaceTransform_sin {a s : ℂ} (hs : |a.im| < s.re) :
-    laplaceTransform (fun t => Complex.sin (a * t)) s = a / (s ^ 2 + a ^ 2) := by
-  sorry
-
-/-- DLMF Table 1.14.4, row 9: `cos(at) ↦ s/(s² + a²)`, `ℜs > |ℑa|`. -/
-@[dlmf 1.14.T4]
-theorem laplaceTransform_cos {a s : ℂ} (hs : |a.im| < s.re) :
-    laplaceTransform (fun t => Complex.cos (a * t)) s = s / (s ^ 2 + a ^ 2) := by
-  sorry
-
-/-- DLMF Table 1.14.4, row 10: `sinh(at) ↦ a/(s² - a²)`, `ℜs > |ℜa|`. -/
-@[dlmf 1.14.T4]
-theorem laplaceTransform_sinh {a s : ℂ} (hs : |a.re| < s.re) :
-    laplaceTransform (fun t => Complex.sinh (a * t)) s = a / (s ^ 2 - a ^ 2) := by
-  sorry
-
-/-- DLMF Table 1.14.4, row 11: `cosh(at) ↦ s/(s² - a²)`, `ℜs > |ℜa|`. -/
-@[dlmf 1.14.T4]
-theorem laplaceTransform_cosh {a s : ℂ} (hs : |a.re| < s.re) :
-    laplaceTransform (fun t => Complex.cosh (a * t)) s = s / (s ^ 2 - a ^ 2) := by
-  sorry
-
-/-- DLMF Table 1.14.4, row 12: `t sin(at) ↦ 2as/(s² + a²)²`, `ℜs > |ℑa|`. -/
-@[dlmf 1.14.T4]
-theorem laplaceTransform_mul_sin {a s : ℂ} (hs : |a.im| < s.re) :
-    laplaceTransform (fun t => t * Complex.sin (a * t)) s = 2 * a * s / (s ^ 2 + a ^ 2) ^ 2 := by
-  sorry
-
-/-- DLMF Table 1.14.4, row 13: `t cos(at) ↦ (s² - a²)/(s² + a²)²`, `ℜs > |ℑa|`. -/
-@[dlmf 1.14.T4]
-theorem laplaceTransform_mul_cos {a s : ℂ} (hs : |a.im| < s.re) :
-    laplaceTransform (fun t => t * Complex.cos (a * t)) s =
-      (s ^ 2 - a ^ 2) / (s ^ 2 + a ^ 2) ^ 2 := by
-  sorry
-
-/-- DLMF Table 1.14.4, row 14: `(e^{-bt} - e^{-at})/t ↦ ln((s + a)/(s + b))`, `ℜs > -ℜa`,
-`ℜs > -ℜb`, principal logarithm. -/
-@[dlmf 1.14.T4]
-theorem laplaceTransform_exp_neg_sub_exp_neg_div {a b s : ℂ} (ha : -a.re < s.re)
-    (hb : -b.re < s.re) :
-    laplaceTransform (fun t => (cexp (-b * t) - cexp (-a * t)) / t) s =
-      Complex.log ((s + a) / (s + b)) := by
-  sorry
-
-/-- DLMF Table 1.14.4, row 15: `2(1 - cosh(at))/t ↦ ln(1 - a²/s²)`, under the **corrected**
-condition `ℜs > |ℜa|` (DLMF prints `ℜ(s + a) > 0`, insufficient since the left side is even in
-`a`). -/
-@[dlmf 1.14.T4]
-theorem laplaceTransform_one_sub_cosh_div {a s : ℂ} (hs : |a.re| < s.re) :
-    laplaceTransform (fun t => 2 * (1 - Complex.cosh (a * t)) / t) s =
-      Complex.log (1 - a ^ 2 / s ^ 2) := by
-  sorry
-
-/-- DLMF Table 1.14.4, row 16: `2(1 - cos(at))/t ↦ ln(1 + a²/s²)`, `ℜs > |ℑa|` (DLMF:
-`ℜs > 0`, for real `a`). -/
-@[dlmf 1.14.T4]
-theorem laplaceTransform_one_sub_cos_div {a s : ℂ} (hs : |a.im| < s.re) :
-    laplaceTransform (fun t => 2 * (1 - Complex.cos (a * t)) / t) s =
-      Complex.log (1 + a ^ 2 / s ^ 2) := by
-  sorry
-
-/-- DLMF Table 1.14.4, row 17: `sin(at)/t ↦ arctan(a/s)`, `ℜs > |ℑa|` (DLMF: `ℜs > 0`, for real
-`a`), principal branch. -/
-@[dlmf 1.14.T4]
-theorem laplaceTransform_sin_div {a s : ℂ} (hs : |a.im| < s.re) :
-    laplaceTransform (fun t => Complex.sin (a * t) / t) s = Complex.arctan (a / s) := by
-  sorry
-
 /-! ### Table 1.14.5: Mellin transforms `∫₀^∞ x^{s-1} f(x) dx` (Mathlib's `mellin`) -/
 
 /-- DLMF Table 1.14.5, row 2: `f = 1` for `x < a`, `0` for `x ≥ a`: `a^s/s`, `a ≥ 0`, `ℜs > 0`. -/
 @[dlmf 1.14.T5]
 theorem mellin_indicator_lt {a : ℝ} (ha : 0 ≤ a) {s : ℂ} (hs : 0 < s.re) :
     mellin (fun x => (Iio a).indicator (fun _ => (1 : ℂ)) x) s = (a : ℂ) ^ s / s := by
-  sorry
+  have hs0 : s ≠ 0 := fun h => by simp [h] at hs
+  unfold mellin
+  have he : (fun x : ℝ => (x : ℂ) ^ (s - 1) •
+      (Iio a).indicator (fun _ => (1 : ℂ)) x) =
+      (Iio a).indicator (fun x => (x : ℂ) ^ (s - 1)) := by
+    ext x
+    by_cases hx : x ∈ Iio a <;> simp [hx]
+  rw [he, setIntegral_indicator measurableSet_Iio, Ioi_inter_Iio,
+    ← integral_Ioc_eq_integral_Ioo, ← intervalIntegral.integral_of_le ha,
+    integral_cpow (Or.inl (by simp; linarith)), sub_add_cancel,
+    ofReal_zero, Complex.zero_cpow hs0, sub_zero]
 
 /-- DLMF Table 1.14.5, row 3: `ln(a/x)` for `x < a`, `0` for `x ≥ a`: `a^s/s²`, `a ≥ 0`;
 valid for `ℜs > 0` (DLMF: `ℜs > 1`). -/
@@ -513,7 +614,39 @@ valid for `ℜs > 0` (DLMF: `ℜs > 1`). -/
 theorem mellin_log_indicator_lt {a : ℝ} (ha : 0 ≤ a) {s : ℂ} (hs : 0 < s.re) :
     mellin (fun x => (Iio a).indicator (fun x => (Real.log (a / x) : ℂ)) x) s =
       (a : ℂ) ^ s / s ^ 2 := by
-  sorry
+  have hs0 : s ≠ 0 := fun h => by simp [h] at hs
+  rcases ha.eq_or_lt with rfl | ha
+  · simp [mellin, Complex.zero_cpow hs0]
+  let g : ℝ → ℂ := (Ioi 0).indicator (fun u => cexp (-s * u) * u)
+  have he : (fun u : ℝ => cexp (-s * u) *
+      (Iio a).indicator (fun x => (Real.log (a / x) : ℂ)) (Real.exp (-u))) =
+      fun u => (a : ℂ) ^ s * g (u + Real.log a) := by
+    funext u
+    have hi : Real.exp (-u) < a ↔ 0 < u + Real.log a := by
+      rw [← Real.log_lt_log_iff (Real.exp_pos _) ha, Real.log_exp]
+      constructor <;> intro h <;> linarith
+    by_cases hu : 0 < u + Real.log a
+    · rw [indicator_of_mem (hi.mpr hu)]
+      dsimp only [g]
+      rw [indicator_of_mem hu, Real.log_div ha.ne' (Real.exp_pos _).ne', Real.log_exp]
+      have hExp : (a : ℂ) ^ s * cexp (-s * ((u + Real.log a : ℝ) : ℂ)) = cexp (-s * u) := by
+        rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr ha.ne'), ← ofReal_log ha.le, ← Complex.exp_add]
+        congr 1
+        push_cast
+        ring
+      rw [← mul_assoc, hExp]
+      congr 1
+      push_cast
+      ring
+    · rw [indicator_of_notMem (show Real.exp (-u) ∉ Iio a from fun h => hu (hi.mp h))]
+      simp only [g, indicator_of_notMem (show u + Real.log a ∉ Ioi 0 from hu), mul_zero]
+  rw [mellin_eq_integral_exp_mul, he, integral_const_mul, integral_add_right_eq_self,
+    integral_indicator measurableSet_Ioi]
+  have h := laplaceTransform_pow_div_factorial 1 hs
+  simp only [laplaceTransform, pow_one, Nat.factorial_one, Nat.cast_one, div_one] at h
+  rw [show (1 : ℕ) + 1 = 2 from rfl] at h
+  rw [h]
+  ring
 
 /-- DLMF Table 1.14.5, row 4: `1/(1 - x) ↦ π cot(sπ)`, `0 < ℜs < 1`, Cauchy principal value at
 `x = 1`. -/
@@ -528,7 +661,9 @@ theorem tendsto_mellin_inv_one_sub_pv {s : ℂ} (hs0 : 0 < s.re) (hs1 : s.re < 1
 @[dlmf 1.14.T5]
 theorem mellin_inv_one_add {s : ℂ} (hs0 : 0 < s.re) (hs1 : s.re < 1) :
     mellin (fun x => 1 / (1 + (x : ℂ))) s = Real.pi / Complex.sin (s * Real.pi) := by
-  sorry
+  have h := DLMF.Gamma.mellin_one_add_cpow_neg (a := 1) hs0 (by simpa using hs1)
+  simpa [Complex.cpow_neg, Complex.Gamma_one, Complex.Gamma_mul_Gamma_one_sub,
+    mul_comm] using h
 
 /-- DLMF Table 1.14.5, row 6: `ln(1 + ax) ↦ π csc(sπ)/(s a^s)`, `|ph a| < π`, `-1 < ℜs < 0`. -/
 @[dlmf 1.14.T5]

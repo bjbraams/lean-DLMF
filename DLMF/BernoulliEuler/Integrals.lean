@@ -7,6 +7,9 @@ module
 
 public import DLMF.BernoulliEuler.Basic
 public import DLMF.BernoulliEuler.GeneratingFunctions
+public import DLMF.BernoulliEuler.Properties
+public import ToMathlib.Analysis.SpecialFunctions.RamanujanMaster
+public import Mathlib.Analysis.SpecialFunctions.PolynomialExp
 
 /-!
 # Bernoulli and Euler numbers and polynomials: integral representations (DLMF §24.7)
@@ -14,11 +17,14 @@ public import DLMF.BernoulliEuler.GeneratingFunctions
 The integrals over `(0, ∞)` are Lebesgue (Bochner) integrals `∫ t in Set.Ioi 0, …`; all
 integrands are integrable on the stated ranges, so Lean's totalization of non-integrable
 integrals to `0` plays no role. The polynomial representations 24.7.7–24.7.10 are stated for
-complex `x` with `0 < Re x < 1` (DLMF §24.7(ii)); 24.7.7 for `n ≥ 1`, 24.7.8–24.7.10 for `n ≥ 0`
-(DLMF's "the following four equations" with the `n` of the section; `n = 0` checked numerically).
-The Mellin–Barnes integral 24.7.11 along `Re t = -c` is written with `t = -c + is`, so that
-`(1/(2πi)) ∫ … dt = (1/(2π)) ∫_ℝ … ds`; it holds for every complex `x` (checked numerically).
-All formulas were checked numerically with mpmath before acquisition.
+complex `x` with `0 < Re x < 1` (DLMF §24.7(ii)); 24.7.7 for `n ≥ 1`, 24.7.8–24.7.10 for `n ≥ 0`.
+
+The Mellin–Barnes representation 24.7.11 is proved by shifting the integration line to
+`Re t = -1/2` and expanding against the moments of `sech²(πs)`. It holds for every complex `x`.
+With `t = -c + is`, the contour normalization becomes
+`(1/(2πi)) ∫ … dt = (1/(2π)) ∫_ℝ … ds`. The proof uses the vertical-line shift theorem from
+lean-codes’ `ToMathlib.Analysis.MellinBarnes` and the sine lower bound from its
+`ToMathlib.Analysis.SpecialFunctions.RamanujanMaster`.
 -/
 
 @[expose] public section
@@ -597,12 +603,329 @@ theorem eulerPolyE_two_mul_add_one_eq_integral (n : ℕ) {x : ℂ} (hx0 : 0 < x.
         (Complex.cosh (2 * π * t) - Complex.cos (2 * π * x)) * (t : ℂ) ^ (2 * n + 1) := by
   sorry
 
+/-! ### Mellin–Barnes representation -/
+
+/-- The sine denominator of the Bernoulli Mellin–Barnes kernel has no zeros in the strip
+`-1 < Re z < 0`. -/
+private lemma bernoulli_mellinBarnes_sin_ne_zero {z : ℂ} (hz0 : -1 < z.re) (hz1 : z.re < 0) :
+    Complex.sin ((π : ℂ) * z) ≠ 0 := by
+  intro h
+  obtain ⟨k, hk⟩ := Complex.sin_eq_zero_iff.mp h
+  have hr := congrArg Complex.re hk
+  simp only [Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im, zero_mul, sub_zero,
+    Complex.intCast_re, Complex.intCast_im, mul_zero] at hr
+  have hk0 : k < 0 := by exact_mod_cast (show (k : ℝ) < 0 by nlinarith [pi_pos])
+  have hk1 : -1 < k := by exact_mod_cast (show (-1 : ℝ) < k by nlinarith [pi_pos])
+  omega
+
+/-- The polynomial Mellin–Barnes kernel is holomorphic between its two neighboring pole lines. -/
+private lemma bernoulli_mellinBarnes_differentiable (n : ℕ) (x : ℂ) {z : ℂ}
+    (hz0 : -1 < z.re) (hz1 : z.re < 0) :
+    DifferentiableAt ℂ (fun z => (x + z) ^ n * ((π : ℂ) / Complex.sin (π * z)) ^ 2) z := by
+  have hs := bernoulli_mellinBarnes_sin_ne_zero hz0 hz1
+  fun_prop
+
+/-- The real sine factor stays uniformly away from zero on a closed subinterval of `(-1, 0)`. -/
+private lemma bernoulli_mellinBarnes_sin_strip_lower {a b : ℝ}
+    (ha : -1 < a) (hb : b < 0) (hab : a ≤ b) :
+    ∃ m > (0 : ℝ), ∀ σ ∈ Icc a b, m ≤ |sin (π * σ)| := by
+  obtain ⟨σ, hσ, hmin⟩ := isCompact_Icc.exists_isMinOn (nonempty_Icc.mpr hab)
+    (by fun_prop : ContinuousOn (fun σ : ℝ => |sin (π * σ)|) (Icc a b))
+  refine ⟨|sin (π * σ)|, abs_pos.mpr ?_, fun t ht => hmin ht⟩
+  apply ne_of_lt
+  exact Real.sin_neg_of_neg_of_neg_pi_lt (mul_neg_of_pos_of_neg pi_pos (lt_of_le_of_lt hσ.2 hb))
+    (by nlinarith [pi_pos, hσ.1])
+
+/-- On a closed substrip of `-1 < Re z < 0`, the polynomial Mellin–Barnes kernel has an
+integrable bound of order `(1 + |Im z|)⁻²`. Exponential sine growth absorbs any polynomial
+degree. -/
+private lemma bernoulli_mellinBarnes_tail_bound (n : ℕ) (x : ℂ) {a b : ℝ}
+    (ha : -1 < a) (hb : b < 0) (hab : a ≤ b) :
+    ∃ C T : ℝ, ∀ σ t : ℝ, a ≤ σ → σ ≤ b → T ≤ |t| →
+      ‖(x + (σ + t * Complex.I)) ^ n *
+        ((π : ℂ) / Complex.sin (π * (σ + t * Complex.I))) ^ 2‖ ≤
+          C * (1 + |t|) ^ (-2 : ℝ) := by
+  obtain ⟨m, hm, hml⟩ := bernoulli_mellinBarnes_sin_strip_lower ha hb hab
+  have hlim := Polynomial.tendsto_div_exp_atTop
+    ((Polynomial.X + 1 : Polynomial ℝ) ^ (n + 2))
+  simp only [Polynomial.eval_pow, Polynomial.eval_add, Polynomial.eval_X,
+    Polynomial.eval_one] at hlim
+  obtain ⟨T, hT⟩ := eventually_atTop.mp (hlim.eventually (gt_mem_nhds (by norm_num : (0 : ℝ) < 1)))
+  let A : ℝ := ‖x‖ + 1
+  let C : ℝ := 4 * π ^ 2 * A ^ n / m ^ 2
+  refine ⟨C, max T 0, fun σ t hσa hσb ht => ?_⟩
+  have htT : T ≤ |t| := le_trans (le_max_left _ _) ht
+  have ht0 : 0 ≤ |t| := abs_nonneg t
+  have hA : 1 ≤ A := by dsimp [A]; linarith [norm_nonneg x]
+  have he : (1 + |t|) ^ (n + 2) ≤ rexp (2 * π * |t|) := by
+    have h := hT _ htT
+    rw [div_lt_one (exp_pos _)] at h
+    rw [add_comm |t| 1] at h
+    refine h.le.trans (Real.exp_le_exp.mpr ?_)
+    nlinarith [pi_gt_three]
+  have hs : m * (rexp (π * |t|) / 2) ≤
+      ‖Complex.sin (π * ((σ : ℂ) + t * Complex.I))‖ := by
+    -- The sine and hyperbolic cosine bounds are imported from lean-codes.
+    have hec := Real.exp_abs_div_two_le_cosh (π * t)
+    rw [abs_mul, abs_of_pos pi_pos] at hec
+    exact (mul_le_mul (hml σ ⟨hσa, hσb⟩) hec (by positivity) (by positivity)).trans
+      (Complex.abs_sin_mul_cosh_le_norm_sin_pi σ t)
+  have hn : ‖x + ((σ : ℂ) + t * Complex.I)‖ ≤ A * (1 + |t|) := by
+    have hσ : |σ| ≤ 1 := by rw [abs_of_neg (lt_of_le_of_lt hσb hb)]; linarith
+    calc
+      _ ≤ ‖x‖ + (‖(σ : ℂ)‖ + ‖(t : ℂ) * Complex.I‖) :=
+        (norm_add_le _ _).trans (add_le_add le_rfl (norm_add_le _ _))
+      _ ≤ ‖x‖ + (1 + |t|) := by simpa using add_le_add_left (add_le_add_right hσ |t|) ‖x‖
+      _ ≤ _ := by dsimp [A]; nlinarith [norm_nonneg x]
+  calc
+    _ = ‖x + ((σ : ℂ) + t * Complex.I)‖ ^ n *
+        (π / ‖Complex.sin (π * ((σ : ℂ) + t * Complex.I))‖) ^ 2 := by
+      rw [norm_mul, norm_pow, norm_pow, norm_div, Complex.norm_real, Real.norm_eq_abs,
+        abs_of_pos pi_pos]
+    _ ≤ (A * (1 + |t|)) ^ n * (π / (m * (rexp (π * |t|) / 2))) ^ 2 := by
+      gcongr
+    _ = C * ((1 + |t|) ^ n / rexp (2 * π * |t|)) := by
+      rw [show 2 * π * |t| = (2 : ℕ) * (π * |t|) by push_cast; ring, exp_nat_mul]
+      rw [mul_pow]
+      dsimp [C]
+      field_simp
+      ring
+    _ ≤ C * (1 / (1 + |t|) ^ 2) := by
+      apply mul_le_mul_of_nonneg_left _ (by dsimp [C]; positivity)
+      rw [div_le_div_iff₀ (exp_pos _) (by positivity), one_mul, ← pow_add]
+      exact he
+    _ = _ := by rw [Real.rpow_neg (by positivity), Real.rpow_two, one_div]
+
+/-- The Bernoulli polynomial Mellin–Barnes integrand is integrable on every line `Re z = -c`
+with `0 < c < 1`. -/
+theorem integrable_bernoulliPolyB_mellinBarnes (n : ℕ) (x : ℂ) {c : ℝ} (hc0 : 0 < c) (hc1 : c < 1) :
+    Integrable (fun t : ℝ => (x + (-c + t * Complex.I)) ^ n *
+      ((π : ℂ) / Complex.sin (π * (-c + t * Complex.I))) ^ 2) := by
+  obtain ⟨C, T, hC⟩ := bernoulli_mellinBarnes_tail_bound n x (a := -c) (b := -c)
+    (by linarith) (by linarith) le_rfl
+  obtain ⟨K, hK⟩ := Complex.exists_bound_of_tail_bound
+    (f := fun z => (x + z) ^ n * ((π : ℂ) / Complex.sin (π * z)) ^ 2)
+    (fun z hza hzb =>
+      (bernoulli_mellinBarnes_differentiable n x (by linarith) (by linarith)).continuousAt) hC
+  have hcont : Continuous (fun t : ℝ => (x + (-c + t * Complex.I)) ^ n *
+      ((π : ℂ) / Complex.sin (π * (-c + t * Complex.I))) ^ 2) := by
+    have hs : ∀ t : ℝ, Complex.sin (π * (-c + t * Complex.I)) ≠ 0 := fun t =>
+      bernoulli_mellinBarnes_sin_ne_zero (by simp; linarith) (by simp; linarith)
+    exact (by fun_prop : Continuous (fun t : ℝ => (x + (-c + t * Complex.I)) ^ n)).mul
+      ((continuous_const.div (by fun_prop) hs).pow 2)
+  exact (integrable_one_add_abs_rpow_neg_two.const_mul K).mono' hcont.aestronglyMeasurable
+    (Eventually.of_forall fun t => by
+      simpa only [Complex.ofReal_neg] using hK (-c) t le_rfl le_rfl)
+
+/-- Moving the vertical line within `-1 < Re z < 0` preserves the polynomial Mellin–Barnes
+integral, by Cauchy’s theorem and uniform decay at infinity. -/
+private lemma bernoulli_mellinBarnes_line_eq (n : ℕ) (x : ℂ) {c d : ℝ} (hc0 : 0 < c) (hc1 : c < 1)
+    (hd0 : 0 < d) (hd1 : d < 1) :
+    (∫ t : ℝ, (x + (-c + t * Complex.I)) ^ n *
+      ((π : ℂ) / Complex.sin (π * (-c + t * Complex.I))) ^ 2) =
+    ∫ t : ℝ, (x + (-d + t * Complex.I)) ^ n *
+      ((π : ℂ) / Complex.sin (π * (-d + t * Complex.I))) ^ 2 := by
+  suffices h : ∀ a b : ℝ, -1 < a → a ≤ b → b < 0 →
+      (∫ t : ℝ, (x + (a + t * Complex.I)) ^ n *
+        ((π : ℂ) / Complex.sin (π * (a + t * Complex.I))) ^ 2) =
+      ∫ t : ℝ, (x + (b + t * Complex.I)) ^ n *
+        ((π : ℂ) / Complex.sin (π * (b + t * Complex.I))) ^ 2 by
+    rcases le_total (-c) (-d) with hcd | hdc
+    · simpa only [Complex.ofReal_neg] using h (-c) (-d) (by linarith) hcd (by linarith)
+    · simpa only [Complex.ofReal_neg] using (h (-d) (-c) (by linarith) hdc (by linarith)).symm
+  intro a b ha hab hb
+  obtain ⟨C, T, hC⟩ := bernoulli_mellinBarnes_tail_bound n x ha hb hab
+  exact Complex.integral_vertical_eq_of_tail_bound hab
+    (fun z hza hzb => bernoulli_mellinBarnes_differentiable n x (by linarith) (by linarith)) hC
+
+/-- On the central line of the strip, the sine denominator becomes the real hyperbolic cosine. -/
+private lemma bernoulli_mellinBarnes_central_sin (t : ℝ) :
+    Complex.sin ((π : ℂ) * (-(1 / 2) + t * Complex.I)) = -(cosh (π * t) : ℂ) := by
+  rw [show (π : ℂ) * (-(1 / 2) + t * Complex.I) = -(π / 2) + (π * t) * Complex.I by ring,
+    Complex.sin_add_mul_I, Complex.sin_neg, Complex.sin_pi_div_two, Complex.cos_neg,
+    Complex.cos_pi_div_two]
+  simp [← Complex.ofReal_mul, ← Complex.ofReal_cosh]
+
+/-- The zeroth half-line moment of `sech²(πt)` follows from the logistic primitive. -/
+private lemma bernoulli_mellinBarnes_integral_sech_sq :
+    ∫ t in Ioi (0 : ℝ), 1 / cosh (π * t) ^ 2 = 1 / π := by
+  have hd : ∀ t : ℝ, HasDerivAt (fun t => 2 / π / (1 + rexp (-(2 * π * t))))
+      (1 / cosh (π * t) ^ 2) t := by
+    intro t
+    have h := ((((hasDerivAt_id t).const_mul (-(2 * π))).exp).const_add 1).inv
+      (by positivity : 1 + rexp (-(2 * π) * t) ≠ 0)
+    have h := h.const_mul (2 / π)
+    simp only [id_eq, mul_one] at h
+    convert h using 1
+    · ext t; simp only [div_eq_mul_inv]; congr 3; ring
+    · rw [Real.cosh_eq, show -(2 * π) * t = -(π * t) + -(π * t) by ring, exp_add,
+        exp_neg]
+      have he : rexp (π * t) ≠ 0 := (exp_pos _).ne'
+      have hp : π ≠ 0 := pi_ne_zero
+      field_simp
+  have hlim : Tendsto (fun t : ℝ => 2 / π / (1 + rexp (-(2 * π * t)))) atTop (𝓝 (2 / π)) := by
+    have he : Tendsto (fun t : ℝ => rexp (-(2 * π * t))) atTop (𝓝 0) := by
+      exact Real.tendsto_exp_atBot.comp (by
+        convert (tendsto_id.const_mul_atTop_of_neg
+          (neg_neg_of_pos (by positivity : 0 < 2 * π))) using 1
+        ext t; simp only [id_eq]; ring)
+    convert tendsto_const_nhds.div (tendsto_const_nhds.add he)
+      (by norm_num : (1 : ℝ) + 0 ≠ 0) using 1
+    norm_num
+  have hint : IntegrableOn (fun t : ℝ => 1 / cosh (π * t) ^ 2) (Ioi 0) :=
+    integrableOn_Ioi_deriv_of_nonneg' (fun t _ => hd t) (fun t _ => by positivity) hlim
+  rw [integral_Ioi_of_hasDerivAt_of_tendsto' (fun t _ => hd t) hint hlim]
+  simp only [mul_zero, neg_zero, exp_zero]
+  field_simp
+  ring
+
+/-- Every polynomial moment of the central `sech²` kernel is integrable. -/
+private lemma bernoulli_mellinBarnes_integrable_moment (n : ℕ) :
+    Integrable (fun t : ℝ => (t * Complex.I) ^ n / (cosh (π * t) : ℂ) ^ 2) := by
+  have h := (integrable_bernoulliPolyB_mellinBarnes n (1 / 2) (c := 1 / 2)
+    (by norm_num) (by norm_num)).const_mul
+    ((π : ℂ) ^ 2)⁻¹
+  norm_num only [Complex.ofReal_div, Complex.ofReal_one, Complex.ofReal_ofNat] at h
+  convert h using 1
+  ext t
+  rw [bernoulli_mellinBarnes_central_sin]
+  have hp : (π : ℂ) ≠ 0 := by exact_mod_cast pi_ne_zero
+  field_simp
+  ring
+
+/-- An even moment of the real `sech²` kernel is twice its integral over the positive half-line. -/
+private lemma bernoulli_mellinBarnes_even_moment (m : ℕ) :
+    (∫ t : ℝ, t ^ (2 * m) / cosh (π * t) ^ 2) =
+      2 * ∫ t in Ioi (0 : ℝ), t ^ (2 * m) / cosh (π * t) ^ 2 := by
+  rw [← integral_comp_abs]
+  congr 1
+  ext t
+  rw [show π * |t| = |π * t| by rw [abs_mul, abs_of_pos pi_pos], Real.cosh_abs]
+  congr 1
+  rw [pow_mul, pow_mul, sq_abs]
+
+/-- A moment along the imaginary axis is the corresponding real `sech²` moment multiplied by
+the appropriate power of `I`. -/
+private lemma bernoulli_mellinBarnes_moment_ofReal (n : ℕ) :
+    (∫ t : ℝ, (t * Complex.I) ^ n / (cosh (π * t) : ℂ) ^ 2) =
+      Complex.I ^ n * (∫ t : ℝ, t ^ n / cosh (π * t) ^ 2 : ℝ) := by
+  rw [← integral_complex_ofReal, ← integral_const_mul]
+  congr 1
+  ext t
+  push_cast
+  rw [mul_pow]
+  ring
+
+/-- The normalized even moments of the central `sech²` kernel evaluate to the Bernoulli
+polynomial values at `1/2`, by the known positive half-line integrals. -/
+private lemma bernoulli_mellinBarnes_moment_two_mul (m : ℕ) :
+    (π / 2 : ℂ) * (∫ t : ℝ, (t * Complex.I) ^ (2 * m) / (cosh (π * t) : ℂ) ^ 2) =
+      bernoulliPolyB (2 * m) (1 / 2) := by
+  rw [bernoulli_mellinBarnes_moment_ofReal]
+  rcases m with _ | m
+  · norm_num only [mul_zero, pow_zero, one_div, one_mul]
+    have hr0 := bernoulli_mellinBarnes_even_moment 0
+    simp only [mul_zero, pow_zero, one_div] at hr0
+    rw [hr0]
+    have hi0 : (∫ t in Ioi (0 : ℝ), (cosh (π * t) ^ 2)⁻¹) = 1 / π := by
+      simpa only [one_div] using bernoulli_mellinBarnes_integral_sech_sq
+    rw [hi0]
+    norm_num [bernoulliPolyB]
+    field_simp
+  · have hb := bernoulli_two_mul_eq_integral_sech_sq (n := m + 1) (by omega)
+    let q : ℝ := 1 - (2 : ℝ) ^ (1 - 2 * ((m + 1 : ℕ) : ℤ))
+    have hq : q ≠ 0 := by
+      dsimp [q]
+      rw [zpow_sub₀ (by norm_num : (2 : ℝ) ≠ 0), zpow_one]
+      norm_cast
+      have htwo : (2 : ℝ) < 2 ^ (2 * (m + 1)) := by
+        calc
+          (2 : ℝ) = 2 ^ 1 := by norm_num
+          _ < _ := pow_lt_pow_right₀ (by norm_num) (by omega)
+      exact ne_of_gt (sub_pos.mpr ((div_lt_one (by positivity)).mpr (by exact_mod_cast htwo)))
+    have hbq : q * (bernoulli (2 * (m + 1)) : ℝ) =
+        (-1) ^ (m + 1 + 1) * π * ∫ t in Ioi (0 : ℝ),
+          t ^ (2 * (m + 1)) / cosh (π * t) ^ 2 := by
+      rw [hb]
+      change q * ((-1) ^ (m + 1 + 1) * π / q * _) = _
+      field_simp
+    rw [bernoulliPolyB_half, bernoulli_mellinBarnes_even_moment,
+      pow_mul, Complex.I_sq]
+    have hbqc := congrArg (Complex.ofReal) hbq
+    push_cast at hbqc
+    rw [pow_succ (-1 : ℂ) (m + 1)] at hbqc
+    have hqc : (1 - (2 : ℂ) ^ (1 - ((2 * (m + 1) : ℕ) : ℤ))) = (q : ℂ) := by
+      dsimp [q]
+      push_cast
+      congr 2
+    rw [hqc]
+    push_cast
+    linear_combination hbqc
+
+/-- Odd moments of the central `sech²` kernel vanish by reflection of the real integration
+variable. -/
+private lemma bernoulli_mellinBarnes_moment_two_mul_add_one (m : ℕ) :
+    (∫ t : ℝ, (t * Complex.I) ^ (2 * m + 1) / (cosh (π * t) : ℂ) ^ 2) = 0 := by
+  rw [bernoulli_mellinBarnes_moment_ofReal]
+  have hzero : (∫ t : ℝ, t ^ (2 * m + 1) / cosh (π * t) ^ 2) = 0 := by
+    have h := integral_neg_eq_self (fun t : ℝ => t ^ (2 * m + 1) / cosh (π * t) ^ 2) volume
+    simp only [neg_pow, (odd_two_mul_add_one m).neg_one_pow,
+      show ∀ t : ℝ, π * -t = -(π * t) by intro t; ring, cosh_neg, neg_one_mul,
+      neg_div, integral_neg] at h
+    linarith
+  rw [hzero, Complex.ofReal_zero, mul_zero]
+
+/-- The normalized moments of the central `sech²` kernel are the Bernoulli polynomial values
+at `1/2`; odd moments vanish by symmetry. -/
+private lemma bernoulli_mellinBarnes_moment (n : ℕ) :
+    (π / 2 : ℂ) * (∫ t : ℝ, (t * Complex.I) ^ n / (cosh (π * t) : ℂ) ^ 2) =
+      bernoulliPolyB n (1 / 2) := by
+  rcases Nat.even_or_odd n with ⟨m, rfl⟩ | ⟨m, rfl⟩
+  · simpa only [two_mul] using bernoulli_mellinBarnes_moment_two_mul m
+  · rw [bernoulli_mellinBarnes_moment_two_mul_add_one, mul_zero]
+    rw [show (1 / 2 : ℂ) = ((2⁻¹ : ℝ) : ℂ) by norm_num,
+      bernoulliPolyB_ofReal, bernoulliFun_eval_half_eq_zero, Complex.ofReal_zero]
+
+/-- Expanding a polynomial against the central `sech²` kernel gives the Bernoulli addition
+formula centered at `1/2`. -/
+private lemma bernoulli_mellinBarnes_central_polynomial (n : ℕ) (z : ℂ) :
+    (π / 2 : ℂ) * (∫ t : ℝ, (z + t * Complex.I) ^ n / (cosh (π * t) : ℂ) ^ 2) =
+      bernoulliPolyB n (z + 1 / 2) := by
+  rw [add_comm z (1 / 2), bernoulliPolyB_add]
+  have heq : (fun t : ℝ => (z + t * Complex.I) ^ n / (cosh (π * t) : ℂ) ^ 2) =
+      fun t : ℝ => ∑ k ∈ Finset.range (n + 1), (n.choose k : ℂ) * z ^ (n - k) *
+        ((t * Complex.I) ^ k / (cosh (π * t) : ℂ) ^ 2) := by
+    ext t
+    rw [add_comm z _, add_pow, Finset.sum_div]
+    refine Finset.sum_congr rfl fun k hk => ?_
+    ring
+  rw [heq, integral_finsetSum, Finset.mul_sum]
+  · refine Finset.sum_congr rfl fun k hk => ?_
+    rw [integral_const_mul]
+    calc
+      _ = (n.choose k : ℂ) * ((π / 2 : ℂ) *
+          (∫ t : ℝ, (t * Complex.I) ^ k / (cosh (π * t) : ℂ) ^ 2)) * z ^ (n - k) := by ring
+      _ = _ := by rw [bernoulli_mellinBarnes_moment]
+  · intro k hk
+    exact (bernoulli_mellinBarnes_integrable_moment k).const_mul _
+
 /-- **Mellin–Barnes integral, DLMF 24.7.11**: for `0 < c < 1` and complex `x`,
 `Bₙ(x) = (1/(2πi)) ∫_{-c-i∞}^{-c+i∞} (x+t)ⁿ (π/sin(πt))² dt`, written along `t = -c + is`. -/
 @[dlmf 24.7.E11]
 theorem bernoulliPolyB_eq_mellinBarnes (n : ℕ) (x : ℂ) {c : ℝ} (hc0 : 0 < c) (hc1 : c < 1) :
     bernoulliPolyB n x = 1 / (2 * π) * ∫ s : ℝ, (x + (-c + s * Complex.I)) ^ n *
       ((π : ℂ) / Complex.sin (π * (-c + s * Complex.I))) ^ 2 := by
-  sorry
+  rw [bernoulli_mellinBarnes_line_eq n x hc0 hc1 (d := 1 / 2) (by norm_num) (by norm_num)]
+  norm_num only [Complex.ofReal_div, Complex.ofReal_one, Complex.ofReal_ofNat]
+  have heq : (fun t : ℝ => (x + (-(1 / 2) + t * Complex.I)) ^ n *
+        ((π : ℂ) / Complex.sin (π * (-(1 / 2) + t * Complex.I))) ^ 2) =
+      fun t : ℝ => (π : ℂ) ^ 2 * ((x - 1 / 2 + t * Complex.I) ^ n /
+        (cosh (π * t) : ℂ) ^ 2) := by
+    ext t
+    rw [bernoulli_mellinBarnes_central_sin]
+    ring
+  rw [heq, integral_const_mul, ← mul_assoc,
+    show (1 / (2 * π) : ℂ) * (π : ℂ) ^ 2 = π / 2 by field_simp,
+    bernoulli_mellinBarnes_central_polynomial, sub_add_cancel]
 
 end DLMF.BernoulliEuler

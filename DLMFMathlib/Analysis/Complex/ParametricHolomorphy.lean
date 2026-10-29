@@ -7,6 +7,7 @@ module
 
 public import Mathlib.Analysis.Complex.Liouville
 public import Mathlib.Analysis.Calculus.SmoothSeries
+public import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
 
 /-!
 # Holomorphy in parameters of series and integrals
@@ -28,6 +29,10 @@ complex normed space (several complex parameters at once):
   holomorphic in a finite-dimensional complex parameter, locally dominated by integrable functions,
   is holomorphic; `Complex.differentiableOn_intervalIntegral_of_locally_dominated` and
   `Complex.differentiableOn_integral_Ioi_of_locally_dominated` are the interval and half-line forms.
+* `Complex.hasFDerivAt_integral_of_locally_dominated` gives the derivative explicitly;
+  `Complex.iteratedDeriv_integral_of_locally_dominated` and its interval form commute every
+  parameter derivative with integration. Their bounds use Mathlib’s Cauchy estimate
+  `Complex.norm_iteratedDeriv_le_of_forall_mem_sphere_norm_le`.
 * `Complex.differentiableOn_of_continuousOn_of_separately` (Osgood's lemma): a continuous function
   on an open subset of `ℂ × E`, `E` finite-dimensional, that is holomorphic in each variable
   separately is jointly holomorphic;
@@ -242,16 +247,16 @@ theorem aestronglyMeasurable_fderiv_param [FiniteDimensional ℂ E] {Φ : E → 
   refine Finset.aestronglyMeasurable_fun_sum _ fun i _ => ?_
   exact (ContinuousLinearMap.continuous _).comp_aestronglyMeasurable (hdir (b i))
 
-/-- A parametric integral of functions holomorphic in a finite-dimensional complex parameter,
-dominated near every point by an integrable function, is holomorphic. -/
-theorem differentiableOn_integral_of_locally_dominated [FiniteDimensional ℂ E]
+/-- Local integrable domination controls the parameter derivative and permits its integration. -/
+private theorem integrable_fderiv_and_hasFDerivAt_integral [FiniteDimensional ℂ E]
     {Φ : E → α → F} {U : Set E} (hU : IsOpen U)
     (hmeas : ∀ x ∈ U, AEStronglyMeasurable (Φ x) μ)
     (hdiff : ∀ᵐ a ∂μ, DifferentiableOn ℂ (Φ · a) U)
     (hdom : ∀ x ∈ U, ∃ V ∈ 𝓝 x, ∃ g : α → ℝ, Integrable g μ ∧
-      ∀ᵐ a ∂μ, ∀ y ∈ V, ‖Φ y a‖ ≤ g a) :
-    DifferentiableOn ℂ (fun x => ∫ a, Φ x a ∂μ) U := by
-  intro x hx
+      ∀ᵐ a ∂μ, ∀ y ∈ V, ‖Φ y a‖ ≤ g a)
+    {x : E} (hx : x ∈ U) :
+    Integrable (fun a => fderiv ℂ (Φ · a) x) μ ∧
+      HasFDerivAt (fun x => ∫ a, Φ x a ∂μ) (∫ a, fderiv ℂ (Φ · a) x ∂μ) x := by
   obtain ⟨V, hV, g, hg, hle⟩ := hdom x hx
   obtain ⟨ε, hε, hεsub⟩ := Metric.mem_nhds_iff.mp (Filter.inter_mem hV (hU.mem_nhds hx))
   set r := ε / 2 with hr
@@ -274,8 +279,145 @@ theorem differentiableOn_integral_of_locally_dominated [FiniteDimensional ℂ E]
       (by filter_upwards [hdiff] with a ha using ha.differentiableAt (hU.mem_nhds hx))
   have hFmeas : ∀ᶠ y in 𝓝 x, AEStronglyMeasurable (Φ y) μ := by
     filter_upwards [hU.mem_nhds hx] with y hy using hmeas y hy
+  have hint' : Integrable (fun a => fderiv ℂ (Φ · a) x) μ :=
+    (hg.div_const r).mono' hF'meas (by
+      filter_upwards [hbound] with a ha using ha x (mem_ball_self hr0))
+  refine ⟨hint', ?_⟩
   exact (hasFDerivAt_integral_of_dominated_of_fderiv_le (ball_mem_nhds x hr0) hFmeas hint
-    hF'meas hbound (hg.div_const r) hderiv).differentiableAt.differentiableWithinAt
+    hF'meas hbound (hg.div_const r) hderiv)
+
+
+/-- The parameter derivative of a locally dominated holomorphic family is integrable. -/
+theorem integrable_fderiv_of_locally_dominated [FiniteDimensional ℂ E]
+    {Φ : E → α → F} {U : Set E} (hU : IsOpen U)
+    (hmeas : ∀ x ∈ U, AEStronglyMeasurable (Φ x) μ)
+    (hdiff : ∀ᵐ a ∂μ, DifferentiableOn ℂ (Φ · a) U)
+    (hdom : ∀ x ∈ U, ∃ V ∈ 𝓝 x, ∃ g : α → ℝ, Integrable g μ ∧
+      ∀ᵐ a ∂μ, ∀ y ∈ V, ‖Φ y a‖ ≤ g a)
+    {x : E} (hx : x ∈ U) :
+    Integrable (fun a => fderiv ℂ (Φ · a) x) μ :=
+  (integrable_fderiv_and_hasFDerivAt_integral hU hmeas hdiff hdom hx).1
+
+/-- The Fréchet derivative of a locally dominated holomorphic integral is the integral of the
+derivatives. -/
+theorem hasFDerivAt_integral_of_locally_dominated [FiniteDimensional ℂ E]
+    {Φ : E → α → F} {U : Set E} (hU : IsOpen U)
+    (hmeas : ∀ x ∈ U, AEStronglyMeasurable (Φ x) μ)
+    (hdiff : ∀ᵐ a ∂μ, DifferentiableOn ℂ (Φ · a) U)
+    (hdom : ∀ x ∈ U, ∃ V ∈ 𝓝 x, ∃ g : α → ℝ, Integrable g μ ∧
+      ∀ᵐ a ∂μ, ∀ y ∈ V, ‖Φ y a‖ ≤ g a)
+    {x : E} (hx : x ∈ U) :
+    HasFDerivAt (fun x => ∫ a, Φ x a ∂μ) (∫ a, fderiv ℂ (Φ · a) x ∂μ) x :=
+  (integrable_fderiv_and_hasFDerivAt_integral hU hmeas hdiff hdom hx).2
+
+/-- A parametric integral of functions holomorphic in a finite-dimensional complex parameter,
+dominated near every point by an integrable function, is holomorphic. -/
+theorem differentiableOn_integral_of_locally_dominated [FiniteDimensional ℂ E]
+    {Φ : E → α → F} {U : Set E} (hU : IsOpen U)
+    (hmeas : ∀ x ∈ U, AEStronglyMeasurable (Φ x) μ)
+    (hdiff : ∀ᵐ a ∂μ, DifferentiableOn ℂ (Φ · a) U)
+    (hdom : ∀ x ∈ U, ∃ V ∈ 𝓝 x, ∃ g : α → ℝ, Integrable g μ ∧
+      ∀ᵐ a ∂μ, ∀ y ∈ V, ‖Φ y a‖ ≤ g a) :
+    DifferentiableOn ℂ (fun x => ∫ a, Φ x a ∂μ) U := by
+  intro x hx
+  have h := hasFDerivAt_integral_of_locally_dominated hU hmeas hdiff hdom hx
+  exact h.differentiableAt.differentiableWithinAt
+
+/-- The derivative of a locally dominated holomorphic integral is the integral of the derivatives.
+-/
+theorem hasDerivAt_integral_of_locally_dominated [CompleteSpace F]
+    {Φ : ℂ → α → F} {U : Set ℂ} (hU : IsOpen U)
+    (hmeas : ∀ x ∈ U, AEStronglyMeasurable (Φ x) μ)
+    (hdiff : ∀ᵐ a ∂μ, DifferentiableOn ℂ (Φ · a) U)
+    (hdom : ∀ x ∈ U, ∃ V ∈ 𝓝 x, ∃ g : α → ℝ, Integrable g μ ∧
+      ∀ᵐ a ∂μ, ∀ y ∈ V, ‖Φ y a‖ ≤ g a) {x : ℂ} (hx : x ∈ U) :
+    HasDerivAt (fun x => ∫ a, Φ x a ∂μ) (∫ a, deriv (Φ · a) x ∂μ) x := by
+  have h := integrable_fderiv_and_hasFDerivAt_integral hU hmeas hdiff hdom hx
+  have hd := h.2.hasDerivAt
+  simpa only [ContinuousLinearMap.integral_apply h.1, fderiv_apply_one_eq_deriv] using hd
+
+/-- Almost every holomorphic integrand remains holomorphic after any number of parameter
+derivatives. -/
+private lemma ae_differentiableOn_iteratedDeriv_param [CompleteSpace F]
+    {Φ : ℂ → α → F} {U : Set ℂ} (hU : IsOpen U)
+    (hdiff : ∀ᵐ a ∂μ, DifferentiableOn ℂ (Φ · a) U) (n : ℕ) :
+    ∀ᵐ a ∂μ, DifferentiableOn ℂ (iteratedDeriv n (Φ · a)) U := by
+  filter_upwards [hdiff] with a ha
+  rw [iteratedDeriv_eq_iterate]
+  exact ((ha.analyticOnNhd hU).iterated_deriv n).differentiableOn
+
+/-- Each parameter derivative of a measurable holomorphic family is almost everywhere strongly
+measurable. -/
+private lemma aestronglyMeasurable_iteratedDeriv_param [CompleteSpace F]
+    {Φ : ℂ → α → F} {U : Set ℂ} (hU : IsOpen U)
+    (hmeas : ∀ x ∈ U, AEStronglyMeasurable (Φ x) μ)
+    (hdiff : ∀ᵐ a ∂μ, DifferentiableOn ℂ (Φ · a) U) (n : ℕ) :
+    ∀ x ∈ U, AEStronglyMeasurable (fun a => iteratedDeriv n (Φ · a) x) μ := by
+  induction n with
+  | zero => simpa only [iteratedDeriv_zero] using hmeas
+  | succ n ih =>
+    intro x hx
+    have hm := aestronglyMeasurable_fderiv_param (hU.mem_nhds hx) ih
+      (by
+        filter_upwards [ae_differentiableOn_iteratedDeriv_param hU hdiff n] with a ha
+        exact ha.differentiableAt (hU.mem_nhds hx))
+    simpa only [iteratedDeriv_succ, ContinuousLinearMap.apply_apply,
+      fderiv_apply_one_eq_deriv] using!
+      (ContinuousLinearMap.apply ℂ F (1 : ℂ)).continuous.comp_aestronglyMeasurable hm
+
+/-- Cauchy estimates provide local integrable majorants for every parameter derivative. -/
+private lemma locally_dominated_iteratedDeriv [CompleteSpace F]
+    {Φ : ℂ → α → F} {U : Set ℂ} (hU : IsOpen U)
+    (hdiff : ∀ᵐ a ∂μ, DifferentiableOn ℂ (Φ · a) U)
+    (hdom : ∀ x ∈ U, ∃ V ∈ 𝓝 x, ∃ g : α → ℝ, Integrable g μ ∧
+      ∀ᵐ a ∂μ, ∀ y ∈ V, ‖Φ y a‖ ≤ g a) (n : ℕ) :
+    ∀ x ∈ U, ∃ V ∈ 𝓝 x, ∃ g : α → ℝ, Integrable g μ ∧
+      ∀ᵐ a ∂μ, ∀ y ∈ V, ‖iteratedDeriv n (Φ · a) y‖ ≤ g a := by
+  intro x hx
+  obtain ⟨V, hV, g, hg, hle⟩ := hdom x hx
+  obtain ⟨ε, hε, hεsub⟩ := Metric.mem_nhds_iff.mp (Filter.inter_mem hV (hU.mem_nhds hx))
+  let r := ε / 2
+  have hr : 0 < r := half_pos hε
+  refine ⟨ball x r, ball_mem_nhds x hr, fun a => (n.factorial : ℝ) * g a / r ^ n,
+    (hg.const_mul _).div_const _, ?_⟩
+  filter_upwards [hdiff, hle] with a ha hla y hy
+  have hball : closedBall y r ⊆ V ∩ U := by
+    intro w hw
+    apply hεsub
+    rw [mem_ball] at hy ⊢
+    rw [mem_closedBall] at hw
+    calc dist w x ≤ dist w y + dist y x := dist_triangle _ _ _
+      _ < r + r := add_lt_add_of_le_of_lt hw hy
+      _ = ε := by dsimp [r]; ring
+  apply norm_iteratedDeriv_le_of_forall_mem_sphere_norm_le n hr
+  · apply DifferentiableOn.diffContOnCl
+    rw [closure_ball y hr.ne']
+    exact ha.mono fun w hw => (hball hw).2
+  · intro w hw
+    exact hla w (hball (sphere_subset_closedBall hw)).1
+
+/-- Every parameter derivative of a locally dominated holomorphic integral commutes with
+integration. -/
+theorem iteratedDeriv_integral_of_locally_dominated [CompleteSpace F]
+    {Φ : ℂ → α → F} {U : Set ℂ} (hU : IsOpen U)
+    (hmeas : ∀ x ∈ U, AEStronglyMeasurable (Φ x) μ)
+    (hdiff : ∀ᵐ a ∂μ, DifferentiableOn ℂ (Φ · a) U)
+    (hdom : ∀ x ∈ U, ∃ V ∈ 𝓝 x, ∃ g : α → ℝ, Integrable g μ ∧
+      ∀ᵐ a ∂μ, ∀ y ∈ V, ‖Φ y a‖ ≤ g a) (n : ℕ) {x : ℂ} (hx : x ∈ U) :
+    iteratedDeriv n (fun x => ∫ a, Φ x a ∂μ) x =
+      ∫ a, iteratedDeriv n (Φ · a) x ∂μ := by
+  induction n generalizing x with
+  | zero => simp only [iteratedDeriv_zero]
+  | succ n ih =>
+    have he : iteratedDeriv n (fun x => ∫ a, Φ x a ∂μ) =ᶠ[𝓝 x]
+        fun x => ∫ a, iteratedDeriv n (Φ · a) x ∂μ := by
+      filter_upwards [hU.mem_nhds hx] with y hy using ih hy
+    rw [iteratedDeriv_succ, he.deriv_eq]
+    have hd := hasDerivAt_integral_of_locally_dominated hU
+      (aestronglyMeasurable_iteratedDeriv_param hU hmeas hdiff n)
+      (ae_differentiableOn_iteratedDeriv_param hU hdiff n)
+      (locally_dominated_iteratedDeriv hU hdiff hdom n) hx
+    simpa only [iteratedDeriv_succ] using hd.deriv
 
 /-- The half-line form of `differentiableOn_integral_of_locally_dominated`. -/
 theorem differentiableOn_integral_Ioi_of_locally_dominated [FiniteDimensional ℂ E]
@@ -309,6 +451,24 @@ theorem differentiableOn_intervalIntegral_of_locally_dominated [FiniteDimensiona
   have h1 := key (s := Ioc a b) Ioc_subset_uIoc
   have h2 := key (s := Ioc b a) Ioc_subset_uIoc'
   exact (h1.sub h2).congr fun x _ => rfl
+
+/-- Every complex parameter derivative commutes with an interval integral under local integrable
+domination. -/
+theorem iteratedDeriv_intervalIntegral_of_locally_dominated [CompleteSpace F]
+    {Φ : ℂ → ℝ → F} {U : Set ℂ} (hU : IsOpen U) {ν : Measure ℝ} (a b : ℝ)
+    (hmeas : ∀ x ∈ U, AEStronglyMeasurable (Φ x) (ν.restrict (uIoc a b)))
+    (hdiff : ∀ᵐ t ∂(ν.restrict (uIoc a b)), DifferentiableOn ℂ (Φ · t) U)
+    (hdom : ∀ x ∈ U, ∃ V ∈ 𝓝 x, ∃ g : ℝ → ℝ,
+      Integrable g (ν.restrict (uIoc a b)) ∧
+      ∀ᵐ t ∂(ν.restrict (uIoc a b)), ∀ y ∈ V, ‖Φ y t‖ ≤ g t)
+    (n : ℕ) {x : ℂ} (hx : x ∈ U) :
+    iteratedDeriv n (fun x => ∫ t in a..b, Φ x t ∂ν) x =
+      ∫ t in a..b, iteratedDeriv n (Φ · t) x ∂ν := by
+  have hi := iteratedDeriv_integral_of_locally_dominated hU hmeas hdiff hdom n hx
+  simp_rw [intervalIntegral.intervalIntegral_eq_integral_uIoc]
+  split_ifs
+  · simpa only [one_smul] using hi
+  · simpa only [neg_one_smul, iteratedDeriv_fun_neg] using congrArg Neg.neg hi
 
 end Integral
 
