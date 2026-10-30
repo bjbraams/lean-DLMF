@@ -15,6 +15,8 @@ values.
 
 Source references and common attribution are retained in
 `DLMF.Elementary.Hyperbolic`.
+The transformed series follows from the proved Euler arctangent series by rotation
+through `-i`; its principal logarithm formula is preserved exactly.
 -/
 
 @[expose] public noncomputable section
@@ -164,12 +166,52 @@ theorem hasSum_arctanh_large {z : ℂ} (hn : 1 < ‖z‖) (hz : z.im ≠ 0) :
     (tendsto_arctanh_large_series hn.le hz)]
   exact hs.hasSum
 
-/-- The series with terms `(fun n : ℕ =>
-(4:ℂ)^n*(n.factorial:ℂ)^2/((2*n+1).factorial:ℂ)*(z^2/(z^2-1))^n)` converges to `(if z=0 then 1
-else (1-z^2)/z*arctanh z)`. -/
+/-- The factorial-coefficient expansion of the principal `arctanh` quotient on
+`Re (z²) < 1/2`, normalized to one at zero. -/
 @[dlmf 4.38.E7]
 theorem hasSum_arctanh_transformed {z : ℂ} (hz : (z^2).re<1/2) : HasSum (fun n : ℕ => (4:ℂ)^n*(n.factorial:ℂ)^2/((2*n+1).factorial:ℂ)*(z^2/(z^2-1))^n) (if z=0 then 1 else (1-z^2)/z*arctanh z) := by
-  sorry
+  by_cases hz0 : z=0
+  · subst z
+    convert hasSum_ite_eq (0:ℕ) (1:ℂ) using 1
+    · funext n
+      by_cases hn : n=0
+      · simp [hn]
+      · simp [hn]
+    · simp
+  have hs : (-I*z)^2 = -z^2 := by simp [mul_pow, Complex.I_sq]
+  have ht : -(1/2:ℝ)<((-I*z)^2).re := by rw [hs, Complex.neg_re]; linarith
+  have hd : 1-z^2 ≠ 0 := by
+    intro h
+    have hh := congrArg Complex.re h
+    simp at hh
+    linarith
+  have hw : (-I*z)^2/(1+(-I*z)^2) = z^2/(z^2-1) := by
+    rw [hs, show 1 + -z^2 = -(z^2-1) by ring, div_neg, neg_div, neg_neg]
+  have ha : Complex.arctan (-I*z) = -I*arctanh z := by
+    rw [Complex.arctan, show (-I*z)*I=z by calc
+      _ = -(I*I)*z := by ring
+      _ = z := by simp, arctanh]
+    ring
+  have hpref : (I*(1-z^2)/z)*((-I*z)/(1+(-I*z)^2)) = 1 := by
+    rw [hs, show 1 + -z^2 = 1-z^2 by ring]
+    field_simp
+    ring_nf
+    rw [Complex.I_sq]
+    ring
+  have h := (hasSum_arctan_euler ht).mul_left (I*(1-z^2)/z)
+  rw [hw] at h
+  simp only [ite_eq_right hz0]
+  convert h using 1
+  · funext n
+    calc (4:ℂ)^n*(n.factorial:ℂ)^2/((2*n+1).factorial:ℂ)*(z^2/(z^2-1))^n =
+        ((I*(1-z^2)/z)*((-I*z)/(1+(-I*z)^2)))*
+          ((4:ℂ)^n*(n.factorial:ℂ)^2/((2*n+1).factorial:ℂ)*(z^2/(z^2-1))^n) := by rw [hpref]; ring
+      _ = _ := by ring
+  · rw [ha]
+    field_simp
+    ring_nf
+    rw [Complex.I_sq]
+    ring
 
 /-- The stated relation follows from the given hypotheses: `(z^2).re<1/2 ↔ z.re^2-z.im^2<1/2`. -/
 @[dlmf 4.38.E8]

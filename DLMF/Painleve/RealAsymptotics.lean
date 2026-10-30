@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Painleve.SolutionsDefs
+public import DLMF.Painleve.Basic.Solutions
 public import DLMF.Airy.Framework
 public import DLMF.Confluent.ParabolicCylinder
 public import Mathlib.Basic.Real.Sign
@@ -15,7 +15,7 @@ public import Mathlib.Basic.Real.Sign
 
 Real solutions of `PI`, `PII` with `α = 0`, the modified `PII` equation 32.11.12, `PIII` with
 `α = -β = 2ν`, `γ = -δ = 1` and `PIV` with `α = 2ν + 1`, `β = 0`, as functions `ℝ → ℝ`
-solving the equation on a real interval (`IsRealODE2SolutionOn`, `DLMF.Painleve.SolutionsDefs`).
+solving the equation on a real interval (`IsRealODE2SolutionOn`, `DLMF.Painleve.Basic.Solutions`).
 Asymptotic relations use `Asymptotics.IsEquivalent` (`~`), `IsLittleO` and `IsBigO` at
 `atTop`, `atBot` or a one-sided neighbourhood. `ph` is `Complex.arg` (DLMF: the branch is
 immaterial, the phases enter only through `sin` or `cos`), `Ai` is `airyAiReal`, `U` is the real

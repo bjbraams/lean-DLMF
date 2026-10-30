@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AsymptoticApproximations.Distributional.Defs
+public import DLMF.AsymptoticApproximations.Distributional.Basic
 public import TauCeti.Analysis.SpecialFunctions.Beta
 
 /-!

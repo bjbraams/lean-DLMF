@@ -12,7 +12,7 @@ public import DLMF.Mathieu.Modified.P2mConnection
 
 The radial functions of the first and second kinds in terms of `Ce_m`, `Se_m`, `Fe_m`, `Ge_m`
 with the joining factors `g_{e,m}`, `g_{o,m}`, `f_{e,m}`, `f_{o,m}` (defined in
-`DLMF.Mathieu.Modified.Defs` by 28.22.5–28.22.10), and, for noninteger `ν`, `M^{(1)}_ν` in
+`DLMF.Mathieu.Modified.Basic` by 28.22.5–28.22.10), and, for noninteger `ν`, `M^{(1)}_ν` in
 terms of `Me_ν` and `M^{(2)}_ν` in terms of `M^{(1)}_{±ν}`. All formulas were checked
 numerically (`h = 1.2`, `m ≤ 4`, `ν = 0.3`). Real `h > 0` throughout (DLMF's joining factors
 are defined for real `h`); `q = h²`.

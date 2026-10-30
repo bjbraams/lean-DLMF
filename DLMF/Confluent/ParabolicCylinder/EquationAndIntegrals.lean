@@ -5,6 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.ParabolicCylinder.Basic.Functions
+
 public import TauCeti.RingTheory.Polynomial.Hermite.Derivative
 public import DLMF.Confluent.Asymptotics
 public import DLMF.Confluent.Relations
@@ -31,15 +33,9 @@ noncomputable section
 
 namespace DLMF.Confluent
 
-/-- The even solution `u₁(a,z) = e^{-z²/4} M(a/2 + 1/4, 1/2, z²/2)` (DLMF 12.7.12). -/
-@[dlmf 12.7.E12]
-def pcfEven (a z : ℂ) : ℂ :=
-  exp (-z ^ 2 / 4) * kummerM (a / 2 + 1 / 4) (1 / 2) (z ^ 2 / 2)
 
-/-- The odd solution `u₂(a,z) = z e^{-z²/4} M(a/2 + 3/4, 3/2, z²/2)` (DLMF 12.7.13). -/
-@[dlmf 12.7.E13]
-def pcfOdd (a z : ℂ) : ℂ :=
-  z * exp (-z ^ 2 / 4) * kummerM (a / 2 + 3 / 4) (3 / 2) (z ^ 2 / 2)
+
+
 
 /-- `5/2` is not a nonpositive integer. -/
 theorem five_halves_ne_neg_nat : ∀ k : ℕ, (5 / 2 : ℂ) ≠ -k := fun k h => by
@@ -59,10 +55,7 @@ theorem hasDerivAt_exp_neg_sq_div_four (z : ℂ) :
   have h := (((hasDerivAt_pow 2 z).neg).div_const 4).cexp
   exact h.congr_deriv (by simp only [Pi.neg_apply]; push_cast; ring)
 
-/-- The derivative of `u₁`. -/
-def pcfEvenDeriv (a z : ℂ) : ℂ :=
-  z * exp (-z ^ 2 / 4) * (-(1 / 2) * kummerM (a / 2 + 1 / 4) (1 / 2) (z ^ 2 / 2) +
-    (a + 1 / 2) * kummerM (a / 2 + 1 / 4 + 1) (1 / 2 + 1) (z ^ 2 / 2))
+
 
 /-- The even Weber solution `pcfEven a` has derivative `pcfEvenDeriv a`. -/
 theorem hasDerivAt_pcfEven (a z : ℂ) : HasDerivAt (pcfEven a) (pcfEvenDeriv a z) z := by
@@ -89,10 +82,7 @@ theorem hasDerivAt_pcfEvenDeriv (a z : ℂ) :
   norm_num at hc ⊢
   linear_combination (exp (-z ^ 2 / 4) * (8 * (a / 2 + 1 / 4) / 3)) * hc
 
-/-- The derivative of `u₂`. -/
-def pcfOddDeriv (a z : ℂ) : ℂ :=
-  exp (-z ^ 2 / 4) * ((1 - z ^ 2 / 2) * kummerM (a / 2 + 3 / 4) (3 / 2) (z ^ 2 / 2) +
-    (a + 3 / 2) / 3 * z ^ 2 * kummerM (a / 2 + 3 / 4 + 1) (3 / 2 + 1) (z ^ 2 / 2))
+
 
 /-- The odd Weber solution `pcfOdd a` has derivative `pcfOddDeriv a`. -/
 theorem hasDerivAt_pcfOdd (a z : ℂ) : HasDerivAt (pcfOdd a) (pcfOddDeriv a z) z := by
@@ -118,24 +108,11 @@ theorem hasDerivAt_pcfOddDeriv (a z : ℂ) :
   norm_num at hc ⊢
   linear_combination (exp (-z ^ 2 / 4) * (8 * (a / 2 + 3 / 4) * z / 15)) * hc
 
-/-- **Weber's parabolic cylinder function** `U(a,z)`, the entire solution of
-`w'' = (z²/4 + a) w` fixed by its initial values (DLMF 12.2.6, 12.2.7, 12.4.1):
-`U(a,z) = U(a,0) u₁(a,z) + U'(a,0) u₂(a,z)`. The reciprocal Gamma factors vanish at the
-poles, as for the entire function `1/Γ`. -/
-@[dlmf 12.4.E1]
-def pcfU (a z : ℂ) : ℂ :=
-  (Real.sqrt π : ℂ) * (2 : ℂ) ^ (-(a / 2 + 1 / 4)) * (Gamma (3 / 4 + a / 2))⁻¹ * pcfEven a z -
-    (Real.sqrt π : ℂ) * (2 : ℂ) ^ (-(a / 2 - 1 / 4)) * (Gamma (1 / 4 + a / 2))⁻¹ * pcfOdd a z
 
-/-- The derivative `U'(a,z)`. -/
-def pcfUDeriv (a z : ℂ) : ℂ :=
-  (Real.sqrt π : ℂ) * (2 : ℂ) ^ (-(a / 2 + 1 / 4)) * (Gamma (3 / 4 + a / 2))⁻¹ *
-      pcfEvenDeriv a z -
-    (Real.sqrt π : ℂ) * (2 : ℂ) ^ (-(a / 2 - 1 / 4)) * (Gamma (1 / 4 + a / 2))⁻¹ * pcfOddDeriv a z
 
-/-- Whittaker's notation `D_ν(z) = U(-ν - 1/2, z)` (DLMF 12.2.5). -/
-@[dlmf 12.2.E5]
-def pcfD (ν z : ℂ) : ℂ := pcfU (-ν - 1 / 2) z
+
+
+
 
 /-- `U(a,·)` has derivative `pcfUDeriv a`. -/
 theorem hasDerivAt_pcfU (a z : ℂ) : HasDerivAt (pcfU a) (pcfUDeriv a z) z :=
@@ -311,9 +288,7 @@ theorem pcfOdd_zero (a : ℂ) : pcfOdd a 0 = 0 := by
 theorem pcfOddDeriv_zero (a : ℂ) : pcfOddDeriv a 0 = 1 := by
   simp [pcfOddDeriv, kummerM_zero]
 
-/-- A function and a derivative candidate solve Weber's equation with parameter `a`. -/
-def IsWeberSol (a : ℂ) (f f' : ℂ → ℂ) : Prop :=
-  ∀ z, HasDerivAt f (f' z) z ∧ HasDerivAt f' ((z ^ 2 / 4 + a) * f z) z
+
 
 /-- The even Weber solution solves Weber's equation, with derivative `pcfEvenDeriv a`. -/
 theorem isWeberSol_pcfEven (a : ℂ) : IsWeberSol a (pcfEven a) (pcfEvenDeriv a) :=
@@ -517,9 +492,7 @@ end Hermite
 
 /-! ### The Laplace-type integral 12.5.1 -/
 
-/-- The moments `∫₀^∞ t^c e^{-t²/2 - z t} dt` used in DLMF 12.5.1. -/
-def pcfMoment (c z : ℂ) : ℂ :=
-  ∫ t in Ioi (0 : ℝ), (t : ℂ) ^ c * exp (-(t : ℂ) ^ 2 / 2 - z * t)
+
 
 /-- `-t²/2 - xt ≤ -t²/4 + x²`. -/
 theorem pcf_exponent_le (t x : ℝ) : -t ^ 2 / 2 - x * t ≤ -t ^ 2 / 4 + x ^ 2 := by

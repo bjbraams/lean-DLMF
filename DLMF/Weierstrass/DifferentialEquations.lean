@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Weierstrass.Basic
+public import DLMF.Weierstrass.EllipticFunctionsAndInvariants
 
 /-!
 # Differential equations for `℘` (DLMF §23.3(ii))

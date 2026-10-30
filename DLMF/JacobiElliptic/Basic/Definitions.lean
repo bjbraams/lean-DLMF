@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Elliptic.Theta.Defs
+public import DLMF.Elliptic.Basic.Theta
 
 /-!
 # Theta-quotient definitions of Jacobian elliptic functions
@@ -193,6 +193,24 @@ def jacobiDsTau (z τ : ℂ) : ℂ := jacobiPQTau .d .s z τ
 def jacobiDcTau (z τ : ℂ) : ℂ := jacobiPQTau .d .c z τ
 /-- `cs(z|τ)`. -/
 def jacobiCsTau (z τ : ℂ) : ℂ := jacobiPQTau .c .s z τ
+
+/-- `z` is not congruent to the corner of letter `r` (the zeros of `θ_r(ζ)`); equivalently, the
+functions `pr(z, k)` are finite at `z`. -/
+def jacobiRegulark (r : JacobiLetter) (z k : ℂ) : Prop :=
+  jacobiLetterTheta r (jacobiZetak z k) (jacobiTauk k) ≠ 0
+
+/-- Neville's theta functions (DLMF §20.1) as functions of the Jacobi argument `z`, with
+`u = z/θ₃²(0|τ)`: `θ_s = θ₃²(0) θ₁(u)/θ₁'(0)`, `θ_c = θ₂(u)/θ₂(0)`, `θ_d = θ₃(u)/θ₃(0)`,
+`θ_n = θ₄(u)/θ₄(0)`. -/
+def jacobiNevilleTau (p : JacobiLetter) (z τ : ℂ) : ℂ :=
+  let u := z / jacobiThetaThreeTau 0 τ ^ 2
+  match p with
+  | .s => jacobiThetaThreeTau 0 τ ^ 2 * jacobiThetaOneTau u τ /
+      deriv (fun w => jacobiThetaOneTau w τ) 0
+  | .c => jacobiThetaTwoTau u τ / jacobiThetaTwoTau 0 τ
+  | .d => jacobiThetaThreeTau u τ / jacobiThetaThreeTau 0 τ
+  | .n => jacobiThetaFourTau u τ / jacobiThetaFourTau 0 τ
+
 
 end DLMF.JacobiElliptic
 end

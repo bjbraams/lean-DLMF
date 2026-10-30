@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.QHypergeometric.Basic
+public import DLMF.QHypergeometric.Convergence
 
 /-!
 # Further basic hypergeometric transformations (DLMF §17.9)

@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Elliptic.Basic.Integrals
 public import DLMF.Elliptic.Jacobi
 
 /-!
@@ -27,19 +28,6 @@ open scoped Topology
 noncomputable section
 
 namespace DLMF.Elliptic
-
-/-- The integrand `(1 - n sin²θ)⁻¹ (1 - m sin²θ)^{-1/2}` of the third kind. -/
-def piIntegrand (n m θ : ℝ) : ℝ := (1 - n * sin θ ^ 2)⁻¹ * (1 - m * sin θ ^ 2) ^ (-(1 / 2) : ℝ)
-
-/-- Legendre's incomplete integral of the third kind in the parameter `m = k²`, with DLMF's
-argument order (amplitude, characteristic `n = α²`, parameter):
-`Π(φ, n, m) = ∫₀^φ (1 - n sin²θ)⁻¹ (1 - m sin²θ)^{-1/2} dθ` (DLMF 19.2.7, Temme (12.17)),
-used here for `n < 1`, `m < 1` where no principal value is needed. -/
-@[dlmf 19.2.E7]
-def Real.incEllIntPim (φ n m : ℝ) : ℝ := ∫ θ in (0 : ℝ)..φ, piIntegrand n m θ
-
-/-- The complete integral of the third kind `Π(n, m) = Π(π/2, n, m)` (DLMF 19.2.7). -/
-def Real.compEllIntPim (n m : ℝ) : ℝ := Real.incEllIntPim (π / 2) n m
 
 /-- For `n, m < 1` the integrand of the third kind is continuous. -/
 theorem continuous_piIntegrand {n m : ℝ} (hn : n < 1) (hm : m < 1) :
@@ -98,11 +86,6 @@ theorem Real.incEllIntPim_add_pi {n m : ℝ} (hn : n < 1) (hm : m < 1) (φ : ℝ
   simp only [piIntegrand_add_pi, zero_add] at h
   rw [← h, add_comm]
 
-/-- A smooth antiderivative of `(cos²φ + c² sin²φ)⁻¹`, equal to `arctan(c tan φ)/c` on
-`(-π/2, π/2)`. -/
-def piZeroPrimitive (c φ : ℝ) : ℝ :=
-  (φ - arctan ((1 - c) * sin φ * cos φ / (cos φ ^ 2 + c * sin φ ^ 2))) / c
-
 /-- `cos²φ + c sin²φ > 0` for `c > 0`. -/
 theorem cos_sq_add_mul_sin_sq_pos {c : ℝ} (hc : 0 < c) (φ : ℝ) : 0 < cos φ ^ 2 + c * sin φ ^ 2 := by
   rcases eq_or_ne (sin φ) 0 with h | h
@@ -153,6 +136,40 @@ theorem Real.compEllIntPim_param_zero {n : ℝ} (hn : n < 1) :
   rw [Real.compEllIntPim, Real.incEllIntPim_param_zero hn, piZeroPrimitive]
   simp
   ring
+
+/-- For a nonnegative parameter, the complete third-kind integral is at least its
+value at parameter zero; this follows by comparing the positive integrands. -/
+theorem Real.compEllIntPim_param_zero_le {n m : ℝ} (hn : n < 1) (hm0 : 0 ≤ m) (hm : m < 1) :
+    Real.compEllIntPim n 0 ≤ Real.compEllIntPim n m := by
+  apply intervalIntegral.integral_mono_on (show (0 : ℝ) ≤ π / 2 by positivity)
+    ((continuous_piIntegrand hn (by norm_num : (0 : ℝ) < 1)).intervalIntegrable _ _)
+    ((continuous_piIntegrand hn hm).intervalIntegrable _ _)
+  intro θ hθ
+  have hpos := one_sub_mul_sin_sq_pos hm θ
+  have hle : 1 - m * Real.sin θ ^ 2 ≤ 1 := by nlinarith [sq_nonneg (Real.sin θ)]
+  have hr := Real.one_le_rpow_of_pos_of_le_one_of_nonpos hpos hle (by norm_num : (-(1 / 2) : ℝ) ≤ 0)
+  simp only [piIntegrand, zero_mul, sub_zero, Real.one_rpow]
+  nlinarith [inv_nonneg.mpr (one_sub_mul_sin_sq_pos hn θ).le]
+
+/-- The complete third-kind integral dominates a positive multiple of the first-kind
+integral: the reciprocal characteristic factor is at least `min 1 (1-n)⁻¹`. -/
+theorem Real.compEllIntPim_ge_min_mul_compEllIntKm {n m : ℝ} (hn : n < 1) (hm : m < 1) :
+    min 1 ((1 - n)⁻¹) * Real.compEllIntKm m ≤ Real.compEllIntPim n m := by
+  rw [Real.compEllIntKm, Real.compEllIntPim, Real.incEllIntPim,
+    ←intervalIntegral.integral_const_mul]
+  apply intervalIntegral.integral_mono_on (show (0 : ℝ) ≤ π / 2 by positivity)
+    (((continuous_one_sub_mul_sin_sq_rpow hm _).const_mul _).intervalIntegrable _ _)
+    ((continuous_piIntegrand hn hm).intervalIntegrable _ _)
+  intro θ hθ
+  have hpos := one_sub_mul_sin_sq_pos hn θ
+  have hc : min 1 ((1 - n)⁻¹) ≤ (1 - n * Real.sin θ ^ 2)⁻¹ := by
+    by_cases hn0 : 0 ≤ n
+    · refine (min_le_left _ _).trans ?_
+      exact (one_le_inv₀ hpos).mpr (by nlinarith [sq_nonneg (Real.sin θ)])
+    · refine (min_le_right _ _).trans ?_
+      apply inv_anti₀ hpos
+      nlinarith [Real.sin_sq_le_one θ]
+  exact mul_le_mul_of_nonneg_right hc (Real.rpow_nonneg (one_sub_mul_sin_sq_pos hm θ).le _)
 
 end DLMF.Elliptic
 

@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.JacobiElliptic.Basic
+public import DLMF.JacobiElliptic.AnalyticProperties
 public import DLMF.Elliptic.ThirdKind
 public import Carlson.Elliptic.Standard
 

@@ -5,6 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Hypergeometric.Basic.Pochhammer
+
 public import DLMF.Hypergeometric.Series
 public import Mathlib.Analysis.Normed.Group.Tannery
 public import Carlson.TwoVariable.GaussHypergeometric
@@ -297,15 +299,7 @@ theorem chu_vandermonde (n : ℕ) {b c : ℂ} (hc : ∀ k : ℕ, c ≠ -k) :
   convert hterm k hk using 1
   ring
 
-/-- Reflection of a Pochhammer symbol: `(1 - y - m)_m = (-1)^m (y)_m`. -/
-theorem poch_reflect (y : ℂ) (m : ℕ) : poch (1 - y - m) m = (-1 : ℂ) ^ m * poch y m := by
-  induction m with
-  | zero => simp [poch_zero]
-  | succ m ih =>
-    rw [poch_succ_left, show 1 - y - ((m + 1 : ℕ) : ℂ) + 1 = 1 - y - m by push_cast; ring, ih,
-      poch_succ]
-    push_cast
-    ring
+
 
 /-- The binomial theorem for rising factorials (Chu–Vandermonde). -/
 theorem poch_add_binomial_sum (u v : ℂ) (n : ℕ) :

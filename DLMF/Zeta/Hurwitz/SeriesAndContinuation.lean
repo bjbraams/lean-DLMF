@@ -9,6 +9,7 @@ public import DLMF.Zeta.Q25bLerchContinuation
 public import DLMF.Zeta.R25bHurwitzContinuation
 public import DLMF.Zeta.S25bDirichletTest
 public import DLMFMathlib.Analysis.EulerMaclaurin
+public import Mathlib.Analysis.Complex.TaylorSeries
 public import Mathlib.NumberTheory.LSeries.HurwitzZetaValues
 public import Mathlib.NumberTheory.LSeries.ZMod
 public import Mathlib.NumberTheory.LSeries.Dirichlet
@@ -20,6 +21,8 @@ public import Mathlib.Tactic.ENatToNat
 # Hurwitz zeta series and continuation
 
 Hurwitz zeta definitions, Euler-Maclaurin continuation and Fourier and Taylor representations.
+The Taylor expansion uses Mathlib's `Complex.hasSum_taylorSeries_on_ball` together
+with the iterated parameter derivative formula proved here.
 
 Source references and common attribution are retained in
 `DLMF.Zeta.Hurwitz`.
@@ -806,6 +809,39 @@ theorem hurwitzZeta_one_sub_fourier {s : ℂ} {a : ℝ}
     field_simp
     ring_nf
 
+/-- Natural shifts preserve exclusion of the Hurwitz pole when nonpositive integers are excluded. -/
+private lemma hurwitz_shift_ne_one {s : ℂ} (hs : s ≠ 1) (hs' : ∀ m : ℕ, s ≠ -m) (n : ℕ) :
+    s + n ≠ 1 := by
+  cases n with
+  | zero => simpa using hs
+  | succ n =>
+    intro he
+    apply hs' n
+    push_cast at he
+    linear_combination he
+
+/-- Repeated differentiation in the second Hurwitz parameter gives a rising factorial
+and a natural shift of the first parameter, on the right half-plane. -/
+theorem iteratedDeriv_hurwitzZetaComplex_param {s a : ℂ} (hs : s ≠ 1) (hs' : ∀ m : ℕ, s ≠ -m)
+    (ha : 0 < a.re) (n : ℕ) :
+    iteratedDeriv n (hurwitzZetaComplex s) a =
+      (-1) ^ n * poch s n * hurwitzZetaComplex (s + n) a := by
+  induction n generalizing a with
+  | zero => simp [DLMF.Hypergeometric.poch_zero]
+  | succ n ih =>
+    have heq : iteratedDeriv n (hurwitzZetaComplex s) =ᶠ[𝓝 a]
+        (fun w => (-1) ^ n * poch s n * hurwitzZetaComplex (s + n) w) := by
+      filter_upwards [isOpen_lt continuous_const continuous_re |>.mem_nhds ha] with w hw
+      exact ih hw
+    rw [iteratedDeriv_succ, heq.deriv_eq]
+    have hs0 : s + n ≠ 0 := by intro he; apply hs' n; linear_combination he
+    have hD := (r25b_hasDerivAt_hurwitzZetaComplex_param hs0
+      (hurwitz_shift_ne_one hs hs' n) ha).const_mul ((-1) ^ n * poch s n)
+    rw [hD.deriv, DLMF.Hypergeometric.poch_succ, pow_succ]
+    push_cast
+    rw [show s + (n + 1) = s + n + 1 by ring]
+    ring
+
 /-- **Taylor series in `a` about `1`** (DLMF 25.11.10): for `s ≠ 1` and `|a - 1| < 1`,
 `ζ(s, a) = ∑_{n≥0} ((s)_n/n!) ζ(n+s) (1-a)^n`.
 
@@ -817,7 +853,21 @@ theorem hasSum_hurwitzZetaComplex_taylor {s a : ℂ} (hs : s ≠ 1) (hs' : ∀ m
     (ha : ‖a - 1‖ < 1) :
     HasSum (fun n : ℕ => poch s n / n ! * riemannZeta (n + s) * (1 - a) ^ n)
       (hurwitzZetaComplex s a) := by
-  sorry
+  have hpos : ∀ z ∈ Metric.ball (1 : ℂ) 1, 0 < z.re := by
+    intro z hz
+    rw [Metric.mem_ball, dist_eq_norm] at hz
+    have h := abs_re_le_norm (z - 1)
+    simp only [sub_re, one_re] at h
+    linarith [neg_abs_le (z.re - 1)]
+  have hd := (r25b_differentiableOn_hurwitzZetaComplex_param hs).mono hpos
+  have hT := Complex.hasSum_taylorSeries_on_ball hd
+    (show a ∈ Metric.ball (1 : ℂ) 1 by simpa [Metric.mem_ball, dist_eq_norm] using ha)
+  refine hT.congr_fun fun n => ?_
+  rw [iteratedDeriv_hurwitzZetaComplex_param hs hs' (by simp) n, hurwitzZetaComplex_one (hurwitz_shift_ne_one hs hs' n)]
+  simp only [smul_eq_mul]
+  rw [show (1 - a) ^ n = (-1 : ℂ) ^ n * (a - 1) ^ n by rw [← mul_pow]; congr 1; ring,
+    add_comm s (n : ℂ)]
+  ring
 
 end DLMF.Zeta
 end

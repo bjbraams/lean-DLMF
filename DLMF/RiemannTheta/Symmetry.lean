@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.RiemannTheta.Basic
+public import DLMF.RiemannTheta.Characteristics
 
 /-!
 # Symmetry and quasi-periodicity of Riemann theta functions (DLMF §21.3)

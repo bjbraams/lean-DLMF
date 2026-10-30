@@ -1,5 +1,44 @@
 # Mathematical review of the lean-DLMF project (formerly lean-AAR)
 
+**Foundational Basic layer, 2026-10-30:** the [reorganization](#foundational-basic-layer-2026-10-30)
+adds `DLMF.Basic`, with 59 Basic entry points and no dependencies on DLMF theorem files.
+All public source statements and definition bodies are preserved; 1,553 admissions remain.
+
+**L'Hôpital, hyperbolic series, Carlson principal values and Appell reductions, 2026-10-30:**
+the [new round](#lhopital-hyperbolic-series-carlson-principal-values-and-appell-reductions-2026-10-30) removes nine
+admissions, leaving 1,553, with public types and mathematical definitions unchanged.
+
+**Hölder–Minkowski equality, inverse series, Horn PDEs and elliptic bounds, 2026-10-30:** the
+[new round](#holder-minkowski-equality-inverse-series-horn-pdes-and-elliptic-bounds-2026-10-30)
+removes 14 admissions, leaving 1,562. The Chapter 1 inequalities file and Appell
+definitions-and-series file are admission-free. A missing-parentheses Stieltjes
+transcription is corrected; all other existing theorem types and definitions are retained.
+
+**Inequalities, hyperbolic integrals, Appell PDEs and Jacobi epsilon, 2026-10-30:** the
+[new proof round](#inequalities-hyperbolic-integrals-appell-pdes-and-jacobi-epsilon-2026-10-30)
+removes 15 admissions, leaving 1,576. It completes all four Appell PDE declarations and
+retains the original hypotheses, domains and mathematical definitions.
+
+**Power-series operations, branches and Appell nonseparability, 2026-10-30:** the
+[new proof round](#power-series-operations-branches-and-appell-nonseparability-2026-10-30)
+removes ten admissions, leaving 1,591, and records a Lean-confirmed branch counterexample
+to the current mean-centered R-function series.
+
+**Series, Carlson bounds and Appell transformations, 2026-10-30:** the
+[continuation round](#series-carlson-bounds-and-appell-transformations-2026-10-30) removes
+20 further admissions, leaving 1,601, with existing statements and definitions unchanged.
+
+**Analytic, elementary, elliptic and q-calculus proofs, 2026-10-30:** the
+[new round](#analytic-elementary-elliptic-and-q-calculus-proofs-2026-10-30) removes 24 admissions,
+leaving 1,621. It preserves existing statements and definitions, and records three
+Lean-confirmed shifted-theta counterexamples and an RC boundary-branch issue.
+
+**Dougall, Lommel and Weierstrass proofs, 2026-10-29:** the
+[new proof round](#dougall-lommel-and-weierstrass-proofs-2026-10-29) removes four
+admissions, leaving 1,645, without changing existing statements or definitions.
+[DEFINITIONS2.md](DEFINITIONS2.md) expands the earlier definitions inventory beyond
+sections whose headings contain “Definitions.”
+
 **Later-chapter identities and series, 2026-10-29:** the
 [new proof round](#later-chapter-identities-and-series-2026-10-29) removes 15 admissions,
 leaving 1,649. Fourteen original statements are proved unchanged; the sigma product's
@@ -33,6 +72,351 @@ removes 37 admissions and frees four existing downstream theorems from admitted 
 The [structural cleanup](#file-proof-and-documentation-cleanup-2026-10-28) below describes
 the preceding committed snapshot, recorded in [CodeReviewInventory.json](CodeReviewInventory.json).
 The [earlier review](#code-and-organization-review-2026-10-28) records the pre-cleanup snapshot.
+
+<a id="lhopital-hyperbolic-series-carlson-principal-values-and-appell-reductions-2026-10-30"></a>
+
+## L'Hôpital, hyperbolic series, Carlson principal values and Appell reductions (2026-10-30)
+
+This round removes **9 direct admissions**, reducing **1,562 to 1,553**.
+[ProofRound20261030f.json](ProofRound20261030f.json) contains the declaration inventory,
+source/type comparison, axiom audits and validation.
+
+- The punctured finite-point L'Hôpital theorem allows the denominator to tend to infinity
+  in absolute value without any numerator-limit assumption. Its generic increment-bound
+  proof uses Cauchy's mean value theorem and two fixed anchors.
+- The arcsinh series and near-one arccosh series preserve their original domains, zero
+  values and selected cut banks. A generic principal-root scaling lemma replaces repeated
+  square-root calculations.
+- The negative-real RC principal-value formula is proved with the original symmetric
+  truncation, including the improper endpoint at zero. It also proves RC divergence at
+  zero from either side. A checked shrinking-excision helper for future negative-RJ work
+  is preserved in the report but is not installed or counted as an admission removal.
+- F1 Pfaff-second, F1-to-Gauss, F2-to-F1 and F3-to-Gauss germ reductions reuse shared Carlson
+  representations and existing Gauss fiber sums. Their unchanged declarations move to
+  `Appell/GermTransformations.lean`.
+
+The ordinary full build passed **14,764 jobs**, and all **13 strict file checks** passed.
+Every completed theorem and all **24 new helper theorems** depend only on the standard
+three axioms. One existing private rotation lemma is exposed for reuse. Public types and
+existing mathematical definitions are unchanged; the only source-signature difference is
+renaming an unused private hypothesis binder from `h` to `_h`. The longest changed proof
+has **57 lines**, and every library file remains under 1500 lines. The import survey finds
+no new area edges, two-way pairs or definitions-to-theorem exceptions.
+
+The Chapter 1, 4, 16 and 19 ledgers are refreshed. A subsequent, separately audited
+organization pass implements the user's Basic-layer naming and dependency policy.
+
+<a id="holder-minkowski-equality-inverse-series-horn-pdes-and-elliptic-bounds-2026-10-30"></a>
+
+## Hölder–Minkowski equality, inverse series, Horn PDEs and elliptic bounds (2026-10-30)
+
+This round removes **14 direct admissions**, reducing **1,576 to 1,562**.
+[ProofRound20261030e.json](ProofRound20261030e.json) records the source and compiled
+declaration comparison, full build, strict checks, axiom audits and import survey.
+
+- Chapter 1: finite and integral Hölder and Minkowski equality cases, including zero
+  functions and both positive exponent ranges for Minkowski. The entire
+  `DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean` file is admission-free. The mixed
+  continuous/discrete Stieltjes integral formula is also proved after the transcription
+  correction described below.
+- Chapter 4: the principal arcsine series on the closed unit disk, including both
+  endpoints; the arccosine series on its shifted closed disk, including the real cut
+  segment `(1,3]`; Euler's arctangent series on `Re(z²) > −1/2`; and the rotated arctanh
+  series on its full stated domain. The hyperbolic inverse-identities file is now
+  admission-free. Beta moments, branch control and summation are separated into helpers.
+- Chapter 16: all four Horn G2/G3 equations follow from Gamma coefficient recurrences,
+  normal convergence and analytic Euler-operator calculus. The original declaration is
+  moved unchanged into `Appell/HornDifferentialEquations.lean`; the paired G2 and G3
+  systems have separate reusable proofs. `DLMFMathlib/Analysis/Complex/BivariateCalculus.lean`
+  contains general coordinate-partial analyticity and mixed-partial symmetry adapters.
+- Chapter 19: both complete-third-kind divergence limits, the sharp incomplete-first-kind
+  bounds after division by `sin φ`, the RF–RC arithmetic/geometric bounds with both
+  equality conditions, and RG bounds with one zero argument. Negative fixed moduli,
+  `x = 0`, and the `y = 0`/`y = z` endpoints remain covered.
+
+One statement correction is necessary. In `setIntegral_withDensity_add_dirac`, the old
+right-hand side was parsed as the integral of the continuous integrand **plus a constant
+atomic sum**, rather than the continuous integral **followed by** that sum. With `w = 0`,
+`f = 1`, interval `(0,2)` and a unit atom at `1`, its assumptions hold but its conclusion
+is `1 = 2`. The round report preserves a Lean counterexample and its standard-axiom audit.
+Parenthesizing the continuous integral restores the formula described by DLMF 1.4.E23_3
+and the existing docstring. No source caller uses the former statement.
+
+All other existing theorem types and all existing mathematical definitions are unchanged.
+The previously flagged Chapter 1–2 and principal-branch issues remain recorded in the
+earlier reviews; the false branch statements are not used by these new proofs.
+
+Validation passed: the ordinary full build completed **14,750 jobs**, all **17 strict file
+checks** passed, and the compiled axiom audit found no nonstandard axioms. Every completed
+proof and all **61 new helper theorems** use only the standard three axioms. The audit
+records **26,964 source-range declarations** and **56,694 project theorems** including
+compiler-generated declarations; **1,667** of the latter still depend on admissions.
+All new declarations have docstrings, no new declaration exactly duplicates an upstream
+theorem type, and no public declaration was removed. The longest changed proof is
+**60 lines**; the largest library file remains **1,454 lines**.
+
+The Chapter 1, 4, 16 and 19 acquisition ledgers are refreshed. Their status changes include
+stale entries and moved source references, so the fourteen removals above are measured
+from the separate source and compiled-axiom comparison. The definitions inventory is
+unchanged.
+
+The import survey records the new one-way area dependency **Elementary → Hypergeometric**:
+the closed-disk arcsine proof reuses the proved Gauss boundary-summability result from
+`Hypergeometric.Basic`. There are **no new two-way area pairs** and **no new imports from
+definitions files into another area's theorem layer**. The 15 existing two-way pairs and
+20 existing definitions-layer imports are unchanged.
+
+The next useful targets are remaining inverse-function continued fractions, Appell
+reductions, the negative-real RC principal-value formula and its negative-RJ
+bridges, and the remaining Jacobi modulus limits and Fourier expansions. The latter RC
+work needs a convergent principal-value calculation, not merely a notation adapter.
+
+## Inequalities, hyperbolic integrals, Appell PDEs and Jacobi epsilon (2026-10-30)
+
+This round removes **15 direct admissions**, reducing **1,591 to 1,576**.
+[ProofRound20261030d.json](ProofRound20261030d.json) records the completed declarations,
+helpers, source and compiled type comparisons, and validation. Earlier uncommitted work
+and the definitions catalogue are retained.
+
+- **Chapter 1: five.** The finite Hölder converse uses a normalized dual vector and handles
+  the zero vector. Power means lie between the extreme entries, increase with their order,
+  and attain equality precisely for constant entries; both negative and positive nonzero
+  orders are covered. Strict Jensen reuses lean-codes' negative-power convexity lemma.
+  Schwarz's equality case follows from Mathlib's affine characterization, and the generating
+  coefficient formula follows from Cauchy's formal power series on an interior circle.
+- **Chapter 4: two.** The exponential-sine/sinh integral includes absolute integrability for
+  every nonzero real parameter. A summable bound on the term integrals justifies the kernel
+  expansion and interchange. The sinh/sinh integral covers the full interval `−π < a < π`.
+  Both evaluations reuse the proved Gamma digamma formulas. `Hyperbolic/Integrals.lean`
+  now has three remaining admissions, all continued fractions.
+- **Chapter 16: four.** All Appell F1–F4 PDE declarations are proved, covering eight equations
+  on their original bidisc, diamond or F4 domain, including the coordinate axes. A general
+  mixed-series differentiation and coefficient-recurrence framework lives in
+  `DLMFMathlib/Analysis/Complex/BivariateDerivatives.lean`. Cauchy estimates prove convergence
+  of the derivative families. Existing F1/F3 function symmetries now reuse coefficient
+  symmetries. The Horn G2/G3 PDE bundle is the only remaining admission in
+  `Appell/DefinitionsAndSeries.lean`.
+- **Chapter 22: four.** The amplitude Maclaurin expansion has its stated `O(x⁷)` remainder for
+  every real `m < 1`. Its initial derivatives come from the proved real ODE and Mathlib's
+  Taylor theorem. The ns, ds and cs epsilon integral identities share a divided-slope
+  regularization and an AE fundamental-theorem-of-calculus argument. Their full original
+  intervals, including negative arguments, are retained. `JacobiElliptic/Related.lean` has
+  four remaining admissions.
+
+All completed results and new helper lemmas use only standard Lean axioms. Existing public
+statement types and mathematical definitions are preserved. New declarations have docstrings,
+and the four PDE docstrings now describe their equations and domains. Every library file
+remains within 1,500 lines. The import survey adds no cross-area edge, two-way pair or
+cross-area definitions-to-theorem import relative to the round's initial snapshot.
+
+The final upstream audit found an existing `Real.strictConvexOn_rpow_of_neg` in lean-codes'
+`ToMathlib.Analysis.Convex.NegativePower`. The power-mean proof imports that module directly;
+the redundant local declaration created during prototyping was removed. The final report
+also compares new theorem types with imported Mathlib, TauCeti and shared lean-codes results.
+
+The full build, strict file and entry-module checks, compiled axiom audit and diff check pass.
+The earlier branch-domain and Chapter 1–2 statement issues remain recorded in the preceding
+reviews. This round makes no statement corrections and identifies no new statement issue.
+
+Next opportunities include the Horn G2/G3 PDE bundle, further Appell reductions, finite and
+integral Hölder/Minkowski equality cases, the remaining Jacobi expansions and modulus limits,
+and the inverse elementary-function series. The round report preserves a concrete Horn PDE
+coefficient/normal-convergence plan using the new generic framework.
+
+## Power-series operations, branches and Appell nonseparability (2026-10-30)
+
+This round removes **ten direct admissions**, reducing **1,601 to 1,591**.
+[ProofRound20261030c.json](ProofRound20261030c.json) records the completed declarations,
+helper lemmas, source and compiled type comparisons, and validation. Earlier uncommitted
+proof work and the definitions catalogue are retained.
+
+- **Chapter 1: three.** The reciprocal, logarithm and general principal-power coefficient
+  expansions now converge near the origin under their original hypotheses. Analytic
+  inversion and the identities `f g′ = f′` and `f g′ = ν f′ g` determine the recursive
+  coefficients by finite convolution. Shared scalar-series adapters shorten the existing
+  coefficient uniqueness and arbitrary termwise differentiation proofs.
+- **Chapter 4: three.** Both principal logarithmic Bernoulli series are proved on the full
+  stated disks. The sinc quotient avoids the negative real ray on its strip, and the tangent
+  quotient has positive real part on its strip; the logarithm identities therefore preserve
+  the principal branch. The cosh-square integral specializes the proved general cosh-power
+  Beta integral and includes the exceptional zero parameter. The logarithmic Bernoulli
+  declarations move, with the same public names and statements, into
+  `Elementary/Trigonometric/LogarithmicSeries.lean`. `DirectIdentities.lean` now has no direct
+  admissions. Both files satisfy the 1,500-line limit.
+- **Chapter 16: two.** A coefficient obstruction proves generic nonseparability for all four
+  Appell functions. The new general bivariate criterion and explicit differentiation of
+  locally dominated sums remain in the Mathlib-only support layer. A sharper Gamma-pair
+  bound proves Horn G3 convergence at `x = y = 1/8`, outside the previously stated sufficient
+  region, for all the original nonintegral parameters.
+- **Chapter 19: two.** The amplitude derivatives of F and E in terms of the symmetric D
+  integral include the original endpoint domain, boundary amplitudes and exceptional
+  modulus cases. An endpoint-to-path lemma supplies the interior slit-plane condition.
+
+The completed proofs use only standard Lean axioms. Existing public theorem types and
+mathematical definitions are preserved. New helper lemmas have docstrings; every library
+file remains within 1,500 lines. The longest added or refactored proof is 58 lines. The
+full build, strict file checks and compiled axiom audit pass. The import survey adds no
+two-way area pair or cross-area definitions-to-theorem import relative to the beginning of
+the round.
+
+### A further principal-branch counterexample
+
+The admitted `symEllIntR_half_hasSum_mean` (19.19.7) is false with its current complex-domain
+hypotheses. For n=2 and a=1, take
+`z₀ = (−3200−798i)/169` and `z₁ = (−1120+3102i)/169`.
+Their mean `A = (−2160+1152i)/169` is in the slit plane, and
+`zⱼ/A = 1 ± (65/72)i`, so both stated radius conditions hold. The principal square roots
+of the original and normalized nodes give opposite signs in the asserted scaling identity.
+
+Lean verifies the hypotheses and the negation of the exact series conclusion using only
+standard axioms. The complete reproduction and axiom log are embedded in the round report.
+The original admission is retained for a branch-domain correction. Earlier shifted-theta,
+RC boundary and Chapter 1–2 statement issues remain recorded in the preceding reviews.
+
+Further opportunities include Appell reductions and PDEs using the new differentiation
+API, repeated-parameter asymptotic coefficient cancellation,
+Carlson principal-value bridges and the remaining inverse elementary-function series.
+
+## Series, Carlson bounds and Appell transformations (2026-10-30)
+
+This continuation removes **20 direct admissions**, reducing **1,621 to 1,601**.
+[ProofRound20261030b.json](ProofRound20261030b.json) records the completed declarations,
+reusable helpers, source and compiled type comparisons, and validation. Earlier uncommitted
+proof work and the definitions catalogue are retained.
+
+- **Chapter 1: three.** The real and imaginary binomial expansions of complex powers,
+  the Cauchy product identity under convergence of all three series, and arbitrary termwise
+  differentiation of a power series are proved. The Cauchy product proof uses Abel's limit
+  theorem, so it includes conditional convergence at the boundary.
+- **Chapter 4: five.** The normalized logarithmic sinhc and tanhc Bernoulli series share an
+  odd-series integration lemma with the shortened log-cosh proof. The tanh Frullani integral
+  includes absolute integrability. The arctangent series includes conditional convergence
+  on the unit circle; its exterior expansion retains the principal-branch correction.
+- **Chapter 16: four.** The asymptotic coefficient recurrence is proved on the stated
+  distinct augmented-parameter locus by identifying its limiting coefficients with the raw
+  finite recurrence. This does not assume the still-admitted repeated-parameter limit.
+  The F3-to-F1 reduction and the first F1 and F2 Pfaff transformations follow from proved
+  Gauss fiber sums and variable symmetries.
+- **Chapter 19: seven.** DLMF 19.24.8 and 19.24.10–14 are proved from lean-codes' Carlson
+  means, capacity estimates and strict order inequalities. Negative-integer R-function
+  values (19.20.24) reuse the proved polynomial specialization. A shared coefficient
+  normalization lemma replaces the duplicate calculation in the generating-series proof.
+- **Chapter 25: one.** The Hurwitz zeta parameter Taylor expansion follows from its
+  all-order parameter derivative and holomorphy. `Zeta/Hurwitz/SeriesAndContinuation.lean`
+  now has no direct admissions.
+
+The completed results depend only on the standard Lean axioms. Existing theorem types,
+hypotheses and definitions are unchanged. New helper lemmas have docstrings, all library
+files remain within 1,500 lines, and the import survey adds no area edge, two-way pair or
+cross-area definitions-to-theorem import relative to this round's initial snapshot.
+The full build and strict file checks pass; detailed axiom and validation data are in the
+round report.
+
+The previously flagged Chapter 1–2 statement issues, shifted-theta radii, RC boundary branch
+and Leibniz transcription concerns remain recorded in the preceding review. This round
+makes no statement corrections. Promising follow-up work includes the remaining Appell
+reductions, a termwise partial-derivative API for double series, repeated-parameter
+asymptotic coefficient cancellation, and the remaining principal-log trigonometric series.
+
+## Analytic, elementary, elliptic and q-calculus proofs (2026-10-30)
+
+This round removes **24 direct admissions**, reducing **1,645 to 1,621**. The preceding
+uncommitted proof and definitions work is retained. [ProofRound20261030.json](ProofRound20261030.json)
+records each completed declaration, helper, axiom dependency and source/type comparison.
+
+- **Chapter 1: six.** The reversed finite and integral Minkowski inequalities retain zero
+  cases and derive the required measurability. Winding-number integrality reuses TauCeti's
+  absolutely continuous contour API. The Möbius inverse handles the pole and infinity. Both
+  harmonic maximum principles reuse TauCeti, including the boundary result for arbitrary
+  bounded open sets without assuming their closure has the same interior.
+- **Chapter 4: seven.** Two hyperbolic bounds, the cosine product, cosecant-square and
+  hyperbolic-cosecant-square partial fractions, and the logarithmic cosine and normalized
+  logarithmic cosh series are proved. Existing hyperbolic product proofs move to a general
+  Mathlib-only module while their public interfaces remain wrappers. A primitive-series
+  lemma provides shared machinery for the logarithmic expansions.
+- **Chapters 19 and 22: six.** Symmetric-integral addition and RC duplication, RF–AGM bounds,
+  the general Jacobi half-argument identity, the logarithmic dn integral and the amplitude
+  limit as the modulus tends to one are proved on their original domains.
+- **Chapter 17: five.** The q-Leibniz rules away from and at the origin, the all-order origin
+  derivative formula and the general q→1 derivative limit include the stated exceptional
+  cases. The negative q-product modular identity follows from Mathlib's eta S-transform
+  with its principal square-root phase retained. Only the Jackson classical limit remains
+  directly admitted in `QHypergeometric/Calculus.lean`.
+
+All completed proofs have standard axioms only. Existing theorem assumptions and definitions
+are unchanged. The import survey finds no new two-way area pair or definitions-to-theorem
+import relative to the beginning of this round. All Lean files satisfy the 1,500-line limit.
+Detailed final build, strict-check and axiom-audit results are in the round report.
+
+### Statement issues found during proof work
+
+Three admitted theta power-series statements have a common radius that is too large:
+`jacobiThetaTwoTau_powerSeries`, `jacobiThetaThreeTau_powerSeries` and
+`jacobiThetaFourTau_powerSeries`. At τ=i, use z=1/2, (1+i)/2 and i/2 respectively. The current
+radius hypothesis holds, but the corresponding theta function is zero while its proposed
+nonzero null value times an exponential cannot vanish. The hypothesis and contradiction
+lemmas are checked by Lean using only standard axioms; their complete reproducible source
+and axiom log are embedded in the round report. The cached DLMF §20.6 prints the same
+common-radius condition. Appropriate shifted-lattice radii require review before proofs.
+The original statements and radius definition remain unchanged.
+
+`symEllIntRC_sq_eq` (19.26.26) also permits a problematic boundary case: x=−i, y=1.
+The defining RC(−1,1) integral has negative imaginary part; the transformed
+RC(−i/2,(1−i)/2) integral has positive imaginary part. Both converge, including the integrable
+square-root singularity at t=1 in the first integral. This analytical counterexample is
+not yet formalized in Lean. The strict-half-plane version is already proved as
+`symEllIntRC_sq` (19.22.22); the admitted boundary statement is retained for review.
+
+An additional transcription concern remains in the variable-limit and improper-integral
+Leibniz statements: continuity of a totalized `deriv` expression does not explicitly assert
+existence of the partial derivatives. This is recorded as a review concern, without claiming
+a formal counterexample. The five previously flagged Chapter 1–2 issues also remain open.
+
+## Dougall, Lommel and Weierstrass proofs (2026-10-29)
+
+This round removes **four direct admissions**, reducing **1,649 to 1,645**.
+[ProofRound20261029f.json](ProofRound20261029f.json) records the completed declarations,
+19 new helper lemmas, three existing limit lemmas made reusable, and validation.
+
+- The terminating Dougall `₅F₄` identity is the finite q→1 limit of the already proved
+  rational terminating `₆φ₅` identity. Bailey's polynomial unit factor avoids square-root
+  branch restrictions. The `₇F₆` identity follows from the proved Whipple transformation
+  and Saalschütz sum; continuity of finite rational sums restores removable parameter
+  cases. Both proofs preserve the original denominator exclusions and include `n = 0`.
+- The capital Lommel ODE now holds at every degree and order. Joint continuity of the
+  regularized `₁F₂` numerator and its divided differences upgrades the earlier parameter
+  limit to locally uniform convergence on the slit plane. Mathlib's derivative-limit
+  theorem then passes the ODE through two argument derivatives. Generic parameter-limit
+  lemmas and hypergeometric joint continuity live in small reusable support modules.
+- The Weierstrass `η₁` cosecant series follows from the proved third logarithmic theta
+  derivative at zero and the existing theta formula for `η₁`. Its original `HasSum`
+  statement and the complex half-period normalization are retained.
+
+The full build passes **14,678 jobs**. Strict checks with both implicit options disabled
+pass for all eight changed implementation/umbrella files and the three root entry checks
+(ten distinct files).
+Every new/completed helper has a docstring and uses only `propext`, `Classical.choice`
+and `Quot.sound`. The global audit covers 55,990 theorems, finds no nonstandard axioms,
+and leaves 1,750 theorems depending on admissions. All existing public compiled types
+are unchanged. All 1,116 Lean source files satisfy the 1,500-line limit; the longest
+library file remains 1,454 lines.
+
+The import survey finds one new two-way area pair:
+`GeneralizedHypergeometric ↔ QHypergeometric`, from the Dougall proof's reuse of the
+q-summation theorem. The file graph remains acyclic, and there is no new import from a
+definitions file into another area's theorem file. The ten pre-existing items beyond
+the older checked-in survey baseline are unchanged. No numerical approximation code,
+new axiom, weakened hypothesis or changed existing definition is introduced. The five
+previously flagged Chapter 1–2 statement issues remain open.
+
+[DEFINITIONS2.md](DEFINITIONS2.md) extends the earlier definitions catalogue to every
+section in all 36 DLMF chapters: 872 section pages and 1,153 grouped correspondences,
+including all 267 original groups and 886 additions. It follows first appearance in
+the DLMF and distinguishes independent Lean constructions, aliases and representation
+theorems. The review records missing counterparts, branch and normalization conditions,
+finite coefficient lists and admission-dependent selections. The source, order, all
+1,763 local links, all 1,631 DLMF links and 1,525 qualified local definition names
+were checked; the exact coverage audit is in [ProofRound20261029f.json](ProofRound20261029f.json).
 
 ## Later-chapter identities and series (2026-10-29)
 
@@ -9132,3 +9516,73 @@ Review validation at source commit `0ae4729`:
 - `DLMF/JacobiElliptic/Basic.lean` — 1,540 lines.
 - `DLMF/ParabolicCylinder/Weber.lean` — 1,538 lines.
 - `DLMF/Weierstrass/Relations.lean` — 1,503 lines.
+
+## Foundational Basic layer (2026-10-30)
+
+The foundational entry point is now `DLMF.Basic`. It imports the 59 area and subarea
+`Basic.lean` entry points. Small collections remain directly in `Basic.lean`; larger
+collections use descriptive leaves below `Basic/`. Substantive developments have names
+such as `Airy.Properties`, `Bessel.RegularizedSeries`, `Confluent.KummerProperties`,
+`Mathieu.FundamentalSolutions`, `Mathieu.SpectralExistence`, `Theta.SeriesAndZeros`,
+`QHypergeometric.Convergence` and `IncompleteGamma.ContinuedProperties`.
+
+The reorganization covers all legacy `Defs.lean` files and the suffix forms
+`Painleve.SolutionsDefs` and `Spheroidal.FerrersDefs`. Chapter 1 and Chapter 2 subareas
+use `Basic.lean`; larger Mathieu, Painlevé, Coulomb and coalescing-saddle collections
+have descriptive leaves. Distinct Painlevé source normalizations remain in separate
+files and retain their original namespaces and predicates. The spheroidal Ferrers
+existence and characterization theorems are separated from the raw Ferrers data.
+
+Definitions previously interleaved with theorem developments have been moved down
+rather than copied. These include Gauss continuation data, Tricomi and incomplete-Gamma
+functions, exponential-integral and Fresnel primitives, parabolic-cylinder functions,
+Appell families and Euler branches, classical orthogonal polynomials, elliptic amplitudes,
+Jacobi regularized functions, and Weierstrass lattice and invariant data. Definitions keep
+their existing public names even when the appropriate file is in a different area.
+
+A foundation may use another area's foundations. It may not import a DLMF theorem file,
+including one in its own area. The import survey now checks the entire `Basic/` tree,
+missing project modules and file cycles; old exceptions cannot bypass these checks.
+`DLMF.Core.*` remains the permitted framework family. Imports of Mathlib, TauCeti,
+lean-codes and `DLMFMathlib` remain governed by the existing dependency rules.
+
+There is one new two-way area pair relative to the start of this reorganization:
+`Confluent <-> ParabolicCylinder`. This records the existing two mathematical interfaces
+at their foundational homes; the actual file graph remains acyclic. Area pairs alone
+are not a layering violation. All foundational leaves are reachable from `DLMF.Basic`,
+and all library modules remain reachable from the complete `DLMF` entry point.
+
+The source and compiled preservation audit and complete module migration map are in
+[OrganizationRound20261030.json](OrganizationRound20261030.json). Definition catalogues
+and acquisition ledgers are refreshed to the relocated declaration sites. Importing an
+old theorem-heavy `Basic` file may require an additional explicit theorem import; old
+`Defs` paths and renamed theorem paths should be updated using the migration map.
+
+The complete build passes (14,914 jobs), as do all 367 required strict Lean checks and
+the compiled foundational-entry-point audit (120 project modules, no theorem modules).
+The import policy passes seven positive and negative fixture checks. All 1,201 Lean
+source files satisfy the 1,500-line limit; the largest library file has 1,454 lines.
+The audit preserves all 25,382 public source declarations and all 3,484 definition
+bodies. The only proof edits replace three uses of a private Mathieu adapter by Lean’s
+`dite_eq_left`; the duplicate adapter is removed. Public declaration docstrings and
+the axiom sets of all public source-range theorems are unchanged.
+
+Both definition catalogues retain their mathematical text and ordering; 303 and 1,581
+source links respectively are refreshed. All 10,703 DLMF tag entries retain their
+declarations, equation numbers, kinds, axiom dependencies and proof statuses. The
+organization itself removes no admissions and introduces none: the direct count remains
+1,553, after the preceding nine-proof round.
+
+The type audit distinguishes mathematical interfaces from raw expression hashes.
+Narrower imports lead Lean to choose definitionally equal normed-ring and normed-space
+instances; file moves also change hygienic names of bound universe parameters. The
+organization report records exact baseline-hash reconstructions and kernel equality
+checks for these elaboration differences.
+The baseline stores expression hashes rather than every original type expression;
+reconstructed comparisons supplement exact source preservation. Surviving old compiled
+modules provide direct comparisons for the independently checked structural cases.
+
+All 1,089 changed type fingerprints are accounted for: each reconstructed baseline
+fingerprint matches and the corresponding type passes the kernel equality check (with
+positionally matched bound universe parameters in the two generated Lamé cases). The
+four generic Backlund cases also retain their original universe parameters.

@@ -1,5 +1,9 @@
 # DLMF Chapter 31 acquisition: Heun Functions
 
+> Source paths and current layout notes were refreshed on 2026-10-30; generated per-entry
+> statuses follow the compiled ledger refresh. Dated acquisition and proof counts
+> describe their original batches.
+
 This acquisition covers the definitions, numbered formulas and analytical assertions in prose
 of [DLMF Chapter 31](https://dlmf.nist.gov/31), §§31.1–31.15, version 1.2.8, checked on
 2026-10-26 (agent ACQ31). The applications §§31.16–31.17 and the computation section §31.18
@@ -13,14 +17,16 @@ are excluded; the pure mathematics of §31.16 is listed below. The Lean code is 
 [DoublyPeriodic](DLMF/Heun/DoublyPeriodic.lean) (§31.2(iv), §31.7(ii)),
 [Integral](DLMF/Heun/Integral.lean) (§31.8, §31.10),
 [Confluent](DLMF/Heun/Confluent.lean) (§31.12) and
-[Fuchsian](DLMF/Heun/Fuchsian.lean) (§§31.14–31.15). Every module imports `Basic`; `Basic`
-imports Mathlib, `DLMFMathlib.Analysis.ODE.Singularities` and
-`TauCeti.Analysis.Complex.Conformal.Continuation.Basic`. Cross-area imports:
-`Hypergeometric` and `Integral` import `DLMF.Hypergeometric.Riemann` (a theorem file of the
-Hypergeometric area, for Riemann's equation and P-symbol operator `riemannNormalOperator`);
-`DoublyPeriodic` imports the definitions files `DLMF.JacobiElliptic.Basic` and
-`DLMF.Weierstrass.Basic`. There are no upstream pointers: Mathlib has no Heun functions; the
-Gauss function `₂F₁` is Mathlib's `ordinaryHypergeometric`.
+[Fuchsian](DLMF/Heun/Fuchsian.lean) (§§31.14–31.15).
+
+**Current layout (2026-10-30).**
+`DLMF.Heun.Basic` contains the canonical definitions and uses Mathlib and TauCeti's
+continuation definitions. The theorem developments use the foundation and import their
+required result APIs explicitly. The hypergeometric and integral developments use the
+Riemann-equation API, including the P-symbol operator `riemannNormalOperator`;
+`DoublyPeriodic` uses Jacobi special-value and analytic-property
+results together with Weierstrass invariant and relation theorems. There are no upstream
+Heun-function pointers; Mathlib supplies the Gauss function `ordinaryHypergeometric`.
 
 **Status after proof round 1 (2026-10-26).** Direct admissions in DLMF/Heun fell from 72 to 43. Proved: convergence of Hl and that it solves Heun's equation, the singularities, exponents, normal forms and homographies of §31.2, the local solutions of §31.3 (confirming DLMF's corrected 31.3.10–11), 31.3.13, the confluent forms' singularities and the Jacobi form. The normal form 31.14.3–5 gained the hypothesis that the singular points are distinct after a proved counterexample. Many results are proved only from the flagged existence theorems; see REVIEW.md, "Proof round 1 for Chapters 28–31 (2026-10-26)".
 
@@ -144,10 +150,10 @@ parameters; scripts in the agent's scratch directory, not part of the project):
 
 - [31.2.i](https://dlmf.nist.gov/31.2.i): [`DLMF.Heun.heun_singularities`](DLMF/Heun/Equation.lean#L208) (proved); [`DLMF.Heun.heun_exponents_zero`](DLMF/Heun/Equation.lean#L339) (proved); [`DLMF.Heun.heun_exponents_one`](DLMF/Heun/Equation.lean#L371) (proved); [`DLMF.Heun.heun_exponents_a`](DLMF/Heun/Equation.lean#L400) (proved); [`DLMF.Heun.heun_exponents_infinity`](DLMF/Heun/Equation.lean#L428) (proved); [`DLMF.Heun.heun_indicial_infinity`](DLMF/Heun/Equation.lean#L464) (proved)
 - [31.2.v](https://dlmf.nist.gov/31.2.v): [`DLMF.Heun.heun_fHomotopic_zero`](DLMF/Heun/Equation.lean#L595) (proved); [`DLMF.Heun.heun_fHomotopic_one`](DLMF/Heun/Equation.lean#L625) (proved); [`DLMF.Heun.heun_fHomotopic_a`](DLMF/Heun/Equation.lean#L652) (proved); [`DLMF.Heun.heun_homography_div`](DLMF/Heun/Equation.lean#L680) (proved); [`DLMF.Heun.heun_homography_mobius`](DLMF/Heun/Equation.lean#L707) (proved)
-- [31.2.E1](https://dlmf.nist.gov/31.2.E1): [`DLMF.Heun.IsHeunSolOn`](DLMF/Heun/Basic.lean#L76) (definition)
+- [31.2.E1](https://dlmf.nist.gov/31.2.E1): [`DLMF.Heun.IsHeunSolOn`](DLMF/Heun/Basic.lean#L78) (definition)
 - [31.2.E2](https://dlmf.nist.gov/31.2.E2): [`DLMF.Heun.heun_normalForm`](DLMF/Heun/Equation.lean#L483) (proved)
-- [31.2.E3](https://dlmf.nist.gov/31.2.E3): [`DLMF.Heun.heunNormalCoeff`](DLMF/Heun/Basic.lean#L108) (definition); [`DLMF.Heun.heunNormal_A_add_B_add_C`](DLMF/Heun/Equation.lean#L473) (proved); [`DLMF.Heun.heun_normalForm`](DLMF/Heun/Equation.lean#L483) (proved)
-- [31.2.E4](https://dlmf.nist.gov/31.2.E4): [`DLMF.Heun.heunNormalA`](DLMF/Heun/Basic.lean#L89) (definition); [`DLMF.Heun.heunNormalB`](DLMF/Heun/Basic.lean#L93) (definition); [`DLMF.Heun.heunNormalC`](DLMF/Heun/Basic.lean#L98) (definition); [`DLMF.Heun.heunNormalD`](DLMF/Heun/Basic.lean#L103) (definition); [`DLMF.Heun.heunNormal_A_add_B_add_C`](DLMF/Heun/Equation.lean#L473) (proved)
+- [31.2.E3](https://dlmf.nist.gov/31.2.E3): [`DLMF.Heun.heunNormalCoeff`](DLMF/Heun/Basic.lean#L110) (definition); [`DLMF.Heun.heunNormal_A_add_B_add_C`](DLMF/Heun/Equation.lean#L473) (proved); [`DLMF.Heun.heun_normalForm`](DLMF/Heun/Equation.lean#L483) (proved)
+- [31.2.E4](https://dlmf.nist.gov/31.2.E4): [`DLMF.Heun.heunNormalA`](DLMF/Heun/Basic.lean#L91) (definition); [`DLMF.Heun.heunNormalB`](DLMF/Heun/Basic.lean#L95) (definition); [`DLMF.Heun.heunNormalC`](DLMF/Heun/Basic.lean#L100) (definition); [`DLMF.Heun.heunNormalD`](DLMF/Heun/Basic.lean#L105) (definition); [`DLMF.Heun.heunNormal_A_add_B_add_C`](DLMF/Heun/Equation.lean#L473) (proved)
 - [31.2.E5](https://dlmf.nist.gov/31.2.E5): [`DLMF.Heun.heun_trigonometricForm`](DLMF/Heun/Equation.lean#L555) (proved)
 - [31.2.E6](https://dlmf.nist.gov/31.2.E6): [`DLMF.Heun.heun_trigonometricForm`](DLMF/Heun/Equation.lean#L555) (proved)
 - [31.2.E7](https://dlmf.nist.gov/31.2.E7): [`DLMF.Heun.heun_jacobiForm`](DLMF/Heun/DoublyPeriodic.lean#L66) (proved)
@@ -159,37 +165,37 @@ parameters; scripts in the agent's scratch directory, not part of the project):
 
 ## [§31.3 Basic Solutions](https://dlmf.nist.gov/31.3)
 
-- [31.3.i](https://dlmf.nist.gov/31.3.i): [`DLMF.Heun.heunLocal_zero`](DLMF/Heun/LocalSolutions.lean#L77) (proved); [`DLMF.Heun.heunLocal_isHeunSolOn`](DLMF/Heun/LocalSolutions.lean#L378) (proved); [`DLMF.Heun.eventuallyEq_heunLocal_of_analyticAt`](DLMF/Heun/LocalSolutions.lean#L582) (proved)
-- [31.3.E1](https://dlmf.nist.gov/31.3.E1): [`DLMF.Heun.heunLocal`](DLMF/Heun/Basic.lean#L145) (definition); [`DLMF.Heun.hasSum_heunLocal`](DLMF/Heun/LocalSolutions.lean#L369) (proved); [`DLMF.Heun.heunLocal_isHeunSolOn`](DLMF/Heun/LocalSolutions.lean#L378) (proved)
-- [31.3.E2](https://dlmf.nist.gov/31.3.E2): [`DLMF.Heun.heunLocalCoeff_rec_zero`](DLMF/Heun/LocalSolutions.lean#L57) (proved)
-- [31.3.E3](https://dlmf.nist.gov/31.3.E3): [`DLMF.Heun.heunLocalCoeff_rec`](DLMF/Heun/LocalSolutions.lean#L65) (proved)
-- [31.3.E4](https://dlmf.nist.gov/31.3.E4): [`DLMF.Heun.heunRecP`](DLMF/Heun/Basic.lean#L118) (definition); [`DLMF.Heun.heunRecQ`](DLMF/Heun/Basic.lean#L122) (definition); [`DLMF.Heun.heunRecR`](DLMF/Heun/Basic.lean#L127) (definition)
-- [31.3.E5](https://dlmf.nist.gov/31.3.E5): [`DLMF.Heun.heunLocal_second_isHeunSolOn`](DLMF/Heun/LocalSolutions.lean#L658) (proved)
-- [31.3.E6](https://dlmf.nist.gov/31.3.E6): [`DLMF.Heun.heunLocal_at_one_isHeunSolOn`](DLMF/Heun/LocalSolutions.lean#L680) (proved)
-- [31.3.E7](https://dlmf.nist.gov/31.3.E7): [`DLMF.Heun.heunLocal_second_at_one_isHeunSolOn`](DLMF/Heun/LocalSolutions.lean#L701) (proved)
-- [31.3.E8](https://dlmf.nist.gov/31.3.E8): [`DLMF.Heun.heunLocal_at_a_isHeunSolOn`](DLMF/Heun/LocalSolutions.lean#L726) (proved)
-- [31.3.E9](https://dlmf.nist.gov/31.3.E9): [`DLMF.Heun.heunLocal_second_at_a_isHeunSolOn`](DLMF/Heun/LocalSolutions.lean#L749) (proved)
-- [31.3.E10](https://dlmf.nist.gov/31.3.E10): [`DLMF.Heun.heunLocal_at_infinity_isHeunSolOn`](DLMF/Heun/LocalSolutions.lean#L780) (proved)
-- [31.3.E11](https://dlmf.nist.gov/31.3.E11): [`DLMF.Heun.heunLocal_second_at_infinity_isHeunSolOn`](DLMF/Heun/LocalSolutions.lean#L803) (proved)
-- [31.3.E12](https://dlmf.nist.gov/31.3.E12): [`DLMF.Heun.heunLocal_eq_heunLocal_inv`](DLMF/Heun/LocalSolutions.lean#L859) (proved)
-- [31.3.E13](https://dlmf.nist.gov/31.3.E13): [`DLMF.Heun.heunLocal_eq_pfaff`](DLMF/Heun/LocalSolutions.lean#L915) (proved)
+- [31.3.i](https://dlmf.nist.gov/31.3.i): [`DLMF.Heun.heunLocal_zero`](DLMF/Heun/LocalSolutions.lean#L81) (proved); [`DLMF.Heun.heunLocal_isHeunSolOn`](DLMF/Heun/LocalSolutions.lean#L393) (proved); [`DLMF.Heun.eventuallyEq_heunLocal_of_analyticAt`](DLMF/Heun/LocalSolutions.lean#L597) (proved)
+- [31.3.E1](https://dlmf.nist.gov/31.3.E1): [`DLMF.Heun.heunLocal`](DLMF/Heun/Basic.lean#L147) (definition); [`DLMF.Heun.hasSum_heunLocal`](DLMF/Heun/LocalSolutions.lean#L384) (proved); [`DLMF.Heun.heunLocal_isHeunSolOn`](DLMF/Heun/LocalSolutions.lean#L393) (proved)
+- [31.3.E2](https://dlmf.nist.gov/31.3.E2): [`DLMF.Heun.heunLocalCoeff_rec_zero`](DLMF/Heun/LocalSolutions.lean#L61) (proved)
+- [31.3.E3](https://dlmf.nist.gov/31.3.E3): [`DLMF.Heun.heunLocalCoeff_rec`](DLMF/Heun/LocalSolutions.lean#L69) (proved)
+- [31.3.E4](https://dlmf.nist.gov/31.3.E4): [`DLMF.Heun.heunRecP`](DLMF/Heun/Basic.lean#L120) (definition); [`DLMF.Heun.heunRecQ`](DLMF/Heun/Basic.lean#L124) (definition); [`DLMF.Heun.heunRecR`](DLMF/Heun/Basic.lean#L129) (definition)
+- [31.3.E5](https://dlmf.nist.gov/31.3.E5): [`DLMF.Heun.heunLocal_second_isHeunSolOn`](DLMF/Heun/LocalSolutions.lean#L673) (proved)
+- [31.3.E6](https://dlmf.nist.gov/31.3.E6): [`DLMF.Heun.heunLocal_at_one_isHeunSolOn`](DLMF/Heun/LocalSolutions.lean#L695) (proved)
+- [31.3.E7](https://dlmf.nist.gov/31.3.E7): [`DLMF.Heun.heunLocal_second_at_one_isHeunSolOn`](DLMF/Heun/LocalSolutions.lean#L716) (proved)
+- [31.3.E8](https://dlmf.nist.gov/31.3.E8): [`DLMF.Heun.heunLocal_at_a_isHeunSolOn`](DLMF/Heun/LocalSolutions.lean#L741) (proved)
+- [31.3.E9](https://dlmf.nist.gov/31.3.E9): [`DLMF.Heun.heunLocal_second_at_a_isHeunSolOn`](DLMF/Heun/LocalSolutions.lean#L764) (proved)
+- [31.3.E10](https://dlmf.nist.gov/31.3.E10): [`DLMF.Heun.heunLocal_at_infinity_isHeunSolOn`](DLMF/Heun/LocalSolutions.lean#L795) (proved)
+- [31.3.E11](https://dlmf.nist.gov/31.3.E11): [`DLMF.Heun.heunLocal_second_at_infinity_isHeunSolOn`](DLMF/Heun/LocalSolutions.lean#L818) (proved)
+- [31.3.E12](https://dlmf.nist.gov/31.3.E12): [`DLMF.Heun.heunLocal_eq_heunLocal_inv`](DLMF/Heun/LocalSolutions.lean#L874) (proved)
+- [31.3.E13](https://dlmf.nist.gov/31.3.E13): [`DLMF.Heun.heunLocal_eq_pfaff`](DLMF/Heun/LocalSolutions.lean#L930) (proved)
 
 ## [§31.4 Solutions Analytic at Two Singularities: Heun Functions](https://dlmf.nist.gov/31.4)
 
-- [31.4](https://dlmf.nist.gov/31.4): [`DLMF.Heun.IsHeunEigenvalue01`](DLMF/Heun/Basic.lean#L164) (definition); [`DLMF.Heun.IsHeunEigenvalue01.analyticOn_ball`](DLMF/Heun/HeunFunctions.lean#L50) (admitted); [`DLMF.Heun.heunEigenvalue01_infinite_discrete`](DLMF/Heun/HeunFunctions.lean#L80) (admitted)
-- [31.4.E1](https://dlmf.nist.gov/31.4.E1): [`DLMF.Heun.heunFunction01`](DLMF/Heun/Basic.lean#L173) (definition); [`DLMF.Heun.IsHeunEigenvalue01.analyticOn_ball`](DLMF/Heun/HeunFunctions.lean#L50) (admitted); [`DLMF.Heun.heunFunction01_eq_heunLocal`](DLMF/Heun/HeunFunctions.lean#L60) (proved from admissions)
-- [31.4.E2](https://dlmf.nist.gov/31.4.E2): [`DLMF.Heun.heunCFApprox`](DLMF/Heun/Basic.lean#L192) (definition); [`DLMF.Heun.tendsto_heunCFApprox`](DLMF/Heun/HeunFunctions.lean#L91) (admitted)
-- [31.4.E3](https://dlmf.nist.gov/31.4.E3): [`DLMF.Heun.IsHeunFunctionOn`](DLMF/Heun/Basic.lean#L155) (definition)
+- [31.4](https://dlmf.nist.gov/31.4): [`DLMF.Heun.IsHeunEigenvalue01`](DLMF/Heun/Basic.lean#L166) (definition); [`DLMF.Heun.IsHeunEigenvalue01.analyticOn_ball`](DLMF/Heun/HeunFunctions.lean#L50) (admitted); [`DLMF.Heun.heunEigenvalue01_infinite_discrete`](DLMF/Heun/HeunFunctions.lean#L80) (admitted)
+- [31.4.E1](https://dlmf.nist.gov/31.4.E1): [`DLMF.Heun.heunFunction01`](DLMF/Heun/Basic.lean#L175) (definition); [`DLMF.Heun.IsHeunEigenvalue01.analyticOn_ball`](DLMF/Heun/HeunFunctions.lean#L50) (admitted); [`DLMF.Heun.heunFunction01_eq_heunLocal`](DLMF/Heun/HeunFunctions.lean#L60) (proved from admissions)
+- [31.4.E2](https://dlmf.nist.gov/31.4.E2): [`DLMF.Heun.heunCFApprox`](DLMF/Heun/Basic.lean#L194) (definition); [`DLMF.Heun.tendsto_heunCFApprox`](DLMF/Heun/HeunFunctions.lean#L91) (admitted)
+- [31.4.E3](https://dlmf.nist.gov/31.4.E3): [`DLMF.Heun.IsHeunFunctionOn`](DLMF/Heun/Basic.lean#L157) (definition)
 
 ## [§31.5 Solutions Analytic at Three Singularities: Heun Polynomials](https://dlmf.nist.gov/31.5)
 
 - [31.5](https://dlmf.nist.gov/31.5): [`DLMF.Heun.heunPoly_isHeunSolOn`](DLMF/Heun/HeunFunctions.lean#L397) (proved); [`DLMF.Heun.heunPolyMatrix_charpoly_natDegree`](DLMF/Heun/HeunFunctions.lean#L456) (proved)
-- [31.5.E1](https://dlmf.nist.gov/31.5.E1): [`DLMF.Heun.heunPolyMatrix`](DLMF/Heun/Basic.lean#L198) (definition)
-- [31.5.E2](https://dlmf.nist.gov/31.5.E2): [`DLMF.Heun.heunPoly`](DLMF/Heun/Basic.lean#L210) (definition); [`DLMF.Heun.heunLocal_eq_heunPoly`](DLMF/Heun/HeunFunctions.lean#L381) (proved); [`DLMF.Heun.heunPoly_isHeunSolOn`](DLMF/Heun/HeunFunctions.lean#L397) (proved)
+- [31.5.E1](https://dlmf.nist.gov/31.5.E1): [`DLMF.Heun.heunPolyMatrix`](DLMF/Heun/Basic.lean#L200) (definition)
+- [31.5.E2](https://dlmf.nist.gov/31.5.E2): [`DLMF.Heun.heunPoly`](DLMF/Heun/Basic.lean#L212) (definition); [`DLMF.Heun.heunLocal_eq_heunPoly`](DLMF/Heun/HeunFunctions.lean#L381) (proved); [`DLMF.Heun.heunPoly_isHeunSolOn`](DLMF/Heun/HeunFunctions.lean#L397) (proved)
 
 ## [§31.6 Path-Multiplicative Solutions](https://dlmf.nist.gov/31.6)
 
-- [31.6.E1](https://dlmf.nist.gov/31.6.E1): [`DLMF.Heun.IsPathMultiplicative`](DLMF/Heun/Basic.lean#L314) (definition)
+- [31.6.E1](https://dlmf.nist.gov/31.6.E1): [`DLMF.Heun.IsPathMultiplicative`](DLMF/Heun/Basic.lean#L316) (definition)
 
 ## [§31.7 Relations to Other Functions](https://dlmf.nist.gov/31.7)
 
@@ -220,11 +226,11 @@ parameters; scripts in the agent's scratch directory, not part of the project):
 ## [§31.10 Integral Equations and Representations](https://dlmf.nist.gov/31.10)
 
 - [31.10.E1](https://dlmf.nist.gov/31.10.E1): [`DLMF.Heun.heun_integral_typeI`](DLMF/Heun/Integral.lean#L338) (admitted); [`DLMF.Heun.heun_integralEquation_example₁`](DLMF/Heun/Integral.lean#L528) (admitted)
-- [31.10.E2](https://dlmf.nist.gov/31.10.E2): [`DLMF.Heun.heunWeight`](DLMF/Heun/Basic.lean#L333) (definition); [`DLMF.Heun.heun_integral_typeI`](DLMF/Heun/Integral.lean#L338) (admitted)
+- [31.10.E2](https://dlmf.nist.gov/31.10.E2): [`DLMF.Heun.heunWeight`](DLMF/Heun/Basic.lean#L335) (definition); [`DLMF.Heun.heun_integral_typeI`](DLMF/Heun/Integral.lean#L338) (admitted)
 - [31.10.E3](https://dlmf.nist.gov/31.10.E3): [`DLMF.Heun.heun_integral_typeI`](DLMF/Heun/Integral.lean#L338) (admitted); [`DLMF.Heun.heun_kernel_example₁_pde`](DLMF/Heun/Integral.lean#L512) (admitted); [`DLMF.Heun.heun_kernel_example₂_pde`](DLMF/Heun/Integral.lean#L549) (admitted)
-- [31.10.E4](https://dlmf.nist.gov/31.10.E4): [`DLMF.Heun.heunOperator`](DLMF/Heun/Basic.lean#L325) (definition); [`DLMF.Heun.isHeunSolOn_iff_heunOperator`](DLMF/Heun/Equation.lean#L119) (proved)
+- [31.10.E4](https://dlmf.nist.gov/31.10.E4): [`DLMF.Heun.heunOperator`](DLMF/Heun/Basic.lean#L327) (definition); [`DLMF.Heun.isHeunSolOn_iff_heunOperator`](DLMF/Heun/Equation.lean#L119) (proved)
 - [31.10.E5](https://dlmf.nist.gov/31.10.E5): [`DLMF.Heun.heun_integral_typeI`](DLMF/Heun/Integral.lean#L338) (admitted)
-- [31.10.E6](https://dlmf.nist.gov/31.10.E6): [`DLMF.Heun.heunConcomitantP`](DLMF/Heun/Basic.lean#L339) (definition); [`DLMF.Heun.heun_integral_typeI`](DLMF/Heun/Integral.lean#L338) (admitted)
+- [31.10.E6](https://dlmf.nist.gov/31.10.E6): [`DLMF.Heun.heunConcomitantP`](DLMF/Heun/Basic.lean#L341) (definition); [`DLMF.Heun.heun_integral_typeI`](DLMF/Heun/Integral.lean#L338) (admitted)
 - [31.10.E7](https://dlmf.nist.gov/31.10.E7): [`DLMF.Heun.heun_kernel_typeI_angles`](DLMF/Heun/Integral.lean#L364) (admitted)
 - [31.10.E8](https://dlmf.nist.gov/31.10.E8): [`DLMF.Heun.heun_kernel_typeI_angles`](DLMF/Heun/Integral.lean#L364) (admitted); [`DLMF.Heun.heun_kernel_typeI_separable`](DLMF/Heun/Integral.lean#L450) (proved). Corrected sign; see source corrections.
 - [31.10.E9](https://dlmf.nist.gov/31.10.E9): [`DLMF.Heun.heun_kernel_typeI_separable`](DLMF/Heun/Integral.lean#L450) (proved)
@@ -250,18 +256,18 @@ parameters; scripts in the agent's scratch directory, not part of the project):
 - [31.11.E1](https://dlmf.nist.gov/31.11.E1): [`DLMF.Heun.hasSum_heunHyp_typeI`](DLMF/Heun/Hypergeometric.lean#L609) (admitted); [`DLMF.Heun.hasSum_heunHyp_typeI'`](DLMF/Heun/Hypergeometric.lean#L623) (admitted)
 - [31.11.E2](https://dlmf.nist.gov/31.11.E2): [`DLMF.Heun.heunHypP5_P6_riemann`](DLMF/Heun/Hypergeometric.lean#L539) (proved)
 - [31.11.E3](https://dlmf.nist.gov/31.11.E3): [`DLMF.Heun.heunHyp_typeI_add`](DLMF/Heun/Hypergeometric.lean#L465) (proved); [`DLMF.Heun.heunHyp_typeII_add`](DLMF/Heun/Hypergeometric.lean#L473) (proved)
-- [31.11.E3_1](https://dlmf.nist.gov/31.11.E3_1): [`DLMF.Heun.heunHypP5`](DLMF/Heun/Basic.lean#L254) (definition); [`DLMF.Heun.heunHypP5_P6_riemann`](DLMF/Heun/Hypergeometric.lean#L539) (proved)
-- [31.11.E3_2](https://dlmf.nist.gov/31.11.E3_2): [`DLMF.Heun.heunHypP6`](DLMF/Heun/Basic.lean#L263) (definition); [`DLMF.Heun.heunHypP5_P6_riemann`](DLMF/Heun/Hypergeometric.lean#L539) (proved)
+- [31.11.E3_1](https://dlmf.nist.gov/31.11.E3_1): [`DLMF.Heun.heunHypP5`](DLMF/Heun/Basic.lean#L256) (definition); [`DLMF.Heun.heunHypP5_P6_riemann`](DLMF/Heun/Hypergeometric.lean#L539) (proved)
+- [31.11.E3_2](https://dlmf.nist.gov/31.11.E3_2): [`DLMF.Heun.heunHypP6`](DLMF/Heun/Basic.lean#L265) (definition); [`DLMF.Heun.heunHypP5_P6_riemann`](DLMF/Heun/Hypergeometric.lean#L539) (proved)
 - [31.11.E4](https://dlmf.nist.gov/31.11.E4): [`DLMF.Heun.hasSum_heunHyp_typeI`](DLMF/Heun/Hypergeometric.lean#L609) (admitted)
 - [31.11.E5](https://dlmf.nist.gov/31.11.E5): [`DLMF.Heun.hasSum_heunHyp_typeI`](DLMF/Heun/Hypergeometric.lean#L609) (admitted)
-- [31.11.E6](https://dlmf.nist.gov/31.11.E6): [`DLMF.Heun.heunHypK`](DLMF/Heun/Basic.lean#L219) (definition)
-- [31.11.E7](https://dlmf.nist.gov/31.11.E7): [`DLMF.Heun.heunHypL`](DLMF/Heun/Basic.lean#L227) (definition)
-- [31.11.E8](https://dlmf.nist.gov/31.11.E8): [`DLMF.Heun.heunHypM`](DLMF/Heun/Basic.lean#L237) (definition)
+- [31.11.E6](https://dlmf.nist.gov/31.11.E6): [`DLMF.Heun.heunHypK`](DLMF/Heun/Basic.lean#L221) (definition)
+- [31.11.E7](https://dlmf.nist.gov/31.11.E7): [`DLMF.Heun.heunHypL`](DLMF/Heun/Basic.lean#L229) (definition)
+- [31.11.E8](https://dlmf.nist.gov/31.11.E8): [`DLMF.Heun.heunHypM`](DLMF/Heun/Basic.lean#L239) (definition)
 - [31.11.E9](https://dlmf.nist.gov/31.11.E9): [`DLMF.Heun.heunHypM_neg_one_eq_zero`](DLMF/Heun/Hypergeometric.lean#L481) (proved)
 - [31.11.E10](https://dlmf.nist.gov/31.11.E10): [`DLMF.Heun.heunHyp_typeI_add`](DLMF/Heun/Hypergeometric.lean#L465) (proved); [`DLMF.Heun.hasSum_heunHyp_typeI`](DLMF/Heun/Hypergeometric.lean#L609) (admitted)
 - [31.11.E11](https://dlmf.nist.gov/31.11.E11): [`DLMF.Heun.heunHyp_typeI_add`](DLMF/Heun/Hypergeometric.lean#L465) (proved); [`DLMF.Heun.hasSum_heunHyp_typeI'`](DLMF/Heun/Hypergeometric.lean#L623) (admitted)
 - [31.11.E12](https://dlmf.nist.gov/31.11.E12): [`DLMF.Heun.hasSum_heunHyp_typeI`](DLMF/Heun/Hypergeometric.lean#L609) (admitted)
-- [31.11.E13](https://dlmf.nist.gov/31.11.E13): [`DLMF.Heun.heunHypCFApprox`](DLMF/Heun/Basic.lean#L279) (definition); [`DLMF.Heun.tendsto_heunHypCFApprox`](DLMF/Heun/Hypergeometric.lean#L634) (admitted)
+- [31.11.E13](https://dlmf.nist.gov/31.11.E13): [`DLMF.Heun.heunHypCFApprox`](DLMF/Heun/Basic.lean#L281) (definition); [`DLMF.Heun.tendsto_heunHypCFApprox`](DLMF/Heun/Hypergeometric.lean#L634) (admitted)
 - [31.11.E14](https://dlmf.nist.gov/31.11.E14): [`DLMF.Heun.heunHyp_typeII_add`](DLMF/Heun/Hypergeometric.lean#L473) (proved); [`DLMF.Heun.heunHypP6_typeII_polynomial`](DLMF/Heun/Hypergeometric.lean#L651) (proved); [`DLMF.Heun.hasSum_heunHyp_typeII`](DLMF/Heun/Hypergeometric.lean#L681) (admitted)
 - [31.11.E15](https://dlmf.nist.gov/31.11.E15): [`DLMF.Heun.heunHyp_typeII_add`](DLMF/Heun/Hypergeometric.lean#L473) (proved). General form 31.11.3 only; see conventions.
 - [31.11.E16](https://dlmf.nist.gov/31.11.E16): [`DLMF.Heun.heunHyp_typeII_add`](DLMF/Heun/Hypergeometric.lean#L473) (proved). General form 31.11.3 only; see conventions.
@@ -269,36 +275,36 @@ parameters; scripts in the agent's scratch directory, not part of the project):
 
 ## [§31.12 Confluent Forms of Heun’s Equation](https://dlmf.nist.gov/31.12)
 
-- [31.12.E1](https://dlmf.nist.gov/31.12.E1): [`DLMF.Heun.IsConfluentHeunSolOn`](DLMF/Heun/Basic.lean#L345) (definition); [`DLMF.Heun.confluentHeun_singularities`](DLMF/Heun/Confluent.lean#L61) (proved)
-- [31.12.E2](https://dlmf.nist.gov/31.12.E2): [`DLMF.Heun.IsDoublyConfluentHeunSolOn`](DLMF/Heun/Basic.lean#L351) (definition); [`DLMF.Heun.doublyConfluentHeun_singularities`](DLMF/Heun/Confluent.lean#L127) (proved)
-- [31.12.E3](https://dlmf.nist.gov/31.12.E3): [`DLMF.Heun.IsBiconfluentHeunSolOn`](DLMF/Heun/Basic.lean#L357) (definition); [`DLMF.Heun.biconfluentHeun_singularities`](DLMF/Heun/Confluent.lean#L202) (proved). Sign as corrected in DLMF 1.0.7.
-- [31.12.E4](https://dlmf.nist.gov/31.12.E4): [`DLMF.Heun.IsTriconfluentHeunSolOn`](DLMF/Heun/Basic.lean#L363) (definition); [`DLMF.Heun.triconfluentHeun_ordinary`](DLMF/Heun/Confluent.lean#L256) (proved); [`DLMF.Heun.triconfluentHeun_rank_infinity`](DLMF/Heun/Confluent.lean#L271) (proved)
+- [31.12.E1](https://dlmf.nist.gov/31.12.E1): [`DLMF.Heun.IsConfluentHeunSolOn`](DLMF/Heun/Basic.lean#L347) (definition); [`DLMF.Heun.confluentHeun_singularities`](DLMF/Heun/Confluent.lean#L61) (proved)
+- [31.12.E2](https://dlmf.nist.gov/31.12.E2): [`DLMF.Heun.IsDoublyConfluentHeunSolOn`](DLMF/Heun/Basic.lean#L353) (definition); [`DLMF.Heun.doublyConfluentHeun_singularities`](DLMF/Heun/Confluent.lean#L127) (proved)
+- [31.12.E3](https://dlmf.nist.gov/31.12.E3): [`DLMF.Heun.IsBiconfluentHeunSolOn`](DLMF/Heun/Basic.lean#L359) (definition); [`DLMF.Heun.biconfluentHeun_singularities`](DLMF/Heun/Confluent.lean#L202) (proved). Sign as corrected in DLMF 1.0.7.
+- [31.12.E4](https://dlmf.nist.gov/31.12.E4): [`DLMF.Heun.IsTriconfluentHeunSolOn`](DLMF/Heun/Basic.lean#L365) (definition); [`DLMF.Heun.triconfluentHeun_ordinary`](DLMF/Heun/Confluent.lean#L256) (proved); [`DLMF.Heun.triconfluentHeun_rank_infinity`](DLMF/Heun/Confluent.lean#L271) (proved)
 
 ## [§31.14 General Fuchsian Equation](https://dlmf.nist.gov/31.14)
 
-- [31.14.E1](https://dlmf.nist.gov/31.14.E1): [`DLMF.Heun.IsFuchsianSolOn`](DLMF/Heun/Basic.lean#L398) (definition); [`DLMF.Heun.fuchsian_exponents_finite`](DLMF/Heun/Fuchsian.lean#L57) (proved); [`DLMF.Heun.fuchsian_exponents_infinity`](DLMF/Heun/Fuchsian.lean#L110) (proved); [`DLMF.Heun.isHeunSolOn_iff_isFuchsianSolOn`](DLMF/Heun/Fuchsian.lean#L155) (proved)
+- [31.14.E1](https://dlmf.nist.gov/31.14.E1): [`DLMF.Heun.IsFuchsianSolOn`](DLMF/Heun/Basic.lean#L400) (definition); [`DLMF.Heun.fuchsian_exponents_finite`](DLMF/Heun/Fuchsian.lean#L57) (proved); [`DLMF.Heun.fuchsian_exponents_infinity`](DLMF/Heun/Fuchsian.lean#L110) (proved); [`DLMF.Heun.isHeunSolOn_iff_isFuchsianSolOn`](DLMF/Heun/Fuchsian.lean#L155) (proved)
 - [31.14.E2](https://dlmf.nist.gov/31.14.E2): [`DLMF.Heun.fuchsian_exponents_infinity`](DLMF/Heun/Fuchsian.lean#L110) (proved); [`DLMF.Heun.fuchsian_indicial_infinity`](DLMF/Heun/Fuchsian.lean#L147) (proved); [`DLMF.Heun.isHeunSolOn_iff_isFuchsianSolOn`](DLMF/Heun/Fuchsian.lean#L155) (proved)
 - [31.14.E3](https://dlmf.nist.gov/31.14.E3): [`DLMF.Heun.fuchsian_normalForm`](DLMF/Heun/Fuchsian.lean#L289) (proved)
-- [31.14.E4](https://dlmf.nist.gov/31.14.E4): [`DLMF.Heun.fuchsianNormalCoeff`](DLMF/Heun/Basic.lean#L415) (definition); [`DLMF.Heun.fuchsianNormalQ_sum`](DLMF/Heun/Fuchsian.lean#L193) (proved); [`DLMF.Heun.fuchsianNormalQ_sum_eq_zero`](DLMF/Heun/Fuchsian.lean#L215) (proved); [`DLMF.Heun.fuchsian_normalForm`](DLMF/Heun/Fuchsian.lean#L289) (proved)
-- [31.14.E5](https://dlmf.nist.gov/31.14.E5): [`DLMF.Heun.fuchsianNormalQ`](DLMF/Heun/Basic.lean#L406) (definition); [`DLMF.Heun.fuchsianNormalGamma`](DLMF/Heun/Basic.lean#L411) (definition); [`DLMF.Heun.fuchsianNormalQ_sum`](DLMF/Heun/Fuchsian.lean#L193) (proved); [`DLMF.Heun.fuchsian_normalForm`](DLMF/Heun/Fuchsian.lean#L289) (proved)
+- [31.14.E4](https://dlmf.nist.gov/31.14.E4): [`DLMF.Heun.fuchsianNormalCoeff`](DLMF/Heun/Basic.lean#L417) (definition); [`DLMF.Heun.fuchsianNormalQ_sum`](DLMF/Heun/Fuchsian.lean#L193) (proved); [`DLMF.Heun.fuchsianNormalQ_sum_eq_zero`](DLMF/Heun/Fuchsian.lean#L215) (proved); [`DLMF.Heun.fuchsian_normalForm`](DLMF/Heun/Fuchsian.lean#L289) (proved)
+- [31.14.E5](https://dlmf.nist.gov/31.14.E5): [`DLMF.Heun.fuchsianNormalQ`](DLMF/Heun/Basic.lean#L408) (definition); [`DLMF.Heun.fuchsianNormalGamma`](DLMF/Heun/Basic.lean#L413) (definition); [`DLMF.Heun.fuchsianNormalQ_sum`](DLMF/Heun/Fuchsian.lean#L193) (proved); [`DLMF.Heun.fuchsian_normalForm`](DLMF/Heun/Fuchsian.lean#L289) (proved)
 
 ## [§31.15 Stieltjes Polynomials](https://dlmf.nist.gov/31.15)
 
-- [31.15.i](https://dlmf.nist.gov/31.15.i): [`DLMF.Heun.IsVanVleckStieltjes`](DLMF/Heun/Basic.lean#L435) (definition); [`DLMF.Heun.vanVleck_card_le`](DLMF/Heun/Fuchsian.lean#L370) (admitted)
+- [31.15.i](https://dlmf.nist.gov/31.15.i): [`DLMF.Heun.IsVanVleckStieltjes`](DLMF/Heun/Basic.lean#L437) (definition); [`DLMF.Heun.vanVleck_card_le`](DLMF/Heun/Fuchsian.lean#L370) (admitted)
 - [31.15.ii](https://dlmf.nist.gov/31.15.ii): [`DLMF.Heun.stieltjes_zeros_critical`](DLMF/Heun/Fuchsian.lean#L552) (proved)
-- [31.15.iii](https://dlmf.nist.gov/31.15.iii): [`DLMF.Heun.stieltjesPoly`](DLMF/Heun/Basic.lean#L459) (definition); [`DLMF.Heun.existsUnique_stieltjesOfIndex`](DLMF/Heun/Fuchsian.lean#L665) (admitted); [`DLMF.Heun.stieltjesProduct_norm_pos`](DLMF/Heun/Fuchsian.lean#L730) (admitted); [`DLMF.Heun.stieltjesProduct_complete`](DLMF/Heun/Fuchsian.lean#L738) (admitted)
-- [31.15.E1](https://dlmf.nist.gov/31.15.E1): [`DLMF.Heun.IsStieltjesEquation`](DLMF/Heun/Basic.lean#L428) (definition); [`DLMF.Heun.vanVleck_card_le`](DLMF/Heun/Fuchsian.lean#L370) (admitted)
+- [31.15.iii](https://dlmf.nist.gov/31.15.iii): [`DLMF.Heun.stieltjesPoly`](DLMF/Heun/Basic.lean#L461) (definition); [`DLMF.Heun.existsUnique_stieltjesOfIndex`](DLMF/Heun/Fuchsian.lean#L665) (admitted); [`DLMF.Heun.stieltjesProduct_norm_pos`](DLMF/Heun/Fuchsian.lean#L730) (admitted); [`DLMF.Heun.stieltjesProduct_complete`](DLMF/Heun/Fuchsian.lean#L738) (admitted)
+- [31.15.E1](https://dlmf.nist.gov/31.15.E1): [`DLMF.Heun.IsStieltjesEquation`](DLMF/Heun/Basic.lean#L430) (definition); [`DLMF.Heun.vanVleck_card_le`](DLMF/Heun/Fuchsian.lean#L370) (admitted)
 - [31.15.E2](https://dlmf.nist.gov/31.15.E2): [`DLMF.Heun.stieltjes_zeros_equilibrium`](DLMF/Heun/Fuchsian.lean#L427) (proved)
 - [31.15.E3](https://dlmf.nist.gov/31.15.E3): [`DLMF.Heun.vanVleck_zeros`](DLMF/Heun/Fuchsian.lean#L479) (proved)
-- [31.15.E4](https://dlmf.nist.gov/31.15.E4): [`DLMF.Heun.stieltjesG`](DLMF/Heun/Basic.lean#L441) (definition); [`DLMF.Heun.stieltjes_zeros_critical`](DLMF/Heun/Fuchsian.lean#L552) (proved)
+- [31.15.E4](https://dlmf.nist.gov/31.15.E4): [`DLMF.Heun.stieltjesG`](DLMF/Heun/Basic.lean#L443) (definition); [`DLMF.Heun.stieltjes_zeros_critical`](DLMF/Heun/Fuchsian.lean#L552) (proved)
 - [31.15.E5](https://dlmf.nist.gov/31.15.E5): [`DLMF.Heun.existsUnique_stieltjesOfIndex`](DLMF/Heun/Fuchsian.lean#L665) (admitted); [`DLMF.Heun.stieltjes_card`](DLMF/Heun/Fuchsian.lean#L674) (admitted)
 - [31.15.E6](https://dlmf.nist.gov/31.15.E6): [`DLMF.Heun.existsUnique_stieltjesOfIndex`](DLMF/Heun/Fuchsian.lean#L665) (admitted); [`DLMF.Heun.stieltjes_card`](DLMF/Heun/Fuchsian.lean#L674) (admitted)
 - [31.15.E7](https://dlmf.nist.gov/31.15.E7): [`DLMF.Heun.stieltjes_accessory`](DLMF/Heun/Fuchsian.lean#L684) (proved)
-- [31.15.E8](https://dlmf.nist.gov/31.15.E8): [`DLMF.Heun.stieltjesProduct`](DLMF/Heun/Basic.lean#L477) (definition); [`DLMF.Heun.stieltjesProduct_orthogonal`](DLMF/Heun/Fuchsian.lean#L722) (admitted)
+- [31.15.E8](https://dlmf.nist.gov/31.15.E8): [`DLMF.Heun.stieltjesProduct`](DLMF/Heun/Basic.lean#L479) (definition); [`DLMF.Heun.stieltjesProduct_orthogonal`](DLMF/Heun/Fuchsian.lean#L722) (admitted)
 - [31.15.E9](https://dlmf.nist.gov/31.15.E9): [`DLMF.Heun.stieltjesProduct_orthogonal`](DLMF/Heun/Fuchsian.lean#L722) (admitted)
-- [31.15.E10](https://dlmf.nist.gov/31.15.E10): [`DLMF.Heun.stieltjesBox`](DLMF/Heun/Basic.lean#L465) (definition); [`DLMF.Heun.stieltjesProduct_orthogonal`](DLMF/Heun/Fuchsian.lean#L722) (admitted)
-- [31.15.E11](https://dlmf.nist.gov/31.15.E11): [`DLMF.Heun.stieltjesInner`](DLMF/Heun/Basic.lean#L482) (definition); [`DLMF.Heun.stieltjesProduct_orthogonal`](DLMF/Heun/Fuchsian.lean#L722) (admitted)
-- [31.15.E12](https://dlmf.nist.gov/31.15.E12): [`DLMF.Heun.stieltjesWeight`](DLMF/Heun/Basic.lean#L470) (definition); [`DLMF.Heun.stieltjesProduct_orthogonal`](DLMF/Heun/Fuchsian.lean#L722) (admitted)
+- [31.15.E10](https://dlmf.nist.gov/31.15.E10): [`DLMF.Heun.stieltjesBox`](DLMF/Heun/Basic.lean#L467) (definition); [`DLMF.Heun.stieltjesProduct_orthogonal`](DLMF/Heun/Fuchsian.lean#L722) (admitted)
+- [31.15.E11](https://dlmf.nist.gov/31.15.E11): [`DLMF.Heun.stieltjesInner`](DLMF/Heun/Basic.lean#L484) (definition); [`DLMF.Heun.stieltjesProduct_orthogonal`](DLMF/Heun/Fuchsian.lean#L722) (admitted)
+- [31.15.E12](https://dlmf.nist.gov/31.15.E12): [`DLMF.Heun.stieltjesWeight`](DLMF/Heun/Basic.lean#L472) (definition); [`DLMF.Heun.stieltjesProduct_orthogonal`](DLMF/Heun/Fuchsian.lean#L722) (admitted)
 
 ## Prose, informal and excluded items
 

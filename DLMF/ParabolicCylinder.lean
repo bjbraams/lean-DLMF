@@ -19,7 +19,7 @@ public import DLMF.ParabolicCylinder.Computation
 public import DLMF.ParabolicCylinder.SourceChecks
 public import DLMF.ParabolicCylinder.Hermite
 public import DLMF.ParabolicCylinder.BarnesContinuation
-public import DLMF.ParabolicCylinder.Basic
+public import DLMF.ParabolicCylinder.ElementaryProperties
 public import DLMF.ParabolicCylinder.Relations
 public import DLMF.ParabolicCylinder.MathlibCoverage
 public import DLMF.ParabolicCylinder.ContourTools

@@ -11,9 +11,10 @@ public import DLMF.EllipticIntegrals.SymmetricAddition
 public import DLMF.EllipticIntegrals.P19sR1Legendre
 public import DLMF.EllipticIntegrals.P19sR1Connection
 public import DLMF.EllipticIntegrals.LegendreIdentities
+public import DLMF.EllipticIntegrals.Derivatives
 public import Carlson.TwoVariable.GaussHypergeometric
 public import DLMF.JacobiElliptic.Inverse
-public import DLMF.Weierstrass.Basic
+public import DLMF.Weierstrass.EllipticFunctionsAndInvariants
 
 /-!
 # Relations of the symmetric integrals to other functions (DLMF §19.25)
@@ -59,7 +60,7 @@ functions of `DLMF.JacobiElliptic.Inverse`; Weierstrass functions are those of
 
 @[expose] public noncomputable section
 
-open Complex Set
+open Complex Set MeasureTheory
 open scoped Real
 
 namespace DLMF.EllipticIntegrals
@@ -173,6 +174,51 @@ theorem incEllIntFk_eq_symEllIntRF {φ : ℝ} {k : ℂ} (hφ : 0 < φ) (hφ' : �
   intro c
   exact (incEllIntFk_ofReal_eq_integral φ k).trans (p19sR1_symEllIntRF_legendre hφ hφ' k).symm
 
+/-- Under the cosecant-square substitution, moving `c-k²` to the third argument
+of `R_D` gives the sine integral with the inverse cube of the Legendre square root. -/
+private lemma p19sR2_symEllIntRD_legendre_cube {φ : ℝ} {k : ℂ} (hφ : 0 < φ) (hφ' : φ ≤ π / 2)
+    (hk : 1 - k ^ 2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane) :
+    let c : ℂ := ((1 / Real.sin φ ^ 2 : ℝ) : ℂ)
+    symEllIntRD (c - 1) c (c - k ^ 2) =
+      3 * ∫ θ in (0 : ℝ)..φ, (Real.sin θ : ℂ) ^ 2 *
+        (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(3 / 2 : ℂ)) := by
+  dsimp only
+  have hc := p19sR1_csc_sq_sub_mem hφ hφ' hk
+  rw [symEllIntRD_eq_integral (ei19c_not_isNegReal_of_mem_slitPlane hc),
+    p19sR1_integral_Ioi_eq_Ioo hφ hφ', intervalIntegral.integral_of_le hφ.le,
+    integral_Ioc_eq_integral_Ioo, ← integral_const_mul, ← integral_const_mul]
+  refine setIntegral_congr_fun measurableSet_Ioo fun θ hθ => ?_
+  have hs : 0 < Real.sin θ := Real.sin_pos_of_pos_of_lt_pi hθ.1 (by linarith [hθ.2, Real.pi_pos])
+  have hcos : 0 < Real.cos θ := Real.cos_pos_of_mem_Ioo
+    ⟨by linarith [hθ.1, Real.pi_pos], by linarith [hθ.2]⟩
+  have hperm : ∀ x y z : ℂ, ∀ t : ℝ, symEllIntS x y z t = symEllIntS x z y t := by
+    intros; simp only [symEllIntS]; ring
+  rw [hperm, p19sR1_symEllIntS_subst hs hcos k]
+  have hsC : Complex.sin (θ : ℂ) ≠ 0 := by
+    rw [← ofReal_sin]; exact ofReal_ne_zero.mpr hs.ne'
+  have hcC : Complex.cos (θ : ℂ) ≠ 0 := by
+    rw [← ofReal_cos]; exact ofReal_ne_zero.mpr hcos.ne'
+  have hden : ((1 / Real.sin θ ^ 2 - 1 / Real.sin φ ^ 2 : ℝ) : ℂ) +
+      (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - k ^ 2) =
+      (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) / (Real.sin θ : ℂ) ^ 2 := by
+    push_cast; field_simp [hsC]; ring
+  rw [hden]
+  have hslit : 1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2 ∈ slitPlane := by
+    have h := legendrePathOK_ofReal_of_endpoint hφ hφ' hk (θ / φ) ⟨div_nonneg hθ.1.le hφ.le,
+      (div_le_one hφ).mpr hθ.2.le⟩
+    simpa only [div_mul_cancel₀ _ hφ.ne', ← ofReal_mul, ← ofReal_sin] using h
+  have hw0 := slitPlane_ne_zero hslit
+  rw [ei19c_cpow_neg_three_halves hw0, cpow_neg]
+  have hV := ei19c_cpow_half_sq (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2)
+  have hs0 : (Real.sin θ : ℂ) ≠ 0 := ofReal_ne_zero.mpr hs.ne'
+  have hcos0 : (Real.cos θ : ℂ) ≠ 0 := ofReal_ne_zero.mpr hcos.ne'
+  have hV0 : (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (1 / 2 : ℂ) ≠ 0 := by
+    intro hv; rw [hv, zero_mul] at hV; exact hw0 hV.symm
+  generalize hB : (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) = B at hw0 hV hV0 ⊢
+  generalize hVdef : B ^ (1 / 2 : ℂ) = V at hV hV0 ⊢
+  push_cast
+  field_simp [hsC, hcC, hV0, hw0]
+
 /-- DLMF 19.25.6: `∂F(φ, k)/∂k = (1/3) k R_D(c - 1, c, c - k²)`, `c = csc² φ`, for real
 `φ ∈ (0, π/2]` and `1 - k² sin² φ ∈ ℂ \ (-∞, 0]`, `k ≠ 0`... (the derivative is the complex
 derivative in `k`). -/
@@ -182,7 +228,27 @@ theorem hasDerivAt_incEllIntFk_symEllIntRD {φ : ℝ} {k : ℂ} (hφ : 0 < φ) (
     let c : ℂ := ((1 / Real.sin φ ^ 2 : ℝ) : ℂ)
     HasDerivAt (fun κ : ℂ => incEllIntFk φ κ)
       ((1 / 3) * k * symEllIntRD (c - 1) c (c - k ^ 2)) k := by
-  sorry
+  dsimp only
+  have hpath := legendrePathOK_ofReal_of_endpoint hφ hφ' hk
+  have h := p19lR1_hasDerivAt_path (by fun_prop : Continuous fun t : ℝ => Complex.sin (t * φ) ^ 2)
+    continuousOn_const (-(1 / 2) : ℂ) (w := fun _ => (φ : ℂ)) hpath
+  change HasDerivAt (fun κ : ℂ => incEllIntFk φ κ) _ k at h
+  have hpt (t : ℝ) : (φ : ℂ) * ((-(1 / 2) : ℂ) *
+      (1 - k ^ 2 * Complex.sin (t * φ) ^ 2) ^ ((-(1 / 2) : ℂ) - 1) * (-(2 * k * Complex.sin (t * φ) ^ 2))) =
+      k * ((φ : ℂ) * (Complex.sin (t * φ) ^ 2 * (1 - k ^ 2 * Complex.sin (t * φ) ^ 2) ^ (-(3 / 2 : ℂ)))) := by
+    rw [show (-(1 / 2) : ℂ) - 1 = -(3 / 2) by norm_num]; ring
+  simp only [hpt, intervalIntegral.integral_const_mul] at h
+  rw [p19sR2_symEllIntRD_legendre_cube hφ hφ' hk]
+  have he : (φ : ℂ) * ∫ t in (0 : ℝ)..1, Complex.sin (t * φ) ^ 2 *
+      (1 - k ^ 2 * Complex.sin (t * φ) ^ 2) ^ (-(3 / 2 : ℂ)) =
+      ∫ θ in (0 : ℝ)..φ, (Real.sin θ : ℂ) ^ 2 * (1 - k ^ 2 * (Real.sin θ : ℂ) ^ 2) ^ (-(3 / 2 : ℂ)) := by
+    simp only [ofReal_sin]
+    rw [← ei19a_segmentIntegral_ofReal (fun z : ℂ => Complex.sin z ^ 2 *
+      (1 - k ^ 2 * Complex.sin z ^ 2) ^ (-(3 / 2 : ℂ))) φ, ei19a_segmentIntegral,
+      intervalIntegral.integral_const_mul]
+  rw [he] at h
+  convert h using 1
+  ring
 
 /-- DLMF 19.25.7: `E(φ, k) = 2 R_G(c - 1, c - k², c) - (c - 1) R_F(c - 1, c - k², c)
 - √(c - 1) √(c - k²)/√c`, for real `φ ∈ (0, π/2]` and `1 - k² sin² φ ∈ ℂ \ (-∞, 0]`. -/
@@ -287,7 +353,22 @@ theorem hasDerivAt_incEllIntEk_symEllIntRD {φ : ℝ} {k : ℂ} (hφ : 0 < φ) (
     let c : ℂ := ((1 / Real.sin φ ^ 2 : ℝ) : ℂ)
     HasDerivAt (fun κ : ℂ => incEllIntEk φ κ)
       (-(1 / 3) * k * symEllIntRD (c - 1) (c - k ^ 2) c) k := by
-  sorry
+  have hpath := legendrePathOK_ofReal_of_endpoint hφ hφ' hk
+  have h := p19lR1_hasDerivAt_path (by fun_prop : Continuous fun t : ℝ => Complex.sin (t * φ) ^ 2)
+    continuousOn_const (1 / 2 : ℂ) (w := fun _ => (φ : ℂ)) hpath
+  change HasDerivAt (fun κ : ℂ => incEllIntEk φ κ) _ k at h
+  have hpt (t : ℝ) : (φ : ℂ) * ((1 / 2 : ℂ) *
+      (1 - k ^ 2 * Complex.sin (t * φ) ^ 2) ^ ((1 / 2 : ℂ) - 1) * (-(2 * k * Complex.sin (t * φ) ^ 2))) =
+      (-k) * ((φ : ℂ) * (Complex.sin (t * φ) ^ 2 * (1 - k ^ 2 * Complex.sin (t * φ) ^ 2) ^ (-(1 / 2 : ℂ)))) := by
+    rw [show (1 / 2 : ℂ) - 1 = -(1 / 2) by norm_num]; ring
+  simp only [hpt, intervalIntegral.integral_const_mul] at h
+  have he : incEllIntDk φ k = (φ : ℂ) * ∫ t in (0 : ℝ)..1, Complex.sin (t * φ) ^ 2 *
+      (1 - k ^ 2 * Complex.sin (t * φ) ^ 2) ^ (-(1 / 2 : ℂ)) := by
+    rw [incEllIntDk, ei19a_segmentIntegral, intervalIntegral.integral_const_mul]
+  rw [← he] at h
+  rw [p19sR1_incEllIntDk_eq hφ hφ' k] at h
+  convert h using 1
+  ring
 
 /-- DLMF 19.25.13: `D(φ, k) = (1/3) R_D(c - 1, c - k², c)`, for real `φ ∈ (0, π/2]` and
 `1 - k² sin² φ ∈ ℂ \ (-∞, 0]`. -/

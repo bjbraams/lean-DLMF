@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AlgebraicAnalytic.Transforms.Defs
+public import DLMF.AlgebraicAnalytic.Transforms.Basic
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import DLMFMathlib.Analysis.SpecialFunctions.ImproperIntegralsExtra
 public import DLMFMathlib.Analysis.Integral.LaplaceRay

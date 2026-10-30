@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AlgebraicAnalytic.Summability.Defs
+public import DLMF.AlgebraicAnalytic.Summability.Basic
 
 /-!
 # Summability of integrals and of Fourier integrals (DLMF §1.15(iv)–(v))

@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Struve.Basic
+public import DLMF.Struve.SeriesAndEquations
 public import DLMF.Bessel.Elementary
 
 /-!

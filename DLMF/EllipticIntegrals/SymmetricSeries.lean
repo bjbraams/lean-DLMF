@@ -41,6 +41,25 @@ def symEllIntT (N : ℕ) {n : ℕ} (b z : Fin n → ℂ) : ℂ :=
   ∑ m ∈ Finset.Nat.antidiagonalTuple n N,
     ∏ j, (ascPochhammer ℂ (m j)).eval (b j) / ((m j).factorial : ℂ) * z j ^ (m j)
 
+/-- The homogeneous polynomial `T_N` is Carlson's Pochhammer numerator divided by `N!`.
+This records the normalization connecting DLMF's generating series and integer R-values. -/
+theorem carlsonRPolynomialNumerator_eq_factorial_mul_symEllIntT {n : ℕ} (N : ℕ) (b z : Fin n → ℂ) :
+    Carlson.carlsonRPolynomialNumerator N b z = (N.factorial : ℂ) * symEllIntT N b z := by
+  rw [Carlson.carlsonRPolynomialNumerator_eq_sum_piAntidiag]
+  unfold Carlson.carlsonGeneratingCoeff symEllIntT
+  rw [Finset.mul_sum]
+  refine Finset.sum_congr ?_ fun m hm => ?_
+  · ext m; simp [Finset.mem_piAntidiag, Finset.Nat.mem_antidiagonalTuple]
+  have hsum : ∑ i, m i = N := Finset.Nat.mem_antidiagonalTuple.mp hm
+  have hspec := Nat.multinomial_spec Finset.univ m
+  rw [hsum] at hspec
+  have hspec' : (∏ i, ((m i).factorial : ℂ)) * (Nat.multinomial Finset.univ m : ℂ) =
+      (N.factorial : ℂ) := by exact_mod_cast hspec
+  have hF : (∏ i, ((m i).factorial : ℂ)) ≠ 0 :=
+    Finset.prod_ne_zero_iff.mpr fun i _ => by exact_mod_cast (m i).factorial_ne_zero
+  rw [Finset.prod_mul_distrib, Finset.prod_div_distrib, ← hspec']
+  field_simp
+
 /-- DLMF 19.19.4: the elementary symmetric function `E_s(𝐳)` (Mathlib's `Multiset.esymm`). -/
 def symEllIntE {n : ℕ} (s : ℕ) (z : Fin n → ℂ) : ℂ :=
   (Finset.univ.val.map z).esymm s
@@ -76,7 +95,7 @@ theorem symEllIntR_hasSum_T {n : ℕ} (a : ℂ) (b z : Fin n → ℂ) (hc : 0 < 
   convert H using 1
   funext N
   rw [Carlson.regCarlsonRPolynomial_eq_numerator_mul_one_div_Gamma,
-    Carlson.carlsonRPolynomialNumerator_eq_sum_piAntidiag]
+    carlsonRPolynomialNumerator_eq_factorial_mul_symEllIntT]
   have hcN : ∀ k : ℕ, c ≠ -k := fun k h => by
     have := congrArg Complex.re h
     simp at this
@@ -90,22 +109,8 @@ theorem symEllIntR_hasSum_T {n : ℕ} (a : ℂ) (b z : Fin n → ℂ) (hc : 0 < 
     rw [← Complex.Gamma_add_nat_div_Gamma_eq c hcN]; field_simp
   have hP : (ascPochhammer ℂ N).eval c ≠ 0 := by
     intro h; rw [h, mul_zero] at hG; exact hGN hG
-  have hNum : Carlson.carlsonGeneratingCoeff Finset.univ b (fun i => 1 - z i) N =
-      (N.factorial : ℂ) * symEllIntT N b (fun j => 1 - z j) := by
-    unfold Carlson.carlsonGeneratingCoeff symEllIntT
-    rw [Finset.mul_sum]
-    refine Finset.sum_congr ?_ fun m hm => ?_
-    · ext m; simp [Finset.mem_piAntidiag, Finset.Nat.mem_antidiagonalTuple]
-    have hsum : ∑ i, m i = N := Finset.Nat.mem_antidiagonalTuple.mp hm
-    have hspec := Nat.multinomial_spec Finset.univ m
-    rw [hsum] at hspec
-    have hspec' : (∏ i, ((m i).factorial : ℂ)) * (Nat.multinomial Finset.univ m : ℂ) =
-        (N.factorial : ℂ) := by exact_mod_cast hspec
-    have hF : (∏ i, ((m i).factorial : ℂ)) ≠ 0 :=
-      Finset.prod_ne_zero_iff.mpr fun i _ => by exact_mod_cast (m i).factorial_ne_zero
-    rw [Finset.prod_mul_distrib, Finset.prod_div_distrib, ← hspec']
-    field_simp
-  rw [hNum, hG]
+
+  rw [hG]
   have hNf : (N.factorial : ℂ) ≠ 0 := by exact_mod_cast N.factorial_ne_zero
   field_simp
 

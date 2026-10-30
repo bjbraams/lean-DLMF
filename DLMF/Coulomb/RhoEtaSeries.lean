@@ -10,7 +10,7 @@ public import DLMF.Core.Framework
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Digamma
 public import Mathlib.Analysis.Calculus.IteratedDeriv.Analytic
 public import DLMF.Confluent.CoulombIrregular
-public import DLMF.Coulomb.Defs
+public import DLMF.Coulomb.Basic.AuxiliaryData
 
 /-!
 # Coulomb functions: series expansions (DLMF §§33.6, 33.9)

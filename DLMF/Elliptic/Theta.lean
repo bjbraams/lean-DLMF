@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Elliptic.Theta.Defs
+public import DLMF.Elliptic.Basic.Theta
 
 /-!
 # Jacobi's theta functions in DLMF normalization (Temme §12.3.2, DLMF §20.2)

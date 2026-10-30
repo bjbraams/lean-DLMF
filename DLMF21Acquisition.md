@@ -1,5 +1,9 @@
 # DLMF Chapter 21 acquisition: Multidimensional Theta Functions
 
+> Source paths and current layout notes were refreshed on 2026-10-30; generated per-entry
+> statuses follow the compiled ledger refresh. Dated acquisition and proof counts
+> describe their original batches.
+
 This acquisition covers mathematical definitions, numbered formulas and analytical
 assertions in prose from [DLMF Chapter 21](https://dlmf.nist.gov/21), version 1.2.8,
 checked on 2026-10-25. The scope is §§21.1–21.6. Graphics (§21.4 figures), the purely
@@ -11,15 +15,16 @@ Of the 38 numbered equations in §§21.2–21.6, 37 are in scope and all 37 are 
 
 **Status after proof round 1 (2026-10-25).** No Chapter 21 admission was proved in this round. The 65 declarations tagged with Chapter 21 IDs are 15 definitions, 40 proved theorems and 10 theorems that still depend on admissions (10 direct admissions in DLMF/RiemannTheta; the counts below record the acquisition and earlier states). The per-line statuses in this ledger are regenerated from the compiled dump. See REVIEW.md, "Proof round 1 for Chapters 19–23 (2026-10-25)".
 
-The entry point is [DLMF/RiemannTheta.lean](DLMF/RiemannTheta.lean), a new area
-with five modules: [Basic](DLMF/RiemannTheta/Basic.lean) (Siegel space, θ, θ with
-characteristics, convergence and analyticity, reductions to Jacobi theta),
-[Symmetry](DLMF/RiemannTheta/Symmetry.lean) (§21.3),
-[Modular](DLMF/RiemannTheta/Modular.lean) (§21.5),
-[Products](DLMF/RiemannTheta/Products.lean) (§21.6) and
-[MathlibCoverage](DLMF/RiemannTheta/MathlibCoverage.lean) with 13 `dlmf_upstream`
-pointers. Neither Mathlib nor TauCeti has the Siegel upper half-space or a
-multivariable theta function; their genus-one theta `jacobiTheta₂` is the g = 1 case.
+**Current layout (2026-10-30).**
+The entry point is [DLMF/RiemannTheta.lean](DLMF/RiemannTheta.lean).
+`Basic` exports `Basic.Definitions` for Siegel space, theta series, matrices and
+characteristics. `Convergence`, `Scaled` and `Characteristics` contain the analytical,
+scaled-function and characteristic/classical-theta developments. The existing `Symmetry`,
+`Modular` and `Products` theorem modules cover §§21.3, 21.5 and 21.6;
+[MathlibCoverage](DLMF/RiemannTheta/MathlibCoverage.lean) records the upstream pointers.
+Neither Mathlib nor TauCeti has the multivariable theta construction; the genus-one
+`jacobiTheta₂` is the g = 1 case.
+
 The acquisition has **10 direct admissions** (Basic 1, Symmetry 1, Modular 6,
 Products 2). Proved results include absolute and locally uniform convergence,
 analyticity in each variable, boundedness of the scaled function, all of §21.3, the
@@ -72,102 +77,102 @@ the addition formula 21.6.E8 and the four-product formulas 21.6.E6 and 21.6.E7.
 
 ## [§21.1 Special Notation](https://dlmf.nist.gov/21.1)
 
-- [21.1](https://dlmf.nist.gov/21.1): [`DLMF.RiemannTheta.siegelUpperHalfSpace`](DLMF/RiemannTheta/Basic.lean#L49) (definition). Riemann matrix: complex symmetric with strictly positive definite imaginary part.
+- [21.1](https://dlmf.nist.gov/21.1): [`DLMF.RiemannTheta.siegelUpperHalfSpace`](DLMF/RiemannTheta/Basic/Definitions.lean#L29) (definition). Riemann matrix: complex symmetric with strictly positive definite imaginary part.
 - [21.1](https://dlmf.nist.gov/21.1): [`DLMF.RiemannTheta.symplecticJ`](DLMF/RiemannTheta/Modular.lean#L56) (definition). J_{2g}.
-- [21.1](https://dlmf.nist.gov/21.1): [`DLMF.RiemannTheta.riemannThetaBig`](DLMF/RiemannTheta/Basic.lean#L85) (definition). Θ(φ|B) = θ(φ/(2πi)|B/(2πi)); the series form is riemannThetaBig_eq_tsum.
-- [21.1](https://dlmf.nist.gov/21.1): [`DLMF.RiemannTheta.riemannThetaBig_eq_tsum`](DLMF/RiemannTheta/Basic.lean#L662) (proved). Series form of Θ(φ|B).
+- [21.1](https://dlmf.nist.gov/21.1): [`DLMF.RiemannTheta.riemannThetaBig`](DLMF/RiemannTheta/Basic/Definitions.lean#L65) (definition). Θ(φ|B) = θ(φ/(2πi)|B/(2πi)); the series form is riemannThetaBig_eq_tsum.
+- [21.1](https://dlmf.nist.gov/21.1): [`DLMF.RiemannTheta.riemannThetaBig_eq_tsum`](DLMF/RiemannTheta/Scaled.lean#L309) (proved). Series form of Θ(φ|B).
 
 ## [§21.2 Definitions](https://dlmf.nist.gov/21.2)
 
-- [21.2.E1](https://dlmf.nist.gov/21.2.E1): [`DLMF.RiemannTheta.riemannTheta`](DLMF/RiemannTheta/Basic.lean#L60) (definition); [`DLMF.RiemannTheta.hasSum_riemannTheta`](DLMF/RiemannTheta/Basic.lean#L295) (proved); Mathlib: [`jacobiTheta₂`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#jacobiTheta₂).
-- [21.2.E1](https://dlmf.nist.gov/21.2.E1): [`DLMF.RiemannTheta.hasSum_riemannTheta`](DLMF/RiemannTheta/Basic.lean#L295) (proved); [`DLMF.RiemannTheta.riemannTheta`](DLMF/RiemannTheta/Basic.lean#L60) (definition); Mathlib: [`jacobiTheta₂`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#jacobiTheta₂).
-- [21.2.E2](https://dlmf.nist.gov/21.2.E2): [`DLMF.RiemannTheta.riemannThetaScaled`](DLMF/RiemannTheta/Basic.lean#L78) (definition).
-- [21.2.E3](https://dlmf.nist.gov/21.2.E3): [`DLMF.RiemannTheta.riemannMatrixExample`](DLMF/RiemannTheta/Basic.lean#L681) (definition). The example Riemann matrix; [`DLMF.RiemannTheta.riemannMatrixExample_mem`](DLMF/RiemannTheta/Basic.lean#L694) (proved); [`DLMF.RiemannTheta.riemannTheta_example`](DLMF/RiemannTheta/Basic.lean#L714) (proved).
-- [21.2.E3](https://dlmf.nist.gov/21.2.E3): [`DLMF.RiemannTheta.riemannMatrixExample_mem`](DLMF/RiemannTheta/Basic.lean#L694) (proved). The example matrix lies in the Siegel upper half-space; [`DLMF.RiemannTheta.riemannTheta_example`](DLMF/RiemannTheta/Basic.lean#L714) (proved).
-- [21.2.E3](https://dlmf.nist.gov/21.2.E3): [`DLMF.RiemannTheta.riemannTheta_example`](DLMF/RiemannTheta/Basic.lean#L714) (proved); [`DLMF.RiemannTheta.riemannMatrixExample`](DLMF/RiemannTheta/Basic.lean#L681) (definition); [`DLMF.RiemannTheta.riemannMatrixExample_mem`](DLMF/RiemannTheta/Basic.lean#L694) (proved).
-- [21.2.E4](https://dlmf.nist.gov/21.2.E4): [`DLMF.RiemannTheta.riemannThetaScaled_example`](DLMF/RiemannTheta/Basic.lean#L728) (proved).
-- [21.2.E5](https://dlmf.nist.gov/21.2.E5): [`DLMF.RiemannTheta.riemannThetaChar`](DLMF/RiemannTheta/Basic.lean#L73) (definition).
-- [21.2.E6](https://dlmf.nist.gov/21.2.E6): [`DLMF.RiemannTheta.riemannThetaChar_eq`](DLMF/RiemannTheta/Basic.lean#L804) (proved). **Corrected** (hypothesis): needs Ω symmetric (Ωᵀ = Ω), used to swap n·Ω·α = α·Ω·n.
-- [21.2.E7](https://dlmf.nist.gov/21.2.E7): [`DLMF.RiemannTheta.riemannThetaChar_zero`](DLMF/RiemannTheta/Basic.lean#L816) (proved).
-- [21.2.E8](https://dlmf.nist.gov/21.2.E8): [`DLMF.RiemannTheta.riemannTheta_fin_one`](DLMF/RiemannTheta/Basic.lean#L883) (proved).
-- [21.2.E9](https://dlmf.nist.gov/21.2.E9): [`DLMF.RiemannTheta.jacobiThetaOneTau_eq_riemannThetaChar`](DLMF/RiemannTheta/Basic.lean#L907) (proved).
-- [21.2.E10](https://dlmf.nist.gov/21.2.E10): [`DLMF.RiemannTheta.jacobiThetaTwoTau_eq_riemannThetaChar`](DLMF/RiemannTheta/Basic.lean#L919) (proved).
-- [21.2.E11](https://dlmf.nist.gov/21.2.E11): [`DLMF.RiemannTheta.jacobiThetaThreeTau_eq_riemannThetaChar`](DLMF/RiemannTheta/Basic.lean#L931) (proved).
-- [21.2.E12](https://dlmf.nist.gov/21.2.E12): [`DLMF.RiemannTheta.jacobiThetaFourTau_eq_riemannThetaChar`](DLMF/RiemannTheta/Basic.lean#L938) (proved).
-- [21.2.i](https://dlmf.nist.gov/21.2#i): [`DLMF.RiemannTheta.summable_norm_riemannThetaTerm`](DLMF/RiemannTheta/Basic.lean#L288) (proved). Absolute convergence of the g-tuple Fourier series.
-- [21.2.i](https://dlmf.nist.gov/21.2#i): [`DLMF.RiemannTheta.tendstoLocallyUniformlyOn_riemannTheta`](DLMF/RiemannTheta/Basic.lean#L301) (proved). Stronger than DLMF: locally uniform where the imaginary quadratic form is positive.
-- [21.2.i](https://dlmf.nist.gov/21.2#i): [`DLMF.RiemannTheta.tendstoUniformlyOn_riemannTheta`](DLMF/RiemannTheta/Basic.lean#L313) (proved). Uniform convergence on compact sets of the z and Ω spaces.
-- [21.2.i](https://dlmf.nist.gov/21.2#i): [`DLMF.RiemannTheta.continuousOn_riemannTheta`](DLMF/RiemannTheta/Basic.lean#L328) (proved). Continuity of the locally uniform limit.
-- [21.2.i](https://dlmf.nist.gov/21.2#i): [`DLMF.RiemannTheta.differentiableAt_riemannTheta_update`](DLMF/RiemannTheta/Basic.lean#L349) (proved). Analytic in each element of z.
-- [21.2.i](https://dlmf.nist.gov/21.2#i): [`DLMF.RiemannTheta.differentiableAt_riemannTheta_entry`](DLMF/RiemannTheta/Basic.lean#L366) (proved). Analytic in each element of Ω.
-- [21.2.i](https://dlmf.nist.gov/21.2#i): [`DLMF.RiemannTheta.riemannThetaScaled_bounded`](DLMF/RiemannTheta/Basic.lean#L453) (proved). The scaled theta function is bounded in z.
-- [21.2.i](https://dlmf.nist.gov/21.2#i): [`DLMF.RiemannTheta.not_differentiable_riemannThetaScaled`](DLMF/RiemannTheta/Basic.lean#L585) (proved). The scaled theta function is nonanalytic in z.
-- [21.2.ii](https://dlmf.nist.gov/21.2#ii): [`DLMF.RiemannTheta.summable_norm_riemannThetaCharTerm`](DLMF/RiemannTheta/Basic.lean#L824) (proved). Absolute convergence of the series with characteristics.
-- [21.2.ii](https://dlmf.nist.gov/21.2#ii): [`DLMF.RiemannTheta.halfPeriodCharacteristics`](DLMF/RiemannTheta/Basic.lean#L832) (definition). Half-period characteristics.
-- [21.2.ii](https://dlmf.nist.gov/21.2#ii): [`DLMF.RiemannTheta.ncard_halfPeriodCharacteristics`](DLMF/RiemannTheta/Basic.lean#L837) (proved). There are 2^(2g) half-period characteristics.
+- [21.2.E1](https://dlmf.nist.gov/21.2.E1): [`DLMF.RiemannTheta.riemannTheta`](DLMF/RiemannTheta/Basic/Definitions.lean#L40) (definition); [`DLMF.RiemannTheta.hasSum_riemannTheta`](DLMF/RiemannTheta/Convergence.lean#L245) (proved); Mathlib: [`jacobiTheta₂`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#jacobiTheta₂).
+- [21.2.E1](https://dlmf.nist.gov/21.2.E1): [`DLMF.RiemannTheta.hasSum_riemannTheta`](DLMF/RiemannTheta/Convergence.lean#L245) (proved); [`DLMF.RiemannTheta.riemannTheta`](DLMF/RiemannTheta/Basic/Definitions.lean#L40) (definition); Mathlib: [`jacobiTheta₂`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#jacobiTheta₂).
+- [21.2.E2](https://dlmf.nist.gov/21.2.E2): [`DLMF.RiemannTheta.riemannThetaScaled`](DLMF/RiemannTheta/Basic/Definitions.lean#L58) (definition).
+- [21.2.E3](https://dlmf.nist.gov/21.2.E3): [`DLMF.RiemannTheta.riemannMatrixExample`](DLMF/RiemannTheta/Basic/Definitions.lean#L75) (definition). The example Riemann matrix; [`DLMF.RiemannTheta.riemannMatrixExample_mem`](DLMF/RiemannTheta/Characteristics.lean#L36) (proved); [`DLMF.RiemannTheta.riemannTheta_example`](DLMF/RiemannTheta/Characteristics.lean#L59) (proved).
+- [21.2.E3](https://dlmf.nist.gov/21.2.E3): [`DLMF.RiemannTheta.riemannMatrixExample_mem`](DLMF/RiemannTheta/Characteristics.lean#L36) (proved). The example matrix lies in the Siegel upper half-space; [`DLMF.RiemannTheta.riemannTheta_example`](DLMF/RiemannTheta/Characteristics.lean#L59) (proved).
+- [21.2.E3](https://dlmf.nist.gov/21.2.E3): [`DLMF.RiemannTheta.riemannTheta_example`](DLMF/RiemannTheta/Characteristics.lean#L59) (proved); [`DLMF.RiemannTheta.riemannMatrixExample`](DLMF/RiemannTheta/Basic/Definitions.lean#L75) (definition); [`DLMF.RiemannTheta.riemannMatrixExample_mem`](DLMF/RiemannTheta/Characteristics.lean#L36) (proved).
+- [21.2.E4](https://dlmf.nist.gov/21.2.E4): [`DLMF.RiemannTheta.riemannThetaScaled_example`](DLMF/RiemannTheta/Characteristics.lean#L73) (proved).
+- [21.2.E5](https://dlmf.nist.gov/21.2.E5): [`DLMF.RiemannTheta.riemannThetaChar`](DLMF/RiemannTheta/Basic/Definitions.lean#L53) (definition).
+- [21.2.E6](https://dlmf.nist.gov/21.2.E6): [`DLMF.RiemannTheta.riemannThetaChar_eq`](DLMF/RiemannTheta/Characteristics.lean#L143) (proved). **Corrected** (hypothesis): needs Ω symmetric (Ωᵀ = Ω), used to swap n·Ω·α = α·Ω·n.
+- [21.2.E7](https://dlmf.nist.gov/21.2.E7): [`DLMF.RiemannTheta.riemannThetaChar_zero`](DLMF/RiemannTheta/Characteristics.lean#L155) (proved).
+- [21.2.E8](https://dlmf.nist.gov/21.2.E8): [`DLMF.RiemannTheta.riemannTheta_fin_one`](DLMF/RiemannTheta/Characteristics.lean#L219) (proved).
+- [21.2.E9](https://dlmf.nist.gov/21.2.E9): [`DLMF.RiemannTheta.jacobiThetaOneTau_eq_riemannThetaChar`](DLMF/RiemannTheta/Characteristics.lean#L243) (proved).
+- [21.2.E10](https://dlmf.nist.gov/21.2.E10): [`DLMF.RiemannTheta.jacobiThetaTwoTau_eq_riemannThetaChar`](DLMF/RiemannTheta/Characteristics.lean#L255) (proved).
+- [21.2.E11](https://dlmf.nist.gov/21.2.E11): [`DLMF.RiemannTheta.jacobiThetaThreeTau_eq_riemannThetaChar`](DLMF/RiemannTheta/Characteristics.lean#L267) (proved).
+- [21.2.E12](https://dlmf.nist.gov/21.2.E12): [`DLMF.RiemannTheta.jacobiThetaFourTau_eq_riemannThetaChar`](DLMF/RiemannTheta/Characteristics.lean#L274) (proved).
+- [21.2.i](https://dlmf.nist.gov/21.2#i): [`DLMF.RiemannTheta.summable_norm_riemannThetaTerm`](DLMF/RiemannTheta/Convergence.lean#L238) (proved). Absolute convergence of the g-tuple Fourier series.
+- [21.2.i](https://dlmf.nist.gov/21.2#i): [`DLMF.RiemannTheta.tendstoLocallyUniformlyOn_riemannTheta`](DLMF/RiemannTheta/Convergence.lean#L251) (proved). Stronger than DLMF: locally uniform where the imaginary quadratic form is positive.
+- [21.2.i](https://dlmf.nist.gov/21.2#i): [`DLMF.RiemannTheta.tendstoUniformlyOn_riemannTheta`](DLMF/RiemannTheta/Convergence.lean#L263) (proved). Uniform convergence on compact sets of the z and Ω spaces.
+- [21.2.i](https://dlmf.nist.gov/21.2#i): [`DLMF.RiemannTheta.continuousOn_riemannTheta`](DLMF/RiemannTheta/Convergence.lean#L280) (proved). Continuity of the locally uniform limit.
+- [21.2.i](https://dlmf.nist.gov/21.2#i): [`DLMF.RiemannTheta.differentiableAt_riemannTheta_update`](DLMF/RiemannTheta/Convergence.lean#L303) (proved). Analytic in each element of z.
+- [21.2.i](https://dlmf.nist.gov/21.2#i): [`DLMF.RiemannTheta.differentiableAt_riemannTheta_entry`](DLMF/RiemannTheta/Convergence.lean#L320) (proved). Analytic in each element of Ω.
+- [21.2.i](https://dlmf.nist.gov/21.2#i): [`DLMF.RiemannTheta.riemannThetaScaled_bounded`](DLMF/RiemannTheta/Scaled.lean#L100) (proved). The scaled theta function is bounded in z.
+- [21.2.i](https://dlmf.nist.gov/21.2#i): [`DLMF.RiemannTheta.not_differentiable_riemannThetaScaled`](DLMF/RiemannTheta/Scaled.lean#L232) (proved). The scaled theta function is nonanalytic in z.
+- [21.2.ii](https://dlmf.nist.gov/21.2#ii): [`DLMF.RiemannTheta.summable_norm_riemannThetaCharTerm`](DLMF/RiemannTheta/Characteristics.lean#L163) (proved). Absolute convergence of the series with characteristics.
+- [21.2.ii](https://dlmf.nist.gov/21.2#ii): [`DLMF.RiemannTheta.halfPeriodCharacteristics`](DLMF/RiemannTheta/Basic/Definitions.lean#L86) (definition). Half-period characteristics.
+- [21.2.ii](https://dlmf.nist.gov/21.2#ii): [`DLMF.RiemannTheta.ncard_halfPeriodCharacteristics`](DLMF/RiemannTheta/Characteristics.lean#L171) (proved). There are 2^(2g) half-period characteristics.
 
 ## [§21.3 Symmetry Properties and Quasi-Periodicity](https://dlmf.nist.gov/21.3)
 
-- [21.3.E1](https://dlmf.nist.gov/21.3.E1): [`DLMF.RiemannTheta.riemannTheta_neg`](DLMF/RiemannTheta/Symmetry.lean#L51) (proved); Mathlib: [`jacobiTheta₂_neg_left`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#jacobiTheta₂_neg_left).
-- [21.3.E2](https://dlmf.nist.gov/21.3.E2): [`DLMF.RiemannTheta.riemannTheta_add_int`](DLMF/RiemannTheta/Symmetry.lean#L60) (proved); Mathlib: [`jacobiTheta₂_add_left`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#jacobiTheta₂_add_left).
-- [21.3.E3](https://dlmf.nist.gov/21.3.E3): [`DLMF.RiemannTheta.riemannTheta_add_lattice`](DLMF/RiemannTheta/Symmetry.lean#L71) (proved); Mathlib: [`jacobiTheta₂_add_left'`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#jacobiTheta₂_add_left').
-- [21.3.E4](https://dlmf.nist.gov/21.3.E4): [`DLMF.RiemannTheta.riemannThetaChar_add_int`](DLMF/RiemannTheta/Symmetry.lean#L119) (proved).
-- [21.3.E5](https://dlmf.nist.gov/21.3.E5): [`DLMF.RiemannTheta.riemannThetaChar_add_lattice`](DLMF/RiemannTheta/Symmetry.lean#L146) (proved).
-- [21.3.E6](https://dlmf.nist.gov/21.3.E6): [`DLMF.RiemannTheta.riemannThetaChar_neg_half`](DLMF/RiemannTheta/Symmetry.lean#L186) (proved). Stronger than DLMF: all integer a, b with α = a/2, β = b/2.
-- [21.3.i](https://dlmf.nist.gov/21.3#i): [`DLMF.RiemannTheta.riemannThetaPeriodLattice`](DLMF/RiemannTheta/Symmetry.lean#L100) (definition). The period lattice of the Riemann theta function.
-- [21.3.i](https://dlmf.nist.gov/21.3#i): [`DLMF.RiemannTheta.eq_const_mul_riemannTheta_of_quasiPeriodic`](DLMF/RiemannTheta/Symmetry.lean#L106) (admitted). Quasi-periodicity determines θ up to a constant factor.
+- [21.3.E1](https://dlmf.nist.gov/21.3.E1): [`DLMF.RiemannTheta.riemannTheta_neg`](DLMF/RiemannTheta/Symmetry.lean#L58) (proved); Mathlib: [`jacobiTheta₂_neg_left`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#jacobiTheta₂_neg_left).
+- [21.3.E2](https://dlmf.nist.gov/21.3.E2): [`DLMF.RiemannTheta.riemannTheta_add_int`](DLMF/RiemannTheta/Symmetry.lean#L67) (proved); Mathlib: [`jacobiTheta₂_add_left`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#jacobiTheta₂_add_left).
+- [21.3.E3](https://dlmf.nist.gov/21.3.E3): [`DLMF.RiemannTheta.riemannTheta_add_lattice`](DLMF/RiemannTheta/Symmetry.lean#L78) (proved); Mathlib: [`jacobiTheta₂_add_left'`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#jacobiTheta₂_add_left').
+- [21.3.E4](https://dlmf.nist.gov/21.3.E4): [`DLMF.RiemannTheta.riemannThetaChar_add_int`](DLMF/RiemannTheta/Symmetry.lean#L126) (proved).
+- [21.3.E5](https://dlmf.nist.gov/21.3.E5): [`DLMF.RiemannTheta.riemannThetaChar_add_lattice`](DLMF/RiemannTheta/Symmetry.lean#L153) (proved).
+- [21.3.E6](https://dlmf.nist.gov/21.3.E6): [`DLMF.RiemannTheta.riemannThetaChar_neg_half`](DLMF/RiemannTheta/Symmetry.lean#L193) (proved). Stronger than DLMF: all integer a, b with α = a/2, β = b/2.
+- [21.3.i](https://dlmf.nist.gov/21.3#i): [`DLMF.RiemannTheta.riemannThetaPeriodLattice`](DLMF/RiemannTheta/Symmetry.lean#L107) (definition). The period lattice of the Riemann theta function.
+- [21.3.i](https://dlmf.nist.gov/21.3#i): [`DLMF.RiemannTheta.eq_const_mul_riemannTheta_of_quasiPeriodic`](DLMF/RiemannTheta/Symmetry.lean#L113) (admitted). Quasi-periodicity determines θ up to a constant factor.
 
 ## [§21.4 Graphics](https://dlmf.nist.gov/21.4)
 
 - [21.4.E1](https://dlmf.nist.gov/21.4.E1): excluded: numerical (decimal entries of a period matrix used for the plots).
-- [21.4.E2](https://dlmf.nist.gov/21.4.E2): [`DLMF.RiemannTheta.riemannMatrixExample_eq_omegaOne`](DLMF/RiemannTheta/Basic.lean#L685) (proved).
-- [21.4.E3](https://dlmf.nist.gov/21.4.E3): [`DLMF.RiemannTheta.riemannMatrixOmegaTwo`](DLMF/RiemannTheta/Basic.lean#L750) (definition); [`DLMF.RiemannTheta.riemannMatrixOmegaTwo_mem`](DLMF/RiemannTheta/Basic.lean#L757) (proved).
-- [21.4.E3](https://dlmf.nist.gov/21.4.E3): [`DLMF.RiemannTheta.riemannMatrixOmegaTwo_mem`](DLMF/RiemannTheta/Basic.lean#L757) (proved). Ω₂ lies in the Siegel upper half-space.
+- [21.4.E2](https://dlmf.nist.gov/21.4.E2): [`DLMF.RiemannTheta.riemannMatrixExample_eq_omegaOne`](DLMF/RiemannTheta/Characteristics.lean#L25) (proved).
+- [21.4.E3](https://dlmf.nist.gov/21.4.E3): [`DLMF.RiemannTheta.riemannMatrixOmegaTwo`](DLMF/RiemannTheta/Basic/Definitions.lean#L79) (definition); [`DLMF.RiemannTheta.riemannMatrixOmegaTwo_mem`](DLMF/RiemannTheta/Characteristics.lean#L95) (proved).
+- [21.4.E3](https://dlmf.nist.gov/21.4.E3): [`DLMF.RiemannTheta.riemannMatrixOmegaTwo_mem`](DLMF/RiemannTheta/Characteristics.lean#L95) (proved). Ω₂ lies in the Siegel upper half-space.
 
 ## [§21.5 Modular Transformations](https://dlmf.nist.gov/21.5)
 
 - [21.5.E1](https://dlmf.nist.gov/21.5.E1): [`DLMF.RiemannTheta.IsSymplecticBlocks`](DLMF/RiemannTheta/Modular.lean#L67) (definition).
-- [21.5.E2](https://dlmf.nist.gov/21.5.E2): [`DLMF.RiemannTheta.IsSymplectic`](DLMF/RiemannTheta/Modular.lean#L62) (definition); [`DLMF.RiemannTheta.isSymplectic_iff_mem_symplecticGroup`](DLMF/RiemannTheta/Modular.lean#L77) (proved); Mathlib: [`Matrix.symplecticGroup`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/LinearAlgebra/SymplecticGroup.html#Matrix.symplecticGroup).
-- [21.5.E2](https://dlmf.nist.gov/21.5.E2): [`DLMF.RiemannTheta.isSymplectic_iff_mem_symplecticGroup`](DLMF/RiemannTheta/Modular.lean#L77) (proved). Bridge to Matrix.symplecticGroup; [`DLMF.RiemannTheta.IsSymplectic`](DLMF/RiemannTheta/Modular.lean#L62) (definition).
-- [21.5.E3](https://dlmf.nist.gov/21.5.E3): [`DLMF.RiemannTheta.det_eq_one_of_isSymplectic`](DLMF/RiemannTheta/Modular.lean#L85) (proved); Mathlib: [`SymplecticGroup.det_eq_one`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/LinearAlgebra/SymplecticGroup.html#SymplecticGroup.det_eq_one).
+- [21.5.E2](https://dlmf.nist.gov/21.5.E2): [`DLMF.RiemannTheta.IsSymplectic`](DLMF/RiemannTheta/Modular.lean#L62) (definition); [`DLMF.RiemannTheta.isSymplectic_iff_mem_symplecticGroup`](DLMF/RiemannTheta/Modular.lean#L78) (proved); Mathlib: [`Matrix.symplecticGroup`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/LinearAlgebra/SymplecticGroup.html#Matrix.symplecticGroup).
+- [21.5.E2](https://dlmf.nist.gov/21.5.E2): [`DLMF.RiemannTheta.isSymplectic_iff_mem_symplecticGroup`](DLMF/RiemannTheta/Modular.lean#L78) (proved). Bridge to Matrix.symplecticGroup; [`DLMF.RiemannTheta.IsSymplectic`](DLMF/RiemannTheta/Modular.lean#L62) (definition).
+- [21.5.E3](https://dlmf.nist.gov/21.5.E3): [`DLMF.RiemannTheta.det_eq_one_of_isSymplectic`](DLMF/RiemannTheta/Modular.lean#L86) (proved); Mathlib: [`SymplecticGroup.det_eq_one`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/LinearAlgebra/SymplecticGroup.html#SymplecticGroup.det_eq_one).
 - [21.5.E4](https://dlmf.nist.gov/21.5.E4): [`DLMF.RiemannTheta.riemannTheta_modular`](DLMF/RiemannTheta/Modular.lean#L331) (admitted). **Corrected**: false for general symplectic Γ (z-dependent ratio for g = 2); requires the theta-group condition (even diag(CDᵀ) and diag(ABᵀ)) and a continuous square-root branch.
 - [21.5.E5](https://dlmf.nist.gov/21.5.E5): [`DLMF.RiemannTheta.riemannTheta_unimodular`](DLMF/RiemannTheta/Modular.lean#L353) (proved). **Corrected** (hypothesis): A ∈ GL_g(ℤ) (invertible over ℤ), not only det A ≠ 0.
-- [21.5.E6](https://dlmf.nist.gov/21.5.E6): [`DLMF.RiemannTheta.riemannTheta_add_symm_int_even`](DLMF/RiemannTheta/Modular.lean#L447) (proved); Mathlib: [`jacobiTheta₂_add_right`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#jacobiTheta₂_add_right).
-- [21.5.E7](https://dlmf.nist.gov/21.5.E7): [`DLMF.RiemannTheta.riemannTheta_add_symm_int`](DLMF/RiemannTheta/Modular.lean#L422) (proved).
-- [21.5.E8](https://dlmf.nist.gov/21.5.E8): [`DLMF.RiemannTheta.riemannTheta_inversion`](DLMF/RiemannTheta/Modular.lean#L462) (admitted). **Corrected**: the printed principal root of det(−iΩ) is wrong for g ≥ 3 (Ω = τI₃, τ = −1.1√3 + i gives minus it); continuous square root with value 1 at Ω = iI; [`DLMF.RiemannTheta.riemannTheta_inversion_fin_one`](DLMF/RiemannTheta/Modular.lean#L497) (proved); [`DLMF.RiemannTheta.riemannTheta_inversion_principal`](DLMF/RiemannTheta/Modular.lean#L476) (admitted); Mathlib: [`jacobiTheta₂_functional_equation`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#jacobiTheta₂_functional_equation).
-- [21.5.E8](https://dlmf.nist.gov/21.5.E8): [`DLMF.RiemannTheta.riemannTheta_inversion_principal`](DLMF/RiemannTheta/Modular.lean#L476) (admitted). **Corrected** (restricted): principal square root valid only for g ≤ 2 (false for g ≥ 3); [`DLMF.RiemannTheta.riemannTheta_inversion_fin_one`](DLMF/RiemannTheta/Modular.lean#L497) (proved); Mathlib: [`jacobiTheta₂_functional_equation`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#jacobiTheta₂_functional_equation).
-- [21.5.E8](https://dlmf.nist.gov/21.5.E8): [`DLMF.RiemannTheta.riemannTheta_inversion_fin_one`](DLMF/RiemannTheta/Modular.lean#L497) (proved). g = 1, principal square root; [`DLMF.RiemannTheta.riemannTheta_inversion_principal`](DLMF/RiemannTheta/Modular.lean#L476) (admitted); Mathlib: [`jacobiTheta₂_functional_equation`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#jacobiTheta₂_functional_equation).
-- [21.5.E9](https://dlmf.nist.gov/21.5.E9): [`DLMF.RiemannTheta.riemannThetaChar_modular`](DLMF/RiemannTheta/Modular.lean#L528) (admitted). Continuous square-root branch; κ independent of z and Ω.
+- [21.5.E6](https://dlmf.nist.gov/21.5.E6): [`DLMF.RiemannTheta.riemannTheta_add_symm_int_even`](DLMF/RiemannTheta/Modular.lean#L449) (proved); Mathlib: [`jacobiTheta₂_add_right`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#jacobiTheta₂_add_right).
+- [21.5.E7](https://dlmf.nist.gov/21.5.E7): [`DLMF.RiemannTheta.riemannTheta_add_symm_int`](DLMF/RiemannTheta/Modular.lean#L424) (proved).
+- [21.5.E8](https://dlmf.nist.gov/21.5.E8): [`DLMF.RiemannTheta.riemannTheta_inversion`](DLMF/RiemannTheta/Modular.lean#L464) (admitted). **Corrected**: the printed principal root of det(−iΩ) is wrong for g ≥ 3 (Ω = τI₃, τ = −1.1√3 + i gives minus it); continuous square root with value 1 at Ω = iI; [`DLMF.RiemannTheta.riemannTheta_inversion_fin_one`](DLMF/RiemannTheta/Modular.lean#L503) (proved); [`DLMF.RiemannTheta.riemannTheta_inversion_principal`](DLMF/RiemannTheta/Modular.lean#L478) (admitted); Mathlib: [`jacobiTheta₂_functional_equation`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#jacobiTheta₂_functional_equation).
+- [21.5.E8](https://dlmf.nist.gov/21.5.E8): [`DLMF.RiemannTheta.riemannTheta_inversion_principal`](DLMF/RiemannTheta/Modular.lean#L478) (admitted). **Corrected** (restricted): principal square root valid only for g ≤ 2 (false for g ≥ 3); [`DLMF.RiemannTheta.riemannTheta_inversion_fin_one`](DLMF/RiemannTheta/Modular.lean#L503) (proved); Mathlib: [`jacobiTheta₂_functional_equation`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#jacobiTheta₂_functional_equation).
+- [21.5.E8](https://dlmf.nist.gov/21.5.E8): [`DLMF.RiemannTheta.riemannTheta_inversion_fin_one`](DLMF/RiemannTheta/Modular.lean#L503) (proved). g = 1, principal square root; [`DLMF.RiemannTheta.riemannTheta_inversion_principal`](DLMF/RiemannTheta/Modular.lean#L478) (admitted); Mathlib: [`jacobiTheta₂_functional_equation`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#jacobiTheta₂_functional_equation).
+- [21.5.E9](https://dlmf.nist.gov/21.5.E9): [`DLMF.RiemannTheta.riemannThetaChar_modular`](DLMF/RiemannTheta/Modular.lean#L534) (admitted). Continuous square-root branch; κ independent of z and Ω.
 - [21.5.i](https://dlmf.nist.gov/21.5#i): [`DLMF.RiemannTheta.modular_mem_siegel`](DLMF/RiemannTheta/Modular.lean#L166) (proved). The modular action preserves the Siegel space and CΩ+D is invertible.
 - [21.5.i](https://dlmf.nist.gov/21.5#i): [`DLMF.RiemannTheta.exists_continuous_sqrt_det`](DLMF/RiemannTheta/Modular.lean#L292) (proved). Existence of a continuous branch of the square root of det(CΩ+D).
 
 ## [§21.6 Products](https://dlmf.nist.gov/21.6)
 
-- [21.6.E1](https://dlmf.nist.gov/21.6.E1): [`DLMF.RiemannTheta.riemannK`](DLMF/RiemannTheta/Products.lean#L59) (definition).
-- [21.6.E2](https://dlmf.nist.gov/21.6.E2): [`DLMF.RiemannTheta.riemannD`](DLMF/RiemannTheta/Products.lean#L75) (definition).
-- [21.6.E3](https://dlmf.nist.gov/21.6.E3): [`DLMF.RiemannTheta.riemann_identity`](DLMF/RiemannTheta/Products.lean#L90) (admitted). Representatives of 𝒦 taken in ℤ^{g×h}T.
-- [21.6.E4](https://dlmf.nist.gov/21.6.E4): [`DLMF.RiemannTheta.riemann_identity_char`](DLMF/RiemannTheta/Products.lean#L107) (admitted). **Corrected**: c_j, d_j are g-dimensional columns, not h-dimensional as printed. Representatives of 𝒦 in ℤ^{g×h}T follow DLMF's own definition 21.6.1 (formalization note, not an erratum).
-- [21.6.E5](https://dlmf.nist.gov/21.6.E5): [`DLMF.RiemannTheta.riemannTExample`](DLMF/RiemannTheta/Products.lean#L130) (definition); [`DLMF.RiemannTheta.riemannTExample_mul_transpose`](DLMF/RiemannTheta/Products.lean#L137) (proved); [`DLMF.RiemannTheta.riemannTExample_rat`](DLMF/RiemannTheta/Products.lean#L145) (proved).
-- [21.6.E5](https://dlmf.nist.gov/21.6.E5): [`DLMF.RiemannTheta.riemannTExample_mul_transpose`](DLMF/RiemannTheta/Products.lean#L137) (proved). T is orthogonal; [`DLMF.RiemannTheta.riemannTExample_rat`](DLMF/RiemannTheta/Products.lean#L145) (proved).
-- [21.6.E5](https://dlmf.nist.gov/21.6.E5): [`DLMF.RiemannTheta.riemannTExample_rat`](DLMF/RiemannTheta/Products.lean#L145) (proved). T has rational entries; [`DLMF.RiemannTheta.riemannTExample_mul_transpose`](DLMF/RiemannTheta/Products.lean#L137) (proved).
-- [21.6.E6](https://dlmf.nist.gov/21.6.E6): [`DLMF.RiemannTheta.riemannTheta_four_product`](DLMF/RiemannTheta/Products.lean#L456) (proved).
-- [21.6.E7](https://dlmf.nist.gov/21.6.E7): [`DLMF.RiemannTheta.riemannThetaChar_four_product`](DLMF/RiemannTheta/Products.lean#L602) (proved).
-- [21.6.E8](https://dlmf.nist.gov/21.6.E8): [`DLMF.RiemannTheta.riemannThetaChar_mul_addition`](DLMF/RiemannTheta/Products.lean#L241) (proved).
+- [21.6.E1](https://dlmf.nist.gov/21.6.E1): [`DLMF.RiemannTheta.riemannK`](DLMF/RiemannTheta/Products.lean#L61) (definition).
+- [21.6.E2](https://dlmf.nist.gov/21.6.E2): [`DLMF.RiemannTheta.riemannD`](DLMF/RiemannTheta/Products.lean#L77) (definition).
+- [21.6.E3](https://dlmf.nist.gov/21.6.E3): [`DLMF.RiemannTheta.riemann_identity`](DLMF/RiemannTheta/Products.lean#L92) (admitted). Representatives of 𝒦 taken in ℤ^{g×h}T.
+- [21.6.E4](https://dlmf.nist.gov/21.6.E4): [`DLMF.RiemannTheta.riemann_identity_char`](DLMF/RiemannTheta/Products.lean#L109) (admitted). **Corrected**: c_j, d_j are g-dimensional columns, not h-dimensional as printed. Representatives of 𝒦 in ℤ^{g×h}T follow DLMF's own definition 21.6.1 (formalization note, not an erratum).
+- [21.6.E5](https://dlmf.nist.gov/21.6.E5): [`DLMF.RiemannTheta.riemannTExample`](DLMF/RiemannTheta/Products.lean#L132) (definition); [`DLMF.RiemannTheta.riemannTExample_mul_transpose`](DLMF/RiemannTheta/Products.lean#L139) (proved); [`DLMF.RiemannTheta.riemannTExample_rat`](DLMF/RiemannTheta/Products.lean#L147) (proved).
+- [21.6.E5](https://dlmf.nist.gov/21.6.E5): [`DLMF.RiemannTheta.riemannTExample_mul_transpose`](DLMF/RiemannTheta/Products.lean#L139) (proved). T is orthogonal; [`DLMF.RiemannTheta.riemannTExample_rat`](DLMF/RiemannTheta/Products.lean#L147) (proved).
+- [21.6.E5](https://dlmf.nist.gov/21.6.E5): [`DLMF.RiemannTheta.riemannTExample_rat`](DLMF/RiemannTheta/Products.lean#L147) (proved). T has rational entries; [`DLMF.RiemannTheta.riemannTExample_mul_transpose`](DLMF/RiemannTheta/Products.lean#L139) (proved).
+- [21.6.E6](https://dlmf.nist.gov/21.6.E6): [`DLMF.RiemannTheta.riemannTheta_four_product`](DLMF/RiemannTheta/Products.lean#L488) (proved).
+- [21.6.E7](https://dlmf.nist.gov/21.6.E7): [`DLMF.RiemannTheta.riemannThetaChar_four_product`](DLMF/RiemannTheta/Products.lean#L647) (proved).
+- [21.6.E8](https://dlmf.nist.gov/21.6.E8): [`DLMF.RiemannTheta.riemannThetaChar_mul_addition`](DLMF/RiemannTheta/Products.lean#L251) (proved).
 
 ## Analytical prose and exclusions
 
 - [21.1.p1](https://dlmf.nist.gov/21.1#p1)–[21.1.p5](https://dlmf.nist.gov/21.1#p5) and table 21.1.T1: notation. Covered by `siegelUpperHalfSpace`, `symplecticJ`, `riemannThetaBig` and `riemannThetaBig_eq_tsum`; ‖·‖, transpose and the integer lattice use Mathlib notation.
-- [21.1](https://dlmf.nist.gov/21.1): [`DLMF.RiemannTheta.riemannThetaBig`](DLMF/RiemannTheta/Basic.lean#L85) (definition); [`DLMF.RiemannTheta.riemannThetaBig_eq_tsum`](DLMF/RiemannTheta/Basic.lean#L662) (proved); [`DLMF.RiemannTheta.siegelUpperHalfSpace`](DLMF/RiemannTheta/Basic.lean#L49) (definition); [`DLMF.RiemannTheta.symplecticJ`](DLMF/RiemannTheta/Modular.lean#L56) (definition); Mathlib: [`Matrix.PosDef`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/LinearAlgebra/Matrix/PosDef.html#Matrix.PosDef); Mathlib: [`Matrix.J`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/LinearAlgebra/SymplecticGroup.html#Matrix.J).
+- [21.1](https://dlmf.nist.gov/21.1): [`DLMF.RiemannTheta.riemannThetaBig`](DLMF/RiemannTheta/Basic/Definitions.lean#L65) (definition); [`DLMF.RiemannTheta.riemannThetaBig_eq_tsum`](DLMF/RiemannTheta/Scaled.lean#L309) (proved); [`DLMF.RiemannTheta.siegelUpperHalfSpace`](DLMF/RiemannTheta/Basic/Definitions.lean#L29) (definition); [`DLMF.RiemannTheta.symplecticJ`](DLMF/RiemannTheta/Modular.lean#L56) (definition); Mathlib: [`Matrix.PosDef`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/LinearAlgebra/Matrix/PosDef.html#Matrix.PosDef); Mathlib: [`Matrix.J`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/LinearAlgebra/SymplecticGroup.html#Matrix.J).
 - [21.2.i.p1](https://dlmf.nist.gov/21.2#i.p1): absolute and uniform convergence on compact sets, analyticity in each element of z and Ω. Covered by `summable_norm_riemannThetaTerm`, `tendstoUniformlyOn_riemannTheta`, `tendstoLocallyUniformlyOn_riemannTheta`, `continuousOn_riemannTheta`, `differentiableAt_riemannTheta_update` and `differentiableAt_riemannTheta_entry` (all proved).
 - [21.2.i.p2](https://dlmf.nist.gov/21.2#i.p2): the scaled θ̂ is bounded and nonanalytic in z. `riemannThetaScaled_bounded` (proved), `not_differentiable_riemannThetaScaled` (admitted).
 - [21.2.Px1.p1](https://dlmf.nist.gov/21.2#Px1.p1): the example 21.2.E3/E4. Covered by `riemannMatrixExample_mem`, `riemannTheta_example` and `riemannThetaScaled_example`.
 - [21.2.ii.p1](https://dlmf.nist.gov/21.2#ii.p1): theta functions with characteristics and the 2^{2g} half-period characteristics. Covered by `summable_norm_riemannThetaCharTerm`, `halfPeriodCharacteristics` and `ncard_halfPeriodCharacteristics`.
 - [21.2.iii.p1](https://dlmf.nist.gov/21.2#iii.p1): relation to the classical theta functions. Covered by 21.2.E8–E12.
-- [21.2.i](https://dlmf.nist.gov/21.2.i): [`DLMF.RiemannTheta.continuousOn_riemannTheta`](DLMF/RiemannTheta/Basic.lean#L328) (proved); [`DLMF.RiemannTheta.differentiableAt_riemannTheta_entry`](DLMF/RiemannTheta/Basic.lean#L366) (proved); [`DLMF.RiemannTheta.differentiableAt_riemannTheta_update`](DLMF/RiemannTheta/Basic.lean#L349) (proved); [`DLMF.RiemannTheta.not_differentiable_riemannThetaScaled`](DLMF/RiemannTheta/Basic.lean#L585) (proved); [`DLMF.RiemannTheta.riemannThetaScaled_bounded`](DLMF/RiemannTheta/Basic.lean#L453) (proved); [`DLMF.RiemannTheta.summable_norm_riemannThetaTerm`](DLMF/RiemannTheta/Basic.lean#L288) (proved); [`DLMF.RiemannTheta.tendstoLocallyUniformlyOn_riemannTheta`](DLMF/RiemannTheta/Basic.lean#L301) (proved); [`DLMF.RiemannTheta.tendstoUniformlyOn_riemannTheta`](DLMF/RiemannTheta/Basic.lean#L313) (proved); Mathlib: [`hasSum_jacobiTheta₂_term`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#hasSum_jacobiTheta₂_term); Mathlib: [`differentiableAt_jacobiTheta₂_fst`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#differentiableAt_jacobiTheta₂_fst); Mathlib: [`differentiableAt_jacobiTheta₂_snd`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#differentiableAt_jacobiTheta₂_snd).
-- [21.2.ii](https://dlmf.nist.gov/21.2.ii): [`DLMF.RiemannTheta.halfPeriodCharacteristics`](DLMF/RiemannTheta/Basic.lean#L832) (definition); [`DLMF.RiemannTheta.ncard_halfPeriodCharacteristics`](DLMF/RiemannTheta/Basic.lean#L837) (proved); [`DLMF.RiemannTheta.summable_norm_riemannThetaCharTerm`](DLMF/RiemannTheta/Basic.lean#L824) (proved).
+- [21.2.i](https://dlmf.nist.gov/21.2.i): [`DLMF.RiemannTheta.continuousOn_riemannTheta`](DLMF/RiemannTheta/Convergence.lean#L280) (proved); [`DLMF.RiemannTheta.differentiableAt_riemannTheta_entry`](DLMF/RiemannTheta/Convergence.lean#L320) (proved); [`DLMF.RiemannTheta.differentiableAt_riemannTheta_update`](DLMF/RiemannTheta/Convergence.lean#L303) (proved); [`DLMF.RiemannTheta.not_differentiable_riemannThetaScaled`](DLMF/RiemannTheta/Scaled.lean#L232) (proved); [`DLMF.RiemannTheta.riemannThetaScaled_bounded`](DLMF/RiemannTheta/Scaled.lean#L100) (proved); [`DLMF.RiemannTheta.summable_norm_riemannThetaTerm`](DLMF/RiemannTheta/Convergence.lean#L238) (proved); [`DLMF.RiemannTheta.tendstoLocallyUniformlyOn_riemannTheta`](DLMF/RiemannTheta/Convergence.lean#L251) (proved); [`DLMF.RiemannTheta.tendstoUniformlyOn_riemannTheta`](DLMF/RiemannTheta/Convergence.lean#L263) (proved); Mathlib: [`hasSum_jacobiTheta₂_term`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#hasSum_jacobiTheta₂_term); Mathlib: [`differentiableAt_jacobiTheta₂_fst`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#differentiableAt_jacobiTheta₂_fst); Mathlib: [`differentiableAt_jacobiTheta₂_snd`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/ModularForms/JacobiTheta/TwoVariable.html#differentiableAt_jacobiTheta₂_snd).
+- [21.2.ii](https://dlmf.nist.gov/21.2.ii): [`DLMF.RiemannTheta.halfPeriodCharacteristics`](DLMF/RiemannTheta/Basic/Definitions.lean#L86) (definition); [`DLMF.RiemannTheta.ncard_halfPeriodCharacteristics`](DLMF/RiemannTheta/Characteristics.lean#L171) (proved); [`DLMF.RiemannTheta.summable_norm_riemannThetaCharTerm`](DLMF/RiemannTheta/Characteristics.lean#L163) (proved).
 - [21.3.i.p1](https://dlmf.nist.gov/21.3#i.p1): the period lattice and the quasi-periodicity that determines θ up to a constant. `riemannThetaPeriodLattice` (definition), `eq_const_mul_riemannTheta_of_quasiPeriodic` (admitted).
 - [21.3.ii.p1](https://dlmf.nist.gov/21.3#ii.p1): the convention α, β ∈ [0,1). Not imposed; see the conventions above.
-- [21.3.i](https://dlmf.nist.gov/21.3.i): [`DLMF.RiemannTheta.eq_const_mul_riemannTheta_of_quasiPeriodic`](DLMF/RiemannTheta/Symmetry.lean#L106) (admitted); [`DLMF.RiemannTheta.riemannThetaPeriodLattice`](DLMF/RiemannTheta/Symmetry.lean#L100) (definition).
+- [21.3.i](https://dlmf.nist.gov/21.3.i): [`DLMF.RiemannTheta.eq_const_mul_riemannTheta_of_quasiPeriodic`](DLMF/RiemannTheta/Symmetry.lean#L113) (admitted); [`DLMF.RiemannTheta.riemannThetaPeriodLattice`](DLMF/RiemannTheta/Symmetry.lean#L107) (definition).
 - [21.5.i.p1](https://dlmf.nist.gov/21.5#i.p1), [21.5.i.p2](https://dlmf.nist.gov/21.5#i.p2): the modular action preserves the Siegel space, and the square-root branch. `modular_mem_siegel` and `exists_continuous_sqrt_det` (both admitted).
 - [21.5.ii.p1](https://dlmf.nist.gov/21.5#ii.p1), [21.5.ii.p2](https://dlmf.nist.gov/21.5#ii.p2): characteristics under modular transformations, κ independent of z and Ω. Covered by `riemannThetaChar_modular`.
 - [21.5.i](https://dlmf.nist.gov/21.5.i): [`DLMF.RiemannTheta.exists_continuous_sqrt_det`](DLMF/RiemannTheta/Modular.lean#L292) (proved); [`DLMF.RiemannTheta.modular_mem_siegel`](DLMF/RiemannTheta/Modular.lean#L166) (proved).

@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Lame.Polynomials.Defs
+public import DLMF.Lame.Polynomials.Basic
 public import DLMF.Lame.Polynomials.P2pODE
 
 /-!

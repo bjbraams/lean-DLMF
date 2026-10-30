@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.IncompleteGamma.Basic
-public import DLMF.ErrorFunctions.Basic
+public import DLMF.IncompleteGamma.ContinuedProperties
+public import DLMF.ErrorFunctions.AnalyticProperties
 
 /-!
 # Special values and confluent representations, DLMF §§8.4–8.5

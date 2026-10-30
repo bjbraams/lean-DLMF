@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AlgebraicAnalytic.Summability.Defs
+public import DLMF.AlgebraicAnalytic.Summability.Basic
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
 
 /-!
@@ -13,7 +13,7 @@ public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
 
 The Riemann–Liouville fractional integral `fractionalIntegral` (1.15.47) and the fractional
 derivative `fractionalDerivative` (1.15.51, with `n = ⌊ℜα⌋ + 1`) are defined in
-`Summability/Defs.lean`. The statements are for `x ≥ 0` (DLMF erratum of version 1.0.1); we take
+`Summability/Basic.lean`. The statements are for `x ≥ 0` (DLMF erratum of version 1.0.1); we take
 `x > 0` where derivatives in `x` occur and `f` continuous on `[0, ∞)`.
 
 Proved: the power rule `I^α t^μ = Γ(μ+1)/Γ(μ+α+1) x^{μ+α}` (the termwise form of 1.15.50, by

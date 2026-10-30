@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.QSeries.Pochhammer
-public import DLMF.Hypergeometric.Basic
+public import DLMF.Hypergeometric.SeriesProperties
 public import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
 public import Mathlib.Analysis.SpecialFunctions.Bernstein
 /-!

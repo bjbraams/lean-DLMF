@@ -5,6 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Confluent.Basic.ErrorFunctions
+
 public import DLMF.Confluent.ErrorFunctions
 public import DLMF.Confluent.TricomiRotated
 
@@ -35,22 +37,11 @@ noncomputable section
 
 namespace DLMF.Confluent
 
-/-- The auxiliary Fresnel function `f(x) = (1/2 - S(x)) cos(πx²/2) - (1/2 - C(x)) sin(πx²/2)`
-(DLMF 7.2.10). -/
-@[dlmf 7.2.E10]
-def fresnelAuxF (x : ℝ) : ℝ :=
-  (1 / 2 - Real.fresnelSinInt x) * Real.cos (π * x ^ 2 / 2) - (1 / 2 - Real.fresnelCosInt x)
-      * Real.sin (π * x ^ 2 / 2)
 
-/-- The auxiliary Fresnel function `g(x) = (1/2 - C(x)) cos(πx²/2) + (1/2 - S(x)) sin(πx²/2)`
-(DLMF 7.2.11). -/
-@[dlmf 7.2.E11]
-def fresnelAuxG (x : ℝ) : ℝ :=
-  (1 / 2 - Real.fresnelCosInt x) * Real.cos (π * x ^ 2 / 2) + (1 / 2 - Real.fresnelSinInt x)
-      * Real.sin (π * x ^ 2 / 2)
 
-/-- The Fresnel variable `ζ = √π (1 - i) x / 2` of DLMF 7.5.7. -/
-def fresnelZeta (x : ℝ) : ℂ := (Real.sqrt π : ℂ) * (1 - I) / 2 * x
+
+
+
 
 /-- `ζ(x)² = -iπx²/2` for `ζ(x) = √π (1-i) x / 2`. -/
 theorem fresnelZeta_sq (x : ℝ) : fresnelZeta x ^ 2 = -(I * (π * x ^ 2 / 2)) := by

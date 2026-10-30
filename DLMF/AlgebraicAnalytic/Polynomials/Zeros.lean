@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AlgebraicAnalytic.Polynomials.Defs
+public import DLMF.AlgebraicAnalytic.Polynomials.Basic
 public import Mathlib.Algebra.Polynomial.RuleOfSigns
 public import Mathlib.Analysis.Complex.Polynomial.Basic
 public import Mathlib.RingTheory.Polynomial.Resultant.Basic

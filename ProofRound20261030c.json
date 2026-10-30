@@ -1,0 +1,750 @@
+{
+  "format": 1,
+  "date": "2026-10-30",
+  "round": "power-series-operations-branches-and-appell-nonseparability",
+  "baseCommit": "2f7efb7a9b8ab22bd9089f6b512bcaf2b6cc7048",
+  "baseline": {
+    "previousRound": "ProofRound20261030b.json",
+    "directAdmissions": 1601
+  },
+  "admissions": {
+    "before": 1601,
+    "after": 1591,
+    "removed": 10,
+    "filesWithAdmissions": 294,
+    "byArea": {
+      "AlgebraicAnalytic": {
+        "before": 220,
+        "after": 217
+      },
+      "Elementary": {
+        "before": 56,
+        "after": 53
+      },
+      "EllipticIntegrals": {
+        "before": 176,
+        "after": 174
+      },
+      "GeneralizedHypergeometric": {
+        "before": 106,
+        "after": 104
+      }
+    }
+  },
+  "completed": [
+    {
+      "name": "DLMF.AlgebraicAnalytic.hasSum_recipCoeff",
+      "file": "DLMF/AlgebraicAnalytic/Complex/Calculus.lean",
+      "line": 670,
+      "proofLines": 33,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.9.53–1.9.54: if `f(z) = ∑ aₙ zⁿ` near `0` with `a₀ ≠ 0`, then\n`1/f(z) = ∑ bₙ zⁿ` for all sufficiently small `|z|`, with `bₙ = recipCoeff a n` (1.9.55–1.9.56)."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.hasSum_logCoeff",
+      "file": "DLMF/AlgebraicAnalytic/Complex/Calculus.lean",
+      "line": 759,
+      "proofLines": 46,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.9.57: if `f(z) = 1 + a₁z + a₂z² + ⋯` near `0`, then the principal logarithm satisfies\n`ln f(z) = ∑_{n ≥ 1} qₙ zⁿ` for all sufficiently small `|z|`, with `qₙ = logCoeff a n`\n(1.9.58–1.9.59)."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.hasSum_powCoeff",
+      "file": "DLMF/AlgebraicAnalytic/Complex/Calculus.lean",
+      "line": 877,
+      "proofLines": 46,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.9.60: if `f(z) = 1 + a₁z + a₂z² + ⋯` near `0` and `ν ∈ ℂ`, then the principal power\nsatisfies `(f(z))^ν = ∑ pₙ zⁿ` for all sufficiently small `|z|`, with `pₙ = powCoeff ν a n`\n(1.9.61–1.9.62)."
+    },
+    {
+      "name": "DLMF.Elementary.integral_exp_div_cosh_sq",
+      "file": "DLMF/Elementary/Hyperbolic/Integrals.lean",
+      "line": 118,
+      "proofLines": 24,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Integrability of the indicated kernel: `Integrable (fun x : ℝ => Real.exp (a*x)/(Real.cosh\n(x/2))^2) ∧ (∫ x : ℝ, Real.exp (a*x)/(Real.cosh (x/2))^2)=(if a=0 then 4 else 4*π*a/Real.sin\n(π*a))`."
+    },
+    {
+      "name": "DLMF.Elementary.hasSum_log_sinc_bernoulli",
+      "file": "DLMF/Elementary/Trigonometric/LogarithmicSeries.lean",
+      "line": 152,
+      "proofLines": 58,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The principal logarithm of the removable sine quotient has its Bernoulli expansion\non the full disk `‖z‖ < π`."
+    },
+    {
+      "name": "DLMF.Elementary.hasSum_log_tan_div_bernoulli",
+      "file": "DLMF/Elementary/Trigonometric/LogarithmicSeries.lean",
+      "line": 401,
+      "proofLines": 13,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The principal logarithm of the removable tangent quotient has its Bernoulli expansion\non the disk `‖z‖ < π / 2`."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.hasDerivAt_incEllIntFk_symEllIntRD",
+      "file": "DLMF/EllipticIntegrals/SymmetricRelations.lean",
+      "line": 225,
+      "proofLines": 22,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.25.6: `∂F(φ, k)/∂k = (1/3) k R_D(c - 1, c, c - k²)`, `c = csc² φ`, for real\n`φ ∈ (0, π/2]` and `1 - k² sin² φ ∈ ℂ \\ (-∞, 0]`, `k ≠ 0`... (the derivative is the complex\nderivative in `k`)."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.hasDerivAt_incEllIntEk_symEllIntRD",
+      "file": "DLMF/EllipticIntegrals/SymmetricRelations.lean",
+      "line": 350,
+      "proofLines": 17,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.25.12: `∂E(φ, k)/∂k = -(1/3) k R_D(c - 1, c - k², c)` (complex derivative in `k`),\nfor real `φ ∈ (0, π/2]` and `1 - k² sin² φ ∈ ℂ \\ (-∞, 0]`."
+    },
+    {
+      "name": "DLMF.Hypergeometric.appell_generic_nonseparable",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/DefinitionsAndSeries.lean",
+      "line": 352,
+      "proofLines": 26,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Concrete parameter witnesses make the prose non-product claim mathematically precise."
+    },
+    {
+      "name": "DLMF.Hypergeometric.hornG3_nonmaximal_region",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/DefinitionsAndSeries.lean",
+      "line": 873,
+      "proofLines": 40,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "16.14.ii: hornG3 nonmaximal region."
+    }
+  ],
+  "downstreamFreedFromAdmissions": [],
+  "newHelpers": [
+    {
+      "name": "DLMF.AlgebraicAnalytic.eq_recipCoeff_of_convolution",
+      "file": "DLMF/AlgebraicAnalytic/Complex/Calculus.lean",
+      "line": 643,
+      "proofLines": 22,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The coefficient convolution with a nonzero constant term uniquely determines its inverse."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.eq_logCoeff_of_convolution",
+      "file": "DLMF/AlgebraicAnalytic/Complex/Calculus.lean",
+      "line": 722,
+      "proofLines": 30,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The logarithmic coefficient recurrence is uniquely determined by the identity `f * g′ = f′`."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.eq_powCoeff_of_convolution",
+      "file": "DLMF/AlgebraicAnalytic/Complex/Calculus.lean",
+      "line": 823,
+      "proofLines": 46,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The power coefficient recurrence is uniquely determined by `f * g′ = ν * f′ * g`."
+    },
+    {
+      "name": "DLMF.Elementary.sin_div_gt_cos",
+      "file": "DLMF/Elementary/Trigonometric/LogarithmicSeries.lean",
+      "line": 40,
+      "proofLines": 10,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Strict concavity of sine bounds the derivative below the secant slope from zero."
+    },
+    {
+      "name": "DLMF.Elementary.sinh_div_le_cosh",
+      "file": "DLMF/Elementary/Trigonometric/LogarithmicSeries.lean",
+      "line": 52,
+      "proofLines": 8,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "TauCeti’s hyperbolic tangent inequality bounds the hyperbolic sine secant slope by its derivative."
+    },
+    {
+      "name": "DLMF.Elementary.sine_quotient_im_ne",
+      "file": "DLMF/Elementary/Trigonometric/LogarithmicSeries.lean",
+      "line": 61,
+      "proofLines": 32,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Off the coordinate axes, the removable sine quotient cannot be real in its first vertical strip."
+    },
+    {
+      "name": "DLMF.Elementary.sine_quotient_slit",
+      "file": "DLMF/Elementary/Trigonometric/LogarithmicSeries.lean",
+      "line": 95,
+      "proofLines": 22,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The sine quotient avoids the principal logarithm cut in its first zero-free vertical strip."
+    },
+    {
+      "name": "DLMF.Elementary.cot_sub_inv_series",
+      "file": "DLMF/Elementary/Trigonometric/LogarithmicSeries.lean",
+      "line": 119,
+      "proofLines": 21,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Removing the cotangent pole shifts the Bernoulli expansion to an odd power series."
+    },
+    {
+      "name": "DLMF.Elementary.even_deriv_zero",
+      "file": "DLMF/Elementary/Trigonometric/LogarithmicSeries.lean",
+      "line": 143,
+      "proofLines": 6,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "An even complex function differentiable at the origin has zero derivative there."
+    },
+    {
+      "name": "DLMF.Elementary.tan_div_re_pos",
+      "file": "DLMF/Elementary/Trigonometric/LogarithmicSeries.lean",
+      "line": 318,
+      "proofLines": 56,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The tangent quotient has positive real part in its first zero-free vertical strip."
+    },
+    {
+      "name": "DLMF.Elementary.log_tan_div_eq",
+      "file": "DLMF/Elementary/Trigonometric/LogarithmicSeries.lean",
+      "line": 376,
+      "proofLines": 22,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Positive real parts of cosine and the tangent quotient permit subtraction of their principal logarithms."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.legendrePathOK_ofReal_of_endpoint",
+      "file": "DLMF/EllipticIntegrals/Derivatives.lean",
+      "line": 50,
+      "proofLines": 18,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "For a positive real amplitude at most `π/2`, the endpoint slit-plane condition\n`1 - k² sin² φ ∈ slitPlane` implies that condition along the entire integration path."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.p19sR2_symEllIntRD_legendre_cube",
+      "file": "DLMF/EllipticIntegrals/SymmetricRelations.lean",
+      "line": 179,
+      "proofLines": 37,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Under the cosecant-square substitution, moving `c-k²` to the third argument\nof `R_D` gives the sine integral with the inverse cube of the Legendre square root."
+    },
+    {
+      "name": "DLMF.Hypergeometric.appellRegular_natCast",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/DefinitionsAndSeries.lean",
+      "line": 344,
+      "proofLines": 6,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Positive natural denominator parameters avoid every nonpositive integer."
+    },
+    {
+      "name": "DLMF.Hypergeometric.ghaR4_weighted_choose_fact",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/DefinitionsAndSeries.lean",
+      "line": 684,
+      "proofLines": 12,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A weighted binomial bound controls `(j+n)! 4^j` by `5^(j+n) j! n!`."
+    },
+    {
+      "name": "DLMF.Hypergeometric.ghaR4_mixed_choose_fact_five",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/DefinitionsAndSeries.lean",
+      "line": 700,
+      "proofLines": 22,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The factorial quotient in a mixed Horn G3 Gamma pair is at most\n`5^(j+3n)`, after dividing by `j! (j+2n)! n!`."
+    },
+    {
+      "name": "DLMF.Hypergeometric.ghaR4_gamma_mixed_bound_five",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/DefinitionsAndSeries.lean",
+      "line": 726,
+      "proofLines": 13,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Forward and backward Gamma estimates combine with the mixed factorial bound\nto give the separate-factorial majorant needed for a Horn G3 bidisc."
+    },
+    {
+      "name": "DLMF.Hypergeometric.hornG3_gammaPair_bound_five",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/DefinitionsAndSeries.lean",
+      "line": 746,
+      "proofLines": 46,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "For non-integral parameters, the Horn G3 Gamma pair admits a majorant\n`C σ^(4(m+n)) 5^(m+n) m! n!`. The separate factorials give convergence beyond\nthe diamond `|x|+|y|<1/4`."
+    },
+    {
+      "name": "Complex.line_iterated",
+      "file": "DLMFMathlib/Analysis/Complex/BivariateSeries.lean",
+      "line": 30,
+      "proofLines": 31,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Restricting a convergent bivariate series to a complex line gives its homogeneous\nTaylor coefficients."
+    },
+    {
+      "name": "Complex.line_zero",
+      "file": "DLMFMathlib/Analysis/Complex/BivariateSeries.lean",
+      "line": 68,
+      "proofLines": 2,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The constant coefficient is the value of a convergent bivariate series at the origin."
+    },
+    {
+      "name": "Complex.line_one",
+      "file": "DLMFMathlib/Analysis/Complex/BivariateSeries.lean",
+      "line": 75,
+      "proofLines": 5,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The first derivative along a line is determined by the two linear coefficients."
+    },
+    {
+      "name": "Complex.line_two",
+      "file": "DLMFMathlib/Analysis/Complex/BivariateSeries.lean",
+      "line": 86,
+      "proofLines": 5,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The second derivative along a line is determined by the three quadratic coefficients."
+    },
+    {
+      "name": "Complex.nonsep_coeff",
+      "file": "DLMFMathlib/Analysis/Complex/BivariateSeries.lean",
+      "line": 98,
+      "proofLines": 54,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "An analytic product decomposition forces the constant, linear and mixed coefficients\nto have zero determinant."
+    },
+    {
+      "name": "Complex.not_exists_mul_analyticAt_of_coeff_ne",
+      "file": "DLMFMathlib/Analysis/Complex/BivariateSeries.lean",
+      "line": 160,
+      "proofLines": 7,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A nonzero determinant of the constant, linear and mixed Taylor coefficients rules out\na local product of one-variable analytic functions."
+    },
+    {
+      "name": "Complex.integral_count_eq_tsum",
+      "file": "DLMFMathlib/Analysis/Complex/ParametricHolomorphy.lean",
+      "line": 426,
+      "proofLines": 7,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The totalized counting-measure integral of a countable complex family is its sum."
+    },
+    {
+      "name": "Complex.iteratedDeriv_tsum_of_locally_dominated",
+      "file": "DLMFMathlib/Analysis/Complex/ParametricHolomorphy.lean",
+      "line": 438,
+      "proofLines": 8,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Every derivative of a locally dominated series of holomorphic complex-valued functions\ncan be computed term by term."
+    },
+    {
+      "name": "Complex.eventually_hasSum_deriv_powerSeries",
+      "file": "DLMFMathlib/Analysis/Complex/PowerSeriesOperations.lean",
+      "line": 26,
+      "proofLines": 15,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Differentiate a scalar power series near its center by shifting its coefficients."
+    },
+    {
+      "name": "Complex.mul_deriv_cpow_const",
+      "file": "DLMFMathlib/Analysis/Complex/PowerSeriesOperations.lean",
+      "line": 45,
+      "proofLines": 10,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Principal complex powers satisfy the first-order power differential identity on the slit plane."
+    },
+    {
+      "name": "Complex.hasFPowerSeriesOnBall_of_hasSum_ball",
+      "file": "DLMFMathlib/Analysis/Complex/TrigR4SeriesExtension.lean",
+      "line": 31,
+      "proofLines": 11,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A scalar power series represents its sum analytically on every strictly smaller disk."
+    },
+    {
+      "name": "Complex.hasSum_mul_powerSeries",
+      "file": "DLMFMathlib/Analysis/Complex/TrigR4SeriesExtension.lean",
+      "line": 48,
+      "proofLines": 11,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Multiply two convergent complex power series by convolution of their coefficients."
+    }
+  ],
+  "reusableExistingHelpers": [],
+  "movedDeclarations": [
+    {
+      "name": "hasSum_log_sinc_bernoulli",
+      "before": "DLMF/Elementary/Trigonometric/DirectIdentities.lean",
+      "after": "DLMF/Elementary/Trigonometric/LogarithmicSeries.lean"
+    },
+    {
+      "name": "trigR4_hasSum_tan_bernoulli",
+      "before": "DLMF/Elementary/Trigonometric/DirectIdentities.lean",
+      "after": "DLMF/Elementary/Trigonometric/LogarithmicSeries.lean"
+    },
+    {
+      "name": "trigR4_cos_mem_slitPlane",
+      "before": "DLMF/Elementary/Trigonometric/DirectIdentities.lean",
+      "after": "DLMF/Elementary/Trigonometric/LogarithmicSeries.lean"
+    },
+    {
+      "name": "trigR4_hasDerivAt_log_cos",
+      "before": "DLMF/Elementary/Trigonometric/DirectIdentities.lean",
+      "after": "DLMF/Elementary/Trigonometric/LogarithmicSeries.lean"
+    },
+    {
+      "name": "hasSum_log_cos_bernoulli",
+      "before": "DLMF/Elementary/Trigonometric/DirectIdentities.lean",
+      "after": "DLMF/Elementary/Trigonometric/LogarithmicSeries.lean"
+    },
+    {
+      "name": "hasSum_log_tan_div_bernoulli",
+      "before": "DLMF/Elementary/Trigonometric/DirectIdentities.lean",
+      "after": "DLMF/Elementary/Trigonometric/LogarithmicSeries.lean"
+    }
+  ],
+  "validation": {
+    "fullBuild": "lake build > /tmp/DLMF-build.log 2>&1",
+    "buildJobs": 14742,
+    "strictChecks": [
+      {
+        "file": "DLMF.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030c/strict-DLMF.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Complex/Calculus.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030c/strict-DLMF_AlgebraicAnalytic_Complex_Calculus.lean.log"
+      },
+      {
+        "file": "DLMF/Elementary/Hyperbolic/Integrals.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030c/strict-DLMF_Elementary_Hyperbolic_Integrals.lean.log"
+      },
+      {
+        "file": "DLMF/Elementary/Trigonometric/DirectIdentities.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030c/strict-DLMF_Elementary_Trigonometric_DirectIdentities.lean.log"
+      },
+      {
+        "file": "DLMF/Elementary/Trigonometric/LogarithmicSeries.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030c/strict-DLMF_Elementary_Trigonometric_LogarithmicSeries.lean.log"
+      },
+      {
+        "file": "DLMF/EllipticIntegrals/Derivatives.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030c/strict-DLMF_EllipticIntegrals_Derivatives.lean.log"
+      },
+      {
+        "file": "DLMF/EllipticIntegrals/SymmetricRelations.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030c/strict-DLMF_EllipticIntegrals_SymmetricRelations.lean.log"
+      },
+      {
+        "file": "DLMF/GeneralizedHypergeometric/Appell/DefinitionsAndSeries.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030c/strict-DLMF_GeneralizedHypergeometric_Appell_DefinitionsAndSeries.lean.log"
+      },
+      {
+        "file": "DLMFMathlib.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030c/strict-DLMFMathlib.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Complex/BivariateSeries.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030c/strict-DLMFMathlib_Analysis_Complex_BivariateSeries.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Complex/ParametricHolomorphy.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030c/strict-DLMFMathlib_Analysis_Complex_ParametricHolomorphy.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Complex/PowerSeriesOperations.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030c/strict-DLMFMathlib_Analysis_Complex_PowerSeriesOperations.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Complex/TrigR4SeriesExtension.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030c/strict-DLMFMathlib_Analysis_Complex_TrigR4SeriesExtension.lean.log"
+      },
+      {
+        "file": "Main.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030c/strict-Main.lean.log"
+      }
+    ],
+    "globalAxioms": {
+      "dependingOnAdmissions": 1696,
+      "nonstandard": [],
+      "theorems": 56428
+    },
+    "tagSummary": {
+      "proved": 8711,
+      "pointers": 1028,
+      "nonstandard": 0,
+      "entries": 10703,
+      "admitted": 1992
+    },
+    "sourceStatementChanges": [],
+    "sourceDefinitionChanges": [],
+    "compiledPublicTypeChanges": [],
+    "maxChangedProofLines": 58,
+    "maxLibraryFileLines": 1454,
+    "newDeclarationsWithoutDocs": [],
+    "newExactUpstreamMatches": [],
+    "imports": {
+      "newTwoWayPairs": [],
+      "newDefinitionsImports": [],
+      "twoWayPairs": 15,
+      "definitionsImports": 20,
+      "newCrossAreaPairs": [],
+      "baseline": "Beginning-of-round source snapshot from ProofRound20261030b"
+    },
+    "changedLeanFiles": [
+      "DLMF/AlgebraicAnalytic/Complex/Calculus.lean",
+      "DLMF/Elementary/Hyperbolic/Integrals.lean",
+      "DLMF/Elementary/Trigonometric/DirectIdentities.lean",
+      "DLMF/Elementary/Trigonometric/LogarithmicSeries.lean",
+      "DLMF/EllipticIntegrals/Derivatives.lean",
+      "DLMF/EllipticIntegrals/SymmetricRelations.lean",
+      "DLMF/GeneralizedHypergeometric/Appell/DefinitionsAndSeries.lean",
+      "DLMFMathlib.lean",
+      "DLMFMathlib/Analysis/Complex/BivariateSeries.lean",
+      "DLMFMathlib/Analysis/Complex/ParametricHolomorphy.lean",
+      "DLMFMathlib/Analysis/Complex/PowerSeriesOperations.lean",
+      "DLMFMathlib/Analysis/Complex/TrigR4SeriesExtension.lean"
+    ],
+    "compiledDeclarationCount": 26866,
+    "newSourceDeclarations": 30,
+    "affectedSourceSorryScan": "passed",
+    "diffCheck": "passed",
+    "allCompletedProofsStandardAxioms": true,
+    "allNewHelpersStandardAxioms": true,
+    "ledgerRefresh": {
+      "files": [
+        "DLMF1Acquisition.md",
+        "DLMF4Acquisition.md",
+        "DLMF16Acquisition.md",
+        "DLMF19Acquisition.md"
+      ],
+      "note": "Refreshes include previously stale statuses and moved source references; direct admission counts are established separately by source and compiled axiom comparisons."
+    }
+  },
+  "statementCorrections": [],
+  "statementIssues": {
+    "previousIssuesRetained": [
+      "liouvilleGreen_interval_isEquivalent: finite-endpoint uniqueness is false",
+      "picard_great: missing positive outer radius",
+      "prod_mtest_log: tail-only bounds do not give global uniform convergence",
+      "haar_isLittleO_pow: separate derivatives need compatibility",
+      "hasCesaroSumOfOrder_of_tendsto: negative-order regularity requires review"
+    ],
+    "definitionConventions": [
+      "narayana 0 0 = 0 locally, whereas DLMF Table 26.6.3 gives 1; the path-count theorem assumes n >= 1 and this round changes no definition."
+    ],
+    "duplicationCandidates": [
+      "periodicBernoulliB versus periodicBernoulli, and periodicEulerE versus antiperiodicEuler"
+    ],
+    "newIssues": [
+      {
+        "names": [
+          "DLMF.Theta.jacobiThetaTwoTau_powerSeries",
+          "DLMF.Theta.jacobiThetaThreeTau_powerSeries",
+          "DLMF.Theta.jacobiThetaFourTau_powerSeries"
+        ],
+        "status": "Lean counterexamples, using only standard axioms; original statements retained",
+        "detail": "The common unshifted lattice radius includes zeros of theta2, theta3 and theta4. At tau=I use z=1/2, (1+I)/2 and I/2 respectively. The null values and complex exponentials on the right are nonzero.",
+        "reproductionSource": "import DLMF.Theta.PowerSeries\nimport DLMF.JacobiElliptic.Basic.QuarterPeriods\nopen Complex Set\nopen scoped Real\nnamespace DLMF.Theta\n\nlemma lattice_norm_ge (p : {p : ℤ × ℤ // p ≠ 0}) :\n    1 ≤ ‖((p.1.1 : ℂ) + p.1.2 * I)‖ := by\n  have hp : p.1.1 ≠ 0 ∨ p.1.2 ≠ 0 := by\n    by_contra h\n    push_neg at h\n    exact p.2 (Prod.ext h.1 h.2)\n  have hi : (1 : ℤ) ≤ p.1.1 ^ 2 + p.1.2 ^ 2 := by\n    rcases hp with h | h\n    · have h2 : p.1.1 ≤ -1 ∨ 1 ≤ p.1.1 := by omega\n      rcases h2 with h2 | h2 <;> nlinarith [sq_nonneg p.1.2]\n    · have h2 : p.1.2 ≤ -1 ∨ 1 ≤ p.1.2 := by omega\n      rcases h2 with h2 | h2 <;> nlinarith [sq_nonneg p.1.1]\n  have hr : (1 : ℝ) ≤ (p.1.1 : ℝ) ^ 2 + (p.1.2 : ℝ) ^ 2 := by exact_mod_cast hi\n  have hn := Complex.sq_norm ((p.1.1 : ℂ) + p.1.2 * I)\n  simp only [normSq_apply, add_re, add_im, intCast_re, intCast_im, mul_re, mul_im, I_re, I_im,\n    mul_zero, zero_mul, mul_one, sub_zero, zero_add, add_zero] at hn\n  nlinarith [norm_nonneg ((p.1.1 : ℂ) + p.1.2 * I)]\n\nlemma radius_ge : Real.pi ≤ thetaLatticeMinNorm I := by\n  letI : Nonempty {p : ℤ × ℤ // p ≠ 0} := ⟨⟨(1,0), by decide⟩⟩\n  apply le_ciInf\n  intro p\n  rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg Real.pi_pos.le]\n  nlinarith [lattice_norm_ge p, Real.pi_pos]\n\nlemma condition : ‖(π : ℂ) * (1 / 2 : ℂ)‖ < thetaLatticeMinNorm I := by\n  calc ‖(π : ℂ) * (1 / 2 : ℂ)‖ = Real.pi / 2 := by simp [div_eq_mul_inv, Real.norm_of_nonneg Real.pi_pos.le]\n    _ < Real.pi := by linarith [Real.pi_pos]\n    _ ≤ _ := radius_ge\n\nlemma theta_two_zero : DLMF.Elliptic.jacobiThetaTwoTau ((π : ℂ) * (1 / 2 : ℂ)) I = 0 := by\n  have h := DLMF.JacobiElliptic.je22a_thetaTwo_add_half_pi 0 I\n  have h0 := DLMF.Theta.jacobiThetaOneTau_lattice_eq_zero I 0 0\n  simp only [Int.cast_zero, zero_mul, zero_add, mul_zero, neg_zero] at h0\n  simpa [h0, div_eq_mul_inv] using h\n\nlemma counterexample : ¬ (∃ S : ℂ,\n    HasSum (fun j : ℕ => thetaAlpha (2 * (j + 1)) I * (1 / 2 : ℂ) ^ (2 * (j + 1)) /\n      (2 * (j + 1))) S ∧\n    DLMF.Elliptic.jacobiThetaTwoTau ((π : ℂ) * (1 / 2 : ℂ)) I =\n      jacobiThetaTwoNullTau I * cexp (-S)) := by\n  rintro ⟨S, _, h⟩\n  rw [theta_two_zero] at h\n  exact (mul_ne_zero (DLMF.JacobiElliptic.je22a_thetaTwo_zero_ne_zero (by norm_num : 0 < I.im)) (exp_ne_zero _)) h.symm\n\n\nlemma condition_four : ‖(π : ℂ) * (I / 2)‖ < thetaLatticeMinNorm I := by\n  calc ‖(π : ℂ) * (I / 2)‖ = Real.pi / 2 := by\n         simp [div_eq_mul_inv, Real.norm_of_nonneg Real.pi_pos.le]\n       _ < Real.pi := by linarith [Real.pi_pos]\n       _ ≤ _ := radius_ge\n\nlemma condition_three : ‖(π : ℂ) * ((1 + I) / 2)‖ < thetaLatticeMinNorm I := by\n  have hn : ‖((1 + I) / 2 : ℂ)‖ < 1 := by\n    have h := Complex.sq_norm ((1 + I) / 2 : ℂ)\n    norm_num [normSq_apply, div_re, div_im] at h\n    rw [norm_div, Complex.norm_ofNat]\n    nlinarith [norm_nonneg (1 + I : ℂ)]\n  calc ‖(π : ℂ) * ((1 + I) / 2)‖ = Real.pi * ‖((1 + I) / 2 : ℂ)‖ := by\n         rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg Real.pi_pos.le]\n       _ < Real.pi := by nlinarith [Real.pi_pos]\n       _ ≤ _ := radius_ge\n\nlemma theta_four_zero : DLMF.Elliptic.jacobiThetaFourTau ((π : ℂ) * (I / 2)) I = 0 := by\n  have h := DLMF.JacobiElliptic.je22a_thetaFour_add_half_tau 0 I\n  simp only [zero_add, DLMF.JacobiElliptic.je22a_thetaOne_zero, mul_zero] at h\n  simpa [mul_div_assoc] using h\n\nlemma theta_three_zero : DLMF.Elliptic.jacobiThetaThreeTau ((π : ℂ) * ((1 + I) / 2)) I = 0 := by\n  have h := DLMF.JacobiElliptic.je22a_thetaThree_add_half_pi ((π : ℂ) * (I / 2)) I\n  rw [theta_four_zero] at h\n  convert h using 1 <;> congr 1 <;> ring\n\nlemma counterexample_four : ¬ (∃ S : ℂ,\n    HasSum (fun j : ℕ => thetaGamma (2 * (j + 1)) I * (I / 2) ^ (2 * (j + 1)) /\n      (2 * (j + 1))) S ∧\n    DLMF.Elliptic.jacobiThetaFourTau ((π : ℂ) * (I / 2)) I =\n      jacobiThetaFourNullTau I * cexp (-S)) := by\n  rintro ⟨S, _, h⟩\n  rw [theta_four_zero] at h\n  exact (mul_ne_zero (DLMF.JacobiElliptic.je22a_thetaFour_zero_ne_zero (by norm_num : 0 < I.im)) (exp_ne_zero _)) h.symm\n\nlemma counterexample_three : ¬ (∃ S : ℂ,\n    HasSum (fun j : ℕ => thetaBeta (2 * (j + 1)) I * ((1 + I) / 2) ^ (2 * (j + 1)) /\n      (2 * (j + 1))) S ∧\n    DLMF.Elliptic.jacobiThetaThreeTau ((π : ℂ) * ((1 + I) / 2)) I =\n      jacobiThetaThreeNullTau I * cexp (-S)) := by\n  rintro ⟨S, _, h⟩\n  rw [theta_three_zero] at h\n  exact (mul_ne_zero (DLMF.JacobiElliptic.je22a_thetaThree_zero_ne_zero (by norm_num : 0 < I.im)) (exp_ne_zero _)) h.symm\n\n#print axioms condition\n#print axioms counterexample\n#print axioms condition_three\n#print axioms condition_four\n#print axioms counterexample_three\n#print axioms counterexample_four\nend DLMF.Theta\n",
+        "axiomAudit": "/tmp/DLMF-theta-radius-counterexample.lean:11:4: warning: `push_neg` has been deprecated. Prefer using `push Not` instead.\nIf you'd rather continue using `push_neg` in your project, you can implement it as follows:\n```\nopen Lean.Parser.Tactic in\nmacro \"push_neg\" cfg:optConfig loc:(location)? : tactic =>\n  `(tactic| push $cfg:optConfig Not $[$loc]?)\n```\n/tmp/DLMF-theta-radius-counterexample.lean:22:14: warning: This simp argument is unused:\n  zero_mul\n\nHint: Omit it from the simp argument list.\n  [apply] simp only [normSq_apply, add_re, add_im, intCast_re, intCast_im, mul_re, mul_im, I_re, I_im, mul_zero,\n    mul_one, sub_zero, zero_add, add_zero] at hn\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n/tmp/DLMF-theta-radius-counterexample.lean:26:2: warning: Try this: \n  letI̵\n\nThe goal is a proposition, so `let` is preferred over `letI`.\nThe difference between `let` and `letI` is that `letI` inlines the value.\nBut this is not relevant for proofs because of proof irrelevance.\n\nNote: This linter can be disabled with `set_option linter.style.haveILetI false`\n/tmp/DLMF-theta-radius-counterexample.lean:40:48: warning: This simp argument is unused:\n  mul_zero\n\nHint: Omit it from the simp argument list.\n  [apply] simp only [Int.cast_zero, zero_mul, zero_add, neg_zero] at h0\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n/tmp/DLMF-theta-radius-counterexample.lean:40:58: warning: This simp argument is unused:\n  neg_zero\n\nHint: Omit it from the simp argument list.\n  [apply] simp only [Int.cast_zero, zero_mul, zero_add, mul_zero] at h0\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n/tmp/DLMF-theta-radius-counterexample.lean:78:20: warning: Unused tactic linter: `<;>` should be replaced with `;` or be removed.\n\nNote: This linter can be disabled with `set_option linter.unusedTactic false`\n/tmp/DLMF-theta-radius-counterexample.lean:78:32: warning: Unused tactic linter: `<;>` should be replaced with `;` or be removed.\n\nNote: This linter can be disabled with `set_option linter.unusedTactic false`\n/tmp/DLMF-theta-radius-counterexample.lean:78:20: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice\n\nNote: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`\n/tmp/DLMF-theta-radius-counterexample.lean:78:32: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice\n\nNote: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`\n'DLMF.Theta.condition' depends on axioms: [propext, Classical.choice, Quot.sound]\n'DLMF.Theta.counterexample' depends on axioms: [propext, Classical.choice, Quot.sound]\n'DLMF.Theta.condition_three' depends on axioms: [propext, Classical.choice, Quot.sound]\n'DLMF.Theta.condition_four' depends on axioms: [propext, Classical.choice, Quot.sound]\n'DLMF.Theta.counterexample_three' depends on axioms: [propext, Classical.choice, Quot.sound]\n'DLMF.Theta.counterexample_four' depends on axioms: [propext, Classical.choice, Quot.sound]\n"
+      },
+      {
+        "name": "DLMF.EllipticIntegrals.symEllIntRC_sq_eq",
+        "status": "Analytical branch counterexample; not formalized in Lean; statement retained",
+        "detail": "At x=-I,y=1 the hypotheses permit the point. The left RC(-1,1) integral has strictly negative imaginary part, whereas the transformed RC(-I/2,(1-I)/2) integrand has strictly positive imaginary part. Both converge, including the integrable left square-root singularity at t=1. The strict-half-plane variant is already proved as symEllIntRC_sq."
+      },
+      {
+        "name": "DLMF.EllipticIntegrals.symEllIntR_half_hasSum_mean",
+        "status": "Lean counterexample, using only standard axioms; original statement retained",
+        "detail": "For n=2,a=1 take z0=(-3200-798*i)/169 and z1=(-1120+3102*i)/169. Their mean A=(-2160+1152*i)/169 lies in the slit plane and the normalized deviations have norm 65/72<1. Original and normalized principal square roots give opposite signs in the asserted homogeneity. The current assumptions do not prevent this branch mismatch.",
+        "reproductionSource": "import DLMF.EllipticIntegrals.SymmetricSpecialCases\nimport DLMF.EllipticIntegrals.SymmetricQuadratic\nopen Complex Set\nopen scoped Real\nnamespace DLMF.EllipticIntegrals\nnoncomputable def branchNodes : Fin 2 → ℂ := ![((7-57*I)/13)^2, ((33+47*I)/13)^2]\nnoncomputable def branchMean : ℂ := (1/(2:ℂ))*∑ i, branchNodes i\nlemma branchMean_eq : branchMean = (-2160+1152*I)/169 := by\n  norm_num [branchMean, branchNodes, Fin.sum_univ_two, Complex.ext_iff,\n    Complex.div_re, Complex.div_im, Complex.mul_re, Complex.mul_im, pow_two]\nlemma branchMean_ne : branchMean ≠ 0 := by\n  rw [branchMean_eq]; norm_num [Complex.ext_iff, Complex.div_re, Complex.div_im]\nlemma branchNorm_eq : (fun i => branchNodes i / branchMean) =\n    ![((13+5*I)/12)^2, ((13-5*I)/12)^2] := by\n  rw [branchMean_eq]; ext i; fin_cases i <;>\n    norm_num [branchNodes, Complex.ext_iff, pow_two, Complex.div_re, Complex.div_im,\n      Complex.mul_re, Complex.mul_im, Complex.normSq]\nlemma branch_domain : branchNodes ∈ Carlson.carlsonRSlitDomain := by\n  intro i; fin_cases i <;> apply ei19c_sq_mem_slitPlane <;>\n    norm_num [branchNodes, Complex.div_re]\nlemma branchMean_slit : branchMean ∈ slitPlane := by\n  apply mem_slitPlane_iff.mpr (Or.inr ?_)\n  rw [branchMean_eq]\n  norm_num [Complex.div_im]\nlemma branchNorm_close (i : Fin 2) : ‖1-branchNodes i / branchMean‖ < 1 := by\n  have he := congrFun branchNorm_eq i\n  rw [he]; fin_cases i <;>\n    norm_num [Complex.ext_iff, pow_two, Complex.norm_def, Complex.normSq, Complex.div_re,\n      Complex.div_im, Complex.mul_re, Complex.mul_im, Real.sqrt_div]\nlemma testMean_counterexample : symEllIntR 1 (fun _ : Fin 2 => 1/2) branchNodes ≠\n    branchMean⁻¹ * symEllIntR 1 (fun _ : Fin 2 => 1/2)\n      (fun i => branchNodes i / branchMean) := by\n  have hR {u v : ℂ} (hu : 0<u.re) (hv : 0<v.re) :\n      symEllIntR 1 (fun _ : Fin 2 => 1/2) ![u^2,v^2] = u⁻¹*v⁻¹ := by\n    have hc : (∑ _ : Fin 2, (1/2:ℂ)) = 1 := by norm_num\n    have h := symEllIntR_sum (fun _ : Fin 2 => (1/2:ℂ))\n      (ei19c_slit2 (ei19c_sq_mem_slitPlane hu) (ei19c_sq_mem_slitPlane hv))\n      (by rw [hc, Gamma_one]; norm_num)\n    rw [hc] at h\n    rw [h]\n    simp only [Fin.prod_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one,\n      cpow_neg, show (1/2:ℂ) = 2⁻¹ by norm_num, sq_cpow_two_inv hu, sq_cpow_two_inv hv]\n  rw [branchNorm_eq]\n  change symEllIntR 1 (fun _ : Fin 2 => 1/2) ![((7-57*I)/13)^2, ((33+47*I)/13)^2] ≠ _\n  rw [hR (by norm_num [Complex.div_re]) (by norm_num [Complex.div_re]),\n    hR (by norm_num [Complex.div_re]) (by norm_num [Complex.div_re]), branchMean_eq]\n  norm_num [Complex.ext_iff, Complex.div_re, Complex.div_im, Complex.mul_re, Complex.mul_im,\n    Complex.inv_re, Complex.inv_im, Complex.normSq]\n#print axioms testMean_counterexample\nend DLMF.EllipticIntegrals\nnamespace DLMF.EllipticIntegrals\nlemma testMean_hasSum_false : ¬ HasSum\n    (fun N => branchMean ^ (-(1:ℂ)) * ((ascPochhammer ℂ N).eval 1 /\n      (ascPochhammer ℂ N).eval ((2:ℂ)/2) *\n        symEllIntT N (fun _ : Fin 2 => 1/2) (fun j => 1-branchNodes j / branchMean)))\n    (symEllIntR 1 (fun _ : Fin 2 => 1/2) branchNodes) := by\n  intro H\n  have h := (symEllIntR_hasSum_T 1 (fun _ : Fin 2 => (1/2:ℂ))\n    (fun j => branchNodes j / branchMean) (by norm_num [Fin.sum_univ_two])\n    branchNorm_close).mul_left (branchMean ^ (-(1:ℂ)))\n  have hs : (∑ _ : Fin 2, (1/2:ℂ)) = (2:ℂ)/2 := by norm_num\n  rw [hs] at h\n  have he := H.unique h\n  apply testMean_counterexample\n  simpa only [cpow_neg_one] using he\n#print axioms testMean_hasSum_false\nend DLMF.EllipticIntegrals\n#print axioms DLMF.EllipticIntegrals.branchMean_slit\n#print axioms DLMF.EllipticIntegrals.branchNorm_close\n",
+        "axiomAudit": "'DLMF.EllipticIntegrals.testMean_counterexample' depends on axioms: [propext, Classical.choice, Quot.sound]\n'DLMF.EllipticIntegrals.testMean_hasSum_false' depends on axioms: [propext, Classical.choice, Quot.sound]\n'DLMF.EllipticIntegrals.branchMean_slit' depends on axioms: [propext, Classical.choice, Quot.sound]\n'DLMF.EllipticIntegrals.branchNorm_close' depends on axioms: [propext, Classical.choice, Quot.sound]\n"
+      }
+    ],
+    "additionalReviewConcern": "hasDerivAt_integral_variable_limits and hasDerivAt_improper_integral_of_tendstoUniformlyOn assume continuity of totalized deriv values without explicitly asserting the underlying partial derivatives exist. Check this transcription before proof work; no formal counterexample or correction is claimed in this round."
+  },
+  "remainingPriorities": [
+    "Further Appell reductions, PDEs and Horn boundary convergence using the new differentiation and Gamma-pair APIs",
+    "Inverse elementary-function Taylor expansions and remaining integral identities",
+    "Repeated-parameter asymptotic coefficient cancellation",
+    "Carlson principal-value bridges and RD/RJ duplication",
+    "Remaining q-product and Jackson classical-limit identities",
+    "Review shifted-theta radii, the RC boundary and the new mean-centered R branch counterexample",
+    "Finite Dixon/Watson identities, nonterminating Dougall and q-polynomial orthogonality",
+    "Incomplete-Gamma all-order cancellation and derivative-specific Airy bounds"
+  ],
+  "reorganizedProofs": [
+    {
+      "name": "Complex.trigR4_coeff_unique_ball",
+      "change": "Reuses the shared scalar-to-multilinear series adapter."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.hasSum_iteratedDeriv_powerSeries",
+      "change": "Shortened using the same scalar-series adapter."
+    },
+    {
+      "module": "DLMF.Elementary.Trigonometric.LogarithmicSeries",
+      "change": "Existing logarithmic Bernoulli declarations retain their names and statements when moved from DirectIdentities; the log-cos proof is retained and the two former admissions are proved in the new file."
+    }
+  ]
+}

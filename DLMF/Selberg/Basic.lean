@@ -5,9 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
-public import DLMF.Selberg.Basic.IntegrationByParts
-public import DLMF.Selberg.Basic.DimensionAndParameters
-public import DLMF.Selberg.Basic.ContinuationAndAomoto
+public import DLMF.Selberg.Basic.Integrands
+public import DLMF.Selberg.Basic.Parameters
 
 /-!
 # The Selberg and Aomoto integrals (AAR §§8.1–8.4)
@@ -35,4 +34,6 @@ dimension, and extend to the full domain of convergence by analytic continuation
    theorem** for Mellin transforms of positive measures
    (`integrable_mul_rpow_of_analytic`), after which the identity theorem gives
    `selberg_integral`.
+
+The evaluation proof is organized in `DLMF.Selberg.IntegrationByParts`, `DimensionAndParameters` and `ContinuationAndAomoto`.
 -/

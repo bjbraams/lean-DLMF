@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AlgebraicAnalytic.ContinuedFractions.Defs
+public import DLMF.AlgebraicAnalytic.ContinuedFractions.Basic
 
 /-!
 # Convergents of continued fractions (DLMF §§1.12(ii)–1.12(iv))

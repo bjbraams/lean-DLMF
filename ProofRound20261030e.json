@@ -1,0 +1,1228 @@
+{
+  "format": 1,
+  "date": "2026-10-30",
+  "round": "holder-minkowski-inverse-series-horn-pdes-and-elliptic-bounds",
+  "baseCommit": "2f7efb7a9b8ab22bd9089f6b512bcaf2b6cc7048",
+  "baseline": {
+    "previousRound": "ProofRound20261030d.json",
+    "directAdmissions": 1576
+  },
+  "admissions": {
+    "before": 1576,
+    "after": 1562,
+    "removed": 14,
+    "filesWithAdmissions": 291,
+    "byArea": {
+      "AlgebraicAnalytic": {
+        "before": 212,
+        "after": 207
+      },
+      "Elementary": {
+        "before": 51,
+        "after": 47
+      },
+      "EllipticIntegrals": {
+        "before": 174,
+        "after": 170
+      },
+      "GeneralizedHypergeometric": {
+        "before": 100,
+        "after": 99
+      }
+    }
+  },
+  "completed": [
+    {
+      "name": "DLMF.AlgebraicAnalytic.inner_eq_Lp_mul_Lq_iff",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+      "line": 168,
+      "proofLines": 35,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.7.2, equality case (corrected): for `p > 1`, `1/p + 1/q = 1` and `aⱼ, bⱼ ≥ 0`,\nequality holds in Hölder's inequality iff `A aⱼᵖ = B bⱼ^q` for all `j`, with `A`, `B` not both\nzero."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.Lp_add_eq_iff",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+      "line": 423,
+      "proofLines": 27,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.7.3, equality case (corrected): for `p > 0`, `p ≠ 1` and `aⱼ, bⱼ ≥ 0`, equality holds\nin Minkowski's inequality iff `A aⱼ = B bⱼ` for all `j`, with `A`, `B` not both zero."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.integral_mul_eq_Lp_mul_Lq_iff",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+      "line": 570,
+      "proofLines": 49,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.7.5, equality case: for `p > 1`, `1/p + 1/q = 1` and `f, g ≥ 0` with `fᵖ`, `g^q`\nintegrable, equality holds in Hölder's inequality iff `A fᵖ = B g^q` almost everywhere, with\n`A`, `B` not both zero."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.integral_add_rpow_eq_iff",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+      "line": 896,
+      "proofLines": 36,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.7.6, equality case: for `p > 0`, `p ≠ 1`, equality holds in Minkowski's inequality\niff `A f = B g` almost everywhere, with `A`, `B` not both zero."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.setIntegral_withDensity_add_dirac",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/OneVariable.lean",
+      "line": 201,
+      "proofLines": 18,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.4.23_3: for the mixed measure `dα = w dx + ∑ₙ wₙ δ(x - xₙ) dx` with mass points\n`xₙ ∈ (a, b)`, `∫ₐᵇ f dα = ∫ₐᵇ w f dx + ∑ₙ wₙ f(xₙ)`; `f w` is assumed integrable on `(a, b)`\n(`f` continuous on `[a, b]` and `w` integrable suffice)."
+    },
+    {
+      "name": "DLMF.Elementary.hasSum_arctanh_transformed",
+      "file": "DLMF/Elementary/Hyperbolic/InverseIdentities.lean",
+      "line": 171,
+      "proofLines": 43,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The factorial-coefficient expansion of the principal `arctanh` quotient on\n`Re (z²) < 1/2`, normalized to one at zero."
+    },
+    {
+      "name": "DLMF.Elementary.hasSum_arcsin_principal",
+      "file": "DLMF/Elementary/Trigonometric/InverseIdentities.lean",
+      "line": 582,
+      "proofLines": 32,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The central-binomial expansion of the principal arcsine converges absolutely\non the closed unit disk, including both branch points."
+    },
+    {
+      "name": "DLMF.Elementary.hasSum_arccos_principal",
+      "file": "DLMF/Elementary/Trigonometric/InverseIdentities.lean",
+      "line": 726,
+      "proofLines": 9,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Arccosine series after factoring its square root, with the removable center handled separately."
+    },
+    {
+      "name": "DLMF.Elementary.hasSum_arctan_euler",
+      "file": "DLMF/Elementary/Trigonometric/InverseIdentities.lean",
+      "line": 952,
+      "proofLines": 31,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Euler’s transformed arctangent series on `Re (z²) > -1/2`, including the removable value at zero."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.incEllIntFk_div_sin_bounds",
+      "file": "DLMF/EllipticIntegrals/Inequalities.lean",
+      "line": 456,
+      "proofLines": 53,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.9.14: `3/(1 + Δ + cos φ) < F(φ, k)/sin φ < (Δ cos φ)^{-1/3}` for `0 < k < 1`,\n`0 < φ < π/2`."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.tendsto_compEllIntPik",
+      "file": "DLMF/EllipticIntegrals/SpecialCases.lean",
+      "line": 397,
+      "proofLines": 30,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.6.4: for real `k` with `k² < 1`, `Π(α², k) → +∞` as `α² → 1-`; for real\n`α² < 1`, `Π(α², k) → +∞` as `k² → 1-` (`∞ · sign(1 - α²)`; the case `α² > 1` is in 19.6.6)."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRG_zero_bounds",
+      "file": "DLMF/EllipticIntegrals/SymmetricInequalities.lean",
+      "line": 136,
+      "proofLines": 44,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.24.2: `1/2 ≤ z^{-1/2} R_G(0, y, z) ≤ π/4` for `0 ≤ y ≤ z`, `z > 0`."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRF_symEllIntRC_bounds",
+      "file": "DLMF/EllipticIntegrals/SymmetricInequalities.lean",
+      "line": 553,
+      "proofLines": 45,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.24.15: `R_C(x, (y + z)/2) ≤ R_F(x, y, z) ≤ R_C(x, √(yz))` for `x ≥ 0` and `y, z > 0`,\nwith equality (in either inequality) iff `y = z`."
+    },
+    {
+      "name": "DLMF.Hypergeometric.hornG2_G3_second_order_pde",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/HornDifferentialEquations.lean",
+      "line": 399,
+      "proofLines": 4,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The Horn G2 and G3 series satisfy their paired second-order Euler-operator equations\non `‖x‖ + ‖y‖ < 1/4`, with all parameters nonintegral."
+    }
+  ],
+  "newHelpers": [
+    {
+      "name": "DLMF.AlgebraicAnalytic.sum_mul_eq_one_iff_of_sum_rpow_eq_one",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+      "line": 120,
+      "proofLines": 8,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Equality in the normalized finite Young inequality holds exactly when the conjugate powers\nagree term by term."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.sum_normalized_rpow",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+      "line": 133,
+      "proofLines": 5,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Dividing a nonzero nonnegative vector by its power-sum norm gives total power mass one."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.div_sum_eq_iff_proportional",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+      "line": 143,
+      "proofLines": 18,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Two finite vectors of nonzero total mass have equal normalized entries exactly when they\nare proportional, allowing arbitrary real proportionality constants."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.sum_strict_jensen_eq_iff",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+      "line": 334,
+      "proofLines": 23,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "For a strictly convex or strictly concave function, equality in a fixed positive\nweighted finite Jensen sum forces the two vectors to agree at every index."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.sum_rpow_add_eq_iff_normalized_eq",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+      "line": 365,
+      "proofLines": 20,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Equality between the power-sum norm of a sum and the sum of two positive normalizing\nfactors is equivalent to equality of the normalized vectors."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.normalized_rpow_sum_eq_iff_proportional",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+      "line": 392,
+      "proofLines": 23,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Two nonzero nonnegative vectors have the same power-norm normalization exactly when\nthey are proportional by real constants."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.integral_mul_eq_one_iff_of_integral_rpow_eq_one",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+      "line": 504,
+      "proofLines": 8,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Equality in the normalized integral Young inequality is equivalent to equality of the\nconjugate powers almost everywhere."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.div_integral_eq_iff_proportional",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+      "line": 520,
+      "proofLines": 18,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Two integrands with nonzero integrals have equal normalized values almost everywhere\nexactly when they are proportional by real constants."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.integral_normalized_rpow",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+      "line": 545,
+      "proofLines": 4,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Normalizing a nonnegative function by its nonzero power-integral norm gives power\nintegral one."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.integrable_rpow_of_nonneg_memLp",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+      "line": 554,
+      "proofLines": 3,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The positive real power of a nonnegative function in the corresponding Lebesgue space\nis integrable."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.ae_eq_zero_of_integral_rpow_eq_zero",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+      "line": 561,
+      "proofLines": 3,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A nonnegative function with zero integral of a positive power vanishes almost everywhere."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.memLp_of_nonneg_integrable_rpow",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+      "line": 775,
+      "proofLines": 7,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Integrability of a positive power of a nonnegative function gives membership in the\ncorresponding Lebesgue space; measurability is recovered by taking the inverse power."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.integral_strict_jensen_eq_iff",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+      "line": 787,
+      "proofLines": 31,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "For a strictly convex or strictly concave function, equality in the integral of a\nfixed positive weighted Jensen combination forces the two inputs to agree almost everywhere."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.integral_rpow_add_eq_iff_normalized_eq",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+      "line": 828,
+      "proofLines": 28,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Equality between the power-integral norm of a sum and the sum of two positive\nnormalizing factors is equivalent to equality of the normalized functions almost everywhere."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.normalized_rpow_integral_eq_iff_proportional",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+      "line": 865,
+      "proofLines": 23,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Two nonnegative functions with nonzero power-integral norms have the same normalization\nalmost everywhere exactly when they are proportional by real constants."
+    },
+    {
+      "name": "DLMF.Elementary.continuousAt_arcsin_principal_of_norm_le_one",
+      "file": "DLMF/Elementary/Trigonometric/InverseBranches.lean",
+      "line": 326,
+      "proofLines": 14,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The principal arcsine is continuous at every point of its closed unit disk,\nincluding the two branch points."
+    },
+    {
+      "name": "DLMF.Elementary.half_poch_coefficient",
+      "file": "DLMF/Elementary/Trigonometric/InverseIdentities.lean",
+      "line": 523,
+      "proofLines": 12,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The half-parameter binomial coefficient is a scaled central binomial coefficient; duplication uses lean-codes."
+    },
+    {
+      "name": "DLMF.Elementary.arcsin_gauss_coefficient",
+      "file": "DLMF/Elementary/Trigonometric/InverseIdentities.lean",
+      "line": 537,
+      "proofLines": 14,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The Gauss coefficient for parameters `(1/2, 1/2; 3/2)` equals the arcsine coefficient."
+    },
+    {
+      "name": "DLMF.Elementary.arcsin_coeff_summable",
+      "file": "DLMF/Elementary/Trigonometric/InverseIdentities.lean",
+      "line": 554,
+      "proofLines": 4,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Gauss convergence at one gives absolute convergence of the arcsine coefficients."
+    },
+    {
+      "name": "DLMF.Elementary.arcsin_series_open",
+      "file": "DLMF/Elementary/Trigonometric/InverseIdentities.lean",
+      "line": 560,
+      "proofLines": 18,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The binomial derivative series integrates to the principal arcsine on the open unit disk."
+    },
+    {
+      "name": "DLMF.Elementary.arccos_half_cut",
+      "file": "DLMF/Elementary/Trigonometric/InverseIdentities.lean",
+      "line": 618,
+      "proofLines": 4,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The principal half-angle logarithm identifies arccosine with twice an arcsine off the cuts."
+    },
+    {
+      "name": "DLMF.Elementary.arcsin_real_cut",
+      "file": "DLMF/Elementary/Trigonometric/InverseIdentities.lean",
+      "line": 624,
+      "proofLines": 8,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The value on the positive real cut agrees with the lower-bank convention."
+    },
+    {
+      "name": "DLMF.Elementary.half_root_norm_le",
+      "file": "DLMF/Elementary/Trigonometric/InverseIdentities.lean",
+      "line": 634,
+      "proofLines": 6,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The principal half-angle square root maps the shifted closed disk into the closed unit disk."
+    },
+    {
+      "name": "DLMF.Elementary.arccos_half_positive_cut",
+      "file": "DLMF/Elementary/Trigonometric/InverseIdentities.lean",
+      "line": 641,
+      "proofLines": 36,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The half-angle identity on the positive cut follows by approaching along the lower bank."
+    },
+    {
+      "name": "DLMF.Elementary.arccos_half_shifted_disk",
+      "file": "DLMF/Elementary/Trigonometric/InverseIdentities.lean",
+      "line": 679,
+      "proofLines": 30,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The principal half-angle identity holds on the whole shifted disk, including its cut values."
+    },
+    {
+      "name": "DLMF.Elementary.sqrt_four_mul",
+      "file": "DLMF/Elementary/Trigonometric/InverseIdentities.lean",
+      "line": 711,
+      "proofLines": 13,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Multiplying by four scales the principal square root by two without changing its argument."
+    },
+    {
+      "name": "DLMF.Elementary.euler_beta_moment",
+      "file": "DLMF/Elementary/Trigonometric/InverseIdentities.lean",
+      "line": 857,
+      "proofLines": 14,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Integer Beta integrals give the factorial moments of the weight `4t(1-t)`."
+    },
+    {
+      "name": "DLMF.Elementary.euler_kernel_series",
+      "file": "DLMF/Elementary/Trigonometric/InverseIdentities.lean",
+      "line": 874,
+      "proofLines": 25,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Integrating a dominated geometric series gives the factorial-coefficient Euler kernel."
+    },
+    {
+      "name": "DLMF.Elementary.arctan_scaled_cut",
+      "file": "DLMF/Elementary/Trigonometric/InverseIdentities.lean",
+      "line": 902,
+      "proofLines": 14,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The parabolic convergence domain remains in the principal arctangent cut plane under real contractions."
+    },
+    {
+      "name": "DLMF.Elementary.euler_arctan_integral",
+      "file": "DLMF/Elementary/Trigonometric/InverseIdentities.lean",
+      "line": 918,
+      "proofLines": 31,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The arctangent derivative evaluates the Euler kernel along the symmetric segment from `-z` to `z`."
+    },
+    {
+      "name": "DLMF.Elliptic.Real.compEllIntPim_param_zero_le",
+      "file": "DLMF/Elliptic/ThirdKind.lean",
+      "line": 159,
+      "proofLines": 10,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "For a nonnegative parameter, the complete third-kind integral is at least its\nvalue at parameter zero; this follows by comparing the positive integrands."
+    },
+    {
+      "name": "DLMF.Elliptic.Real.compEllIntPim_ge_min_mul_compEllIntKm",
+      "file": "DLMF/Elliptic/ThirdKind.lean",
+      "line": 173,
+      "proofLines": 16,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The complete third-kind integral dominates a positive multiple of the first-kind\nintegral: the reciprocal characteristic factor is at least `min 1 (1-n)⁻¹`."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.compEllIntPik_re_ofReal",
+      "file": "DLMF/EllipticIntegrals/SpecialCases.lean",
+      "line": 389,
+      "proofLines": 4,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "On real characteristics below one and real modulus with `k²<1`, the real part\nof the complex complete integral is the real integral in parameter `k²`."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRF_re_integral_and_integrable",
+      "file": "DLMF/EllipticIntegrals/SymmetricInequalities.lean",
+      "line": 500,
+      "proofLines": 18,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "On nonnegative real arguments, `R_F` is its convergent real square-root integral."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRF_RC_kernel_bounds",
+      "file": "DLMF/EllipticIntegrals/SymmetricInequalities.lean",
+      "line": 525,
+      "proofLines": 22,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Replacing two distinct positive arguments by their arithmetic or geometric mean\nstrictly brackets the real `R_F` kernel."
+    },
+    {
+      "name": "DLMF.Hypergeometric.analyticAt_appellThetaX",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/HornDifferentialEquations.lean",
+      "line": 29,
+      "proofLines": 2,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The first Euler operator preserves joint complex analyticity."
+    },
+    {
+      "name": "DLMF.Hypergeometric.analyticAt_appellThetaY",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/HornDifferentialEquations.lean",
+      "line": 35,
+      "proofLines": 2,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The second Euler operator preserves joint complex analyticity."
+    },
+    {
+      "name": "DLMF.Hypergeometric.appellThetaX_sub",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/HornDifferentialEquations.lean",
+      "line": 41,
+      "proofLines": 10,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The first Euler operator distributes over subtraction of analytic functions."
+    },
+    {
+      "name": "DLMF.Hypergeometric.appellThetaX_add",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/HornDifferentialEquations.lean",
+      "line": 57,
+      "proofLines": 10,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The first Euler operator distributes over addition of analytic functions."
+    },
+    {
+      "name": "DLMF.Hypergeometric.appellThetaY_sub",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/HornDifferentialEquations.lean",
+      "line": 73,
+      "proofLines": 8,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The second Euler operator distributes over subtraction of analytic functions."
+    },
+    {
+      "name": "DLMF.Hypergeometric.appellThetaY_add",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/HornDifferentialEquations.lean",
+      "line": 87,
+      "proofLines": 8,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The second Euler operator distributes over addition of analytic functions."
+    },
+    {
+      "name": "DLMF.Hypergeometric.appellThetaX_const_mul",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/HornDifferentialEquations.lean",
+      "line": 101,
+      "proofLines": 4,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The first Euler operator commutes with multiplication by a constant."
+    },
+    {
+      "name": "DLMF.Hypergeometric.appellThetaY_const_mul",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/HornDifferentialEquations.lean",
+      "line": 108,
+      "proofLines": 4,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The second Euler operator commutes with multiplication by a constant."
+    },
+    {
+      "name": "DLMF.Hypergeometric.appellThetaX_twice",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/HornDifferentialEquations.lean",
+      "line": 115,
+      "proofLines": 11,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The square of the first Euler operator expands into first and second partial derivatives."
+    },
+    {
+      "name": "DLMF.Hypergeometric.appellThetaY_twice",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/HornDifferentialEquations.lean",
+      "line": 131,
+      "proofLines": 10,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The square of the second Euler operator expands into first and second partial derivatives."
+    },
+    {
+      "name": "DLMF.Hypergeometric.appellThetaX_appellThetaY",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/HornDifferentialEquations.lean",
+      "line": 146,
+      "proofLines": 4,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The mixed Euler operator equals the mixed partial derivative times `x * y`."
+    },
+    {
+      "name": "DLMF.Hypergeometric.appellThetaY_appellThetaX",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/HornDifferentialEquations.lean",
+      "line": 153,
+      "proofLines": 8,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Joint analyticity identifies the reverse mixed Euler operator with the same mixed partial."
+    },
+    {
+      "name": "DLMF.Hypergeometric.horn_nonint_shift_ne_zero",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/HornDifferentialEquations.lean",
+      "line": 165,
+      "proofLines": 5,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "An integral shift of a nonintegral complex parameter cannot vanish."
+    },
+    {
+      "name": "DLMF.Hypergeometric.hornG2_coeff_recurrence_left",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/HornDifferentialEquations.lean",
+      "line": 173,
+      "proofLines": 18,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Gamma recurrence gives the Horn G2 coefficient relation in the first index."
+    },
+    {
+      "name": "DLMF.Hypergeometric.hornG3_coeff_recurrence_left",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/HornDifferentialEquations.lean",
+      "line": 199,
+      "proofLines": 17,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Two forward gamma shifts and one backward shift give the Horn G3 first-index relation."
+    },
+    {
+      "name": "DLMF.Hypergeometric.horn_series_local_data",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/HornDifferentialEquations.lean",
+      "line": 224,
+      "proofLines": 19,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Absolute convergence on the small diamond gives a larger polydisc majorant and joint\nanalyticity."
+    },
+    {
+      "name": "DLMF.Hypergeometric.hornG2_second_order_pde",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/HornDifferentialEquations.lean",
+      "line": 252,
+      "proofLines": 60,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Horn G2 satisfies its two Euler-operator differential equations on the small diamond\n`‖x‖ + ‖y‖ < 1/4`, for nonintegral parameters."
+    },
+    {
+      "name": "DLMF.Hypergeometric.hornG3_second_order_pde",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/HornDifferentialEquations.lean",
+      "line": 324,
+      "proofLines": 60,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Horn G3 satisfies its two Euler-operator differential equations on the small diamond\n`‖x‖ + ‖y‖ < 1/4`, for nonintegral parameters."
+    },
+    {
+      "name": "Complex.deriv_fst_eq_fderiv",
+      "file": "DLMFMathlib/Analysis/Complex/BivariateCalculus.lean",
+      "line": 27,
+      "proofLines": 3,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A derivative along the first coordinate is evaluation of the Fréchet derivative at `(1, 0)`."
+    },
+    {
+      "name": "Complex.deriv_snd_eq_fderiv",
+      "file": "DLMFMathlib/Analysis/Complex/BivariateCalculus.lean",
+      "line": 34,
+      "proofLines": 3,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A derivative along the second coordinate is evaluation of the Fréchet derivative at `(0, 1)`."
+    },
+    {
+      "name": "Complex.analyticAt_deriv_fst",
+      "file": "DLMFMathlib/Analysis/Complex/BivariateCalculus.lean",
+      "line": 41,
+      "proofLines": 7,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The first coordinate partial derivative of a jointly analytic function is jointly analytic."
+    },
+    {
+      "name": "Complex.analyticAt_deriv_snd",
+      "file": "DLMFMathlib/Analysis/Complex/BivariateCalculus.lean",
+      "line": 52,
+      "proofLines": 7,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The second coordinate partial derivative of a jointly analytic function is jointly analytic."
+    },
+    {
+      "name": "Complex.mixed_x_y_hessian",
+      "file": "DLMFMathlib/Analysis/Complex/BivariateCalculus.lean",
+      "line": 63,
+      "proofLines": 11,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Differentiating first in the second coordinate and then in the first evaluates the Hessian."
+    },
+    {
+      "name": "Complex.mixed_y_x_hessian",
+      "file": "DLMFMathlib/Analysis/Complex/BivariateCalculus.lean",
+      "line": 79,
+      "proofLines": 11,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Differentiating first in the first coordinate and then in the second evaluates the Hessian."
+    },
+    {
+      "name": "Complex.deriv_snd_deriv_fst_comm",
+      "file": "DLMFMathlib/Analysis/Complex/BivariateCalculus.lean",
+      "line": 95,
+      "proofLines": 3,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The mixed coordinate partial derivatives of a jointly complex analytic function commute."
+    },
+    {
+      "name": "Complex.hasSum_even_primitive_on_ball",
+      "file": "DLMFMathlib/Analysis/Complex/TrigR4SeriesExtension.lean",
+      "line": 193,
+      "proofLines": 30,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Integrating an even power series gives the odd series of its primitive normalized at zero."
+    }
+  ],
+  "reusableExistingHelpers": [],
+  "downstreamFreedFromAdmissions": [],
+  "movedDeclarations": [
+    {
+      "name": "hornG2_G3_second_order_pde",
+      "before": "DLMF/GeneralizedHypergeometric/Appell/DefinitionsAndSeries.lean",
+      "after": "DLMF/GeneralizedHypergeometric/Appell/HornDifferentialEquations.lean"
+    }
+  ],
+  "validation": {
+    "fullBuild": "lake build > /tmp/DLMF-build.log 2>&1",
+    "buildJobs": 14750,
+    "strictChecks": [
+      {
+        "file": "DLMF.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030e/strict-DLMF.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030e/strict-DLMF_AlgebraicAnalytic_Calculus_Inequalities.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Calculus/OneVariable.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030e/strict-DLMF_AlgebraicAnalytic_Calculus_OneVariable.lean.log"
+      },
+      {
+        "file": "DLMF/Elementary/Hyperbolic/InverseIdentities.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030e/strict-DLMF_Elementary_Hyperbolic_InverseIdentities.lean.log"
+      },
+      {
+        "file": "DLMF/Elementary/Trigonometric/InverseBranches.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030e/strict-DLMF_Elementary_Trigonometric_InverseBranches.lean.log"
+      },
+      {
+        "file": "DLMF/Elementary/Trigonometric/InverseIdentities.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030e/strict-DLMF_Elementary_Trigonometric_InverseIdentities.lean.log"
+      },
+      {
+        "file": "DLMF/Elliptic/ThirdKind.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030e/strict-DLMF_Elliptic_ThirdKind.lean.log"
+      },
+      {
+        "file": "DLMF/EllipticIntegrals/Inequalities.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030e/strict-DLMF_EllipticIntegrals_Inequalities.lean.log"
+      },
+      {
+        "file": "DLMF/EllipticIntegrals/SpecialCases.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030e/strict-DLMF_EllipticIntegrals_SpecialCases.lean.log"
+      },
+      {
+        "file": "DLMF/EllipticIntegrals/SymmetricInequalities.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030e/strict-DLMF_EllipticIntegrals_SymmetricInequalities.lean.log"
+      },
+      {
+        "file": "DLMF/GeneralizedHypergeometric/Appell.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030e/strict-DLMF_GeneralizedHypergeometric_Appell.lean.log"
+      },
+      {
+        "file": "DLMF/GeneralizedHypergeometric/Appell/DefinitionsAndSeries.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030e/strict-DLMF_GeneralizedHypergeometric_Appell_DefinitionsAndSeries.lean.log"
+      },
+      {
+        "file": "DLMF/GeneralizedHypergeometric/Appell/HornDifferentialEquations.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030e/strict-DLMF_GeneralizedHypergeometric_Appell_HornDifferentialEquations.lean.log"
+      },
+      {
+        "file": "DLMFMathlib.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030e/strict-DLMFMathlib.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Complex/BivariateCalculus.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030e/strict-DLMFMathlib_Analysis_Complex_BivariateCalculus.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Complex/TrigR4SeriesExtension.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030e/strict-DLMFMathlib_Analysis_Complex_TrigR4SeriesExtension.lean.log"
+      },
+      {
+        "file": "Main.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030e/strict-Main.lean.log"
+      }
+    ],
+    "globalAxioms": {
+      "dependingOnAdmissions": 1667,
+      "nonstandard": [],
+      "theorems": 56694
+    },
+    "tagSummary": {
+      "proved": 8741,
+      "pointers": 1028,
+      "nonstandard": 0,
+      "entries": 10703,
+      "admitted": 1962
+    },
+    "sourceStatementChanges": [
+      {
+        "file": "DLMF/AlgebraicAnalytic/Calculus/OneVariable.lean",
+        "name": "setIntegral_withDensity_add_dirac"
+      }
+    ],
+    "sourceDefinitionChanges": [],
+    "compiledPublicTypeChanges": [
+      "DLMF.AlgebraicAnalytic.setIntegral_withDensity_add_dirac"
+    ],
+    "maxChangedProofLines": 60,
+    "maxLibraryFileLines": 1454,
+    "newDeclarationsWithoutDocs": [],
+    "newExactUpstreamMatches": [],
+    "removedPublicDeclarations": [],
+    "imports": {
+      "newTwoWayPairs": [],
+      "newDefinitionsImports": [],
+      "twoWayPairs": 15,
+      "definitionsImports": 20,
+      "newCrossAreaPairs": [
+        [
+          "Elementary",
+          "Hypergeometric"
+        ]
+      ],
+      "baseline": "Beginning-of-round source snapshot from ProofRound20261030d"
+    },
+    "changedLeanFiles": [
+      "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+      "DLMF/AlgebraicAnalytic/Calculus/OneVariable.lean",
+      "DLMF/Elementary/Hyperbolic/InverseIdentities.lean",
+      "DLMF/Elementary/Trigonometric/InverseBranches.lean",
+      "DLMF/Elementary/Trigonometric/InverseIdentities.lean",
+      "DLMF/Elliptic/ThirdKind.lean",
+      "DLMF/EllipticIntegrals/Inequalities.lean",
+      "DLMF/EllipticIntegrals/SpecialCases.lean",
+      "DLMF/EllipticIntegrals/SymmetricInequalities.lean",
+      "DLMF/GeneralizedHypergeometric/Appell.lean",
+      "DLMF/GeneralizedHypergeometric/Appell/DefinitionsAndSeries.lean",
+      "DLMF/GeneralizedHypergeometric/Appell/HornDifferentialEquations.lean",
+      "DLMFMathlib.lean",
+      "DLMFMathlib/Analysis/Complex/BivariateCalculus.lean",
+      "DLMFMathlib/Analysis/Complex/TrigR4SeriesExtension.lean"
+    ],
+    "compiledDeclarationCount": 26964,
+    "newSourceDeclarations": 61,
+    "affectedSourceSorryScan": "passed",
+    "diffCheck": "passed",
+    "allCompletedProofsStandardAxioms": true,
+    "allNewHelpersStandardAxioms": true,
+    "ledgerRefresh": {
+      "files": [
+        "DLMF1Acquisition.md",
+        "DLMF4Acquisition.md",
+        "DLMF16Acquisition.md",
+        "DLMF19Acquisition.md"
+      ],
+      "note": "Refreshes may include stale statuses and moved source references; admission counts are measured separately from source and compiled axiom comparisons."
+    }
+  },
+  "statementCorrections": [
+    {
+      "name": "DLMF.AlgebraicAnalytic.setIntegral_withDensity_add_dirac",
+      "reason": "Missing parentheses placed the finite atomic contribution inside the Lebesgue integral instead of after it.",
+      "correction": "Parenthesize the continuous integral before adding the finite atomic sum; this agrees with DLMF1.4.E23_3 and the existing docstring.",
+      "counterexample": "w = 0, one mass of weight 1 at x = 1, interval (0,2), f = 1. All original assumptions hold; the former conclusion asserts 1 = 2.",
+      "counterexampleSource": "import DLMF.AlgebraicAnalytic.Calculus.OneVariable\nopen Set MeasureTheory\nopen scoped NNReal ENNReal\nlemma mixed_stieltjes_counterexample :\n    (∫ _ in Ioo (0 : ℝ) 2, (1 : ℝ) ∂(volume.withDensity (fun _ => (0 : ℝ≥0∞)) +\n        ∑ _ : Fin 1, (1 : ℝ≥0∞) • Measure.dirac (1 : ℝ))) ≠\n      (∫ _ in Ioo (0 : ℝ) 2, (0 : ℝ) * 1 + ∑ _ : Fin 1, (1 : ℝ) * 1) := by\n  norm_num [integral_const, Measure.real, Real.volume_Ioo, setIntegral_dirac]\n\n#print axioms mixed_stieltjes_counterexample\n\nlemma mixed_stieltjes_counterexample_hypotheses :\n    Measurable (fun _ : ℝ => (0 : ℝ≥0)) ∧\n    (∀ _ : Fin 1, (1 : ℝ) ∈ Ioo (0 : ℝ) 2) ∧\n    Measurable (fun _ : ℝ => (1 : ℝ)) ∧\n    IntegrableOn (fun _ : ℝ => (0 : ℝ) * 1) (Ioo (0 : ℝ) 2) := by\n  exact ⟨measurable_const, fun _ => by norm_num, measurable_const, by simp⟩\n\n#print axioms mixed_stieltjes_counterexample_hypotheses\n",
+      "counterexampleLog": "'mixed_stieltjes_counterexample' depends on axioms: [propext, Classical.choice, Quot.sound]\n'mixed_stieltjes_counterexample_hypotheses' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "callers": "No source callers of the former statement."
+    }
+  ],
+  "statementIssues": {
+    "previousIssuesRetained": [
+      "liouvilleGreen_interval_isEquivalent: finite-endpoint uniqueness is false",
+      "picard_great: missing positive outer radius",
+      "prod_mtest_log: tail-only bounds do not give global uniform convergence",
+      "haar_isLittleO_pow: separate derivatives need compatibility",
+      "hasCesaroSumOfOrder_of_tendsto: negative-order regularity requires review"
+    ],
+    "definitionConventions": [
+      "narayana 0 0 = 0 locally, whereas DLMF Table 26.6.3 gives 1; the path-count theorem assumes n >= 1 and this round changes no definition."
+    ],
+    "duplicationCandidates": [
+      "periodicBernoulliB versus periodicBernoulli, and periodicEulerE versus antiperiodicEuler"
+    ],
+    "newIssues": [
+      {
+        "names": [
+          "DLMF.Theta.jacobiThetaTwoTau_powerSeries",
+          "DLMF.Theta.jacobiThetaThreeTau_powerSeries",
+          "DLMF.Theta.jacobiThetaFourTau_powerSeries"
+        ],
+        "status": "Lean counterexamples, using only standard axioms; original statements retained",
+        "detail": "The common unshifted lattice radius includes zeros of theta2, theta3 and theta4. At tau=I use z=1/2, (1+I)/2 and I/2 respectively. The null values and complex exponentials on the right are nonzero.",
+        "reproductionSource": "import DLMF.Theta.PowerSeries\nimport DLMF.JacobiElliptic.Basic.QuarterPeriods\nopen Complex Set\nopen scoped Real\nnamespace DLMF.Theta\n\nlemma lattice_norm_ge (p : {p : ℤ × ℤ // p ≠ 0}) :\n    1 ≤ ‖((p.1.1 : ℂ) + p.1.2 * I)‖ := by\n  have hp : p.1.1 ≠ 0 ∨ p.1.2 ≠ 0 := by\n    by_contra h\n    push_neg at h\n    exact p.2 (Prod.ext h.1 h.2)\n  have hi : (1 : ℤ) ≤ p.1.1 ^ 2 + p.1.2 ^ 2 := by\n    rcases hp with h | h\n    · have h2 : p.1.1 ≤ -1 ∨ 1 ≤ p.1.1 := by omega\n      rcases h2 with h2 | h2 <;> nlinarith [sq_nonneg p.1.2]\n    · have h2 : p.1.2 ≤ -1 ∨ 1 ≤ p.1.2 := by omega\n      rcases h2 with h2 | h2 <;> nlinarith [sq_nonneg p.1.1]\n  have hr : (1 : ℝ) ≤ (p.1.1 : ℝ) ^ 2 + (p.1.2 : ℝ) ^ 2 := by exact_mod_cast hi\n  have hn := Complex.sq_norm ((p.1.1 : ℂ) + p.1.2 * I)\n  simp only [normSq_apply, add_re, add_im, intCast_re, intCast_im, mul_re, mul_im, I_re, I_im,\n    mul_zero, zero_mul, mul_one, sub_zero, zero_add, add_zero] at hn\n  nlinarith [norm_nonneg ((p.1.1 : ℂ) + p.1.2 * I)]\n\nlemma radius_ge : Real.pi ≤ thetaLatticeMinNorm I := by\n  letI : Nonempty {p : ℤ × ℤ // p ≠ 0} := ⟨⟨(1,0), by decide⟩⟩\n  apply le_ciInf\n  intro p\n  rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg Real.pi_pos.le]\n  nlinarith [lattice_norm_ge p, Real.pi_pos]\n\nlemma condition : ‖(π : ℂ) * (1 / 2 : ℂ)‖ < thetaLatticeMinNorm I := by\n  calc ‖(π : ℂ) * (1 / 2 : ℂ)‖ = Real.pi / 2 := by simp [div_eq_mul_inv, Real.norm_of_nonneg Real.pi_pos.le]\n    _ < Real.pi := by linarith [Real.pi_pos]\n    _ ≤ _ := radius_ge\n\nlemma theta_two_zero : DLMF.Elliptic.jacobiThetaTwoTau ((π : ℂ) * (1 / 2 : ℂ)) I = 0 := by\n  have h := DLMF.JacobiElliptic.je22a_thetaTwo_add_half_pi 0 I\n  have h0 := DLMF.Theta.jacobiThetaOneTau_lattice_eq_zero I 0 0\n  simp only [Int.cast_zero, zero_mul, zero_add, mul_zero, neg_zero] at h0\n  simpa [h0, div_eq_mul_inv] using h\n\nlemma counterexample : ¬ (∃ S : ℂ,\n    HasSum (fun j : ℕ => thetaAlpha (2 * (j + 1)) I * (1 / 2 : ℂ) ^ (2 * (j + 1)) /\n      (2 * (j + 1))) S ∧\n    DLMF.Elliptic.jacobiThetaTwoTau ((π : ℂ) * (1 / 2 : ℂ)) I =\n      jacobiThetaTwoNullTau I * cexp (-S)) := by\n  rintro ⟨S, _, h⟩\n  rw [theta_two_zero] at h\n  exact (mul_ne_zero (DLMF.JacobiElliptic.je22a_thetaTwo_zero_ne_zero (by norm_num : 0 < I.im)) (exp_ne_zero _)) h.symm\n\n\nlemma condition_four : ‖(π : ℂ) * (I / 2)‖ < thetaLatticeMinNorm I := by\n  calc ‖(π : ℂ) * (I / 2)‖ = Real.pi / 2 := by\n         simp [div_eq_mul_inv, Real.norm_of_nonneg Real.pi_pos.le]\n       _ < Real.pi := by linarith [Real.pi_pos]\n       _ ≤ _ := radius_ge\n\nlemma condition_three : ‖(π : ℂ) * ((1 + I) / 2)‖ < thetaLatticeMinNorm I := by\n  have hn : ‖((1 + I) / 2 : ℂ)‖ < 1 := by\n    have h := Complex.sq_norm ((1 + I) / 2 : ℂ)\n    norm_num [normSq_apply, div_re, div_im] at h\n    rw [norm_div, Complex.norm_ofNat]\n    nlinarith [norm_nonneg (1 + I : ℂ)]\n  calc ‖(π : ℂ) * ((1 + I) / 2)‖ = Real.pi * ‖((1 + I) / 2 : ℂ)‖ := by\n         rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg Real.pi_pos.le]\n       _ < Real.pi := by nlinarith [Real.pi_pos]\n       _ ≤ _ := radius_ge\n\nlemma theta_four_zero : DLMF.Elliptic.jacobiThetaFourTau ((π : ℂ) * (I / 2)) I = 0 := by\n  have h := DLMF.JacobiElliptic.je22a_thetaFour_add_half_tau 0 I\n  simp only [zero_add, DLMF.JacobiElliptic.je22a_thetaOne_zero, mul_zero] at h\n  simpa [mul_div_assoc] using h\n\nlemma theta_three_zero : DLMF.Elliptic.jacobiThetaThreeTau ((π : ℂ) * ((1 + I) / 2)) I = 0 := by\n  have h := DLMF.JacobiElliptic.je22a_thetaThree_add_half_pi ((π : ℂ) * (I / 2)) I\n  rw [theta_four_zero] at h\n  convert h using 1 <;> congr 1 <;> ring\n\nlemma counterexample_four : ¬ (∃ S : ℂ,\n    HasSum (fun j : ℕ => thetaGamma (2 * (j + 1)) I * (I / 2) ^ (2 * (j + 1)) /\n      (2 * (j + 1))) S ∧\n    DLMF.Elliptic.jacobiThetaFourTau ((π : ℂ) * (I / 2)) I =\n      jacobiThetaFourNullTau I * cexp (-S)) := by\n  rintro ⟨S, _, h⟩\n  rw [theta_four_zero] at h\n  exact (mul_ne_zero (DLMF.JacobiElliptic.je22a_thetaFour_zero_ne_zero (by norm_num : 0 < I.im)) (exp_ne_zero _)) h.symm\n\nlemma counterexample_three : ¬ (∃ S : ℂ,\n    HasSum (fun j : ℕ => thetaBeta (2 * (j + 1)) I * ((1 + I) / 2) ^ (2 * (j + 1)) /\n      (2 * (j + 1))) S ∧\n    DLMF.Elliptic.jacobiThetaThreeTau ((π : ℂ) * ((1 + I) / 2)) I =\n      jacobiThetaThreeNullTau I * cexp (-S)) := by\n  rintro ⟨S, _, h⟩\n  rw [theta_three_zero] at h\n  exact (mul_ne_zero (DLMF.JacobiElliptic.je22a_thetaThree_zero_ne_zero (by norm_num : 0 < I.im)) (exp_ne_zero _)) h.symm\n\n#print axioms condition\n#print axioms counterexample\n#print axioms condition_three\n#print axioms condition_four\n#print axioms counterexample_three\n#print axioms counterexample_four\nend DLMF.Theta\n",
+        "axiomAudit": "/tmp/DLMF-theta-radius-counterexample.lean:11:4: warning: `push_neg` has been deprecated. Prefer using `push Not` instead.\nIf you'd rather continue using `push_neg` in your project, you can implement it as follows:\n```\nopen Lean.Parser.Tactic in\nmacro \"push_neg\" cfg:optConfig loc:(location)? : tactic =>\n  `(tactic| push $cfg:optConfig Not $[$loc]?)\n```\n/tmp/DLMF-theta-radius-counterexample.lean:22:14: warning: This simp argument is unused:\n  zero_mul\n\nHint: Omit it from the simp argument list.\n  [apply] simp only [normSq_apply, add_re, add_im, intCast_re, intCast_im, mul_re, mul_im, I_re, I_im, mul_zero,\n    mul_one, sub_zero, zero_add, add_zero] at hn\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n/tmp/DLMF-theta-radius-counterexample.lean:26:2: warning: Try this: \n  letI̵\n\nThe goal is a proposition, so `let` is preferred over `letI`.\nThe difference between `let` and `letI` is that `letI` inlines the value.\nBut this is not relevant for proofs because of proof irrelevance.\n\nNote: This linter can be disabled with `set_option linter.style.haveILetI false`\n/tmp/DLMF-theta-radius-counterexample.lean:40:48: warning: This simp argument is unused:\n  mul_zero\n\nHint: Omit it from the simp argument list.\n  [apply] simp only [Int.cast_zero, zero_mul, zero_add, neg_zero] at h0\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n/tmp/DLMF-theta-radius-counterexample.lean:40:58: warning: This simp argument is unused:\n  neg_zero\n\nHint: Omit it from the simp argument list.\n  [apply] simp only [Int.cast_zero, zero_mul, zero_add, mul_zero] at h0\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n/tmp/DLMF-theta-radius-counterexample.lean:78:20: warning: Unused tactic linter: `<;>` should be replaced with `;` or be removed.\n\nNote: This linter can be disabled with `set_option linter.unusedTactic false`\n/tmp/DLMF-theta-radius-counterexample.lean:78:32: warning: Unused tactic linter: `<;>` should be replaced with `;` or be removed.\n\nNote: This linter can be disabled with `set_option linter.unusedTactic false`\n/tmp/DLMF-theta-radius-counterexample.lean:78:20: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice\n\nNote: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`\n/tmp/DLMF-theta-radius-counterexample.lean:78:32: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice\n\nNote: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`\n'DLMF.Theta.condition' depends on axioms: [propext, Classical.choice, Quot.sound]\n'DLMF.Theta.counterexample' depends on axioms: [propext, Classical.choice, Quot.sound]\n'DLMF.Theta.condition_three' depends on axioms: [propext, Classical.choice, Quot.sound]\n'DLMF.Theta.condition_four' depends on axioms: [propext, Classical.choice, Quot.sound]\n'DLMF.Theta.counterexample_three' depends on axioms: [propext, Classical.choice, Quot.sound]\n'DLMF.Theta.counterexample_four' depends on axioms: [propext, Classical.choice, Quot.sound]\n"
+      },
+      {
+        "name": "DLMF.EllipticIntegrals.symEllIntRC_sq_eq",
+        "status": "Analytical branch counterexample; not formalized in Lean; statement retained",
+        "detail": "At x=-I,y=1 the hypotheses permit the point. The left RC(-1,1) integral has strictly negative imaginary part, whereas the transformed RC(-I/2,(1-I)/2) integrand has strictly positive imaginary part. Both converge, including the integrable left square-root singularity at t=1. The strict-half-plane variant is already proved as symEllIntRC_sq."
+      },
+      {
+        "name": "DLMF.EllipticIntegrals.symEllIntR_half_hasSum_mean",
+        "status": "Lean counterexample, using only standard axioms; original statement retained",
+        "detail": "For n=2,a=1 take z0=(-3200-798*i)/169 and z1=(-1120+3102*i)/169. Their mean A=(-2160+1152*i)/169 lies in the slit plane and the normalized deviations have norm 65/72<1. Original and normalized principal square roots give opposite signs in the asserted homogeneity. The current assumptions do not prevent this branch mismatch.",
+        "reproductionSource": "import DLMF.EllipticIntegrals.SymmetricSpecialCases\nimport DLMF.EllipticIntegrals.SymmetricQuadratic\nopen Complex Set\nopen scoped Real\nnamespace DLMF.EllipticIntegrals\nnoncomputable def branchNodes : Fin 2 → ℂ := ![((7-57*I)/13)^2, ((33+47*I)/13)^2]\nnoncomputable def branchMean : ℂ := (1/(2:ℂ))*∑ i, branchNodes i\nlemma branchMean_eq : branchMean = (-2160+1152*I)/169 := by\n  norm_num [branchMean, branchNodes, Fin.sum_univ_two, Complex.ext_iff,\n    Complex.div_re, Complex.div_im, Complex.mul_re, Complex.mul_im, pow_two]\nlemma branchMean_ne : branchMean ≠ 0 := by\n  rw [branchMean_eq]; norm_num [Complex.ext_iff, Complex.div_re, Complex.div_im]\nlemma branchNorm_eq : (fun i => branchNodes i / branchMean) =\n    ![((13+5*I)/12)^2, ((13-5*I)/12)^2] := by\n  rw [branchMean_eq]; ext i; fin_cases i <;>\n    norm_num [branchNodes, Complex.ext_iff, pow_two, Complex.div_re, Complex.div_im,\n      Complex.mul_re, Complex.mul_im, Complex.normSq]\nlemma branch_domain : branchNodes ∈ Carlson.carlsonRSlitDomain := by\n  intro i; fin_cases i <;> apply ei19c_sq_mem_slitPlane <;>\n    norm_num [branchNodes, Complex.div_re]\nlemma branchMean_slit : branchMean ∈ slitPlane := by\n  apply mem_slitPlane_iff.mpr (Or.inr ?_)\n  rw [branchMean_eq]\n  norm_num [Complex.div_im]\nlemma branchNorm_close (i : Fin 2) : ‖1-branchNodes i / branchMean‖ < 1 := by\n  have he := congrFun branchNorm_eq i\n  rw [he]; fin_cases i <;>\n    norm_num [Complex.ext_iff, pow_two, Complex.norm_def, Complex.normSq, Complex.div_re,\n      Complex.div_im, Complex.mul_re, Complex.mul_im, Real.sqrt_div]\nlemma testMean_counterexample : symEllIntR 1 (fun _ : Fin 2 => 1/2) branchNodes ≠\n    branchMean⁻¹ * symEllIntR 1 (fun _ : Fin 2 => 1/2)\n      (fun i => branchNodes i / branchMean) := by\n  have hR {u v : ℂ} (hu : 0<u.re) (hv : 0<v.re) :\n      symEllIntR 1 (fun _ : Fin 2 => 1/2) ![u^2,v^2] = u⁻¹*v⁻¹ := by\n    have hc : (∑ _ : Fin 2, (1/2:ℂ)) = 1 := by norm_num\n    have h := symEllIntR_sum (fun _ : Fin 2 => (1/2:ℂ))\n      (ei19c_slit2 (ei19c_sq_mem_slitPlane hu) (ei19c_sq_mem_slitPlane hv))\n      (by rw [hc, Gamma_one]; norm_num)\n    rw [hc] at h\n    rw [h]\n    simp only [Fin.prod_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one,\n      cpow_neg, show (1/2:ℂ) = 2⁻¹ by norm_num, sq_cpow_two_inv hu, sq_cpow_two_inv hv]\n  rw [branchNorm_eq]\n  change symEllIntR 1 (fun _ : Fin 2 => 1/2) ![((7-57*I)/13)^2, ((33+47*I)/13)^2] ≠ _\n  rw [hR (by norm_num [Complex.div_re]) (by norm_num [Complex.div_re]),\n    hR (by norm_num [Complex.div_re]) (by norm_num [Complex.div_re]), branchMean_eq]\n  norm_num [Complex.ext_iff, Complex.div_re, Complex.div_im, Complex.mul_re, Complex.mul_im,\n    Complex.inv_re, Complex.inv_im, Complex.normSq]\n#print axioms testMean_counterexample\nend DLMF.EllipticIntegrals\nnamespace DLMF.EllipticIntegrals\nlemma testMean_hasSum_false : ¬ HasSum\n    (fun N => branchMean ^ (-(1:ℂ)) * ((ascPochhammer ℂ N).eval 1 /\n      (ascPochhammer ℂ N).eval ((2:ℂ)/2) *\n        symEllIntT N (fun _ : Fin 2 => 1/2) (fun j => 1-branchNodes j / branchMean)))\n    (symEllIntR 1 (fun _ : Fin 2 => 1/2) branchNodes) := by\n  intro H\n  have h := (symEllIntR_hasSum_T 1 (fun _ : Fin 2 => (1/2:ℂ))\n    (fun j => branchNodes j / branchMean) (by norm_num [Fin.sum_univ_two])\n    branchNorm_close).mul_left (branchMean ^ (-(1:ℂ)))\n  have hs : (∑ _ : Fin 2, (1/2:ℂ)) = (2:ℂ)/2 := by norm_num\n  rw [hs] at h\n  have he := H.unique h\n  apply testMean_counterexample\n  simpa only [cpow_neg_one] using he\n#print axioms testMean_hasSum_false\nend DLMF.EllipticIntegrals\n#print axioms DLMF.EllipticIntegrals.branchMean_slit\n#print axioms DLMF.EllipticIntegrals.branchNorm_close\n",
+        "axiomAudit": "'DLMF.EllipticIntegrals.testMean_counterexample' depends on axioms: [propext, Classical.choice, Quot.sound]\n'DLMF.EllipticIntegrals.testMean_hasSum_false' depends on axioms: [propext, Classical.choice, Quot.sound]\n'DLMF.EllipticIntegrals.branchMean_slit' depends on axioms: [propext, Classical.choice, Quot.sound]\n'DLMF.EllipticIntegrals.branchNorm_close' depends on axioms: [propext, Classical.choice, Quot.sound]\n"
+      }
+    ],
+    "additionalReviewConcern": "hasDerivAt_integral_variable_limits and hasDerivAt_improper_integral_of_tendstoUniformlyOn assume continuity of totalized deriv values without explicitly asserting the underlying partial derivatives exist. Check this transcription before proof work; no formal counterexample or correction is claimed in this round."
+  },
+  "newStatementIssues": [
+    {
+      "name": "DLMF.AlgebraicAnalytic.setIntegral_withDensity_add_dirac",
+      "status": "corrected",
+      "issue": "The unparenthesized atomic sum lay inside the Lebesgue integral; a standard-axiom counterexample verifies the transcription error."
+    }
+  ],
+  "reorganizedProofs": [
+    {
+      "module": "DLMF.AlgebraicAnalytic.Calculus.Inequalities",
+      "change": "Finite and integral Holder equality use normalized Young equality; Minkowski equality uses strict Jensen on the normalized functions for both exponent ranges. Zero cases and arbitrary real proportionality constants are retained. The entire file is now admission-free."
+    },
+    {
+      "module": "DLMF.Elementary.Trigonometric.InverseIdentities",
+      "change": "Euler arctangent series separates Beta moments, geometric-kernel summation, branch control and FTC evaluation; the hyperbolic series is obtained by rotation."
+    },
+    {
+      "module": "DLMF.Elementary.Trigonometric.InverseIdentities",
+      "change": "The arcsine closed-disk series is extended by continuity and Gauss boundary summability; the arccosine shifted-disk series uses a half-angle identity with explicit lower-bank branch control."
+    },
+    {
+      "module": "DLMF.GeneralizedHypergeometric.Appell.HornDifferentialEquations",
+      "change": "Horn PDEs are moved out of the definitions/series file into a focused theorem file; generic coordinate calculus and coefficient recurrences are separated."
+    }
+  ],
+  "upstreamAdoptions": [
+    {
+      "module": "Mathlib.Analysis.MeanInequalities",
+      "declaration": "Real.young_inequality_eq_iff_of_nonneg",
+      "change": "Finite and integral Holder equality adapters normalize the power masses and reuse the upstream equality criterion."
+    },
+    {
+      "module": "Pochhammer.BinomialSeries",
+      "declaration": "Complex.hasSum_ascPochhammer_mul_pow_div_factorial",
+      "change": "The shared series imports pinned TauCeti binomial summation; Pochhammer duplication and local proved Gauss summability give the closed-disk arcsine series."
+    },
+    {
+      "module": "Carlson.Elliptic.Standard",
+      "declaration": "Carlson.Real.incEllIntFk_eq"
+    },
+    {
+      "module": "Carlson.Elliptic.CapacityBound",
+      "declaration": "Carlson.carlsonRF_capacity_lower_bound"
+    },
+    {
+      "module": "Carlson.Mean.Bounds",
+      "declaration": "Carlson.carlsonRReal_bounds_between_neg_sum_zero"
+    },
+    {
+      "module": "ToMathlib.Analysis.Integral.StrictMono",
+      "declaration": "integral_lt_integral_of_ae_lt"
+    },
+    {
+      "module": "Carlson.Elliptic.LegendreStandard",
+      "declaration": "Carlson.carlsonRE_eq_compEllIntEk"
+    }
+  ],
+  "remainingPriorities": [
+    "Remaining Appell reductions using coefficient identities and the proved PDEs",
+    "Remaining inverse-function continued fractions",
+    "Negative-real Carlson RC principal-value formula and negative-RJ bridges",
+    "Jacobi amplitude modulus limits, Fourier series and epsilon theta identity",
+    "Repeated-parameter and incomplete-Gamma asymptotic coefficient cancellation",
+    "Jackson classical limit and remaining q-product identities",
+    "Previously flagged branch-domain and Chapter1-2 statement issues"
+  ]
+}

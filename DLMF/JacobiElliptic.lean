@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module -- shake: keep-all
 
 public import DLMF.JacobiElliptic.Addition
-public import DLMF.JacobiElliptic.Basic
+public import DLMF.JacobiElliptic.AnalyticProperties
 public import DLMF.JacobiElliptic.Cyclic
 public import DLMF.JacobiElliptic.Derivatives
 public import DLMF.JacobiElliptic.ElementaryIdentities

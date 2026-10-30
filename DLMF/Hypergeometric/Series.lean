@@ -5,7 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Hypergeometric.Basic
+public import DLMF.Hypergeometric.Basic.Pochhammer
+
+public import DLMF.Hypergeometric.SeriesProperties
 
 /-!
 # Scalar power series for hypergeometric differential equations
@@ -31,9 +33,7 @@ theorem not_neg_nat_add_nat {a : ℂ} (ha : ∀ k : ℕ, a ≠ -k) (m : ℕ) :
   push_cast
   linear_combination h
 
-/-- Mathlib's left Pochhammer recurrence in the project's notation. -/
-theorem poch_succ_left (a : ℂ) (n : ℕ) : poch a (n + 1) = a * poch (a + 1) n := by
-  simp [poch, ascPochhammer_succ_left, Polynomial.eval_comp]
+
 
 /-- Termwise differentiation, as a direct scalar specialization of Mathlib's
 `HasFPowerSeriesOnBall.fderiv`. -/

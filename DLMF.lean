@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
+public import DLMF.Basic
 public import DLMF.Elementary
 public import DLMF.GeneralizedHypergeometric
 public import DLMF.QHypergeometric

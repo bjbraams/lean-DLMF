@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AsymptoticApproximations.Remainders.Defs
-public import DLMF.AsymptoticApproximations.ODE.Defs
+public import DLMF.AsymptoticApproximations.Remainders.Basic
+public import DLMF.AsymptoticApproximations.ODE.Basic
 public import DLMF.ExpIntegrals.Asymptotics
 
 /-!

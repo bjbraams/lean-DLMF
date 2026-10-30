@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Theta.Basic
+public import DLMF.Theta.SeriesAndZeros
 public import Mathlib.NumberTheory.LSeries.RiemannZeta
 public import Mathlib.Analysis.PSeriesComplex
 

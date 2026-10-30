@@ -7,7 +7,7 @@ module
 
 public import DLMF.WignerSymbols.Basic
 public import DLMF.WignerSymbols.Q2wHelpers
-public import DLMF.GeneralizedHypergeometric.Basic
+public import DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties
 
 /-!
 # The `6j` symbol: DLMF §§34.4–34.5 and §34.10

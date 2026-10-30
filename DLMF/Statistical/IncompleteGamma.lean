@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Statistical.Basic.IncompleteGamma
 public import DLMF.Confluent.IncompleteGamma
 
 /-!
@@ -38,14 +39,6 @@ open DLMF.Hypergeometric
 noncomputable section
 
 namespace DLMF.Statistical
-
-/-- The regularized lower incomplete Gamma function `P(a,z) = γ(a,z)/Γ(a)` (DLMF 8.2.4). -/
-@[dlmf 8.2.E4]
-def normIncGammaP (a z : ℂ) : ℂ := lowerIncGamma a z / Gamma a
-
-/-- The regularized upper incomplete Gamma function `Q(a,z) = Γ(a,z)/Γ(a)` (DLMF 8.2.4). -/
-@[dlmf 8.2.E4]
-def normIncGammaQ (a z : ℂ) : ℂ := upperIncGamma a z / Gamma a
 
 /-- `P(a,z) + Q(a,z) = 1` (DLMF 8.2.5) for `z ≠ 0` and `a` not a nonpositive integer. -/
 @[dlmf 8.2.E5]
@@ -171,9 +164,6 @@ theorem hasDerivAt_lowerIncGamma_ofReal {a : ℂ} (ha : 0 < a.re) {x : ℝ} (hx 
   exact intervalIntegral.integral_hasDerivAt_right hint
     (hcont.stronglyMeasurableAtFilter isOpen_Ioi x hx)
     (hcont.continuousAt (isOpen_Ioi.mem_nhds hx))
-
-/-- Tricomi's entire incomplete Gamma function `γ*(a,z) = e^{-z} 𝐌(1, a+1, z)`. -/
-def scIncGamma (a z : ℂ) : ℂ := exp (-z) * regularizedHGFun {1} {a + 1} z
 
 /-- The series `γ*(a,z) = e^{-z} ∑ₖ zᵏ / Γ(a+k+1)` (DLMF 8.7.1), valid for all complex `a, z`. -/
 @[dlmf 8.7.E1]

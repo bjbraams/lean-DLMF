@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
-public import DLMF.Theta.Basic
+public import DLMF.Theta.SeriesAndZeros
 public import DLMF.Theta.ZeroValues
 public import DLMF.Theta.Products
 public import DLMF.Theta.PowerSeries

@@ -5,14 +5,14 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Mathieu.Hill.Defs
-public import DLMF.Mathieu.Basic
+public import DLMF.Mathieu.Hill.Basic
+public import DLMF.Mathieu.SpectralExistence
 public import DLMF.Mathieu.Noninteger.Properties
 
 /-!
 # The equations of Whittaker–Hill and Ince (DLMF §28.31)
 
-Statements of DLMF §28.31 for the definitions in `DLMF.Mathieu.Hill.Defs`: the reduction of
+Statements of DLMF §28.31 for the definitions in `DLMF.Mathieu.Hill.Basic`: the reduction of
 the Whittaker–Hill equation 28.31.1 to Ince's equation 28.31.3 (28.31.2), the Fourier-series
 solutions and their coefficient recurrences (28.31.4–28.31.9), the Ince polynomials
 `C_p^m`, `S_p^m` and their eigenvalues `a_p^m`, `b_p^m` (28.31.10–28.31.15), and the

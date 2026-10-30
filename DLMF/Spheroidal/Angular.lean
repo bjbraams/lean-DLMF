@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Spheroidal.FerrersDefs
+public import DLMF.Spheroidal.FerrersProperties
 public import DLMF.Spheroidal.Equation
 public import DLMF.Spheroidal.Existence
 public import DLMF.Legendre.Associated

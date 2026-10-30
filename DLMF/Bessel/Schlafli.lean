@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Bessel.Basic
+public import DLMF.Bessel.RegularizedSeries
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
 

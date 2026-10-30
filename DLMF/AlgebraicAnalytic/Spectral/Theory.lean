@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AlgebraicAnalytic.Spectral.Defs
+public import DLMF.AlgebraicAnalytic.Spectral.Basic
 public import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
 public import Mathlib.Analysis.InnerProductSpace.l2Space
 public import Mathlib.Analysis.SpecialFunctions.Bernstein

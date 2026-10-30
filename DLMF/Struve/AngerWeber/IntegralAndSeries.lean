@@ -7,7 +7,7 @@ module
 
 public import DLMF.Struve.Lommel
 public import DLMF.Bessel.Schlafli
-public import DLMF.ErrorFunctions.Basic
+public import DLMF.ErrorFunctions.AnalyticProperties
 public import Mathlib.Analysis.SpecialFunctions.Sqrt
 public import DLMF.Struve.Poisson
 

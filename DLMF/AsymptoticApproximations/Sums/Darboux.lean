@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AsymptoticApproximations.Sums.Defs
-public import DLMF.GeneralizedHypergeometric.Basic
+public import DLMF.AsymptoticApproximations.Sums.Basic
+public import DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties
 public import DLMF.OrthogonalPolynomials.Series
 
 /-!

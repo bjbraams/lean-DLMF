@@ -10,6 +10,8 @@ public import DLMF.Elementary.LogExpAnalysis
 public import TauCeti.Analysis.SpecialFunctions.Artanh
 public import DLMFMathlib.NumberTheory.BernoulliTaylor
 
+public import DLMFMathlib.Analysis.Complex.TrigR4SeriesExtension
+
 /-!
 # Hyperbolic functions and their series
 
@@ -18,6 +20,8 @@ Direct hyperbolic functions, elementary inequalities, power series and parameter
 Source references and common attribution are retained in
 `DLMF.Elementary.Hyperbolic`.
 This module uses results of the Tau Ceti contributors; see also `CREDITS.md`.
+The normalized logarithmic series integrate the Bernoulli expansions of their logarithmic
+derivatives, using Cauchy–Taylor uniqueness and the removable values at the origin.
 -/
 
 @[expose] public noncomputable section
@@ -458,12 +462,6 @@ theorem hyperbolic_table_cosh_poles (k : ℤ) :
   exact (hcl.pos_mul_atTop hC hinv).congr
     (fun z => by simp [Complex.tanh_eq_sinh_div_cosh, div_eq_mul_inv])
 
-/-- Estimate under the stated parameter and domain assumptions: `Real.cosh x ≤ (if x=0 then 1 else
-Real.sinh x/x)^3`. -/
-@[dlmf 4.32.E1]
-theorem cosh_le_sinhc_cube (x : ℝ) : Real.cosh x ≤ (if x=0 then 1 else Real.sinh x/x)^3 := by
-  sorry
-
 /-- A function vanishing at `0` with positive derivative on `(0,∞)` is positive there. -/
 private lemma hypR4_pos_of_deriv_pos {f f' : ℝ → ℝ} (hf : Continuous f) (h0 : f 0 = 0)
     (hd : ∀ x, 0 < x → HasDerivAt f (f' x) x) (hp : ∀ x, 0 < x → 0 < f' x) {x : ℝ}
@@ -474,6 +472,117 @@ private lemma hypR4_pos_of_deriv_pos {f f' : ℝ → ℝ} (hf : Continuous f) (h
     rw [(hd y hy).deriv]; exact hp y hy
   have := hm (Set.mem_Ici.mpr le_rfl) (Set.mem_Ici.mpr hx.le) hx
   rwa [h0] at this
+
+/-- The auxiliary numerator for the derivative of the Lazarević ratio is positive. -/
+private lemma hypR4_sinh_aux {x : ℝ} (hx : 0 < x) :
+    0 < x * (3 + 2 * Real.sinh x ^ 2) - 3 * Real.sinh x * Real.cosh x := by
+  have hg : ∀ t : ℝ, 0 < t → 0 < t * Real.cosh t - Real.sinh t := by
+    intro t ht
+    exact hypR4_pos_of_deriv_pos (f := fun u => u * Real.cosh u - Real.sinh u)
+      (f' := fun u => u * Real.sinh u) (by fun_prop) (by simp)
+      (fun u _ => by
+        have h := ((hasDerivAt_id u).mul (Real.hasDerivAt_cosh u)).sub (Real.hasDerivAt_sinh u)
+        exact h.congr_deriv (by simp only [id_eq]; ring))
+      (fun u hu => mul_pos hu (Real.sinh_pos_iff.mpr hu)) ht
+  exact hypR4_pos_of_deriv_pos (f := fun u => u * (3 + 2 * Real.sinh u ^ 2) - 3 * Real.sinh u * Real.cosh u)
+    (f' := fun u => 4 * Real.sinh u * (u * Real.cosh u - Real.sinh u))
+    (by fun_prop) (by simp)
+    (fun u _ => by
+      have h := ((hasDerivAt_id u).mul ((Real.hasDerivAt_sinh u).pow 2 |>.const_mul 2 |>.const_add 3)).sub
+        (((Real.hasDerivAt_sinh u).mul (Real.hasDerivAt_cosh u)).const_mul 3)
+      have hh : 1 * (3 + 2 * Real.sinh u ^ 2) + u * (2 * (2 * Real.sinh u * Real.cosh u)) -
+          3 * (Real.cosh u * Real.cosh u + Real.sinh u * Real.sinh u) =
+          4 * Real.sinh u * (u * Real.cosh u - Real.sinh u) := by
+        nlinarith [Real.cosh_sq_sub_sinh_sq u]
+      simp only [id_eq, Pi.pow_apply, Nat.cast_ofNat, show 2 - 1 = (1 : ℕ) by omega,
+        pow_one] at h
+      convert h.congr_deriv hh using 1
+      funext t
+      simp only [Pi.sub_apply, Pi.mul_apply, id_eq]
+      ring)
+    (fun u hu => by have := hg u hu; have := Real.sinh_pos_iff.mpr hu; positivity) hx
+
+/-- Estimate under the stated parameter and domain assumptions: `Real.cosh x ≤ (if x=0 then 1 else
+Real.sinh x/x)^3`. -/
+@[dlmf 4.32.E1]
+theorem cosh_le_sinhc_cube (x : ℝ) : Real.cosh x ≤ (if x=0 then 1 else Real.sinh x/x)^3 := by
+  let s : ℝ → ℝ := dslope Real.sinh 0
+  have hs0 : s 0 = 1 := by simp [s, dslope_same, Real.deriv_sinh]
+  have hseq : ∀ t : ℝ, t ≠ 0 → s t = Real.sinh t / t := by
+    intro t ht
+    simp [s, dslope_of_ne _ ht, slope_def_field]
+  have hscont : Continuous s := by
+    apply continuous_iff_continuousAt.mpr
+    intro t
+    by_cases ht : t = 0
+    · subst t
+      exact continuousAt_dslope_same.mpr (Real.differentiable_sinh.differentiableAt)
+    · exact (continuousAt_dslope_of_ne ht).mpr Real.continuous_sinh.continuousAt
+  have hsne : ∀ t, s t ≠ 0 := by
+    intro t
+    by_cases ht : t = 0
+    · simp [ht, hs0]
+    · rw [hseq t ht]
+      exact div_ne_zero (Real.sinh_ne_zero.mpr ht) ht
+  let g : ℝ → ℝ := fun t => Real.cosh t / s t ^ 3
+  have hgcont : Continuous g := by
+    exact Real.continuous_cosh.div (hscont.pow 3) (fun t => pow_ne_zero 3 (hsne t))
+  have hgzero : g 0 = 1 := by simp [g, hs0]
+  have hgformula : ∀ t, t ≠ 0 → g t = t ^ 3 * Real.cosh t / Real.sinh t ^ 3 := by
+    intro t ht
+    dsimp only [g]
+    rw [hseq t ht]
+    field_simp
+  have hgderiv : ∀ t, 0 < t → HasDerivAt g
+      (-(t ^ 2 * (t * (3 + 2 * Real.sinh t ^ 2) - 3 * Real.sinh t * Real.cosh t)) /
+        Real.sinh t ^ 4) t := by
+    intro t ht
+    have hn : Real.sinh t ≠ 0 := (Real.sinh_pos_iff.mpr ht).ne'
+    have hd := (((hasDerivAt_pow 3 t).mul (Real.hasDerivAt_cosh t)).div
+      ((Real.hasDerivAt_sinh t).pow 3) (pow_ne_zero 3 hn))
+    have he : (3 * t ^ 2 * Real.cosh t + t ^ 3 * Real.sinh t) * Real.sinh t ^ 3 -
+        t ^ 3 * Real.cosh t * (3 * Real.sinh t ^ 2 * Real.cosh t) =
+        -t ^ 2 * (t * (3 + 2 * Real.sinh t ^ 2) - 3 * Real.sinh t * Real.cosh t) *
+          Real.sinh t ^ 2 := by
+      linear_combination (-3 * t ^ 3 * Real.sinh t ^ 2) * (Real.cosh_sq_sub_sinh_sq t)
+    have hd' : HasDerivAt (fun t => t ^ 3 * Real.cosh t / Real.sinh t ^ 3)
+        (-(t ^ 2 * (t * (3 + 2 * Real.sinh t ^ 2) - 3 * Real.sinh t * Real.cosh t)) /
+          Real.sinh t ^ 4) t := by
+      simp only [Pi.mul_apply, Pi.pow_apply, Nat.cast_ofNat,
+        show 3 - 1 = (2 : ℕ) by omega] at hd
+      apply hd.congr_deriv
+      rw [he]
+      field_simp
+    refine hd'.congr_of_eventuallyEq ?_
+    filter_upwards [isOpen_ne.mem_nhds (show t ∈ {y : ℝ | y ≠ 0} from ht.ne')] with u hu
+    exact hgformula u hu
+  have hmono : AntitoneOn g (Ici 0) := by
+    refine antitoneOn_of_deriv_nonpos (convex_Ici 0) hgcont.continuousOn ?_ ?_
+    · intro t ht
+      rw [interior_Ici] at ht
+      exact (hgderiv t ht).differentiableAt.differentiableWithinAt
+    · intro t ht
+      rw [interior_Ici] at ht
+      rw [(hgderiv t ht).deriv]
+      exact div_nonpos_of_nonpos_of_nonneg (neg_nonpos.mpr (mul_nonneg (sq_nonneg t) (hypR4_sinh_aux ht).le)) (pow_nonneg (Real.sinh_pos_iff.mpr ht).le _)
+  have hpos : ∀ x : ℝ, 0 ≤ x → Real.cosh x ≤ (if x=0 then 1 else Real.sinh x/x)^3 := by
+    intro x hx
+    have h := hmono (mem_Ici.mpr (le_refl 0)) (mem_Ici.mpr hx) hx
+    rw [hgzero] at h
+    have heq : (if x=0 then 1 else Real.sinh x/x) = s x := by
+      by_cases hx : x = 0 <;> simp [hx, hs0, hseq]
+    rw [heq]
+    have hdpos : 0 < s x ^ 3 := pow_pos (by
+      by_cases h : x = 0
+      · simp [h, hs0]
+      · rw [hseq x h]; exact div_pos (Real.sinh_pos_iff.mpr (lt_of_le_of_ne hx (Ne.symm h))) (lt_of_le_of_ne hx (Ne.symm h))) _
+    dsimp only [g] at h
+    rw [div_le_iff₀ hdpos] at h
+    linarith
+  rcases le_total 0 x with hx | hx
+  · exact hpos x hx
+  · have h := hpos (-x) (neg_nonneg.mpr hx)
+    simpa [Real.cosh_neg, Real.sinh_neg] using h
 
 /-- `tanh x < x` and `x - x³/3 < tanh x` for `x > 0`. -/
 private lemma hypR4_tanh_bounds {x : ℝ} (hx : 0 < x) :
@@ -583,7 +692,18 @@ theorem cosh_sub_lower {x y : ℝ} (hx : 0<x) (hy : 0<y) :
 /-- Estimate under the stated parameter and domain assumptions: `Real.arctan x ≤ π/2*Real.tanh x`. -/
 @[dlmf 4.32.E4]
 theorem arctan_le_tanh {x : ℝ} (hx : 0≤x) : Real.arctan x ≤ π/2*Real.tanh x := by
-  sorry
+  have hs : x ≤ Real.sinh x := Real.self_le_sinh_iff.mpr hx
+  have hm := Real.sin_arctan_strictMono.monotone hs
+  have hc : Real.sqrt (1 + Real.sinh x ^ 2) = Real.cosh x := by
+    have he : 1 + Real.sinh x ^ 2 = Real.cosh x ^ 2 := by
+      nlinarith [Real.cosh_sq_sub_sinh_sq x]
+    rw [he, Real.sqrt_sq_eq_abs, abs_of_pos (Real.cosh_pos x)]
+  rw [Real.sin_arctan (Real.sinh x), hc, ← Real.tanh_eq_sinh_div_cosh] at hm
+  have h := Real.mul_le_sin (Real.arctan_nonneg.mpr hx) (Real.arctan_lt_pi_div_two x).le
+  have hh := mul_le_mul_of_nonneg_left (h.trans hm) (show 0 ≤ π / 2 by positivity)
+  have he : π / 2 * (2 / π * Real.arctan x) = Real.arctan x := by
+    field_simp
+  rwa [he] at hh
 
 /-- Powers of the rotated argument `iz` produce the alternating sign `(-1)^k`. -/
 private lemma hypR4_rot_pow (z c : ℂ) (k : ℕ) : (c*(I*z))^(2*k) = (-1:ℂ)^k*(c*z)^(2*k) := by
@@ -722,29 +842,107 @@ theorem hasSum_coth {z : ℂ} (hz0 : z≠0) (hz : ‖z‖<π) :
   · simp [bernoulli_zero]
     field_simp
 
-/-- The series with terms `(fun n : ℕ => (2:ℂ)^(2*n+1)*(bernoulli (2*n+2):ℂ)/
-((n+1:ℂ)*((2*n+2).factorial:ℂ))*z^(2*n+2))` converges to `(L z)`. -/
+/-- The derivative of a normalized analytic logarithm is the logarithmic derivative of its
+exponential; equality on the open domain supplies differentiability of the exponential. -/
+private lemma hypR4_deriv_normalizedLog {U : Set ℂ} (hU : IsOpen U) {f L : ℂ → ℂ}
+    (hL : HyperbolicNormalizedLog U f L) {z : ℂ} (hz : z ∈ U) :
+    deriv L z = deriv f z / f z := by
+  have hd : HasDerivAt L (deriv L z) z := (hL.1 z hz).differentiableAt.hasDerivAt
+  have he : (fun w => Complex.exp (L w)) =ᶠ[𝓝 z] f :=
+    eventually_of_mem (hU.mem_nhds hz) hL.2.2
+  have hh := (hd.cexp).congr_of_eventuallyEq he.symm
+  have hne : f z ≠ 0 := by rw [← hL.2.2 z hz]; exact Complex.exp_ne_zero _
+  apply (eq_div_iff hne).mpr
+  have hval := hh.deriv
+  rw [hL.2.2 z hz] at hval
+  simpa [mul_comm] using hval.symm
+
+/-- A normalized analytic logarithm of an even function has zero derivative at the origin. -/
+private lemma hypR4_deriv_normalizedLog_zero {R : ℝ} (hR : 0 < R) {f L : ℂ → ℂ}
+    (hL : HyperbolicNormalizedLog (Metric.ball 0 R) f L) (heven : ∀ z, f (-z) = f z) :
+    deriv L 0 = 0 := by
+  have h0 : (0 : ℂ) ∈ Metric.ball 0 R := by simpa using hR
+  have hd : HasDerivAt L (deriv L 0) 0 := (hL.1 0 h0).differentiableAt.hasDerivAt
+  have he : (fun w => Complex.exp (L w)) =ᶠ[𝓝 (0 : ℂ)] f :=
+    eventually_of_mem (Metric.isOpen_ball.mem_nhds h0) hL.2.2
+  have hh := (hd.cexp).congr_of_eventuallyEq he.symm
+  have hn := hh.comp_of_eq (0 : ℂ) ((hasDerivAt_id (0 : ℂ)).neg) (by simp)
+  have hh' : HasDerivAt f (-(Complex.exp (L 0) * deriv L 0)) 0 := by
+    simpa only [Function.comp_def, Pi.neg_apply, id_eq, heven, mul_neg, mul_one] using hn
+  have h := hh.unique hh'
+  simp only [hL.2.1, Complex.exp_zero, one_mul] at h
+  linear_combination (1 / 2 : ℂ) * h
+
+/-- The Bernoulli expansion of an analytic logarithm of the removable quotient `sinh z / z`,
+normalized to vanish at zero, on the disk `‖z‖ < π`. -/
 theorem hasSum_log_sinhc {L : ℂ → ℂ} (hL : HyperbolicNormalizedLog (Metric.ball 0 π) sinhc L)
     {z : ℂ} (hz : ‖z‖<π) :
     HasSum (fun n : ℕ => (2:ℂ)^(2*n+1)*(bernoulli (2*n+2):ℂ)/
       ((n+1:ℂ)*((2*n+2).factorial:ℂ))*z^(2*n+2)) (L z) := by
-  sorry
+  let b : ℕ → ℂ := fun n => (2:ℂ)^(2*n+2)*(bernoulli (2*n+2):ℂ)/
+      ((2*n+2).factorial:ℂ)
+  have hb : ∀ w : ℂ, ‖w‖ < π → HasSum (fun n => b n * w ^ (2*n+1)) (deriv L w) := by
+    intro w hw
+    by_cases hw0 : w = 0
+    · subst w
+      have hd := hypR4_deriv_normalizedLog_zero Real.pi_pos hL (by
+        intro w
+        simp [sinhc])
+      rw [hd]
+      convert hasSum_zero using 1
+      ext n
+      simp
+    · have hd := hypR4_deriv_normalizedLog Metric.isOpen_ball hL (by simpa using hw)
+      have he : sinhc =ᶠ[𝓝 w] (fun v => Complex.sinh v / v) := by
+        filter_upwards [eventually_ne_nhds hw0] with v hv
+        simp [sinhc, hv]
+      have hdq := ((Complex.hasDerivAt_sinh w).div (hasDerivAt_id w) hw0).congr_of_eventuallyEq he
+      rw [hdq.deriv, sinhc, ite_eq_right hw0] at hd
+      have hs : Complex.sinh w ≠ 0 := by
+        have hne : sinhc w ≠ 0 := by rw [← hL.2.2 w (by simpa using hw)]; exact Complex.exp_ne_zero _
+        rw [sinhc, ite_eq_right hw0] at hne
+        exact (div_ne_zero_iff.mp hne).1
+      have hd' : deriv L w = coth w - w⁻¹ := by
+        rw [hd, coth]
+        simp only [id_eq, mul_one]
+        field_simp
+      rw [hd']
+      exact hasSum_coth hw0 hw
+  have hs := Complex.hasSum_odd_primitive_on_ball Real.pi_pos hL.1.differentiableOn hL.2.1 hb hz
+  convert hs using 1
+  ext n
+  dsimp only [b]
+  rw [show 2*n+2 = (2*n+1)+1 by omega, pow_succ (2:ℂ)]
+  have hn0 : (n : ℂ) + 1 ≠ 0 := by exact_mod_cast Nat.succ_ne_zero n
+  have hf : ((2*n+1+1).factorial : ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero _
+  field_simp
+  ring
 
-/-- The series with terms `(fun n : ℕ => (2:ℂ)^(2*n+1)*((2:ℂ)^(2*n+2)-1)*(bernoulli (2*n+2):ℂ)/
-((n+1:ℂ)*((2*n+2).factorial:ℂ))*z^(2*n+2))` converges to `(L z)`. -/
+/-- The Bernoulli expansion of an analytic logarithm of `cosh`, normalized to vanish at zero,
+on the disk `‖z‖ < π / 2`. -/
 theorem hasSum_log_cosh {L : ℂ → ℂ} (hL : HyperbolicNormalizedLog (Metric.ball 0 (π/2)) Complex.cosh L)
     {z : ℂ} (hz : ‖z‖<π/2) :
     HasSum (fun n : ℕ => (2:ℂ)^(2*n+1)*((2:ℂ)^(2*n+2)-1)*(bernoulli (2*n+2):ℂ)/
       ((n+1:ℂ)*((2*n+2).factorial:ℂ))*z^(2*n+2)) (L z) := by
-  sorry
-
-/-- The series with terms `(fun n : ℕ => (2:ℂ)^(2*n+2)*(1-(2:ℂ)^(2*n+1))*(bernoulli (2*n+2):ℂ)/
-((n+1:ℂ)*((2*n+2).factorial:ℂ))*z^(2*n+2))` converges to `(L z)`. -/
-theorem hasSum_log_tanhc {L : ℂ → ℂ} (hL : HyperbolicNormalizedLog (Metric.ball 0 (π/2)) tanhc L)
-    {z : ℂ} (hz : ‖z‖<π/2) :
-    HasSum (fun n : ℕ => (2:ℂ)^(2*n+2)*(1-(2:ℂ)^(2*n+1))*(bernoulli (2*n+2):ℂ)/
-      ((n+1:ℂ)*((2*n+2).factorial:ℂ))*z^(2*n+2)) (L z) := by
-  sorry
+  let b : ℕ → ℂ := fun n => (2:ℂ)^(2*(n+1))*((2:ℂ)^(2*(n+1))-1)*
+      (bernoulli (2*(n+1)):ℂ)/((2*(n+1)).factorial:ℂ)
+  have hb : ∀ w : ℂ, ‖w‖ < π/2 → HasSum (fun n => b n * w^(2*n+1)) (deriv L w) := by
+    intro w hw
+    have hd := hypR4_deriv_normalizedLog Metric.isOpen_ball hL (by simpa using hw)
+    rw [Complex.deriv_cosh, ←Complex.tanh_eq_sinh_div_cosh] at hd
+    rw [hd]
+    exact hasSum_tanh hw
+  have hs := Complex.hasSum_odd_primitive_on_ball (by positivity : 0 < π/2)
+    hL.1.differentiableOn hL.2.1 hb hz
+  convert hs using 1
+  ext n
+  dsimp only [b]
+  rw [show 2*(n+1) = 2*n+2 by omega,
+    show 2*n+2 = (2*n+1)+1 by omega, pow_succ (2:ℂ)]
+  have hn0 : (n : ℂ) + 1 ≠ 0 := by exact_mod_cast Nat.succ_ne_zero n
+  have hf : ((2*n+1+1).factorial : ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero _
+  field_simp
+  ring
 
 /-- At `z`, the function `Complex.tanh` has derivative `(sech z^2)`. -/
 @[dlmf 4.34.E3]
@@ -754,6 +952,70 @@ theorem hasDerivAt_tanh {z : ℂ} (hz : Complex.cosh z≠0) : HasDerivAt Complex
   · simp only [sech]
     field_simp
     linear_combination -(Complex.cosh_sq_sub_sinh_sq z)
+
+/-- The Bernoulli expansion of an analytic logarithm of the removable quotient `tanh z / z`,
+normalized to vanish at zero, on the disk `‖z‖ < π / 2`. -/
+theorem hasSum_log_tanhc {L : ℂ → ℂ} (hL : HyperbolicNormalizedLog (Metric.ball 0 (π/2)) tanhc L)
+    {z : ℂ} (hz : ‖z‖<π/2) :
+    HasSum (fun n : ℕ => (2:ℂ)^(2*n+2)*(1-(2:ℂ)^(2*n+1))*(bernoulli (2*n+2):ℂ)/
+      ((n+1:ℂ)*((2*n+2).factorial:ℂ))*z^(2*n+2)) (L z) := by
+  let b : ℕ → ℂ := fun n => (2:ℂ)^(2*n+2)*(bernoulli (2*n+2):ℂ)/
+      ((2*n+2).factorial:ℂ) -
+      (2:ℂ)^(2*(n+1))*((2:ℂ)^(2*(n+1))-1)*(bernoulli (2*(n+1)):ℂ)/
+        ((2*(n+1)).factorial:ℂ)
+  have hb : ∀ w : ℂ, ‖w‖ < π/2 → HasSum (fun n => b n * w ^ (2*n+1)) (deriv L w) := by
+    intro w hw
+    by_cases hw0 : w = 0
+    · subst w
+      have hd := hypR4_deriv_normalizedLog_zero (by positivity : 0 < π/2) hL (by
+        intro w
+        simp only [tanhc, neg_eq_zero, Complex.tanh_eq_sinh_div_cosh,
+          Complex.sinh_neg, Complex.cosh_neg]
+        split_ifs <;> ring)
+      rw [hd]
+      convert hasSum_zero using 1
+      ext n
+      simp
+    · have hne : Complex.tanh w ≠ 0 := by
+        have hne : tanhc w ≠ 0 := by
+          rw [← hL.2.2 w (by simpa using hw)]
+          exact Complex.exp_ne_zero _
+        rw [tanhc, ite_eq_right hw0] at hne
+        exact (div_ne_zero_iff.mp hne).1
+      have hs : Complex.sinh w ≠ 0 := by
+        rw [Complex.tanh_eq_sinh_div_cosh] at hne
+        exact (div_ne_zero_iff.mp hne).1
+      have hc : Complex.cosh w ≠ 0 := by
+        rw [Complex.tanh_eq_sinh_div_cosh] at hne
+        exact (div_ne_zero_iff.mp hne).2
+      have hd := hypR4_deriv_normalizedLog Metric.isOpen_ball hL (by simpa using hw)
+      have he : tanhc =ᶠ[𝓝 w] (fun v => Complex.tanh v / v) := by
+        filter_upwards [eventually_ne_nhds hw0] with v hv
+        simp [tanhc, hv]
+      have hdq := ((hasDerivAt_tanh hc).div (hasDerivAt_id w) hw0).congr_of_eventuallyEq he
+      rw [hdq.deriv, tanhc, ite_eq_right hw0] at hd
+      have hd' : deriv L w = (coth w - w⁻¹) - Complex.tanh w := by
+        rw [hd, coth, sech, Complex.tanh_eq_sinh_div_cosh]
+        simp only [id_eq, mul_one]
+        field_simp
+        linear_combination -w * (Complex.cosh_sq_sub_sinh_sq w)
+      rw [hd']
+      have hp : ‖w‖ < π := lt_trans hw (by linarith [Real.pi_pos])
+      convert (hasSum_coth hw0 hp).sub (hasSum_tanh hw) using 1
+      ext n
+      dsimp only [b]
+      ring
+  have ht := Complex.hasSum_odd_primitive_on_ball (by positivity : 0 < π/2)
+    hL.1.differentiableOn hL.2.1 hb hz
+  convert ht using 1
+  ext n
+  dsimp only [b]
+  rw [show 2*(n+1) = 2*n+2 by omega,
+    show 2*n+2 = (2*n+1)+1 by omega, pow_succ (2:ℂ)]
+  have hn0 : (n : ℂ) + 1 ≠ 0 := by exact_mod_cast Nat.succ_ne_zero n
+  have hf : ((2*n+1+1).factorial : ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero _
+  field_simp
+  ring
 
 /-- At `z`, the function `csch` has derivative `(-csch z*coth z)`. -/
 @[dlmf 4.34.E4]

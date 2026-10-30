@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Bessel.Basic
+public import DLMF.Bessel.RegularizedSeries
 
 /-! # Sonine’s integral and Gamma-weighted integrals of regularized `₀F₁`
 

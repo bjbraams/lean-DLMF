@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AlgebraicAnalytic.ODE.Defs
+public import DLMF.AlgebraicAnalytic.ODE.Basic
 public import DLMFMathlib.Analysis.ODE.P1oEntireLinear
 public import Mathlib.AlgebraicTopology.FundamentalGroupoid.SimplyConnected
 

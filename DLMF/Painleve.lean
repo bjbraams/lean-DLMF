@@ -13,12 +13,12 @@ public import DLMF.Painleve.Rational
 public import DLMF.Painleve.LocalTheory
 public import DLMF.Painleve.Poles
 public import DLMF.Painleve.Tau
-public import DLMF.Painleve.Defs
+public import DLMF.Painleve.Basic
 public import DLMF.Painleve.Equations
 public import DLMF.Painleve.BacklundDLMF
 public import DLMF.Painleve.Hamiltonian
 public import DLMF.Painleve.Isomonodromy
-public import DLMF.Painleve.SolutionsDefs
+public import DLMF.Painleve.Basic.Solutions
 public import DLMF.Painleve.RationalDLMF
 public import DLMF.Painleve.ElementarySolutions
 public import DLMF.Painleve.SpecialSolutions
@@ -28,7 +28,7 @@ public import DLMF.Painleve.Combinatorics
 
 /-! # Painlevé transcendents: DLMF Chapter 32 and Beals–Wong Chapter 15
 
-The DLMF modules (`Defs`, `SolutionsDefs`, `Equations`, `BacklundDLMF`, `Hamiltonian`,
+The DLMF modules (`Basic`, `Basic.Solutions`, `Equations`, `BacklundDLMF`, `Hamiltonian`,
 `Isomonodromy`, `RationalDLMF`, `ElementarySolutions`, `SpecialSolutions`, `RealAsymptotics`,
 `Reductions`, `Combinatorics`) state DLMF Chapter 32 in its own normalization; see
 DLMF32Acquisition.md. DLMF's PII `w'' = 2w³ + zw + α` is the Beals–Wong `PII(-α)` below

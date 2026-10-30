@@ -5,18 +5,21 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Painleve.SolutionsDefs
-public import DLMF.Painleve.Defs
+public import DLMF.Painleve.Basic.Solutions
+public import DLMF.Painleve.Basic
 public import Mathlib.Tactic.Basify
 public import Mathlib.Tactic.ENatToNat
 public import Mathlib.Tactic.Polynomial.Basic
 public import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Analysis.Complex.CauchyIntegral
+public import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
+public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 
 /-!
 # Reductions of partial differential equations (DLMF §32.13)
 
 The PDE predicates `IsMKdVOn`, `IsKdVOn`, `IsSineGordonOn`, `IsBoussinesqOn` are in
-`DLMF.Painleve.SolutionsDefs`. The scaling reductions of mKdV and KdV to `PII` (32.13.2,
+`DLMF.Painleve.Basic.Solutions`. The scaling reductions of mKdV and KdV to `PII` (32.13.2,
 32.13.4; verified symbolically for every `α`), the similarity reduction of KdV (32.13.5), the
 scaling reduction of sine-Gordon (32.13.7) and the travelling-wave reduction of Boussinesq
 (32.13.9–32.13.10) are proved as PDE statements, with the principal branch of `(3t)^{-1/3}`

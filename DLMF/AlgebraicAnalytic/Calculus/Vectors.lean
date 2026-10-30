@@ -19,7 +19,7 @@ Vectors of `ℝ³` are `Fin 3 → ℝ`, with Mathlib's `dotProduct` (`⬝ᵥ`) a
 `EuclideanSpace ℝ (Fin 3)`. The Levi-Civita symbol is `leviCivita` (1.6.14).
 
 For §1.6(iii) the operators `grad`, `divergence`, `curl`, `laplacian`, `vectorLaplacian` are
-those of `DLMF.AlgebraicAnalytic.Calculus.Defs`, built from partial derivatives of sections.
+those of `DLMF.AlgebraicAnalytic.Calculus.Basic`, built from partial derivatives of sections.
 The identities 1.6.23–1.6.34 are proved pointwise: first-order identities assume
 differentiability at the point, second-order ones `C²` at the point (which gives the symmetry
 of mixed partial derivatives, `partialDeriv_comm`).

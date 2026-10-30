@@ -1,6 +1,6 @@
 module -- shake: keep-all
 
-public import DLMF.ExpIntegrals.Basic
+public import DLMF.ExpIntegrals.AnalyticProperties
 public import DLMF.ExpIntegrals.Continuation
 public import DLMF.ExpIntegrals.Representations
 public import DLMF.ExpIntegrals.Expansions

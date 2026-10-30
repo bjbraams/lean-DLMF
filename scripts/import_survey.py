@@ -11,15 +11,20 @@ needed) and reports
 * the number of areas, modules and cross-area import lines;
 * the pairs of areas that import each other (two-way pairs), with an example file edge each way;
 * the strongly connected components of the area graph (areas that depend on each other);
-* the imports from a definitions file into a theorem file of another area.
+* all imports from foundational files into theorem files, within or across areas;
+* missing project modules and file-import cycles.
 
 An area is the second component of a module name (`DLMF.Bessel.Basic` lies in `Bessel`). An
-area umbrella `DLMF/<Area>.lean` (one with a directory `DLMF/<Area>/`) is ignored. A
-definitions file is recognised by name only: a module whose last component is `Basic`, `Defs`
-or `Definitions`. Imports of `DLMF.Core` modules (the project framework) are exempt.
+area umbrella `DLMF/<Area>.lean` (one with a directory `DLMF/<Area>/`) and the
+`DLMF.Basic` foundational entry point are ignored in the area graph. A
+foundational file is recognised by name: a `Basic` module, any module below a `Basic/`
+directory, or a legacy `Defs`/`Definitions` module. Imports of `DLMF.Core.*` modules
+(the project framework) are exempt. Both same-area and cross-area foundational imports
+are checked; area umbrellas are not foundational modules.
 
 With `--baseline`, two-way pairs and definitions-file imports that are already in the baseline
-are listed as known and the new ones are marked NEW; the exit status is 1 if anything is new.
+are listed as known and the new ones are marked NEW. Foundational violations, missing
+project modules and file-import cycles always fail; they cannot be grandfathered by a baseline.
 `--write-baseline` writes the current state to the baseline file instead.
 """
 
@@ -50,7 +55,7 @@ def read_modules(root):
 def umbrellas(root, mods):
     """The area umbrellas `DLMF.<Area>` that have a directory `DLMF/<Area>/`."""
     return {m for m in mods
-            if m.count('.') == 1 and os.path.isdir(os.path.join(root, 'DLMF', m.split('.')[1]))}
+            if m.count('.') == 1 and os.path.isdir(os.path.join(root, 'DLMF', m.split('.')[1]))} | ({'DLMF.Basic'} & mods.keys())
 
 
 def area(m):
@@ -59,7 +64,8 @@ def area(m):
 
 
 def is_defs(m):
-    return m.split('.')[-1] in DEF_NAMES
+    parts = m.split('.')
+    return 'Basic' in parts[2:] or parts[-1] in DEF_NAMES
 
 
 def survey(root):
@@ -68,14 +74,14 @@ def survey(root):
     edges = collections.defaultdict(list)
     defs_imports = []
     for m, imps in sorted(mods.items()):
-        if m in umb or m == 'DLMF':
-            continue
         for i in imps:
+            if (is_defs(m) and i in mods and area(i) != 'Core' and not is_defs(i)):
+                defs_imports.append(f'{m} -> {i}')
+            if m in umb or m == 'DLMF':
+                continue
             if i not in mods or i in umb or area(i) == area(m) or area(i) == 'Core':
                 continue
             edges[(area(m), area(i))].append((m, i))
-            if is_defs(m) and not is_defs(i):
-                defs_imports.append(f'{m} -> {i}')
     graph = collections.defaultdict(set)
     for a, b in edges:
         graph[a].add(b)
@@ -124,7 +130,15 @@ def main():
     args = ap.parse_args()
     mods, umb, edges, two_way, comps, defs_imports = survey(args.root)
 
+    missing = sorted(f'{m} -> {i}' for m, imports in mods.items()
+                     for i in imports if i.startswith('DLMF.') and i not in mods)
+    module_graph = {m: {i for i in imports if i in mods} for m, imports in mods.items()}
+    cycles = strongly_connected(module_graph)
+    self_imports = sorted(m for m, imports in mods.items() if m in imports)
+
     if args.write_baseline:
+        if defs_imports or missing or cycles or self_imports:
+            ap.error('foundational violations, missing imports and file cycles cannot be baselined')
         if not args.baseline:
             ap.error('--write-baseline needs --baseline FILE')
         with open(args.baseline, 'w', encoding='utf8') as h:
@@ -155,14 +169,22 @@ def main():
     print(f'\nStrongly connected groups of areas ({len(comps)}):')
     for c in comps:
         print(f'  {len(c)}: {", ".join(c)}')
-    print(f'\nDefinitions files importing theorem files of other areas ({len(defs_imports)}):')
+    print(f'\nFoundational files importing non-foundational DLMF modules ({len(defs_imports)}):')
     for d in defs_imports:
         tag = '' if d in known['defs_imports'] or not args.baseline else '  NEW'
         new += bool(tag)
         print(f'  {d}{tag}')
     if args.baseline:
         print(f'\n{new} new item(s) relative to {args.baseline}')
-    return 1 if new else 0
+    print(f'\nMissing project imports ({len(missing)}):')
+    for item in missing:
+        print(f'  {item}')
+    print(f'\nFile-import cycles ({len(cycles) + len(self_imports)}):')
+    for component in cycles:
+        print('  ' + ', '.join(component))
+    for module in self_imports:
+        print(f'  {module} imports itself')
+    return 1 if new or defs_imports or missing or cycles or self_imports else 0
 
 
 if __name__ == '__main__':

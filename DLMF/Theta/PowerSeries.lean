@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Theta.Basic
+public import DLMF.Theta.SeriesAndZeros
 public import DLMF.Theta.Identities
 
 /-!

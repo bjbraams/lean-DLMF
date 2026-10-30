@@ -5,11 +5,15 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Hypergeometric.Basic.AppellF4
+
 public import DLMF.Hypergeometric.Saalschutz
 public import Mathlib.Data.Nat.Choose.Cast
 
 /-!
 # Appell's function F₄ and Bailey's product formula
+
+Canonical function definitions are imported from the focused Basic layer.
 
 We define the coefficients `appF4Coeff` and the totalized double-series function `appF4` of
 Appell's fourth function (DLMF 16.13.4), and prove Bailey's product formula
@@ -33,10 +37,7 @@ noncomputable section
 
 namespace DLMF.Hypergeometric
 
-/-- The coefficients of Appell's `F₄`:
-`(a)_{m+n} (b)_{m+n} / ((c)_m (c')_n m! n!)`. -/
-noncomputable def appF4Coeff (a b c c' : ℂ) (m n : ℕ) : ℂ :=
-  poch a (m + n) * poch b (m + n) / (poch c m * poch c' n * (m ! * n !))
+
 
 /-- One term of the coefficient comparison in Bailey's formula. -/
 lemma appF4_term (a b c c' : ℂ) (hc : ∀ k, poch c k ≠ 0) (hc' : ∀ k, poch c' k ≠ 0)
@@ -88,10 +89,7 @@ lemma appF4_term (a b c c' : ℂ) (hc : ∀ k, poch c k ≠ 0) (hc' : ∀ k, poc
   rw [hs, hs', mul_one, mul_one]
 
 
-/-- The summand of the coefficient comparison in Bailey's formula. -/
-noncomputable def appF4Term (a b c c' : ℂ) (M N m n : ℕ) : ℂ :=
-  appF4Coeff a b c c' m n * ((-1) ^ (M - m) * (n.choose (M - m) : ℂ)) *
-    ((-1) ^ (N - n) * (m.choose (N - n) : ℂ))
+
 
 /-- The inner (Chu–Vandermonde) sum in Bailey's coefficient comparison. -/
 lemma appF4_inner {a b c c' : ℂ} (hcc : c + c' = a + b + 1) (hc : ∀ k, poch c k ≠ 0)
@@ -291,9 +289,7 @@ lemma appF4Coeff_norm_le (a b : ℂ) {c c' : ℂ} (hc : 0 < c.re) (hc' : 0 < c'.
     _ = _ := by simp only [mul_pow, pow_add]; ring
 
 
-/-- The coefficient of `X^M` in `X^m (1 - X)^n`. -/
-noncomputable def appF4E (m n M : ℕ) : ℂ :=
-  if m ≤ M then (-1) ^ (M - m) * (n.choose (M - m) : ℂ) else 0
+
 
 /-- The coefficient `appF4E m n M` vanishes when `m + n < M`. -/
 theorem appF4E_eq_zero_of_lt {m n M : ℕ} (h : m + n < M) : appF4E m n M = 0 := by
@@ -336,17 +332,10 @@ theorem appF4E_norm_le (m n M : ℕ) {X : ℂ} (hX : ‖X‖ ≤ 1) :
       _ = _ := by ring
   · simp only [zero_mul, norm_zero]; positivity
 
-/-- The four-index family behind Bailey's formula. -/
-noncomputable def appF4Fam (a b c c' X Y : ℂ) (p : (ℕ × ℕ) × (ℕ × ℕ)) : ℂ :=
-  appF4Coeff a b c c' p.1.1 p.1.2 * (appF4E p.1.1 p.1.2 p.2.1 * X ^ p.2.1) *
-    (appF4E p.1.2 p.1.1 p.2.2 * Y ^ p.2.2)
 
 
-/-- **Appell's function `F₄`** (DLMF 16.13.4), as the sum of its double series
-`∑ (a)_{m+n}(b)_{m+n}/((c)_m(c')_n m! n!) sᵐ tⁿ` (totalized to `0` where it diverges). -/
-@[dlmf 16.13.E4]
-noncomputable def appF4 (a b c c' s t : ℂ) : ℂ :=
-  ∑' p : ℕ × ℕ, appF4Coeff a b c c' p.1 p.2 * s ^ p.1 * t ^ p.2
+
+
 
 /-- **Bailey's product formula**: for `c + c' = a + b + 1` (and `Re c, Re c' > 0`),
 `₂F₁(a,b;c;X) ₂F₁(a,b;c';Y) = F₄(a,b;c,c';X(1-Y),Y(1-X))` for small `X`, `Y`, the double

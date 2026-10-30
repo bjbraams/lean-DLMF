@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Coulomb.Energy.Defs
+public import DLMF.Coulomb.Energy.Basic
 
 /-!
 # Coulomb functions `f`, `h`, `s`, `c`: large `|r|` (DLMF §33.21)

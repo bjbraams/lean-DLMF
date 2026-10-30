@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.ParabolicCylinder.Basic
+public import DLMF.ParabolicCylinder.ElementaryProperties
 public import DLMFMathlib.Analysis.Asymptotics.WatsonRotated
 public import DLMF.Core.Framework
 

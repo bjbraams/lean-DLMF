@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Mathieu.Basic
+public import DLMF.Mathieu.SpectralExistence
 
 /-!
 # Analytic continuation of the eigenvalues (DLMF §28.7)

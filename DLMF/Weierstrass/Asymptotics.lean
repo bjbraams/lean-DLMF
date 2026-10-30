@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Weierstrass.Basic
+public import DLMF.Weierstrass.EllipticFunctionsAndInvariants
 
 /-!
 # Asymptotic approximations as `q → 0` (DLMF §23.12)

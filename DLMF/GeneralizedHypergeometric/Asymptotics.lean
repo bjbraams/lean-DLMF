@@ -20,7 +20,9 @@ coefficient recurrence is continued through repeated lower parameters by a speci
 limit. Formal E/H series are coefficient families, never asserted convergent except
 where DLMF explicitly claims convergence (p=q+1, |z|>1).
 
-Residues are the proved pinned TauCeti API (authors and origin retained upstream).
+The finite coefficient recurrence uses Mathlib continuity of finite sums and products
+and uniqueness of punctured limits. Residues are the proved pinned TauCeti API
+(authors and origin retained upstream).
 -/
 
 @[expose] public section
@@ -128,6 +130,70 @@ theorem genAsymptoticC_limit {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
       (𝓝[≠] 0) (𝓝 (genAsymptoticC a b k)) := by
   sorry
 
+/-- Each augmented lower parameter varies continuously with the parameter vector. -/
+private lemma genAsymptoticAugment_continuous {q : ℕ} (j : Fin (q + 1)) :
+    Continuous (fun b : Fin q → ℂ => genAsymptoticAugment b j) := by
+  unfold genAsymptoticAugment
+  split_ifs <;> fun_prop
+
+/-- The exponential exponent is continuous in the lower parameters. -/
+private lemma genAsymptoticNu_continuous {p q : ℕ} (a : Fin p → ℂ) :
+    Continuous (fun b : Fin q → ℂ => genAsymptoticNu a b) := by
+  unfold genAsymptoticNu
+  fun_prop
+
+/-- The finite coefficient sum is continuous where the augmented lower parameters are distinct. -/
+lemma genAsymptoticEkm_continuousAt {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
+    (hb : Function.Injective (genAsymptoticAugment b)) (k m : ℕ) :
+    ContinuousAt (fun c : Fin q → ℂ => genAsymptoticEkm a c k m) b := by
+  classical
+  unfold genAsymptoticEkm
+  apply tendsto_finsetSum
+  intro j hj
+  apply ContinuousAt.div
+  · apply ContinuousAt.mul
+    · exact (ascPochhammer ℂ _).continuous.continuousAt.comp (by
+        exact (((continuous_const.sub (genAsymptoticNu_continuous a)).sub
+          (continuous_const.mul (genAsymptoticAugment_continuous j))).add continuous_const).continuousAt)
+    · apply tendsto_finsetProd
+      intro i hi
+      exact (continuous_const.sub (genAsymptoticAugment_continuous j)).continuousAt
+  · apply tendsto_finsetProd
+    intro i hi
+    exact ((genAsymptoticAugment_continuous i).sub (genAsymptoticAugment_continuous j)).continuousAt
+  · exact Finset.prod_ne_zero_iff.mpr fun i hi =>
+      sub_ne_zero.mpr (fun he => (Finset.mem_erase.mp hi).1 (hb he))
+
+/-- The raw finite recurrence is continuous at distinct augmented lower parameters. -/
+lemma genAsymptoticCRaw_continuousAt {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
+    (_hpq : p < q + 1) (hb : Function.Injective (genAsymptoticAugment b)) (k : ℕ) :
+    ContinuousAt (fun c : Fin q → ℂ => genAsymptoticCRaw a c k) b := by
+  induction k using Nat.strong_induction_on with
+  | h k ih =>
+    cases k with
+    | zero => simpa [genAsymptoticCRaw] using (continuousAt_const :
+        ContinuousAt (fun _ : Fin q → ℂ => (1 : ℂ)) b)
+    | succ k =>
+      simp only [genAsymptoticCRaw]
+      apply ContinuousAt.div_const
+      apply ContinuousAt.neg
+      apply tendsto_finsetSum
+      intro m hm
+      exact (ih m m.isLt).mul (genAsymptoticEkm_continuousAt a b hb (k + 1) m)
+
+/-- At distinct augmented lower parameters, the selected limiting coefficient equals
+the ordinary finite recurrence coefficient. -/
+lemma genAsymptoticC_eq_raw {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
+    (hpq : p < q + 1) (hb : Function.Injective (genAsymptoticAugment b)) (k : ℕ) :
+    genAsymptoticC a b k = genAsymptoticCRaw a b k := by
+  have he : genAsymptoticPerturb b 0 = b := by ext j; simp [genAsymptoticPerturb]
+  have hc := (genAsymptoticCRaw_continuousAt a b hpq hb k).comp_of_eq (show ContinuousAt
+    (fun ε : ℂ => genAsymptoticPerturb b ε) 0 by
+      unfold genAsymptoticPerturb
+      fun_prop) he
+  simpa only [genAsymptoticC, Function.comp_def, he] using
+    (hc.tendsto.mono_left (nhdsWithin_le_nhds (s := ({0}ᶜ : Set ℂ)))).limUnder_eq
+
 /-- The complete printed recurrence on its nonsingular augmented-parameter domain. -/
 @[dlmf 16.11.E4]
 theorem genAsymptoticC_recurrence {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ) (hpq : p < q + 1)
@@ -135,7 +201,13 @@ theorem genAsymptoticC_recurrence {p q : ℕ} (a : Fin p → ℂ) (b : Fin q →
     genAsymptoticC a b 0 = 1 ∧ ∀ k : ℕ, genAsymptoticC a b (k + 1) =
       -(∑ m ∈ range (k + 1), genAsymptoticC a b m * genAsymptoticEkm a b (k + 1) m) /
         ((k + 1 : ℂ) * (genAsymptoticKappa p q : ℂ) ^ genAsymptoticKappa p q) := by
-  sorry
+  constructor
+  · rw [genAsymptoticC_eq_raw a b hpq hb, genAsymptoticCRaw]
+  · intro k
+    simp only [genAsymptoticC_eq_raw a b hpq hb, genAsymptoticCRaw]
+    congr 2
+    exact Fin.sum_univ_eq_sum_range (fun m => genAsymptoticCRaw a b m *
+      genAsymptoticEkm a b (k + 1) m) (k + 1)
 
 /-- Gamma is analytic away from its poles. -/
 lemma ghbR4_Gamma_analyticAt {c : ℂ} (hc : ∀ m : ℕ, c ≠ -m) : AnalyticAt ℂ Gamma c := by

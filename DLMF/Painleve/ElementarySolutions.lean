@@ -5,18 +5,19 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Painleve.SolutionsDefs
+public import DLMF.Painleve.Basic.Solutions
 public import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
-public import DLMF.Painleve.Defs
+public import DLMF.Painleve.Basic
 public import Mathlib.Tactic.Basify
 public import Mathlib.Tactic.ENatToNat
 public import Mathlib.Tactic.Polynomial.Basic
 public import Mathlib.Tactic.ReduceModChar
+public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 
 /-!
 # Other elementary solutions of the Painlevé equations (DLMF §32.9)
 
-DLMF normalization (`DLMF.Painleve.Defs`). The nonrational elementary solutions 32.9.1–32.9.3,
+DLMF normalization (`DLMF.Painleve.Basic`). The nonrational elementary solutions 32.9.1–32.9.3,
 32.9.7, 32.9.8 and 32.9.13 involve powers and logarithms; they are stated with the principal
 branches (`Complex.cpow`, `Complex.log`) on open subsets of the slit plane `ℂ ∖ (-∞, 0]`,
 where these are holomorphic. Any other branch differs by a constant factor (a root of unity)

@@ -5,8 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
-public import DLMF.GeneralizedHypergeometric.Appell.DefinitionsAndSeries
+public import DLMF.GeneralizedHypergeometric.Appell.SeriesAndDifferentialEquations
 public import DLMF.GeneralizedHypergeometric.Appell.EulerIntegrals
+public import DLMF.GeneralizedHypergeometric.Appell.GermTransformations
+public import DLMF.GeneralizedHypergeometric.Appell.HornDifferentialEquations
 
 /-!
 # Appell functions and Horn's double series (DLMF §§16.13–16.16)

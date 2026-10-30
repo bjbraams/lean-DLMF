@@ -11,7 +11,7 @@ public import DLMF.Struve.AngerWeber
 public import DLMF.Struve.Asymptotics
 public import DLMF.Struve.Computation
 public import DLMF.Struve.Coefficients
-public import DLMF.Struve.Basic
+public import DLMF.Struve.SeriesAndEquations
 public import DLMF.Struve.Poisson
 public import DLMF.Struve.Properties
 public import DLMF.Struve.AsymptoticTools

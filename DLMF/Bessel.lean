@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module -- shake: keep-all
 
 public import DLMF.Bessel.Asymptotics
-public import DLMF.Bessel.Basic
+public import DLMF.Bessel.RegularizedSeries
 public import DLMF.Bessel.BesselIntegral
 public import DLMF.Bessel.Elementary
 public import DLMF.Bessel.KIntegrals

@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Elementary.Hyperbolic.InverseCalculus
+public import DLMFMathlib.Analysis.Complex.Sqrt
 
 /-!
 # Branches and cut values of inverse hyperbolic functions
@@ -449,13 +450,12 @@ private lemma hypR4_sqrt_re_pos {w : ℂ} (h : w.im ≠ 0 ∨ 0 < w.re) : 0 < (C
   · linarith [Complex.re_le_norm w]
 
 /-- Halving under the principal square root. -/
-private lemma hypR4_sqrt_half {w : ℂ} (h : w.im ≠ 0 ∨ 0 < w.re) :
+private lemma hypR4_sqrt_half {w : ℂ} (_h : w.im ≠ 0 ∨ 0 < w.re) :
     Complex.sqrt (w/2) = Complex.sqrt w*((Real.sqrt 2)⁻¹:ℝ) := by
-  apply hypR4_sqrt_eq_of_sq
-  · rw [mul_pow, trig_sqrt_sq, ← Complex.ofReal_pow, inv_pow, Real.sq_sqrt (by norm_num)]
-    push_cast; ring
-  · rw [Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im, mul_zero, sub_zero]
-    exact mul_pos (hypR4_sqrt_re_pos h) (inv_pos.mpr (Real.sqrt_pos.mpr (by norm_num)))
+  have hs := Complex.sqrt_ofReal_mul (by norm_num : (0:ℝ)≤1/2) w
+  simpa only [Complex.ofReal_div, Complex.ofReal_one, Complex.ofReal_ofNat,
+    Real.sqrt_div, Real.sqrt_one, Real.sqrt_inv, one_div, one_mul, Complex.ofReal_inv, mul_comm,
+    div_eq_mul_inv] using hs
 
 /-- `log (u²) = 2 log u` in the open right half-plane. -/
 private lemma hypR4_log_sq_of_re_pos {u : ℂ} (h : 0 < u.re) :
@@ -1008,13 +1008,52 @@ theorem arcsech_arccoth_interrelation {a : ℂ} (hre : 0<a.re) (ha : a∈arcsech
   · rw [show (2:ℂ) = ((2:ℝ):ℂ) by norm_num, Complex.im_ofReal_mul, Complex.log_im]
     linarith [(abs_lt.mp harg).2]
 
+/-- The half-angle logarithm holds on the right half-plane, including the chosen real cut bank. -/
+private lemma arccosh_half_right {z : ℂ} (hz : 0<z.re) :
+    arccosh z = 2*arcsinh (Complex.sqrt ((z-1)/2)) := by
+  let c : ℂ := (Real.sqrt (1/2):ℝ)
+  have hc2 : c^2=(1/2:ℂ) := by
+    dsimp [c]
+    rw [← Complex.ofReal_pow, Real.sq_sqrt (by norm_num)]
+    norm_num
+  have hs (w : ℂ) : Complex.sqrt (w/2) = c*Complex.sqrt w := by
+    simpa only [c, Complex.ofReal_div, Complex.ofReal_one, Complex.ofReal_ofNat,
+      div_mul_eq_mul_div, one_mul] using
+      Complex.sqrt_ofReal_mul (by norm_num : (0:ℝ)≤1/2) w
+  have hp : 0<((z+1)/2).re := by simp; linarith
+  have hre : 0<(Complex.sqrt ((z+1)/2)+Complex.sqrt ((z-1)/2)).re := by
+    rw [Complex.add_re]
+    linarith [hypR4_sqrt_re_pos (Or.inr hp), hypR4_sqrt_re_nonneg ((z-1)/2)]
+  have hlog := hypR4_log_sq_of_re_pos hre
+  rw [hs,hs,add_sq,mul_pow,mul_pow,hc2,trig_sqrt_sq,trig_sqrt_sq] at hlog
+  unfold arccosh arcsinh
+  rw [trig_sqrt_sq,show (z-1)/2+1=(z+1)/2 by ring]
+  rw [hs,hs,← hlog]
+  congr 1
+  linear_combination -2*Complex.sqrt (z+1)*Complex.sqrt (z-1)*hc2
+
 /-- Central-binomial coefficient divided by 4^n, used in the inverse expansions. -/
 def hyperbolicCentral (n : ℕ) : ℂ := (Nat.choose (2*n) n:ℂ)/(4:ℂ)^n
-/-- The series with terms `(fun n : ℕ => (-1:ℂ)^n*hyperbolicCentral n/(2*n+1:ℂ)*z^(2*n+1))`
-converges to `(arcsinh z)`. -/
+/-- The central-binomial expansion of the principal inverse hyperbolic sine
+converges on the closed unit disk, including its two branch points. -/
+lemma hasSum_arcsinh_closed_disk {z : ℂ} (hz : ‖z‖≤1) :
+    HasSum (fun n : ℕ => (-1:ℂ)^n*hyperbolicCentral n/(2*n+1:ℂ)*z^(2*n+1))
+      (arcsinh z) := by
+  have hn : ‖-I*z‖≤1 := by simpa using hz
+  have h := (hasSum_arcsin_principal hn).mul_left I
+  rw [← hyper_arcsinh_rotation] at h
+  convert h using 1
+  ext n
+  rw [mul_pow, pow_add, pow_mul, pow_add, pow_mul, show (-I:ℂ)^2 = -1 by simp, pow_one]
+  dsimp only [hyperbolicCentral]
+  simp only [div_eq_mul_inv, mul_inv_rev]
+  linear_combination ((2*n).choose n:ℂ)*(-1:ℂ)^n*z^(2*n)*z*(4^n:ℂ)⁻¹*(2*n+1:ℂ)⁻¹*Complex.I_sq
+
+/-- The central-binomial power series of the principal inverse hyperbolic sine
+on the open unit disk, obtained by rotating the principal arcsine expansion. -/
 @[dlmf 4.38.E1]
 theorem hasSum_arcsinh {z : ℂ} (hz : ‖z‖<1) : HasSum (fun n : ℕ => (-1:ℂ)^n*hyperbolicCentral n/(2*n+1:ℂ)*z^(2*n+1)) (arcsinh z) := by
-  sorry
+  exact hasSum_arcsinh_closed_disk hz.le
 
 /-- The series with terms `(fun n : ℕ => (-1:ℂ)^n*hyperbolicCentral (n+1)/((2*n+2:ℂ)*z^(2*n+2)))`
 converges to `(arcsinh z-Complex.log (2*z))`. -/
@@ -1028,12 +1067,43 @@ to `(Complex.log (2*z)-arccosh z)`. -/
 theorem hasSum_arccosh_large {z : ℂ} (hn : 1<‖z‖) : HasSum (fun n : ℕ => hyperbolicCentral (n+1)/((2*n+2:ℂ)*z^(2*n+2))) (Complex.log (2*z)-arccosh z) := by
   sorry
 
-/-- The series with terms `(fun n : ℕ => (-1:ℂ)^n*hyperbolicCentral
-n/((2:ℂ)^n*(2*n+1:ℂ))*(z-1)^n)` converges to `(if z=1 then 1 else arccosh z/Complex.sqrt
-(2*(z-1)))`. -/
+/-- The principal inverse-cosh expansion about one after factoring the square root.
+The series converges on the stated closed disk in the right half-plane, with
+its removable value at one assigned explicitly. -/
 @[dlmf 4.38.E4]
 theorem hasSum_arccosh_near_one {z : ℂ} (hz : 0<z.re) (hn : ‖z-1‖≤2) : HasSum (fun n : ℕ => (-1:ℂ)^n*hyperbolicCentral n/((2:ℂ)^n*(2*n+1:ℂ))*(z-1)^n) (if z=1 then 1 else arccosh z/Complex.sqrt (2*(z-1))) := by
-  sorry
+  by_cases hz1 : z=1
+  · subst z
+    convert hasSum_ite_eq (0:ℕ) (1:ℂ) using 1
+    · funext n
+      by_cases hn : n=0
+      · simp [hn,hyperbolicCentral]
+      · simp [hn]
+    · simp
+  let w := Complex.sqrt ((z-1)/2)
+  have hw2 : w^2=(z-1)/2 := trig_sqrt_sq _
+  have hw0 : w≠0 := by intro h; rw [h] at hw2; apply hz1; linear_combination -2*hw2
+  have hwn : ‖w‖≤1 := by
+    have he : ‖w‖^2=‖z-1‖/2 := by
+      rw [← norm_pow,hw2,norm_div]; norm_num
+    nlinarith [norm_nonneg w]
+  have h := (hasSum_arcsinh_closed_disk hwn).mul_left w⁻¹
+  have hs : Complex.sqrt (2*(z-1))=2*w := by
+    have he := Complex.sqrt_ofReal_mul (by norm_num : (0:ℝ)≤4) ((z-1)/2)
+    norm_num at he
+    convert he using 1
+    congr 1
+    ring
+  have hv : w⁻¹*arcsinh w=arccosh z/Complex.sqrt (2*(z-1)) := by
+    rw [arccosh_half_right hz,hs]
+    dsimp only [w]
+    field_simp [hw0]
+  rw [hv] at h
+  rw [ite_eq_right_iff.mpr (fun h => (hz1 h).elim)]
+  convert h using 1
+  ext n
+  rw [pow_add,pow_mul,hw2,pow_one,div_pow]
+  field_simp [hw0]
 
 end DLMF.Elementary
 end

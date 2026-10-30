@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Coulomb.Energy.Defs
+public import DLMF.Coulomb.Energy.Basic
 public import DLMF.Coulomb.Energy.Q2eRegular
 public import DLMF.Bessel.Modified
 

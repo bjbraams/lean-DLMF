@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Spheroidal.FerrersDefs
+public import DLMF.Spheroidal.FerrersProperties
 public import DLMF.Spheroidal.Angular
 public import DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion
 

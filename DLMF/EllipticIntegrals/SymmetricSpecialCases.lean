@@ -7,6 +7,7 @@ module
 
 public import DLMF.EllipticIntegrals.SymmetricSeries
 public import DLMF.EllipticIntegrals.SymmetricRelations
+public import Carlson.RPolynomial.Appell
 
 /-!
 # Symmetric elliptic integrals: special cases (DLMF §19.20)
@@ -584,7 +585,14 @@ theorem symEllIntR_neg_natCast {n : ℕ} (N : ℕ) (b : Fin n → ℂ) {z : Fin 
     (hz : z ∈ Carlson.carlsonRSlitDomain) (hc : 0 < (∑ j, b j).re) :
     symEllIntR (-(N : ℂ)) b z =
       (N.factorial : ℂ) / (ascPochhammer ℂ N).eval (∑ j, b j) * symEllIntT N b z := by
-  sorry
+  have hcn : ∀ k : ℕ, ∑ j, b j ≠ -k := fun k h => by
+    have he := congrArg Complex.re h
+    simp only [neg_re, natCast_re] at he
+    linarith [Nat.cast_nonneg (α := ℝ) k]
+  rw [symEllIntR_of_mem _ _ hz, Carlson.carlsonR, neg_neg,
+    Carlson.regCarlsonR_natCast N b hz,
+    ← Carlson.carlsonRPolynomialNumerator_div_eq N hcn z, carlsonRPolynomialNumerator_eq_factorial_mul_symEllIntT]
+  ring
 
 /-- DLMF 19.20.25: `R_{-c}(𝐛; 𝐳) = ∏ⱼ zⱼ^{-bⱼ}`, `c = ∑ bⱼ`, `Γ(c) ≠ 0`, slit-plane nodes.
 From `Carlson.regCarlsonR_neg_sum_sub_nat`. -/

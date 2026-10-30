@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Airy.Basic
+public import DLMF.Airy.Properties
 
 /-!
 # Conventions for the DLMF Airy acquisition

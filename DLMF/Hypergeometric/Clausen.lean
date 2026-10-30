@@ -8,7 +8,7 @@ module
 public import Mathlib.Data.Nat.Choose.Cast
 
 public import DLMF.Hypergeometric.Continuation
-public import DLMF.Bessel.Basic
+public import DLMF.Bessel.RegularizedSeries
 public import Mathlib.RingTheory.PowerSeries.Basic
 
 /-!

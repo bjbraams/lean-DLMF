@@ -8,7 +8,7 @@ module
 public import DLMF.Core.Framework
 public import DLMF.Statistical.ContinuedFraction
 public import DLMF.Confluent.ContinuedFractions
-public import DLMF.IncompleteGamma.Basic
+public import DLMF.IncompleteGamma.ContinuedProperties
 public import TauCeti.Analysis.Complex.Conformal.Vitali
 
 /-!

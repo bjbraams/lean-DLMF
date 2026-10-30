@@ -7,6 +7,7 @@ module
 
 public import Mathlib.Analysis.Complex.Liouville
 public import Mathlib.Analysis.Calculus.SmoothSeries
+public import Mathlib.MeasureTheory.Integral.Bochner.SumMeasure
 public import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
 
 /-!
@@ -25,6 +26,8 @@ complex normed space (several complex parameters at once):
 * `Complex.differentiableOn_tsum_of_locally_dominated`: a series of holomorphic functions which
   is locally dominated by summable sequences is holomorphic; the `ℕ`-indexed variant
   `Complex.differentiableOn_tsum_of_eventually_dominated` only asks for domination of a tail.
+* `Complex.iteratedDeriv_tsum_of_locally_dominated` computes every derivative of a
+  locally dominated complex series term by term, using counting-measure integration.
 * `Complex.differentiableOn_integral_of_locally_dominated`: a parametric integral of functions
   holomorphic in a finite-dimensional complex parameter, locally dominated by integrable functions,
   is holomorphic; `Complex.differentiableOn_intervalIntegral_of_locally_dominated` and
@@ -418,6 +421,33 @@ theorem iteratedDeriv_integral_of_locally_dominated [CompleteSpace F]
       (ae_differentiableOn_iteratedDeriv_param hU hdiff n)
       (locally_dominated_iteratedDeriv hU hdiff hdom n) hx
     simpa only [iteratedDeriv_succ] using hd.deriv
+
+/-- The totalized counting-measure integral of a countable complex family is its sum. -/
+private lemma integral_count_eq_tsum {ι : Type*} [Countable ι] [MeasurableSpace ι]
+    [MeasurableSingletonClass ι] (f : ι → ℂ) :
+    (∫ i, f i ∂Measure.count) = ∑' i, f i := by
+  by_cases hs : Summable f
+  · have hi : Integrable f Measure.count := integrable_count_iff.mpr hs.norm
+    simpa using integral_countable hi
+  · rw [tsum_eq_zero_of_not_summable hs, integral_undef]
+    intro hi
+    exact hs (integrable_count_iff.mp hi).of_norm
+
+/-- Every derivative of a locally dominated series of holomorphic complex-valued functions
+can be computed term by term. -/
+theorem iteratedDeriv_tsum_of_locally_dominated {ι : Type*} [Countable ι]
+    {f : ι → ℂ → ℂ} {U : Set ℂ} (hU : IsOpen U)
+    (hf : ∀ i, DifferentiableOn ℂ (f i) U)
+    (hdom : ∀ x ∈ U, ∃ V ∈ 𝓝 x, ∃ g : ι → ℝ, Summable g ∧
+      ∀ i, ∀ y ∈ V, ‖f i y‖ ≤ g i) (n : ℕ) {x : ℂ} (hx : x ∈ U) :
+    iteratedDeriv n (fun z => ∑' i, f i z) x = ∑' i, iteratedDeriv n (f i) x := by
+  let : MeasurableSpace ι := ⊤
+  have hI := iteratedDeriv_integral_of_locally_dominated (μ := Measure.count) hU
+    (fun z hz => (measurable_of_countable _).aestronglyMeasurable) (ae_of_all _ hf) (by
+      intro z hz
+      obtain ⟨V, hV, g, hg, hle⟩ := hdom z hz
+      exact ⟨V, hV, g, integrable_count_iff.mpr hg.norm, ae_of_all _ hle⟩) n hx
+  simpa only [integral_count_eq_tsum] using hI
 
 /-- The half-line form of `differentiableOn_integral_of_locally_dominated`. -/
 theorem differentiableOn_integral_Ioi_of_locally_dominated [FiniteDimensional ℂ E]

@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.QSeries.Basic.Calculus
 public import DLMF.QSeries.Pochhammer
 
 /-!
@@ -24,12 +25,6 @@ open scoped Topology
 noncomputable section
 
 namespace DLMF.QSeries
-
-/-- The `q`-derivative `δ_q f(x) = (f(x) - f(qx)) / ((1-q)x)` (Duverney (10.10)). -/
-def qDeriv (q : ℂ) (f : ℂ → ℂ) (x : ℂ) : ℂ := (f x - f (q * x)) / ((1 - q) * x)
-
-/-- The `q`-number `[n]_q = (1 - qⁿ)/(1 - q)`. -/
-def qNum (q : ℂ) (n : ℕ) : ℂ := (1 - q ^ n) / (1 - q)
 
 /-- `δ_q xⁿ = [n]_q x^{n-1}` (Duverney (10.11)). -/
 theorem qDeriv_pow {q x : ℂ} (hq : q ≠ 1) (hx : x ≠ 0) (n : ℕ) :

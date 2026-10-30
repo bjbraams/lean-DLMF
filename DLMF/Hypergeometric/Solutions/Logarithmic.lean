@@ -5,6 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Hypergeometric.Basic.Pochhammer
+
 public import DLMF.Hypergeometric.Solutions.Equation
 
 /-!
@@ -101,12 +103,7 @@ def logSing (a b : ℂ) (n : ℕ) (z : ℂ) : ℂ :=
     ((n - 1).factorial : ℂ) * (j.factorial : ℂ) /
       (((n - j - 2).factorial : ℂ) * poch (1 - a) (j + 1) * poch (1 - b) (j + 1)) * ((-z)⁻¹) ^ (j + 1)
 
-/-- If `(x)_N ≠ 0` then `(x)_k ≠ 0` for every `k ≤ N`. -/
-theorem poch_ne_zero_of_le {x : ℂ} {N k : ℕ} (hk : k ≤ N) (h : poch x N ≠ 0) : poch x k ≠ 0 := by
-  intro h0
-  apply h
-  obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le hk
-  rw [poch_add, h0, zero_mul]
+
 
 /-- For `c = n ≥ 1`, the Gauss operator maps the pole part `logSing` to `(n - 1)/z`. -/
 theorem gaussOperator_logSing {a b : ℂ} {n : ℕ} (hn : 0 < n)

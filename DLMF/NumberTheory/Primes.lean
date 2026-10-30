@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.NumberTheory.Functions
-public import DLMF.ExpIntegrals.Basic
+public import DLMF.ExpIntegrals.AnalyticProperties
 public import Mathlib.NumberTheory.CarmichaelNumber
 public import Mathlib.NumberTheory.LucasLehmer
 

@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module -- shake: keep-all
 
 public import DLMF.Core.Upstream
-public import DLMF.AlgebraicAnalytic.Transforms.Defs
+public import DLMF.AlgebraicAnalytic.Transforms.Basic
 public import DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion
 public import DLMFMathlib.Analysis.Asymptotics.AsymptoticInversion
 public import DLMFMathlib.Analysis.Asymptotics.Watson
@@ -29,7 +29,7 @@ with DLMF's `f/g → 1` (2.1.1) when `g` is eventually nonzero; `f =o[l] g` and 
 DLMF's `o` and `O` (2.1.2–2.1.3) without a division, so they also cover functions with zeros.
 `HasAsymptoticExpansion l φ a f` (`DLMFMathlib`) is the generalized expansion of §2.1(v) with
 coefficients `a` on a scale `φ`; the Poincaré expansions of §2.1(iii) are the scale `x^{-s}`
-(`HasPoincareExpansion`, `Basics.Defs`).
+(`HasPoincareExpansion`, `Basics.Basic`).
 -/
 
 /- §2.1(i): order symbols. -/

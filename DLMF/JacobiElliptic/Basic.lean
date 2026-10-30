@@ -6,9 +6,6 @@ Authors: Bastiaan J Braams
 module -- shake: keep-all
 
 public import DLMF.JacobiElliptic.Basic.Definitions
-public import DLMF.JacobiElliptic.Basic.QuarterPeriods
-public import DLMF.JacobiElliptic.Basic.ModulusInversion
-public import DLMF.JacobiElliptic.Basic.AnalyticProperties
 
 /-!
 # Jacobian elliptic functions: definitions (DLMF §22.2)
@@ -45,4 +42,6 @@ DLMF 22.2 defines the twelve Jacobian elliptic functions `pq(z, k)` (Glaisher's 
   uniqueness).
 
 Mathlib and TauCeti have no Jacobian elliptic functions (checked 2026-10-25).
+
+Quarter-period identities, modulus inversion and analytic properties are proved in the separate theorem modules `QuarterPeriods`, `ModulusInversion` and `AnalyticProperties`.
 -/

@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AlgebraicAnalytic.Transforms.Defs
+public import DLMF.AlgebraicAnalytic.Transforms.Basic
 public import DLMFMathlib.Analysis.MellinConvolution
 public import DLMFMathlib.Analysis.MellinParseval
 public import Mathlib.Analysis.MellinInversion
@@ -25,7 +25,7 @@ The Mellin transform 1.14.32 is Mathlib's `mellin f s = ∫₀^∞ x^{s-1} f(x) 
 normalization, principal powers of the positive real `x`); its inversion theorem 1.14.35 is
 Mathlib's `mellinInv_mellin_eq` (pointer in `MathlibCoverage`). The Hilbert transform
 `hilbertTransform` (1.14.41) and the Stieltjes transform `stieltjesTransform` (1.14.47) are
-defined in `Transforms/Defs`.
+defined in `Transforms/Basic`.
 
 Proved: Mellin holomorphy in its strip of absolute convergence, the Riemann–Lebesgue
 property 1.14.33 on vertical lines, the integrability criterion of §1.14(iv), Mellin

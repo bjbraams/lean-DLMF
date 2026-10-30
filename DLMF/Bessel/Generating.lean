@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Bessel.Basic
+public import DLMF.Bessel.RegularizedSeries
 
 /-! # Absolute convergence of the Bessel generating function
 

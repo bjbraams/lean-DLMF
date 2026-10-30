@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AsymptoticApproximations.Basics.Defs
+public import DLMF.AsymptoticApproximations.Basics.Basic
 public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
 public import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
 

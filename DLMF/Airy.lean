@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
-public import DLMF.Airy.Basic
+public import DLMF.Airy.Properties
 public import DLMF.Airy.Bessel
 public import DLMF.Airy.Framework
 public import DLMF.Airy.Equation

@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module -- shake: keep-all
 
 public import DLMF.Selberg.Applications
-public import DLMF.Selberg.Basic
+public import DLMF.Selberg.ContinuationAndAomoto
 
 /-!
 # The Selberg integral (AAR Chapter 8)

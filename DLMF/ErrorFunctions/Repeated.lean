@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.ErrorFunctions.BoundsAsymptotics
-public import DLMF.ParabolicCylinder.Basic
+public import DLMF.ParabolicCylinder.ElementaryProperties
 
 /-!
 # Repeated complementary error integrals, DLMF §7.18

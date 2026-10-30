@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Elliptic.Basic.Integrals
 public import DLMF.Hypergeometric.Identities
 
 /-!
@@ -35,20 +36,6 @@ open DLMF.Hypergeometric
 noncomputable section
 
 namespace DLMF.Elliptic
-
-/-- For `m < 1` the base `1 - m sin²θ` is positive. -/
-theorem one_sub_mul_sin_sq_pos {m : ℝ} (hm : m < 1) (θ : ℝ) : 0 < 1 - m * sin θ ^ 2 := by
-  rcases le_or_gt m 0 with h | h <;> nlinarith [sin_sq_le_one θ, sq_nonneg (sin θ)]
-
-/-- Upper bound for the base `1 - m sin²θ`. -/
-theorem one_sub_mul_sin_sq_le {m : ℝ} (θ : ℝ) : 1 - m * sin θ ^ 2 ≤ 1 + |m| := by
-  nlinarith [sin_sq_le_one θ, sq_nonneg (sin θ), abs_nonneg m, neg_abs_le m, le_abs_self m]
-
-/-- For `m < 1`, `θ ↦ (1 - m sin²θ)^p` is continuous. -/
-theorem continuous_one_sub_mul_sin_sq_rpow {m : ℝ} (hm : m < 1) (p : ℝ) :
-    Continuous fun θ : ℝ => (1 - m * sin θ ^ 2) ^ p :=
-  (by fun_prop : Continuous fun θ : ℝ => 1 - m * sin θ ^ 2).rpow_const
-    fun θ => Or.inl (one_sub_mul_sin_sq_pos hm θ).ne'
 
 /-- Differentiation in the parameter of `∫₀^{π/2} (1 - m sin²θ)^p dθ`. -/
 theorem hasDerivAt_integral_one_sub_mul_sin_sq_rpow (p : ℝ) {m₀ : ℝ} (hm : m₀ < 1) :
@@ -111,16 +98,6 @@ theorem hasDerivAt_integral_one_sub_mul_sin_sq_rpow (p : ℝ) {m₀ : ℝ} (hm :
       have h2 := h.rpow_const (p := p) (Or.inl hpos.ne')
       exact h2.congr_deriv (by simp only [id]; ring))
   exact key.2
-
-/-- The complete elliptic integral of the first kind in Legendre's form, with parameter
-`m = k²`: `K(m) = ∫₀^{π/2} (1 - m sin²θ)^{-1/2} dθ` (DLMF 19.2.8). -/
-@[dlmf 19.2.E8]
-def Real.compEllIntKm (m : ℝ) : ℝ := ∫ θ in (0 : ℝ)..(π / 2), (1 - m * sin θ ^ 2) ^ (-(1 / 2) : ℝ)
-
-/-- The complete elliptic integral of the second kind, with parameter `m = k²`:
-`E(m) = ∫₀^{π/2} (1 - m sin²θ)^{1/2} dθ` (DLMF 19.2.8). -/
-@[dlmf 19.2.E8]
-def Real.compEllIntEm (m : ℝ) : ℝ := ∫ θ in (0 : ℝ)..(π / 2), (1 - m * sin θ ^ 2) ^ (1 / 2 : ℝ)
 
 /-- `x^{1/2} = x · x^{-1/2}` for `x > 0`. -/
 theorem rpow_half_eq_mul {x : ℝ} (hx : 0 < x) : x ^ (1 / 2 : ℝ) = x * x ^ (-(1 / 2) : ℝ) := by

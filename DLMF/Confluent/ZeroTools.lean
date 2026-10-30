@@ -991,7 +991,7 @@ end Kummer
 section NegativeAxis
 
 open Complex DLMF.Hypergeometric
-open scoped Real
+open scoped _root_.Real
 
 /-- **DLMF 13.2.41 on the negative real axis.** For `x < 0`, where the principal branch has
 `ph x = π`, the lower-sign connection formula

@@ -5,6 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.OrthogonalPolynomials.Basic.Definitions
+public import DLMF.Confluent.Basic.IncompleteGamma
+public import DLMF.Confluent.Basic.ExpansionData
+
 public import ComplexAnalysis.HalfPlane
 public import DLMF.Confluent.Continuation
 public import DLMF.OrthogonalPolynomials.Hahn
@@ -35,9 +39,7 @@ noncomputable section
 
 namespace DLMF.Confluent
 
-/-- Physicists' Hermite polynomial evaluated in `ℂ`. -/
-def hermitePolyHEval (n : ℕ) (z : ℂ) : ℂ :=
-  eval z ((hermitePolyH n).map (Int.castRingHom ℂ))
+
 
 /-- `(-n)_{n-s} (-1)^{n-s} / (n-s)! = C(n,s)`. -/
 theorem poch_neg_nat_sub_div (n s : ℕ) (hs : s ≤ n) :
@@ -104,8 +106,7 @@ theorem kummerU_shift_one (a : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
   rw [kummerU_kummer_transform_all a _ (slitPlane_ne_zero hz), show a - (a + 1) + 1 = 0 by ring, kummerU_zero,
     show (1 : ℂ) - (a + 1) = -a by ring, mul_one]
 
-/-- Upper incomplete gamma via Tricomi's `U`, from DLMF 13.6.6. -/
-def upperIncGamma (s z : ℂ) : ℂ := exp (-z) * kummerU (1 - s) (1 - s) z
+
 
 /-- Lower incomplete-Gamma identities with a regular denominator for Kummer M. -/
 @[dlmf 13.6.E5]
@@ -324,10 +325,7 @@ theorem kummerU_besselK (ν z : ℂ) (hz : z ∈ slitPlane) :
   have := key (2 * ν)
   rwa [show 2 * ν / 2 = ν by ring] at this
 
-/-- Entire coefficient for the normalized finite Kummer–Bessel expansion. -/
-noncomputable def kummerBesselCoeff (ν : ℂ) (n k : ℕ) : ℂ :=
-  (-1) ^ k * (n.choose k : ℂ) * poch (2 * ν) k * (ν + k) *
-    (1 / Gamma (2 * ν + 1 + n + k))
+
 
 /-- Pascal's identity combined with the reciprocal-Gamma recurrence. -/
 theorem kummerBesselCoeff_succ (ν : ℂ) (n k : ℕ) :

@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.GeneralizedHypergeometric.Basic
+public import DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties
 public import DLMFMathlib.Analysis.Complex.SeparatingContour
 public import Mathlib.MeasureTheory.Function.AbsolutelyContinuous
 

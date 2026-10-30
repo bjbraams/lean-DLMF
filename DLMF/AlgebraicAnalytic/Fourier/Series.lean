@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AlgebraicAnalytic.Fourier.Defs
+public import DLMF.AlgebraicAnalytic.Fourier.Basic
 public import DLMFMathlib.Analysis.Fourier.AddCircle
 public import DLMFMathlib.Analysis.Fourier.GaussianSeries
 public import Mathlib.Analysis.Fourier.RiemannLebesgueLemma
@@ -17,7 +17,7 @@ public import TauCeti.Analysis.Calculus.PeriodicDeriv
 
 Statements of DLMF §1.8 for `f : ℝ → ℂ`, with the coefficients `fourierCosCoeff`,
 `fourierSinCoeff`, `fourierExpCoeff` and the Lebesgue constants `lebesgueConstant` of
-`DLMF.AlgebraicAnalytic.Fourier.Defs`.
+`DLMF.AlgebraicAnalytic.Fourier.Basic`.
 
 Conventions.
 * DLMF series over `n = 1, 2, …` that may converge only conditionally (the Fourier series in

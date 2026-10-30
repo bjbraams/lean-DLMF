@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Mathieu.Basic
+public import DLMF.Mathieu.SpectralExistence
 
 /-!
 # Expansions in series of Mathieu functions (DLMF §28.11)

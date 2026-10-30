@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
-public import DLMF.Weierstrass.Basic
+public import DLMF.Weierstrass.EllipticFunctionsAndInvariants
 public import DLMF.Weierstrass.DifferentialEquations
 public import DLMF.Weierstrass.SpecialLattices
 public import DLMF.Weierstrass.Relations

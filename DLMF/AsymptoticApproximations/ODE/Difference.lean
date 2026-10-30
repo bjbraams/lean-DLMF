@@ -5,7 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AsymptoticApproximations.ODE.Defs
+public import DLMF.AsymptoticApproximations.ODE.Basic
+
+public import DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion
 
 /-!
 # Difference equations (DLMF §2.9)

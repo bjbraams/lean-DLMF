@@ -1,11 +1,19 @@
 # DLMF Chapter 2 acquisition: Asymptotic Approximations
 
+> Source paths and current layout notes were refreshed on 2026-10-30; generated per-entry
+> statuses follow the compiled ledger refresh. Dated acquisition and proof counts
+> describe their original batches.
+
+**Current layout (2026-10-30).** Each Chapter 2 subarea uses a `Basic` foundation. Watson, Laplace, Mellin,
+stationary-phase and other analytical results remain in the separately named theorem
+modules; foundational files do not import those developments.
+
 This acquisition covers the definitions, numbered formulas and analytical assertions in prose
 of [DLMF Chapter 2](https://dlmf.nist.gov/2), version 1.2.8, checked on 2026-10-27, by two
 agents working in parallel: g2a (§§2.1–2.5) and g2b (§§2.6–2.11). Helper lemmas carry the
 agent's prefix (`g2a_`, `g2b_`) or are private. The Lean code is in
 `DLMF/AsymptoticApproximations/` (namespace `DLMF.AsymptoticApproximations`), with one
-subdirectory per section group, each with its own `Defs` file. Expansions use the project API
+subdirectory per section group, each with its own `Basic` foundation. Expansions use the project API
 `HasAsymptoticExpansion` of `DLMFMathlib/Analysis/Asymptotics`; Watson's lemma, Euler–Maclaurin
 and Liouville–Green material of `DLMFMathlib` is reused. The umbrella is
 [DLMF/AsymptoticApproximations.lean](DLMF/AsymptoticApproximations.lean). The parts below are
@@ -47,34 +55,35 @@ g2b's files.
 
 Modules, in import order:
 
-- §§2.1–2.2: [Basics/Defs](DLMF/AsymptoticApproximations/Basics/Defs.lean) (Mathlib and
+- §§2.1–2.2: [Basics/Basic](DLMF/AsymptoticApproximations/Basics/Basic.lean) (Mathlib and
   `DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion`) →
   [Basics/OrderSymbols](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean) (§2.1; also
   `DLMFMathlib` `AsymptoticInversion`, `WatsonSector`),
   [Basics/Transcendental](DLMF/AsymptoticApproximations/Basics/Transcendental.lean) (§2.2).
-- §§2.3–2.4: [Integrals/Defs](DLMF/AsymptoticApproximations/Integrals/Defs.lean) (Mathlib only) →
+- §§2.3–2.4: [Integrals/Basic](DLMF/AsymptoticApproximations/Integrals/Basic.lean) (Mathlib only) →
   [Integrals/Watson](DLMF/AsymptoticApproximations/Integrals/Watson.lean) (§2.3(ii), §2.4(i)–(ii);
-  also the definitions file `DLMF.AlgebraicAnalytic.Transforms.Defs` and `DLMFMathlib` Watson
+  also the definitions file `DLMF.AlgebraicAnalytic.Transforms.Basic` and `DLMFMathlib` Watson
   files) → [Integrals/Parts](DLMF/AsymptoticApproximations/Integrals/Parts.lean) (§2.3(i); also
-  `Basics.Defs`); [Integrals/Laplace](DLMF/AsymptoticApproximations/Integrals/Laplace.lean)
+  `Basics.Basic`); [Integrals/Laplace](DLMF/AsymptoticApproximations/Integrals/Laplace.lean)
   (§2.3(iii), §2.4(iii)–(iv)),
   [Integrals/StationaryPhase](DLMF/AsymptoticApproximations/Integrals/StationaryPhase.lean)
   (§2.3(iv)), [Integrals/Coalescing](DLMF/AsymptoticApproximations/Integrals/Coalescing.lean)
-  (§2.3(v), §2.4(v)), each importing `Integrals.Defs`.
-- §2.5: [Mellin/Defs](DLMF/AsymptoticApproximations/Mellin/Defs.lean) (Mathlib only) →
+  (§2.3(v), §2.4(v)), each importing `Integrals.Basic`.
+- §2.5: [Mellin/Basic](DLMF/AsymptoticApproximations/Mellin/Basic.lean) (Mathlib only) →
   [Mellin/Transforms](DLMF/AsymptoticApproximations/Mellin/Transforms.lean) (§2.5(i)–(ii); also
-  the definitions file `DLMF.AlgebraicAnalytic.Complex.Defs` for `residueAt`) →
+  the definitions file `DLMF.AlgebraicAnalytic.Complex.Basic` for `residueAt`) →
   [Mellin/SmallParameter](DLMF/AsymptoticApproximations/Mellin/SmallParameter.lean) (§2.5(iii);
-  also `DLMF.AlgebraicAnalytic.Transforms.Defs`, `DLMF.ExpIntegrals.Expansions`);
+  also `DLMF.AlgebraicAnalytic.Transforms.Basic`, `DLMF.ExpIntegrals.Expansions`);
   [Mellin/BesselExample](DLMF/AsymptoticApproximations/Mellin/BesselExample.lean) (2.5.8–2.5.16;
-  `Mellin.Defs`, `DLMF.AlgebraicAnalytic.Complex.Defs`, `DLMF.Gamma.MellinBarnes`,
+  `Mellin.Basic`, `DLMF.AlgebraicAnalytic.Complex.Basic`, `DLMF.Gamma.MellinBarnes`,
   `DLMF.Gamma.Asymptotics`).
 - [Basics/MathlibCoverage](DLMF/AsymptoticApproximations/Basics/MathlibCoverage.lean):
   `dlmf_upstream` pointers (`DLMF.Core.Upstream`, Mathlib, DLMFMathlib, lean-codes `ToMathlib`,
-  `DLMF.AlgebraicAnalytic.Transforms.Defs`).
+  `DLMF.AlgebraicAnalytic.Transforms.Basic`).
 
-All definitions are in the three `Defs` files. No umbrella file is edited; the coordinator adds
-the modules to `DLMF.lean`.
+The foundational definitions for this part are in the corresponding `Basics.Basic`,
+`Integrals.Basic` and `Mellin.Basic` files. `DLMF.AsymptoticApproximations` exports these
+foundations and their separate theorem developments.
 
 **Counts.** §§2.1–2.5 have 132 numbered equations (2.1: 21, 2.2: 8, 2.3: 33, 2.4: 21,
 2.5: 49) and 2 tables (2.5.T1, 2.5.T2): 134 IDs in scope. Covered: 132; 2 are no statement
@@ -90,12 +99,12 @@ other 67 public proved theorems use only `propext`, `Classical.choice`, `Quot.so
 
 Module admissions (`grep -cE 'by sorry|:= sorry|^\s*(·\s*)?sorry\s*$|exact sorry'`):
 
-- [Basics/Defs](DLMF/AsymptoticApproximations/Basics/Defs.lean): 0; 8 definitions.
+- [Basics/Basic](DLMF/AsymptoticApproximations/Basics/Basic.lean): 0; 8 definitions.
 - [Basics/OrderSymbols](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean): 9; 33 theorems:
   24 proved, 9 admitted.
 - [Basics/Transcendental](DLMF/AsymptoticApproximations/Basics/Transcendental.lean): 4;
   9 theorems: 5 proved, 4 admitted.
-- [Integrals/Defs](DLMF/AsymptoticApproximations/Integrals/Defs.lean): 0; 12 definitions.
+- [Integrals/Basic](DLMF/AsymptoticApproximations/Integrals/Basic.lean): 0; 12 definitions.
 - [Integrals/Watson](DLMF/AsymptoticApproximations/Integrals/Watson.lean): 7; 14 theorems:
   7 proved, 7 admitted.
 - [Integrals/Parts](DLMF/AsymptoticApproximations/Integrals/Parts.lean): 4; 5 theorems: 1 proved,
@@ -106,7 +115,7 @@ Module admissions (`grep -cE 'by sorry|:= sorry|^\s*(·\s*)?sorry\s*$|exact sorr
   3 theorems admitted.
 - [Integrals/Coalescing](DLMF/AsymptoticApproximations/Integrals/Coalescing.lean): 3;
   9 theorems: 6 proved, 3 admitted.
-- [Mellin/Defs](DLMF/AsymptoticApproximations/Mellin/Defs.lean): 0; 5 definitions.
+- [Mellin/Basic](DLMF/AsymptoticApproximations/Mellin/Basic.lean): 0; 5 definitions.
 - [Mellin/Transforms](DLMF/AsymptoticApproximations/Mellin/Transforms.lean): 5; 16 theorems:
   11 proved, 5 admitted.
 - [Mellin/BesselExample](DLMF/AsymptoticApproximations/Mellin/BesselExample.lean): 5;
@@ -180,20 +189,20 @@ Total: 53 admissions.
 - [2.1.E5](https://dlmf.nist.gov/2.1.E5): [`DLMF.AsymptoticApproximations.exp_neg_isLittleO_one`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L52) (proved).
 - [2.1.E6](https://dlmf.nist.gov/2.1.E6): [`DLMF.AsymptoticApproximations.sin_pi_mul_add_inv_isBigO`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L97) (proved).
 - [2.1.E7](https://dlmf.nist.gov/2.1.E7): [`DLMF.AsymptoticApproximations.cexp_mul_I_isBigO_one`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L109) (proved).
-- [2.1.E8](https://dlmf.nist.gov/2.1.E8): [`DLMF.AsymptoticApproximations.tsum_tail_isBigO_pow`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L116) (proved); upstream [`HasFPowerSeriesAt.isBigO_sub_partialSum_pow`](DLMF/AsymptoticApproximations/Basics/MathlibCoverage.lean#L52) (stronger: a convergent power series is an asymptotic expansion, f - partial sum = O(zⁿ)). Proved for a power series convergent in a disc: the tail after `n` terms is `O(zⁿ)`.
+- [2.1.E8](https://dlmf.nist.gov/2.1.E8): [`DLMF.AsymptoticApproximations.tsum_tail_isBigO_pow`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L116) (proved); upstream [`HasFPowerSeriesAt.isBigO_sub_partialSum_pow`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L116) (stronger: a convergent power series is an asymptotic expansion, f - partial sum = O(zⁿ)). Proved for a power series convergent in a disc: the tail after `n` terms is `O(zⁿ)`.
 - [2.1.E9](https://dlmf.nist.gov/2.1.E9): [`DLMF.AsymptoticApproximations.cexp_sub_one_sub_isBigO_sq`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L159) (proved).
 - [2.1.E10](https://dlmf.nist.gov/2.1.E10): upstream [`Asymptotics.IsLittleO.isBigO`](DLMF/AsymptoticApproximations/Basics/MathlibCoverage.lean#L44) (exact: o(φ) is O(φ)); upstream [`Asymptotics.IsBigO.add`](DLMF/AsymptoticApproximations/Basics/MathlibCoverage.lean#L46) (exact: O(φ) + O(φ) = O(φ)); upstream [`Asymptotics.IsLittleO.add`](DLMF/AsymptoticApproximations/Basics/MathlibCoverage.lean#L48) (exact: o(φ) + o(φ) = o(φ)).
 - [2.1.E11](https://dlmf.nist.gov/2.1.E11): [`DLMF.AsymptoticApproximations.integral_Ioi_isEquivalent_of_isEquivalent_cpow`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L170) (proved). Integrated relation for `f ∼ x^ν`, `ℜν < -1`, complex `ν`.
 - [2.1.E12](https://dlmf.nist.gov/2.1.E12): [`DLMF.AsymptoticApproximations.exists_tendsto_intervalIntegral_of_isEquivalent_cpow`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L180) (proved); [`DLMF.AsymptoticApproximations.intervalIntegral_isEquivalent_log`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L191) (proved); [`DLMF.AsymptoticApproximations.intervalIntegral_isEquivalent_cpow`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L199) (proved). Three statements: convergence/divergence of the integral and the equivalents `ln x` (`ν = -1`) and `x^{ν+1}/(ν+1)` (`ℜν > -1`).
-- [2.1.E13](https://dlmf.nist.gov/2.1.E13): [`DLMF.AsymptoticApproximations.HasPoincareExpansion`](DLMF/AsymptoticApproximations/Basics/Defs.lean#L42) (definition).
-- [2.1.E14](https://dlmf.nist.gov/2.1.E14): [`DLMF.AsymptoticApproximations.HasPoincareExpansion`](DLMF/AsymptoticApproximations/Basics/Defs.lean#L42) (definition).
+- [2.1.E13](https://dlmf.nist.gov/2.1.E13): [`DLMF.AsymptoticApproximations.HasPoincareExpansion`](DLMF/AsymptoticApproximations/Basics/Basic.lean#L42) (definition).
+- [2.1.E14](https://dlmf.nist.gov/2.1.E14): [`DLMF.AsymptoticApproximations.HasPoincareExpansion`](DLMF/AsymptoticApproximations/Basics/Basic.lean#L42) (definition).
 - [2.1.E15](https://dlmf.nist.gov/2.1.E15): [`DLMF.AsymptoticApproximations.hasPoincareExpansion_iff_tendsto`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L298) (proved).
-- [2.1.E16](https://dlmf.nist.gov/2.1.E16): [`DLMF.AsymptoticApproximations.HasPoincareExpansionAt`](DLMF/AsymptoticApproximations/Basics/Defs.lean#L52) (definition).
+- [2.1.E16](https://dlmf.nist.gov/2.1.E16): [`DLMF.AsymptoticApproximations.HasPoincareExpansionAt`](DLMF/AsymptoticApproximations/Basics/Basic.lean#L52) (definition).
 - [2.1.E17](https://dlmf.nist.gov/2.1.E17): [`DLMF.AsymptoticApproximations.hasPoincareExpansion_zero`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L447) (proved); [`DLMF.AsymptoticApproximations.hasPoincareExpansion_cexp_neg`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L454) (proved); [`DLMF.AsymptoticApproximations.hasPoincareExpansion_cexp_neg_sqrt`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L486) (proved). Expansion of `e^{-x}` (all coefficients `0`, proved) and of `e^{-√x}`-type examples (admitted); illustrates non-uniqueness of the function.
-- [2.1.E18](https://dlmf.nist.gov/2.1.E18): [`DLMF.AsymptoticApproximations.HasUniformPoincareExpansion`](DLMF/AsymptoticApproximations/Basics/Defs.lean#L59) (definition); [`DLMF.AsymptoticApproximations.hasUniformPoincareExpansion_iff`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L538) (proved). `HasUniformPoincareExpansion` uses the product filter `𝓟 U ×ˢ (cobounded ⊓ 𝓟 X)`.
-- [2.1.E19](https://dlmf.nist.gov/2.1.E19): [`DLMF.AsymptoticApproximations.HasGeneralizedAsymptoticExpansion`](DLMF/AsymptoticApproximations/Basics/Defs.lean#L69) (definition); upstream [`Asymptotics.IsAsymptoticScale`](DLMF/AsymptoticApproximations/Basics/MathlibCoverage.lean#L58) (exact: φ_{s+1} = o(φ_s) (DLMFMathlib)).
-- [2.1.E20](https://dlmf.nist.gov/2.1.E20): [`DLMF.AsymptoticApproximations.HasGeneralizedAsymptoticExpansion`](DLMF/AsymptoticApproximations/Basics/Defs.lean#L69) (definition); upstream [`Asymptotics.HasAsymptoticExpansion`](DLMF/AsymptoticApproximations/Basics/MathlibCoverage.lean#L60) (special case: ∑ aₛ φₛ with constant aₛ (DLMFMathlib); see HasGeneralizedAsymptoticExpansion).
-- [2.1.E21](https://dlmf.nist.gov/2.1.E21): [`DLMF.AsymptoticApproximations.HasGeneralizedAsymptoticExpansion`](DLMF/AsymptoticApproximations/Basics/Defs.lean#L69) (definition).
+- [2.1.E18](https://dlmf.nist.gov/2.1.E18): [`DLMF.AsymptoticApproximations.HasUniformPoincareExpansion`](DLMF/AsymptoticApproximations/Basics/Basic.lean#L59) (definition); [`DLMF.AsymptoticApproximations.hasUniformPoincareExpansion_iff`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L538) (proved). `HasUniformPoincareExpansion` uses the product filter `𝓟 U ×ˢ (cobounded ⊓ 𝓟 X)`.
+- [2.1.E19](https://dlmf.nist.gov/2.1.E19): [`DLMF.AsymptoticApproximations.HasGeneralizedAsymptoticExpansion`](DLMF/AsymptoticApproximations/Basics/Basic.lean#L69) (definition); upstream [`Asymptotics.IsAsymptoticScale`](DLMFMathlib/Analysis/Asymptotics/AsymptoticExpansion.lean#L55) (exact: φ_{s+1} = o(φ_s) (DLMFMathlib)).
+- [2.1.E20](https://dlmf.nist.gov/2.1.E20): [`DLMF.AsymptoticApproximations.HasGeneralizedAsymptoticExpansion`](DLMF/AsymptoticApproximations/Basics/Basic.lean#L69) (definition); upstream [`Asymptotics.HasAsymptoticExpansion`](DLMFMathlib/Analysis/Asymptotics/AsymptoticExpansion.lean#L59) (special case: ∑ aₛ φₛ with constant aₛ (DLMFMathlib); see HasGeneralizedAsymptoticExpansion).
+- [2.1.E21](https://dlmf.nist.gov/2.1.E21): [`DLMF.AsymptoticApproximations.HasGeneralizedAsymptoticExpansion`](DLMF/AsymptoticApproximations/Basics/Basic.lean#L69) (definition).
 
 ## [§2.2 Transcendental Equations](https://dlmf.nist.gov/2.2)
 
@@ -204,18 +213,18 @@ Total: 53 admissions.
 - [2.2.E5](https://dlmf.nist.gov/2.2.E5): [`DLMF.AsymptoticApproximations.sq_sub_log_root_sq`](DLMF/AsymptoticApproximations/Basics/Transcendental.lean#L155) (proved).
 - [2.2.E6](https://dlmf.nist.gov/2.2.E6): [`DLMF.AsymptoticApproximations.sq_sub_log_root_second`](DLMF/AsymptoticApproximations/Basics/Transcendental.lean#L179) (proved).
 - [2.2.E7](https://dlmf.nist.gov/2.2.E7): [`DLMF.AsymptoticApproximations.lagrange_reversion`](DLMF/AsymptoticApproximations/Basics/Transcendental.lean#L219) (admitted).
-- [2.2.E8](https://dlmf.nist.gov/2.2.E8): [`DLMF.AsymptoticApproximations.lagrangeReversionCoeff`](DLMF/AsymptoticApproximations/Basics/Defs.lean#L78) (definition); [`DLMF.AsymptoticApproximations.lagrange_reversion`](DLMF/AsymptoticApproximations/Basics/Transcendental.lean#L219) (admitted). Lagrange coefficients via `PowerSeries.coeff`; checked with sympy against the series reversion (F₁ = f₁, F₂ = f₀f₁ + f₂, …).
+- [2.2.E8](https://dlmf.nist.gov/2.2.E8): [`DLMF.AsymptoticApproximations.lagrangeReversionCoeff`](DLMF/AsymptoticApproximations/Basics/Basic.lean#L78) (definition); [`DLMF.AsymptoticApproximations.lagrange_reversion`](DLMF/AsymptoticApproximations/Basics/Transcendental.lean#L219) (admitted). Lagrange coefficients via `PowerSeries.coeff`; checked with sympy against the series reversion (F₁ = f₁, F₂ = f₀f₁ + f₂, …).
 
 ## [§2.3 Integrals of a Real Variable](https://dlmf.nist.gov/2.3)
 
-- [2.3.E1](https://dlmf.nist.gov/2.3.E1): upstream [`DLMF.AlgebraicAnalytic.laplaceTransform`](DLMF/AsymptoticApproximations/Basics/MathlibCoverage.lean#L68) (exact: the Laplace transform of §1.14 (DLMF 1.14.17)); [`DLMF.AsymptoticApproximations.watson_lemma`](DLMF/AsymptoticApproximations/Integrals/Watson.lean#L94) (proved); [`DLMF.AsymptoticApproximations.watson_lemma_laplaceTransform`](DLMF/AsymptoticApproximations/Integrals/Watson.lean#L113) (proved).
+- [2.3.E1](https://dlmf.nist.gov/2.3.E1): upstream [`DLMF.AlgebraicAnalytic.laplaceTransform`](DLMF/AlgebraicAnalytic/Transforms/Basic.lean#L70) (exact: the Laplace transform of §1.14 (DLMF 1.14.17)); [`DLMF.AsymptoticApproximations.watson_lemma`](DLMF/AsymptoticApproximations/Integrals/Watson.lean#L94) (proved); [`DLMF.AsymptoticApproximations.watson_lemma_laplaceTransform`](DLMF/AsymptoticApproximations/Integrals/Watson.lean#L113) (proved).
 - [2.3.E2](https://dlmf.nist.gov/2.3.E2): [`DLMF.AsymptoticApproximations.laplace_hasAsymptoticExpansion_of_contDiffOn`](DLMF/AsymptoticApproximations/Integrals/Parts.lean#L43) (proved).
 - [2.3.E3](https://dlmf.nist.gov/2.3.E3): [`DLMF.AsymptoticApproximations.laplace_error_bound`](DLMF/AsymptoticApproximations/Integrals/Parts.lean#L120) (proved).
 - [2.3.E4](https://dlmf.nist.gov/2.3.E4): [`DLMF.AsymptoticApproximations.fourier_hasGeneralizedAsymptoticExpansion`](DLMF/AsymptoticApproximations/Integrals/Parts.lean#L228) (proved); [`DLMF.AsymptoticApproximations.fourier_error_bound`](DLMF/AsymptoticApproximations/Integrals/Parts.lean#L283) (proved).
 - [2.3.E5](https://dlmf.nist.gov/2.3.E5): [`DLMF.AsymptoticApproximations.fourier_Ioi_hasGeneralizedAsymptoticExpansion`](DLMF/AsymptoticApproximations/Integrals/Parts.lean#L430) (proved).
-- [2.3.E6](https://dlmf.nist.gov/2.3.E6): upstream [`eVariationOn`](DLMF/AsymptoticApproximations/Basics/MathlibCoverage.lean#L90) (different convention: total variation as an extended real; 𝒱 of 2.3.6 is variationalOperator); [`DLMF.AsymptoticApproximations.variationalOperator`](DLMF/AsymptoticApproximations/Integrals/Defs.lean#L36) (definition); [`DLMF.AsymptoticApproximations.fourier_error_bound`](DLMF/AsymptoticApproximations/Integrals/Parts.lean#L283) (proved). `variationalOperator a b f` is `∫ₐᵇ |f′|` for differentiable `f` (DLMF 2.3.6); Mathlib `eVariationOn` (pointer) is the total variation in `ℝ≥0∞`.
+- [2.3.E6](https://dlmf.nist.gov/2.3.E6): upstream [`eVariationOn`](DLMF/AsymptoticApproximations/Basics/MathlibCoverage.lean#L90) (different convention: total variation as an extended real; 𝒱 of 2.3.6 is variationalOperator); [`DLMF.AsymptoticApproximations.variationalOperator`](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L36) (definition); [`DLMF.AsymptoticApproximations.fourier_error_bound`](DLMF/AsymptoticApproximations/Integrals/Parts.lean#L283) (proved). `variationalOperator a b f` is `∫ₐᵇ |f′|` for differentiable `f` (DLMF 2.3.6); Mathlib `eVariationOn` (pointer) is the total variation in `ℝ≥0∞`.
 - [2.3.E7](https://dlmf.nist.gov/2.3.E7): [`DLMF.AsymptoticApproximations.watson_lemma`](DLMF/AsymptoticApproximations/Integrals/Watson.lean#L94) (proved).
-- [2.3.E8](https://dlmf.nist.gov/2.3.E8): upstream [`hasAsymptoticExpansion_integral_exp_smul`](DLMF/AsymptoticApproximations/Basics/MathlibCoverage.lean#L70) (special case: Watson's lemma 2.3.8 with DLMF's μ = 1 (DLMFMathlib's μ is DLMF's λ)); upstream [`hasAsymptoticExpansion_integral_exp_smul_cpow`](DLMF/AsymptoticApproximations/Basics/MathlibCoverage.lean#L72) (stronger: Watson's lemma with complex exponent μ, ℜμ > 0 (DLMFMathlib)); [`DLMF.AsymptoticApproximations.watson_lemma`](DLMF/AsymptoticApproximations/Integrals/Watson.lean#L94) (proved); [`DLMF.AsymptoticApproximations.watson_lemma_laplaceTransform`](DLMF/AsymptoticApproximations/Integrals/Watson.lean#L113) (proved).
+- [2.3.E8](https://dlmf.nist.gov/2.3.E8): upstream [`hasAsymptoticExpansion_integral_exp_smul`](DLMFMathlib/Analysis/Asymptotics/Watson.lean#L180) (special case: Watson's lemma 2.3.8 with DLMF's μ = 1 (DLMFMathlib's μ is DLMF's λ)); upstream [`hasAsymptoticExpansion_integral_exp_smul_cpow`](DLMFMathlib/Analysis/Asymptotics/Watson.lean#L252) (stronger: Watson's lemma with complex exponent μ, ℜμ > 0 (DLMFMathlib)); [`DLMF.AsymptoticApproximations.watson_lemma`](DLMF/AsymptoticApproximations/Integrals/Watson.lean#L94) (proved); [`DLMF.AsymptoticApproximations.watson_lemma_laplaceTransform`](DLMF/AsymptoticApproximations/Integrals/Watson.lean#L113) (proved).
 - [2.3.E9](https://dlmf.nist.gov/2.3.E9): [`DLMF.AsymptoticApproximations.watson_lemma_log`](DLMF/AsymptoticApproximations/Integrals/Watson.lean#L131) (proved).
 - [2.3.E10](https://dlmf.nist.gov/2.3.E10): [`DLMF.AsymptoticApproximations.watson_lemma_kernel`](DLMF/AsymptoticApproximations/Integrals/Watson.lean#L152) (proved).
 - [2.3.E11](https://dlmf.nist.gov/2.3.E11): [`DLMF.AsymptoticApproximations.watson_lemma_kernel`](DLMF/AsymptoticApproximations/Integrals/Watson.lean#L152) (proved).
@@ -225,26 +234,26 @@ Total: 53 admissions.
 - [2.3.E15](https://dlmf.nist.gov/2.3.E15): [`DLMF.AsymptoticApproximations.laplace_method`](DLMF/AsymptoticApproximations/Integrals/Laplace.lean#L38) (admitted); [`DLMF.AsymptoticApproximations.laplace_method_Ioi`](DLMF/AsymptoticApproximations/Integrals/Laplace.lean#L66) (admitted). Error estimate checked with mpmath for `p = t² + t³`, `q = 1 + 2t`.
 - [2.3.E16](https://dlmf.nist.gov/2.3.E16): [`DLMF.AsymptoticApproximations.laplaceCoeff_hasAsymptoticExpansion`](DLMF/AsymptoticApproximations/Integrals/Laplace.lean#L87) (admitted).
 - [2.3.E17](https://dlmf.nist.gov/2.3.E17): [`DLMF.AsymptoticApproximations.laplaceCoeff_zero`](DLMF/AsymptoticApproximations/Integrals/Laplace.lean#L127) (proved); [`DLMF.AsymptoticApproximations.laplaceCoeff_one`](DLMF/AsymptoticApproximations/Integrals/Laplace.lean#L136) (proved); [`DLMF.AsymptoticApproximations.laplaceCoeff_two`](DLMF/AsymptoticApproximations/Integrals/Laplace.lean#L147) (proved). `b₀, b₁, b₂` from `laplaceCoeff`; checked against 2.3.18 with sympy.
-- [2.3.E18](https://dlmf.nist.gov/2.3.E18): [`DLMF.AsymptoticApproximations.laplaceCoeff`](DLMF/AsymptoticApproximations/Integrals/Defs.lean#L55) (definition); [`DLMF.AsymptoticApproximations.laplaceCoeff_hasAsymptoticExpansion`](DLMF/AsymptoticApproximations/Integrals/Laplace.lean#L87) (admitted).
+- [2.3.E18](https://dlmf.nist.gov/2.3.E18): [`DLMF.AsymptoticApproximations.laplaceCoeff`](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L55) (definition); [`DLMF.AsymptoticApproximations.laplaceCoeff_hasAsymptoticExpansion`](DLMF/AsymptoticApproximations/Integrals/Laplace.lean#L87) (admitted).
 - [2.3.E19](https://dlmf.nist.gov/2.3.E19): [`DLMF.AsymptoticApproximations.stationaryPhase_endpoint`](DLMF/AsymptoticApproximations/Integrals/StationaryPhase.lean#L59) (admitted).
 - [2.3.E20](https://dlmf.nist.gov/2.3.E20): [`DLMF.AsymptoticApproximations.stationaryPhase_watson`](DLMF/AsymptoticApproximations/Integrals/StationaryPhase.lean#L38) (admitted).
-- [2.3.E21](https://dlmf.nist.gov/2.3.E21): [`DLMF.AsymptoticApproximations.stationaryPhaseP`](DLMF/AsymptoticApproximations/Integrals/Defs.lean#L72) (definition); [`DLMF.AsymptoticApproximations.stationaryPhase_endpoint`](DLMF/AsymptoticApproximations/Integrals/StationaryPhase.lean#L59) (admitted).
+- [2.3.E21](https://dlmf.nist.gov/2.3.E21): [`DLMF.AsymptoticApproximations.stationaryPhaseP`](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L72) (definition); [`DLMF.AsymptoticApproximations.stationaryPhase_endpoint`](DLMF/AsymptoticApproximations/Integrals/StationaryPhase.lean#L59) (admitted).
 - [2.3.E22](https://dlmf.nist.gov/2.3.E22): [`DLMF.AsymptoticApproximations.stationaryPhase_endpoint_infinite`](DLMF/AsymptoticApproximations/Integrals/StationaryPhase.lean#L90) (admitted).
 - [2.3.E23](https://dlmf.nist.gov/2.3.E23): [`DLMF.AsymptoticApproximations.stationaryPhase_endpoint`](DLMF/AsymptoticApproximations/Integrals/StationaryPhase.lean#L59) (admitted); [`DLMF.AsymptoticApproximations.stationaryPhase_endpoint_infinite`](DLMF/AsymptoticApproximations/Integrals/StationaryPhase.lean#L90) (admitted). The two series are interpreted separately (§2.1(iii)); the remainder after `N` and `M` terms is `O(x^{-(N+λ)/μ}) + O(x^{-M-1})`.
 - [2.3.E24](https://dlmf.nist.gov/2.3.E24): [`DLMF.AsymptoticApproximations.bleistein_transform`](DLMF/AsymptoticApproximations/Integrals/Coalescing.lean#L110) (admitted).
 - [2.3.E25](https://dlmf.nist.gov/2.3.E25): [`DLMF.AsymptoticApproximations.bleistein_quadratic`](DLMF/AsymptoticApproximations/Integrals/Coalescing.lean#L42) (proved).
-- [2.3.E26](https://dlmf.nist.gov/2.3.E26): [`DLMF.AsymptoticApproximations.bleisteinA`](DLMF/AsymptoticApproximations/Integrals/Defs.lean#L78) (definition); [`DLMF.AsymptoticApproximations.bleisteinB`](DLMF/AsymptoticApproximations/Integrals/Defs.lean#L86) (definition); [`DLMF.AsymptoticApproximations.bleisteinW_zero`](DLMF/AsymptoticApproximations/Integrals/Coalescing.lean#L54) (proved); [`DLMF.AsymptoticApproximations.bleisteinW_self`](DLMF/AsymptoticApproximations/Integrals/Coalescing.lean#L65) (proved). **Sign correction**: `a(α)` must carry the sign of `α` (`a = sgn(α)·(2p(α,0) - 2p(α,α))^{1/2}`) for `t = 0` to correspond to `w = 0` when `α < 0`, as DLMF requires before 2.3.26; implemented in `bleisteinA`, `bleisteinW_zero` proved.
-- [2.3.E27](https://dlmf.nist.gov/2.3.E27): [`DLMF.AsymptoticApproximations.bleisteinW`](DLMF/AsymptoticApproximations/Integrals/Defs.lean#L91) (definition).
+- [2.3.E26](https://dlmf.nist.gov/2.3.E26): [`DLMF.AsymptoticApproximations.bleisteinA`](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L78) (definition); [`DLMF.AsymptoticApproximations.bleisteinB`](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L86) (definition); [`DLMF.AsymptoticApproximations.bleisteinW_zero`](DLMF/AsymptoticApproximations/Integrals/Coalescing.lean#L54) (proved); [`DLMF.AsymptoticApproximations.bleisteinW_self`](DLMF/AsymptoticApproximations/Integrals/Coalescing.lean#L65) (proved). **Sign correction**: `a(α)` must carry the sign of `α` (`a = sgn(α)·(2p(α,0) - 2p(α,α))^{1/2}`) for `t = 0` to correspond to `w = 0` when `α < 0`, as DLMF requires before 2.3.26; implemented in `bleisteinA`, `bleisteinW_zero` proved.
+- [2.3.E27](https://dlmf.nist.gov/2.3.E27): [`DLMF.AsymptoticApproximations.bleisteinW`](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L91) (definition).
 - [2.3.E28](https://dlmf.nist.gov/2.3.E28): [`DLMF.AsymptoticApproximations.bleisteinW_hasDerivAt`](DLMF/AsymptoticApproximations/Integrals/Coalescing.lean#L70) (proved).
 - [2.3.E29](https://dlmf.nist.gov/2.3.E29): [`DLMF.AsymptoticApproximations.bleistein_transform`](DLMF/AsymptoticApproximations/Integrals/Coalescing.lean#L110) (admitted).
 - [2.3.E30](https://dlmf.nist.gov/2.3.E30): [`DLMF.AsymptoticApproximations.bleistein_transform`](DLMF/AsymptoticApproximations/Integrals/Coalescing.lean#L110) (admitted).
 - [2.3.E31](https://dlmf.nist.gov/2.3.E31): [`DLMF.AsymptoticApproximations.bleistein_uniform`](DLMF/AsymptoticApproximations/Integrals/Coalescing.lean#L127) (admitted).
 - [2.3.E32](https://dlmf.nist.gov/2.3.E32): [`DLMF.AsymptoticApproximations.bleistein_uniform`](DLMF/AsymptoticApproximations/Integrals/Coalescing.lean#L127) (admitted).
-- [2.3.E33](https://dlmf.nist.gov/2.3.E33): [`DLMF.AsymptoticApproximations.bleisteinF`](DLMF/AsymptoticApproximations/Integrals/Defs.lean#L99) (definition); [`DLMF.AsymptoticApproximations.bleistein_uniform`](DLMF/AsymptoticApproximations/Integrals/Coalescing.lean#L127) (admitted).
+- [2.3.E33](https://dlmf.nist.gov/2.3.E33): [`DLMF.AsymptoticApproximations.bleisteinF`](DLMF/AsymptoticApproximations/Integrals/Basic.lean#L99) (definition); [`DLMF.AsymptoticApproximations.bleistein_uniform`](DLMF/AsymptoticApproximations/Integrals/Coalescing.lean#L127) (admitted).
 
 ## [§2.4 Contour Integrals](https://dlmf.nist.gov/2.4)
 
-- [2.4.E1](https://dlmf.nist.gov/2.4.E1): upstream [`hasAsymptoticExpansion_integral_cexp_smul_sector`](DLMF/AsymptoticApproximations/Basics/MathlibCoverage.lean#L74) (exact: Watson's lemma in a sector |ph z| ≤ π/2 - δ (DLMFMathlib)); [`DLMF.AsymptoticApproximations.watson_lemma_sector`](DLMF/AsymptoticApproximations/Integrals/Watson.lean#L229) (proved).
+- [2.4.E1](https://dlmf.nist.gov/2.4.E1): upstream [`hasAsymptoticExpansion_integral_cexp_smul_sector`](DLMFMathlib/Analysis/Asymptotics/WatsonSector.lean#L326) (exact: Watson's lemma in a sector |ph z| ≤ π/2 - δ (DLMFMathlib)); [`DLMF.AsymptoticApproximations.watson_lemma_sector`](DLMF/AsymptoticApproximations/Integrals/Watson.lean#L229) (proved).
 - [2.4.E2](https://dlmf.nist.gov/2.4.E2): [`DLMF.AsymptoticApproximations.laplace_inversion`](DLMF/AsymptoticApproximations/Integrals/Watson.lean#L286) (admitted).
 - [2.4.E3](https://dlmf.nist.gov/2.4.E3): [`DLMF.AsymptoticApproximations.laplace_inversion`](DLMF/AsymptoticApproximations/Integrals/Watson.lean#L286) (admitted).
 - [2.4.E4](https://dlmf.nist.gov/2.4.E4): [`DLMF.AsymptoticApproximations.inverseLaplace_of_hasAsymptoticExpansion`](DLMF/AsymptoticApproximations/Integrals/Watson.lean#L298) (admitted).
@@ -279,8 +288,8 @@ Total: 53 admissions.
 - [2.5.E9](https://dlmf.nist.gov/2.5.E9): [`DLMF.AsymptoticApproximations.mellin_inv_one_add_one_sub`](DLMF/AsymptoticApproximations/Mellin/BesselExample.lean#L47) (proved). From `DLMF.Gamma.mellin_one_add_cpow_neg` (Beta integral 5.12.3) and the reflection formula.
 - [2.5.E10](https://dlmf.nist.gov/2.5.E10): [`DLMF.AsymptoticApproximations.mellin_besselJ_sq`](DLMF/AsymptoticApproximations/Mellin/BesselExample.lean#L57) (admitted); [`DLMF.AsymptoticApproximations.mellin_besselJ_sq_eq_kernel`](DLMF/AsymptoticApproximations/Mellin/BesselExample.lean#L69) (proved from admissions). Stated as `2^{z-1}Γ(ν+z/2)Γ(1-z)/(Γ²(1-z/2)Γ(1+ν-z/2))`, valid at `z = 0` where the printed form is `0·∞` in Lean; the printed form is proved from it for `sin(πz) ≠ 0`. Checked with mpmath (`ν = 0.3, z = 0.5, -0.3`; `ν = 1.2, z = 0.2`).
 - [2.5.E11](https://dlmf.nist.gov/2.5.E11): [`DLMF.AsymptoticApproximations.residueAt_besselSq`](DLMF/AsymptoticApproximations/Mellin/BesselExample.lean#L89) (admitted). **Erratum (sign)**: the residue is `-(aₙ ln x + bₙ)x^{-n}`, since `π²/sin²(πz) ∼ (z-n)^{-2}` and the residue is `d/dz[x^{-z}A(z)]` at `n`, `bₙ = -A′(n)`. Consequently 2.5.15 and 2.5.16 hold with the opposite sign. mpmath: `ν = 0`, `x = 20`: `I(x) = 0.0899450`, `+(a₁ ln x + b₁)/x = 0.0899606` (also `ν = 0.3`, `x = 10, 20`).
-- [2.5.E12](https://dlmf.nist.gov/2.5.E12): [`DLMF.AsymptoticApproximations.besselSqMellinA`](DLMF/AsymptoticApproximations/Mellin/Defs.lean#L49) (definition); [`DLMF.AsymptoticApproximations.besselSqMellinA_two_mul`](DLMF/AsymptoticApproximations/Mellin/BesselExample.lean#L170) (proved).
-- [2.5.E13](https://dlmf.nist.gov/2.5.E13): [`DLMF.AsymptoticApproximations.besselSqMellinB`](DLMF/AsymptoticApproximations/Mellin/Defs.lean#L54) (definition); [`DLMF.AsymptoticApproximations.besselSqMellinB_eq_digamma`](DLMF/AsymptoticApproximations/Mellin/BesselExample.lean#L139) (proved); [`DLMF.AsymptoticApproximations.besselSqMellinB_two_mul`](DLMF/AsymptoticApproximations/Mellin/BesselExample.lean#L186) (proved). `besselSqMellinB ν n = -A′(n)`; DLMF's digamma form is `besselSqMellinB_eq_digamma` (odd `n`, `1 + ν - n/2` not a pole); vanishing for even `n ≥ 2` proved. For `n = 0` DLMF's `0·∞` is not zero (`b₀ = -1/(2ν)`), so the sum in 2.5.15 starts at `s = 1`.
+- [2.5.E12](https://dlmf.nist.gov/2.5.E12): [`DLMF.AsymptoticApproximations.besselSqMellinA`](DLMF/AsymptoticApproximations/Mellin/Basic.lean#L49) (definition); [`DLMF.AsymptoticApproximations.besselSqMellinA_two_mul`](DLMF/AsymptoticApproximations/Mellin/BesselExample.lean#L170) (proved).
+- [2.5.E13](https://dlmf.nist.gov/2.5.E13): [`DLMF.AsymptoticApproximations.besselSqMellinB`](DLMF/AsymptoticApproximations/Mellin/Basic.lean#L54) (definition); [`DLMF.AsymptoticApproximations.besselSqMellinB_eq_digamma`](DLMF/AsymptoticApproximations/Mellin/BesselExample.lean#L139) (proved); [`DLMF.AsymptoticApproximations.besselSqMellinB_two_mul`](DLMF/AsymptoticApproximations/Mellin/BesselExample.lean#L186) (proved). `besselSqMellinB ν n = -A′(n)`; DLMF's digamma form is `besselSqMellinB_eq_digamma` (odd `n`, `1 + ν - n/2` not a pole); vanishing for even `n ≥ 2` proved. For `n = 0` DLMF's `0·∞` is not zero (`b₀ = -1/(2ν)`), so the sum in 2.5.15 starts at `s = 1`.
 - [2.5.E14](https://dlmf.nist.gov/2.5.E14): [`DLMF.AsymptoticApproximations.norm_Gamma_vertical_atTop`](DLMF/AsymptoticApproximations/Mellin/BesselExample.lean#L223) (proved); [`DLMF.AsymptoticApproximations.norm_Gamma_vertical_atBot`](DLMF/AsymptoticApproximations/Mellin/BesselExample.lean#L231) (proved); [`DLMF.AsymptoticApproximations.norm_Gamma_vertical_uniform`](DLMF/AsymptoticApproximations/Mellin/BesselExample.lean#L245) (admitted). Pointwise forms (`y → ±∞`) proved from DLMF 5.11.9 (`DLMF.Gamma.norm_Gamma_imag_large`) and `Γ(z̄) = conj Γ(z)`; uniform form admitted.
 - [2.5.E15](https://dlmf.nist.gov/2.5.E15): [`DLMF.AsymptoticApproximations.besselSq_integral_expansion`](DLMF/AsymptoticApproximations/Mellin/BesselExample.lean#L254) (admitted). **Corrected sign** (see 2.5.E11): `I(x) = +∑_{s=1}^{2n}(aₛ ln x + bₛ)x^{-s} + O(x^{-2n-1+ε})`.
 - [2.5.E16](https://dlmf.nist.gov/2.5.E16): [`DLMF.AsymptoticApproximations.besselSq_integral_expansion_odd`](DLMF/AsymptoticApproximations/Mellin/BesselExample.lean#L278) (proved from admissions). **Corrected sign**: `cₛ = a_{2s+1}`, `dₛ = b_{2s+1}`; proved from 2.5.15 (admitted) and the vanishing of even coefficients.
@@ -288,10 +297,10 @@ Total: 53 admissions.
 - [2.5.E18](https://dlmf.nist.gov/2.5.E18): [`DLMF.AsymptoticApproximations.mellin_truncHigh_continuation`](DLMF/AsymptoticApproximations/Mellin/Transforms.lean#L312) (admitted); [`DLMF.AsymptoticApproximations.mellin_truncHigh_continuation_osc`](DLMF/AsymptoticApproximations/Mellin/Transforms.lean#L327) (admitted). `κ = 0` (2.5.27) and `κ ≠ 0` (entire continuation) stated separately.
 - [2.5.E19](https://dlmf.nist.gov/2.5.E19): [`DLMF.AsymptoticApproximations.mellinConvergent_truncHigh`](DLMF/AsymptoticApproximations/Mellin/Transforms.lean#L222) (proved).
 - [2.5.E20](https://dlmf.nist.gov/2.5.E20): [`DLMF.AsymptoticApproximations.mellinConvergent_trunc_h`](DLMF/AsymptoticApproximations/Mellin/Transforms.lean#L245) (proved).
-- [2.5.E21](https://dlmf.nist.gov/2.5.E21): [`DLMF.AsymptoticApproximations.mellinTruncLow`](DLMF/AsymptoticApproximations/Mellin/Defs.lean#L32) (definition).
-- [2.5.E22](https://dlmf.nist.gov/2.5.E22): [`DLMF.AsymptoticApproximations.mellinTruncHigh`](DLMF/AsymptoticApproximations/Mellin/Defs.lean#L38) (definition); [`DLMF.AsymptoticApproximations.mellin_eq_truncLow_add_truncHigh`](DLMF/AsymptoticApproximations/Mellin/Transforms.lean#L299) (proved).
-- [2.5.E23](https://dlmf.nist.gov/2.5.E23): [`DLMF.AsymptoticApproximations.mellinTruncLow`](DLMF/AsymptoticApproximations/Mellin/Defs.lean#L32) (definition).
-- [2.5.E24](https://dlmf.nist.gov/2.5.E24): [`DLMF.AsymptoticApproximations.mellinTruncHigh`](DLMF/AsymptoticApproximations/Mellin/Defs.lean#L38) (definition); [`DLMF.AsymptoticApproximations.mellin_eq_truncLow_add_truncHigh`](DLMF/AsymptoticApproximations/Mellin/Transforms.lean#L299) (proved).
+- [2.5.E21](https://dlmf.nist.gov/2.5.E21): [`DLMF.AsymptoticApproximations.mellinTruncLow`](DLMF/AsymptoticApproximations/Mellin/Basic.lean#L32) (definition).
+- [2.5.E22](https://dlmf.nist.gov/2.5.E22): [`DLMF.AsymptoticApproximations.mellinTruncHigh`](DLMF/AsymptoticApproximations/Mellin/Basic.lean#L38) (definition); [`DLMF.AsymptoticApproximations.mellin_eq_truncLow_add_truncHigh`](DLMF/AsymptoticApproximations/Mellin/Transforms.lean#L299) (proved).
+- [2.5.E23](https://dlmf.nist.gov/2.5.E23): [`DLMF.AsymptoticApproximations.mellinTruncLow`](DLMF/AsymptoticApproximations/Mellin/Basic.lean#L32) (definition).
+- [2.5.E24](https://dlmf.nist.gov/2.5.E24): [`DLMF.AsymptoticApproximations.mellinTruncHigh`](DLMF/AsymptoticApproximations/Mellin/Basic.lean#L38) (definition); [`DLMF.AsymptoticApproximations.mellin_eq_truncLow_add_truncHigh`](DLMF/AsymptoticApproximations/Mellin/Transforms.lean#L299) (proved).
 - [2.5.E25](https://dlmf.nist.gov/2.5.E25): [`DLMF.AsymptoticApproximations.mellin_truncLow_continuation`](DLMF/AsymptoticApproximations/Mellin/Transforms.lean#L284) (admitted).
 - [2.5.E26](https://dlmf.nist.gov/2.5.E26): [`DLMF.AsymptoticApproximations.mellin_eq_truncLow_add_truncHigh`](DLMF/AsymptoticApproximations/Mellin/Transforms.lean#L299) (proved).
 - [2.5.E27](https://dlmf.nist.gov/2.5.E27): [`DLMF.AsymptoticApproximations.mellin_truncHigh_continuation`](DLMF/AsymptoticApproximations/Mellin/Transforms.lean#L312) (admitted).
@@ -324,18 +333,18 @@ Total: 53 admissions.
 
 Prose IDs carrying tags or pointers:
 
-- [2.1.i](https://dlmf.nist.gov/2.1.i): [`DLMF.AsymptoticApproximations.cexp_neg_isLittleO_one_sector`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L58) (proved); [`DLMF.AsymptoticApproximations.not_cexp_neg_isLittleO_one_halfPlane`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L75) (proved); upstream [`Asymptotics.isBigO_top`](DLMF/AsymptoticApproximations/Basics/MathlibCoverage.lean#L42) (exact: f = O(g) in a region (the filter ⊤): |f| ≤ C|g| everywhere).
+- [2.1.i](https://dlmf.nist.gov/2.1.i): [`DLMF.AsymptoticApproximations.cexp_neg_isLittleO_one_sector`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L58) (proved); [`DLMF.AsymptoticApproximations.not_cexp_neg_isLittleO_one_halfPlane`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L75) (proved); upstream [`Asymptotics.isBigO_top`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L75) (exact: f = O(g) in a region (the filter ⊤): |f| ≤ C|g| everywhere).
 - [2.1.ii](https://dlmf.nist.gov/2.1.ii): [`DLMF.AsymptoticApproximations.ritt_isBigO`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L240) (proved); [`DLMF.AsymptoticApproximations.ritt_isLittleO`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L259) (proved).
-- [2.1.iii](https://dlmf.nist.gov/2.1.iii): [`DLMF.AsymptoticApproximations.hasPoincareExpansion_of_hasSum`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L332) (proved); [`DLMF.AsymptoticApproximations.HasPoincareExpansion.add`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L369) (proved); [`DLMF.AsymptoticApproximations.HasPoincareExpansion.sub`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L376) (proved); [`DLMF.AsymptoticApproximations.HasPoincareExpansion.mul`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L383) (proved); [`DLMF.AsymptoticApproximations.HasPoincareExpansion.inv`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L393) (proved); [`DLMF.AsymptoticApproximations.HasPoincareExpansion.pow`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L403) (proved); [`DLMF.AsymptoticApproximations.HasPoincareExpansion.unique`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L412) (proved); [`DLMF.AsymptoticApproximations.HasPoincareExpansionAt.unique`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L425) (proved); [`DLMF.AsymptoticApproximations.hasPoincareExpansion_cexp_neg`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L454) (proved); [`DLMF.AsymptoticApproximations.hasPoincareExpansion_cexp_neg_sqrt`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L486) (proved); [`DLMF.AsymptoticApproximations.exists_hasPoincareExpansion_sector`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L527) (admitted); upstream [`Asymptotics.HasAsymptoticExpansion.unique`](DLMF/AsymptoticApproximations/Basics/MathlibCoverage.lean#L54) (exact: uniqueness of the coefficients of an expansion on an asymptotic scale (DLMFMathlib)); upstream [`Asymptotics.HasAsymptoticExpansion.add`](DLMF/AsymptoticApproximations/Basics/MathlibCoverage.lean#L56) (exact: expansions can be added (DLMFMathlib)).
+- [2.1.iii](https://dlmf.nist.gov/2.1.iii): [`DLMF.AsymptoticApproximations.hasPoincareExpansion_of_hasSum`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L332) (proved); [`DLMF.AsymptoticApproximations.HasPoincareExpansion.add`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L369) (proved); [`DLMF.AsymptoticApproximations.HasPoincareExpansion.sub`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L376) (proved); [`DLMF.AsymptoticApproximations.HasPoincareExpansion.mul`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L383) (proved); [`DLMF.AsymptoticApproximations.HasPoincareExpansion.inv`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L393) (proved); [`DLMF.AsymptoticApproximations.HasPoincareExpansion.pow`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L403) (proved); [`DLMF.AsymptoticApproximations.HasPoincareExpansion.unique`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L412) (proved); [`DLMF.AsymptoticApproximations.HasPoincareExpansionAt.unique`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L425) (proved); [`DLMF.AsymptoticApproximations.hasPoincareExpansion_cexp_neg`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L454) (proved); [`DLMF.AsymptoticApproximations.hasPoincareExpansion_cexp_neg_sqrt`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L486) (proved); [`DLMF.AsymptoticApproximations.exists_hasPoincareExpansion_sector`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L527) (admitted); upstream [`Asymptotics.HasAsymptoticExpansion.unique`](DLMFMathlib/Analysis/Asymptotics/AsymptoticExpansion.lean#L156) (exact: uniqueness of the coefficients of an expansion on an asymptotic scale (DLMFMathlib)); upstream [`Asymptotics.HasAsymptoticExpansion.add`](DLMFMathlib/Analysis/Asymptotics/AsymptoticExpansion.lean#L111) (exact: expansions can be added (DLMFMathlib)).
 - [2.1.iv](https://dlmf.nist.gov/2.1.iv): [`DLMF.AsymptoticApproximations.hasUniformPoincareExpansion_iff`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L538) (proved).
 - [2.1.v](https://dlmf.nist.gov/2.1.v): [`DLMF.AsymptoticApproximations.hasGeneralizedAsymptoticExpansion_convergent_ne`](DLMF/AsymptoticApproximations/Basics/OrderSymbols.lean#L581) (proved).
-- [2.2](https://dlmf.nist.gov/2.2): [`DLMF.AsymptoticApproximations.existsUnique_root_of_isEquivalent`](DLMF/AsymptoticApproximations/Basics/Transcendental.lean#L34) (proved); [`DLMF.AsymptoticApproximations.root_isEquivalent`](DLMF/AsymptoticApproximations/Basics/Transcendental.lean#L50) (proved); upstream [`Asymptotics.HasAsymptoticPowerSeries.inversion`](DLMF/AsymptoticApproximations/Basics/MathlibCoverage.lean#L64) (stronger: reversion of an asymptotic power series w ∼ P(σ), P(0) = 0, P'(0) ≠ 0 (DLMFMathlib)).
+- [2.2](https://dlmf.nist.gov/2.2): [`DLMF.AsymptoticApproximations.existsUnique_root_of_isEquivalent`](DLMF/AsymptoticApproximations/Basics/Transcendental.lean#L34) (proved); [`DLMF.AsymptoticApproximations.root_isEquivalent`](DLMF/AsymptoticApproximations/Basics/Transcendental.lean#L50) (proved); upstream [`Asymptotics.HasAsymptoticPowerSeries.inversion`](DLMFMathlib/Analysis/Asymptotics/AsymptoticInversion.lean#L250) (stronger: reversion of an asymptotic power series w ∼ P(σ), P(0) = 0, P'(0) ≠ 0 (DLMFMathlib)).
 - [2.3.i](https://dlmf.nist.gov/2.3.i): [`DLMF.AsymptoticApproximations.laplace_error_bound`](DLMF/AsymptoticApproximations/Integrals/Parts.lean#L120) (proved); [`DLMF.AsymptoticApproximations.fourier_error_bound`](DLMF/AsymptoticApproximations/Integrals/Parts.lean#L283) (proved); [`DLMF.AsymptoticApproximations.fourier_Ioi_hasGeneralizedAsymptoticExpansion`](DLMF/AsymptoticApproximations/Integrals/Parts.lean#L430) (proved).
 - [2.3.ii](https://dlmf.nist.gov/2.3.ii): [`DLMF.AsymptoticApproximations.watson_lemma`](DLMF/AsymptoticApproximations/Integrals/Watson.lean#L94) (proved).
 - [2.3.iii](https://dlmf.nist.gov/2.3.iii): upstream [`Complex.isEquivalent_integral_laplace_Icc`](DLMF/AsymptoticApproximations/Basics/MathlibCoverage.lean#L78) (special case: leading term of Laplace's method at an interior quadratic minimum (lean-codes)); [`DLMF.AsymptoticApproximations.laplace_method`](DLMF/AsymptoticApproximations/Integrals/Laplace.lean#L38) (admitted); [`DLMF.AsymptoticApproximations.laplace_method_Ioi`](DLMF/AsymptoticApproximations/Integrals/Laplace.lean#L66) (admitted).
 - [2.3.iv](https://dlmf.nist.gov/2.3.iv): [`DLMF.AsymptoticApproximations.stationaryPhase_watson`](DLMF/AsymptoticApproximations/Integrals/StationaryPhase.lean#L38) (admitted); [`DLMF.AsymptoticApproximations.stationaryPhase_endpoint`](DLMF/AsymptoticApproximations/Integrals/StationaryPhase.lean#L59) (admitted); [`DLMF.AsymptoticApproximations.stationaryPhase_endpoint_infinite`](DLMF/AsymptoticApproximations/Integrals/StationaryPhase.lean#L90) (admitted).
 - [2.3.v](https://dlmf.nist.gov/2.3.v): [`DLMF.AsymptoticApproximations.bleisteinW_zero`](DLMF/AsymptoticApproximations/Integrals/Coalescing.lean#L54) (proved); [`DLMF.AsymptoticApproximations.bleisteinW_self`](DLMF/AsymptoticApproximations/Integrals/Coalescing.lean#L65) (proved); [`DLMF.AsymptoticApproximations.bleisteinW_hasDerivAt_self`](DLMF/AsymptoticApproximations/Integrals/Coalescing.lean#L99) (admitted).
-- [2.4.i](https://dlmf.nist.gov/2.4.i): upstream [`hasAsymptoticExpansion_integral_cexp_smul_rotate`](DLMF/AsymptoticApproximations/Basics/MathlibCoverage.lean#L76) (exact: Watson's lemma after rotation of the path of integration (DLMFMathlib)); [`DLMF.AsymptoticApproximations.watson_lemma_sector`](DLMF/AsymptoticApproximations/Integrals/Watson.lean#L229) (proved); [`DLMF.AsymptoticApproximations.watson_lemma_rotate`](DLMF/AsymptoticApproximations/Integrals/Watson.lean#L258) (admitted).
+- [2.4.i](https://dlmf.nist.gov/2.4.i): upstream [`hasAsymptoticExpansion_integral_cexp_smul_rotate`](DLMFMathlib/Analysis/Asymptotics/WatsonRotated.lean#L375) (exact: Watson's lemma after rotation of the path of integration (DLMFMathlib)); [`DLMF.AsymptoticApproximations.watson_lemma_sector`](DLMF/AsymptoticApproximations/Integrals/Watson.lean#L229) (proved); [`DLMF.AsymptoticApproximations.watson_lemma_rotate`](DLMF/AsymptoticApproximations/Integrals/Watson.lean#L258) (admitted).
 - [2.4.iii](https://dlmf.nist.gov/2.4.iii): [`DLMF.AsymptoticApproximations.laplace_method_contour`](DLMF/AsymptoticApproximations/Integrals/Laplace.lean#L165) (admitted).
 - [2.4.iv](https://dlmf.nist.gov/2.4.iv): [`DLMF.AsymptoticApproximations.saddle_point`](DLMF/AsymptoticApproximations/Integrals/Laplace.lean#L222) (admitted).
 - [2.5.i](https://dlmf.nist.gov/2.5.i): upstream [`mellinConvergent_of_isBigO_rpow`](DLMF/AsymptoticApproximations/Basics/MathlibCoverage.lean#L86) (exact: the strip of convergence a < ℜz < b from O-bounds at 0 and ∞); upstream [`mellin_differentiableAt_of_isBigO_rpow`](DLMF/AsymptoticApproximations/Basics/MathlibCoverage.lean#L88) (exact: analyticity of 𝓜f in the strip of convergence); [`DLMF.AsymptoticApproximations.mellin_convolution_eq_mellinInv`](DLMF/AsymptoticApproximations/Mellin/Transforms.lean#L104) (proved); [`DLMF.AsymptoticApproximations.besselSqMellinA_two_mul`](DLMF/AsymptoticApproximations/Mellin/BesselExample.lean#L170) (proved); [`DLMF.AsymptoticApproximations.besselSqMellinB_two_mul`](DLMF/AsymptoticApproximations/Mellin/BesselExample.lean#L186) (proved).
@@ -393,29 +402,29 @@ assertions in prose of [DLMF §§2.6–2.11](https://dlmf.nist.gov/2.6), version
 
 Modules, in import order:
 
-- §2.6: [Distributional/Defs](DLMF/AsymptoticApproximations/Distributional/Defs.lean) (Mathlib
+- §2.6: [Distributional/Basic](DLMF/AsymptoticApproximations/Distributional/Basic.lean) (Mathlib
   only) → [Distributional/Stieltjes](DLMF/AsymptoticApproximations/Distributional/Stieltjes.lean)
   (also `DLMF.Gamma.BetaFunction`) →
   [Distributional/FractionalIntegrals](DLMF/AsymptoticApproximations/Distributional/FractionalIntegrals.lean);
   [Distributional/MathlibCoverage](DLMF/AsymptoticApproximations/Distributional/MathlibCoverage.lean)
   (`DLMF.Core.Upstream` and Mathlib only).
-- §§2.7–2.9: [ODE/Defs](DLMF/AsymptoticApproximations/ODE/Defs.lean) (definitions files
-  `DLMF.Painleve.Defs`, `DLMF.Airy.Basic`, `DLMF.Bessel.Basic`, and
+- §§2.7–2.9: [ODE/Basic](DLMF/AsymptoticApproximations/ODE/Basic.lean) (definitions files
+  `DLMF.Painleve.Basic`, `DLMF.Airy.Basic`, `DLMF.Bessel.Basic`, and
   `DLMFMathlib.Analysis.ODE.Singularities`) →
   [ODE/Singularities](DLMF/AsymptoticApproximations/ODE/Singularities.lean) (§2.7(i)–(ii), (iv)),
   [ODE/LiouvilleGreen](DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean) (§2.7(iii)),
   [ODE/Parameter](DLMF/AsymptoticApproximations/ODE/Parameter.lean) (§2.8; also
   `DLMF.Bessel.Modified`), [ODE/Difference](DLMF/AsymptoticApproximations/ODE/Difference.lean)
   (§2.9).
-- §2.10: [Sums/Defs](DLMF/AsymptoticApproximations/Sums/Defs.lean) (Mathlib and
+- §2.10: [Sums/Basic](DLMF/AsymptoticApproximations/Sums/Basic.lean) (Mathlib and
   `DLMFMathlib.Analysis.EulerMaclaurin`) →
   [Sums/EulerMaclaurin](DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean) (§2.10(i)–(ii);
   also `DLMF.Gamma.BarnesG`), [Sums/Darboux](DLMF/AsymptoticApproximations/Sums/Darboux.lean)
   (§2.10(iii)–(iv); also `DLMF.GeneralizedHypergeometric.Basic`,
   `DLMF.OrthogonalPolynomials.Series`);
   [Sums/MathlibCoverage](DLMF/AsymptoticApproximations/Sums/MathlibCoverage.lean).
-- §2.11: [Remainders/Defs](DLMF/AsymptoticApproximations/Remainders/Defs.lean) (Mathlib only) →
-  [Remainders/Stokes](DLMF/AsymptoticApproximations/Remainders/Stokes.lean) (also `ODE/Defs`,
+- §2.11: [Remainders/Basic](DLMF/AsymptoticApproximations/Remainders/Basic.lean) (Mathlib only) →
+  [Remainders/Stokes](DLMF/AsymptoticApproximations/Remainders/Stokes.lean) (also `ODE/Basic`,
   `DLMF.IncompleteGamma.ExpIntegralAsymptotics`, `DLMF.ExpIntegrals.Asymptotics`,
   `DLMF.Confluent.Asymptotics`, `DLMF.Confluent.Basic`).
 
@@ -500,40 +509,40 @@ Module admissions (`grep -cE 'by sorry|:= sorry|^\s*(·\s*)?sorry\s*$|exact sorr
 
 ## [§2.6 Distributional Methods](https://dlmf.nist.gov/2.6)
 
-- [2.6.E1](https://dlmf.nist.gov/2.6.E1): [`DLMF.AsymptoticApproximations.stieltjesCubeRootExample`](DLMF/AsymptoticApproximations/Distributional/Defs.lean#L178) (definition); [`DLMF.AsymptoticApproximations.stieltjesCubeRootExample_expansion`](DLMF/AsymptoticApproximations/Distributional/Stieltjes.lean#L144) (admitted)
+- [2.6.E1](https://dlmf.nist.gov/2.6.E1): [`DLMF.AsymptoticApproximations.stieltjesCubeRootExample`](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L178) (definition); [`DLMF.AsymptoticApproximations.stieltjesCubeRootExample_expansion`](DLMF/AsymptoticApproximations/Distributional/Stieltjes.lean#L144) (admitted)
 - [2.6.E2](https://dlmf.nist.gov/2.6.E2): [`DLMF.AsymptoticApproximations.one_add_rpow_neg_third_hasSum`](DLMF/AsymptoticApproximations/Distributional/Stieltjes.lean#L39) (proved)
 - [2.6.E3](https://dlmf.nist.gov/2.6.E3): [`DLMF.AsymptoticApproximations.not_integrableOn_rpow_div_add`](DLMF/AsymptoticApproximations/Distributional/Stieltjes.lean#L66) (proved)
 - [2.6.E4](https://dlmf.nist.gov/2.6.E4): [`DLMF.AsymptoticApproximations.integral_rpow_div_add_cpow`](DLMF/AsymptoticApproximations/Distributional/Stieltjes.lean#L87) (proved)
 - [2.6.E5](https://dlmf.nist.gov/2.6.E5): [`DLMF.AsymptoticApproximations.gamma_two_thirds_sub_mul_gamma`](DLMF/AsymptoticApproximations/Distributional/Stieltjes.lean#L127) (proved)
 - [2.6.E6](https://dlmf.nist.gov/2.6.E6): [`DLMF.AsymptoticApproximations.not_stieltjesCubeRootExample_naive`](DLMF/AsymptoticApproximations/Distributional/Stieltjes.lean#L155) (admitted)
 - [2.6.E7](https://dlmf.nist.gov/2.6.E7): [`DLMF.AsymptoticApproximations.stieltjesCubeRootExample_expansion`](DLMF/AsymptoticApproximations/Distributional/Stieltjes.lean#L144) (admitted)
-- [2.6.E8](https://dlmf.nist.gov/2.6.E8): [`DLMF.AsymptoticApproximations.stieltjesTransform`](DLMF/AsymptoticApproximations/Distributional/Defs.lean#L44) (definition)
-- [2.6.E9](https://dlmf.nist.gov/2.6.E9): [`DLMF.AsymptoticApproximations.IsStieltjesExpansion`](DLMF/AsymptoticApproximations/Distributional/Defs.lean#L132) (definition)
-- [2.6.E10](https://dlmf.nist.gov/2.6.E10): [`DLMF.AsymptoticApproximations.IsStieltjesExpansion`](DLMF/AsymptoticApproximations/Distributional/Defs.lean#L132) (definition); [`DLMF.AsymptoticApproximations.stieltjesRemainder`](DLMF/AsymptoticApproximations/Distributional/Defs.lean#L148) (definition)
-- [2.6.E11](https://dlmf.nist.gov/2.6.E11): [`DLMF.AsymptoticApproximations.functionPairing`](DLMF/AsymptoticApproximations/Distributional/Defs.lean#L57) (definition)
-- [2.6.E12](https://dlmf.nist.gov/2.6.E12): [`DLMF.AsymptoticApproximations.functionPairing`](DLMF/AsymptoticApproximations/Distributional/Defs.lean#L57) (definition); [`DLMF.AsymptoticApproximations.tPowPairing`](DLMF/AsymptoticApproximations/Distributional/Defs.lean#L77) (definition)
-- [2.6.E13](https://dlmf.nist.gov/2.6.E13): [`DLMF.AsymptoticApproximations.powPairing`](DLMF/AsymptoticApproximations/Distributional/Defs.lean#L63) (definition); [`DLMF.AsymptoticApproximations.tPowPairing`](DLMF/AsymptoticApproximations/Distributional/Defs.lean#L77) (definition)
-- [2.6.E14](https://dlmf.nist.gov/2.6.E14): [`DLMF.AsymptoticApproximations.logPowPairing`](DLMF/AsymptoticApproximations/Distributional/Defs.lean#L71) (definition); [`DLMF.AsymptoticApproximations.tPowPairing`](DLMF/AsymptoticApproximations/Distributional/Defs.lean#L77) (definition)
-- [2.6.E15](https://dlmf.nist.gov/2.6.E15): [`DLMF.AsymptoticApproximations.repeatedTailIntegral`](DLMF/AsymptoticApproximations/Distributional/Defs.lean#L92) (definition)
-- [2.6.E16](https://dlmf.nist.gov/2.6.E16): [`DLMF.AsymptoticApproximations.remainderPairing`](DLMF/AsymptoticApproximations/Distributional/Defs.lean#L99) (definition)
+- [2.6.E8](https://dlmf.nist.gov/2.6.E8): [`DLMF.AsymptoticApproximations.stieltjesTransform`](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L44) (definition)
+- [2.6.E9](https://dlmf.nist.gov/2.6.E9): [`DLMF.AsymptoticApproximations.IsStieltjesExpansion`](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L132) (definition)
+- [2.6.E10](https://dlmf.nist.gov/2.6.E10): [`DLMF.AsymptoticApproximations.IsStieltjesExpansion`](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L132) (definition); [`DLMF.AsymptoticApproximations.stieltjesRemainder`](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L148) (definition)
+- [2.6.E11](https://dlmf.nist.gov/2.6.E11): [`DLMF.AsymptoticApproximations.functionPairing`](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L57) (definition)
+- [2.6.E12](https://dlmf.nist.gov/2.6.E12): [`DLMF.AsymptoticApproximations.functionPairing`](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L57) (definition); [`DLMF.AsymptoticApproximations.tPowPairing`](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L77) (definition)
+- [2.6.E13](https://dlmf.nist.gov/2.6.E13): [`DLMF.AsymptoticApproximations.powPairing`](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L63) (definition); [`DLMF.AsymptoticApproximations.tPowPairing`](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L77) (definition)
+- [2.6.E14](https://dlmf.nist.gov/2.6.E14): [`DLMF.AsymptoticApproximations.logPowPairing`](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L71) (definition); [`DLMF.AsymptoticApproximations.tPowPairing`](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L77) (definition)
+- [2.6.E15](https://dlmf.nist.gov/2.6.E15): [`DLMF.AsymptoticApproximations.repeatedTailIntegral`](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L92) (definition)
+- [2.6.E16](https://dlmf.nist.gov/2.6.E16): [`DLMF.AsymptoticApproximations.remainderPairing`](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L99) (definition)
 - [2.6.E17](https://dlmf.nist.gov/2.6.E17): [`DLMF.AsymptoticApproximations.functionPairing_eq_of_lt_one`](DLMF/AsymptoticApproximations/Distributional/Stieltjes.lean#L166) (admitted)
-- [2.6.E18](https://dlmf.nist.gov/2.6.E18): [`DLMF.AsymptoticApproximations.stieltjesDeltaCoeff`](DLMF/AsymptoticApproximations/Distributional/Defs.lean#L191) (definition)
-- [2.6.E19](https://dlmf.nist.gov/2.6.E19): [`DLMF.AsymptoticApproximations.diracDerivPairing`](DLMF/AsymptoticApproximations/Distributional/Defs.lean#L87) (definition)
+- [2.6.E18](https://dlmf.nist.gov/2.6.E18): [`DLMF.AsymptoticApproximations.stieltjesDeltaCoeff`](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L191) (definition)
+- [2.6.E19](https://dlmf.nist.gov/2.6.E19): [`DLMF.AsymptoticApproximations.diracDerivPairing`](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L87) (definition)
 - [2.6.E20](https://dlmf.nist.gov/2.6.E20): [`DLMF.AsymptoticApproximations.functionPairing_eq_of_eq_one`](DLMF/AsymptoticApproximations/Distributional/Stieltjes.lean#L181) (admitted)
-- [2.6.E21](https://dlmf.nist.gov/2.6.E21): [`DLMF.AsymptoticApproximations.stieltjesLogDeltaCoeff`](DLMF/AsymptoticApproximations/Distributional/Defs.lean#L202) (definition)
-- [2.6.E22](https://dlmf.nist.gov/2.6.E22): [`DLMF.AsymptoticApproximations.stieltjesTestFunction`](DLMF/AsymptoticApproximations/Distributional/Defs.lean#L106) (definition)
+- [2.6.E21](https://dlmf.nist.gov/2.6.E21): [`DLMF.AsymptoticApproximations.stieltjesLogDeltaCoeff`](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L202) (definition)
+- [2.6.E22](https://dlmf.nist.gov/2.6.E22): [`DLMF.AsymptoticApproximations.stieltjesTestFunction`](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L106) (definition)
 - [2.6.E23](https://dlmf.nist.gov/2.6.E23): [`DLMF.AsymptoticApproximations.tendsto_powPairing_stieltjesTestFunction`](DLMF/AsymptoticApproximations/Distributional/Stieltjes.lean#L195) (admitted)
 - [2.6.E24](https://dlmf.nist.gov/2.6.E24): [`DLMF.AsymptoticApproximations.tendsto_logPowPairing_stieltjesTestFunction`](DLMF/AsymptoticApproximations/Distributional/Stieltjes.lean#L204) (admitted)
 - [2.6.E25](https://dlmf.nist.gov/2.6.E25): [`DLMF.AsymptoticApproximations.tendsto_functionPairing_stieltjesTestFunction`](DLMF/AsymptoticApproximations/Distributional/Stieltjes.lean#L214) (admitted)
 - [2.6.E26](https://dlmf.nist.gov/2.6.E26): [`DLMF.AsymptoticApproximations.tendsto_remainderPairing_stieltjesTestFunction`](DLMF/AsymptoticApproximations/Distributional/Stieltjes.lean#L224) (admitted)
 - [2.6.E27](https://dlmf.nist.gov/2.6.E27): [`DLMF.AsymptoticApproximations.stieltjesTransform_eq_of_lt_one`](DLMF/AsymptoticApproximations/Distributional/Stieltjes.lean#L240) (admitted)
 - [2.6.E28](https://dlmf.nist.gov/2.6.E28): [`DLMF.AsymptoticApproximations.stieltjesTransform_eq_of_eq_one`](DLMF/AsymptoticApproximations/Distributional/Stieltjes.lean#L253) (admitted)
-- [2.6.E29](https://dlmf.nist.gov/2.6.E29): [`DLMF.AsymptoticApproximations.stieltjesLogCoeff`](DLMF/AsymptoticApproximations/Distributional/Defs.lean#L197) (definition); [`DLMF.AsymptoticApproximations.stieltjesTransform_eq_of_eq_one`](DLMF/AsymptoticApproximations/Distributional/Stieltjes.lean#L253) (admitted)
-- [2.6.E30](https://dlmf.nist.gov/2.6.E30): [`DLMF.AsymptoticApproximations.stieltjesRemainderTerm`](DLMF/AsymptoticApproximations/Distributional/Defs.lean#L153) (definition); [`DLMF.AsymptoticApproximations.stieltjesTransform_eq_of_lt_one`](DLMF/AsymptoticApproximations/Distributional/Stieltjes.lean#L240) (admitted)
+- [2.6.E29](https://dlmf.nist.gov/2.6.E29): [`DLMF.AsymptoticApproximations.stieltjesLogCoeff`](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L197) (definition); [`DLMF.AsymptoticApproximations.stieltjesTransform_eq_of_eq_one`](DLMF/AsymptoticApproximations/Distributional/Stieltjes.lean#L253) (admitted)
+- [2.6.E30](https://dlmf.nist.gov/2.6.E30): [`DLMF.AsymptoticApproximations.stieltjesRemainderTerm`](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L153) (definition); [`DLMF.AsymptoticApproximations.stieltjesTransform_eq_of_lt_one`](DLMF/AsymptoticApproximations/Distributional/Stieltjes.lean#L240) (admitted)
 - [2.6.E31](https://dlmf.nist.gov/2.6.E31): excluded: informal (the hypothesis class `f(t) ∼ e^{ict} ∑ a_s t^{-s-α}` for which "similar results hold"; references only)
-- [2.6.E32](https://dlmf.nist.gov/2.6.E32): [`DLMF.AsymptoticApproximations.generalizedStieltjesTransform`](DLMF/AsymptoticApproximations/Distributional/Defs.lean#L51) (definition)
-- [2.6.E33](https://dlmf.nist.gov/2.6.E33): [`DLMF.AsymptoticApproximations.riemannLiouvilleIntegral`](DLMF/AsymptoticApproximations/Distributional/Defs.lean#L112) (definition)
-- [2.6.E34](https://dlmf.nist.gov/2.6.E34): [`DLMF.AsymptoticApproximations.halfLineConvolution`](DLMF/AsymptoticApproximations/Distributional/Defs.lean#L118) (definition)
+- [2.6.E32](https://dlmf.nist.gov/2.6.E32): [`DLMF.AsymptoticApproximations.generalizedStieltjesTransform`](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L51) (definition)
+- [2.6.E33](https://dlmf.nist.gov/2.6.E33): [`DLMF.AsymptoticApproximations.riemannLiouvilleIntegral`](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L112) (definition)
+- [2.6.E34](https://dlmf.nist.gov/2.6.E34): [`DLMF.AsymptoticApproximations.halfLineConvolution`](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L118) (definition)
 - [2.6.E35](https://dlmf.nist.gov/2.6.E35): [`DLMF.AsymptoticApproximations.riemannLiouvilleIntegral_eq_convolution`](DLMF/AsymptoticApproximations/Distributional/FractionalIntegrals.lean#L36) (proved)
 - [2.6.E36](https://dlmf.nist.gov/2.6.E36): [`DLMF.AsymptoticApproximations.integrableOn_powKernel_mul_rpow_iff`](DLMF/AsymptoticApproximations/Distributional/FractionalIntegrals.lean#L42) (proved)
 - [2.6.E37](https://dlmf.nist.gov/2.6.E37): [`DLMF.AsymptoticApproximations.kPlusPairing_convolution_congr`](DLMF/AsymptoticApproximations/Distributional/FractionalIntegrals.lean#L99) (admitted)
@@ -546,14 +555,14 @@ Module admissions (`grep -cE 'by sorry|:= sorry|^\s*(·\s*)?sorry\s*$|exact sorr
 - [2.6.E44](https://dlmf.nist.gov/2.6.E44): [`DLMF.AsymptoticApproximations.riemannLiouvilleIntegral_eq_of_eq_one`](DLMF/AsymptoticApproximations/Distributional/FractionalIntegrals.lean#L181) (admitted)
 - [2.6.E45](https://dlmf.nist.gov/2.6.E45): [`DLMF.AsymptoticApproximations.riemannLiouvilleIntegral_eq_of_lt_one`](DLMF/AsymptoticApproximations/Distributional/FractionalIntegrals.lean#L165) (admitted)
 - [2.6.E46](https://dlmf.nist.gov/2.6.E46): [`DLMF.AsymptoticApproximations.riemannLiouvilleIntegral_eq_of_eq_one`](DLMF/AsymptoticApproximations/Distributional/FractionalIntegrals.lean#L181) (admitted)
-- [2.6.E47](https://dlmf.nist.gov/2.6.E47): [`DLMF.AsymptoticApproximations.fractionalRemainder`](DLMF/AsymptoticApproximations/Distributional/Defs.lean#L236) (definition)
+- [2.6.E47](https://dlmf.nist.gov/2.6.E47): [`DLMF.AsymptoticApproximations.fractionalRemainder`](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L236) (definition)
 - [2.6.E48](https://dlmf.nist.gov/2.6.E48): [`DLMF.AsymptoticApproximations.riemannLiouvilleIntegral_exampleF`](DLMF/AsymptoticApproximations/Distributional/FractionalIntegrals.lean#L234) (admitted)
 - [2.6.E49](https://dlmf.nist.gov/2.6.E49): [`DLMF.AsymptoticApproximations.g2b_exampleF_eq`](DLMF/AsymptoticApproximations/Distributional/FractionalIntegrals.lean#L199) (proved)
 - [2.6.E50](https://dlmf.nist.gov/2.6.E50): [`DLMF.AsymptoticApproximations.g2b_exampleF_eq`](DLMF/AsymptoticApproximations/Distributional/FractionalIntegrals.lean#L199) (proved)
 - [2.6.E51](https://dlmf.nist.gov/2.6.E51): [`DLMF.AsymptoticApproximations.g2b_exampleF_mellin`](DLMF/AsymptoticApproximations/Distributional/FractionalIntegrals.lean#L225) (admitted)
 - [2.6.E52](https://dlmf.nist.gov/2.6.E52): [`DLMF.AsymptoticApproximations.riemannLiouvilleIntegral_exampleF`](DLMF/AsymptoticApproximations/Distributional/FractionalIntegrals.lean#L234) (admitted)
 - [2.6.E53](https://dlmf.nist.gov/2.6.E53): [`DLMF.AsymptoticApproximations.norm_fractionalRemainder_exampleF_le`](DLMF/AsymptoticApproximations/Distributional/FractionalIntegrals.lean#L252) (admitted)
-- [2.6.E54](https://dlmf.nist.gov/2.6.E54): [`DLMF.AsymptoticApproximations.mellinConvolutionIntegral`](DLMF/AsymptoticApproximations/Distributional/Defs.lean#L165) (definition)
+- [2.6.E54](https://dlmf.nist.gov/2.6.E54): [`DLMF.AsymptoticApproximations.mellinConvolutionIntegral`](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L165) (definition)
 - [2.6.E55](https://dlmf.nist.gov/2.6.E55): [`DLMF.AsymptoticApproximations.mul_comp_mul_eq_expansion`](DLMF/AsymptoticApproximations/Distributional/FractionalIntegrals.lean#L266) (admitted); [`DLMF.AsymptoticApproximations.mellin_continuation_eq_mellin_remainder`](DLMF/AsymptoticApproximations/Distributional/FractionalIntegrals.lean#L301) (admitted)
 - [2.6.E56](https://dlmf.nist.gov/2.6.E56): [`DLMF.AsymptoticApproximations.mul_comp_mul_eq_expansion`](DLMF/AsymptoticApproximations/Distributional/FractionalIntegrals.lean#L266) (admitted)
 - [2.6.E57](https://dlmf.nist.gov/2.6.E57): [`DLMF.AsymptoticApproximations.mul_comp_mul_eq_expansion`](DLMF/AsymptoticApproximations/Distributional/FractionalIntegrals.lean#L266) (admitted)
@@ -562,30 +571,30 @@ Module admissions (`grep -cE 'by sorry|:= sorry|^\s*(·\s*)?sorry\s*$|exact sorr
 - [2.6.E60](https://dlmf.nist.gov/2.6.E60): [`DLMF.AsymptoticApproximations.mellin_continuation_eq_mellin_remainder`](DLMF/AsymptoticApproximations/Distributional/FractionalIntegrals.lean#L301) (admitted)
 - [2.6.E61](https://dlmf.nist.gov/2.6.E61): Mathlib [`mellin_comp_mul_left`](DLMF/AsymptoticApproximations/Distributional/MathlibCoverage.lean#L21) (upstream pointer)
 - [2.6.E62](https://dlmf.nist.gov/2.6.E62): [`DLMF.AsymptoticApproximations.mellinConvolutionIntegral_eq`](DLMF/AsymptoticApproximations/Distributional/FractionalIntegrals.lean#L317) (admitted)
-- [2.6.iii](https://dlmf.nist.gov/2.6.iii) (prose): [`DLMF.AsymptoticApproximations.kPlusPairing`](DLMF/AsymptoticApproximations/Distributional/Defs.lean#L124) (definition); [`DLMF.AsymptoticApproximations.halfLineConvolution_comm`](DLMF/AsymptoticApproximations/Distributional/FractionalIntegrals.lean#L85) (proved)
-- [2.6.iii](https://dlmf.nist.gov/2.6.iii): [`DLMF.AsymptoticApproximations.halfLineConvolution_comm`](DLMF/AsymptoticApproximations/Distributional/FractionalIntegrals.lean#L85) (proved); [`DLMF.AsymptoticApproximations.kPlusPairing`](DLMF/AsymptoticApproximations/Distributional/Defs.lean#L124) (definition).
+- [2.6.iii](https://dlmf.nist.gov/2.6.iii) (prose): [`DLMF.AsymptoticApproximations.kPlusPairing`](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L124) (definition); [`DLMF.AsymptoticApproximations.halfLineConvolution_comm`](DLMF/AsymptoticApproximations/Distributional/FractionalIntegrals.lean#L85) (proved)
+- [2.6.iii](https://dlmf.nist.gov/2.6.iii): [`DLMF.AsymptoticApproximations.halfLineConvolution_comm`](DLMF/AsymptoticApproximations/Distributional/FractionalIntegrals.lean#L85) (proved); [`DLMF.AsymptoticApproximations.kPlusPairing`](DLMF/AsymptoticApproximations/Distributional/Basic.lean#L124) (definition).
 
 ## [§2.7 Differential Equations](https://dlmf.nist.gov/2.7)
 
-- [2.7.E1](https://dlmf.nist.gov/2.7.E1): [`DLMF.AsymptoticApproximations.IsLinearODE2SolOn`](DLMF/AsymptoticApproximations/ODE/Defs.lean#L44) (definition); [`DLMF.AsymptoticApproximations.IsLogPlaneSolOn`](DLMF/AsymptoticApproximations/ODE/Defs.lean#L50) (definition)
-- [2.7.E2](https://dlmf.nist.gov/2.7.E2): [`DLMF.AsymptoticApproximations.frobenius_solutions`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L69) (admitted)
-- [2.7.E3](https://dlmf.nist.gov/2.7.E3): [`DLMF.AsymptoticApproximations.indicialPoly`](DLMF/AsymptoticApproximations/ODE/Defs.lean#L58) (definition); [`DLMF.AsymptoticApproximations.frobenius_solutions`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L69) (admitted)
-- [2.7.E4](https://dlmf.nist.gov/2.7.E4): [`DLMF.AsymptoticApproximations.frobenius_solutions`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L69) (admitted)
-- [2.7.E5](https://dlmf.nist.gov/2.7.E5): [`DLMF.AsymptoticApproximations.frobeniusCoeff`](DLMF/AsymptoticApproximations/ODE/Defs.lean#L62) (definition); [`DLMF.AsymptoticApproximations.frobenius_solutions`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L69) (admitted)
-- [2.7.E6](https://dlmf.nist.gov/2.7.E6): [`DLMF.AsymptoticApproximations.frobenius_log_solution`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L93) (admitted)
-- [2.7.E7](https://dlmf.nist.gov/2.7.E7): [`DLMF.AsymptoticApproximations.rankOne_exists_unique_solutions`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L140) (admitted)
-- [2.7.E8](https://dlmf.nist.gov/2.7.E8): [`DLMF.AsymptoticApproximations.rankOneCoeff`](DLMF/AsymptoticApproximations/ODE/Defs.lean#L89) (definition); [`DLMF.AsymptoticApproximations.rankOne_exists_unique_solutions`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L140) (admitted)
-- [2.7.E9](https://dlmf.nist.gov/2.7.E9): [`DLMF.AsymptoticApproximations.characteristic_roots_eq_iff`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L127) (proved)
-- [2.7.E10](https://dlmf.nist.gov/2.7.E10): [`DLMF.AsymptoticApproximations.rankOneExponent`](DLMF/AsymptoticApproximations/ODE/Defs.lean#L83) (definition)
-- [2.7.E11](https://dlmf.nist.gov/2.7.E11): [`DLMF.AsymptoticApproximations.rankOneCoeff`](DLMF/AsymptoticApproximations/ODE/Defs.lean#L89) (definition)
-- [2.7.E12](https://dlmf.nist.gov/2.7.E12): [`DLMF.AsymptoticApproximations.rankOne_late_coefficients`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L188) (admitted)
-- [2.7.E13](https://dlmf.nist.gov/2.7.E13): [`DLMF.AsymptoticApproximations.rankOne_late_coefficients`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L188) (admitted)
-- [2.7.E14](https://dlmf.nist.gov/2.7.E14): [`DLMF.AsymptoticApproximations.rankOne_exists_unique_solutions`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L140) (admitted)
-- [2.7.E15](https://dlmf.nist.gov/2.7.E15): [`DLMF.AsymptoticApproximations.rankOne_exists_unique_solutions`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L140) (admitted)
-- [2.7.E16](https://dlmf.nist.gov/2.7.E16): [`DLMF.AsymptoticApproximations.rankOne_exists_unique_solutions`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L140) (admitted)
-- [2.7.E17](https://dlmf.nist.gov/2.7.E17): [`DLMF.AsymptoticApproximations.rankOne_stokes_multipliers`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L168) (admitted)
-- [2.7.E18](https://dlmf.nist.gov/2.7.E18): [`DLMF.AsymptoticApproximations.rankOne_late_coefficients`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L188) (admitted)
-- [2.7.E19](https://dlmf.nist.gov/2.7.E19): [`DLMF.AsymptoticApproximations.fabry_transformation`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L221) (admitted)
+- [2.7.E1](https://dlmf.nist.gov/2.7.E1): [`DLMF.AsymptoticApproximations.IsLinearODE2SolOn`](DLMF/AsymptoticApproximations/ODE/Basic.lean#L46) (definition); [`DLMF.AsymptoticApproximations.IsLogPlaneSolOn`](DLMF/AsymptoticApproximations/ODE/Basic.lean#L52) (definition)
+- [2.7.E2](https://dlmf.nist.gov/2.7.E2): [`DLMF.AsymptoticApproximations.frobenius_solutions`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L71) (admitted)
+- [2.7.E3](https://dlmf.nist.gov/2.7.E3): [`DLMF.AsymptoticApproximations.indicialPoly`](DLMF/AsymptoticApproximations/ODE/Basic.lean#L60) (definition); [`DLMF.AsymptoticApproximations.frobenius_solutions`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L71) (admitted)
+- [2.7.E4](https://dlmf.nist.gov/2.7.E4): [`DLMF.AsymptoticApproximations.frobenius_solutions`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L71) (admitted)
+- [2.7.E5](https://dlmf.nist.gov/2.7.E5): [`DLMF.AsymptoticApproximations.frobeniusCoeff`](DLMF/AsymptoticApproximations/ODE/Basic.lean#L64) (definition); [`DLMF.AsymptoticApproximations.frobenius_solutions`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L71) (admitted)
+- [2.7.E6](https://dlmf.nist.gov/2.7.E6): [`DLMF.AsymptoticApproximations.frobenius_log_solution`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L95) (admitted)
+- [2.7.E7](https://dlmf.nist.gov/2.7.E7): [`DLMF.AsymptoticApproximations.rankOne_exists_unique_solutions`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L142) (admitted)
+- [2.7.E8](https://dlmf.nist.gov/2.7.E8): [`DLMF.AsymptoticApproximations.rankOneCoeff`](DLMF/AsymptoticApproximations/ODE/Basic.lean#L91) (definition); [`DLMF.AsymptoticApproximations.rankOne_exists_unique_solutions`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L142) (admitted)
+- [2.7.E9](https://dlmf.nist.gov/2.7.E9): [`DLMF.AsymptoticApproximations.characteristic_roots_eq_iff`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L129) (proved)
+- [2.7.E10](https://dlmf.nist.gov/2.7.E10): [`DLMF.AsymptoticApproximations.rankOneExponent`](DLMF/AsymptoticApproximations/ODE/Basic.lean#L85) (definition)
+- [2.7.E11](https://dlmf.nist.gov/2.7.E11): [`DLMF.AsymptoticApproximations.rankOneCoeff`](DLMF/AsymptoticApproximations/ODE/Basic.lean#L91) (definition)
+- [2.7.E12](https://dlmf.nist.gov/2.7.E12): [`DLMF.AsymptoticApproximations.rankOne_late_coefficients`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L190) (admitted)
+- [2.7.E13](https://dlmf.nist.gov/2.7.E13): [`DLMF.AsymptoticApproximations.rankOne_late_coefficients`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L190) (admitted)
+- [2.7.E14](https://dlmf.nist.gov/2.7.E14): [`DLMF.AsymptoticApproximations.rankOne_exists_unique_solutions`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L142) (admitted)
+- [2.7.E15](https://dlmf.nist.gov/2.7.E15): [`DLMF.AsymptoticApproximations.rankOne_exists_unique_solutions`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L142) (admitted)
+- [2.7.E16](https://dlmf.nist.gov/2.7.E16): [`DLMF.AsymptoticApproximations.rankOne_exists_unique_solutions`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L142) (admitted)
+- [2.7.E17](https://dlmf.nist.gov/2.7.E17): [`DLMF.AsymptoticApproximations.rankOne_stokes_multipliers`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L170) (admitted)
+- [2.7.E18](https://dlmf.nist.gov/2.7.E18): [`DLMF.AsymptoticApproximations.rankOne_late_coefficients`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L190) (admitted)
+- [2.7.E19](https://dlmf.nist.gov/2.7.E19): [`DLMF.AsymptoticApproximations.fabry_transformation`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L223) (admitted)
 - [2.7.E20](https://dlmf.nist.gov/2.7.E20): [`DLMF.AsymptoticApproximations.liouvilleGreen_interval`](DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean#L36) (admitted); [`DLMF.AsymptoticApproximations.liouvilleGreen_recessive_atTop`](DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean#L58) (proved)
 - [2.7.E21](https://dlmf.nist.gov/2.7.E21): [`DLMF.AsymptoticApproximations.liouvilleGreen_interval`](DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean#L36) (admitted)
 - [2.7.E22](https://dlmf.nist.gov/2.7.E22): [`DLMF.AsymptoticApproximations.liouvilleGreen_interval`](DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean#L36) (admitted); [`DLMF.AsymptoticApproximations.liouvilleGreen_recessive_atTop`](DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean#L58) (proved)
@@ -601,17 +610,17 @@ Module admissions (`grep -cE 'by sorry|:= sorry|^\s*(·\s*)?sorry\s*$|exact sorr
 - [2.7.E32](https://dlmf.nist.gov/2.7.E32): [`DLMF.AsymptoticApproximations.sqrt_add_log_expansion`](DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean#L154) (proved)
 - [2.7.E33](https://dlmf.nist.gov/2.7.E33): [`DLMF.AsymptoticApproximations.liouvilleGreen_example`](DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean#L192) (admitted)
 - [2.7.E34](https://dlmf.nist.gov/2.7.E34): [`DLMF.AsymptoticApproximations.liouvilleGreen_example`](DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean#L192) (admitted)
-- [2.7.E35](https://dlmf.nist.gov/2.7.E35): [`DLMF.AsymptoticApproximations.eq_exp_combination`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L252) (proved)
-- [2.7.E36](https://dlmf.nist.gov/2.7.E36): [`DLMF.AsymptoticApproximations.eq_exp_combination`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L252) (proved)
-- [2.7.E37](https://dlmf.nist.gov/2.7.E37): [`DLMF.AsymptoticApproximations.eq_cosh_sinh_combination`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L284) (proved)
-- [2.7.i](https://dlmf.nist.gov/2.7.i) (prose): [`DLMF.AsymptoticApproximations.exists_unique_solution_of_ordinary`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L37) (admitted); [`DLMF.AsymptoticApproximations.linearODERegularSingularAt_iff`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L51) (proved)
-- [2.7.ii](https://dlmf.nist.gov/2.7.ii) (prose): [`DLMF.AsymptoticApproximations.HasSingularityRank`](DLMF/AsymptoticApproximations/ODE/Defs.lean#L73) (definition); [`DLMF.AsymptoticApproximations.hasSingularityRank_zero_of_regularSingular`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L118) (proved); [`DLMF.AsymptoticApproximations.fabry_coefficients`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L233) (admitted)
+- [2.7.E35](https://dlmf.nist.gov/2.7.E35): [`DLMF.AsymptoticApproximations.eq_exp_combination`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L254) (proved)
+- [2.7.E36](https://dlmf.nist.gov/2.7.E36): [`DLMF.AsymptoticApproximations.eq_exp_combination`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L254) (proved)
+- [2.7.E37](https://dlmf.nist.gov/2.7.E37): [`DLMF.AsymptoticApproximations.eq_cosh_sinh_combination`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L286) (proved)
+- [2.7.i](https://dlmf.nist.gov/2.7.i) (prose): [`DLMF.AsymptoticApproximations.exists_unique_solution_of_ordinary`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L39) (admitted); [`DLMF.AsymptoticApproximations.linearODERegularSingularAt_iff`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L53) (proved)
+- [2.7.ii](https://dlmf.nist.gov/2.7.ii) (prose): [`DLMF.AsymptoticApproximations.HasSingularityRank`](DLMF/AsymptoticApproximations/ODE/Basic.lean#L75) (definition); [`DLMF.AsymptoticApproximations.hasSingularityRank_zero_of_regularSingular`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L120) (proved); [`DLMF.AsymptoticApproximations.fabry_coefficients`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L235) (admitted)
 - [2.7.iii](https://dlmf.nist.gov/2.7.iii) (prose): [`DLMF.AsymptoticApproximations.liouvilleGreen_dominant`](DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean#L137) (admitted)
-- [2.7.iv](https://dlmf.nist.gov/2.7.iv) (prose): [`DLMF.AsymptoticApproximations.exp_div_exp_neg_tendsto`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L295) (proved)
-- [2.7.i](https://dlmf.nist.gov/2.7.i): [`DLMF.AsymptoticApproximations.exists_unique_solution_of_ordinary`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L37) (admitted); [`DLMF.AsymptoticApproximations.linearODERegularSingularAt_iff`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L51) (proved).
-- [2.7.ii](https://dlmf.nist.gov/2.7.ii): [`DLMF.AsymptoticApproximations.HasSingularityRank`](DLMF/AsymptoticApproximations/ODE/Defs.lean#L73) (definition); [`DLMF.AsymptoticApproximations.fabry_coefficients`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L233) (admitted); [`DLMF.AsymptoticApproximations.hasSingularityRank_zero_of_regularSingular`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L118) (proved).
+- [2.7.iv](https://dlmf.nist.gov/2.7.iv) (prose): [`DLMF.AsymptoticApproximations.exp_div_exp_neg_tendsto`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L297) (proved)
+- [2.7.i](https://dlmf.nist.gov/2.7.i): [`DLMF.AsymptoticApproximations.exists_unique_solution_of_ordinary`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L39) (admitted); [`DLMF.AsymptoticApproximations.linearODERegularSingularAt_iff`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L53) (proved).
+- [2.7.ii](https://dlmf.nist.gov/2.7.ii): [`DLMF.AsymptoticApproximations.HasSingularityRank`](DLMF/AsymptoticApproximations/ODE/Basic.lean#L75) (definition); [`DLMF.AsymptoticApproximations.fabry_coefficients`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L235) (admitted); [`DLMF.AsymptoticApproximations.hasSingularityRank_zero_of_regularSingular`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L120) (proved).
 - [2.7.iii](https://dlmf.nist.gov/2.7.iii): [`DLMF.AsymptoticApproximations.liouvilleGreen_dominant`](DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean#L137) (admitted).
-- [2.7.iv](https://dlmf.nist.gov/2.7.iv): [`DLMF.AsymptoticApproximations.exp_div_exp_neg_tendsto`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L295) (proved).
+- [2.7.iv](https://dlmf.nist.gov/2.7.iv): [`DLMF.AsymptoticApproximations.exp_div_exp_neg_tendsto`](DLMF/AsymptoticApproximations/ODE/Singularities.lean#L297) (proved).
 
 ## [§2.8 Differential Equations with a Parameter](https://dlmf.nist.gov/2.8)
 
@@ -633,9 +642,9 @@ Module admissions (`grep -cE 'by sorry|:= sorry|^\s*(·\s*)?sorry\s*$|exact sorr
 - [2.8.E16](https://dlmf.nist.gov/2.8.E16): [`DLMF.AsymptoticApproximations.caseII_airy_expansion`](DLMF/AsymptoticApproximations/ODE/Parameter.lean#L218) (admitted)
 - [2.8.E17](https://dlmf.nist.gov/2.8.E17): [`DLMF.AsymptoticApproximations.caseII_airy_expansion`](DLMF/AsymptoticApproximations/ODE/Parameter.lean#L218) (admitted)
 - [2.8.E18](https://dlmf.nist.gov/2.8.E18): [`DLMF.AsymptoticApproximations.caseII_airy_expansion`](DLMF/AsymptoticApproximations/ODE/Parameter.lean#L218) (admitted)
-- [2.8.E19](https://dlmf.nist.gov/2.8.E19): [`DLMF.AsymptoticApproximations.airyEnvCrit`](DLMF/AsymptoticApproximations/ODE/Defs.lean#L106) (definition)
-- [2.8.E20](https://dlmf.nist.gov/2.8.E20): [`DLMF.AsymptoticApproximations.envAi`](DLMF/AsymptoticApproximations/ODE/Defs.lean#L112) (definition); [`DLMF.AsymptoticApproximations.envBi`](DLMF/AsymptoticApproximations/ODE/Defs.lean#L120) (definition)
-- [2.8.E21](https://dlmf.nist.gov/2.8.E21): [`DLMF.AsymptoticApproximations.envAi`](DLMF/AsymptoticApproximations/ODE/Defs.lean#L112) (definition); [`DLMF.AsymptoticApproximations.envBi`](DLMF/AsymptoticApproximations/ODE/Defs.lean#L120) (definition)
+- [2.8.E19](https://dlmf.nist.gov/2.8.E19): [`DLMF.AsymptoticApproximations.airyEnvCrit`](DLMF/AsymptoticApproximations/ODE/Basic.lean#L108) (definition)
+- [2.8.E20](https://dlmf.nist.gov/2.8.E20): [`DLMF.AsymptoticApproximations.envAi`](DLMF/AsymptoticApproximations/ODE/Basic.lean#L114) (definition); [`DLMF.AsymptoticApproximations.envBi`](DLMF/AsymptoticApproximations/ODE/Basic.lean#L122) (definition)
+- [2.8.E21](https://dlmf.nist.gov/2.8.E21): [`DLMF.AsymptoticApproximations.envAi`](DLMF/AsymptoticApproximations/ODE/Basic.lean#L114) (definition); [`DLMF.AsymptoticApproximations.envBi`](DLMF/AsymptoticApproximations/ODE/Basic.lean#L122) (definition)
 - [2.8.E22](https://dlmf.nist.gov/2.8.E22): [`DLMF.AsymptoticApproximations.caseII_airy_envelope`](DLMF/AsymptoticApproximations/ODE/Parameter.lean#L248) (admitted)
 - [2.8.E23](https://dlmf.nist.gov/2.8.E23): [`DLMF.AsymptoticApproximations.caseII_airy_envelope`](DLMF/AsymptoticApproximations/ODE/Parameter.lean#L248) (admitted)
 - [2.8.E24](https://dlmf.nist.gov/2.8.E24): [`DLMF.AsymptoticApproximations.caseIII_bessel_expansion_pos`](DLMF/AsymptoticApproximations/ODE/Parameter.lean#L277) (admitted)
@@ -646,9 +655,9 @@ Module admissions (`grep -cE 'by sorry|:= sorry|^\s*(·\s*)?sorry\s*$|exact sorr
 - [2.8.E29](https://dlmf.nist.gov/2.8.E29): [`DLMF.AsymptoticApproximations.caseIII_bessel_expansion_neg`](DLMF/AsymptoticApproximations/ODE/Parameter.lean#L309) (admitted)
 - [2.8.E30](https://dlmf.nist.gov/2.8.E30): [`DLMF.AsymptoticApproximations.caseIII_bessel_expansion_neg`](DLMF/AsymptoticApproximations/ODE/Parameter.lean#L309) (admitted)
 - [2.8.E31](https://dlmf.nist.gov/2.8.E31): [`DLMF.AsymptoticApproximations.caseIII_bessel_expansion_neg`](DLMF/AsymptoticApproximations/ODE/Parameter.lean#L309) (admitted)
-- [2.8.E32](https://dlmf.nist.gov/2.8.E32): [`DLMF.AsymptoticApproximations.besselEnvCrit`](DLMF/AsymptoticApproximations/ODE/Defs.lean#L128) (definition)
-- [2.8.E33](https://dlmf.nist.gov/2.8.E33): [`DLMF.AsymptoticApproximations.envJ`](DLMF/AsymptoticApproximations/ODE/Defs.lean#L133) (definition); [`DLMF.AsymptoticApproximations.envY`](DLMF/AsymptoticApproximations/ODE/Defs.lean#L140) (definition)
-- [2.8.E34](https://dlmf.nist.gov/2.8.E34): [`DLMF.AsymptoticApproximations.envJ`](DLMF/AsymptoticApproximations/ODE/Defs.lean#L133) (definition); [`DLMF.AsymptoticApproximations.envY`](DLMF/AsymptoticApproximations/ODE/Defs.lean#L140) (definition)
+- [2.8.E32](https://dlmf.nist.gov/2.8.E32): [`DLMF.AsymptoticApproximations.besselEnvCrit`](DLMF/AsymptoticApproximations/ODE/Basic.lean#L130) (definition)
+- [2.8.E33](https://dlmf.nist.gov/2.8.E33): [`DLMF.AsymptoticApproximations.envJ`](DLMF/AsymptoticApproximations/ODE/Basic.lean#L135) (definition); [`DLMF.AsymptoticApproximations.envY`](DLMF/AsymptoticApproximations/ODE/Basic.lean#L142) (definition)
+- [2.8.E34](https://dlmf.nist.gov/2.8.E34): [`DLMF.AsymptoticApproximations.envJ`](DLMF/AsymptoticApproximations/ODE/Basic.lean#L135) (definition); [`DLMF.AsymptoticApproximations.envY`](DLMF/AsymptoticApproximations/ODE/Basic.lean#L142) (definition)
 - [2.8.E35](https://dlmf.nist.gov/2.8.E35): [`DLMF.AsymptoticApproximations.caseIII_bessel_envelope`](DLMF/AsymptoticApproximations/ODE/Parameter.lean#L340) (admitted)
 - [2.8.E36](https://dlmf.nist.gov/2.8.E36): [`DLMF.AsymptoticApproximations.caseIII_bessel_envelope`](DLMF/AsymptoticApproximations/ODE/Parameter.lean#L340) (admitted)
 - [2.8.i](https://dlmf.nist.gov/2.8.i) (prose): [`DLMF.AsymptoticApproximations.liouville_caseI`](DLMF/AsymptoticApproximations/ODE/Parameter.lean#L65) (proved)
@@ -662,38 +671,38 @@ Module admissions (`grep -cE 'by sorry|:= sorry|^\s*(·\s*)?sorry\s*$|exact sorr
 
 ## [§2.9 Difference Equations](https://dlmf.nist.gov/2.9)
 
-- [2.9.E1](https://dlmf.nist.gov/2.9.E1): [`DLMF.AsymptoticApproximations.recurrence_eq_difference`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L35) (proved); [`DLMF.AsymptoticApproximations.recurrence_iff_difference`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L44) (proved)
-- [2.9.E2](https://dlmf.nist.gov/2.9.E2): [`DLMF.AsymptoticApproximations.recurrence_eq_difference`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L35) (proved); [`DLMF.AsymptoticApproximations.recurrence_iff_difference`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L44) (proved)
-- [2.9.E3](https://dlmf.nist.gov/2.9.E3): [`DLMF.AsymptoticApproximations.difference_distinct_roots_solution`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L52) (admitted)
-- [2.9.E4](https://dlmf.nist.gov/2.9.E4): [`DLMF.AsymptoticApproximations.differenceCoeff`](DLMF/AsymptoticApproximations/ODE/Defs.lean#L155) (definition); [`DLMF.AsymptoticApproximations.difference_distinct_roots_solution`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L52) (admitted)
-- [2.9.E5](https://dlmf.nist.gov/2.9.E5): [`DLMF.AsymptoticApproximations.difference_distinct_roots_solution`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L52) (admitted)
-- [2.9.E6](https://dlmf.nist.gov/2.9.E6): [`DLMF.AsymptoticApproximations.differenceExponent`](DLMF/AsymptoticApproximations/ODE/Defs.lean#L149) (definition)
-- [2.9.E7](https://dlmf.nist.gov/2.9.E7): [`DLMF.AsymptoticApproximations.differenceCoeff`](DLMF/AsymptoticApproximations/ODE/Defs.lean#L155) (definition); [`DLMF.AsymptoticApproximations.IsDifferenceCoeffRel`](DLMF/AsymptoticApproximations/ODE/Defs.lean#L173) (definition)
-- [2.9.E8](https://dlmf.nist.gov/2.9.E8): [`DLMF.AsymptoticApproximations.difference_distinct_roots_solution`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L52) (admitted)
-- [2.9.E9](https://dlmf.nist.gov/2.9.E9): [`DLMF.AsymptoticApproximations.difference_coincident_sqrt`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L105) (admitted)
-- [2.9.E10](https://dlmf.nist.gov/2.9.E10): [`DLMF.AsymptoticApproximations.difference_coincident_sqrt`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L105) (admitted)
-- [2.9.E11](https://dlmf.nist.gov/2.9.E11): [`DLMF.AsymptoticApproximations.difference_coincident_power`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L124) (admitted)
-- [2.9.E12](https://dlmf.nist.gov/2.9.E12): [`DLMF.AsymptoticApproximations.difference_coincident_power`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L124) (admitted); [`DLMF.AsymptoticApproximations.difference_coincident_power_int`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L141) (admitted)
-- [2.9.E13](https://dlmf.nist.gov/2.9.E13): [`DLMF.AsymptoticApproximations.difference_coincident_log`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L156) (admitted)
+- [2.9.E1](https://dlmf.nist.gov/2.9.E1): [`DLMF.AsymptoticApproximations.recurrence_eq_difference`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L37) (proved); [`DLMF.AsymptoticApproximations.recurrence_iff_difference`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L46) (proved)
+- [2.9.E2](https://dlmf.nist.gov/2.9.E2): [`DLMF.AsymptoticApproximations.recurrence_eq_difference`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L37) (proved); [`DLMF.AsymptoticApproximations.recurrence_iff_difference`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L46) (proved)
+- [2.9.E3](https://dlmf.nist.gov/2.9.E3): [`DLMF.AsymptoticApproximations.difference_distinct_roots_solution`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L54) (admitted)
+- [2.9.E4](https://dlmf.nist.gov/2.9.E4): [`DLMF.AsymptoticApproximations.differenceCoeff`](DLMF/AsymptoticApproximations/ODE/Basic.lean#L157) (definition); [`DLMF.AsymptoticApproximations.difference_distinct_roots_solution`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L54) (admitted)
+- [2.9.E5](https://dlmf.nist.gov/2.9.E5): [`DLMF.AsymptoticApproximations.difference_distinct_roots_solution`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L54) (admitted)
+- [2.9.E6](https://dlmf.nist.gov/2.9.E6): [`DLMF.AsymptoticApproximations.differenceExponent`](DLMF/AsymptoticApproximations/ODE/Basic.lean#L151) (definition)
+- [2.9.E7](https://dlmf.nist.gov/2.9.E7): [`DLMF.AsymptoticApproximations.differenceCoeff`](DLMF/AsymptoticApproximations/ODE/Basic.lean#L157) (definition); [`DLMF.AsymptoticApproximations.IsDifferenceCoeffRel`](DLMF/AsymptoticApproximations/ODE/Basic.lean#L175) (definition)
+- [2.9.E8](https://dlmf.nist.gov/2.9.E8): [`DLMF.AsymptoticApproximations.difference_distinct_roots_solution`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L54) (admitted)
+- [2.9.E9](https://dlmf.nist.gov/2.9.E9): [`DLMF.AsymptoticApproximations.difference_coincident_sqrt`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L107) (admitted)
+- [2.9.E10](https://dlmf.nist.gov/2.9.E10): [`DLMF.AsymptoticApproximations.difference_coincident_sqrt`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L107) (admitted)
+- [2.9.E11](https://dlmf.nist.gov/2.9.E11): [`DLMF.AsymptoticApproximations.difference_coincident_power`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L126) (admitted)
+- [2.9.E12](https://dlmf.nist.gov/2.9.E12): [`DLMF.AsymptoticApproximations.difference_coincident_power`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L126) (admitted); [`DLMF.AsymptoticApproximations.difference_coincident_power_int`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L143) (admitted)
+- [2.9.E13](https://dlmf.nist.gov/2.9.E13): [`DLMF.AsymptoticApproximations.difference_coincident_log`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L158) (admitted)
 - [2.9.E14](https://dlmf.nist.gov/2.9.E14): no statement (references only: the equation form for which Wong and Li (1992a) give analogous results)
-- [2.9.i](https://dlmf.nist.gov/2.9.i) (prose): [`DLMF.AsymptoticApproximations.difference_distinct_roots_solution`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L52) (admitted); [`DLMF.AsymptoticApproximations.difference_distinct_roots_independent`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L67) (admitted); [`DLMF.AsymptoticApproximations.difference_recessive`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L83) (admitted)
-- [2.9.ii](https://dlmf.nist.gov/2.9.ii) (prose): [`DLMF.AsymptoticApproximations.difference_coincident_sqrt`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L105) (admitted); [`DLMF.AsymptoticApproximations.difference_coincident_power`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L124) (admitted); [`DLMF.AsymptoticApproximations.difference_coincident_power_int`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L141) (admitted); [`DLMF.AsymptoticApproximations.difference_coincident_log`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L156) (admitted)
-- [2.9.i](https://dlmf.nist.gov/2.9.i): [`DLMF.AsymptoticApproximations.difference_distinct_roots_independent`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L67) (admitted); [`DLMF.AsymptoticApproximations.difference_distinct_roots_solution`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L52) (admitted); [`DLMF.AsymptoticApproximations.difference_recessive`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L83) (admitted).
-- [2.9.ii](https://dlmf.nist.gov/2.9.ii): [`DLMF.AsymptoticApproximations.difference_coincident_log`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L156) (admitted); [`DLMF.AsymptoticApproximations.difference_coincident_power`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L124) (admitted); [`DLMF.AsymptoticApproximations.difference_coincident_power_int`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L141) (admitted); [`DLMF.AsymptoticApproximations.difference_coincident_sqrt`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L105) (admitted).
+- [2.9.i](https://dlmf.nist.gov/2.9.i) (prose): [`DLMF.AsymptoticApproximations.difference_distinct_roots_solution`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L54) (admitted); [`DLMF.AsymptoticApproximations.difference_distinct_roots_independent`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L69) (admitted); [`DLMF.AsymptoticApproximations.difference_recessive`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L85) (admitted)
+- [2.9.ii](https://dlmf.nist.gov/2.9.ii) (prose): [`DLMF.AsymptoticApproximations.difference_coincident_sqrt`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L107) (admitted); [`DLMF.AsymptoticApproximations.difference_coincident_power`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L126) (admitted); [`DLMF.AsymptoticApproximations.difference_coincident_power_int`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L143) (admitted); [`DLMF.AsymptoticApproximations.difference_coincident_log`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L158) (admitted)
+- [2.9.i](https://dlmf.nist.gov/2.9.i): [`DLMF.AsymptoticApproximations.difference_distinct_roots_independent`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L69) (admitted); [`DLMF.AsymptoticApproximations.difference_distinct_roots_solution`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L54) (admitted); [`DLMF.AsymptoticApproximations.difference_recessive`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L85) (admitted).
+- [2.9.ii](https://dlmf.nist.gov/2.9.ii): [`DLMF.AsymptoticApproximations.difference_coincident_log`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L158) (admitted); [`DLMF.AsymptoticApproximations.difference_coincident_power`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L126) (admitted); [`DLMF.AsymptoticApproximations.difference_coincident_power_int`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L143) (admitted); [`DLMF.AsymptoticApproximations.difference_coincident_sqrt`](DLMF/AsymptoticApproximations/ODE/Difference.lean#L107) (admitted).
 
 ## [§2.10 Sums and Sequences](https://dlmf.nist.gov/2.10)
 
 - [2.10.E1](https://dlmf.nist.gov/2.10.E1): [`DLMF.AsymptoticApproximations.euler_maclaurin`](DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean#L67) (proved)
 - [2.10.E2](https://dlmf.nist.gov/2.10.E2): [`DLMF.AsymptoticApproximations.abel_plana`](DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean#L131) (admitted)
-- [2.10.E3](https://dlmf.nist.gov/2.10.E3): [`DLMF.AsymptoticApproximations.jLogJSum`](DLMF/AsymptoticApproximations/Sums/Defs.lean#L37) (definition)
+- [2.10.E3](https://dlmf.nist.gov/2.10.E3): [`DLMF.AsymptoticApproximations.jLogJSum`](DLMF/AsymptoticApproximations/Sums/Basic.lean#L37) (definition)
 - [2.10.E4](https://dlmf.nist.gov/2.10.E4): [`DLMF.AsymptoticApproximations.jLogJSum_eq`](DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean#L160) (admitted); [`DLMF.AsymptoticApproximations.tendsto_jLogJSum_sub`](DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean#L179) (proved)
-- [2.10.E5](https://dlmf.nist.gov/2.10.E5): [`DLMF.AsymptoticApproximations.jLogJRemainder`](DLMF/AsymptoticApproximations/Sums/Defs.lean#L41) (definition); [`DLMF.AsymptoticApproximations.jLogJSum_eq`](DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean#L160) (admitted)
+- [2.10.E5](https://dlmf.nist.gov/2.10.E5): [`DLMF.AsymptoticApproximations.jLogJRemainder`](DLMF/AsymptoticApproximations/Sums/Basic.lean#L41) (definition); [`DLMF.AsymptoticApproximations.jLogJSum_eq`](DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean#L160) (admitted)
 - [2.10.E6](https://dlmf.nist.gov/2.10.E6): [`DLMF.AsymptoticApproximations.log_glaisherKinkelin_eq`](DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean#L194) (proved)
 - [2.10.E7](https://dlmf.nist.gov/2.10.E7): [`DLMF.AsymptoticApproximations.powerSum_asymptotic`](DLMF/AsymptoticApproximations/Sums/PowerSums.lean#L208) (proved)
-- [2.10.E8](https://dlmf.nist.gov/2.10.E8): [`DLMF.AsymptoticApproximations.harmonic_asymptotic`](DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean#L317) (proved); Mathlib [`Real.tendsto_harmonic_sub_log`](DLMF/AsymptoticApproximations/Sums/MathlibCoverage.lean#L22) (upstream pointer)
-- [2.10.E9](https://dlmf.nist.gov/2.10.E9): [`DLMF.AsymptoticApproximations.sum_by_parts`](DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean#L360) (proved); Mathlib [`Finset.sum_range_by_parts`](DLMF/AsymptoticApproximations/Sums/MathlibCoverage.lean#L19) (upstream pointer)
-- [2.10.E10](https://dlmf.nist.gov/2.10.E10): [`DLMF.AsymptoticApproximations.partialSumFrom`](DLMF/AsymptoticApproximations/Sums/Defs.lean#L49) (definition); [`DLMF.AsymptoticApproximations.sum_by_parts`](DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean#L360) (proved)
-- [2.10.E11](https://dlmf.nist.gov/2.10.E11): [`DLMF.AsymptoticApproximations.oscillatorySum`](DLMF/AsymptoticApproximations/Sums/Defs.lean#L53) (definition)
+- [2.10.E8](https://dlmf.nist.gov/2.10.E8): [`DLMF.AsymptoticApproximations.harmonic_asymptotic`](DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean#L317) (proved); Mathlib [`Real.tendsto_harmonic_sub_log`](DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean#L317) (upstream pointer)
+- [2.10.E9](https://dlmf.nist.gov/2.10.E9): [`DLMF.AsymptoticApproximations.sum_by_parts`](DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean#L360) (proved); Mathlib [`Finset.sum_range_by_parts`](DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean#L360) (upstream pointer)
+- [2.10.E10](https://dlmf.nist.gov/2.10.E10): [`DLMF.AsymptoticApproximations.partialSumFrom`](DLMF/AsymptoticApproximations/Sums/Basic.lean#L49) (definition); [`DLMF.AsymptoticApproximations.sum_by_parts`](DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean#L360) (proved)
+- [2.10.E11](https://dlmf.nist.gov/2.10.E11): [`DLMF.AsymptoticApproximations.oscillatorySum`](DLMF/AsymptoticApproximations/Sums/Basic.lean#L53) (definition)
 - [2.10.E12](https://dlmf.nist.gov/2.10.E12): [`DLMF.AsymptoticApproximations.norm_oscillatorySum_le`](DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean#L381) (proved); [`DLMF.AsymptoticApproximations.oscillatorySum_isBigO_trivial`](DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean#L390) (proved)
 - [2.10.E13](https://dlmf.nist.gov/2.10.E13): [`DLMF.AsymptoticApproximations.partialSumFrom_exp`](DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean#L403) (proved)
 - [2.10.E14](https://dlmf.nist.gov/2.10.E14): [`DLMF.AsymptoticApproximations.oscillatorySum_eq`](DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean#L423) (proved)
@@ -701,14 +710,14 @@ Module admissions (`grep -cE 'by sorry|:= sorry|^\s*(·\s*)?sorry\s*$|exact sorr
 - [2.10.E16](https://dlmf.nist.gov/2.10.E16): [`DLMF.AsymptoticApproximations.oscillatorySum_recursive`](DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean#L536) (proved)
 - [2.10.E17](https://dlmf.nist.gov/2.10.E17): [`DLMF.AsymptoticApproximations.oscillatorySum_isBigO`](DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean#L566) (proved)
 - [2.10.E18](https://dlmf.nist.gov/2.10.E18): [`DLMF.AsymptoticApproximations.oscillatorySum_asymptotic`](DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean#L613) (proved)
-- [2.10.E19](https://dlmf.nist.gov/2.10.E19): [`DLMF.AsymptoticApproximations.genCoeff_zero_one_one`](DLMF/AsymptoticApproximations/Sums/Darboux.lean#L38) (proved); [`DLMF.AsymptoticApproximations.hypergeometric0F2OneOne_hasSum`](DLMF/AsymptoticApproximations/Sums/Darboux.lean#L59) (proved); [`DLMF.AsymptoticApproximations.genSeriesConvergesTo_0F2`](DLMF/AsymptoticApproximations/Sums/Darboux.lean#L71) (proved); [`DLMF.AsymptoticApproximations.hypergeometric0F2OneOne`](DLMF/AsymptoticApproximations/Sums/Defs.lean#L58) (definition)
+- [2.10.E19](https://dlmf.nist.gov/2.10.E19): [`DLMF.AsymptoticApproximations.genCoeff_zero_one_one`](DLMF/AsymptoticApproximations/Sums/Darboux.lean#L38) (proved); [`DLMF.AsymptoticApproximations.hypergeometric0F2OneOne_hasSum`](DLMF/AsymptoticApproximations/Sums/Darboux.lean#L59) (proved); [`DLMF.AsymptoticApproximations.genSeriesConvergesTo_0F2`](DLMF/AsymptoticApproximations/Sums/Darboux.lean#L71) (proved); [`DLMF.AsymptoticApproximations.hypergeometric0F2OneOne`](DLMF/AsymptoticApproximations/Sums/Basic.lean#L58) (definition)
 - [2.10.E20](https://dlmf.nist.gov/2.10.E20): [`DLMF.AsymptoticApproximations.sum_0F2_eq_contourIntegral`](DLMF/AsymptoticApproximations/Sums/Darboux.lean#L78) (admitted)
 - [2.10.E21](https://dlmf.nist.gov/2.10.E21): [`DLMF.AsymptoticApproximations.cot_div_two_I`](DLMF/AsymptoticApproximations/Sums/Darboux.lean#L87) (proved)
 - [2.10.E22](https://dlmf.nist.gov/2.10.E22): [`DLMF.AsymptoticApproximations.sum_0F2_eq_real_integral_add`](DLMF/AsymptoticApproximations/Sums/Darboux.lean#L118) (admitted)
 - [2.10.E23](https://dlmf.nist.gov/2.10.E23): [`DLMF.AsymptoticApproximations.hypergeometric0F2OneOne_eq_integrals`](DLMF/AsymptoticApproximations/Sums/Darboux.lean#L131) (admitted); [`DLMF.AsymptoticApproximations.hypergeometric0F2OneOne_sub_integral_isBigO`](DLMF/AsymptoticApproximations/Sums/Darboux.lean#L144) (admitted)
 - [2.10.E24](https://dlmf.nist.gov/2.10.E24): [`DLMF.AsymptoticApproximations.hypergeometric0F2OneOne_isEquivalent`](DLMF/AsymptoticApproximations/Sums/Darboux.lean#L152) (admitted)
 - [2.10.E25](https://dlmf.nist.gov/2.10.E25): [`DLMF.AsymptoticApproximations.laurent_expansion`](DLMF/AsymptoticApproximations/Sums/Darboux.lean#L162) (admitted)
-- [2.10.E26](https://dlmf.nist.gov/2.10.E26): [`DLMF.AsymptoticApproximations.laurent_expansion`](DLMF/AsymptoticApproximations/Sums/Darboux.lean#L162) (admitted); [`DLMF.AsymptoticApproximations.laurentCoeff`](DLMF/AsymptoticApproximations/Sums/Defs.lean#L93) (definition)
+- [2.10.E26](https://dlmf.nist.gov/2.10.E26): [`DLMF.AsymptoticApproximations.laurent_expansion`](DLMF/AsymptoticApproximations/Sums/Darboux.lean#L162) (admitted); [`DLMF.AsymptoticApproximations.laurentCoeff`](DLMF/AsymptoticApproximations/Sums/Basic.lean#L93) (definition)
 - [2.10.E27](https://dlmf.nist.gov/2.10.E27): [`DLMF.AsymptoticApproximations.darboux`](DLMF/AsymptoticApproximations/Sums/Darboux.lean#L172) (admitted)
 - [2.10.E28](https://dlmf.nist.gov/2.10.E28): [`DLMF.AsymptoticApproximations.darboux`](DLMF/AsymptoticApproximations/Sums/Darboux.lean#L172) (admitted)
 - [2.10.E29](https://dlmf.nist.gov/2.10.E29): [`DLMF.AsymptoticApproximations.darboux`](DLMF/AsymptoticApproximations/Sums/Darboux.lean#L172) (admitted)
@@ -716,7 +725,7 @@ Module admissions (`grep -cE 'by sorry|:= sorry|^\s*(·\s*)?sorry\s*$|exact sorr
 - [2.10.E31](https://dlmf.nist.gov/2.10.E31): [`DLMF.AsymptoticApproximations.darboux_smooth`](DLMF/AsymptoticApproximations/Sums/Darboux.lean#L205) (admitted)
 - [2.10.E32](https://dlmf.nist.gov/2.10.E32): [`DLMF.AsymptoticApproximations.darboux_smooth_singular`](DLMF/AsymptoticApproximations/Sums/Darboux.lean#L218) (admitted)
 - [2.10.E33](https://dlmf.nist.gov/2.10.E33): [`DLMF.AsymptoticApproximations.legendre_generating_cos`](DLMF/AsymptoticApproximations/Sums/Darboux.lean#L237) (proved)
-- [2.10.E34](https://dlmf.nist.gov/2.10.E34): [`DLMF.AsymptoticApproximations.legendreComparison_hasSum`](DLMF/AsymptoticApproximations/Sums/Darboux.lean#L245) (admitted); [`DLMF.AsymptoticApproximations.legendreComparison`](DLMF/AsymptoticApproximations/Sums/Defs.lean#L99) (definition)
+- [2.10.E34](https://dlmf.nist.gov/2.10.E34): [`DLMF.AsymptoticApproximations.legendreComparison_hasSum`](DLMF/AsymptoticApproximations/Sums/Darboux.lean#L245) (admitted); [`DLMF.AsymptoticApproximations.legendreComparison`](DLMF/AsymptoticApproximations/Sums/Basic.lean#L99) (definition)
 - [2.10.E35](https://dlmf.nist.gov/2.10.E35): [`DLMF.AsymptoticApproximations.legendreComparison_hasSum`](DLMF/AsymptoticApproximations/Sums/Darboux.lean#L245) (admitted)
 - [2.10.E36](https://dlmf.nist.gov/2.10.E36): [`DLMF.AsymptoticApproximations.legendrePolyP_cos_asymptotic`](DLMF/AsymptoticApproximations/Sums/Darboux.lean#L256) (admitted)
 - [2.10.i](https://dlmf.nist.gov/2.10.i) (prose): [`DLMF.AsymptoticApproximations.jLogJRemainder_bound`](DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean#L171) (admitted); [`DLMF.AsymptoticApproximations.powerSum_remainder_bound`](DLMF/AsymptoticApproximations/Sums/PowerSums.lean#L237) (admitted); [`DLMF.AsymptoticApproximations.harmonic_remainder_bound`](DLMF/AsymptoticApproximations/Sums/EulerMaclaurin.lean#L260) (proved)
@@ -726,8 +735,8 @@ Module admissions (`grep -cE 'by sorry|:= sorry|^\s*(·\s*)?sorry\s*$|exact sorr
 
 ## [§2.11 Remainder Terms; Stokes Phenomenon](https://dlmf.nist.gov/2.11)
 
-- [2.11.E1](https://dlmf.nist.gov/2.11.E1): [`DLMF.AsymptoticApproximations.cosRationalIntegral`](DLMF/AsymptoticApproximations/Remainders/Defs.lean#L36) (definition); [`DLMF.AsymptoticApproximations.cosRationalIntegral_asymptotic`](DLMF/AsymptoticApproximations/Remainders/Stokes.lean#L41) (admitted)
-- [2.11.E2](https://dlmf.nist.gov/2.11.E2): [`DLMF.AsymptoticApproximations.cosRationalCoeff`](DLMF/AsymptoticApproximations/Remainders/Defs.lean#L40) (definition); [`DLMF.AsymptoticApproximations.cosRationalIntegral_asymptotic`](DLMF/AsymptoticApproximations/Remainders/Stokes.lean#L41) (admitted)
+- [2.11.E1](https://dlmf.nist.gov/2.11.E1): [`DLMF.AsymptoticApproximations.cosRationalIntegral`](DLMF/AsymptoticApproximations/Remainders/Basic.lean#L36) (definition); [`DLMF.AsymptoticApproximations.cosRationalIntegral_asymptotic`](DLMF/AsymptoticApproximations/Remainders/Stokes.lean#L41) (admitted)
+- [2.11.E2](https://dlmf.nist.gov/2.11.E2): [`DLMF.AsymptoticApproximations.cosRationalCoeff`](DLMF/AsymptoticApproximations/Remainders/Basic.lean#L40) (definition); [`DLMF.AsymptoticApproximations.cosRationalIntegral_asymptotic`](DLMF/AsymptoticApproximations/Remainders/Stokes.lean#L41) (admitted)
 - [2.11.E3](https://dlmf.nist.gov/2.11.E3): [`DLMF.AsymptoticApproximations.cosRationalCoeff_explicit`](DLMF/AsymptoticApproximations/Remainders/Stokes.lean#L50) (admitted)
 - [2.11.E4](https://dlmf.nist.gov/2.11.E4): excluded: numerical
 - [2.11.E5](https://dlmf.nist.gov/2.11.E5): [`DLMF.AsymptoticApproximations.genExpIntE_eq_integral`](DLMF/AsymptoticApproximations/Remainders/Stokes.lean#L61) (proved)
@@ -739,10 +748,10 @@ Module admissions (`grep -cE 'by sorry|:= sorry|^\s*(·\s*)?sorry\s*$|exact sorr
 - [2.11.E11](https://dlmf.nist.gov/2.11.E11): [`DLMF.AsymptoticApproximations.terminant_eq_integral`](DLMF/AsymptoticApproximations/Remainders/Stokes.lean#L121) (proved)
 - [2.11.E12](https://dlmf.nist.gov/2.11.E12): [`DLMF.AsymptoticApproximations.terminant_eq_saddle_integral`](DLMF/AsymptoticApproximations/Remainders/Stokes.lean#L136) (proved)
 - [2.11.E13](https://dlmf.nist.gov/2.11.E13): [`DLMF.AsymptoticApproximations.terminant_reexpansions`](DLMF/AsymptoticApproximations/Remainders/Stokes.lean#L160) (admitted)
-- [2.11.E14](https://dlmf.nist.gov/2.11.E14): [`DLMF.AsymptoticApproximations.stokesA2`](DLMF/AsymptoticApproximations/Remainders/Defs.lean#L55) (definition); [`DLMF.AsymptoticApproximations.terminant_reexpansions`](DLMF/AsymptoticApproximations/Remainders/Stokes.lean#L160) (admitted)
+- [2.11.E14](https://dlmf.nist.gov/2.11.E14): [`DLMF.AsymptoticApproximations.stokesA2`](DLMF/AsymptoticApproximations/Remainders/Basic.lean#L55) (definition); [`DLMF.AsymptoticApproximations.terminant_reexpansions`](DLMF/AsymptoticApproximations/Remainders/Stokes.lean#L160) (admitted)
 - [2.11.E15](https://dlmf.nist.gov/2.11.E15): [`DLMF.AsymptoticApproximations.terminant_reexpansions`](DLMF/AsymptoticApproximations/Remainders/Stokes.lean#L160) (admitted)
-- [2.11.E16](https://dlmf.nist.gov/2.11.E16): [`DLMF.AsymptoticApproximations.stokesC`](DLMF/AsymptoticApproximations/Remainders/Defs.lean#L46) (definition); [`DLMF.AsymptoticApproximations.stokesC_sq`](DLMF/AsymptoticApproximations/Remainders/Stokes.lean#L189) (proved); [`DLMF.AsymptoticApproximations.stokesC_continuous_tendsto`](DLMF/AsymptoticApproximations/Remainders/Stokes.lean#L203) (admitted)
-- [2.11.E17](https://dlmf.nist.gov/2.11.E17): [`DLMF.AsymptoticApproximations.stokesH`](DLMF/AsymptoticApproximations/Remainders/Defs.lean#L62) (definition); [`DLMF.AsymptoticApproximations.terminant_reexpansions`](DLMF/AsymptoticApproximations/Remainders/Stokes.lean#L160) (admitted)
+- [2.11.E16](https://dlmf.nist.gov/2.11.E16): [`DLMF.AsymptoticApproximations.stokesC`](DLMF/AsymptoticApproximations/Remainders/Basic.lean#L46) (definition); [`DLMF.AsymptoticApproximations.stokesC_sq`](DLMF/AsymptoticApproximations/Remainders/Stokes.lean#L189) (proved); [`DLMF.AsymptoticApproximations.stokesC_continuous_tendsto`](DLMF/AsymptoticApproximations/Remainders/Stokes.lean#L203) (admitted)
+- [2.11.E17](https://dlmf.nist.gov/2.11.E17): [`DLMF.AsymptoticApproximations.stokesH`](DLMF/AsymptoticApproximations/Remainders/Basic.lean#L62) (definition); [`DLMF.AsymptoticApproximations.terminant_reexpansions`](DLMF/AsymptoticApproximations/Remainders/Stokes.lean#L160) (admitted)
 - [2.11.E18](https://dlmf.nist.gov/2.11.E18): [`DLMF.AsymptoticApproximations.stokesH_zero`](DLMF/AsymptoticApproximations/Remainders/Stokes.lean#L210) (proved)
 - [2.11.E19](https://dlmf.nist.gov/2.11.E19): [`DLMF.AsymptoticApproximations.rankOne_terminant_reexpansion`](DLMF/AsymptoticApproximations/Remainders/Stokes.lean#L231) (admitted)
 - [2.11.E20](https://dlmf.nist.gov/2.11.E20): [`DLMF.AsymptoticApproximations.rankOne_terminant_reexpansion`](DLMF/AsymptoticApproximations/Remainders/Stokes.lean#L231) (admitted)
@@ -755,9 +764,9 @@ Module admissions (`grep -cE 'by sorry|:= sorry|^\s*(·\s*)?sorry\s*$|exact sorr
 - [2.11.E27](https://dlmf.nist.gov/2.11.E27): excluded: numerical
 - [2.11.E28](https://dlmf.nist.gov/2.11.E28): excluded: numerical
 - [2.11.E29](https://dlmf.nist.gov/2.11.E29): [`DLMF.AsymptoticApproximations.whittakerW_asymptotic`](DLMF/AsymptoticApproximations/Remainders/Stokes.lean#L306) (proved)
-- [2.11.E30](https://dlmf.nist.gov/2.11.E30): [`DLMF.AsymptoticApproximations.whittakerTerm`](DLMF/AsymptoticApproximations/Remainders/Defs.lean#L70) (definition); [`DLMF.AsymptoticApproximations.whittakerW_asymptotic`](DLMF/AsymptoticApproximations/Remainders/Stokes.lean#L306) (proved)
+- [2.11.E30](https://dlmf.nist.gov/2.11.E30): [`DLMF.AsymptoticApproximations.whittakerTerm`](DLMF/AsymptoticApproximations/Remainders/Basic.lean#L70) (definition); [`DLMF.AsymptoticApproximations.whittakerW_asymptotic`](DLMF/AsymptoticApproximations/Remainders/Stokes.lean#L306) (proved)
 - [2.11.E31](https://dlmf.nist.gov/2.11.E31): excluded: numerical
-- [2.11.E32](https://dlmf.nist.gov/2.11.E32): [`DLMF.AsymptoticApproximations.levinTransform`](DLMF/AsymptoticApproximations/Remainders/Defs.lean#L78) (definition)
+- [2.11.E32](https://dlmf.nist.gov/2.11.E32): [`DLMF.AsymptoticApproximations.levinTransform`](DLMF/AsymptoticApproximations/Remainders/Basic.lean#L78) (definition)
 - [2.11.iii](https://dlmf.nist.gov/2.11.iii) (prose): [`DLMF.AsymptoticApproximations.terminant_reexpansions`](DLMF/AsymptoticApproximations/Remainders/Stokes.lean#L160) (admitted)
 - [2.11.iv](https://dlmf.nist.gov/2.11.iv) (prose): [`DLMF.AsymptoticApproximations.stokesC_re_sign`](DLMF/AsymptoticApproximations/Remainders/Stokes.lean#L221) (admitted)
 - [2.11.v](https://dlmf.nist.gov/2.11.v) (prose): [`DLMF.AsymptoticApproximations.rankOne_terminant_reexpansion`](DLMF/AsymptoticApproximations/Remainders/Stokes.lean#L231) (admitted)

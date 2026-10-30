@@ -7,7 +7,7 @@ module
 
 public import DLMF.Airy.Scorer
 public import DLMF.Airy.IntegralTools
-public import DLMF.IncompleteGamma.Basic
+public import DLMF.IncompleteGamma.ContinuedProperties
 public import DLMFMathlib.Analysis.Integral.PrincipalValue
 public import DLMF.Bessel.KMellin
 public import DLMFMathlib.Analysis.Complex.NonInteger

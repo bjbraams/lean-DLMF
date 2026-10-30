@@ -5,7 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Mathieu.Basic
+public import DLMF.Elliptic.Jacobi
+public import DLMF.Mathieu.SpectralExistence
 public import DLMF.Lame.Basic
 public import Mathlib.Tactic.Basify
 public import Mathlib.Tactic.ENatToNat

@@ -20,6 +20,7 @@ public import DLMFMathlib.Analysis.Integral.LaplaceRay
 public import DLMFMathlib.Analysis.Integral.RepeatedIntegrationByParts
 public import DLMFMathlib.Analysis.InnerProductSpace.CauchySchwarz
 public import DLMFMathlib.Analysis.Complex.ScalarSeries
+public import DLMFMathlib.Analysis.Complex.Sqrt
 public import DLMFMathlib.Analysis.SpecialFunctions.ChebyshevSeries
 public import DLMFMathlib.Analysis.SpecialFunctions.Complex.LogBoundary
 public import DLMFMathlib.NumberTheory.EulerPolynomials
@@ -45,6 +46,12 @@ public import DLMFMathlib.Analysis.MellinParseval
 public import DLMFMathlib.Analysis.Fourier.L1Inversion
 public import DLMFMathlib.Analysis.Fourier.Pairing
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
+public import DLMFMathlib.Analysis.Complex.BivariateSeries
+public import DLMFMathlib.Analysis.Complex.BivariateDerivatives
+public import DLMFMathlib.Analysis.Complex.BivariateCalculus
+public import DLMFMathlib.Analysis.Calculus.LHopitalInfinity
+public import DLMFMathlib.Analysis.Complex.ParameterLimits
+public import DLMFMathlib.Analysis.Complex.TrigonometricProducts
 public import DLMFMathlib.Analysis.Complex.GeometricNewtonSeries
 public import DLMFMathlib.Analysis.Complex.TaylorParameter
 public import DLMFMathlib.Analysis.Complex.SegmentPrimitive
@@ -73,6 +80,7 @@ public import DLMFMathlib.Topology.Order.ZeroEnumeration
 public import DLMFMathlib.Analysis.Calculus.DoubleZeroSqrt
 public import DLMFMathlib.Analysis.Complex.MellinBarnesSeries
 public import DLMFMathlib.Analysis.Complex.LagrangeBurmann
+public import DLMFMathlib.Analysis.Complex.PowerSeriesOperations
 public import DLMFMathlib.Analysis.Complex.TrigR4SeriesExtension
 public import DLMFMathlib.Analysis.Integral.PrincipalValue
 public import DLMFMathlib.Analysis.ODE.SturmCount

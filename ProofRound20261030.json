@@ -1,0 +1,1154 @@
+{
+  "format": 1,
+  "date": "2026-10-30",
+  "round": "analytic-elementary-elliptic-and-q-calculus",
+  "baseCommit": "2f7efb7a9b8ab22bd9089f6b512bcaf2b6cc7048",
+  "baseline": {
+    "previousRound": "ProofRound20261029f.json",
+    "directAdmissions": 1645
+  },
+  "admissions": {
+    "before": 1645,
+    "after": 1621,
+    "removed": 24,
+    "filesWithAdmissions": 296,
+    "byArea": {
+      "AlgebraicAnalytic": {
+        "before": 229,
+        "after": 223
+      },
+      "Elementary": {
+        "before": 68,
+        "after": 61
+      },
+      "EllipticIntegrals": {
+        "before": 186,
+        "after": 183
+      },
+      "JacobiElliptic": {
+        "before": 35,
+        "after": 32
+      },
+      "QHypergeometric": {
+        "before": 95,
+        "after": 90
+      }
+    }
+  },
+  "completed": [
+    {
+      "name": "DLMF.AlgebraicAnalytic.Lp_add_ge_of_lt_one",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+      "line": 128,
+      "proofLines": 64,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.7.3, reversed Minkowski inequality: for `0 < p < 1` and `aⱼ, bⱼ ≥ 0`,\n`(∑ (aⱼ + bⱼ)ᵖ)^{1/p} ≥ (∑ aⱼᵖ)^{1/p} + (∑ bⱼᵖ)^{1/p}`."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.integral_add_rpow_ge_of_lt_one",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+      "line": 314,
+      "proofLines": 92,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.7.6, reversed for `0 < p < 1`: for `f, g ≥ 0` with `fᵖ`, `gᵖ` integrable,\n`(∫ (f + g)ᵖ)^{1/p} ≥ (∫ fᵖ)^{1/p} + (∫ gᵖ)^{1/p}`."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.windingNumber_eq_intCast",
+      "file": "DLMF/AlgebraicAnalytic/Complex/Calculus.lean",
+      "line": 330,
+      "proofLines": 8,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.9.32: for a closed contour `C` and `z₀ ∉ C`, `(2πi)⁻¹ ∫_C dz/(z - z₀)` is an integer,\nthe winding number `𝒩(C, z₀)` (Tau Ceti's `TauCeti.Contour.windingNumber`, which equals this\nintegral off the curve)."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.mobiusExt_bijective",
+      "file": "DLMF/AlgebraicAnalytic/Complex/Calculus.lean",
+      "line": 520,
+      "proofLines": 9,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF §1.9(iv): the bilinear transformation 1.9.40 (`ad - bc ≠ 0`, `c ≠ 0`) is a one-to-one\nmapping of `ℂ ∪ {∞}` onto itself; its inverse is the transformation of 1.9.44."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.harmonic_eqOn_of_isMaxOn",
+      "file": "DLMF/AlgebraicAnalytic/Complex/Functions.lean",
+      "line": 191,
+      "proofLines": 2,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF §1.10(v) (maximum principle for harmonic functions): if `u` is harmonic in a domain\n`D` and attains its maximum over `D` at `z₀ ∈ D`, then `u` is constant in `D`."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.harmonic_exists_mem_frontier_isMaxOn",
+      "file": "DLMF/AlgebraicAnalytic/Complex/Functions.lean",
+      "line": 200,
+      "proofLines": 13,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF §1.10(v) (maximum principle for harmonic functions on bounded domains): if `D` is\nbounded and `u` is continuous on `D̄` and harmonic in `D`, then `u` attains its maximum over `D̄`\nat some point of `∂D`."
+    },
+    {
+      "name": "DLMF.Elementary.cosh_le_sinhc_cube",
+      "file": "DLMF/Elementary/Hyperbolic/IdentitiesAndSeries.lean",
+      "line": 505,
+      "proofLines": 78,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Estimate under the stated parameter and domain assumptions: `Real.cosh x ≤ (if x=0 then 1 else\nReal.sinh x/x)^3`."
+    },
+    {
+      "name": "DLMF.Elementary.arctan_le_tanh",
+      "file": "DLMF/Elementary/Hyperbolic/IdentitiesAndSeries.lean",
+      "line": 692,
+      "proofLines": 13,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Estimate under the stated parameter and domain assumptions: `Real.arctan x ≤ π/2*Real.tanh x`."
+    },
+    {
+      "name": "DLMF.Elementary.hasSum_log_cosh",
+      "file": "DLMF/Elementary/Hyperbolic/IdentitiesAndSeries.lean",
+      "line": 869,
+      "proofLines": 44,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The series with terms `(fun n : ℕ => (2:ℂ)^(2*n+1)*((2:ℂ)^(2*n+2)-1)*(bernoulli (2*n+2):ℂ)/\n((n+1:ℂ)*((2*n+2).factorial:ℂ))*z^(2*n+2))` converges to `(L z)`."
+    },
+    {
+      "name": "DLMF.Elementary.hasSum_csch_sq",
+      "file": "DLMF/Elementary/Hyperbolic/Products.lean",
+      "line": 545,
+      "proofLines": 20,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The series with terms `(fun n : ℤ => 1/(z-(n:ℂ)*π*I)^2)` converges to `(csch z^2)`."
+    },
+    {
+      "name": "DLMF.Elementary.hasSum_log_cos_bernoulli",
+      "file": "DLMF/Elementary/Trigonometric/DirectIdentities.lean",
+      "line": 466,
+      "proofLines": 46,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 4.19.E8: hasSum log cos bernoulli."
+    },
+    {
+      "name": "DLMF.Elementary.cos_infinite_product",
+      "file": "DLMF/Elementary/Trigonometric/DirectIdentities.lean",
+      "line": 1212,
+      "proofLines": 10,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 4.22.E2: cos infinite product."
+    },
+    {
+      "name": "DLMF.Elementary.hasSum_csc_sq_partial_fraction",
+      "file": "DLMF/Elementary/Trigonometric/DirectIdentities.lean",
+      "line": 1318,
+      "proofLines": 25,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 4.22.E4: hasSum csc sq partial fraction."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllInt_addition_sqrt_z",
+      "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+      "line": 141,
+      "proofLines": 33,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.26.3 with 19.26.4: with `(ξ, η, ζ) = (x + λ, y + λ, z + λ)` and\n`(ξ', η', ζ') = (x + μ, y + μ, z + μ)`, `√z = (ξζ' + η'ζ - ξη')/(√(ξηζ') + √(ξ'η'ζ))` (and the\npermuted formulas for `√x`, `√y`)."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRC_duplication_theta",
+      "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+      "line": 742,
+      "proofLines": 27,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.26.27: `R_C(x², x² - θ) = 2 R_C(s², s² - θ)`, `s = x + √(x² - θ)`, `θ ≠ x², s²`.\n**Corrected from the printed DLMF formula**: we also assume `ℜ x > 0` and\n`x² - θ ∈ ℂ \\ (-∞, 0]`. DLMF's conditions do not suffice: the identity fails for `x = -2`,\n`θ = -3` (the left side depends on `x²` only), and for `x = 1`, `θ = 2`, where the left side is\na Cauchy principal value (19.2.20) but the right side is not (they differ by `-π i/(2√θ)`).\nThe proof reuses lean-codes' `Carlson.TwoVariable.carlsonRC_sq_eq` and\n`Carlson.TwoVariable.carlsonRC_mul_of_pos`.\nChecked numerically at 3000 random complex points under the stated hypotheses."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRF_zero_agm_bounds",
+      "file": "DLMF/EllipticIntegrals/SymmetricInequalities.lean",
+      "line": 119,
+      "proofLines": 43,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.24.5 with 19.24.6: for `a₀ ≥ g₀ > 0` and the AGM sequences\n`a_{n+1} = (aₙ + gₙ)/2`, `g_{n+1} = √(aₙ gₙ)` (19.24.6, §19.8(i)),\n`1/aₙ ≤ (2/π) R_F(0, a₀², g₀²) ≤ 1/gₙ` for every `n`."
+    },
+    {
+      "name": "DLMF.JacobiElliptic.jacobiPQk_half_sq",
+      "file": "DLMF/JacobiElliptic/ElementaryIdentities.lean",
+      "line": 543,
+      "proofLines": 91,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 22.6.22: for a permutation `{p, q, r}` of `{c, d, n}`,\n`pq²(z/2) = (ps + rs)/(qs + rs) = (pq + rq)/(1 + rq) = (pr + 1)/(qr + 1)`, where all twelve\nfunctions are finite at `z/2` and `z` and the denominators are nonzero."
+    },
+    {
+      "name": "DLMF.JacobiElliptic.Real.integral_log_jacobiDnm",
+      "file": "DLMF/JacobiElliptic/Integrals.lean",
+      "line": 492,
+      "proofLines": 26,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 22.14.18: `∫₀^K ln dn(t,k) dt = K(k) ln(k')/2`, `0 < k < 1`."
+    },
+    {
+      "name": "DLMF.JacobiElliptic.Real.tendsto_jacobiAmm_one",
+      "file": "DLMF/JacobiElliptic/Related.lean",
+      "line": 106,
+      "proofLines": 22,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 22.16.5: `am(x, 1) = gd(x)`, as the limit `k → 1⁻` (the existing real amplitude is\ndefined only for `m < 1`)."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qPochhammer_negative_modular",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 163,
+      "proofLines": 61,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The modular transformation of `(-e^(-t);e^(-t))_∞` for `t > 0`, relating it to a product in\nthe base `e^(-4π²/t)` (DLMF 17.2.E6, second relation)."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qDeriv_iterate_origin",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 679,
+      "proofLines": 9,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "At the origin the `n`-th q-derivative of an analytic function is `f^(n)(0) (q;q)_n/(n!\n(1-q)^n)` (DLMF 17.2.E42)."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qDeriv_leibniz",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 752,
+      "proofLines": 19,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The q-Leibniz rule for the `n`-th q-derivative of a product, away from the origin (DLMF\n17.2.E44)."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qDeriv_leibniz_origin",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 914,
+      "proofLines": 27,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The q-Leibniz rule at the origin for analytic factors (DLMF 17.2.E44)."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qDeriv_iterate_limit",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 1203,
+      "proofLines": 39,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "As `q → 1`, the `n`-th q-derivative of an analytic function tends to its `n`-th derivative."
+    }
+  ],
+  "downstreamFreedFromAdmissions": [],
+  "newHelpers": [
+    {
+      "name": "DLMF.AlgebraicAnalytic.sum_rpow_eq_zero_iff",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+      "line": 113,
+      "proofLines": 11,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A finite sum of positive real powers of nonnegative terms vanishes exactly when every term\nvanishes."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.integrable_add_rpow_of_integrable_rpow",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+      "line": 292,
+      "proofLines": 16,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Nonnegative functions with integrable `p`th powers have an integrable sum to the `p`th\npower for `0 < p ≤ 1`."
+    },
+    {
+      "name": "DLMF.AlgebraicAnalytic.mobiusExt_leftInv",
+      "file": "DLMF/AlgebraicAnalytic/Complex/Calculus.lean",
+      "line": 491,
+      "proofLines": 25,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The inverse fractional-linear map cancels its forward map on the one-point compactification."
+    },
+    {
+      "name": "DLMF.Elementary.hypR4_sinh_aux",
+      "file": "DLMF/Elementary/Hyperbolic/IdentitiesAndSeries.lean",
+      "line": 475,
+      "proofLines": 26,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The auxiliary numerator for the derivative of the Lazarević ratio is positive."
+    },
+    {
+      "name": "DLMF.Elementary.hypR4_deriv_normalizedLog",
+      "file": "DLMF/Elementary/Hyperbolic/IdentitiesAndSeries.lean",
+      "line": 854,
+      "proofLines": 10,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The derivative of a normalized analytic logarithm is the logarithmic derivative of its\nexponential; equality on the open domain supplies differentiability of the exponential."
+    },
+    {
+      "name": "DLMF.Elementary.trigR4_hasSum_tan_bernoulli",
+      "file": "DLMF/Elementary/Trigonometric/DirectIdentities.lean",
+      "line": 413,
+      "proofLines": 28,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The odd Bernoulli series of tangent, obtained from the existing scaled tangent series."
+    },
+    {
+      "name": "DLMF.Elementary.trigR4_cos_mem_slitPlane",
+      "file": "DLMF/Elementary/Trigonometric/DirectIdentities.lean",
+      "line": 447,
+      "proofLines": 9,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Cosine has positive real part on its first zero-free centered disk."
+    },
+    {
+      "name": "DLMF.Elementary.trigR4_hasDerivAt_log_cos",
+      "file": "DLMF/Elementary/Trigonometric/DirectIdentities.lean",
+      "line": 459,
+      "proofLines": 4,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The principal logarithm of cosine has derivative minus tangent on its first zero-free disk."
+    },
+    {
+      "name": "DLMF.Elementary.cscSq_tsum_upperHalfPlane",
+      "file": "DLMF/Elementary/Trigonometric/DirectIdentities.lean",
+      "line": 1228,
+      "proofLines": 20,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The reciprocal-square lattice sum on the upper half-plane, from Mathlib’s cotangent\nderivative."
+    },
+    {
+      "name": "DLMF.Elementary.cscSq_tsum_closedUpperHalfPlane",
+      "file": "DLMF/Elementary/Trigonometric/DirectIdentities.lean",
+      "line": 1251,
+      "proofLines": 42,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The reciprocal-square lattice sum extends to the real axis by dominated convergence."
+    },
+    {
+      "name": "DLMF.Elementary.cscSq_tsum_integerComplement",
+      "file": "DLMF/Elementary/Trigonometric/DirectIdentities.lean",
+      "line": 1297,
+      "proofLines": 18,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Reflection extends the reciprocal-square lattice sum to the full complement of the integers."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.ei19d_sqrt_z_algebra",
+      "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+      "line": 110,
+      "proofLines": 5,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Algebraic identity behind the square-root addition formula."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.ei19d_shifted_sqrt",
+      "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+      "line": 123,
+      "proofLines": 10,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The defining shifted-square equation yields its nonnegative square root."
+    },
+    {
+      "name": "DLMF.JacobiElliptic.p22R1_half_pair_sums",
+      "file": "DLMF/JacobiElliptic/ElementaryIdentities.lean",
+      "line": 517,
+      "proofLines": 15,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Doubled Jacobi cosine and delta pair sums in terms of the half-argument values."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qModular_sqrt_imag",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 75,
+      "proofLines": 11,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The principal complex square root on the positive imaginary axis separates its phase."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qModular_eta_exp",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 89,
+      "proofLines": 10,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The Dedekind eta product at an imaginary argument is a q-Pochhammer product."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qModular_eta_imag_inv",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 103,
+      "proofLines": 8,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Mathlib's eta S-transformation on the imaginary axis has a positive real square-root factor."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qModular_norm_exp_neg",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 114,
+      "proofLines": 3,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A negative real exponential has complex norm less than one."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qModular_multipliable",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 119,
+      "proofLines": 5,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The factors of a q-Pochhammer product are multipliable inside the unit disk."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qModular_negative_split",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 127,
+      "proofLines": 7,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Multiplying the positive and negative q-products doubles their exponents."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qModular_positive_split",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 137,
+      "proofLines": 22,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The even and odd factors split a q-product into two products with squared base."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qDerivative_taylor_step",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 613,
+      "proofLines": 37,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The q-derivative shifts Taylor coefficients and multiplies them by q-numbers."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qDerivative_taylor_iter",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 656,
+      "proofLines": 17,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Iterating q-differentiation at zero multiplies the Taylor coefficient by q-factorials."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qLeibniz_sum",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 704,
+      "proofLines": 25,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The q-Pascal recurrence combines the two finite sums arising in the product rule."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qLeibniz_product",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 734,
+      "proofLines": 5,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The q-difference of a product with its first argument scaled by a power of q."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qLeibniz_iter_succ",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 744,
+      "proofLines": 4,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "At a nonzero argument, the next extended q-derivative is the ordinary q-difference."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qLeibniz_analytic",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 777,
+      "proofLines": 22,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The extended q-derivative of a germ analytic at zero is analytic there."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qLeibniz_iter_analytic",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 802,
+      "proofLines": 6,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Every iterated extended q-derivative preserves analyticity at zero."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qLeibniz_add",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 811,
+      "proofLines": 7,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Extended q-differentiation is additive for germs analytic at zero."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qLeibniz_const",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 823,
+      "proofLines": 7,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Extended q-differentiation commutes with constant multiplication."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qLeibniz_succ",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 833,
+      "proofLines": 2,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "An iterated q-derivative can be differentiated once more."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qLeibniz_succ_input",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 838,
+      "proofLines": 4,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "An initial q-derivative can be incorporated into an iterate."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qLeibniz_iter_add",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 845,
+      "proofLines": 6,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Iterated extended q-differentiation is additive on analytic germs."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qLeibniz_iter_const",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 856,
+      "proofLines": 6,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Iterated extended q-differentiation commutes with constant multiplication."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qLeibniz_binom_zero",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 865,
+      "proofLines": 12,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "At base zero the Gaussian coefficient is one in the triangular range."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qLeibniz_zero_conv",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 879,
+      "proofLines": 29,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "At base zero, the q-derivatives of a product at zero form a convolution."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qLimit_qnum_limit",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 955,
+      "proofLines": 13,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The finite geometric q-number tends to its integer index as the complex base tends to one."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qLimit_qfactorial_limit",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 972,
+      "proofLines": 13,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The normalized finite q-factorial tends to the ordinary factorial as the complex base\ntends to one."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qLimit_qderiv_monomial",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 989,
+      "proofLines": 14,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The extended q-derivative of a monomial, including its removable value at the origin."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qLimit_qconst",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 1006,
+      "proofLines": 7,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Constant scalar multiplication commutes with the extended q-derivative."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qLimit_qmonomial_iter",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 1016,
+      "proofLines": 9,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Repeated q-differentiation of a monomial multiplies by successive q-numbers."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qLimit_qmonomial_limit",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 1029,
+      "proofLines": 14,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Each iterated q-derivative of a monomial tends to its ordinary iterated derivative."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qLimit_qiter_sum",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 1047,
+      "proofLines": 10,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Away from zero, iterated q-differentiation commutes with finite linear combinations."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qLimit_qLimit_qiter_sum_limit",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 1062,
+      "proofLines": 20,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Away from zero, iterated q-differentiation commutes with finite linear combinations."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qLimit_qiter_centered_limit",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 1087,
+      "proofLines": 10,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The iterated q-derivatives of a translated monomial have their classical limits."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qLimit_qiter_remainder_limit",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 1102,
+      "proofLines": 45,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A Taylor remainder of order `n + 1` contributes zero to the classical limit of the\n`n`th q-derivative."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qLimit_qiter_taylor_limit",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 1151,
+      "proofLines": 17,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Finite Taylor polynomials have the expected classical q-derivative limit."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qLimit_deriv_taylor",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 1173,
+      "proofLines": 21,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The `n`th derivative of the degree-`n` Taylor polynomial at its center extracts its\ntop coefficient."
+    },
+    {
+      "name": "DLMF.QHypergeometric.qLimit_qiter_sub",
+      "file": "DLMF/QHypergeometric/Calculus.lean",
+      "line": 1197,
+      "proofLines": 2,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Away from zero, iterated q-differentiation commutes with subtraction."
+    },
+    {
+      "name": "Complex.hasSum_primitive_on_ball",
+      "file": "DLMFMathlib/Analysis/Complex/TrigR4SeriesExtension.lean",
+      "line": 109,
+      "proofLines": 18,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Integrating a scalar power series termwise recovers its normalized holomorphic primitive\non the same centered disk. Coefficients are identified through the Cauchy–Taylor expansion."
+    },
+    {
+      "name": "Complex.hasProd_sinh_div",
+      "file": "DLMFMathlib/Analysis/Complex/TrigonometricProducts.lean",
+      "line": 29,
+      "proofLines": 17,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Euler's product for hyperbolic sine divided by its argument, with its removable value at zero."
+    },
+    {
+      "name": "Complex.hasProd_cosh_product",
+      "file": "DLMFMathlib/Analysis/Complex/TrigonometricProducts.lean",
+      "line": 49,
+      "proofLines": 100,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Euler’s product for complex hyperbolic cosine over the odd positive integers."
+    }
+  ],
+  "reusableExistingHelpers": [],
+  "movedDeclarations": [],
+  "validation": {
+    "fullBuild": "lake build > /tmp/DLMF-build.log 2>&1",
+    "buildJobs": 14698,
+    "strictChecks": [
+      {
+        "file": "DLMF.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029g/strict-DLMF.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029g/strict-DLMF_AlgebraicAnalytic_Calculus_Inequalities.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Complex/Calculus.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029g/strict-DLMF_AlgebraicAnalytic_Complex_Calculus.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Complex/Functions.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029g/strict-DLMF_AlgebraicAnalytic_Complex_Functions.lean.log"
+      },
+      {
+        "file": "DLMF/Elementary/Hyperbolic/IdentitiesAndSeries.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029g/strict-DLMF_Elementary_Hyperbolic_IdentitiesAndSeries.lean.log"
+      },
+      {
+        "file": "DLMF/Elementary/Hyperbolic/Products.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029g/strict-DLMF_Elementary_Hyperbolic_Products.lean.log"
+      },
+      {
+        "file": "DLMF/Elementary/Trigonometric/DirectIdentities.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029g/strict-DLMF_Elementary_Trigonometric_DirectIdentities.lean.log"
+      },
+      {
+        "file": "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029g/strict-DLMF_EllipticIntegrals_SymmetricAddition.lean.log"
+      },
+      {
+        "file": "DLMF/EllipticIntegrals/SymmetricInequalities.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029g/strict-DLMF_EllipticIntegrals_SymmetricInequalities.lean.log"
+      },
+      {
+        "file": "DLMF/JacobiElliptic/ElementaryIdentities.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029g/strict-DLMF_JacobiElliptic_ElementaryIdentities.lean.log"
+      },
+      {
+        "file": "DLMF/JacobiElliptic/Integrals.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029g/strict-DLMF_JacobiElliptic_Integrals.lean.log"
+      },
+      {
+        "file": "DLMF/JacobiElliptic/Related.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029g/strict-DLMF_JacobiElliptic_Related.lean.log"
+      },
+      {
+        "file": "DLMF/QHypergeometric/Calculus.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029g/strict-DLMF_QHypergeometric_Calculus.lean.log"
+      },
+      {
+        "file": "DLMFMathlib.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029g/strict-DLMFMathlib.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Complex/TrigR4SeriesExtension.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029g/strict-DLMFMathlib_Analysis_Complex_TrigR4SeriesExtension.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Complex/TrigonometricProducts.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029g/strict-DLMFMathlib_Analysis_Complex_TrigonometricProducts.lean.log"
+      },
+      {
+        "file": "Main.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261029g/strict-Main.lean.log"
+      }
+    ],
+    "globalAxioms": {
+      "dependingOnAdmissions": 1726,
+      "nonstandard": [],
+      "theorems": 56200
+    },
+    "tagSummary": {
+      "proved": 8681,
+      "pointers": 1028,
+      "nonstandard": 0,
+      "entries": 10703,
+      "admitted": 2022
+    },
+    "sourceStatementChanges": [],
+    "sourceDefinitionChanges": [],
+    "compiledPublicTypeChanges": [],
+    "maxChangedProofLines": 100,
+    "maxLibraryFileLines": 1454,
+    "newDeclarationsWithoutDocs": [],
+    "newExactUpstreamMatches": [],
+    "imports": {
+      "newTwoWayPairs": [],
+      "newDefinitionsImports": [],
+      "twoWayPairs": 15,
+      "definitionsImports": 20,
+      "newCrossAreaPairs": [],
+      "baseline": "Beginning-of-round source snapshot from ProofRound20261029f",
+      "existingItemsBeyondOldBaseline": 10
+    },
+    "changedLeanFiles": [
+      "DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean",
+      "DLMF/AlgebraicAnalytic/Complex/Calculus.lean",
+      "DLMF/AlgebraicAnalytic/Complex/Functions.lean",
+      "DLMF/Elementary/Hyperbolic/IdentitiesAndSeries.lean",
+      "DLMF/Elementary/Hyperbolic/Products.lean",
+      "DLMF/Elementary/Trigonometric/DirectIdentities.lean",
+      "DLMF/EllipticIntegrals/SymmetricAddition.lean",
+      "DLMF/EllipticIntegrals/SymmetricInequalities.lean",
+      "DLMF/JacobiElliptic/ElementaryIdentities.lean",
+      "DLMF/JacobiElliptic/Integrals.lean",
+      "DLMF/JacobiElliptic/Related.lean",
+      "DLMF/QHypergeometric/Calculus.lean",
+      "DLMFMathlib.lean",
+      "DLMFMathlib/Analysis/Complex/TrigR4SeriesExtension.lean",
+      "DLMFMathlib/Analysis/Complex/TrigonometricProducts.lean"
+    ],
+    "fileLengthCheck": "python3 scripts/check_file_lengths.py: all1117 Lean sources at most1500 lines",
+    "gitDiffCheck": "git diff --check: pass",
+    "independentReview": "Nine new analytic/elliptic main proofs independently compared with the beginning-of-round source snapshot and axiom-checked; no blocking findings."
+  },
+  "statementCorrections": [],
+  "statementIssues": {
+    "previousIssuesRetained": [
+      "liouvilleGreen_interval_isEquivalent: finite-endpoint uniqueness is false",
+      "picard_great: missing positive outer radius",
+      "prod_mtest_log: tail-only bounds do not give global uniform convergence",
+      "haar_isLittleO_pow: separate derivatives need compatibility",
+      "hasCesaroSumOfOrder_of_tendsto: negative-order regularity requires review"
+    ],
+    "definitionConventions": [
+      "narayana 0 0 = 0 locally, whereas DLMF Table 26.6.3 gives 1; the path-count theorem assumes n >= 1 and this round changes no definition."
+    ],
+    "duplicationCandidates": [
+      "periodicBernoulliB versus periodicBernoulli, and periodicEulerE versus antiperiodicEuler"
+    ],
+    "newIssues": [
+      {
+        "names": [
+          "DLMF.Theta.jacobiThetaTwoTau_powerSeries",
+          "DLMF.Theta.jacobiThetaThreeTau_powerSeries",
+          "DLMF.Theta.jacobiThetaFourTau_powerSeries"
+        ],
+        "status": "Lean counterexamples, using only standard axioms; original statements retained",
+        "detail": "The common unshifted lattice radius includes zeros of theta2, theta3 and theta4. At tau=I use z=1/2, (1+I)/2 and I/2 respectively. The null values and complex exponentials on the right are nonzero.",
+        "reproductionSource": "import DLMF.Theta.PowerSeries\nimport DLMF.JacobiElliptic.Basic.QuarterPeriods\nopen Complex Set\nopen scoped Real\nnamespace DLMF.Theta\n\nlemma lattice_norm_ge (p : {p : ℤ × ℤ // p ≠ 0}) :\n    1 ≤ ‖((p.1.1 : ℂ) + p.1.2 * I)‖ := by\n  have hp : p.1.1 ≠ 0 ∨ p.1.2 ≠ 0 := by\n    by_contra h\n    push_neg at h\n    exact p.2 (Prod.ext h.1 h.2)\n  have hi : (1 : ℤ) ≤ p.1.1 ^ 2 + p.1.2 ^ 2 := by\n    rcases hp with h | h\n    · have h2 : p.1.1 ≤ -1 ∨ 1 ≤ p.1.1 := by omega\n      rcases h2 with h2 | h2 <;> nlinarith [sq_nonneg p.1.2]\n    · have h2 : p.1.2 ≤ -1 ∨ 1 ≤ p.1.2 := by omega\n      rcases h2 with h2 | h2 <;> nlinarith [sq_nonneg p.1.1]\n  have hr : (1 : ℝ) ≤ (p.1.1 : ℝ) ^ 2 + (p.1.2 : ℝ) ^ 2 := by exact_mod_cast hi\n  have hn := Complex.sq_norm ((p.1.1 : ℂ) + p.1.2 * I)\n  simp only [normSq_apply, add_re, add_im, intCast_re, intCast_im, mul_re, mul_im, I_re, I_im,\n    mul_zero, zero_mul, mul_one, sub_zero, zero_add, add_zero] at hn\n  nlinarith [norm_nonneg ((p.1.1 : ℂ) + p.1.2 * I)]\n\nlemma radius_ge : Real.pi ≤ thetaLatticeMinNorm I := by\n  letI : Nonempty {p : ℤ × ℤ // p ≠ 0} := ⟨⟨(1,0), by decide⟩⟩\n  apply le_ciInf\n  intro p\n  rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg Real.pi_pos.le]\n  nlinarith [lattice_norm_ge p, Real.pi_pos]\n\nlemma condition : ‖(π : ℂ) * (1 / 2 : ℂ)‖ < thetaLatticeMinNorm I := by\n  calc ‖(π : ℂ) * (1 / 2 : ℂ)‖ = Real.pi / 2 := by simp [div_eq_mul_inv, Real.norm_of_nonneg Real.pi_pos.le]\n    _ < Real.pi := by linarith [Real.pi_pos]\n    _ ≤ _ := radius_ge\n\nlemma theta_two_zero : DLMF.Elliptic.jacobiThetaTwoTau ((π : ℂ) * (1 / 2 : ℂ)) I = 0 := by\n  have h := DLMF.JacobiElliptic.je22a_thetaTwo_add_half_pi 0 I\n  have h0 := DLMF.Theta.jacobiThetaOneTau_lattice_eq_zero I 0 0\n  simp only [Int.cast_zero, zero_mul, zero_add, mul_zero, neg_zero] at h0\n  simpa [h0, div_eq_mul_inv] using h\n\nlemma counterexample : ¬ (∃ S : ℂ,\n    HasSum (fun j : ℕ => thetaAlpha (2 * (j + 1)) I * (1 / 2 : ℂ) ^ (2 * (j + 1)) /\n      (2 * (j + 1))) S ∧\n    DLMF.Elliptic.jacobiThetaTwoTau ((π : ℂ) * (1 / 2 : ℂ)) I =\n      jacobiThetaTwoNullTau I * cexp (-S)) := by\n  rintro ⟨S, _, h⟩\n  rw [theta_two_zero] at h\n  exact (mul_ne_zero (DLMF.JacobiElliptic.je22a_thetaTwo_zero_ne_zero (by norm_num : 0 < I.im)) (exp_ne_zero _)) h.symm\n\n\nlemma condition_four : ‖(π : ℂ) * (I / 2)‖ < thetaLatticeMinNorm I := by\n  calc ‖(π : ℂ) * (I / 2)‖ = Real.pi / 2 := by\n         simp [div_eq_mul_inv, Real.norm_of_nonneg Real.pi_pos.le]\n       _ < Real.pi := by linarith [Real.pi_pos]\n       _ ≤ _ := radius_ge\n\nlemma condition_three : ‖(π : ℂ) * ((1 + I) / 2)‖ < thetaLatticeMinNorm I := by\n  have hn : ‖((1 + I) / 2 : ℂ)‖ < 1 := by\n    have h := Complex.sq_norm ((1 + I) / 2 : ℂ)\n    norm_num [normSq_apply, div_re, div_im] at h\n    rw [norm_div, Complex.norm_ofNat]\n    nlinarith [norm_nonneg (1 + I : ℂ)]\n  calc ‖(π : ℂ) * ((1 + I) / 2)‖ = Real.pi * ‖((1 + I) / 2 : ℂ)‖ := by\n         rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg Real.pi_pos.le]\n       _ < Real.pi := by nlinarith [Real.pi_pos]\n       _ ≤ _ := radius_ge\n\nlemma theta_four_zero : DLMF.Elliptic.jacobiThetaFourTau ((π : ℂ) * (I / 2)) I = 0 := by\n  have h := DLMF.JacobiElliptic.je22a_thetaFour_add_half_tau 0 I\n  simp only [zero_add, DLMF.JacobiElliptic.je22a_thetaOne_zero, mul_zero] at h\n  simpa [mul_div_assoc] using h\n\nlemma theta_three_zero : DLMF.Elliptic.jacobiThetaThreeTau ((π : ℂ) * ((1 + I) / 2)) I = 0 := by\n  have h := DLMF.JacobiElliptic.je22a_thetaThree_add_half_pi ((π : ℂ) * (I / 2)) I\n  rw [theta_four_zero] at h\n  convert h using 1 <;> congr 1 <;> ring\n\nlemma counterexample_four : ¬ (∃ S : ℂ,\n    HasSum (fun j : ℕ => thetaGamma (2 * (j + 1)) I * (I / 2) ^ (2 * (j + 1)) /\n      (2 * (j + 1))) S ∧\n    DLMF.Elliptic.jacobiThetaFourTau ((π : ℂ) * (I / 2)) I =\n      jacobiThetaFourNullTau I * cexp (-S)) := by\n  rintro ⟨S, _, h⟩\n  rw [theta_four_zero] at h\n  exact (mul_ne_zero (DLMF.JacobiElliptic.je22a_thetaFour_zero_ne_zero (by norm_num : 0 < I.im)) (exp_ne_zero _)) h.symm\n\nlemma counterexample_three : ¬ (∃ S : ℂ,\n    HasSum (fun j : ℕ => thetaBeta (2 * (j + 1)) I * ((1 + I) / 2) ^ (2 * (j + 1)) /\n      (2 * (j + 1))) S ∧\n    DLMF.Elliptic.jacobiThetaThreeTau ((π : ℂ) * ((1 + I) / 2)) I =\n      jacobiThetaThreeNullTau I * cexp (-S)) := by\n  rintro ⟨S, _, h⟩\n  rw [theta_three_zero] at h\n  exact (mul_ne_zero (DLMF.JacobiElliptic.je22a_thetaThree_zero_ne_zero (by norm_num : 0 < I.im)) (exp_ne_zero _)) h.symm\n\n#print axioms condition\n#print axioms counterexample\n#print axioms condition_three\n#print axioms condition_four\n#print axioms counterexample_three\n#print axioms counterexample_four\nend DLMF.Theta\n",
+        "axiomAudit": "/tmp/DLMF-theta-radius-counterexample.lean:11:4: warning: `push_neg` has been deprecated. Prefer using `push Not` instead.\nIf you'd rather continue using `push_neg` in your project, you can implement it as follows:\n```\nopen Lean.Parser.Tactic in\nmacro \"push_neg\" cfg:optConfig loc:(location)? : tactic =>\n  `(tactic| push $cfg:optConfig Not $[$loc]?)\n```\n/tmp/DLMF-theta-radius-counterexample.lean:22:14: warning: This simp argument is unused:\n  zero_mul\n\nHint: Omit it from the simp argument list.\n  [apply] simp only [normSq_apply, add_re, add_im, intCast_re, intCast_im, mul_re, mul_im, I_re, I_im, mul_zero,\n    mul_one, sub_zero, zero_add, add_zero] at hn\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n/tmp/DLMF-theta-radius-counterexample.lean:26:2: warning: Try this: \n  letI̵\n\nThe goal is a proposition, so `let` is preferred over `letI`.\nThe difference between `let` and `letI` is that `letI` inlines the value.\nBut this is not relevant for proofs because of proof irrelevance.\n\nNote: This linter can be disabled with `set_option linter.style.haveILetI false`\n/tmp/DLMF-theta-radius-counterexample.lean:40:48: warning: This simp argument is unused:\n  mul_zero\n\nHint: Omit it from the simp argument list.\n  [apply] simp only [Int.cast_zero, zero_mul, zero_add, neg_zero] at h0\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n/tmp/DLMF-theta-radius-counterexample.lean:40:58: warning: This simp argument is unused:\n  neg_zero\n\nHint: Omit it from the simp argument list.\n  [apply] simp only [Int.cast_zero, zero_mul, zero_add, mul_zero] at h0\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n/tmp/DLMF-theta-radius-counterexample.lean:78:20: warning: Unused tactic linter: `<;>` should be replaced with `;` or be removed.\n\nNote: This linter can be disabled with `set_option linter.unusedTactic false`\n/tmp/DLMF-theta-radius-counterexample.lean:78:32: warning: Unused tactic linter: `<;>` should be replaced with `;` or be removed.\n\nNote: This linter can be disabled with `set_option linter.unusedTactic false`\n/tmp/DLMF-theta-radius-counterexample.lean:78:20: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice\n\nNote: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`\n/tmp/DLMF-theta-radius-counterexample.lean:78:32: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice\n\nNote: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`\n'DLMF.Theta.condition' depends on axioms: [propext, Classical.choice, Quot.sound]\n'DLMF.Theta.counterexample' depends on axioms: [propext, Classical.choice, Quot.sound]\n'DLMF.Theta.condition_three' depends on axioms: [propext, Classical.choice, Quot.sound]\n'DLMF.Theta.condition_four' depends on axioms: [propext, Classical.choice, Quot.sound]\n'DLMF.Theta.counterexample_three' depends on axioms: [propext, Classical.choice, Quot.sound]\n'DLMF.Theta.counterexample_four' depends on axioms: [propext, Classical.choice, Quot.sound]\n"
+      },
+      {
+        "name": "DLMF.EllipticIntegrals.symEllIntRC_sq_eq",
+        "status": "Analytical branch counterexample; not formalized in Lean; statement retained",
+        "detail": "At x=-I,y=1 the hypotheses permit the point. The left RC(-1,1) integral has strictly negative imaginary part, whereas the transformed RC(-I/2,(1-I)/2) integrand has strictly positive imaginary part. Both converge, including the integrable left square-root singularity at t=1. The strict-half-plane variant is already proved as symEllIntRC_sq."
+      }
+    ],
+    "additionalReviewConcern": "hasDerivAt_integral_variable_limits and hasDerivAt_improper_integral_of_tendstoUniformlyOn assume continuity of totalized deriv values without explicitly asserting the underlying partial derivatives exist. Check this transcription before proof work; no formal counterexample or correction is claimed in this round."
+  },
+  "remainingPriorities": [
+    "Normalized log-sinhc and log-tanhc series via the new primitive-series lemma",
+    "Remaining q-product and Jackson classical-limit identities",
+    "Further Jacobi elliptic integrals and modulus limits",
+    "Correct the shifted-theta radii and review the RC boundary convention",
+    "Finite Dixon/Watson identities and nonterminating Dougall evaluations",
+    "de Branges-Wilson integral and continuous q-polynomial orthogonality",
+    "Incomplete-Gamma all-order coefficient cancellation and derivative-specific Airy bounds"
+  ],
+  "movedProofs": [
+    {
+      "original": "DLMF.Elementary.hasProd_sinh",
+      "replacement": "Complex.hasProd_sinh_div",
+      "module": "DLMFMathlib.Analysis.Complex.TrigonometricProducts",
+      "originalInterface": "retained as wrapper"
+    },
+    {
+      "original": "DLMF.Elementary.hasProd_cosh",
+      "replacement": "Complex.hasProd_cosh_product",
+      "module": "DLMFMathlib.Analysis.Complex.TrigonometricProducts",
+      "originalInterface": "retained as wrapper"
+    }
+  ]
+}

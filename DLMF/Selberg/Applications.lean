@@ -7,7 +7,7 @@ module
 
 public import DLMF.OrthogonalPolynomials.Classical
 public import DLMF.OrthogonalPolynomials.JacobiDiscriminant
-public import DLMF.Selberg.Basic
+public import DLMF.Selberg.ContinuationAndAomoto
 public import Mathlib.RingTheory.Polynomial.Resultant.Basic
 
 /-!

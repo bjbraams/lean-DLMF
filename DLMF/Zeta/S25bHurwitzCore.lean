@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Hypergeometric.Basic
+public import DLMF.Hypergeometric.SeriesProperties
 public import Mathlib.Analysis.Complex.LocallyUniformLimit
 public import Mathlib.NumberTheory.LSeries.HurwitzZeta
 public import Mathlib.NumberTheory.ZetaValues

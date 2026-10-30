@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.QSeries.Basic.Series
 public import DLMF.QSeries.QBinomial
 public import Mathlib.NumberTheory.ModularForms.JacobiTheta.OneVariable
 
@@ -36,9 +37,6 @@ passes to the limit `m → ∞` using `[2m, m+n]_q → 1/(q;q)_∞` and a unifor
 open Finset Filter
 open scoped Topology
 
-/-- The exponent `n(n-1)/2` as an integer. -/
-def tri (n : ℤ) : ℤ := n * (n - 1) / 2
-
 /-- `2 tri n = n (n - 1)`: the integer division in `tri` is exact. -/
 theorem tri_mul_two (n : ℤ) : tri n * 2 = n * (n - 1) :=
   Int.ediv_mul_cancel (even_iff_two_dvd.mp (Int.even_mul_pred_self n))
@@ -63,9 +61,6 @@ theorem qPochhammer_shift_down {q z : ℂ} (hq : q ≠ 0) (hz : z ≠ 0) (m : �
     rw [qPochhammer_succ', hx, hc, qPochhammer_succ, pow_add]
     have hqm : q ^ (m + 1) ≠ 0 := pow_ne_zero _ hq
     linear_combination (norm := (field_simp; ring)) ((1 - z / q ^ (m + 1)) * q ^ (m + 1)) * ih
-
-/-- The summand `(-1)^n q^{n(n-1)/2} z^n` of the triple product. -/
-def term (q z : ℂ) (n : ℤ) : ℂ := (-1 : ℂ) ^ n * q ^ tri n * z ^ n
 
 /-- `C(k,2) + C(m+1,2) - m k = tri (k - m)`. -/
 theorem tri_sub_cast (k m : ℕ) :
@@ -127,9 +122,6 @@ theorem finite_jtp {q z : ℂ} (hq : q ≠ 0) (hz : z ≠ 0) (m : ℕ) :
         rw [qPochhammer_eq_sum_qBinom, sum_mul]
         refine sum_congr rfl fun k _ => ?_
         linear_combination qBinom q (2 * m) k * term_shift hq hz k m
-
-/-- `∏_{j<k} (1 - r^{j+1})⁻¹`, a bound for `‖[n k]_q‖` with `r = ‖q‖`. -/
-def dprod (r : ℝ) (k : ℕ) : ℝ := ∏ j ∈ range k, (1 - r ^ (j + 1))⁻¹
 
 /-- `0 < 1 - r^{j+1}` for `0 ≤ r < 1`. -/
 theorem one_sub_pow_succ_pos {r : ℝ} (h0 : 0 ≤ r) (h1 : r < 1) (j : ℕ) : 0 < 1 - r ^ (j + 1) :=
@@ -346,11 +338,6 @@ theorem jacobiTheta_eq_qPochhammer {τ : ℂ} (hτ : 0 < τ.im) :
   congr 1
   ring
 
-/-- The integer-index q-Pochhammer symbol, AAR (10.5.2). -/
-def qPochhammerInt (a q : ℂ) : ℤ → ℂ
-  | .ofNat n => qPochhammer a q n
-  | .negSucc n => (qPochhammer (a * q ^ (-(n + 1 : ℤ))) q (n + 1))⁻¹
-
 /-- At a natural index `qPochhammerInt` is the ordinary `q`-shifted factorial. -/
 @[simp] theorem qPochhammerInt_natCast (a q : ℂ) (n : ℕ) :
     qPochhammerInt a q n = qPochhammer a q n := rfl
@@ -371,12 +358,6 @@ theorem ramanujan_1psi1 {a b q z : ℂ}
         (qPochhammerInf b q * qPochhammerInf (q / a) q * qPochhammerInf z q *
           qPochhammerInf (b / (a * z)) q) := by
   sorry
-
-/-- Basic hypergeometric series `ᵣφₛ` with `r = s + 1` (AAR §10.9). -/
-def basicHG (a b : List ℂ) (q z : ℂ) : ℂ :=
-  ∑' n : ℕ,
-    (a.map fun ai => qPochhammer ai q n).prod /
-        ((b.map fun bi => qPochhammer bi q n).prod * qPochhammer q q n) * z ^ n
 
 /-- Heine's transformation of `₂φ₁` (AAR §10.10). -/
 @[dlmf 17.6.E6 "exact: both actual series disks, nonzero b, and all literal lower exclusions; local notation adapter proved"]
@@ -471,14 +452,6 @@ theorem heine_transformation {a b c q z : ℂ}
   rw [hcol, hright]
   dsimp only [K, L]
   ring
-
-/-- The Laurent form of the `q`-ultraspherical polynomials (AAR (10.11.1)),
-with `x = exp(iθ)` corresponding to the polynomial argument `cos θ`. -/
-@[dlmf 18.28.E13]
-def qGegenbauer (beta q : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
-  ∑ k ∈ Finset.range (n + 1),
-    qPochhammer beta q k * qPochhammer beta q (n - k) /
-        (qPochhammer q q k * qPochhammer q q (n - k)) * x ^ ((n : ℤ) - 2 * k)
 
 /-- The degree-zero `q`-ultraspherical polynomial is `1`. -/
 theorem qGegenbauer_zero (beta q x : ℂ) : qGegenbauer beta q 0 x = 1 := by

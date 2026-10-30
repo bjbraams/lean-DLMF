@@ -5,6 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.ParabolicCylinder.Basic.Functions
+
 public import DLMF.Confluent.ParabolicCylinder.EquationAndIntegrals
 
 /-!
@@ -324,21 +326,13 @@ theorem pcfU_connection_mul_neg_I {a : ℂ} (ha : ∀ n : ℕ, 1 / 2 + a ≠ -n)
 
 /-! ### The second solution `V(a,z)` (DLMF 12.2, 12.4.2, 12.8) -/
 
-/-- `V(a,0)` (DLMF 12.2.8), with reciprocal Gamma factors, so that it is entire in `a`. -/
-def pcfVZero (a : ℂ) : ℂ :=
-  π * (2 : ℂ) ^ (a / 2 + 1 / 4) * (Gamma (3 / 4 - a / 2))⁻¹ ^ 2 * (Gamma (1 / 4 + a / 2))⁻¹
 
-/-- `V'(a,0)` (DLMF 12.2.9), with reciprocal Gamma factors. -/
-def pcfVDerivZero (a : ℂ) : ℂ :=
-  π * (2 : ℂ) ^ (a / 2 + 3 / 4) * (Gamma (1 / 4 - a / 2))⁻¹ ^ 2 * (Gamma (3 / 4 + a / 2))⁻¹
 
-/-- **Weber's second function** `V(a,z) = V(a,0) u₁(a,z) + V'(a,0) u₂(a,z)` (DLMF 12.4.2). It is
-entire in `a` and `z`; see `pcfV_eq` for the classical form in terms of `U(a, ±z)`. -/
-@[dlmf 12.4.E2]
-def pcfV (a z : ℂ) : ℂ := pcfVZero a * pcfEven a z + pcfVDerivZero a * pcfOdd a z
 
-/-- The derivative `V'(a,z)`. -/
-def pcfVDeriv (a z : ℂ) : ℂ := pcfVZero a * pcfEvenDeriv a z + pcfVDerivZero a * pcfOddDeriv a z
+
+
+
+
 
 /-- `V(a,·)` has derivative `pcfVDeriv a`. -/
 theorem hasDerivAt_pcfV (a z : ℂ) : HasDerivAt (pcfV a) (pcfVDeriv a z) z :=

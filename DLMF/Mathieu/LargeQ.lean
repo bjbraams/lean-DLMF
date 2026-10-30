@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Mathieu.Basic
+public import DLMF.Mathieu.SpectralExistence
 public import Mathlib.RingTheory.Polynomial.Hermite.Basic
 
 /-!

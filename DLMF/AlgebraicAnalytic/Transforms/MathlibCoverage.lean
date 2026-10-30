@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module -- shake: keep-all
 
 public import DLMF.Core.Upstream
-public import DLMF.AlgebraicAnalytic.Transforms.Defs
+public import DLMF.AlgebraicAnalytic.Transforms.Basic
 public import Mathlib.Analysis.Fourier.Inversion
 public import Mathlib.Analysis.Fourier.Convolution
 public import Mathlib.Analysis.Fourier.LpSpace

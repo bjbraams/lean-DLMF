@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AlgebraicAnalytic.Calculus.Defs
+public import DLMF.AlgebraicAnalytic.Calculus.Basic
 public import Mathlib.Analysis.Calculus.Deriv.Pi
 public import Mathlib.Analysis.Calculus.Deriv.Prod
 public import Mathlib.Analysis.Calculus.FDeriv.Symmetric
@@ -18,7 +18,7 @@ public import Mathlib.MeasureTheory.Integral.Prod
 
 Partial derivatives are derivatives of sections, as in DLMF 1.5.3–1.5.4: for `f : ℝ × ℝ → ℝ`
 we write `deriv (fun t => f (t, y)) x` for `∂f/∂x` at `(x, y)`, and on `Fin n → ℝ` we use
-`partialDeriv` (`DLMF.AlgebraicAnalytic.Calculus.Defs`). The first part of the file connects
+`partialDeriv` (`DLMF.AlgebraicAnalytic.Calculus.Basic`). The first part of the file connects
 them with Fréchet derivatives (`partialDeriv_eq_fderiv`, `partialDeriv_partialDeriv`), which
 gives the symmetry of mixed partials 1.5.6 and the chain rules 1.5.7–1.5.9.
 

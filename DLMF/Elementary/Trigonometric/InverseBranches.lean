@@ -321,6 +321,24 @@ theorem analytic_arcsin_principal : AnalyticOnNhd ℂ arcsinPrincipal arcsinCutP
   exact (show DifferentiableOn ℂ arcsinPrincipal arcsinCutPlane from fun z hz=>
     (trig_hasDerivAt_arcsin hz).differentiableAt.differentiableWithinAt).analyticOnNhd hU
 
+/-- The principal arcsine is continuous at every point of its closed unit disk,
+including the two branch points. -/
+lemma continuousAt_arcsin_principal_of_norm_le_one {z : ℂ} (hz : ‖z‖≤1) :
+    ContinuousAt arcsinPrincipal z := by
+  have hre : 0 ≤ (1-z^2).re := by
+    have hnorm := Complex.sq_norm z
+    rw [Complex.normSq_apply] at hnorm
+    simp only [Complex.sub_re, Complex.one_re, pow_two, Complex.mul_re]
+    nlinarith [sq_nonneg z.im, norm_nonneg z]
+  have hroot : ContinuousAt Complex.sqrt (1-z^2) := Complex.continuousAt_sqrt (Or.inl hre)
+  have hpoly : ContinuousAt (fun w : ℂ => 1-w^2) z := by fun_prop
+  have hsqrt : ContinuousAt (fun w : ℂ => Complex.sqrt (1-w^2)) z :=
+    hroot.comp (f := fun w : ℂ => 1-w^2) hpoly
+  have hs : ContinuousAt (fun w : ℂ => Complex.sqrt (1-w^2)+I*w) z :=
+    hsqrt.add (by fun_prop)
+  exact (continuousAt_clog (trig_arcsin_log_slit z)).comp
+    (f := fun w : ℂ => Complex.sqrt (1-w^2)+I*w) hs |>.const_mul (-I)
+
 /-- DLMF 4.23.ii: analytic arccos principal. -/
 @[dlmf 4.23.ii]
 theorem analytic_arccos_principal : AnalyticOnNhd ℂ arccosPrincipal arcsinCutPlane := by

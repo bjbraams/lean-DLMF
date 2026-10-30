@@ -5,9 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Coulomb.Energy.Defs
+public import DLMF.Coulomb.Energy.Basic
 public import DLMF.Confluent.Coulomb
-public import DLMF.Bessel.Basic
+public import DLMF.Bessel.RegularizedSeries
 public import DLMFMathlib.Analysis.ODE.PowerSeriesUniqueness
 public import Mathlib.Analysis.Complex.TaylorSeries
 public import Mathlib.Algebra.Order.Ring.Star

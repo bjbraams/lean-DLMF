@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Bessel.Basic
+public import DLMF.Bessel.RegularizedSeries
 
 /-!
 # Modified Bessel functions (AAR §4.12)
@@ -22,21 +22,6 @@ open scoped Real Nat Topology
 noncomputable section
 
 namespace DLMF.Bessel
-
-/-- Modified Bessel function of the first kind. -/
-@[dlmf 10.25.E2]
-def besselI (ν z : ℂ) : ℂ :=
-  (z / 2) ^ ν * regularizedHGFun (∅ : Multiset ℂ) {ν + 1} (z ^ 2 / 4)
-
-/-- Modified Bessel function of the second kind (Macdonald's `K_ν`), with integer
-orders defined by their limits in the order parameter (AAR (4.12.3)). -/
-@[dlmf 10.27.E4]
-def besselK (ν z : ℂ) : ℂ := by
-  classical
-  exact if ∃ k : ℤ, ν = k then
-    Filter.limUnder (𝓝[≠] ν) (fun μ =>
-      π / 2 * (besselI (-μ) z - besselI μ z) / sin (μ * π))
-  else π / 2 * (besselI (-ν) z - besselI ν z) / sin (ν * π)
 
 /-- Identity under the stated parameter and domain assumptions: `besselI ν 0 = 0`. -/
 theorem besselI_apply_zero {ν : ℂ} (hν : ν ≠ 0) : besselI ν 0 = 0 := by

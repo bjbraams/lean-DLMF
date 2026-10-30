@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Coulomb.Defs
+public import DLMF.Coulomb.Basic.AuxiliaryData
 public import DLMF.Confluent.CoulombIrregular
 public import DLMF.Confluent.Whittaker
 

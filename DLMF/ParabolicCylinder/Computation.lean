@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMFMathlib.Analysis.SpecialFunctions.ChebyshevSeries
-public import DLMF.ParabolicCylinder.Basic
+public import DLMF.ParabolicCylinder.ElementaryProperties
 
 /-!
 # Cylinder Chebyshev-series existence claims

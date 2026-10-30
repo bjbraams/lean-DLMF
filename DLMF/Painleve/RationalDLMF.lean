@@ -5,14 +5,14 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Painleve.SolutionsDefs
+public import DLMF.Painleve.Basic.Solutions
 public import DLMF.Painleve.Equations
 public import DLMF.Painleve.Rational
 
 /-!
 # Rational solutions of the Painlevé equations (DLMF §32.8)
 
-DLMF normalization (`DLMF.Painleve.Defs`). The rational solutions of `PII` are bridged to the
+DLMF normalization (`DLMF.Painleve.Basic`). The rational solutions of `PII` are bridged to the
 Beals–Wong construction of `DLMF.Painleve.Rational` (`rationalPIIPair`), whose `PII(c)` is DLMF's
 `PII` with `α = -c`. The explicit solutions 32.8.1–32.8.4 and the Yablonskii–Vorob'ev
 polynomials 32.8.7 are proved by polynomial identities. The general statements 32.8.5–32.8.6

@@ -5,8 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
-public import DLMF.Weierstrass.Basic.LatticesAndSigma
-public import DLMF.Weierstrass.Basic.EllipticFunctionsAndInvariants
+public import DLMF.Weierstrass.Basic.Periods
+public import DLMF.Weierstrass.Basic.Functions
+public import DLMF.Weierstrass.Basic.Invariants
 
 /-!
 # Weierstrass lattices, `℘`, `ζ` and `σ` (DLMF §§23.2–23.3(i))
@@ -25,9 +26,11 @@ The Weierstrass `℘` and `℘'` are Mathlib's `PeriodPair.weierstrassP` and
 over `𝕃 ∖ {0}`. The same convention defines `weierstrassZeta` (23.2.5) and
 `weierstrassSigma` (23.2.6) here: the `w = 0` summand of `ζ` is `1/z`, and the `w = 0` factor
 of the product for `σ` is `1`. At lattice points the totalized values are junk where DLMF has
-poles; every statement below states its domain.
+poles; the theorems state their domains.
 
 The invariants-form `℘(z; g₂, g₃)` (23.3.8) is defined through a chosen lattice with the given
 invariants; it agrees with `℘(z|𝕃)` for every lattice with those invariants, which uses the
-(admitted) uniqueness of the lattice.
+uniqueness of the lattice proved in `EllipticFunctionsAndInvariants`.
+
+The lattice, sigma and invariant developments are in `DLMF.Weierstrass.LatticesAndSigma` and `DLMF.Weierstrass.EllipticFunctionsAndInvariants`.
 -/

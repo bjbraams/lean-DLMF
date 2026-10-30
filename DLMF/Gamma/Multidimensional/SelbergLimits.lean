@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Selberg.Basic
+public import DLMF.Selberg.ContinuationAndAomoto
 public import Dirichlet.Beta.Complex.Integral
 public import Mathlib.LinearAlgebra.Lagrange
 

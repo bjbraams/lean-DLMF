@@ -8,8 +8,8 @@ module
 public import DLMFMathlib.Analysis.Complex.StarPrimitive
 public import Mathlib.Topology.Homotopy.Lifting
 public import TauCeti.Topology.Covering.Proper
-public import DLMF.ErrorFunctions.Basic
-public import DLMF.IncompleteGamma.Basic
+public import DLMF.ErrorFunctions.AnalyticProperties
+public import DLMF.IncompleteGamma.ContinuedProperties
 
 /-!
 # Uniform incomplete-Gamma expansions and inversion, DLMF §8.12

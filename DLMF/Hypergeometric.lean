@@ -9,7 +9,7 @@ public import DLMF.Hypergeometric.EulerHalfLine
 public import DLMF.Hypergeometric.Boundary
 public import DLMF.Hypergeometric.AnalyticProperties
 public import DLMF.Hypergeometric.Asymptotics
-public import DLMF.Hypergeometric.Basic
+public import DLMF.Hypergeometric.SeriesProperties
 public import DLMF.Hypergeometric.ConnectionFormulas
 public import DLMF.Hypergeometric.LogConnectionsRecipGamma
 public import DLMF.Hypergeometric.Contiguous
@@ -34,6 +34,7 @@ public import DLMF.Hypergeometric.Saalschutz
 public import DLMF.Hypergeometric.AppellF4
 public import DLMF.Hypergeometric.FiniteConvolution
 public import DLMF.Hypergeometric.GeneralizedCalculus
+public import DLMF.Hypergeometric.GeneralizedContinuity
 public import DLMF.Hypergeometric.GeneralizedIntegral
 public import DLMF.Hypergeometric.Clausen
 public import DLMF.Hypergeometric.SpecialCases

@@ -8,7 +8,7 @@ module
 public import Mathlib.Analysis.Calculus.Deriv.Polynomial
 public import DLMF.Gamma.ComplexBinet
 public import DLMF.Gamma.MellinBarnes
-public import DLMF.Hypergeometric.Basic
+public import DLMF.Hypergeometric.SeriesProperties
 public import Mathlib.NumberTheory.BernoulliPolynomials
 
 /-!

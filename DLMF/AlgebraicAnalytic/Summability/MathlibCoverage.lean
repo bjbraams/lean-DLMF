@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module -- shake: keep-all
 
 public import DLMF.Core.Upstream
-public import DLMF.AlgebraicAnalytic.Summability.Defs
+public import DLMF.AlgebraicAnalytic.Summability.Basic
 public import Mathlib.Analysis.Complex.AbelLimit
 public import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
 public import Mathlib.Analysis.Fourier.AddCircle

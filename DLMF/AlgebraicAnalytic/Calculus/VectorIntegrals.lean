@@ -12,7 +12,7 @@ public import Mathlib.MeasureTheory.Integral.IntervalIntegral.IntegrationByParts
 # Path, line and surface integrals; Gauss's theorem (DLMF §1.6(iv)–(v))
 
 Paths are `c : ℝ → ℝ³`, surfaces are parametrized by `Φ : ℝ × ℝ → ℝ³` on a parameter set
-`D ⊆ ℝ²` (definitions in `DLMF.AlgebraicAnalytic.Calculus.Defs`). This file has:
+`D ⊆ ℝ²` (definitions in `DLMF.AlgebraicAnalytic.Calculus.Basic`). This file has:
 
 * reparametrization invariance of line and path integrals (1.6.39–1.6.41) and the gradient
   theorem 1.6.42;

@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AsymptoticApproximations.Integrals.Defs
-public import DLMF.AlgebraicAnalytic.Transforms.Defs
+public import DLMF.AsymptoticApproximations.Integrals.Basic
+public import DLMF.AlgebraicAnalytic.Transforms.Basic
 public import DLMF.AlgebraicAnalytic.Transforms.Fourier
 public import DLMFMathlib.Analysis.Asymptotics.WatsonSector
 public import DLMFMathlib.Analysis.Asymptotics.WatsonLog

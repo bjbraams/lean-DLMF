@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.CoalescingSaddles.Defs
+public import DLMF.CoalescingSaddles.Basic.AuxiliaryData
 public import DLMF.CoalescingSaddles.DifferentialEquations
 public import DLMFMathlib.Analysis.Analytic.OfScalarsUnique
 

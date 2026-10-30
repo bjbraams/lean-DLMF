@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.QHypergeometric.Basic
+public import DLMF.QHypergeometric.Convergence
 
 /-!
 # q-Appell functions and their transformations (DLMF §§17.4(iii),17.11)

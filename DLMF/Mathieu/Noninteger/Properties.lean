@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Mathieu.Noninteger.Defs
+public import DLMF.Mathieu.Noninteger.Basic
 public import DLMF.Mathieu.Properties
 public import Mathlib.Topology.Separation.CompletelyRegular
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
@@ -16,7 +16,7 @@ public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
 
 Statements of DLMF §28.12 (eigenvalues `λ_ν(q)`, Floquet solutions `me_ν(z, q)`, the functions
 `ce_ν`, `se_ν`) and §28.14 (Fourier series and their coefficients `c^ν_{2m}(q)`), for the
-definitions of `DLMF.Mathieu.Noninteger.Defs`.
+definitions of `DLMF.Mathieu.Noninteger.Basic`.
 
 Proved here from the definitions (no admissions):
 

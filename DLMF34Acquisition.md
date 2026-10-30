@@ -1,12 +1,21 @@
 # DLMF Chapter 34 acquisition: 3j, 6j, 9j Symbols
 
+> Source paths and current layout notes were refreshed on 2026-10-30; generated per-entry
+> statuses follow the compiled ledger refresh. Dated acquisition and proof counts
+> describe their original batches.
+
+**Current layout (2026-10-30).** `DLMF.WignerSymbols.Basic` remains the definition layer. The `ThreeJ`, `SixJ`,
+`NineJ`, `ThreeJLegendre` and `LargeParameters` developments use theorem APIs explicitly;
+in particular the generalized-hypergeometric parameter and series results are outside
+that area’s `Basic` foundation.
+
 This acquisition covers the definitions, numbered formulas and analytical assertions in prose
 of [DLMF Chapter 34](https://dlmf.nist.gov/34), version 1.2.8, checked on 2026-10-26, by
 agent wj (helper prefix `w34_`). The Lean code is in `DLMF/WignerSymbols/` (namespace
 `DLMF.WignerSymbols`). The modules, in import order, are
 [Basic](DLMF/WignerSymbols/Basic.lean) (all definitions and their API; imports Mathlib only),
 [ThreeJ](DLMF/WignerSymbols/ThreeJ.lean) (§§34.2–34.3(vi); imports `Basic` and the
-definitions file `DLMF.GeneralizedHypergeometric.Basic`),
+parameter/series theorem API `DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties`),
 [SixJ](DLMF/WignerSymbols/SixJ.lean) (§§34.4–34.5; imports `Basic` and
 `DLMF.GeneralizedHypergeometric.Basic`),
 [NineJ](DLMF/WignerSymbols/NineJ.lean) (§§34.6–34.7; imports `Basic`),

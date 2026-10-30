@@ -45,6 +45,28 @@ theorem legendrePathOK_ofReal {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) (φ : ℝ
     legendrePathOK φ k := fun t _ => by
   simpa using ei19a_one_sub_sq_mul_sin_sq_mem_slitPlane hk (t * φ)
 
+/-- For a positive real amplitude at most `π/2`, the endpoint slit-plane condition
+`1 - k² sin² φ ∈ slitPlane` implies that condition along the entire integration path. -/
+theorem legendrePathOK_ofReal_of_endpoint {φ : ℝ} {k : ℂ} (hφ : 0 < φ) (hφ' : φ ≤ π / 2)
+    (hk : 1 - k ^ 2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane) : legendrePathOK φ k := by
+  have hsφ : 0 < Real.sin φ := Real.sin_pos_of_pos_of_lt_pi hφ (by linarith [Real.pi_pos])
+  intro t ht
+  have htφ : 0 ≤ t * φ ∧ t * φ ≤ φ := ⟨mul_nonneg ht.1 hφ.le, mul_le_of_le_one_left hφ.le ht.2⟩
+  have hst : 0 ≤ Real.sin (t * φ) := Real.sin_nonneg_of_nonneg_of_le_pi htφ.1 (by linarith [Real.pi_pos])
+  have hss : Real.sin (t * φ) ≤ Real.sin φ :=
+    Real.sin_le_sin_of_le_of_le_pi_div_two (by linarith [Real.pi_pos]) hφ' htφ.2
+  have hu0 : 0 ≤ Real.sin (t * φ) ^ 2 / Real.sin φ ^ 2 := by positivity
+  have hu1 : Real.sin (t * φ) ^ 2 / Real.sin φ ^ 2 ≤ 1 := by
+    apply (div_le_one (sq_pos_of_pos hsφ)).mpr
+    nlinarith
+  have h := ei19a_one_sub_mul_mem_slitPlane hk hu0 hu1
+  convert h using 1
+  rw [← ofReal_mul, ← ofReal_sin]
+  push_cast
+  have hs0 : Complex.sin (φ : ℂ) ≠ 0 := by
+    rw [← ofReal_sin]; exact ofReal_ne_zero.mpr hsφ.ne'
+  field_simp [hs0]
+
 /-- The principal domain of `K` and `E` as a differentiable function: `k ≠ 0`, `k² ∉ [1, ∞)`. -/
 def compEllIntDomain : Set ℂ := {k | k ≠ 0 ∧ 1 - k ^ 2 ∈ slitPlane}
 

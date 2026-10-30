@@ -5,10 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AlgebraicAnalytic.Distributions.Defs
+public import DLMF.AlgebraicAnalytic.Distributions.Basic
 public import Mathlib.MeasureTheory.Integral.PeakFunction
-public import DLMF.Airy.Basic
-public import DLMF.Coulomb.Energy.Defs
+public import DLMF.Airy.Properties
+public import DLMF.Coulomb.Energy.Basic
 public import DLMF.Legendre.Harmonics
 
 /-!

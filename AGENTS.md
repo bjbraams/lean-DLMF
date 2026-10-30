@@ -47,21 +47,30 @@ DLMF 27.14(v); both remain in the DLMF priority scope.
 - The top-level module prefix `ToMathlib` belongs to lean-codes. Lean locates a module's
   build files by its package, so two packages must never share a top-level prefix; put new
   general results of this project under `DLMFMathlib/`.
-- Imports within `DLMF` (rule adopted 2026-10-26 after an import survey). There is no
-  hierarchy between areas; imports in both directions between areas are allowed, and only
-  the file graph must be acyclic (Lean enforces this). Each definition lives in exactly one
-  file near the bottom of its area (a definitions or `Basic` file, or an older AAR area's
-  definitions file), never in a theorem file. When a definition or lemma is needed below
-  the file that holds it, move it down unchanged (same name, namespace and statement);
-  never copy a definition or proof to avoid an import. Definitions files should import only
-  Mathlib, TauCeti, lean-codes, `DLMFMathlib`, `DLMF.Core` and the definitions files of
-  other areas. A statement linking a special function to a general one (for example Bessel
-  as ₀F₁) goes in a bridge file that imports both definitions layers. At integration, the
-  coordinator runs `scripts/import_survey.py` and reports new two-way area pairs and any
-  definitions file that imports a theorem file of another area. Exceptions: imports of
-  `DLMF.Core` are always allowed, and the 30 imports from `Basic` files into other areas'
-  theorem files that existed on 2026-10-26 (listed in `scripts/import_baseline.json`) may
-  stay until those files are next edited.
+- Foundational layout (adopted 2026-10-30). Use `Basic.lean` for a small foundational
+  file or an umbrella; larger collections use descriptive files under `Basic/`. Each
+  mathematical definition has exactly one canonical home, together with the minimal
+  supporting facts needed to use it. Preserve names, namespaces, statements, branches,
+  normalizations and definition bodies when reorganizing files. Substantive theorem
+  developments belong outside `Basic/`.
+- A foundational module (`Basic.lean`, any file below `Basic/`, or a remaining legacy
+  `Defs.lean`/`Definitions.lean`) may import Mathlib, TauCeti, lean-codes, `DLMFMathlib`,
+  actual `DLMF.Core.*` modules, and other foundational modules. It must not import a
+  DLMF theorem module, even in its own area. The old grandfathered Basic-to-theorem
+  exceptions have been removed; no such exceptions remain. `DLMF.Core` denotes the
+  framework family, not an existing `DLMF/Core.lean` file.
+- `DLMF.Basic` is the foundational entry point. When adding a new `Basic.lean` entry
+  point, include it there. The complete area and top-level umbrellas may import both
+  foundational and theorem modules.
+- There is no hierarchy between areas: imports in both directions between areas are
+  allowed, and only the file graph must be acyclic. A bridge theorem imports the
+  foundational modules it connects. If a definition or lemma is needed below its
+  current file, move it down unchanged rather than copying it or adding a theorem-file
+  dependency to a foundation.
+- At integration run `scripts/import_survey.py`. Report new two-way area pairs. The
+  survey checks the entire foundational layer (including `Basic/` submodules and
+  same-area imports), missing project modules and file-import cycles. These violations
+  fail regardless of the two-way-area baseline.
 
 Mathlib and TauCeti are allowed throughout the DLMF library, including when filling
 existing admissions. Preserve complex branches, normalizations, exceptional parameters

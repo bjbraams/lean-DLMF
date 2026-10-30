@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Lame.Polynomials.Defs
+public import DLMF.Lame.Polynomials.Basic
 public import Mathlib.Analysis.Matrix.Spectrum
 public import DLMF.JacobiElliptic.PeriodsPolesZeros
 

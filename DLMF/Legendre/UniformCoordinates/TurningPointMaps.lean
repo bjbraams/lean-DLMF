@@ -10,7 +10,7 @@ public import Mathlib.Analysis.SpecialFunctions.Artanh
 public import TauCeti.Analysis.SpecialFunctions.Artanh
 public import DLMFMathlib.Analysis.Calculus.DoubleZeroSqrt
 public import DLMF.Bessel.Elementary
-public import DLMF.ParabolicCylinder.Basic
+public import DLMF.ParabolicCylinder.ElementaryProperties
 public import Mathlib.Analysis.SpecialFunctions.Sqrt
 
 /-!

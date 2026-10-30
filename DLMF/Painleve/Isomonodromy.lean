@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Painleve.Defs
-public import DLMF.Airy.Basic
+public import DLMF.Painleve.Basic
+public import DLMF.Airy.Properties
 public import DLMF.Painleve.Basic
 
 /-!

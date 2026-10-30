@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Bessel.Basic
+public import DLMF.Bessel.RegularizedSeries
 
 /-!
 # Separating the Helmholtz equation (Temme Chapter 10)

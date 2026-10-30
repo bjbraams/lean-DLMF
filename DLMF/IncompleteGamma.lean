@@ -1,6 +1,6 @@
 module -- shake: keep-all
 
-public import DLMF.IncompleteGamma.Basic
+public import DLMF.IncompleteGamma.ContinuedProperties
 public import DLMF.Core.MathlibCoverage
 public import DLMF.IncompleteGamma.SpecialValues
 public import DLMF.IncompleteGamma.BetaAsymptotics

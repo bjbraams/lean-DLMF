@@ -7,7 +7,7 @@ module
 
 public import DLMF.WignerSymbols.Basic
 public import DLMF.WignerSymbols.Q2wHelpers
-public import DLMF.GeneralizedHypergeometric.Basic
+public import DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties
 public import Mathlib.Algebra.Order.Ring.Star
 
 /-!

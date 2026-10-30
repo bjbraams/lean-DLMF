@@ -1485,3 +1485,236 @@ lean-codes' `Complex.integral_vertical_eq_of_tail_bound` from
 `ToMathlib.Analysis.MellinBarnes` and `Complex.abs_sin_mul_cosh_le_norm_sin_pi` from
 `ToMathlib.Analysis.SpecialFunctions.RamanujanMaster`, together with the already proved
 Bernoulli moments of the hyperbolic secant kernel. Shared proofs are imported directly.
+
+## Dougall, Lommel and Weierstrass proofs (2026-10-29)
+
+The finite Dougall `₅F₄` proof reuses `DLMF.QHypergeometric.qbR4_six_rational`, Bailey's
+proved polynomial unit-factor identity, and the existing q→1 finite-product limit lemmas.
+The finite `₇F₆` proof reuses the project's proved Whipple and Saalschütz identities,
+then applies Mathlib's continuity and limit uniqueness for removable parameter values.
+
+The Lommel ODE reuses the preceding pole-cancellation/parameter-limit proof and
+`DLMF.Confluent.continuousOn_dslope_param`. Joint regularized-hypergeometric continuity
+uses lean-codes' `Complex.exists_uniform_norm_inv_Gamma_add_nat` from
+`ToMathlib.Analysis.SpecialFunctions.GammaShiftBounds`; argument derivative limits use
+Mathlib's locally uniform holomorphic convergence API. The general topological limit
+lemmas are kept in a Mathlib-only support module. The Weierstrass cosecant series reuses
+the local theta third-derivative identity and the existing half-period theta formula.
+Upstream and shared results are imported directly; no dependency source is copied or edited.
+
+## Analytic, elementary, elliptic and q-calculus proofs (2026-10-30)
+
+The reversed finite and integral Minkowski inequalities use Mathlib's concavity of real powers,
+power subadditivity, measurability and integral comparison. The winding-number adapter uses
+TauCeti's absolutely continuous contour integrality and integral formula. The harmonic maximum
+principles use TauCeti's strong maximum principle and subharmonic boundary comparison, imported
+from their specific modules. The extended Möbius inverse reuses the existing finite inverse.
+
+The hyperbolic bounds use Mathlib's derivative monotonicity, divided slopes, sine chord bound
+and `Real.sin_arctan_strictMono`. The sine/cosh product proofs were moved, without duplication,
+to `DLMFMathlib.Analysis.Complex.TrigonometricProducts`; their existing project interfaces are
+wrappers, and the cosine product follows by rotation. These proofs use Mathlib's Euler sine
+product and infinite-product convergence APIs. The cosecant-square partial fractions use
+Mathlib's cotangent derivative, Eisenstein-series lattice summability and dominated convergence;
+the hyperbolic version follows by rotation.
+
+The symmetric elliptic proofs reuse existing permutation identities and lean-codes'
+`Carlson.TwoVariable.carlsonRC_sq_eq` and `carlsonRC_mul_of_pos`. The Jacobi half-argument proof
+uses the proved doubling and Glaisher identities. The real logarithmic dn integral uses
+quarter-period reflection; the amplitude limit uses the proved sn modulus limit, real bridges,
+the complete elliptic integral limit and the Gudermannian identity.
+The RF–AGM bounds combine the existing RF–AGM identity with Mathlib's
+`NNReal.agmSequences_fst_le_agm`, `agm_le_agmSequences_snd`, `min_le_agm`, `agm_le_max`
+and `agm_pos`.
+
+The q-Leibniz and origin derivative proofs use Mathlib's analytic divided differences,
+`HasFPowerSeriesAt.dslope_fslope`, power-series composition and coefficient uniqueness. The
+general q→1 derivative limit uses Mathlib's Taylor remainder estimate and finite-sum limit
+rules, together with the project's finite-difference formula. The primitive-series lemma used
+for the logarithmic cosine expansion likewise reuses Taylor coefficient uniqueness.
+The normalized logarithmic cosh expansion uses the same primitive lemma and the proved
+Bernoulli tanh series.
+The negative q-product modular identity uses Mathlib's
+`ModularForm.eta_comp_eq_csqrt_I_inv` from
+`Mathlib.NumberTheory.ModularForms.Discriminant`, with q-product splitting and the principal
+square-root value on the positive imaginary axis.
+
+## Series, Carlson bounds and multivariate transformations (2026-10-30)
+
+Termwise differentiation of scalar power series reuses Mathlib's formal multilinear series,
+Cauchy–Taylor expansion, iterated derivatives and factorial–Pochhammer identity, together
+with the existing local Taylor coefficient uniqueness lemma. The conditional Cauchy product
+identity uses Mathlib's complex Abel limit theorem and the absolutely convergent Cauchy
+product formula inside the unit disk. The real/imaginary binomial decomposition specializes
+Mathlib's binomial theorem after splitting the finite sum by parity.
+
+The normalized log-sinhc and log-tanhc series integrate the already proved Bernoulli
+logarithmic derivatives with the shared primitive-series lemma. The log-cosh proof now uses
+the same odd-series adapter. The tanh Frullani integral uses Mathlib's Frullani theorem,
+real mean-value estimates and exponential integrability, with the existing complex tanh
+derivative and TauCeti's real hyperbolic continuity.
+
+The Carlson inequalities and negative-integer polynomial specialization import lean-codes'
+proved `Carlson.Mean.StrictOrder`, mean inequalities, capacity estimates, Euler transform
+and `regCarlsonR_natCast` interfaces directly. Existing symmetric-integral permutation and
+normalization identities supply the bridges; no shared source is copied or edited.
+
+The generalized hypergeometric asymptotic coefficient recurrence uses continuity of finite
+products and sums and Mathlib's `Filter.Tendsto.limUnder_eq` on the distinct-parameter locus.
+The Hurwitz zeta parameter Taylor expansion reuses the proved parameter holomorphy and
+first derivative, Mathlib's iterated derivative rules and
+`Complex.hasSum_taylorSeries_on_ball`. The Appell transformations apply the already proved
+Gauss Pfaff transformation to each fiber, using the existing double-series conventions.
+The arctangent boundary and exterior series reuse the local proved logarithmic odd-series
+identities, retaining conditional convergence on the unit circle and the principal-branch
+correction according to the sign of the real part.
+
+## Power-series operations, logarithmic branches and Appell criteria (2026-10-30)
+
+The reciprocal, logarithm and principal-power coefficient expansions use Mathlib's analytic
+inversion, complex logarithm and power derivatives, and Cauchy–Taylor coefficients. Finite
+coefficient convolutions identify the existing recursive definitions. The shared scalar-series
+adapter replaces repeated convergence-radius arguments in coefficient uniqueness and termwise
+differentiation. General derivative adapters remain in `DLMFMathlib` with Mathlib-only imports.
+
+The logarithmic sine and tangent quotient series combine the existing Bernoulli cotangent
+and tangent expansions with principal-branch estimates. The sine argument estimate uses
+Mathlib's strict sine concavity and TauCeti's real hyperbolic tangent inequality; the tangent
+quotient has positive real part on its strip. The cosh-square integral specializes the
+already proved `DLMF.Gamma.integral_exp_div_cosh_rpow`, with Mathlib's Gamma recurrence and
+reflection formulas handling the exact value and its exceptional zero parameter.
+
+The elliptic amplitude derivatives reuse the existing path differentiation and symmetric
+integral bridges, retaining boundary amplitudes and exceptional modulus values. The Appell
+nonseparability witnesses use a general obstruction from the first four bivariate Taylor
+coefficients. Explicit differentiation of dominated sums reuses the proved parametric
+integral differentiation theorem and Mathlib's counting-measure integral APIs.
+The sharper Horn G3 Gamma-pair bound uses the existing Gamma-shift estimates and weighted
+binomial/factorial inequalities. Geometric bidisc domination then proves convergence at the
+exact rational witness `x = y = 1/8` for the original nonintegral parameters.
+
+## Inequalities, hyperbolic integrals, Appell PDEs and Jacobi epsilon (2026-10-30)
+
+Cauchy's coefficient circle-integral formula reuses the shared scalar-series adapter and
+Mathlib's `DifferentiableOn.hasFPowerSeriesOnBall` with Cauchy coefficients. Schwarz's
+equality case uses Mathlib's affine characterization via divided slopes, including the
+slope at the center. The finite Hölder converse uses a normalized dual vector and Mathlib's
+conjugate-exponent and real-power identities. Power-mean bounds use positive weighted sums;
+order comparison and equality use strict Jensen and lean-codes' proved
+`Real.strictConvexOn_rpow_of_neg` from `ToMathlib.Analysis.Convex.NegativePower`. The shared
+result is imported directly; the redundant local copy found during the audit was removed.
+
+The two hyperbolic integrals reuse the proved Gamma digamma integral, series, reflection and
+coth formulas. The exponential-sine/sinh proof also uses Mathlib's exponential Laplace
+integral, sine bound and p-series summability to justify interchanging the sum and integral.
+No new special-function integral is assumed to establish the norm bounds.
+
+All four Appell PDE declarations use the shared mixed-series framework. Cauchy's estimate
+`Complex.norm_iteratedDeriv_le_of_forall_mem_sphere_norm_le` supplies normal convergence
+of derivative families; falling-factorial derivative formulas identify their terms.
+Mathlib's `HasSum` operations and `Function.Injective.tsum_eq` convert coefficient recurrences
+into differential equations. The generic support uses Mathlib only, and existing function
+symmetry proofs now reuse coefficient symmetry lemmas.
+
+The Jacobi amplitude expansion uses the proved real ODE derivatives and Mathlib's Taylor
+remainder theorem. The epsilon integrals regularize `sn(x)/x` by divided slopes; evenness,
+analytic derivatives and the AE fundamental theorem of calculus remove the singularity at
+zero. Existing squared identities give the ds/cs corollaries from the ns identity.
+
+## Hölder–Minkowski equality, inverse series, Horn PDEs and elliptic bounds (2026-10-30)
+
+The finite and integral Hölder equality cases use Mathlib’s
+`Real.young_inequality_eq_iff_of_nonneg` after normalizing the two power masses. The
+Minkowski equality cases use strict convexity for `p > 1` and strict concavity for
+`0 < p < 1`, together with finite-sum equality and
+`MeasureTheory.integral_eq_iff_of_ae_le`. Zero vectors, almost-everywhere zero functions,
+and arbitrary real proportionality constants are included. These normalization and
+equality adapters are original project proofs.
+
+The mixed Stieltjes formula combines Mathlib’s `integral_add_measure`,
+`integral_finsetSum_measure`, restriction of Dirac measures, and the integral identity
+for `withDensity`. A missing pair of parentheses in its former statement incorrectly
+put the finite atomic contribution inside the Lebesgue integral. The corrected formula
+matches its existing docstring; the round report includes a standard-axiom Lean
+counterexample to the former transcription.
+
+Euler’s arctangent series uses Mathlib’s integer Beta integral, dominated convergence,
+and the existing principal-arctangent derivative and branch lemmas. The transformed
+arctanh series follows by rotation and an explicit principal-logarithm identity. The
+arcsine series uses lean-codes’
+`ToMathlib.Algebra.Polynomial.PochhammerIdentities.ascPochhammer_eval_double` and
+`Complex.hasSum_ascPochhammer_mul_pow_div_factorial` from `Pochhammer.BinomialSeries`.
+The latter imports the proved pinned TauCeti binomial-series result. Absolute
+summability at the boundary reuses the project’s proved
+`DLMF.Hypergeometric.ordinaryHypergeometric_summable_of_mem_sphere` and
+`poch_three_halves_eq`; Mathlib’s `continuousOn_tsum` and `EqOn.of_subset_closure`
+extend the identity to the closed unit disk. The even-series primitive adapter and
+principal-branch continuity lemma are original adapters to Mathlib’s APIs. The arccosine
+series on its shifted closed disk follows from the half-angle identity and the proved
+arcsine series. The real cut segment is handled using the existing lower-bank limit
+and principal square-root convention, without changing the stated domain.
+
+The Horn G2/G3 PDE proofs reuse the existing bivariate normal-convergence and
+coefficient-recurrence framework. Mathlib’s `Complex.Gamma_add_one` gives the Gamma
+coefficient recurrences. Analytic coordinate derivatives and equality of mixed
+partials use Mathlib’s Fréchet derivative APIs,
+`ContDiffAt.isSymmSndFDerivAt`, `IsSymmSndFDerivAt.eq`, and `HasDerivAt.prodMk`.
+Joint analyticity retains the existing project bridge to pinned TauCeti’s finite-
+dimensional analyticity theorem; no upstream proof is copied.
+
+The complete third-kind divergence limits use Mathlib’s integral comparison and
+real-power asymptotics and the existing Jacobi complete-first-kind divergence.
+The sharp incomplete-first-kind bounds import lean-codes’
+`Carlson.Real.incEllIntFk_eq` from `Carlson.Elliptic.Standard`,
+`Carlson.carlsonRF_capacity_lower_bound` from `Carlson.Elliptic.CapacityBound`, and
+`Carlson.carlsonRReal_bounds_between_neg_sum_zero` from `Carlson.Mean.Bounds`.
+The RF–RC inequalities use an original pointwise strict arithmetic/geometric mean
+comparison and lean-codes’ `integral_lt_integral_of_ae_lt` from
+`ToMathlib.Analysis.Integral.StrictMono`. The RG bounds at a zero argument use
+`Carlson.carlsonRE_eq_compEllIntEk` from `Carlson.Elliptic.LegendreStandard` and
+existing local exact values and complete-second-kind bounds. All shared results are
+imported directly; their implementations and dependency pins are unchanged.
+
+## L'Hôpital, hyperbolic inverse series, Carlson principal values and Appell reductions (2026-10-30)
+
+The unbounded-denominator form of L'Hôpital's rule is an original project proof using
+Mathlib's `exists_ratio_deriv_eq_ratio_slope`. Bounds on affine increments and fixed
+anchors on either side of the puncture handle denominators tending to infinity in
+absolute value, without assuming a limit for the numerator. The generic result is in
+`DLMFMathlib.Analysis.Calculus.LHopitalInfinity`.
+
+The principal square-root scaling adapter uses Mathlib's `Complex.sqrt_eq_real_add_ite`
+and `Real.sqrt_mul`. It replaces repeated scaling arguments and supports the arcsinh
+rotation and the near-one arccosh half-angle expansion. These proofs reuse the project's
+proved closed-disk arcsine series and existing logarithm/cut-bank identities; the full
+original boundary and principal-branch conventions are retained.
+
+The negative-real Carlson RC principal value is computed from an explicit real
+square-root/logarithm primitive. Mathlib's FTC and improper-integral APIs justify each
+excised integral and the endpoint at infinity, including the original `x = 0` case.
+Cancellation in the exact symmetric truncation proves the PV limit; the same formula
+gives the two-sided RC divergence. The computation is original project work and adds
+no new TauCeti dependency.
+
+The four Appell germ reductions import lean-codes' `Carlson.TwoVariable.AppellF1`,
+`Carlson.R.Homogeneity`, `Carlson.Elliptic.ReductionRelations`, and
+`Carlson.TwoVariable.RPolynomial.Hypergeometric`. The key shared results are
+`regCarlsonR_eq_regularizedAppellF1`, `regCarlsonR_mul_of_re_pos`,
+`regCarlsonR_comp_equiv`, `numerator_pair_div_factorial`, and
+`carlsonRPolynomialNumerator₂_eq_hypergeometric`. Existing local Gauss fiber sums and the
+Euler transformation are reused. The germ and branch adapters and total-degree grouping
+are original project proofs; shared results are imported directly without source copies
+or dependency changes.
+
+## Foundational `Basic` layer (2026-10-30)
+
+The foundation reorganization relocates existing declarations without changing their
+mathematical definitions, public names or namespaces. It adds the `DLMF.Basic` entry
+point and separates foundational data from substantive theorem developments. Where
+moving a definition exposes an indirect dependency, theorem clients import the
+appropriate theorem module explicitly. The existing project normalizations and
+complex-branch conventions are retained.
+
+The private Mathieu adapter `dif_pos'` duplicated Lean's `dite_eq_left`; its three
+uses now call that existing result directly. No upstream proof is copied, and no
+new dependency or mathematical result is introduced by this reorganization.

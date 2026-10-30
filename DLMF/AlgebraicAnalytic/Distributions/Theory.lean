@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AlgebraicAnalytic.Distributions.Defs
+public import DLMF.AlgebraicAnalytic.Distributions.Basic
 
 /-!
 # Distributions (DLMF §1.16)

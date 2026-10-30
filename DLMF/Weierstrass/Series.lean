@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Weierstrass.Basic
+public import DLMF.Weierstrass.EllipticFunctionsAndInvariants
 public import DLMF.Weierstrass.DifferentialEquations
 public import DLMF.Weierstrass.Relations.ThetaIdentities
 public import DLMF.Theta.Products.InfiniteProducts
@@ -202,13 +202,51 @@ theorem weierstrassZeta_cot_series {z : ℂ} (hz : z ∉ H.lattice) :
         π / (2 * H.ω₁) * Complex.cot (π * z / (2 * H.ω₁))) := by
   sorry
 
+/-- The reciprocal sine square in exponential coordinates, away from its poles. -/
+private lemma inv_sin_sq_eq_exp {v : ℂ} (hv : 1 - cexp (2 * I * v) ≠ 0) :
+    1 / sin v ^ 2 = -4 * cexp (2 * I * v) / (1 - cexp (2 * I * v)) ^ 2 := by
+  let x := cexp (2 * I * v)
+  have hx0 : x ≠ 0 := exp_ne_zero _
+  have hc := DLMF.Theta.th20_exp_add_inv v
+  change x + x⁻¹ = 2 * cos (2 * v) at hc
+  have hs := cos_sub_cos (2 * v) 0
+  rw [show (2 * v + 0) / 2 = v by ring, show (2 * v - 0) / 2 = v by ring, cos_zero] at hs
+  have h2 : (1 - x) ^ 2 = -4 * x * sin v ^ 2 := by
+    have hxx := mul_inv_cancel₀ hx0
+    linear_combination x * hc - hxx + 2 * x * hs
+  have hsn : sin v ^ 2 ≠ 0 := by
+    intro he
+    rw [he, mul_zero] at h2
+    exact hv ((pow_eq_zero_iff two_ne_zero).mp h2)
+  apply (div_eq_div_iff hsn (pow_ne_zero 2 hv)).2
+  simpa only [one_mul] using h2
+
 /-- DLMF 23.8.5: `η₁ = (π²/(2ω₁)) (1/6 + ∑_{n≥1} csc²(nπω₃/ω₁))`. -/
 @[dlmf 23.8.E5]
 theorem eta_one_csc_series :
     HasSum (fun n : ℕ ↦ π ^ 2 / (2 * H.ω₁) *
         (1 / Complex.sin ((n + 1 : ℂ) * π * H.ω₃ / H.ω₁) ^ 2))
       (H.eta 1 - π ^ 2 / (2 * H.ω₁) * (1 / 6)) := by
-  sorry
+  have h := (DLMF.Theta.jacobiThetaOne_third_deriv_ratio H.tau_im_pos).mul_left
+    (-(π ^ 2 / (12 * H.ω₁)))
+  convert h using 1
+  · ext n
+    have he : cexp (2 * I * ((n + 1 : ℂ) * π * H.ω₃ / H.ω₁)) =
+        H.nome ^ (2 * (n + 1)) := by
+      rw [HalfPeriods.nome, ← exp_nat_mul, HalfPeriods.tau]
+      congr 1
+      push_cast
+      ring
+    have hn : 1 - cexp (2 * I * ((n + 1 : ℂ) * π * H.ω₃ / H.ω₁)) ≠ 0 := by
+      rw [he]
+      exact DLMF.QSeries.one_sub_ne_zero_of_norm_lt_one
+        (DLMF.Theta.p20R1_norm_nome_pow_lt_one H.tau_im_pos (by omega))
+    rw [inv_sin_sq_eq_exp hn, he]
+    simp only [HalfPeriods.nome]
+    ring
+  · rw [H.eta_one_eq_theta, thetaOneTripleDerivNull]
+    ring
+
 
 /-! ### Infinite products (§23.8(iii)) -/
 

@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.ErrorFunctions.Basic
+public import DLMF.ErrorFunctions.AnalyticProperties
 public import DLMF.Hypergeometric.GeneralizedCalculus
 public import DLMF.Confluent.ExpIntegral
 

@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AsymptoticApproximations.Sums.Defs
+public import DLMF.AsymptoticApproximations.Sums.Basic
 public import DLMF.Zeta.Riemann
 public import DLMFMathlib.RingTheory.Binomial
 public import DLMFMathlib.Analysis.Asymptotics.IntegralComparison

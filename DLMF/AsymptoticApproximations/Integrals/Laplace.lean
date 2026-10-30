@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AsymptoticApproximations.Integrals.Defs
+public import DLMF.AsymptoticApproximations.Integrals.Basic
 public import DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
 

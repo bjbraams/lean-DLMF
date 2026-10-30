@@ -5,6 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Confluent.Basic.ErrorFunctions
+
 public import DLMF.Confluent.Asymptotics
 public import DLMF.Confluent.Relations
 
@@ -39,13 +41,9 @@ noncomputable section
 
 namespace DLMF.Confluent
 
-/-- The Fresnel cosine integral `C(x) = ∫₀ˣ cos(π t²/2) dt` (DLMF 7.2.7). -/
-@[dlmf 7.2.E7]
-def Real.fresnelCosInt (x : ℝ) : ℝ := ∫ t in (0 : ℝ)..x, Real.cos (π * t ^ 2 / 2)
 
-/-- The Fresnel sine integral `S(x) = ∫₀ˣ sin(π t²/2) dt` (DLMF 7.2.8). -/
-@[dlmf 7.2.E8]
-def Real.fresnelSinInt (x : ℝ) : ℝ := ∫ t in (0 : ℝ)..x, Real.sin (π * t ^ 2 / 2)
+
+
 
 /-- `C'(x) = cos(πx²/2)` for the Fresnel integral `C`. -/
 theorem Real.hasDerivAt_fresnelCosInt (x : ℝ) : HasDerivAt Real.fresnelCosInt
@@ -153,9 +151,7 @@ theorem Real.tendsto_fresnelSinInt_atTop : Tendsto Real.fresnelSinInt atTop (�
     field_simp
     rw [Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 2)]
 
-/-- Dawson's integral `F(x) = e^{-x²} ∫₀ˣ e^{t²} dt` (DLMF 7.2.5). -/
-@[dlmf 7.2.E5]
-def Real.dawsonF (x : ℝ) : ℝ := Real.exp (-x ^ 2) * ∫ t in (0 : ℝ)..x, Real.exp (t ^ 2)
+
 
 /-- `∫₀ˣ e^{t²} dt = x M(1/2, 3/2, x²)`. -/
 theorem integral_exp_sq_eq_kummerM (x : ℝ) :

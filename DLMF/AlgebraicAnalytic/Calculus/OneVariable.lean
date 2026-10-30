@@ -5,7 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AlgebraicAnalytic.Calculus.Defs
+public import DLMF.AlgebraicAnalytic.Calculus.Basic
+public import DLMFMathlib.Analysis.Calculus.LHopitalInfinity
 public import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
 public import Mathlib.Analysis.Convex.Deriv
 public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
@@ -32,7 +33,12 @@ Most of DLMF §1.4 is in Mathlib; the pointers are in
 
 The integral mean-value formulas use Mathlib’s
 `exists_eq_const_mul_intervalIntegral_of_nonneg` and
-`exists_eq_const_mul_intervalIntegral_of_nonneg_of_monotoneOn`.
+`exists_eq_const_mul_intervalIntegral_of_nonneg_of_monotoneOn`. The mixed Stieltjes measure
+formula uses Mathlib’s `integral_add_measure`, `integral_finsetSum_measure`, and the integral
+identity for a measure with density; the finite atomic measure is unchanged by restriction
+because all its mass points lie inside the integration interval. L’Hôpital’s rule with an
+unbounded denominator uses the Mathlib-based increment comparison theorem in
+`DLMFMathlib.Analysis.Calculus.LHopitalInfinity`.
 -/
 
 @[expose] public noncomputable section
@@ -94,7 +100,7 @@ theorem lhopital_atTop_nhdsNE {f g : ℝ → ℝ} {a l : ℝ}
     (hgtop : Tendsto (fun x => |g x|) (𝓝[≠] a) atTop)
     (hdiv : Tendsto (fun x => deriv f x / deriv g x) (𝓝[≠] a) (𝓝 l)) :
     Tendsto (fun x => f x / g x) (𝓝[≠] a) (𝓝 l) := by
-  sorry
+  exact deriv.lhopital_infty_nhdsNE hf hg hg' hgtop hdiv
 
 /-! ### §1.4(iv) Indefinite integrals -/
 
@@ -201,8 +207,24 @@ theorem setIntegral_withDensity_add_dirac {w : ℝ → ℝ≥0} (hw : Measurable
     (hfm : Measurable f) (hfw : IntegrableOn (fun x => (w x : ℝ) * f x) (Ioo a b)) :
     ∫ x in Ioo a b, f x ∂(volume.withDensity (fun x => (w x : ℝ≥0∞)) +
         ∑ n, (wn n : ℝ≥0∞) • Measure.dirac (xn n)) =
-      ∫ x in Ioo a b, (w x : ℝ) * f x + ∑ n, (wn n : ℝ) * f (xn n) := by
-  sorry
+      (∫ x in Ioo a b, (w x : ℝ) * f x) + ∑ n, (wn n : ℝ) * f (xn n) := by
+  have hd : Integrable f ((volume.withDensity (fun x => (w x : ℝ≥0∞))).restrict (Ioo a b)) := by
+    rw [restrict_withDensity measurableSet_Ioo]
+    exact (integrable_withDensity_iff_integrable_coe_smul hw).mpr (by simpa only [smul_eq_mul, IntegrableOn] using hfw)
+  have hatom (j : Fin N) : Integrable f ((wn j : ℝ≥0∞) • Measure.dirac (xn j)) :=
+    (integrable_dirac' hfm.stronglyMeasurable (by simp)).smul_measure ENNReal.coe_ne_top
+  have hdisc : (∑ j, (wn j : ℝ≥0∞) • Measure.dirac (xn j)).restrict (Ioo a b) =
+      ∑ j, (wn j : ℝ≥0∞) • Measure.dirac (xn j) := by
+    change Measure.restrictₗ (Ioo a b) (∑ j, (wn j : ℝ≥0∞) • Measure.dirac (xn j)) = _
+    rw [map_sum]
+    simp [Measure.restrictₗ_apply, restrict_dirac, hxn]
+  rw [Measure.restrict_add, hdisc, integral_add_measure hd
+    (integrable_finsetSum_measure.mpr fun j _ => hatom j)]
+  congr 1
+  · rw [setIntegral_withDensity_eq_setIntegral_smul hw f measurableSet_Ioo]
+    simp [NNReal.smul_def]
+  · rw [integral_finsetSum_measure fun j _ => hatom j]
+    simp [integral_dirac, NNReal.smul_def]
 
 /-- DLMF 1.4.24: for `f` integrable on `[a, b]` the principal value at `c ∈ (a, b)` exists and
 equals the integral `∫ₐᵇ f`. -/

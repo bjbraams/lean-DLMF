@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.JacobiElliptic.P3jJacobiODE
-public import DLMF.Weierstrass.Basic
+public import DLMF.Weierstrass.EllipticFunctionsAndInvariants
 
 /-!
 # Eisenstein-type series for `ns` and `ds` (helpers for DLMF §22.12, round 3)

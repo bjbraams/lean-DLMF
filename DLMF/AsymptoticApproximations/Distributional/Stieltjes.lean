@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AsymptoticApproximations.Distributional.Defs
+public import DLMF.AsymptoticApproximations.Distributional.Basic
 public import DLMF.Gamma.BetaFunction
 public import Mathlib.Analysis.Distribution.SchwartzSpace.Basic
 public import Mathlib.Analysis.SpecialFunctions.NonIntegrable

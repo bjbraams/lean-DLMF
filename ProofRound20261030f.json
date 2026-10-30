@@ -1,0 +1,708 @@
+{
+  "format": 1,
+  "date": "2026-10-30",
+  "round": "lhopital-hyperbolic-series-carlson-principal-values-and-appell-reductions",
+  "baseCommit": "2f7efb7a9b8ab22bd9089f6b512bcaf2b6cc7048",
+  "baseline": {
+    "previousRound": "ProofRound20261030e.json",
+    "directAdmissions": 1562
+  },
+  "admissions": {
+    "before": 1562,
+    "after": 1553,
+    "removed": 9,
+    "filesWithAdmissions": 291,
+    "byArea": {
+      "AlgebraicAnalytic": {
+        "before": 207,
+        "after": 206
+      },
+      "Elementary": {
+        "before": 47,
+        "after": 45
+      },
+      "EllipticIntegrals": {
+        "before": 170,
+        "after": 168
+      },
+      "GeneralizedHypergeometric": {
+        "before": 99,
+        "after": 95
+      }
+    }
+  },
+  "completed": [
+    {
+      "name": "DLMF.AlgebraicAnalytic.lhopital_atTop_nhdsNE",
+      "file": "DLMF/AlgebraicAnalytic/Calculus/OneVariable.lean",
+      "line": 95,
+      "proofLines": 2,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 1.4.14–1.4.15 (L'Hôpital's rule, case `∞/∞`): if `f` and `g` are differentiable in a\npunctured neighbourhood of `a`, `g' ≠ 0` there, `|g(x)| → ∞` as `x → a`, and\n`f'(x)/g'(x) → l`, then `f(x)/g(x) → l`. (No hypothesis on `f` is needed beyond\ndifferentiability; the case `0/0` is Mathlib's `deriv.lhopital_zero_nhdsNE`.)"
+    },
+    {
+      "name": "DLMF.Elementary.hasSum_arcsinh",
+      "file": "DLMF/Elementary/Hyperbolic/InverseBranches.lean",
+      "line": 1054,
+      "proofLines": 2,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The central-binomial power series of the principal inverse hyperbolic sine\non the open unit disk, obtained by rotating the principal arcsine expansion."
+    },
+    {
+      "name": "DLMF.Elementary.hasSum_arccosh_near_one",
+      "file": "DLMF/Elementary/Hyperbolic/InverseBranches.lean",
+      "line": 1073,
+      "proofLines": 33,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The principal inverse-cosh expansion about one after factoring the square root.\nThe series converges on the stated closed disk in the right half-plane, with\nits removable value at one assigned explicitly."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRC_of_neg",
+      "file": "DLMF/EllipticIntegrals/LegendreIdentities.lean",
+      "line": 783,
+      "proofLines": 23,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.2.20: for `y < 0 ≤ x` the Cauchy principal value is hyperbolic:\n`R_C(x, y) = √(x/(x-y)) R_C(x-y, -y) = (x-y)^{-1/2} artanh √(x/(x-y))\n= (x-y)^{-1/2} ln((√x + √(x-y))/√(-y))`."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.tendsto_symEllIntRC_zero",
+      "file": "DLMF/EllipticIntegrals/SpecialCases.lean",
+      "line": 753,
+      "proofLines": 26,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "DLMF 19.6.15: `R_C(x, y) → +∞` as `y → 0+` or `y → 0-`, for real `x > 0`."
+    },
+    {
+      "name": "DLMF.Hypergeometric.appF1_pfaff_second",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/GermTransformations.lean",
+      "line": 104,
+      "proofLines": 19,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A fractional linear change in both variables gives F1's second Pfaff transformation\nas principal analytic germs at the origin."
+    },
+    {
+      "name": "DLMF.Hypergeometric.appF1_reduction_gauss",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/GermTransformations.lean",
+      "line": 145,
+      "proofLines": 21,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "When the lower parameter is the sum of the separate upper parameters, F1 reduces\nto a Gauss function after a fractional linear change, as germs at the origin."
+    },
+    {
+      "name": "DLMF.Hypergeometric.appF3_reduction_gauss",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/GermTransformations.lean",
+      "line": 172,
+      "proofLines": 33,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Complementary pairs of upper parameters reduce F3 to a Gauss function with\nargument `x + y - x * y`, as principal germs at the origin."
+    },
+    {
+      "name": "DLMF.Hypergeometric.appF2_reduction_appF1",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/GermTransformations.lean",
+      "line": 268,
+      "proofLines": 28,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "When the second lower parameter equals the common upper parameter, F2 reduces\nto F1 with one rescaled variable, as germs at the origin."
+    }
+  ],
+  "newHelpers": [
+    {
+      "name": "DLMF.Elementary.arccosh_half_right",
+      "file": "DLMF/Elementary/Hyperbolic/InverseBranches.lean",
+      "line": 1012,
+      "proofLines": 21,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The half-angle logarithm holds on the right half-plane, including the chosen real cut bank."
+    },
+    {
+      "name": "DLMF.Elementary.hasSum_arcsinh_closed_disk",
+      "file": "DLMF/Elementary/Hyperbolic/InverseBranches.lean",
+      "line": 1039,
+      "proofLines": 10,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The central-binomial expansion of the principal inverse hyperbolic sine\nconverges on the closed unit disk, including its two branch points."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.hasDerivAt_rcNeg_primitive",
+      "file": "DLMF/EllipticIntegrals/LegendreIdentities.lean",
+      "line": 588,
+      "proofLines": 12,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The logarithmic primitive of the real RC kernel away from its pole."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.tendsto_rcNeg_primitive_atTop",
+      "file": "DLMF/EllipticIntegrals/LegendreIdentities.lean",
+      "line": 604,
+      "proofLines": 34,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The logarithmic RC primitive vanishes at infinity."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.continuousAt_rcNeg_primitive",
+      "file": "DLMF/EllipticIntegrals/LegendreIdentities.lean",
+      "line": 642,
+      "proofLines": 9,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The RC primitive is continuous away from its logarithmic pole, including at zero."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.integral_rcNeg_kernel_truncated",
+      "file": "DLMF/EllipticIntegrals/LegendreIdentities.lean",
+      "line": 654,
+      "proofLines": 57,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The real RC integral with a symmetric interval removed is the sum of its two primitive differences."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.tendsto_integral_rcNeg_kernel_truncated",
+      "file": "DLMF/EllipticIntegrals/LegendreIdentities.lean",
+      "line": 716,
+      "proofLines": 27,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The logarithms at the two sides of the RC pole cancel in the symmetric truncation limit."
+    },
+    {
+      "name": "DLMF.EllipticIntegrals.symEllIntRC_of_neg_log",
+      "file": "DLMF/EllipticIntegrals/LegendreIdentities.lean",
+      "line": 747,
+      "proofLines": 30,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The negative-real RC principal value equals its real logarithmic expression."
+    },
+    {
+      "name": "DLMF.Hypergeometric.appF1_eq_appellF1",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/GermTransformations.lean",
+      "line": 34,
+      "proofLines": 7,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The project and lean-codes ordinary normalizations of F1 agree on the unit bidisc."
+    },
+    {
+      "name": "DLMF.Hypergeometric.appF1_eq_gamma_mul_regCarlsonR",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/GermTransformations.lean",
+      "line": 44,
+      "proofLines": 3,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "F1 is the Gamma-normalized three-node Carlson average on the unit bidisc."
+    },
+    {
+      "name": "DLMF.Hypergeometric.appell_nodes_mem_variableDomain",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/GermTransformations.lean",
+      "line": 52,
+      "proofLines": 12,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Nodes of the Appell representation lie in the right half-plane on the unit bidisc."
+    },
+    {
+      "name": "DLMF.Hypergeometric.appF1_pfaff_second_of_norm_lt_one",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/GermTransformations.lean",
+      "line": 68,
+      "proofLines": 29,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Scaling and permuting the three Carlson nodes gives F1's second Pfaff identity\nwhenever both Appell series converge in the unit bidisc."
+    },
+    {
+      "name": "DLMF.Hypergeometric.appF1_zero_upper_germ",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/GermTransformations.lean",
+      "line": 129,
+      "proofLines": 11,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A vanishing second upper parameter leaves just a Gauss series in F1's second variable."
+    },
+    {
+      "name": "DLMF.Hypergeometric.appF1_totalDegree_eq",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/GermTransformations.lean",
+      "line": 210,
+      "proofLines": 7,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "The total-degree coefficient of F1 is a two-node Carlson polynomial numerator."
+    },
+    {
+      "name": "DLMF.Hypergeometric.hasSum_appF1_totalDegree",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/GermTransformations.lean",
+      "line": 221,
+      "proofLines": 12,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Grouping F1 by total degree gives its convergent Carlson-polynomial expansion."
+    },
+    {
+      "name": "DLMF.Hypergeometric.appF2_reduction_numerator",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/GermTransformations.lean",
+      "line": 238,
+      "proofLines": 14,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A homogeneous Carlson numerator at the rescaled F1 nodes is a terminating Gauss function."
+    },
+    {
+      "name": "DLMF.Hypergeometric.appF2_swap",
+      "file": "DLMF/GeneralizedHypergeometric/Appell/GermTransformations.lean",
+      "line": 257,
+      "proofLines": 7,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Exchanging the two separate upper and lower parameter pairs exchanges the F2 variables."
+    },
+    {
+      "name": "deriv.abs_increment_sub_mul_le_of_deriv_div_bound",
+      "file": "DLMFMathlib/Analysis/Calculus/LHopitalInfinity.lean",
+      "line": 29,
+      "proofLines": 16,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Cauchy’s mean value theorem transports a bound on a derivative quotient to a bound\non the corresponding affine increments over an ordered interval."
+    },
+    {
+      "name": "deriv.abs_quotient_sub_lt_of_increment_bound",
+      "file": "DLMFMathlib/Analysis/Calculus/LHopitalInfinity.lean",
+      "line": 53,
+      "proofLines": 11,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A small affine increment error and a negligible fixed anchor bound the error in\na quotient whose denominator is nonzero."
+    },
+    {
+      "name": "deriv.abs_increment_sub_mul_le_of_deriv_div_bound_uIcc",
+      "file": "DLMFMathlib/Analysis/Calculus/LHopitalInfinity.lean",
+      "line": 71,
+      "proofLines": 17,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A derivative-quotient bound controls affine increments in either orientation of\na closed interval."
+    },
+    {
+      "name": "deriv.eventually_quotient_anchor_bounds",
+      "file": "DLMFMathlib/Analysis/Calculus/LHopitalInfinity.lean",
+      "line": 96,
+      "proofLines": 9,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "An unbounded absolute denominator eventually dominates any fixed anchor and its\naffine error by the constants needed in a quotient estimate."
+    },
+    {
+      "name": "deriv.punctured_increment_bound_or",
+      "file": "DLMFMathlib/Analysis/Calculus/LHopitalInfinity.lean",
+      "line": 111,
+      "proofLines": 20,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A point near a puncture can be compared with a fixed anchor on the same side,\nso the intervening interval stays inside the differentiability region."
+    },
+    {
+      "name": "deriv.lhopital_infty_nhdsNE",
+      "file": "DLMFMathlib/Analysis/Calculus/LHopitalInfinity.lean",
+      "line": 142,
+      "proofLines": 25,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "L’Hôpital’s rule at a punctured finite point when the denominator is unbounded in\nabsolute value. The numerator need not have a limit."
+    },
+    {
+      "name": "Complex.sqrt_ofReal_mul",
+      "file": "DLMFMathlib/Analysis/Complex/Sqrt.lean",
+      "line": 25,
+      "proofLines": 11,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "A nonnegative real factor scales the principal complex square root without changing its bank."
+    }
+  ],
+  "reusableExistingHelpers": [
+    {
+      "name": "DLMF.Elementary.hyper_arcsinh_rotation",
+      "file": "DLMF/Elementary/Hyperbolic/InverseCalculus.lean",
+      "line": 211,
+      "proofLines": 6,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "doc": "Rotation identifies the chosen logarithm/square-root inverse with the trigonometric one."
+    }
+  ],
+  "downstreamFreedFromAdmissions": [],
+  "movedDeclarations": [
+    {
+      "name": "appF1_pfaff_second",
+      "before": "DLMF/GeneralizedHypergeometric/Appell/EulerIntegrals.lean",
+      "after": "DLMF/GeneralizedHypergeometric/Appell/GermTransformations.lean"
+    },
+    {
+      "name": "appF1_reduction_gauss",
+      "before": "DLMF/GeneralizedHypergeometric/Appell/EulerIntegrals.lean",
+      "after": "DLMF/GeneralizedHypergeometric/Appell/GermTransformations.lean"
+    },
+    {
+      "name": "appF3_reduction_gauss",
+      "before": "DLMF/GeneralizedHypergeometric/Appell/EulerIntegrals.lean",
+      "after": "DLMF/GeneralizedHypergeometric/Appell/GermTransformations.lean"
+    },
+    {
+      "name": "appF2_reduction_appF1",
+      "before": "DLMF/GeneralizedHypergeometric/Appell/EulerIntegrals.lean",
+      "after": "DLMF/GeneralizedHypergeometric/Appell/GermTransformations.lean"
+    }
+  ],
+  "validation": {
+    "fullBuild": "lake build > /tmp/DLMF-build.log 2>&1",
+    "buildJobs": 14764,
+    "strictChecks": [
+      {
+        "file": "DLMF.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030f/strict-DLMF.lean.log"
+      },
+      {
+        "file": "DLMF/AlgebraicAnalytic/Calculus/OneVariable.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030f/strict-DLMF_AlgebraicAnalytic_Calculus_OneVariable.lean.log"
+      },
+      {
+        "file": "DLMF/Elementary/Hyperbolic/InverseBranches.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030f/strict-DLMF_Elementary_Hyperbolic_InverseBranches.lean.log"
+      },
+      {
+        "file": "DLMF/Elementary/Trigonometric/InverseIdentities.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030f/strict-DLMF_Elementary_Trigonometric_InverseIdentities.lean.log"
+      },
+      {
+        "file": "DLMF/EllipticIntegrals/LegendreIdentities.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030f/strict-DLMF_EllipticIntegrals_LegendreIdentities.lean.log"
+      },
+      {
+        "file": "DLMF/EllipticIntegrals/SpecialCases.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030f/strict-DLMF_EllipticIntegrals_SpecialCases.lean.log"
+      },
+      {
+        "file": "DLMF/GeneralizedHypergeometric/Appell.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030f/strict-DLMF_GeneralizedHypergeometric_Appell.lean.log"
+      },
+      {
+        "file": "DLMF/GeneralizedHypergeometric/Appell/EulerIntegrals.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030f/strict-DLMF_GeneralizedHypergeometric_Appell_EulerIntegrals.lean.log"
+      },
+      {
+        "file": "DLMF/GeneralizedHypergeometric/Appell/GermTransformations.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030f/strict-DLMF_GeneralizedHypergeometric_Appell_GermTransformations.lean.log"
+      },
+      {
+        "file": "DLMFMathlib.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030f/strict-DLMFMathlib.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Calculus/LHopitalInfinity.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030f/strict-DLMFMathlib_Analysis_Calculus_LHopitalInfinity.lean.log"
+      },
+      {
+        "file": "DLMFMathlib/Analysis/Complex/Sqrt.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030f/strict-DLMFMathlib_Analysis_Complex_Sqrt.lean.log"
+      },
+      {
+        "file": "Main.lean",
+        "exitCode": 0,
+        "log": "/tmp/DLMF-proof-round-20261030f/strict-Main.lean.log"
+      }
+    ],
+    "globalAxioms": {
+      "dependingOnAdmissions": 1658,
+      "nonstandard": [],
+      "theorems": 56746
+    },
+    "tagSummary": {
+      "proved": 8751,
+      "pointers": 1028,
+      "nonstandard": 0,
+      "entries": 10703,
+      "admitted": 1952
+    },
+    "sourceStatementChanges": [
+      {
+        "file": "DLMF/Elementary/Hyperbolic/InverseBranches.lean",
+        "name": "hypR4_sqrt_half"
+      }
+    ],
+    "sourceDefinitionChanges": [],
+    "compiledPublicTypeChanges": [],
+    "privateBinderRenames": [
+      {
+        "name": "hypR4_sqrt_half",
+        "change": "Unused hypothesis binder h renamed _h; its type and mathematical assumptions are unchanged."
+      }
+    ],
+    "maxChangedProofLines": 57,
+    "maxLibraryFileLines": 1454,
+    "newDeclarationsWithoutDocs": [],
+    "newExactUpstreamMatches": [],
+    "removedPublicDeclarations": [],
+    "imports": {
+      "newTwoWayPairs": [],
+      "newDefinitionsImports": [],
+      "twoWayPairs": 15,
+      "definitionsImports": 20,
+      "newCrossAreaPairs": [],
+      "baseline": "Beginning-of-round source snapshot from ProofRound20261030e"
+    },
+    "changedLeanFiles": [
+      "DLMF/AlgebraicAnalytic/Calculus/OneVariable.lean",
+      "DLMF/Elementary/Hyperbolic/InverseBranches.lean",
+      "DLMF/Elementary/Trigonometric/InverseIdentities.lean",
+      "DLMF/EllipticIntegrals/LegendreIdentities.lean",
+      "DLMF/EllipticIntegrals/SpecialCases.lean",
+      "DLMF/GeneralizedHypergeometric/Appell.lean",
+      "DLMF/GeneralizedHypergeometric/Appell/EulerIntegrals.lean",
+      "DLMF/GeneralizedHypergeometric/Appell/GermTransformations.lean",
+      "DLMFMathlib.lean",
+      "DLMFMathlib/Analysis/Calculus/LHopitalInfinity.lean",
+      "DLMFMathlib/Analysis/Complex/Sqrt.lean"
+    ],
+    "compiledDeclarationCount": 26988,
+    "newSourceDeclarations": 24,
+    "affectedSourceSorryScan": "passed",
+    "diffCheck": "passed",
+    "allCompletedProofsStandardAxioms": true,
+    "allNewHelpersStandardAxioms": true,
+    "ledgerRefresh": {
+      "files": [
+        "DLMF1Acquisition.md",
+        "DLMF4Acquisition.md",
+        "DLMF16Acquisition.md",
+        "DLMF19Acquisition.md"
+      ],
+      "note": "Statuses may include stale entries and moved source references; direct removals are counted separately from source and compiled axioms."
+    }
+  },
+  "statementCorrections": [],
+  "statementIssues": {
+    "previousIssuesRetained": [
+      "liouvilleGreen_interval_isEquivalent: finite-endpoint uniqueness is false",
+      "picard_great: missing positive outer radius",
+      "prod_mtest_log: tail-only bounds do not give global uniform convergence",
+      "haar_isLittleO_pow: separate derivatives need compatibility",
+      "hasCesaroSumOfOrder_of_tendsto: negative-order regularity requires review"
+    ],
+    "definitionConventions": [
+      "narayana 0 0 = 0 locally, whereas DLMF Table 26.6.3 gives 1; the path-count theorem assumes n >= 1 and this round changes no definition."
+    ],
+    "duplicationCandidates": [
+      "periodicBernoulliB versus periodicBernoulli, and periodicEulerE versus antiperiodicEuler"
+    ],
+    "newIssues": [
+      {
+        "names": [
+          "DLMF.Theta.jacobiThetaTwoTau_powerSeries",
+          "DLMF.Theta.jacobiThetaThreeTau_powerSeries",
+          "DLMF.Theta.jacobiThetaFourTau_powerSeries"
+        ],
+        "status": "Lean counterexamples, using only standard axioms; original statements retained",
+        "detail": "The common unshifted lattice radius includes zeros of theta2, theta3 and theta4. At tau=I use z=1/2, (1+I)/2 and I/2 respectively. The null values and complex exponentials on the right are nonzero.",
+        "reproductionSource": "import DLMF.Theta.PowerSeries\nimport DLMF.JacobiElliptic.Basic.QuarterPeriods\nopen Complex Set\nopen scoped Real\nnamespace DLMF.Theta\n\nlemma lattice_norm_ge (p : {p : ℤ × ℤ // p ≠ 0}) :\n    1 ≤ ‖((p.1.1 : ℂ) + p.1.2 * I)‖ := by\n  have hp : p.1.1 ≠ 0 ∨ p.1.2 ≠ 0 := by\n    by_contra h\n    push_neg at h\n    exact p.2 (Prod.ext h.1 h.2)\n  have hi : (1 : ℤ) ≤ p.1.1 ^ 2 + p.1.2 ^ 2 := by\n    rcases hp with h | h\n    · have h2 : p.1.1 ≤ -1 ∨ 1 ≤ p.1.1 := by omega\n      rcases h2 with h2 | h2 <;> nlinarith [sq_nonneg p.1.2]\n    · have h2 : p.1.2 ≤ -1 ∨ 1 ≤ p.1.2 := by omega\n      rcases h2 with h2 | h2 <;> nlinarith [sq_nonneg p.1.1]\n  have hr : (1 : ℝ) ≤ (p.1.1 : ℝ) ^ 2 + (p.1.2 : ℝ) ^ 2 := by exact_mod_cast hi\n  have hn := Complex.sq_norm ((p.1.1 : ℂ) + p.1.2 * I)\n  simp only [normSq_apply, add_re, add_im, intCast_re, intCast_im, mul_re, mul_im, I_re, I_im,\n    mul_zero, zero_mul, mul_one, sub_zero, zero_add, add_zero] at hn\n  nlinarith [norm_nonneg ((p.1.1 : ℂ) + p.1.2 * I)]\n\nlemma radius_ge : Real.pi ≤ thetaLatticeMinNorm I := by\n  letI : Nonempty {p : ℤ × ℤ // p ≠ 0} := ⟨⟨(1,0), by decide⟩⟩\n  apply le_ciInf\n  intro p\n  rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg Real.pi_pos.le]\n  nlinarith [lattice_norm_ge p, Real.pi_pos]\n\nlemma condition : ‖(π : ℂ) * (1 / 2 : ℂ)‖ < thetaLatticeMinNorm I := by\n  calc ‖(π : ℂ) * (1 / 2 : ℂ)‖ = Real.pi / 2 := by simp [div_eq_mul_inv, Real.norm_of_nonneg Real.pi_pos.le]\n    _ < Real.pi := by linarith [Real.pi_pos]\n    _ ≤ _ := radius_ge\n\nlemma theta_two_zero : DLMF.Elliptic.jacobiThetaTwoTau ((π : ℂ) * (1 / 2 : ℂ)) I = 0 := by\n  have h := DLMF.JacobiElliptic.je22a_thetaTwo_add_half_pi 0 I\n  have h0 := DLMF.Theta.jacobiThetaOneTau_lattice_eq_zero I 0 0\n  simp only [Int.cast_zero, zero_mul, zero_add, mul_zero, neg_zero] at h0\n  simpa [h0, div_eq_mul_inv] using h\n\nlemma counterexample : ¬ (∃ S : ℂ,\n    HasSum (fun j : ℕ => thetaAlpha (2 * (j + 1)) I * (1 / 2 : ℂ) ^ (2 * (j + 1)) /\n      (2 * (j + 1))) S ∧\n    DLMF.Elliptic.jacobiThetaTwoTau ((π : ℂ) * (1 / 2 : ℂ)) I =\n      jacobiThetaTwoNullTau I * cexp (-S)) := by\n  rintro ⟨S, _, h⟩\n  rw [theta_two_zero] at h\n  exact (mul_ne_zero (DLMF.JacobiElliptic.je22a_thetaTwo_zero_ne_zero (by norm_num : 0 < I.im)) (exp_ne_zero _)) h.symm\n\n\nlemma condition_four : ‖(π : ℂ) * (I / 2)‖ < thetaLatticeMinNorm I := by\n  calc ‖(π : ℂ) * (I / 2)‖ = Real.pi / 2 := by\n         simp [div_eq_mul_inv, Real.norm_of_nonneg Real.pi_pos.le]\n       _ < Real.pi := by linarith [Real.pi_pos]\n       _ ≤ _ := radius_ge\n\nlemma condition_three : ‖(π : ℂ) * ((1 + I) / 2)‖ < thetaLatticeMinNorm I := by\n  have hn : ‖((1 + I) / 2 : ℂ)‖ < 1 := by\n    have h := Complex.sq_norm ((1 + I) / 2 : ℂ)\n    norm_num [normSq_apply, div_re, div_im] at h\n    rw [norm_div, Complex.norm_ofNat]\n    nlinarith [norm_nonneg (1 + I : ℂ)]\n  calc ‖(π : ℂ) * ((1 + I) / 2)‖ = Real.pi * ‖((1 + I) / 2 : ℂ)‖ := by\n         rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg Real.pi_pos.le]\n       _ < Real.pi := by nlinarith [Real.pi_pos]\n       _ ≤ _ := radius_ge\n\nlemma theta_four_zero : DLMF.Elliptic.jacobiThetaFourTau ((π : ℂ) * (I / 2)) I = 0 := by\n  have h := DLMF.JacobiElliptic.je22a_thetaFour_add_half_tau 0 I\n  simp only [zero_add, DLMF.JacobiElliptic.je22a_thetaOne_zero, mul_zero] at h\n  simpa [mul_div_assoc] using h\n\nlemma theta_three_zero : DLMF.Elliptic.jacobiThetaThreeTau ((π : ℂ) * ((1 + I) / 2)) I = 0 := by\n  have h := DLMF.JacobiElliptic.je22a_thetaThree_add_half_pi ((π : ℂ) * (I / 2)) I\n  rw [theta_four_zero] at h\n  convert h using 1 <;> congr 1 <;> ring\n\nlemma counterexample_four : ¬ (∃ S : ℂ,\n    HasSum (fun j : ℕ => thetaGamma (2 * (j + 1)) I * (I / 2) ^ (2 * (j + 1)) /\n      (2 * (j + 1))) S ∧\n    DLMF.Elliptic.jacobiThetaFourTau ((π : ℂ) * (I / 2)) I =\n      jacobiThetaFourNullTau I * cexp (-S)) := by\n  rintro ⟨S, _, h⟩\n  rw [theta_four_zero] at h\n  exact (mul_ne_zero (DLMF.JacobiElliptic.je22a_thetaFour_zero_ne_zero (by norm_num : 0 < I.im)) (exp_ne_zero _)) h.symm\n\nlemma counterexample_three : ¬ (∃ S : ℂ,\n    HasSum (fun j : ℕ => thetaBeta (2 * (j + 1)) I * ((1 + I) / 2) ^ (2 * (j + 1)) /\n      (2 * (j + 1))) S ∧\n    DLMF.Elliptic.jacobiThetaThreeTau ((π : ℂ) * ((1 + I) / 2)) I =\n      jacobiThetaThreeNullTau I * cexp (-S)) := by\n  rintro ⟨S, _, h⟩\n  rw [theta_three_zero] at h\n  exact (mul_ne_zero (DLMF.JacobiElliptic.je22a_thetaThree_zero_ne_zero (by norm_num : 0 < I.im)) (exp_ne_zero _)) h.symm\n\n#print axioms condition\n#print axioms counterexample\n#print axioms condition_three\n#print axioms condition_four\n#print axioms counterexample_three\n#print axioms counterexample_four\nend DLMF.Theta\n",
+        "axiomAudit": "/tmp/DLMF-theta-radius-counterexample.lean:11:4: warning: `push_neg` has been deprecated. Prefer using `push Not` instead.\nIf you'd rather continue using `push_neg` in your project, you can implement it as follows:\n```\nopen Lean.Parser.Tactic in\nmacro \"push_neg\" cfg:optConfig loc:(location)? : tactic =>\n  `(tactic| push $cfg:optConfig Not $[$loc]?)\n```\n/tmp/DLMF-theta-radius-counterexample.lean:22:14: warning: This simp argument is unused:\n  zero_mul\n\nHint: Omit it from the simp argument list.\n  [apply] simp only [normSq_apply, add_re, add_im, intCast_re, intCast_im, mul_re, mul_im, I_re, I_im, mul_zero,\n    mul_one, sub_zero, zero_add, add_zero] at hn\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n/tmp/DLMF-theta-radius-counterexample.lean:26:2: warning: Try this: \n  letI̵\n\nThe goal is a proposition, so `let` is preferred over `letI`.\nThe difference between `let` and `letI` is that `letI` inlines the value.\nBut this is not relevant for proofs because of proof irrelevance.\n\nNote: This linter can be disabled with `set_option linter.style.haveILetI false`\n/tmp/DLMF-theta-radius-counterexample.lean:40:48: warning: This simp argument is unused:\n  mul_zero\n\nHint: Omit it from the simp argument list.\n  [apply] simp only [Int.cast_zero, zero_mul, zero_add, neg_zero] at h0\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n/tmp/DLMF-theta-radius-counterexample.lean:40:58: warning: This simp argument is unused:\n  neg_zero\n\nHint: Omit it from the simp argument list.\n  [apply] simp only [Int.cast_zero, zero_mul, zero_add, mul_zero] at h0\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n/tmp/DLMF-theta-radius-counterexample.lean:78:20: warning: Unused tactic linter: `<;>` should be replaced with `;` or be removed.\n\nNote: This linter can be disabled with `set_option linter.unusedTactic false`\n/tmp/DLMF-theta-radius-counterexample.lean:78:32: warning: Unused tactic linter: `<;>` should be replaced with `;` or be removed.\n\nNote: This linter can be disabled with `set_option linter.unusedTactic false`\n/tmp/DLMF-theta-radius-counterexample.lean:78:20: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice\n\nNote: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`\n/tmp/DLMF-theta-radius-counterexample.lean:78:32: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice\n\nNote: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`\n'DLMF.Theta.condition' depends on axioms: [propext, Classical.choice, Quot.sound]\n'DLMF.Theta.counterexample' depends on axioms: [propext, Classical.choice, Quot.sound]\n'DLMF.Theta.condition_three' depends on axioms: [propext, Classical.choice, Quot.sound]\n'DLMF.Theta.condition_four' depends on axioms: [propext, Classical.choice, Quot.sound]\n'DLMF.Theta.counterexample_three' depends on axioms: [propext, Classical.choice, Quot.sound]\n'DLMF.Theta.counterexample_four' depends on axioms: [propext, Classical.choice, Quot.sound]\n"
+      },
+      {
+        "name": "DLMF.EllipticIntegrals.symEllIntRC_sq_eq",
+        "status": "Analytical branch counterexample; not formalized in Lean; statement retained",
+        "detail": "At x=-I,y=1 the hypotheses permit the point. The left RC(-1,1) integral has strictly negative imaginary part, whereas the transformed RC(-I/2,(1-I)/2) integrand has strictly positive imaginary part. Both converge, including the integrable left square-root singularity at t=1. The strict-half-plane variant is already proved as symEllIntRC_sq."
+      },
+      {
+        "name": "DLMF.EllipticIntegrals.symEllIntR_half_hasSum_mean",
+        "status": "Lean counterexample, using only standard axioms; original statement retained",
+        "detail": "For n=2,a=1 take z0=(-3200-798*i)/169 and z1=(-1120+3102*i)/169. Their mean A=(-2160+1152*i)/169 lies in the slit plane and the normalized deviations have norm 65/72<1. Original and normalized principal square roots give opposite signs in the asserted homogeneity. The current assumptions do not prevent this branch mismatch.",
+        "reproductionSource": "import DLMF.EllipticIntegrals.SymmetricSpecialCases\nimport DLMF.EllipticIntegrals.SymmetricQuadratic\nopen Complex Set\nopen scoped Real\nnamespace DLMF.EllipticIntegrals\nnoncomputable def branchNodes : Fin 2 → ℂ := ![((7-57*I)/13)^2, ((33+47*I)/13)^2]\nnoncomputable def branchMean : ℂ := (1/(2:ℂ))*∑ i, branchNodes i\nlemma branchMean_eq : branchMean = (-2160+1152*I)/169 := by\n  norm_num [branchMean, branchNodes, Fin.sum_univ_two, Complex.ext_iff,\n    Complex.div_re, Complex.div_im, Complex.mul_re, Complex.mul_im, pow_two]\nlemma branchMean_ne : branchMean ≠ 0 := by\n  rw [branchMean_eq]; norm_num [Complex.ext_iff, Complex.div_re, Complex.div_im]\nlemma branchNorm_eq : (fun i => branchNodes i / branchMean) =\n    ![((13+5*I)/12)^2, ((13-5*I)/12)^2] := by\n  rw [branchMean_eq]; ext i; fin_cases i <;>\n    norm_num [branchNodes, Complex.ext_iff, pow_two, Complex.div_re, Complex.div_im,\n      Complex.mul_re, Complex.mul_im, Complex.normSq]\nlemma branch_domain : branchNodes ∈ Carlson.carlsonRSlitDomain := by\n  intro i; fin_cases i <;> apply ei19c_sq_mem_slitPlane <;>\n    norm_num [branchNodes, Complex.div_re]\nlemma branchMean_slit : branchMean ∈ slitPlane := by\n  apply mem_slitPlane_iff.mpr (Or.inr ?_)\n  rw [branchMean_eq]\n  norm_num [Complex.div_im]\nlemma branchNorm_close (i : Fin 2) : ‖1-branchNodes i / branchMean‖ < 1 := by\n  have he := congrFun branchNorm_eq i\n  rw [he]; fin_cases i <;>\n    norm_num [Complex.ext_iff, pow_two, Complex.norm_def, Complex.normSq, Complex.div_re,\n      Complex.div_im, Complex.mul_re, Complex.mul_im, Real.sqrt_div]\nlemma testMean_counterexample : symEllIntR 1 (fun _ : Fin 2 => 1/2) branchNodes ≠\n    branchMean⁻¹ * symEllIntR 1 (fun _ : Fin 2 => 1/2)\n      (fun i => branchNodes i / branchMean) := by\n  have hR {u v : ℂ} (hu : 0<u.re) (hv : 0<v.re) :\n      symEllIntR 1 (fun _ : Fin 2 => 1/2) ![u^2,v^2] = u⁻¹*v⁻¹ := by\n    have hc : (∑ _ : Fin 2, (1/2:ℂ)) = 1 := by norm_num\n    have h := symEllIntR_sum (fun _ : Fin 2 => (1/2:ℂ))\n      (ei19c_slit2 (ei19c_sq_mem_slitPlane hu) (ei19c_sq_mem_slitPlane hv))\n      (by rw [hc, Gamma_one]; norm_num)\n    rw [hc] at h\n    rw [h]\n    simp only [Fin.prod_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one,\n      cpow_neg, show (1/2:ℂ) = 2⁻¹ by norm_num, sq_cpow_two_inv hu, sq_cpow_two_inv hv]\n  rw [branchNorm_eq]\n  change symEllIntR 1 (fun _ : Fin 2 => 1/2) ![((7-57*I)/13)^2, ((33+47*I)/13)^2] ≠ _\n  rw [hR (by norm_num [Complex.div_re]) (by norm_num [Complex.div_re]),\n    hR (by norm_num [Complex.div_re]) (by norm_num [Complex.div_re]), branchMean_eq]\n  norm_num [Complex.ext_iff, Complex.div_re, Complex.div_im, Complex.mul_re, Complex.mul_im,\n    Complex.inv_re, Complex.inv_im, Complex.normSq]\n#print axioms testMean_counterexample\nend DLMF.EllipticIntegrals\nnamespace DLMF.EllipticIntegrals\nlemma testMean_hasSum_false : ¬ HasSum\n    (fun N => branchMean ^ (-(1:ℂ)) * ((ascPochhammer ℂ N).eval 1 /\n      (ascPochhammer ℂ N).eval ((2:ℂ)/2) *\n        symEllIntT N (fun _ : Fin 2 => 1/2) (fun j => 1-branchNodes j / branchMean)))\n    (symEllIntR 1 (fun _ : Fin 2 => 1/2) branchNodes) := by\n  intro H\n  have h := (symEllIntR_hasSum_T 1 (fun _ : Fin 2 => (1/2:ℂ))\n    (fun j => branchNodes j / branchMean) (by norm_num [Fin.sum_univ_two])\n    branchNorm_close).mul_left (branchMean ^ (-(1:ℂ)))\n  have hs : (∑ _ : Fin 2, (1/2:ℂ)) = (2:ℂ)/2 := by norm_num\n  rw [hs] at h\n  have he := H.unique h\n  apply testMean_counterexample\n  simpa only [cpow_neg_one] using he\n#print axioms testMean_hasSum_false\nend DLMF.EllipticIntegrals\n#print axioms DLMF.EllipticIntegrals.branchMean_slit\n#print axioms DLMF.EllipticIntegrals.branchNorm_close\n",
+        "axiomAudit": "'DLMF.EllipticIntegrals.testMean_counterexample' depends on axioms: [propext, Classical.choice, Quot.sound]\n'DLMF.EllipticIntegrals.testMean_hasSum_false' depends on axioms: [propext, Classical.choice, Quot.sound]\n'DLMF.EllipticIntegrals.branchMean_slit' depends on axioms: [propext, Classical.choice, Quot.sound]\n'DLMF.EllipticIntegrals.branchNorm_close' depends on axioms: [propext, Classical.choice, Quot.sound]\n"
+      }
+    ],
+    "additionalReviewConcern": "hasDerivAt_integral_variable_limits and hasDerivAt_improper_integral_of_tendstoUniformlyOn assume continuity of totalized deriv values without explicitly asserting the underlying partial derivatives exist. Check this transcription before proof work; no formal counterexample or correction is claimed in this round."
+  },
+  "newStatementIssues": [],
+  "reorganizedProofs": [
+    {
+      "module": "DLMFMathlib.Analysis.Calculus.LHopitalInfinity",
+      "change": "Cauchy mean-value increment bounds and fixed anchors on either side of the puncture prove the unbounded-denominator LHopital rule, with no limit assumption on the numerator."
+    },
+    {
+      "module": "DLMF.GeneralizedHypergeometric.Appell.GermTransformations",
+      "change": "Four existing germ declarations moved unchanged into a focused theorem file; Carlson homogeneity/permutation, Gauss fibers and total-degree summation replace their admissions."
+    },
+    {
+      "module": "DLMFMathlib.Analysis.Complex.Sqrt",
+      "change": "One nonnegative-real scaling lemma replaces repeated principal-square-root scaling arguments."
+    }
+  ],
+  "upstreamAdoptions": [
+    {
+      "module": "Mathlib.Analysis.Calculus.Deriv.MeanValue",
+      "declaration": "exists_ratio_deriv_eq_ratio_slope"
+    },
+    {
+      "module": "Mathlib.Analysis.RCLike.Sqrt",
+      "declaration": "Complex.sqrt_eq_real_add_ite"
+    },
+    {
+      "module": "Carlson.TwoVariable.AppellF1",
+      "declarations": [
+        "regCarlsonR_eq_regularizedAppellF1",
+        "numerator_pair_div_factorial"
+      ]
+    },
+    {
+      "module": "Carlson.R.Homogeneity",
+      "declaration": "regCarlsonR_mul_of_re_pos"
+    },
+    {
+      "module": "Carlson.Elliptic.ReductionRelations",
+      "declaration": "regCarlsonR_comp_equiv"
+    },
+    {
+      "module": "Carlson.TwoVariable.RPolynomial.Hypergeometric",
+      "declaration": "carlsonRPolynomialNumerator₂_eq_hypergeometric"
+    }
+  ],
+  "remainingPriorities": [
+    "Foundational Basic-layer reorganization authorized by the user",
+    "Negative-parameter repeated-node RJ formulas using the proved RC principal-value limit",
+    "Exterior arcsinh/arccosh series and complex continued-fraction convergence",
+    "F3 Euler integrals and remaining Appell reductions",
+    "Remaining Jacobi modulus limits and Fourier expansions",
+    "Previously recorded Chapter1-2 and branch-domain statement issues"
+  ],
+  "postponedRJWork": {
+    "helperSource": "import Mathlib.MeasureTheory.Integral.Bochner.Set\nimport Mathlib.MeasureTheory.Measure.Lebesgue.Basic\nimport Mathlib.Topology.Instances.ENNReal.Lemmas\nopen MeasureTheory Set Filter\nopen scoped Topology\nvariable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]\nlemma testExcision {f : ℝ → E} {s : Set ℝ} (hs : MeasurableSet s)\n    (hf : IntegrableOn f s) (c : ℝ) :\n    Tendsto (fun ε : ℝ => ∫ t in s \\ Icc (c-ε) (c+ε), f t) (𝓝[>] 0)\n      (𝓝 (∫ t in s, f t)) := by\n  have hg : Integrable (s.indicator f) := hf.integrable_indicator hs\n  have hm : Tendsto (fun ε : ℝ => volume (Icc (c-ε) (c+ε))) (𝓝[>] 0) (𝓝 0) := by\n    simp only [Real.volume_Icc]\n    have hc : Continuous (fun ε : ℝ => ENNReal.ofReal (c+ε-(c-ε))) := ENNReal.continuous_ofReal.comp (by fun_prop)\n    simpa using (hc.tendsto 0).mono_left (nhdsWithin_le_nhds (s:=Ioi (0:ℝ)))\n  have hi := hg.tendsto_setIntegral_nhds_zero hm\n  have hl := (tendsto_const_nhds (x := ∫ t in s, f t)).sub hi\n  simp only [sub_zero] at hl\n  apply hl.congr\n  intro ε\n  have he : (∫ t in Icc (c-ε) (c+ε), s.indicator f t) = ∫ t in s ∩ Icc (c-ε) (c+ε), f t := by\n    rw [setIntegral_indicator hs]\n    rw [inter_comm]\n  rw [he]\n  have hh := integral_inter_add_sdiff (t := Icc (c-ε) (c+ε)) measurableSet_Icc hf\n  exact (eq_sub_iff_add_eq.mpr (by simpa [add_comm] using hh)).symm\n#print axioms testExcision\n",
+    "helperLog": "'testExcision' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+    "note": "Proved shrinking-excision helper retained as a starting point, not installed or counted as a completed admission."
+  }
+}

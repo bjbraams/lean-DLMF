@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Hypergeometric.Basic
+public import DLMF.Hypergeometric.SeriesProperties
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import TauCeti.Analysis.Complex.CauchyIntegralPolydisc
 

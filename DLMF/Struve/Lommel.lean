@@ -5,12 +5,16 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Struve.Basic
+public import DLMF.Struve.SeriesAndEquations
 public import DLMF.Bessel.Elementary
 public import DLMF.Bessel.NeumannSeries
 public import DLMF.Gamma.Simplex.GammaPochhammer
 public import Mathlib.Analysis.Complex.RemovableSingularity
 public import Mathlib.Analysis.Calculus.Deriv.Prod
+public import DLMF.Confluent.BasicProperties.Continuity
+public import Mathlib.Analysis.Complex.LocallyUniformLimit
+public import DLMFMathlib.Analysis.Complex.ParameterLimits
+public import DLMF.Hypergeometric.GeneralizedContinuity
 
 /-!
 # Lommel functions and parameter continuation
@@ -374,13 +378,6 @@ theorem lommelS_neg_order {μ ν : ℂ} (h : LommelRegular μ ν) {z : ℂ} (hz 
     lommelS μ (-ν) z = lommelS μ ν z := by
   have h (k : ℕ) : lommelA μ (-ν) k=lommelA μ ν k := by simp [lommelA]
   simp only [lommelS, h]
-
-/-- Identity under the stated parameter and domain assumptions: `iteratedDeriv 2 (lommelCapital μ
-ν) z+deriv (lommelCapital μ ν) z/z+(1-ν^2/z^2)*lommelCapital μ ν z = z^(μ-1)`. -/
-@[dlmf 11.9.E1]
-theorem lommelCapital_ode (μ ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
-    iteratedDeriv 2 (lommelCapital μ ν) z+deriv (lommelCapital μ ν) z/z+(1-ν^2/z^2)*lommelCapital μ ν z = z^(μ-1) := by
-  sorry
 
 /-- Identity under the stated parameter and domain assumptions: `lommelCapital μ (-ν) z =
 lommelCapital μ ν z`. -/
@@ -1112,6 +1109,204 @@ theorem lommelCapital_parameter_limit (μ ν : ℂ) {z : ℂ} (hz : z ∈ slitPl
   obtain ⟨c,hc⟩ := lommelCapital_exists_parameter_limit μ ν hz
   simpa only [lommelCapital,hc.limUnder_eq] using hc
 
+
+
+/-- The Lommel cancellation numerator is jointly continuous in degree and argument on the
+ slit plane. -/
+private lemma lommelNumerator_joint_continuous (ν : ℂ) {μ z : ℂ} (hz : z ∈ slitPlane) :
+    ContinuousAt (fun p : ℂ × ℂ => lommelNumerator ((p.1+ν+1)/2) ((p.1-ν+1)/2) p.2) (μ,z) := by
+  have hF := continuous_regularized1F2_one.comp
+    (show Continuous (fun p : ℂ × ℂ => (((p.1+ν+1)/2)+1,((p.1-ν+1)/2)+1,-(p.2^2/4))) by fun_prop)
+  have hJ : ContinuousAt (fun p : ℂ × ℂ => besselJ ν p.2) (μ,z) := by
+    have hJ0 : ContinuousAt (fun p : ℂ × ℂ => besselJ p.1 p.2) (ν,z) :=
+      continuousOn_besselJ.continuousAt (prod_mem_nhds univ_mem (isOpen_slitPlane.mem_nhds hz))
+    exact hJ0.comp (f:=fun p : ℂ × ℂ => (ν,p.2)) (x:=(μ,z)) (by fun_prop)
+  have hY : ContinuousAt (fun p : ℂ × ℂ => besselY ν p.2) (μ,z) :=
+    (continuousAt_besselY ν hz).comp (f:=fun p : ℂ × ℂ => (ν,p.2)) (x:=(μ,z)) (by fun_prop)
+  have hp : ContinuousAt (fun p : ℂ × ℂ => p.2^(((p.1+ν+1)/2)+((p.1-ν+1)/2))) (μ,z) :=
+    ContinuousAt.cpow (by fun_prop) (by fun_prop) hz
+  have hp2 : Continuous (fun p : ℂ × ℂ => (2:ℂ)^(((p.1+ν+1)/2)+((p.1-ν+1)/2)-2)) :=
+    (by fun_prop : Continuous fun p : ℂ × ℂ => ((p.1+ν+1)/2)+((p.1-ν+1)/2)-2).const_cpow (Or.inl two_ne_zero)
+  have he : ∀ w : ℂ, (w+ν+1)/2-(w-ν+1)/2=ν := by intro w;ring
+  have hc : ContinuousAt (fun p : ℂ × ℂ => cos (((p.1-ν+1)/2)*π)) (μ,z) := by fun_prop
+  have hs : ContinuousAt (fun p : ℂ × ℂ => sin (((p.1-ν+1)/2)*π)) (μ,z) := by fun_prop
+  simp only [lommelNumerator,he]
+  exact ((hp.div_const 4).mul hF.continuousAt).sub (hp2.continuousAt.mul
+    ((hc.mul hJ).add (hs.mul hY)))
+
+/-- All sufficiently close punctured degree parameters are regular. -/
+private lemma lommel_eventually_regular (μ ν : ℂ) :
+    ∀ᶠ m in 𝓝[≠] μ, LommelRegular m ν := by
+  filter_upwards [lommel_eventually_affine_regular (ν+1) μ,
+    lommel_eventually_affine_regular (-ν+1) μ] with m ha hb
+  intro n
+  constructor
+  · intro he
+    exact hb n (by linear_combination he/2)
+  · intro he
+    exact ha n (by linear_combination he/2)
+
+/-- Pole cancellation is continuous jointly in degree and argument, hence the parameter limit
+ is locally uniform on the slit plane. -/
+private lemma lommelCapital_parameter_locallyUniform (μ ν : ℂ) :
+    TendstoLocallyUniformlyOn (fun m => lommelCapitalRegular m ν) (lommelCapital μ ν)
+      (𝓝[≠] μ) slitPlane := by
+  let A : ℂ → ℂ := fun m => (m+ν+1)/2
+  let B : ℂ → ℂ := fun m => (m-ν+1)/2
+  let H : ℂ → ℂ → ℂ := fun z m => lommelNumerator (A m) (B m) z
+  let D₁ : ℂ → ℂ → ℂ := fun m z => dslope (H z) μ m
+  let D₂ : ℂ → ℂ → ℂ := fun m z => dslope (fun t => D₁ t z) μ m
+  have hAcont : Continuous A := by dsimp only [A]; fun_prop
+  have hBcont : Continuous B := by dsimp only [B]; fun_prop
+  have hHd : ∀ z ∈ slitPlane, Differentiable ℂ (H z) := by
+    intro z hz
+    change Differentiable ℂ ((fun p : ℂ × ℂ => lommelNumerator p.1 p.2 z) ∘
+      (fun m : ℂ => (A m,B m)))
+    exact (lommelNumerator_differentiable hz).comp (by dsimp only [A,B]; fun_prop)
+  have hHc : ContinuousOn (fun p : ℂ × ℂ => H p.1 p.2) (slitPlane ×ˢ univ) := by
+    intro p hp
+    exact ((lommelNumerator_joint_continuous ν (μ:=p.2) hp.1).comp
+      (f:=Prod.swap) (x:=p) continuous_swap.continuousAt).continuousWithinAt
+  have hD₁c := DLMF.Confluent.continuousOn_dslope_param isOpen_slitPlane hHc hHd μ
+  have hD₁d : ∀ z ∈ slitPlane, Differentiable ℂ (fun t => D₁ t z) := by
+    intro z hz
+    rw [← differentiableOn_univ,Complex.differentiableOn_dslope Filter.univ_mem]
+    exact (hHd z hz).differentiableOn
+  have hD₂c := DLMF.Confluent.continuousOn_dslope_param isOpen_slitPlane hD₁c hD₁d μ
+  have hDcont : ∀ z ∈ slitPlane, ContinuousAt (fun p : ℂ × ℂ => D₁ p.1 p.2) (μ,z) ∧
+      ContinuousAt (fun p : ℂ × ℂ => D₂ p.1 p.2) (μ,z) := by
+    intro z hz
+    have hmem : slitPlane ×ˢ (univ:Set ℂ) ∈ 𝓝 (z,μ) :=
+      prod_mem_nhds (isOpen_slitPlane.mem_nhds hz) univ_mem
+    exact ⟨(hD₁c.continuousAt hmem).comp (f:=Prod.swap) (x:=(μ,z)) continuous_swap.continuousAt,
+      (hD₂c.continuousAt hmem).comp (f:=Prod.swap) (x:=(μ,z)) continuous_swap.continuousAt⟩
+  have hrepr : ∀ᶠ m in 𝓝[≠] μ, ∀ z,
+      lommelCapitalRegular m ν z=Gamma (A m)*Gamma (B m)*H z m := by
+    filter_upwards [lommel_eventually_regular μ ν] with m hm
+    intro z
+    exact lommelRegular_eq_numerator hm
+  have hpoint : ∀ z ∈ slitPlane,
+      Tendsto (fun m => lommelCapitalRegular m ν z) (𝓝[≠] μ) (𝓝 (lommelCapital μ ν z)) :=
+    fun z hz => lommelCapital_parameter_limit μ ν hz
+  by_cases hApole : ∃ n : ℕ, A μ= -(n:ℂ)
+  · obtain ⟨n,hn⟩ := hApole
+    obtain ⟨U,hU,hUeq⟩ := lommel_gamma_affine_pole (ν+1) μ n (by simpa only [A,add_assoc] using hn)
+    have hUeq' : ∀ᶠ m in 𝓝[≠] μ, Gamma (A m)=U m/(m-μ) := by
+      simpa only [A,add_assoc] using hUeq
+    have hH0 : ∀ z ∈ slitPlane, H z μ=0 := by
+      intro z hz
+      change lommelNumerator (A μ) (B μ) z=0
+      rw [hn]
+      exact lommelNumerator_neg_nat_left n (B μ) hz
+    by_cases hBpole : ∃ k : ℕ, B μ= -(k:ℂ)
+    · obtain ⟨k,hk⟩ := hBpole
+      obtain ⟨V,hV,hVeq⟩ := lommel_gamma_affine_pole (-ν+1) μ k
+        (by simpa only [B,sub_eq_add_neg,add_assoc] using hk)
+      have hVeq' : ∀ᶠ m in 𝓝[≠] μ, Gamma (B m)=V m/(m-μ) := by
+        simpa only [B,sub_eq_add_neg,add_assoc] using hVeq
+      have hH1 : ∀ z ∈ slitPlane, deriv (H z) μ=0 :=
+        fun z hz => lommelNumerator_diagonal_deriv_zero μ ν n k hz hn hk
+      apply tendstoLocallyUniformlyOn_of_local_extension (E:=fun m z => U m*V m*D₂ m z)
+        nhdsWithin_le_nhds isOpen_slitPlane ?_ ?_ hpoint
+      · intro z hz
+        exact ((hU.comp (x:=(μ,z)) continuousAt_fst).mul
+          (hV.comp (x:=(μ,z)) continuousAt_fst)).mul (hDcont z hz).2
+      · filter_upwards [hrepr,hUeq',hVeq',self_mem_nhdsWithin] with m hm hu hv hmμ
+        intro z hz
+        rw [hm z,hu,hv]
+        simp only [D₂,D₁,dslope_of_ne _ (show m ≠ μ from hmμ),slope_def_field,
+          dslope_same,hH0 z hz,hH1 z hz,sub_zero,div_eq_mul_inv]
+        ring
+    · push Not at hBpole
+      have hG : ContinuousAt (Gamma ∘ B) μ :=
+        (continuousAt_Gamma (B μ) hBpole).comp hBcont.continuousAt
+      apply tendstoLocallyUniformlyOn_of_local_extension (E:=fun m z => U m*Gamma (B m)*D₁ m z)
+        nhdsWithin_le_nhds isOpen_slitPlane ?_ ?_ hpoint
+      · intro z hz
+        exact ((hU.comp (x:=(μ,z)) continuousAt_fst).mul
+          (hG.comp (x:=(μ,z)) continuousAt_fst)).mul (hDcont z hz).1
+      · filter_upwards [hrepr,hUeq',self_mem_nhdsWithin] with m hm hu hmμ
+        intro z hz
+        rw [hm z,hu]
+        simp only [D₁,dslope_of_ne _ (show m ≠ μ from hmμ),slope_def_field,hH0 z hz,
+          sub_zero,div_eq_mul_inv]
+        ring
+  · push Not at hApole
+    have hG : ContinuousAt (Gamma ∘ A) μ :=
+      (continuousAt_Gamma (A μ) hApole).comp hAcont.continuousAt
+    by_cases hBpole : ∃ k : ℕ, B μ= -(k:ℂ)
+    · obtain ⟨k,hk⟩ := hBpole
+      obtain ⟨V,hV,hVeq⟩ := lommel_gamma_affine_pole (-ν+1) μ k
+        (by simpa only [B,sub_eq_add_neg,add_assoc] using hk)
+      have hVeq' : ∀ᶠ m in 𝓝[≠] μ, Gamma (B m)=V m/(m-μ) := by
+        simpa only [B,sub_eq_add_neg,add_assoc] using hVeq
+      have hH0 : ∀ z ∈ slitPlane, H z μ=0 := by
+        intro z hz
+        change lommelNumerator (A μ) (B μ) z=0
+        rw [hk]
+        exact lommelNumerator_neg_nat_right (A μ) k hz
+      apply tendstoLocallyUniformlyOn_of_local_extension (E:=fun m z => Gamma (A m)*V m*D₁ m z)
+        nhdsWithin_le_nhds isOpen_slitPlane ?_ ?_ hpoint
+      · intro z hz
+        exact ((hG.comp (x:=(μ,z)) continuousAt_fst).mul
+          (hV.comp (x:=(μ,z)) continuousAt_fst)).mul (hDcont z hz).1
+      · filter_upwards [hrepr,hVeq',self_mem_nhdsWithin] with m hm hv hmμ
+        intro z hz
+        rw [hm z,hv]
+        simp only [D₁,dslope_of_ne _ (show m ≠ μ from hmμ),slope_def_field,hH0 z hz,
+          sub_zero,div_eq_mul_inv]
+        ring
+    · push Not at hBpole
+      have hG' : ContinuousAt (Gamma ∘ B) μ :=
+        (continuousAt_Gamma (B μ) hBpole).comp hBcont.continuousAt
+      apply tendstoLocallyUniformlyOn_of_local_extension (E:=fun m z => Gamma (A m)*Gamma (B m)*H z m)
+        nhdsWithin_le_nhds isOpen_slitPlane ?_ ?_ hpoint
+      · intro z hz
+        exact ((hG.comp (x:=(μ,z)) continuousAt_fst).mul
+          (hG'.comp (x:=(μ,z)) continuousAt_fst)).mul (lommelNumerator_joint_continuous ν hz)
+      · filter_upwards [hrepr] with m hm
+        intro z hz
+        exact (hm z).symm
+
+
+/-- The capital Lommel function solves the inhomogeneous Bessel equation throughout the slit
+plane, including exceptional parameters filled in by the parameter limit. -/
+@[dlmf 11.9.E1]
+theorem lommelCapital_ode (μ ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
+    iteratedDeriv 2 (lommelCapital μ ν) z+deriv (lommelCapital μ ν) z/z+
+      (1-ν^2/z^2)*lommelCapital μ ν z=z^(μ-1) := by
+  let F : ℂ → ℂ → ℂ := fun m => lommelCapitalRegular m ν
+  have hconv := lommelCapital_parameter_locallyUniform μ ν
+  have hreg := lommel_eventually_regular μ ν
+  have hhol : ∀ᶠ m in 𝓝[≠] μ, AnalyticOnNhd ℂ (F m) slitPlane := by
+    filter_upwards [hreg] with m hm
+    exact AnalyticOnNhd.congr isOpen_slitPlane (lommelCapital_analytic_ode_of_regular hm).1
+      (fun w hw => lommelCapital_regular hm hw)
+  have hdiff : ∀ᶠ m in 𝓝[≠] μ, DifferentiableOn ℂ (F m) slitPlane :=
+    hhol.mono fun _ h => h.differentiableOn
+  have hdiff' : ∀ᶠ m in 𝓝[≠] μ, DifferentiableOn ℂ (deriv (F m)) slitPlane :=
+    hhol.mono fun _ h => h.deriv.differentiableOn
+  have hconv' := hconv.deriv hdiff isOpen_slitPlane
+  have hconv'' := hconv'.deriv hdiff' isOpen_slitPlane
+  have hode : ∀ᶠ m in 𝓝[≠] μ,
+      deriv (deriv (F m)) z+deriv (F m) z/z+(1-ν^2/z^2)*F m z=z^(m-1) := by
+    filter_upwards [hreg] with m hm
+    have he := (lommelCapital_analytic_ode_of_regular hm).2 z hz
+    have heq : lommelCapital m ν =ᶠ[𝓝 z] F m := by
+      filter_upwards [isOpen_slitPlane.mem_nhds hz] with w hw
+      exact lommelCapital_regular hm hw
+    rw [heq.deriv_eq,(heq.iteratedDeriv 2).self_of_nhds,heq.self_of_nhds] at he
+    simpa only [iteratedDeriv_succ,iteratedDeriv_zero] using he
+  have hl : Tendsto (fun m => deriv (deriv (F m)) z+deriv (F m) z/z+
+      (1-ν^2/z^2)*F m z) (𝓝[≠] μ)
+      (𝓝 (deriv (deriv (lommelCapital μ ν)) z+deriv (lommelCapital μ ν) z/z+
+        (1-ν^2/z^2)*lommelCapital μ ν z)) :=
+    ((hconv''.tendsto_at hz).add ((hconv'.tendsto_at hz).div_const z)).add
+      (tendsto_const_nhds.mul (hconv.tendsto_at hz))
+  have hr : Tendsto (fun m : ℂ => z^(m-1)) (𝓝[≠] μ) (𝓝 (z^(μ-1))) :=
+    ((continuousAt_const_cpow (slitPlane_ne_zero hz)).comp
+      (f:=fun m : ℂ => m-1) (x:=μ) (by fun_prop)).tendsto.mono_left nhdsWithin_le_nhds
+  simpa only [iteratedDeriv_succ,iteratedDeriv_zero] using tendsto_nhds_unique (hl.congr' hode) hr
 
 
 end DLMF.Struve

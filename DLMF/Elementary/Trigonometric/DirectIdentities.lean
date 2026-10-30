@@ -6,8 +6,10 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Core.Framework
+public import DLMF.Elementary.Trigonometric.LogarithmicSeries
 public import DLMFMathlib.NumberTheory.EulerNumbers
 public import DLMFMathlib.Analysis.Complex.TrigR4SeriesExtension
+public import DLMFMathlib.Analysis.Complex.TrigonometricProducts
 public import Mathlib.Analysis.Convex.SpecificFunctions.Deriv
 public import DLMF.Gamma.IntegralRepresentations
 public import TauCeti.Analysis.Contour.WorkedExamples.HalfDisc.SineIntegral
@@ -22,6 +24,9 @@ public import TauCeti.Analysis.SpecialFunctions.Trigonometric.Orthogonality
 public import Mathlib.Analysis.Real.Pi.Bounds
 public import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Series
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Cotangent
+public import Mathlib.NumberTheory.ModularForms.EisensteinSeries.Summable
+public import Mathlib.Analysis.Normed.Group.Tannery
 
 /-!
 # Complex trigonometric identities and products
@@ -32,6 +37,10 @@ Cartesian forms.
 Source references and common attribution are retained in
 `DLMF.Elementary.Trigonometric`.
 This module uses results of the Tau Ceti contributors; see also `CREDITS.md`.
+The principal logarithmic Bernoulli expansions are in
+`DLMF.Elementary.Trigonometric.LogarithmicSeries`.
+The cosecant-square expansion reuses Mathlib’s cotangent derivative, Eisenstein-series
+summability and dominated-convergence theorem for sums.
 -/
 
 @[expose] public noncomputable section
@@ -393,24 +402,6 @@ theorem hasSum_sec_euler {z : ℂ} (hz : ‖z‖<π/2) :
   have h := Complex.trigR4_hasSum_of_differentiableOn_ball (by norm_num) hf hsmall hz
   rw [hconv] at h
   exact Complex.trigR4_hasSum_even_iff.mp h
-
-/-- DLMF 4.19.E7: hasSum log sinc bernoulli. -/
-@[dlmf 4.19.E7]
-theorem hasSum_log_sinc_bernoulli {z : ℂ} (hz : ‖z‖<π) :
-    HasSum (fun n : ℕ => ((-1:ℂ)^(n+1)*2^(2*(n+1)-1)*(bernoulli (2*(n+1)):ℂ)/((n+1)*(2*(n+1))!))*z^(2*(n+1))) (Complex.log (if z=0 then 1 else Complex.sin z/z)) := by
-  sorry
-
-/-- DLMF 4.19.E8: hasSum log cos bernoulli. -/
-@[dlmf 4.19.E8]
-theorem hasSum_log_cos_bernoulli {z : ℂ} (hz : ‖z‖<π/2) :
-    HasSum (fun n : ℕ => ((-1:ℂ)^(n+1)*2^(2*(n+1)-1)*(2^(2*(n+1))-1)*(bernoulli (2*(n+1)):ℂ)/((n+1)*(2*(n+1))!))*z^(2*(n+1))) (Complex.log (Complex.cos z)) := by
-  sorry
-
-/-- DLMF 4.19.E9: hasSum log tan div bernoulli. -/
-@[dlmf 4.19.E9]
-theorem hasSum_log_tan_div_bernoulli {z : ℂ} (hz : ‖z‖<π/2) :
-    HasSum (fun n : ℕ => ((-1:ℂ)^n*2^(2*(n+1))*(2^(2*(n+1)-1)-1)*(bernoulli (2*(n+1)):ℂ)/((n+1)*(2*(n+1))!))*z^(2*(n+1))) (Complex.log (if z=0 then 1 else Complex.tan z/z)) := by
-  sorry
 
 /-- DLMF 4.20.E4: hasDerivAt csc. -/
 @[dlmf 4.20.E4]
@@ -1107,13 +1098,135 @@ theorem norm_tan_explicit {z : ℂ} (hz : Complex.cos z≠0) :
 theorem cos_infinite_product (z : ℂ) :
     Tendsto (fun N : ℕ => ∏ n∈Finset.range N,
       (1-4*z^2/(((2*n+1:ℕ):ℂ)^2*(π:ℂ)^2))) atTop (𝓝 (Complex.cos z)) := by
-  sorry
+  have h := (Complex.hasProd_cosh_product (Complex.I * z)).tendsto_prod_nat
+  convert h using 1
+  · funext N
+    apply Finset.prod_congr rfl
+    intro n hn
+    push_cast
+    rw [mul_pow, Complex.I_sq]
+    ring
+  · rw [mul_comm Complex.I z, Complex.cosh_mul_I]
+
+/-- The reciprocal-square lattice sum on the upper half-plane, from Mathlib’s cotangent
+derivative. -/
+private lemma cscSq_tsum_upperHalfPlane {z : ℂ} (hz : z ∈ UpperHalfPlane.upperHalfPlaneSet) :
+    (∑' n : ℤ, 1 / (z + n) ^ 2) = (π : ℂ) ^ 2 / Complex.sin (π * z) ^ 2 := by
+  have hzsin : Complex.sin (π * z) ≠ 0 := by
+    have := UpperHalfPlane.coe_mem_integerComplement ⟨z, hz⟩
+    exact sin_pi_mul_ne_zero this
+  have hd : HasDerivAt (fun w : ℂ => (π : ℂ) * Complex.cot (π * w))
+      (-(π : ℂ) ^ 2 / Complex.sin (π * z) ^ 2) z := by
+    have hcos := (Complex.hasDerivAt_cos (π * z)).comp z ((hasDerivAt_id z).const_mul (π : ℂ))
+    have hsin := (Complex.hasDerivAt_sin (π * z)).comp z ((hasDerivAt_id z).const_mul (π : ℂ))
+    have hh := (hcos.div hsin hzsin).const_mul (π : ℂ)
+    simp only [Function.comp_apply, mul_one] at hh
+    have htrig := Complex.sin_sq_add_cos_sq (π * z)
+    convert hh using 1
+    · funext w; simp [Complex.cot]
+    · field_simp
+      linear_combination htrig
+  have hh := iteratedDerivWithin_cot_pi_mul_eq_mul_tsum_div_pow (k := 1) (by omega) hz
+  rw [iteratedDerivWithin_one,
+    derivWithin_of_isOpen UpperHalfPlane.isOpen_upperHalfPlaneSet hz, hd.deriv] at hh
+  norm_num at hh
+  simpa [one_div, neg_div] using (congrArg Neg.neg hh).symm
+
+/-- The reciprocal-square lattice sum extends to the real axis by dominated convergence. -/
+private lemma cscSq_tsum_closedUpperHalfPlane {z : ℂ} (hz : z ∈ Complex.integerComplement)
+    (him : 0 ≤ z.im) :
+    (∑' n : ℤ, 1 / (z + n) ^ 2) = (π : ℂ) ^ 2 / Complex.sin (π * z) ^ 2 := by
+  have hsin : Complex.sin (π * z) ≠ 0 := sin_pi_mul_ne_zero hz
+  have hzn : ∀ n : ℤ, z + n ≠ 0 := fun n => integerComplement_add_ne_zero hz n
+  have hsum : Summable (fun n : ℤ => ‖1 / (z + n) ^ 2‖) := by
+    have hh := (EisensteinSeries.linear_right_summable z 1 (k := 2) (by norm_num)).norm
+    simpa only [Int.cast_one, one_mul, zpow_ofNat, one_div] using hh
+  let f : ℝ → ℤ → ℂ := fun t n => 1 / (z + n + t * I) ^ 2
+  have hlim : Tendsto (fun t : ℝ => ∑' n : ℤ, f t n) (𝓝[>] 0)
+      (𝓝 (∑' n : ℤ, 1 / (z + n) ^ 2)) := by
+    apply tendsto_tsum_of_dominated_convergence hsum
+    · intro n
+      have hcts : ContinuousAt (fun t : ℝ => 1 / (z + n + t * I) ^ 2) 0 := by
+        apply ContinuousAt.div (by fun_prop) (by fun_prop)
+        simpa using pow_ne_zero 2 (hzn n)
+      simpa [f] using hcts.tendsto.mono_left nhdsWithin_le_nhds
+    · filter_upwards [self_mem_nhdsWithin] with t ht n
+      have ht : 0 < t := ht
+      have hnorm : ‖z + n‖ ≤ ‖z + n + t * I‖ := by
+        have h1 : ‖z + n‖ ^ 2 = (z.re + n) ^ 2 + z.im ^ 2 := by
+          rw [Complex.sq_norm]; simp [Complex.normSq_apply, pow_two]
+        have h2 : ‖z + n + t * I‖ ^ 2 = (z.re + n) ^ 2 + (z.im + t) ^ 2 := by
+          rw [Complex.sq_norm]; simp [Complex.normSq_apply, pow_two]
+        nlinarith [norm_nonneg (z + n), norm_nonneg (z + n + t * I)]
+      simp only [f, norm_div, norm_one, norm_pow]
+      exact one_div_le_one_div_of_le (pow_pos (norm_pos_iff.mpr (hzn n)) 2)
+        (pow_le_pow_left₀ (norm_nonneg _) hnorm 2)
+  have hs : Tendsto (fun t : ℝ => (π : ℂ) ^ 2 / Complex.sin (π * (z + t * I)) ^ 2)
+      (𝓝[>] 0) (𝓝 ((π : ℂ) ^ 2 / Complex.sin (π * z) ^ 2)) := by
+    have hc : ContinuousAt (fun t : ℝ => (π : ℂ) ^ 2 / Complex.sin (π * (z + t * I)) ^ 2) 0 := by
+      apply ContinuousAt.div (by fun_prop) (by fun_prop)
+      simpa using pow_ne_zero 2 hsin
+    simpa using hc.tendsto.mono_left nhdsWithin_le_nhds
+  have he : (fun t : ℝ => ∑' n : ℤ, f t n) =ᶠ[𝓝[>] 0]
+      (fun t : ℝ => (π : ℂ) ^ 2 / Complex.sin (π * (z + t * I)) ^ 2) := by
+    filter_upwards [self_mem_nhdsWithin] with t ht
+    have htpos : 0 < t := ht
+    have ht' : z + t * I ∈ UpperHalfPlane.upperHalfPlaneSet := by
+      change 0 < (z + t * I).im
+      simp only [add_im, mul_im, ofReal_re, ofReal_im, I_re, I_im, mul_one, mul_zero, add_zero]
+      linarith
+    simpa [f, add_assoc, add_comm, add_left_comm] using (cscSq_tsum_upperHalfPlane ht')
+  exact tendsto_nhds_unique (hlim.congr' he) hs
+
+/-- Reflection extends the reciprocal-square lattice sum to the full complement of the integers. -/
+private lemma cscSq_tsum_integerComplement {z : ℂ} (hz : z ∈ Complex.integerComplement) :
+    (∑' n : ℤ, 1 / (z + n) ^ 2) = (π : ℂ) ^ 2 / Complex.sin (π * z) ^ 2 := by
+  rcases le_total 0 z.im with h | h
+  · exact cscSq_tsum_closedUpperHalfPlane hz h
+  · have hz' : -z ∈ Complex.integerComplement := by
+      rintro ⟨n, hn⟩
+      apply hz
+      refine ⟨-n, ?_⟩
+      push_cast
+      simpa using congrArg Neg.neg hn
+    have hs := cscSq_tsum_closedUpperHalfPlane hz' (by simpa using neg_nonneg.mpr h)
+    have he : (∑' n : ℤ, 1 / (-z + n) ^ 2) = ∑' n : ℤ, 1 / (z + n) ^ 2 := by
+      rw [← (Equiv.neg ℤ).tsum_eq (fun n : ℤ => 1 / (-z + n) ^ 2)]
+      congr 1
+      funext n
+      simp only [Equiv.neg_apply, Int.cast_neg]
+      rw [show -z + -(n : ℂ) = -(z + n) by ring, neg_sq]
+    rw [he, show (π : ℂ) * -z = -(π * z) by ring, Complex.sin_neg, neg_sq] at hs
+    exact hs
 
 /-- DLMF 4.22.E4: hasSum csc sq partial fraction. -/
 @[dlmf 4.22.E4]
 theorem hasSum_csc_sq_partial_fraction {z : ℂ} (hz : Complex.sin z≠0) :
     HasSum (fun n : ℤ => 1/(z-n*π)^2) ((csc z)^2) := by
-  sorry
+  have hp : (π : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
+  have hw : z / π ∈ Complex.integerComplement := by
+    rintro ⟨n, hn⟩
+    apply hz
+    have he : z = (n : ℂ) * π := by
+      have h := congrArg (fun w : ℂ => w * π) hn
+      field_simp at h
+      exact h.symm
+    rw [he, Complex.sin_int_mul_pi]
+  have hh : HasSum (fun n : ℤ => 1 / (z / π + n) ^ 2)
+      ((π : ℂ) ^ 2 / Complex.sin (π * (z / π)) ^ 2) := by
+    rw [← cscSq_tsum_integerComplement hw]
+    have h := EisensteinSeries.linear_right_summable (z / π) 1 (k := 2) (by norm_num)
+    apply Summable.hasSum
+    simpa only [Int.cast_one, one_mul, zpow_ofNat, one_div] using h
+  have h := ((Equiv.neg ℤ).hasSum_iff.mpr hh).mul_left ((π : ℂ) ^ 2)⁻¹
+  convert h using 1
+  · funext n
+    simp only [Function.comp_apply, Equiv.neg_apply, Int.cast_neg]
+    field_simp
+    ring
+  · rw [show (π : ℂ) * (z / π) = z by field_simp]
+    simp only [DLMF.Elementary.csc, inv_pow]
+    field_simp
 
 end DLMF.Elementary
 end

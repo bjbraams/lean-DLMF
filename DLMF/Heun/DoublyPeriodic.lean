@@ -8,8 +8,8 @@ module
 public import DLMF.Heun.Basic
 public import DLMF.Heun.LocalSolutions
 public import DLMF.JacobiElliptic.SpecialValues
-public import DLMF.JacobiElliptic.Basic
-public import DLMF.Weierstrass.Basic
+public import DLMF.JacobiElliptic.AnalyticProperties
+public import DLMF.Weierstrass.EllipticFunctionsAndInvariants
 public import DLMF.Weierstrass.Relations
 
 /-!

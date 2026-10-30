@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.JacobiElliptic.Derivatives
+public import DLMF.Elliptic.JacobiIdentities
 
 /-!
 # Integrals of the Jacobian elliptic functions (DLMF §22.14)
@@ -25,8 +26,8 @@ sign); in 22.14.3 the primitive `am` has derivative `dn` on all of `ℝ`
 principal form is proved here. The ranges `-K < x < K` (22.14.7–22.14.9) and
 `0 < x < 2K` (22.14.10–22.14.15) are DLMF's.
 
-The definite integrals 22.14.16–22.14.18 of `ln sn`, `ln cn`, `ln dn` over `[0, K]` are
-admitted.
+The logarithmic `dn` integral 22.14.18 is proved by quarter-period reflection;
+the `sn` and `cn` definite integrals 22.14.16–22.14.17 remain admitted.
 -/
 
 @[expose] public section
@@ -487,12 +488,36 @@ theorem Real.integral_log_jacobiCnm (hk0 : 0 < k) (hk1 : k < 1) :
         1 / 2 * Real.compEllIntKm (k ^ 2) * Real.log (√(1 - k ^ 2) / k) := by
   sorry
 
-/-- DLMF 22.14.18: `∫₀^K ln dn(t,k) dt = K(k) ln(k')/2`, `0 < k < 1`. Admitted. -/
+/-- DLMF 22.14.18: `∫₀^K ln dn(t,k) dt = K(k) ln(k')/2`, `0 < k < 1`. -/
 @[dlmf 22.14.E18 "special case: 0 < k < 1"]
 theorem Real.integral_log_jacobiDnm (hk0 : 0 < k) (hk1 : k < 1) :
     ∫ t in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.log (Real.jacobiDnm t (k ^ 2)) =
       1 / 2 * Real.compEllIntKm (k ^ 2) * Real.log (√(1 - k ^ 2)) := by
-  sorry
+  have hm : k ^ 2 < 1 := by nlinarith
+  let K := Real.compEllIntKm (k ^ 2)
+  have hc : Continuous (fun t => Real.log (Real.jacobiDnm t (k ^ 2))) := by
+    apply Continuous.log
+    · exact continuous_iff_continuousAt.mpr fun t =>
+        (Real.hasDerivAt_jacobiDnm hm t).continuousAt
+    · exact fun t => (Real.jacobiDnm_pos hm t).ne'
+  have hshift (t : ℝ) : Real.log (Real.jacobiDnm (K - t) (k ^ 2)) =
+      Real.log (√(1 - k ^ 2)) - Real.log (Real.jacobiDnm t (k ^ 2)) := by
+    have h := (Real.jacobi_add_compEllIntKm hm (-t)).2.2
+    rw [(jacobi_neg hm t).2.2] at h
+    have h' : Real.jacobiDnm (K - t) (k ^ 2) =
+        √(1 - k ^ 2) / Real.jacobiDnm t (k ^ 2) := by
+      simpa only [Real.sqrt_eq_rpow, sub_eq_add_neg, add_comm] using h
+    rw [h', Real.log_div (Real.sqrt_pos.mpr (by linarith)).ne'
+      (Real.jacobiDnm_pos hm t).ne']
+  have he := intervalIntegral.integral_comp_sub_left
+    (fun t => Real.log (Real.jacobiDnm t (k ^ 2))) (a := 0) (b := K) K
+  simp only [sub_self, sub_zero] at he
+  simp_rw [hshift] at he
+  rw [intervalIntegral.integral_sub intervalIntegrable_const (hc.intervalIntegrable 0 K),
+    intervalIntegral.integral_const] at he
+  simp only [sub_zero, smul_eq_mul] at he
+  change _ = 1 / 2 * K * Real.log (√(1 - k ^ 2))
+  linarith
 
 end Definite
 

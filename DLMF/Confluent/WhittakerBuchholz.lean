@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Confluent.BuchholzDefinitions
+public import DLMF.Confluent.Basic.Buchholz
 public import DLMF.Confluent.Whittaker
 public import DLMF.Confluent.Continuation
 public import DLMF.Bessel.NeumannSeries

@@ -8,13 +8,14 @@ module
 public import DLMF.Painleve.RationalDLMF
 public import DLMF.Painleve.Airy
 public import DLMF.Confluent.ParabolicCylinder
-public import DLMF.ErrorFunctions.Basic
+public import DLMF.ErrorFunctions.AnalyticProperties
 public import DLMF.OrthogonalPolynomials.Differential
+public import DLMF.Weierstrass.EllipticFunctionsAndInvariants
 
 /-!
 # Special function solutions of the Painlevé equations (DLMF §32.10)
 
-DLMF normalization (`DLMF.Painleve.Defs`). For each of `PII`–`PVI`, the Riccati equation of
+DLMF normalization (`DLMF.Painleve.Basic`). For each of `PII`–`PVI`, the Riccati equation of
 §32.10 (the case `n = 0` of the parameter conditions 32.10.11, 32.10.15, 32.10.23, 32.10.28)
 is proved to imply the Painlevé equation. The Airy solutions 32.10.4–32.10.6 of `PII` are
 proved, bridging to the Beals–Wong construction of `DLMF.Painleve.Airy` (`airyPII`, with the

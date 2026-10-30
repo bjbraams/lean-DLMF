@@ -32,7 +32,7 @@ public import DLMF.Legendre.Primitives
 public import DLMF.Legendre.LocalTheory
 public import DLMF.Legendre.SourceChecks
 public import DLMF.Legendre.ParameterLimits
-public import DLMF.Legendre.Basic
+public import DLMF.Legendre.FirstKindProperties
 public import DLMF.Legendre.Ferrers
 public import DLMF.Legendre.Integer
 public import DLMF.Legendre.Laplace

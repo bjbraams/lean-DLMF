@@ -7,9 +7,11 @@ module
 
 public import DLMF.JacobiElliptic.SpecialValues
 public import Mathlib.Analysis.SpecialFunctions.Arsinh
+public import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
 public import Carlson.TwoVariable.R.ElementaryValues
 public import Carlson.TwoVariable.Reduction
 public import DLMF.EllipticIntegrals.Legendre
+public import DLMF.EllipticIntegrals.LegendreIdentities
 public import DLMF.EllipticIntegrals.Symmetric
 
 /-!
@@ -383,13 +385,49 @@ theorem compEllIntPik_special {α2 : ℝ} (hα : α2 < 1) (k : ℂ) :
     push_cast; ring
   · rw [compEllIntPik, incEllIntPik_zero, compEllIntKk_eq_incEllIntFk]
 
-/-- **Admitted.** DLMF 19.6.4: for real `k` with `k² < 1`, `Π(α², k) → +∞` as `α² → 1-`; for real
+/-- On real characteristics below one and real modulus with `k²<1`, the real part
+of the complex complete integral is the real integral in parameter `k²`. -/
+private lemma compEllIntPik_re_ofReal {n k : ℝ} (hn : n < 1) (hk : k ^ 2 < 1) :
+    (compEllIntPik n k).re = DLMF.Elliptic.Real.compEllIntPim n (k ^ 2) := by
+  rw [compEllIntPik, show (π : ℂ) / 2 = ((π / 2 : ℝ) : ℂ) by push_cast; ring,
+    incEllIntPik_eq_ofReal (m:=k ^ 2) (by push_cast; rfl) hk.le hn, ofReal_re]
+  rfl
+
+/-- DLMF 19.6.4: for real `k` with `k² < 1`, `Π(α², k) → +∞` as `α² → 1-`; for real
 `α² < 1`, `Π(α², k) → +∞` as `k² → 1-` (`∞ · sign(1 - α²)`; the case `α² > 1` is in 19.6.6). -/
 @[dlmf 19.6.E4]
 theorem tendsto_compEllIntPik {k α2 : ℝ} (hk : k ^ 2 < 1) (hα : α2 < 1) :
     Tendsto (fun a : ℝ => (compEllIntPik a k).re) (𝓝[<] 1) atTop ∧
       Tendsto (fun k : ℝ => (compEllIntPik α2 k).re) (𝓝[<] 1) atTop := by
-  sorry
+  constructor
+  · have hs : Tendsto (fun a : ℝ => 1 - a) (𝓝[<] 1) (𝓝[>] 0) := by
+      refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
+      · have h : Tendsto (fun a : ℝ => 1 - a) (𝓝 1) (𝓝 (1 - 1)) :=
+          (continuous_const.sub continuous_id).tendsto 1
+        simpa using h.mono_left nhdsWithin_le_nhds
+      · filter_upwards [self_mem_nhdsWithin] with a ha
+        change a < 1 at ha
+        exact sub_pos.mpr ha
+    have hpow := (tendsto_rpow_neg_nhdsGT_zero (by norm_num : (-1 / 2 : ℝ) < 0)).comp hs
+    have hlim := hpow.const_mul_atTop (by positivity : (0 : ℝ) < π / 2)
+    refine tendsto_atTop_mono' _ ?_ hlim
+    filter_upwards [self_mem_nhdsWithin] with a (ha : a < 1)
+    rw [compEllIntPik_re_ofReal ha hk]
+    have hb := DLMF.Elliptic.Real.compEllIntPim_param_zero_le ha (sq_nonneg k) hk
+    rw [DLMF.Elliptic.Real.compEllIntPim_param_zero ha] at hb
+    convert hb using 1
+    dsimp only [Function.comp_def]
+    rw [show (-1 / 2 : ℝ)=-(1 / 2) by norm_num, Real.rpow_neg (by linarith : 0 ≤ 1 - a), ←Real.sqrt_eq_rpow]
+    ring
+  · let c : ℝ := min 1 ((1 - α2)⁻¹)
+    have hc : 0 < c := lt_min zero_lt_one (inv_pos.mpr (sub_pos.mpr hα))
+    have hlim := tendsto_norm_compEllIntKk_one.const_mul_atTop hc
+    refine tendsto_atTop_mono' _ ?_ hlim
+    filter_upwards [Ioo_mem_nhdsLT (show (0 : ℝ) < 1 by norm_num)] with r hr
+    have hr2 : r ^ 2 < 1 := by nlinarith [hr.1, hr.2]
+    rw [compEllIntPik_re_ofReal hα hr2, compEllIntKk_ofReal hr2, Complex.norm_real,
+      Real.norm_of_nonneg (DLMF.Elliptic.Real.compEllIntKm_pos hr2).le]
+    exact DLMF.Elliptic.Real.compEllIntPim_ge_min_mul_compEllIntKm hα hr2
 
 /-- **Admitted.** DLMF 19.6.5: for real `1 < α²` and real `k` with `k² < 1`, the Cauchy principal
 value satisfies `Π(α², k) = K(k) - Π(k²/α², k)`. -/
@@ -711,10 +749,34 @@ theorem symEllIntRC_special :
       (∀ y : ℝ, y < 0 → symEllIntRC 0 y = 0) := by
   sorry
 
-/-- **Admitted.** DLMF 19.6.15: `R_C(x, y) → +∞` as `y → 0+` or `y → 0-`, for real `x > 0`. -/
+/-- DLMF 19.6.15: `R_C(x, y) → +∞` as `y → 0+` or `y → 0-`, for real `x > 0`. -/
 @[dlmf 19.6.E15]
 theorem tendsto_symEllIntRC_zero {x : ℝ} (hx : 0 < x) :
     Tendsto (fun y : ℝ => (symEllIntRC x y).re) (𝓝[≠] 0) atTop := by
-  sorry
+  have hi : Tendsto (fun y : ℝ => y) (𝓝[≠] 0) (𝓝 0) := nhdsWithin_le_nhds
+  have hs : Tendsto (fun y : ℝ => Real.sqrt (x - y)) (𝓝[≠] 0) (𝓝 (Real.sqrt x)) := by
+    simpa using ((tendsto_const_nhds (x := x)).sub hi).sqrt
+  have hsum : Tendsto (fun y : ℝ => Real.sqrt x + Real.sqrt (x - y)) (𝓝[≠] 0)
+      (𝓝 (2 * Real.sqrt x)) := by simpa [two_mul] using hs.const_add (Real.sqrt x)
+  have hlog := (Real.continuousAt_log (by positivity : 2 * Real.sqrt x ≠ 0)).tendsto.comp hsum
+  have hmain := (tendsto_neg_atBot_atTop.comp Real.tendsto_log_nhdsNE_zero).const_mul_atTop
+    (by norm_num : (0 : ℝ) < 1 / 2)
+  have hl := hlog.add_atTop hmain
+  have hfinal := hl.atTop_mul_pos (by positivity : 0 < (Real.sqrt x)⁻¹) (hs.inv₀ (by positivity))
+  apply hfinal.congr'
+  filter_upwards [self_mem_nhdsWithin,
+    (eventually_lt_nhds hx).filter_mono nhdsWithin_le_nhds] with y hy0 hyx
+  have hy0 : y ≠ 0 := by simpa using hy0
+  have hxy : 0 < x - y := by linarith
+  have hyabs : 0 < |y| := abs_pos.mpr hy0
+  have hr : symEllIntRC x y =
+      ((Real.log ((Real.sqrt x + Real.sqrt (x - y)) / Real.sqrt |y|) / Real.sqrt (x - y) : ℝ) : ℂ) := by
+    rcases hy0.lt_or_gt with hy | hy
+    · simpa only [abs_of_neg hy] using (symEllIntRC_of_neg hy hx.le).2.2
+    · simpa only [abs_of_pos hy] using (symEllIntRC_of_gt hy hyx).2
+  rw [hr, ofReal_re, Real.log_div (by positivity) (by positivity), Real.log_sqrt hyabs.le,
+    Real.log_abs]
+  dsimp only [Function.comp_def]
+  ring
 
 end DLMF.EllipticIntegrals

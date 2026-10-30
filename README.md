@@ -15,63 +15,81 @@ umbrella module `DLMF/<Area>.lean` describes what Mathlib already provides and w
 area adds. Statements taken from the DLMF record their equation numbers with Mathlib's
 `@[dlmf]` cross-reference attribute.
 
-`DLMF.lean` imports all areas. The current source tree has 1,112 library files,
-including the two root entry points and 101 general supporting modules. Large topic modules
+`DLMF.lean` imports all areas. The current library has 1,199 Lean files, including
+109 general supporting modules and the two library root entry points. Large topic modules
 are split into mathematical subtopics; the former file remains as a small import umbrella.
 For example, `Gamma/IntegralRepresentations.lean` now imports the Hankel, Prym, Binet and
-moment modules below `Gamma/IntegralRepresentations/`. Existing import paths still work.
+moment modules below `Gamma/IntegralRepresentations/`.
 Every Lean source file is at most 1,500 lines; run `python3 scripts/check_file_lengths.py`
 to enforce this limit. The complete split map and the structural cleanup snapshot are in
 [CodeReviewInventory.json](CodeReviewInventory.json), with the mathematical review in
 [REVIEW.md](REVIEW.md). The chapter-by-chapter correspondence between DLMF definitions
 and actual Lean constructions is recorded in [DEFINITIONS.md](DEFINITIONS.md).
-That catalogue also records missing counterparts and differences in domains and branches.
+[DEFINITIONS2.md](DEFINITIONS2.md) expands that inventory to definitions introduced
+throughout the DLMF, in source order, including auxiliary objects and definitions in prose.
+Both catalogues record missing counterparts and differences in domains and branches.
+
+For a view of the organized foundations, use `import DLMF.Basic`. It imports all
+59 area and subarea `Basic.lean` entry points. Each is a small foundational file or
+an umbrella over descriptive files under `Basic/`, such as
+`Confluent/Basic/IncompleteGamma.lean` and `Mathieu/Basic/Spectral.lean`.
+This layer contains canonical definitions and their necessary elementary support;
+it has no dependencies on DLMF theorem files. The complete area umbrellas continue
+to expose their theorem developments. The foundation entry point is a coherent
+import layer, while the definition catalogues remain the fuller mathematical inventory.
+
+The [foundation reorganization](REVIEW.md#foundational-basic-layer-2026-10-30)
+moves legacy `Defs.lean`, `SolutionsDefs.lean` and `FerrersDefs.lean` modules into
+this layout and gives former theorem-heavy `Basic` files descriptive theorem names.
+Lean declaration names and namespaces are preserved; some module import paths change.
+The module migration map and preservation checks are recorded in
+[OrganizationRound20261030.json](OrganizationRound20261030.json).
 
 Source files below each area directory, including nested topic modules and compatibility
-umbrellas (2026-10-28):
+umbrellas (2026-10-30):
 
-- [Airy](DLMF/Airy.lean): 40 files.
+- [Airy](DLMF/Airy.lean): 41 files.
 - [AlgebraicAnalytic](DLMF/AlgebraicAnalytic.lean): 53 files.
 - [AsymptoticApproximations](DLMF/AsymptoticApproximations.lean): 30 files.
 - [BernoulliEuler](DLMF/BernoulliEuler.lean): 21 files.
-- [Bessel](DLMF/Bessel.lean): 28 files.
-- [CoalescingSaddles](DLMF/CoalescingSaddles.lean): 16 files.
+- [Bessel](DLMF/Bessel.lean): 29 files.
+- [CoalescingSaddles](DLMF/CoalescingSaddles.lean): 17 files.
 - [Combinatorics](DLMF/Combinatorics.lean): 30 files.
-- [Confluent](DLMF/Confluent.lean): 57 files.
+- [Confluent](DLMF/Confluent.lean): 64 files.
 - [Constants](DLMF/Constants.lean): 3 files.
 - `Core`: 5 files.
-- [Coulomb](DLMF/Coulomb.lean): 14 files.
-- [Elementary](DLMF/Elementary.lean): 22 files.
-- [Elliptic](DLMF/Elliptic.lean): 10 files.
+- [Coulomb](DLMF/Coulomb.lean): 15 files.
+- [Elementary](DLMF/Elementary.lean): 23 files.
+- [Elliptic](DLMF/Elliptic.lean): 13 files.
 - [EllipticIntegrals](DLMF/EllipticIntegrals.lean): 32 files.
-- [ErrorFunctions](DLMF/ErrorFunctions.lean): 18 files.
-- [ExpIntegrals](DLMF/ExpIntegrals.lean): 9 files.
+- [ErrorFunctions](DLMF/ErrorFunctions.lean): 20 files.
+- [ExpIntegrals](DLMF/ExpIntegrals.lean): 11 files.
 - [Gamma](DLMF/Gamma.lean): 49 files.
-- [GeneralizedHypergeometric](DLMF/GeneralizedHypergeometric.lean): 16 files.
+- [GeneralizedHypergeometric](DLMF/GeneralizedHypergeometric.lean): 25 files.
 - [Heun](DLMF/Heun.lean): 9 files.
-- [Hypergeometric](DLMF/Hypergeometric.lean): 48 files.
-- [IncompleteGamma](DLMF/IncompleteGamma.lean): 23 files.
+- [Hypergeometric](DLMF/Hypergeometric.lean): 54 files.
+- [IncompleteGamma](DLMF/IncompleteGamma.lean): 24 files.
 - [JacobiElliptic](DLMF/JacobiElliptic.lean): 34 files.
-- [Lame](DLMF/Lame.lean): 20 files.
-- [Legendre](DLMF/Legendre.lean): 58 files.
-- [Mathieu](DLMF/Mathieu.lean): 46 files.
+- [Lame](DLMF/Lame.lean): 23 files.
+- [Legendre](DLMF/Legendre.lean): 60 files.
+- [Mathieu](DLMF/Mathieu.lean): 54 files.
 - [MatrixArgument](DLMF/MatrixArgument.lean): 9 files.
 - [NumberTheory](DLMF/NumberTheory.lean): 13 files.
-- [OrthogonalPolynomials](DLMF/OrthogonalPolynomials.lean): 59 files.
-- [Painleve](DLMF/Painleve.lean): 23 files.
-- [ParabolicCylinder](DLMF/ParabolicCylinder.lean): 27 files.
+- [OrthogonalPolynomials](DLMF/OrthogonalPolynomials.lean): 61 files.
+- [Painleve](DLMF/Painleve.lean): 25 files.
+- [ParabolicCylinder](DLMF/ParabolicCylinder.lean): 30 files.
 - [Polylog](DLMF/Polylog.lean): 3 files.
-- [QHypergeometric](DLMF/QHypergeometric.lean): 13 files.
-- [QSeries](DLMF/QSeries.lean): 7 files.
-- [RiemannTheta](DLMF/RiemannTheta.lean): 5 files.
-- [Selberg](DLMF/Selberg.lean): 5 files.
+- [QHypergeometric](DLMF/QHypergeometric.lean): 15 files.
+- [QSeries](DLMF/QSeries.lean): 11 files.
+- [RiemannTheta](DLMF/RiemannTheta.lean): 9 files.
+- [Selberg](DLMF/Selberg.lean): 7 files.
 - [SphericalHarmonics](DLMF/SphericalHarmonics.lean): 5 files.
-- [Spheroidal](DLMF/Spheroidal.lean): 15 files.
-- [Statistical](DLMF/Statistical.lean): 4 files.
-- [Struve](DLMF/Struve.lean): 28 files.
-- [Theta](DLMF/Theta.lean): 11 files.
+- [Spheroidal](DLMF/Spheroidal.lean): 17 files.
+- [Statistical](DLMF/Statistical.lean): 6 files.
+- [Struve](DLMF/Struve.lean): 30 files.
+- [Theta](DLMF/Theta.lean): 13 files.
 - [WaveEquation](DLMF/WaveEquation.lean): 1 file.
-- [Weierstrass](DLMF/Weierstrass.lean): 15 files.
+- [Weierstrass](DLMF/Weierstrass.lean): 18 files.
 - [WignerSymbols](DLMF/WignerSymbols.lean): 7 files.
 - [Zeta](DLMF/Zeta.lean): 23 files.
 
@@ -242,6 +260,63 @@ Mathlib's `Complex.digamma`; moving it into `DLMF.Gamma.Real` is left for a late
 
 ## Status
 
+The [L'Hôpital, inverse-series and Appell reduction round](REVIEW.md#lhopital-hyperbolic-series-carlson-principal-values-and-appell-reductions-2026-10-30)
+removes **9 admissions**, leaving **1,553**. It proves the unbounded-denominator L'Hôpital
+rule, two hyperbolic inverse series, the negative-real RC principal-value formula and its
+two-sided divergence limit, and four Appell reductions. Public theorem types and existing
+mathematical definitions are unchanged. [ProofRound20261030f.json](ProofRound20261030f.json)
+records validation and reusable support.
+
+The [equality, inverse-series, Horn and elliptic round](REVIEW.md#holder-minkowski-equality-inverse-series-horn-pdes-and-elliptic-bounds-2026-10-30)
+removes **14 admissions**, leaving **1,562**. It closes all remaining admissions in the
+Chapter 1 inequalities file, proves the closed-disk arcsine/arccosine and Euler inverse
+series, all four Horn G2/G3 PDEs, and four elliptic limit/bound declarations. One missing
+pair of parentheses in the mixed Stieltjes formula is corrected and its intended formula
+proved; a formal counterexample to the former transcription is preserved in the
+[round report](ProofRound20261030e.json). All other existing theorem types and mathematical
+definitions are retained.
+
+The [inequality and Appell PDE round](REVIEW.md#inequalities-hyperbolic-integrals-appell-pdes-and-jacobi-epsilon-2026-10-30)
+removes **15 admissions**, leaving **1,576**. It proves the finite Hölder converse, power-mean
+bounds and order with equality cases, Schwarz's equality case, the coefficient circle-integral
+formula, two hyperbolic integrals, all eight Appell PDE equations, the Jacobi amplitude
+Maclaurin expansion and three epsilon integral identities. Existing statements and domains
+are retained. [ProofRound20261030d.json](ProofRound20261030d.json) records validation,
+reusable helpers and the next Horn PDE proof plan.
+
+The [power-series and branch round](REVIEW.md#power-series-operations-branches-and-appell-nonseparability-2026-10-30)
+removes **ten admissions**, leaving **1,591**. It completes reciprocal, logarithm and general
+power coefficient convergence, the principal logarithmic sine and tangent series, the
+cosh-square integral, two elliptic amplitude derivatives, all four Appell nonseparability
+witnesses and a larger Horn G3 convergence region. General derivative and bivariate-series
+lemmas support these proofs.
+[ProofRound20261030c.json](ProofRound20261030c.json) records validation and a formal
+counterexample to the existing mean-centered R-function series domain.
+
+The [series, Carlson and Appell continuation](REVIEW.md#series-carlson-bounds-and-appell-transformations-2026-10-30)
+removes **20 further admissions**, leaving **1,601**. It proves power-series differentiation
+and Cauchy products, normalized logarithmic and boundary arctangent series, the tanh Frullani
+integral, seven Carlson results, three Appell transformations, an asymptotic coefficient
+recurrence and the Hurwitz zeta Taylor expansion. Existing statements and definitions are
+unchanged. [ProofRound20261030b.json](ProofRound20261030b.json) records the checks and
+reusable helpers.
+
+The [analytic, elementary, elliptic and q-calculus round](REVIEW.md#analytic-elementary-elliptic-and-q-calculus-proofs-2026-10-30)
+removes **24 admissions**, leaving **1,621**. It completes reversed Minkowski inequalities,
+harmonic maximum principles, winding-number and Möbius results, elementary products and
+logarithmic series, elliptic identities and limits, and q-derivative and modular-product
+formulas. Existing statements and definitions are preserved. The
+[round report](ProofRound20261030.json) records the source/type comparison, axiom audit,
+validation and new statement issues, including three Lean-confirmed theta radius counterexamples.
+
+The [Dougall, Lommel and Weierstrass round](REVIEW.md#dougall-lommel-and-weierstrass-proofs-2026-10-29)
+removes **four admissions**, leaving **1,645**. It proves both terminating Dougall
+summations, the capital Lommel differential equation at all parameters, and the
+Weierstrass cosecant-series constant. All four statements and every existing definition
+are unchanged. [ProofRound20261029f.json](ProofRound20261029f.json) records the compiled
+axiom/type checks, reusable helpers and validation. The expanded definitions inventory
+is [DEFINITIONS2.md](DEFINITIONS2.md).
+
 The [later-chapter proof round](REVIEW.md#later-chapter-identities-and-series-2026-10-29)
 removes **15 further admissions**, leaving **1,649**. It proves the full-domain q-Gauss sum,
 classical coefficient limits, the Whittaker–Buchholz expansion, the Lommel parameter limit,
@@ -285,13 +360,13 @@ oscillatory-sum bound. Its inventory and validation are in
 [preceding round](REVIEW.md#admission-proof-round-2026-10-28) removed 37 admissions and
 freed four existing downstream theorems from admitted dependencies.
 
-Remaining source admissions by area: Elementary 68, GeneralizedHypergeometric 112,
-QHypergeometric 95, EllipticIntegrals 186, Theta 13, RiemannTheta 7, JacobiElliptic 35,
-Weierstrass 36, BernoulliEuler 24, Zeta 46, Combinatorics 36, NumberTheory 36, Mathieu 140,
+Remaining source admissions by area: Elementary 61, GeneralizedHypergeometric 110,
+QHypergeometric 90, EllipticIntegrals 183, Theta 13, RiemannTheta 7, JacobiElliptic 32,
+Weierstrass 35, BernoulliEuler 24, Zeta 46, Combinatorics 36, NumberTheory 36, Mathieu 140,
 Lame 41, Spheroidal 33, Heun 26, Painleve 42, Coulomb 49, WignerSymbols 34, MatrixArgument 36,
-CoalescingSaddles 35, AlgebraicAnalytic 229, AsymptoticApproximations 104, and 186 in the older
+CoalescingSaddles 35, AlgebraicAnalytic 223, AsymptoticApproximations 104, and 185 in the older
 areas. The current axiom audit verifies all newly completed proofs using only the standard
-Lean/Mathlib axioms. The DLMF cross-reference audit records 8,653 proved entries, 2,050 entries
+Lean/Mathlib axioms. The DLMF cross-reference audit records 8,681 proved entries, 2,022 entries
 that depend on admissions, and no nonstandard axiom dependencies. The review also records
 statement qualifications that require attention before further proof work.
 Counts in the dated development history describe their earlier scope.

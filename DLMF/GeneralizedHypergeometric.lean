@@ -10,7 +10,7 @@ public import DLMF.GeneralizedHypergeometric.Appell
 public import DLMF.GeneralizedHypergeometric.GHATools
 public import DLMF.GeneralizedHypergeometric.AppellContinuation
 public import DLMF.GeneralizedHypergeometric.Asymptotics
-public import DLMF.GeneralizedHypergeometric.Basic
+public import DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties
 public import DLMF.GeneralizedHypergeometric.Derivatives
 public import DLMF.GeneralizedHypergeometric.DifferentialEquations
 public import DLMF.GeneralizedHypergeometric.Integrals

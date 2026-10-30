@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Mathieu.Hill.Defs
+public import DLMF.Mathieu.Hill.Basic
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Arctan
 public import Mathlib.MeasureTheory.Covering.Besicovitch
 

@@ -17,7 +17,7 @@ formulas 22.6.5–22.6.13 are the cases `u = v` of the addition theorems 22.8.1�
 22.6.14–22.6.16 are proved from the theta duplication identities, 22.6.17–22.6.18 and the
 half-argument formulas 22.6.19–22.6.21 from 22.6.6–22.6.7 and 22.6.1. Jacobi's imaginary
 transformation (Table 22.6.1) is proved from `τ(k') = -1/τ(k)` and the theta transformations
-under `τ ↦ -1/τ`. The half-argument formula 22.6.22 is admitted. All
+under `τ ↦ -1/τ`. The half-argument formula 22.6.22 follows from the doubled pair sums and Glaisher quotients. All
 identities are pointwise, at points where the functions involved are finite (`jacobiRegulark`)
 and the printed denominators are nonzero.
 -/
@@ -513,7 +513,31 @@ theorem jacobiDnk_half_sq {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
       (k ^ 4 * (jacobiSnk w k) ^ 6 - k ^ 2 * (jacobiSnk w k) ^ 4 +
           k ^ 2 * (jacobiSnk w k) ^ 2 - 1) * hK
 
-/-- **Admitted.** DLMF 22.6.22: for a permutation `{p, q, r}` of `{c, d, n}`,
+/-- Doubled Jacobi cosine and delta pair sums in terms of the half-argument values. -/
+private lemma p22R1_half_pair_sums {k w : ℂ} (hk : k ∈ jacobiModulusDomain)
+    (hn : jacobiRegulark .n w k) (hn2 : jacobiRegulark .n (2 * w) k) :
+    let D := 1 - k ^ 2 * jacobiSnk w k ^ 4
+    D * (jacobiCnk (2 * w) k + 1) = 2 * jacobiCnk w k ^ 2 ∧
+      D * (jacobiDnk (2 * w) k + 1) = 2 * jacobiDnk w k ^ 2 ∧
+      D * (jacobiCnk (2 * w) k + jacobiDnk (2 * w) k) =
+        2 * jacobiCnk w k ^ 2 * jacobiDnk w k ^ 2 := by
+  have hD := p22R1_den_two hk hn hn2
+  have e1 := (jacobi_sq_sum hk hn).1
+  have e2 := (jacobi_sq_sum hk hn).2
+  have ec := (jacobiCnk_two_mul hk hn hD).1
+  have ed := (jacobiDnk_two_mul hk hn hD).1
+  dsimp only
+  refine ⟨?_, ?_, ?_⟩
+  · rw [ec]; field_simp
+    linear_combination -e1 - jacobiSnk w k ^ 2 * e2
+  · rw [ed]; field_simp
+    linear_combination -e2 - k ^ 2 * jacobiSnk w k ^ 2 * e1
+  · rw [ec, ed]; field_simp
+    linear_combination (-2 * jacobiDnk w k ^ 2 - jacobiSnk w k ^ 2 * k ^ 2 + 1) * e1 +
+      (jacobiSnk w k ^ 2 - 1) * e2
+
+
+/-- DLMF 22.6.22: for a permutation `{p, q, r}` of `{c, d, n}`,
 `pq²(z/2) = (ps + rs)/(qs + rs) = (pq + rq)/(1 + rq) = (pr + 1)/(qr + 1)`, where all twelve
 functions are finite at `z/2` and `z` and the denominators are nonzero. -/
 @[dlmf 22.6.E22]
@@ -527,7 +551,97 @@ theorem jacobiPQk_half_sq {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p q r : Ja
       jacobiPQk p q (z / 2) k ^ 2 =
         (jacobiPQk p q z k + jacobiPQk r q z k) / (1 + jacobiPQk r q z k) ∧
       jacobiPQk p q (z / 2) k ^ 2 = (jacobiPQk p r z k + 1) / (jacobiPQk q r z k + 1) := by
-  sorry
+  obtain ⟨w, rfl⟩ : ∃ w, z = 2 * w := ⟨z / 2, by ring⟩
+  have hw : 2 * w / 2 = w := by ring
+  simp only [hw] at hz2 ⊢
+  have hn : jacobiRegulark .n w k := hz2 .n
+  have hn2 : jacobiRegulark .n (2 * w) k := hz .n
+  have hD := p22R1_den_two hk hn hn2
+  let D : ℂ := 1 - k ^ 2 * jacobiSnk w k ^ 4
+  have hsum := p22R1_half_pair_sums hk hn hn2
+  change D * (jacobiCnk (2 * w) k + 1) = 2 * jacobiCnk w k ^ 2 ∧
+    D * (jacobiDnk (2 * w) k + 1) = 2 * jacobiDnk w k ^ 2 ∧
+    D * (jacobiCnk (2 * w) k + jacobiDnk (2 * w) k) =
+      2 * jacobiCnk w k ^ 2 * jacobiDnk w k ^ 2 at hsum
+  obtain ⟨gcn, gdn, gcd⟩ := hsum
+  have hc0 : jacobiCnk w k ≠ 0 := jacobiPQk_ne_zero (by decide) (hz2 .c) hn
+  have hd0 : jacobiDnk w k ≠ 0 := jacobiPQk_ne_zero (by decide) (hz2 .d) hn
+  have hS0 : jacobiSnk (2 * w) k ≠ 0 := jacobiPQk_ne_zero (by decide) (hz .s) hn2
+  have hC0 : jacobiCnk (2 * w) k ≠ 0 := jacobiPQk_ne_zero (by decide) (hz .c) hn2
+  have hD0 : jacobiDnk (2 * w) k ≠ 0 := jacobiPQk_ne_zero (by decide) (hz .d) hn2
+  have hdn : jacobiDnk (2 * w) k + 1 ≠ 0 := by
+    intro hz0; rw [hz0, mul_zero] at gdn
+    exact (mul_ne_zero (by norm_num) (pow_ne_zero 2 hd0)) gdn.symm
+  have hcn : jacobiCnk (2 * w) k + 1 ≠ 0 := by
+    intro hz0; rw [hz0, mul_zero] at gcn
+    exact (mul_ne_zero (by norm_num) (pow_ne_zero 2 hc0)) gcn.symm
+  have hcd : jacobiCnk (2 * w) k + jacobiDnk (2 * w) k ≠ 0 := by
+    intro hz0; rw [hz0, mul_zero] at gcd
+    exact (mul_ne_zero (mul_ne_zero (by norm_num) (pow_ne_zero 2 hc0))
+      (pow_ne_zero 2 hd0)) gcd.symm
+  have hcross1 : jacobiCnk w k ^ 2 * (jacobiDnk (2 * w) k + 1) =
+      jacobiDnk w k ^ 2 * (jacobiCnk (2 * w) k + 1) := by
+    apply mul_left_cancel₀ hD
+    dsimp only [D] at gcn gdn
+    linear_combination jacobiCnk w k ^ 2 * gdn - jacobiDnk w k ^ 2 * gcn
+  have hcross2 : jacobiCnk w k ^ 2 * (jacobiDnk (2 * w) k + 1) =
+      jacobiCnk (2 * w) k + jacobiDnk (2 * w) k := by
+    apply mul_left_cancel₀ hD
+    dsimp only [D] at gdn gcd
+    linear_combination jacobiCnk w k ^ 2 * gdn - gcd
+  have hcross3 : jacobiDnk w k ^ 2 * (jacobiCnk (2 * w) k + 1) =
+      jacobiCnk (2 * w) k + jacobiDnk (2 * w) k := by
+    apply mul_left_cancel₀ hD
+    dsimp only [D] at gcn gcd
+    linear_combination jacobiDnk w k ^ 2 * gcn - gcd
+  have Rcd : (jacobiCnk w k / jacobiDnk w k) ^ 2 =
+      (jacobiCnk (2 * w) k + 1) / (jacobiDnk (2 * w) k + 1) := by
+    rw [eq_div_iff hdn, div_pow]
+    field_simp
+    exact hcross1
+  have Rcn : jacobiCnk w k ^ 2 =
+      (jacobiCnk (2 * w) k + jacobiDnk (2 * w) k) / (jacobiDnk (2 * w) k + 1) :=
+    (eq_div_iff hdn).2 hcross2
+  have Rdc : (jacobiDnk w k / jacobiCnk w k) ^ 2 =
+      (jacobiDnk (2 * w) k + 1) / (jacobiCnk (2 * w) k + 1) := by
+    rw [eq_div_iff hcn, div_pow]
+    field_simp
+    exact hcross1.symm
+  have Rdn : jacobiDnk w k ^ 2 =
+      (jacobiCnk (2 * w) k + jacobiDnk (2 * w) k) / (jacobiCnk (2 * w) k + 1) :=
+    (eq_div_iff hcn).2 hcross3
+  have Rnc : (1 / jacobiCnk w k) ^ 2 =
+      (jacobiDnk (2 * w) k + 1) / (jacobiCnk (2 * w) k + jacobiDnk (2 * w) k) := by
+    rw [eq_div_iff hcd, div_pow]
+    field_simp
+    exact hcross2.symm
+  have Rnd : (1 / jacobiDnk w k) ^ 2 =
+      (jacobiCnk (2 * w) k + 1) / (jacobiCnk (2 * w) k + jacobiDnk (2 * w) k) := by
+    rw [eq_div_iff hcd, div_pow]
+    field_simp
+    exact hcross3.symm
+  have eG := je22a_glaisher_via_n hn2
+  have eGw := je22a_glaisher_via_n hn
+  cases p <;> cases q <;> cases r <;> try { exfalso; first | exact hp rfl | exact hq rfl | exact hr rfl | exact hpq rfl | exact hpr rfl | exact hqr rfl }
+  all_goals have hCsk (t : ℂ) : jacobiPQk .c .s t k = jacobiCsk t k := rfl
+  all_goals have hDsk (t : ℂ) : jacobiPQk .d .s t k = jacobiDsk t k := rfl
+  all_goals have hNsk (t : ℂ) : jacobiPQk .n .s t k = jacobiNsk t k := rfl
+  all_goals have hDck (t : ℂ) : jacobiPQk .d .c t k = jacobiDck t k := rfl
+  all_goals have hNck (t : ℂ) : jacobiPQk .n .c t k = jacobiNck t k := rfl
+  all_goals have hCdk (t : ℂ) : jacobiPQk .c .d t k = jacobiCdk t k := rfl
+  all_goals have hNdk (t : ℂ) : jacobiPQk .n .d t k = jacobiNdk t k := rfl
+  all_goals have hCnk (t : ℂ) : jacobiPQk .c .n t k = jacobiCnk t k := rfl
+  all_goals have hDnk (t : ℂ) : jacobiPQk .d .n t k = jacobiDnk t k := rfl
+  all_goals simp only [hCsk, hDsk, hNsk, hDck, hNck, hCdk, hNdk, hCnk, hDnk] at h1 h2 h3 ⊢
+  all_goals obtain ⟨gcs, gds, gns, _, gdc, gnc, _, gcd, gnd⟩ := eG
+  all_goals obtain ⟨_, _, _, _, wdc, wnc, _, wcd, wnd⟩ := eGw
+  all_goals simp only [gcs, gds, gns, gdc, gnc, gcd, gnd, wdc, wnc, wcd, wnd] at h1 h2 h3 ⊢
+  all_goals first | rw [Rcd] | rw [Rdc] | rw [Rnc] | rw [Rnd] | rw [Rcn] | rw [Rdn]
+  all_goals refine ⟨?_, ?_, ?_⟩
+  all_goals have hdc : jacobiDnk (2 * w) k + jacobiCnk (2 * w) k ≠ 0 := by simpa only [add_comm] using hcd
+  all_goals field_simp [hcd, hdc, hcn, hdn, hS0, hC0, hD0, hc0, hd0, h1, h2, h3]
+  all_goals ring
+
 
 /-! ### Jacobi's imaginary transformation (§22.6(iv), Table 22.6.1) -/
 

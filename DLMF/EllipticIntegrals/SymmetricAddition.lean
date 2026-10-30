@@ -8,6 +8,8 @@ module
 public import DLMF.EllipticIntegrals.Symmetric
 public import Carlson.Elliptic.Addition
 public import Carlson.Elliptic.ZeroVariable
+public import Carlson.TwoVariable.QuadraticHybrid
+public import Carlson.TwoVariable.Reduction
 
 /-!
 # Addition theorems for the symmetric elliptic integrals (DLMF §19.26)
@@ -104,6 +106,35 @@ theorem symEllInt_addition_mu_perm {x y z l m : ℝ} (h : ei19d_posDomain x y z)
   rw [hb, hc] at key
   exact key
 
+/-- Algebraic identity behind the square-root addition formula. -/
+private lemma ei19d_sqrt_z_algebra {a b c A B C l : ℝ} (hA : A ^ 2 = a ^ 2 + l)
+    (hC : C ^ 2 = c ^ 2 + l) :
+    c * (A * B * (C * a * b + c * A * B) * l +
+      (A * b * c + a * B * C) * (B * a * c + b * A * C) * C) =
+    A ^ 2 * (C * a * b + c * A * B) ^ 2 +
+      (B * a * c + b * A * C) ^ 2 * C ^ 2 -
+      A ^ 2 * (B * a * c + b * A * C) ^ 2 := by
+  linear_combination
+    (-(A ^ 2 * B ^ 2 * c ^ 2) + A ^ 2 * C ^ 2 * b ^ 2 - C ^ 4 * b ^ 2 +
+      C ^ 2 * b ^ 2 * c ^ 2 + C ^ 2 * b ^ 2 * l) * hA +
+    (-(A * B * C * a * b * c) - C ^ 2 * a ^ 2 * b ^ 2 - C ^ 2 * b ^ 2 * l) * hC
+
+/-- The defining shifted-square equation yields its nonnegative square root. -/
+private lemma ei19d_shifted_sqrt {q r s l m : ℝ} (hq : 0 ≤ q) (hr : 0 ≤ r) (hs : 0 ≤ s)
+    (hl : 0 < l) (hm : 0 < m)
+    (he : q + m = (√((q + l) * r * s) + √(q * (r + l) * (s + l))) ^ 2 / l ^ 2) :
+    √(q + m) * l = √(q + l) * √r * √s + √q * √(r + l) * √(s + l) := by
+  have hqL : 0 ≤ q + l := by linarith
+  have hrL : 0 ≤ r + l := by linarith
+  have hsL : 0 ≤ s + l := by linarith
+  rw [ei19d_sqrt_mul3 hqL hr hs, ei19d_sqrt_mul3 hq hrL hsL] at he
+  have hl2 : l ^ 2 ≠ 0 := by positivity
+  rw [eq_div_iff hl2] at he
+  apply (sq_eq_sq₀ (by positivity) (by positivity)).mp
+  rw [mul_pow, Real.sq_sqrt (by linarith : 0 ≤ q + m)]
+  exact he
+
+
 /-- DLMF 19.26.3 with 19.26.4: with `(ξ, η, ζ) = (x + λ, y + λ, z + λ)` and
 `(ξ', η', ζ') = (x + μ, y + μ, z + μ)`, `√z = (ξζ' + η'ζ - ξη')/(√(ξηζ') + √(ξ'η'ζ))` (and the
 permuted formulas for `√x`, `√y`). -/
@@ -114,7 +145,38 @@ theorem symEllInt_addition_sqrt_z {x y z l m : ℝ} (h : ei19d_posDomain x y z) 
     let ξ := x + l; let η := y + l; let ζ := z + l
     let ξ' := x + m; let η' := y + m; let ζ' := z + m
     √z = (ξ * ζ' + η' * ζ - ξ * η') / (√(ξ * η * ζ') + √(ξ' * η' * ζ)) := by
-  sorry
+  have hx := h.1
+  have hy := h.2.1
+  have hz := h.2.2.1
+  have hxL : 0 < x + l := by linarith
+  have hyL : 0 < y + l := by linarith
+  have hzL : 0 < z + l := by linarith
+  have hxM : 0 < x + m := by linarith
+  have hyM : 0 < y + m := by linarith
+  have hzM : 0 < z + m := by linarith
+  have hl0 : l ≠ 0 := ne_of_gt hl
+  have hp := symEllInt_addition_mu_perm h hl hμ
+  have hU := ei19d_shifted_sqrt hx hy hz hl hm hμ
+  have hV := ei19d_shifted_sqrt hy hx hz hl hm hp.1
+  have hW := ei19d_shifted_sqrt hz hx hy hl hm hp.2
+  have hA : √(x + l) ^ 2 = √x ^ 2 + l := by rw [Real.sq_sqrt hxL.le, Real.sq_sqrt hx]
+  have hC : √(z + l) ^ 2 = √z ^ 2 + l := by rw [Real.sq_sqrt hzL.le, Real.sq_sqrt hz]
+  have ha := ei19d_sqrt_z_algebra (a := √x) (b := √y) (c := √z)
+    (A := √(x + l)) (B := √(y + l)) (C := √(z + l)) (l := l) hA hC
+  rw [← hU, ← hV, ← hW] at ha
+  have he : √z * (√(x + l) * √(y + l) * √(z + m) + √(x + m) * √(y + m) * √(z + l)) =
+      √(x + l) ^ 2 * √(z + m) ^ 2 + √(y + m) ^ 2 * √(z + l) ^ 2 -
+        √(x + l) ^ 2 * √(y + m) ^ 2 := by
+    apply mul_left_cancel₀ (pow_ne_zero 2 hl0)
+    linear_combination ha
+  have hd : 0 < √(x + l) * √(y + l) * √(z + m) + √(x + m) * √(y + m) * √(z + l) :=
+    by positivity
+  dsimp only
+  rw [ei19d_sqrt_mul3 hxL.le hyL.le hzM.le,
+    ei19d_sqrt_mul3 hxM.le hyM.le hzL.le, eq_div_iff (ne_of_gt hd)]
+  rw [Real.sq_sqrt hxL.le, Real.sq_sqrt hzM.le, Real.sq_sqrt hyM.le,
+    Real.sq_sqrt hzL.le] at he
+  exact he
 
 /-- DLMF 19.26.4 (the note): `ξζ' + η'ζ - ξη' = ξ'ζ + ηζ' - ξ'η`, an identity for all
 `x, y, z, λ, μ`. -/
@@ -674,6 +736,8 @@ theorem symEllIntRC_sq_eq {x y : ℂ} (hx : 0 ≤ x.re) (hy : 0 < y.re) :
 `x² - θ ∈ ℂ \ (-∞, 0]`. DLMF's conditions do not suffice: the identity fails for `x = -2`,
 `θ = -3` (the left side depends on `x²` only), and for `x = 1`, `θ = 2`, where the left side is
 a Cauchy principal value (19.2.20) but the right side is not (they differ by `-π i/(2√θ)`).
+The proof reuses lean-codes' `Carlson.TwoVariable.carlsonRC_sq_eq` and
+`Carlson.TwoVariable.carlsonRC_mul_of_pos`.
 Checked numerically at 3000 random complex points under the stated hypotheses. -/
 @[dlmf 19.26.E27]
 theorem symEllIntRC_duplication_theta {x θ : ℂ} (hx : 0 < x.re) (hθ : θ ≠ x ^ 2)
@@ -681,6 +745,31 @@ theorem symEllIntRC_duplication_theta {x θ : ℂ} (hx : 0 < x.re) (hθ : θ ≠
     (hθ' : θ ≠ (x + (x ^ 2 - θ) ^ (1 / 2 : ℂ)) ^ 2) :
     let s := x + (x ^ 2 - θ) ^ (1 / 2 : ℂ)
     symEllIntRC (x ^ 2) (x ^ 2 - θ) = 2 * symEllIntRC (s ^ 2) (s ^ 2 - θ) := by
-  sorry
+  let y := (x ^ 2 - θ) ^ (1 / 2 : ℂ)
+  have hy : 0 < y.re := Carlson.re_cpow_half_pos hθx
+  have hy2 : y ^ 2 = x ^ 2 - θ := by
+    dsimp only [y]
+    rw [pow_two, ei19c_cpow_half_sq]
+  have hs : 0 < (x + y).re := by simp only [add_re]; linarith
+  have ha : 0 < ((x + y) / 2).re := by simp only [div_ofNat_re]; linarith
+  have he : (x + y) ^ 2 - θ = (x + y) * (2 * y) := by linear_combination -hy2
+  have h1 := Carlson.TwoVariable.carlsonRC_sq_eq x y hx hy
+  rw [hy2] at h1
+  have hscale := Carlson.TwoVariable.carlsonRC_mul_of_pos (l := (1 / 4 : ℝ))
+    (x := (x + y) ^ 2) (y := (x + y) ^ 2 - θ)
+    (by norm_num) (by simpa only [pow_two] using Carlson.mul_mem_slitPlane_of_re_pos hs hs)
+    (he ▸ Carlson.mul_mem_slitPlane_of_re_pos hs (by simp [hy]))
+  have hsarg : ((1 / 4 : ℝ) : ℂ) * (x + y) ^ 2 = ((x + y) / 2) ^ 2 := by push_cast; ring
+  have hsarg2 : ((1 / 4 : ℝ) : ℂ) * ((x + y) ^ 2 - θ) = (x + y) / 2 * y := by
+    rw [he]; push_cast; ring
+  rw [hsarg, hsarg2, ei19d_quarter_cpow] at hscale
+  change symEllIntRC (x ^ 2) (x ^ 2 - θ) =
+    2 * symEllIntRC ((x + y) ^ 2) ((x + y) ^ 2 - θ)
+  have hright := he ▸ Carlson.mul_mem_slitPlane_of_re_pos hs (by simp [hy])
+  rw [symEllIntRC_eq_carlsonRC
+      (by simpa only [pow_two] using Carlson.mul_mem_slitPlane_of_re_pos hx hx) hθx,
+    symEllIntRC_eq_carlsonRC
+      (by simpa only [pow_two] using Carlson.mul_mem_slitPlane_of_re_pos hs hs) hright]
+  exact h1.trans hscale
 
 end DLMF.EllipticIntegrals

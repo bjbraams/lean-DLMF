@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Confluent.Basic
+public import DLMF.Confluent.KummerProperties
 
 /-!
 # Confluence with a shifted large parameter

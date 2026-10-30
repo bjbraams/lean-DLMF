@@ -5,14 +5,17 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
-public import DLMF.AlgebraicAnalytic.Complex.Defs
+public import DLMF.AlgebraicAnalytic.Complex.Basic
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
+public import DLMFMathlib.Analysis.Complex.TrigR4SeriesExtension
 public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 public import Mathlib.Analysis.Complex.CauchyIntegral
 public import Mathlib.Analysis.Complex.Schwarz
 public import Mathlib.Analysis.Complex.LocallyUniformLimit
 public import Mathlib.Analysis.Calculus.LogDeriv
 public import Mathlib.Analysis.InnerProductSpace.Harmonic.Basic
+public import TauCeti.Analysis.InnerProductSpace.Laplacian.StrongMaximumPrinciple
+public import TauCeti.Analysis.InnerProductSpace.Harmonic.Subharmonic
 public import Mathlib.Analysis.Meromorphic.Order
 public import Mathlib.Analysis.Normed.Algebra.Exponential
 public import Mathlib.Analysis.SpecialFunctions.Exponential
@@ -30,7 +33,7 @@ lemma on discs, removable singularities, Rouché's theorem on discs, …) are re
 `dlmf_upstream` pointers in `DLMF.AlgebraicAnalytic.Complex.MathlibCoverage`.
 
 Conventions.
-* Contours, interiors and the positive sense are those of `DLMF.AlgebraicAnalytic.Complex.Defs`
+* Contours, interiors and the positive sense are those of `DLMF.AlgebraicAnalytic.Complex.Basic`
   (simple closed piecewise `C¹` contours, Tau Ceti's filled hull and winding number).
 * The residue is `residueAt f z₀`, the Laurent coefficient `a_{-1}` defined by a circle integral,
   so that it is meaningful also at essential singularities; at poles it is Tau Ceti's
@@ -47,6 +50,9 @@ Mathlib), the analyticity of the branches of `√z` and `(1 - z)^α (1 + z)^β` 
 `TendstoLocallyUniformlyOn.deriv` and `logDeriv_fun_prod`. The improper-integral
 holomorphy statements and the integral M-test use the project’s dominated-holomorphy theorem,
 Mathlib’s locally uniform limit theorem and `MeasureTheory.tendsto_integral_Ioi_zero`.
+Schwarz’s equality case uses Mathlib’s affine-map characterization via divided slopes.
+The coefficient circle-integral formula compares scalar coefficients with Mathlib’s
+Cauchy power series on a smaller disk.
 -/
 
 @[expose] public noncomputable section
@@ -190,7 +196,7 @@ theorem IsSimpleClosedContour.rouche {γ : ℝ → ℂ} {a b : ℝ} {f g : ℂ �
 theorem harmonic_eqOn_of_isMaxOn {u : ℂ → ℝ} {D : Set ℂ} (hD : IsOpen D) (hc : IsConnected D)
     (hu : InnerProductSpace.HarmonicOnNhd u D) {z₀ : ℂ} (hz₀ : z₀ ∈ D) (hmax : IsMaxOn u D z₀) :
     EqOn u (fun _ => u z₀) D := by
-  sorry
+  exact TauCeti.eqOn_const_of_harmonicOnNhd_of_isMaxOn_of_isOpen hD hz₀ hc.isPreconnected hu hmax
 
 /-- DLMF §1.10(v) (maximum principle for harmonic functions on bounded domains): if `D` is
 bounded and `u` is continuous on `D̄` and harmonic in `D`, then `u` attains its maximum over `D̄`
@@ -200,7 +206,18 @@ theorem harmonic_exists_mem_frontier_isMaxOn {u : ℂ → ℝ} {D : Set ℂ} (hD
     (hb : Bornology.IsBounded D) (hne : D.Nonempty) (hc : ContinuousOn u (closure D))
     (hu : InnerProductSpace.HarmonicOnNhd u D) :
     ∃ z ∈ frontier D, IsMaxOn u (closure D) z := by
-  sorry
+  have hcompact : IsCompact (frontier D) :=
+    hb.isCompact_closure.of_isClosed_subset isClosed_frontier frontier_subset_closure
+  have hproper : D ≠ Set.univ := by
+    intro h
+    have hk : IsCompact (Set.univ : Set ℂ) := by simpa [h] using hb.isCompact_closure
+    exact noncompact_univ ℂ hk
+  have hfront : (frontier D).Nonempty := nonempty_frontier_iff.mpr ⟨hne, hproper⟩
+  obtain ⟨z, hz, hmax⟩ := hcompact.exists_isMaxOn hfront (hc.mono frontier_subset_closure)
+  refine ⟨z, hz, ?_⟩
+  have hbound := hu.subharmonicOn.le_of_le_frontier hD hb hc
+    (InnerProductSpace.harmonicOnNhd_const (u z)) continuousOn_const (fun x hx => hmax hx)
+  exact hbound
 
 /-- DLMF 1.10.11 (Schwarz's lemma, inequalities): if `f` is analytic in `|z| < R`,
 `|f(z)| ≤ M` there and `f(0) = 0`, then `|f(z)| ≤ M|z|/R` and `|f'(0)| ≤ M/R`. From Mathlib's
@@ -225,7 +242,28 @@ theorem schwarz_lemma_eq_iff {f : ℂ → ℂ} {R M : ℝ} (hR : 0 < R)
     (hf : DifferentiableOn ℂ f (ball 0 R)) (hM : ∀ z ∈ ball (0 : ℂ) R, ‖f z‖ ≤ M) (h0 : f 0 = 0) :
     ((∃ z₁ ∈ ball (0 : ℂ) R, z₁ ≠ 0 ∧ ‖f z₁‖ = M * ‖z₁‖ / R) ∨ ‖deriv f 0‖ = M / R) ↔
       ∃ A : ℂ, ‖A‖ = M / R ∧ EqOn f (fun z => A * z) (ball 0 R) := by
-  sorry
+  constructor
+  · intro h
+    have hmaps : MapsTo f (ball (0 : ℂ) R) (closedBall (f 0) M) := fun z hz => by
+      simpa [mem_closedBall, h0, dist_zero_right] using hM z hz
+    have hds : ∃ z ∈ ball (0 : ℂ) R, ‖dslope f 0 z‖ = M / R := by
+      rcases h with ⟨z, hz, hz0, hzeq⟩ | hd
+      · refine ⟨z, hz, ?_⟩
+        rw [dslope_of_ne f hz0, slope_def_field, h0, sub_zero, sub_zero, norm_div, hzeq]
+        field_simp
+      · exact ⟨0, mem_ball_self hR, by simpa [dslope_same] using hd⟩
+    obtain ⟨A, hAnorm, hAf⟩ :=
+      Complex.affine_of_mapsTo_ball_of_exists_norm_dslope_eq_div' hf hmaps hds
+    refine ⟨A, hAnorm, ?_⟩
+    intro z hz
+    simpa [h0, smul_eq_mul, mul_comm] using hAf hz
+  · rintro ⟨A, hAnorm, hAf⟩
+    right
+    have heq : f =ᶠ[𝓝 (0 : ℂ)] (fun z => A * z) :=
+      eventually_of_mem (ball_mem_nhds _ hR) hAf
+    have hd := ((hasDerivAt_id (0 : ℂ)).const_mul A).congr_of_eventuallyEq heq
+    rw [hd.deriv]
+    simpa using hAnorm
 
 /-! ## §1.10(vi) Multivalued functions -/
 
@@ -556,6 +594,23 @@ theorem mittagLeffler {a zs : ℕ → ℂ} (hinj : Function.Injective zs) (hz : 
 theorem coeff_eq_circleIntegral {p : ℕ → ℂ} {F : ℂ → ℂ} {R : ℝ}
     (hF : ∀ z ∈ ball (0 : ℂ) R, HasSum (fun n => p n * z ^ n) (F z)) {r : ℝ} (hr : r ∈ Ioo 0 R)
     (n : ℕ) : p n = (2 * Real.pi * I)⁻¹ * ∮ z in C(0, r), F z / z ^ (n + 1) := by
-  sorry
+  obtain ⟨ρ, hrρ, hρR⟩ := exists_between hr.2
+  have hρ : 0 < ρ := hr.1.trans hrρ
+  let s : NNReal := ⟨ρ, hρ.le⟩
+  have hp := Complex.hasFPowerSeriesOnBall_of_hasSum_ball (ρ := s)
+    (by exact_mod_cast hρ) hρR (fun z hz => hF z (by simpa using hz))
+  have hsball : Metric.eball (0 : ℂ) (s : ENNReal) = ball (0 : ℂ) ρ := Metric.eball_coe
+  have hd : DifferentiableOn ℂ F (closedBall 0 r) := by
+    apply hp.differentiableOn.mono
+    rw [hsball]
+    exact closedBall_subset_ball hrρ
+  let r₀ : NNReal := ⟨r, hr.1.le⟩
+  have hr₀ : (r₀ : ℝ) = r := rfl
+  have hc := hd.hasFPowerSeriesOnBall (R := r₀) (by exact_mod_cast hr.1)
+  have heq := hp.hasFPowerSeriesAt.eq_formalMultilinearSeries hc.hasFPowerSeriesAt
+  have h := congrArg (fun q : FormalMultilinearSeries ℂ ℂ ℂ => q n (fun _ => 1)) heq
+  simpa [FormalMultilinearSeries.ofScalars_apply_eq, cauchyPowerSeries, cauchyPowerSeries_apply,
+    smul_eq_mul, sub_zero, div_eq_mul_inv, pow_succ, mul_inv, inv_pow, hr₀,
+    mul_comm, mul_left_comm, mul_assoc] using h
 
 end DLMF.AlgebraicAnalytic

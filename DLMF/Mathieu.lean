@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
-public import DLMF.Mathieu.Basic
-public import DLMF.Mathieu.ContFracDefs
+public import DLMF.Mathieu.SpectralExistence
+public import DLMF.Mathieu.Basic.ContinuedFractions
 public import DLMF.Mathieu.Properties
 public import DLMF.Mathieu.FourierSeries
 public import DLMF.Mathieu.SecondSolutions
@@ -16,17 +16,17 @@ public import DLMF.Mathieu.LargeQ
 public import DLMF.Mathieu.Zeros
 public import DLMF.Mathieu.IntegralEquations
 public import DLMF.Mathieu.Expansions
-public import DLMF.Mathieu.Noninteger.Defs
+public import DLMF.Mathieu.Noninteger.Basic
 public import DLMF.Mathieu.Noninteger.Properties
 public import DLMF.Mathieu.Noninteger.Fourier
 public import DLMF.Mathieu.Noninteger.Expansions
-public import DLMF.Mathieu.Modified.Defs
+public import DLMF.Mathieu.Modified.Basic
 public import DLMF.Mathieu.Modified.BesselSeries
 public import DLMF.Mathieu.Modified.Properties
 public import DLMF.Mathieu.Modified.Connection
 public import DLMF.Mathieu.Modified.Asymptotics
 public import DLMF.Mathieu.Modified.Integrals
-public import DLMF.Mathieu.Hill.Defs
+public import DLMF.Mathieu.Hill.Basic
 public import DLMF.Mathieu.Hill.Floquet
 public import DLMF.Mathieu.Hill.Eigenfunctions
 public import DLMF.Mathieu.Hill.Ince

@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Coulomb.RhoEtaProperties
-public import DLMF.Airy.Basic
+public import DLMF.Airy.Properties
 
 /-!
 # Coulomb functions: asymptotic expansions (DLMF §§33.11–33.12)

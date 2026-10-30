@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Painleve.Backlund
-public import DLMF.Airy.Basic
+public import DLMF.Airy.Properties
 public import Mathlib.Analysis.Complex.Polynomial.Basic
 
 /-!

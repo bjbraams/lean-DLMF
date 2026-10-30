@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AsymptoticApproximations.Mellin.Defs
-public import DLMF.AlgebraicAnalytic.Complex.Defs
+public import DLMF.AsymptoticApproximations.Mellin.Basic
+public import DLMF.AlgebraicAnalytic.Complex.Basic
 public import DLMF.Gamma.Asymptotics
 public import Mathlib.Analysis.SpecialFunctions.Bessel
 
@@ -15,7 +15,7 @@ public import Mathlib.Analysis.SpecialFunctions.Bessel
 
 For `ν > -½` and `x > 0` let `I(x) = ∫₀^∞ J_ν²(xt)/(1 + t) dt` (2.5.8), a Mellin convolution
 with `f(t) = 1/(1 + t)` and `h(t) = J_ν²(t)`. With `A = besselSqMellinKernel ν`,
-`aₙ = A(n)` and `bₙ = -A'(n)` (`Mellin.Defs`):
+`aₙ = A(n)` and `bₙ = -A'(n)` (`Mellin.Basic`):
 
 * 2.5.9: `𝓜f(1 - z) = π/sin(πz)` (proved);
 * 2.5.10: `𝓜h(z) = A(z) π/sin(πz)`, here in the equivalent form

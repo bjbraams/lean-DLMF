@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Mathieu.Basic
+public import DLMF.Mathieu.SpectralExistence
 public import DLMF.Mathieu.P2sBridge
 public import DLMF.Elementary.Trigonometric
 public import DLMFMathlib.Analysis.ODE.Singularities

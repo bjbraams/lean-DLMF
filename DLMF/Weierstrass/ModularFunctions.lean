@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Weierstrass.Basic
-public import DLMF.JacobiElliptic.Basic
+public import DLMF.Weierstrass.EllipticFunctionsAndInvariants
+public import DLMF.JacobiElliptic.AnalyticProperties
 public import DLMF.Weierstrass.SpecialLattices
 public import Mathlib.LinearAlgebra.Matrix.FixedDetMatrices
 

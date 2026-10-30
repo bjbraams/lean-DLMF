@@ -5,9 +5,14 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
-public import DLMF.AlgebraicAnalytic.Complex.Defs
+public import DLMF.AlgebraicAnalytic.Complex.Basic
+public import DLMFMathlib.Analysis.Complex.PowerSeriesOperations
+public import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
+public import Mathlib.Analysis.Complex.AbelLimit
+public import Mathlib.Analysis.Normed.Ring.InfiniteSum
 public import Mathlib.Analysis.Complex.Conformal
 public import Mathlib.Analysis.SpecialFunctions.Complex.Log
+public import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Arctan
 public import Mathlib.Analysis.SpecialFunctions.Pow.Complex
 public import Mathlib.Analysis.Calculus.Deriv.Comp
@@ -17,6 +22,8 @@ public import Mathlib.Analysis.InnerProductSpace.Harmonic.Basic
 public import Mathlib.Topology.Compactification.OnePoint.Basic
 public import Mathlib.RingTheory.Polynomial.Pochhammer
 public import TauCeti.Analysis.Contour.Winding.UnboundedComponent
+public import TauCeti.Analysis.Contour.AbsolutelyContinuous
+public import TauCeti.Analysis.Contour.Winding.AbsolutelyContinuous.Basic
 public import TauCeti.Analysis.Contour.Curve.Integrability
 public import Mathlib.MeasureTheory.Integral.DominatedConvergence
 public import Mathlib.Tactic.CrossRefAttribute
@@ -37,7 +44,7 @@ Conventions.
   (Mathlib: `Complex.arg_conj`, `Complex.arg_mul_coe_angle`, `Complex.arg_div_coe_angle`).
 * **Contours.** Contours are Tau Ceti's piecewise `C¹` curves; `IsSimpleClosedContour`,
   `contourInterior`, `contourExterior`, `IsPositivelyOriented` and `contourIntegral` are in
-  `DLMF.AlgebraicAnalytic.Complex.Defs`. Tau Ceti proves Cauchy's theorem and formula in the
+  `DLMF.AlgebraicAnalytic.Complex.Basic`. Tau Ceti proves Cauchy's theorem and formula in the
   homology form (holomorphy on an open set containing the curve, null-homologous curve); the DLMF
   forms, with continuity up to a Jordan contour and holomorphy only inside, are admitted here.
 * **Series.** DLMF's series converge as partial sums; Mathlib's `HasSum` is unconditional. They
@@ -49,6 +56,10 @@ Proved here: the quadrant formulas 1.9.5–1.9.6 for `arg`, the characterization
 De Moivre's theorem 1.9.22 for `n ∈ ℤ` (and complex `θ`), the triangle inequality 1.9.23, the
 Cauchy–Riemann equations 1.9.25, the arithmetic of `∞` (1.9.36–1.9.39), the bilinear
 transformation formulas 1.9.41–1.9.44 and the invariance of the cross ratio 1.9.45, the
+binomial decomposition 1.9.21, the Cauchy product identity 1.9.51–1.9.52 via Mathlib’s
+Abel limit theorem, the reciprocal-series convergence 1.9.53–1.9.54 via analytic inversion,
+the logarithm and principal-power series 1.9.57 and 1.9.60 via their differential identities,
+termwise differentiation 1.9.63 via Mathlib’s Cauchy–Taylor theorem, the
 recurrence values 1.9.55, 1.9.58, 1.9.61, the double-limit theorem of §1.9(vii), and the
 vanishing of the winding number on the exterior of a closed contour (from Tau Ceti).
 -/
@@ -186,6 +197,26 @@ theorem div_eq_mul_conj_div (z₁ z₂ : ℂ) :
   · apply Complex.ext <;> simp; ring
   · push_cast; ring
 
+/-- Split a finite complex sum into its even and odd indices. -/
+private lemma sum_range_even_odd (f : ℕ → ℂ) (N : ℕ) :
+    ∑ k ∈ Finset.range N, f k =
+      (∑ k ∈ Finset.range ((N + 1) / 2), f (2 * k)) +
+        ∑ k ∈ Finset.range (N / 2), f (2 * k + 1) := by
+  induction N with
+  | zero => simp
+  | succ N ih =>
+    rcases Nat.mod_two_eq_zero_or_one N with hN | hN
+    · have h₁ : (N + 1) / 2 = N / 2 := by omega
+      have h₂ : (N + 1 + 1) / 2 = N / 2 + 1 := by omega
+      have h₃ : 2 * (N / 2) = N := by omega
+      simp only [Finset.sum_range_succ, ih, h₁, h₂, h₃]
+      ring
+    · have h₁ : (N + 1) / 2 = N / 2 + 1 := by omega
+      have h₂ : (N + 1 + 1) / 2 = N / 2 + 1 := by omega
+      have h₃ : 2 * (N / 2) + 1 = N := by omega
+      simp only [Finset.sum_range_succ, ih, h₁, h₂, h₃]
+      ring
+
 /-- DLMF 1.9.21: the real and imaginary parts of `zⁿ`, `z = x + iy`:
 `zⁿ = (xⁿ - C(n,2) x^{n-2} y² + C(n,4) x^{n-4} y⁴ - ⋯) + i(C(n,1) x^{n-1} y - C(n,3) x^{n-3} y³
 + ⋯)`. -/
@@ -196,7 +227,22 @@ theorem pow_eq_sum_choose (z : ℂ) (n : ℕ) :
       I * ((∑ k ∈ Finset.range ((n + 1) / 2),
         (-1 : ℝ) ^ k * n.choose (2 * k + 1) * z.re ^ (n - (2 * k + 1)) * z.im ^ (2 * k + 1) :
           ℝ) : ℂ) := by
-  sorry
+  have hz : z = (z.im : ℂ) * I + (z.re : ℂ) := by apply Complex.ext <;> simp
+  conv_lhs => rw [hz, add_pow, sum_range_even_odd]
+  have heven : (n + 1 + 1) / 2 = n / 2 + 1 := by omega
+  rw [heven]
+  push_cast
+  congr 1
+  · apply Finset.sum_congr rfl
+    intro k hk
+    rw [mul_pow, show I ^ (2 * k) = (-1 : ℂ) ^ k by rw [pow_mul, I_sq]]
+    ring
+  · rw [Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro k hk
+    rw [mul_pow, show I ^ (2 * k + 1) = (-1 : ℂ) ^ k * I by
+      rw [pow_add, pow_mul, I_sq, pow_one]]
+    ring
 
 /-- DLMF 1.9.22 (De Moivre's theorem): `cos nθ + i sin nθ = (cos θ + i sin θ)ⁿ` for `n ∈ ℤ`.
 Stronger than DLMF: `θ` may be complex. -/
@@ -330,7 +376,13 @@ theorem windingNumber_eq_intCast {γ : ℝ → ℂ} {a b : ℝ} (hγ : TauCeti.C
     (hcl : γ a = γ b) {z₀ : ℂ} (hz₀ : z₀ ∉ γ '' uIcc a b) :
     ∃ n : ℤ, TauCeti.Contour.windingNumber γ a b z₀ = n ∧
       (2 * Real.pi * I)⁻¹ * contourIntegral γ a b (fun z => (z - z₀)⁻¹) = n := by
-  sorry
+  -- TauCeti supplies both integrality and the ordinary integral formula for this contour.
+  have hac : AbsolutelyContinuousOnInterval γ a b :=
+    TauCeti.Contour.IsPiecewiseC1On.absolutelyContinuousOnInterval hγ
+  obtain ⟨n, hn⟩ := hac.exists_int_windingNumber hcl hz₀
+  refine ⟨n, hn, ?_⟩
+  rw [hac.windingNumber_eq_integral hz₀] at hn
+  simpa [DLMF.AlgebraicAnalytic.contourIntegral, smul_eq_mul, mul_comm] using hn
 
 /-- DLMF §1.9(iii) (winding number of a simple closed contour): the winding number of a simple
 closed contour is constant, equal to `1` or to `-1`, on its interior; the positive sense
@@ -479,13 +531,48 @@ theorem mobius_mobius_inv {a b c d : ℂ} (hdet : a * d - b * c ≠ 0) {w : ℂ}
     rw [mul_div_assoc', div_add' _ _ _ hw]; congr 1; ring
   rw [e1, e2, div_div_div_cancel_right₀ hw, mul_div_cancel_left₀ w hdet]
 
+/-- The inverse fractional-linear map cancels its forward map on the one-point compactification. -/
+private lemma mobiusExt_leftInv {a b c d : ℂ} (hdet : a * d - b * c ≠ 0) (hc : c ≠ 0) :
+    Function.LeftInverse (mobiusExt d (-b) (-c) a) (mobiusExt a b c d) := by
+  intro z
+  induction z using OnePoint.rec with
+  | infty =>
+    have hh : -(c * (a / c)) + a = 0 := by field_simp; ring
+    simp [mobiusExt, hc, hh]
+  | coe z =>
+    by_cases hz : c * z + d = 0
+    · have hz' : d / (-c) = z := by
+        apply (div_eq_iff (neg_ne_zero.mpr hc)).2
+        linear_combination hz
+      simp [mobiusExt, hz, hc, hz']
+    · have hden : -c * mobius a b c d z + a ≠ 0 := by
+        have he : -c * mobius a b c d z + a = (a * d - b * c) / (c * z + d) := by
+          unfold mobius
+          field_simp
+          ring
+        rw [he]
+        exact div_ne_zero hdet hz
+      simp only [mobiusExt, hz, ite_false, hden]
+      have hd' : d * a - (-b) * (-c) ≠ 0 := by
+        simpa only [neg_mul_neg, mul_comm] using hdet
+      have hz' : -(-c) * z + d ≠ 0 := by simpa using hz
+      have he := mobius_mobius_inv (a := d) (b := -b) (c := -c) (d := a) (w := z) hd' hz'
+      simpa only [neg_neg] using congrArg (fun w : ℂ => (w : OnePoint ℂ)) he
+
 /-- DLMF §1.9(iv): the bilinear transformation 1.9.40 (`ad - bc ≠ 0`, `c ≠ 0`) is a one-to-one
 mapping of `ℂ ∪ {∞}` onto itself; its inverse is the transformation of 1.9.44. -/
 @[dlmf 1.9.iv]
 theorem mobiusExt_bijective {a b c d : ℂ} (hdet : a * d - b * c ≠ 0) (hc : c ≠ 0) :
     Function.Bijective (mobiusExt a b c d) ∧
       Function.LeftInverse (mobiusExt d (-b) (-c) a) (mobiusExt a b c d) := by
-  sorry
+  have hl := mobiusExt_leftInv hdet hc
+  have hr := mobiusExt_leftInv (a := d) (b := -b) (c := -c) (d := a)
+    (by simpa only [neg_mul_neg, mul_comm] using hdet)
+    (neg_ne_zero.mpr hc)
+  refine ⟨⟨hl.injective, ?_⟩, hl⟩
+  intro z
+  refine ⟨mobiusExt d (-b) (-c) a z, ?_⟩
+  simpa only [neg_neg] using hr z
 
 /-- DLMF 1.9.45: the cross ratio is invariant under bilinear transformations (for four finite
 points with finite images, `ad - bc ≠ 0`). -/
@@ -525,7 +612,58 @@ theorem tendsto_cauchyProduct {a b : ℕ → ℂ} {z A B C : ℂ}
     (hc : Tendsto (fun N => ∑ n ∈ Finset.range N,
       (∑ k ∈ Finset.range (n + 1), a k * b (n - k)) * z ^ n) atTop (𝓝 C)) :
     C = A * B := by
-  sorry
+  have hA := Complex.tendsto_tsum_powerSeries_nhdsWithin_lt ha
+  have hB := Complex.tendsto_tsum_powerSeries_nhdsWithin_lt hb
+  have hC := Complex.tendsto_tsum_powerSeries_nhdsWithin_lt hc
+  have heq : ∀ᶠ w : ℂ in ((𝓝[<] (1 : ℝ)).map Complex.ofReal),
+      (∑' n, ((∑ k ∈ Finset.range (n + 1), a k * b (n - k)) * z ^ n) * w ^ n) =
+        (∑' n, (a n * z ^ n) * w ^ n) * ∑' n, (b n * z ^ n) * w ^ n := by
+    rw [Filter.eventually_map]
+    filter_upwards [eventually_mem_nhdsWithin,
+      mem_nhdsWithin_of_mem_nhds (Ioi_mem_nhds (show (0 : ℝ) < 1 by norm_num))]
+      with x hx hx0
+    have hxnorm : ‖(x : ℂ)‖ < 1 := by
+      simpa [Real.norm_of_nonneg (show 0 ≤ x from le_of_lt hx0)] using hx
+    rw [tsum_mul_tsum_eq_tsum_sum_range_of_summable_norm
+      (summable_powerSeries_of_norm_lt_one ha.cauchySeq hxnorm).norm
+      (summable_powerSeries_of_norm_lt_one hb.cauchySeq hxnorm).norm]
+    apply tsum_congr
+    intro n
+    rw [Finset.sum_mul, Finset.sum_mul]
+    apply Finset.sum_congr rfl
+    intro k hk
+    have hkn : k ≤ n := Nat.le_of_lt_succ (Finset.mem_range.mp hk)
+    rw [show z ^ n = z ^ k * z ^ (n - k) by rw [← pow_add, Nat.add_sub_of_le hkn],
+      show (x : ℂ) ^ n = (x : ℂ) ^ k * (x : ℂ) ^ (n - k) by
+        rw [← pow_add, Nat.add_sub_of_le hkn]]
+    ring
+  exact tendsto_nhds_unique hC ((hA.mul hB).congr' (heq.mono fun _ h => h.symm))
+
+/-- The coefficient convolution with a nonzero constant term uniquely determines its inverse. -/
+private lemma eq_recipCoeff_of_convolution {a b : ℕ → ℂ} (ha : a 0 ≠ 0)
+    (hab : ∀ n, ∑ k ∈ Finset.range (n + 1), a k * b (n - k) = if n = 0 then 1 else 0) :
+    b = recipCoeff a := by
+  funext n
+  induction n using Nat.strong_induction_on with
+  | h n ih =>
+    have h := hab n
+    by_cases hn : n = 0
+    · subst n
+      simp at h
+      rw [recipCoeff, dite_eq_left rfl]
+      exact (eq_div_iff ha).mpr (by simpa [mul_comm] using h)
+    · rw [recipCoeff, dite_eq_right hn]
+      rw [Finset.sum_range_succ'] at h
+      simp only [Nat.sub_zero, ite_eq_right hn] at h
+      have he : (∑ k ∈ Finset.range n, a (k + 1) * b (n - (k + 1))) =
+          ∑ k : Fin n, a (k + 1) * recipCoeff a (n - 1 - k) := by
+        rw [← Fin.sum_univ_eq_sum_range]
+        apply Finset.sum_congr rfl
+        intro k hk
+        rw [show n - (k.val + 1) = n - 1 - k.val by omega, ih _ (by omega)]
+      rw [he] at h
+      apply (eq_div_iff ha).mpr
+      linear_combination h
 
 /-- DLMF 1.9.53–1.9.54: if `f(z) = ∑ aₙ zⁿ` near `0` with `a₀ ≠ 0`, then
 `1/f(z) = ∑ bₙ zⁿ` for all sufficiently small `|z|`, with `bₙ = recipCoeff a n` (1.9.55–1.9.56). -/
@@ -533,7 +671,38 @@ theorem tendsto_cauchyProduct {a b : ℕ → ℂ} {z A B C : ℂ}
 theorem hasSum_recipCoeff {a : ℕ → ℂ} {f : ℂ → ℂ} {r : ℝ} (hr : 0 < r)
     (hf : ∀ z ∈ ball (0 : ℂ) r, HasSum (fun n => a n * z ^ n) (f z)) (ha : a 0 ≠ 0) :
     ∀ᶠ z in 𝓝 (0 : ℂ), HasSum (fun n => recipCoeff a n * z ^ n) (1 / f z) := by
-  sorry
+  have hp := Complex.hasFPowerSeriesOnBall_of_hasSum_ball (a := a) (f := f) (ρ := ⟨r / 2, by positivity⟩) (by exact_mod_cast half_pos hr) (half_lt_self hr)
+    (fun z hz => hf z (by simpa using hz))
+  have hfa : AnalyticAt ℂ f 0 := hp.hasFPowerSeriesAt.analyticAt
+  have hf0 : f 0 = a 0 := by
+    simpa [FormalMultilinearSeries.ofScalars_apply_eq] using
+      (hp.coeff_zero (fun _ => 0)).symm
+  have hne : f 0 ≠ 0 := by rwa [hf0]
+  have hga : AnalyticAt ℂ (fun z => 1 / f z) 0 := by
+    simpa only [one_div] using hfa.fun_inv hne
+  let b : ℕ → ℂ := fun n => iteratedDeriv n (fun z => 1 / f z) 0 / n.factorial
+  have hb : ∀ᶠ z in 𝓝 (0 : ℂ), HasSum (fun n => b n * z ^ n) (1 / f z) := by
+    simpa [b, FormalMultilinearSeries.ofScalars_apply_eq, smul_eq_mul, mul_comm] using
+      hga.hasFPowerSeriesAt.eventually_hasSum
+  have hlocal : ∀ᶠ z in 𝓝 (0 : ℂ),
+      HasSum (fun n => a n * z ^ n) (f z) ∧
+        HasSum (fun n => b n * z ^ n) (1 / f z) ∧ f z ≠ 0 := by
+    filter_upwards [Metric.ball_mem_nhds (0 : ℂ) hr, hb, hfa.continuousAt.eventually_ne hne]
+      with z hz hzb hzn
+    exact ⟨hf z hz, hzb, hzn⟩
+  obtain ⟨δ, hδ, hδsub⟩ := Metric.eventually_nhds_iff.mp hlocal
+  have hcoef : (fun n => ∑ k ∈ Finset.range (n + 1), a k * b (n - k)) =
+      fun n => if n = 0 then (1 : ℂ) else 0 := by
+    apply Complex.trigR4_coeff_unique_ball hδ (g := fun _ => 1)
+    · intro z hz
+      obtain ⟨hza, hzb, hzn⟩ := hδsub (by simpa [dist_eq_norm] using hz)
+      simpa [hzn] using Complex.hasSum_mul_powerSeries hza hzb
+    · intro z hz
+      convert hasSum_ite_eq 0 (1 : ℂ) using 1
+      ext n
+      by_cases hn : n = 0 <;> simp [hn]
+  have heq : b = recipCoeff a := eq_recipCoeff_of_convolution ha (fun n => congrFun hcoef n)
+  simpa [← heq] using hb
 
 /-- DLMF 1.9.55: `b₀ = 1/a₀`, `b₁ = -a₁/a₀²`, `b₂ = (a₁² - a₀a₂)/a₀³`. -/
 @[dlmf 1.9.E55]
@@ -549,6 +718,41 @@ theorem recipCoeff_zero_one_two (a : ℕ → ℂ) (ha : a 0 ≠ 0) :
   field_simp
   ring
 
+/-- The logarithmic coefficient recurrence is uniquely determined by the identity `f * g′ = f′`. -/
+private lemma eq_logCoeff_of_convolution {a b : ℕ → ℂ} (ha : a 0 = 1) (hb : b 0 = 0)
+    (hab : ∀ n, ∑ k ∈ Finset.range (n + 1),
+      a k * ((n - k + 1 : ℕ) : ℂ) * b (n - k + 1) = (n + 1 : ℂ) * a (n + 1)) :
+    b = logCoeff a := by
+  funext n
+  induction n using Nat.strong_induction_on with
+  | h n ih =>
+    by_cases hn : n = 0
+    · subst n
+      simpa [logCoeff] using hb
+    · have hn' : n - 1 + 1 = n := by omega
+      have h := hab (n - 1)
+      rw [Finset.sum_range_succ', show ((n - 1 : ℕ) : ℂ) + 1 = n by exact_mod_cast hn'] at h
+      simp only [Nat.sub_zero, hn', ha, one_mul] at h
+      have he : (∑ k ∈ Finset.range (n - 1),
+          a (k + 1) * ((n - 1 - (k + 1) + 1 : ℕ) : ℂ) * b (n - 1 - (k + 1) + 1)) =
+          ∑ k : Fin (n - 1), ((n : ℂ) - (k + 1)) * a (k + 1) * logCoeff a (n - 1 - k) := by
+        rw [← Fin.sum_univ_eq_sum_range]
+        apply Finset.sum_congr rfl
+        intro k hk
+        have hk' : n - 1 - (k.val + 1) + 1 = n - 1 - k.val := by omega
+        have hk'' : ((n - 1 - k.val : ℕ) : ℂ) = (n : ℂ) - (k.val + 1) := by
+          rw [show n - 1 - k.val = n - (k.val + 1) by omega,
+            Nat.cast_sub (by omega : k.val + 1 ≤ n)]
+          push_cast
+          ring
+        rw [hk', ih _ (by omega), hk'']
+        ring
+      rw [he] at h
+      rw [logCoeff, dite_eq_right hn]
+      have hn0 : (n : ℂ) ≠ 0 := by exact_mod_cast hn
+      apply (eq_div_iff hn0).mpr
+      linear_combination h
+
 /-- DLMF 1.9.57: if `f(z) = 1 + a₁z + a₂z² + ⋯` near `0`, then the principal logarithm satisfies
 `ln f(z) = ∑_{n ≥ 1} qₙ zⁿ` for all sufficiently small `|z|`, with `qₙ = logCoeff a n`
 (1.9.58–1.9.59). -/
@@ -556,7 +760,51 @@ theorem recipCoeff_zero_one_two (a : ℕ → ℂ) (ha : a 0 ≠ 0) :
 theorem hasSum_logCoeff {a : ℕ → ℂ} {f : ℂ → ℂ} {r : ℝ} (hr : 0 < r)
     (hf : ∀ z ∈ ball (0 : ℂ) r, HasSum (fun n => a n * z ^ n) (f z)) (ha : a 0 = 1) :
     ∀ᶠ z in 𝓝 (0 : ℂ), HasSum (fun n => logCoeff a n * z ^ n) (log (f z)) := by
-  sorry
+  have hp := Complex.hasFPowerSeriesOnBall_of_hasSum_ball (a := a) (f := f)
+    (ρ := ⟨r / 2, by positivity⟩) (by exact_mod_cast half_pos hr) (half_lt_self hr)
+    (fun z hz => hf z (by simpa using hz))
+  have hfa := hp.hasFPowerSeriesAt.analyticAt
+  have hf0 : f 0 = 1 := by
+    simpa [FormalMultilinearSeries.ofScalars_apply_eq, ha] using
+      (hp.coeff_zero (fun _ => 0)).symm
+  have hslit0 : f 0 ∈ Complex.slitPlane := by rw [hf0]; exact one_mem_slitPlane
+  let g : ℂ → ℂ := fun z => log (f z)
+  have hga : AnalyticAt ℂ g 0 := hfa.clog hslit0
+  let b : ℕ → ℂ := fun n : ℕ => iteratedDeriv n g 0 / n.factorial
+  have hbp : HasFPowerSeriesAt g (FormalMultilinearSeries.ofScalars ℂ b) 0 :=
+    hga.hasFPowerSeriesAt
+  have hb : ∀ᶠ z in 𝓝 (0 : ℂ), HasSum (fun n : ℕ => b n * z ^ n) (g z) := by
+    simpa [FormalMultilinearSeries.ofScalars_apply_eq, smul_eq_mul, mul_comm] using
+      hbp.eventually_hasSum
+  have hlocal : ∀ᶠ z in 𝓝 (0 : ℂ),
+      HasSum (fun n : ℕ => a n * z ^ n) (f z) ∧
+      HasSum (fun n : ℕ => (n + 1 : ℂ) * b (n + 1) * z ^ n) (deriv g z) ∧
+      HasSum (fun n : ℕ => (n + 1 : ℂ) * a (n + 1) * z ^ n) (deriv f z) ∧
+      f z * deriv g z = deriv f z := by
+    filter_upwards [Metric.ball_mem_nhds (0 : ℂ) hr,
+      Complex.eventually_hasSum_deriv_powerSeries hbp, Complex.eventually_hasSum_deriv_powerSeries hp.hasFPowerSeriesAt,
+      hfa.eventually_analyticAt, hfa.continuousAt.eventually_mem (isOpen_slitPlane.mem_nhds hslit0)]
+      with z hz hzg hzf hzfa hzslit
+    refine ⟨hf z hz, hzg, hzf, ?_⟩
+    have hd := hzfa.differentiableAt.hasDerivAt.clog hzslit
+    rw [show deriv g z = deriv f z / f z from hd.deriv]
+    field_simp [Complex.slitPlane_ne_zero hzslit]
+  obtain ⟨δ, hδ, hδsub⟩ := Metric.eventually_nhds_iff.mp hlocal
+  have hcoef : (fun n : ℕ => ∑ k ∈ Finset.range (n + 1),
+      a k * (((n - k + 1 : ℕ) : ℂ) * b (n - k + 1))) =
+      fun n : ℕ => (n + 1 : ℂ) * a (n + 1) := by
+    apply Complex.trigR4_coeff_unique_ball hδ (g := deriv f)
+    · intro z hz
+      obtain ⟨hza, hzg, hzf, hzeq⟩ := hδsub (by simpa [dist_eq_norm] using hz)
+      simpa only [hzeq, Nat.cast_add, Nat.cast_one] using Complex.hasSum_mul_powerSeries hza hzg
+    · intro z hz
+      exact (hδsub (by simpa [dist_eq_norm] using hz)).2.2.1
+  have hb0 : b 0 = 0 := by simp [b, g, hf0]
+  have heq : b = logCoeff a := by
+    apply eq_logCoeff_of_convolution ha hb0
+    intro n
+    simpa [mul_assoc] using congrFun hcoef n
+  simpa [← heq, g] using hb
 
 /-- DLMF 1.9.58: `q₁ = a₁`, `q₂ = (2a₂ - a₁²)/2`, `q₃ = (3a₃ - 3a₁a₂ + a₁³)/3`. -/
 @[dlmf 1.9.E58]
@@ -571,6 +819,58 @@ theorem logCoeff_one_two_three (a : ℕ → ℂ) :
   simp [Fin.sum_univ_two, h1, h2]
   ring
 
+/-- The power coefficient recurrence is uniquely determined by `f * g′ = ν * f′ * g`. -/
+private lemma eq_powCoeff_of_convolution {a b : ℕ → ℂ} (ν : ℂ) (ha : a 0 = 1) (hb : b 0 = 1)
+    (hab : ∀ n, (∑ k ∈ Finset.range (n + 1),
+      a k * ((n - k + 1 : ℕ) : ℂ) * b (n - k + 1)) =
+        ν * ∑ k ∈ Finset.range (n + 1), (k + 1 : ℂ) * a (k + 1) * b (n - k)) :
+    b = powCoeff ν a := by
+  funext n
+  induction n using Nat.strong_induction_on with
+  | h n ih =>
+    by_cases hn : n = 0
+    · subst n
+      simpa [powCoeff] using hb
+    · have hn' : n - 1 + 1 = n := by omega
+      have h := hab (n - 1)
+      rw [Finset.sum_range_succ'] at h
+      simp only [Nat.sub_zero, hn', ha, one_mul] at h
+      have hrest : (∑ k ∈ Finset.range (n - 1),
+          a (k + 1) * ((n - 1 - (k + 1) + 1 : ℕ) : ℂ) * b (n - 1 - (k + 1) + 1)) =
+          ∑ k ∈ Finset.range n, ((n : ℂ) - (k + 1)) * a (k + 1) * b (n - 1 - k) := by
+        conv_rhs => rw [← hn', Finset.sum_range_succ]
+        have hz : (n : ℂ) - (((n - 1 : ℕ) : ℂ) + 1) = 0 := by
+          rw [show ((n - 1 : ℕ) : ℂ) + 1 = n by exact_mod_cast hn']
+          ring
+        simp only [hn', hz, zero_mul, add_zero]
+        apply Finset.sum_congr rfl
+        intro k hk
+        have hk0 := Finset.mem_range.mp hk
+        have hk' : n - 1 - (k + 1) + 1 = n - 1 - k := by omega
+        have hk'' : ((n - 1 - k : ℕ) : ℂ) = (n : ℂ) - (k + 1) := by
+          rw [show n - 1 - k = n - (k + 1) by omega, Nat.cast_sub (by omega : k + 1 ≤ n)]
+          push_cast
+          ring
+        rw [hk', hk'']
+        ring
+      rw [hrest] at h
+      have he : (∑ k : Fin n, ((ν + 1) * (k + 1) - n) * a (k + 1) *
+          powCoeff ν a (n - 1 - k)) =
+          ν * (∑ k ∈ Finset.range n, (k + 1 : ℂ) * a (k + 1) * b (n - 1 - k)) -
+            ∑ k ∈ Finset.range n, ((n : ℂ) - (k + 1)) * a (k + 1) * b (n - 1 - k) := by
+        change (∑ k : Fin n, (fun k : ℕ => ((ν + 1) * (k + 1) - n) * a (k + 1) *
+          powCoeff ν a (n - 1 - k)) k.val) = _
+        rw [Fin.sum_univ_eq_sum_range (fun k : ℕ => ((ν + 1) * (k + 1) - n) * a (k + 1) *
+          powCoeff ν a (n - 1 - k)) n, Finset.mul_sum, ← Finset.sum_sub_distrib]
+        apply Finset.sum_congr rfl
+        intro k hk
+        rw [← ih _ (by have := Finset.mem_range.mp hk; omega)]
+        ring
+      rw [powCoeff, dite_eq_right hn, he]
+      have hn0 : (n : ℂ) ≠ 0 := by exact_mod_cast hn
+      apply (eq_div_iff hn0).mpr
+      linear_combination h
+
 /-- DLMF 1.9.60: if `f(z) = 1 + a₁z + a₂z² + ⋯` near `0` and `ν ∈ ℂ`, then the principal power
 satisfies `(f(z))^ν = ∑ pₙ zⁿ` for all sufficiently small `|z|`, with `pₙ = powCoeff ν a n`
 (1.9.61–1.9.62). -/
@@ -578,7 +878,51 @@ satisfies `(f(z))^ν = ∑ pₙ zⁿ` for all sufficiently small `|z|`, with `p�
 theorem hasSum_powCoeff {a : ℕ → ℂ} {f : ℂ → ℂ} {r : ℝ} (hr : 0 < r)
     (hf : ∀ z ∈ ball (0 : ℂ) r, HasSum (fun n => a n * z ^ n) (f z)) (ha : a 0 = 1) (ν : ℂ) :
     ∀ᶠ z in 𝓝 (0 : ℂ), HasSum (fun n => powCoeff ν a n * z ^ n) (f z ^ ν) := by
-  sorry
+  have hp := Complex.hasFPowerSeriesOnBall_of_hasSum_ball (a := a) (f := f)
+    (ρ := ⟨r / 2, by positivity⟩) (by exact_mod_cast half_pos hr) (half_lt_self hr)
+    (fun z hz => hf z (by simpa using hz))
+  have hfa := hp.hasFPowerSeriesAt.analyticAt
+  have hf0 : f 0 = 1 := by
+    simpa [FormalMultilinearSeries.ofScalars_apply_eq, ha] using
+      (hp.coeff_zero (fun _ => 0)).symm
+  have hslit0 : f 0 ∈ Complex.slitPlane := by rw [hf0]; exact one_mem_slitPlane
+  let g : ℂ → ℂ := fun z => f z ^ ν
+  have hga : AnalyticAt ℂ g 0 := hfa.cpow analyticAt_const hslit0
+  let b : ℕ → ℂ := fun n => iteratedDeriv n g 0 / n.factorial
+  have hbp : HasFPowerSeriesAt g (FormalMultilinearSeries.ofScalars ℂ b) 0 := hga.hasFPowerSeriesAt
+  have hb : ∀ᶠ z in 𝓝 (0 : ℂ), HasSum (fun n => b n * z ^ n) (g z) := by
+    simpa [FormalMultilinearSeries.ofScalars_apply_eq, smul_eq_mul, mul_comm] using
+      hbp.eventually_hasSum
+  have hlocal : ∀ᶠ z in 𝓝 (0 : ℂ),
+      HasSum (fun n => a n * z ^ n) (f z) ∧
+      HasSum (fun n : ℕ => (n + 1 : ℂ) * b (n + 1) * z ^ n) (deriv g z) ∧
+      HasSum (fun n : ℕ => (n + 1 : ℂ) * a (n + 1) * z ^ n) (deriv f z) ∧
+      HasSum (fun n => b n * z ^ n) (g z) ∧
+      f z * deriv g z = ν * (deriv f z * g z) := by
+    filter_upwards [Metric.ball_mem_nhds (0 : ℂ) hr, hb,
+      Complex.eventually_hasSum_deriv_powerSeries hbp, Complex.eventually_hasSum_deriv_powerSeries hp.hasFPowerSeriesAt,
+      hfa.eventually_analyticAt, hfa.continuousAt.eventually_mem (isOpen_slitPlane.mem_nhds hslit0)]
+      with z hz hzb hzg hzf hzfa hzslit
+    refine ⟨hf z hz, hzg, hzf, hzb, ?_⟩
+    exact Complex.mul_deriv_cpow_const hzfa.differentiableAt hzslit ν
+  obtain ⟨δ, hδ, hδsub⟩ := Metric.eventually_nhds_iff.mp hlocal
+  have hcoef : (fun n : ℕ => ∑ k ∈ Finset.range (n + 1),
+      a k * (((n - k + 1 : ℕ) : ℂ) * b (n - k + 1))) =
+      fun n => ν * ∑ k ∈ Finset.range (n + 1), (k + 1 : ℂ) * a (k + 1) * b (n - k) := by
+    apply Complex.trigR4_coeff_unique_ball hδ (g := fun z => f z * deriv g z)
+    · intro z hz
+      obtain ⟨hza, hzg, hzf, hzb, hzeq⟩ := hδsub (by simpa [dist_eq_norm] using hz)
+      simpa only [Nat.cast_add, Nat.cast_one] using Complex.hasSum_mul_powerSeries hza hzg
+    · intro z hz
+      obtain ⟨hza, hzg, hzf, hzb, hzeq⟩ := hδsub (by simpa [dist_eq_norm] using hz)
+      have h := (Complex.hasSum_mul_powerSeries hzf hzb).mul_left ν
+      simpa only [← hzeq, mul_assoc] using h
+  have hb0 : b 0 = 1 := by simp [b, g, hf0]
+  have heq : b = powCoeff ν a := by
+    apply eq_powCoeff_of_convolution ν ha hb0
+    intro n
+    simpa [mul_assoc] using congrFun hcoef n
+  simpa [← heq, g] using hb
 
 /-- DLMF 1.9.61: `p₀ = 1`, `p₁ = νa₁`, `p₂ = ν((ν - 1)a₁² + 2a₂)/2`. -/
 @[dlmf 1.9.E61]
@@ -601,7 +945,50 @@ theorem hasSum_iteratedDeriv_powerSeries {a : ℕ → ℂ} {f : ℂ → ℂ} {z�
     (hz : z ∈ ball z₀ R) :
     HasSum (fun n : ℕ => (ascPochhammer ℂ m).eval ((n : ℂ) + 1) * a (n + m) * (z - z₀) ^ n)
       (iteratedDeriv m f z) := by
-  sorry
+  have hzR : ‖z - z₀‖ < R := by simpa [dist_eq_norm] using hz
+  obtain ⟨ρ, hzρ, hρR⟩ := exists_between hzR
+  have hρ : 0 < ρ := lt_of_le_of_lt (norm_nonneg _) hzρ
+  let g : ℂ → ℂ := fun w => f (w + z₀)
+  have hg (w : ℂ) (hw : ‖w‖ < R) : HasSum (fun n => a n * w ^ n) (g w) := by
+    simpa [g] using hf (w + z₀) (by simpa [dist_eq_norm] using hw)
+  let r : NNReal := ⟨ρ, hρ.le⟩
+  have hp := Complex.hasFPowerSeriesOnBall_of_hasSum_ball
+    (ρ := r) (by exact_mod_cast hρ) hρR hg
+  have heball : Metric.eball (0 : ℂ) (r : ENNReal) = ball (0 : ℂ) ρ := Metric.eball_coe
+  have hd : DifferentiableOn ℂ g (ball 0 ρ) := by
+    simpa only [heball] using hp.differentiableOn
+  have hcoef : a = fun n => iteratedDeriv n g 0 / n.factorial := by
+    apply Complex.trigR4_coeff_unique_ball hρ
+      (fun w hw => hg w (lt_trans hw hρR))
+    intro w hw
+    convert Complex.hasSum_taylorSeries_on_ball hd (z := w) (by simpa using hw) using 1
+    funext n
+    simp only [sub_zero, smul_eq_mul]
+    ring
+  have hdm : ∀ k, DifferentiableOn ℂ (iteratedDeriv k g) (ball 0 ρ) := by
+    intro k
+    induction k with
+    | zero => simpa using hd
+    | succ k ih => simpa [iteratedDeriv_succ] using ih.deriv isOpen_ball
+  have hs := Complex.hasSum_taylorSeries_on_ball (hdm m) (z := z - z₀) (by simpa using hzρ)
+  have he : ∀ n, iteratedDeriv n (iteratedDeriv m g) 0 = iteratedDeriv (n + m) g 0 := by
+    intro n
+    simp only [iteratedDeriv_eq_iterate, Function.iterate_add_apply]
+  have hc (n : ℕ) :
+      (ascPochhammer ℂ m).eval ((n : ℂ) + 1) * a (n + m) =
+        iteratedDeriv n (iteratedDeriv m g) 0 / n.factorial := by
+    rw [hcoef, he]
+    have hh := factorial_mul_ascPochhammer ℂ n m
+    have hn : (n.factorial : ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero n
+    have hnm : ((n + m).factorial : ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero (n + m)
+    field_simp
+    linear_combination (iteratedDeriv (n + m) g 0) * hh
+  convert hs using 1
+  · funext n
+    rw [hc]
+    simp only [sub_zero, smul_eq_mul, div_eq_mul_inv]
+    ring
+  · simp [g, iteratedDeriv_comp_add_const]
 
 /-! ## §1.9(vii) Inversion of limits -/
 

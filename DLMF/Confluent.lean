@@ -7,7 +7,7 @@ module -- shake: keep-all
 
 public import DLMF.Confluent.TricomiLaplace
 public import DLMF.Confluent.MobiusTaylor
-public import DLMF.Confluent.Basic
+public import DLMF.Confluent.KummerProperties
 public import DLMF.Confluent.Regularized
 public import DLMF.Confluent.ParameterDerivatives
 public import DLMF.Confluent.LogSeries

@@ -7,7 +7,7 @@ module
 
 public import Mathlib.Analysis.Calculus.Taylor
 public import DLMF.Confluent.IncompleteGamma
-public import DLMF.ErrorFunctions.Basic
+public import DLMF.ErrorFunctions.AnalyticProperties
 
 /-!
 # Generalized and inverse error functions, DLMF §§7.16–7.17

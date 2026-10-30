@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AlgebraicAnalytic.Summability.Defs
+public import DLMF.AlgebraicAnalytic.Summability.Basic
 public import Mathlib.Analysis.Complex.AbelLimit
 public import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
 

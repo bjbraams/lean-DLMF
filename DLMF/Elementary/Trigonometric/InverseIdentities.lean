@@ -6,6 +6,14 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Elementary.Trigonometric.InverseBranches
+public import DLMFMathlib.Analysis.Complex.Sqrt
+public import DLMF.Elementary.LogExpAnalysis
+public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
+public import Mathlib.MeasureTheory.Integral.DominatedConvergence
+public import DLMF.Hypergeometric.SeriesProperties
+public import Pochhammer.BinomialSeries
+public import ToMathlib.Algebra.Polynomial.PochhammerIdentities
+public import Mathlib.Analysis.Normed.Group.FunctionSeries
 
 /-!
 # General inverse trigonometric identities
@@ -15,6 +23,16 @@ conditions.
 
 Source references and common attribution are retained in
 `DLMF.Elementary.Trigonometric`.
+The boundary and exterior arctangent series reuse the natural-order odd logarithm
+series from `DLMF.Elementary.LogExpAnalysis`, retaining the principal branch correction.
+Euler’s transformed series integrates a dominated geometric kernel; its factorial moments
+come from Mathlib’s Beta integral, and the principal arctangent derivative evaluates the kernel.
+The closed-disk arcsine series uses the lean-codes binomial series and Pochhammer
+duplication, with Gauss summability from `DLMF.Hypergeometric.Basic` at the boundary.
+The binomial series in `Pochhammer.BinomialSeries` imports the Tau Ceti contributors’
+complex binomial theorem; see `CREDITS.md`.
+The arccosine expansion follows from the principal half-angle identity. Its positive
+real cut values use the lower-bank limit already proved in `InverseBranches`.
 -/
 
 @[expose] public noncomputable section
@@ -502,18 +520,213 @@ theorem gudermannian_inverse {x : ℝ} (hx : |x|<π/2) (y : ℝ) :
     rw [(inverse_gudermannian_elementary hy).2.2.1,(gudermannian_elementary y).2.2,
       Real.tan_arctan,Real.arsinh_sinh]
 
-/-- DLMF 4.24.E1: hasSum arcsin principal. -/
+/-- The half-parameter binomial coefficient is a scaled central binomial coefficient; duplication uses lean-codes. -/
+private lemma half_poch_coefficient (n : ℕ) :
+    (ascPochhammer ℂ n).eval (1/2:ℂ)/(n.factorial:ℂ) = ((2*n).choose n:ℂ)/(4:ℂ)^n := by
+  have hd := ascPochhammer_eval_double (1/2:ℂ) n
+  norm_num only [show (2:ℂ)*(1/2)=1 by norm_num,
+    show (1/2:ℂ)+1/2=1 by norm_num, ascPochhammer_eval_one] at hd
+  have hc := congrArg (fun k : ℕ => (k:ℂ)) (Nat.add_choose_mul_factorial_mul_factorial n n)
+  rw [show n+n=2*n by omega] at hc
+  push_cast at hc
+  have hn : (n.factorial:ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero n
+  have h4 : (4:ℂ)^n ≠ 0 := pow_ne_zero n (by norm_num)
+  apply (div_eq_div_iff hn h4).mpr
+  apply (mul_right_cancel₀ hn)
+  linear_combination -hd-hc
+/-- The Gauss coefficient for parameters `(1/2, 1/2; 3/2)` equals the arcsine coefficient. -/
+private lemma arcsin_gauss_coefficient (n : ℕ) :
+    DLMF.Hypergeometric.gaussHGCoeff (1/2:ℂ) (1/2) (3/2) n =
+      ((2*n).choose n:ℂ)/((4:ℂ)^n*(2*n+1)) := by
+  have hp : DLMF.Hypergeometric.poch (1/2:ℂ) n ≠ 0 := by
+    apply DLMF.Hypergeometric.poch_ne_zero_of_not_neg_nat
+    intro k h
+    have hh := congrArg Complex.re h
+    norm_num at hh
+    linarith [(Nat.cast_nonneg k : (0:ℝ) ≤ k)]
+  rw [DLMF.Hypergeometric.gaussHGCoeff, DLMF.Hypergeometric.poch_three_halves_eq]
+  have hhalf := half_poch_coefficient n
+  unfold DLMF.Hypergeometric.poch at *
+  have hn : (n.factorial:ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero n
+  have h2 : (2*n+1:ℂ) ≠ 0 := by exact_mod_cast (show 2*n+1 ≠ 0 by omega)
+  field_simp at hhalf ⊢
+  linear_combination hhalf
+/-- Gauss convergence at one gives absolute convergence of the arcsine coefficients. -/
+private lemma arcsin_coeff_summable :
+    Summable (fun n : ℕ => ((2*n).choose n:ℂ)/((4:ℂ)^n*(2*n+1))) := by
+  have h := DLMF.Hypergeometric.ordinaryHypergeometric_summable_of_mem_sphere
+    (a:=(1/2:ℂ)) (b:=1/2) (c:=3/2) (z:=1) (by simp) (by norm_num)
+  simpa only [one_pow,mul_one,arcsin_gauss_coefficient] using h
+/-- The binomial derivative series integrates to the principal arcsine on the open unit disk. -/
+private lemma arcsin_series_open {z : ℂ} (hz : ‖z‖<1) :
+    HasSum (fun n : ℕ => ((2*n).choose n:ℂ)*z^(2*n+1)/(4^n*(2*n+1))) (arcsinPrincipal z) := by
+  have hdom {w : ℂ} (hw : ‖w‖<1) : w ∈ arcsinCutPlane :=
+    Or.inr ((Complex.abs_re_le_norm w).trans_lt hw)
+  have hb : ∀ w : ℂ, ‖w‖<1 →
+      HasSum (fun n : ℕ => (((2*n).choose n:ℂ)/(4:ℂ)^n)*w^(2*n)) (deriv arcsinPrincipal w) := by
+    intro w hw
+    have hw2 : ‖w^2‖<1 := by rw [norm_pow]; nlinarith [norm_nonneg w]
+    have h := Complex.hasSum_ascPochhammer_mul_pow_div_factorial (1/2:ℂ) (w^2) hw2
+    have hpow (n : ℕ) : (w^2)^n=w^(2*n) := (pow_mul w 2 n).symm
+    simp_rw [half_poch_coefficient, hpow] at h
+    rw [(trig_hasDerivAt_arcsin (hdom hw)).deriv]
+    simpa only [Complex.sqrt, one_div] using h
+  have h := Complex.hasSum_even_primitive_on_ball (by norm_num : (0:ℝ)<1)
+    (fun w hw => (trig_hasDerivAt_arcsin (hdom (by simpa using hw))).differentiableAt.differentiableWithinAt)
+    (by simp [arcsinPrincipal]) hb hz
+  convert h using 1
+  ext n
+  field_simp
+
+/-- The central-binomial expansion of the principal arcsine converges absolutely
+on the closed unit disk, including both branch points. -/
 @[dlmf 4.24.E1]
 theorem hasSum_arcsin_principal {z : ℂ} (hz : ‖z‖≤1) :
     HasSum (fun n : ℕ => ((2*n).choose n:ℂ)*z^(2*n+1)/(4^n*(2*n+1))) (arcsinPrincipal z) := by
-  sorry
+  let c : ℕ → ℂ := fun n => ((2*n).choose n:ℂ)/((4:ℂ)^n*(2*n+1))
+  let S := fun w : ℂ => ∑' n, c n*w^(2*n+1)
+  have hsum : Summable (fun n => ‖c n‖) := arcsin_coeff_summable.norm
+  have hbound {w : ℂ} (hw : ‖w‖≤1) (n : ℕ) : ‖c n*w^(2*n+1)‖ ≤ ‖c n‖ := by
+    rw [norm_mul,norm_pow]
+    exact mul_le_of_le_one_right (norm_nonneg _) (pow_le_one₀ (norm_nonneg _) hw)
+  have hc : ContinuousOn S (Metric.closedBall (0:ℂ) 1) :=
+    continuousOn_tsum (fun n => (by fun_prop : Continuous (fun w : ℂ => c n*w^(2*n+1))).continuousOn)
+      hsum (fun n w hw => hbound (by simpa using hw) n)
+  have ha : ContinuousOn arcsinPrincipal (Metric.closedBall (0:ℂ) 1) := fun w hw =>
+    (continuousAt_arcsin_principal_of_norm_le_one (by simpa using hw)).continuousWithinAt
+  have he : EqOn S arcsinPrincipal (Metric.ball (0:ℂ) 1) := by
+    intro w hw
+    have h := arcsin_series_open (z:=w) (by simpa using hw)
+    have hf : (fun n : ℕ => ((2*n).choose n:ℂ)*w^(2*n+1)/(4^n*(2*n+1))) =
+        fun n => c n*w^(2*n+1) := by
+      funext n
+      dsimp only [c]
+      ring
+    rw [hf] at h
+    exact h.tsum_eq
+  have hval : S z=arcsinPrincipal z := he.of_subset_closure hc ha Metric.ball_subset_closedBall
+    (by rw [closure_ball (0:ℂ) (by norm_num : (1:ℝ)≠0)]) (by simpa using hz)
+  have hsz : Summable (fun n => c n*z^(2*n+1)) := Summable.of_norm_bounded hsum (hbound hz)
+  have hh := hsz.hasSum
+  change HasSum (fun n => c n*z^(2*n+1)) (S z) at hh
+  rw [hval] at hh
+  convert hh using 1
+  ext n
+  dsimp only [c]
+  ring
+
+/-- The principal half-angle logarithm identifies arccosine with twice an arcsine off the cuts. -/
+private lemma arccos_half_cut {z : ℂ} (hz : z ∈ arcsinCutPlane) :
+    arccosPrincipal z = 2*arcsinPrincipal (Complex.sqrt ((1-z)/2)) := by
+  rw [arccos_principal_log_half hz, arcsinPrincipal, trig_sqrt_sq,
+    show 1-(1-z)/2 = (1+z)/2 by ring]
+  ring
+/-- The value on the positive real cut agrees with the lower-bank convention. -/
+private lemma arcsin_real_cut {x : ℝ} (hx : 1≤x) :
+    arcsinPrincipal x = arcsinRightBank false x := by
+  have hp : 0 < Real.sqrt (x^2-1)+x := by positivity
+  rw [arcsinPrincipal, trigR4_sqrt_eq_up (by simp [pow_two]), trigR4_one_sub_sq_real,
+    trigR4_sqrtUp_neg (by nlinarith)]
+  rw [show I*(Real.sqrt (x^2-1):ℂ)+I*x = I*((Real.sqrt (x^2-1)+x:ℝ):ℂ) by push_cast; ring,
+    trigR4_log_I_mul_pos hp]
+  simp only [arcsinRightBank, trigBankSign, Bool.false_eq_true, ite_false]
+  linear_combination (-(π:ℂ)/2)*Complex.I_sq
+/-- The principal half-angle square root maps the shifted closed disk into the closed unit disk. -/
+private lemma half_root_norm_le {z : ℂ} (hz : ‖1-z‖≤2) : ‖Complex.sqrt ((1-z)/2)‖≤1 := by
+  have he : ‖Complex.sqrt ((1-z)/2)‖^2 = ‖(1-z)/2‖ := by
+    rw [← norm_pow, trig_sqrt_sq]
+  rw [norm_div] at he
+  norm_num at he
+  nlinarith [norm_nonneg (Complex.sqrt ((1-z)/2))]
+/-- The half-angle identity on the positive cut follows by approaching along the lower bank. -/
+private lemma arccos_half_positive_cut {x : ℝ} (hx : 1<x) (hx3 : x≤3) :
+    arccosPrincipal x = 2*arcsinPrincipal (Complex.sqrt ((1-(x:ℂ))/2)) := by
+  let z : ℕ → ℂ := fun n => x-I/(n+1:ℂ)
+  have hi (n : ℕ) : (z n).im < 0 := by
+    dsimp only [z]
+    simp only [Complex.sub_im, Complex.ofReal_im, Complex.div_im, Complex.I_im,
+      Complex.I_re, Complex.add_re, Complex.natCast_re, Complex.one_re, Complex.add_im,
+      Complex.natCast_im, Complex.one_im, zero_add, zero_mul, zero_sub]
+    have hn : 0 < Complex.normSq (n+1:ℂ) := Complex.normSq_pos.mpr (by exact_mod_cast Nat.succ_ne_zero n)
+    have hn' : 0 < (n+1:ℝ) := by positivity
+    simpa using neg_neg_of_pos (div_pos hn' hn)
+  have hseq : Tendsto z atTop (𝓝 (x:ℂ)) := by
+    have h := tendsto_const_div_atTop_nhds_zero_nat (I:ℂ)
+    have hh := h.comp (tendsto_add_atTop_nat 1)
+    simpa [z] using tendsto_const_nhds.sub hh
+  have hseqT : Tendsto z atTop (𝓝[{w : ℂ | w.im<0}] (x:ℂ)) :=
+    tendsto_nhdsWithin_iff.mpr ⟨hseq,Eventually.of_forall hi⟩
+  have hL := (arccos_right_cut_limit hx.le false).comp hseqT
+  rw [← arcsin_real_cut hx.le] at hL
+  change Tendsto (arccosPrincipal ∘ z) atTop (𝓝 (arccosPrincipal x)) at hL
+  have hn : ‖1-(x:ℂ)‖≤2 := by
+    rw [show 1-(x:ℂ)=((1-x:ℝ):ℂ) by push_cast; ring, Complex.norm_real, Real.norm_eq_abs,
+      abs_of_neg (by linarith)]
+    linarith
+  have hp := continuousAt_arcsin_principal_of_norm_le_one (half_root_norm_le hn)
+  have hroot := (trigR4_continuous_sqrtUp.comp
+    (by fun_prop : Continuous (fun w : ℂ => (1-w)/2))).continuousAt.tendsto.comp hseq
+  have he : trigR4_sqrtUp ((1-(x:ℂ))/2) = Complex.sqrt ((1-(x:ℂ))/2) :=
+    (trigR4_sqrt_eq_up (by simp)).symm
+  dsimp only [Function.comp_def] at hroot
+  rw [he] at hroot
+  have hR := (hp.tendsto.comp hroot).const_mul (2:ℂ)
+  apply tendsto_nhds_unique hL
+  refine hR.congr (fun n => ?_)
+  dsimp only [Function.comp_def]
+  rw [arccos_half_cut (Or.inl (ne_of_lt (hi n))),
+    trigR4_sqrt_eq_up (by simp; linarith [hi n])]
+/-- The principal half-angle identity holds on the whole shifted disk, including its cut values. -/
+private lemma arccos_half_shifted_disk {z : ℂ} (hz : ‖1-z‖≤2) :
+    arccosPrincipal z = 2*arcsinPrincipal (Complex.sqrt ((1-z)/2)) := by
+  by_cases hcut : z ∈ arcsinCutPlane
+  · exact arccos_half_cut hcut
+  have him : z.im=0 := by
+    by_contra h
+    exact hcut (Or.inl h)
+  have hab : 1≤|z.re| := le_of_not_gt fun h => hcut (Or.inr h)
+  have hb := (Complex.abs_re_le_norm (1-z)).trans hz
+  simp only [Complex.sub_re,Complex.one_re] at hb
+  have hzrep : z=(z.re:ℂ) := by apply Complex.ext <;> simp [him]
+  rcases lt_or_ge z.re 1 with hlt | hge
+  · have hx : z.re = -1 := by
+      rcases le_or_gt 0 z.re with hpos | hneg
+      · rw [abs_of_nonneg hpos] at hab; linarith
+      · rw [abs_of_neg hneg] at hab
+        have hlow := (abs_le.mp hb).2
+        linarith
+    rw [hzrep,hx]
+    norm_num [arccosPrincipal,arcsinPrincipal,Complex.log_I,Complex.log_neg_I]
+    ring_nf
+    rw [Complex.I_sq]
+    ring
+  · rcases eq_or_lt_of_le hge with heq | hgt
+    · rw [hzrep,← heq]
+      norm_num [arccosPrincipal,arcsinPrincipal,Complex.log_I]
+      ring_nf
+      rw [Complex.I_sq]
+      ring
+    · rw [hzrep]
+      exact arccos_half_positive_cut hgt (by have hlow := (abs_le.mp hb).1; linarith)
+/-- Multiplying by four scales the principal square root by two without changing its argument. -/
+private lemma sqrt_four_mul (w : ℂ) : Complex.sqrt (4*w) = 2*Complex.sqrt w := by
+  have h := Complex.sqrt_ofReal_mul (by norm_num : (0:ℝ)≤4) w
+  norm_num at h
+  exact h
 
 /-- Arccosine series after factoring its square root, with the removable center handled separately. -/
 @[dlmf 4.24.E2]
 theorem hasSum_arccos_principal {z : ℂ} (hz : ‖1-z‖≤2) :
     HasSum (fun n : ℕ => Complex.sqrt (2*(1-z))*((2*n).choose n:ℂ)*(1-z)^n/(8^n*(2*n+1)))
       (arccosPrincipal z) := by
-  sorry
+  have h := (hasSum_arcsin_principal (half_root_norm_le hz)).mul_left 2
+  rw [← arccos_half_shifted_disk hz] at h
+  convert h using 1
+  ext n
+  rw [show (2:ℂ)*(1-z)=4*((1-z)/2) by ring, sqrt_four_mul,
+    pow_add, pow_mul, trig_sqrt_sq, pow_one, div_pow,
+    show (8:ℂ)^n=4^n*2^n by rw [← mul_pow]; norm_num]
+  field_simp
 
 /-- DLMF 4.24.E2: arccos series center. -/
 @[dlmf 4.24.E2]
@@ -528,21 +741,240 @@ theorem arccos_series_center : arccosPrincipal 1=0 := by
 theorem hasSum_arctan_closed_disc {z : ℂ} (hz : ‖z‖≤1) (hp : z≠I) (hm : z≠ -I) :
     Tendsto (fun N : ℕ => ∑ n∈Finset.range N,(-1:ℂ)^n*z^(2*n+1)/(2*n+1)) atTop
       (𝓝 (Complex.arctan z)) := by
-  sorry
+  have hnorm : ‖z * I‖ ≤ 1 := by simpa using hz
+  have hplus : z * I ≠ 1 := by
+    intro h
+    apply hm
+    calc z = (z * I) * (-I) := by simp [mul_assoc]
+         _ = -I := by rw [h]; ring
+  have hminus : z * I ≠ -1 := by
+    intro h
+    apply hp
+    calc z = (z * I) * (-I) := by simp [mul_assoc]
+         _ = I := by rw [h]; ring
+  have h := (logBoundary_odd hnorm hplus hminus).const_mul (-I/2)
+  rw [← Complex.arctan] at h
+  refine h.congr (fun N => ?_)
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro n _
+  rw [mul_pow, pow_add I, pow_mul I, I_sq, pow_one I]
+  ring_nf
+  rw [Complex.I_sq]
+  ring
+
+/-- The exterior logarithmic form of arctangent keeps the principal branch correction
+on the appropriate side of the imaginary axis. -/
+private lemma trigR4_arctan_exterior_log {z : ℂ} (hr : z.re ≠ 0) :
+    (if 0<z.re then (π:ℂ)/2 else -π/2) -
+      I/2*Complex.log ((z*I+1)/(z*I-1)) = Complex.arctan z := by
+  let v := (1 + z * I) / (1 - z * I)
+  have hd : 1 - z * I ≠ 0 := by
+    intro h
+    apply hr
+    have hi := congrArg Complex.im h
+    simpa using hi
+  have hns : 0 < Complex.normSq (1 - z * I) := Complex.normSq_pos.mpr hd
+  have hvim : v.im = 2 * z.re / Complex.normSq (1 - z * I) := by
+    dsimp only [v]
+    rw [Complex.div_im]
+    simp [Complex.normSq_apply]
+    ring
+  have hq : (z * I + 1) / (z * I - 1) = -v := by
+    dsimp only [v]
+    have hd' : z*I-1 ≠ 0 := by intro h; apply hd; linear_combination -h
+    field_simp
+    ring
+  rw [hq]
+  change (if 0<z.re then (π:ℂ)/2 else -π/2) - I/2*Complex.log (-v) = Complex.arctan z
+  have hlog : (if 0<z.re then (π:ℂ)/2 else -π/2) - I/2*Complex.log (-v) = Complex.arctan z := by
+    rw [Complex.arctan]
+    change (if 0<z.re then (π:ℂ)/2 else -π/2) - I/2*Complex.log (-v) = -I/2*Complex.log v
+    split_ifs with hp
+    · have hi : 0 < v.im := by rw [hvim]; positivity
+      have hl : Complex.log (-v) = Complex.log v - π*I := by
+        rw [Complex.log, Complex.log, norm_neg, Complex.arg_neg_eq_arg_sub_pi_of_im_pos hi]
+        push_cast
+        ring
+      rw [hl]
+      ring_nf
+      rw [Complex.I_sq]
+      ring
+    · have hneg : z.re < 0 := lt_of_le_of_ne (not_lt.mp hp) hr
+      have hi : v.im < 0 := by rw [hvim]; exact div_neg_of_neg_of_pos (by linarith) hns
+      have hl : Complex.log (-v) = Complex.log v + π*I := by
+        rw [Complex.log, Complex.log, norm_neg, Complex.arg_neg_eq_arg_add_pi_of_im_neg hi]
+        push_cast
+        ring
+      rw [hl]
+      ring_nf
+      rw [Complex.I_sq]
+      ring
+  exact hlog
 
 /-- DLMF 4.24.E4: arctan exterior series. -/
 @[dlmf 4.24.E4]
 theorem arctan_exterior_series {z : ℂ} (hz : 1≤‖z‖) (hr : z.re≠0) :
     Tendsto (fun N : ℕ => (if 0<z.re then (π:ℂ)/2 else -π/2)-
       ∑ n∈Finset.range N,(-1:ℂ)^n/(z^(2*n+1)*(2*n+1))) atTop (𝓝 (Complex.arctan z)) := by
-  sorry
+  have hz0 : z ≠ 0 := by rintro rfl; simp at hr
+  have hnorm : 1 ≤ ‖z * I‖ := by simpa using hz
+  have hplus : z * I ≠ 1 := by
+    intro h
+    have hh := congrArg Complex.re (congrArg (fun w : ℂ => w * (-I)) h)
+    simp [mul_assoc] at hh
+    exact hr hh
+  have hminus : z * I ≠ -1 := by
+    intro h
+    have hh := congrArg Complex.re (congrArg (fun w : ℂ => w * (-I)) h)
+    simp [mul_assoc] at hh
+    exact hr hh
+  have h := (log_ratio_hasSum_odd hnorm hplus hminus).const_mul (I/2)
+  have hc : ∀ N : ℕ, I/2 * (∑ n ∈ Finset.range N, 2 / ((2*n+1:ℂ)*(z*I)^(2*n+1))) =
+      ∑ n ∈ Finset.range N, (-1:ℂ)^n/(z^(2*n+1)*(2*n+1)) := by
+    intro N
+    rw [Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro n _
+    rw [mul_pow, pow_add I, pow_mul I, I_sq, pow_one I]
+    have hn : (2*n+1:ℂ) ≠ 0 := by exact_mod_cast (show 2*n+1 ≠ 0 by omega)
+    field_simp
+    ring_nf
+    simp
+  simp_rw [hc] at h
+  simpa only [trigR4_arctan_exterior_log hr] using
+    ((tendsto_const_nhds (x := if 0<z.re then (π:ℂ)/2 else -π/2)).sub h)
 
-/-- Euler transformed arctangent series, with its removable zero excluded. -/
+/-- Integer Beta integrals give the factorial moments of the weight `4t(1-t)`. -/
+private lemma euler_beta_moment (n : ℕ) :
+    (∫ t : ℝ in (0:ℝ)..1, ((4*t*(1-t):ℝ):ℂ)^n) =
+      (4:ℂ)^n*(n.factorial:ℂ)^2/((2*n+1).factorial:ℂ) := by
+  have hh : Complex.betaIntegral ((n:ℂ)+1) ((n:ℂ)+1) =
+      (n.factorial:ℂ)^2/((2*n+1).factorial:ℂ) := by
+    rw [Complex.betaIntegral_eq_Gamma_mul_div _ _ (by simp; positivity) (by simp; positivity),
+      Complex.Gamma_nat_eq_factorial]
+    rw [show (n:ℂ)+1+(n+1) = ((2*n+1:ℕ):ℂ)+1 by push_cast; ring,
+      Complex.Gamma_nat_eq_factorial]
+    ring
+  rw [mul_div_assoc, ← hh, Complex.betaIntegral, ← intervalIntegral.integral_const_mul]
+  apply intervalIntegral.integral_congr
+  intro t _
+  simp only [add_sub_cancel_right, Complex.cpow_natCast, Complex.ofReal_mul,
+    Complex.ofReal_ofNat, Complex.ofReal_sub, Complex.ofReal_one, mul_pow]
+  ring
+/-- Integrating a dominated geometric series gives the factorial-coefficient Euler kernel. -/
+private lemma euler_kernel_series {w : ℂ} (hw : ‖w‖<1) :
+    HasSum (fun n : ℕ => (4:ℂ)^n*(n.factorial:ℂ)^2/((2*n+1).factorial:ℂ)*w^n)
+      (∫ t : ℝ in (0:ℝ)..1, (1-((4*t*(1-t):ℝ):ℂ)*w)⁻¹) := by
+  let F : ℕ → ℝ → ℂ := fun n t => (((4*t*(1-t):ℝ):ℂ)*w)^n
+  have hb {t : ℝ} (ht : t ∈ Icc (0:ℝ) 1) : 0 ≤ 4*t*(1-t) ∧ 4*t*(1-t) ≤ 1 := by
+    constructor
+    · exact mul_nonneg (mul_nonneg (by norm_num) ht.1) (sub_nonneg.mpr ht.2)
+    · nlinarith [sq_nonneg (2*t-1)]
+  have hnorm {t : ℝ} (ht : t ∈ Icc (0:ℝ) 1) : ‖((4*t*(1-t):ℝ):ℂ)*w‖ ≤ ‖w‖ := by
+    rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (hb ht).1]
+    nlinarith [(hb ht).2, norm_nonneg w]
+  have hbound (n : ℕ) (t : ℝ) (ht : t ∈ uIoc (0:ℝ) 1) : ‖F n t‖ ≤ ‖w‖^n := by
+    rw [norm_pow]
+    exact pow_le_pow_left₀ (norm_nonneg _) (hnorm ⟨by simpa using le_of_lt ht.1, by simpa using ht.2⟩) n
+  have hsum := intervalIntegral.hasSum_integral_of_dominated_convergence
+    (μ := volume) (a := (0:ℝ)) (b := 1) (fun n _ => ‖w‖^n)
+    (fun n => (by fun_prop : Continuous (F n)).aestronglyMeasurable)
+    (fun n => Eventually.of_forall (hbound n))
+    (Eventually.of_forall fun t ht => summable_geometric_of_lt_one (norm_nonneg _) hw)
+    (intervalIntegrable_const : IntervalIntegrable (fun _ : ℝ => ∑' n : ℕ, ‖w‖^n) volume 0 1)
+    (Eventually.of_forall fun t ht =>
+      hasSum_geometric_of_norm_lt_one ((hnorm ⟨by simpa using le_of_lt ht.1, by simpa using ht.2⟩).trans_lt hw))
+  convert hsum using 1
+  ext n
+  dsimp only [F]
+  simp_rw [mul_pow]
+  rw [intervalIntegral.integral_mul_const, euler_beta_moment]
+/-- The parabolic convergence domain remains in the principal arctangent cut plane under real contractions. -/
+private lemma arctan_scaled_cut {z : ℂ} (hz : -(1/2:ℝ)<(z^2).re)
+    {u : ℝ} (hu : |u|≤1) : (u:ℂ)*z ∈ arctanCutPlane := by
+  by_cases hu0 : u=0
+  · simp [hu0, arctanCutPlane]
+  by_cases hx0 : z.re=0
+  · right
+    have hh : |z.im|<1 := by
+      rw [pow_two, Complex.mul_re, hx0] at hz
+      rw [abs_lt]
+      constructor <;> nlinarith
+    simp only [Complex.mul_im, Complex.ofReal_im, Complex.ofReal_re, zero_mul, add_zero,
+      abs_mul]
+    exact (mul_le_mul_of_nonneg_right hu (abs_nonneg _)).trans_lt (by simpa using hh)
+  · left
+    simpa using mul_ne_zero hu0 hx0
+/-- The arctangent derivative evaluates the Euler kernel along the symmetric segment from `-z` to `z`. -/
+private lemma euler_arctan_integral {z : ℂ} (hz : -(1/2:ℝ)<(z^2).re) :
+    (∫ t : ℝ in (0:ℝ)..1, z/(1+z^2*((2*t-1:ℝ):ℂ)^2)) = Complex.arctan z := by
+  have hdom {t : ℝ} (ht : t ∈ uIcc (0:ℝ) 1) : ((2*t-1:ℝ):ℂ)*z ∈ arctanCutPlane := by
+    apply arctan_scaled_cut hz
+    have ht' : t ∈ Icc (0:ℝ) 1 := by simpa using ht
+    rw [abs_le]
+    constructor <;> linarith [ht'.1,ht'.2]
+  have hden {t : ℝ} (ht : t ∈ uIcc (0:ℝ) 1) : 1+z^2*((2*t-1:ℝ):ℂ)^2 ≠ 0 := by
+    have h := Complex.slitPlane_ne_zero (trig_one_add_sq_slit (hdom ht))
+    convert h using 1
+    ring
+  have hint : IntervalIntegrable (fun t : ℝ => z/(1+z^2*((2*t-1:ℝ):ℂ)^2)) volume 0 1 := by
+    apply ContinuousOn.intervalIntegrable
+    apply ContinuousOn.div continuousOn_const (by fun_prop)
+    exact fun t ht => hden ht
+  have hd (t : ℝ) (ht : t ∈ uIcc (0:ℝ) 1) :
+      HasDerivAt (fun u : ℝ => Complex.arctan (((2*u-1:ℝ):ℂ)*z)/2)
+        (z/(1+z^2*((2*t-1:ℝ):ℂ)^2)) t := by
+    have hu : HasDerivAt (fun u : ℝ => ((2*u-1:ℝ):ℂ)*z) (2*z) t := by
+      simpa using (((Complex.ofRealCLM.hasDerivAt (x:=t)).const_mul (2:ℂ)).sub_const 1).mul_const z
+    have hh := ((trig_hasDerivAt_arctan (hdom ht)).comp_hasFDerivAt t hu.hasFDerivAt).hasDerivAt
+    convert hh.div_const (2:ℂ) using 1
+    · rfl
+    · simp only [smul_apply, smul_eq_mul]
+      simp
+      ring
+  have h := intervalIntegral.integral_eq_sub_of_hasDerivAt hd hint
+  have hzdom := arctan_scaled_cut hz (u:=1) (by norm_num)
+  simp only [Complex.ofReal_one, one_mul] at hzdom
+  convert h using 1
+  norm_num [arctan_principal_neg hzdom]
+  ring
+
+/-- Euler’s transformed arctangent series on `Re (z²) > -1/2`, including the removable value at zero. -/
 @[dlmf 4.24.E5]
 theorem hasSum_arctan_euler {z : ℂ} (hz : -(1/2:ℝ)<(z^2).re) :
     HasSum (fun n : ℕ => z/(1+z^2)*(4:ℂ)^n*(n.factorial:ℂ)^2/(2*n+1)!*(z^2/(1+z^2))^n)
       (Complex.arctan z) := by
-  sorry
+  have hden : 1+z^2 ≠ 0 := by
+    intro h
+    have hh := congrArg Complex.re h
+    simp at hh
+    linarith
+  have hw : ‖z^2/(1+z^2)‖<1 := by
+    rw [norm_div, div_lt_one (norm_pos_iff.mpr hden)]
+    have hs : ‖1+z^2‖^2 = ‖z^2‖^2+1+2*(z^2).re := by
+      rw [Complex.sq_norm,Complex.sq_norm]
+      simp [Complex.normSq_apply]
+      ring
+    nlinarith [norm_nonneg (1+z^2),norm_nonneg (z^2)]
+  have h := (euler_kernel_series hw).mul_left (z/(1+z^2))
+  have he : z/(1+z^2)*(∫ t : ℝ in (0:ℝ)..1,
+      (1-((4*t*(1-t):ℝ):ℂ)*(z^2/(1+z^2)))⁻¹) = Complex.arctan z := by
+    rw [← intervalIntegral.integral_const_mul, ← euler_arctan_integral hz]
+    apply intervalIntegral.integral_congr
+    intro t _
+    dsimp only
+    have hp : 1-((4*t*(1-t):ℝ):ℂ)*(z^2/(1+z^2)) =
+        (1+z^2*((2*t-1:ℝ):ℂ)^2)/(1+z^2) := by
+      field_simp
+      push_cast
+      ring
+    rw [hp, inv_div]
+    field_simp
+  rw [he] at h
+  convert h using 1
+  ext n
+  ring
 
 /-- DLMF 4.24.E6: arctan euler domain. -/
 @[dlmf 4.24.E6]

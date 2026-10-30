@@ -1,6 +1,6 @@
 module -- shake: keep-all
 
-public import DLMF.ErrorFunctions.Basic
+public import DLMF.ErrorFunctions.AnalyticProperties
 public import DLMF.ErrorFunctions.Relations
 public import DLMF.ErrorFunctions.Series
 public import DLMF.ErrorFunctions.InverseGeneralized

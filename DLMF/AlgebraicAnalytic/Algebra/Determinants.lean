@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AlgebraicAnalytic.Algebra.Defs
+public import DLMF.AlgebraicAnalytic.Algebra.Basic
 public import Mathlib.Analysis.InnerProductSpace.GramSchmidtOrtho
 public import Mathlib.Analysis.InnerProductSpace.PiL2
 public import Mathlib.LinearAlgebra.Vandermonde
@@ -20,7 +20,7 @@ triangular matrices) and the Vandermonde determinant 1.3.13 are in Mathlib; the 
 alternant property 1.3.11–1.3.12, Hadamard's inequality 1.3.8–1.3.10, the Cauchy determinant
 1.3.14, the circulant 1.3.15, Krattenthaler's formula 1.3.16–1.3.17 and the convergence of
 infinite determinants of Hill's type (1.3.19); the truncations `D_n` (1.3.18) are defined in
-`DLMF/AlgebraicAnalytic/Algebra/Defs.lean`.
+`DLMF/AlgebraicAnalytic/Algebra/Basic.lean`.
 
 DLMF's circulant (1.3.15) has rows `(a₁, …, aₙ)`, `(aₙ, a₁, …, a_{n-1})`, …, that is the entry
 `a_{k-j}` (indices mod `n`) in row `j`, column `k`; it is the transpose of Mathlib's

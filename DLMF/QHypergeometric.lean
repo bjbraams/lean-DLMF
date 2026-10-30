@@ -7,7 +7,7 @@ module -- shake: keep-all
 
 public import DLMF.QHypergeometric.Appell
 public import DLMF.QHypergeometric.BaileyPairs
-public import DLMF.QHypergeometric.Basic
+public import DLMF.QHypergeometric.Convergence
 public import DLMF.QHypergeometric.BasicSummations
 public import DLMF.QHypergeometric.BilateralSummations
 public import DLMF.QHypergeometric.BilateralTransformations

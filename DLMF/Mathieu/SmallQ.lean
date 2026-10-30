@@ -5,10 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Mathieu.Basic
+public import DLMF.Mathieu.SpectralExistence
 public import DLMF.Mathieu.P3qCeSe
 public import DLMF.Mathieu.P3qCeSeGen
-public import DLMF.Mathieu.ContFracDefs
+public import DLMF.Mathieu.Basic.ContinuedFractions
 public import DLMF.EllipticIntegrals.Legendre
 
 /-!

@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.QSeries.Basic.Calculus
 public import DLMF.QSeries.Pochhammer
 
 /-!
@@ -24,12 +25,6 @@ open Complex Finset
 noncomputable section
 
 namespace DLMF.QSeries
-
-/-- Gaussian `q`-binomial coefficients `[n k]_q`, by the `q`-Pascal rule. -/
-def qBinom (q : ℂ) : ℕ → ℕ → ℂ
-  | _, 0 => 1
-  | 0, _ + 1 => 0
-  | n + 1, k + 1 => qBinom q n k + q ^ (k + 1) * qBinom q n (k + 1)
 
 /-- `[n 0]_q = 1`. -/
 @[simp] theorem qBinom_zero_right (q : ℂ) (n : ℕ) : qBinom q n 0 = 1 := by

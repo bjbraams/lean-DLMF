@@ -5,12 +5,16 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.GeneralizedHypergeometric.Appell.DefinitionsAndSeries
+public import DLMF.GeneralizedHypergeometric.Appell.Basic.EulerBranches
+
+public import DLMF.GeneralizedHypergeometric.Appell.SeriesAndDifferentialEquations
 
 /-!
 # Euler integrals for Appell functions
 
 Branch domains and locally dominated Euler-integral representations of the Appell functions.
+The F3-to-F1 reduction and F1/F2 Pfaff transformations use Gauss-series fiber sums
+and the proved `pfaff_transformation_of_ne_neg_nat`, retaining all regular lower parameters.
 
 Source references and common attribution are retained in
 `DLMF.GeneralizedHypergeometric.Appell`.
@@ -26,58 +30,27 @@ namespace DLMF.Hypergeometric
 
 /-! ## Euler integral branches with actual integrability -/
 
-/-- Natural principal cut plane for the two separate Euler denominator factors. -/
-def appellEulerDomain : Set (ℂ × ℂ) := {p | 1-p.1∈slitPlane ∧ 1-p.2∈slitPlane}
 
-/-- The square-integral denominator stays on its principal branch at every integration point. -/
-def appellSquareSlit (p : ℂ × ℂ) : Prop :=
-  ∀ u∈Icc (0:ℝ) 1,∀ v∈Icc (0:ℝ) 1,1-(u:ℂ)*p.1-(v:ℂ)*p.2∈slitPlane
 
-/-- Euler's integration triangle, including its measure-zero boundary. -/
-def appellTriangle : Set (ℝ × ℝ) := {p | 0≤p.1 ∧ 0≤p.2 ∧ p.1+p.2≤1}
 
-/-- The Euler kernel for F1, with all powers principal on their stated domain. -/
-def appF1EulerKernel (a b b' c x y : ℂ) (u : ℝ) : ℂ :=
-  (u:ℂ)^(a-1)*((1-u:ℝ):ℂ)^(c-a-1)/(1-u*x)^b/(1-u*y)^b'
 
-/-- The Euler kernel for F2. -/
-def appF2EulerKernel (a b b' c c' x y : ℂ) (p : ℝ × ℝ) : ℂ :=
-  (p.1:ℂ)^(b-1)*(p.2:ℂ)^(b'-1)*((1-p.1:ℝ):ℂ)^(c-b-1)*
-    ((1-p.2:ℝ):ℂ)^(c'-b'-1)/(1-p.1*x-p.2*y)^a
 
-/-- The simplex Euler kernel for F3. -/
-def appF3EulerKernel (a a' b b' c x y : ℂ) (p : ℝ × ℝ) : ℂ :=
-  (p.1:ℂ)^(b-1)*(p.2:ℂ)^(b'-1)*((1-p.1-p.2:ℝ):ℂ)^(c-b-b'-1)/
-    (1-p.1*x)^a/(1-p.2*y)^a'
 
-/-- The transformed Euler kernel for F4. -/
-def appF4EulerKernel (a b c c' x y : ℂ) (p : ℝ × ℝ) : ℂ :=
-  (p.1:ℂ)^(a-1)*(p.2:ℂ)^(b-1)*((1-p.1:ℝ):ℂ)^(c-a-1)*
-    ((1-p.2:ℝ):ℂ)^(c'-b-1)/(1-p.1*x)^(c+c'-a-1)/(1-p.2*y)^(c+c'-b-1)/
-    (1-p.1*x-p.2*y)^(a+b-c-c'+1)
 
-/-- The Euler integral branch of F1, distinct from its totalized double series. -/
-@[dlmf 16.15.E1]
-def appF1Euler (a b b' c x y : ℂ) : ℂ :=
-  Gamma c/(Gamma a*Gamma (c-a))*∫ u in (0:ℝ)..1,appF1EulerKernel a b b' c x y u
 
-/-- The Euler square-integral branch of F2. -/
-@[dlmf 16.15.E2]
-def appF2Euler (a b b' c c' x y : ℂ) : ℂ :=
-  Gamma c*Gamma c'/(Gamma b*Gamma b'*Gamma (c-b)*Gamma (c'-b'))*
-    ∫ p in Icc (0:ℝ) 1×ˢIcc (0:ℝ) 1,appF2EulerKernel a b b' c c' x y p
 
-/-- The Euler simplex-integral branch of F3. -/
-@[dlmf 16.15.E3]
-def appF3Euler (a a' b b' c x y : ℂ) : ℂ :=
-  Gamma c/(Gamma b*Gamma b'*Gamma (c-b-b'))*
-    ∫ p in appellTriangle,appF3EulerKernel a a' b b' c x y p
 
-/-- The Euler branch at the transformed arguments x(1-y),y(1-x). -/
-@[dlmf 16.15.E4]
-def appF4Euler (a b c c' x y : ℂ) : ℂ :=
-  Gamma c*Gamma c'/(Gamma a*Gamma b*Gamma (c-a)*Gamma (c'-b))*
-    ∫ p in Icc (0:ℝ) 1×ˢIcc (0:ℝ) 1,appF4EulerKernel a b c c' x y p
+
+
+
+
+
+
+
+
+
+
+
 
 /-- The segment from `1` to `1 - w` stays in the slit plane. -/
 lemma ghaR4_slit_segment {w : ℂ} (hw : 1 - w ∈ slitPlane) {u : ℝ} (hu : u ∈ Icc (0:ℝ) 1) :
@@ -778,13 +751,6 @@ theorem appF4_euler_germ (a b c c' : ℂ) (ha : 0<a.re) (hb : 0<b.re) (hca : a.r
     (fun p : ℂ × ℂ => appF4 a b c c' (p.1*(1-p.2)) (p.2*(1-p.1)))=ᶠ[𝓝 (0,0)] (fun p => appF4Euler a b c c' p.1 p.2) := by
   sorry
 
-/-- 16.16.E1: appF1 reduction gauss. -/
-@[dlmf 16.16.E1]
-theorem appF1_reduction_gauss (a b b' : ℂ) (hc : AppellRegular (b+b')) :
-    (fun p : ℂ × ℂ => let x:=p.1; let y:=p.2; appF1 a b b' (b+b') x y)=ᶠ[𝓝 (0,0)]
-      (fun p => let x:=p.1; let y:=p.2; (1-y)^(-a)*₂F₁ a b (b+b') ((x-y)/(1-y))) := by
-  sorry
-
 /-- The Gauss series in the unit disk, as a scalar `HasSum`. -/
 lemma ghaR4_gauss_hasSum {a b c z : ℂ} (hz : ‖z‖ < 1) :
     HasSum (fun n : ℕ => gaussHGCoeff a b c n * z ^ n) (₂F₁ a b c z) := by
@@ -830,26 +796,70 @@ theorem appF2_reduction_gauss (a b b' c : ℂ) (hc : AppellRegular c) (hb' : App
     cpow_natCast, div_pow]
   field_simp
 
-/-- 16.16.E3: appF2 reduction appF1. -/
-@[dlmf 16.16.E3]
-theorem appF2_reduction_appF1 (a b b' c : ℂ) (hc : AppellRegular c) (ha : AppellRegular a) :
-    (fun p : ℂ × ℂ => let x:=p.1; let y:=p.2; appF2 a b b' c a x y)=ᶠ[𝓝 (0,0)]
-      (fun p => let x:=p.1; let y:=p.2; (1-y)^(-b')*appF1 b (a-b') b' c x (x/(1-y))) := by
-  sorry
+/-- Summing each row of the F3 double series gives a Gauss hypergeometric series. -/
+lemma hasSum_appF3_gauss_fibers (a a' b b' c : ℂ) (hc : AppellRegular c)
+    {x y : ℂ} (hx : ‖x‖ < 1) (hy : ‖y‖ < 1) :
+    HasSum (fun m : ℕ => poch a m * poch b m / (poch c m * m !) * x ^ m *
+      ₂F₁ a' b' (c + m) y) (appF3 a a' b b' c x y) := by
+  have hs := hasSum_appF3 a a' b b' c hc (x := x) (y := y) ⟨hx, hy⟩
+  apply hs.prod_fiberwise
+  intro m
+  have h := (ghaR4_gauss_hasSum (a := a') (b := b') (c := c + m) hy).mul_left
+    (poch a m * poch b m / (poch c m * m !) * x ^ m)
+  refine h.congr_fun fun n => ?_
+  rw [appF3Coeff, gaussHGCoeff, poch_add]
+  simp only [div_eq_mul_inv, mul_inv_rev]
+  ring
 
-/-- 16.16.E4: appF3 reduction appF1. -/
+/-- Summing each row of the F1 double series gives a Gauss hypergeometric series. -/
+lemma hasSum_appF1_gauss_fibers (a b b' c : ℂ) (hc : AppellRegular c)
+    {x y : ℂ} (hx : ‖x‖ < 1) (hy : ‖y‖ < 1) :
+    HasSum (fun m : ℕ => poch a m * poch b m / (poch c m * m !) * x ^ m *
+      ₂F₁ (a + m) b' (c + m) y) (appF1 a b b' c x y) := by
+  have hs := hasSum_appF1 a b b' c hc (x := x) (y := y) ⟨hx, hy⟩
+  apply hs.prod_fiberwise
+  intro m
+  have h := (ghaR4_gauss_hasSum (a := a + m) (b := b') (c := c + m) hy).mul_left
+    (poch a m * poch b m / (poch c m * m !) * x ^ m)
+  refine h.congr_fun fun n => ?_
+  rw [appF1Coeff, gaussHGCoeff, poch_add a, poch_add c]
+  simp only [div_eq_mul_inv, mul_inv_rev]
+  ring
+
+/-- Complementary first upper parameters reduce Appell F3 to F1 after a fractional
+linear change of its second variable, as germs at the origin (DLMF 16.16.E4). -/
 @[dlmf 16.16.E4]
 theorem appF3_reduction_appF1 (a b b' c : ℂ) (hc : AppellRegular c) :
     (fun p : ℂ × ℂ => let x:=p.1; let y:=p.2; appF3 a (c-a) b b' c x y)=ᶠ[𝓝 (0,0)]
       (fun p => let x:=p.1; let y:=p.2; (1-y)^(-b')*appF1 a b b' c x (y/(y-1))) := by
-  sorry
-
-/-- 16.16.E5: appF3 reduction gauss. -/
-@[dlmf 16.16.E5]
-theorem appF3_reduction_gauss (a b c : ℂ) (hc : AppellRegular c) :
-    (fun p : ℂ × ℂ => let x:=p.1; let y:=p.2; appF3 a (c-a) b (c-b) c x y)=ᶠ[𝓝 (0,0)]
-      (fun p => let x:=p.1; let y:=p.2; (1-y)^(a+b-c)*₂F₁ a b c (x+y-x*y)) := by
-  sorry
+  have hU : {p : ℂ × ℂ | ‖p.1‖ < 1 ∧ ‖p.2‖ < 1 / 3} ∈ 𝓝 ((0 : ℂ),(0 : ℂ)) :=
+    ((isOpen_lt (continuous_norm.comp continuous_fst) continuous_const).inter
+      (isOpen_lt (continuous_norm.comp continuous_snd) continuous_const)).mem_nhds (by norm_num)
+  filter_upwards [hU] with p hp
+  obtain ⟨x, y⟩ := p
+  simp only at hp ⊢
+  have hy : ‖y‖ < 1 := by linarith [hp.2]
+  have hd : 0 < ‖1 - y‖ := by
+    have := norm_sub_norm_le (1 : ℂ) y
+    simp only [norm_one] at this
+    linarith
+  have hyt : ‖y / (y - 1)‖ < 1 := by
+    rw [norm_div, norm_sub_rev y 1, div_lt_one hd]
+    have := norm_sub_norm_le (1 : ℂ) y
+    simp only [norm_one] at this
+    linarith [hp.2]
+  have hs := hasSum_appF3_gauss_fibers a (c - a) b b' c hc hp.1 hy
+  have hs' := (hasSum_appF1_gauss_fibers a b b' c hc hp.1 hyt).mul_left ((1 - y)^ (-b'))
+  apply hs.unique
+  refine hs'.congr_fun fun m => ?_
+  have hcm : ∀ j : ℕ, c + m ≠ -(j:ℂ) := by
+    intro j he
+    apply hc (m + j)
+    push_cast
+    linear_combination he
+  rw [ordinaryHypergeometric_symm (c - a) b', pfaff_transformation_of_ne_neg_nat hcm hy hyt,
+    show c+(m : ℂ)-(c - a) = a + m by ring, ordinaryHypergeometric_symm b' (a + m)]
+  ring
 
 /-- 16.16.E5_5: appF4 reduction appF1. -/
 @[dlmf 16.16.E5_5]
@@ -1024,26 +1034,126 @@ theorem appF4_product_germ (a b c : ℂ) (hc : AppellRegular c) (hc' : AppellReg
   filter_upwards [hU] with p hp
   exact (h p.1 p.2 hp.1 hp.2).tsum_eq
 
-/-- 16.16.E8: appF1 pfaff first. -/
+/-- Exchanging the two pairs of upper parameters exchanges the F3 variables. -/
+lemma appF3_swap (a a' b b' c x y : ℂ) :
+    appF3 a a' b b' c x y = appF3 a' a b' b c y x := by
+  rw [appF3, appF3, ← (Equiv.prodComm ℕ ℕ).tsum_eq]
+  apply tsum_congr
+  rintro ⟨m, n⟩
+  simp only [Equiv.prodComm_apply, Prod.swap_prod_mk]
+  rw [appF3Coeff_swap a a' b b' c n m]
+  ring
+
+/-- Exchanging the two separate upper parameters exchanges the F1 variables. -/
+lemma appF1_swap (a b b' c x y : ℂ) :
+    appF1 a b b' c x y = appF1 a b' b c y x := by
+  rw [appF1, appF1, ← (Equiv.prodComm ℕ ℕ).tsum_eq]
+  apply tsum_congr
+  rintro ⟨m, n⟩
+  simp only [Equiv.prodComm_apply, Prod.swap_prod_mk]
+  rw [appF1Coeff_swap a b b' c n m]
+  ring
+
+/-- Pfaff's simultaneous fractional linear change of both Appell F1 variables,
+as analytic germs at the origin (DLMF 16.16.E8). -/
 @[dlmf 16.16.E8]
 theorem appF1_pfaff_first (a b b' c : ℂ) (hc : AppellRegular c) :
     (fun p : ℂ × ℂ => let x:=p.1; let y:=p.2; appF1 a b b' c x y)=ᶠ[𝓝 (0,0)]
       (fun p => let x:=p.1; let y:=p.2; (1-x)^(-b)*(1-y)^(-b')*appF1 (c-a) b b' c (x/(x-1)) (y/(y-1))) := by
-  sorry
+  let T : ℂ → ℂ := fun z => z / (z-1)
+  have hT : ContinuousAt T 0 := by
+    dsimp [T]
+    exact continuousAt_id.div (continuousAt_id.sub continuousAt_const) (by norm_num)
+  have h0 : T 0 = 0 := by simp [T]
+  have hC1 : Tendsto (fun p : ℂ × ℂ => (p.1, T p.2)) (𝓝 (0, 0)) (𝓝 (0, 0)) := by
+    simpa only [Function.comp_apply, h0] using continuous_fst.continuousAt.prodMk
+      (hT.comp_of_eq (continuous_snd.continuousAt (x := ((0 : ℂ),(0 : ℂ)))) rfl) |>.tendsto
+  have hC2 : Tendsto (fun p : ℂ × ℂ => (T p.2, p.1)) (𝓝 (0, 0)) (𝓝 (0, 0)) := by
+    simpa only [Function.comp_apply, h0] using
+      (hT.comp_of_eq (continuous_snd.continuousAt (x := ((0 : ℂ), (0 : ℂ)))) rfl).prodMk
+      continuous_fst.continuousAt |>.tendsto
+  have h1 := (appF3_reduction_appF1 a b b' c hc).comp_tendsto hC1
+  have h2 := (appF3_reduction_appF1 (c - a) b' b c hc).comp_tendsto hC2
+  have hU : {p : ℂ × ℂ | ‖p.1‖ < 1 ∧ ‖p.2‖ < 1} ∈ 𝓝 ((0 : ℂ),(0 : ℂ)) :=
+    ((isOpen_lt (continuous_norm.comp continuous_fst) continuous_const).inter
+      (isOpen_lt (continuous_norm.comp continuous_snd) continuous_const)).mem_nhds (by norm_num)
+  filter_upwards [h1, h2, hU] with p h1 h2 hp
+  obtain ⟨x, y⟩ := p
+  simp only [Function.comp_apply] at h1 h2 ⊢
+  have hy : y - 1 ≠ 0 := by
+    intro he
+    rw [sub_eq_zero.mp he] at hp
+    simp at hp
+  have hy1 : 1 - y ≠ 0 := sub_ne_zero.mpr (Ne.symm (sub_ne_zero.mp hy))
+  have hinv : 1 - T y = (1 - y)⁻¹ := by dsimp [T]; field_simp [hy1, hy]; ring
+  have hTT : T (T y) = y := by dsimp [T]; field_simp [hy1, hy]; ring
+  have harg : (1 - y).arg ≠ Real.pi := by
+    have hslit : 1 - y ∈ slitPlane := by
+      left
+      have := re_le_norm y
+      simp only [sub_re, one_re]
+      linarith [hp.2]
+    exact (arg_lt_pi_iff.mpr (hslit.imp_left le_of_lt)).ne
+  change appF3 a (c - a) b b' c x (T y) = (1 - T y)^ (-b') * appF1 a b b' c x (T (T y)) at h1
+  rw [hinv, hTT, inv_cpow _ _ harg] at h1
+  rw [show c - (c - a) = a by ring, ← appF3_swap a (c - a) b b' c x (T y),
+    appF1_swap (c - a) b' b c (T y) (T x)] at h2
+  rw [h2] at h1
+  have hne : (1 - y)^ (-b') ≠ 0 := Complex.cpow_ne_zero_iff.mpr (Or.inl hy1)
+  have hh := congrArg (fun v : ℂ => (1 - y)^ (-b') * v) h1
+  rw [mul_inv_cancel_left₀ hne] at hh
+  calc appF1 a b b' c x y = _ := hh.symm
+       _ = _ := by dsimp only [T]; ring
 
-/-- 16.16.E8: appF1 pfaff second. -/
-@[dlmf 16.16.E8]
-theorem appF1_pfaff_second (a b b' c : ℂ) (hc : AppellRegular c) :
-    (fun p : ℂ × ℂ => let x:=p.1; let y:=p.2; appF1 a b b' c x y)=ᶠ[𝓝 (0,0)]
-      (fun p => let x:=p.1; let y:=p.2; (1-x)^(-a)*appF1 a (c-b-b') b' c (x/(x-1)) ((y-x)/(1-x))) := by
-  sorry
+/-- Summing each column of the F2 double series gives a Gauss hypergeometric series. -/
+lemma hasSum_appF2_gauss_fibers (a b b' c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c')
+    {x y : ℂ} (hxy : ‖x‖ + ‖y‖ < 1) :
+    HasSum (fun n : ℕ => poch a n * poch b' n / (poch c' n * n !) * y ^ n *
+      ₂F₁ (a + n) b c x) (appF2 a b b' c c' x y) := by
+  have hs := (Equiv.prodComm ℕ ℕ).hasSum_iff.mpr (hasSum_appF2 a b b' c c' hc hc' hxy)
+  apply hs.prod_fiberwise
+  intro n
+  have hx : ‖x‖ < 1 := by linarith [norm_nonneg y]
+  have h := (ghaR4_gauss_hasSum (a := a + n) (b := b) (c := c) hx).mul_left
+    (poch a n * poch b' n / (poch c' n * n !) * y ^ n)
+  refine h.congr_fun fun m => ?_
+  change appF2Coeff a b b' c c' m n * x ^ m * y ^ n = _
+  rw [appF2Coeff, gaussHGCoeff, show m + n = n + m by omega, poch_add]
+  simp only [div_eq_mul_inv, mul_inv_rev]
+  ring
 
-/-- 16.16.E9: appF2 pfaff. -/
+/-- Pfaff's transformation in the first F2 variable rescales the second variable,
+as analytic germs at the origin (DLMF 16.16.E9). -/
 @[dlmf 16.16.E9]
 theorem appF2_pfaff (a b b' c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c') :
     (fun p : ℂ × ℂ => let x:=p.1; let y:=p.2; appF2 a b b' c c' x y)=ᶠ[𝓝 (0,0)]
       (fun p => let x:=p.1; let y:=p.2; (1-x)^(-a)*appF2 a (c-b) b' c c' (x/(x-1)) (y/(1-x))) := by
-  sorry
+  have hU : {p : ℂ × ℂ | ‖p.1‖ + ‖p.2‖ < 1 / 3} ∈ 𝓝 ((0 : ℂ),(0 : ℂ)) :=
+    (isOpen_lt ((continuous_norm.comp continuous_fst).add (continuous_norm.comp continuous_snd))
+      continuous_const).mem_nhds (by norm_num)
+  filter_upwards [hU] with p hp
+  obtain ⟨x, y⟩ := p
+  simp only at hp ⊢
+  have hx : ‖x‖ < 1 := by linarith [norm_nonneg y]
+  have h1x : 1 - x ≠ 0 := by
+    intro he
+    have : x = 1 := by linear_combination -he
+    simp [this] at hx
+  have hden : 1 - ‖x‖ ≤ ‖1 - x‖ := by
+    simpa using norm_sub_norm_le (1 : ℂ) x
+  have hd : 0 < ‖1 - x‖ := norm_pos_iff.mpr h1x
+  have ht : ‖x / (x - 1)‖ + ‖y / (1 - x)‖ < 1 := by
+    rw [norm_div, norm_div, norm_sub_rev x 1, ← add_div, div_lt_one hd]
+    linarith [norm_nonneg x, norm_nonneg y]
+  have hxt : ‖x / (x - 1)‖ < 1 := by linarith [norm_nonneg (y / (1 - x))]
+  have hs := hasSum_appF2_gauss_fibers a b b' c c' hc hc' (x := x) (y := y) (by linarith)
+  have hs' := (hasSum_appF2_gauss_fibers a (c - b) b' c c' hc hc' ht).mul_left ((1 - x)^ (-a))
+  apply hs.unique
+  refine hs'.congr_fun fun n => ?_
+  rw [pfaff_transformation_of_ne_neg_nat hc hx hxt]
+  rw [show -(a+(n : ℂ)) = -a + -(n : ℂ) by ring, cpow_add _ _ h1x,
+    cpow_neg (1 - x) (n : ℂ), cpow_natCast, div_pow]
+  ring
 
 /-- 16.16.E7: appF4 burchnall chaundy. -/
 @[dlmf 16.16.E7]

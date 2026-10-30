@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.IncompleteGamma.Basic
+public import DLMF.IncompleteGamma.ContinuedProperties
 
 /-!
 # Real-variable tools for the incomplete Gamma inequalities, DLMF §8.10

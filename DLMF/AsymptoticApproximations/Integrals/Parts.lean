@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AsymptoticApproximations.Basics.Defs
+public import DLMF.AsymptoticApproximations.Basics.Basic
 public import DLMF.AsymptoticApproximations.Integrals.Watson
 public import DLMF.AlgebraicAnalytic.Transforms.Laplace
 public import DLMFMathlib.Analysis.Integral.RepeatedIntegrationByParts

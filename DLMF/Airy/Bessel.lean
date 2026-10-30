@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Airy.Basic
+public import DLMF.Airy.Properties
 
 /-!
 # Airy functions and Bessel functions of order `±1/3` (DLMF §§9.6, 9.7)

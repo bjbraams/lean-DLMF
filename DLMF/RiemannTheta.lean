@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
-public import DLMF.RiemannTheta.Basic
+public import DLMF.RiemannTheta.Characteristics
 public import DLMF.RiemannTheta.Symmetry
 public import DLMF.RiemannTheta.Modular
 public import DLMF.RiemannTheta.Products

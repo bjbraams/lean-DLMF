@@ -6,9 +6,9 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMFMathlib.Analysis.MellinConvolution
-public import DLMF.AlgebraicAnalytic.Transforms.Defs
-public import DLMF.AsymptoticApproximations.Mellin.Defs
-public import DLMF.AlgebraicAnalytic.Complex.Defs
+public import DLMF.AlgebraicAnalytic.Transforms.Basic
+public import DLMF.AsymptoticApproximations.Mellin.Basic
+public import DLMF.AlgebraicAnalytic.Complex.Basic
 public import DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion
 public import Mathlib.Analysis.MellinInversion
 public import Mathlib.Analysis.Fourier.RiemannLebesgueLemma

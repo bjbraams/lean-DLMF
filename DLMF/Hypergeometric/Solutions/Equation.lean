@@ -5,6 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Hypergeometric.Basic.Pochhammer
+
 public import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
 public import DLMF.Hypergeometric.Continuation
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Digamma
@@ -28,13 +30,7 @@ noncomputable section
 
 namespace DLMF.Hypergeometric
 
-/-- `(1-x-m)_{m-j} = (-1)^{m-j} (x)_m / (x)_j` in multiplied-out form. -/
-theorem poch_one_sub_sub_mul {x : ℂ} {m j : ℕ} (hj : j ≤ m) :
-    poch x j * poch (1 - x - m) (m - j) = (-1 : ℂ) ^ (m - j) * poch x m := by
-  have h := poch_reflect (x + j) (m - j)
-  rw [show 1 - (x + j) - ((m - j : ℕ) : ℂ) = 1 - x - m by push_cast [hj]; ring] at h
-  rw [h, show poch x m = poch x (j + (m - j)) by rw [Nat.add_sub_cancel' hj], poch_add]
-  ring
+
 
 /-- A principal power computed from any logarithm in the principal strip. -/
 theorem cpow_eq_exp_of_exp_eq {x L : ℂ} (hx : exp L = x) (h1 : -Real.pi < L.im)

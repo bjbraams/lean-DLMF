@@ -6,6 +6,11 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Elementary.Hyperbolic.InverseIdentities
+public import DLMF.Gamma.BetaFunction.Cosine
+public import Mathlib.Analysis.SpecialFunctions.FrullaniIntegral
+public import TauCeti.Analysis.SpecialFunctions.Hyperbolic
+public import DLMF.Gamma.IntegralRepresentations.DigammaAndBinet
+public import DLMF.Gamma.SeriesExpansions
 
 /-!
 # Continued fractions and integrals of hyperbolic functions
@@ -15,6 +20,13 @@ hyperbolic functions.
 
 Source references and common attribution are retained in
 `DLMF.Elementary.Hyperbolic`.
+The hyperbolic tangent difference integral applies Mathlib’s Frullani theorem after
+an exponential mean-value bound; continuity uses TauCeti’s `Real.continuous_tanh`.
+The exponential over squared-cosh integral specializes the general cosh-power Beta
+integral in `DLMF.Gamma.BetaFunction.Cosine` and Mathlib’s Gamma reflection formula.
+The sine and hyperbolic-sine kernels use the proved digamma series, special values,
+and real digamma integral in the Gamma area; the Laplace sine integral is the imaginary
+part of Mathlib’s complex exponential integral.
 -/
 
 @[expose] public noncomputable section
@@ -92,31 +104,285 @@ x/Real.sinh x)`. -/
 theorem antiderivative_coth {x : ℝ} (hx : 0<x) : HasDerivAt (fun t : ℝ => Real.log (Real.sinh t)) (Real.cosh x/Real.sinh x) x := by
   exact (Real.hasDerivAt_sinh x).log (Real.sinh_pos_iff.mpr hx).ne'
 
+/-- The imaginary part of the complex exponential Laplace integral evaluates a damped sine. -/
+private lemma laplace_sin {a b : ℝ} (hb : 0<b) :
+    IntegrableOn (fun x : ℝ => Real.exp (-b*x)*Real.sin (a*x)) (Ioi 0) ∧
+      (∫ x : ℝ in Ioi 0, Real.exp (-b*x)*Real.sin (a*x)) = a/(b^2+a^2) := by
+  let c : ℂ := -b+I*a
+  have hc : c.re<0 := by dsimp [c]; simpa using neg_neg_of_pos hb
+  have hi := integrableOn_exp_mul_complex_Ioi hc 0
+  have he : (fun x : ℝ => (Complex.exp (c*x)).im) =
+      fun x => Real.exp (-b*x)*Real.sin (a*x) := by
+    ext x
+    simp [c, Complex.exp_im]
+  have him : IntegrableOn (fun x : ℝ => (Complex.exp (c*x)).im) (Ioi 0) := hi.im
+  rw [he] at him
+  refine ⟨him, ?_⟩
+  rw [← he]
+  simp only [← RCLike.im_to_complex]
+  rw [integral_im hi, integral_exp_mul_complex_Ioi hc]
+  simp [c, Complex.div_im, Complex.normSq_apply]
+  ring
+/-- Integral norms of the exponential-sine terms are bounded by a summable quadratic tail. -/
+private lemma exp_sin_term_integral_norm_bound (a : ℝ) (n : ℕ) :
+    (∫ x in Ioi (0:ℝ), ‖2*Real.exp (-(2*(n+1:ℝ))*x)*Real.sin (a*x)‖) ≤
+      |a| /(2*(n+1:ℝ)^2) := by
+  have hb : 0<2*(n+1:ℝ) := by positivity
+  have hFn : IntegrableOn (fun x : ℝ => 2*Real.exp (-(2*(n+1:ℝ))*x)*Real.sin (a*x))
+      (Ioi 0) := by
+    simpa [IntegrableOn, mul_assoc] using (laplace_sin (a:=a) hb).1.const_mul 2
+  have hI := (DLMF.Gamma.integrableOn_exp_mul_pow hb 1).const_mul (2 * |a| )
+  have hlt : ∀ x ∈ Ioi (0:ℝ), ‖2*Real.exp (-(2*(n+1:ℝ))*x)*Real.sin (a*x)‖ ≤ 2 * |a|  * (Real.exp (-(2*(n+1:ℝ))*x)*x^1) := by
+    intro x hx
+    simp only [norm_mul, Real.norm_eq_abs, abs_of_pos (Real.exp_pos _),
+      abs_of_nonneg (by norm_num : (0:ℝ)≤2), pow_one]
+    have hs := Real.abs_sin_le_abs (x := a*x)
+    rw [abs_mul, abs_of_pos (show 0<x from hx)] at hs
+    nlinarith [Real.exp_pos (-(2*(n+1:ℝ))*x)]
+  have h := integral_mono_ae hFn.norm hI
+    ((ae_restrict_iff' measurableSet_Ioi).mpr (Eventually.of_forall (hlt)))
+  apply h.trans_eq
+  rw [integral_const_mul, DLMF.Gamma.integral_exp_mul_pow hb 1]
+  norm_num
+  field_simp
+
+/-- A bounded sine and `x ≤ sinh x` control the removable quotient by `|a| exp (-x)`. -/
+private lemma integrable_exp_sin_div_sinh (a : ℝ) :
+    IntegrableOn (fun x : ℝ => Real.exp (-x)*Real.sin (a*x)/Real.sinh x) (Ioi 0) := by
+  apply Integrable.mono' ((integrableOn_exp_mul_Ioi (a := -1) (by norm_num) 0).const_mul |a|)
+  · have hc : ContinuousOn (fun x : ℝ => Real.exp (-x)*Real.sin (a*x)/Real.sinh x) (Ioi 0) := by
+      apply ContinuousOn.div (by fun_prop) (by fun_prop)
+      intro x hx
+      exact (Real.sinh_pos_iff.mpr hx).ne'
+    exact hc.aestronglyMeasurable measurableSet_Ioi
+  · filter_upwards [ae_restrict_mem measurableSet_Ioi] with x hx
+    have hs := Real.abs_sin_le_abs (x := a*x)
+    rw [abs_mul, abs_of_pos (show 0<x from hx)] at hs
+    rw [norm_div, norm_mul, Real.norm_eq_abs, Real.norm_eq_abs,
+      abs_of_pos (Real.exp_pos _), Real.norm_eq_abs, abs_of_pos (Real.sinh_pos_iff.mpr hx)]
+    apply (div_le_iff₀ (Real.sinh_pos_iff.mpr hx)).mpr
+    have hxsh := Real.self_le_sinh_iff.mpr hx.le
+    have he := Real.exp_pos (-x)
+    simp only [neg_one_mul]
+    calc Real.exp (-x)*|Real.sin (a*x)| ≤ Real.exp (-x)*(|a| *x) :=
+          mul_le_mul_of_nonneg_left hs he.le
+      _ = (|a| *Real.exp (-x))*x := by ring
+      _ ≤ (|a| *Real.exp (-x))*Real.sinh x :=
+          mul_le_mul_of_nonneg_left hxsh (mul_nonneg (abs_nonneg a) he.le)
+
 /-- Integrability on the specified set: `IntegrableOn (fun x : ℝ => Real.exp (-x)*Real.sin
 (a*x)/Real.sinh x) (Ioi 0) ∧ (∫ x : ℝ in Ioi 0, Real.exp (-x)*Real.sin (a*x)/Real.sinh
 x)=π/2*(Real.cosh (π*a/2)/Real.sinh (π*a/2))-1/a`. -/
 @[dlmf 4.40.E7]
 theorem integral_exp_sin_div_sinh {a : ℝ} (ha : a≠0) : IntegrableOn (fun x : ℝ => Real.exp (-x)*Real.sin (a*x)/Real.sinh x) (Ioi 0) ∧ (∫ x : ℝ in Ioi 0, Real.exp (-x)*Real.sin (a*x)/Real.sinh x)=π/2*(Real.cosh (π*a/2)/Real.sinh (π*a/2))-1/a := by
-  sorry
+  let F : ℕ → ℝ → ℝ := fun n x => 2*Real.exp (-(2*(n+1:ℝ))*x)*Real.sin (a*x)
+  have hb (n : ℕ) : 0<2*(n+1:ℝ) := by positivity
+  have hi (n : ℕ) : IntegrableOn (F n) (Ioi 0) := by
+    simpa [IntegrableOn, F, mul_assoc] using (laplace_sin (a:=a) (hb n)).1.const_mul 2
+  have hbound (n : ℕ) : (∫ x in Ioi (0:ℝ), ‖F n x‖) ≤
+      |a| /(2*(n+1:ℝ)^2) := exp_sin_term_integral_norm_bound a n
+  have hsum : Summable (fun n => ∫ x in Ioi (0:ℝ), ‖F n x‖) := by
+    apply Summable.of_nonneg_of_le (fun n => integral_nonneg fun x => norm_nonneg _) hbound
+    have hp : Summable (fun n : ℕ => 1/(n:ℝ)^2) :=
+      Real.summable_one_div_nat_pow.mpr (by norm_num : 1<2)
+    have h := ((summable_nat_add_iff 1).mpr hp).mul_left (|a| /2)
+    convert h using 1
+    ext n
+    push_cast
+    field_simp
+  have he : EqOn (fun x : ℝ => ∑' n, F n x)
+      (fun x => Real.exp (-x)*Real.sin (a*x)/Real.sinh x) (Ioi 0) := by
+    intro x hx
+    have hx0 : 0<x := hx
+    have hxexp : Real.exp (-2*x)<1 := Real.exp_lt_one_iff.mpr (by linarith)
+    have hf (n : ℕ) : F n x = (2*Real.exp (-2*x)*Real.sin (a*x))*Real.exp (-2*x)^n := by
+      dsimp only [F]
+      rw [show -(2*(n+1:ℝ))*x = -2*x+(n:ℝ)*(-2*x) by ring,
+        Real.exp_add, Real.exp_nat_mul]
+      ring
+    simp_rw [hf]
+    rw [tsum_mul_left, tsum_geometric_of_lt_one (Real.exp_pos _).le hxexp]
+    rw [Real.sinh_eq, show -2*x=-(x+x) by ring, Real.exp_neg, Real.exp_add, Real.exp_neg]
+    field_simp
+  have htsum := integral_tsum_of_summable_integral_norm hi hsum
+  refine ⟨integrable_exp_sin_div_sinh a, ?_⟩
+  rw [← setIntegral_congr_fun measurableSet_Ioi he, ← htsum]
+  have hv (n : ℕ) : (∫ x in Ioi (0:ℝ), F n x) = (a/2)/((n+1:ℝ)^2+(a/2)^2) := by
+    have h := (laplace_sin (a:=a) (hb n)).2
+    have hf : F n = fun x => 2 * (Real.exp (-(2*(n+1:ℝ))*x)*Real.sin (a*x)) := by
+      ext x; dsimp only [F]; ring
+    rw [hf, integral_const_mul, h]
+    field_simp
+  simp_rw [hv]
+  rw [← DLMF.Gamma.digamma_one_add_mul_I_im_series (a/2),
+    DLMF.Gamma.digamma_one_add_mul_I_im (a/2) (div_ne_zero ha (by norm_num))]
+  rw [show 2*(a/2)=a by ring, show π*(a/2)=π*a/2 by ring]
+  ring
 
 /-- Integrability on the specified set: `IntegrableOn (fun x : ℝ => Real.sinh (a*x)/Real.sinh
 (π*x)) (Ioi 0) ∧ (∫ x : ℝ in Ioi 0, Real.sinh (a*x)/Real.sinh (π*x))=Real.tan (a/2)/2`. -/
 @[dlmf 4.40.E8]
 theorem integral_sinh_div_sinh {a : ℝ} (ha : -π<a ∧ a<π) : IntegrableOn (fun x : ℝ => Real.sinh (a*x)/Real.sinh (π*x)) (Ioi 0) ∧ (∫ x : ℝ in Ioi 0, Real.sinh (a*x)/Real.sinh (π*x))=Real.tan (a/2)/2 := by
-  sorry
+  let p := (π-a)/(2*π)
+  have hp : 0<p := div_pos (by linarith) (by positivity)
+  have hp1 : p<1 := (div_lt_one (by positivity : 0<2*π)).mpr (by linarith)
+  let F := fun (s t : ℝ) => (Real.exp (-t)-Real.exp (-s*t))/(1-Real.exp (-t))
+  let H := fun t : ℝ => F (1-p) t-F p t
+  have hi : IntegrableOn H (Ioi 0) :=
+    (DLMF.Gamma.integrableOn_digamma_add_euler (by linarith : 0<1-p)).sub
+      (DLMF.Gamma.integrableOn_digamma_add_euler hp)
+  have hv : (∫ t in Ioi (0:ℝ), H t) = π * Real.cot (π*p) := by
+    rw [integral_sub (DLMF.Gamma.integrableOn_digamma_add_euler (by linarith : 0<1-p))
+      (DLMF.Gamma.integrableOn_digamma_add_euler hp),
+      ← DLMF.Gamma.digamma_add_euler_Ioi (by linarith : 0<1-p),
+      ← DLMF.Gamma.digamma_add_euler_Ioi hp]
+    have h := Real.digamma_one_sub hp hp1
+    dsimp only [H, F] at *
+    linarith
+  have he : EqOn (fun x : ℝ => H ((2*π)*x))
+      (fun x : ℝ => Real.sinh (a*x)/Real.sinh (π*x)) (Ioi 0) := by
+    intro x hx
+    have hx0 : 0<x := hx
+    have hex : Real.exp (-(2*π*x)) ≠ 1 := ne_of_lt (Real.exp_lt_one_iff.mpr (by nlinarith [Real.pi_pos]))
+    have hs : Real.sinh (π*x) ≠ 0 := (Real.sinh_pos_iff.mpr (by positivity)).ne'
+    dsimp only [H, F, p]
+    rw [show -(1-(π-a)/(2*π))*((2*π)*x) = -π*x-a*x by field_simp; ring,
+      show -((π-a)/(2*π))*((2*π)*x) = -π*x+a*x by field_simp; ring]
+    rw [Real.sinh_eq, Real.sinh_eq]
+    rw [Real.exp_sub, Real.exp_add, show -(2*π*x)=-(π*x+π*x) by ring,
+      Real.exp_neg, Real.exp_add, Real.exp_neg, Real.exp_neg]
+    simp only [neg_mul, Real.exp_neg]
+    field_simp
+    ring
+  have hi' : IntegrableOn (fun x : ℝ => H ((2*π)*x)) (Ioi 0) := by
+    simpa using (integrableOn_Ioi_comp_mul_left_iff H 0 (by positivity : 0<2*π)).mpr
+      (by simpa using hi)
+  refine ⟨hi'.congr_fun he measurableSet_Ioi, ?_⟩
+  rw [← setIntegral_congr_fun measurableSet_Ioi he,
+    integral_comp_mul_left_Ioi H 0 (by positivity : 0<2*π)]
+  simp only [mul_zero, smul_eq_mul]
+  rw [hv, Real.cot_eq_cos_div_sin, show π*p=π/2-a/2 by dsimp only [p]; field_simp,
+    Real.cos_pi_div_two_sub, Real.sin_pi_div_two_sub, Real.tan_eq_sin_div_cos]
+  field_simp
 
 /-- Integrability of the indicated kernel: `Integrable (fun x : ℝ => Real.exp (a*x)/(Real.cosh
 (x/2))^2) ∧ (∫ x : ℝ, Real.exp (a*x)/(Real.cosh (x/2))^2)=(if a=0 then 4 else 4*π*a/Real.sin
 (π*a))`. -/
 @[dlmf 4.40.E9]
 theorem integral_exp_div_cosh_sq {a : ℝ} (ha : -1<a ∧ a<1) : Integrable (fun x : ℝ => Real.exp (a*x)/(Real.cosh (x/2))^2) ∧ (∫ x : ℝ, Real.exp (a*x)/(Real.cosh (x/2))^2)=(if a=0 then 4 else 4*π*a/Real.sin (π*a)) := by
-  sorry
+  have habs : |a| < 1 := abs_lt.mpr ha
+  obtain ⟨hi,hv⟩ := DLMF.Gamma.integral_exp_div_cosh_rpow (a := 1) habs
+  have he : (fun t : ℝ => Real.exp (2*a*t)/Real.cosh t^(2*(1:ℝ))) =
+      fun t => Real.exp (2*a*t)/Real.cosh t^2 := by
+    funext t
+    norm_num
+  rw [he] at hi hv
+  have hcomp := (integrable_comp_mul_left_iff (g := fun t : ℝ => Real.exp (2*a*t)/Real.cosh t^2)
+    (by norm_num : (1/2:ℝ) ≠ 0)).mpr hi
+  have hform : (fun x : ℝ => Real.exp (a*x)/Real.cosh (x/2)^2) =
+      fun x => Real.exp (2*a*((1/2)*x))/Real.cosh ((1/2)*x)^2 := by
+    funext x
+    rw [show 2*a*((1/2)*x) = a*x by ring, show (1/2:ℝ)*x = x/2 by ring]
+  rw [hform]
+  refine ⟨hcomp, ?_⟩
+  rw [Measure.integral_comp_mul_left (fun t : ℝ => Real.exp (2*a*t)/Real.cosh t^2) (1/2), hv]
+  norm_num
+  by_cases ha0 : a=0
+  · subst a
+    norm_num [Real.Gamma_one]
+  · rw [ite_eq_right ha0, show 1+a=a+1 by ring, Real.Gamma_add_one ha0,
+      mul_assoc, Real.Gamma_mul_Gamma_one_sub a]
+    ring
+
+/-- The real derivative of hyperbolic tangent is the real restriction of its complex derivative. -/
+private lemma hypR4_real_hasDerivAt_tanh (x : ℝ) :
+    HasDerivAt Real.tanh ((Real.cosh x)⁻¹ ^ 2) x := by
+  have hc : Complex.cosh (x : ℂ) ≠ 0 := by
+    rw [← Complex.ofReal_cosh]
+    exact_mod_cast (Real.cosh_pos x).ne'
+  simpa only [sech, ← Complex.ofReal_cosh, ← Complex.ofReal_inv,
+    ← Complex.ofReal_pow, ← Complex.ofReal_tanh, Complex.ofReal_re] using
+    (hasDerivAt_tanh hc).real_of_complex
+/-- The derivative of hyperbolic tangent has an exponential upper bound on the real line. -/
+private lemma hypR4_real_tanh_deriv_bound (x : ℝ) :
+    ‖(Real.cosh x)⁻¹ ^ 2‖ ≤ 4 * Real.exp (-2 * x) := by
+  have hc : 0 < Real.cosh x := Real.cosh_pos x
+  have he : 0 < Real.exp x := Real.exp_pos x
+  have hl : Real.exp x ≤ 2 * Real.cosh x := by
+    rw [Real.cosh_eq]
+    linarith [Real.exp_pos (-x)]
+  rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]
+  have hi : (Real.cosh x)⁻¹ ≤ 2 * (Real.exp x)⁻¹ := by
+    apply (inv_le_iff_one_le_mul₀ hc).mpr
+    have hh : 1 ≤ (2 * Real.cosh x) / Real.exp x :=
+      (le_div_iff₀ he).mpr (by simpa using hl)
+    simpa [div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc] using hh
+  have hx : Real.exp (-2 * x) = ((Real.exp x)⁻¹)^2 := by
+    rw [show -2 * x = -(x + x) by ring, Real.exp_neg, Real.exp_add, mul_inv, pow_two]
+  rw [hx]
+  nlinarith [inv_pos.mpr hc, inv_pos.mpr he]
+/-- A mean-value bound for two scaled hyperbolic tangents cancels the Frullani kernel’s apparent singularity. -/
+private lemma hypR4_real_tanh_difference_bound {a b t : ℝ} (ht : 0 ≤ t) :
+    ‖Real.tanh (a*t) - Real.tanh (b*t)‖ ≤
+      4 * Real.exp (-2 * min a b * t) * (|a-b| * t) := by
+  have hd (x : ℝ) (_hx : x ∈ uIcc (b*t) (a*t)) :=
+    (hypR4_real_hasDerivAt_tanh x).hasDerivWithinAt (s := uIcc (b*t) (a*t))
+  have hb (x : ℝ) (hx : x ∈ uIcc (b*t) (a*t)) :
+      ‖(Real.cosh x)⁻¹ ^ 2‖ ≤ 4 * Real.exp (-2 * min a b * t) := by
+    apply (hypR4_real_tanh_deriv_bound x).trans
+    have hmin : min a b * t ≤ x := by
+      rw [uIcc, mem_Icc] at hx
+      rw [min_mul_of_nonneg _ _ ht]
+      simpa [min_comm] using hx.1
+    exact mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr (by linarith)) (by norm_num)
+  have h := (convex_uIcc (b*t) (a*t)).norm_image_sub_le_of_norm_hasDerivWithin_le hd hb
+    (left_mem_uIcc) (right_mem_uIcc)
+  simpa only [Real.norm_eq_abs, ← sub_mul, abs_mul, abs_of_nonneg ht] using h
+/-- Hyperbolic tangent tends to one at positive infinity. -/
+private lemma hypR4_real_tanh_tendsto : Tendsto Real.tanh atTop (𝓝 1) := by
+  have he : Tendsto (fun x : ℝ => Real.exp (-2*x)) atTop (𝓝 0) :=
+    Real.tendsto_exp_atBot.comp
+      ((tendsto_const_mul_atBot_of_neg (by norm_num : (-2 : ℝ) < 0)).mpr tendsto_id)
+  have h := ((tendsto_const_nhds (x := (1 : ℝ))).sub he).div
+    ((tendsto_const_nhds (x := (1 : ℝ))).add he) (by norm_num : (1:ℝ)+0 ≠ 0)
+  convert h using 1
+  · ext x
+    dsimp only [Pi.div_apply]
+    rw [Real.tanh_eq, show -2*x = -x + -x by ring, Real.exp_add, Real.exp_neg]
+    have he0 := Real.exp_ne_zero x
+    field_simp
+  · norm_num
 
 /-- Integrability on the specified set: `IntegrableOn (fun x : ℝ => (Real.tanh (a*x)-Real.tanh
 (b*x))/x) (Ioi 0) ∧ (∫ x : ℝ in Ioi 0, (Real.tanh (a*x)-Real.tanh (b*x))/x)=Real.log (a/b)`. -/
 @[dlmf 4.40.E10]
 theorem integral_tanh_difference {a b : ℝ} (ha : 0<a) (hb : 0<b) : IntegrableOn (fun x : ℝ => (Real.tanh (a*x)-Real.tanh (b*x))/x) (Ioi 0) ∧ (∫ x : ℝ in Ioi 0, (Real.tanh (a*x)-Real.tanh (b*x))/x)=Real.log (a/b) := by
-  sorry
+  -- TauCeti supplies continuity of the total real hyperbolic tangent.
+  have hc := Real.continuous_tanh
+  have hm : -2 * min a b < 0 := by nlinarith [lt_min ha hb]
+  have hi : IntegrableOn (fun x : ℝ => (Real.tanh (a*x)-Real.tanh (b*x))/x) (Ioi 0) := by
+    apply Integrable.mono' ((integrableOn_exp_mul_Ioi hm 0).const_mul (4 * |a-b|))
+    · have hg : ContinuousOn (fun x : ℝ => (Real.tanh (a*x)-Real.tanh (b*x))/x) (Ioi 0) :=
+        ((hc.comp (by fun_prop)).continuousOn.sub (hc.comp (by fun_prop)).continuousOn).div
+          continuousOn_id (fun x hx => (ne_of_gt hx))
+      exact hg.aestronglyMeasurable measurableSet_Ioi
+    · filter_upwards [ae_restrict_mem measurableSet_Ioi] with x hx
+      have hx0 : (0 : ℝ) < x := hx
+      rw [norm_div, Real.norm_eq_abs, Real.norm_eq_abs, abs_of_pos hx0]
+      apply (div_le_iff₀ hx0).mpr
+      have h := hypR4_real_tanh_difference_bound (a := a) (b := b) hx0.le
+      convert h using 1
+      ring
+  refine ⟨hi, ?_⟩
+  have hl : Tendsto Real.tanh (𝓝[>] 0) (𝓝 0) := by
+    simpa using (hc.tendsto 0).mono_left nhdsWithin_le_nhds
+  have hi' : IntegrableOn (fun x : ℝ => x⁻¹ • (Real.tanh (a*x)-Real.tanh (b*x))) (Ioi 0) := by
+    simpa [smul_eq_mul, div_eq_mul_inv, mul_comm] using hi
+  have h := Frullani.integral_Ioi_eq (hc.locallyIntegrable.locallyIntegrableOn _) ha hb hl
+    hypR4_real_tanh_tendsto hi'
+  rw [Real.log_div hb.ne' ha.ne'] at h
+  rw [Real.log_div ha.ne' hb.ne']
+  convert h using 1 <;> simp [smul_eq_mul, div_eq_mul_inv, mul_comm]
 
 /-- At `x`, the function `(fun t : ℝ => t*Real.arsinh t-Real.sqrt (1+t^2))` has derivative
 `(Real.arsinh x)`. -/

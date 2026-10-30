@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module -- shake: keep-all
 
 public import DLMF.Spheroidal.Basic
-public import DLMF.Spheroidal.FerrersDefs
+public import DLMF.Spheroidal.FerrersProperties
 public import DLMF.Spheroidal.Equation
 public import DLMF.Spheroidal.Eigenvalues
 public import DLMF.Spheroidal.Angular

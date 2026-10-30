@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import TauCeti.Analysis.Green.IndexOne
-public import DLMF.AlgebraicAnalytic.Calculus.Defs
+public import DLMF.AlgebraicAnalytic.Calculus.Basic
 public import Mathlib.Analysis.Calculus.ContDiff.Operations
 public import Mathlib.MeasureTheory.Covering.Besicovitch
 

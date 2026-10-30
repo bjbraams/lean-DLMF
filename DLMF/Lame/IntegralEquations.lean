@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Legendre.Basic
+public import DLMF.Legendre.FirstKindProperties
 public import DLMF.Lame.Basic
 
 /-!

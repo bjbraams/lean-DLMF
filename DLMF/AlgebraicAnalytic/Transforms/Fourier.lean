@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AlgebraicAnalytic.Transforms.Defs
+public import DLMF.AlgebraicAnalytic.Transforms.Basic
 public import Mathlib.Analysis.Fourier.Convolution
 public import Mathlib.Analysis.Fourier.RiemannLebesgueLemma
 public import Mathlib.Topology.EMetricSpace.BoundedVariation

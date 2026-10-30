@@ -7,6 +7,7 @@ module
 
 public import DLMF.EllipticIntegrals.Legendre
 public import DLMF.EllipticIntegrals.Symmetric
+public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 
 /-!
 # Legendre's integrals: the statements of DLMF §19.2
@@ -25,6 +26,9 @@ remaining content of §19.2:
 
 Real amplitudes `φ` are used where DLMF's identities are path statements; the principal
 domain `1 - k² ∈ ℂ \ (-∞, 0]` makes the integrand `(1 - k² sin²θ)^{∓1/2}` continuous for real `θ`.
+The negative-real `R_C` formula is proved by evaluating the symmetrically truncated integral
+with a logarithmic primitive. Mathlib's FTC lemmas for derivatives of constant sign provide
+integrability on both sides, including the square-root singularity at the endpoint `x = 0`.
 -/
 
 @[expose] public noncomputable section
@@ -580,7 +584,200 @@ theorem symEllIntRC_of_gt {x y : ℝ} (hy : 0 < y) (hxy : y < x) :
       Carlson.TwoVariable.carlsonRC_of_gt hy hxy]
   exact ⟨by rw [h, p19lR1_artanh_eq_log hy hxy], h⟩
 
-/-- **Admitted.** DLMF 19.2.20: for `y < 0 ≤ x` the Cauchy principal value is hyperbolic:
+/-- The logarithmic primitive of the real RC kernel away from its pole. -/
+private lemma hasDerivAt_rcNeg_primitive {x y t : ℝ} (hx : 0 ≤ x) (hy : y < 0) (ht : 0 < t) (h : t + y ≠ 0) :
+    HasDerivAt (fun u : ℝ => (Real.log (u + y) -
+      2 * Real.log (Real.sqrt (u + x) + Real.sqrt (x - y))) / Real.sqrt (x - y))
+      (Real.sqrt (t + x) * (t + y))⁻¹ t := by
+  have hs : 0 < Real.sqrt (t + x) := Real.sqrt_pos.mpr (by linarith)
+  have ha : 0 < Real.sqrt (x - y) := Real.sqrt_pos.mpr (by linarith)
+  have hsq := Real.sq_sqrt (show 0 ≤ t + x by linarith)
+  have haq := Real.sq_sqrt (show 0 ≤ x - y by linarith)
+  have hd := (((hasDerivAt_id t).add_const y).log h).sub
+    (((((hasDerivAt_id t).add_const x).sqrt (by dsimp; linarith)).add_const (Real.sqrt (x - y))).log
+      (show Real.sqrt (t + x) + Real.sqrt (x - y) ≠ 0 by positivity) |>.const_mul 2)
+  simp only [id_eq] at hd
+  convert hd.div_const (Real.sqrt (x - y)) using 1
+  field_simp [h, hs.ne', ha.ne', show Real.sqrt (t + x) + Real.sqrt (x - y) ≠ 0 by positivity]
+  nlinarith
+/-- The logarithmic RC primitive vanishes at infinity. -/
+private lemma tendsto_rcNeg_primitive_atTop {x y : ℝ} (hx : 0 ≤ x) (hy : y < 0) :
+    Tendsto (fun t : ℝ => (Real.log (t + y) -
+      2 * Real.log (Real.sqrt (t + x) + Real.sqrt (x - y))) / Real.sqrt (x - y))
+      atTop (𝓝 0) := by
+  let a := Real.sqrt (x - y)
+  have ha : 0 < a := Real.sqrt_pos.mpr (by linarith)
+  have ht : Tendsto (fun t : ℝ => Real.sqrt (t + x)) atTop atTop :=
+    Real.tendsto_sqrt_atTop.comp (tendsto_atTop_add_const_right _ x tendsto_id)
+  have hi : Tendsto (fun t : ℝ => a / Real.sqrt (t + x)) atTop (𝓝 0) :=
+    tendsto_const_nhds.div_atTop ht
+  have hr : Tendsto (fun t : ℝ =>
+      (1 - a / Real.sqrt (t + x)) / (1 + a / Real.sqrt (t + x))) atTop (𝓝 1) := by
+    convert ((tendsto_const_nhds.sub hi).div (tendsto_const_nhds.add hi) (by norm_num : (1 : ℝ) + 0 ≠ 0)) using 1; norm_num
+  have hl := (Real.continuousAt_log (by norm_num : (1 : ℝ) ≠ 0)).tendsto.comp hr
+  have hld := hl.div_const a
+  simp only [Real.log_one, zero_div] at hld
+  apply hld.congr'
+  filter_upwards [eventually_gt_atTop (max 0 (-y))] with t ht'
+  have ht0 : 0 < t := lt_of_le_of_lt (le_max_left _ _) ht'
+  have hty : 0 < t + y := by have := lt_of_le_of_lt (le_max_right 0 (-y)) ht'; linarith
+  have hs : 0 < Real.sqrt (t + x) := Real.sqrt_pos.mpr (by linarith)
+  have hs1 : 0 < Real.sqrt (t + x) - a := by
+    have hsq := Real.sq_sqrt (show 0 ≤ t + x by linarith)
+    have haq := Real.sq_sqrt (show 0 ≤ x - y by linarith)
+    change 0 < Real.sqrt (t + x) - Real.sqrt (x - y)
+    exact sub_pos.mpr (Real.sqrt_lt_sqrt (by linarith) (by linarith))
+  have he : t + y = (Real.sqrt (t + x) - a) * (Real.sqrt (t + x) + a) := by
+    have hsq := Real.sq_sqrt (show 0 ≤ t + x by linarith)
+    have haq := Real.sq_sqrt (show 0 ≤ x - y by linarith)
+    dsimp [a]
+    nlinarith
+  have hrat : (1 - a / Real.sqrt (t + x)) / (1 + a / Real.sqrt (t + x)) =
+      (Real.sqrt (t + x) - a) / (Real.sqrt (t + x) + a) := by field_simp
+  dsimp only [Function.comp_def]
+  rw [hrat, Real.log_div hs1.ne' (by positivity), he, Real.log_mul hs1.ne' (by positivity)]
+  dsimp [a]
+  ring
+/-- The RC primitive is continuous away from its logarithmic pole, including at zero. -/
+private lemma continuousAt_rcNeg_primitive {x y t : ℝ} (hx : 0 ≤ x) (hy : y < 0) (ht : t + y ≠ 0) :
+    ContinuousAt (fun u : ℝ => (Real.log (u + y) -
+      2 * Real.log (Real.sqrt (u + x) + Real.sqrt (x - y))) / Real.sqrt (x - y)) t := by
+  have ha : 0 < Real.sqrt (x - y) := Real.sqrt_pos.mpr (by linarith)
+  apply ContinuousAt.div_const
+  apply ContinuousAt.sub
+  · exact (continuousAt_id.add_const y).log ht
+  · apply ContinuousAt.const_mul
+    apply ContinuousAt.log
+    · fun_prop
+    · positivity
+/-- The real RC integral with a symmetric interval removed is the sum of its two primitive differences. -/
+private lemma integral_rcNeg_kernel_truncated {x y ε : ℝ} (hx : 0 ≤ x) (hy : y < 0) (he : 0 < ε) (hec : ε < -y) :
+    let F := fun u : ℝ => (Real.log (u + y) -
+      2 * Real.log (Real.sqrt (u + x) + Real.sqrt (x - y))) / Real.sqrt (x - y)
+    (∫ t in Ioi (0 : ℝ) \ Icc (-y - ε) (-y + ε), (Real.sqrt (t + x) * (t + y))⁻¹) =
+      F (-y - ε) - F 0 - F (-y + ε) := by
+  let F := fun u : ℝ => (Real.log (u + y) -
+    2 * Real.log (Real.sqrt (u + x) + Real.sqrt (x - y))) / Real.sqrt (x - y)
+  let f := fun t : ℝ => (Real.sqrt (t + x) * (t + y))⁻¹
+  have hF (t : ℝ) (ht : t + y ≠ 0) : ContinuousAt F t := continuousAt_rcNeg_primitive hx hy ht
+  have hD (t : ℝ) (ht : 0 < t) (hty : t + y ≠ 0) : HasDerivAt F (f t) t :=
+    hasDerivAt_rcNeg_primitive hx hy ht hty
+  have hleftcont : ContinuousOn F (Icc 0 (-y - ε)) := by
+    intro t ht
+    exact (hF t (by linarith [ht.2])).continuousWithinAt
+  have hleft : IntegrableOn f (Ioo 0 (-y - ε)) := by
+    have hi := intervalIntegral.integrableOn_deriv_of_nonneg hleftcont.neg
+      (fun t ht => (hD t ht.1 (by linarith [ht.2])).neg) (fun t ht => ?_)
+    · rw [← integrableOn_Ioc_iff_integrableOn_Ioo]
+      simpa using hi.neg
+    · dsimp [f]
+      have : t + y < 0 := by linarith [ht.2]
+      exact neg_nonneg.mpr (inv_nonpos.mpr (by nlinarith [Real.sqrt_nonneg (t + x)]))
+  have hleftval : (∫ t in Ioo 0 (-y - ε), f t) = F (-y - ε) - F 0 := by
+    rw [← integral_Ioc_eq_integral_Ioo, ← intervalIntegral.integral_of_le (by linarith : 0 ≤ -y - ε)]
+    apply intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le (by linarith) hleftcont
+      (fun t ht => hD t ht.1 (by linarith [ht.2]))
+    rw [intervalIntegrable_iff_integrableOn_Ioc_of_le (by linarith)]
+    rwa [integrableOn_Ioc_iff_integrableOn_Ioo]
+  have hrightD : ∀ t ∈ Ioi (-y + ε), HasDerivAt F (f t) t := by
+    intro t ht
+    change -y + ε < t at ht
+    exact hD t (by linarith [ht]) (by linarith [ht])
+  have hrightpos : ∀ t ∈ Ioi (-y + ε), 0 ≤ f t := by
+    intro t ht
+    change -y + ε < t at ht
+    dsimp [f]
+    have : 0 < t + y := by linarith [ht]
+    positivity
+  have hright := integrableOn_Ioi_deriv_of_nonneg
+    (hF (-y + ε) (by linarith)).continuousWithinAt hrightD hrightpos (tendsto_rcNeg_primitive_atTop hx hy)
+  have hrightval := integral_Ioi_of_hasDerivAt_of_nonneg
+    (hF (-y + ε) (by linarith)).continuousWithinAt hrightD hrightpos (tendsto_rcNeg_primitive_atTop hx hy)
+  have hset : Ioi (0 : ℝ) \ Icc (-y - ε) (-y + ε) = Ioo 0 (-y - ε) ∪ Ioi (-y + ε) := by
+    ext t
+    simp only [Set.mem_sdiff, mem_Ioi, mem_Icc, mem_union, mem_Ioo]
+    constructor
+    · rintro ⟨ht, h⟩
+      by_cases h1 : t < -y - ε
+      · exact Or.inl ⟨ht, h1⟩
+      · exact Or.inr (lt_of_not_ge fun h2 => h ⟨by linarith, h2⟩)
+    · rintro (⟨h1, h2⟩ | h)
+      · exact ⟨h1, by rintro ⟨h3, h4⟩; linarith⟩
+      · exact ⟨show 0 < t by linarith, by rintro ⟨h3, h4⟩; linarith⟩
+  change (∫ t in Ioi (0 : ℝ) \ Icc (-y - ε) (-y + ε), f t) = _
+  rw [hset, setIntegral_union (by
+    apply disjoint_left.mpr
+    intro t ht1 ht2
+    have h1 := ht1.2
+    have h2 : -y + ε < t := ht2
+    linarith) measurableSet_Ioi hleft hright, hleftval, hrightval]
+  ring
+/-- The logarithms at the two sides of the RC pole cancel in the symmetric truncation limit. -/
+private lemma tendsto_integral_rcNeg_kernel_truncated {x y : ℝ} (hx : 0 ≤ x) (hy : y < 0) :
+    Tendsto (fun ε : ℝ => ∫ t in Ioi (0 : ℝ) \ Icc (-y - ε) (-y + ε),
+      (Real.sqrt (t + x) * (t + y))⁻¹) (𝓝[>] 0)
+      (𝓝 (-(Real.log y - 2 * Real.log (Real.sqrt x + Real.sqrt (x - y))) / Real.sqrt (x - y))) := by
+  let a := Real.sqrt (x - y)
+  have ha : 0 < a := Real.sqrt_pos.mpr (by linarith)
+  have hc : Continuous (fun ε : ℝ =>
+      (2 * Real.log (Real.sqrt (-y + ε + x) + a) - 2 * Real.log (Real.sqrt (-y - ε + x) + a)) / a -
+      (Real.log y - 2 * Real.log (Real.sqrt x + a)) / a) := by
+    have hp (s : ℝ → ℝ) (hs : Continuous s) :
+        Continuous (fun ε => Real.log (Real.sqrt (s ε) + a)) :=
+      ((Real.continuous_sqrt.comp hs).add_const a).log
+        (fun ε => (add_pos_of_nonneg_of_pos (Real.sqrt_nonneg _) ha).ne')
+    exact (((hp _ (by fun_prop)).const_mul 2).sub
+      ((hp _ (by fun_prop)).const_mul 2) |>.div_const a).sub continuous_const
+  have hl := (hc.tendsto 0).mono_left (nhdsWithin_le_nhds (s := Ioi (0 : ℝ)))
+  simp only [add_zero, sub_zero, sub_self, zero_div, zero_sub] at hl
+  have hl' : Tendsto (fun ε : ℝ =>
+      (2 * Real.log (Real.sqrt (-y + ε + x) + a) - 2 * Real.log (Real.sqrt (-y - ε + x) + a)) / a -
+      (Real.log y - 2 * Real.log (Real.sqrt x + a)) / a) (𝓝[>] 0)
+      (𝓝 (-(Real.log y - 2 * Real.log (Real.sqrt x + Real.sqrt (x - y))) / Real.sqrt (x - y))) := by
+    simpa only [a, neg_div] using hl
+  apply hl'.congr'
+  filter_upwards [self_mem_nhdsWithin,
+    (eventually_lt_nhds (show (0 : ℝ) < -y by linarith)).filter_mono nhdsWithin_le_nhds]
+    with ε he hec
+  rw [integral_rcNeg_kernel_truncated hx hy he hec]
+  dsimp [a]
+  rw [show -y - ε + y = -ε by ring, show -y + ε + y = ε by ring, Real.log_neg_eq_log]
+  ring_nf
+/-- The negative-real RC principal value equals its real logarithmic expression. -/
+private lemma symEllIntRC_of_neg_log {x y : ℝ} (hx : 0 ≤ x) (hy : y < 0) :
+    symEllIntRC x y = ((Real.log ((Real.sqrt x + Real.sqrt (x - y)) / Real.sqrt (-y)) /
+      Real.sqrt (x - y) : ℝ) : ℂ) := by
+  have ha : 0 < Real.sqrt (x - y) := Real.sqrt_pos.mpr (by linarith)
+  have hb : 0 < Real.sqrt (-y) := Real.sqrt_pos.mpr (by linarith)
+  have hcast (ε : ℝ) :
+      (∫ t in Ioi (0 : ℝ) \ Icc (-y - ε) (-y + ε),
+        (((t : ℂ) + (x : ℂ)) ^ (1 / 2 : ℂ) * ((t : ℂ) + (y : ℂ)))⁻¹) =
+        ((∫ t in Ioi (0 : ℝ) \ Icc (-y - ε) (-y + ε),
+          (Real.sqrt (t + x) * (t + y))⁻¹ : ℝ) : ℂ) := by
+    rw [← integral_complex_ofReal]
+    apply setIntegral_congr_fun (measurableSet_Ioi.diff measurableSet_Icc)
+    intro t ht
+    have ht0 : 0 < t := ht.1
+    have hpow : ((t : ℂ) + (x : ℂ)) ^ (1 / 2 : ℂ) = (Real.sqrt (t + x) : ℂ) := by
+      rw [← ofReal_add, show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring,
+        ← ofReal_cpow (by linarith : 0 ≤ t + x), ← Real.sqrt_eq_rpow]
+    dsimp only
+    rw [hpow]
+    push_cast
+    rfl
+  have hl := Complex.continuous_ofReal.tendsto _ |>.comp (tendsto_integral_rcNeg_kernel_truncated hx hy)
+  have hl' : Tendsto (fun ε : ℝ => ∫ t in Ioi (0 : ℝ) \ Icc (-y - ε) (-y + ε),
+      (((t : ℂ) + (x : ℂ)) ^ (1 / 2 : ℂ) * ((t : ℂ) + (y : ℂ)))⁻¹) (𝓝[>] 0)
+      (𝓝 ((-(Real.log y - 2 * Real.log (Real.sqrt x + Real.sqrt (x - y))) / Real.sqrt (x - y) : ℝ) : ℂ)) := by
+    simpa only [Function.comp_def, hcast] using hl
+  rw [symEllIntRC_eq_cauchyPV (show IsNegReal (y : ℂ) by exact ⟨by simp, by simpa using hy⟩),
+    cauchyPVIoi, ofReal_re, hl'.limUnder_eq]
+  rw [Real.log_div (by positivity) hb.ne', Real.log_sqrt (by linarith : 0 ≤ -y),
+    ← Real.log_neg_eq_log y]
+  push_cast
+  ring
+
+/-- DLMF 19.2.20: for `y < 0 ≤ x` the Cauchy principal value is hyperbolic:
 `R_C(x, y) = √(x/(x-y)) R_C(x-y, -y) = (x-y)^{-1/2} artanh √(x/(x-y))
 = (x-y)^{-1/2} ln((√x + √(x-y))/√(-y))`. -/
 @[dlmf 19.2.E20]
@@ -591,7 +788,28 @@ theorem symEllIntRC_of_neg {x y : ℝ} (hy : y < 0) (hx : 0 ≤ x) :
       symEllIntRC x y =
         ((Real.log ((Real.sqrt x + Real.sqrt (x - y)) / Real.sqrt (-y)) / Real.sqrt (x - y) : ℝ) :
           ℂ) := by
-  sorry
+  have hlog := symEllIntRC_of_neg_log hx hy
+  have hxy : 0 < x - y := by linarith
+  have hy' : 0 < -y := by linarith
+  rcases hx.eq_or_lt with hx0 | hx
+  · subst x
+    have hs : Real.sqrt (-y) ≠ 0 := (Real.sqrt_pos.mpr hy').ne'
+    simp only [Real.sqrt_zero, zero_add, zero_sub, div_self hs, Real.log_one,
+      zero_div, ofReal_zero] at hlog
+    simp only [ofReal_zero]
+    rw [hlog]
+    simp [hs]
+  · have ha : 0 < Real.sqrt (x - y) := Real.sqrt_pos.mpr hxy
+    have hb : 0 < Real.sqrt x := Real.sqrt_pos.mpr hx
+    have hc := symEllIntRC_of_gt hy' (by linarith : -y < x - y)
+    have hat := p19lR1_artanh_eq_log hy' (by linarith : -y < x - y)
+    rw [show x - y- -y = x by ring, add_comm (Real.sqrt (x - y))] at hc hat
+    have he : Real.sqrt (x / (x - y)) = Real.sqrt x / Real.sqrt (x - y) := Real.sqrt_div' _ hxy.le
+    refine ⟨?_, ?_, hlog⟩
+    · rw [hlog, ← ofReal_sub, ← ofReal_neg, hc.2, he]
+      push_cast
+      field_simp [ofReal_ne_zero.mpr hb.ne', ofReal_ne_zero.mpr ha.ne']
+    · rw [hlog, hat]
 
 /-- **Admitted.** DLMF 19.2.21: if the segment with endpoints `x` and `y` lies in
 `ℂ \ (-∞, 0]`, `R_C(x, y) = ∫₀¹ (v²x + (1-v²)y)^{-1/2} dv`. -/

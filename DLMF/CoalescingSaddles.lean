@@ -10,7 +10,7 @@ public import DLMF.CoalescingSaddles.CanonicalIntegrals
 public import DLMF.CoalescingSaddles.BifurcationSets
 public import DLMF.CoalescingSaddles.StokesSets
 public import DLMF.CoalescingSaddles.Scaling
-public import DLMF.CoalescingSaddles.Defs
+public import DLMF.CoalescingSaddles.Basic.AuxiliaryData
 public import DLMF.CoalescingSaddles.DifferentialEquations
 public import DLMF.CoalescingSaddles.Zeros
 public import DLMF.CoalescingSaddles.Series

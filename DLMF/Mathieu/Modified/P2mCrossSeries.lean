@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Mathieu.Modified.Defs
+public import DLMF.Mathieu.Modified.Basic
 public import DLMF.Mathieu.Noninteger.Fourier
 public import DLMF.Bessel.SecondKind
 

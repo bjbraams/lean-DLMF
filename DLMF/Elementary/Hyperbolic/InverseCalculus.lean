@@ -208,7 +208,7 @@ lemma hyper_sinh_fiber_forms (A w:ℂ) :
       linear_combination I*hn+((2*k+1)*π)*Complex.I_sq
 
 /-- Rotation identifies the chosen logarithm/square-root inverse with the trigonometric one. -/
-private lemma hyper_arcsinh_rotation (z:ℂ) : arcsinh z=I*arcsinPrincipal (-I*z) := by
+lemma hyper_arcsinh_rotation (z:ℂ) : arcsinh z=I*arcsinPrincipal (-I*z) := by
   have hq:1-(-I*z)^2=z^2+1 := by linear_combination -z^2*Complex.I_sq
   have hi:I*(-I*z)=z := by linear_combination -z*Complex.I_sq
   unfold arcsinh arcsinPrincipal

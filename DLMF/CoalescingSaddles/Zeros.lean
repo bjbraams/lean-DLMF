@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.CoalescingSaddles.Defs
+public import DLMF.CoalescingSaddles.Basic.AuxiliaryData
 public import DLMF.CoalescingSaddles.CanonicalIntegrals
 
 /-!
@@ -14,7 +14,7 @@ public import DLMF.CoalescingSaddles.CanonicalIntegrals
 DLMF §36.7 describes the zeros of the canonical integrals, mostly through approximate formulas
 read off from the stationary-phase approximation and from numerical computation (Berry, Nye and
 Wright 1979). The approximate loci 36.7.1, 36.7.2, 36.7.4–36.7.7 are definitions in
-`DLMF.CoalescingSaddles.Defs`; the words "approximately", "close to", "deep inside" carry no
+`DLMF.CoalescingSaddles.Basic.AuxiliaryData`; the words "approximately", "close to", "deep inside" carry no
 error bound and are not formalized. This file proves the exact statements:
 
 * the zeros of `Ψ₁` are those of `Ai(x/3^{1/3})` (§36.7(i), from 36.2.13);

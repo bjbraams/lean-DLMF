@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Core.Framework
-public import DLMF.Bessel.Basic
+public import DLMF.Bessel.RegularizedSeries
 public import Mathlib.Algebra.Order.Ring.Star
 public import Mathlib.Analysis.Complex.LocallyUniformLimit
 public import Mathlib.Analysis.Complex.TaylorSeries

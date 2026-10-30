@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.ExpIntegrals.Basic
+public import DLMF.ExpIntegrals.AnalyticProperties
 
 /-!
 # Logarithmic continuation and boundary values, DLMF §§6.4–6.5

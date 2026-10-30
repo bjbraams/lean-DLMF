@@ -7,6 +7,9 @@ module
 
 public import DLMF.EllipticIntegrals.Legendre
 public import DLMF.Elementary.Trigonometric
+public import Carlson.Elliptic.Standard
+public import Carlson.Elliptic.CapacityBound
+public import Carlson.Mean.Bounds
 
 /-!
 # Inequalities for Legendre's elliptic integrals (DLMF §19.9)
@@ -17,6 +20,11 @@ are the complex DLMF integrals of `DLMF.EllipticIntegrals` (`incEllIntFk`, `incE
 `incEllIntPik`, `compEllIntEk`, `compEllIntPik`, and `DLMF.JacobiElliptic.compEllIntKk`,
 `cCompEllIntKk`), evaluated at real arguments; there they are real
 (`incEllIntFk_eq_ofReal` etc.), and the inequalities are stated for their real parts.
+
+The strict bounds (19.9.14) use the normalized first-kind integral from
+`Carlson.Elliptic.Standard`, the strict capacity lower bound from
+`Carlson.Elliptic.CapacityBound`, and the geometric upper bound from `Carlson.Mean.Bounds`
+(all in lean-codes).
 
 Domain qualifications (Lean totalization; DLMF's own statements are kept otherwise):
 
@@ -452,7 +460,58 @@ theorem incEllIntFk_div_sin_bounds {φ k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hφ
         (incEllIntFk φ k).re / Real.sin φ ∧
       (incEllIntFk φ k).re / Real.sin φ <
         (Real.sqrt (1 - k ^ 2 * Real.sin φ ^ 2) * Real.cos φ) ^ (-(1 / 3) : ℝ) := by
-  sorry
+  have hk : k ^ 2 < 1 := by nlinarith
+  have hs : 0 < Real.sin φ := Real.sin_pos_of_pos_of_lt_pi hφ0 (by linarith [Real.pi_pos])
+  have hc : 0 < Real.cos φ := Real.cos_pos_of_mem_Ioo ⟨by linarith [Real.pi_pos], hφ1⟩
+  have hx : 0 < Real.cos φ ^ 2 := sq_pos_of_pos hc
+  have hy : 0 < 1 - k ^ 2 * Real.sin φ ^ 2 := DLMF.Elliptic.one_sub_mul_sin_sq_pos hk φ
+  have hxy : ¬(Real.cos φ ^ 2 = 1 - k ^ 2 * Real.sin φ ^ 2 ∧ 1 - k ^ 2 * Real.sin φ ^ 2 = 1) := by
+    intro he
+    nlinarith [Real.sin_sq_add_cos_sq φ, sq_pos_of_pos hs]
+  have hF : (incEllIntFk φ k).re / Real.sin φ =
+      (Carlson.carlsonRF ((Real.cos φ ^ 2 : ℝ) : ℂ) ((1 - k ^ 2 * Real.sin φ ^ 2 : ℝ) : ℂ) 1).re := by
+    have h := congrArg Complex.re (Carlson.Real.incEllIntFk_eq hφ0 hφ1 hk)
+    have he := incEllIntFk_eq_ofReal (m:=k ^ 2) (k:=(k : ℂ)) (by push_cast; rfl) hk.le φ
+    rw [he, ofReal_re]
+    change DLMF.Elliptic.Real.incEllIntFm φ (k ^ 2) / Real.sin φ = _
+    simp only [ofReal_re] at h
+    have hreal : Carlson.Real.incEllIntFk φ k = DLMF.Elliptic.Real.incEllIntFm φ (k ^ 2) := by
+      simp only [Carlson.Real.incEllIntFk, DLMF.Elliptic.Real.incEllIntFm, neg_div]
+    rw [hreal] at h
+    simp only [mul_re, ofReal_re, ofReal_im, zero_mul, sub_zero] at h
+    rw [h]
+    field_simp
+  rw [hF]
+  constructor
+  · have h := Carlson.carlsonRF_capacity_lower_bound hx hy (by norm_num : (0 : ℝ) < 1) hxy
+    simpa only [Real.sqrt_sq hc.le, Real.sqrt_one, ofReal_one, add_comm, add_left_comm] using h
+  · let b : Fin 3 → ℝ := fun _ => 1 / 2
+    let v : Fin 3 → ℝ := ![Real.cos φ ^ 2, 1 - k ^ 2 * Real.sin φ ^ 2, 1]
+    have hb : b ∈ ProbabilityTheory.mvRealBetaDomain := by intro i; norm_num [b]
+    have hv : ∀ i, 0 < v i := by intro i; fin_cases i <;> first | exact hx | exact hy | norm_num [v]
+    have hn : ∃ i j, v i ≠ v j := by
+      refine ⟨0, 2, ?_⟩
+      dsimp [v]
+      nlinarith [Real.sin_sq_add_cos_sq φ, sq_pos_of_pos hs]
+    have hh := (Carlson.carlsonRReal_bounds_between_neg_sum_zero hb hv hn
+      (by norm_num : (-1 / 2 : ℝ) < 0) (by norm_num [b, Fin.sum_univ_succ])).2
+    have he := Carlson.ofReal_carlsonRReal (-1 / 2) hb hv
+    have he' : (Carlson.carlsonRF ((Real.cos φ ^ 2 : ℝ) : ℂ) ((1 - k ^ 2 * Real.sin φ ^ 2 : ℝ) : ℂ) 1).re =
+        Carlson.carlsonRReal (-1 / 2) b v := by
+      unfold Carlson.carlsonRF
+      have ev : (fun i => (v i : ℂ)) = ![((Real.cos φ ^ 2 : ℝ) : ℂ), ((1 - k ^ 2 * Real.sin φ ^ 2 : ℝ) : ℂ), 1] := by
+        ext i; fin_cases i <;> simp [v]
+      norm_num only [b, ofReal_neg, ofReal_div, ofReal_one, ofReal_ofNat, ev] at he
+      rw [neg_div, ←he, ofReal_re]
+      simp only [neg_div, b]
+    rw [he']
+    refine hh.trans_eq ?_
+    rw [←Real.exp_mul, Real.rpow_def_of_pos (mul_pos (Real.sqrt_pos.mpr hy) hc)]
+    congr 1
+    simp only [b, v, Fin.sum_univ_succ, Matrix.cons_val_zero, Matrix.cons_val_succ,
+      Matrix.cons_val_fin_one, Real.log_one, mul_zero, Real.log_mul (Real.sqrt_pos.mpr hy).ne' hc.ne',
+      Real.log_sqrt hy.le, Real.log_pow]
+    ring
 
 /-- DLMF 19.9.15: `1 < F(φ, k)/((sin φ) ln(4/(Δ + cos φ))) < 4/(2 + (1 + k²) sin²φ)` for
 `0 < k < 1`, `0 < φ ≤ π/2`. -/

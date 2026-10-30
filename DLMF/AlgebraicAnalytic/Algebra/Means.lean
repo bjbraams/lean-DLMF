@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AlgebraicAnalytic.Algebra.Defs
+public import DLMF.AlgebraicAnalytic.Algebra.Basic
 public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 public import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
 public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
@@ -14,7 +14,7 @@ public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
 # Means (DLMF §1.2(iv))
 
 Properties of the arithmetic, geometric, harmonic and weighted power means defined in
-`DLMF/AlgebraicAnalytic/Algebra/Defs.lean`: the limits of `M(r)` as `r → ±∞` (1.2.23–1.2.24),
+`DLMF/AlgebraicAnalytic/Algebra/Basic.lean`: the limits of `M(r)` as `r → ±∞` (1.2.23–1.2.24),
 `M(1) = A` and `M(-1) = H` for equal weights (1.2.25), and `M(r) → G` as `r → 0` (1.2.26).
 
 The limits 1.2.23–1.2.24 and 1.2.26 are proved for arbitrary positive weights `p_j` with

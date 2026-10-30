@@ -5,6 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.QSeries.Basic.Pochhammer
 public import Mathlib.Analysis.Normed.Group.Tannery
 public import Mathlib.Analysis.SpecialFunctions.Log.Summable
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
@@ -25,12 +26,6 @@ open scoped Topology Real
 noncomputable section
 
 namespace DLMF.QSeries
-
-/-- The finite `q`-Pochhammer symbol `(a;q)_n`. -/
-@[dlmf 17.2.E1]
-def qPochhammer (a q : ℂ) : ℕ → ℂ
-  | 0 => 1
-  | n + 1 => qPochhammer a q n * (1 - a * q ^ n)
 
 /-- `(a;q)_0 = 1`. -/
 @[simp]
@@ -73,11 +68,6 @@ theorem qPochhammer_zero_param (q : ℂ) (n : ℕ) : qPochhammer 0 q n = 1 := by
   | zero => rfl
   | succ n ih => simp [qPochhammer_succ, ih]
 
-/-- The infinite `q`-Pochhammer symbol `(a;q)_∞`. -/
-@[dlmf 17.2.E4]
-def qPochhammerInf (a q : ℂ) : ℂ :=
-  ∏' k : ℕ, (1 - a * q ^ k)
-
 /-- The infinite product is nonzero inside the unit disk if none of its factors vanish. -/
 theorem qPochhammerInf_ne_zero {a q : ℂ} (hq : ‖q‖ < 1)
     (ha : ∀ n : ℕ, 1 - a * q ^ n ≠ 0) : qPochhammerInf a q ≠ 0 := by
@@ -101,11 +91,6 @@ theorem qPochhammerInf_shift {a q : ℂ} (hq : ‖q‖ < 1) :
   simpa only [qPochhammerInf, pow_zero, mul_one, pow_succ', mul_assoc] using
     (tprod_eq_zero_mul' (f := fun n : ℕ => 1 - a * q ^ n)
       (by simpa only [pow_succ', mul_assoc] using hs))
-
-/-- Jackson's `q`-integral `∫_0^a f(t)\,d_q t` (AAR §10.1). -/
-@[dlmf 17.2.E46]
-def jacksonIntegral (q a : ℂ) (f : ℂ → ℂ) : ℂ :=
-  a * (1 - q) * ∑' n : ℕ, f (a * q ^ n) * q ^ n
 
 /-- `∫_0^1 1\,d_q t = 1` for `|q| < 1`. -/
 theorem jacksonIntegral_one {q : ℂ} (hq : ‖q‖ < 1) :
@@ -443,12 +428,6 @@ theorem q_binomial_theorem {a q z : ℂ} (hq : ‖q‖ < 1) (hz : ‖z‖ < 1) :
   change qPochhammerInf (a * z) q / qPochhammerInf z q = G z
   rw [div_eq_iff hzinf]
   exact hval.symm
-
-/-- The `q`-gamma function (AAR §10.3):
-`Γ_q(x) = (q;q)_∞ / (q^x;q)_∞ · (1-q)^{1-x}`. -/
-@[dlmf 5.18.E4]
-def qGamma (q x : ℂ) : ℂ :=
-  qPochhammerInf q q / qPochhammerInf (q ^ x) q * (1 - q) ^ (1 - x)
 
 /-- `Γ_q(1) = 1` for `|q| < 1`, as in AAR §10.3, pp. 493–494. -/
 @[dlmf 5.18.E5]

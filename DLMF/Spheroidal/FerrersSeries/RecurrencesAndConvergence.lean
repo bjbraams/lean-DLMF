@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Spheroidal.FerrersDefs
+public import DLMF.Spheroidal.FerrersProperties
 public import DLMF.Legendre.IntegralTools
 public import DLMF.Spheroidal.Angular
 public import Mathlib.Tactic.Monotonicity.Lemmas

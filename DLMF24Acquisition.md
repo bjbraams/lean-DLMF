@@ -1,5 +1,9 @@
 # DLMF Chapter 24 acquisition: Bernoulli and Euler Polynomials
 
+> Source paths and current layout notes were refreshed on 2026-10-30; generated per-entry
+> statuses follow the compiled ledger refresh. Dated acquisition and proof counts
+> describe their original batches.
+
 This acquisition covers the definitions, numbered formulas and analytical assertions in prose
 of [DLMF Chapter 24](https://dlmf.nist.gov/24), version 1.2.8, checked on 2026-10-25. It was
 done in two parts: part A (ACQ24A) covers §§24.1–24.10 (definitions, basic properties,

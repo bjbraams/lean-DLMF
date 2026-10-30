@@ -1,5 +1,9 @@
 # DLMF Chapter 35 acquisition: Functions of Matrix Argument
 
+> Source paths and current layout notes were refreshed on 2026-10-30; generated per-entry
+> statuses follow the compiled ledger refresh. Dated acquisition and proof counts
+> describe their original batches.
+
 This acquisition covers the definitions, numbered formulas and analytical assertions in prose
 of [DLMF Chapter 35](https://dlmf.nist.gov/35), version 1.2.8, checked on 2026-10-26, by one
 agent (agent ma, helper prefix `m35_`). The Lean code is in `DLMF/MatrixArgument/` (namespace
@@ -141,35 +145,35 @@ All were checked before acquisition; `m = 2` checks use the zonal polynomials co
 
 ## [§35.2 Laplace Transform](https://dlmf.nist.gov/35.2)
 
-- [35.2](https://dlmf.nist.gov/35.2): [`DLMF.MatrixArgument.laplaceTransform_integrableOn_analyticOnNhd`](DLMF/MatrixArgument/GammaBeta.lean#L112) (admitted). Paragraph 35.2.Px1.p2 (absolute convergence for ℜ𝐙 > X₀ and holomorphy in the entries `z_{j,k}`); measurability of `f` added.
+- [35.2](https://dlmf.nist.gov/35.2): [`DLMF.MatrixArgument.laplaceTransform_integrableOn_analyticOnNhd`](DLMF/MatrixArgument/GammaBeta.lean#L123) (admitted). Paragraph 35.2.Px1.p2 (absolute convergence for ℜ𝐙 > X₀ and holomorphy in the entries `z_{j,k}`); measurability of `f` added.
 - [35.2.E1](https://dlmf.nist.gov/35.2.E1): [`DLMF.MatrixArgument.laplaceTransform`](DLMF/MatrixArgument/Basic.lean#L306) (definition)
-- [35.2.E2](https://dlmf.nist.gov/35.2.E2): [`DLMF.MatrixArgument.laplaceTransform_inversion`](DLMF/MatrixArgument/GammaBeta.lean#L131) (admitted). **Corrected**: DLMF omits the factor `2^{m(m-1)/2}` (Fourier inversion on `𝓢` with `tr(VX)` doubling the off-diagonal frequencies; checked with a Gaussian). Continuity of `f` added; DLMF's limit hypothesis as `U → ∞` dropped (not needed).
-- [35.2.E3](https://dlmf.nist.gov/35.2.E3): [`DLMF.MatrixArgument.matrixConvolution`](DLMF/MatrixArgument/Basic.lean#L315) (definition); [`DLMF.MatrixArgument.laplaceTransform_matrixConvolution`](DLMF/MatrixArgument/GammaBeta.lean#L162) (proved). The convolution theorem of 35.2.Px3.p1.
+- [35.2.E2](https://dlmf.nist.gov/35.2.E2): [`DLMF.MatrixArgument.laplaceTransform_inversion`](DLMF/MatrixArgument/GammaBeta.lean#L142) (admitted). **Corrected**: DLMF omits the factor `2^{m(m-1)/2}` (Fourier inversion on `𝓢` with `tr(VX)` doubling the off-diagonal frequencies; checked with a Gaussian). Continuity of `f` added; DLMF's limit hypothesis as `U → ∞` dropped (not needed).
+- [35.2.E3](https://dlmf.nist.gov/35.2.E3): [`DLMF.MatrixArgument.matrixConvolution`](DLMF/MatrixArgument/Basic.lean#L315) (definition); [`DLMF.MatrixArgument.laplaceTransform_matrixConvolution`](DLMF/MatrixArgument/GammaBeta.lean#L173) (proved). The convolution theorem of 35.2.Px3.p1.
 
 ## [§35.3 Multivariate Gamma and Beta Functions](https://dlmf.nist.gov/35.3)
 
-- [35.3.E1](https://dlmf.nist.gov/35.3.E1): [`DLMF.MatrixArgument.multivariateGamma_eq_integral`](DLMF/MatrixArgument/GammaBeta.lean#L577) (proved); upstream `TauCeti.integral_posDef_multivariateGamma`; upstream `TauCeti.integrableOn_posDef_det_rpow_mul_exp_neg_trace`. Complex `a` admitted; the real case is upstream in Tau Ceti (pointers in [MathlibCoverage](DLMF/MatrixArgument/MathlibCoverage.lean)).
-- [35.3.E2](https://dlmf.nist.gov/35.3.E2): [`DLMF.MatrixArgument.multivariateGammaVec_eq_integral`](DLMF/MatrixArgument/GammaBeta.lean#L606) (proved). Zero-based indices; the factor `|X|^{s_m-(m+1)/2}` is the `j = m` factor with `s_{m+1} := (m+1)/2`.
-- [35.3.E3](https://dlmf.nist.gov/35.3.E3): [`DLMF.MatrixArgument.multivariateBeta_eq_integral`](DLMF/MatrixArgument/GammaBeta.lean#L1367) (proved)
-- [35.3.E4](https://dlmf.nist.gov/35.3.E4): [`DLMF.MatrixArgument.multivariateGamma`](DLMF/MatrixArgument/Basic.lean#L163) (definition); [`DLMF.MatrixArgument.multivariateGamma_ofReal`](DLMF/MatrixArgument/GammaBeta.lean#L559) (proved); [`DLMF.MatrixArgument.multivariateGamma_one`](DLMF/MatrixArgument/GammaBeta.lean#L572) (proved); upstream `TauCeti.multivariateGamma_def`. Definition by the product formula (the meromorphic continuation of 35.3.1); agrees with Tau Ceti's real `TauCeti.multivariateGamma`.
+- [35.3.E1](https://dlmf.nist.gov/35.3.E1): [`DLMF.MatrixArgument.multivariateGamma_eq_integral`](DLMF/MatrixArgument/GammaBeta.lean#L597) (proved); upstream `TauCeti.integral_posDef_multivariateGamma`; upstream `TauCeti.integrableOn_posDef_det_rpow_mul_exp_neg_trace`. Complex `a` admitted; the real case is upstream in Tau Ceti (pointers in [MathlibCoverage](DLMF/MatrixArgument/MathlibCoverage.lean)).
+- [35.3.E2](https://dlmf.nist.gov/35.3.E2): [`DLMF.MatrixArgument.multivariateGammaVec_eq_integral`](DLMF/MatrixArgument/GammaBeta.lean#L626) (proved). Zero-based indices; the factor `|X|^{s_m-(m+1)/2}` is the `j = m` factor with `s_{m+1} := (m+1)/2`.
+- [35.3.E3](https://dlmf.nist.gov/35.3.E3): [`DLMF.MatrixArgument.multivariateBeta_eq_integral`](DLMF/MatrixArgument/GammaBeta.lean#L1408) (proved)
+- [35.3.E4](https://dlmf.nist.gov/35.3.E4): [`DLMF.MatrixArgument.multivariateGamma`](DLMF/MatrixArgument/Basic.lean#L163) (definition); [`DLMF.MatrixArgument.multivariateGamma_ofReal`](DLMF/MatrixArgument/GammaBeta.lean#L579) (proved); [`DLMF.MatrixArgument.multivariateGamma_one`](DLMF/MatrixArgument/GammaBeta.lean#L592) (proved); upstream `TauCeti.multivariateGamma_def`. Definition by the product formula (the meromorphic continuation of 35.3.1); agrees with Tau Ceti's real `TauCeti.multivariateGamma`.
 - [35.3.E5](https://dlmf.nist.gov/35.3.E5): [`DLMF.MatrixArgument.multivariateGammaVec`](DLMF/MatrixArgument/Basic.lean#L172) (definition). Definition by the product formula (continuation of 35.3.2).
-- [35.3.E6](https://dlmf.nist.gov/35.3.E6): [`DLMF.MatrixArgument.multivariateGammaVec_const`](DLMF/MatrixArgument/GammaBeta.lean#L1390) (proved)
-- [35.3.E7](https://dlmf.nist.gov/35.3.E7): [`DLMF.MatrixArgument.multivariateBeta`](DLMF/MatrixArgument/Basic.lean#L180) (definition); [`DLMF.MatrixArgument.multivariateBeta_one`](DLMF/MatrixArgument/GammaBeta.lean#L1395) (proved). Definition `B_m(a,b) = Γ_m(a)Γ_m(b)/Γ_m(a+b)`; the integral 35.3.3 is a theorem.
-- [35.3.E8](https://dlmf.nist.gov/35.3.E8): [`DLMF.MatrixArgument.multivariateBeta_eq_integral_posDefCone`](DLMF/MatrixArgument/GammaBeta.lean#L1401) (proved)
+- [35.3.E6](https://dlmf.nist.gov/35.3.E6): [`DLMF.MatrixArgument.multivariateGammaVec_const`](DLMF/MatrixArgument/GammaBeta.lean#L1431) (proved)
+- [35.3.E7](https://dlmf.nist.gov/35.3.E7): [`DLMF.MatrixArgument.multivariateBeta`](DLMF/MatrixArgument/Basic.lean#L180) (definition); [`DLMF.MatrixArgument.multivariateBeta_one`](DLMF/MatrixArgument/GammaBeta.lean#L1436) (proved). Definition `B_m(a,b) = Γ_m(a)Γ_m(b)/Γ_m(a+b)`; the integral 35.3.3 is a theorem.
+- [35.3.E8](https://dlmf.nist.gov/35.3.E8): [`DLMF.MatrixArgument.multivariateBeta_eq_integral_posDefCone`](DLMF/MatrixArgument/GammaBeta.lean#L1442) (proved)
 
 ## [§35.4 Partitions and Zonal Polynomials](https://dlmf.nist.gov/35.4)
 
 - [35.4.i](https://dlmf.nist.gov/35.4.i): [`DLMF.MatrixArgument.partitions`](DLMF/MatrixArgument/Basic.lean#L139) (definition). Partitions are nonincreasing `κ : Fin m → ℕ` (DLMF's vectors with at most `m` parts); `partitionLength` is `ℓ(κ)`, `|κ|` is `∑ j, κ j`.
-- [35.4.E1](https://dlmf.nist.gov/35.4.E1): [`DLMF.MatrixArgument.partitionalShiftedFactorial`](DLMF/MatrixArgument/Basic.lean#L155) (definition); [`DLMF.MatrixArgument.multivariateGammaVec_add_div`](DLMF/MatrixArgument/Zonal.lean#L107) (proved). First equality proved under `Γ_m(a) ≠ 0`; the second is the definition.
-- [35.4.E2](https://dlmf.nist.gov/35.4.E2): [`DLMF.MatrixArgument.zonalPolynomialAtOne`](DLMF/MatrixArgument/Basic.lean#L188) (definition); [`DLMF.MatrixArgument.zonalPolynomial_one`](DLMF/MatrixArgument/Zonal.lean#L130) (proved)
-- [35.4.E3](https://dlmf.nist.gov/35.4.E3): [`DLMF.MatrixArgument.zonalPolynomial`](DLMF/MatrixArgument/Basic.lean#L201) (definition); [`DLMF.MatrixArgument.zonalPolynomial_eq_dlmf`](DLMF/MatrixArgument/Zonal.lean#L148) (proved). Definition by DLMF's formula itself (Haar integral over `O(m)`), with the factor `|T|^{k_m}` written as the `j = m` factor; the literal DLMF form is `zonalPolynomial_eq_dlmf`.
-- [35.4.E4](https://dlmf.nist.gov/35.4.E4): [`DLMF.MatrixArgument.zonalPolynomial_zero`](DLMF/MatrixArgument/Zonal.lean#L184) (proved). Proved for every `κ`.
-- [35.4.E5](https://dlmf.nist.gov/35.4.E5): [`DLMF.MatrixArgument.zonalPolynomial_conj`](DLMF/MatrixArgument/Zonal.lean#L223) (proved)
-- [35.4.E6](https://dlmf.nist.gov/35.4.E6): [`DLMF.MatrixArgument.sum_zonalPolynomial`](DLMF/MatrixArgument/Zonal.lean#L565) (admitted)
-- [35.4.E7](https://dlmf.nist.gov/35.4.E7): [`DLMF.MatrixArgument.integral_zonalPolynomial_conj`](DLMF/MatrixArgument/Zonal.lean#L572) (admitted). `S ∈ Ω`, `T ∈ 𝓢`; `Z_κ(SHTH⁻¹)` is written `Z_κ(S^{1/2}HTHᵀS^{1/2})` (same eigenvalues).
-- [35.4.E8](https://dlmf.nist.gov/35.4.E8): [`DLMF.MatrixArgument.hasIntegralOn_zonalPolynomial_laplace`](DLMF/MatrixArgument/Zonal.lean#L698) (proved)
-- [35.4.E9](https://dlmf.nist.gov/35.4.E9): [`DLMF.MatrixArgument.hasIntegralOn_zonalPolynomial_beta`](DLMF/MatrixArgument/Zonal.lean#L801) (admitted). `Z_κ(TX)` written `Z_κ(X^{1/2}TX^{1/2})`.
-- [35.4.ii](https://dlmf.nist.gov/35.4.ii): [`DLMF.MatrixArgument.zonalPolynomial_exists_symmetric`](DLMF/MatrixArgument/Zonal.lean#L551) (proved). The prose after 35.4.5 ("therefore `Z_κ(T)` is a symmetric polynomial in the eigenvalues"), with homogeneity of degree `|κ|`. Untagged proved companions: `zonalPolynomial_smul` (`Z_κ(cT) = c^{|κ|}Z_κ(T)`), `zonalPolynomial_neg`, `zonalPolynomial_fin_one` (`m = 1`: `Z_{(k)}(t) = t^k`).
+- [35.4.E1](https://dlmf.nist.gov/35.4.E1): [`DLMF.MatrixArgument.partitionalShiftedFactorial`](DLMF/MatrixArgument/Basic.lean#L155) (definition); [`DLMF.MatrixArgument.multivariateGammaVec_add_div`](DLMF/MatrixArgument/Zonal.lean#L113) (proved). First equality proved under `Γ_m(a) ≠ 0`; the second is the definition.
+- [35.4.E2](https://dlmf.nist.gov/35.4.E2): [`DLMF.MatrixArgument.zonalPolynomialAtOne`](DLMF/MatrixArgument/Basic.lean#L188) (definition); [`DLMF.MatrixArgument.zonalPolynomial_one`](DLMF/MatrixArgument/Zonal.lean#L136) (proved)
+- [35.4.E3](https://dlmf.nist.gov/35.4.E3): [`DLMF.MatrixArgument.zonalPolynomial`](DLMF/MatrixArgument/Basic.lean#L201) (definition); [`DLMF.MatrixArgument.zonalPolynomial_eq_dlmf`](DLMF/MatrixArgument/Zonal.lean#L154) (proved). Definition by DLMF's formula itself (Haar integral over `O(m)`), with the factor `|T|^{k_m}` written as the `j = m` factor; the literal DLMF form is `zonalPolynomial_eq_dlmf`.
+- [35.4.E4](https://dlmf.nist.gov/35.4.E4): [`DLMF.MatrixArgument.zonalPolynomial_zero`](DLMF/MatrixArgument/Zonal.lean#L190) (proved). Proved for every `κ`.
+- [35.4.E5](https://dlmf.nist.gov/35.4.E5): [`DLMF.MatrixArgument.zonalPolynomial_conj`](DLMF/MatrixArgument/Zonal.lean#L229) (proved)
+- [35.4.E6](https://dlmf.nist.gov/35.4.E6): [`DLMF.MatrixArgument.sum_zonalPolynomial`](DLMF/MatrixArgument/Zonal.lean#L587) (admitted)
+- [35.4.E7](https://dlmf.nist.gov/35.4.E7): [`DLMF.MatrixArgument.integral_zonalPolynomial_conj`](DLMF/MatrixArgument/Zonal.lean#L594) (admitted). `S ∈ Ω`, `T ∈ 𝓢`; `Z_κ(SHTH⁻¹)` is written `Z_κ(S^{1/2}HTHᵀS^{1/2})` (same eigenvalues).
+- [35.4.E8](https://dlmf.nist.gov/35.4.E8): [`DLMF.MatrixArgument.hasIntegralOn_zonalPolynomial_laplace`](DLMF/MatrixArgument/Zonal.lean#L728) (proved)
+- [35.4.E9](https://dlmf.nist.gov/35.4.E9): [`DLMF.MatrixArgument.hasIntegralOn_zonalPolynomial_beta`](DLMF/MatrixArgument/Zonal.lean#L831) (admitted). `Z_κ(TX)` written `Z_κ(X^{1/2}TX^{1/2})`.
+- [35.4.ii](https://dlmf.nist.gov/35.4.ii): [`DLMF.MatrixArgument.zonalPolynomial_exists_symmetric`](DLMF/MatrixArgument/Zonal.lean#L574) (proved). The prose after 35.4.5 ("therefore `Z_κ(T)` is a symmetric polynomial in the eigenvalues"), with homogeneity of degree `|κ|`. Untagged proved companions: `zonalPolynomial_smul` (`Z_κ(cT) = c^{|κ|}Z_κ(T)`), `zonalPolynomial_neg`, `zonalPolynomial_fin_one` (`m = 1`: `Z_{(k)}(t) = t^k`).
 
 ## [§35.5 Bessel Functions of Matrix Argument](https://dlmf.nist.gov/35.5)
 
@@ -188,13 +192,13 @@ All were checked before acquisition; `m = 2` checks use the zonal polynomials co
 - [35.6.E1](https://dlmf.nist.gov/35.6.E1): [`DLMF.MatrixArgument.hyp1F1`](DLMF/MatrixArgument/Basic.lean#L238) (definition); [`DLMF.MatrixArgument.hyp1F1_eq_tsum`](DLMF/MatrixArgument/Confluent.lean#L30) (proved). Definition as `pFq` with `p = q = 1`; the series form is proved. Untagged: `hyp1F1_fin_one` (`m = 1`, Kummer's series).
 - [35.6.E2](https://dlmf.nist.gov/35.6.E2): [`DLMF.MatrixArgument.kummerPsi`](DLMF/MatrixArgument/Basic.lean#L276) (definition); [`DLMF.MatrixArgument.integrableOn_kummerPsi`](DLMF/MatrixArgument/Confluent.lean#L45) (proved). Definition by the integral; absolute convergence stated as `integrableOn_kummerPsi`.
 - [35.6.E3](https://dlmf.nist.gov/35.6.E3): [`DLMF.MatrixArgument.laguerreL`](DLMF/MatrixArgument/Basic.lean#L288) (definition)
-- [35.6.E4](https://dlmf.nist.gov/35.6.E4): [`DLMF.MatrixArgument.hasIntegralOn_hyp1F1`](DLMF/MatrixArgument/Confluent.lean#L156) (admitted). Stated as `∫ … = B_m(a, b-a) ₁F₁(a; b; T)` with integrability.
-- [35.6.E5](https://dlmf.nist.gov/35.6.E5): [`DLMF.MatrixArgument.hasIntegralOn_hyp1F1_laplace`](DLMF/MatrixArgument/Confluent.lean#L169) (admitted). `₁F₁(SX)` written `₁F₁(X^{1/2}SX^{1/2})`; `S ∈ 𝓢`, `T ∈ Ω` made explicit.
-- [35.6.E6](https://dlmf.nist.gov/35.6.E6): [`DLMF.MatrixArgument.hasIntegralOn_hyp1F1_convolution`](DLMF/MatrixArgument/Confluent.lean#L181) (admitted)
-- [35.6.E7](https://dlmf.nist.gov/35.6.E7): [`DLMF.MatrixArgument.hyp1F1_kummer`](DLMF/MatrixArgument/Confluent.lean#L195) (admitted)
-- [35.6.E8](https://dlmf.nist.gov/35.6.E8): [`DLMF.MatrixArgument.hasIntegralOn_kummerPsi_mellin`](DLMF/MatrixArgument/Confluent.lean#L207) (proved)
-- [35.6.E9](https://dlmf.nist.gov/35.6.E9): [`DLMF.MatrixArgument.tendsto_hyp1F1_besselA`](DLMF/MatrixArgument/Confluent.lean#L357) (admitted). Real `a → +∞`; `Γ_m(ν+(m+1)/2) ≠ 0` made explicit.
-- [35.6.E10](https://dlmf.nist.gov/35.6.E10): [`DLMF.MatrixArgument.tendsto_kummerPsi_besselB`](DLMF/MatrixArgument/Confluent.lean#L367) (admitted). Real `a → +∞`, `T ∈ Ω`.
+- [35.6.E4](https://dlmf.nist.gov/35.6.E4): [`DLMF.MatrixArgument.hasIntegralOn_hyp1F1`](DLMF/MatrixArgument/Confluent.lean#L155) (admitted). Stated as `∫ … = B_m(a, b-a) ₁F₁(a; b; T)` with integrability.
+- [35.6.E5](https://dlmf.nist.gov/35.6.E5): [`DLMF.MatrixArgument.hasIntegralOn_hyp1F1_laplace`](DLMF/MatrixArgument/Confluent.lean#L168) (admitted). `₁F₁(SX)` written `₁F₁(X^{1/2}SX^{1/2})`; `S ∈ 𝓢`, `T ∈ Ω` made explicit.
+- [35.6.E6](https://dlmf.nist.gov/35.6.E6): [`DLMF.MatrixArgument.hasIntegralOn_hyp1F1_convolution`](DLMF/MatrixArgument/Confluent.lean#L180) (admitted)
+- [35.6.E7](https://dlmf.nist.gov/35.6.E7): [`DLMF.MatrixArgument.hyp1F1_kummer`](DLMF/MatrixArgument/Confluent.lean#L194) (admitted)
+- [35.6.E8](https://dlmf.nist.gov/35.6.E8): [`DLMF.MatrixArgument.hasIntegralOn_kummerPsi_mellin`](DLMF/MatrixArgument/Confluent.lean#L208) (proved)
+- [35.6.E9](https://dlmf.nist.gov/35.6.E9): [`DLMF.MatrixArgument.tendsto_hyp1F1_besselA`](DLMF/MatrixArgument/Confluent.lean#L358) (admitted). Real `a → +∞`; `Γ_m(ν+(m+1)/2) ≠ 0` made explicit.
+- [35.6.E10](https://dlmf.nist.gov/35.6.E10): [`DLMF.MatrixArgument.tendsto_kummerPsi_besselB`](DLMF/MatrixArgument/Confluent.lean#L368) (admitted). Real `a → +∞`, `T ∈ Ω`.
 - [35.6.iv](https://dlmf.nist.gov/35.6.iv): No statement (references only).
 
 ## [§35.7 Gaussian Hypergeometric Function of Matrix Argument](https://dlmf.nist.gov/35.7)
@@ -215,20 +219,20 @@ All were checked before acquisition; `m = 2` checks use the zonal polynomials co
 
 ## [§35.8 Generalized Hypergeometric Functions of Matrix Argument](https://dlmf.nist.gov/35.8)
 
-- [35.8.i](https://dlmf.nist.gov/35.8.i): [`DLMF.MatrixArgument.hypergeometricPFQ_eq_sum_of_neg_nat`](DLMF/MatrixArgument/Generalized.lean#L105) (proved); [`DLMF.MatrixArgument.hypergeometricPFQ_summable_of_le`](DLMF/MatrixArgument/Generalized.lean#L138) (admitted); [`DLMF.MatrixArgument.hypergeometricPFQ_summable_of_eq_succ`](DLMF/MatrixArgument/Generalized.lean#L152) (admitted); [`DLMF.MatrixArgument.not_summable_hypergeometricPFQ_of_eq_succ`](DLMF/MatrixArgument/Generalized.lean#L164) (admitted); [`DLMF.MatrixArgument.not_summable_hypergeometricPFQ_of_lt`](DLMF/MatrixArgument/Generalized.lean#L175) (admitted). Paragraphs 35.8.Px1.p1–p4. **Corrected** p1: termination only when some `a_j` is a nonpositive integer (DLMF: `-a_j + (k+1)/2 ∈ ℕ` for some `k ≤ m`; false for `k ≥ 2`, e.g. `m = 2`, `a = 1/2`). Divergence (p3, p4) is stated for the absolute series, with non-termination as hypothesis.
+- [35.8.i](https://dlmf.nist.gov/35.8.i): [`DLMF.MatrixArgument.hypergeometricPFQ_eq_sum_of_neg_nat`](DLMF/MatrixArgument/Generalized.lean#L110) (proved); [`DLMF.MatrixArgument.hypergeometricPFQ_summable_of_le`](DLMF/MatrixArgument/Generalized.lean#L143) (admitted); [`DLMF.MatrixArgument.hypergeometricPFQ_summable_of_eq_succ`](DLMF/MatrixArgument/Generalized.lean#L157) (admitted); [`DLMF.MatrixArgument.not_summable_hypergeometricPFQ_of_eq_succ`](DLMF/MatrixArgument/Generalized.lean#L169) (admitted); [`DLMF.MatrixArgument.not_summable_hypergeometricPFQ_of_lt`](DLMF/MatrixArgument/Generalized.lean#L180) (admitted). Paragraphs 35.8.Px1.p1–p4. **Corrected** p1: termination only when some `a_j` is a nonpositive integer (DLMF: `-a_j + (k+1)/2 ∈ ℕ` for some `k ≤ m`; false for `k ≥ 2`, e.g. `m = 2`, `a = 1/2`). Divergence (p3, p4) is stated for the absolute series, with non-termination as hypothesis.
 - [35.8.E1](https://dlmf.nist.gov/35.8.E1): [`DLMF.MatrixArgument.hypergeometricPFQ`](DLMF/MatrixArgument/Basic.lean#L216) (definition)
-- [35.8.E2](https://dlmf.nist.gov/35.8.E2): [`DLMF.MatrixArgument.hyp0F0_eq_etr`](DLMF/MatrixArgument/Generalized.lean#L213) (admitted)
-- [35.8.E3](https://dlmf.nist.gov/35.8.E3): [`DLMF.MatrixArgument.hyp2F1_self_right`](DLMF/MatrixArgument/Generalized.lean#L219) (proved); [`DLMF.MatrixArgument.hyp1F0_eq_det_cpow`](DLMF/MatrixArgument/Generalized.lean#L233) (admitted). First equality proved (`Γ_m(b) ≠ 0`); second admitted (`0 < T < I`).
-- [35.8.E4](https://dlmf.nist.gov/35.8.E4): [`DLMF.MatrixArgument.besselA_eq_hyp0F1`](DLMF/MatrixArgument/Generalized.lean#L239) (proved)
-- [35.8.E5](https://dlmf.nist.gov/35.8.E5): [`DLMF.MatrixArgument.hyp3F2_one_kummer`](DLMF/MatrixArgument/Generalized.lean#L257) (admitted). Added hypotheses: `ℜ(b₂ - a₃) > (m-1)/2` (convergence of the right side) and regularity of the denominators.
-- [35.8.E6](https://dlmf.nist.gov/35.8.E6): [`DLMF.MatrixArgument.hyp3F2_one_saalschutz`](DLMF/MatrixArgument/Generalized.lean#L273) (admitted). **Corrected**: DLMF prints the reciprocal of the right-hand side (already wrong for `m = 1`, cf. 16.4.3).
-- [35.8.E7](https://dlmf.nist.gov/35.8.E7): [`DLMF.MatrixArgument.hyp3F2_one_thomae`](DLMF/MatrixArgument/Generalized.lean#L293) (admitted). **Corrected**: upper parameter `b₂ - a₁` (DLMF: `b₂ - a₂`) and `Γ_m(c)`, `Γ_m(c + a₃)` (DLMF: `Γ(c)`, `Γ(c + a₃)`); added `ℜa₁ > (m-1)/2` (convergence of the right side).
-- [35.8.E8](https://dlmf.nist.gov/35.8.E8): [`DLMF.MatrixArgument.hypergeometricPFQ_zero`](DLMF/MatrixArgument/Generalized.lean#L187) (proved)
-- [35.8.E9](https://dlmf.nist.gov/35.8.E9): [`DLMF.MatrixArgument.tendsto_hypergeometricPFQ_snoc`](DLMF/MatrixArgument/Generalized.lean#L316) (admitted). Real `γ → +∞`, `p ≤ q`.
-- [35.8.E10](https://dlmf.nist.gov/35.8.E10): [`DLMF.MatrixArgument.tendsto_hypergeometricPFQ_snoc_denom`](DLMF/MatrixArgument/Generalized.lean#L326) (admitted). Real `γ → +∞`; `p ≤ q`, or `p = q + 1` with `‖T‖ < 1`.
-- [35.8.E11](https://dlmf.nist.gov/35.8.E11): [`DLMF.MatrixArgument.hypergeometricPFQ_conj`](DLMF/MatrixArgument/Generalized.lean#L202) (proved)
-- [35.8.E12](https://dlmf.nist.gov/35.8.E12): [`DLMF.MatrixArgument.hasIntegralOn_hypergeometricPFQ_laplace`](DLMF/MatrixArgument/Generalized.lean#L337) (admitted). Restricted to `p < q`, or `p = q` with `T > I` (where both series converge).
-- [35.8.E13](https://dlmf.nist.gov/35.8.E13): [`DLMF.MatrixArgument.hasIntegralOn_hypergeometricPFQ_euler`](DLMF/MatrixArgument/Generalized.lean#L353) (admitted). **Corrected**: the factor is `B_m(b₁ - a₁, a₁)`, not its reciprocal. `pFq(TX)` written `pFq(X^{1/2}TX^{1/2})`; `p ≤ q`, or `p = q + 1` with `‖T‖ < 1`.
+- [35.8.E2](https://dlmf.nist.gov/35.8.E2): [`DLMF.MatrixArgument.hyp0F0_eq_etr`](DLMF/MatrixArgument/Generalized.lean#L218) (admitted)
+- [35.8.E3](https://dlmf.nist.gov/35.8.E3): [`DLMF.MatrixArgument.hyp2F1_self_right`](DLMF/MatrixArgument/Generalized.lean#L224) (proved); [`DLMF.MatrixArgument.hyp1F0_eq_det_cpow`](DLMF/MatrixArgument/Generalized.lean#L238) (admitted). First equality proved (`Γ_m(b) ≠ 0`); second admitted (`0 < T < I`).
+- [35.8.E4](https://dlmf.nist.gov/35.8.E4): [`DLMF.MatrixArgument.besselA_eq_hyp0F1`](DLMF/MatrixArgument/Generalized.lean#L244) (proved)
+- [35.8.E5](https://dlmf.nist.gov/35.8.E5): [`DLMF.MatrixArgument.hyp3F2_one_kummer`](DLMF/MatrixArgument/Generalized.lean#L262) (admitted). Added hypotheses: `ℜ(b₂ - a₃) > (m-1)/2` (convergence of the right side) and regularity of the denominators.
+- [35.8.E6](https://dlmf.nist.gov/35.8.E6): [`DLMF.MatrixArgument.hyp3F2_one_saalschutz`](DLMF/MatrixArgument/Generalized.lean#L278) (admitted). **Corrected**: DLMF prints the reciprocal of the right-hand side (already wrong for `m = 1`, cf. 16.4.3).
+- [35.8.E7](https://dlmf.nist.gov/35.8.E7): [`DLMF.MatrixArgument.hyp3F2_one_thomae`](DLMF/MatrixArgument/Generalized.lean#L298) (admitted). **Corrected**: upper parameter `b₂ - a₁` (DLMF: `b₂ - a₂`) and `Γ_m(c)`, `Γ_m(c + a₃)` (DLMF: `Γ(c)`, `Γ(c + a₃)`); added `ℜa₁ > (m-1)/2` (convergence of the right side).
+- [35.8.E8](https://dlmf.nist.gov/35.8.E8): [`DLMF.MatrixArgument.hypergeometricPFQ_zero`](DLMF/MatrixArgument/Generalized.lean#L192) (proved)
+- [35.8.E9](https://dlmf.nist.gov/35.8.E9): [`DLMF.MatrixArgument.tendsto_hypergeometricPFQ_snoc`](DLMF/MatrixArgument/Generalized.lean#L321) (admitted). Real `γ → +∞`, `p ≤ q`.
+- [35.8.E10](https://dlmf.nist.gov/35.8.E10): [`DLMF.MatrixArgument.tendsto_hypergeometricPFQ_snoc_denom`](DLMF/MatrixArgument/Generalized.lean#L331) (admitted). Real `γ → +∞`; `p ≤ q`, or `p = q + 1` with `‖T‖ < 1`.
+- [35.8.E11](https://dlmf.nist.gov/35.8.E11): [`DLMF.MatrixArgument.hypergeometricPFQ_conj`](DLMF/MatrixArgument/Generalized.lean#L207) (proved)
+- [35.8.E12](https://dlmf.nist.gov/35.8.E12): [`DLMF.MatrixArgument.hasIntegralOn_hypergeometricPFQ_laplace`](DLMF/MatrixArgument/Generalized.lean#L342) (admitted). Restricted to `p < q`, or `p = q` with `T > I` (where both series converge).
+- [35.8.E13](https://dlmf.nist.gov/35.8.E13): [`DLMF.MatrixArgument.hasIntegralOn_hypergeometricPFQ_euler`](DLMF/MatrixArgument/Generalized.lean#L358) (admitted). **Corrected**: the factor is `B_m(b₁ - a₁, a₁)`, not its reciprocal. `pFq(TX)` written `pFq(X^{1/2}TX^{1/2})`; `p ≤ q`, or `p = q + 1` with `‖T‖ < 1`.
 - [35.8.v](https://dlmf.nist.gov/35.8.v): No statement (references only: Mellin–Barnes integrals of Ding et al. 1996, Faraut and Korányi 1994).
 
 ## [§§35.9–35.12](https://dlmf.nist.gov/35.9) and other prose, informal and excluded items

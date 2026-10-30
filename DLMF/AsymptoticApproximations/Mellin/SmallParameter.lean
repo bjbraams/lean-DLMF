@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.AsymptoticApproximations.Mellin.Transforms
-public import DLMF.AlgebraicAnalytic.Transforms.Defs
+public import DLMF.AlgebraicAnalytic.Transforms.Basic
 public import DLMF.ExpIntegrals.Expansions
 
 /-!

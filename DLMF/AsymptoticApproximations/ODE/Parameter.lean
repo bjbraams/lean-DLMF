@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AsymptoticApproximations.ODE.Defs
+public import DLMF.AsymptoticApproximations.ODE.Basic
 public import DLMFMathlib.Analysis.ODE.LiouvilleGreenExpansion
 public import DLMFMathlib.Analysis.ODE.LiouvilleGreenFinite
 

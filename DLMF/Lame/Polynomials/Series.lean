@@ -13,7 +13,7 @@ public import DLMF.Lame.Polynomials.P3lZeros
 # Lamé polynomials: definitions, algebraic form, zeros and Fourier series (DLMF §§29.12, 29.15)
 
 The Lamé polynomials of the eight types of Table 29.12.1 are defined in
-`DLMF.Lame.Polynomials.Defs` by their Chebyshev series 29.15.43–29.15.50, with the
+`DLMF.Lame.Polynomials.Basic` by their Chebyshev series 29.15.43–29.15.50, with the
 coefficients and eigenvalues of the finite matrix problems 29.15.2–29.15.6 (and the analogues
 for the other seven types). This file states
 

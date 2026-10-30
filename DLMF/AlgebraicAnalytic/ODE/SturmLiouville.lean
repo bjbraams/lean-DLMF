@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AlgebraicAnalytic.ODE.Defs
+public import DLMF.AlgebraicAnalytic.ODE.Basic
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 
 /-!

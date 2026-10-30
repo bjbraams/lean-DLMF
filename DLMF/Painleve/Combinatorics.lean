@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Painleve.SolutionsDefs
+public import DLMF.Painleve.Basic.Solutions
 public import DLMF.Airy.Framework
 
 /-!

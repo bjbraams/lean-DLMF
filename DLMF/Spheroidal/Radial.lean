@@ -5,7 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Spheroidal.FerrersDefs
+public import DLMF.Spheroidal.FerrersProperties
+public import DLMF.Bessel.RegularizedSeries
 
 /-!
 # Radial spheroidal wave functions (DLMF §30.11)

@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.JacobiElliptic.Basic
+public import DLMF.JacobiElliptic.AnalyticProperties
 
 /-!
 # Jacobian elliptic functions: periods, poles and zeros (DLMF §22.4)

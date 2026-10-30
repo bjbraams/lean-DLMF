@@ -5,7 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Confluent.Basic
+public import DLMF.OrthogonalPolynomials.Basic.Definitions
+
+public import DLMF.Confluent.KummerProperties
 public import DLMF.Hypergeometric.DiffEq
 public import Mathlib.Analysis.Complex.TaylorSeries
 public import Mathlib.RingTheory.Polynomial.Chebyshev
@@ -16,6 +18,8 @@ public import Mathlib.Analysis.SpecialFunctions.Bernstein
 
 /-!
 # Classical orthogonal polynomials (AAR Chapter 6)
+
+Canonical function definitions are imported from the focused Basic layer.
 
 Mathlib has the probabilists' Hermite polynomials `Polynomial.hermite` and the shifted
 Legendre polynomials `shiftedLegendre`. This file adds the physicists' Hermite polynomials,
@@ -34,10 +38,7 @@ noncomputable section
 
 namespace DLMF.OrthogonalPolynomials
 
-/-- Physicists' Hermite polynomials, AAR §6.1: `H_{n+1} = 2x H_n - H_n'`. -/
-def hermitePolyH : ℕ → ℤ[X]
-  | 0 => 1
-  | n + 1 => 2 * X * hermitePolyH n - derivative (hermitePolyH n)
+
 
 /-- `H_0 = 1` (DLMF 18.5.18). -/
 @[simp, dlmf 18.5.E18]
@@ -200,12 +201,7 @@ theorem hermitePolyH_generating_function (x t : ℂ) :
       exp (2 * x * t - t ^ 2) :=
   (hasSum_hermitePolyH_generating_function x t).tsum_eq
 
-/-- Hypergeometric realization of generalized Laguerre polynomials, AAR §6.2,
-for `α + 1` not a nonpositive integer:
-`L_n^{(α)}(x) = (α+1)_n / n! · ₁F₁(-n; α+1; x)`. -/
-@[dlmf 18.5.E12]
-def laguerrePolyL (α : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
-  poch (α + 1) n / n ! * kummerM (-n : ℂ) (α + 1) x
+
 
 /-- `L_0^{(α)}(x) = 1` (DLMF 18.5.17). -/
 @[simp, dlmf 18.5.E17, dlmf 18.5.E17_5]
@@ -478,22 +474,14 @@ theorem laguerrePolyL_generating_function {α x t : ℂ}
         (-x) ^ k * (t ^ (n - k) * t ^ k) := by ring
     _ = _ := by rw [htprod]
 
-/-- Hypergeometric realization of Jacobi polynomials, AAR §6.3,
-for `α + 1` not a nonpositive integer:
-`P_n^{(α,β)}(x) = (α+1)_n / n! · ₂F₁(-n, n+α+β+1; α+1; (1-x)/2)`. -/
-@[dlmf 18.5.E7]
-def jacobiPolyP (α β : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
-  poch (α + 1) n / n ! * ₂F₁ (-n : ℂ) (n + α + β + 1) (α + 1) ((1 - x) / 2)
+
 
 /-- `P_0^{(α,β)}(x) = 1`. -/
 @[simp]
 theorem jacobiPolyP_zero (α β x : ℂ) : jacobiPolyP α β 0 x = 1 := by
   simp [jacobiPolyP, poch_zero, ordinaryHypergeometric_zero_left]
 
-/-- Legendre polynomials as Jacobi polynomials with `α = β = 0`. -/
-@[dlmf 18.7.E9]
-def legendrePolyP (n : ℕ) (x : ℂ) : ℂ :=
-  jacobiPolyP 0 0 n x
+
 
 /-- Identity under the stated parameter and domain assumptions: `legendrePolyP 0 x = 1`. -/
 @[dlmf 18.5.E16]
@@ -697,12 +685,7 @@ theorem jacobiPolyP_orthogonal {α β : ℝ} {m n : ℕ}
         intervalIntegral.integral_congr fun x _ => by ring
       _ = 0 := hlt n m h
 
-/-- Hypergeometric realization of Gegenbauer polynomials, AAR §6.11,
-for `λ + 1/2` not a nonpositive integer:
-`C_n^{(λ)}(x) = (2λ)_n / n! · ₂F₁(-n, n+2λ; λ+1/2; (1-x)/2)`. -/
-@[dlmf 18.5.E9]
-def ultrasphPoly (lam : ℂ) (n : ℕ) (x : ℂ) : ℂ :=
-  poch (2 * lam) n / n ! * ₂F₁ (-n : ℂ) (n + 2 * lam) (lam + 1 / 2) ((1 - x) / 2)
+
 
 /-- `C_0^{(λ)}(x) = 1`. -/
 @[simp]
@@ -832,12 +815,7 @@ theorem ultrasphPoly_one_coeff {n k : ℕ} (hk : k ≤ n) :
   rw [gaussHGCoeff_neg_nat, poch_three_halves_factorial, hpoch, hch, hnk', hfac]
   field [hk0, hn, hn1, hnk, h2k, h4]
 
-/-- Helper lemma for `eval_U_eq_ultrasphPoly`. Closed form of the coefficients of `C_n^{(1)}`. -/
-def gegenbauerB (n k : ℕ) : ℂ :=
-  if k ≤ n then
-    (-1 : ℂ) ^ k * (4 : ℂ) ^ k * (n + k + 1).factorial /
-      ((n - k).factorial * (2 * k + 1).factorial : ℂ)
-  else 0
+
 
 /-- Helper lemma for `eval_U_eq_ultrasphPoly`. -/
 theorem gegenbauerB_eq (n k : ℕ) :
@@ -924,9 +902,6 @@ theorem ultrasphPoly_eq_jacobiPolyP {lam : ℂ} (n : ℕ) (x : ℂ)
   simp_rw [hα, hb]
   field [h, Nat.cast_ne_zero.mpr n.factorial_ne_zero]
 
-/-- The Jacobi weight measure on `(-1,1)`. -/
-def jacobiMeasure (α β : ℝ) : Measure ℝ :=
-  (volume.restrict (Set.Ioo (-1 : ℝ) 1)).withDensity
-    (fun x => ENNReal.ofReal ((1 - x) ^ α * (1 + x) ^ β))
+
 
 end DLMF.OrthogonalPolynomials

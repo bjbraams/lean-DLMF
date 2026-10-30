@@ -5,7 +5,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Mathieu.Hill.Defs
+public import DLMF.Mathieu.Hill.Basic
 public import DLMFMathlib.Analysis.ODE.P1oLinearGlobal
 public import DLMFMathlib.Analysis.ODE.P1oParamHolomorphic
 public import DLMFMathlib.Analysis.ODE.P2sGrowth
@@ -16,7 +16,7 @@ public import Mathlib.Analysis.Calculus.ContDiff.Defs
 # Hill's equation: Floquet theory and the discriminant (DLMF §28.29)
 
 Statements of DLMF §28.29 for Hill's equation `w'' + (λ + Q(x)) w = 0` (definitions in
-`DLMF.Mathieu.Hill.Defs`):
+`DLMF.Mathieu.Hill.Basic`):
 
 * §28.29(i): Mathieu's equation is the case `Q(x) = -2q cos 2x` (`isHillPotential_mathieu`).
 * §28.29(ii): existence (`hill_exists_solution`, from `ODE.exists_linear_ode`) and uniqueness

@@ -8,6 +8,12 @@ module
 public import DLMF.JacobiElliptic.Integrals
 public import DLMF.Elementary.Trigonometric
 public import DLMF.Elliptic.JacobiIdentities
+public import DLMF.JacobiElliptic.SpecialValues.ModulusLimits
+public import Mathlib.Analysis.Calculus.Taylor
+public import Mathlib.Analysis.Calculus.DSlope
+public import Mathlib.Analysis.Calculus.FDeriv.Analytic
+public import Mathlib.Analysis.Complex.CauchyIntegral
+public import Mathlib.Analysis.Complex.RealDeriv
 
 /-!
 # Related functions: amplitude, Jacobi's Epsilon and Zeta functions (DLMF §22.16)
@@ -101,20 +107,109 @@ theorem Real.jacobiAmm_eq_integral_jacobiDnm (hm : m < 1) (x : ℝ) :
   rw [h, Real.jacobiAmm_zero hm, sub_zero]
 
 /-- DLMF 22.16.5: `am(x, 1) = gd(x)`, as the limit `k → 1⁻` (the existing real amplitude is
-defined only for `m < 1`). Admitted. -/
+defined only for `m < 1`). -/
 @[dlmf 22.16.E5 "different convention: limit k → 1⁻, since Real.jacobiAmm is totalized at m = 1"]
 theorem Real.tendsto_jacobiAmm_one (x : ℝ) :
     Tendsto (fun k : ℝ => Real.jacobiAmm x (k ^ 2)) (𝓝[<] 1)
       (𝓝 (DLMF.Elementary.gudermannian x)) := by
-  sorry
+  have hcosh : Complex.cosh (x : ℂ) ≠ 0 := by
+    rw [← Complex.ofReal_cosh]
+    exact_mod_cast (Real.cosh_pos x).ne'
+  have hsn := (Complex.continuous_re.tendsto _).comp (tendsto_jacobiSnk_one (x : ℂ) hcosh)
+  rw [Complex.tanh_ofReal_re] at hsn
+  have hsn' : Tendsto (fun k : ℝ => Real.jacobiSnm x (k ^ 2)) (𝓝[<] 1)
+      (𝓝 (Real.tanh x)) := by
+    apply hsn.congr'
+    filter_upwards [Ioo_mem_nhdsLT (show (0 : ℝ) < 1 by norm_num)] with k hk
+    simp only [Function.comp_apply]
+    rw [jacobiSnk_ofReal hk.1 hk.2, Complex.ofReal_re]
+  have hlim := Real.continuous_arcsin.continuousAt.tendsto.comp hsn'
+  rw [← (DLMF.Elementary.gudermannian_elementary x).2.1] at hlim
+  apply hlim.congr'
+  filter_upwards [Ioo_mem_nhdsLT (show (0 : ℝ) < 1 by norm_num),
+    (tendsto_norm_compEllIntKk_one.eventually_gt_atTop |x|)] with k hk hK
+  have hm : k ^ 2 < 1 := by nlinarith [hk.1, hk.2]
+  rw [compEllIntKk_ofReal hm, Complex.norm_real,
+    Real.norm_of_nonneg (Real.compEllIntKm_pos hm).le] at hK
+  exact (Real.jacobiAmm_eq_arcsin_jacobiSnm hm
+    (by linarith [neg_abs_le x]) (by linarith [le_abs_self x])).symm
+
+/-- The derivatives of the real Jacobi amplitude through order six at the origin.
+They follow successively from the real Jacobi differential equations and determine
+the Maclaurin polynomial without restricting the parameter to a positive modulus. -/
+private lemma jacobiAmm_derivatives_zero {m : ℝ} (hm : m < 1) :
+    ∀ i : Fin 7, iteratedDeriv i (fun x => Real.jacobiAmm x m) 0 =
+      (![0, 1, 0, -m, 0, m * (4 + m), 0] : Fin 7 → ℝ) i := by
+  let A := fun x => Real.jacobiAmm x m
+  let S := fun x => Real.jacobiSnm x m
+  let C := fun x => Real.jacobiCnm x m
+  let D := fun x => Real.jacobiDnm x m
+  have hS : Differentiable ℝ S := fun x => (Real.hasDerivAt_jacobiSnm hm x).differentiableAt
+  have hC : Differentiable ℝ C := fun x => (Real.hasDerivAt_jacobiCnm hm x).differentiableAt
+  have hD : Differentiable ℝ D := fun x => (Real.hasDerivAt_jacobiDnm hm x).differentiableAt
+  have dA : deriv A = D := funext fun x => (Real.hasDerivAt_jacobiAmm hm x).deriv
+  have dS (x) : deriv S x = C x * D x := (Real.hasDerivAt_jacobiSnm hm x).deriv
+  have dC (x) : deriv C x = -(S x * D x) := (Real.hasDerivAt_jacobiCnm hm x).deriv
+  have dD (x) : deriv D x = -(m * S x * C x) := (Real.hasDerivAt_jacobiDnm hm x).deriv
+  have j1 : iteratedDeriv 1 A = D := by rw [iteratedDeriv_one, dA]
+  have j2 : iteratedDeriv 2 A = fun x => -(m * S x * C x) := by
+    rw [show 2=1 + 1 by norm_num, iteratedDeriv_succ, j1]; exact funext dD
+  have j3 : iteratedDeriv 3 A = fun x => -m * D x * (C x - S x) * (C x + S x) := by
+    rw [show 3=2 + 1 by norm_num, iteratedDeriv_succ, j2]
+    funext x
+    simp (disch := fun_prop) [dS, dC]
+    ring
+  have j4 : iteratedDeriv 4 A = fun x => m * C x * S x * (m * C x ^ 2 + 4 * D x ^ 2 - m * S x ^ 2) := by
+    rw [show 4=3 + 1 by norm_num, iteratedDeriv_succ, j3]
+    funext x
+    simp (disch := fun_prop) [dS, dC, dD]
+    ring
+  have j5 : iteratedDeriv 5 A = fun x => m * D x * (m * C x ^ 4 + 4 * C x ^ 2 * D x ^ 2-
+      14 * m * C x ^ 2 * S x ^ 2 - 4 * D x ^ 2 * S x ^ 2 + m * S x ^ 4) := by
+    rw [show 5=4 + 1 by norm_num, iteratedDeriv_succ, j4]
+    funext x
+    simp (disch := fun_prop) [dS, dC, dD]
+    ring
+  have j6 : iteratedDeriv 6 A = fun x => -m * C x * S x * (m ^ 2 * C x ^ 4 + 44 * m * C x ^ 2 * D x ^ 2-
+      14 * m ^ 2 * C x ^ 2 * S x ^ 2 + 16 * D x ^ 4 - 44 * m * D x ^ 2 * S x ^ 2 + m ^ 2 * S x ^ 4) := by
+    rw [show 6=5 + 1 by norm_num, iteratedDeriv_succ, j5]
+    funext x
+    simp (disch := fun_prop) [dS, dC, dD]
+    ring
+  intro i
+  change iteratedDeriv (i : ℕ) A 0 = _
+  fin_cases i <;> simp [j1, j2, j3, j4, j5, j6, A, S, C, D, Real.jacobiAmm_zero hm,
+    Real.jacobiSnm, Real.jacobiCnm, Real.jacobiDnm, add_comm]
 
 /-- DLMF 22.16.6: `am(x,k) = x - k² x³/3! + k²(4 + k²) x⁵/5! + O(x⁷)` as `x → 0`, `m = k²`.
-Admitted. -/
+The remainder follows from Mathlib's `taylor_isLittleO_univ` and the Jacobi ODE coefficients. -/
 @[dlmf 22.16.E6 "special case: real x, real parameter m = k² < 1"]
 theorem Real.jacobiAmm_isBigO_maclaurin (hm : m < 1) :
     (fun x => Real.jacobiAmm x m - (x - m * x ^ 3 / 6 + m * (4 + m) * x ^ 5 / 120)) =O[𝓝 0]
       fun x => x ^ 7 := by
-  sorry
+  let A := fun x => Real.jacobiAmm x m
+  have h0 := jacobiAmm_derivatives_zero hm ⟨0, by decide⟩
+  have h1 := jacobiAmm_derivatives_zero hm ⟨1, by decide⟩
+  have h2 := jacobiAmm_derivatives_zero hm ⟨2, by decide⟩
+  have h3 := jacobiAmm_derivatives_zero hm ⟨3, by decide⟩
+  have h4 := jacobiAmm_derivatives_zero hm ⟨4, by decide⟩
+  have h5 := jacobiAmm_derivatives_zero hm ⟨5, by decide⟩
+  have h6 := jacobiAmm_derivatives_zero hm ⟨6, by decide⟩
+  norm_num at h0 h1 h2 h3 h4 h5 h6
+  have ht (x : ℝ) : taylorWithinEval A 7 Set.univ 0 x =
+      x - m * x ^ 3 / 6 + m * (4 + m) * x ^ 5 / 120 + iteratedDeriv 7 A 0 / 5040 * x ^ 7 := by
+    rw [taylor_within_apply]
+    norm_num [Finset.sum_range_succ, iteratedDerivWithin_univ,
+      h0, h1, h2, h3, h4, h5, h6, A]
+    ring
+  have hf : ContDiff ℝ (7 : ℕ) A := (Real.contDiff_jacobiAmm hm).of_le (by simp)
+  have h := (taylor_isLittleO_univ (x₀:=0) hf).isBigO
+  simp only [sub_zero] at h
+  have hc := (isBigO_refl (fun x : ℝ => x ^ 7) (𝓝 0)).const_mul_left (iteratedDeriv 7 A 0 / 5040)
+  convert h.add hc using 1
+  funext x
+  rw [ht]
+  ring
 
 /-- DLMF 22.16.7: `am(x,k) = x - k²(x - sin x cos x)/4 + O(k⁴)` as `k → 0`, for fixed real `x`.
 Admitted. -/
@@ -645,18 +740,207 @@ theorem Real.jacobiEpsilonk_eq_integral_sc_sq (hk0 : 0 < k) (hk1 : k < 1) {x : �
   simp only [mul_zero, zero_mul, add_zero, sub_zero] at key
   linarith
 
+open Complex Set MeasureTheory in
+/-- Dividing `sn(z,k)` by `z` with Mathlib's `dslope` removes the origin zero.
+The quotient is analytic at every real argument, equals one at zero, and has zero
+derivative there because `sn` is odd. -/
+private lemma jacobiSnk_dslope_regular {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) :
+    let g := dslope (fun z : ℂ => jacobiSnk z k) 0
+    g 0 = 1 ∧ deriv g 0 = 0 ∧ ∀ x : ℝ, AnalyticAt ℂ g (x : ℂ) := by
+  dsimp only
+  let s := fun z : ℂ => jacobiSnk z k
+  have hk := p22R1_ofReal_mem hk0 hk1
+  have han (x : ℝ) : AnalyticAt ℂ s (x : ℂ) := by
+    apply analyticAt_iff_eventually_differentiableAt.mpr
+    filter_upwards [p22R1_eventually_ne hk (p22R1_reg_real hk0 hk1 x)] with z hz
+    exact (hasDerivAt_jacobiSnk hk hz).differentiableAt
+  have hag (x : ℝ) : AnalyticAt ℂ (dslope s 0) (x : ℂ) := (han x).dslope 0
+  have hg0 : dslope s 0 0 = 1 := by
+    rw [dslope_same]
+    simpa [s, jacobiCnk_zero hk, jacobiDnk_zero hk] using
+      (hasDerivAt_jacobiSnk hk (p22R1_reg0 hk (q:=.n) (by decide))).deriv
+  have heven : ∀ z : ℂ, dslope s 0 (-z) = dslope s 0 z := by
+    intro z
+    by_cases hz : z = 0
+    · simp [hz]
+    rw [dslope_of_ne _ (neg_ne_zero.mpr hz), dslope_of_ne _ hz]
+    have hs0 : s 0 = 0 := jacobiSnk_zero hk
+    have hodd : s (-z) = -s z := by simp [s, jacobiSnk, jacobiPQk_neg]
+    simp only [slope, hs0, sub_zero, smul_eq_mul, hodd, vsub_eq_sub]
+    ring
+  have hd : HasDerivAt (dslope s 0) (deriv (dslope s 0) 0) (0 : ℂ) := by
+    simpa using (hag 0).differentiableAt.hasDerivAt
+  have hd' := (show HasDerivAt (dslope s 0) (deriv (dslope s 0) 0) (-(0 : ℂ)) by
+    simpa using hd).comp (0 : ℂ) (hasDerivAt_neg (0 : ℂ))
+  change HasDerivAt (fun z : ℂ => dslope s 0 (-z)) (deriv (dslope s 0) 0 * (-1)) 0 at hd'
+  simp only [heven] at hd'
+  have he : deriv (dslope s 0) 0 * (-1) = deriv (dslope s 0) 0 := hd'.unique hd
+  refine ⟨hg0, ?_, hag⟩
+  linear_combination -(1 / 2 : ℂ) * he
+
+open Complex Set MeasureTheory in
+/-- The real Jacobi sine has no zero strictly between `-2K` and `2K` except at zero. -/
+private lemma jacobiSnm_ne_zero_between {m : ℝ} (hm : m < 1) (t : ℝ)
+    (ht : t ∈ Ioo (-(2 * Real.compEllIntKm m)) (2 * Real.compEllIntKm m)) (ht0 : t ≠ 0) :
+    Real.jacobiSnm t m ≠ 0 := by
+  rcases lt_or_gt_of_ne ht0 with hn | hp
+  · have h := je22b_jacobiSnm_pos hm (by linarith : 0 < -t)
+      (by linarith [ht.1] : -t < 2 * Real.compEllIntKm m)
+    rw [(jacobi_neg hm t).1] at h
+    exact fun h0 => by rw [h0, neg_zero] at h; exact lt_irrefl _ h
+  · exact (je22b_jacobiSnm_pos hm hp ht.2).ne'
+
+open Complex Set MeasureTheory in
+/-- The regularized expression `1/t+t-cn(t)dn(t)/sn(t)` extends to a smooth real
+primitive vanishing at zero. Its derivative away from zero is
+`ns(t)²-t⁻²+dn(t)²`; analyticity of the divided Jacobi sine supplies the extension. -/
+private lemma jacobiNs_regularized_primitive {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) :
+    ∃ F G : ℝ → ℝ, F 0 = 0 ∧ ∀ t ∈ Ioo (-(2 * Real.compEllIntKm (k ^ 2))) (2 * Real.compEllIntKm (k ^ 2)),
+      HasDerivAt F (G t) t ∧ ContinuousAt G t ∧
+      (t ≠ 0 → F t = t⁻¹ + t - Real.jacobiCnm t (k ^ 2) * (Real.jacobiDnm t (k ^ 2) / Real.jacobiSnm t (k ^ 2)) ∧
+        G t = (1 / Real.jacobiSnm t (k ^ 2)) ^ 2 - t⁻¹ ^ 2 + Real.jacobiDnm t (k ^ 2) ^ 2) := by
+  let s := fun z : ℂ => jacobiSnk z k
+  let g := dslope s 0
+  let H := fun z : ℂ => -(deriv g z / g z) + z
+  let F := fun t : ℝ => (H t).re
+  let G := fun t : ℝ => (deriv H t).re
+  have hk := p22R1_ofReal_mem hk0 hk1
+  have hm : k ^ 2 < 1 := by nlinarith
+  obtain ⟨hg0, hdg0, hgan⟩ := jacobiSnk_dslope_regular hk0 hk1
+  change g 0 = 1 at hg0
+  change deriv g 0 = 0 at hdg0
+  change ∀ t : ℝ, AnalyticAt ℂ g (t : ℂ) at hgan
+  have hs0 : s 0 = 0 := jacobiSnk_zero hk
+  have hsne := jacobiSnm_ne_zero_between hm
+  have heg (t : ℝ) (ht0 : t ≠ 0) : g =ᶠ[𝓝 (t : ℂ)] fun z => s z / z := by
+    have htC : (t : ℂ) ≠ 0 := ofReal_ne_zero.mpr ht0
+    filter_upwards [dslope_eventuallyEq_slope_of_ne s htC] with z hz
+    simpa only [slope, hs0, sub_zero, vsub_eq_sub, smul_eq_mul, div_eq_mul_inv, mul_comm] using hz
+  have hgval (t : ℝ) (ht0 : t ≠ 0) : g (t : ℂ) = s t / t := (heg t ht0).self_of_nhds
+  have hgN (t : ℝ) (ht : t ∈ Ioo (-(2 * Real.compEllIntKm (k ^ 2))) (2 * Real.compEllIntKm (k ^ 2))) : g (t : ℂ) ≠ 0 := by
+    by_cases ht0 : t = 0
+    · simp [ht0, hg0]
+    · rw [hgval t ht0]
+      exact div_ne_zero (by dsimp only [s]; rw [jacobiSnk_ofReal hk0 hk1]; exact ofReal_ne_zero.mpr (hsne t ht ht0))
+        (ofReal_ne_zero.mpr ht0)
+  have hH (t : ℝ) (ht : t ∈ Ioo (-(2 * Real.compEllIntKm (k ^ 2))) (2 * Real.compEllIntKm (k ^ 2))) :
+      AnalyticAt ℂ H (t : ℂ) := ((hgan t).deriv.div (hgan t) (hgN t ht)).neg.add analyticAt_id
+  have hFeq (t : ℝ) (ht : t ∈ Ioo (-(2 * Real.compEllIntKm (k ^ 2))) (2 * Real.compEllIntKm (k ^ 2)))
+      (ht0 : t ≠ 0) : F t = t⁻¹ + t - Real.jacobiCnm t (k ^ 2) * (Real.jacobiDnm t (k ^ 2) / Real.jacobiSnm t (k ^ 2)) := by
+    have htC : (t : ℂ) ≠ 0 := ofReal_ne_zero.mpr ht0
+    have hsC : s (t : ℂ) ≠ 0 := by dsimp only [s]; rw [jacobiSnk_ofReal hk0 hk1]; exact ofReal_ne_zero.mpr (hsne t ht ht0)
+    have hd := (hasDerivAt_jacobiSnk hk (p22R1_reg_real hk0 hk1 t)).div (hasDerivAt_id (t : ℂ)) htC
+    simp only [id_eq, mul_one] at hd
+    change HasDerivAt (fun z : ℂ => s z / z)
+      ((jacobiCnk t k * jacobiDnk t k * (t : ℂ) - s t) / (t : ℂ) ^ 2) (t : ℂ) at hd
+    have he : H (t : ℂ) = (t : ℂ)⁻¹ + (t : ℂ) - jacobiCnk t k * (jacobiDnk t k / jacobiSnk t k) := by
+      change -(deriv g (t : ℂ) / g (t : ℂ)) + (t : ℂ) = _
+      rw [(heg t ht0).deriv_eq, hd.deriv, hgval t ht0]
+      dsimp only [s]
+      have hSn0 : jacobiSnk t k ≠ 0 := hsC
+      field_simp [htC, hSn0]
+      ring
+    change (H (t : ℂ)).re = _
+    rw [he, jacobiSnk_ofReal hk0 hk1, jacobiCnk_ofReal hk0 hk1, jacobiDnk_ofReal hk0 hk1,
+      ←ofReal_inv, ←ofReal_div, ←ofReal_mul, ←ofReal_add, ←ofReal_sub, ofReal_re]
+  refine ⟨F, G, by simp [F, H, hg0, hdg0], fun t ht => ⟨?_, ?_, ?_⟩⟩
+  · exact (hH t ht).differentiableAt.hasDerivAt.real_of_complex
+  · exact Complex.continuous_re.continuousAt.comp
+      ((hH t ht).deriv.continuousAt.comp Complex.continuous_ofReal.continuousAt)
+  · intro ht0
+    refine ⟨hFeq t ht ht0, ?_⟩
+    have hev : F =ᶠ[𝓝 t] fun w : ℝ => w⁻¹ + w - Real.jacobiCnm w (k ^ 2) *
+        (Real.jacobiDnm w (k ^ 2) / Real.jacobiSnm w (k ^ 2)) := by
+      filter_upwards [Ioo_mem_nhds ht.1 ht.2, eventually_ne_nhds ht0] with w hw hw0
+      exact hFeq w hw hw0
+    have hd := ((hasDerivAt_inv ht0).add (hasDerivAt_id t)).sub
+      ((Real.hasDerivAt_jacobiCnm hm t).mul
+        ((Real.hasDerivAt_jacobiDnm hm t).div (Real.hasDerivAt_jacobiSnm hm t) (hsne t ht ht0)))
+    have hd' := hd.congr_of_eventuallyEq hev
+    have hF := (hH t ht).differentiableAt.hasDerivAt.real_of_complex
+    change HasDerivAt F (G t) t at hF
+    rw [hF.unique hd']
+    have h1 := Real.jacobiSnm_sq_add_jacobiCnm_sq t (k ^ 2)
+    have h2 := Real.mul_jacobiSnm_sq_add_jacobiDnm_sq hm t
+    dsimp only [Pi.div_apply]
+    field_simp [ht0, hsne t ht ht0]
+    linear_combination t ^ 2 * h1 + t ^ 2 * Real.jacobiCnm t (k ^ 2) ^ 2 * h2
+
+open Complex Set MeasureTheory in
+/-- The regularized `ns²` integrand is integrable across the origin. Its primitive
+gives the epsilon integral formula, with the point value at zero handled by almost
+everywhere equality. -/
+private lemma jacobiEpsilonk_ns_integral_aux {k x : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hx : x ≠ 0)
+    (hx0 : -(2 * Real.compEllIntKm (k ^ 2)) < x) (hx1 : x < 2 * Real.compEllIntKm (k ^ 2)) :
+    IntervalIntegrable (fun t => (1 / Real.jacobiSnm t (k ^ 2)) ^ 2 - t⁻¹ ^ 2) volume 0 x ∧
+    Real.jacobiEpsilonk x k = -(∫ t in (0 : ℝ)..x, (1 / Real.jacobiSnm t (k ^ 2)) ^ 2 - t⁻¹ ^ 2) +
+      x⁻¹ + x - Real.jacobiCnm x (k ^ 2) * (Real.jacobiDnm x (k ^ 2) / Real.jacobiSnm x (k ^ 2)) := by
+  obtain ⟨F, G, hF0, hFG⟩ := jacobiNs_regularized_primitive hk0 hk1
+  have hm : k ^ 2 < 1 := by nlinarith
+  have hK := Real.compEllIntKm_pos hm
+  have hseg : uIcc 0 x ⊆ Ioo (-(2 * Real.compEllIntKm (k ^ 2))) (2 * Real.compEllIntKm (k ^ 2)) := by
+    intro t ht
+    rw [mem_uIcc] at ht
+    rcases ht with ht | ht <;> exact ⟨by linarith [ht.1, ht.2], by linarith [ht.1, ht.2]⟩
+  have hGc : ContinuousOn G (uIcc 0 x) := fun t ht => (hFG t (hseg ht)).2.1.continuousWithinAt
+  have hGi : IntervalIntegrable G volume 0 x := hGc.intervalIntegrable
+  have hdi : IntervalIntegrable (fun t => Real.jacobiDnm t (k ^ 2) ^ 2) volume 0 x :=
+    ((je22b_continuous_jacobiDnm hm).pow 2).intervalIntegrable _ _
+  have he : (fun t => G t - Real.jacobiDnm t (k ^ 2) ^ 2) =ᵐ[volume.restrict (uIoc 0 x)]
+      (fun t => (1 / Real.jacobiSnm t (k ^ 2)) ^ 2 - t⁻¹ ^ 2) := by
+    filter_upwards [ae_restrict_mem measurableSet_uIoc, (volume.restrict (uIoc 0 x)).ae_ne 0] with t ht ht0
+    rw [((hFG t (hseg (uIoc_subset_uIcc ht))).2.2 ht0).2]
+    ring
+  have hni := (hGi.sub hdi).congr_ae he
+  refine ⟨hni, ?_⟩
+  have hI := intervalIntegral.integral_eq_sub_of_hasDerivAt (fun t ht => (hFG t (hseg ht)).1) hGi
+  have hN : (∫ t in (0 : ℝ)..x, (1 / Real.jacobiSnm t (k ^ 2)) ^ 2 - t⁻¹ ^ 2) =
+      F x - Real.jacobiEpsilonk x k := by
+    rw [←intervalIntegral.integral_congr_ae_restrict he, intervalIntegral.integral_sub hGi hdi, hI, hF0, sub_zero]
+    rfl
+  rw [((hFG x ⟨hx0, hx1⟩).2.2 hx).1] at hN
+  linarith
+
+open Complex Set MeasureTheory in
+/-- A squared identity `v²+α sn²=1` changes the regularized `ns²` integral by `-αx`.
+This applies to both `v=dn`, `α=k²` and `v=cn`, `α=1`. -/
+private lemma jacobiNs_sq_integral_shift {k x : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (hx : x ≠ 0)
+    (hx0 : -(2 * Real.compEllIntKm (k ^ 2)) < x) (hx1 : x < 2 * Real.compEllIntKm (k ^ 2))
+    (v : ℝ → ℝ) (α : ℝ) (hv : ∀ t, v t ^ 2 + α * Real.jacobiSnm t (k ^ 2) ^ 2 = 1) :
+    (∫ t in (0 : ℝ)..x, (v t / Real.jacobiSnm t (k ^ 2)) ^ 2 - t⁻¹ ^ 2) =
+      (∫ t in (0 : ℝ)..x, (1 / Real.jacobiSnm t (k ^ 2)) ^ 2 - t⁻¹ ^ 2) - α * x := by
+  have hm : k ^ 2 < 1 := by nlinarith
+  have hK := Real.compEllIntKm_pos hm
+  have hni := (jacobiEpsilonk_ns_integral_aux hk0 hk1 hx hx0 hx1).1
+  have he : (fun t => (v t / Real.jacobiSnm t (k ^ 2)) ^ 2 - t⁻¹ ^ 2) =ᵐ[volume.restrict (uIoc 0 x)]
+      (fun t => ((1 / Real.jacobiSnm t (k ^ 2)) ^ 2 - t⁻¹ ^ 2) - α) := by
+    filter_upwards [ae_restrict_mem measurableSet_uIoc, (volume.restrict (uIoc 0 x)).ae_ne 0] with t ht ht0
+    have hts : t ∈ Ioo (-(2 * Real.compEllIntKm (k ^ 2))) (2 * Real.compEllIntKm (k ^ 2)) := by
+      have htt := uIoc_subset_uIcc ht
+      rw [mem_uIcc] at htt
+      rcases htt with hh | hh <;> exact ⟨by linarith [hh.1, hh.2], by linarith [hh.1, hh.2]⟩
+    have hrat : (v t / Real.jacobiSnm t (k ^ 2)) ^ 2 = (1 / Real.jacobiSnm t (k ^ 2)) ^ 2 - α := by
+      field_simp [jacobiSnm_ne_zero_between hm t hts ht0]
+      nlinarith [hv t]
+    rw [hrat]
+    ring
+  rw [intervalIntegral.integral_congr_ae_restrict he,
+    intervalIntegral.integral_sub hni intervalIntegrable_const, intervalIntegral.integral_const]
+  simp only [sub_zero, smul_eq_mul]
+  ring
+
 /-- DLMF 22.16.24: `ℰ(x,k) = -∫₀ˣ (ns²(t,k) - t⁻²) dt + x⁻¹ + x - cn(x,k) ds(x,k)` for
-`0 < |x| < 2K` (the integrand has a removable singularity at `t = 0`). Admitted. -/
+`0 < |x| < 2K` (the integrand has a removable singularity at `t = 0`). -/
 @[dlmf 22.16.E24 "special case: real modulus 0 < k < 1, x ≠ 0"]
 theorem Real.jacobiEpsilonk_eq_integral_ns_sq (hk0 : 0 < k) (hk1 : k < 1) {x : ℝ} (hx : x ≠ 0)
     (hx0 : -(2 * Real.compEllIntKm (k ^ 2)) < x) (hx1 : x < 2 * Real.compEllIntKm (k ^ 2)) :
     Real.jacobiEpsilonk x k =
       -(∫ t in (0 : ℝ)..x, ((1 / Real.jacobiSnm t (k ^ 2)) ^ 2 - t⁻¹ ^ 2)) + x⁻¹ + x -
         Real.jacobiCnm x (k ^ 2) * (Real.jacobiDnm x (k ^ 2) / Real.jacobiSnm x (k ^ 2)) := by
-  sorry
+  exact (jacobiEpsilonk_ns_integral_aux hk0 hk1 hx hx0 hx1).2
 
 /-- DLMF 22.16.25: `ℰ(x,k) = -∫₀ˣ (ds²(t,k) - t⁻²) dt + x⁻¹ + k'² x - cn(x,k) ds(x,k)` for
-`0 < |x| < 2K`. Admitted. -/
+`0 < |x| < 2K`. -/
 @[dlmf 22.16.E25 "special case: real modulus 0 < k < 1, x ≠ 0"]
 theorem Real.jacobiEpsilonk_eq_integral_ds_sq (hk0 : 0 < k) (hk1 : k < 1) {x : ℝ} (hx : x ≠ 0)
     (hx0 : -(2 * Real.compEllIntKm (k ^ 2)) < x) (hx1 : x < 2 * Real.compEllIntKm (k ^ 2)) :
@@ -665,10 +949,14 @@ theorem Real.jacobiEpsilonk_eq_integral_ds_sq (hk0 : 0 < k) (hk1 : k < 1) {x : �
           ((Real.jacobiDnm t (k ^ 2) / Real.jacobiSnm t (k ^ 2)) ^ 2 - t⁻¹ ^ 2)) + x⁻¹ +
         (1 - k ^ 2) * x -
         Real.jacobiCnm x (k ^ 2) * (Real.jacobiDnm x (k ^ 2) / Real.jacobiSnm x (k ^ 2)) := by
-  sorry
+  have hm : k ^ 2 < 1 := by nlinarith
+  rw [jacobiNs_sq_integral_shift hk0 hk1 hx hx0 hx1 (fun t => Real.jacobiDnm t (k ^ 2)) (k ^ 2)
+    (fun t => by linarith [Real.mul_jacobiSnm_sq_add_jacobiDnm_sq hm t])]
+  rw [(jacobiEpsilonk_ns_integral_aux hk0 hk1 hx hx0 hx1).2]
+  ring
 
 /-- DLMF 22.16.26: `ℰ(x,k) = -∫₀ˣ (cs²(t,k) - t⁻²) dt + x⁻¹ - cn(x,k) ds(x,k)` for
-`0 < |x| < 2K`. Admitted. -/
+`0 < |x| < 2K`. -/
 @[dlmf 22.16.E26 "special case: real modulus 0 < k < 1, x ≠ 0"]
 theorem Real.jacobiEpsilonk_eq_integral_cs_sq (hk0 : 0 < k) (hk1 : k < 1) {x : ℝ} (hx : x ≠ 0)
     (hx0 : -(2 * Real.compEllIntKm (k ^ 2)) < x) (hx1 : x < 2 * Real.compEllIntKm (k ^ 2)) :
@@ -676,7 +964,10 @@ theorem Real.jacobiEpsilonk_eq_integral_cs_sq (hk0 : 0 < k) (hk1 : k < 1) {x : �
       -(∫ t in (0 : ℝ)..x,
           ((Real.jacobiCnm t (k ^ 2) / Real.jacobiSnm t (k ^ 2)) ^ 2 - t⁻¹ ^ 2)) + x⁻¹ -
         Real.jacobiCnm x (k ^ 2) * (Real.jacobiDnm x (k ^ 2) / Real.jacobiSnm x (k ^ 2)) := by
-  sorry
+  rw [jacobiNs_sq_integral_shift hk0 hk1 hx hx0 hx1 (fun t => Real.jacobiCnm t (k ^ 2)) 1
+    (fun t => by linarith [Real.jacobiSnm_sq_add_jacobiCnm_sq t (k ^ 2)])]
+  rw [(jacobiEpsilonk_ns_integral_aux hk0 hk1 hx hx0 hx1).2]
+  ring
 
 /-- DLMF 22.16.27: the quasi-addition formula
 `ℰ(x₁ + x₂, k) = ℰ(x₁, k) + ℰ(x₂, k) - k² sn(x₁,k) sn(x₂,k) sn(x₁ + x₂,k)`. -/

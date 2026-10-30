@@ -6,7 +6,7 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.GeneralizedHypergeometric.Basic
+public import DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties
 public import TauCeti.Analysis.Complex.Conformal.Continuation.Basic
 public import Mathlib.Algebra.Order.Ring.Star
 
