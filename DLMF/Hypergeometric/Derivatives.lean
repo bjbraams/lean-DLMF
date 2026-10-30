@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Hypergeometric.DiffEq
+public import DLMFMathlib.Analysis.Calculus.DifferentialOperators
 
 /-!
 # Higher derivatives and contiguous relations (DLMF §15.5)
@@ -31,13 +32,6 @@ theorem ordinaryHypergeometric_symm (a b c : ℂ) : (₂F₁ a b c : ℂ → ℂ
   funext z
   unfold ordinaryHypergeometric
   rw [ordinaryHypergeometricSeries_symm]
-
-/-- The differential operator `f ↦ z * (z * f)'`. -/
-def mulDerivMul (f : ℂ → ℂ) (z : ℂ) : ℂ := z * deriv (fun w => w * f w) z
-
-/-- The differential operator `f ↦ (1-z) * ((1-z) * f)'`. -/
-def oneSubMulDerivMul (f : ℂ → ℂ) (z : ℂ) : ℂ :=
-  (1 - z) * deriv (fun w => (1 - w) * f w) z
 
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (₂F₁ a b c) z =
 poch a n * poch b n / poch c n * ₂F₁ (a + n) (b + n) (c + n) z`. -/
@@ -78,17 +72,17 @@ private lemma deriv_cpow_mul_hg {a b c z : ℂ} (s : ℂ)
   have hp := (hasDerivAt_id z).cpow_const (c := s) hs
   simpa only [mul_one, hF.deriv, id_eq, Pi.mul_def] using (hp.mul hF).deriv
 
-/-- The operator `mulDerivMul` maps `z ^ (a - 1) ₂F₁(a, b; c; z)` to `a z ^ a ₂F₁(a + 1, b; c; z)`.
+/-- The operator `Function.mulDerivMul` maps `z ^ (a - 1) ₂F₁(a, b; c; z)` to `a z ^ a ₂F₁(a + 1, b; c; z)`.
   -/
 private lemma mulDerivMul_hg {a b c z : ℂ}
     (hc : ∀ k : ℕ, c ≠ -(k : ℂ)) (hz : ‖z‖ < 1) (hs : z ∈ slitPlane) :
-    mulDerivMul (fun w => w ^ (a - 1) * ₂F₁ a b c w) z =
+    Function.mulDerivMul (fun w => w ^ (a - 1) * ₂F₁ a b c w) z =
       a * z ^ a * ₂F₁ (a + 1) b c z := by
   have heq : (fun w => w * (w ^ (a - 1) * ₂F₁ a b c w)) =ᶠ[𝓝 z]
       (fun w => w ^ a * ₂F₁ a b c w) := by
     filter_upwards [isOpen_slitPlane.mem_nhds hs] with w hw
     rw [← mul_assoc, mul_cpow_pred (slitPlane_ne_zero hw)]
-  rw [mulDerivMul, heq.deriv_eq, deriv_cpow_mul_hg a hc hz hs,
+  rw [Function.mulDerivMul, heq.deriv_eq, deriv_cpow_mul_hg a hc hz hs,
     ← mul_cpow_pred (slitPlane_ne_zero hs) a]
   have h := ordinaryHypergeometric_mul_deriv_eq_shift_a (a := a) (b := b) hc hz
   linear_combination z * z ^ (a - 1) * h
@@ -106,7 +100,7 @@ private lemma deriv_cpow_mul_hg_lower {a b c z : ℂ}
   simp only [sub_add_cancel] at hd
   linear_combination z ^ (c - 1 - 1) * ha - z ^ (c - 1 - 1) * hd
 
-/-- Identity under the stated parameter and domain assumptions: `(mulDerivMul^[n]) (fun w => w ^
+/-- Identity under the stated parameter and domain assumptions: `(Function.mulDerivMul^[n]) (fun w => w ^
 (a - 1) * ₂F₁ a b c w) z = poch a n * z ^ (a + n - 1) * ₂F₁ (a + n) b c z`. -/
 @[dlmf 15.5.E3]
 theorem iterate_mulDerivMul
@@ -115,22 +109,22 @@ theorem iterate_mulDerivMul
     (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
     (hz : ‖z‖ < 1)
     (hzs : z ∈ slitPlane) :
-    (mulDerivMul^[n]) (fun w => w ^ (a - 1) * ₂F₁ a b c w) z =
+    (Function.mulDerivMul^[n]) (fun w => w ^ (a - 1) * ₂F₁ a b c w) z =
       poch a n * z ^ (a + n - 1) * ₂F₁ (a + n) b c z := by
   induction n generalizing z with
   | zero => simp [poch_zero]
   | succ n ih =>
-    have heq : (fun w => w * (mulDerivMul^[n]) (fun t => t ^ (a - 1) * ₂F₁ a b c t) w)
+    have heq : (fun w => w * (Function.mulDerivMul^[n]) (fun t => t ^ (a - 1) * ₂F₁ a b c t) w)
         =ᶠ[𝓝 z] (fun w => poch a n * (w * (w ^ (a + n - 1) * ₂F₁ (a + n) b c w))) := by
       filter_upwards [isOpen_lt continuous_norm continuous_const |>.mem_nhds hz,
         isOpen_slitPlane.mem_nhds hzs] with w hw hs
       rw [ih hw hs]
       ring
-    rw [Function.iterate_succ_apply', mulDerivMul, heq.deriv_eq, deriv_const_mul_field]
+    rw [Function.iterate_succ_apply', Function.mulDerivMul, heq.deriv_eq, deriv_const_mul_field]
     change z * (poch a n * deriv (fun w => w * (w ^ (a + n - 1) * ₂F₁ (a + n) b c w)) z) = _
     calc
-      _ = poch a n * mulDerivMul (fun w => w ^ (a + n - 1) * ₂F₁ (a + n) b c w) z := by
-        rw [mulDerivMul]; ring
+      _ = poch a n * Function.mulDerivMul (fun w => w ^ (a + n - 1) * ₂F₁ (a + n) b c w) z := by
+        rw [Function.mulDerivMul]; ring
       _ = _ := by
         rw [mulDerivMul_hg hc hz hzs]
         simp only [poch_succ, Nat.cast_add, Nat.cast_one]
@@ -198,12 +192,12 @@ private lemma iteratedDeriv_mul_id {h : ℂ → ℂ} (hh : ContDiff ℂ ⊤ h) (
 /-- Operator identity for smooth functions; no hypergeometric parameters occur. -/
 @[dlmf 15.5.E10]
 theorem iterate_mulDerivMul_eq (n : ℕ) {f : ℂ → ℂ} (hf : ContDiff ℂ ⊤ f) (z : ℂ) :
-    (mulDerivMul^[n]) f z = z ^ n * iteratedDeriv n (fun w => w ^ n * f w) z := by
+    (Function.mulDerivMul^[n]) f z = z ^ n * iteratedDeriv n (fun w => w ^ n * f w) z := by
   induction n generalizing f z with
   | zero => simp [iteratedDeriv_zero]
   | succ n ih =>
     have hg : ContDiff ℂ ⊤ (fun t : ℂ => t ^ n * f t) := (contDiff_id.pow n).mul hf
-    have heq : (fun w => w * (mulDerivMul^[n] f) w) =
+    have heq : (fun w => w * (Function.mulDerivMul^[n] f) w) =
         fun w => w ^ (n + 1) * iteratedDeriv n (fun t => t ^ n * f t) w := by
       funext w
       rw [ih hf w, pow_succ]
@@ -219,7 +213,7 @@ theorem iterate_mulDerivMul_eq (n : ℕ) {f : ℂ → ℂ} (hf : ContDiff ℂ �
           (n + 1 : ℂ) * z ^ n * iteratedDeriv n (fun t => t ^ n * f t) z +
             z ^ (n + 1) * iteratedDeriv (n + 1) (fun t => t ^ n * f t) z := by
       rw [deriv_fun_mul hpow hidiff, hpz, iteratedDeriv_succ]
-    rw [Function.iterate_succ_apply', mulDerivMul, heq, hprod]
+    rw [Function.iterate_succ_apply', Function.mulDerivMul, heq, hprod]
     have hleib := iteratedDeriv_mul_id hg n z
     have hwg : (fun w : ℂ => w * (w ^ n * f w)) = fun w => w ^ (n + 1) * f w := by
       funext w
@@ -474,7 +468,7 @@ private lemma deriv_cpow_mul_one_sub_cpow_mul_hg {a b c z : ℂ} (s t : ℂ)
   rw [h, hF.deriv]
   ring
 
-/-- Identity under the stated parameter and domain assumptions: `(mulDerivMul^[n]) (fun w => w ^
+/-- Identity under the stated parameter and domain assumptions: `(Function.mulDerivMul^[n]) (fun w => w ^
 (c - a - 1) * (1 - w) ^ (a + b - c) * ₂F₁ a b c w) z = poch (c - a) n * z ^ (c - a + n - 1) *
 (1 - z) ^ (a - n + b - c) * ₂F₁ (a - n) b c z`. -/
 @[dlmf 15.5.E5]
@@ -484,12 +478,12 @@ theorem iterate_mulDerivMul_euler
     (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
     (hz : ‖z‖ < 1)
     (hzs : z ∈ slitPlane) :
-    (mulDerivMul^[n]) (fun w => w ^ (c - a - 1) * (1 - w) ^ (a + b - c) * ₂F₁ a b c w) z =
+    (Function.mulDerivMul^[n]) (fun w => w ^ (c - a - 1) * (1 - w) ^ (a + b - c) * ₂F₁ a b c w) z =
       poch (c - a) n * z ^ (c - a + n - 1) * (1 - z) ^ (a - n + b - c) * ₂F₁ (a - n) b c z := by
   induction n generalizing z with
   | zero => simp [poch_zero]
   | succ n ih =>
-    have heq : (fun w => w * (mulDerivMul^[n])
+    have heq : (fun w => w * (Function.mulDerivMul^[n])
           (fun t => t ^ (c - a - 1) * (1 - t) ^ (a + b - c) * ₂F₁ a b c t) w) =ᶠ[𝓝 z]
         (fun w => poch (c - a) n *
           (w ^ (c - a + n) * (1 - w) ^ (a - n + b - c) * ₂F₁ (a - n) b c w)) := by
@@ -497,7 +491,7 @@ theorem iterate_mulDerivMul_euler
         isOpen_slitPlane.mem_nhds hzs] with w hw hs
       rw [ih hw hs, ← mul_cpow_pred (slitPlane_ne_zero hs) (c - a + n)]
       ring
-    rw [Function.iterate_succ_apply', mulDerivMul, heq.deriv_eq, deriv_const_mul_field,
+    rw [Function.iterate_succ_apply', Function.mulDerivMul, heq.deriv_eq, deriv_const_mul_field,
       deriv_cpow_mul_one_sub_cpow_mul_hg (c - a + n) (a - n + b - c) hc hz hzs]
     have hd := ordinaryHypergeometric_mul_one_sub_mul_deriv_eq (a := a - n) (b := b) hc hz
     have hz0 : z ≠ 0 := slitPlane_ne_zero hzs
@@ -592,7 +586,7 @@ private lemma mul_one_sub_deriv_eq_shift_down_two {a b c z : ℂ}
   apply mul_left_cancel₀ hc0
   linear_combination c * h1 - c * h2 - (c - a) * h3 - (a - 1) * h4 - (a - 1) * z * h5
 
-/-- Identity under the stated parameter and domain assumptions: `(oneSubMulDerivMul^[n]) (fun w =>
+/-- Identity under the stated parameter and domain assumptions: `(Function.oneSubMulDerivMul^[n]) (fun w =>
 (1 - w) ^ (a - 1) * ₂F₁ a b c w) z = (-1 : ℂ) ^ n * poch a n * poch (c - b) n / poch c n * (1
 - z) ^ (a + n - 1) * ₂F₁ (a + n) b (c + n) z`. -/
 @[dlmf 15.5.E7]
@@ -601,7 +595,7 @@ theorem iterate_oneSubMulDerivMul
     (n : ℕ)
     (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
     (hz : ‖z‖ < 1)  :
-    (oneSubMulDerivMul^[n]) (fun w => (1 - w) ^ (a - 1) * ₂F₁ a b c w) z =
+    (Function.oneSubMulDerivMul^[n]) (fun w => (1 - w) ^ (a - 1) * ₂F₁ a b c w) z =
       (-1 : ℂ) ^ n * poch a n * poch (c - b) n / poch c n * (1 - z) ^ (a + n - 1) * ₂F₁ (a + n) b (c + n) z
         := by
   induction n generalizing z with
@@ -609,7 +603,7 @@ theorem iterate_oneSubMulDerivMul
   | succ n ih =>
     have hcn : ∀ k : ℕ, c + n ≠ -(k : ℂ) := not_neg_nat_add_nat hc n
     have hcn0 : c + (n : ℂ) ≠ 0 := by simpa using hcn 0
-    have heq : (fun w => (1 - w) * (oneSubMulDerivMul^[n])
+    have heq : (fun w => (1 - w) * (Function.oneSubMulDerivMul^[n])
           (fun t => (1 - t) ^ (a - 1) * ₂F₁ a b c t) w) =ᶠ[𝓝 z]
         (fun w => (-1 : ℂ) ^ n * poch a n * poch (c - b) n / poch c n *
           ((1 - w) ^ (a + n) * ₂F₁ (a + n) b (c + n) w)) := by
@@ -617,7 +611,7 @@ theorem iterate_oneSubMulDerivMul
       rw [ih hw, ← mul_cpow_pred (slitPlane_ne_zero (one_sub_mem_slitPlane_of_norm_lt_one hw))
           (a + n)]
       ring
-    rw [Function.iterate_succ_apply', oneSubMulDerivMul, heq.deriv_eq, deriv_const_mul_field,
+    rw [Function.iterate_succ_apply', Function.oneSubMulDerivMul, heq.deriv_eq, deriv_const_mul_field,
       deriv_one_sub_cpow_mul_hg (a + n) hcn hz]
     have hd := one_sub_mul_deriv_eq_shift_a_c (a := a + n) (b := b) hcn hz
     have h1z : (1 : ℂ) - z ≠ 0 := slitPlane_ne_zero (one_sub_mem_slitPlane_of_norm_lt_one hz)
@@ -631,18 +625,18 @@ theorem iterate_oneSubMulDerivMul
     field_simp
     linear_combination (poch a n * poch (c - b) n * (1 - z) ^ (a + n - 1)) * hd
 
-/-- Identity under the stated parameter and domain assumptions: `(oneSubMulDerivMul^[n]) (fun w =>
+/-- Identity under the stated parameter and domain assumptions: `(Function.oneSubMulDerivMul^[n]) (fun w =>
 w ^ (c - 1) * (1 - w) ^ (b - c) * ₂F₁ a b c w) z = poch (c - n) n * z ^ (c - n - 1) * (1 - z)
 ^ (b - c + n) * ₂F₁ (a - n) b (c - n) z`. -/
 @[dlmf 15.5.E8]
 theorem iterate_oneSubMulDerivMul_cpow
     {a b c z : ℂ}
     (n : ℕ)
-    (hc : ∀ k : ℕ, c ≠ -(k : ℂ))
+
     (hz : ‖z‖ < 1)
     (hzs : z ∈ slitPlane)
     (hcn : ∀ k : ℕ, c - n ≠ -(k : ℂ)) :
-    (oneSubMulDerivMul^[n]) (fun w => w ^ (c - 1) * (1 - w) ^ (b - c) * ₂F₁ a b c w) z =
+    (Function.oneSubMulDerivMul^[n]) (fun w => w ^ (c - 1) * (1 - w) ^ (b - c) * ₂F₁ a b c w) z =
       poch (c - n) n * z ^ (c - n - 1) * (1 - z) ^ (b - c + n) * ₂F₁ (a - n) b (c - n) z := by
   induction n generalizing z with
   | zero => simp [poch_zero]
@@ -657,7 +651,7 @@ theorem iterate_oneSubMulDerivMul_cpow
       apply hcn k
       push_cast
       linear_combination hk
-    have heq : (fun w => (1 - w) * (oneSubMulDerivMul^[n])
+    have heq : (fun w => (1 - w) * (Function.oneSubMulDerivMul^[n])
           (fun t => t ^ (c - 1) * (1 - t) ^ (b - c) * ₂F₁ a b c t) w) =ᶠ[𝓝 z]
         (fun w => poch (c - n) n *
           (w ^ (c - n - 1) * (1 - w) ^ (b - c + n + 1) * ₂F₁ (a - n) b (c - n) w)) := by
@@ -670,7 +664,7 @@ theorem iterate_oneSubMulDerivMul_cpow
         ring
       rw [ih hw hs hcn', ← hw1]
       ring
-    rw [Function.iterate_succ_apply', oneSubMulDerivMul, heq.deriv_eq, deriv_const_mul_field,
+    rw [Function.iterate_succ_apply', Function.oneSubMulDerivMul, heq.deriv_eq, deriv_const_mul_field,
       deriv_cpow_mul_one_sub_cpow_mul_hg (c - n - 1) (b - c + n + 1) hcn' hz hzs]
     have hd := mul_one_sub_deriv_eq_shift_down (a := a - n) (b := b) hcn' hcn1 hz
     have hz0 : z ≠ 0 := slitPlane_ne_zero hzs

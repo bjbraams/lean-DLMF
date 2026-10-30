@@ -196,7 +196,7 @@ def jacobiCsTau (z τ : ℂ) : ℂ := jacobiPQTau .c .s z τ
 
 /-- `z` is not congruent to the corner of letter `r` (the zeros of `θ_r(ζ)`); equivalently, the
 functions `pr(z, k)` are finite at `z`. -/
-def jacobiRegulark (r : JacobiLetter) (z k : ℂ) : Prop :=
+def JacobiRegulark (r : JacobiLetter) (z k : ℂ) : Prop :=
   jacobiLetterTheta r (jacobiZetak z k) (jacobiTauk k) ≠ 0
 
 /-- Neville's theta functions (DLMF §20.1) as functions of the Jacobi argument `z`, with
@@ -210,7 +210,6 @@ def jacobiNevilleTau (p : JacobiLetter) (z τ : ℂ) : ℂ :=
   | .c => jacobiThetaTwoTau u τ / jacobiThetaTwoTau 0 τ
   | .d => jacobiThetaThreeTau u τ / jacobiThetaThreeTau 0 τ
   | .n => jacobiThetaFourTau u τ / jacobiThetaFourTau 0 τ
-
 
 end DLMF.JacobiElliptic
 end

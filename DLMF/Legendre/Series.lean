@@ -5,9 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Legendre.SpecialValues
-public import DLMF.Legendre.SeriesTools
 public import DLMF.Legendre.FourierTools
+public import DLMF.Legendre.SeriesTools
+public import DLMF.Legendre.SpecialValues
 
 /-!
 # Legendre Fourier series, generating functions and continued fractions
@@ -22,8 +22,6 @@ not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
 namespace DLMF.Legendre
-
-
 
 /-- Eventual bound `‖Γ(k+a)/Γ(k+b)‖ ≤ 2 k^{Re(a-b)}` (from DLMF 5.11.12). -/
 theorem legFour_gamma_ratio_le (a b : ℂ) :
@@ -537,7 +535,7 @@ theorem ferrersP_fourier_series {ν μ : ℂ} (hν : LegendreQRegular ν μ) (h�
   ring_nf
 
 /-- Absolute convergence in DLMF 14.13. -/
-theorem ferrersP_fourier_absolute {ν μ : ℂ} (hν : LegendreQRegular ν μ) (hμ : μ.re < 0) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
+theorem ferrersP_fourier_absolute {ν μ : ℂ} (hμ : μ.re < 0) {θ : ℝ} :
     Summable (fun k : ℕ => ‖Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*poch (μ+1/2) k/(k.factorial:ℂ)*sin ((ν+μ+2*k+1)*θ)‖) := by
   refine legFour_summable hμ _ (B := Real.exp |((ν+μ)*θ).im|) fun k => ?_
   have him : ((ν+μ+2*(k:ℂ)+1)*(θ:ℂ)).im = ((ν+μ)*θ).im := by simp [mul_im]
@@ -592,7 +590,7 @@ theorem ferrersQ_fourier_series {ν μ : ℂ} (hν : LegendreQRegular ν μ) (h�
   ring_nf
 
 /-- Absolute convergence in DLMF 14.13. -/
-theorem ferrersQ_fourier_absolute {ν μ : ℂ} (hν : LegendreQRegular ν μ) (hμ : μ.re < 0) {θ : ℝ} (h0 : 0 < θ) (hπ : θ < π) :
+theorem ferrersQ_fourier_absolute {ν μ : ℂ} (hμ : μ.re < 0) {θ : ℝ} :
     Summable (fun k : ℕ => ‖Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*poch (μ+1/2) k/(k.factorial:ℂ)*cos ((ν+μ+2*k+1)*θ)‖) := by
   refine legFour_summable hμ _ (B := Real.exp |((ν+μ)*θ).im|) fun k => ?_
   have him : ((ν+μ+2*(k:ℂ)+1)*(θ:ℂ)).im = ((ν+μ)*θ).im := by simp [mul_im]
@@ -740,7 +738,7 @@ theorem ferrersQ_nat_logarithm (n : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
 
 /-- DLMF 14.7.6: for `n ∈ ℕ` and `z ∉ (−∞, 1]`, `Q_n(z) = n! 𝑸_n(z)`. -/
 @[dlmf 14.7.E6]
-theorem olverQ_nat_normalization (n : ℕ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+theorem olverQ_nat_normalization (n : ℕ) {z : ℂ} :
     associatedQ n 0 z=(n.factorial:ℂ)*olverQ n 0 z := by
   simp [associatedQ, Gamma_nat_eq_factorial]
 
@@ -1362,8 +1360,8 @@ theorem associatedQ_continued_fraction {ν μ : ℂ} (hne : ν ≠ μ) {x : ℝ}
       (legFS_wQ_rec ν μ hx) hw0
 
 /-- DLMF 14.13: outside the central angle, this Fourier series is not absolutely convergent. -/
-theorem ferrersP_fourier_not_absolute {ν μ : ℂ} (hν : LegendreQRegular ν μ)
-    (hμ0 : 0 ≤ μ.re) (hμ1 : μ.re < 1/2) {θ : ℝ}
+theorem ferrersP_fourier_not_absolute {ν μ : ℂ}
+    (hμ0 : 0 ≤ μ.re) {θ : ℝ}
     (h0 : 0 < θ) (hπ : θ < π) (hmid : θ ≠ π/2) :
     ¬Summable (fun k : ℕ => ‖Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*poch (μ+1/2) k/
       (k.factorial:ℂ)*sin ((ν+μ+2*k+1)*θ)‖) := by
@@ -1379,8 +1377,8 @@ theorem ferrersP_fourier_not_absolute {ν μ : ℂ} (hν : LegendreQRegular ν �
     push_cast; ring
 
 /-- DLMF 14.13: the analogous second-kind Fourier series converges only conditionally. -/
-theorem ferrersQ_fourier_not_absolute {ν μ : ℂ} (hν : LegendreQRegular ν μ)
-    (hμ0 : 0 ≤ μ.re) (hμ1 : μ.re < 1/2) {θ : ℝ}
+theorem ferrersQ_fourier_not_absolute {ν μ : ℂ}
+    (hμ0 : 0 ≤ μ.re) {θ : ℝ}
     (h0 : 0 < θ) (hπ : θ < π) (hmid : θ ≠ π/2) :
     ¬Summable (fun k : ℕ => ‖Gamma (ν+μ+k+1)/Gamma (ν+k+3/2)*poch (μ+1/2) k/
       (k.factorial:ℂ)*cos ((ν+μ+2*k+1)*θ)‖) := by

@@ -15,8 +15,8 @@ public import DLMF.JacobiElliptic.SpecialValues
 * `p3j_ode_unique`: two solutions of `s' = cd`, `c' = -sd`, `d' = -κsc` near `0` with the same
   initial values agree near `0` (bootstrapping the error to infinite order).
 * `p3j_eq_of_eventuallyEq`: two functions that are analytic or have a pole with junk value `0`
-  at every point (`p3j_Dich`), and that agree near `0`, are equal (identity theorem for
-  meromorphic functions on `ℂ`). The Glaisher functions `pq(·, k)` satisfy `p3j_Dich`
+  at every point (`P3jDich`), and that agree near `0`, are equal (identity theorem for
+  meromorphic functions on `ℂ`). The Glaisher functions `pq(·, k)` satisfy `P3jDich`
   (from `jacobiPQk_zeros_poles`), and it is preserved by `f ↦ c f(w/a)`.
 -/
 
@@ -162,11 +162,11 @@ theorem p3j_ode_unique {s c d s₂ c₂ d₂ : ℂ → ℂ} {κ : ℂ}
     exact sub_eq_zero.mp hz
 
 /-- The pole dichotomy: analytic at `z`, or a pole at `z` with Lean's junk value `0`. -/
-def p3j_Dich (f : ℂ → ℂ) : Prop :=
+def P3jDich (f : ℂ → ℂ) : Prop :=
   ∀ z, AnalyticAt ℂ f z ∨ (meromorphicOrderAt f z < 0 ∧ f z = 0)
 
 /-- A function with the pole dichotomy is meromorphic. -/
-theorem p3j_Dich.meromorphicAt {f : ℂ → ℂ} (hf : p3j_Dich f) (z : ℂ) : MeromorphicAt f z := by
+theorem P3jDich.meromorphicAt {f : ℂ → ℂ} (hf : P3jDich f) (z : ℂ) : MeromorphicAt f z := by
   rcases hf z with h | h
   · exact h.meromorphicAt
   · by_contra hm
@@ -175,7 +175,7 @@ theorem p3j_Dich.meromorphicAt {f : ℂ → ℂ} (hf : p3j_Dich f) (z : ℂ) : M
 
 /-- Identity theorem for functions with the pole dichotomy: agreement near `0` gives agreement
 everywhere, including the junk values at the poles. -/
-theorem p3j_eq_of_eventuallyEq {f g : ℂ → ℂ} (hf : p3j_Dich f) (hg : p3j_Dich g)
+theorem p3j_eq_of_eventuallyEq {f g : ℂ → ℂ} (hf : P3jDich f) (hg : P3jDich g)
     (h0 : f =ᶠ[𝓝 0] g) : f = g := by
   have hm : MeromorphicOn (f - g) Set.univ := fun z _ =>
     (hf.meromorphicAt z).sub (hg.meromorphicAt z)
@@ -200,8 +200,8 @@ theorem p3j_eq_of_eventuallyEq {f g : ℂ → ℂ} (hf : p3j_Dich f) (hg : p3j_D
   · rw [h1.2, h2.2]
 
 /-- The pole dichotomy is preserved by `f ↦ c f(w/a)`. -/
-theorem p3j_Dich.comp {f : ℂ → ℂ} (hf : p3j_Dich f) {a c : ℂ} (ha : a ≠ 0) (hc : c ≠ 0) :
-    p3j_Dich fun w => c * f (w / a) := by
+theorem P3jDich.comp {f : ℂ → ℂ} (hf : P3jDich f) {a c : ℂ} (ha : a ≠ 0) (hc : c ≠ 0) :
+    P3jDich fun w => c * f (w / a) := by
   intro z
   have hg : AnalyticAt ℂ (fun w : ℂ => w / a) z := by fun_prop
   rcases hf (z / a) with h | h
@@ -221,7 +221,7 @@ theorem p3j_Dich.comp {f : ℂ → ℂ} (hf : p3j_Dich f) {a c : ℂ} (ha : a �
 
 /-- The Glaisher functions have the pole dichotomy. -/
 theorem p3j_dich_pq {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p q : JacobiLetter} (hpq : p ≠ q) :
-    p3j_Dich fun w => jacobiPQk p q w k := by
+    P3jDich fun w => jacobiPQk p q w k := by
   intro z
   have hτ := jacobiTauk_im_pos hk
   have heq : (fun w => jacobiPQk p q w k) = fun w =>

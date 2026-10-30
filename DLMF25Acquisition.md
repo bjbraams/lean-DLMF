@@ -58,7 +58,7 @@ IntegralReps 20, IntegerArguments 13, Sums 7, Asymptotics 1, Zeros 4), plus 10 n
   limit of `∫₀^R`. Lebesgue integrals are stated together with integrability.
 - The Stieltjes constants (25.2.5) are `stieltjesConstant n = limUnder atTop (stieltjesSeq n)`;
   the existence of the limit is a separate (admitted) theorem, proved for n = 0 (γ₀ = γ).
-- B̃ₙ (§25.1) is ACQ24A's `DLMF.BernoulliEuler.periodicBernoulliB`; the generalized binomial
+- B̃ₙ (§25.1) is ACQ24A's `periodicBernoulli`; the generalized binomial
   coefficient of complex top is `z25a_gbinom z m = (descPochhammer ℂ m).eval z / m!`; ψ is
   `Complex.digamma`, ψ^{(m)} is `DLMF.Gamma.polygamma m`; γ is `Real.eulerMascheroniConstant`.
 - The Hankel-type loops of 25.5.20–25.5.21 are represented by the keyhole contours
@@ -128,7 +128,7 @@ IntegralReps 20, IntegerArguments 13, Sums 7, Asymptotics 1, Zeros 4), plus 10 n
 
 ## [§25.6 Integer Arguments](https://dlmf.nist.gov/25.6)
 
-- [25.6.E1](https://dlmf.nist.gov/25.6.E1): [`DLMF.Zeta.riemannZeta_four`](DLMF/Zeta/IntegerArguments.lean#L37) (proved); [`DLMF.Zeta.riemannZeta_six`](DLMF/Zeta/IntegerArguments.lean#L45) (proved); Mathlib: [`riemannZeta_zero`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=riemannZeta_zero#doc); Mathlib: [`riemannZeta_two`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=riemannZeta_two#doc). ζ(0), ζ(2) in Mathlib (pointers in DLMF/Core/UpstreamElementary.lean); ζ(4), ζ(6) proved here from riemannZeta_two_mul_nat.
+- [25.6.E1](https://dlmf.nist.gov/25.6.E1): [`DLMF.Zeta.riemannZeta_six`](DLMF/Zeta/IntegerArguments.lean#L45) (proved); Mathlib: [`riemannZeta_zero`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=riemannZeta_zero#doc); Mathlib: [`riemannZeta_two`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=riemannZeta_two#doc). ζ(0), ζ(2) in Mathlib (pointers in DLMF/Core/UpstreamElementary.lean); ζ(4) is Mathlib’s riemannZeta_four; ζ(6) is proved here from riemannZeta_two_mul_nat.
 - [25.6.E2](https://dlmf.nist.gov/25.6.E2): Mathlib: [`riemannZeta_two_mul_nat`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=riemannZeta_two_mul_nat#doc). n ≥ 1, with (-1)^{n+1} B_{2n} in place of |B_{2n}|; pointer in DLMF/Core/UpstreamElementary.lean.
 - [25.6.E3](https://dlmf.nist.gov/25.6.E3): Mathlib: [`riemannZeta_neg_nat_eq_bernoulli`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=riemannZeta_neg_nat_eq_bernoulli#doc). Stronger: also n = 0; pointer in DLMF/Core/UpstreamElementary.lean.
 - [25.6.E4](https://dlmf.nist.gov/25.6.E4): Mathlib: [`riemannZeta_neg_two_mul_nat_add_one`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=riemannZeta_neg_two_mul_nat_add_one#doc). Exact, as ζ(-2(n+1)) = 0, n ≥ 0.
@@ -180,7 +180,7 @@ IntegralReps 20, IntegerArguments 13, Sums 7, Asymptotics 1, Zeros 4), plus 10 n
 - [25.1](https://dlmf.nist.gov/25.1) p1–p4 (notation; the table of symbols): conventions only.
   k, m, n, p, x, a, s, z, γ (`Real.eulerMascheroniConstant`), ψ (`Complex.digamma`),
   Bₙ and Bₙ(x) (Mathlib's `bernoulli`, `bernoulliFun`, `Polynomial.bernoulli`; B₁ = -1/2 as in
-  DLMF), B̃ₙ(x) (`DLMF.BernoulliEuler.periodicBernoulliB`), m ∣ n and primes for derivatives.
+  DLMF), B̃ₙ(x) (`periodicBernoulli`), m ∣ n and primes for derivatives.
   p3 (Riemann 1859) and p4 (related functions, treated in part B) are informal.
 - [25.2.i](https://dlmf.nist.gov/25.2.i): ζ is meromorphic with a simple pole of residue 1 at; Mathlib: [`riemannZeta_residue_one`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/LSeries/RiemannZeta.html#riemannZeta_residue_one); Mathlib: [`differentiableAt_riemannZeta`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/NumberTheory/LSeries/RiemannZeta.html#differentiableAt_riemannZeta).
   s = 1 as its only singularity; Mathlib `riemannZeta_residue_one`, `differentiableAt_riemannZeta`
@@ -386,7 +386,7 @@ DLMF/Polylog/Dilog.lean already existed.
 - [25.14.E7](https://dlmf.nist.gov/25.14.E7): [`DLMF.Zeta.lerchPhi_transformation`](DLMF/Zeta/Lerch.lean#L292) (admitted). DLMF states no conditions; stated for 0 < Re a < 1, 0 < |z| < 1 (verified numerically; it fails e.g. for a = 1.6 + 0.2i, a = 1, |z| = 1 and mixed cases with |z| > 1).
 - [25.14.E8](https://dlmf.nist.gov/25.14.E8): [`DLMF.Zeta.lerchPhi_neg_eq_mellinBarnes`](DLMF/Zeta/Lerch.lean#L306) (admitted). |ph z| < π, Re a > 0, max(-Re a, -1) < σ < 0; the vertical line integral as ∫ over ℝ.
 - [25.14.E9](https://dlmf.nist.gov/25.14.E9): [`DLMF.Zeta.hasSum_lerchPhi_neg_large`](DLMF/Zeta/Lerch.lean#L317) (admitted). |z| > 1 (exact in that range; checked numerically).
-- [25.14.i](https://dlmf.nist.gov/25.14.i): [`DLMF.Zeta.lerchPhi`](DLMF/Zeta/Lerch.lean#L49) (definition); [`DLMF.Zeta.exists_lerchPhi_continuation`](DLMF/Zeta/Lerch.lean#L69) (proved); [`DLMF.Zeta.analyticOnNhd_lerchPhi`](DLMF/Zeta/Lerch.lean#L140) (proved). lerchPhi z s a: the continuation of the series to z ∈ ℂ \ [1, ∞) (classical choice, existence admitted); conditions a ∉ {0, -1, …} (z25b_lerchParamOK).
+- [25.14.i](https://dlmf.nist.gov/25.14.i): [`DLMF.Zeta.lerchPhi`](DLMF/Zeta/Lerch.lean#L49) (definition); [`DLMF.Zeta.exists_lerchPhi_continuation`](DLMF/Zeta/Lerch.lean#L69) (proved); [`DLMF.Zeta.analyticOnNhd_lerchPhi`](DLMF/Zeta/Lerch.lean#L140) (proved). lerchPhi z s a: the continuation of the series to z ∈ ℂ \ [1, ∞) (classical choice, existence admitted); conditions a ∉ {0, -1, …} (Z25bLerchParamOK).
 
 ## [§25.15 Dirichlet L-functions](https://dlmf.nist.gov/25.15)
 

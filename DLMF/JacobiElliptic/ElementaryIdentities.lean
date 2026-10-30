@@ -18,7 +18,7 @@ formulas 22.6.5–22.6.13 are the cases `u = v` of the addition theorems 22.8.1�
 half-argument formulas 22.6.19–22.6.21 from 22.6.6–22.6.7 and 22.6.1. Jacobi's imaginary
 transformation (Table 22.6.1) is proved from `τ(k') = -1/τ(k)` and the theta transformations
 under `τ ↦ -1/τ`. The half-argument formula 22.6.22 follows from the doubled pair sums and Glaisher quotients. All
-identities are pointwise, at points where the functions involved are finite (`jacobiRegulark`)
+identities are pointwise, at points where the functions involved are finite (`JacobiRegulark`)
 and the printed denominators are nonzero.
 -/
 
@@ -38,7 +38,7 @@ theorem jacobiComodulusk_sq (k : ℂ) : jacobiComodulusk k ^ 2 = 1 - k ^ 2 := by
 
 /-- `pq(z, k) ≠ 0` where the letters `p ≠ q` are both regular at `z`. -/
 theorem jacobiPQk_ne_zero {p q : JacobiLetter} (hpq : p ≠ q) {z k : ℂ}
-    (hp : jacobiRegulark p z k) (hq : jacobiRegulark q z k) : jacobiPQk p q z k ≠ 0 := by
+    (hp : JacobiRegulark p z k) (hq : JacobiRegulark q z k) : jacobiPQk p q z k ≠ 0 := by
   unfold jacobiPQk jacobiGlaisher
   simp only [hpq, ↓reduceIte]
   exact div_ne_zero hp hq
@@ -47,7 +47,7 @@ theorem jacobiPQk_ne_zero {p q : JacobiLetter} (hpq : p ≠ q) {z k : ℂ}
 `dn` are finite. From the theta identities 20.7.2–20.7.3 and `k = θ₂²/θ₃²` (22.2.2). -/
 @[dlmf 22.6.E1]
 theorem jacobi_sq_sum {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hn : jacobiRegulark .n z k) :
+    (hn : JacobiRegulark .n z k) :
     jacobiSnk z k ^ 2 + jacobiCnk z k ^ 2 = 1 ∧ k ^ 2 * jacobiSnk z k ^ 2 + jacobiDnk z k ^ 2 = 1 :=
         by
   have hτ := jacobiTauk_im_pos hk
@@ -75,7 +75,7 @@ theorem jacobi_sq_sum {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 
 /-- Glaisher's relations expressing the nine functions with a letter other than `n` through
 `sn, cn, dn` (DLMF 22.2.10, `r = n`). -/
-theorem je22a_glaisher_via_n {z k : ℂ} (hn : jacobiRegulark .n z k) :
+theorem je22a_glaisher_via_n {z k : ℂ} (hn : JacobiRegulark .n z k) :
     jacobiCsk z k = jacobiCnk z k / jacobiSnk z k ∧ jacobiDsk z k = jacobiDnk z k / jacobiSnk z k ∧
     jacobiNsk z k = 1 / jacobiSnk z k ∧ jacobiSck z k = jacobiSnk z k / jacobiCnk z k ∧
     jacobiDck z k = jacobiDnk z k / jacobiCnk z k ∧ jacobiNck z k = 1 / jacobiCnk z k ∧
@@ -100,7 +100,7 @@ macro "je22a_lc" : tactic => `(tactic| first
 Proved from 22.6.1. -/
 @[dlmf 22.6.E2]
 theorem jacobi_sq_sum_s {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hn : jacobiRegulark .n z k) (hs : jacobiRegulark .s z k) :
+    (hn : JacobiRegulark .n z k) (hs : JacobiRegulark .s z k) :
     1 + jacobiCsk z k ^ 2 = k ^ 2 + jacobiDsk z k ^ 2 ∧
       k ^ 2 + jacobiDsk z k ^ 2 = jacobiNsk z k ^ 2 := by
   obtain ⟨h1, h2⟩ := jacobi_sq_sum hk hn
@@ -113,7 +113,7 @@ theorem jacobi_sq_sum_s {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 `cn ≠ 0`. Proved from 22.6.1. -/
 @[dlmf 22.6.E3]
 theorem jacobi_sq_sum_c {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hn : jacobiRegulark .n z k) (hc : jacobiRegulark .c z k) :
+    (hn : JacobiRegulark .n z k) (hc : JacobiRegulark .c z k) :
     jacobiComodulusk k ^ 2 * jacobiSck z k ^ 2 + 1 = jacobiDck z k ^ 2 ∧
       jacobiDck z k ^ 2 = jacobiComodulusk k ^ 2 * jacobiNck z k ^ 2 + k ^ 2 := by
   obtain ⟨h1, h2⟩ := jacobi_sq_sum hk hn
@@ -126,7 +126,7 @@ theorem jacobi_sq_sum_c {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 and `dn ≠ 0`. Proved from 22.6.1. -/
 @[dlmf 22.6.E4]
 theorem jacobi_sq_sum_d {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hn : jacobiRegulark .n z k) (hd : jacobiRegulark .d z k) :
+    (hn : JacobiRegulark .n z k) (hd : JacobiRegulark .d z k) :
     -k ^ 2 * jacobiComodulusk k ^ 2 * jacobiSdk z k ^ 2 = k ^ 2 * (jacobiCdk z k ^ 2 - 1) ∧
       k ^ 2 * (jacobiCdk z k ^ 2 - 1) = jacobiComodulusk k ^ 2 * (1 - jacobiNdk z k ^ 2) := by
   obtain ⟨h1, h2⟩ := jacobi_sq_sum hk hn
@@ -140,7 +140,7 @@ theorem jacobi_sq_sum_d {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 /-- DLMF 22.6.5: `sn 2z = 2 sn cn dn/(1 - k² sn⁴)` (from the addition theorem 22.8.1). -/
 @[dlmf 22.6.E5]
 theorem jacobiSnk_two_mul {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hn : jacobiRegulark .n z k) (hden : 1 - k ^ 2 * jacobiSnk z k ^ 4 ≠ 0) :
+    (hn : JacobiRegulark .n z k) (hden : 1 - k ^ 2 * jacobiSnk z k ^ 4 ≠ 0) :
     jacobiSnk (2 * z) k =
       2 * jacobiSnk z k * jacobiCnk z k * jacobiDnk z k / (1 - k ^ 2 * jacobiSnk z k ^ 4) := by
   have hd : 1 - k ^ 2 * jacobiSnk z k ^ 2 * jacobiSnk z k ^ 2 ≠ 0 := by
@@ -152,7 +152,7 @@ theorem jacobiSnk_two_mul {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 (from 22.8.2 and 22.6.1). -/
 @[dlmf 22.6.E6]
 theorem jacobiCnk_two_mul {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hn : jacobiRegulark .n z k) (hden : 1 - k ^ 2 * jacobiSnk z k ^ 4 ≠ 0) :
+    (hn : JacobiRegulark .n z k) (hden : 1 - k ^ 2 * jacobiSnk z k ^ 4 ≠ 0) :
     jacobiCnk (2 * z) k = (jacobiCnk z k ^ 2 - jacobiSnk z k ^ 2 * jacobiDnk z k ^ 2) /
         (1 - k ^ 2 * jacobiSnk z k ^ 4) ∧
       (jacobiCnk z k ^ 2 - jacobiSnk z k ^ 2 * jacobiDnk z k ^ 2) /
@@ -174,7 +174,7 @@ theorem jacobiCnk_two_mul {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 (from 22.8.3 and 22.6.1). -/
 @[dlmf 22.6.E7]
 theorem jacobiDnk_two_mul {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hn : jacobiRegulark .n z k) (hden : 1 - k ^ 2 * jacobiSnk z k ^ 4 ≠ 0) :
+    (hn : JacobiRegulark .n z k) (hden : 1 - k ^ 2 * jacobiSnk z k ^ 4 ≠ 0) :
     jacobiDnk (2 * z) k = (jacobiDnk z k ^ 2 - k ^ 2 * jacobiSnk z k ^ 2 * jacobiCnk z k ^ 2) /
         (1 - k ^ 2 * jacobiSnk z k ^ 4) ∧
       (jacobiDnk z k ^ 2 - k ^ 2 * jacobiSnk z k ^ 2 * jacobiCnk z k ^ 2) /
@@ -195,7 +195,7 @@ theorem jacobiDnk_two_mul {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 /-- DLMF 22.6.8: `cd 2z = (cd² - k'² sd² nd²)/(1 + k²k'² sd⁴)` (from 22.8.4). -/
 @[dlmf 22.6.E8]
 theorem jacobiCdk_two_mul {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hd : jacobiRegulark .d z k)
+    (hd : JacobiRegulark .d z k)
     (hden : 1 + k ^ 2 * jacobiComodulusk k ^ 2 * jacobiSdk z k ^ 4 ≠ 0) :
     jacobiCdk (2 * z) k =
       (jacobiCdk z k ^ 2 - jacobiComodulusk k ^ 2 * jacobiSdk z k ^ 2 * jacobiNdk z k ^ 2) /
@@ -208,7 +208,7 @@ theorem jacobiCdk_two_mul {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 /-- DLMF 22.6.9: `sd 2z = 2 sd cd nd/(1 + k²k'² sd⁴)` (from 22.8.5). -/
 @[dlmf 22.6.E9]
 theorem jacobiSdk_two_mul {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hd : jacobiRegulark .d z k)
+    (hd : JacobiRegulark .d z k)
     (hden : 1 + k ^ 2 * jacobiComodulusk k ^ 2 * jacobiSdk z k ^ 4 ≠ 0) :
     jacobiSdk (2 * z) k = 2 * jacobiSdk z k * jacobiCdk z k * jacobiNdk z k /
       (1 + k ^ 2 * jacobiComodulusk k ^ 2 * jacobiSdk z k ^ 4) := by
@@ -220,7 +220,7 @@ theorem jacobiSdk_two_mul {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 /-- DLMF 22.6.10: `nd 2z = (nd² + k² sd² cd²)/(1 + k²k'² sd⁴)` (from 22.8.6). -/
 @[dlmf 22.6.E10]
 theorem jacobiNdk_two_mul {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hd : jacobiRegulark .d z k)
+    (hd : JacobiRegulark .d z k)
     (hden : 1 + k ^ 2 * jacobiComodulusk k ^ 2 * jacobiSdk z k ^ 4 ≠ 0) :
     jacobiNdk (2 * z) k = (jacobiNdk z k ^ 2 + k ^ 2 * jacobiSdk z k ^ 2 * jacobiCdk z k ^ 2) /
       (1 + k ^ 2 * jacobiComodulusk k ^ 2 * jacobiSdk z k ^ 4) := by
@@ -232,7 +232,7 @@ theorem jacobiNdk_two_mul {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 /-- DLMF 22.6.11: `dc 2z = (dc² + k'² sc² nc²)/(1 - k'² sc⁴)` (from 22.8.7). -/
 @[dlmf 22.6.E11]
 theorem jacobiDck_two_mul {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hc : jacobiRegulark .c z k) (hden : 1 - jacobiComodulusk k ^ 2 * jacobiSck z k ^ 4 ≠ 0) :
+    (hc : JacobiRegulark .c z k) (hden : 1 - jacobiComodulusk k ^ 2 * jacobiSck z k ^ 4 ≠ 0) :
     jacobiDck (2 * z) k =
       (jacobiDck z k ^ 2 + jacobiComodulusk k ^ 2 * jacobiSck z k ^ 2 * jacobiNck z k ^ 2) /
         (1 - jacobiComodulusk k ^ 2 * jacobiSck z k ^ 4) := by
@@ -244,7 +244,7 @@ theorem jacobiDck_two_mul {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 /-- DLMF 22.6.12: `nc 2z = (nc² + sc² dc²)/(1 - k'² sc⁴)` (from 22.8.8). -/
 @[dlmf 22.6.E12]
 theorem jacobiNck_two_mul {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hc : jacobiRegulark .c z k) (hden : 1 - jacobiComodulusk k ^ 2 * jacobiSck z k ^ 4 ≠ 0) :
+    (hc : JacobiRegulark .c z k) (hden : 1 - jacobiComodulusk k ^ 2 * jacobiSck z k ^ 4 ≠ 0) :
     jacobiNck (2 * z) k = (jacobiNck z k ^ 2 + jacobiSck z k ^ 2 * jacobiDck z k ^ 2) /
       (1 - jacobiComodulusk k ^ 2 * jacobiSck z k ^ 4) := by
   have hd' : 1 - jacobiComodulusk k ^ 2 * jacobiSck z k ^ 2 * jacobiSck z k ^ 2 ≠ 0 := by
@@ -255,7 +255,7 @@ theorem jacobiNck_two_mul {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 /-- DLMF 22.6.13: `sc 2z = 2 sc dc nc/(1 - k'² sc⁴)` (from 22.8.9). -/
 @[dlmf 22.6.E13]
 theorem jacobiSck_two_mul {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hc : jacobiRegulark .c z k) (hden : 1 - jacobiComodulusk k ^ 2 * jacobiSck z k ^ 4 ≠ 0) :
+    (hc : JacobiRegulark .c z k) (hden : 1 - jacobiComodulusk k ^ 2 * jacobiSck z k ^ 4 ≠ 0) :
     jacobiSck (2 * z) k = 2 * jacobiSck z k * jacobiDck z k * jacobiNck z k /
       (1 - jacobiComodulusk k ^ 2 * jacobiSck z k ^ 4) := by
   have hd' : 1 - jacobiComodulusk k ^ 2 * jacobiSck z k ^ 2 * jacobiSck z k ^ 2 ≠ 0 := by
@@ -270,7 +270,7 @@ local notation "θ₄" => jacobiThetaFourTau
 
 /-- `1 - k² sn⁴ z ≠ 0` where `sn` is finite at `z` and `2z` (helper). -/
 lemma p22R1_den_two {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hn : jacobiRegulark .n z k) (hn2 : jacobiRegulark .n (2 * z) k) :
+    (hn : JacobiRegulark .n z k) (hn2 : JacobiRegulark .n (2 * z) k) :
     1 - k ^ 2 * jacobiSnk z k ^ 4 ≠ 0 := by
   have hτ := jacobiTauk_im_pos hk
   have hmod := (jacobi_inversion_k hk).1
@@ -300,7 +300,7 @@ lemma p22R1_den_two {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 functions are finite and the denominator is nonzero. -/
 @[dlmf 22.6.E14, dlmf 22.6.E15, dlmf 22.6.E16]
 theorem jacobi_two_mul_s {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hs : jacobiRegulark .s z k)
+    (hs : JacobiRegulark .s z k)
     (hden : 2 * jacobiCsk z k * jacobiDsk z k * jacobiNsk z k ≠ 0) :
     jacobiNsk (2 * z) k = (jacobiNsk z k ^ 4 - k ^ 2) /
         (2 * jacobiCsk z k * jacobiDsk z k * jacobiNsk z k) ∧
@@ -351,7 +351,7 @@ theorem jacobi_two_mul_s {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 `sn, cn, dn` are finite at `z` and `2z` and the denominators are nonzero. -/
 @[dlmf 22.6.E17, dlmf 22.6.E18]
 theorem jacobi_two_mul_ratio {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hn : jacobiRegulark .n z k) (hn2 : jacobiRegulark .n (2 * z) k)
+    (hn : JacobiRegulark .n z k) (hn2 : JacobiRegulark .n (2 * z) k)
     (hc : jacobiCnk z k ≠ 0) (hd : jacobiDnk z k ≠ 0)
     (hc2 : 1 + jacobiCnk (2 * z) k ≠ 0) (hd2 : 1 + jacobiDnk (2 * z) k ≠ 0) :
     (1 - jacobiCnk (2 * z) k) / (1 + jacobiCnk (2 * z) k) =
@@ -383,7 +383,7 @@ theorem jacobi_two_mul_ratio {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ
 the denominators are nonzero. -/
 @[dlmf 22.6.E19]
 theorem jacobiSnk_half_sq {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hn : jacobiRegulark .n z k) (hn2 : jacobiRegulark .n (z / 2) k)
+    (hn : JacobiRegulark .n z k) (hn2 : JacobiRegulark .n (z / 2) k)
     (h1 : 1 + jacobiDnk z k ≠ 0) (h2 : 1 + jacobiCnk z k ≠ 0)
     (h3 : jacobiDnk z k - jacobiCnk z k ≠ 0) :
     jacobiSnk (z / 2) k ^ 2 = (1 - jacobiCnk z k) / (1 + jacobiDnk z k) ∧
@@ -417,7 +417,7 @@ theorem jacobiSnk_half_sq {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 = k'²(1 - dn z)/(k²(dn z - cn z)) = k'²(1 + cn z)/(k'² + dn z - k² cn z)`. -/
 @[dlmf 22.6.E20]
 theorem jacobiCnk_half_sq {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hn : jacobiRegulark .n z k) (hn2 : jacobiRegulark .n (z / 2) k)
+    (hn : JacobiRegulark .n z k) (hn2 : JacobiRegulark .n (z / 2) k)
     (h1 : 1 + jacobiCnk z k ≠ 0) (h2 : jacobiDnk z k - jacobiCnk z k ≠ 0)
     (h3 : jacobiComodulusk k ^ 2 + jacobiDnk z k - k ^ 2 * jacobiCnk z k ≠ 0) :
     jacobiCnk (z / 2) k ^ 2 = (-jacobiComodulusk k ^ 2 + jacobiDnk z k + k ^ 2 * jacobiCnk z k) /
@@ -468,7 +468,7 @@ theorem jacobiCnk_half_sq {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 = k'²(1 - cn z)/(dn z - cn z) = k'²(1 + dn z)/(k'² + dn z - k² cn z)`. -/
 @[dlmf 22.6.E21]
 theorem jacobiDnk_half_sq {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hn : jacobiRegulark .n z k) (hn2 : jacobiRegulark .n (z / 2) k)
+    (hn : JacobiRegulark .n z k) (hn2 : JacobiRegulark .n (z / 2) k)
     (h1 : 1 + jacobiDnk z k ≠ 0) (h2 : jacobiDnk z k - jacobiCnk z k ≠ 0)
     (h3 : jacobiComodulusk k ^ 2 + jacobiDnk z k - k ^ 2 * jacobiCnk z k ≠ 0) :
     jacobiDnk (z / 2) k ^ 2 = (k ^ 2 * jacobiCnk z k + jacobiDnk z k + jacobiComodulusk k ^ 2) /
@@ -515,7 +515,7 @@ theorem jacobiDnk_half_sq {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
 
 /-- Doubled Jacobi cosine and delta pair sums in terms of the half-argument values. -/
 private lemma p22R1_half_pair_sums {k w : ℂ} (hk : k ∈ jacobiModulusDomain)
-    (hn : jacobiRegulark .n w k) (hn2 : jacobiRegulark .n (2 * w) k) :
+    (hn : JacobiRegulark .n w k) (hn2 : JacobiRegulark .n (2 * w) k) :
     let D := 1 - k ^ 2 * jacobiSnk w k ^ 4
     D * (jacobiCnk (2 * w) k + 1) = 2 * jacobiCnk w k ^ 2 ∧
       D * (jacobiDnk (2 * w) k + 1) = 2 * jacobiDnk w k ^ 2 ∧
@@ -536,14 +536,13 @@ private lemma p22R1_half_pair_sums {k w : ℂ} (hk : k ∈ jacobiModulusDomain)
     linear_combination (-2 * jacobiDnk w k ^ 2 - jacobiSnk w k ^ 2 * k ^ 2 + 1) * e1 +
       (jacobiSnk w k ^ 2 - 1) * e2
 
-
 /-- DLMF 22.6.22: for a permutation `{p, q, r}` of `{c, d, n}`,
 `pq²(z/2) = (ps + rs)/(qs + rs) = (pq + rq)/(1 + rq) = (pr + 1)/(qr + 1)`, where all twelve
 functions are finite at `z/2` and `z` and the denominators are nonzero. -/
 @[dlmf 22.6.E22]
 theorem jacobiPQk_half_sq {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p q r : JacobiLetter}
     (hp : p ≠ .s) (hq : q ≠ .s) (hr : r ≠ .s) (hpq : p ≠ q) (hpr : p ≠ r) (hqr : q ≠ r) {z : ℂ}
-    (hz : ∀ l, jacobiRegulark l z k) (hz2 : ∀ l, jacobiRegulark l (z / 2) k)
+    (hz : ∀ l, JacobiRegulark l z k) (hz2 : ∀ l, JacobiRegulark l (z / 2) k)
     (h1 : jacobiPQk q .s z k + jacobiPQk r .s z k ≠ 0) (h2 : 1 + jacobiPQk r q z k ≠ 0)
     (h3 : jacobiPQk q r z k + 1 ≠ 0) :
     jacobiPQk p q (z / 2) k ^ 2 =
@@ -554,8 +553,8 @@ theorem jacobiPQk_half_sq {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p q r : Ja
   obtain ⟨w, rfl⟩ : ∃ w, z = 2 * w := ⟨z / 2, by ring⟩
   have hw : 2 * w / 2 = w := by ring
   simp only [hw] at hz2 ⊢
-  have hn : jacobiRegulark .n w k := hz2 .n
-  have hn2 : jacobiRegulark .n (2 * w) k := hz .n
+  have hn : JacobiRegulark .n w k := hz2 .n
+  have hn2 : JacobiRegulark .n (2 * w) k := hz .n
   have hD := p22R1_den_two hk hn hn2
   let D : ℂ := 1 - k ^ 2 * jacobiSnk w k ^ 4
   have hsum := p22R1_half_pair_sums hk hn hn2
@@ -641,7 +640,6 @@ theorem jacobiPQk_half_sq {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p q r : Ja
   all_goals have hdc : jacobiDnk (2 * w) k + jacobiCnk (2 * w) k ≠ 0 := by simpa only [add_comm] using hcd
   all_goals field_simp [hcd, hdc, hcn, hdn, hS0, hC0, hD0, hc0, hd0, h1, h2, h3]
   all_goals ring
-
 
 /-! ### Jacobi's imaginary transformation (§22.6(iv), Table 22.6.1) -/
 

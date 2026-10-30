@@ -5,9 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Legendre.ZeroCounts
 public import DLMF.Legendre.Connections
 public import DLMF.Legendre.IntegerTheory
+public import DLMF.Legendre.ZeroCounts
 
 /-!
 # Real zeros of Ferrers and associated Legendre functions
@@ -177,9 +177,9 @@ theorem ferrersP_nat_degree_zero_count (n : ℕ) (μ : ℝ) (hnondeg : ∃ x ∈
 /-- Real form of a Wronskian identity `W{F, G} = c/(1-x²)` for real-valued `F`, `G`. -/
 theorem lzero_real_wronskian {F G : ℝ → ℂ} {f f' g g' : ℝ → ℝ} {x c : ℝ}
     (hx : x ∈ Ioo (-1:ℝ) 1) (hF : F x = f x) (hF' : deriv F x = f' x) (hG : G x = g x)
-    (hG' : deriv G x = g' x) (hW : ferrersWronskian F G x = (c : ℂ) / (1 - (x : ℂ) ^ 2)) :
+    (hG' : deriv G x = g' x) (hW : ODE.wronskian F G x = (c : ℂ) / (1 - (x : ℂ) ^ 2)) :
     (1 - x ^ 2) * (f x * g' x - g x * f' x) = c := by
-  unfold ferrersWronskian at hW
+  unfold ODE.wronskian at hW
   rw [hF, hF', hG, hG', show (1 - (x:ℂ) ^ 2) = ((1 - x ^ 2 : ℝ) : ℂ) by push_cast; ring] at hW
   have h : f x * g' x - g x * f' x = c / (1 - x ^ 2) := by exact_mod_cast hW
   have hne : 1 - x ^ 2 ≠ 0 := by nlinarith [hx.1, hx.2]
@@ -241,7 +241,7 @@ theorem lzero_extra_iff {ν μ : ℝ} (hνn : ∀ n : ℤ, ν ≠ n) (hμn : ∀
     omega
 
 /-- Nonintegral parameter zero count from DLMF 14.16(ii). -/
-theorem ferrersP_zero_count {ν μ : ℝ} (hν : -1/2 ≤ ν) (hνn : ∀ n : ℤ, ν ≠ n) (hμn : ∀ n : ℤ, μ ≠ n) (hnondeg : ∃ x ∈ Ioo (-1:ℝ) 1, ferrersP ν μ x ≠ 0) :
+theorem ferrersP_zero_count {ν μ : ℝ} (hν : -1/2 ≤ ν) (hνn : ∀ n : ℤ, ν ≠ n) (hμn : ∀ n : ℤ, μ ≠ n) :
     Set.Finite (ferrersZeroSet false ν μ) ∧ (ferrersZeroSet false ν μ).ncard=(max (⌈ν-|μ|⌉:ℤ) 0).toNat+(if ferrersPExtraZero ν μ then 1 else 0) := by
   rcases le_or_gt μ 0 with hμ | hμ
   · have h := ferrersP_nonpositive_order_zero_count hν hμ
@@ -388,7 +388,7 @@ theorem lzero_wronskian {ν μ : ℝ} (hr : LegendreQRegular ν μ) {x : ℝ} (h
     lzero_p ν μ x * lzero_q' ν μ x - lzero_q ν μ x * lzero_p' ν μ x =
       Real.Gamma (ν + μ + 1) / Real.Gamma (ν - μ + 1) / (1 - x ^ 2) := by
   have hW := ferrers_wronskian_4 ν μ hr hx
-  unfold ferrersWronskian at hW
+  unfold ODE.wronskian at hW
   rw [(lzero_P_data ν μ hx).2.1, (lzero_P_data ν μ hx).2.2, (lzero_Q_data hr hx).2.1,
     (lzero_Q_data hr hx).2.2,
     show (ν : ℂ) + μ + 1 = ((ν + μ + 1 : ℝ) : ℂ) by push_cast; ring,
@@ -622,7 +622,7 @@ theorem lzero_interlace_of_wronskian {p p' q q' : ℝ → ℝ}
     (fun x => by rw [hS x, neg_eq_zero])⟩
 
 /-- The Wronskian must be nonzero; degenerate proportional solutions do not interlace. -/
-theorem ferrersPQ_interlace {ν μ : ℝ} (hν : -1/2 ≤ ν) (hr : LegendreQRegular ν μ) (hind : Gamma (ν+μ+1)/Gamma (ν-μ+1) ≠ 0) :
+theorem ferrersPQ_interlace {ν μ : ℝ} (hr : LegendreQRegular ν μ) (hind : Gamma (ν+μ+1)/Gamma (ν-μ+1) ≠ 0) :
     InterlacesZeros (ferrersZeroSet false ν μ) (ferrersZeroSet true ν μ) := by
   set G := Real.Gamma (ν + μ + 1) / Real.Gamma (ν - μ + 1)
   have hG : G ≠ 0 := by
@@ -786,10 +786,10 @@ theorem ferrersQ_zero_count_range {ν μ : ℝ} (hν : -1/2 ≤ ν) (hr : Legend
     · rw [he.neg_one_pow] at h; nlinarith
     · exact_mod_cast ho.natCast
 
-/-- associatedPOneZero. DLMF 14.16(iii) case (b) (`μ ≤ ν`, μ non-integer, ⌊μ⌋ odd) needs `μ > 0`:
+/-- AssociatedPOneZero. DLMF 14.16(iii) case (b) (`μ ≤ ν`, μ non-integer, ⌊μ⌋ odd) needs `μ > 0`:
 for `μ < 0`, P^μ_ν > 0 on (1, ∞) (both the behaviour at `x = 1`, with factor `1/Γ(1−μ) > 0`, and the
 leading term at ∞ are positive), e.g. at ν = 0.184, μ = −0.088 (corrected 2026-10-22; DLMF erratum). -/
-def associatedPOneZero (ν μ : ℝ) : Prop :=
+def AssociatedPOneZero (ν μ : ℝ) : Prop :=
   (0 < μ ∧ ν < μ ∧ (∀ n : ℤ, μ ≠ n) ∧ Real.sin ((μ-ν)*π)*Real.sin (μ*π) < 0) ∨ (0 < μ ∧ μ ≤ ν ∧ (∀ n : ℤ, μ ≠ n) ∧ Odd (⌊μ⌋:ℤ))
 
 /-- A complex sum of nonnegative real terms with positive leading term is nonzero. -/

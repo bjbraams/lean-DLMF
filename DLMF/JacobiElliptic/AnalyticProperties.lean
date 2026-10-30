@@ -43,7 +43,7 @@ theorem jacobiPQk_eq_one_div (p q : JacobiLetter) (z k : ℂ) :
 points where the `·r` functions are finite. -/
 @[dlmf 22.2.E10]
 theorem jacobiPQk_eq_div {p q r : JacobiLetter} (hpq : p ≠ q) (hpr : p ≠ r) (hqr : q ≠ r)
-    {z k : ℂ} (hr : jacobiRegulark r z k) :
+    {z k : ℂ} (hr : JacobiRegulark r z k) :
     jacobiPQk p q z k = jacobiPQk p r z k / jacobiPQk q r z k := by
   unfold jacobiPQk jacobiGlaisher
   simp only [hpq, hpr, hqr, ↓reduceIte]

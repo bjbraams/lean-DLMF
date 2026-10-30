@@ -255,7 +255,7 @@ parameters built from `θ_j = Θ_j + σ/2` (where `R ≠ 0` and `w ∉ {0, 1, z}
 @[dlmf 32.7.E42, dlmf 32.7.E43, dlmf 32.7.E44, dlmf 32.7.E45, dlmf 32.7.E46]
 theorem IsPainleveVIOn.okamoto {Θ₀ Θ₁ Θ₂ Θinf : ℂ} {W : ℂ → ℂ} {U : Set ℂ}
     (h : IsPainleveVIOn (Θinf ^ 2 / 2) (-Θ₀ ^ 2 / 2) (Θ₁ ^ 2 / 2) ((1 - Θ₂ ^ 2) / 2) W U)
-    (hU : IsOpen U)
+
     (hR : ∀ z ∈ U, z * (z - 1) * deriv W z / (W z * (W z - 1) * (W z - z)) + Θ₀ / W z +
       Θ₁ / (W z - 1) + (Θ₂ - 1) / (W z - z) ≠ 0)
     (hσ : 1 - (Θ₀ + Θ₁ + Θ₂ + Θinf) ≠ 0) :
@@ -788,7 +788,7 @@ Stronger than DLMF: the numerical check gives the parameters exactly,
 `(α₃, β₃, γ₃, δ₃) = (0, 0, γ, 1/2 - γ)`. Formulated like `IsPainleveVIOn.quadratic`. -/
 @[dlmf 32.7.E49, dlmf 32.7.E50]
 theorem IsPainleveVIOn.quartic_root {γ : ℂ} {w q p u : ℂ → ℂ} {U V : Set ℂ}
-    (h : IsPainleveVIOn 0 0 γ (1 / 2 - γ) w U) (hU : IsOpen U) (hV : IsOpen V)
+    (h : IsPainleveVIOn 0 0 γ (1 / 2 - γ) w U) (hU : IsOpen U)
     (hq : ∀ z ∈ U, q z ^ 4 = z) (hq' : ∀ z ∈ U, HasDerivAt q (q z / (4 * z)) z)
     (hp : ∀ z ∈ U, p z ^ 2 = w z) (hp' : ∀ z ∈ U, HasDerivAt p (deriv w z / (2 * p z)) z)
     (hq1 : ∀ z ∈ U, q z ≠ -1) (hpq : ∀ z ∈ U, p z ≠ q z)

@@ -631,8 +631,7 @@ theorem exists_hill_periodic_of_discriminant (hQ : IsHillPotential Q) {s : ℂ}
 28.29.11 vanishes for all solutions (all solutions have multiplier `s`) iff the monodromy
 matrix is `s` times the identity. -/
 @[dlmf 28.29.E12]
-theorem hill_coexistence_iff (hQ : IsHillPotential Q) {s : ℂ} (hs : s = 1 ∨ s = -1)
-    (hΔ : hillDiscriminant Q lam = 2 * s) :
+theorem hill_coexistence_iff (hQ : IsHillPotential Q) {s : ℂ} :
     (∀ w, IsHillSolution Q lam w → w ∈ hillMultiplierSolutions Q lam s) ↔
       hillMonodromy Q lam = s • (1 : Matrix (Fin 2) (Fin 2) ℂ) := by
   obtain ⟨h1, h1a, h1b⟩ := hillWI_spec hQ.continuous lam
@@ -1046,7 +1045,6 @@ theorem hillDiscriminant_order_half {Q : ℝ → ℝ} (hQ : IsHillPotential (fun
     have k3 := Real.exp_lt_exp.mpr hta
     rw [Real.exp_log (by positivity)] at k3
     linarith
-
 
 /-- For given `ν` the characteristic equation `Δ(λ) - 2 cos(πν) = 0` has **infinitely many
 roots** `λ` (DLMF §28.29(iii)), for real `Q`. -/

@@ -5,9 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.SpecialFunctions.Sqrt
-public import DLMF.OrthogonalPolynomials.Topics
 public import DLMF.OrthogonalPolynomials.Explicit
+public import DLMF.OrthogonalPolynomials.Topics
+public import Mathlib.Analysis.SpecialFunctions.Sqrt
 
 /-!
 # Differential equations and derivatives of classical polynomials
@@ -969,7 +969,7 @@ jacobiPolyP (-1 / 2) (-1 / 2) n x / jacobiPolyP (-1 / 2) (-1 / 2) n 1`. -/
 theorem chebyshevT_eq_jacobi (n : ℕ) (x : ℂ) :
     (Chebyshev.T ℂ n).eval x = jacobiPolyP (-1 / 2) (-1 / 2) n x
         / jacobiPolyP (-1 / 2) (-1 / 2) n 1 := by
-  rw [chebyshevT_hypergeometric, jacobiPolyP_half_half, jacobi_at_one (by norm_num),
+  rw [chebyshevT_hypergeometric, jacobiPolyP_half_half, jacobiPolyP_one,
     show (-1 / 2 : ℂ) + 1 = 1 / 2 by norm_num]
   have hp : poch (1 / 2 : ℂ) n ≠ 0 := poch_half_ne_zero n
   have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero

@@ -6,8 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.GeneralizedHypergeometric.DifferentialEquations
-public import TauCeti.Analysis.Contour.Residue.Basic
 public import DLMFMathlib.Analysis.Complex.BarnesResidue
+public import TauCeti.Analysis.Contour.Residue.Basic
 
 /-!
 # Generalized hypergeometric asymptotics: DLMF §16.11
@@ -410,7 +410,7 @@ lemma ghbR4_mem_genParams {p : ℕ} (a : Fin p → ℂ) (i : Fin p) : a i ∈ ge
   simp [genParams]
 
 /-- The reflected Gamma factor is regular at every upper pole. -/
-lemma ghbR4_Gamma_neg_analyticAt {p : ℕ} (a : Fin p → ℂ) (ha : genDenRegular (genParams a))
+lemma ghbR4_Gamma_neg_analyticAt {p : ℕ} (a : Fin p → ℂ) (ha : GenDenRegular (genParams a))
     (j : Fin p) (k : ℕ) : AnalyticAt ℂ (fun s => Gamma (-s)) (-a j - k) := by
   have hnp : ∀ m : ℕ, -(-a j - k) ≠ -m := by
     intro m h
@@ -419,7 +419,7 @@ lemma ghbR4_Gamma_neg_analyticAt {p : ℕ} (a : Fin p → ℂ) (ha : genDenRegul
   exact (ghbR4_Gamma_analyticAt hnp).comp_of_eq (f := fun s => -s) (by fun_prop) rfl
 
 /-- The pole-removed Barnes kernel is analytic at an upper pole. -/
-lemma ghbR4_G_analyticAt {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ) (ha : genDenRegular (genParams a))
+lemma ghbR4_G_analyticAt {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ) (ha : GenDenRegular (genParams a))
     (j : Fin p) (k : ℕ) (w : ℂ) :
     AnalyticAt ℂ (fun s => (∏ i, ghbR4_localGamma (a i + (-a j - k)) (a i + s)) *
       (genGamma (genShift (genParams b) s))⁻¹ * Gamma (-s) * Complex.exp (s * w)) (-a j - k) := by
@@ -438,7 +438,7 @@ lemma ghbR4_poleExp_le_one (c : ℂ) : ghbR4_poleExp c ≤ 1 := by
 /-- The algebraic coefficients equal the corresponding simple Barnes residues. -/
 @[dlmf 16.11.E2]
 theorem genH_simple_residue {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
-    (ha : genDenRegular (genParams a))
+    (ha : GenDenRegular (genParams a))
     (hdiff : ∀ i j, i ≠ j → ∀ n : ℤ, a i - a j ≠ n)
     (w : ℂ) (j : Fin p) (k : ℕ) :
     genHResidueLog a b w (-a j - k) = genHTermLog a b w (j, k) := by
@@ -471,7 +471,7 @@ theorem genH_simple_residue {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
 
 /-- A repeated pole contributes an exponential times a polynomial in the logarithm. -/
 theorem genH_resonant_log_polynomial {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ)
-    (ha : genDenRegular (genParams a)) {s : ℂ} (hs : s ∈ genHPoleSet a) :
+    (ha : GenDenRegular (genParams a)) {s : ℂ} (hs : s ∈ genHPoleSet a) :
     ∃ P : Polynomial ℂ, P.natDegree ≤ p - 1 ∧
       ∀ w : ℂ, genHResidueLog a b w s = Complex.exp (s * w) * P.eval w := by
   classical
@@ -526,7 +526,7 @@ theorem genH_resonant_log_polynomial {p q : ℕ} (a : Fin p → ℂ) (b : Fin q 
 /-- The full H residue series converges to the continued function at |z|>1, including resonances and both closed cut sides. -/
 @[dlmf 16.11.E6]
 theorem genH_balanced_converges {q : ℕ} (a : Fin (q + 1) → ℂ) (b : Fin q → ℂ)
-    (ha : genDenRegular (genParams a)) (hb : genDenRegular (genParams b))
+    (ha : GenDenRegular (genParams a)) (hb : GenDenRegular (genParams b))
     {w : ℂ} (hr : 0 < w.re) (hi : |w.im| ≤ Real.pi) :
     HasSum (fun s : genHPoleSet a => genHResidueLog a b w s)
       (genGamma (genParams a) / genGamma (genParams b) *
@@ -536,7 +536,7 @@ theorem genH_balanced_converges {q : ℕ} (a : Fin (q + 1) → ℂ) (b : Fin q �
 /-- All orders of the equal-order expansion, with the full phase convention and resonant residues. -/
 @[dlmf 16.11.E7]
 theorem genHG_equal_order_asymptotic {q : ℕ} (a b : Fin q → ℂ)
-    (ha : genDenRegular (genParams a)) (hb : genDenRegular (genParams b))
+    (ha : GenDenRegular (genParams a)) (hb : GenDenRegular (genParams b))
     (N : ℕ) (ε : ℝ) (hε : ε = 1 ∨ ε = -1) :
     Asymptotics.IsBigO (genInfinityLogHalf ε)
       (fun w => genGamma (genParams a) / genGamma (genParams b) *
@@ -548,7 +548,7 @@ theorem genHG_equal_order_asymptotic {q : ℕ} (a b : Fin q → ℂ)
 /-- All orders with p=q−1, both shifted E branches, and the full algebraic residue series. -/
 @[dlmf 16.11.E8]
 theorem genHG_one_lower_asymptotic {p : ℕ} (a : Fin p → ℂ) (b : Fin (p + 1) → ℂ)
-    (ha : genDenRegular (genParams a)) (hb : genDenRegular (genParams b)) (N : ℕ) :
+    (ha : GenDenRegular (genParams a)) (hb : GenDenRegular (genParams b)) (N : ℕ) :
     Asymptotics.IsBigO (DLMF.logSector Real.pi)
       (fun w => genGamma (genParams a) / genGamma (genParams b) *
         genHG (genParams a) (genParams b) (-Complex.exp w) - genHTruncLog a b w N -
@@ -560,7 +560,7 @@ theorem genHG_one_lower_asymptotic {p : ℕ} (a : Fin p → ℂ) (b : Fin (p + 1
 /-- All orders with p≤q−2 on the full principal sector, with both E branch contributions. -/
 @[dlmf 16.11.E9]
 theorem genHG_fewer_upper_asymptotic {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ) (hpq : p + 2 ≤ q)
-    (ha : genDenRegular (genParams a)) (hb : genDenRegular (genParams b)) (N : ℕ) :
+    (ha : GenDenRegular (genParams a)) (hb : GenDenRegular (genParams b)) (N : ℕ) :
     Asymptotics.IsBigO (DLMF.logSector Real.pi)
       (fun w => genGamma (genParams a) / genGamma (genParams b) *
         genHG (genParams a) (genParams b) (-Complex.exp w) -
@@ -711,7 +711,7 @@ theorem genHG_all_large_parameter_asymptotic {p q : ℕ} (a : Fin p → ℂ) (b 
     obtain ⟨i, rfl⟩ := List.mem_ofFn.mp (by simpa [genParams] using hx)
     have := single_le_sum (f := fun i => ‖b i‖) (fun _ _ => norm_nonneg _) (mem_univ i)
     linarith
-  have hreg : genDenRegular (genShift (genParams b) r) := by
+  have hreg : GenDenRegular (genShift (genParams b) r) := by
     intro x hx n hxn
     obtain ⟨y, hy, rfl⟩ := Multiset.mem_map.mp hx
     have h1 := congrArg Complex.re hxn

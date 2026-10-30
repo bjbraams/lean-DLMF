@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.NumberTheory.ZetaValues
 public import Mathlib.MeasureTheory.Function.Floor
+public import Mathlib.NumberTheory.ZetaValues
 
 /-!
 # The Euler–Maclaurin summation formula
@@ -45,6 +45,7 @@ open scoped Nat
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
 
 /-- The periodic Bernoulli function `B̃ₚ(x) = Bₚ(x - ⌊x⌋)`. -/
+@[dlmf 24.2.iii]
 def periodicBernoulli (p : ℕ) (x : ℝ) : ℝ := bernoulliFun p (Int.fract x)
 
 /-- Identity under the stated parameter and domain assumptions: `periodicBernoulli p (x + m) =

@@ -5,9 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Lame.Polynomials.P2pODE
 public import DLMF.JacobiElliptic.SpecialValues
 public import DLMF.Lame.Eigenvalues
+public import DLMF.Lame.Polynomials.P2pODE
 
 /-!
 # Lamé polynomials as Lamé eigenfunctions: eigenvalues (DLMF 29.15.7 and analogues)
@@ -166,10 +166,10 @@ theorem p2p_sym_vals {E : ℂ → ℂ} {p σ : ℂ} (hd : DifferentiableAt ℂ E
 /-- The real part along `ℝ` of a complex solution of Lamé's equation with real parameters, regular
 on `ℝ`, is a real solution. -/
 lemma p2p_re_sol {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {h ν : ℝ} {E : ℂ → ℂ}
-    (hE : IsLameSolutionOn (h : ℂ) (ν : ℂ) (k : ℂ) E {z | jacobiRegulark .n z k}) :
+    (hE : IsLameSolutionOn (h : ℂ) (ν : ℂ) (k : ℂ) E {z | JacobiRegulark .n z k}) :
     Real.IsLameSolution h ν k (fun x : ℝ => (E x).re) ∧
       ∀ x : ℝ, deriv (fun x : ℝ => (E x).re) x = (deriv E x).re := by
-  have r : ∀ x : ℝ, jacobiRegulark .n (x : ℂ) k := p2p_regular_real hk0 hk1
+  have r : ∀ x : ℝ, JacobiRegulark .n (x : ℂ) k := p2p_regular_real hk0 hk1
   have d1 : ∀ x : ℝ, HasDerivAt (fun x : ℝ => (E x).re) (deriv E x).re x := fun x =>
     (hE.differentiableAt _ (r x)).hasDerivAt.real_of_complex
   have hd : deriv (fun x : ℝ => (E x).re) = fun x : ℝ => (deriv E x).re :=
@@ -293,6 +293,5 @@ theorem p2p_lameEigenvalue_eq {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t : LamePol
   have hν : -1 / 2 ≤ ν := by simp only [ν]; have := Nat.cast_nonneg (α := ℝ) (t.order n); linarith
   have huniq := (Real.lameEigenvalue_spec hν hk0 hk1 (p2p_odd0 t) (p2p_oddK t)).1 m
   exact huniq.unique (Real.isNthLameEigenvalue_lameEigenvalue hν hk0 hk1 _ _ m) hnth
-
 
 end DLMF.Lame

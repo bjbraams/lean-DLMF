@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Hypergeometric.Boundary
 public import DLMF.Gamma.RecipGammaDeriv
+public import DLMF.Hypergeometric.Boundary
 public import DLMF.Legendre.Connections
 
 /-!
@@ -141,7 +141,6 @@ theorem legBd_ferrersQ_tendsto {ν μ : ℂ} (h : LegendreQRegular ν μ) (hμ :
     π/2*cos ((ν+μ)*π/2)*(2^μ*Gamma ((ν+μ+2)/2)/Gamma ((ν-μ+1)/2)) *
           ((x:ℂ) * regularizedGaussHG ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) ((x:ℂ)^2))) * hc
 
-
 /-- The regularized pullbacks with negative balance, `(1-x²)^(a+b-c) 𝐅(a,b;c;x²)`, as `x → 1⁻`. -/
 theorem legBd_tendsto_rGHG_sq_neg {a b c : ℂ} (h : (c-a-b).re < 0) :
     Tendsto (fun x : ℝ => (1-(x:ℂ)^2)^(a+b-c) * regularizedGaussHG a b c ((x:ℂ)^2)) (𝓝[<] 1)
@@ -231,7 +230,6 @@ theorem legBd_ferrersQ_neg_tendsto {ν μ : ℂ} (hp : LegendreQRegular ν μ)
     π/2*cos ((ν-μ)*π/2)*(2^(-μ)*Gamma ((ν-μ+2)/2)/Gamma ((ν+μ+1)/2)) *
           ((x:ℂ) * regularizedGaussHG ((1-(ν-μ))/2) ((ν+μ+2)/2) (3/2) ((x:ℂ)^2))) * hc
 
-
 /-- `u ~ v` when `u = v g` eventually and `g → 1`. -/
 theorem legBd_isEquivalent_of_eventuallyEq_mul {l : Filter ℝ} {u v g : ℝ → ℂ}
     (h : u =ᶠ[l] fun x => v x * g x) (hg : Tendsto g l (𝓝 1)) : u ~[l] v := by
@@ -281,7 +279,6 @@ theorem legBd_tendsto_weight_left (μ : ℂ) :
   congr 1
   have : (1:ℂ)-x ≠ 0 := by exact_mod_cast hx1
   field_simp; ring
-
 
 /-- `2^(μ-1)/2^μ = 1/2`. -/
 theorem legBd_two_cpow_sub_one_div (μ : ℂ) : (2:ℂ)^(μ-1) / 2^μ = 1/2 := by
@@ -578,9 +575,6 @@ theorem legBd_associatedP_half_tendsto_atTop (μ : ℂ) :
     regularizedGaussHG ((1/2-μ)/2) ((3/2-μ)/2) ((1/2-μ)/2 + (3/2-μ)/2) (1-1/(x:ℂ)^2) /
       (Real.log x : ℂ)) * hp
 
-
-
-
 /-- `2^(1/2)/√π = (2/π)^(1/2)` in complex powers. -/
 theorem legBd_sqrt_two_div_sqrt_pi :
     (2:ℂ)^(1/2:ℂ) / (Real.sqrt π : ℂ) = ((2/π:ℝ):ℂ)^(1/2:ℂ) := by
@@ -594,7 +588,6 @@ theorem legBd_sqrt_two_div_sqrt_pi :
 
 section ZeroBalanced
 open DLMF.Gamma
-
 
 /-- Constant `Γ(a)⁻¹Γ(b)⁻¹` of the zero-balanced expansion. -/
 def legBdK (a b : ℂ) : ℂ := (Gamma a)⁻¹ * (Gamma b)⁻¹

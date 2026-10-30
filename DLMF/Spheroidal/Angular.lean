@@ -5,13 +5,13 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Spheroidal.FerrersProperties
-public import DLMF.Spheroidal.Equation
-public import DLMF.Spheroidal.Existence
 public import DLMF.Legendre.Associated
 public import DLMF.Legendre.Integrals
-public import DLMF.Legendre.SpecialValues
 public import DLMF.Legendre.SeriesTools
+public import DLMF.Legendre.SpecialValues
+public import DLMF.Spheroidal.Equation
+public import DLMF.Spheroidal.Existence
+public import DLMF.Spheroidal.FerrersProperties
 public import DLMF.Spheroidal.P2yFerrersTools
 
 /-!
@@ -176,7 +176,6 @@ theorem p1s_isSpheroidalPsFactor_reflect {n m : ℕ} {γ2 : ℝ} {g : ℂ → �
     rw [show -((-1 : ℂ) ^ (n - m) * deriv g 0) = (((-((-1 : ℝ) ^ (n - m))) : ℝ) : ℂ) * deriv g 0
       by push_cast; ring, Complex.re_ofReal_mul, ho.neg_one_pow, neg_neg, one_mul]
     exact hg.sign_odd ho
-
 
 /-- Iterated derivatives of an entire function real on `ℝ` are real on `ℝ`. -/
 lemma p1s_iteratedDeriv_im_eq_zero {g : ℂ → ℂ} (hg : Differentiable ℂ g)
@@ -754,7 +753,6 @@ lemma p1s_hasDerivAt_factor_wronskian {m : ℕ} {γ2 l1 l2 : ℝ} {g1 g2 : ℂ �
     linear_combination (1 - x ^ 2) ^ m * ((g1 x).re * e2 - (g2 x).re * e1)
   · exact Filter.Eventually.of_forall fun t => by simp only [Pi.mul_apply, Pi.sub_apply]
 
-
 /-- **Orthogonality** (DLMF 30.4.6): `∫_{-1}^1 𝖯s^m_k 𝖯s^m_n dx = 0` for `k ≠ n`; the case
 `k = n` is 30.4.1 (`integral_spheroidalPs_sq`). -/
 @[dlmf 30.4.E6]
@@ -1151,7 +1149,7 @@ theorem spheroidalQs_gamma_zero {n m : ℕ} (hmn : m ≤ n) {x : ℝ} (hx : x �
     · rw [hdQ y hy, hdP y hy, hf₀I y hy, p2y_ps_zero_re hmn hy, p2y_A_gamma_zero hmn,
         p2y_ANeg_gamma_zero hmn, mul_one, mul_one]
       have hW := ferrers_wronskian_4 (n : ℂ) (m : ℂ) hreg hy
-      unfold ferrersWronskian at hW
+      unfold ODE.wronskian at hW
       have hG1 : Complex.Gamma ((n : ℂ) + m + 1) = ((n + m).factorial : ℂ) := by
         rw [← Complex.Gamma_nat_eq_factorial]; push_cast; ring_nf
       have hG2 : Complex.Gamma ((n : ℂ) - m + 1) = ((n - m).factorial : ℂ) := by

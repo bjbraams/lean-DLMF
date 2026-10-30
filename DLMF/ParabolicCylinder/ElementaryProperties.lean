@@ -7,8 +7,8 @@ module
 
 public import DLMF.ParabolicCylinder.Basic
 
-public import DLMF.Confluent.ParabolicCylinder
 public import DLMF.Confluent.Coulomb
+public import DLMF.Confluent.ParabolicCylinder
 
 /-!
 # Additional parabolic cylinder definitions and entire dependence
@@ -25,10 +25,6 @@ not completed proofs. See `DLMF111214Acquisition.md` for coverage and validation
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat ComplexConjugate
 namespace DLMF.Confluent
-
-
-
-
 
 /-- Identity under the stated parameter and domain assumptions: `IsQuadraticCylinderSolution a b c
 (fun z => f (s*(z+b/(2*a))))`. -/
@@ -163,14 +159,6 @@ theorem pcfV_real (a x : ℝ) :
     (pcfV a x).im=0 := by
   rw [← Complex.conj_eq_iff_im, conj_pcfV, Complex.conj_ofReal, Complex.conj_ofReal]
 
-
-
-
-
-
-
-
-
 /-- The derivative of the even Kummer basis commuteswith complex conjugation. -/
 theorem conj_pcfEvenDeriv (a z : ℂ) : conj (pcfEvenDeriv a z) = pcfEvenDeriv (conj a) (conj z) := by
   simp [pcfEvenDeriv, conj_kummerM, ← Complex.exp_conj, map_div₀, map_ofNat]
@@ -224,10 +212,6 @@ theorem pcfF_phase {a : ℝ} (ha : ∀ n : ℕ, a ≠ n+1/2) (x : ℝ) :
   have h := norm_mul_exp_arg_mul_I (pcfU a x + I*pcfUBar a x)
   rw [mul_comm ((arg _ : ℝ) : ℂ) I] at h
   exact h.symm
-
-
-
-
 
 /-- Estimate under the stated parameter and domain assumptions: `0 < pcfG a x ∧ pcfUDeriv a
 x+I*pcfUBarDeriv a x=-(pcfG a x*exp (I*pcfPsi a x))`. -/
@@ -601,7 +585,5 @@ theorem pcfUBar_recurrences {a : ℂ} (ha : ∀ n : ℤ, a ≠ n+1/2) (z : ℂ) 
   · linear_combination Gamma (1/2-a) * r2 + pcfV (a+1) z * gA
   · linear_combination Gamma (1/2-a) * r3
   · linear_combination Gamma (1/2-a) * (r2 + r3) + pcfV (a+1) z * gA
-
-
 
 end DLMF.Confluent

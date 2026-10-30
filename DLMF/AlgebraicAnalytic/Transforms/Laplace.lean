@@ -7,14 +7,14 @@ module
 
 public import DLMF.AlgebraicAnalytic.Transforms.Basic
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
-public import DLMFMathlib.Analysis.SpecialFunctions.ImproperIntegralsExtra
 public import DLMFMathlib.Analysis.Integral.LaplaceRay
-public import Mathlib.Analysis.MellinTransform
+public import DLMFMathlib.Analysis.SpecialFunctions.ImproperIntegralsExtra
+public import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
 public import Mathlib.Analysis.Calculus.ParametricIntegral
 public import Mathlib.Analysis.Convolution
+public import Mathlib.Analysis.MellinTransform
 public import Mathlib.MeasureTheory.Integral.ExpDecay
 public import Mathlib.Topology.EMetricSpace.BoundedVariation
-public import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
 
 /-!
 # The Laplace transform (DLMF §1.14(iii))
@@ -121,7 +121,7 @@ theorem norm_laplaceTransform_le {f : ℝ → ℂ} {α M : ℝ}
 /-- DLMF 1.14.19: under 1.14.18, `𝓛(f)(s) → 0` as `ℜs → ∞`, uniformly in `ℑs`. -/
 @[dlmf 1.14.E19]
 theorem tendsto_laplaceTransform_re_atTop {f : ℝ → ℂ} {α : ℝ}
-    (_hf : LocallyIntegrableOn f (Ici 0)) (hg : IsOfExponentialGrowth f α) :
+    (hg : IsOfExponentialGrowth f α) :
     Tendsto (laplaceTransform f) (comap Complex.re atTop) (𝓝 0) := by
   obtain ⟨M, hM⟩ := hg
   apply tendsto_zero_iff_norm_tendsto_zero.mpr
@@ -275,7 +275,6 @@ theorem hasDerivAt_laplaceTransform_moment {f : ℝ → ℂ} {α : ℝ}
       ring)
   simpa only [integral_neg, laplaceTransform] using! hd.2
 
-
 /-- DLMF 1.14.23: `(-1)ⁿ (dⁿ/dsⁿ) 𝓛(f)(s) = 𝓛(f_n)(s)` with `f_n(t) = tⁿ f(t)`, for `ℜs > α`. -/
 @[dlmf 1.14.E23]
 theorem iteratedDeriv_laplaceTransform {f : ℝ → ℂ} {α : ℝ} (hf : LocallyIntegrableOn f (Ici 0))
@@ -415,7 +414,6 @@ private lemma laplaceTransform_of_shift_mul {f : ℝ → ℂ} {α a : ℝ} {c : 
     c * cexp (-a * s) * laplaceTransform f s = laplaceTransform f s at he
   linear_combination -he
 
-
 /-- DLMF 1.14.25: if `a > 0` and `f(t + a) = f(t)` for `t > 0`, then
 `𝓛(f)(s) = (1 - e^{-as})⁻¹ ∫₀^a e^{-st} f(t) dt`. -/
 @[dlmf 1.14.E25]
@@ -459,7 +457,6 @@ private lemma laplace_integrand_tendsto_zero {f : ℝ → ℂ} {α : ℝ}
           mul_le_mul_of_nonneg_left (hM t ht) (Real.exp_pos _).le
     _ = M * Real.exp (-(s.re - α) * t) := by
         rw [mul_left_comm, ← Real.exp_add]; congr 2; ring
-
 
 /-- DLMF 1.14.27: if `f` is continuous on `[0, ∞)`, differentiable on `(0, ∞)` with locally
 integrable derivative `f'`, and `f`, `f'` are of exponential growth `α`, then
@@ -577,7 +574,6 @@ private lemma convolution_laplace_integrands (f g : ℝ → ℂ) (s : ℂ) :
       · have htu : ¬ 0 < t - u := by linarith
         simp [indicator, hu, htu]
       · simp [indicator, hu]
-
 
 /-- DLMF 1.14.31 (convolution theorem): `𝓛(f * g) = 𝓛(f) 𝓛(g)` for the Laplace convolution
 1.14.30, for `ℜs > α`. -/

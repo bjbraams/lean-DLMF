@@ -181,11 +181,58 @@ theorem jacobiPQTau_add_iKp {τ : ℂ} (hτ : 0 < τ.im) (p q : JacobiLetter) (z
       je22a_betaKp τ p / je22a_betaKp τ q * jacobiPQTau p.swapKp q.swapKp z τ := by
   rw [jacobiPQTau, je22a_zetaTau_add_iKp hτ, je22a_glaisher_add_half_tau hτ, jacobiPQTau]
 
+/-- Composing the real and imaginary quarter-period shifts of a Glaisher quotient. -/
+theorem jacobiPQTau_add_K_add_iKp {τ : ℂ} (hτ : 0 < τ.im) (p q : JacobiLetter) (z : ℂ) :
+    jacobiPQTau p q (z + compEllIntKTau τ + I * compEllIntKpTau τ) τ =
+      (je22a_betaK τ p / je22a_betaK τ q) *
+        (je22a_betaKp τ p.swapK / je22a_betaKp τ q.swapK *
+          jacobiPQTau p.swapK.swapKp q.swapK.swapKp z τ) := by
+  rw [show z + compEllIntKTau τ + I * compEllIntKpTau τ =
+    z + I * compEllIntKpTau τ + compEllIntKTau τ by ring,
+    jacobiPQTau_add_K hτ, jacobiPQTau_add_iKp hτ]
+
+/-- Composing two real quarter-period shifts of a Glaisher quotient. -/
+theorem jacobiPQTau_add_two_K {τ : ℂ} (hτ : 0 < τ.im) (p q : JacobiLetter) (z : ℂ) :
+    jacobiPQTau p q (z + 2 * compEllIntKTau τ) τ =
+      (je22a_betaK τ p / je22a_betaK τ q) *
+        (je22a_betaK τ p.swapK / je22a_betaK τ q.swapK *
+          jacobiPQTau p.swapK.swapK q.swapK.swapK z τ) := by
+  rw [show z + 2 * compEllIntKTau τ =
+    z + compEllIntKTau τ + compEllIntKTau τ by ring,
+    jacobiPQTau_add_K hτ, jacobiPQTau_add_K hτ]
+
+/-- Composing two imaginary quarter-period shifts of a Glaisher quotient. -/
+theorem jacobiPQTau_add_two_iKp {τ : ℂ} (hτ : 0 < τ.im) (p q : JacobiLetter) (z : ℂ) :
+    jacobiPQTau p q (z + 2 * (I * compEllIntKpTau τ)) τ =
+      (je22a_betaKp τ p / je22a_betaKp τ q) *
+        (je22a_betaKp τ p.swapKp / je22a_betaKp τ q.swapKp *
+          jacobiPQTau p.swapKp.swapKp q.swapKp.swapKp z τ) := by
+  rw [show z + 2 * (I * compEllIntKpTau τ) =
+    z + I * compEllIntKpTau τ + I * compEllIntKpTau τ by ring,
+    jacobiPQTau_add_iKp hτ, jacobiPQTau_add_iKp hτ]
+
+/-- Composing the two full-period translations of a Glaisher quotient. -/
+theorem jacobiPQTau_add_two_K_add_two_iKp {τ : ℂ} (hτ : 0 < τ.im)
+    (p q : JacobiLetter) (z : ℂ) :
+    jacobiPQTau p q (z + 2 * compEllIntKTau τ + 2 * (I * compEllIntKpTau τ)) τ =
+      (je22a_betaK τ p / je22a_betaK τ q) *
+        (je22a_betaK τ p.swapK / je22a_betaK τ q.swapK *
+          ((je22a_betaKp τ p.swapK.swapK / je22a_betaKp τ q.swapK.swapK) *
+            (je22a_betaKp τ p.swapK.swapK.swapKp /
+              je22a_betaKp τ q.swapK.swapK.swapKp *
+              jacobiPQTau p.swapK.swapK.swapKp.swapKp q.swapK.swapK.swapKp.swapKp z τ))) := by
+  rw [show z + 2 * compEllIntKTau τ + 2 * (I * compEllIntKpTau τ) =
+    z + 2 * (I * compEllIntKpTau τ) + 2 * compEllIntKTau τ by ring,
+    jacobiPQTau_add_two_K hτ, jacobiPQTau_add_two_iKp hτ]
+
 /-- Unfold the twelve lattice-form functions and apply the quarter-period shifts. -/
 macro "je22a_shift_simp " h:term : tactic => `(tactic|
   simp only [jacobiSnTau, jacobiCnTau, jacobiDnTau, jacobiSdTau, jacobiCdTau, jacobiScTau,
     jacobiNsTau, jacobiNcTau, jacobiNdTau, jacobiDsTau, jacobiDcTau, jacobiCsTau,
-    jacobiPQTau_add_K $h, jacobiPQTau_add_iKp $h, JacobiLetter.swapK, JacobiLetter.swapKp,
+    jacobiPQTau_add_K $h, jacobiPQTau_add_iKp $h,
+    jacobiPQTau_add_K_add_iKp $h, jacobiPQTau_add_two_K $h,
+    jacobiPQTau_add_two_iKp $h, jacobiPQTau_add_two_K_add_two_iKp $h,
+    JacobiLetter.swapK, JacobiLetter.swapKp,
     je22a_betaK, je22a_betaKp, je22a_modulusTau_eq, je22a_comodulusTau_eq])
 
 /-- Close a coefficient identity `a * X = b * X` produced by `je22a_shift_simp`. -/
@@ -213,22 +260,7 @@ theorem jacobiSnTau_shift {τ : ℂ} (hτ : 0 < τ.im) (z : ℂ) :
       jacobiSnTau z τ := by
   have hr := je22a_r_ne_zero hτ
   have hrp := je22a_rp_ne_zero hτ
-  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
-  · je22a_shift_close hτ
-  · rw [show z + compEllIntKTau τ + I * compEllIntKpTau τ =
-        z + I * compEllIntKpTau τ + compEllIntKTau τ by ring]
-    je22a_shift_close hτ
-  · je22a_shift_close hτ
-  · rw [show z + 2 * compEllIntKTau τ =
-        z + compEllIntKTau τ + compEllIntKTau τ by ring]
-    je22a_shift_close hτ
-  · rw [show z + 2 * compEllIntKTau τ + 2 * (I * compEllIntKpTau τ) =
-        z + I * compEllIntKpTau τ + I * compEllIntKpTau τ + compEllIntKTau τ + compEllIntKTau τ by
-            ring]
-    je22a_shift_close hτ
-  · rw [show z + 2 * (I * compEllIntKpTau τ) =
-        z + I * compEllIntKpTau τ + I * compEllIntKpTau τ by ring]
-    je22a_shift_close hτ
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩ <;> je22a_shift_close hτ
 
 /-- Table 22.4.3, row `cn`, in the lattice form: the shifts of `cn` by `K`, `K + iK'`,
 `iK'`, `2K`, `2K + 2iK'`, `2iK'`, with `k = θ₂²/θ₃²`, `k' = θ₄²/θ₃²`. -/
@@ -247,22 +279,7 @@ theorem jacobiCnTau_shift {τ : ℂ} (hτ : 0 < τ.im) (z : ℂ) :
       -jacobiCnTau z τ := by
   have hr := je22a_r_ne_zero hτ
   have hrp := je22a_rp_ne_zero hτ
-  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
-  · je22a_shift_close hτ
-  · rw [show z + compEllIntKTau τ + I * compEllIntKpTau τ =
-        z + I * compEllIntKpTau τ + compEllIntKTau τ by ring]
-    je22a_shift_close hτ
-  · je22a_shift_close hτ
-  · rw [show z + 2 * compEllIntKTau τ =
-        z + compEllIntKTau τ + compEllIntKTau τ by ring]
-    je22a_shift_close hτ
-  · rw [show z + 2 * compEllIntKTau τ + 2 * (I * compEllIntKpTau τ) =
-        z + I * compEllIntKpTau τ + I * compEllIntKpTau τ + compEllIntKTau τ + compEllIntKTau τ by
-            ring]
-    je22a_shift_close hτ
-  · rw [show z + 2 * (I * compEllIntKpTau τ) =
-        z + I * compEllIntKpTau τ + I * compEllIntKpTau τ by ring]
-    je22a_shift_close hτ
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩ <;> je22a_shift_close hτ
 
 /-- Table 22.4.3, row `dn`, in the lattice form: the shifts of `dn` by `K`, `K + iK'`,
 `iK'`, `2K`, `2K + 2iK'`, `2iK'`, with `k = θ₂²/θ₃²`, `k' = θ₄²/θ₃²`. -/
@@ -281,22 +298,7 @@ theorem jacobiDnTau_shift {τ : ℂ} (hτ : 0 < τ.im) (z : ℂ) :
       -jacobiDnTau z τ := by
   have hr := je22a_r_ne_zero hτ
   have hrp := je22a_rp_ne_zero hτ
-  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
-  · je22a_shift_close hτ
-  · rw [show z + compEllIntKTau τ + I * compEllIntKpTau τ =
-        z + I * compEllIntKpTau τ + compEllIntKTau τ by ring]
-    je22a_shift_close hτ
-  · je22a_shift_close hτ
-  · rw [show z + 2 * compEllIntKTau τ =
-        z + compEllIntKTau τ + compEllIntKTau τ by ring]
-    je22a_shift_close hτ
-  · rw [show z + 2 * compEllIntKTau τ + 2 * (I * compEllIntKpTau τ) =
-        z + I * compEllIntKpTau τ + I * compEllIntKpTau τ + compEllIntKTau τ + compEllIntKTau τ by
-            ring]
-    je22a_shift_close hτ
-  · rw [show z + 2 * (I * compEllIntKpTau τ) =
-        z + I * compEllIntKpTau τ + I * compEllIntKpTau τ by ring]
-    je22a_shift_close hτ
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩ <;> je22a_shift_close hτ
 
 /-- Table 22.4.3, row `cd`, in the lattice form: the shifts of `cd` by `K`, `K + iK'`,
 `iK'`, `2K`, `2K + 2iK'`, `2iK'`, with `k = θ₂²/θ₃²`, `k' = θ₄²/θ₃²`. -/
@@ -315,22 +317,7 @@ theorem jacobiCdTau_shift {τ : ℂ} (hτ : 0 < τ.im) (z : ℂ) :
       jacobiCdTau z τ := by
   have hr := je22a_r_ne_zero hτ
   have hrp := je22a_rp_ne_zero hτ
-  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
-  · je22a_shift_close hτ
-  · rw [show z + compEllIntKTau τ + I * compEllIntKpTau τ =
-        z + I * compEllIntKpTau τ + compEllIntKTau τ by ring]
-    je22a_shift_close hτ
-  · je22a_shift_close hτ
-  · rw [show z + 2 * compEllIntKTau τ =
-        z + compEllIntKTau τ + compEllIntKTau τ by ring]
-    je22a_shift_close hτ
-  · rw [show z + 2 * compEllIntKTau τ + 2 * (I * compEllIntKpTau τ) =
-        z + I * compEllIntKpTau τ + I * compEllIntKpTau τ + compEllIntKTau τ + compEllIntKTau τ by
-            ring]
-    je22a_shift_close hτ
-  · rw [show z + 2 * (I * compEllIntKpTau τ) =
-        z + I * compEllIntKpTau τ + I * compEllIntKpTau τ by ring]
-    je22a_shift_close hτ
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩ <;> je22a_shift_close hτ
 
 /-- Table 22.4.3, row `sd`, in the lattice form: the shifts of `sd` by `K`, `K + iK'`,
 `iK'`, `2K`, `2K + 2iK'`, `2iK'`, with `k = θ₂²/θ₃²`, `k' = θ₄²/θ₃²`. -/
@@ -349,22 +336,7 @@ theorem jacobiSdTau_shift {τ : ℂ} (hτ : 0 < τ.im) (z : ℂ) :
       -jacobiSdTau z τ := by
   have hr := je22a_r_ne_zero hτ
   have hrp := je22a_rp_ne_zero hτ
-  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
-  · je22a_shift_close hτ
-  · rw [show z + compEllIntKTau τ + I * compEllIntKpTau τ =
-        z + I * compEllIntKpTau τ + compEllIntKTau τ by ring]
-    je22a_shift_close hτ
-  · je22a_shift_close hτ
-  · rw [show z + 2 * compEllIntKTau τ =
-        z + compEllIntKTau τ + compEllIntKTau τ by ring]
-    je22a_shift_close hτ
-  · rw [show z + 2 * compEllIntKTau τ + 2 * (I * compEllIntKpTau τ) =
-        z + I * compEllIntKpTau τ + I * compEllIntKpTau τ + compEllIntKTau τ + compEllIntKTau τ by
-            ring]
-    je22a_shift_close hτ
-  · rw [show z + 2 * (I * compEllIntKpTau τ) =
-        z + I * compEllIntKpTau τ + I * compEllIntKpTau τ by ring]
-    je22a_shift_close hτ
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩ <;> je22a_shift_close hτ
 
 /-- Table 22.4.3, row `nd`, in the lattice form: the shifts of `nd` by `K`, `K + iK'`,
 `iK'`, `2K`, `2K + 2iK'`, `2iK'`, with `k = θ₂²/θ₃²`, `k' = θ₄²/θ₃²`. -/
@@ -383,22 +355,7 @@ theorem jacobiNdTau_shift {τ : ℂ} (hτ : 0 < τ.im) (z : ℂ) :
       -jacobiNdTau z τ := by
   have hr := je22a_r_ne_zero hτ
   have hrp := je22a_rp_ne_zero hτ
-  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
-  · je22a_shift_close hτ
-  · rw [show z + compEllIntKTau τ + I * compEllIntKpTau τ =
-        z + I * compEllIntKpTau τ + compEllIntKTau τ by ring]
-    je22a_shift_close hτ
-  · je22a_shift_close hτ
-  · rw [show z + 2 * compEllIntKTau τ =
-        z + compEllIntKTau τ + compEllIntKTau τ by ring]
-    je22a_shift_close hτ
-  · rw [show z + 2 * compEllIntKTau τ + 2 * (I * compEllIntKpTau τ) =
-        z + I * compEllIntKpTau τ + I * compEllIntKpTau τ + compEllIntKTau τ + compEllIntKTau τ by
-            ring]
-    je22a_shift_close hτ
-  · rw [show z + 2 * (I * compEllIntKpTau τ) =
-        z + I * compEllIntKpTau τ + I * compEllIntKpTau τ by ring]
-    je22a_shift_close hτ
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩ <;> je22a_shift_close hτ
 
 /-- Table 22.4.3, row `dc`, in the lattice form: the shifts of `dc` by `K`, `K + iK'`,
 `iK'`, `2K`, `2K + 2iK'`, `2iK'`, with `k = θ₂²/θ₃²`, `k' = θ₄²/θ₃²`. -/
@@ -417,22 +374,7 @@ theorem jacobiDcTau_shift {τ : ℂ} (hτ : 0 < τ.im) (z : ℂ) :
       jacobiDcTau z τ := by
   have hr := je22a_r_ne_zero hτ
   have hrp := je22a_rp_ne_zero hτ
-  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
-  · je22a_shift_close hτ
-  · rw [show z + compEllIntKTau τ + I * compEllIntKpTau τ =
-        z + I * compEllIntKpTau τ + compEllIntKTau τ by ring]
-    je22a_shift_close hτ
-  · je22a_shift_close hτ
-  · rw [show z + 2 * compEllIntKTau τ =
-        z + compEllIntKTau τ + compEllIntKTau τ by ring]
-    je22a_shift_close hτ
-  · rw [show z + 2 * compEllIntKTau τ + 2 * (I * compEllIntKpTau τ) =
-        z + I * compEllIntKpTau τ + I * compEllIntKpTau τ + compEllIntKTau τ + compEllIntKTau τ by
-            ring]
-    je22a_shift_close hτ
-  · rw [show z + 2 * (I * compEllIntKpTau τ) =
-        z + I * compEllIntKpTau τ + I * compEllIntKpTau τ by ring]
-    je22a_shift_close hτ
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩ <;> je22a_shift_close hτ
 
 /-- Table 22.4.3, row `nc`, in the lattice form: the shifts of `nc` by `K`, `K + iK'`,
 `iK'`, `2K`, `2K + 2iK'`, `2iK'`, with `k = θ₂²/θ₃²`, `k' = θ₄²/θ₃²`. -/
@@ -451,22 +393,7 @@ theorem jacobiNcTau_shift {τ : ℂ} (hτ : 0 < τ.im) (z : ℂ) :
       -jacobiNcTau z τ := by
   have hr := je22a_r_ne_zero hτ
   have hrp := je22a_rp_ne_zero hτ
-  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
-  · je22a_shift_close hτ
-  · rw [show z + compEllIntKTau τ + I * compEllIntKpTau τ =
-        z + I * compEllIntKpTau τ + compEllIntKTau τ by ring]
-    je22a_shift_close hτ
-  · je22a_shift_close hτ
-  · rw [show z + 2 * compEllIntKTau τ =
-        z + compEllIntKTau τ + compEllIntKTau τ by ring]
-    je22a_shift_close hτ
-  · rw [show z + 2 * compEllIntKTau τ + 2 * (I * compEllIntKpTau τ) =
-        z + I * compEllIntKpTau τ + I * compEllIntKpTau τ + compEllIntKTau τ + compEllIntKTau τ by
-            ring]
-    je22a_shift_close hτ
-  · rw [show z + 2 * (I * compEllIntKpTau τ) =
-        z + I * compEllIntKpTau τ + I * compEllIntKpTau τ by ring]
-    je22a_shift_close hτ
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩ <;> je22a_shift_close hτ
 
 /-- Table 22.4.3, row `sc`, in the lattice form: the shifts of `sc` by `K`, `K + iK'`,
 `iK'`, `2K`, `2K + 2iK'`, `2iK'`, with `k = θ₂²/θ₃²`, `k' = θ₄²/θ₃²`. -/
@@ -485,22 +412,7 @@ theorem jacobiScTau_shift {τ : ℂ} (hτ : 0 < τ.im) (z : ℂ) :
       -jacobiScTau z τ := by
   have hr := je22a_r_ne_zero hτ
   have hrp := je22a_rp_ne_zero hτ
-  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
-  · je22a_shift_close hτ
-  · rw [show z + compEllIntKTau τ + I * compEllIntKpTau τ =
-        z + I * compEllIntKpTau τ + compEllIntKTau τ by ring]
-    je22a_shift_close hτ
-  · je22a_shift_close hτ
-  · rw [show z + 2 * compEllIntKTau τ =
-        z + compEllIntKTau τ + compEllIntKTau τ by ring]
-    je22a_shift_close hτ
-  · rw [show z + 2 * compEllIntKTau τ + 2 * (I * compEllIntKpTau τ) =
-        z + I * compEllIntKpTau τ + I * compEllIntKpTau τ + compEllIntKTau τ + compEllIntKTau τ by
-            ring]
-    je22a_shift_close hτ
-  · rw [show z + 2 * (I * compEllIntKpTau τ) =
-        z + I * compEllIntKpTau τ + I * compEllIntKpTau τ by ring]
-    je22a_shift_close hτ
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩ <;> je22a_shift_close hτ
 
 /-- Table 22.4.3, row `ns`, in the lattice form: the shifts of `ns` by `K`, `K + iK'`,
 `iK'`, `2K`, `2K + 2iK'`, `2iK'`, with `k = θ₂²/θ₃²`, `k' = θ₄²/θ₃²`. -/
@@ -519,22 +431,7 @@ theorem jacobiNsTau_shift {τ : ℂ} (hτ : 0 < τ.im) (z : ℂ) :
       jacobiNsTau z τ := by
   have hr := je22a_r_ne_zero hτ
   have hrp := je22a_rp_ne_zero hτ
-  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
-  · je22a_shift_close hτ
-  · rw [show z + compEllIntKTau τ + I * compEllIntKpTau τ =
-        z + I * compEllIntKpTau τ + compEllIntKTau τ by ring]
-    je22a_shift_close hτ
-  · je22a_shift_close hτ
-  · rw [show z + 2 * compEllIntKTau τ =
-        z + compEllIntKTau τ + compEllIntKTau τ by ring]
-    je22a_shift_close hτ
-  · rw [show z + 2 * compEllIntKTau τ + 2 * (I * compEllIntKpTau τ) =
-        z + I * compEllIntKpTau τ + I * compEllIntKpTau τ + compEllIntKTau τ + compEllIntKTau τ by
-            ring]
-    je22a_shift_close hτ
-  · rw [show z + 2 * (I * compEllIntKpTau τ) =
-        z + I * compEllIntKpTau τ + I * compEllIntKpTau τ by ring]
-    je22a_shift_close hτ
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩ <;> je22a_shift_close hτ
 
 /-- Table 22.4.3, row `ds`, in the lattice form: the shifts of `ds` by `K`, `K + iK'`,
 `iK'`, `2K`, `2K + 2iK'`, `2iK'`, with `k = θ₂²/θ₃²`, `k' = θ₄²/θ₃²`. -/
@@ -553,22 +450,7 @@ theorem jacobiDsTau_shift {τ : ℂ} (hτ : 0 < τ.im) (z : ℂ) :
       -jacobiDsTau z τ := by
   have hr := je22a_r_ne_zero hτ
   have hrp := je22a_rp_ne_zero hτ
-  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
-  · je22a_shift_close hτ
-  · rw [show z + compEllIntKTau τ + I * compEllIntKpTau τ =
-        z + I * compEllIntKpTau τ + compEllIntKTau τ by ring]
-    je22a_shift_close hτ
-  · je22a_shift_close hτ
-  · rw [show z + 2 * compEllIntKTau τ =
-        z + compEllIntKTau τ + compEllIntKTau τ by ring]
-    je22a_shift_close hτ
-  · rw [show z + 2 * compEllIntKTau τ + 2 * (I * compEllIntKpTau τ) =
-        z + I * compEllIntKpTau τ + I * compEllIntKpTau τ + compEllIntKTau τ + compEllIntKTau τ by
-            ring]
-    je22a_shift_close hτ
-  · rw [show z + 2 * (I * compEllIntKpTau τ) =
-        z + I * compEllIntKpTau τ + I * compEllIntKpTau τ by ring]
-    je22a_shift_close hτ
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩ <;> je22a_shift_close hτ
 
 /-- Table 22.4.3, row `cs`, in the lattice form: the shifts of `cs` by `K`, `K + iK'`,
 `iK'`, `2K`, `2K + 2iK'`, `2iK'`, with `k = θ₂²/θ₃²`, `k' = θ₄²/θ₃²`. -/
@@ -587,24 +469,7 @@ theorem jacobiCsTau_shift {τ : ℂ} (hτ : 0 < τ.im) (z : ℂ) :
       -jacobiCsTau z τ := by
   have hr := je22a_r_ne_zero hτ
   have hrp := je22a_rp_ne_zero hτ
-  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
-  · je22a_shift_close hτ
-  · rw [show z + compEllIntKTau τ + I * compEllIntKpTau τ =
-        z + I * compEllIntKpTau τ + compEllIntKTau τ by ring]
-    je22a_shift_close hτ
-  · je22a_shift_close hτ
-  · rw [show z + 2 * compEllIntKTau τ =
-        z + compEllIntKTau τ + compEllIntKTau τ by ring]
-    je22a_shift_close hτ
-  · rw [show z + 2 * compEllIntKTau τ + 2 * (I * compEllIntKpTau τ) =
-        z + I * compEllIntKpTau τ + I * compEllIntKpTau τ + compEllIntKTau τ + compEllIntKTau τ by
-            ring]
-    je22a_shift_close hτ
-  · rw [show z + 2 * (I * compEllIntKpTau τ) =
-        z + I * compEllIntKpTau τ + I * compEllIntKpTau τ by ring]
-    je22a_shift_close hτ
-
-/-! ### Transfer to the modulus form -/
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩ <;> je22a_shift_close hτ
 
 /-- `K(k) ≠ 0` on `jacobiModulusDomain` (from the admitted inversion). -/
 theorem compEllIntKk_ne_zero {k : ℂ} (hk : k ∈ jacobiModulusDomain) : compEllIntKk k ≠ 0 := by

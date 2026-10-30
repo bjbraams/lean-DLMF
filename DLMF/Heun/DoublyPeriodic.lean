@@ -7,8 +7,8 @@ module
 
 public import DLMF.Heun.Basic
 public import DLMF.Heun.LocalSolutions
-public import DLMF.JacobiElliptic.SpecialValues
 public import DLMF.JacobiElliptic.AnalyticProperties
+public import DLMF.JacobiElliptic.SpecialValues
 public import DLMF.Weierstrass.EllipticFunctionsAndInvariants
 public import DLMF.Weierstrass.Relations
 
@@ -290,7 +290,7 @@ principal powers) satisfies
 `H = e₁(γ+δ-1)² + e₂(γ+ε-1)² + e₃(δ+ε-1)² - 4αβe₃ - 4q(e₂-e₃)` (31.2.12). -/
 @[dlmf 31.2.E9, dlmf 31.2.E10, dlmf 31.2.E11, dlmf 31.2.E12]
 theorem heun_weierstrassForm (L : HalfPeriods) (hF : α + β + 1 = γ + δ + ε) {U V : Set ℂ}
-    (hU : IsOpen U) (hV : IsOpen V) {u : ℂ → ℂ}
+    (hV : IsOpen V) {u : ℂ → ℂ}
     (hu : IsHeunSolOn ((L.e 1 - L.e 3) / (L.e 2 - L.e 3)) q α β γ δ ε u U)
     (hVU : ∀ ξ ∈ V, ξ ∉ L.lattice ∧ (L.weierstrassP ξ - L.e 3) / (L.e 2 - L.e 3) ∈ U ∧
       L.weierstrassP ξ - L.e 1 ∈ slitPlane ∧ L.weierstrassP ξ - L.e 2 ∈ slitPlane ∧

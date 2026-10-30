@@ -30,7 +30,7 @@ namespace DLMF.JacobiElliptic
 functions are finite. -/
 @[dlmf 22.9.E7, dlmf 22.9.E14]
 theorem jacobi_cyclic_c4_triple {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ)
-    (hreg4 : ∀ m : ℕ, jacobiRegulark .n (jacobiCyclicArg 4 m 3 z k) k) :
+    (hreg4 : ∀ m : ℕ, JacobiRegulark .n (jacobiCyclicArg 4 m 3 z k) k) :
     jacobiCyclicC 4 1 3 z k * jacobiCyclicC 4 2 3 z k * jacobiCyclicC 4 3 3 z k =
       jacobiCyclicKappa k ^ 2 / (1 - jacobiCyclicKappa k ^ 2) * (jacobiCyclicC 4 1 3 z k +
         jacobiCyclicC 4 2 3 z k + jacobiCyclicC 4 3 3 z k) := by
@@ -162,7 +162,7 @@ theorem jacobi_cyclic_c4_triple {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : 
 functions are finite. -/
 @[dlmf 22.9.E7, dlmf 22.9.E15]
 theorem jacobi_cyclic_d2_triple {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ)
-    (hreg2 : ∀ m : ℕ, jacobiRegulark .n (jacobiCyclicArg 2 m 3 z k) k) :
+    (hreg2 : ∀ m : ℕ, JacobiRegulark .n (jacobiCyclicArg 2 m 3 z k) k) :
     jacobiCyclicD 2 1 3 z k * jacobiCyclicD 2 2 3 z k * jacobiCyclicD 2 3 3 z k =
       (jacobiCyclicKappa k ^ 2 + k ^ 2 - 1) / (1 - jacobiCyclicKappa k ^ 2) *
         (jacobiCyclicD 2 1 3 z k + jacobiCyclicD 2 2 3 z k + jacobiCyclicD 2 3 3 z k) := by
@@ -370,7 +370,7 @@ theorem jacobi_cyclic_d2_triple {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : 
 functions are finite. -/
 @[dlmf 22.9.E7, dlmf 22.9.E16]
 theorem jacobi_cyclic_scc_triple {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ)
-    (hreg4 : ∀ m : ℕ, jacobiRegulark .n (jacobiCyclicArg 4 m 3 z k) k) :
+    (hreg4 : ∀ m : ℕ, JacobiRegulark .n (jacobiCyclicArg 4 m 3 z k) k) :
     jacobiCyclicS 4 1 3 z k * jacobiCyclicC 4 2 3 z k * jacobiCyclicC 4 3 3 z k +
       jacobiCyclicS 4 2 3 z k * jacobiCyclicC 4 3 3 z k * jacobiCyclicC 4 1 3 z k +
         jacobiCyclicS 4 3 3 z k * jacobiCyclicC 4 1 3 z k * jacobiCyclicC 4 2 3 z k =
@@ -535,7 +535,7 @@ theorem jacobi_cyclic_scc_triple {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z :
 the functions are finite. -/
 @[dlmf 22.9.E17]
 theorem jacobi_cyclic_d2_four {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ)
-    (hreg2 : ∀ m : ℕ, jacobiRegulark .n (jacobiCyclicArg 2 m 4 z k) k) :
+    (hreg2 : ∀ m : ℕ, JacobiRegulark .n (jacobiCyclicArg 2 m 4 z k) k) :
     jacobiCyclicD 2 1 4 z k * jacobiCyclicD 2 2 4 z k * jacobiCyclicD 2 3 4 z k +
       jacobiCyclicD 2 2 4 z k * jacobiCyclicD 2 3 4 z k * jacobiCyclicD 2 4 4 z k +
         jacobiCyclicD 2 3 4 z k * jacobiCyclicD 2 4 4 z k * jacobiCyclicD 2 1 4 z k +
@@ -568,7 +568,7 @@ theorem jacobi_cyclic_d2_four {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : �
 the functions are finite. -/
 @[dlmf 22.9.E18]
 theorem jacobi_cyclic_d2_four_sq {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ)
-    (hreg2 : ∀ m : ℕ, jacobiRegulark .n (jacobiCyclicArg 2 m 4 z k) k) :
+    (hreg2 : ∀ m : ℕ, JacobiRegulark .n (jacobiCyclicArg 2 m 4 z k) k) :
     jacobiCyclicD 2 1 4 z k ^ 2 * jacobiCyclicD 2 3 4 z k + jacobiCyclicD 2 2 4 z k ^ 2 *
       jacobiCyclicD 2 4 4 z k + jacobiCyclicD 2 3 4 z k ^ 2 * jacobiCyclicD 2 1 4 z k +
         jacobiCyclicD 2 4 4 z k ^ 2 * jacobiCyclicD 2 2 4 z k = jacobiComodulusk k *
@@ -599,7 +599,7 @@ theorem jacobi_cyclic_d2_four_sq {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z :
 are finite. -/
 @[dlmf 22.9.E19]
 theorem jacobi_cyclic_csd_four {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ)
-    (hreg2 : ∀ m : ℕ, jacobiRegulark .n (jacobiCyclicArg 2 m 4 z k) k) :
+    (hreg2 : ∀ m : ℕ, JacobiRegulark .n (jacobiCyclicArg 2 m 4 z k) k) :
     jacobiCyclicC 2 1 4 z k * jacobiCyclicS 2 1 4 z k * jacobiCyclicD 2 3 4 z k +
       jacobiCyclicC 2 3 4 z k * jacobiCyclicS 2 3 4 z k * jacobiCyclicD 2 1 4 z k = 0 ∧
     jacobiCyclicC 2 2 4 z k * jacobiCyclicS 2 2 4 z k * jacobiCyclicD 2 4 4 z k +
@@ -624,7 +624,7 @@ theorem jacobi_cyclic_csd_four {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : �
 the functions are finite. -/
 @[dlmf 22.9.E20]
 theorem jacobi_cyclic_d2_two_rank4 {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ)
-    (hreg2 : ∀ m : ℕ, jacobiRegulark .n (jacobiCyclicArg 2 m 2 z k) k) :
+    (hreg2 : ∀ m : ℕ, JacobiRegulark .n (jacobiCyclicArg 2 m 2 z k) k) :
     jacobiCyclicD 2 1 2 z k ^ 3 * jacobiCyclicD 2 2 2 z k + jacobiCyclicD 2 2 2 z k ^ 3 *
       jacobiCyclicD 2 1 2 z k = jacobiComodulusk k * (jacobiCyclicD 2 1 2 z k ^ 2 +
         jacobiCyclicD 2 2 2 z k ^ 2) ∧
@@ -645,7 +645,7 @@ theorem jacobi_cyclic_d2_two_rank4 {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z
 are finite. -/
 @[dlmf 22.9.E21]
 theorem jacobi_cyclic_cscs_two {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ)
-    (hreg2 : ∀ m : ℕ, jacobiRegulark .n (jacobiCyclicArg 2 m 2 z k) k) :
+    (hreg2 : ∀ m : ℕ, JacobiRegulark .n (jacobiCyclicArg 2 m 2 z k) k) :
     k ^ 2 * jacobiCyclicC 2 1 2 z k * jacobiCyclicS 2 1 2 z k * jacobiCyclicC 2 2 2 z k *
       jacobiCyclicS 2 2 2 z k = jacobiComodulusk k * (1 - jacobiCyclicS 2 1 2 z k ^ 2 -
         jacobiCyclicS 2 2 2 z k ^ 2) := by

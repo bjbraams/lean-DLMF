@@ -5,9 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.MeasureTheory.Integral.Asymptotics
 public import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
 public import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
+public import Mathlib.MeasureTheory.Integral.Asymptotics
 
 /-!
 # Integrating power-law asymptotics
@@ -74,7 +74,7 @@ theorem Asymptotics.IsEquivalent.integral_Ioi_cpow {f : ℝ → ℂ} {ν : ℂ} 
 /-- A little-o bound can be integrated from a fixed endpoint when the nonnegative
 comparison integral tends to infinity. The fixed initial segment becomes negligible. -/
 theorem Asymptotics.IsLittleO.intervalIntegral_of_nonneg {E : Type*}
-    [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
+    [NormedAddCommGroup E] [NormedSpace ℝ E]
     {f : ℝ → E} {g : ℝ → ℝ} {a : ℝ} (h : f =o[atTop] g)
     (hf : ContinuousOn f (Ici a)) (hg : ContinuousOn g (Ici a))
     (hg0 : ∀ x ∈ Ici a, 0 ≤ g x)

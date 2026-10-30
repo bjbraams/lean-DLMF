@@ -703,7 +703,7 @@ theorem jacobiThetaFourTau_doubleProd (z : ℂ) {τ : ℂ} (hτ : 0 < τ.im) :
 /-- DLMF §20.5(iii): the double products are not absolutely convergent: for `z ≠ 0` the terms
 `z/((m + nτ)π)` are not absolutely summable over the lattice. -/
 @[dlmf 20.5.iii]
-theorem jacobiTheta_doubleProd_not_absolutely_convergent {z τ : ℂ} (hz : z ≠ 0) (hτ : 0 < τ.im) :
+theorem jacobiTheta_doubleProd_not_absolutely_convergent {z τ : ℂ} (hz : z ≠ 0) :
     ¬ Summable (fun p : ℤ × ℤ => ‖z / ((p.1 + p.2 * τ) * π)‖) := by
   intro hs
   have hinj : Function.Injective (fun n : ℕ => (((n : ℤ) + 1), (0 : ℤ))) := by

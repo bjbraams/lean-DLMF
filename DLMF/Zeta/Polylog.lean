@@ -5,12 +5,12 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Zeta.Q25bLerchContinuation
 public import DLMF.Polylog.Dilog
-public import Mathlib.Analysis.SpecialFunctions.Integrability.Log
+public import DLMF.Zeta.Q25bLerchContinuation
 public import DLMF.Zeta.S25bHurwitzCore
 public import Mathlib.Analysis.CStarAlgebra.Classes
 public import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.SpecialFunctions.Integrability.Log
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
 public import Mathlib.NumberTheory.ArithmeticFunction.VonMangoldt
 public import Mathlib.Tactic.Basify
@@ -161,7 +161,7 @@ lemma z25b_polylog_spec (s : ℂ) :
 
 /-- On the cut plane, `Li_s(z) = z Φ(z, s, 1)` for any continuation `Φ(·, s, 1)` of Lerch's
 series. -/
-lemma q25b_polylog_eq_mul {s : ℂ} {F : ℂ → ℂ} (hF : q25b_IsLerchCont s 1 F) {z : ℂ}
+lemma q25b_polylog_eq_mul {s : ℂ} {F : ℂ → ℂ} (hF : Q25bIsLerchCont s 1 F) {z : ℂ}
     (hz : z ∈ z25b_slitOne) : polylog s z = z * F z := by
   simp only [polylog, hz, ↓reduceIte]
   refine q25b_eqOn_slit (z25b_polylog_spec s).1 (analyticOnNhd_id.mul hF.1) (fun w hw => ?_) hz
@@ -205,7 +205,7 @@ theorem analyticOnNhd_polylog (s : ℂ) : AnalyticOnNhd ℂ (polylog s) z25b_sli
 /-- `Li_s` is differentiable on the cut plane; in terms of `Φ(z, s, 1) = F z`,
 `Li_s'(z) = F z + z F'(z)`. -/
 lemma q25b_hasDerivAt_polylog (s : ℂ) {z : ℂ} (hz : z ∈ z25b_slitOne) :
-    ∃ F : ℂ → ℂ, q25b_IsLerchCont s 1 F ∧ HasDerivAt (polylog s) (F z + z * deriv F z) z := by
+    ∃ F : ℂ → ℂ, Q25bIsLerchCont s 1 F ∧ HasDerivAt (polylog s) (F z + z * deriv F z) z := by
   obtain ⟨F, hF⟩ := q25b_exists_isLerchCont s 1
   refine ⟨F, hF, ?_⟩
   have hev : polylog s =ᶠ[𝓝 z] fun w => w * F w := by

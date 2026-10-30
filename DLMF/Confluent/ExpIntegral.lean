@@ -45,8 +45,6 @@ noncomputable section
 
 namespace DLMF.Confluent
 
-
-
 /-- `E_p(z) = z^{p-1} e^{-z} U(p, p, z)` (Temme §7.3.5). -/
 @[dlmf 8.19.E16]
 theorem genExpIntE_eq_cpow_mul_kummerU (p z : ℂ) :
@@ -138,8 +136,6 @@ theorem genExpIntE_one_eq_integral {x : ℝ} (hx : 0 < x) :
   rw [zero_sub, Complex.cpow_neg_one]
   push_cast
   field_simp
-
-
 
 /-- `(1 - e^{-t})/t` is interval integrable between nonnegative endpoints. -/
 theorem intervalIntegrable_einIntegrand {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) :
@@ -343,8 +339,6 @@ theorem genExpIntE_one_eq_tsum {x : ℝ} (hx : 0 < x) :
 
 /-! ### Sine and cosine integrals -/
 
-
-
 /-- `Si'(x) = sinc x`. -/
 theorem Real.hasDerivAt_sinInt (x : ℝ) : HasDerivAt Real.sinInt (Real.sinc x) x :=
   intervalIntegral.integral_hasDerivAt_right (Real.continuous_sinc.intervalIntegrable _ _)
@@ -387,10 +381,6 @@ theorem Real.hasSum_sinInt (x : ℝ) :
     refine hs.congr_fun fun k => ?_
     rw [pow_succ]
     field_simp
-
-
-
-
 
 /-- **The power series of `Cin`**: `Cin(x) = ∑_{k≥0} (-1)^k x^{2k+2} / ((2k+2) (2k+2)!)`. -/
 theorem Real.hasSum_cosIntCin (x : ℝ) :

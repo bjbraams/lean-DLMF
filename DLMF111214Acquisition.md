@@ -360,9 +360,9 @@ No selected numbered equations. Mathematical prose is recorded in the module inv
 - [11.2.E4](https://dlmf.nist.gov/11.2.E4): [`DLMF.Struve.struveL_zero_order_series`](DLMF/Struve/SeriesAndEquations.lean#L867) (proved).
 - [11.2.E5](https://dlmf.nist.gov/11.2.E5): [`DLMF.Struve.struveK`](DLMF/Struve/Basic/Functions.lean#L61) (defined).
 - [11.2.E6](https://dlmf.nist.gov/11.2.E6): [`DLMF.Struve.struveM`](DLMF/Struve/Basic/Functions.lean#L66) (defined).
-- [11.2.E7](https://dlmf.nist.gov/11.2.E7): [`DLMF.Struve.struveEquation`](DLMF/Struve/Basic/Functions.lean#L71) (defined).
+- [11.2.E7](https://dlmf.nist.gov/11.2.E7): [`DLMF.Struve.StruveEquation`](DLMF/Struve/Basic/Functions.lean#L71) (defined).
 - [11.2.E8](https://dlmf.nist.gov/11.2.E8): [`DLMF.Struve.struveH_ode`](DLMF/Struve/SeriesAndEquations.lean#L519) (proved); [`DLMF.Struve.struveK_ode`](DLMF/Struve/SeriesAndEquations.lean#L532) (proved).
-- [11.2.E9](https://dlmf.nist.gov/11.2.E9): [`DLMF.Struve.struveEquation`](DLMF/Struve/Basic/Functions.lean#L71) (defined).
+- [11.2.E9](https://dlmf.nist.gov/11.2.E9): [`DLMF.Struve.StruveEquation`](DLMF/Struve/Basic/Functions.lean#L71) (defined).
 - [11.2.E10](https://dlmf.nist.gov/11.2.E10): [`DLMF.Struve.struveL_ode`](DLMF/Struve/SeriesAndEquations.lean#L554) (proved); [`DLMF.Struve.struveM_ode`](DLMF/Struve/SeriesAndEquations.lean#L568) (proved).
 - [11.2.E11](https://dlmf.nist.gov/11.2.E11): [`DLMF.Struve.struve_general_solution_11`](DLMF/Struve/SeriesAndEquations.lean#L591) (proved).
 - [11.2.E12](https://dlmf.nist.gov/11.2.E12): [`DLMF.Struve.struve_general_solution_12`](DLMF/Struve/SeriesAndEquations.lean#L613) (proved).

@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Mathieu.P3qJacobi
 public import DLMF.Mathieu.FourierSeries
+public import DLMF.Mathieu.P3qJacobi
 
 /-!
 # The eigenvalues `a_n(q)`, `b_n(q)` near `q = 0`
@@ -34,12 +34,12 @@ open scoped Topology Real
 
 namespace DLMF.Mathieu
 
-/-! ### The recurrences 28.4.5–28.4.8 as `p3qRec` -/
+/-! ### The recurrences 28.4.5–28.4.8 as `P3qRec` -/
 
-/-- The coefficients `A^{2n}_{2i}` satisfy the recurrence 28.4.5 in `p3qRec` form,
+/-- The coefficients `A^{2n}_{2i}` satisfy the recurrence 28.4.5 in `P3qRec` form,
 with diagonal `4i²` and `β = 2`. -/
 theorem p3q_rec_AE (n : ℕ) (q : ℝ) :
-    p3qRec (fun i => 4 * (i : ℂ) ^ 2) 2 q (mathieuA (2 * n) q)
+    P3qRec (fun i => 4 * (i : ℂ) ^ 2) 2 q (mathieuA (2 * n) q)
       (fun i => mathieuFourierA (2 * n) (2 * i) q) := by
   intro i
   rcases i with _ | _ | j
@@ -56,10 +56,10 @@ theorem p3q_rec_AE (n : ℕ) (q : ℝ) :
     push_cast at this ⊢
     linear_combination -this
 
-/-- The coefficients `A^{2n+1}_{2i+1}` satisfy 28.4.6 in `p3qRec` form, with diagonal
+/-- The coefficients `A^{2n+1}_{2i+1}` satisfy 28.4.6 in `P3qRec` form, with diagonal
 `(2i+1)² + q δ_{i0}` and `β = 1`. -/
 theorem p3q_rec_AO (n : ℕ) (q : ℝ) :
-    p3qRec (fun i => (2 * (i : ℂ) + 1) ^ 2 + if i = 0 then (q : ℂ) else 0) 1 q
+    P3qRec (fun i => (2 * (i : ℂ) + 1) ^ 2 + if i = 0 then (q : ℂ) else 0) 1 q
       (mathieuA (2 * n + 1) q) (fun i => mathieuFourierA (2 * n + 1) (2 * i + 1) q) := by
   intro i
   rcases i with _ | j
@@ -76,10 +76,10 @@ theorem p3q_rec_AO (n : ℕ) (q : ℝ) :
     · simp only [p3qL, p3qLo]; push_cast at this ⊢; norm_num at this ⊢
       linear_combination -this
 
-/-- The coefficients `B^{2n+1}_{2i+1}` satisfy 28.4.7 in `p3qRec` form, with diagonal
+/-- The coefficients `B^{2n+1}_{2i+1}` satisfy 28.4.7 in `P3qRec` form, with diagonal
 `(2i+1)² - q δ_{i0}` and `β = 1`. -/
 theorem p3q_rec_BO (n : ℕ) (q : ℝ) :
-    p3qRec (fun i => (2 * (i : ℂ) + 1) ^ 2 - if i = 0 then (q : ℂ) else 0) 1 q
+    P3qRec (fun i => (2 * (i : ℂ) + 1) ^ 2 - if i = 0 then (q : ℂ) else 0) 1 q
       (mathieuB (2 * n + 1) q) (fun i => mathieuFourierB (2 * n + 1) (2 * i + 1) q) := by
   intro i
   rcases i with _ | j
@@ -96,10 +96,10 @@ theorem p3q_rec_BO (n : ℕ) (q : ℝ) :
     · simp only [p3qL, p3qLo]; push_cast at this ⊢; norm_num at this ⊢
       linear_combination -this
 
-/-- The coefficients `B^{2n+2}_{2i+2}` satisfy 28.4.8 in `p3qRec` form, with diagonal
+/-- The coefficients `B^{2n+2}_{2i+2}` satisfy 28.4.8 in `P3qRec` form, with diagonal
 `(2i+2)²` and `β = 1`. -/
 theorem p3q_rec_BE (n : ℕ) (q : ℝ) :
-    p3qRec (fun i => (2 * (i : ℂ) + 2) ^ 2) 1 q
+    P3qRec (fun i => (2 * (i : ℂ) + 2) ^ 2) 1 q
       (mathieuB (2 * n + 2) q) (fun i => mathieuFourierB (2 * n + 2) (2 * i + 2) q) := by
   intro i
   rcases i with _ | j
@@ -115,7 +115,6 @@ theorem p3q_rec_BE (n : ℕ) (q : ℝ) :
       linear_combination -this
     · simp only [p3qL, p3qLo]; push_cast at this ⊢
       linear_combination -this
-
 
 /-- Some Fourier coefficient `A^n_m(q)` is nonzero (since `ce_n(0, q) > 0`). -/
 lemma p3q_fourierA_ne (n : ℕ) (q : ℝ) : ∃ m, mathieuFourierA n m q ≠ 0 := by
@@ -296,7 +295,6 @@ lemma p3q_interlace {V : ℝ → ℝ} {B L : ℝ} (hV : Continuous V) (hB : ∀ 
       have := Set.ncard_le_ncard hsub (hfinD d)
       omega
     · exact ODE.p2s_ne_of_deriv hV he hd
-
 
 /-- `a_m(q)` lies in its Sturm–Liouville spectrum on `[0, π/2]` and has exactly `⌊m/2⌋`
 smaller spectral values there. -/
@@ -516,7 +514,6 @@ lemma p3q_sin_odd (i : ℕ) : Real.sin (((2 * i + 1 : ℕ) : ℝ) * (π / 2)) = 
 /-- `cos(2i · π/2) = (-1)^i`. -/
 lemma p3q_cos_even (i : ℕ) : Real.cos (((2 * i : ℕ) : ℝ) * (π / 2)) = (-1) ^ i := by
   rw [show ((2 * i : ℕ) : ℝ) * (π / 2) = (i : ℝ) * π by push_cast; ring, Real.cos_nat_mul_pi]
-
 
 /-- A complex number fixed by conjugation with zero real part is `0`. -/
 lemma p3q_real_eq_zero {z : ℂ} (hz : (starRingEnd ℂ) z = z) (h : z.re = 0) : z = 0 := by

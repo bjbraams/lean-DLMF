@@ -560,7 +560,7 @@ any function `s` on `V` with `s² = 2ζ`, `s' = 1/s`, mapping `V` into `U`, and
 `W(ζ) = (v(s ζ) - 1)/(v(s ζ) + 1)`. -/
 @[dlmf 32.7.E30, dlmf 32.7.E31, dlmf 32.7.E32]
 theorem IsPainleveIIIOn.toPainleveV {α β ε : ℂ} (hε : ε ^ 2 = 1) {w s : ℂ → ℂ} {U V : Set ℂ}
-    (h : IsPainleveIIIOn α β 1 (-1) w U) (hU : IsOpen U) (hV : IsOpen V)
+    (h : IsPainleveIIIOn α β 1 (-1) w U) (hV : IsOpen V)
     (hs : ∀ ζ ∈ V, s ζ ^ 2 = 2 * ζ) (hs' : ∀ ζ ∈ V, HasDerivAt s (1 / s ζ) ζ)
     (hsU : ∀ ζ ∈ V, s ζ ∈ U)
     (hv1 : ∀ ζ ∈ V, deriv w (s ζ) - ε * w (s ζ) ^ 2 + (1 - ε * α) * w (s ζ) / s ζ ≠ 1)

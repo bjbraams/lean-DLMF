@@ -5,11 +5,11 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import DLMFMathlib.Analysis.Asymptotics.WatsonSector
+public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import Mathlib.Analysis.Complex.LocallyUniformLimit
-public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
 public import Mathlib.Analysis.PSeries
+public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
 
 /-!
@@ -280,14 +280,14 @@ lemma q25b_summable_norm_mul_pow {c : ℕ → ℂ} (hc : ∀ z : ℂ, ‖z‖ < 
 
 /-- The continuation property: `F` is analytic on the cut plane and sums `∑ zⁿ/(a+n)^s` on the
 open unit disk. -/
-def q25b_IsLerchCont (s a : ℂ) (F : ℂ → ℂ) : Prop :=
+def Q25bIsLerchCont (s a : ℂ) (F : ℂ → ℂ) : Prop :=
   AnalyticOnNhd ℂ F q25b_slit ∧ ∀ z, ‖z‖ < 1 → HasSum (fun n : ℕ => z ^ n / (a + n) ^ s) (F z)
 
 /-- **Lowering the order**: `Φ(z, s-1, a) = z ∂_z Φ(z, s, a) + a Φ(z, s, a)`, for
 `a ≠ 0, -1, -2, …`. -/
 theorem q25b_isLerchCont_sub_one {s a : ℂ} (ha : ∀ n : ℕ, a + n ≠ 0) {F : ℂ → ℂ}
-    (hF : q25b_IsLerchCont s a F) :
-    q25b_IsLerchCont (s - 1) a (fun z => z * deriv F z + a * F z) := by
+    (hF : Q25bIsLerchCont s a F) :
+    Q25bIsLerchCont (s - 1) a (fun z => z * deriv F z + a * F z) := by
   refine ⟨(analyticOnNhd_id.mul hF.1.deriv).add (analyticOnNhd_const.mul hF.1), fun z hz => ?_⟩
   set c : ℕ → ℂ := fun n => 1 / (a + n) ^ s
   have hc : ∀ w : ℂ, ‖w‖ < 1 → Summable fun n => c n * w ^ n := fun w hw =>
@@ -325,10 +325,10 @@ theorem q25b_isLerchCont_sub_one {s a : ℂ} (ha : ∀ n : ℕ, a + n ≠ 0) {F 
 
 /-- For `Re a > 0` the continuation exists for every order `s`. -/
 lemma q25b_exists_isLerchCont_of_re_pos {a : ℂ} (ha : 0 < a.re) (s : ℂ) :
-    ∃ F, q25b_IsLerchCont s a F := by
+    ∃ F, Q25bIsLerchCont s a F := by
   have han : ∀ n : ℕ, a + n ≠ 0 := fun n h => by
     have := congrArg Complex.re h; simp at this; linarith [(n.cast_nonneg : (0 : ℝ) ≤ n)]
-  suffices ∀ k : ℕ, ∀ s : ℂ, 0 < s.re + k → ∃ F, q25b_IsLerchCont s a F by
+  suffices ∀ k : ℕ, ∀ s : ℂ, 0 < s.re + k → ∃ F, Q25bIsLerchCont s a F by
     obtain ⟨k, hk⟩ := exists_nat_gt (-s.re)
     exact this k s (by linarith)
   intro k
@@ -359,7 +359,7 @@ theorem q25b_hasSum_shift {s a z w : ℂ} (m : ℕ)
 
 /-- **Continuation of Lerch's series** (DLMF §25.14(i)): for all complex `s` and `a` (principal
 powers), `∑_{n≥0} zⁿ/(a+n)^s` extends analytically from the unit disk to `ℂ \ [1, ∞)`. -/
-theorem q25b_exists_isLerchCont (s a : ℂ) : ∃ F, q25b_IsLerchCont s a F := by
+theorem q25b_exists_isLerchCont (s a : ℂ) : ∃ F, Q25bIsLerchCont s a F := by
   obtain ⟨m, hm⟩ := exists_nat_gt (-a.re)
   obtain ⟨F, hF, hFs⟩ := q25b_exists_isLerchCont_of_re_pos (a := a + m) (by simp; linarith) s
   refine ⟨fun z => z ^ m * F z + ∑ n ∈ Finset.range m, z ^ n / (a + n) ^ s,
@@ -368,12 +368,12 @@ theorem q25b_exists_isLerchCont (s a : ℂ) : ∃ F, q25b_IsLerchCont s a F := b
   · exact q25b_hasSum_shift m (hFs z hz)
 
 /-- Two continuations agree on the cut plane. -/
-theorem q25b_IsLerchCont.eqOn {s a : ℂ} {F G : ℂ → ℂ} (hF : q25b_IsLerchCont s a F)
-    (hG : q25b_IsLerchCont s a G) : EqOn F G q25b_slit :=
+theorem Q25bIsLerchCont.eqOn {s a : ℂ} {F G : ℂ → ℂ} (hF : Q25bIsLerchCont s a F)
+    (hG : Q25bIsLerchCont s a G) : EqOn F G q25b_slit :=
   q25b_eqOn_slit hF.1 hG.1 fun z hz => (hF.2 z hz).unique (hG.2 z hz)
 
 /-- **The continuation is the integral 25.14.5** on the cut plane, for `Re s > 0`, `Re a > 0`. -/
-theorem q25b_IsLerchCont.eq_lerchInt {s a : ℂ} {F : ℂ → ℂ} (hF : q25b_IsLerchCont s a F)
+theorem Q25bIsLerchCont.eq_lerchInt {s a : ℂ} {F : ℂ → ℂ} (hF : Q25bIsLerchCont s a F)
     (hs : 0 < s.re) (ha : 0 < a.re) {z : ℂ} (hz : z ∈ q25b_slit) :
     F z = (Gamma s)⁻¹ * q25b_lerchInt s a z :=
   hF.eqOn (G := fun z => (Gamma s)⁻¹ * q25b_lerchInt s a z)
@@ -382,8 +382,8 @@ theorem q25b_IsLerchCont.eq_lerchInt {s a : ℂ} {F : ℂ → ℂ} (hF : q25b_Is
 
 /-- **The series on the closed disk** (Abel's theorem for 25.14.1): for `Re s > 1`, `|z| ≤ 1`,
 `z ∈ ℂ \ [1, ∞)`, the continuation is the sum of the series. -/
-theorem q25b_IsLerchCont.hasSum_of_norm_le_one {s a : ℂ} {F : ℂ → ℂ}
-    (hF : q25b_IsLerchCont s a F) (hs : 1 < s.re) {z : ℂ} (hz : ‖z‖ ≤ 1)
+theorem Q25bIsLerchCont.hasSum_of_norm_le_one {s a : ℂ} {F : ℂ → ℂ}
+    (hF : Q25bIsLerchCont s a F) (hs : 1 < s.re) {z : ℂ} (hz : ‖z‖ ≤ 1)
     (hzs : z ∈ q25b_slit) : HasSum (fun n : ℕ => z ^ n / (a + n) ^ s) (F z) := by
   obtain ⟨m, hm⟩ := exists_nat_gt (-a.re)
   have ham : 0 < (a + m).re := by simp; linarith
@@ -393,7 +393,7 @@ theorem q25b_IsLerchCont.hasSum_of_norm_le_one {s a : ℂ} {F : ℂ → ℂ}
       HasSum (fun n : ℕ => z ^ n / (a + n) ^ s)
         (z ^ m * G z + ∑ n ∈ Finset.range m, z ^ n / (a + n) ^ s) := fun z hz =>
     q25b_hasSum_shift m (q25b_hasSum_lerchInt hs0 ham hz)
-  have hH : q25b_IsLerchCont s a
+  have hH : Q25bIsLerchCont s a
       (fun z => z ^ m * G z + ∑ n ∈ Finset.range m, z ^ n / (a + n) ^ s) :=
     ⟨(analyticOnNhd_id.pow m |>.mul
         (analyticOnNhd_const.mul (q25b_analyticOnNhd_lerchInt hs0 ham))).add

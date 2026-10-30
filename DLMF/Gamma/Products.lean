@@ -5,9 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import Mathlib.Analysis.PSeries
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
 public import Mathlib.Analysis.SpecialFunctions.Log.Summable
-public import Mathlib.Analysis.PSeries
 
 /-!
 # Infinite products (DLMF §5.8)
@@ -195,7 +195,7 @@ open Finset in
 /-- DLMF 5.8.5: if `∑ aₖ = ∑ bₖ` and no `bₖ` is a nonpositive integer, then `∏_{n≥0} ∏ₖ (aₖ + n)/(bₖ
 + n) = ∏ₖ Γ(bₖ) / ∏ₖ Γ(aₖ)`. -/
 @[dlmf 5.8.E5]
-theorem Gamma_balanced_product {m : ℕ} (hm : 0 < m) (a b : Fin m → ℂ)
+theorem Gamma_balanced_product {m : ℕ} (a b : Fin m → ℂ)
     (hsum : ∑ k : Fin m, a k = ∑ k : Fin m, b k)
     (hb : ∀ k : Fin m, ∀ n : ℕ, b k ≠ -n) :
     ∏' n : ℕ, (∏ k : Fin m, (a k + n)) / (∏ k : Fin m, (b k + n)) =

@@ -30,28 +30,6 @@ namespace DLMF.Hypergeometric
 
 /-! ## Euler integral branches with actual integrability -/
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /-- The segment from `1` to `1 - w` stays in the slit plane. -/
 lemma ghaR4_slit_segment {w : ℂ} (hw : 1 - w ∈ slitPlane) {u : ℝ} (hu : u ∈ Icc (0:ℝ) 1) :
     1 - (u:ℂ) * w ∈ slitPlane := by
@@ -117,8 +95,8 @@ lemma ghaR4_differentiableAt_inv_cpow {u : ℝ} (hu : u ∈ Icc (0:ℝ) 1) {x : 
   exact fun h => slitPlane_ne_zero hs h.1
 
 /-- The square-slit condition is open. -/
-lemma ghaR4_square_eventually {p₀ : ℂ × ℂ} (h : appellSquareSlit p₀) :
-    ∀ᶠ p in 𝓝 p₀, appellSquareSlit p := by
+lemma ghaR4_square_eventually {p₀ : ℂ × ℂ} (h : AppellSquareSlit p₀) :
+    ∀ᶠ p in 𝓝 p₀, AppellSquareSlit p := by
   have hK : IsCompact (Icc (0:ℝ) 1 ×ˢ Icc (0:ℝ) 1) := isCompact_Icc.prod isCompact_Icc
   have := hK.eventually_forall_of_forall_eventually (x₀ := p₀)
     (P := fun p q => 1 - (q.1:ℂ) * p.1 - (q.2:ℂ) * p.2 ∈ slitPlane) (fun q hq => by
@@ -129,12 +107,12 @@ lemma ghaR4_square_eventually {p₀ : ℂ × ℂ} (h : appellSquareSlit p₀) :
   exact hp (u, v) ⟨hu, hv⟩
 
 /-- The F2/F4 Euler domain is open. -/
-lemma ghaR4_isOpen_square : IsOpen {p : ℂ × ℂ | appellSquareSlit p} :=
+lemma ghaR4_isOpen_square : IsOpen {p : ℂ × ℂ | AppellSquareSlit p} :=
   isOpen_iff_mem_nhds.mpr fun _ hp => ghaR4_square_eventually hp
 
 /-- A closed ball inside the F2/F4 Euler domain. -/
-lemma ghaR4_exists_closedBall_square {p₀ : ℂ × ℂ} (h : appellSquareSlit p₀) :
-    ∃ r > 0, ∀ p ∈ Metric.closedBall p₀ r, appellSquareSlit p := by
+lemma ghaR4_exists_closedBall_square {p₀ : ℂ × ℂ} (h : AppellSquareSlit p₀) :
+    ∃ r > 0, ∀ p ∈ Metric.closedBall p₀ r, AppellSquareSlit p := by
   obtain ⟨r, hr, hsub⟩ := Metric.isOpen_iff.mp ghaR4_isOpen_square p₀ h
   exact ⟨r / 2, by positivity, fun p hp => hsub (Metric.closedBall_subset_ball (by linarith) hp)⟩
 
@@ -460,7 +438,7 @@ theorem appF1_euler_germ (a b b' c : ℂ) (ha : 0<a.re) (hca : 0<(c-a).re) :
 
 /-- 16.15.E2: appF2 euler integrable. -/
 @[dlmf 16.15.E2]
-theorem appF2_euler_integrable (a b b' c c' : ℂ) (hb : 0<b.re) (hb' : 0<b'.re) (hcb : b.re<c.re) (hcb' : b'.re<c'.re) {x y : ℂ} (hxy : (x,y)∈{p | appellSquareSlit p}) :
+theorem appF2_euler_integrable (a b b' c c' : ℂ) (hb : 0<b.re) (hb' : 0<b'.re) (hcb : b.re<c.re) (hcb' : b'.re<c'.re) {x y : ℂ} (hxy : (x,y)∈{p | AppellSquareSlit p}) :
     IntegrableOn (appF2EulerKernel a b b' c c' x y) (Icc (0:ℝ) 1×ˢIcc (0:ℝ) 1) := by
   obtain ⟨M, hM⟩ := ghaR4_inv_cpow_bound (f := fun p : ℝ × ℝ => 1 - (p.1:ℂ) * x - (p.2:ℂ) * y)
     (isCompact_Icc.prod isCompact_Icc) (by fun_prop) (fun p hp => hxy p.1 hp.1 p.2 hp.2) a
@@ -481,14 +459,14 @@ theorem appF2_euler_integrable (a b b' c c' : ℂ) (hb : 0<b.re) (hb' : 0<b'.re)
 /-- 16.15.E2: appF2 euler analytic. -/
 @[dlmf 16.15.E2]
 theorem appF2_euler_analytic (a b b' c c' : ℂ) (hb : 0<b.re) (hb' : 0<b'.re) (hcb : b.re<c.re) (hcb' : b'.re<c'.re) :
-    AnalyticOnNhd ℂ (fun p : ℂ × ℂ => appF2Euler a b b' c c' p.1 p.2) {p | appellSquareSlit p} := by
+    AnalyticOnNhd ℂ (fun p : ℂ × ℂ => appF2Euler a b b' c c' p.1 p.2) {p | AppellSquareSlit p} := by
   have hU := ghaR4_isOpen_square
   have hcb1 : 0 < (c - b).re := by simp; linarith
   have hcb2 : 0 < (c' - b').re := by simp; linarith
   have hsq : MeasurableSet (Icc (0:ℝ) 1 ×ˢ Icc (0:ℝ) 1) := measurableSet_Icc.prod measurableSet_Icc
   have hd : DifferentiableOn ℂ (fun p : ℂ × ℂ =>
       ∫ q in Icc (0:ℝ) 1 ×ˢ Icc (0:ℝ) 1, appF2EulerKernel a b b' c c' p.1 p.2 q)
-      {p | appellSquareSlit p} := by
+      {p | AppellSquareSlit p} := by
     refine differentiableOn_integral_of_locally_dominated hU
       (fun p _ => (by unfold appF2EulerKernel; fun_prop : Measurable _).aestronglyMeasurable)
       ?_ ?_
@@ -522,7 +500,7 @@ theorem appF2_euler_analytic (a b b' c c' : ℂ) (hb : 0<b.re) (hb' : 0<b'.re) (
               ‖(1 - (q.2:ℂ)) ^ (c' - b' - 1)‖ * M := by gcongr
           _ = _ := by ring
   have : DifferentiableOn ℂ (fun p : ℂ × ℂ => appF2Euler a b b' c c' p.1 p.2)
-      {p | appellSquareSlit p} := (differentiableOn_const _).mul hd
+      {p | AppellSquareSlit p} := (differentiableOn_const _).mul hd
   exact this.analyticOnNhd_of_finiteDimensional hU
 
 /-- For `z ∈ [0, 1]²` and `‖x‖ + ‖y‖ < 1`, the double binomial series of
@@ -646,7 +624,7 @@ theorem appF3_euler_germ (a a' b b' c : ℂ) (hb : 0<b.re) (hb' : 0<b'.re) (hres
 
 /-- 16.15.E4: appF4 euler integrable. -/
 @[dlmf 16.15.E4]
-theorem appF4_euler_integrable (a b c c' : ℂ) (ha : 0<a.re) (hb : 0<b.re) (hca : a.re<c.re) (hcb : b.re<c'.re) {x y : ℂ} (hxy : (x,y)∈{p | appellSquareSlit p}) :
+theorem appF4_euler_integrable (a b c c' : ℂ) (ha : 0<a.re) (hb : 0<b.re) (hca : a.re<c.re) (hcb : b.re<c'.re) {x y : ℂ} (hxy : (x,y)∈{p | AppellSquareSlit p}) :
     IntegrableOn (appF4EulerKernel a b c c' x y) (Icc (0:ℝ) 1×ˢIcc (0:ℝ) 1) := by
   have hK : IsCompact (Icc (0:ℝ) 1 ×ˢ Icc (0:ℝ) 1) := isCompact_Icc.prod isCompact_Icc
   have h0 : (0:ℝ) ∈ Icc (0:ℝ) 1 := left_mem_Icc.mpr zero_le_one
@@ -679,7 +657,7 @@ theorem appF4_euler_integrable (a b c c' : ℂ) (ha : 0<a.re) (hb : 0<b.re) (hca
 /-- 16.15.E4: appF4 euler analytic. -/
 @[dlmf 16.15.E4]
 theorem appF4_euler_analytic (a b c c' : ℂ) (ha : 0<a.re) (hb : 0<b.re) (hca : a.re<c.re) (hcb : b.re<c'.re) :
-    AnalyticOnNhd ℂ (fun p : ℂ × ℂ => appF4Euler a b c c' p.1 p.2) {p | appellSquareSlit p} := by
+    AnalyticOnNhd ℂ (fun p : ℂ × ℂ => appF4Euler a b c c' p.1 p.2) {p | AppellSquareSlit p} := by
   have hU := ghaR4_isOpen_square
   have hca1 : 0 < (c - a).re := by simp; linarith
   have hcb1 : 0 < (c' - b).re := by simp; linarith
@@ -687,7 +665,7 @@ theorem appF4_euler_analytic (a b c c' : ℂ) (ha : 0<a.re) (hb : 0<b.re) (hca :
   have h0 : (0:ℝ) ∈ Icc (0:ℝ) 1 := left_mem_Icc.mpr zero_le_one
   have hd : DifferentiableOn ℂ (fun p : ℂ × ℂ =>
       ∫ q in Icc (0:ℝ) 1 ×ˢ Icc (0:ℝ) 1, appF4EulerKernel a b c c' p.1 p.2 q)
-      {p | appellSquareSlit p} := by
+      {p | AppellSquareSlit p} := by
     refine differentiableOn_integral_of_locally_dominated hU
       (fun p _ => (by unfold appF4EulerKernel; fun_prop : Measurable _).aestronglyMeasurable)
       ?_ ?_
@@ -742,7 +720,7 @@ theorem appF4_euler_analytic (a b c c' : ℂ) (ha : 0<a.re) (hb : 0<b.re) (hca :
               ‖(1 - (q.2:ℂ)) ^ (c' - b - 1)‖ * M1 * M2 * M3 := by gcongr
           _ = _ := by ring
   have : DifferentiableOn ℂ (fun p : ℂ × ℂ => appF4Euler a b c c' p.1 p.2)
-      {p | appellSquareSlit p} := (differentiableOn_const _).mul hd
+      {p | AppellSquareSlit p} := (differentiableOn_const _).mul hd
   exact this.analyticOnNhd_of_finiteDimensional hU
 
 /-- 16.15.E4: appF4 euler germ. -/

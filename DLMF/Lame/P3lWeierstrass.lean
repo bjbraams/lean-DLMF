@@ -5,9 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.JacobiElliptic.SpecialValues
 public import DLMF.Lame.Polynomials.P2pODE
 public import DLMF.Weierstrass.Relations
-public import DLMF.JacobiElliptic.SpecialValues
 
 /-!
 # Lamé's equation in Weierstrass form (DLMF 29.2.6–29.2.9, 29.2.12)
@@ -84,7 +84,7 @@ lemma p3l_pole_zero (hk0 : 0 < k) (hk1 : k < 1) {h ν : ℂ} {w : ℂ → ℂ} {
     (hU.mem_nhds hz₀)
   have hsn : HasDerivAt (fun u => jacobiSnk u k) 1 0 := by
     have := hasDerivAt_jacobiSnk hkD
-      (by have := p2p_regular_real hk0 hk1 0; simpa [jacobiRegulark] using this)
+      (by have := p2p_regular_real hk0 hk1 0; simpa [JacobiRegulark] using this)
     simpa [jacobiCnk_zero hkD, jacobiDnk_zero hkD] using this
   set F : ℂ → ℂ := fun u => ν * (ν + 1) * w (z₀ + u)
   set G : ℂ → ℂ := fun u => (deriv (deriv w) (z₀ + u) + h * w (z₀ + u)) * jacobiSnk u k ^ 2

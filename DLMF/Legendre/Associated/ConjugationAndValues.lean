@@ -470,7 +470,7 @@ theorem quadratic_gauss_gauge_jets (a b c μ : ℂ) {z : ℂ}
 /-- DLMF 14.2.2: when `ν+μ ∉ {-1,-2,…}` and for `-1 < x < 1`, `w = 𝖰^μ_ν(x)` satisfies `(1-x²) w'' -
 2x w' + (ν(ν+1) - μ²/(1-x²)) w = 0`. -/
 @[dlmf 14.2.E2]
-theorem ferrersQ_ode {ν μ : ℂ} (h : LegendreQRegular ν μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem ferrersQ_ode {ν μ : ℂ} {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     (1-x^2:ℂ)*iteratedDeriv 2 (ferrersQ ν μ) x-2*x*deriv (ferrersQ ν μ) x+(ν*(ν+1)-μ^2/(1-x^2:ℂ))*ferrersQ ν μ x=0 := by
   let a : ℂ := -(ν+μ)/2
   let b : ℂ := (ν-μ+1)/2

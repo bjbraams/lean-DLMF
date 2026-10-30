@@ -5,9 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Core.Framework
 public import DLMF.ParabolicCylinder.ElementaryProperties
 public import DLMFMathlib.Analysis.Asymptotics.WatsonRotated
-public import DLMF.Core.Framework
 
 /-!
 # Sector asymptotics of `U(a,z)` past `|ph z| = π/2` (DLMF 12.9)
@@ -338,7 +338,7 @@ def pcfSect_uTerm (a z : ℂ) (s : ℕ) : ℂ :=
 def pcfSect_G (a z : ℂ) : ℂ := exp (z ^ 2 / 4) * z ^ (a + 1 / 2) * pcfU a z
 
 /-- The expansion DLMF 12.9.1 along a filter `l`, as a family of `O`-bounds. -/
-def pcfSect_IsExp (a : ℂ) (l : Filter ℂ) : Prop :=
+def PcfSectIsExp (a : ℂ) (l : Filter ℂ) : Prop :=
   ∀ N : ℕ, (fun z : ℂ => pcfSect_G a z - ∑ s ∈ Finset.range N, pcfSect_uTerm a z s) =O[l]
     (fun z : ℂ => z ^ (-(2 * N : ℤ)))
 
@@ -391,7 +391,7 @@ theorem pcfSect_hasAsymptoticExpansion {a : ℂ} (ha : -1 / 2 < a.re) {δ : ℝ}
 
 /-- **DLMF 12.9.1 for `re a > -1/2`** in the closed sector `|ph z| ≤ 3π/4 - δ`. -/
 theorem pcfSect_isExp_of_re {a : ℂ} (ha : -1 / 2 < a.re) {δ : ℝ} (hδ : 0 < δ) :
-    pcfSect_IsExp a (sector (3 * π / 4 - δ)) := by
+    PcfSectIsExp a (sector (3 * π / 4 - δ)) := by
   intro N
   set μ := a + 1 / 2 with hμd
   have hμ : 0 < μ.re := by simp [hμd]; linarith
@@ -501,7 +501,7 @@ theorem pcfSect_sum_uTerm_recurrence (a z : ℂ) (hz : z ≠ 0) (N : ℕ) :
 
 /-- **The recurrence step**: the expansion for `a` and `a + 1` gives the expansion for `a - 1`. -/
 theorem pcfSect_isExp_sub_one {a : ℂ} {l : Filter ℂ} (hl : ∀ᶠ z in l, z ≠ 0 ∧ 1 ≤ ‖z‖)
-    (h1 : pcfSect_IsExp a l) (h2 : pcfSect_IsExp (a + 1) l) : pcfSect_IsExp (a - 1) l := by
+    (h1 : PcfSectIsExp a l) (h2 : PcfSectIsExp (a + 1) l) : PcfSectIsExp (a - 1) l := by
   intro N
   have hB : (fun z : ℂ => (a + 1 / 2) * (z ^ 2)⁻¹ * z ^ (-(2 * ((N - 1 : ℕ) : ℤ)))) =O[l]
       (fun z : ℂ => z ^ (-(2 * N : ℤ))) := by
@@ -523,9 +523,9 @@ theorem pcfSect_isExp_sub_one {a : ℂ} {l : Filter ℂ} (hl : ∀ᶠ z in l, z 
 /-- **DLMF 12.9.1** for all complex `a`, uniformly in `|ph z| ≤ 3π/4 - δ`:
 `e^{z²/4} z^{a+1/2} U(a,z) - ∑_{s<N} (-1)^s (a+1/2)_{2s}/(s! (2z²)^s) = O(z^{-2N})`. -/
 theorem pcfSect_U_sector (a : ℂ) {δ : ℝ} (hδ : 0 < δ) :
-    pcfSect_IsExp a (sector (3 * π / 4 - δ)) := by
+    PcfSectIsExp a (sector (3 * π / 4 - δ)) := by
   have hl := pcfSect_eventually_sector (3 * π / 4 - δ)
-  suffices h : ∀ m : ℕ, ∀ a : ℂ, -1 / 2 < (a + m).re → pcfSect_IsExp a (sector (3 * π / 4 - δ)) by
+  suffices h : ∀ m : ℕ, ∀ a : ℂ, -1 / 2 < (a + m).re → PcfSectIsExp a (sector (3 * π / 4 - δ)) by
     obtain ⟨m, hm⟩ := exists_nat_gt (-1 / 2 - a.re)
     exact h m a (by simp; linarith)
   intro m

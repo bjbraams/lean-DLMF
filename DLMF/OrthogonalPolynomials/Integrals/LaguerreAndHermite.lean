@@ -130,7 +130,7 @@ theorem laguerrePolyL_fractional_integral {α μ x : ℝ} (hα : -1 < α) (hμ :
 ∫ y : ℝ in Set.Ioi x, exp (-y) * laguerrePolyL (α + μ) n y * (y - x : ℂ) ^ ((μ : ℂ) - 1) /
 Gamma (μ : ℂ)`. -/
 @[dlmf 18.17.E15]
-theorem laguerrePolyL_fractional_tail_integral {α μ x : ℝ} (hα : -1 < α) (hμ : 0 < μ) (hx : 0 ≤ x)
+theorem laguerrePolyL_fractional_tail_integral {α μ x : ℝ} (hα : -1 < α) (hμ : 0 < μ)
     (n : ℕ) :
     exp (-x) * laguerrePolyL α n x = ∫ y : ℝ in Set.Ioi x,
       exp (-y) * laguerrePolyL (α + μ) n y * (y - x : ℂ) ^ ((μ : ℂ) - 1) / Gamma (μ : ℂ) := by

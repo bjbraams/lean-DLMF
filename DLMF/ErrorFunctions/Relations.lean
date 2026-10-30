@@ -5,9 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Confluent.ExpIntegral
 public import DLMF.ErrorFunctions.AnalyticProperties
 public import DLMF.Hypergeometric.GeneralizedCalculus
-public import DLMF.Confluent.ExpIntegral
 
 /-!
 # Symmetries, differential identities and interrelations, DLMF §§7.4–7.5 and 7.10–7.11
@@ -312,7 +312,7 @@ theorem fresnelTail_norm_sq_real (x : ℝ) :
 /-- Identity under the stated parameter and domain assumptions: `‖fresnelTail x‖^2 = fresnelAuxF
 x^2+fresnelAuxG x^2`. -/
 @[dlmf 7.5.E11]
-theorem fresnelTail_norm_sq_nonneg {x : ℝ} (hx : 0 ≤ x) :
+theorem fresnelTail_norm_sq_nonneg {x : ℝ} :
     ‖fresnelTail x‖^2 = fresnelAuxF x^2+fresnelAuxG x^2 := by
   exact fresnelTail_norm_sq_real x
 
@@ -320,7 +320,7 @@ theorem fresnelTail_norm_sq_nonneg {x : ℝ} (hx : 0 ≤ x) :
 (-x)^2+fresnelAuxG (-x)^2-2*Real.sqrt 2*Real.cos (π/4+π*x^2/2)*fresnelAuxF (-x)-2*Real.sqrt
 2*Real.cos (π/4-π*x^2/2)*fresnelAuxG (-x)`. -/
 @[dlmf 7.5.E12]
-theorem fresnelTail_norm_sq_nonpos {x : ℝ} (hx : x ≤ 0) :
+theorem fresnelTail_norm_sq_nonpos {x : ℝ} :
     ‖fresnelTail x‖^2 = 2+fresnelAuxF (-x)^2+fresnelAuxG (-x)^2-2*Real.sqrt 2*Real.cos (π/4+π*x^2/2)*fresnelAuxF (-x)-2*Real.sqrt 2*Real.cos (π/4-π*x^2/2)*fresnelAuxG (-x) := by
   have h := fresnelAux_negative ((-x:ℝ):ℂ)
   rw [fresnelAuxFComplex_ofReal (-x), fresnelAuxGComplex_ofReal (-x)] at h

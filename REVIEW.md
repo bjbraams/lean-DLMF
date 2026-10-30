@@ -9586,3 +9586,94 @@ All 1,089 changed type fingerprints are accounted for: each reconstructed baseli
 fingerprint matches and the corresponding type passes the kernel equality check (with
 positionally matched bound universe parameters in the two generated Lamé cases). The
 four generic Backlund cases also retain their original universe parameters.
+
+## Comprehensive Mathlib-style review (2026-10-30)
+
+The post-reorganization review is in [MathlibReview20261030.md](MathlibReview20261030.md),
+with the full candidate lists and audit programs in
+[MathlibReviewInventory20261030.json](MathlibReviewInventory20261030.json).
+It covers all 1,199 library files and matches all 26,262 explicit named declarations to
+compiled metadata. All declarations and 205 directly declared structure fields have
+formal docstrings; no library file exceeds 1,500 lines, although 134 exceed 1,000.
+
+The main verified findings are 341 individually removable binders in 291 admission-free
+theorems, three further hypothesis simplifications checked in Lean, 27 pairs of identical
+public definitions, and 80 exact upstream theorem-type matches (62 with accessible public
+matches). Naming, semantic documentation, repeated proof families and near-limit files
+still need attention. The report also lists the unchanged false admitted formulations
+and distinguishes them from the pending Leibniz/Haar hypothesis questions.
+
+The full build passes (14,914 jobs), as do the import and file-length surveys, every
+narrowed-proof kernel check, the strict hypothesis experiments and a reduced-import
+experiment. This review changes documentation only; it does not change statements,
+proofs, imports, admission counts or the foundation reorganization.
+
+## Review cleanup: statement corrections and shared APIs (2026-10-30)
+
+This implements a first substantial batch from [the Mathlib-style review](MathlibReview20261030.md).
+The review and its inventory remain a record of the state before these changes. The exact
+renames, removed hypotheses and validation results are recorded in
+[ReviewCleanup20261030.json](ReviewCleanup20261030.json).
+
+The nine identified false admitted formulations have been corrected: Great Picard requires
+positive comparison radii; the logarithmic product M-test gives local uniform convergence;
+Cesàro regularity is restricted to nonnegative orders; the Liouville–Green asymptotic
+normalization requires singular-endpoint conditions; the three even theta logarithmic
+series use their shifted zero lattices; the multivariate elliptic mean expansion requires
+compatible arguments; and the squared-argument Carlson RC identity excludes the negative
+real cut. Two Leibniz statements now assume existence of the partial derivative, and Haar's
+lemma assumes holomorphy of each comparison function. These additional hypotheses are
+explained at the declarations and in [the errata report](reports/DLMFErrata.tex).
+
+The corrected `symEllIntR_half_hasSum_mean` has a proof from the existing Taylor expansion
+and homogeneity theorem. Its nonempty-index condition follows from the nonzero mean.
+The shifted theta radii now have nonnegativity, pointwise upper-bound and positivity lemmas.
+The order-zero Cesàro mean is identified with the ordinary partial sum by a proved simp lemma.
+The other corrected admissions remain explicit; correcting their mathematical statements
+is separate from proving them.
+
+Hypothesis cleanup removes 224 of the individually kernel-verified binders in the frozen
+review: 212 propositional binders and twelve redundant typeclass assumptions. Further
+simplifications derive continuity for entire primitives, absolute convergence of the
+monomial series from its `HasSum` assumption, positivity of the mean's index count, and the
+modulus instance for a Dirichlet-character conjugation wrapper. The two Wigner
+`AtLeastTwo` numeral guards are retained, and the other audit candidates still require
+caller or API review. The Jacobi value at one is now `jacobiPolyP_one`, without an
+unnecessary positivity restriction on its first parameter.
+
+All 76 lowercase predicate definitions identified by the review have been migrated to
+Mathlib capitalization. In particular, the power-series evaluation predicate is now
+`PowerSeries.HasSumAt`, which stores just convergence: complex summability already implies
+norm summability. Its multiplication, power, sum and finite-product lemmas share this
+single convergence hypothesis.
+
+Canonical shared objects replace the copied definitions and proofs:
+
+- `DLMF.Core.Framework` supplies the improper-integral and primitive definitions used by Airy.
+- `Function.mulDerivMul` and `Function.oneSubMulDerivMul` provide scalar-generic differential
+  operators in `DLMFMathlib.Analysis.Calculus.DifferentialOperators`.
+- `ODE.wronskian` in `DLMFMathlib.Analysis.ODE.Wronskian` replaces the four ordinary
+  two-function Wronskians; weighted uses share `ODE.sturmWronskian`. The spectral
+  `wronskianC` retains its distinct multiplication convention.
+- `periodicBernoulli` and `antiperiodicEuler` are the canonical periodic functions, with the
+  original endpoint conventions. Their DLMF tags are attached at their definitions.
+- The existing Carlson homogeneity theorem replaces its duplicate in `SymmetricSeries`.
+- Mathlib supplies `Complex.sin_int_mul_pi` and `riemannZeta_four`; pinned TauCeti supplies
+  `TauCeti.integrable_exp_neg_mul_abs`; lean-codes supplies `Complex.ofReal_cpow_eq_exp`.
+  Local duplicate proofs and their callers have been migrated, with attribution in CREDITS.
+
+The theta coefficient and lattice definitions now live in `Theta/Basic/PowerSeries`, and
+Carlson's symmetric-integral definitions in `EllipticIntegrals/Basic/Symmetric`, exposed by
+a new `EllipticIntegrals.Basic` umbrella. `DLMF.Basic` now imports 60 foundational entries.
+These moves preserve the foundational import restrictions. The catalogues and acquisition
+ledgers track the canonical names and locations.
+
+Repeated proof families have been reduced using mathematical helper statements. Four
+compositional shift identities shorten all twelve Jacobi quotient shift proofs. Two
+finite-support lemmas replace 53 repeated zero-residual cases in thirteen Mathieu
+small-parameter eigenvalue proofs; their nonzero coefficient calculations are retained.
+The Jacobi file decreases from 1,242 to 1,107 lines, and Mathieu `SmallQ` from 1,384 to
+1,222 lines. Remaining priorities include the restricted versus reciprocal-gamma
+hypergeometric logarithmic connection proofs, the larger Jacobi coefficient certificates,
+and the unprocessed hypothesis and development-prefix naming candidates. The review's
+other long-proof and duplicate candidates are not claimed to be resolved by this batch.

@@ -627,7 +627,7 @@ lemma s26b_box_prod_rat (r s t : ℕ) :
 /-! The array description of §26.12(i). -/
 
 /-- The array condition of §26.12(i). -/
-def s26b_IsPPArray (n : ℕ) (a : ℕ → ℕ → ℕ) : Prop :=
+def S26bIsPPArray (n : ℕ) (a : ℕ → ℕ → ℕ) : Prop :=
   (∀ i j, a (i + 1) j ≤ a i j) ∧ (∀ i j, a i (j + 1) ≤ a i j) ∧
     (Function.support (Function.uncurry a)).Finite ∧
     ∑ᶠ ij : ℕ × ℕ, Function.uncurry a ij = n
@@ -641,7 +641,7 @@ lemma s26b_array_anti {a : ℕ → ℕ → ℕ} (h1 : ∀ i j, a (i + 1) j ≤ a
   exact (hB i' hj).trans (hA j hi)
 
 /-- Bounds for an array of sum `n`: nonzero entries lie in `[0, n)²` and are at most `n`. -/
-lemma s26b_array_bound {n : ℕ} {a : ℕ → ℕ → ℕ} (ha : s26b_IsPPArray n a) {i j : ℕ}
+lemma s26b_array_bound {n : ℕ} {a : ℕ → ℕ → ℕ} (ha : S26bIsPPArray n a) {i j : ℕ}
     (hij : a i j ≠ 0) : i < n ∧ j < n ∧ a i j ≤ n := by
   obtain ⟨h1, h2, hfin, hsum⟩ := ha
   rw [finsum_eq_sum_of_support_subset _ hfin.coe_toFinset.symm.subset] at hsum
@@ -707,7 +707,7 @@ lemma s26b_card_eq_sum_fiber {r s t : ℕ} {π : Finset (ℕ × ℕ × ℕ)} (hs
     omega
 
 /-- The columns of `s26b_ofArr`. -/
-lemma s26b_fiber_ofArr {n : ℕ} {a : ℕ → ℕ → ℕ} (ha : s26b_IsPPArray n a) {h k : ℕ}
+lemma s26b_fiber_ofArr {n : ℕ} {a : ℕ → ℕ → ℕ} (ha : S26bIsPPArray n a) {h k : ℕ}
     (hh : 1 ≤ h ∧ h ≤ n) (hk : 1 ≤ k ∧ k ≤ n) :
     s26b_fiber (s26b_ofArr n a) n h k = Icc 1 (a (h - 1) (k - 1)) := by
   have hle : a (h - 1) (k - 1) ≤ n := by
@@ -721,7 +721,7 @@ lemma s26b_fiber_ofArr {n : ℕ} {a : ℕ → ℕ → ℕ} (ha : s26b_IsPPArray 
   · rintro ⟨hj1, hj2⟩; exact ⟨⟨hj1, by omega⟩, ⟨hh.1, hh.2, hj1, by omega, hk.1, hk.2⟩, hj2⟩
 
 /-- `s26b_ofArr` of an array is a plane partition of `n` in `B(n, n, n)`. -/
-lemma s26b_ofArr_mem {n : ℕ} {a : ℕ → ℕ → ℕ} (ha : s26b_IsPPArray n a) :
+lemma s26b_ofArr_mem {n : ℕ} {a : ℕ → ℕ → ℕ} (ha : S26bIsPPArray n a) :
     s26b_ofArr n a ∈ {π ∈ (planeBox n n n).powerset | IsPlanePartition π ∧ π.card = n} := by
   simp only [mem_filter, mem_powerset]
   refine ⟨filter_subset _ _, ?_, ?_⟩
@@ -804,11 +804,11 @@ theorem planePartitionCount_eq_card_arrays (n : ℕ) :
       Nat.card {a : ℕ → ℕ → ℕ // (∀ i j, a (i + 1) j ≤ a i j) ∧ (∀ i j, a i (j + 1) ≤ a i j) ∧
         (Function.support (Function.uncurry a)).Finite ∧
         ∑ᶠ ij : ℕ × ℕ, Function.uncurry a ij = n} := by
-  change _ = Nat.card {a : ℕ → ℕ → ℕ // s26b_IsPPArray n a}
+  change _ = Nat.card {a : ℕ → ℕ → ℕ // S26bIsPPArray n a}
   rw [planePartitionCount, ← Nat.card_eq_finsetCard]
   -- forward map facts
   have hfwd : ∀ π : Finset (ℕ × ℕ × ℕ), π ∈ {π ∈ (planeBox n n n).powerset |
-      IsPlanePartition π ∧ π.card = n} → s26b_IsPPArray n (s26b_toArr n π) := by
+      IsPlanePartition π ∧ π.card = n} → S26bIsPPArray n (s26b_toArr n π) := by
     intro π hπ
     simp only [mem_filter, mem_powerset] at hπ
     obtain ⟨hsub, hπ, hcard⟩ := hπ

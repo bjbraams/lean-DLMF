@@ -6,8 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.AlgebraicAnalytic.Summability.Basic
-public import Mathlib.Analysis.Complex.AbelLimit
 public import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
+public import Mathlib.Analysis.Complex.AbelLimit
 
 /-!
 # Summability of series: regularity and Tauberian theorems (DLMF §1.15(ii), §1.15(viii))
@@ -69,10 +69,11 @@ theorem hasCesaroSum_of_tendsto {a : ℕ → ℂ} {s : ℂ}
   push_cast
   ring
 
-/-- DLMF §1.15(ii) (regularity of general Cesàro summation): for `α > -1`, if `∑ a_n = s` then
-`∑ a_n = s (C,α)`. -/
+/-- DLMF §1.15(ii) (regularity of general Cesàro summation): for `α ≥ 0`,
+a series with convergent partial sums is `(C,α)`-summable to the same sum. Negative orders
+are not regular, despite the larger range in which the means are defined. -/
 @[dlmf 1.15.ii]
-theorem hasCesaroSumOfOrder_of_tendsto {α : ℝ} (hα : -1 < α) {a : ℕ → ℂ} {s : ℂ}
+theorem hasCesaroSumOfOrder_of_tendsto {α : ℝ} (hα : 0 ≤ α) {a : ℕ → ℂ} {s : ℂ}
     (h : Tendsto (seriesPartialSum a) atTop (𝓝 s)) : HasCesaroSumOfOrder α a s := by
   sorry
 

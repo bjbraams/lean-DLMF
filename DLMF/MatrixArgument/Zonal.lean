@@ -5,10 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.RingTheory.MvPolynomial.Homogeneous
-public import Mathlib.Data.Matrix.PEquiv
-public import Mathlib.Algebra.MvPolynomial.Funext
 public import DLMF.MatrixArgument.GammaBeta
+public import Mathlib.Algebra.MvPolynomial.Funext
+public import Mathlib.Data.Matrix.PEquiv
+public import Mathlib.RingTheory.MvPolynomial.Homogeneous
 
 /-!
 # Partitions and zonal polynomials (DLMF §35.4)
@@ -286,20 +286,20 @@ section q2mPoly
 open MvPolynomial
 
 /-- A family of polynomials whose coefficients depend continuously on the parameter. -/
-def q2m_CoeffCont {G σ : Type*} [TopologicalSpace G] (F : G → MvPolynomial σ ℝ) : Prop :=
+def Q2mCoeffCont {G σ : Type*} [TopologicalSpace G] (F : G → MvPolynomial σ ℝ) : Prop :=
   ∀ α, Continuous fun g => (F g).coeff α
 
 section CoeffCont
 variable {G σ : Type*} [TopologicalSpace G]
 
-/-- Identity under the stated parameter and domain assumptions: `q2m_CoeffCont (fun _ : G => p)`. -/
-theorem q2m_CoeffCont.const (p : MvPolynomial σ ℝ) : q2m_CoeffCont (fun _ : G => p) :=
+/-- Identity under the stated parameter and domain assumptions: `Q2mCoeffCont (fun _ : G => p)`. -/
+theorem Q2mCoeffCont.const (p : MvPolynomial σ ℝ) : Q2mCoeffCont (fun _ : G => p) :=
   fun _ => continuous_const
 
-/-- Identity under the stated parameter and domain assumptions: `q2m_CoeffCont (fun g =>
+/-- Identity under the stated parameter and domain assumptions: `Q2mCoeffCont (fun g =>
 (MvPolynomial.C (f g) : MvPolynomial σ ℝ))`. -/
-theorem q2m_CoeffCont.C {f : G → ℝ} (hf : Continuous f) :
-    q2m_CoeffCont (fun g => (MvPolynomial.C (f g) : MvPolynomial σ ℝ)) := by
+theorem Q2mCoeffCont.C {f : G → ℝ} (hf : Continuous f) :
+    Q2mCoeffCont (fun g => (MvPolynomial.C (f g) : MvPolynomial σ ℝ)) := by
   intro α
   classical
   simp only [MvPolynomial.coeff_C]
@@ -307,63 +307,63 @@ theorem q2m_CoeffCont.C {f : G → ℝ} (hf : Continuous f) :
   · exact hf
   · exact continuous_const
 
-/-- Identity under the stated parameter and domain assumptions: `q2m_CoeffCont (fun g => F₁ g + F₂
+/-- Identity under the stated parameter and domain assumptions: `Q2mCoeffCont (fun g => F₁ g + F₂
 g)`. -/
-theorem q2m_CoeffCont.add {F₁ F₂ : G → MvPolynomial σ ℝ} (h₁ : q2m_CoeffCont F₁)
-    (h₂ : q2m_CoeffCont F₂) : q2m_CoeffCont (fun g => F₁ g + F₂ g) := fun α => by
+theorem Q2mCoeffCont.add {F₁ F₂ : G → MvPolynomial σ ℝ} (h₁ : Q2mCoeffCont F₁)
+    (h₂ : Q2mCoeffCont F₂) : Q2mCoeffCont (fun g => F₁ g + F₂ g) := fun α => by
   have : ∀ g, (F₁ g + F₂ g).coeff α = (F₁ g).coeff α + (F₂ g).coeff α :=
     fun g => (MvPolynomial.lcoeff ℝ α).map_add _ _
   simp only [this]; exact (h₁ α).add (h₂ α)
 
-/-- Identity under the stated parameter and domain assumptions: `q2m_CoeffCont (fun g => F₁ g * F₂
+/-- Identity under the stated parameter and domain assumptions: `Q2mCoeffCont (fun g => F₁ g * F₂
 g)`. -/
-theorem q2m_CoeffCont.mul {F₁ F₂ : G → MvPolynomial σ ℝ} (h₁ : q2m_CoeffCont F₁)
-    (h₂ : q2m_CoeffCont F₂) : q2m_CoeffCont (fun g => F₁ g * F₂ g) := fun α => by
+theorem Q2mCoeffCont.mul {F₁ F₂ : G → MvPolynomial σ ℝ} (h₁ : Q2mCoeffCont F₁)
+    (h₂ : Q2mCoeffCont F₂) : Q2mCoeffCont (fun g => F₁ g * F₂ g) := fun α => by
   classical
   simp only [MvPolynomial.coeff_mul]
   exact continuous_finsetSum _ fun x _ => (h₁ x.1).mul (h₂ x.2)
 
-/-- Formula under the stated hypotheses: `q2m_CoeffCont (fun g => ∑ i ∈ s, F i g)`. -/
-theorem q2m_CoeffCont.sum {ι : Type*} (s : Finset ι) {F : ι → G → MvPolynomial σ ℝ}
-    (h : ∀ i ∈ s, q2m_CoeffCont (F i)) : q2m_CoeffCont (fun g => ∑ i ∈ s, F i g) := fun α => by
+/-- Formula under the stated hypotheses: `Q2mCoeffCont (fun g => ∑ i ∈ s, F i g)`. -/
+theorem Q2mCoeffCont.sum {ι : Type*} (s : Finset ι) {F : ι → G → MvPolynomial σ ℝ}
+    (h : ∀ i ∈ s, Q2mCoeffCont (F i)) : Q2mCoeffCont (fun g => ∑ i ∈ s, F i g) := fun α => by
   simp only [MvPolynomial.coeff_sum]
   exact continuous_finsetSum _ fun i hi => h i hi α
 
-/-- Formula under the stated hypotheses: `q2m_CoeffCont (fun g => ∏ i ∈ s, F i g)`. -/
-theorem q2m_CoeffCont.prod {ι : Type*} (s : Finset ι) {F : ι → G → MvPolynomial σ ℝ}
-    (h : ∀ i ∈ s, q2m_CoeffCont (F i)) : q2m_CoeffCont (fun g => ∏ i ∈ s, F i g) := by
+/-- Formula under the stated hypotheses: `Q2mCoeffCont (fun g => ∏ i ∈ s, F i g)`. -/
+theorem Q2mCoeffCont.prod {ι : Type*} (s : Finset ι) {F : ι → G → MvPolynomial σ ℝ}
+    (h : ∀ i ∈ s, Q2mCoeffCont (F i)) : Q2mCoeffCont (fun g => ∏ i ∈ s, F i g) := by
   classical
   induction s using Finset.induction_on with
-  | empty => simpa using q2m_CoeffCont.const (G := G) (1 : MvPolynomial σ ℝ)
+  | empty => simpa using Q2mCoeffCont.const (G := G) (1 : MvPolynomial σ ℝ)
   | insert a s ha ih =>
     simp only [Finset.prod_insert ha]
     exact (h a (Finset.mem_insert_self a s)).mul
       (ih fun i hi => h i (Finset.mem_insert_of_mem hi))
 
-/-- Identity under the stated parameter and domain assumptions: `q2m_CoeffCont (fun g => F g ^
+/-- Identity under the stated parameter and domain assumptions: `Q2mCoeffCont (fun g => F g ^
 n)`. -/
-theorem q2m_CoeffCont.pow {F : G → MvPolynomial σ ℝ} (h : q2m_CoeffCont F) (n : ℕ) :
-    q2m_CoeffCont (fun g => F g ^ n) := by
-  have := q2m_CoeffCont.prod (Finset.range n) (F := fun _ => F) (fun _ _ => h)
+theorem Q2mCoeffCont.pow {F : G → MvPolynomial σ ℝ} (h : Q2mCoeffCont F) (n : ℕ) :
+    Q2mCoeffCont (fun g => F g ^ n) := by
+  have := Q2mCoeffCont.prod (Finset.range n) (F := fun _ => F) (fun _ _ => h)
   simpa using this
 
-/-- Identity under the stated parameter and domain assumptions: `q2m_CoeffCont (fun g => (M
+/-- Identity under the stated parameter and domain assumptions: `Q2mCoeffCont (fun g => (M
 g).det)`. -/
-theorem q2m_CoeffCont.det {n : Type*} [Fintype n] [DecidableEq n]
-    {M : G → Matrix n n (MvPolynomial σ ℝ)} (h : ∀ a b, q2m_CoeffCont fun g => M g a b) :
-    q2m_CoeffCont (fun g => (M g).det) := by
+theorem Q2mCoeffCont.det {n : Type*} [Fintype n] [DecidableEq n]
+    {M : G → Matrix n n (MvPolynomial σ ℝ)} (h : ∀ a b, Q2mCoeffCont fun g => M g a b) :
+    Q2mCoeffCont (fun g => (M g).det) := by
   simp only [Matrix.det_apply']
-  exact q2m_CoeffCont.sum _ fun σ' _ => (q2m_CoeffCont.const _).mul
-    (q2m_CoeffCont.prod _ fun i _ => h _ _)
+  exact Q2mCoeffCont.sum _ fun σ' _ => (Q2mCoeffCont.const _).mul
+    (Q2mCoeffCont.prod _ fun i _ => h _ _)
 
-/-- Identity under the stated parameter and domain assumptions: `q2m_CoeffCont fun g => (A g * B
+/-- Identity under the stated parameter and domain assumptions: `Q2mCoeffCont fun g => (A g * B
 g) a b`. -/
-theorem q2m_CoeffCont.matMul {n : Type*} [Fintype n]
-    {A B : G → Matrix n n (MvPolynomial σ ℝ)} (hA : ∀ a b, q2m_CoeffCont fun g => A g a b)
-    (hB : ∀ a b, q2m_CoeffCont fun g => B g a b) (a b : n) :
-    q2m_CoeffCont fun g => (A g * B g) a b := by
+theorem Q2mCoeffCont.matMul {n : Type*} [Fintype n]
+    {A B : G → Matrix n n (MvPolynomial σ ℝ)} (hA : ∀ a b, Q2mCoeffCont fun g => A g a b)
+    (hB : ∀ a b, Q2mCoeffCont fun g => B g a b) (a b : n) :
+    Q2mCoeffCont fun g => (A g * B g) a b := by
   simp only [Matrix.mul_apply]
-  exact q2m_CoeffCont.sum _ fun k _ => (hA a k).mul (hB k b)
+  exact Q2mCoeffCont.sum _ fun k _ => (hA a k).mul (hB k b)
 
 end CoeffCont
 
@@ -424,34 +424,34 @@ lemma q2m_eval_zonalPoly {m : ℕ} (κ : Fin m → ℕ) (H : Matrix (Fin m) (Fin
     Matrix.diagonal_map (map_zero _)]
   simp
 
-/-- Identity under the stated parameter and domain assumptions: `q2m_CoeffCont (fun H :
+/-- Identity under the stated parameter and domain assumptions: `Q2mCoeffCont (fun H :
 Matrix.orthogonalGroup (Fin m) ℝ => q2m_zonalPoly κ (H : Matrix (Fin m) (Fin m) ℝ))`. -/
 lemma q2m_coeffCont_zonalPoly {m : ℕ} (κ : Fin m → ℕ) :
-    q2m_CoeffCont (fun H : Matrix.orthogonalGroup (Fin m) ℝ =>
+    Q2mCoeffCont (fun H : Matrix.orthogonalGroup (Fin m) ℝ =>
       q2m_zonalPoly κ (H : Matrix (Fin m) (Fin m) ℝ)) := by
-  have hent : ∀ a b, q2m_CoeffCont fun H : Matrix.orthogonalGroup (Fin m) ℝ =>
+  have hent : ∀ a b, Q2mCoeffCont fun H : Matrix.orthogonalGroup (Fin m) ℝ =>
       q2m_polyConj (H : Matrix (Fin m) (Fin m) ℝ) a b := by
     intro a b
-    have hHc : ∀ a b, q2m_CoeffCont fun H : Matrix.orthogonalGroup (Fin m) ℝ =>
+    have hHc : ∀ a b, Q2mCoeffCont fun H : Matrix.orthogonalGroup (Fin m) ℝ =>
         ((H : Matrix (Fin m) (Fin m) ℝ).map
           (MvPolynomial.C : ℝ →+* MvPolynomial (Fin m) ℝ)) a b := fun a b =>
-      q2m_CoeffCont.C ((continuous_apply b).comp ((continuous_apply a).comp continuous_subtype_val))
-    have hHt : ∀ a b, q2m_CoeffCont fun H : Matrix.orthogonalGroup (Fin m) ℝ =>
+      Q2mCoeffCont.C ((continuous_apply b).comp ((continuous_apply a).comp continuous_subtype_val))
+    have hHt : ∀ a b, Q2mCoeffCont fun H : Matrix.orthogonalGroup (Fin m) ℝ =>
         ((H : Matrix (Fin m) (Fin m) ℝ).map
           (MvPolynomial.C : ℝ →+* MvPolynomial (Fin m) ℝ))ᵀ a b := fun a b => hHc b a
     unfold q2m_polyConj
-    refine q2m_CoeffCont.matMul (fun a b => ?_) hHt a b
-    exact q2m_CoeffCont.matMul (A := fun H : Matrix.orthogonalGroup (Fin m) ℝ =>
+    refine Q2mCoeffCont.matMul (fun a b => ?_) hHt a b
+    exact Q2mCoeffCont.matMul (A := fun H : Matrix.orthogonalGroup (Fin m) ℝ =>
       (H : Matrix (Fin m) (Fin m) ℝ).map (MvPolynomial.C : ℝ →+* MvPolynomial (Fin m) ℝ))
       (B := fun _ => diagonal (fun i => (X i : MvPolynomial (Fin m) ℝ))) hHc
-      (fun a b => q2m_CoeffCont.const (diagonal (fun i => (X i : MvPolynomial (Fin m) ℝ)) a b))
+      (fun a b => Q2mCoeffCont.const (diagonal (fun i => (X i : MvPolynomial (Fin m) ℝ)) a b))
       a b
   unfold q2m_zonalPoly
-  refine q2m_CoeffCont.prod _ fun j _ => q2m_CoeffCont.pow ?_ _
+  refine Q2mCoeffCont.prod _ fun j _ => Q2mCoeffCont.pow ?_ _
   have hj : j.1 + 1 ≤ m := j.2
   unfold leadingMinor
   simp only [hj, dite_true]
-  exact q2m_CoeffCont.det fun a b => hent _ _
+  exact Q2mCoeffCont.det fun a b => hent _ _
 
 /-- The stated relation follows from the given hypotheses: `(q2m_zonalPoly κ H).IsHomogeneous (∑
 j, κ j)`. -/

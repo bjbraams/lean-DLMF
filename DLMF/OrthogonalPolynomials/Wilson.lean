@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.OrthogonalPolynomials.Hahn
 public import DLMF.Confluent.Relations
+public import DLMF.OrthogonalPolynomials.Hahn
 /-!
 # Wilson, continuous dual Hahn, Racah, and dual Hahn polynomials
 
@@ -157,7 +157,7 @@ theorem dualHahn_hypergeometric (γ δ : ℂ) (N n : ℕ) (y : ℂ) :
 /-- Identity under the stated parameter and domain assumptions: `dualHahn γ δ N n ((y : ℂ) * (y +
 γ + δ + 1)) = hahn γ δ N y n`. -/
 @[dlmf 18.26.E4_1]
-theorem dualHahn_hahn_duality (γ δ : ℂ) {N n y : ℕ} (hn : n ≤ N) (hy : y ≤ N) :
+theorem dualHahn_hahn_duality (γ δ : ℂ) {N n y : ℕ} :
     dualHahn γ δ N n ((y : ℂ) * (y + γ + δ + 1)) = hahn γ δ N y n := by
   rw [dualHahn_hypergeometric, hahn]
   have hs := terminatingHG_hasSum_neg_nat n [-(y : ℂ), y + γ + δ + 1] [γ + 1, -(N : ℂ)] 1
@@ -227,7 +227,7 @@ theorem eventually_poch_add_ne_zero (u : ℂ) (k : ℕ) :
 /-- The map `(fun d : ℝ => wilson a b c d n x / poch (a + d) n)` tends to `(𝓝 (continuousDualHahn
 a b c n x))` along `atTop`. -/
 @[dlmf 18.26.E5]
-theorem wilson_limit_continuousDualHahn {a b c : ℂ} (hab : 0 < (a + b).re) (hac : 0 < (a + c).re) (n : ℕ) (x : ℂ) :
+theorem wilson_limit_continuousDualHahn {a b c : ℂ} (n : ℕ) (x : ℂ) :
     Tendsto (fun d : ℝ => wilson a b c d n x / poch (a + d) n) atTop (𝓝 (continuousDualHahn a b c n x)) := by
   unfold wilson continuousDualHahn
   have hT : Tendsto (fun d : ℝ => poch (a + b) n * poch (a + c) n *
@@ -255,7 +255,7 @@ theorem wilson_limit_continuousDualHahn {a b c : ℂ} (hab : 0 < (a + b).re) (ha
 /-- The map `(fun b : ℝ => racah (-(N : ℂ) - 1) b γ δ n x)` tends to `(𝓝 (dualHahn γ δ N n x))`
 along `atTop`. -/
 @[dlmf 18.26.E9]
-theorem racah_limit_dualHahn {γ δ : ℂ} (hγ : -1 < γ.re) {N n : ℕ} (hn : n ≤ N) (x : ℂ) :
+theorem racah_limit_dualHahn {γ δ : ℂ} {N n : ℕ} (x : ℂ) :
     Tendsto (fun b : ℝ => racah (-(N : ℂ) - 1) b γ δ n x) atTop (𝓝 (dualHahn γ δ N n x)) := by
   unfold racah dualHahn
   refine tendsto_finsetSum _ fun k _ => ?_
@@ -274,7 +274,7 @@ theorem racah_limit_dualHahn {γ δ : ℂ} (hγ : -1 < γ.re) {N n : ℕ} (hn : 
 /-- The map `(fun d : ℝ => racah α β (-(N : ℂ) - 1) d n (x * (x - N + d)))` tends to `(𝓝 (hahn α β
 N n x))` along `atTop`. -/
 @[dlmf 18.26.E10]
-theorem racah_limit_hahn {α β : ℂ} (hα : -1 < α.re) {N n : ℕ} (hn : n ≤ N) (x : ℂ) :
+theorem racah_limit_hahn {α β : ℂ} {N n : ℕ} (x : ℂ) :
     Tendsto (fun d : ℝ => racah α β (-(N : ℂ) - 1) d n (x * (x - N + d))) atTop (𝓝 (hahn α β N n x)) := by
   unfold racah hahn terminatingHG
   refine tendsto_finsetSum _ fun k _ => ?_
@@ -475,7 +475,6 @@ theorem wilson_coeff_convolution {a b c d : ℂ}
   have hsign : ((-1 : ℂ)^j)^2 = 1 := by rw [← pow_mul, pow_mul']; norm_num
   simp only [hsign, one_mul]
 
-
 /-- The series with terms `(fun n : ℕ => wilson a b c d n (y ^ 2) / (poch (a + d) n * poch (b + c)
 n * n.factorial) * z ^ n)` converges to `(₂F₁ (a + I * y) (d + I * y) (a + d) z * ₂F₁ (b - I *
 y) (c - I * y) (b + c) z)`. -/
@@ -493,7 +492,6 @@ theorem wilson_generating_function {a b c d : ℂ}
   apply h.congr_fun
   intro n
   rw [wilson_coeff_convolution hab hac had hbc]
-
 
 /-- Continuous dual Hahn coefficients are a binomial–Gauss convolution. -/
 theorem dualHahn_coeff_convolution {a b c : ℂ}
@@ -533,7 +531,6 @@ theorem dualHahn_coeff_convolution {a b c : ℂ}
   field_simp [hn, hkf, hnk, hR k]
   linear_combination (poch (a + I * y) k * poch (b + I * y) k * poch (c - I * y) (n-k)) * hf
 
-
 /-- The series with terms `(fun n : ℕ => continuousDualHahn a b c n (y ^ 2) / (poch (a + b) n *
 n.factorial) * z ^ n)` converges to `((1 - z) ^ (-c + I * y) * ₂F₁ (a + I * y) (b + I * y) (a
 + b) z)`. -/
@@ -552,7 +549,6 @@ theorem continuousDualHahn_generating_function {a b c : ℂ}
   intro n
   rw [dualHahn_coeff_convolution hab hac]
   rfl
-
 
 /-- Charlier polynomials as Laguerre polynomials with a degree-dependent parameter,
 `C_n(z; a) = (-1)ⁿ n! a⁻ⁿ L_n^{(z-n)}(a)`. Both sides are the Tricomi function

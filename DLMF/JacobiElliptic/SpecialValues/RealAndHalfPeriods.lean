@@ -245,8 +245,8 @@ lemma p22R1_halfK_alg {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
         jacobiSnk (compEllIntKk k / 2) k * jacobiDnk (compEllIntKk k / 2) k := by
   have hτ := jacobiTauk_im_pos hk
   set u := compEllIntKk k / 2 with hu
-  have hreg : ∀ r, jacobiRegulark r u k := fun r => by
-    unfold jacobiRegulark; rw [hu, p22R1_zeta_halfK hk]; exact p22R1_theta_quarter_ne hτ r
+  have hreg : ∀ r, JacobiRegulark r u k := fun r => by
+    unfold JacobiRegulark; rw [hu, p22R1_zeta_halfK hk]; exact p22R1_theta_quarter_ne hτ r
   have hd : jacobiDnk u k ≠ 0 := jacobiPQk_ne_zero (by decide) (hreg .d) (hreg .n)
   have hm : -u + compEllIntKk k = u := by rw [hu]; ring
   have e1 := (jacobiSnk_shift hk (-u)).1
@@ -372,32 +372,32 @@ theorem jacobi_specialValues_ThreeHalfK {k : ℂ} (hk : k ∈ jacobiModulusDomai
   simp
 
 /-- `|Im a| < Re a` (argument in `(-π/4, π/4)`). -/
-def p22R1_Good (a : ℂ) : Prop := |a.im| < a.re
+def P22R1Good (a : ℂ) : Prop := |a.im| < a.re
 
-/-- The stated relation follows from the given hypotheses: `p22R1_Good (w ^ (1 / 2 : ℂ))`. -/
-lemma p22R1_good_sqrt {w : ℂ} (hw : 0 < w.re) : p22R1_Good (w ^ (1 / 2 : ℂ)) := by
+/-- The stated relation follows from the given hypotheses: `P22R1Good (w ^ (1 / 2 : ℂ))`. -/
+lemma p22R1_good_sqrt {w : ℂ} (hw : 0 < w.re) : P22R1Good (w ^ (1 / 2 : ℂ)) := by
   have h := p22R1_sqrt_sq w
   have hr := p22R1_re_cpow_half_pos hw
   set a := w ^ (1 / 2 : ℂ)
   have : w.re = a.re ^ 2 - a.im ^ 2 := by rw [← h]; simp [pow_two]
-  unfold p22R1_Good
+  unfold P22R1Good
   rw [abs_lt]; constructor <;> nlinarith
 
-/-- The stated relation follows from the given hypotheses: `p22R1_Good a⁻¹`. -/
-lemma p22R1_good_inv {a : ℂ} (ha : p22R1_Good a) : p22R1_Good a⁻¹ := by
-  unfold p22R1_Good at *
+/-- The stated relation follows from the given hypotheses: `P22R1Good a⁻¹`. -/
+lemma p22R1_good_inv {a : ℂ} (ha : P22R1Good a) : P22R1Good a⁻¹ := by
+  unfold P22R1Good at *
   have h0 : a ≠ 0 := fun h => by rw [h] at ha; simp at ha
   have hn := normSq_pos.mpr h0
   rw [inv_re, inv_im, neg_div, abs_neg, abs_div, abs_of_pos hn]
   exact div_lt_div_of_pos_right ha hn
 
 /-- Estimate under the stated parameter and domain assumptions: `0 < a.re`. -/
-lemma p22R1_good_re {a : ℂ} (ha : p22R1_Good a) : 0 < a.re :=
+lemma p22R1_good_re {a : ℂ} (ha : P22R1Good a) : 0 < a.re :=
   lt_of_le_of_lt (abs_nonneg _) ha
 
 /-- Estimate under the stated parameter and domain assumptions: `0 < (a * b).re`. -/
-lemma p22R1_good_mul_re {a b : ℂ} (ha : p22R1_Good a) (hb : p22R1_Good b) : 0 < (a * b).re := by
-  unfold p22R1_Good at ha hb
+lemma p22R1_good_mul_re {a b : ℂ} (ha : P22R1Good a) (hb : P22R1Good b) : 0 < (a * b).re := by
+  unfold P22R1Good at ha hb
   rw [mul_re]
   have := abs_mul a.im b.im
   have h1 : a.im * b.im ≤ |a.im| * |b.im| := by rw [← abs_mul]; exact le_abs_self _
@@ -434,8 +434,8 @@ theorem jacobi_specialValues_HalfKp {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   obtain ⟨s1, c1, d1⟩ := jacobi_specialValues_HalfK hk'
   rw [hkk] at s1 c1 d1
   have hτ' := jacobiTauk_im_pos hk'
-  have hreg : jacobiRegulark .n (compEllIntKk (jacobiComodulusk k) / 2) (jacobiComodulusk k) := by
-    unfold jacobiRegulark; rw [p22R1_zeta_halfK hk']; exact p22R1_theta_quarter_ne hτ' _
+  have hreg : JacobiRegulark .n (compEllIntKk (jacobiComodulusk k) / 2) (jacobiComodulusk k) := by
+    unfold JacobiRegulark; rw [p22R1_zeta_halfK hk']; exact p22R1_theta_quarter_ne hτ' _
   obtain ⟨-, -, -, hsc, hdc, hnc, -, -, -⟩ := je22a_glaisher_via_n hreg
   obtain ⟨t1, t2, t3, -⟩ := jacobi_imaginary_transformation hk
     (compEllIntKk (jacobiComodulusk k) / 2)
@@ -446,11 +446,11 @@ theorem jacobi_specialValues_HalfKp {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   have hre1 : 0 < (1 + k).re := by simp only [add_re, one_re]; linarith [hk.1]
   have h1k : 1 + k ≠ 0 := fun h => by rw [h] at hre1; simp at hre1
   have hq := p22R1_re_div_one_add_pos hk.1
-  have gS : p22R1_Good ((1 + k) ^ (-(1 / 2) : ℂ)) := by
+  have gS : P22R1Good ((1 + k) ^ (-(1 / 2) : ℂ)) := by
     rw [cpow_neg]; exact p22R1_good_inv (p22R1_good_sqrt hre1)
   have gC := p22R1_good_sqrt hq
   have gCi := p22R1_good_inv gC
-  have gK : p22R1_Good (k ^ (-(1 / 2) : ℂ)) := by
+  have gK : P22R1Good (k ^ (-(1 / 2) : ℂ)) := by
     rw [cpow_neg]; exact p22R1_good_inv (p22R1_good_sqrt hk.1)
   refine ⟨?_, ?_, ?_⟩
   · congr 1
@@ -494,13 +494,13 @@ lemma p22R1_theta4_ne {τ : ℂ} (hτ : 0 < τ.im) (a b : ℝ) (hb : ∀ n : ℤ
     (by rw [h', zero_mul])
   exact hb n (by linarith [this.2])
 
-/-- The stated relation follows from the given hypotheses: `jacobiRegulark .n (I * compEllIntKpk k
+/-- The stated relation follows from the given hypotheses: `JacobiRegulark .n (I * compEllIntKpk k
 / 2) k`. -/
 lemma p22R1_reg_halfKp {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
-    jacobiRegulark .n (I * compEllIntKpk k / 2) k := by
+    JacobiRegulark .n (I * compEllIntKpk k / 2) k := by
   have hτ := jacobiTauk_im_pos hk
   have hK := compEllIntKk_ne_zero hk
-  unfold jacobiRegulark
+  unfold JacobiRegulark
   have hz : jacobiZetak (I * compEllIntKpk k / 2) k =
       (((0 : ℝ) : ℂ) + ((1 / 4 : ℝ) : ℂ) * jacobiTauk k) * π := by
     rw [jacobiZetak, jacobiTauk]; push_cast; field_simp; ring
@@ -511,11 +511,11 @@ lemma p22R1_reg_halfKp {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   have h2 : (4 * n + 1 : ℤ) = 0 := by exact_mod_cast h1
   omega
 
-/-- The stated relation follows from the given hypotheses: `jacobiRegulark r (compEllIntKk k / 2)
+/-- The stated relation follows from the given hypotheses: `JacobiRegulark r (compEllIntKk k / 2)
 k`. -/
 lemma p22R1_reg_halfK {k : ℂ} (hk : k ∈ jacobiModulusDomain) (r : JacobiLetter) :
-    jacobiRegulark r (compEllIntKk k / 2) k := by
-  unfold jacobiRegulark; rw [p22R1_zeta_halfK hk]
+    JacobiRegulark r (compEllIntKk k / 2) k := by
+  unfold JacobiRegulark; rw [p22R1_zeta_halfK hk]
   exact p22R1_theta_quarter_ne (jacobiTauk_im_pos hk) r
 
 /-- `k + k' ≠ -1`, so `1 + k + k' ≠ 0`. -/
@@ -526,48 +526,48 @@ lemma p22R1_one_add_add_ne {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   linarith [hk.1, p22R1_comodulus_re_pos hk]
 
 /-- Positive reals. -/
-def p22R1_PR (a : ℂ) : Prop := a.im = 0 ∧ 0 < a.re
+def P22R1PR (a : ℂ) : Prop := a.im = 0 ∧ 0 < a.re
 
-/-- The stated relation follows from the given hypotheses: `p22R1_PR (a * b)`. -/
-lemma p22R1_PR_mul {a b : ℂ} (ha : p22R1_PR a) (hb : p22R1_PR b) : p22R1_PR (a * b) := by
-  unfold p22R1_PR at *; simp [mul_re, mul_im, ha.1, hb.1, mul_pos ha.2 hb.2]
+/-- The stated relation follows from the given hypotheses: `P22R1PR (a * b)`. -/
+lemma p22R1_PR_mul {a b : ℂ} (ha : P22R1PR a) (hb : P22R1PR b) : P22R1PR (a * b) := by
+  unfold P22R1PR at *; simp [mul_re, mul_im, ha.1, hb.1, mul_pos ha.2 hb.2]
 
-/-- The stated relation follows from the given hypotheses: `p22R1_PR (a + b)`. -/
-lemma p22R1_PR_add {a b : ℂ} (ha : p22R1_PR a) (hb : p22R1_PR b) : p22R1_PR (a + b) := by
-  unfold p22R1_PR at *; simp [ha.1, hb.1]; linarith [ha.2, hb.2]
+/-- The stated relation follows from the given hypotheses: `P22R1PR (a + b)`. -/
+lemma p22R1_PR_add {a b : ℂ} (ha : P22R1PR a) (hb : P22R1PR b) : P22R1PR (a + b) := by
+  unfold P22R1PR at *; simp [ha.1, hb.1]; linarith [ha.2, hb.2]
 
-/-- The stated relation follows from the given hypotheses: `p22R1_PR a⁻¹`. -/
-lemma p22R1_PR_inv {a : ℂ} (ha : p22R1_PR a) : p22R1_PR a⁻¹ := by
-  unfold p22R1_PR at *
+/-- The stated relation follows from the given hypotheses: `P22R1PR a⁻¹`. -/
+lemma p22R1_PR_inv {a : ℂ} (ha : P22R1PR a) : P22R1PR a⁻¹ := by
+  unfold P22R1PR at *
   have h0 : a ≠ 0 := fun h => by rw [h] at ha; simp at ha
   refine ⟨by simp [inv_im, ha.1], ?_⟩
   rw [inv_re]; exact div_pos ha.2 (normSq_pos.mpr h0)
 
-/-- The stated relation follows from the given hypotheses: `p22R1_PR (a / b)`. -/
-lemma p22R1_PR_div {a b : ℂ} (ha : p22R1_PR a) (hb : p22R1_PR b) : p22R1_PR (a / b) := by
+/-- The stated relation follows from the given hypotheses: `P22R1PR (a / b)`. -/
+lemma p22R1_PR_div {a b : ℂ} (ha : P22R1PR a) (hb : P22R1PR b) : P22R1PR (a / b) := by
   rw [div_eq_mul_inv]; exact p22R1_PR_mul ha (p22R1_PR_inv hb)
 
-/-- The stated relation follows from the given hypotheses: `p22R1_PR (a ^ (c : ℂ))`. -/
-lemma p22R1_PR_cpow {a : ℂ} (ha : p22R1_PR a) (c : ℝ) : p22R1_PR (a ^ (c : ℂ)) := by
+/-- The stated relation follows from the given hypotheses: `P22R1PR (a ^ (c : ℂ))`. -/
+lemma p22R1_PR_cpow {a : ℂ} (ha : P22R1PR a) (c : ℝ) : P22R1PR (a ^ (c : ℂ)) := by
   have e : a = (a.re : ℂ) := by apply Complex.ext <;> simp [ha.1]
   rw [e, ← ofReal_cpow ha.2.le]
   exact ⟨ofReal_im _, by rw [ofReal_re]; exact Real.rpow_pos_of_pos ha.2 _⟩
 
-/-- The stated relation follows from the given hypotheses: `p22R1_PR 1`. -/
-lemma p22R1_PR_one : p22R1_PR 1 := ⟨by simp, by simp⟩
+/-- The stated relation follows from the given hypotheses: `P22R1PR 1`. -/
+lemma p22R1_PR_one : P22R1PR 1 := ⟨by simp, by simp⟩
 
-/-- The stated relation follows from the given hypotheses: `p22R1_PR (x : ℂ)`. -/
-lemma p22R1_PR_ofReal {x : ℝ} (hx : 0 < x) : p22R1_PR (x : ℂ) := ⟨ofReal_im _, by simpa⟩
+/-- The stated relation follows from the given hypotheses: `P22R1PR (x : ℂ)`. -/
+lemma p22R1_PR_ofReal {x : ℝ} (hx : 0 < x) : P22R1PR (x : ℂ) := ⟨ofReal_im _, by simpa⟩
 
-/-- The stated relation follows from the given hypotheses: `p22R1_PR (jacobiComodulusk x)`. -/
+/-- The stated relation follows from the given hypotheses: `P22R1PR (jacobiComodulusk x)`. -/
 lemma p22R1_PR_comodulus {x : ℝ} (h0 : 0 < x) (h1 : x < 1) :
-    p22R1_PR (jacobiComodulusk x) := by
+    P22R1PR (jacobiComodulusk x) := by
   have : (1 - (x : ℂ) ^ 2) = ((1 - x ^ 2 : ℝ) : ℂ) := by push_cast; ring
   rw [jacobiComodulusk, this, show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring]
   exact p22R1_PR_cpow (p22R1_PR_ofReal (by nlinarith)) _
 
 /-- Identity under the stated parameter and domain assumptions: `(a + I * b).re = a.re`. -/
-lemma p22R1_PR_re_add_I_mul {a b : ℂ} (ha : p22R1_PR a) (hb : p22R1_PR b) :
+lemma p22R1_PR_re_add_I_mul {a b : ℂ} (hb : P22R1PR b) :
     (a + I * b).re = a.re := by
   simp [hb.1]
 
@@ -627,10 +627,10 @@ lemma p22R1_halfKKp_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
     rw [div_left_inj' h3]
     linear_combination (-D * A * k ^ 2 * I * Q ^ 2) * hSS - D * A * k * I * hQQ
 
-/-- The stated relation follows from the given hypotheses: `p22R1_PR (a ^ (1 / 2 : ℂ)) ∧ p22R1_PR
+/-- The stated relation follows from the given hypotheses: `P22R1PR (a ^ (1 / 2 : ℂ)) ∧ P22R1PR
 (a ^ (-(1 / 2) : ℂ))`. -/
-lemma p22R1_PR_half {a : ℂ} (ha : p22R1_PR a) :
-    p22R1_PR (a ^ (1 / 2 : ℂ)) ∧ p22R1_PR (a ^ (-(1 / 2) : ℂ)) := by
+lemma p22R1_PR_half {a : ℂ} (ha : P22R1PR a) :
+    P22R1PR (a ^ (1 / 2 : ℂ)) ∧ P22R1PR (a ^ (-(1 / 2) : ℂ)) := by
   constructor
   · rw [show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) by push_cast; ring]; exact p22R1_PR_cpow ha _
   · rw [show (-(1 / 2) : ℂ) = ((-(1 / 2) : ℝ) : ℂ) by push_cast; ring]; exact p22R1_PR_cpow ha _
@@ -638,19 +638,19 @@ lemma p22R1_PR_half {a : ℂ} (ha : p22R1_PR a) :
 /-- Real data at a real modulus `0 < x < 1`. -/
 lemma p22R1_real_atoms {x : ℝ} (h0 : 0 < x) (h1 : x < 1) :
     let κ := jacobiComodulusk x
-    p22R1_PR (x : ℂ) ∧ p22R1_PR κ ∧ p22R1_PR ((1 + κ) ^ (-(1 / 2) : ℂ)) ∧
-      p22R1_PR ((x : ℂ) ^ (-(1 / 2) : ℂ)) ∧ p22R1_PR ((1 + (x : ℂ)) ^ (1 / 2 : ℂ)) ∧
-      p22R1_PR (κ ^ (1 / 2 : ℂ)) ∧ p22R1_PR ((1 - (x : ℂ)) ^ (1 / 2 : ℂ)) ∧
-      p22R1_PR ((2 * (x : ℂ)) ^ (1 / 2 : ℂ)) ∧
+    P22R1PR (x : ℂ) ∧ P22R1PR κ ∧ P22R1PR ((1 + κ) ^ (-(1 / 2) : ℂ)) ∧
+      P22R1PR ((x : ℂ) ^ (-(1 / 2) : ℂ)) ∧ P22R1PR ((1 + (x : ℂ)) ^ (1 / 2 : ℂ)) ∧
+      P22R1PR (κ ^ (1 / 2 : ℂ)) ∧ P22R1PR ((1 - (x : ℂ)) ^ (1 / 2 : ℂ)) ∧
+      P22R1PR ((2 * (x : ℂ)) ^ (1 / 2 : ℂ)) ∧
       (1 + (x : ℂ)) ^ (1 / 2 : ℂ) * (1 - (x : ℂ)) ^ (1 / 2 : ℂ) = κ := by
   intro κ
   have hx := p22R1_PR_ofReal h0
   have hκ := p22R1_PR_comodulus h0 h1
-  have h1x : p22R1_PR (1 + (x : ℂ)) := p22R1_PR_add p22R1_PR_one hx
-  have h1mx : p22R1_PR (1 - (x : ℂ)) := by
+  have h1x : P22R1PR (1 + (x : ℂ)) := p22R1_PR_add p22R1_PR_one hx
+  have h1mx : P22R1PR (1 - (x : ℂ)) := by
     rw [show (1 - (x : ℂ)) = ((1 - x : ℝ) : ℂ) by push_cast; ring]
     exact p22R1_PR_ofReal (by linarith)
-  have h2x : p22R1_PR (2 * (x : ℂ)) := by
+  have h2x : P22R1PR (2 * (x : ℂ)) := by
     rw [show (2 * (x : ℂ)) = ((2 * x : ℝ) : ℂ) by push_cast; ring]
     exact p22R1_PR_ofReal (by linarith)
   refine ⟨hx, hκ, (p22R1_PR_half (p22R1_PR_add p22R1_PR_one hκ)).2, (p22R1_PR_half hx).2,
@@ -885,7 +885,7 @@ theorem jacobi_specialValues_HalfKKp {k : ℂ} (hk : k ∈ jacobiModulusDomain) 
     · obtain ⟨hx, hκ, hS, hQ, hA, hD, hB, hC, hAB⟩ := p22R1_real_atoms h0 h1
       have e : ∀ D A B : ℂ, (1 - I) / 2 * D * (A + I * B) = D * (A + B) / 2 + I * (D * (B - A) / 2) :=
         fun D A B => by linear_combination (-(D * B) / 2) * I_sq
-      have h2 : p22R1_PR (2 : ℂ) := ⟨by simp, by norm_num⟩
+      have h2 : P22R1PR (2 : ℂ) := ⟨by simp, by norm_num⟩
       rw [e, p22R1_re_add_I_mul' (by simp only [div_ofNat_im, mul_im, sub_im, sub_re, hD.1, hA.1, hB.1]; ring)]
       exact (p22R1_PR_div (p22R1_PR_mul hD (p22R1_PR_add hA hB)) h2).2
 

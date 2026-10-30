@@ -7,8 +7,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties
-public import TauCeti.Analysis.Complex.Conformal.Continuation.Basic
 public import Mathlib.Algebra.Order.Ring.Star
+public import TauCeti.Analysis.Complex.Conformal.Continuation.Basic
 
 /-!
 # Analytic properties and zeros: DLMF §§16.2,16.9
@@ -31,7 +31,7 @@ noncomputable section
 namespace DLMF.Hypergeometric
 
 /-- For p≤q the full ordinary principal function is entire, with regular lower parameters. -/
-theorem genHG_entire {a b : Multiset ℂ} (h : a.card ≤ b.card) (hb : genDenRegular b) :
+theorem genHG_entire {a b : Multiset ℂ} (h : a.card ≤ b.card) (hb : GenDenRegular b) :
     AnalyticOnNhd ℂ (genHG a b) univ := by
   have hne : a.card ≠ b.card + 1 := by omega
   unfold genHG genRegularizedHG
@@ -39,7 +39,7 @@ theorem genHG_entire {a b : Multiset ℂ} (h : a.card ≤ b.card) (hb : genDenRe
   exact analyticOnNhd_const.mul (Complex.analyticOnNhd_regularizedHGFun_of_card_le h)
 
 /-- The entire case has an absolutely convergent series for every finite z. -/
-theorem genHG_hasSum_entire {a b : Multiset ℂ} (h : a.card ≤ b.card) (hb : genDenRegular b) (z : ℂ) :
+theorem genHG_hasSum_entire {a b : Multiset ℂ} (h : a.card ≤ b.card) (hb : GenDenRegular b) (z : ℂ) :
     HasSum (fun n : ℕ => genCoeff a b n * z ^ n) (genHG a b z) := by
   have hne : a.card ≠ b.card + 1 := by omega
   have hs : HasSum (fun n => Complex.regularizedHGFunCoeff a b n * z ^ n)
@@ -55,7 +55,7 @@ theorem genHG_hasSum_entire {a b : Multiset ℂ} (h : a.card ≤ b.card) (hb : g
   ring
 
 /-- Any nonpositive integer upper parameter gives a polynomial for every p,q. -/
-theorem genHG_terminating_entire {a b : Multiset ℂ} (hb : genDenRegular b) (ha : genTerminates a) :
+theorem genHG_terminating_entire {a b : Multiset ℂ} (hb : GenDenRegular b) (ha : GenTerminates a) :
     ∃ P : Polynomial ℂ, ∀ z : ℂ, genHG a b z = P.eval z := by
   obtain ⟨x, hx, m, rfl⟩ := ha
   refine ⟨∑ n ∈ range (m + 1), Polynomial.monomial n (genCoeff a b n), ?_⟩
@@ -65,7 +65,7 @@ theorem genHG_terminating_entire {a b : Multiset ℂ} (hb : genDenRegular b) (ha
 
 /-- The nonterminating p=q+1 series has exactly radius one. -/
 theorem genHG_radius_one {a b : Multiset ℂ} (h : a.card = b.card + 1)
-    (hb : genDenRegular b) (ha : ¬genTerminates a) :
+    (hb : GenDenRegular b) (ha : ¬GenTerminates a) :
     (FormalMultilinearSeries.ofScalars ℂ (genCoeff a b)).radius = 1 := by
   rw [genScalarSeries_eq_gamma_smul hb,
     FormalMultilinearSeries.radius_smul_eq _ (genGamma_ne_zero hb)]
@@ -126,7 +126,7 @@ lemma ghbR4_prod_inv_Gamma_ne_zero {a : Multiset ℂ} (ha : ∀ x ∈ a, ∀ k :
 
 /-- Balanced coefficients satisfy `genCoeff a b n · n^(γ+1) → Π Γ(a)⁻¹ / Π Γ(b)⁻¹`. -/
 lemma ghbR4_genCoeff_tendsto {a b : Multiset ℂ} (h : a.card = b.card + 1)
-    (ha : ∀ x ∈ a, ∀ k : ℕ, x ≠ -k) (hb : genDenRegular b) :
+    (ha : ∀ x ∈ a, ∀ k : ℕ, x ≠ -k) (hb : GenDenRegular b) :
     Tendsto (fun n : ℕ => genCoeff a b n * (n : ℂ) ^ (genExcess a b + 1)) atTop
       (𝓝 ((a.map fun x => (Gamma x)⁻¹).prod / (b.map fun x => (Gamma x)⁻¹).prod)) := by
   apply ((ghbR4_genPoch_tendsto a ha).div (ghbR4_genPoch_tendsto b hb)
@@ -144,7 +144,7 @@ lemma ghbR4_genCoeff_tendsto {a b : Multiset ℂ} (h : a.card = b.card + 1)
 
 /-- Norm form: `‖genCoeff a b n‖ · n^(Re γ + 1)` tends to a positive limit. -/
 lemma ghbR4_norm_genCoeff_tendsto {a b : Multiset ℂ} (h : a.card = b.card + 1)
-    (ha : ∀ x ∈ a, ∀ k : ℕ, x ≠ -k) (hb : genDenRegular b) :
+    (ha : ∀ x ∈ a, ∀ k : ℕ, x ≠ -k) (hb : GenDenRegular b) :
     ∃ L : ℝ, 0 < L ∧ Tendsto (fun n : ℕ => ‖genCoeff a b n‖ * (n : ℝ) ^ ((genExcess a b).re + 1))
       atTop (𝓝 L) := by
   refine ⟨_, norm_pos_iff.mpr (div_ne_zero (ghbR4_prod_inv_Gamma_ne_zero ha)
@@ -154,12 +154,12 @@ lemma ghbR4_norm_genCoeff_tendsto {a b : Multiset ℂ} (h : a.card = b.card + 1)
   simp
 
 /-- A nonterminating upper multiset has no nonpositive integer entry. -/
-lemma ghbR4_not_neg_of_not_terminates {a : Multiset ℂ} (ha : ¬genTerminates a) :
+lemma ghbR4_not_neg_of_not_terminates {a : Multiset ℂ} (ha : ¬GenTerminates a) :
     ∀ x ∈ a, ∀ k : ℕ, x ≠ -k := fun x hx k hxk => ha ⟨x, hx, k, hxk⟩
 
 /-- The balanced nonterminating coefficients are absolutely summable iff `Re γ > 0`. -/
 lemma ghbR4_summable_norm_iff {a b : Multiset ℂ} (h : a.card = b.card + 1)
-    (hb : genDenRegular b) (ha : ¬genTerminates a) :
+    (hb : GenDenRegular b) (ha : ¬GenTerminates a) :
     Summable (fun n : ℕ => ‖genCoeff a b n‖) ↔ 0 < (genExcess a b).re := by
   obtain ⟨L, hL, hlim⟩ := ghbR4_norm_genCoeff_tendsto h (ghbR4_not_neg_of_not_terminates ha) hb
   set e := (genExcess a b).re + 1
@@ -179,7 +179,7 @@ lemma ghbR4_summable_norm_iff {a b : Multiset ℂ} (h : a.card = b.card + 1)
 
 /-- Convergence of natural partial sums forces the terms to tend to zero. -/
 lemma ghbR4_tendsto_zero_of_converges {a b : Multiset ℂ} {z v : ℂ}
-    (hv : genSeriesConvergesTo a b z v) :
+    (hv : GenSeriesConvergesTo a b z v) :
     Tendsto (fun n : ℕ => genCoeff a b n * z ^ n) atTop (𝓝 0) := by
   have hS : Tendsto (fun N : ℕ => ∑ n ∈ range N, genCoeff a b n * z ^ n) atTop (𝓝 v) := hv
   have hS' : Tendsto (fun N : ℕ => ∑ n ∈ range (N + 1), genCoeff a b n * z ^ n)
@@ -203,24 +203,24 @@ theorem genHG_principal_analytic {a b : Multiset ℂ} (h : a.card = b.card + 1) 
 
 /-- Full criterion for absolute convergence on the unit circle in the nonterminating case. -/
 theorem genHG_unit_absolute_iff {a b : Multiset ℂ} (h : a.card = b.card + 1)
-    (hb : genDenRegular b) (ha : ¬genTerminates a) {z : ℂ} (hz : ‖z‖ = 1) :
-    genSeriesAbsolutelyConverges a b z ↔ 0 < (genExcess a b).re := by
-  unfold genSeriesAbsolutelyConverges
+    (hb : GenDenRegular b) (ha : ¬GenTerminates a) {z : ℂ} (hz : ‖z‖ = 1) :
+    GenSeriesAbsolutelyConverges a b z ↔ 0 < (genExcess a b).re := by
+  unfold GenSeriesAbsolutelyConverges
   simp only [norm_mul, norm_pow, hz, one_pow, mul_one]
   exact ghbR4_summable_norm_iff h hb ha
 
 /-- Every nonunit point of the unit circle converges in natural order when the excess exceeds minus one. -/
 theorem genHG_unit_conditional {a b : Multiset ℂ} (h : a.card = b.card + 1)
-    (hb : genDenRegular b) {z : ℂ} (hz : ‖z‖ = 1) (hne : z ≠ 1)
-    (hγ : -1 < (genExcess a b).re) : genSeriesConvergesTo a b z (genHG a b z) := by
+    (hb : GenDenRegular b) {z : ℂ} (hz : ‖z‖ = 1) (hne : z ≠ 1)
+    (hγ : -1 < (genExcess a b).re) : GenSeriesConvergesTo a b z (genHG a b z) := by
   sorry
 
 /-- Positive excess gives absolute convergence to the declared endpoint value. -/
 theorem genHG_one_hasSum {a b : Multiset ℂ} (h : a.card = b.card + 1)
-    (hb : genDenRegular b) (hγ : 0 < (genExcess a b).re) :
+    (hb : GenDenRegular b) (hγ : 0 < (genExcess a b).re) :
     HasSum (fun n : ℕ => genCoeff a b n) (genHG a b 1) := by
   have hs : Summable (fun n : ℕ => genCoeff a b n) := by
-    by_cases ha : genTerminates a
+    by_cases ha : GenTerminates a
     · obtain ⟨x, hx, m, rfl⟩ := ha
       apply summable_of_ne_finset_zero (s := range (m + 1))
       intro n hn
@@ -237,8 +237,8 @@ theorem genHG_one_hasSum {a b : Multiset ℂ} (h : a.card = b.card + 1)
 
 /-- At real excess at most minus one, no point of the unit circle converges in the nonterminating case. -/
 theorem genHG_unit_diverges {a b : Multiset ℂ} (h : a.card = b.card + 1)
-    (hb : genDenRegular b) (ha : ¬genTerminates a) {z : ℂ} (hz : ‖z‖ = 1)
-    (hγ : (genExcess a b).re ≤ -1) : ¬∃ v : ℂ, genSeriesConvergesTo a b z v := by
+    (hb : GenDenRegular b) (ha : ¬GenTerminates a) {z : ℂ} (hz : ‖z‖ = 1)
+    (hγ : (genExcess a b).re ≤ -1) : ¬∃ v : ℂ, GenSeriesConvergesTo a b z v := by
   rintro ⟨v, hv⟩
   obtain ⟨L, hL, hlim⟩ := ghbR4_norm_genCoeff_tendsto h (ghbR4_not_neg_of_not_terminates ha) hb
   have ht : Tendsto (fun n : ℕ => ‖genCoeff a b n‖) atTop (𝓝 0) := by
@@ -485,7 +485,7 @@ lemma ghbR4_genPoch_succ (a : Multiset ℂ) (n : ℕ) :
   exact Multiset.map_congr rfl fun x _ => poch_succ x n
 
 /-- Ratio identity between consecutive generalized hypergeometric coefficients. -/
-lemma ghbR4_genCoeff_succ {a b : Multiset ℂ} (hb : genDenRegular b) (n : ℕ) :
+lemma ghbR4_genCoeff_succ {a b : Multiset ℂ} (hb : GenDenRegular b) (n : ℕ) :
     genCoeff a b (n + 1) * ((b.map (· + (n : ℂ))).prod * (n + 1)) =
       genCoeff a b n * (a.map (· + (n : ℂ))).prod := by
   have h1 := genPoch_ne_zero hb n
@@ -658,14 +658,14 @@ private lemma gen_one_compare {c m : ℕ → ℂ} {v D0 C2 γ : ℂ} {K2 : ℝ} 
 
 /-- At one, natural-order convergence requires strictly positive real excess unless the series terminates. -/
 theorem genHG_one_converges_iff {a b : Multiset ℂ} (h : a.card = b.card + 1)
-    (hb : genDenRegular b) (ha : ¬genTerminates a) :
-    (∃ v : ℂ, genSeriesConvergesTo a b 1 v) ↔ 0 < (genExcess a b).re := by
+    (hb : GenDenRegular b) (ha : ¬GenTerminates a) :
+    (∃ v : ℂ, GenSeriesConvergesTo a b 1 v) ↔ 0 < (genExcess a b).re := by
   constructor
   swap
   · intro hγ
     refine ⟨genHG a b 1, ?_⟩
     have := (genHG_one_hasSum h hb hγ).tendsto_sum_nat
-    simpa only [genSeriesConvergesTo, one_pow, mul_one] using this
+    simpa only [GenSeriesConvergesTo, one_pow, mul_one] using this
   rintro ⟨v, hv⟩
   by_contra hγ
   push Not at hγ
@@ -674,7 +674,7 @@ theorem genHG_one_converges_iff {a b : Multiset ℂ} (h : a.card = b.card + 1)
   · exact genHG_unit_diverges h hb ha (z := 1) norm_one hle ⟨v, hv⟩
   push Not at hle
   have hv' : Tendsto (fun N : ℕ => ∑ n ∈ range N, genCoeff a b n) atTop (𝓝 v) := by
-    simpa only [genSeriesConvergesTo, one_pow, mul_one] using hv
+    simpa only [GenSeriesConvergesTo, one_pow, mul_one] using hv
   -- the comparison model
   obtain ⟨α, β, hαp, hβp, hβα, hmodel⟩ := gen_one_model hγ
   set m : ℕ → ℂ := fun n => poch α n / poch β n with hm
@@ -750,7 +750,7 @@ theorem genHG_one_converges_iff {a b : Multiset ℂ} (h : a.card = b.card + 1)
 
 /-- The nonterminating p>q+1 formal series has radius zero. -/
 theorem genHG_radius_zero {a b : Multiset ℂ} (h : b.card + 1 < a.card)
-    (hb : genDenRegular b) (ha : ¬genTerminates a) :
+    (hb : GenDenRegular b) (ha : ¬GenTerminates a) :
     (FormalMultilinearSeries.ofScalars ℂ (genCoeff a b)).radius = 0 := by
   rw [genScalarSeries_eq_gamma_smul hb,
     FormalMultilinearSeries.radius_smul_eq _ (genGamma_ne_zero hb)]
@@ -771,8 +771,8 @@ theorem genHG_radius_zero {a b : Multiset ℂ} (h : b.card + 1 < a.card)
 
 /-- The nonterminating overbalanced formal series diverges at every nonzero argument. -/
 theorem genHG_diverges_nonzero {a b : Multiset ℂ} (h : b.card + 1 < a.card)
-    (hb : genDenRegular b) (ha : ¬genTerminates a) {z : ℂ} (hz : z ≠ 0) :
-    ¬∃ v : ℂ, genSeriesConvergesTo a b z v := by
+    (hb : GenDenRegular b) (ha : ¬GenTerminates a) {z : ℂ} (hz : z ≠ 0) :
+    ¬∃ v : ℂ, GenSeriesConvergesTo a b z v := by
   rintro ⟨v, hv⟩
   have hS : Tendsto (fun N : ℕ => ∑ n ∈ range N, genCoeff a b n * z ^ n) atTop (𝓝 v) := hv
   have hS' : Tendsto (fun N : ℕ => ∑ n ∈ range (N + 1), genCoeff a b n * z ^ n)
@@ -814,14 +814,14 @@ theorem genContinued_parameter_entire {q : ℕ} (γ : ℝ → ℂ) (hc : Continu
 
 /-- Equal-order generalized hypergeometric functions have finitely many complex zeros exactly for a matched nonnegative-integer parameter difference. -/
 theorem genHG_finite_zeros_iff {p : ℕ} (a b : Fin p → ℂ)
-    (hb : genDenRegular (genParams b)) (ha : ¬genTerminates (genParams a)) :
+    (hb : GenDenRegular (genParams b)) (ha : ¬GenTerminates (genParams a)) :
     {z : ℂ | genHG (genParams a) (genParams b) z = 0}.Finite ↔
       ∃ σ : Equiv.Perm (Fin p), ∀ j, ∃ n : ℕ, a (σ j) - b j = n := by
   sorry
 
 /-- Equal-order real parameters and real coefficient ratios give only finitely many real zeros. -/
 theorem genHG_finite_real_zeros {p : ℕ} (a b : Fin p → ℂ)
-    (hb : genDenRegular (genParams b)) (ha : ∀ j, (a j).im = 0)
+    (hb : GenDenRegular (genParams b)) (ha : ∀ j, (a j).im = 0)
     (hr : ∀ n : ℕ, (genPoch (genParams a) n / genPoch (genParams b) n).im = 0) :
     {x : ℝ | genHG (genParams a) (genParams b) x = 0}.Finite := by
   sorry

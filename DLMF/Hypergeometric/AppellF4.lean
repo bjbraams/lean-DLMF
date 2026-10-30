@@ -37,8 +37,6 @@ noncomputable section
 
 namespace DLMF.Hypergeometric
 
-
-
 /-- One term of the coefficient comparison in Bailey's formula. -/
 lemma appF4_term (a b c c' : ℂ) (hc : ∀ k, poch c k ≠ 0) (hc' : ∀ k, poch c' k ≠ 0)
     (t d e f : ℕ) :
@@ -88,9 +86,6 @@ lemma appF4_term (a b c c' : ℂ) (hc : ∀ k, poch c k ≠ 0) (hc' : ∀ k, poc
   field_simp
   rw [hs, hs', mul_one, mul_one]
 
-
-
-
 /-- The inner (Chu–Vandermonde) sum in Bailey's coefficient comparison. -/
 lemma appF4_inner {a b c c' : ℂ} (hcc : c + c' = a + b + 1) (hc : ∀ k, poch c k ≠ 0)
     (hc' : ∀ k, poch c' k ≠ 0) (t s f : ℕ) :
@@ -111,7 +106,6 @@ lemma appF4_inner {a b c c' : ℂ} (hcc : c + c' = a + b + 1) (hc : ∀ k, poch 
     show d + e - d = e by omega, show t + d + e + f = t + (d + e) + f by ring,
     show t + d + e = t + (d + e) by ring]
   ring
-
 
 /-- The outer (Pfaff–Saalschütz) sum in Bailey's coefficient comparison, for `M ≤ N`. -/
 lemma appF4_outer (a b c c' : ℂ) {M N : ℕ} (hMN : M ≤ N) :
@@ -160,7 +154,6 @@ lemma appF4_outer (a b c c' : ℂ) {M N : ℕ} (hMN : M ≤ N) :
     rw [Finset.sum_div]; refine Finset.sum_congr rfl fun t _ => ?_; ring, key]
   ring
 
-
 /-- Bailey's coefficient identity for `M ≤ N`. -/
 lemma appF4_coeff_of_le {a b c c' : ℂ} (hcc : c + c' = a + b + 1) (hc : ∀ k, poch c k ≠ 0)
     (hc' : ∀ k, poch c' k ≠ 0) {M N : ℕ} (hMN : M ≤ N) :
@@ -207,7 +200,6 @@ theorem appF4_coeff {a b c c' : ℂ} (hcc : c + c' = a + b + 1) (hc : ∀ k, poc
     unfold appF4Term appF4Coeff
     rw [add_comm n m]
     ring
-
 
 /-- `|(μ)_m| ≤ (1 + |μ|)^m m!`. -/
 theorem appF4_norm_poch_le (μ : ℂ) (m : ℕ) : ‖poch μ m‖ ≤ (1 + ‖μ‖) ^ m * m ! := by
@@ -288,9 +280,6 @@ lemma appF4Coeff_norm_le (a b : ℂ) {c c' : ℂ} (hc : 0 < c.re) (hc' : 0 < c'.
         (((1 + 1 / c.re) ^ m * ‖poch c m‖) * ((1 + 1 / c'.re) ^ n * ‖poch c' n‖)) := by gcongr
     _ = _ := by simp only [mul_pow, pow_add]; ring
 
-
-
-
 /-- The coefficient `appF4E m n M` vanishes when `m + n < M`. -/
 theorem appF4E_eq_zero_of_lt {m n M : ℕ} (h : m + n < M) : appF4E m n M = 0 := by
   unfold appF4E
@@ -331,11 +320,6 @@ theorem appF4E_norm_le (m n M : ℕ) {X : ℂ} (hX : ‖X‖ ≤ 1) :
           mul_le_mul h1 h2 (by positivity) (by positivity)
       _ = _ := by ring
   · simp only [zero_mul, norm_zero]; positivity
-
-
-
-
-
 
 /-- **Bailey's product formula**: for `c + c' = a + b + 1` (and `Re c, Re c' > 0`),
 `₂F₁(a,b;c;X) ₂F₁(a,b;c';Y) = F₄(a,b;c,c';X(1-Y),Y(1-X))` for small `X`, `Y`, the double

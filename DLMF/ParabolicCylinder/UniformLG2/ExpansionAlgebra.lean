@@ -30,7 +30,7 @@ open Polynomial
 /-! ### Asymptotic expansions in reciprocal powers: algebra -/
 
 /-- `f(u) ∼ ∑ a_s u^{-s}` as `u → ∞`. -/
-def pcfLG2_HasExp (f : ℝ → ℂ) (a : ℕ → ℂ) : Prop :=
+def PcfLG2HasExp (f : ℝ → ℂ) (a : ℕ → ℂ) : Prop :=
   ∀ N : ℕ, (fun u : ℝ => f u - ∑ s ∈ Finset.range N, a s / (u:ℂ)^s) =O[atTop]
     (fun u : ℝ => (u:ℂ)^(-(N:ℤ)))
 
@@ -97,20 +97,20 @@ lemma pcfLG2_trunc_isBigO_one (N : ℕ) (a : ℕ → ℂ) :
   exact pcfLG2_trunc_eval N a hu
 
 /-- An expansion gives boundedness. -/
-theorem pcfLG2_HasExp.isBigO_one {f : ℝ → ℂ} {a : ℕ → ℂ} (h : pcfLG2_HasExp f a) :
+theorem PcfLG2HasExp.isBigO_one {f : ℝ → ℂ} {a : ℕ → ℂ} (h : PcfLG2HasExp f a) :
     f =O[atTop] (fun _ => (1:ℂ)) := by
   have := h 0
   simpa using this
 
 /-- Uniqueness of asymptotic expansions. -/
-theorem pcfLG2_HasExp.unique {f : ℝ → ℂ} {a b : ℕ → ℂ} (ha : pcfLG2_HasExp f a)
-    (hb : pcfLG2_HasExp f b) : a = b := by
+theorem PcfLG2HasExp.unique {f : ℝ → ℂ} {a b : ℕ → ℂ} (ha : PcfLG2HasExp f a)
+    (hb : PcfLG2HasExp f b) : a = b := by
   funext n
   rw [← pcfLG_asymptoticCoeff_eq ha n, pcfLG_asymptoticCoeff_eq hb n]
 
 /-- Products of expansions. -/
-theorem pcfLG2_HasExp.mul {f g : ℝ → ℂ} {a b : ℕ → ℂ} (ha : pcfLG2_HasExp f a)
-    (hb : pcfLG2_HasExp g b) : pcfLG2_HasExp (fun u => f u * g u) (pcfLG2_cauchy a b) := by
+theorem PcfLG2HasExp.mul {f g : ℝ → ℂ} {a b : ℕ → ℂ} (ha : PcfLG2HasExp f a)
+    (hb : PcfLG2HasExp g b) : PcfLG2HasExp (fun u => f u * g u) (pcfLG2_cauchy a b) := by
   intro N
   have hQ : ∀ n < N, (pcfLG2_trunc N a * pcfLG2_trunc N b - pcfLG2_trunc N (pcfLG2_cauchy a b)).coeff n = 0 := by
     intro n hn
@@ -135,22 +135,22 @@ theorem pcfLG2_HasExp.mul {f g : ℝ → ℂ} {a b : ℕ → ℂ} (ha : pcfLG2_H
   · filter_upwards with u; ring
 
 /-- Sums of expansions. -/
-theorem pcfLG2_HasExp.sub {f g : ℝ → ℂ} {a b : ℕ → ℂ} (ha : pcfLG2_HasExp f a)
-    (hb : pcfLG2_HasExp g b) : pcfLG2_HasExp (fun u => f u - g u) (fun n => a n - b n) := by
+theorem PcfLG2HasExp.sub {f g : ℝ → ℂ} {a b : ℕ → ℂ} (ha : PcfLG2HasExp f a)
+    (hb : PcfLG2HasExp g b) : PcfLG2HasExp (fun u => f u - g u) (fun n => a n - b n) := by
   intro N
   refine ((ha N).sub (hb N)).congr' (Eventually.of_forall fun u => ?_) EventuallyEq.rfl
   simp only [sub_div, Finset.sum_sub_distrib]; ring
 
 /-- Expansion of a function that is `O(u^{-N})` for every `N`. -/
-theorem pcfLG2_HasExp.of_isBigO {f : ℝ → ℂ}
-    (h : ∀ N : ℕ, f =O[atTop] (fun u : ℝ => (u:ℂ)^(-(N:ℤ)))) : pcfLG2_HasExp f 0 := by
+theorem PcfLG2HasExp.of_isBigO {f : ℝ → ℂ}
+    (h : ∀ N : ℕ, f =O[atTop] (fun u : ℝ => (u:ℂ)^(-(N:ℤ)))) : PcfLG2HasExp f 0 := by
   intro N; simpa using h N
 
 /-- **Reciprocals of expansions.** -/
-theorem pcfLG2_HasExp.recip {f : ℝ → ℂ} {a d : ℕ → ℂ} (ha : pcfLG2_HasExp f a)
+theorem PcfLG2HasExp.recip {f : ℝ → ℂ} {a d : ℕ → ℂ} (ha : PcfLG2HasExp f a)
     (had : pcfLG2_cauchy a d = pcfLG2_delta) (hf : (fun u => (f u)⁻¹) =O[atTop] (fun _ => (1:ℂ)))
     (hf0 : ∀ᶠ u in atTop, f u ≠ 0) :
-    pcfLG2_HasExp (fun u => (f u)⁻¹) d := by
+    PcfLG2HasExp (fun u => (f u)⁻¹) d := by
   intro N
   have hQ : ∀ n < N, (pcfLG2_trunc N a * pcfLG2_trunc N d - 1).coeff n = 0 := by
     intro n hn
@@ -221,7 +221,7 @@ lemma pcfLG2_cauchy_smul (a b : ℕ → ℂ) (k : ℂ) :
   funext n; simp only [pcfLG2_cauchy, Finset.mul_sum]; congr 1; funext x; ring
 
 /-- **The expansion of `Γ(1/2+z)/(√(2π)e^{-z}z^z)` at `z = u/2`** (DLMF 12.10.16). -/
-lemma pcfLG2_HasExp_gamma : pcfLG2_HasExp
+lemma pcfLG2_HasExp_gamma : PcfLG2HasExp
     (fun u : ℝ => Gamma (1/2+((u/2:ℝ):ℂ))/((Real.sqrt (2*π):ℂ)*exp (-((u/2:ℝ):ℂ))*
       (((u/2:ℝ):ℂ))^(((u/2:ℝ):ℂ))))
     (fun j => pcfGammaCoeff j * 2^j) := by
@@ -244,9 +244,9 @@ lemma pcfLG2_HasExp_gamma : pcfLG2_HasExp
   rw [div_pow]
   field_simp
 
-/-- **Borel's lemma** in the form of `pcfLG2_HasExp`, for real coefficients. -/
+/-- **Borel's lemma** in the form of `PcfLG2HasExp`, for real coefficients. -/
 lemma pcfLG2_exists_HasExp (c : ℕ → ℝ) :
-    ∃ Φ : ℝ → ℝ, pcfLG2_HasExp (fun u => (Φ u : ℂ)) (fun s => (c s : ℂ)) := by
+    ∃ Φ : ℝ → ℝ, PcfLG2HasExp (fun u => (Φ u : ℂ)) (fun s => (c s : ℂ)) := by
   obtain ⟨Φ, hΦ⟩ := pcfLG_exists_asymptotic c
   refine ⟨Φ, fun N => ?_⟩
   obtain ⟨B, hB⟩ := (hΦ N).bound
@@ -258,7 +258,7 @@ lemma pcfLG2_exists_HasExp (c : ℕ → ℝ) :
   rwa [norm_inv, norm_pow] at hu
 
 /-- An expansion in `u` gives one in `μ²`. -/
-theorem pcfLG2_HasExp.comp_sq {f : ℝ → ℂ} {a : ℕ → ℂ} (h : pcfLG2_HasExp f a) (N : ℕ) :
+theorem PcfLG2HasExp.comp_sq {f : ℝ → ℂ} {a : ℕ → ℂ} (h : PcfLG2HasExp f a) (N : ℕ) :
     (fun μ : ℝ => f (μ^2) - ∑ s ∈ Finset.range N, a s / (μ^2:ℂ)^s) =O[atTop]
       (fun μ : ℝ => (μ:ℂ)^(-(2*N:ℤ))) := by
   have h2 : Tendsto (fun μ : ℝ => μ^2) atTop atTop := tendsto_pow_atTop two_ne_zero
@@ -372,11 +372,11 @@ lemma pcfLG2_gamma_identity :
       pcfLG2_tw (fun s => (pcfLG_c s : ℂ)) := by
   obtain ⟨Φ, hΦ⟩ := pcfLG2_exists_HasExp pcfLG_c
   obtain ⟨Ψ, hΨ⟩ := pcfLG2_exists_HasExp pcfLG2_cbar
-  have hR : pcfLG2_HasExp pcfLG2_Rf (fun j => pcfGammaCoeff j * 2^j) := pcfLG2_HasExp_gamma
+  have hR : PcfLG2HasExp pcfLG2_Rf (fun j => pcfGammaCoeff j * 2^j) := pcfLG2_HasExp_gamma
   have hcb : (fun s => (pcfLG2_cbar s : ℂ)) = pcfLG2_tw (fun s => (pcfLG_c s : ℂ)) := by
     funext s; simp [pcfLG2_cbar, pcfLG2_Q_coeff, pcfLG2_tw]
-  have hdiff : pcfLG2_HasExp (fun u => (Ψ u : ℂ) - pcfLG2_Rf u * Φ u) 0 := by
-    refine pcfLG2_HasExp.of_isBigO fun N => ?_
+  have hdiff : PcfLG2HasExp (fun u => (Ψ u : ℂ) - pcfLG2_Rf u * Φ u) 0 := by
+    refine PcfLG2HasExp.of_isBigO fun N => ?_
     obtain ⟨C, μ₀, hμ₀, hF⟩ := pcfLG2_F1 (N := N+1) (by omega)
     obtain ⟨B, hB⟩ := hR.isBigO_one.bound
     have h3 : (fun u : ℝ => (∑ s ∈ Finset.range (N+1), (pcfLG2_cbar s : ℂ) / (u:ℂ)^s) -

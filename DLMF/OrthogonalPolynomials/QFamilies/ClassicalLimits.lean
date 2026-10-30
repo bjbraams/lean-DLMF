@@ -228,7 +228,7 @@ theorem dqh_algebra (Pn Pm Gk A x u v s : ℂ) (m k : ℕ) (hu : u ≠ 0) (hv : 
 /-- The map `(fun q : ℝ => qHahn (Real.rpow q α) (Real.rpow q β) q N n (Real.rpow q (-x)))` tends
 to `(𝓝 (hahn α β N n x))` along `(𝓝[<] 1)`. -/
 @[dlmf 18.27.E4_2]
-theorem qHahn_limit_hahn {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) {N n : ℕ} (hn : n ≤ N) (x : ℝ) :
+theorem qHahn_limit_hahn {α β : ℝ} (hα : -1 < α) {N n : ℕ} (hn : n ≤ N) (x : ℝ) :
     Tendsto (fun q : ℝ => qHahn (Real.rpow q α) (Real.rpow q β) q N n (Real.rpow q (-x))) (𝓝[<] 1) (𝓝 (hahn α β N n x)) := by
   have hα' : ∀ k : ℕ, (α : ℂ) + 1 ≠ -(k : ℂ) := fun k h => by
     have := congrArg re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
@@ -277,7 +277,7 @@ theorem qHahn_limit_hahn {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) {N n : �
 /-- The map `(fun q : ℝ => littleQJacobi (Real.rpow q α) (Real.rpow q β) q n x)` tends to `(𝓝
 ((n.factorial : ℂ) / poch (α + 1) n * jacobiPolyP α β n (1 - 2 * x)))` along `(𝓝[<] 1)`. -/
 @[dlmf 18.27.E14_4]
-theorem littleQJacobi_limit_jacobi {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ) (x : ℂ) :
+theorem littleQJacobi_limit_jacobi {α β : ℝ} (hα : -1 < α) (n : ℕ) (x : ℂ) :
     Tendsto (fun q : ℝ => littleQJacobi (Real.rpow q α) (Real.rpow q β) q n x) (𝓝[<] 1)
         (𝓝 ((n.factorial : ℂ) / poch (α + 1) n * jacobiPolyP α β n (1 - 2 * x))) := by
   have hα' : ∀ k : ℕ, (α : ℂ) + 1 ≠ -(k : ℂ) := fun k h => by

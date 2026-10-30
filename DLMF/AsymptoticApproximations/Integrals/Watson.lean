@@ -5,12 +5,12 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.AsymptoticApproximations.Integrals.Basic
 public import DLMF.AlgebraicAnalytic.Transforms.Basic
 public import DLMF.AlgebraicAnalytic.Transforms.Fourier
-public import DLMFMathlib.Analysis.Asymptotics.WatsonSector
-public import DLMFMathlib.Analysis.Asymptotics.WatsonLog
+public import DLMF.AsymptoticApproximations.Integrals.Basic
 public import DLMFMathlib.Analysis.Asymptotics.WatsonKernel
+public import DLMFMathlib.Analysis.Asymptotics.WatsonLog
+public import DLMFMathlib.Analysis.Asymptotics.WatsonSector
 public import Mathlib.Analysis.MellinTransform
 
 /-!
@@ -135,7 +135,7 @@ as `x → +∞`, in the sense that the remainder after `N` terms of both sums is
 `O(x^{-(N+λ)/μ} ln x)`. -/
 @[dlmf 2.3.E9]
 theorem watson_lemma_log {q : ℝ → ℝ} {a : ℕ → ℝ} {lam mu c : ℝ} (hlam : 0 < lam) (hmu : 0 < mu)
-    (_hint : IntegrableOn (fun t => Real.exp (-c * t) * q t) (Ioi 0))
+
     (hintlog : IntegrableOn (fun t => Real.exp (-c * t) * q t * Real.log t) (Ioi 0))
     (hq : HasAsymptoticExpansion (𝓝[>] 0) (fun (s : ℕ) (t : ℝ) => t ^ (((s : ℝ) + lam - mu) / mu))
       a q) (N : ℕ) :
@@ -351,7 +351,7 @@ large `t` (and the integrand is locally integrable in `τ`), then, by the Rieman
 `q(t) = f(t) + o(e^{ct})` as `t → +∞`. -/
 @[dlmf 2.4.E8]
 theorem haar_isLittleO {Q F : ℂ → ℂ} {q f : ℝ → ℂ} {c T : ℝ} {L : ℝ → ℂ}
-    (_hloc : ∀ η : ℝ, IntervalIntegrable (fun τ : ℝ => Q (c + τ * I) - F (c + τ * I)) volume (-η) η)
+
     (hunif : TendstoUniformlyOn (fun (η t : ℝ) =>
       ∫ τ in -η..η, Complex.exp (I * t * τ) * (Q (c + τ * I) - F (c + τ * I))) L atTop (Ici T))
     (hqf : ∀ t, T ≤ t → q t - f t = (Real.exp (c * t) / (2 * π) : ℂ) * L t) :
@@ -385,20 +385,17 @@ theorem haar_isLittleO {Q F : ℂ → ℂ} {q f : ℝ → ℂ} {c T : ℝ} {L : 
   push_cast
   ring
 
-/-- DLMF 2.4.9 (Haar's method): if in addition the integrals with `Q`, `F` replaced by their
-derivatives `Q^{(j)}`, `F^{(j)}`, `j = 1, …, m`, converge uniformly for all sufficiently large
-`t`, then `q(t) = f(t) + o(t^{-m} e^{ct})` as `t → +∞`.
-
-**Hypothesis issue:** holomorphy of `Q - F` alone does not identify its derivatives with
-`iteratedDeriv j Q - iteratedDeriv j F`. For example, `Q z = conj z + z` and `F z = conj z`
-have zero totalized first derivatives, although `(Q - F)' = 1`. The higher-order argument
-requires individual holomorphy or explicit compatibility of the derivative data. The
-current statement is retained as admitted pending this mathematical review. -/
+/-- DLMF 2.4.9 (Haar's method): if `Q` and `F` are holomorphic in the right half-plane
+and their Fourier integrals along the vertical line, through derivative order `m`, converge
+uniformly for all sufficiently large `t`, then `q(t) = f(t) + o(t^{-m} e^{ct})`.
+Individual holomorphy identifies the separate derivative data with the derivatives of `Q-F`.
+-/
 @[dlmf 2.4.E9]
 theorem haar_isLittleO_pow {Q F : ℂ → ℂ} {q f : ℝ → ℂ} {c T : ℝ} {m : ℕ} {L : ℕ → ℝ → ℂ}
     (hd : ∀ j ≤ m, ∀ η : ℝ, IntervalIntegrable
       (fun τ : ℝ => iteratedDeriv j Q (c + τ * I) - iteratedDeriv j F (c + τ * I)) volume (-η) η)
-    (hQF : DifferentiableOn ℂ (fun z => Q z - F z) {z | c - 1 < z.re})
+    (hQ : DifferentiableOn ℂ Q {z | c - 1 < z.re})
+    (hF : DifferentiableOn ℂ F {z | c - 1 < z.re})
     (hunif : ∀ j ≤ m, TendstoUniformlyOn (fun (η t : ℝ) => ∫ τ in -η..η,
       Complex.exp (I * t * τ) * (iteratedDeriv j Q (c + τ * I) - iteratedDeriv j F (c + τ * I)))
       (L j) atTop (Ici T))

@@ -6,9 +6,9 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMFMathlib.NumberTheory.EulerPolynomials
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.IntegrationByParts
-public import Mathlib.MeasureTheory.Function.Floor
 public import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
+public import Mathlib.MeasureTheory.Function.Floor
+public import Mathlib.MeasureTheory.Integral.IntervalIntegral.IntegrationByParts
 
 /-!
 # Boole's summation formula
@@ -37,6 +37,7 @@ open scoped Nat
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
 
 /-- The antiperiodic Euler function `Ẽₖ(x) = (-1)^{⌊x⌋} Eₖ(x - ⌊x⌋)`. -/
+@[dlmf 24.2.iii]
 def antiperiodicEuler (k : ℕ) (x : ℝ) : ℝ := (-1 : ℝ) ^ ⌊x⌋ * eulerFun k (Int.fract x)
 
 /-- Measurability of the indicated function: `Measurable (antiperiodicEuler k)`. -/

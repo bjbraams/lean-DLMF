@@ -110,14 +110,14 @@ theorem kummer_pair_wronskian_core {a b : ℂ} (hb : ∀ k : ℕ, b ≠ -k)
 denominators. -/
 theorem wronskian_kummer_pair_of_nonpole (a b : ℂ) {z : ℂ} (hbk : ∀ k : ℕ, b ≠ -k)
     (hBk : ∀ k : ℕ, 2 - b ≠ -k) (hz : z ∈ slitPlane) :
-    wronskian (kummerM a b) (fun w => w ^ (1 - b) * kummerM (a - b + 1) (2 - b) w) z =
+    ODE.wronskian (kummerM a b) (fun w => w ^ (1 - b) * kummerM (a - b + 1) (2 - b) w) z =
       (1 - b) * z ^ (-b) * exp z := by
   have hz0 := slitPlane_ne_zero hz
   have hv := ((analyticOnNhd_kummerM (a := a - b + 1) hBk) z (Set.mem_univ _)).differentiableAt
   have hp := (hasDerivAt_id z).cpow_const (c := 1 - b) hz
   have hy := hp.mul hv.hasDerivAt
   simp only [id, mul_one] at hy
-  unfold wronskian
+  unfold ODE.wronskian
   rw [HasDerivAt.deriv (f := fun w => w ^ (1 - b) * kummerM (a - b + 1) (2 - b) w) hy]
   have hcore := kummer_pair_wronskian_core (a := a) hbk hBk z
   have e1 : z ^ (1 - b - 1) = z ^ (-b) := by ring_nf
@@ -129,7 +129,7 @@ theorem wronskian_kummer_pair_of_nonpole (a b : ℂ) {z : ℂ} (hbk : ∀ k : �
 
 /-- The Wronskian of Kummer's pair `M(a,b,z)`, `z^{1-b} M(a-b+1,2-b,z)`. -/
 theorem wronskian_kummer_pair (a b : ℂ) {z : ℂ} (hb : ∀ n : ℤ, b ≠ n) (hz : z ∈ slitPlane) :
-    wronskian (kummerM a b) (fun w => w ^ (1 - b) * kummerM (a - b + 1) (2 - b) w) z =
+    ODE.wronskian (kummerM a b) (fun w => w ^ (1 - b) * kummerM (a - b + 1) (2 - b) w) z =
       (1 - b) * z ^ (-b) * exp z :=
   wronskian_kummer_pair_of_nonpole a b (fun k h => hb (-k) (by push_cast; exact h))
     (fun k h => hb (2 + k) (by push_cast; linear_combination -h)) hz
@@ -246,7 +246,7 @@ theorem wronskian_regularized_kummerU_of_mem (a : ℂ) {c z : ℂ} (hc : c ∈ i
     funext w; rw [regularizedConfluent_eq_div_Gamma hck, div_eq_inv_mul]
   have hu := ((analyticOnNhd_kummerM (a := a) hck) z (Set.mem_univ _)).differentiableAt
   have hW := wronskian_kummer_pair a c hcz hz
-  unfold wronskian at hW
+  unfold ODE.wronskian at hW
   rw [(hasDerivAt_kummerU_connection a hc hz).deriv, h1, deriv_const_mul _ hu,
     kummerU_eq_connection a c z hcz]
   unfold kummerUConnection
@@ -288,7 +288,7 @@ theorem wronskian_shifted_kummerU_of_mem (a : ℂ) {c z : ℂ} (hc : c ∈ integ
   have hy : DifferentiableAt ℂ (fun w => w ^ (1 - c) * kummerM (a - c + 1) (2 - c) w) z :=
     ((hasDerivAt_id z).cpow_const (c := 1 - c) hz).differentiableAt.mul hv
   have hW := wronskian_kummer_pair a c hcz hz
-  unfold wronskian at hW
+  unfold ODE.wronskian at hW
   rw [(hasDerivAt_kummerU_connection a hc hz).deriv, h2, deriv_const_mul _ hy,
     regularizedConfluent_eq_div_Gamma h2c, kummerU_eq_connection a c z hcz]
   unfold kummerUConnection
@@ -322,25 +322,25 @@ theorem tendsto_regularizedConfluent_param (A B : ℂ → ℂ) (hA : Continuous 
     (f := fun c => (A c, B c, z)) (by fun_prop)
   exact (h.continuousAt.tendsto).mono_left hl
 
-/-- Identity under the stated parameter and domain assumptions: `wronskian (kummerM a b) (fun w =>
+/-- Identity under the stated parameter and domain assumptions: `ODE.wronskian (kummerM a b) (fun w =>
 w ^ (1 - b) * kummerM (a - b + 1) (2 - b) w) z ≠ 0`. -/
 @[dlmf 13.2.E26]
 theorem wronskian_kummerM_pair {a b z : ℂ} (hb : ∀ n : ℤ, b ≠ n)
     (hz : z ∈ slitPlane) :
-    wronskian (kummerM a b)
+    ODE.wronskian (kummerM a b)
       (fun w => w ^ (1 - b) * kummerM (a - b + 1) (2 - b) w) z ≠ 0 := by
   rw [wronskian_kummer_pair a b hb hz]
   have hb1 : (1 : ℂ) - b ≠ 0 := fun h => hb 1 (by push_cast; linear_combination -h)
   exact mul_ne_zero (mul_ne_zero hb1 (cpow_ne_zero_of_ne_zero' (slitPlane_ne_zero hz) _))
     (exp_ne_zero _)
 
-/-- Identity under the stated parameter and domain assumptions: `wronskian (regularizedHGFun {a}
+/-- Identity under the stated parameter and domain assumptions: `ODE.wronskian (regularizedHGFun {a}
 {b}) (fun w => w ^ (1 - b) * regularizedHGFun {a - b + 1} {2 - b} w) z = sin (π * b) * z ^
 (-b) * exp z / π`. -/
 @[dlmf 13.2.E33]
 theorem wronskian_regularizedHGFun (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
     (hb : ∀ n : ℤ, b ≠ n) :
-    wronskian (regularizedHGFun {a} {b})
+    ODE.wronskian (regularizedHGFun {a} {b})
       (fun w => w ^ (1 - b) * regularizedHGFun {a - b + 1} {2 - b} w) z =
       sin (π * b) * z ^ (-b) * exp z / π := by
   have hbk : ∀ k : ℕ, b ≠ -k := fun k h => hb (-k) (by push_cast; exact h)
@@ -360,7 +360,7 @@ theorem wronskian_regularizedHGFun (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
   have hv := ((analyticOnNhd_kummerM (a := a - b + 1) hBk) z (Set.mem_univ _)).differentiableAt
   have hy : DifferentiableAt ℂ (fun w => w ^ (1 - b) * kummerM (a - b + 1) (2 - b) w) z :=
     ((hasDerivAt_id z).cpow_const (c := 1 - b) hz).differentiableAt.mul hv
-  unfold wronskian at hW ⊢
+  unfold ODE.wronskian at hW ⊢
   rw [h1, h2, deriv_const_mul _ hu, deriv_const_mul _ hy]
   have hG := Gamma_mul_Gamma_two_sub b hb1
   have hGb : Gamma b ≠ 0 := Gamma_ne_zero hbk
@@ -379,11 +379,11 @@ theorem wronskian_regularizedHGFun (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
 
 /-- 13.2.34 without the hypothesis on `a`. -/
 theorem wronskian_regularizedHGFun_kummerU_all (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
-    wronskian (regularizedHGFun {a} {b}) (kummerU a b) z =
+    ODE.wronskian (regularizedHGFun {a} {b}) (kummerU a b) z =
       -(z ^ (-b) * exp z) / Gamma a := by
   have hz0 := slitPlane_ne_zero hz
   have := integerComplement_nhdsWithin_neBot b
-  unfold wronskian
+  unfold ODE.wronskian
   have key : ∀ c, regularizedHGFun {a} {c} z * deriv (kummerU a c) z -
       kummerU a c z * deriv (regularizedHGFun {a} {c}) z =
       regularizedHGFun {a} {c} z * deriv (kummerU a c) z -
@@ -410,12 +410,12 @@ theorem wronskian_regularizedHGFun_kummerU_all (a b : ℂ) {z : ℂ} (hz : z ∈
   rw [← key]
   exact (wronskian_regularized_kummerU_of_mem a hc hz).symm
 
-/-- Identity under the stated parameter and domain assumptions: `wronskian (regularizedHGFun {a}
+/-- Identity under the stated parameter and domain assumptions: `ODE.wronskian (regularizedHGFun {a}
 {b}) (kummerU a b) z = -(z ^ (-b) * exp z) / Gamma a`. -/
 @[dlmf 13.2.E34]
 theorem wronskian_regularizedHGFun_kummerU (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
     (ha : ∀ k : ℕ, a ≠ -k) :
-    wronskian (regularizedHGFun {a} {b}) (kummerU a b) z =
+    ODE.wronskian (regularizedHGFun {a} {b}) (kummerU a b) z =
       -(z ^ (-b) * exp z) / Gamma a := by
   exact wronskian_regularizedHGFun_kummerU_all a b hz
 
@@ -520,12 +520,12 @@ theorem kummerM_div_Gamma_connection_of_not_int (a b : ℂ) {z : ℂ} (hb : ∀ 
 
 /-- 13.2.36 without the hypothesis on `a - b + 1`. -/
 theorem wronskian_shifted_regularized_kummerU_all (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
-    wronskian (fun w => w ^ (1 - b) * regularizedHGFun {a - b + 1} {2 - b} w)
+    ODE.wronskian (fun w => w ^ (1 - b) * regularizedHGFun {a - b + 1} {2 - b} w)
       (kummerU a b) z =
       -(z ^ (-b) * exp z) / Gamma (a - b + 1) := by
   have hz0 := slitPlane_ne_zero hz
   have := integerComplement_nhdsWithin_neBot b
-  unfold wronskian
+  unfold ODE.wronskian
   have hD : ∀ c, HasDerivAt (fun w => w ^ (1 - c) * regularizedHGFun {a - c + 1} {2 - c} w)
       ((1 - c) * z ^ (-c) * regularizedHGFun {a - c + 1} {2 - c} z +
         z ^ (1 - c) * ((a - c + 1) * regularizedHGFun {a - c + 1 + 1} {2 - c + 1} z)) z := by
@@ -576,13 +576,12 @@ theorem wronskian_shifted_regularized_kummerU_all (a b : ℂ) {z : ℂ} (hz : z 
   rw [← key]
   exact (wronskian_shifted_kummerU_of_mem a hc hz).symm
 
-/-- Identity under the stated parameter and domain assumptions: `wronskian (fun w => w ^ (1 - b) *
+/-- Identity under the stated parameter and domain assumptions: `ODE.wronskian (fun w => w ^ (1 - b) *
 regularizedHGFun {a - b + 1} {2 - b} w) (kummerU a b) z = -(z ^ (-b) * exp z) / Gamma (a - b +
 1)`. -/
 @[dlmf 13.2.E36]
-theorem wronskian_shifted_regularized_kummerU (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
-    (hab : ∀ k : ℕ, a - b + 1 ≠ -k) :
-    wronskian (fun w => w ^ (1 - b) * regularizedHGFun {a - b + 1} {2 - b} w)
+theorem wronskian_shifted_regularized_kummerU (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
+    ODE.wronskian (fun w => w ^ (1 - b) * regularizedHGFun {a - b + 1} {2 - b} w)
       (kummerU a b) z =
       -(z ^ (-b) * exp z) / Gamma (a - b + 1) := by
   exact wronskian_shifted_regularized_kummerU_all a b hz
@@ -690,7 +689,7 @@ theorem kummerUOnLog_half_turn (a b : ℂ) {z : ℂ} (hz : z ≠ 0) (sign : Bool
 the logarithmic argument plane. `kummerUOnLog` represents `U` there for noninteger `b`. -/
 @[dlmf 13.2.E43]
 theorem kummerM_eq_kummerU_jump (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
-    (hbi : ∀ k : ℤ, b ≠ k) (hab : ∀ k : ℕ, a - b + 1 ≠ -k) :
+    (hbi : ∀ k : ℤ, b ≠ k) :
     2 * π * I * exp (-z) / (Gamma b * Gamma (a - b + 1)) * kummerM (b - a) b z =
       exp (b * π * I) * kummerUOnLog a b (log z + π * I) -
         exp (-b * π * I) * kummerUOnLog a b (log z - π * I) := by
@@ -768,8 +767,7 @@ theorem kummerU_jump_all (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane) (hbi : ∀
 /-- The jump of `U` across the negative axis, with both continuations `z e^{±πi}` taken on
 the logarithmic argument plane. `kummerUOnLog` represents `U` there for noninteger `b`. -/
 @[dlmf 13.2.E44]
-theorem kummerU_jump (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane) (hbi : ∀ k : ℤ, b ≠ k)
-    (ha : ∀ k : ℕ, a ≠ -k) (hab : ∀ k : ℕ, a - b + 1 ≠ -k) :
+theorem kummerU_jump (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane) (hbi : ∀ k : ℤ, b ≠ k) :
     2 * π * I * exp (-z) / (Gamma a * Gamma (a - b + 1)) * kummerU (b - a) b z =
       exp (a * π * I) * kummerUOnLog a b (log z + π * I) -
         exp (-a * π * I) * kummerUOnLog a b (log z - π * I) := by

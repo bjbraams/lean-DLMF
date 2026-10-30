@@ -326,14 +326,6 @@ theorem pcfU_connection_mul_neg_I {a : ℂ} (ha : ∀ n : ℕ, 1 / 2 + a ≠ -n)
 
 /-! ### The second solution `V(a,z)` (DLMF 12.2, 12.4.2, 12.8) -/
 
-
-
-
-
-
-
-
-
 /-- `V(a,·)` has derivative `pcfVDeriv a`. -/
 theorem hasDerivAt_pcfV (a z : ℂ) : HasDerivAt (pcfV a) (pcfVDeriv a z) z :=
   ((hasDerivAt_pcfEven a z).const_mul _).add ((hasDerivAt_pcfOdd a z).const_mul _)

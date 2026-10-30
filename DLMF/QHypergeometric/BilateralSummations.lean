@@ -56,7 +56,7 @@ def qQuintupleExponent (n : ℤ) : ℤ := n*(3*n-1)/2
 /-- Ramanujan's `1ψ1` summation, valid for `|b/a| < |z| < 1` (DLMF 17.8.E2). -/
 @[dlmf 17.8.E2]
 theorem ramanujan_one_psi_one {a b q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (ha : a≠0)
-    (hab : qBilateralRegular [a] [b] q) (hz : ‖b/a‖<‖z‖ ∧ ‖z‖<1) :
+    (hab : QBilateralRegular [a] [b] q) (hz : ‖b/a‖<‖z‖ ∧ ‖z‖<1) :
     qPsi [a] [b] q z=qRamanujanValue a b q z := by
   sorry
 
@@ -70,14 +70,14 @@ theorem quintuple_product {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz : z≠0
 /-- The well-poised `2ψ2` summation (DLMF 17.8.E4). -/
 @[dlmf 17.8.E4]
 theorem bilateral_two_sum {a b c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (ha : a≠0) (hz : ‖q*a‖<‖b*c‖)
-    (hreg : qBilateralRegular [b,c] [a*q/b,a*q/c] q) :
+    (hreg : QBilateralRegular [b,c] [a*q/b,a*q/c] q) :
     qPsi [b,c] [a*q/b,a*q/c] q (-a*q/(b*c))=qBilateralTwoValue a b c q := by
   sorry
 
 /-- The `3ψ3` summation at argument `q/(bcd)` (DLMF 17.8.E5). -/
 @[dlmf 17.8.E5]
 theorem bilateral_three_sum {b c d q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz : ‖q‖<‖b*c*d‖)
-    (hreg : qBilateralRegular [b,c,d] [q/b,q/c,q/d] q) :
+    (hreg : QBilateralRegular [b,c,d] [q/b,q/c,q/d] q) :
     qPsi [b,c,d] [q/b,q/c,q/d] q (q/(b*c*d))=qBilateralThreeValue b c d q := by
   sorry
 
@@ -85,7 +85,7 @@ theorem bilateral_three_sum {b c d q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz :
 @[dlmf 17.8.E6]
 theorem bilateral_four_sum {a b c d q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (ha : a≠0)
     (hz : ‖q*a*Complex.sqrt a‖<‖b*c*d‖)
-    (hreg : qBilateralRegular [-q*Complex.sqrt a,b,c,d] [-Complex.sqrt a,a*q/b,a*q/c,a*q/d] q) :
+    (hreg : QBilateralRegular [-q*Complex.sqrt a,b,c,d] [-Complex.sqrt a,a*q/b,a*q/c,a*q/d] q) :
     qPsi [-q*Complex.sqrt a,b,c,d] [-Complex.sqrt a,a*q/b,a*q/c,a*q/d] q
       (q*a*Complex.sqrt a/(b*c*d))=qBilateralFourValue a b c d q := by
   sorry
@@ -94,7 +94,7 @@ theorem bilateral_four_sum {a b c d q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (ha 
 @[dlmf 17.8.E7]
 theorem bilateral_six_sum {a b c d e q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (ha : a≠0)
     (hz : ‖q*a^2‖<‖b*c*d*e‖)
-    (hreg : qBilateralRegular [q*Complex.sqrt a,-q*Complex.sqrt a,b,c,d,e]
+    (hreg : QBilateralRegular [q*Complex.sqrt a,-q*Complex.sqrt a,b,c,d,e]
       [Complex.sqrt a,-Complex.sqrt a,a*q/b,a*q/c,a*q/d,a*q/e] q) :
     qPsi [q*Complex.sqrt a,-q*Complex.sqrt a,b,c,d,e]
       [Complex.sqrt a,-Complex.sqrt a,a*q/b,a*q/c,a*q/d,a*q/e] q
@@ -105,14 +105,14 @@ theorem bilateral_six_sum {a b c d e q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (ha
 @[dlmf 17.8.E8]
 theorem bilateral_even_sum {b c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hb : b≠0) (hc : c≠0)
     (hz : ‖c/b^2‖<1)
-    (hreg : qBilateralRegular [b^2,b^2/c] [q,c*q] (q^2)) :
+    (hreg : QBilateralRegular [b^2,b^2/c] [q,c*q] (q^2)) :
     qPsi [b^2,b^2/c] [q,c*q] (q^2) (c*q^2/b^2)=qBilateralEvenValue b c q := by
   sorry
 
 /-- The product side of Ramanujan's `1ψ1` sum is analytic off its zeros and continues the
 bilateral series analytically from its annulus of convergence. -/
 theorem ramanujan_continues {a b q z₀ : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (ha : a≠0)
-    (hreg : qBilateralRegular [a] [b] q) (hz : ‖b/a‖<‖z₀‖ ∧ ‖z₀‖<1) :
+    (hreg : QBilateralRegular [a] [b] q) (hz : ‖b/a‖<‖z₀‖ ∧ ‖z₀‖<1) :
     let U : Set ℂ := {z | z≠0 ∧ qPochhammerListInf [b,q/a,z,b/(a*z)] q≠0}
     AnalyticOnNhd ℂ (qRamanujanValue a b q) U ∧
     (qPsi [a] [b] q=ᶠ[𝓝 z₀] qRamanujanValue a b q) ∧
@@ -122,7 +122,7 @@ theorem ramanujan_continues {a b q z₀ : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (h
 /-- The product side of the `2ψ2` sum, as a function of `a`, analytically continues the bilateral
 series. -/
 theorem bilateral_two_continues {a₀ b c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (ha : a₀≠0)
-    (hz : ‖q*a₀‖<‖b*c‖) (hreg : qBilateralRegular [b,c] [a₀*q/b,a₀*q/c] q) :
+    (hz : ‖q*a₀‖<‖b*c‖) (hreg : QBilateralRegular [b,c] [a₀*q/b,a₀*q/c] q) :
     let U : Set ℂ := {a | a≠0 ∧ qPochhammerListInf [a*q/b,a*q/c,q/b,q/c,-a*q/(b*c)] q≠0}
     AnalyticOnNhd ℂ (fun a => qBilateralTwoValue a b c q) U ∧
     ((fun a => qPsi [b,c] [a*q/b,a*q/c] q (-a*q/(b*c)))=ᶠ[𝓝 a₀] (fun a => qBilateralTwoValue a b c q)) ∧
@@ -132,7 +132,7 @@ theorem bilateral_two_continues {a₀ b c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1
 /-- The product side of the `3ψ3` sum, as a function of `d`, analytically continues the bilateral
 series. -/
 theorem bilateral_three_continues {b c d₀ q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
-    (hz : ‖q‖<‖b*c*d₀‖) (hreg : qBilateralRegular [b,c,d₀] [q/b,q/c,q/d₀] q) :
+    (hz : ‖q‖<‖b*c*d₀‖) (hreg : QBilateralRegular [b,c,d₀] [q/b,q/c,q/d₀] q) :
     let U : Set ℂ := {d | d≠0 ∧ qPochhammerListInf [q/b,q/c,q/d,q/(b*c*d)] q≠0}
     AnalyticOnNhd ℂ (fun d => qBilateralThreeValue b c d q) U ∧
     ((fun d => qPsi [b,c,d] [q/b,q/c,q/d] q (q/(b*c*d)))=ᶠ[𝓝 d₀] (fun d => qBilateralThreeValue b c d q)) ∧
@@ -143,7 +143,7 @@ theorem bilateral_three_continues {b c d₀ q : ℂ} (hq0 : q≠0) (hq : ‖q‖
 series. -/
 theorem bilateral_four_continues {a b c d₀ q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (ha : a≠0)
     (hz : ‖q*a*Complex.sqrt a‖<‖b*c*d₀‖)
-    (hreg : qBilateralRegular [-q*Complex.sqrt a,b,c,d₀] [-Complex.sqrt a,a*q/b,a*q/c,a*q/d₀] q) :
+    (hreg : QBilateralRegular [-q*Complex.sqrt a,b,c,d₀] [-Complex.sqrt a,a*q/b,a*q/c,a*q/d₀] q) :
     let U : Set ℂ := {d | d≠0 ∧ qPochhammerListInf [a*q/b,a*q/c,a*q/d,q/b,q/c,q/d,q*a*Complex.sqrt a/(b*c*d)] q≠0}
     AnalyticOnNhd ℂ (fun d => qBilateralFourValue a b c d q) U ∧
     ((fun d => qPsi [-q*Complex.sqrt a,b,c,d] [-Complex.sqrt a,a*q/b,a*q/c,a*q/d] q (q*a*Complex.sqrt a/(b*c*d)))=ᶠ[𝓝 d₀] (fun d => qBilateralFourValue a b c d q)) ∧
@@ -154,7 +154,7 @@ theorem bilateral_four_continues {a b c d₀ q : ℂ} (hq0 : q≠0) (hq : ‖q�
 series. -/
 theorem bilateral_six_continues {a b c d e₀ q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (ha : a≠0)
     (hz : ‖q*a^2‖<‖b*c*d*e₀‖)
-    (hreg : qBilateralRegular [q*Complex.sqrt a,-q*Complex.sqrt a,b,c,d,e₀]
+    (hreg : QBilateralRegular [q*Complex.sqrt a,-q*Complex.sqrt a,b,c,d,e₀]
       [Complex.sqrt a,-Complex.sqrt a,a*q/b,a*q/c,a*q/d,a*q/e₀] q) :
     let U : Set ℂ := {e | e≠0 ∧ qPochhammerListInf [a*q/b,a*q/c,a*q/d,a*q/e,q/b,q/c,q/d,q/e,q*a^2/(b*c*d*e)] q≠0}
     AnalyticOnNhd ℂ (fun e => qBilateralSixValue a b c d e q) U ∧
@@ -165,7 +165,7 @@ theorem bilateral_six_continues {a b c d e₀ q : ℂ} (hq0 : q≠0) (hq : ‖q�
 /-- The product side of the base-`q²` bilateral sum, as a function of `c`, analytically continues
 the bilateral series. -/
 theorem bilateral_even_continues {b c₀ q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hb : b≠0) (hc : c₀≠0)
-    (hz : ‖c₀/b^2‖<1) (hreg : qBilateralRegular [b^2,b^2/c₀] [q,c₀*q] (q^2)) :
+    (hz : ‖c₀/b^2‖<1) (hreg : QBilateralRegular [b^2,b^2/c₀] [q,c₀*q] (q^2)) :
     let U : Set ℂ := {c | qPochhammerListInf [c*q,c*q^2/b^2,q^2/b^2,c/b^2] (q^2)≠0}
     AnalyticOnNhd ℂ (fun c => qBilateralEvenValue b c q) U ∧
     ((fun c => qPsi [b^2,b^2/c] [q,c*q] (q^2) (c*q^2/b^2))=ᶠ[𝓝 c₀] (fun c => qBilateralEvenValue b c q)) ∧

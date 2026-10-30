@@ -47,7 +47,7 @@ namespace DLMF.EllipticIntegrals
 
 /-- DLMF 19.23.p3: the domain of (19.23.6) and (19.23.6_5): `x, y, z` have positive real parts,
 except that at most one of them may be `0`. -/
-def ei19d_rightHalfDomain (x y z : ℂ) : Prop :=
+def Ei19dRightHalfDomain (x y z : ℂ) : Prop :=
   (0 < x.re ∨ x = 0) ∧ (0 < y.re ∨ y = 0) ∧ (0 < z.re ∨ z = 0) ∧
     (x = 0 → y ≠ 0 ∧ z ≠ 0) ∧ (y = 0 → z ≠ 0)
 
@@ -95,7 +95,7 @@ theorem symEllIntRF_zero_eq_integral_symEllIntRC {y z : ℂ} (hy : 0 < y.re) (hz
 /-- DLMF 19.23.5: `R_F(x, y, z) = (2/π) ∫₀^{π/2} R_C(x, y cos² θ + z sin² θ) dθ`, for
 `ℜ y > 0`, `ℜ z > 0` and `x ∈ ℂ \ (-∞, 0)` (the domain of `R_C`'s first argument). -/
 @[dlmf 19.23.E5]
-theorem symEllIntRF_eq_integral_symEllIntRC {x y z : ℂ} (hx : symEllIntArg x) (hy : 0 < y.re)
+theorem symEllIntRF_eq_integral_symEllIntRC {x y z : ℂ} (hx : SymEllIntArg x) (hy : 0 < y.re)
     (hz : 0 < z.re) :
     symEllIntRF x y z = (2 / π) * ∫ θ in (0 : ℝ)..(π / 2),
       symEllIntRC x (y * (Real.cos θ : ℂ) ^ 2 + z * (Real.sin θ : ℂ) ^ 2) := by
@@ -113,7 +113,7 @@ def ei19d_sphereForm (x y z : ℂ) (θ φ : ℝ) : ℂ :=
 (x sin² θ cos² φ + y sin² θ sin² φ + z cos² θ)^{1/2}`, for `x, y, z` with positive real parts,
 at most one of them `0` (19.23.p3). -/
 @[dlmf 19.23.E6]
-theorem symEllIntRF_eq_sphere_integral {x y z : ℂ} (h : ei19d_rightHalfDomain x y z) :
+theorem symEllIntRF_eq_sphere_integral {x y z : ℂ} (h : Ei19dRightHalfDomain x y z) :
     4 * π * symEllIntRF x y z = ∫ φ in (0 : ℝ)..(2 * π), ∫ θ in (0 : ℝ)..π,
       (Real.sin θ : ℂ) / ei19d_sphereForm x y z θ φ ^ (1 / 2 : ℂ) := by
   sorry
@@ -122,7 +122,7 @@ theorem symEllIntRF_eq_sphere_integral {x y z : ℂ} (h : ei19d_rightHalfDomain 
 (x sin² θ cos² φ + y sin² θ sin² φ + z cos² θ)^{1/2} sin θ dθ dφ`, for `x, y, z` with positive
 real parts, at most one of them `0` (19.23.p3). -/
 @[dlmf 19.23.E6_5]
-theorem symEllIntRG_eq_sphere_integral {x y z : ℂ} (h : ei19d_rightHalfDomain x y z) :
+theorem symEllIntRG_eq_sphere_integral {x y z : ℂ} (h : Ei19dRightHalfDomain x y z) :
     symEllIntRG x y z = (1 / (4 * π)) * ∫ φ in (0 : ℝ)..(2 * π), ∫ θ in (0 : ℝ)..π,
       ei19d_sphereForm x y z θ φ ^ (1 / 2 : ℂ) * (Real.sin θ : ℂ) := by
   sorry

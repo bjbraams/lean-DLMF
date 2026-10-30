@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.EllipticIntegrals.Symmetric
 public import Carlson.Elliptic.QuarticIntegral
+public import DLMF.EllipticIntegrals.Symmetric
 
 /-!
 # Reduction of general elliptic integrals (DLMF §19.29)
@@ -43,7 +43,7 @@ The coefficients `a_α`, `b_α` are complex, indexed by `Fin 5` (DLMF's `α = 1,
 All integrals over `(y, x)` with `y < x` are Lebesgue integrals over `Ioo y x`; for a
 non-integrable integrand the Lean value is `0`, so integrability is either implied by the
 hypotheses or assumed explicitly. DLMF's condition that the segment with endpoints
-`a_α + b_α y`, `a_α + b_α x` lie in `ℂ \ (-∞, 0)` is `∀ t ∈ [y, x], symEllIntArg (a_α + b_α t)`.
+`a_α + b_α y`, `a_α + b_α x` lie in `ℂ \ (-∞, 0)` is `∀ t ∈ [y, x], SymEllIntArg (a_α + b_α t)`.
 
 ## References
 
@@ -125,7 +125,7 @@ def ellRedQ5Sq (a b : Fin 5 → ℂ) (x y : ℝ) (α β γ δ : Fin 5) : ℂ :=
 `ℂ \ (-∞, 0)`. -/
 def EllRedHyp (a b : Fin 5 → ℂ) (x y : ℝ) : Prop :=
   y < x ∧ (∀ α β : Fin 5, α ≠ β → α ≠ 4 → β ≠ 4 → ellRedDet a b α β ≠ 0) ∧
-    ∀ α : Fin 5, α ≠ 4 → ∀ t ∈ Icc y x, symEllIntArg (a α + b α * t)
+    ∀ α : Fin 5, α ≠ 4 → ∀ t ∈ Icc y x, SymEllIntArg (a α + b α * t)
 
 /-- `α, β, γ, δ` is a permutation of DLMF's `1, 2, 3, 4` (Lean `0, 1, 2, 3`). -/
 def EllRedPerm (α β γ δ : Fin 5) : Prop :=
@@ -263,7 +263,7 @@ theorem ellRed_integral_inv_s {a b : Fin 5 → ℂ} {x y : ℝ} (h : EllRedHyp a
 @[dlmf 19.29.E6]
 theorem ellRed_integral_inv_s_Ioi {a b : Fin 5 → ℂ} {y : ℝ}
     (hd : ∀ α β : Fin 5, α ≠ β → α ≠ 4 → β ≠ 4 → ellRedDet a b α β ≠ 0)
-    (hseg : ∀ α : Fin 5, α ≠ 4 → ∀ t ∈ Ici y, symEllIntArg (a α + b α * t)) :
+    (hseg : ∀ α : Fin 5, α ≠ 4 → ∀ t ∈ Ici y, SymEllIntArg (a α + b α * t)) :
     ∫ t in Ioi y, (ellRedS a b t)⁻¹ =
       2 * symEllIntRF (ellRedUInf a b y 0 1 2 3 ^ 2) (ellRedUInf a b y 0 2 1 3 ^ 2)
         (ellRedUInf a b y 1 2 0 3 ^ 2) := by
@@ -276,7 +276,7 @@ theorem ellRed_integral_inv_s_Ioi {a b : Fin 5 → ℂ} {y : ℝ}
 @[dlmf 19.29.E6]
 theorem ellRed_integral_inv_s_Iio {a b : Fin 5 → ℂ} {x : ℝ}
     (hd : ∀ α β : Fin 5, α ≠ β → α ≠ 4 → β ≠ 4 → ellRedDet a b α β ≠ 0)
-    (hseg : ∀ α : Fin 5, α ≠ 4 → ∀ t ∈ Iic x, symEllIntArg (a α + b α * t)) :
+    (hseg : ∀ α : Fin 5, α ≠ 4 → ∀ t ∈ Iic x, SymEllIntArg (a α + b α * t)) :
     ∫ t in Iio x, (ellRedS a b t)⁻¹ =
       2 * symEllIntRF (ellRedUNegInf a b x 0 1 2 3 ^ 2) (ellRedUNegInf a b x 0 2 1 3 ^ 2)
         (ellRedUNegInf a b x 1 2 0 3 ^ 2) := by
@@ -311,7 +311,7 @@ theorem ellRed_integral_ratio5_s {a b : Fin 5 → ℂ} {x y : ℝ} (h : EllRedHy
     (hd5 : ∀ ε : Fin 5, ε ≠ 4 → ellRedDet a b ε 4 ≠ 0)
     (h5 : ∀ t ∈ Icc y x, a 4 + b 4 * t ≠ 0)
     (hU5 : ellRedU5Sq a b x y α β γ δ ≠ 0) (hQ5 : ellRedQ5Sq a b x y α β γ δ ≠ 0)
-    (hS5 : symEllIntArg (ellRedS5 a b x y α β γ δ ^ 2)) :
+    (hS5 : SymEllIntArg (ellRedS5 a b x y α β γ δ ^ 2)) :
     ∫ t in Ioo y x, (a α + b α * t) / (a 4 + b 4 * t) * (ellRedS a b t)⁻¹ =
       2 / 3 * (ellRedDet a b α β * ellRedDet a b α γ * ellRedDet a b α δ / ellRedDet a b α 4) *
           symEllIntRJ (ellRedU a b x y 0 1 2 3 ^ 2) (ellRedU a b x y 0 2 1 3 ^ 2)

@@ -7,24 +7,6 @@ module
 
 public import Mathlib.Analysis.Complex.HasPrimitives
 public import Mathlib.Analysis.Complex.RemovableSingularity
-public import Mathlib.Tactic.Echelon.Zsqrtd
-public import Mathlib.Tactic.Inclusion.Extension.Core.Core
-public import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Hypotheses
-public import Mathlib.Tactic.Inclusion.Extension.IntervalDyadicReal.Rational
-public import Mathlib.Tactic.NormNum.Irrational
-public import Mathlib.Tactic.NormNum.IsCoprime
-public import Mathlib.Tactic.NormNum.IsSquare
-public import Mathlib.Tactic.NormNum.LegendreSymbol
-public import Mathlib.Tactic.NormNum.ModEq
-public import Mathlib.Tactic.NormNum.NatFib
-public import Mathlib.Tactic.NormNum.NatLog
-public import Mathlib.Tactic.NormNum.NatSqrt
-public import Mathlib.Tactic.NormNum.Ordinal
-public import Mathlib.Tactic.NormNum.Parity
-public import Mathlib.Tactic.NormNum.Prime
-public import Mathlib.Tactic.NormNum.RealSqrt
-public import Mathlib.Tactic.Polynomial.Basic
-public import Mathlib.Tactic.ReduceModChar
 
 /-!
 # Straight-segment primitives of entire functions
@@ -65,8 +47,11 @@ theorem differentiable_dslope_entire {f : ℂ → ℂ} (hf : Differentiable ℂ 
 
 /-- Integrating a complex derivative on a straight segment recovers the endpoint difference. -/
 theorem mul_integral_comp_mul_eq_sub {f g : ℂ → ℂ}
-    (hf : Continuous f) (hg : ∀ z, HasDerivAt g (f z) z) (z : ℂ) :
+    (hg : ∀ z, HasDerivAt g (f z) z) (z : ℂ) :
     z * (∫ t : ℝ in 0..1, f (t*z)) = g z-g 0 := by
+  have hgd : Differentiable ℂ g := fun w => (hg w).differentiableAt
+  have he : deriv g = f := funext fun w => (hg w).deriv
+  have hf : Continuous f := he ▸ hgd.deriv.continuous
   have hd (t : ℝ) : HasDerivAt (fun u : ℝ => g (u*z)) (z*f (t*z)) t := by
     simpa [mul_comm] using
       ((hg (t*z)).comp (t:ℂ) ((hasDerivAt_id (t:ℂ)).mul_const z)).comp_ofReal
@@ -81,7 +66,7 @@ theorem hasDerivAt_mul_integral_comp_mul {f : ℂ → ℂ} (hf : Differentiable 
   obtain ⟨g, hg⟩ := hf.isExactOn_univ
   have hg' (w : ℂ) := hg w (mem_univ w)
   have he : (fun w : ℂ => w*(∫ t : ℝ in 0..1, f (t*w))) = fun w => g w-g 0 :=
-    funext (mul_integral_comp_mul_eq_sub hf.continuous hg')
+    funext (mul_integral_comp_mul_eq_sub hg')
   rw [he]
   exact (hg' z).sub_const _
 

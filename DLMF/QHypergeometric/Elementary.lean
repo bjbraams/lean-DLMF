@@ -108,7 +108,7 @@ theorem qExpBig_hasSum {q : ℂ} (hq : ‖q‖<1) (x : ℂ) : HasSum (fun n : �
     simpa [qExpBig,DLMF.QSeries.TripleProduct.qPochhammerInf_zero_right,qPochhammer_zero_param,
       sum_range_succ] using hs
   · have hs := qPhi_hasSum (a := []) (b := []) (z := -(1-q)*x) hq0 hq
-      (by simp [qDenominatorRegular]) (by simp) (by simp)
+      (by simp [QDenominatorRegular]) (by simp) (by simp)
     rw [zero_phi_zero hq] at hs
     convert hs using 1
     · ext n
@@ -370,7 +370,7 @@ theorem qStirling_polynomial (m s : ℕ) : ∃ P : Polynomial ℂ, ∀ q : ℂ, 
     | succ s => simp [qaR4_qStirlingPoly,qStirlingSecond,ih,Polynomial.eval_finsetSum]
 
 /-- Carlitz's q-Bernoulli expression `β_n(x,q)` is a polynomial of degree at most `n` in `q^x`. -/
-theorem qBernoulli_polynomial_in_qpow {q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (n : ℕ) : ∃ P : Polynomial ℂ, P.natDegree≤n ∧ ∀ x : ℂ, qBernoulli n x q=P.eval (q^x) := by
+theorem qBernoulli_polynomial_in_qpow {q : ℂ} (n : ℕ) : ∃ P : Polynomial ℂ, P.natDegree≤n ∧ ∀ x : ℂ, qBernoulli n x q=P.eval (q^x) := by
   open Polynomial in
   refine ⟨∑ j∈range (n+1), C ((1-q)^((1:ℤ)-n)*((-1:ℂ)^j*(n.choose j:ℂ)*(j+1:ℂ)/(1-q^(j+1))))*X^j,
     ?_,fun x => ?_⟩

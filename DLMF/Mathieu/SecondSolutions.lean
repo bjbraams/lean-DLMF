@@ -104,7 +104,6 @@ lemma p2x_casoratian_eq_zero {q : ℂ} (hq : q ≠ 0) {e x y : ℕ → ℂ}
   simp only [hD] at hlim'
   exact tendsto_nhds_unique tendsto_const_nhds hlim'
 
-
 /-- Shift of a sum: if each term at `w` is `s` times the term at `z`, so is the sum. -/
 lemma p2x_hasSum_shift {F : ℂ → ℂ} {t : ℕ → ℂ → ℂ} (h : ∀ z, HasSum (fun m => t m z) (F z))
     {s z w : ℂ} (ht : ∀ m, t m w = s * t m z) : F w = s * F z := by
@@ -259,7 +258,6 @@ theorem p2x_not_coexist {a q : ℂ} (hq : q ≠ 0)
     simp only [hz, mul_zero] at h0
     have := h0.unique hasSum_zero
     rw [h21] at this; exact one_ne_zero this
-
 
 /-- Two solutions with vanishing Wronskian at `0`, the first nontrivial, are proportional. -/
 theorem p2x_eq_const_mul_of_wronskian {a q : ℂ} {w v : ℂ → ℂ} (hw : IsMathieuSolution a q w)
@@ -1023,7 +1021,7 @@ theorem mathieuFeF_unique {n : ℕ} {q : ℝ} (hq : q ≠ 0) {c : ℂ} {h : ℂ 
 `h = g_n(·, q)`. -/
 @[dlmf 28.5.i]
 theorem mathieuGeG_unique {n : ℕ} (hn : n ≠ 0) {q : ℝ} (hq : q ≠ 0) {c : ℂ} {h : ℂ → ℂ}
-    (hh : ∀ z, h (z + π) = (-1) ^ n * h z) (heven : ∀ z, h (-z) = h z)
+    (hh : ∀ z, h (z + π) = (-1) ^ n * h z)
     (he : ∀ z, mathieuGe n z q = c * (z * mathieuSe n z q + h z)) :
     c = mathieuGeS n q ∧ h = fun z => mathieuGeG n z q := by
   have hS := mathieuGeS_ne_zero hn hq

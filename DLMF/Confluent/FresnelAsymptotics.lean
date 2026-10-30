@@ -37,12 +37,6 @@ noncomputable section
 
 namespace DLMF.Confluent
 
-
-
-
-
-
-
 /-- `ζ(x)² = -iπx²/2` for `ζ(x) = √π (1-i) x / 2`. -/
 theorem fresnelZeta_sq (x : ℝ) : fresnelZeta x ^ 2 = -(I * (π * x ^ 2 / 2)) := by
   have hπ : (Real.sqrt π : ℂ) ^ 2 = π := by

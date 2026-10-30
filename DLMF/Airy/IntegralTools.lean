@@ -38,7 +38,7 @@ theorem airyInt_primitive_ofReal {f : ℂ → ℂ} (hf : Differentiable ℂ f) (
     have h := intervalIntegral.integral_eq_sub_of_hasDerivAt (fun t _ => hd t)
       ((continuous_const.mul (hf.continuous.comp (continuous_ofReal.mul continuous_const))).intervalIntegrable 0 1)
     rw [intervalIntegral.integral_const_mul] at h
-    simpa [primitive, lineIntegral] using h
+    simpa [primitive, segmentIntegral] using h
   rw [h1, intervalIntegral.integral_eq_sub_of_hasDerivAt (f := fun t : ℝ => g t)
     (fun t _ => (hg' t).comp_ofReal)
     ((hf.continuous.comp continuous_ofReal).intervalIntegrable _ _)]
@@ -62,7 +62,6 @@ theorem airyInt_integral_pow_mul_exp_neg (m : ℕ) {s : ℝ} (hs : 0 < s) :
       show ((m + 1 : ℕ) : ℝ) = (m : ℝ) + 1 by push_cast; ring, Real.Gamma_nat_eq_factorial,
       one_div, inv_pow]
     ring
-
 
 /-- The Laplace integrand of Hi is dominated by `t^m e^{-st}` when `Re w ≤ -s`. -/
 theorem airyInt_norm_integral_cubic_le (m : ℕ) {w : ℂ} {s : ℝ} (hs : 0 < s) (hw : w.re ≤ -s) :
@@ -141,7 +140,6 @@ theorem airyInt_norm_scorerHi_neg_sub_le {s : ℝ} (hs : 0 < s) :
   calc _ ≤ 2 / s ^ 4 / π := by gcongr
     _ = _ := by rw [div_div, mul_comm]
 
-
 /-- `Hi(-s) = O(s^{-1})` as `s → ∞`. -/
 theorem airyInt_scorerHi_neg_isBigO :
     (fun s : ℝ => scorerHi (-(s : ℂ))) =O[atTop] (fun s : ℝ => s ^ (-1 : ℝ)) := by
@@ -181,7 +179,6 @@ theorem airyInt_tendsto_cross_atBot {f f' : ℂ → ℂ}
   simp only [sub_zero] at h
   refine h.congr fun x => ?_
   simp
-
 
 /-- An improper integral at `-∞` obtained from a Scorer-type identity
 `c + ∫₀ˣ f = π g(x)` with `g → 0` at `-∞`. -/
@@ -285,7 +282,6 @@ theorem airyInt_cross_expansion {f f' : ℂ → ℂ} {φ : ℝ → ℝ} (hφ : �
   refine ((t1.sub t2).sub t3).congr' ?_ EventuallyEq.rfl
   filter_upwards [eventually_gt_atTop 0] with s hs
   exact (key s hs).symm
-
 
 /-- `‖e^{cπi}‖ = 1` for real `c`. -/
 theorem airyInt_norm_exp_pi_I_mul (c : ℝ) : ‖exp ((c : ℂ) * π * I)‖ = 1 := by
@@ -462,7 +458,6 @@ theorem airyInt_poincare_real (kind : AiryKind) :
   · have := (airy_biDeriv_poincare (δ := π / 6) (by positivity) (by linarith) 1).comp_tendsto hT
     simpa [hs, Function.comp_def] using this
 
-
 /-- `Gi(x) = O(x^{-1})` as `x → +∞`. -/
 theorem airyInt_scorerGi_isBigO :
     (fun x : ℝ => scorerGi x) =O[atTop] (fun x : ℝ => x ^ (-1 : ℝ)) := by
@@ -537,7 +532,6 @@ theorem airyInt_cross_equiv_atTop {A A' v : ℝ → ℂ}
   field_simp
   ring
 
-
 /-- Real-axis Poincaré bound with no terms: `w(x) = O(pref(x))`. -/
 theorem airyInt_poincare0_real (kind : AiryKind) :
     (fun x : ℝ => airyFunction kind x) =O[atTop] (fun x : ℝ => airyPrefactor kind x) := by
@@ -571,7 +565,6 @@ theorem airyInt_quarter_rpow {x : ℝ} (hx : 0 < x) :
   · rw [← Real.rpow_add hx]; norm_num
   · rw [← Real.rpow_add hx]; norm_num
   · rw [← Real.rpow_add hx, ← Real.rpow_add hx]; norm_num
-
 
 /-- Norm of the prefactor of `Bi'(x)` on the positive axis. -/
 theorem airyInt_norm_prefactor_biDeriv {x : ℝ} (hx : 0 < x) :

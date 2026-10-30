@@ -524,7 +524,6 @@ theorem besselJ_infinite_zeros_of_real (ν : ℝ) :
   simp only at hy0
   rw [hy0, ofReal_zero]
 
-
 /-- `(z^{-ν} J_ν(z))' = -z^{-ν} J_{ν+1}(z)` (DLMF 10.6.6). -/
 theorem hasDerivAt_cpow_neg_mul_besselJ (ν : ℂ) {x : ℝ} (hx : 0 < x) :
     HasDerivAt (fun w : ℂ => w ^ (-ν) * besselJ ν w) (-((x : ℂ) ^ (-ν) * besselJ (ν + 1) x)) x := by
@@ -586,7 +585,7 @@ theorem exists_besselJ_zero_between {ν a b : ℝ} (ha : 0 < a) (hab : a < b)
 
 /-- For real `ν > -1` and `x > 0`, `J_ν(x)` has infinitely many positive zeros (AAR §4.14).
 The restriction `ν > -1` is not needed; see `DLMF.Bessel.besselJ_infinite_zeros_of_real`. -/
-theorem besselJ_infinite_zeros {ν : ℝ} (_hν : -1 < ν) :
+theorem besselJ_infinite_zeros {ν : ℝ} :
     Set.Infinite {x : ℝ | 0 < x ∧ besselJ ν x = 0} :=
   besselJ_infinite_zeros_of_real ν
 

@@ -7,9 +7,9 @@ module
 
 public import DLMF.Struve.Basic
 
+public import DLMF.Confluent.Relations
 public import DLMF.Core.Framework
 public import DLMF.Hypergeometric.GeneralizedCalculus
-public import DLMF.Confluent.Relations
 
 /-!
 # Struve functions: definitions, convergence and differential equations
@@ -84,8 +84,6 @@ theorem regularized1F2_bessel_gauge (r ν σ : ℂ) (g : ℂ → ℂ)
   dsimp only [f, q, v, F, Pi.mul_apply, Pi.add_apply, Function.comp_apply]
   linear_combination (norm := (dsimp [u]; field_simp [slitPlane_ne_zero hz]; ring))
     (4*g z)*hode
-
-
 
 /-- Linearity of the Bessel operator at analytic functions. -/
 theorem besselResidual_linear (ν σ A B : ℂ) {f g : ℂ → ℂ} {z : ℂ}
@@ -167,14 +165,6 @@ theorem exp_halfTurn_sq (w : ℂ) (m : ℤ) :
   rw [pow_two, ← Complex.exp_add,
     show w+m*π*I+(w+m*π*I)=w+w+m*(2*π*I) by ring,
     Complex.exp_add, Complex.exp_int_mul_two_pi_mul_I, mul_one, Complex.exp_add, pow_two]
-
-
-
-
-
-
-
-
 
 /-- The regularized 1F2 coefficient agrees at all orders, including reciprocal-Gamma zeros. -/
 theorem struveCoeff_eq_regularized (ν : ℂ) (n : ℕ) :
@@ -305,12 +295,6 @@ theorem struveHOnLog_shift (ν w : ℂ) (m : ℤ) :
     Complex.exp_add]
   ring
 
-
-
-
-
-
-
 /-- Exact all-parameter regularized hypergeometric representation of the Struve L core. -/
 theorem struveLCore_eq_regularized (ν z : ℂ) :
     struveLCore ν z=regularizedHGFun {1} {3/2,ν+3/2} (z^2/4) := by
@@ -366,8 +350,6 @@ theorem struveLOnLog_shift (ν w : ℂ) (m : ℤ) :
   rw [hc, show (ν+1)*(w+m*π*I-log 2)=m*π*I*(ν+1)+(ν+1)*(w-log 2) by ring,
     Complex.exp_add]
   ring
-
-
 
 /-- Ordinary Struve H is the negative-sign quadratic series. -/
 theorem struveQuadratic_H (ν z : ℂ) : struveQuadratic ν (-1) z=struveH ν z := by
@@ -473,12 +455,6 @@ theorem iterated_weighted_struveQuadratic (ν σ : ℂ) (m : ℕ) {z : ℂ} (hz 
     rw [show ν-(m+1)=ν-m-1 by ring,cpow_sub (ν-m) 1 (slitPlane_ne_zero hz),cpow_one]
     ring
 
-
-
-
-
-
-
 /-- Analyticity of the principal Struve functions on the slit plane. -/
 theorem struve_analytic (ν : ℂ) :
     AnalyticOnNhd ℂ (struveH ν) slitPlane ∧ AnalyticOnNhd ℂ (struveL ν) slitPlane := by
@@ -516,10 +492,10 @@ theorem struve_series_ode (ν σ : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
   generalize iteratedDeriv 2 f z=A, deriv f z=B, f z=C at h ⊢
   linear_combination (norm := (field_simp [slitPlane_ne_zero hz]; ring)) h/z^2
 
-/-- The stated relation follows from the given hypotheses: `struveEquation ν false (struveH ν) z`. -/
+/-- The stated relation follows from the given hypotheses: `StruveEquation ν false (struveH ν) z`. -/
 @[dlmf 11.2.E8]
 theorem struveH_ode (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
-    struveEquation ν false (struveH ν) z := by
+    StruveEquation ν false (struveH ν) z := by
   have h := struve_series_ode ν (-1) hz
   have he : (fun w : ℂ => (w/2)^(ν+1)*regularizedHGFun {1} {3/2,ν+3/2} ((-1)*w^2/4)) =
       struveH ν := by
@@ -527,13 +503,13 @@ theorem struveH_ode (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     simp only [struveH, struveHCore_eq_regularized, neg_one_mul, neg_div]
   dsimp only at h
   rw [he] at h
-  simpa only [struveEquation, Bool.false_eq_true, ↓reduceIte, neg_neg, neg_one_mul, one_mul, struveH, struveHCore_eq_regularized, struveL, struveLCore_eq_regularized] using h
+  simpa only [StruveEquation, Bool.false_eq_true, ↓reduceIte, neg_neg, neg_one_mul, one_mul, struveH, struveHCore_eq_regularized, struveL, struveLCore_eq_regularized] using h
 
 /-- The auxiliary ordinary Struve function satisfies the inhomogeneous Bessel equation with the
 ordinary Struve forcing term. -/
 @[dlmf 11.2.E8]
 theorem struveK_ode (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
-    struveEquation ν false (struveK ν) z := by
+    StruveEquation ν false (struveK ν) z := by
   have hp := (struve_analytic ν).1 z hz
   have hg : AnalyticAt ℂ (besselY ν) z := besselY_analytic ν z hz
   have hl := besselResidual_linear ν (-1) 1 (-1) hp hg
@@ -542,7 +518,7 @@ theorem struveK_ode (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
   simp only [one_mul, neg_one_mul, ← sub_eq_add_neg] at hl
   change besselResidual ν (-1) (fun w => struveH ν w-besselY ν w) z=_ at hl
   unfold besselResidual at hl
-  unfold struveEquation at he ⊢
+  unfold StruveEquation at he ⊢
   simp only [Bool.false_eq_true, ↓reduceIte] at he ⊢
   rw [show struveK ν=(fun w => struveH ν w-besselY ν w) from rfl]
   generalize iteratedDeriv 2 (struveH ν) z=A, deriv (struveH ν) z=B,
@@ -555,7 +531,7 @@ theorem struveK_ode (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
 prescribed Gamma-normalized forcing term. -/
 @[dlmf 11.2.E10]
 theorem struveL_ode (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
-    struveEquation ν true (struveL ν) z := by
+    StruveEquation ν true (struveL ν) z := by
   have h := struve_series_ode ν (1) hz
   have he : (fun w : ℂ => (w/2)^(ν+1)*regularizedHGFun {1} {3/2,ν+3/2} ((1)*w^2/4)) =
       struveL ν := by
@@ -563,12 +539,12 @@ theorem struveL_ode (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     simp only [struveL, struveLCore_eq_regularized, one_mul]
   dsimp only at h
   rw [he] at h
-  simpa only [struveEquation, Bool.false_eq_true, ↓reduceIte, neg_neg, neg_one_mul, one_mul, struveH, struveHCore_eq_regularized, struveL, struveLCore_eq_regularized] using h
+  simpa only [StruveEquation, Bool.false_eq_true, ↓reduceIte, neg_neg, neg_one_mul, one_mul, struveH, struveHCore_eq_regularized, struveL, struveLCore_eq_regularized] using h
 
-/-- The stated relation follows from the given hypotheses: `struveEquation ν true (struveM ν) z`. -/
+/-- The stated relation follows from the given hypotheses: `StruveEquation ν true (struveM ν) z`. -/
 @[dlmf 11.2.E10]
 theorem struveM_ode (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
-    struveEquation ν true (struveM ν) z := by
+    StruveEquation ν true (struveM ν) z := by
   have hp := (struve_analytic ν).2 z hz
   have hg : AnalyticAt ℂ (besselI ν) z := analyticAt_besselI ν hz
   have hl := besselResidual_linear ν (1) 1 (-1) hp hg
@@ -577,7 +553,7 @@ theorem struveM_ode (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
   simp only [one_mul, neg_one_mul, ← sub_eq_add_neg] at hl
   change besselResidual ν (1) (fun w => struveL ν w-besselI ν w) z=_ at hl
   unfold besselResidual at hl
-  unfold struveEquation at he ⊢
+  unfold StruveEquation at he ⊢
   simp only [↓reduceIte] at he ⊢
   rw [show struveM ν=(fun w => struveL ν w-besselI ν w) from rfl]
   generalize iteratedDeriv 2 (struveL ν) z=A, deriv (struveL ν) z=B,
@@ -585,8 +561,6 @@ theorem struveM_ode (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     iteratedDeriv 2 (fun w => struveL ν w-besselI ν w) z=E,
     deriv (fun w => struveL ν w-besselI ν w) z=F at hl ho he ⊢
   linear_combination (norm := (field_simp [slitPlane_ne_zero hz]; ring)) hl/z^2+he-ho/z^2
-
-
 
 /-- General analytic solutions on the principal slit plane; numerical stability is not asserted. -/
 @[dlmf 11.2.E11]
@@ -601,7 +575,7 @@ theorem struve_general_solution_11 (ν : ℂ) (f : ℂ → ℂ) :
   apply forall_congr'
   intro hz
   have hp := struveH_ode ν hz
-  unfold struveEquation at hp ⊢
+  unfold StruveEquation at hp ⊢
   simp only [Bool.false_eq_true, ↓reduceIte] at hp ⊢
   unfold besselResidual
   constructor
@@ -783,7 +757,7 @@ theorem struve_general_solution_16 (ν : ℂ) (f : ℂ → ℂ) :
   apply forall_congr'
   intro hz
   have hp := struveL_ode ν hz
-  unfold struveEquation at hp ⊢
+  unfold StruveEquation at hp ⊢
   simp only [↓reduceIte] at hp ⊢
   unfold besselResidual
   constructor

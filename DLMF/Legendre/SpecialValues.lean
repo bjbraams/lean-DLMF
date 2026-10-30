@@ -5,12 +5,12 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Legendre.Associated
-public import DLMF.Elliptic.Complete
-public import DLMF.Legendre.Neumann
-public import DLMF.Hypergeometric.Clausen
-public import DLMF.Legendre.Connections
 public import DLMF.Elliptic.AGM
+public import DLMF.Elliptic.Complete
+public import DLMF.Hypergeometric.Clausen
+public import DLMF.Legendre.Associated
+public import DLMF.Legendre.Connections
+public import DLMF.Legendre.Neumann
 
 /-!
 # Associated Legendre and Ferrers special values
@@ -76,7 +76,7 @@ theorem ferrersP_zero_2 (ν μ : ℂ) :
 /-- DLMF 14.5.3: when `ν+μ ∉ {-1,-2,…}`, `𝖰^μ_ν(0) = -2^{μ-1} π^{1/2} sin((ν+μ)π/2)
 Γ((ν+μ+1)/2)/Γ((ν-μ)/2+1)`. -/
 @[dlmf 14.5.E3]
-theorem ferrersQ_zero_3 (ν μ : ℂ) (h : LegendreQRegular ν μ) :
+theorem ferrersQ_zero_3 (ν μ : ℂ) :
     ferrersQ ν μ 0=-2^(μ-1)*Real.sqrt π*sin ((ν+μ)*π/2)*Gamma ((ν+μ+1)/2)/Gamma ((ν-μ)/2+1) := by
   unfold ferrersQ ferrersW1 ferrersW2
   simp only [ofReal_zero, zero_mul, mul_zero, add_zero, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
@@ -92,7 +92,7 @@ theorem ferrersQ_zero_3 (ν μ : ℂ) (h : LegendreQRegular ν μ) :
 /-- DLMF 14.5.4: when `ν+μ ∉ {-1,-2,…}`, `𝖰^μ_ν` has derivative `2^μ π^{1/2} cos((ν+μ)π/2)
 Γ((ν+μ)/2+1)/Γ((ν-μ+1)/2)` at `x = 0`. -/
 @[dlmf 14.5.E4]
-theorem ferrersQ_zero_4 (ν μ : ℂ) (h : LegendreQRegular ν μ) :
+theorem ferrersQ_zero_4 (ν μ : ℂ) :
     HasDerivAt (ferrersQ ν μ) (2^μ*Real.sqrt π*cos ((ν+μ)*π/2)*Gamma ((ν+μ)/2+1)/Gamma ((ν-μ+1)/2)) 0 := by
   have h1 := (hasDerivAt_quadratic_even (-(ν+μ)/2) ((ν-μ+1)/2) (1/2) μ).comp_ofReal (z := 0)
   have h2 := (hasDerivAt_quadratic_odd ((1-ν-μ)/2) ((ν-μ+2)/2) (3/2) μ).comp_ofReal (z := 0)
@@ -1303,7 +1303,6 @@ theorem legendre_elliptic_26 {θ : ℝ} (h0 : 0 < θ) :
   rw [← hpi2]
   field_simp
   ring
-
 
 /-- Complete elliptic integrals use parameter equal to the square of DLMF modulus. -/
 @[dlmf 14.5.E27]

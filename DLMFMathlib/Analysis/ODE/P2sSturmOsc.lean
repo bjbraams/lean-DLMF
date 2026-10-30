@@ -813,7 +813,7 @@ theorem p2s_oscillation_encard (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (hL
 `w'' = (V - h) w` satisfying the separated boundary conditions has as many zeros in `(0, L)`
 as there are eigenvalues below `h`. -/
 theorem p2s_oscillation_of_sol (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (hL : 0 < L)
-    (odd0 oddK : Bool) {h : ℝ} {w : ℝ → ℝ} (hw : p2lIsSol V h w) (hbc : p2lBC L odd0 oddK w)
+    (odd0 oddK : Bool) {h : ℝ} {w : ℝ → ℝ} (hw : P2lIsSol V h w) (hbc : P2lBC L odd0 oddK w)
     (hne : w ≠ 0) :
     {x | x ∈ Ioo 0 L ∧ w x = 0}.encard = (p2lSpec V L odd0 oddK ∩ Iio h).encard := by
   have hh : h ∈ p2lSpec V L odd0 oddK := ⟨w, hw, hbc, hne⟩

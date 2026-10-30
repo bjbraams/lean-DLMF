@@ -473,7 +473,7 @@ Module admissions (`grep -cE 'by sorry|:= sorry|^\s*(·\s*)?sorry\s*$|exact sorr
   `IsMellinContinuation` (holomorphy off `k + α`, agreement with `mellin` on the strip). The
   test variable is `u` (the letter `φ` is Mathlib's totient notation under `open scoped Nat`).
 - **§2.7(i).** Ordinary and regular singular points use DLMFMathlib's
-  `Complex.linearODEOrdinaryAt`/`linearODERegularSingularAt` with coefficients `![g, f]`;
+  `Complex.LinearODEOrdinaryAt`/`LinearODERegularSingularAt` with coefficients `![g, f]`;
   `linearODERegularSingularAt_iff` (proved) gives DLMF's description.
 - **§2.8.** Case I (2.8.10–2.8.13) is proved for real `ξ` from DLMFMathlib's Liouville–Green
   expansions with error bounds (Olver Ch. 10, Thm 3.1) with amplitude 1: stronger than DLMF,
@@ -491,7 +491,7 @@ Module admissions (`grep -cE 'by sorry|:= sorry|^\s*(·\s*)?sorry\s*$|exact sorr
   imaginary axis down to `i/2`, the left semicircle `|t| = ½` and the imaginary axis down to
   `-i(n-½)` (`contourIntegralC`, with halves `contourIntegralC₁`, `contourIntegralC₂`);
   `₀F₂(-; 1, 1; x)` is matched with the project's `genCoeff` (16.2.1) and
-  `genSeriesConvergesTo`.
+  `GenSeriesConvergesTo`.
 - **§2.10(iv).** Laurent coefficients are circle integrals (`laurentCoeff`); `n → ±∞` is the
   cofinite filter on `ℤ`; the branches of `(e^{∓iα} - z)^{-1/2}` in 2.10.34 are
   `e^{±iα/2}(1 - z e^{±iα})^{-1/2}` with the principal power.

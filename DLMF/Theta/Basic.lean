@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module -- shake: keep-all
 
 public import DLMF.Theta.Basic.Definitions
+public import DLMF.Theta.Basic.PowerSeries
 
 /-!
 # Theta functions: definitions and periodic properties (DLMF §§20.1–20.2)

@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Painleve.Basic
 public import DLMF.Airy.Properties
+public import DLMF.Painleve.Basic
 public import DLMF.Painleve.Basic
 
 /-!
@@ -245,7 +245,7 @@ theorem painleveIII_lax_isPainleveIIIOn {θinf θ₀ : ℂ} {u₀ u₁ v₀ v₁
     (hU : IsOpen U) (hz : ∀ z ∈ U, z ≠ 0) (hu₀ : ∀ z ∈ U, u₀ z ≠ 0) (hv₀ : ∀ z ∈ U, v₀ z ≠ 0)
     (hv₁ : ∀ z ∈ U, v₁ z ≠ 0)
     (hu₀' : ∀ z ∈ U, HasDerivAt u₀ (painleveIIISystemRhs θinf z (u₀ z) (u₁ z) (v₀ z) (v₁ z)).1 z)
-    (hu₁' : ∀ z ∈ U, HasDerivAt u₁ (painleveIIISystemRhs θinf z (u₀ z) (u₁ z) (v₀ z) (v₁ z)).2.1 z)
+
     (hv₀' : ∀ z ∈ U,
       HasDerivAt v₀ (painleveIIISystemRhs θinf z (u₀ z) (u₁ z) (v₀ z) (v₁ z)).2.2.1 z)
     (hv₁' : ∀ z ∈ U,

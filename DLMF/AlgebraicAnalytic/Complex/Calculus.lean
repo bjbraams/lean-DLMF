@@ -7,26 +7,26 @@ module -- shake: keep-all
 
 public import DLMF.AlgebraicAnalytic.Complex.Basic
 public import DLMFMathlib.Analysis.Complex.PowerSeriesOperations
-public import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
-public import Mathlib.Analysis.Complex.AbelLimit
-public import Mathlib.Analysis.Normed.Ring.InfiniteSum
-public import Mathlib.Analysis.Complex.Conformal
-public import Mathlib.Analysis.SpecialFunctions.Complex.Log
-public import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Arctan
-public import Mathlib.Analysis.SpecialFunctions.Pow.Complex
 public import Mathlib.Analysis.Calculus.Deriv.Comp
 public import Mathlib.Analysis.Calculus.Deriv.Inv
 public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
+public import Mathlib.Analysis.Complex.AbelLimit
+public import Mathlib.Analysis.Complex.Conformal
 public import Mathlib.Analysis.InnerProductSpace.Harmonic.Basic
-public import Mathlib.Topology.Compactification.OnePoint.Basic
-public import Mathlib.RingTheory.Polynomial.Pochhammer
-public import TauCeti.Analysis.Contour.Winding.UnboundedComponent
-public import TauCeti.Analysis.Contour.AbsolutelyContinuous
-public import TauCeti.Analysis.Contour.Winding.AbsolutelyContinuous.Basic
-public import TauCeti.Analysis.Contour.Curve.Integrability
+public import Mathlib.Analysis.Normed.Ring.InfiniteSum
+public import Mathlib.Analysis.SpecialFunctions.Complex.Log
+public import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
+public import Mathlib.Analysis.SpecialFunctions.Pow.Complex
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Arctan
 public import Mathlib.MeasureTheory.Integral.DominatedConvergence
+public import Mathlib.RingTheory.Polynomial.Pochhammer
 public import Mathlib.Tactic.CrossRefAttribute
+public import Mathlib.Topology.Compactification.OnePoint.Basic
+public import TauCeti.Analysis.Contour.AbsolutelyContinuous
+public import TauCeti.Analysis.Contour.Curve.Integrability
+public import TauCeti.Analysis.Contour.Winding.AbsolutelyContinuous.Basic
+public import TauCeti.Analysis.Contour.Winding.UnboundedComponent
 
 /-!
 # Calculus of a complex variable (DLMF §1.9)
@@ -1021,7 +1021,7 @@ theorem tendsto_iterated_of_tendsto_prod {z : ℕ → ℕ → ℂ} {L : ℂ} {g 
 uniformly on every compact subset of a domain `D`, then `∫_C ∑ fₙ(z) dz = ∑ ∫_C fₙ(z) dz` for
 every contour `C` in `D`, the right-hand side converging as partial sums. -/
 @[dlmf 1.9.E68]
-theorem tendsto_contourIntegral_tsum {D : Set ℂ} (_hD : IsOpen D) {f : ℕ → ℂ → ℂ}
+theorem tendsto_contourIntegral_tsum {D : Set ℂ} {f : ℕ → ℂ → ℂ}
     (hf : ∀ n, ContinuousOn (f n) D) {F : ℂ → ℂ}
     (hu : ∀ K ⊆ D, IsCompact K →
       TendstoUniformlyOn (fun N z => ∑ n ∈ Finset.range N, f n z) F atTop K)

@@ -5,10 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.NumberTheory.ArithmeticFunction.Liouville
+public import DLMFMathlib.NumberTheory.T27aPrimeNumberTheorem
 public import Mathlib.Algebra.Order.Antidiag.Nat
 public import Mathlib.Data.Finset.NatDivisors
-public import DLMFMathlib.NumberTheory.T27aPrimeNumberTheorem
+public import Mathlib.NumberTheory.ArithmeticFunction.Liouville
 
 /-!
 # Functions of multiplicative number theory (DLMF §§27.1–27.3)
@@ -627,7 +627,7 @@ theorem totient_eq_mul_prod (n : ℕ) :
 
 /-- DLMF 27.3.4: `J_k(n) = n^k ∏_{p∣n} (1 - p^{-k})`. -/
 @[dlmf 27.3.E4]
-theorem jordanTotient_eq_mul_prod (k n : ℕ) (hk : 0 < k) (hn : 0 < n) :
+theorem jordanTotient_eq_mul_prod (k n : ℕ) (hn : 0 < n) :
     (jordanTotient k n : ℚ) = (n : ℚ) ^ k * ∏ p ∈ n.primeFactors, (1 - ((p : ℚ) ^ k)⁻¹) := by
   rw [(q27_isMultiplicativeFn_jordanTotient k).eq_prod_primeFactors hn.ne']
   have hnq : (n : ℚ) = ∏ p ∈ n.primeFactors, (p : ℚ) ^ (n.factorization p) := by

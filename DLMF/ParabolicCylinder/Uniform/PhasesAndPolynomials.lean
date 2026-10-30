@@ -5,10 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMFMathlib.Analysis.Calculus.DoubleZeroSqrt
-public import DLMFMathlib.Analysis.Calculus.InverseSeries
 public import DLMF.Confluent.ParabolicCylinder
 public import DLMF.Core.Framework
+public import DLMFMathlib.Analysis.Calculus.DoubleZeroSqrt
+public import DLMFMathlib.Analysis.Calculus.InverseSeries
 public import Mathlib.Analysis.SpecialFunctions.Sqrt
 
 /-!
@@ -523,64 +523,64 @@ theorem pcfLG_olver_exists {k : ℕ} (hk : 1 ≤ k) {r : Polynomial ℝ}
   · exact ⟨p, hp, hpd, hpp⟩
 
 /-- Parity–degree class: the support of `f` lies in `{n ≤ D : n ≡ e mod 2}`. -/
-def pcfLG_good (e D : ℕ) (f : Polynomial ℝ) : Prop :=
+def PcfLGGood (e D : ℕ) (f : Polynomial ℝ) : Prop :=
   ∀ n, f.coeff n ≠ 0 → Even (n + e) ∧ n ≤ D
 
-/-- The stated relation follows from the given hypotheses: `pcfLG_good e D' f`. -/
-theorem pcfLG_good_mono {e D D' : ℕ} {f : Polynomial ℝ} (h : D ≤ D') (hf : pcfLG_good e D f) :
-    pcfLG_good e D' f := fun n hn => ⟨(hf n hn).1, (hf n hn).2.trans h⟩
+/-- The stated relation follows from the given hypotheses: `PcfLGGood e D' f`. -/
+theorem pcfLG_good_mono {e D D' : ℕ} {f : Polynomial ℝ} (h : D ≤ D') (hf : PcfLGGood e D f) :
+    PcfLGGood e D' f := fun n hn => ⟨(hf n hn).1, (hf n hn).2.trans h⟩
 
-/-- The stated relation follows from the given hypotheses: `pcfLG_good e D f`. -/
-theorem pcfLG_good_add_two {e D : ℕ} {f : Polynomial ℝ} (hf : pcfLG_good (e+2) D f) :
-    pcfLG_good e D f := fun n hn => by
+/-- The stated relation follows from the given hypotheses: `PcfLGGood e D f`. -/
+theorem pcfLG_good_add_two {e D : ℕ} {f : Polynomial ℝ} (hf : PcfLGGood (e+2) D f) :
+    PcfLGGood e D f := fun n hn => by
   obtain ⟨⟨j, hj⟩, h2⟩ := hf n hn; exact ⟨⟨j-1, by omega⟩, h2⟩
 
-/-- The stated relation follows from the given hypotheses: `pcfLG_good (e+2) D f`. -/
-theorem pcfLG_good_two {e D : ℕ} {f : Polynomial ℝ} (hf : pcfLG_good e D f) :
-    pcfLG_good (e+2) D f := fun n hn => by
+/-- The stated relation follows from the given hypotheses: `PcfLGGood (e+2) D f`. -/
+theorem pcfLG_good_two {e D : ℕ} {f : Polynomial ℝ} (hf : PcfLGGood e D f) :
+    PcfLGGood (e+2) D f := fun n hn => by
   obtain ⟨⟨j, hj⟩, h2⟩ := hf n hn; exact ⟨⟨j+1, by omega⟩, h2⟩
 
-/-- The stated relation follows from the given hypotheses: `pcfLG_good e D 0`. -/
-theorem pcfLG_good_zero (e D : ℕ) : pcfLG_good e D 0 := fun n hn => by simp at hn
+/-- The stated relation follows from the given hypotheses: `PcfLGGood e D 0`. -/
+theorem pcfLG_good_zero (e D : ℕ) : PcfLGGood e D 0 := fun n hn => by simp at hn
 
-/-- The stated relation follows from the given hypotheses: `pcfLG_good e D (f + g)`. -/
-theorem pcfLG_good_add {e D : ℕ} {f g : Polynomial ℝ} (hf : pcfLG_good e D f)
-    (hg : pcfLG_good e D g) : pcfLG_good e D (f + g) := fun n hn => by
+/-- The stated relation follows from the given hypotheses: `PcfLGGood e D (f + g)`. -/
+theorem pcfLG_good_add {e D : ℕ} {f g : Polynomial ℝ} (hf : PcfLGGood e D f)
+    (hg : PcfLGGood e D g) : PcfLGGood e D (f + g) := fun n hn => by
   rw [coeff_add] at hn
   by_cases h : f.coeff n = 0
   · rw [h, zero_add] at hn; exact hg n hn
   · exact hf n h
 
-/-- The stated relation follows from the given hypotheses: `pcfLG_good e D (C a * f)`. -/
-theorem pcfLG_good_C_mul {e D : ℕ} {f : Polynomial ℝ} (a : ℝ) (hf : pcfLG_good e D f) :
-    pcfLG_good e D (C a * f) := fun n hn => by
+/-- The stated relation follows from the given hypotheses: `PcfLGGood e D (C a * f)`. -/
+theorem pcfLG_good_C_mul {e D : ℕ} {f : Polynomial ℝ} (a : ℝ) (hf : PcfLGGood e D f) :
+    PcfLGGood e D (C a * f) := fun n hn => by
   rw [coeff_C_mul] at hn; exact hf n (right_ne_zero_of_mul hn)
 
-/-- The stated relation follows from the given hypotheses: `pcfLG_good e D (f - g)`. -/
-theorem pcfLG_good_sub {e D : ℕ} {f g : Polynomial ℝ} (hf : pcfLG_good e D f)
-    (hg : pcfLG_good e D g) : pcfLG_good e D (f - g) := by
+/-- The stated relation follows from the given hypotheses: `PcfLGGood e D (f - g)`. -/
+theorem pcfLG_good_sub {e D : ℕ} {f g : Polynomial ℝ} (hf : PcfLGGood e D f)
+    (hg : PcfLGGood e D g) : PcfLGGood e D (f - g) := by
   rw [sub_eq_add_neg, ← neg_one_mul, show (-1 : Polynomial ℝ) = C (-1) by simp]
   exact pcfLG_good_add hf (pcfLG_good_C_mul _ hg)
 
-/-- The stated relation follows from the given hypotheses: `pcfLG_good (e+1) (D+1) (X * f)`. -/
-theorem pcfLG_good_X_mul {e D : ℕ} {f : Polynomial ℝ} (hf : pcfLG_good e D f) :
-    pcfLG_good (e+1) (D+1) (X * f) := fun n hn => by
+/-- The stated relation follows from the given hypotheses: `PcfLGGood (e+1) (D+1) (X * f)`. -/
+theorem pcfLG_good_X_mul {e D : ℕ} {f : Polynomial ℝ} (hf : PcfLGGood e D f) :
+    PcfLGGood (e+1) (D+1) (X * f) := fun n hn => by
   rcases n with _ | n
   · simp at hn
   · rw [coeff_X_mul] at hn
     obtain ⟨⟨j, hj⟩, h2⟩ := hf n hn; exact ⟨⟨j+1, by omega⟩, by omega⟩
 
-/-- The stated relation follows from the given hypotheses: `pcfLG_good (e+1) D (derivative f)`. -/
-theorem pcfLG_good_derivative {e D : ℕ} {f : Polynomial ℝ} (hf : pcfLG_good e (D+1) f) :
-    pcfLG_good (e+1) D (derivative f) := fun n hn => by
+/-- The stated relation follows from the given hypotheses: `PcfLGGood (e+1) D (derivative f)`. -/
+theorem pcfLG_good_derivative {e D : ℕ} {f : Polynomial ℝ} (hf : PcfLGGood e (D+1) f) :
+    PcfLGGood (e+1) D (derivative f) := fun n hn => by
   rw [coeff_derivative] at hn
   obtain ⟨⟨j, hj⟩, h2⟩ := hf (n+1) (left_ne_zero_of_mul hn); exact ⟨⟨j, by omega⟩, by omega⟩
 
 /-- One step of the Olver recursion: existence and uniqueness of `u_{s+1}`. -/
-theorem pcfLG_olver_step (s : ℕ) {r : Polynomial ℝ} (hr : pcfLG_good s (3*s+2) r) :
+theorem pcfLG_olver_step (s : ℕ) {r : Polynomial ℝ} (hr : PcfLGGood s (3*s+2) r) :
     ∃ p : Polynomial ℝ, ((X^2-1)*derivative p-C (3*(s+1:ℝ))*X*p=r ∧
       p.natDegree ≤ if Even (s+1) then 3*(s+1)-2 else 3*(s+1)) ∧
-      pcfLG_good (s+1) (3*(s+1)) p ∧
+      PcfLGGood (s+1) (3*(s+1)) p ∧
       ∀ q : Polynomial ℝ, ((X^2-1)*derivative q-C (3*(s+1:ℝ))*X*q=r ∧
         q.natDegree ≤ if Even (s+1) then 3*(s+1)-2 else 3*(s+1)) → q = p := by
   have hk : (3*(s+1:ℝ)) = ((3*(s+1) : ℕ) : ℝ) := by push_cast; ring
@@ -602,14 +602,14 @@ theorem pcfLG_olver_step (s : ℕ) {r : Polynomial ℝ} (hr : pcfLG_good s (3*s+
     refine (natDegree_sub_le _ _).trans (max_le hqd hpd)
 
 /-- The right-hand side `r_s` of the Olver recursion has parity `s` and degree `≤ 3s+2`. -/
-theorem pcfLG_r_good {s : ℕ} {u ρ : Polynomial ℝ} (hu : pcfLG_good s (3*s) u)
-    (hρ : pcfLG_good (s+1) (3*s+1) ρ) :
-    pcfLG_good s (3*s+2) (C (1/8:ℝ)*(C 3*X^2+C 2)*u - C (3/2*(s+1:ℝ))*X*ρ +
+theorem pcfLG_r_good {s : ℕ} {u ρ : Polynomial ℝ} (hu : PcfLGGood s (3*s) u)
+    (hρ : PcfLGGood (s+1) (3*s+1) ρ) :
+    PcfLGGood s (3*s+2) (C (1/8:ℝ)*(C 3*X^2+C 2)*u - C (3/2*(s+1:ℝ))*X*ρ +
       C (1/2:ℝ)*(X^2-1)*derivative ρ) := by
   have e : C (1/8:ℝ)*(C 3*X^2+C 2)*u - C (3/2*(s+1:ℝ))*X*ρ + C (1/2:ℝ)*(X^2-1)*derivative ρ =
       C (1/8:ℝ)*(C 3*(X*(X*u)) + C 2*u) - C (3/2*(s+1:ℝ))*(X*ρ) +
       C (1/2:ℝ)*(X*(X*derivative ρ) - derivative ρ) := by ring
-  have hρ' : pcfLG_good (s+2) (3*s) (derivative ρ) := pcfLG_good_derivative hρ
+  have hρ' : PcfLGGood (s+2) (3*s) (derivative ρ) := pcfLG_good_derivative hρ
   rw [e]
   refine pcfLG_good_add (pcfLG_good_sub (pcfLG_good_C_mul _ (pcfLG_good_add
     (pcfLG_good_C_mul _ (pcfLG_good_add_two (pcfLG_good_X_mul (pcfLG_good_X_mul hu))))
@@ -621,7 +621,7 @@ theorem pcfLG_r_good {s : ℕ} {u ρ : Polynomial ℝ} (hu : pcfLG_good s (3*s) 
 
 /-- Parity and degree invariants of the Olver pairs `(u_s, r_{s-1})`. -/
 theorem pcfLG_olverPair_inv (s : ℕ) :
-    pcfLG_good s (3*s) (pcfOlverPair s).1 ∧ pcfLG_good (s+1) (3*s+1) (pcfOlverPair s).2 := by
+    PcfLGGood s (3*s) (pcfOlverPair s).1 ∧ PcfLGGood (s+1) (3*s+1) (pcfOlverPair s).2 := by
   induction s with
   | zero =>
     refine ⟨fun n hn => ?_, pcfLG_good_zero _ _⟩

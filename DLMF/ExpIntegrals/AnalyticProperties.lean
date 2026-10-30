@@ -7,10 +7,10 @@ module
 
 public import DLMF.ExpIntegrals.Basic
 
+public import DLMF.Confluent.ExpIntegral
+public import DLMF.Confluent.Integrals
 public import DLMF.Core.Framework
 public import DLMFMathlib.Analysis.Complex.FactorialSeries
-public import DLMF.Confluent.Integrals
-public import DLMF.Confluent.ExpIntegral
 
 /-!
 # Entire and principal exponential, trigonometric and hyperbolic integrals
@@ -27,28 +27,6 @@ not completed proofs.
 open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
 namespace DLMF.Confluent
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /-- The series with terms `(fun k : ℕ => (-1 : ℂ)^k*z^(k+1)/((k+1).factorial*(k+1 : ℂ)))`
 converges to `(expIntEin z)`. -/
@@ -295,7 +273,7 @@ theorem sinhInt_segment_integral (z : ℂ) :
 /-- Identity under the stated parameter and domain assumptions: `coshInt z =
 Real.eulerMascheroniConstant + log z + primitive (fun t => (cosh t-1)/t) z`. -/
 @[dlmf 6.2.E16]
-theorem coshInt_segment_integral {z : ℂ} (hz : z ∈ slitPlane) :
+theorem coshInt_segment_integral {z : ℂ} :
     coshInt z = Real.eulerMascheroniConstant + log z + primitive (fun t => (cosh t-1)/t) z := by
   have h := cosIntCin_mul_I z
   rw [cosIntCin_segment_integral] at h

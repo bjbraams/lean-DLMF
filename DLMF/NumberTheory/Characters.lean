@@ -5,15 +5,15 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.NumberTheory.DirichletCharacter.Orthogonality
-public import Mathlib.NumberTheory.DirichletCharacter.GaussSum
-public import Mathlib.NumberTheory.LegendreSymbol.JacobiSymbol
-public import Mathlib.Analysis.SpecialFunctions.Complex.CircleAddChar
 public import Mathlib.Algebra.Order.Ring.Star
 public import Mathlib.Analysis.SpecialFunctions.Bernstein
+public import Mathlib.Analysis.SpecialFunctions.Complex.CircleAddChar
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
 public import Mathlib.Data.Nat.Choose.Multinomial
 public import Mathlib.NumberTheory.Chebyshev
+public import Mathlib.NumberTheory.DirichletCharacter.GaussSum
+public import Mathlib.NumberTheory.DirichletCharacter.Orthogonality
+public import Mathlib.NumberTheory.LegendreSymbol.JacobiSymbol
 
 /-!
 # Dirichlet characters, quadratic characters, periodic functions (DLMF §§27.8–27.10)
@@ -124,7 +124,7 @@ theorem principalCharacter_apply (k n : ℕ) :
 
 /-- §27.8 after 27.8.5: `χ(n) ≠ 0` iff `(n, k) = 1`, and then `χ(n)^{φ(k)} = 1`. -/
 @[dlmf 27.8]
-theorem DirichletCharacter.apply_ne_zero_iff {k : ℕ} [NeZero k] (χ : DirichletCharacter ℂ k)
+theorem DirichletCharacter.apply_ne_zero_iff {k : ℕ} (χ : DirichletCharacter ℂ k)
     (n : ℕ) : (χ n ≠ 0 ↔ n.Coprime k) ∧ (n.Coprime k → χ n ^ k.totient = 1) := by
   refine ⟨⟨fun h ↦ ?_, fun h ↦ ?_⟩, fun h ↦ ?_⟩
   · by_contra hc
@@ -142,13 +142,13 @@ theorem card_dirichletCharacter (k : ℕ) [NeZero k] :
   exact DirichletCharacter.card_eq_totient_of_hasEnoughRootsOfUnity ℂ k
 
 /-- The conjugate character (proof of `DirichletCharacter.exists_conj`). -/
-lemma q27_exists_conj {k : ℕ} [NeZero k] (χ : DirichletCharacter ℂ k) :
+lemma q27_exists_conj {k : ℕ} (χ : DirichletCharacter ℂ k) :
     ∃ ψ : DirichletCharacter ℂ k, ∀ n : ℕ, ψ n = starRingEnd ℂ (χ n) :=
   ⟨star χ, fun n ↦ by rw [MulChar.star_apply]; rfl⟩
 
 /-- §27.8 after 27.8.5: the complex conjugate of a character mod `k` is a character mod `k`. -/
 @[dlmf 27.8]
-theorem DirichletCharacter.exists_conj {k : ℕ} [NeZero k] (χ : DirichletCharacter ℂ k) :
+theorem DirichletCharacter.exists_conj {k : ℕ} (χ : DirichletCharacter ℂ k) :
     ∃ ψ : DirichletCharacter ℂ k, ∀ n : ℕ, ψ n = starRingEnd ℂ (χ n) :=
   q27_exists_conj χ
 
@@ -264,7 +264,7 @@ def IsInducedModulus {k : ℕ} (χ : DirichletCharacter ℂ k) (d : ℕ) : Prop 
   d ∣ k ∧ ∀ a : ℕ, a.Coprime k → a ≡ 1 [MOD d] → χ a = 1
 
 /-- DLMF 27.8.8 (proof), with `χ₀` the primitive character. -/
-lemma q27_eq_mul_principal {k : ℕ} [NeZero k] (χ : DirichletCharacter ℂ k) :
+lemma q27_eq_mul_principal {k : ℕ} (χ : DirichletCharacter ℂ k) :
     IsInducedModulus χ χ.conductor ∧ ∃ χ₀ : DirichletCharacter ℂ χ.conductor,
       ∀ n : ℕ, χ n = χ₀ n * (1 : DirichletCharacter ℂ k) n := by
   refine ⟨⟨χ.conductor_dvd_level, fun a ha hmod ↦ q27_apply_eq_one_of_modEq_conductor χ a ha hmod⟩,
@@ -1034,7 +1034,6 @@ lemma s27_sum_comp_surjective {G H : Type*} [Group G] [Fintype G] [Group H] [Fin
   congr 2
   exact MonoidHom.card_fiber_eq_of_mem_range f (hf v) (hf 1)
 
-
 /-- For `k = d q` with `d` the conductor, `G(q, χ) = #ker · G(1, χ*)`. -/
 lemma s27_gaussSum_mulShift_conductor {k : ℕ} [NeZero k] (χ : DirichletCharacter ℂ k)
     [NeZero χ.conductor] {q : ℕ} (hkq : k = χ.conductor * q) :
@@ -1057,7 +1056,6 @@ lemma s27_gaussSum_mulShift_conductor {k : ℕ} [NeZero k] (χ : DirichletCharac
   rw [sum_congr rfl fun u _ ↦ hterm u]
   convert s27_sum_comp_surjective _ (ZMod.unitsMap_surjective hd) _ using 1
   rfl
-
 
 /-- §27.10 after 27.10.11 (proof). -/
 lemma s27_isPrimitive_of_separable {k : ℕ} [NeZero k] {χ : DirichletCharacter ℂ k}

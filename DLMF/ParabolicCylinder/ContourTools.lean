@@ -43,7 +43,6 @@ open scoped Real Topology
 
 namespace DLMF.Confluent
 
-
 /-- Growth of `e^{-zt+t²/2}` on the vertical line `t = c+iy`. -/
 theorem pcfCt_norm_exp_le (z : ℂ) {c : ℝ} (hc : 0 ≤ c) (y : ℝ) :
     ‖exp (-z*((c:ℂ)+y*I) + ((c:ℂ)+y*I)^2/2)‖ ≤
@@ -98,7 +97,6 @@ theorem pcfCt_norm_cpow_le (p : ℂ) {c : ℝ} (hc : 0 < c) (y : ℝ) :
   have : ‖p‖ * (|Real.log c| + |y|/c) = ‖p‖*|Real.log c| + ‖p‖/c*|y| := by ring
   nlinarith
 
-
 /-- Dominating Gaussian for the vertical-line integrands. -/
 noncomputable def pcfCt_dom (Z P c y : ℝ) : ℝ :=
   Real.exp (Z*c + c^2/2 + P*(|Real.log c| + π) + (Z + P/c)^2) * Real.exp (-(1/4) * y^2)
@@ -149,7 +147,6 @@ theorem pcfCt_gauss_vertical_integrable (w : ℂ) (c : ℝ) :
       fun y : ℝ => exp ((-1/2:ℂ) * y^2 + ((c - w)*I) * y + (c^2/2 - w*c)) := by
     funext y; congr 1; ring_nf; rw [I_sq]; ring
   rw [h]; exact integrable_cexp_quadratic' (by norm_num) _ _
-
 
 /-- Continuity of the vertical-line integrand in `y`. -/
 theorem pcfCt_vert_continuous (z p : ℂ) {c : ℝ} (hc : 0 < c) :
@@ -233,7 +230,6 @@ theorem pcfCt_vertical_of_re {a : ℂ} (ha : -1/2 < a.re) (z : ℂ) {c : ℝ} (h
   generalize (∫ t in Ioi (0:ℝ), (t:ℂ)^(a-1/2) * exp (-(t:ℂ)^2/2 - z*t)) = J
   field_simp
 
-
 /-- The vertical-line integral is entire in the parameter. -/
 theorem pcfCt_vertical_differentiable (z : ℂ) {c : ℝ} (hc : 0 < c) :
     Differentiable ℂ (fun a : ℂ =>
@@ -277,7 +273,6 @@ theorem pcfCt_vertical (a z : ℂ) {c : ℝ} (hc : 0 < c) :
     fun x _ => hf.analyticAt x
   exact hf'.eqOn_of_preconnected_of_eventuallyEq (fun x _ => hg.analyticAt x) isPreconnected_univ
     (mem_univ 1) heq (mem_univ a)
-
 
 /-- `(± i s)^w = s^w e^{± iπw/2}` for `re s > 0`. -/
 theorem pcfCt_I_mul_cpow {s : ℂ} (hs : 0 < s.re) (w : ℂ) :
@@ -401,7 +396,6 @@ theorem pcfCt_F_edge (a z : ℂ) (x : ℝ) (s : ℝ) (hs : s = 1 ∨ s = -1) :
   push_cast
   ring
 
-
 /-- `pcfCt_g` is continuous on the open half-line. -/
 theorem pcfCt_g_continuousOn (a z : ℂ) : ContinuousOn (pcfCt_g a z) (Ioi 0) := by
   intro t ht
@@ -440,7 +434,6 @@ theorem pcfCt_C_sub (a z : ℂ) {r₁ r₂ : ℝ} (h₁ : 0 < r₁) (h₂ : 0 < 
   rw [intervalIntegral.integral_const_mul, intervalIntegral.integral_const_mul]
   simp only [smul_eq_mul] at hR
   linear_combination hR
-
 
 /-- The Hankel loop of DLMF 12.5.5 (the body of `pcfNegativeLoop`) in terms of the jump and the
 circle part. -/
@@ -481,7 +474,6 @@ theorem pcfCt_loop_eq (a z : ℂ) {r R : ℝ} (hr : 0 < r) (hR : 0 < R) :
     ring
   rw [h1, h2, h3, intervalIntegral.integral_const_mul, intervalIntegral.integral_const_mul]
   unfold pcfCt_kappa; ring
-
 
 /-- Growth of `F`. -/
 theorem pcfCt_norm_F_le (a z w : ℂ) :
@@ -545,7 +537,6 @@ theorem pcfCt_C_tendsto_zero {a : ℂ} (ha : -1/2 < a.re) (z : ℂ) :
   rw [show π - -π = 2*π by ring, abs_of_pos (by linarith [Real.pi_pos] : (0:ℝ) < 2*π)]
   simp only [M]; ring
 
-
 /-- For `re a > -1/2` the loop collapses onto the two sides of the cut. -/
 theorem pcfCt_loop_limit_of_re {a : ℂ} (ha : -1/2 < a.re) (z : ℂ) {r : ℝ} (hr : 0 < r) :
     pcfCt_kappa a * (∫ t in Ioi r, pcfCt_g a z t) + pcfCt_C a z r =
@@ -580,7 +571,6 @@ theorem pcfCt_loop_limit_of_re {a : ℂ} (ha : -1/2 < a.re) (z : ℂ) {r : ℝ} 
       (fun ρ => κ * (J - ∫ t in (0:ℝ)..ρ, pcfCt_g a z t) + pcfCt_C a z ρ) := by
     filter_upwards [Ioo_mem_nhdsGT hr] with ρ hρ using hEq ρ hρ
   exact tendsto_nhds_unique (tendsto_const_nhds.congr' hev) hT
-
 
 /-- Gaussian majorant of `pcfCt_g` on `[r, ∞)`, uniform for `‖a - 1/2‖ ≤ Q`, `‖z‖ ≤ Z`. -/
 theorem pcfCt_g_le {a z : ℂ} {Q Z r : ℝ} (hr : 0 < r) (hQ : ‖a-1/2‖ ≤ Q) (hZ : ‖z‖ ≤ Z) {t : ℝ}
@@ -681,7 +671,6 @@ theorem pcfCt_C_differentiable (z : ℂ) {r : ℝ} (hr : 0 < r) :
         rw [norm_mul]; exact mul_le_mul ha' hw (norm_nonneg _) (by positivity))
     linarith
 
-
 /-- The jump times the reflection pair: `κ(a) Γ(1/2+a) Γ(1/2-a) = 2πi` when both Gammas are
 finite and nonzero. -/
 theorem pcfCt_kappa_Gamma {a : ℂ} (h1 : Gamma (1/2+a) ≠ 0) (h2 : Gamma (1/2-a) ≠ 0) :
@@ -781,7 +770,6 @@ theorem pcfCt_norm_Phi_le (μ : ℂ) (x : ℝ) {σ : ℝ} (hσ : 0 ≤ σ) {w : 
           exact Real.exp_le_one_iff.mpr h2
     _ = _ := by ring
 
-
 /-- The Stieltjes–Fourier integrand `t^{μ-1} e^{iσt}/(x² + t²)`. -/
 noncomputable def pcfCt_gs (μ : ℂ) (x σ : ℝ) (t : ℝ) : ℂ :=
   (t:ℂ)^(μ-1) * exp (I*σ*t) / ((x:ℂ)^2 + (t:ℂ)^2)
@@ -852,10 +840,9 @@ theorem pcfCt_Phi_real_integrable {μ : ℂ} (hm0 : 0 < μ.re) (hm2 : μ.re < 2)
     refine Continuous.div (by fun_prop) (by fun_prop) fun u => ?_
     have : (x:ℂ)^2 + exp (u:ℂ)^2 = ((x^2 + Real.exp u^2 : ℝ) : ℂ) := by push_cast; rfl
     rw [this]; exact ofReal_ne_zero.mpr (by positivity)
-  refine ((DLMF.Gamma.integrable_exp_neg_mul_abs (b := min μ.re (2 - μ.re)) (lt_min hm0 (by linarith))).const_mul
+  refine ((TauCeti.integrable_exp_neg_mul_abs (a := min μ.re (2 - μ.re)) (lt_min hm0 (by linarith))).const_mul
     (1 + 1/x^2)).mono' hc.aestronglyMeasurable (Eventually.of_forall fun u => ?_)
   rw [pcfCt_norm_Phi_real]; exact pcfCt_line_bound μ.re hx u
-
 
 /-- The real majorant of the kernel on vertical cross-sections tends to zero at both ends. -/
 theorem pcfCt_cross_bound_tendsto {m : ℝ} (hm0 : 0 < m) (hm2 : m < 2) {x : ℝ} (hx : 0 < x) (c : ℝ) :
@@ -888,7 +875,6 @@ theorem pcfCt_cross_bound_tendsto {m : ℝ} (hm0 : 0 < m) (hm2 : m < 2) {x : ℝ
         (x^2)).sub tendsto_const_nhds).abs
     have h := hn.div hd (by norm_num)
     rw [zero_div] at h; exact h
-
 
 /-- The residue identity behind the kernel of DLMF 12.12.3: shifting the line `Im w = 0` to
 `Im w = π` across the pole `w = log x + iπ/2` of `pcfCt_Phi`. -/
@@ -1019,7 +1005,6 @@ theorem pcfCt_kernel_shift {μ : ℂ} (hm0 : 0 < μ.re) (hm2 : μ.re < 2) {x : �
     integral_neg_eq_self (fun u : ℝ => pcfCt_Phi μ x σ u), hval] at hB
   exact hB
 
-
 /-- The Stieltjes–Fourier kernel of DLMF 12.12.3: for `0 < re μ < 2`, `x > 0`, `σ ≥ 0`,
 `∫₀^∞ t^{μ-1} cos(tσ + π/2 - πμ/2)/(x² + t²) dt = (π/2) x^{μ-2} e^{-xσ}`. -/
 theorem pcfCt_kernel {μ : ℂ} (hm0 : 0 < μ.re) (hm2 : μ.re < 2) {x : ℝ} (hx : 0 < x)
@@ -1093,6 +1078,5 @@ theorem pcfCt_U_decay (P : ℝ) : ∃ M : ℝ, ∀ a : ℂ, ‖-a-1/2‖ ≤ P �
   rw [he, mul_assoc, norm_mul, norm_mul, ← ofReal_neg, ← ofReal_exp, norm_real,
     Real.norm_of_nonneg (Real.exp_pos _).le, Complex.norm_exp_ofReal_mul_I, mul_one]
   exact mul_le_mul_of_nonneg_left hb (Real.exp_pos _).le
-
 
 end DLMF.Confluent

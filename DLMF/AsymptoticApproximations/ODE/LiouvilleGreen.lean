@@ -114,18 +114,17 @@ theorem liouvilleGreen_recessive_isEquivalent {a : ℝ} {f f' f'' g ξ : ℝ →
   simp only [Pi.div_apply]
   field_simp
 
-/-- DLMF 2.7.26–2.7.27 on a finite interval: if moreover `𝒱_{a₁,a₂}(F) < ∞`, then the solutions
-of `liouvilleGreen_interval` satisfy `w₁(x) ∼ f^{-1/4} e^{ξ}` as `x → a₁+` and
-`w₂(x) ∼ f^{-1/4} e^{-ξ}` as `x → a₂-`; solutions with these properties are unique.
-
-**Qualification needed:** the uniqueness assertion fails at regular endpoints under the
-present hypotheses. For `f = 1`, `g = 0`, `ξ(x) = x` on `(0, 1)`, both `exp x` and
-`exp x + sinh x` solve the equation and are equivalent to `exp x` at `0+`.
-An endpoint condition is missing; see the proof-round review of 2026-10-29. -/
+/-- DLMF 2.7.26–2.7.27, with the singular-endpoint condition from the following paragraph:
+if the error-control variation is finite and `|ξ|` is unbounded at both endpoints, there are
+unique recessive solutions equivalent to `f^{-1/4} e^{ξ}` at `a₁+` and to `f^{-1/4} e^{-ξ}` at
+`a₂-`. The endpoint condition is essential: at a regular endpoint asymptotic equivalence
+alone does not determine a solution. -/
 @[dlmf 2.7.E26, dlmf 2.7.E27]
 theorem liouvilleGreen_interval_isEquivalent {a₁ a₂ : ℝ} (ha : a₁ < a₂) {f f' f'' g ξ : ℝ → ℝ}
     (hd : IsLGData f f' f'' g ξ (Ioo a₁ a₂))
-    (hV : IntegrableOn (fun t => |errorDensity f f' f'' g t|) (Ioo a₁ a₂)) :
+    (hV : IntegrableOn (fun t => |errorDensity f f' f'' g t|) (Ioo a₁ a₂))
+    (hξ₁ : ¬ IsBoundedUnder (· ≤ ·) (𝓝[>] a₁) (fun x => |ξ x|))
+    (hξ₂ : ¬ IsBoundedUnder (· ≤ ·) (𝓝[<] a₂) (fun x => |ξ x|)) :
     (∃ w₁ : ℝ → ℝ, IsLGSolOn f g w₁ (Ioo a₁ a₂) ∧ w₁ ~[𝓝[>] a₁] lgApproximant f ξ 1 ∧
       ∀ v, IsLGSolOn f g v (Ioo a₁ a₂) → v ~[𝓝[>] a₁] lgApproximant f ξ 1 →
         EqOn v w₁ (Ioo a₁ a₂)) ∧

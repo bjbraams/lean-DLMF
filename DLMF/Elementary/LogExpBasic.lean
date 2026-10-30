@@ -5,16 +5,16 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
-public import Mathlib.MeasureTheory.Function.AbsolutelyContinuous
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.AbsolutelyContinuousFun
-public import Mathlib.MeasureTheory.Integral.IntervalIntegral.LebesgueDifferentiationThm
 public import Mathlib.Analysis.CStarAlgebra.Classes
 public import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
 public import Mathlib.Analysis.SpecialFunctions.Bernstein
+public import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
 public import Mathlib.Data.Nat.Choose.Multinomial
+public import Mathlib.MeasureTheory.Function.AbsolutelyContinuous
+public import Mathlib.MeasureTheory.Integral.IntervalIntegral.AbsolutelyContinuousFun
+public import Mathlib.MeasureTheory.Integral.IntervalIntegral.LebesgueDifferentiationThm
 public import Mathlib.Tactic.Basify
 public import Mathlib.Tactic.ENatToNat
 public import Mathlib.Tactic.Echelon.Zsqrtd
@@ -325,7 +325,7 @@ def complexLogb (a z : ℂ) : ℂ := Complex.log z / Complex.log a
 /-- Complex change of logarithm base; both bases are nonzero and different from one. -/
 @[dlmf 4.2.E9]
 theorem complexLogb_change_base {a b z : ℂ}
-    (ha : a ≠ 0) (ha1 : a ≠ 1) (hb : b ≠ 0) (hb1 : b ≠ 1) :
+    (hb : b ≠ 0) (hb1 : b ≠ 1) :
     complexLogb a z = complexLogb b z / complexLogb b a := by
   have hb' : Complex.log b ≠ 0 := by simpa [log_eq_zero_iff hb] using hb1
   simp only [complexLogb]
@@ -413,7 +413,6 @@ theorem real_power_of_logValue {z l : ℂ} (hz : z ≠ 0) (hl : l ∈ generalLog
   · simpa using norm_power_of_logValue hz hl (a : ℂ)
   · simpa using power_phase_of_logValue hz hl (a : ℂ)
 
-
 /-- The unreduced phase of a power, before reduction modulo `2π` (4.2.30). -/
 @[dlmf 4.2.E30]
 theorem power_phase {z a : ℂ} (hz : z ≠ 0) :
@@ -444,7 +443,7 @@ theorem generalPowerValues_exp_one (a : ℂ) :
 
 /-- Inversion of the full general power relation (4.2.35). -/
 @[dlmf 4.2.E35]
-theorem mem_generalPowerValues_iff {z a w : ℂ} (hz : z ≠ 0) (ha : a ≠ 0)
+theorem mem_generalPowerValues_iff {z a w : ℂ} (ha : a ≠ 0)
     (hw : w ≠ 0) :
     w ∈ generalPowerValues z a ↔
       ∃ l ∈ generalLogValues w, z = Complex.exp (l / a) := by
@@ -463,7 +462,7 @@ theorem mem_generalPowerValues_iff {z a w : ℂ} (hz : z ≠ 0) (ha : a ≠ 0)
 /-- Principal-power inversion uses exactly those logarithms whose divided imaginary
 part lies in the principal strip (4.2.36); both edges are retained. -/
 @[dlmf 4.2.E36]
-theorem mem_closedPowerValues_iff {z a w : ℂ} (hz : z ≠ 0) (ha : a ≠ 0)
+theorem mem_closedPowerValues_iff {z a w : ℂ} (ha : a ≠ 0)
     (hw : w ≠ 0) :
     w ∈ closedPowerValues z a ↔
       ∃ l ∈ generalLogValues w, |(l / a).im| ≤ Real.pi ∧ z = Complex.exp (l / a) := by
@@ -586,6 +585,5 @@ theorem generalPowerValues_int {z : ℂ} (hz : z ≠ 0) (n : ℤ) :
     refine ⟨Complex.log z, Complex.exp_log hz, ?_⟩
     rw [Complex.exp_int_mul, Complex.exp_log hz]
     exact hw'
-
 
 end DLMF.Elementary

@@ -59,7 +59,7 @@ theorem jacobi_disk_coefficients {α : ℂ} (hα : -1 < α.re) {m n : ℕ} (hmn 
   have hp (k : ℕ) := poch_ne_zero_of_not_neg_nat hnp k
   have hf (k : ℕ) : (k.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero
   rw [show 2 * s - 1 = -(1 - 2 * s) by ring, jacobi_reflection hα hd,
-    jacobi_finite_sum hd, jacobi_at_one hα,
+    jacobi_finite_sum hd, jacobiPolyP_one,
     show (1 - 2 * s - 1) / 2 = -s by ring, Finset.mul_sum, Finset.sum_div]
   conv_lhs => rw [← Finset.sum_range_reflect]
   apply Finset.sum_congr rfl
@@ -120,7 +120,6 @@ theorem diskPolynomial_swap (α : ℂ) (m n : ℕ) (z : ℂ) :
   intro j hj
   rw [star_star, Nat.add_comm n m]
   ring
-
 
 /-- Identity under the stated parameter and domain assumptions: `diskPolynomial α m n ((r : ℂ) *
 exp (I * θ)) = exp (I * ((m : ℂ) - n) * θ) * (r : ℂ) ^ (Int.natAbs ((m : ℤ) - n)) *
@@ -509,6 +508,5 @@ theorem trianglePolynomial_orthogonal {α β γ : ℝ} (hα : -1 < α) (hβ : -1
       simpa only [F, hp] using jacobi_unit_orthogonal hα hb hdeg
     rw [hf, zero_mul]
   · rw [show (∫ u in Ioo (0 : ℝ) 1, G u) = 0 from jacobi_unit_orthogonal hβ hγ hnk, mul_zero]
-
 
 end DLMF.OrthogonalPolynomials

@@ -45,7 +45,7 @@ lemma p3l_hasDerivAt_re {G : ℝ → ℂ} {G' : ℂ} {x : ℝ} (h : HasDerivAt G
 /-- The real part of a complex solution of `w'' = (V - μ) w` is a real solution. -/
 lemma p3l_re_sol {V : ℝ → ℝ} {μ : ℝ} {g : ℝ → ℂ} (hd : Differentiable ℝ g)
     (hG : ∀ x, HasDerivAt (deriv g) (((V x - μ : ℝ) : ℂ) * g x) x) :
-    ODE.p2lIsSol V μ (fun x => (g x).re) ∧
+    ODE.P2lIsSol V μ (fun x => (g x).re) ∧
       deriv (fun x => (g x).re) = fun x => (deriv g x).re := by
   have hd' : deriv (fun x => (g x).re) = fun x => (deriv g x).re :=
     funext fun x => (p3l_hasDerivAt_re (hd x).hasDerivAt).deriv
@@ -57,7 +57,7 @@ lemma p3l_re_sol {V : ℝ → ℝ} {μ : ℝ} {g : ℝ → ℂ} (hd : Differenti
 /-- The real part of a constant multiple of a complex solution is a real solution. -/
 lemma p3l_re_mul_sol {V : ℝ → ℝ} {μ : ℝ} {g : ℝ → ℂ} (hd : Differentiable ℝ g)
     (hG : ∀ x, HasDerivAt (deriv g) (((V x - μ : ℝ) : ℂ) * g x) x) (c : ℂ) :
-    ODE.p2lIsSol V μ (fun x => (c * g x).re) ∧
+    ODE.P2lIsSol V μ (fun x => (c * g x).re) ∧
       deriv (fun x => (c * g x).re) = fun x => (c * deriv g x).re := by
   have hd1 : ∀ x, HasDerivAt (fun x => c * g x) (c * deriv g x) x := fun x =>
     (hd x).hasDerivAt.const_mul c

@@ -682,7 +682,7 @@ theorem kummerU_barnes_exp {a b : ℂ} {x σ : ℝ}
 (μ - 1 / 2 + κ)`. -/
 @[dlmf 13.16.E1]
 theorem whittakerM_euler {κ μ z : ℂ}
-    (hμ : 0 < μ.re + 1 / 2 - |κ.re|) (hz : z ∈ slitPlane) :
+    (hμ : 0 < μ.re + 1 / 2 - |κ.re|) :
     whittakerM κ μ z =
       Gamma (1 + 2 * μ) * z ^ (μ + 1 / 2) * (2 : ℂ) ^ (-(2 * μ)) /
           (Gamma (1 / 2 + μ - κ) * Gamma (1 / 2 + μ + κ)) *
@@ -1090,7 +1090,7 @@ theorem whittakerW_barnes {κ μ : ℂ} {x σ : ℝ} (hx : 0 < x)
 Gamma (1 - κ + σ + I * t) * (x : ℂ) ^ (-(σ + I * t)) * I`. -/
 @[dlmf 13.16.E12]
 theorem whittakerW_barnes_exp {κ μ : ℂ} {x σ : ℝ} (hx : 0 < x)
-    (hμ : 0 < (1 / 2 + μ).re + σ) (hμ' : 0 < (1 / 2 - μ).re + σ) (hσ : 0 < σ) :
+    (hμ : 0 < (1 / 2 + μ).re + σ) (hμ' : 0 < (1 / 2 - μ).re + σ) :
     whittakerW κ μ x =
       exp ((x : ℂ) / 2) / (2 * π * I) *
         ∫ t : ℝ, Gamma (1 / 2 + μ + σ + I * t) * Gamma (1 / 2 - μ + σ + I * t) /

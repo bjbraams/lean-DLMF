@@ -29,11 +29,11 @@ namespace DLMF.Spheroidal
 private lemma s30e_dif_pos {c : Prop} [Decidable c] (h : c) {α : Sort*} {t : c → α}
     {e : ¬c → α} : dite c t e = t h := by simp [h]
 
-/-- The factor equation in the form `DLMF.Spheroidal.p3lSol` used in
+/-- The factor equation in the form `DLMF.Spheroidal.P3lSol` used in
 `DLMF.Spheroidal.P3lSpectrum`. -/
 theorem isSpheroidalFactor_iff {m : ℕ} {γ2 lam : ℝ} {g : ℂ → ℂ} :
     IsSpheroidalFactor m γ2 lam g ↔
-      Differentiable ℂ g ∧ p3lSol m (γ2 : ℂ) (p3lC m lam) univ g := by
+      Differentiable ℂ g ∧ P3lSol m (γ2 : ℂ) (p3lC m lam) univ g := by
   constructor
   · intro hg
     refine ⟨hg.differentiable, fun z _ => ?_⟩
@@ -76,7 +76,6 @@ theorem spheroidalEigenvalue_spec {n m : ℕ} (hmn : m ≤ n) (γ2 : ℝ) :
   have h := exists_spheroidalEigenvalue hmn γ2
   simp only [spheroidalEigenvalue, s30e_dif_pos h]
   exact h.choose_spec
-
 
 /-- **Existence and uniqueness of the normalized eigenfunction** (DLMF §30.4(i)). Flagged
 existence theorem, proved in `DLMF.Spheroidal.P3lParity`: the eigenvalues are simple, the

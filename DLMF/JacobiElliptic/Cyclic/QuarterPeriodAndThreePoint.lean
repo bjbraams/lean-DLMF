@@ -49,14 +49,14 @@ def jacobiCyclicKappa (k : ℂ) : ℂ := jacobiDnk (2 * compEllIntKk k / 3) k
 
 /-! ### Helpers (quarter-period shifts and the points `2K/3`, `4K/3`) -/
 
-/-- The stated relation follows from the given hypotheses: `jacobiRegulark .d z k`. -/
+/-- The stated relation follows from the given hypotheses: `JacobiRegulark .d z k`. -/
 lemma p22R1_reg_d_of_n_add_K {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (h : jacobiRegulark .n (z + compEllIntKk k) k) : jacobiRegulark .d z k :=
+    (h : JacobiRegulark .n (z + compEllIntKk k) k) : JacobiRegulark .d z k :=
   (p22R1_reg_add_K hk .n z).1 h
 
 /-- Values at `z + K` in terms of `sn, cn, dn` at `z` (`dn z ≠ 0`). -/
 lemma p22R1_add_K_vals {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hn : jacobiRegulark .n z k) :
+    (hn : JacobiRegulark .n z k) :
     jacobiSnk (z + compEllIntKk k) k = jacobiCnk z k / jacobiDnk z k ∧
     jacobiCnk (z + compEllIntKk k) k =
       -jacobiComodulusk k * (jacobiSnk z k / jacobiDnk z k) ∧
@@ -84,12 +84,12 @@ lemma p22R1_cyc4 (k z : ℂ) : jacobiCyclicArg 2 1 4 z k = z ∧
 
 /-- The three cyclic points `z, z + 4K/3, z + 8K/3` (`N = 4`, `p = 3`). -/
 lemma p22R1_cyc43_vals {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ)
-    (hreg4 : ∀ m : ℕ, jacobiRegulark .n (jacobiCyclicArg 4 m 3 z k) k) :
+    (hreg4 : ∀ m : ℕ, JacobiRegulark .n (jacobiCyclicArg 4 m 3 z k) k) :
     let s := jacobiSnk z k; let c := jacobiCnk z k; let d := jacobiDnk z k
     let a := 2 * compEllIntKk k / 3
     let sa := jacobiSnk a k; let ca := jacobiCnk a k; let κ := jacobiDnk a k
     let D := 1 - k ^ 2 * s ^ 2 * sa ^ 2
-    jacobiRegulark .n z k ∧ D ≠ 0 ∧
+    JacobiRegulark .n z k ∧ D ≠ 0 ∧
     jacobiCyclicS 4 1 3 z k = s ∧ jacobiCyclicC 4 1 3 z k = c ∧ jacobiCyclicD 4 1 3 z k = d ∧
     jacobiCyclicS 4 2 3 z k = (-s * ca * κ + sa * c * d) / D ∧
     jacobiCyclicC 4 2 3 z k = (-c * ca - s * d * sa * κ) / D ∧
@@ -127,12 +127,12 @@ lemma p22R1_cyc43_vals {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ)
 
 /-- The three cyclic points `z, z + 2K/3, z + 4K/3` (`N = 2`, `p = 3`). -/
 lemma p22R1_cyc23_vals {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ)
-    (hreg2 : ∀ m : ℕ, jacobiRegulark .n (jacobiCyclicArg 2 m 3 z k) k) :
+    (hreg2 : ∀ m : ℕ, JacobiRegulark .n (jacobiCyclicArg 2 m 3 z k) k) :
     let s := jacobiSnk z k; let c := jacobiCnk z k; let d := jacobiDnk z k
     let a := 2 * compEllIntKk k / 3
     let sa := jacobiSnk a k; let ca := jacobiCnk a k; let κ := jacobiDnk a k
     let D := 1 - k ^ 2 * s ^ 2 * sa ^ 2
-    jacobiRegulark .n z k ∧ D ≠ 0 ∧
+    JacobiRegulark .n z k ∧ D ≠ 0 ∧
     jacobiCyclicS 2 1 3 z k = s ∧ jacobiCyclicC 2 1 3 z k = c ∧ jacobiCyclicD 2 1 3 z k = d ∧
     jacobiCyclicS 2 2 3 z k = (s * ca * κ + sa * c * d) / D ∧
     jacobiCyclicC 2 2 3 z k = (c * ca - s * d * sa * κ) / D ∧
@@ -164,7 +164,7 @@ lemma p22R1_cyc23_vals {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ)
 are finite. -/
 @[dlmf 22.9.E7, dlmf 22.9.E8]
 theorem jacobi_cyclic_s4_pairs {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ)
-    (hreg4 : ∀ m : ℕ, jacobiRegulark .n (jacobiCyclicArg 4 m 3 z k) k) :
+    (hreg4 : ∀ m : ℕ, JacobiRegulark .n (jacobiCyclicArg 4 m 3 z k) k) :
     jacobiCyclicS 4 1 3 z k * jacobiCyclicS 4 2 3 z k + jacobiCyclicS 4 2 3 z k *
       jacobiCyclicS 4 3 3 z k + jacobiCyclicS 4 3 3 z k * jacobiCyclicS 4 1 3 z k =
         (jacobiCyclicKappa k ^ 2 - 1) / k ^ 2 := by
@@ -248,7 +248,7 @@ theorem jacobi_cyclic_s4_pairs {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : �
 are finite. -/
 @[dlmf 22.9.E7, dlmf 22.9.E9]
 theorem jacobi_cyclic_c4_pairs {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ)
-    (hreg4 : ∀ m : ℕ, jacobiRegulark .n (jacobiCyclicArg 4 m 3 z k) k) :
+    (hreg4 : ∀ m : ℕ, JacobiRegulark .n (jacobiCyclicArg 4 m 3 z k) k) :
     jacobiCyclicC 4 1 3 z k * jacobiCyclicC 4 2 3 z k + jacobiCyclicC 4 2 3 z k *
       jacobiCyclicC 4 3 3 z k + jacobiCyclicC 4 3 3 z k * jacobiCyclicC 4 1 3 z k =
         -(jacobiCyclicKappa k * (jacobiCyclicKappa k + 2)) / (1 + jacobiCyclicKappa k) ^ 2 := by
@@ -399,8 +399,8 @@ theorem jacobi_cyclic_c4_pairs {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : �
 functions are finite. -/
 @[dlmf 22.9.E7, dlmf 22.9.E10]
 theorem jacobi_cyclic_d_pairs {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ)
-    (hreg2 : ∀ m : ℕ, jacobiRegulark .n (jacobiCyclicArg 2 m 3 z k) k)
-        (hreg4 : ∀ m : ℕ, jacobiRegulark .n (jacobiCyclicArg 4 m 3 z k) k) :
+    (hreg2 : ∀ m : ℕ, JacobiRegulark .n (jacobiCyclicArg 2 m 3 z k) k)
+        (hreg4 : ∀ m : ℕ, JacobiRegulark .n (jacobiCyclicArg 4 m 3 z k) k) :
     jacobiCyclicD 2 1 3 z k * jacobiCyclicD 2 2 3 z k + jacobiCyclicD 2 2 3 z k *
       jacobiCyclicD 2 3 3 z k + jacobiCyclicD 2 3 3 z k * jacobiCyclicD 2 1 3 z k =
         jacobiCyclicKappa k * (jacobiCyclicKappa k + 2) ∧
@@ -671,7 +671,7 @@ theorem jacobi_cyclic_d_pairs {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : �
 the functions are finite. -/
 @[dlmf 22.9.E11]
 theorem jacobi_cyclic_d2_two {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ)
-    (hreg2 : ∀ m : ℕ, jacobiRegulark .n (jacobiCyclicArg 2 m 2 z k) k) :
+    (hreg2 : ∀ m : ℕ, JacobiRegulark .n (jacobiCyclicArg 2 m 2 z k) k) :
     jacobiCyclicD 2 1 2 z k ^ 2 * jacobiCyclicD 2 2 2 z k + jacobiCyclicD 2 2 2 z k ^ 2 *
       jacobiCyclicD 2 1 2 z k = jacobiComodulusk k * (jacobiCyclicD 2 1 2 z k +
         jacobiCyclicD 2 2 2 z k) ∧
@@ -694,7 +694,7 @@ theorem jacobi_cyclic_d2_two {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ
 are finite. -/
 @[dlmf 22.9.E12]
 theorem jacobi_cyclic_csd_two {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ)
-    (hreg2 : ∀ m : ℕ, jacobiRegulark .n (jacobiCyclicArg 2 m 2 z k) k) :
+    (hreg2 : ∀ m : ℕ, JacobiRegulark .n (jacobiCyclicArg 2 m 2 z k) k) :
     jacobiCyclicC 2 1 2 z k * jacobiCyclicS 2 1 2 z k * jacobiCyclicD 2 2 2 z k +
       jacobiCyclicC 2 2 2 z k * jacobiCyclicS 2 2 2 z k * jacobiCyclicD 2 1 2 z k = 0 := by
   obtain ⟨a1, a2⟩ := p22R1_cyc2 k z
@@ -711,7 +711,7 @@ theorem jacobi_cyclic_csd_two {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : �
 functions are finite. -/
 @[dlmf 22.9.E7, dlmf 22.9.E13]
 theorem jacobi_cyclic_s4_triple {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ)
-    (hreg4 : ∀ m : ℕ, jacobiRegulark .n (jacobiCyclicArg 4 m 3 z k) k) :
+    (hreg4 : ∀ m : ℕ, JacobiRegulark .n (jacobiCyclicArg 4 m 3 z k) k) :
     jacobiCyclicS 4 1 3 z k * jacobiCyclicS 4 2 3 z k * jacobiCyclicS 4 3 3 z k = -(1 /
       (1 - jacobiCyclicKappa k ^ 2)) * (jacobiCyclicS 4 1 3 z k + jacobiCyclicS 4 2 3 z k +
         jacobiCyclicS 4 3 3 z k) := by

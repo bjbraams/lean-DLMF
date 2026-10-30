@@ -118,7 +118,7 @@ namespace DLMF.OrthogonalPolynomials.LegendreSingular
 /-- Legendre endpoint values. -/
 theorem endpoints (n : ℕ) : legendrePolyP n 1 = 1 ∧ legendrePolyP n (-1) = (-1)^n := by
   have h1 : legendrePolyP n 1 = 1 := by
-    rw [legendrePolyP, jacobi_at_one (by norm_num)]
+    rw [legendrePolyP, jacobiPolyP_one ]
     simp [Nat.cast_ne_zero.mpr n.factorial_ne_zero]
   refine ⟨h1, ?_⟩
   change jacobiPolyP 0 0 n (-1) = _

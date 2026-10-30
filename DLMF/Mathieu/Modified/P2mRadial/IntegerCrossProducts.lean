@@ -53,7 +53,7 @@ lemma p2m_besselYExp_neg (μ : ℂ) {h : ℂ} (hh : h ≠ 0) (z : ℂ) :
 lemma p2m_besselYExp_neg_intCast (k : ℤ) {h : ℂ} (hh : h ≠ 0) (z : ℂ) :
     besselYExp ((-k : ℤ) : ℂ) h z = (-1 : ℂ) ^ k * besselYExp k h z := by
   rw [Int.cast_neg, p2m_besselYExp_neg _ hh, DLMF.Bessel.cos_int_mul_pi_complex,
-    DLMF.Bessel.sin_int_mul_pi_complex, zero_mul, add_zero]
+    Complex.sin_int_mul_pi, zero_mul, add_zero]
 
 /-- For an integer `k`, `𝒞^{(j)}_{-k}(h e^z) = (-1)^k 𝒞^{(j)}_k(h e^z)`. -/
 lemma p2m_mathieuCylExp_neg_intCast (j : ℕ) (hj₁ : 1 ≤ j) (hj₄ : j ≤ 4) (k : ℤ) {h : ℂ}
@@ -82,13 +82,13 @@ theorem p2m_mathieuSe_add_pi {N : ℕ} (hN : N ≠ 0) (z : ℂ) (q : ℝ) :
 theorem p2m_cos_add_int_mul_pi (K : ℤ) (x : ℂ) :
     Complex.cos (K * (x + π)) = (-1 : ℂ) ^ K * Complex.cos (K * x) := by
   rw [mul_add, Complex.cos_add, DLMF.Bessel.cos_int_mul_pi_complex,
-    DLMF.Bessel.sin_int_mul_pi_complex]; ring
+    Complex.sin_int_mul_pi]; ring
 
 /-- For `K ∈ ℤ`, `sin(K(x + π)) = (-1)^K sin(Kx)`. -/
 theorem p2m_sin_add_int_mul_pi (K : ℤ) (x : ℂ) :
     Complex.sin (K * (x + π)) = (-1 : ℂ) ^ K * Complex.sin (K * x) := by
   rw [mul_add, Complex.sin_add, DLMF.Bessel.cos_int_mul_pi_complex,
-    DLMF.Bessel.sin_int_mul_pi_complex]; ring
+    Complex.sin_int_mul_pi]; ring
 
 /-- If `K ≡ N (mod 2)` then `(-1)^N (-1)^K = 1`. -/
 lemma p2m_negOnePow_mul_eq_one {N : ℕ} {K : ℤ} (hK : ∃ k : ℤ, K = N + 2 * k) :

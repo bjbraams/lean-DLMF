@@ -431,11 +431,11 @@ theorem isAirySol_airyAi_mul {ν : ℂ} (hν : ν ^ 3 = 1) :
 theorem hasDerivAt_primitive {f : ℂ → ℂ} (hf : Differentiable ℂ f) (z : ℂ) :
     HasDerivAt (primitive f) (f z) z := by
   have he : primitive f = fun w : ℂ => w * ∫ t : ℝ in 0..1, f (t * w) := by
-    funext w; simp [primitive, lineIntegral]
+    funext w; simp [primitive, segmentIntegral]
   rw [he]; exact Complex.hasDerivAt_mul_integral_comp_mul hf z
 
 /-- The primitive `∫₀^z f` vanishes at `z = 0`. -/
-theorem primitive_zero (f : ℂ → ℂ) : primitive f 0 = 0 := by simp [primitive, lineIntegral]
+theorem primitive_zero (f : ℂ → ℂ) : primitive f 0 = 0 := by simp [primitive, segmentIntegral]
 
 /-- `Bi(0) = √3 Ai(0)`. -/
 theorem airyBi_zero_eq : airyBi 0 = (Real.sqrt 3 : ℂ) * airyAi 0 := by

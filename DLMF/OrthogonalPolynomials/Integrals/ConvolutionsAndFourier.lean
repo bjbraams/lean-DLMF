@@ -576,7 +576,7 @@ jacobiPolyP (α + μ) (β - μ) n x / Gamma (α + μ + n + 1 : ℂ) = ∫ y : �
 (α : ℂ) * jacobiPolyP α β n y / Gamma (α + n + 1 : ℂ) * ((y - x : ℂ) ^ (μ - 1 : ℂ) / Gamma (μ
 : ℂ))`. -/
 @[dlmf 18.17.E9]
-theorem jacobi_fractional_integral {α β μ : ℝ} (hα : -1 < α) (hβ : -1 < β) (hμ : 0 < μ)
+theorem jacobi_fractional_integral {α β μ : ℝ} (hα : -1 < α) (hμ : 0 < μ)
     (n : ℕ) {x : ℝ} (hx : x ∈ Set.Ioo (-1) 1) :
     (1 - (x : ℂ)) ^ (α + μ : ℂ) * jacobiPolyP (α + μ) (β - μ) n x / Gamma (α + μ + n + 1 : ℂ) =
       ∫ y : ℝ in x..1, (1 - (y : ℂ)) ^ (α : ℂ) * jacobiPolyP α β n y / Gamma (α + n + 1 : ℂ) *

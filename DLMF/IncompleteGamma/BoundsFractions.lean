@@ -5,9 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.IncompleteGamma.RealIntegrals
-public import DLMF.IncompleteGamma.FractionTools
 public import DLMF.IncompleteGamma.BoundTools
+public import DLMF.IncompleteGamma.FractionTools
+public import DLMF.IncompleteGamma.RealIntegrals
 
 /-!
 # Continued fractions and inequalities, DLMF §§8.9–8.10
@@ -75,7 +75,7 @@ theorem upperIncGamma_continuedFraction_complex (a : ℂ) {z : ℂ} (hz : z ∈ 
 /-- Estimate under the stated parameter and domain assumptions: `x^(1-a)*Real.exp x*(upperIncGamma
 a x).re ≤ 1`. -/
 @[dlmf 8.10.E1]
-theorem upperIncGamma_bound_le_one {a x : ℝ} (ha : 0 < a) (ha1 : a ≤ 1) (hx : 0 < x) :
+theorem upperIncGamma_bound_le_one {a x : ℝ} (ha1 : a ≤ 1) (hx : 0 < x) :
     x^(1-a)*Real.exp x*(upperIncGamma a x).re ≤ 1 := by
   have h := incG_upperIncGamma_re_le ha1 hx
   have e : x^(1-a)*Real.exp x*(x^(a-1)*Real.exp (-x)) = 1 := by
@@ -439,7 +439,7 @@ theorem incompleteGamma_positive_exponential_bounds {a x : ℝ} (ha : 0 < a) (hx
 /-- The map `(fun a : ℝ => (exp (-x : ℂ)*Gamma (a+1)*scIncGamma a (-x)).re)` tends to `(𝓝
 (Real.exp (-x)))` along `(𝓝[>] 0)`. -/
 @[dlmf 8.10.E8]
-theorem incompleteGamma_positive_exponential_limit {x : ℝ} (hx : 0 < x) :
+theorem incompleteGamma_positive_exponential_limit {x : ℝ} :
     Tendsto (fun a : ℝ => (exp (-x : ℂ)*Gamma (a+1)*scIncGamma a (-x)).re) (𝓝[>] 0) (𝓝 (Real.exp (-x))) := by
   have h0 : scIncGamma 0 (-x) = 1 := by
     have := scIncGamma_neg_nat 0 (-(x:ℂ)); simpa using this

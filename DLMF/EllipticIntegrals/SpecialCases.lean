@@ -5,14 +5,14 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.JacobiElliptic.SpecialValues
-public import Mathlib.Analysis.SpecialFunctions.Arsinh
-public import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
 public import Carlson.TwoVariable.R.ElementaryValues
 public import Carlson.TwoVariable.Reduction
 public import DLMF.EllipticIntegrals.Legendre
 public import DLMF.EllipticIntegrals.LegendreIdentities
 public import DLMF.EllipticIntegrals.Symmetric
+public import DLMF.JacobiElliptic.SpecialValues
+public import Mathlib.Analysis.SpecialFunctions.Arsinh
+public import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
 
 /-!
 # Special cases of Legendre's integrals and of `R_C` (DLMF §19.6)
@@ -743,7 +743,7 @@ value). -/
 @[dlmf 19.6.E15]
 theorem symEllIntRC_special :
     (∀ x : ℂ, x ∈ slitPlane → symEllIntRC x x = x ^ (-(1 / 2 : ℂ))) ∧
-      (∀ (l : ℝ) (x y : ℂ), 0 < l → symEllIntArg x → y ≠ 0 →
+      (∀ (l : ℝ) (x y : ℂ), 0 < l → SymEllIntArg x → y ≠ 0 →
         symEllIntRC (l * x) (l * y) = (l : ℂ) ^ (-(1 / 2 : ℂ)) * symEllIntRC x y) ∧
       (∀ y : ℂ, y ∈ slitPlane → symEllIntRC 0 y = π / 2 * y ^ (-(1 / 2 : ℂ))) ∧
       (∀ y : ℝ, y < 0 → symEllIntRC 0 y = 0) := by

@@ -53,7 +53,7 @@ lemma pcfLG2_im_I_pow {e n : ℕ} (h : Even (n + e)) : (I^e * (-I)^n).im = 0 := 
   rw [this, Complex.ofReal_im]
 
 /-- For a polynomial of parity `e`, `i^e P(-it)` is real. -/
-lemma pcfLG2_bar_real {e D : ℕ} {P : Polynomial ℝ} (hP : pcfLG_good e D P) (t : ℝ) :
+lemma pcfLG2_bar_real {e D : ℕ} {P : Polynomial ℝ} (hP : PcfLGGood e D P) (t : ℝ) :
     I^e * aeval (-I * t) P = (((pcfLG2_bar e P).eval t : ℝ) : ℂ) := by
   refine Complex.ext ?_ ?_
   · rw [pcfLG2_bar_eval, Complex.ofReal_re]
@@ -85,13 +85,13 @@ lemma pcfLG2_bar_coeff (e : ℕ) (P : Polynomial ℝ) (n : ℕ) :
     simp [coeff_eq_zero_of_natDegree_lt this]
 
 /-- The barred polynomial keeps the parity class. -/
-lemma pcfLG2_bar_good {e D : ℕ} {P : Polynomial ℝ} (hP : pcfLG_good e D P) (e' : ℕ) :
-    pcfLG_good e D (pcfLG2_bar e' P) := fun n hn => by
+lemma pcfLG2_bar_good {e D : ℕ} {P : Polynomial ℝ} (hP : PcfLGGood e D P) (e' : ℕ) :
+    PcfLGGood e D (pcfLG2_bar e' P) := fun n hn => by
   rw [pcfLG2_bar_coeff] at hn
   exact hP n (left_ne_zero_of_mul hn)
 
 /-- Parity: `P(-t) = (-1)^e P(t)` for `P` of parity `e`. -/
-lemma pcfLG2_eval_neg {e D : ℕ} {P : Polynomial ℝ} (hP : pcfLG_good e D P) (t : ℝ) :
+lemma pcfLG2_eval_neg {e D : ℕ} {P : Polynomial ℝ} (hP : PcfLGGood e D P) (t : ℝ) :
     P.eval (-t) = (-1)^e * P.eval t := by
   rw [eval_eq_sum_range, eval_eq_sum_range, Finset.mul_sum]
   refine Finset.sum_congr rfl fun n _ => ?_
@@ -352,7 +352,7 @@ lemma pcfLG2_tail_le {f : ℝ → ℝ} (hf : Continuous f) {K : ℝ}
     _ = K * π := by rw [integral_const_mul, integral_univ_inv_one_add_sq]
 
 /-- Parity and degree of `Q_s`. -/
-lemma pcfLG2_Q_good (s : ℕ) : pcfLG_good s (3*s) (pcfLG2_Q s) :=
+lemma pcfLG2_Q_good (s : ℕ) : PcfLGGood s (3*s) (pcfLG2_Q s) :=
   pcfLG2_bar_good (pcfLG_olverPair_inv s).1 s
 
 /-- `|Ā_s(t)| ≤ K_s` on `ℝ`. -/

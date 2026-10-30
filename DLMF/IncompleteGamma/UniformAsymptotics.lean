@@ -5,11 +5,11 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.ErrorFunctions.AnalyticProperties
+public import DLMF.IncompleteGamma.ContinuedProperties
 public import DLMFMathlib.Analysis.Complex.StarPrimitive
 public import Mathlib.Topology.Homotopy.Lifting
 public import TauCeti.Topology.Covering.Proper
-public import DLMF.ErrorFunctions.AnalyticProperties
-public import DLMF.IncompleteGamma.ContinuedProperties
 
 /-!
 # Uniform incomplete-Gamma expansions and inversion, DLMF §8.12
@@ -328,7 +328,7 @@ theorem slitPlane_add_one_ne_neg_nat {a : ℂ} (ha : a ∈ slitPlane) : ∀ n : 
 
 /-- The reflection formula cancels the source quotient by sin(πa), including integral a. -/
 @[dlmf 8.12.E5]
-theorem gammaUniformQ_negative_identity {a : ℂ} (ha : a ∈ slitPlane) {w : ℂ} (hw : |w.im| < 2*π) {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
+theorem gammaUniformQ_negative_identity {a : ℂ} (ha : a ∈ slitPlane) {w : ℂ} {ε : ℝ} (hε : ε=1 ∨ ε = -1) :
     -exp (ε*π*I*a)*Gamma (a+1)/(2*π*I)*upperIncGammaOnLog (-a) (log a+w+ε*π*I)=ε/2*erfc (ε*I*gammaUniformEtaOnLog w*(a/2)^(1/2 : ℂ))-I*gammaUniformT a w := by
   have hG := Gamma_ne_zero (slitPlane_add_one_ne_neg_nat ha)
   rcases hε with rfl | rfl
@@ -357,7 +357,7 @@ theorem gammaUniformQ_negative_identity {a : ℂ} (ha : a ∈ slitPlane) {w : �
 (-a) (-a*exp w)=cos (π*a)-2*sin (π*a)*(exp (a*gammaUniformEtaOnLog w^2/2)/Real.sqrt π*dawsonF
 (gammaUniformEtaOnLog w*(a/2)^(1/2 : ℂ))+gammaUniformT a w)`. -/
 @[dlmf 8.12.E6]
-theorem gammaUniform_scIncGamma_identity {a : ℂ} (ha : a ∈ slitPlane) {w : ℂ} (hw : |w.im| < 2*π) :
+theorem gammaUniform_scIncGamma_identity {a : ℂ} (ha : a ∈ slitPlane) {w : ℂ} :
     exp (-a*(log a+w))*scIncGamma (-a) (-a*exp w)=cos (π*a)-2*sin (π*a)*(exp (a*gammaUniformEtaOnLog w^2/2)/Real.sqrt π*dawsonF (gammaUniformEtaOnLog w*(a/2)^(1/2 : ℂ))+gammaUniformT a w) := by
   have ha0 : a ≠ 0 := slitPlane_ne_zero ha
   have hev : exp (log a+w)=a*exp w := by rw [Complex.exp_add, Complex.exp_log ha0]

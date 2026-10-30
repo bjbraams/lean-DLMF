@@ -347,7 +347,7 @@ paragraph in §1.2(vi), §1.8(i), §1.15(i), §1.15(iv), and §1.17(iv).
 ### §1.13 Differential Equations
 
 - **Simply connected domain, second-order linear ODE, fundamental pair and Wronskians**, [DLMF 1.13.i](https://dlmf.nist.gov/1.13.i):
-  `DLMF.AlgebraicAnalytic.IsLinODE2SolOn` ([source](DLMF/AlgebraicAnalytic/ODE/Basic.lean#L35)), `DLMF.AlgebraicAnalytic.IsFundamentalPair` ([source](DLMF/AlgebraicAnalytic/ODE/Basic.lean#L42)), `DLMF.AlgebraicAnalytic.wronskian` ([source](DLMF/AlgebraicAnalytic/ODE/Basic.lean#L49)), `DLMF.AlgebraicAnalytic.wronskianN` ([source](DLMF/AlgebraicAnalytic/ODE/Basic.lean#L54)). The solution predicate includes genuine derivatives. The source’s simply connected planar domain corresponds to the topological simply-connected condition under its open-domain assumptions. Fundamental solutions with prescribed initial data are existentially characterized, not globally selected by this definitions file.
+  `DLMF.AlgebraicAnalytic.IsLinODE2SolOn` ([source](DLMF/AlgebraicAnalytic/ODE/Basic.lean#L35)), `DLMF.AlgebraicAnalytic.IsFundamentalPair` ([source](DLMF/AlgebraicAnalytic/ODE/Basic.lean#L42)), `ODE.wronskian` ([source](DLMF/AlgebraicAnalytic/ODE/Basic.lean#L49)), `DLMF.AlgebraicAnalytic.wronskianN` ([source](DLMF/AlgebraicAnalytic/ODE/Basic.lean#L54)). The solution predicate includes genuine derivatives. The source’s simply connected planar domain corresponds to the topological simply-connected condition under its open-domain assumptions. Fundamental solutions with prescribed initial data are existentially characterized, not globally selected by this definitions file.
 
 - **Variation-of-parameters particular solution and transformed ODE coefficients**, [DLMF 1.13.E10](https://dlmf.nist.gov/1.13.E10):
   The particular solution in 1.13.10 is a combination of two primitives divided by their Wronskian. W,F,G in 1.13.12, H in 1.13.15, and η in 1.13.16 are explicit substitutions and coefficient expressions in the local transformation theorems; no additional universal coefficient functions are named. Choice of primitive and nonzero coordinate derivatives remain relevant.
@@ -2505,7 +2505,7 @@ Traversal: all §§11.1–11.16 checked; matching headings are §11.2,
 ### §11.2 Definitions
 
 - **Struve normalized cores, logarithmic branches and equation predicates**, [DLMF 11.2](https://dlmf.nist.gov/11.2):
-  The retained H,L,K,M constructions also have normalized entire `DLMF.Struve.struveHCore`, `DLMF.Struve.struveLCore`, reciprocal-Gamma `DLMF.Struve.struveCoeff`, and explicit logarithmic-plane `DLMF.Struve.struveHOnLog`, `DLMF.Struve.struveLOnLog` variants ([source](DLMF/Struve/Basic/Functions.lean#L27)). The ordinary/modified inhomogeneous equation is `DLMF.Struve.struveEquation`, with cleared `DLMF.Struve.besselResidual` and `DLMF.Struve.IsStruveSolutionOn`. The entire normalized series differs from the branch-dependent prefactor; principal powers alone do not record continuation through multiple turns.
+  The retained H,L,K,M constructions also have normalized entire `DLMF.Struve.struveHCore`, `DLMF.Struve.struveLCore`, reciprocal-Gamma `DLMF.Struve.struveCoeff`, and explicit logarithmic-plane `DLMF.Struve.struveHOnLog`, `DLMF.Struve.struveLOnLog` variants ([source](DLMF/Struve/Basic/Functions.lean#L27)). The ordinary/modified inhomogeneous equation is `DLMF.Struve.StruveEquation`, with cleared `DLMF.Struve.besselResidual` and `DLMF.Struve.IsStruveSolutionOn`. The entire normalized series differs from the branch-dependent prefactor; principal powers alone do not record continuation through multiple turns.
 
 <!-- retained entry 83 -->
 - **Struve H and modified Struve L**, [11.2.1–2](https://dlmf.nist.gov/11.2.E1):
@@ -2526,7 +2526,7 @@ Traversal: all §§11.1–11.16 checked; matching headings are §11.2,
 
 <!-- retained entry 85 -->
 - **Struve and modified Struve equations**, [11.2.7–10](https://dlmf.nist.gov/11.2.E7):
-  `DLMF.Struve.struveEquation` and `IsStruveSolutionOn` in
+  `DLMF.Struve.StruveEquation` and `IsStruveSolutionOn` in
   [Basic](DLMF/Struve/Basic/Functions.lean#L71), with a Boolean selecting the modified sign.
 
 ### §11.4 Basic Properties
@@ -3458,7 +3458,7 @@ Traversal: all §§16.1–16.27 checked; matching headings are §16.2 and §16.1
   `GenPrincipalContinuation` specifies the principal continuation for `p=q+1`;
   `genHGLower` separately gives lower-bank values. For `p>q+1` nonterminating
   series values are not a continuation: use the Barnes constructions
-  `genHasBarnesValueLog`, `genBarnesHGLog` in the same file.
+  `GenHasBarnesValueLog`, `genBarnesHGLog` in the same file.
 
 <!-- retained entry 110 -->
 - **Excess γq**, [16.2.2](https://dlmf.nist.gov/16.2.E2):
@@ -3466,7 +3466,7 @@ Traversal: all §§16.1–16.27 checked; matching headings are §16.2 and §16.1
   [Basic](DLMF/GeneralizedHypergeometric/Basic/ParametersAndSeries.lean#L59).
 
 - **Generalized hypergeometric excess and classifications**, [DLMF 16.2.E2](https://dlmf.nist.gov/16.2.E2):
-  The excessγ_q is `DLMF.Hypergeometric.genExcess`; regularized and ordinary/finite series are distinct constructions. Well-poised, very-well-poised andk-balanced classifications are `DLMF.Hypergeometric.genWellPoised`, the corresponding half-parameter condition, and `DLMF.Hypergeometric.genKBalanced` ([source](DLMF/GeneralizedHypergeometric/UnitArgument.lean#L38)). Balanced/Saalschützian means1-balanced with termination as specified. The bilateral coefficient and series are `DLMF.Hypergeometric.genBilateralCoeff`, `DLMF.Hypergeometric.genBilateralHG` ([source](DLMF/GeneralizedHypergeometric/Basic/BilateralAndBarnes.lean#L26)); negative indices use the appropriate generalized factorial convention.
+  The excessγ_q is `DLMF.Hypergeometric.genExcess`; regularized and ordinary/finite series are distinct constructions. Well-poised, very-well-poised andk-balanced classifications are `DLMF.Hypergeometric.GenWellPoised`, the corresponding half-parameter condition, and `DLMF.Hypergeometric.GenKBalanced` ([source](DLMF/GeneralizedHypergeometric/UnitArgument.lean#L38)). Balanced/Saalschützian means1-balanced with termination as specified. The bilateral coefficient and series are `DLMF.Hypergeometric.genBilateralCoeff`, `DLMF.Hypergeometric.genBilateralHG` ([source](DLMF/GeneralizedHypergeometric/Basic/BilateralAndBarnes.lean#L26)); negative indices use the appropriate generalized factorial convention.
 
 <!-- retained entry 111 -->
 - **Regularized generalized hypergeometric function**, [16.2.5](https://dlmf.nist.gov/16.2.E5):
@@ -3482,11 +3482,11 @@ Traversal: all §§16.1–16.27 checked; matching headings are §16.2 and §16.1
 
 - **Well-poised parameter vectors, in exactly the indexing order of 16.4.1**, [DLMF 16.4.E1](https://dlmf.nist.gov/16.4.E1):
   Well-poised parameter vectors, in exactly the indexing order of 16.4.1.
-  `DLMF.Hypergeometric.genWellPoised` ([definition](DLMF/GeneralizedHypergeometric/UnitArgument.lean#L38)).
+  `DLMF.Hypergeometric.GenWellPoised` ([definition](DLMF/GeneralizedHypergeometric/UnitArgument.lean#L38)).
 
 - **K-balanced terminating unity series (16.4.2); balanced means k=1**, [DLMF 16.4.E2](https://dlmf.nist.gov/16.4.E2):
   A k-balanced terminating unity series (16.4.2); balanced means k=1.
-  `DLMF.Hypergeometric.genKBalanced` ([definition](DLMF/GeneralizedHypergeometric/UnitArgument.lean#L47)).
+  `DLMF.Hypergeometric.GenKBalanced` ([definition](DLMF/GeneralizedHypergeometric/UnitArgument.lean#L47)).
 
 - **Thomae expression supplies parameter continuation beyond the original unit**, [DLMF 16.4.E11](https://dlmf.nist.gov/16.4.E11):
   The Thomae expression supplies parameter continuation beyond the original unit
@@ -3505,7 +3505,7 @@ Traversal: all §§16.1–16.27 checked; matching headings are §16.2 and §16.1
 ### §16.8 Differential Equations
 
 - **Ordinary/regular singularities and generalized hypergeometric ODE**, [DLMF 16.8](https://dlmf.nist.gov/16.8):
-  The classification extends §2.7 to arbitrary order; the local predicates are `Complex.linearODEOrdinaryAt`, `Complex.linearODEAtMostRegularAt`, `Complex.linearODERegularSingularAt`, `Complex.linearODEIrregularAt` and their infinity counterparts ([source](DLMFMathlib/Analysis/ODE/Singularities.lean#L32)). The module path is `DLMFMathlib.Analysis.ODE.Singularities`; the declaration namespace is `Complex`. Eulerθ=zD is `DLMF.Hypergeometric.eulerTheta`, while the normalized differential form, coefficient polynomials and Frobenius solutions are `DLMF.Hypergeometric.genNormalizedODE`, `DLMF.Hypergeometric.genD`, `DLMF.Hypergeometric.genThetaA`, `DLMF.Hypergeometric.genThetaB`, `DLMF.Hypergeometric.genThetaDCoeff`, `DLMF.Hypergeometric.genODEAlpha`, `DLMF.Hypergeometric.genODEBeta`, `DLMF.Hypergeometric.genODEOrder`, `DLMF.Hypergeometric.genODECoeff`, `DLMF.Hypergeometric.genODESolution`, `DLMF.Hypergeometric.genFundamentalSystem`, `DLMF.Hypergeometric.genFrobeniusRoot`, `DLMF.Hypergeometric.genFrobeniusZero`, `DLMF.Hypergeometric.genHGNegativeLog`, `DLMF.Hypergeometric.genFrobeniusInfinityLog`, `DLMF.Hypergeometric.genInfinityConnectionCoeff`, `DLMF.Hypergeometric.genCenteredInfinityTerm` ([source](DLMF/GeneralizedHypergeometric/DifferentialEquations.lean#L32)). Ordinary powers and full logarithmic sheets remain separate.
+  The classification extends §2.7 to arbitrary order; the local predicates are `Complex.LinearODEOrdinaryAt`, `Complex.LinearODEAtMostRegularAt`, `Complex.LinearODERegularSingularAt`, `Complex.LinearODEIrregularAt` and their infinity counterparts ([source](DLMFMathlib/Analysis/ODE/Singularities.lean#L32)). The module path is `DLMFMathlib.Analysis.ODE.Singularities`; the declaration namespace is `Complex`. Eulerθ=zD is `DLMF.Hypergeometric.eulerTheta`, while the normalized differential form, coefficient polynomials and Frobenius solutions are `DLMF.Hypergeometric.genNormalizedODE`, `DLMF.Hypergeometric.genD`, `DLMF.Hypergeometric.genThetaA`, `DLMF.Hypergeometric.genThetaB`, `DLMF.Hypergeometric.genThetaDCoeff`, `DLMF.Hypergeometric.genODEAlpha`, `DLMF.Hypergeometric.genODEBeta`, `DLMF.Hypergeometric.genODEOrder`, `DLMF.Hypergeometric.genODECoeff`, `DLMF.Hypergeometric.GenODESolution`, `DLMF.Hypergeometric.GenFundamentalSystem`, `DLMF.Hypergeometric.genFrobeniusRoot`, `DLMF.Hypergeometric.genFrobeniusZero`, `DLMF.Hypergeometric.genHGNegativeLog`, `DLMF.Hypergeometric.genFrobeniusInfinityLog`, `DLMF.Hypergeometric.genInfinityConnectionCoeff`, `DLMF.Hypergeometric.genCenteredInfinityTerm` ([source](DLMF/GeneralizedHypergeometric/DifferentialEquations.lean#L32)). Ordinary powers and full logarithmic sheets remain separate.
 
   [DLMF 16.8.E1](https://dlmf.nist.gov/16.8.E1):
   Normalized scalar ODE value (16.8.1).
@@ -3624,7 +3624,7 @@ specify general continuation data, rather than a globally single-valued Appell f
   `MeijerGConvergesLog`, `meijerGLog`, and `meijerG` in
   [MeijerG](DLMF/GeneralizedHypergeometric/MeijerG.lean#L27).
   Pole separation, orientation and convergence are recorded explicitly by
-  `Valid`, `Admissible`, and `meijerGContourRegion`. The principal function
+  `Valid`, `Admissible`, and `MeijerGContourRegion`. The principal function
   specializes the logarithmic one with `Complex.log`; a zero fallback outside
   the existence predicate is not a convergent contour value.
 
@@ -3722,7 +3722,7 @@ Traversal: all §§17.1–17.19 checked; no heading contains “Definition” or
 ### §17.4 Basic Hypergeometric Functions
 
 - **Basic hypergeometric continuations and poised classifications**, [DLMF 17.4](https://dlmf.nist.gov/17.4):
-  The unilateral/bilateral series `DLMF.QHypergeometric.qPhi`, `DLMF.QHypergeometric.qPsi`, their finite forms/coefficient functions and `DLMF.QHypergeometric.qAppell1`, `DLMF.QHypergeometric.qAppell2`, `DLMF.QHypergeometric.qAppell3`, `DLMF.QHypergeometric.qAppell4` constructions retain the Gasper–Rahman phase factor convention; older Bailey/Slater notation differs. The five class predicates are `DLMF.QHypergeometric.qBalanced`, `DLMF.QHypergeometric.qKBalanced`, `DLMF.QHypergeometric.qWellPoised`, `DLMF.QHypergeometric.qVeryWellPoised`, `DLMF.QHypergeometric.qNearlyPoised` ([source](DLMF/QHypergeometric/Basic/Series.lean#L42)). `DLMF.QHypergeometric.qOnePhiZeroContinuation` ([source](DLMF/QHypergeometric/BasicSummations.lean#L31)), `DLMF.QHypergeometric.qHeineJacksonValue` ([source](DLMF/QHypergeometric/BasicSummations.lean#L33)), `DLMF.QHypergeometric.qHeineBarnesKernel` ([source](DLMF/QHypergeometric/BasicSummations.lean#L37)), `DLMF.QHypergeometric.qHeineBarnesLeft` ([source](DLMF/QHypergeometric/BasicSummations.lean#L41)), `DLMF.QHypergeometric.qHeineBarnesRight` ([source](DLMF/QHypergeometric/BasicSummations.lean#L44)) provide a product continuation and independent Jackson/Barnes expressions. Common-zero removal is an existential analytic-germ theorem, without another selected function. No separately named global two-phi-one continued function was found. Bibasic identities use two bases; they do not define a new q-Gamma branch.
+  The unilateral/bilateral series `DLMF.QHypergeometric.qPhi`, `DLMF.QHypergeometric.qPsi`, their finite forms/coefficient functions and `DLMF.QHypergeometric.qAppell1`, `DLMF.QHypergeometric.qAppell2`, `DLMF.QHypergeometric.qAppell3`, `DLMF.QHypergeometric.qAppell4` constructions retain the Gasper–Rahman phase factor convention; older Bailey/Slater notation differs. The five class predicates are `DLMF.QHypergeometric.QBalanced`, `DLMF.QHypergeometric.QKBalanced`, `DLMF.QHypergeometric.QWellPoised`, `DLMF.QHypergeometric.QVeryWellPoised`, `DLMF.QHypergeometric.QNearlyPoised` ([source](DLMF/QHypergeometric/Basic/Series.lean#L42)). `DLMF.QHypergeometric.qOnePhiZeroContinuation` ([source](DLMF/QHypergeometric/BasicSummations.lean#L31)), `DLMF.QHypergeometric.qHeineJacksonValue` ([source](DLMF/QHypergeometric/BasicSummations.lean#L33)), `DLMF.QHypergeometric.qHeineBarnesKernel` ([source](DLMF/QHypergeometric/BasicSummations.lean#L37)), `DLMF.QHypergeometric.qHeineBarnesLeft` ([source](DLMF/QHypergeometric/BasicSummations.lean#L41)), `DLMF.QHypergeometric.qHeineBarnesRight` ([source](DLMF/QHypergeometric/BasicSummations.lean#L44)) provide a product continuation and independent Jackson/Barnes expressions. Common-zero removal is an existential analytic-germ theorem, without another selected function. No separately named global two-phi-one continued function was found. Bibasic identities use two bases; they do not define a new q-Gamma branch.
 
 <!-- retained entry 117 -->
 - **Basic unilateral and bilateral hypergeometric series**,
@@ -3741,8 +3741,8 @@ Traversal: all §§17.1–17.19 checked; no heading contains “Definition” or
 <!-- retained entry 119 -->
 - **Balanced/Saalschützian, k-balanced, well-poised, very-well-poised and
   nearly-poised series**, [17.4.9–13](https://dlmf.nist.gov/17.4.E9):
-  `DLMF.QHypergeometric.qBalanced`, `qKBalanced`, `qWellPoised`,
-  `qVeryWellPoised`, `qNearlyPoised` in
+  `DLMF.QHypergeometric.QBalanced`, `QKBalanced`, `QWellPoised`,
+  `QVeryWellPoised`, `QNearlyPoised` in
   [Basic](DLMF/QHypergeometric/Basic/Series.lean#L75).
 
 ### §17.12 Bailey Pairs
@@ -4457,10 +4457,10 @@ Traversal: all §§19.1–19.39 checked; matching sections are §19.2 and §19.1
 ### §19.16 Definitions
 
 - **Admissible symmetric-integral arguments and cut-root convention**, [DLMF 19.16.i](https://dlmf.nist.gov/19.16.i): DLMF §19.16(i): an admissible argument of a symmetric integral, `x ∈ ℂ \ (-∞, 0]` or `x = 0` (that is, `x` is not a negative real number).
-  [`DLMF.EllipticIntegrals.symEllIntArg`](DLMF/EllipticIntegrals/Symmetric.lean#L72).
+  [`DLMF.EllipticIntegrals.SymEllIntArg`](DLMF/EllipticIntegrals/Symmetric.lean#L72).
 
   [DLMF 19.16.i](https://dlmf.nist.gov/19.16.i): DLMF §19.16(i): the domain of `R_F(x, y, z)` and of the first three arguments of `R_J`: admissible arguments, at most one of them zero.
-  [`DLMF.EllipticIntegrals.symEllIntRFDomain`](DLMF/EllipticIntegrals/Symmetric.lean#L77).
+  [`DLMF.EllipticIntegrals.SymEllIntRFDomain`](DLMF/EllipticIntegrals/Symmetric.lean#L77).
 
 <!-- retained entry 144 -->
 - **RF, RJ, RG, RD and kernel s(t)**, [19.16.1–5](https://dlmf.nist.gov/19.16.E1):
@@ -5157,14 +5157,12 @@ are numerical and introduce no further functions.
 <!-- retained entry 167 -->
 - **Periodic Bernoulli and antiperiodic Euler functions**,
   [24.2.11–12](https://dlmf.nist.gov/24.2.E11):
-  `DLMF.BernoulliEuler.periodicBernoulliB`, `periodicEulerE` in
-  [Basic](DLMF/BernoulliEuler/Basic.lean#L236), using fractional part and
-  the integer-part sign for Euler. Their values at integers follow the
-  half-open interval convention, especially relevant in degree one.
-  The real definitions `periodicBernoulli` in
+  `periodicBernoulli` in
   [EulerMaclaurin](DLMFMathlib/Analysis/EulerMaclaurin.lean#L47) and
-  `antiperiodicEuler` in [BooleSummation](DLMFMathlib/Analysis/BooleSummation.lean#L39)
-  repeat these same expressions. Mathlib's `periodizedBernoulli` in
+  `antiperiodicEuler` in [BooleSummation](DLMFMathlib/Analysis/BooleSummation.lean#L39),
+  using fractional part and the integer-part sign for Euler. Their values at
+  integers follow the half-open interval convention, especially relevant in
+  degree one. These are the canonical real definitions used throughout the project. Mathlib's `periodizedBernoulli` in
   [ZetaValues](.lake/packages/mathlib/Mathlib/NumberTheory/ZetaValues.lean#L274)
   is the corresponding function on `UnitAddCircle`; the local equality
   theorem makes the change of domain explicit.
@@ -5308,9 +5306,9 @@ are numerical and introduce no further functions.
 
 ### §24.17 Mathematical Applications
 
-- **Boole remainder**, [24.17.2](https://dlmf.nist.gov/24.17.E2): Rₘ(n) is the integral of f⁽ᵐ⁾(x) times the shifted antiperiodic Euler function, divided by 2(m−1)!. The existing Boole-summation development under `DLMFMathlib` supplies related formulas; no separate public remainder function was identified. The named periodic factor is `DLMF.BernoulliEuler.periodicEulerE`. This exact summation remainder remains mathematical, although it appears in the applications section.
+- **Boole remainder**, [24.17.2](https://dlmf.nist.gov/24.17.E2): Rₘ(n) is the integral of f⁽ᵐ⁾(x) times the shifted antiperiodic Euler function, divided by 2(m−1)!. The existing Boole-summation development under `DLMFMathlib` supplies related formulas; no separate public remainder function was identified. The named periodic factor is `antiperiodicEuler`. This exact summation remainder remains mathematical, although it appears in the applications section.
 
-- **Cardinal splines, Euler splines and Bernoulli monosplines**, [§24.17(ii), 24.17.3–8](https://dlmf.nist.gov/24.17.ii): S-classₙ consists of functions with n−1 continuous derivatives and polynomial pieces of degree at most n between consecutive integers; cardinal monosplines of degree n are xⁿ−S(x), with S in S-classₙ₋₁. Euler splines are the normalized shifted periodic Euler function in 24.17.3; Mₙ is periodic Bₙ−Bₙ(0) for even n and the half-shifted periodic Bₙ for odd n. The minimal-norm F is periodic Bₙ−2⁻ⁿBₙ(0). The periodic factors exist as `DLMF.BernoulliEuler.periodicEulerE` and `periodicBernoulliB`, but no dedicated spline-class/Euler-spline/monospline wrappers were found. These application-note definitions are recorded without adding theorem-acquisition targets.
+- **Cardinal splines, Euler splines and Bernoulli monosplines**, [§24.17(ii), 24.17.3–8](https://dlmf.nist.gov/24.17.ii): S-classₙ consists of functions with n−1 continuous derivatives and polynomial pieces of degree at most n between consecutive integers; cardinal monosplines of degree n are xⁿ−S(x), with S in S-classₙ₋₁. Euler splines are the normalized shifted periodic Euler function in 24.17.3; Mₙ is periodic Bₙ−Bₙ(0) for even n and the half-shifted periodic Bₙ for odd n. The minimal-norm F is periodic Bₙ−2⁻ⁿBₙ(0). The periodic factors exist as `antiperiodicEuler` and `periodicBernoulli`, but no dedicated spline-class/Euler-spline/monospline wrappers were found. These application-note definitions are recorded without adding theorem-acquisition targets.
 
 ### §24.19 Methods of Computation
 
@@ -5461,11 +5459,11 @@ Traversal: all §§25.1–25.21 checked; matching headings are §25.2
 <!-- retained entry 172 -->
 - **Lerch transcendent Φ(z,s,a)**, [25.14.1](https://dlmf.nist.gov/25.14.E1):
   `DLMF.Zeta.lerchPhiSeries`, `lerchPhi`, and parameter-domain predicate
-  `z25b_lerchParamOK` in [Lerch](DLMF/Zeta/Lerch.lean#L44).
+  `Z25bLerchParamOK` in [Lerch](DLMF/Zeta/Lerch.lean#L44).
   The continued function chooses an analytic extension on `ℂ \ [1,∞)`;
   on the cut it retains the totalized series, which does not encode DLMF's
   two boundary values. A separate actual integral construction
-  `q25b_lerchInt` and continuation predicate `q25b_IsLerchCont` occur in
+  `q25b_lerchInt` and continuation predicate `Q25bIsLerchCont` occur in
   [Q25bLerchContinuation](DLMF/Zeta/Q25bLerchContinuation.lean#L124).
   Lerch's historical K notation is an exponential-argument specialization,
   without a separate local function.
@@ -5699,7 +5697,7 @@ Restricted Number and Part Size
   `planePartitionCount` in
   [BoxFormula](DLMF/Combinatorics/PlanePartitions/BoxFormula.lean#L29).
   The public construction is a finite down-closed set of positive lattice
-  triples. The independent array predicate `s26b_IsPPArray` and conversions
+  triples. The independent array predicate `S26bIsPPArray` and conversions
   `s26b_toArr`, `s26b_ofArr` in the same file realize the decreasing-array definition.
 
 - **Volume and combined symmetry classes of plane partitions**, [§26.12(i)–(ii)](https://dlmf.nist.gov/26.12.i): |π| is the cardinality of the positive-triple set, also the sum of entries of the decreasing array. Symmetric self-complementary, cyclically symmetric transpose-complement, cyclically symmetric self-complementary and totally symmetric self-complementary classes combine the already listed symmetry predicates with `planeComplement` and `planeTranspose`. They are not the same class, and no extra named predicates are needed where the local counting statements use conjunctions/equalities. `IsStrictShiftedPP`/`IsDescendingPP` use row lists, not ordinary unshifted triple sets. The box dimensions and parity restrictions are part of each enumerated subclass.
@@ -5783,7 +5781,7 @@ Restricted Number and Part Size
 
 ### §26.17 The Twelvefold Way
 
-- **Labeling and restrictions in the twelvefold way**, [§26.17 and Table26.17.1](https://dlmf.nist.gov/26.17): the existing `DLMF.Combinatorics.twelvefoldCount` uses `Labeling` for labeled/unlabeled domain/codomain and `MapRestriction` for unrestricted/injective/surjective maps. `MapRestriction.Holds` tests the map, and `twelvefoldRel` identifies maps under relabeling when the balls/boxes are unlabeled, in [TwelvefoldWay](DLMF/Combinatorics/TwelvefoldWay.lean#L60). Thus the twelve cases count actual map equivalence classes, not twelve unrelated arithmetic definitions; empty domain/codomain cases remain explicit.
+- **Labeling and restrictions in the twelvefold way**, [§26.17 and Table26.17.1](https://dlmf.nist.gov/26.17): the existing `DLMF.Combinatorics.twelvefoldCount` uses `Labeling` for labeled/unlabeled domain/codomain and `MapRestriction` for unrestricted/injective/surjective maps. `MapRestriction.Holds` tests the map, and `TwelvefoldRel` identifies maps under relabeling when the balls/boxes are unlabeled, in [TwelvefoldWay](DLMF/Combinatorics/TwelvefoldWay.lean#L60). Thus the twelve cases count actual map equivalence classes, not twelve unrelated arithmetic definitions; empty domain/codomain cases remain explicit.
 
   [DLMF 26.17](https://dlmf.nist.gov/26.17):
   The entry of Table 26.17.1: the number of classes of maps `Fin n → Fin k` satisfying the

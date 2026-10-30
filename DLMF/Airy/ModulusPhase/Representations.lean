@@ -612,31 +612,31 @@ theorem tendsto_airyDerivPhase_atBot : Tendsto airyDerivPhase atBot atTop := by
 
 /-- For `x ≤ 0`, `Ai(x) = M(x) sin θ(x)` (DLMF 9.8.1). -/
 @[dlmf 9.8.E1]
-theorem airyAiReal_modulus_phase {x : ℝ} (hx : x ≤ 0) :
+theorem airyAiReal_modulus_phase {x : ℝ} :
     airyAiReal x = airyModulus x * Real.sin (airyPhase x) :=
   airyAiReal_eq_modulus_sin x
 
 /-- For `x ≤ 0`, `Bi(x) = M(x) cos θ(x)` (DLMF 9.8.2). -/
 @[dlmf 9.8.E2]
-theorem airyBiReal_modulus_phase {x : ℝ} (hx : x ≤ 0) :
+theorem airyBiReal_modulus_phase {x : ℝ} :
     airyBiReal x = airyModulus x * Real.cos (airyPhase x) :=
   airyBiReal_eq_modulus_cos x
 
 /-- For `x ≤ 0`, `Ai'(x) = N(x) sin φ(x)` (DLMF 9.8.5). -/
 @[dlmf 9.8.E5]
-theorem airyAiDerivReal_modulus_phase {x : ℝ} (hx : x ≤ 0) :
+theorem airyAiDerivReal_modulus_phase {x : ℝ} :
     airyAiDerivReal x = airyDerivModulus x * Real.sin (airyDerivPhase x) :=
   airyAiDerivReal_eq_modulus_sin x
 
 /-- For `x ≤ 0`, `Bi'(x) = N(x) cos φ(x)` (DLMF 9.8.6). -/
 @[dlmf 9.8.E6]
-theorem airyBiDerivReal_modulus_phase {x : ℝ} (hx : x ≤ 0) :
+theorem airyBiDerivReal_modulus_phase {x : ℝ} :
     airyBiDerivReal x = airyDerivModulus x * Real.cos (airyDerivPhase x) :=
   airyBiDerivReal_eq_modulus_cos x
 
 /-- The arctangent formula with its continuous branch retained (DLMF 9.8.4). -/
 @[dlmf 9.8.E4]
-theorem airyPhase_atan_branch {x : ℝ} (hx : x ≤ 0) (hb : airyBiReal x ≠ 0) :
+theorem airyPhase_atan_branch {x : ℝ} (hb : airyBiReal x ≠ 0) :
     ∃ k : ℤ, airyPhase x = Real.arctan (airyAiReal x / airyBiReal x) + k * π := by
   have hc : Real.cos (airyPhase x) ≠ 0 := fun h => hb (by rw [airyBiReal_eq_modulus_cos, h, mul_zero])
   have hM := (airyModulus_pos x).ne'
@@ -656,7 +656,7 @@ theorem airyPhase_zero :
 
 /-- The arctangent formula with its continuous branch retained (DLMF 9.8.8). -/
 @[dlmf 9.8.E8]
-theorem airyDerivPhase_atan_branch {x : ℝ} (hx : x ≤ 0) (hb : airyBiDerivReal x ≠ 0) :
+theorem airyDerivPhase_atan_branch {x : ℝ} (hb : airyBiDerivReal x ≠ 0) :
     ∃ k : ℤ, airyDerivPhase x = Real.arctan (airyAiDerivReal x / airyBiDerivReal x) + k * π := by
   have hc : Real.cos (airyDerivPhase x) ≠ 0 := fun h =>
     hb (by rw [airyBiDerivReal_eq_modulus_cos, h, mul_zero])
@@ -952,7 +952,7 @@ theorem airy_modulus_phase_wronskian {x : ℝ} (hx : x ≤ 0) :
 
 /-- `M² θ' = -1/π`, `N² φ' = x/π` and `N N' = x M M'` (DLMF 9.8.14). -/
 @[dlmf 9.8.E14]
-theorem airy_modulus_phase_derivatives {x : ℝ} (hx : x ≤ 0) :
+theorem airy_modulus_phase_derivatives {x : ℝ} :
     airyModulus x ^ 2 * deriv airyPhase x = -1 / π ∧
       airyDerivModulus x ^ 2 * deriv airyDerivPhase x = x / π ∧
       airyDerivModulus x * deriv airyDerivModulus x = x * airyModulus x * deriv airyModulus x := by
@@ -964,7 +964,7 @@ theorem airy_modulus_phase_derivatives {x : ℝ} (hx : x ≤ 0) :
 
 /-- `N² = M'² + M² θ'² = M'² + 1/(π² M²)` (DLMF 9.8.15). -/
 @[dlmf 9.8.E15]
-theorem airy_derivModulus_identity {x : ℝ} (hx : x ≤ 0) :
+theorem airy_derivModulus_identity {x : ℝ} :
     airyDerivModulus x ^ 2 = deriv airyModulus x ^ 2 + airyModulus x ^ 2 * deriv airyPhase x ^ 2 ∧
       airyDerivModulus x ^ 2 = deriv airyModulus x ^ 2 + 1 / (π ^ 2 * airyModulus x ^ 2) := by
   have hM := (airyModulus_pos x).ne'
@@ -981,7 +981,7 @@ theorem airy_derivModulus_identity {x : ℝ} (hx : x ≤ 0) :
 
 /-- `x² M² = N'² + N² φ'² = N'² + x²/(π² N²)` (DLMF 9.8.16). -/
 @[dlmf 9.8.E16]
-theorem airy_modulus_identity {x : ℝ} (hx : x ≤ 0) :
+theorem airy_modulus_identity {x : ℝ} :
     x ^ 2 * airyModulus x ^ 2 = deriv airyDerivModulus x ^ 2 + airyDerivModulus x ^ 2 * deriv airyDerivPhase x ^ 2 ∧
       x ^ 2 * airyModulus x ^ 2 = deriv airyDerivModulus x ^ 2 + x ^ 2 / (π ^ 2 * airyDerivModulus x ^ 2) := by
   have hN := (airyDerivModulus_pos x).ne'
@@ -998,7 +998,7 @@ theorem airy_modulus_identity {x : ℝ} (hx : x ≤ 0) :
 
 /-- `tan(θ - φ) = 1/(π M M') = -M θ'/M'` (DLMF 9.8.17). -/
 @[dlmf 9.8.E17]
-theorem airy_phase_difference_tan {x : ℝ} (hx : x ≤ 0) :
+theorem airy_phase_difference_tan {x : ℝ} :
     Real.tan (airyPhase x - airyDerivPhase x) = 1 / (π * airyModulus x * deriv airyModulus x) ∧
       Real.tan (airyPhase x - airyDerivPhase x) = -airyModulus x * deriv airyPhase x / deriv airyModulus x := by
   have hM := (airyModulus_pos x).ne'
@@ -1025,7 +1025,7 @@ theorem airy_phase_difference_tan {x : ℝ} (hx : x ≤ 0) :
 /-- The modulus satisfies `M'' = x M + 1/(π² M³)`, and `M²` satisfies
 `w''' - 4x w' - 2w = 0` (DLMF 9.8.18). -/
 @[dlmf 9.8.E18]
-theorem airy_modulus_ode {x : ℝ} (hx : x ≤ 0) :
+theorem airy_modulus_ode {x : ℝ} :
     deriv (deriv airyModulus) x = x * airyModulus x + 1 / (π ^ 2 * airyModulus x ^ 3) ∧
       iteratedDeriv 3 (fun t => airyModulus t ^ 2) x -
         4 * x * deriv (fun t => airyModulus t ^ 2) x - 2 * airyModulus x ^ 2 = 0 := by
@@ -1067,7 +1067,7 @@ theorem airy_modulus_ode {x : ℝ} (hx : x ≤ 0) :
 
 /-- The phase satisfies `θ'² + θ'''/(2θ') - (3/4)(θ''/θ')² = -x` (DLMF 9.8.19). -/
 @[dlmf 9.8.E19]
-theorem airy_phase_ode {x : ℝ} (hx : x ≤ 0) :
+theorem airy_phase_ode {x : ℝ} :
     deriv airyPhase x ^ 2 + iteratedDeriv 3 airyPhase x / (2 * deriv airyPhase x) -
       3 / 4 * (iteratedDeriv 2 airyPhase x / deriv airyPhase x) ^ 2 = -x := by
   set p : ℝ → ℝ := fun t => airyAiReal t ^ 2 + airyBiReal t ^ 2 with hp

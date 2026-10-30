@@ -34,9 +34,9 @@ def s26a_add (k s : ℕ) : List ℕ → List ℕ
   | a :: t => (a + (k * t.length + s)) :: s26a_add k s t
 
 /-- Every entry dominates the staircase. -/
-def s26a_Good (k s : ℕ) : List ℕ → Prop
+def S26aGood (k s : ℕ) : List ℕ → Prop
   | [] => True
-  | a :: t => k * t.length + s ≤ a ∧ s26a_Good k s t
+  | a :: t => k * t.length + s ≤ a ∧ S26aGood k s t
 
 /-- Identity under the stated parameter and domain assumptions: `(s26a_sub k s l).length =
 l.length`. -/
@@ -61,12 +61,12 @@ lemma s26a_sub_add (k s : ℕ) (l : List ℕ) : s26a_sub k s (s26a_add k s l) = 
 
 /-- Identity under the stated parameter and domain assumptions: `s26a_add k s (s26a_sub k s l) =
 l`. -/
-lemma s26a_add_sub (k s : ℕ) {l : List ℕ} (h : s26a_Good k s l) :
+lemma s26a_add_sub (k s : ℕ) {l : List ℕ} (h : S26aGood k s l) :
     s26a_add k s (s26a_sub k s l) = l := by
   induction l with
   | nil => rfl
   | cons a t ih =>
-    simp only [s26a_Good] at h
+    simp only [S26aGood] at h
     simp only [s26a_sub, s26a_add, s26a_length_sub, ih h.2, List.cons.injEq, and_true]
     omega
 
@@ -83,21 +83,21 @@ lemma s26a_sum_add (k s : ℕ) (l : List ℕ) :
 
 /-- Identity under the stated parameter and domain assumptions: `(s26a_sub k s l).sum + (k *
 l.length.choose 2 + s * l.length) = l.sum`. -/
-lemma s26a_sum_sub (k s : ℕ) {l : List ℕ} (h : s26a_Good k s l) :
+lemma s26a_sum_sub (k s : ℕ) {l : List ℕ} (h : S26aGood k s l) :
     (s26a_sub k s l).sum + (k * l.length.choose 2 + s * l.length) = l.sum := by
   have := s26a_sum_add k s (s26a_sub k s l)
   rw [s26a_add_sub k s h, s26a_length_sub] at this
   exact this.symm
 
-/-- The stated relation follows from the given hypotheses: `s26a_Good k s (s26a_add k s l)`. -/
-lemma s26a_good_add (k s : ℕ) (l : List ℕ) : s26a_Good k s (s26a_add k s l) := by
+/-- The stated relation follows from the given hypotheses: `S26aGood k s (s26a_add k s l)`. -/
+lemma s26a_good_add (k s : ℕ) (l : List ℕ) : S26aGood k s (s26a_add k s l) := by
   induction l with
   | nil => trivial
   | cons a t ih => exact ⟨by simp, ih⟩
 
-/-- The stated relation follows from the given hypotheses: `s26a_Good k s l`. -/
+/-- The stated relation follows from the given hypotheses: `S26aGood k s l`. -/
 lemma s26a_good_of_chain (k s : ℕ) {l : List ℕ} (hc : l.IsChain (fun a b => b + k ≤ a))
-    (hs : ∀ x ∈ l, s ≤ x) : s26a_Good k s l := by
+    (hs : ∀ x ∈ l, s ≤ x) : S26aGood k s l := by
   induction l with
   | nil => trivial
   | cons a t ih =>
@@ -249,7 +249,7 @@ at least `s`, and `m` parts. -/
 lemma s26a_src_facts (k s : ℕ) {m n : ℕ} (p : n.Partition)
     (hd : ∀ a ∈ p.parts, ∀ b ∈ p.parts.erase a, a + k ≤ b ∨ b + k ≤ a)
     (hmin : ∀ i ∈ p.parts, s ≤ i) (hc : p.parts.card = m) :
-    s26a_Good k s (s26a_sortDesc p) ∧ (s26a_sortDesc p).length = m ∧
+    S26aGood k s (s26a_sortDesc p) ∧ (s26a_sortDesc p).length = m ∧
       (s26a_sub k s (s26a_sortDesc p)).sum + (k * m.choose 2 + s * m) = n ∧
       (s26a_sub k s (s26a_sortDesc p)).Pairwise (· ≥ ·) := by
   set l := s26a_sortDesc p
@@ -259,7 +259,7 @@ lemma s26a_src_facts (k s : ℕ) {m n : ℕ} (p : n.Partition)
     have ha' : a ∈ p.parts := by rw [← hcoe]; exact Multiset.mem_coe.mpr ha
     have hb' : b ∈ p.parts.erase a := by rw [← hcoe, Multiset.coe_erase]; exact hb
     exact hd a ha' b hb'
-  have hG : s26a_Good k s l := s26a_good_of_chain k s hP.isChain fun x hx => hmin x (by
+  have hG : S26aGood k s l := s26a_good_of_chain k s hP.isChain fun x hx => hmin x (by
     rw [← hcoe]; exact Multiset.mem_coe.mpr hx)
   have hlen : l.length = m := by rw [← hc, ← hcoe, Multiset.coe_card]
   have hsum := s26a_sum_sub k s hG
@@ -278,7 +278,7 @@ lemma s26a_card_staircase (k s m : ℕ) (hs : 1 ≤ s) {n N : ℕ}
       #{q : N.Partition | q.parts.card ≤ m} := by
   have hsrc : ∀ p : n.Partition, (∀ a ∈ p.parts, ∀ b ∈ p.parts.erase a, a + k ≤ b ∨ b + k ≤ a) →
       (∀ i ∈ p.parts, s ≤ i) → p.parts.card = m →
-      s26a_Good k s (s26a_sortDesc p) ∧ (s26a_sortDesc p).length = m ∧
+      S26aGood k s (s26a_sortDesc p) ∧ (s26a_sortDesc p).length = m ∧
         (s26a_sub k s (s26a_sortDesc p)).sum = N ∧
         (s26a_sub k s (s26a_sortDesc p)).Pairwise (· ≥ ·) := by
     intro p hd hmin hc

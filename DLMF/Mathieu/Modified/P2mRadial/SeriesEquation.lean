@@ -347,7 +347,7 @@ lemma p2m_continuousAt_besselYExp {h : ℂ} (hh : h ≠ 0) (μ₀ z₀ : ℂ) :
     filter_upwards [prod_mem_nhds (hopen.mem_nhds (DLMF.Bessel.sin_mul_pi_ne_zero hν))
       univ_mem] with p hp
     have hp' : ∀ k : ℤ, p.1 ≠ k := fun k hk => hp.1 (by
-      rw [hk]; exact DLMF.Bessel.sin_int_mul_pi_complex k)
+      rw [hk]; exact Complex.sin_int_mul_pi k)
     exact (p2m_besselYExp_of_not_int hp' h p.2).symm
 
 /-- For `μ ∉ ℤ` and `h ≠ 0`, `d/dz Y_μ(h e^z) = μ Y_μ(h e^z) - h e^z Y_{μ+1}(h e^z)`. -/

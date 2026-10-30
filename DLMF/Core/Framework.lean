@@ -17,11 +17,15 @@ public import Mathlib.Tactic.Basify
 public import Mathlib.Tactic.ENatToNat
 
 /-!
-# Convergence and branch conventions for the DLMF Chapters 6–8 acquisition
+# Shared convergence, primitive and branch conventions for the DLMF
 
 Improper integrals assert limits of finite integrals. Logarithmic coordinates
 retain continuation across cuts. Continued fractions assert convergence of
 finite truncations, rather than an equality to a totalized infinite expression.
+
+The primitive API integrates entire functions on straight complex segments and integrates
+globally convergent monomial series term by term. Further support includes spherical Bessel
+functions and zero-selection conventions used across the special-function areas.
 -/
 
 @[expose] public noncomputable section
@@ -53,27 +57,31 @@ def segmentIntegral (f : ℂ → ℂ) (a b : ℂ) : ℂ :=
 /-- Primitive based at zero of an entire integrand. -/
 def primitive (f : ℂ → ℂ) (z : ℂ) : ℂ := segmentIntegral f 0 z
 /-- The straight-segment primitive equals any entire antiderivative minus its base value. -/
-theorem primitive_eq_sub {f g : ℂ → ℂ} (hf : Continuous f)
+theorem primitive_eq_sub {f g : ℂ → ℂ}
     (hg : ∀ z, HasDerivAt g (f z) z) (z : ℂ) :
     primitive f z=g z-g 0 := by
-  simpa [primitive, segmentIntegral] using Complex.mul_integral_comp_mul_eq_sub hf hg z
+  simpa [primitive, segmentIntegral] using Complex.mul_integral_comp_mul_eq_sub hg z
 
 /-- An entire antiderivative evaluates the integral on any straight segment. -/
-theorem segmentIntegral_eq_sub {f g : ℂ → ℂ} (hf : Continuous f)
+theorem segmentIntegral_eq_sub {f g : ℂ → ℂ}
     (hg : ∀ z, HasDerivAt g (f z) z) (a b : ℂ) :
     segmentIntegral f a b=g b-g a := by
   have hd (w : ℂ) : HasDerivAt (fun u => g (a+u)) (f (a+w)) w := by
     convert! (hg (a+w)).comp w ((hasDerivAt_id w).const_add a) using 1
     simp
   have h := Complex.mul_integral_comp_mul_eq_sub (f:=fun w=>f (a+w))
-    (by fun_prop) hd (b-a)
+    hd (b-a)
   simpa [segmentIntegral] using h
 
-/-- A locally absolutely convergent monomial series may be integrated along a straight segment. -/
+/-- A globally convergent complex monomial series may be integrated along a straight segment.
+Its norm summability on every real radius follows from the global `HasSum` hypothesis. -/
 theorem hasSum_primitive_monomials {f : ℂ → ℂ} (c : ℕ → ℂ) (d : ℕ → ℕ)
     (hs : ∀ z, HasSum (fun n=>c n*z^(d n)) (f z))
-    (hb : ∀ R : ℝ, 0≤R → Summable (fun n=>‖c n‖*R^(d n))) (z : ℂ) :
+    (z : ℂ) :
     HasSum (fun n=>c n*z^(d n+1)/(d n+1:ℂ)) (primitive f z) := by
+  have hb (R : ℝ) (hR : 0 ≤ R) : Summable (fun n => ‖c n‖ * R ^ d n) := by
+    simpa only [norm_mul, norm_pow, Complex.norm_real, Real.norm_of_nonneg hR] using
+      (hs (R : ℂ)).summable.norm
   let F : ℕ → ℝ → ℂ := fun n t=>c n*((t:ℂ)*z)^(d n)
   let B : ℕ → ℝ → ℝ := fun n _=>‖c n‖*‖z‖^(d n)
   have hF (n : ℕ) : Continuous (F n) := by dsimp [F]; fun_prop

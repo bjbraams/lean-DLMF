@@ -5,9 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.ParabolicCylinder.AsymptoticsZeros
 public import DLMF.ParabolicCylinder.Uniform
 public import DLMFMathlib.Analysis.ODE.LiouvilleGreenExpansion
-public import DLMF.ParabolicCylinder.AsymptoticsZeros
 
 /-!
 # Olver's uniform expansion of `U(-½μ², μt√2)` for `t > 1` (DLMF 12.10.3)
@@ -397,7 +397,7 @@ theorem pcfLG_tail_poly_rpow (P : Polynomial ℝ) {d : ℕ} (hd : P.natDegree �
         rw [integral_const_mul, integral_Ioi_rpow_of_lt hde hx0]; field_simp
 
 /-- The parity–degree class bounds the degree. -/
-theorem pcfLG_good_natDegree {e D : ℕ} {f : Polynomial ℝ} (hf : pcfLG_good e D f) :
+theorem pcfLG_good_natDegree {e D : ℕ} {f : Polynomial ℝ} (hf : PcfLGGood e D f) :
     f.natDegree ≤ D :=
   natDegree_le_iff_coeff_eq_zero.2 fun n hn => by
     by_contra h; have := (hf n h).2; exact absurd hn (not_lt.2 (by exact_mod_cast this))

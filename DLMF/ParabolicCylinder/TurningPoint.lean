@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.ParabolicCylinder.Uniform
 public import DLMF.Airy.Zeros
+public import DLMF.ParabolicCylinder.Uniform
 
 /-!
 # Cylinder turning-point expansions and large-parameter zeros
@@ -41,7 +41,7 @@ theorem iteratedDeriv_two_comp_const_mul {f : ℂ → ℂ} (hf : Differentiable 
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv 2 (fun t : ℂ => f
 (μ*t*Real.sqrt 2)) t=(μ:ℂ)^4*(t^2+s)*f (μ*t*Real.sqrt 2)`. -/
 @[dlmf 12.10.E1, dlmf 12.10.E2]
-theorem pcf_parameter_scaling (μ : ℝ) (f : ℂ → ℂ) (hf : Differentiable ℂ f) (hf2 : Differentiable ℂ (deriv f)) (s : ℂ) (hs : s=1 ∨ s=-1) (hode : ∀ z, iteratedDeriv 2 f z-(z^2/4+s*μ^2/2)*f z=0) (t : ℂ) :
+theorem pcf_parameter_scaling (μ : ℝ) (f : ℂ → ℂ) (hf : Differentiable ℂ f) (hf2 : Differentiable ℂ (deriv f)) (s : ℂ) (hode : ∀ z, iteratedDeriv 2 f z-(z^2/4+s*μ^2/2)*f z=0) (t : ℂ) :
     iteratedDeriv 2 (fun t : ℂ => f (μ*t*Real.sqrt 2)) t=(μ:ℂ)^4*(t^2+s)*f (μ*t*Real.sqrt 2) := by
   have hs2 : (Real.sqrt 2:ℂ)^2=2 := by exact_mod_cast Real.sq_sqrt (by norm_num : (0:ℝ)≤2)
   have e : (fun t : ℂ => f (μ*t*Real.sqrt 2)) = fun t => f ((μ*Real.sqrt 2)*t) := by

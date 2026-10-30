@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Zeta.Polylog
 public import DLMF.Zeta.Hurwitz
+public import DLMF.Zeta.Polylog
 
 /-!
 # Lerch's transcendent (DLMF §25.14)
@@ -16,7 +16,7 @@ public import DLMF.Zeta.Hurwitz
   the series from the unit disk to the cut plane `ℂ \ [1, ∞)`, chosen as for `DLMF.Zeta.polylog`
   (`z25b_slitContinuation`), and the series itself on `[1, ∞)` (so `Φ(1, s, a) = ζ(s, a)` for
   `Re s > 1`). DLMF's parameter conditions (`|ph a| < π` if `s ∉ ℤ`; `a ≠ 0, -1, -2, …` if
-  `s = 1, 2, …`; any `a` if `s = 0, -1, -2, …`) are `z25b_lerchParamOK s a`. The existence of the
+  `s = 1, 2, …`; any `a` if `s = 0, -1, -2, …`) are `Z25bLerchParamOK s a`. The existence of the
   continuation, together with the convergence of the series in the disk, is the admitted
   `exists_lerchPhi_continuation` (DLMF §25.14(i), "defined by analytic continuation").
 
@@ -55,12 +55,12 @@ def lerchPhi (z s a : ℂ) : ℂ :=
 
 /-- DLMF's conditions on `a` in 25.14.1: `|ph a| < π` if `s` is not an integer, and
 `a ≠ 0, -1, -2, …` if `s` is a positive integer (no condition if `s = 0, -1, -2, …`). -/
-def z25b_lerchParamOK (s a : ℂ) : Prop :=
+def Z25bLerchParamOK (s a : ℂ) : Prop :=
   ((∀ n : ℤ, s ≠ n) → a ∈ slitPlane) ∧ ((∃ n : ℕ, s = n + 1) → ∀ m : ℕ, a ≠ -m)
 
-/-- The stated relation follows from the given hypotheses: `z25b_lerchParamOK s (a + m)`. -/
-lemma z25b_lerchParamOK_add_nat {s a : ℂ} (h : z25b_lerchParamOK s a) (m : ℕ) :
-    z25b_lerchParamOK s (a + m) := by
+/-- The stated relation follows from the given hypotheses: `Z25bLerchParamOK s (a + m)`. -/
+lemma z25b_lerchParamOK_add_nat {s a : ℂ} (h : Z25bLerchParamOK s a) (m : ℕ) :
+    Z25bLerchParamOK s (a + m) := by
   refine ⟨fun hs => ?_, fun hs j hj => h.2 hs (j + m) (by push_cast; linear_combination hj)⟩
   rcases h.1 hs with h1 | h1
   · left; simp only [add_re, natCast_re]; positivity
@@ -69,7 +69,7 @@ lemma z25b_lerchParamOK_add_nat {s a : ℂ} (h : z25b_lerchParamOK s a) (m : ℕ
 /-- **Convergence and continuation** (DLMF §25.14(i)): under the conditions of 25.14.1, the series
 converges in the unit disk and extends analytically in `z` to `ℂ \ [1, ∞)`. -/
 @[dlmf 25.14.i]
-theorem exists_lerchPhi_continuation {s a : ℂ} (h : z25b_lerchParamOK s a) :
+theorem exists_lerchPhi_continuation {s a : ℂ} (h : Z25bLerchParamOK s a) :
     ∃ F : ℂ → ℂ, AnalyticOnNhd ℂ F z25b_slitOne ∧
       ∀ z, ‖z‖ < 1 → HasSum (fun n : ℕ => z ^ n / (a + n) ^ s) (F z) := by
   have _ := h
@@ -78,7 +78,7 @@ theorem exists_lerchPhi_continuation {s a : ℂ} (h : z25b_lerchParamOK s a) :
 /-- Analyticity on a neighborhood of the specified domain: `AnalyticOnNhd ℂ (z25b_slitContinuation
 (fun w => lerchPhiSeries w s a)) z25b_slitOne ∧ ∀ z, ‖z‖ < 1 → HasSum (fun n : ℕ => z ^ n / (a
 + n) ^ s) (z25b_slitContinuation (fun w => lerchPhiSeries w s a) z)`. -/
-lemma z25b_lerchPhi_spec {s a : ℂ} (h : z25b_lerchParamOK s a) :
+lemma z25b_lerchPhi_spec {s a : ℂ} (h : Z25bLerchParamOK s a) :
     AnalyticOnNhd ℂ (z25b_slitContinuation (fun w => lerchPhiSeries w s a)) z25b_slitOne ∧
       ∀ z, ‖z‖ < 1 → HasSum (fun n : ℕ => z ^ n / (a + n) ^ s)
         (z25b_slitContinuation (fun w => lerchPhiSeries w s a) z) := by
@@ -94,7 +94,7 @@ lemma z25b_lerchPhi_spec {s a : ℂ} (h : z25b_lerchParamOK s a) :
 
 /-- On the cut plane, `Φ(z, s, a)` is the value of any continuation of Lerch's series (no
 conditions on `s`, `a`). -/
-lemma q25b_lerchPhi_eq {s a : ℂ} {F : ℂ → ℂ} (hF : q25b_IsLerchCont s a F) {z : ℂ}
+lemma q25b_lerchPhi_eq {s a : ℂ} {F : ℂ → ℂ} (hF : Q25bIsLerchCont s a F) {z : ℂ}
     (hz : z ∈ z25b_slitOne) : lerchPhi z s a = F z := by
   obtain ⟨G, hG⟩ := q25b_exists_isLerchCont s a
   have he : ∃ F : ℂ → ℂ, AnalyticOnNhd ℂ F z25b_slitOne ∧
@@ -115,7 +115,7 @@ lemma q25b_summable_lerch_of_norm_le_one {s a z : ℂ} (hs : 1 < s.re) (hz : ‖
 /-- **The series in the unit disk** (DLMF 25.14.1): `Φ(z, s, a) = ∑ zⁿ/(a+n)^s` for `|z| < 1`
 under the conditions on `a`. -/
 @[dlmf 25.14.E1]
-theorem hasSum_lerchPhi {z s a : ℂ} (h : z25b_lerchParamOK s a) (hz : ‖z‖ < 1) :
+theorem hasSum_lerchPhi {z s a : ℂ} (h : Z25bLerchParamOK s a) (hz : ‖z‖ < 1) :
     HasSum (fun n : ℕ => z ^ n / (a + n) ^ s) (lerchPhi z s a) := by
   simp only [lerchPhi, z25b_mem_slitOne_of_norm_lt_one hz, ↓reduceIte]
   exact (z25b_lerchPhi_spec h).2 z hz
@@ -123,7 +123,7 @@ theorem hasSum_lerchPhi {z s a : ℂ} (h : z25b_lerchParamOK s a) (hz : ‖z‖ 
 /-- **The series on the unit circle** (DLMF 25.14.1): for `|z| = 1` and `Re s > 1` (at `z = 1` by
 definition; otherwise by Abel's theorem). -/
 @[dlmf 25.14.E1]
-theorem hasSum_lerchPhi_of_norm_eq_one {z s a : ℂ} (h : z25b_lerchParamOK s a) (hs : 1 < s.re)
+theorem hasSum_lerchPhi_of_norm_eq_one {z s a : ℂ} (h : Z25bLerchParamOK s a) (hs : 1 < s.re)
     (hz : ‖z‖ = 1) :
     HasSum (fun n : ℕ => z ^ n / (a + n) ^ s) (lerchPhi z s a) := by
   have _ := h
@@ -139,13 +139,13 @@ theorem hasSum_lerchPhi_of_norm_eq_one {z s a : ℂ} (h : z25b_lerchParamOK s a)
 
 /-- **Analyticity in `z`** (DLMF §25.14(i)). -/
 @[dlmf 25.14.i]
-theorem analyticOnNhd_lerchPhi {s a : ℂ} (h : z25b_lerchParamOK s a) :
+theorem analyticOnNhd_lerchPhi {s a : ℂ} (h : Z25bLerchParamOK s a) :
     AnalyticOnNhd ℂ (fun z => lerchPhi z s a) z25b_slitOne := by
   refine (z25b_lerchPhi_spec h).1.congr z25b_isOpen_slitOne fun z hz => ?_
   simp only [lerchPhi, hz, ↓reduceIte]
 
 /-- The series with terms `(fun n : ℕ => z ^ n / (a + n) ^ s)` converges to `(lerchPhi z s a)`. -/
-lemma z25b_hasSum_lerchPhi_of_cond {z s a : ℂ} (h : z25b_lerchParamOK s a)
+lemma z25b_hasSum_lerchPhi_of_cond {z s a : ℂ} (h : Z25bLerchParamOK s a)
     (hz : ‖z‖ < 1 ∨ (‖z‖ = 1 ∧ 1 < s.re)) :
     HasSum (fun n : ℕ => z ^ n / (a + n) ^ s) (lerchPhi z s a) := by
   rcases hz with hz | ⟨hz, hs⟩
@@ -167,7 +167,7 @@ theorem hurwitzZetaComplex_eq_lerchPhi {s a : ℂ} (hs : 1 < s.re) (ha : ∀ m :
 @[dlmf 25.14.E3]
 theorem polylog_eq_mul_lerchPhi {s z : ℂ} (hs : 1 < s.re) (hz : ‖z‖ ≤ 1) :
     polylog s z = z * lerchPhi z s 1 := by
-  have hp : z25b_lerchParamOK s 1 :=
+  have hp : Z25bLerchParamOK s 1 :=
     ⟨fun _ => Or.inl (by simp), fun _ m hm => by
       have := congrArg Complex.re hm; simp at this; linarith [(m.cast_nonneg : (0 : ℝ) ≤ m)]⟩
   have hc : ‖z‖ < 1 ∨ (‖z‖ = 1 ∧ 1 < s.re) := by
@@ -188,7 +188,7 @@ theorem polylog_eq_mul_lerchPhi {s z : ℂ} (hs : 1 < s.re) (hz : ‖z‖ ≤ 1)
 `z^a Φ(z, s, a) = Γ(1-s)(-ln z)^{s-1} + ∑_{n≥0} ζ(s-n, a)(ln z)ⁿ/n!`. We take `z ∈ ℂ \ [1, ∞)`,
 `z ≠ 0` (on the cut the principal branch is not defined) and DLMF's conditions on `a`. -/
 @[dlmf 25.14.E3_1]
-theorem hasSum_lerchPhi_log {z s a : ℂ} (hs : ∀ n : ℕ, s ≠ n + 1) (ha : z25b_lerchParamOK s a)
+theorem hasSum_lerchPhi_log {z s a : ℂ} (hs : ∀ n : ℕ, s ≠ n + 1) (ha : Z25bLerchParamOK s a)
     (ha' : ∀ m : ℕ, a ≠ -m) (hz : z ∈ z25b_slitOne) (hz0 : z ≠ 0)
     (hlog : ‖Complex.log z‖ < 2 * π) :
     HasSum (fun n : ℕ => hurwitzZetaComplex (s - n) a * Complex.log z ^ n / n !)
@@ -233,7 +233,7 @@ theorem mul_lerchPhi_one_eq_hypergeometric {z a : ℂ} (hz : ‖z‖ < 1) (ha : 
     have hf : (n ! : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
     field_simp
     linear_combination hP n
-  have hp : z25b_lerchParamOK 1 a :=
+  have hp : Z25bLerchParamOK 1 a :=
     ⟨fun h => absurd rfl (by exact_mod_cast h 1), fun _ m hm => ha m hm⟩
   rw [ordinaryHypergeometric_eq_tsum, ← ((hasSum_lerchPhi hp hz).mul_left a).tsum_eq]
   congr 1; funext n
@@ -246,7 +246,7 @@ theorem mul_lerchPhi_one_eq_hypergeometric {z a : ℂ} (hz : ‖z‖ < 1) (ha : 
 and `Re s > 1`) and `m = 1, 2, 3, …`,
 `Φ(z, s, a) = z^m Φ(z, s, a+m) + ∑_{n=0}^{m-1} zⁿ/(a+n)^s` (valid also for `m = 0`). -/
 @[dlmf 25.14.E4]
-theorem lerchPhi_eq_add_nat {z s a : ℂ} (h : z25b_lerchParamOK s a)
+theorem lerchPhi_eq_add_nat {z s a : ℂ} (h : Z25bLerchParamOK s a)
     (hz : ‖z‖ < 1 ∨ (‖z‖ = 1 ∧ 1 < s.re)) (m : ℕ) :
     lerchPhi z s a = z ^ m * lerchPhi z s (a + m) +
       ∑ n ∈ Finset.range m, z ^ n / (a + n) ^ s := by

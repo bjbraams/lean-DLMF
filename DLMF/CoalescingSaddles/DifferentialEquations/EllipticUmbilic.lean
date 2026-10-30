@@ -37,21 +37,21 @@ along a ray in `a` (or `b`) leaves a boundary term at `a = 0` (or `b = 0`) indep
 `q2t_EM_Wb`). -/
 
 /-- A weight `W(a, b)` that is continuous and polynomially bounded. -/
-def q2t_PolyBdd (W : ℂ → ℂ → ℂ) : Prop :=
+def Q2tPolyBdd (W : ℂ → ℂ → ℂ) : Prop :=
   Continuous (fun p : ℂ × ℂ => W p.1 p.2) ∧
     ∃ C : ℝ, 0 ≤ C ∧ ∃ N : ℕ, ∀ a b, ‖W a b‖ ≤ C * (1 + ‖a‖ + ‖b‖) ^ N
 
 /-- Constant weights are polynomially bounded. -/
-lemma q2t_polyBdd_const (c : ℂ) : q2t_PolyBdd fun _ _ => c :=
+lemma q2t_polyBdd_const (c : ℂ) : Q2tPolyBdd fun _ _ => c :=
   ⟨continuous_const, ‖c‖, norm_nonneg _, 0, fun a b => by simp⟩
 
 /-- The weight `(a, b) ↦ a` is polynomially bounded. -/
-lemma q2t_polyBdd_fst : q2t_PolyBdd fun a _ => a :=
+lemma q2t_polyBdd_fst : Q2tPolyBdd fun a _ => a :=
   ⟨continuous_fst, 1, zero_le_one, 1, fun a b => by
     simp only [pow_one, one_mul]; linarith [norm_nonneg b]⟩
 
 /-- The weight `(a, b) ↦ b` is polynomially bounded. -/
-lemma q2t_polyBdd_snd : q2t_PolyBdd fun _ b => b :=
+lemma q2t_polyBdd_snd : Q2tPolyBdd fun _ b => b :=
   ⟨continuous_snd, 1, zero_le_one, 1, fun a b => by
     simp only [pow_one, one_mul]; linarith [norm_nonneg a]⟩
 
@@ -60,8 +60,8 @@ lemma q2t_one_le_base (a b : ℂ) : 1 ≤ 1 + ‖a‖ + ‖b‖ := by
   linarith [norm_nonneg a, norm_nonneg b]
 
 /-- Sums of polynomially bounded weights are polynomially bounded. -/
-lemma q2t_polyBdd_add {W₁ W₂ : ℂ → ℂ → ℂ} (h₁ : q2t_PolyBdd W₁) (h₂ : q2t_PolyBdd W₂) :
-    q2t_PolyBdd fun a b => W₁ a b + W₂ a b := by
+lemma q2t_polyBdd_add {W₁ W₂ : ℂ → ℂ → ℂ} (h₁ : Q2tPolyBdd W₁) (h₂ : Q2tPolyBdd W₂) :
+    Q2tPolyBdd fun a b => W₁ a b + W₂ a b := by
   obtain ⟨c₁, C₁, hC₁, N₁, hb₁⟩ := h₁
   obtain ⟨c₂, C₂, hC₂, N₂, hb₂⟩ := h₂
   refine ⟨c₁.add c₂, C₁ + C₂, by positivity, N₁ + N₂, fun a b => ?_⟩
@@ -77,8 +77,8 @@ lemma q2t_polyBdd_add {W₁ W₂ : ℂ → ℂ → ℂ} (h₁ : q2t_PolyBdd W₁
     _ = (C₁ + C₂) * (1 + ‖a‖ + ‖b‖) ^ (N₁ + N₂) := by ring
 
 /-- Products of polynomially bounded weights are polynomially bounded. -/
-lemma q2t_polyBdd_mul {W₁ W₂ : ℂ → ℂ → ℂ} (h₁ : q2t_PolyBdd W₁) (h₂ : q2t_PolyBdd W₂) :
-    q2t_PolyBdd fun a b => W₁ a b * W₂ a b := by
+lemma q2t_polyBdd_mul {W₁ W₂ : ℂ → ℂ → ℂ} (h₁ : Q2tPolyBdd W₁) (h₂ : Q2tPolyBdd W₂) :
+    Q2tPolyBdd fun a b => W₁ a b * W₂ a b := by
   obtain ⟨c₁, C₁, hC₁, N₁, hb₁⟩ := h₁
   obtain ⟨c₂, C₂, hC₂, N₂, hb₂⟩ := h₂
   refine ⟨c₁.mul c₂, C₁ * C₂, by positivity, N₁ + N₂, fun a b => ?_⟩
@@ -224,7 +224,7 @@ lemma q2t_continuous_potential (x y z : ℝ) (j k : Fin 3) :
   simp only [ellipticUmbilicPotentialAB_eq]; fun_prop
 
 /-- The weighted integrand on `ρ_j × ρ_k` is continuous. -/
-lemma q2t_continuous_integrand {W : ℂ → ℂ → ℂ} (hW : q2t_PolyBdd W) (x y z : ℝ) (j k : Fin 3) :
+lemma q2t_continuous_integrand {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (x y z : ℝ) (j k : Fin 3) :
     Continuous (q2t_integrand W x y z j k) := by
   have h1 : Continuous fun p : ℝ × ℝ =>
       W ((p.1 : ℂ) * ellipticUmbilicRayDir j) ((p.2 : ℂ) * ellipticUmbilicRayDir k) :=
@@ -235,7 +235,7 @@ lemma q2t_continuous_integrand {W : ℂ → ℂ → ℂ} (hW : q2t_PolyBdd W) (x
   exact (continuous_const.mul h1).mul (continuous_exp.comp (continuous_const.mul h2))
 
 /-- Uniform bound `A e^{-r} e^{-q}` for the weighted integrand, for `|x| + |y| + |z| ≤ C`. -/
-lemma q2t_norm_integrand_le {W : ℂ → ℂ → ℂ} (hW : q2t_PolyBdd W) {C : ℝ} (hC : 0 ≤ C) :
+lemma q2t_norm_integrand_le {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) {C : ℝ} (hC : 0 ≤ C) :
     ∃ A : ℝ, ∀ x y z : ℝ, |x| + |y| + |z| ≤ C → ∀ (j k : Fin 3) (p : ℝ × ℝ), 0 ≤ p.1 → 0 ≤ p.2 →
       ‖q2t_integrand W x y z j k p‖ ≤ A * Real.exp (-p.1) * Real.exp (-p.2) := by
   obtain ⟨-, CW, hCW, N, hb⟩ := hW
@@ -272,7 +272,7 @@ lemma q2t_integrableOn_exp_prod (A : ℝ) :
   exact (h1.const_mul A).mul_prod h1
 
 /-- The weighted integrand is integrable on the positive quadrant. -/
-lemma q2t_integrableOn {W : ℂ → ℂ → ℂ} (hW : q2t_PolyBdd W) (x y z : ℝ) (j k : Fin 3) :
+lemma q2t_integrableOn {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (x y z : ℝ) (j k : Fin 3) :
     IntegrableOn (q2t_integrand W x y z j k) (Ioi 0 ×ˢ Ioi 0) := by
   obtain ⟨A, hA⟩ := q2t_norm_integrand_le hW (C := |x| + |y| + |z|) (by positivity)
   refine (q2t_integrableOn_exp_prod A).mono'
@@ -281,7 +281,7 @@ lemma q2t_integrableOn {W : ℂ → ℂ → ℂ} (hW : q2t_PolyBdd W) (x y z : �
   exact hA x y z le_rfl j k p (le_of_lt hp.1) (le_of_lt hp.2)
 
 /-- The quadrant integral is additive in the weight. -/
-lemma q2t_quad_add {W₁ W₂ : ℂ → ℂ → ℂ} (h₁ : q2t_PolyBdd W₁) (h₂ : q2t_PolyBdd W₂)
+lemma q2t_quad_add {W₁ W₂ : ℂ → ℂ → ℂ} (h₁ : Q2tPolyBdd W₁) (h₂ : Q2tPolyBdd W₂)
     (x y z : ℝ) (j k : Fin 3) :
     q2t_quad (fun a b => W₁ a b + W₂ a b) x y z j k =
       q2t_quad W₁ x y z j k + q2t_quad W₂ x y z j k := by
@@ -297,7 +297,7 @@ lemma q2t_quad_const_mul (c : ℂ) (W : ℂ → ℂ → ℂ) (x y z : ℝ) (j k 
   congr 1; funext p; unfold q2t_integrand; ring
 
 /-- The weighted elliptic umbilic integral is additive in the weight. -/
-lemma q2t_EM_add {W₁ W₂ : ℂ → ℂ → ℂ} (h₁ : q2t_PolyBdd W₁) (h₂ : q2t_PolyBdd W₂) (x y z : ℝ) :
+lemma q2t_EM_add {W₁ W₂ : ℂ → ℂ → ℂ} (h₁ : Q2tPolyBdd W₁) (h₂ : Q2tPolyBdd W₂) (x y z : ℝ) :
     q2t_EM (fun a b => W₁ a b + W₂ a b) x y z = q2t_EM W₁ x y z + q2t_EM W₂ x y z := by
   simp only [q2t_EM, q2t_quad_add h₁ h₂, mul_add, Finset.sum_add_distrib]
 
@@ -312,7 +312,7 @@ def q2t_L (dx dy dz : ℝ) (a b : ℂ) : ℂ :=
   dz * a * b + (dx - I * dy) / 2 * a + (dx + I * dy) / 2 * b
 
 /-- The linear form `q2t_L dx dy dz` is polynomially bounded. -/
-lemma q2t_polyBdd_L (dx dy dz : ℝ) : q2t_PolyBdd (q2t_L dx dy dz) := by
+lemma q2t_polyBdd_L (dx dy dz : ℝ) : Q2tPolyBdd (q2t_L dx dy dz) := by
   unfold q2t_L
   refine q2t_polyBdd_add (q2t_polyBdd_add ?_ ?_) ?_
   · exact q2t_polyBdd_mul (q2t_polyBdd_mul (q2t_polyBdd_const _) q2t_polyBdd_fst) q2t_polyBdd_snd
@@ -327,12 +327,12 @@ lemma q2t_potential_affine (a b : ℂ) (x₀ y₀ z₀ dx dy dz w : ℝ) :
   rw [ellipticUmbilicPotentialAB_eq, ellipticUmbilicPotentialAB_eq, q2t_L]; push_cast; ring
 
 /-- Differentiation under the integral sign along an affine path in the parameters. -/
-lemma q2t_hasDerivAt_quad {W : ℂ → ℂ → ℂ} (hW : q2t_PolyBdd W) (x₀ y₀ z₀ dx dy dz w₀ : ℝ)
+lemma q2t_hasDerivAt_quad {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (x₀ y₀ z₀ dx dy dz w₀ : ℝ)
     (j k : Fin 3) :
     HasDerivAt (fun w : ℝ => q2t_quad W (x₀ + w * dx) (y₀ + w * dy) (z₀ + w * dz) j k)
       (q2t_quad (fun a b => W a b * (I * q2t_L dx dy dz a b))
         (x₀ + w₀ * dx) (y₀ + w₀ * dy) (z₀ + w₀ * dz) j k) w₀ := by
-  have hW' : q2t_PolyBdd fun a b => W a b * (I * q2t_L dx dy dz a b) :=
+  have hW' : Q2tPolyBdd fun a b => W a b * (I * q2t_L dx dy dz a b) :=
     q2t_polyBdd_mul hW (q2t_polyBdd_mul (q2t_polyBdd_const I) (q2t_polyBdd_L dx dy dz))
   set C := |x₀| + |y₀| + |z₀| + (|w₀| + 1) * (|dx| + |dy| + |dz|) with hCdef
   have hC : 0 ≤ C := by positivity
@@ -382,7 +382,7 @@ lemma q2t_hasDerivAt_quad {W : ℂ → ℂ → ℂ} (hW : q2t_PolyBdd W) (x₀ y
     |>.comp_ofReal
 
 /-- Differentiation of the weighted elliptic umbilic integral along an affine path. -/
-lemma q2t_hasDerivAt_EM {W : ℂ → ℂ → ℂ} (hW : q2t_PolyBdd W) (x₀ y₀ z₀ dx dy dz w₀ : ℝ) :
+lemma q2t_hasDerivAt_EM {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (x₀ y₀ z₀ dx dy dz w₀ : ℝ) :
     HasDerivAt (fun w : ℝ => q2t_EM W (x₀ + w * dx) (y₀ + w * dy) (z₀ + w * dz))
       (q2t_EM (fun a b => W a b * (I * q2t_L dx dy dz a b))
         (x₀ + w₀ * dx) (y₀ + w₀ * dy) (z₀ + w₀ * dz)) w₀ := by
@@ -391,7 +391,7 @@ lemma q2t_hasDerivAt_EM {W : ℂ → ℂ → ℂ} (hW : q2t_PolyBdd W) (x₀ y�
   exact (q2t_hasDerivAt_quad hW x₀ y₀ z₀ dx dy dz w₀ j k).const_mul _
 
 /-- Differentiation under the integral sign in `x` for the weighted elliptic umbilic integral. -/
-lemma q2t_hasDerivAt_EM_x {W : ℂ → ℂ → ℂ} (hW : q2t_PolyBdd W) (x y z : ℝ) :
+lemma q2t_hasDerivAt_EM_x {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (x y z : ℝ) :
     HasDerivAt (fun s : ℝ => q2t_EM W s y z)
       (q2t_EM (fun a b => W a b * (I * q2t_L 1 0 0 a b)) x y z) x := by
   have h := q2t_hasDerivAt_EM hW 0 y z 1 0 0 x
@@ -399,7 +399,7 @@ lemma q2t_hasDerivAt_EM_x {W : ℂ → ℂ → ℂ} (hW : q2t_PolyBdd W) (x y z 
   exact h
 
 /-- Differentiation under the integral sign in `y` for the weighted elliptic umbilic integral. -/
-lemma q2t_hasDerivAt_EM_y {W : ℂ → ℂ → ℂ} (hW : q2t_PolyBdd W) (x y z : ℝ) :
+lemma q2t_hasDerivAt_EM_y {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (x y z : ℝ) :
     HasDerivAt (fun t : ℝ => q2t_EM W x t z)
       (q2t_EM (fun a b => W a b * (I * q2t_L 0 1 0 a b)) x y z) y := by
   have h := q2t_hasDerivAt_EM hW x 0 z 0 1 0 y
@@ -407,7 +407,7 @@ lemma q2t_hasDerivAt_EM_y {W : ℂ → ℂ → ℂ} (hW : q2t_PolyBdd W) (x y z 
   exact h
 
 /-- Differentiation under the integral sign in `z` for the weighted elliptic umbilic integral. -/
-lemma q2t_hasDerivAt_EM_z {W : ℂ → ℂ → ℂ} (hW : q2t_PolyBdd W) (x y z : ℝ) :
+lemma q2t_hasDerivAt_EM_z {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (x y z : ℝ) :
     HasDerivAt (fun w : ℝ => q2t_EM W x y w)
       (q2t_EM (fun a b => W a b * (I * q2t_L 0 0 1 a b)) x y z) z := by
   have h := q2t_hasDerivAt_EM hW x y 0 0 0 1 z
@@ -416,8 +416,8 @@ lemma q2t_hasDerivAt_EM_z {W : ℂ → ℂ → ℂ} (hW : q2t_PolyBdd W) (x y z 
 
 /-- Multiplying a polynomially bounded weight by `i q2t_L dx dy dz` keeps it polynomially bounded.
 -/
-lemma q2t_polyBdd_mulL {W : ℂ → ℂ → ℂ} (hW : q2t_PolyBdd W) (dx dy dz : ℝ) :
-    q2t_PolyBdd fun a b => W a b * (I * q2t_L dx dy dz a b) :=
+lemma q2t_polyBdd_mulL {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (dx dy dz : ℝ) :
+    Q2tPolyBdd fun a b => W a b * (I * q2t_L dx dy dz a b) :=
   q2t_polyBdd_mul hW (q2t_polyBdd_mul (q2t_polyBdd_const I) (q2t_polyBdd_L dx dy dz))
 
 /-- Integration by parts along a ray `r ↦ r e`, `r > 0`, for `exp(iP)` decaying at infinity. -/
@@ -441,7 +441,7 @@ lemma q2t_ray_ibp {P P' : ℂ → ℂ} (hP : ∀ u, HasDerivAt P (P' u) u) (e : 
   rw [h]; simp
 
 /-- Slices of the weighted integrand are integrable. -/
-lemma q2t_integrableOn_slice_fst {W : ℂ → ℂ → ℂ} (hW : q2t_PolyBdd W) (x y z : ℝ) (j k : Fin 3)
+lemma q2t_integrableOn_slice_fst {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (x y z : ℝ) (j k : Fin 3)
     {q : ℝ} (hq : 0 ≤ q) :
     IntegrableOn (fun r : ℝ => q2t_integrand W x y z j k (r, q)) (Ioi 0) := by
   obtain ⟨A, hA⟩ := q2t_norm_integrand_le hW (C := |x| + |y| + |z|) (by positivity)
@@ -455,7 +455,7 @@ lemma q2t_integrableOn_slice_fst {W : ℂ → ℂ → ℂ} (hW : q2t_PolyBdd W) 
   simp only at this; linarith
 
 /-- For fixed `r ≥ 0` the weighted integrand is integrable in the second ray variable. -/
-lemma q2t_integrableOn_slice_snd {W : ℂ → ℂ → ℂ} (hW : q2t_PolyBdd W) (x y z : ℝ) (j k : Fin 3)
+lemma q2t_integrableOn_slice_snd {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (x y z : ℝ) (j k : Fin 3)
     {r : ℝ} (hr : 0 ≤ r) :
     IntegrableOn (fun q : ℝ => q2t_integrand W x y z j k (r, q)) (Ioi 0) := by
   obtain ⟨A, hA⟩ := q2t_norm_integrand_le hW (C := |x| + |y| + |z|) (by positivity)
@@ -501,8 +501,8 @@ lemma q2t_tendsto_exp_snd (x y z : ℝ) (j k : Fin 3) {r : ℝ} (hr : 0 ≤ r) :
   exact hA r q hr hq
 
 /-- Polynomial boundedness transfers along pointwise equality of weights. -/
-lemma q2t_polyBdd_congr {W W' : ℂ → ℂ → ℂ} (h : q2t_PolyBdd W) (e : ∀ a b, W a b = W' a b) :
-    q2t_PolyBdd W' := by
+lemma q2t_polyBdd_congr {W W' : ℂ → ℂ → ℂ} (h : Q2tPolyBdd W) (e : ∀ a b, W a b = W' a b) :
+    Q2tPolyBdd W' := by
   have : W = W' := funext fun a => funext fun b => e a b
   exact this ▸ h
 
@@ -513,7 +513,7 @@ def q2t_Wa (x y z : ℝ) (a b : ℂ) : ℂ := 3 * a ^ 2 / 2 + z * b + (x - I * y
 def q2t_Wb (x y z : ℝ) (a b : ℂ) : ℂ := 3 * b ^ 2 / 2 + z * a + (x + I * y) / 2
 
 /-- The weight `∂Φ^{(E)}/∂a` is polynomially bounded. -/
-lemma q2t_polyBdd_Wa (x y z : ℝ) : q2t_PolyBdd (q2t_Wa x y z) := by
+lemma q2t_polyBdd_Wa (x y z : ℝ) : Q2tPolyBdd (q2t_Wa x y z) := by
   refine q2t_polyBdd_congr (q2t_polyBdd_add (q2t_polyBdd_add (q2t_polyBdd_mul
     (q2t_polyBdd_const (3 / 2)) (q2t_polyBdd_mul q2t_polyBdd_fst q2t_polyBdd_fst))
     (q2t_polyBdd_mul (q2t_polyBdd_const (z : ℂ)) q2t_polyBdd_snd))
@@ -521,7 +521,7 @@ lemma q2t_polyBdd_Wa (x y z : ℝ) : q2t_PolyBdd (q2t_Wa x y z) := by
   simp only [q2t_Wa]; ring
 
 /-- The weight `∂Φ^{(E)}/∂b` is polynomially bounded. -/
-lemma q2t_polyBdd_Wb (x y z : ℝ) : q2t_PolyBdd (q2t_Wb x y z) := by
+lemma q2t_polyBdd_Wb (x y z : ℝ) : Q2tPolyBdd (q2t_Wb x y z) := by
   refine q2t_polyBdd_congr (q2t_polyBdd_add (q2t_polyBdd_add (q2t_polyBdd_mul
     (q2t_polyBdd_const (3 / 2)) (q2t_polyBdd_mul q2t_polyBdd_snd q2t_polyBdd_snd))
     (q2t_polyBdd_mul (q2t_polyBdd_const (z : ℂ)) q2t_polyBdd_fst))
@@ -551,7 +551,7 @@ lemma q2t_hasDerivAt_potential_b (x y z : ℝ) (a u : ℂ) :
   · push_cast; ring
 
 /-- The weighted integrand is integrable for the product of the restricted measures. -/
-lemma q2t_integrable_prod {W : ℂ → ℂ → ℂ} (hW : q2t_PolyBdd W) (x y z : ℝ) (j k : Fin 3) :
+lemma q2t_integrable_prod {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (x y z : ℝ) (j k : Fin 3) :
     Integrable (q2t_integrand W x y z j k)
       ((volume.restrict (Ioi (0 : ℝ))).prod (volume.restrict (Ioi (0 : ℝ)))) := by
   have h := q2t_integrableOn hW x y z j k
@@ -627,21 +627,21 @@ lemma q2t_EM_Wb (x y z : ℝ) : q2t_EM (q2t_Wb x y z) x y z = 0 := by
 
 /-- The `x`-derivative of the weighted elliptic umbilic integral multiplies the weight by `i q2t_L 1
 0 0`. -/
-lemma q2t_deriv_EM_x {W : ℂ → ℂ → ℂ} (hW : q2t_PolyBdd W) (y z : ℝ) :
+lemma q2t_deriv_EM_x {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (y z : ℝ) :
     deriv (fun s : ℝ => q2t_EM W s y z) =
       fun x => q2t_EM (fun a b => W a b * (I * q2t_L 1 0 0 a b)) x y z :=
   funext fun x => (q2t_hasDerivAt_EM_x hW x y z).deriv
 
 /-- The `y`-derivative of the weighted elliptic umbilic integral multiplies the weight by `i q2t_L 0
 1 0`. -/
-lemma q2t_deriv_EM_y {W : ℂ → ℂ → ℂ} (hW : q2t_PolyBdd W) (x z : ℝ) :
+lemma q2t_deriv_EM_y {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (x z : ℝ) :
     deriv (fun t : ℝ => q2t_EM W x t z) =
       fun y => q2t_EM (fun a b => W a b * (I * q2t_L 0 1 0 a b)) x y z :=
   funext fun y => (q2t_hasDerivAt_EM_y hW x y z).deriv
 
 /-- The `z`-derivative of the weighted elliptic umbilic integral multiplies the weight by `i q2t_L 0
 0 1`. -/
-lemma q2t_deriv_EM_z {W : ℂ → ℂ → ℂ} (hW : q2t_PolyBdd W) (x y : ℝ) :
+lemma q2t_deriv_EM_z {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (x y : ℝ) :
     deriv (fun w : ℝ => q2t_EM W x y w) =
       fun z => q2t_EM (fun a b => W a b * (I * q2t_L 0 0 1 a b)) x y z :=
   funext fun z => (q2t_hasDerivAt_EM_z hW x y z).deriv
@@ -653,8 +653,8 @@ lemma q2t_EM_congr {W W' : ℂ → ℂ → ℂ} (e : ∀ a b, W a b = W' a b) (x
   rw [this]
 
 /-- Scalar multiples of polynomially bounded weights are polynomially bounded. -/
-lemma q2t_polyBdd_cmul {W : ℂ → ℂ → ℂ} (hW : q2t_PolyBdd W) (c : ℂ) :
-    q2t_PolyBdd fun a b => c * W a b := q2t_polyBdd_mul (q2t_polyBdd_const c) hW
+lemma q2t_polyBdd_cmul {W : ℂ → ℂ → ℂ} (hW : Q2tPolyBdd W) (c : ℂ) :
+    Q2tPolyBdd fun a b => c * W a b := q2t_polyBdd_mul (q2t_polyBdd_const c) hW
 
 /-- The combination `i(∂Φ/∂a - ∂Φ/∂b) = ∂Φ/∂t` integrates to zero. -/
 lemma q2t_EM_Wt (x y z : ℝ) :

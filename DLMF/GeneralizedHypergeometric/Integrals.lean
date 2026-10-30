@@ -27,52 +27,52 @@ noncomputable section
 namespace DLMF.Hypergeometric
 
 /-- Topological separation of the upper-parameter poles from the nonnegative integers. -/
-def genBarnesSeparates (a : Multiset ℂ) (L : ℝ → ℂ) : Prop :=
-  Complex.separatesPoleSets L {s | ∃ x ∈ a, ∃ n : ℕ, s = -x - n}
+def GenBarnesSeparates (a : Multiset ℂ) (L : ℝ → ℂ) : Prop :=
+  Complex.SeparatesPoleSets L {s | ∃ x ∈ a, ∃ n : ℕ, s = -x - n}
     {s | ∃ n : ℕ, s = n}
 
 /-- An upward Barnes contour with finite indentations and two vertical tails. -/
-def genVerticalBarnesContour (a : Multiset ℂ) (L : ℝ → ℂ) : Prop :=
+def GenVerticalBarnesContour (a : Multiset ℂ) (L : ℝ → ℂ) : Prop :=
   (∀ T : ℝ, 0 < T → AbsolutelyContinuousOnInterval L (-T) T) ∧
-  genBarnesSeparates a L ∧ Complex.hasVerticalTails L
+  GenBarnesSeparates a L ∧ Complex.HasVerticalTails L
 
 /-- A negatively oriented right-infinite Barnes loop, with horizontal tails. -/
-def genRightBarnesContour (a : Multiset ℂ) (L : ℝ → ℂ) : Prop :=
+def GenRightBarnesContour (a : Multiset ℂ) (L : ℝ → ℂ) : Prop :=
   (∀ T : ℝ, 0 < T → AbsolutelyContinuousOnInterval L (-T) T) ∧
-  genBarnesSeparates a L ∧ Complex.hasHorizontalRightTails L
+  GenBarnesSeparates a L ∧ Complex.HasHorizontalRightTails L
 
 /-- Approach to zero on a closed sector of the logarithmic cover. -/
 def genZeroLogSector (θ : ℝ) : Filter ℂ :=
   comap Complex.re atBot ⊓ 𝓟 {w : ℂ | |w.im| ≤ θ}
 
 /-- Separating Barnes contours exist for every nonsingular upper parameter family. -/
-theorem genBarnesContours_exist (a : Multiset ℂ) (ha : genDenRegular a) :
-    (∃ L : ℝ → ℂ, genVerticalBarnesContour a L) ∧
-    (∃ L : ℝ → ℂ, genRightBarnesContour a L) := by
+theorem genBarnesContours_exist (a : Multiset ℂ) (ha : GenDenRegular a) :
+    (∃ L : ℝ → ℂ, GenVerticalBarnesContour a L) ∧
+    (∃ L : ℝ → ℂ, GenRightBarnesContour a L) := by
   sorry
 
 /-- The right-loop integral in the entire case and the full open disk in the balanced case. -/
 @[dlmf 16.5.E1]
-theorem genHG_barnes_right (a b : Multiset ℂ) (ha : genDenRegular a) (hb : genDenRegular b)
-    (L : ℝ → ℂ) (hL : genRightBarnesContour a L) (w : ℂ)
+theorem genHG_barnes_right (a b : Multiset ℂ) (ha : GenDenRegular a) (hb : GenDenRegular b)
+    (L : ℝ → ℂ) (hL : GenRightBarnesContour a L) (w : ℂ)
     (h : a.card ≤ b.card ∨ (a.card = b.card + 1 ∧ w.re < 0)) :
-    genHasBarnesValueLog a b L w (genHG a b (-Complex.exp w)) := by
+    GenHasBarnesValueLog a b L w (genHG a b (-Complex.exp w)) := by
   sorry
 
 /-- The full vertical convergence sector; for p=q or p=q+1 it gives the principal continued function. -/
 @[dlmf 16.5.E1]
-theorem genHG_barnes_vertical (a b : Multiset ℂ) (ha : genDenRegular a) (hb : genDenRegular b)
-    (L : ℝ → ℂ) (hL : genVerticalBarnesContour a L) (w : ℂ)
+theorem genHG_barnes_vertical (a b : Multiset ℂ) (ha : GenDenRegular a) (hb : GenDenRegular b)
+    (L : ℝ → ℂ) (hL : GenVerticalBarnesContour a L) (w : ℂ)
     (hpq : b.card < a.card + 1)
     (harg : |w.im| < (a.card + 1 - b.card : ℝ) * Real.pi / 2) :
-    genHasBarnesValueLog a b L w (genBarnesHGLog a b L w) ∧
+    GenHasBarnesValueLog a b L w (genBarnesHGLog a b L w) ∧
     (a.card ≤ b.card + 1 → genBarnesHGLog a b L w = genHG a b (-Complex.exp w)) := by
   sorry
 
 /-- For p>q+1 the divergent formal series is the Barnes value asymptotic on every closed proper logarithmic sector. -/
 @[dlmf 16.5.E1]
-theorem genHG_barnes_formal_asymptotic (a b : Multiset ℂ) (ha : genDenRegular a) (hb : genDenRegular b)
-    (hpq : b.card + 1 < a.card) (L : ℝ → ℂ) (hL : genVerticalBarnesContour a L)
+theorem genHG_barnes_formal_asymptotic (a b : Multiset ℂ) (ha : GenDenRegular a) (hb : GenDenRegular b)
+    (hpq : b.card + 1 < a.card) (L : ℝ → ℂ) (hL : GenVerticalBarnesContour a L)
     (N : ℕ) {δ : ℝ} (hδ : 0 < δ) (hδpq : δ < a.card + 1 - b.card) :
     Asymptotics.IsBigO (genZeroLogSector ((a.card + 1 - b.card - δ) * Real.pi / 2))
       (fun w => genBarnesHGLog a b L w -
@@ -82,7 +82,7 @@ theorem genHG_barnes_formal_asymptotic (a b : Multiset ℂ) (ha : genDenRegular 
 
 /-- Euler integral on the entire domain or the full continued principal slit, with convergence. -/
 @[dlmf 16.5.E2]
-theorem genHG_euler_integral (a b : Multiset ℂ) (a₀ b₀ : ℂ) (hb : genDenRegular b)
+theorem genHG_euler_integral (a b : Multiset ℂ) (a₀ b₀ : ℂ) (hb : GenDenRegular b)
     (ha₀ : 0 < a₀.re) (hb₀ : a₀.re < b₀.re) {z : ℂ}
     (h : a.card ≤ b.card ∨ (a.card = b.card + 1 ∧ z ∈ cutPlane)) :
     IntervalIntegrable (fun t : ℝ => (t : ℂ) ^ (a₀ - 1) *
@@ -94,7 +94,7 @@ theorem genHG_euler_integral (a b : Multiset ℂ) (a₀ b₀ : ℂ) (hb : genDen
 
 /-- Laplace integral with the z restriction removed whenever p<q. -/
 @[dlmf 16.5.E3]
-theorem genHG_laplace_integral (a b : Multiset ℂ) (a₀ : ℂ) (hb : genDenRegular b)
+theorem genHG_laplace_integral (a b : Multiset ℂ) (a₀ : ℂ) (hb : GenDenRegular b)
     (ha₀ : 0 < a₀.re) (hpq : a.card ≤ b.card) {z : ℂ}
     (hz : a.card < b.card ∨ z.re < 1) :
     IntegrableOn (fun t : ℝ => Complex.exp (-t) * (t : ℂ) ^ (a₀ - 1) * genHG a b (z * t)) (Ioi 0) ∧
@@ -105,7 +105,7 @@ theorem genHG_laplace_integral (a b : Multiset ℂ) (a₀ : ℂ) (hb : genDenReg
 
 /-- Inverse Laplace integral with separate oscillatory tails and the full p=q+1 extension. -/
 @[dlmf 16.5.E4]
-theorem genHG_inverse_laplace (a b : Multiset ℂ) (b₀ : ℂ) (hb : genDenRegular b) (hb₀ : 0 < b₀.re)
+theorem genHG_inverse_laplace (a b : Multiset ℂ) (b₀ : ℂ) (hb : GenDenRegular b) (hb₀ : 0 < b₀.re)
     {c : ℝ} (hc : 0 < c) (z : ℂ)
     (h : a.card ≤ b.card ∨ (a.card = b.card + 1 ∧ max 0 z.re < c)) :
     DLMF.HasIntegralWholeLine (fun y : ℝ =>

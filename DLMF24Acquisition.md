@@ -70,8 +70,8 @@ DLMFMathlib declarations are all proved or definitions. No proved theorem depend
   acquired as printed (n ≥ 2).
 - Removable singularities: 24.2.1 and 24.2.3 are stated for 0 < |t| < 2π (the left sides are
   0/0 at t = 0). The generating functions are `HasSum` statements in the complex variable t.
-- Periodic functions (§24.2(iii)): `periodicBernoulliB n x = bernoulliFun n (Int.fract x)` and
-  `periodicEulerE n x = (-1)^⌊x⌋ eulerFun n (Int.fract x)` on ℝ; Mathlib's `periodizedBernoulli`
+- Periodic functions (§24.2(iii)): `periodicBernoulli n x = bernoulliFun n (Int.fract x)` and
+  `antiperiodicEuler n x = (-1)^⌊x⌋ eulerFun n (Int.fract x)` on ℝ; Mathlib's `periodizedBernoulli`
   lives on `UnitAddCircle` and the bridge is proved.
 - Symbolic operations (§24.4(viii)): P(B(x)) is the ℂ-linear map `umbralBernoulli x` on ℂ[X]
   with Xⁿ ↦ Bₙ(x) (likewise `umbralEuler`); 24.4.36–24.4.39 are proved for every polynomial P.
@@ -94,7 +94,7 @@ DLMFMathlib declarations are all proved or definitions. No proved theorem depend
 
 - [24.2.i](https://dlmf.nist.gov/24.2.i): [`DLMF.BernoulliEuler.bernoulliPolyB`](DLMF/BernoulliEuler/Basic.lean#L49) (definition). Bₙ(x) for complex x is `aeval x (Polynomial.bernoulli n)`; Bₙ is Mathlib's `bernoulli` (B₁ = -1/2, DLMF's convention).
 - [24.2.ii](https://dlmf.nist.gov/24.2.ii): [`DLMF.BernoulliEuler.eulerPolyE`](DLMF/BernoulliEuler/Basic.lean#L54) (definition); [`eulerFun`](DLMFMathlib/NumberTheory/EulerPolynomials.lean#L350) (definition). Eₙ(x) is `aeval x (Polynomial.euler n)` from DLMFMathlib; Eₙ = 2ⁿ Eₙ(1/2) is `eulerNumber`.
-- [24.2.iii](https://dlmf.nist.gov/24.2.iii): [`DLMF.BernoulliEuler.periodicBernoulliB`](DLMF/BernoulliEuler/Basic.lean#L236) (definition); [`DLMF.BernoulliEuler.periodicEulerE`](DLMF/BernoulliEuler/Basic.lean#L240) (definition); Mathlib: [`periodizedBernoulli`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=periodizedBernoulli#doc). B̃ₙ(x) = Bₙ(x - ⌊x⌋) and Ẽₙ(x) = (-1)^⌊x⌋ Eₙ(x - ⌊x⌋) on ℝ; bridge to Mathlib's periodizedBernoulli on UnitAddCircle proved (`periodicBernoulliB_eq_periodizedBernoulli`).
+- [24.2.iii](https://dlmf.nist.gov/24.2.iii): [`periodicBernoulli`](DLMF/BernoulliEuler/Basic.lean#L236) (definition); [`antiperiodicEuler`](DLMF/BernoulliEuler/Basic.lean#L240) (definition); Mathlib: [`periodizedBernoulli`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=periodizedBernoulli#doc). B̃ₙ(x) = Bₙ(x - ⌊x⌋) and Ẽₙ(x) = (-1)^⌊x⌋ Eₙ(x - ⌊x⌋) on ℝ; bridge to Mathlib's periodizedBernoulli on UnitAddCircle proved (`periodicBernoulliB_eq_periodizedBernoulli`).
 - [24.2.E1](https://dlmf.nist.gov/24.2.E1): [`Complex.hasSum_bernoulli_mul_pow_div`](DLMFMathlib/NumberTheory/BernoulliTaylor.lean#L146) (proved). Generating function t/(eᵗ - 1) = ∑ Bₙ tⁿ/n! for 0 < |t| < 2π (complex t), tagged in place in DLMFMathlib (the removable point t = 0 excluded).
 - [24.2.E2](https://dlmf.nist.gov/24.2.E2): [`DLMF.BernoulliEuler.bernoulli_two_mul_add_one_eq_zero_and_sign`](DLMF/BernoulliEuler/GeneratingFunctions.lean#L84) (proved); Mathlib: [`bernoulli_eq_zero_of_odd`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=bernoulli_eq_zero_of_odd#doc). n ≥ 1: B₂ₙ₊₁ = 0 and (-1)ⁿ⁺¹B₂ₙ > 0, proved from Mathlib's ζ(2n) formula.
 - [24.2.E3](https://dlmf.nist.gov/24.2.E3): [`DLMF.BernoulliEuler.hasSum_bernoulliPolyB_mul_pow_div`](DLMF/BernoulliEuler/GeneratingFunctions.lean#L116) (proved); Mathlib: [`Polynomial.bernoulli_generating_function`](https://leanprover-community.github.io/mathlib4_docs/find/?pattern=Polynomial.bernoulli_generating_function#doc). Complex x, 0 < |t| < 2π; proved from 24.2.1 and the Appell property.

@@ -6,14 +6,14 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.NumberTheory.Functions
+public import DLMF.NumberTheory.T27bHecke
 public import DLMF.Partitions
 public import DLMF.Weierstrass.ModularFunctions
-public import Mathlib.Combinatorics.Enumerative.Pentagonal.EulerFunction
+public import DLMFMathlib.RingTheory.PowerSeriesEvaluation
 public import Mathlib.Algebra.Order.Field.GeomSum
-public import DLMFMathlib.RingTheory.R27PowerSeriesEval
-public import DLMF.NumberTheory.T27bHecke
-public import TauCeti.NumberTheory.ModularForms.LevelOne.DiscriminantEigenform
 public import Mathlib.Combinatorics.Enumerative.Partition.Glaisher
+public import Mathlib.Combinatorics.Enumerative.Pentagonal.EulerFunction
+public import TauCeti.NumberTheory.ModularForms.LevelOne.DiscriminantEigenform
 
 /-!
 # Unrestricted partitions (DLMF §27.14)
@@ -133,7 +133,7 @@ lemma r27_sum_Icc_neg_self (h : ℤ → ℤ) (n : ℕ) :
 /-- Generating function of partitions with parts `≤ N` as a finite product. -/
 lemma r27_restrictedSeries_eq (N : ℕ) :
     (PowerSeries.mk fun n ↦ ((Nat.Partition.restricted n (· ≤ N)).card : ℤ)) =
-      ∏ i ∈ range N, r27_geomSeries (i + 1) := by
+      ∏ i ∈ range N, PowerSeries.geomSeriesOnMultiples (i + 1) := by
   rw [Nat.Partition.powerSeriesMk_card_restricted_eq_tprod ℤ (· ≤ N)]
   rw [tprod_eq_prod (s := range N) (fun i hi ↦ by
     simp at hi; rw [ite_eq_right_iff.mpr (fun h ↦ absurd h (by omega))])]
@@ -142,7 +142,7 @@ lemma r27_restrictedSeries_eq (N : ℕ) :
   have h1 : (∑' j : ℕ, (X : PowerSeries ℤ) ^ ((i + 1) * j)) * (1 - X ^ (i + 1)) = 1 := by
     simp_rw [pow_mul]
     exact PowerSeries.WithPiTopology.tsum_pow_mul_one_sub_of_constantCoeff_eq_zero (by simp)
-  have h2 := r27_geomSeries_mul (Nat.succ_pos i)
+  have h2 := PowerSeries.geomSeriesOnMultiples_mul_one_sub_X_pow (Nat.succ_pos i)
   have hne : (1 - X ^ (i + 1) : PowerSeries ℤ) ≠ 0 := by
     intro h
     have := congrArg (coeff 0) h
@@ -151,7 +151,7 @@ lemma r27_restrictedSeries_eq (N : ℕ) :
 
 /-- The coefficients `n ≤ N` of `∏_{m ≤ N} 1/(1 - Xᵐ)` are `p(n)`. -/
 lemma r27_coeff_prod_geomSeries {n N : ℕ} (hn : n ≤ N) :
-    coeff n (∏ i ∈ range N, r27_geomSeries (i + 1)) = partitionFunction n := by
+    coeff n (∏ i ∈ range N, PowerSeries.geomSeriesOnMultiples (i + 1)) = partitionFunction n := by
   rw [← r27_restrictedSeries_eq, coeff_mk, Nat.Partition.restricted]
   congr 1
   rw [Finset.filter_true_of_mem fun p _ i hi ↦ (Nat.Partition.le_of_mem_parts hi).trans hn]
@@ -192,12 +192,12 @@ lemma r27_summable_partitionFunction {t : ℝ} (ht0 : 0 ≤ t) (ht : t < 1) :
     Summable fun n ↦ (partitionFunction n : ℝ) * t ^ n := by
   refine summable_of_sum_range_le (c := Real.exp (1 / (1 - t) ^ 2))
     (fun n ↦ by positivity) fun N ↦ ?_
-  set Q := ∏ i ∈ range N, r27_geomSeries (i + 1)
+  set Q := ∏ i ∈ range N, PowerSeries.geomSeriesOnMultiples (i + 1)
   have hx : ‖(t : ℂ)‖ < 1 := by
     rw [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg ht0]; exact ht
-  have hQ : r27_absEval Q t (∏ i ∈ range N, (1 - (t : ℂ) ^ (i + 1))⁻¹) :=
-    r27_absEval_prod _ fun i _ ↦ r27_absEval_geomSeries (Nat.succ_pos i) hx
-  have hre := Complex.hasSum_re hQ.2
+  have hQ : PowerSeries.HasSumAt Q t (∏ i ∈ range N, (1 - (t : ℂ) ^ (i + 1))⁻¹) :=
+    PowerSeries.HasSumAt.prod _ fun i _ ↦ PowerSeries.hasSumAt_geomSeriesOnMultiples (Nat.succ_pos i) hx
+  have hre := Complex.hasSum_re hQ
   have hv : (∏ i ∈ range N, (1 - (t : ℂ) ^ (i + 1))⁻¹).re = ∏ i ∈ range N, (1 - t ^ (i + 1))⁻¹ := by
     rw [show (∏ i ∈ range N, (1 - (t : ℂ) ^ (i + 1))⁻¹) =
       ((∏ i ∈ range N, (1 - t ^ (i + 1))⁻¹ : ℝ) : ℂ) by push_cast; rfl, Complex.ofReal_re]
@@ -221,7 +221,7 @@ lemma r27_summable_partitionFunction {t : ℝ} (ht0 : 0 ≤ t) (ht : t < 1) :
 
 /-- The pentagonal series converges absolutely to Euler's function in the unit disc. -/
 lemma r27_absEval_pentagonalSeries {x : ℂ} (hx : ‖x‖ < 1) :
-    r27_absEval (pentagonalSeries ℤ) x (eulerFunction x) := by
+    PowerSeries.HasSumAt (pentagonalSeries ℤ) x (eulerFunction x) := by
   have hc : ∀ n, ((coeff n (pentagonalSeries ℤ) : ℤ) : ℂ) = coeff n (pentagonalSeries ℂ) := by
     intro n
     by_cases hn : n ∈ Set.range pentagonal
@@ -229,25 +229,24 @@ lemma r27_absEval_pentagonalSeries {x : ℂ} (hx : ‖x‖ < 1) :
       simp only [coeff_pentagonalSeries_pentagonal]
       rcases Int.even_or_odd k with h | h <;> simp [Int.negOnePow_even, Int.negOnePow_odd, h]
     · simp [coeff_pentagonalSeries_eq_zero _ hn]
-  have hb := r27_absEval_of_bounded (P := pentagonalSeries ℤ) (C := 1) (fun n ↦ by
+  have hb := PowerSeries.hasSumAt_of_bounded (P := pentagonalSeries ℤ) (C := 1) (fun n ↦ by
     by_cases hn : n ∈ Set.range pentagonal
     · obtain ⟨k, rfl⟩ := hn
       simp only [coeff_pentagonalSeries_pentagonal]
       rcases Int.even_or_odd k with h | h <;> simp [Int.negOnePow_even, Int.negOnePow_odd, h]
     · simp [coeff_pentagonalSeries_eq_zero _ hn]) hx
-  simp only [hc] at hb ⊢
+  simp only [PowerSeries.HasSumAt, hc] at hb ⊢
   rwa [← eulerFunction_def] at hb
 
 /-- The partition series converges absolutely in the unit disc. -/
 lemma r27_absEval_partitionSeries {x : ℂ} (hx : ‖x‖ < 1) :
-    r27_absEval r27_partitionSeries x (∑' n, (partitionFunction n : ℂ) * x ^ n) := by
+    PowerSeries.HasSumAt r27_partitionSeries x (∑' n, (partitionFunction n : ℂ) * x ^ n) := by
   have hc : ∀ n, ((coeff n r27_partitionSeries : ℤ) : ℂ) = (partitionFunction n : ℂ) := by
     intro n; simp [r27_partitionSeries]
   have hs : Summable fun n ↦ ‖((coeff n r27_partitionSeries : ℤ) : ℂ) * x ^ n‖ := by
     simp only [hc, norm_mul, norm_pow, Complex.norm_natCast]
     exact r27_summable_partitionFunction (norm_nonneg x) hx
-  refine ⟨hs, ?_⟩
-  simp only [hc] at hs ⊢
+  simp only [PowerSeries.HasSumAt, hc] at hs ⊢
   exact hs.of_norm.hasSum
 
 /-- Euler's pentagonal recursion for `p(n)` (DLMF 27.14.6). -/
@@ -272,49 +271,48 @@ lemma r27_rec {n : ℕ} (hn : 1 ≤ n) :
   simp only [Int.negOnePow_neg, Int.coe_negOnePow_natCast]
   split_ifs <;> ring
 
-
 /-- `X g_k' = g_k (k X^k g_k)` for the geometric series `g_k = 1/(1 - X^k)`. -/
 lemma r27_X_derivative_geomSeries {k : ℕ} (hk : 0 < k) :
-    X * d⁄dX (r27_geomSeries k) =
-      r27_geomSeries k * ((k : PowerSeries ℤ) * X ^ k * r27_geomSeries k) := by
-  have h := r27_geomSeries_mul hk
+    X * d⁄dX (PowerSeries.geomSeriesOnMultiples k) =
+      PowerSeries.geomSeriesOnMultiples k * ((k : PowerSeries ℤ) * X ^ k * PowerSeries.geomSeriesOnMultiples k) := by
+  have h := PowerSeries.geomSeriesOnMultiples_mul_one_sub_X_pow hk
   have hd := congrArg (fun f : PowerSeries ℤ ↦ d⁄dX f) h
   rw [Derivation.leibniz, derivative_one, map_sub, derivative_one, derivative_pow,
     derivative_X] at hd
   simp only [smul_eq_mul, zero_sub, mul_one] at hd
   -- hd : g * -(k X^{k-1}) + (1 - X^k) * g' = 0
-  have key : (1 - X ^ k) * d⁄dX (r27_geomSeries k) =
-      r27_geomSeries k * ((k : PowerSeries ℤ) * X ^ (k - 1)) := by
+  have key : (1 - X ^ k) * d⁄dX (PowerSeries.geomSeriesOnMultiples k) =
+      PowerSeries.geomSeriesOnMultiples k * ((k : PowerSeries ℤ) * X ^ (k - 1)) := by
     linear_combination hd
   have hXk : X * X ^ (k - 1) = (X ^ k : PowerSeries ℤ) := by
     rw [← pow_succ']; congr 1; omega
-  calc X * d⁄dX (r27_geomSeries k)
-      = X * (r27_geomSeries k * (1 - X ^ k)) * d⁄dX (r27_geomSeries k) := by rw [h]; ring
-    _ = X * r27_geomSeries k * ((1 - X ^ k) * d⁄dX (r27_geomSeries k)) := by ring
+  calc X * d⁄dX (PowerSeries.geomSeriesOnMultiples k)
+      = X * (PowerSeries.geomSeriesOnMultiples k * (1 - X ^ k)) * d⁄dX (PowerSeries.geomSeriesOnMultiples k) := by rw [h]; ring
+    _ = X * PowerSeries.geomSeriesOnMultiples k * ((1 - X ^ k) * d⁄dX (PowerSeries.geomSeriesOnMultiples k)) := by ring
     _ = _ := by rw [key, ← hXk]; ring
 
 /-- Logarithmic derivative of a finite product of geometric series. -/
 lemma r27_X_derivative_prod_geomSeries (N : ℕ) :
-    X * d⁄dX (∏ i ∈ range N, r27_geomSeries (i + 1)) =
-      (∏ i ∈ range N, r27_geomSeries (i + 1)) *
-        ∑ i ∈ range N, (((i + 1 : ℕ) : PowerSeries ℤ) * X ^ (i + 1) * r27_geomSeries (i + 1)) := by
+    X * d⁄dX (∏ i ∈ range N, PowerSeries.geomSeriesOnMultiples (i + 1)) =
+      (∏ i ∈ range N, PowerSeries.geomSeriesOnMultiples (i + 1)) *
+        ∑ i ∈ range N, (((i + 1 : ℕ) : PowerSeries ℤ) * X ^ (i + 1) * PowerSeries.geomSeriesOnMultiples (i + 1)) := by
   induction N with
   | zero => simp
   | succ N ih =>
     have hg := r27_X_derivative_geomSeries (Nat.succ_pos N)
     rw [prod_range_succ, sum_range_succ, Derivation.leibniz, smul_eq_mul, smul_eq_mul]
     simp only [Nat.succ_eq_add_one] at hg ⊢
-    linear_combination (∏ i ∈ range N, r27_geomSeries (i + 1)) * hg + r27_geomSeries (N + 1) * ih
+    linear_combination (∏ i ∈ range N, PowerSeries.geomSeriesOnMultiples (i + 1)) * hg + PowerSeries.geomSeriesOnMultiples (N + 1) * ih
 
 /-- Coefficients of `∑_{k ≤ N} k X^k/(1 - X^k)`: `σ₁(m)` for `1 ≤ m ≤ N`. -/
 lemma r27_coeff_sigmaSeries {m N : ℕ} (hm : 1 ≤ m) (hmN : m ≤ N) :
     coeff m (∑ i ∈ range N, (((i + 1 : ℕ) : PowerSeries ℤ) * X ^ (i + 1) *
-      r27_geomSeries (i + 1))) = (σ 1 m : ℤ) := by
+      PowerSeries.geomSeriesOnMultiples (i + 1))) = (σ 1 m : ℤ) := by
   rw [map_sum]
   have : ∀ i ∈ range N, coeff m (((i + 1 : ℕ) : PowerSeries ℤ) * X ^ (i + 1) *
-      r27_geomSeries (i + 1)) = if (i + 1) ∣ m then ((i + 1 : ℕ) : ℤ) else 0 := by
+      PowerSeries.geomSeriesOnMultiples (i + 1)) = if (i + 1) ∣ m then ((i + 1 : ℕ) : ℤ) else 0 := by
     intro i _
-    rw [← map_natCast (C (R := ℤ)), mul_assoc, coeff_C_mul, coeff_X_pow_mul', r27_geomSeries]
+    rw [← map_natCast (C (R := ℤ)), mul_assoc, coeff_C_mul, coeff_X_pow_mul', PowerSeries.geomSeriesOnMultiples]
     split_ifs with h1 h2 h2
     · simp [coeff_mk, (Nat.dvd_sub_iff_left h1 dvd_rfl).mpr h2]
     · have h3 : ¬ (i + 1) ∣ m - (i + 1) := fun h ↦ h2 ((Nat.dvd_sub_iff_left h1 dvd_rfl).mp h)
@@ -389,14 +387,14 @@ theorem hasProd_eulerReciprocal {x : ℂ} (hx : ‖x‖ < 1) :
 theorem hasSum_partitionFunction {x : ℂ} (hx : ‖x‖ < 1) :
     HasSum (fun n : ℕ ↦ (partitionFunction n : ℂ) * x ^ n) (1 / eulerReciprocal x) := by
   have hF := r27_absEval_partitionSeries hx
-  have h1 := r27_absEval_mul hF (r27_absEval_pentagonalSeries hx)
+  have h1 := PowerSeries.HasSumAt.mul hF (r27_absEval_pentagonalSeries hx)
   rw [r27_partitionSeries_mul_pentagonal] at h1
-  have h2 := r27_absEval_unique h1 (r27_absEval_one x)
+  have h2 := PowerSeries.HasSumAt.unique h1 (PowerSeries.hasSumAt_one x)
   rw [(hasProd_eulerReciprocal hx).2, ← eq_one_div_of_mul_eq_one_left h2]
   have hc : ∀ n, ((PowerSeries.coeff n r27_partitionSeries : ℤ) : ℂ) =
       (partitionFunction n : ℂ) := by
     intro n; simp [r27_partitionSeries]
-  simpa only [hc] using hF.2
+  simpa only [PowerSeries.HasSumAt, hc] using hF
 
 /-- DLMF 27.14.5: the pentagonal numbers `ω(±k) = (3k² ∓ k)/2`. -/
 @[dlmf 27.14.E5]
@@ -445,10 +443,10 @@ theorem partitionFunction_sigma_recursion (n : ℕ) :
   rw [coeff_succ_X_mul, coeff_derivative, r27_coeff_prod_geomSeries le_rfl, mul_comm _ (∑ i ∈ _, _),
     coeff_mul, Finset.Nat.sum_antidiagonal_eq_sum_range_succ
       (fun i j ↦ coeff i (∑ i ∈ range (m + 1), (((i + 1 : ℕ) : PowerSeries ℤ) * X ^ (i + 1) *
-        r27_geomSeries (i + 1))) * coeff j (∏ i ∈ range (m + 1), r27_geomSeries (i + 1))),
+        PowerSeries.geomSeriesOnMultiples (i + 1))) * coeff j (∏ i ∈ range (m + 1), PowerSeries.geomSeriesOnMultiples (i + 1))),
     sum_range_succ'] at h
   have h0 : coeff 0 (∑ i ∈ range (m + 1), (((i + 1 : ℕ) : PowerSeries ℤ) * X ^ (i + 1) *
-      r27_geomSeries (i + 1))) = 0 := by
+      PowerSeries.geomSeriesOnMultiples (i + 1))) = 0 := by
     rw [map_sum]
     refine sum_eq_zero fun i _ ↦ ?_
     rw [← map_natCast (C (R := ℤ)), mul_assoc, coeff_C_mul, coeff_X_pow_mul']
@@ -587,7 +585,7 @@ def ramanujanTau (n : ℕ) : ℤ :=
 theorem hasSum_ramanujanTau {x : ℂ} (hx : ‖x‖ < 1) :
     HasSum (fun n : ℕ ↦ (ramanujanTau n : ℂ) * x ^ n) (x * eulerReciprocal x ^ 24) := by
   rw [(hasProd_eulerReciprocal hx).2]
-  exact (r27_absEval_mul (r27_absEval_X x) (r27_absEval_pow (r27_absEval_pentagonalSeries hx) 24)).2
+  exact (PowerSeries.HasSumAt.mul (PowerSeries.hasSumAt_X x) (PowerSeries.HasSumAt.pow (r27_absEval_pentagonalSeries hx) 24))
 
 /-! #### Bridge to Mathlib's discriminant and Eisenstein series (helpers) -/
 

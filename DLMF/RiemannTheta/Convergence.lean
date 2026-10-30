@@ -5,13 +5,13 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.RiemannTheta.Basic.Definitions
 public import DLMF.Elliptic.Basic.Theta
-public import Mathlib.Analysis.Complex.LocallyUniformLimit
+public import DLMF.RiemannTheta.Basic.Definitions
 public import Mathlib.Algebra.Order.Chebyshev
 public import Mathlib.Algebra.Order.Star.Real
-public import Mathlib.MeasureTheory.Integral.Pi
 public import Mathlib.Analysis.Complex.Liouville
+public import Mathlib.Analysis.Complex.LocallyUniformLimit
+public import Mathlib.MeasureTheory.Integral.Pi
 
 /-!
 # Convergence and analytic properties of the Riemann theta series
@@ -66,7 +66,7 @@ theorem norm_riemannThetaTerm (z : ι → ℂ) (Ω : Matrix ι ι ℂ) (n : ι �
 /-- Membership in Siegel upper half-space implies the positive-definiteness condition used to
 control the theta summands. -/
 theorem rth21_posIm_of_mem {Ω : Matrix ι ι ℂ} (h : Ω ∈ siegelUpperHalfSpace ι) :
-    rth21_PosIm Ω := fun x hx => by
+    Rth21PosIm Ω := fun x hx => by
   simpa using h.2.dotProduct_mulVec_pos hx
 
 /-- Estimate under the stated parameter and domain assumptions: `∃ c > 0, ∀ x : ι → ℝ, c * ∑ i, x
@@ -191,7 +191,7 @@ lemma rth21_eventually_abs_lt {X : Type*} [TopologicalSpace X] {f : X → ℝ} (
 
 /-- Local summable majorant: near a point `(z₀, Ω₀)` with `Im Ω₀` positive definite there is a
 summable bound for the theta terms, uniform on a neighbourhood. -/
-lemma rth21_local_majorant {z0 : ι → ℂ} {Ω0 : Matrix ι ι ℂ} (h0 : rth21_PosIm Ω0) :
+lemma rth21_local_majorant {z0 : ι → ℂ} {Ω0 : Matrix ι ι ℂ} (h0 : Rth21PosIm Ω0) :
     ∃ t ∈ 𝓝 (z0, Ω0), ∃ u : (ι → ℤ) → ℝ, Summable u ∧
       ∀ p ∈ t, ∀ n, ‖riemannThetaTerm p.1 p.2 n‖ ≤ u n := by
   obtain ⟨c, hc, hlow⟩ := rth21_exists_lower h0
@@ -254,7 +254,7 @@ of `Im Ω` is positive definite (stronger than DLMF: `Ω` need not be symmetric)
 theorem tendstoLocallyUniformlyOn_riemannTheta :
     TendstoLocallyUniformlyOn (fun (s : Finset (ι → ℤ)) (p : (ι → ℂ) × Matrix ι ι ℂ) =>
         ∑ n ∈ s, riemannThetaTerm p.1 p.2 n) (fun p => riemannTheta p.1 p.2) atTop
-      {p | rth21_PosIm p.2} := by
+      {p | Rth21PosIm p.2} := by
   intro u hu p hp
   obtain ⟨t, ht, v, hv, hb⟩ := rth21_local_majorant (z0 := p.1) (Ω0 := p.2) hp
   exact ⟨t, mem_nhdsWithin_of_mem_nhds ht,
@@ -290,7 +290,7 @@ theorem continuousOn_riemannTheta :
 /-- Differentiability at the specified argument: `DifferentiableAt ℂ (fun w => riemannTheta (L
 w).1 (L w).2) w0`. -/
 lemma rth21_differentiableAt_comp {L : ℂ → (ι → ℂ) × Matrix ι ι ℂ} {w0 : ℂ}
-    (hL : Continuous L) (h0 : rth21_PosIm (L w0).2)
+    (hL : Continuous L) (h0 : Rth21PosIm (L w0).2)
     (hd : ∀ n, Differentiable ℂ fun w => riemannThetaTerm (L w).1 (L w).2 n) :
     DifferentiableAt ℂ (fun w => riemannTheta (L w).1 (L w).2) w0 := by
   obtain ⟨t, ht, u, hu, hb⟩ := rth21_local_majorant (z0 := (L w0).1) (Ω0 := (L w0).2) h0

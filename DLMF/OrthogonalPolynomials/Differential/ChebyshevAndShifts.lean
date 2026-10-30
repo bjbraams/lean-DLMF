@@ -43,8 +43,8 @@ theorem chebyshevV_contiguous (n : ℕ) (x : ℂ) :
   unfold chebyshevV
   have hT := chebyshevT_eq_jacobi (n + 1) x
   push_cast at hT
-  rw [hT, jacobi_at_one (by norm_num), jacobi_at_one (by norm_num),
-    jacobi_at_one (by norm_num), show (-1 / 2 : ℂ) + 1 = 1 / 2 by norm_num, poch_succ,
+  rw [hT, jacobiPolyP_one, jacobiPolyP_one,
+    jacobiPolyP_one, show (-1 / 2 : ℂ) + 1 = 1 / 2 by norm_num, poch_succ,
     Nat.factorial_succ]
   have hp : poch (1 / 2 : ℂ) n ≠ 0 := poch_half_ne_zero n
   have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
@@ -74,8 +74,8 @@ theorem chebyshevV_mul_one_add (n : ℕ) (x : ℂ) :
   unfold chebyshevV
   have hT := chebyshevT_eq_jacobi (n + 1) x
   push_cast at hT
-  rw [hT, chebyshevT_eq_jacobi, jacobi_at_one (by norm_num),
-    jacobi_at_one (by norm_num), jacobi_at_one (by norm_num),
+  rw [hT, chebyshevT_eq_jacobi, jacobiPolyP_one,
+    jacobiPolyP_one, jacobiPolyP_one,
     show (-1 / 2 : ℂ) + 1 = 1 / 2 by norm_num, poch_succ, Nat.factorial_succ]
   have hp : poch (1 / 2 : ℂ) n ≠ 0 := poch_half_ne_zero n
   have hf : (n.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr n.factorial_ne_zero
@@ -180,7 +180,7 @@ theorem chebyshevW_contiguous (n : ℕ) (x : ℂ) :
   unfold chebyshevW
   have hT := chebyshevT_eq_jacobi (n + 1) x
   push_cast at hT
-  rw [hT, jacobi_at_one (by norm_num), jacobi_at_one (by norm_num), jacobi_at_one (by norm_num),
+  rw [hT, jacobiPolyP_one, jacobiPolyP_one, jacobiPolyP_one,
     show (-1 / 2 : ℂ) + 1 = 1 / 2 by norm_num, show (1 / 2 : ℂ) + 1 = 3 / 2 by norm_num,
     poch_succ (3 / 2 : ℂ) n, poch_succ_left (1 / 2 : ℂ) n,
     show (1 / 2 : ℂ) + 1 = 3 / 2 by norm_num, Nat.factorial_succ]

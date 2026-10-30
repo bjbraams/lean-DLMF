@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Legendre.Associated.ConjugationAndValues
+public import DLMFMathlib.Analysis.ODE.Wronskian
 
 /-!
 # Ferrers fundamental pairs and their Wronskians
@@ -211,20 +212,12 @@ theorem ferrersP_conical_real (τ μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1
   rw [show -(-(-1/2+I*(τ:ℂ))-1) = (-1/2+I*τ)+1 by ring, show -(-1/2+I*(τ:ℂ))-1+1 = -(-1/2+I*τ) by ring,
     regularizedGaussHG_symm _ _ _ (mem_cutPlane_of_one_add hp)]
 
-/-- Complex Wronskian. -/
-def LegendreWronskian (f g : ℂ → ℂ) (z : ℂ) : ℂ :=
-  f z*deriv g z-g z*deriv f z
-
-/-- The Wronskian `f(x) g'(x) - g(x) f'(x)` of two functions `ℝ → ℂ`. -/
-def ferrersWronskian (f g : ℝ → ℂ) (x : ℝ) : ℂ :=
-  f x*deriv g x-g x*deriv f x
-
 /-- The Wronskian of two combinations of the even and odd solutions. -/
 theorem ferrersWronskian_of_even_odd {ν μ a b c d : ℂ} {f g : ℝ → ℂ}
     (hf : EqOn f (fun y => a*ferrersEven ν μ y+b*ferrersOdd ν μ y) (Ioo (-1:ℝ) 1))
     (hg : EqOn g (fun y => c*ferrersEven ν μ y+d*ferrersOdd ν μ y) (Ioo (-1:ℝ) 1))
     {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ferrersWronskian f g x = (a*d-b*c)*(2/(π*(1-(x:ℂ)^2))) := by
+    ODE.wronskian f g x = (a*d-b*c)*(2/(π*(1-(x:ℂ)^2))) := by
   have hE := ((ferrersEven_isFerrersSolution ν μ) x hx).1.hasDerivAt
   have hO := ((ferrersOdd_isFerrersSolution ν μ) x hx).1.hasDerivAt
   have hev : ∀ {h : ℝ → ℂ} {p q : ℂ},
@@ -235,7 +228,7 @@ theorem ferrersWronskian_of_even_odd {ν μ a b c d : ℂ} {f g : ℝ → ℂ}
       filter_upwards [isOpen_Ioo.mem_nhds hx] with y hy using hh hy
     rw [this.deriv_eq]
     exact ((hE.const_mul p).add (hO.const_mul q)).deriv
-  unfold ferrersWronskian
+  unfold ODE.wronskian
   rw [hev hf, hev hg, hf hx, hg hx, ← ferrers_even_odd_wronskian ν μ hx]
   ring
 
@@ -287,7 +280,7 @@ theorem ferrersP_regular_eqOn {ν μ : ℂ} (h : LegendreQRegular ν μ) : EqOn 
 `𝒲{f,g} = f g' - g f'`. -/
 @[dlmf 14.2.E3]
 theorem ferrers_wronskian_3 (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ferrersWronskian (ferrersP ν (-μ)) (fun x => ferrersP ν (-μ) (-x)) x=2/(Gamma (μ-ν)*Gamma (ν+μ+1)*(1-x^2:ℂ)) := by
+    ODE.wronskian (ferrersP ν (-μ)) (fun x => ferrersP ν (-μ) (-x)) x=2/(Gamma (μ-ν)*Gamma (ν+μ+1)*(1-x^2:ℂ)) := by
   rw [ferrersWronskian_of_even_odd (ferrersP_neg_eqOn_even_odd ν μ)
     (ferrersP_neg_reflect_eqOn_even_odd ν μ) hx,
     show (2:ℂ)/(Gamma (μ-ν)*Gamma (ν+μ+1)*(1-x^2:ℂ)) =
@@ -306,7 +299,7 @@ theorem ferrers_wronskian_3 (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) 
 Γ(ν+μ+1)/(Γ(ν-μ+1) (1-x²))`. -/
 @[dlmf 14.2.E4]
 theorem ferrers_wronskian_4 (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ferrersWronskian (ferrersP ν μ) (ferrersQ ν μ) x=Gamma (ν+μ+1)/(Gamma (ν-μ+1)*(1-x^2:ℂ)) := by
+    ODE.wronskian (ferrersP ν μ) (ferrersQ ν μ) x=Gamma (ν+μ+1)/(Gamma (ν-μ+1)*(1-x^2:ℂ)) := by
   rw [ferrersWronskian_of_even_odd (ferrersP_regular_eqOn h) (ferrersQ_eqOn_even_odd ν μ) hx,
     show Gamma (ν+μ+1)/(Gamma (ν-μ+1)*(1-x^2:ℂ)) = Gamma (ν+μ+1)/Gamma (ν-μ+1)/(1-x^2:ℂ) from
       (div_div _ _ _).symm, legendre_Gamma_ratio]
@@ -321,7 +314,7 @@ theorem ferrers_wronskian_4 (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : ℝ}
 cos(μπ)/(1-x²)`. -/
 @[dlmf 14.2.E6]
 theorem ferrers_wronskian_6 (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ferrersWronskian (ferrersP ν (-μ)) (ferrersQ ν μ) x=cos (μ*π)/(1-x^2:ℂ) := by
+    ODE.wronskian (ferrersP ν (-μ)) (ferrersQ ν μ) x=cos (μ*π)/(1-x^2:ℂ) := by
   have hne : 1-(x:ℂ)^2≠0 := slitPlane_ne_zero (ferrers_one_sub_sq_mem_slitPlane hx)
   have hP : (π:ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   rw [ferrersWronskian_of_even_odd (ferrersP_neg_eqOn_even_odd ν μ) (ferrersQ_eqOn_even_odd ν μ) hx,
@@ -356,7 +349,7 @@ theorem ferrers_wronskian_6 (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : ℝ}
 (1-x²))`. -/
 @[dlmf 14.2.E7]
 theorem ferrers_wronskian_7 (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ferrersWronskian (ferrersP ν (-μ)) (ferrersP ν μ) x=2*sin (μ*π)/(π*(1-x^2:ℂ)) := by
+    ODE.wronskian (ferrersP ν (-μ)) (ferrersP ν μ) x=2*sin (μ*π)/(π*(1-x^2:ℂ)) := by
   rw [ferrersWronskian_of_even_odd (ferrersP_neg_eqOn_even_odd ν μ) (ferrersP_eqOn_even_odd ν μ) hx,
     show 2*sin (μ*π)/(π*(1-x^2:ℂ)) = sin (μ*π)*(2/(π*(1-x^2:ℂ))) by ring]
   congr 1

@@ -440,7 +440,7 @@ theorem incG_hasSum_taylor_of_analyticAt {f : ℝ → ℝ} {ξ : ℝ} (hf : Anal
 r → HasSum (fun k : ℕ => Real.betaGeneratingCoeff b ξ k*(t-ξ)^k) (Real.betaGeneratingKernel b
 t)`. -/
 @[dlmf 8.18.E6]
-theorem Real.betaGenerating_hasSum {b ξ : ℝ} (hb : 0 < b) (hξ : 0 ≤ ξ) :
+theorem Real.betaGenerating_hasSum {b ξ : ℝ} :
     ∃ r : ℝ, 0 < r ∧ ∀ t : ℝ, |t-ξ| < r → HasSum (fun k : ℕ => Real.betaGeneratingCoeff b ξ k*(t-ξ)^k) (Real.betaGeneratingKernel b t) := by
   set h : ℝ → ℝ := fun t => 1-Real.exp (-t)
   set D := dslope h 0
@@ -489,7 +489,7 @@ theorem Real.betaGenerating_hasSum {b ξ : ℝ} (hb : 0 < b) (hξ : 0 ≤ ξ) :
 1=(x*Real.betaXi x+x-1)/((1-x)*Real.betaXi x)*(b-1)*Real.betaGeneratingCoeff b (Real.betaXi x)
 0`. -/
 @[dlmf 8.18.E7]
-theorem Real.betaGeneratingCoeff_first {b x : ℝ} (hb : 0 < b) (hx : 0 < x) (hx1 : x < 1) :
+theorem Real.betaGeneratingCoeff_first {b x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
     Real.betaGeneratingCoeff b (Real.betaXi x) 0=((1-x)/Real.betaXi x)^(b-1) ∧ Real.betaGeneratingCoeff b (Real.betaXi x) 1=(x*Real.betaXi x+x-1)/((1-x)*Real.betaXi x)*(b-1)*Real.betaGeneratingCoeff b (Real.betaXi x) 0 := by
   set ξ := Real.betaXi x with hξdef
   have hξ : 0 < ξ := by
@@ -549,7 +549,7 @@ theorem hasDerivAt_one_sub_exp_neg_div_zero :
 /-- Identity under the stated parameter and domain assumptions: `Real.betaGeneratingCoeff b 0 0=1
 ∧ Real.betaGeneratingCoeff b 0 1=(1-b)/2`. -/
 @[dlmf 8.18.E7]
-theorem Real.betaGeneratingCoeff_at_endpoint {b : ℝ} (hb : 0 < b) :
+theorem Real.betaGeneratingCoeff_at_endpoint {b : ℝ} :
     Real.betaGeneratingCoeff b 0 0=1 ∧ Real.betaGeneratingCoeff b 0 1=(1-b)/2 := by
   refine ⟨by simp [Real.betaGeneratingCoeff, Real.betaGeneratingKernel], ?_⟩
   have hK : Real.betaGeneratingKernel b =

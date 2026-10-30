@@ -32,6 +32,7 @@ public import DLMF.Confluent.Basic
 public import DLMF.Coulomb.Basic
 public import DLMF.Coulomb.Energy.Basic
 public import DLMF.Elliptic.Basic
+public import DLMF.EllipticIntegrals.Basic
 public import DLMF.ErrorFunctions.Basic
 public import DLMF.ExpIntegrals.Basic
 public import DLMF.Gamma.Basic

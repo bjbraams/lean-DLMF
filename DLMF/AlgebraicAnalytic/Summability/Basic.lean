@@ -77,8 +77,17 @@ def cesaroMeanOfOrder (α : ℝ) (a : ℕ → ℂ) (n : ℕ) : ℂ :=
   (((n ! : ℝ) / (ascPochhammer ℝ n).eval (α + 1) : ℝ) : ℂ) *
     ∑ k ∈ range (n + 1), ((((ascPochhammer ℝ k).eval (α + 1) / k ! : ℝ)) : ℂ) * a (n - k)
 
+/-- The Cesàro mean of order zero is the ordinary partial sum. -/
+@[simp] theorem cesaroMeanOfOrder_zero (a : ℕ → ℂ) (n : ℕ) :
+    cesaroMeanOfOrder 0 a n = seriesPartialSum a n := by
+  simp only [cesaroMeanOfOrder, zero_add, ascPochhammer_eval_one]
+  simp only [Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero _), ne_eq, not_false_eq_true,
+    div_self, Complex.ofReal_one, one_mul]
+  simpa only [seriesPartialSum, Nat.add_sub_cancel] using
+    (Finset.sum_range_reflect (f := a) (n + 1))
+
 /-- DLMF 1.15.6–1.15.7: `∑ a_n = s (C,α)`, general Cesàro summability (DLMF: `α > -1`; the
-predicate is defined for every real `α` and the theorems assume `-1 < α`). -/
+predicate is defined for every real `α`; regularity requires `0 ≤ α`). -/
 @[dlmf 1.15.E6, dlmf 1.15.E7]
 def HasCesaroSumOfOrder (α : ℝ) (a : ℕ → ℂ) (s : ℂ) : Prop :=
   Tendsto (cesaroMeanOfOrder α a) atTop (𝓝 s)

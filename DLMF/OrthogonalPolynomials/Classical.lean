@@ -759,7 +759,7 @@ theorem poch_half (k : ℕ) :
       field [hk0, h2k, h4, hk1]
     exact this.symm
 
-/-- Helper lemma for `eval_U_eq_ultrasphPoly`. -/
+/-- The rising factorial starting at `3/2`, expressed using ordinary factorials. -/
 theorem poch_three_halves_factorial (k : ℕ) :
     poch (3 / 2 : ℂ) k = (2 * k + 1).factorial / (4 ^ k * k.factorial : ℂ) := by
   have hk0 : (k.factorial : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr k.factorial_ne_zero

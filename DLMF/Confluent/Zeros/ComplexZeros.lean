@@ -604,7 +604,7 @@ Kummer's transformation and the Sturm-comparison count `kzt_U_posZeros_count`; o
 nonintegrality of `a-b+1` is used (`hai` and `hbi` are not needed). -/
 @[dlmf 13.9.E14]
 theorem kummerU_posZeros_ceil {a b : ℝ} (hb : b ≤ 1) (hab : a + 1 < b)
-    (hai : ∀ n : ℤ, a ≠ n) (hbi : ∀ n : ℤ, b ≠ n) (habi : ∀ n : ℤ, a - b + 1 ≠ n) :
+    (habi : ∀ n : ℤ, a - b + 1 ≠ n) :
     (kummerUPosZeros a b).encard = Int.toNat ⌈b - a - 1⌉ := by
   have h := kzt_U_posZeros_count (a := a - b + 1) (b := 2 - b) (by linarith) (by linarith) habi
   have hset : kummerUPosZeros a b =

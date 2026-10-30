@@ -5,9 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.OrthogonalPolynomials.Basic.Definitions
-public import DLMF.Confluent.Basic.IncompleteGamma
 public import DLMF.Confluent.Basic.ExpansionData
+public import DLMF.Confluent.Basic.IncompleteGamma
+public import DLMF.OrthogonalPolynomials.Basic.Definitions
 
 public import ComplexAnalysis.HalfPlane
 public import DLMF.Confluent.Continuation
@@ -38,8 +38,6 @@ open DLMF.Bessel
 noncomputable section
 
 namespace DLMF.Confluent
-
-
 
 /-- `(-n)_{n-s} (-1)^{n-s} / (n-s)! = C(n,s)`. -/
 theorem poch_neg_nat_sub_div (n s : ℕ) (hs : s ≤ n) :
@@ -105,8 +103,6 @@ theorem kummerU_shift_one (a : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     kummerU a (a + 1) z = z ^ (-a) := by
   rw [kummerU_kummer_transform_all a _ (slitPlane_ne_zero hz), show a - (a + 1) + 1 = 0 by ring, kummerU_zero,
     show (1 : ℂ) - (a + 1) = -a by ring, mul_one]
-
-
 
 /-- Lower incomplete-Gamma identities with a regular denominator for Kummer M. -/
 @[dlmf 13.6.E5]
@@ -325,8 +321,6 @@ theorem kummerU_besselK (ν z : ℂ) (hz : z ∈ slitPlane) :
   have := key (2 * ν)
   rwa [show 2 * ν / 2 = ν by ring] at this
 
-
-
 /-- Pascal's identity combined with the reciprocal-Gamma recurrence. -/
 theorem kummerBesselCoeff_succ (ν : ℂ) (n k : ℕ) :
     kummerBesselCoeff ν n (k + 1) - 2 * ν * (2 * ν + 1) * kummerBesselCoeff (ν + 1) n k =
@@ -534,7 +528,6 @@ theorem cpow_neg_mul_besselI_shift (ν : ℂ) (k : ℕ) {z : ℂ} (hz : z ≠ 0)
       regularizedHGFun ∅ {ν + k + 1} (z ^ 2 / 4) := by
   rw [besselI, ← mul_assoc, ← cpow_add _ _ (div_ne_zero hz two_ne_zero),
     show -ν + (ν + k) = (k : ℂ) by ring, cpow_natCast]
-
 
 /-- Finite Kummer–Bessel expansion away from the Gamma-prefactor poles.
 The former statement included `ν = 0, n = 0`, where totalized `Gamma 0`
@@ -961,7 +954,7 @@ theorem whittakerM_exp (κ : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
 
 /-- An exponential Whittaker-M specialization with a regular denominator parameter. -/
 @[dlmf 13.18.E3]
-theorem whittakerM_exp_neg (κ : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
+theorem whittakerM_exp_neg (κ : ℂ) {z : ℂ}
     (hκ : ∀ k : ℕ, -2 * κ ≠ -k) :
     whittakerM κ (-κ - 1 / 2) z = exp (z / 2) * z ^ (-κ) := by
   unfold whittakerM
@@ -1107,7 +1100,7 @@ theorem whittakerW_besselK (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
 /-- Whittaker function and Hermite polynomials. The left side depends only on `z ^ 2`, so the
 identity needs `0 < Re z`. -/
 @[dlmf 13.18.E14]
-theorem whittakerM_hermite_even (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane) (hre : 0 < z.re) :
+theorem whittakerM_hermite_even (n : ℕ) {z : ℂ} (hre : 0 < z.re) :
     whittakerM (1 / 4 + n) (-1 / 4) (z ^ 2) =
       (-1 : ℂ) ^ n * n.factorial / (2 * n).factorial * exp (-z ^ 2 / 2) *
         z ^ (1 / 2 : ℂ) * hermitePolyHEval (2 * n) z := by
@@ -1148,7 +1141,7 @@ theorem whittakerW_hermite (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane) (hre : 0 <
 
 /-- Laguerre specialization of W with a regular Kummer-M denominator. -/
 @[dlmf 13.18.E17]
-theorem whittakerW_laguerrePolyL (α : ℂ) (n : ℕ) {z : ℂ} (hz : z ∈ slitPlane)
+theorem whittakerW_laguerrePolyL (α : ℂ) (n : ℕ) {z : ℂ}
     (hα : ∀ k : ℕ, α + 1 ≠ -k) :
     whittakerW (α / 2 + 1 / 2 + n) (α / 2) z =
       (-1 : ℂ) ^ n * poch (α + 1) n * whittakerM (α / 2 + 1 / 2 + n) (α / 2) z ∧

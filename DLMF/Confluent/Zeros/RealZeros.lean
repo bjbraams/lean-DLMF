@@ -6,8 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Confluent.KummerProperties
-public import DLMF.ErrorFunctions.ZeroTools
 public import DLMF.Confluent.ZeroTools
+public import DLMF.ErrorFunctions.ZeroTools
 
 /-!
 # Counts of real Kummer zeros
@@ -110,13 +110,13 @@ theorem kummerM_ofReal_hasSum {a b : ℝ} (hb : ∀ k : ℕ, (b : ℂ) ≠ -k) (
 
 The counts are proved by induction along `(a,b) ↦ (a+1,b+1)` using `M' = (a/b) M(a+1,b+1,·)`
 and Kummer's equation, which at a zero `x` of `M(a+1,b+1,·)` gives
-`M(a,b,x) = (x/b) M'(a+1,b+1,x)`. The invariant `kumZ_Q` records the zeros together with the
+`M(a,b,x) = (x/b) M'(a+1,b+1,x)`. The invariant `KumZQ` records the zeros together with the
 sign pattern between them and the eventual growth. -/
 
 /-- Sign-pattern data for counting positive zeros: `f` has exactly `m` positive zeros
 `y 1 < ⋯ < y m`, at which `(-1)^j f'` is positive, with `(-1)^j f > 0` between consecutive zeros,
 `(-1)^m f > 0` beyond the last one, and eventually `(-1)^m f ≥ 1`. -/
-def kumZ_Q (f f' : ℝ → ℝ) (m : ℕ) : Prop :=
+def KumZQ (f f' : ℝ → ℝ) (m : ℕ) : Prop :=
   ∃ y : ℕ → ℝ, y 0 = 0 ∧ (∀ j < m, y j < y (j + 1)) ∧
     (∀ j, 1 ≤ j → j ≤ m → f (y j) = 0 ∧ 0 < (-1) ^ j * f' (y j)) ∧
     (∀ j < m, ∀ x ∈ Ioo (y j) (y (j + 1)), 0 < (-1) ^ j * f x) ∧
@@ -124,15 +124,15 @@ def kumZ_Q (f f' : ℝ → ℝ) (m : ℕ) : Prop :=
     (∃ X, ∀ x, X ≤ x → 1 ≤ (-1) ^ m * f x)
 
 /-- The base case: a function bounded below by `1` on `[0, ∞)` has no positive zeros. -/
-theorem kumZ_Q_zero {f f' : ℝ → ℝ} (h1 : ∀ x, 0 ≤ x → 1 ≤ f x) : kumZ_Q f f' 0 := by
+theorem kumZ_Q_zero {f f' : ℝ → ℝ} (h1 : ∀ x, 0 ≤ x → 1 ≤ f x) : KumZQ f f' 0 := by
   refine ⟨fun j => j, by simp, fun j hj => absurd hj (Nat.not_lt_zero _),
     fun j hj1 hj => by omega, fun j hj => absurd hj (Nat.not_lt_zero _), fun x hx => ?_,
     ⟨0, fun x hx => by simpa using h1 x hx⟩⟩
   have := h1 x (by simp at hx; linarith)
   simp only [pow_zero, one_mul]; linarith
 
-/-- Under `kumZ_Q`, the positive zeros are exactly `y 1, …, y m`. -/
-theorem kumZ_Q_encard {f f' : ℝ → ℝ} {m : ℕ} (hQ : kumZ_Q f f' m) :
+/-- Under `KumZQ`, the positive zeros are exactly `y 1, …, y m`. -/
+theorem kumZ_Q_encard {f f' : ℝ → ℝ} {m : ℕ} (hQ : KumZQ f f' m) :
     {x : ℝ | 0 < x ∧ f x = 0}.encard = m := by
   obtain ⟨y, hy0, hymono, hyz, hysign, hylast, -⟩ := hQ
   have hmono : StrictMonoOn y (Iic m) := strictMonoOn_Iic_of_lt_succ fun j hj => hymono j hj
@@ -200,7 +200,7 @@ sign-pattern data for `g` with `k` zeros yields the data for `f` with `k + 1` ze
 theorem kumZ_step {f g g' : ℝ → ℝ} {a b : ℝ} {k : ℕ} (hab : a / b < 0) (hb : k = 0 ∨ 0 < b)
     (hf0 : f 0 = 1) (hfd : ∀ x, HasDerivAt f (a / b * g x) x)
     (hode : ∀ x, 0 < x → g x = 0 → f x = x / b * g' x)
-    (hQ : kumZ_Q g g' k) : kumZ_Q f (fun x => a / b * g x) (k + 1) := by
+    (hQ : KumZQ g g' k) : KumZQ f (fun x => a / b * g x) (k + 1) := by
   obtain ⟨y, hy0, hymono, hyz, hysign, hylast, X, hX⟩ := hQ
   set c : ℝ := -(a / b) with hcdef
   have hc : 0 < c := by rw [hcdef]; exact neg_pos.mpr hab
@@ -365,7 +365,7 @@ minimum. -/
 theorem kumZ_step_down {f g g' : ℝ → ℝ} {a b : ℝ} (hab : a / b < 0) (hb : b < 0)
     (hfd : ∀ x, HasDerivAt f (a / b * g x) x)
     (hode : ∀ x, 0 < x → g x = 0 → f x = x / b * g' x)
-    (hQ : kumZ_Q g g' 1) : kumZ_Q f (fun x => a / b * g x) 0 := by
+    (hQ : KumZQ g g' 1) : KumZQ f (fun x => a / b * g x) 0 := by
   obtain ⟨y, hy0, hymono, hyz, hysign, hylast, X, hX⟩ := hQ
   have hfc : Continuous f := continuous_iff_continuousAt.2 fun x => (hfd x).continuousAt
   have hy1 : 0 < y 1 := by have := hymono 0 (by norm_num); rwa [hy0] at this
@@ -408,7 +408,7 @@ theorem kumZ_step_down {f g g' : ℝ → ℝ} {a b : ℝ} (hab : a / b < 0) (hb 
 theorem kumZ_step_same {f g g' : ℝ → ℝ} {a b : ℝ} {k : ℕ} (hab : 0 < a / b) (hb : b < 0)
     (hf0 : f 0 = 1) (hfd : ∀ x, HasDerivAt f (a / b * g x) x)
     (hode : ∀ x, 0 < x → g x = 0 → f x = x / b * g' x)
-    (hQ : kumZ_Q g g' k) : kumZ_Q f (fun x => a / b * g x) k := by
+    (hQ : KumZQ g g' k) : KumZQ f (fun x => a / b * g x) k := by
   obtain ⟨y, hy0, hymono, hyz, hysign, hylast, X, hX⟩ := hQ
   set c : ℝ := a / b with hcdef
   have hfc : Continuous f := continuous_iff_continuousAt.2 fun x => (hfd x).continuousAt
@@ -626,7 +626,7 @@ theorem kumZ_F_one_le {a b : ℝ} (ha : 0 ≤ a) (hb : 0 < b) {x : ℝ} (hx : 0 
 
 /-- The sign-pattern data for `M(a,b,·)` with `⌈-a⌉ = n` zeros. -/
 theorem kumZ_F_Q (n : ℕ) : ∀ a b : ℝ, 0 < b → -(n : ℝ) ≤ a → a < -(n : ℝ) + 1 →
-    kumZ_Q (kumZ_F a b) (fun x => a / b * kumZ_F (a + 1) (b + 1) x) n := by
+    KumZQ (kumZ_F a b) (fun x => a / b * kumZ_F (a + 1) (b + 1) x) n := by
   induction n with
   | zero =>
     intro a b hb ha _
@@ -656,13 +656,13 @@ theorem kumZ_not_neg_nat_of_Ioo {b : ℝ} {n : ℕ} (h1 : -((n : ℝ) + 1) < b) 
 /-- Sign-pattern data for `a > 0` and `b ∈ (-(n+1), -n)`: one zero when `n` is even, none when
 `n` is odd. -/
 theorem kumZ_F_Q_negb (n : ℕ) : ∀ a b : ℝ, 0 < a → -((n : ℝ) + 1) < b → b < -(n : ℝ) →
-    kumZ_Q (kumZ_F a b) (fun x => a / b * kumZ_F (a + 1) (b + 1) x) ((n + 1) % 2) := by
+    KumZQ (kumZ_F a b) (fun x => a / b * kumZ_F (a + 1) (b + 1) x) ((n + 1) % 2) := by
   induction n with
   | zero =>
     intro a b ha hb1 hb2
     simp only [CharP.cast_eq_zero, zero_add, neg_zero] at hb1 hb2
     have hbn := kumZ_not_neg_nat_of_Ioo (n := 0) (by simpa using hb1) (by simpa using hb2)
-    have hg : kumZ_Q (kumZ_F (a + 1) (b + 1))
+    have hg : KumZQ (kumZ_F (a + 1) (b + 1))
         (fun x => (a + 1) / (b + 1) * kumZ_F (a + 1 + 1) (b + 1 + 1) x) 0 :=
       kumZ_Q_zero fun x hx => kumZ_F_one_le (by linarith) (by linarith) hx
     exact kumZ_step (div_neg_of_pos_of_neg ha hb2) (Or.inl rfl) (kumZ_F_zero a b)
@@ -713,7 +713,7 @@ theorem kumZ_not_neg_nat_real {b : ℝ} (hbi : ∀ k : ℕ, b ≠ -(k : ℝ)) : 
 
 /-- Sign-pattern data for `a < -m` and `b ∈ (-(m+1), -m)`: `⌈-a⌉ - (m+1)` zeros. -/
 theorem kumZ_F_Q_both (m : ℕ) : ∀ a b : ℝ, -((m : ℝ) + 1) < b → b < -(m : ℝ) → a < -(m : ℝ) →
-    kumZ_Q (kumZ_F a b) (fun x => a / b * kumZ_F (a + 1) (b + 1) x)
+    KumZQ (kumZ_F a b) (fun x => a / b * kumZ_F (a + 1) (b + 1) x)
       (⌈-a⌉.toNat - (m + 1)) := by
   induction m with
   | zero =>
@@ -748,7 +748,7 @@ theorem kumZ_F_Q_both (m : ℕ) : ∀ a b : ℝ, -((m : ℝ) + 1) < b → b < -(
 `⌈-b⌉ > p + 1`: `(⌈-b⌉ - (p+1)) mod 2` zeros. -/
 theorem kumZ_F_Q_swap (p : ℕ) : ∀ a b : ℝ, -((p : ℝ) + 1) < a → a < -(p : ℝ) →
     (∀ k : ℕ, b ≠ -(k : ℝ)) → (p : ℤ) + 1 < ⌈-b⌉ →
-    kumZ_Q (kumZ_F a b) (fun x => a / b * kumZ_F (a + 1) (b + 1) x)
+    KumZQ (kumZ_F a b) (fun x => a / b * kumZ_F (a + 1) (b + 1) x)
       ((⌈-b⌉ - (p + 1)) % 2).toNat := by
   induction p with
   | zero =>
@@ -968,7 +968,7 @@ theorem kummerM_posZeros_ceil_swap_ne :
     have h3 : 2 * k = 3 := by exact_mod_cast h2
     omega
   have hbn := kumZ_not_neg_nat_real hbi
-  have hg : kumZ_Q (kumZ_F ((-1 : ℝ) + 1) ((-3 / 2 : ℝ) + 1))
+  have hg : KumZQ (kumZ_F ((-1 : ℝ) + 1) ((-3 / 2 : ℝ) + 1))
       (fun x => ((-1 : ℝ) + 1) / ((-3 / 2 : ℝ) + 1) * kumZ_F ((-1 : ℝ) + 1 + 1) ((-3 / 2 : ℝ) + 1 + 1) x)
       0 :=
     kumZ_Q_zero fun x _ => by

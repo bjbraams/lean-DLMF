@@ -8,14 +8,14 @@ module
 public import DLMF.AlgebraicAnalytic.Transforms.Fourier
 public import DLMF.AlgebraicAnalytic.Transforms.LaplaceTable
 public import DLMF.Gamma.MellinBarnes
-public import Mathlib.Analysis.SpecialFunctions.Gaussian.FourierTransform
-public import Mathlib.Analysis.SpecialFunctions.Complex.Arctan
-public import Mathlib.Analysis.MellinTransform
-public import TauCeti.MeasureTheory.Integral.Bochner.Basic
-public import TauCeti.Analysis.Fourier.ExpNegAbs
-public import TauCeti.Analysis.Contour.WorkedExamples.HalfDisc.SineIntegral
 public import DLMFMathlib.Analysis.MellinConvolution
 public import DLMFMathlib.Analysis.SpecialFunctions.Pow.ComplexReal
+public import Mathlib.Analysis.MellinTransform
+public import Mathlib.Analysis.SpecialFunctions.Complex.Arctan
+public import Mathlib.Analysis.SpecialFunctions.Gaussian.FourierTransform
+public import TauCeti.Analysis.Contour.WorkedExamples.HalfDisc.SineIntegral
+public import TauCeti.Analysis.Fourier.ExpNegAbs
+public import TauCeti.MeasureTheory.Integral.Bochner.Basic
 
 /-!
 # Tables of integral transforms (DLMF §1.14(vii), Tables 1.14.1–1.14.5)
@@ -330,7 +330,7 @@ theorem fourierCosTransform_quartic {a : ℂ} (ha : 0 < a.re) {x : ℝ} (hx : 0 
 
 /-- DLMF Table 1.14.2, row 6: `e^{-at} ↦ √(2/π) a/(a² + x²)`, `ℜa > 0`. -/
 @[dlmf 1.14.T2]
-theorem fourierCosTransform_exp_neg {a : ℂ} (ha : 0 < a.re) {x : ℝ} (_hx : 0 < x) :
+theorem fourierCosTransform_exp_neg {a : ℂ} (ha : 0 < a.re) {x : ℝ} :
     fourierCosTransform (fun t => cexp (-a * t)) x =
       (Real.sqrt (2 / Real.pi) : ℂ) * (a / (a ^ 2 + x ^ 2)) := by
   have h := laplaceTransform_cos (a := x) (s := a) (by simpa using ha)
@@ -477,7 +477,7 @@ theorem fourierSinTransform_exp_neg_div {a : ℂ} (ha : 0 < a.re) {x : ℝ} (hx 
 
 /-- DLMF Table 1.14.3, row 9: `e^{-at} ↦ √(2/π) x/(a² + x²)`, `ℜa > 0`. -/
 @[dlmf 1.14.T3]
-theorem fourierSinTransform_exp_neg {a : ℂ} (ha : 0 < a.re) {x : ℝ} (_hx : 0 < x) :
+theorem fourierSinTransform_exp_neg {a : ℂ} (ha : 0 < a.re) {x : ℝ} :
     fourierSinTransform (fun t => cexp (-a * t)) x =
       (Real.sqrt (2 / Real.pi) : ℂ) * (x / (a ^ 2 + x ^ 2)) := by
   have h := laplaceTransform_sin (a := x) (s := a) (by simpa using ha)
@@ -488,7 +488,7 @@ theorem fourierSinTransform_exp_neg {a : ℂ} (ha : 0 < a.re) {x : ℝ} (_hx : 0
 
 /-- DLMF Table 1.14.3, row 10: `t e^{-at} ↦ √(2/π) 2ax/(a² + x²)²`, `ℜa > 0`. -/
 @[dlmf 1.14.T3]
-theorem fourierSinTransform_mul_exp_neg {a : ℂ} (ha : 0 < a.re) {x : ℝ} (_hx : 0 < x) :
+theorem fourierSinTransform_mul_exp_neg {a : ℂ} (ha : 0 < a.re) {x : ℝ} :
     fourierSinTransform (fun t => t * cexp (-a * t)) x =
       (Real.sqrt (2 / Real.pi) : ℂ) * (2 * a * x / (a ^ 2 + x ^ 2) ^ 2) := by
   have h := laplaceTransform_mul_sin (a := x) (s := a) (by simpa using ha)

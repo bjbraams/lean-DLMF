@@ -5,9 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Bessel.SecondKind
 public import DLMF.Mathieu.Modified.Basic
 public import DLMF.Mathieu.Noninteger.Fourier
-public import DLMF.Bessel.SecondKind
 
 /-!
 # Convergence of the cross-product series of the modified Mathieu functions (DLMF 28.24.1)
@@ -69,7 +69,6 @@ theorem p2m_besselJExp_rec (μ : ℂ) {h : ℂ} (hh : h ≠ 0) (z : ℂ) :
   linear_combination (norm := (field_simp; ring))
     (2 * (h / 2) ^ μ * Complex.exp (μ * z) / (h * Complex.exp z)) * he
 
-
 /-- The continued `J_μ(h e^z)` is entire in the order `μ` for `h ≠ 0`. -/
 theorem p2m_differentiable_besselJExp_order {h : ℂ} (hh : h ≠ 0) (z : ℂ) :
     Differentiable ℂ fun μ : ℂ => besselJExp μ h z := by
@@ -119,7 +118,7 @@ theorem p2m_besselYExp_eq_dslope (n : ℤ) {μ h : ℂ} (hμ : μ ∈ Metric.bal
       refine (hcont.tendsto.mono_left nhdsWithin_le_nhds).congr' ?_
       filter_upwards [self_mem_nhdsWithin] with μ hμ
       rw [dslope_of_ne _ hμ, dslope_of_ne _ hμ, slope_def_field, slope_def_field,
-        p2m_besselDExp_int, DLMF.Bessel.sin_int_mul_pi_complex, sub_zero, sub_zero]
+        p2m_besselDExp_int, Complex.sin_int_mul_pi, sub_zero, sub_zero]
       have hμn : μ - n ≠ 0 := sub_ne_zero.mpr hμ
       simp only [p2m_besselDExp]
       field_simp
@@ -128,7 +127,7 @@ theorem p2m_besselYExp_eq_dslope (n : ℤ) {μ h : ℂ} (hμ : μ ∈ Metric.bal
     exact ht.limUnder_eq
   · rw [p2m_besselYExp_of_not_int (DLMF.Bessel.not_int_of_mem_ball hμ hne), dslope_of_ne _ hne,
       dslope_of_ne _ hne, slope_def_field, slope_def_field, p2m_besselDExp_int,
-      DLMF.Bessel.sin_int_mul_pi_complex, sub_zero, sub_zero]
+      Complex.sin_int_mul_pi, sub_zero, sub_zero]
     have hμn : μ - n ≠ 0 := sub_ne_zero.mpr hne
     field_simp
 
@@ -154,7 +153,7 @@ theorem p2m_continuousAt_besselYExp_order {h : ℂ} (hh : h ≠ 0) (z μ₀ : �
     refine hc.congr ?_
     filter_upwards [hopen.mem_nhds (DLMF.Bessel.sin_mul_pi_ne_zero hν)] with μ hμ
     have hμ' : ∀ k : ℤ, μ ≠ k := fun k hk => hμ (by
-      rw [hk]; exact DLMF.Bessel.sin_int_mul_pi_complex k)
+      rw [hk]; exact Complex.sin_int_mul_pi k)
     exact (p2m_besselYExp_of_not_int hμ' h z).symm
 
 /-- The order recurrence of the continued `Y`, for every order. -/
@@ -509,8 +508,6 @@ theorem p2m_fam_tsum_le {c Jx Cy : ℤ → ℂ} {Cc K EJ B EC A : ℝ} (hCc : 0 
   refine tsum_of_norm_bounded (hs.mul_left _).hasSum
     (fun ℓ => p2m_fam_bound hCc hK hEJ hB hEC hA hc hJ hC α β ℓ)
 
-
-
 /-- The pointwise identity behind the recurrence in `n` of the cross-product series. -/
 lemma p2m_fam_identity {c Jx Cy : ℤ → ℂ} {ν a x y : ℂ} (hx : x ≠ 0) (hy : y ≠ 0)
     (hrec : ∀ m : ℤ, x * y * c (m + 1) - (a - (ν + 2 * m) ^ 2) * c m + x * y * c (m - 1) = 0)
@@ -537,8 +534,6 @@ lemma p2m_fam_identity {c Jx Cy : ℤ → ℂ} {ν a x y : ℂ} (hx : x ≠ 0) (
     (-(x * y) * (-1 : ℂ) ^ ℓ * c ℓ * (Cy (n + ℓ - 1) + Cy (n + ℓ + 1))) * eJ +
     (-(x * y) * (-1 : ℂ) ^ ℓ * c ℓ * (2 * (ℓ - n) / x * Jx (ℓ - n))) * eC +
     (-(-1 : ℂ) ^ ℓ * Jx (ℓ - n) * Cy (n + ℓ)) * ec
-
-
 
 /-- Two consecutive zeros of a solution of the three-term recurrence force it to vanish. -/
 lemma p2m_rec_eq_zero {u : ℤ → ℂ} {D : ℤ → ℂ} {q : ℂ} (hq : q ≠ 0)

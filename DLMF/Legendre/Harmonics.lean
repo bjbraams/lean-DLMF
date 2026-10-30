@@ -6,8 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Legendre.IntegerTheory
-public import DLMF.Legendre.SpecialValues
 public import DLMF.Legendre.Integrals
+public import DLMF.Legendre.SpecialValues
 public import DLMF.SphericalHarmonics.AdditionTools
 
 /-!
@@ -290,7 +290,7 @@ theorem sphericalHarmonic_rodrigues (l : ℕ) (m : ℤ) (hm : m.natAbs ≤ l) {�
 theorem ferrersPNat_one (l m : ℕ) : ferrersPNat l m 1 = if m = 0 then 1 else 0 := by
   rcases m with _ | k
   · simp only [ferrersPNat, pow_zero, one_mul, iteratedDeriv_zero, ite_true, ofReal_one]
-    rw [legendrePolyP, jacobi_at_one (by norm_num)]
+    rw [legendrePolyP, jacobiPolyP_one ]
     simp [Nat.cast_ne_zero.mpr l.factorial_ne_zero]
   · simp [ferrersPNat]
 
@@ -572,7 +572,6 @@ theorem sphericalHarmonic_orthonormal (l₁ l₂ : ℕ) (m₁ m₂ : ℤ) (h1 : 
         _ = 1 := by rw [hss, hc]; field_simp; ring
     · simp [hl]
   · rw [ite_eq_right (sub_ne_zero.mpr hm), ite_eq_right (fun h => hm h.2.symm)]; simp
-
 
 /-- A sum over a symmetric integer interval, paired by sign. -/
 theorem sum_Icc_neg_pair (g : ℤ → ℂ) (l : ℕ) :
@@ -934,7 +933,6 @@ theorem herglotz_generating {lam : ℂ} (hlam : lam ≠ 0) (t : ℂ) (r θ phi :
   simp_rw [hterm]
   exact NormedSpace.expSeries_div_hasSum_exp (t*r*A)
 
-
 /-- Scaled oblate harmonic of the first kind in DLMF 14.30(i). -/
 def scaledOblateR (n m : ℕ) (x : ℝ) : ℂ :=
   exp (-I*π*n/2)*associatedP n m (I*x)
@@ -1004,7 +1002,6 @@ theorem scaledOblate_real (n m : ℕ) {x : ℝ} (hx : 0 < x) :
       push_cast
       field_simp
     rw [hT, mul_im, ofReal_im, ofReal_re, hF]; ring
-
 
 /- DLMF 14.30(iv), including 14.30.10–13 and the angular-momentum
 application discussion, is excluded under the project application-notes policy. -/

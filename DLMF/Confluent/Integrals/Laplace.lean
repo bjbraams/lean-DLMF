@@ -5,12 +5,12 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Confluent.Growth
-public import DLMF.Confluent.TricomiLaplace
-public import DLMF.Confluent.KummerDecay
 public import DLMF.Bessel.Asymptotics
 public import DLMF.Bessel.Lommel
 public import DLMF.Bessel.NeumannSeries
+public import DLMF.Confluent.Growth
+public import DLMF.Confluent.KummerDecay
+public import DLMF.Confluent.TricomiLaplace
 public import DLMF.Hypergeometric.Boundary
 public import DLMF.Hypergeometric.Identities
 public import Mathlib.Tactic.Monotonicity.Lemmas
@@ -78,7 +78,7 @@ theorem deriv_regularizedHGFun_shift {a b z : ℂ} (ha : a ≠ 1) :
 /-- Derivative of Tricomi U with shifted parameters. `U` is not complex-differentiable on the cut,
 so `z` is restricted to the slit plane. -/
 @[dlmf 13.10.E2]
-theorem deriv_kummerU_shift {a b z : ℂ} (ha : a ≠ 1) (hz : z ∈ slitPlane) :
+theorem deriv_kummerU_shift {a b z : ℂ} (hz : z ∈ slitPlane) :
     deriv (kummerU (a - 1) (b - 1)) z = -(a - 1) * kummerU a b z := by
   rw [deriv_kummerU (a - 1) (b - 1) hz, sub_add_cancel, sub_add_cancel]
 

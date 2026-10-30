@@ -153,7 +153,7 @@ theorem ferrersP_reflected_dependence (ν μ : ℂ) :
       fun y _ => by simp
     have w1 := ferrersWronskian_of_even_odd hz hO h0
     have w2 := ferrersWronskian_of_even_odd hz hE h0
-    simp only [ferrersWronskian, zero_mul, sub_zero, deriv_const, mul_zero, ofReal_zero,
+    simp only [ODE.wronskian, zero_mul, sub_zero, deriv_const, mul_zero, ofReal_zero,
       ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, mul_one, zero_sub] at w1 w2
     have hk : (2:ℂ)/π ≠ 0 := div_ne_zero two_ne_zero hpi
     have a1 : (A+B)*α = 0 := by
@@ -198,7 +198,7 @@ theorem associatedPQ_independent {ν μ : ℂ} (hν : -1/2 ≤ ν.re) (hμ : 0 �
     hr.unique hz
   have e0 : A*associatedP ν (-μ) ((2:ℝ):ℂ) + B*olverQ ν μ ((2:ℝ):ℂ) = 0 := hrel 2 (by norm_num)
   have hW := associated_wronskian_8 ν μ h2
-  unfold LegendreWronskian at hW
+  unfold ODE.wronskian at hW
   have hG : Gamma (ν+μ+1) ≠ 0 :=
     Complex.Gamma_ne_zero_of_re_pos (by simp only [add_re, one_re]; linarith)
   have hR : -1/(Gamma (ν+μ+1)*(((2:ℝ):ℂ)^2-1)) ≠ 0 := by

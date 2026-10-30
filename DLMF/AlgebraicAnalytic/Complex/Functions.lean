@@ -8,21 +8,21 @@ module -- shake: keep-all
 public import DLMF.AlgebraicAnalytic.Complex.Basic
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
 public import DLMFMathlib.Analysis.Complex.TrigR4SeriesExtension
-public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
-public import Mathlib.Analysis.Complex.CauchyIntegral
-public import Mathlib.Analysis.Complex.Schwarz
-public import Mathlib.Analysis.Complex.LocallyUniformLimit
+public import Mathlib.Analysis.Analytic.Order
 public import Mathlib.Analysis.Calculus.LogDeriv
+public import Mathlib.Analysis.Complex.CauchyIntegral
+public import Mathlib.Analysis.Complex.LocallyUniformLimit
+public import Mathlib.Analysis.Complex.Schwarz
 public import Mathlib.Analysis.InnerProductSpace.Harmonic.Basic
-public import TauCeti.Analysis.InnerProductSpace.Laplacian.StrongMaximumPrinciple
-public import TauCeti.Analysis.InnerProductSpace.Harmonic.Subharmonic
 public import Mathlib.Analysis.Meromorphic.Order
 public import Mathlib.Analysis.Normed.Algebra.Exponential
 public import Mathlib.Analysis.SpecialFunctions.Exponential
 public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
-public import Mathlib.Analysis.Analytic.Order
-public import TauCeti.Analysis.Contour.Residue.Basic
+public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 public import Mathlib.Tactic.CrossRefAttribute
+public import TauCeti.Analysis.Contour.Residue.Basic
+public import TauCeti.Analysis.InnerProductSpace.Harmonic.Subharmonic
+public import TauCeti.Analysis.InnerProductSpace.Laplacian.StrongMaximumPrinciple
 
 /-!
 # Functions of a complex variable (DLMF §1.10)
@@ -117,10 +117,11 @@ theorem residueAt_eq_residue {f : ℂ → ℂ} {z₀ : ℂ} {r₂ : ℝ}
   sorry
 
 /-- DLMF §1.10(iii) (Picard's theorem): in any neighbourhood of an isolated essential
-singularity (`f` analytic in a punctured disc and not meromorphic at `z₀`), `f` assumes every
+singularity (`f` analytic in a punctured disc of positive radius and not meromorphic at `z₀`),
+`f` assumes every
 value in `ℂ` with at most one exception. -/
 @[dlmf 1.10.iii]
-theorem picard_great {f : ℂ → ℂ} {z₀ : ℂ} {r₂ : ℝ}
+theorem picard_great {f : ℂ → ℂ} {z₀ : ℂ} {r₂ : ℝ} (hr₂ : 0 < r₂)
     (hf : DifferentiableOn ℂ f {z | 0 < ‖z - z₀‖ ∧ ‖z - z₀‖ < r₂}) (hess : ¬ MeromorphicAt f z₀)
     {ε : ℝ} (hε : 0 < ε) :
     ∃ w₀ : ℂ, ∀ w : ℂ, w ≠ w₀ → ∃ z, 0 < ‖z - z₀‖ ∧ ‖z - z₀‖ < ε ∧ f z = w := by
@@ -496,14 +497,15 @@ theorem prodConvergesDLMF_norm_iff {a : ℕ → ℂ} :
 
 /-- DLMF 1.10.20–1.10.21 (`M`-test for products): let `aₙ` be analytic in the domain `D`; if
 `|ln(1 + aₙ(z))| ≤ Mₙ` for `n ≥ N` and `z ∈ D` and `∑ Mₙ < ∞`, then `∏_{n ≥ 1} (1 + aₙ(z))`
-converges uniformly to a function `p` analytic in `D`, and `p(z) = 0` only where some factor
-`1 + aₙ(z)` vanishes. -/
+converges locally uniformly to a function `p` analytic in `D`, and `p(z) = 0` only where some factor
+`1 + aₙ(z)` vanishes. Bounds on the tail give local uniform convergence; global uniform
+convergence would additionally need control of the finite prefix. -/
 @[dlmf 1.10.E20]
 theorem prod_mtest_log {a : ℕ → ℂ → ℂ} {D : Set ℂ} (hD : IsOpen D)
     (ha : ∀ n, DifferentiableOn ℂ (a n) D) {M : ℕ → ℝ} {N : ℕ}
     (hM : ∀ n ≥ N, ∀ z ∈ D, ‖log (1 + a n z)‖ ≤ M n) (hs : Summable M) :
     ∃ p : ℂ → ℂ, DifferentiableOn ℂ p D ∧
-      TendstoUniformlyOn (fun m z => ∏ n ∈ Finset.Icc 1 m, (1 + a n z)) p atTop D ∧
+      TendstoLocallyUniformlyOn (fun m z => ∏ n ∈ Finset.Icc 1 m, (1 + a n z)) p atTop D ∧
       ∀ z ∈ D, p z = 0 → ∃ n ≥ 1, 1 + a n z = 0 := by
   sorry
 

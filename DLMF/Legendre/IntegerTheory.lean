@@ -259,14 +259,14 @@ theorem ferrersP_nat_reflection (n m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1
 
 /-- DLMF 14.7.18: for natural `m ≤ n` and `-1 < x < 1`, `𝖰^m_n(-x) = (-1)^{n+m+1} 𝖰^m_n(x)`. -/
 @[dlmf 14.7.E18]
-theorem ferrersQ_nat_reflection_1 (n m : ℕ) (h : m ≤ n) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem ferrersQ_nat_reflection_1 (n m : ℕ) {x : ℝ} :
     ferrersQ n (1*m) (-x)=(-1)^(n+m+1)*ferrersQ n (1*m) x := by
   exact ferrersQ_neg_of_add_eq_nat (by push_cast; ring) x
 
 /-- DLMF 14.7.18 (negative order): for natural `m ≤ n` and `-1 < x < 1`, `𝖰^{-m}_n(-x) =
 (-1)^{n+m+1} 𝖰^{-m}_n(x)`. -/
 @[dlmf 14.7.E18]
-theorem ferrersQ_nat_reflection_2 (n m : ℕ) (h : m ≤ n) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem ferrersQ_nat_reflection_2 (n m : ℕ) (h : m ≤ n) {x : ℝ} :
     ferrersQ n (-1*m) (-x)=(-1)^(n+m+1)*ferrersQ n (-1*m) x := by
   rw [ferrersQ_neg_of_add_eq_nat (N := n-m) (by push_cast [h]; ring) x]
   congr 1

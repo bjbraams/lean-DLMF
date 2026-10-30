@@ -5,9 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Lame.Polynomials.P2pBase
 public import DLMF.Elliptic.JacobiIdentities
 public import DLMF.JacobiElliptic.Derivatives
+public import DLMF.Lame.Polynomials.P2pBase
 
 /-!
 # Lamé polynomials solve Lamé's equation (DLMF §§29.12, 29.15)
@@ -163,8 +163,8 @@ lemma p2p_kind_Ucd (k h lam s : ℂ) (j : ℤ) :
 
 /-- First and second derivatives of `F(z) G(sn z)` at a regular point. -/
 lemma p2p_E_deriv2 {k : ℂ} (hk : k ∈ jacobiModulusDomain) (F F1 : ℂ → ℂ) (F2 : ℂ) (G : ℂ[X])
-    {z : ℂ} (hz : jacobiRegulark .n z k)
-    (hF : ∀ y, jacobiRegulark .n y k → HasDerivAt F (F1 y) y) (hF1 : HasDerivAt F1 F2 z) :
+    {z : ℂ} (hz : JacobiRegulark .n z k)
+    (hF : ∀ y, JacobiRegulark .n y k → HasDerivAt F (F1 y) y) (hF1 : HasDerivAt F1 F2 z) :
     HasDerivAt (deriv fun z => F z * G.eval (jacobiSnk z k))
       (F2 * G.eval (jacobiSnk z k) +
         2 * F1 z * ((derivative G).eval (jacobiSnk z k) * (jacobiCnk z k * jacobiDnk z k)) +
@@ -173,11 +173,11 @@ lemma p2p_E_deriv2 {k : ℂ} (hk : k ∈ jacobiModulusDomain) (F F1 : ℂ → �
           (derivative G).eval (jacobiSnk z k) *
             (-(jacobiSnk z k * jacobiDnk z k) * jacobiDnk z k +
               jacobiCnk z k * -(k ^ 2 * jacobiSnk z k * jacobiCnk z k)))) z := by
-  have hE1 : ∀ y, jacobiRegulark .n y k → HasDerivAt (fun z => F z * G.eval (jacobiSnk z k))
+  have hE1 : ∀ y, JacobiRegulark .n y k → HasDerivAt (fun z => F z * G.eval (jacobiSnk z k))
       (F1 y * G.eval (jacobiSnk y k) +
         F y * ((derivative G).eval (jacobiSnk y k) * (jacobiCnk y k * jacobiDnk y k))) y :=
     fun y hy => (hF y hy).mul ((G.hasDerivAt _).comp y (hasDerivAt_jacobiSnk hk hy))
-  have hev : ∀ᶠ y in 𝓝 z, jacobiRegulark .n y k := p22R1_eventually_ne hk hz
+  have hev : ∀ᶠ y in 𝓝 z, JacobiRegulark .n y k := p22R1_eventually_ne hk hz
   have hd : deriv (fun z => F z * G.eval (jacobiSnk z k)) =ᶠ[𝓝 z] fun y =>
       F1 y * G.eval (jacobiSnk y k) +
         F y * ((derivative G).eval (jacobiSnk y k) * (jacobiCnk y k * jacobiDnk y k)) :=
@@ -194,9 +194,9 @@ lemma p2p_E_deriv2 {k : ℂ} (hk : k ∈ jacobiModulusDomain) (F F1 : ℂ → �
 
 /-- Lamé's equation for `F(z) G(sn z)` from the pointwise identity for its second derivative. -/
 lemma p2p_solution_of {k : ℂ} (hk : k ∈ jacobiModulusDomain) (F F1 F2 : ℂ → ℂ) (G : ℂ[X])
-    (h ν : ℂ) (hF : ∀ y, jacobiRegulark .n y k → HasDerivAt F (F1 y) y)
-    (hF1 : ∀ y, jacobiRegulark .n y k → HasDerivAt F1 (F2 y) y)
-    (hval : ∀ y, jacobiRegulark .n y k →
+    (h ν : ℂ) (hF : ∀ y, JacobiRegulark .n y k → HasDerivAt F (F1 y) y)
+    (hF1 : ∀ y, JacobiRegulark .n y k → HasDerivAt F1 (F2 y) y)
+    (hval : ∀ y, JacobiRegulark .n y k →
       F2 y * G.eval (jacobiSnk y k) +
         2 * F1 y * ((derivative G).eval (jacobiSnk y k) * (jacobiCnk y k * jacobiDnk y k)) +
         F y * ((derivative (derivative G)).eval (jacobiSnk y k) *
@@ -206,7 +206,7 @@ lemma p2p_solution_of {k : ℂ} (hk : k ∈ jacobiModulusDomain) (F F1 F2 : ℂ 
               jacobiCnk y k * -(k ^ 2 * jacobiSnk y k * jacobiCnk y k))) =
         -(h - ν * (ν + 1) * k ^ 2 * jacobiSnk y k ^ 2) * (F y * G.eval (jacobiSnk y k))) :
     IsLameSolutionOn h ν k (fun z => F z * G.eval (jacobiSnk z k))
-      {z | jacobiRegulark .n z k} := by
+      {z | JacobiRegulark .n z k} := by
   refine ⟨fun z hz => ?_, fun z hz => ?_⟩
   · exact ((hF z hz).mul ((G.hasDerivAt _).comp z (hasDerivAt_jacobiSnk hk hz))).differentiableAt
   · exact (p2p_E_deriv2 hk F F1 (F2 z) G hz hF (hF1 z hz)).congr_deriv (hval z hz)
@@ -214,7 +214,7 @@ lemma p2p_solution_of {k : ℂ} (hk : k ∈ jacobiModulusDomain) (F F1 F2 : ℂ 
 /-- The case of prefactor `1`. -/
 lemma p2p_solution_one {k : ℂ} (hk : k ∈ jacobiModulusDomain) (G : ℂ[X]) (h ν : ℂ)
     (hop : ∀ s, p2p_opVal k h (ν * (ν + 1)) (1 + k ^ 2 - 2 * k ^ 2 * s ^ 2) 0 G s = 0) :
-    IsLameSolutionOn h ν k (fun z => 1 * G.eval (jacobiSnk z k)) {z | jacobiRegulark .n z k} := by
+    IsLameSolutionOn h ν k (fun z => 1 * G.eval (jacobiSnk z k)) {z | JacobiRegulark .n z k} := by
   refine p2p_solution_of hk (fun _ => 1) (fun _ => 0) (fun _ => 0) G h ν
     (fun y _ => hasDerivAt_const y 1) (fun y _ => hasDerivAt_const y 0) fun y hy => ?_
   obtain ⟨e1, e2⟩ := jacobi_sq_sum hk hy
@@ -231,7 +231,7 @@ lemma p2p_solution_c {k : ℂ} (hk : k ∈ jacobiModulusDomain) (G : ℂ[X]) (h 
       (1 + k ^ 2 - 2 * k ^ 2 * s ^ 2 + 2 * (1 - k ^ 2 * s ^ 2))
       (2 * k ^ 2 * s ^ 2 - 1) G s = 0) :
     IsLameSolutionOn h ν k (fun z => jacobiCnk z k * G.eval (jacobiSnk z k))
-      {z | jacobiRegulark .n z k} := by
+      {z | JacobiRegulark .n z k} := by
   refine p2p_solution_of hk (fun y => jacobiCnk y k) (fun y => -(jacobiSnk y k * jacobiDnk y k))
     (fun y => -(jacobiCnk y k * jacobiDnk y k * jacobiDnk y k +
       jacobiSnk y k * -(k ^ 2 * jacobiSnk y k * jacobiCnk y k))) G h ν
@@ -253,7 +253,7 @@ lemma p2p_solution_d {k : ℂ} (hk : k ∈ jacobiModulusDomain) (G : ℂ[X]) (h 
       (1 + k ^ 2 - 2 * k ^ 2 * s ^ 2 + 2 * k ^ 2 * (1 - s ^ 2)) (-k ^ 2 * (1 - 2 * s ^ 2)) G s =
         0) :
     IsLameSolutionOn h ν k (fun z => jacobiDnk z k * G.eval (jacobiSnk z k))
-      {z | jacobiRegulark .n z k} := by
+      {z | JacobiRegulark .n z k} := by
   refine p2p_solution_of hk (fun y => jacobiDnk y k)
     (fun y => -(k ^ 2 * jacobiSnk y k * jacobiCnk y k))
     (fun y => -(k ^ 2 * (jacobiCnk y k * jacobiDnk y k) * jacobiCnk y k +
@@ -276,7 +276,7 @@ lemma p2p_solution_cd {k : ℂ} (hk : k ∈ jacobiModulusDomain) (G : ℂ[X]) (h
     (hop : ∀ s, p2p_opVal k h (ν * (ν + 1)) (3 * (1 + k ^ 2 - 2 * k ^ 2 * s ^ 2))
       (4 * k ^ 2 * s ^ 2 - (1 + k ^ 2 - 2 * k ^ 2 * s ^ 2)) G s = 0) :
     IsLameSolutionOn h ν k (fun z => jacobiCnk z k * jacobiDnk z k * G.eval (jacobiSnk z k))
-      {z | jacobiRegulark .n z k} := by
+      {z | JacobiRegulark .n z k} := by
   refine p2p_solution_of hk (fun y => jacobiCnk y k * jacobiDnk y k)
     (fun y => -(jacobiSnk y k * jacobiDnk y k) * jacobiDnk y k +
       jacobiCnk y k * -(k ^ 2 * jacobiSnk y k * jacobiCnk y k))
@@ -776,7 +776,7 @@ macro "p2p_eq_tac" : tactic => `(tactic| (
 theorem p2p_lamePolyEk_isLameSolution {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType)
     {n m : ℕ} (hm : m ≤ n) :
     IsLameSolutionOn ((lamePolyH t n m k + t.order n * (t.order n + 1) * k ^ 2) / 2)
-      (t.order n) k (fun z => lamePolyEk t n m z k) {z | jacobiRegulark .n z k} := by
+      (t.order n) k (fun z => lamePolyEk t n m z k) {z | JacobiRegulark .n z k} := by
   have hk := p22R1_ofReal_mem hk0 hk1
   cases t
   · convert p2p_solution_one hk _ _ _ (p2p_ode_uE hk0 hm) using 2 with z
@@ -800,7 +800,7 @@ theorem p2p_lamePolyEk_isLameSolution {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t :
 lemma p2p_regular {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {z : ℂ}
     (hz : ∀ p q : ℤ,
       z ≠ 2 * p * Real.compEllIntKm (k ^ 2) + (2 * q + 1) * I * Real.compEllIntKm (1 - k ^ 2)) :
-    jacobiRegulark .n z k := by
+    JacobiRegulark .n z k := by
   have hkD : (k : ℂ) ∈ jacobiModulusDomain := p22R1_ofReal_mem hk0 hk1
   have hτ := jacobiTauk_im_pos hkD
   have hK : compEllIntKk (k : ℂ) = (Real.compEllIntKm (k ^ 2) : ℂ) :=
@@ -821,7 +821,7 @@ lemma p2p_regular {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {z : ℂ}
 
 /-- Real points are regular. -/
 theorem p2p_regular_real {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (x : ℝ) :
-    jacobiRegulark .n (x : ℂ) k := by
+    JacobiRegulark .n (x : ℂ) k := by
   refine p2p_regular hk0 hk1 fun p q h => ?_
   have hK' : 0 < Real.compEllIntKm (1 - k ^ 2) := Real.compEllIntKm_pos (by nlinarith)
   have := congrArg Complex.im h
@@ -836,7 +836,7 @@ theorem p2p_regular_real {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (x : ℝ) :
 
 /-- The points `K + iτ`, `τ` real, are regular. -/
 theorem p2p_regular_vert {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (τ : ℝ) :
-    jacobiRegulark .n ((Real.compEllIntKm (k ^ 2) : ℂ) + I * τ) k := by
+    JacobiRegulark .n ((Real.compEllIntKm (k ^ 2) : ℂ) + I * τ) k := by
   refine p2p_regular hk0 hk1 fun p q h => ?_
   have hK : 0 < Real.compEllIntKm (k ^ 2) := Real.compEllIntKm_pos (by nlinarith)
   have hK' : 0 < Real.compEllIntKm (1 - k ^ 2) := Real.compEllIntKm_pos (by nlinarith)
@@ -852,9 +852,9 @@ theorem p2p_regular_vert {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (τ : ℝ) :
 
 /-- Green's identity for two solutions of Lamé's equation along the segment `x ↦ p₀ + u x`. -/
 lemma p2p_green {k : ℂ} (hk : k ∈ jacobiModulusDomain) {h1 h2 ν1 ν2 : ℂ} {E1 E2 : ℂ → ℂ}
-    (hE1 : IsLameSolutionOn h1 ν1 k E1 {z | jacobiRegulark .n z k})
-    (hE2 : IsLameSolutionOn h2 ν2 k E2 {z | jacobiRegulark .n z k}) (p0 u : ℂ) (a b : ℝ)
-    (hreg : ∀ x : ℝ, jacobiRegulark .n (p0 + u * x) k) :
+    (hE1 : IsLameSolutionOn h1 ν1 k E1 {z | JacobiRegulark .n z k})
+    (hE2 : IsLameSolutionOn h2 ν2 k E2 {z | JacobiRegulark .n z k}) (p0 u : ℂ) (a b : ℝ)
+    (hreg : ∀ x : ℝ, JacobiRegulark .n (p0 + u * x) k) :
     ∫ x in a..b, u * ((h2 - h1) - (ν2 * (ν2 + 1) - ν1 * (ν1 + 1)) * k ^ 2 *
         jacobiSnk (p0 + u * x) k ^ 2) * E1 (p0 + u * x) * E2 (p0 + u * x) =
       (deriv E1 (p0 + u * b) * E2 (p0 + u * b) - E1 (p0 + u * b) * deriv E2 (p0 + u * b)) -
@@ -914,9 +914,9 @@ lemma p2p_wronskian_sym {E1 E2 : ℂ → ℂ} {p σ : ℂ} (hσ : σ = 1 ∨ σ 
 
 /-- Green's identity, split. -/
 lemma p2p_green_split {k : ℂ} (hk : k ∈ jacobiModulusDomain) {h1 h2 ν1 ν2 : ℂ} {E1 E2 : ℂ → ℂ}
-    (hE1 : IsLameSolutionOn h1 ν1 k E1 {z | jacobiRegulark .n z k})
-    (hE2 : IsLameSolutionOn h2 ν2 k E2 {z | jacobiRegulark .n z k}) (p0 u : ℂ) (a b : ℝ)
-    (hreg : ∀ x : ℝ, jacobiRegulark .n (p0 + u * x) k) :
+    (hE1 : IsLameSolutionOn h1 ν1 k E1 {z | JacobiRegulark .n z k})
+    (hE2 : IsLameSolutionOn h2 ν2 k E2 {z | JacobiRegulark .n z k}) (p0 u : ℂ) (a b : ℝ)
+    (hreg : ∀ x : ℝ, JacobiRegulark .n (p0 + u * x) k) :
     u * ((h2 - h1) * ∫ x in a..b, E1 (p0 + u * x) * E2 (p0 + u * x)) -
       u * ((ν2 * (ν2 + 1) - ν1 * (ν1 + 1)) * k ^ 2 *
         ∫ x in a..b, jacobiSnk (p0 + u * x) k ^ 2 * (E1 (p0 + u * x) * E2 (p0 + u * x))) =
@@ -952,8 +952,8 @@ theorem p2p_lamePolyH_lt {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyType
 
 /-- Continuity along a line of a solution of Lamé's equation and of `sn`. -/
 lemma p2p_path_cont {k : ℂ} (hk : k ∈ jacobiModulusDomain) {h ν : ℂ} {E : ℂ → ℂ}
-    (hE : IsLameSolutionOn h ν k E {z | jacobiRegulark .n z k}) (p0 u : ℂ)
-    (hreg : ∀ x : ℝ, jacobiRegulark .n (p0 + u * x) k) :
+    (hE : IsLameSolutionOn h ν k E {z | JacobiRegulark .n z k}) (p0 u : ℂ)
+    (hreg : ∀ x : ℝ, JacobiRegulark .n (p0 + u * x) k) :
     Continuous (fun x : ℝ => E (p0 + u * x)) ∧
       Continuous (fun x : ℝ => jacobiSnk (p0 + u * x) k) := by
   have hγc : Continuous fun x : ℝ => p0 + u * x := by fun_prop
@@ -995,9 +995,9 @@ theorem p2p_inner_split {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {t t' : LamePolyTy
   have hk := p22R1_ofReal_mem hk0 hk1
   have S1 := p2p_lamePolyEk_isLameSolution hk0 hk1 t hm
   have S2 := p2p_lamePolyEk_isLameSolution hk0 hk1 t' hm'
-  have rr : ∀ x : ℝ, jacobiRegulark .n (0 + 1 * x) k := fun x => by
+  have rr : ∀ x : ℝ, JacobiRegulark .n (0 + 1 * x) k := fun x => by
     simpa using p2p_regular_real hk0 hk1 x
-  have rv : ∀ x : ℝ, jacobiRegulark .n ((K : ℂ) + I * x) k := p2p_regular_vert hk0 hk1
+  have rv : ∀ x : ℝ, JacobiRegulark .n ((K : ℂ) + I * x) k := p2p_regular_vert hk0 hk1
   obtain ⟨cf1, cs⟩ := p2p_path_cont hk S1 0 1 rr
   obtain ⟨cf2, -⟩ := p2p_path_cont hk S2 0 1 rr
   obtain ⟨cg1, csv⟩ := p2p_path_cont hk S1 (K : ℂ) I rv
@@ -1040,9 +1040,9 @@ theorem p2p_inner_zero_green {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {t t' : LameP
   have hk := p22R1_ofReal_mem hk0 hk1
   have S1 := p2p_lamePolyEk_isLameSolution hk0 hk1 t hm
   have S2 := p2p_lamePolyEk_isLameSolution hk0 hk1 t' hm'
-  have rr : ∀ x : ℝ, jacobiRegulark .n (0 + 1 * x) k := fun x => by
+  have rr : ∀ x : ℝ, JacobiRegulark .n (0 + 1 * x) k := fun x => by
     simpa using p2p_regular_real hk0 hk1 x
-  have rv : ∀ x : ℝ, jacobiRegulark .n ((K : ℂ) + I * x) k := p2p_regular_vert hk0 hk1
+  have rv : ∀ x : ℝ, JacobiRegulark .n ((K : ℂ) + I * x) k := p2p_regular_vert hk0 hk1
   have G1 := p2p_green_split hk S1 S2 0 1 0 a rr
   have G2 := p2p_green_split hk S1 S2 (K : ℂ) I 0 b rv
   simp only [Complex.ofReal_zero, mul_zero, add_zero, zero_add, one_mul] at G1 G2
@@ -1122,7 +1122,7 @@ theorem p2p_lamePolyEk_sym {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) (t : LamePolyTy
 /-- The Wronskian of two Lamé polynomials vanishes at a regular point of common reflection
 symmetry. -/
 theorem p2p_W_zero {k : ℝ} (hk0 : 0 < k) (hk1 : k < 1) {t t' : LamePolyType} {n m n' m' : ℕ}
-    (hm : m ≤ n) (hm' : m' ≤ n') {p σ : ℂ} (hreg : jacobiRegulark .n p k)
+    (hm : m ≤ n) (hm' : m' ≤ n') {p σ : ℂ} (hreg : JacobiRegulark .n p k)
     (hσ : σ = 1 ∨ σ = -1)
     (h1 : ∀ z, lamePolyEk t n m (p - z) k = σ * lamePolyEk t n m (p + z) k)
     (h2 : ∀ z, lamePolyEk t' n' m' (p - z) k = σ * lamePolyEk t' n' m' (p + z) k) :

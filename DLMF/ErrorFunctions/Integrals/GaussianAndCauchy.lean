@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.ErrorFunctions.IntegralTools
 public import DLMF.Bessel.KMellin
+public import DLMF.ErrorFunctions.IntegralTools
 
 /-!
 # Gaussian and Cauchy representations of error functions
@@ -1041,7 +1041,7 @@ theorem erf_primitive (z : ℂ) :
     simp only [Pi.neg_apply, Pi.pow_apply]
     field_simp
     ring
-  rw [primitive_eq_sub differentiable_erf_complex.continuous hd]
+  rw [primitive_eq_sub hd]
   simp
 
 /-- Identity under the stated parameter and domain assumptions: `fresnelAuxFComplex

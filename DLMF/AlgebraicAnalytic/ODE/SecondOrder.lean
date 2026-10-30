@@ -124,8 +124,8 @@ theorem isLinODE2SolOn_unique (hD : IsOpen D) (hD' : IsPreconnected D)
 /-- DLMF 1.13.4: the two-argument Wronskian is the determinant `det [[w₁, w₂], [w₁', w₂']]`. -/
 @[dlmf 1.13.E4]
 theorem wronskianN_two (w₁ w₂ : ℂ → ℂ) (z : ℂ) :
-    wronskianN ![w₁, w₂] z = wronskian w₁ w₂ z := by
-  simp [wronskianN, wronskian, Matrix.det_fin_two]
+    wronskianN ![w₁, w₂] z = ODE.wronskian w₁ w₂ z := by
+  simp [wronskianN, ODE.wronskian, Matrix.det_fin_two]
 
 /-- DLMF §1.13(i): if the Wronskian of two solutions does not vanish at one point `z₀` of the
 connected open set `D`, they are a fundamental pair in `D`. -/
@@ -133,21 +133,21 @@ connected open set `D`, they are a fundamental pair in `D`. -/
 theorem isFundamentalPair_of_wronskian_ne_zero (hD : IsOpen D) (hD' : IsPreconnected D)
     (hf : DifferentiableOn ℂ f D) (hg : DifferentiableOn ℂ g D) {w₁ w₂ : ℂ → ℂ}
     (h₁ : IsLinODE2SolOn f g 0 w₁ D) (h₂ : IsLinODE2SolOn f g 0 w₂ D) {z₀ : ℂ} (hz₀ : z₀ ∈ D)
-    (hW : wronskian w₁ w₂ z₀ ≠ 0) : IsFundamentalPair f g w₁ w₂ D := by
+    (hW : ODE.wronskian w₁ w₂ z₀ ≠ 0) : IsFundamentalPair f g w₁ w₂ D := by
   refine ⟨h₁, h₂, fun w hw => ?_⟩
-  set W := wronskian w₁ w₂ z₀
+  set W := ODE.wronskian w₁ w₂ z₀
   set A := (w z₀ * deriv w₂ z₀ - w₂ z₀ * deriv w z₀) / W
   set B := (w₁ z₀ * deriv w z₀ - w z₀ * deriv w₁ z₀) / W
   have hsol := h₁.linComb hD h₂ A B (r := 0) (fun z _ => by simp)
   refine ⟨A, B, fun z hz => isLinODE2SolOn_unique hD hD' hf hg hw hsol hz₀ ?_ ?_ hz⟩
   · simp only [A, B]
     rw [div_mul_eq_mul_div, div_mul_eq_mul_div, ← add_div, eq_div_iff hW]
-    simp only [W, wronskian]
+    simp only [W, ODE.wronskian]
     ring
   · rw [g1d_deriv_linComb h₁ h₂ A B hz₀]
     simp only [A, B]
     rw [div_mul_eq_mul_div, div_mul_eq_mul_div, ← add_div, eq_div_iff hW]
-    simp only [W, wronskian]
+    simp only [W, ODE.wronskian]
     ring
 
 /-- DLMF 1.13.3: solutions with `w₁(z₀) = 1`, `w₁'(z₀) = 0`, `w₂(z₀) = 0`, `w₂'(z₀) = 1` are a
@@ -158,7 +158,7 @@ theorem isFundamentalPair_of_initial (hD : IsOpen D) (hD' : IsPreconnected D)
     (h₁ : IsLinODE2SolOn f g 0 w₁ D) (h₂ : IsLinODE2SolOn f g 0 w₂ D) {z₀ : ℂ} (hz₀ : z₀ ∈ D)
     (h10 : w₁ z₀ = 1) (h11 : deriv w₁ z₀ = 0) (h20 : w₂ z₀ = 0) (h21 : deriv w₂ z₀ = 1) :
     IsFundamentalPair f g w₁ w₂ D :=
-  isFundamentalPair_of_wronskian_ne_zero hD hD' hf hg h₁ h₂ hz₀ (by simp [wronskian, *])
+  isFundamentalPair_of_wronskian_ne_zero hD hD' hf hg h₁ h₂ hz₀ (by simp [ODE.wronskian, *])
 
 /-- DLMF 1.13.3: on a simply connected domain, a fundamental pair exists. -/
 @[dlmf 1.13.E3]
@@ -174,11 +174,11 @@ theorem exists_isFundamentalPair (hD : IsOpen D) (hsc : IsSimplyConnected D)
 /-- The derivative of the Wronskian of two solutions of 1.13.1: `𝒲' = -f 𝒲`. -/
 lemma g1d_hasDerivAt_wronskian {w₁ w₂ : ℂ → ℂ} (h₁ : IsLinODE2SolOn f g 0 w₁ D)
     (h₂ : IsLinODE2SolOn f g 0 w₂ D) {z : ℂ} (hz : z ∈ D) :
-    HasDerivAt (wronskian w₁ w₂) (-f z * wronskian w₁ w₂ z) z := by
+    HasDerivAt (ODE.wronskian w₁ w₂) (-f z * ODE.wronskian w₁ w₂ z) z := by
   have := (((h₁ z hz).1.hasDerivAt.mul (h₂ z hz).2)).sub
     ((h₂ z hz).1.hasDerivAt.mul (h₁ z hz).2)
   refine this.congr_deriv ?_
-  simp only [wronskian, Pi.zero_apply]
+  simp only [ODE.wronskian, Pi.zero_apply]
   ring
 
 /-- DLMF 1.13.5 (Abel's identity): if `F` is a primitive of `f` on the connected open set `D`
@@ -188,8 +188,8 @@ with `c` independent of `z`. -/
 theorem wronskian_eq_mul_exp (hD : IsOpen D) (hD' : IsPreconnected D) {F : ℂ → ℂ}
     (hF : ∀ z ∈ D, HasDerivAt F (f z) z) {w₁ w₂ : ℂ → ℂ} (h₁ : IsLinODE2SolOn f g 0 w₁ D)
     (h₂ : IsLinODE2SolOn f g 0 w₂ D) :
-    ∃ c : ℂ, ∀ z ∈ D, wronskian w₁ w₂ z = c * Complex.exp (-F z) := by
-  have hd : ∀ z ∈ D, HasDerivAt (fun z => wronskian w₁ w₂ z * Complex.exp (F z)) 0 z := by
+    ∃ c : ℂ, ∀ z ∈ D, ODE.wronskian w₁ w₂ z = c * Complex.exp (-F z) := by
+  have hd : ∀ z ∈ D, HasDerivAt (fun z => ODE.wronskian w₁ w₂ z * Complex.exp (F z)) 0 z := by
     intro z hz
     refine ((g1d_hasDerivAt_wronskian h₁ h₂ hz).mul ((hF z hz).cexp)).congr_deriv ?_
     ring
@@ -204,17 +204,17 @@ set. -/
 @[dlmf 1.13.E5]
 theorem wronskian_const_of_f_eq_zero (hD : IsOpen D) (hD' : IsPreconnected D)
     {w₁ w₂ : ℂ → ℂ} (h₁ : IsLinODE2SolOn 0 g 0 w₁ D) (h₂ : IsLinODE2SolOn 0 g 0 w₂ D)
-    {z z' : ℂ} (hz : z ∈ D) (hz' : z' ∈ D) : wronskian w₁ w₂ z = wronskian w₁ w₂ z' := by
+    {z z' : ℂ} (hz : z ∈ D) (hz' : z' ∈ D) : ODE.wronskian w₁ w₂ z = ODE.wronskian w₁ w₂ z' := by
   obtain ⟨c, hc⟩ := wronskian_eq_mul_exp hD hD' (F := fun _ => 0)
     (fun z _ => by simpa using hasDerivAt_const z (0 : ℂ)) h₁ h₂
   rw [hc z hz, hc z' hz']
 
 /-- The data of a linear combination of solutions at a point vanish only trivially if the
 Wronskian there does not vanish. -/
-lemma g1d_eq_zero_of_wronskian {w₁ w₂ : ℂ → ℂ} {A B z : ℂ} (hW : wronskian w₁ w₂ z ≠ 0)
+lemma g1d_eq_zero_of_wronskian {w₁ w₂ : ℂ → ℂ} {A B z : ℂ} (hW : ODE.wronskian w₁ w₂ z ≠ 0)
     (h0 : A * w₁ z + B * w₂ z = 0) (h1 : A * deriv w₁ z + B * deriv w₂ z = 0) :
     A = 0 ∧ B = 0 := by
-  unfold wronskian at hW
+  unfold ODE.wronskian at hW
   constructor
   · have : A * (w₁ z * deriv w₂ z - w₂ z * deriv w₁ z) = 0 := by
       linear_combination deriv w₂ z * h0 - w₂ z * h1
@@ -230,7 +230,7 @@ Wronskian does not vanish in `D`; they are linearly independent on `D`. -/
 theorem isFundamentalPair_tfae (hD : IsOpen D) (hsc : IsSimplyConnected D)
     (hf : DifferentiableOn ℂ f D) (hg : DifferentiableOn ℂ g D) {w₁ w₂ : ℂ → ℂ}
     (h₁ : IsLinODE2SolOn f g 0 w₁ D) (h₂ : IsLinODE2SolOn f g 0 w₂ D) :
-    List.TFAE [IsFundamentalPair f g w₁ w₂ D, ∀ z ∈ D, wronskian w₁ w₂ z ≠ 0,
+    List.TFAE [IsFundamentalPair f g w₁ w₂ D, ∀ z ∈ D, ODE.wronskian w₁ w₂ z ≠ 0,
       ∀ A B : ℂ, (∀ z ∈ D, A * w₁ z + B * w₂ z = 0) → A = 0 ∧ B = 0] := by
   have hD' : IsPreconnected D := hsc.isPathConnected.isConnected.isPreconnected
   obtain ⟨z₀, hz₀⟩ := hsc.nonempty
@@ -248,8 +248,8 @@ theorem isFundamentalPair_tfae (hD : IsOpen D) (hsc : IsSimplyConnected D)
     have e4 : deriv w₁ z * A₂ + deriv w₂ z * B₂ = 1 := by
       rw [← hu21, (eventuallyEq_of_mem (hD.mem_nhds hz) hAB₂).deriv_eq,
         g1d_deriv_linComb h₁ h₂ A₂ B₂ hz]; ring
-    have : wronskian w₁ w₂ z * (A₁ * B₂ - A₂ * B₁) = 1 := by
-      unfold wronskian
+    have : ODE.wronskian w₁ w₂ z * (A₁ * B₂ - A₂ * B₁) = 1 := by
+      unfold ODE.wronskian
       linear_combination (deriv w₁ z * A₂ + deriv w₂ z * B₂) * e1 + e4 -
         (deriv w₁ z * A₁ + deriv w₂ z * B₁) * e3
     exact left_ne_zero_of_mul_eq_one this
@@ -263,7 +263,7 @@ theorem isFundamentalPair_tfae (hD : IsOpen D) (hsc : IsSimplyConnected D)
     exact g1d_eq_zero_of_wronskian (hW z₀ hz₀) h0 h1
   tfae_have 3 → 1 := by
     intro hind
-    by_cases hW : wronskian w₁ w₂ z₀ = 0
+    by_cases hW : ODE.wronskian w₁ w₂ z₀ = 0
     · exfalso
       have key : ∀ A B : ℂ, A * w₁ z₀ + B * w₂ z₀ = 0 → A * deriv w₁ z₀ + B * deriv w₂ z₀ = 0 →
           A = 0 ∧ B = 0 := by
@@ -272,7 +272,7 @@ theorem isFundamentalPair_tfae (hD : IsOpen D) (hsc : IsSimplyConnected D)
         refine hind A B fun z hz => isLinODE2SolOn_unique hD hD' hf hg hsol isLinODE2SolOn_zero
           hz₀ h0 ?_ hz
         rw [g1d_deriv_linComb h₁ h₂ A B hz₀, h1, deriv_const']
-      unfold wronskian at hW
+      unfold ODE.wronskian at hW
       by_cases ha : w₂ z₀ = 0 ∧ w₁ z₀ = 0
       · by_cases hb : deriv w₂ z₀ = 0 ∧ deriv w₁ z₀ = 0
         · have := key 1 0 (by simp [ha.2]) (by simp [hb.2])
@@ -332,8 +332,8 @@ theorem isLinODE2SolOn_inhom_eq (hD : IsOpen D) {w₀ w₁ w₂ w : ℂ → ℂ}
 /-- The variation-of-parameters solution `w₂ P - w₁ Q` (with `P' = w₁ r/𝒲`, `Q' = w₂ r/𝒲`)
 has derivative `w₂' P - w₁' Q`. -/
 lemma g1d_hasDerivAt_varParam {w₁ w₂ P Q : ℂ → ℂ} {z : ℂ} (h₁ : DifferentiableAt ℂ w₁ z)
-    (h₂ : DifferentiableAt ℂ w₂ z) (hP : HasDerivAt P (w₁ z * r z / wronskian w₁ w₂ z) z)
-    (hQ : HasDerivAt Q (w₂ z * r z / wronskian w₁ w₂ z) z) :
+    (h₂ : DifferentiableAt ℂ w₂ z) (hP : HasDerivAt P (w₁ z * r z / ODE.wronskian w₁ w₂ z) z)
+    (hQ : HasDerivAt Q (w₂ z * r z / ODE.wronskian w₁ w₂ z) z) :
     HasDerivAt (fun y => w₂ y * P y - w₁ y * Q y) (deriv w₂ z * P z - deriv w₁ z * Q z) z := by
   refine ((h₂.hasDerivAt.mul hP).sub (h₁.hasDerivAt.mul hQ)).congr_deriv ?_
   ring
@@ -344,9 +344,9 @@ nonvanishing Wronskian `𝒲`, and `P`, `Q` are primitives of `w₁ r/𝒲` and 
 @[dlmf 1.13.E10]
 theorem isLinODE2SolOn_varParam (hD : IsOpen D) {w₁ w₂ P Q : ℂ → ℂ}
     (h₁ : IsLinODE2SolOn f g 0 w₁ D) (h₂ : IsLinODE2SolOn f g 0 w₂ D)
-    (hW : ∀ z ∈ D, wronskian w₁ w₂ z ≠ 0)
-    (hP : ∀ z ∈ D, HasDerivAt P (w₁ z * r z / wronskian w₁ w₂ z) z)
-    (hQ : ∀ z ∈ D, HasDerivAt Q (w₂ z * r z / wronskian w₁ w₂ z) z) :
+    (hW : ∀ z ∈ D, ODE.wronskian w₁ w₂ z ≠ 0)
+    (hP : ∀ z ∈ D, HasDerivAt P (w₁ z * r z / ODE.wronskian w₁ w₂ z) z)
+    (hQ : ∀ z ∈ D, HasDerivAt Q (w₂ z * r z / ODE.wronskian w₁ w₂ z) z) :
     IsLinODE2SolOn f g r (fun z => w₂ z * P z - w₁ z * Q z) D := by
   intro z hz
   have hd := g1d_hasDerivAt_varParam (h₁ z hz).1 (h₂ z hz).1 (hP z hz) (hQ z hz)
@@ -358,10 +358,10 @@ theorem isLinODE2SolOn_varParam (hD : IsOpen D) {w₁ w₂ P Q : ℂ → ℂ}
     (((h₁ z hz).2.mul (hQ z hz)))).congr_of_eventuallyEq hev |>.congr_deriv ?_⟩
   rw [hd.deriv]
   have hWz := hW z hz
-  have key : deriv w₂ z * (w₁ z * r z / wronskian w₁ w₂ z) -
-      deriv w₁ z * (w₂ z * r z / wronskian w₁ w₂ z) = r z := by
+  have key : deriv w₂ z * (w₁ z * r z / ODE.wronskian w₁ w₂ z) -
+      deriv w₁ z * (w₂ z * r z / ODE.wronskian w₁ w₂ z) = r z := by
     rw [mul_div_assoc', mul_div_assoc', ← sub_div, div_eq_iff hWz]
-    unfold wronskian
+    unfold ODE.wronskian
     ring
   simp only [Pi.zero_apply]
   linear_combination key

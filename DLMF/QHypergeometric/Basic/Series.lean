@@ -53,13 +53,13 @@ def qPsi (a b : List ℂ) (q z : ℂ) : ℂ := ∑' n : ℤ, qPsiTerm a b q z n
 def qPhiPartial (a b : List ℂ) (q z : ℂ) (N : ℕ) : ℂ :=
   ∑ n ∈ range (N+1), qPhiTerm a b q z n
 /-- Denominator parameters avoid the nonpositive q-lattice. -/
-def qDenominatorRegular (b : List ℂ) (q : ℂ) : Prop :=
+def QDenominatorRegular (b : List ℂ) (q : ℂ) : Prop :=
   ∀ bi∈b, ∀ n : ℕ, bi*q^n≠1
 /-- Bilateral parameters avoid the additional positive q-lattice in the numerator. -/
-def qBilateralRegular (a b : List ℂ) (q : ℂ) : Prop :=
-  qDenominatorRegular b q ∧ ∀ ai∈a, ∀ n : ℕ, ai≠q^(n+1)
+def QBilateralRegular (a b : List ℂ) (q : ℂ) : Prop :=
+  QDenominatorRegular b q ∧ ∀ ai∈a, ∀ n : ℕ, ai≠q^(n+1)
 /-- Termination by an upper parameter q^(-N); lower-parameter validity is independent. -/
-def qTerminating (a : List ℂ) (q : ℂ) : Prop :=
+def QTerminating (a : List ℂ) (q : ℂ) : Prop :=
   ∃ ai∈a, ∃ N : ℕ, ai=q^(-(N:ℤ))
 
 /-- Rogers–Ramanujan G; the term n=0 supplies the initial1. -/
@@ -70,28 +70,28 @@ def rogersH (q : ℂ) : ℂ := ∑' n : ℕ, q^(n*(n+1))/DLMF.QSeries.qPochhamme
 def qPochhammerOrder (a q ν : ℂ) : ℂ :=
   DLMF.QSeries.qPochhammerInf a q/DLMF.QSeries.qPochhammerInf (a*q^ν) q
 /-- Lower parameters are regular only through the final retained index of a terminating sum. -/
-def qDenominatorRegularThrough (b : List ℂ) (q : ℂ) (N : ℕ) : Prop :=
+def QDenominatorRegularThrough (b : List ℂ) (q : ℂ) (N : ℕ) : Prop :=
   qPochhammerList b q N≠0
 /-- Balanced/Saalschuetzian unilateral series: termination, r=s+1, z=q, and the product balance. -/
 @[dlmf 17.4.E9]
-def qBalanced (a b : List ℂ) (q z : ℂ) : Prop :=
-  qTerminating a q ∧ a.length=b.length+1 ∧ z=q ∧ q*a.prod=b.prod
+def QBalanced (a b : List ℂ) (q z : ℂ) : Prop :=
+  QTerminating a q ∧ a.length=b.length+1 ∧ z=q ∧ q*a.prod=b.prod
 /-- k-balanced series; k=1 gives the product condition in the balanced case. -/
 @[dlmf 17.4.E10]
-def qKBalanced (k : ℤ) (a b : List ℂ) (q : ℂ) : Prop :=
+def QKBalanced (k : ℤ) (a b : List ℂ) (q : ℂ) : Prop :=
   a.length=b.length+1 ∧ q^k*a.prod=b.prod
 /-- Well-poised parameters, with a0 singled out and paired remaining upper/lower lists. -/
 @[dlmf 17.4.E11]
-def qWellPoised (a0 : ℂ) (a b : List ℂ) (q : ℂ) : Prop :=
+def QWellPoised (a0 : ℂ) (a b : List ℂ) (q : ℂ) : Prop :=
   List.Forall₂ (fun ai bi => a0*q=ai*bi) a b
 /-- Very-well-poised parameters, preserving the first two principal square-root parameters. -/
 @[dlmf 17.4.E12]
-def qVeryWellPoised (a0 : ℂ) (a b : List ℂ) (q : ℂ) : Prop :=
-  qWellPoised a0 a b q ∧ ∃ bb : List ℂ,
+def QVeryWellPoised (a0 : ℂ) (a b : List ℂ) (q : ℂ) : Prop :=
+  QWellPoised a0 a b q ∧ ∃ bb : List ℂ,
     b=Complex.sqrt a0 :: -Complex.sqrt a0 :: bb
 /-- Nearly-poised parameters: the paired relations hold except possibly at the last pair. -/
 @[dlmf 17.4.E13]
-def qNearlyPoised (a0 : ℂ) (a b : List ℂ) (q : ℂ) : Prop :=
+def QNearlyPoised (a0 : ℂ) (a b : List ℂ) (q : ℂ) : Prop :=
   a.length=b.length ∧ List.Forall₂ (fun ai bi => a0*q=ai*bi) a.dropLast b.dropLast
 /-- The idem notation is the sum obtained by singling out every parameter except the first. -/
 def qIdem (f : ℂ → List ℂ → ℂ) (a : List ℂ) : ℂ :=

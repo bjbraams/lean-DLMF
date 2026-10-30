@@ -16,8 +16,9 @@ public import Mathlib.Tactic.ENatToNat
 
 The logarithmic formulas are stated on intersections of convergence regions.
 Nonintegrality assumptions avoid products involving the totalized value of
-digamma at its poles. They can later be weakened using the source's explicitly
-prescribed limits. Finite sums use `range m`, including the empty sum at `m = 0`.
+digamma at its poles. The companion module
+`DLMF.Hypergeometric.LogConnectionsRecipGamma` supplies formulas without these
+restrictions, using derivatives of the entire reciprocal gamma function. Finite sums use `range m`, including the empty sum at `m = 0`.
 
 The cubic connection formula 15.8.32 is proved in the variable `u = 1/ζ` with the tools of
 `DLMF.Hypergeometric.CubicTools`: Goursat's cubic transformation near `u = 0`, the connection

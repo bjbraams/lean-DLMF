@@ -5,9 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Legendre.Hypergeometric
 public import DLMF.Gamma.RecipGammaDeriv
 public import DLMF.Legendre.BoundaryAsymptotics
+public import DLMF.Legendre.Hypergeometric
 public import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
 
 /-!
@@ -145,7 +145,7 @@ theorem legendre_singular_4 (ν μ : ℂ) (h : LegendreQRegular ν μ) (hμ : 0 
 /-- DLMF 14.8.5: for `n ∈ ℕ` and `ν ± (n+1/2) ∉ {−1, −2, …}`, `𝖰^{n+1/2}_ν(x) ~ (−1)^{n+1} π
 Γ(ν+n+3/2)/(2 Γ(n+3/2) Γ(ν−n+1/2)) · ((1−x)/2)^{n/2+1/4}` as `x → 1⁻`. -/
 @[dlmf 14.8.E5]
-theorem legendre_singular_5 (ν : ℂ) (n : ℕ) (hp : LegendreQRegular ν (n+1/2)) (hm : LegendreQRegular ν (-n-1/2)) :
+theorem legendre_singular_5 (ν : ℂ) (n : ℕ) (hp : LegendreQRegular ν (n+1/2)) :
     (fun x : ℝ => ferrersQ ν (n+1/2) x) ~[𝓝[<] (1:ℝ)] (fun x : ℝ => (-1)^(n+1)*π*Gamma (ν+n+3/2)/(2*Gamma (n+3/2)*Gamma (ν-n+1/2))*((1-x)/2:ℂ)^((n+1/2:ℂ)/2)) := by
   set μ : ℂ := n+1/2 with hμdef
   have hμ : ∀ k : ℤ, μ ≠ k := fun k hk => by
@@ -238,7 +238,7 @@ theorem legendre_singular_7 (ν μ : ℂ) (hμ : ∀ n : ℕ, μ ≠ n+1) :
 /-- DLMF 14.8.8: for `m ≥ 1` and `ν ± m ∉ {−1, −2, …}`, `P^m_ν(x) ~ Γ(ν+m+1)/(m! Γ(ν−m+1)) ·
 ((x−1)/2)^{m/2}` as `x → 1⁺`. -/
 @[dlmf 14.8.E8]
-theorem legendre_singular_8 (ν : ℂ) (m : ℕ) (hm : 0 < m) (hp : LegendreQRegular ν m) (hn : LegendreQRegular ν (-m)) :
+theorem legendre_singular_8 (ν : ℂ) (m : ℕ) (hn : LegendreQRegular ν (-m)) :
     (fun x : ℝ => associatedP ν m x) ~[𝓝[>] (1:ℝ)] (fun x : ℝ => Gamma (ν+m+1)/((m.factorial:ℂ)*Gamma (ν-m+1))*((x-1)/2:ℂ)^((m:ℂ)/2)) := by
   have hf : (m.factorial:ℂ) ≠ 0 := Nat.cast_ne_zero.mpr m.factorial_ne_zero
   have hc : ∀ n : ℕ, (m:ℂ)+1 ≠ -n := fun n hn => by

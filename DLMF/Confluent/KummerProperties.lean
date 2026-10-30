@@ -7,11 +7,11 @@ module
 
 public import DLMF.Confluent.Basic
 
-public import TauCeti.Analysis.SpecialFunctions.Erf
-public import Mathlib.Analysis.Complex.IntegerCompl
 public import DLMF.Hypergeometric.EulerIntegral
-public import Mathlib.Analysis.SpecialFunctions.RegularizedHypergeometric
 public import Mathlib.Analysis.Complex.AbsMax
+public import Mathlib.Analysis.Complex.IntegerCompl
+public import Mathlib.Analysis.SpecialFunctions.RegularizedHypergeometric
+public import TauCeti.Analysis.SpecialFunctions.Erf
 
 /-!
 # Kummer's function `M(a,c,z) = ₁F₁(a;c;z)` (AAR §4.1)
@@ -37,12 +37,6 @@ noncomputable section
 
 namespace DLMF.Confluent
 
-
-
-
-
-
-
 /-- `₁F₁(a;a;z) = e^z` when `a` is not a nonpositive integer. -/
 @[dlmf 13.6.E1]
 theorem kummerM_self {a z : ℂ} (ha : ∀ k : ℕ, a ≠ -k) :
@@ -65,8 +59,6 @@ theorem kummerM_eq_sum_neg_nat (n : ℕ) (c z : ℂ) :
     rw [Finset.mem_range] at hk
     omega
   simp [poch_neg_nat_eq_zero hkn]
-
-
 
 /-- The coefficients of the regularized `₁F₁` are `(a)_n / (n! Γ(c+n))`. -/
 theorem regularizedHGFunCoeff_singleton (a c : ℂ) (n : ℕ) :
@@ -378,13 +370,6 @@ theorem tendsto_ordinaryHypergeometric_div_atTop {a c z : ℂ} :
     ring
   simpa only [← he, kummerM, kummerMCoeff] using ht
 
-
-
-
-
-
-
-
 /-- The connection formula at zero first parameter is identically one away from integers. -/
 theorem kummerUConnection_zero (b z : ℂ) (hb : ∀ k : ℤ, b ≠ k) :
     kummerUConnection 0 b z = 1 := by
@@ -418,8 +403,6 @@ theorem kummerU_zero (b z : ℂ) : kummerU 0 b z = 1 := by
     have : NeBot (𝓝[integerComplement] b) :=
       mem_closure_iff_nhdsWithin_neBot.mp (hd b)
     exact (tendsto_kummerUConnection_zero b z).limUnder_eq
-
-
 
 /-- Euler's integral for Kummer's function, obtained by integrating the exponential
 series against the beta weight (AAR §4.2). This is the `M` form of DLMF 13.4.1. -/
@@ -485,10 +468,6 @@ theorem kummerM_eq_euler_integral {a c z : ℂ}
     funext n
     simp only [F, d, mul_pow]
     ring
-
-
-
-
 
 /-- `erf 0 = 0`. -/
 theorem erf_zero : erf 0 = 0 := by simp [erf]
@@ -579,8 +558,6 @@ theorem erf_ofReal (x : ℝ) : erf x = (TauCeti.Real.erf x : ℂ) := by
 /-- The complex complementary error function restricts to TauCeti's real complement. -/
 theorem erfc_ofReal (x : ℝ) : erfc x = (TauCeti.Real.erfc x : ℂ) := by
   simp [erfc, erf_ofReal, TauCeti.Real.erfc_def]
-
-
 
 section ParabolicRegion
 
@@ -733,10 +710,6 @@ theorem parab_hurwitz {f : ℂ → ℂ} {s : ℕ → ℂ → ℂ} {U : Set ℂ} 
   have := (inv_le_inv₀ hpos (by positivity)).1 hmax
   linarith
 
-
-
-
-
 /-- The three parameter cases of AAR Corollary 4.16.4 give the Saff–Varga conditions. -/
 theorem parab_params {a c α : ℝ}
     (hparams : (0 < c ∧ c ≤ a ∧ α = c / a) ∨
@@ -800,7 +773,7 @@ theorem kummerM_ne_zero_of_mem_parabolicRegion {a c α : ℝ} {z : ℂ}
       (1 ≤ a ∧ a ≤ c ∧ α = 1) ∨
       (0 < a ∧ a < 1 ∧ a ≤ c ∧ c < 2 * a / (1 - a) ∧
         α = (2 * a - c + c * a) / (a ^ 2 + a)))
-    (hre : -α < z.re) (him : z.im ^ 2 < 4 * α * (z.re + α)) :
+    (him : z.im ^ 2 < 4 * α * (z.re + α)) :
     kummerM a c z ≠ 0 := by
   obtain ⟨ha, hc, hα, h1, h2⟩ := parab_params hparams
   have hck : ∀ k : ℕ, (c : ℂ) ≠ -k := fun k h => by
@@ -852,7 +825,6 @@ theorem kummerM_ne_zero_of_mem_parabolicRegion {a c α : ℝ} {z : ℂ}
     exact parab_partialSums hA hb hbA hα h1 h2 hw m
   · have := hps.tendstoUniformlyOn (r' := R) ENNReal.coe_lt_top
     simpa using this
-
 
 end ParabolicRegion
 

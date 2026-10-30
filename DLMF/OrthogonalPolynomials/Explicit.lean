@@ -271,13 +271,13 @@ theorem laguerrePolyL_at_zero (α : ℂ) (n : ℕ) : laguerrePolyL α n 0 = poch
 /-- Identity under the stated parameter and domain assumptions: `jacobiPolyP α β n 1 = poch (α +
 1) n / n.factorial`. -/
 @[dlmf 18.6.T1]
-theorem jacobi_at_one {α β : ℂ} (hα : -1 < α.re) (n : ℕ) :
+theorem jacobiPolyP_one {α β : ℂ} (n : ℕ) :
     jacobiPolyP α β n 1 = poch (α + 1) n / n.factorial := by
   simp [jacobiPolyP]
 
 /-- Jacobi polynomials do not vanish at `x = 1` for `Re α > -1`. -/
 theorem jacobiPolyP_one_ne_zero {α β : ℂ} (hα : -1 < α.re) (n : ℕ) : jacobiPolyP α β n 1 ≠ 0 := by
-  rw [jacobi_at_one hα]
+  rw [jacobiPolyP_one]
   exact div_ne_zero (poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by
     simp only [Complex.add_re, Complex.one_re]
     linarith)) n) (Nat.cast_ne_zero.mpr n.factorial_ne_zero)
@@ -413,7 +413,6 @@ theorem hermitePolyH_odd_eq_laguerrePolyL (n : ℕ) (x : ℂ) :
   apply mul_right_cancel₀ hf
   linear_combination h - ((-1 : ℂ) ^ n * 2 ^ (2 * n + 1) * n.factorial * x) * hL -
     ((-1 : ℂ) ^ n * 2 * x * kummerM (-(n : ℂ)) (3 / 2) (x ^ 2)) * hp
-
 
 /-- The cosines of `k` times the Chebyshev–Gauss angles sum to zero unless `2M ∣ k`. -/
 theorem sum_cos_chebyshevGauss_eq_zero {M : ℕ} {k : ℤ} (hk : ¬ (2 * M : ℤ) ∣ k) :

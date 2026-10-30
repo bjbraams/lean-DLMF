@@ -79,7 +79,7 @@ theorem lommel_zero_neg_one_regularized {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n)
 /-- Identity under the stated parameter and domain assumptions: `angerJ ν z = sin (π*ν)/π*(lommelS
 0 ν z-ν*lommelS (-1) ν z)`. -/
 @[dlmf 11.10.E17]
-theorem angerJ_lommel {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) {z : ℂ} (hz : z ∈ slitPlane) :
+theorem angerJ_lommel {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) {z : ℂ} :
     angerJ ν z = sin (π*ν)/π*(lommelS 0 ν z-ν*lommelS (-1) ν z) := by
   obtain ⟨h0, h1⟩ := lommel_zero_neg_one_regularized hν z
   have hν0 : ν ≠ 0 := by simpa using hν 0
@@ -97,7 +97,7 @@ theorem angerJ_lommel {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) {z : ℂ} (hz : z
 /-- Identity under the stated parameter and domain assumptions: `weberE ν z = -(1+cos
 (π*ν))/π*lommelS 0 ν z-ν/π*(1-cos (π*ν))*lommelS (-1) ν z`. -/
 @[dlmf 11.10.E18]
-theorem weberE_lommel {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) {z : ℂ} (hz : z ∈ slitPlane) :
+theorem weberE_lommel {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) {z : ℂ} :
     weberE ν z = -(1+cos (π*ν))/π*lommelS 0 ν z-ν/π*(1-cos (π*ν))*lommelS (-1) ν z := by
   obtain ⟨h0, h1⟩ := lommel_zero_neg_one_regularized hν z
   have hν0 : ν ≠ 0 := by simpa using hν 0

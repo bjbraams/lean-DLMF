@@ -5,11 +5,11 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.EllipticIntegrals.Symmetric
 public import Carlson.Elliptic.Addition
 public import Carlson.Elliptic.ZeroVariable
 public import Carlson.TwoVariable.QuadraticHybrid
 public import Carlson.TwoVariable.Reduction
+public import DLMF.EllipticIntegrals.Symmetric
 
 /-!
 # Addition theorems for the symmetric elliptic integrals (DLMF §19.26)
@@ -18,7 +18,7 @@ public import Carlson.TwoVariable.Reduction
   `R_G`, `R_J`, with Euler's algebraic relation between `λ` and `μ` in the forms (19.26.2),
   (19.26.3), (19.26.5), (19.26.6); the addition theorem (19.26.11)–(19.26.12) of `R_C` and its
   equivalent forms (19.26.13)–(19.26.15). DLMF's standing assumption (19.26.i.p1): `λ, x, y, z`
-  are positive, except that at most one of `x, y, z` can be `0` (`ei19d_posDomain`).
+  are positive, except that at most one of `x, y, z` can be `0` (`Ei19dPosDomain`).
 * §19.26(ii): the case `x = 0`, where `λμ = yz` (19.26.ii.p1), (19.26.16), (19.26.17).
 * §19.26(iii): the duplication formulas (19.26.18)–(19.26.27), with
   `λ = √x√y + √y√z + √z√x` (19.26.19, `symEllIntDupLambda`).
@@ -57,7 +57,7 @@ namespace DLMF.EllipticIntegrals
 
 /-- DLMF 19.26.i.p1: the standing assumption of §19.26: `x, y, z ≥ 0`, at most one of them `0`
 (and `λ > 0`, assumed separately). -/
-def ei19d_posDomain (x y z : ℝ) : Prop :=
+def Ei19dPosDomain (x y z : ℝ) : Prop :=
   0 ≤ x ∧ 0 ≤ y ∧ 0 ≤ z ∧ (x = 0 → 0 < y ∧ 0 < z) ∧ (y = 0 → 0 < z)
 
 /-! ### §19.26(i) General formulas -/
@@ -83,7 +83,7 @@ lemma ei19d_perm_alg {a b c A B C l m : ℝ} (hA : A ^ 2 = a ^ 2 + l) (hB : B ^ 
 `x, y, z`"): under the standing assumptions, the `x`-form of (19.26.2) implies the `y`- and
 `z`-forms. -/
 @[dlmf 19.26.E2]
-theorem symEllInt_addition_mu_perm {x y z l m : ℝ} (h : ei19d_posDomain x y z) (hl : 0 < l)
+theorem symEllInt_addition_mu_perm {x y z l m : ℝ} (h : Ei19dPosDomain x y z) (hl : 0 < l)
     (hμ : x + m = (√((x + l) * y * z) + √(x * (y + l) * (z + l))) ^ 2 / l ^ 2) :
     y + m = (√((y + l) * x * z) + √(y * (x + l) * (z + l))) ^ 2 / l ^ 2 ∧
       z + m = (√((z + l) * x * y) + √(z * (x + l) * (y + l))) ^ 2 / l ^ 2 := by
@@ -134,12 +134,11 @@ private lemma ei19d_shifted_sqrt {q r s l m : ℝ} (hq : 0 ≤ q) (hr : 0 ≤ r)
   rw [mul_pow, Real.sq_sqrt (by linarith : 0 ≤ q + m)]
   exact he
 
-
 /-- DLMF 19.26.3 with 19.26.4: with `(ξ, η, ζ) = (x + λ, y + λ, z + λ)` and
 `(ξ', η', ζ') = (x + μ, y + μ, z + μ)`, `√z = (ξζ' + η'ζ - ξη')/(√(ξηζ') + √(ξ'η'ζ))` (and the
 permuted formulas for `√x`, `√y`). -/
 @[dlmf 19.26.E3, dlmf 19.26.E4]
-theorem symEllInt_addition_sqrt_z {x y z l m : ℝ} (h : ei19d_posDomain x y z) (hl : 0 < l)
+theorem symEllInt_addition_sqrt_z {x y z l m : ℝ} (h : Ei19dPosDomain x y z) (hl : 0 < l)
     (hm : 0 < m)
     (hμ : x + m = (√((x + l) * y * z) + √(x * (y + l) * (z + l))) ^ 2 / l ^ 2) :
     let ξ := x + l; let η := y + l; let ζ := z + l
@@ -233,7 +232,7 @@ lemma ei19d_addition_core {x y z l m : ℝ} (hx : 0 ≤ x) (hy : 0 ≤ y) (hz : 
 /-- DLMF 19.26.5: (19.26.2) is equivalent to
 `μ = λ^{-2} (√(xyz) + √((x + λ)(y + λ)(z + λ)))² - λ - x - y - z`. -/
 @[dlmf 19.26.E5]
-theorem symEllInt_addition_mu_iff {x y z l m : ℝ} (h : ei19d_posDomain x y z) (hl : 0 < l) :
+theorem symEllInt_addition_mu_iff {x y z l m : ℝ} (h : Ei19dPosDomain x y z) (hl : 0 < l) :
     x + m = (√((x + l) * y * z) + √(x * (y + l) * (z + l))) ^ 2 / l ^ 2 ↔
       m = (√(x * y * z) + √((x + l) * (y + l) * (z + l))) ^ 2 / l ^ 2 - l - x - y - z := by
   obtain ⟨hx, hy, hz, -, -⟩ := h
@@ -267,7 +266,7 @@ theorem symEllInt_addition_mu_iff {x y z l m : ℝ} (h : ei19d_posDomain x y z) 
 
 /-- DLMF 19.26.6: (19.26.2) implies `(λμ - xy - xz - yz)² = 4xyz(λ + μ + x + y + z)`. -/
 @[dlmf 19.26.E6]
-theorem symEllInt_addition_quadratic {x y z l m : ℝ} (h : ei19d_posDomain x y z) (hl : 0 < l)
+theorem symEllInt_addition_quadratic {x y z l m : ℝ} (h : Ei19dPosDomain x y z) (hl : 0 < l)
     (hμ : x + m = (√((x + l) * y * z) + √(x * (y + l) * (z + l))) ^ 2 / l ^ 2) :
     (l * m - x * y - x * z - y * z) ^ 2 = 4 * x * y * z * (l + m + x + y + z) := by
   have h5 := (symEllInt_addition_mu_iff h hl).mp hμ
@@ -332,7 +331,7 @@ lemma ei19d_addition_of_first {x y z l m : ℝ} (hx : 0 ≤ x) (hy : 0 < y) (hz 
 `x + μ = λ^{-2} (√((x + λ) y z) + √(x (y + λ)(z + λ)))²` (19.26.2; the permuted equations for
 `y + μ`, `z + μ` follow, `symEllInt_addition_mu_perm`). -/
 @[dlmf 19.26.E1, dlmf 19.26.E2]
-theorem symEllIntRF_add_symEllIntRF {x y z l m : ℝ} (h : ei19d_posDomain x y z) (hl : 0 < l)
+theorem symEllIntRF_add_symEllIntRF {x y z l m : ℝ} (h : Ei19dPosDomain x y z) (hl : 0 < l)
     (hm : 0 < m)
     (hμ : x + m = (√((x + l) * y * z) + √(x * (y + l) * (z + l))) ^ 2 / l ^ 2) :
     symEllIntRF ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) +
@@ -366,7 +365,7 @@ theorem symEllIntRF_add_symEllIntRF {x y z l m : ℝ} (h : ei19d_posDomain x y z
 = R_D(x, y, z) - 3/√(z (z + λ)(z + μ))`, with `λ, μ` as in (19.26.1)–(19.26.2) and `z > 0`
 (`R_D`'s third argument is nonzero). -/
 @[dlmf 19.26.E7]
-theorem symEllIntRD_add_symEllIntRD {x y z l m : ℝ} (h : ei19d_posDomain x y z) (hz : 0 < z)
+theorem symEllIntRD_add_symEllIntRD {x y z l m : ℝ} (h : Ei19dPosDomain x y z) (hz : 0 < z)
     (hl : 0 < l) (hm : 0 < m)
     (hμ : x + m = (√((x + l) * y * z) + √(x * (y + l) * (z + l))) ^ 2 / l ^ 2) :
     symEllIntRD ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) +
@@ -377,7 +376,7 @@ theorem symEllIntRD_add_symEllIntRD {x y z l m : ℝ} (h : ei19d_posDomain x y z
 /-- DLMF 19.26.8: `2R_G(x + λ, …) + 2R_G(x + μ, …) = 2R_G(x, y, z) + λ R_F(x + λ, …)
 + μ R_F(x + μ, …) + √(λ + μ + x + y + z)`, with `λ, μ` as in (19.26.1)–(19.26.2). -/
 @[dlmf 19.26.E8]
-theorem symEllIntRG_add_symEllIntRG {x y z l m : ℝ} (h : ei19d_posDomain x y z) (hl : 0 < l)
+theorem symEllIntRG_add_symEllIntRG {x y z l m : ℝ} (h : Ei19dPosDomain x y z) (hl : 0 < l)
     (hm : 0 < m)
     (hμ : x + m = (√((x + l) * y * z) + √(x * (y + l) * (z + l))) ^ 2 / l ^ 2) :
     2 * symEllIntRG ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) +
@@ -392,7 +391,7 @@ theorem symEllIntRG_add_symEllIntRG {x y z l m : ℝ} (h : ei19d_posDomain x y z
 = R_J(x, y, z, p) - 3 R_C(γ - δ, γ)`, `γ = p(p + λ)(p + μ)`, `δ = (p - x)(p - y)(p - z)`, with
 `λ, μ` as in (19.26.1)–(19.26.2) and `p > 0` (the identity fails for `p < 0`). -/
 @[dlmf 19.26.E9, dlmf 19.26.E10]
-theorem symEllIntRJ_add_symEllIntRJ {x y z p l m : ℝ} (h : ei19d_posDomain x y z) (hp : 0 < p)
+theorem symEllIntRJ_add_symEllIntRJ {x y z p l m : ℝ} (h : Ei19dPosDomain x y z) (hp : 0 < p)
     (hl : 0 < l) (hm : 0 < m)
     (hμ : x + m = (√((x + l) * y * z) + √(x * (y + l) * (z + l))) ^ 2 / l ^ 2) :
     let γ := p * (p + l) * (p + m)
@@ -495,7 +494,7 @@ theorem symEllIntRC_addition_eta_sub_xi {x y p q : ℝ} (hx : x ≠ 0)
 /-- DLMF 19.26.17: `√α R_C(β, α + β) + √β R_C(α, α + β) = π/2`, for
 `α, β ∈ ℂ \ (-∞, 0)` with `α + β > 0`. -/
 @[dlmf 19.26.E17]
-theorem symEllIntRC_addition_zero {α β : ℂ} (hα : symEllIntArg α) (hβ : symEllIntArg β)
+theorem symEllIntRC_addition_zero {α β : ℂ} (hα : SymEllIntArg α) (hβ : SymEllIntArg β)
     (hαβ : 0 < (α + β).re) (hαβ' : (α + β).im = 0) :
     α ^ (1 / 2 : ℂ) * symEllIntRC β (α + β) + β ^ (1 / 2 : ℂ) * symEllIntRC α (α + β) = π / 2 := by
   sorry
@@ -601,7 +600,7 @@ theorem symEllIntRF_duplication_quarter {x y z : ℂ} (hx : x ∈ slitPlane) (hy
 /-- DLMF 19.26.20: `R_D(x, y, z) = 2 R_D(x + λ, y + λ, z + λ) + 3/(√z (z + λ))`, `λ` as in
 (19.26.19), under the standing assumptions with `z > 0`. -/
 @[dlmf 19.26.E20]
-theorem symEllIntRD_duplication {x y z : ℝ} (h : ei19d_posDomain x y z) (hz : 0 < z) :
+theorem symEllIntRD_duplication {x y z : ℝ} (h : Ei19dPosDomain x y z) (hz : 0 < z) :
     let l := √x * √y + √y * √z + √z * √x
     symEllIntRD x y z = 2 * symEllIntRD ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) +
       ((3 / (√z * (z + l)) : ℝ) : ℂ) := by
@@ -610,7 +609,7 @@ theorem symEllIntRD_duplication {x y z : ℝ} (h : ei19d_posDomain x y z) (hz : 
 /-- DLMF 19.26.21: `2 R_G(x, y, z) = 4 R_G(x + λ, y + λ, z + λ) - λ R_F(x, y, z) - √x - √y - √z`,
 `λ` as in (19.26.19), under the standing assumptions. -/
 @[dlmf 19.26.E21]
-theorem symEllIntRG_duplication {x y z : ℝ} (h : ei19d_posDomain x y z) :
+theorem symEllIntRG_duplication {x y z : ℝ} (h : Ei19dPosDomain x y z) :
     let l := √x * √y + √y * √z + √z * √x
     2 * symEllIntRG x y z = 4 * symEllIntRG ((x + l : ℝ) : ℂ) ((y + l : ℝ) : ℂ) ((z + l : ℝ) : ℂ) -
       l * symEllIntRF x y z - √x - √y - √z := by
@@ -620,7 +619,7 @@ theorem symEllIntRG_duplication {x y z : ℝ} (h : ei19d_posDomain x y z) :
 + 3 R_C(α², β²)`, `α = p(√x + √y + √z) + √x√y√z`, `β = √p (p + λ)`, `λ` as in (19.26.19),
 under the standing assumptions and `p > 0`. -/
 @[dlmf 19.26.E22, dlmf 19.26.E23]
-theorem symEllIntRJ_duplication {x y z p : ℝ} (h : ei19d_posDomain x y z) (hp : 0 < p) :
+theorem symEllIntRJ_duplication {x y z p : ℝ} (h : Ei19dPosDomain x y z) (hp : 0 < p) :
     let l := √x * √y + √y * √z + √z * √x
     let α := p * (√x + √y + √z) + √x * √y * √z
     let β := √p * (p + l)
@@ -658,7 +657,7 @@ theorem symEllIntRJ_duplication_alpha_beta {x y z p : ℝ} (hx : 0 ≤ x) (hy : 
 `z = (ξζ + ηζ - ξη)²/(4ξηζ)`, `(ξ, η, ζ) = (x + λ, y + λ, z + λ)`, `λ` as in (19.26.19), for
 `x, y, z ≥ 0` at most one of them `0`; the formulas for `x`, `y` follow by permutation. -/
 @[dlmf 19.26.E24]
-theorem symEllInt_duplication_inverse {x y z : ℝ} (h : ei19d_posDomain x y z) :
+theorem symEllInt_duplication_inverse {x y z : ℝ} (h : Ei19dPosDomain x y z) :
     let l := √x * √y + √y * √z + √z * √x
     let ξ := x + l; let η := y + l; let ζ := z + l
     z = (ξ * ζ + η * ζ - ξ * η) ^ 2 / (4 * ξ * η * ζ) := by
@@ -725,9 +724,11 @@ theorem symEllIntRC_duplication {x y : ℝ} (hx : 0 ≤ x) (hy : 0 < y) :
       (ofReal_mem_slitPlane.mpr hy) (ofReal_mem_slitPlane.mpr hy)
     simpa only [hdup, ← Complex.ofReal_add] using h
 
-/-- DLMF 19.26.26: `R_C(x², y²) = R_C(a², a y)`, `a = (x + y)/2`, `ℜ x ≥ 0`, `ℜ y > 0`. -/
+/-- DLMF 19.26.26: `R_C(x², y²) = R_C(a², a y)`, `a = (x + y)/2`, for
+`x = 0` or `ℜ x > 0`, and `ℜ y > 0`. The first squared argument must avoid the negative
+real cut; a nonzero purely imaginary `x` is outside this domain. -/
 @[dlmf 19.26.E26]
-theorem symEllIntRC_sq_eq {x y : ℂ} (hx : 0 ≤ x.re) (hy : 0 < y.re) :
+theorem symEllIntRC_sq_eq {x y : ℂ} (hx : x = 0 ∨ 0 < x.re) (hy : 0 < y.re) :
     symEllIntRC (x ^ 2) (y ^ 2) = symEllIntRC (((x + y) / 2) ^ 2) ((x + y) / 2 * y) := by
   sorry
 
@@ -740,9 +741,8 @@ The proof reuses lean-codes' `Carlson.TwoVariable.carlsonRC_sq_eq` and
 `Carlson.TwoVariable.carlsonRC_mul_of_pos`.
 Checked numerically at 3000 random complex points under the stated hypotheses. -/
 @[dlmf 19.26.E27]
-theorem symEllIntRC_duplication_theta {x θ : ℂ} (hx : 0 < x.re) (hθ : θ ≠ x ^ 2)
-    (hθx : x ^ 2 - θ ∈ slitPlane)
-    (hθ' : θ ≠ (x + (x ^ 2 - θ) ^ (1 / 2 : ℂ)) ^ 2) :
+theorem symEllIntRC_duplication_theta {x θ : ℂ} (hx : 0 < x.re)
+    (hθx : x ^ 2 - θ ∈ slitPlane) :
     let s := x + (x ^ 2 - θ) ^ (1 / 2 : ℂ)
     symEllIntRC (x ^ 2) (x ^ 2 - θ) = 2 * symEllIntRC (s ^ 2) (s ^ 2 - θ) := by
   let y := (x ^ 2 - θ) ^ (1 / 2 : ℂ)

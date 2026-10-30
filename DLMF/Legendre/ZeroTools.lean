@@ -44,13 +44,13 @@ open Set Filter Topology
 namespace DLMF.Legendre
 
 /-- `y` (with derivative `y'`) solves `((1-x²) y')' + q y = 0` on `(-1, 1)`. -/
-def lzt_IsSol (q y y' : ℝ → ℝ) : Prop :=
+def LztIsSol (q y y' : ℝ → ℝ) : Prop :=
   ∀ x ∈ Ioo (-1:ℝ) 1, HasDerivAt y (y' x) x ∧
     HasDerivAt (fun t => (1 - t ^ 2) * y' t) (-(q x * y x)) x
 
 /-- The negative of a solution is a solution. -/
-theorem lzt_IsSol.neg {q y y' : ℝ → ℝ} (h : lzt_IsSol q y y') :
-    lzt_IsSol q (fun x => -y x) (fun x => -y' x) := fun x hx => by
+theorem LztIsSol.neg {q y y' : ℝ → ℝ} (h : LztIsSol q y y') :
+    LztIsSol q (fun x => -y x) (fun x => -y' x) := fun x hx => by
   refine ⟨(h x hx).1.neg, ?_⟩
   have := (h x hx).2.neg
   convert this using 1
@@ -61,7 +61,7 @@ theorem lzt_IsSol.neg {q y y' : ℝ → ℝ} (h : lzt_IsSol q y y') :
 def lzt_W (u u' y y' : ℝ → ℝ) (x : ℝ) : ℝ := (1 - x ^ 2) * (u' x * y x - u x * y' x)
 
 /-- Derivative of the weighted Wronskian: `W' = (qy - qu) u y`. -/
-theorem lzt_hasDerivAt_W {qy qu y y' u u' : ℝ → ℝ} (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
+theorem lzt_hasDerivAt_W {qy qu y y' u u' : ℝ → ℝ} (hy : LztIsSol qy y y') (hu : LztIsSol qu u u')
     {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt (lzt_W u u' y y') ((qy x - qu x) * u x * y x) x := by
   have h1 := (hu x hx).2.mul (hy x hx).1
@@ -72,8 +72,8 @@ theorem lzt_hasDerivAt_W {qy qu y y' u u' : ℝ → ℝ} (hy : lzt_IsSol qy y y'
   · ring
 
 /-- The weighted Wronskian is continuous on subsets of `(-1, 1)`. -/
-theorem lzt_W_continuousOn {qy qu y y' u u' : ℝ → ℝ} (hy : lzt_IsSol qy y y')
-    (hu : lzt_IsSol qu u u') {s : Set ℝ} (hs : s ⊆ Ioo (-1:ℝ) 1) :
+theorem lzt_W_continuousOn {qy qu y y' u u' : ℝ → ℝ} (hy : LztIsSol qy y y')
+    (hu : LztIsSol qu u u') {s : Set ℝ} (hs : s ⊆ Ioo (-1:ℝ) 1) :
     ContinuousOn (lzt_W u u' y y') s := fun _x hx =>
   (lzt_hasDerivAt_W hy hu (hs hx)).continuousAt.continuousWithinAt
 
@@ -122,7 +122,6 @@ theorem lzt_sign {f : ℝ → ℝ} {s : Set ℝ} (hs : s.OrdConnected) (hc : Con
   · obtain ⟨c, hc', hc0⟩ := intermediate_value_Icc' hle (hc.mono (hs.out hx₂ hx₁))
       ⟨h₁'.le, h₂'.le⟩
     exact hne c (hs.out hx₂ hx₁ hc') hc0
-
 
 /-- **Divergence of a ratio at the right end.** If `u > 0`, `(1-x²)u² ≤ K(1-x)` and the
 weighted Wronskian satisfies `W ≤ -c₀ < 0` on `[s, 1)`, then `y/u` is unbounded above there. -/
@@ -173,7 +172,6 @@ theorem lzt_ratio_left {y y' u u' : ℝ → ℝ} {s K c₀ : ℝ} (hs : -1 < s) 
   have := hb x hx
   nlinarith [mul_le_mul_of_nonneg_right hD hu2.le, mul_le_mul_of_nonneg_left this hDp.le]
 
-
 section Comparison
 
 variable {qy qu y y' u u' : ℝ → ℝ}
@@ -183,12 +181,12 @@ theorem lzt_p_pos {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) : 0 < 1 - x ^ 2 := by
   nlinarith [hx.1, hx.2]
 
 /-- Solutions are continuous on subsets of `(-1, 1)`. -/
-theorem lzt_IsSol.continuousOn {q y y' : ℝ → ℝ} (h : lzt_IsSol q y y') {s : Set ℝ}
+theorem LztIsSol.continuousOn {q y y' : ℝ → ℝ} (h : LztIsSol q y y') {s : Set ℝ}
     (hs : s ⊆ Ioo (-1:ℝ) 1) : ContinuousOn y s := fun _x hx =>
   (h _ (hs hx)).1.continuousAt.continuousWithinAt
 
 /-- `W = (1-x²)(u'y-uy')` is strictly decreasing where `u, y > 0` and `qy < qu`. -/
-theorem lzt_W_strictAntiOn (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
+theorem lzt_W_strictAntiOn (hy : LztIsSol qy y y') (hu : LztIsSol qu u u')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qy x < qu x) {s : Set ℝ} (hs : s ⊆ Ioo (-1:ℝ) 1) (hcv : Convex ℝ s)
     (hpos : ∀ x ∈ interior s, 0 < u x ∧ 0 < y x) : StrictAntiOn (lzt_W u u' y y') s := by
   refine strictAntiOn_of_deriv_neg hcv (lzt_W_continuousOn hy hu hs) fun x hx => ?_
@@ -199,7 +197,7 @@ theorem lzt_W_strictAntiOn (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
   nlinarith
 
 /-- `W = (1-x²)(u'y-uy')` is strictly increasing where `u, y > 0` and `qu < qy`. -/
-theorem lzt_W_strictMonoOn (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
+theorem lzt_W_strictMonoOn (hy : LztIsSol qy y y') (hu : LztIsSol qu u u')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qu x < qy x) {s : Set ℝ} (hs : s ⊆ Ioo (-1:ℝ) 1) (hcv : Convex ℝ s)
     (hpos : ∀ x ∈ interior s, 0 < u x ∧ 0 < y x) : StrictMonoOn (lzt_W u u' y y') s := by
   refine strictMonoOn_of_deriv_pos hcv (lzt_W_continuousOn hy hu hs) fun x hx => ?_
@@ -210,7 +208,7 @@ theorem lzt_W_strictMonoOn (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
   nlinarith
 
 /-- Sign-normalized core of `lzt_between`. -/
-theorem lzt_between_core (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
+theorem lzt_between_core (hy : LztIsSol qy y y') (hu : LztIsSol qu u u')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qy x < qu x) {a b : ℝ} (ha : -1 < a) (hb : b < 1) (hab : a < b)
     (ya : y a = 0) (yb : y b = 0) (ypos : ∀ x ∈ Ioo a b, 0 < y x)
     (upos : ∀ x ∈ Ioo a b, 0 < u x) : False := by
@@ -234,7 +232,7 @@ theorem lzt_between_core (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
 
 /-- **Sturm comparison.** If `qy < qu`, then between two consecutive zeros of `y` the function
 `u` has a zero. -/
-theorem lzt_between (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
+theorem lzt_between (hy : LztIsSol qy y y') (hu : LztIsSol qu u u')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qy x < qu x) {a b : ℝ} (ha : -1 < a) (hb : b < 1) (hab : a < b)
     (ya : y a = 0) (yb : y b = 0) (hyne : ∀ x ∈ Ioo a b, y x ≠ 0) :
     ∃ c ∈ Ioo a b, u c = 0 := by
@@ -250,9 +248,8 @@ theorem lzt_between (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
   · exact lzt_between_core hy.neg hu.neg hq ha hb hab (by simp [ya]) (by simp [yb])
       (fun x hx => neg_pos.mpr (hy1 x hx)) fun x hx => neg_pos.mpr (hu1 x hx)
 
-
 /-- Sign-normalized core of `lzt_upper_right`. -/
-theorem lzt_upper_right_core (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
+theorem lzt_upper_right_core (hy : LztIsSol qy y y') (hu : LztIsSol qu u u')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qy x < qu x) {z s₀ C K : ℝ} (hz : z ∈ Ioo (-1:ℝ) 1) (hs₀ : s₀ < 1)
     (hK : 0 < K) (yz : y z = 0) (ypos : ∀ x ∈ Ioo z 1, 0 < y x) (upos : ∀ x ∈ Ioo z 1, 0 < u x)
     (hC : ∀ x ∈ Ioo s₀ 1, y x ≤ C * u x)
@@ -288,7 +285,7 @@ theorem lzt_upper_right_core (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
 
 /-- **Comparison at the right end.** Let `qy < qu`, let `z` be the last zero of `y`, and let
 `y/u` stay bounded and `(1-x²)u² = O(1-x)` near `1`. Then `u` has a zero in `(z, 1)`. -/
-theorem lzt_upper_right (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
+theorem lzt_upper_right (hy : LztIsSol qy y y') (hu : LztIsSol qu u u')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qy x < qu x) {z s₀ C K : ℝ} (hz : z ∈ Ioo (-1:ℝ) 1) (hs₀ : s₀ < 1)
     (hK : 0 < K) (yz : y z = 0) (hyne : ∀ x ∈ Ioo z 1, y x ≠ 0)
     (hC : ∀ x ∈ Ioo s₀ 1, |y x| ≤ C * |u x|)
@@ -298,7 +295,7 @@ theorem lzt_upper_right (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
   have hsub : Ioo z 1 ⊆ Ioo (-1:ℝ) 1 := Ioo_subset_Ioo hz.1.le le_rfl
   have hb' : ∀ x ∈ Ioo s₀ 1, (1 - x ^ 2) * (-u x) ^ 2 ≤ K * (1 - x) := fun x hx => by
     rw [neg_sq]; exact hb x hx
-  have key : ∀ (y₁ y₁' u₁ u₁' : ℝ → ℝ), lzt_IsSol qy y₁ y₁' → lzt_IsSol qu u₁ u₁' → y₁ z = 0 →
+  have key : ∀ (y₁ y₁' u₁ u₁' : ℝ → ℝ), LztIsSol qy y₁ y₁' → LztIsSol qu u₁ u₁' → y₁ z = 0 →
       (∀ x ∈ Ioo z 1, 0 < y₁ x) → (∀ x ∈ Ioo z 1, 0 < u₁ x) →
       (∀ x ∈ Ioo s₀ 1, |y₁ x| ≤ C * |u₁ x|) →
       (∀ x ∈ Ioo s₀ 1, (1 - x ^ 2) * u₁ x ^ 2 ≤ K * (1 - x)) → False := by
@@ -322,7 +319,6 @@ theorem lzt_upper_right (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
   · exact key _ _ _ _ hy.neg hu.neg (by simp [yz]) (fun x hx => neg_pos.mpr (hy1 x hx))
       (fun x hx => neg_pos.mpr (hu1 x hx)) hCn3 hb'
 
-
 /-- The weighted Wronskian is odd in `y`. -/
 theorem lzt_W_neg (u u' y y' : ℝ → ℝ) (x : ℝ) :
     lzt_W u u' (fun x => -y x) (fun x => -y' x) x = -lzt_W u u' y y' x := by
@@ -331,7 +327,7 @@ theorem lzt_W_neg (u u' y y' : ℝ → ℝ) (x : ℝ) :
 variable {qw w w' : ℝ → ℝ}
 
 /-- Sign-normalized core of `lzt_lower_right`. -/
-theorem lzt_lower_right_core (hy : lzt_IsSol qy y y') (hw : lzt_IsSol qw w w')
+theorem lzt_lower_right_core (hy : LztIsSol qy y y') (hw : LztIsSol qw w w')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qw x < qy x) {z s₀ K : ℝ} (hz : z ∈ Ioo (-1:ℝ) 1) (hs₀ : s₀ < 1)
     (hK : 0 < K) (wz : w z = 0) (ypos : ∀ x ∈ Ioo z 1, 0 < y x) (wpos : ∀ x ∈ Ioo z 1, 0 < w x)
     (hb : ∀ x ∈ Ioo s₀ 1, (1 - x ^ 2) * w x ^ 2 ≤ K * (1 - x)) : False := by
@@ -365,7 +361,7 @@ theorem lzt_lower_right_core (hy : lzt_IsSol qy y y') (hw : lzt_IsSol qw w w')
   exact absurd hxC (not_lt.mpr (div_pos (ypos x hx') (wpos x hx')).le)
 
 /-- Sign-normalized core of `lzt_lower_left`. -/
-theorem lzt_lower_left_core (hy : lzt_IsSol qy y y') (hw : lzt_IsSol qw w w')
+theorem lzt_lower_left_core (hy : LztIsSol qy y y') (hw : LztIsSol qw w w')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qw x < qy x) {z s₀ K : ℝ} (hz : z ∈ Ioo (-1:ℝ) 1) (hs₀ : -1 < s₀)
     (hK : 0 < K) (wz : w z = 0) (ypos : ∀ x ∈ Ioo (-1) z, 0 < y x)
     (wpos : ∀ x ∈ Ioo (-1) z, 0 < w x)
@@ -397,7 +393,7 @@ theorem lzt_lower_left_core (hy : lzt_IsSol qy y y') (hw : lzt_IsSol qw w w')
   exact absurd hxC (not_lt.mpr (div_pos (ypos x hx') (wpos x hx')).le)
 
 /-- Sign-normalized core of `lzt_lower_whole`. -/
-theorem lzt_lower_whole_core (hy : lzt_IsSol qy y y') (hw : lzt_IsSol qw w w')
+theorem lzt_lower_whole_core (hy : LztIsSol qy y y') (hw : LztIsSol qw w w')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qw x < qy x) {s₀ s₀' K : ℝ} (hs₀ : s₀ < 1) (hs₀' : -1 < s₀')
     (hK : 0 < K) (ypos : ∀ x ∈ Ioo (-1) 1, 0 < y x) (wpos : ∀ x ∈ Ioo (-1) 1, 0 < w x)
     (hb : ∀ x ∈ Ioo s₀ 1, (1 - x ^ 2) * w x ^ 2 ≤ K * (1 - x))
@@ -443,7 +439,6 @@ theorem lzt_lower_whole_core (hy : lzt_IsSol qy y y') (hw : lzt_IsSol qw w w')
     have hx' := hS x (Ioo_subset_Ioc_self hx)
     exact absurd hxC (not_lt.mpr (div_pos (ypos x hx') (wpos x hx')).le)
 
-
 /-- Bounds on `(1-x²)w²` are unchanged by `w ↦ -w`. -/
 theorem lzt_neg_sq_bound {w : ℝ → ℝ} {S : Set ℝ} {g : ℝ → ℝ}
     (hb : ∀ x ∈ S, (1 - x ^ 2) * w x ^ 2 ≤ g x) : ∀ x ∈ S, (1 - x ^ 2) * (-w x) ^ 2 ≤ g x :=
@@ -451,7 +446,7 @@ theorem lzt_neg_sq_bound {w : ℝ → ℝ} {S : Set ℝ} {g : ℝ → ℝ}
 
 /-- **Comparison at the right end (lower function).** Let `qw < qy`, let `z` be the last zero of
 `w`, and let `(1-x²)w² = O(1-x)` near `1`. Then `y` has a zero in `(z, 1)`. -/
-theorem lzt_lower_right (hy : lzt_IsSol qy y y') (hw : lzt_IsSol qw w w')
+theorem lzt_lower_right (hy : LztIsSol qy y y') (hw : LztIsSol qw w w')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qw x < qy x) {z s₀ K : ℝ} (hz : z ∈ Ioo (-1:ℝ) 1) (hs₀ : s₀ < 1)
     (hK : 0 < K) (wz : w z = 0) (hwne : ∀ x ∈ Ioo z 1, w x ≠ 0)
     (hb : ∀ x ∈ Ioo s₀ 1, (1 - x ^ 2) * w x ^ 2 ≤ K * (1 - x)) : ∃ c ∈ Ioo z 1, y c = 0 := by
@@ -470,7 +465,7 @@ theorem lzt_lower_right (hy : lzt_IsSol qy y y') (hw : lzt_IsSol qw w w')
 
 /-- **Comparison at the left end (lower function).** Let `qw < qy`, let `z` be the first zero of
 `w`, and let `(1-x²)w² = O(1+x)` near `-1`. Then `y` has a zero in `(-1, z)`. -/
-theorem lzt_lower_left (hy : lzt_IsSol qy y y') (hw : lzt_IsSol qw w w')
+theorem lzt_lower_left (hy : LztIsSol qy y y') (hw : LztIsSol qw w w')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qw x < qy x) {z s₀ K : ℝ} (hz : z ∈ Ioo (-1:ℝ) 1) (hs₀ : -1 < s₀)
     (hK : 0 < K) (wz : w z = 0) (hwne : ∀ x ∈ Ioo (-1) z, w x ≠ 0)
     (hb : ∀ x ∈ Ioo (-1) s₀, (1 - x ^ 2) * w x ^ 2 ≤ K * (1 + x)) :
@@ -490,7 +485,7 @@ theorem lzt_lower_left (hy : lzt_IsSol qy y y') (hw : lzt_IsSol qw w w')
 
 /-- **Comparison on the whole interval.** Let `qw < qy`, let `w` have no zeros in `(-1, 1)` and
 `(1-x²)w² = O(1∓x)` near `±1`. Then `y` has a zero in `(-1, 1)`. -/
-theorem lzt_lower_whole (hy : lzt_IsSol qy y y') (hw : lzt_IsSol qw w w')
+theorem lzt_lower_whole (hy : LztIsSol qy y y') (hw : LztIsSol qw w w')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qw x < qy x) {s₀ s₀' K : ℝ} (hs₀ : s₀ < 1) (hs₀' : -1 < s₀')
     (hK : 0 < K) (hwne : ∀ x ∈ Ioo (-1) 1, w x ≠ 0)
     (hb : ∀ x ∈ Ioo s₀ 1, (1 - x ^ 2) * w x ^ 2 ≤ K * (1 - x))
@@ -508,11 +503,10 @@ theorem lzt_lower_whole (hy : lzt_IsSol qy y y') (hw : lzt_IsSol qw w w')
   · exact lzt_lower_whole_core hy.neg hw.neg hq hs₀ hs₀' hK (fun x hx => neg_pos.mpr (hy1 x hx))
       (fun x hx => neg_pos.mpr (hu1 x hx)) (lzt_neg_sq_bound hb) (lzt_neg_sq_bound hb')
 
-
 /-- **Lower zero count by comparison.** If `qw < qy` and the zeros of `w` in `(-1, 1)` are
 exactly `e₀ < ⋯ < e_{j-1}`, with `(1-x²)w² = O(1∓x)` at `±1`, then `y` has `j+1` distinct zeros,
 one in each gap. -/
-theorem lzt_lower_count (hy : lzt_IsSol qy y y') (hw : lzt_IsSol qw w w')
+theorem lzt_lower_count (hy : LztIsSol qy y y') (hw : LztIsSol qw w w')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qw x < qy x) {j : ℕ} {e : Fin j → ℝ} (he : StrictMono e)
     (heI : ∀ i, e i ∈ Ioo (-1:ℝ) 1) (hwz : ∀ x ∈ Ioo (-1:ℝ) 1, w x = 0 ↔ ∃ i, x = e i)
     {s₀ s₀' K : ℝ} (hs₀ : s₀ < 1) (hs₀' : -1 < s₀') (hK : 0 < K)
@@ -585,11 +579,10 @@ theorem lzt_lower_count (hy : lzt_IsSol qy y y') (hw : lzt_IsSol qw w w')
     exact he.monotone (Fin.mk_le_mk.2 (by omega))
   linarith [(hc i₁).2, (hc i₂).1]
 
-
 /-- **Upper zero count by comparison.** If `qy < qu`, the zeros of `u` in `(-1, 1)` are among
 `e₀, …, e_{k-1}`, the zeros of `y` are simple and stay away from `1`, `y/u` is bounded and
 `(1-x²)u² = O(1-x)` near `1`, then `y` has at most `k` zeros in `(-1, 1)`. -/
-theorem lzt_upper_count (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
+theorem lzt_upper_count (hy : LztIsSol qy y y') (hu : LztIsSol qu u u')
     (hq : ∀ x ∈ Ioo (-1:ℝ) 1, qy x < qu x) {k : ℕ} {e : Fin k → ℝ}
     (huz : ∀ x ∈ Ioo (-1:ℝ) 1, u x = 0 → ∃ i, x = e i)
     (hsimple : ∀ x ∈ Ioo (-1:ℝ) 1, y x = 0 → y' x ≠ 0) {δ : ℝ} (hδ : δ < 1)
@@ -674,8 +667,6 @@ theorem lzt_upper_count (hy : lzt_IsSol qy y y') (hu : lzt_IsSol qu u u')
   rw [Set.ncard_eq_toFinset_card Z hfin]
   exact claim _ (by simp)
 
-
-
 end Comparison
 
 section Ferrers
@@ -746,7 +737,6 @@ theorem lzt_ferrersP_base {m : ℝ} (hm : 0 ≤ m) (j : ℕ) {x : ℝ} (hx : x �
   push_cast
   field_simp
 
-
 /-- Real form of the associated Legendre equation for the real parts of `𝖯^μ_ν`. -/
 theorem lzt_ferrersP_sol (ν μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     HasDerivAt (fun t => (ferrersP ν μ t).re) (deriv (ferrersP ν μ) x).re x ∧
@@ -787,7 +777,6 @@ theorem lzt_ferrersP_real_data (ν μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 
   exact ⟨Complex.ext (by simp) (by simpa using ferrersP_real ν μ hx),
     Complex.ext (by simp) (by simp [h0])⟩
 
-
 /-- The zeros of `𝖯^{-m}_ν` in `(-1, 1)` are simple (`m ≥ 0`, `ν ≥ -1/2`), by the Wronskians
 DLMF 14.2.4 (with `𝖰^{-m}_ν`) and 14.2.3 (with `𝖯^{-m}_ν(-x)`). -/
 theorem lzt_ferrersP_simple {ν m : ℝ} (hm : 0 ≤ m) (hν : -1/2 ≤ ν) {x : ℝ}
@@ -805,7 +794,7 @@ theorem lzt_ferrersP_simple {ν m : ℝ} (hm : 0 ≤ m) (hν : -1/2 ≤ ν) {x :
     Complex.Gamma_ne_zero_of_re_pos (by simp; linarith)
   by_cases hr : LegendreQRegular (ν:ℂ) ((-m:ℝ):ℂ)
   · have hW := ferrers_wronskian_4 _ _ hr hx
-    rw [ferrersWronskian, e0, e1] at hW
+    rw [ODE.wronskian, e0, e1] at hW
     simp only [zero_mul, mul_zero, sub_zero] at hW
     have hG1 : Gamma ((ν:ℂ) + ((-m:ℝ):ℂ) + 1) ≠ 0 := by
       refine Complex.Gamma_ne_zero fun n hn => hr n ?_
@@ -816,13 +805,12 @@ theorem lzt_ferrersP_simple {ν m : ℝ} (hm : 0 ≤ m) (hν : -1/2 ≤ ν) {x :
   · simp only [LegendreQRegular, not_forall, not_not] at hr
     obtain ⟨n, hn⟩ := hr
     have hW := ferrers_wronskian_3 (ν:ℂ) (m:ℂ) hx
-    rw [show -(m:ℂ) = ((-m:ℝ):ℂ) by push_cast; ring, ferrersWronskian, e0, e1] at hW
+    rw [show -(m:ℂ) = ((-m:ℝ):ℂ) by push_cast; ring, ODE.wronskian, e0, e1] at hW
     simp only [zero_mul, mul_zero, sub_zero] at hW
     have hG1 : Gamma ((m:ℂ) - ν) ≠ 0 := by
       rw [show (m:ℂ) - ν = ((n + 1 : ℕ) : ℂ) by push_cast at hn ⊢; linear_combination -hn]
       exact Complex.Gamma_ne_zero_of_re_pos (by simp; positivity)
     exact (div_ne_zero two_ne_zero (mul_ne_zero (mul_ne_zero hG1 hG2) hx2)) hW.symm
-
 
 /-- `((1+x)/(1-x))^{-m/2} ≤ (1-x²)^{m/2}` for `0 ≤ x < 1`, `m ≥ 0`. -/
 theorem lzt_rpow_le {m x : ℝ} (hm : 0 ≤ m) (hx0 : 0 ≤ x) (hx1 : x < 1) :
@@ -884,7 +872,6 @@ theorem lzt_ferrersP_near_one (ν : ℝ) {m : ℝ} (hm : 0 ≤ m) :
   calc ((1 + x) / (1 - x)) ^ (-m / 2) * |(g x).re| ≤ (1 - x ^ 2) ^ (m / 2) * (‖g 1‖ + 1) :=
         mul_le_mul hle ((Complex.abs_re_le_norm _).trans hgn.le) (abs_nonneg _) hq
     _ = (‖g 1‖ + 1) * (1 - x ^ 2) ^ (m / 2) := by ring
-
 
 /-- Zeros, boundedness and the behaviour at `1` of the polynomial case `𝖯^{-m}_{m+j}`. -/
 theorem lzt_base_data {m : ℝ} (hm : 0 ≤ m) (j : ℕ) :
@@ -952,7 +939,6 @@ theorem lzt_base_data {m : ℝ} (hm : 0 ≤ m) (j : ℕ) :
     have := hrp x hxI
     nlinarith [mul_le_mul_of_nonneg_left hxl.le (mul_pos hB0 this).le]
 
-
 /-- **Zero count of `𝖯^{-m}_ν`** (DLMF 14.16(ii)). For `m ≥ 0` and `ν ≥ -1/2`, the Ferrers
 function `𝖯^{-m}_ν` has exactly `max(⌈ν - m⌉, 0)` zeros in `(-1, 1)`. With
 `k = max(⌈ν - m⌉, 0)`, the count is squeezed between Sturm comparisons with the polynomial cases
@@ -968,7 +954,7 @@ theorem lzt_ferrersP_neg_order_zero_count {ν m : ℝ} (hm : 0 ≤ m) (hν : -1/
     have h1 : (⌈ν - m⌉ : ℝ) ≤ k := by exact_mod_cast hkz ▸ le_max_left _ _
     exact (Int.le_ceil _).trans h1
   set q : ℝ → ℝ → ℝ := fun a x => a * (a + 1) - (-m) ^ 2 / (1 - x ^ 2) with hq
-  have hsol : ∀ a : ℝ, lzt_IsSol (q a) (fun x => (ferrersP a (-m : ℝ) x).re)
+  have hsol : ∀ a : ℝ, LztIsSol (q a) (fun x => (ferrersP a (-m : ℝ) x).re)
       (fun x => (deriv (ferrersP a (-m : ℝ)) x).re) := fun a x hx => lzt_ferrersP_sol a (-m) hx
   have hqlt : ∀ a b : ℝ, -1/2 ≤ a → a < b → ∀ x ∈ Ioo (-1:ℝ) 1, q a x < q b x := by
     intro a b ha hab x _

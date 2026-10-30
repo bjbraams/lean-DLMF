@@ -6,8 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Combinatorics.RestrictedPartitions
-public import Mathlib.Data.Sym.Card
 public import DLMFMathlib.Combinatorics.Q26bSurjections
+public import Mathlib.Data.Sym.Card
 
 /-!
 # The twelvefold way (DLMF §26.17, Table 26.17.1)
@@ -15,7 +15,7 @@ public import DLMFMathlib.Combinatorics.Q26bSurjections
 Mappings `f : N → K` from a set `N` of `n` balls to a set `K` of `k` boxes are
 `f : Fin n → Fin k`, restricted to all maps, injective maps or surjective maps
 (`MapRestriction`). When the balls (resp. boxes) are unlabeled, maps are identified up to a
-permutation of `N` (resp. of `K`): `f ∼ τ ∘ f ∘ σ` (`twelvefoldRel`). `twelvefoldCount balls
+permutation of `N` (resp. of `K`): `f ∼ τ ∘ f ∘ σ` (`TwelvefoldRel`). `twelvefoldCount balls
 boxes r n k` is the number of equivalence classes, `Nat.card` of the quotient. The twelve
 entries of Table 26.17.1 are the twelve theorems below, all tagged `26.17.T1`.
 
@@ -65,7 +65,7 @@ def MapRestriction.Holds {n k : ℕ} : MapRestriction → (Fin n → Fin k) → 
 
 /-- Two maps are identified when they differ by a permutation of the unlabeled sides:
 `g = τ ∘ f ∘ σ` with `σ = 1` if the balls are labeled and `τ = 1` if the boxes are labeled. -/
-def twelvefoldRel {n k : ℕ} (balls boxes : Labeling) (f g : Fin n → Fin k) : Prop :=
+def TwelvefoldRel {n k : ℕ} (balls boxes : Labeling) (f g : Fin n → Fin k) : Prop :=
   ∃ σ : Perm (Fin n), ∃ τ : Perm (Fin k), (balls = .labeled → σ = 1) ∧ (boxes = .labeled → τ = 1) ∧
     g = τ ∘ f ∘ σ
 
@@ -73,7 +73,7 @@ def twelvefoldRel {n k : ℕ} (balls boxes : Labeling) (f g : Fin n → Fin k) :
 restriction `r`, up to the permutations of the unlabeled sides (DLMF §26.17). -/
 @[dlmf 26.17]
 def twelvefoldCount (balls boxes : Labeling) (r : MapRestriction) (n k : ℕ) : ℕ :=
-  Nat.card (Quot fun f g : {f : Fin n → Fin k // r.Holds f} => twelvefoldRel balls boxes f.1 g.1)
+  Nat.card (Quot fun f g : {f : Fin n → Fin k // r.Holds f} => TwelvefoldRel balls boxes f.1 g.1)
 
 /-- With both sides labeled the relation is equality, so the quotient is the set of maps. -/
 lemma c26b_twelvefoldCount_labeled (r : MapRestriction) (n k : ℕ) :
@@ -81,12 +81,12 @@ lemma c26b_twelvefoldCount_labeled (r : MapRestriction) (n k : ℕ) :
   unfold twelvefoldCount
   refine Nat.card_congr (Equiv.ofBijective (Quot.mk _) ⟨fun a b h => ?_, Quot.mk_surjective⟩).symm
   have hr : ∀ a b : {f : Fin n → Fin k // r.Holds f},
-      twelvefoldRel .labeled .labeled a.1 b.1 → a = b := by
+      TwelvefoldRel .labeled .labeled a.1 b.1 → a = b := by
     rintro a b ⟨σ, τ, hσ, hτ, h⟩
     rw [hσ rfl, hτ rfl] at h
     exact Subtype.ext (by simpa using h.symm)
   have key : ∀ x y, Relation.EqvGen
-      (fun f g : {f : Fin n → Fin k // r.Holds f} => twelvefoldRel .labeled .labeled f.1 g.1) x y →
+      (fun f g : {f : Fin n → Fin k // r.Holds f} => TwelvefoldRel .labeled .labeled f.1 g.1) x y →
       x = y := by
     intro x y hxy
     induction hxy with
@@ -98,7 +98,7 @@ lemma c26b_twelvefoldCount_labeled (r : MapRestriction) (n k : ℕ) :
 
 /-- The relation for unlabeled balls and labeled boxes. -/
 lemma q26b_rel_UL {n k : ℕ} (f g : Fin n → Fin k) :
-    twelvefoldRel .unlabeled .labeled f g ↔ ∃ σ : Perm (Fin n), g = f ∘ σ := by
+    TwelvefoldRel .unlabeled .labeled f g ↔ ∃ σ : Perm (Fin n), g = f ∘ σ := by
   constructor
   · rintro ⟨σ, τ, -, hτ, h⟩
     rw [hτ rfl] at h
@@ -176,7 +176,7 @@ lemma q26b_card_image_ker {n : ℕ} {β : Type*} [DecidableEq β] (g : Fin n →
 
 /-- For labeled balls and unlabeled boxes, the classes are the kernels. -/
 lemma q26b_rel_LU {n k : ℕ} (f g : Fin n → Fin k) :
-    twelvefoldRel .labeled .unlabeled f g ↔ q26b_ker f = q26b_ker g := by
+    TwelvefoldRel .labeled .unlabeled f g ↔ q26b_ker f = q26b_ker g := by
   constructor
   · rintro ⟨σ, τ, hσ, -, h⟩
     rw [hσ rfl] at h
@@ -201,9 +201,9 @@ lemma q26b_twelvefoldCount_LU (r : MapRestriction) (n k : ℕ)
     obtain ⟨f, hf, rfl⟩ := mem_image.mp hx
     exact ⟨⟨f, by simpa using hf⟩, rfl⟩
 
-/-- `twelvefoldRel` is an equivalence relation. -/
+/-- `TwelvefoldRel` is an equivalence relation. -/
 lemma q26b_twelvefoldRel_equivalence {n k : ℕ} (balls boxes : Labeling) :
-    Equivalence (twelvefoldRel (n := n) (k := k) balls boxes) := by
+    Equivalence (TwelvefoldRel (n := n) (k := k) balls boxes) := by
   refine ⟨fun f => ⟨1, 1, fun _ => rfl, fun _ => rfl, rfl⟩, ?_, ?_⟩
   · rintro f g ⟨σ, τ, hσ, hτ, rfl⟩
     refine ⟨σ⁻¹, τ⁻¹, fun h => by rw [hσ h, inv_one], fun h => by rw [hτ h, inv_one], ?_⟩
@@ -224,7 +224,7 @@ lemma q26b_LU_surj (n k : ℕ) :
   classical
   unfold twelvefoldCount
   set r := fun f g : {f : Fin n → Fin k // MapRestriction.surjective.Holds f} =>
-    twelvefoldRel .labeled .unlabeled f.1 g.1 with hr
+    TwelvefoldRel .labeled .unlabeled f.1 g.1 with hr
   have heq : Equivalence r := by
     have h := q26b_twelvefoldRel_equivalence (n := n) (k := k) .labeled .unlabeled
     exact ⟨fun a => h.refl _, fun hab => h.symm hab, fun hab hbc => h.trans hab hbc⟩
@@ -268,7 +268,6 @@ lemma q26b_LU_surj (n k : ℕ) :
   have := Nat.factorial_pos k
   rw [mul_comm] at htot
   exact (Nat.eq_of_mul_eq_mul_right this htot).symm
-
 
 /-- The `Sym` of values of a map. -/
 def q26b_sym {n k : ℕ} (f : Fin n → Fin k) : Sym (Fin k) n := ⟨univ.val.map f, by simp⟩
@@ -356,7 +355,7 @@ lemma q26b_exists_ofSym_eq {k n : ℕ} (p : n.Partition) (hp : Multiset.card p.p
 
 /-- For unlabeled balls and boxes, the classes are the partitions of fibre sizes. -/
 lemma q26b_rel_UU {n k : ℕ} (f g : Fin n → Fin k) :
-    twelvefoldRel .unlabeled .unlabeled f g ↔
+    TwelvefoldRel .unlabeled .unlabeled f g ↔
       Nat.Partition.ofSym (q26b_sym f) = Nat.Partition.ofSym (q26b_sym g) := by
   constructor
   · rintro ⟨σ, τ, -, -, rfl⟩

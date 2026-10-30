@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.IncompleteGamma.SpecialValues
 public import DLMF.Bessel.SphericalSeriesTools
+public import DLMF.IncompleteGamma.SpecialValues
 
 /-!
 # Series, recurrences and derivatives, DLMF §§8.7–8.8
@@ -926,7 +926,7 @@ theorem lowerIncGamma_iteratedDeriv_scaled_power (n : ℕ) {a : ℂ} (ha : ∀ k
 /-- Identity under the stated parameter and domain assumptions: `iteratedDeriv n (fun t =>
 t^(-a)*upperIncGamma a t) z=(-1 : ℂ)^n*z^(-a-n)*upperIncGamma (a+n) z`. -/
 @[dlmf 8.8.E16]
-theorem upperIncGamma_iteratedDeriv_scaled_power (n : ℕ) {a : ℂ} (ha : ∀ k : ℕ, a ≠ -k) {z : ℂ} (hz : z ∈ slitPlane) :
+theorem upperIncGamma_iteratedDeriv_scaled_power (n : ℕ) {a : ℂ} {z : ℂ} (hz : z ∈ slitPlane) :
     iteratedDeriv n (fun t => t^(-a)*upperIncGamma a t) z=(-1 : ℂ)^n*z^(-a-n)*upperIncGamma (a+n) z := by
   have he : (fun t => t^(-a)*upperIncGamma a t)=ᶠ[𝓝 z]
       (fun t => exp (-t)*kummerU 1 (1+a) t) := by
@@ -1080,8 +1080,7 @@ theorem upperIncGammaOnLog_zero (w : ℂ) :
     simp only [zero_mul, zero_sub]
     field_simp
     ring
-  have hi := segmentIntegral_eq_sub (by fun_prop : Continuous (fun u : ℂ => exp (0*u-exp u)))
-    hd (log (exp w)) w
+  have hi := segmentIntegral_eq_sub hd (log (exp w)) w
   rw [upperIncGammaOnLog, hi, upperIncGamma_zero_E1 hz, expIntE1_eq_Ein_complex hz,
     Complex.exp_log hz]
   ring

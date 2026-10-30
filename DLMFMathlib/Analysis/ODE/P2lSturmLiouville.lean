@@ -5,10 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMFMathlib.Analysis.ODE.P1oLinearGlobal
 public import DLMFMathlib.Analysis.ODE.P1oParamHolomorphic
 public import DLMFMathlib.Analysis.ODE.SturmComparison
 public import DLMFMathlib.Analysis.ODE.SturmDeformation
-public import DLMFMathlib.Analysis.ODE.P1oLinearGlobal
 
 /-!
 # Spectra of separated Sturm–Liouville problems with an even potential
@@ -43,16 +43,16 @@ namespace ODE
 variable {V : ℝ → ℝ} {L B h : ℝ}
 
 /-- `w` solves `w'' = (V - h) w` on `ℝ`. -/
-def p2lIsSol (V : ℝ → ℝ) (h : ℝ) (w : ℝ → ℝ) : Prop :=
+def P2lIsSol (V : ℝ → ℝ) (h : ℝ) (w : ℝ → ℝ) : Prop :=
   Differentiable ℝ w ∧ ∀ x, HasDerivAt (deriv w) ((V x - h) * w x) x
 
 /-- The separated boundary conditions at `0` and `L`. -/
-def p2lBC (L : ℝ) (odd0 oddK : Bool) (w : ℝ → ℝ) : Prop :=
+def P2lBC (L : ℝ) (odd0 oddK : Bool) (w : ℝ → ℝ) : Prop :=
   (if odd0 then w 0 = 0 else deriv w 0 = 0) ∧ (if oddK then w L = 0 else deriv w L = 0)
 
 /-- The spectrum of the separated problem. -/
 def p2lSpec (V : ℝ → ℝ) (L : ℝ) (odd0 oddK : Bool) : Set ℝ :=
-  {h | ∃ w, p2lIsSol V h w ∧ p2lBC L odd0 oddK w ∧ w ≠ 0}
+  {h | ∃ w, P2lIsSol V h w ∧ P2lBC L odd0 oddK w ∧ w ≠ 0}
 
 /-- Initial value at `0` of the basic solution. -/
 def p2lD0 (odd0 : Bool) : ℝ := if odd0 then 0 else 1
@@ -61,9 +61,9 @@ def p2lD0 (odd0 : Bool) : ℝ := if odd0 then 0 else 1
 def p2lD1 (odd0 : Bool) : ℝ := if odd0 then 1 else 0
 
 /-- Identity under the stated parameter and domain assumptions: `∃ f : ℝ → ℝ, f 0 = p2lD0 odd0 ∧
-deriv f 0 = p2lD1 odd0 ∧ p2lIsSol V h f`. -/
+deriv f 0 = p2lD1 odd0 ∧ P2lIsSol V h f`. -/
 lemma p2l_exists (hV : Continuous V) (h : ℝ) (odd0 : Bool) :
-    ∃ f : ℝ → ℝ, f 0 = p2lD0 odd0 ∧ deriv f 0 = p2lD1 odd0 ∧ p2lIsSol V h f := by
+    ∃ f : ℝ → ℝ, f 0 = p2lD0 odd0 ∧ deriv f 0 = p2lD1 odd0 ∧ P2lIsSol V h f := by
   obtain ⟨f, f', h0, h1, hf⟩ := exists_linear_ode (𝕜 := ℝ) (E := ℝ) (p := fun _ => 0)
     (q := fun x => V x - h) continuous_const (hV.sub continuous_const) 0 (p2lD0 odd0)
     (p2lD1 odd0)
@@ -77,28 +77,28 @@ def p2lY (V : ℝ → ℝ) (odd0 : Bool) (h : ℝ) : ℝ → ℝ :=
   if hV : Continuous V then (p2l_exists hV h odd0).choose else 0
 
 /-- Identity under the stated parameter and domain assumptions: `p2lY V odd0 h 0 = p2lD0 odd0 ∧
-deriv (p2lY V odd0 h) 0 = p2lD1 odd0 ∧ p2lIsSol V h (p2lY V odd0 h)`. -/
+deriv (p2lY V odd0 h) 0 = p2lD1 odd0 ∧ P2lIsSol V h (p2lY V odd0 h)`. -/
 theorem p2lY_spec (hV : Continuous V) (odd0 : Bool) (h : ℝ) :
     p2lY V odd0 h 0 = p2lD0 odd0 ∧ deriv (p2lY V odd0 h) 0 = p2lD1 odd0 ∧
-      p2lIsSol V h (p2lY V odd0 h) := by
+      P2lIsSol V h (p2lY V odd0 h) := by
   rw [p2lY, dite_eq_left hV]
   exact (p2l_exists hV h odd0).choose_spec
 
 /-- At `x`, the function `w` has derivative `(deriv w x)`. -/
-theorem p2lIsSol.hasDerivAt {w : ℝ → ℝ} (hw : p2lIsSol V h w) (x : ℝ) :
+theorem P2lIsSol.hasDerivAt {w : ℝ → ℝ} (hw : P2lIsSol V h w) (x : ℝ) :
     HasDerivAt w (deriv w x) x := (hw.1 x).hasDerivAt
 
 /-- The function `w` is continuous. -/
-theorem p2lIsSol.continuous {w : ℝ → ℝ} (hw : p2lIsSol V h w) : Continuous w :=
+theorem P2lIsSol.continuous {w : ℝ → ℝ} (hw : P2lIsSol V h w) : Continuous w :=
   hw.1.continuous
 
 /-- The function `(deriv w)` is continuous. -/
-theorem p2lIsSol.continuous_deriv {w : ℝ → ℝ} (hw : p2lIsSol V h w) : Continuous (deriv w) :=
+theorem P2lIsSol.continuous_deriv {w : ℝ → ℝ} (hw : P2lIsSol V h w) : Continuous (deriv w) :=
   continuous_iff_continuousAt.2 fun x => (hw.2 x).continuousAt
 
 /-- Uniqueness for the equation. -/
-theorem p2l_sol_eq (hV : Continuous V) {w₁ w₂ : ℝ → ℝ} (h₁ : p2lIsSol V h w₁)
-    (h₂ : p2lIsSol V h w₂) {x₀ : ℝ} (e₀ : w₁ x₀ = w₂ x₀) (e₁ : deriv w₁ x₀ = deriv w₂ x₀) :
+theorem p2l_sol_eq (hV : Continuous V) {w₁ w₂ : ℝ → ℝ} (h₁ : P2lIsSol V h w₁)
+    (h₂ : P2lIsSol V h w₂) {x₀ : ℝ} (e₀ : w₁ x₀ = w₂ x₀) (e₁ : deriv w₁ x₀ = deriv w₂ x₀) :
     w₁ = w₂ := by
   have := eq_of_linear_ode (𝕜 := ℝ) (E := ℝ) (t₀ := x₀) (p := fun _ => 0)
     (q := fun x => V x - h) continuous_const (hV.sub continuous_const)
@@ -107,9 +107,9 @@ theorem p2l_sol_eq (hV : Continuous V) {w₁ w₂ : ℝ → ℝ} (h₁ : p2lIsSo
     (fun t => ⟨h₂.hasDerivAt t, (h₂.2 t).congr_deriv (by simp)⟩) e₀ e₁
   exact this.1
 
-/-- Identity under the stated parameter and domain assumptions: `p2lIsSol V h (fun x => c * w x)`. -/
-theorem p2lIsSol.const_mul {w : ℝ → ℝ} (hw : p2lIsSol V h w) (c : ℝ) :
-    p2lIsSol V h (fun x => c * w x) := by
+/-- Identity under the stated parameter and domain assumptions: `P2lIsSol V h (fun x => c * w x)`. -/
+theorem P2lIsSol.const_mul {w : ℝ → ℝ} (hw : P2lIsSol V h w) (c : ℝ) :
+    P2lIsSol V h (fun x => c * w x) := by
   have hd : deriv (fun x => c * w x) = fun x => c * deriv w x :=
     funext fun x => ((hw.hasDerivAt x).const_mul c).deriv
   refine ⟨fun x => ((hw.hasDerivAt x).const_mul c).differentiableAt, fun x => ?_⟩
@@ -117,14 +117,14 @@ theorem p2lIsSol.const_mul {w : ℝ → ℝ} (hw : p2lIsSol V h w) (c : ℝ) :
   exact ((hw.2 x).const_mul c).congr_deriv (by ring)
 
 /-- A solution vanishing to first order at a point is zero. -/
-theorem p2l_eq_zero (hV : Continuous V) {w : ℝ → ℝ} (hw : p2lIsSol V h w) {x₀ : ℝ}
+theorem p2l_eq_zero (hV : Continuous V) {w : ℝ → ℝ} (hw : P2lIsSol V h w) {x₀ : ℝ}
     (e₀ : w x₀ = 0) (e₁ : deriv w x₀ = 0) : w = 0 := by
-  have h0 : p2lIsSol V h (0 : ℝ → ℝ) := ⟨differentiable_const 0, fun x => by
+  have h0 : P2lIsSol V h (0 : ℝ → ℝ) := ⟨differentiable_const 0, fun x => by
     simp⟩
   exact p2l_sol_eq hV hw h0 (x₀ := x₀) (by simp [e₀]) (by simp [e₁])
 
 /-- Every solution satisfying the condition at `0` is a multiple of the basic solution. -/
-theorem p2l_eq_mul_p2lY (hV : Continuous V) {odd0 : Bool} {w : ℝ → ℝ} (hw : p2lIsSol V h w)
+theorem p2l_eq_mul_p2lY (hV : Continuous V) {odd0 : Bool} {w : ℝ → ℝ} (hw : P2lIsSol V h w)
     (h0 : if odd0 then w 0 = 0 else deriv w 0 = 0) :
     w = fun x => (if odd0 then deriv w 0 else w 0) * p2lY V odd0 h x := by
   obtain ⟨y0, y1, hy⟩ := p2lY_spec hV odd0 h
@@ -334,7 +334,7 @@ lemma p2lY_neg (hV : Continuous V) (hVe : ∀ x, V (-x) = V x) (odd0 : Bool) (h 
   have hu1 : ∀ x, HasDerivAt u (-(s * deriv Y (-x))) x := fun x =>
     (((hy.hasDerivAt (-x)).comp x (hasDerivAt_neg x)).const_mul s).congr_deriv (by ring)
   have hdu : deriv u = fun x => -(s * deriv Y (-x)) := funext fun x => (hu1 x).deriv
-  have hu : p2lIsSol V h u := by
+  have hu : P2lIsSol V h u := by
     refine ⟨fun x => (hu1 x).differentiableAt, fun x => ?_⟩
     rw [hdu]
     have := (((hy.2 (-x)).comp x (hasDerivAt_neg x)).const_mul s).neg
@@ -504,7 +504,7 @@ theorem p2lY_continuous (hV : Continuous V) (hB : ∀ x, |V x| ≤ B) (odd0 : Bo
 /-- For `h > B + ((N + 1)π/(2L))²`, a nonzero solution has `N + 1` zeros in `(-L, L)`, in
 increasing order (Sturm comparison with `sin(ω(x + L))`, `ω = (N + 1)π/(2L)`). -/
 lemma p2l_many_zeros (hB : ∀ x, |V x| ≤ B) (hL : 0 < L) (N : ℕ) {w : ℝ → ℝ}
-    (hw : p2lIsSol V h w) (hh : B + ((N + 1) * Real.pi / (2 * L)) ^ 2 < h) :
+    (hw : P2lIsSol V h w) (hh : B + ((N + 1) * Real.pi / (2 * L)) ^ 2 < h) :
     ∃ z : Fin (N + 1) → ℝ, StrictMono z ∧ (∀ j, z j ∈ Ioo (-L) L) ∧ ∀ j, w (z j) = 0 := by
   set ω := (N + 1) * Real.pi / (2 * L)
   have hω : 0 < ω := by positivity
@@ -564,7 +564,7 @@ lemma p2l_many_zeros (hB : ∀ x, |V x| ≤ B) (hL : 0 < L) (N : ℕ) {w : ℝ �
     linarith [(hz j).2]
 
 /-- Simple zeros of a nonzero solution in a compact interval are finite in number. -/
-theorem p2l_zeros_finite (hV : Continuous V) {w : ℝ → ℝ} (hw : p2lIsSol V h w) (hne : w ≠ 0)
+theorem p2l_zeros_finite (hV : Continuous V) {w : ℝ → ℝ} (hw : P2lIsSol V h w) (hne : w ≠ 0)
     (a b : ℝ) : {x | x ∈ Icc a b ∧ w x = 0}.Finite :=
   sturmDef_finite (fun x _ => hw.hasDerivAt x) fun _ _ h0 h1 => hne (p2l_eq_zero hV hw h0 h1)
 

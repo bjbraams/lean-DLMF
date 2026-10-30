@@ -177,20 +177,20 @@ lemma p19sR1_alg7 (t u v w x y z : ℂ) (hu : u ^ 2 = t + x) (hv : v ^ 2 = t + y
   ring
 
 /-- An admissible argument is not a negative real. -/
-lemma p19sR1_not_isNegReal {x : ℂ} (hx : symEllIntArg x) : ¬ IsNegReal x := by
+lemma p19sR1_not_isNegReal {x : ℂ} (hx : SymEllIntArg x) : ¬ IsNegReal x := by
   rcases hx with hx | rfl
   · exact ei19c_not_isNegReal_of_mem_slitPlane hx
   · simp [IsNegReal]
 
 /-- `R_D(y, z, x)` as `(3/2) ∫ (s(t) (t + x))⁻¹` with `s` written in the order `x, y, z`. -/
-lemma p19sR1_symEllIntRD_perm1 (x y z : ℂ) (hx : symEllIntArg x) :
+lemma p19sR1_symEllIntRD_perm1 (x y z : ℂ) (hx : SymEllIntArg x) :
     symEllIntRD y z x = (3 / 2) * ∫ t in Ioi (0 : ℝ), (((t : ℂ) + x) ^ (1 / 2 : ℂ) *
       ((t : ℂ) + y) ^ (1 / 2 : ℂ) * ((t : ℂ) + z) ^ (1 / 2 : ℂ) * ((t : ℂ) + x))⁻¹ := by
   rw [symEllIntRD_eq_integral (p19sR1_not_isNegReal hx)]
   congr 2; funext t; simp only [symEllIntS]; ring_nf
 
 /-- `R_D(z, x, y)` as `(3/2) ∫ (s(t) (t + y))⁻¹` with `s` written in the order `x, y, z`. -/
-lemma p19sR1_symEllIntRD_perm2 (x y z : ℂ) (hy : symEllIntArg y) :
+lemma p19sR1_symEllIntRD_perm2 (x y z : ℂ) (hy : SymEllIntArg y) :
     symEllIntRD z x y = (3 / 2) * ∫ t in Ioi (0 : ℝ), (((t : ℂ) + x) ^ (1 / 2 : ℂ) *
       ((t : ℂ) + y) ^ (1 / 2 : ℂ) * ((t : ℂ) + z) ^ (1 / 2 : ℂ) * ((t : ℂ) + y))⁻¹ := by
   rw [symEllIntRD_eq_integral (p19sR1_not_isNegReal hy)]
@@ -200,7 +200,7 @@ lemma p19sR1_symEllIntRD_perm2 (x y z : ℂ) (hy : symEllIntArg y) :
 `x R_D(y, z, x) + y R_D(z, x, y) + z R_D(x, y, z) = 3 R_F(x, y, z)` for admissible `x` and
 `y, z ∈ ℂ \ (-∞, 0]` (at `x = 0` the first term is `0`). -/
 @[dlmf 19.21.E9]
-theorem p19sR1_symEllIntRD_cyclic_mul_sum {x y z : ℂ} (hx : symEllIntArg x) (hy : y ∈ slitPlane)
+theorem p19sR1_symEllIntRD_cyclic_mul_sum {x y z : ℂ} (hx : SymEllIntArg x) (hy : y ∈ slitPlane)
     (hz : z ∈ slitPlane) :
     x * symEllIntRD y z x + y * symEllIntRD z x y + z * symEllIntRD x y z =
       3 * symEllIntRF x y z := by
@@ -366,7 +366,7 @@ theorem p19sR1_six_mul_symEllIntRG {x y z : ℂ} (hx : x ∈ slitPlane) (hy : y 
 
 /-- Integrability of `R_C`'s integrand `((t + x)^{1/2} (t + y))⁻¹`: `x` admissible, `y` in the
 slit plane. -/
-lemma p19sR1_integrableOn_RC {x y : ℂ} (hx : symEllIntArg x) (hy : y ∈ slitPlane) :
+lemma p19sR1_integrableOn_RC {x y : ℂ} (hx : SymEllIntArg x) (hy : y ∈ slitPlane) :
     IntegrableOn (fun t : ℝ => (((t : ℂ) + x) ^ (1 / 2 : ℂ) * ((t : ℂ) + y))⁻¹) (Ioi 0) := by
   obtain ⟨c1, hc1, h1⟩ := p19sR1_norm_cpow_half_ge' hx
   obtain ⟨c2, hc2, h2⟩ := p19sR1_norm_add_ge hy
@@ -387,7 +387,7 @@ lemma p19sR1_integrableOn_RC {x y : ℂ} (hx : symEllIntArg x) (hy : y ∈ slitP
 /-- DLMF 19.20.8 (third), **stronger than DLMF** in allowing `x = 0`:
 `R_J(x, y, y, p) = 3/(p - y) (R_C(x, y) - R_C(x, p))`, `p ≠ y`, `x` admissible,
 `y, p ∈ ℂ \ (-∞, 0]`. Partial fractions in the integrand. -/
-theorem p19sR1_symEllIntRJ_self_right_eq {x y p : ℂ} (hx : symEllIntArg x) (hy : y ∈ slitPlane)
+theorem p19sR1_symEllIntRJ_self_right_eq {x y p : ℂ} (hx : SymEllIntArg x) (hy : y ∈ slitPlane)
     (hp : p ∈ slitPlane) (hpy : p ≠ y) :
     symEllIntRJ x y y p = 3 / (p - y) * (symEllIntRC x y - symEllIntRC x p) := by
   have iy := p19sR1_integrableOn_RC hx hy

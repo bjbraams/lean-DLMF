@@ -76,11 +76,11 @@ theorem neg_mem_slitPlane_of_arg_ne_zero {z : ℂ} (hz : z ∈ slitPlane) (h : z
 /-- The explicit Wronskian `W{U(a,b,·), F}` at `z`. -/
 theorem wronskian_kummerU_reflected_eq (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
     (hz' : -z ∈ slitPlane) :
-    wronskian (kummerU a b) (fun w => exp w * kummerU (b - a) b (-w)) z =
+    ODE.wronskian (kummerU a b) (fun w => exp w * kummerU (b - a) b (-w)) z =
       kummerU a b z * (exp z * kummerU (b - a) b (-z) +
         exp z * ((b - a) * kummerU (b - a + 1) (b + 1) (-z))) -
       exp z * kummerU (b - a) b (-z) * (-a * kummerU (a + 1) (b + 1) z) := by
-  rw [wronskian, (hasDerivAt_kummerU_reflected a b hz').deriv, (hasDerivAt_kummerU a b hz).deriv]
+  rw [ODE.wronskian, (hasDerivAt_kummerU_reflected a b hz').deriv, (hasDerivAt_kummerU a b hz).deriv]
 
 /-- The connection formula in a neighborhood of a point off the real axis. -/
 theorem eventually_regularizedHGFun_eq_connection (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
@@ -106,11 +106,11 @@ theorem eventually_regularizedHGFun_eq_connection (a b : ℂ) {z : ℂ} (hz : z 
 /-- The core identities: `W{𝐌, F} = c₁ W{U, F}`, and `c₂ W{U, F} = -W{𝐌, U}`. -/
 theorem wronskian_connection_core (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane) (hz' : -z ∈ slitPlane)
     (sign : Bool) (hsign : if sign then z.arg < 0 else 0 < z.arg) :
-    wronskian (regularizedHGFun {a} {b}) (fun w => exp w * kummerU (b - a) b (-w)) z =
+    ODE.wronskian (regularizedHGFun {a} {b}) (fun w => exp w * kummerU (b - a) b (-w)) z =
         exp (-(if sign then 1 else -1) * a * π * I) / Gamma (b - a) *
-          wronskian (kummerU a b) (fun w => exp w * kummerU (b - a) b (-w)) z ∧
+          ODE.wronskian (kummerU a b) (fun w => exp w * kummerU (b - a) b (-w)) z ∧
       exp ((if sign then 1 else -1) * (b - a) * π * I) / Gamma a *
-          wronskian (kummerU a b) (fun w => exp w * kummerU (b - a) b (-w)) z =
+          ODE.wronskian (kummerU a b) (fun w => exp w * kummerU (b - a) b (-w)) z =
         z ^ (-b) * exp z / Gamma a := by
   set c1 := exp (-(if sign then 1 else -1) * a * π * I) / Gamma (b - a)
   set c2 := exp ((if sign then 1 else -1) * (b - a) * π * I) / Gamma a
@@ -122,8 +122,8 @@ theorem wronskian_connection_core (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane) (
   have hM : HasDerivAt (regularizedHGFun {a} {b}) _ z := hG.congr_of_eventuallyEq heq
   have hMz := heq.self_of_nhds
   have hW := wronskian_regularizedHGFun_kummerU_all a b hz
-  rw [wronskian, hM.deriv, hU.deriv] at hW
-  rw [wronskian, wronskian, hM.deriv, hFd.deriv, hU.deriv, hMz]
+  rw [ODE.wronskian, hM.deriv, hU.deriv] at hW
+  rw [ODE.wronskian, ODE.wronskian, hM.deriv, hFd.deriv, hU.deriv, hMz]
   simp only [hF] at hW hMz ⊢
   rw [hMz] at hW
   constructor
@@ -135,7 +135,7 @@ theorem wronskian_connection_core (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane) (
 @[dlmf 13.2.E38]
 theorem wronskian_kummerU_kummerUReflected (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
     (sign : Bool) (hsign : if sign then z.arg < 0 else 0 < z.arg) :
-    wronskian (kummerU a b)
+    ODE.wronskian (kummerU a b)
       (fun w => exp w * kummerU (b - a) b (exp ((if sign then 1 else -1) * π * I) * w)) z =
       exp ((if sign then 1 else -1) * (a - b) * π * I) * z ^ (-b) * exp z := by
   have hz0 := slitPlane_ne_zero hz
@@ -145,7 +145,7 @@ theorem wronskian_kummerU_kummerUReflected (a b : ℂ) {z : ℂ} (hz : z ∈ sli
   set ε : ℂ := if sign then 1 else -1 with hε
   have hnz : -z ≠ 0 := neg_ne_zero.mpr hz0
   refine eq_of_continuousAt_of_integerComplement
-    (f := fun c => wronskian (kummerU c b) (fun w => exp w * kummerU (b - c) b (-w)) z)
+    (f := fun c => ODE.wronskian (kummerU c b) (fun w => exp w * kummerU (b - c) b (-w)) z)
     (g := fun c => exp (ε * (c - b) * π * I) * z ^ (-b) * exp z) ?_ (by fun_prop) ?_
   · simp only [wronskian_kummerU_reflected_eq _ b hz hz']
     have h1 := continuousAt_kummerU_comp (A := fun c => c) (B := fun _ => b) (b := a)
@@ -173,7 +173,7 @@ theorem wronskian_kummerU_kummerUReflected (a b : ℂ) {z : ℂ} (hz : z ∈ sli
 fixed by the half-plane of `z` (DLMF 13.2.36). -/
 theorem wronskian_kummerU_reflected (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
     (sign : Bool) (hsign : if sign then z.arg < 0 else 0 < z.arg) :
-    wronskian (kummerU a b) (fun w => exp w * kummerU (b - a) b (-w)) z =
+    ODE.wronskian (kummerU a b) (fun w => exp w * kummerU (b - a) b (-w)) z =
       exp ((if sign then 1 else -1) * (a - b) * π * I) * z ^ (-b) * exp z := by
   have h := wronskian_kummerU_kummerUReflected a b hz sign hsign
   rwa [kummerU_reflected_eq] at h
@@ -184,7 +184,7 @@ theorem wronskian_kummerU_reflected (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
 theorem wronskian_regularizedHGFun_kummerUReflected (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
     (sign : Bool) (hsign : if sign then z.arg < 0 else 0 < z.arg)
     (_hba : ∀ k : ℕ, b - a ≠ -k) :
-    wronskian (regularizedHGFun {a} {b})
+    ODE.wronskian (regularizedHGFun {a} {b})
       (fun w => exp w * kummerU (b - a) b (exp ((if sign then 1 else -1) * π * I) * w)) z =
       exp (-(if sign then 1 else -1) * b * π * I) * z ^ (-b) * exp z / Gamma (b - a) := by
   have harg : z.arg ≠ 0 := by split_ifs at hsign <;> [exact hsign.ne; exact hsign.ne']
@@ -202,7 +202,7 @@ theorem wronskian_regularizedHGFun_kummerUReflected (a b : ℂ) {z : ℂ} (hz : 
 plane. -/
 theorem wronskian_kummerU_reflected_ne_zero (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
     (hz' : -z ∈ slitPlane) :
-    wronskian (kummerU a b) (fun w => exp w * kummerU (b - a) b (-w)) z ≠ 0 := by
+    ODE.wronskian (kummerU a b) (fun w => exp w * kummerU (b - a) b (-w)) z ≠ 0 := by
   have hz0 := slitPlane_ne_zero hz
   have him : z.im ≠ 0 := by
     intro h
@@ -224,7 +224,7 @@ the principal branch, so `-z` must avoid the cut for it to be differentiable at 
 theorem wronskian_kummerU_kummer_neg (a b : ℂ) {z : ℂ}
     (hz : z ∈ slitPlane) (hz' : -z ∈ slitPlane) (_harg : -(π / 2) ≤ z.arg)
     (_harg' : z.arg ≤ 3 * π / 2) (_hb : ∀ n : ℤ, b ≠ n) :
-    wronskian (kummerU a b)
+    ODE.wronskian (kummerU a b)
       (fun w => exp w * kummerU (b - a) b (exp (-π * I) * w)) z ≠ 0 := by
   have h := kummerU_reflected_eq a b false
   simp only [Bool.false_eq_true, ↓reduceIte, neg_one_mul] at h
@@ -238,7 +238,7 @@ the principal branch, so `-z` must avoid the cut for it to be differentiable at 
 theorem wronskian_kummerU_kummer_pos (a b : ℂ) {z : ℂ}
     (hz : z ∈ slitPlane) (hz' : -z ∈ slitPlane) (_harg : -(3 * π / 2) ≤ z.arg)
     (_harg' : z.arg ≤ π / 2) (_hb : ∀ n : ℤ, b ≠ n) :
-    wronskian (kummerU a b)
+    ODE.wronskian (kummerU a b)
       (fun w => exp w * kummerU (b - a) b (exp (π * I) * w)) z ≠ 0 := by
   have h := kummerU_reflected_eq a b true
   simp only [↓reduceIte, one_mul] at h
@@ -250,7 +250,7 @@ function is differentiable at `z`. -/
 @[dlmf 13.2.E37]
 theorem wronskian_shifted_regularized_kummerUReflected (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
     (hz' : -z ∈ slitPlane) (sign : Bool) (_ha : ∀ k : ℕ, 1 - a ≠ -k) :
-    wronskian (fun w => w ^ (1 - b) * regularizedHGFun {a - b + 1} {2 - b} w)
+    ODE.wronskian (fun w => w ^ (1 - b) * regularizedHGFun {a - b + 1} {2 - b} w)
       (fun w => exp w * kummerU (b - a) b (exp ((if sign then 1 else -1) * π * I) * w)) z =
       -(z ^ (-b) * exp z) / Gamma (1 - a) := by
   have hz0 := slitPlane_ne_zero hz
@@ -302,8 +302,8 @@ theorem wronskian_shifted_regularized_kummerUReflected (a b : ℂ) {z : ℂ} (hz
   have hG := ((hU.const_mul c1).add (hFd.const_mul c3)).congr_of_eventuallyEq heq
   have hGz := heq.self_of_nhds
   have hW := wronskian_kummerU_reflected a b hz s hs
-  rw [wronskian, hU.deriv, hFd.deriv] at hW
-  rw [wronskian, hG.deriv, hFd.deriv]
+  rw [ODE.wronskian, hU.deriv, hFd.deriv] at hW
+  rw [ODE.wronskian, hG.deriv, hFd.deriv]
   simp only at hGz ⊢
   rw [hGz]
   have he : c1 * exp ((if s then 1 else -1) * (a - b) * π * I) = -(Gamma (1 - a))⁻¹ := by
@@ -320,18 +320,18 @@ theorem wronskian_shifted_regularized_kummerUReflected (a b : ℂ) {z : ℂ} (hz
 
 /-- The Wronskian at `z` depends only on the germ at `z` of its second function. -/
 theorem wronskian_congr_right {f g h : ℂ → ℂ} {z : ℂ} (hgh : g =ᶠ[𝓝 z] h) :
-    wronskian f g z = wronskian f h z := by
-  unfold wronskian; rw [hgh.eq_of_nhds, hgh.deriv_eq]
+    ODE.wronskian f g z = ODE.wronskian f h z := by
+  unfold ODE.wronskian; rw [hgh.eq_of_nhds, hgh.deriv_eq]
 
 /-- The Wronskian is linear in its second function: `W(f, c g) = c W(f, g)`. -/
 theorem wronskian_const_mul_right {f g : ℂ → ℂ} {z : ℂ} (c : ℂ) (hg : DifferentiableAt ℂ g z) :
-    wronskian f (fun w => c * g w) z = c * wronskian f g z := by
-  unfold wronskian; rw [deriv_const_mul _ hg]; ring
+    ODE.wronskian f (fun w => c * g w) z = c * ODE.wronskian f g z := by
+  unfold ODE.wronskian; rw [deriv_const_mul _ hg]; ring
 
 /-- The Wronskian is linear in its first function: `W(c f, g) = c W(f, g)`. -/
 theorem wronskian_const_mul_left {f g : ℂ → ℂ} {z : ℂ} (c : ℂ) (hf : DifferentiableAt ℂ f z) :
-    wronskian (fun w => c * f w) g z = c * wronskian f g z := by
-  unfold wronskian; rw [deriv_const_mul _ hf]; ring
+    ODE.wronskian (fun w => c * f w) g z = c * ODE.wronskian f g z := by
+  unfold ODE.wronskian; rw [deriv_const_mul _ hf]; ring
 
 /-- `(-w)^s = w^s e^{επis}` near a point `z` off the real axis, with `ε = ±1` from `sign`. -/
 theorem eventually_neg_cpow (s : ℂ) {z : ℂ} (hz : z ∈ slitPlane) (sign : Bool)
@@ -420,10 +420,10 @@ theorem whittakerM_eq_whittakerW_connection {κ μ z : ℂ} (hz : z ∈ slitPlan
 Tricomi Wronskians. -/
 theorem whittaker_wronskian_setup (κ μ : ℂ) {z : ℂ} (hz : z ∈ slitPlane) (sign : Bool)
     (hsign : if sign then z.arg < 0 else 0 < z.arg) (f : ℂ → ℂ) (hf : DifferentiableAt ℂ f z) :
-    wronskian (fun w => (exp (-w / 2) * w ^ (1 / 2 + μ)) * f w)
+    ODE.wronskian (fun w => (exp (-w / 2) * w ^ (1 / 2 + μ)) * f w)
       (fun w => whittakerW (-κ) μ (exp ((if sign then 1 else -1) * π * I) * w)) z =
       exp ((if sign then 1 else -1) * π * I * (1 / 2 + μ)) * (exp (-z) * z ^ (1 + 2 * μ)) *
-        wronskian f (fun w => exp w * kummerU (1 / 2 + μ + κ) (1 + 2 * μ) (-w)) z := by
+        ODE.wronskian f (fun w => exp w * kummerU (1 / 2 + μ + κ) (1 + 2 * μ) (-w)) z := by
   have harg : z.arg ≠ 0 := by split_ifs at hsign <;> [exact hsign.ne; exact hsign.ne']
   have hz' := neg_mem_slitPlane_of_arg_ne_zero hz harg
   have hF := (hasDerivAt_kummerU_reflected (1 / 2 + μ - κ) (1 + 2 * μ) hz').differentiableAt
@@ -442,7 +442,7 @@ theorem whittaker_wronskian_setup (κ μ : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
 /-- `W{U(a,b,·), F}` in Whittaker parameters. -/
 theorem wronskian_kummerU_reflected_whittaker (κ μ : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
     (sign : Bool) (hsign : if sign then z.arg < 0 else 0 < z.arg) :
-    wronskian (kummerU (1 / 2 + μ - κ) (1 + 2 * μ))
+    ODE.wronskian (kummerU (1 / 2 + μ - κ) (1 + 2 * μ))
       (fun w => exp w * kummerU (1 / 2 + μ + κ) (1 + 2 * μ) (-w)) z =
       exp ((if sign then 1 else -1) * (1 / 2 + μ - κ - (1 + 2 * μ)) * π * I) *
         z ^ (-(1 + 2 * μ)) * exp z := by
@@ -458,7 +458,7 @@ theorem cpow_mul_cpow_neg_self {z : ℂ} (hz0 : z ≠ 0) (s : ℂ) : z ^ s * z ^
 @[dlmf 13.14.E30]
 theorem wronskian_whittakerW_pair {κ μ z : ℂ} (hz : z ∈ slitPlane) (sign : Bool)
     (hsign : if sign then z.arg < 0 else 0 < z.arg) :
-    wronskian (whittakerW κ μ)
+    ODE.wronskian (whittakerW κ μ)
       (fun w => whittakerW (-κ) μ (exp ((if sign then 1 else -1) * π * I) * w)) z =
       exp (-(if sign then 1 else -1) * κ * π * I) := by
   have hz0 := slitPlane_ne_zero hz
@@ -483,7 +483,7 @@ theorem wronskian_whittakerW_pair {κ μ z : ℂ} (hz : z ∈ slitPlane) (sign :
 theorem wronskian_whittakerM_W_neg {κ μ z : ℂ} (hz : z ∈ slitPlane)
     (hμ : ∀ k : ℕ, 1 + 2 * μ ≠ -k) (sign : Bool)
     (hsign : if sign then z.arg < 0 else 0 < z.arg) :
-    wronskian (whittakerM κ μ)
+    ODE.wronskian (whittakerM κ μ)
       (fun w => whittakerW (-κ) μ (exp ((if sign then 1 else -1) * π * I) * w)) z =
       Gamma (1 + 2 * μ) / Gamma (1 / 2 + μ + κ) *
         exp (-(if sign then 1 else -1) * (1 / 2 + μ) * π * I) := by

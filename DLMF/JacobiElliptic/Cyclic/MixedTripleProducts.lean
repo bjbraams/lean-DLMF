@@ -32,7 +32,7 @@ set_option maxHeartbeats 1600000 in
 functions are finite. -/
 @[dlmf 22.9.E7, dlmf 22.9.E22]
 theorem jacobi_cyclic_scdd_three {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ)
-    (hreg2 : ∀ m : ℕ, jacobiRegulark .n (jacobiCyclicArg 2 m 3 z k) k) :
+    (hreg2 : ∀ m : ℕ, JacobiRegulark .n (jacobiCyclicArg 2 m 3 z k) k) :
     jacobiCyclicS 2 1 3 z k * jacobiCyclicC 2 1 3 z k * jacobiCyclicD 2 2 3 z k *
       jacobiCyclicD 2 3 3 z k + jacobiCyclicS 2 2 3 z k * jacobiCyclicC 2 2 3 z k *
         jacobiCyclicD 2 3 3 z k * jacobiCyclicD 2 1 3 z k + jacobiCyclicS 2 3 3 z k *
@@ -317,7 +317,7 @@ the functions are finite. Corrected from the printed DLMF formula: the printed r
 @[dlmf 22.9.E7,
   dlmf 22.9.E23 "corrected: last summand s_{3,3} d_{3,3} instead of the repeated s_{2,3} d_{2,3}"]
 theorem jacobi_cyclic_sdcc_three {k : ℂ} (hk : k ∈ jacobiModulusDomain) (z : ℂ)
-    (hreg4 : ∀ m : ℕ, jacobiRegulark .n (jacobiCyclicArg 4 m 3 z k) k) :
+    (hreg4 : ∀ m : ℕ, JacobiRegulark .n (jacobiCyclicArg 4 m 3 z k) k) :
     jacobiCyclicS 4 1 3 z k * jacobiCyclicD 4 1 3 z k * jacobiCyclicC 4 2 3 z k *
       jacobiCyclicC 4 3 3 z k + jacobiCyclicS 4 2 3 z k * jacobiCyclicD 4 2 3 z k *
         jacobiCyclicC 4 3 3 z k * jacobiCyclicC 4 1 3 z k + jacobiCyclicS 4 3 3 z k *

@@ -1718,3 +1718,22 @@ complex-branch conventions are retained.
 The private Mathieu adapter `dif_pos'` duplicated Lean's `dite_eq_left`; its three
 uses now call that existing result directly. No upstream proof is copied, and no
 new dependency or mathematical result is introduced by this reorganization.
+
+## Review corrections and shared APIs (2026-10-30)
+
+The review cleanup uses Mathlib's `Complex.sin_int_mul_pi` and `riemannZeta_four`
+directly, and uses lean-codes' `Complex.ofReal_cpow_eq_exp` in place of local copies.
+The exponential-decay integrability result is imported directly from
+`TauCeti.MeasureTheory.Integral.ExpDecay` (`TauCeti.integrable_exp_neg_mul_abs`).
+No upstream proof is copied and no dependency pin is changed.
+
+The primitive adapters derive continuity from Mathlib's `Differentiable.deriv`.
+Norm summability of complex series follows from Mathlib's `Summable.norm`; the
+`PowerSeries.HasSumAt` API uses the existing absolutely convergent Cauchy-product
+results. The corrected symmetric-R expansion combines the project's existing Taylor
+series with its Carlson homogeneity bridge, preserving the principal-branch condition.
+
+Shared Wronskians, weighted differential operators and periodic Bernoulli/Euler
+functions consolidate existing project constructions. The Jacobi shift compositions
+and the finite-support Mathieu residual lemmas organize the existing exact proofs;
+the special-function normalizations and trial-vector coefficients are retained.

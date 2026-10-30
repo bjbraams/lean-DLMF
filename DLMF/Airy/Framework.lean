@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Airy.Properties
+public import DLMF.Core.Framework
 
 /-!
 # Conventions for the DLMF Airy acquisition
@@ -14,7 +15,8 @@ Oscillatory integrals are stated as limits of finite integrals, not as totalized
 integrals. Complex powers of the Bessel argument use an explicit logarithmic coordinate,
 so that the substitution `ζ = 2 z^(3/2)/3` retains its analytically continued branch.
 The sector filter contains the whole closed sector, hence Big-O statements are uniform
-there. These conventions support DLMF §§9.2 and 9.4–9.14.
+there. These conventions support DLMF §§9.2 and 9.4–9.14. Improper convergence and
+straight-segment primitives use the canonical definitions in `DLMF.Core.Framework`.
 -/
 
 @[expose] public noncomputable section
@@ -31,27 +33,10 @@ def airyAiDerivReal (x : ℝ) : ℝ := (airyAiDeriv x).re
 /-- Bi' restricted to the real axis. -/
 def airyBiDerivReal (x : ℝ) : ℝ := (airyBiDeriv x).re
 
-/-- An ordinary improper integral, including its convergence assertion. -/
-def HasIntegralAtTop (f : ℝ → ℂ) (a : ℝ) (v : ℂ) : Prop :=
-  Tendsto (fun R : ℝ => ∫ t in a..R, f t) atTop (𝓝 v)
-/-- An ordinary improper integral with infinite lower endpoint. -/
-def HasIntegralAtBot (f : ℝ → ℂ) (b : ℝ) (v : ℂ) : Prop :=
-  Tendsto (fun R : ℝ => ∫ t in R..b, f t) atBot (𝓝 v)
-/-- The totalized value of a one-sided improper integral; use `HasIntegralAtTop` for convergence. -/
-def improperAtTop (f : ℝ → ℂ) (a : ℝ) : ℂ :=
-  limUnder atTop (fun R : ℝ => ∫ t in a..R, f t)
 /-- The totalized value of an improper integral with infinite lower endpoint. -/
 def improperAtBot (f : ℝ → ℂ) (b : ℝ) : ℂ :=
   limUnder atBot (fun R : ℝ => ∫ t in R..b, f t)
-/-- Two-sided ordinary improper integration, split at zero. -/
-def HasIntegralWholeLine (f : ℝ → ℂ) (v : ℂ) : Prop :=
-  ∃ u w, HasIntegralAtBot f 0 u ∧ HasIntegralAtTop f 0 w ∧ u + w = v
 
-/-- The integral of `f dz` on a straight segment. -/
-def lineIntegral (f : ℂ → ℂ) (a b : ℂ) : ℂ :=
-  (b - a) * ∫ s : ℝ in 0..1, f (a + (s : ℂ) * (b - a))
-/-- The entire primitive based at zero, when the integrand is entire. -/
-def primitive (f : ℂ → ℂ) (z : ℂ) : ℂ := lineIntegral f 0 z
 /-- An oriented ray integral with its Jacobian, starting at radius `r`. -/
 def rayIntegral (f : ℂ → ℂ) (θ r : ℝ) : ℂ :=
   ∫ t : ℝ in Ioi r, exp (θ * I) * f ((t : ℂ) * exp (θ * I))
@@ -102,7 +87,7 @@ def airyHankel2OnLog (ν w : ℂ) : ℂ := airyBesselJOnLog ν w - I * airyBesse
 The added segment integrates its entire logarithmic derivative, without subtracting Gamma poles. -/
 def airyUpperGammaOnLog (s w : ℂ) : ℂ :=
   DLMF.Confluent.upperIncGamma s (exp w) -
-    lineIntegral (fun u => exp (s * u - exp u)) (log (exp w)) w
+    segmentIntegral (fun u => exp (s * u - exp u)) (log (exp w)) w
 
 /-- A basis is uniformly separated in its value/derivative matrix after column normalization.
 This quantitative version of numerical independence also accommodates oscillatory pairs. -/

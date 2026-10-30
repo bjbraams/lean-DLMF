@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.QHypergeometric.Calculus
 public import DLMF.Gamma.QGamma
+public import DLMF.QHypergeometric.Calculus
 
 /-!
 # q-beta integrals (DLMF §17.13)
@@ -33,7 +33,7 @@ def jacksonBetaKernel (a b c d q x : ℂ) : ℂ :=
 @[dlmf 17.13.E1]
 theorem jacksonBeta_integral (a b c d q : ℂ) (hq : ‖q‖<1)
     (hc : c≠0) (hd : d≠0) (hcd : c+d≠0)
-    (hden : qDenominatorRegular [a,b,-b*c/d,-a*d/c] q) :
+    (hden : QDenominatorRegular [a,b,-b*c/d,-a*d/c] q) :
     Summable (fun n : ℕ => jacksonBetaKernel a b c d q (d*q^n)*q^n) ∧
     Summable (fun n : ℕ => jacksonBetaKernel a b c d q (-c*q^n)*q^n) ∧
     jacksonBetween q (-c) d (jacksonBetaKernel a b c d q) =
@@ -48,7 +48,7 @@ theorem jacksonBeta_integral (a b c d q : ℂ) (hq : ‖q‖<1)
 theorem jacksonBeta_integral_qGamma (q : ℝ) (hq0 : 0<q) (hq1 : q<1)
     (α β c d : ℂ) (hα : 0<α.re) (hβ : 0<β.re)
     (hc : c≠0) (hd : d≠0) (hcd : c+d≠0)
-    (hden : qDenominatorRegular [-((q:ℂ)^β)*c/d,-((q:ℂ)^α)*d/c] q) :
+    (hden : QDenominatorRegular [-((q:ℂ)^β)*c/d,-((q:ℂ)^α)*d/c] q) :
     Summable (fun n : ℕ => jacksonBetaKernel ((q:ℂ)^α) ((q:ℂ)^β) c d q (d*q^n)*q^n) ∧
     Summable (fun n : ℕ => jacksonBetaKernel ((q:ℂ)^α) ((q:ℂ)^β) c d q (-c*q^n)*q^n) ∧
     jacksonBetween q (-c) d (jacksonBetaKernel ((q:ℂ)^α) ((q:ℂ)^β) c d q) =
@@ -144,6 +144,5 @@ theorem tendsto_mellinQBetaValue (q : ℝ) (hq0 : 0 < q) (hq1 : q < 1)
         (DLMF.QSeries.qGamma q (1-a) * DLMF.QSeries.qGamma q (a+β)))
       (𝓝[≠] α) (𝓝 (mellinQBetaValue q α β)) := by
   sorry
-
 
 end DLMF.QHypergeometric

@@ -5,14 +5,14 @@ Authors: Bastiaan J Braams
 -/
 module -- shake: keep-all
 
-public import DLMF.JacobiElliptic.Addition.ThetaAndQuotients
 public import DLMF.JacobiElliptic.Addition.SymmetricAndThreePoint
+public import DLMF.JacobiElliptic.Addition.ThetaAndQuotients
 
 /-!
 # Jacobian elliptic functions: addition theorems (DLMF §22.8)
 
 The addition theorems 22.8.1–22.8.18 are stated pointwise for complex `u`, `v` where the
-functions involved are finite (`jacobiRegulark`) and the printed denominator is nonzero. They
+functions involved are finite (`JacobiRegulark`) and the printed denominator is nonzero. They
 are proved from the theta-function product identities of §20.7: each formula reduces, after
 `k = θ₂²(0)/θ₃²(0)`, `k' = θ₄²(0)/θ₃²(0)` (22.2.2) and clearing denominators, to one identity
 `θ_p(0)θ_q(0) θ_p(u+v)θ_q(u-v) = …` (derived from Watson's formulas 20.7.13 and the

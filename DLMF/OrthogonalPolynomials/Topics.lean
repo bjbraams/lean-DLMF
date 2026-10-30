@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.OrthogonalPolynomials.Classical
 public import DLMF.Gamma.Pochhammer
+public import DLMF.OrthogonalPolynomials.Classical
 public import Mathlib.NumberTheory.LSeries.RiemannZeta
 public import Mathlib.NumberTheory.Real.Irrational
 
@@ -74,8 +74,6 @@ theorem sum_choose_weighted_recip_poch_tail {a : ℂ} (ha : -1 < a.re) (N : ℕ)
   -- Mathlib’s finite telescoping identity evaluates the regularized head-and-tail sum.
   rw [Finset.sum_range_sub]
   simp [g]
-
-
 
 /-- The finite very-well-poised cancellation underlying polynomial basis inversion. -/
 theorem sum_choose_weighted_recip_poch {a : ℂ} (ha : 0 < a.re) (N : ℕ) :
@@ -240,7 +238,6 @@ theorem jacobiInverseCoeff_mul_gaussCoeff {α β : ℂ} (hα : -1 < α.re) (hβ 
         (poch (α + 1) (j + t) * poch (α + (j + t : ℕ) + 1) (n - j - t)) := by ring
     _ = _ := by rw [hsgn, hnum']; ring
 
-
 /-- Powers of the shifted coordinate in the Jacobi basis, including `α + β = -1`. -/
 theorem jacobi_monomial_inverse {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re) (n : ℕ) (x : ℂ) :
     ((1 - x) / 2) ^ n = ∑ k ∈ Finset.range (n + 1), jacobiInverseCoeff α β n k * jacobiPolyP α β k x := by
@@ -296,7 +293,6 @@ theorem jacobi_monomial_inverse {α β : ℂ} (hα : -1 < α.re) (hβ : -1 < β.
     intro j hj
     rw [hs j hj]
 
-
 /-- A finite Jacobi coefficient multiplied by the inverse basis coefficient. -/
 theorem jacobi_connection_coeff_term {α β γ δ : ℂ} (hα : -1 < α.re) (hβ : -1 < β.re)
     (hγ : -1 < γ.re) (n k j : ℕ) (hkj : k + j ≤ n) :
@@ -338,11 +334,10 @@ theorem jacobi_connection_coeff_term {α β γ δ : ℂ} (hα : -1 < α.re) (hβ
   field_simp [hp, hpk, hf, hlead, hshift]
   rw [hsgn, one_mul]
 
-
 /-- Connection coefficients of Jacobi polynomials, AAR Lemma 7.1.1. -/
 @[dlmf 18.18.iv]
 theorem jacobiPolyP_connection {α β γ δ : ℝ}
-    (hα : -1 < α) (hβ : -1 < β) (hγ : -1 < γ) (hδ : -1 < δ) (n : ℕ) (x : ℂ) :
+    (hα : -1 < α) (hβ : -1 < β) (hγ : -1 < γ) (n : ℕ) (x : ℂ) :
     jacobiPolyP γ δ n x =
       ∑ k ∈ Finset.range (n + 1),
         (poch (n + (γ : ℂ) + δ + 1) k * poch (k + (γ : ℂ) + 1) (n - k) /

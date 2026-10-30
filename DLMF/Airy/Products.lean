@@ -229,10 +229,10 @@ theorem airyAi_sq_mellin {α : ℂ} (hα : 0 < α.re) :
     rw [show (12 : ℝ) = 2 ^ 2 * 3 by norm_num, Real.log_mul (by norm_num) (by norm_num),
       Real.log_pow]; push_cast; ring
   have h12 : (12 : ℂ) ^ ((2 * α + 5) / 6) = exp ((Real.log 12 : ℂ) * ((2 * α + 5) / 6)) := by
-    rw [show (12 : ℂ) = ((12 : ℝ) : ℂ) by norm_num, Complex.ofReal_cpow_eq_exp_log_mul (by
+    rw [show (12 : ℂ) = ((12 : ℝ) : ℂ) by norm_num, Complex.ofReal_cpow_eq_exp (by
         norm_num)]
   have h3 : (3 : ℂ) ^ ((2 * α + 5) / 6) = exp ((Real.log 3 : ℂ) * ((2 * α + 5) / 6)) := by
-    rw [show (3 : ℂ) = ((3 : ℝ) : ℂ) by norm_num, Complex.ofReal_cpow_eq_exp_log_mul (by norm_num)]
+    rw [show (3 : ℂ) = ((3 : ℝ) : ℂ) by norm_num, Complex.ofReal_cpow_eq_exp (by norm_num)]
   have hc : ((airySq_c : ℝ) : ℂ) = exp (Real.log airySq_c : ℂ) := by
     rw [← ofReal_exp, Real.exp_log airySq_c_pos]
   have key : ((airySq_c : ℝ) : ℂ) * exp (-(Real.log airySq_c : ℂ) * (α + 1 / 2)) *

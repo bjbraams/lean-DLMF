@@ -37,12 +37,12 @@ variable {ι κ : Type*} [Fintype ι] [Fintype κ]
 /-! ## The sets `𝒦` and the number `𝒟` (DLMF 21.6.1–21.6.2) -/
 
 /-- A real matrix with integer entries. -/
-def rth21_IsInt {m n : Type*} (A : Matrix m n ℝ) : Prop := ∃ M : Matrix m n ℤ, A = M.map Int.cast
+def Rth21IsInt {m n : Type*} (A : Matrix m n ℝ) : Prop := ∃ M : Matrix m n ℤ, A = M.map Int.cast
 
 /-- Identity under the stated parameter and domain assumptions: `Equivalence fun (A A' : Matrix m
-n ℝ) => rth21_IsInt (A - A')`. -/
+n ℝ) => Rth21IsInt (A - A')`. -/
 lemma rth21_isInt_setoid {m n : Type*} :
-    Equivalence fun (A A' : Matrix m n ℝ) => rth21_IsInt (A - A') where
+    Equivalence fun (A A' : Matrix m n ℝ) => Rth21IsInt (A - A') where
   refl A := ⟨0, by ext; simp⟩
   symm := fun {A A'} ⟨M, h⟩ => ⟨-M, by rw [← neg_sub, h]; ext; simp⟩
   trans := fun {A B C} ⟨M₁, h₁⟩ ⟨M₂, h₂⟩ =>
@@ -54,7 +54,7 @@ def riemannKSet (ι : Type*) (T : Matrix κ κ ℝ) : Set (Matrix ι κ ℝ) :=
 
 /-- Equivalence modulo integer matrices on `ℤ^{g×h} T`. -/
 def riemannKSetoid (ι : Type*) (T : Matrix κ κ ℝ) : Setoid (riemannKSet ι T) where
-  r A A' := rth21_IsInt (A.1 - A'.1)
+  r A A' := Rth21IsInt (A.1 - A'.1)
   iseqv := ⟨fun A => rth21_isInt_setoid.refl A.1, fun h => rth21_isInt_setoid.symm h,
     fun h h' => rth21_isInt_setoid.trans h h'⟩
 
@@ -450,7 +450,7 @@ lemma rth21_sum_collapse [DecidableEq ι] {K : ℂ} (e : (ι → Fin 2) → (ι 
 
 /-- The four-theta summand transforms under the binary half-characteristic shift by the displayed
 quadratic phase factor. -/
-lemma rth21_four_summand [DecidableEq ι] {Ω : Matrix ι ι ℂ} (hΩ : Ωᵀ = Ω) (a b : ι → Fin 2)
+lemma rth21_four_summand {Ω : Matrix ι ι ℂ} (hΩ : Ωᵀ = Ω) (a b : ι → Fin 2)
     (x y u v : ι → ℂ) :
     cexp (2 * π * I * (2 * ((fun i => (rth21_half a i : ℂ)) ⬝ᵥ
           (Ω *ᵥ fun i => (rth21_half a i : ℂ))) +

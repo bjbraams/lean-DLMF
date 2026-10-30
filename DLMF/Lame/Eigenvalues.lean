@@ -5,10 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Elliptic.JacobiIdentities
 public import DLMF.Lame.Basic
 public import DLMFMathlib.Analysis.ODE.P2lSturmLiouville
 public import DLMFMathlib.Analysis.ODE.P2sSturmOsc
-public import DLMF.Elliptic.JacobiIdentities
 
 /-!
 # Lamé functions: eigenvalues, parity, normalization, orthogonality (DLMF §§29.3, 29.9)
@@ -74,7 +74,7 @@ lemma p2lPot_neg (hk : k ^ 2 < 1) (x : ℝ) : p2lPot ν k (-x) = p2lPot ν k x :
 /-- `w` solves the real Lamé equation 29.2.1 iff it solves the Hill-type equation
 `w'' + (h - V(x)) w = 0` with the Lamé potential `V = p2lPot ν k`. -/
 theorem p2l_isLameSolution_iff {h : ℝ} {w : ℝ → ℝ} :
-    Real.IsLameSolution h ν k w ↔ ODE.p2lIsSol (p2lPot ν k) h w := by
+    Real.IsLameSolution h ν k w ↔ ODE.P2lIsSol (p2lPot ν k) h w := by
   constructor
   · intro hw
     exact ⟨hw.differentiable, fun x => (hw.hasDerivAt_deriv x).congr_deriv (by
@@ -129,7 +129,7 @@ theorem Real.isNthLameEigenvalue_lameEigenvalue (hν : -1 / 2 ≤ ν) (hk0 : 0 <
 
 /-- Positivity of `∫₀^K dn · w²` for a nonzero solution `w`. -/
 lemma p2l_integral_dn_sq_pos (hk : k ^ 2 < 1) {h : ℝ} {w : ℝ → ℝ}
-    (hw : ODE.p2lIsSol (p2lPot ν k) h w) (hne : w ≠ 0) :
+    (hw : ODE.P2lIsSol (p2lPot ν k) h w) (hne : w ≠ 0) :
     0 < ∫ x in (0 : ℝ)..Real.compEllIntKm (k ^ 2), Real.jacobiDnm x (k ^ 2) * w x ^ 2 := by
   have hK := Real.compEllIntKm_pos hk
   set K := Real.compEllIntKm (k ^ 2)
@@ -253,7 +253,6 @@ theorem Real.isNormalizedLameEigenfunction_lameEigenfunction (hν : -1 / 2 ≤ �
   have hs := Real.lameEigenfunction_spec hν hk0 hk1 odd0 oddK j
   rw [Real.lameEigenfunction, dite_eq_left hs]
   exact hs.exists.choose_spec
-
 
 /-! ### Helper lemmas: continuity, reflection, Green's identity -/
 
@@ -703,8 +702,8 @@ lemma p2l_zeros_shift {w : ℝ → ℝ} {K s : ℝ} (hpar : ∀ x, w (-x) = s * 
   exact Set.InjOn.encard_image fun a _ b _ hab => by simpa using hab
 
 /-- The Lamé equation shifted by `K`. -/
-lemma p2l_isSol_shift {V : ℝ → ℝ} {h K : ℝ} {w : ℝ → ℝ} (hw : ODE.p2lIsSol V h w) :
-    ODE.p2lIsSol (fun x => V (x - K)) h (fun x => w (x - K)) := by
+lemma p2l_isSol_shift {V : ℝ → ℝ} {h K : ℝ} {w : ℝ → ℝ} (hw : ODE.P2lIsSol V h w) :
+    ODE.P2lIsSol (fun x => V (x - K)) h (fun x => w (x - K)) := by
   have hd : deriv (fun x => w (x - K)) = fun x => deriv w (x - K) :=
     funext fun x => deriv_comp_sub_const (f := w) (a := K) (x := x)
   refine ⟨fun x => ((hw.1 (x - K)).hasDerivAt.comp_sub_const x K).differentiableAt,
@@ -738,8 +737,8 @@ lemma p2l_lameAk_shift (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : �
   have hus := p2l_isSol_shift (K := K) hw
   have hdu : ∀ x, deriv u x = deriv E (x - K) := fun x => deriv_comp_sub_const E K x
   simp only [Real.LameBoundary, Bool.false_eq_true, ↓reduceIte] at hb
-  have hbc : ODE.p2lBC (2 * K) false false u := by
-    simp only [ODE.p2lBC, Bool.false_eq_true, ↓reduceIte]
+  have hbc : ODE.P2lBC (2 * K) false false u := by
+    simp only [ODE.P2lBC, Bool.false_eq_true, ↓reduceIte]
     rw [hdu, hdu, zero_sub, show 2 * K - K = K by ring]
     exact ⟨p2l_deriv_neg_eq_zero hw.1 (fun x => (hpar x).1) hb.2, hb.2⟩
   have hune : u ≠ 0 := fun h0 => hne (funext fun y => by
@@ -788,8 +787,8 @@ lemma p2l_lameBk_shift (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) {m : �
   set u := fun x => E (x - K) with hu
   have hus := p2l_isSol_shift (K := K) hw
   simp only [Real.LameBoundary, ↓reduceIte] at hb
-  have hbc : ODE.p2lBC (2 * K) true true u := by
-    simp only [ODE.p2lBC, ↓reduceIte, u]
+  have hbc : ODE.P2lBC (2 * K) true true u := by
+    simp only [ODE.P2lBC, ↓reduceIte, u]
     rw [zero_sub, show 2 * K - K = K by ring]
     refine ⟨?_, hb.2⟩
     show Real.lameEsk ν m (-K) k = 0
@@ -833,8 +832,7 @@ theorem Real.lameEck_zeros_Ioo (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1)
 
 /-- Table 29.3.2: `Es^m_ν(x, k²)` (`m ≥ 1`) has exactly `⌊(m - 1)/2⌋` zeros in `(0, K)`. -/
 @[dlmf 29.3.iv]
-theorem Real.lameEsk_zeros_Ioo (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ)
-    (hm : 1 ≤ m) :
+theorem Real.lameEsk_zeros_Ioo (hν : -1 / 2 ≤ ν) (hk0 : 0 < k) (hk1 : k < 1) (m : ℕ) :
     {x ∈ Set.Ioo 0 (Real.compEllIntKm (k ^ 2)) | Real.lameEsk ν m x k = 0}.Finite ∧
       {x ∈ Set.Ioo 0 (Real.compEllIntKm (k ^ 2)) | Real.lameEsk ν m x k = 0}.ncard =
         (m - 1) / 2 :=

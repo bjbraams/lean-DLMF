@@ -5,10 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Lame.Eigenvalues
 public import DLMF.Heun.Basic
-public import DLMFMathlib.Analysis.ODE.Singularities
+public import DLMF.Lame.Eigenvalues
 public import DLMF.Lame.P3lWeierstrass
+public import DLMFMathlib.Analysis.ODE.Singularities
 
 /-!
 # Lamé's equation: singularities and other forms (DLMF §§29.2, 29.10, 29.11)
@@ -112,7 +112,7 @@ and `sn(u) = u G(u)` with `G` analytic, `G(0) = 1`. -/
 @[dlmf 29.2.i]
 theorem lame_regularSingularAt (hk0 : 0 < k) (hk1 : k < 1) (hν : ν * (ν + 1) ≠ 0) (h : ℂ)
     (p q : ℤ) :
-    Complex.linearODERegularSingularAt (lameODECoeff h ν k)
+    Complex.LinearODERegularSingularAt (lameODECoeff h ν k)
       (2 * p * Real.compEllIntKm (k ^ 2) + (2 * q + 1) * I * Real.compEllIntKm (1 - k ^ 2)) := by
   set z₀ : ℂ := 2 * p * Real.compEllIntKm (k ^ 2) + (2 * q + 1) * I * Real.compEllIntKm (1 - k ^ 2)
   have hkD : (k : ℂ) ∈ jacobiModulusDomain := p22R1_ofReal_mem hk0 hk1
@@ -181,7 +181,7 @@ theorem lame_regularSingularAt (hk0 : 0 < k) (hk1 : k < 1) (hν : ν * (ν + 1) 
 theorem lame_ordinaryAt (hk0 : 0 < k) (hk1 : k < 1) (h z : ℂ)
     (hz : ∀ p q : ℤ,
       z ≠ 2 * p * Real.compEllIntKm (k ^ 2) + (2 * q + 1) * I * Real.compEllIntKm (1 - k ^ 2)) :
-    Complex.linearODEOrdinaryAt (lameODECoeff h ν k) z := by
+    Complex.LinearODEOrdinaryAt (lameODECoeff h ν k) z := by
   have ha := p1l_analyticAt_sn hk0 hk1 hz
   intro j
   refine ⟨lameODECoeff h ν k j, ?_, Filter.EventuallyEq.rfl⟩
@@ -317,7 +317,7 @@ any open set `U` on which `℘` is holomorphic with values in `V`. Proved from 2
 admitted existence of a lattice with given invariants (`periodPairOfInvariants_spec`). -/
 @[dlmf 29.2.E10, dlmf 29.2.E11]
 theorem isLameWeierstrassSolutionOn_comp_wp {e₁ e₂ e₃ : ℝ} (h12 : e₂ < e₁) (h23 : e₃ < e₂)
-    (hsum : e₁ + e₂ + e₃ = 0) {g : ℂ} {v : ℂ → ℂ} {V U : Set ℂ} (hV : IsOpen V)
+    (hsum : e₁ + e₂ + e₃ = 0) {g : ℂ} {v : ℂ → ℂ} {V U : Set ℂ}
     (he : (e₁ : ℂ) ∉ V ∧ (e₂ : ℂ) ∉ V ∧ (e₃ : ℂ) ∉ V) (hU : IsOpen U)
     (hwp : ∀ η ∈ U, DifferentiableAt ℂ
       (DLMF.Weierstrass.weierstrassPInvariants (-4 * (e₂ * e₃ + e₃ * e₁ + e₁ * e₂))

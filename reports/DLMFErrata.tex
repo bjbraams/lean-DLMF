@@ -189,9 +189,8 @@ Later proof-review findings carry their own dates below.
   \]
   For each finite $m\ge1$, $|P_m(z)-P(z)|$ is unbounded on $D$.
 \item[Lean] \lean{prod_mtest_log}
-  (\file{DLMF/AlgebraicAnalytic/Complex/Functions.lean}) still asserts global uniform
-  convergence and remains admitted, pending correction. This is an analytical
-  counterexample, not a new Lean counterexample theorem.
+  (\file{DLMF/AlgebraicAnalytic/Complex/Functions.lean}) was corrected on 2026-10-30 to assert locally uniform convergence and remains admitted.
+  The counterexample to the former interface is analytical, not a new Lean theorem.
 \item[Found] 2026-10-28; source wording rechecked 2026-10-30.
 \end{fields}
 
@@ -268,8 +267,8 @@ Later proof-review findings carry their own dates below.
   The means do not converge, despite ordinary convergence. This exact argument
   resolves the earlier tentative alternating-series example without numerical evidence.
 \item[Lean] \lean{hasCesaroSumOfOrder_of_tendsto}
-  (\file{DLMF/AlgebraicAnalytic/Summability/Series.lean}) retains the hypothesis
-  $\alpha>-1$ and remains admitted. The counterexample above has not been formalized.
+  (\file{DLMF/AlgebraicAnalytic/Summability/Series.lean}) was corrected on 2026-10-30 to assume $\alpha\ge0$ and remains admitted.
+  The counterexample to the negative-order assertion has not been formalized.
 \item[Found] Range concern on 2026-10-28; confirmed analytically 2026-10-30.
 \end{fields}
 
@@ -975,9 +974,10 @@ false); proved.
   The value at $a=1$ uses parameter continuation; continuity gives failures also
   for real $a<1$ sufficiently close to $1$, inside the integral's parameter range.
 \item[Lean] \lean{symEllIntR_half_hasSum_mean}
-  (\file{DLMF/EllipticIntegrals/SymmetricSeries.lean}) remains admitted and unchanged.
-  Lean checks both the stated hypotheses and the negation of its series conclusion;
-  the source and standard-axiom audit are in \file{ProofRound20261030c.json}.
+  (\file{DLMF/EllipticIntegrals/SymmetricSeries.lean}) was corrected on 2026-10-30
+  by adding the argument-sum condition above, and is now proved from the Taylor series
+  and complex homogeneity. Lean counterexamples to the former hypotheses and their
+  standard-axiom audit remain in \file{ProofRound20261030c.json}.
 \item[Found] 2026-10-30.
 \end{fields}
 
@@ -1198,9 +1198,9 @@ $5.19321$.
   the left side zero. A nonzero theta null value times the exponential of a
   convergent complex series cannot vanish.
 \item[Lean] \lean{jacobiThetaTwoTau_powerSeries}, \lean{jacobiThetaThreeTau_powerSeries},
-  \lean{jacobiThetaFourTau_powerSeries} (\file{DLMF/Theta/PowerSeries.lean}) remain
-  admitted and unchanged. Lean counterexamples and standard-axiom audits for all three
-  are preserved in \file{ProofRound20261030.json}.
+  \lean{jacobiThetaFourTau_powerSeries} (\file{DLMF/Theta/PowerSeries.lean}) were corrected on 2026-10-30 to use the respective shifted-lattice radii; they remain
+  admitted. Lean counterexamples to the former common radius and their standard-axiom
+  audits are preserved in \file{ProofRound20261030.json}.
 \item[Found] 2026-10-30.
 \end{fields}
 
@@ -2821,8 +2821,10 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
   expression \lean{deriv (fun t => f (t, y)) x} does not by itself assert existence.
   An explicit derivative-existence hypothesis, or a theorem deriving it from the
   existing assumptions, is needed before applying the classical Leibniz theorem.
-\item[Status] Pending project-hypothesis review, not a confirmed counterexample to the
-  full Lean statements and not a DLMF erratum. Neither declaration has been changed.
+\item[Status] Corrected on 2026-10-30 by requiring the partial derivative to exist at
+  every interior parameter and every integration variable in the stated domain. Both
+  corrected theorems remain admitted. This is a project-hypothesis correction, not a
+  DLMF erratum or a formal counterexample to the former full statements.
 \item[Lean] \lean{hasDerivAt_integral_variable_limits},
   \lean{hasDerivAt_improper_integral_of_tendstoUniformlyOn}
   (\file{DLMF/AlgebraicAnalytic/Calculus/SeveralVariables.lean}), admitted.
@@ -2855,7 +2857,8 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
   more than one value. This refutes the acquired interface, not DLMF's theorem.
   The counterexample is analytical, not a new Lean counterexample theorem.
 \item[Lean] \lean{picard_great}
-  (\file{DLMF/AlgebraicAnalytic/Complex/Functions.lean}), admitted and unchanged.
+  (\file{DLMF/AlgebraicAnalytic/Complex/Functions.lean}), corrected on 2026-10-30
+  by adding $r_2>0$; the corrected theorem remains admitted.
 \item[Found] 2026-10-28; source convention rechecked 2026-10-30.
 \end{fields}
 
@@ -2904,11 +2907,12 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
   totalized first derivatives are both zero, while $(Q-F)'=1$.
   This demonstrates the compatibility gap; it is not a counterexample satisfying
   all the statement's additional inverse-transform and uniform-convergence assumptions.
-\item[Status] Pending project-hypothesis review. Individual holomorphy of $Q,F$, or
-  explicit compatibility of their derivative data, would support the integrations
-  by parts. No DLMF erratum is asserted.
+\item[Status] Corrected on 2026-10-30 by assuming individual holomorphy of $Q,F$ on
+  the half-plane, in place of holomorphy of the difference alone. This supplies
+  compatibility of the separate derivative data. No DLMF erratum is asserted.
 \item[Lean] \lean{haar_isLittleO_pow}
-  (\file{DLMF/AsymptoticApproximations/Integrals/Watson.lean}), admitted and unchanged.
+  (\file{DLMF/AsymptoticApproximations/Integrals/Watson.lean}); the corrected theorem
+  remains admitted.
 \item[Found] 2026-10-29 (\file{ProofRound20261029b.json}).
 \end{fields}
 
@@ -2926,8 +2930,9 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
   uniqueness, or provide suitable endpoint normalization. The printed conditional
   uniqueness paragraph is not refuted by this example.
 \item[Lean] \lean{liouvilleGreen_interval_isEquivalent}
-  (\file{DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean}), admitted and unchanged,
-  with a qualification in its docstring. The counterexample is analytical, not formalized.
+  (\file{DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean}), corrected on
+  2026-10-30 by retaining unboundedness of $|\xi|$ at both endpoints. The corrected
+  theorem remains admitted. The counterexample to the former interface is analytical.
 \item[Found] 2026-10-29 (\file{ProofRound20261029.json}); source scope rechecked 2026-10-30.
 \end{fields}
 
@@ -3104,7 +3109,8 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
   Both converge, but $-1$ is excluded by DLMF's definition of the first argument.
   This is therefore not a counterexample within DLMF's stated function domain.
 \item[Lean] \lean{symEllIntRC_sq_eq}
-  (\file{DLMF/EllipticIntegrals/SymmetricAddition.lean}), admitted and unchanged.
+  (\file{DLMF/EllipticIntegrals/SymmetricAddition.lean}), corrected on 2026-10-30
+  to require $x=0$ or $\Re x>0$; it remains admitted.
   The strict-half-plane variant \lean{symEllIntRC_sq}
   (\file{DLMF/EllipticIntegrals/SymmetricQuadratic.lean}) is proved.
 \item[Found] 2026-10-30; analytical counterexample to the Lean extension, not yet formalized.

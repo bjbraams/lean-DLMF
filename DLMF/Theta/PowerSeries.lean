@@ -5,8 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Theta.SeriesAndZeros
+public import DLMF.Theta.Basic.PowerSeries
 public import DLMF.Theta.Identities
+public import DLMF.Theta.SeriesAndZeros
 
 /-!
 # Theta functions: power series (DLMF §20.6)
@@ -30,34 +31,6 @@ namespace DLMF.Theta
 
 open DLMF.Elliptic
 
-/-- DLMF 20.6.6: `δ_k(τ) = ∑_n ∑'_m (m + nτ)^{-k}` (`(m,n) ≠ (0,0)`; DLMF writes `δ_{2j}`,
-`k = 2j`).
-Iterated sum, inner over `m`. -/
-@[dlmf 20.6.E6]
-def thetaDelta (k : ℕ) (τ : ℂ) : ℂ :=
-  ∑' n : ℤ, ∑' m : ℤ, if m = 0 ∧ n = 0 then 0 else ((m : ℂ) + n * τ) ^ (-(k : ℤ))
-
-/-- DLMF 20.6.7: `α_k(τ) = ∑_n ∑_m (m - 1/2 + nτ)^{-k}` (`k = 2j`). -/
-@[dlmf 20.6.E7]
-def thetaAlpha (k : ℕ) (τ : ℂ) : ℂ :=
-  ∑' n : ℤ, ∑' m : ℤ, ((m : ℂ) - 1 / 2 + n * τ) ^ (-(k : ℤ))
-
-/-- DLMF 20.6.8: `β_k(τ) = ∑_n ∑_m (m - 1/2 + (n - 1/2)τ)^{-k}` (`k = 2j`). -/
-@[dlmf 20.6.E8]
-def thetaBeta (k : ℕ) (τ : ℂ) : ℂ :=
-  ∑' n : ℤ, ∑' m : ℤ, ((m : ℂ) - 1 / 2 + (n - 1 / 2) * τ) ^ (-(k : ℤ))
-
-/-- DLMF 20.6.9: `γ_k(τ) = ∑_n ∑_m (m + (n - 1/2)τ)^{-k}` (`k = 2j`). -/
-@[dlmf 20.6.E9]
-def thetaGamma (k : ℕ) (τ : ℂ) : ℂ :=
-  ∑' n : ℤ, ∑' m : ℤ, ((m : ℂ) + (n - 1 / 2) * τ) ^ (-(k : ℤ))
-
-/-- DLMF 20.6.1: the radius `min_{(m,n) ≠ (0,0)} |z_{m,n}| = min |(m + nτ)π|`; the power series
-20.6.2–20.6.5 hold for `|πz|` below it. -/
-@[dlmf 20.6.E1]
-def thetaLatticeMinNorm (τ : ℂ) : ℝ :=
-  ⨅ p : {p : ℤ × ℤ // p ≠ 0}, ‖((p.1.1 : ℂ) + p.1.2 * τ) * π‖
-
 /-- DLMF 20.6.2: for `|πz| < min |z_{m,n}|`,
 `θ₁(πz|τ) = πz θ₁'(0|τ) exp(-∑_{j≥1} δ_{2j}(τ) z^{2j}/(2j))`. -/
 @[dlmf 20.6.E2]
@@ -68,31 +41,34 @@ theorem jacobiThetaOneTau_powerSeries {τ z : ℂ} (hτ : 0 < τ.im)
       jacobiThetaOneTau (π * z) τ = π * z * jacobiThetaOneDerivNullTau τ * cexp (-S) := by
   sorry
 
-/-- DLMF 20.6.3: for `|πz| < min |z_{m,n}|`,
+/-- DLMF 20.6.3: for `|πz|` below the distance to the shifted zero lattice
+`π(m - 1/2 + nτ)`,
 `θ₂(πz|τ) = θ₂(0|τ) exp(-∑_{j≥1} α_{2j}(τ) z^{2j}/(2j))`. -/
 @[dlmf 20.6.E3]
 theorem jacobiThetaTwoTau_powerSeries {τ z : ℂ} (hτ : 0 < τ.im)
-    (hz : ‖π * z‖ < thetaLatticeMinNorm τ) :
+    (hz : ‖π * z‖ < thetaShiftedLatticeMinNorm (1 / 2) 0 τ) :
     ∃ S : ℂ, HasSum (fun j : ℕ => thetaAlpha (2 * (j + 1)) τ * z ^ (2 * (j + 1)) /
         (2 * (j + 1))) S ∧
       jacobiThetaTwoTau (π * z) τ = jacobiThetaTwoNullTau τ * cexp (-S) := by
   sorry
 
-/-- DLMF 20.6.4: for `|πz| < min |z_{m,n}|`,
+/-- DLMF 20.6.4: for `|πz|` below the distance to the shifted zero lattice
+`π(m - 1/2 + (n - 1/2)τ)`,
 `θ₃(πz|τ) = θ₃(0|τ) exp(-∑_{j≥1} β_{2j}(τ) z^{2j}/(2j))`. -/
 @[dlmf 20.6.E4]
 theorem jacobiThetaThreeTau_powerSeries {τ z : ℂ} (hτ : 0 < τ.im)
-    (hz : ‖π * z‖ < thetaLatticeMinNorm τ) :
+    (hz : ‖π * z‖ < thetaShiftedLatticeMinNorm (1 / 2) (1 / 2) τ) :
     ∃ S : ℂ, HasSum (fun j : ℕ => thetaBeta (2 * (j + 1)) τ * z ^ (2 * (j + 1)) /
         (2 * (j + 1))) S ∧
       jacobiThetaThreeTau (π * z) τ = jacobiThetaThreeNullTau τ * cexp (-S) := by
   sorry
 
-/-- DLMF 20.6.5: for `|πz| < min |z_{m,n}|`,
+/-- DLMF 20.6.5: for `|πz|` below the distance to the shifted zero lattice
+`π(m + (n - 1/2)τ)`,
 `θ₄(πz|τ) = θ₄(0|τ) exp(-∑_{j≥1} γ_{2j}(τ) z^{2j}/(2j))`. -/
 @[dlmf 20.6.E5]
 theorem jacobiThetaFourTau_powerSeries {τ z : ℂ} (hτ : 0 < τ.im)
-    (hz : ‖π * z‖ < thetaLatticeMinNorm τ) :
+    (hz : ‖π * z‖ < thetaShiftedLatticeMinNorm 0 (1 / 2) τ) :
     ∃ S : ℂ, HasSum (fun j : ℕ => thetaGamma (2 * (j + 1)) τ * z ^ (2 * (j + 1)) /
         (2 * (j + 1))) S ∧
       jacobiThetaFourTau (π * z) τ = jacobiThetaFourNullTau τ * cexp (-S) := by

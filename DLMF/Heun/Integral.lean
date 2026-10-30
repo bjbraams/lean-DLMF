@@ -452,7 +452,7 @@ lemma p2h_riemann_poly₀ {a₂ b₂ c₁ c₂ x : ℂ} {u : ℂ → ℂ} (hx0 :
 `g ∈ P{0, 1, ∞; 0, 0, -1/2+δ+σ; 1-ε, 1-δ, -1/2+ε-σ; ·}` (Riemann's equation,
 `riemannNormalOperator`), `σ` a separation constant. -/
 @[dlmf 31.10.E9, dlmf 31.10.E8]
-theorem heun_kernel_typeI_separable (hF : α + β + 1 = γ + δ + ε) (σ : ℂ) {f g : ℂ → ℂ}
+theorem heun_kernel_typeI_separable (σ : ℂ) {f g : ℂ → ℂ}
     {Uf Ug : Set ℂ} (hUf : IsOpen Uf) (hUg : IsOpen Ug)
     (hf : ContDiffOn ℂ 2 f Uf ∧ ∀ x ∈ Uf, DLMF.Hypergeometric.riemannNormalOperator 0 (1 - γ)
       (1 / 2 - δ - σ) (1 / 2 - ε + σ) α β f x = 0)
@@ -726,7 +726,6 @@ theorem heun_kernel_typeII_cylinder (σ₁ σ₂ : ℂ) {C₁ C₂ C₃ : ℂ �
   set F := u ^ (1 - γ) * v ^ (1 - δ) * w ^ (1 - ε) * C₁ (u * k₁) * C₂ (v * k₂) *
     C₃ (I * w * k₃)
   linear_combination E1 + E2 + E3 - F * s1 - F * s2 - F * I ^ 2 * s3 - F * (σ₁ + σ₂) * hI
-
 
 /-- DLMF 31.10.20–31.10.21: in spherical coordinates `u = r cos θ`, `v = r sin θ sin φ`,
 `w = r sin θ cos φ`, a solution of 31.10.18 satisfies

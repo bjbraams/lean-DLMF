@@ -234,7 +234,7 @@ theorem zero_second_representations
     {a b c z : ℂ}
     (hc : ∀ k : ℕ, 2 - c ≠ -(k : ℂ))
     (hz : ‖z‖ < 1)
-    (hs : z ∈ slitPlane)
+
     (hw : ‖z /
     (z - 1)‖ < 1) :
     zeroSecond a b c z = z ^ (1 - c) * (1 - z) ^ (c - a - b) * ₂F₁ (1 - a) (1 - b) (2 - c) z ∧
@@ -500,8 +500,8 @@ theorem kummer_six_left_connection_zero {a b c z : ℂ} (hc : ∀ k : ℤ, c ≠
 * Gamma (c - b)) * kummerSixLeft a b c z`. -/
 @[dlmf 15.10.E25]
 theorem zero_first_connection_left {a b c z : ℂ} (hc : ∀ k : ℤ, c ≠ (k : ℂ))
-    (_he : ∀ k : ℤ, c - a - b ≠ (k : ℂ)) (hab : ∀ k : ℤ, a - b ≠ (k : ℂ))
-    (hz : ‖z‖ < 1) (hw : 1 < ‖1 - z‖) (_hi : 0 < z.im) :
+    (hab : ∀ k : ℤ, a - b ≠ (k : ℂ))
+    (hz : ‖z‖ < 1) (hw : 1 < ‖1 - z‖) :
     ₂F₁ a b c z =
       Gamma c * Gamma (b - a) / (Gamma b * Gamma (c - a)) * kummerFiveLeft a b c z + Gamma c * Gamma (a - b)
         / (Gamma a * Gamma (c - b)) * kummerSixLeft a b c z := by
@@ -513,7 +513,7 @@ kummerFiveLeft a b c z + exp ((1 - c) * Real.pi * I) * Gamma (2 - c) * Gamma (a 
 (1 - b) * Gamma (a - c + 1)) * kummerSixLeft a b c z`. -/
 @[dlmf 15.10.E26]
 theorem zero_second_connection_left {a b c z : ℂ} (hc : ∀ k : ℤ, c ≠ (k : ℂ))
-    (_he : ∀ k : ℤ, c - a - b ≠ (k : ℂ)) (hab : ∀ k : ℤ, a - b ≠ (k : ℂ))
+    (hab : ∀ k : ℤ, a - b ≠ (k : ℂ))
     (hz : ‖z‖ < 1) (hw : 1 < ‖1 - z‖) (hi : 0 < z.im) :
     zeroSecond a b c z =
       exp ((1 - c) * Real.pi * I) * Gamma (2 - c) * Gamma (b - a) / (Gamma (1 - a) * Gamma (b - c + 1)) *
@@ -605,9 +605,9 @@ Real.pi * I) * Gamma (a + b - c + 1) * Gamma (b - a) / (Gamma b * Gamma (b - c +
 kummerFive a b c z + exp (-b * Real.pi * I) * Gamma (a + b - c + 1) * Gamma (a - b) / (Gamma a
 * Gamma (a - c + 1)) * kummerSix a b c z`. -/
 @[dlmf 15.10.E27]
-theorem one_first_connection_infinity {a b c z : ℂ} (_hc : ∀ k : ℤ, c ≠ (k : ℂ))
+theorem one_first_connection_infinity {a b c z : ℂ}
     (he : ∀ k : ℤ, c - a - b ≠ (k : ℂ)) (hab : ∀ k : ℤ, a - b ≠ (k : ℂ))
-    (hz : 1 < ‖z‖) (hw : ‖1 - z‖ < 1) (_hi : 0 < z.im) :
+    (hz : 1 < ‖z‖) (hw : ‖1 - z‖ < 1) :
     oneFirst a b c z =
       exp (-a * Real.pi * I) * Gamma (a + b - c + 1) * Gamma (b - a) / (Gamma b * Gamma (b - c + 1)) *
         kummerFive a b c z + exp (-b * Real.pi * I) * Gamma (a + b - c + 1) * Gamma (a - b) / (Gamma a *
@@ -635,7 +635,7 @@ theorem one_first_connection_infinity {a b c z : ℂ} (_hc : ∀ k : ℤ, c ≠ 
 kummerFive a b c z + exp ((a - c) * Real.pi * I) * Gamma (c - a - b + 1) * Gamma (a - b) /
 (Gamma (1 - b) * Gamma (c - b)) * kummerSix a b c z`. -/
 @[dlmf 15.10.E28]
-theorem one_second_connection_infinity {a b c z : ℂ} (_hc : ∀ k : ℤ, c ≠ (k : ℂ))
+theorem one_second_connection_infinity {a b c z : ℂ}
     (he : ∀ k : ℤ, c - a - b ≠ (k : ℂ)) (hab : ∀ k : ℤ, a - b ≠ (k : ℂ))
     (hz : 1 < ‖z‖) (hw : ‖1 - z‖ < 1) (hi : 0 < z.im) :
     oneSecond a b c z =

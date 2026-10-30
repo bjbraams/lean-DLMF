@@ -5,9 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties
 public import DLMF.GeneralizedHypergeometric.AnalyticProperties
 public import DLMF.GeneralizedHypergeometric.GHATools
+public import DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties
 
 /-!
 # Transformations, expansions, and products: DLMF §§16.6,16.10,16.12
@@ -56,7 +56,7 @@ def genFieldsWimpDoubleTerm (a b c d : Multiset ℂ) (α β γ z ζ : ℂ) (kn :
 
 /-- Quadratic transformation on the full common principal component. -/
 @[dlmf 16.6.E1]
-theorem genHG_quadratic_transformation (a b c : ℂ) (hb : genDenRegular {a - b + 1, a - c + 1})
+theorem genHG_quadratic_transformation (a b c : ℂ) (hb : GenDenRegular {a - b + 1, a - c + 1})
     {z : ℂ} (hz : z ∈ genQuadraticDomain) :
     genHG {a, b, c} {a - b + 1, a - c + 1} z = (1 - z) ^ (-a) *
       genHG {a - b - c + 1, a / 2, (a + 1) / 2}
@@ -65,7 +65,7 @@ theorem genHG_quadratic_transformation (a b c : ℂ) (hb : genDenRegular {a - b 
 
 /-- Cubic transformation on the full common principal component. -/
 @[dlmf 16.6.E2]
-theorem genHG_cubic_transformation (a b : ℂ) (hb : genDenRegular {b, a - b + 3 / 2})
+theorem genHG_cubic_transformation (a b : ℂ) (hb : GenDenRegular {b, a - b + 3 / 2})
     {z : ℂ} (hz : z ∈ genCubicDomain) :
     genHG {a, 2 * b - a - 1, 2 - 2 * b + a} {b, a - b + 3 / 2} (z / 4) =
       (1 - z) ^ (-a) * genHG {a / 3, a / 3 + 1 / 3, a / 3 + 2 / 3}
@@ -75,8 +75,8 @@ theorem genHG_cubic_transformation (a b : ℂ) (hb : genDenRegular {b, a - b + 3
 /-- The formal coefficient identity has no analytic convergence restriction. -/
 @[dlmf 16.10.E1]
 theorem genHG_fields_wimp_coeff (a b c d : Multiset ℂ) (α β γ ζ : ℂ)
-    (hb : genDenRegular (b + d)) (hαβ : genDenRegular {α, β})
-    (hγ : ∀ k : ℕ, poch (γ + k) k ≠ 0 ∧ genDenRegular {γ + 2 * k + 1}) (N : ℕ) :
+    (hb : GenDenRegular (b + d)) (hαβ : GenDenRegular {α, β})
+    (hγ : ∀ k : ℕ, poch (γ + k) k ≠ 0 ∧ GenDenRegular {γ + 2 * k + 1}) (N : ℕ) :
     genCoeff (a + c) (b + d) N * ζ ^ N =
       ∑ k ∈ range (N + 1), genFieldsWimpCoeff a b α β γ k *
         genCoeff ((α + k) ::ₘ (β + k) ::ₘ genShift a k)
@@ -87,8 +87,8 @@ theorem genHG_fields_wimp_coeff (a b c d : Multiset ℂ) (α β γ ζ : ℂ)
 /-- The analytic expansion under explicit absolute double-series convergence and valid original germs. -/
 @[dlmf 16.10.E1]
 theorem genHG_fields_wimp_hasSum (a b c d : Multiset ℂ) (α β γ z ζ : ℂ)
-    (hb : genDenRegular (b + d)) (hαβ : genDenRegular {α, β})
-    (hγ : ∀ k : ℕ, poch (γ + k) k ≠ 0 ∧ genDenRegular {γ + 2 * k + 1})
+    (hb : GenDenRegular (b + d)) (hαβ : GenDenRegular {α, β})
+    (hγ : ∀ k : ℕ, poch (γ + k) k ≠ 0 ∧ GenDenRegular {γ + 2 * k + 1})
     (hleft : HasSum (fun n => genCoeff (a + c) (b + d) n * (z * ζ) ^ n)
       (genHG (a + c) (b + d) (z * ζ)))
     (hinner : ∀ k : ℕ, HasSum (fun n =>
@@ -102,7 +102,7 @@ theorem genHG_fields_wimp_hasSum (a b c d : Multiset ℂ) (α β γ z ζ : ℂ)
 
 /-- Norlund expansion with the full printed convergence half-plane and zeta disk. -/
 @[dlmf 16.10.E2]
-theorem genHG_norlund_expansion (a : ℂ) (A B : Multiset ℂ) (hcard : A.card = B.card) (hb : genDenRegular B)
+theorem genHG_norlund_expansion (a : ℂ) (A B : Multiset ℂ) (hcard : A.card = B.card) (hb : GenDenRegular B)
     {z ζ : ℂ} (hζ : ‖ζ - 1‖ < 1) (hz : z.re < 1 / 2) :
     HasSum (fun k : ℕ => (1 - z) ^ (-a) * poch a k / k.factorial *
       genFiniteHG k ((-k : ℂ) ::ₘ A) B ζ * (z / (z - 1)) ^ k)
@@ -199,7 +199,7 @@ lemma ghaR4_summable_norm_0F1 (a z : ℂ) (ha : ∀ k : ℕ, a ≠ -k) :
 
 /-- The product of two 0F1 functions for every complex z. -/
 @[dlmf 16.12.E1]
-theorem genHG_0F1_product (a b z : ℂ) (hb : genDenRegular {a, b, a + b - 1}) :
+theorem genHG_0F1_product (a b z : ℂ) (hb : GenDenRegular {a, b, a + b - 1}) :
     genHG ∅ {a} z * genHG ∅ {b} z =
       genHG {(a + b) / 2, (a + b - 1) / 2} {a, b, a + b - 1} (4 * z) := by
   have ha' : ∀ k : ℕ, a ≠ -k := hb a (by simp)
@@ -232,7 +232,7 @@ theorem genHG_0F1_product (a b z : ℂ) (hb : genDenRegular {a, b, a + b - 1}) :
 
 /-- The existing Clausen germ identity continued to its whole principal slit. -/
 @[dlmf 16.12.E2]
-theorem genHG_clausen_principal (a b : ℂ) (hb : genDenRegular {a + b + 1 / 2, 2 * a + 2 * b})
+theorem genHG_clausen_principal (a b : ℂ) (hb : GenDenRegular {a + b + 1 / 2, 2 * a + 2 * b})
     {z : ℂ} (hz : z ∈ cutPlane) :
     genHG {a, b} {a + b + 1 / 2} z ^ 2 =
       genHG {2 * a, 2 * b, a + b} {a + b + 1 / 2, 2 * a + 2 * b} z := by
@@ -240,7 +240,7 @@ theorem genHG_clausen_principal (a b : ℂ) (hb : genDenRegular {a + b + 1 / 2, 
 
 /-- The full generalized square series; terminating inner sums preserve lower exceptions after termination. -/
 @[dlmf 16.12.E3]
-theorem genHG_general_square_hasSum (a b c : ℂ) (hb : genDenRegular {c, 2 * c - 1, a + 1 / 2, b + 1 / 2})
+theorem genHG_general_square_hasSum (a b c : ℂ) (hb : GenDenRegular {c, 2 * c - 1, a + 1 / 2, b + 1 / 2})
     {z : ℂ} (hz : ‖z‖ < 1) :
     HasSum (fun k : ℕ => poch (2 * a) k * poch (2 * b) k * poch (c - 1 / 2) k /
       (poch c k * poch (2 * c - 1) k * k.factorial) *

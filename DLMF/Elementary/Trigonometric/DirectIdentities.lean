@@ -7,26 +7,28 @@ module
 
 public import DLMF.Core.Framework
 public import DLMF.Elementary.Trigonometric.LogarithmicSeries
-public import DLMFMathlib.NumberTheory.EulerNumbers
+public import DLMF.Gamma.IntegralRepresentations
 public import DLMFMathlib.Analysis.Complex.TrigR4SeriesExtension
 public import DLMFMathlib.Analysis.Complex.TrigonometricProducts
-public import Mathlib.Analysis.Convex.SpecificFunctions.Deriv
-public import DLMF.Gamma.IntegralRepresentations
-public import TauCeti.Analysis.Contour.WorkedExamples.HalfDisc.SineIntegral
+public import DLMFMathlib.NumberTheory.EulerNumbers
 public import Mathlib.Analysis.Complex.SqrtDeriv
-public import Mathlib.Analysis.SpecialFunctions.Complex.Arctan
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.InverseDeriv
-public import Mathlib.Analysis.SpecialFunctions.Arsinh
-public import Mathlib.Analysis.SpecialFunctions.Arcosh
-public import Mathlib.Analysis.SpecialFunctions.Artanh
-public import Mathlib.Analysis.SpecialFunctions.Sqrt
-public import TauCeti.Analysis.SpecialFunctions.Trigonometric.Orthogonality
-public import Mathlib.Analysis.Real.Pi.Bounds
-public import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Series
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Cotangent
-public import Mathlib.NumberTheory.ModularForms.EisensteinSeries.Summable
+public import Mathlib.Analysis.Convex.SpecificFunctions.Deriv
 public import Mathlib.Analysis.Normed.Group.Tannery
+public import Mathlib.Analysis.Real.Pi.Bounds
+public import Mathlib.Analysis.SpecialFunctions.Arcosh
+public import Mathlib.Analysis.SpecialFunctions.Arsinh
+public import Mathlib.Analysis.SpecialFunctions.Artanh
+public import Mathlib.Analysis.SpecialFunctions.Complex.Arctan
+public import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
+public import Mathlib.Analysis.SpecialFunctions.Sqrt
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Cotangent
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.InverseDeriv
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Series
+public import Mathlib.NumberTheory.ModularForms.EisensteinSeries.Summable
+public import Mathlib.RingTheory.Polynomial.Cyclotomic.Basic
+public import Mathlib.RingTheory.RootsOfUnity.Complex
+public import TauCeti.Analysis.Contour.WorkedExamples.HalfDisc.SineIntegral
+public import TauCeti.Analysis.SpecialFunctions.Trigonometric.Orthogonality
 
 /-!
 # Complex trigonometric identities and products
@@ -1082,7 +1084,7 @@ theorem norm_cos_explicit (z : ℂ) :
 
 /-- DLMF 4.21.E43: norm tan explicit. -/
 @[dlmf 4.21.E43]
-theorem norm_tan_explicit {z : ℂ} (hz : Complex.cos z≠0) :
+theorem norm_tan_explicit {z : ℂ} :
     ‖Complex.tan z‖=Real.sqrt ((Real.cosh (2*z.im)-Real.cos (2*z.re))/
       (Real.cosh (2*z.im)+Real.cos (2*z.re))) := by
   have hp : 0≤(Real.cosh (2*z.im)-Real.cos (2*z.re))/2 := by

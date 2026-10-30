@@ -8,10 +8,10 @@ module
 public import DLMF.QHypergeometric.Convergence
 public import DLMF.QSeries.QCalculus
 public import DLMF.QSeries.Saalschutz
-public import Mathlib.LinearAlgebra.Complex.FiniteDimensional
 public import Mathlib.Analysis.Analytic.Basic
 public import Mathlib.Analysis.Asymptotics.Lemmas
 public import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
+public import Mathlib.LinearAlgebra.Complex.FiniteDimensional
 public import Mathlib.NumberTheory.ModularForms.Discriminant
 
 /-!
@@ -673,7 +673,6 @@ private lemma qDerivative_taylor_iter {q : ℂ} (hq : q ≠ 1) (n : ℕ) {f : �
     field_simp
     ring
 
-
 /-- At the origin the `n`-th q-derivative of an analytic function is `f^(n)(0) (q;q)_n/(n!
 (1-q)^n)` (DLMF 17.2.E42). -/
 @[dlmf 17.2.E42]
@@ -908,7 +907,6 @@ private lemma qLeibniz_zero_conv {f g : ℂ → ℂ} (hf : AnalyticAt ℂ f 0)
         qLeibniz_succ_input]
     rw [heq]
     simp [qDerivIterate]
-
 
 /-- The q-Leibniz rule at the origin for analytic factors (DLMF 17.2.E44). -/
 @[dlmf 17.2.E44]
@@ -1274,7 +1272,7 @@ theorem jackson_classical_limit {f : ℝ → ℂ} {a : ℝ} (hf : ContinuousOn f
 /-- For an absolutely summable bilateral Jackson series, the integrals `∫_0^(q^(-n)) f d_q t` tend
 to the bilateral Jackson integral (DLMF 17.2.E48). -/
 @[dlmf 17.2.E48]
-theorem jackson_bilateral_limit {q : ℝ} (hq0 : 0<q) (hq1 : q<1) {f : ℂ → ℂ}
+theorem jackson_bilateral_limit {q : ℝ} (hq0 : 0<q) {f : ℂ → ℂ}
     (hf : Summable (fun j : ℤ => (q:ℂ)^j*f ((q:ℂ)^j))) :
     Tendsto (fun n : ℕ => jacksonIntegral (q:ℂ) ((q:ℂ)^(-(n:ℤ))) f) atTop
       (𝓝 (jacksonBilateral q f)) := by
@@ -1293,7 +1291,7 @@ theorem jackson_bilateral_limit {q : ℝ} (hq0 : 0<q) (hq1 : q<1) {f : ℂ → �
 
 /-- The same improper-integral identity for two naturally convergent tails, without assuming absolute summability. -/
 @[dlmf 17.2.E48]
-theorem jackson_bilateral_natural_limit {q : ℝ} (hq0 : 0<q) (hq1 : q<1) {f : ℂ → ℂ} {v : ℂ}
+theorem jackson_bilateral_natural_limit {q : ℝ} (hq0 : 0<q) {f : ℂ → ℂ} {v : ℂ}
     (hf : HasNaturalJacksonBilateral q f v) :
     ∃ J : ℕ → ℂ,
       (∀ n : ℕ, HasNaturalJacksonIntegral q ((q:ℂ)^(-(n:ℤ))) f (J n)) ∧

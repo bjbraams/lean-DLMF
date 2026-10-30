@@ -6,8 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.OrthogonalPolynomials.ClassicalInstances
-public import DLMF.OrthogonalPolynomials.SoninePolyaApplications
 public import DLMF.OrthogonalPolynomials.InequalityTools
+public import DLMF.OrthogonalPolynomials.SoninePolyaApplications
 
 /-!
 # Pointwise bounds and zeros of classical polynomials
@@ -74,7 +74,7 @@ theorem jacobi_bound_at_one {α β x : ℝ} (hαβ : β ≤ α) (hβ : -1 < β) 
   have hnorm : ∀ t : ℝ, ‖jacobiPolyP α β n t‖ = |p.eval t| := fun t => by
     rw [← eval_jacobiPolyPR hα1, Complex.norm_real, Real.norm_eq_abs]
   have hone : |p.eval 1| = (poch (α + 1) n).re / n.factorial := by
-    rw [← hnorm, show ((1 : ℝ) : ℂ) = 1 by simp, jacobi_at_one (by simpa using hα1)]
+    rw [← hnorm, show ((1 : ℝ) : ℂ) = 1 by simp, jacobiPolyP_one ]
     have : ((α : ℂ) + 1) = ((α + 1 : ℝ) : ℂ) := by push_cast; ring
     rw [this, h2, norm_div, Complex.norm_real, Complex.norm_natCast, Real.norm_of_nonneg
       (hu.le.trans huv)]
@@ -82,8 +82,8 @@ theorem jacobi_bound_at_one {α β x : ℝ} (hαβ : β ≤ α) (hβ : -1 < β) 
   have hneg : |p.eval (-1)| ≤ |p.eval 1| := by
     rw [← hnorm, ← hnorm, show ((-1 : ℝ) : ℂ) = -1 by simp,
       jacobi_reflection (by simpa using hα1) (by simpa using hβ),
-      show ((1 : ℝ) : ℂ) = 1 by simp, jacobi_at_one (by simpa using hβ),
-      jacobi_at_one (by simpa using hα1)]
+      show ((1 : ℝ) : ℂ) = 1 by simp, jacobiPolyP_one,
+      jacobiPolyP_one ]
     have e1 : ((β : ℂ) + 1) = ((β + 1 : ℝ) : ℂ) := by push_cast; ring
     have e2 : ((α : ℂ) + 1) = ((α + 1 : ℝ) : ℂ) := by push_cast; ring
     rw [e1, e2, h1, h2, norm_mul, norm_pow, norm_neg, norm_one, one_pow, one_mul, norm_div,

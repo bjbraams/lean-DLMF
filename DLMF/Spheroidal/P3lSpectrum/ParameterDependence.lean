@@ -597,7 +597,7 @@ lemma p3l_exists_odd_zero (m : ℕ) (γr Λ₀ : ℝ) : ∃ lam > Λ₀, p3lyR m
 
 /-- The spectrum of the factor equation with real parameters. -/
 def p3lSpec (m : ℕ) (γr : ℝ) : Set ℝ :=
-  {lam | ∃ g : ℂ → ℂ, Differentiable ℂ g ∧ p3lSol m (γr : ℂ) (p3lC m lam) univ g ∧ g ≠ 0}
+  {lam | ∃ g : ℂ → ℂ, Differentiable ℂ g ∧ P3lSol m (γr : ℂ) (p3lC m lam) univ g ∧ g ≠ 0}
 
 /-- `Y(0) Y'(0)` is the real number `y(0) y'(0)`. -/
 theorem p3lY_zero_eq (m : ℕ) (γr lam : ℝ) :

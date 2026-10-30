@@ -36,7 +36,7 @@ theorem ferrersP_addition (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 : 0 ≤ θ₁) (h2 
 integer, `𝖰_ν(cos θ₁ cos θ₂ + sin θ₁ sin θ₂ cos φ) = 𝖯_ν(cos θ₁) 𝖰_ν(cos θ₂) + 2 Σ_{m≥1} (-1)^m
 𝖯^{-m}_ν(cos θ₁) 𝖰^m_ν(cos θ₂) cos(mφ)`, as a convergent series. -/
 @[dlmf 14.18.E3]
-theorem ferrersQ_addition (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 : 0 < θ₁) (h2 : 0 < θ₂) (hs : θ₁+θ₂ < π) (hhalf : θ₁ < π/2) (h12 : θ₁ < θ₂) (hr : LegendreQRegular ν 0) (phi : ℝ) :
+theorem ferrersQ_addition (ν : ℂ) {θ₁ θ₂ : ℝ} (h1 : 0 < θ₁) (hs : θ₁+θ₂ < π) (h12 : θ₁ < θ₂) (hr : LegendreQRegular ν 0) (phi : ℝ) :
     HasSum (fun j : ℕ => let m:=j+1; 2*(-1)^m*ferrersP ν (-m) (Real.cos θ₁)*ferrersQ ν m (Real.cos θ₂)*Real.cos (m*phi)) (ferrersQ ν 0 (Real.cos θ₁*Real.cos θ₂+Real.sin θ₁*Real.sin θ₂*Real.cos phi)-ferrersP ν 0 (Real.cos θ₁)*ferrersQ ν 0 (Real.cos θ₂)) := by
   -- Non-real `ν`: 14.18.1 at `(θ₁, θ₂)` and `(θ₁, π - θ₂)` with 14.9.10; then continuity in `ν`.
   -- The hypothesis `θ₁ < π/2` is not needed.

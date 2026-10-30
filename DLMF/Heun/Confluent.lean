@@ -65,8 +65,8 @@ singularity of rank `1` at `∞`. Coefficients indexed as in `heunODECoeff`. -/
 theorem confluentHeun_singularities (q α γ δ ε : ℂ) (hε : ε ≠ 0) :
     let c : Fin 2 → ℂ → ℂ := ![fun z => (α * z - q) / (z * (z - 1)),
       fun z => γ / z + δ / (z - 1) + ε]
-    Complex.linearODEAtMostRegularAt c 0 ∧ Complex.linearODEAtMostRegularAt c 1 ∧
-    (∀ z : ℂ, z ≠ 0 → z ≠ 1 → Complex.linearODEOrdinaryAt c z) ∧
+    Complex.LinearODEAtMostRegularAt c 0 ∧ Complex.LinearODEAtMostRegularAt c 1 ∧
+    (∀ z : ℂ, z ≠ 0 → z ≠ 1 → Complex.LinearODEOrdinaryAt c z) ∧
     HasIrregularRankAtInfinity (fun z => γ / z + δ / (z - 1) + ε)
       (fun z => (α * z - q) / (z * (z - 1))) 1 := by
   intro c
@@ -129,7 +129,7 @@ theorem confluentHeun_singularities (q α γ δ ε : ℂ) (hε : ε ≠ 0) :
 @[dlmf 31.12.E2]
 theorem doublyConfluentHeun_singularities (q α γ δ : ℂ) (hδ : δ ≠ 0) :
     let c : Fin 2 → ℂ → ℂ := ![fun z => (α * z - q) / z ^ 2, fun z => δ / z ^ 2 + γ / z + 1]
-    (∀ z : ℂ, z ≠ 0 → Complex.linearODEOrdinaryAt c z) ∧
+    (∀ z : ℂ, z ≠ 0 → Complex.LinearODEOrdinaryAt c z) ∧
     HasIrregularRankAt (fun z => δ / z ^ 2 + γ / z + 1) (fun z => (α * z - q) / z ^ 2) 0 1 ∧
     HasIrregularRankAtInfinity (fun z => δ / z ^ 2 + γ / z + 1)
       (fun z => (α * z - q) / z ^ 2) 1 := by
@@ -205,8 +205,8 @@ irregular singularity of rank `2` at `∞`. -/
 @[dlmf 31.12.E3]
 theorem biconfluentHeun_singularities (q α γ δ : ℂ) :
     let c : Fin 2 → ℂ → ℂ := ![fun z => (α * z - q) / z, fun z => -(γ / z + δ + z)]
-    Complex.linearODEAtMostRegularAt c 0 ∧
-    (∀ z : ℂ, z ≠ 0 → Complex.linearODEOrdinaryAt c z) ∧
+    Complex.LinearODEAtMostRegularAt c 0 ∧
+    (∀ z : ℂ, z ≠ 0 → Complex.LinearODEOrdinaryAt c z) ∧
     HasIrregularRankAtInfinity (fun z => -(γ / z + δ + z)) (fun z => (α * z - q) / z) 2 := by
   intro c
   have hevi : ∀ᶠ z in Bornology.cobounded ℂ, z ≠ 0 := Bornology.eventually_ne_cobounded 0
@@ -257,7 +257,7 @@ theorem biconfluentHeun_singularities (q α γ δ : ℂ) :
 point is ordinary). -/
 @[dlmf 31.12.E4]
 theorem triconfluentHeun_ordinary (q α γ : ℂ) (z : ℂ) :
-    Complex.linearODEOrdinaryAt (![fun z => α * z - q, fun z => (γ + z) * z] : Fin 2 → ℂ → ℂ)
+    Complex.LinearODEOrdinaryAt (![fun z => α * z - q, fun z => (γ + z) * z] : Fin 2 → ℂ → ℂ)
       z := by
   intro j
   refine ⟨(![fun z => α * z - q, fun z => (γ + z) * z] : Fin 2 → ℂ → ℂ) j, ?_,

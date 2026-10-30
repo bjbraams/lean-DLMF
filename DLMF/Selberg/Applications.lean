@@ -8,7 +8,9 @@ module
 public import DLMF.OrthogonalPolynomials.Classical
 public import DLMF.OrthogonalPolynomials.JacobiDiscriminant
 public import DLMF.Selberg.ContinuationAndAomoto
+public import Mathlib.NumberTheory.GaussSum
 public import Mathlib.RingTheory.Polynomial.Resultant.Basic
+public import Mathlib.RingTheory.Trace.Defs
 
 /-!
 # Applications of the Selberg integral (AAR §§8.5–8.11)
@@ -160,7 +162,6 @@ theorem vdm_two (k : ℕ) (t : Fin 2 → ℝ) :
   rw [← ofReal_pow, (Even.pow_abs ⟨k, by ring⟩ _), ofReal_pow]
   push_cast; ring
 
-
 /-- One term of the expanded Aomoto integral. -/
 theorem term_eq {α β : ℂ} (hα : 0 < α.re) (hβ : 0 < β.re) (k r : ℕ) (hr : r ≤ 2 * k) :
     poch (-((2 * k : ℕ) : ℂ)) r / r ! *
@@ -201,7 +202,6 @@ theorem term_eq {α β : ℂ} (hα : 0 < α.re) (hβ : 0 < β.re) (k r : ℕ) (h
   push_cast
   field_simp
 
-
 /-- The Aomoto integral with `n = 2`, one linear factor and `c = k`, expanded by the binomial
 theorem: a sum of products of two Beta integrals. -/
 theorem aomoto_two_expand {α β : ℂ} (hα : 0 < α.re) (hβ : 0 < β.re) (k : ℕ) :
@@ -231,7 +231,6 @@ theorem aomoto_two_expand {α β : ℂ} (hα : 0 < α.re) (hβ : 0 < β.re) (k :
   · intro r _
     exact (integrableOn_cube_two (integrableOn_weight_mul_pow hα hβ _)
       (integrableOn_weight_mul_pow hα hβ r)).const_mul _
-
 
 /-- The Aomoto evaluation divided by the two Beta factors. -/
 theorem final_identity {α β : ℂ} (hα : 0 < α.re) (hβ : 0 < β.re) (k : ℕ) :

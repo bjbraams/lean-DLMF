@@ -7,9 +7,9 @@ module
 
 public import DLMF.AsymptoticApproximations.Sums.Basic
 public import DLMF.Zeta.Riemann
-public import DLMFMathlib.RingTheory.Binomial
-public import DLMFMathlib.Analysis.Asymptotics.IntegralComparison
 public import DLMFMathlib.Analysis.Asymptotics.AsymptoticExpansion
+public import DLMFMathlib.Analysis.Asymptotics.IntegralComparison
+public import DLMFMathlib.RingTheory.Binomial
 public import Mathlib.Analysis.Analytic.Binomial
 
 /-!
@@ -75,9 +75,9 @@ private lemma powerSum_partialSum_even {α : ℝ} (hα : α ≠ -1) (m n : ℕ) 
 /-- Rewrite the real-axis periodic-Bernoulli remainder without complex powers. -/
 private lemma powerSum_em_integral (α : ℝ) (m n : ℕ) (hn : 1 ≤ n) :
     (∫ t in Ioi (n : ℝ),
-      (DLMF.BernoulliEuler.periodicBernoulliB (2 * m + 1) t : ℂ) /
+      (periodicBernoulli (2 * m + 1) t : ℂ) /
         (t : ℂ) ^ (-(α : ℂ) + 2 * m + 1)) =
-      ((∫ t in Ioi (n : ℝ), DLMF.BernoulliEuler.periodicBernoulliB (2 * m + 1) t *
+      ((∫ t in Ioi (n : ℝ), periodicBernoulli (2 * m + 1) t *
         t ^ (α - 2 * m - 1) : ℝ) : ℂ) := by
   rw [← integral_complex_ofReal]
   apply setIntegral_congr_fun measurableSet_Ioi
@@ -112,7 +112,7 @@ private lemma powerSum_eq_truncation_add_remainder {α : ℝ} (hα : α ≠ -1) 
     (∑ j ∈ Ico 1 n, (j : ℝ) ^ α) - (riemannZeta (-(α : ℂ))).re -
         ∑ j ∈ range (2 * m + 2), g2b_powScale α j n * g2b_powSumCoeff α j =
       Ring.choose (-α + 2 * m) (2 * m + 1) *
-        ∫ t in Ioi (n : ℝ), DLMF.BernoulliEuler.periodicBernoulliB (2 * m + 1) t *
+        ∫ t in Ioi (n : ℝ), periodicBernoulli (2 * m + 1) t *
           t ^ (α - 2 * m - 1) := by
   have hs : -(α : ℂ) ≠ 1 := by
     intro h
@@ -162,11 +162,11 @@ private lemma powerSum_eq_truncation_add_remainder {α : ℝ} (hα : α ≠ -1) 
 against the decaying real power. -/
 private lemma powerSum_integral_isBigO {α : ℝ} {m : ℕ} (hmα : α < 2 * m) :
     (fun x : ℝ => ∫ t in Ioi x,
-      DLMF.BernoulliEuler.periodicBernoulliB (2 * m + 1) t * t ^ (α - 2 * m - 1)) =O[atTop]
+      periodicBernoulli (2 * m + 1) t * t ^ (α - 2 * m - 1)) =O[atTop]
         (fun x : ℝ => x ^ (α - 2 * m)) := by
   obtain ⟨C, hC⟩ := DLMF.Zeta.q25a_periodicBernoulliB_bound (2 * m + 1)
   have h := isBigO_integral_Ioi_bdd_mul_rpow
-    (f := fun t => (DLMF.BernoulliEuler.periodicBernoulliB (2 * m + 1) t : ℂ))
+    (f := fun t => (periodicBernoulli (2 * m + 1) t : ℂ))
     (r := α - 2 * m - 1) (fun t => by simpa only [Complex.norm_real, Real.norm_eq_abs] using hC t)
     (by linarith)
   simp only [← Complex.ofReal_mul, integral_complex_ofReal, Complex.isBigO_ofReal_left] at h

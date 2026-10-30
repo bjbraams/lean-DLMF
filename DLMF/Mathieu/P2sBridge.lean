@@ -47,7 +47,7 @@ lemma p2s_WI_re (a q : ℝ) : (fun x : ℝ => (mathieuWI a q x).re) =
     (fun a => by simp [(mathieuWI_spec a q).2.1]) (fun a => by simp [(mathieuWI_spec a q).2.2])
   have hdw : deriv (fun x : ℝ => (mathieuWI a q x).re) =
       fun x : ℝ => (deriv (mathieuWI a q) x).re := funext fun x => (hd a x).deriv
-  have hsol : ODE.p2lIsSol (fun x : ℝ => 2 * q * Real.cos (2 * x)) a
+  have hsol : ODE.P2lIsSol (fun x : ℝ => 2 * q * Real.cos (2 * x)) a
       (fun x : ℝ => (mathieuWI a q x).re) :=
     ⟨fun x => (hd a x).differentiableAt, fun x => by rw [hdw]; exact hd' a x⟩
   obtain ⟨y0, y1, hy⟩ := ODE.p2lY_spec (p2s_hV q) false a
@@ -65,7 +65,7 @@ lemma p2s_WII_re (a q : ℝ) : (fun x : ℝ => (mathieuWII a q x).re) =
     (fun a => by simp [(mathieuWII_spec a q).2.2])
   have hdw : deriv (fun x : ℝ => (mathieuWII a q x).re) =
       fun x : ℝ => (deriv (mathieuWII a q) x).re := funext fun x => (hd a x).deriv
-  have hsol : ODE.p2lIsSol (fun x : ℝ => 2 * q * Real.cos (2 * x)) a
+  have hsol : ODE.P2lIsSol (fun x : ℝ => 2 * q * Real.cos (2 * x)) a
       (fun x : ℝ => (mathieuWII a q x).re) :=
     ⟨fun x => (hd a x).differentiableAt, fun x => by rw [hdw]; exact hd' a x⟩
   obtain ⟨y0, y1, hy⟩ := ODE.p2lY_spec (p2s_hV q) true a

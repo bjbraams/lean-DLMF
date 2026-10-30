@@ -423,7 +423,7 @@ theorem airySt_norm_prefactor_bi {x : ℝ} (hx : 0 < x) :
 
 /-- First-neglected-term remainder bound and its sign, DLMF §9.7(iii). -/
 theorem airy_bi_real_error {x : ℝ} (hx : 0 < x) {N : ℕ} (hN : 0 ≤ N) :
-    ‖airyRemainder .bi N x‖ ≤ (airyChi (N + 1 / 6) + 1) * 
+    ‖airyRemainder .bi N x‖ ≤ (airyChi (N + 1 / 6) + 1) *
       ‖airyExpansionCoeff .bi N / airyZetaComplex x ^ N‖ := by
   have hx0 : (x : ℂ) ≠ 0 := ofReal_ne_zero.mpr hx.ne'
   have harg : |arg (x : ℂ)| < π / 3 := by
@@ -452,7 +452,7 @@ theorem airy_bi_real_error {x : ℝ} (hx : 0 < x) {N : ℕ} (hN : 0 ≤ N) :
 
 /-- First-neglected-term remainder bound and its sign, DLMF §9.7(iii). -/
 theorem airy_biDeriv_real_error {x : ℝ} (hx : 0 < x) {N : ℕ} (hN : 1 ≤ N) :
-    ‖airyRemainder .biDeriv N x‖ ≤ (airyChi (N + 0) + 1) * 
+    ‖airyRemainder .biDeriv N x‖ ≤ (airyChi (N + 0) + 1) *
       ‖airyExpansionCoeff .biDeriv N / airyZetaComplex x ^ N‖ := by
   sorry
 
@@ -795,7 +795,7 @@ theorem airy_biDeriv_bound {x : ℝ} (hx : 0 < x) :
 /-- On the slit plane the remainder of the normalized `Ai` expansion is bounded by the error
 multiplier times the first neglected term (DLMF 9.7.17). -/
 @[dlmf 9.7.E17]
-theorem airy_ai_complex_error {z : ℂ} (hz : z ∈ slitPlane) {N : ℕ} (hN : 0 ≤ N) :
+theorem airy_ai_complex_error {z : ℂ} (hz : z ∈ slitPlane) {N : ℕ} :
     ‖airyRemainder .ai N z‖ ≤ airyErrorMultiplier N (1 / 6) z *
       ‖airyExpansionCoeff .ai N / airyZetaComplex z ^ N‖ := by
   have hπ := Real.pi_pos

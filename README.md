@@ -15,8 +15,8 @@ umbrella module `DLMF/<Area>.lean` describes what Mathlib already provides and w
 area adds. Statements taken from the DLMF record their equation numbers with Mathlib's
 `@[dlmf]` cross-reference attribute.
 
-`DLMF.lean` imports all areas. The current library has 1,199 Lean files, including
-109 general supporting modules and the two library root entry points. Large topic modules
+`DLMF.lean` imports all areas. The current library has 1,204 Lean files, including
+111 general supporting modules and the two library root entry points. Large topic modules
 are split into mathematical subtopics; the former file remains as a small import umbrella.
 For example, `Gamma/IntegralRepresentations.lean` now imports the Hankel, Prym, Binet and
 moment modules below `Gamma/IntegralRepresentations/`.
@@ -29,8 +29,18 @@ and actual Lean constructions is recorded in [DEFINITIONS.md](DEFINITIONS.md).
 throughout the DLMF, in source order, including auxiliary objects and definitions in prose.
 Both catalogues record missing counterparts and differences in domains and branches.
 
+The latest [Mathlib-style review](MathlibReview20261030.md) covers statement hypotheses,
+upstream reuse, naming, documentation, proof structure and organization after the foundation
+reorganization. Its [inventory](MathlibReviewInventory20261030.json) records verified
+findings, remaining review candidates and reproducible audit programs. The subsequent
+[implementation round](REVIEW.md#review-cleanup-statement-corrections-and-shared-apis-2026-10-30)
+corrects false formulations, removes redundant assumptions and consolidates shared APIs;
+its [manifest](ReviewCleanup20261030.json) records migrations and validation.
+As of this round the project has 1,552 direct admissions. The corrected multivariate
+elliptic mean expansion is proved; the other corrected statements remain explicit obligations.
+
 For a view of the organized foundations, use `import DLMF.Basic`. It imports all
-59 area and subarea `Basic.lean` entry points. Each is a small foundational file or
+60 area and subarea `Basic.lean` entry points. Each is a small foundational file or
 an umbrella over descriptive files under `Basic/`, such as
 `Confluent/Basic/IncompleteGamma.lean` and `Mathieu/Basic/Spectral.lean`.
 This layer contains canonical definitions and their necessary elementary support;
@@ -61,7 +71,7 @@ umbrellas (2026-10-30):
 - [Coulomb](DLMF/Coulomb.lean): 15 files.
 - [Elementary](DLMF/Elementary.lean): 23 files.
 - [Elliptic](DLMF/Elliptic.lean): 13 files.
-- [EllipticIntegrals](DLMF/EllipticIntegrals.lean): 32 files.
+- [EllipticIntegrals](DLMF/EllipticIntegrals.lean): 34 files.
 - [ErrorFunctions](DLMF/ErrorFunctions.lean): 20 files.
 - [ExpIntegrals](DLMF/ExpIntegrals.lean): 11 files.
 - [Gamma](DLMF/Gamma.lean): 49 files.
@@ -87,7 +97,7 @@ umbrellas (2026-10-30):
 - [Spheroidal](DLMF/Spheroidal.lean): 17 files.
 - [Statistical](DLMF/Statistical.lean): 6 files.
 - [Struve](DLMF/Struve.lean): 30 files.
-- [Theta](DLMF/Theta.lean): 13 files.
+- [Theta](DLMF/Theta.lean): 14 files.
 - [WaveEquation](DLMF/WaveEquation.lean): 1 file.
 - [Weierstrass](DLMF/Weierstrass.lean): 18 files.
 - [WignerSymbols](DLMF/WignerSymbols.lean): 7 files.

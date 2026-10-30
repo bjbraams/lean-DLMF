@@ -41,10 +41,6 @@ noncomputable section
 
 namespace DLMF.Confluent
 
-
-
-
-
 /-- `C'(x) = cos(πx²/2)` for the Fresnel integral `C`. -/
 theorem Real.hasDerivAt_fresnelCosInt (x : ℝ) : HasDerivAt Real.fresnelCosInt
     (Real.cos (π * x ^ 2 / 2)) x :=
@@ -150,8 +146,6 @@ theorem Real.tendsto_fresnelSinInt_atTop : Tendsto Real.fresnelSinInt atTop (�
     congr 1
     field_simp
     rw [Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 2)]
-
-
 
 /-- `∫₀ˣ e^{t²} dt = x M(1/2, 3/2, x²)`. -/
 theorem integral_exp_sq_eq_kummerM (x : ℝ) :

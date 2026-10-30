@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.IncompleteGamma.ContinuedProperties
 public import DLMF.ErrorFunctions.AnalyticProperties
+public import DLMF.IncompleteGamma.ContinuedProperties
 
 /-!
 # Special values and confluent representations, DLMF §§8.4–8.5
@@ -327,7 +327,7 @@ theorem upperIncGammaOnLog_half (w : ℂ) :
     simp only [id_eq,one_div,hs]
     rw [show (2:ℂ)⁻¹*u-exp u=u/2+(-exp u) by ring,Complex.exp_add]
     field_simp
-  have hi := segmentIntegral_eq_sub (by fun_prop : Continuous (fun u : ℂ => exp ((1/2:ℂ)*u-exp u))) hd (log (exp w)) w
+  have hi := segmentIntegral_eq_sub hd (log (exp w)) w
   have hl : lowerIncGammaOnLog (1/2) (log (exp w))=lowerIncGamma (1/2) (exp w) := by
     rw [lowerIncGammaOnLog,Complex.exp_log (Complex.exp_ne_zero _)]
     rw [show exp ((1/2:ℂ)*log (exp w))=(exp w)^(1/2:ℂ) by

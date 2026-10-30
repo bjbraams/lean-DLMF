@@ -8,17 +8,17 @@ module -- shake: keep-all
 public import DLMF.BernoulliEuler.Basic
 public import DLMF.Constants.Dirichlet
 public import DLMFMathlib.Analysis.Complex.ParametricHolomorphy
+public import Mathlib.Analysis.Analytic.Order
+public import Mathlib.Analysis.Complex.TaylorSeries
+public import Mathlib.Analysis.Normed.Group.Tannery
+public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
 public import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
+public import Mathlib.Analysis.SpecialFunctions.Log.Monotone
 public import Mathlib.MeasureTheory.Function.Floor
 public import Mathlib.MeasureTheory.Integral.DivergenceTheorem
-public import Mathlib.Analysis.Analytic.Order
-public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
-public import Mathlib.Analysis.SpecialFunctions.Log.Monotone
 public import Mathlib.NumberTheory.Harmonic.Bounds
 public import Mathlib.NumberTheory.Harmonic.EulerMascheroni
 public import Mathlib.NumberTheory.Harmonic.ZetaAsymp
-public import Mathlib.Analysis.Normed.Group.Tannery
-public import Mathlib.Analysis.Complex.TaylorSeries
 public import Mathlib.NumberTheory.LSeries.Deriv
 public import Mathlib.NumberTheory.LSeries.Dirichlet
 public import Mathlib.NumberTheory.ZetaValues
@@ -46,7 +46,7 @@ This file acquires the remaining items of §25.2:
   derivative.
 * 25.2.8–25.2.10: the Euler–Maclaurin representations. `x - ⌊x⌋` is `Int.fract x` and the
   periodic Bernoulli function `B̃ₙ(x) = Bₙ(x - ⌊x⌋)` of §25.1 / §24.2(iii) is the project's
-  `DLMF.BernoulliEuler.periodicBernoulliB`; the generalized binomial coefficient is `z25a_gbinom`.
+  `periodicBernoulli`; the generalized binomial coefficient is `z25a_gbinom`.
 * 25.2.12: the Hadamard product over the zeros `ρ` with `Re ρ > 0`, counted with multiplicity
   (`analyticOrderNatAt`).
 
@@ -595,37 +595,37 @@ def z25a_gbinom (z : ℂ) (m : ℕ) : ℂ :=
 /-! #### Helpers for 25.2.8–25.2.9: integration by parts against `B̃ₚ` -/
 
 /-- `B̃_q` is bounded. -/
-theorem q25a_periodicBernoulliB_bound (q : ℕ) : ∃ C : ℝ, ∀ x, |periodicBernoulliB q x| ≤ C := by
+theorem q25a_periodicBernoulliB_bound (q : ℕ) : ∃ C : ℝ, ∀ x, |periodicBernoulli q x| ≤ C := by
   obtain ⟨C, hC⟩ := IsCompact.exists_bound_of_continuousOn (isCompact_Icc (a := (0 : ℝ)) (b := 1))
     (continuous_bernoulliFun q).continuousOn
   exact ⟨C, fun x => by
-    simpa [Real.norm_eq_abs, periodicBernoulliB] using
+    simpa [Real.norm_eq_abs, periodicBernoulli] using
       hC _ ⟨Int.fract_nonneg x, (Int.fract_lt_one x).le⟩⟩
 
 /-- `B̃_q` is measurable. -/
-theorem q25a_measurable_periodicBernoulliB (q : ℕ) : Measurable (periodicBernoulliB q) :=
+theorem q25a_measurable_periodicBernoulliB (q : ℕ) : Measurable (periodicBernoulli q) :=
   (continuous_bernoulliFun q).measurable.comp measurable_fract
 
 /-- `B̃_q` is continuous for `q ≠ 1`. -/
 lemma q25a_continuous_periodicBernoulliB {q : ℕ} (hq : q ≠ 1) :
-    Continuous (periodicBernoulliB q) := by
-  have : periodicBernoulliB q = periodizedBernoulli q ∘ ((↑) : ℝ → UnitAddCircle) := by
+    Continuous (periodicBernoulli q) := by
+  have : periodicBernoulli q = periodizedBernoulli q ∘ ((↑) : ℝ → UnitAddCircle) := by
     funext x; exact periodicBernoulliB_eq_periodizedBernoulli q x
   rw [this]; exact (periodizedBernoulli.continuous hq).comp continuous_quotient_mk'
 
 /-- `B̃_{p+1}' = (p+1) B̃_p` off the integers. -/
 lemma q25a_hasDerivAt_periodicBernoulliB (p : ℕ) {x : ℝ} (hx : x ∉ range (Int.cast : ℤ → ℝ)) :
-    HasDerivAt (periodicBernoulliB (p + 1)) ((p + 1) * periodicBernoulliB p x) x := by
+    HasDerivAt (periodicBernoulli (p + 1)) ((p + 1) * periodicBernoulli p x) x := by
   set m := ⌊x⌋
   have hlt : (m : ℝ) < x := lt_of_le_of_ne (Int.floor_le x) (fun h => hx ⟨m, h⟩)
   have hlt2 : x < m + 1 := Int.lt_floor_add_one x
-  have heq : periodicBernoulliB (p + 1) =ᶠ[𝓝 x] (fun y => bernoulliFun (p + 1) (y - m)) := by
+  have heq : periodicBernoulli (p + 1) =ᶠ[𝓝 x] (fun y => bernoulliFun (p + 1) (y - m)) := by
     filter_upwards [Ioo_mem_nhds hlt hlt2] with y hy
-    rw [periodicBernoulliB, Int.fract, Int.floor_eq_iff.mpr ⟨hy.1.le, hy.2⟩]
+    rw [periodicBernoulli, Int.fract, Int.floor_eq_iff.mpr ⟨hy.1.le, hy.2⟩]
   have hd := (hasDerivAt_bernoulliFun (p + 1) (x - m)).comp x
     ((hasDerivAt_id x).sub_const (m : ℝ))
-  have hP : periodicBernoulliB p x = bernoulliFun p (x - m) := by
-    rw [periodicBernoulliB, Int.fract]
+  have hP : periodicBernoulli p x = bernoulliFun p (x - m) := by
+    rw [periodicBernoulli, Int.fract]
   refine HasDerivAt.congr_of_eventuallyEq ?_ heq
   convert hd using 1
   · funext y; simp
@@ -668,9 +668,9 @@ theorem q25a_intervalIntegrable_bdd_div_cpow {f : ℝ → ℝ} (hf : Measurable 
 /-- The derivative of `B̃_{p+1}(x) / x^w` off the integers, `x > 0`. -/
 lemma q25a_hasDerivAt_pB_div_cpow (p : ℕ) (w : ℂ) {x : ℝ} (hx0 : 0 < x)
     (hx : x ∉ range (Int.cast : ℤ → ℝ)) :
-    HasDerivAt (fun y : ℝ => (periodicBernoulliB (p + 1) y : ℂ) / (y : ℂ) ^ w)
-      ((p + 1) * ((periodicBernoulliB p x : ℂ) / (x : ℂ) ^ w) -
-        w * ((periodicBernoulliB (p + 1) x : ℂ) / (x : ℂ) ^ (w + 1))) x := by
+    HasDerivAt (fun y : ℝ => (periodicBernoulli (p + 1) y : ℂ) / (y : ℂ) ^ w)
+      ((p + 1) * ((periodicBernoulli p x : ℂ) / (x : ℂ) ^ w) -
+        w * ((periodicBernoulli (p + 1) x : ℂ) / (x : ℂ) ^ (w + 1))) x := by
   have h1 := (q25a_hasDerivAt_periodicBernoulliB p hx).ofReal_comp
   have h2 : HasDerivAt (fun y : ℝ => (y : ℂ) ^ (-w)) (-w * (x : ℂ) ^ (-w - 1)) x :=
     (Complex.hasStrictDerivAt_cpow_const (c := -w)
@@ -682,14 +682,14 @@ lemma q25a_hasDerivAt_pB_div_cpow (p : ℕ) (w : ℂ) {x : ℝ} (hx0 : 0 < x)
 
 /-- Integration by parts against `B̃_{p+1}` on `[a, b]`, `0 < a ≤ b`, `p ≥ 1`. -/
 theorem q25a_integral_ibp {p : ℕ} (hp : 1 ≤ p) (w : ℂ) {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) :
-    ∫ x in a..b, ((p + 1) * ((periodicBernoulliB p x : ℂ) / (x : ℂ) ^ w) -
-        w * ((periodicBernoulliB (p + 1) x : ℂ) / (x : ℂ) ^ (w + 1))) =
-      (periodicBernoulliB (p + 1) b : ℂ) / (b : ℂ) ^ w -
-        (periodicBernoulliB (p + 1) a : ℂ) / (a : ℂ) ^ w := by
+    ∫ x in a..b, ((p + 1) * ((periodicBernoulli p x : ℂ) / (x : ℂ) ^ w) -
+        w * ((periodicBernoulli (p + 1) x : ℂ) / (x : ℂ) ^ (w + 1))) =
+      (periodicBernoulli (p + 1) b : ℂ) / (b : ℂ) ^ w -
+        (periodicBernoulli (p + 1) a : ℂ) / (a : ℂ) ^ w := by
   obtain ⟨C, hC⟩ := q25a_periodicBernoulliB_bound p
   obtain ⟨D, hD⟩ := q25a_periodicBernoulliB_bound (p + 1)
   refine integral_eq_of_hasDerivAt_off_countable_of_le
-    (fun y : ℝ => (periodicBernoulliB (p + 1) y : ℂ) / (y : ℂ) ^ w) _ hab
+    (fun y : ℝ => (periodicBernoulli (p + 1) y : ℂ) / (y : ℂ) ^ w) _ hab
     (countable_range (Int.cast : ℤ → ℝ)) ?_ ?_ ?_
   · have hc := q25a_continuous_periodicBernoulliB (q := p + 1) (by omega)
     refine (Complex.continuous_ofReal.comp hc).continuousOn.div ?_ ?_
@@ -706,7 +706,7 @@ theorem q25a_integral_ibp {p : ℕ} (hp : 1 ≤ p) (w : ℂ) {a b : ℝ} (ha : 0
 
 /-- `B̃_q(b) / b^w → 0` as `b → ∞` for `Re w > 0`. -/
 theorem q25a_tendsto_pB_div_cpow (q : ℕ) {w : ℂ} (hw : 0 < w.re) :
-    Tendsto (fun b : ℝ => (periodicBernoulliB q b : ℂ) / (b : ℂ) ^ w) atTop (𝓝 0) := by
+    Tendsto (fun b : ℝ => (periodicBernoulli q b : ℂ) / (b : ℂ) ^ w) atTop (𝓝 0) := by
   obtain ⟨D, hD⟩ := q25a_periodicBernoulliB_bound q
   have hg : Tendsto (fun b : ℝ => D * b ^ (-w.re)) atTop (𝓝 0) := by
     simpa using (tendsto_rpow_neg_atTop hw).const_mul D
@@ -719,9 +719,9 @@ theorem q25a_tendsto_pB_div_cpow (q : ℕ) {w : ℂ} (hw : 0 < w.re) :
 /-- The recursion for `∫_a^∞ B̃_p(x) x^{-w} dx`, `p ≥ 1`, `Re w > 1`, `a > 0`:
 `(p+1) ∫ B̃_p x^{-w} = -B̃_{p+1}(a) a^{-w} + w ∫ B̃_{p+1} x^{-w-1}`. -/
 theorem q25a_recursion {p : ℕ} (hp : 1 ≤ p) {w : ℂ} (hw : 1 < w.re) {a : ℝ} (ha : 0 < a) :
-    (p + 1) * ∫ x in Ioi a, (periodicBernoulliB p x : ℂ) / (x : ℂ) ^ w =
-      -((periodicBernoulliB (p + 1) a : ℂ) / (a : ℂ) ^ w) +
-        w * ∫ x in Ioi a, (periodicBernoulliB (p + 1) x : ℂ) / (x : ℂ) ^ (w + 1) := by
+    (p + 1) * ∫ x in Ioi a, (periodicBernoulli p x : ℂ) / (x : ℂ) ^ w =
+      -((periodicBernoulli (p + 1) a : ℂ) / (a : ℂ) ^ w) +
+        w * ∫ x in Ioi a, (periodicBernoulli (p + 1) x : ℂ) / (x : ℂ) ^ (w + 1) := by
   obtain ⟨C, hC⟩ := q25a_periodicBernoulliB_bound p
   obtain ⟨D, hD⟩ := q25a_periodicBernoulliB_bound (p + 1)
   have hI1 := q25a_integrableOn_bdd_div_cpow (q25a_measurable_periodicBernoulliB p) hC hw ha
@@ -731,10 +731,10 @@ theorem q25a_recursion {p : ℕ} (hp : 1 ≤ p) {w : ℂ} (hw : 1 < w.re) {a : �
   have hlim2 := intervalIntegral_tendsto_integral_Ioi a hI2 tendsto_id
   have hlim := (hlim1.const_mul ((p : ℂ) + 1)).sub (hlim2.const_mul w)
   have heq : ∀ᶠ b in atTop, ((p : ℂ) + 1) * (∫ x in a..id b,
-        (periodicBernoulliB p x : ℂ) / (x : ℂ) ^ w) -
-      w * (∫ x in a..id b, (periodicBernoulliB (p + 1) x : ℂ) / (x : ℂ) ^ (w + 1)) =
-      (periodicBernoulliB (p + 1) b : ℂ) / (b : ℂ) ^ w -
-        (periodicBernoulliB (p + 1) a : ℂ) / (a : ℂ) ^ w := by
+        (periodicBernoulli p x : ℂ) / (x : ℂ) ^ w) -
+      w * (∫ x in a..id b, (periodicBernoulli (p + 1) x : ℂ) / (x : ℂ) ^ (w + 1)) =
+      (periodicBernoulli (p + 1) b : ℂ) / (b : ℂ) ^ w -
+        (periodicBernoulli (p + 1) a : ℂ) / (a : ℂ) ^ w := by
     filter_upwards [eventually_ge_atTop a] with b hb
     rw [← q25a_integral_ibp hp w ha hb, intervalIntegral.integral_sub, id,
       intervalIntegral.integral_const_mul, intervalIntegral.integral_const_mul]
@@ -775,12 +775,12 @@ lemma q25a_tendsto_sum_Icc {s : ℂ} (hs : 1 < s.re) :
 lemma q25a_unit_step {s : ℂ} (hs0 : s ≠ 0) (hs1 : s ≠ 1) {k : ℕ} (hk : 1 ≤ k) :
     1 / ((k + 1 : ℕ) : ℂ) ^ s = -(((k + 1 : ℕ) : ℂ) ^ (1 - s) - (k : ℂ) ^ (1 - s)) / (s - 1) +
       1 / 2 * (((k + 1 : ℕ) : ℂ) ^ (-s) - (k : ℂ) ^ (-s)) -
-      s * ∫ x in (k : ℝ)..(k + 1 : ℕ), (periodicBernoulliB 1 x : ℂ) / (x : ℂ) ^ (s + 1) := by
+      s * ∫ x in (k : ℝ)..(k + 1 : ℕ), (periodicBernoulli 1 x : ℂ) / (x : ℂ) ^ (s + 1) := by
   have hk0 : (0 : ℝ) < k := by exact_mod_cast hk
   set G : ℝ → ℂ := fun x => (x : ℂ) ^ (-s + 1) / (-s + 1) -
     ((k : ℂ) + 1 / 2) * ((x : ℂ) ^ (-s) / (-s)) with hG
   have hns : -s ≠ 0 := neg_ne_zero.mpr hs0
-  have hint : ∫ x in (k : ℝ)..(k + 1 : ℕ), (periodicBernoulliB 1 x : ℂ) / (x : ℂ) ^ (s + 1) =
+  have hint : ∫ x in (k : ℝ)..(k + 1 : ℕ), (periodicBernoulli 1 x : ℂ) / (x : ℂ) ^ (s + 1) =
       G ((k + 1 : ℕ) : ℝ) - G k := by
     obtain ⟨C, hC⟩ := q25a_periodicBernoulliB_bound 1
     refine integral_eq_of_hasDerivAt_off_countable_of_le G _ (by push_cast; linarith)
@@ -802,8 +802,8 @@ lemma q25a_unit_step {s : ℂ} (hs0 : s ≠ 0) (hs1 : s ≠ 1) {k : ℕ} (hk : 1
       convert h using 1
       have hx2 : x < (k : ℝ) + 1 := by
         have := hx.1.2; push_cast at this; exact this
-      have hP : (periodicBernoulliB 1 x : ℂ) = x - k - 1 / 2 := by
-        rw [periodicBernoulliB, bernoulliFun_one, Int.fract,
+      have hP : (periodicBernoulli 1 x : ℂ) = x - k - 1 / 2 := by
+        rw [periodicBernoulli, bernoulliFun_one, Int.fract,
           Int.floor_eq_iff.mpr ⟨by exact_mod_cast hx.1.1.le, by exact_mod_cast hx2⟩]
         push_cast; ring
       have hx' : (x : ℂ) ≠ 0 := by exact_mod_cast hxne
@@ -835,7 +835,7 @@ lemma q25a_finite_identity {s : ℂ} (hs0 : s ≠ 0) (hs1 : s ≠ 1) {N : ℕ} (
     ∑ k ∈ Finset.Icc (1 : ℕ) M, 1 / (k : ℂ) ^ s =
       ∑ k ∈ Finset.Icc (1 : ℕ) N, 1 / (k : ℂ) ^ s + (N : ℂ) ^ (1 - s) / (s - 1) -
         (M : ℂ) ^ (1 - s) / (s - 1) + 1 / 2 * (M : ℂ) ^ (-s) - 1 / 2 * (N : ℂ) ^ (-s) -
-        s * ∫ x in (N : ℝ)..M, (periodicBernoulliB 1 x : ℂ) / (x : ℂ) ^ (s + 1) := by
+        s * ∫ x in (N : ℝ)..M, (periodicBernoulli 1 x : ℂ) / (x : ℂ) ^ (s + 1) := by
   obtain ⟨C, hC⟩ := q25a_periodicBernoulliB_bound 1
   have hN0 : (0 : ℝ) < N := by exact_mod_cast hN
   induction M, hM using Nat.le_induction with
@@ -855,7 +855,7 @@ lemma q25a_finite_identity {s : ℂ} (hs0 : s ≠ 0) (hs1 : s ≠ 1) {N : ℕ} (
 lemma q25a_base {s : ℂ} (hs : 1 < s.re) {N : ℕ} (hN : 1 ≤ N) :
     riemannZeta s = ∑ k ∈ Finset.Icc (1 : ℕ) N, 1 / (k : ℂ) ^ s + (N : ℂ) ^ (1 - s) / (s - 1) -
       1 / 2 * (N : ℂ) ^ (-s) -
-      s * ∫ x in Ioi (N : ℝ), (periodicBernoulliB 1 x : ℂ) / (x : ℂ) ^ (s + 1) := by
+      s * ∫ x in Ioi (N : ℝ), (periodicBernoulli 1 x : ℂ) / (x : ℂ) ^ (s + 1) := by
   have hs0 : s ≠ 0 := by rintro rfl; simp at hs; linarith
   have hs1 : s ≠ 1 := by rintro rfl; simp at hs
   obtain ⟨C, hC⟩ := q25a_periodicBernoulliB_bound 1
@@ -878,7 +878,7 @@ lemma q25a_base {s : ℂ} (hs : 1 < s.re) {N : ℕ} (hN : 1 ≤ N) :
   have heq : ∀ᶠ M : ℕ in atTop, ∑ k ∈ Finset.Icc (1 : ℕ) M, 1 / (k : ℂ) ^ s =
       ∑ k ∈ Finset.Icc (1 : ℕ) N, 1 / (k : ℂ) ^ s + (N : ℂ) ^ (1 - s) / (s - 1) -
         (M : ℂ) ^ (1 - s) / (s - 1) + 1 / 2 * (M : ℂ) ^ (-s) - 1 / 2 * (N : ℂ) ^ (-s) -
-        s * ∫ x in (N : ℝ)..M, (periodicBernoulliB 1 x : ℂ) / (x : ℂ) ^ (s + 1) := by
+        s * ∫ x in (N : ℝ)..M, (periodicBernoulli 1 x : ℂ) / (x : ℂ) ^ (s + 1) := by
     filter_upwards [eventually_ge_atTop N] with M hM
     exact q25a_finite_identity hs0 hs1 hN M hM
   have := tendsto_nhds_unique (q25a_tendsto_sum_Icc hs) (hR.congr' (heq.mono fun M h => h.symm))
@@ -898,17 +898,17 @@ lemma q25a_gbinom_succ (z : ℂ) (m : ℕ) :
 
 /-- `B̃_q(N) = B_q` at an integer `N`. -/
 lemma q25a_periodicBernoulliB_natCast (q N : ℕ) :
-    periodicBernoulliB q N = bernoulli q := by
-  rw [periodicBernoulliB, Int.fract_natCast, bernoulliFun_eval_zero]
+    periodicBernoulli q N = bernoulli q := by
+  rw [periodicBernoulli, Int.fract_natCast, bernoulliFun_eval_zero]
 
 /-- The double integration-by-parts step from `B̃_{2n+1}` to `B̃_{2n+3}`, `Re s > -2n`. -/
 lemma q25a_double_step {s : ℂ} {n N : ℕ} (hN : 1 ≤ N) (hs : -(2 * n : ℝ) < s.re) :
     z25a_gbinom (s + 2 * n) (2 * n + 1) * ∫ x in Ioi (N : ℝ),
-        (periodicBernoulliB (2 * n + 1) x : ℂ) / (x : ℂ) ^ (s + 2 * n + 1) =
+        (periodicBernoulli (2 * n + 1) x : ℂ) / (x : ℂ) ^ (s + 2 * n + 1) =
       -(z25a_gbinom (s + 2 * n) (2 * n + 1) * ((bernoulli (2 * n + 2) : ℂ) / (2 * n + 2)) *
           (N : ℂ) ^ (-(s + 2 * n + 1))) +
         z25a_gbinom (s + 2 * n + 2) (2 * n + 3) * ∫ x in Ioi (N : ℝ),
-          (periodicBernoulliB (2 * n + 3) x : ℂ) / (x : ℂ) ^ (s + 2 * n + 3) := by
+          (periodicBernoulli (2 * n + 3) x : ℂ) / (x : ℂ) ^ (s + 2 * n + 3) := by
   have hN0 : (0 : ℝ) < N := by exact_mod_cast hN
   have h1 := q25a_recursion (p := 2 * n + 1) (by omega) (w := s + 2 * n + 1)
     (by simp; linarith) hN0
@@ -938,9 +938,9 @@ lemma q25a_double_step {s : ℂ} {n N : ℕ} (hN : 1 ≤ N) (hs : -(2 * n : ℝ)
   have hNp : (N : ℂ) ^ (-(s + 2 * n + 1)) = 1 / (N : ℂ) ^ (s + 2 * n + 1) := by
     rw [cpow_neg, one_div]
   rw [hb2, hb1, hNp]
-  set A := ∫ x in Ioi (N : ℝ), (periodicBernoulliB (2 * n + 1) x : ℂ) / (x : ℂ) ^ (s + 2 * n + 1)
-  set B := ∫ x in Ioi (N : ℝ), (periodicBernoulliB (2 * n + 2) x : ℂ) / (x : ℂ) ^ (s + 2 * n + 2)
-  set C := ∫ x in Ioi (N : ℝ), (periodicBernoulliB (2 * n + 3) x : ℂ) / (x : ℂ) ^ (s + 2 * n + 3)
+  set A := ∫ x in Ioi (N : ℝ), (periodicBernoulli (2 * n + 1) x : ℂ) / (x : ℂ) ^ (s + 2 * n + 1)
+  set B := ∫ x in Ioi (N : ℝ), (periodicBernoulli (2 * n + 2) x : ℂ) / (x : ℂ) ^ (s + 2 * n + 2)
+  set C := ∫ x in Ioi (N : ℝ), (periodicBernoulli (2 * n + 3) x : ℂ) / (x : ℂ) ^ (s + 2 * n + 3)
   set g := z25a_gbinom (s + 2 * n) (2 * n + 1)
   have hA : A = (-((bernoulli (2 * n + 2) : ℂ) / (N : ℂ) ^ (s + 2 * n + 1)) +
       (s + 2 * n + 1) * B) / (2 * n + 2) := by
@@ -957,7 +957,7 @@ noncomputable def q25a_emRHS (N n : ℕ) (s : ℂ) : ℂ :=
     ∑ k ∈ Finset.Icc (1 : ℕ) n, z25a_gbinom (s + 2 * k - 2) (2 * k - 1) *
       ((bernoulli (2 * k) : ℂ) / (2 * k)) * (N : ℂ) ^ (1 - s - 2 * k) -
     z25a_gbinom (s + 2 * n) (2 * n + 1) *
-      ∫ x in Ioi (N : ℝ), (periodicBernoulliB (2 * n + 1) x : ℂ) / (x : ℂ) ^ (s + 2 * n + 1)
+      ∫ x in Ioi (N : ℝ), (periodicBernoulli (2 * n + 1) x : ℂ) / (x : ℂ) ^ (s + 2 * n + 1)
 
 /-- Identity under the stated parameter and domain assumptions: `q25a_emRHS N (n + 1) s =
 q25a_emRHS N n s`. -/
@@ -1158,11 +1158,11 @@ theorem riemannZeta_eq_sum_add_integral_fract {s : ℂ} (hs : 0 < s.re) (hs1 : s
   rw [h0, q25a_emRHS] at h1
   simp [q25a_gbinom_one] at h1
   have hsplit : ∫ x in Ioi (N : ℝ), ((Int.fract x : ℝ) : ℂ) / (x : ℂ) ^ (s + 1) =
-      (∫ x in Ioi (N : ℝ), (periodicBernoulliB 1 x : ℂ) / (x : ℂ) ^ (s + 1)) +
+      (∫ x in Ioi (N : ℝ), (periodicBernoulli 1 x : ℂ) / (x : ℂ) ^ (s + 1)) +
         1 / 2 * ∫ x in Ioi (N : ℝ), (x : ℂ) ^ (-(s + 1)) := by
     rw [← integral_const_mul, ← integral_add hJ (hP.const_mul _)]
     refine setIntegral_congr_fun measurableSet_Ioi fun x _ => ?_
-    simp only [periodicBernoulliB, bernoulliFun_one, cpow_neg]
+    simp only [periodicBernoulli, bernoulliFun_one, cpow_neg]
     push_cast
     ring
   rw [hsplit, integral_Ioi_cpow_of_lt (by simp; linarith) hN0, h1]
@@ -1300,14 +1300,14 @@ with `B̃_{2n+1}(x) = B_{2n+1}(x - ⌊x⌋)`; the integral converges absolutely.
 @[dlmf 25.2.E9]
 theorem riemannZeta_eq_eulerMaclaurin {s : ℂ} {n N : ℕ} (hn : 1 ≤ n) (hN : 1 ≤ N)
     (hs : -(2 * n : ℝ) < s.re) (hs1 : s ≠ 1) :
-    IntegrableOn (fun x : ℝ => (DLMF.BernoulliEuler.periodicBernoulliB (2 * n + 1) x : ℂ) /
+    IntegrableOn (fun x : ℝ => (periodicBernoulli (2 * n + 1) x : ℂ) /
         (x : ℂ) ^ (s + 2 * n + 1)) (Ioi (N : ℝ)) ∧
       riemannZeta s = ∑ k ∈ Finset.Icc (1 : ℕ) N, 1 / (k : ℂ) ^ s + (N : ℂ) ^ (1 - s) / (s - 1) -
         1 / 2 * (N : ℂ) ^ (-s) +
         ∑ k ∈ Finset.Icc (1 : ℕ) n, z25a_gbinom (s + 2 * k - 2) (2 * k - 1) *
           ((bernoulli (2 * k) : ℂ) / (2 * k)) * (N : ℂ) ^ (1 - s - 2 * k) -
         z25a_gbinom (s + 2 * n) (2 * n + 1) *
-          ∫ x in Ioi (N : ℝ), (DLMF.BernoulliEuler.periodicBernoulliB (2 * n + 1) x : ℂ) /
+          ∫ x in Ioi (N : ℝ), (periodicBernoulli (2 * n + 1) x : ℂ) /
             (x : ℂ) ^ (s + 2 * n + 1) := by
   obtain ⟨D, hD⟩ := q25a_periodicBernoulliB_bound (2 * n + 1)
   refine ⟨q25a_integrableOn_bdd_div_cpow (q25a_measurable_periodicBernoulliB _) hD
@@ -1324,7 +1324,7 @@ theorem riemannZeta_eq_eulerMaclaurin_one {s : ℂ} {n : ℕ} (hn : 1 ≤ n)
         ∑ k ∈ Finset.Icc (1 : ℕ) n, z25a_gbinom (s + 2 * k - 2) (2 * k - 1) *
           ((bernoulli (2 * k) : ℂ) / (2 * k)) -
         z25a_gbinom (s + 2 * n) (2 * n + 1) *
-          ∫ x in Ioi (1 : ℝ), (DLMF.BernoulliEuler.periodicBernoulliB (2 * n + 1) x : ℂ) /
+          ∫ x in Ioi (1 : ℝ), (periodicBernoulli (2 * n + 1) x : ℂ) /
             (x : ℂ) ^ (s + 2 * n + 1) := by
   have h := (riemannZeta_eq_eulerMaclaurin hn le_rfl hs hs1).2
   rw [h]

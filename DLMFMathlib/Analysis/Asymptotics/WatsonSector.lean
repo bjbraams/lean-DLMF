@@ -169,6 +169,7 @@ section Sector
 
 variable {V : Type*} [NormedAddCommGroup V] [NormedSpace ℂ V] [CompleteSpace V]
 
+omit [CompleteSpace V] in
 /-- Integrability of `e^{-zt} G` for `re z ≥ c`, given that of `e^{-ct} G`. -/
 theorem integrableOn_cexp_neg_mul_smul_of_le {G : ℝ → V} {c : ℝ} {z : ℂ}
     (hint : IntegrableOn (fun t => Real.exp (-c * t) • G t) (Ioi 0)) (hz : c ≤ z.re) :

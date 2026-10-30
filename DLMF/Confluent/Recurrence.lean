@@ -13,7 +13,7 @@ public import DLMF.Confluent.Recurrence.Derivatives
 
 Denominator parameters of `kummerM` stay off the nonpositive integers.
 Tricomi and Whittaker identities use the principal branch on the slit plane.
-The operator `(z d/dz z)` is `mulDerivMul`, matching DLMF 13.3.29.
+The operator `(z d/dz z)` is `Function.mulDerivMul`, matching DLMF 13.3.29.
 13.3.15 is already proved as `deriv_kummerM_regular` in
 `OrthogonalPolynomials.Differential`; the pointwise form is restated here.
 -/

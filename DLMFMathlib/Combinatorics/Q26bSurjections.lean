@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Combinatorics.Enumerative.Stirling
 public import Mathlib.Combinatorics.Enumerative.InclusionExclusion
+public import Mathlib.Combinatorics.Enumerative.Stirling
 public import Mathlib.Data.Nat.Choose.Sum
 public import Mathlib.Logic.Equiv.Fintype
 public import Mathlib.SetTheory.Cardinal.Finite
@@ -207,7 +207,7 @@ theorem q26b_exists_map_eq {β : Type*} {n : ℕ} (s : Multiset β) (h : Multise
   exact ⟨l.get, by rw [Fin.univ_val_map, List.ofFn_get]; rfl⟩
 
 /-- Two injections into a finite type differ by a permutation of the target. -/
-theorem q26b_exists_perm_comp_of_injective {α β : Type*} [Fintype β] [DecidableEq β] {a b : α → β}
+theorem q26b_exists_perm_comp_of_injective {α β : Type*} [Fintype β] {a b : α → β}
     (ha : Function.Injective a) (hb : Function.Injective b) : ∃ τ : Perm β, b = τ ∘ a := by
   classical
   let e : {x // x ∈ Set.range a} ≃ {x // x ∈ Set.range b} :=

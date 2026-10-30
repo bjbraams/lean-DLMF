@@ -5,20 +5,22 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Zeta.Riemann
-public import DLMF.Zeta.Reflection
 public import DLMF.BernoulliEuler.IntegralsSums
-public import DLMF.Polylog.Dilog
+public import DLMF.Core.Upstream
 public import DLMF.Hypergeometric.Clausen
+public import DLMF.Polylog.Dilog
+public import DLMF.Zeta.Reflection
+public import DLMF.Zeta.Riemann
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Digamma
+public import Mathlib.NumberTheory.LSeries.HurwitzZetaValues
 
 /-!
 # The Riemann zeta function at integer arguments (DLMF §25.6)
 
-Mathlib proves `ζ(0) = -1/2`, `ζ(2) = π²/6` (25.6.1), Euler's `ζ(2n)` formula (25.6.2), `ζ(-n)`
+Mathlib proves `ζ(0) = -1/2`, `ζ(2) = π²/6`, `ζ(4) = π⁴/90` (25.6.1), Euler's `ζ(2n)` formula (25.6.2), `ζ(-n)`
 (25.6.3, for all `n ≥ 0`), the trivial zeros (25.6.4) and `ζ'(0) = -½ ln(2π)` (25.6.11); the
 pointers are in `DLMF.Core.UpstreamElementary` and `DLMF.Zeta.MathlibCoverage`. This file proves
-`ζ(4)`, `ζ(6)` and the derivative values 25.6.13–25.6.14 at the trivial zeros and at negative odd
+`ζ(6)` and the derivative values 25.6.13–25.6.14 at the trivial zeros and at negative odd
 integers (from the derivative reflection formula 25.4.5) and acquires the remaining formulas.
 
 `ζ^{(k)}` is `iteratedDeriv k riemannZeta`, `Γ^{(r)}` is `iteratedDeriv r Gamma`, `ψ` is
@@ -34,13 +36,8 @@ namespace DLMF.Zeta
 
 /-! ### §25.6(i) Function values -/
 
-/-- DLMF 25.6.1: `ζ(4) = π⁴/90` (from Mathlib's `riemannZeta_two_mul_nat`). -/
-@[dlmf 25.6.E1]
-theorem riemannZeta_four : riemannZeta 4 = π ^ 4 / 90 := by
-  have h := riemannZeta_two_mul_nat (k := 2) (by norm_num)
-  have hb : bernoulli 4 = -1 / 30 := by decide +kernel
-  norm_num [hb, Nat.factorial] at h
-  rw [h]; ring
+-- DLMF 25.6.1 at 4 is Mathlib's `_root_.riemannZeta_four`.
+dlmf_upstream 25.6.E1 _root_.riemannZeta_four "exact: ζ(4) = π⁴/90"
 
 /-- DLMF 25.6.1: `ζ(6) = π⁶/945` (from Mathlib's `riemannZeta_two_mul_nat`). -/
 @[dlmf 25.6.E1]

@@ -5,13 +5,13 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.NumberTheory.SumFourSquares
-public import Mathlib.NumberTheory.ModularForms.JacobiTheta.OneVariable
-public import DLMFMathlib.RingTheory.R27PowerSeriesEval
+public import DLMFMathlib.RingTheory.PowerSeriesEvaluation
 public import Mathlib.CategoryTheory.Category.Init
 public import Mathlib.Combinatorics.Matroid.Init
 public import Mathlib.Data.Nat.Choose.Multinomial
 public import Mathlib.NumberTheory.Chebyshev
+public import Mathlib.NumberTheory.ModularForms.JacobiTheta.OneVariable
+public import Mathlib.NumberTheory.SumFourSquares
 
 /-!
 # Functions of additive number theory (DLMF §27.13)
@@ -375,7 +375,7 @@ lemma r27_sumSquaresCount_one (n : ℕ) :
 open Classical in
 /-- `ϑ(x) = ∑ r₁(n) xⁿ` converges absolutely in the unit disc. -/
 lemma r27_absEval_thetaSeries {x : ℂ} (hx : ‖x‖ < 1) :
-    r27_absEval r27_thetaSeries x (jacobiThetaSeries x) := by
+    PowerSeries.HasSumAt r27_thetaSeries x (jacobiThetaSeries x) := by
   have hc : ∀ n, ((coeff n r27_thetaSeries : ℤ) : ℂ) * x ^ n =
       (if n = 0 then 1 else 0) +
         (if ∃ m : ℕ, (m + 1) ^ 2 = n then 2 * x ^ n else 0) := by
@@ -384,7 +384,7 @@ lemma r27_absEval_thetaSeries {x : ℂ} (hx : ‖x‖ < 1) :
     by_cases h0 : n = 0
     · subst h0; simp
     · by_cases hm : ∃ m : ℕ, (m + 1) ^ 2 = n <;> simp [h0]
-  have hb := r27_absEval_of_bounded (P := r27_thetaSeries) (C := 2) (fun n ↦ by
+  have hb := PowerSeries.hasSumAt_of_bounded (P := r27_thetaSeries) (C := 2) (fun n ↦ by
     rw [r27_thetaSeries, coeff_mk, r27_sumSquaresCount_one]; split_ifs <;> norm_num) hx
   convert hb using 1
   rw [jacobiThetaSeries]
@@ -416,8 +416,8 @@ theorem jacobiThetaSeries_sq {x : ℂ} (hx : ‖x‖ < 1) :
     HasSum (fun n : ℕ ↦ (sumSquaresCount 2 (n + 1) : ℂ) * x ^ (n + 1))
       (jacobiThetaSeries x ^ 2 - 1) := by
   open PowerSeries in
-  have h := (r27_absEval_pow (r27_absEval_thetaSeries hx) 2).2
-  simp only [r27_coeff_thetaSeries_pow, Int.cast_natCast] at h
+  have h := (PowerSeries.HasSumAt.pow (r27_absEval_thetaSeries hx) 2)
+  simp only [PowerSeries.HasSumAt, r27_coeff_thetaSeries_pow, Int.cast_natCast] at h
   have h0 : sumSquaresCount 2 0 = 1 := by rfl
   have h1 := (hasSum_nat_add_iff' 1).mpr h
   simpa [h0] using h1
@@ -427,8 +427,8 @@ theorem jacobiThetaSeries_sq {x : ℂ} (hx : ‖x‖ < 1) :
 theorem jacobiThetaSeries_pow (k : ℕ) {x : ℂ} (hx : ‖x‖ < 1) :
     HasSum (fun n : ℕ ↦ (sumSquaresCount k n : ℂ) * x ^ n) (jacobiThetaSeries x ^ k) := by
   open PowerSeries in
-  have h := (r27_absEval_pow (r27_absEval_thetaSeries hx) k).2
-  simpa only [r27_coeff_thetaSeries_pow, Int.cast_natCast] using h
+  have h := (PowerSeries.HasSumAt.pow (r27_absEval_thetaSeries hx) k)
+  simpa only [PowerSeries.HasSumAt, r27_coeff_thetaSeries_pow, Int.cast_natCast] using h
 
 /-- DLMF 27.13.6 (Jacobi): `ϑ(x)² = 1 + 4 ∑_{n≥1} (δ₁(n) - δ₃(n)) xⁿ`, with `δ_j(n)` the number of
 divisors of `n` congruent to `j` mod 4. -/

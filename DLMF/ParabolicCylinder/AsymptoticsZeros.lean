@@ -325,7 +325,7 @@ theorem pcfU_no_real_zero {a : ℝ} (ha : -1/2 ≤ a) (x : ℝ) :
     exact (integrableOn_pcfIntegrand hc x).congr_fun heq measurableSet_Ioi
 
 /-- DLMF 12.11(i): the first real zero lies on the negative axis. -/
-theorem pcfU_no_positive_zero {a : ℝ} (h0 : -3/2 < a) (h1 : a < -1/2) {x : ℝ} (hx : 0 < x) :
+theorem pcfU_no_positive_zero {a : ℝ} (h0 : -3/2 < a) {x : ℝ} (hx : 0 < x) :
     pcfU a x ≠ 0 := by
   have hz : 0 < ((x:ℂ)^2/2).re := by
     rw [show (x:ℂ)^2/2 = ((x^2/2 : ℝ) : ℂ) by push_cast; ring, Complex.ofReal_re]; positivity

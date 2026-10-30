@@ -287,7 +287,7 @@ theorem associatedP_fractional_integral {μ : ℂ} (hμ : 0 < μ.re) (ν : ℂ) 
 
 /-- associatedP cosh integral. The hypothesis `hν` is implied by `hconv` and is not used. -/
 @[dlmf 14.12.E4]
-theorem associatedP_cosh_integral {ν μ : ℂ} (hν : LegendreQRegular ν μ) (h : 0 < (μ-ν).re) (hconv : -1 < (μ+ν).re) {x : ℝ} (hx : 1 < x) :
+theorem associatedP_cosh_integral {ν μ : ℂ} (h : 0 < (μ-ν).re) (hconv : -1 < (μ+ν).re) {x : ℝ} (hx : 1 < x) :
     HasIntegralAtTop (fun t : ℝ => Real.sqrt 2*Gamma (μ+1/2)*(x^2-1:ℂ)^(μ/2)/(Real.sqrt π*Gamma (ν+μ+1)*Gamma (μ-ν))*cosh ((ν+1/2)*t)/(x+Real.cosh t:ℂ)^(μ+1/2)) 0 (associatedP ν (-μ) x) :=
   legInt_associatedP_cosh_integral h hconv hx
 
@@ -631,7 +631,7 @@ theorem olverQ_nat_reduction_integral (n m : ℕ) (hmn : m ≤ n) {x : ℝ} (hx 
     have hPd := ((associatedP_analytic n m) _ hs).differentiableAt.hasDerivAt
     have h := ((hQd.div hPd (hPne t ht)).comp_ofReal).const_mul (-associatedP n m x)
     have hw := olverQ_wronskian_pos (n:ℂ) (m:ℂ) hs
-    rw [LegendreWronskian, hfac] at hw
+    rw [ODE.wronskian, hfac] at hw
     have ht2 : (t:ℂ)^2-1 ≠ 0 := by
       rw [show (t:ℂ)^2-1 = ((t^2-1:ℝ):ℂ) by push_cast; ring]; exact ofReal_ne_zero.2 (by nlinarith)
     convert h using 1
@@ -713,7 +713,7 @@ theorem olverQ_nat_heine (n : ℕ) {x : ℝ} (hx : 1 < x) :
 /-- DLMF 14.6.6: for `m ≥ 1` and `-1 < x < 1`, `𝖯^{−m}_ν(x) = (1−x²)^{−m/2} ∫_x^1 ⋯ ∫_x^1 𝖯_ν(x)
 (dx)^m`, the `m`-fold iterated integral over `(x, 1)`. -/
 @[dlmf 14.6.E6]
-theorem ferrersP_negative_order_integral (ν : ℂ) (m : ℕ) (hm : 0 < m) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem ferrersP_negative_order_integral (ν : ℂ) (m : ℕ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     ferrersP ν (-m) x=(1-x^2:ℂ)^(-(m:ℂ)/2)*((fun f : ℝ → ℂ => fun x => ∫ t : ℝ in x..1, f t)^[m]) (ferrersP ν 0) x := by
   rw [legInt_iterate_ferrers ν m ⟨hx.1, hx.2.le⟩, legInt_H, ferrersP]
   have h1 : (0:ℝ) < 1 + x := by linarith [hx.1]
@@ -733,7 +733,7 @@ theorem ferrersP_negative_order_integral (ν : ℂ) (m : ℕ) (hm : 0 < m) {x : 
 /-- DLMF 14.6.7: for `m ≥ 1` and `x > 1`, `P^{−m}_ν(x) = (x²−1)^{−m/2} ∫_1^x ⋯ ∫_1^x P_ν(x) (dx)^m`,
 the `m`-fold iterated integral over `(1, x)`. -/
 @[dlmf 14.6.E7]
-theorem associatedP_negative_order_integral (ν : ℂ) (m : ℕ) (hm : 0 < m) {x : ℝ} (hx : 1 < x) :
+theorem associatedP_negative_order_integral (ν : ℂ) (m : ℕ) {x : ℝ} (hx : 1 < x) :
     associatedP ν (-m) x=(x^2-1:ℂ)^(-(m:ℂ)/2)*((fun f : ℝ → ℂ => fun x => ∫ t : ℝ in 1..x, f t)^[m]) (fun x : ℝ => associatedP ν 0 x) x := by
   have hz : (x:ℂ)-1 ∈ slitPlane := Or.inl (by simp; linarith)
   rw [legInt_iterate_associated ν m hx.le, legInt_associatedP_neg_nat ν m hz,
@@ -742,7 +742,7 @@ theorem associatedP_negative_order_integral (ν : ℂ) (m : ℕ) (hm : 0 < m) {x
 /-- DLMF 14.6.8: for `m ≥ 1`, `Re ν > m − 1` and `x > 1`, `Q^{−m}_ν(x) = (−1)^m (x²−1)^{−m/2} ∫_x^∞
 ⋯ ∫_x^∞ Q_ν(x) (dx)^m`, the `m`-fold iterated improper integral over `(x, ∞)`. -/
 @[dlmf 14.6.E8]
-theorem associatedQ_negative_order_integral (ν : ℂ) (m : ℕ) (hm : 0 < m) (hν : (m:ℝ)-1 < ν.re) {x : ℝ} (hx : 1 < x) :
+theorem associatedQ_negative_order_integral (ν : ℂ) (m : ℕ) (hν : (m:ℝ)-1 < ν.re) {x : ℝ} (hx : 1 < x) :
     associatedQ ν (-m) x=(-1)^m*(x^2-1:ℂ)^(-(m:ℂ)/2)*((fun f : ℝ → ℂ => fun x => improperAtTop f x)^[m]) (fun x : ℝ => associatedQ ν 0 x) x := by
   rw [legInt_iterate_Q ν m hν hx, legInt_g, legInt_legendreBranchPower_real _ hx]
   have hne : ((x:ℂ)^2-1) ≠ 0 := by
@@ -755,7 +755,7 @@ theorem associatedQ_negative_order_integral (ν : ℂ) (m : ℕ) (hm : 0 < m) (h
 
 /-- DLMF 14.6.7 extended to the principal complex sheet by iterated segment primitives. -/
 @[dlmf 14.6.E7]
-theorem associatedP_negative_order_integral_complex (ν : ℂ) (m : ℕ) (hm : 0 < m)
+theorem associatedP_negative_order_integral_complex (ν : ℂ) (m : ℕ)
     {z : ℂ} (hz : z-1 ∈ slitPlane) :
     associatedP ν (-m) z=legendreBranchPower (-m) z*
       ((fun f : ℂ → ℂ => fun z => segmentIntegral f 1 z)^[m]) (associatedP ν 0) z := by
@@ -763,7 +763,7 @@ theorem associatedP_negative_order_integral_complex (ν : ℂ) (m : ℕ) (hm : 0
 
 /-- DLMF 14.6.8: a tail joined to the positive real axis, with actual convergence. -/
 @[dlmf 14.6.E8]
-theorem associatedQ_negative_order_integral_complex (ν : ℂ) (m : ℕ) (hm : 0 < m)
+theorem associatedQ_negative_order_integral_complex (ν : ℂ) (m : ℕ)
     (hν : (m:ℝ)-1 < ν.re) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     associatedQ ν (-m) z=(-1)^m*legendreBranchPower (-m) z*
       ((fun f : ℂ → ℂ => fun z => segmentIntegral f z 2+improperAtTop (fun t : ℝ => f t) 2)^[m])

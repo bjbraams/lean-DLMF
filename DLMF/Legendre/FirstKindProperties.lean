@@ -48,10 +48,6 @@ end DLMF.Hypergeometric
 
 namespace DLMF.Legendre
 
-
-
-
-
 /-- For `z ∉ (-∞, -1]`, the argument `(1-z)/2` lies in the cut plane. -/
 theorem mem_cutPlane_of_one_add {z : ℂ} (hz : 1 + z ∈ slitPlane) : (1 - z) / 2 ∈ cutPlane := by
   rw [mem_cutPlane, show 1 - (1 - z) / 2 = (1 + z) / 2 by ring]
@@ -73,7 +69,6 @@ theorem legendreP_neg_sub_one (ν : ℂ) {z : ℂ} (hz : 1 + z ∈ slitPlane) :
     legendreP (-ν - 1) z = legendreP ν z := by
   rw [legendreP, legendreP, regularizedGaussHG_symm _ _ _ (mem_cutPlane_of_one_add hz)]
   congr 1 <;> ring
-
 
 /-- The domain `ℂ ∖ (-∞, -1]` is open. -/
 theorem isOpen_one_add_mem_slitPlane : IsOpen {z : ℂ | 1 + z ∈ slitPlane} :=
@@ -127,7 +122,6 @@ theorem legendreP_ode (ν : ℂ) {z : ℂ} (hz : 1 + z ∈ slitPlane) :
     show ν + 1 + 2 = ν + 3 by ring] at h
   push_cast at h
   linear_combination h
-
 
 /-- For `n ∈ ℕ`, `P_n` is the Legendre polynomial (DLMF 14.7.1 with `μ = 0`). -/
 theorem legendreP_nat (n : ℕ) {z : ℂ} (hz : 1 + z ∈ slitPlane) :

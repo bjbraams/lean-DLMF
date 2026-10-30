@@ -92,7 +92,7 @@ lemma qbR4_summable_of_geom {f : ℕ × ℕ → ℂ} {x y : ℂ} (hx : ‖x‖<1
 /-- All four q-Appell double series converge absolutely on the stated bidisc. -/
 @[dlmf 17.4.iii]
 theorem summable_qAppell (a ap b bp c cp q x y : ℂ) (hq : ‖q‖<1)
-    (hc : qDenominatorRegular [c,cp] q) (hx : ‖x‖<1) (hy : ‖y‖<1) :
+    (hc : QDenominatorRegular [c,cp] q) (hx : ‖x‖<1) (hy : ‖y‖<1) :
     Summable (qAppell1Term a b bp c q x y) ∧
     Summable (qAppell2Term a b bp c cp q x y) ∧
     Summable (qAppell3Term a ap b bp c q x y) ∧
@@ -174,7 +174,7 @@ private lemma qAppell3_transformation_summable {a ap b bp c q x y : ℂ} (hq : �
 @[dlmf 17.11.E2]
 theorem qAppell2_transformation (a b bp c cp q x y : ℂ)
     (hq : ‖q‖<1) (hb0 : b≠0) (hb : ‖b‖<1) (hx : ‖x‖<1) (hy : ‖y‖<1)
-    (hc : qDenominatorRegular [c,cp,a*x] q) :
+    (hc : QDenominatorRegular [c,cp,a*x] q) :
     qAppell2 a b bp c cp q x y =
       qPochhammerListInf [b,a*x] q / qPochhammerListInf [c,x] q *
         ∑' p : ℕ × ℕ,
@@ -245,7 +245,7 @@ theorem qAppell2_transformation (a b bp c cp q x y : ℂ)
 @[dlmf 17.11.E3]
 theorem qAppell3_transformation (a ap b bp c q x y : ℂ)
     (hq : ‖q‖<1) (ha0 : a≠0) (ha : ‖a‖<1) (hx : ‖x‖<1) (hy : ‖y‖<1)
-    (hc : qDenominatorRegular [c,c/a,b*x] q) :
+    (hc : QDenominatorRegular [c,c/a,b*x] q) :
     qAppell3 a ap b bp c q x y =
       qPochhammerListInf [a,b*x] q / qPochhammerListInf [c,x] q *
         ∑' p : ℕ × ℕ,
@@ -330,7 +330,7 @@ lemma qbR4_summable_pi_geom : ∀ (n : ℕ) (r : Fin n → ℝ), (∀ i, 0 ≤ r
 /-- Absolute convergence of the multivariate Appell generalization. -/
 @[dlmf 17.11.E4]
 theorem summable_qLauricella (n : ℕ) (a c q : ℂ) (b x : Fin n → ℂ)
-    (hq : ‖q‖<1) (hc : qDenominatorRegular [c] q) (hx : ∀ i, ‖x i‖<1) :
+    (hq : ‖q‖<1) (hc : QDenominatorRegular [c] q) (hx : ∀ i, ‖x i‖<1) :
     Summable (qLauricellaTerm n a c q b x) := by
   obtain ⟨A, hA0, hA⟩ := qbR4_qPochhammer_bdd a hq
   obtain ⟨Dq, hDq0, hDq⟩ := qbR4_qPochhammer_inv_bdd hq (qbR4_q_regular hq)
@@ -414,7 +414,7 @@ private lemma qbR4_inf_ratio_shift {q β w : ℂ} (hq : ‖q‖<1) (hwf : ∀ k 
 @[dlmf 17.11.E4]
 theorem qLauricella_transformation (n : ℕ) (a c q : ℂ) (b x : Fin n → ℂ)
     (hq : ‖q‖<1) (ha0 : a≠0) (ha : ‖a‖<1) (hx : ∀ i, ‖x i‖<1)
-    (hc : qDenominatorRegular (c :: List.ofFn (fun i => b i*x i)) q) :
+    (hc : QDenominatorRegular (c :: List.ofFn (fun i => b i*x i)) q) :
     (∑' m : Fin n → ℕ, qLauricellaTerm n a c q b x m) =
       qPochhammerListInf (a :: List.ofFn (fun i => b i*x i)) q /
         qPochhammerListInf (c :: List.ofFn x) q *
@@ -533,7 +533,7 @@ theorem qLauricella_two (a b bp c q x y : ℂ) :
 @[dlmf 17.11.E1]
 theorem qAppell1_transformation (a b bp c q x y : ℂ)
     (hq : ‖q‖<1) (ha0 : a≠0) (ha : ‖a‖<1) (hx : ‖x‖<1) (hy : ‖y‖<1)
-    (hc : qDenominatorRegular [c,b*x,bp*y] q) :
+    (hc : QDenominatorRegular [c,b*x,bp*y] q) :
     qAppell1 a b bp c q x y =
       qPochhammerListInf [a,b*x,bp*y] q / qPochhammerListInf [c,x,y] q *
         qPhi [c/a,x,y] [b*x,bp*y] q a := by

@@ -36,7 +36,7 @@ def p3lH {K : Type*} [Field K] (m : ℕ) (γ2 c : K) : ℕ → K
       2 * γ2 * p3lH m γ2 c (k + 1) - γ2 * p3lH m γ2 c k) / (2 * ((k : K) + 1) * (k + m + 1))
 
 /-- The coefficients commute with ring homomorphisms. -/
-lemma p3lH_map {K L : Type*} [Field K] [Field L] [CharZero L] (f : K →+* L) (m : ℕ) (γ2 c : K)
+lemma p3lH_map {K L : Type*} [Field K] [Field L] (f : K →+* L) (m : ℕ) (γ2 c : K)
     (k : ℕ) : f (p3lH m γ2 c k) = p3lH m (f γ2) (f c) k := by
   induction k using Nat.strong_induction_on with
   | _ k ih =>
@@ -322,12 +322,12 @@ lemma p3lY_ode (m : ℕ) (γ2 c : ℂ) {z : ℂ} (hz : ‖z - 1‖ < 5 / 3) :
   linear_combination h
 
 /-- The factor equation `(1-z²) f'' - 2(m+1) z f' + (c + γ²(1-z²)) f = 0` on `U`. -/
-def p3lSol (m : ℕ) (γ2 c : ℂ) (U : Set ℂ) (f : ℂ → ℂ) : Prop :=
+def P3lSol (m : ℕ) (γ2 c : ℂ) (U : Set ℂ) (f : ℂ → ℂ) : Prop :=
   ∀ z ∈ U, (1 - z ^ 2) * deriv (deriv f) z - 2 * ((m : ℂ) + 1) * z * deriv f z +
     (c + γ2 * (1 - z ^ 2)) * f z = 0
 
 /-- The Frobenius solution solves the factor equation on `|z - 1| < 5/3`. -/
-lemma p3lY_sol (m : ℕ) (γ2 c : ℂ) : p3lSol m γ2 c (Metric.ball 1 (5 / 3)) (p3lY m γ2 c) :=
+lemma p3lY_sol (m : ℕ) (γ2 c : ℂ) : P3lSol m γ2 c (Metric.ball 1 (5 / 3)) (p3lY m γ2 c) :=
   fun z hz => p3lY_ode m γ2 c (by simpa [dist_eq_norm] using hz)
 
 /-- `F(0) = 1`. -/
@@ -359,7 +359,7 @@ def p3lP (m : ℕ) (z : ℂ) : ℂ := 2 * ((m : ℂ) + 1) * z / (1 - z ^ 2)
 def p3lQ (γ2 c : ℂ) (z : ℂ) : ℂ := -(c + γ2 * (1 - z ^ 2)) / (1 - z ^ 2)
 
 /-- The factor equation in the normalized form `f'' = p f' + q f`. -/
-lemma p3l_ode_normal {m : ℕ} {γ2 c : ℂ} {U : Set ℂ} {f : ℂ → ℂ} (hf : p3lSol m γ2 c U f)
+lemma p3l_ode_normal {m : ℕ} {γ2 c : ℂ} {U : Set ℂ} {f : ℂ → ℂ} (hf : P3lSol m γ2 c U f)
     {z : ℂ} (hz : z ∈ U) (h1 : 1 - z ^ 2 ≠ 0) :
     deriv (deriv f) z = p3lP m z * deriv f z + p3lQ γ2 c z * f z := by
   have := hf z hz
@@ -381,7 +381,7 @@ lemma p3lQ_contDiffAt (γ2 c : ℂ) {z : ℂ} (h1 : 1 - z ^ 2 ≠ 0) :
 /-- Uniqueness for the factor equation on a preconnected open set avoiding `±1`. -/
 lemma p3l_eqOn {m : ℕ} {γ2 c : ℂ} {U : Set ℂ} (hU : IsOpen U) (hU' : IsPreconnected U)
     (h1 : ∀ z ∈ U, 1 - z ^ 2 ≠ 0) {f g : ℂ → ℂ} (hf : AnalyticOnNhd ℂ f U)
-    (hg : AnalyticOnNhd ℂ g U) (hfs : p3lSol m γ2 c U f) (hgs : p3lSol m γ2 c U g) {x₀ : ℂ}
+    (hg : AnalyticOnNhd ℂ g U) (hfs : P3lSol m γ2 c U f) (hgs : P3lSol m γ2 c U g) {x₀ : ℂ}
     (hx₀ : x₀ ∈ U) (h₀ : f x₀ = g x₀) (h₁ : deriv f x₀ = deriv g x₀) : EqOn f g U :=
   ODE.eqOn_of_ode hU hU' hf hg hx₀ (p3lP_contDiffAt m (h1 x₀ hx₀))
     (p3lQ_contDiffAt γ2 c (h1 x₀ hx₀)) (fun z hz => p3l_ode_normal hfs hz (h1 z hz))
@@ -390,7 +390,7 @@ lemma p3l_eqOn {m : ℕ} {γ2 c : ℂ} {U : Set ℂ} (hU : IsOpen U) (hU' : IsPr
 /-- Local uniqueness at a regular point. -/
 lemma p3l_eventuallyEq {m : ℕ} {γ2 c x₀ : ℂ} {U : Set ℂ} (hU : U ∈ 𝓝 x₀)
     (h1 : 1 - x₀ ^ 2 ≠ 0) {f g : ℂ → ℂ} (hf : AnalyticAt ℂ f x₀)
-    (hg : AnalyticAt ℂ g x₀) (hfs : p3lSol m γ2 c U f) (hgs : p3lSol m γ2 c U g)
+    (hg : AnalyticAt ℂ g x₀) (hfs : P3lSol m γ2 c U f) (hgs : P3lSol m γ2 c U g)
     (h₀ : f x₀ = g x₀) (h₁ : deriv f x₀ = deriv g x₀) : f =ᶠ[𝓝 x₀] g := by
   have hne : ∀ᶠ z in 𝓝 x₀, 1 - z ^ 2 ≠ 0 :=
     ((continuous_const.sub (continuous_pow 2)).continuousAt.eventually_ne h1)
@@ -404,8 +404,8 @@ lemma p3l_deriv_comp_neg (f : ℂ → ℂ) (z : ℂ) :
     deriv (fun w => f (-w)) z = -deriv f (-z) := deriv_comp_neg (f := f) (x := z)
 
 /-- The reflection `z ↦ s f(-z)` preserves the factor equation. -/
-lemma p3lSol_reflect {m : ℕ} {γ2 c : ℂ} {U : Set ℂ} {f : ℂ → ℂ} (hf : p3lSol m γ2 c U f)
-    (s : ℂ) : p3lSol m γ2 c ((fun z => -z) ⁻¹' U) (fun z => s * f (-z)) := by
+lemma p3lSol_reflect {m : ℕ} {γ2 c : ℂ} {U : Set ℂ} {f : ℂ → ℂ} (hf : P3lSol m γ2 c U f)
+    (s : ℂ) : P3lSol m γ2 c ((fun z => -z) ⁻¹' U) (fun z => s * f (-z)) := by
   intro z hz
   have e1 : deriv (fun w => s * f (-w)) = fun w => -(s * deriv f (-w)) := by
     funext w
@@ -429,7 +429,7 @@ lemma p3l_one_sub_sq_ne_zero {z : ℂ} (hz : ‖z‖ < 1) : 1 - z ^ 2 ≠ 0 := b
 
 /-- An entire solution vanishing to first order at `0` vanishes. -/
 theorem p3l_eq_zero_of_data {m : ℕ} {γ2 c : ℂ} {g : ℂ → ℂ} (hg : Differentiable ℂ g)
-    (hgs : p3lSol m γ2 c univ g) (h0 : g 0 = 0) (h1 : deriv g 0 = 0) : g = 0 := by
+    (hgs : P3lSol m γ2 c univ g) (h0 : g 0 = 0) (h1 : deriv g 0 = 0) : g = 0 := by
   have hA : AnalyticOnNhd ℂ g univ := fun z _ => hg.analyticAt z
   have hB : EqOn g (fun _ => 0) (Metric.ball 0 1) := by
     refine p3l_eqOn (m := m) (γ2 := γ2) (c := c) Metric.isOpen_ball
@@ -445,7 +445,7 @@ theorem p3l_eq_zero_of_data {m : ℕ} {γ2 c : ℂ} {g : ℂ → ℂ} (hg : Diff
 
 /-- The Wronskian of an entire solution with the Frobenius solution vanishes at `0`. -/
 theorem p3l_wronskian {m : ℕ} {γ2 c : ℂ} {g : ℂ → ℂ} (hg : Differentiable ℂ g)
-    (hgs : p3lSol m γ2 c univ g) :
+    (hgs : P3lSol m γ2 c univ g) :
     g 0 * deriv (p3lY m γ2 c) 0 = deriv g 0 * p3lY m γ2 c 0 := by
   set Y := p3lY m γ2 c
   set B : Set ℂ := Metric.ball 1 (5 / 3)
@@ -480,12 +480,12 @@ theorem p3l_wronskian {m : ℕ} {γ2 c : ℂ} {g : ℂ → ℂ} (hg : Differenti
 
 /-- **Entire solutions force `Y(0) Y'(0) = 0`.** -/
 theorem p3l_Y_mul_deriv_eq_zero {m : ℕ} {γ2 c : ℂ} {g : ℂ → ℂ} (hg : Differentiable ℂ g)
-    (hgs : p3lSol m γ2 c univ g) (hne : g ≠ 0) :
+    (hgs : P3lSol m γ2 c univ g) (hne : g ≠ 0) :
     p3lY m γ2 c 0 * deriv (p3lY m γ2 c) 0 = 0 := by
   have h1 := p3l_wronskian hg hgs
   have hh : Differentiable ℂ (fun z => 1 * g (-z)) := by
     have := hg.comp differentiable_neg; simpa [Function.comp_def] using this
-  have hhs : p3lSol m γ2 c univ (fun z => 1 * g (-z)) := by
+  have hhs : P3lSol m γ2 c univ (fun z => 1 * g (-z)) := by
     simpa using p3lSol_reflect hgs 1
   have h2 := p3l_wronskian hh hhs
   have e : deriv (fun z => 1 * g (-z)) 0 = -deriv g 0 := by
@@ -605,7 +605,7 @@ lemma p3l_superexp {a : ℕ → ℝ} (ha : ∀ n, 0 ≤ a n) {σ₀ D₀ : ℝ} 
 
 /-- The factor equation is preserved by equality on an open set. -/
 lemma p3lSol_congr {m : ℕ} {γ2 c : ℂ} {U : Set ℂ} (hU : IsOpen U) {f g : ℂ → ℂ}
-    (h : EqOn f g U) (hf : p3lSol m γ2 c U f) : p3lSol m γ2 c U g := by
+    (h : EqOn f g U) (hf : P3lSol m γ2 c U f) : P3lSol m γ2 c U g := by
   intro z hz
   have he : f =ᶠ[𝓝 z] g := by
     filter_upwards [hU.mem_nhds hz] with w hw using h hw
@@ -622,8 +622,8 @@ lemma p3l_eq_ofScalars_coeff (p : FormalMultilinearSeries ℂ ℂ ℂ) :
 /-- A solution analytic on a disc of radius `6/5` about `0` extends to an entire solution. -/
 lemma p3l_entire_of_ball {m : ℕ} {γ2 c : ℂ} {G : ℂ → ℂ}
     (hG : DifferentiableOn ℂ G (Metric.closedBall 0 (6 / 5)))
-    (hode : p3lSol m γ2 c (Metric.ball 0 (2 / 3)) G) :
-    ∃ E : ℂ → ℂ, Differentiable ℂ E ∧ p3lSol m γ2 c univ E ∧
+    (hode : P3lSol m γ2 c (Metric.ball 0 (2 / 3)) G) :
+    ∃ E : ℂ → ℂ, Differentiable ℂ E ∧ P3lSol m γ2 c univ E ∧
       EqOn E G (Metric.ball 0 (6 / 5)) := by
   have hp0 := hG.hasFPowerSeriesOnBall (R := 6 / 5) (by norm_num)
   set a : ℕ → ℂ := fun n => (cauchyPowerSeries G 0 (6 / 5)).coeff n
@@ -766,7 +766,7 @@ lemma p3l_entire_of_ball {m : ℕ} {γ2 c : ℂ} {G : ℂ → ℂ}
 
 /-- Restriction of the factor equation to a subset. -/
 lemma p3lSol_mono {m : ℕ} {γ2 c : ℂ} {U V : Set ℂ} {f : ℂ → ℂ} (hUV : U ⊆ V)
-    (hf : p3lSol m γ2 c V f) : p3lSol m γ2 c U f := fun z hz => hf z (hUV hz)
+    (hf : P3lSol m γ2 c V f) : P3lSol m γ2 c U f := fun z hz => hf z (hUV hz)
 
 /-- `‖z - 1‖² = ‖z‖² - 2 Re z + 1`. -/
 lemma p3l_norm_sub_one_sq (z : ℂ) : ‖z - 1‖ ^ 2 = ‖z‖ ^ 2 - 2 * z.re + 1 := by
@@ -791,7 +791,7 @@ lemma p3l_mem_neg_ball {z : ℂ} : z ∈ (fun w : ℂ => -w) ⁻¹' Metric.ball 
 and its reflection at `-1` glue to a solution on a disc of radius `> 1`. -/
 theorem p3l_exists_entire {m : ℕ} {γ2 c : ℂ}
     (h : p3lY m γ2 c 0 * deriv (p3lY m γ2 c) 0 = 0) :
-    ∃ g : ℂ → ℂ, Differentiable ℂ g ∧ p3lSol m γ2 c univ g ∧ g ≠ 0 := by
+    ∃ g : ℂ → ℂ, Differentiable ℂ g ∧ P3lSol m γ2 c univ g ∧ g ≠ 0 := by
   set Y := p3lY m γ2 c with hYdef
   obtain ⟨s, hs0, hs1⟩ : ∃ s : ℂ, s * Y 0 = Y 0 ∧ -s * deriv Y 0 = deriv Y 0 := by
     rcases mul_eq_zero.1 h with h0 | h1
@@ -823,7 +823,7 @@ theorem p3l_exists_entire {m : ℕ} {γ2 c : ℂ}
   have hYta : AnalyticOnNhd ℂ Yt Bm := fun z hz =>
     analyticAt_const.mul ((hYa (-z) hz).comp (f := fun w : ℂ => -w) (by fun_prop))
   have hYs := p3lY_sol m γ2 c
-  have hYts : p3lSol m γ2 c Bm Yt := p3lSol_reflect hYs s
+  have hYts : P3lSol m γ2 c Bm Yt := p3lSol_reflect hYs s
   have h0W : (0 : ℂ) ∈ W := ⟨by simp [Bp]; norm_num, by rw [hBm]; simp; norm_num⟩
   have hdYt : deriv Yt 0 = -s * deriv Y 0 := by
     simp only [Yt]
@@ -883,7 +883,7 @@ theorem p3l_exists_entire {m : ℕ} {γ2 c : ℂ}
       simp only [Bp, Metric.mem_ball, dist_eq_norm]
       calc ‖-z - 1‖ ≤ ‖-z‖ + ‖(1 : ℂ)‖ := norm_sub_le _ _
         _ < 5 / 3 := by simp; linarith
-  have hGs : p3lSol m γ2 c (Metric.ball 0 (2 / 3)) G :=
+  have hGs : P3lSol m γ2 c (Metric.ball 0 (2 / 3)) G :=
     p3lSol_congr Metric.isOpen_ball (fun z hz => (hGW (hsub hz)).symm)
       (p3lSol_mono (hsub.trans inter_subset_left) hYs)
   obtain ⟨E, hEd, hEs, hEG⟩ := p3l_entire_of_ball hGd hGs

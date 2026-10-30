@@ -36,10 +36,10 @@ def genCoeff (a b : Multiset ℂ) (n : ℕ) : ℂ :=
   genPoch a n / (genPoch b n * n.factorial)
 
 /-- Lower parameters avoid the nonpositive integers, unless a formula explicitly overrides this. -/
-def genDenRegular (b : Multiset ℂ) : Prop := ∀ x ∈ b, ∀ n : ℕ, x ≠ -n
+def GenDenRegular (b : Multiset ℂ) : Prop := ∀ x ∈ b, ∀ n : ℕ, x ≠ -n
 
 /-- At least one upper parameter terminates the series. -/
-def genTerminates (a : Multiset ℂ) : Prop := ∃ x ∈ a, ∃ n : ℕ, x = -n
+def GenTerminates (a : Multiset ℂ) : Prop := ∃ x ∈ a, ∃ n : ℕ, x = -n
 
 /-- The formal scalar series, meaningful even where the analytic series diverges. -/
 def genFormalSeries (a b : Multiset ℂ) : PowerSeries ℂ := PowerSeries.mk (genCoeff a b)
@@ -49,11 +49,11 @@ def genFiniteHG (m : ℕ) (a b : Multiset ℂ) (z : ℂ) : ℂ :=
   ∑ n ∈ range (m + 1), genCoeff a b n * z ^ n
 
 /-- Natural-order hypergeometric series convergence; unlike `HasSum`, permits conditional convergence. -/
-def genSeriesConvergesTo (a b : Multiset ℂ) (z v : ℂ) : Prop :=
+def GenSeriesConvergesTo (a b : Multiset ℂ) (z v : ℂ) : Prop :=
   Tendsto (fun N : ℕ => ∑ n ∈ range N, genCoeff a b n * z ^ n) atTop (𝓝 v)
 
 /-- Absolute convergence of the ordinary coefficient series. -/
-def genSeriesAbsolutelyConverges (a b : Multiset ℂ) (z : ℂ) : Prop :=
+def GenSeriesAbsolutelyConverges (a b : Multiset ℂ) (z : ℂ) : Prop :=
   Summable (fun n : ℕ => ‖genCoeff a b n * z ^ n‖)
 
 /-- The unit-circle excess parameter (16.2.2). -/

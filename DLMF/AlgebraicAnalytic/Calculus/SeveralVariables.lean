@@ -364,7 +364,8 @@ theorem isLocalMax_of_hessian_negDef {f : ℝ × ℝ → ℝ} {a b : ℝ} (hf : 
 /-! ### §1.5(iv) Leibniz's theorem for differentiation of integrals -/
 
 /-- DLMF 1.5.22 (Leibniz's rule with variable limits): if `f` and `∂f/∂x` are continuous on
-`[a, b] × [c, d]` and `α`, `β` are continuously differentiable on `[a, b]` with values in
+`[a, b] × [c, d]`, with the partial derivative existing for interior `x`, and `α`, `β`
+are continuously differentiable on `[a, b]` with values in
 `[c, d]`, then for `x ∈ (a, b)`
 `d/dx ∫_{α(x)}^{β(x)} f(x, y) dy = f(x, β(x)) β'(x) - f(x, α(x)) α'(x) + ∫_{α(x)}^{β(x)} f_x dy`.
 -/
@@ -372,6 +373,7 @@ theorem isLocalMax_of_hessian_negDef {f : ℝ × ℝ → ℝ} {a b : ℝ} (hf : 
 theorem hasDerivAt_integral_variable_limits {f : ℝ × ℝ → ℝ} {α β : ℝ → ℝ} {a b c d : ℝ}
     (hf : ContinuousOn f (Icc a b ×ˢ Icc c d))
     (hfx : ContinuousOn (fun q => deriv (fun t => f (t, q.2)) q.1) (Icc a b ×ˢ Icc c d))
+    (hdf : ∀ q ∈ Ioo a b ×ˢ Icc c d, DifferentiableAt ℝ (fun t => f (t, q.2)) q.1)
     (hα : ContDiffOn ℝ 1 α (Icc a b)) (hβ : ContDiffOn ℝ 1 β (Icc a b))
     (hαI : ∀ x ∈ Icc a b, α x ∈ Icc c d) (hβI : ∀ x ∈ Icc a b, β x ∈ Icc c d)
     {x : ℝ} (hx : x ∈ Ioo a b) :
@@ -384,11 +386,13 @@ theorem hasDerivAt_integral_variable_limits {f : ℝ × ℝ → ℝ} {α β : �
 `∂f/∂x` are continuous on `[a, b] × [c, ∞)`, `∫_c^∞ f(x, y) dy` converges to `I(x)` for
 `x ∈ [a, b]`, and `∫_c^∞ ∂f/∂x dy` converges to `J(x)` uniformly on `[a, b]` (1.5.23, stated
 as uniform convergence of `∫_c^R` as `R → ∞`, which is equivalent to the uniform smallness of
-the tails). Then `I' = J` on `(a, b)`. -/
+the tails). The partial derivative is required to exist for interior `x` and all `y ≥ c`;
+continuity of a totalized derivative alone does not assert this. Then `I' = J` on `(a, b)`. -/
 @[dlmf 1.5.E23, dlmf 1.5.E24]
 theorem hasDerivAt_improper_integral_of_tendstoUniformlyOn {f : ℝ × ℝ → ℝ} {I J : ℝ → ℝ}
     {a b c : ℝ} (hf : ContinuousOn f (Icc a b ×ˢ Ici c))
     (hfx : ContinuousOn (fun q => deriv (fun t => f (t, q.2)) q.1) (Icc a b ×ˢ Ici c))
+    (hdf : ∀ q ∈ Ioo a b ×ˢ Ici c, DifferentiableAt ℝ (fun t => f (t, q.2)) q.1)
     (hI : ∀ x ∈ Icc a b, Tendsto (fun R => ∫ y in c..R, f (x, y)) atTop (𝓝 (I x)))
     (hJ : TendstoUniformlyOn (fun R x => ∫ y in c..R, deriv (fun t => f (t, y)) x) J atTop
       (Icc a b))

@@ -288,7 +288,7 @@ def lambertSeries (f : ℕ → ℂ) (x : ℂ) : ℂ :=
   ∑' n : ℕ, f (n + 1) * x ^ (n + 1) / (1 - x ^ (n + 1))
 
 /-- `∑_{b≥1} y^b = y/(1 - y)` for `‖y‖ < 1`, over `ℕ+`. -/
-lemma q27_hasSum_geometric_pnat {K : Type*} [NormedDivisionRing K] [CompleteSpace K]
+lemma q27_hasSum_geometric_pnat {K : Type*} [NormedDivisionRing K]
     {y : K} (hy : ‖y‖ < 1) : HasSum (fun b : ℕ+ ↦ y ^ (b : ℕ)) (y * (1 - y)⁻¹) := by
   rw [← (Equiv.pnatEquivNat.symm.hasSum_iff (f := fun b : ℕ+ ↦ y ^ (b : ℕ)))]
   have := (hasSum_geometric_of_norm_lt_one hy).mul_left y

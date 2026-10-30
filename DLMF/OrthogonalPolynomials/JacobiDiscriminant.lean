@@ -108,8 +108,6 @@ theorem jacPoly_natDegree_lc (a b : ℂ) (n : ℕ) (hc : coef a b n n ≠ 0) :
   · rw [leadingCoeff_add_of_degree_lt hlt, leadingCoeff_mul, leadingCoeff_C,
       leadingCoeff_pow, leadingCoeff_X_sub_C, one_pow, mul_one]
 
-
-
 /-- A complex polynomial is its leading coefficient times `∏ (x - r)` over its roots. -/
 theorem eval_eq_lc_mul_prod_roots (p : ℂ[X]) (x : ℂ) :
     p.eval x = p.leadingCoeff * (p.roots.map fun r => x - r).prod := by
@@ -148,8 +146,6 @@ theorem lc_pow_mul_prod_roots_eval (p q : ℂ[X]) :
     norm_num
   linear_combination (-(p.leadingCoeff ^ q.natDegree * q.leadingCoeff ^ p.natDegree *
     (p.roots.map fun x => (q.roots.map fun y => x - y).prod).prod)) * hs
-
-
 
 /-- `∏_{i,j<N, i<j} c = c^{C(N,2)}`. -/
 theorem prod_range_prod_range_ite_lt (c : ℂ) (N : ℕ) :
@@ -201,7 +197,6 @@ theorem prod_prod_erase_sub {N : ℕ} (v : Fin N → ℂ) :
   rw [← this, ← Fin.prod_univ_eq_prod_range]
   refine prod_congr rfl fun i _ => ?_
   rw [← Fin.prod_univ_eq_prod_range (fun j => if (i : ℕ) < j then (-1 : ℂ) else 1)]
-
 
 /-- The algebraic induction step for the closed form of the discriminant. -/
 theorem disc_step_algebra (n : ℕ) {K K2 S0 S1 u1 v1 c1 u2 v2 c2 d e n2 pa1 pb1 f1 σ1 : ℂ}
@@ -566,11 +561,11 @@ theorem disc_eq_EE (hα : -1 < α) (hβ : -1 < β) (m : ℕ) (x : Fin (m + 1) �
   have h1 : K * ∏ i, (1 - xc i) = poch (α + 1) (m + 1) / (m + 1)! := by
     have := congrArg (fun p => p.eval 1) hnodal
     simp only [eval_mul, eval_C, Lagrange.eval_nodal, eval_jacPoly hα'] at this
-    rw [← this, jacobi_at_one hα']
+    rw [← this, jacobiPolyP_one ]
   have h2 : K * ∏ i, (1 + xc i) = poch (β + 1) (m + 1) / (m + 1)! := by
     have := congrArg (fun p => p.eval (-1)) hnodal
     simp only [eval_mul, eval_C, Lagrange.eval_nodal, eval_jacPoly hα'] at this
-    rw [jacobi_reflection hα' hβ' (m + 1) 1, jacobi_at_one hβ'] at this
+    rw [jacobi_reflection hα' hβ' (m + 1) 1, jacobiPolyP_one ] at this
     have hneg : ∏ i, (-1 - xc i) = (-1) ^ (m + 1) * ∏ i, (1 + xc i) := by
       have hc : ∏ _i : Fin (m + 1), (-1 : ℂ) = (-1) ^ (m + 1) := by simp
       rw [← hc, ← prod_mul_distrib]

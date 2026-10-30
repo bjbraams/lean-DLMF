@@ -5,14 +5,14 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.QHypergeometric.Basic.Series
-public import TauCeti.Analysis.Complex.Conformal.Continuation.Basic
 public import DLMF.GeneralizedHypergeometric.ParameterAndSeriesProperties
-public import Mathlib.Analysis.RCLike.Sqrt
+public import DLMF.QHypergeometric.Basic.Series
 public import DLMF.QSeries.Identities
 public import DLMF.QSeries.QExponential
+public import Mathlib.Analysis.RCLike.Sqrt
 public import Mathlib.FieldTheory.KummerExtension
 public import Mathlib.RingTheory.RootsOfUnity.Complex
+public import TauCeti.Analysis.Complex.Conformal.Continuation.Basic
 
 /-!
 # Basic hypergeometric series: common definitions (DLMF §§17.1,17.2,17.4)
@@ -74,7 +74,7 @@ theorem qPochhammer_order_hasProd {a q ν : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
 
 /-- For natural `n`, the generalized q-shifted factorial `(a;q)_n` defined via infinite products
 agrees with the finite q-Pochhammer symbol. -/
-theorem qPochhammer_order_nat {a q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (n : ℕ)
+theorem qPochhammer_order_nat {a q : ℂ} (hq : ‖q‖<1) (n : ℕ)
     (hd : qPochhammerInf (a*q^n) q≠0) : qPochhammerOrder a q n=qPochhammer a q n := by
   unfold qPochhammerOrder
   rw [cpow_natCast]
@@ -410,7 +410,6 @@ theorem qPochhammer_root_ratio {a q : ℂ} {k : ℕ} (hk : 0<k) (n : ℕ) (hd : 
     rw [qPochhammer_one, Nat.add_comm 1 n, qPochhammer_succ] at h
     simpa [← pow_mul, mul_comm] using h.symm
 
-
 /-- Limits in a parameter: `(a/τ;q)_n τ^n → (-a)^n q^(n(n-1)/2)` as `τ → 0`, and likewise `(aσ;q)_n
 σ^(-n)` as `σ → ∞` (DLMF 17.2.E24). -/
 @[dlmf 17.2.E24]
@@ -498,7 +497,7 @@ theorem qPochhammer_double_parameter_limit {a b c q : ℂ} (hc : c≠0) (hq : q�
 /-- For `|q| < 1`, regular lower parameters and `r ≤ s + 1` (with `|z| < 1` when `r = s + 1`), the
 basic hypergeometric series `rφs` converges to `qPhi`. -/
 theorem qPhi_hasSum {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
-    (hb : qDenominatorRegular b q)
+    (hb : QDenominatorRegular b q)
     (hr : a.length≤b.length+1) (hz : a.length=b.length+1 → ‖z‖<1) :
     HasSum (qPhiTerm a b q z) (qPhi a b q z) := by
   let K : ℕ := b.length+1-a.length
@@ -692,7 +691,7 @@ lemma qaR4_qPsiTerm_natCast {a b : List ℂ} {q z : ℂ} (hq : ‖q‖<1) (n : �
 
 /-- The negative-index bilateral terms are summable. -/
 lemma qaR4_qPsiTerm_neg_summable {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
-    (hab : qBilateralRegular a b q) (ha : a.prod≠0) (hz0 : z≠0)
+    (hab : QBilateralRegular a b q) (ha : a.prod≠0) (hz0 : z≠0)
     (hr : a.length≤b.length) (hz : ‖b.prod/(a.prod*z)‖<1) :
     Summable (fun m : ℕ => qPsiTerm a b q z (-(m:ℤ))) := by
   set R : ℕ → ℂ := fun m => (b.map fun x => q^(m+1)-x).prod/(a.map fun x => q^(m+1)-x).prod*
@@ -719,7 +718,7 @@ lemma qaR4_qPsiTerm_neg_summable {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq 
 
 /-- Both halves of a bilateral series in its annulus are summable. -/
 lemma qaR4_qPsiTerm_summable_parts {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
-    (hab : qBilateralRegular a b q) (ha : a.prod≠0) (hz0 : z≠0)
+    (hab : QBilateralRegular a b q) (ha : a.prod≠0) (hz0 : z≠0)
     (hr : a.length≤b.length) (hz : ‖b.prod/(a.prod*z)‖<1)
     (hz' : a.length=b.length → ‖z‖<1) :
     Summable (fun n : ℕ => qPsiTerm a b q z n) ∧
@@ -758,7 +757,7 @@ lemma qaR4_list_prod_pow_sub_recip (l : List ℂ) (q : ℂ) (m : ℕ) (hl : ∀ 
 
 /-- Closed form of the negative-index bilateral terms. -/
 lemma qaR4_qPsiTerm_neg_closed {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hz0 : z≠0)
-    (hr : a.length≤b.length) (hab : qBilateralRegular a b q) (ha : a.prod≠0) (hb0 : b.prod≠0)
+    (hr : a.length≤b.length) (hab : QBilateralRegular a b q) (ha : a.prod≠0) (hb0 : b.prod≠0)
     (m : ℕ) :
     qPsiTerm a b q z (-(m:ℤ))=qPochhammerList (b.map fun bi => q/bi) q m/
       qPochhammerList (a.map fun ai => q/ai) q m*(b.prod/(a.prod*z))^m := by
@@ -794,7 +793,7 @@ lemma qaR4_qPsiTerm_neg_closed {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hz0 :
 /-- In its annulus of convergence the bilateral basic hypergeometric series `rψs` converges to
 `qPsi`. -/
 theorem qPsi_hasSum {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
-    (hab : qBilateralRegular a b q) (ha : a.prod≠0) (hz0 : z≠0)
+    (hab : QBilateralRegular a b q) (ha : a.prod≠0) (hz0 : z≠0)
     (hr : a.length≤b.length) (hz : ‖b.prod/(a.prod*z)‖<1)
     (hz' : a.length=b.length → ‖z‖<1) : HasSum (qPsiTerm a b q z) (qPsi a b q z) := by
   obtain ⟨h1,h2⟩ := qaR4_qPsiTerm_summable_parts hq0 hq hab ha hz0 hr hz hz'
@@ -804,7 +803,7 @@ theorem qPsi_hasSum {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
 negative-index part (DLMF 17.4.E3). -/
 @[dlmf 17.4.E3]
 theorem qPsi_split {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
-    (hab : qBilateralRegular a b q) (ha : a.prod≠0) (hb0 : b.prod≠0) (hz0 : z≠0)
+    (hab : QBilateralRegular a b q) (ha : a.prod≠0) (hb0 : b.prod≠0) (hz0 : z≠0)
     (hr : a.length≤b.length) (hz : ‖b.prod/(a.prod*z)‖<1)
     (hz' : a.length=b.length → ‖z‖<1) :
     qPsi a b q z=(∑' n : ℕ, qPsiTerm a b q z n)+
@@ -823,7 +822,7 @@ theorem qPsi_split {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
 /-- A basic hypergeometric series with upper parameter `q^(-N)` terminates: it equals its partial
 sum through index `N`. -/
 theorem qPhi_terminates {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
-    (N : ℕ) (hb : qDenominatorRegularThrough b q N) :
+    (N : ℕ) (hb : QDenominatorRegularThrough b q N) :
     qPhi (q^(-(N:ℤ))::a) b q z=qPhiPartial (q^(-(N:ℤ))::a) b q z N := by
   unfold qPhi qPhiPartial
   apply tsum_eq_sum
@@ -843,7 +842,7 @@ theorem qIdem_expansion (f : ℂ → List ℂ → ℂ) (x : ℂ) (a : List ℂ) 
 /-- The bilateral split by actual negative indices, valid also for lower parameter zero. -/
 @[dlmf 17.4.E3]
 theorem qPsi_split_indices {a b : List ℂ} {q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
-    (hab : qBilateralRegular a b q) (ha : a.prod≠0) (hz0 : z≠0)
+    (hab : QBilateralRegular a b q) (ha : a.prod≠0) (hz0 : z≠0)
     (hr : a.length≤b.length) (hz : ‖b.prod/(a.prod*z)‖<1)
     (hz' : a.length=b.length → ‖z‖<1) :
     qPsi a b q z=(∑' n : ℕ, qPsiTerm a b q z n)+
@@ -1005,7 +1004,7 @@ private lemma qPhiTerm_classical_limit (a b : List ℂ) (z : ℂ) (n : ℕ)
 /-- Formal coefficient limit in 17.4.2, with its integer phase/scaling exponent. -/
 @[dlmf 17.4.E2]
 theorem qPhi_coefficient_classical_limit (a b : List ℂ) (z : ℂ) (n : ℕ)
-    (hb : DLMF.Hypergeometric.genDenRegular (b:Multiset ℂ)) :
+    (hb : DLMF.Hypergeometric.GenDenRegular (b:Multiset ℂ)) :
     Tendsto (fun q : ℝ => qPhiTerm (a.map fun ai => (q:ℂ)^ai)
       (b.map fun bi => (q:ℂ)^bi) q (((q:ℂ)-1)^qPhiExponent a b*z) n)
       (𝓝[<] 1) (𝓝 (DLMF.Hypergeometric.genCoeff (a:Multiset ℂ) (b:Multiset ℂ) n*z^n)) := by
@@ -1014,7 +1013,7 @@ theorem qPhi_coefficient_classical_limit (a b : List ℂ) (z : ℂ) (n : ℕ)
 /-- The analytic unilateral limit on the genuine classical convergence domain. -/
 @[dlmf 17.4.E2]
 theorem qPhi_classical_limit (a b : List ℂ) (z : ℂ)
-    (hb : DLMF.Hypergeometric.genDenRegular (b:Multiset ℂ))
+    (hb : DLMF.Hypergeometric.GenDenRegular (b:Multiset ℂ))
     (hr : a.length≤b.length+1) (hz : a.length=b.length+1 → ‖z‖<1) :
     Tendsto (fun q : ℝ => qPhi (a.map fun ai => (q:ℂ)^ai)
       (b.map fun bi => (q:ℂ)^bi) q (((q:ℂ)-1)^qPhiExponent a b*z))
@@ -1068,7 +1067,7 @@ private lemma qPochhammerListInt_neg (l : List ℂ) (q : ℂ) (m : ℕ) :
 theorem qPsi_coefficient_classical_limit (a b : List ℂ) (n : ℤ)
     (hlen : a.length=b.length)
     (ha : ∀ ai∈a, ∀ m : ℕ, ai≠(m+1:ℂ))
-    (hb : DLMF.Hypergeometric.genDenRegular (b:Multiset ℂ)) :
+    (hb : DLMF.Hypergeometric.GenDenRegular (b:Multiset ℂ)) :
     Tendsto (fun q : ℝ => qPsiTerm (a.map fun ai => (q:ℂ)^ai)
       (b.map fun bi => (q:ℂ)^bi) q 1 n)
       (𝓝[<] 1) (𝓝 (DLMF.Hypergeometric.genBilateralCoeff (a:Multiset ℂ) (b:Multiset ℂ) n)) := by
@@ -1135,7 +1134,7 @@ theorem qPhiTerm_eq_coeff_mul (a b : List ℂ) (q z : ℂ) (n : ℕ) :
 /-- Convergence at a nonnegative real radius bounds the formal-series radius.
 This uses Mathlib `FormalMultilinearSeries.le_radius_of_tendsto` directly. -/
 theorem qPhiPowerSeries_radius_ge {a b : List ℂ} {q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
-    (hb : qDenominatorRegular b q) (hr : a.length≤b.length+1) (r : ℝ≥0)
+    (hb : QDenominatorRegular b q) (hr : a.length≤b.length+1) (r : ℝ≥0)
     (hz : a.length=b.length+1 → (r:ℝ)<1) :
     (r:ℝ≥0∞)≤(qPhiPowerSeries a b q).radius := by
   have hs := (qPhi_hasSum (z := (r:ℂ)) hq0 hq hb hr (by simpa using hz)).summable
@@ -1145,7 +1144,7 @@ theorem qPhiPowerSeries_radius_ge {a b : List ℂ} {q : ℂ} (hq0 : q≠0) (hq :
 /-- The full q-series has the expected scalar power series on every admissible positive ball.
 Upper parameters may be zero or terminating. -/
 theorem qPhi_hasFPowerSeriesOnBall {a b : List ℂ} {q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
-    (hb : qDenominatorRegular b q) (hr : a.length≤b.length+1) (r : ℝ≥0) (hr0 : 0<r)
+    (hb : QDenominatorRegular b q) (hr : a.length≤b.length+1) (r : ℝ≥0) (hr0 : 0<r)
     (hz : a.length=b.length+1 → (r:ℝ)<1) :
     HasFPowerSeriesOnBall (qPhi a b q) (qPhiPowerSeries a b q) 0 r := by
   refine ⟨qPhiPowerSeries_radius_ge hq0 hq hb hr r hz,by exact_mod_cast hr0,?_⟩
@@ -1161,7 +1160,7 @@ theorem qPhi_hasFPowerSeriesOnBall {a b : List ℂ} {q : ℂ} (hq0 : q≠0) (hq 
 
 /-- Every convergent unilateral series is analytic on the open unit disk. -/
 theorem qPhi_analytic_disc {a b : List ℂ} {q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
-    (hb : qDenominatorRegular b q) (hr : a.length≤b.length+1) :
+    (hb : QDenominatorRegular b q) (hr : a.length≤b.length+1) :
     AnalyticOnNhd ℂ (qPhi a b q) {z | ‖z‖<1} := by
   intro z hz
   obtain ⟨r,hzr,hr1⟩ := exists_between hz
@@ -1173,7 +1172,7 @@ theorem qPhi_analytic_disc {a b : List ℂ} {q : ℂ} (hq0 : q≠0) (hq : ‖q�
 
 /-- Unilateral series with at most as many upper as lower parameters are entire. -/
 theorem qPhi_analytic_entire {a b : List ℂ} {q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
-    (hb : qDenominatorRegular b q) (hr : a.length≤b.length) :
+    (hb : QDenominatorRegular b q) (hr : a.length≤b.length) :
     AnalyticOnNhd ℂ (qPhi a b q) Set.univ := by
   intro z hz
   let R : ℝ≥0 := ⟨‖z‖+1,by positivity⟩
@@ -1186,14 +1185,14 @@ theorem qPhi_analytic_entire {a b : List ℂ} {q : ℂ} (hq0 : q≠0) (hq : ‖q
 
 /-- The q-series has its explicit scalar Taylor series at the origin. -/
 theorem qPhi_hasFPowerSeriesAt {a b : List ℂ} {q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
-    (hb : qDenominatorRegular b q) (hr : a.length≤b.length+1) :
+    (hb : QDenominatorRegular b q) (hr : a.length≤b.length+1) :
     HasFPowerSeriesAt (qPhi a b q) (qPhiPowerSeries a b q) 0 := by
   exact (qPhi_hasFPowerSeriesOnBall hq0 hq hb hr (1/2) (by norm_num)
     (fun _ => by norm_num)).hasFPowerSeriesAt
 /-- Every Taylor derivative is its factorial times the explicit q-series coefficient.
 This directly applies Mathlib's uniqueness of the scalar analytic expansion. -/
 theorem qPhi_iteratedDeriv_zero {a b : List ℂ} {q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
-    (hb : qDenominatorRegular b q) (hr : a.length≤b.length+1) (n : ℕ) :
+    (hb : QDenominatorRegular b q) (hr : a.length≤b.length+1) (n : ℕ) :
     iteratedDeriv n (qPhi a b q) 0=(n.factorial:ℂ)*qPhiCoeff a b q n := by
   have hp := qPhi_hasFPowerSeriesAt hq0 hq hb hr
   have heq := hp.eq_formalMultilinearSeries hp.analyticAt.hasFPowerSeriesAt
@@ -1228,14 +1227,14 @@ theorem qPochhammerInf_analytic {q : ℂ} (hq : ‖q‖<1) :
     have h : AnalyticAt ℂ (fun a : ℂ => 1-a) z := analyticAt_const.sub analyticAt_id
     simpa only [DLMF.QSeries.TripleProduct.qPochhammerInf_zero_right] using h
   · have h := qPhi_analytic_entire (a := []) (b := []) hq0 hq
-      (by simp [qDenominatorRegular]) (by simp)
+      (by simp [QDenominatorRegular]) (by simp)
     rw [show qPhi [] [] q=(fun z => qPochhammerInf z q) from
       funext fun z => zero_phi_zero hq z] at h
     exact h
 
 /-- Bilateral series are analytic on their actual open annulus, including valid lower zeros. -/
 theorem qPsi_analytic_annulus {a b : List ℂ} {q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
-    (hab : qBilateralRegular a b q) (ha : a.prod≠0) (hr : a.length≤b.length) :
+    (hab : QBilateralRegular a b q) (ha : a.prod≠0) (hr : a.length≤b.length) :
     AnalyticOnNhd ℂ (qPsi a b q)
       {z | z≠0 ∧ ‖b.prod/(a.prod*z)‖<1 ∧ (a.length=b.length → ‖z‖<1)} := by
   sorry
@@ -1250,7 +1249,7 @@ theorem qPhi_continuesInside_of_eq {a b : List ℂ} {q z₀ : ℂ} {U : Set ℂ}
 /-- A holomorphic RHS germ continues the actual bilateral-series germ inside its domain.
 Only the germ in the convergence annulus is used, never a totalized value outside it. -/
 theorem qPsi_continuesInside_of_eq {a b : List ℂ} {q z₀ : ℂ} {U : Set ℂ} {F : ℂ → ℂ}
-    (hU : IsOpen U) (hz₀ : z₀∈U) (hF : AnalyticOnNhd ℂ F U)
+    (hU : IsOpen U) (hF : AnalyticOnNhd ℂ F U)
     (heq : qPsi a b q=ᶠ[𝓝 z₀] F) : TauCeti.ContinuesInside (qPsi a b q) U z₀ := by
   exact (TauCeti.ContinuesInside.of_differentiableOn hU hF.differentiableOn).congr heq.symm
 

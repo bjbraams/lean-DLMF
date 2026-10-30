@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Airy.Scorer
 public import DLMF.Airy.IntegralTools
+public import DLMF.Airy.Scorer
 public import DLMFMathlib.Analysis.SpecialFunctions.ImproperIntegralsExtra
 
 /-!
@@ -223,7 +223,7 @@ theorem scorerTwo_sector_mono {α β : ℝ} (h : α ≤ β) : airySector α ≤ 
 exponential expansion `airyPrefactor .bi z · airyExponentialSum .bi M z`, up to
 `O(|z|^{-3N-1} + |airyPrefactor .bi z / ζ^M|)` (DLMF 9.12.29). -/
 @[dlmf 9.12.E29]
-theorem scorerHi_two_scale_expansion {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π) (N M : ℕ) :
+theorem scorerHi_two_scale_expansion {δ : ℝ} (hδ : 0 < δ) (N M : ℕ) :
     IsBigO (airySector (π - δ))
       (fun z => scorerHi z + (1 / (π * z) *
         ∑ k ∈ Finset.range N, ((3 * k).factorial : ℂ) / (k.factorial * (3 * z ^ 3) ^ k)) -
@@ -302,7 +302,6 @@ theorem scorerPrim_integral_cube :
   rw [setIntegral_congr_fun measurableSet_Ioi hpt, integral_const_mul,
     integral_comp_rpow_Ioi g (by norm_num : (3 : ℝ) ≠ 0), hgv]
   ring
-
 
 /-- `∫₀^∞ ((1+v³/3)⁻¹ - (1+v)⁻¹)/v dv = (log 3)/3`, with integrability. -/
 theorem scorerPrim_integral_rat :
@@ -462,7 +461,6 @@ theorem scorerPrim_integral_tendsto :
   filter_upwards [eventually_gt_atTop 0] with t ht
   exact ((key t ht).2).symm
 
-
 /-- `e^{-v³/3}` is integrable on `(0, ∞)`. -/
 theorem scorerPrim_integrableOn_exp_cube :
     IntegrableOn (fun v : ℝ => Real.exp (-(v ^ 3 / 3))) (Ioi 0) := by
@@ -559,7 +557,6 @@ theorem scorerPrim_tendsto_ofReal :
   simp only [Function.comp]
   rw [scorerPrim_primitive_ofReal hx, ← Complex.ofReal_log hx.le]
   push_cast; ring
-
 
 section
 open Complex
@@ -871,7 +868,7 @@ theorem scorerHi_primitive_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < 2 *
 /-- Rescaling the segment primitive: `∫₀^z f(ta) dt = a⁻¹ ∫₀^{za} f`. -/
 theorem scorerPrim_primitive_comp_mul (f : ℂ → ℂ) {a : ℂ} (ha : a ≠ 0) (z : ℂ) :
     primitive (fun t => f (t * a)) z = a⁻¹ * primitive f (z * a) := by
-  simp only [primitive, lineIntegral, zero_add, sub_zero]
+  simp only [primitive, segmentIntegral, zero_add, sub_zero]
   field_simp
   congr 1; congr 1; funext s; ring_nf
 
@@ -879,7 +876,7 @@ theorem scorerPrim_primitive_comp_mul (f : ℂ → ℂ) {a : ℂ} (ha : a ≠ 0)
 theorem scorerPrim_primitive_lin {f g : ℂ → ℂ} (hf : Continuous f) (hg : Continuous g)
     (c₁ c₂ : ℂ) (z : ℂ) :
     primitive (fun t => c₁ * f t + c₂ * g t) z = c₁ * primitive f z + c₂ * primitive g z := by
-  simp only [primitive, lineIntegral, zero_add, sub_zero]
+  simp only [primitive, segmentIntegral, zero_add, sub_zero]
   have h1 : IntervalIntegrable (fun s : ℝ => f ((s : ℂ) * z)) volume 0 1 :=
     (hf.comp (by fun_prop)).intervalIntegrable _ _
   have h2 : IntervalIntegrable (fun s : ℝ => g ((s : ℂ) * z)) volume 0 1 :=
@@ -1021,6 +1018,5 @@ theorem scorerGi_primitive_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ' : δ < π 
   ring
 
 end ScorerPrimitive
-
 
 end DLMF.Airy

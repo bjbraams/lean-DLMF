@@ -26,6 +26,11 @@ public import Mathlib.Tactic.NormNum.RealSqrt
 
 /-!
 # Painlevé equations and elementary Bäcklund maps in the DLMF normalization
+
+The solution predicates assert the existence of the required derivatives and the
+second-order equation on a domain. The six Painlevé families use the DLMF parameter
+normalizations. Elementary parameter and solution maps record the Bäcklund data;
+theorems proving that these maps transport solutions live in the theorem layer.
 -/
 
 @[expose] public noncomputable section

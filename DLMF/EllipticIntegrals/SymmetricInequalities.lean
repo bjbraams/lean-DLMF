@@ -5,13 +5,13 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.EllipticIntegrals.Symmetric
-public import DLMF.EllipticIntegrals.Inequalities
-public import DLMF.EllipticIntegrals.SymmetricQuadratic
 public import Carlson.Elliptic.CapacityBound
 public import Carlson.Elliptic.LegendreStandard
-public import Carlson.Mean.StrictOrder
 public import Carlson.Mean.Capacity
+public import Carlson.Mean.StrictOrder
+public import DLMF.EllipticIntegrals.Inequalities
+public import DLMF.EllipticIntegrals.Symmetric
+public import DLMF.EllipticIntegrals.SymmetricQuadratic
 
 /-!
 # Inequalities for the symmetric elliptic integrals (DLMF §19.24)
@@ -506,7 +506,7 @@ private lemma symEllIntRF_re_integral_and_integrable {x y z : ℝ}
       (fun t => (((√(t + x) * √(t + y) * √(t + z))⁻¹ : ℝ) : ℂ)) := by
     filter_upwards [ae_restrict_mem measurableSet_Ioi] with t (ht : 0 < t)
     rw [ei19d_symEllIntS_ofReal (by linarith) (by linarith) (by linarith), ofReal_inv]
-  have hxc : symEllIntArg (x : ℂ) := by
+  have hxc : SymEllIntArg (x : ℂ) := by
     rcases hx.eq_or_lt with hh | hh
     · exact Or.inr (by exact_mod_cast hh.symm)
     · exact Or.inl (ofReal_mem_slitPlane.mpr hh)

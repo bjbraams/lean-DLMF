@@ -5,11 +5,11 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Painleve.RationalDLMF
-public import DLMF.Painleve.Airy
 public import DLMF.Confluent.ParabolicCylinder
 public import DLMF.ErrorFunctions.AnalyticProperties
 public import DLMF.OrthogonalPolynomials.Differential
+public import DLMF.Painleve.Airy
+public import DLMF.Painleve.RationalDLMF
 public import DLMF.Weierstrass.EllipticFunctionsAndInvariants
 
 /-!
@@ -338,7 +338,7 @@ equation 32.10.12 wherever `φ ≠ 0` (principal branches; `U` in the slit plane
 slit plane). -/
 @[dlmf 32.10.E13, dlmf 32.10.E14]
 theorem painleveIII_bessel_riccati {ε₁ ε₂ α C₁ C₂ : ℂ} (h₁ : ε₁ = 1 ∨ ε₁ = -1)
-    (h₂ : ε₂ = 1 ∨ ε₂ = -1) (hα : α ≠ ε₁) {U : Set ℂ} (hU : IsOpen U) (hUs : U ⊆ slitPlane)
+    (h₂ : ε₂ = 1 ∨ ε₂ = -1) {U : Set ℂ} (hUs : U ⊆ slitPlane)
     (hζ : ∀ z ∈ U, (ε₁ * ε₂) ^ (1 / 2 : ℂ) * z ∈ slitPlane) :
     let φ := fun z : ℂ => z ^ (α * ε₁ / 2) *
       (C₁ * besselJ (α * ε₁ / 2) ((ε₁ * ε₂) ^ (1 / 2 : ℂ) * z) +

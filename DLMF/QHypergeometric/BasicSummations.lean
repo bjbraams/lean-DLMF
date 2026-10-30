@@ -6,8 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.QHypergeometric.Calculus
-public import DLMFMathlib.Analysis.Complex.SeparatingContour
 public import DLMFMathlib.Analysis.Complex.GeometricNewtonSeries
+public import DLMFMathlib.Analysis.Complex.SeparatingContour
 public import Mathlib.Analysis.Analytic.IsolatedZeros
 
 /-!
@@ -56,7 +56,7 @@ lemma qaR4_phi21_term (a b c q z : ℂ) (n : ℕ) :
 
 /-- The phase-free `₂φ₁` series converges to `qPhi` in the unit disk. -/
 lemma qaR4_phi21_hasSum {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz : ‖z‖<1)
-    (hc : qDenominatorRegular [c] q) :
+    (hc : QDenominatorRegular [c] q) :
     HasSum (fun n : ℕ => qPochhammer a q n*qPochhammer b q n/
       (qPochhammer c q n*qPochhammer q q n)*z^n) (qPhi [a,b] [c] q z) := by
   have h := qPhi_hasSum (a := [a,b]) (b := [c]) (z := z) hq0 hq hc (by simp) (fun _ => hz)
@@ -67,20 +67,20 @@ lemma qaR4_phi21_hasSum {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz : �
   exact h
 
 /-- Regularity of a lower parameter passes to its `q`-multiple. -/
-lemma qaR4_reg_mul_q {c q : ℂ} (hc : qDenominatorRegular [c] q) :
-    qDenominatorRegular [c*q] q := by
+lemma qaR4_reg_mul_q {c q : ℂ} (hc : QDenominatorRegular [c] q) :
+    QDenominatorRegular [c*q] q := by
   intro x hx n
   simp only [List.mem_singleton] at hx
   subst hx
   simpa [pow_succ',mul_assoc] using hc c (by simp) (n+1)
 
 /-- Regularity of a lower parameter gives nonvanishing factorials. -/
-lemma qaR4_reg_poch_ne {c q : ℂ} (hq : ‖q‖<1) (hc : qDenominatorRegular [c] q) (n : ℕ) :
+lemma qaR4_reg_poch_ne {c q : ℂ} (hq : ‖q‖<1) (hc : QDenominatorRegular [c] q) (n : ℕ) :
     qPochhammer c q n≠0 :=
   qPochhammer_ne_zero_of_factors hq (fun j h => hc c (by simp) j (sub_eq_zero.mp h).symm) n
 
 /-- Regularity of a lower parameter gives `1-c≠0`. -/
-lemma qaR4_reg_one_sub_ne {c q : ℂ} (hc : qDenominatorRegular [c] q) : 1-c≠0 := by
+lemma qaR4_reg_one_sub_ne {c q : ℂ} (hc : QDenominatorRegular [c] q) : 1-c≠0 := by
   intro h; exact hc c (by simp) 0 (by simpa using (sub_eq_zero.mp h).symm)
 
 /-- Prepending a zero term to a series. -/
@@ -94,8 +94,8 @@ lemma qaR4_hasSum_shift {f : ℕ → ℂ} {s : ℂ} (h : HasSum f s) : HasSum (q
   simpa [qaR4_shift] using h
 
 /-- Regularity of `c/q` gives regularity of `c`. -/
-lemma qaR4_reg_of_div_q {c q : ℂ} (hq0 : q≠0) (hc : qDenominatorRegular [c/q] q) :
-    qDenominatorRegular [c] q := by
+lemma qaR4_reg_of_div_q {c q : ℂ} (hq0 : q≠0) (hc : QDenominatorRegular [c/q] q) :
+    QDenominatorRegular [c] q := by
   intro x hx n
   simp only [List.mem_singleton] at hx
   subst hx
@@ -110,7 +110,7 @@ lemma qaR4_poch_mul_q {x q : ℂ} (hx : 1-x≠0) (n : ℕ) :
 
 /-- The `₂φ₁` series with its first upper parameter multiplied by `q`, premultiplied by `1-a`. -/
 lemma qaR4_phi21_hasSum_pre {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz : ‖z‖<1)
-    (hc : qDenominatorRegular [c] q) :
+    (hc : QDenominatorRegular [c] q) :
     HasSum (fun n : ℕ => qPochhammer a q (n+1)*qPochhammer b q n/
       (qPochhammer c q n*qPochhammer q q n)*z^n) ((1-a)*qPhi [a*q,b] [c] q z) := by
   refine ((qaR4_phi21_hasSum (a := a*q) (b := b) hq0 hq hz hc).mul_left (1-a)).congr_fun ?_
@@ -193,7 +193,7 @@ lemma qaR4_sum_chu {a c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hc0 : c≠0) {n
     qPhi [q^(-(n:ℤ)),a] [c] q z*qPochhammer c q n=q^(n.choose 2)*
       ∑ k ∈ range (n+1), qBinom q n k*qPochhammer a q k*qPochhammer (q^(1-(n:ℤ))/c) q (n-k)*
         (-(z*q^(-(n:ℤ))))^k*(-c)^(n-k) := by
-  rw [qPhi_terminates (a := [a]) hq0 hq n (by simpa [qDenominatorRegularThrough,qPochhammerList]
+  rw [qPhi_terminates (a := [a]) hq0 hq n (by simpa [QDenominatorRegularThrough,qPochhammerList]
     using hcn),qPhiPartial,sum_mul,mul_sum]
   apply sum_congr rfl
   intro k hk
@@ -288,7 +288,7 @@ lemma qaR4_qPhi_zero (a b : List ℂ) (q : ℂ) : qPhi a b q 0=1 := by
 
 /-- One q-derivative step for the `₂φ₁` series. -/
 lemma qaR4_qDeriv_phi21 {a b c q d w : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
-    (hc : qDenominatorRegular [c] q) (hw : w≠0) (hdw : ‖d*w‖<1) :
+    (hc : QDenominatorRegular [c] q) (hw : w≠0) (hdw : ‖d*w‖<1) :
     (qPhi [a,b] [c] q (d*w)-qPhi [a,b] [c] q (d*(q*w)))/((1-q)*w)=
       (1-a)*(1-b)*d/((1-c)*(1-q))*qPhi [a*q,b*q] [c*q] q (d*w) := by
   have hdqw : ‖d*(q*w)‖<1 := by
@@ -326,7 +326,7 @@ lemma qaR4_qDeriv_phi21 {a b c q d w : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
 
 /-- The derivative of a `₂φ₁` series at the origin. -/
 lemma qaR4_hasDerivAt_phi21_zero {a b c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
-    (hc : qDenominatorRegular [c] q) :
+    (hc : QDenominatorRegular [c] q) :
     HasDerivAt (qPhi [a,b] [c] q) ((1-a)*(1-b)/((1-c)*(1-q))) 0 := by
   have han := qPhi_analytic_disc (a := [a,b]) (b := [c]) hq0 hq hc (by simp) 0 (by simp)
   have hd := han.differentiableAt.hasDerivAt
@@ -338,7 +338,7 @@ lemma qaR4_hasDerivAt_phi21_zero {a b c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
 
 /-- The iterated q-derivative of `w ↦ ₂φ₁(dw)` on the whole disc `‖dw‖<1`. -/
 lemma qaR4_qDerivIterate_phi21 {a b c d q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
-    (hc : qDenominatorRegular [c] q) (k : ℕ) : ∀ w : ℂ, ‖d*w‖<1 →
+    (hc : QDenominatorRegular [c] q) (k : ℕ) : ∀ w : ℂ, ‖d*w‖<1 →
     qDerivIterate k q (fun w => qPhi [a,b] [c] q (w*d)) w=
       qPochhammerList [a,b] q k*d^k/(qPochhammer c q k*(1-q)^k)*
         qPhi [a*q^k,b*q^k] [c*q^k] q (d*w) := by
@@ -348,7 +348,7 @@ lemma qaR4_qDerivIterate_phi21 {a b c d q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
     simp [qDerivIterate,qPochhammerList,mul_comm]
   | succ k ih =>
     intro w hw
-    have hck : qDenominatorRegular [c*q^k] q := by
+    have hck : QDenominatorRegular [c*q^k] q := by
       intro x hx n
       simp only [List.mem_singleton] at hx
       subst hx
@@ -389,11 +389,11 @@ lemma qaR4_qDerivIterate_phi21 {a b c d q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
 
 /-- The `₂φ₁` series with all parameters shifted by `q^j`, premultiplied by its leading factors. -/
 lemma qaR4_phi21_hasSum_shiftpar {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz : ‖z‖<1)
-    (hc : qDenominatorRegular [c] q) (j : ℕ) :
+    (hc : QDenominatorRegular [c] q) (j : ℕ) :
     HasSum (fun m : ℕ => qPochhammer a q (m+j)*qPochhammer b q (m+j)/
       (qPochhammer c q (m+j)*qPochhammer q q m)*z^m)
       (qPochhammer a q j*qPochhammer b q j/qPochhammer c q j*qPhi [a*q^j,b*q^j] [c*q^j] q z) := by
-  have hcj : qDenominatorRegular [c*q^j] q := by
+  have hcj : QDenominatorRegular [c*q^j] q := by
     intro x hx n
     simp only [List.mem_singleton] at hx
     subst hx
@@ -419,7 +419,7 @@ theorem one_phi_zero {a q z : ℂ} (hq : ‖q‖<1) (hz : ‖z‖<1) :
 @[dlmf 17.5.E3]
 theorem one_phi_zero_terminating {q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (z : ℂ) (n : ℕ) :
     qPhi [q^(-(n:ℤ))] [] q z=qPochhammer (z*q^(-(n:ℤ))) q n := by
-  rw [qPhi_terminates (a := []) hq0 hq n (by simp [qDenominatorRegularThrough,qPochhammerList]),
+  rw [qPhi_terminates (a := []) hq0 hq n (by simp [QDenominatorRegularThrough,qPochhammerList]),
     qPochhammer_eq_sum_qBinom,qPhiPartial]
   apply sum_congr rfl
   intro k hk
@@ -446,7 +446,7 @@ theorem one_phi_zero_upper_zero {q z : ℂ} (hq : ‖q‖<1) (hz : ‖z‖<1) :
 
 /-- The `1φ1` summation `1φ1(a;c;q,c/a) = (c/a;q)_∞/(c;q)_∞` (DLMF 17.5.E5). -/
 @[dlmf 17.5.E5]
-theorem one_phi_one_sum {a c q : ℂ} (ha : a≠0) (hq : ‖q‖<1) (hc : qDenominatorRegular [c] q) :
+theorem one_phi_one_sum {a c q : ℂ} (ha : a≠0) (hq : ‖q‖<1) (hc : QDenominatorRegular [c] q) :
     qPhi [a] [c] q (c/a)=qPochhammerInf (c/a) q/qPochhammerInf c q := by
   sorry
 
@@ -540,14 +540,14 @@ theorem one_phi_zero_common_zeros_removable {a q z : ℂ} (hq0 : q≠0) (hq : �
 17.6.E2). -/
 @[dlmf 17.6.E2]
 theorem q_chu_vandermonde_first {a c q : ℂ} (ha : a≠0) (hq0 : q≠0) (hq : ‖q‖<1) (n : ℕ)
-    (hc : qDenominatorRegularThrough [c] q n) :
+    (hc : QDenominatorRegularThrough [c] q n) :
     qPhi [a,q^(-(n:ℤ))] [c] q (c*q^n/a)=qPochhammer (c/a) q n/qPochhammer c q n := by
-  have hcn : qPochhammer c q n≠0 := by simpa [qDenominatorRegularThrough,qPochhammerList] using hc
+  have hcn : qPochhammer c q n≠0 := by simpa [QDenominatorRegularThrough,qPochhammerList] using hc
   rw [eq_div_iff hcn,qaR4_qPhi_swap21]
   by_cases hc0 : c=0
   · subst hc0
     rw [qPhi_terminates (a := [a]) hq0 hq n
-      (by simp [qDenominatorRegularThrough, qPochhammerList]), qPhiPartial, sum_range_succ']
+      (by simp [QDenominatorRegularThrough, qPochhammerList]), qPhiPartial, sum_range_succ']
     simp [qaR4_phi21_term]
   rw [qaR4_sum_chu hq0 hq hc0 hcn]
   have hz : -(c*q^n/a*q^(-(n:ℤ)))=-c/a := by
@@ -583,9 +583,9 @@ theorem q_chu_vandermonde_first {a c q : ℂ} (ha : a≠0) (hq0 : q≠0) (hq : �
 /-- The cleared product retains the regular upper parameter a=0. -/
 @[dlmf 17.6.E3]
 theorem q_chu_vandermonde_second {a c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (n : ℕ)
-    (hc : qDenominatorRegularThrough [c] q n) :
+    (hc : QDenominatorRegularThrough [c] q n) :
     qPhi [a,q^(-(n:ℤ))] [c] q q=((range n).prod (fun j => a-c*q^j))/qPochhammer c q n := by
-  have hcn : qPochhammer c q n≠0 := by simpa [qDenominatorRegularThrough,qPochhammerList] using hc
+  have hcn : qPochhammer c q n≠0 := by simpa [QDenominatorRegularThrough,qPochhammerList] using hc
   rw [eq_div_iff hcn,qaR4_qPhi_swap21]
   by_cases hc0 : c=0
   · subst hc0
@@ -611,19 +611,19 @@ theorem q_chu_vandermonde_second {a c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (n
         (continuous_qPochhammer q n).continuousAt.eventually_ne hcn
       filter_upwards [self_mem_nhdsWithin,nhdsWithin_le_nhds h1] with c hc0 hcn'
       simp only [F,G]
-      rw [← qPhi_terminates (a := [a]) hq0 hq n (by simpa [qDenominatorRegularThrough,
+      rw [← qPhi_terminates (a := [a]) hq0 hq n (by simpa [QDenominatorRegularThrough,
         qPochhammerList] using hcn')]
       exact qaR4_chu_second_ne hq0 hq n hc0 hcn'
     have := qaR4_eq_at_zero_of_punctured hF hG hev
     simp only [F,G] at this
-    rw [qPhi_terminates (a := [a]) hq0 hq n (by simp [qDenominatorRegularThrough,
+    rw [qPhi_terminates (a := [a]) hq0 hq n (by simp [QDenominatorRegularThrough,
       qPochhammerList])]
     exact this
   exact qaR4_chu_second_ne hq0 hq n hc0 hcn
 
 /-- The phase-free coefficients are bounded because the finite factorials have nonzero limiting denominators. -/
 private lemma qGauss_coefficient_bound {a c q : ℂ} (hq : ‖q‖ < 1)
-    (hc : qDenominatorRegular [c] q) :
+    (hc : QDenominatorRegular [c] q) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ n : ℕ,
       ‖qPochhammer a q n / (qPochhammer c q n * qPochhammer q q n)‖ ≤ C := by
   have hc0 : qPochhammerInf c q ≠ 0 := qPochhammerInf_ne_zero hq fun n he =>
@@ -659,7 +659,7 @@ private lemma qGauss_newton_eq_phi {a c q w : ℂ} (hw : w ≠ 0) :
 
 /-- The reciprocal-parameter Newton series is analytic throughout its convergence disc. -/
 private lemma qGauss_analytic_newton {a c q : ℂ} (hq : ‖q‖ < 1) (hca : c / a ≠ 0)
-    (hc : qDenominatorRegular [c] q) :
+    (hc : QDenominatorRegular [c] q) :
     AnalyticOnNhd ℂ (fun w => ∑' n : ℕ,
       (qPochhammer a q n / (qPochhammer c q n * qPochhammer q q n) * (c / a) ^ n) *
         ∏ j ∈ range n, (w - q ^ j)) (Metric.ball 0 ‖c / a‖⁻¹) := by
@@ -671,7 +671,7 @@ private lemma qGauss_analytic_newton {a c q : ℂ} (hq : ‖q‖ < 1) (hca : c /
 
 /-- The q-Gauss product quotient is analytic on the same reciprocal-parameter disc. -/
 private lemma qGauss_analytic_product {a c q : ℂ} (hq : ‖q‖ < 1)
-    (hc : qDenominatorRegular [c] q) :
+    (hc : QDenominatorRegular [c] q) :
     AnalyticOnNhd ℂ (fun w => qPochhammerInf (c / a) q * qPochhammerInf (c * w) q /
       (qPochhammerInf c q * qPochhammerInf (c / a * w) q))
       (Metric.ball 0 ‖c / a‖⁻¹) := by
@@ -695,7 +695,7 @@ private lemma qGauss_analytic_product {a c q : ℂ} (hq : ‖q‖ < 1)
 /-- Terminating q-Chu values accumulate at zero and determine the analytic q-Gauss identity. -/
 private lemma qGauss_nonzero {a b c q : ℂ} (hq0 : q ≠ 0) (hq : ‖q‖ < 1)
     (ha : a ≠ 0) (hb : b ≠ 0) (hc0 : c ≠ 0) (hz : ‖c‖ < ‖a * b‖)
-    (hc : qDenominatorRegular [c] q) :
+    (hc : QDenominatorRegular [c] q) :
     qPhi [a,b] [c] q (c/(a*b)) =
       qPochhammerListInf [c/a,c/b] q / qPochhammerListInf [c,c/(a*b)] q := by
   let F : ℂ → ℂ := fun w => ∑' n : ℕ,
@@ -730,8 +730,8 @@ private lemma qGauss_nonzero {a b c q : ℂ} (hq0 : q ≠ 0) (hq : ‖q‖ < 1)
     dsimp only [F, G]
     rw [qGauss_newton_eq_phi (pow_ne_zero n hq0)]
     have hchu := q_chu_vandermonde_first ha hq0 hq n
-      (show qDenominatorRegularThrough [c] q n by
-        simpa only [qDenominatorRegularThrough, qPochhammerList, List.map_singleton,
+      (show QDenominatorRegularThrough [c] q n by
+        simpa only [QDenominatorRegularThrough, qPochhammerList, List.map_singleton,
           List.prod_singleton] using hcn)
     rw [zpow_neg, zpow_natCast] at hchu
     rw [hchu, qPochhammerInf_mul_qPochhammer (a := c / a) hq n,
@@ -763,7 +763,7 @@ private lemma qGauss_poch_zero_base (a : ℂ) (n : ℕ) : qPochhammer a 0 (n + 1
 
 /-- At base zero, q-Gauss reduces to summing a geometric tail. -/
 private lemma qGauss_zero_base {a b c : ℂ} (ha : a ≠ 0) (hb : b ≠ 0)
-    (hz : ‖c‖ < ‖a * b‖) (hc : qDenominatorRegular [c] 0) :
+    (hz : ‖c‖ < ‖a * b‖) (hc : QDenominatorRegular [c] 0) :
     qPhi [a,b] [c] 0 (c/(a*b)) =
       qPochhammerListInf [c/a,c/b] 0 / qPochhammerListInf [c,c/(a*b)] 0 := by
   let z := c / (a * b)
@@ -802,7 +802,7 @@ private lemma qGauss_zero_base {a b c : ℂ} (ha : a ≠ 0) (hb : b ≠ 0)
 17.6.E1). -/
 @[dlmf 17.6.E1]
 theorem q_gauss {a b c q : ℂ} (hq : ‖q‖<1) (hz : ‖c‖<‖a*b‖)
-    (hc : qDenominatorRegular [c] q) :
+    (hc : QDenominatorRegular [c] q) :
     qPhi [a,b] [c] q (c/(a*b))=qPochhammerListInf [c/a,c/b] q/qPochhammerListInf [c,c/(a*b)] q := by
   have hab : a * b ≠ 0 := norm_pos_iff.mp ((norm_nonneg c).trans_lt hz)
   have ha := left_ne_zero_of_mul hab
@@ -815,11 +815,10 @@ theorem q_gauss {a b c q : ℂ} (hq : ‖q‖<1) (hz : ‖c‖<‖a*b‖)
     exact qGauss_zero_base ha hb hz hc
   exact qGauss_nonzero hq0 hq ha hb hc0 hz hc
 
-
 /-- The cancelled product form retains b=±q^(-m) whenever the left series is regular. -/
 @[dlmf 17.6.E4]
 theorem q_even_heine {b c q : ℂ} (hb : b≠0) (hc0 : c≠0) (hq : ‖q‖<1) (hz : ‖c*q‖<‖b^2‖)
-    (hc : qDenominatorRegular [c] (q^2)) :
+    (hc : QDenominatorRegular [c] (q^2)) :
     qPhi [b^2,b^2/c] [c] (q^2) (c*q/b^2)=
       qPochhammerInf q (q^2)/(2*qPochhammerListInf [c,c*q/b^2] (q^2))*
         (qPochhammerInf (-b) q*qPochhammerInf (c/b) q+
@@ -830,7 +829,7 @@ theorem q_even_heine {b c q : ℂ} (hb : b≠0) (hc0 : c≠0) (hq : ‖q‖<1) (
 (DLMF 17.6.E4, E5). -/
 @[dlmf 17.6.E4_5]
 theorem q_odd_heine {b c q : ℂ} (hb : b≠0) (hc0 : c≠0) (hq : ‖q‖<1) (hz : ‖c*q^3‖<‖b^2‖)
-    (hc : qDenominatorRegular [c*q^2] (q^2))
+    (hc : QDenominatorRegular [c*q^2] (q^2))
     (hd : qPochhammerInf (c*q/b^2) (q^2)≠0) :
     qPhi [b^2,b^2/c] [c*q^2] (q^2) (c*q^3/b^2)=
       qPochhammerInf q (q^2)/(2*b*qPochhammerListInf [c*q^2,c*q/b^2] (q^2))*
@@ -841,7 +840,7 @@ theorem q_odd_heine {b c q : ℂ} (hb : b≠0) (hc0 : c≠0) (hq : ‖q‖<1) (h
 /-- The only additional common product zero inside the stated convergence domain is handled as a removable limit. -/
 @[dlmf 17.6.E4_5]
 theorem q_odd_heine_removable {b q : ℂ} (hb : b≠0) (hq0 : q≠0) (hq : ‖q‖<1)
-    (hc : qDenominatorRegular [b^2*q] (q^2)) :
+    (hc : QDenominatorRegular [b^2*q] (q^2)) :
     Tendsto (fun c : ℂ => qPochhammerInf q (q^2)/(2*b*qPochhammerListInf [c*q^2,c*q/b^2] (q^2))*
       (qPochhammerInf (-b) q*qPochhammerInf (c*q/b) q-
        qPochhammerInf b q*qPochhammerInf (-c*q/b) q))
@@ -852,7 +851,7 @@ theorem q_odd_heine_removable {b q : ℂ} (hb : b≠0) (hq0 : q≠0) (hq : ‖q�
 factorials (DLMF 17.6.E5). -/
 @[dlmf 17.6.E5]
 theorem q_bailey_daum {a b q : ℂ} (hq : ‖q‖<1) (hb : ‖q‖<‖b‖)
-    (hc : qDenominatorRegular [a*q/b] q) :
+    (hc : QDenominatorRegular [a*q/b] q) :
     qPhi [a,b] [a*q/b] q (-q/b)=qPochhammerInf (-q) q*
       qPochhammerListInf [a*q,a*q^2/b^2] (q^2)/qPochhammerListInf [-q/b,a*q/b] q := by
   sorry
@@ -861,7 +860,7 @@ theorem q_bailey_daum {a b q : ℂ} (hq : ‖q‖<1) (hb : ‖q‖<‖b‖)
 17.6.E6). -/
 @[dlmf 17.6.E6]
 theorem heine_first {a b c q z : ℂ} (hq : ‖q‖<1) (hz : ‖z‖<1) (hb : ‖b‖<1) (hb0 : b≠0)
-    (hc : qDenominatorRegular [c,a*z] q) :
+    (hc : QDenominatorRegular [c,a*z] q) :
     qPhi [a,b] [c] q z=qPochhammerListInf [b,a*z] q/qPochhammerListInf [c,z] q*
       qPhi [c/b,z] [a*z] q b := by
   rw [qPhi_eq_basicHG (by simp),qPhi_eq_basicHG (by simp)]
@@ -872,7 +871,7 @@ theorem heine_first {a b c q z : ℂ} (hq : ‖q‖<1) (hz : ‖z‖<1) (hb : �
 (DLMF 17.6.E7). -/
 @[dlmf 17.6.E7]
 theorem heine_second {a b c q z : ℂ} (hq : ‖q‖<1) (hz : ‖z‖<1) (hc0 : c≠0) (hcb : ‖c‖<‖b‖)
-    (hc : qDenominatorRegular [c,b*z] q) :
+    (hc : QDenominatorRegular [c,b*z] q) :
     qPhi [a,b] [c] q z=qPochhammerListInf [c/b,b*z] q/qPochhammerListInf [c,z] q*
       qPhi [a*b*z/c,b] [b*z] q (c/b) := by
   sorry
@@ -881,7 +880,7 @@ theorem heine_second {a b c q z : ℂ} (hq : ‖q‖<1) (hz : ‖z‖<1) (hc0 : 
 (DLMF 17.6.E8). -/
 @[dlmf 17.6.E8]
 theorem heine_third {a b c q z : ℂ} (ha : a≠0) (hb : b≠0) (hq : ‖q‖<1) (hz : ‖z‖<1)
-    (hc0 : c≠0) (habz : ‖a*b*z‖<‖c‖) (hc : qDenominatorRegular [c] q) :
+    (hc0 : c≠0) (habz : ‖a*b*z‖<‖c‖) (hc : QDenominatorRegular [c] q) :
     qPhi [a,b] [c] q z=qPochhammerInf (a*b*z/c) q/qPochhammerInf z q*
       qPhi [c/a,c/b] [c] q (a*b*z/c) := by
   sorry
@@ -889,7 +888,7 @@ theorem heine_third {a b c q z : ℂ} (ha : a≠0) (hb : b≠0) (hq : ‖q‖<1)
 /-- Fine's first expansion of `2φ1(q,aq;bq;q,z)` (DLMF 17.6.E9). -/
 @[dlmf 17.6.E9]
 theorem heine_fine_expansion {a b q z : ℂ} (hb0 : b≠0) (hq : ‖q‖<1) (hz : ‖z‖<1)
-    (hd : qDenominatorRegular [b*q,a*z*q^2/b,a*q/b] q) :
+    (hd : QDenominatorRegular [b*q,a*z*q^2/b,a*q/b] q) :
     qPhi [q,a*q] [b*q] q z= -(1-b)*(a*q/b)/(1-a*q/b)*
       (∑' n : ℕ, qPochhammerList [a*q,a*z*q/b] q n*q^n/qPochhammer (a*z*q^2/b) q n)+
       qPochhammerListInf [a*q,a*z*q/b] q/qPochhammerInf (a*q/b) q*qPhi [q,0] [b*q] q z := by
@@ -899,7 +898,7 @@ theorem heine_fine_expansion {a b q z : ℂ} (hb0 : b≠0) (hq : ‖q‖<1) (hz 
 q^(n(n+1)/2)` (DLMF 17.6.E10). -/
 @[dlmf 17.6.E10]
 theorem heine_fine_expansion_second {a b q z : ℂ} (ha : a≠0) (hq : ‖q‖<1) (hz : ‖z‖<1)
-    (hd : qDenominatorRegular [b*q] q) :
+    (hd : QDenominatorRegular [b*q] q) :
     (1-z)*qPhi [q,a*q] [b*q] q z=
       ∑' n : ℕ, qPochhammer (b/a) q n*(-a*z)^n*q^((n*(n+1))/2)/qPochhammerList [b*q,z*q] q n := by
   sorry
@@ -907,7 +906,7 @@ theorem heine_fine_expansion_second {a b q z : ℂ} (ha : a≠0) (hq : ‖q‖<1
 /-- Fine's third expansion of `(1-z)/(1-b) 2φ1(q,aq;bq;q,z)` (DLMF 17.6.E11). -/
 @[dlmf 17.6.E11]
 theorem heine_fine_expansion_third {a b q z : ℂ} (hb0 : b≠0) (hq : ‖q‖<1) (hz : ‖z‖<1) (hb : ‖b‖<1)
-    (hd : qDenominatorRegular [b*q,a*q/b] q) :
+    (hd : QDenominatorRegular [b*q,a*q/b] q) :
     (1-z)/(1-b)*qPhi [q,a*q] [b*q] q z=
       (∑' n : ℕ, qPochhammer (a*q) q n*qPochhammer (a*z*q/b) q (2*n)*b^n/qPochhammerList [z*q,a*q/b] q n)-
       a*q*∑' n : ℕ, qPochhammer (a*q) q n*qPochhammer (a*z*q/b) q (2*n+1)*(b*q)^n/
@@ -918,7 +917,7 @@ theorem heine_fine_expansion_third {a b q z : ℂ} (hb0 : b≠0) (hq : ‖q‖<1
 17.6.E12). -/
 @[dlmf 17.6.E12]
 theorem heine_fine_expansion_fourth {a b q z : ℂ} (hb0 : b≠0) (hq : ‖q‖<1) (hz : ‖z‖<1)
-    (hd : qDenominatorRegular [b*q] q) :
+    (hd : QDenominatorRegular [b*q] q) :
     (1-z)*qPhi [q,a*q] [b*q] q z=∑' n : ℕ,
       qPochhammerList [a*q,a*z*q/b] q n/qPochhammerList [b*q,z*q] q n*
         (1-a*z*q^(2*n+1))*(b*z)^n*q^(n*n) := by
@@ -928,7 +927,7 @@ theorem heine_fine_expansion_fourth {a b q z : ℂ} (hb0 : b≠0) (hq : ‖q‖<
 (DLMF 17.6.E13). -/
 @[dlmf 17.6.E13]
 theorem heine_nonterminating_sum {a b c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hc0 : c≠0)
-    (hd : qDenominatorRegular [c,q^2/c,c/q,a*q/c,b*q/c] q) :
+    (hd : QDenominatorRegular [c,q^2/c,c/q,a*q/c,b*q/c] q) :
     qPhi [a,b] [c] q q+qPochhammerListInf [q/c,a,b] q/qPochhammerListInf [c/q,a*q/c,b*q/c] q*
       qPhi [a*q/c,b*q/c] [q^2/c] q q=qPochhammerListInf [q/c,a*b*q/c] q/qPochhammerListInf [a*q/c,b*q/c] q := by
   sorry
@@ -937,7 +936,7 @@ theorem heine_nonterminating_sum {a b c q : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) 
 (DLMF 17.6.E14). -/
 @[dlmf 17.6.E14]
 theorem heine_mixed_base {a b q z : ℂ} (hq : ‖q‖<1)
-    (hd : qDenominatorRegular [a*z*b,b*z] (q^2))
+    (hd : QDenominatorRegular [a*z*b,b*z] (q^2))
     (hD : qPochhammerListInf [z,a*z*b] (q^2)≠0)
     (hL : Summable (fun n : ℕ => qPochhammer a q n*qPochhammer b (q^2) n*z^n/
       (qPochhammer q q n*qPochhammer (a*z*b) (q^2) n)))
@@ -951,7 +950,7 @@ theorem heine_mixed_base {a b q z : ℂ} (hq : ‖q‖<1)
 @[dlmf 17.6.E15]
 theorem heine_connection_first {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz : ‖z‖<1)
     (habcz : a*b*c*z≠0) (hbc : ‖b*q‖<‖c‖)
-    (hd : qDenominatorRegular [c,c*q/(a*z),q^2/c,a*z/c,q/a,c/q,b*q/c] q) :
+    (hd : QDenominatorRegular [c,c*q/(a*z),q^2/c,a*z/c,q/a,c/q,b*q/c] q) :
     qPhi [a,b] [c] q z=qPochhammerListInf [a*b*z/c,q/c] q/qPochhammerListInf [a*z/c,q/a] q*
       qPhi [c/a,c*q/(a*b*z)] [c*q/(a*z)] q (b*q/c)-
       qPochhammerListInf [b,q/c,c/a,a*z/q,q^2/(a*z)] q/
@@ -963,7 +962,7 @@ theorem heine_connection_first {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) 
 @[dlmf 17.6.E16]
 theorem heine_connection_second {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz : ‖z‖<1)
     (habcz : a*b*c*z≠0) (harg : ‖c*q‖<‖a*b*z‖)
-    (hd : qDenominatorRegular [c,a*q/b,b*q/a,b/a,a/b,z,q/z] q) :
+    (hd : QDenominatorRegular [c,a*q/b,b*q/a,b/a,a/b,z,q/z] q) :
     qPhi [a,b] [c] q z=qPochhammerListInf [b,c/a,a*z,q/(a*z)] q/qPochhammerListInf [c,b/a,z,q/z] q*
       qPhi [a,a*q/c] [a*q/b] q (c*q/(a*b*z))+
       qPochhammerListInf [a,c/b,b*z,q/(b*z)] q/qPochhammerListInf [c,a/b,z,q/z] q*
@@ -973,7 +972,7 @@ theorem heine_connection_second {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1)
 /-- Heine's contiguous relation in the lower parameter `c/q` versus `c` (DLMF 17.6.E17). -/
 @[dlmf 17.6.E17]
 theorem heine_contiguous_17 {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz : ‖z‖<1)
-    (hd : qDenominatorRegular [c/q] q) :
+    (hd : QDenominatorRegular [c/q] q) :
     qPhi [a,b] [c/q] q z-qPhi [a,b] [c] q z=c*z*(1-a)*(1-b)/((q-c)*(1-c))*qPhi [a*q,b*q] [c*q] q z := by
   have hc := qaR4_reg_of_div_q hq0 hd
   have hc' := qaR4_reg_mul_q hc
@@ -1003,7 +1002,7 @@ theorem heine_contiguous_17 {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz
 /-- Heine's contiguous relation in the upper parameter `aq` versus `a` (DLMF 17.6.E18). -/
 @[dlmf 17.6.E18]
 theorem heine_contiguous_18 {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz : ‖z‖<1)
-    (hd : qDenominatorRegular [c] q) :
+    (hd : QDenominatorRegular [c] q) :
     qPhi [a*q,b] [c] q z-qPhi [a,b] [c] q z=a*z*(1-b)/(1-c)*qPhi [a*q,b*q] [c*q] q z := by
   have h1 := qaR4_phi21_hasSum (a := a*q) (b := b) hq0 hq hz hd
   have h2 := qaR4_phi21_hasSum (a := a) (b := b) hq0 hq hz hd
@@ -1028,10 +1027,10 @@ theorem heine_contiguous_18 {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz
 /-- Heine's contiguous relation shifting `a` and `c` together (DLMF 17.6.E19). -/
 @[dlmf 17.6.E19]
 theorem heine_contiguous_19 {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz : ‖z‖<1)
-    (hd : qDenominatorRegular [c] q) :
+    (hd : QDenominatorRegular [c] q) :
     qPhi [a*q,b] [c*q] q z-qPhi [a,b] [c] q z=z*(1-b)*(a-c)/((1-c)*(1-c*q))*qPhi [a*q,b*q] [c*q^2] q z := by
   have hc' := qaR4_reg_mul_q hd
-  have hc'' : qDenominatorRegular [c*q^2] q := by
+  have hc'' : QDenominatorRegular [c*q^2] q := by
     simpa [pow_two,mul_assoc] using qaR4_reg_mul_q hc'
   have h1 := qaR4_phi21_hasSum (a := a*q) (b := b) hq0 hq hz hc'
   have h2 := qaR4_phi21_hasSum (a := a) (b := b) hq0 hq hz hd
@@ -1068,7 +1067,7 @@ theorem heine_contiguous_19 {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz
 /-- Heine's contiguous relation for `(aq, b/q)` versus `(a, b)` (DLMF 17.6.E20). -/
 @[dlmf 17.6.E20]
 theorem heine_contiguous_20 {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz : ‖z‖<1)
-    (hd : qDenominatorRegular [c] q) :
+    (hd : QDenominatorRegular [c] q) :
     qPhi [a*q,b/q] [c] q z-qPhi [a,b] [c] q z=z*(a-b/q)/(1-c)*qPhi [a*q,b] [c*q] q z := by
   have hc' := qaR4_reg_mul_q hd
   have h1 := qaR4_phi21_hasSum (a := a*q) (b := b/q) hq0 hq hz hd
@@ -1093,7 +1092,7 @@ theorem heine_contiguous_20 {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz
 /-- Heine's contiguous relation `b(1-a)φ(aq,b) - a(1-b)φ(a,bq) = (b-a)φ(a,b)` (DLMF 17.6.E21). -/
 @[dlmf 17.6.E21]
 theorem heine_contiguous_21 {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz : ‖z‖<1)
-    (hd : qDenominatorRegular [c] q) :
+    (hd : QDenominatorRegular [c] q) :
     b*(1-a)*qPhi [a*q,b] [c] q z-a*(1-b)*qPhi [a,b*q] [c] q z=(b-a)*qPhi [a,b] [c] q z := by
   have h1 := (qaR4_phi21_hasSum (a := a*q) (b := b) hq0 hq hz hd).mul_left (b*(1-a))
   have h2 := (qaR4_phi21_hasSum (a := a) (b := b*q) hq0 hq hz hd).mul_left (a*(1-b))
@@ -1112,7 +1111,7 @@ theorem heine_contiguous_21 {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz
 /-- Heine's contiguous relation between `φ(a,b/q)`, `φ(a/q,b)` and `φ(a,b)` (DLMF 17.6.E22). -/
 @[dlmf 17.6.E22]
 theorem heine_contiguous_22 {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz : ‖z‖<1)
-    (hd : qDenominatorRegular [c] q) :
+    (hd : QDenominatorRegular [c] q) :
     a*(c-b)*qPhi [a,b/q] [c] q z-b*(c-a)*qPhi [a/q,b] [c] q z=(a-b)*(c-a*b*z/q)*qPhi [a,b] [c] q z := by
   have h0 := qaR4_phi21_hasSum (a := a) (b := b) hq0 hq hz hd
   have h1 := (qaR4_phi21_hasSum (a := a) (b := b/q) hq0 hq hz hd).mul_left (a*(c-b))
@@ -1146,7 +1145,7 @@ theorem heine_contiguous_22 {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz
 17.6.E23). -/
 @[dlmf 17.6.E23]
 theorem heine_contiguous_23 {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz : ‖z‖<1)
-    (hd : qDenominatorRegular [c] q) :
+    (hd : QDenominatorRegular [c] q) :
     q*(c-a)*qPhi [a/q,b] [c] q z+(1-a)*(c-a*b*z)*qPhi [a*q,b] [c] q z=(c*(1+q-a)-a*q+a^2*z-a*b*z)*qPhi [a,b] [c] q z := by
   have h0 := qaR4_phi21_hasSum (a := a) (b := b) hq0 hq hz hd
   have hp := qaR4_phi21_hasSum_pre (a := a) (b := b) hq0 hq hz hd
@@ -1182,7 +1181,7 @@ theorem heine_contiguous_23 {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz
 17.6.E24). -/
 @[dlmf 17.6.E24]
 theorem heine_contiguous_24 {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz : ‖z‖<1)
-    (hd : qDenominatorRegular [c/q] q) :
+    (hd : QDenominatorRegular [c/q] q) :
     (1-c)*(q-c)*(a*b*z-c)*qPhi [a,b] [c/q] q z+z*(c-a)*(c-b)*qPhi [a,b] [c*q] q z=(c-1)*(c*(q-c)+z*(c*a+c*b-a*b-a*b*q))*qPhi [a,b] [c] q z := by
   have hc := qaR4_reg_of_div_q hq0 hd
   have hc' := qaR4_reg_mul_q hc
@@ -1230,7 +1229,7 @@ theorem heine_contiguous_24 {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz
 17.6.E25). -/
 @[dlmf 17.6.E25]
 theorem heine_qDerivative {a b c d q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz : ‖d*z‖<1)
-    (hc : qDenominatorRegular [c] q) (n : ℕ) :
+    (hc : QDenominatorRegular [c] q) (n : ℕ) :
     qDerivIterate n q (fun w => qPhi [a,b] [c] q (w*d)) z=
       qPochhammerList [a,b] q n*d^n/(qPochhammer c q n*(1-q)^n)*qPhi [a*q^n,b*q^n] [c*q^n] q (d*z) :=
   qaR4_qDerivIterate_phi21 hq0 hq hc n z hz
@@ -1239,7 +1238,7 @@ theorem heine_qDerivative {a b c d q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz
 `(z;q)_∞/(abz/c;q)_∞` (DLMF 17.6.E26). -/
 @[dlmf 17.6.E26]
 theorem heine_weighted_qDerivative {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz : ‖z‖<1) (hc0 : c≠0)
-    (hc : qDenominatorRegular [c] q) (hD : qPochhammerInf (a*b*z/c) q≠0) (n : ℕ) :
+    (hc : QDenominatorRegular [c] q) (hD : qPochhammerInf (a*b*z/c) q≠0) (n : ℕ) :
     qDerivIterate n q (fun w => qPochhammerInf w q/qPochhammerInf (a*b*w/c) q*qPhi [a,b] [c] q w) z=
       ((range n).prod (fun j => a-c*q^j))*((range n).prod (fun j => b-c*q^j))/
         (c^n*qPochhammer c q n*(1-q)^n)*qPochhammerInf (z*q^n) q/qPochhammerInf (a*b*z/c) q*
@@ -1249,7 +1248,7 @@ theorem heine_weighted_qDerivative {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖
 /-- The second-order q-differential equation satisfied by `2φ1(a,b;c;q,z)` (DLMF 17.6.E27). -/
 @[dlmf 17.6.E27]
 theorem heine_qDifferentialEquation {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz : ‖z‖<1)
-    (hc : qDenominatorRegular [c] q) :
+    (hc : QDenominatorRegular [c] q) :
     let F := fun w => qPhi [a,b] [c] q w
     z*(c-a*b*q*z)*qDerivIterate 2 q F z+
       ((1-c)/(1-q)+((1-a)*(1-b)-(1-a*b*q))/(1-q)*z)*qDerivExtended q F z-
@@ -1365,7 +1364,7 @@ theorem heine_qDifferentialEquation_classical_coefficients (a b c z : ℂ) :
 @[dlmf 17.6.E28]
 theorem heine_jackson_integral {q : ℝ} (hq0 : 0<q) (hq1 : q<1) {a b c z : ℂ}
     (hb : 0<b.re) (hz : ‖z‖<1)
-    (hc : qDenominatorRegular [(q:ℂ)^c,(q:ℂ)^(c-b)] q) :
+    (hc : QDenominatorRegular [(q:ℂ)^c,(q:ℂ)^(c-b)] q) :
     qPhi [(q:ℂ)^a,(q:ℂ)^b] [(q:ℂ)^c] q z=
       qGamma q c/(qGamma q b*qGamma q (c-b))*
       jacksonIntegral q 1 (fun t => t^(b-1)*qPochhammerOrder (t*q) q (c-b-1)/qPochhammerOrder (z*t) q a) := by
@@ -1374,11 +1373,11 @@ theorem heine_jackson_integral {q : ℝ} (hq0 : 0<q) (hq1 : q<1) {a b c z : ℂ}
 /-- The q-Mellin–Barnes integral representation of `2φ1(a,b;c;q,z)` (DLMF 17.6.E29). -/
 @[dlmf 17.6.E29]
 theorem heine_mellin_barnes {a b c q z : ℂ} (hq0 : q≠0) (hq : ‖q‖<1) (hz0 : z≠0) (hz : ‖z‖<1)
-    (harg : |Complex.arg (-z)|<π) (hc : qDenominatorRegular [c] q)
-    (L : ℝ → ℂ) (hL : ContDiff ℝ 1 L) (htail : Complex.hasVerticalTails L)
-    (hsep : Complex.separatesPoleSets L (qHeineBarnesLeft a b q) qHeineBarnesRight)
-    (hleft : Complex.staysAwayFrom L (qHeineBarnesLeft a b q))
-    (hright : Complex.staysAwayFrom L qHeineBarnesRight) :
+    (harg : |Complex.arg (-z)|<π) (hc : QDenominatorRegular [c] q)
+    (L : ℝ → ℂ) (hL : ContDiff ℝ 1 L) (htail : Complex.HasVerticalTails L)
+    (hsep : Complex.SeparatesPoleSets L (qHeineBarnesLeft a b q) qHeineBarnesRight)
+    (hleft : Complex.StaysAwayFrom L (qHeineBarnesLeft a b q))
+    (hright : Complex.StaysAwayFrom L qHeineBarnesRight) :
     Integrable (fun t : ℝ => qHeineBarnesKernel a b c q z (L t)*deriv L t) ∧
     qPhi [a,b] [c] q z= -1/(2*π*I)*qPochhammerListInf [a,b] q/qPochhammerListInf [q,c] q*
       ∫ t : ℝ, qHeineBarnesKernel a b c q z (L t)*deriv L t := by
@@ -1403,9 +1402,9 @@ theorem one_phi_zero_continues {a q : ℂ} (hq : ‖q‖<1) :
 @[dlmf 17.6.E28]
 theorem heine_jackson_parameter_limit {q : ℝ} (hq0 : 0<q) (hq1 : q<1)
     {a b c₀ z : ℂ} (hb : 0<b.re) (hz : ‖z‖<1)
-    (hc₀ : qDenominatorRegular [(q:ℂ)^c₀] q) :
+    (hc₀ : QDenominatorRegular [(q:ℂ)^c₀] q) :
     Tendsto (fun c : ℂ => qHeineJacksonValue q a b c z)
-      (𝓝[{c : ℂ | qDenominatorRegular [(q:ℂ)^c,(q:ℂ)^(c-b)] q}] c₀)
+      (𝓝[{c : ℂ | QDenominatorRegular [(q:ℂ)^c,(q:ℂ)^(c-b)] q}] c₀)
       (𝓝 (qPhi [(q:ℂ)^a,(q:ℂ)^b] [(q:ℂ)^c₀] q z)) := by
   sorry
 

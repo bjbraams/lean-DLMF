@@ -5,10 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.RingTheory.Binomial
+public import DLMF.Airy.Basic
 public import DLMF.Bessel.Basic
 public import DLMF.Painleve.Basic
-public import DLMF.Airy.Basic
+public import Mathlib.RingTheory.Binomial
 
 /-!
 # Differential and difference equations: definitions (DLMF §§2.7–2.9)
@@ -29,8 +29,8 @@ Definitions for DLMF §§2.7–2.9 (namespace `DLMF.AsymptoticApproximations`).
 * `differenceExponent`, `differenceCoeff`: the exponent 2.9.6 and the recursion 2.9.7 of the
   formal solutions 2.9.4 of three-term recurrences.
 
-The singular-point classification itself is DLMFMathlib's `Complex.linearODEOrdinaryAt`,
-`Complex.linearODERegularSingularAt` and `Complex.linearODEIrregularAt` applied to the
+The singular-point classification itself is DLMFMathlib's `Complex.LinearODEOrdinaryAt`,
+`Complex.LinearODERegularSingularAt` and `Complex.LinearODEIrregularAt` applied to the
 coefficient vector `![g, f]` (coefficient of `w` first).
 -/
 

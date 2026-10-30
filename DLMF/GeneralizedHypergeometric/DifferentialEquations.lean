@@ -65,15 +65,15 @@ def genODECoeff (a b : Multiset ℂ) (j : Fin (genODEOrder a b)) (z : ℂ) : ℂ
     genThetaDCoeff (genThetaA a) (genODEOrder a b) * z ^ (genODEOrder a b + 1))
 
 /-- Vanishing of the generalized hypergeometric theta operator. -/
-def genODESolution (a b : Multiset ℂ) (f : ℂ → ℂ) (z : ℂ) : Prop :=
+def GenODESolution (a b : Multiset ℂ) (f : ℂ → ℂ) (z : ℂ) : Prop :=
   thetaPoly (genThetaB b) f z = z * thetaPoly (genThetaA a) f z
 
 /-- A fundamental system on an open domain, expressed by independence and full span. -/
-def genFundamentalSystem {n : ℕ} (a b : Multiset ℂ) (D : Set ℂ)
+def GenFundamentalSystem {n : ℕ} (a b : Multiset ℂ) (D : Set ℂ)
     (F : Fin n → ℂ → ℂ) : Prop :=
-  (∀ i, AnalyticOnNhd ℂ (F i) D ∧ ∀ z ∈ D, genODESolution a b (F i) z) ∧
+  (∀ i, AnalyticOnNhd ℂ (F i) D ∧ ∀ z ∈ D, GenODESolution a b (F i) z) ∧
   LinearIndependent ℂ (fun i => fun z : D => F i z) ∧
-  ∀ f : ℂ → ℂ, AnalyticOnNhd ℂ f D → (∀ z ∈ D, genODESolution a b f z) →
+  ∀ f : ℂ → ℂ, AnalyticOnNhd ℂ f D → (∀ z ∈ D, GenODESolution a b f z) →
     ∃ c : Fin n → ℂ, ∀ z ∈ D, f z = ∑ i, c i * F i z
 
 /-- The common principal zero-to-one slit domain for Frobenius solutions at zero. -/
@@ -131,9 +131,9 @@ def genCenteredInfinityTerm {q : ℕ} (a : Fin (q + 1) → ℂ) (b : Fin q → �
 
 /-- The proved theta equation continued throughout the ordinary principal analytic domain. -/
 @[dlmf 16.8.E3]
-theorem genHG_theta_ode (a b : Multiset ℂ) (hb : genDenRegular b)
-    (h : a.card ≤ b.card + 1 ∨ genTerminates a) {z : ℂ} (hz : z ∈ genAnalyticDomain a b) :
-    genODESolution a b (genHG a b) z := by
+theorem genHG_theta_ode (a b : Multiset ℂ) (hb : GenDenRegular b)
+    (h : a.card ≤ b.card + 1 ∨ GenTerminates a) {z : ℂ} (hz : z ∈ genAnalyticDomain a b) :
+    GenODESolution a b (genHG a b) z := by
   sorry
 
 /-- Derivative of an iterated derivative of a smooth function. -/
@@ -281,8 +281,8 @@ lemma ghbR4_genHG_eq_entire {a b : Multiset ℂ} (h : a.card ≤ b.card) :
 
 /-- For p≤q the theta equation holds at every complex point. -/
 lemma ghbR4_genHG_entire_theta {a b : Multiset ℂ} (h : a.card ≤ b.card) (z : ℂ) :
-    genODESolution a b (genHG a b) z := by
-  unfold genODESolution
+    GenODESolution a b (genHG a b) z := by
+  unfold GenODESolution
   rw [ghbR4_genHG_eq_entire h, ghbR4_thetaPoly_const_mul, ghbR4_thetaPoly_const_mul]
   have := regularizedHGFun_ode_of_card_le h z
   simp only [genThetaA, genThetaB]
@@ -290,7 +290,7 @@ lemma ghbR4_genHG_entire_theta {a b : Multiset ℂ} (h : a.card ≤ b.card) (z :
 
 /-- The full expanded equation for p≤q with the explicit alpha and beta constants. -/
 @[dlmf 16.8.E4]
-theorem genHG_expanded_ode_entire (a b : Multiset ℂ) (h : a.card ≤ b.card) (hb : genDenRegular b) (z : ℂ) :
+theorem genHG_expanded_ode_entire (a b : Multiset ℂ) (h : a.card ≤ b.card) (hb : GenDenRegular b) (z : ℂ) :
     z ^ b.card * iteratedDeriv (b.card + 1) (genHG a b) z +
       (∑ j ∈ Finset.Icc 1 b.card, z ^ (j - 1) *
         (genODEAlpha a j * z + genODEBeta b j) * iteratedDeriv j (genHG a b) z) +
@@ -316,7 +316,7 @@ theorem genHG_expanded_ode_entire (a b : Multiset ℂ) (h : a.card ≤ b.card) (
   have hzT : ∀ z, z * T z = 0 := by
     intro z
     have hode := ghbR4_genHG_entire_theta h z
-    unfold genODESolution at hode
+    unfold GenODESolution at hode
     rw [ghbR4_thetaPoly_eq_sum hf _ (M := q + 1) hBdeg.le,
       ghbR4_thetaPoly_eq_sum hf _ (M := q + 1) (by rw [hAdeg]; omega)] at hode
     have hE : ∑ j ∈ range (q + 1 + 1), (genODEBeta b j * z ^ j + genODEAlpha a j * z ^ (j + 1)) *
@@ -355,7 +355,7 @@ theorem genHG_expanded_ode_entire (a b : Multiset ℂ) (h : a.card ≤ b.card) (
 
 /-- The full expanded equation for p=q+1. -/
 @[dlmf 16.8.E5]
-theorem genHG_expanded_ode_balanced (a b : Multiset ℂ) (h : a.card = b.card + 1) (hb : genDenRegular b)
+theorem genHG_expanded_ode_balanced (a b : Multiset ℂ) (h : a.card = b.card + 1) (hb : GenDenRegular b)
     {z : ℂ} (hz : z ∈ cutPlane) :
     z ^ b.card * (1 - z) * iteratedDeriv (b.card + 1) (genHG a b) z +
       (∑ j ∈ Finset.Icc 1 b.card, z ^ (j - 1) *
@@ -364,18 +364,18 @@ theorem genHG_expanded_ode_balanced (a b : Multiset ℂ) (h : a.card = b.card + 
   sorry
 
 /-- Zero is at most regular, infinity is irregular, and there are no other singularities for p≤q. -/
-theorem genHG_ode_singularities_entire (a b : Multiset ℂ) (h : a.card ≤ b.card) (hb : genDenRegular b) :
-    Complex.linearODEAtMostRegularAt (genODECoeff a b) 0 ∧
-    Complex.linearODEIrregularAtInfinity (genODECoeff a b) ∧
-    ∀ z : ℂ, z ≠ 0 → Complex.linearODEOrdinaryAt (genODECoeff a b) z := by
+theorem genHG_ode_singularities_entire (a b : Multiset ℂ) (h : a.card ≤ b.card) (hb : GenDenRegular b) :
+    Complex.LinearODEAtMostRegularAt (genODECoeff a b) 0 ∧
+    Complex.LinearODEIrregularAtInfinity (genODECoeff a b) ∧
+    ∀ z : ℂ, z ≠ 0 → Complex.LinearODEOrdinaryAt (genODECoeff a b) z := by
   sorry
 
 /-- Zero, one and infinity are at most regular; removable parameter degeneracies are retained. -/
-theorem genHG_ode_singularities_balanced (a b : Multiset ℂ) (h : a.card = b.card + 1) (hb : genDenRegular b) :
-    Complex.linearODEAtMostRegularAt (genODECoeff a b) 0 ∧
-    Complex.linearODEAtMostRegularAt (genODECoeff a b) 1 ∧
-    Complex.linearODEAtMostRegularAtInfinity (genODECoeff a b) ∧
-    ∀ z : ℂ, z ≠ 0 → z ≠ 1 → Complex.linearODEOrdinaryAt (genODECoeff a b) z := by
+theorem genHG_ode_singularities_balanced (a b : Multiset ℂ) (h : a.card = b.card + 1) (hb : GenDenRegular b) :
+    Complex.LinearODEAtMostRegularAt (genODECoeff a b) 0 ∧
+    Complex.LinearODEAtMostRegularAt (genODECoeff a b) 1 ∧
+    Complex.LinearODEAtMostRegularAtInfinity (genODECoeff a b) ∧
+    ∀ z : ℂ, z ≠ 0 → z ≠ 1 → Complex.LinearODEOrdinaryAt (genODECoeff a b) z := by
   sorry
 
 /-- The nominal operator order is max(p,q+1), independently of lower-order equations for special solutions. -/
@@ -401,14 +401,14 @@ theorem genHG_ode_nominal_order (a b : Multiset ℂ) :
 theorem genFrobeniusZero_fundamental {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ) (hpq : p ≤ q + 1)
     (hb : ∀ j, ∀ n : ℤ, b j ≠ n)
     (hdiff : ∀ i j, i ≠ j → ∀ n : ℤ, b i - b j ≠ n) :
-    genFundamentalSystem (genParams a) (genParams b) genFrobeniusDomain (genFrobeniusZero a b) := by
+    GenFundamentalSystem (genParams a) (genParams b) genFrobeniusDomain (genFrobeniusZero a b) := by
   sorry
 
 /-- All resonant cases admit logarithmic Frobenius series, with analytic power series and logs through order q. -/
 theorem genFrobeniusZero_resonant {p q : ℕ} (a : Fin p → ℂ) (b : Fin q → ℂ) (hpq : p ≤ q + 1)
-    (hb : genDenRegular (genParams b)) :
+    (hb : GenDenRegular (genParams b)) :
     ∃ r : ℝ, 0 < r ∧ ∃ F : Fin (q + 1) → ℂ → ℂ,
-      genFundamentalSystem (genParams a) (genParams b)
+      GenFundamentalSystem (genParams a) (genParams b)
         (Complex.slitPlane ∩ Metric.ball 0 r) F ∧
       ∃ A : Fin (q + 1) → Fin (q + 1) → Fin (q + 1) → ℂ → ℂ,
         (∀ i j k, AnalyticOnNhd ℂ (A i j k) (Metric.ball 0 r)) ∧
@@ -420,9 +420,9 @@ theorem genFrobeniusZero_resonant {p q : ℕ} (a : Fin p → ℂ) (b : Fin q →
 /-- The nonresonant infinity solutions form a fundamental system in their principal exterior domain. -/
 @[dlmf 16.8.E7]
 theorem genFrobeniusInfinity_fundamental {q : ℕ} (a : Fin (q + 1) → ℂ) (b : Fin q → ℂ)
-    (hb : genDenRegular (genParams b))
+    (hb : GenDenRegular (genParams b))
     (hdiff : ∀ i j, i ≠ j → ∀ n : ℤ, a i - a j ≠ n) :
-    genFundamentalSystem (genParams a) (genParams b)
+    GenFundamentalSystem (genParams a) (genParams b)
       {z : ℂ | 1 < ‖z‖ ∧ -z ∈ Complex.slitPlane}
       (fun j z => genFrobeniusInfinityLog a b j (Complex.log (-z))) := by
   sorry
@@ -430,7 +430,7 @@ theorem genFrobeniusInfinity_fundamental {q : ℕ} (a : Fin (q + 1) → ℂ) (b 
 /-- The connection formula on both correlated closed log(-z) cut sides. -/
 @[dlmf 16.8.E8]
 theorem genHG_infinity_connection {q : ℕ} (a : Fin (q + 1) → ℂ) (b : Fin q → ℂ)
-    (hb : genDenRegular (genParams b))
+    (hb : GenDenRegular (genParams b))
     (hdiff : ∀ i j, i ≠ j → ∀ n : ℤ, a i - a j ≠ n)
     {w : ℂ} (hw : |w.im| ≤ Real.pi) (hz : -Complex.exp w ≠ 1) :
     genHGNegativeLog (genParams a) (genParams b) w =
@@ -440,7 +440,7 @@ theorem genHG_infinity_connection {q : ℕ} (a : Fin (q + 1) → ℂ) (b : Fin q
 /-- The convergent displaced-center expansion with correlated principal branches and all regularized finite inner polynomials. -/
 @[dlmf 16.8.E9]
 theorem genHG_centered_infinity_connection {q : ℕ} (a : Fin (q + 1) → ℂ) (b : Fin q → ℂ)
-    (ha : genDenRegular (genParams a)) (hb : genDenRegular (genParams b))
+    (ha : GenDenRegular (genParams a)) (hb : GenDenRegular (genParams b))
     (hdiff : ∀ i j, i ≠ j → ∀ n : ℤ, a i - a j ≠ n)
     (z₀ : ℂ) {z : ℂ} (hz : z ∈ genCenteredInfinityDomain z₀) :
     ∃ v : Fin (q + 1) → ℂ,
@@ -466,7 +466,7 @@ lemma ghbR4_genCoeff_cons (x : ℂ) (a b : Multiset ℂ) (n : ℕ) :
 
 /-- The coefficient series converges absolutely in the open unit disk for p≤q+1. -/
 lemma ghbR4_summable_norm_disk {a b : Multiset ℂ} (h : a.card ≤ b.card + 1)
-    (hb : genDenRegular b) {w : ℂ} (hw : ‖w‖ < 1) :
+    (hb : GenDenRegular b) {w : ℂ} (hw : ‖w‖ < 1) :
     Summable (fun n : ℕ => ‖genCoeff a b n * w ^ n‖) := by
   have hr : (1 : ENNReal) ≤ (FormalMultilinearSeries.ofScalars ℂ (genCoeff a b)).radius := by
     rw [genScalarSeries_eq_gamma_smul hb,
@@ -481,7 +481,7 @@ lemma ghbR4_summable_norm_disk {a b : Multiset ℂ} (h : a.card ≤ b.card + 1)
 
 /-- Upper-parameter confluence along every complex direction to infinity. -/
 @[dlmf 16.8.E10]
-theorem genHG_upper_confluence (a b : Multiset ℂ) (h : a.card ≤ b.card) (hb : genDenRegular b) (z : ℂ) :
+theorem genHG_upper_confluence (a b : Multiset ℂ) (h : a.card ≤ b.card) (hb : GenDenRegular b) (z : ℂ) :
     Tendsto (fun α : ℂ => genHG (α ::ₘ a) b (z / α)) (Bornology.cobounded ℂ)
       (𝓝 (genHG a b z)) := by
   set R : ℝ := ‖z‖ + 1 with hR
@@ -539,7 +539,7 @@ theorem genHG_upper_confluence (a b : Multiset ℂ) (h : a.card ≤ b.card) (hb 
 
 /-- Lower-parameter confluence with the full angle-dependent z restriction from the source. -/
 @[dlmf 16.8.E11]
-theorem genHG_lower_confluence (a b : Multiset ℂ) (h : a.card ≤ b.card + 1) (hb : genDenRegular b)
+theorem genHG_lower_confluence (a b : Multiset ℂ) (h : a.card ≤ b.card + 1) (hb : GenDenRegular b)
     (z : ℂ) {δ : ℝ} (hδ : 0 < δ) (hδπ : δ ≤ Real.pi) :
     Tendsto (fun β : ℂ => genHG a (β ::ₘ b) (β * z))
       (comap norm atTop ⊓ 𝓟 {β : ℂ | β ≠ 0 ∧ |β.arg| ≤ Real.pi - δ ∧
@@ -551,9 +551,9 @@ theorem genHG_lower_confluence (a b : Multiset ℂ) (h : a.card ≤ b.card + 1) 
 /-- Resonant infinity exponents admit a fundamental system with power series in 1/z
 and logarithms of degree at most q, without integer-difference exclusions. -/
 theorem genFrobeniusInfinity_resonant {q : ℕ} (a : Fin (q + 1) → ℂ) (b : Fin q → ℂ)
-    (hb : genDenRegular (genParams b)) :
+    (hb : GenDenRegular (genParams b)) :
     ∃ R : ℝ, 1 < R ∧ ∃ F : Fin (q + 1) → ℂ → ℂ,
-      genFundamentalSystem (genParams a) (genParams b)
+      GenFundamentalSystem (genParams a) (genParams b)
         {z : ℂ | R < ‖z‖ ∧ -z ∈ Complex.slitPlane} F ∧
       ∃ A : Fin (q + 1) → Fin (q + 1) → Fin (q + 1) → ℂ → ℂ,
         (∀ i j k, AnalyticOnNhd ℂ (A i j k) (Metric.ball 0 (1 / R))) ∧

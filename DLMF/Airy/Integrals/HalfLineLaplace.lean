@@ -742,7 +742,7 @@ theorem airyLap_upperGamma_real (a : ℂ) {x : ℝ} (hx : 0 < x) :
     rw [← Complex.ofReal_exp, Real.exp_sub, show 3 * Real.log x = ((3 : ℕ) : ℝ) * Real.log x by
       norm_num, Real.exp_nat_mul, Real.exp_log hx, Real.exp_log (by norm_num)]
   rw [hw, airyUpperGammaOnLog, hlog, he]
-  simp [lineIntegral]
+  simp [segmentIntegral]
 
 /-- `Γ(a, y) → 0` as `y → +∞` for `Re a > 0`. -/
 theorem airyLap_upperIncGamma_tendsto {a : ℂ} (ha : 0 < a.re) :

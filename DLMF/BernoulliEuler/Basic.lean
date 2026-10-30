@@ -5,10 +5,12 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.NumberTheory.ZetaValues
+public import DLMFMathlib.Analysis.BooleSummation
+public import DLMFMathlib.Analysis.EulerMaclaurin
 public import DLMFMathlib.NumberTheory.EulerPolynomials
 public import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+public import Mathlib.NumberTheory.ZetaValues
 
 /-!
 # Bernoulli and Euler polynomials: definitions (DLMF §§24.1–24.2)
@@ -28,7 +30,7 @@ Their real-variable forms are Mathlib's `bernoulliFun n : ℝ → ℝ` and the p
 * `bernoulliPolyB n x`, `eulerPolyE n x`: complex evaluation `x ↦ Bₙ(x)`, `x ↦ Eₙ(x)` (DLMF
   §24.1: "`x` real or complex"), via `Polynomial.aeval`, with bridges to the real, rational and
   polynomial forms;
-* `periodicBernoulliB n x`, `periodicEulerE n x`: the periodic functions `B̃ₙ(x)`, `Ẽₙ(x)` of
+* `periodicBernoulli n x`, `antiperiodicEuler n x`: the periodic functions `B̃ₙ(x)`, `Ẽₙ(x)` of
   §24.2(iii) (DLMF 24.2.11–24.2.12), with a bridge to Mathlib's `periodizedBernoulli`;
 * the Appell (binomial) property `b24a_appell_aeval` used for 24.2.5, 24.2.10, 24.4.12–13.
 
@@ -231,20 +233,14 @@ theorem differentiable_bernoulliPolyB (n : ℕ) : Differentiable ℂ (bernoulliP
 theorem differentiable_eulerPolyE (n : ℕ) : Differentiable ℂ (eulerPolyE n) :=
   fun x => (Polynomial.hasDerivAt_aeval (Polynomial.euler n) x).differentiableAt
 
-/-! ### Periodic Bernoulli and Euler functions (DLMF §24.2(iii)) -/
+/-! ### Periodic Bernoulli and Euler functions (DLMF §24.2(iii))
 
-/-- The periodic Bernoulli function `B̃ₙ(x) = Bₙ(x - ⌊x⌋)` of DLMF 24.2.11–24.2.12, real `x`. -/
-@[dlmf 24.2.iii]
-def periodicBernoulliB (n : ℕ) (x : ℝ) : ℝ := bernoulliFun n (Int.fract x)
-
-/-- The periodic Euler function `Ẽₙ(x) = (-1)^⌊x⌋ Eₙ(x - ⌊x⌋)` of DLMF 24.2.11–24.2.12, real `x`:
-the antiperiodic extension of `Eₙ` from `[0, 1)`. -/
-@[dlmf 24.2.iii]
-def periodicEulerE (n : ℕ) (x : ℝ) : ℝ := (-1 : ℝ) ^ ⌊x⌋ * eulerFun n (Int.fract x)
+The canonical definitions are `periodicBernoulli` and `antiperiodicEuler` in the general
+summation APIs, with the half-open-interval endpoint convention. -/
 
 /-- Bridge to Mathlib's `periodizedBernoulli` on the unit additive circle. -/
 theorem periodicBernoulliB_eq_periodizedBernoulli (n : ℕ) (x : ℝ) :
-    periodicBernoulliB n x = periodizedBernoulli n (x : UnitAddCircle) := by
+    periodicBernoulli n x = periodizedBernoulli n (x : UnitAddCircle) := by
   rw [← AddCircle.coe_fract, periodizedBernoulli, AddCircle.liftIco_coe_apply]
   · rfl
   · exact ⟨Int.fract_nonneg x, by simpa using Int.fract_lt_one x⟩

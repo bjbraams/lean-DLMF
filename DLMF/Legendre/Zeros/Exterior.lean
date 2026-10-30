@@ -232,7 +232,7 @@ theorem lzero_ext_count {f f' Q Q' : ℝ → ℝ} {c t₁ T σ₁ σ₂ : ℝ} (
     rw [hZ]; exact ⟨finite_empty, ncard_empty ℝ⟩
 
 /-- The rule of DLMF 14.16(iii) (as corrected) through the sign of `sin(μπ)/Γ(ν-μ+1)`. -/
-theorem lzero_oneZero_iff {ν μ : ℝ} : associatedPOneZero ν μ ↔
+theorem lzero_oneZero_iff {ν μ : ℝ} : AssociatedPOneZero ν μ ↔
     0 < μ ∧ (∀ n : ℤ, μ ≠ n) ∧ Real.sin (μ * π) * (Real.Gamma (ν - μ + 1))⁻¹ < 0 := by
   have hinv : ν < μ → (Real.Gamma (ν - μ + 1))⁻¹ =
       Real.sin ((μ - ν) * π) * Real.Gamma (μ - ν) / π := by
@@ -253,7 +253,7 @@ theorem lzero_oneZero_iff {ν μ : ℝ} : associatedPOneZero ν μ ↔
         rw [eq_div_iff (mul_ne_zero h0 hG.ne')]
         linear_combination h'
       rw [hGs, inv_div]
-  unfold associatedPOneZero
+  unfold AssociatedPOneZero
   constructor
   · rintro (⟨h0, hlt, hn, hs⟩ | ⟨h0, hle, hn, hodd⟩)
     · refine ⟨h0, hn, ?_⟩
@@ -454,12 +454,12 @@ theorem lzero_olverQ_pos_bound {ν : ℝ} (hν : -1/2 ≤ ν) (μ : ℝ) :
 
 /-- Real form of a Wronskian identity on `(1, ∞)` for functions real there. -/
 theorem lzero_ext_wr {F G : ℂ → ℂ} {x c : ℝ} (hx : 1 < x) (hF : (F x).im = 0)
-    (hG : (G x).im = 0) (h : LegendreWronskian F G x = (c : ℂ) / ((x : ℂ) ^ 2 - 1)) :
+    (hG : (G x).im = 0) (h : ODE.wronskian F G x = (c : ℂ) / ((x : ℂ) ^ 2 - 1)) :
     (x ^ 2 - 1) * ((F x).re * (deriv G x).re - (G x).re * (deriv F x).re) = c := by
   have hp : x ^ 2 - 1 ≠ 0 := by nlinarith
   rw [show (c : ℂ) / ((x : ℂ) ^ 2 - 1) = ((c / (x ^ 2 - 1) : ℝ) : ℂ) by push_cast; ring] at h
   have h' := congrArg re h
-  simp only [LegendreWronskian, sub_re, mul_re, hF, hG, zero_mul, sub_zero, ofReal_re] at h'
+  simp only [ODE.wronskian, sub_re, mul_re, hF, hG, zero_mul, sub_zero, ofReal_re] at h'
   rw [h']
   field_simp
 
@@ -539,9 +539,9 @@ private lemma lzero_assocP_wronskian_re {ν μ x : ℝ} (hx : 1 < x) :
   set Qc : ℂ → ℂ := olverQ (ν : ℂ) (μ : ℂ) with hQc
   set cA : ℝ := (Real.Gamma (ν - μ + 1))⁻¹ with hcA
   have h := olverQ_wronskian_pos (ν : ℂ) μ (z := x) (lzero_mem hx)
-  have h2 : LegendreWronskian Qc P x = (cA : ℂ) / ((x : ℂ) ^ 2 - 1) := by
-    rw [show LegendreWronskian Qc P x = -LegendreWronskian P Qc x by
-      simp only [LegendreWronskian]; ring, h,
+  have h2 : ODE.wronskian Qc P x = (cA : ℂ) / ((x : ℂ) ^ 2 - 1) := by
+    rw [show ODE.wronskian Qc P x = -ODE.wronskian P Qc x by
+      simp only [ODE.wronskian]; ring, h,
       show (ν : ℂ) - μ + 1 = ((ν - μ + 1 : ℝ) : ℂ) by push_cast; ring, Complex.Gamma_ofReal,
       hcA]
     push_cast; ring
@@ -552,7 +552,7 @@ private lemma lzero_assocP_wronskian_re {ν μ x : ℝ} (hx : 1 < x) :
 private lemma lzero_assocP_sign_near_one {ν μ : ℝ} (hν : -1/2 ≤ ν)
     (hA : (Real.Gamma (ν - μ + 1))⁻¹ ≠ 0) :
     ∃ σ₁ t₁ : ℝ, 1 < t₁ ∧ (∀ x ∈ Ioo 1 t₁, 0 < σ₁ * (associatedP (ν : ℂ) (μ : ℂ) x).re) ∧
-      (σ₁ * (Real.Gamma (ν - μ + 1))⁻¹ < 0 ↔ associatedPOneZero ν μ) := by
+      (σ₁ * (Real.Gamma (ν - μ + 1))⁻¹ < 0 ↔ AssociatedPOneZero ν μ) := by
   set P : ℂ → ℂ := associatedP (ν : ℂ) (μ : ℂ) with hP
   set Qc : ℂ → ℂ := olverQ (ν : ℂ) (μ : ℂ) with hQc
   set f : ℝ → ℝ := fun x => (P x).re with hf
@@ -566,7 +566,7 @@ private lemma lzero_assocP_sign_near_one {ν μ : ℝ} (hν : -1/2 ≤ ν)
     lzero_assocP_wronskian_re hx
   have hcA2 : 0 < cA ^ 2 := by positivity
   show ∃ σ₁ t₁ : ℝ, 1 < t₁ ∧ (∀ x ∈ Ioo 1 t₁, 0 < σ₁ * f x) ∧
-    (σ₁ * cA < 0 ↔ associatedPOneZero ν μ)
+    (σ₁ * cA < 0 ↔ AssociatedPOneZero ν μ)
   rcases le_or_gt μ 0 with hμ | hμ
   · obtain ⟨s, hs, K1, hK1, hv⟩ := lzero_assocP_near_one ν (m := -μ) (by linarith)
     have hcA0 : 0 < cA := inv_pos.mpr (Real.Gamma_pos_of_pos (by linarith))
@@ -596,7 +596,7 @@ private lemma lzero_assocP_sign_near_one {ν μ : ℝ} (hν : -1/2 ≤ ν)
     have hWB : ∀ x, 1 < x → (x ^ 2 - 1) * (v x * f' x - f x * v' x) = cB := by
       intro x hx
       have h := associated_wronskian_7 (ν : ℂ) μ (z := x) (lzero_mem hx)
-      have h2 : LegendreWronskian V P x = (cB : ℂ) / ((x : ℂ) ^ 2 - 1) := by
+      have h2 : ODE.wronskian V P x = (cB : ℂ) / ((x : ℂ) ^ 2 - 1) := by
         rw [h, hcB, show (μ : ℂ) * π = ((μ * π : ℝ) : ℂ) by push_cast; ring, ← ofReal_sin]
         have hp : (x : ℂ) ^ 2 - 1 ≠ 0 := by
           rw [show (x : ℂ) ^ 2 - 1 = ((x ^ 2 - 1 : ℝ) : ℂ) by push_cast; ring]
@@ -645,9 +645,9 @@ private lemma lzero_assocP_sign_near_one {ν μ : ℝ} (hν : -1/2 ≤ ν)
       have hWC : ∀ x, 1 < x → (x ^ 2 - 1) * (q x * v' x - v x * q' x) = cC := by
         intro x hx
         have h := associated_wronskian_8 (ν : ℂ) μ (z := x) (lzero_mem hx)
-        have h2 : LegendreWronskian Qc V x = (cC : ℂ) / ((x : ℂ) ^ 2 - 1) := by
-          rw [show LegendreWronskian Qc V x = -LegendreWronskian V Qc x by
-            simp only [LegendreWronskian]; ring, h,
+        have h2 : ODE.wronskian Qc V x = (cC : ℂ) / ((x : ℂ) ^ 2 - 1) := by
+          rw [show ODE.wronskian Qc V x = -ODE.wronskian V Qc x by
+            simp only [ODE.wronskian]; ring, h,
             show (ν : ℂ) + μ + 1 = ((ν + μ + 1 : ℝ) : ℂ) by push_cast; ring,
             Complex.Gamma_ofReal, hcC]
           push_cast
@@ -697,7 +697,7 @@ private lemma lzero_assocP_sign_near_one {ν μ : ℝ} (hν : -1/2 ≤ ν)
 
 /-- Exactly one or no exterior zeros, excluding an identically zero solution. -/
 theorem associatedP_zero_count {ν μ : ℝ} (hν : -1/2 ≤ ν) (hnondeg : ∃ x : ℝ, 1 < x ∧ associatedP ν μ x ≠ 0) :
-    Set.Finite {x : ℝ | 1 < x ∧ associatedP ν μ x=0} ∧ ({x : ℝ | 1 < x ∧ associatedP ν μ x=0}:Set ℝ).ncard=if associatedPOneZero ν μ then 1 else 0 := by
+    Set.Finite {x : ℝ | 1 < x ∧ associatedP ν μ x=0} ∧ ({x : ℝ | 1 < x ∧ associatedP ν μ x=0}:Set ℝ).ncard=if AssociatedPOneZero ν μ then 1 else 0 := by
   set P : ℂ → ℂ := associatedP (ν : ℂ) (μ : ℂ) with hP
   set Qc : ℂ → ℂ := olverQ (ν : ℂ) (μ : ℂ) with hQc
   set f : ℝ → ℝ := fun x => (P x).re with hf
@@ -747,7 +747,7 @@ theorem associatedP_zero_count {ν μ : ℝ} (hν : -1/2 ≤ ν) (hnondeg : ∃ 
       rcases h2 with h2 | h2
       · exact hfw h2
       · exact (hQpos w hw).ne' h2
-    have hno : ¬ associatedPOneZero ν μ := by
+    have hno : ¬ AssociatedPOneZero ν μ := by
       rw [lzero_oneZero_iff, ← hcA, hA, mul_zero]
       exact fun h => lt_irrefl _ h.2.2
     rw [hZ]

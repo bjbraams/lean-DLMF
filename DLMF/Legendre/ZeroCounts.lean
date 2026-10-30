@@ -35,7 +35,6 @@ open Set Filter Topology
 
 namespace DLMF.Legendre
 
-
 /-- **Sturm separation.** If `p q' - q p'` has no zeros on `[a, b]` and `q a = q b = 0`, then `p`
 vanishes somewhere in `(a, b)` (Rolle's theorem for `q / p`). -/
 theorem lzc_exists_zero_between {p p' q q' : ℝ → ℝ} {a b : ℝ} (hab : a < b)
@@ -533,11 +532,10 @@ section Wronskians
 open Complex
 open scoped Real
 
-
 /-- The Wronskian of `𝖯^{-μ}_ν(-x)` and `𝖯^μ_ν(x)` is `2 sin(νπ)/(π(1-x²))` (from the even and odd
 solutions, as in DLMF 14.2.7). -/
 theorem lzc_wronskian_reflect_P (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ferrersWronskian (fun x => ferrersP ν (-μ) (-x)) (ferrersP ν μ) x =
+    ODE.wronskian (fun x => ferrersP ν (-μ) (-x)) (ferrersP ν μ) x =
       2*sin (ν*π)/(π*(1-x^2:ℂ)) := by
   rw [ferrersWronskian_of_even_odd (ferrersP_neg_reflect_eqOn_even_odd ν μ)
     (ferrersP_eqOn_even_odd ν μ) hx,
@@ -566,7 +564,7 @@ theorem lzc_wronskian_reflect_P (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ)
 /-- The Wronskian of `𝖯^{-μ}_ν(-x)` and `𝖰^μ_ν(x)` is `cos(νπ)/(1-x²)` (compare DLMF 14.2.6). -/
 theorem lzc_wronskian_reflect_Q (ν μ : ℂ) (h : LegendreQRegular ν μ) {x : ℝ}
     (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ferrersWronskian (fun x => ferrersP ν (-μ) (-x)) (ferrersQ ν μ) x = cos (ν*π)/(1-x^2:ℂ) := by
+    ODE.wronskian (fun x => ferrersP ν (-μ) (-x)) (ferrersQ ν μ) x = cos (ν*π)/(1-x^2:ℂ) := by
   have hne : 1-(x:ℂ)^2≠0 := slitPlane_ne_zero (ferrers_one_sub_sq_mem_slitPlane hx)
   have hP : (π:ℂ) ≠ 0 := ofReal_ne_zero.mpr Real.pi_ne_zero
   rw [ferrersWronskian_of_even_odd (ferrersP_neg_reflect_eqOn_even_odd ν μ)

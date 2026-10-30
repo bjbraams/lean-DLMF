@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Painleve.Equations
 public import DLMF.Painleve.Backlund
+public import DLMF.Painleve.Equations
 
 /-!
 # Backlund transformations for Painleve II and III
@@ -649,7 +649,7 @@ any function `s` on `U` with `s² = 2z` and `s' = 1/s` (so `s = ±√(2z)`), and
 `PIII(0, 0, a, b)` near `s(z)`. -/
 @[dlmf 32.7.E18]
 theorem isPainleveIIIOn_sq_of_isPainleveIIIOn {a b : ℂ} {W s : ℂ → ℂ} {U V : Set ℂ}
-    (hW : IsPainleveIIIOn 0 0 a b W V) (hV : IsOpen V) (hU : IsOpen U)
+    (hW : IsPainleveIIIOn 0 0 a b W V) (hU : IsOpen U)
     (hs : ∀ z ∈ U, s z ^ 2 = 2 * z) (hs' : ∀ z ∈ U, HasDerivAt s (1 / s z) z)
     (hsV : ∀ z ∈ U, s z ∈ V) :
     IsPainleveIIIOn a b 0 0 (fun z => W (s z) ^ 2) U := by

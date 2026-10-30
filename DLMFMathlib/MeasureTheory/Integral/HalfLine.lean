@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.MeasureTheory.Measure.Lebesgue.Integral
 public import Mathlib.MeasureTheory.Function.LpSeminorm.Indicator
+public import Mathlib.MeasureTheory.Measure.Lebesgue.Integral
 
 /-!
 # Reflection and integration on the positive half-line
@@ -25,7 +25,7 @@ namespace MeasureTheory
 
 /-- Splitting an integrable function into its positive and reflected negative halves. -/
 theorem integral_eq_integral_Ioi_add_neg {E : Type*} [NormedAddCommGroup E]
-    [NormedSpace ℝ E] [CompleteSpace E] {f : ℝ → E} (hf : Integrable f) :
+    [NormedSpace ℝ E] {f : ℝ → E} (hf : Integrable f) :
     (∫ t, f t) = ∫ t in Ioi (0 : ℝ), f t + f (-t) := by
   have hn : Integrable (fun t => f (-t)) :=
     (volume.measurePreserving_neg).integrable_comp_of_integrable hf

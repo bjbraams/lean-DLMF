@@ -6,8 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import ComplexAnalysis.Pow
-public import DLMF.Confluent.Whittaker
 public import DLMF.Confluent.MobiusTaylor
+public import DLMF.Confluent.Whittaker
 
 /-!
 # Products and addition theorems (DLMF §§13.12, 13.13, 13.25, 13.26)
@@ -669,7 +669,7 @@ theorem whittakerM_addition {κ μ x y : ℂ} (hx : 0 < x.re) (hxy : x + y ∈ s
 /-- Addition theorem; the series converges for `‖y‖ < ‖x‖`. -/
 @[dlmf 13.26.E2]
 theorem whittakerM_addition_shift_mu {κ μ x y : ℂ} (hx : 0 < x.re)
-    (hxy : x + y ∈ slitPlane) (hyx : ‖y‖ < ‖x‖) (hμ : ∀ k : ℕ, 1 + 2 * μ ≠ -k) :
+    (hyx : ‖y‖ < ‖x‖) (hμ : ∀ k : ℕ, 1 + 2 * μ ≠ -k) :
     whittakerM κ μ (x + y) =
       exp (-y / 2) * ((x + y) / x) ^ (μ + 1 / 2) *
         ∑' n : ℕ, poch (1 / 2 + μ - κ) n / (poch (1 + 2 * μ) n * n.factorial) *
@@ -744,7 +744,7 @@ theorem whittakerM_addition_exp {κ μ x y : ℂ} (hx : 0 < x.re)
 /-- Addition theorem; the series converges for `‖y‖ < ‖x‖`. -/
 @[dlmf 13.26.E5]
 theorem whittakerM_addition_exp_shift_mu {κ μ x y : ℂ} (hx : 0 < x.re)
-    (hxy : x + y ∈ slitPlane) (hyx : ‖y‖ < ‖x‖) (hμ : ∀ k : ℕ, 1 + 2 * μ ≠ -k) :
+    (hyx : ‖y‖ < ‖x‖) (hμ : ∀ k : ℕ, 1 + 2 * μ ≠ -k) :
     whittakerM κ μ (x + y) =
       exp (y / 2) * ((x + y) / x) ^ (μ + 1 / 2) *
         ∑' n : ℕ, poch (1 / 2 + μ + κ) n / (poch (1 + 2 * μ) n * n.factorial) *

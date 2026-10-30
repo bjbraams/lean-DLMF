@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Confluent.Whittaker
+public import DLMFMathlib.Analysis.Calculus.DifferentialOperators
 
 /-!
 # Contiguous relations for Kummer and Tricomi functions
@@ -29,20 +30,11 @@ noncomputable section
 
 namespace DLMF.Confluent
 
-/-- The operator `f ↦ z (z f)'`. -/
-def mulDerivMul (f : ℂ → ℂ) (z : ℂ) : ℂ := z * deriv (fun w => w * f w) z
-
--- NOTE (2026-09-17): the smoothness hypothesis `hf` was added; the DLMF identity is for
--- smooth `f`, and without it the two sides involve junk values of `deriv`. The proof reuses
--- the Gauss-side operator identity `DLMF.Hypergeometric.iterate_mulDerivMul_eq`.
-/-- Identity under the stated parameter and domain assumptions: `mulDerivMul^[n] f z = z ^ n *
+/-- Identity under the stated parameter and domain assumptions: `Function.mulDerivMul^[n] f z = z ^ n *
 iteratedDeriv n (fun w => w ^ n * f w) z`. -/
 @[dlmf 13.3.E29]
-theorem mulDerivMul_eq_mul_iteratedDeriv (n : ℕ) (f : ℂ → ℂ) (hf : ContDiff ℂ ⊤ f) {z : ℂ}
-    (hz : z ≠ 0) :
-    mulDerivMul^[n] f z = z ^ n * iteratedDeriv n (fun w => w ^ n * f w) z := by
-  have h : mulDerivMul = DLMF.Hypergeometric.mulDerivMul := rfl
-  rw [h]
+theorem mulDerivMul_eq_mul_iteratedDeriv (n : ℕ) (f : ℂ → ℂ) (hf : ContDiff ℂ ⊤ f) {z : ℂ} :
+    Function.mulDerivMul^[n] f z = z ^ n * iteratedDeriv n (fun w => w ^ n * f w) z := by
   exact DLMF.Hypergeometric.iterate_mulDerivMul_eq n hf z
 
 section KummerContiguous
@@ -897,22 +889,22 @@ private lemma deriv_cpow_mul_exp_neg_mul_kummerM {a b : ℂ} (s : ℂ) (hb : ∀
   rw [h]
   ring
 
-/-- Identity under the stated parameter and domain assumptions: `mulDerivMul^[n] (fun w => w ^ (a
+/-- Identity under the stated parameter and domain assumptions: `Function.mulDerivMul^[n] (fun w => w ^ (a
 - 1) * kummerM a b w) z = poch a n * z ^ (a + n - 1) * kummerM (a + n) b z`. -/
 @[dlmf 13.3.E17]
 theorem iterate_mulDerivMul_kummerM {a b : ℂ} (n : ℕ) {z : ℂ}
     (hb : ∀ k : ℕ, b ≠ -k) (hz : z ∈ slitPlane) :
-    mulDerivMul^[n] (fun w => w ^ (a - 1) * kummerM a b w) z =
+    Function.mulDerivMul^[n] (fun w => w ^ (a - 1) * kummerM a b w) z =
       poch a n * z ^ (a + n - 1) * kummerM (a + n) b z := by
   induction n generalizing z with
   | zero => simp [poch_zero]
   | succ n ih =>
-    have heq : (fun w => w * mulDerivMul^[n] (fun t => t ^ (a - 1) * kummerM a b t) w)
+    have heq : (fun w => w * Function.mulDerivMul^[n] (fun t => t ^ (a - 1) * kummerM a b t) w)
         =ᶠ[𝓝 z] (fun w => poch a n * (w ^ (a + n) * kummerM (a + n) b w)) := by
       filter_upwards [isOpen_slitPlane.mem_nhds hz] with w hw
       rw [ih hw, ← mul_cpow_pred' (slitPlane_ne_zero hw) (a + n)]
       ring
-    rw [Function.iterate_succ_apply', mulDerivMul, heq.deriv_eq, deriv_const_mul_field,
+    rw [Function.iterate_succ_apply', Function.mulDerivMul, heq.deriv_eq, deriv_const_mul_field,
       deriv_cpow_mul_kummerM (a + n) hb hz]
     have hA := z_mul_deriv_kummerM_eq_shift_a (a := a + n) hb z
     have hz0 : z ≠ 0 := slitPlane_ne_zero hz
@@ -961,24 +953,24 @@ theorem iteratedDeriv_mul_cpow_kummerM {a b : ℂ} (n : ℕ) {z : ℂ}
       show b - ((n + 1 : ℕ) : ℂ) + (n : ℂ) = b - 1 by push_cast; ring]
     ring
 
-/-- Identity under the stated parameter and domain assumptions: `mulDerivMul^[n] (fun w => w ^ (b
+/-- Identity under the stated parameter and domain assumptions: `Function.mulDerivMul^[n] (fun w => w ^ (b
 - a - 1) * exp (-w) * kummerM a b w) z = poch (b - a) n * z ^ (b - a + n - 1) * exp (-z) *
 kummerM (a - n) b z`. -/
 @[dlmf 13.3.E19]
 theorem iterate_mulDerivMul_exp_neg_kummerM {a b : ℂ} (n : ℕ) {z : ℂ}
     (hb : ∀ k : ℕ, b ≠ -k) (hz : z ∈ slitPlane) :
-    mulDerivMul^[n] (fun w => w ^ (b - a - 1) * exp (-w) * kummerM a b w) z =
+    Function.mulDerivMul^[n] (fun w => w ^ (b - a - 1) * exp (-w) * kummerM a b w) z =
       poch (b - a) n * z ^ (b - a + n - 1) * exp (-z) * kummerM (a - n) b z := by
   induction n generalizing z with
   | zero => simp [poch_zero]
   | succ n ih =>
-    have heq : (fun w => w * mulDerivMul^[n]
+    have heq : (fun w => w * Function.mulDerivMul^[n]
           (fun t => t ^ (b - a - 1) * exp (-t) * kummerM a b t) w) =ᶠ[𝓝 z]
         (fun w => poch (b - a) n * (w ^ (b - a + n) * exp (-w) * kummerM (a - n) b w)) := by
       filter_upwards [isOpen_slitPlane.mem_nhds hz] with w hw
       rw [ih hw, ← mul_cpow_pred' (slitPlane_ne_zero hw) (b - a + n)]
       ring
-    rw [Function.iterate_succ_apply', mulDerivMul, heq.deriv_eq, deriv_const_mul_field,
+    rw [Function.iterate_succ_apply', Function.mulDerivMul, heq.deriv_eq, deriv_const_mul_field,
       deriv_cpow_mul_exp_neg_mul_kummerM (b - a + n) hb hz]
     have hC := z_mul_deriv_kummerM_eq_shift_a_pred (a := a - n) hb z
     have hz0 : z ≠ 0 := slitPlane_ne_zero hz

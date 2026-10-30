@@ -6,9 +6,9 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Confluent.Whittaker
-public import Mathlib.Algebra.ContinuedFractions.Basic
 public import DLMF.Confluent.Zeros
 public import DLMFMathlib.Analysis.ContinuedFraction.Convergence
+public import Mathlib.Algebra.ContinuedFractions.Basic
 
 /-!
 # Continued fractions (DLMF §§13.5, 13.17)
@@ -479,7 +479,7 @@ theorem kummerM_continued_fraction_tendsto {a b z : ℂ} (hb : ∀ k : ℕ, b �
 /-- The map `(kummerMContinuedFraction a b x).convs` tends to `(𝓝 (kummerM a b x / kummerM (a + 1)
 (b + 1) x))` along `atTop`. -/
 @[dlmf 13.5.E1]
-theorem kummerM_continued_fraction_limit {a b x : ℝ} (ha : 0 < a) (hb : 0 < b)
+theorem kummerM_continued_fraction_limit {a b x : ℝ} (ha : 0 < a)
     (hba : a < b) (hx : 0 < x) (hx1 : x < 1) :
     Tendsto (kummerMContinuedFraction a b x).convs atTop
       (𝓝 (kummerM a b x / kummerM (a + 1) (b + 1) x)) := by
@@ -1040,7 +1040,7 @@ the hypothesis `hden` excludes those points; this is a transcription correction,
 erratum. The proof reduces to the fraction 13.5.3 with `a = 1/2 + μ - κ`, `b = 1 + 2μ`
 (`kummerU_continued_fraction_tendsto_real`). -/
 @[dlmf 13.17.E3 "special case: denominator nonzero (Lean's x/0 = 0)"]
-theorem whittakerW_continued_fraction_limit {κ μ x : ℝ} (hμ : 0 < μ) (hx : 0 < x)
+theorem whittakerW_continued_fraction_limit {κ μ x : ℝ} (hx : 0 < x)
     (hden : whittakerW (κ - 1 / 2) (μ - 1 / 2) x ≠ 0) :
     Tendsto (whittakerWContinuedFraction κ μ x).convs atTop
       (𝓝 (whittakerW κ μ x / (Real.sqrt x * whittakerW (κ - 1 / 2) (μ - 1 / 2) x))) := by

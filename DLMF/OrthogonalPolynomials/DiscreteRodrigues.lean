@@ -199,7 +199,7 @@ theorem krawtchoukRodriguesWeight_eq_zero {p : ℂ} {N n : ℕ} {x : ℤ}
 /-- Krawtchouk's discrete Rodrigues formula on every integer argument, including
 both ends of the finite support. The parameter exclusions keep the binomial
 weight and the existing hypergeometric normalization nondegenerate. -/
-theorem krawtchouk_rodrigues {p : ℂ} (_hp : p ≠ 0) (hp1 : p ≠ 1)
+theorem krawtchouk_rodrigues {p : ℂ} (hp1 : p ≠ 1)
     {N n : ℕ} (hn : n ≤ N) (x : ℤ) :
     (fwdDiff (-1 : ℤ))^[n] (krawtchoukRodriguesWeight p N n) x =
       (-1 : ℂ) ^ n * krawtchoukRodriguesWeight p N 0 x * poch (-(N : ℂ)) n *

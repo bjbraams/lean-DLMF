@@ -190,27 +190,27 @@ theorem q26a_latticePaths_zero {steps : Finset (ℕ × ℕ)} (h0 : (0, 0) ∉ st
   · rintro rfl; simp; rfl
 
 /-- Every vertex `(x, y)` of the path satisfies `x ≤ y + d`. -/
-def q26a_StaysAbove (d : ℤ) (l : List (ℕ × ℕ)) : Prop :=
+def Q26aStaysAbove (d : ℤ) (l : List (ℕ × ℕ)) : Prop :=
   ∀ i ∈ range (l.length + 1), (((l.take i).sum).1 : ℤ) ≤ ((l.take i).sum).2 + d
 
-/-- Decidability of `q26a_StaysAbove`. -/
-instance (d : ℤ) (l : List (ℕ × ℕ)) : Decidable (q26a_StaysAbove d l) := by
-  unfold q26a_StaysAbove; infer_instance
+/-- Decidability of `Q26aStaysAbove`. -/
+instance (d : ℤ) (l : List (ℕ × ℕ)) : Decidable (Q26aStaysAbove d l) := by
+  unfold Q26aStaysAbove; infer_instance
 
-/-- With offset `0`, `q26a_StaysAbove` is `StaysWeaklyAboveDiagonal`. -/
+/-- With offset `0`, `Q26aStaysAbove` is `StaysWeaklyAboveDiagonal`. -/
 theorem q26a_staysAbove_zero_iff (l : List (ℕ × ℕ)) :
-    q26a_StaysAbove 0 l ↔ StaysWeaklyAboveDiagonal l := by
-  simp only [q26a_StaysAbove, StaysWeaklyAboveDiagonal, add_zero, Nat.cast_le]
+    Q26aStaysAbove 0 l ↔ StaysWeaklyAboveDiagonal l := by
+  simp only [Q26aStaysAbove, StaysWeaklyAboveDiagonal, add_zero, Nat.cast_le]
 
 /-- The empty path stays in `x ≤ y + d` iff `0 ≤ d`. -/
-lemma q26a_staysAbove_nil (d : ℤ) : q26a_StaysAbove d [] ↔ 0 ≤ d := by
-  simp [q26a_StaysAbove]
+lemma q26a_staysAbove_nil (d : ℤ) : Q26aStaysAbove d [] ↔ 0 ≤ d := by
+  simp [Q26aStaysAbove]
 
 /-- A path stays in `x ≤ y + d` iff the origin does and the rest stays in the shifted
 half-plane. -/
 lemma q26a_staysAbove_cons (d : ℤ) (s : ℕ × ℕ) (l : List (ℕ × ℕ)) :
-    q26a_StaysAbove d (s :: l) ↔ 0 ≤ d ∧ q26a_StaysAbove (d + s.2 - s.1) l := by
-  simp only [q26a_StaysAbove, mem_range, List.length_cons]
+    Q26aStaysAbove d (s :: l) ↔ 0 ≤ d ∧ Q26aStaysAbove (d + s.2 - s.1) l := by
+  simp only [Q26aStaysAbove, mem_range, List.length_cons]
   constructor
   · intro h
     refine ⟨by simpa using h 0 (by omega), fun i hi => ?_⟩
@@ -227,7 +227,7 @@ lemma q26a_staysAbove_cons (d : ℤ) (s : ℕ × ℕ) (l : List (ℕ × ℕ)) :
       linarith
 
 /-- The count of unit-step paths to `(m, n)` staying in `x ≤ y + d`. -/
-def q26a_ballot (d : ℤ) (m n : ℕ) : ℕ := #{l ∈ latticePaths unitSteps m n | q26a_StaysAbove d l}
+def q26a_ballot (d : ℤ) (m n : ℕ) : ℕ := #{l ∈ latticePaths unitSteps m n | Q26aStaysAbove d l}
 
 /-- No path stays in `x ≤ y + d` for `d < 0` (the origin fails). -/
 lemma q26a_ballot_neg {d : ℤ} (hd : d < 0) (m n : ℕ) : q26a_ballot d m n = 0 := by

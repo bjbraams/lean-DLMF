@@ -5,11 +5,11 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Elementary.LogExpBasic
-public import Mathlib.Analysis.Analytic.Binomial
-public import DLMFMathlib.Analysis.SpecialFunctions.Complex.LogBoundary
 public import DLMF.Core.Framework
+public import DLMF.Elementary.LogExpBasic
+public import DLMFMathlib.Analysis.SpecialFunctions.Complex.LogBoundary
 public import Mathlib.Algebra.Order.Ring.Star
+public import Mathlib.Analysis.Analytic.Binomial
 public import Mathlib.Analysis.Complex.ExponentialBounds
 
 /-!
@@ -91,7 +91,7 @@ theorem exp_three_pi_div_four (ε : ℝ) (hε : ε = 1 ∨ ε = -1) :
 
 /-- The principal imaginary powers of `I`. -/
 @[dlmf 4.4.E12]
-theorem I_cpow_I (ε : ℝ) (hε : ε = 1 ∨ ε = -1) :
+theorem I_cpow_I (ε : ℝ) :
     I ^ (ε * I) = (Real.exp (-ε * Real.pi / 2) : ℂ) := by
   rw [Complex.cpow_def_of_ne_zero Complex.I_ne_zero,Complex.log_I]
   have he : (Real.pi/2*I)*(ε*I)=((-ε*Real.pi/2:ℝ):ℂ) := by
@@ -839,7 +839,6 @@ theorem logarithmic_ode_solution {s : Set ℂ} (hs : IsOpen s) (hc : IsPreconnec
       filter_upwards [hs.mem_nhds hz] with z hz using hC z hz
     exact ((hLD z hz).add_const C).congr_of_eventuallyEq hloc
 
-
 /-- Derivative of an exponential with an arbitrary complex slope. -/
 @[dlmf 4.7.E8]
 theorem exp_mul_hasDerivAt (a z : ℂ) : HasDerivAt (fun z : ℂ => Complex.exp (a * z))
@@ -1029,7 +1028,7 @@ theorem generalLogValues_exp (z : ℂ) : generalLogValues (Complex.exp z) =
 
 /-- Logarithms of a selected general power acquire an independent integer shift. -/
 @[dlmf 4.8.E11]
-theorem generalLogValues_power {a : ℂ} (ha : a ≠ 0) (z : ℂ) (j : ℤ) :
+theorem generalLogValues_power {a : ℂ} (z : ℂ) (j : ℤ) :
     generalLogValues (Complex.exp (z * logSheet j a)) =
       {w | ∃ k : ℤ, w = z * logSheet j a + k * (2 * Real.pi * I)} := by
   exact generalLogValues_exp (z*logSheet j a)

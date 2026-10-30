@@ -358,10 +358,10 @@ theorem p3l_parity (m : ℕ) (γr : ℝ) : ∀ k : ℕ, ∀ lam ∈ p3lSpec m γ
 
 /-- Linear combinations of entire solutions are entire solutions. -/
 theorem p3lSol_lincomb {m : ℕ} {γ2 c : ℂ} {f g : ℂ → ℂ} (hf : Differentiable ℂ f)
-    (hg : Differentiable ℂ g) (hfs : p3lSol m γ2 c univ f) (hgs : p3lSol m γ2 c univ g)
+    (hg : Differentiable ℂ g) (hfs : P3lSol m γ2 c univ f) (hgs : P3lSol m γ2 c univ g)
     (a b : ℂ) :
     Differentiable ℂ (fun z => a * f z + b * g z) ∧
-      p3lSol m γ2 c univ (fun z => a * f z + b * g z) ∧
+      P3lSol m γ2 c univ (fun z => a * f z + b * g z) ∧
       deriv (fun z => a * f z + b * g z) = fun z => a * deriv f z + b * deriv g z := by
   have hf' : Differentiable ℂ (deriv f) := fun z => (hf.analyticAt z).deriv.differentiableAt
   have hg' : Differentiable ℂ (deriv g) := fun z => (hg.analyticAt z).deriv.differentiableAt
@@ -377,8 +377,8 @@ theorem p3lSol_lincomb {m : ℕ} {γ2 c : ℂ} {f g : ℂ → ℂ} (hf : Differe
 
 /-- Reflection in the real axis preserves the factor equation with real parameters. -/
 lemma p3lSol_conj {m : ℕ} {γr cr : ℝ} {g : ℂ → ℂ} (hg : Differentiable ℂ g)
-    (hs : p3lSol m (γr : ℂ) (cr : ℂ) univ g) :
-    Differentiable ℂ (conj ∘ g ∘ conj) ∧ p3lSol m (γr : ℂ) (cr : ℂ) univ (conj ∘ g ∘ conj) := by
+    (hs : P3lSol m (γr : ℂ) (cr : ℂ) univ g) :
+    Differentiable ℂ (conj ∘ g ∘ conj) ∧ P3lSol m (γr : ℂ) (cr : ℂ) univ (conj ∘ g ∘ conj) := by
   refine ⟨fun z => by simpa using (hg (conj z)).conj_conj, fun z _ => ?_⟩
   rw [deriv_conj_conj, deriv_conj_conj]
   have := congrArg conj (hs (conj z) trivial)
@@ -388,7 +388,7 @@ lemma p3lSol_conj {m : ℕ} {γr cr : ℝ} {g : ℂ → ℂ} (hg : Differentiabl
 
 /-- An entire solution with real data at `0` is real on the real axis. -/
 lemma p3l_real_of_data {m : ℕ} {γr cr : ℝ} {g : ℂ → ℂ} (hg : Differentiable ℂ g)
-    (hs : p3lSol m (γr : ℂ) (cr : ℂ) univ g) (h0 : (g 0).im = 0) (h1 : (deriv g 0).im = 0) :
+    (hs : P3lSol m (γr : ℂ) (cr : ℂ) univ g) (h0 : (g 0).im = 0) (h1 : (deriv g 0).im = 0) :
     ∀ x : ℝ, (g x).im = 0 := by
   obtain ⟨hcd, hcs⟩ := p3lSol_conj hg hs
   obtain ⟨hdd, hds, hde⟩ := p3lSol_lincomb hg hcd hs hcs 1 (-1)
@@ -413,7 +413,7 @@ lemma p3l_deriv_im {g : ℂ → ℂ} (hg : Differentiable ℂ g) (hr : ∀ x : �
 
 /-- The Wronskian with the Frobenius solution, in real form. -/
 lemma p3l_wronskian_real {m : ℕ} {γr lam : ℝ} {g : ℂ → ℂ} (hg : Differentiable ℂ g)
-    (hs : p3lSol m (γr : ℂ) (p3lC m lam) univ g) :
+    (hs : P3lSol m (γr : ℂ) (p3lC m lam) univ g) :
     g 0 * (p3lyR' m γr lam 0 : ℂ) = deriv g 0 * (p3lyR m γr lam 0 : ℂ) := by
   have h := p3l_wronskian hg hs
   have h1 := p3lY_ofReal m γr lam 0
@@ -424,7 +424,7 @@ lemma p3l_wronskian_real {m : ℕ} {γr lam : ℝ} {g : ℂ → ℂ} (hg : Diffe
 /-- Entire solutions at an even eigenvalue (`Y'(0) = 0`) have `g'(0) = 0`; at an odd one,
 `g(0) = 0`. -/
 theorem p3l_data_of_parity {m : ℕ} {γr lam : ℝ} {g : ℂ → ℂ} (hl : lam ∈ p3lSpec m γr)
-    (hg : Differentiable ℂ g) (hs : p3lSol m (γr : ℂ) (p3lC m lam) univ g) :
+    (hg : Differentiable ℂ g) (hs : P3lSol m (γr : ℂ) (p3lC m lam) univ g) :
     (p3lyR' m γr lam 0 = 0 → deriv g 0 = 0) ∧ (p3lyR' m γr lam 0 ≠ 0 → g 0 = 0) := by
   have hW := p3l_wronskian_real hg hs
   constructor
@@ -440,7 +440,7 @@ theorem p3l_data_of_parity {m : ℕ} {γr lam : ℝ} {g : ℂ → ℂ} (hl : lam
 /-- **A real eigenfunction with unit data**: for `λ` in the spectrum there is an entire solution,
 real on `ℝ`, with `(g(0), g'(0)) = (1, 0)` (even case) or `(0, 1)` (odd case). -/
 theorem p3l_exists_unit {m : ℕ} {γr lam : ℝ} (hl : lam ∈ p3lSpec m γr) :
-    ∃ g : ℂ → ℂ, Differentiable ℂ g ∧ p3lSol m (γr : ℂ) (p3lC m lam) univ g ∧
+    ∃ g : ℂ → ℂ, Differentiable ℂ g ∧ P3lSol m (γr : ℂ) (p3lC m lam) univ g ∧
       (∀ x : ℝ, (g x).im = 0) ∧ (p3lyR' m γr lam 0 = 0 → g 0 = 1 ∧ deriv g 0 = 0) ∧
       (p3lyR' m γr lam 0 ≠ 0 → g 0 = 0 ∧ deriv g 0 = 1) := by
   obtain ⟨h, hd, hs, hne⟩ := hl
@@ -493,7 +493,7 @@ theorem p3l_norm_pos (m : ℕ) {g : ℂ → ℂ} (hg : Differentiable ℂ g)
 /-- **Uniqueness of the normalized eigenfunction**: two entire solutions, real on `ℝ`, with
 vanishing Wronskian at `0`, equal weighted norms and the same sign of the leading datum agree. -/
 theorem p3l_unique {m : ℕ} {γ2 c : ℂ} {g₁ g₂ : ℂ → ℂ} (hd₁ : Differentiable ℂ g₁)
-    (hs₁ : p3lSol m γ2 c univ g₁) (hd₂ : Differentiable ℂ g₂) (hs₂ : p3lSol m γ2 c univ g₂)
+    (hs₁ : P3lSol m γ2 c univ g₁) (hd₂ : Differentiable ℂ g₂) (hs₂ : P3lSol m γ2 c univ g₂)
     (hr₁ : ∀ x : ℝ, (g₁ x).im = 0) (hr₂ : ∀ x : ℝ, (g₂ x).im = 0)
     (hW : g₁ 0 * deriv g₂ 0 = g₂ 0 * deriv g₁ 0)
     (hint : ∫ x in (-1 : ℝ)..1, (1 - x ^ 2) ^ m * (g₁ x).re ^ 2 =

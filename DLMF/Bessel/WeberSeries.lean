@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Bessel.SecondKind
 public import DLMF.Bessel.BesselIntegral
+public import DLMF.Bessel.SecondKind
 
 /-!
 # Weber's function at integer order, products and Jacobi–Anger series (Duverney Ch. 7)
@@ -41,7 +41,6 @@ namespace DLMF.Bessel
 theorem recip_Gamma_succ' (z : ℂ) : (Gamma z)⁻¹ = z * (Gamma (z + 1))⁻¹ := by
   simpa [one_div] using one_div_Gamma_eq_self_mul_one_div_Gamma_add_one z
 
-
 /-- `Y_{-ν} = sin(νπ) J_ν + cos(νπ) Y_ν` for every order (DLMF §10.4). -/
 theorem besselY_neg (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     besselY (-ν) z = sin (ν * π) * besselJ ν z + cos (ν * π) * besselY ν z := by
@@ -67,7 +66,7 @@ theorem besselY_neg (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
 @[dlmf 10.4.E1]
 theorem besselY_neg_int (n : ℤ) {z : ℂ} (hz : z ∈ slitPlane) :
     besselY (-n) z = (-1) ^ n * besselY n z := by
-  rw [besselY_neg _ hz, sin_int_mul_pi_complex, cos_int_mul_pi_complex]; ring
+  rw [besselY_neg _ hz, Complex.sin_int_mul_pi, cos_int_mul_pi_complex]; ring
 
 /-- `Y_n(z) = π⁻¹ (∂J_ν/∂ν |_{ν=n} + (-1)ⁿ ∂J_ν/∂ν |_{ν=-n})` (DLMF 10.2.4, Duverney (7.48)). -/
 @[dlmf 10.2.E4]
@@ -89,7 +88,7 @@ theorem besselY_int_eq_deriv (n : ℤ) {z : ℂ} (hz : z ∈ slitPlane) :
     exact (h1.mul h2).sub h3
   have hS : HasDerivAt (fun ν : ℂ => sin (ν * π)) (cos ((n : ℂ) * π) * π) n := by
     simpa using ((hasDerivAt_id (n : ℂ)).mul_const (π : ℂ)).csin
-  rw [hD.deriv, hS.deriv, sin_int_mul_pi_complex, cos_int_mul_pi_complex]
+  rw [hD.deriv, hS.deriv, Complex.sin_int_mul_pi, cos_int_mul_pi_complex]
   have hpi : (π : ℂ) ≠ 0 := by exact_mod_cast Real.pi_ne_zero
   have hm : ((-1 : ℂ)) ^ n * (-1) ^ n = 1 := by
     rw [← mul_zpow]; norm_num

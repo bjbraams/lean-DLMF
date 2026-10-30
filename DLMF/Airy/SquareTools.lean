@@ -91,10 +91,10 @@ theorem airySq_aiDeriv_le {u : ℝ} (hu : 1 ≤ u) :
     _ = _ := by ring
 
 /-- The exponential decay class used for the Ai² representation. -/
-def airySq_Decay (h : ℝ → ℝ) : Prop := ∃ K, ∀ u, 1 ≤ u → |h u| ≤ K * Real.exp (-u / 2)
+def AirySqDecay (h : ℝ → ℝ) : Prop := ∃ K, ∀ u, 1 ≤ u → |h u| ≤ K * Real.exp (-u / 2)
 
 /-- Extension of the decay bound to every half-line `[a, ∞)`, by compactness. -/
-theorem airySq_Decay.ext {h : ℝ → ℝ} (hd : airySq_Decay h) (hc : Continuous h) (a : ℝ) :
+theorem AirySqDecay.ext {h : ℝ → ℝ} (hd : AirySqDecay h) (hc : Continuous h) (a : ℝ) :
     ∃ K, 0 ≤ K ∧ ∀ u, a ≤ u → |h u| ≤ K * Real.exp (-u / 2) := by
   obtain ⟨K, hK⟩ := hd
   obtain ⟨M, hM⟩ := (isCompact_Icc (a := a) (b := 1)).exists_bound_of_continuousOn
@@ -117,24 +117,24 @@ theorem airySq_Decay.ext {h : ℝ → ℝ} (hd : airySq_Decay h) (hc : Continuou
 
 /-- A bound `|h u| ≤ 2 u² e^{-2u/3}` for `u ≥ 1` implies the decay class `|h u| ≤ K e^{-u/2}`. -/
 theorem airySq_decay_of_le {h : ℝ → ℝ} (hb : ∀ u, 1 ≤ u → |h u| ≤ 2 * (u ^ 2 * Real.exp (-(2 / 3) * u))) :
-    airySq_Decay h :=
+    AirySqDecay h :=
   ⟨144, fun u hu => (hb u hu).trans (by nlinarith [airySq_sq_mul_exp_le (u := u) (by linarith)])⟩
 
 /-- `Ai` restricted to the reals lies in the exponential decay class. -/
-theorem airySq_decay_ai : airySq_Decay airyAiReal := by
+theorem airySq_decay_ai : AirySqDecay airyAiReal := by
   refine airySq_decay_of_le fun u hu => (airySq_ai_le hu).trans ?_
   have := Real.exp_pos (-(2 / 3) * u)
   nlinarith [one_le_pow₀ (n := 2) hu]
 
 /-- `Ai'` restricted to the reals lies in the exponential decay class. -/
-theorem airySq_decay_aiDeriv : airySq_Decay airyAiDerivReal := by
+theorem airySq_decay_aiDeriv : AirySqDecay airyAiDerivReal := by
   refine airySq_decay_of_le fun u hu => (airySq_aiDeriv_le hu).trans ?_
   have := Real.exp_pos (-(2 / 3) * u)
   have : u ≤ u ^ 2 := by nlinarith
   nlinarith
 
 /-- `u ↦ u Ai(u)` lies in the exponential decay class. -/
-theorem airySq_decay_mul_ai : airySq_Decay fun u => u * airyAiReal u := by
+theorem airySq_decay_mul_ai : AirySqDecay fun u => u * airyAiReal u := by
   refine airySq_decay_of_le fun u hu => ?_
   have h := airySq_ai_le hu
   have := Real.exp_pos (-(2 / 3) * u)
@@ -145,7 +145,7 @@ theorem airySq_decay_mul_ai : airySq_Decay fun u => u * airyAiReal u := by
   nlinarith
 
 /-- `u ↦ Ai(u) + u Ai'(u)` lies in the exponential decay class. -/
-theorem airySq_decay_ai_add : airySq_Decay fun u => airyAiReal u + u * airyAiDerivReal u := by
+theorem airySq_decay_ai_add : AirySqDecay fun u => airyAiReal u + u * airyAiDerivReal u := by
   refine airySq_decay_of_le fun u hu => ?_
   have h := airySq_ai_le hu
   have h' := airySq_aiDeriv_le hu
@@ -158,7 +158,7 @@ theorem airySq_decay_ai_add : airySq_Decay fun u => airyAiReal u + u * airyAiDer
   nlinarith
 
 /-- The Gaussian bound on the integrand `h(c(x+t²))`, uniformly for `x ≥ b`. -/
-theorem airySq_bound {h : ℝ → ℝ} (hd : airySq_Decay h) (hc : Continuous h) {c : ℝ} (hc0 : 0 < c)
+theorem airySq_bound {h : ℝ → ℝ} (hd : AirySqDecay h) (hc : Continuous h) {c : ℝ} (hc0 : 0 < c)
     (b : ℝ) : ∃ K, 0 ≤ K ∧ ∀ x, b ≤ x → ∀ t : ℝ,
       |h (c * (x + t ^ 2))| ≤ K * Real.exp (-(c / 2) * t ^ 2) := by
   obtain ⟨K, hK0, hK⟩ := hd.ext hc (c * b)
@@ -171,7 +171,7 @@ theorem airySq_bound {h : ℝ → ℝ} (hd : airySq_Decay h) (hc : Continuous h)
   exact Real.exp_le_exp.mpr (by nlinarith [sq_nonneg t])
 
 /-- For `h` continuous in the decay class and `c > 0`, `t ↦ h(c(x+t²))` is integrable on `ℝ`. -/
-theorem airySq_integrable {h : ℝ → ℝ} (hd : airySq_Decay h) (hc : Continuous h) {c : ℝ}
+theorem airySq_integrable {h : ℝ → ℝ} (hd : AirySqDecay h) (hc : Continuous h) {c : ℝ}
     (hc0 : 0 < c) (x : ℝ) : Integrable (fun t : ℝ => h (c * (x + t ^ 2))) := by
   obtain ⟨K, -, hK⟩ := airySq_bound hd hc hc0 x
   refine ((integrable_exp_neg_mul_sq (by positivity : 0 < c / 2)).const_mul K).mono'
@@ -179,8 +179,8 @@ theorem airySq_integrable {h : ℝ → ℝ} (hd : airySq_Decay h) (hc : Continuo
   rw [Real.norm_eq_abs]; exact hK x le_rfl t
 
 /-- Differentiation under the integral sign for `x ↦ ∫₀^∞ h(c(x+t²)) dt`. -/
-theorem airySq_hasDerivAt {h h' : ℝ → ℝ} (hd : airySq_Decay h) (hc : Continuous h)
-    (hd' : airySq_Decay h') (hc' : Continuous h') (hder : ∀ u, HasDerivAt h (h' u) u)
+theorem airySq_hasDerivAt {h h' : ℝ → ℝ} (hd : AirySqDecay h) (hc : Continuous h)
+    (hd' : AirySqDecay h') (hc' : Continuous h') (hder : ∀ u, HasDerivAt h (h' u) u)
     {c : ℝ} (hc0 : 0 < c) (x₀ : ℝ) :
     HasDerivAt (fun x => ∫ t in Ioi 0, h (c * (x + t ^ 2)))
       (c * ∫ t in Ioi 0, h' (c * (x₀ + t ^ 2))) x₀ := by
@@ -330,7 +330,7 @@ theorem airySq_hasDerivAt_F2' (x : ℝ) :
   ring
 
 /-- A solution triple `(y, y', y'')` of the product equation `y''' = 4x y' + 2y` (DLMF 9.11.1). -/
-def airySq_IsProdSol (y y1 y2 : ℝ → ℝ) : Prop :=
+def AirySqIsProdSol (y y1 y2 : ℝ → ℝ) : Prop :=
   ∀ x, HasDerivAt y (y1 x) x ∧ HasDerivAt y1 (y2 x) x ∧ HasDerivAt y2 (4 * x * y1 x + 2 * y x) x
 
 /-- The Wronskian determinant of three triples. -/
@@ -339,8 +339,8 @@ def airySq_det (y y1 y2 u u1 u2 v v1 v2 : ℝ → ℝ) (x : ℝ) : ℝ :=
     v x * (y1 x * u2 x - u1 x * y2 x)
 
 /-- Decomposition along a fundamental system with constant nonzero Wronskian. -/
-theorem airySq_decomp_gen {y y1 y2 u u1 u2 v v1 v2 w w1 w2 : ℝ → ℝ} (hy : airySq_IsProdSol y y1 y2)
-    (hu : airySq_IsProdSol u u1 u2) (hv : airySq_IsProdSol v v1 v2) (hw : airySq_IsProdSol w w1 w2)
+theorem airySq_decomp_gen {y y1 y2 u u1 u2 v v1 v2 w w1 w2 : ℝ → ℝ} (hy : AirySqIsProdSol y y1 y2)
+    (hu : AirySqIsProdSol u u1 u2) (hv : AirySqIsProdSol v v1 v2) (hw : AirySqIsProdSol w w1 w2)
     {D : ℝ} (hW : ∀ x, airySq_det u u1 u2 v v1 v2 w w1 w2 x = D) (hD : D ≠ 0) (x : ℝ) :
     y x = airySq_det y y1 y2 v v1 v2 w w1 w2 0 / D * u x +
       airySq_det u u1 u2 y y1 y2 w w1 w2 0 / D * v x +
@@ -351,7 +351,7 @@ theorem airySq_decomp_gen {y y1 y2 u u1 u2 v v1 v2 w w1 w2 : ℝ → ℝ} (hy : 
 theorem airySq_isProdSol_mul {f f' g g' : ℝ → ℝ} (hf : ∀ x, HasDerivAt f (f' x) x)
     (hf' : ∀ x, HasDerivAt f' (x * f x) x) (hg : ∀ x, HasDerivAt g (g' x) x)
     (hg' : ∀ x, HasDerivAt g' (x * g x) x) :
-    airySq_IsProdSol (fun x => f x * g x) (fun x => f' x * g x + f x * g' x)
+    AirySqIsProdSol (fun x => f x * g x) (fun x => f' x * g x + f x * g' x)
       (fun x => 2 * x * f x * g x + 2 * f' x * g' x) := by
   change ODE.IsThirdOrderSolution (fun x => 4*x) (fun _ => 2) _ _ _
   simpa only [mul_one] using ODE.product_isThirdOrderSolution
@@ -359,12 +359,12 @@ theorem airySq_isProdSol_mul {f f' g g' : ℝ → ℝ} (hf : ∀ x, HasDerivAt f
 
 /-- The triple of `F`. -/
 theorem airySq_isProdSol_F :
-    airySq_IsProdSol airySq_F (fun x => airySq_c * airySq_F1 x) (fun x => airySq_c ^ 2 * airySq_F2 x) :=
+    AirySqIsProdSol airySq_F (fun x => airySq_c * airySq_F1 x) (fun x => airySq_c ^ 2 * airySq_F2 x) :=
   fun x => ⟨airySq_hasDerivAt_F x,
     ((airySq_hasDerivAt_F1 x).const_mul airySq_c).congr_deriv (by ring), airySq_hasDerivAt_F2' x⟩
 
 /-- Every solution of the product equation is a combination of `Ai², Ai Bi, Bi²`. -/
-theorem airySq_decomp {y y1 y2 : ℝ → ℝ} (hy : airySq_IsProdSol y y1 y2) :
+theorem airySq_decomp {y y1 y2 : ℝ → ℝ} (hy : AirySqIsProdSol y y1 y2) :
     ∃ a b d : ℝ, ∀ x, y x = a * airyAiReal x ^ 2 + b * (airyAiReal x * airyBiReal x) +
       d * airyBiReal x ^ 2 := by
   have hA := hasDerivAt_airyAiReal
@@ -848,7 +848,7 @@ theorem airySq_scaled_mellin {w : ℂ} (hw : 0 < w.re) :
   have e2 : ∀ s ∈ Ioi (0 : ℝ), ((s / airySq_c : ℝ) : ℂ) ^ (w - 1) * ((airyAiReal s : ℝ) : ℂ) =
       exp (-(Real.log airySq_c : ℂ) * (w - 1)) * ((s : ℂ) ^ (w - 1) * airyAi s) := fun s hs => by
     have hs' : (0 : ℝ) < s := hs
-    rw [Complex.ofReal_cpow_eq_exp_log_mul (div_pos hs' hc0), Complex.ofReal_cpow_eq_exp_log_mul
+    rw [Complex.ofReal_cpow_eq_exp (div_pos hs' hc0), Complex.ofReal_cpow_eq_exp
         hs', Real.log_div hs'.ne' hc0.ne',
       airyAi_ofReal_eq, ← mul_assoc, ← Complex.exp_add]
     push_cast; ring_nf

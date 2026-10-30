@@ -7,9 +7,9 @@ module
 
 public import DLMF.ParabolicCylinder.Basic.Functions
 
-public import TauCeti.RingTheory.Polynomial.Hermite.Derivative
 public import DLMF.Confluent.Asymptotics
 public import DLMF.Confluent.Relations
+public import TauCeti.RingTheory.Polynomial.Hermite.Derivative
 
 /-!
 # Parabolic cylinder equations and Laplace representations
@@ -33,10 +33,6 @@ noncomputable section
 
 namespace DLMF.Confluent
 
-
-
-
-
 /-- `5/2` is not a nonpositive integer. -/
 theorem five_halves_ne_neg_nat : ∀ k : ℕ, (5 / 2 : ℂ) ≠ -k := fun k h => by
   have := congrArg Complex.re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]
@@ -54,8 +50,6 @@ theorem hasDerivAt_exp_neg_sq_div_four (z : ℂ) :
     HasDerivAt (fun z : ℂ => exp (-z ^ 2 / 4)) (-z / 2 * exp (-z ^ 2 / 4)) z := by
   have h := (((hasDerivAt_pow 2 z).neg).div_const 4).cexp
   exact h.congr_deriv (by simp only [Pi.neg_apply]; push_cast; ring)
-
-
 
 /-- The even Weber solution `pcfEven a` has derivative `pcfEvenDeriv a`. -/
 theorem hasDerivAt_pcfEven (a z : ℂ) : HasDerivAt (pcfEven a) (pcfEvenDeriv a z) z := by
@@ -82,8 +76,6 @@ theorem hasDerivAt_pcfEvenDeriv (a z : ℂ) :
   norm_num at hc ⊢
   linear_combination (exp (-z ^ 2 / 4) * (8 * (a / 2 + 1 / 4) / 3)) * hc
 
-
-
 /-- The odd Weber solution `pcfOdd a` has derivative `pcfOddDeriv a`. -/
 theorem hasDerivAt_pcfOdd (a z : ℂ) : HasDerivAt (pcfOdd a) (pcfOddDeriv a z) z := by
   have h := ((hasDerivAt_id z).mul (hasDerivAt_exp_neg_sq_div_four z)).mul
@@ -107,12 +99,6 @@ theorem hasDerivAt_pcfOddDeriv (a z : ℂ) :
   rw [show a / 2 + 3 / 4 + 1 + 1 = a / 2 + 3 / 4 + 2 by ring]
   norm_num at hc ⊢
   linear_combination (exp (-z ^ 2 / 4) * (8 * (a / 2 + 3 / 4) * z / 15)) * hc
-
-
-
-
-
-
 
 /-- `U(a,·)` has derivative `pcfUDeriv a`. -/
 theorem hasDerivAt_pcfU (a z : ℂ) : HasDerivAt (pcfU a) (pcfUDeriv a z) z :=
@@ -287,8 +273,6 @@ theorem pcfOdd_zero (a : ℂ) : pcfOdd a 0 = 0 := by
 /-- The derivative of the odd Weber solution is `1` at `0`. -/
 theorem pcfOddDeriv_zero (a : ℂ) : pcfOddDeriv a 0 = 1 := by
   simp [pcfOddDeriv, kummerM_zero]
-
-
 
 /-- The even Weber solution solves Weber's equation, with derivative `pcfEvenDeriv a`. -/
 theorem isWeberSol_pcfEven (a : ℂ) : IsWeberSol a (pcfEven a) (pcfEvenDeriv a) :=
@@ -491,8 +475,6 @@ theorem pcfD_nat (n : ℕ) (z : ℂ) : pcfD n z = exp (-z ^ 2 / 4) * aeval z (he
 end Hermite
 
 /-! ### The Laplace-type integral 12.5.1 -/
-
-
 
 /-- `-t²/2 - xt ≤ -t²/4 + x²`. -/
 theorem pcf_exponent_le (t x : ℝ) : -t ^ 2 / 2 - x * t ≤ -t ^ 2 / 4 + x ^ 2 := by

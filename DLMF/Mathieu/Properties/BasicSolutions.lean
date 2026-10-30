@@ -5,13 +5,13 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Mathieu.SpectralExistence
-public import DLMF.Mathieu.P2sBridge
 public import DLMF.Elementary.Trigonometric
-public import DLMFMathlib.Analysis.ODE.Singularities
-public import SeveralComplexVariables.SeparateAnalytic
+public import DLMF.Mathieu.P2sBridge
+public import DLMF.Mathieu.SpectralExistence
 public import DLMFMathlib.Analysis.Fourier.P1a2EntirePeriodic
+public import DLMFMathlib.Analysis.ODE.Singularities
 public import Mathlib.Analysis.Convex.Contractible
+public import SeveralComplexVariables.SeparateAnalytic
 
 /-!
 # Basic Mathieu solutions and symmetries
@@ -150,12 +150,12 @@ indicial equation is `r(r - 1) + r/2 = 0`: `ζ c₁ → 1/2`, `ζ² c₀ → 0` 
 theorem mathieu_algebraic_form_singularities (a q : ℂ) :
     let c : Fin 2 → ℂ → ℂ := ![fun ζ => (a - 2 * q * (1 - 2 * ζ)) / (4 * ζ * (1 - ζ)),
       fun ζ => (1 - 2 * ζ) / (2 * ζ * (1 - ζ))]
-    Complex.linearODERegularSingularAt c 0 ∧ Complex.linearODERegularSingularAt c 1 ∧
+    Complex.LinearODERegularSingularAt c 0 ∧ Complex.LinearODERegularSingularAt c 1 ∧
       Tendsto (fun ζ => ζ * c 1 ζ) (𝓝[≠] 0) (𝓝 (1 / 2)) ∧
       Tendsto (fun ζ => ζ ^ 2 * c 0 ζ) (𝓝[≠] 0) (𝓝 0) ∧
       Tendsto (fun ζ => (ζ - 1) * c 1 ζ) (𝓝[≠] 1) (𝓝 (1 / 2)) ∧
       Tendsto (fun ζ => (ζ - 1) ^ 2 * c 0 ζ) (𝓝[≠] 1) (𝓝 0) ∧
-      (q ≠ 0 → Complex.linearODEIrregularAtInfinity c) := by
+      (q ≠ 0 → Complex.LinearODEIrregularAtInfinity c) := by
   intro c
   have hc0 : ∀ ζ, c 0 ζ = (a - 2 * q * (1 - 2 * ζ)) / (4 * ζ * (1 - ζ)) := fun _ => rfl
   have hc1 : ∀ ζ, c 1 ζ = (1 - 2 * ζ) / (2 * ζ * (1 - ζ)) := fun _ => rfl

@@ -214,7 +214,7 @@ theorem struveBar_rect_identity (ν : ℂ) {x c h : ℝ} (hx : 0 < x) (hc : -1 <
 (`struveBar_integrable_vertical`). A 30-digit numerical check (2026-10-22) is recorded in
 REVIEW.md. -/
 @[dlmf 11.5.E8]
-theorem struveH_barnes {ν : ℂ} (hν : -1 < ν.re) {x c : ℝ} (hx : 0 < x) (hc : -1 < c) (hc0 : c < 0) (hv : -1 < ν.re+2*c) :
+theorem struveH_barnes {ν : ℂ} {x c : ℝ} (hx : 0 < x) (hc : -1 < c) (hc0 : c < 0) (hv : -1 < ν.re+2*c) :
     HasIntegralWholeLine (fun y : ℝ => let s : ℂ := c+y*I; π/sin (π*s)/(Gamma (3/2+s)*Gamma (3/2+ν+s))*(x^2/4:ℂ)^s) (-2*π*(x/2:ℂ)^(-ν-1)*struveH ν x) := by
   set f : ℝ → ℂ := fun y => struveLoop_F ν (I * x) (c + y * I) with hfdef
   have hfe : (fun y : ℝ => let s : ℂ := c+y*I; π/sin (π*s)/(Gamma (3/2+s)*Gamma (3/2+ν+s))*(x^2/4:ℂ)^s) = f := by

@@ -873,7 +873,7 @@ lemma q24b_triple_conv_even (b : ℕ → ℚ) (hb : ∀ j, Odd j → b j = 0) (n
   field_simp
 
 /-- The derivative of the constant power series `2`. -/
-lemma q24b_derivative_two {A : Type*} [CommRing A] [Algebra ℚ A] :
+lemma q24b_derivative_two {A : Type*} [CommRing A] :
     PowerSeries.derivative (R := A) (2 : PowerSeries A) = 0 := by
   rw [show (2 : PowerSeries A) = PowerSeries.C 2 from (map_ofNat PowerSeries.C 2).symm]
   exact PowerSeries.derivative_C

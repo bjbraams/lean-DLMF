@@ -5,15 +5,15 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Elementary.Trigonometric.InverseBranches
-public import DLMFMathlib.Analysis.Complex.Sqrt
 public import DLMF.Elementary.LogExpAnalysis
+public import DLMF.Elementary.Trigonometric.InverseBranches
+public import DLMF.Hypergeometric.SeriesProperties
+public import DLMFMathlib.Analysis.Complex.Sqrt
+public import Mathlib.Analysis.Normed.Group.FunctionSeries
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
 public import Mathlib.MeasureTheory.Integral.DominatedConvergence
-public import DLMF.Hypergeometric.SeriesProperties
 public import Pochhammer.BinomialSeries
 public import ToMathlib.Algebra.Polynomial.PochhammerIdentities
-public import Mathlib.Analysis.Normed.Group.FunctionSeries
 
 /-!
 # General inverse trigonometric identities
@@ -434,7 +434,7 @@ theorem gudermannian_elementary (x : ℝ) :
 
 /-- DLMF 4.23.E40: gudermannian reciprocal. -/
 @[dlmf 4.23.E40]
-theorem gudermannian_reciprocal {x : ℝ} (hx : x≠0) :
+theorem gudermannian_reciprocal {x : ℝ} :
     gudermannian x=Real.arcsin ((Real.cosh x/Real.sinh x)⁻¹) ∧
     gudermannian x=Real.arctan (((Real.sinh x)⁻¹)⁻¹) := by
   constructor
@@ -485,7 +485,7 @@ theorem inverse_gudermannian_elementary {x : ℝ} (hx : |x|<π/2) :
 
 /-- DLMF 4.23.E42: inverse gudermannian reciprocal. -/
 @[dlmf 4.23.E42]
-theorem inverse_gudermannian_reciprocal {x : ℝ} (hx : |x|<π/2) (hx0 : x≠0) :
+theorem inverse_gudermannian_reciprocal {x : ℝ} (hx : |x|<π/2) :
     inverseGudermannian x=Real.arsinh (Real.cot x)⁻¹ ∧
     inverseGudermannian x=Real.artanh (((Real.sin x)⁻¹)⁻¹) := by
   refine ⟨?_,?_⟩
@@ -1244,7 +1244,7 @@ lemma trigR4_tan_add_mem {a b u v σ : ℂ} (hσ : σ=1 ∨ σ= -1) (ha : a∈ar
 /-- DLMF 4.24.E15: arctan general add. -/
 @[dlmf 4.24.E15]
 theorem arctan_general_add (u v σ : ℂ) (hσ : σ=1 ∨ σ= -1)
-    (hu : u≠I ∧ u≠ -I) (hv : v≠I ∧ v≠ -I) (hd : 1-σ*u*v≠0) :
+    (hu : u≠I ∧ u≠ -I) (hd : 1-σ*u*v≠0) :
     inverseTrigSum (arctanGeneral u) (arctanGeneral v) σ=arctanGeneral ((u+σ*v)/(1-σ*u*v)) := by
   ext w
   constructor
@@ -1316,7 +1316,7 @@ lemma trigR4_arctanGeneral_eq_arccotGeneral {x : ℂ} (hx : x≠0) :
 /-- DLMF 4.24.E17: arctan arccot general add. -/
 @[dlmf 4.24.E17]
 theorem arctan_arccot_general_add (u v σ : ℂ) (hσ : σ=1 ∨ σ= -1)
-    (hu : u≠I ∧ u≠ -I) (hv : v≠I ∧ v≠ -I)
+    (hu : u≠I ∧ u≠ -I)
     (h1 : v-σ*u≠0) (h2 : u*v+σ≠0) :
     inverseTrigSum (arctanGeneral u) (arccotGeneral v) σ=arctanGeneral ((u*v+σ)/(v-σ*u)) ∧
     inverseTrigSum (arctanGeneral u) (arccotGeneral v) σ=arccotGeneral ((v-σ*u)/(u*v+σ)) := by

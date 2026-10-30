@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.ErrorFunctions.Relations
 public import DLMF.Bessel.SphericalSeriesTools
+public import DLMF.ErrorFunctions.Relations
 
 /-!
 # Power and spherical Bessel series, DLMF §7.6
@@ -33,12 +33,7 @@ theorem hasSum_erf_complex (z : ℂ) :
     funext n
     rw [neg_pow, pow_mul]
     ring
-  have hb (R : ℝ) (_ : 0 ≤ R) : Summable (fun n : ℕ => ‖(-1:ℂ)^n/n.factorial‖*R^(2*n)) := by
-    convert Real.summable_pow_div_factorial (R^2) using 1
-    funext n
-    simp [pow_mul]
-    ring
-  have h := (hasSum_primitive_monomials _ (fun n => 2*n) hs hb z).mul_left (2/(Real.sqrt π:ℂ))
+  have h := (hasSum_primitive_monomials _ (fun n => 2*n) hs z).mul_left (2/(Real.sqrt π:ℂ))
   rw [← erf_complex_segment_integral] at h
   refine h.congr_fun fun n => ?_
   push_cast
@@ -553,7 +548,7 @@ theorem erfCheb_hasSum (z b : ℂ) :
 ℂ)^2)*z^2)*(Polynomial.Chebyshev.T ℝ (2*n+1 : ℤ)).eval a*sphericalI n (z^2/2))` converges to
 `(erf (a*z))`. -/
 @[dlmf 7.6.E9]
-theorem erf_chebyshev_spherical_series {a : ℝ} (ha : -1 ≤ a) (ha1 : a ≤ 1) (z : ℂ) :
+theorem erf_chebyshev_spherical_series {a : ℝ} (z : ℂ) :
     HasSum (fun n : ℕ => 2*z/Real.sqrt π*exp ((1/2-(a : ℂ)^2)*z^2)*(Polynomial.Chebyshev.T ℝ (2*n+1 : ℤ)).eval a*sphericalI n (z^2/2)) (erf (a*z)) := by
   have hT : ∀ m : ℤ, (((Polynomial.Chebyshev.T ℝ m).eval a : ℝ) : ℂ) =
       (Polynomial.Chebyshev.T ℂ m).eval (a:ℂ) := by

@@ -435,8 +435,7 @@ lemma hypR4_sq_eq_continuation {U : Set ℂ} (hU : IsOpen U) (hc : IsPreconnecte
 @[dlmf 4.35.E20]
 theorem sinh_half_continued_root {U : Set ℂ} (hU : IsOpen U) (hc : IsConnected U) {r : ℂ → ℂ}
     (hr : AnalyticOnNhd ℂ r U) (hsq : ∀ z ∈ U, r z^2=(Complex.cosh z-1)/2)
-    {x : ℝ} (hx : 0<x) (hxU : (x:ℂ) ∈ U) (hanchor : r x=Complex.sinh ((x:ℂ)/2))
-     :
+    {x : ℝ} (hx : 0<x) (hxU : (x:ℂ) ∈ U) (hanchor : r x=Complex.sinh ((x:ℂ)/2)) :
     ∀ z ∈ U, r z=Complex.sinh (z/2) := by
   have hs : AnalyticOnNhd ℂ (fun z => Complex.sinh (z/2)) U := fun z _ =>
     (Complex.differentiable_sinh.comp (differentiable_id.div_const 2)).analyticAt z
@@ -449,8 +448,7 @@ theorem sinh_half_continued_root {U : Set ℂ} (hU : IsOpen U) (hc : IsConnected
 @[dlmf 4.35.E21]
 theorem cosh_half_continued_root {U : Set ℂ} (hU : IsOpen U) (hc : IsConnected U) {r : ℂ → ℂ}
     (hr : AnalyticOnNhd ℂ r U) (hsq : ∀ z ∈ U, r z^2=(Complex.cosh z+1)/2)
-    {x : ℝ} (hx : 0<x) (hxU : (x:ℂ) ∈ U) (hanchor : r x=Complex.cosh ((x:ℂ)/2))
-     :
+    {x : ℝ} (hxU : (x:ℂ) ∈ U) (hanchor : r x=Complex.cosh ((x:ℂ)/2)) :
     ∀ z ∈ U, r z=Complex.cosh (z/2) := by
   have hs : AnalyticOnNhd ℂ (fun z => Complex.cosh (z/2)) U := fun z _ =>
     (Complex.differentiable_cosh.comp (differentiable_id.div_const 2)).analyticAt z

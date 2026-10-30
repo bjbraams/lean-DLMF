@@ -7,10 +7,10 @@ module
 
 public import DLMF.GeneralizedHypergeometric.Basic
 
-public import DLMF.Hypergeometric.GeneralizedCalculus
 public import DLMF.Core.Framework
-public import DLMF.Hypergeometric.Solutions
 public import DLMF.Hypergeometric.ArgumentContinuation
+public import DLMF.Hypergeometric.GeneralizedCalculus
+public import DLMF.Hypergeometric.Solutions
 public import Mathlib.RingTheory.PowerSeries.Basic
 
 /-!
@@ -38,28 +38,6 @@ open Complex Filter Set Finset
 open scoped Topology Real ENNReal
 noncomputable section
 namespace DLMF.Hypergeometric
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /-- Existence of principal continuation for all regularized parameters, including Gamma zeros. -/
 theorem genPrincipalContinuation_exists (a b : Multiset ℂ) (h : a.card = b.card + 1) :
@@ -97,8 +75,6 @@ theorem genPrincipalContinuation_unique (a b : Multiset ℂ)
       exact tendsto_nhds_unique (F.upper_boundary z.re hx')
         ((G.upper_boundary z.re hx').congr' hev.symm)
 
-
-
 /-- An explicitly supplied continuation gives the declared principal value, independently
 of the separate existence theorem. -/
 theorem genRegularizedHG_eq_choice {a b : Multiset ℂ} (h : a.card = b.card + 1)
@@ -122,23 +98,15 @@ theorem genRegularizedHG_eq_original (a b : Multiset ℂ) (z : ℂ) :
   · exact False.elim (hF (genPrincipalContinuation_exists a b h))
   · rfl
 
-
-
-
-
-
-
-
-
 /-- A regular lower-parameter Gamma product is nonzero, including the empty product. -/
-theorem genGamma_ne_zero {b : Multiset ℂ} (hb : genDenRegular b) : genGamma b ≠ 0 := by
+theorem genGamma_ne_zero {b : Multiset ℂ} (hb : GenDenRegular b) : genGamma b ≠ 0 := by
   apply Multiset.prod_ne_zero
   intro h0
   obtain ⟨x, hx, heq⟩ := Multiset.mem_map.mp h0
   exact Complex.Gamma_ne_zero (hb x hx) heq
 
 /-- Every retained rising-factorial product is nonzero for regular lower parameters. -/
-theorem genPoch_ne_zero {b : Multiset ℂ} (hb : genDenRegular b) (n : ℕ) : genPoch b n ≠ 0 := by
+theorem genPoch_ne_zero {b : Multiset ℂ} (hb : GenDenRegular b) (n : ℕ) : genPoch b n ≠ 0 := by
   apply Multiset.prod_ne_zero
   intro h0
   obtain ⟨x, hx, heq⟩ := Multiset.mem_map.mp h0
@@ -146,7 +114,7 @@ theorem genPoch_ne_zero {b : Multiset ℂ} (hb : genDenRegular b) (n : ℕ) : ge
 
 /-- The fixed Gamma product times the rising-factorial product gives all shifted
 Gamma factors; this is Mathlib's Gamma/Pochhammer identity multiplied over parameters. -/
-theorem genGamma_shift_nat {b : Multiset ℂ} (hb : genDenRegular b) (n : ℕ) :
+theorem genGamma_shift_nat {b : Multiset ℂ} (hb : GenDenRegular b) (n : ℕ) :
     (b.map fun x => Complex.Gamma (x + n)).prod = genPoch b n * genGamma b := by
   unfold genPoch genGamma
   rw [← Multiset.prod_map_mul]
@@ -169,7 +137,7 @@ theorem genRegularizedHG_eq_series {a b : Multiset ℂ} (h : a.card ≤ b.card +
 
 /-- Ordinary and regularized coefficients differ by the fixed Gamma product. -/
 @[dlmf 16.2.E5]
-theorem genCoeff_eq_gamma_mul_regularized {a b : Multiset ℂ} (hb : genDenRegular b)
+theorem genCoeff_eq_gamma_mul_regularized {a b : Multiset ℂ} (hb : GenDenRegular b)
     (n : ℕ) : genCoeff a b n = genGamma b * Complex.regularizedHGFunCoeff a b n := by
   unfold genCoeff genPoch Complex.regularizedHGFunCoeff
   rw [genGamma_shift_nat hb n]
@@ -182,7 +150,7 @@ theorem genCoeff_eq_gamma_mul_regularized {a b : Multiset ℂ} (hb : genDenRegul
 /-- The defining series converges to the principal value in its open disk. -/
 @[dlmf 16.2.E1]
 theorem genHG_hasSum_disk {a b : Multiset ℂ} (h : a.card ≤ b.card + 1)
-    (hb : genDenRegular b) {z : ℂ} (hz : ‖z‖ < 1) :
+    (hb : GenDenRegular b) {z : ℂ} (hz : ‖z‖ < 1) :
     HasSum (fun n : ℕ => genCoeff a b n * z ^ n) (genHG a b z) := by
   have hr : (1 : ℝ≥0∞) ≤ (Complex.regularizedHGFunSeries a b).radius := by
     by_cases hc : a.card ≤ b.card
@@ -202,7 +170,7 @@ theorem genHG_hasSum_disk {a b : Multiset ℂ} (h : a.card ≤ b.card + 1)
 
 /-- A terminating native regularized series is entire, including exceptional lower
 parameters; Mathlib already supplies its infinite convergence radius. -/
-theorem genRegularizedHG_terminating_analytic {a b : Multiset ℂ} (ha : genTerminates a) :
+theorem genRegularizedHG_terminating_analytic {a b : Multiset ℂ} (ha : GenTerminates a) :
     AnalyticOnNhd ℂ (Complex.regularizedHGFun a b) univ := by
   obtain ⟨x, hx, m, hxm⟩ := ha
   have hr := Complex.radius_regularizedHGFunSeries_eq_top_of_finite (b := b) hx hxm
@@ -211,7 +179,7 @@ theorem genRegularizedHG_terminating_analytic {a b : Multiset ℂ} (ha : genTerm
 
 /-- On a terminating series the guarded continuation agrees everywhere with its
 entire polynomial germ, without assuming existence of a nonterminating continuation. -/
-theorem genRegularizedHG_eq_series_of_terminates {a b : Multiset ℂ} (ha : genTerminates a)
+theorem genRegularizedHG_eq_series_of_terminates {a b : Multiset ℂ} (ha : GenTerminates a)
     (z : ℂ) : genRegularizedHG a b z = Complex.regularizedHGFun a b z := by
   classical
   have han := genRegularizedHG_terminating_analytic (b := b) ha
@@ -230,7 +198,7 @@ theorem genRegularizedHG_eq_series_of_terminates {a b : Multiset ℂ} (ha : genT
 
 /-- Scalar ordinary and regularized multilinear series differ by the same fixed
 nonzero Gamma product, so all convergence radii agree for regular bottoms. -/
-theorem genScalarSeries_eq_gamma_smul {a b : Multiset ℂ} (hb : genDenRegular b) :
+theorem genScalarSeries_eq_gamma_smul {a b : Multiset ℂ} (hb : GenDenRegular b) :
     FormalMultilinearSeries.ofScalars ℂ (genCoeff a b) =
       genGamma b • Complex.regularizedHGFunSeries a b := by
   have hc : genCoeff a b =
@@ -241,7 +209,7 @@ theorem genScalarSeries_eq_gamma_smul {a b : Multiset ℂ} (hb : genDenRegular b
   rfl
 
 /-- Terminating series are the retained polynomial, with the minimum terminating degree. -/
-theorem genHG_eq_finite {a b : Multiset ℂ} (hb : genDenRegular b)
+theorem genHG_eq_finite {a b : Multiset ℂ} (hb : GenDenRegular b)
     {m : ℕ} (hm : (-m : ℂ) ∈ a) (z : ℂ) :
     genHG a b z = genFiniteHG m a b z := by
   rw [genHG, genRegularizedHG_eq_series_of_terminates ⟨-m, hm, m, rfl⟩,
@@ -339,7 +307,6 @@ theorem genFiniteHG_inversion (a b : Multiset ℂ) (m : ℕ) {z : ℂ} (hz : z �
   linear_combination -(m.choose j : ℂ) * hsq (m - j) -
     (m.choose j : ℂ) * ((-1 : ℂ) ^ (m - j)) ^ 2 * hsq ((m - j) * b.card)
 
-
 /-- The terminating upper/lower pair cancels throughout every retained term,
 even though it would be exceptional beyond the final retained index. -/
 theorem genFiniteHG_cancel_neg_nat (a b : Multiset ℂ) (m : ℕ) (z : ℂ) :
@@ -384,8 +351,6 @@ theorem genFiniteHG_partial_sum_inversion (a b : Multiset ℂ) (m : ℕ)
   rw [hmap, hfac] at h
   simpa only [Multiset.card_cons, Nat.add_assoc] using h
 
-
-
 /-- Integer-index Pochhammer/Gamma normalization, including positive integral
 base parameters whose negatively shifted Gamma values are totalized to zero.
 This extends Mathlib's `Complex.Gamma_add_nat_div_Gamma_eq` to integer indices. -/
@@ -415,15 +380,5 @@ theorem genIntPoch_eq_Gamma_div {a : ℂ} (ha : ∀ j : ℕ, a ≠ -(j : ℂ)) (
     unfold genIntPoch
     rw [ite_eq_right (show ¬(0 : ℤ) ≤ Int.negSucc n by omega)]
     simpa [Int.negSucc_eq, sub_eq_add_neg, Nat.cast_add, Nat.cast_one] using hneg
-
-
-
-
-
-
-
-
-
-
 
 end DLMF.Hypergeometric

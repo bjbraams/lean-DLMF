@@ -5,12 +5,12 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.Asymptotics.Lemmas
-public import Mathlib.Analysis.Complex.Basic
-public import Mathlib.Data.Nat.Dist
 public import Mathlib.Algebra.BigOperators.Field
 public import Mathlib.Algebra.Order.Field.Power
+public import Mathlib.Analysis.Asymptotics.Lemmas
+public import Mathlib.Analysis.Complex.Basic
 public import Mathlib.Data.EReal.Inv
+public import Mathlib.Data.Nat.Dist
 
 /-!
 # Three-term recurrences of Mathieu type
@@ -25,6 +25,9 @@ recurrences used for the small-`q` behaviour (DLMF §28.6, §28.4(vi)):
 * `p3q_window`: a solution tending to `0` forces some `|a - d_i| ≤ 3|q|` (maximum principle);
 * `p3q_decay`: geometric decay `|A_i| ≤ (3|q|)^{|i-n|} |A_n|` away from an isolated diagonal
   entry;
+* `p3qL_eq_zero_of_support` and `isBigO_residual_of_support`: the residual of a finitely
+  supported trial vector vanishes beyond its one-step support, including for diagonals
+  depending on the small parameter;
 * `p3q_eig_isBigO`: the eigenvalue estimate `a(q) - p(q) = O(q^K)` from a trial vector with
   small residual.
 -/
@@ -46,8 +49,31 @@ def p3qLo (β : ℂ) (A : ℕ → ℂ) : ℕ → ℂ
 def p3qL (d : ℕ → ℂ) (β q : ℂ) (v : ℕ → ℂ) (i : ℕ) : ℂ :=
   d i * v i + q * (p3qLo β v i + v (i + 1))
 
+/-- A tridiagonal Mathieu operator vanishes beyond the one-step enlargement of the support. -/
+lemma p3qL_eq_zero_of_support {d : ℕ → ℂ} {β q : ℂ} {v : ℕ → ℂ} {k i : ℕ}
+    (hki : k < i) (hv : ∀ j, k ≤ j → v j = 0) : p3qL d β q v i = 0 := by
+  cases i with
+  | zero => omega
+  | succ i =>
+    have hi := hv i (by omega)
+    have hi1 := hv (i + 1) (by omega)
+    have hi2 := hv (i + 1 + 1) (by omega)
+    cases i <;> simp_all [p3qL, p3qLo]
+
+/-- A residual of a finitely supported trial vector is zero beyond its one-step support,
+and hence is bounded by every comparison function along any filter. -/
+lemma isBigO_residual_of_support {d : ℝ → ℕ → ℂ} {β : ℂ}
+    {v : ℝ → ℕ → ℂ} {p : ℝ → ℂ} {k i : ℕ} {g : ℝ → ℝ} {l : Filter ℝ}
+    (hki : k < i) (hv : ∀ q j, k ≤ j → v q j = 0) :
+    (fun q : ℝ => p3qL (d q) β q (v q) i - p q * v q i) =O[l] g := by
+  have he : (fun q : ℝ => p3qL (d q) β q (v q) i - p q * v q i) = fun _ => 0 := by
+    funext q
+    rw [p3qL_eq_zero_of_support hki (hv q), hv q i hki.le, mul_zero, sub_zero]
+  rw [he]
+  exact isBigO_zero _ _
+
 /-- The recurrence `L A = a A`. -/
-def p3qRec (d : ℕ → ℂ) (β q a : ℂ) (A : ℕ → ℂ) : Prop :=
+def P3qRec (d : ℕ → ℂ) (β q a : ℂ) (A : ℕ → ℂ) : Prop :=
   ∀ i, p3qL d β q A i = a * A i
 
 /-- The symmetrizing weights `w₀ = β`, `w_i = 1`. -/
@@ -69,7 +95,7 @@ lemma p3q_pair_aux (d : ℕ → ℂ) (β q : ℂ) (A v : ℕ → ℂ) (N : ℕ) 
 
 /-- **Symmetry of the recurrence** (finite Green identity): for `v` supported in `[0, N)`,
 `∑ w_i A_i ((Lv)_i - p v_i) = (a - p) ∑ w_i A_i v_i`. -/
-lemma p3q_pair {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (hrec : p3qRec d β q a A) (v : ℕ → ℂ)
+lemma p3q_pair {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (hrec : P3qRec d β q a A) (v : ℕ → ℂ)
     (p : ℂ) {N : ℕ} (hv : v N = 0) (hv' : v (N + 1) = 0) :
     ∑ i ∈ Finset.range (N + 1), p3qW β i * A i * (p3qL d β q v i - p * v i) =
       (a - p) * ∑ i ∈ Finset.range (N + 1), p3qW β i * A i * v i := by
@@ -82,7 +108,7 @@ lemma p3q_pair {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (hrec : p3qRec
 
 /-- Row estimate for a solution of `L A = a A`:
 `|a - d_i| |A_i| ≤ |q| (|lo_i| + |A_{i+1}|)`. -/
-lemma p3q_row {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (hrec : p3qRec d β q a A) (i : ℕ) :
+lemma p3q_row {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (hrec : P3qRec d β q a A) (i : ℕ) :
     ‖a - d i‖ * ‖A i‖ ≤ ‖q‖ * (‖p3qLo β A i‖ + ‖A (i + 1)‖) := by
   have h := hrec i
   simp only [p3qL] at h
@@ -120,7 +146,7 @@ theorem p3q_exists_tail_max {f : ℕ → ℝ} (hf : Tendsto f atTop (𝓝 0)) (h
 
 /-- **Window**: some diagonal entry is within `3|q|` of the eigenvalue. -/
 theorem p3q_window {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (hβ : ‖β‖ ≤ 2)
-    (hrec : p3qRec d β q a A) (hA : Tendsto A atTop (𝓝 0)) (hne : ∃ i, A i ≠ 0) :
+    (hrec : P3qRec d β q a A) (hA : Tendsto A atTop (𝓝 0)) (hne : ∃ i, A i ≠ 0) :
     ∃ i, ‖a - d i‖ ≤ 3 * ‖q‖ := by
   obtain ⟨k, -, hk⟩ := p3q_exists_tail_max (f := fun i => ‖A i‖) (by simpa using hA.norm)
     (fun _ => norm_nonneg _) 0
@@ -137,7 +163,7 @@ theorem p3q_window {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (hβ : ‖
 /-- Upward decay step: above the isolated index `n`, `|A_i| ≤ 3|q| |A_{i-1}|`
 (for `|q| ≤ 1/4`, `A → 0`). -/
 lemma p3q_up {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (hβ : ‖β‖ ≤ 2)
-    (hrec : p3qRec d β q a A) (hA : Tendsto A atTop (𝓝 0)) (hq : ‖q‖ ≤ 1 / 4) {n : ℕ}
+    (hrec : P3qRec d β q a A) (hA : Tendsto A atTop (𝓝 0)) (hq : ‖q‖ ≤ 1 / 4) {n : ℕ}
     (hgap : ∀ i ≠ n, 1 ≤ ‖a - d i‖) {i : ℕ} (hi : n < i) :
     ‖A i‖ ≤ 3 * ‖q‖ * ‖A (i - 1)‖ := by
   obtain ⟨k, hki, hk⟩ := p3q_exists_tail_max (f := fun i => ‖A i‖) (by simpa using hA.norm)
@@ -160,7 +186,7 @@ lemma p3q_up {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (hβ : ‖β‖ 
 /-- Downward decay step: below the isolated index `n`, `|A_i| ≤ 3|q| |A_{i+1}|`
 (for `|q| ≤ 1/4`). -/
 lemma p3q_down {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (hβ : ‖β‖ ≤ 2)
-    (hrec : p3qRec d β q a A) (hq : ‖q‖ ≤ 1 / 4) {n : ℕ}
+    (hrec : P3qRec d β q a A) (hq : ‖q‖ ≤ 1 / 4) {n : ℕ}
     (hgap : ∀ i ≠ n, 1 ≤ ‖a - d i‖) {i : ℕ} (hi : i < n) :
     ‖A i‖ ≤ 3 * ‖q‖ * ‖A (i + 1)‖ := by
   obtain ⟨k, hk, hmax⟩ := (Finset.range (i + 1)).exists_max_image (fun j => ‖A j‖)
@@ -182,7 +208,7 @@ lemma p3q_down {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (hβ : ‖β�
 /-- **Geometric decay** of the solution away from the index `n` of the eigenvalue:
 `|A_i| ≤ (3|q|)^{|i-n|} |A_n|`. -/
 theorem p3q_decay {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (hβ : ‖β‖ ≤ 2)
-    (hrec : p3qRec d β q a A) (hA : Tendsto A atTop (𝓝 0)) (hq : ‖q‖ ≤ 1 / 4) {n : ℕ}
+    (hrec : P3qRec d β q a A) (hA : Tendsto A atTop (𝓝 0)) (hq : ‖q‖ ≤ 1 / 4) {n : ℕ}
     (hgap : ∀ i ≠ n, 1 ≤ ‖a - d i‖) (i : ℕ) :
     ‖A i‖ ≤ (3 * ‖q‖) ^ (Nat.dist i n) * ‖A n‖ := by
   have hq0 : 0 ≤ 3 * ‖q‖ := by positivity
@@ -213,7 +239,6 @@ theorem p3q_decay {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (hβ : ‖�
     rw [← hj] at this
     rwa [show Nat.dist i n = j by simp [Nat.dist]; omega]
 
-
 /-- For `k ≤ m`, `x^m = O(x^k)` as `x → 0`. -/
 theorem p3q_pow_isBigO {m k : ℕ} (h : k ≤ m) :
     (fun x : ℝ => x ^ m) =O[𝓝 0] (fun x => x ^ k) := by
@@ -235,7 +260,7 @@ eigenvalue `a(q)` separated by `1` from all diagonal entries except the `n`-th, 
 `O(q^{K - |i - n|})` in the `i`-th row. Then `a(q) - p(q) = O(q^K)` as `q → 0`. -/
 theorem p3q_eig_isBigO {d : ℝ → ℕ → ℂ} {β : ℂ} (hβ : ‖β‖ ≤ 2) (hβ0 : β ≠ 0)
     {a : ℝ → ℂ} {A : ℝ → ℕ → ℂ} {n N K : ℕ} (hnN : n < N)
-    (hrec : ∀ᶠ q : ℝ in 𝓝 0, p3qRec (d q) β q (a q) (A q))
+    (hrec : ∀ᶠ q : ℝ in 𝓝 0, P3qRec (d q) β q (a q) (A q))
     (hA : ∀ᶠ q : ℝ in 𝓝 0, Tendsto (A q) atTop (𝓝 0))
     (hne : ∀ᶠ q : ℝ in 𝓝 0, ∃ i, A q i ≠ 0)
     (hgap : ∀ᶠ q : ℝ in 𝓝 0, ∀ i ≠ n, 1 ≤ ‖a q - d q i‖)

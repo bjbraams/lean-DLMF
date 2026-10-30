@@ -6,9 +6,9 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Gamma.Polygamma
+public import DLMF.Gamma.PolygammaHurwitz
 public import DLMF.Zeta.Riemann
 public import Mathlib.NumberTheory.ModularForms.JacobiTheta.OneVariable
-public import DLMF.Gamma.PolygammaHurwitz
 
 /-!
 # Zeta integrals with elementary kernels
@@ -527,13 +527,13 @@ open DLMF.BernoulliEuler in
 /-- For `-1 < Re s`, `s ≠ 1`: `ζ(s) = ½ + 1/(s-1) + s/12 - s(s+1)/2 ∫₁^∞ B̃₂(x) x^{-s-2} dx`. -/
 lemma r25a_zeta_eq_B2 {s : ℂ} (hs : -1 < s.re) (hs1 : s ≠ 1) :
     riemannZeta s = 1 / 2 + 1 / (s - 1) + s / 12 - s * (s + 1) / 2 *
-      ∫ x in Ioi (1 : ℝ), (periodicBernoulliB 2 x : ℂ) / (x : ℂ) ^ (s + 2) := by
+      ∫ x in Ioi (1 : ℝ), (periodicBernoulli 2 x : ℂ) / (x : ℂ) ^ (s + 2) := by
   have h := q25a_zeta_eq_emRHS (n := 1) (N := 1) le_rfl le_rfl (by simp; linarith) hs1
   simp [q25a_emRHS, q25a_gbinom_one] at h
   have hr := q25a_recursion (p := 2) (by norm_num) (w := s + 2) (by simp; linarith)
     (a := 1) one_pos
-  have hB3 : periodicBernoulliB 3 1 = 0 := by
-    simp [periodicBernoulliB, bernoulliFun_eval_zero, bernoulli_eq_zero_of_odd (n := 3)
+  have hB3 : periodicBernoulli 3 1 = 0 := by
+    simp [periodicBernoulli, bernoulliFun_eval_zero, bernoulli_eq_zero_of_odd (n := 3)
       ⟨1, rfl⟩ (by norm_num)]
   rw [hB3] at hr
   simp only [ofReal_zero, ofReal_one, one_cpow, div_one, neg_zero, zero_add] at hr
@@ -586,12 +586,12 @@ theorem tendsto_integral_fract_sub_half {s : ℂ} (hs : -1 < s.re) (hs' : s.re <
   -- on `[1, R]`, integration by parts against `B̃₂`
   obtain ⟨C1, hC1⟩ := q25a_periodicBernoulliB_bound 1
   obtain ⟨C2, hC2⟩ := q25a_periodicBernoulliB_bound 2
-  have hfB : ∀ x, f x = (periodicBernoulliB 1 x : ℂ) / (x : ℂ) ^ (s + 1) := fun x => by
-    simp [hf, periodicBernoulliB, bernoulliFun_one]
-  set I2 := ∫ x in Ioi (1 : ℝ), (periodicBernoulliB 2 x : ℂ) / (x : ℂ) ^ (s + 2) with hI2
+  have hfB : ∀ x, f x = (periodicBernoulli 1 x : ℂ) / (x : ℂ) ^ (s + 1) := fun x => by
+    simp [hf, periodicBernoulli, bernoulliFun_one]
+  set I2 := ∫ x in Ioi (1 : ℝ), (periodicBernoulli 2 x : ℂ) / (x : ℂ) ^ (s + 2) with hI2
   have hstep : ∀ R : ℝ, 1 ≤ R → ∫ x in (1 : ℝ)..R, f x =
-      ((periodicBernoulliB 2 R : ℂ) / (R : ℂ) ^ (s + 1) - 1 / 6 +
-        (s + 1) * ∫ x in (1 : ℝ)..R, (periodicBernoulliB 2 x : ℂ) / (x : ℂ) ^ (s + 2)) / 2 := by
+      ((periodicBernoulli 2 R : ℂ) / (R : ℂ) ^ (s + 1) - 1 / 6 +
+        (s + 1) * ∫ x in (1 : ℝ)..R, (periodicBernoulli 2 x : ℂ) / (x : ℂ) ^ (s + 2)) / 2 := by
     intro R hR
     have h := q25a_integral_ibp (p := 1) le_rfl (s + 1) one_pos hR
     have i1 := q25a_intervalIntegrable_bdd_div_cpow (q25a_measurable_periodicBernoulliB 1) hC1
@@ -600,23 +600,23 @@ theorem tendsto_integral_fract_sub_half {s : ℂ} (hs : -1 < s.re) (hs' : s.re <
       (s + 1 + 1) one_pos hR
     rw [intervalIntegral.integral_sub (i1.const_mul _) (i2.const_mul _),
       intervalIntegral.integral_const_mul, intervalIntegral.integral_const_mul] at h
-    have hB2 : periodicBernoulliB 2 1 = 1 / 6 := by
-      simp [periodicBernoulliB, bernoulliFun_eval_zero, bernoulli_two]
+    have hB2 : periodicBernoulli 2 1 = 1 / 6 := by
+      simp [periodicBernoulli, bernoulliFun_eval_zero, bernoulli_two]
     rw [hB2] at h
     simp only [ofReal_one, one_cpow, div_one] at h
     simp_rw [hfB]
     rw [show s + 1 + 1 = s + 2 by ring] at h
     push_cast at h ⊢
     linear_combination h / 2
-  have hlimB : Tendsto (fun R : ℝ => (periodicBernoulliB 2 R : ℂ) / (R : ℂ) ^ (s + 1)) atTop
+  have hlimB : Tendsto (fun R : ℝ => (periodicBernoulli 2 R : ℂ) / (R : ℂ) ^ (s + 1)) atTop
       (𝓝 0) := q25a_tendsto_pB_div_cpow 2 (by simp; linarith)
   have hlimI : Tendsto (fun R : ℝ => ∫ x in (1 : ℝ)..R,
-      (periodicBernoulliB 2 x : ℂ) / (x : ℂ) ^ (s + 2)) atTop (𝓝 I2) :=
+      (periodicBernoulli 2 x : ℂ) / (x : ℂ) ^ (s + 2)) atTop (𝓝 I2) :=
     intervalIntegral_tendsto_integral_Ioi 1 (q25a_integrableOn_bdd_div_cpow
       (q25a_measurable_periodicBernoulliB 2) hC2 (by simp; linarith) one_pos) tendsto_id
   have hlim : Tendsto (fun R : ℝ => -s * ((1 / (1 - s) + 1 / (2 * s)) +
-      ((periodicBernoulliB 2 R : ℂ) / (R : ℂ) ^ (s + 1) - 1 / 6 +
-        (s + 1) * ∫ x in (1 : ℝ)..R, (periodicBernoulliB 2 x : ℂ) / (x : ℂ) ^ (s + 2)) / 2))
+      ((periodicBernoulli 2 R : ℂ) / (R : ℂ) ^ (s + 1) - 1 / 6 +
+        (s + 1) * ∫ x in (1 : ℝ)..R, (periodicBernoulli 2 x : ℂ) / (x : ℂ) ^ (s + 2)) / 2))
       atTop (𝓝 (-s * ((1 / (1 - s) + 1 / (2 * s)) + (0 - 1 / 6 + (s + 1) * I2) / 2))) :=
     ((((hlimB.sub_const _).add (hlimI.const_mul _)).div_const _).const_add _).const_mul _
   have hval : -s * ((1 / (1 - s) + 1 / (2 * s)) + (0 - 1 / 6 + (s + 1) * I2) / 2) =

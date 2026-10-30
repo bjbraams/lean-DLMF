@@ -40,12 +40,12 @@ def genBarnesKernelLog (a b : Multiset ℂ) (w s : ℂ) : ℂ :=
 
 /-- A convergent contour-defined ordinary pFq value, separate from the divergent formal
 series. Both contour tails converge separately; the log sheet of `-z` is explicit. -/
-def genHasBarnesValueLog (a b : Multiset ℂ) (L : ℝ → ℂ) (w v : ℂ) : Prop :=
+def GenHasBarnesValueLog (a b : Multiset ℂ) (L : ℝ → ℂ) (w v : ℂ) : Prop :=
   DLMF.HasIntegralWholeLine (fun t => deriv L t * genBarnesKernelLog a b w (L t))
     (2 * Real.pi * I * genGamma a / genGamma b * v)
 
 /-- Totalized value of a Barnes contour. Every mathematical use asserts its separate
-convergence with `genHasBarnesValueLog` and excludes poles in the parameter prefactor. -/
+convergence with `GenHasBarnesValueLog` and excludes poles in the parameter prefactor. -/
 def genBarnesHGLog (a b : Multiset ℂ) (L : ℝ → ℂ) (w : ℂ) : ℂ :=
   genGamma b / (2 * Real.pi * I * genGamma a) *
     limUnder atTop (fun T : ℝ =>

@@ -113,7 +113,7 @@ def MeijerGContour.Admissible (L : MeijerGContour) (P : MeijerGParameters) : Pro
 
 /-- Sufficient convergence region in the logarithmic argument for each DLMF contour type. -/
 @[dlmf 16.17]
-def meijerGContourRegion (P : MeijerGParameters) (kind : MeijerContourKind) (w : ℂ) : Prop :=
+def MeijerGContourRegion (P : MeijerGParameters) (kind : MeijerContourKind) (w : ℂ) : Prop :=
   match kind with
   | .vertical => P.p+P.q<2*(P.m+P.n) ∧
       |w.im|<((P.m:ℝ)+P.n-((P.p:ℝ)+P.q)/2)*π
@@ -123,7 +123,7 @@ def meijerGContourRegion (P : MeijerGParameters) (kind : MeijerContourKind) (w :
 /-- A genuine Meijer G value is a convergent, correctly normalized admissible contour integral. -/
 @[dlmf 16.17.E1]
 def MeijerGHasValueLog (P : MeijerGParameters) (w v : ℂ) : Prop :=
-  ∃ L : MeijerGContour,L.Admissible P ∧ meijerGContourRegion P L.kind w ∧
+  ∃ L : MeijerGContour,L.Admissible P ∧ MeijerGContourRegion P L.kind w ∧
     Integrable (fun t : ℝ => deriv L.path t*meijerGKernelLog P w (L.path t)) ∧
     v=(2*π*I)⁻¹*∫ t : ℝ,deriv L.path t*meijerGKernelLog P w (L.path t)
 
@@ -148,7 +148,7 @@ theorem meijerG_contour_exists (P : MeijerGParameters) (hP : P.Valid) (kind : Me
 /-- All three geometric contour classes converge in the exact sufficient regions stated by DLMF. -/
 @[dlmf 16.17]
 theorem meijerG_contour_integrable {P : MeijerGParameters} {L : MeijerGContour} {w : ℂ}
-    (hL : L.Admissible P) (hw : meijerGContourRegion P L.kind w) :
+    (hL : L.Admissible P) (hw : MeijerGContourRegion P L.kind w) :
     Integrable (fun t : ℝ => deriv L.path t*meijerGKernelLog P w (L.path t)) := by
   sorry
 
@@ -161,7 +161,7 @@ theorem meijerG_contour_independent {P : MeijerGParameters} {w v v' : ℂ}
 /-- 16.17: meijerG converges of region. -/
 @[dlmf 16.17]
 theorem meijerG_converges_of_region {P : MeijerGParameters} (hP : P.Valid) (kind : MeijerContourKind)
-    {w : ℂ} (hw : meijerGContourRegion P kind w) : MeijerGConvergesLog P w := by
+    {w : ℂ} (hw : MeijerGContourRegion P kind w) : MeijerGConvergesLog P w := by
   sorry
 
 /-- 16.17: meijerGLog has value. -/
@@ -196,6 +196,5 @@ theorem meijerGLog_parameter_continuous {A B : ℝ→List ℂ} {P : MeijerGParam
     (hP : P.Valid) (hw : MeijerGConvergesLog P w) :
     Tendsto (fun t : ℝ => meijerGLog {P with a:=A t,b:=B t} w) (𝓝 0) (𝓝 (meijerGLog P w)) := by
   sorry
-
 
 end DLMF.Hypergeometric

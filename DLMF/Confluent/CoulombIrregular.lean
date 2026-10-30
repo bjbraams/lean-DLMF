@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Confluent.CoulombAsymptotics
 public import DLMF.Confluent.Coulomb
+public import DLMF.Confluent.CoulombAsymptotics
 
 /-!
 # The irregular Coulomb function and the Wronskian (DLMF 33.2.11–33.2.12, 33.10.1–33.10.2)
@@ -338,7 +338,7 @@ lemma coulomb_wronskian_aux (ℓ : ℕ) (η : ℝ) {ρ : ℝ} (hρ : 0 < ρ) :
       simp only [Pi.mul_apply, Function.comp_apply]
       rw [ofReal_coulombF_eq_regularized]
   · have hW := wronskian_regularizedHGFun_kummerU_all α b hs
-    rw [wronskian, hU.deriv] at hW
+    rw [ODE.wronskian, hU.deriv] at hW
     rw [coulombHPlus_eq ℓ η hρ, ofReal_coulombF_eq_regularized]
     simp only [Function.comp_apply]
     rw [← hα, ← hb, ← hA, ← hK, ← hp0]

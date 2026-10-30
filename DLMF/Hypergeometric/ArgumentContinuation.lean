@@ -46,37 +46,7 @@ namespace DLMF.Hypergeometric
 
 /-! ### The cut plane -/
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /-! ### The Euler integral on the cut plane -/
-
-
-
-
-
-
 
 /-- On the unit disk the Euler integral is the regularized Gauss function. -/
 theorem regularizedGaussHGIntegral_eq_regularizedGaussHGFun {a b c : ℂ} (hb : 0 < b.re)
@@ -183,12 +153,6 @@ theorem analyticOnNhd_regularizedGaussHGIntegral (a : ℂ) {b c : ℂ} (hb : 0 <
 
 /-! ### The continuation for all parameters -/
 
-
-
-
-
-
-
 /-- For `x > 0`, `⌈x - 1⌉₊ < ⌈x⌉₊`. -/
 theorem ceil_sub_one_lt_ceil {x : ℝ} (hx : 0 < x) : ⌈x - 1⌉₊ < ⌈x⌉₊ := by
   have h1 : 0 < ⌈x⌉₊ := Nat.ceil_pos.mpr hx
@@ -226,10 +190,6 @@ theorem euler_region_of_shift_eq_zero {b c : ℂ} (hB : shiftB b = 0) (hC : shif
   have hC' : 1 + (shiftB b : ℝ) - (c - b).re ≤ 0 := Nat.ceil_eq_zero.mp hC
   rw [hB, Nat.cast_zero] at hC'
   constructor <;> linarith
-
-
-
-
 
 /-- Unfolding the recursion when a `c`-shift is needed: the contiguous relation in `c`. -/
 theorem regularizedGaussHGAux_succ_of_pos_c {n : ℕ} {a b c z : ℂ} (h : 0 < shiftC b c) :

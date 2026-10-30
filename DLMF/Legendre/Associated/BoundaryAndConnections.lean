@@ -244,9 +244,9 @@ theorem regularizedGaussHG_at_zero (a b c : ℂ) : regularizedGaussHG a b c 0 = 
 
 /-- Abel's identity for two solutions of the associated Legendre equation of orders `±μ`. -/
 theorem associatedP_wronskian_const (ν μ : ℂ) {z w : ℂ} (hz : z-1 ∈ slitPlane) (hw : w-1 ∈ slitPlane) :
-    (1-z^2)*LegendreWronskian (associatedP ν (-μ)) (associatedP ν μ) z =
-      (1-w^2)*LegendreWronskian (associatedP ν (-μ)) (associatedP ν μ) w := by
-  set G : ℂ → ℂ := fun y => (1-y^2)*LegendreWronskian (associatedP ν (-μ)) (associatedP ν μ) y
+    (1-z^2)*ODE.wronskian (associatedP ν (-μ)) (associatedP ν μ) z =
+      (1-w^2)*ODE.wronskian (associatedP ν (-μ)) (associatedP ν μ) w := by
+  set G : ℂ → ℂ := fun y => (1-y^2)*ODE.wronskian (associatedP ν (-μ)) (associatedP ν μ) y
   have hd : ∀ y ∈ {z : ℂ | z-1 ∈ slitPlane}, HasDerivAt G 0 y := by
     intro y hy
     have hfa := associatedP_analytic ν (-μ) y hy
@@ -274,7 +274,7 @@ theorem associatedP_wronskian_const (ν μ : ℂ) {z w : ℂ} (hz : z-1 ∈ slit
 sin(μπ)/(π (1-z²))`, with `𝒲{f,g} = f g' - g f'`. -/
 @[dlmf 14.2.E7]
 theorem associated_wronskian_7 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    LegendreWronskian (associatedP ν (-μ)) (associatedP ν μ) z=2*sin (μ*π)/(π*(1-z^2)) := by
+    ODE.wronskian (associatedP ν (-μ)) (associatedP ν μ) z=2*sin (μ*π)/(π*(1-z^2)) := by
   set H : ℂ → ℂ := fun y => 2*μ*regularizedGaussHG (ν+1) (-ν) (1-(-μ)) ((1-y)/2)*
       regularizedGaussHG (ν+1) (-ν) (1-μ) ((1-y)/2) + (1-y^2)*(ν*(ν+1)/2)*
       (regularizedGaussHG (ν+1) (-ν) (1-(-μ)) ((1-y)/2)*regularizedGaussHG (ν+1+1) (-ν+1) (1-μ+1) ((1-y)/2)
@@ -285,7 +285,7 @@ theorem associated_wronskian_7 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) 
     have hfac : (y-1)*(1+y)=0 := by linear_combination -h
     exact (mul_ne_zero (slitPlane_ne_zero hy) hp) hfac
   have hGH : ∀ y : ℂ, y-1 ∈ slitPlane →
-      (1-y^2)*LegendreWronskian (associatedP ν (-μ)) (associatedP ν μ) y = H y := by
+      (1-y^2)*ODE.wronskian (associatedP ν (-μ)) (associatedP ν μ) y = H y := by
     intro y hy
     have hf : HasDerivAt (associatedP ν (-μ)) _ y := hasDerivAt_associatedP_aux (ν+1) (-ν) (1-(-μ)) (-μ) hy
     have hg : HasDerivAt (associatedP ν μ) _ y := hasDerivAt_associatedP_aux (ν+1) (-ν) (1-μ) μ hy
@@ -293,7 +293,7 @@ theorem associated_wronskian_7 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) 
       rw [← exp_add]; ring_nf; exact exp_zero
     have hB : exp (μ/2*(log (y+1)-log (y-1))) ≠ 0 := exp_ne_zero _
     have h1 := hne y hy
-    unfold LegendreWronskian
+    unfold ODE.wronskian
     rw [hf.deriv, hg.deriv]
     simp only [associatedP, H]
     rw [eq_inv_of_mul_eq_one_left hE]
@@ -319,7 +319,7 @@ theorem associated_wronskian_7 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) 
       simpa using (hc.tendsto 0).mono_left nhdsWithin_le_nhds
     exact hcont.tendsto.comp this
   have hev : ∀ᶠ ε : ℝ in 𝓝[>] (0:ℝ), H (1+ε) =
-      (1-z^2)*LegendreWronskian (associatedP ν (-μ)) (associatedP ν μ) z := by
+      (1-z^2)*ODE.wronskian (associatedP ν (-μ)) (associatedP ν μ) z := by
     filter_upwards [self_mem_nhdsWithin] with ε hε
     have hm : (1+(ε:ℂ))-1 ∈ slitPlane := by
       rw [add_sub_cancel_left]; exact Or.inl (by simpa using hε)
@@ -479,15 +479,15 @@ theorem legendre_sq_sub_one_ne_zero {z : ℂ} (hz : z-1 ∈ slitPlane) : z^2-1 �
 theorem continuous_legendreWronskian_order {f g : ℂ → ℂ → ℂ} {z : ℂ}
     (hf : Continuous fun μ => f μ z) (hf' : Continuous fun μ => deriv (f μ) z)
     (hg : Continuous fun μ => g μ z) (hg' : Continuous fun μ => deriv (g μ) z) :
-    Continuous fun μ => LegendreWronskian (f μ) (g μ) z :=
+    Continuous fun μ => ODE.wronskian (f μ) (g μ) z :=
   (hf.mul hg').sub (hg.mul hf')
 
 /-- For non-integer `μ` and `z - 1` in the slit plane, the Wronskian `W{P^{-μ}_ν, 𝑸^μ_ν}(z) =
 -1/(Γ(ν+μ+1) (z²-1))`; the non-integer case of DLMF 14.2.8. -/
 theorem associated_wronskian_8_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    LegendreWronskian (associatedP ν (-μ)) (olverQ ν μ) z = -(Gamma (ν+μ+1))⁻¹*(z^2-1)⁻¹ := by
+    ODE.wronskian (associatedP ν (-μ)) (olverQ ν μ) z = -(Gamma (ν+μ+1))⁻¹*(z^2-1)⁻¹ := by
   have h7 := associated_wronskian_7 ν μ hz
-  unfold LegendreWronskian at h7 ⊢
+  unfold ODE.wronskian at h7 ⊢
   rw [deriv_olverQ_nonint ν μ hμ hz, (olverQ_eventuallyEq_nonint ν μ hμ hz).eq_of_nhds]
   generalize (Gamma (ν+μ+1))⁻¹ = g1
   generalize (Gamma (ν-μ+1))⁻¹ = g2
@@ -503,9 +503,9 @@ theorem associated_wronskian_8_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n
 /-- For non-integer `μ` and `z - 1` in the slit plane, the Wronskian `W{P^μ_ν, 𝑸^μ_ν}(z) =
 -1/(Γ(ν-μ+1) (z²-1))`. -/
 theorem olverQ_wronskian_pos_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    LegendreWronskian (associatedP ν μ) (olverQ ν μ) z = -(Gamma (ν-μ+1))⁻¹*(z^2-1)⁻¹ := by
+    ODE.wronskian (associatedP ν μ) (olverQ ν μ) z = -(Gamma (ν-μ+1))⁻¹*(z^2-1)⁻¹ := by
   have h7 := associated_wronskian_7 ν μ hz
-  unfold LegendreWronskian at h7 ⊢
+  unfold ODE.wronskian at h7 ⊢
   rw [deriv_olverQ_nonint ν μ hμ hz, (olverQ_eventuallyEq_nonint ν μ hμ hz).eq_of_nhds]
   generalize (Gamma (ν+μ+1))⁻¹ = g1
   generalize (Gamma (ν-μ+1))⁻¹ = g2
@@ -532,9 +532,9 @@ theorem continuous_deriv_associatedP_neg_order (ν : ℂ) {z : ℂ} (hz : z-1 �
 -1/(Γ(ν+μ+1) (z²-1))`. -/
 @[dlmf 14.2.E8]
 theorem associated_wronskian_8 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    LegendreWronskian (associatedP ν (-μ)) (olverQ ν μ) z=-1/(Gamma (ν+μ+1)*(z^2-1)) := by
+    ODE.wronskian (associatedP ν (-μ)) (olverQ ν μ) z=-1/(Gamma (ν+μ+1)*(z^2-1)) := by
   have key := legendre_eq_of_continuous_nonint
-    (f := fun μ => LegendreWronskian (associatedP ν (-μ)) (olverQ ν μ) z)
+    (f := fun μ => ODE.wronskian (associatedP ν (-μ)) (olverQ ν μ) z)
     (g := fun μ => -(Gamma (ν+μ+1))⁻¹*(z^2-1)⁻¹)
     (continuous_legendreWronskian_order (continuous_associatedP_neg_order ν hz)
       (continuous_deriv_associatedP_neg_order ν hz) (olverQ_entire_order ν z hz).continuous
@@ -546,9 +546,9 @@ theorem associated_wronskian_8 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) 
 /-- For all complex `ν, μ` and `z - 1` in the slit plane, the Wronskian `W{P^μ_ν, 𝑸^μ_ν}(z) =
 -1/(Γ(ν-μ+1) (z²-1))`, extended from non-integer `μ` by continuity in the order. -/
 theorem olverQ_wronskian_pos (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    LegendreWronskian (associatedP ν μ) (olverQ ν μ) z = -(Gamma (ν-μ+1))⁻¹*(z^2-1)⁻¹ :=
+    ODE.wronskian (associatedP ν μ) (olverQ ν μ) z = -(Gamma (ν-μ+1))⁻¹*(z^2-1)⁻¹ :=
   legendre_eq_of_continuous_nonint
-    (f := fun μ => LegendreWronskian (associatedP ν μ) (olverQ ν μ) z)
+    (f := fun μ => ODE.wronskian (associatedP ν μ) (olverQ ν μ) z)
     (g := fun μ => -(Gamma (ν-μ+1))⁻¹*(z^2-1)⁻¹)
     (continuous_legendreWronskian_order (associatedP_entire_order ν z hz).continuous
       (continuous_deriv_associatedP_order ν hz) (olverQ_entire_order ν z hz).continuous
@@ -559,12 +559,12 @@ theorem olverQ_wronskian_pos (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
 /-- DLMF 14.2.10: when `ν+μ ∉ {-1,-2,…}` and for `z-1` in the slit plane (`z ∉ (-∞, 1]`),
 `𝒲{P^μ_ν(z), Q^μ_ν(z)} = -e^{μπi} Γ(ν+μ+1)/(Γ(ν-μ+1) (z²-1))`. -/
 @[dlmf 14.2.E10]
-theorem associated_wronskian_10 (ν μ : ℂ) (h : LegendreQRegular ν μ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    LegendreWronskian (associatedP ν μ) (associatedQ ν μ) z=-exp (μ*π*I)*Gamma (ν+μ+1)/(Gamma (ν-μ+1)*(z^2-1)) := by
+theorem associated_wronskian_10 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
+    ODE.wronskian (associatedP ν μ) (associatedQ ν μ) z=-exp (μ*π*I)*Gamma (ν+μ+1)/(Gamma (ν-μ+1)*(z^2-1)) := by
   have hW := olverQ_wronskian_pos ν μ hz
   have hd : deriv (associatedQ ν μ) z = exp (μ*π*I)*Gamma (ν+μ+1)*deriv (olverQ ν μ) z :=
     deriv_const_mul _ (olverQ_analytic ν μ z hz).differentiableAt
-  unfold LegendreWronskian at hW ⊢
+  unfold ODE.wronskian at hW ⊢
   rw [hd]
   simp only [associatedQ]
   rw [div_eq_mul_inv, mul_inv]
@@ -582,7 +582,7 @@ theorem olverQ_reflect_eventuallyEq_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ 
 /-- For non-integer `μ` and `z - 1` in the slit plane, the Wronskian `W{𝑸^μ_ν, 𝑸^μ_{-ν-1}}(z) =
 cos(νπ)/(z²-1)`; the non-integer case of DLMF 14.2.9. -/
 theorem associated_wronskian_9_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    LegendreWronskian (olverQ ν μ) (olverQ (-ν-1) μ) z=cos (ν*π)*(z^2-1)⁻¹ := by
+    ODE.wronskian (olverQ ν μ) (olverQ (-ν-1) μ) z=cos (ν*π)*(z^2-1)⁻¹ := by
   have h7 := associated_wronskian_7 ν μ hz
   have he := olverQ_reflect_eventuallyEq_nonint ν μ hμ hz
   have hd2 : deriv (olverQ (-ν-1) μ) z = π/(2*sin (μ*π))*(deriv (associatedP ν μ) z*(Gamma (-ν-1+μ+1))⁻¹-
@@ -599,7 +599,7 @@ theorem associated_wronskian_9_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n
     rw [show (π:ℂ)*(ν+μ+1) = ν*π+μ*π+π by ring, sin_add_pi, sin_add]
   have t2 : sin (π*(ν-μ+1)) = -(sin (ν*π)*cos (μ*π)-cos (ν*π)*sin (μ*π)) := by
     rw [show (π:ℂ)*(ν-μ+1) = ν*π-μ*π+π by ring, sin_add_pi, sin_sub]
-  unfold LegendreWronskian at h7 ⊢
+  unfold ODE.wronskian at h7 ⊢
   rw [hd2, he.eq_of_nhds, deriv_olverQ_nonint ν μ hμ hz, (olverQ_eventuallyEq_nonint ν μ hμ hz).eq_of_nhds]
   generalize (Gamma (ν+μ+1))⁻¹ = g1 at r1 ⊢
   generalize (Gamma (ν-μ+1))⁻¹ = g2 at r2 ⊢
@@ -621,9 +621,9 @@ theorem associated_wronskian_9_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n
 cos(νπ)/(z²-1)`. -/
 @[dlmf 14.2.E9]
 theorem associated_wronskian_9 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
-    LegendreWronskian (olverQ ν μ) (olverQ (-ν-1) μ) z=cos (ν*π)/(z^2-1) := by
+    ODE.wronskian (olverQ ν μ) (olverQ (-ν-1) μ) z=cos (ν*π)/(z^2-1) := by
   have key := legendre_eq_of_continuous_nonint
-    (f := fun μ => LegendreWronskian (olverQ ν μ) (olverQ (-ν-1) μ) z)
+    (f := fun μ => ODE.wronskian (olverQ ν μ) (olverQ (-ν-1) μ) z)
     (g := fun _ => cos (ν*π)*(z^2-1)⁻¹)
     (continuous_legendreWronskian_order (olverQ_entire_order ν z hz).continuous
       (continuous_deriv_olverQ_order ν hz) (olverQ_entire_order (-ν-1) z hz).continuous

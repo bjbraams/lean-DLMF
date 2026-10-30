@@ -236,7 +236,7 @@ theorem deriv_generalizedAiryB (n : ℕ) : deriv (generalizedAiryB n) = generali
 
 /-- `A_n` solves the generalized Airy equation `w'' = zⁿ w` (DLMF 9.13.1). -/
 @[dlmf 9.13.E1]
-theorem generalizedAiryA_ode {n : ℕ} (hn : 1 ≤ n) (z : ℂ) :
+theorem generalizedAiryA_ode {n : ℕ} (z : ℂ) :
     deriv (deriv (generalizedAiryA n)) z = z ^ n * generalizedAiryA n z := by
   rw [deriv_generalizedAiryA, ((isGenAirySol_generalizedAiryA n) z).2.deriv, one_mul]
 
@@ -256,7 +256,7 @@ theorem generalizedAiryB_entire (n : ℕ) :
 
 /-- `B_n` solves the generalized Airy equation `w'' = zⁿ w` (DLMF 9.13.1). -/
 @[dlmf 9.13.E1]
-theorem generalizedAiryB_ode {n : ℕ} (hn : 1 ≤ n) (z : ℂ) :
+theorem generalizedAiryB_ode {n : ℕ} (z : ℂ) :
     deriv (deriv (generalizedAiryB n)) z = z ^ n * generalizedAiryB n z := by
   rw [deriv_generalizedAiryB, ((isGenAirySol_generalizedAiryB n) z).2.deriv, one_mul]
 
@@ -518,10 +518,9 @@ theorem generalizedAiryB_neg_of_even {n : ℕ} (hn : Even n) (z : ℂ) :
     generalizedAiryA_neg_of_even hn, ← mul_assoc, ← cpow_add _ _ hp,
     show (-1 / 2 : ℂ) + 1 / 2 = 0 by ring, cpow_zero, one_mul]
 
-
 /-- `A_n(x) = (2p/π) sin(pπ) x^{1/2} K_p(ζ)` for `x > 0` (DLMF 9.13.4). -/
 @[dlmf 9.13.E4]
-theorem generalizedAiryA_bessel {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx : 0 < x) :
+theorem generalizedAiryA_bessel {n : ℕ} {x : ℝ} (hx : 0 < x) :
     generalizedAiryA n x = 2 * (generalizedAiryOrder n : ℂ) / π * sin ((generalizedAiryOrder n : ℂ) * π) * (x : ℂ) ^ (1 / 2 : ℂ) * DLMF.Bessel.besselK (generalizedAiryOrder n : ℂ) (generalizedAiryZeta n x) := by
   obtain ⟨c1, c2, -, -, c5, -⟩ := generalizedAiry_cpow_consts n hx
   have hp := generalizedAiryOrder_pos n
@@ -556,7 +555,7 @@ theorem generalizedAiryA_bessel {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx : 0 < x) 
 
 /-- `B_n(x) = (p x)^{1/2} (I_{-p}(ζ) + I_p(ζ))` for `x > 0` (DLMF 9.13.4). -/
 @[dlmf 9.13.E4]
-theorem generalizedAiryB_bessel {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx : 0 < x) :
+theorem generalizedAiryB_bessel {n : ℕ} {x : ℝ} (hx : 0 < x) :
     generalizedAiryB n x = ((generalizedAiryOrder n : ℂ) * x) ^ (1 / 2 : ℂ) * (DLMF.Bessel.besselI (-(generalizedAiryOrder n : ℂ)) (generalizedAiryZeta n x) + DLMF.Bessel.besselI (generalizedAiryOrder n : ℂ) (generalizedAiryZeta n x)) := by
   obtain ⟨c1, c2, c3, -, -, c6⟩ := generalizedAiry_cpow_consts n hx
   have hp := generalizedAiryOrder_pos n
@@ -624,7 +623,7 @@ theorem generalizedAiryGDeriv_zero (n : ℕ) :
 /-- Initial values: `A_n(0) = p^{1/2} B_n(0) = p^{1-p}/Γ(1-p)` and
 `-A_n'(0) = p^{1/2} B_n'(0) = p^p/Γ(p)` (DLMF 9.13.5). -/
 @[dlmf 9.13.E5]
-theorem generalizedAiry_initial_values {n : ℕ} (hn : 1 ≤ n) :
+theorem generalizedAiry_initial_values {n : ℕ} :
     generalizedAiryA n 0 = (generalizedAiryOrder n : ℂ) ^ (1 / 2 : ℂ) * generalizedAiryB n 0 ∧
       generalizedAiryA n 0 = (generalizedAiryOrder n : ℂ) ^ (1 - (generalizedAiryOrder n : ℂ)) / Gamma (1 - (generalizedAiryOrder n : ℂ)) ∧
       -deriv (generalizedAiryA n) 0 = (generalizedAiryOrder n : ℂ) ^ (1 / 2 : ℂ) * deriv (generalizedAiryB n) 0 ∧
@@ -651,7 +650,7 @@ theorem generalizedAiry_initial_values {n : ℕ} (hn : 1 ≤ n) :
 /-- `A_n(-x)` for `x > 0`: `p x^{1/2} (J_{-p}(ζ) + J_p(ζ))` for odd `n`, and
 `p^{1/2} B_n(x)` for even `n` (DLMF 9.13.6). -/
 @[dlmf 9.13.E6]
-theorem generalizedAiryA_negative {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx : 0 < x) :
+theorem generalizedAiryA_negative {n : ℕ} {x : ℝ} (hx : 0 < x) :
     generalizedAiryA n (-x) = if Odd n then (generalizedAiryOrder n : ℂ) * (x : ℂ) ^ (1 / 2 : ℂ) * (besselJ (-(generalizedAiryOrder n : ℂ)) (generalizedAiryZeta n x) + besselJ (generalizedAiryOrder n : ℂ) (generalizedAiryZeta n x)) else (generalizedAiryOrder n : ℂ) ^ (1 / 2 : ℂ) * generalizedAiryB n x := by
   split_ifs with hodd
   · obtain ⟨c1, c2, -, -, c5, -⟩ := generalizedAiry_cpow_consts n hx
@@ -681,7 +680,7 @@ theorem generalizedAiryA_negative {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx : 0 < x
 /-- `B_n(-x)` for `x > 0`: `(p x)^{1/2} (J_{-p}(ζ) - J_p(ζ))` for odd `n`, and
 `p^{-1/2} A_n(x)` for even `n` (DLMF 9.13.7). -/
 @[dlmf 9.13.E7]
-theorem generalizedAiryB_negative {n : ℕ} (hn : 1 ≤ n) {x : ℝ} (hx : 0 < x) :
+theorem generalizedAiryB_negative {n : ℕ} {x : ℝ} (hx : 0 < x) :
     generalizedAiryB n (-x) = if Odd n then ((generalizedAiryOrder n : ℂ) * x) ^ (1 / 2 : ℂ) * (besselJ (-(generalizedAiryOrder n : ℂ)) (generalizedAiryZeta n x) - besselJ (generalizedAiryOrder n : ℂ) (generalizedAiryZeta n x)) else (generalizedAiryOrder n : ℂ) ^ (-1 / 2 : ℂ) * generalizedAiryA n x := by
   split_ifs with hodd
   · obtain ⟨c1, c2, c3, -, -, c6⟩ := generalizedAiry_cpow_consts n hx
@@ -901,7 +900,7 @@ theorem olver_scale_cancel (n : ℕ) (z : ℂ) :
 /-- Olver's `U_m` is the rescaled Swanson–Headley `A_{m-2}`:
 `(2π)^{1/2} (m/2)^{(m-1)/m} A_n(z)/sin(π/m) = U_m(t)`, `m = n + 2` (DLMF 9.13.15). -/
 @[dlmf 9.13.E15]
-theorem olverAiry_normalization_first {n : ℕ} (hn : 1 ≤ n) (z : ℂ) :
+theorem olverAiry_normalization_first {n : ℕ} (z : ℂ) :
     (2 * π : ℂ) ^ (1 / 2 : ℂ) * ((n + 2 : ℂ) / 2) ^ ((n + 1 : ℂ) / (n + 2 : ℂ)) /
       sin (π / (n + 2 : ℂ)) * generalizedAiryA n z = olverAiryU (n + 2) (olverAiryVariable (n + 2) z) := by
   simp only [olverAiryU, olverAiryVariable, Nat.add_sub_cancel]
@@ -913,7 +912,7 @@ theorem olverAiry_normalization_first {n : ℕ} (hn : 1 ≤ n) (z : ℂ) :
 /-- Olver's `V̄_m` is the rescaled `B_{m-2}`:
 `π^{1/2} (m/2)^{(m-2)/(2m)} B_n(z)/sin(π/m) = V̄_m(t)`, `m = n + 2` (DLMF 9.13.16). -/
 @[dlmf 9.13.E16]
-theorem olverAiry_normalization_second {n : ℕ} (hn : 1 ≤ n) (z : ℂ) :
+theorem olverAiry_normalization_second {n : ℕ} (z : ℂ) :
     (π : ℂ) ^ (1 / 2 : ℂ) * ((n + 2 : ℂ) / 2) ^ ((n : ℂ) / (2 * (n + 2 : ℂ))) /
       sin (π / (n + 2 : ℂ)) * generalizedAiryB n z = olverAiryVBar (n + 2) (olverAiryVariable (n + 2) z) := by
   simp only [olverAiryVBar, olverAiryVariable, Nat.add_sub_cancel]

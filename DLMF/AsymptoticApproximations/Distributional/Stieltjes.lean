@@ -62,7 +62,6 @@ theorem one_add_rpow_neg_third_hasSum {t : ℝ} (ht : 1 < t) :
     show -(s : ℝ) - 1 / 3 = -(1 / 3) + -(s : ℝ) by ring, Real.rpow_add ht0]
   ring
 
-
 /-- DLMF 2.6.3: the termwise integrals `∫₀^∞ t^{-s-1/3}/(x+t) dt`, `s = 1, 2, …`, diverge
 (here: the integrand is not integrable on `(0, ∞)`), for every `x > 0`. -/
 @[dlmf 2.6.E3]
@@ -123,12 +122,11 @@ theorem integral_rpow_div_add_cpow {x : ℝ} (hx : 0 < x) {α β : ℂ} (hα : 0
   rw [hsub', hB]
   field_simp
 
-
 /-- DLMF 2.6.5: the generalized value of `∫₀^∞ t^{-s-1/3}/(x+t) dt` obtained from the
 right-hand side of 2.6.4 with `α = 2/3 - s`, `β = s + 1/3`:
 `Γ(2/3 - s) Γ(s + 1/3)/Γ(1) · x^{-s-1/3} = (2π/√3) (-1)^s x^{-s-1/3}`, `s = 0, 1, 2, …`. -/
 @[dlmf 2.6.E5]
-theorem gamma_two_thirds_sub_mul_gamma (s : ℕ) {x : ℝ} (_hx : 0 < x) :
+theorem gamma_two_thirds_sub_mul_gamma (s : ℕ) {x : ℝ} :
     Real.Gamma (2 / 3 - s) * Real.Gamma (s + 1 / 3) / Real.Gamma 1 * x ^ (-(s : ℝ) - 1 / 3) =
       2 * π / √3 * (-1) ^ s * x ^ (-(s : ℝ) - 1 / 3) := by
   have h := Real.Gamma_mul_Gamma_one_sub ((s : ℝ) + 1 / 3)

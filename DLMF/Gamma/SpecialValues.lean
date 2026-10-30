@@ -7,9 +7,9 @@ module
 
 public import DLMF.Gamma.Digamma
 public import DLMF.Gamma.GaussDigamma
-public import Mathlib.NumberTheory.ZetaValues
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
 public import Mathlib.Analysis.Complex.AbelLimit
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+public import Mathlib.NumberTheory.ZetaValues
 
 /-!
 # Special values and extrema (DLMF §5.4)
@@ -206,7 +206,7 @@ theorem trigamma_one_div_two : Real.trigamma (1 / 2) = π ^ 2 / 2 := by
 
 /-- DLMF 5.4.15: `ψ(n + 1/2) = -γ - 2 ln 2 + 2 ∑_{k<n} 1/(2k + 1)`. -/
 @[dlmf 5.4.E15]
-theorem digamma_nat_add_half (n : ℕ) (hn : 0 < n) :
+theorem digamma_nat_add_half (n : ℕ) :
     Real.digamma (n + 1 / 2) =
       -Real.eulerMascheroniConstant - 2 * Real.log 2 +
         2 * ∑ k ∈ Finset.range n, (1 / (2 * (k : ℝ) + 1)) := by

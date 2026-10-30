@@ -7,6 +7,7 @@ module
 
 public import DLMF.Gamma.Products
 public import DLMF.Gamma.SpecialValues
+public import TauCeti.MeasureTheory.Integral.ExpDecay
 
 /-!
 # Bounds for the Gamma function on vertical lines
@@ -305,19 +306,6 @@ theorem exists_norm_recip_Gamma_le (X : ℝ) :
   refine (step n x ⟨by linarith [hx.1], hx.2.trans (le_max_left _ _)⟩ y).trans (le_of_eq ?_)
   ring
 
-/-- `e^(-b|y|)` is integrable on `ℝ` for `b > 0`. -/
-theorem integrable_exp_neg_mul_abs {b : ℝ} (hb : 0 < b) :
-    Integrable (fun y : ℝ => Real.exp (-(b * |y|))) := by
-  have h1 : IntegrableOn (fun y : ℝ => Real.exp (-(b * |y|))) (Ioi 0) :=
-    (exp_neg_integrableOn_Ioi 0 hb).congr_fun (fun y hy => by
-      simp [abs_of_pos (mem_Ioi.mp hy)]) measurableSet_Ioi
-  have h2 : IntegrableOn (fun y : ℝ => Real.exp (-(b * |y|))) (Iic 0) := by
-    rw [← integrableOn_Ici_iff_integrableOn_Ioi] at h1
-    have := h1.comp_neg
-    simpa [abs_neg] using this
-  rw [← integrableOn_univ, ← Iic_union_Ioi (a := (0 : ℝ))]
-  exact h2.union h1
-
 /-- Polynomial times `e^{-c|y|}` is integrable on `ℝ`. -/
 theorem integrable_one_add_abs_pow_mul_exp_neg {c : ℝ} (hc : 0 < c) (K : ℕ) :
     Integrable (fun y : ℝ => (1 + |y|) ^ K * Real.exp (-(c * |y|))) := by
@@ -348,7 +336,7 @@ theorem integrable_one_add_abs_pow_mul_exp_neg {c : ℝ} (hc : 0 < c) (K : ℕ) 
     · push Not at htM
       exact (hM t (le_of_lt (lt_of_le_of_lt (le_max_left _ _) htM))).le.trans (le_max_right _ _)
   obtain ⟨D, hD⟩ := hbd
-  refine ((integrable_exp_neg_mul_abs (half_pos hc)).const_mul D).mono'
+  refine ((TauCeti.integrable_exp_neg_mul_abs (half_pos hc)).const_mul D).mono'
     (by fun_prop) (Eventually.of_forall fun y => ?_)
   rw [Real.norm_eq_abs, abs_of_nonneg (by positivity)]
   have h := hD |y| (abs_nonneg y)

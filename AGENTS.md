@@ -36,8 +36,9 @@ DLMF 27.14(v); both remain in the DLMF priority scope.
 - `DLMFMathlib/` (modules `DLMFMathlib.*`, renamed from `ToMathlib/` on 2026-10-25) holds
   general results that are not specific to special functions (Euler polynomials,
   Euler–Maclaurin and Boole summation, asymptotic expansions, Watson's lemma), in the
-  namespaces of the Mathlib APIs they extend. `DLMFMathlib` imports Mathlib and lean-codes'
-  `ToMathlib` only, never `DLMF`; `DLMF` modules may import `DLMFMathlib`.
+  namespaces of the Mathlib APIs they extend. `DLMFMathlib` may import Mathlib, TauCeti and
+  lean-codes, never `DLMF`; `DLMF` modules may import `DLMFMathlib`. This includes the
+  existing TauCeti prime-number-theorem imports in the general number-theory support.
 - lean-codes is a Lake path dependency (package `LeanCodes`, `../lean-codes`, since
   2026-10-25). Its modules (`Carlson.*`, `Pochhammer.*`, `Dirichlet.*`, its `ToMathlib.*`, …)
   are imported directly; never copy them here and never edit lean-codes from this project.

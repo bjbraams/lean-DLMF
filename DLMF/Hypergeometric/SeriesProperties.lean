@@ -7,10 +7,10 @@ module
 
 public import DLMF.Hypergeometric.Basic
 
-public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
-public import Mathlib.Analysis.PSeries
 public import Mathlib.Analysis.Analytic.Binomial
+public import Mathlib.Analysis.PSeries
 public import Mathlib.Analysis.SpecialFunctions.Complex.Arctan
+public import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
 
 /-!
 # The hypergeometric series (AAR §2.1)
@@ -31,34 +31,6 @@ noncomputable section
 
 namespace DLMF.Hypergeometric
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /-- The series `₂F₁(0,b;c;z)` terminates after the constant term. -/
 theorem ordinaryHypergeometric_zero_left (b c z : ℂ) : ₂F₁ (0 : ℂ) b c z = 1 := by
   rw [ordinaryHypergeometric_eq_tsum]
@@ -75,10 +47,6 @@ theorem ordinaryHypergeometric_zero_left (b c z : ℂ) : ₂F₁ (0 : ℂ) b c z
   · simp
   · intro n hn
     simp [hn]
-
-
-
-
 
 /-- Helper lemma for Chu–Vandermonde and the shifted Legendre evaluation. -/
 theorem gaussHGCoeff_neg_nat (n : ℕ) (b c : ℂ) (k : ℕ) :
@@ -173,7 +141,8 @@ theorem log_one_add_eq_ordinaryHypergeometric {x : ℂ} (hx : ‖x‖ < 1) :
     rwa [heq] at h
   exact hlog.unique hF
 
-/-- Helper lemma for `ordinaryHypergeometric_eq_one_sub_neg_cpow`. -/
+/-- Cancelling equal upper and lower parameters identifies the hypergeometric power series
+with the binomial series composed with negation. -/
 theorem ordinaryHypergeometricSeries_eq_binomialSeries_comp {a c : ℂ}
     (hc : ∀ k : ℕ, (k : ℂ) ≠ -c) :
     ordinaryHypergeometricSeries ℂ a c c =
@@ -206,8 +175,6 @@ theorem ordinaryHypergeometric_eq_one_sub_neg_cpow {a c z : ℂ}
   have hmem : z ∈ Metric.eball (0 : ℂ) (ordinaryHypergeometricSeries ℂ a c c).radius :=
     Metric.eball_subset_eball hfps.r_le hz'
   exact ((ordinaryHypergeometricSeries ℂ a c c).hasSum hmem).unique hs
-
-
 
 /-- Helper lemma for `arctan_eq_ordinaryHypergeometric`. -/
 theorem gaussHGCoeff_half_one_three_halves (n : ℕ) :

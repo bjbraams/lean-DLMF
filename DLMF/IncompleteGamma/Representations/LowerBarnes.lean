@@ -286,7 +286,7 @@ theorem ofReal_exp_cpow_eq_exp_mul (x : ℝ) (w : ℂ) : ((Real.exp x : ℝ) : �
 /-- Identity under the stated parameter and domain assumptions: `lowerIncGamma a z=z^a*(∫ t : ℝ in
 Ioi 0, exp (-a*t-z*Real.exp (-t)))`. -/
 @[dlmf 8.6.E3]
-theorem lowerIncGamma_logarithmic_integral {a : ℂ} (ha : 0 < a.re) {z : ℂ} (hz : z ≠ 0) :
+theorem lowerIncGamma_logarithmic_integral {a : ℂ} (ha : 0 < a.re) {z : ℂ} :
     lowerIncGamma a z=z^a*(∫ t : ℝ in Ioi 0, exp (-a*t-z*Real.exp (-t))) := by
   have ha' : ∀ k : ℕ, a ≠ -k := fun k hk => by
     have := congrArg Complex.re hk
@@ -393,7 +393,7 @@ theorem upperIncGamma_logarithmic_integral (a : ℂ) {z : ℂ} (hz : 0 < z.re) :
 /-- Identity under the stated parameter and domain assumptions: `lowerIncGamma a z = -I*z^a/(2*sin
 (π*a))*(∫ θ : ℝ in (-π)..π, I*exp (a*I*θ+z*exp (I*θ)))`. -/
 @[dlmf 8.6.E8]
-theorem lowerIncGamma_circle_integral {a : ℂ} (ha : ∀ n : ℤ, a ≠ n) {z : ℂ} (hz : z ≠ 0) :
+theorem lowerIncGamma_circle_integral {a : ℂ} (ha : ∀ n : ℤ, a ≠ n) {z : ℂ} :
     lowerIncGamma a z = -I*z^a/(2*sin (π*a))*(∫ θ : ℝ in (-π)..π, I*exp (a*I*θ+z*exp (I*θ))) := by
   have ha' : ∀ n : ℕ, a ≠ -n := fun n h => ha (-n) (by push_cast; exact h)
   have hsin : sin (π*a) ≠ 0 := by

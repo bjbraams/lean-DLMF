@@ -5,10 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.Complex.RemovableSingularity
-public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
-public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
 public import DLMFMathlib.Analysis.Asymptotics.WatsonSector
+public import Mathlib.Analysis.Complex.RemovableSingularity
+public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
 
 /-!
 # Large-order tools for the Anger–Weber coefficients
@@ -20,7 +20,7 @@ coefficients `[u^{2k}] dt/du` of the inverse of `u = t + λ sinh t`; by Lagrange
 `I_m(λ) = ∮_{|t|=r} g(t) (t + λ sinh t)^{-m} dt`  (`struveLO_I`)
 
 on a small circle on which `t + λ sinh t = t (1 + λ σ(t))`, `σ = dslope sinh 0`, has no zero
-other than `t = 0` for all `λ` in a closed disc around `λ₀ ≠ -1` (`struveLO_Good`,
+other than `t = 0` for all `λ` in a closed disc around `λ₀ ≠ -1` (`StruveLOGood`,
 `struveLO_good_exists`). The integrals are holomorphic in `λ`
 (`struveLO_hasDerivAt_I`, by differentiation under the integral sign,
 `struveLO_hasDerivAt_circleIntegral`), `I_1 = 2πi/(1+λ)` (`struveLO_I_one`, Cauchy's
@@ -82,7 +82,6 @@ theorem struveLO_hasDerivAt_circleIntegral {F F' : ℂ → ℂ → ℂ} {s : Set
   · refine Eventually.of_forall fun θ _ z hzs => ?_
     exact (hd z hzs θ).const_smul (circleMap 0 r θ * I)
 
-
 /-- The circle integral `∮_{|t|=r} g(t) (t + λ sinh t)^{-m} dt`. -/
 def struveLO_I (r : ℝ) (g : ℂ → ℂ) (m : ℕ) (lam : ℂ) : ℂ :=
   ∮ t in C(0, r), g t * ((t + lam * sinh t) ^ m)⁻¹
@@ -105,12 +104,12 @@ theorem struveLO_dslope_zero : dslope sinh 0 0 = 1 := by
 
 /-- The good-set condition: on the closed disc `|λ - λ₀| ≤ ε` and `|t| ≤ r` the factor
 `1 + λ σ(t)` of `t + λ sinh t = t (1 + λ σ(t))` does not vanish. -/
-def struveLO_Good (r ε : ℝ) (lam₀ : ℂ) : Prop :=
+def StruveLOGood (r ε : ℝ) (lam₀ : ℂ) : Prop :=
   ∀ lam ∈ closedBall lam₀ ε, ∀ t ∈ closedBall (0 : ℂ) r, 1 + lam * dslope sinh 0 t ≠ 0
 
 /-- For `1 + λ₀ ≠ 0` a good disc pair exists. -/
 theorem struveLO_good_exists {lam₀ : ℂ} (h : 1 + lam₀ ≠ 0) :
-    ∃ r > 0, ∃ ε > 0, struveLO_Good r ε lam₀ := by
+    ∃ r > 0, ∃ ε > 0, StruveLOGood r ε lam₀ := by
   set m := ‖1 + lam₀‖ with hm
   have hm0 : 0 < m := norm_pos_iff.2 h
   set L := ‖lam₀‖ + m / 4 + 1 with hL
@@ -139,7 +138,7 @@ theorem struveLO_good_exists {lam₀ : ℂ} (h : 1 + lam₀ ≠ 0) :
   linarith
 
 /-- On a good disc pair the denominator `t + λ sinh t` does not vanish for `0 < |t| ≤ r`. -/
-theorem struveLO_u_ne {r ε : ℝ} {lam₀ : ℂ} (hG : struveLO_Good r ε lam₀) {lam : ℂ}
+theorem struveLO_u_ne {r ε : ℝ} {lam₀ : ℂ} (hG : StruveLOGood r ε lam₀) {lam : ℂ}
     (hlam : lam ∈ closedBall lam₀ ε) {t : ℂ} (ht : t ∈ closedBall (0 : ℂ) r) (ht0 : t ≠ 0) :
     t + lam * sinh t ≠ 0 := by
   rw [struveLO_sinh_eq, show t + lam * (t * dslope sinh 0 t) = t * (1 + lam * dslope sinh 0 t) by
@@ -167,7 +166,7 @@ theorem struveLO_hasDerivAt_recip_pow (a b c : ℂ) (m : ℕ) {w : ℂ} (h : a +
     ring
 
 /-- Continuity of the circle integrands on a good disc. -/
-theorem struveLO_continuousOn {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : struveLO_Good r ε lam₀)
+theorem struveLO_continuousOn {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : StruveLOGood r ε lam₀)
     {g : ℂ → ℂ} (hg : Continuous g) (m : ℕ) :
     ContinuousOn (fun p : ℂ × ℝ => g (circleMap 0 r p.2) *
       ((circleMap 0 r p.2 + p.1 * sinh (circleMap 0 r p.2)) ^ m)⁻¹) (closedBall lam₀ ε ×ˢ univ) := by
@@ -180,7 +179,7 @@ theorem struveLO_continuousOn {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : str
 
 /-- `λ ↦ ∮ g (t + λ sinh t)^{-m}` is differentiable on a good disc, with derivative
 `-m ∮ g sinh (t + λ sinh t)^{-(m+1)}`. -/
-theorem struveLO_hasDerivAt_I {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : struveLO_Good r ε lam₀)
+theorem struveLO_hasDerivAt_I {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : StruveLOGood r ε lam₀)
     {g : ℂ → ℂ} (hg : Continuous g) (m : ℕ) {lam : ℂ} (hlam : lam ∈ ball lam₀ ε) :
     HasDerivAt (struveLO_I r g m)
       (-(m : ℂ) * struveLO_I r (fun t => g t * sinh t) (m + 1) lam) lam := by
@@ -216,7 +215,7 @@ theorem struveLO_hasDerivAt_exact (lam : ℂ) (n : ℕ) {t : ℂ} (h : t + lam *
   linear_combination (-(n : ℂ) * (n + 1) * (t + lam * sinh t)⁻¹ ^ (n + 2) * lam ^ 2) * cosh_sq t
 
 /-- Circle integrability of the integrands on a good disc. -/
-theorem struveLO_circleIntegrable {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : struveLO_Good r ε lam₀)
+theorem struveLO_circleIntegrable {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : StruveLOGood r ε lam₀)
     {g : ℂ → ℂ} (hg : Continuous g) (m : ℕ) {lam : ℂ} (hlam : lam ∈ closedBall lam₀ ε) (c : ℂ) :
     CircleIntegrable (fun t => c * (g t * ((t + lam * sinh t) ^ m)⁻¹)) 0 r := by
   refine ContinuousOn.circleIntegrable hr.le (continuousOn_const.mul (hg.continuousOn.mul
@@ -225,7 +224,7 @@ theorem struveLO_circleIntegrable {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG :
 
 /-- The recurrence identity for the circle integrals:
 `λ² n(n+1) I(sinh², n+2) - λ n I(sinh, n+1) = (1-λ²) n(n+1) I(1, n+2)`. -/
-theorem struveLO_recurrence {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : struveLO_Good r ε lam₀)
+theorem struveLO_recurrence {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : StruveLOGood r ε lam₀)
     (n : ℕ) {lam : ℂ} (hlam : lam ∈ closedBall lam₀ ε) :
     lam ^ 2 * (n * (n + 1)) * struveLO_I r (fun t => 1 * sinh t * sinh t) (n + 1 + 1) lam -
       lam * n * struveLO_I r (fun t => 1 * sinh t) (n + 1) lam =
@@ -248,7 +247,7 @@ theorem struveLO_recurrence {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : struv
   linear_combination h0
 
 /-- Base case: `∮ (t + λ sinh t)^{-1} dt = 2πi/(1+λ)` on a good disc. -/
-theorem struveLO_I_one {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : struveLO_Good r ε lam₀)
+theorem struveLO_I_one {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : StruveLOGood r ε lam₀)
     {lam : ℂ} (hlam : lam ∈ closedBall lam₀ ε) :
     struveLO_I r (fun _ => 1) 1 lam = 2 * π * I / (1 + lam) := by
   have hd : DifferentiableOn ℂ (fun t => (1 + lam * dslope sinh 0 t)⁻¹) (closedBall 0 r) :=

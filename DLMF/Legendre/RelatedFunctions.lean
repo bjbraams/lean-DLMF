@@ -78,7 +78,7 @@ theorem ferrersP_gegenbauer (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) 
 
 /-- Removable exceptional parameters use the limit of the whole representation. -/
 @[dlmf 14.3.E22]
-theorem associatedP_gegenbauer (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (hre : 0 < z.re) :
+theorem associatedP_gegenbauer (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     Tendsto (fun m : ℂ => 2^m*Gamma (1-2*m)*Gamma (ν+m+1)/(Gamma (ν-m+1)*Gamma (1-m)*legendreBranchPower m z)*gegenbauerFunction (ν+m) (1/2-m) z) (𝓝[≠] μ) (𝓝 (associatedP ν μ z)) := by
   have hz' := one_add_mem_slitPlane_of_sub_one hz
   have ht := mem_cutPlane_of_one_add hz'
@@ -172,7 +172,7 @@ def associatedDegreeA (ν μ z : ℂ) : ℂ :=
 `∂P^μ_ν(z)/∂ν = π cot(νπ) P^μ_ν(z) - (1/π) A^μ_ν(z)`, with `A^μ_ν` the series 14.11.3 continued to
 complex `z`. -/
 @[dlmf 14.11.E1]
-theorem associatedP_degree_deriv {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane) (hdisk : ‖1-z‖ < 2) :
+theorem associatedP_degree_deriv {ν : ℂ} (hν : ∀ n : ℤ, ν ≠ n) (μ : ℂ) {z : ℂ} (hdisk : ‖1-z‖ < 2) :
     HasDerivAt (fun ν => associatedP ν μ z) (π*cos (ν*π)/sin (ν*π)*associatedP ν μ z-associatedDegreeA ν μ z/π) ν := by
   have hw : ‖(1-z)/2‖ < 1 := by
     rw [norm_div, norm_ofNat]

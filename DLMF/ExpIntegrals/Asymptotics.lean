@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.IncompleteGamma.ExpIntegralAsymptotics
 public import DLMF.ExpIntegrals.Continuation
+public import DLMF.IncompleteGamma.ExpIntegralAsymptotics
 
 /-!
 # Sectorial asymptotic expansions and explicit remainders, DLMF §6.12
@@ -482,7 +482,7 @@ theorem expIntEi_asymptotic  :
 (π-δ)) (fun n z => z^(-(2*(n : ℂ)+1))) (fun n => (-1 : ℂ)^n*((2*n+0).factorial : ℂ))
 expIntAuxF`. -/
 @[dlmf 6.12.E3]
-theorem expIntAuxF_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) :
+theorem expIntAuxF_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) :
     HasAsymptoticExpansion (sector (π-δ)) (fun n z => z^(-(2*(n : ℂ)+1))) (fun n => (-1 : ℂ)^n*((2*n+0).factorial : ℂ)) expIntAuxF := by
   obtain ⟨β, hβ, hcos, hcov⟩ := sector_pi_sub_le_sup hδ
   have hodd : ∀ n : ℕ, Gamma (((2 * n + 1 : ℕ) : ℂ) + 1) • expIntAuxCoeff 0 (2 * n + 1) = 0 := by
@@ -509,7 +509,7 @@ theorem expIntAuxF_remainder_integral {z : ℂ} (hz : 0 < z.re) (N : ℕ) :
 (π-δ)) (fun n z => z^(-(2*(n : ℂ)+2))) (fun n => (-1 : ℂ)^n*((2*n+1).factorial : ℂ))
 expIntAuxG`. -/
 @[dlmf 6.12.E4]
-theorem expIntAuxG_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < π) :
+theorem expIntAuxG_sector_asymptotic {δ : ℝ} (hδ : 0 < δ) :
     HasAsymptoticExpansion (sector (π-δ)) (fun n z => z^(-(2*(n : ℂ)+2))) (fun n => (-1 : ℂ)^n*((2*n+1).factorial : ℂ)) expIntAuxG := by
   obtain ⟨β, hβ, hcos, hcov⟩ := sector_pi_sub_le_sup hδ
   have hev : ∀ n : ℕ, Gamma (((2 * n : ℕ) : ℂ) + 1) • expIntAuxCoeff 1 (2 * n) = 0 := by

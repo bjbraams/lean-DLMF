@@ -5,9 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.SpecialFunctions.Pow.Real
 public import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
 public import Mathlib.Analysis.SpecialFunctions.Pow.Complex
+public import Mathlib.Analysis.SpecialFunctions.Pow.Real
+public import ToMathlib.Analysis.SpecialFunctions.Pow
 
 /-!
 # Complex powers of positive reals
@@ -23,11 +24,6 @@ positive real factor, conjugation of `2 ^ w`, the bound
 open scoped Real ComplexConjugate
 
 namespace Complex
-
-/-- A complex power of a positive real is an exponential: `r ^ z = exp (log r · z)`. -/
-theorem ofReal_cpow_eq_exp_log_mul {r : ℝ} (hr : 0 < r) (z : ℂ) :
-    (r : ℂ) ^ z = exp ((Real.log r : ℂ) * z) := by
-  rw [cpow_def_of_ne_zero (ofReal_ne_zero.mpr hr.ne'), ofReal_log hr.le]
 
 /-- A complex power of a positive real is an exponential: `t ^ w = exp (w · log t)`. -/
 theorem ofReal_cpow_eq_exp_mul_log {t : ℝ} (ht : 0 < t) (w : ℂ) :

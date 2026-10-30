@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.EllipticIntegrals.Symmetric
 public import DLMF.EllipticIntegrals.Legendre
+public import DLMF.EllipticIntegrals.Symmetric
 
 /-!
 # Legendre's integrals as symmetric integrals: the substitution (DLMF §19.25(i))
@@ -380,10 +380,10 @@ theorem p19sR1_csc_sq_mem {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π / 2) :
     ((1 / Real.sin φ ^ 2 : ℝ) : ℂ) ∈ slitPlane :=
   ofReal_mem_slitPlane.mpr (lt_of_lt_of_le one_pos (p19sR1_one_le_csc_sq h0 h1))
 
-/-- The stated relation follows from the given hypotheses: `symEllIntArg (((1 / Real.sin φ ^ 2 :
+/-- The stated relation follows from the given hypotheses: `SymEllIntArg (((1 / Real.sin φ ^ 2 :
 ℝ) : ℂ) - 1)`. -/
 theorem p19sR1_csc_sq_sub_one_arg {φ : ℝ} (h0 : 0 < φ) (h1 : φ ≤ π / 2) :
-    symEllIntArg (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1) := by
+    SymEllIntArg (((1 / Real.sin φ ^ 2 : ℝ) : ℂ) - 1) := by
   rcases eq_or_lt_of_le (p19sR1_one_le_csc_sq h0 h1) with h | h
   · right; rw [← h]; simp
   · left

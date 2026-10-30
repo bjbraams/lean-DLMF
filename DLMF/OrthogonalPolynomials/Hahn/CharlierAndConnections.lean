@@ -187,7 +187,7 @@ theorem hahn_limit_krawtchouk {p : ℝ} (hp : 0 < p) (N n : ℕ) (x : ℂ) :
 /-- The map `(fun N : ℕ => hahn α β N n (N * x))` tends to `(𝓝 (jacobiPolyP α β n (1 - 2 * x) /
 jacobiPolyP α β n 1))` along `atTop`. -/
 @[dlmf 18.21.E5]
-theorem hahn_limit_jacobi {α β : ℝ} (hα : -1 < α) (hβ : -1 < β) (n : ℕ) (x : ℂ) :
+theorem hahn_limit_jacobi {α β : ℝ} (hα : -1 < α) (n : ℕ) (x : ℂ) :
     Tendsto (fun N : ℕ => hahn α β N n (N * x)) atTop (𝓝 (jacobiPolyP α β n (1 - 2 * x) / jacobiPolyP α β n 1)) := by
   have hα' : ∀ k : ℕ, (α : ℂ) + 1 ≠ -(k : ℂ) := fun k h => by
     have := congrArg re h; simp at this; linarith [(Nat.cast_nonneg k : (0 : ℝ) ≤ k)]

@@ -167,7 +167,7 @@ theorem angular_homogeneous {β : ℝ} (hβ : -1 / 2 < β) (n : ℕ) {x y : ℝ}
   rw [hI]
   have hscaled := angularJacobiSum_eq hβ n hs
   have harg : ((Real.cos q.arg : ℝ) : ℂ) = (x ^ 2 - y ^ 2) / (x ^ 2 + y ^ 2) := by rw [hc]; push_cast; rfl
-  conv_lhs at hL => rw [harg, jacobi_at_one hβC]
+  conv_lhs at hL => rw [harg, jacobiPolyP_one ]
   have hGammaArgs : (β + 1 / 2 + 1 / 2 : ℂ) = β + 1 := by ring
   rw [show (β : ℂ) + 1 / 2 + 1 / 2 = β + 1 by ring] at hL
   rw [hG]
@@ -293,7 +293,7 @@ theorem jacobi_half_angle_normalized {α β : ℝ} (hα : -1 < α) (n : ℕ) (θ
     exact_mod_cast (by linarith : Real.cos θ + 1 = 2 * Real.cos (θ / 2) ^ 2)
   have hP : poch ((α : ℂ) + 1) n ≠ 0 :=
     poch_ne_zero_of_not_neg_nat (not_neg_nat_of_re_pos (by simp; linarith)) n
-  rw [jacobi_binomial_sum (by simpa using hα), jacobi_at_one (by simpa using hα)]
+  rw [jacobi_binomial_sum (by simpa using hα), jacobiPolyP_one ]
   simp only [Finset.mul_sum, Finset.sum_div]
   apply Finset.sum_congr rfl
   intro k hk

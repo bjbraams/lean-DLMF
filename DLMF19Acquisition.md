@@ -72,7 +72,7 @@ Quadratic 11). Twenty-two existing real-variable declarations in `DLMF/Elliptic/
 - 19.6.9 `E(φ, 1) = sin φ` holds for real `|φ| ≤ π/2` (in general `E(φ, 1) = ∫₀^φ |cos θ| dθ`);
   the real case is proved with that range, the complex case admitted with `|Re φ| < π/2`.
 - Totalization: real-parameter statements carry the hypotheses (`α² ≠ 1`, `α² ≠ k²`,
-  `legendrePathOK φ k`, integrability) under which DLMF's integrals are genuine; Lean's
+  `LegendrePathOK φ k`, integrability) under which DLMF's integrals are genuine; Lean's
   `x / 0 = 0` is never used to fake an identity.
 - Import clash: `DLMF.GeneralizedHypergeometric.Appell` cannot be imported together with
   `lean-codes` (both TauCeti's `CauchyIntegralPolydisc` and `SeveralComplexVariables` declare
@@ -128,7 +128,7 @@ Quadratic 11). Twenty-two existing real-variable declarations in `DLMF/Elliptic/
 - [19.4.E2](https://dlmf.nist.gov/19.4.E2): [`DLMF.EllipticIntegrals.hasDerivAt_compEllIntEk`](DLMF/EllipticIntegrals/Derivatives.lean#L199) (proved); [`DLMF.EllipticIntegrals.hasDerivAt_compEllIntEk_sub_compEllIntKk`](DLMF/EllipticIntegrals/Derivatives.lean#L234) (proved); [`DLMF.Elliptic.Real.hasDerivAt_compEllIntEm`](DLMF/Elliptic/Complete.lean#L159) (proved); [`DLMF.Elliptic.Real.hasDerivAt_compEllIntEm_sq`](DLMF/Elliptic/Complete.lean#L445) (proved).
 - [19.4.E3](https://dlmf.nist.gov/19.4.E3): [`DLMF.EllipticIntegrals.deriv_deriv_compEllIntEk`](DLMF/EllipticIntegrals/Derivatives.lean#L246) (proved).
 - [19.4.E4](https://dlmf.nist.gov/19.4.E4): [`DLMF.EllipticIntegrals.hasDerivAt_compEllIntPik`](DLMF/EllipticIntegrals/Derivatives.lean#L264) (proved).
-- [19.4.E5](https://dlmf.nist.gov/19.4.E5): [`DLMF.EllipticIntegrals.hasDerivAt_incEllIntFk`](DLMF/EllipticIntegrals/Derivatives.lean#L474) (proved). Derivatives in k at fixed φ, with `legendrePathOK φ k` (the path stays off the branch cut).
+- [19.4.E5](https://dlmf.nist.gov/19.4.E5): [`DLMF.EllipticIntegrals.hasDerivAt_incEllIntFk`](DLMF/EllipticIntegrals/Derivatives.lean#L474) (proved). Derivatives in k at fixed φ, with `LegendrePathOK φ k` (the path stays off the branch cut).
 - [19.4.E6](https://dlmf.nist.gov/19.4.E6): [`DLMF.EllipticIntegrals.hasDerivAt_incEllIntEk`](DLMF/EllipticIntegrals/Derivatives.lean#L521) (proved).
 - [19.4.E7](https://dlmf.nist.gov/19.4.E7): [`DLMF.EllipticIntegrals.hasDerivAt_incEllIntPik`](DLMF/EllipticIntegrals/Derivatives.lean#L545) (proved).
 - [19.4.E8](https://dlmf.nist.gov/19.4.E8): [`DLMF.EllipticIntegrals.incEllIntFk_ode`](DLMF/EllipticIntegrals/Derivatives.lean#L621) (proved).
@@ -421,7 +421,7 @@ Prose:
 
 ## [§19.16 Definitions](https://dlmf.nist.gov/19.16)
 
-- [19.16.E1](https://dlmf.nist.gov/19.16.E1): [`DLMF.EllipticIntegrals.symEllIntRF`](DLMF/EllipticIntegrals/Symmetric.lean#L102) (definition). Complex arguments; off `symEllIntRFDomain` the Bochner integral is totalized. Bridge to lean-codes `Carlson.carlsonRF` on the slit plane: `symEllIntRF_eq_carlsonRF`.
+- [19.16.E1](https://dlmf.nist.gov/19.16.E1): [`DLMF.EllipticIntegrals.symEllIntRF`](DLMF/EllipticIntegrals/Symmetric.lean#L102) (definition). Complex arguments; off `SymEllIntRFDomain` the Bochner integral is totalized. Bridge to lean-codes `Carlson.carlsonRF` on the slit plane: `symEllIntRF_eq_carlsonRF`.
 - [19.16.E2](https://dlmf.nist.gov/19.16.E2): [`DLMF.EllipticIntegrals.symEllIntRJ`](DLMF/EllipticIntegrals/Symmetric.lean#L109) (definition). R_G (19.16.E2_5) has its own line below. R_J takes the Cauchy principal value (`cauchyPVIoi`) when p is a negative real. Bridge `symEllIntRJ_eq_carlsonR`.
 - [19.16.E3](https://dlmf.nist.gov/19.16.E3): excluded: moved (DLMF: "Moved to (19.23.6_5)"; see §19.23).
 - [19.16.E4](https://dlmf.nist.gov/19.16.E4): [`DLMF.EllipticIntegrals.symEllIntS`](DLMF/EllipticIntegrals/Symmetric.lean#L97) (definition). Principal square roots.
@@ -447,14 +447,14 @@ Prose:
 - [19.16.E24](https://dlmf.nist.gov/19.16.E24): [`DLMF.EllipticIntegrals.symEllIntR_eq_integral_complete`](DLMF/EllipticIntegrals/Symmetric.lean#L678) (admitted).
 Prose:
 
-- [19.16.i.p1](https://dlmf.nist.gov/19.16#i.p1): domain of the integrals: `symEllIntArg`, `symEllIntRFDomain` (definitions, tag `19.16.i`); principal value for p < 0 in `symEllIntRJ`; normalizations R_F(1,1,1) = R_J(1,1,1,1) = 1: `symEllIntRF_one_one_one`, `symEllIntRJ_one_one_one_one` (proved); R_G(1,1,1) = 1 is a consequence of 19.20.E4.
+- [19.16.i.p1](https://dlmf.nist.gov/19.16#i.p1): domain of the integrals: `SymEllIntArg`, `SymEllIntRFDomain` (definitions, tag `19.16.i`); principal value for p < 0 in `symEllIntRJ`; normalizations R_F(1,1,1) = R_J(1,1,1,1) = 1: `symEllIntRF_one_one_one`, `symEllIntRJ_one_one_one_one` (proved); R_G(1,1,1) = 1 is a consequence of 19.20.E4.
 - [19.16.i.p2](https://dlmf.nist.gov/19.16#i.p2), [19.16.i.p3](https://dlmf.nist.gov/19.16#i.p3): introduce 19.16.E5–E7.
 - [19.16.ii.p1](https://dlmf.nist.gov/19.16#ii.p1), [19.16.ii.p2](https://dlmf.nist.gov/19.16#ii.p2): the conditions on a, 𝐛, 𝐳 are recorded in the docstrings of `symEllIntR` and `symEllIntR_eq_integral`.
 - [19.16.ii.p3](https://dlmf.nist.gov/19.16#ii.p3): bibliographic (earlier notation R(a; 𝐛; 𝐳)); recorded in the `symEllIntR` docstring.
 - [19.16.iii.p1](https://dlmf.nist.gov/19.16#iii.p1): classification terminology (complete/incomplete, symmetric cases); not formalized.
 - [19.16.iii.p2](https://dlmf.nist.gov/19.16#iii.p2), [19.16.iii.p3](https://dlmf.nist.gov/19.16#iii.p3): introduce 19.16.E14–E24; the zero-argument convention is the limit from the slit domain in `symEllIntR`.
 - [19.16.E2_5](https://dlmf.nist.gov/19.16.E2_5): [`DLMF.EllipticIntegrals.symEllIntRG`](DLMF/EllipticIntegrals/Symmetric.lean#L120) (definition).
-- [19.16.i](https://dlmf.nist.gov/19.16.i): [`DLMF.EllipticIntegrals.symEllIntArg`](DLMF/EllipticIntegrals/Symmetric.lean#L72) (definition); [`DLMF.EllipticIntegrals.symEllIntRFDomain`](DLMF/EllipticIntegrals/Symmetric.lean#L77) (definition); [`DLMF.EllipticIntegrals.symEllIntRF_one_one_one`](DLMF/EllipticIntegrals/Symmetric.lean#L536) (proved); [`DLMF.EllipticIntegrals.symEllIntRJ_one_one_one_one`](DLMF/EllipticIntegrals/Symmetric.lean#L542) (proved).
+- [19.16.i](https://dlmf.nist.gov/19.16.i): [`DLMF.EllipticIntegrals.SymEllIntArg`](DLMF/EllipticIntegrals/Symmetric.lean#L72) (definition); [`DLMF.EllipticIntegrals.SymEllIntRFDomain`](DLMF/EllipticIntegrals/Symmetric.lean#L77) (definition); [`DLMF.EllipticIntegrals.symEllIntRF_one_one_one`](DLMF/EllipticIntegrals/Symmetric.lean#L536) (proved); [`DLMF.EllipticIntegrals.symEllIntRJ_one_one_one_one`](DLMF/EllipticIntegrals/Symmetric.lean#L542) (proved).
 
 ## [§19.18 Derivatives and Differential Equations](https://dlmf.nist.gov/19.18)
 

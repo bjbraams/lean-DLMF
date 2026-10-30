@@ -250,7 +250,6 @@ theorem ferrersP_recurrence_4 (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1
   rw [show ν-1+2=ν+1 by ring,show ν-1+1=ν by ring] at hr
   linear_combination hd+hr
 
-
 /-! ### Ferrers-Q recurrences by continuity in the degree
 
 For non-real `ν+μ`, `𝖰` is a combination of `𝖯(±x)`; the recurrences then extend to all
@@ -394,7 +393,6 @@ theorem ferrersQ_reflection_deriv {ν μ : ℂ} (h : LegendreQRegular ν μ) {x 
     refine (((hPd x hx).const_mul _).sub h2).congr_deriv ?_
     simp
   rw [← deriv_const_mul_field, hev.deriv_eq, hR.deriv]
-
 
 /-- DLMF 14.10.1 for `𝖰`: when `ν+μ ∉ {-1,-2,…}` and for `-1 < x < 1`, `𝖰^{μ+2}_ν(x) + 2(μ+1) x
 (1-x²)^{-1/2} 𝖰^{μ+1}_ν(x) + (ν-μ)(ν+μ+1) 𝖰^μ_ν(x) = 0`. -/
@@ -555,7 +553,7 @@ theorem ferrers_wronskian_5_generic (ν μ : ℂ) (h : LegendreQRegular ν μ) (
   have hQ := ferrersQ_recurrence_4 ν μ h hx
   have hW := ferrers_wronskian_4 ν μ h hx
   have hne := slitPlane_ne_zero (ferrers_one_sub_sq_mem_slitPlane hx)
-  unfold ferrersWronskian at hW
+  unfold ODE.wronskian at hW
   rw [show ν-μ+2 = (ν-μ+1)+1 by ring, Gamma_add_one _ hd]
   have key : (ν-μ+1)*(ferrersP (ν+1) μ x*ferrersQ ν μ x-ferrersP ν μ x*ferrersQ (ν+1) μ x) =
       Gamma (ν+μ+1)/Gamma (ν-μ+1) := by
@@ -689,7 +687,6 @@ theorem associatedP_recurrence_4 (ν μ : ℂ) {z : ℂ} (hz : z-1 ∈ slitPlane
   have hr := associatedP_recurrence_3 (ν-1) μ hz
   rw [show ν-1+2=ν+1 by ring,show ν-1+1=ν by ring] at hr
   linear_combination hd+hr
-
 
 /-- For non-integer `μ` and `z - 1` in the slit plane, `𝑸^μ_ν(z) = π/(2 sin(μπ)) (P^μ_ν(z)/Γ(ν+μ+1)
 - P^{-μ}_ν(z)/Γ(ν-μ+1))`. -/
@@ -957,7 +954,7 @@ theorem associatedQ_recurrence_5 (ν μ : ℂ) (h : LegendreQRegular (ν-1) μ) 
 theorem olverQ_casoratian_nonint (ν μ : ℂ) (hμ : ∀ n : ℤ, μ ≠ n) {z : ℂ} (hz : z-1 ∈ slitPlane) :
     associatedP (ν+1) μ z*olverQ ν μ z-(ν+μ+1)*associatedP ν μ z*olverQ (ν+1) μ z=(Gamma (ν-μ+2))⁻¹ := by
   have h7 := associated_wronskian_7 ν μ hz
-  unfold LegendreWronskian at h7
+  unfold ODE.wronskian at h7
   have R1 := associatedP_recurrence_4 ν μ hz
   have R2 := associatedP_recurrence_4 ν (-μ) hz
   rw [olverQ_eq_nonint (ν+1) μ hμ hz, olverQ_eq_nonint ν μ hμ hz]
@@ -1001,11 +998,6 @@ theorem associated_wronskian_11 (ν μ : ℂ) (h : LegendreQRegular ν μ) {z : 
   rw [e1', div_eq_mul_inv]
   linear_combination (exp (μ*π*I)*Gamma (ν+μ+1))*R
 
-
-
-
-
-
 /-- `𝖰^μ_ν` is differentiable on `(-1,1)`. -/
 theorem differentiableAt_ferrersQ (ν μ : ℂ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     DifferentiableAt ℝ (ferrersQ ν μ) x :=
@@ -1034,7 +1026,6 @@ theorem hasDerivAt_one_sub_sq_sqrt {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
   rw [show (1/2:ℂ)-1 = -(1/2) by norm_num, cpow_neg]
   field_simp
   ring
-
 
 /-- DLMF 14.6.2 / 14.7.9: for `m ∈ ℕ`, `ν ∉ {-1,-2,…}` and for `-1 < x < 1`, `𝖰^m_ν(x) = (-1)^m
 (1-x²)^{m/2} d^m 𝖰_ν(x)/dx^m`. -/
@@ -1220,6 +1211,5 @@ theorem associatedQ_nat_order_derivative (ν : ℂ) (m : ℕ) (h : LegendreQRegu
   have hs : (-1:ℂ)^m*(-1)^m = 1 := by rw [← mul_pow]; norm_num
   linear_combination ((-1)^m*Gamma (ν+1))*hO + (Gamma (ν+1)*legendreBranchPower m z*
     iteratedDeriv m (olverQ ν 0) z)*hs
-
 
 end DLMF.Legendre

@@ -5,9 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.EllipticIntegrals.SymmetricSeries
-public import DLMF.EllipticIntegrals.SymmetricRelations
 public import Carlson.RPolynomial.Appell
+public import DLMF.EllipticIntegrals.SymmetricRelations
+public import DLMF.EllipticIntegrals.SymmetricSeries
 
 /-!
 # Symmetric elliptic integrals: special cases (DLMF §19.20)
@@ -226,7 +226,7 @@ theorem symEllIntRG_zero_self {y z : ℂ} (hy : y ∈ slitPlane) (hz : z ∈ sli
 
 /-- DLMF 19.20.5: `2 R_G(x, y, y) = y R_C(x, y) + √x`, `x` admissible, `y ∈ ℂ \ (-∞, 0]`. -/
 @[dlmf 19.20.E5]
-theorem two_mul_symEllIntRG_self_right {x y : ℂ} (hx : symEllIntArg x) (hy : y ∈ slitPlane) :
+theorem two_mul_symEllIntRG_self_right {x y : ℂ} (hx : SymEllIntArg x) (hy : y ∈ slitPlane) :
     2 * symEllIntRG x y y = y * symEllIntRC x y + x ^ (1 / 2 : ℂ) := by
   rw [p19sR1_two_mul_symEllIntRG hx hy hy, symEllIntRC_eq_symEllIntRF x
     (ei19c_not_isNegReal_of_mem_slitPlane hy)]
@@ -358,7 +358,7 @@ theorem symEllIntRJ_zero_self_self_neg {y q : ℝ} (hy : 0 < y) (hq : 0 < q) :
 /-- DLMF 19.20.8 (third): `R_J(x, y, y, p) = 3/(p - y) (R_C(x, y) - R_C(x, p))`, `p ≠ y`,
 for `x` admissible, `y, p ∈ ℂ \ (-∞, 0]`. -/
 @[dlmf 19.20.E8]
-theorem symEllIntRJ_self_right_eq {x y p : ℂ} (hx : symEllIntArg x) (hy : y ∈ slitPlane)
+theorem symEllIntRJ_self_right_eq {x y p : ℂ} (hx : SymEllIntArg x) (hy : y ∈ slitPlane)
     (hp : p ∈ slitPlane) (hpy : p ≠ y) :
     symEllIntRJ x y y p = 3 / (p - y) * (symEllIntRC x y - symEllIntRC x p) :=
   p19sR1_symEllIntRJ_self_right_eq hx hy hp hpy
@@ -402,7 +402,7 @@ theorem symEllIntRJ_zero_asymptotic {z p : ℝ} (hz : 0 < z) (hp : p ≠ 0) :
 /-- DLMF 19.20.12: `lim_{p→±∞} p R_J(x, y, z, p) = 3 R_F(x, y, z)` (real `p`; for `p < 0` the
 principal value), `x, y, z` in the domain of §19.16(i). -/
 @[dlmf 19.20.E12]
-theorem tendsto_mul_symEllIntRJ {x y z : ℂ} (h : symEllIntRFDomain x y z) :
+theorem tendsto_mul_symEllIntRJ {x y z : ℂ} (h : SymEllIntRFDomain x y z) :
     Tendsto (fun p : ℝ => (p : ℂ) * symEllIntRJ x y z p) atTop (𝓝 (3 * symEllIntRF x y z)) ∧
       Tendsto (fun p : ℝ => (p : ℂ) * symEllIntRJ x y z p) atBot (𝓝 (3 * symEllIntRF x y z)) := by
   sorry
@@ -493,7 +493,7 @@ theorem symEllIntRD_isEquivalent_zero {x y : ℝ} (hx : 0 < x) (hy : 0 < y) :
 /-- DLMF 19.20.20: `R_D(x, y, y) = 3/(2(y - x)) (R_C(x, y) - √x/y)`, `x ≠ y`, `y ≠ 0`
 (`x` admissible, `y ∈ ℂ \ (-∞, 0]`). -/
 @[dlmf 19.20.E20]
-theorem symEllIntRD_self_right {x y : ℂ} (hx : symEllIntArg x) (hy : y ∈ slitPlane)
+theorem symEllIntRD_self_right {x y : ℂ} (hx : SymEllIntArg x) (hy : y ∈ slitPlane)
     (hxy : x ≠ y) :
     symEllIntRD x y y = 3 / (2 * (y - x)) * (symEllIntRC x y - x ^ (1 / 2 : ℂ) / y) := by
   rcases hx with hx | rfl

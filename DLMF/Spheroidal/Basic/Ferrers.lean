@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Spheroidal.Basic.EquationAndSpectralData
 public import DLMF.Legendre.Basic
+public import DLMF.Spheroidal.Basic.EquationAndSpectralData
 
 /-!
 # Spheroidal wave functions: definitions built on Ferrers functions (DLMF §§30.1, 30.5, 30.6,

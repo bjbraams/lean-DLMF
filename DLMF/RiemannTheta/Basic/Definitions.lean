@@ -5,13 +5,13 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Tactic.CrossRefAttribute
 public import DLMF.Elliptic.Basic.Theta
-public import Mathlib.Analysis.Complex.LocallyUniformLimit
 public import Mathlib.Algebra.Order.Chebyshev
 public import Mathlib.Algebra.Order.Star.Real
-public import Mathlib.MeasureTheory.Integral.Pi
 public import Mathlib.Analysis.Complex.Liouville
+public import Mathlib.Analysis.Complex.LocallyUniformLimit
+public import Mathlib.MeasureTheory.Integral.Pi
+public import Mathlib.Tactic.CrossRefAttribute
 
 /-!
 # Riemann matrices, theta series and characteristics
@@ -69,7 +69,7 @@ def riemannThetaBig (φ : ι → ℂ) (B : Matrix ι ι ℂ) : ℂ :=
 
 /-- Positivity of the quadratic form of `Im Ω` on nonzero real vectors. This open condition
 holds on the Siegel upper half-space and does not require `Ω` to be symmetric. -/
-def rth21_PosIm (Ω : Matrix ι ι ℂ) : Prop :=
+def Rth21PosIm (Ω : Matrix ι ι ℂ) : Prop :=
   ∀ x : ι → ℝ, x ≠ 0 → 0 < x ⬝ᵥ (Ω.map Complex.im *ᵥ x)
 
 /-- The Riemann matrix `[[i, -1/2], [-1/2, i]]` of DLMF 21.2.3 (also `Ω₁` of 21.4.2). -/

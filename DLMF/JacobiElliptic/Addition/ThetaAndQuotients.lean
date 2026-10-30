@@ -136,7 +136,7 @@ lemma p22R1_zetak_add (u v k : ℂ) : jacobiZetak (u + v) k = jacobiZetak u k + 
 
 /-- Nonvanishing under the stated hypotheses: `jacobiThetaFourTau (jacobiZetak z k) (jacobiTauk k)
 ≠ 0`. -/
-lemma p22R1_four_ne {z k : ℂ} (h : jacobiRegulark .n z k) :
+lemma p22R1_four_ne {z k : ℂ} (h : JacobiRegulark .n z k) :
     jacobiThetaFourTau (jacobiZetak z k) (jacobiTauk k) ≠ 0 := by
   intro h'; apply h; simp [jacobiLetterTheta, h']
 
@@ -341,10 +341,10 @@ lemma p22R1_S2' : θ₄ 0 τ ^ 4 * (θ₂ (x + y) τ * θ₂ (x - y) τ) =
 end
 
 /-- DLMF 22.8.1: an addition theorem for `sn`, at points `u`, `v` where the functions
-`·n` are finite (`jacobiRegulark .n`) and the printed denominator is nonzero. -/
+`·n` are finite (`JacobiRegulark .n`) and the printed denominator is nonzero. -/
 @[dlmf 22.8.E1]
 theorem jacobiSnk_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
-    (hu : jacobiRegulark .n u k) (hv : jacobiRegulark .n v k)
+    (hu : JacobiRegulark .n u k) (hv : JacobiRegulark .n v k)
     (hden : (1 - k ^ 2 * jacobiSnk u k ^ 2 * jacobiSnk v k ^ 2) ≠ 0) :
     jacobiSnk (u + v) k =
       (jacobiSnk u k * jacobiCnk v k * jacobiDnk v k + jacobiSnk v k * jacobiCnk u k *
@@ -378,10 +378,10 @@ theorem jacobiSnk_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
     jacobiThetaFourTau 0 τ ^ 2 * jacobiThetaFourTau (x + y) τ * M
 
 /-- DLMF 22.8.2: an addition theorem for `cn`, at points `u`, `v` where the functions
-`·n` are finite (`jacobiRegulark .n`) and the printed denominator is nonzero. -/
+`·n` are finite (`JacobiRegulark .n`) and the printed denominator is nonzero. -/
 @[dlmf 22.8.E2]
 theorem jacobiCnk_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
-    (hu : jacobiRegulark .n u k) (hv : jacobiRegulark .n v k)
+    (hu : JacobiRegulark .n u k) (hv : JacobiRegulark .n v k)
     (hden : (1 - k ^ 2 * jacobiSnk u k ^ 2 * jacobiSnk v k ^ 2) ≠ 0) :
     jacobiCnk (u + v) k =
       (jacobiCnk u k * jacobiCnk v k - jacobiSnk u k * jacobiDnk u k * jacobiSnk v k *
@@ -414,10 +414,10 @@ theorem jacobiCnk_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
     jacobiThetaFourTau 0 τ * jacobiThetaFourTau (x + y) τ * M
 
 /-- DLMF 22.8.3: an addition theorem for `dn`, at points `u`, `v` where the functions
-`·n` are finite (`jacobiRegulark .n`) and the printed denominator is nonzero. -/
+`·n` are finite (`JacobiRegulark .n`) and the printed denominator is nonzero. -/
 @[dlmf 22.8.E3]
 theorem jacobiDnk_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
-    (hu : jacobiRegulark .n u k) (hv : jacobiRegulark .n v k)
+    (hu : JacobiRegulark .n u k) (hv : JacobiRegulark .n v k)
     (hden : (1 - k ^ 2 * jacobiSnk u k ^ 2 * jacobiSnk v k ^ 2) ≠ 0) :
     jacobiDnk (u + v) k =
       (jacobiDnk u k * jacobiDnk v k - k ^ 2 * jacobiSnk u k * jacobiCnk u k * jacobiSnk v k *
@@ -450,10 +450,10 @@ theorem jacobiDnk_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
     jacobiThetaFourTau 0 τ * jacobiThetaFourTau (x + y) τ * M
 
 /-- DLMF 22.8.4: an addition theorem for `cd`, at points `u`, `v` where the functions
-`·d` are finite (`jacobiRegulark .d`) and the printed denominator is nonzero. -/
+`·d` are finite (`JacobiRegulark .d`) and the printed denominator is nonzero. -/
 @[dlmf 22.8.E4]
 theorem jacobiCdk_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
-    (hu : jacobiRegulark .d u k) (hv : jacobiRegulark .d v k)
+    (hu : JacobiRegulark .d u k) (hv : JacobiRegulark .d v k)
     (hden : (1 + k ^ 2 * jacobiComodulusk k ^ 2 * jacobiSdk u k ^ 2 * jacobiSdk v k ^ 2) ≠ 0) :
     jacobiCdk (u + v) k =
       (jacobiCdk u k * jacobiCdk v k - jacobiComodulusk k ^ 2 * jacobiSdk u k * jacobiNdk u k *
@@ -486,10 +486,10 @@ theorem jacobiCdk_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
     (θ₃ (x + y) τ * θ₃ 0 τ) * p22R1_P23 x y τ hτ
 
 /-- DLMF 22.8.5: an addition theorem for `sd`, at points `u`, `v` where the functions
-`·d` are finite (`jacobiRegulark .d`) and the printed denominator is nonzero. -/
+`·d` are finite (`JacobiRegulark .d`) and the printed denominator is nonzero. -/
 @[dlmf 22.8.E5]
 theorem jacobiSdk_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
-    (hu : jacobiRegulark .d u k) (hv : jacobiRegulark .d v k)
+    (hu : JacobiRegulark .d u k) (hv : JacobiRegulark .d v k)
     (hden : (1 + k ^ 2 * jacobiComodulusk k ^ 2 * jacobiSdk u k ^ 2 * jacobiSdk v k ^ 2) ≠ 0) :
     jacobiSdk (u + v) k =
       (jacobiSdk u k * jacobiCdk v k * jacobiNdk v k + jacobiSdk v k * jacobiCdk u k *
@@ -522,10 +522,10 @@ theorem jacobiSdk_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
     (θ₃ 0 τ ^ 2 * θ₃ (x + y) τ) * p22R1_P13 x y τ hτ
 
 /-- DLMF 22.8.6: an addition theorem for `nd`, at points `u`, `v` where the functions
-`·d` are finite (`jacobiRegulark .d`) and the printed denominator is nonzero. -/
+`·d` are finite (`JacobiRegulark .d`) and the printed denominator is nonzero. -/
 @[dlmf 22.8.E6]
 theorem jacobiNdk_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
-    (hu : jacobiRegulark .d u k) (hv : jacobiRegulark .d v k)
+    (hu : JacobiRegulark .d u k) (hv : JacobiRegulark .d v k)
     (hden : (1 + k ^ 2 * jacobiComodulusk k ^ 2 * jacobiSdk u k ^ 2 * jacobiSdk v k ^ 2) ≠ 0) :
     jacobiNdk (u + v) k =
       (jacobiNdk u k * jacobiNdk v k + k ^ 2 * jacobiSdk u k * jacobiCdk u k * jacobiSdk v k *
@@ -558,10 +558,10 @@ theorem jacobiNdk_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
     (θ₃ (x + y) τ * θ₃ 0 τ) * p22R1_P43 x y τ hτ
 
 /-- DLMF 22.8.7: an addition theorem for `dc`, at points `u`, `v` where the functions
-`·c` are finite (`jacobiRegulark .c`) and the printed denominator is nonzero. -/
+`·c` are finite (`JacobiRegulark .c`) and the printed denominator is nonzero. -/
 @[dlmf 22.8.E7]
 theorem jacobiDck_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
-    (hu : jacobiRegulark .c u k) (hv : jacobiRegulark .c v k)
+    (hu : JacobiRegulark .c u k) (hv : JacobiRegulark .c v k)
     (hden : (1 - jacobiComodulusk k ^ 2 * jacobiSck u k ^ 2 * jacobiSck v k ^ 2) ≠ 0) :
     jacobiDck (u + v) k =
       (jacobiDck u k * jacobiDck v k + jacobiComodulusk k ^ 2 * jacobiSck u k * jacobiNck u k *
@@ -594,10 +594,10 @@ theorem jacobiDck_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
     (θ₂ (x + y) τ * θ₂ 0 τ) * p22R1_P32 x y τ hτ
 
 /-- DLMF 22.8.8: an addition theorem for `nc`, at points `u`, `v` where the functions
-`·c` are finite (`jacobiRegulark .c`) and the printed denominator is nonzero. -/
+`·c` are finite (`JacobiRegulark .c`) and the printed denominator is nonzero. -/
 @[dlmf 22.8.E8]
 theorem jacobiNck_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
-    (hu : jacobiRegulark .c u k) (hv : jacobiRegulark .c v k)
+    (hu : JacobiRegulark .c u k) (hv : JacobiRegulark .c v k)
     (hden : (1 - jacobiComodulusk k ^ 2 * jacobiSck u k ^ 2 * jacobiSck v k ^ 2) ≠ 0) :
     jacobiNck (u + v) k =
       (jacobiNck u k * jacobiNck v k + jacobiSck u k * jacobiDck u k * jacobiSck v k *
@@ -629,10 +629,10 @@ theorem jacobiNck_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
     (θ₂ (x + y) τ * θ₂ 0 τ) * p22R1_P42 x y τ hτ
 
 /-- DLMF 22.8.9: an addition theorem for `sc`, at points `u`, `v` where the functions
-`·c` are finite (`jacobiRegulark .c`) and the printed denominator is nonzero. -/
+`·c` are finite (`JacobiRegulark .c`) and the printed denominator is nonzero. -/
 @[dlmf 22.8.E9]
 theorem jacobiSck_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
-    (hu : jacobiRegulark .c u k) (hv : jacobiRegulark .c v k)
+    (hu : JacobiRegulark .c u k) (hv : JacobiRegulark .c v k)
     (hden : (1 - jacobiComodulusk k ^ 2 * jacobiSck u k ^ 2 * jacobiSck v k ^ 2) ≠ 0) :
     jacobiSck (u + v) k =
       (jacobiSck u k * jacobiDck v k * jacobiNck v k + jacobiSck v k * jacobiDck u k *
@@ -664,10 +664,10 @@ theorem jacobiSck_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
     (θ₂ 0 τ ^ 2 * θ₂ (x + y) τ) * p22R1_P12 x y τ hτ
 
 /-- DLMF 22.8.10: an addition theorem for `ns`, at points `u`, `v` where the functions
-`·s` are finite (`jacobiRegulark .s`) and the printed denominator is nonzero. -/
+`·s` are finite (`JacobiRegulark .s`) and the printed denominator is nonzero. -/
 @[dlmf 22.8.E10]
 theorem jacobiNsk_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
-    (hu : jacobiRegulark .s u k) (hv : jacobiRegulark .s v k)
+    (hu : JacobiRegulark .s u k) (hv : JacobiRegulark .s v k)
     (hden : (jacobiCsk v k ^ 2 - jacobiCsk u k ^ 2) ≠ 0) :
     jacobiNsk (u + v) k =
       (jacobiNsk u k * jacobiDsk v k * jacobiCsk v k - jacobiNsk v k * jacobiDsk u k *
@@ -698,10 +698,10 @@ theorem jacobiNsk_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
     (θ₂ 0 τ * θ₁ (x + y) τ) * p22R1_P41 x y τ hτ
 
 /-- DLMF 22.8.11: an addition theorem for `ds`, at points `u`, `v` where the functions
-`·s` are finite (`jacobiRegulark .s`) and the printed denominator is nonzero. -/
+`·s` are finite (`JacobiRegulark .s`) and the printed denominator is nonzero. -/
 @[dlmf 22.8.E11]
 theorem jacobiDsk_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
-    (hu : jacobiRegulark .s u k) (hv : jacobiRegulark .s v k)
+    (hu : JacobiRegulark .s u k) (hv : JacobiRegulark .s v k)
     (hden : (jacobiCsk v k ^ 2 - jacobiCsk u k ^ 2) ≠ 0) :
     jacobiDsk (u + v) k =
       (jacobiDsk u k * jacobiCsk v k * jacobiNsk v k - jacobiDsk v k * jacobiCsk u k *
@@ -732,10 +732,10 @@ theorem jacobiDsk_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
     (θ₂ 0 τ * θ₁ (x + y) τ) * p22R1_P31 x y τ hτ
 
 /-- DLMF 22.8.12: an addition theorem for `cs`, at points `u`, `v` where the functions
-`·s` are finite (`jacobiRegulark .s`) and the printed denominator is nonzero. -/
+`·s` are finite (`JacobiRegulark .s`) and the printed denominator is nonzero. -/
 @[dlmf 22.8.E12]
 theorem jacobiCsk_add {k : ℂ} (hk : k ∈ jacobiModulusDomain) {u v : ℂ}
-    (hu : jacobiRegulark .s u k) (hv : jacobiRegulark .s v k)
+    (hu : JacobiRegulark .s u k) (hv : JacobiRegulark .s v k)
     (hden : (jacobiCsk v k ^ 2 - jacobiCsk u k ^ 2) ≠ 0) :
     jacobiCsk (u + v) k =
       (jacobiCsk u k * jacobiDsk v k * jacobiNsk v k - jacobiCsk v k * jacobiDsk u k *

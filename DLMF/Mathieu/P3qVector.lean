@@ -40,8 +40,8 @@ lemma p3qLo_smul (β c : ℂ) (A : ℕ → ℂ) (i : ℕ) :
   rcases i with _ | _ | i <;> simp [p3qLo]; ring
 
 /-- A scalar multiple of a solution of the recurrence `L A = a A` is again a solution. -/
-theorem p3qRec.smul {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (h : p3qRec d β q a A) (c : ℂ) :
-    p3qRec d β q a (fun i => c * A i) := by
+theorem P3qRec.smul {d : ℕ → ℂ} {β q a : ℂ} {A : ℕ → ℂ} (h : P3qRec d β q a A) (c : ℂ) :
+    P3qRec d β q a (fun i => c * A i) := by
   intro i
   have := h i
   simp only [p3qL, p3qLo_smul] at this ⊢
@@ -58,7 +58,7 @@ lemma p3q_eventually_bound {f : ℝ → ℂ} {g : ℝ → ℝ} (h : f =O[𝓝 0]
 `|α_i - v_i| ≤ C |q|^K` uniformly in `i`, and `|α_i| ≤ (3|q|)^{|i-n|}`. -/
 lemma p3q_vec_bound {d : ℝ → ℕ → ℂ} {β : ℂ} (hβ : ‖β‖ ≤ 2) (hβ0 : β ≠ 0)
     {a : ℝ → ℂ} {A : ℝ → ℕ → ℂ} {n N K : ℕ} (hnN : n < N)
-    (hrec : ∀ᶠ q : ℝ in 𝓝 0, p3qRec (d q) β q (a q) (A q))
+    (hrec : ∀ᶠ q : ℝ in 𝓝 0, P3qRec (d q) β q (a q) (A q))
     (hA : ∀ᶠ q : ℝ in 𝓝 0, Tendsto (A q) atTop (𝓝 0))
     (hne : ∀ᶠ q : ℝ in 𝓝 0, ∃ i, A q i ≠ 0)
     (hgap : ∀ᶠ q : ℝ in 𝓝 0, ∀ i ≠ n, 1 ≤ ‖a q - d q i‖)
@@ -113,7 +113,7 @@ lemma p3q_vec_bound {d : ℝ → ℕ → ℂ} {β : ℂ} (hβ : ‖β‖ ≤ 2) 
   refine ⟨hn, hdec, ?_⟩
   set α : ℕ → ℂ := fun i => A q i / A q n with hαdef
   set e : ℕ → ℂ := fun i => α i - v q i with hedef
-  have hαrec : p3qRec (d q) β q (a q) α := by
+  have hαrec : P3qRec (d q) β q (a q) α := by
     have := h1.smul (A q n)⁻¹
     intro i; have h := this i
     simpa only [hαdef, div_eq_inv_mul] using h
@@ -180,7 +180,6 @@ lemma p3q_vec_bound {d : ℝ → ℕ → ℂ} {β : ℂ} (hβ : ‖β‖ ≤ 2) 
   calc ‖A q i / A q n - v q i‖ = ‖e i‖ := rfl
     _ ≤ ‖e i₀‖ := h9
     _ ≤ _ := by linarith
-
 
 /-- For `ε > 0`, eventually as `q → 0`, `|q| ≤ ε`. -/
 lemma p3q_small_nhds (ε : ℝ) (hε : 0 < ε) : ∀ᶠ q : ℝ in 𝓝 0, |q| ≤ ε := by
@@ -274,7 +273,7 @@ normalizing function `c(q) → c₀ > 0` with `c² ∑_{i<N} w_i v_i² = 1 + O(q
 `∑ A_i g_i` with `|g_i| ≤ B R^i` equals `c ∑_{i<N} v_i g_i + O(q^K)`. -/
 lemma p3q_expand {d : ℝ → ℕ → ℂ} {β : ℂ} (hβ : ‖β‖ ≤ 2) (hβ0 : β ≠ 0)
     {a : ℝ → ℂ} {A : ℝ → ℕ → ℂ} {n N K : ℕ} (hnN : n < N) (hNK : N ≤ n + K) (hK : 1 ≤ K)
-    (hrec : ∀ᶠ q : ℝ in 𝓝 0, p3qRec (d q) β q (a q) (A q))
+    (hrec : ∀ᶠ q : ℝ in 𝓝 0, P3qRec (d q) β q (a q) (A q))
     (hA : ∀ᶠ q : ℝ in 𝓝 0, Tendsto (A q) atTop (𝓝 0))
     (hne : ∀ᶠ q : ℝ in 𝓝 0, ∃ i, A q i ≠ 0)
     (hgap : ∀ᶠ q : ℝ in 𝓝 0, ∀ i ≠ n, 1 ≤ ‖a q - d q i‖)
@@ -574,7 +573,6 @@ lemma p3q_u_bound (c : ℕ) (hc : c ≤ 2) (n : ℕ) (i : ℕ) :
     rw [div_le_iff₀ (by exact_mod_cast h0)]
     have : (1 : ℝ) ≤ ((2 * n + c : ℕ) : ℝ) := by exact_mod_cast h0
     nlinarith [show (0 : ℝ) ≤ 2 * 2 ^ i by positivity]
-
 
 /-! ### Expansions of `ce_n`, `se_n` from trial vectors -/
 

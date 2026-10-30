@@ -1012,7 +1012,7 @@ theorem erfRecip_iteratedErfc_rotSector (n : ℕ) {θ δ : ℝ} (hθ : |θ| < π
 (3*π/4-δ)) (fun m z => 2/Real.sqrt π*exp (-z^2)/(2*z)^(n+1+2*m)) (fun m => (-1 :
 ℂ)^m*(2*m+n).factorial/((n.factorial : ℂ)*m.factorial)) (iteratedErfc n)`. -/
 @[dlmf 7.18.E14]
-theorem iteratedErfc_asymptotic (n : ℕ) {δ : ℝ} (hδ : 0 < δ) (hδ1 : δ < 3*π/4) :
+theorem iteratedErfc_asymptotic (n : ℕ) {δ : ℝ} (hδ : 0 < δ) :
     HasAsymptoticExpansion (sector (3*π/4-δ)) (fun m z => 2/Real.sqrt π*exp (-z^2)/(2*z)^(n+1+2*m)) (fun m => (-1 : ℂ)^m*(2*m+n).factorial/((n.factorial : ℂ)*m.factorial)) (iteratedErfc n) := by
   set d := min δ (π / 4) with hd
   have hd0 : 0 < d := lt_min hδ (by positivity)

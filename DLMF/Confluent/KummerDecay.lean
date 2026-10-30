@@ -297,7 +297,7 @@ theorem kumDec_bound_base {α₀ β₀ : ℂ} (ha : 0 < α₀.re) (hba : 0 < (β
           _ ≤ _ := by gcongr
 
 /-- The locally uniform decay property of `𝐌(·,·,-t)` near `(α₀, β₀)`, with exponent loss `ε`. -/
-def kumDec_Bnd (α₀ β₀ : ℂ) : Prop :=
+def KumDecBnd (α₀ β₀ : ℂ) : Prop :=
   ∀ ε : ℝ, 0 < ε → ∃ C, ∀ᶠ p : ℂ × ℂ in 𝓝 (α₀, β₀), ∀ t : ℝ, 0 ≤ t →
     ‖regularizedHGFun {p.1} {p.2} (-(t : ℂ))‖ ≤ C * (1 + t) ^ (-α₀.re + ε)
 
@@ -333,8 +333,8 @@ theorem kumDec_eventually_norm_le (α₀ β₀ : ℂ) :
 
 /-- Lowering `re (b - a)` by one: 13.3.20 with `n = 1`,
 `𝐌(a,b,z) = b 𝐌(a,b+1,z) + a z 𝐌(a+1,b+2,z)`, keeps the decay exponent. -/
-theorem kumDec_bnd_step_b {α₀ β₀ : ℂ} (h1 : kumDec_Bnd α₀ (β₀ + 1))
-    (h2 : kumDec_Bnd (α₀ + 1) (β₀ + 2)) : kumDec_Bnd α₀ β₀ := by
+theorem kumDec_bnd_step_b {α₀ β₀ : ℂ} (h1 : KumDecBnd α₀ (β₀ + 1))
+    (h2 : KumDecBnd (α₀ + 1) (β₀ + 2)) : KumDecBnd α₀ β₀ := by
   intro ε hε
   obtain ⟨C1, hC1⟩ := h1 ε hε
   obtain ⟨C2, hC2⟩ := h2 ε hε
@@ -379,8 +379,8 @@ theorem kumDec_bnd_step_b {α₀ β₀ : ℂ} (h1 : kumDec_Bnd α₀ (β₀ + 1)
 
 /-- Lowering `re a` by one: 13.3.4, `𝐌(a,b,z) = 𝐌(a+1,b,z) - z 𝐌(a+1,b+1,z)`, keeps the decay
 exponent. -/
-theorem kumDec_bnd_step_a {α₀ β₀ : ℂ} (h1 : kumDec_Bnd (α₀ + 1) β₀)
-    (h2 : kumDec_Bnd (α₀ + 1) (β₀ + 1)) : kumDec_Bnd α₀ β₀ := by
+theorem kumDec_bnd_step_a {α₀ β₀ : ℂ} (h1 : KumDecBnd (α₀ + 1) β₀)
+    (h2 : KumDecBnd (α₀ + 1) (β₀ + 1)) : KumDecBnd α₀ β₀ := by
   intro ε hε
   obtain ⟨C1, hC1⟩ := h1 ε hε
   obtain ⟨C2, hC2⟩ := h2 ε hε
@@ -421,7 +421,7 @@ theorem kumDec_bnd_step_a {α₀ β₀ : ℂ} (h1 : kumDec_Bnd (α₀ + 1) β₀
 /-- The locally uniform decay bound `|M̃(α,β,-t)| ≤ C (1+t)^{-Re α₀ + ε}` holds at every `(α₀, β₀)`,
 by induction on the shifts needed to reach `Re α > 0`, `Re(β-α) > 0`. -/
 theorem kumDec_bnd_all : ∀ (m k : ℕ) (α₀ β₀ : ℂ), -(m : ℝ) < α₀.re → -(k : ℝ) < (β₀ - α₀).re →
-    kumDec_Bnd α₀ β₀ := by
+    KumDecBnd α₀ β₀ := by
   intro m
   induction m with
   | zero =>

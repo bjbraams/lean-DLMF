@@ -150,7 +150,7 @@ theorem arcsech_neg {z : ℂ} (hz : z.im≠0) :
 /-- Identity under the stated parameter and domain assumptions: `arcsinh z=Complex.log
 (Complex.sqrt (z^2+1)+z)`. -/
 @[dlmf 4.37.E16]
-theorem arcsinh_log {z : ℂ} (hz : z ∈ arcsinhDomain) : arcsinh z=Complex.log (Complex.sqrt (z^2+1)+z) := by
+theorem arcsinh_log {z : ℂ} : arcsinh z=Complex.log (Complex.sqrt (z^2+1)+z) := by
   rfl
 
 /-- The principal square root is continuous off the open negative real axis. -/
@@ -690,7 +690,7 @@ theorem arccosh_outer_cut {x : ℝ} (hx : x≤ -1) :
 /-- Identity under the stated parameter and domain assumptions: `arctanh z=Complex.log
 ((1+z)/(1-z))/2`. -/
 @[dlmf 4.37.E24]
-theorem arctanh_log {z : ℂ} (hz : z ∈ arctanhDomain) : arctanh z=Complex.log ((1+z)/(1-z))/2 := by
+theorem arctanh_log {z : ℂ} : arctanh z=Complex.log ((1+z)/(1-z))/2 := by
   rfl
 
 /-- Limit formula in the specified filter: `Tendsto (fun ε : ℝ => arctanh ((x:ℂ)+I*ε)) (𝓝[>] 0) (𝓝
@@ -951,8 +951,7 @@ lemma hypR4_asech_slit {w : ℂ} (hw : w ∈ arcsechDomain) :
       intro h; apply mul_ne_zero (mul_ne_zero two_ne_zero hx) hy; linear_combination -h
 
 /-- The interrelation example in §4.37(vi), with compatible principal branches. -/
-theorem arcsech_arccoth_interrelation {a : ℂ} (hre : 0<a.re) (ha : a∈arcsechDomain)
-    (hr : (Complex.sqrt (1-a^2))⁻¹∈arccothDomain) :
+theorem arcsech_arccoth_interrelation {a : ℂ} (hre : 0<a.re) (ha : a∈arcsechDomain) :
     arcsech a=arccoth ((Complex.sqrt (1-a^2))⁻¹) := by
   have ha0 : a ≠ 0 := ha.1
   set q := Complex.sqrt (1-a^2) with hqdef

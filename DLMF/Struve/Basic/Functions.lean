@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Core.Framework
 public import DLMF.Bessel.Basic
+public import DLMF.Core.Framework
 
 /-!
 # Struve functions, power series and inhomogeneous equations
@@ -71,12 +71,12 @@ def struveM (ν z : ℂ) : ℂ :=
 /-- The ordinary or modified inhomogeneous Bessel equation defining a Struve solution, with the
 DLMF reciprocal-Gamma forcing term. -/
 @[dlmf 11.2.E7, dlmf 11.2.E9]
-def struveEquation (ν : ℂ) (modified : Bool) (f : ℂ → ℂ) (z : ℂ) : Prop :=
+def StruveEquation (ν : ℂ) (modified : Bool) (f : ℂ → ℂ) (z : ℂ) : Prop :=
   iteratedDeriv 2 f z + deriv f z/z + ((if modified then -1 else 1)-ν^2/z^2)*f z = (z/2)^(ν-1)/(Real.sqrt π*Gamma (ν+1/2))
 
 /-- An analytic function on S satisfying the ordinary or modified Struve differential equation at
 each point of S. -/
 def IsStruveSolutionOn (ν : ℂ) (modified : Bool) (f : ℂ → ℂ) (S : Set ℂ) : Prop :=
-  AnalyticOnNhd ℂ f S ∧ ∀ z ∈ S, struveEquation ν modified f z
+  AnalyticOnNhd ℂ f S ∧ ∀ z ∈ S, StruveEquation ν modified f z
 
 end DLMF.Struve

@@ -34,7 +34,7 @@ def conicalQHat (τ μ x : ℝ) : ℂ :=
 /-- DLMF 14.20.1: for `μ, τ ≥ 0`, the conical function `w = 𝖯^{-μ}_{-1/2+iτ}(x)` satisfies `(1-x²)
 w'' - 2x w' - (τ² + 1/4 + μ²/(1-x²)) w = 0` on `-1 < x < 1`. -/
 @[dlmf 14.20.E1]
-theorem conical_ode (τ μ : ℝ) (hμ : 0 ≤ μ) (hτ : 0 ≤ τ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
+theorem conical_ode (τ μ : ℝ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
     (1-x^2:ℂ)*iteratedDeriv 2 (conicalP τ μ) x-2*x*deriv (conicalP τ μ) x-(τ^2+1/4+μ^2/(1-x^2):ℂ)*conicalP τ μ x=0 := by
   have h := ferrersP_ode (-1/2+I*τ) (-(μ:ℂ)) hx
   have e : conicalP τ μ = ferrersP (-1/2+I*τ) (-(μ:ℂ)) := rfl
@@ -161,8 +161,8 @@ theorem conicalQHat_connection {τ μ : ℝ} (hτ : 0 ≤ τ) (hμ : 0 ≤ μ) (
 2/(|Γ(μ+1/2+iτ)|² (1-x²))`. -/
 @[dlmf 14.20.E4]
 theorem conical_wronskian (τ μ : ℝ) (hτ : 0 ≤ τ) (hμ : 0 ≤ μ) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ferrersWronskian (conicalP τ μ) (fun x => conicalP τ μ (-x)) x=2/((‖Gamma (μ+1/2+I*τ)‖^2:ℂ)*(1-x^2)) := by
-  show ferrersWronskian (fun x => ferrersP (-1/2+I*τ) (-(μ:ℂ)) x)
+    ODE.wronskian (conicalP τ μ) (fun x => conicalP τ μ (-x)) x=2/((‖Gamma (μ+1/2+I*τ)‖^2:ℂ)*(1-x^2)) := by
+  show ODE.wronskian (fun x => ferrersP (-1/2+I*τ) (-(μ:ℂ)) x)
     (fun x => ferrersP (-1/2+I*τ) (-(μ:ℂ)) (-x)) x = _
   rw [ferrers_wronskian_3 _ _ hx]
   congr 2
@@ -176,7 +176,7 @@ x < 1`, `𝒲{𝖯^{-μ}_{-1/2+iτ}, 𝖰̂^{-μ}_{-1/2+iτ}}(x) = π (e^{-τπ}
 (cosh²(τπ) - sin²(μπ)) (1-x²))`. -/
 @[dlmf 14.20.E5]
 theorem conicalQHat_wronskian {τ μ : ℝ} (hτ : 0 ≤ τ) (hμ : 0 ≤ μ) (hex : τ ≠ 0 ∨ ∀ n : ℕ, μ ≠ n+1/2) {x : ℝ} (hx : x ∈ Ioo (-1:ℝ) 1) :
-    ferrersWronskian (conicalP τ μ) (conicalQHat τ μ) x=π*(Real.exp (-τ*π)*(Real.cos (μ*π))^2+Real.sinh (τ*π))/((‖Gamma (μ+1/2+I*τ)‖^2:ℂ)*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2)*(1-x^2)) := by
+    ODE.wronskian (conicalP τ μ) (conicalQHat τ μ) x=π*(Real.exp (-τ*π)*(Real.cos (μ*π))^2+Real.sinh (τ*π))/((‖Gamma (μ+1/2+I*τ)‖^2:ℂ)*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2)*(1-x^2)) := by
   set A : ℂ := π*Real.exp (-τ*π)*Real.sin (μ*π)*Real.sinh (τ*π)/(2*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2))
   set B : ℂ := π*(Real.exp (-τ*π)*(Real.cos (μ*π))^2+Real.sinh (τ*π))/(2*((Real.cosh (τ*π))^2-(Real.sin (μ*π))^2))
   have hev : conicalQHat τ μ =ᶠ[nhds x] fun y => A*conicalP τ μ y+B*conicalP τ μ (-y) := by
@@ -187,7 +187,7 @@ theorem conicalQHat_wronskian {τ μ : ℝ} (hτ : 0 ≤ τ) (hμ : 0 ≤ μ) (h
   have hd2 : DifferentiableAt ℝ (fun y => conicalP τ μ (-y)) x :=
     (conicalP_differentiableAt τ μ hxm).comp x differentiableAt_id.neg
   have hW := conical_wronskian τ μ hτ hμ hx
-  unfold ferrersWronskian at hW ⊢
+  unfold ODE.wronskian at hW ⊢
   have hder : deriv (fun y => A*conicalP τ μ y+B*conicalP τ μ (-y)) x =
       A*deriv (conicalP τ μ) x + B*deriv (fun y => conicalP τ μ (-y)) x :=
     ((hd1.hasDerivAt.const_mul A).add (hd2.hasDerivAt.const_mul B)).deriv
@@ -207,7 +207,7 @@ theorem conicalQHat_wronskian {τ μ : ℝ} (hτ : 0 ≤ τ) (hμ : 0 ≤ μ) (h
 /-- DLMF 14.20.6: for `τ > 0`, `μ ≥ 0` and `x > 1`, `P^{-μ}_{-1/2+iτ}(x) = i e^{-μπi}/(sinh(τπ)
 |Γ(μ+1/2+iτ)|²) (Q^μ_{-1/2+iτ}(x) - Q^μ_{-1/2-iτ}(x))`. -/
 @[dlmf 14.20.E6]
-theorem conical_associated_connection {τ μ : ℝ} (hτ : 0 < τ) (hμ : 0 ≤ μ) {x : ℝ} (hx : 1 < x) :
+theorem conical_associated_connection {τ μ : ℝ} (hτ : 0 < τ) {x : ℝ} (hx : 1 < x) :
     associatedP (-1/2+I*τ) (-μ) x=I*exp (-μ*π*I)/(Real.sinh (τ*π)*(‖Gamma (μ+1/2+I*τ)‖^2:ℂ))*(associatedQ (-1/2+I*τ) μ x-associatedQ (-1/2-I*τ) μ x) := by
   have hz : (x:ℂ)-1 ∈ slitPlane := by
     rw [show (x:ℂ)-1 = ((x-1:ℝ):ℂ) by push_cast; ring]; exact Or.inl (by simp; linarith)
@@ -325,7 +325,7 @@ theorem legCon_tendsto_P_neg (ν : ℂ) {μ : ℝ} (hμ : 0 < μ) :
 /-- DLMF 14.20.7: for `τ ≥ 0` and `μ > 0` (excluding `τ = 0` with `μ` a positive half-odd integer),
 `𝖰̂^{μ}_{-1/2+iτ}(x) ~ (Γ(μ)/2) (2/(1-x))^{μ/2}` as `x → 1⁻`. -/
 @[dlmf 14.20.E7]
-theorem conical_singular_7 {τ μ : ℝ} (hτ : 0 ≤ τ) (hμ : 0 < μ) (hex : τ ≠ 0 ∨ ∀ n : ℕ, μ ≠ n+1/2) :
+theorem conical_singular_7 {τ μ : ℝ} (hμ : 0 < μ) :
     (fun x : ℝ => conicalQHat τ (-1*μ) x) ~[𝓝[<] (1:ℝ)] (fun x : ℝ => Gamma (μ:ℂ)/2*(2/(1-x):ℂ)^((μ:ℂ)/2)) := by
   set ν : ℂ := -1/2+I*τ with hνdef
   have hreg : LegendreQRegular ν (μ:ℂ) := fun n hn => by

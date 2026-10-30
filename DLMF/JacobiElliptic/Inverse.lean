@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.JacobiElliptic.Related
 public import DLMF.Elliptic.SpecialValues
+public import DLMF.JacobiElliptic.Related
 
 /-!
 # Inverse Jacobian elliptic functions (DLMF §22.15)
@@ -626,7 +626,7 @@ theorem Real.jacobiNdm_jacobiArcndm (hm : m < 1) {x : ℝ} (hx0 : 1 ≤ x) (hx1 
 
 /-- DLMF 22.15.18: `arcdc` inverts `dc` for `1 ≤ x < ∞`. -/
 @[dlmf 22.15.E18 "special case: real parameter 0 ≤ m = k² < 1"]
-theorem Real.jacobiDcm_jacobiArcdcm (hm0 : 0 ≤ m) (hm : m < 1) {x : ℝ} (hx : 1 ≤ x) :
+theorem Real.jacobiDcm_jacobiArcdcm (hm : m < 1) {x : ℝ} (hx : 1 ≤ x) :
     Real.jacobiDnm (Real.jacobiArcdcm x m) m / Real.jacobiCnm (Real.jacobiArcdcm x m) m = x := by
   have hxpos : 0 < x := by linarith
   have hy0 : -1 ≤ 1 / x := by have : 0 < 1 / x := by positivity
@@ -705,7 +705,7 @@ lemma p22R1_recip_subst_Ioi {g h : ℝ → ℝ} {x : ℝ} (hx : 0 < x)
 
 /-- DLMF 22.15.21: `arcns` inverts `ns` for `1 ≤ x < ∞`. -/
 @[dlmf 22.15.E21 "special case: real parameter 0 ≤ m = k² < 1"]
-theorem Real.jacobiNsm_jacobiArcnsm (hm0 : 0 ≤ m) (hm : m < 1) {x : ℝ} (hx : 1 ≤ x) :
+theorem Real.jacobiNsm_jacobiArcnsm (hm : m < 1) {x : ℝ} (hx : 1 ≤ x) :
     1 / Real.jacobiSnm (Real.jacobiArcnsm x m) m = x := by
   have hxpos : 0 < x := by linarith
   have hy0 : -1 ≤ 1 / x := by have : 0 < 1 / x := by positivity
@@ -759,7 +759,7 @@ theorem Real.jacobiDsm_jacobiArcdsm (hm0 : 0 < m) (hm : m < 1) {x : ℝ} (hx : �
 
 /-- DLMF 22.15.20: `arcsc` inverts `sc` on `ℝ` (substitution `t = tan θ`). -/
 @[dlmf 22.15.E20 "special case: real parameter 0 ≤ m = k² < 1"]
-theorem Real.jacobiScm_jacobiArcscm (hm0 : 0 ≤ m) (hm : m < 1) (x : ℝ) :
+theorem Real.jacobiScm_jacobiArcscm (hm : m < 1) (x : ℝ) :
     Real.jacobiSnm (Real.jacobiArcscm x m) m / Real.jacobiCnm (Real.jacobiArcscm x m) m = x := by
   set φ := arctan x with hφ
   have hb : |φ| < π / 2 := by rw [abs_lt]; exact ⟨Real.neg_pi_div_two_lt_arctan x, Real.arctan_lt_pi_div_two x⟩
@@ -789,7 +789,7 @@ theorem Real.jacobiScm_jacobiArcscm (hm0 : 0 ≤ m) (hm : m < 1) (x : ℝ) :
 open Set MeasureTheory in
 /-- DLMF 22.15.23: `arccs` inverts `cs` on `ℝ`. -/
 @[dlmf 22.15.E23 "special case: real parameter 0 ≤ m = k² < 1"]
-theorem Real.jacobiCsm_jacobiArccsm (hm0 : 0 ≤ m) (hm : m < 1) (x : ℝ) :
+theorem Real.jacobiCsm_jacobiArccsm (hm : m < 1) (x : ℝ) :
     Real.jacobiCnm (Real.jacobiArccsm x m) m / Real.jacobiSnm (Real.jacobiArccsm x m) m = x := by
   set φ0 := π / 2 - Real.arctan x with hφ0
   have hφpos : 0 < φ0 := by linarith [Real.arctan_lt_pi_div_two x]

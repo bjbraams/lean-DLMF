@@ -809,7 +809,7 @@ theorem angerA_turning_uniform (M : ℝ) (hM : 0 < M) :
 /-- The recurrence quotient of DLMF 11.11(iii) evaluated on the circle-integral form:
 if `A_k = c I_n` on the disc `|λ - λ₀| < ε` (`n = 2k+1`), the quotient defining `A_{k+1}` equals
 `c I_{n+2}` at every point of the disc other than `λ = 1`. -/
-theorem struveLO_quotient_eq {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : struveLO_Good r ε lam₀)
+theorem struveLO_quotient_eq {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : StruveLOGood r ε lam₀)
     (k : ℕ) (c : ℂ)
     (hA : ∀ l ∈ Metric.ball lam₀ ε, angerScaledA k l = c * struveLO_I r (fun _ => 1) (2 * k + 1) l)
     {lam : ℂ} (hlam : lam ∈ Metric.ball lam₀ ε) (h1 : lam ≠ 1) :
@@ -857,7 +857,7 @@ theorem struveLO_quotient_eq {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : stru
 
 /-- Under the hypothesis of `struveLO_quotient_eq`, the recurrence quotient tends to
 `c I_{2k+3}(λ)` along the punctured neighbourhood of every point `λ` of the disc. -/
-theorem struveLO_tendsto_quotient {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : struveLO_Good r ε lam₀)
+theorem struveLO_tendsto_quotient {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : StruveLOGood r ε lam₀)
     (k : ℕ) (c : ℂ)
     (hA : ∀ l ∈ Metric.ball lam₀ ε, angerScaledA k l = c * struveLO_I r (fun _ => 1) (2 * k + 1) l)
     {lam : ℂ} (hlam : lam ∈ Metric.ball lam₀ ε) :
@@ -877,7 +877,7 @@ theorem struveLO_tendsto_quotient {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG :
 
 /-- On a good disc, `A_k(λ) = (2πi)⁻¹ ∮ (t + λ sinh t)^{-(2k+1)} dt` (Lagrange inversion form of
 the coefficients of DLMF 11.11.8). -/
-theorem struveLO_angerScaledA_eq {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : struveLO_Good r ε lam₀)
+theorem struveLO_angerScaledA_eq {r ε : ℝ} {lam₀ : ℂ} (hr : 0 < r) (hG : StruveLOGood r ε lam₀)
     (k : ℕ) : ∀ l ∈ Metric.ball lam₀ ε,
       angerScaledA k l = (2 * π * I)⁻¹ * struveLO_I r (fun _ => 1) (2 * k + 1) l := by
   induction k with

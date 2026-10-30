@@ -14,7 +14,7 @@ public import DLMF.EllipticIntegrals.SpecialCases
 Complex-modulus forms of DLMF 19.4.1–19.4.9. Here `k'² = 1 - k²`. The complete integrals are
 differentiated on the principal domain `{k ≠ 0, 1 - k² ∈ ℂ \ (-∞, 0]}`; the incomplete ones at
 a complex amplitude `φ` whose path `[0, φ]` keeps `1 - k² sin²θ` in `ℂ \ (-∞, 0]`
-(`legendrePathOK`), with `Δ = (1 - k² sin²φ)^{1/2}`. The real-parameter forms (in `m = k²`) are
+(`LegendrePathOK`), with `Δ = (1 - k² sin²φ)^{1/2}`. The real-parameter forms (in `m = k²`) are
 the existing `DLMF.Elliptic.Real.hasDerivAt_compEllIntKm`, `Real.hasDerivAt_compEllIntEm`,
 `Real.hasDerivAt_compEllIntKm_sq` and `Real.hasDerivAt_compEllIntEm_sq` (tagged 19.4.E1–E2).
 
@@ -37,18 +37,18 @@ open DLMF.JacobiElliptic
 
 /-- The path condition for Legendre's integrals at amplitude `φ`: `1 - k² sin²θ` stays in
 `ℂ \ (-∞, 0]` along the segment `[0, φ]`, so the integrand is holomorphic near the path. -/
-def legendrePathOK (φ k : ℂ) : Prop :=
+def LegendrePathOK (φ k : ℂ) : Prop :=
   ∀ t ∈ Icc (0 : ℝ) 1, 1 - k ^ 2 * Complex.sin (t * φ) ^ 2 ∈ slitPlane
 
 /-- For a real amplitude the path condition follows from `1 - k² ∈ ℂ \ (-∞, 0]`. -/
 theorem legendrePathOK_ofReal {k : ℂ} (hk : 1 - k ^ 2 ∈ slitPlane) (φ : ℝ) :
-    legendrePathOK φ k := fun t _ => by
+    LegendrePathOK φ k := fun t _ => by
   simpa using ei19a_one_sub_sq_mul_sin_sq_mem_slitPlane hk (t * φ)
 
 /-- For a positive real amplitude at most `π/2`, the endpoint slit-plane condition
 `1 - k² sin² φ ∈ slitPlane` implies that condition along the entire integration path. -/
 theorem legendrePathOK_ofReal_of_endpoint {φ : ℝ} {k : ℂ} (hφ : 0 < φ) (hφ' : φ ≤ π / 2)
-    (hk : 1 - k ^ 2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane) : legendrePathOK φ k := by
+    (hk : 1 - k ^ 2 * (Real.sin φ : ℂ) ^ 2 ∈ slitPlane) : LegendrePathOK φ k := by
   have hsφ : 0 < Real.sin φ := Real.sin_pos_of_pos_of_lt_pi hφ (by linarith [Real.pi_pos])
   intro t ht
   have htφ : 0 ≤ t * φ ∧ t * φ ≤ φ := ⟨mul_nonneg ht.1 hφ.le, mul_le_of_le_one_left hφ.le ht.2⟩
@@ -408,7 +408,7 @@ lemma p19lR1_Δc_ne_zero {k z : ℂ} (hz : 1 - k ^ 2 * Complex.sin z ^ 2 ∈ sli
 
 /-- The complex-path form of `∫ Δ⁻³`: along the segment `[0, φ]`,
 `∫₀¹ φ Δ(tφ)⁻³ dt = (E(φ, k) - k² sin φ cos φ/Δ(φ))/k′²`. -/
-lemma p19lR1_path_integral_cube {φ k : ℂ} (hk1 : k ^ 2 ≠ 1) (hφ : legendrePathOK φ k) :
+lemma p19lR1_path_integral_cube {φ k : ℂ} (hk1 : k ^ 2 ≠ 1) (hφ : LegendrePathOK φ k) :
     ∫ t in (0 : ℝ)..1, φ * ((1 - k ^ 2 * Complex.sin (t * φ) ^ 2)⁻¹ *
         (1 - k ^ 2 * Complex.sin (t * φ) ^ 2) ^ (-(1 / 2 : ℂ))) =
       (incEllIntEk φ k - k ^ 2 * Complex.sin φ * Complex.cos φ / p19lR1_Δc k φ) / (1 - k ^ 2) := by
@@ -473,10 +473,10 @@ lemma p19lR1_path_integral_cube {φ k : ℂ} (hk1 : k ^ 2 ≠ 1) (hφ : legendre
 
 /-- DLMF 19.4.5:
 `∂F(φ, k)/∂k = (E(φ, k) - k'²F(φ, k))/(k k'²) - k sin φ cos φ/(k'² Δ)`, `Δ = √(1 - k² sin²φ)`,
-for `k ≠ 0`, `k² ≠ 1` and a path `[0, φ]` satisfying `legendrePathOK`. -/
+for `k ≠ 0`, `k² ≠ 1` and a path `[0, φ]` satisfying `LegendrePathOK`. -/
 @[dlmf 19.4.E5]
 theorem hasDerivAt_incEllIntFk {φ k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1)
-    (hφ : legendrePathOK φ k) :
+    (hφ : LegendrePathOK φ k) :
     HasDerivAt (fun k => incEllIntFk φ k)
       ((incEllIntEk φ k - (1 - k ^ 2) * incEllIntFk φ k) / (k * (1 - k ^ 2)) -
         k * Complex.sin φ * Complex.cos φ /
@@ -519,9 +519,9 @@ theorem hasDerivAt_incEllIntFk {φ k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1)
   ring
 
 /-- DLMF 19.4.6: `∂E(φ, k)/∂k = (E(φ, k) - F(φ, k))/k` for `k ≠ 0` and a path
-satisfying `legendrePathOK`. -/
+satisfying `LegendrePathOK`. -/
 @[dlmf 19.4.E6]
-theorem hasDerivAt_incEllIntEk {φ k : ℂ} (hk0 : k ≠ 0) (hφ : legendrePathOK φ k) :
+theorem hasDerivAt_incEllIntEk {φ k : ℂ} (hk0 : k ≠ 0) (hφ : LegendrePathOK φ k) :
     HasDerivAt (fun k => incEllIntEk φ k) ((incEllIntEk φ k - incEllIntFk φ k) / k) k := by
   have hg : Continuous fun t : ℝ => Complex.sin (t * φ) ^ 2 := by fun_prop
   have h := p19lR1_hasDerivAt_path hg continuousOn_const (1 / 2 : ℂ) (w := fun _ => φ) hφ
@@ -544,10 +544,10 @@ theorem hasDerivAt_incEllIntEk {φ k : ℂ} (hk0 : k ≠ 0) (hφ : legendrePathO
 
 /-- DLMF 19.4.7:
 `∂Π(φ, α², k)/∂k = k/(k'²(k² - α²)) (E(φ, k) - k'²Π(φ, α², k) - k² sin φ cos φ/Δ)`, for `k ≠ 0`,
-`k² ≠ 1`, `k² ≠ α²`, a path satisfying `legendrePathOK` on which `1 - α² sin²θ ≠ 0`. -/
+`k² ≠ 1`, `k² ≠ α²`, a path satisfying `LegendrePathOK` on which `1 - α² sin²θ ≠ 0`. -/
 @[dlmf 19.4.E7]
 theorem hasDerivAt_incEllIntPik {φ α2 k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1) (hαk : k ^ 2 ≠ α2)
-    (hφ : legendrePathOK φ k) (hα : ∀ t ∈ Icc (0 : ℝ) 1, 1 - α2 * Complex.sin (t * φ) ^ 2 ≠ 0) :
+    (hφ : LegendrePathOK φ k) (hα : ∀ t ∈ Icc (0 : ℝ) 1, 1 - α2 * Complex.sin (t * φ) ^ 2 ≠ 0) :
     HasDerivAt (fun k => incEllIntPik φ α2 k) (k / ((1 - k ^ 2) * (k ^ 2 - α2)) *
       (incEllIntEk φ k - (1 - k ^ 2) * incEllIntPik φ α2 k -
         k ^ 2 * Complex.sin φ * Complex.cos φ /
@@ -608,10 +608,10 @@ theorem hasDerivAt_incEllIntPik {φ α2 k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 �
 
 /-! ### §19.4(ii) Differential equations -/
 
-/-- The hypotheses `k ≠ 0`, `k² ≠ 1` and `legendrePathOK φ k` hold near `k`. -/
+/-- The hypotheses `k ≠ 0`, `k² ≠ 1` and `LegendrePathOK φ k` hold near `k`. -/
 lemma p19lR1_eventually_good {φ k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1)
-    (hφ : legendrePathOK φ k) :
-    ∀ᶠ z in 𝓝 k, z ≠ 0 ∧ z ^ 2 ≠ 1 ∧ legendrePathOK φ z := by
+    (hφ : LegendrePathOK φ k) :
+    ∀ᶠ z in 𝓝 k, z ≠ 0 ∧ z ^ 2 ≠ 1 ∧ LegendrePathOK φ z := by
   have hg : Continuous fun t : ℝ => Complex.sin (t * φ) ^ 2 := by fun_prop
   filter_upwards [isOpen_ne.mem_nhds hk0,
     (isOpen_ne.preimage (continuous_pow 2)).mem_nhds (show k ∈ (fun z : ℂ => z ^ 2) ⁻¹' {x | x ≠ 1} from hk1),
@@ -620,9 +620,9 @@ lemma p19lR1_eventually_good {φ k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1)
 
 /-- DLMF 19.4.8: with `D_k = ∂/∂k`,
 `(k k'² D_k² + (1 - 3k²) D_k - k) F(φ, k) = -k sin φ cos φ/(1 - k² sin²φ)^{3/2}`, for `k ≠ 0`,
-`k² ≠ 1` and a path satisfying `legendrePathOK`. -/
+`k² ≠ 1` and a path satisfying `LegendrePathOK`. -/
 @[dlmf 19.4.E8]
-theorem incEllIntFk_ode {φ k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1) (hφ : legendrePathOK φ k) :
+theorem incEllIntFk_ode {φ k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1) (hφ : LegendrePathOK φ k) :
     k * (1 - k ^ 2) * deriv (deriv fun k => incEllIntFk φ k) k +
         (1 - 3 * k ^ 2) * deriv (fun k => incEllIntFk φ k) k - k * incEllIntFk φ k =
       -(k * Complex.sin φ * Complex.cos φ) / (1 - k ^ 2 * Complex.sin φ ^ 2) ^ (3 / 2 : ℂ) := by
@@ -669,9 +669,9 @@ theorem incEllIntFk_ode {φ k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1) (hφ : 
 
 /-- DLMF 19.4.9:
 `(k k'² D_k² + k'² D_k + k) E(φ, k) = k sin φ cos φ/√(1 - k² sin²φ)`, for `k ≠ 0`, `k² ≠ 1` and a
-path satisfying `legendrePathOK`. -/
+path satisfying `LegendrePathOK`. -/
 @[dlmf 19.4.E9]
-theorem incEllIntEk_ode {φ k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1) (hφ : legendrePathOK φ k) :
+theorem incEllIntEk_ode {φ k : ℂ} (hk0 : k ≠ 0) (hk1 : k ^ 2 ≠ 1) (hφ : LegendrePathOK φ k) :
     k * (1 - k ^ 2) * deriv (deriv fun k => incEllIntEk φ k) k +
         (1 - k ^ 2) * deriv (fun k => incEllIntEk φ k) k + k * incEllIntEk φ k =
       k * Complex.sin φ * Complex.cos φ / (1 - k ^ 2 * Complex.sin φ ^ 2) ^ (1 / 2 : ℂ) := by
@@ -704,7 +704,7 @@ theorem compEllIntKk_compEllIntEk_ode {k : ℂ} (hk : k ∈ compEllIntDomain) :
       k * (1 - k ^ 2) * deriv (deriv compEllIntEk) k + (1 - k ^ 2) * deriv compEllIntEk k +
         k * compEllIntEk k = 0 := by
   have hk1 : k ^ 2 ≠ 1 := fun h => ei19a_one_sub_sq_ne_zero hk (by rw [h]; ring)
-  have hp : legendrePathOK (π / 2) k := by
+  have hp : LegendrePathOK (π / 2) k := by
     have := legendrePathOK_ofReal hk.2 (π / 2)
     simpa using this
   have hcos : Complex.cos (π / 2) = 0 := by

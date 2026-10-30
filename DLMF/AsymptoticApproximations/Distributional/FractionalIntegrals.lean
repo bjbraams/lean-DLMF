@@ -44,7 +44,7 @@ integral `∫₀^x (x-t)^{μ-1} t^{-s-α} dt` exists in the usual (Lebesgue) sen
 `s = 0` and `α < 1`. -/
 @[dlmf 2.6.E36]
 theorem integrableOn_powKernel_mul_rpow_iff {x μ α : ℝ} (hx : 0 < x) (hμ : 0 < μ) (hα : 0 < α)
-    (_hα1 : α ≤ 1) (s : ℕ) :
+    (s : ℕ) :
     IntegrableOn (fun t : ℝ => (x - t) ^ (μ - 1) * t ^ (-(s : ℝ) - α)) (Ioo 0 x) ↔
       s = 0 ∧ α < 1 := by
   let F : ℝ → ℝ := fun t => (x - t) ^ (μ - 1) * t ^ (-(s : ℝ) - α)

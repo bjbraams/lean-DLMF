@@ -6,10 +6,10 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Heun.Basic
-public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 public import DLMFMathlib.Analysis.ODE.Singularities
 public import Mathlib.Analysis.Calculus.Deriv.Pow
 public import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
+public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Arctan
 public import Mathlib.MeasureTheory.Covering.Besicovitch
 
@@ -115,7 +115,6 @@ theorem p1h_hasDerivAt_const_div_sub (k c z : ℂ) (h : z - c ≠ 0) :
   · ext; simp [div_eq_mul_inv]
   · simp; ring
 
-
 /-- DLMF 31.10.4 and 31.2.1: away from the singular points, Heun's equation is
 `𝒟_z w = q w` for Heun's operator `𝒟_z`. -/
 @[dlmf 31.10.E4]
@@ -152,7 +151,7 @@ theorem isHeunSolOn_iff_heunOperator {w : ℂ → ℂ} {s : Set ℂ}
 theorem p1h_atMostRegular_two {c₀ c₁ g₀ g₁ : ℂ → ℂ} {z₀ : ℂ} (hg₀ : AnalyticAt ℂ g₀ z₀)
     (hg₁ : AnalyticAt ℂ g₁ z₀) (h₀ : ∀ z, z ≠ z₀ → (z - z₀) ^ 2 * c₀ z = g₀ z)
     (h₁ : ∀ z, z ≠ z₀ → (z - z₀) * c₁ z = g₁ z) :
-    Complex.linearODEAtMostRegularAt ![c₀, c₁] z₀ := by
+    Complex.LinearODEAtMostRegularAt ![c₀, c₁] z₀ := by
   intro j
   fin_cases j
   · exact ⟨g₀, hg₀, eventually_nhdsWithin_of_forall fun z hz => by simpa using h₀ z hz⟩
@@ -160,7 +159,7 @@ theorem p1h_atMostRegular_two {c₀ c₁ g₀ g₁ : ℂ → ℂ} {z₀ : ℂ} (
 
 /-- Ordinary point of a second-order equation with analytic coefficients. -/
 theorem p1h_ordinary_two {c₀ c₁ : ℂ → ℂ} {z₀ : ℂ} (h₀ : AnalyticAt ℂ c₀ z₀)
-    (h₁ : AnalyticAt ℂ c₁ z₀) : Complex.linearODEOrdinaryAt ![c₀, c₁] z₀ := by
+    (h₁ : AnalyticAt ℂ c₁ z₀) : Complex.LinearODEOrdinaryAt ![c₀, c₁] z₀ := by
   intro j
   fin_cases j
   · exact ⟨c₀, h₀, by simp⟩
@@ -207,15 +206,15 @@ lemma p1h_recipRaw_two (c₀ c₁ : ℂ → ℂ) {u : ℂ} (hu : u ≠ 0) :
 
 /-- DLMF §31.2(i): for `a ∉ {0, 1}` Heun's equation has at most regular singular points at
 `0, 1, a` and `∞` and no other singular points (degenerate parameter values can make a
-singular point ordinary or removable, which the predicate `linearODEAtMostRegularAt` allows). -/
+singular point ordinary or removable, which the predicate `LinearODEAtMostRegularAt` allows). -/
 @[dlmf 31.2.i]
 theorem heun_singularities (ha0 : a ≠ 0) (ha1 : a ≠ 1) :
-    Complex.linearODEAtMostRegularAt (heunODECoeff a q α β γ δ ε) 0 ∧
-    Complex.linearODEAtMostRegularAt (heunODECoeff a q α β γ δ ε) 1 ∧
-    Complex.linearODEAtMostRegularAt (heunODECoeff a q α β γ δ ε) a ∧
-    Complex.linearODEAtMostRegularAtInfinity (heunODECoeff a q α β γ δ ε) ∧
+    Complex.LinearODEAtMostRegularAt (heunODECoeff a q α β γ δ ε) 0 ∧
+    Complex.LinearODEAtMostRegularAt (heunODECoeff a q α β γ δ ε) 1 ∧
+    Complex.LinearODEAtMostRegularAt (heunODECoeff a q α β γ δ ε) a ∧
+    Complex.LinearODEAtMostRegularAtInfinity (heunODECoeff a q α β γ δ ε) ∧
     ∀ z : ℂ, z ≠ 0 → z ≠ 1 → z ≠ a →
-      Complex.linearODEOrdinaryAt (heunODECoeff a q α β γ δ ε) z := by
+      Complex.LinearODEOrdinaryAt (heunODECoeff a q α β γ δ ε) z := by
   have h01 : (0 : ℂ) - 1 ≠ 0 := by norm_num
   have h0a : (0 : ℂ) - a ≠ 0 := by simpa using ha0
   have h1a : (1 : ℂ) - a ≠ 0 := sub_ne_zero.2 (Ne.symm ha1)
@@ -557,7 +556,7 @@ theorem heun_normalForm (ha0 : a ≠ 0) (ha1 : a ≠ 1) (hF : α + β + 1 = γ +
 `w'' + ((2γ-1)cot θ - (2δ-1)tan θ - ε sin 2θ/(a - sin²θ)) w' + 4(αβ sin²θ - q)/(a - sin²θ) w = 0`.
 -/
 @[dlmf 31.2.E5, dlmf 31.2.E6]
-theorem heun_trigonometricForm (hF : α + β + 1 = γ + δ + ε) {U V : Set ℂ} (hU : IsOpen U)
+theorem heun_trigonometricForm {U V : Set ℂ}
     (hV : IsOpen V) {W : ℂ → ℂ} (hW : IsHeunSolOn a q α β γ δ ε W U)
     (hVU : ∀ θ ∈ V, Complex.sin θ ^ 2 ∈ U ∧ Complex.sin θ ≠ 0 ∧ Complex.cos θ ≠ 0 ∧
       a - Complex.sin θ ^ 2 ≠ 0) :
@@ -680,10 +679,9 @@ theorem heun_fHomotopic_a (hF : α + β + 1 = γ + δ + ε) {U : Set ℂ} (hU : 
 /-- DLMF §31.2(v), homography `z̃ = z/a` (one of the six fixing `∞`): if `w̃` solves Heun's
 equation with `ã = 1/a`, `q̃ = q/a`, `δ̃ = ε`, `ε̃ = δ`, then `w̃(z/a)` solves the original. -/
 @[dlmf 31.2.v]
-theorem heun_homography_div (ha0 : a ≠ 0) (hF : α + β + 1 = γ + δ + ε) {U V : Set ℂ}
+theorem heun_homography_div (ha0 : a ≠ 0) {U V : Set ℂ}
     (hU : IsOpen U) (hUs : ∀ z ∈ U, z ≠ 0 ∧ z ≠ 1 ∧ z ≠ a) {w : ℂ → ℂ}
-    (hw : IsHeunSolOn (1 / a) (q / a) α β γ ε δ w V) (hUV : ∀ z ∈ U, z / a ∈ V)
-    (hV : IsOpen V) :
+    (hw : IsHeunSolOn (1 / a) (q / a) α β γ ε δ w V) (hUV : ∀ z ∈ U, z / a ∈ V) :
     IsHeunSolOn a q α β γ δ ε (fun z => w (z / a)) U := by
   refine p1h_isLinearODE2On_comp (φ₁ := fun _ => 1 / a) (φ₂ := fun _ => 0) hU
     (fun z hz => ?_) (fun z hz => hasDerivAt_const _ _) hUV (fun z hz => ?_) (fun z hz => ?_) hw

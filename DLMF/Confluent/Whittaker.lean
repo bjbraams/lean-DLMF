@@ -215,7 +215,6 @@ theorem whittakerW_ode {κ μ z : ℂ} (hz : z ∈ slitPlane)
     Gamma (-2 * μ) / Gamma (1 / 2 - μ - κ) * hp +
       Gamma (2 * μ) / Gamma (1 / 2 + μ - κ) * hn
 
-
 /-- The definition of W through the continued Tricomi function. -/
 @[dlmf 13.14.E3]
 theorem whittakerW_eq_kummerU {κ μ z : ℂ} (hz : z ∈ slitPlane) :
@@ -443,9 +442,9 @@ theorem isBigO_whittakerM_at_zero {κ μ : ℂ} (hμ : ∀ k : ℕ, 2 * μ ≠ -
 /-- `W(g f₁, g f₂) = g² W(f₁, f₂)`. -/
 theorem wronskian_mul_left {g f₁ f₂ : ℂ → ℂ} {z : ℂ} (hg : DifferentiableAt ℂ g z)
     (h₁ : DifferentiableAt ℂ f₁ z) (h₂ : DifferentiableAt ℂ f₂ z) :
-    wronskian (fun w => g w * f₁ w) (fun w => g w * f₂ w) z =
-      g z ^ 2 * wronskian f₁ f₂ z := by
-  unfold wronskian
+    ODE.wronskian (fun w => g w * f₁ w) (fun w => g w * f₂ w) z =
+      g z ^ 2 * ODE.wronskian f₁ f₂ z := by
+  unfold ODE.wronskian
   rw [deriv_fun_mul hg h₁, deriv_fun_mul hg h₂]
   ring
 
@@ -475,12 +474,12 @@ theorem differentiableAt_kummerU (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     DifferentiableAt ℂ (kummerU a b) z :=
   (differentiableOn_kummerU a b).differentiableAt (isOpen_slitPlane.mem_nhds hz)
 
-/-- Identity under the stated parameter and domain assumptions: `wronskian (whittakerM κ μ)
+/-- Identity under the stated parameter and domain assumptions: `ODE.wronskian (whittakerM κ μ)
 (whittakerM κ (-μ)) z = -2 * μ`. -/
 @[dlmf 13.14.E25]
 theorem wronskian_whittakerM {κ μ z : ℂ} (hz : z ∈ slitPlane)
     (hμ : ∀ k : ℕ, 1 + 2 * μ ≠ -k) (hμ' : ∀ k : ℕ, 1 - 2 * μ ≠ -k) :
-    wronskian (whittakerM κ μ) (whittakerM κ (-μ)) z = -2 * μ := by
+    ODE.wronskian (whittakerM κ μ) (whittakerM κ (-μ)) z = -2 * μ := by
   have hz0 := slitPlane_ne_zero hz
   set b := 1 + 2 * μ
   have hB : ∀ k : ℕ, 2 - b ≠ -k := fun k h => hμ' k (by rw [← h]; ring)
@@ -503,10 +502,10 @@ theorem wronskian_whittakerM {κ μ z : ℂ} (hz : z ∈ slitPlane)
     (Set.mem_univ _)).differentiableAt
   have hy : DifferentiableAt ℂ (fun w => w ^ (1 - b) * kummerM (μ - κ + 1 / 2 - b + 1) (2 - b) w) z :=
     ((hasDerivAt_id z).cpow_const (c := 1 - b) hz).differentiableAt.mul hv
-  have hW : wronskian (whittakerM κ μ) (whittakerM κ (-μ)) z =
-      wronskian (whittakerM κ μ) (fun w => (exp (-w / 2) * w ^ (μ + 1 / 2)) *
+  have hW : ODE.wronskian (whittakerM κ μ) (whittakerM κ (-μ)) z =
+      ODE.wronskian (whittakerM κ μ) (fun w => (exp (-w / 2) * w ^ (μ + 1 / 2)) *
         (w ^ (1 - b) * kummerM (μ - κ + 1 / 2 - b + 1) (2 - b) w)) z := by
-    unfold wronskian
+    unfold ODE.wronskian
     rw [heq.deriv_eq, heq.eq_of_nhds]
   rw [hW, h1, wronskian_mul_left (differentiableAt_whittaker_prefactor μ hz) hu hy,
     wronskian_kummer_pair_of_nonpole _ b hμ hB hz, whittaker_prefactor_sq μ z]
@@ -516,12 +515,12 @@ theorem wronskian_whittakerM {κ μ z : ℂ} (hz : z ∈ slitPlane)
   simp only [b] at hp ⊢
   linear_combination (-2 * μ) * (exp (-z) * exp z) * hp + (-2 * μ) * he
 
-/-- Identity under the stated parameter and domain assumptions: `wronskian (whittakerM κ μ)
+/-- Identity under the stated parameter and domain assumptions: `ODE.wronskian (whittakerM κ μ)
 (whittakerW κ μ) z = -Gamma (1 + 2 * μ) / Gamma (1 / 2 + μ - κ)`. -/
 @[dlmf 13.14.E26]
 theorem wronskian_whittakerM_W {κ μ z : ℂ} (hz : z ∈ slitPlane)
     (hμ : ∀ k : ℕ, 1 + 2 * μ ≠ -k) :
-    wronskian (whittakerM κ μ) (whittakerW κ μ) z =
+    ODE.wronskian (whittakerM κ μ) (whittakerW κ μ) z =
       -Gamma (1 + 2 * μ) / Gamma (1 / 2 + μ - κ) := by
   have hz0 := slitPlane_ne_zero hz
   have hM : kummerM (μ - κ + 1 / 2) (1 + 2 * μ) = fun w =>
@@ -537,11 +536,11 @@ theorem wronskian_whittakerM_W {κ μ z : ℂ} (hz : z ∈ slitPlane)
   rw [h1, whittakerW_eq_prefactor_mul,
     wronskian_mul_left (differentiableAt_whittaker_prefactor μ hz) hu
       (differentiableAt_kummerU _ _ hz), whittaker_prefactor_sq μ z]
-  have hW : wronskian (kummerM (μ - κ + 1 / 2) (1 + 2 * μ))
+  have hW : ODE.wronskian (kummerM (μ - κ + 1 / 2) (1 + 2 * μ))
       (kummerU (μ + 1 / 2 - κ) (1 + 2 * μ)) z =
-      Gamma (1 + 2 * μ) * wronskian (regularizedHGFun {μ + 1 / 2 - κ} {1 + 2 * μ})
+      Gamma (1 + 2 * μ) * ODE.wronskian (regularizedHGFun {μ + 1 / 2 - κ} {1 + 2 * μ})
         (kummerU (μ + 1 / 2 - κ) (1 + 2 * μ)) z := by
-    unfold wronskian
+    unfold ODE.wronskian
     rw [hM, deriv_const_mul _ hd]
     ring
   rw [hW, wronskian_regularizedHGFun_kummerU_all _ _ hz,
@@ -552,12 +551,12 @@ theorem wronskian_whittakerM_W {κ μ z : ℂ} (hz : z ∈ slitPlane)
   linear_combination (-Gamma (1 + 2 * μ) / Gamma (1 / 2 + μ - κ)) * (exp (-z) * exp z) * hp +
     (-Gamma (1 + 2 * μ) / Gamma (1 / 2 + μ - κ)) * he
 
-/-- Identity under the stated parameter and domain assumptions: `wronskian (whittakerM κ (-μ))
+/-- Identity under the stated parameter and domain assumptions: `ODE.wronskian (whittakerM κ (-μ))
 (whittakerW κ μ) z = -Gamma (1 - 2 * μ) / Gamma (1 / 2 - μ - κ)`. -/
 @[dlmf 13.14.E28]
 theorem wronskian_whittakerM_neg_W {κ μ z : ℂ} (hz : z ∈ slitPlane)
     (hμ : ∀ k : ℕ, 1 - 2 * μ ≠ -k) :
-    wronskian (whittakerM κ (-μ)) (whittakerW κ μ) z =
+    ODE.wronskian (whittakerM κ (-μ)) (whittakerW κ μ) z =
       -Gamma (1 - 2 * μ) / Gamma (1 / 2 - μ - κ) := by
   have hz0 := slitPlane_ne_zero hz
   set b := 1 + 2 * μ with hbdef
@@ -578,20 +577,20 @@ theorem wronskian_whittakerM_neg_W {κ μ z : ℂ} (hz : z ∈ slitPlane)
   have hy : DifferentiableAt ℂ (fun w => w ^ (1 - b) * regularizedHGFun {a - b + 1} {2 - b} w) z :=
     ((hasDerivAt_id z).cpow_const (c := 1 - b) hz).differentiableAt.mul
       (differentiableAt_regularizedConfluent _ _ z)
-  have hW : wronskian (whittakerM κ (-μ)) (whittakerW κ μ) z =
-      wronskian (fun w => (exp (-w / 2) * w ^ (μ + 1 / 2)) *
+  have hW : ODE.wronskian (whittakerM κ (-μ)) (whittakerW κ μ) z =
+      ODE.wronskian (fun w => (exp (-w / 2) * w ^ (μ + 1 / 2)) *
         (Gamma (2 - b) * (w ^ (1 - b) * regularizedHGFun {a - b + 1} {2 - b} w)))
         (whittakerW κ μ) z := by
-    unfold wronskian
+    unfold ODE.wronskian
     rw [heq.deriv_eq, heq.eq_of_nhds]
   rw [hW, whittakerW_eq_prefactor_mul,
     wronskian_mul_left (differentiableAt_whittaker_prefactor μ hz) (hy.const_mul _)
       (differentiableAt_kummerU _ _ hz), whittaker_prefactor_sq μ z]
-  have hW2 : wronskian (fun w => Gamma (2 - b) * (w ^ (1 - b) *
+  have hW2 : ODE.wronskian (fun w => Gamma (2 - b) * (w ^ (1 - b) *
       regularizedHGFun {a - b + 1} {2 - b} w)) (kummerU a b) z =
-      Gamma (2 - b) * wronskian (fun w => w ^ (1 - b) * regularizedHGFun {a - b + 1} {2 - b} w)
+      Gamma (2 - b) * ODE.wronskian (fun w => w ^ (1 - b) * regularizedHGFun {a - b + 1} {2 - b} w)
         (kummerU a b) z := by
-    unfold wronskian
+    unfold ODE.wronskian
     rw [deriv_const_mul _ hy]
     ring
   rw [hW2, wronskian_shifted_regularized_kummerU_all a b hz,
@@ -622,7 +621,7 @@ theorem whittakerW_even_mu (κ μ : ℂ) {z : ℂ} (hz : z ∈ slitPlane)
 the logarithmic argument plane. `whittakerWOnLog` represents `W` there for noninteger `2μ`. -/
 @[dlmf 13.14.E34]
 theorem whittakerM_jump {κ μ z : ℂ} (hz : z ∈ slitPlane) (hμi : ∀ n : ℤ, 2 * μ ≠ n)
-    (hμ : ∀ k : ℕ, 1 + 2 * μ ≠ -k) (hκ : ∀ k : ℕ, 1 / 2 - μ - κ ≠ -k) :
+    (hμ : ∀ k : ℕ, 1 + 2 * μ ≠ -k) :
     2 * π / (Gamma (1 + 2 * μ) * Gamma (1 / 2 - μ - κ)) * whittakerM (-κ) μ z =
       exp (μ * π * I) * whittakerWOnLog κ μ (log z + π * I) +
         exp (-μ * π * I) * whittakerWOnLog κ μ (log z - π * I) := by

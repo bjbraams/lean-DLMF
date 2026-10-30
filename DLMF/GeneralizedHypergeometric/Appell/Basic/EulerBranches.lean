@@ -23,7 +23,7 @@ namespace DLMF.Hypergeometric
 def appellEulerDomain : Set (ℂ × ℂ) := {p | 1-p.1∈slitPlane ∧ 1-p.2∈slitPlane}
 
 /-- The square-integral denominator stays on its principal branch at every integration point. -/
-def appellSquareSlit (p : ℂ × ℂ) : Prop :=
+def AppellSquareSlit (p : ℂ × ℂ) : Prop :=
   ∀ u∈Icc (0:ℝ) 1,∀ v∈Icc (0:ℝ) 1,1-(u:ℂ)*p.1-(v:ℂ)*p.2∈slitPlane
 
 /-- Euler's integration triangle, including its measure-zero boundary. -/

@@ -389,7 +389,7 @@ theorem Real.voigt_limits (x : ℝ) :
 /-- Identity under the stated parameter and domain assumptions: `Real.voigtU (-x) t=Real.voigtU x
 t ∧ Real.voigtV (-x) t = -Real.voigtV x t`. -/
 @[dlmf 7.19.E6]
-theorem Real.voigt_symmetry (x : ℝ) {t : ℝ} (ht : 0 < t) :
+theorem Real.voigt_symmetry (x : ℝ) {t : ℝ} :
     Real.voigtU (-x) t=Real.voigtU x t ∧ Real.voigtV (-x) t = -Real.voigtV x t := by
   constructor
   · rw [Real.voigtU, Real.voigtU, ← integral_neg_eq_self]

@@ -5,10 +5,11 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
-public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
+public import DLMFMathlib.Analysis.ODE.Wronskian
 public import Mathlib.Algebra.Order.BigOperators.Expect
+public import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
 public import Mathlib.Analysis.Complex.Order
+public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 
 /-!
 # Linear second-order differential equations: definitions (DLMF §1.13)
@@ -17,7 +18,7 @@ public import Mathlib.Analysis.Complex.Order
   differentiability of `w` and of `w'` at every point of `D` (so the totalized `deriv` cannot
   make a nonsolution satisfy the equation); `r = 0` is the homogeneous equation 1.13.1.
 * `IsFundamentalPair f g w₁ w₂ D` (1.13.2).
-* `wronskian w₁ w₂` (1.13.4) and the `n`-argument Wronskian `wronskianN`.
+* `ODE.wronskian w₁ w₂` (1.13.4) and the `n`-argument Wronskian `wronskianN`.
 * `schwarzian z ζ` (1.13.20): `{z, ζ} = z'''/z' - (3/2)(z''/z')²`, derivatives with respect
   to `ζ`.
 * The Sturm–Liouville equation 1.13.26 (`IsSturmLiouvilleSolOn`), the unmixed and periodic
@@ -45,11 +46,6 @@ def IsLinODE2SolOn (f g r : 𝕜 → 𝕜) (w : 𝕜 → 𝕜) (D : Set 𝕜) : 
 def IsFundamentalPair (f g : 𝕜 → 𝕜) (w₁ w₂ : 𝕜 → 𝕜) (D : Set 𝕜) : Prop :=
   IsLinODE2SolOn f g 0 w₁ D ∧ IsLinODE2SolOn f g 0 w₂ D ∧
     ∀ w, IsLinODE2SolOn f g 0 w D → ∃ A B : 𝕜, ∀ z ∈ D, w z = A * w₁ z + B * w₂ z
-
-/-- DLMF 1.13.4: the **Wronskian** `𝒲{w₁, w₂} = w₁ w₂' - w₂ w₁'`. -/
-@[dlmf 1.13.E4]
-def wronskian (w₁ w₂ : 𝕜 → 𝕜) (z : 𝕜) : 𝕜 :=
-  w₁ z * deriv w₂ z - w₂ z * deriv w₁ z
 
 /-- DLMF §1.13(i): the `n`-argument Wronskian `𝒲{w₁, …, w_n} = det[w_k^{(j-1)}]`, with rows
 indexed by the order of the derivative and columns by the function. -/

@@ -177,7 +177,7 @@ theorem normIncBetaI_quadratic {a : ℝ} (ha : 0 < a) {x : ℝ} (hx : 0 ≤ x) (
 /-- Identity under the stated parameter and domain assumptions: `incBeta a b x=(x : ℂ)^(a :
 ℂ)*(1-x : ℂ)^(b : ℂ)/a*Gamma (a+1)*DLMF.Hypergeometric.regularizedGaussHG (a+b) 1 (a+1) x`. -/
 @[dlmf 8.17.E8]
-theorem incBeta_hypergeometric_euler {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
+theorem incBeta_hypergeometric_euler {a b : ℝ} (ha : 0 < a) {x : ℝ} (hx1 : x < 1) :
     incBeta a b x=(x : ℂ)^(a : ℂ)*(1-x : ℂ)^(b : ℂ)/a*Gamma (a+1)*DLMF.Hypergeometric.regularizedGaussHG (a+b) 1 (a+1) x := by
   have hc : (x:ℂ) ∈ cutPlane := by
     change 1-(x:ℂ) ∈ slitPlane
@@ -197,7 +197,7 @@ theorem incBeta_hypergeometric_euler {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : 
 ℂ)*(1-x : ℂ)^((b : ℂ)-1)/a*Gamma (a+1)*DLMF.Hypergeometric.regularizedGaussHG 1 (1-b) (a+1)
 (x/(x-1))`. -/
 @[dlmf 8.17.E9]
-theorem incBeta_hypergeometric_pfaff {a b : ℝ} (ha : 0 < a) (hb : 0 < b) {x : ℝ} (hx : 0 < x) (hx1 : x < 1) :
+theorem incBeta_hypergeometric_pfaff {a b : ℝ} (ha : 0 < a) {x : ℝ} (hx1 : x < 1) :
     incBeta a b x=(x : ℂ)^(a : ℂ)*(1-x : ℂ)^((b : ℂ)-1)/a*Gamma (a+1)*DLMF.Hypergeometric.regularizedGaussHG 1 (1-b) (a+1) (x/(x-1)) := by
   have hc : (x:ℂ) ∈ cutPlane := by
     change 1-(x:ℂ) ∈ slitPlane

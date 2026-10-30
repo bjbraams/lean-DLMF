@@ -36,7 +36,7 @@ def qProductRatioInf (a b : List ℂ) (q : ℂ) : ℂ :=
 theorem qPhi2_to_qPhi2_2 (a b c q z : ℂ)
     (hq : ‖q‖<1) (hq0 : q≠0)
     (hpar : ∀ x ∈ [b], x≠0)
-    (hden : qDenominatorRegular [c,a*z,z] q)
+    (hden : QDenominatorRegular [c,a*z,z] q)
     (hz : ‖z‖<1) :
     qPhi [a,b] [c] q (z) =
       qProductRatioInf [z*a] [z] q * qPhi [a,c/b] [c,a*z] q (b*z) := by
@@ -47,7 +47,7 @@ theorem qPhi2_to_qPhi2_2 (a b c q z : ℂ)
 theorem qPhi2_terminating_to_qPhi3_1 (n : ℕ) (b c q z : ℂ)
     (hq : ‖q‖<1) (hq0 : q≠0)
     (hpar : ∀ x ∈ [b,c,z], x≠0)
-    (hden : qDenominatorRegular [c,b*q^(1-(n:ℤ))/c] q) :
+    (hden : QDenominatorRegular [c,b*q^(1-(n:ℤ))/c] q) :
     qPhi [q^(-(n:ℤ)),b] [c] q (z) =
       qProductRatio n [c/b] [c] q * b^n * qPhi [q^(-(n:ℤ)),b,q/z] [b*q^(1-(n:ℤ))/c] q (z/c) := by
   sorry
@@ -57,7 +57,7 @@ theorem qPhi2_terminating_to_qPhi3_1 (n : ℕ) (b c q z : ℂ)
 theorem qPhi2_two_qPhi3_2 (a b c q z : ℂ)
     (hq : ‖q‖<1) (hq0 : q≠0)
     (hpar : ∀ x ∈ [b,c,z], x≠0)
-    (hden : qDenominatorRegular [c,b*z/c,z,c/(b*z),b*z,b*z*q/c,c*q/(b*z)] q)
+    (hden : QDenominatorRegular [c,b*z/c,z,c/(b*z),b*z,b*z*q/c,c*q/(b*z)] q)
     (hz : ‖z‖<1) :
     qPhi [a,b] [c] q (z) =
       qProductRatioInf [a*b*z/c] [b*z/c] q * qPhi [a,c/b,0] [c,c*q/(b*z)] q (q) + qProductRatioInf [a,b*z,c/b] [c,z,c/(b*z)] q * qPhi [z,a*b*z/c,0] [b*z,b*z*q/c] q (q) := by
@@ -68,7 +68,7 @@ theorem qPhi2_two_qPhi3_2 (a b c q z : ℂ)
 theorem qPhi2_two_qPhi3_2_alternative (a b c q z : ℂ)
     (hq : ‖q‖<1) (hq0 : q≠0)
     (hpar : ∀ x ∈ [a,b,c], x≠0)
-    (hden : qDenominatorRegular [c,c/(a*b),a*b/c,z,q*a*b/c,q*c/(a*b),0] q)
+    (hden : QDenominatorRegular [c,c/(a*b),a*b/c,z,q*a*b/c,q*c/(a*b),0] q)
     (hz : ‖z‖<1) :
     qPhi [a,b] [c] q (z) =
       qProductRatioInf [c/a,c/b] [c,c/(a*b)] q * qPhi [a,b,a*b*z/c] [q*a*b/c,0] q (q) + qProductRatioInf [a,b,a*b*z/c] [c,a*b/c,z] q * qPhi [c/a,c/b,z] [q*c/(a*b),0] q (q) := by
@@ -79,7 +79,7 @@ theorem qPhi2_two_qPhi3_2_alternative (a b c q z : ℂ)
 theorem qPhi2_terminating_reverse (n : ℕ) (b c q z : ℂ)
     (hq : ‖q‖<1) (hq0 : q≠0)
     (hpar : ∀ x ∈ [b,c,z], x≠0)
-    (hden : qDenominatorRegular [c,b*q^(1-(n:ℤ))/c,0] q) :
+    (hden : QDenominatorRegular [c,b*q^(1-(n:ℤ))/c,0] q) :
     qPhi [q^(-(n:ℤ)),b] [c] q (z) =
       qProductRatio n [c/b] [c] q * (b*z/q)^n * qPhi [q^(-(n:ℤ)),q/z,q^(1-(n:ℤ))/c] [b*q^(1-(n:ℤ))/c,0] q (q) := by
   sorry
@@ -89,7 +89,7 @@ theorem qPhi2_terminating_reverse (n : ℕ) (b c q z : ℂ)
 theorem qPhi2_terminating_sears (n : ℕ) (b c q z : ℂ)
     (hq : ‖q‖<1) (hq0 : q≠0)
     (hpar : ∀ x ∈ [b,c], x≠0)
-    (hden : qDenominatorRegular [c,b*q^(1-(n:ℤ))/c,0] q) :
+    (hden : QDenominatorRegular [c,b*q^(1-(n:ℤ))/c,0] q) :
     qPhi [q^(-(n:ℤ)),b] [c] q (z) =
       qProductRatio n [c/b] [c] q * qPhi [q^(-(n:ℤ)),b,b*z*q^(-(n:ℤ))/c] [b*q^(1-(n:ℤ))/c,0] q (q) := by
   sorry
@@ -99,7 +99,7 @@ theorem qPhi2_terminating_sears (n : ℕ) (b c q z : ℂ)
 theorem qPhi3_sears_first (a b c d e q : ℂ)
     (hq : ‖q‖<1) (hq0 : q≠0)
     (hpar : ∀ x ∈ [a,b,c], x≠0)
-    (hden : qDenominatorRegular [d,e,d*e/(a*b*c),d*e/(b*c)] q)
+    (hden : QDenominatorRegular [d,e,d*e/(a*b*c),d*e/(b*c)] q)
     (hz : ‖d*e/(a*b*c)‖<1)
     (he : ‖e/a‖<1) :
     qPhi [a,b,c] [d,e] q (d*e/(a*b*c)) =
@@ -111,7 +111,7 @@ theorem qPhi3_sears_first (a b c d e q : ℂ)
 theorem qPhi3_sears_second (a b c d e q : ℂ)
     (hq : ‖q‖<1) (hq0 : q≠0)
     (hpar : ∀ x ∈ [a,b,c], x≠0)
-    (hden : qDenominatorRegular [d,e,d*e/(a*b*c),d*e/(a*b),d*e/(b*c)] q)
+    (hden : QDenominatorRegular [d,e,d*e/(a*b*c),d*e/(a*b),d*e/(b*c)] q)
     (hz : ‖d*e/(a*b*c)‖<1)
     (hb : ‖b‖<1) :
     qPhi [a,b,c] [d,e] q (d*e/(a*b*c)) =
@@ -123,7 +123,7 @@ theorem qPhi3_sears_second (a b c d e q : ℂ)
 theorem qPhi3_terminating_first (n : ℕ) (b c d e q : ℂ)
     (hq : ‖q‖<1) (hq0 : q≠0)
     (hpar : ∀ x ∈ [b,c,d], x≠0)
-    (hden : qDenominatorRegular [d,e,d*e/(b*c)] q) :
+    (hden : QDenominatorRegular [d,e,d*e/(b*c)] q) :
     qPhi [q^(-(n:ℤ)),b,c] [d,e] q (q) =
       qProductRatio n [d*e/(b*c)] [e] q * (b*c/d)^n * qPhi [q^(-(n:ℤ)),d/b,d/c] [d,d*e/(b*c)] q (q) := by
   sorry
@@ -133,7 +133,7 @@ theorem qPhi3_terminating_first (n : ℕ) (b c d e q : ℂ)
 theorem qPhi3_terminating_second (n : ℕ) (b c d e q : ℂ)
     (hq : ‖q‖<1) (hq0 : q≠0)
     (hpar : ∀ x ∈ [b,c,e], x≠0)
-    (hden : qDenominatorRegular [d,e,c*q^(1-(n:ℤ))/e] q) :
+    (hden : QDenominatorRegular [d,e,c*q^(1-(n:ℤ))/e] q) :
     qPhi [q^(-(n:ℤ)),b,c] [d,e] q (q) =
       qProductRatio n [e/c] [e] q * c^n * qPhi [q^(-(n:ℤ)),c,d/b] [d,c*q^(1-(n:ℤ))/e] q (b*q/e) := by
   sorry
@@ -143,7 +143,7 @@ theorem qPhi3_terminating_second (n : ℕ) (b c d e q : ℂ)
 theorem qPhi3_terminating_third (n : ℕ) (b c d e q : ℂ)
     (hq : ‖q‖<1) (hq0 : q≠0)
     (hpar : ∀ x ∈ [b,c,e], x≠0)
-    (hden : qDenominatorRegular [d,e,c*q^(1-(n:ℤ))/e] q) :
+    (hden : QDenominatorRegular [d,e,c*q^(1-(n:ℤ))/e] q) :
     qPhi [q^(-(n:ℤ)),b,c] [d,e] q (d*e*q^n/(b*c)) =
       qProductRatio n [e/c] [e] q * qPhi [q^(-(n:ℤ)),c,d/b] [d,c*q^(1-(n:ℤ))/e] q (q) := by
   sorry
@@ -153,7 +153,7 @@ theorem qPhi3_terminating_third (n : ℕ) (b c d e q : ℂ)
 theorem qPhi3_terminating_fourth (n : ℕ) (b c d e q : ℂ)
     (hq : ‖q‖<1) (hq0 : q≠0)
     (hpar : ∀ x ∈ [c,d,e], x≠0)
-    (hden : qDenominatorRegular [d,e,c*q^(1-(n:ℤ))/e,c*q^(1-(n:ℤ))/d] q) :
+    (hden : QDenominatorRegular [d,e,c*q^(1-(n:ℤ))/e,c*q^(1-(n:ℤ))/d] q) :
     qPhi [q^(-(n:ℤ)),b,c] [d,e] q (q) =
       qProductRatio n [e/c,d/c] [e,d] q * c^n * qPhi [q^(-(n:ℤ)),c,c*b*q^(1-(n:ℤ))/(d*e)] [c*q^(1-(n:ℤ))/e,c*q^(1-(n:ℤ))/d] q (q) := by
   sorry
@@ -163,7 +163,7 @@ theorem qPhi3_terminating_fourth (n : ℕ) (b c d e q : ℂ)
 theorem qPhi3_three_term (a b c d e q : ℂ)
     (hq : ‖q‖<1) (hq0 : q≠0)
     (hpar : ∀ x ∈ [a,b,c,d,e], x≠0)
-    (hden : qDenominatorRegular [d,e,c*q/d,q/a,e/(b*c),b*c*q/e,d/q,b*q/d,q^2/d,e*q/d,c*q/a] q)
+    (hden : QDenominatorRegular [d,e,c*q/d,q/a,e/(b*c),b*c*q/e,d/q,b*q/d,q^2/d,e*q/d,c*q/a] q)
     (hz : ‖d*e/(a*b*c)‖<1)
     (hb : ‖b*q/d‖<1) :
     qPhi [a,b,c] [d,e] q (d*e/(a*b*c)) =
@@ -175,7 +175,7 @@ theorem qPhi3_three_term (a b c d e q : ℂ)
 theorem qPhi3_connection (a b c d e q : ℂ)
     (hq : ‖q‖<1) (hq0 : q≠0)
     (hpar : ∀ x ∈ [a,b,c,e], x≠0)
-    (hden : qDenominatorRegular [d,e,e/(b*c),b*c/e,d*e/(a*b*c),b*c*q/e,d*e/(b*c),e*q/(b*c)] q)
+    (hden : QDenominatorRegular [d,e,e/(b*c),b*c/e,d*e/(a*b*c),b*c*q/e,d*e/(b*c),e*q/(b*c)] q)
     (hz : ‖d*e/(a*b*c)‖<1) :
     qPhi [a,b,c] [d,e] q (d*e/(a*b*c)) =
       qProductRatioInf [e/b,e/c] [e,e/(b*c)] q * qPhi [d/a,b,c] [d,b*c*q/e] q (q) + qProductRatioInf [d/a,b,c,d*e/(b*c)] [d,e,b*c/e,d*e/(a*b*c)] q * qPhi [e/b,e/c,d*e/(a*b*c)] [d*e/(b*c),e*q/(b*c)] q (q) := by
@@ -186,7 +186,7 @@ theorem qPhi3_connection (a b c d e q : ℂ)
 theorem qPhi4_balanced_transformations (n : ℕ) (a b c d e f q : ℂ)
     (hq : ‖q‖<1) (hq0 : q≠0)
     (hpar : ∀ x ∈ [a,b,c,d,e,f], x≠0)
-    (hden : qDenominatorRegular [d,e,f,a*q^(1-(n:ℤ))/e,a*q^(1-(n:ℤ))/f,e*f/(a*b),e*f/(a*c),e*f/(a*b*c),q^(1-(n:ℤ))/a] q)
+    (hden : QDenominatorRegular [d,e,f,a*q^(1-(n:ℤ))/e,a*q^(1-(n:ℤ))/f,e*f/(a*b),e*f/(a*c),e*f/(a*b*c),q^(1-(n:ℤ))/a] q)
     (hbal : d*e*f=a*b*c*q^(1-(n:ℤ))) :
     (qPhi [q^(-(n:ℤ)),a,b,c] [d,e,f] q (q)) = qProductRatio n [e/a,f/a] [e,f] q * a^n * qPhi [q^(-(n:ℤ)),a,d/b,d/c] [d,a*q^(1-(n:ℤ))/e,a*q^(1-(n:ℤ))/f] q (q) ∧
     (qPhi [q^(-(n:ℤ)),a,b,c] [d,e,f] q (q)) = qProductRatio n [a,e*f/(a*b),e*f/(a*c)] [e,f,e*f/(a*b*c)] q * qPhi [q^(-(n:ℤ)),e/a,f/a,e*f/(a*b*c)] [e*f/(a*b),e*f/(a*c),q^(1-(n:ℤ))/a] q (q) := by
@@ -197,7 +197,7 @@ theorem qPhi4_balanced_transformations (n : ℕ) (a b c d e f q : ℂ)
 theorem nonterminating_watson (a b c d e f q : ℂ)
     (hq : ‖q‖<1) (hq0 : q≠0)
     (hpar : ∀ x ∈ [a,b,c,d,e,f], x≠0)
-    (hden : qDenominatorRegular [a^(1/2:ℂ),-a^(1/2:ℂ),a*q/b,a*q/c,a*q/d,a*q/e,a*q/f,a*q/(d*e*f),d*e*f/a,a^2*q^2/(b*c*d*e*f),d*e*f/(a*q),a^2*q^2/(b*d*e*f),a^2*q^2/(c*d*e*f),a*q^2/(d*e*f)] q)
+    (hden : QDenominatorRegular [a^(1/2:ℂ),-a^(1/2:ℂ),a*q/b,a*q/c,a*q/d,a*q/e,a*q/f,a*q/(d*e*f),d*e*f/a,a^2*q^2/(b*c*d*e*f),d*e*f/(a*q),a^2*q^2/(b*d*e*f),a^2*q^2/(c*d*e*f),a*q^2/(d*e*f)] q)
     (hz : ‖a^2*q^2/(b*c*d*e*f)‖<1) :
     qPhi [a,q*a^(1/2:ℂ),-q*a^(1/2:ℂ),b,c,d,e,f] [a^(1/2:ℂ),-a^(1/2:ℂ),a*q/b,a*q/c,a*q/d,a*q/e,a*q/f] q (a^2*q^2/(b*c*d*e*f)) =
       qProductRatioInf [a*q,a*q/(d*e),a*q/(d*f),a*q/(e*f)] [a*q/d,a*q/e,a*q/f,a*q/(d*e*f)] q * qPhi [a*q/(b*c),d,e,f] [a*q/b,a*q/c,d*e*f/a] q (q) + qProductRatioInf [a*q,a*q/(b*c),d,e,f,a^2*q^2/(b*d*e*f),a^2*q^2/(c*d*e*f)] [a*q/b,a*q/c,a*q/d,a*q/e,a*q/f,a^2*q^2/(b*c*d*e*f),d*e*f/(a*q)] q * qPhi [a*q/(d*e),a*q/(d*f),a*q/(e*f),a^2*q^2/(b*c*d*e*f)] [a^2*q^2/(b*d*e*f),a^2*q^2/(c*d*e*f),a*q^2/(d*e*f)] q (q) := by
@@ -208,7 +208,7 @@ theorem nonterminating_watson (a b c d e f q : ℂ)
 theorem qPhi3_terminating_quadratic (n : ℕ) (a b c q z : ℂ)
     (hq : ‖q‖<1) (hq0 : q≠0)
     (hpar : ∀ x ∈ [b,c,z], x≠0)
-    (hden : qDenominatorRegular [a*q/b,a*q/c,z,a*z,q/z] q)
+    (hden : QDenominatorRegular [a*q/b,a*q/c,z,a*z,q/z] q)
     (ha : a=q^(-(n:ℤ))) :
     qPhi [a,b,c] [a*q/b,a*q/c] q (a*q*z/(b*c)) =
       qProductRatioInf [a*z] [z] q * qPhi [a^(1/2:ℂ),-a^(1/2:ℂ),(a*q)^(1/2:ℂ),-(a*q)^(1/2:ℂ),a*q/(b*c)] [a*q/b,a*q/c,a*z,q/z] q (q) := by
@@ -219,8 +219,8 @@ theorem qPhi3_terminating_quadratic (n : ℕ) (a b c q z : ℂ)
 theorem qPhi4_square (a b q z : ℂ)
     (hq : ‖q‖<1) (hq0 : q≠0)
     (hpar : ∀ x ∈ [z], x≠0)
-    (hden : qDenominatorRegular [a*b*q^(1/2:ℂ),-a*b*q^(1/2:ℂ),-a*b,a^2*b^2] q)
-    (hterm : qTerminating [a,b,a*b*z,a*b/z] q ∧ qTerminating [a^2,b^2,a*b,a*b*z,a*b/z] q) :
+    (hden : QDenominatorRegular [a*b*q^(1/2:ℂ),-a*b*q^(1/2:ℂ),-a*b,a^2*b^2] q)
+    (hterm : QTerminating [a,b,a*b*z,a*b/z] q ∧ QTerminating [a^2,b^2,a*b,a*b*z,a*b/z] q) :
     qPhi [a,b,a*b*z,a*b/z] [a*b*q^(1/2:ℂ),-a*b*q^(1/2:ℂ),-a*b] q (q) ^ 2 =
       qPhi [a^2,b^2,a*b,a*b*z,a*b/z] [a*b*q^(1/2:ℂ),-a*b*q^(1/2:ℂ),-a*b,a^2*b^2] q (q) := by
   sorry
@@ -230,7 +230,7 @@ theorem qPhi4_square (a b q z : ℂ)
 theorem mixed_base_even_odd (a b c q z : ℂ)
     (hq : ‖q‖<1) (hq0 : q≠0)
     (hpar : ∀ x ∈ [b], x≠0)
-    (hden : qDenominatorRegular [c,a*z] q)
+    (hden : QDenominatorRegular [c,a*z] q)
     (hb : ‖b‖<1)
     (hz : ‖z‖<1) :
     (∑' n : ℕ, qPochhammer a (q^2) n * qPochhammer b q n * z^n / (qPochhammer (q^2) (q^2) n * qPochhammer c q n)) =
@@ -242,12 +242,12 @@ theorem mixed_base_even_odd (a b c q z : ℂ)
 theorem mixed_base_general (a b c q z : ℂ)
     (hq : ‖q‖<1) (hq0 : q≠0)
     (hpar : ∀ x ∈ [b], x≠0)
-    (hden : qDenominatorRegular [c] q)
+    (hden : QDenominatorRegular [c] q)
     (k : ℕ)
     (hk : 0<k)
     (hb : ‖b‖<1)
     (hz : ‖z‖<1)
-    (hbase : qDenominatorRegular [a*z] (q^k)) :
+    (hbase : QDenominatorRegular [a*z] (q^k)) :
     (∑' n : ℕ, qPochhammer a (q^k) n * qPochhammer b q (k*n) * z^n / (qPochhammer (q^k) (q^k) n * qPochhammer c q (k*n))) =
       qPochhammerInf b q * qPochhammerInf (a*z) (q^k) / (qPochhammerInf c q * qPochhammerInf z (q^k)) * (∑' n : ℕ, qPochhammer (c/b) q n * qPochhammer z (q^k) n * b^n / (qPochhammer q q n * qPochhammer (a*z) (q^k) n)) := by
   sorry

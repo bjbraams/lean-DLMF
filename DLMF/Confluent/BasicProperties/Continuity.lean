@@ -6,6 +6,7 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Confluent.LogSeries
+public import DLMFMathlib.Analysis.ODE.Wronskian
 
 /-!
 # Existence and continuity of Tricomi functions
@@ -27,10 +28,6 @@ open DLMF.Hypergeometric
 noncomputable section
 
 namespace DLMF.Confluent
-
-/-- Wronskian `f g' - g f'`. -/
-def wronskian (f g : ℂ → ℂ) (z : ℂ) : ℂ :=
-  f z * deriv g z - g z * deriv f z
 
 /-- Identity under the stated parameter and domain assumptions: `regularizedHGFun {a} {(-(n : ℂ))}
 z = poch a (n + 1) / (n + 1).factorial * z ^ (n + 1) * kummerM (a + n + 1) (n + 2) z`. -/

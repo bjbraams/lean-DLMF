@@ -65,8 +65,7 @@ theorem liouville_transformation {u : ℝ} {f g w w' Z Z' Z'' A' A'' : ℝ → �
 /-- DLMF 2.8.5 (Case I): with `ξ = ∫ f^{1/2} dz`, `ż² f(z) = 1`, where `ż = 1/ξ'(z)`; the
 transformed equation is 2.8.8 with `m = 0`. -/
 @[dlmf 2.8.E5, dlmf 2.8.E8, dlmf 2.8.i]
-theorem liouville_caseI {f ξ : ℝ → ℝ} {z : ℝ} (hf : 0 < f z)
-    (_hξ : HasDerivAt ξ (√(f z)) z) :
+theorem liouville_caseI {f ξ : ℝ → ℝ} {z : ℝ} (hf : 0 < f z) :
     (√(f z))⁻¹ ^ 2 * f z = 1 := by
   rw [inv_pow, Real.sq_sqrt hf.le, inv_mul_cancel₀ hf.ne']
 

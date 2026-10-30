@@ -666,7 +666,7 @@ Traversal: all §§11.1–11.16 checked; matching headings are §11.2,
   [YIntegralRep](DLMF/Bessel/YIntegralRep.lean#L252), corresponding to
   [11.5.2](https://dlmf.nist.gov/11.5.E2) on the proper convergence domain.
 - **Struve and modified Struve equations**, [11.2.7–10](https://dlmf.nist.gov/11.2.E7):
-  `DLMF.Struve.struveEquation` and `IsStruveSolutionOn` in
+  `DLMF.Struve.StruveEquation` and `IsStruveSolutionOn` in
   [Basic](DLMF/Struve/Basic/Functions.lean#L71), with a Boolean selecting the modified sign.
 
 ### §11.9(i): Lommel definitions
@@ -855,7 +855,7 @@ Traversal: all §§16.1–16.27 checked; matching headings are §16.2 and §16.1
   `GenPrincipalContinuation` specifies the principal continuation for `p=q+1`;
   `genHGLower` separately gives lower-bank values. For `p>q+1` nonterminating
   series values are not a continuation: use the Barnes constructions
-  `genHasBarnesValueLog`, `genBarnesHGLog` in the same file.
+  `GenHasBarnesValueLog`, `genBarnesHGLog` in the same file.
 - **Excess γq**, [16.2.2](https://dlmf.nist.gov/16.2.E2):
   `DLMF.Hypergeometric.genExcess` in
   [Basic](DLMF/GeneralizedHypergeometric/Basic/ParametersAndSeries.lean#L59).
@@ -890,7 +890,7 @@ specify general continuation data, rather than a globally single-valued Appell f
   `MeijerGConvergesLog`, `meijerGLog`, and `meijerG` in
   [MeijerG](DLMF/GeneralizedHypergeometric/MeijerG.lean#L27).
   Pole separation, orientation and convergence are recorded explicitly by
-  `Valid`, `Admissible`, and `meijerGContourRegion`. The principal function
+  `Valid`, `Admissible`, and `MeijerGContourRegion`. The principal function
   specializes the logarithmic one with `Complex.log`; a zero fallback outside
   the existence predicate is not a convergent contour value.
 
@@ -937,8 +937,8 @@ Traversal: all §§17.1–17.19 checked; no heading contains “Definition” or
   their parameter order matching the displayed formulas.
 - **Balanced/Saalschützian, k-balanced, well-poised, very-well-poised and
   nearly-poised series**, [17.4.9–13](https://dlmf.nist.gov/17.4.E9):
-  `DLMF.QHypergeometric.qBalanced`, `qKBalanced`, `qWellPoised`,
-  `qVeryWellPoised`, `qNearlyPoised` in
+  `DLMF.QHypergeometric.QBalanced`, `QKBalanced`, `QWellPoised`,
+  `QVeryWellPoised`, `QNearlyPoised` in
   [Basic](DLMF/QHypergeometric/Basic/Series.lean#L75).
 
 ## Chapter 18 — Orthogonal polynomials
@@ -1380,14 +1380,12 @@ are numerical and introduce no further functions.
   `2ⁿ Eₙ(1/2)`, retaining DLMF's alternating even Euler numbers.
 - **Periodic Bernoulli and antiperiodic Euler functions**,
   [24.2.11–12](https://dlmf.nist.gov/24.2.E11):
-  `DLMF.BernoulliEuler.periodicBernoulliB`, `periodicEulerE` in
-  [Basic](DLMF/BernoulliEuler/Basic.lean#L236), using fractional part and
-  the integer-part sign for Euler. Their values at integers follow the
-  half-open interval convention, especially relevant in degree one.
-  The real definitions `periodicBernoulli` in
+  `periodicBernoulli` in
   [EulerMaclaurin](DLMFMathlib/Analysis/EulerMaclaurin.lean#L47) and
-  `antiperiodicEuler` in [BooleSummation](DLMFMathlib/Analysis/BooleSummation.lean#L39)
-  repeat these same expressions. Mathlib's `periodizedBernoulli` in
+  `antiperiodicEuler` in [BooleSummation](DLMFMathlib/Analysis/BooleSummation.lean#L39),
+  using fractional part and the integer-part sign for Euler. Their values at
+  integers follow the half-open interval convention, especially relevant in
+  degree one. These are the canonical real definitions used throughout the project. Mathlib's `periodizedBernoulli` in
   [ZetaValues](.lake/packages/mathlib/Mathlib/NumberTheory/ZetaValues.lean#L274)
   is the corresponding function on `UnitAddCircle`; the local equality
   theorem makes the change of domain explicit.
@@ -1429,11 +1427,11 @@ Traversal: all §§25.1–25.21 checked; matching headings are §25.2
 
 - **Lerch transcendent Φ(z,s,a)**, [25.14.1](https://dlmf.nist.gov/25.14.E1):
   `DLMF.Zeta.lerchPhiSeries`, `lerchPhi`, and parameter-domain predicate
-  `z25b_lerchParamOK` in [Lerch](DLMF/Zeta/Lerch.lean#L44).
+  `Z25bLerchParamOK` in [Lerch](DLMF/Zeta/Lerch.lean#L44).
   The continued function chooses an analytic extension on `ℂ \ [1,∞)`;
   on the cut it retains the totalized series, which does not encode DLMF's
   two boundary values. A separate actual integral construction
-  `q25b_lerchInt` and continuation predicate `q25b_IsLerchCont` occur in
+  `q25b_lerchInt` and continuation predicate `Q25bIsLerchCont` occur in
   [Q25bLerchContinuation](DLMF/Zeta/Q25bLerchContinuation.lean#L124).
   Lerch's historical K notation is an exponential-argument specialization,
   without a separate local function.
@@ -1570,7 +1568,7 @@ the definitions; displayed examples do not introduce new families.
   `planePartitionCount` in
   [BoxFormula](DLMF/Combinatorics/PlanePartitions/BoxFormula.lean#L29).
   The public construction is a finite down-closed set of positive lattice
-  triples. The independent array predicate `s26b_IsPPArray` and conversions
+  triples. The independent array predicate `S26bIsPPArray` and conversions
   `s26b_toArr`, `s26b_ofArr` in the same file realize the decreasing-array definition.
 - **Symmetric, cyclically symmetric and totally symmetric plane partitions**,
   [prose before 26.12.5–8](https://dlmf.nist.gov/26.12.E5):

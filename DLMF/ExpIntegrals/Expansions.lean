@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.IncompleteGamma.ExponentialIntegral
 public import DLMF.Bessel.SphericalProductTools
+public import DLMF.IncompleteGamma.ExponentialIntegral
 
 /-!
 # Power, reciprocal factorial and spherical Bessel series, DLMF §§6.6 and 6.10–6.11
@@ -880,7 +880,7 @@ theorem cosIntCin_spherical_series (z : ℂ) :
 /-- The series with terms `(fun n : ℕ => (-1 : ℂ)^n*((x : ℂ)-expIntSphericalCoeff n)*sphericalI n
 (x/2)^2)` converges to `((Real.expIntEi x : ℂ)-Real.eulerMascheroniConstant-Real.log |x|)`. -/
 @[dlmf 6.10.E6]
-theorem expIntEi_spherical_series {x : ℝ} (hx : x ≠ 0) :
+theorem expIntEi_spherical_series {x : ℝ} :
     HasSum (fun n : ℕ => (-1 : ℂ)^n*((x : ℂ)-expIntSphericalCoeff n)*sphericalI n (x/2)^2) ((Real.expIntEi x : ℂ)-Real.eulerMascheroniConstant-Real.log |x|) := by
   have hE : ((Real.expIntEi x : ℂ) - Real.eulerMascheroniConstant - Real.log |x|) =
       -cosIntCin (I*x) - I*sinInt (I*x) := by
@@ -1002,7 +1002,7 @@ theorem Ein_spherical_series (z : ℂ) :
 /-- Identity under the stated parameter and domain assumptions: `genExpIntE 1 z = upperIncGamma 0
 z`. -/
 @[dlmf 6.11.E1]
-theorem expIntE1_eq_upperIncGamma {z : ℂ} (hz : z ≠ 0) :
+theorem expIntE1_eq_upperIncGamma {z : ℂ} :
     genExpIntE 1 z = upperIncGamma 0 z := by
   simp [genExpIntE]
 

@@ -71,7 +71,7 @@ theorem hypergeometric0F2OneOne_hasSum (x : ℂ) :
 /-- DLMF 2.10.19 in the project's convergence predicate for generalized hypergeometric series. -/
 @[dlmf 2.10.E19]
 theorem genSeriesConvergesTo_0F2 (x : ℂ) :
-    DLMF.Hypergeometric.genSeriesConvergesTo 0 {1, 1} x
+    DLMF.Hypergeometric.GenSeriesConvergesTo 0 {1, 1} x
       (hypergeometric0F2OneOne x) :=
   (hypergeometric0F2OneOne_hasSum x).tendsto_sum_nat
 

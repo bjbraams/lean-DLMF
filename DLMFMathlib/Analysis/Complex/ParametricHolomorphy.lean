@@ -5,10 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import Mathlib.Analysis.Complex.Liouville
-public import Mathlib.Analysis.Calculus.SmoothSeries
-public import Mathlib.MeasureTheory.Integral.Bochner.SumMeasure
 public import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
+public import Mathlib.Analysis.Calculus.SmoothSeries
+public import Mathlib.Analysis.Complex.Liouville
+public import Mathlib.MeasureTheory.Integral.Bochner.SumMeasure
 
 /-!
 # Holomorphy in parameters of series and integrals
@@ -289,7 +289,6 @@ private theorem integrable_fderiv_and_hasFDerivAt_integral [FiniteDimensional �
   exact (hasFDerivAt_integral_of_dominated_of_fderiv_le (ball_mem_nhds x hr0) hFmeas hint
     hF'meas hbound (hg.div_const r) hderiv)
 
-
 /-- The parameter derivative of a locally dominated holomorphic family is integrable. -/
 theorem integrable_fderiv_of_locally_dominated [FiniteDimensional ℂ E]
     {Φ : E → α → F} {U : Set E} (hU : IsOpen U)
@@ -328,7 +327,7 @@ theorem differentiableOn_integral_of_locally_dominated [FiniteDimensional ℂ E]
 
 /-- The derivative of a locally dominated holomorphic integral is the integral of the derivatives.
 -/
-theorem hasDerivAt_integral_of_locally_dominated [CompleteSpace F]
+theorem hasDerivAt_integral_of_locally_dominated
     {Φ : ℂ → α → F} {U : Set ℂ} (hU : IsOpen U)
     (hmeas : ∀ x ∈ U, AEStronglyMeasurable (Φ x) μ)
     (hdiff : ∀ᵐ a ∂μ, DifferentiableOn ℂ (Φ · a) U)

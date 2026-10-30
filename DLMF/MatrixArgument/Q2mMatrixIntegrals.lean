@@ -100,9 +100,6 @@ theorem q2m_det_one_add {m : ℕ} {X : Matrix (Fin m) (Fin m) ℝ} (hX : X.IsHer
   rw [h1, det_mul, det_mul, det_diagonal, mul_comm, ← mul_assoc, ← det_mul,
     Unitary.star_mul_self_of_mem U.2, det_one, one_mul]
 
-
-
-
 /-- A positive-definite `T` stays positive definite after subtracting a small multiple of `I`. -/
 theorem q2m_exists_posDef_sub_smul {m : ℕ} {T : Matrix (Fin m) (Fin m) ℝ} (hT : T.PosDef) :
     ∃ ε : ℝ, 0 < ε ∧ (T - ε • (1 : Matrix (Fin m) (Fin m) ℝ)).PosDef := by

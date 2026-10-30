@@ -5,16 +5,16 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Struve.SeriesAndEquations
 public import DLMF.Bessel.Elementary
 public import DLMF.Bessel.NeumannSeries
-public import DLMF.Gamma.Simplex.GammaPochhammer
-public import Mathlib.Analysis.Complex.RemovableSingularity
-public import Mathlib.Analysis.Calculus.Deriv.Prod
 public import DLMF.Confluent.BasicProperties.Continuity
-public import Mathlib.Analysis.Complex.LocallyUniformLimit
-public import DLMFMathlib.Analysis.Complex.ParameterLimits
+public import DLMF.Gamma.Simplex.GammaPochhammer
 public import DLMF.Hypergeometric.GeneralizedContinuity
+public import DLMF.Struve.SeriesAndEquations
+public import DLMFMathlib.Analysis.Complex.ParameterLimits
+public import Mathlib.Analysis.Calculus.Deriv.Prod
+public import Mathlib.Analysis.Complex.LocallyUniformLimit
+public import Mathlib.Analysis.Complex.RemovableSingularity
 
 /-!
 # Lommel functions and parameter continuation
@@ -374,7 +374,7 @@ theorem lommelS_ode {μ ν : ℂ} (h : LommelRegular μ ν) {z : ℂ} (hz : z �
 /-- Identity under the stated parameter and domain assumptions: `lommelS μ (-ν) z = lommelS μ ν
 z`. -/
 @[dlmf 11.9.E6]
-theorem lommelS_neg_order {μ ν : ℂ} (h : LommelRegular μ ν) {z : ℂ} (hz : z ∈ slitPlane) :
+theorem lommelS_neg_order {μ ν : ℂ} (h : LommelRegular μ ν) {z : ℂ} :
     lommelS μ (-ν) z = lommelS μ ν z := by
   have h (k : ℕ) : lommelA μ (-ν) k=lommelA μ ν k := by simp [lommelA]
   simp only [lommelS, h]
@@ -462,7 +462,7 @@ theorem lommelS_bessel_series_7 {μ ν : ℂ} (h : ∀ n : ℕ, μ-ν ≠ -(n+1)
 ((μ+ν+1)/2)*z^((μ+1-ν)/2)*(z/2)^k/((k.factorial:ℂ)*(2*k+μ-ν+1))*besselJ (k+(μ+ν+1)/2) z)`
 converges to `(lommelS μ ν z)`. -/
 @[dlmf 11.9.E8]
-theorem lommelS_bessel_series_8 {μ ν : ℂ} (h : ∀ n : ℕ, μ-ν ≠ -(n+1) ∧ μ+ν ≠ -(n+1)) (hm : ∀ n : ℕ, μ ≠ -(n+1)) {z : ℂ} (hz : z ∈ slitPlane) :
+theorem lommelS_bessel_series_8 {μ ν : ℂ} (h : ∀ n : ℕ, μ-ν ≠ -(n+1) ∧ μ+ν ≠ -(n+1)) {z : ℂ} (hz : z ∈ slitPlane) :
     HasSum (fun k : ℕ => 2^((μ+ν-1)/2)*Gamma ((μ+ν+1)/2)*z^((μ+1-ν)/2)*(z/2)^k/((k.factorial:ℂ)*(2*k+μ-ν+1))*besselJ (k+(μ+ν+1)/2) z) (lommelS μ ν z) := by
   have hz0 := slitPlane_ne_zero hz
   have hw0 : z / 2 ≠ 0 := div_ne_zero hz0 two_ne_zero
@@ -739,7 +739,7 @@ theorem differentiable_besselY_order {z : ℂ} (hz : z ∈ slitPlane) :
     have hopen : IsOpen {μ : ℂ | sin (μ*π) ≠ 0} := isOpen_ne_fun (by fun_prop) continuous_const
     refine ((differentiable_besselD (slitPlane_ne_zero hz) ν).div (show DifferentiableAt ℂ (fun μ : ℂ => sin (μ*π)) ν by fun_prop) hS).congr_of_eventuallyEq ?_
     filter_upwards [hopen.mem_nhds hS] with μ hμ
-    exact besselY_eq_of_not_int (fun k hk => hμ (by rw [hk, sin_int_mul_pi_complex])) z
+    exact besselY_eq_of_not_int (fun k hk => hμ (by rw [hk, Complex.sin_int_mul_pi])) z
 
 /-- The entire numerator of the regular capital Lommel function in its two half-parameters. -/
 def lommelNumerator (a b z : ℂ) : ℂ :=
@@ -785,7 +785,6 @@ theorem lommelNumerator_symm (a b : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
   rw [hc,hs]
   linear_combination (2^(a+b-2)*cos (b*π)*besselJ (a-b) z)*hca +
     (2^(a+b-2)*sin (b*π)*besselY (a-b) z)*hca
-
 
 /-- The regular capital Lommel function is a product of Gamma factors and its entire numerator. -/
 private lemma lommelRegular_eq_numerator {μ ν z : ℂ} (h : LommelRegular μ ν) :
@@ -942,7 +941,6 @@ private lemma lommel_eventually_affine_regular (c μ : ℂ) :
     exact ((by fun_prop : ContinuousAt (fun w : ℂ => (w+c)/2) μ).tendsto.mono_left
       nhdsWithin_le_nhds).eventually (isOpen_not_neg_nat.mem_nhds h)
 
-
 /-- At an intersection of the polar hyperplanes, the numerator vanishes to second order along
  the degree parameter. The two partial derivatives vanish separately. -/
 private lemma lommelNumerator_diagonal_deriv_zero (μ ν : ℂ) (n k : ℕ) {z : ℂ}
@@ -1004,7 +1002,6 @@ private lemma lommel_exists_tendsto_div_sub_sq {F : ℂ → ℂ} (hF : Different
   apply ht.congr'
   filter_upwards [self_mem_nhdsWithin] with w hw
   simp only [dslope_of_ne _ (show w ≠ μ from hw),slope_def_field,h0,sub_zero,div_div,pow_two]
-
 
 /-- The one- or two-pole numerator cancellations give a finite parameter limit for every
  capital Lommel function on the slit plane. -/
@@ -1108,8 +1105,6 @@ theorem lommelCapital_parameter_limit (μ ν : ℂ) {z : ℂ} (hz : z ∈ slitPl
     Tendsto (fun m => lommelCapitalRegular m ν z) (𝓝[≠] μ) (𝓝 (lommelCapital μ ν z)) := by
   obtain ⟨c,hc⟩ := lommelCapital_exists_parameter_limit μ ν hz
   simpa only [lommelCapital,hc.limUnder_eq] using hc
-
-
 
 /-- The Lommel cancellation numerator is jointly continuous in degree and argument on the
  slit plane. -/
@@ -1268,7 +1263,6 @@ private lemma lommelCapital_parameter_locallyUniform (μ ν : ℂ) :
         intro z hz
         exact (hm z).symm
 
-
 /-- The capital Lommel function solves the inhomogeneous Bessel equation throughout the slit
 plane, including exceptional parameters filled in by the parameter limit. -/
 @[dlmf 11.9.E1]
@@ -1307,6 +1301,5 @@ theorem lommelCapital_ode (μ ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
     ((continuousAt_const_cpow (slitPlane_ne_zero hz)).comp
       (f:=fun m : ℂ => m-1) (x:=μ) (by fun_prop)).tendsto.mono_left nhdsWithin_le_nhds
   simpa only [iteratedDeriv_succ,iteratedDeriv_zero] using tendsto_nhds_unique (hl.congr' hode) hr
-
 
 end DLMF.Struve

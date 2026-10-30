@@ -24,11 +24,11 @@ namespace DLMF.Airy
 The lower endpoint remains infinity on the ray of angle -π/3. -/
 def incompleteAiryAi (a z : ℂ) : ℂ :=
   (-rayIntegral (fun t => exp (t ^ 3 / 3 - z * t)) (-π / 3) 1 +
-    lineIntegral (fun t => exp (t ^ 3 / 3 - z * t)) (exp (-π * I / 3)) a) / (2 * π * I)
+    segmentIntegral (fun t => exp (t ^ 3 / 3 - z * t)) (exp (-π * I / 3)) a) / (2 * π * I)
 
 /-- A segment integral of a derivative is the difference of the primitive at the endpoints. -/
 theorem lineIntegral_eq_sub {f g : ℂ → ℂ} (hf : Continuous f) (hg : ∀ z, HasDerivAt g (f z) z)
-    (a b : ℂ) : lineIntegral f a b = g b - g a := by
+    (a b : ℂ) : segmentIntegral f a b = g b - g a := by
   have hd (t : ℝ) : HasDerivAt (fun u : ℝ => g (a + u * (b - a))) ((b - a) * f (a + t * (b - a))) t := by
     have h := ((hg (a + t * (b - a))).comp (t : ℂ)
       (((hasDerivAt_id (t : ℂ)).mul_const (b - a)).const_add a)).comp_ofReal
@@ -37,24 +37,24 @@ theorem lineIntegral_eq_sub {f g : ℂ → ℂ} (hf : Continuous f) (hg : ∀ z,
     (by fun_prop : Continuous (fun t : ℝ => (b - a) * f (a + t * (b - a)))).intervalIntegrable _ _
   have h := intervalIntegral.integral_eq_sub_of_hasDerivAt (fun t _ => hd t) hi
   rw [intervalIntegral.integral_const_mul] at h
-  simpa [lineIntegral] using h
+  simpa [segmentIntegral] using h
 
 /-- For an entire integrand, the segment integral differentiates in its upper endpoint. -/
 theorem hasDerivAt_lineIntegral_right {f : ℂ → ℂ} (hf : Differentiable ℂ f) (a b : ℂ) :
-    HasDerivAt (fun w => lineIntegral f a w) (f b) b := by
+    HasDerivAt (fun w => segmentIntegral f a w) (f b) b := by
   obtain ⟨g, hg⟩ := hf.isExactOn_univ
   have hg' (w : ℂ) : HasDerivAt g (f w) w := hg w (mem_univ w)
-  have he : (fun w => lineIntegral f a w) = fun w => g w - g a :=
+  have he : (fun w => segmentIntegral f a w) = fun w => g w - g a :=
     funext fun w => lineIntegral_eq_sub hf.continuous hg' a w
   rw [he]
   exact (hg' b).sub_const _
 
 /-- For an entire integrand, the segment integral differentiates in its lower endpoint. -/
 theorem hasDerivAt_lineIntegral_left {f : ℂ → ℂ} (hf : Differentiable ℂ f) (a b : ℂ) :
-    HasDerivAt (fun w => lineIntegral f w b) (-f a) a := by
+    HasDerivAt (fun w => segmentIntegral f w b) (-f a) a := by
   obtain ⟨g, hg⟩ := hf.isExactOn_univ
   have hg' (w : ℂ) : HasDerivAt g (f w) w := hg w (mem_univ w)
-  have he : (fun w => lineIntegral f w b) = fun w => g b - g w :=
+  have he : (fun w => segmentIntegral f w b) = fun w => g b - g w :=
     funext fun w => lineIntegral_eq_sub hf.continuous hg' w b
   rw [he]
   exact (hg' a).const_sub _
@@ -139,7 +139,7 @@ theorem incompleteAiryAi_complete_limit (z : ℂ) :
 
 /-- The incomplete integral with variable lower endpoint and the upper endpoint at infinity. -/
 def incompleteAiryAiLower (a z : ℂ) : ℂ :=
-  (lineIntegral (fun t => exp (t ^ 3 / 3 - z * t)) a (exp (π * I / 3)) +
+  (segmentIntegral (fun t => exp (t ^ 3 / 3 - z * t)) a (exp (π * I / 3)) +
     rayIntegral (fun t => exp (t ^ 3 / 3 - z * t)) (π / 3) 1) / (2 * π * I)
 
 /-- The lower-endpoint version of the incomplete Airy integral, DLMF §9.14. -/

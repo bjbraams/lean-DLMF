@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.EllipticIntegrals.Symmetric
 public import Carlson.R.BinomialSeries
+public import DLMF.EllipticIntegrals.Symmetric
 
 /-!
 # Symmetric elliptic integrals: Taylor and related series (DLMF §19.19)
@@ -114,29 +114,12 @@ theorem symEllIntR_hasSum_T {n : ℕ} (a : ℂ) (b z : Fin n → ℂ) (hc : 0 < 
   have hNf : (N.factorial : ℂ) ≠ 0 := by exact_mod_cast N.factorial_ne_zero
   field_simp
 
-/-- Complex homogeneity of `R_{-a}(𝐛; 𝐳)` (helper; any complex `a, 𝐛`): for slit-plane nodes and
-a slit-plane scale `μ` with `arg μ + arg zᵢ ∈ (-π, π)`, `R_{-a}(𝐛; μ𝐳) = μ^{-a} R_{-a}(𝐛; 𝐳)`. -/
-lemma p19sR1_symEllIntR_mul {ι : Type*} [Fintype ι] (a : ℂ) (b : ι → ℂ) {μ : ℂ} {z : ι → ℂ}
-    (hz : z ∈ Carlson.carlsonRSlitDomain) (hμ : μ ∈ slitPlane)
-    (harg : ∀ i, arg μ + arg (z i) ∈ Ioo (-Real.pi) Real.pi) :
-    symEllIntR a b (fun i => μ * z i) = μ ^ (-a) * symEllIntR a b z := by
-  have hmz : (fun i => μ * z i) ∈ Carlson.carlsonRSlitDomain := fun i => by
-    have hμ' := hμ
-    have hw := hz i
-    rw [mem_slitPlane_iff_arg] at hμ' hw ⊢
-    rw [arg_mul hμ'.2 hw.2 ⟨(harg i).1, (harg i).2.le⟩]
-    exact ⟨(harg i).2.ne, mul_ne_zero hμ'.2 hw.2⟩
-  rw [symEllIntR_of_mem _ _ hmz, symEllIntR_of_mem _ _ hz]
-  unfold Carlson.carlsonR
-  rw [Carlson.regCarlsonR_mul_of_arg_add (-a) b hz hμ harg]
-  ring
-
 /-- Complex homogeneity on the right half-plane (helper): `R_{-a}(𝐛; μ𝐳) = μ^{-a} R_{-a}(𝐛; 𝐳)`
 for `ℜ μ > 0` and `ℜ zᵢ > 0`. -/
 lemma p19sR1_symEllIntR_mul_of_re_pos {ι : Type*} [Fintype ι] (a : ℂ) (b : ι → ℂ) {μ : ℂ}
     {z : ι → ℂ} (hz : ∀ i, 0 < (z i).re) (hμ : 0 < μ.re) :
     symEllIntR a b (fun i => μ * z i) = μ ^ (-a) * symEllIntR a b z := by
-  refine p19sR1_symEllIntR_mul a b (fun i => mem_slitPlane_iff.mpr (Or.inl (hz i)))
+  refine symEllIntR_mul a b (fun i => mem_slitPlane_iff.mpr (Or.inl (hz i)))
     (mem_slitPlane_iff.mpr (Or.inl hμ)) fun i => ?_
   have hm := abs_lt.mp (abs_arg_lt_pi_div_two_iff.mpr (Or.inl hμ))
   have hi := abs_lt.mp (abs_arg_lt_pi_div_two_iff.mpr (Or.inl (hz i)))
@@ -224,7 +207,7 @@ theorem symEllIntR_hasSum_T_last {n : ℕ} (a : ℂ) (b : Fin (n + 1) → ℂ) (
     | cast j => exact harg j
   have hzw : symEllIntR a b z = symEllIntR a b (fun i => μ * w i) := by
     congr 1; funext i; simp only [w]; field_simp
-  rw [hzw, p19sR1_symEllIntR_mul a b hws hzn harg']
+  rw [hzw, symEllIntR_mul a b hws hzn harg']
   have H := (symEllIntR_hasSum_T a b w hc hw1).mul_left (μ ^ (-a))
   convert H using 2 with N
   rw [p19sR1_symEllIntT_last_zero N b (fun j => 1 - w j) (by simp only [hwl]; ring)]
@@ -264,16 +247,44 @@ theorem symEllIntRJ_eq_symEllIntR_five {x y z p : ℂ} (hx : x ∈ slitPlane) (h
   rw [← this]; ring
 
 /-- DLMF 19.19.7 with 19.19.8: with `A = (1/n) ∑ zⱼ`, `Zⱼ = 1 - zⱼ/A` (so `E₁(𝐙) = 0`),
-`|Zⱼ| < 1`, `R_{-a}(½; 𝐳) = A^{-a} ∑_N (a)_N/(n/2)_N T_N(½, 𝐙)`; `n ≥ 1`, `A ∈ ℂ \ (-∞, 0]`. -/
+`|Zⱼ| < 1`, `R_{-a}(½; 𝐳) = A^{-a} ∑_N (a)_N/(n/2)_N T_N(½, 𝐙)`; `n ≥ 1`, `A ∈ ℂ \ (-∞, 0]`.
+The condition `arg A + arg(zⱼ/A) ∈ (-π,π)` ensures that homogeneity preserves the
+principal branches. -/
 @[dlmf 19.19.E7, dlmf 19.19.E8]
-theorem symEllIntR_half_hasSum_mean {n : ℕ} (hn : 0 < n) (a : ℂ) (z : Fin n → ℂ)
+theorem symEllIntR_half_hasSum_mean {n : ℕ} (a : ℂ) (z : Fin n → ℂ)
     (hA : (1 / n : ℂ) * ∑ j, z j ∈ slitPlane)
-    (hZ : ∀ j, ‖1 - z j / ((1 / n : ℂ) * ∑ i, z i)‖ < 1) :
+    (hZ : ∀ j, ‖1 - z j / ((1 / n : ℂ) * ∑ i, z i)‖ < 1)
+    (harg : ∀ j, arg ((1 / n : ℂ) * ∑ i, z i) +
+      arg (z j / ((1 / n : ℂ) * ∑ i, z i)) ∈ Ioo (-π) π) :
     HasSum (fun N => ((1 / n : ℂ) * ∑ j, z j) ^ (-a) * ((ascPochhammer ℂ N).eval a /
       (ascPochhammer ℂ N).eval ((n : ℂ) / 2) *
         symEllIntT N (fun _ => 1 / 2) (fun j => 1 - z j / ((1 / n : ℂ) * ∑ i, z i))))
       (symEllIntR a (fun _ => 1 / 2) z) := by
-  sorry
+  let A : ℂ := (1 / n : ℂ) * ∑ j, z j
+  let w : Fin n → ℂ := fun j => z j / A
+  have hA0 : A ≠ 0 := slitPlane_ne_zero hA
+  have hn : 0 < n := by
+    apply Nat.pos_of_ne_zero
+    intro hn
+    subst n
+    simp [A] at hA0
+  have hwre (j : Fin n) : 0 < (w j).re := by
+    have hr := (abs_re_le_norm (1 - w j)).trans_lt (hZ j)
+    simp only [sub_re, one_re] at hr
+    linarith [le_abs_self (1 - (w j).re)]
+  have hws : w ∈ Carlson.carlsonRSlitDomain :=
+    fun j => mem_slitPlane_iff.mpr (Or.inl (hwre j))
+  have hc : 0 < (∑ _ : Fin n, (1 / 2 : ℂ)).re := by
+    simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul,
+      mul_re, natCast_re, natCast_im, zero_mul, sub_zero]
+    norm_num
+    positivity
+  have H := (symEllIntR_hasSum_T a (fun _ : Fin n => 1 / 2) w hc hZ).mul_left (A ^ (-a))
+  have hz : (fun j => A * w j) = z := by
+    funext j
+    exact mul_div_cancel₀ (z j) hA0
+  rw [← symEllIntR_mul a (fun _ : Fin n => 1 / 2) hws hA harg, hz] at H
+  simpa [A, w, Finset.sum_const, nsmul_eq_mul, div_eq_mul_inv] using H
 
 /-- DLMF 19.19.8: `E₁(𝐙) = 0` for `Zⱼ = 1 - zⱼ/A`, `A = (1/n)∑ zⱼ ≠ 0`. -/
 @[dlmf 19.19.E8]

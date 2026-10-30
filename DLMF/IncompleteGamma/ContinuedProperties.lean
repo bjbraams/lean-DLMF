@@ -5,8 +5,8 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.IncompleteGamma.Basic
 public import DLMF.ExpIntegrals.AnalyticProperties
+public import DLMF.IncompleteGamma.Basic
 public import DLMF.Statistical.IncompleteGamma
 
 /-!
@@ -351,8 +351,7 @@ theorem hasDerivAt_lowerIncGammaOnLog {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (w 
 /-- At a regular parameter the upper Gamma continuation is `Γ(a)` minus the lower one. -/
 theorem upperIncGammaOnLog_eq_Gamma_sub {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) (w : ℂ) :
     upperIncGammaOnLog a w=Gamma a-lowerIncGammaOnLog a w := by
-  have hi := segmentIntegral_eq_sub (by fun_prop : Continuous (fun u : ℂ => exp (a*u-exp u)))
-    (hasDerivAt_lowerIncGammaOnLog ha) (log (exp w)) w
+  have hi := segmentIntegral_eq_sub (hasDerivAt_lowerIncGammaOnLog ha) (log (exp w)) w
   have hz : exp w ≠ 0 := Complex.exp_ne_zero w
   have hl : lowerIncGammaOnLog a (log (exp w))=lowerIncGamma a (exp w) := by
     rw [lowerIncGammaOnLog, Complex.exp_log hz,
@@ -433,9 +432,8 @@ theorem upperIncGammaOnLog_add_one (a w : ℂ) :
     refine (((hP u).const_mul a).sub he).congr_deriv ?_
     rw [show (a+1)*u-exp u=(a*u-exp u)+u by ring, Complex.exp_add (a*u-exp u)]
     ring
-  have h1 := segmentIntegral_eq_sub (by fun_prop : Continuous (fun u : ℂ => exp ((a+1)*u-exp u)))
-    hd (log (exp w)) w
-  have h0 := segmentIntegral_eq_sub hf.continuous hP (log (exp w)) w
+  have h1 := segmentIntegral_eq_sub hd (log (exp w)) w
+  have h0 := segmentIntegral_eq_sub hP (log (exp w)) w
   have hr := upperIncGamma_add_one a hz
   have hp : (exp w)^a=exp (a*log (exp w)) := by rw [cpow_def_of_ne_zero hz]; ring_nf
   rw [upperIncGammaOnLog, upperIncGammaOnLog, h1, h0, hr, hp, Complex.exp_log hz,
@@ -457,7 +455,7 @@ theorem exp_eps_pi_I {ε : ℝ} (hε : ε=1 ∨ ε = -1) : exp (ε*π*I) = -1 :=
 /-- Identity under the stated parameter and domain assumptions: `lowerIncGammaOnLog a
 (w+2*π*m*I)=exp (2*π*m*I*a)*lowerIncGammaOnLog a w`. -/
 @[dlmf 8.2.E8]
-theorem lowerIncGammaOnLog_monodromy (w : ℂ) (m : ℤ) {a : ℂ} (ha : ∀ n : ℕ, a ≠ -n) :
+theorem lowerIncGammaOnLog_monodromy (w : ℂ) (m : ℤ) {a : ℂ} :
     lowerIncGammaOnLog a (w+2*π*m*I)=exp (2*π*m*I*a)*lowerIncGammaOnLog a w := by
   have he : exp (2*π*m*I)=1 := by
     rw [show (2:ℂ)*π*m*I=m*(2*π*I) by ring, exp_int_mul_two_pi_mul_I]

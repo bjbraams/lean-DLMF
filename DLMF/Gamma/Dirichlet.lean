@@ -27,7 +27,7 @@ noncomputable section
 namespace Real
 
 /-- Inner integral of Dirichlet's formula in two variables: `∫_0^t y^{b-1} dy = t^b / b`. -/
-theorem integral_rpow_zero_of_pos {b t : ℝ} (hb : 0 < b) (_ht : 0 ≤ t) :
+theorem integral_rpow_zero_of_pos {b t : ℝ} (hb : 0 < b) :
     ∫ y in (0 : ℝ)..t, y ^ (b - 1) = t ^ b / b := by
   have h : -1 < b - 1 := by linarith
   rw [integral_rpow (Or.inl h), sub_add_cancel, zero_rpow hb.ne', sub_zero]

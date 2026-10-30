@@ -7,10 +7,10 @@ module
 
 public import DLMF.Elementary.Hyperbolic.InverseIdentities
 public import DLMF.Gamma.BetaFunction.Cosine
-public import Mathlib.Analysis.SpecialFunctions.FrullaniIntegral
-public import TauCeti.Analysis.SpecialFunctions.Hyperbolic
 public import DLMF.Gamma.IntegralRepresentations.DigammaAndBinet
 public import DLMF.Gamma.SeriesExpansions
+public import Mathlib.Analysis.SpecialFunctions.FrullaniIntegral
+public import TauCeti.Analysis.SpecialFunctions.Hyperbolic
 
 /-!
 # Continued fractions and integrals of hyperbolic functions
@@ -1068,9 +1068,9 @@ theorem arccoth_zero_values :
     rw [hc, hs] at this; norm_num at this
 
 /-- Continued inverse-sinh branches have the corresponding continued primitive. -/
-theorem continued_antiderivative_arcsinh {U : Set ℂ} (hU : IsOpen U) {z : ℂ} (hz : z∈U)
+theorem continued_antiderivative_arcsinh {U : Set ℂ} {z : ℂ} (hz : z∈U)
     {A : ℂ → ℂ} (hA : AnalyticOnNhd ℂ A U)
-    (hinv : ∀ w∈U, Complex.sinh (A w)=w) (hcrit : z≠I ∧ z≠ -I) :
+    (hinv : ∀ w∈U, Complex.sinh (A w)=w) :
     HasDerivAt (fun w => w*A w-Complex.cosh (A w)) (A z) z := by
   have hdA:=(hA z hz).differentiableAt.hasDerivAt
   have hd:=((hasDerivAt_id z).mul hdA).sub hdA.ccosh
@@ -1081,9 +1081,9 @@ theorem continued_antiderivative_arcsinh {U : Set ℂ} (hU : IsOpen U) {z : ℂ}
     ring
 
 /-- Continued inverse-cosh branches have the corresponding continued primitive. -/
-theorem continued_antiderivative_arccosh {U : Set ℂ} (hU : IsOpen U) {z : ℂ} (hz : z∈U)
+theorem continued_antiderivative_arccosh {U : Set ℂ} {z : ℂ} (hz : z∈U)
     {A : ℂ → ℂ} (hA : AnalyticOnNhd ℂ A U)
-    (hinv : ∀ w∈U, Complex.cosh (A w)=w) (hcrit : z≠1 ∧ z≠ -1) :
+    (hinv : ∀ w∈U, Complex.cosh (A w)=w) :
     HasDerivAt (fun w => w*A w-Complex.sinh (A w)) (A z) z := by
   have hdA:=(hA z hz).differentiableAt.hasDerivAt
   have hd:=((hasDerivAt_id z).mul hdA).sub hdA.csinh

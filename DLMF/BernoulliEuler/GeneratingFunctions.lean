@@ -16,7 +16,7 @@ public import DLMF.Elementary.Hyperbolic
 * 24.2.3 and 24.2.8: the generating functions of the polynomials, on DLMF's full discs
   `|t| < 2π` and `|t| < π`, by a Cauchy product with `e^{xt}`.
 * 24.2.5 and 24.2.10: the explicit sums; 24.2.6 on the full disc `|t| < π/2`; 24.2.9.
-* 24.2.11–24.2.12: the periodic functions `periodicBernoulliB`, `periodicEulerE` (Basic).
+* 24.2.11–24.2.12: the periodic functions `periodicBernoulli`, `antiperiodicEuler` (Basic).
 * Tables 24.2.1 and 24.2.2: the first entries (exact values).
 
 Helper declarations carry the prefix `b24a_`.
@@ -311,18 +311,18 @@ theorem eulerNumber_eq_two_pow_mul_and_integer (n : ℕ) :
 /-- **DLMF 24.2.11**: `B̃ₙ(x) = Bₙ(x)` and `Ẽₙ(x) = Eₙ(x)` for `0 ≤ x < 1`. -/
 @[dlmf 24.2.E11]
 theorem periodic_eq_of_mem_Ico (n : ℕ) {x : ℝ} (h0 : 0 ≤ x) (h1 : x < 1) :
-    periodicBernoulliB n x = bernoulliFun n x ∧ periodicEulerE n x = eulerFun n x := by
+    periodicBernoulli n x = bernoulliFun n x ∧ antiperiodicEuler n x = eulerFun n x := by
   have hf : Int.fract x = x := Int.fract_eq_self.mpr ⟨h0, h1⟩
   have hfl : ⌊x⌋ = 0 := Int.floor_eq_zero_iff.mpr ⟨h0, h1⟩
-  simp [periodicBernoulliB, periodicEulerE, hf, hfl]
+  simp [periodicBernoulli, antiperiodicEuler, hf, hfl]
 
 /-- **DLMF 24.2.12**: `B̃ₙ(x+1) = B̃ₙ(x)` and `Ẽₙ(x+1) = -Ẽₙ(x)`, real `x`. -/
 @[dlmf 24.2.E12]
 theorem periodic_add_one (n : ℕ) (x : ℝ) :
-    periodicBernoulliB n (x + 1) = periodicBernoulliB n x ∧
-      periodicEulerE n (x + 1) = -periodicEulerE n x := by
-  refine ⟨by simp [periodicBernoulliB], ?_⟩
-  simp only [periodicEulerE, Int.fract_add_one, Int.floor_add_one]
+    periodicBernoulli n (x + 1) = periodicBernoulli n x ∧
+      antiperiodicEuler n (x + 1) = -antiperiodicEuler n x := by
+  refine ⟨by simp [periodicBernoulli], ?_⟩
+  simp only [antiperiodicEuler, Int.fract_add_one, Int.floor_add_one]
   rw [zpow_add_one₀ (by norm_num : (-1 : ℝ) ≠ 0)]
   ring
 

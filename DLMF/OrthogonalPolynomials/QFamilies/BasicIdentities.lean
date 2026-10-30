@@ -5,10 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.OrthogonalPolynomials.Wilson
 public import DLMF.OrthogonalPolynomials.GegenbauerSeries
-public import DLMF.QSeries.Identities
 public import DLMF.OrthogonalPolynomials.QOrthogonalityTools
+public import DLMF.OrthogonalPolynomials.Wilson
+public import DLMF.QSeries.Identities
 public import TauCeti.Probability.Distributions.LogNormal.Basic
 
 /-!
@@ -711,7 +711,7 @@ theorem askeyWilson_laurent_kernel (a q : ℂ) {z : ℂ} (hz : z ≠ 0) (k : ℕ
 z⁻¹) / 2) = a⁻¹ ^ n * qPochhammer (a * b) q n * qPochhammer (a * c) q n * qPochhammer (a * d)
 q n * askeyWilsonLaurent a b c d q n z`. -/
 @[dlmf 18.28.E1_5]
-theorem askeyWilson_laurent_representation {a b c d q : ℂ} (ha : a ≠ 0) (hq : q ≠ 0)
+theorem askeyWilson_laurent_representation {a b c d q : ℂ}
     (hq1 : ‖q‖ < 1) (hab : ‖a * b‖ < 1) (hac : ‖a * c‖ < 1) (had : ‖a * d‖ < 1) (n : ℕ) {z : ℂ} (hz : z ≠ 0) :
     askeyWilson a b c d q n ((z + z⁻¹) / 2) = a⁻¹ ^ n * qPochhammer (a * b) q n *
       qPochhammer (a * c) q n * qPochhammer (a * d) q n * askeyWilsonLaurent a b c d q n z := by
@@ -805,7 +805,7 @@ theorem qRacah_eq_sum_lattice {q : ℂ} (hq : q ≠ 0) (a b c d : ℂ)
 /-- Identity under the stated parameter and domain assumptions: `qRacah a b c d q n (q⁻¹ ^ y + c *
 d * q ^ (y + 1)) = qRacah c d a b q y (q⁻¹ ^ n + a * b * q ^ (n + 1))`. -/
 @[dlmf 18.28.E23]
-theorem qRacah_duality {a b c d q : ℂ} (hq : q ≠ 0) (hq1 : ‖q‖ < 1) (n y : ℕ) :
+theorem qRacah_duality {a b c d q : ℂ} (hq : q ≠ 0) (n y : ℕ) :
     qRacah a b c d q n (q⁻¹ ^ y + c * d * q ^ (y + 1)) =
       qRacah c d a b q y (q⁻¹ ^ n + a * b * q ^ (n + 1)) := by
   rw [qRacah_eq_sum_lattice hq a b c d n y (max n y) (le_max_left _ _),

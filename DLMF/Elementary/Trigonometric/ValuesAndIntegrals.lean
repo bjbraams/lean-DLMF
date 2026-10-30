@@ -158,7 +158,7 @@ def trigTwelfthTable : Fin 13→Fin 6→ℝ :=
     ![0,-1,0,0,-1,0]]
 
 /-- Pole cells of the exact trigonometric value table; they are not finite values. -/
-def trigTwelfthPole (q : Fin 13) (j : Fin 6) : Prop :=
+def TrigTwelfthPole (q : Fin 13) (j : Fin 6) : Prop :=
   ((q=0 ∨ q=12) ∧ (j=3 ∨ j=5)) ∨ (q=6 ∧ (j=2 ∨ j=4))
 
 /-- Exact sine and cosine at `π/12`. -/
@@ -172,7 +172,7 @@ lemma trigR4_sin_cos_pi_div_twelve :
 
 /-- DLMF 4.17.T1: trig twelfth exact values. -/
 @[dlmf 4.17.T1]
-theorem trig_twelfth_exact_values (q : Fin 13) (j : Fin 6) (h : ¬trigTwelfthPole q j) :
+theorem trig_twelfth_exact_values (q : Fin 13) (j : Fin 6) (h : ¬TrigTwelfthPole q j) :
     trigRealVector ((q:ℝ)*π/12) j=trigTwelfthTable q j := by
   obtain ⟨s1, c1⟩ := trigR4_sin_cos_pi_div_twelve
   have hr : Real.sqrt 2 ^ 2 = 2 := Real.sq_sqrt (by norm_num)
@@ -186,63 +186,63 @@ theorem trig_twelfth_exact_values (q : Fin 13) (j : Fin 6) (h : ¬trigTwelfthPol
     ext k; fin_cases k <;> simp [trigRealVector, Real.tan_eq_sin_div_cos, Real.cot_eq_cos_div_sin, hs, hc]
   fin_cases q
   · rw [key _ 0 1 (by simp) (by simp)]
-    fin_cases j <;> simp [trigTwelfthTable, trigTwelfthPole] at h ⊢
+    fin_cases j <;> simp [trigTwelfthTable, TrigTwelfthPole] at h ⊢
   · rw [key _ _ _ (by simpa using s1) (by simpa using c1)]
-    fin_cases j <;> simp [trigTwelfthTable, trigTwelfthPole] at h ⊢ <;> grind
+    fin_cases j <;> simp [trigTwelfthTable, TrigTwelfthPole] at h ⊢ <;> grind
   · have hs : Real.sin (2*π/12) = 1/2 := by rw [show (2:ℝ)*π/12 = π/6 by ring, Real.sin_pi_div_six]
     have hc : Real.cos (2*π/12) = Real.sqrt 3/2 := by rw [show (2:ℝ)*π/12 = π/6 by ring, Real.cos_pi_div_six]
     rw [key _ _ _ (by simpa using hs) (by simpa using hc)]
-    fin_cases j <;> simp [trigTwelfthTable, trigTwelfthPole] at h ⊢ <;> grind
+    fin_cases j <;> simp [trigTwelfthTable, TrigTwelfthPole] at h ⊢ <;> grind
   · have hs : Real.sin (3*π/12) = Real.sqrt 2/2 := by rw [show (3:ℝ)*π/12 = π/4 by ring, Real.sin_pi_div_four]
     have hc : Real.cos (3*π/12) = Real.sqrt 2/2 := by rw [show (3:ℝ)*π/12 = π/4 by ring, Real.cos_pi_div_four]
     rw [key _ _ _ (by simpa using hs) (by simpa using hc)]
-    fin_cases j <;> simp [trigTwelfthTable, trigTwelfthPole] at h ⊢
+    fin_cases j <;> simp [trigTwelfthTable, TrigTwelfthPole] at h ⊢
   · have hs : Real.sin (4*π/12) = Real.sqrt 3/2 := by rw [show (4:ℝ)*π/12 = π/3 by ring, Real.sin_pi_div_three]
     have hc : Real.cos (4*π/12) = 1/2 := by rw [show (4:ℝ)*π/12 = π/3 by ring, Real.cos_pi_div_three]
     rw [key _ _ _ (by simpa using hs) (by simpa using hc)]
-    fin_cases j <;> simp [trigTwelfthTable, trigTwelfthPole] at h ⊢ <;> grind
+    fin_cases j <;> simp [trigTwelfthTable, TrigTwelfthPole] at h ⊢ <;> grind
   · have hs : Real.sin (5*π/12) = Real.sqrt 2 * (Real.sqrt 3 + 1) / 4 := by
       rw [show (5:ℝ)*π/12 = π/2 - π/12 by ring, Real.sin_pi_div_two_sub, c1]
     have hc : Real.cos (5*π/12) = Real.sqrt 2 * (Real.sqrt 3 - 1) / 4 := by
       rw [show (5:ℝ)*π/12 = π/2 - π/12 by ring, Real.cos_pi_div_two_sub, s1]
     rw [key _ _ _ (by simpa using hs) (by simpa using hc)]
-    fin_cases j <;> simp [trigTwelfthTable, trigTwelfthPole] at h ⊢ <;> grind
+    fin_cases j <;> simp [trigTwelfthTable, TrigTwelfthPole] at h ⊢ <;> grind
   · have hs : Real.sin (6*π/12) = 1 := by rw [show (6:ℝ)*π/12 = π/2 by ring, Real.sin_pi_div_two]
     have hc : Real.cos (6*π/12) = 0 := by rw [show (6:ℝ)*π/12 = π/2 by ring, Real.cos_pi_div_two]
     rw [key _ _ _ (by simpa using hs) (by simpa using hc)]
-    fin_cases j <;> simp [trigTwelfthTable, trigTwelfthPole] at h ⊢
+    fin_cases j <;> simp [trigTwelfthTable, TrigTwelfthPole] at h ⊢
   · have hs : Real.sin (7*π/12) = Real.sqrt 2 * (Real.sqrt 3 + 1) / 4 := by
       rw [show (7:ℝ)*π/12 = π - (π/2 - π/12) by ring, Real.sin_pi_sub, Real.sin_pi_div_two_sub, c1]
     have hc : Real.cos (7*π/12) = -(Real.sqrt 2 * (Real.sqrt 3 - 1) / 4) := by
       rw [show (7:ℝ)*π/12 = π - (π/2 - π/12) by ring, Real.cos_pi_sub, Real.cos_pi_div_two_sub, s1]
     rw [key _ _ _ (by simpa using hs) (by simpa using hc)]
-    fin_cases j <;> simp [trigTwelfthTable, trigTwelfthPole] at h ⊢ <;> grind
+    fin_cases j <;> simp [trigTwelfthTable, TrigTwelfthPole] at h ⊢ <;> grind
   · have hs : Real.sin (8*π/12) = Real.sqrt 3/2 := by
       rw [show (8:ℝ)*π/12 = π - (π/3) by ring, Real.sin_pi_sub, Real.sin_pi_div_three]
     have hc : Real.cos (8*π/12) = -(1/2) := by
       rw [show (8:ℝ)*π/12 = π - (π/3) by ring, Real.cos_pi_sub, Real.cos_pi_div_three]
     rw [key _ _ _ (by simpa using hs) (by simpa using hc)]
-    fin_cases j <;> simp [trigTwelfthTable, trigTwelfthPole] at h ⊢ <;> grind
+    fin_cases j <;> simp [trigTwelfthTable, TrigTwelfthPole] at h ⊢ <;> grind
   · have hs : Real.sin (9*π/12) = Real.sqrt 2/2 := by
       rw [show (9:ℝ)*π/12 = π - (π/4) by ring, Real.sin_pi_sub, Real.sin_pi_div_four]
     have hc : Real.cos (9*π/12) = -(Real.sqrt 2/2) := by
       rw [show (9:ℝ)*π/12 = π - (π/4) by ring, Real.cos_pi_sub, Real.cos_pi_div_four]
     rw [key _ _ _ (by simpa using hs) (by simpa using hc)]
-    fin_cases j <;> simp [trigTwelfthTable, trigTwelfthPole] at h ⊢ <;> grind
+    fin_cases j <;> simp [trigTwelfthTable, TrigTwelfthPole] at h ⊢ <;> grind
   · have hs : Real.sin (10*π/12) = 1/2 := by
       rw [show (10:ℝ)*π/12 = π - (π/6) by ring, Real.sin_pi_sub, Real.sin_pi_div_six]
     have hc : Real.cos (10*π/12) = -(Real.sqrt 3/2) := by
       rw [show (10:ℝ)*π/12 = π - (π/6) by ring, Real.cos_pi_sub, Real.cos_pi_div_six]
     rw [key _ _ _ (by simpa using hs) (by simpa using hc)]
-    fin_cases j <;> simp [trigTwelfthTable, trigTwelfthPole] at h ⊢ <;> grind
+    fin_cases j <;> simp [trigTwelfthTable, TrigTwelfthPole] at h ⊢ <;> grind
   · have hs : Real.sin (11*π/12) = Real.sqrt 2 * (Real.sqrt 3 - 1) / 4 := by
       rw [show (11:ℝ)*π/12 = π - (π/12) by ring, Real.sin_pi_sub, s1]
     have hc : Real.cos (11*π/12) = -(Real.sqrt 2 * (Real.sqrt 3 + 1) / 4) := by
       rw [show (11:ℝ)*π/12 = π - (π/12) by ring, Real.cos_pi_sub, c1]
     rw [key _ _ _ (by simpa using hs) (by simpa using hc)]
-    fin_cases j <;> simp [trigTwelfthTable, trigTwelfthPole] at h ⊢ <;> grind
+    fin_cases j <;> simp [trigTwelfthTable, TrigTwelfthPole] at h ⊢ <;> grind
   · rw [key _ 0 (-1) (by simp) (by simp)]
-    fin_cases j <;> simp [trigTwelfthTable, trigTwelfthPole] at h ⊢
+    fin_cases j <;> simp [trigTwelfthTable, TrigTwelfthPole] at h ⊢
 
 /-- Real reciprocal blow-up at a simple zero. -/
 lemma trigR4_real_pole {g h : ℝ → ℝ} {a : ℝ} {g' : ℝ} (hg : HasDerivAt g g' a) (hg' : g' ≠ 0)
@@ -263,7 +263,7 @@ lemma trigR4_real_pole {g h : ℝ → ℝ} {a : ℝ} {g' : ℝ} (hg : HasDerivAt
 
 /-- DLMF 4.17.T1: trig twelfth poles. -/
 @[dlmf 4.17.T1]
-theorem trig_twelfth_poles (q : Fin 13) (j : Fin 6) (h : trigTwelfthPole q j) :
+theorem trig_twelfth_poles (q : Fin 13) (j : Fin 6) (h : TrigTwelfthPole q j) :
     Tendsto (fun θ : ℝ => |trigRealVector θ j|) (𝓝[≠] ((q:ℝ)*π/12)) atTop := by
   have hsin : ∀ a : ℝ, Real.sin a = 0 → Real.cos a ≠ 0 →
       Tendsto (fun θ : ℝ => |1 * (Real.sin θ)⁻¹|) (𝓝[≠] a) atTop ∧
@@ -275,7 +275,7 @@ theorem trig_twelfth_poles (q : Fin 13) (j : Fin 6) (h : trigTwelfthPole q j) :
       Tendsto (fun θ : ℝ => |Real.sin θ * (Real.cos θ)⁻¹|) (𝓝[≠] a) atTop := fun a h0 hs =>
     ⟨trigR4_real_pole (Real.hasDerivAt_cos a) (neg_ne_zero.mpr hs) h0 continuousAt_const one_ne_zero,
      trigR4_real_pole (Real.hasDerivAt_cos a) (neg_ne_zero.mpr hs) h0 Real.continuous_sin.continuousAt hs⟩
-  simp only [trigTwelfthPole] at h
+  simp only [TrigTwelfthPole] at h
   rcases h with ⟨hq | hq, hj | hj⟩ | ⟨hq, hj | hj⟩ <;> subst hq <;> subst hj
   · simpa [trigRealVector] using (hsin 0 (by simp) (by simp)).1
   · simpa [trigRealVector, Real.cot_eq_cos_div_sin, div_eq_mul_inv] using (hsin 0 (by simp) (by simp)).2

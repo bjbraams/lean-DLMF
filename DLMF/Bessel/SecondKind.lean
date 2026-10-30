@@ -5,9 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
+public import DLMF.Bessel.Modified
 public import DLMF.Bessel.Theorems
 public import DLMF.Confluent.BasicProperties
-public import DLMF.Bessel.Modified
 
 /-!
 # Bessel functions of the second kind and Hankel functions (Temme §§9.1–9.4, DLMF 10.2–10.6)
@@ -138,11 +138,6 @@ theorem cos_int_mul_pi_complex (n : ℤ) : cos ((n : ℂ) * π) = (-1) ^ n := by
   rw [show ((n : ℂ) * π) = ((n * π : ℝ) : ℂ) by push_cast; ring, ← ofReal_cos,
     Real.cos_int_mul_pi]; push_cast; rfl
 
-/-- Identity under the stated parameter and domain assumptions: `sin ((n : ℂ) * π) = 0`. -/
-theorem sin_int_mul_pi_complex (n : ℤ) : sin ((n : ℂ) * π) = 0 := by
-  rw [show ((n : ℂ) * π) = ((n * π : ℝ) : ℂ) by push_cast; ring, ← ofReal_sin,
-    Real.sin_int_mul_pi]; simp
-
 /-- Identity under the stated parameter and domain assumptions: `besselD n z = 0`. -/
 theorem besselD_int (n : ℤ) (z : ℂ) : besselD n z = 0 := by
   rw [besselD, besselJ_neg_int, cos_int_mul_pi_complex]; ring
@@ -206,7 +201,7 @@ theorem dslope_sin_ne_zero (n : ℤ) {μ : ℂ} (hμ : μ ∈ Metric.ball (n : �
       simpa using ((hasDerivAt_id (n : ℂ)).mul_const (π : ℂ)).csin
     rw [hd.deriv, cos_int_mul_pi_complex]
     exact mul_ne_zero (zpow_ne_zero _ (by norm_num)) (by exact_mod_cast Real.pi_ne_zero)
-  · rw [dslope_of_ne _ hne, slope_def_field, sin_int_mul_pi_complex, sub_zero]
+  · rw [dslope_of_ne _ hne, slope_def_field, Complex.sin_int_mul_pi, sub_zero]
     exact div_ne_zero (sin_mul_pi_ne_zero (not_int_of_mem_ball hμ hne)) (sub_ne_zero.mpr hne)
 
 /-- Near an integer `n`, `Y_μ(z)` is the quotient of the difference quotients of `D_μ(z)` and
@@ -228,14 +223,14 @@ theorem besselY_eq_dslope (n : ℤ) {μ z : ℂ} (hμ : μ ∈ Metric.ball (n : 
       refine (hcont.tendsto.mono_left nhdsWithin_le_nhds).congr' ?_
       filter_upwards [self_mem_nhdsWithin] with μ hμ
       rw [dslope_of_ne _ hμ, dslope_of_ne _ hμ, slope_def_field, slope_def_field,
-        besselD_int, sin_int_mul_pi_complex, sub_zero, sub_zero]
+        besselD_int, Complex.sin_int_mul_pi, sub_zero, sub_zero]
       have hμn : μ - n ≠ 0 := sub_ne_zero.mpr hμ
       field_simp
     have hex : ∃ k : ℤ, (n : ℂ) = k := ⟨n, rfl⟩
     simp only [besselY, hex, ite_true]
     exact ht.limUnder_eq
   · rw [besselY_eq_of_not_int (not_int_of_mem_ball hμ hne), dslope_of_ne _ hne,
-      dslope_of_ne _ hne, slope_def_field, slope_def_field, besselD_int, sin_int_mul_pi_complex,
+      dslope_of_ne _ hne, slope_def_field, slope_def_field, besselD_int, Complex.sin_int_mul_pi,
       sub_zero, sub_zero]
     have hμn : μ - n ≠ 0 := sub_ne_zero.mpr hne
     field_simp
@@ -270,7 +265,7 @@ theorem continuousAt_besselY (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
       exact h1.div (by fun_prop) (sin_mul_pi_ne_zero hν)
     refine hc.congr ?_
     filter_upwards [prod_mem_nhds (hopen.mem_nhds (sin_mul_pi_ne_zero hν)) univ_mem] with p hp
-    have hp' : ∀ k : ℤ, p.1 ≠ k := fun k hk => hp.1 (by rw [hk]; exact sin_int_mul_pi_complex k)
+    have hp' : ∀ k : ℤ, p.1 ≠ k := fun k hk => hp.1 (by rw [hk]; exact Complex.sin_int_mul_pi k)
     exact (besselY_eq_of_not_int hp' p.2).symm
 
 /-! ### Recurrences, derivative and the Bessel equation for `Y_ν` -/
@@ -684,7 +679,7 @@ theorem besselK_eq_dslope (n : ℤ) {μ z : ℂ} (hμ : μ ∈ Metric.ball (n : 
       refine (hcont.tendsto.mono_left nhdsWithin_le_nhds).congr' ?_
       filter_upwards [self_mem_nhdsWithin] with μ hμ
       rw [dslope_of_ne _ hμ, dslope_of_ne _ hμ, slope_def_field, slope_def_field,
-        besselE_int, sin_int_mul_pi_complex, sub_zero, sub_zero]
+        besselE_int, Complex.sin_int_mul_pi, sub_zero, sub_zero]
       have hμn : μ - n ≠ 0 := sub_ne_zero.mpr hμ
       simp only [besselE]
       field_simp
@@ -692,7 +687,7 @@ theorem besselK_eq_dslope (n : ℤ) {μ z : ℂ} (hμ : μ ∈ Metric.ball (n : 
     simp only [besselK, hex, ite_true]
     exact ht.limUnder_eq
   · rw [besselK_eq_of_not_int (not_int_of_mem_ball hμ hne), dslope_of_ne _ hne,
-      dslope_of_ne _ hne, slope_def_field, slope_def_field, besselE_int, sin_int_mul_pi_complex,
+      dslope_of_ne _ hne, slope_def_field, slope_def_field, besselE_int, Complex.sin_int_mul_pi,
       sub_zero, sub_zero]
     have hμn : μ - n ≠ 0 := sub_ne_zero.mpr hne
     field_simp
@@ -728,7 +723,7 @@ theorem continuousAt_besselK (ν : ℂ) {z : ℂ} (hz : z ∈ slitPlane) :
       exact (continuousAt_const.mul h1).div (by fun_prop) (sin_mul_pi_ne_zero hν)
     refine hc.congr ?_
     filter_upwards [prod_mem_nhds (hopen.mem_nhds (sin_mul_pi_ne_zero hν)) univ_mem] with p hp
-    have hp' : ∀ k : ℤ, p.1 ≠ k := fun k hk => hp.1 (by rw [hk]; exact sin_int_mul_pi_complex k)
+    have hp' : ∀ k : ℤ, p.1 ≠ k := fun k hk => hp.1 (by rw [hk]; exact Complex.sin_int_mul_pi k)
     exact (besselK_eq_of_not_int hp' p.2).symm
 
 /-- The function `(fun μ => besselK (f μ) z)` is continuous at `ν`. -/

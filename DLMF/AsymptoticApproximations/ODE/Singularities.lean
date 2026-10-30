@@ -55,11 +55,11 @@ theorem exists_unique_solution_of_ordinary {f g : ℂ → ℂ} {z₀ : ℂ} {R :
 singularity), in DLMFMathlib's classification with the coefficient vector `![g, f]`. -/
 @[dlmf 2.7.i]
 theorem linearODERegularSingularAt_iff (f g : ℂ → ℂ) (z₀ : ℂ) :
-    Complex.linearODERegularSingularAt ![g, f] z₀ ↔
-      ¬ Complex.linearODEOrdinaryAt ![g, f] z₀ ∧
+    Complex.LinearODERegularSingularAt ![g, f] z₀ ↔
+      ¬ Complex.LinearODEOrdinaryAt ![g, f] z₀ ∧
         (∃ F : ℂ → ℂ, AnalyticAt ℂ F z₀ ∧ (fun z => (z - z₀) * f z) =ᶠ[𝓝[≠] z₀] F) ∧
         ∃ G : ℂ → ℂ, AnalyticAt ℂ G z₀ ∧ (fun z => (z - z₀) ^ 2 * g z) =ᶠ[𝓝[≠] z₀] G := by
-  unfold Complex.linearODERegularSingularAt Complex.linearODEAtMostRegularAt
+  unfold Complex.LinearODERegularSingularAt Complex.LinearODEAtMostRegularAt
   simp only [Fin.forall_fin_two, Matrix.cons_val_zero, Matrix.cons_val_one, Fin.val_zero,
     Fin.val_one, Nat.sub_zero]
   constructor
@@ -120,7 +120,7 @@ theorem frobenius_log_solution {f g : ℂ → ℂ} {z₀ : ℂ} {R : ℝ} (hR : 
 /-- DLMF 2.7.ii: a regular singularity has rank `0`. -/
 @[dlmf 2.7.ii]
 theorem hasSingularityRank_zero_of_regularSingular {f g : ℂ → ℂ} {z₀ : ℂ}
-    (h : Complex.linearODERegularSingularAt ![g, f] z₀) : HasSingularityRank f g z₀ 0 := by
+    (h : Complex.LinearODERegularSingularAt ![g, f] z₀) : HasSingularityRank f g z₀ 0 := by
   obtain ⟨-, hF, hG⟩ := (linearODERegularSingularAt_iff f g z₀).1 h
   refine ⟨⟨le_rfl, ?_, ?_⟩, fun ℓ hℓ => hℓ.1⟩
   · simpa using hF

@@ -7,10 +7,10 @@ module
 
 public import DLMF.GeneralizedHypergeometric.Appell.Basic
 
-public import DLMF.Hypergeometric.AppellF4
 public import DLMF.GeneralizedHypergeometric.GHATools
-public import DLMFMathlib.Analysis.Complex.BivariateSeries
+public import DLMF.Hypergeometric.AppellF4
 public import DLMFMathlib.Analysis.Complex.BivariateDerivatives
+public import DLMFMathlib.Analysis.Complex.BivariateSeries
 public import Mathlib.Analysis.CStarAlgebra.Classes
 public import Mathlib.Analysis.Complex.UpperHalfPlane.Basic
 public import Mathlib.Analysis.SpecialFunctions.Bernstein
@@ -73,38 +73,6 @@ theorem appell_tsum_zero (c : ℕ × ℕ→ℂ) :
       have hn : n≠0 := fun hn => hp (by simp [hn])
       simp [hn]
     · simp [hm]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /-- Subexponential bound for the F1 coefficients. -/
 lemma ghaR4_appF1Coeff_bound (a b b' c : ℂ) (hc : AppellRegular c) {σ : ℝ} (hσ : 1 < σ) :
@@ -550,10 +518,6 @@ theorem appF4_pde (a b c c' : ℂ) (hc : AppellRegular c) (hc' : AppellRegular c
     linear_combination hP
   · unfold appellDx appellDy appF4
     linear_combination hQ
-
-
-
-
 
 /-- A non-integral parameter is regular. -/
 lemma ghaR4_regular_of_nonint {b : ℂ} (hb : ∀ k : ℤ, b ≠ k) : ∀ k : ℕ, b ≠ -k :=

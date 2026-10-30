@@ -418,7 +418,7 @@ lemma p3j_removable {a b c₁ c₂ : ℂ} {N₁ S₁ N₂ S₂ : ℂ → ℂ} (h
 /-- Liouville core for the Eisenstein-type series: a function with the same quasi-periods,
 oddness, poles and residue at `0` as `∑ₙ εⁿ π/sin(π(t - nτ))` equals it off the lattice. -/
 lemma p3j_eq_G {ε τ : ℂ} (hε : ε = 1 ∨ ε = -1) (hτ : 0 < τ.im) {f : ℂ → ℂ}
-    (hf : p3j_Dich f) (hf1 : ∀ t, f (t + 1) = -f t) (hfτ : ∀ t, f (t + τ) = ε * f t)
+    (hf : P3jDich f) (hf1 : ∀ t, f (t + 1) = -f t) (hfτ : ∀ t, f (t + τ) = ε * f t)
     (hfodd : ∀ t, f (-t) = -f t) (hfan : ∀ t ∉ p3j_latt τ, AnalyticAt ℂ f t)
     (hf0 : ∃ A : ℂ → ℂ, AnalyticAt ℂ A 0 ∧
       (fun t => f t - π / sin (π * t)) =ᶠ[𝓝[≠] 0] A) :
@@ -616,7 +616,7 @@ lemma p3j_two_K_tau {k : ℂ} (hk : k ∈ jacobiModulusDomain) :
   rw [jacobiTauk]; field_simp
 
 /-- A function with the pole dichotomy is analytic where its order is not negative. -/
-theorem p3j_Dich.analyticAt_of_not_neg {f : ℂ → ℂ} (hf : p3j_Dich f) {z : ℂ}
+theorem P3jDich.analyticAt_of_not_neg {f : ℂ → ℂ} (hf : P3jDich f) {z : ℂ}
     (h : ¬ meromorphicOrderAt f z < 0) : AnalyticAt ℂ f z :=
   (hf z).resolve_right fun h' => h h'.1
 
@@ -657,7 +657,7 @@ lemma p3j_ps_eq_G {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p : JacobiLetter} 
     have h2 := p3j_two_K_tau hk
     apply mul_left_cancel₀ hK2
     rw [hmn]; linear_combination (-(n : ℂ)) * h2
-  have hdich : p3j_Dich f := by
+  have hdich : P3jDich f := by
     have := (p3j_dich_pq hk (p := p) (q := .s) hps).comp (a := (2 * K)⁻¹) (inv_ne_zero hK2) hK2
     convert this using 2 with w
     rw [div_inv_eq_mul, mul_comm w]
@@ -737,7 +737,6 @@ lemma p3j_ps_eq_G {k : ℂ} (hk : k ∈ jacobiModulusDomain) {p : JacobiLetter} 
     rw [← h1, h2]; ring
   have := p3j_eq_G hε hτ hdich hf1 hfτ hfodd hfan hf0 t ht
   exact this
-
 
 /-- A point avoiding all `m + nτ` is off the lattice. -/
 theorem p3j_not_latt {τ t : ℂ} (h : ∀ m n : ℤ, t - m - n * τ ≠ 0) : t ∉ p3j_latt τ := by

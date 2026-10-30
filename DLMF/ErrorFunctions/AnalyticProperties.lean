@@ -26,22 +26,6 @@ open Complex Filter Set MeasureTheory Asymptotics DLMF.Hypergeometric DLMF
 open scoped Real Topology Nat
 namespace DLMF.Confluent
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /-- The proved Kummer Gaussian antiderivative gives the complex error-function derivative. -/
 theorem hasDerivAt_erf_complex (z : ℂ) :
     HasDerivAt erf (2/Real.sqrt π*exp (-z^2)) z := by
@@ -97,7 +81,7 @@ theorem fresnelCosInt_hasSum (z : ℂ) :
     ring
   have h := hasSum_primitive_monomials
     (fun n : ℕ=>(-1:ℂ)^n*(π/2:ℂ)^(2*n+0)/(2*n+0).factorial)
-    (fun n=>2*(2*n+0)) hs (fun R _=>summable_fresnel_coeff 0 R) z
+    (fun n=>2*(2*n+0)) hs z
   change HasSum _ (fresnelCosInt z) at h
   refine h.congr_fun fun n=>?_
   rw [show 2*(2*n+0)+1=4*n+1 by omega]
@@ -120,7 +104,7 @@ theorem fresnelSinInt_hasSum (z : ℂ) :
     ring
   have h := hasSum_primitive_monomials
     (fun n : ℕ=>(-1:ℂ)^n*(π/2:ℂ)^(2*n+1)/(2*n+1).factorial)
-    (fun n=>2*(2*n+1)) hs (fun R _=>summable_fresnel_coeff 1 R) z
+    (fun n=>2*(2*n+1)) hs z
   change HasSum _ (fresnelSinInt z) at h
   refine h.congr_fun fun n=>?_
   rw [show 2*(2*n+1)+1=4*n+3 by omega]
@@ -232,8 +216,7 @@ theorem dawsonF_eq_kummerM (z : ℂ) : dawsonF z=z*kummerM 1 (3/2) (-z^2) := by
 @[dlmf 7.2.E1]
 theorem erf_complex_segment_integral (z : ℂ) :
     erf z = 2/Real.sqrt π*primitive (fun t => exp (-t^2)) z := by
-  have h := primitive_eq_sub (by fun_prop : Continuous (fun t : ℂ => exp (-t^2)))
-    hasDerivAt_gaussianPrimitive z
+  have h := primitive_eq_sub hasDerivAt_gaussianPrimitive z
   simp only [zero_mul, sub_zero] at h
   rw [h, erf]
   ring
@@ -265,7 +248,7 @@ theorem tendsto_erf_add_ofReal_atTop (z : ℂ) :
     field_simp
   have hs (R : ℝ) : erf (z+R) = erf R + 2/Real.sqrt π*
       segmentIntegral (fun t => exp (-t^2)) R (z+R) := by
-    rw [segmentIntegral_eq_sub (by fun_prop) hd]
+    rw [segmentIntegral_eq_sub hd]
     field_simp
     ring
   simp_rw [hs]
@@ -546,7 +529,7 @@ theorem fresnelTail_horizontal_integral (z : ℂ) :
   have hs (R : ℝ) : segmentIntegral (fun t => exp (π*I*t^2/2)) z R =
       ((Real.fresnelCosInt R : ℂ) + I*Real.fresnelSinInt R) -
         (fresnelCosInt z + I*fresnelSinInt z) := by
-    rw [segmentIntegral_eq_sub (by fun_prop) hd, fresnelCosInt_ofReal, fresnelSinInt_ofReal]
+    rw [segmentIntegral_eq_sub hd, fresnelCosInt_ofReal, fresnelSinInt_ofReal]
   simp_rw [hs]
   have hC := (Complex.continuous_ofReal.tendsto _).comp Real.tendsto_fresnelCosInt_atTop
   have hS := (Complex.continuous_ofReal.tendsto _).comp Real.tendsto_fresnelSinInt_atTop
@@ -581,21 +564,5 @@ theorem goodwinStatonG_integrable {z : ℂ} (hz : z ∈ slitPlane) :
     have h1 : (-(t:ℂ)^2).re = -1*t^2 := by simp [← ofReal_pow]
     rw [h1]
     exact div_le_div_of_nonneg_left (Real.exp_pos _).le hm (hb t (le_of_lt ht))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 end DLMF.Confluent

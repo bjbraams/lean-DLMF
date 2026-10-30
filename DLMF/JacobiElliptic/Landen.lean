@@ -57,8 +57,8 @@ theorem jacobiLandenAscComodulus_sq {k : ℂ} (hk : 1 + k ≠ 0) :
 the denominators nonzero. -/
 @[dlmf 22.7.E2, dlmf 22.7.E3, dlmf 22.7.E4]
 theorem jacobi_landen_descending {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hn : jacobiRegulark .n z k)
-    (hn₁ : jacobiRegulark .n (z / (1 + jacobiLandenDescModulus k)) (jacobiLandenDescModulus k))
+    (hn : JacobiRegulark .n z k)
+    (hn₁ : JacobiRegulark .n (z / (1 + jacobiLandenDescModulus k)) (jacobiLandenDescModulus k))
     (h₁ : 1 + jacobiLandenDescModulus k *
       jacobiSnk (z / (1 + jacobiLandenDescModulus k)) (jacobiLandenDescModulus k) ^ 2 ≠ 0)
     (h₂ : 1 + jacobiLandenDescModulus k -
@@ -78,8 +78,8 @@ theorem jacobi_landen_descending {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z :
 `dn(w, k₂) ≠ 0`. -/
 @[dlmf 22.7.E6, dlmf 22.7.E7, dlmf 22.7.E8]
 theorem jacobi_landen_ascending {k : ℂ} (hk : k ∈ jacobiModulusDomain) {z : ℂ}
-    (hn : jacobiRegulark .n z k)
-    (hn₂ : jacobiRegulark .n (z / (1 + jacobiLandenAscComodulus k)) (jacobiLandenAscModulus k))
+    (hn : JacobiRegulark .n z k)
+    (hn₂ : JacobiRegulark .n (z / (1 + jacobiLandenAscComodulus k)) (jacobiLandenAscModulus k))
     (hd₂ : jacobiDnk (z / (1 + jacobiLandenAscComodulus k)) (jacobiLandenAscModulus k) ≠ 0) :
     let k₂ := jacobiLandenAscModulus k
     let k₂' := jacobiLandenAscComodulus k

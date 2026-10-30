@@ -5,9 +5,9 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.OrthogonalPolynomials.PollaczekMoments
 public import DLMF.Confluent.Recurrence
 public import DLMF.OrthogonalPolynomials.BinomialSeries
+public import DLMF.OrthogonalPolynomials.PollaczekMoments
 
 /-!
 # Hahn and Meixner polynomial identities
@@ -639,7 +639,7 @@ theorem hahn_forward_difference {α β : ℂ} (hα : -1 < α.re) {N n : ℕ} (hn
 /-- Identity under the stated parameter and domain assumptions: `krawtchouk p (N + 1) (n + 1) (x +
 1) - krawtchouk p (N + 1) (n + 1) x = -(n + 1) / (p * (N + 1)) * krawtchouk p N n x`. -/
 @[dlmf 18.22.E21]
-theorem krawtchouk_forward_difference {p : ℂ} (hp : p ≠ 0) {N n : ℕ} (hn : n ≤ N) (x : ℂ) :
+theorem krawtchouk_forward_difference {p : ℂ} (hp : p ≠ 0) {N n : ℕ} (x : ℂ) :
     krawtchouk p (N + 1) (n + 1) (x + 1) - krawtchouk p (N + 1) (n + 1) x =
       -(n + 1) / (p * (N + 1)) * krawtchouk p N n x := by
   unfold krawtchouk

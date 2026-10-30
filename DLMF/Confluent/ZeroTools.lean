@@ -5,9 +5,10 @@ Authors: Bastiaan J Braams
 -/
 module
 
-public import DLMF.Confluent.CoulombIrregular
 public import DLMF.Confluent.AsymptoticConsequences
+public import DLMF.Confluent.CoulombIrregular
 public import DLMF.OrthogonalPolynomials.ClassicalInstances
+public import DLMFMathlib.Analysis.ODE.SturmComparison
 public import DLMFMathlib.Analysis.ODE.SturmCount
 public import DLMFMathlib.Analysis.ODE.SturmDeformation
 
@@ -49,13 +50,13 @@ namespace DLMF.Confluent
 /-! ### Sturm comparison on `(0, ∞)` -/
 
 /-- `y` (with derivative `y'`) solves `(p y')' + q y = 0` on `(0, ∞)`. -/
-def kzt_IsSol (p q y y' : ℝ → ℝ) : Prop :=
+def KztIsSol (p q y y' : ℝ → ℝ) : Prop :=
   ∀ x ∈ Ioi (0:ℝ), HasDerivAt y (y' x) x ∧
     HasDerivAt (fun t => p t * y' t) (-(q x * y x)) x
 
 /-- The negative of a solution is a solution. -/
-theorem kzt_IsSol.neg {p q y y' : ℝ → ℝ} (h : kzt_IsSol p q y y') :
-    kzt_IsSol p q (fun x => -y x) (fun x => -y' x) := fun x hx => by
+theorem KztIsSol.neg {p q y y' : ℝ → ℝ} (h : KztIsSol p q y y') :
+    KztIsSol p q (fun x => -y x) (fun x => -y' x) := fun x hx => by
   refine ⟨(h x hx).1.neg, ?_⟩
   have := (h x hx).2.neg
   convert this using 1
@@ -63,36 +64,33 @@ theorem kzt_IsSol.neg {p q y y' : ℝ → ℝ} (h : kzt_IsSol p q y y') :
   · ring
 
 /-- Solutions are continuous on subsets of `(0, ∞)`. -/
-theorem kzt_IsSol.continuousOn {p q y y' : ℝ → ℝ} (h : kzt_IsSol p q y y') {s : Set ℝ}
+theorem KztIsSol.continuousOn {p q y y' : ℝ → ℝ} (h : KztIsSol p q y y') {s : Set ℝ}
     (hs : s ⊆ Ioi (0:ℝ)) : ContinuousOn y s := fun _x hx =>
   (h _ (hs hx)).1.continuousAt.continuousWithinAt
 
-/-- The weighted Wronskian `p (u'y - uy')` of two solutions. -/
-def kzt_W (p u u' y y' : ℝ → ℝ) (x : ℝ) : ℝ := p x * (u' x * y x - u x * y' x)
-
 /-- The weighted Wronskian is odd in `y`. -/
 theorem kzt_W_neg (p u u' y y' : ℝ → ℝ) (x : ℝ) :
-    kzt_W p u u' (fun x => -y x) (fun x => -y' x) x = -kzt_W p u u' y y' x := by
-  simp only [kzt_W]; ring
+    ODE.sturmWronskian p u u' (fun x => -y x) (fun x => -y' x) x = -ODE.sturmWronskian p u u' y y' x := by
+  simp only [ODE.sturmWronskian]; ring
 
 section Comparison
 
 variable {p qy qu qw y y' u u' w w' : ℝ → ℝ}
 
 /-- Derivative of the weighted Wronskian: `W' = (qy - qu) u y`. -/
-theorem kzt_hasDerivAt_W (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
+theorem kzt_hasDerivAt_W (hy : KztIsSol p qy y y') (hu : KztIsSol p qu u u')
     {x : ℝ} (hx : x ∈ Ioi (0:ℝ)) :
-    HasDerivAt (kzt_W p u u' y y') ((qy x - qu x) * u x * y x) x := by
+    HasDerivAt (ODE.sturmWronskian p u u' y y') ((qy x - qu x) * u x * y x) x := by
   have h1 := (hu x hx).2.mul (hy x hx).1
   have h2 := (hu x hx).1.mul (hy x hx).2
   have := h1.sub h2
   convert this using 1
-  · funext t; simp only [kzt_W, Pi.mul_apply, Pi.sub_apply]; ring
+  · funext t; simp only [ODE.sturmWronskian, Pi.mul_apply, Pi.sub_apply]; ring
   · ring
 
 /-- The weighted Wronskian is continuous on subsets of `(0, ∞)`. -/
-theorem kzt_W_continuousOn (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u') {s : Set ℝ}
-    (hs : s ⊆ Ioi (0:ℝ)) : ContinuousOn (kzt_W p u u' y y') s := fun _x hx =>
+theorem kzt_W_continuousOn (hy : KztIsSol p qy y y') (hu : KztIsSol p qu u u') {s : Set ℝ}
+    (hs : s ⊆ Ioi (0:ℝ)) : ContinuousOn (ODE.sturmWronskian p u u' y y') s := fun _x hx =>
   (kzt_hasDerivAt_W hy hu (hs hx)).continuousAt.continuousWithinAt
 
 /-- At a zero `a` followed by positive values, the derivative is nonnegative. -/
@@ -147,13 +145,13 @@ theorem kzt_ratio_top {s K c₀ : ℝ} (hK : 0 < K) (hc₀ : 0 < c₀)
     (hyd : ∀ x ∈ Ici s, HasDerivAt y (y' x) x) (hud : ∀ x ∈ Ici s, HasDerivAt u (u' x) x)
     (hup : ∀ x ∈ Ici s, 0 < u x) (hp : ∀ x ∈ Ici s, 0 < p x)
     (hb : ∀ x ∈ Ici s, p x * u x ^ 2 ≤ K)
-    (hW : ∀ x ∈ Ici s, kzt_W p u u' y y' x ≤ -c₀) (C : ℝ) :
+    (hW : ∀ x ∈ Ici s, ODE.sturmWronskian p u u' y y' x ≤ -c₀) (C : ℝ) :
     ∃ x ∈ Ioi s, C < y x / u x := by
   have hge : ∀ x ∈ Ici s, c₀ / K ≤ (y' x * u x - y x * u' x) / u x ^ 2 := by
     intro x hx
     have hu2 : 0 < u x ^ 2 := pow_pos (hup x hx) 2
     have hWx := hW x hx
-    simp only [kzt_W] at hWx
+    simp only [ODE.sturmWronskian] at hWx
     set D := y' x * u x - y x * u' x
     have hD : c₀ ≤ p x * D := by simp only [D]; linarith
     have hDp : 0 < D := by
@@ -191,7 +189,7 @@ theorem kzt_ratio_zero {s K c₀ : ℝ} (hs : 0 < s) (hK : 0 < K) (hc₀ : 0 < c
     (hyd : ∀ x ∈ Ioc 0 s, HasDerivAt y (y' x) x) (hud : ∀ x ∈ Ioc 0 s, HasDerivAt u (u' x) x)
     (hup : ∀ x ∈ Ioc 0 s, 0 < u x) (hp : ∀ x ∈ Ioc 0 s, 0 < p x)
     (hb : ∀ x ∈ Ioc 0 s, p x * u x ^ 2 ≤ K * x)
-    (hW : ∀ x ∈ Ioc 0 s, kzt_W p u u' y y' x ≤ -c₀) :
+    (hW : ∀ x ∈ Ioc 0 s, ODE.sturmWronskian p u u' y y' x ≤ -c₀) :
     ∃ x ∈ Ioo 0 s, y x / u x < 0 := by
   refine ODE.sturmCount_exists_neg_of_deriv_ge (r := fun x => y x / u x)
     (r' := fun x => (y' x * u x - y x * u' x) / u x ^ 2) (c := c₀ / K) hs (div_pos hc₀ hK)
@@ -199,7 +197,7 @@ theorem kzt_ratio_zero {s K c₀ : ℝ} (hs : 0 < s) (hK : 0 < K) (hc₀ : 0 < c
   have h1x : 0 < x - 0 := by linarith [hx.1]
   have hu2 : 0 < u x ^ 2 := pow_pos (hup x hx) 2
   have hWx := hW x hx
-  simp only [kzt_W] at hWx
+  simp only [ODE.sturmWronskian] at hWx
   set D := y' x * u x - y x * u' x
   have hD : c₀ ≤ p x * D := by simp only [D]; linarith
   have hDp : 0 < D := by
@@ -213,9 +211,9 @@ include hp
 
 omit hp in
 /-- `W = p (u'y - uy')` is strictly decreasing where `u, y > 0` and `qy < qu`. -/
-theorem kzt_W_strictAntiOn (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
+theorem kzt_W_strictAntiOn (hy : KztIsSol p qy y y') (hu : KztIsSol p qu u u')
     (hq : ∀ x ∈ Ioi (0:ℝ), qy x < qu x) {s : Set ℝ} (hs : s ⊆ Ioi (0:ℝ)) (hcv : Convex ℝ s)
-    (hpos : ∀ x ∈ interior s, 0 < u x ∧ 0 < y x) : StrictAntiOn (kzt_W p u u' y y') s := by
+    (hpos : ∀ x ∈ interior s, 0 < u x ∧ 0 < y x) : StrictAntiOn (ODE.sturmWronskian p u u' y y') s := by
   refine strictAntiOn_of_deriv_neg hcv (kzt_W_continuousOn hy hu hs) fun x hx => ?_
   have hx' := hs (interior_subset hx)
   rw [(kzt_hasDerivAt_W hy hu hx').deriv]
@@ -225,9 +223,9 @@ theorem kzt_W_strictAntiOn (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
 
 omit hp in
 /-- `W = p (u'y - uy')` is strictly increasing where `u, y > 0` and `qu < qy`. -/
-theorem kzt_W_strictMonoOn (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
+theorem kzt_W_strictMonoOn (hy : KztIsSol p qy y y') (hu : KztIsSol p qu u u')
     (hq : ∀ x ∈ Ioi (0:ℝ), qu x < qy x) {s : Set ℝ} (hs : s ⊆ Ioi (0:ℝ)) (hcv : Convex ℝ s)
-    (hpos : ∀ x ∈ interior s, 0 < u x ∧ 0 < y x) : StrictMonoOn (kzt_W p u u' y y') s := by
+    (hpos : ∀ x ∈ interior s, 0 < u x ∧ 0 < y x) : StrictMonoOn (ODE.sturmWronskian p u u' y y') s := by
   refine strictMonoOn_of_deriv_pos hcv (kzt_W_continuousOn hy hu hs) fun x hx => ?_
   have hx' := hs (interior_subset hx)
   rw [(kzt_hasDerivAt_W hy hu hx').deriv]
@@ -236,7 +234,7 @@ theorem kzt_W_strictMonoOn (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
   nlinarith
 
 /-- Sign-normalized core of `kzt_between`. -/
-theorem kzt_between_core (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
+theorem kzt_between_core (hy : KztIsSol p qy y y') (hu : KztIsSol p qu u u')
     (hq : ∀ x ∈ Ioi (0:ℝ), qy x < qu x) {a b : ℝ} (ha : 0 < a) (hab : a < b)
     (ya : y a = 0) (yb : y b = 0) (ypos : ∀ x ∈ Ioo a b, 0 < y x)
     (upos : ∀ x ∈ Ioo a b, 0 < u x) : False := by
@@ -252,7 +250,7 @@ theorem kzt_between_core (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
   have hyb := kzt_deriv_nonpos_left (hy b hb').1 yb hab ypos
   have pa := hp a ha'
   have pb := hp b hb'
-  simp only [kzt_W, ya, yb, mul_zero, zero_sub] at hWab
+  simp only [ODE.sturmWronskian, ya, yb, mul_zero, zero_sub] at hWab
   have h1 : 0 ≤ p b * -(u b * y' b) := mul_nonneg pb.le (by nlinarith)
   have h2 : p a * -(u a * y' a) ≤ 0 :=
     mul_nonpos_of_nonneg_of_nonpos pa.le (by nlinarith [mul_nonneg hua hya])
@@ -260,7 +258,7 @@ theorem kzt_between_core (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
 
 /-- **Sturm comparison.** If `qy < qu`, then between two consecutive zeros of `y` the function
 `u` has a zero. -/
-theorem kzt_between (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
+theorem kzt_between (hy : KztIsSol p qy y y') (hu : KztIsSol p qu u u')
     (hq : ∀ x ∈ Ioi (0:ℝ), qy x < qu x) {a b : ℝ} (ha : 0 < a) (hab : a < b)
     (ya : y a = 0) (yb : y b = 0) (hyne : ∀ x ∈ Ioo a b, y x ≠ 0) :
     ∃ c ∈ Ioo a b, u c = 0 := by
@@ -277,7 +275,7 @@ theorem kzt_between (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
       (fun x hx => neg_pos.mpr (hy1 x hx)) fun x hx => neg_pos.mpr (hu1 x hx)
 
 /-- Sign-normalized core of `kzt_upper_right`. -/
-theorem kzt_upper_right_core (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
+theorem kzt_upper_right_core (hy : KztIsSol p qy y y') (hu : KztIsSol p qu u u')
     (hq : ∀ x ∈ Ioi (0:ℝ), qy x < qu x) {z s₀ C K : ℝ} (hz : 0 < z)
     (hK : 0 < K) (yz : y z = 0) (ypos : ∀ x ∈ Ioi z, 0 < y x) (upos : ∀ x ∈ Ioi z, 0 < u x)
     (hC : ∀ x ∈ Ioi s₀, y x ≤ C * u x)
@@ -286,21 +284,21 @@ theorem kzt_upper_right_core (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u
   have hanti := kzt_W_strictAntiOn hy hu hq hsub (convex_Ici z) fun x hx => by
     rw [interior_Ici] at hx; exact ⟨upos x hx, ypos x hx⟩
   have hz1 : z < z + 1 := by linarith
-  have hWz : kzt_W p u u' y y' z ≤ 0 := by
+  have hWz : ODE.sturmWronskian p u u' y y' z ≤ 0 := by
     have hpz : ∀ x ∈ Ioo z (z + 1), 0 < u x := fun x hx => upos x hx.1
     have hpy : ∀ x ∈ Ioo z (z + 1), 0 < y x := fun x hx => ypos x hx.1
     have hua := kzt_nonneg_left (hu z hz).1.continuousAt hz1 hpz
     have hya := kzt_deriv_nonneg_right (hy z hz).1 yz hz1 hpy
-    simp only [kzt_W, yz, mul_zero, zero_sub]
+    simp only [ODE.sturmWronskian, yz, mul_zero, zero_sub]
     exact mul_nonpos_of_nonneg_of_nonpos (hp z hz).le (by nlinarith [mul_nonneg hua hya])
   set s₁ := max z s₀ + 1 with hs₁
   have hzs : z < s₁ := by have := le_max_left z s₀; linarith
   have hs0s : s₀ < s₁ := by have := le_max_right z s₀; linarith
-  have hW1 : kzt_W p u u' y y' s₁ < kzt_W p u u' y y' z :=
+  have hW1 : ODE.sturmWronskian p u u' y y' s₁ < ODE.sturmWronskian p u u' y y' z :=
     hanti ((mem_Ici.2 le_rfl)) (mem_Ici.2 hzs.le) hzs
   have hIci : ∀ x ∈ Ici s₁, x ∈ Ioi z := fun x hx => lt_of_lt_of_le hzs hx
   have hIci0 : ∀ x ∈ Ici s₁, x ∈ Ioi s₀ := fun x hx => lt_of_lt_of_le hs0s hx
-  obtain ⟨x, hx, hxC⟩ := kzt_ratio_top (p := p) (y := y) (u := u) (c₀ := -kzt_W p u u' y y' s₁)
+  obtain ⟨x, hx, hxC⟩ := kzt_ratio_top (p := p) (y := y) (u := u) (c₀ := -ODE.sturmWronskian p u u' y y' s₁)
     hK (by linarith)
     (fun x hx => (hy x (hsub (le_of_lt (hIci x hx)))).1)
     (fun x hx => (hu x (hsub (le_of_lt (hIci x hx)))).1)
@@ -316,7 +314,7 @@ theorem kzt_upper_right_core (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u
 
 /-- **Comparison at `∞`.** Let `qy < qu`, let `z` be the last zero of `y`, and let `y/u` stay
 bounded and `p u² = O(1)` near `∞`. Then `u` has a zero in `(z, ∞)`. -/
-theorem kzt_upper_right (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
+theorem kzt_upper_right (hy : KztIsSol p qy y y') (hu : KztIsSol p qu u u')
     (hq : ∀ x ∈ Ioi (0:ℝ), qy x < qu x) {z s₀ C K : ℝ} (hz : 0 < z)
     (hK : 0 < K) (yz : y z = 0) (hyne : ∀ x ∈ Ioi z, y x ≠ 0)
     (hC : ∀ x ∈ Ioi s₀, |y x| ≤ C * |u x|)
@@ -326,7 +324,7 @@ theorem kzt_upper_right (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
   have hsub : Ioi z ⊆ Ioi (0:ℝ) := fun x hx => hz.trans hx
   have hb' : ∀ x ∈ Ioi s₀, p x * (-u x) ^ 2 ≤ K := fun x hx => by
     rw [neg_sq]; exact hb x hx
-  have key : ∀ (y₁ y₁' u₁ u₁' : ℝ → ℝ), kzt_IsSol p qy y₁ y₁' → kzt_IsSol p qu u₁ u₁' →
+  have key : ∀ (y₁ y₁' u₁ u₁' : ℝ → ℝ), KztIsSol p qy y₁ y₁' → KztIsSol p qu u₁ u₁' →
       y₁ z = 0 → (∀ x ∈ Ioi z, 0 < y₁ x) → (∀ x ∈ Ioi z, 0 < u₁ x) →
       (∀ x ∈ Ioi s₀, |y₁ x| ≤ C * |u₁ x|) →
       (∀ x ∈ Ioi s₀, p x * u₁ x ^ 2 ≤ K) → False := by
@@ -351,7 +349,7 @@ theorem kzt_upper_right (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
       (fun x hx => neg_pos.mpr (hu1 x hx)) hCn3 hb'
 
 /-- Sign-normalized core of `kzt_lower_right`. -/
-theorem kzt_lower_right_core (hy : kzt_IsSol p qy y y') (hw : kzt_IsSol p qw w w')
+theorem kzt_lower_right_core (hy : KztIsSol p qy y y') (hw : KztIsSol p qw w w')
     (hq : ∀ x ∈ Ioi (0:ℝ), qw x < qy x) {z s₀ K : ℝ} (hz : 0 < z)
     (hK : 0 < K) (wz : w z = 0) (ypos : ∀ x ∈ Ioi z, 0 < y x) (wpos : ∀ x ∈ Ioi z, 0 < w x)
     (hb : ∀ x ∈ Ioi s₀, p x * w x ^ 2 ≤ K) : False := by
@@ -359,20 +357,20 @@ theorem kzt_lower_right_core (hy : kzt_IsSol p qy y y') (hw : kzt_IsSol p qw w w
   have hmono := kzt_W_strictMonoOn hy hw hq hsub (convex_Ici z) fun x hx => by
     rw [interior_Ici] at hx; exact ⟨wpos x hx, ypos x hx⟩
   have hz1 : z < z + 1 := by linarith
-  have hWz : 0 ≤ kzt_W p w w' y y' z := by
+  have hWz : 0 ≤ ODE.sturmWronskian p w w' y y' z := by
     have hya := kzt_nonneg_left (hy z hz).1.continuousAt hz1 fun x hx => ypos x hx.1
     have hwa := kzt_deriv_nonneg_right (hw z hz).1 wz hz1 fun x hx => wpos x hx.1
-    simp only [kzt_W, wz, zero_mul, sub_zero]
+    simp only [ODE.sturmWronskian, wz, zero_mul, sub_zero]
     exact mul_nonneg (hp z hz).le (mul_nonneg hwa hya)
   set s₁ := max z s₀ + 1 with hs₁
   have hzs : z < s₁ := by have := le_max_left z s₀; linarith
   have hs0s : s₀ < s₁ := by have := le_max_right z s₀; linarith
-  have hW1 : kzt_W p w w' y y' z < kzt_W p w w' y y' s₁ :=
+  have hW1 : ODE.sturmWronskian p w w' y y' z < ODE.sturmWronskian p w w' y y' s₁ :=
     hmono (mem_Ici.2 le_rfl) (mem_Ici.2 hzs.le) hzs
   have hIci : ∀ x ∈ Ici s₁, x ∈ Ioi z := fun x hx => lt_of_lt_of_le hzs hx
   have hIci0 : ∀ x ∈ Ici s₁, x ∈ Ioi s₀ := fun x hx => lt_of_lt_of_le hs0s hx
   obtain ⟨x, hx, hxC⟩ := kzt_ratio_top (p := p) (y := fun x => -y x) (y' := fun x => -y' x)
-    (u := w) (c₀ := kzt_W p w w' y y' s₁) hK (by linarith)
+    (u := w) (c₀ := ODE.sturmWronskian p w w' y y' s₁) hK (by linarith)
     (fun x hx => (hy x (hsub (le_of_lt (hIci x hx)))).1.neg)
     (fun x hx => (hw x (hsub (le_of_lt (hIci x hx)))).1)
     (fun x hx => wpos x (hIci x hx)) (fun x hx => hp x (hsub (le_of_lt (hIci x hx))))
@@ -386,7 +384,7 @@ theorem kzt_lower_right_core (hy : kzt_IsSol p qy y y') (hw : kzt_IsSol p qw w w
   exact absurd hxC (not_lt.mpr (div_pos (ypos x hx') (wpos x hx')).le)
 
 /-- Sign-normalized core of `kzt_lower_left`. -/
-theorem kzt_lower_left_core (hy : kzt_IsSol p qy y y') (hw : kzt_IsSol p qw w w')
+theorem kzt_lower_left_core (hy : KztIsSol p qy y y') (hw : KztIsSol p qw w w')
     (hq : ∀ x ∈ Ioi (0:ℝ), qw x < qy x) {z s₀ K : ℝ} (hz : 0 < z) (hs₀ : 0 < s₀)
     (hK : 0 < K) (wz : w z = 0) (ypos : ∀ x ∈ Ioo 0 z, 0 < y x)
     (wpos : ∀ x ∈ Ioo 0 z, 0 < w x)
@@ -394,10 +392,10 @@ theorem kzt_lower_left_core (hy : kzt_IsSol p qy y y') (hw : kzt_IsSol p qw w w'
   have hsub : Ioc 0 z ⊆ Ioi (0:ℝ) := fun x hx => hx.1
   have hmono := kzt_W_strictMonoOn hy hw hq hsub (convex_Ioc 0 z) fun x hx => by
     rw [interior_Ioc] at hx; exact ⟨wpos x hx, ypos x hx⟩
-  have hWz : kzt_W p w w' y y' z ≤ 0 := by
+  have hWz : ODE.sturmWronskian p w w' y y' z ≤ 0 := by
     have hya := kzt_nonneg_right (hy z hz).1.continuousAt hz ypos
     have hwa := kzt_deriv_nonpos_left (hw z hz).1 wz hz wpos
-    simp only [kzt_W, wz, zero_mul, sub_zero]
+    simp only [ODE.sturmWronskian, wz, zero_mul, sub_zero]
     exact mul_nonpos_of_nonneg_of_nonpos (hp z hz).le
       (by nlinarith [mul_nonneg hya (neg_nonneg.mpr hwa)])
   set s₁ := min z s₀ / 2 with hs₁
@@ -405,11 +403,11 @@ theorem kzt_lower_left_core (hy : kzt_IsSol p qy y y') (hw : kzt_IsSol p qw w w'
   have hzs : s₁ < z := by have := min_le_left z s₀; linarith
   have hs0s : s₁ < s₀ := by have := min_le_right z s₀; linarith
   have hs1 : 0 < s₁ := by linarith
-  have hW1 : kzt_W p w w' y y' s₁ < kzt_W p w w' y y' z :=
+  have hW1 : ODE.sturmWronskian p w w' y y' s₁ < ODE.sturmWronskian p w w' y y' z :=
     hmono ⟨hs1, hzs.le⟩ ⟨hz, le_rfl⟩ hzs
   have hIoc : ∀ x ∈ Ioc 0 s₁, x ∈ Ioc 0 z := fun x hx => ⟨hx.1, by linarith [hx.2]⟩
   obtain ⟨x, hx, hxC⟩ := kzt_ratio_zero (p := p) (y := y) (u := w)
-    (c₀ := -kzt_W p w w' y y' s₁) hs1 hK (by linarith)
+    (c₀ := -ODE.sturmWronskian p w w' y y' s₁) hs1 hK (by linarith)
     (fun x hx => (hy x (hsub (hIoc x hx))).1) (fun x hx => (hw x (hsub (hIoc x hx))).1)
     (fun x hx => wpos x ⟨hx.1, by linarith [hx.2]⟩) (fun x hx => hp x (hsub (hIoc x hx)))
     (fun x hx => hb x ⟨hx.1, by linarith [hx.2]⟩)
@@ -420,7 +418,7 @@ theorem kzt_lower_left_core (hy : kzt_IsSol p qy y y') (hw : kzt_IsSol p qw w w'
   exact absurd hxC (not_lt.mpr (div_pos (ypos x hx') (wpos x hx')).le)
 
 /-- Sign-normalized core of `kzt_lower_whole`. -/
-theorem kzt_lower_whole_core (hy : kzt_IsSol p qy y y') (hw : kzt_IsSol p qw w w')
+theorem kzt_lower_whole_core (hy : KztIsSol p qy y y') (hw : KztIsSol p qw w w')
     (hq : ∀ x ∈ Ioi (0:ℝ), qw x < qy x) {s₀ s₀' K : ℝ} (hs₀' : 0 < s₀')
     (hK : 0 < K) (ypos : ∀ x ∈ Ioi 0, 0 < y x) (wpos : ∀ x ∈ Ioi 0, 0 < w x)
     (hb : ∀ x ∈ Ioi s₀, p x * w x ^ 2 ≤ K)
@@ -428,16 +426,16 @@ theorem kzt_lower_whole_core (hy : kzt_IsSol p qy y y') (hw : kzt_IsSol p qw w w
   have hmono := kzt_W_strictMonoOn hy hw hq subset_rfl (convex_Ioi 0) fun x hx => by
     rw [interior_Ioi] at hx; exact ⟨wpos x hx, ypos x hx⟩
   have h1 : (1:ℝ) ∈ Ioi (0:ℝ) := by norm_num
-  by_cases hW0 : 0 ≤ kzt_W p w w' y y' 1
+  by_cases hW0 : 0 ≤ ODE.sturmWronskian p w w' y y' 1
   · set s₁ := max 1 s₀ + 1 with hs₁
     have hzs : 1 < s₁ := by have := le_max_left 1 s₀; linarith
     have hs0s : s₀ < s₁ := by have := le_max_right 1 s₀; linarith
     have hS : ∀ x ∈ Ici s₁, x ∈ Ioi (0:ℝ) := fun x hx => by
       have : (0:ℝ) < s₁ := by linarith
       exact lt_of_lt_of_le this hx
-    have hW1 : kzt_W p w w' y y' 1 < kzt_W p w w' y y' s₁ := hmono h1 (hS s₁ (mem_Ici.2 le_rfl)) hzs
+    have hW1 : ODE.sturmWronskian p w w' y y' 1 < ODE.sturmWronskian p w w' y y' s₁ := hmono h1 (hS s₁ (mem_Ici.2 le_rfl)) hzs
     obtain ⟨x, hx, hxC⟩ := kzt_ratio_top (p := p) (y := fun x => -y x) (y' := fun x => -y' x)
-      (u := w) (c₀ := kzt_W p w w' y y' s₁) hK (by linarith)
+      (u := w) (c₀ := ODE.sturmWronskian p w w' y y' s₁) hK (by linarith)
       (fun x hx => (hy x (hS x hx)).1.neg)
       (fun x hx => (hw x (hS x hx)).1) (fun x hx => wpos x (hS x hx))
       (fun x hx => hp x (hS x hx)) (fun x hx => hb x (lt_of_lt_of_le hs0s hx))
@@ -455,9 +453,9 @@ theorem kzt_lower_whole_core (hy : kzt_IsSol p qy y y') (hw : kzt_IsSol p qw w w
     have hs0s : s₁ < s₀' := by have := min_le_right 1 s₀'; linarith
     have hs1 : 0 < s₁ := by linarith
     have hS : ∀ x ∈ Ioc 0 s₁, x ∈ Ioi (0:ℝ) := fun x hx => hx.1
-    have hW1 : kzt_W p w w' y y' s₁ < kzt_W p w w' y y' 1 := hmono hs1 h1 hzs
+    have hW1 : ODE.sturmWronskian p w w' y y' s₁ < ODE.sturmWronskian p w w' y y' 1 := hmono hs1 h1 hzs
     obtain ⟨x, hx, hxC⟩ := kzt_ratio_zero (p := p) (y := y) (u := w)
-      (c₀ := -kzt_W p w w' y y' s₁) hs1 hK (by linarith)
+      (c₀ := -ODE.sturmWronskian p w w' y y' s₁) hs1 hK (by linarith)
       (fun x hx => (hy x (hS x hx)).1) (fun x hx => (hw x (hS x hx)).1)
       (fun x hx => wpos x (hS x hx)) (fun x hx => hp x (hS x hx))
       (fun x hx => hb' x ⟨hx.1, by linarith [hx.2]⟩)
@@ -474,7 +472,7 @@ theorem kzt_neg_sq_bound {S : Set ℝ} {g : ℝ → ℝ}
 
 /-- **Comparison at `∞` (lower function).** Let `qw < qy`, let `z` be the last zero of `w`, and
 let `p w² = O(1)` near `∞`. Then `y` has a zero in `(z, ∞)`. -/
-theorem kzt_lower_right (hy : kzt_IsSol p qy y y') (hw : kzt_IsSol p qw w w')
+theorem kzt_lower_right (hy : KztIsSol p qy y y') (hw : KztIsSol p qw w w')
     (hq : ∀ x ∈ Ioi (0:ℝ), qw x < qy x) {z s₀ K : ℝ} (hz : 0 < z)
     (hK : 0 < K) (wz : w z = 0) (hwne : ∀ x ∈ Ioi z, w x ≠ 0)
     (hb : ∀ x ∈ Ioi s₀, p x * w x ^ 2 ≤ K) : ∃ c ∈ Ioi z, y c = 0 := by
@@ -495,7 +493,7 @@ theorem kzt_lower_right (hy : kzt_IsSol p qy y y') (hw : kzt_IsSol p qw w w')
 
 /-- **Comparison at `0` (lower function).** Let `qw < qy`, let `z` be the first zero of `w`, and
 let `p w² = O(x)` near `0`. Then `y` has a zero in `(0, z)`. -/
-theorem kzt_lower_left (hy : kzt_IsSol p qy y y') (hw : kzt_IsSol p qw w w')
+theorem kzt_lower_left (hy : KztIsSol p qy y y') (hw : KztIsSol p qw w w')
     (hq : ∀ x ∈ Ioi (0:ℝ), qw x < qy x) {z s₀ K : ℝ} (hz : 0 < z) (hs₀ : 0 < s₀)
     (hK : 0 < K) (wz : w z = 0) (hwne : ∀ x ∈ Ioo 0 z, w x ≠ 0)
     (hb : ∀ x ∈ Ioo 0 s₀, p x * w x ^ 2 ≤ K * x) :
@@ -517,7 +515,7 @@ theorem kzt_lower_left (hy : kzt_IsSol p qy y y') (hw : kzt_IsSol p qw w w')
 
 /-- **Comparison on the whole half-line.** Let `qw < qy`, let `w` have no zeros in `(0, ∞)`,
 `p w² = O(x)` near `0` and `p w² = O(1)` near `∞`. Then `y` has a zero in `(0, ∞)`. -/
-theorem kzt_lower_whole (hy : kzt_IsSol p qy y y') (hw : kzt_IsSol p qw w w')
+theorem kzt_lower_whole (hy : KztIsSol p qy y y') (hw : KztIsSol p qw w w')
     (hq : ∀ x ∈ Ioi (0:ℝ), qw x < qy x) {s₀ s₀' K : ℝ} (hs₀' : 0 < s₀')
     (hK : 0 < K) (hwne : ∀ x ∈ Ioi 0, w x ≠ 0)
     (hb : ∀ x ∈ Ioi s₀, p x * w x ^ 2 ≤ K)
@@ -538,7 +536,7 @@ theorem kzt_lower_whole (hy : kzt_IsSol p qy y y') (hw : kzt_IsSol p qw w w')
 /-- **Lower zero count by comparison.** If `qw < qy` and the zeros of `w` in `(0, ∞)` are
 exactly `e₀ < ⋯ < e_{j-1}`, with `p w² = O(x)` at `0` and `p w² = O(1)` at `∞`, then `y` has
 `j+1` distinct zeros, one in each gap. -/
-theorem kzt_lower_count (hy : kzt_IsSol p qy y y') (hw : kzt_IsSol p qw w w')
+theorem kzt_lower_count (hy : KztIsSol p qy y y') (hw : KztIsSol p qw w w')
     (hq : ∀ x ∈ Ioi (0:ℝ), qw x < qy x) {j : ℕ} {e : Fin j → ℝ} (he : StrictMono e)
     (heI : ∀ i, 0 < e i) (hwz : ∀ x ∈ Ioi (0:ℝ), w x = 0 ↔ ∃ i, x = e i)
     {s₀ s₀' K : ℝ} (hs₀' : 0 < s₀') (hK : 0 < K)
@@ -598,7 +596,7 @@ theorem kzt_lower_count (hy : kzt_IsSol p qy y y') (hw : kzt_IsSol p qw w w')
 /-- **Upper zero count by comparison.** If `qy < qu`, the zeros of `u` in `(0, ∞)` are among
 `e₀, …, e_{k-1}`, the zeros of `y` are simple and stay away from `∞`, `y/u` is bounded and
 `p u² = O(1)` near `∞`, then `y` has at most `k` zeros in `(0, ∞)`. -/
-theorem kzt_upper_count (hy : kzt_IsSol p qy y y') (hu : kzt_IsSol p qu u u')
+theorem kzt_upper_count (hy : KztIsSol p qy y y') (hu : KztIsSol p qu u u')
     (hq : ∀ x ∈ Ioi (0:ℝ), qy x < qu x) {k : ℕ} {e : Fin k → ℝ}
     (huz : ∀ x ∈ Ioi (0:ℝ), u x = 0 → ∃ i, x = e i)
     (hsimple : ∀ x ∈ Ioi (0:ℝ), y x = 0 → y' x ≠ 0) {δ : ℝ}
@@ -719,7 +717,7 @@ theorem kzt_U_eq_add (a b : ℝ) (k : ℕ) {x : ℝ} (hx : 0 < x) :
 
 /-- **Self-adjoint form of Kummer's equation.** For real `a`, `b`, the function `U(a,b,·)`
 solves `(x^b e^{-x} y')' - a x^{b-1} e^{-x} y = 0` on `(0, ∞)` (DLMF 13.2.1 with 13.3.22). -/
-theorem kzt_U_isSol (a b : ℝ) : kzt_IsSol (kzt_p b) (kzt_q a b) (kzt_U a b) (kzt_dU a b) := by
+theorem kzt_U_isSol (a b : ℝ) : KztIsSol (kzt_p b) (kzt_q a b) (kzt_U a b) (kzt_dU a b) := by
   intro x hx
   have hx' : (0:ℝ) < x := hx
   have hz : (x : ℂ) ∈ slitPlane := ofReal_mem_slitPlane.2 hx'
@@ -777,7 +775,7 @@ theorem kzt_U_simple (a b : ℝ) (ha : ∀ n : ℕ, a ≠ -(n : ℝ)) :
     rw [show -(a : ℂ) * ((kummerU ((a : ℂ) + 1) ((b : ℂ) + 1) (x : ℂ)).re : ℂ) =
       ((-a * (kummerU ((a : ℂ) + 1) ((b : ℂ) + 1) (x : ℂ)).re : ℝ) : ℂ) by push_cast; ring, hd]
     simp
-  simp only [wronskian, hU, hdU, mul_zero, zero_mul, sub_zero] at hW
+  simp only [ODE.wronskian, hU, hdU, mul_zero, zero_mul, sub_zero] at hW
   have hG : Gamma (a : ℂ) ≠ 0 := Gamma_ne_zero ha'
   have hx0 : (x : ℂ) ≠ 0 := ofReal_ne_zero.2 hx'.ne'
   have hpw : (x : ℂ) ^ (-(b : ℂ)) ≠ 0 := by
@@ -1116,7 +1114,7 @@ theorem kzt_wronskian_neg (a b : ℂ) {x : ℝ} (hx : x < 0) :
     have hz : g ε ∈ slitPlane := by
       rw [mem_slitPlane_iff]; right; simp [hg, hε'.ne']
     have hW := wronskian_regularizedHGFun_kummerU_all a c hz
-    rw [wronskian, deriv_kummerU _ _ hz, deriv_regularizedConfluent] at hW
+    rw [ODE.wronskian, deriv_kummerU _ _ hz, deriv_regularizedConfluent] at hW
     simp only [Function.comp_apply, hF, hG]
     rw [← hW]
   refine eq_of_continuousAt_of_integerComplement

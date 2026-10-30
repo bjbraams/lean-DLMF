@@ -6,8 +6,8 @@ Authors: Bastiaan J Braams
 module
 
 public import DLMF.Elliptic.Jacobi
-public import DLMF.Mathieu.SpectralExistence
 public import DLMF.Lame.Basic
+public import DLMF.Mathieu.SpectralExistence
 public import Mathlib.Tactic.Basify
 public import Mathlib.Tactic.ENatToNat
 
@@ -40,12 +40,12 @@ namespace DLMF.Lame
 /-! ### The case `k = 0` -/
 
 /-- `w'' = -h w` on `ℝ` (Lamé's equation at `k = 0`). -/
-def p2p_Sol (h : ℝ) (w : ℝ → ℝ) : Prop :=
+def P2pSol (h : ℝ) (w : ℝ → ℝ) : Prop :=
   Differentiable ℝ w ∧ ∀ x, HasDerivAt (deriv w) (-h * w x) x
 
 /-- At `k = 0` Lamé's equation is `w'' + h w = 0`. -/
 lemma p2p_isLameSolution_zero_iff {h ν : ℝ} {w : ℝ → ℝ} :
-    Real.IsLameSolution h ν 0 w ↔ p2p_Sol h w := by
+    Real.IsLameSolution h ν 0 w ↔ P2pSol h w := by
   constructor
   · intro hw
     exact ⟨hw.differentiable, fun x => (hw.hasDerivAt_deriv x).congr_deriv (by simp)⟩
@@ -53,7 +53,7 @@ lemma p2p_isLameSolution_zero_iff {h ν : ℝ} {w : ℝ → ℝ} :
     exact ⟨hw.1, fun x => (hw.2 x).congr_deriv (by simp)⟩
 
 /-- Uniqueness for `w'' = -h w`: a solution is determined by `w 0` and `w' 0`. -/
-lemma p2p_sol_unique {h : ℝ} {w g g' : ℝ → ℝ} (hw : p2p_Sol h w)
+lemma p2p_sol_unique {h : ℝ} {w g g' : ℝ → ℝ} (hw : P2pSol h w)
     (hg : ∀ t, HasDerivAt g (g' t) t ∧ HasDerivAt g' (-h * g t) t) (h0 : w 0 = g 0)
     (h1 : deriv w 0 = g' 0) : w = g ∧ deriv w = g' := by
   have := ODE.eq_of_linear_ode (p := fun _ => (0 : ℝ)) (q := fun _ => -h) (t₀ := 0)
@@ -63,7 +63,7 @@ lemma p2p_sol_unique {h : ℝ} {w g g' : ℝ → ℝ} (hw : p2p_Sol h w)
   exact this
 
 /-- A nonzero solution with `w' 0 = 0` has `w 0 ≠ 0`, and one with `w 0 = 0` has `w' 0 ≠ 0`. -/
-lemma p2p_sol_init_ne {h : ℝ} {w : ℝ → ℝ} (hw : p2p_Sol h w) (hne : w ≠ 0) :
+lemma p2p_sol_init_ne {h : ℝ} {w : ℝ → ℝ} (hw : P2pSol h w) (hne : w ≠ 0) :
     ¬ (w 0 = 0 ∧ deriv w 0 = 0) := by
   rintro ⟨h0, h1⟩
   refine hne (p2p_sol_unique hw (g := 0) (g' := 0) (fun t => ⟨?_, ?_⟩) h0 h1).1
@@ -72,7 +72,7 @@ lemma p2p_sol_init_ne {h : ℝ} {w : ℝ → ℝ} (hw : p2p_Sol h w) (hne : w �
 
 /-- For `h > 0` a solution of `w'' = -h w` is
 `w(x) = w(0) cos(√h x) + w'(0)/√h · sin(√h x)`, together with the formula for `w'`. -/
-lemma p2p_sol_pos {h : ℝ} {w : ℝ → ℝ} (hh : 0 < h) (hw : p2p_Sol h w) (x : ℝ) :
+lemma p2p_sol_pos {h : ℝ} {w : ℝ → ℝ} (hh : 0 < h) (hw : P2pSol h w) (x : ℝ) :
     w x = w 0 * Real.cos (√h * x) + deriv w 0 / √h * Real.sin (√h * x) ∧
       deriv w x = -(w 0 * √h * Real.sin (√h * x)) + deriv w 0 * Real.cos (√h * x) := by
   obtain ⟨s, hs, rfl⟩ : ∃ s, 0 < s ∧ h = s ^ 2 :=
@@ -92,7 +92,7 @@ lemma p2p_sol_pos {h : ℝ} {w : ℝ → ℝ} (hh : 0 < h) (hw : p2p_Sol h w) (x
   exact ⟨congrFun this.1 x, congrFun this.2 x⟩
 
 /-- For `h = 0` a solution of `w'' = 0` is `w(x) = w(0) + w'(0) x`, with `w' ≡ w'(0)`. -/
-lemma p2p_sol_zero {w : ℝ → ℝ} (hw : p2p_Sol 0 w) (x : ℝ) :
+lemma p2p_sol_zero {w : ℝ → ℝ} (hw : P2pSol 0 w) (x : ℝ) :
     w x = w 0 + deriv w 0 * x ∧ deriv w x = deriv w 0 := by
   have := p2p_sol_unique hw (g := fun t => w 0 + deriv w 0 * t) (g' := fun _ => deriv w 0)
     (fun t => ⟨by simpa using ((hasDerivAt_id t).const_mul (deriv w 0)).const_add (w 0),
@@ -101,7 +101,7 @@ lemma p2p_sol_zero {w : ℝ → ℝ} (hw : p2p_Sol 0 w) (x : ℝ) :
 
 /-- For `h < 0` a solution of `w'' = -h w` is
 `w(x) = w(0) cosh(√(-h) x) + w'(0)/√(-h) · sinh(√(-h) x)`, together with the formula for `w'`. -/
-lemma p2p_sol_neg {h : ℝ} {w : ℝ → ℝ} (hh : h < 0) (hw : p2p_Sol h w) (x : ℝ) :
+lemma p2p_sol_neg {h : ℝ} {w : ℝ → ℝ} (hh : h < 0) (hw : P2pSol h w) (x : ℝ) :
     w x = w 0 * Real.cosh (√(-h) * x) + deriv w 0 / √(-h) * Real.sinh (√(-h) * x) ∧
       deriv w x = w 0 * √(-h) * Real.sinh (√(-h) * x) + deriv w 0 * Real.cosh (√(-h) * x) := by
   obtain ⟨s, hs, rfl⟩ : ∃ s, 0 < s ∧ h = -s ^ 2 :=
@@ -190,7 +190,7 @@ lemma p2p_deriv_phi (N : ℕ) (oddK : Bool) : deriv (p2p_phi N oddK) = p2p_dphi 
   funext fun x => (p2p_phi_hasDerivAt N oddK x).1.deriv
 
 /-- `p2p_phi N oddK` solves `w'' + N² w = 0`. -/
-lemma p2p_phi_sol (N : ℕ) (oddK : Bool) : p2p_Sol ((N : ℝ) ^ 2) (p2p_phi N oddK) :=
+lemma p2p_phi_sol (N : ℕ) (oddK : Bool) : P2pSol ((N : ℝ) ^ 2) (p2p_phi N oddK) :=
   ⟨fun x => (p2p_phi_hasDerivAt N oddK x).1.differentiableAt, fun x => by
     rw [p2p_deriv_phi]; exact (p2p_phi_hasDerivAt N oddK x).2.congr_deriv (by ring)⟩
 
@@ -356,7 +356,7 @@ lemma p2p_lameEigenvalue_zero (ν : ℝ) (odd0 oddK : Bool) (j : ℕ) :
 
 /-- Two solutions of `w'' = -h w` with the same boundary condition at `0`, the second nonzero,
 are proportional. -/
-lemma p2p_eq_smul {h : ℝ} {odd0 : Bool} {w ψ : ℝ → ℝ} (hw : p2p_Sol h w) (hψ : p2p_Sol h ψ)
+lemma p2p_eq_smul {h : ℝ} {odd0 : Bool} {w ψ : ℝ → ℝ} (hw : P2pSol h w) (hψ : P2pSol h ψ)
     (hψ0 : ψ ≠ 0) (hbw : if odd0 then w 0 = 0 else deriv w 0 = 0)
     (hbψ : if odd0 then ψ 0 = 0 else deriv ψ 0 = 0) : ∃ c, w = fun x => c * ψ x := by
   have hi := p2p_sol_init_ne hψ hψ0
