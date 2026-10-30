@@ -18,9 +18,9 @@
   leftmargin=1.5em, labelindent=0pt, itemsep=0.3ex, topsep=0.3ex, parsep=0.3ex]\setlength{\parindent}{0pt}\RaggedRight}{\end{description}}
 
 % entry counts
-\newcommand{\NumA}{135}
-\newcommand{\NumB}{27}
-\newcommand{\NumC}{58}
+\newcommand{\NumA}{139}
+\newcommand{\NumB}{29}
+\newcommand{\NumC}{63}
 \newcommand{\NumOut}{3}
 
 \begin{document}
@@ -29,7 +29,7 @@
   NIST Digital Library of Mathematical Functions\\[0.4ex]
   \large found in the Lean~4 formalization \texttt{lean-DLMF}}
 \author{Bastiaan J. Braams}
-\date{2026-10-27}
+\date{2026-10-30}
 \maketitle
 
 \begin{abstract}
@@ -39,7 +39,7 @@
   fixed. It is meant for readers who compare a Lean statement with the printed DLMF formula and
   find that the two differ, and as a list of candidate errata reports for the DLMF editors. The
   entries refer to DLMF Release~1.2.8 of 2026-09-15 and describe the state of the
-  \texttt{lean-DLMF} project on 2026-10-27. The report has \NumA{} entries of genuine DLMF
+  \texttt{lean-DLMF} project through 2026-10-30. The report has \NumA{} entries of genuine DLMF
   errata, \NumB{} project transcription defects that were fixed, and \NumC{} formalization
   notes.
 \end{abstract}
@@ -71,7 +71,8 @@ Entries are grouped in three categories.
   Lean statement needs an extra hypothesis or a separate case because of Lean's conventions
   ($x/0=0$, $\Gamma(0)=0$, totalized $\zeta(1)$, unordered sums), a branch choice, a removable
   point, or an implicit convention made explicit. DLMF's own published errata~\cite{DLMFErrata}
-  that the formalization follows are also listed here.
+  that the formalization follows are also listed here. Pending reviews of the project's
+  hypotheses are identified explicitly; they are not counted as confirmed source errata.
 \end{description}
 Section~\ref{sec:out} (``Outside the DLMF scope'') records errors found in the supporting
 sources (AAR and Beals--Wong), together with two DLMF items that were checked and cleared.
@@ -80,8 +81,9 @@ Each entry gives the DLMF identifier, linked to the DLMF web page (equation numb
 as, for example, DLMF~\deq{28.28.16}); what is printed against what is correct, with the printed
 formula taken from DLMF's own \LaTeX{} source where a formula is involved; the evidence; the
 Lean declaration(s) and the file that holds them; the status (proved, admitted, definition, or
-an upstream pointer to Mathlib); and the date found. ``Admitted'' means that the corrected
-statement is in Lean with a \texttt{sorry} proof. Some entries group closely related equation
+an upstream pointer to Mathlib); and the date found. ``Admitted'' means that the declaration
+has a \texttt{sorry} proof; pending statement corrections are identified explicitly.
+Some entries group closely related equation
 numbers. File names such as \file{REVIEW.md} and \file{DLMF19Acquisition.md} refer to the review
 log and the chapter acquisition ledgers of the project repository.
 
@@ -102,9 +104,20 @@ under (c) or dropped. The Chapter~28--31 entries were found by the acquisition a
 numerics. The Chapter~32 entries were found by the acquisition agents on 2026-10-26 and
 confirmed by an independent exact symbolic check against DLMF's own definitions (\file{REVIEW.md},
 section ``Chapter 32 acquisition (2026-10-26)''; ledger \file{DLMF32Acquisition.md}). The
-Chapter~1--2 entries were found by the acquisition agents on 2026-10-27 and confirmed by the
+initial Chapter~1--2 entries were found by the acquisition agents on 2026-10-27 and confirmed by the
 coordinator from the DLMF~1.2.8 page text, analytically or with fresh mpmath scripts (ledgers
 \file{DLMF1Acquisition.md} and \file{DLMF2Acquisition.md}).
+
+The update of 2026-10-30 incorporates the reviews and proof rounds of 2026-10-28--30.
+The relevant DLMF pages and their surrounding domain conditions were checked again.
+Four entries are added to (a): the product $M$-test, negative-order Ces\`aro regularity,
+the mean-centered $R$-series, and the three shifted-theta power series (grouped in one
+entry). Two repaired project transcriptions are added to (b), and five notes to (c).
+The Ces\`aro concern is resolved here by an exact binomial-coefficient counterexample;
+no new Lean proof of that counterexample is claimed. The theta and $R$-series
+counterexamples already have Lean checks with only the standard axioms, recorded in
+\file{ProofRound20261030.json} and \file{ProofRound20261030c.json}. The older entries
+retain their dated verification and proof-status snapshots unless updated explicitly.
 
 \subsection{Counts}
 
@@ -117,8 +130,9 @@ are numbered a.1, a.2, \dots, b.1, \dots, c.1, \dots\ within each category.
 
 \subsection{Chapter 1 (algebraic and analytic methods)}
 
-Found by the acquisition agents on 2026-10-27 and confirmed by the coordinator from the DLMF
-1.2.8 page text, analytically or with fresh mpmath scripts.
+The initial entries were found by the acquisition agents on 2026-10-27 and confirmed by the
+coordinator from the DLMF 1.2.8 page text, analytically or with fresh mpmath scripts.
+Later proof-review findings carry their own dates below.
 
 \entry{\deq{1.2.51}}
 \begin{fields}
@@ -137,7 +151,7 @@ Found by the acquisition agents on 2026-10-27 and confirmed by the coordinator f
   itself states the integral versions \deq{1.7.4}--\deq{1.7.6}; the printed form misses
   $\mathbf b=\mathbf 0\ne\mathbf a$.
 \item[Lean] \lean{sq_sum_mul_eq_iff}, \lean{inner_eq_Lp_mul_Lq_iff}, \lean{Lp_add_eq_iff}
-  (\file{DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean}), admitted.
+  (\file{DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean}), now proved (2026-10-30).
 \end{fields}
 
 \entry{\deq{1.7.11}}
@@ -146,7 +160,7 @@ Found by the acquisition agents on 2026-10-27 and confirmed by the coordinator f
 \item[Correct] $\le$; the inequality is strict unless $f$ is almost everywhere constant (for
   constant $f$ both sides are equal).
 \item[Lean] \lean{exp_integral_log_le_integral}, proved; \lean{exp_integral_log_lt_integral}
-  (strict, $f$ not a.e.\ constant), admitted
+  (strict, $f$ not a.e.\ constant), now proved
   (\file{DLMF/AlgebraicAnalytic/Calculus/Inequalities.lean}).
 \end{fields}
 
@@ -158,7 +172,27 @@ Found by the acquisition agents on 2026-10-27 and confirmed by the coordinator f
 \item[Evidence] $a_n=b_n=(-1)^n/\sqrt{n+1}$ at $z=1$: both series converge, while
   $|c_n|\ge\sum_{k=0}^n((k+1)(n-k+1))^{-1/2}\ge 2(n+1)/(n+2)$, so the product series diverges.
 \item[Lean] \lean{tendsto_cauchyProduct} (\file{DLMF/AlgebraicAnalytic/Complex/Calculus.lean}),
-  admitted.
+  now proved (2026-10-30).
+\end{fields}
+
+\entry{\deq{1.10.20}--\deq{1.10.21}, product $M$-test}\label{err:product-m-test}
+\begin{fields}
+\item[Printed] A summable bound $|\ln(1+a_n(z))|\le M_n$ for $n\ge N$, uniformly
+  in $z\in D$, implies uniform convergence of the full partial products on $D$.
+\item[Correct] The conclusion is locally uniform convergence. Global uniform convergence
+  also requires control of the finite initial product, for example boundedness on $D$.
+\item[Evidence] Take $D=\CC$, $1+a_1(z)=\eu^z$, and
+  $1+a_n(z)=\exp(2^{-n})$ for $n\ge2$. The tail logarithms have summable bounds,
+  and every factor is nonzero. But
+  \[
+    P_m(z)=\exp(z+\tfrac12-2^{-m}),\qquad P(z)=\exp(z+\tfrac12).
+  \]
+  For each finite $m\ge1$, $|P_m(z)-P(z)|$ is unbounded on $D$.
+\item[Lean] \lean{prod_mtest_log}
+  (\file{DLMF/AlgebraicAnalytic/Complex/Functions.lean}) still asserts global uniform
+  convergence and remains admitted, pending correction. This is an analytical
+  counterexample, not a new Lean counterexample theorem.
+\item[Found] 2026-10-28; source wording rechecked 2026-10-30.
 \end{fields}
 
 \entry{\deq{1.10.25}}
@@ -214,6 +248,29 @@ Found by the acquisition agents on 2026-10-27 and confirmed by the coordinator f
 \item[Lean] \lean{laplaceTransform_one_sub_cosh_div}, \lean{laplaceTransform_one_sub_cos_div},
   \lean{laplaceTransform_sin_div} (\file{DLMF/AlgebraicAnalytic/Transforms/Tables.lean}),
   admitted.
+\end{fields}
+
+\entry{\dlink{1.15.ii}{\S1.15(ii)}, regularity for negative Ces\`aro orders}
+\label{err:negative-cesaro}
+\begin{fields}
+\item[Printed] All methods of \S1.15(i) are regular; the general Ces\`aro method
+  \deq{1.15.6}--\deq{1.15.7} is defined for $\alpha>-1$.
+\item[Correct] General Ces\`aro summation is regular for $\alpha\ge0$, not throughout
+  $-1<\alpha<0$.
+\item[Evidence] Put $b_n=\poch{1/2}{n}/n!=4^{-n}\binom{2n}{n}$ and $a_n=(-1)^n b_n$.
+  The ordinary alternating series converges to $1/\sqrt2$. At $\alpha=-1/2$,
+  \[
+    \sigma_n^{(-1/2)}=b_n^{-1}\sum_{k=0}^n b_k(-1)^{n-k}b_{n-k}.
+  \]
+  The numerator is the coefficient of $t^n$ in
+  $(1-t)^{-1/2}(1+t)^{-1/2}=(1-t^2)^{-1/2}$.
+  Thus every odd mean is zero; every even mean is $b_m/b_{2m}\ge1$.
+  The means do not converge, despite ordinary convergence. This exact argument
+  resolves the earlier tentative alternating-series example without numerical evidence.
+\item[Lean] \lean{hasCesaroSumOfOrder_of_tendsto}
+  (\file{DLMF/AlgebraicAnalytic/Summability/Series.lean}) retains the hypothesis
+  $\alpha>-1$ and remains admitted. The counterexample above has not been formalized.
+\item[Found] Range concern on 2026-10-28; confirmed analytically 2026-10-30.
 \end{fields}
 
 \entry{\dlink{1.15.v}{\S1.15(v)}, after \deq{1.15.40}}
@@ -894,6 +951,36 @@ false); proved.
 \item[Found] 2026-10-25 (proof round~1).
 \end{fields}
 
+\entry{\deq{19.19.7}--\deq{19.19.8}, mean-centered series}\label{err:R-mean}
+\begin{fields}
+\item[Printed]
+  \[
+  R_{-a}\left(\boldsymbol{\tfrac12};\mathbf z\right)
+   =A^{-a}\sum_{N=0}^{\infty}
+     \frac{\poch{a}{N}}{\poch{n/2}{N}}
+       T_N\left(\boldsymbol{\tfrac12},\mathbf Z\right),\quad
+  A=\frac1n\sum_j z_j,\quad Z_j=1-z_j/A,\quad |Z_j|<1.
+  \]
+\item[Correct] Principal powers also require a compatible scaling branch, for example
+  $A\in\CC\setminus(-\infty,0]$ and
+  $\ph A+\ph(z_j/A)\in(-\pi,\pi)$ for every $j$, as in \deq{19.16.11}.
+\item[Evidence] Take $n=2$, $a=1$ and
+  \[
+  z_1=\frac{-3200-798\iu}{169},\quad
+  z_2=\frac{-1120+3102\iu}{169},\quad
+  A=\frac{-2160+1152\iu}{169}.
+  \]
+  All nodes and $A$ are off the cut; $z_j/A=1\pm(65/72)\iu$.
+  The left side is $-72/(97A)$, while the series sums to $+72/(97A)$.
+  The value at $a=1$ uses parameter continuation; continuity gives failures also
+  for real $a<1$ sufficiently close to $1$, inside the integral's parameter range.
+\item[Lean] \lean{symEllIntR_half_hasSum_mean}
+  (\file{DLMF/EllipticIntegrals/SymmetricSeries.lean}) remains admitted and unchanged.
+  Lean checks both the stated hypotheses and the negation of its series conclusion;
+  the source and standard-axiom audit are in \file{ProofRound20261030c.json}.
+\item[Found] 2026-10-30.
+\end{fields}
+
 \entry{\deq{19.20.3}, \deq{19.20.23}}
 \begin{fields}
 \item[Printed] under the \S19.16(i) constraints,
@@ -1088,6 +1175,34 @@ $5.19321$.
 \end{fields}
 
 \subsection{Chapter 20 (theta functions)}
+
+\entry{\deq{20.6.1}, \deq{20.6.3}--\deq{20.6.5}, convergence radii}
+\label{err:theta-radii}
+\begin{fields}
+\item[Printed] The common condition $|\pi z|<\min_{(m,n)\ne(0,0)}|\pi(m+n\tau)|$
+  is applied to all four logarithmic power-series formulas, including
+  \[
+  \theta_2(\pi z\mid\tau)=\theta_2(0\mid\tau)
+    \exp\left(-\sum_{j=1}^{\infty}\frac{\alpha_{2j}(\tau)z^{2j}}{2j}\right).
+  \]
+\item[Correct] The three even-theta formulas need the distances to their respective
+  shifted zero lattices. In the unscaled $z$ variable these radii are
+  \begin{align*}
+  r_2&=\min_{m,n\in\ZZ}|m+\tfrac12+n\tau|,\\
+  r_3&=\min_{m,n\in\ZZ}|m+\tfrac12+(n+\tfrac12)\tau|,\\
+  r_4&=\min_{m,n\in\ZZ}|m+(n+\tfrac12)\tau|.
+  \end{align*}
+  Use $|z|<r_j$ in the formula for $\theta_j$, with $\Im\tau>0$.
+\item[Evidence] At $\tau=\iu$ the printed radius is $1$ in $z$. Respectively choose
+  $z=1/2$, $(1+\iu)/2$, $\iu/2$. Each satisfies the printed inequality and makes
+  the left side zero. A nonzero theta null value times the exponential of a
+  convergent complex series cannot vanish.
+\item[Lean] \lean{jacobiThetaTwoTau_powerSeries}, \lean{jacobiThetaThreeTau_powerSeries},
+  \lean{jacobiThetaFourTau_powerSeries} (\file{DLMF/Theta/PowerSeries.lean}) remain
+  admitted and unchanged. Lean counterexamples and standard-axiom audits for all three
+  are preserved in \file{ProofRound20261030.json}.
+\item[Found] 2026-10-30.
+\end{fields}
 
 \entry{\deq{20.7.34}}
 \begin{fields}
@@ -2374,6 +2489,25 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
 \section{(b) Project transcription defects that were fixed}\label{sec:b}
 \category{b}
 
+\entry{\dlink{1.4.E23_3}{(1.4.23\_3)}, mixed Stieltjes integral}
+\begin{fields}
+\item[Defect] The finite atomic sum was parsed inside the Lebesgue integral because
+  the continuous integral was not parenthesized. With density $w=0$, $f=1$, a unit
+  atom at $1$, and interval $(0,2)$, the former conclusion was $1=2$.
+\item[Fix] For $\mu=w\,\dd t+\sum_k m_k\delta_{x_k}$, write
+  \[
+    \int_{(a,b)} f\,\dd\mu
+      =\left(\int_{(a,b)} f(t)w(t)\,\dd t\right)
+         +\sum_{k:\,a<x_k<b}m_k f(x_k).
+  \]
+  The parentheses keep the atomic term outside the continuous integral. DLMF's
+  mixed continuous--discrete formula was correct.
+\item[Lean] \lean{setIntegral_withDensity_add_dirac}
+  (\file{DLMF/AlgebraicAnalytic/Calculus/OneVariable.lean}), corrected and proved.
+  The old statement's counterexample and axiom audit are in \file{ProofRound20261030e.json}.
+\item[Found] 2026-10-30.
+\end{fields}
+
 \entry{\deq{4.19.3}, \deq{4.19.4}, \deq{4.22.5}}
 \begin{fields}
 \item[Defect] Mistaken tags: the tangent series was tagged E4, the cosecant series E5. The
@@ -2589,6 +2723,20 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
 \item[Found] 2026-10-25 (proof round 1), restated and proved the same day.
 \end{fields}
 
+\entry{\deq{23.8.6}, sigma product at zeros of its prefactor}
+\begin{fields}
+\item[Defect] The Lean statement identified the normalized infinite product with
+  $\sigma(z)$ divided by its sine prefactor at every $z$. At $z=0$ every product
+  factor is $1$, whereas the quotient is $0/0=0$ in Lean.
+\item[Fix] State convergence as \lean{Multipliable}, and retain the all-point identity
+  $\sigma(z)=(\text{sine prefactor})\prod_n(\text{normalized factor})$.
+  DLMF prints the multiplication formula, so no DLMF correction is needed.
+\item[Lean] \lean{DLMF.Weierstrass.HalfPeriods.weierstrassSigma_prod}
+  (\file{DLMF/Weierstrass/Series.lean}), corrected and proved. The Lean counterexample
+  to the former quotient conjunct is preserved in \file{ProofRound20261029e.json}.
+\item[Found] 2026-10-29.
+\end{fields}
+
 \entry{\deq{28.2.33} and \dlink{28.4.i}{\S28.4(i)}}
 \begin{fields}
 \item[Defect] The acquired statements ranged over all $n\in\NN$, including $n=0$, but DLMF has
@@ -2666,6 +2814,21 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
 
 \subsection{Chapters 1--2}
 
+\entry{\deq{1.5.22}--\deq{1.5.24}, existence of partial derivatives in Lean}
+\begin{fields}
+\item[Note] DLMF assumes continuity of $f$ and its partial derivative $f_x$; the latter
+  presupposes that the partial derivative exists. Continuity of Lean's totalized
+  expression \lean{deriv (fun t => f (t, y)) x} does not by itself assert existence.
+  An explicit derivative-existence hypothesis, or a theorem deriving it from the
+  existing assumptions, is needed before applying the classical Leibniz theorem.
+\item[Status] Pending project-hypothesis review, not a confirmed counterexample to the
+  full Lean statements and not a DLMF erratum. Neither declaration has been changed.
+\item[Lean] \lean{hasDerivAt_integral_variable_limits},
+  \lean{hasDerivAt_improper_integral_of_tendstoUniformlyOn}
+  (\file{DLMF/AlgebraicAnalytic/Calculus/SeveralVariables.lean}), admitted.
+\item[Found] 2026-10-30 (\file{ProofRound20261030.json}).
+\end{fields}
+
 \entry{\deq{1.10.24}}
 \begin{fields}
 \item[Note] $F\ne0$ follows from the hypotheses only with DLMF's definition of convergence of a
@@ -2680,6 +2843,20 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
 \item[Note] The identity theorem behind the uniqueness of analytic continuation needs
   $D_1\cap D_2$ to be connected, which DLMF leaves tacit; the Lean statement assumes it.
 \item[Lean] \file{DLMF/AlgebraicAnalytic/Complex/Functions.lean}.
+\end{fields}
+
+\entry{\dlink{1.10.iii}{\S1.10(iii)}, great Picard theorem}
+\begin{fields}
+\item[Note] An isolated essential singularity has a punctured analytic neighbourhood
+  of positive radius. The Lean acquisition allows the outer radius $r_2$ to be zero,
+  making its punctured-disc analyticity hypothesis vacuous. Add $r_2>0$.
+\item[Evidence] Set $f(z)=\overline z$, $z_0=0$, $r_2=0$ and $\epsilon=1$.
+  The function is not meromorphic at $0$, but the punctured unit-disc image omits
+  more than one value. This refutes the acquired interface, not DLMF's theorem.
+  The counterexample is analytical, not a new Lean counterexample theorem.
+\item[Lean] \lean{picard_great}
+  (\file{DLMF/AlgebraicAnalytic/Complex/Functions.lean}), admitted and unchanged.
+\item[Found] 2026-10-28; source convention rechecked 2026-10-30.
 \end{fields}
 
 \entry{\dlink{1.14.T5}{Table~1.14.5}, rows 3 and 7}
@@ -2704,7 +2881,7 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
   $t=0\leftrightarrow w=0$ and $t=\alpha\leftrightarrow w=a$ correspond monotonically as DLMF
   requires; the principal root would fail for $\alpha<0$.
 \item[Lean] \lean{bleisteinA}, \lean{bleisteinW_zero}
-  (\file{DLMF/AsymptoticApproximations/Integrals/Defs.lean},
+  (\file{DLMF/AsymptoticApproximations/Integrals/Basic.lean},
   \file{DLMF/AsymptoticApproximations/Integrals/Coalescing.lean}), definition and proved.
 \end{fields}
 
@@ -2716,6 +2893,42 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
   printed form is proved from it where $\sin\pi z\ne0$.
 \item[Lean] \lean{mellin_besselJ_sq}, admitted; \lean{mellin_besselJ_sq_eq_kernel}, proved
   (\file{DLMF/AsymptoticApproximations/Mellin/BesselExample.lean}).
+\end{fields}
+
+\entry{\deq{2.4.9}, higher-order Haar derivative compatibility}
+\begin{fields}
+\item[Note] DLMF's use of $Q^{(j)}$ and $F^{(j)}$ presupposes the relevant derivatives.
+  The Lean statement assumes holomorphy only of $Q-F$, but uses the separate
+  totalized derivatives of $Q$ and $F$. These need not differentiate the difference.
+\item[Evidence] For $Q(z)=\overline z+z$ and $F(z)=\overline z$, the separate
+  totalized first derivatives are both zero, while $(Q-F)'=1$.
+  This demonstrates the compatibility gap; it is not a counterexample satisfying
+  all the statement's additional inverse-transform and uniform-convergence assumptions.
+\item[Status] Pending project-hypothesis review. Individual holomorphy of $Q,F$, or
+  explicit compatibility of their derivative data, would support the integrations
+  by parts. No DLMF erratum is asserted.
+\item[Lean] \lean{haar_isLittleO_pow}
+  (\file{DLMF/AsymptoticApproximations/Integrals/Watson.lean}), admitted and unchanged.
+\item[Found] 2026-10-29 (\file{ProofRound20261029b.json}).
+\end{fields}
+
+\entry{\deq{2.7.26}--\deq{2.7.30}, scope of Liouville--Green uniqueness}
+\begin{fields}
+\item[Note] DLMF's uniqueness paragraph follows the additional assumption that
+  $|\int\sqrt f\,\dd x|$ is unbounded at both endpoints. The Lean acquisition attaches
+  uniqueness to the weaker finite-endpoint hypotheses before that assumption.
+\item[Evidence] On $(0,1)$ put $f=1$, $g=0$ and $\xi(x)=x$.
+  The error-control density vanishes, but both $\eu^x$ and $\eu^x+\sinh x$ solve
+  $w''=w$ and are equivalent to $\eu^x$ as $x\to0+$.
+  They are distinct, so asymptotic equivalence alone cannot specify a unique solution
+  at this regular endpoint.
+\item[Correct reading] Retain the additional endpoint assumptions when asserting
+  uniqueness, or provide suitable endpoint normalization. The printed conditional
+  uniqueness paragraph is not refuted by this example.
+\item[Lean] \lean{liouvilleGreen_interval_isEquivalent}
+  (\file{DLMF/AsymptoticApproximations/ODE/LiouvilleGreen.lean}), admitted and unchanged,
+  with a qualification in its docstring. The counterexample is analytical, not formalized.
+\item[Found] 2026-10-29 (\file{ProofRound20261029.json}); source scope rechecked 2026-10-30.
 \end{fields}
 
 \subsection{Totalization, removable points and nonvanishing hypotheses}
@@ -2776,15 +2989,25 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
 \entry{\deq{13.6.11}}
 \begin{fields}
 \item[Note] $\Gamma(0)=0$ in Lean; nonpositive integer $\nu$ ($\nu-n$) excluded.
-\item[Lean] \lean{kummerM_besselI_sum}, \lean{kummerM_besselI_sum_neg}, proved.
-\item[Found] 2026-10-07.
+  Rechecking the original review on 2026-10-30 gives the former case $\nu=0$, $n=0$, $z=1$:
+  its right side was zero, while $M(1/2,1,2)>0$. Denominator-parameter conditions
+  alone did not exclude this case; the Gamma-prefactor hypotheses must also be retained.
+\item[Lean] \lean{kummerM_besselI_sum}, \lean{kummerM_besselI_sum_neg}
+  (\file{DLMF/Confluent/Relations.lean}), proved with the corrected hypotheses.
+\item[Found] 2026-10-07; current statement and proof rechecked 2026-10-30.
 \end{fields}
 
 \entry{\deq{13.16.8} (borderline (a)/(c))}
 \begin{fields}
 \item[Note] The Bochner integral also needs $\Re(-\mu-\kappa)+\tfrac12>0$.
-\item[Lean] \lean{whittakerW_integral_besselK}, proved.
-\item[Found] 2026-10-08 (\file{REVIEW.md}, ``Further proofs and a statement correction'').
+  Rechecking the original review on 2026-10-30 gives $\kappa=0$, $\mu=1/2$, $z=1$ and
+  $W_{0,1/2}(1)=\eu^{-1/2}\ne0$, while the former right side contained the totalized
+  prefactor $1/\Gamma(0)=0$. The corrected literal-integral statement retains both
+  parameter bounds and also excludes $z=0$, where totalized values disagree.
+\item[Lean] \lean{whittakerW_integral_besselK}
+  (\file{DLMF/Confluent/IntegralRepresentations/BarnesAndConnections.lean}), now proved.
+\item[Found] 2026-10-08; current statement and proof rechecked 2026-10-30.
+  See \file{REVIEW.md}, ``Further proofs and a statement correction''.
 \end{fields}
 
 \entry{\deq{13.17.1}, \deq{13.17.3}}
@@ -2868,6 +3091,24 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
 \end{fields}
 
 \subsection{Branches and multivalued sets}
+
+\entry{\deq{19.26.26}, an excluded first-argument cut}
+\begin{fields}
+\item[Note] The printed identity $\RC(x^2,y^2)=\RC(a^2,ay)$, $a=(x+y)/2$,
+  lists $\Re x\ge0$, $\Re y>0$. The defining domain in \S19.2(iv) also excludes
+  negative real first arguments. That restriction must be retained in Lean;
+  its totalized integral otherwise assigns extra cut values.
+\item[Evidence] The acquired hypotheses allow $x=-\iu$, $y=1$.
+  The literal principal-square-root integral for $\RC(-1,1)$ has negative imaginary
+  part, while that for $\RC(-\iu/2,(1-\iu)/2)$ has positive imaginary part.
+  Both converge, but $-1$ is excluded by DLMF's definition of the first argument.
+  This is therefore not a counterexample within DLMF's stated function domain.
+\item[Lean] \lean{symEllIntRC_sq_eq}
+  (\file{DLMF/EllipticIntegrals/SymmetricAddition.lean}), admitted and unchanged.
+  The strict-half-plane variant \lean{symEllIntRC_sq}
+  (\file{DLMF/EllipticIntegrals/SymmetricQuadratic.lean}) is proved.
+\item[Found] 2026-10-30; analytical counterexample to the Lean extension, not yet formalized.
+\end{fields}
 
 \entry{\deq{19.16.11}, \deq{19.21.4}, \deq{19.21.5}}
 \begin{fields}
@@ -3139,7 +3380,7 @@ scripts built from DLMF's own definitions (mpmath at 30--40 digits, sympy in exa
   DLMF's continuous branch (with the principal branch \deq{33.10.10} is off by about $38$ at
   $\eta=-20$). The continuous branch is \lean{phaseShift}, defined by the Weierstrass product;
   its defining property \lean{phaseShift_spec} is admitted.
-\item[Lean] \file{DLMF/Coulomb/Defs.lean}, \file{DLMF/Coulomb/RhoEtaLimits.lean}.
+\item[Lean] \file{DLMF/Coulomb/Basic/Functions.lean}, \file{DLMF/Coulomb/RhoEtaLimits.lean}.
 \end{fields}
 
 \entry{\deq{36.2.19}, \deq{36.2.28}, \deq{36.4.8}, \deq{36.4.12}}
