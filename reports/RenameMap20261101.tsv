@@ -5275,3 +5275,4 @@ module	DLMF.Zeta.Q25bLerchContinuation	DLMF.Zeta.LerchContinuation
 module	DLMF.Zeta.R25bHurwitzContinuation	DLMF.Zeta.HurwitzContinuation	
 module	DLMF.Zeta.S25bDirichletTest	DLMF.Zeta.DirichletTest	
 module	DLMF.Zeta.S25bHurwitzCore	DLMF.Zeta.HurwitzEulerMaclaurin	
+declaration	DLMF.Confluent.hurwitzZetaComplex	DLMF.Zeta.hurwitzZetaComplex	namespace
