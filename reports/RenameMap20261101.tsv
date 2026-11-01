@@ -5276,3 +5276,16 @@ module	DLMF.Zeta.R25bHurwitzContinuation	DLMF.Zeta.HurwitzContinuation
 module	DLMF.Zeta.S25bDirichletTest	DLMF.Zeta.DirichletTest	
 module	DLMF.Zeta.S25bHurwitzCore	DLMF.Zeta.HurwitzEulerMaclaurin	
 declaration	DLMF.Confluent.hurwitzZetaComplex	DLMF.Zeta.hurwitzZetaComplex	namespace
+declaration	DLMF.AsymptoticApproximations.cbinom	Ring.choose	removed: replaced by Mathlib
+declaration	DLMF.Zeta.cbinom_one	Ring.choose_one_right	removed: replaced by Mathlib
+declaration	DLMF.Weierstrass.kleinJ	ModularForm.kleinJ	removed: merged; theta formula is DLMF.Weierstrass.kleinJ_eq_jacobiTheta
+declaration	DLMF.Weierstrass.kleinJ_smul	ModularForm.kleinJ_smul	removed: duplicate
+declaration	DLMF.Polylog.polylogSeries	DLMF.Zeta.polylogSeries	removed: merged (natural order n becomes (n : ℂ))
+declaration	DLMF.Polylog.polylogSeries_zero_arg	DLMF.Zeta.polylogSeries_zero_arg	removed: generalized to complex order
+declaration	DLMF.Zeta.polylogSeriesC	DLMF.Zeta.polylogSeries	rename
+declaration	DLMF.Zeta.polylog_eq_polylogSeriesC_of_norm_lt_one	DLMF.Zeta.polylog_eq_polylogSeries_of_norm_lt_one	rename
+declaration	DLMF.Zeta.summable_polylogSeriesC_of_norm_lt_one	DLMF.Zeta.summable_polylogSeries_of_norm_lt_one	rename
+declaration	DLMF.Zeta.summable_polylogSeriesC_of_norm_le_one	DLMF.Zeta.summable_polylogSeries_of_norm_le_one	rename
+declaration	DLMF.Zeta.hasSum_polylogSeriesC_of_hasSum_lerch	DLMF.Zeta.hasSum_polylogSeries_of_hasSum_lerch	private
+declaration	DLMF.Zeta.polylogSeriesC_natCast	DLMF.Zeta.polylogSeries_natCast	moved to DLMF.Zeta.Basic.Polylog; now unfolds to natural powers
+declaration	DLMF.Zeta.polylog_two_ofReal	DLMF.Zeta.polylog_two_ofReal_eq_dilog	made public
