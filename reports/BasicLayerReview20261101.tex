@@ -1,0 +1,459 @@
+% BasicLayerReview20261101.tex -- review of the foundational (Basic) layer of lean-DLMF as a
+% possible starting point for incorporating DLMF into TauCeti and later Mathlib.
+% Compile with LuaLaTeX: latexmk -lualatex BasicLayerReview20261101.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage{leanreport}
+\hypersetup{pdftitle={lean-DLMF: review of the Basic layer, 2026-11-01}}
+
+\newcommand{\dlmf}{\repofile{lean-DLMF}}
+
+\begin{document}
+
+\title{The Basic Layer of \texttt{lean-DLMF}\\as a Starting Point for TauCeti and Mathlib}
+\author{Bastiaan J. Braams}
+\date{2026-11-01}
+\maketitle
+
+\begin{abstract}
+  The plan is to point the Mathlib and TauCeti communities to the foundational files of
+  \texttt{lean-DLMF} only: each \file{Basic.lean} and every file below a \file{Basic/}
+  directory. Those files would then serve as the start for bringing all of DLMF into TauCeti
+  first and Mathlib later. This review asks two questions. Do the Basic files contain the
+  important definitions and their basic theorems? Do they import only other Basic files of
+  \texttt{lean-DLMF}, besides Mathlib, \module{DLMFMathlib} and TauCeti? The review is of
+  commit \texttt{a329483}. The supporting lists are in
+  \dlmf{reports/BasicLayerInventory20261101.json}. No library source was changed.
+\end{abstract}
+
+\section{Summary}
+
+The Basic layer has 122 files with 15{,}265 lines: 61 files \file{Basic.lean} and 61 files below
+\file{Basic/} directories. \module{DLMF.Basic} imports all of them. They hold 1{,}233 public
+definitions but only 180 public theorems. They contain no \lean{sorry}.
+
+\paragraph{Imports.} No Basic file imports a DLMF theorem module. The import survey has
+enforced this since 2026-10-30. Against the stricter rule (only Basic files of
+\texttt{lean-DLMF}, plus Mathlib, \module{DLMFMathlib} and TauCeti), there are two exceptions,
+and both are easy to remove:
+
+\begin{itemize}
+  \item 14 Basic files import \module{DLMF.Core.Framework}. Only three of them use anything
+    defined there. Framework is foundational in content, and it can be renamed to
+    \file{DLMF/Core/Basic.lean} without changing any declaration name.
+  \item \file{DLMF/EllipticIntegrals/Basic/Symmetric.lean} imports two lean-codes Carlson
+    modules, for the single definition \lean{symEllIntR}. Through them, the import closure of
+    \module{DLMF.Basic} contains 183 lean-codes modules (Carlson, Dirichlet averages, simplex
+    measures, several complex variables). Moving \lean{symEllIntR} into
+    \file{DLMF/EllipticIntegrals/Symmetric.lean} removes all of them.
+\end{itemize}
+
+After these two changes, the closure of \module{DLMF.Basic} would be 122 Basic files, 13
+\module{DLMFMathlib} modules, Mathlib and TauCeti (\S\ref{sec:imports}).
+
+\paragraph{Definitions.} The Basic layer has most of the defining material: 878 of the 1{,}503
+DLMF-tagged definitions in the compiled environment. Coverage is uneven, though:
+
+\begin{itemize}
+  \item Five areas have no Basic file at all. Among them are Elementary (DLMF Chapter 4), Zeta
+    (Chapter 25) and NumberTheory (Chapter 27).
+  \item Several central functions are defined in theorem files, for example the Hankel
+    functions, the Whittaker functions, the Legendre function \(Q_\nu\), the associated
+    Legendre and Ferrers functions of the second kind, Barnes' \(G\), the Hurwitz zeta
+    function, the polylogarithm, Lerch's \(\Phi\), the Legendre-form elliptic integrals, the
+    Anger and Weber functions, and most of the hypergeometric orthogonal polynomial families
+    of DLMF §18.19–18.28.
+\end{itemize}
+
+Section~\ref{sec:definitions} lists them, together with some overlapping definitions and some
+parameter restrictions that a Mathlib reviewer will question.
+
+\paragraph{Basic theorems.} This is the main gap. Of the 8{,}154 DLMF-tagged theorems, 16 are in
+the Basic layer. For every chapter except 5, 20 and 23, none of the tagged theorems of the
+definitions section (§\(n\).2) is in a Basic file. The basic properties (differential
+equations, Wronskians, special values, recurrences, analyticity) are in theorem modules. Many of
+those modules sit on deep import stacks: for example, \module{DLMF.Airy.Equation} has 137 DLMF
+theorem modules below it. So today the Basic layer is a layer of documented definitions, not of
+definitions with their API. To make it the intended entry point, the project rule ``substantive
+theorem developments belong outside \file{Basic/}'' needs refining, and a curated set of key
+properties needs to move down (\S\ref{sec:theorems}).
+
+\section{Imports}\label{sec:imports}
+
+\subsection{Direct imports}
+
+The 122 Basic files have these direct imports:
+
+\begin{itemize}
+  \item 256 of Mathlib modules, 11 of TauCeti modules and 10 of \module{DLMFMathlib} modules;
+  \item 182 of other Basic files;
+  \item 14 of \module{DLMF.Core.Framework};
+  \item 2 of lean-codes modules (\module{Carlson.Elliptic.ReductionTables} and
+    \module{Carlson.Elliptic.Standard}, both in
+    \file{DLMF/EllipticIntegrals/Basic/Symmetric.lean}).
+\end{itemize}
+
+None of them is a DLMF theorem module. The four legacy files \file{Definitions.lean}
+(RiemannTheta, OrthogonalPolynomials, JacobiElliptic, Theta) lie below \file{Basic/}
+directories, so they are Basic files by location.
+
+\subsection{The closure of \texorpdfstring{\texttt{DLMF.Basic}}{DLMF.Basic}}
+
+\module{DLMF.Basic} imports 61 modules, and its transitive closure reaches all 122 Basic files.
+Inside the project, that closure contains one module that is not a Basic file,
+\module{DLMF.Core.Framework}. It also contains 13 \module{DLMFMathlib} modules, 232 Mathlib
+modules and 23 TauCeti modules, all reached directly. And it contains 183 lean-codes modules: 69
+Carlson, 41 Dirichlet, 25 StdSimplexMeasure, 20 SeveralComplexVariables, 11 ToMathlib, 9
+ComplexAnalysis and 8 Pochhammer. All 183 enter through the two Carlson imports above. No
+\module{DLMFMathlib} module in the closure imports lean-codes.
+
+\subsection{\texorpdfstring{\texttt{DLMF.Core.Framework}}{DLMF.Core.Framework}}
+
+Framework (232 lines) fixes shared conventions. It defines improper integrals
+(\lean{HasIntegralAtTop}, \lean{improperAtTop}), the principal value
+\lean{HasPrincipalValueIoi}, straight-segment integrals and primitives (\lean{segmentIntegral},
+\lean{primitive}, with eight basic theorems), the sector filters \lean{sector} and
+\lean{logSector}, finite continued fractions (\lean{cfContinuants}, \lean{cfTail},
+\lean{HasContinuedFraction}), \lean{oddProduct}, the spherical Bessel functions
+\lean{sphericalJ} and \lean{sphericalI}, \lean{orderedZero} and \lean{asymptoticCoeff}. That is
+a foundational file in all but name.
+
+Of the 14 Basic files that import it, only three use one of its definitions:
+\begin{itemize}
+  \item \file{Spheroidal/Basic/EquationAndSpectralData.lean} uses \lean{sphericalJ};
+  \item \file{ErrorFunctions/Basic/Functions.lean} uses \lean{primitive};
+  \item \file{IncompleteGamma/Basic.lean} uses \lean{segmentIntegral}.
+\end{itemize}
+The other eleven import it only for the Mathlib modules that it imports in turn:
+\begin{itemize}
+  \item \file{Hypergeometric/Basic/PrincipalBranch.lean} and
+    \file{Legendre/Basic/Functions.lean};
+  \item \file{ExpIntegrals/Basic/Functions.lean} and \file{Struve/Basic/Functions.lean};
+  \item \file{Theta/Basic/PowerSeries.lean};
+  \item \file{Confluent/Basic/ExpansionData.lean}, \file{KummerM.lean} and
+    \file{Buchholz.lean};
+  \item \file{GeneralizedHypergeometric/Basic/ParametersAndSeries.lean}\\ and
+    \file{GeneralizedHypergeometric/Appell/Basic/Series.lean};
+  \item \file{OrthogonalPolynomials/Basic/Definitions.lean}.
+\end{itemize}
+
+Recommended change, in two steps:
+\begin{enumerate}
+  \item Rename \file{DLMF/Core/Framework.lean} to \file{DLMF/Core/Basic.lean} and update its 36
+    importers. No declaration name changes. The import survey already recognizes
+    \module{DLMF.Core.Basic} as a foundational module. In the eleven files that do not use
+    Framework, replace the import by the Mathlib imports they actually need.
+  \item Later, give each definition its natural home:
+    \begin{itemize}
+      \item the general analysis (improper integrals, principal values, segment primitives,
+        sector filters, continued fractions, \lean{asymptoticCoeff}) in \module{DLMFMathlib},
+        in the namespaces of the Mathlib APIs it extends;
+      \item \lean{sphericalJ}, \lean{sphericalI} and \lean{oddProduct} in
+        \file{Bessel/Basic.lean} (DLMF §10.47);
+      \item \lean{orderedZero} in \file{AlgebraicAnalytic} or
+        \file{AsymptoticApproximations}.
+    \end{itemize}
+    This step changes namespaces, so it is a rename and needs the usual review.
+\end{enumerate}
+The remaining Core modules (\module{MathlibCoverage}, \module{Upstream},
+\module{UpstreamElementary}, \module{ZeroCounting}) are not imported by any Basic file.
+
+\subsection{The Carlson imports}
+
+In \file{DLMF/EllipticIntegrals/Basic/Symmetric.lean}, every definition except one is a literal
+integral over \(\RR\) or a domain predicate: \lean{symEllIntRF}, \lean{symEllIntRJ},
+\lean{symEllIntRG}, \lean{symEllIntRD}, \lean{symEllIntRC}, \lean{symEllIntS},
+\lean{cauchyPVIoi}, \lean{SymEllIntArg} and \lean{SymEllIntRFDomain}. Those need only Mathlib.
+The exception is \lean{symEllIntR} (DLMF 19.16.8), which is defined from
+\lean{Carlson.carlsonR} and \lean{Carlson.carlsonRSlitDomain}. Importing just the two defining
+modules (\module{Carlson.R.Explicit} and \module{Carlson.R.SlitPlane}) would still bring in 113
+lean-codes modules, because \lean{carlsonR} is built on Dirichlet averages.
+
+Recommended change: move \lean{symEllIntR} unchanged into
+\file{DLMF/EllipticIntegrals/Symmetric.lean}. That file already imports the Carlson modules and
+the Basic file, and all 13 modules that use \lean{symEllIntR} import it, directly or
+transitively. Then replace the two Carlson imports of the Basic file by the Mathlib modules for
+\lean{slitPlane}, \lean{cpow} and the set integral.
+
+An alternative is to define \(R_{-a}(\mathbf b;\mathbf z)\) inside the Basic layer by its
+Dirichlet-average integral (DLMF 19.16.9), but that needs the simplex measure, which is not in
+Mathlib. Since 19.16.8 is a generalization that the rest of Chapter 19 does not need, the theorem
+layer is the right place for it.
+
+\section{Definitions}\label{sec:definitions}
+
+\subsection{Areas without a Basic file}
+
+Five areas have no foundational file at all, and all of their definitions are in theorem
+modules:
+\begin{itemize}
+  \item Elementary (DLMF Chapter 4): 109 definitions, 41 of them tagged. Among them are
+    \lean{csc}, \lean{sec}, \lean{csch}, \lean{sech}, \lean{coth}, the inverse hyperbolic
+    functions with their DLMF branches (\lean{arcsinh}, \lean{arccosh}, \lean{arctanh},
+    \lean{arccsch}, \lean{arcsech}, \lean{arccoth}), the principal inverse trigonometric
+    branches (\lean{arcsinPrincipal} and siblings), \lean{gudermannian}, the general logarithm
+    and power values (\lean{generalLogValues}, \lean{generalPowerValues}) and the Lambert \(W\)
+    branches.
+  \item Zeta (Chapter 25): 42 definitions, 19 tagged. Among them are
+    \lean{hurwitzZetaComplex}, \lean{riemannXi}, \lean{riemannChi}, \lean{lerchPhi},
+    \lean{polylog}, \lean{fermiDiracF}, \lean{boseEinsteinG}, \lean{stieltjesConstant},
+    \lean{riemannSiegelTheta} and \lean{riemannSiegelZ}.
+  \item NumberTheory (Chapter 27): 52 definitions, 29 tagged. Among them are
+    \lean{jordanTotient}, \lean{divisorCountK}, \lean{ramanujanSum}, \lean{gaussSumDLMF},
+    \lean{ramanujanTau}, \lean{lambertSeries}, \lean{sumSquaresCount}, \lean{eulerReciprocal}
+    and \lean{IsPrimitiveRootMod}.
+  \item Constants: \lean{catalanConstant}.
+  \item WaveEquation: six definitions.
+\end{itemize}
+The top-level files \file{DLMF/Bailey.lean} (\lean{IsBaileyPair}) and
+\file{DLMF/Partitions.lean} also hold definitions outside the Basic layer.
+
+AlgebraicAnalytic (Chapter 1) and AsymptoticApproximations (Chapter 2) have no area-level
+\file{Basic.lean}, but they have ten and seven \file{Basic.lean} files in their subdirectories,
+which hold 183 and 114 definitions. They are well covered.
+
+\subsection{Central definitions in theorem files}
+
+Of the 1{,}503 DLMF-tagged definitions, 625 are outside the Basic layer; the complete list, by
+file, is in the inventory. Most of them are auxiliary data and should stay where they are:
+coefficients of asymptotic and uniform expansions (\lean{pcfOlverA}, \lean{ellAsymA},
+\lean{gammaUniformS}), error-bound multipliers, the reduction data of §19.29
+(\lean{ellRedS}, \lean{ellRedQuadU}), argument-reduction data for computation
+(\lean{expReductionIndex}), zero-counting functions, and the predicates for conjectures
+(\lean{GoldbachConjecture}, \lean{LehmerConjecture}). The following are central functions of
+their chapters, and should be in the Basic layer:
+
+\begin{itemize}
+  \item Chapter 5: \lean{barnesG} and \lean{barnesGSucc} (§5.17, in
+    \file{Gamma/BarnesG/WeierstrassProduct.lean}); \lean{digamma} (real, in
+    \file{Gamma/Digamma.lean}); \lean{glaisherKinkelin}; \lean{scaledGamma}.
+  \item Chapter 7: \lean{Real.invErf}, \lean{Real.invErfc}, \lean{iteratedErfc}, and the Voigt
+    functions \lean{Real.voigtU}, \lean{Real.voigtV} and \lean{Real.voigtH}.
+  \item Chapter 8: \lean{Real.incBeta} and \lean{Real.normIncBetaI} (in Statistical), and
+    \lean{genExpIntL}.
+  \item Chapter 9: \lean{scorerGi} and \lean{scorerHi} (§9.12); \lean{airyModulus},
+    \lean{airyPhase} and their derivative counterparts (§9.8).
+  \item Chapter 10: \lean{hankelH1} and \lean{hankelH2} (in \file{Bessel/SecondKind.lean});
+    \lean{sphericalJ} and \lean{sphericalI} (in Core).
+  \item Chapter 11: \lean{angerJ} and \lean{weberE} (§11.10); \lean{lommelS} and
+    \lean{lommelCapitalRegular} (§11.9).
+  \item Chapter 13: \lean{whittakerM} and \lean{whittakerW} (in \file{Confluent/Whittaker.lean}).
+  \item Chapter 14: \lean{legendreQ}, \lean{associatedP}, \lean{associatedQ}, \lean{ferrersQ},
+    \lean{olverQ}, \lean{conicalQHat} and \lean{sphericalHarmonic}.
+  \item Chapter 15: no tagged definition in a Basic file. The principal branch is in
+    \file{Hypergeometric/Basic/PrincipalBranch.lean}, but the solutions of the hypergeometric
+    equation (\lean{gaussOperator}, \lean{riemannOperator}) are in theorem files.
+  \item Chapter 16: \lean{meijerGLog} and its contour predicates; \lean{gen3F2UnitThomae}.
+  \item Chapter 17: \lean{qExp}, \lean{qSin} and \lean{qCos} with their capital forms;
+    \lean{qAppell1} to \lean{qAppell4}.
+  \item Chapter 18: \lean{chebyshevV} and \lean{chebyshevW}; \lean{hahn},
+    \lean{krawtchouk}, \lean{meixner}, \lean{charlier}, \lean{continuousHahn},
+    \lean{meixnerPollaczek}, \lean{wilson}, \lean{continuousDualHahn}, \lean{racah} and
+    \lean{dualHahn}; the q-families (\lean{askeyWilson}, \lean{qHahn}, \lean{bigQJacobi},
+    \lean{littleQJacobi} and the others in \file{QFamilies/BasicIdentities.lean});
+    \lean{besselPolynomial}, \lean{pollaczek}; \lean{IsOrthogonalPolynomials},
+    \lean{christoffelDarbouxKernel} and \lean{hankelDeterminant}.
+  \item Chapter 19: the Legendre-form integrals \lean{incEllIntFk}, \lean{incEllIntEk},
+    \lean{incEllIntDk}, \lean{incEllIntPik}, \lean{compEllIntEk}, \lean{compEllIntDk},
+    \lean{compEllIntPik}, \lean{cCompEllIntKk} and \lean{cCompEllIntEk}, and Bulirsch's
+    \lean{bulirschCel} and \lean{bulirschEl1} to \lean{bulirschEl3} (all in
+    \file{EllipticIntegrals/Legendre.lean}). \lean{compEllIntKk} itself is in
+    \file{JacobiElliptic/Basic/Definitions.lean}, while the other complete integrals are not.
+  \item Chapter 22: the inverse Jacobian functions \lean{Real.jacobiArccnm} and siblings;
+    \lean{Real.jacobiEpsilonk} and \lean{Real.jacobiZetaFunctionk}.
+  \item Chapter 23: \lean{kleinJ}, \lean{modularLambda}, \lean{dedekindSum},
+    \lean{etaMultiplier}, \lean{IsModularForm} and \lean{IsModularFunction} (in
+    \file{Weierstrass/ModularFunctions.lean}).
+  \item Chapter 24: \lean{bernoulliOrder}, \lean{eulerOrder} and \lean{norlundPolynomial}
+    (§24.16); \lean{genocchiNumber} and \lean{tangentNumber}.
+  \item Chapter 26: \lean{signedStirlingFirst}, \lean{eulerianNumber}, \lean{narayana},
+    \lean{motzkin}, \lean{delannoy}, \lean{partitionCountAtMostParts} and the other partition
+    counts, and \lean{planePartitionCount}.
+\end{itemize}
+
+The project rule for such moves is ``move it down unchanged''. Most of these definitions have
+short bodies that depend only on Basic material, so moving them is mechanical. Where a body
+uses a theorem-layer helper, the helper moves too, or the definition waits until that helper
+has a foundational home.
+
+\subsection{Overlaps to settle before a contribution}
+
+\begin{itemize}
+  \item Polylogarithm. Two areas define it: \lean{polylogSeries} in \file{Polylog/Basic.lean},
+    and \lean{polylogSeriesC} and \lean{polylog} in \file{Zeta/Polylog.lean}. There is also
+    \lean{Real.dilog} in \file{Polylog/Dilog.lean}. One canonical definition, with bridges,
+    is needed.
+  \item Spherical harmonics. \file{SphericalHarmonics/Basic.lean} works with harmonic
+    homogeneous \lean{MvPolynomial}s, while \lean{sphericalHarmonic} (DLMF 14.30.1) is a
+    function of angles in \file{Legendre/Harmonics.lean}. Both are legitimate, but the
+    contribution should present them together.
+  \item Klein's \(J\). \lean{ModularForm.kleinJ} is in
+    \file{DLMFMathlib/NumberTheory/ModularForms/KleinJSurjective.lean}, and
+    \lean{DLMF.Weierstrass.kleinJ} is in \file{Weierstrass/ModularFunctions.lean}.
+  \item Jacobi polynomials. \lean{jacobiPolyP} (DLMF 18.5.7) is in OrthogonalPolynomials,
+    and a matrix-argument \lean{jacobiP} is in \file{MatrixArgument/Basic.lean}. The names
+    collide in spirit, though not in namespace.
+  \item Complete elliptic integrals. \lean{compEllIntKk} is in JacobiElliptic, and its
+    siblings are in EllipticIntegrals (see above).
+  \item Two judgment items carried over from the 2026-11-01 duplication pass:
+    \lean{arctanCutPlane} versus \lean{arcsinhDomain}, and \lean{cbinom} versus
+    \lean{Ring.choose}.
+\end{itemize}
+
+\subsection{Definitions a Mathlib reviewer will question}
+
+\begin{itemize}
+  \item Parameter restrictions. \lean{laguerrePolyL}, \lean{jacobiPolyP} and
+    \lean{ultrasphPoly} are defined through \({}_1F_1\) and \({}_2F_1\) with a Pochhammer
+    prefactor. They are ``intended for \(\alpha+1\) (resp.\ \(\lambda+\tfrac12\)) not a
+    nonpositive integer'', so at the excluded parameters the value is not the polynomial. Mathlib
+    would expect a definition valid for every parameter, preferably as a
+    \lean{Polynomial} with an evaluation lemma, as Mathlib does for \lean{Polynomial.hermite}
+    and \lean{Polynomial.Chebyshev.T}. The hypergeometric form then becomes a theorem.
+  \item Limits in the order. \lean{besselY} and \lean{besselK} define integer orders by
+    \lean{limUnder} in the order parameter. That is faithful to DLMF, but such a definition is
+    usable only together with the theorem that the limit exists and is analytic in \(\nu\).
+    That theorem is not in the Basic layer.
+  \item Real-only definitions. Some definitions are real-valued where DLMF is complex:
+    \lean{digamma}, \lean{Real.incBeta}, \lean{Real.dilog}, \lean{Real.invErf}. TauCeti and
+    Mathlib have their own conventions here (Mathlib's \lean{Real.Gamma} and
+    \lean{Complex.Gamma}), and the contribution should state the choice explicitly.
+  \item Definitions by choice. Mathieu, Lam\'e and spheroidal functions are defined through
+    spectral data, partly by choice. Each such definition needs an existence and uniqueness
+    theorem next to it to be reviewable.
+\end{itemize}
+
+\section{Basic theorems}\label{sec:theorems}
+
+\subsection{What is there}
+
+The 122 Basic files contain 180 public theorems, and 16 of them carry a DLMF tag. The theorems
+are concentrated in a few files:
+\begin{itemize}
+  \item \file{WignerSymbols/Basic.lean}: 32 theorems;
+  \item \file{Hypergeometric/Basic/Pochhammer.lean}: 18;
+  \item \file{BernoulliEuler/Basic.lean}: 17;
+  \item \file{Polylog/Basic.lean}: 16;
+  \item \file{Elliptic/Basic/Amplitude.lean}: 12;
+  \item \file{Hypergeometric/Basic/PrincipalBranch.lean}: 11;
+  \item \file{Gamma/Basic.lean}: 10.
+\end{itemize}
+Most other Basic files contain definitions only.
+
+DLMF puts the basic properties of each family in its definitions section §\(n\).2: differential
+equations, Wronskians, standard solutions, analyticity and branch conventions. For every chapter
+except 5, 20 and 23, none of the tagged theorems of §\(n\).2 is in a Basic file. Examples of
+where they are instead:
+\begin{itemize}
+  \item Chapter 9 (18 theorems): \file{Airy/Properties.lean} and \file{Airy/Equation.lean};
+  \item Chapter 13 (42): \file{Confluent/BasicProperties/}, mainly
+    \file{IntegerParametersAndLimits.lean}, \file{Wronskians.lean} and
+    \file{Continuity.lean};
+  \item Chapter 17 (54): \file{QHypergeometric/Convergence.lean} and
+    \file{Calculus/QBinomial.lean};
+  \item Chapter 22 (27): \file{JacobiElliptic/AnalyticProperties.lean};
+  \item Chapter 28 (78): \file{Mathieu/Properties/};
+  \item Chapter 32 (47): \file{Painleve/Equations.lean}.
+\end{itemize}
+
+\subsection{How deep the key properties sit}
+
+How hard it is to move a property into the Basic layer depends on what its proof imports. For
+the modules that hold the §\(n\).2 results, the number of DLMF theorem modules in the import
+closure, and of lean-codes modules, is:
+\begin{itemize}
+  \item shallow:
+    \begin{itemize}
+      \item \module{DLMF.Painleve.Equations}: 0 theorem modules, 0 lean-codes modules;
+      \item \module{DLMF.Zeta.Riemann}: 1 and 0;
+      \item \module{DLMF.OrthogonalPolynomials.GeneralIdentities}: 1 and 0;
+      \item \module{DLMF.Theta.SeriesAndZeros}: 4 and 0;
+    \end{itemize}
+  \item moderate:
+    \begin{itemize}
+      \item \module{DLMF.Hypergeometric.AnalyticProperties}: 19 and 188;
+      \item \module{DLMF.Mathieu.Properties.BasicSolutions}: 19 and 27;
+      \item \module{DLMF.Confluent.BasicProperties.Wronskians}: 26 and 222;
+      \item \module{DLMF.Legendre.Associated.Wronskians}: 37 and 188;
+    \end{itemize}
+  \item deep:
+    \begin{itemize}
+      \item \module{DLMF.JacobiElliptic.AnalyticProperties}: 61 and 189;
+      \item \module{DLMF.Airy.Properties}: 97 and 226;
+      \item \module{DLMF.ExpIntegrals.AnalyticProperties}: 120 and 226;
+      \item \module{DLMF.Airy.Equation}: 137 and 226.
+    \end{itemize}
+\end{itemize}
+The deep cases are mostly accidental. A property module imports a large sibling (an asymptotics
+or error-bound framework) for a few lemmas, and the closure grows from there. Airy's equation
+for the Maclaurin-series definitions in \file{Airy/Basic.lean} needs only term-by-term
+differentiation of \({}_0\tilde F_1\), not 137 modules.
+
+\subsection{Recommendation}
+
+\begin{enumerate}
+  \item Refine the project rule. AGENTS.md now says that a Basic file holds ``the minimal
+    supporting facts needed to use'' a definition, and that ``substantive theorem developments
+    belong outside \file{Basic/}''. For the intended use, the Basic layer of each core family
+    should contain:
+    \begin{enumerate}
+      \item the definition;
+      \item unfolding, \lean{simp} and special-value lemmas (values at \(0\), at integer
+        parameters, at exceptional parameters);
+      \item symmetries and parity;
+      \item continuity, differentiability or analyticity on the stated domain;
+      \item the defining differential equation, recurrence or functional equation, and the
+        Wronskian where DLMF gives it;
+      \item the bridge to the corresponding Mathlib or TauCeti function where one exists.
+    \end{enumerate}
+    All of these must be proved from Basic imports only. Everything else (asymptotics, zeros,
+    integrals, expansions, inequalities) stays in the theorem layer.
+  \item Put these properties in new files below \file{Basic/}, for example
+    \file{Airy/Basic/Properties.lean}. The definition files then stay short, and the import
+    survey covers the new files automatically.
+  \item Start with the shallow cases, which can move almost unchanged: Painlevé §32.2, Riemann
+    zeta §25.2, the general orthogonal-polynomial identities of §18.2, and theta §20.2.
+  \item For the deep cases, prove the key properties again from the Basic definitions instead
+    of moving the existing proofs, and leave the existing theorems in place as wrappers. Airy,
+    Bessel (series, derivative and differential equation), Kummer and Gauss hypergeometric
+    functions are the most valuable, because many other chapters build on them.
+  \item Have each Basic module docstring list, under ``Main results'', the properties it
+    proves. Under ``Implementation notes'', it should point to the theorem modules for the
+    rest. A reader who starts from the Basic layer then sees what is proved there and where the
+    rest is.
+\end{enumerate}
+
+\section{Recommended order of work}
+
+\begin{enumerate}
+  \item Imports, about an hour of work plus one build:
+    \begin{itemize}
+      \item rename Framework to \file{DLMF/Core/Basic.lean} and trim the eleven unnecessary
+        imports;
+      \item move \lean{symEllIntR} out of the Basic layer.
+    \end{itemize}
+    The closure of \module{DLMF.Basic} is then free of lean-codes, and every Basic file imports
+    only Basic files, Mathlib, \module{DLMFMathlib} and TauCeti. Optionally, extend the import
+    survey to fail on any non-Basic DLMF import from a Basic file (including Core) and on any
+    lean-codes import in the closure of \module{DLMF.Basic}.
+  \item Basic files for Elementary, Zeta and NumberTheory, and the moves of the central
+    definitions of \S\ref{sec:definitions}. This is mechanical, with one build per area group.
+  \item Settle the overlaps (polylogarithm, Klein's \(J\), complete elliptic integrals,
+    spherical harmonics) and the parameter-restricted polynomial definitions.
+  \item The key-properties layer of \S\ref{sec:theorems}, area by area, starting with the
+    shallow cases and the most-used families.
+  \item Afterwards: split Framework into \module{DLMFMathlib} and the areas.
+\end{enumerate}
+
+\section*{Method}
+
+Foundational files were found by name, as in \dlmf{scripts/import_survey.py}: a module named
+\file{Basic}, a module below a \file{Basic/} directory, or a legacy
+\file{Defs}/\file{Definitions} module. Imports were read from the sources, and closures were
+computed over the project and the sibling \file{../lean-codes} checkout. Counts of tagged
+declarations come from a fresh dump of the compiled environment (\dlmf{scripts/DumpDLMF.lean}),
+with 10{,}697 entries. Counts of public declarations come from a source scan (top-level
+\texttt{def}, \texttt{abbrev}, \texttt{structure}, \texttt{class}, \texttt{inductive},
+\texttt{theorem} and \texttt{lemma} not marked \texttt{private}). Whether a definition counts as
+``central'' is the reviewer's judgment, made against the DLMF chapter structure.
+
+\end{document}

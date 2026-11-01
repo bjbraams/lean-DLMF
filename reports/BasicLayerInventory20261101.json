@@ -1,0 +1,1193 @@
+{
+ "commit": "a329483",
+ "basicFileImportsOutsideAllowedRoots": [
+  {
+   "file": "DLMF/Confluent/Basic/Buchholz.lean",
+   "class": "DLMF-Core",
+   "import": "DLMF.Core.Framework"
+  },
+  {
+   "file": "DLMF/Confluent/Basic/ExpansionData.lean",
+   "class": "DLMF-Core",
+   "import": "DLMF.Core.Framework"
+  },
+  {
+   "file": "DLMF/Confluent/Basic/KummerM.lean",
+   "class": "DLMF-Core",
+   "import": "DLMF.Core.Framework"
+  },
+  {
+   "file": "DLMF/EllipticIntegrals/Basic/Symmetric.lean",
+   "class": "other:Carlson",
+   "import": "Carlson.Elliptic.ReductionTables"
+  },
+  {
+   "file": "DLMF/EllipticIntegrals/Basic/Symmetric.lean",
+   "class": "other:Carlson",
+   "import": "Carlson.Elliptic.Standard"
+  },
+  {
+   "file": "DLMF/ErrorFunctions/Basic/Functions.lean",
+   "class": "DLMF-Core",
+   "import": "DLMF.Core.Framework"
+  },
+  {
+   "file": "DLMF/ExpIntegrals/Basic/Functions.lean",
+   "class": "DLMF-Core",
+   "import": "DLMF.Core.Framework"
+  },
+  {
+   "file": "DLMF/GeneralizedHypergeometric/Appell/Basic/Series.lean",
+   "class": "DLMF-Core",
+   "import": "DLMF.Core.Framework"
+  },
+  {
+   "file": "DLMF/GeneralizedHypergeometric/Basic/ParametersAndSeries.lean",
+   "class": "DLMF-Core",
+   "import": "DLMF.Core.Framework"
+  },
+  {
+   "file": "DLMF/Hypergeometric/Basic/PrincipalBranch.lean",
+   "class": "DLMF-Core",
+   "import": "DLMF.Core.Framework"
+  },
+  {
+   "file": "DLMF/IncompleteGamma/Basic.lean",
+   "class": "DLMF-Core",
+   "import": "DLMF.Core.Framework"
+  },
+  {
+   "file": "DLMF/Legendre/Basic/Functions.lean",
+   "class": "DLMF-Core",
+   "import": "DLMF.Core.Framework"
+  },
+  {
+   "file": "DLMF/OrthogonalPolynomials/Basic/Definitions.lean",
+   "class": "DLMF-Core",
+   "import": "DLMF.Core.Framework"
+  },
+  {
+   "file": "DLMF/Spheroidal/Basic/EquationAndSpectralData.lean",
+   "class": "DLMF-Core",
+   "import": "DLMF.Core.Framework"
+  },
+  {
+   "file": "DLMF/Struve/Basic/Functions.lean",
+   "class": "DLMF-Core",
+   "import": "DLMF.Core.Framework"
+  },
+  {
+   "file": "DLMF/Theta/Basic/PowerSeries.lean",
+   "class": "DLMF-Core",
+   "import": "DLMF.Core.Framework"
+  }
+ ],
+ "taggedDefinitionsOutsideBasic": {
+  "DLMF/Airy/Asymptotics/LaplaceSectors.lean": [
+   "airyChi",
+   "AiryKind",
+   "airyErrorMultiplier",
+   "airyTerminator",
+   "airyOptimalIndex"
+  ],
+  "DLMF/Airy/Bessel.lean": [
+   "airyZeta"
+  ],
+  "DLMF/Airy/Framework.lean": [
+   "airyZetaComplex",
+   "airyLogZeta"
+  ],
+  "DLMF/Airy/Generalized.lean": [
+   "generalizedAiryOrder",
+   "generalizedAiryZeta",
+   "generalizedAiryF",
+   "olverAiryVariable",
+   "olverAiryU",
+   "smirnovAiryU1",
+   "smirnovAiryU2",
+   "smirnovAiryVariable"
+  ],
+  "DLMF/Airy/GeneralizedContours.lean": [
+   "reidAiryA",
+   "reidAiryB0",
+   "reidTaylorCoeff"
+  ],
+  "DLMF/Airy/ModulusPhase/Representations.lean": [
+   "airyModulus",
+   "airyDerivModulus",
+   "airyPhase"
+  ],
+  "DLMF/Airy/Relations/BesselRepresentations.lean": [
+   "airyInverseZetaOnLog"
+  ],
+  "DLMF/Airy/Scorer/Representations.lean": [
+   "scorerHi",
+   "scorerGi"
+  ],
+  "DLMF/Bailey.lean": [
+   "IsBaileyPair"
+  ],
+  "DLMF/BernoulliEuler/Arithmetic.lean": [
+   "RatModEq"
+  ],
+  "DLMF/BernoulliEuler/Generalizations/DegenerateAndCharacter.lean": [
+   "bernoulliChar",
+   "bernoulliCharPoly"
+  ],
+  "DLMF/BernoulliEuler/Generalizations/HigherOrder.lean": [
+   "norlundPolynomial",
+   "bernoulliNumberOrder",
+   "bernoulliOrder",
+   "eulerNumberOrder",
+   "eulerOrder",
+   "bernoulliSecondKind",
+   "degenerateBernoulli"
+  ],
+  "DLMF/BernoulliEuler/Inequalities.lean": [
+   "bernoulliIneqBeta"
+  ],
+  "DLMF/BernoulliEuler/Properties.lean": [
+   "umbralBernoulli",
+   "umbralEuler"
+  ],
+  "DLMF/BernoulliEuler/RelatedNumbers.lean": [
+   "genocchiNumber",
+   "tangentNumber",
+   "lucasNumber"
+  ],
+  "DLMF/BernoulliEuler/Zeros/RealZeros.lean": [
+   "bernoulliRealZerosGE",
+   "bernoulliRealZero",
+   "bernoulliRealZeroCount",
+   "eulerRealZerosGE",
+   "eulerRealZero"
+  ],
+  "DLMF/Bessel/SecondKind.lean": [
+   "hankelH1",
+   "hankelH2"
+  ],
+  "DLMF/Combinatorics/Compositions.lean": [
+   "compositionCount",
+   "compositionCountLength",
+   "compositionCountNoOne"
+  ],
+  "DLMF/Combinatorics/LatticePaths.lean": [
+   "delannoy",
+   "motzkin",
+   "narayana"
+  ],
+  "DLMF/Combinatorics/MultisetPermutations.lean": [
+   "multisetPermutations",
+   "qMultinomial"
+  ],
+  "DLMF/Combinatorics/PartitionIdentities/RestrictedProducts.lean": [
+   "partitionCountDistinct",
+   "partitionCountOdd",
+   "partitionCountAtMostDistinct",
+   "partitionCountAtMostDistinctBoxed",
+   "partitionCountDiff",
+   "partitionCountSchur",
+   "partitionCountIn",
+   "residueSetPM",
+   "setGeTwo",
+   "partitionCountDiffTwoNoOne"
+  ],
+  "DLMF/Combinatorics/PartitionIdentities/RogersRamanujan.lean": [
+   "sawtooth",
+   "distinctPartitionDedekindSum",
+   "distinctPartitionKloosterman"
+  ],
+  "DLMF/Combinatorics/Permutations/CyclesAndExcedances.lean": [
+   "dlmfExamplePerm",
+   "numCycles",
+   "wordInversions",
+   "wordDescentSet",
+   "wordMajorIndex",
+   "inversionNumber",
+   "descentNumber",
+   "majorIndex",
+   "eulerianNumber"
+  ],
+  "DLMF/Combinatorics/Permutations/RookPolynomials.lean": [
+   "rookNumber",
+   "rookPolynomial",
+   "hitNumber",
+   "hitPolynomial"
+  ],
+  "DLMF/Combinatorics/PlanePartitions/BoxFormula.lean": [
+   "planeBox",
+   "IsPlanePartition",
+   "planePartitionCount",
+   "IsSymmetricPP",
+   "IsCyclicallySymmetricPP",
+   "IsTotallySymmetricPP",
+   "planeComplement",
+   "IsStrictShiftedPP",
+   "IsDescendingPP"
+  ],
+  "DLMF/Combinatorics/RestrictedPartitions.lean": [
+   "partitionCountAtMostParts",
+   "partitionCountBoxed"
+  ],
+  "DLMF/Combinatorics/Stirling/DefinitionsAndSeries.lean": [
+   "signedStirlingFirst"
+  ],
+  "DLMF/Combinatorics/TwelvefoldWay.lean": [
+   "twelvefoldCount"
+  ],
+  "DLMF/Confluent/Asymptotics/LargeArgument.lean": [
+   "largeBGenerating",
+   "largeBCoeff"
+  ],
+  "DLMF/Confluent/ContinuedFractions.lean": [
+   "kummerMContinuedFraction",
+   "kummerUContinuedFraction",
+   "whittakerMContinuedFraction",
+   "whittakerWContinuedFraction"
+  ],
+  "DLMF/Confluent/Series.lean": [
+   "besselExpansionCoeff"
+  ],
+  "DLMF/Confluent/Whittaker.lean": [
+   "whittakerM",
+   "whittakerW"
+  ],
+  "DLMF/Constants/Catalan.lean": [
+   "catalanConstant"
+  ],
+  "DLMF/Elementary/Computation.lean": [
+   "logReductionArgument",
+   "expReductionIndex",
+   "expReductionArgument",
+   "trigReductionIndex",
+   "trigReductionAngle",
+   "arctanReductionStep",
+   "arctanReductionSequence"
+  ],
+  "DLMF/Elementary/Hyperbolic/IdentitiesAndSeries.lean": [
+   "csch",
+   "sech",
+   "coth",
+   "arcsinhDomain",
+   "arcsinh",
+   "arccosh",
+   "arctanh",
+   "arccsch",
+   "arcsech",
+   "arccoth"
+  ],
+  "DLMF/Elementary/LambertW/BranchesAndCalculus.lean": [
+   "lambertDerivPolynomial"
+  ],
+  "DLMF/Elementary/LogExpBasic.lean": [
+   "generalLogValues",
+   "logSheet",
+   "logBranchCut",
+   "complexLogb",
+   "generalPowerValues"
+  ],
+  "DLMF/Elementary/LogExpIntegrals.lean": [
+   "expPartialSum"
+  ],
+  "DLMF/Elementary/Trigonometric/DirectIdentities.lean": [
+   "csc",
+   "sec",
+   "IsTrigLinearSolution",
+   "IsTrigEnergySolution",
+   "IsTrigRiccatiSolution"
+  ],
+  "DLMF/Elementary/Trigonometric/InverseBranches.lean": [
+   "arcsinPrincipal",
+   "arccosPrincipal",
+   "arccscPrincipal",
+   "arcsecPrincipal",
+   "arccotPrincipal",
+   "arcsinRightBank",
+   "arcsinLeftBank",
+   "arctanCutBank"
+  ],
+  "DLMF/Elementary/Trigonometric/InverseIdentities.lean": [
+   "inverseTrigAlpha",
+   "inverseTrigBeta",
+   "gudermannian",
+   "inverseGudermannian"
+  ],
+  "DLMF/Elliptic/SpecialValues.lean": [
+   "Real.jacobiArcsnm"
+  ],
+  "DLMF/EllipticIntegrals/Asymptotics.lean": [
+   "compEllIntLogCoeff"
+  ],
+  "DLMF/EllipticIntegrals/Expansions.lean": [
+   "landenModulusSeq"
+  ],
+  "DLMF/EllipticIntegrals/Inequalities.lean": [
+   "ellipsePerimeter"
+  ],
+  "DLMF/EllipticIntegrals/Legendre.lean": [
+   "incEllIntFk",
+   "incEllIntEk",
+   "incEllIntDk",
+   "incEllIntPik",
+   "compEllIntEk",
+   "compEllIntDk",
+   "compEllIntPik",
+   "cCompEllIntKk",
+   "cCompEllIntEk",
+   "bulirschCel",
+   "bulirschEl1",
+   "bulirschEl2",
+   "bulirschEl3"
+  ],
+  "DLMF/EllipticIntegrals/Quadratic.lean": [
+   "agmSeqA",
+   "agmSeqG",
+   "agmSeqC",
+   "agmPiSeq",
+   "agmPiEps"
+  ],
+  "DLMF/EllipticIntegrals/Reduction.lean": [
+   "ellRedQuadU"
+  ],
+  "DLMF/EllipticIntegrals/Symmetric.lean": [
+   "symEllIntRConj"
+  ],
+  "DLMF/EllipticIntegrals/SymmetricAddition.lean": [
+   "symEllIntDupLambda"
+  ],
+  "DLMF/EllipticIntegrals/SymmetricAsymptotics.lean": [
+   "ellAsymA",
+   "ellAsymB",
+   "ellAsymC",
+   "ellAsymF",
+   "ellAsymG",
+   "ellAsymH"
+  ],
+  "DLMF/EllipticIntegrals/SymmetricReduction.lean": [
+   "ellRedRoot",
+   "ellRedDet",
+   "ellRedS",
+   "ellRedU",
+   "ellRedUInf",
+   "ellRedUNegInf",
+   "ellRedU5Sq",
+   "ellRedS5",
+   "ellRedQ5Sq",
+   "ellRedI",
+   "ellRedE",
+   "ellRedBasic",
+   "ellRedS3",
+   "ellRedQuadS",
+   "ellRedQuadD",
+   "ellRedQuadRF",
+   "ellRedBiquadU"
+  ],
+  "DLMF/EllipticIntegrals/SymmetricRelations.lean": [
+   "jacobiDeltam",
+   "weierstrassSigmaIdx"
+  ],
+  "DLMF/EllipticIntegrals/SymmetricSeries.lean": [
+   "symEllIntT"
+  ],
+  "DLMF/ErrorFunctions/BoundsAsymptotics/ContinuedFractions.lean": [
+   "Real.millsRatio"
+  ],
+  "DLMF/ErrorFunctions/BoundsAsymptotics/FresnelRemainders.lean": [
+   "fresnelAsymptoticRemainder"
+  ],
+  "DLMF/ErrorFunctions/InverseGeneralized.lean": [
+   "Real.invErf",
+   "Real.invErfc",
+   "invErfcAsymptoticU",
+   "invErfcAsymptoticV"
+  ],
+  "DLMF/ErrorFunctions/Relations.lean": [
+   "fresnelZetaComplex"
+  ],
+  "DLMF/ErrorFunctions/Repeated.lean": [
+   "iteratedErfc"
+  ],
+  "DLMF/ErrorFunctions/Voigt.lean": [
+   "Real.voigtU",
+   "Real.voigtV",
+   "Real.voigtH"
+  ],
+  "DLMF/ErrorFunctions/Zeros.lean": [
+   "errorZeroLambda",
+   "errorZeroMu",
+   "fresnelZeroLambda",
+   "fresnelZeroAlpha"
+  ],
+  "DLMF/ExpIntegrals/Asymptotics.lean": [
+   "expIntAsymptoticRemainder"
+  ],
+  "DLMF/ExpIntegrals/Continuation.lean": [
+   "expIntE1OnLog"
+  ],
+  "DLMF/ExpIntegrals/Expansions.lean": [
+   "expIntReciprocalFactorialCoeff",
+   "expIntSphericalCoeff"
+  ],
+  "DLMF/ExpIntegrals/ZerosIntegrals.lean": [
+   "Real.expIntEiZero",
+   "expIntActonA",
+   "expIntActonB",
+   "expIntActonC"
+  ],
+  "DLMF/Gamma/Asymptotics/Stirling.lean": [
+   "scaledGamma",
+   "stirlingG",
+   "stirlingRatioG"
+  ],
+  "DLMF/Gamma/BarnesG/WeierstrassProduct.lean": [
+   "barnesGSucc",
+   "glaisherKinkelin"
+  ],
+  "DLMF/Gamma/ContinuedFractions.lean": [
+   "logGammaContFractCoeff",
+   "logGammaContinuedFraction",
+   "logGammaBinet"
+  ],
+  "DLMF/Gamma/IntegralRepresentations/HankelAndGaussian.lean": [
+   "binetPhi"
+  ],
+  "DLMF/Gamma/Multidimensional/SelbergLimits.lean": [
+   "vandermonde"
+  ],
+  "DLMF/Gamma/QGamma.lean": [
+   "qFactorial",
+   "qBeta"
+  ],
+  "DLMF/Gamma/SeriesExpansions.lean": [
+   "recipGammaCoeff"
+  ],
+  "DLMF/GeneralizedHypergeometric/Asymptotics.lean": [
+   "genAsymptoticKappa",
+   "genAsymptoticNu",
+   "genAsymptoticEkm",
+   "genAsymptoticCRaw",
+   "genETermLog",
+   "genHTermLog"
+  ],
+  "DLMF/GeneralizedHypergeometric/DifferentialEquations.lean": [
+   "genNormalizedODE",
+   "genD",
+   "genFrobeniusZero",
+   "genFrobeniusInfinityLog"
+  ],
+  "DLMF/GeneralizedHypergeometric/MeijerG.lean": [
+   "meijerGKernelLog",
+   "MeijerGContourRegion",
+   "MeijerGHasValueLog",
+   "meijerGLog"
+  ],
+  "DLMF/GeneralizedHypergeometric/MeijerGRelations.lean": [
+   "meijerResidueCoeff",
+   "MeijerLogEquation",
+   "meijerFundamentalTerm"
+  ],
+  "DLMF/GeneralizedHypergeometric/UnitArgument.lean": [
+   "GenWellPoised",
+   "GenKBalanced",
+   "gen3F2UnitThomae"
+  ],
+  "DLMF/Hypergeometric/Asymptotics.lean": [
+   "largeDenominatorGenerating",
+   "largeDenominatorCoeff"
+  ],
+  "DLMF/Hypergeometric/ContinuedFractions.lean": [
+   "gaussContinuedFraction",
+   "contiguousContinuedFraction",
+   "derivativeContinuedFraction"
+  ],
+  "DLMF/Hypergeometric/Generalized.lean": [
+   "eulerTheta"
+  ],
+  "DLMF/Hypergeometric/Identities/Whipple.lean": [
+   "compEllIntKkSeries"
+  ],
+  "DLMF/Hypergeometric/Kummer.lean": [
+   "kummerFive",
+   "kummerSix",
+   "kummerFiveLeft",
+   "kummerSixLeft"
+  ],
+  "DLMF/Hypergeometric/Riemann.lean": [
+   "riemannOperator",
+   "riemannSolutions"
+  ],
+  "DLMF/Hypergeometric/Solutions/Equation.lean": [
+   "gaussOperator",
+   "zeroSecond",
+   "oneFirst",
+   "oneSecond",
+   "infinityFirst",
+   "logarithmicSecond",
+   "logarithmicSecondTerminating",
+   "logarithmicSecondBothTerminating"
+  ],
+  "DLMF/IncompleteGamma/Asymptotics/LargeArgument.lean": [
+   "incGammaAsymptoticCoeff",
+   "incGammaAsymptoticRemainder",
+   "incGammaLambdaPolynomial"
+  ],
+  "DLMF/IncompleteGamma/Asymptotics/PartialSums.lean": [
+   "expPartialSumRemainderS",
+   "expPartialSumRemainderCoeff"
+  ],
+  "DLMF/IncompleteGamma/Beta.lean": [
+   "incBetaComplement",
+   "incBetaContiguousParameter",
+   "incBetaFractionD"
+  ],
+  "DLMF/IncompleteGamma/BetaAsymptotics.lean": [
+   "Real.betaXi",
+   "Real.betaGeneratingCoeff",
+   "Real.betaCenter",
+   "Real.betaEta",
+   "Real.betaZeta",
+   "Real.incBetaInverse"
+  ],
+  "DLMF/IncompleteGamma/BoundsFractions.lean": [
+   "Real.upperGammaTheta",
+   "Real.upperGammaCa",
+   "Real.upperGammaDa",
+   "Real.gammaPAlpha",
+   "Real.gammaPBeta"
+  ],
+  "DLMF/IncompleteGamma/ExpIntegralAsymptotics.lean": [
+   "expIntLargeOrderPolynomial"
+  ],
+  "DLMF/IncompleteGamma/ExponentialIntegral.lean": [
+   "genExpIntL"
+  ],
+  "DLMF/IncompleteGamma/SineCosine/SphericalSeries.lean": [
+   "genTrigAuxF",
+   "genTrigAuxG"
+  ],
+  "DLMF/IncompleteGamma/UniformAsymptotics.lean": [
+   "gammaUniformEtaOnLog",
+   "gammaUniformS",
+   "gammaUniformC",
+   "gammaParisD",
+   "gammaQInverse"
+  ],
+  "DLMF/JacobiElliptic/Cyclic/QuarterPeriodAndThreePoint.lean": [
+   "jacobiCyclicArg",
+   "jacobiCyclicS",
+   "jacobiCyclicC",
+   "jacobiCyclicD",
+   "jacobiCyclicKappa"
+  ],
+  "DLMF/JacobiElliptic/Inverse.lean": [
+   "Real.jacobiArccnm",
+   "Real.jacobiArcdnm",
+   "Real.jacobiArccdm",
+   "Real.jacobiArcsdm",
+   "Real.jacobiArcndm",
+   "Real.jacobiArcdcm",
+   "Real.jacobiArcncm",
+   "Real.jacobiArcscm",
+   "Real.jacobiArcnsm",
+   "Real.jacobiArcdsm",
+   "Real.jacobiArccsm"
+  ],
+  "DLMF/JacobiElliptic/Landen.lean": [
+   "jacobiLandenDescModulus",
+   "jacobiLandenAscModulus",
+   "jacobiLandenAscComodulus"
+  ],
+  "DLMF/JacobiElliptic/OutsideModuli.lean": [
+   "jacobiImagModulusk"
+  ],
+  "DLMF/JacobiElliptic/Related.lean": [
+   "Real.jacobiEpsilonk",
+   "Real.jacobiZetaFunctionk"
+  ],
+  "DLMF/Legendre/Associated/BoundaryAndConnections.lean": [
+   "IsGeneralizedLegendreSolution"
+  ],
+  "DLMF/Legendre/Associated/QuadraticFerrers.lean": [
+   "associatedP",
+   "olverQ",
+   "associatedQ",
+   "ferrersW1",
+   "ferrersW2",
+   "ferrersQ"
+  ],
+  "DLMF/Legendre/Conical.lean": [
+   "conicalQHat",
+   "mehlerFockTransform",
+   "mehlerFockInverse"
+  ],
+  "DLMF/Legendre/ConicalAsymptotics.lean": [
+   "conicalAlpha",
+   "conicalSigma",
+   "ConicalEtaRelation",
+   "conicalEta",
+   "conicalBeta",
+   "conicalRho"
+  ],
+  "DLMF/Legendre/Harmonics.lean": [
+   "sphericalHarmonicNonneg",
+   "sphericalHarmonic",
+   "surfaceHarmonic"
+  ],
+  "DLMF/Legendre/Hypergeometric.lean": [
+   "legendreGaussF",
+   "legendreDegreeA"
+  ],
+  "DLMF/Legendre/IntegralRepresentations/Ferrers.lean": [
+   "legendreUCoordinate"
+  ],
+  "DLMF/Legendre/Primitives.lean": [
+   "ferrersProductPrimitive"
+  ],
+  "DLMF/Legendre/SecondKind.lean": [
+   "legendreQ"
+  ],
+  "DLMF/Legendre/Series.lean": [
+   "legendrePCFNum",
+   "legendrePCFDen",
+   "legendreQCFNum",
+   "legendreQCFDen"
+  ],
+  "DLMF/Legendre/Toroidal.lean": [
+   "toroidalCoordinates"
+  ],
+  "DLMF/Legendre/UniformCoordinates/InverseCoordinates.lean": [
+   "cylinderEnvelopeCross",
+   "legendreCylinderEnvelope",
+   "legendreCylinderA",
+   "legendreCylinderAlpha",
+   "LegendreCylinderRelation"
+  ],
+  "DLMF/Legendre/UniformCoordinates/TurningPointMaps.lean": [
+   "legendreOrderAlpha",
+   "legendreOrderP",
+   "legendreOrderRho",
+   "LegendreEtaRelation",
+   "legendreOrderEta",
+   "legendreDegreeAlpha",
+   "legendreDegreeBeta",
+   "LegendreYRelation"
+  ],
+  "DLMF/Legendre/Zeros/FerrersAndReal.lean": [
+   "legendreIntegerPart",
+   "legendreFractionalPart"
+  ],
+  "DLMF/NumberTheory/Additive.lean": [
+   "GoldbachConjecture",
+   "IsWaringNumber",
+   "waringSmallG",
+   "waringBigG",
+   "HardyLittlewoodWaringConjecture",
+   "sumSquaresCount",
+   "jacobiThetaSeries"
+  ],
+  "DLMF/NumberTheory/Asymptotics/DivisorSums.lean": [
+   "HasPartialSumAsymptotic"
+  ],
+  "DLMF/NumberTheory/Characters.lean": [
+   "IsDirichletCharacterFn",
+   "IsPrimitiveDLMF",
+   "IsInducedModulus",
+   "IsPeriodicFn",
+   "finiteFourierCoeff",
+   "ramanujanSum",
+   "divisorConvolutionSum",
+   "gaussSumDLMF",
+   "GaussSumSeparable"
+  ],
+  "DLMF/NumberTheory/DivisorSums.lean": [
+   "lambertSeries"
+  ],
+  "DLMF/NumberTheory/Functions.lean": [
+   "totientPowerSum",
+   "IsPrimitiveRootMod",
+   "divisorCountK",
+   "jordanTotient",
+   "IsMultiplicativeFn",
+   "IsCompletelyMultiplicativeFn"
+  ],
+  "DLMF/NumberTheory/Partitions.lean": [
+   "eulerReciprocal",
+   "rademacherA",
+   "discriminantDLMF",
+   "ramanujanTau",
+   "LehmerConjecture"
+  ],
+  "DLMF/OrthogonalPolynomials/Associated.lean": [
+   "associated",
+   "associatedLaguerre",
+   "associatedHermite",
+   "associatedMeixnerPollaczek",
+   "pollaczek",
+   "besselPolynomial",
+   "reverseBesselPolynomial",
+   "freudWeight",
+   "exceptionalLaguerre",
+   "exceptionalLaguerreWeight",
+   "exceptionalHermite",
+   "pollaczekTau",
+   "pollaczekAngularWeight",
+   "morsePolynomialFunction"
+  ],
+  "DLMF/OrthogonalPolynomials/BoundsZeros/PointwiseAndZeroBounds.lean": [
+   "rootDiscriminant"
+  ],
+  "DLMF/OrthogonalPolynomials/Explicit.lean": [
+   "laguerreExtended",
+   "chebyshevV",
+   "chebyshevW"
+  ],
+  "DLMF/OrthogonalPolynomials/General.lean": [
+   "IsOrthogonalPolynomials"
+  ],
+  "DLMF/OrthogonalPolynomials/GeneralIdentities.lean": [
+   "squaredNorm",
+   "christoffelDarbouxKernel",
+   "moment",
+   "hankelDeterminant",
+   "recurrenceDiagonal",
+   "firstWeightedSquaredNorm",
+   "shiftedHankelDeterminant",
+   "poissonKernel",
+   "IsSzegoWeight",
+   "IsNevaiClass"
+  ],
+  "DLMF/OrthogonalPolynomials/Hahn/HahnAndMeixner.lean": [
+   "hahn",
+   "krawtchouk",
+   "meixner",
+   "charlier",
+   "continuousHahn",
+   "meixnerPollaczek",
+   "continuousHahnWeight",
+   "meixnerPollaczekWeight"
+  ],
+  "DLMF/OrthogonalPolynomials/HermiteFixedX.lean": [
+   "hermiteLambda"
+  ],
+  "DLMF/OrthogonalPolynomials/Multivariate.lean": [
+   "diskPolynomial",
+   "trianglePolynomial"
+  ],
+  "DLMF/OrthogonalPolynomials/QFamilies/BasicIdentities.lean": [
+   "qHahn",
+   "bigQJacobi",
+   "littleQJacobi",
+   "littleQLaguerre",
+   "qLaguerre",
+   "stieltjesWigert",
+   "discreteQHermiteI",
+   "discreteQHermiteII",
+   "askeyWilson",
+   "askeyWilsonLaurent",
+   "alSalamChihara",
+   "continuousQHermiteLaurent",
+   "qRacah"
+  ],
+  "DLMF/OrthogonalPolynomials/QFamilies/ClassicalLimits.lean": [
+   "askeyWilsonDifferenceCoefficient",
+   "askeyWilsonAsymptoticCoefficient"
+  ],
+  "DLMF/OrthogonalPolynomials/UnitCircle.lean": [
+   "reflectedPolynomial",
+   "IsUnitCircleOP",
+   "verblunskyCoefficient",
+   "szegoAskey",
+   "szegoAskeyQ"
+  ],
+  "DLMF/OrthogonalPolynomials/Wilson.lean": [
+   "wilson",
+   "continuousDualHahn",
+   "racah",
+   "dualHahn"
+  ],
+  "DLMF/ParabolicCylinder/AsymptoticsZeros.lean": [
+   "pcfZeroTau",
+   "pcfZeroLambda"
+  ],
+  "DLMF/ParabolicCylinder/Relations.lean": [
+   "hhFunction"
+  ],
+  "DLMF/ParabolicCylinder/TurningPoint.lean": [
+   "pcfZeroP1",
+   "pcfFirstZeroCoeff"
+  ],
+  "DLMF/ParabolicCylinder/Uniform/ExpansionData.lean": [
+   "pcfOlverA",
+   "pcfOlverATilde",
+   "pcfOlverUBar",
+   "pcfOlverB",
+   "pcfOlverBTilde",
+   "pcfOlverVBar",
+   "IsCylinderGNormalizer",
+   "pcfKappa",
+   "pcfChi",
+   "IsCylinderGBarNormalizer",
+   "pcfTau",
+   "pcfZeta",
+   "pcfPhi",
+   "pcfAiryAlpha",
+   "pcfAiryBeta",
+   "pcfAiryA",
+   "pcfAiryB",
+   "pcfAiryC",
+   "pcfAiryD",
+   "pcfAiryChi"
+  ],
+  "DLMF/ParabolicCylinder/Uniform/PhasesAndPolynomials.lean": [
+   "pcfXi",
+   "pcfEta",
+   "pcfXiBar",
+   "pcfH",
+   "pcfGammaCoeff",
+   "pcfOlverU",
+   "pcfOlverR",
+   "pcfOlverV"
+  ],
+  "DLMF/ParabolicCylinder/Weber/Representations.lean": [
+   "pcfWOmega",
+   "pcfWS",
+   "pcfWCoeff",
+   "pcfWF",
+   "pcfWTheta",
+   "pcfWG",
+   "pcfWPsi"
+  ],
+  "DLMF/ParabolicCylinder/Weber/Solutions.lean": [
+   "pcfWZero",
+   "pcfWDerivZero",
+   "pcfWEven",
+   "pcfWOdd",
+   "pcfW",
+   "pcfWK",
+   "pcfGammaPhase",
+   "pcfWRho"
+  ],
+  "DLMF/ParabolicCylinder/WeberUniform.lean": [
+   "pcfWSigma",
+   "pcfWSigmaBar",
+   "pcfWOlverL",
+   "IsCylinderLNormalizer"
+  ],
+  "DLMF/Polylog/Dilog.lean": [
+   "Real.dilog"
+  ],
+  "DLMF/QHypergeometric/Appell.lean": [
+   "qAppell1",
+   "qAppell2",
+   "qAppell3",
+   "qAppell4"
+  ],
+  "DLMF/QHypergeometric/BaileyPairs.lean": [
+   "generalBaileyBeta",
+   "generalBaileyGamma",
+   "IsBaileyChain",
+   "rogersBaileyAlpha",
+   "rogersBaileyBeta"
+  ],
+  "DLMF/QHypergeometric/Calculus/JacksonIntegral.lean": [
+   "jacksonBilateral"
+  ],
+  "DLMF/QHypergeometric/Calculus/QDerivative.lean": [
+   "qDerivExtended"
+  ],
+  "DLMF/QHypergeometric/Elementary.lean": [
+   "qExp",
+   "qExpBig",
+   "qSin",
+   "qSinBig",
+   "qCos",
+   "qCosBig",
+   "qBernoulli"
+  ],
+  "DLMF/RiemannTheta/Modular.lean": [
+   "symplecticJ",
+   "IsSymplectic",
+   "IsSymplecticBlocks"
+  ],
+  "DLMF/RiemannTheta/Products.lean": [
+   "riemannK",
+   "riemannD",
+   "riemannTExample"
+  ],
+  "DLMF/RiemannTheta/Symmetry.lean": [
+   "riemannThetaPeriodLattice"
+  ],
+  "DLMF/Statistical/IncompleteBeta.lean": [
+   "Real.incBeta",
+   "Real.normIncBetaI"
+  ],
+  "DLMF/Struve/AngerWeber/IntegralAndSeries.lean": [
+   "angerJ",
+   "weberE",
+   "angerA",
+   "angerS1",
+   "angerS2"
+  ],
+  "DLMF/Struve/AngerWeber/LommelConnections.lean": [
+   "angerFresnelPlus",
+   "angerFresnelMinus",
+   "weberM1",
+   "weberM2"
+  ],
+  "DLMF/Struve/Asymptotics/AngerWeberExpansions.lean": [
+   "angerMu"
+  ],
+  "DLMF/Struve/Asymptotics/BinomialAndAnger.lean": [
+   "angerF",
+   "angerG"
+  ],
+  "DLMF/Struve/Lommel.lean": [
+   "lommelA",
+   "lommelS",
+   "lommelCapitalRegular"
+  ],
+  "DLMF/Struve/Representations/BarnesAndSonine.lean": [
+   "struveHPrimitive"
+  ],
+  "DLMF/Theta/Generalizations.lean": [
+   "thetaGaussSum",
+   "ramanujanThetaF",
+   "combinedTheta"
+  ],
+  "DLMF/Theta/Identities.lean": [
+   "thetaLandenA",
+   "thetaLandenB"
+  ],
+  "DLMF/Theta/Relations.lean": [
+   "thetaModulusK"
+  ],
+  "DLMF/Weierstrass/Addition.lean": [
+   "nTupleConst",
+   "nTupleG"
+  ],
+  "DLMF/Weierstrass/Integrals.lean": [
+   "integralKernelOne",
+   "integralKernelTwo"
+  ],
+  "DLMF/Weierstrass/ModularFunctions.lean": [
+   "mobius",
+   "IsModularFunction",
+   "IsModularForm",
+   "IsCuspForm",
+   "modularLambda",
+   "kleinJ",
+   "dedekindSum",
+   "etaMultiplier"
+  ],
+  "DLMF/Weierstrass/Series.lean": [
+   "laurentCoeff",
+   "sigmaCoeff"
+  ],
+  "DLMF/Zeta/Asymptotics.lean": [
+   "riemannChi"
+  ],
+  "DLMF/Zeta/IntegralReps/PolygammaAndContours.lean": [
+   "zetaOmega",
+   "keyholeLoopIntegral"
+  ],
+  "DLMF/Zeta/Lerch.lean": [
+   "lerchPhiSeries",
+   "lerchPhi"
+  ],
+  "DLMF/Zeta/Polylog.lean": [
+   "polylogSeriesC",
+   "polylog",
+   "fermiDiracF",
+   "boseEinsteinG"
+  ],
+  "DLMF/Zeta/Reflection.lean": [
+   "riemannXi",
+   "reflectionConst"
+  ],
+  "DLMF/Zeta/Riemann.lean": [
+   "stieltjesSeq",
+   "stieltjesConstant"
+  ],
+  "DLMF/Zeta/Zeros.lean": [
+   "criticalStripZeros",
+   "riemannSiegelTheta",
+   "riemannSiegelZ",
+   "riemannZeroCount",
+   "criticalLineZeroCount",
+   "riemannSiegelRemainder"
+  ]
+ },
+ "taggedDeclarationsPerChapter": {
+  "1": {
+   "defInBasic": 184,
+   "theoremElsewhere": 687,
+   "theoremInBasic": 1,
+   "defElsewhere": 1
+  },
+  "2": {
+   "defInBasic": 84,
+   "theoremElsewhere": 416,
+   "defElsewhere": 2
+  },
+  "4": {
+   "theoremElsewhere": 483,
+   "defElsewhere": 38
+  },
+  "5": {
+   "theoremElsewhere": 119,
+   "theoremInBasic": 5,
+   "defElsewhere": 13,
+   "defInBasic": 1
+  },
+  "6": {
+   "theoremElsewhere": 96,
+   "defInBasic": 15,
+   "defElsewhere": 9
+  },
+  "7": {
+   "defInBasic": 13,
+   "theoremElsewhere": 133,
+   "defElsewhere": 21
+  },
+  "8": {
+   "defElsewhere": 32,
+   "theoremElsewhere": 260,
+   "defInBasic": 5
+  },
+  "9": {
+   "defInBasic": 4,
+   "theoremElsewhere": 301,
+   "defElsewhere": 18
+  },
+  "10": {
+   "theoremElsewhere": 76,
+   "defInBasic": 3,
+   "defElsewhere": 2
+  },
+  "11": {
+   "defInBasic": 6,
+   "defElsewhere": 16,
+   "theoremElsewhere": 161
+  },
+  "12": {
+   "defElsewhere": 54,
+   "defInBasic": 13,
+   "theoremElsewhere": 168
+  },
+  "13": {
+   "defElsewhere": 9,
+   "theoremElsewhere": 268,
+   "defInBasic": 6,
+   "theoremInBasic": 1
+  },
+  "14": {
+   "defElsewhere": 49,
+   "theoremElsewhere": 300,
+   "defInBasic": 2
+  },
+  "15": {
+   "theoremElsewhere": 164,
+   "defElsewhere": 19
+  },
+  "16": {
+   "defElsewhere": 21,
+   "theoremElsewhere": 157,
+   "defInBasic": 18
+  },
+  "17": {
+   "defElsewhere": 19,
+   "theoremElsewhere": 198,
+   "defInBasic": 12
+  },
+  "18": {
+   "theoremElsewhere": 373,
+   "defElsewhere": 64,
+   "defInBasic": 5
+  },
+  "19": {
+   "defInBasic": 15,
+   "theoremElsewhere": 516,
+   "defElsewhere": 58
+  },
+  "20": {
+   "theoremElsewhere": 126,
+   "defInBasic": 10,
+   "theoremInBasic": 1,
+   "defElsewhere": 6
+  },
+  "21": {
+   "defElsewhere": 7,
+   "theoremElsewhere": 50,
+   "defInBasic": 8
+  },
+  "22": {
+   "theoremElsewhere": 414,
+   "defElsewhere": 27,
+   "defInBasic": 20
+  },
+  "23": {
+   "theoremElsewhere": 178,
+   "defInBasic": 11,
+   "defElsewhere": 14,
+   "theoremInBasic": 1
+  },
+  "24": {
+   "theoremElsewhere": 206,
+   "defElsewhere": 26,
+   "defInBasic": 2,
+   "theoremInBasic": 4
+  },
+  "25": {
+   "defElsewhere": 21,
+   "theoremElsewhere": 188,
+   "defInBasic": 1,
+   "theoremInBasic": 2
+  },
+  "26": {
+   "defElsewhere": 46,
+   "defInBasic": 3,
+   "theoremInBasic": 1,
+   "theoremElsewhere": 242
+  },
+  "27": {
+   "defElsewhere": 33,
+   "theoremElsewhere": 184
+  },
+  "28": {
+   "defInBasic": 92,
+   "theoremElsewhere": 457
+  },
+  "29": {
+   "defInBasic": 89,
+   "theoremElsewhere": 203
+  },
+  "30": {
+   "defInBasic": 51,
+   "theoremElsewhere": 101
+  },
+  "31": {
+   "defInBasic": 42,
+   "theoremElsewhere": 166
+  },
+  "32": {
+   "defInBasic": 43,
+   "theoremElsewhere": 315
+  },
+  "33": {
+   "defInBasic": 42,
+   "theoremElsewhere": 169
+  },
+  "34": {
+   "defInBasic": 9,
+   "theoremElsewhere": 73
+  },
+  "35": {
+   "defInBasic": 20,
+   "theoremElsewhere": 64
+  },
+  "36": {
+   "defInBasic": 49,
+   "theoremElsewhere": 126
+  }
+ }
+}
